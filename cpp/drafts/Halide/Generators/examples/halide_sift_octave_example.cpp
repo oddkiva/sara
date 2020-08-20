@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <omp.h>
+
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
@@ -48,10 +50,14 @@ GRAPHICS_MAIN()
 #elif __APPLE__
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
-  const auto video_filepath =
-      "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      // "/home/david/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  //"/home/david/Desktop/GOPR0542.MP4"s;
 #endif
+
+
+  // Optimization.
+  omp_set_num_threads(omp_get_max_threads());
+  std::ios_base::sync_with_stdio(false);
 
 
   // SIFT octave parameters.
@@ -75,9 +81,6 @@ GRAPHICS_MAIN()
             ? std::sqrt(std::pow(scale_initial, 2) - std::pow(scale_camera, 2))
             : std::sqrt(std::pow(scales[i], 2) - std::pow(scales[i - 1], 2));
   }
-
-
-
 
 
   // ===========================================================================
@@ -113,8 +116,9 @@ GRAPHICS_MAIN()
 
   // Downsampling.
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
-  auto buffer_gray_down_4d = Halide::Runtime::Buffer<float>(
-      frame.width() / downscale_factor, frame.height() / downscale_factor, 1, 1);
+  auto buffer_gray_down_4d =
+      Halide::Runtime::Buffer<float>(frame.width() / downscale_factor,
+                                     frame.height() / downscale_factor, 1, 1);
 
   // Octave of Gaussians.
   auto buffer_convs =
@@ -135,7 +139,8 @@ GRAPHICS_MAIN()
             : halide::as_runtime_buffer(frame_conv_tensor);
   }
 
-  auto buffer_extremas = std::vector<Halide::Runtime::Buffer<std::int8_t>>(num_scales - 3);
+  auto buffer_extremas =
+      std::vector<Halide::Runtime::Buffer<std::int8_t>>(num_scales - 3);
   for (auto i = 0u; i < extrema_maps.size(); ++i)
     buffer_extremas[i] = Halide::Runtime::Buffer<std::int8_t>{
         extrema_maps[i].data(),                                  //
@@ -188,11 +193,12 @@ GRAPHICS_MAIN()
 
     for (auto i = 0u; i < buffer_convs.size(); ++i)
     {
-      auto& conv_in = i == 0u? buffer_before_conv : buffer_convs[i - 1];
+      auto& conv_in = i == 0u ? buffer_before_conv : buffer_convs[i - 1];
       auto& conv_out = buffer_convs[i];
       sara::tic();
       halide::gaussian_convolution(conv_in, conv_out, sigmas[i], 4);
-      sara::toc("Gaussian convolution " + std::to_string(i) + ": " + std::to_string(sigmas[i]));
+      sara::toc("Gaussian convolution " + std::to_string(i) + ": " +
+                std::to_string(sigmas[i]));
     }
 
     for (auto i = 0u; i < buffer_dogs.size(); ++i)
@@ -201,7 +207,6 @@ GRAPHICS_MAIN()
       halide::subtract(buffer_convs[i + 1], buffer_convs[i], buffer_dogs[i]);
       sara::toc("DoG " + std::to_string(i));
     }
-
 
     for (auto i = 0u; i < buffer_extremas.size(); ++i)
     {
@@ -222,6 +227,43 @@ GRAPHICS_MAIN()
       buffer_extremas[i].copy_to_host();
     sara::toc("Copy extrema map buffers to host");
 
+
+    sara::tic();
+    auto extrema_quantized =
+        std::vector<halide::QuantizedExtremumArray>(extrema_maps.size());
+#pragma omp parallel for
+    for (auto s = 0u; s < extrema_maps.size(); ++s)
+    {
+      const auto& dog_ext_map = extrema_maps[s];
+      const auto num_extrema = std::count_if(      //
+          dog_ext_map.begin(), dog_ext_map.end(),  //
+          [](const auto& v) { return v != 0; }     //
+      );
+
+      if (num_extrema == 0)
+        continue;
+
+      // Populate the list of extrema for the corresponding scale.
+      extrema_quantized[s].resize(num_extrema);
+
+      auto i = 0;
+      for (auto y = 0; y < dog_ext_map.height(); ++y)
+      {
+        for (auto x = 0; x < dog_ext_map.width(); ++x)
+        {
+          if (dog_ext_map(x, y) == 0)
+            continue;
+
+          extrema_quantized[s].x[i] = x;
+          extrema_quantized[s].y[i] = y;
+          extrema_quantized[s].scale = scales[s + 1];
+          extrema_quantized[s].type[i] = dog_ext_map(x, y);
+          ++i;
+        }
+      }
+    }
+    sara::toc("Populating list of extrema");
+
     elapsed_ms = timer.elapsed_ms();
     SARA_DEBUG << "[" << frames_read
                << "] total computation time = " << elapsed_ms << " ms"
@@ -230,6 +272,21 @@ GRAPHICS_MAIN()
 
     sara::tic();
     sara::display(frame);
+    for (const auto& extrema_array: extrema_quantized)
+    {
+      const auto& scale = extrema_array.scale;
+      for (auto i = 0u; i < extrema_array.x.size(); ++i)
+      {
+        const auto& c0 = extrema_array.type[i] == 1 ? sara::Blue8 : sara::Red8;
+        const auto& x0 = extrema_array.x[i];
+        const auto& y0 = extrema_array.y[i];
+
+        // N.B.: the blob radius is the scale multiplied sqrt(2).
+        // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
+        const auto& r0 = scale * std::sqrt(2.f);
+        sara::draw_circle(x0, y0, r0, c0, 2 + 2);
+      }
+    }
     sara::toc("Display");
   }
 
