@@ -30,94 +30,12 @@
 #include <drafts/Halide/Resize.hpp>
 #include <drafts/Halide/SIFT.hpp>
 
+#include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_sift_octave.h"
 
 
 namespace sara = DO::Sara;
 namespace halide = DO::Shakti::HalideBackend;
-
-
-namespace DO::Shakti::HalideBackend {
-
-  struct SIFTOctaveExtractor
-  {
-    struct Parameters
-    {
-      //! @brief Pyramid construction.
-      int initial_pyramid_octave = 0;
-
-      //! @brief Extrema detection thresholds.
-      //! @{
-      float edge_ratio_thres = 10.f;
-      float extremum_thres = 0.01f;  // 0.03f;
-      //! @}
-    };
-
-    struct Pipeline
-    {
-      std::array<sara::Image<float>, 5> dog_octave;
-      std::array<sara::Image<std::int8_t>, 3> dog_extrema_octave;
-    };
-
-    Sara::Timer timer;
-    Parameters params;
-    Pipeline pipeline;
-
-    auto operator()(Sara::ImageView<float>& image)
-    {
-      auto elapsed = double{};
-
-      timer.restart();
-      for (auto& dog : pipeline.dog_octave)
-        dog.resize(image.sizes());
-      for (auto& dog_extrema_map : pipeline.dog_extrema_octave)
-        dog_extrema_map.resize(image.sizes());
-
-      auto image_buffer = halide::as_runtime_buffer(image);
-      auto dog_buffer = std::array<Halide::Runtime::Buffer<float>, 5>{};
-      auto dog_extrema_buffer =
-          std::array<Halide::Runtime::Buffer<std::int8_t>, 3>{};
-
-      image_buffer.set_host_dirty();
-      for (auto s = 0; s < 5; ++s)
-      {
-        dog_buffer[s] = halide::as_runtime_buffer(pipeline.dog_octave[s]);
-        dog_buffer[s].set_host_dirty();
-      }
-
-      for (auto s = 0; s < 3; ++s)
-      {
-        dog_extrema_buffer[s] =
-            halide::as_runtime_buffer(pipeline.dog_extrema_octave[s]);
-        dog_extrema_buffer[s].set_host_dirty();
-      }
-
-      shakti_sift_octave(image_buffer,             //
-                         params.edge_ratio_thres,  //
-                         params.extremum_thres,    //
-                         dog_buffer[0],            //
-                         dog_buffer[1],            //
-                         dog_buffer[2],            //
-                         dog_buffer[3],            //
-                         dog_buffer[4],            //
-                         dog_extrema_buffer[0],    //
-                         dog_extrema_buffer[1],    //
-                         dog_extrema_buffer[2]);
-
-      for (auto s = 0; s < 5; ++s)
-        dog_buffer[s].copy_to_host();
-
-      for (auto s = 0; s < 3; ++s)
-        dog_extrema_buffer[s].copy_to_host();
-
-      elapsed = timer.elapsed_ms();
-
-      SARA_DEBUG << "Gaussian octave = " << timer.elapsed_ms() << " ms"
-                 << std::endl;
-    }
-  };
-
-}  // namespace DO::Shakti::HalideBackend
 
 
 GRAPHICS_MAIN()
@@ -130,8 +48,9 @@ GRAPHICS_MAIN()
 #elif __APPLE__
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  // const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
+  const auto video_filepath =
+      // "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+      "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
 
@@ -158,6 +77,7 @@ GRAPHICS_MAIN()
           .reshape(
               Eigen::Vector4i{1, 1, frame_conv.height(), frame_conv.width()});
 
+  auto frame_conv_as_rgb = sara::Image<sara::Rgb8>{frame_conv.sizes()};
 
 
 
@@ -199,12 +119,18 @@ GRAPHICS_MAIN()
             : halide::as_runtime_buffer(frame_conv_tensor);
   }
 
+  auto buffer_conv_2d = halide::as_runtime_buffer(frame_conv);
+  auto buffer_conv_as_rgb =
+      halide::as_interleaved_runtime_buffer(frame_conv_as_rgb);
 
   // Show the local extrema.
   sara::create_window(frame.sizes() / downscale_factor);
   sara::set_antialiasing();
 
   auto frames_read = 0;
+
+  auto timer = sara::Timer{};
+  auto elapsed_ms = double{};
 
   while (true)
   {
@@ -218,6 +144,8 @@ GRAPHICS_MAIN()
 
     ++frames_read;
     SARA_CHECK(frames_read);
+
+    timer.restart();
 
     sara::tic();
     shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray);
@@ -249,8 +177,18 @@ GRAPHICS_MAIN()
     buffer_convs.back().copy_to_host();
     sara::toc("Copy to host");
 
+    elapsed_ms = timer.elapsed_ms();
+    SARA_DEBUG << "[" << frames_read
+               << "] total computation time = " << elapsed_ms << " ms"
+               << std::endl;
+
+
     sara::tic();
-    sara::display(frame_conv);
+    shakti_halide_gray32f_to_rgb(buffer_conv_2d, buffer_conv_as_rgb);
+    sara::toc("Convert conv to RGB");
+
+    sara::tic();
+    sara::display(frame_conv_as_rgb);
     sara::toc("Display");
   }
 

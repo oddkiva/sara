@@ -288,35 +288,25 @@ auto test_on_video()
     shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
     sara::toc("Grayscale");
 
-    // Use parallelization and vectorization.
-    sara::tic();
-    halide::scale(frame_gray32f, frame_downsampled);
-    sara::toc("Downsample");
+    if (scale_factor != 1)
+    {
+      // Use parallelization and vectorization.
+      sara::tic();
+      halide::scale(frame_gray32f, frame_downsampled);
+      sara::toc("Downsample");
+    }
+
+    auto& frame_to_process = scale_factor == 1  //
+                                 ? frame_gray32f
+                                 : frame_downsampled;
 
     sara::tic();
-// #define ORIGINAL
-#ifdef ORIGINAL
-    const auto [features, descriptors] =
-        sara::compute_sift_keypoints(frame_downsampled);
-#else
-    sift_extractor(frame_downsampled);
-#endif
+    sift_extractor(frame_to_process);
     sara::toc("Oriented DoG");
 
     sara::tic();
-    sara::display(frame_downsampled);
-#ifdef ORIGINAL
-    for (size_t i = 0; i != features.size(); ++i)
-    {
-      const auto color =
-          features[i].extremum_type == sara::OERegion::ExtremumType::Max
-              ? sara::Red8
-              : sara::Blue8;
-      features[i].draw(color);
-    }
-#else
+    sara::display(frame_to_process);
     draw_extrema(sift_extractor.pipeline.oriented_extrema);
-#endif
     sara::toc("Display");
   }
 }
@@ -324,7 +314,7 @@ auto test_on_video()
 
 GRAPHICS_MAIN()
 {
-  test_on_image();
-  // test_on_video();
+  // test_on_image();
+  test_on_video();
   return 0;
 }
