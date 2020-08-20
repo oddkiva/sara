@@ -31,7 +31,7 @@
 #include <drafts/Halide/SIFT.hpp>
 
 #include "shakti_halide_gray32f_to_rgb.h"
-#include "shakti_sift_octave.h"
+#include "shakti_local_scale_space_extremum_32f_v2.h"
 
 
 namespace sara = DO::Sara;
@@ -53,6 +53,28 @@ GRAPHICS_MAIN()
       // "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
+
+  // SIFT octave parameters.
+  const auto scale_camera = 1.f;
+  const auto scale_initial = 1.6f;
+  const auto scale_factor = std::pow(2.f, 1 / 3.f);
+  const auto num_scales = 6;
+  const auto edge_ratio = 10.0f;
+  const auto extremum_thres = 0.03f;
+
+  // Successive Gaussian convolutions.
+  auto scales = std::vector<float>(num_scales);
+  for (auto i = 0; i < num_scales; ++i)
+    scales[i] = scale_initial * std::pow(scale_factor, i);
+
+  auto sigmas = std::vector<float>(num_scales);
+  for (auto i = 0u; i < sigmas.size(); ++i)
+  {
+    sigmas[i] =
+        i == 0
+            ? std::sqrt(std::pow(scale_initial, 2) - std::pow(scale_camera, 2))
+            : std::sqrt(std::pow(scales[i], 2) - std::pow(scales[i - 1], 2));
+  }
 
 
 
@@ -77,10 +99,9 @@ GRAPHICS_MAIN()
           .reshape(
               Eigen::Vector4i{1, 1, frame_conv.height(), frame_conv.width()});
 
-  auto frame_conv_as_rgb = sara::Image<sara::Rgb8>{frame_conv.sizes()};
 
-
-
+  auto extrema_maps = std::vector<sara::Image<std::int8_t>>(
+      num_scales - 3, sara::Image<std::int8_t>{frame_conv.sizes()});
 
 
   // ===========================================================================
@@ -92,35 +113,15 @@ GRAPHICS_MAIN()
 
   // Downsampling.
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
-  // auto buffer_gray_down_4d = halide::as_runtime_buffer(frame_down_tensor);
   auto buffer_gray_down_4d = Halide::Runtime::Buffer<float>(
       frame.width() / downscale_factor, frame.height() / downscale_factor, 1, 1);
-
-  // Successive Gaussian convolutions.
-  const auto scale_initial = 1.6f;
-  const auto scale_factor = std::pow(2.f, 1 / 3.f);
-  const auto num_scales = 6;
-  auto scales = std::vector<float>(num_scales);
-  for (auto i = 0; i < num_scales; ++i)
-    scales[i] = scale_initial * std::pow(scale_factor, i);
-
-  auto sigmas = std::vector<float>(num_scales - 1);
-  for (auto i = 0u; i < sigmas.size(); ++i)
-    sigmas[i] = std::sqrt(std::pow(scales[i + 1], 2) - std::pow(scales[i], 2));
 
   // Octave of Gaussians.
   auto buffer_convs =
       std::vector<Halide::Runtime::Buffer<float>>(sigmas.size());
   for (auto i = 0u; i < buffer_convs.size(); ++i)
-  {
-    // buffer_convs[i] =
-    //     i != buffer_convs.size() - 1
-    //         ? Halide::Runtime::Buffer<float>(buffer_gray_down_4d.width(),
-    //                                          buffer_gray_4d.height(), 1, 1)
-    //         : halide::as_runtime_buffer(frame_conv_tensor);
     buffer_convs[i] = Halide::Runtime::Buffer<float>(
         buffer_gray_down_4d.width(), buffer_gray_4d.height(), 1, 1);
-  }
 
   // Octave of difference of Gaussians.
   auto buffer_dogs =
@@ -134,10 +135,15 @@ GRAPHICS_MAIN()
             : halide::as_runtime_buffer(frame_conv_tensor);
   }
 
+  auto buffer_extremas = std::vector<Halide::Runtime::Buffer<std::int8_t>>(num_scales - 3);
+  for (auto i = 0u; i < extrema_maps.size(); ++i)
+    buffer_extremas[i] = Halide::Runtime::Buffer<std::int8_t>{
+        extrema_maps[i].data(),                                  //
+        extrema_maps[i].width(), extrema_maps[i].height(), 1, 1  //
+    };
+
 
   auto buffer_conv_2d = halide::as_runtime_buffer(frame_conv);
-  auto buffer_conv_as_rgb =
-      halide::as_interleaved_runtime_buffer(frame_conv_as_rgb);
 
   // Show the local extrema.
   sara::create_window(frame.sizes() / downscale_factor);
@@ -196,9 +202,25 @@ GRAPHICS_MAIN()
       sara::toc("DoG " + std::to_string(i));
     }
 
+
+    for (auto i = 0u; i < buffer_extremas.size(); ++i)
+    {
+      sara::tic();
+      shakti_local_scale_space_extremum_32f_v2(
+          buffer_dogs[i], buffer_dogs[i + 1], buffer_dogs[i + 2],  //
+          edge_ratio, extremum_thres,                              //
+          buffer_extremas[i]);
+      sara::toc("DoG extremum localization " + std::to_string(i));
+    }
+
     sara::tic();
     buffer_dogs.back().copy_to_host();
-    sara::toc("Copy to host");
+    sara::toc("Copy last DoG buffer to host");
+
+    sara::tic();
+    for (auto i = 0u; i < buffer_extremas.size(); ++i)
+      buffer_extremas[i].copy_to_host();
+    sara::toc("Copy extrema map buffers to host");
 
     elapsed_ms = timer.elapsed_ms();
     SARA_DEBUG << "[" << frames_read
@@ -206,16 +228,8 @@ GRAPHICS_MAIN()
                << std::endl;
 
 
-    // sara::tic();
-    // shakti_halide_gray32f_to_rgb(buffer_conv_2d, buffer_conv_as_rgb);
-    // sara::toc("Convert conv to RGB");
-
-    // sara::tic();
-    // sara::display(frame_conv_as_rgb);
-    // sara::toc("Display");
-
     sara::tic();
-    sara::display(color_rescale(frame_conv));
+    sara::display(frame);
     sara::toc("Display");
   }
 

@@ -15,7 +15,6 @@
 
 #include <drafts/Halide/Utilities.hpp>
 
-#include "shakti_gaussian_convolution.h"
 #include "shakti_gaussian_convolution_v2.h"
 #include "shakti_halide_gaussian_blur.h"
 
@@ -26,27 +25,6 @@ namespace halide = DO::Shakti::HalideBackend;
 
 using namespace sara;
 
-
-auto gaussian_convolution_aot_and_stub(sara::Image<float>& src, sara::Image<float>& dst)
-{
-  const auto sigma = 100.f;
-  const auto truncation_factor = 4;
-
-  auto src_buffer = halide::as_runtime_buffer_3d(src);
-  auto dst_buffer = halide::as_runtime_buffer_3d(dst);
-
-  for (auto i = 0; i < 100; ++i)
-  {
-    sara::tic();
-    src_buffer.set_host_dirty();
-    shakti_gaussian_convolution(src_buffer, sigma, truncation_factor,
-                                dst_buffer);
-    dst_buffer.copy_to_host();
-    sara::toc("[SEPARABLE GENERATOR STUB-BASED] Gaussian convolution");
-  }
-
-  sara::display(sara::color_rescale(dst));
-}
 
 auto gaussian_convolution_aot(sara::Image<float>& src, sara::Image<float>& dst)
 {
@@ -112,7 +90,6 @@ GRAPHICS_MAIN()
   SARA_CHECK(dst.sizes().transpose());
   sara::create_window(src.sizes());
 
-  gaussian_convolution_aot_and_stub(src, dst);
   gaussian_convolution_aot(src, dst);
   gaussian_convolution_aot_v2(src, dst);
 

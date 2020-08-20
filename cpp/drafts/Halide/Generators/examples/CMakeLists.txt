@@ -30,7 +30,6 @@ target_link_libraries(halide_gaussian_convolution_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
   Halide
-  shakti_gaussian_convolution
   shakti_gaussian_convolution_v2
   shakti_halide_gaussian_blur)
 set_property(TARGET halide_gaussian_convolution_example
@@ -118,6 +117,7 @@ target_link_libraries(halide_sift_octave_example
   # Scale-space extrema.
   shakti_local_max_32f
   shakti_local_scale_space_extremum_32f
+  shakti_local_scale_space_extremum_32f_v2
   # Refine extrema.
   shakti_refine_scale_space_extrema
   # Dominant gradient orientations.
@@ -128,8 +128,6 @@ target_link_libraries(halide_sift_octave_example
   shakti_sift_descriptor_v2
   shakti_sift_descriptor_v3
   shakti_sift_descriptor_v4
-  # SIFT octave calculation in one go.
-  shakti_sift_octave
   )
 set_property(TARGET halide_sift_octave_example
   PROPERTY

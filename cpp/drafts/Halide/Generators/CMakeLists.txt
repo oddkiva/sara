@@ -17,13 +17,6 @@ shakti_halide_library_v2(
   SRCS SeparableConvolution2dGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
-# Gaussian convolution (slower implementation).
-shakti_halide_library_v2(
-  NAME shakti_gaussian_convolution
-  SRCS GaussianConvolutionGenerator.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS}
-  DEPS shakti_separable_convolution_2d.generator)
-
 # Gaussian convolution V2 (teeny-tiny bit slower).
 shakti_halide_library_v2(
   NAME shakti_gaussian_convolution_v2
@@ -75,6 +68,11 @@ shakti_halide_library_v2(
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
+  NAME shakti_local_scale_space_extremum_32f_v2
+  SRCS LocalExtremumGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
   NAME shakti_refine_scale_space_extrema
   SRCS RefineExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
@@ -83,13 +81,6 @@ shakti_halide_library_v2(
 shakti_halide_library_v2(
   NAME shakti_polar_gradient_2d_32f
   SRCS DifferentialGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-
-# SIFT octave.
-shakti_halide_library_v2(
-  NAME shakti_sift_octave
-  SRCS SIFTOctaveGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
