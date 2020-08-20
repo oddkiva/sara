@@ -68,14 +68,15 @@ namespace DO::Shakti::HalideBackend {
       auto elapsed = double{};
 
       timer.restart();
-      for (auto& dog: pipeline.dog_octave)
+      for (auto& dog : pipeline.dog_octave)
         dog.resize(image.sizes());
-      for (auto& dog_extrema_map: pipeline.dog_extrema_octave)
+      for (auto& dog_extrema_map : pipeline.dog_extrema_octave)
         dog_extrema_map.resize(image.sizes());
 
       auto image_buffer = halide::as_runtime_buffer(image);
       auto dog_buffer = std::array<Halide::Runtime::Buffer<float>, 5>{};
-      auto dog_extrema_buffer = std::array<Halide::Runtime::Buffer<std::int8_t>, 3>{};
+      auto dog_extrema_buffer =
+          std::array<Halide::Runtime::Buffer<std::int8_t>, 3>{};
 
       image_buffer.set_host_dirty();
       for (auto s = 0; s < 5; ++s)
@@ -86,7 +87,8 @@ namespace DO::Shakti::HalideBackend {
 
       for (auto s = 0; s < 3; ++s)
       {
-        dog_extrema_buffer[s] = halide::as_runtime_buffer(pipeline.dog_extrema_octave[s]);
+        dog_extrema_buffer[s] =
+            halide::as_runtime_buffer(pipeline.dog_extrema_octave[s]);
         dog_extrema_buffer[s].set_host_dirty();
       }
 
@@ -132,26 +134,77 @@ GRAPHICS_MAIN()
   // const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
 #endif
 
+
+
+
+
+
+  // ===========================================================================
+  // SARA PIPELINE
+  //
   // Input and output from Sara.
   sara::VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-  auto frame_gray32f = sara::Image<float>{frame.sizes()};
+  auto frame_gray = sara::Image<float>{frame.sizes()};
+  auto frame_gray_tensor =
+      tensor_view(frame_gray)
+          .reshape(
+              Eigen::Vector4i{1, 1, frame_gray.height(), frame_gray.width()});
 
-  const auto scale_factor = 1;
-  auto frame_downsampled = sara::Image<float>{frame.sizes() / scale_factor};
+  const auto downscale_factor = 1;
+  auto frame_conv = sara::Image<float>{frame.sizes() / downscale_factor};
+  auto frame_conv_tensor =
+      tensor_view(frame_conv)
+          .reshape(
+              Eigen::Vector4i{1, 1, frame_conv.height(), frame_conv.width()});
 
-  // Halide buffers.
+
+
+
+
+
+  // ===========================================================================
+  // HALIDE PIPELINE.
+  //
+  // RGB-grayscale conversion.
   auto buffer_rgb = halide::as_interleaved_runtime_buffer(frame);
-  auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
+  auto buffer_gray = halide::as_runtime_buffer(frame_gray);
 
-  auto sift_extractor = halide::SIFTOctaveExtractor{};
+  // Downsampling.
+  auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
+  // auto buffer_gray_down_4d = halide::as_runtime_buffer(frame_down_tensor);
+  auto buffer_gray_down_4d = Halide::Runtime::Buffer<float>(
+      frame.width() / downscale_factor, frame.height() / downscale_factor, 1, 1);
+
+  // Successive Gaussian convolutions.
+  const auto scale_initial = 1.6f;
+  const auto scale_factor = std::pow(2.f, 1 / 3.f);
+  const auto num_scales = 6;
+  auto scales = std::vector<float>(num_scales);
+  for (auto i = 0; i < num_scales; ++i)
+    scales[i] = scale_initial * std::pow(scale_factor, i);
+
+  auto sigmas = std::vector<float>(num_scales - 1);
+  for (auto i = 0u; i < sigmas.size(); ++i)
+    sigmas[i] = std::sqrt(std::pow(scales[i + 1], 2) - std::pow(scales[i], 2));
+
+  auto buffer_convs =
+      std::vector<Halide::Runtime::Buffer<float>>(sigmas.size());
+  for (auto i = 0u; i < buffer_convs.size(); ++i)
+  {
+    buffer_convs[i] =
+        i != buffer_convs.size() - 1
+            ? Halide::Runtime::Buffer<float>(buffer_gray_down_4d.width(),
+                                             buffer_gray_4d.height(), 1, 1)
+            : halide::as_runtime_buffer(frame_conv_tensor);
+  }
+
 
   // Show the local extrema.
-  sara::create_window(frame_downsampled.sizes());
+  sara::create_window(frame.sizes() / downscale_factor);
   sara::set_antialiasing();
 
   auto frames_read = 0;
-  auto skip = 0;
 
   while (true)
   {
@@ -164,25 +217,40 @@ GRAPHICS_MAIN()
     sara::toc("Video Decoding");
 
     ++frames_read;
-    if (frames_read % (skip + 1) != 0)
-      continue;
-
-    // Use parallelization and vectorization.
-    sara::tic();
-    shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
-    sara::toc("Grayscale");
-
-    // Use parallelization and vectorization.
-    sara::tic();
-    halide::scale(frame_gray32f, frame_downsampled);
-    sara::toc("Downsample");
+    SARA_CHECK(frames_read);
 
     sara::tic();
-    sift_extractor(frame_downsampled);
-    sara::toc("Oriented DoG");
+    shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray);
+    sara::toc("CPU rgb to grayscale");
 
     sara::tic();
-    sara::display(sara::color_rescale(sift_extractor.pipeline.dog_octave[0]));
+    buffer_gray_4d.set_host_dirty();
+    sara::toc("Set host dirty");
+
+    if (downscale_factor != 1)
+    {
+      sara::tic();
+      halide::scale(buffer_gray_4d, buffer_gray_down_4d);
+      sara::toc("Downsample");
+    }
+    auto& buffer_before_conv =
+        downscale_factor == 1 ? buffer_gray_4d : buffer_gray_down_4d;
+
+    for (auto i = 0u; i < sigmas.size(); ++i)
+    {
+      auto& conv_in = i == 0u? buffer_before_conv : buffer_convs[i - 1];
+      auto& conv_out = buffer_convs[i];
+      sara::tic();
+      halide::gaussian_convolution(conv_in, conv_out, sigmas[i], 4);
+      sara::toc("Gaussian convolution " + std::to_string(i) + ": " + std::to_string(sigmas[i]));
+    }
+
+    sara::tic();
+    buffer_convs.back().copy_to_host();
+    sara::toc("Copy to host");
+
+    sara::tic();
+    sara::display(frame_conv);
     sara::toc("Display");
   }
 

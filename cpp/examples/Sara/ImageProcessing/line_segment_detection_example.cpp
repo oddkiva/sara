@@ -146,6 +146,7 @@ auto fit_line_segment(const std::vector<Eigen::Vector2i>& curve_points,
   return {true, {tl.cast<double>(), br.cast<double>()}};
 }
 
+
 auto test_on_image()
 {
   // Read an image.
@@ -326,6 +327,7 @@ auto test_on_video()
     }
   }
 }
+
 
 GRAPHICS_MAIN()
 {

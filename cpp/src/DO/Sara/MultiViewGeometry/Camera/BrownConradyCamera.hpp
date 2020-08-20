@@ -93,17 +93,20 @@ namespace DO::Sara {
     auto undistort(const ImageView<PixelType>& src,
                    ImageView<PixelType>& dst) const
     {
+      const auto& w = dst.width();
+      const auto& h = dst.height();
 
 #pragma omp parallel for
-      for (auto y = 0; y < dst.height(); ++y)
+      for (auto y = 0; y < h; ++y)
       {
-        for (auto x = 0; x < dst.width(); ++x)
+        for (auto x = 0; x < w; ++x)
         {
-          const auto p = intrinsics.undistort(Vec2(x, y));
+          const auto p = undistort(Vec2(x, y));
           const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
                                        0 <= p.y() && p.y() < h - 1;
-          dst(y, x) = in_image_domain ?  //
-            interpolate(src, p) : PixelTraits<Pixel>::template zero();
+          dst(y, x) = in_image_domain  //
+                          ? interpolate(src, p)
+                          : PixelTraits<PixelType>::template zero();
         }
       }
     }
