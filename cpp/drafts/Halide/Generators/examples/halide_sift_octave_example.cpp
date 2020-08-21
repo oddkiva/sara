@@ -54,8 +54,8 @@ GRAPHICS_MAIN()
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
   const auto video_filepath =
-      //"/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/home/david/Desktop/GOPR0542.MP4"s;
+      "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+      // "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
 
@@ -124,16 +124,15 @@ GRAPHICS_MAIN()
 
   // Downsampling.
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
-  auto buffer_gray_down_4d =
-      Halide::Runtime::Buffer<float>(frame.width() / downscale_factor,
-                                     frame.height() / downscale_factor, 1, 1);
+  auto buffer_gray_down_4d = Halide::Runtime::Buffer<float>(
+      frame_conv.width(), frame_conv.height(), 1, 1);
 
   // Octave of Gaussians.
   auto buffer_convs =
       std::vector<Halide::Runtime::Buffer<float>>(sigmas.size());
   for (auto i = 0u; i < buffer_convs.size(); ++i)
     buffer_convs[i] = Halide::Runtime::Buffer<float>(
-        buffer_gray_down_4d.width(), buffer_gray_4d.height(), 1, 1);
+        buffer_gray_down_4d.width(), buffer_gray_down_4d.height(), 1, 1);
 
   // Octave of difference of Gaussians.
   auto buffer_dogs =
@@ -143,7 +142,7 @@ GRAPHICS_MAIN()
     buffer_dogs[i] =
         i != buffer_dogs.size() - 1
             ? Halide::Runtime::Buffer<float>(buffer_gray_down_4d.width(),
-                                             buffer_gray_4d.height(), 1, 1)
+                                             buffer_gray_down_4d.height(), 1, 1)
             : halide::as_runtime_buffer(frame_conv_tensor);
   }
 
@@ -349,6 +348,11 @@ GRAPHICS_MAIN()
       auto scale_buffer = halide::as_runtime_buffer(e.s);
       const auto& scale_max = *std::max_element(e.s.begin(), e.s.end());
 
+      // TODO: optimize this.
+      x_buffer.set_host_dirty();
+      y_buffer.set_host_dirty();
+      scale_buffer.set_host_dirty();
+
       //  Outputs.
       auto& d = dominant_orientations_dense[s];
       d.resize(static_cast<std::int32_t>(e.size()), num_orientation_bins);
@@ -404,6 +408,7 @@ GRAPHICS_MAIN()
 
     sara::tic();
     sara::display(frame);
+    // sara::display(sara::color_rescale(frame_conv));
     for (const auto& e: oriented_extrema)
     {
       for (auto i = 0u; i < e.x.size(); ++i)
