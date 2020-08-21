@@ -43,7 +43,36 @@ namespace sara = DO::Sara;
 namespace halide = DO::Shakti::HalideBackend;
 
 
-GRAPHICS_MAIN()
+
+
+// ===========================================================================
+// SIFT octave parameters.
+//
+constexpr auto scale_camera = 1.f;
+constexpr auto scale_initial = 1.6f;
+constexpr auto scale_factor = std::pow(2.f, 1 / 3.f);
+constexpr auto num_scales = 6;
+constexpr auto edge_ratio = 10.0f;
+constexpr auto extremum_thres = 0.01f;
+constexpr auto num_orientation_bins = 36;
+constexpr auto gaussian_truncation_factor = 3.f;
+constexpr auto scale_multiplying_factor = 1.5f;
+constexpr auto peak_ratio_thres = 0.8f;
+
+
+
+
+
+// ===========================================================================
+// Video processing parameters.
+//
+const auto downscale_factor = 1;
+
+
+
+
+
+auto impl1() -> int
 {
   using namespace std::string_literals;
 
@@ -51,11 +80,12 @@ GRAPHICS_MAIN()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
+  const auto
+      video_filepath =  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
+      "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
-  const auto video_filepath =
-      "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      // "/home/david/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
 
@@ -63,18 +93,6 @@ GRAPHICS_MAIN()
   omp_set_num_threads(omp_get_max_threads());
   std::ios_base::sync_with_stdio(false);
 
-
-  // SIFT octave parameters.
-  const auto scale_camera = 1.f;
-  const auto scale_initial = 1.6f;
-  const auto scale_factor = std::pow(2.f, 1 / 3.f);
-  const auto num_scales = 6;
-  const auto edge_ratio = 10.0f;
-  const auto extremum_thres = 0.03f;
-  const auto num_orientation_bins = 36;
-  const auto gaussian_truncation_factor = 3.f;
-  const auto scale_multiplying_factor = 1.5f;
-  const auto peak_ratio_thres = 0.8f;
 
   // Successive Gaussian convolutions.
   auto scales = std::vector<float>(num_scales);
@@ -103,7 +121,6 @@ GRAPHICS_MAIN()
           .reshape(
               Eigen::Vector4i{1, 1, frame_gray.height(), frame_gray.width()});
 
-  const auto downscale_factor = 1;
   auto frame_conv = sara::Image<float>{frame.sizes() / downscale_factor};
   auto frame_conv_tensor =
       tensor_view(frame_conv)
@@ -145,6 +162,7 @@ GRAPHICS_MAIN()
                                              buffer_gray_down_4d.height(), 1, 1)
             : halide::as_runtime_buffer(frame_conv_tensor);
   }
+
 
   auto buffer_extremas =
       std::vector<Halide::Runtime::Buffer<std::int8_t>>(num_scales - 3);
@@ -201,14 +219,14 @@ GRAPHICS_MAIN()
     buffer_gray_4d.set_host_dirty();
     sara::toc("Set host dirty");
 
-    if (downscale_factor != 1)
+    if (downscale_factor > 1)
     {
       sara::tic();
       halide::scale(buffer_gray_4d, buffer_gray_down_4d);
       sara::toc("Downsample");
     }
     auto& buffer_before_conv =
-        downscale_factor == 1 ? buffer_gray_4d : buffer_gray_down_4d;
+        downscale_factor > 1 ? buffer_gray_down_4d : buffer_gray_4d;
 
     for (auto i = 0u; i < buffer_convs.size(); ++i)
     {
@@ -230,7 +248,8 @@ GRAPHICS_MAIN()
     for (auto i = 0u; i < buffer_mag.size(); ++i)
     {
       sara::tic();
-      shakti_polar_gradient_2d_32f_v2(buffer_convs[i+1], buffer_mag[i], buffer_ori[i]);
+      shakti_polar_gradient_2d_32f_v2(buffer_convs[i + 1], buffer_mag[i],
+                                      buffer_ori[i]);
       sara::toc("Gradients in polar coordinates " + std::to_string(i));
     }
 
@@ -244,9 +263,11 @@ GRAPHICS_MAIN()
       sara::toc("DoG extremum localization " + std::to_string(i));
     }
 
+#if !defined(__APPLE__)
     sara::tic();
     buffer_dogs.back().copy_to_host();
     sara::toc("Copy last DoG buffer to host");
+#endif
 
     sara::tic();
     for (auto i = 0u; i < buffer_extremas.size(); ++i)
@@ -332,7 +353,6 @@ GRAPHICS_MAIN()
     sara::toc("Refined extrema");
 
 
-
     sara::tic();
     auto dominant_orientations_dense =
         std::vector<halide::DominantOrientationDenseMap>(extrema.size());
@@ -356,7 +376,6 @@ GRAPHICS_MAIN()
       //  Outputs.
       auto& d = dominant_orientations_dense[s];
       d.resize(static_cast<std::int32_t>(e.size()), num_orientation_bins);
-      SARA_CHECK(e.size());
       auto peak_map_buffer = halide::as_runtime_buffer(d.peak_map);
       auto peak_residuals_buffer = halide::as_runtime_buffer(d.peak_residuals);
 
@@ -377,7 +396,9 @@ GRAPHICS_MAIN()
     sara::toc("Dense dominant gradient orientations");
 
     sara::tic();
-    auto dominant_orientations = std::vector<halide::DominantOrientationMap>(extrema.size());
+    auto dominant_orientations =
+        std::vector<halide::DominantOrientationMap>(extrema.size());
+#pragma omp parallel for
     for (auto s = 0u; s < dominant_orientations_dense.size(); ++s)
     {
       auto& d = dominant_orientations_dense[s];
@@ -397,9 +418,6 @@ GRAPHICS_MAIN()
     sara::toc("Populating oriented extrema");
 
 
-
-
-
     elapsed_ms = timer.elapsed_ms();
     SARA_DEBUG << "[" << frames_read
                << "] total computation time = " << elapsed_ms << " ms"
@@ -407,9 +425,8 @@ GRAPHICS_MAIN()
 
 
     sara::tic();
-    sara::display(frame);
-    // sara::display(sara::color_rescale(frame_conv));
-    for (const auto& e: oriented_extrema)
+    sara::clear_window();
+    for (const auto& e : oriented_extrema)
     {
       for (auto i = 0u; i < e.x.size(); ++i)
       {
@@ -419,7 +436,7 @@ GRAPHICS_MAIN()
 
         // N.B.: the blob radius is the scale multiplied sqrt(2).
         // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-        const auto r = e[i].s * M_SQRT2;
+        const float r = e[i].s * M_SQRT2;
         const auto& p1 = xy;
         const Eigen::Vector2f& p2 =
             xy + r * Eigen::Vector2f{cos(theta), sin(theta)};
@@ -432,4 +449,148 @@ GRAPHICS_MAIN()
   }
 
   return 0;
+}
+
+
+auto impl2() -> int
+{
+  using namespace std::string_literals;
+
+#ifdef _WIN32
+  const auto video_filepath =
+      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+#elif __APPLE__
+  const auto
+      video_filepath =  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
+      "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
+#else
+  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // "/home/david/Desktop/GOPR0542.MP4"s;
+#endif
+
+
+  // Optimization.
+  omp_set_num_threads(omp_get_max_threads());
+  std::ios_base::sync_with_stdio(false);
+
+
+  // Successive Gaussian convolutions.
+  auto scales = std::vector<float>(num_scales);
+  for (auto i = 0; i < num_scales; ++i)
+    scales[i] = scale_initial * std::pow(scale_factor, i);
+
+  auto sigmas = std::vector<float>(num_scales);
+  for (auto i = 0u; i < sigmas.size(); ++i)
+  {
+    sigmas[i] =
+        i == 0
+            ? std::sqrt(std::pow(scale_initial, 2) - std::pow(scale_camera, 2))
+            : std::sqrt(std::pow(scales[i], 2) - std::pow(scales[i - 1], 2));
+  }
+
+
+  // ===========================================================================
+  // SARA PIPELINE
+  //
+  // Input and output from Sara.
+  sara::VideoStream video_stream(video_filepath);
+  auto frame = video_stream.frame();
+  auto frame_gray = sara::Image<float>{frame.sizes()};
+  auto frame_gray_tensor =
+      tensor_view(frame_gray)
+          .reshape(
+              Eigen::Vector4i{1, 1, frame_gray.height(), frame_gray.width()});
+
+  auto frame_conv = sara::Image<float>{frame.sizes() / downscale_factor};
+  auto frame_conv_tensor =
+      tensor_view(frame_conv)
+          .reshape(
+              Eigen::Vector4i{1, 1, frame_conv.height(), frame_conv.width()});
+
+
+  auto extrema_maps = std::vector<sara::Image<std::int8_t>>(
+      num_scales - 3, sara::Image<std::int8_t>{frame_conv.sizes()});
+
+
+  // ===========================================================================
+  // HALIDE PIPELINE.
+  //
+  // RGB-grayscale conversion.
+  auto buffer_rgb = halide::as_interleaved_runtime_buffer(frame);
+  auto buffer_gray = halide::as_runtime_buffer(frame_gray);
+
+  // Downsampling.
+  auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
+  auto buffer_gray_down_4d = Halide::Runtime::Buffer<float>(
+      frame_conv.width(), frame_conv.height(), 1, 1);
+
+
+  // Show the local extrema.
+  sara::create_window(frame.sizes() / downscale_factor);
+  sara::set_antialiasing();
+
+  auto frames_read = 0;
+
+  auto timer = sara::Timer{};
+  auto elapsed_ms = double{};
+
+  while (true)
+  {
+    sara::tic();
+    if (!video_stream.read())
+    {
+      std::cout << "Reached the end of the video!" << std::endl;
+      break;
+    }
+    sara::toc("Video Decoding");
+
+    ++frames_read;
+    SARA_CHECK(frames_read);
+
+    timer.restart();
+
+    sara::tic();
+    shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray);
+    sara::toc("CPU rgb to grayscale");
+
+
+
+
+
+    elapsed_ms = timer.elapsed_ms();
+    SARA_DEBUG << "[" << frames_read
+               << "] total computation time = " << elapsed_ms << " ms"
+               << std::endl;
+
+
+    sara::tic();
+    sara::clear_window();
+    for (const auto& e : oriented_extrema)
+    {
+      for (auto i = 0u; i < e.x.size(); ++i)
+      {
+        const auto& color = e[i].type == 1 ? sara::Cyan8 : sara::Magenta8;
+        const Eigen::Vector2f xy = {e[i].x, e[i].y};
+        const auto& theta = e[i].orientation;
+
+        // N.B.: the blob radius is the scale multiplied sqrt(2).
+        // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
+        const float r = e[i].s * M_SQRT2;
+        const auto& p1 = xy;
+        const Eigen::Vector2f& p2 =
+            xy + r * Eigen::Vector2f{cos(theta), sin(theta)};
+
+        sara::draw_line(p1, p2, color, 2);
+        sara::draw_circle(xy, r, color, 2);
+      }
+    }
+    sara::toc("Display");
+  }
+
+  return 0;
+}
+
+GRAPHICS_MAIN()
+{
+  return impl1();
 }
