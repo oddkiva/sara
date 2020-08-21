@@ -125,9 +125,11 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
   template <typename Input>
-  auto refine_extremum_v1(const Input& I0, const Input& I1, const Input& I2,  //
-                          const Halide::Expr& x, const Halide::Expr& y,       //
-                          const Halide::Var& c, const Halide::Var& n)         //
+  auto refine_extremum_v1_4d(const Input& I0,                               //
+                             const Input& I1,                               //
+                             const Input& I2,                               //
+                             const Halide::Expr& x, const Halide::Expr& y,  //
+                             const Halide::Expr& c, const Halide::Expr& n)  //
       -> Tuple
   {
     auto h = scale_space_hessian(I0, I1, I2, x, y, c, n);

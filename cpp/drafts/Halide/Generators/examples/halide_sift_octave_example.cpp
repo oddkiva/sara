@@ -32,8 +32,11 @@
 #include <drafts/Halide/Resize.hpp>
 #include <drafts/Halide/SIFT.hpp>
 
+#include "shakti_dominant_gradient_orientations_v2.h"
 #include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_local_scale_space_extremum_32f_v2.h"
+#include "shakti_polar_gradient_2d_32f_v2.h"
+#include "shakti_refine_scale_space_extrema_v2.h"
 
 
 namespace sara = DO::Sara;
@@ -50,8 +53,9 @@ GRAPHICS_MAIN()
 #elif __APPLE__
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  //"/home/david/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath =
+      //"/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+      "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
 
@@ -67,6 +71,10 @@ GRAPHICS_MAIN()
   const auto num_scales = 6;
   const auto edge_ratio = 10.0f;
   const auto extremum_thres = 0.03f;
+  const auto num_orientation_bins = 36;
+  const auto gaussian_truncation_factor = 3.f;
+  const auto scale_multiplying_factor = 1.5f;
+  const auto peak_ratio_thres = 0.8f;
 
   // Successive Gaussian convolutions.
   auto scales = std::vector<float>(num_scales);
@@ -147,6 +155,18 @@ GRAPHICS_MAIN()
         extrema_maps[i].width(), extrema_maps[i].height(), 1, 1  //
     };
 
+  auto buffer_mag = std::vector<Halide::Runtime::Buffer<float>>(num_scales - 3);
+  auto buffer_ori = std::vector<Halide::Runtime::Buffer<float>>(num_scales - 3);
+  for (auto i = 0u; i < buffer_mag.size(); ++i)
+  {
+    buffer_mag[i] = Halide::Runtime::Buffer<float>{
+        extrema_maps[i].width(), extrema_maps[i].height(), 1, 1  //
+    };
+    buffer_ori[i] = Halide::Runtime::Buffer<float>{
+        extrema_maps[i].width(), extrema_maps[i].height(), 1, 1  //
+    };
+  }
+
 
   auto buffer_conv_2d = halide::as_runtime_buffer(frame_conv);
 
@@ -208,6 +228,13 @@ GRAPHICS_MAIN()
       sara::toc("DoG " + std::to_string(i));
     }
 
+    for (auto i = 0u; i < buffer_mag.size(); ++i)
+    {
+      sara::tic();
+      shakti_polar_gradient_2d_32f_v2(buffer_convs[i+1], buffer_mag[i], buffer_ori[i]);
+      sara::toc("Gradients in polar coordinates " + std::to_string(i));
+    }
+
     for (auto i = 0u; i < buffer_extremas.size(); ++i)
     {
       sara::tic();
@@ -245,6 +272,8 @@ GRAPHICS_MAIN()
 
       // Populate the list of extrema for the corresponding scale.
       extrema_quantized[s].resize(num_extrema);
+      extrema_quantized[s].scale = scales[s + 1];
+      extrema_quantized[s].scale_geometric_factor = scale_factor;
 
       auto i = 0;
       for (auto y = 0; y < dog_ext_map.height(); ++y)
@@ -256,13 +285,116 @@ GRAPHICS_MAIN()
 
           extrema_quantized[s].x[i] = x;
           extrema_quantized[s].y[i] = y;
-          extrema_quantized[s].scale = scales[s + 1];
           extrema_quantized[s].type[i] = dog_ext_map(x, y);
           ++i;
         }
       }
     }
     sara::toc("Populating list of extrema");
+
+
+    sara::tic();
+    auto extrema = std::vector<halide::ExtremumArray>(extrema_maps.size());
+    for (auto s = 0u; s < extrema_quantized.size(); ++s)
+    {
+      auto& e = extrema_quantized[s];
+      if (e.x.empty())
+        continue;
+
+      auto x_buffer = halide::as_runtime_buffer(e.x);
+      auto y_buffer = halide::as_runtime_buffer(e.y);
+      x_buffer.set_host_dirty();
+      y_buffer.set_host_dirty();
+
+      auto& e_refined = extrema[s];
+      e_refined.resize(e.x.size());
+      e_refined.type = e.type;
+      auto xf_buffer = halide::as_runtime_buffer(e_refined.x);
+      auto yf_buffer = halide::as_runtime_buffer(e_refined.y);
+      auto sf_buffer = halide::as_runtime_buffer(e_refined.s);
+      auto value_buffer = halide::as_runtime_buffer(e_refined.value);
+
+      shakti_refine_scale_space_extrema_v2(
+          buffer_dogs[s], buffer_dogs[s + 1], buffer_dogs[s + 2],  //
+          x_buffer, y_buffer,                                      //
+          buffer_dogs[s].width(), buffer_dogs[s].height(),         //
+          e.scale,                                                 //
+          e.scale_geometric_factor,                                //
+          xf_buffer,                                               //
+          yf_buffer,                                               //
+          sf_buffer,                                               //
+          value_buffer);                                           //
+
+      xf_buffer.copy_to_host();
+      yf_buffer.copy_to_host();
+      sf_buffer.copy_to_host();
+      value_buffer.copy_to_host();
+    }
+    sara::toc("Refined extrema");
+
+
+
+    sara::tic();
+    auto dominant_orientations_dense =
+        std::vector<halide::DominantOrientationDenseMap>(extrema.size());
+    for (auto s = 0u; s < dominant_orientations_dense.size(); ++s)
+    {
+      // Inputs.
+      auto& e = extrema[s];
+      if (e.x.size() == 0)
+        continue;
+
+      auto x_buffer = halide::as_runtime_buffer(e.x);
+      auto y_buffer = halide::as_runtime_buffer(e.y);
+      auto scale_buffer = halide::as_runtime_buffer(e.s);
+      const auto& scale_max = *std::max_element(e.s.begin(), e.s.end());
+
+      //  Outputs.
+      auto& d = dominant_orientations_dense[s];
+      d.resize(static_cast<std::int32_t>(e.size()), num_orientation_bins);
+      SARA_CHECK(e.size());
+      auto peak_map_buffer = halide::as_runtime_buffer(d.peak_map);
+      auto peak_residuals_buffer = halide::as_runtime_buffer(d.peak_residuals);
+
+      shakti_dominant_gradient_orientations_v2(buffer_mag[s], buffer_ori[s],  //
+                                               x_buffer,                      //
+                                               y_buffer,                      //
+                                               scale_buffer,                  //
+                                               scale_max,                     //
+                                               num_orientation_bins,          //
+                                               gaussian_truncation_factor,    //
+                                               scale_multiplying_factor,      //
+                                               peak_ratio_thres,              //
+                                               peak_map_buffer,               //
+                                               peak_residuals_buffer);
+      peak_map_buffer.copy_to_host();
+      peak_residuals_buffer.copy_to_host();
+    }
+    sara::toc("Dense dominant gradient orientations");
+
+    sara::tic();
+    auto dominant_orientations = std::vector<halide::DominantOrientationMap>(extrema.size());
+    for (auto s = 0u; s < dominant_orientations_dense.size(); ++s)
+    {
+      auto& d = dominant_orientations_dense[s];
+      auto& dsparse = dominant_orientations[s];
+      dsparse = halide::DominantOrientationMap{halide::compress(d)};
+    }
+    sara::toc("Sparse dominant gradient orientations");
+
+
+    sara::tic();
+    auto oriented_extrema =
+        std::vector<halide::OrientedExtremumArray>(extrema.size());
+#pragma omp parallel for
+    for (auto s = 0u; s < oriented_extrema.size(); ++s)
+      oriented_extrema[s] = halide::to_oriented_extremum_array(
+          extrema[s], dominant_orientations[s]);
+    sara::toc("Populating oriented extrema");
+
+
+
+
 
     elapsed_ms = timer.elapsed_ms();
     SARA_DEBUG << "[" << frames_read
@@ -272,19 +404,23 @@ GRAPHICS_MAIN()
 
     sara::tic();
     sara::display(frame);
-    for (const auto& extrema_array: extrema_quantized)
+    for (const auto& e: oriented_extrema)
     {
-      const auto& scale = extrema_array.scale;
-      for (auto i = 0u; i < extrema_array.x.size(); ++i)
+      for (auto i = 0u; i < e.x.size(); ++i)
       {
-        const auto& c0 = extrema_array.type[i] == 1 ? sara::Blue8 : sara::Red8;
-        const auto& x0 = extrema_array.x[i];
-        const auto& y0 = extrema_array.y[i];
+        const auto& color = e[i].type == 1 ? sara::Cyan8 : sara::Magenta8;
+        const Eigen::Vector2f xy = {e[i].x, e[i].y};
+        const auto& theta = e[i].orientation;
 
         // N.B.: the blob radius is the scale multiplied sqrt(2).
         // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-        const auto& r0 = scale * std::sqrt(2.f);
-        sara::draw_circle(x0, y0, r0, c0, 2 + 2);
+        const auto r = e[i].s * M_SQRT2;
+        const auto& p1 = xy;
+        const Eigen::Vector2f& p2 =
+            xy + r * Eigen::Vector2f{cos(theta), sin(theta)};
+
+        sara::draw_line(p1, p2, color, 2);
+        sara::draw_circle(xy, r, color, 2);
       }
     }
     sara::toc("Display");

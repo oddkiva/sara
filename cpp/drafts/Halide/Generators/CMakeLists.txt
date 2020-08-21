@@ -77,10 +77,21 @@ shakti_halide_library_v2(
   SRCS RefineExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+shakti_halide_library_v2(
+  NAME shakti_refine_scale_space_extrema_v2
+  SRCS RefineExtremumGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
 # Gradients in polar coordinates.
 shakti_halide_library_v2(
   NAME shakti_polar_gradient_2d_32f
   SRCS DifferentialGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
+  NAME shakti_polar_gradient_2d_32f_v2
+  SRCS DifferentialGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
@@ -94,6 +105,11 @@ if (NOT APPLE)
   target_link_libraries(shakti_dominant_gradient_orientations.generator_library
     PRIVATE dl)
 endif ()
+
+shakti_halide_library_v2(
+  NAME shakti_dominant_gradient_orientations_v2
+  SRCS DominantGradientOrientationsGeneratorV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
 # SIFT descriptors.

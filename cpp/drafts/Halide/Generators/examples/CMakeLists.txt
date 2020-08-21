@@ -120,9 +120,12 @@ target_link_libraries(halide_sift_octave_example
   shakti_local_scale_space_extremum_32f_v2
   # Refine extrema.
   shakti_refine_scale_space_extrema
+  shakti_refine_scale_space_extrema_v2
   # Dominant gradient orientations.
   shakti_polar_gradient_2d_32f
+  shakti_polar_gradient_2d_32f_v2
   shakti_dominant_gradient_orientations
+  shakti_dominant_gradient_orientations_v2
   # SIFT descriptor.
   shakti_sift_descriptor
   shakti_sift_descriptor_v2
