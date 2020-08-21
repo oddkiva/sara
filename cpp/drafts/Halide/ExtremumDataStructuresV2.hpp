@@ -18,6 +18,16 @@
 #include <drafts/Halide/MyHalide.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
+#include <drafts/Halide/BinaryOperators.hpp>
+#include <drafts/Halide/GaussianConvolution.hpp>
+#include <drafts/Halide/Resize.hpp>
+#include "shakti_dominant_gradient_orientations_v2.h"
+#include "shakti_halide_gray32f_to_rgb.h"
+#include "shakti_local_scale_space_extremum_32f_v2.h"
+#include "shakti_polar_gradient_2d_32f_v2.h"
+#include "shakti_refine_scale_space_extrema_v2.h"
+
+
 
 namespace DO::Shakti::HalideBackend::v2 {
 
@@ -131,24 +141,19 @@ namespace DO::Shakti::HalideBackend::v2 {
     auto resize(int num_keypoints, int num_orientation_bins = 36) -> void
     {
       peak_map =
-          Halide::Runtime::Buffer<bool>{num_keypoints, num_orientation_bins};
+          Halide::Runtime::Buffer<bool>{num_orientation_bins, num_keypoints};
       peak_residuals =
-          Halide::Runtime::Buffer<float>{num_keypoints, num_orientation_bins};
+          Halide::Runtime::Buffer<float>{num_orientation_bins, num_keypoints};
     }
 
     auto num_keypoints() const noexcept
     {
-      return peak_map.dim(0).extent();
+      return peak_map.dim(1).extent();
     }
 
     auto num_orientation_bins() const noexcept
     {
-      return peak_map.dim(1).extent();
-    }
-
-    auto orientations_count() const
-    {
-      return std::count(peak_map.begin(), peak_map.end(), true);
+      return peak_map.dim(0).extent();
     }
 
     auto copy_to_host()
@@ -166,6 +171,8 @@ namespace DO::Shakti::HalideBackend::v2 {
 
     sparse_map_type orientation_map;
 
+    DominantOrientationSparseMap() = default;
+
     //! @brief Make sure the data is copied to host memory.
     DominantOrientationSparseMap(const DominantOrientationDenseMap& dense)
     {
@@ -174,8 +181,17 @@ namespace DO::Shakti::HalideBackend::v2 {
               dense.peak_map.data(),
               {dense.num_keypoints(), dense.num_orientation_bins()}}
               .matrix();
+      SARA_CHECK(dense.peak_map.dim(0).extent());
+      SARA_CHECK(dense.peak_map.dim(1).extent());
+      SARA_CHECK(dense.peak_map.dim(0).stride());
+      SARA_CHECK(dense.peak_map.dim(1).stride());
+      SARA_CHECK(peak_map_view.rows());
+      SARA_CHECK(peak_map_view.cols());
       const Eigen::VectorXi peak_count =
           peak_map_view.rowwise().count().cast<int>();
+      SARA_CHECK(peak_count.rows());
+      SARA_CHECK(peak_count.cols());
+      SARA_CHECK(peak_count.sum());
 
       for (auto k = 0; k < dense.num_keypoints(); ++k)
       {
@@ -189,10 +205,10 @@ namespace DO::Shakti::HalideBackend::v2 {
         constexpr auto two_pi = 2 * static_cast<float>(M_PI);
         for (auto o = 0; o < dense.num_orientation_bins(); ++o)
         {
-          if (!dense.peak_map(k, o))
+          if (!dense.peak_map(o, k))
             continue;
 
-          auto ori = o + dense.peak_residuals(k, o);
+          auto ori = o + dense.peak_residuals(o, k);
 
           // Make sure that the angle is in the interval [0, N[.
           if (ori < 0)
@@ -249,7 +265,7 @@ namespace DO::Shakti::HalideBackend::v2 {
     float scale_camera = 1.f;
     float scale_initial = 1.6f;
     float scale_factor = std::pow(2.f, 1 / 3.f);
-    int num_scales = 6;
+    int num_scales = 3;
     int gaussian_truncation_factor{4};
     //! @}
 
@@ -309,7 +325,12 @@ namespace DO::Shakti::HalideBackend::v2 {
       Downscale = 0,
     };
 
-    SiftOctavePipeline(const SiftOctaveParameters& params_ = {})
+    SiftOctavePipeline()
+    {
+      params.initialize_cached_scales();
+    }
+
+    SiftOctavePipeline(const SiftOctaveParameters& params_)
       : params{params_}
     {
       params.initialize_cached_scales();
@@ -318,26 +339,30 @@ namespace DO::Shakti::HalideBackend::v2 {
     auto initialize_buffers(std::int32_t w, std::int32_t h)
     {
       // Octave of Gaussians.
-      gaussians = std::vector(params.num_scales + 3,
-                              Halide::Runtime::Buffer<float>(w, h, 1, 1));
+      gaussians.resize(params.num_scales + 3);
+      for (auto& g : gaussians)
+        g = Halide::Runtime::Buffer<float>(w, h, 1, 1);
       // Octave of Difference of Gaussians.
-      dogs = std::vector(params.num_scales + 2,
-                         Halide::Runtime::Buffer<float>(w, h, 1, 1));
+      dogs.resize(params.num_scales + 2);
+      for (auto& dog : dogs)
+        dog = Halide::Runtime::Buffer<float>(w, h, 1, 1);
+
       // Octave of DoG extrema maps.
-      extrema_maps = std::vector(
-          params.num_scales, Halide::Runtime::Buffer<std::int8_t>(w, h, 1, 1));
-
-      // Octave of Gradients of Gaussians.
-      gradients = std::vector(
-          params.num_scales,
-          GradientBuffer{Halide::Runtime::Buffer<float>(w, h, 1, 1),
-                         Halide::Runtime::Buffer<float>(w, h, 1, 1)});
-
+      extrema_maps.resize(params.num_scales);
+      for (auto& e: extrema_maps)
+        e = Halide::Runtime::Buffer<std::int8_t>(w, h, 1, 1);
       extrema_quantized.resize(params.num_scales);
       extrema.resize(params.num_scales);
 
+      // Octave of Gradients of Gaussians.
+      gradients.resize(params.num_scales);
+      for (auto& grad: gradients)
+        grad = {Halide::Runtime::Buffer<float>(w, h, 1, 1),
+                Halide::Runtime::Buffer<float>(w, h, 1, 1)};
       dominant_orientation_dense_maps.resize(params.num_scales);
       dominant_orientation_sparse_maps.resize(params.num_scales);
+
+      // Final output: the list of oriented keypoints.
       extrema_oriented.resize(params.num_scales);
     }
 
@@ -346,24 +371,40 @@ namespace DO::Shakti::HalideBackend::v2 {
     {
       // Compute the Gaussians.
       if (first_action == FirstAction::Convolve)
-        shakti_gaussian_convolution_v2(input, gaussians[0], params.sigmas[0],
-                                       params.gaussian_truncation_factor);
+      {
+        sara::tic();
+        HalideBackend::gaussian_convolution(
+            input,                               //
+            gaussians[0],                        //
+            params.sigmas[0],                    //
+            params.gaussian_truncation_factor);  //
+        sara::toc("Convolving for Gaussian 0: " +
+                  std::to_string(params.sigmas[0]));
+      }
       else if (first_action == FirstAction::Downscale)
       {
         if (input.width() != gaussians[0].width() * 2 ||
             input.height() != gaussians[0].height() * 2)
           throw std::runtime_error{"Invalid input sizes!"};
-        shakti_scale_32f(input, gaussians[0]);
+        sara::tic();
+        HalideBackend::scale(input, gaussians[0]);
+        sara::toc("Downsampling for Gaussian 0: " +
+                  std::to_string(params.sigmas[0]));
       }
       else
+      {
         throw std::runtime_error{"Not implemented"};
+      }
 
       for (auto i = 1u; i < gaussians.size(); ++i)
       {
         sara::tic();
-        shakti_gaussian_convolution_v2(gaussians[i - 1], gaussians[i],
-                                       params.sigmas[i], 4);
-        sara::toc("Gaussian convolution " + std::to_string(i) + ": " +
+        HalideBackend::gaussian_convolution(  //
+            gaussians[i - 1],                 //
+            gaussians[i],                     //
+            params.sigmas[i],                 //
+            params.gaussian_truncation_factor);
+        sara::toc("Convolving for Gaussian " + std::to_string(i) + ": " +
                   std::to_string(params.sigmas[i]));
       }
 
@@ -371,17 +412,8 @@ namespace DO::Shakti::HalideBackend::v2 {
       for (auto i = 0u; i < dogs.size(); ++i)
       {
         sara::tic();
-        shakti_subtract_32f(gaussians[i + 1], gaussians[i], dogs[i]);
+        HalideBackend::subtract(gaussians[i + 1], gaussians[i], dogs[i]);
         sara::toc("DoG " + std::to_string(i));
-      }
-
-      // Compute the gradients.
-      for (auto i = 0u; i < gradients.size(); ++i)
-      {
-        sara::tic();
-        shakti_polar_gradient_2d_32f_v2(gaussians[i + 1], gradients[i][0],
-                                        gradients[i][1]);
-        sara::toc("Gradients in polar coordinates " + std::to_string(i));
       }
 
       // Localize the extrema.
@@ -395,7 +427,25 @@ namespace DO::Shakti::HalideBackend::v2 {
         sara::toc("DoG extremum localization " + std::to_string(i));
       }
 
+      // Compute the gradients.
+      for (auto i = 0u; i < gradients.size(); ++i)
+      {
+        sara::tic();
+        shakti_polar_gradient_2d_32f_v2(gaussians[i + 1], gradients[i][0],
+                                        gradients[i][1]);
+        sara::toc("Gradients in polar coordinates " + std::to_string(i));
+      }
+
+      // Compress and refine the extrema.
       compress_quantized_extrema_maps();
+      refine_extrema();
+
+      // Compute dominant orientations.
+      compute_dominant_orientations();
+      compress_dominant_orientations();
+
+      // The final result.
+      populate_oriented_extrema();
     }
 
     auto compress_quantized_extrema_maps() -> void
@@ -406,8 +456,6 @@ namespace DO::Shakti::HalideBackend::v2 {
       sara::toc("Copy extrema map buffers to host");
 
       sara::tic();
-      auto extrema_quantized =
-          std::vector<v2::QuantizedExtremumArray>(extrema_maps.size());
 #pragma omp parallel for
       for (auto s = 0u; s < extrema_maps.size(); ++s)
       {
@@ -458,6 +506,7 @@ namespace DO::Shakti::HalideBackend::v2 {
         // Copy the necessary data from host to device memory.
         quantized.x.set_host_dirty();
         quantized.y.set_host_dirty();
+        refined.type = quantized.type;  // Should be cheap. (shallow copy).
 
         // Run the operation on the GPU.
         shakti_refine_scale_space_extrema_v2(
@@ -484,7 +533,10 @@ namespace DO::Shakti::HalideBackend::v2 {
         if (e.size() == 0)
           continue;
 
-        // Only copy the array of scales back to find the maximum scale value.
+        // Just copy the array of scales back to find the maximum scale value.
+        //
+        // We will copy the remaining data when populating the list of oriented
+        // extrema.
         e.s.copy_to_host();
         const auto& scale_max = *std::max_element(e.s.begin(), e.s.end());
 
@@ -512,6 +564,7 @@ namespace DO::Shakti::HalideBackend::v2 {
 #pragma omp parallel for
       for (auto s = 0u; s < dominant_orientation_dense_maps.size(); ++s)
       {
+        SARA_CHECK(s);
         auto& dense = dominant_orientation_dense_maps[s];
         auto& sparse = dominant_orientation_sparse_maps[s];
         dense.copy_to_host();
@@ -529,6 +582,15 @@ namespace DO::Shakti::HalideBackend::v2 {
         auto& d = dominant_orientation_sparse_maps[s];
         auto& e = extrema[s];
         auto& e_oriented = extrema_oriented[s];
+        if (e.size() == 0)
+          continue;
+
+        // Copy the remaining data of the array of extrema to host.
+        e.x.copy_to_host();
+        e.y.copy_to_host();
+        e.value.copy_to_host();
+        // No need to copy e.type because it is already in the host memory.
+
         e_oriented.resize(d.orientation_map.size());
 
         auto k = 0;
@@ -547,10 +609,34 @@ namespace DO::Shakti::HalideBackend::v2 {
             ++k;
           }
         }
+
+        SARA_CHECK(d.orientation_map.size());
+        SARA_DEBUG << e.size() << "  vs  " << e_oriented.size() << std::endl;
       }
       sara::toc("Populating oriented extrema");
     }
-  };
 
+
+    auto gaussian_view(int i) -> sara::ImageView<float>
+    {
+      auto& g = gaussians[i];
+      g.copy_to_host();
+      return {g.data(), {g.width(), g.height()}};
+    }
+
+    auto dog_view(int i) -> sara::ImageView<float>
+    {
+      auto& dog = dogs[i];
+      dog.copy_to_host();
+      return {dog.data(), {dog.width(), dog.height()}};
+    }
+
+    auto extrema_map_view(int i) -> sara::ImageView<std::int8_t>
+    {
+      auto& extrema = extrema_maps[i];
+      extrema.copy_to_host();
+      return {extrema.data(), {extrema.width(), extrema.height()}};
+    }
+  };
 
 }  // namespace DO::Shakti::HalideBackend::v2
