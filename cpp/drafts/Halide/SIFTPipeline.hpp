@@ -24,7 +24,7 @@ namespace DO::Shakti::HalideBackend::v2 {
     float scale_initial = 1.6f;
     float scale_factor = std::pow(2.f, 1 / 3.f);
     int num_scales = 3;
-    int gaussian_truncation_factor{4};
+    int gaussian_truncation_factor = 4;
     //! @}
 
     //! @brief Extremum detection thresholds.
@@ -211,7 +211,7 @@ namespace DO::Shakti::HalideBackend::v2 {
       sara::toc("Copy extrema map buffers to host");
 
       sara::tic();
-//#pragma omp parallel for
+#pragma omp parallel for
       for (auto s = 0u; s < extrema_maps.size(); ++s)
       {
         const auto& dog_ext_map = extrema_maps[s];

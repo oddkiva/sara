@@ -46,13 +46,13 @@ struct GaussianKernelBatch
   std::vector<float> scales;
   std::vector<float> sigmas;
   sara::Tensor_<float, 2> kernels;
+  sara::Tensor_<float, 3> kernels_2d;
   Halide::Runtime::Buffer<float> kernel_x_buffer;
   Halide::Runtime::Buffer<float> kernel_y_buffer;
 
   auto kernel_size(float sigma) const
   {
-    return static_cast<int>(
-        std::ceil(2 * gaussian_truncation_factor * sigma + 1));
+    return static_cast<int>(2 * gaussian_truncation_factor * sigma) + 1;
   }
 
   auto kernel_offset() const
@@ -73,8 +73,9 @@ struct GaussianKernelBatch
       sigmas[i] = std::sqrt(std::pow(scales[i], 2) - std::pow(scales[0], 2));
 
 
+    // As separable kernels.
     const auto kernel_size_max = kernel_size(sigmas.back());
-    const auto kernel_mid = kernel_size_max / 2 + 1;
+    const auto kernel_mid = kernel_size_max / 2;
     kernels.resize(num_scales + 3, kernel_size_max);
 
     kernels.flat_array().fill(0);
@@ -83,10 +84,12 @@ struct GaussianKernelBatch
       const auto& sigma = sigmas[n];
       const auto ksize = kernel_size(sigma);
       const auto kradius = ksize / 2;
-      auto two_sigma_squared = 2 * sigma * sigma;
+      const auto two_sigma_squared = 2 * sigma * sigma;
+
       for (auto k = 0; k < ksize; ++k)
         kernels(n, k + kernel_mid - kradius) =
             exp(-std::pow(k - kradius, 2) / two_sigma_squared);
+
       const auto kernel_sum =
           std::accumulate(&kernels(n, kernel_mid - kradius),
                           &kernels(n, kernel_mid - kradius) + ksize, 0.f);
@@ -95,6 +98,7 @@ struct GaussianKernelBatch
         kernels(n, k + kernel_mid - kradius) /= kernel_sum;
     }
 
+    // Set up on Halide's side.
     kernel_x_buffer = Halide::Runtime::Buffer<float>(
         kernels.data(), kernel_size_max, 1, 1, num_scales + 3);
     kernel_x_buffer.set_min(-kernel_mid, 0, 0, 0);
@@ -102,7 +106,6 @@ struct GaussianKernelBatch
     kernel_y_buffer = Halide::Runtime::Buffer<float>(
         kernels.data(), 1, kernel_size_max, 1, num_scales + 3);
     kernel_y_buffer.set_min(0, -kernel_mid, 0, 0);
-
     kernel_x_buffer.set_host_dirty();
     kernel_y_buffer.set_host_dirty();
   }
@@ -152,11 +155,9 @@ auto test_on_video()
       video_filepath =  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
-  const auto video_filepath =
-      //"/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/home/david/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
-
 
 
   // ===========================================================================
@@ -182,6 +183,7 @@ auto test_on_video()
   auto buffer_rgb = halide::as_interleaved_runtime_buffer(frame);
   auto buffer_gray = halide::as_runtime_buffer(frame_gray);
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
+
   auto x_convolved_batch = Halide::Runtime::Buffer<float>(
       frame.width(), frame.height(), 1, kernels.kernels.size(0));
   auto y_convolved_batch = Halide::Runtime::Buffer<float>(
@@ -223,14 +225,12 @@ auto test_on_video()
     sara::toc("Set host dirty");
 
     sara::tic();
-    shakti_convolve_batch_32f(buffer_gray_4d,
-                              kernels.kernel_x_buffer,
+    shakti_convolve_batch_32f(buffer_gray_4d, kernels.kernel_x_buffer,
                               x_convolved_batch);
     sara::toc("Convolving on x-axis");
 
     sara::tic();
-    shakti_convolve_batch_32f(x_convolved_batch,
-                              kernels.kernel_y_buffer,
+    shakti_convolve_batch_32f(x_convolved_batch, kernels.kernel_y_buffer,
                               y_convolved_batch);
     sara::toc("Convolving on y-axis");
 
@@ -283,20 +283,20 @@ auto test_on_video()
     dog_batch.copy_to_host();
     sara::toc("Copy dog to host");
 
-    for (auto n = 0; n < dog_batch.dim(3).extent();
-         ++n)
+    sara::tic();
+    for (auto n = 0; n < 1 /* dog_batch.dim(3).extent() */; ++n)
     {
       auto dog_slice = dog_batch.sliced(3, n);
       auto dog = sara::ImageView<float>(dog_slice.data(), frame.sizes());
       sara::display(sara::color_rescale(dog));
-      sara::draw_string(10, 10,
+      sara::draw_string(20, 20,
                         sara::format("dog: scale[%d] = %f "
                                      "sigma[%d] = %f",
                                      n, kernels.scales[n], n,
                                      kernels.sigmas[n]),
                         sara::Blue8);
-      sara::get_key();
     }
+    sara::toc("Display");
 #endif
 
     sara::display(frame);

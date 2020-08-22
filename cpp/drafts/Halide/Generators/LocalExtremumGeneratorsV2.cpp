@@ -225,10 +225,6 @@ namespace v3 {
 
     void schedule()
     {
-      auto& prev = scale_prev;
-      auto& curr = scale_curr;
-      auto& next = scale_next;
-
       // GPU schedule.
       if (get_target().has_gpu_feature())
       {
@@ -243,9 +239,7 @@ namespace v3 {
             get_target().has_feature(Target::HVX_128) ? 128 : 64;
 
         out.hexagon()
-            .prefetch(prev, y, 2)
-            .prefetch(curr, y, 2)
-            .prefetch(next, y, 2)
+            .prefetch(f, y, 2)
             .split(y, yo, yi, 128)
             .parallel(yo)
             .vectorize(x, vector_size, TailStrategy::GuardWithIf);
