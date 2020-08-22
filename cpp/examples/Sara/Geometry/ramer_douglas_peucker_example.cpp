@@ -41,8 +41,8 @@ GRAPHICS_MAIN()
 
   auto simplified_circle = ramer_douglas_peucker(circle, 5.);
 
-  draw_poly(circle, Red8, 2);
-  draw_poly(simplified_circle, Green8, 2);
+  draw_polygon(circle, Red8, 2);
+  draw_polygon(simplified_circle, Green8, 2);
   get_key();
 
 
@@ -63,8 +63,8 @@ GRAPHICS_MAIN()
   SARA_CHECK(simplified_square.size());
 
   clear_window();
-  draw_poly(square, Red8, 2);
-  draw_poly(simplified_square, Green8, 2);
+  draw_polygon(square, Red8, 2);
+  draw_polygon(simplified_square, Green8, 2);
   get_key();
 
   return 0;

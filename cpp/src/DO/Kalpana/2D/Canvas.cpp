@@ -68,7 +68,7 @@ namespace DO { namespace Kalpana {
   void Canvas::wheelEvent(QWheelEvent *event)
   {
     if (event->modifiers() == Qt::ControlModifier)
-      scaleView(pow(double(2), event->delta() / 240.0));
+      scaleView(pow(double(2), event->angleDelta().y() / 240.0));
     QGraphicsView::wheelEvent(event);
   }
 

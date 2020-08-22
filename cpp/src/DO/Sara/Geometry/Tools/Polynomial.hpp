@@ -88,7 +88,10 @@ namespace DO { namespace Sara {
   class Polynomial
   {
   public:
-    enum { Degree = N };
+    enum
+    {
+      Degree = N
+    };
 
     //! @{
     //! Constructors.
@@ -96,9 +99,9 @@ namespace DO { namespace Sara {
     {
     }
 
-    inline explicit Polynomial(T * coeff)
+    inline explicit Polynomial(T* coeff)
     {
-      std::copy(coeff, coeff+N+1, _coeff);
+      std::copy(coeff, coeff + N + 1, _coeff);
     }
 
     inline Polynomial(std::initializer_list<T> list)
@@ -138,7 +141,7 @@ namespace DO { namespace Sara {
     {
       T res = static_cast<T>(0);
       for (int i = 0; i <= N; ++i)
-        res += _coeff[i]*std::pow(x, i);
+        res += _coeff[i] * std::pow(x, i);
       return res;
     }
 
@@ -146,7 +149,7 @@ namespace DO { namespace Sara {
     {
       std::complex<T> res;
       for (int i = 0; i <= N; ++i)
-        res += _coeff[i]*std::pow(x, i);
+        res += _coeff[i] * std::pow(x, i);
       return res;
     }
     //! @}
@@ -168,9 +171,9 @@ namespace DO { namespace Sara {
     //! @}
 
     //! I/O.
-    friend std::ostream& operator<<(std::ostream& os,const Polynomial& P)
+    friend std::ostream& operator<<(std::ostream& os, const Polynomial& P)
     {
-      for(int i = N; i >= 0; --i)
+      for (int i = N; i >= 0; --i)
       {
         if (signum(P[i]) >= 0)
           os << "+";
@@ -186,14 +189,13 @@ namespace DO { namespace Sara {
   private:
     inline void copy(const Polynomial& other)
     {
-      std::copy(other._coeff, other._coeff + N+1, _coeff);
+      std::copy(other._coeff, other._coeff + N + 1, _coeff);
     }
 
   private:
-    T _coeff[N+1];
+    T _coeff[N + 1];
   };
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

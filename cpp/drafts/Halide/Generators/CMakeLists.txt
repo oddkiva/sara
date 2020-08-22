@@ -17,13 +17,6 @@ shakti_halide_library_v2(
   SRCS SeparableConvolution2dGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
-# Gaussian convolution (slower implementation).
-shakti_halide_library_v2(
-  NAME shakti_gaussian_convolution
-  SRCS GaussianConvolutionGenerator.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS}
-  DEPS shakti_separable_convolution_2d.generator)
-
 # Gaussian convolution V2 (teeny-tiny bit slower).
 shakti_halide_library_v2(
   NAME shakti_gaussian_convolution_v2
@@ -75,16 +68,32 @@ shakti_halide_library_v2(
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
+  NAME shakti_local_scale_space_extremum_32f_v2
+  SRCS LocalExtremumGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
   NAME shakti_refine_scale_space_extrema
   SRCS RefineExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+shakti_halide_library_v2(
+  NAME shakti_refine_scale_space_extrema_v2
+  SRCS RefineExtremumGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
-# Gradient in polar coordinates in 2D.
+
+# Gradients in polar coordinates.
 shakti_halide_library_v2(
   NAME shakti_polar_gradient_2d_32f
   SRCS DifferentialGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
+  NAME shakti_polar_gradient_2d_32f_v2
+  SRCS DifferentialGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
 
 # Dominant gradient orientations.
 shakti_halide_library_v2(
@@ -96,6 +105,11 @@ if (NOT APPLE)
   target_link_libraries(shakti_dominant_gradient_orientations.generator_library
     PRIVATE dl)
 endif ()
+
+shakti_halide_library_v2(
+  NAME shakti_dominant_gradient_orientations_v2
+  SRCS DominantGradientOrientationsGeneratorV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
 # SIFT descriptors.

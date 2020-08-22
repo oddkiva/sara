@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2014-2016 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2014-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -14,46 +14,66 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-namespace DO { namespace Sara { namespace P2 {
+namespace DO::Sara::Projective {
 
   //! @addtogroup GeometryTools
   //! @{
 
-  using Line = Vector3d;
-  using Point = Vector3d;
-  using Point2 = Point2d;
-  using Vector2 = Vector2d;
+  template <typename T, int N>
+  using Point = Eigen::Matrix<T, N + 1, 1>;
 
-  inline Point2 euclidean(const Point& p)
+  template <typename T>
+  using Point2 = Point<T, 2>;
+
+  template <typename T>
+  using Point3 = Point<T, 3>;
+
+
+  template <typename T>
+  using Line2 = Eigen::Matrix<T, 3, 1>;
+
+
+  template <typename T>
+  using Plane3 = Eigen::Matrix<T, 4, 1>;
+
+
+  template <typename T, int N>
+  inline auto euclidean(const Point<T, N>& p) -> Point<T, N>
   {
-    return (p / p(2)).head(2);
+    return p.hnormalized();
   }
 
-  inline Point homogeneous(const Point2& p)
-  {
-    return Point(p.x(), p.y(), 1.);
-  }
-
-  inline Point intersection(const Line& l1, const Line& l2)
+  template <typename T>
+  inline auto intersection(const Line2<T>& l1, const Line2<T>& l2) -> Point2<T>
   {
     return l1.cross(l2);
   }
 
-  inline Line line(const Point& p, const Point& q)
+  template <typename T>
+  inline auto line(const Point2<T>& p, const Point2<T>& q) -> Line2<T>
   {
     return p.cross(q);
   }
 
-  inline Line line(const Point2& a, const Point2& b)
+  template <typename T>
+  inline auto normal(const Line2<T>& l) -> Eigen::Matrix<T, 2, 1>
   {
-    return line(homogeneous(a), homogeneous(b));
+    return l.head(2);
   }
 
-  inline double dist(const Point& p, const Line& l)
+  template <typename T>
+  inline auto tangent(const Line2<T>& l) -> Eigen::Matrix<T, 2, 1>
   {
-    return std::abs((p / p(2)).dot(l)) / l.head(2).norm();
+    const auto n = normal(l);
+    return {-n(1), n(0)};
+  }
+
+  template <typename T>
+  inline auto point_to_line_distance(const Point2<T>& p, const Line2<T>& l)
+  {
+    return std::abs(l.dot(p) / l.head(2).norm());
   }
 
   //! @}
 
-}}}  // namespace DO::Sara::P2
+}  // namespace DO::Sara::Projective

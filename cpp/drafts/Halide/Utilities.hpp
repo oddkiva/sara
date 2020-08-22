@@ -2,7 +2,7 @@
 
 #include <DO/Sara/Core.hpp>
 
-#include <Halide.h>
+#include <drafts/Halide/MyHalide.hpp>
 
 #ifdef _WIN32
 #  include <windows.h>

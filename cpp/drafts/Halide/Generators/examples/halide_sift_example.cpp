@@ -15,7 +15,6 @@
 #include <cmath>
 
 #include <DO/Sara/Core.hpp>
-#include <DO/Sara/FeatureDetectors/DoG.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
@@ -161,7 +160,7 @@ namespace DO::Shakti::HalideBackend {
 // #define SIFT_V1
 // #define SIFT_V2
 // #define SIFT_V3
-#define SIFT_V4
+// #define SIFT_V4
 #if defined(SIFT_V1)
       SARA_DEBUG << "RUNNING SIFT V1..." << std::endl;
       timer.restart();
@@ -192,10 +191,10 @@ namespace DO::Shakti::HalideBackend {
 #elif defined(SIFT_V4)
       SARA_DEBUG << "RUNNING SIFT V4..." << std::endl;
       timer.restart();
-      pipeline.descriptors_v3 =
-          v4::compute_sift_descriptors(pipeline.gradient_pyramid[0],  //
-                                       pipeline.gradient_pyramid[1],  //
-                                       pipeline.oriented_extrema);
+      pipeline.descriptors_v3 = v4::compute_sift_descriptors(  //
+          pipeline.gradient_pyramid[0],                        //
+          pipeline.gradient_pyramid[1],                        //
+          pipeline.oriented_extrema);
       SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms() << " ms"
                  << std::endl;
 #endif
@@ -245,8 +244,11 @@ auto test_on_video()
 #elif __APPLE__
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  // const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
+  const auto video_filepath =
+      //"/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+      // const auto video_filepath =
+      // "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
+      "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
   // Input and output from Sara.
@@ -289,35 +291,25 @@ auto test_on_video()
     shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
     sara::toc("Grayscale");
 
-    // Use parallelization and vectorization.
-    sara::tic();
-    halide::scale(frame_gray32f, frame_downsampled);
-    sara::toc("Downsample");
+    if (scale_factor != 1)
+    {
+      // Use parallelization and vectorization.
+      sara::tic();
+      halide::scale(frame_gray32f, frame_downsampled);
+      sara::toc("Downsample");
+    }
+
+    auto& frame_to_process = scale_factor == 1  //
+                                 ? frame_gray32f
+                                 : frame_downsampled;
 
     sara::tic();
-// #define ORIGINAL
-#ifdef ORIGINAL
-    const auto [features, descriptors] =
-        sara::compute_sift_keypoints(frame_downsampled);
-#else
-    sift_extractor(frame_downsampled);
-#endif
+    sift_extractor(frame_to_process);
     sara::toc("Oriented DoG");
 
     sara::tic();
-    sara::display(frame_downsampled);
-#ifdef ORIGINAL
-    for (size_t i = 0; i != features.size(); ++i)
-    {
-      const auto color =
-          features[i].extremum_type == sara::OERegion::ExtremumType::Max
-              ? sara::Red8
-              : sara::Blue8;
-      features[i].draw(color);
-    }
-#else
+    sara::display(frame_to_process);
     draw_extrema(sift_extractor.pipeline.oriented_extrema);
-#endif
     sara::toc("Display");
   }
 }
@@ -325,7 +317,7 @@ auto test_on_video()
 
 GRAPHICS_MAIN()
 {
-  test_on_image();
-  // test_on_video();
+  // test_on_image();
+  test_on_video();
   return 0;
 }

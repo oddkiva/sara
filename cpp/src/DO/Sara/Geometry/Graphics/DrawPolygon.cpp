@@ -28,8 +28,8 @@ namespace DO { namespace Sara {
     draw_rect(tl.x(), tl.y(), sz.x(), sz.y(), color, pen_width);
   }
 
-  void draw_poly(const std::vector<Point2d>& p, const Color3ub& color,
-                int pen_width)
+  void draw_polygon(const std::vector<Point2d>& p, const Color3ub& color,
+                    int pen_width)
   {
     for (size_t i1 = 0, i2 = p.size()-1; i1 != p.size(); i2=i1++)
       draw_line(p[i1], p[i2], color, pen_width);

@@ -453,7 +453,7 @@ namespace DO::Shakti::HalideBackend {
       auto wo0 = 1 - dori;
       auto wo1 = dori;
 
-      auto at = [this](const auto& i, const auto& j, const auto& o) {
+      auto at = [](const auto& i, const auto& j, const auto& o) {
         return Halide::clamp(i * N * O + j * O + o, 0, N * N * O - 1);
       };
 

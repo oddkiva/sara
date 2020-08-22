@@ -36,8 +36,8 @@ namespace DO { namespace Sara {
   void draw_bbox(const BBox& bbox, const Color3ub& c, int pen_width = 1);
 
   DO_SARA_EXPORT
-  void draw_poly(const std::vector<Point2d>& p, const Color3ub& color,
-                 int pen_width = 1);
+  void draw_polygon(const std::vector<Point2d>& p, const Color3ub& color,
+                    int pen_width = 1);
 
   DO_SARA_EXPORT
   void draw_ellipse(const Ellipse& e, const Color3ub& col, int pen_width = 1);

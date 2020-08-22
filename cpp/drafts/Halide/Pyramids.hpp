@@ -55,8 +55,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
     // Adjust the new camera sigma with the appropriate factor.
     //
-    // Note that the enlarged photograph cannot have a lower scale of resolution
-    // than the original image.
+    // Note that the enlarged photograph cannot have a scale of resolution lower
+    // than the original image's scale.
     const auto scale_camera = params.scale_camera() * resize_factor;
 
     // Blur the image so that its scale is equal to the beginning scale of
