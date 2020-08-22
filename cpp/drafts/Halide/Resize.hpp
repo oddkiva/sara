@@ -79,8 +79,13 @@ namespace DO::Shakti::HalideBackend {
 
   auto enlarge(Sara::ImageView<float>& src, Sara::ImageView<float>& dst)
   {
-    auto src_buffer = as_runtime_buffer_3d(src);
-    auto dst_buffer = as_runtime_buffer_3d(dst);
+    auto src_tensor_view = tensor_view(src).reshape(
+        Eigen::Vector4i{1, 1, src.height(), src.width()});
+    auto dst_tensor_view = tensor_view(dst).reshape(
+        Eigen::Vector4i{1, 1, dst.height(), dst.width()});
+
+    auto src_buffer = as_runtime_buffer(src_tensor_view);
+    auto dst_buffer = as_runtime_buffer(dst_tensor_view);
 
     src_buffer.set_host_dirty();
     enlarge(src_buffer, dst_buffer);
@@ -90,11 +95,18 @@ namespace DO::Shakti::HalideBackend {
   auto enlarge(Sara::ImageView<Sara::Rgb32f>& src,
                Sara::ImageView<Sara::Rgb32f>& dst)
   {
-    auto src_buffer = as_interleaved_runtime_buffer(src);
-    auto dst_buffer = as_interleaved_runtime_buffer(dst);
+    auto src_buffer = Halide::Runtime::Buffer<float>::make_interleaved(
+        reinterpret_cast<float*>(src.data()), src.width(), src.height(), 3);
+    auto dst_buffer = Halide::Runtime::Buffer<float>::make_interleaved(
+        reinterpret_cast<float*>(dst.data()), dst.width(), dst.height(), 3);
+    src_buffer.add_dimension();
+    dst_buffer.add_dimension();
 
     src_buffer.set_host_dirty();
-    enlarge(src_buffer, dst_buffer);
+    shakti_enlarge(src_buffer,                 //
+                   src.width(), src.height(),  //
+                   dst.width(), dst.height(),  //
+                   dst_buffer);
     dst_buffer.copy_to_host();
   }
 

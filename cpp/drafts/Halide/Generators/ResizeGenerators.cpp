@@ -196,12 +196,12 @@ namespace {
     GeneratorParam<int> tile_x{"tile_x", 8};
     GeneratorParam<int> tile_y{"tile_y", 8};
 
-    Input<Buffer<float>> input{"input", 3};
+    Input<Buffer<float>> input{"input", 4};
     Input<int[2]> in_sizes{"in_sizes"};
     Input<int[2]> out_sizes{"out_sizes"};
-    Output<Buffer<float>> output{"enlarged_input", 3};
+    Output<Buffer<float>> output{"enlarged_input", 4};
 
-    Var x{"x"}, y{"y"}, c{"c"};
+    Var x{"x"}, y{"y"}, c{"c"}, n{"n"};
     Var xo{"xo"}, yo{"yo"}, co{"co"};
     Var xi{"xi"}, yi{"yi"}, ci{"ci"};
 
@@ -223,10 +223,11 @@ namespace {
       auto xr = cast<int>(xx);
       auto yr = cast<int>(yy);
 
-      output(x, y, c) = (1 - wx) * (1 - wy) * input_padded(xr, yr, c) +  //
-                        wx * (1 - wy) * input_padded(xr + 1, yr, c) +    //
-                        (1 - wx) * wy * input_padded(xr, yr + 1, c) +    //
-                        wx * wy * input_padded(xr + 1, yr + 1, c);
+      output(x, y, c, n) =
+          (1 - wx) * (1 - wy) * input_padded(xr, yr, c, n) +  //
+          wx * (1 - wy) * input_padded(xr + 1, yr, c, n) +    //
+          (1 - wx) * wy * input_padded(xr, yr + 1, c, n) +    //
+          wx * wy * input_padded(xr + 1, yr + 1, c, n);
     }
 
     void schedule()

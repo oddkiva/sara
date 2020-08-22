@@ -160,8 +160,13 @@ BOOST_AUTO_TEST_CASE(test_enlarge_multi_channel)
 
   for (auto y = 0; y < dst.height(); ++y)
     for (auto x = 0; x < dst.width(); ++x)
-      BOOST_REQUIRE_SMALL((dst(x, y) - true_dst(x, y)).norm(),
+    {
+      std::cout << x << " " << y << " : " << dst(x, y).transpose() << std::endl;
+      // BOOST_REQUIRE_SMALL((dst(x, y) - true_dst(x, y)).norm(),
+      //                     std::numeric_limits<float>::epsilon());
+      BOOST_CHECK_SMALL((dst(x, y) - true_dst(x, y)).norm(),
                           std::numeric_limits<float>::epsilon());
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_enlarge_small_image)

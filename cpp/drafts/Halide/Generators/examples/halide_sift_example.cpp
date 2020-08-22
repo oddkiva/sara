@@ -244,8 +244,11 @@ auto test_on_video()
 #elif __APPLE__
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  // const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
+  const auto video_filepath =
+      //"/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+      // const auto video_filepath =
+      // "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
+      "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
   // Input and output from Sara.
