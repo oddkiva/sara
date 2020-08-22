@@ -37,7 +37,7 @@ auto draw_quantized_extrema(const halide::v2::QuantizedExtremumArray& e,
 #pragma omp parallel for
   for (auto i = 0; i < e.size(); ++i)
   {
-    const auto& c = e.type(i) == 1 ? sara::Blue8 : sara::Red8;
+    const auto& c = e.type(i) == 1 ? sara::Cyan8 : sara::Blue8;
     const float x = e.x(i) * octave_scaling_factor;
     const float y = e.y(i) * octave_scaling_factor;
 
@@ -55,7 +55,7 @@ auto draw_extrema(const halide::v2::ExtremumArray& e,
 #pragma omp parallel for
   for (auto i = 0; i < e.size(); ++i)
   {
-    const auto& c = e.type(i) == 1 ? sara::Blue8 : sara::Red8;
+    const auto& c = e.type(i) == 1 ? sara::Cyan8 : sara::Blue8;
     const auto& x = e.x(i) * octave_scaling_factor;
     const auto& y = e.y(i) * octave_scaling_factor;
     const auto& s = e.s(i) * octave_scaling_factor;
@@ -74,7 +74,7 @@ auto draw_oriented_extrema(const halide::v2::OrientedExtremumArray& e,
 #pragma omp parallel for
   for (auto i = 0; i < e.size(); ++i)
   {
-    const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Blue8;
+    const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Cyan8;
     const auto& x = e.x(i) * octave_scaling_factor;
     const auto& y = e.y(i) * octave_scaling_factor;
     const auto& s = e.s(i) * octave_scaling_factor;
@@ -95,6 +95,34 @@ auto draw_oriented_extrema(const halide::v2::OrientedExtremumArray& e,
   }
 }
 
+auto draw_oriented_extrema(sara::ImageView<sara::Rgb8>& display,
+                           const halide::v2::OrientedExtremumArray& e,
+                           float octave_scaling_factor = 1, int width = 3)
+{
+#pragma omp parallel for
+  for (auto i = 0; i < e.size(); ++i)
+  {
+    const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Cyan8;
+    const auto& x = e.x(i) * octave_scaling_factor;
+    const auto& y = e.y(i) * octave_scaling_factor;
+    const auto& s = e.s(i) * octave_scaling_factor;
+    const auto& theta = e.orientations(i);
+
+    // N.B.: the blob radius is the scale multiplied by sqrt(2).
+    // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
+    const float r = s * M_SQRT2;
+    const auto& p1 = Eigen::Vector2f{x, y};
+    const Eigen::Vector2f& p2 =
+        p1 + r * Eigen::Vector2f{cos(theta), sin(theta)};
+
+    // Contour of orientation line.
+    sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), sara::Black8,
+                    width + 2);
+    sara::draw_circle(display, p1.x(), p1.y(), r, sara::Black8, width + 2);
+    sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), c, width);
+    sara::draw_circle(display, p1.x(), p1.y(), r, c, width);
+  }
+}
 
 auto test_on_image()
 {
@@ -185,6 +213,7 @@ auto test_on_video()
   const auto video_filepath =
       // "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
       "/home/david/Desktop/GOPR0542.MP4"s;
+      // "/home/david/Desktop/Datasets/ha/turn_bikes.mp4"s;
 #endif
 
 
@@ -209,7 +238,9 @@ auto test_on_video()
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
 
   auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
-  sift_pipeline.initialize(0, frame.width(), frame.height());
+
+  const auto start_octave_index = 0;
+  sift_pipeline.initialize(start_octave_index, frame.width(), frame.height());
 
 
   // Show the local extrema.
@@ -234,8 +265,8 @@ auto test_on_video()
     ++frames_read;
     SARA_CHECK(frames_read);
 
-    if(frames_read % 3 != 0)
-      continue;
+    // if(frames_read % 3 != 0)
+    //   continue;
 
     timer.restart();
     {
@@ -252,15 +283,15 @@ auto test_on_video()
                << std::endl;
 
     sara::tic();
-    sara::display(frame);
     for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
     {
       auto& octave = sift_pipeline.octaves[o];
       for (auto s = 0u; s < octave.extrema_oriented.size(); ++s)
-        draw_oriented_extrema(octave.extrema_oriented[s],
+        draw_oriented_extrema(frame, octave.extrema_oriented[s],
                               sift_pipeline.octave_scaling_factor(
                                   sift_pipeline.start_octave_index + o));
     }
+    sara::display(frame);
     sara::toc("Display");
   }
 }
@@ -272,7 +303,7 @@ GRAPHICS_MAIN()
   omp_set_num_threads(omp_get_max_threads());
   std::ios_base::sync_with_stdio(false);
 
-  test_on_image();
-  // test_on_video();
+  // test_on_image();
+  test_on_video();
   return 0;
 }

@@ -63,7 +63,6 @@ namespace v2 {
       const Expr n = 0;
 
       using DO::Shakti::HalideBackend::refine_extremum_v1_4d;
-      using DO::Shakti::HalideBackend::refine_extremum_v2_4d;
       const auto result =
           refine_extremum_v1_4d(f_prev, f_curr, f_next, xi, yi, c, n);
           // refine_extremum_v2_4d(f_prev, f_curr, f_next, xi, yi, c, n);

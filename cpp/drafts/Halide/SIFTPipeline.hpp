@@ -141,9 +141,6 @@ namespace DO::Shakti::HalideBackend::v2 {
       }
       else if (first_action == FirstAction::Downscale)
       {
-        if (input.width() / 2 != gaussians[0].width() ||
-            input.height() / 2 != gaussians[0].height())
-          throw std::runtime_error{"Invalid input sizes!"};
         sara::tic();
         HalideBackend::scale(input, gaussians[0]);
         sara::toc("Downsampling for Gaussian 0: " +
@@ -414,7 +411,7 @@ namespace DO::Shakti::HalideBackend::v2 {
     // float scale_camera = 0.5;
     // int start_octave_index = -1;
 
-    Halide::Runtime::Buffer<float> input_upscaled;
+    Halide::Runtime::Buffer<float> input_rescaled;
     std::vector<SiftOctavePipeline> octaves;
 
     auto initialize(int start_octave, int width, int height) -> void
@@ -449,7 +446,11 @@ namespace DO::Shakti::HalideBackend::v2 {
       {
         const auto w = width * std::pow(2, -start_octave_index);
         const auto h = height * std::pow(2, -start_octave_index);
-        input_upscaled = Halide::Runtime::Buffer<float>(w, h, 1, 1);
+        input_rescaled = Halide::Runtime::Buffer<float>(w, h, 1, 1);
+      }
+      else if (start_octave_index > 0)
+      {
+        input_rescaled = Halide::Runtime::Buffer<float>(width, height, 1, 1);
       }
 
       octaves.resize(num_octaves);
@@ -469,24 +470,38 @@ namespace DO::Shakti::HalideBackend::v2 {
 
     auto feed(Halide::Runtime::Buffer<float>& input)
     {
-      if (start_octave_index > 0)
-        throw std::runtime_error{"Not implemented"};
-
       if (start_octave_index < 0)
       {
         sara::tic();
-        HalideBackend::enlarge(input, input_upscaled);
+        HalideBackend::enlarge(input, input_rescaled);
         sara::toc("Upscaling the image");
       }
+      else if (start_octave_index > 0)
+      {
+        const auto& scale =
+            octaves.front().params.scales[octaves.front().params.num_scales];
+        const auto& sigma = std::sqrt(scale * scale - 1);
+        sara::tic();
+        HalideBackend::gaussian_convolution(
+            input, input_rescaled, sigma,
+            octaves.front().params.gaussian_truncation_factor);
+        sara::toc("Convolving for downscaling: sigma = " +
+                  std::to_string(sigma));
+      }
 
-      auto& which_input = start_octave_index < 0 ? input_upscaled : input;
+      auto& which_input = start_octave_index != 0 ? input_rescaled : input;
 
       for (auto o = 0u; o < octaves.size(); ++o)
       {
         timer.restart();
 
         if (o == 0)
-          octaves[o].feed(which_input, SiftOctavePipeline::FirstAction::Convolve);
+        {
+          if (start_octave_index <= 0)
+            octaves[o].feed(which_input, SiftOctavePipeline::FirstAction::Convolve);
+          else
+            octaves[o].feed(which_input, SiftOctavePipeline::FirstAction::Downscale);
+        }
         else
         {
           auto& prev_octave = octaves[o - 1];
@@ -510,10 +525,10 @@ namespace DO::Shakti::HalideBackend::v2 {
       return std::pow(2, o);
     }
 
-    auto input_upscaled_view() -> sara::ImageView<float>
+    auto input_rescaled_view() -> sara::ImageView<float>
     {
-      input_upscaled.copy_to_host();
-      return {input_upscaled.data(), {input_upscaled.width(), input_upscaled.height()}};
+      input_rescaled.copy_to_host();
+      return {input_rescaled.data(), {input_rescaled.width(), input_rescaled.height()}};
     }
   };
 
