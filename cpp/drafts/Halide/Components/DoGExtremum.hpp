@@ -148,6 +148,10 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
 
+  //! @todo TODO:
+  //! - Rework this: Halide will choke on this. So we have to break it down !
+  //!   into smaller steps.
+  //! - Support multiple iterations.
   template <typename Input>
   auto refine_extremum_v2(const Input& I0, const Input& I1, const Input& I2,  //
                           const Halide::Expr& x, const Halide::Expr& y)       //

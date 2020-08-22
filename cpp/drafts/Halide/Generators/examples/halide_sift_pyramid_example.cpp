@@ -69,12 +69,12 @@ auto draw_extrema(const halide::v2::ExtremumArray& e,
 }
 
 auto draw_oriented_extrema(const halide::v2::OrientedExtremumArray& e,
-                           float octave_scaling_factor = 1, int width = 2)
+                           float octave_scaling_factor = 1, int width = 3)
 {
 #pragma omp parallel for
   for (auto i = 0; i < e.size(); ++i)
   {
-    const auto& c = e.type(i) == 1 ? sara::Blue8 : sara::Red8;
+    const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Blue8;
     const auto& x = e.x(i) * octave_scaling_factor;
     const auto& y = e.y(i) * octave_scaling_factor;
     const auto& s = e.s(i) * octave_scaling_factor;
@@ -87,6 +87,9 @@ auto draw_oriented_extrema(const halide::v2::OrientedExtremumArray& e,
     const Eigen::Vector2f& p2 =
         p1 + r * Eigen::Vector2f{cos(theta), sin(theta)};
 
+    // Contour of orientation line.
+    sara::draw_line(p1, p2, sara::Black8, width + 2);
+    sara::draw_circle(p1, r, sara::Black8, width + 2);
     sara::draw_line(p1, p2, c, width);
     sara::draw_circle(p1, r, c, width);
   }
@@ -120,6 +123,7 @@ auto test_on_image()
   SARA_DEBUG << "SIFT pipeline: " << elapsed_ms << " ms" << std::endl;
 
 
+#ifdef CHECK_INPUT_UPSCALED
   if (sift_pipeline.start_octave_index < 0)
   {
     auto input_upscaled = sift_pipeline.input_upscaled_view();
@@ -128,6 +132,7 @@ auto test_on_image()
     sara::get_key();
     sara::resize_window(image.sizes());
   }
+#endif
 
   if (!sara::active_window())
     sara::create_window(image.sizes());
@@ -229,19 +234,18 @@ auto test_on_video()
     ++frames_read;
     SARA_CHECK(frames_read);
 
-    if(frames_read % 2 != 0)
+    if(frames_read % 3 != 0)
       continue;
 
     timer.restart();
+    {
+      sara::tic();
+      shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray);
+      sara::toc("CPU RGB to grayscale");
 
-    sara::tic();
-    shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray);
-    sara::toc("CPU RGB to grayscale");
-
-    buffer_gray_4d.set_host_dirty();
-    sift_pipeline.feed(buffer_gray_4d);
-
-
+      buffer_gray_4d.set_host_dirty();
+      sift_pipeline.feed(buffer_gray_4d);
+    }
     elapsed_ms = timer.elapsed_ms();
     SARA_DEBUG << "[Frame: " << frames_read << "] "
                << "total computation time = " << elapsed_ms << " ms"
@@ -268,7 +272,7 @@ GRAPHICS_MAIN()
   omp_set_num_threads(omp_get_max_threads());
   std::ios_base::sync_with_stdio(false);
 
-  // test_on_image();
-  test_on_video();
+  test_on_image();
+  // test_on_video();
   return 0;
 }
