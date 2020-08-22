@@ -89,7 +89,6 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
   //! @}
 
-
   //! @brief Local extremum predicate in Halide.
   /*!
    *
@@ -150,6 +149,52 @@ namespace DO { namespace Shakti { namespace HalideBackend {
                minimum(curr(x + r.x, y + r.y, c, n)),
                minimum(next(x + r.x, y + r.y, c, n))) == curr(x, y, c, n);
   }
+
+  template <typename Input>
+  auto local_max_4d(const Input& f,                //
+                    const Halide::Expr& x_min,     //
+                    const Halide::Expr& y_min,     //
+                    const Halide::Expr& c_min,     //
+                    const Halide::Expr& n_min,     //
+                    const Halide::Expr& x_extent,  //
+                    const Halide::Expr& y_extent,  //
+                    const Halide::Expr& c_extent,  //
+                    const Halide::Expr& n_extent,  //
+                    const Halide::Var& x,          //
+                    const Halide::Var& y,          //
+                    const Halide::Var& c,          //
+                    const Halide::Var& n)          //
+  {
+    auto r = Halide::RDom{x_min, x_extent,  //
+                          y_min, y_extent,  //
+                          c_min, c_extent,  //
+                          n_min, n_extent};
+    return Halide::maximum(f(x + r.x, y + r.y, c + r.z, n + r.w)) ==
+           f(x, y, c, n);
+  }
+
+  template <typename Input>
+  auto local_min_4d(const Input& f,                //
+                    const Halide::Expr& x_min,     //
+                    const Halide::Expr& y_min,     //
+                    const Halide::Expr& c_min,     //
+                    const Halide::Expr& n_min,     //
+                    const Halide::Expr& x_extent,  //
+                    const Halide::Expr& y_extent,  //
+                    const Halide::Expr& c_extent,  //
+                    const Halide::Expr& n_extent,  //
+                    const Halide::Var& x,          //
+                    const Halide::Var& y,          //
+                    const Halide::Var& c,          //
+                    const Halide::Var& n)          //
+  {
+    auto r = Halide::RDom{x_min, x_extent,  //
+                          y_min, y_extent,  //
+                          c_min, c_extent,  //
+                          n_min, n_extent};
+    return Halide::min(f(x + r.x, y + r.y, c + r.z, n + r.w)) == f(x, y, c, n);
+  }
+
   //! @}
 
 }}}  // namespace DO::Shakti::HalideBackend

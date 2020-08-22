@@ -178,3 +178,23 @@ target_link_libraries(halide_sift_pyramid_example
 set_property(TARGET halide_sift_pyramid_example
   PROPERTY
   FOLDER "Tutorials/Halide")
+
+add_executable(halide_batched_convolution_example
+  halide_batched_convolution_example.cpp)
+target_compile_definitions(halide_batched_convolution_example
+  PRIVATE ${SARA_DEFINITIONS})
+target_link_options(halide_batched_convolution_example
+  PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
+target_link_libraries(halide_batched_convolution_example
+  PRIVATE
+  ${DO_Sara_LIBRARIES}
+  Halide
+  shakti_halide_rgb_to_gray
+  shakti_halide_gray32f_to_rgb
+  shakti_convolve_batch_32f
+  shakti_forward_difference_32f
+  )
+set_property(TARGET halide_batched_convolution_example
+  PROPERTY
+  FOLDER "Tutorials/Halide")

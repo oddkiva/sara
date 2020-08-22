@@ -48,6 +48,12 @@ shakti_halide_library_v2(
   SRCS Im2ColGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+# Batched convolution.
+shakti_halide_library_v2(
+  NAME shakti_convolve_batch_32f
+  SRCS BatchedConvolutionGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
 
 # Binary operators.
 shakti_halide_library_v2(
@@ -80,6 +86,12 @@ shakti_halide_library_v2(
 shakti_halide_library_v2(
   NAME shakti_refine_scale_space_extrema_v2
   SRCS RefineExtremumGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+# Forward difference operator.
+shakti_halide_library_v2(
+  NAME shakti_forward_difference_32f
+  SRCS DifferentialGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 

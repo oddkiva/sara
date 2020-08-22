@@ -93,6 +93,26 @@ namespace DO { namespace Shakti { namespace HalideBackend {
             Halide::cast<std::int8_t>(0) /* not a local extremum! */));  //
   }
 
+  template <typename Input>
+  auto is_dog_extremum(                                                    //
+      const Input& f,                                                      //
+      const Halide::Expr& edge_ratio, const Halide::Expr& extremum_thres,  //
+      const Halide::Var& x, const Halide::Var& y,                          //
+      const Halide::Var& c, const Halide::Var& n)                          //
+  {
+    auto is_max = local_max_4d(f, -1, 3, -1, 3, 0, 1, -1, 3, x, y, c, n);
+    auto is_min = local_min_4d(f, -1, 3, -1, 3, 0, 1, -1, 3, x, y, c, n);
+    auto is_strong = abs(f(x, y, c, n)) > 0.8f * extremum_thres;
+    auto is_not_on_edge = !on_edge(f, edge_ratio, x, y, c, n);
+
+    return Halide::select(
+        is_max && is_strong && is_not_on_edge,                           //
+        Halide::cast<std::int8_t>(1) /* good local max! */,              //
+        Halide::select(                                                  //
+            is_min && is_strong && is_not_on_edge,                       //
+            Halide::cast<std::int8_t>(-1) /* good local min! */,         //
+            Halide::cast<std::int8_t>(0) /* not a local extremum! */));  //
+  }
 
   // Count the number of extrema in Halide.
   template <typename Input>
