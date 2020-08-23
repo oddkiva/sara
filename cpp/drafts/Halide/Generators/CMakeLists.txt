@@ -134,6 +134,11 @@ shakti_halide_library_v2(
   SRCS DominantGradientOrientationsGeneratorV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+shakti_halide_library_v2(
+  NAME shakti_dominant_gradient_orientations_v3
+  SRCS DominantGradientOrientationsGeneratorV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
 
 # SIFT descriptors.
 shakti_halide_library_v2(

@@ -30,6 +30,8 @@
 #include <drafts/Halide/Resize.hpp>
 #include <drafts/Halide/SIFT.hpp>
 
+#include "shakti_halide_rgb_to_gray.h"
+
 
 namespace shakti = DO::Shakti;
 

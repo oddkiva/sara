@@ -14,6 +14,7 @@
 #pragma once
 
 #include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 #include <drafts/Halide/ExtremumDataStructures.hpp>
 #include <drafts/Halide/Utilities.hpp>
@@ -173,13 +174,13 @@ namespace DO::Shakti::HalideBackend {
       sift_tensor_buffer.copy_to_host();
     }
 
-    auto compute_sift_descriptors(                         //
-        Sara::ImagePyramid<float>& gradient_magnitudes,    //
-        Sara::ImagePyramid<float>& gradient_orientations,  //
-        Pyramid<OrientedExtremumArray>& keypoints,         //
-        float bin_length_in_scale_unit = 3.f,              //
-        int N = 4,                                         //
-        int O = 8)                                         //
+    auto compute_sift_descriptors(                                 //
+        Sara::ImagePyramid<float>& gradient_magnitudes,            //
+        Sara::ImagePyramid<float>& gradient_orientations,          //
+        Pyramid<HalideBackend::OrientedExtremumArray>& keypoints,  //
+        float bin_length_in_scale_unit = 3.f,                      //
+        int N = 4,                                                 //
+        int O = 8)                                                 //
     {
       auto descriptors = Pyramid<Sara::Tensor_<float, 2>>{};
 

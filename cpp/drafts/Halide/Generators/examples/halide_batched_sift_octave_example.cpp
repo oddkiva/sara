@@ -11,9 +11,6 @@
 
 //! @example
 
-#include <algorithm>
-#include <cmath>
-
 #include <omp.h>
 
 #include <DO/Sara/Core.hpp>
@@ -31,41 +28,63 @@ namespace sara = DO::Sara;
 namespace halide = DO::Shakti::HalideBackend;
 
 
-auto test_on_image()
+auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
 {
-  const auto image_filepath =
-#ifdef __APPLE__
-      "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg";
-#else
-      "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg";
-#endif
-  auto image = sara::imread<float>(image_filepath);
-  auto image_tensor = tensor_view(image).reshape(
-      Eigen::Vector4i{1, 1, image.height(), image.width()});
-  auto buffer_4d = halide::as_runtime_buffer(image_tensor);
-
-  auto sift_octave_pipeline = halide::v2::SiftOctavePipeline{};
-  sift_octave_pipeline.initialize_buffers(image.width(), image.height());
-
-  auto timer = sara::Timer{};
-  timer.restart();
-  {
-    buffer_4d.set_host_dirty();
-    sift_octave_pipeline.feed(buffer_4d);
-  }
-  const auto elapsed_ms = timer.elapsed_ms();
-  SARA_DEBUG << "SIFT octave: " << elapsed_ms << " ms" << std::endl;
-
-
-  sara::create_window(image.sizes());
-  sara::set_antialiasing();
   sara::tic();
-  sara::display(image);
-  for (auto s = 0u; s < sift_octave_pipeline.extrema_oriented.size(); ++s)
-    draw_oriented_extrema(sift_octave_pipeline.extrema_oriented[s]);
+  sift_octave.y_convolved.copy_to_host();
+  sara::toc("Copy gaussians to host");
+
+  for (auto s = 0; s < sift_octave.params.num_scales + 3; ++s)
+  {
+    sara::display(sift_octave.gaussian(s, 0));
+    sara::draw_string(20, 20,
+                      sara::format("Gaussian: scale[%d] = %f", s,
+                                   sift_octave.params.scales[s]),
+                      sara::Blue8);
+    sara::get_key();
+  }
+
+  sara::tic();
+  sift_octave.gradient_mag.copy_to_host();
+  sift_octave.gradient_ori.copy_to_host();
+  sara::toc("Copy gradients to host");
+
+  for (auto s = 0; s < sift_octave.params.num_scales + 3; ++s)
+  {
+    sara::display(sara::color_rescale(sift_octave.gradient_magnitude(s, 0)));
+    sara::draw_string(20, 20,
+                      sara::format("Gradient magnitude: scale[%d] = %f", s,
+                                   sift_octave.params.scales[s]),
+                      sara::Blue8);
+    sara::get_key();
+
+    sara::display(sara::color_rescale(sift_octave.gradient_orientation(s, 0)));
+    sara::draw_string(20, 20,
+                      sara::format("Gradient orientation: scale[%d] = %f", s,
+                                   sift_octave.params.scales[s]),
+                      sara::Blue8);
+    sara::get_key();
+  }
+
+  sara::tic();
+  sift_octave.dog.copy_to_host();
+  sara::toc("Copy dog to host");
+
+  for (auto s = 0; s < sift_octave.params.num_scales + 2; ++s)
+  {
+    sara::display(
+        sara::color_rescale(sift_octave.difference_of_gaussians(s, 0)));
+    sara::draw_string(
+        20, 20,
+        sara::format("DoG: scale[%d] = %f", s, sift_octave.params.scales[s]),
+        sara::Blue8);
+    sara::get_key();
+  }
   sara::toc("Display");
 
-  sara::get_key();
+  SARA_CHECK(sift_octave.extrema_quantized.size());
+  SARA_CHECK(sift_octave.extrema.size());
+  SARA_CHECK(sift_octave.extrema_oriented.size());
 }
 
 auto test_on_video()
@@ -80,11 +99,9 @@ auto test_on_video()
       video_filepath =  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
-  const auto video_filepath =
-      "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      // "/home/david/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
-
 
 
   // ===========================================================================
@@ -108,8 +125,9 @@ auto test_on_video()
   auto buffer_gray = halide::as_runtime_buffer(frame_gray);
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
 
-  auto sift_octave_pipeline = halide::v2::SiftOctavePipeline{};
-  sift_octave_pipeline.initialize_buffers(frame.width(), frame.height());
+  auto sift_octave = halide::v3::SiftOctavePipeline{};
+  sift_octave.params.initialize_kernels();
+  sift_octave.initialize(frame.width(), frame.height());
 
 
   // Show the local extrema.
@@ -143,52 +161,24 @@ auto test_on_video()
     sara::toc("Set host dirty");
 
     timer.restart();
-    sift_octave_pipeline.feed(buffer_gray_4d);
+    sift_octave.feed(buffer_gray_4d);
     elapsed_ms = timer.elapsed_ms();
-    SARA_DEBUG << "[" << frames_read
-               << "] total computation time = " << elapsed_ms << " ms"
+    SARA_DEBUG << "[Frame: " << frames_read << "] "
+               << "total computation time = " << elapsed_ms << " ms"
                << std::endl;
+    sara::toc("Octave computation");
 
     sara::tic();
-#ifdef CHECK_GAUSSIANS
-    for (auto i = 0; i < sift_octave_pipeline.params.num_scales + 3; ++i)
-    {
-      sara::display(sift_octave_pipeline.gaussian_view(i));
-      sara::get_key();
-    }
-#endif
-
-#ifdef CHECK_DOGS
-    for (auto i = 0; i < sift_octave_pipeline.params.num_scales + 2; ++i)
-    {
-      sara::display(sara::color_rescale(sift_octave_pipeline.dog_view(i)));
-      sara::get_key();
-    }
-#endif
-
-#ifdef CHECK_QUANTIZED_EXTREMA
-    for (auto s = 0u; s < sift_octave_pipeline.extrema_quantized.size(); ++s)
-      draw_quantized_extrema(sift_octave_pipeline.extrema_quantized[s],
-                             sift_octave_pipeline.params.scales[s + 1]);
-#endif
-
-#ifdef CHECK_REFINED_EXTREMA
-    for (auto s = 0u; s < sift_octave_pipeline.extrema.size(); ++s)
-    {
-      sift_octave_pipeline.extrema[s].x.copy_to_host();
-      sift_octave_pipeline.extrema[s].y.copy_to_host();
-      sift_octave_pipeline.extrema[s].s.copy_to_host();
-      draw_extrema(sift_octave_pipeline.extrema[s]);
-    }
-#endif
-
-    for (auto s = 0u; s < sift_octave_pipeline.extrema_oriented.size(); ++s)
-      draw_oriented_extrema(frame, sift_octave_pipeline.extrema_oriented[s]);
+    // draw_quantized_extrema(frame, extrema_quantized);
+    // draw_extrema(frame, extrema);
+    // draw_oriented_extrema(extrema_oriented);
+    draw_oriented_extrema(frame, sift_octave.extrema_oriented, 1, 2);
     sara::display(frame);
     sara::toc("Display");
+
+    // debug_sift_octave(sift_octave);
   }
 }
-
 
 GRAPHICS_MAIN()
 {

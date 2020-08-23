@@ -199,8 +199,9 @@ namespace v3 {
   public:
     GeneratorParam<int> tile_x{"tile_x", 16};
     GeneratorParam<int> tile_y{"tile_y", 16};
+    GeneratorParam<int> tile_s{"tile_s", 4};
 
-    Input<Buffer<T>> f{"prev", 4};
+    Input<Buffer<T>> f{"f", 4};
     Input<T> edge_ratio{"edge_ratio"};
     Input<T> extremum_thres{"extremum_thres"};
 
@@ -208,19 +209,23 @@ namespace v3 {
 
     //! @brief Variables.
     //! @{
-    Var x{"x"}, y{"y"}, s{"c"}, n{"s"};
+    Var x{"x"}, y{"y"}, s{"s"}, n{"n"};
     Var xo{"xo"}, yo{"yo"}, so{"so"};
     Var xi{"xi"}, yi{"yi"}, si{"si"};
     //! @}
 
     void generate()
     {
-      const auto f_ext = BoundaryConditions::repeat_edge(f);
-
       using DO::Shakti::HalideBackend::is_dog_extremum;
-      out(x, y, s, n) = is_dog_extremum(f_ext,                       //
+      const auto f_ext = BoundaryConditions::repeat_edge(f);
+      auto f_fwd = Halide::Func{"f_forward"};
+      f_fwd(x, y, s, n) = f_ext(x, y, s + 1, n);
+      out(x, y, s, n) = is_dog_extremum(f_fwd,                       //
                                         edge_ratio, extremum_thres,  //
-                                        x, y, s + 1, n);             //
+                                        x, y, s, n);                 //
+      // out(x, y, s, n) = is_dog_extremum(f_ext,                       //
+      //                                   edge_ratio, extremum_thres,  //
+      //                                   x, y, s + 1, n);             //
     }
 
     void schedule()
@@ -228,7 +233,7 @@ namespace v3 {
       // GPU schedule.
       if (get_target().has_gpu_feature())
       {
-        out.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y,
+        out.gpu_tile(x, y, s, xo, yo, so, xi, yi, si, tile_x, tile_y, tile_s,
                      TailStrategy::GuardWithIf);
       }
 

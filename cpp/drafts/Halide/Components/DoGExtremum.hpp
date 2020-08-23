@@ -86,10 +86,9 @@ namespace DO { namespace Shakti { namespace HalideBackend {
         -1, 3,  // x
         -1, 3,  // y
         -1, 3,  // s
-         0, 1   // n
     };
-    auto is_max = local_max_4d(f, r, x, y, s, n);
-    auto is_min = local_min_4d(f, r, x, y, s, n);
+    auto is_max = local_max_3d(f, r, x, y, s, n);
+    auto is_min = local_min_3d(f, r, x, y, s, n);
     auto is_strong = Halide::abs(f(x, y, s, n)) > 0.8f * extremum_thres;
     auto is_not_on_edge = !on_edge(f, edge_ratio, x, y, s, n);
 
