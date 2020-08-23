@@ -194,6 +194,7 @@ target_link_libraries(halide_batched_convolution_example
   shakti_halide_gray32f_to_rgb
   shakti_convolve_batch_32f
   shakti_forward_difference_32f
+  shakti_local_scale_space_extremum_32f_v3
   )
 set_property(TARGET halide_batched_convolution_example
   PROPERTY

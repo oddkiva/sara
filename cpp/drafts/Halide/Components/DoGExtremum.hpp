@@ -35,8 +35,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
   template <typename Input>
   auto on_edge(const Input& in, const Halide::Expr& edge_ratio,  //
-               const Halide::Var& x, const Halide::Var& y,       //
-               const Halide::Var& c, const Halide::Var& n)       //
+               const Halide::Expr& x, const Halide::Expr& y,       //
+               const Halide::Expr& c, const Halide::Expr& n)       //
   {
     const auto h = hessian(in, x, y, c, n);
     return pow(trace(h), 2) * edge_ratio >=
@@ -72,6 +72,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
             Halide::cast<std::int8_t>(0) /* not a local extremum! */));  //
   }
 
+  //! @brief Awkward API.
   template <typename Input>
   auto is_dog_extremum(                                                    //
       const Input& prev, const Input& curr, const Input& next,             //
@@ -93,17 +94,24 @@ namespace DO { namespace Shakti { namespace HalideBackend {
             Halide::cast<std::int8_t>(0) /* not a local extremum! */));  //
   }
 
+  //! @brief f has shape {w, h, 1, n}.
   template <typename Input>
-  auto is_dog_extremum(                                                    //
-      const Input& f,                                                      //
-      const Halide::Expr& edge_ratio, const Halide::Expr& extremum_thres,  //
-      const Halide::Var& x, const Halide::Var& y,                          //
-      const Halide::Var& c, const Halide::Var& n)                          //
+  auto is_dog_extremum(const Input& f,                                //
+                       const Halide::Expr& edge_ratio,                //
+                       const Halide::Expr& extremum_thres,            //
+                       const Halide::Expr& x, const Halide::Expr& y,  //
+                       const Halide::Expr& s, const Halide::Expr& n)  //
   {
-    auto is_max = local_max_4d(f, -1, 3, -1, 3, 0, 1, -1, 3, x, y, c, n);
-    auto is_min = local_min_4d(f, -1, 3, -1, 3, 0, 1, -1, 3, x, y, c, n);
-    auto is_strong = abs(f(x, y, c, n)) > 0.8f * extremum_thres;
-    auto is_not_on_edge = !on_edge(f, edge_ratio, x, y, c, n);
+    auto r = Halide::RDom{
+        -1, 3,  // x
+        -1, 3,  // y
+        -1, 3,  // s
+         0, 1   // n
+    };
+    auto is_max = local_max_4d(f, r, x, y, s, n);
+    auto is_min = local_min_4d(f, r, x, y, s, n);
+    auto is_strong = Halide::abs(f(x, y, s, n)) > 0.8f * extremum_thres;
+    auto is_not_on_edge = !on_edge(f, edge_ratio, x, y, s, n);
 
     return Halide::select(
         is_max && is_strong && is_not_on_edge,                           //

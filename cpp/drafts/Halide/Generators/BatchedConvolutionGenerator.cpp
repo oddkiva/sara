@@ -60,7 +60,7 @@ namespace {
       auto input_ext = BoundaryConditions::repeat_edge(input);
 
       output(x, y, c, n) = sum(input_ext(x + r.x, y + r.y, c + r.z, n) *  //
-                               kernel(r.x, r.y, r.z, n));                 //
+                               kernel(r.x, r.y, r.z, c));                 //
     }
 
     void schedule()

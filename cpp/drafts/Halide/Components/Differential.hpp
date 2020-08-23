@@ -62,9 +62,9 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
   template <typename Input>
-  auto hessian(const Input& in,                             //
-               const Expr& x, const Expr& y,                //
-               const Halide::Var& c, const Halide::Var& n)  //
+  auto hessian(const Input& in,                               //
+               const Halide::Expr& x, const Halide::Expr& y,  //
+               const Halide::Expr& c, const Halide::Expr& n)  //
       -> Matrix<2, 2>
   {
     auto dxx = in(x + 1, y, c, n) + in(x - 1, y, c, n) - 2 * in(x, y, c, n);
@@ -91,9 +91,9 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
   template <typename Input>
-  auto laplacian(const Input& in,                             //
-                 const Expr& x, const Expr& y,                //
-                 const Halide::Var& c, const Halide::Var& n)  //
+  auto laplacian(const Input& in,                               //
+                 const Halide::Expr& x, const Halide::Expr& y,  //
+                 const Halide::Expr& c, const Halide::Expr& n)  //
       -> Expr
   {
     return in(x + 1, y, c, n) + in(x - 1, y, c, n) - 2 * in(x, y, c, n);
@@ -115,11 +115,11 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
   template <typename Input>
-  auto scale_space_gradient(const Input& in0,              //
-                            const Input& in1,              //
-                            const Input& in2,              //
-                            const Expr& x, const Expr& y,  //
-                            const Expr& c, const Expr& n)  //
+  auto scale_space_gradient(const Input& in0,                              //
+                            const Input& in1,                              //
+                            const Input& in2,                              //
+                            const Halide::Expr& x, const Halide::Expr& y,  //
+                            const Halide::Expr& c, const Halide::Expr& n)  //
       -> Vector<3>
   {
     auto g = Vector<3>{};
@@ -165,8 +165,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   auto scale_space_hessian(const Input& in0,              //
                            const Input& in1,              //
                            const Input& in2,              //
-                           const Expr& x, const Expr& y,  //
-                           const Expr& c, const Expr& n)  //
+                           const Halide::Expr& x, const Halide::Expr& y,  //
+                           const Halide::Expr& c, const Halide::Expr& n)  //
       -> Matrix<3, 3>
   {
     Expr dxx = in1(x + 1, y, c, n) - 2 * in1(x, y, c, n) + in1(x - 1, y, c, n);

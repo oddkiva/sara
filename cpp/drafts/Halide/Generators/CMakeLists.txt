@@ -79,6 +79,11 @@ shakti_halide_library_v2(
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
+  NAME shakti_local_scale_space_extremum_32f_v3
+  SRCS LocalExtremumGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
   NAME shakti_refine_scale_space_extrema
   SRCS RefineExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})

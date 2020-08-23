@@ -151,48 +151,27 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
   template <typename Input>
-  auto local_max_4d(const Input& f,                //
-                    const Halide::Expr& x_min,     //
-                    const Halide::Expr& y_min,     //
-                    const Halide::Expr& c_min,     //
-                    const Halide::Expr& n_min,     //
-                    const Halide::Expr& x_extent,  //
-                    const Halide::Expr& y_extent,  //
-                    const Halide::Expr& c_extent,  //
-                    const Halide::Expr& n_extent,  //
-                    const Halide::Var& x,          //
-                    const Halide::Var& y,          //
-                    const Halide::Var& c,          //
-                    const Halide::Var& n)          //
+  inline auto local_max_4d(const Input& f,         //
+                           const Halide::RDom& r,  //
+                           const Halide::Expr& x,  //
+                           const Halide::Expr& y,  //
+                           const Halide::Expr& z,  //
+                           const Halide::Expr& w)  //
   {
-    auto r = Halide::RDom{x_min, x_extent,  //
-                          y_min, y_extent,  //
-                          c_min, c_extent,  //
-                          n_min, n_extent};
-    return Halide::maximum(f(x + r.x, y + r.y, c + r.z, n + r.w)) ==
-           f(x, y, c, n);
+    return Halide::maximum(f(x + r.x, y + r.y, z + r.z, w + r.w)) ==
+           f(x, y, z, w);
   }
 
   template <typename Input>
-  auto local_min_4d(const Input& f,                //
-                    const Halide::Expr& x_min,     //
-                    const Halide::Expr& y_min,     //
-                    const Halide::Expr& c_min,     //
-                    const Halide::Expr& n_min,     //
-                    const Halide::Expr& x_extent,  //
-                    const Halide::Expr& y_extent,  //
-                    const Halide::Expr& c_extent,  //
-                    const Halide::Expr& n_extent,  //
-                    const Halide::Var& x,          //
-                    const Halide::Var& y,          //
-                    const Halide::Var& c,          //
-                    const Halide::Var& n)          //
+  inline auto local_min_4d(const Input& f,         //
+                           const Halide::RDom& r,  //
+                           const Halide::Expr& x,  //
+                           const Halide::Expr& y,  //
+                           const Halide::Expr& z,  //
+                           const Halide::Expr& w)  //
   {
-    auto r = Halide::RDom{x_min, x_extent,  //
-                          y_min, y_extent,  //
-                          c_min, c_extent,  //
-                          n_min, n_extent};
-    return Halide::min(f(x + r.x, y + r.y, c + r.z, n + r.w)) == f(x, y, c, n);
+    return Halide::minimum(f(x + r.x, y + r.y, z + r.z, w + r.w)) ==
+           f(x, y, z, w);
   }
 
   //! @}

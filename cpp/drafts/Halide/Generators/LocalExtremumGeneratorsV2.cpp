@@ -208,7 +208,7 @@ namespace v3 {
 
     //! @brief Variables.
     //! @{
-    Var x{"x"}, y{"y"}, c{"c"}, s{"s"};
+    Var x{"x"}, y{"y"}, s{"c"}, n{"s"};
     Var xo{"xo"}, yo{"yo"}, so{"so"};
     Var xi{"xi"}, yi{"yi"}, si{"si"};
     //! @}
@@ -218,9 +218,9 @@ namespace v3 {
       const auto f_ext = BoundaryConditions::repeat_edge(f);
 
       using DO::Shakti::HalideBackend::is_dog_extremum;
-      out(x, y, c, s) = is_dog_extremum(f,                           //
+      out(x, y, s, n) = is_dog_extremum(f_ext,                       //
                                         edge_ratio, extremum_thres,  //
-                                        x, y, c, s);                 //
+                                        x, y, s + 1, n);             //
     }
 
     void schedule()
@@ -261,5 +261,5 @@ namespace v3 {
 HALIDE_REGISTER_GENERATOR(v2::LocalMax<float>, shakti_local_max_32f_v2)
 HALIDE_REGISTER_GENERATOR(v2::LocalScaleSpaceExtremum<float>,
                           shakti_local_scale_space_extremum_32f_v2)
-// HALIDE_REGISTER_GENERATOR(v3::LocalScaleSpaceExtremum<float>,
-//                           shakti_local_scale_space_extremum_32f_v3)
+HALIDE_REGISTER_GENERATOR(v3::LocalScaleSpaceExtremum<float>,
+                          shakti_local_scale_space_extremum_32f_v3)
