@@ -93,6 +93,12 @@ shakti_halide_library_v2(
   SRCS RefineExtremumGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+shakti_halide_library_v2(
+  NAME shakti_refine_scale_space_extrema_v3
+  SRCS RefineExtremumGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
 # Forward difference operator.
 shakti_halide_library_v2(
   NAME shakti_forward_difference_32f

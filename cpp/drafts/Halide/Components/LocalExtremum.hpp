@@ -53,6 +53,31 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
 
   template <typename Input>
+  inline auto local_max_4d(const Input& f,         //
+                           const Halide::RDom& r,  //
+                           const Halide::Expr& x,  //
+                           const Halide::Expr& y,  //
+                           const Halide::Expr& z,  //
+                           const Halide::Expr& w)  //
+  {
+    return Halide::maximum(f(x + r.x, y + r.y, z + r.z, w + r.w)) ==
+           f(x, y, z, w);
+  }
+
+  template <typename Input>
+  inline auto local_min_4d(const Input& f,         //
+                           const Halide::RDom& r,  //
+                           const Halide::Expr& x,  //
+                           const Halide::Expr& y,  //
+                           const Halide::Expr& z,  //
+                           const Halide::Expr& w)  //
+  {
+    return Halide::minimum(f(x + r.x, y + r.y, z + r.z, w + r.w)) ==
+           f(x, y, z, w);
+  }
+
+
+  template <typename Input>
   auto local_scale_space_min(                                   //
       const Input& prev, const Input& curr, const Input& next,  //
       const Halide::Var& x, const Halide::Var& y)               //
@@ -149,31 +174,6 @@ namespace DO { namespace Shakti { namespace HalideBackend {
                minimum(curr(x + r.x, y + r.y, c, n)),
                minimum(next(x + r.x, y + r.y, c, n))) == curr(x, y, c, n);
   }
-
-  template <typename Input>
-  inline auto local_max_4d(const Input& f,         //
-                           const Halide::RDom& r,  //
-                           const Halide::Expr& x,  //
-                           const Halide::Expr& y,  //
-                           const Halide::Expr& z,  //
-                           const Halide::Expr& w)  //
-  {
-    return Halide::maximum(f(x + r.x, y + r.y, z + r.z, w + r.w)) ==
-           f(x, y, z, w);
-  }
-
-  template <typename Input>
-  inline auto local_min_4d(const Input& f,         //
-                           const Halide::RDom& r,  //
-                           const Halide::Expr& x,  //
-                           const Halide::Expr& y,  //
-                           const Halide::Expr& z,  //
-                           const Halide::Expr& w)  //
-  {
-    return Halide::minimum(f(x + r.x, y + r.y, z + r.z, w + r.w)) ==
-           f(x, y, z, w);
-  }
-
   //! @}
 
 }}}  // namespace DO::Shakti::HalideBackend

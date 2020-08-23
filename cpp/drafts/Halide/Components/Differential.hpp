@@ -14,13 +14,13 @@
 #include <drafts/Halide/Components/TinyLinearAlgebra.hpp>
 
 
-namespace DO { namespace Shakti { namespace HalideBackend {
+namespace DO::Shakti::HalideBackend {
 
-  using namespace Halide;
-
+  //! @brief Nice API.
+  //! @{
   template <typename Input>
-  auto gradient(const Input& in,               //
-                const Expr& x, const Expr& y)  //
+  auto gradient(const Input& in,                               //
+                const Halide::Expr& x, const Halide::Expr& y)  //
       -> Vector<2>
   {
     auto g = Vector<2>{};
@@ -30,21 +30,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
   template <typename Input>
-  auto gradient(const Input& in,                             //
-                const Expr& x, const Expr& y,                //
-                const Halide::Var& c, const Halide::Var& n)  //
-      -> Vector<2>
-  {
-    auto g = Vector<2>{};
-    g(0) = (in(x + 1, y, c, n) - in(x - 1, y, c, n)) / 2;
-    g(1) = (in(x, y + 1, c, n) - in(x, y - 1, c, n)) / 2;
-    return g;
-  }
-
-
-  template <typename Input>
-  auto hessian(const Input& in,               //
-               const Expr& x, const Expr& y)  //
+  auto hessian(const Input& in,                               //
+               const Halide::Expr& x, const Halide::Expr& y)  //
       -> Matrix<2, 2>
   {
     auto dxx = in(x + 1, y) + in(x - 1, y) - 2 * in(x, y);
@@ -59,6 +46,128 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     h(1, 0) = dxy; h(1, 1) = dyy;
 
     return h;
+  }
+
+  template <typename Input>
+  auto laplacian(const Input& in,                               //
+                 const Halide::Expr& x, const Halide::Expr& y)  //
+      -> Halide::Expr
+  {
+    return in(x + 1, y) + in(x - 1, y) - 2 * in(x, y);
+  }
+
+  template <typename Input>
+  auto gradient_3d(const Input& f,  //
+                   const Halide::Expr& x,   //
+                   const Halide::Expr& y,   //
+                   const Halide::Expr& z,   //
+                   const Halide::Expr& n)   //
+      -> Vector<3>
+  {
+    auto g = Vector<3>{};
+    g(0) = (f(x + 1, y, z, n) - f(x - 1, y, z, n)) / 2;
+    g(1) = (f(x, y + 1, z, n) - f(x, y - 1, z, n)) / 2;
+    g(2) = (f(x, y, z + 1, n) - f(x, y, z - 1, n)) / 2;
+    return g;
+  }
+
+  template <typename Input>
+  auto hessian_3d(const Input& f,  //
+                  const Halide::Expr& x,   //
+                  const Halide::Expr& y,   //
+                  const Halide::Expr& z,   //
+                  const Halide::Expr& n)   //
+      -> Matrix<3, 3>
+  {
+    using Halide::Expr;
+
+    Expr dxx = f(x + 1, y, z, n) - 2 * f(x, y, z, n) + f(x - 1, y, z, n);
+    Expr dyy = f(x, y + 1, z, n) - 2 * f(x, y, z, n) + f(x, y - 1, z, n);
+    Expr dss = f(x, y, z + 1, n) - 2 * f(x, y, z, n) + f(x, y, z - 1, n);
+
+    Expr dxy = (f(x + 1, y + 1, z, n) - f(x - 1, y - 1, z, n) -  //
+                f(x + 1, y - 1, z, n) + f(x - 1, y - 1, z, n)) /
+               4;
+
+    Expr dxs = (f(x + 1, y, z + 1, n) - f(x - 1, y, z + 1, n) -  //
+                f(x + 1, y, z - 1, n) + f(x - 1, y, z - 1, n)) /
+               4;
+
+    Expr dys = (f(x, y + 1, z + 1, n) - f(x, y - 1, z + 1, n) -  //
+                f(x, y + 1, z - 1, n) + f(x, y - 1, z - 1, n)) /
+               4;
+
+    auto h = Matrix<3, 3>{};
+    h(0, 0) = dxx; h(0, 1) = dxy; h(0, 2) = dxs;
+    h(1, 0) = dxy; h(1, 1) = dyy; h(1, 2) = dys;
+    h(2, 0) = dxs; h(2, 1) = dys; h(2, 2) = dss;
+
+    return h;
+  }
+
+  template <typename Input>
+  auto scale_space_gradient(const Input& in0,       //
+                            const Input& in1,       //
+                            const Input& in2,       //
+                            const Halide::Expr& x,  //
+                            const Halide::Expr& y)  //
+      -> Vector<3>
+  {
+    auto g = Vector<3>{};
+    g(0) = (in1(x + 1, y) - in1(x - 1, y)) / 2;
+    g(1) = (in1(x, y + 1) - in1(x, y - 1)) / 2;
+    g(2) = (in2(x, y) - in0(x, y)) / 2;
+    return g;
+  }
+
+  template <typename Input>
+  auto scale_space_hessian(const Input& in0,       //
+                           const Input& in1,       //
+                           const Input& in2,       //
+                           const Halide::Expr& x,  //
+                           const Halide::Expr& y)  //
+      -> Matrix<3, 3>
+  {
+    using Halide::Expr;
+
+    const Expr dxx = in1(x + 1, y) - 2 * in1(x, y) + in1(x - 1, y);
+    const Expr dyy = in1(x, y + 1) - 2 * in1(x, y) + in1(x, y - 1);
+    const Expr dss = in2(x, y) - 2 * in1(x, y) + in0(x, y);
+
+    const Expr dxy = (in1(x + 1, y + 1) - in1(x - 1, y - 1) -  //
+                      in1(x + 1, y - 1) + in1(x - 1, y - 1)) /
+                     4;
+
+    const Expr dxs = (in2(x + 1, y) - in2(x - 1, y) -  //
+                      in0(x + 1, y) + in0(x - 1, y)) /
+                     4;
+
+    const Expr dys = (in2(x, y + 1) - in2(x, y - 1) -  //
+                      in0(x, y + 1) + in0(x, y - 1)) /
+                     4;
+
+    auto h = Matrix<3, 3>{};
+    h(0, 0) = dxx; h(0, 1) = dxy; h(0, 2) = dxs;
+    h(1, 0) = dxy; h(1, 1) = dyy; h(1, 2) = dys;
+    h(2, 0) = dxs; h(2, 1) = dys; h(2, 2) = dss;
+
+    return h;
+  }
+  //! @}
+
+
+  //! @brief Bad API.
+  //! @{
+  template <typename Input>
+  auto gradient(const Input& in,                               //
+                const Halide::Expr& x, const Halide::Expr& y,  //
+                const Halide::Var& c, const Halide::Var& n)    //
+      -> Vector<2>
+  {
+    auto g = Vector<2>{};
+    g(0) = (in(x + 1, y, c, n) - in(x - 1, y, c, n)) / 2;
+    g(1) = (in(x, y + 1, c, n) - in(x, y - 1, c, n)) / 2;
+    return g;
   }
 
   template <typename Input>
@@ -81,37 +190,13 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     return h;
   }
 
-
-  template <typename Input>
-  auto laplacian(const Input& in,               //
-                 const Expr& x, const Expr& y)  //
-      -> Expr
-  {
-    return in(x + 1, y) + in(x - 1, y) - 2 * in(x, y);
-  }
-
   template <typename Input>
   auto laplacian(const Input& in,                               //
                  const Halide::Expr& x, const Halide::Expr& y,  //
                  const Halide::Expr& c, const Halide::Expr& n)  //
-      -> Expr
+      -> Halide::Expr
   {
     return in(x + 1, y, c, n) + in(x - 1, y, c, n) - 2 * in(x, y, c, n);
-  }
-
-
-  template <typename Input>
-  auto scale_space_gradient(const Input& in0,              //
-                            const Input& in1,              //
-                            const Input& in2,              //
-                            const Expr& x, const Expr& y)  //
-      -> Vector<3>
-  {
-    auto g = Vector<3>{};
-    g(0) = (in1(x + 1, y) - in1(x - 1, y)) / 2;
-    g(1) = (in1(x, y + 1) - in1(x, y - 1)) / 2;
-    g(2) = (in2(x, y) - in0(x, y)) / 2;
-    return g;
   }
 
   template <typename Input>
@@ -129,38 +214,6 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     return g;
   }
 
-
-  template <typename Input>
-  auto scale_space_hessian(const Input& in0,              //
-                           const Input& in1,              //
-                           const Input& in2,              //
-                           const Expr& x, const Expr& y)  //
-      -> Matrix<3, 3>
-  {
-    Expr dxx = in1(x + 1, y) - 2 * in1(x, y) + in1(x - 1, y);
-    Expr dyy = in1(x, y + 1) - 2 * in1(x, y) + in1(x, y - 1);
-    Expr dss = in2(x, y) - 2 * in1(x, y) + in0(x, y);
-
-    Expr dxy = (in1(x + 1, y + 1) - in1(x - 1, y - 1) -  //
-                in1(x + 1, y - 1) + in1(x - 1, y - 1)) /
-               4;
-
-    Expr dxs = (in2(x + 1, y) - in2(x - 1, y) -  //
-                in0(x + 1, y) + in0(x - 1, y)) /
-               4;
-
-    Expr dys = (in2(x, y + 1) - in2(x, y - 1) -  //
-                in0(x, y + 1) + in0(x, y - 1)) /
-               4;
-
-    auto h = Matrix<3, 3>{};
-    h(0, 0) = dxx; h(0, 1) = dxy; h(0, 2) = dxs;
-    h(1, 0) = dxy; h(1, 1) = dyy; h(1, 2) = dys;
-    h(2, 0) = dxs; h(2, 1) = dys; h(2, 2) = dss;
-
-    return h;
-  }
-
   template <typename Input>
   auto scale_space_hessian(const Input& in0,              //
                            const Input& in1,              //
@@ -169,6 +222,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
                            const Halide::Expr& c, const Halide::Expr& n)  //
       -> Matrix<3, 3>
   {
+    using Halide::Expr;
+
     Expr dxx = in1(x + 1, y, c, n) - 2 * in1(x, y, c, n) + in1(x - 1, y, c, n);
     Expr dyy = in1(x, y + 1, c, n) - 2 * in1(x, y, c, n) + in1(x, y - 1, c, n);
     Expr dss = in2(x, y, c, n) - 2 * in1(x, y, c, n) + in0(x, y, c, n);
@@ -192,4 +247,6 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
     return h;
   }
-}}}  // namespace DO::Shakti::HalideBackend
+  //! @}
+
+}  // namespace DO::Shakti::HalideBackend

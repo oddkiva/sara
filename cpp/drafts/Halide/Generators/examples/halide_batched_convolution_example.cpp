@@ -21,12 +21,15 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <drafts/Halide/Draw.hpp>
 #include <drafts/Halide/ExtremumDataStructuresV2.hpp>
+
+#include "shakti_halide_rgb_to_gray.h"
 
 #include "shakti_convolve_batch_32f.h"
 #include "shakti_forward_difference_32f.h"
 #include "shakti_local_scale_space_extremum_32f_v3.h"
-#include "shakti_halide_rgb_to_gray.h"
+#include "shakti_refine_scale_space_extrema_v3.h"
 
 
 namespace sara = DO::Sara;
@@ -151,26 +154,6 @@ auto compress_quantized_extrema_maps(
   }
 
   sara::toc("Populating list of extrema");
-}
-
-auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
-                            const halide::v2::QuantizedExtremumArray& e,
-                            float scale, float octave_scaling_factor = 1,
-                            int width = 2)
-{
-#pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
-  {
-    const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Cyan8;
-    const float x = std::round(e.x(i) * octave_scaling_factor);
-    const float y = std::round(e.y(i) * octave_scaling_factor);
-
-    // N.B.: the blob radius is the scale multiplied by sqrt(2).
-    // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = std::round(scale * octave_scaling_factor * float(M_SQRT2));
-
-    sara::draw_circle(display, x, y, r, c, width);
-  }
 }
 
 
@@ -313,9 +296,7 @@ auto test_on_video()
                                              extrema_map_batch);
     sara::toc("Extrema maps");
 
-    sara::tic();
     compress_quantized_extrema_maps(extrema_map_batch, extrema_quantized);
-    sara::toc("Compressing extrema maps");
 
     elapsed_ms = timer.elapsed();
     SARA_DEBUG << "[Frame: " << frames_read << "] "
