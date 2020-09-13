@@ -21,7 +21,7 @@ namespace {
   class SIFTv4 : public Generator<SIFTv4>
   {
   public:
-    GeneratorParam<int> tile_k{"tile_k", 32};
+    GeneratorParam<int> tile_k{"tile_k", 8};
     GeneratorParam<int> tile_u{"tile_u", 4};
     GeneratorParam<int> tile_v{"tile_v", 4};
     GeneratorParam<int> tile_ji{"tile_ji", 16};

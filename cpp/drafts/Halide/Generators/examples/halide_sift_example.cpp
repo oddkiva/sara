@@ -162,7 +162,7 @@ namespace DO::Shakti::HalideBackend {
 // #define SIFT_V1
 // #define SIFT_V2
 // #define SIFT_V3
-// #define SIFT_V4
+#define SIFT_V4
 #if defined(SIFT_V1)
       SARA_DEBUG << "RUNNING SIFT V1..." << std::endl;
       timer.restart();
@@ -247,10 +247,10 @@ auto test_on_video()
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
   const auto video_filepath =
-      //"/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+      "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
       // const auto video_filepath =
       // "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
-      "/home/david/Desktop/GOPR0542.MP4"s;
+      // "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
   // Input and output from Sara.
