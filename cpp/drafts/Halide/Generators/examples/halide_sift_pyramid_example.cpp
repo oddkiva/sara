@@ -72,7 +72,7 @@ auto test_on_image()
   if (!sara::active_window())
     sara::create_window(image.sizes());
 
-#define CHECK_PYRAMIDS
+// #define CHECK_PYRAMIDS
 #ifdef CHECK_PYRAMIDS
   for (auto& octave : sift_pipeline.octaves)
     for (auto s = 0; s < octave.params.num_scales + 3; ++s)
@@ -214,7 +214,8 @@ GRAPHICS_MAIN()
   omp_set_num_threads(omp_get_max_threads());
   std::ios_base::sync_with_stdio(false);
 
-  // test_on_image();
-  test_on_video();
+  test_on_image();
+  test_on_image();
+  // test_on_video();
   return 0;
 }

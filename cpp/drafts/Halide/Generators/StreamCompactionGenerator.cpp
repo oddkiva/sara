@@ -20,8 +20,7 @@ namespace {
   class StreamCompaction : public Generator<StreamCompaction>
   {
   public:
-    GeneratorParam<int> tile_x{"tile_x", 16};
-    GeneratorParam<int> tile_y{"tile_y", 16};
+    GeneratorParam<int> tile_x{"tile_x", 256};
 
     Input<Buffer<std::int8_t>> input{"input", 4};
     Output<Buffer<std::int32_t>[4]> output{"output", 1};
@@ -38,10 +37,12 @@ namespace {
       const auto n = input.dim(3).extent();
       const auto size = w * h * c * n;
 
-      auto in_flattened = halide::flatten_4d(input, x, w, h, c);
+      auto in_flattened = Halide::Func{"input_flattened"};
+      in_flattened(x) =
+          input(x % w, (x / w) % h, (x / (w * h)) % c, x / (w * h * c));
 
       // Express the prefix sum by a recurrence relation.
-      Func prefix_sum;
+      auto prefix_sum = Halide::Func{"prefix_sum"};
       prefix_sum(x) = cast<int32_t>(0);
 
       RDom range(1, size - 1);
@@ -52,7 +53,7 @@ namespace {
 
       // Compacted indices.
       RDom in_range(0, size);
-      Func compacted_indices;
+      auto compacted_indices = Halide::Func{"compacted_indices"};
       compacted_indices(x) = -1;
       compacted_indices(clamp(prefix_sum(in_range), 0, size - 1)) =
           select(in_flattened(in_range) != 0, in_range, -1);
@@ -68,35 +69,36 @@ namespace {
       y_indices(x) = select(flat_index != -1, (flat_index / w) % h, -1);
       c_indices(x) = select(flat_index != -1, (flat_index / (w * h)) % c, -1);
       n_indices(x) = select(flat_index != -1, flat_index / (w * h * c), -1);
-    }
 
-    void schedule()
-    {
-      // GPU schedule.
-      if (get_target().has_gpu_feature())
-      {
-        output.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
-      }
 
-      // Hexagon schedule.
-      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
-      {
-        const auto vector_size =
-            get_target().has_feature(Target::HVX_128) ? 128 : 64;
+      // // GPU schedule.
+      // if (get_target().has_gpu_feature())
+      // {
+      //   // x_indices.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+      //   // y_indices.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+      //   // c_indices.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+      //   // n_indices.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+      // }
 
-        output.hexagon()
-            .split(x, xo, xi, 128)
-            .parallel(xo)
-            .vectorize(xi, vector_size, TailStrategy::GuardWithIf);
-      }
+      // // Hexagon schedule.
+      // else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
+      // {
+      //   const auto vector_size =
+      //       get_target().has_feature(Target::HVX_128) ? 128 : 64;
 
-      // CPU schedule.
-      else
-      {
-        output.split(x, xo, xi, 8)
-            .parallel(xo)
-            .vectorize(xi, 8, TailStrategy::GuardWithIf);
-      }
+      //   output.hexagon()
+      //       .split(x, xo, xi, 128)
+      //       .parallel(xo)
+      //       .vectorize(xi, vector_size, TailStrategy::GuardWithIf);
+      // }
+
+      // // CPU schedule.
+      // else
+      // {
+      //   output.split(x, xo, xi, 8)
+      //       .parallel(xo)
+      //       .vectorize(xi, 8, TailStrategy::GuardWithIf);
+      // }
     }
   };
 

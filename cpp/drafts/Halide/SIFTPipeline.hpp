@@ -9,6 +9,7 @@
 #include <drafts/Halide/GaussianConvolution.hpp>
 #include <drafts/Halide/Resize.hpp>
 
+#include "shakti_count_extrema.h"
 #include "shakti_dominant_gradient_orientations_v2.h"
 #include "shakti_dominant_gradient_orientations_v3.h"
 #include "shakti_halide_gray32f_to_rgb.h"
@@ -703,52 +704,30 @@ namespace DO::Shakti::HalideBackend::v3 {
           dog, params.edge_ratio, params.extremum_thres, extrema_map);
       sara::toc("Extrema maps");
 
-      compress_quantized_extrema_maps();
+      // 120-150 ms with the extremum count.
+      // 206 ms to populate the list of extremas.
+      compress_quantized_extrema_maps_cpu();
+
+      // 130-155 ms
+      // compress_quantized_extrema_maps_gpu();
 
       refine_scale_space_extrema();
-
       compute_dominant_orientations();
-
       populate_oriented_extrema();
     }
 
-    auto compress_quantized_extrema_maps() -> void
+    auto compress_quantized_extrema_maps_cpu() -> void
     {
       sara::tic();
       extrema_map.copy_to_host();
       sara::toc("Copy extrema map buffers to host");
 
-//       sara::tic();
-//       const auto num_extrema = std::count_if(        //
-//           extrema_map.begin(), extrema_map.end(),  //
-//           [](const auto& v) { return v != 0; }       //
-//       );
-//       sara::toc("Counting number of extrema");
-
-      // Count extrema per slice.
       sara::tic();
-      const auto batch_size = extrema_map.dim(3).extent();
-      const auto num_scales = extrema_map.dim(2).extent();
-      std::vector<std::int32_t> num_extrema_per_scales(num_scales * batch_size,
-                                                       0);
-
-#pragma omp parallel for
-      for (auto sn = 0u; sn < num_extrema_per_scales.size(); ++sn)
-      {
-        const auto n = sn / num_scales;
-        const auto s = sn % num_scales;
-        const auto wh = extrema_map.width() * extrema_map.height();
-        const auto slice_start = extrema_map.begin() + wh * sn;
-        const auto slice_end = extrema_map.begin() + wh * (sn + 1);
-        num_extrema_per_scales[sn] = std::count_if(  //
-            slice_start, slice_end,                  //
-            [](const auto& v) { return v != 0; }     //
-        );
-      }
-      const auto num_extrema = std::accumulate(num_extrema_per_scales.begin(),
-                                               num_extrema_per_scales.end(), 0);
+      const auto num_extrema = std::count_if(      //
+          extrema_map.begin(), extrema_map.end(),  //
+          [](const auto& v) { return v != 0; }     //
+      );
       sara::toc("Counting number of extrema");
-
 
       if (num_extrema == 0)
         return;
@@ -780,6 +759,24 @@ namespace DO::Shakti::HalideBackend::v3 {
         }
       }
       sara::toc("Populating list of refined extrema");
+    }
+
+    auto compress_quantized_extrema_maps_gpu() -> void
+    {
+      sara::tic();
+      auto extremum_count_host = std::int32_t{};
+      auto extremum_count =
+          Halide::Runtime::Buffer<std::int32_t>{&extremum_count_host, 1}.sliced(
+              0);
+      shakti_count_extrema(extrema_map, extremum_count);
+      sara::toc("GPU Counting number of extrema");
+
+      sara::tic();
+      extremum_count.copy_to_host();
+      sara::toc("GPU-CPU transfer extrema count");
+
+      // SARA_CHECK(extremum_count_host);
+      // SARA_CHECK(extremum_count());
     }
 
     auto refine_scale_space_extrema() -> void
@@ -918,7 +915,6 @@ namespace DO::Shakti::HalideBackend::v3 {
 
       sara::toc("Populating list of oriented extrema");
     }
-
 
     auto gaussian(int s, int n) -> sara::ImageView<float>
     {

@@ -161,6 +161,19 @@ shakti_halide_library_v2(
   SRCS SIFTGeneratorV4.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+
+# Stream compaction to populate extrema.
+shakti_halide_library_v2(
+  NAME shakti_count_extrema
+  SRCS CountGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
+  NAME shakti_stream_compaction
+  SRCS StreamCompactionGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
 if (SARA_BUILD_SAMPLES)
   add_subdirectory(lessons)
   add_subdirectory(examples)

@@ -88,6 +88,9 @@ set(HALIDE_SIFT_LIBRARIES
   shakti_sift_descriptor_v2
   shakti_sift_descriptor_v3
   shakti_sift_descriptor_v4
+  # Stream compaction
+  shakti_count_extrema
+  shakti_stream_compaction
   )
 
 

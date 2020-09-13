@@ -223,9 +223,6 @@ namespace v3 {
       out(x, y, s, n) = is_dog_extremum(f_fwd,                       //
                                         edge_ratio, extremum_thres,  //
                                         x, y, s, n);                 //
-      // out(x, y, s, n) = is_dog_extremum(f_ext,                       //
-      //                                   edge_ratio, extremum_thres,  //
-      //                                   x, y, s + 1, n);             //
     }
 
     void schedule()
