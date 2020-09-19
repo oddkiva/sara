@@ -23,11 +23,12 @@ namespace {
     GeneratorParam<int> tile_x{"tile_x", 256};
 
     Input<Buffer<std::int8_t>> input{"input", 4};
-    Output<Buffer<std::int32_t>[4]> output{"output", 1};
+    Output<Buffer<std::int32_t>[4]> xysn{"xysn", 1};
+    Output<Buffer<std::int8_t>> value{"value", 1};
 
-    Var x{"x"}, y{"y"}, c{"c"}, n{"n"};
-    Var xo{"xo"}, yo{"yo"}, co{"co"};
-    Var xi{"xi"}, yi{"yi"}, ci{"ci"};
+    Var x{"x"};
+    Var xo{"xo"};
+    Var xi{"xi"};
 
     void generate()
     {
@@ -59,26 +60,48 @@ namespace {
           select(in_flattened(in_range) != 0, in_range, -1);
       compacted_indices.compute_root();
 
-      auto& x_indices = output[0];
-      auto& y_indices = output[1];
-      auto& c_indices = output[2];
-      auto& n_indices = output[3];
+      auto x_index_fn = Halide::Func{"x_index"};
+      auto y_index_fn = Halide::Func{"y_index"};
+      auto s_index_fn = Halide::Func{"s_index"};
+      auto n_index_fn = Halide::Func{"n_index"};
+      auto value_fn = Halide::Func{"value_fn"};
 
       const auto flat_index = compacted_indices(x);
-      x_indices(x) = select(flat_index != -1, flat_index % w, -1);
-      y_indices(x) = select(flat_index != -1, (flat_index / w) % h, -1);
-      c_indices(x) = select(flat_index != -1, (flat_index / (w * h)) % c, -1);
-      n_indices(x) = select(flat_index != -1, flat_index / (w * h * c), -1);
+      x_index_fn(x) = select(flat_index != -1, flat_index % w, -1);
+      y_index_fn(x) = select(flat_index != -1, (flat_index / w) % h, -1);
+      s_index_fn(x) = select(flat_index != -1, (flat_index / (w * h)) % c, -1);
+      n_index_fn(x) = select(flat_index != -1, flat_index / (w * h * c), -1);
+      value_fn(x) = select(flat_index != -1, //
+                           in_flattened(clamp(flat_index, 0, size - 1)),
+                           Halide::cast<std::int8_t>(0));
+      x_index_fn.compute_root();
+      y_index_fn.compute_root();
+      s_index_fn.compute_root();
+      n_index_fn.compute_root();
+      value_fn.compute_root();
 
+      auto& x_indices = xysn[0];
+      auto& y_indices = xysn[1];
+      auto& s_indices = xysn[2];
+      auto& n_indices = xysn[3];
+      x_indices(x) = x_index_fn(x);
+      y_indices(x) = y_index_fn(x);
+      s_indices(x) = s_index_fn(x) + 1;  // Notice the +1 offset because we are processing SIFT.
+      n_indices(x) = n_index_fn(x);
+      value(x) = value_fn(x);
 
-      // // GPU schedule.
-      // if (get_target().has_gpu_feature())
-      // {
-      //   // x_indices.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
-      //   // y_indices.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
-      //   // c_indices.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
-      //   // n_indices.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
-      // }
+      // GPU schedule.
+      if (get_target().has_gpu_feature())
+      {
+        prefix_sum.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+        compacted_indices.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+
+        x_index_fn.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+        y_index_fn.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+        s_index_fn.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+        n_index_fn.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+        value_fn.gpu_tile(x, xo, xi, tile_x, TailStrategy::GuardWithIf);
+      }
 
       // // Hexagon schedule.
       // else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))

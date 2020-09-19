@@ -20,6 +20,7 @@
 #include "shakti_polar_gradient_2d_32f_v2.h"
 #include "shakti_refine_scale_space_extrema_v2.h"
 #include "shakti_refine_scale_space_extrema_v3.h"
+#include "shakti_stream_compaction.h"
 
 
 namespace DO::Shakti::HalideBackend::v2 {
@@ -708,7 +709,7 @@ namespace DO::Shakti::HalideBackend::v3 {
       // 206 ms to populate the list of extremas.
       compress_quantized_extrema_maps_cpu();
 
-      // 130-155 ms
+      // Super-slow.
       // compress_quantized_extrema_maps_gpu();
 
       refine_scale_space_extrema();
@@ -777,6 +778,18 @@ namespace DO::Shakti::HalideBackend::v3 {
 
       // SARA_CHECK(extremum_count_host);
       // SARA_CHECK(extremum_count());
+
+      sara::tic();
+      extrema_quantized.resize(extremum_count_host);
+      shakti_stream_compaction(extrema_map,          //
+                               extrema_quantized.x,  //
+                               extrema_quantized.y,  //
+                               extrema_quantized.s,  //
+                               extrema_quantized.n,  //
+                               extrema_quantized.type);
+      for (auto i = 0; i < extrema_quantized.s.dim(0).extent(); ++i)
+        extrema_quantized.scale(i) = params.scales[extrema_quantized.s(i)];
+      sara::toc("GPU stream compaction");
     }
 
     auto refine_scale_space_extrema() -> void
