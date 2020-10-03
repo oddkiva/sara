@@ -17,10 +17,11 @@ namespace {
   using namespace Halide;
 
   template <typename T>
-  class ConvolutionGenerator : public Generator<ConvolutionGenerator<T>>
+  class BatchedConvolutionGenerator
+    : public Generator<BatchedConvolutionGenerator<T>>
   {
   public:
-    using Base = Generator<GemmBasedConvolutionGenerator<T>>;
+    using Base = Generator<BatchedConvolutionGenerator<T>>;
     using Base::get_target;
 
     template <typename T2>
@@ -29,14 +30,11 @@ namespace {
     template <typename T2>
     using Output = typename Base::template Output<T2>;
 
-    GeneratorParam<int> tile_x{"tile_x", 32};
-    GeneratorParam<int> tile_y{"tile_y", 32};
+    GeneratorParam<int> tile_x{"tile_x", 16};
+    GeneratorParam<int> tile_y{"tile_y", 16};
 
-    Input<Buffer<T>> input{"im2col", 4};
-
+    Input<Buffer<T>> input{"input", 4};
     Input<Buffer<T>> kernel{"kernel", 4};
-    Input<int[3]> kernel_begin{"k_begin"};
-    Input<int[3]> kernel_extent{"k_extent"};
 
     Output<Buffer<T>> output{"output", 4};
 
@@ -49,18 +47,20 @@ namespace {
 
     void generate()
     {
-      const auto x0 = kernel_begin[0];
-      const auto y0 = kernel_begin[1];
-      const auto c0 = kernel_begin[2];
+      const auto& x0 = kernel.dim(0).min();
+      const auto& y0 = kernel.dim(1).min();
+      const auto& c0 = kernel.dim(2).min();
 
-      const auto kw = kernel_extent[0];
-      const auto kh = kernel_extent[1];
-      const auto kc = kernel_extent[2];
+      const auto& kw = kernel.dim(0).extent();
+      const auto& kh = kernel.dim(1).extent();
+      const auto& kc = kernel.dim(2).extent();
 
       auto r = RDom{x0, kw, y0, kh, c0, kc};
 
-      output(x, y, c, n) = sum(input(x + r.x, y + r.y, c + r.z, n) *  //
-                               kernel(r.x, r.y, r.z, c));             //
+      auto input_ext = BoundaryConditions::repeat_edge(input);
+
+      output(x, y, c, n) = sum(input_ext(x + r.x, y + r.y, c + r.z, n) *  //
+                               kernel(r.x, r.y, r.z, c));                 //
     }
 
     void schedule()
@@ -96,5 +96,5 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(ConvolutionGenerator<float>, shakti_convolve_32f)
-HALIDE_REGISTER_GENERATOR(ConvolutionGenerator<double>, shakti_convolve_64f)
+HALIDE_REGISTER_GENERATOR(BatchedConvolutionGenerator<float>,
+                          shakti_convolve_batch_32f)

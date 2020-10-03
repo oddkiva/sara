@@ -48,6 +48,12 @@ shakti_halide_library_v2(
   SRCS Im2ColGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+# Batched convolution.
+shakti_halide_library_v2(
+  NAME shakti_convolve_batch_32f
+  SRCS BatchedConvolutionGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
 
 # Binary operators.
 shakti_halide_library_v2(
@@ -73,6 +79,11 @@ shakti_halide_library_v2(
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
+  NAME shakti_local_scale_space_extremum_32f_v3
+  SRCS LocalExtremumGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
   NAME shakti_refine_scale_space_extrema
   SRCS RefineExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
@@ -80,6 +91,18 @@ shakti_halide_library_v2(
 shakti_halide_library_v2(
   NAME shakti_refine_scale_space_extrema_v2
   SRCS RefineExtremumGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
+  NAME shakti_refine_scale_space_extrema_v3
+  SRCS RefineExtremumGeneratorsV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# Forward difference operator.
+shakti_halide_library_v2(
+  NAME shakti_forward_difference_32f
+  SRCS DifferentialGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
@@ -111,6 +134,11 @@ shakti_halide_library_v2(
   SRCS DominantGradientOrientationsGeneratorV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+shakti_halide_library_v2(
+  NAME shakti_dominant_gradient_orientations_v3
+  SRCS DominantGradientOrientationsGeneratorV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
 
 # SIFT descriptors.
 shakti_halide_library_v2(
@@ -132,6 +160,19 @@ shakti_halide_library_v2(
   NAME shakti_sift_descriptor_v4
   SRCS SIFTGeneratorV4.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# Stream compaction to populate extrema.
+shakti_halide_library_v2(
+  NAME shakti_count_extrema
+  SRCS CountGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
+  NAME shakti_stream_compaction
+  SRCS StreamCompactionGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
 
 if (SARA_BUILD_SAMPLES)
   add_subdirectory(lessons)

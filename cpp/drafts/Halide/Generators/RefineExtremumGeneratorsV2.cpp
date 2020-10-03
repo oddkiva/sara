@@ -118,6 +118,102 @@ namespace v2 {
 
 }  // namespace
 
+namespace v3 {
+
+  using namespace Halide;
+
+  class RefineScaleSpaceExtrema
+    : public Halide::Generator<RefineScaleSpaceExtrema>
+  {
+  public:
+    GeneratorParam<int> tile_i{"tile_i", 32};
+
+    // Scale-space function f(x, y, s, n)
+    Input<Buffer<float>> f{"f", 4};
+
+    // Extrema.
+    Input<Buffer<std::int32_t>[4]> extrema_xysn{"xysn", 1};
+    Input<Buffer<float>> scale{"scale", 1};
+    Input<float> scale_factor{"scale_factor"};
+
+    // Residuals.
+    Output<Buffer<>> extrema_final{
+        "extrema",                                     //
+        {Float(32), Float(32), Float(32), Float(32)},  //
+        1                                              //
+    };                                                 //
+
+    //! @brief Variables.
+    //! @{
+    Var i{"i"};
+    Var io{"io"};
+    Var ii{"ii"};
+    //! @}
+
+    void generate()
+    {
+      auto f_ext = Halide::BoundaryConditions::repeat_edge(f);
+
+      const auto& x = extrema_xysn[0](i);
+      const auto& y = extrema_xysn[1](i);
+      const auto& s = extrema_xysn[2](i);
+      const auto& n = extrema_xysn[3](i);
+
+      using DO::Shakti::HalideBackend::refine_extremum_v1_batch;
+      const auto result = refine_extremum_v1_batch(f_ext, x, y, s, n);
+
+      const auto& dx = result[0];
+      const auto& dy = result[1];
+      const auto& ds = result[2];
+      const auto& val = result[3];
+      const auto& success = result[4];
+
+      const auto xf = cast<float>(x);
+      const auto yf = cast<float>(y);
+
+      const auto x_final = select(success, xf + dx, xf);
+      const auto y_final = select(success, yf + dy, yf);
+      const auto s_final = select(success,                        //
+                                  scale(i) * pow(scale_factor, ds),  //
+                                  scale(i));                         //
+      const auto val_final = select(success, val, f_ext(x, y, s, n));
+
+      extrema_final(i) = {x_final, y_final, s_final, val_final};
+    }
+
+    void schedule()
+    {
+      // GPU schedule.
+      if (get_target().has_gpu_feature())
+      {
+        extrema_final.gpu_tile(i, io, ii, tile_i, TailStrategy::GuardWithIf);
+      }
+
+      // Hexagon schedule.
+      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
+      {
+        const auto vector_size =
+            get_target().has_feature(Target::HVX_128) ? 128 : 64;
+
+        extrema_final.hexagon()
+            .split(i, io, ii, 128)
+            .parallel(io)
+            .vectorize(i, vector_size, TailStrategy::GuardWithIf);
+      }
+
+      // CPU schedule.
+      else
+      {
+        extrema_final.split(i, io, ii, 8)
+            .parallel(io)
+            .vectorize(i, 8, TailStrategy::GuardWithIf);
+      }
+    }
+  };
+
+}  // namespace
 
 HALIDE_REGISTER_GENERATOR(v2::RefineScaleSpaceExtrema,
                           shakti_refine_scale_space_extrema_v2)
+HALIDE_REGISTER_GENERATOR(v3::RefineScaleSpaceExtrema,
+                          shakti_refine_scale_space_extrema_v3)

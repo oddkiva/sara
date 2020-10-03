@@ -25,21 +25,23 @@ namespace DO { namespace Sara {
     p.drawPoint(x, y);
   }
 
-  void draw_circle(ImageView<Rgb8>& image,
-                   int xc, int yc, int r, const Color3ub& c, int penWidth)
+  void draw_circle(ImageView<Rgb8>& image, int xc, int yc, int r,
+                   const Color3ub& c, int penWidth, bool antialiasing)
   {
     QImage qimage(as_QImage(image));
     QPainter p(&qimage);
+    p.setRenderHints(QPainter::Antialiasing, antialiasing);
     p.setPen(QPen(to_QColor(c), penWidth));
     p.drawEllipse(QPoint(xc, yc), r, r);
   }
 
   void draw_line(ImageView<Rgb8>& image,
                  int x1, int y1, int x2, int y2, const Color3ub& c,
-                 int penWidth)
+                 int penWidth, bool antialiasing)
   {
     QImage qimage(as_QImage(image));
     QPainter p(&qimage);
+    p.setRenderHints(QPainter::Antialiasing, antialiasing);
     p.setPen(QPen(to_QColor(c), penWidth));
     p.drawLine(x1, y1, x2, y2);
   }

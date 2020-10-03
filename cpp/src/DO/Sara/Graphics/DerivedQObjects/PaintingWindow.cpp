@@ -338,7 +338,9 @@ namespace DO { namespace Sara {
   }
 
   void PaintingWindow::setAntialiasing(bool on)
-  { m_painter.setRenderHints(QPainter::Antialiasing, on); }
+  {
+    m_painter.setRenderHints(QPainter::Antialiasing, on);
+  }
 
   void PaintingWindow::setTransparency(bool on)
   {

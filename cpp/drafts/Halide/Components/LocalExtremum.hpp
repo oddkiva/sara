@@ -51,6 +51,52 @@ namespace DO { namespace Shakti { namespace HalideBackend {
                maximum(next(x + r.x, y + r.y))) == curr(x, y);
   }
 
+  template <typename Input>
+  inline auto local_max_3d(const Input& f,         //
+                           const Halide::RDom& r,  //
+                           const Halide::Expr& x,  //
+                           const Halide::Expr& y,  //
+                           const Halide::Expr& z,  //
+                           const Halide::Expr& w)  //
+  {
+    return Halide::maximum(f(x + r.x, y + r.y, z + r.z, w)) == f(x, y, z, w);
+  }
+
+  template <typename Input>
+  inline auto local_min_3d(const Input& f,         //
+                           const Halide::RDom& r,  //
+                           const Halide::Expr& x,  //
+                           const Halide::Expr& y,  //
+                           const Halide::Expr& z,  //
+                           const Halide::Expr& w)  //
+  {
+    return Halide::minimum(f(x + r.x, y + r.y, z + r.z, w)) == f(x, y, z, w);
+  }
+
+  template <typename Input>
+  inline auto local_max_4d(const Input& f,         //
+                           const Halide::RDom& r,  //
+                           const Halide::Expr& x,  //
+                           const Halide::Expr& y,  //
+                           const Halide::Expr& z,  //
+                           const Halide::Expr& w)  //
+  {
+    return Halide::maximum(f(x + r.x, y + r.y, z + r.z, w + r.w)) ==
+           f(x, y, z, w);
+  }
+
+  template <typename Input>
+  inline auto local_min_4d(const Input& f,         //
+                           const Halide::RDom& r,  //
+                           const Halide::Expr& x,  //
+                           const Halide::Expr& y,  //
+                           const Halide::Expr& z,  //
+                           const Halide::Expr& w)  //
+  {
+    return Halide::minimum(f(x + r.x, y + r.y, z + r.z, w + r.w)) ==
+           f(x, y, z, w);
+  }
+
 
   template <typename Input>
   auto local_scale_space_min(                                   //
@@ -88,7 +134,6 @@ namespace DO { namespace Shakti { namespace HalideBackend {
                minimum(next(x + r.x, y + r.y, n))) == curr(x, y, n);
   }
   //! @}
-
 
   //! @brief Local extremum predicate in Halide.
   /*!

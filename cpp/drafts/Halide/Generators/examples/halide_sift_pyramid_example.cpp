@@ -21,6 +21,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <drafts/Halide/Draw.hpp>
 #include <drafts/Halide/SIFTPipeline.hpp>
 
 #include "shakti_halide_rgb_to_gray.h"
@@ -29,100 +30,6 @@
 namespace sara = DO::Sara;
 namespace halide = DO::Shakti::HalideBackend;
 
-
-auto draw_quantized_extrema(const halide::v2::QuantizedExtremumArray& e,
-                            float scale, float octave_scaling_factor = 1,
-                            int width = 2)
-{
-#pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
-  {
-    const auto& c = e.type(i) == 1 ? sara::Cyan8 : sara::Blue8;
-    const float x = e.x(i) * octave_scaling_factor;
-    const float y = e.y(i) * octave_scaling_factor;
-
-    // N.B.: the blob radius is the scale multiplied by sqrt(2).
-    // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = scale * octave_scaling_factor * M_SQRT2;
-
-    sara::draw_circle(sara::Point2f{x, y}, r, c, width);
-  }
-}
-
-auto draw_extrema(const halide::v2::ExtremumArray& e,
-                  float octave_scaling_factor = 1, int width = 2)
-{
-#pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
-  {
-    const auto& c = e.type(i) == 1 ? sara::Cyan8 : sara::Blue8;
-    const auto& x = e.x(i) * octave_scaling_factor;
-    const auto& y = e.y(i) * octave_scaling_factor;
-    const auto& s = e.s(i) * octave_scaling_factor;
-
-    // N.B.: the blob radius is the scale multiplied by sqrt(2).
-    // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = s * octave_scaling_factor * M_SQRT2;
-
-    sara::draw_circle(sara::Point2f{x, y}, r, c, width);
-  }
-}
-
-auto draw_oriented_extrema(const halide::v2::OrientedExtremumArray& e,
-                           float octave_scaling_factor = 1, int width = 3)
-{
-#pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
-  {
-    const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Cyan8;
-    const auto& x = e.x(i) * octave_scaling_factor;
-    const auto& y = e.y(i) * octave_scaling_factor;
-    const auto& s = e.s(i) * octave_scaling_factor;
-    const auto& theta = e.orientations(i);
-
-    // N.B.: the blob radius is the scale multiplied by sqrt(2).
-    // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = s * M_SQRT2;
-    const auto& p1 = Eigen::Vector2f{x, y};
-    const Eigen::Vector2f& p2 =
-        p1 + r * Eigen::Vector2f{cos(theta), sin(theta)};
-
-    // Contour of orientation line.
-    sara::draw_line(p1, p2, sara::Black8, width + 2);
-    sara::draw_circle(p1, r, sara::Black8, width + 2);
-    sara::draw_line(p1, p2, c, width);
-    sara::draw_circle(p1, r, c, width);
-  }
-}
-
-auto draw_oriented_extrema(sara::ImageView<sara::Rgb8>& display,
-                           const halide::v2::OrientedExtremumArray& e,
-                           float octave_scaling_factor = 1, int width = 3)
-{
-#pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
-  {
-    const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Cyan8;
-    const auto& x = e.x(i) * octave_scaling_factor;
-    const auto& y = e.y(i) * octave_scaling_factor;
-    const auto& s = e.s(i) * octave_scaling_factor;
-    const auto& theta = e.orientations(i);
-
-    // N.B.: the blob radius is the scale multiplied by sqrt(2).
-    // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = s * M_SQRT2;
-    const auto& p1 = Eigen::Vector2f{x, y};
-    const Eigen::Vector2f& p2 =
-        p1 + r * Eigen::Vector2f{cos(theta), sin(theta)};
-
-    // Contour of orientation line.
-    sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), sara::Black8,
-                    width + 2);
-    sara::draw_circle(display, p1.x(), p1.y(), r, sara::Black8, width + 2);
-    sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), c, width);
-    sara::draw_circle(display, p1.x(), p1.y(), r, c, width);
-  }
-}
 
 auto test_on_image()
 {
@@ -165,6 +72,7 @@ auto test_on_image()
   if (!sara::active_window())
     sara::create_window(image.sizes());
 
+// #define CHECK_PYRAMIDS
 #ifdef CHECK_PYRAMIDS
   for (auto& octave : sift_pipeline.octaves)
     for (auto s = 0; s < octave.params.num_scales + 3; ++s)
@@ -173,7 +81,10 @@ auto test_on_image()
 
   for (auto& octave : sift_pipeline.octaves)
     for (auto s = 0; s < octave.params.num_scales + 2; ++s)
+    {
       sara::display(sara::color_rescale(octave.dog_view(s)));
+      sara::get_key();
+    }
   sara::get_key();
 #endif
 
@@ -211,8 +122,8 @@ auto test_on_video()
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
   const auto video_filepath =
-      // "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/home/david/Desktop/GOPR0542.MP4"s;
+      "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+      // "/home/david/Desktop/GOPR0542.MP4"s;
       // "/home/david/Desktop/Datasets/ha/turn_bikes.mp4"s;
 #endif
 
@@ -303,7 +214,8 @@ GRAPHICS_MAIN()
   omp_set_num_threads(omp_get_max_threads());
   std::ios_base::sync_with_stdio(false);
 
-  // test_on_image();
-  test_on_video();
+  test_on_image();
+  test_on_image();
+  // test_on_video();
   return 0;
 }
