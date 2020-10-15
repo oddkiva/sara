@@ -68,8 +68,8 @@ BOOST_AUTO_TEST_CASE(test_robust_line_fit)
 
   auto line_solver = LineSolver2D<double>{};
   auto inlier_predicate = InlierPredicate<LinePointDistance2D<double>>{
-      .distance = {},         //
-      .error_threshold = 0.1  //
+      {},  //
+      0.1  //
   };
   const auto& estimation = ransac(points,            //
                                  line_solver,       //

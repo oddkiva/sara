@@ -22,7 +22,7 @@ namespace DO { namespace Sara {
   void draw_scale_space_extremum(const ImagePyramid<float>& I, float x, float y,
                                  float s, int o, const Rgb8& c)
   {
-    float z = I.octave_scaling_factor(o);
+    const auto z = static_cast<float>(I.octave_scaling_factor(o));
     x *= z;
     y *= z;
     s *= z;
