@@ -69,8 +69,8 @@ auto fit_line_segment(const std::vector<Eigen::Vector2i>& curve_points,
 
   auto line_solver = LineSolver2D<float>{};
   auto inlier_predicate = InlierPredicate<LinePointDistance2D<float>>{
-      .distance = {},                     //
-      .error_threshold = error_threshold  //
+      {},              //
+      error_threshold  //
   };
 
   auto points = Tensor_<float, 2>(curve_points.size(), 3);
@@ -303,7 +303,7 @@ auto test_on_video()
         {false, {}}                                                   //
     );
 #pragma omp parallel for
-    for (auto i = 0u; i < curve_list.size(); ++i)
+    for (auto i = 0; i < static_cast<int>(curve_list.size()); ++i)
     {
       const auto& curve = curve_list[i];
       if (curve.size() < 5)

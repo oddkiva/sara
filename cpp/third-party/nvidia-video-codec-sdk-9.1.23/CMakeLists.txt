@@ -1,8 +1,3 @@
-if (NOT NvidiaVideoCodec_ROOT)
-  message(FATAL_ERROR "Please specify path to nVidia Video Codec SDK folder!")
-  return ()
-endif ()
-
 find_package(NvidiaVideoCodec)
 
 set(NvDecoder_SOURCE_FILES

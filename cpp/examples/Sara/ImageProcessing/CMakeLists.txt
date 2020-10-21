@@ -1,5 +1,5 @@
 find_package(OpenMP)
-find_package(DO_Sara COMPONENTS Core Graphics ImageIO
+find_package(DO_Sara COMPONENTS Core DisjointSets Graphics ImageIO
   ImageProcessing VideoIO REQUIRED)
 
 macro (sara_add_example example)

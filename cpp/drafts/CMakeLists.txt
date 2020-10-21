@@ -21,7 +21,7 @@ endif ()
 add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
 add_subdirectory(Taskflow)
-if (CUDA_FOUND)
+if (CUDA_FOUND AND NvidiaVideoCodec_ROOT)
   add_subdirectory(NvCodec)
 endif ()
 

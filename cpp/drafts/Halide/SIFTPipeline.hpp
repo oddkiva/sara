@@ -221,7 +221,7 @@ namespace DO::Shakti::HalideBackend::v2 {
 
       sara::tic();
 #pragma omp parallel for
-      for (auto s = 0u; s < extrema_maps.size(); ++s)
+      for (auto s = 0; s < static_cast<int>(extrema_maps.size()); ++s)
       {
         const auto& dog_ext_map = extrema_maps[s];
         const auto num_extrema = std::count_if(      //
@@ -341,7 +341,7 @@ namespace DO::Shakti::HalideBackend::v2 {
     {
       sara::tic();
 #pragma omp parallel for
-      for (auto s = 0u; s < extrema_oriented.size(); ++s)
+      for (auto s = 0; s < static_cast<int>(extrema_oriented.size()); ++s)
       {
         auto& d = dominant_orientation_sparse_maps[s];
         auto& e = extrema[s];
