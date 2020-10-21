@@ -21,6 +21,7 @@ before_script:
   - export CCACHE_DIR=${PWD}/ccache
 
   # Install the latest CMake please.
+  - apt-get install -y -qq software-properties-common
   - apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
 
   # For the documentation.
