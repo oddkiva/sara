@@ -204,7 +204,7 @@ namespace DO { namespace Sara {
           flip,
           fancy_pca, num_fancy_pca, fancy_pca_std_dev, randn);
 
-      for (const auto t : data_transforms)
+      for (const auto& t : data_transforms)
         augmented_data.push_back(make_pair(i, t));
     }
     return augmented_data;
