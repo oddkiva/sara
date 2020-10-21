@@ -58,6 +58,11 @@
 // Data augmentation.
 #include <DO/Sara/ImageProcessing/DataAugmentation.hpp>
 
+// Edge detection.
+#include <DO/Sara/ImageProcessing/EdgeDetection.hpp>
+
+// Watershed.
+#include <DO/Sara/ImageProcessing/Watershed.hpp>
 
 /*!
   @defgroup ImageProcessing Image Processing

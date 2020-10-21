@@ -14,23 +14,22 @@
 
 namespace DO { namespace Sara {
 
-  bool intersection(const P2::Line& l1, const P2::Line& l2, Vector2d& u)
+  bool intersection(const Projective::Line2<double>& l1,  //
+                    const Projective::Line2<double>& l2,  //
+                    Eigen::Vector2d& u)
   {
-    P2::Point P;
-    P = P2::intersection(l1, l2);
+    const auto P = Projective::intersection(l1, l2);
 
     if (fabs(P(2)) < std::numeric_limits<double>::epsilon())
       return false;
 
-    u = P.head(2) / P(2);
+    u = P.hnormalized();
     return true;
   }
 
-  static
-  P2::Line line(const Point2d& s, const Point2d& e)
+  inline auto line(const Point2d& s, const Point2d& e)
   {
-    P2::Line l;
-    l = P2::line(s, e);
+    auto l = Projective::line(s.homogeneous().eval(), e.homogeneous().eval());
     l /= l.maxCoeff();
     return l;
   }
@@ -38,43 +37,45 @@ namespace DO { namespace Sara {
   // Polygon 'subject' can be a polygon of any type.
   // Polygon 'clip'  must be a convex polygon.
   std::vector<Point2d> sutherland_hodgman(const std::vector<Point2d>& subject,
-                                         const std::vector<Point2d>& clip)
+                                          const std::vector<Point2d>& clip)
   {
-    std::vector<Point2d> in, out;
-    Point2d inter;
-    P2::Line clip_line;
-    P2::Line in_line;
+    auto in = std::vector<Point2d>{};
+    auto out = std::vector<Point2d>{};
+    auto inter = Point2d{};
+    auto clip_line = Projective::Line2<double>{};
+    auto in_line = Projective::Line2<double>{};
 
     // Initialize
     out = subject;
-    const size_t M = clip.size();
+    const auto M = clip.size();
     // Loop.
-    for (size_t e2 = 0, e1 = M-1; e2 != M; e1 = e2++) // 'e' like edge of the clip polygon.
+    for (auto e2 = std::size_t{}, e1 = M - 1; e2 != M;
+         e1 = e2++)  // 'e' like edge of the clip polygon.
     {
       in = out;
       out.clear();
 
-      const size_t N = in.size();
-      for (size_t v2 = 0, v1 = N-1; v2 != N; v1 = v2++)
+      const auto N = in.size();
+      for (auto v2 = std::size_t{}, v1 = N - 1; v2 != N; v1 = v2++)
       {
-        int ccw1 = ccw(clip[e1], clip[e2], in[v1]);
-        int ccw2 = ccw(clip[e1], clip[e2], in[v2]);
+        const auto ccw1 = ccw(clip[e1], clip[e2], in[v1]);
+        const auto ccw2 = ccw(clip[e1], clip[e2], in[v2]);
 
-        if (ccw1 ==  1 && ccw2 ==  1)
+        if (ccw1 == 1 && ccw2 == 1)
           out.push_back(in[v2]);
-        else if (ccw1 ==  1 && ccw2 == -1)
+        else if (ccw1 == 1 && ccw2 == -1)
         {
           clip_line = line(clip[e1], clip[e2]);
           in_line = line(in[v1], in[v2]);
 
-          if ( intersection(clip_line, in_line, inter) )
+          if (intersection(clip_line, in_line, inter))
             out.push_back(inter);
         }
-        else if (ccw1 == -1 && ccw2 ==  1)
+        else if (ccw1 == -1 && ccw2 == 1)
         {
           clip_line = line(clip[e1], clip[e2]);
           in_line = line(in[v1], in[v2]);
-          if ( intersection(clip_line, in_line, inter) )
+          if (intersection(clip_line, in_line, inter))
             out.push_back(inter);
           out.push_back(in[v2]);
         }
@@ -84,5 +85,4 @@ namespace DO { namespace Sara {
     return out;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

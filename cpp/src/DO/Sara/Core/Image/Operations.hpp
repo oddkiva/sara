@@ -75,12 +75,13 @@ namespace DO { namespace Sara {
         "Color conversion error: image sizes are not equal!"
       };
 
-    const auto* src_first = src.begin();
-    const auto* src_last = src.end();
-    auto dst_first = dst.begin();
-
-    for (; src_first != src_last; ++src_first, ++dst_first)
-      smart_convert_color(*src_first, *dst_first);
+    using dst_pixel_type = typename DstImageBase::value_type;
+    std::transform(src.begin(), src.end(), dst.begin(),
+                   [](const auto& src_pixel) {
+                     auto dst_pixel = dst_pixel_type{};
+                     smart_convert_color(src_pixel, dst_pixel);
+                     return dst_pixel;
+                   });
   }
 
   //! @}

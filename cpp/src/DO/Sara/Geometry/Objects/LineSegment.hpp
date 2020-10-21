@@ -25,40 +25,41 @@ namespace DO { namespace Sara {
   {
   public:
     using Base = std::pair<Point2d, Point2d>;
-    LineSegment() {}
-    LineSegment(const Base& pair) : Base(pair) {}
-    LineSegment(const Point2d& p1, const Point2d& p2) : Base(p1, p2) {}
 
-    Point2d& p1() { return first; }
-    Point2d& p2() { return second; }
-    const Point2d& p1() const { return first; }
-    const Point2d& p2() const { return second; }
+    LineSegment() = default;
+    LineSegment(const Base& pair) noexcept : Base(pair) {}
+    LineSegment(const Point2d& p1, const Point2d& p2) noexcept : Base(p1, p2) {}
 
-    double x1() const { return p1().x(); }
-    double y1() const { return p1().y(); }
-    double& x1() { return p1().x(); }
-    double& y1() { return p1().y(); }
+    Point2d& p1() noexcept { return first; }
+    Point2d& p2() noexcept { return second; }
+    const Point2d& p1() const noexcept { return first; }
+    const Point2d& p2() const noexcept { return second; }
 
-    double x2() const { return p2().x(); }
-    double y2() const { return p2().y(); }
-    double& x2() { return p2().x(); }
-    double& y2() { return p2().y(); }
+    double x1() const noexcept { return p1().x(); }
+    double y1() const noexcept { return p1().y(); }
+    double& x1() noexcept { return p1().x(); }
+    double& y1() noexcept { return p1().y(); }
+
+    double x2() const noexcept { return p2().x(); }
+    double y2() const noexcept { return p2().y(); }
+    double& x2() noexcept { return p2().x(); }
+    double& y2() noexcept { return p2().y(); }
+
+    inline auto direction() const -> Eigen::Vector2d
+    {
+      return p2() - p1();
+    }
+
+    inline auto squared_length() const
+    {
+      return direction().squaredNorm();
+    }
+
+    inline auto length() const
+    {
+      return direction().norm();
+    }
   };
-
-  inline Vector2d dir(const LineSegment& s)
-  {
-    return s.p2() - s.p1();
-  }
-
-  inline double squared_length(const LineSegment& s)
-  {
-    return (s.p2()-s.p1()).squaredNorm();
-  }
-
-  inline double length(const LineSegment& s)
-  {
-    return (s.p2()-s.p1()).norm();
-  }
 
   /*!
     Intersection test between line segments.

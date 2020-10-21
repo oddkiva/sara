@@ -30,12 +30,13 @@ namespace DO { namespace Sara {
   {
   public:
     //! @brief Constructor.
-    ImagePyramidParams(int first_octave_index = -1,
-                       int num_scales_per_octave = 3+3,
-                       double scale_geometric_factor = std::pow(2., 1./3.),
-                       int image_padding_size = 1,
-                       double scale_camera = 0.5,
-                       double scale_initial = 1.6)
+    ImagePyramidParams(                                         //
+        int first_octave_index = -1,                            //
+        int num_scales_per_octave = 3 + 3,                      //
+        double scale_geometric_factor = std::pow(2., 1. / 3.),  //
+        int image_padding_size = 1,                             //
+        double scale_camera = 0.5,                              //
+        double scale_initial = 1.6)
     {
       _scale_camera = scale_camera;
       _scale_initial = scale_initial;
@@ -52,23 +53,24 @@ namespace DO { namespace Sara {
      *  In theory, this corresponds to the ideal image function where we would
      *  know the intensity value with perfect precision at any position @f$(x,
      *  y)@f$ at any fine resolution @f$\sigma@f$ in meters (millimeters,
-     *  microns, and so on...). The resolution is the scale.
+     *  microns, and so on...). The resolution is termed as scale.
      *
      *  There is this nice stackexchange answer:
      *  https://biology.stackexchange.com/questions/26189/whats-the-smallest-size-a-human-eye-can-see.
      *
-     *  Just like the smallest size that the human eye can perceive is of the
-     *  order of a tens of microns, the camera captures photographs with details
-     *  limited by its resolution @f$\sigma@f$. From this resolution and coarser
-     *  resolutions, the pixel value is known with good certainty.
+     *  Just like the human eye can perceive small objects whose size is of the
+     *  order of a tens of microns, the camera will capture photographs with
+     *  details at a fixed resolution @f$\sigma@f$ defined by the size of
+     *  photoreceptors. At this resolution and at coarser resolutions, the
+     *  average pixel value can be known with good certainty.
      *
      *  Each pixel of a photograph can be viewed as a local averaging of all
-     *  values @f$I(x, y)@f$ on a patch of size @f$\sigma@f$ meters. All these
-     *  pixel values would be known with infinitesimally small resolution
+     *  color values @f$I(x, y)@f$ on a patch of size @f$\sigma@f$ meters. And
+     *  these pixel values would be known with infinitesimally small resolution
      *  @f$\sigma \rightarrow 0@f$.
      *
-     *  In the scale-space framework, the local averaging function that is
-     *  chosen is the Gaussian kernel and the image function is augmented with
+     *  In the scale-space framework, the local averaging is modeled by a
+     *  Gaussian convolution and the image function is augmented with
      *  an additional dimension which is the scale:
      *
      *  @f$ I : (x,y,\sigma) \mapsto (g_\sigma * I)\ (x,y) @f$,
@@ -79,21 +81,22 @@ namespace DO { namespace Sara {
      *  We also denote by @f$ I_\sigma : (x,y) \mapsto I(x,y,\sigma) @f$ the
      *  image @f$I@f$ at scale @f$\sigma@f$.
      *
-     *
-     *  Because of the spatial sampling, the camera captures the real image
-     *  @f$I_0@f$ with some blurring and the camera-acquired image is
+     *  By design, the camera samples the perfect image @f$I_0@f$ at a
+     *  predefined scale and the image acquired by the camera is denoted as
      *  @f$I_{\sigma_\textrm{camera}}@f$.
      *
      *  Here scale_camera() corresponds to camera resolution
      *  @f$\sigma_\textrm{camera}@f$.
      *
-     *  The digital image that our computers read is
+     *  The digital image that computers read is
      *  @f$I_{\sigma_\textrm{camera}}@f$ and not @f$I@f$.
      *
      *  Now the caveat here is that @f$\sigma_\textrm{camera}@f$ is not known in
      *  meters and we work with pixels. The default parameter we use is
      *  @f$0.5@f$, which means that we assume we can estimate the pixel values
      *  with good confidence up to half a pixel resolution.
+     *  We can retrieve such color values every half pixels by using bilinear
+     *  interpolation.
      */
     double scale_camera() const
     {
@@ -200,8 +203,8 @@ namespace DO { namespace Sara {
     //! @brief Reset image pyramid with the following parameters.
     void reset(int num_octaves,
                int num_scales_per_octave,
-               scalar_type scale_initial,
-               scalar_type scale_geometric_factor)
+               double scale_initial,
+               double scale_geometric_factor)
     {
       _octaves.clear();
       _oct_scaling_factors.clear();
@@ -234,83 +237,89 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Mutable getter of the octave scaling factor.
-    scalar_type& octave_scaling_factor(int o)
+    auto octave_scaling_factor(int o) -> double&
     {
       return _oct_scaling_factors[o];
     }
 
     //! @brief Immutable octave getter.
-    const octave_type& operator()(int o) const
+    auto operator()(int o) const -> const octave_type&
     {
       return _octaves[o];
     }
 
     //! @brief Immutable image getter.
-    const image_type& operator()(int s, int o) const
+    auto operator()(int s, int o) const -> const image_type&
     {
       return _octaves[o][s];
     }
 
     //! @brief Immutable pixel getter.
-    const pixel_type& operator()(int x, int y, int s, int o) const
+    auto operator()(int x, int y, int s, int o) const -> const pixel_type&
     {
       return _octaves[o][s](x,y);
     }
 
     //! @brief Immutable getter of the octave scaling factor.
-    scalar_type octave_scaling_factor(int o) const
+    auto octave_scaling_factor(int o) const -> double
     {
       return _oct_scaling_factors[o];
     }
 
     //! @brief Immutable getter of the number of octaves.
-    int num_octaves() const
+    auto num_octaves() const
     {
       return static_cast<int>(_octaves.size());
     }
 
     //! @brief Immutable getter of the number of scales per octave.
-    int num_scales_per_octave() const
+    auto num_scales_per_octave() const
     {
       return static_cast<int>(_octaves.front().size());
     }
 
+    //! @brief Returns the number of scales (across all octaves).
+    auto num_scales() const
+    {
+      return num_octaves() * num_scales_per_octave();
+    }
+
     //! @brief Immutable getter of the initial scale.
-    scalar_type scale_initial() const
+    auto scale_initial() const
     {
       return _scale_initial;
     }
 
     //! @brief Immutable getter of the scale geometric factor.
-    scalar_type scale_geometric_factor() const
+    auto scale_geometric_factor() const
     {
       return _scale_geometric_factor;
     }
 
     //! @brief Immutable getter of the relative scale w.r.t. an octave.
-    scalar_type scale_relative_to_octave(int s) const
+    auto scale_relative_to_octave(int s) const
     {
-      return pow(_scale_geometric_factor, s)*_scale_initial;
+      return pow(_scale_geometric_factor, s) * _scale_initial;
     }
 
     //! @brief Immutable getter of the scale relative to an octave.
 
-    scalar_type scale(int s, int o) const
+    auto scale(int s, int o) const
     {
-      return _oct_scaling_factors[o]*scale_relative_to_octave(s);
+      return _oct_scaling_factors[o] * scale_relative_to_octave(s);
     }
 
   protected: /* data members */
     //! @{
     //! @brief Parameters.
-    scalar_type _scale_initial;
-    scalar_type _scale_geometric_factor;
+    double _scale_initial;
+    double _scale_geometric_factor;
     //! @}
 
     //! @{
     //! @brief Image data.
     std::vector<octave_type> _octaves;
-    std::vector<scalar_type> _oct_scaling_factors;
+    std::vector<double> _oct_scaling_factors;
     //! @}
   };
 

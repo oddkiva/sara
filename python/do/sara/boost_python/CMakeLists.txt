@@ -48,6 +48,7 @@ target_link_libraries(pysara
   DO_Sara_Features
   DO_Sara_Geometry
   DO_Sara_ImageIO)
+
 if (SARA_BUILD_VIDEOIO)
   target_link_libraries(pysara DO_Sara_VideoIO)
 
@@ -55,6 +56,7 @@ if (SARA_BUILD_VIDEOIO)
     target_link_libraries(pysara rt)
   endif ()
 endif ()
+set_target_properties(pysara PROPERTIES FOLDER "Python")
 
 
 # ============================================================================ #

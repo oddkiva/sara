@@ -161,9 +161,9 @@ namespace DO { namespace Sara {
       throw std::out_of_range{"Computing gradient out of image range!"};
 
     auto d = Matrix<T, 3, 1>{};
-    d(0) = (I(x+1,y  ,s  ,o) - I(x-1,y  ,s  ,o)) / T(2);
-    d(1) = (I(x  ,y+1,s  ,o) - I(x  ,y-1,s  ,o)) / T(2);
-    d(2) = (I(x  ,y  ,s+1,o) - I(x  ,y  ,s-1,o)) / T(2);
+    d(0) = (I(x + 1, y    , s  , o) - I(x - 1, y    , s    , o)) / T(2);
+    d(1) = (I(x    , y + 1, s  , o) - I(x    , y - 1, s    , o)) / T(2);
+    d(2) = (I(x    , y    , s+1, o) - I(x    , y    , s - 1, o)) / T(2);
     return d;
   }
 
@@ -181,20 +181,23 @@ namespace DO { namespace Sara {
     auto H = Matrix<T, 3, 3>{};
 
     // Ixx
-    H(0,0) = I(x+1,y,s,o) - T(2)*I(x,y,s,o) + I(x-1,y,s,o);
+    H(0, 0) = I(x + 1, y, s, o) - T(2) * I(x, y, s, o) + I(x - 1, y, s, o);
     // Iyy
-    H(1,1) = I(x,y+1,s,o) - T(2)*I(x,y,s,o) + I(x,y-1,s,o);
+    H(1, 1) = I(x, y + 1, s, o) - T(2) * I(x, y, s, o) + I(x, y - 1, s, o);
     // Iss
-    H(2,2) = I(x,y,s+1,o) - T(2)*I(x,y,s,o) + I(x,y,s-1,o);
+    H(2, 2) = I(x, y, s + 1, o) - T(2) * I(x, y, s, o) + I(x, y, s - 1, o);
     // Ixy = Iyx
-    H(0,1) = H(1,0) = ( I(x+1,y+1,s,o) - I(x-1,y+1,s,o)
-                      - I(x+1,y-1,s,o) + I(x-1,y-1,s,o) ) / T(4);
+    H(0, 1) = H(1, 0) = (I(x + 1, y + 1, s, o) - I(x - 1, y + 1, s, o) -
+                         I(x + 1, y - 1, s, o) + I(x - 1, y - 1, s, o)) /
+                        T(4);
     // Ixs = Isx
-    H(0,2) = H(2,0) = ( I(x+1,y,s+1,o) - I(x-1,y,s+1,o)
-                      - I(x+1,y,s-1,o) + I(x-1,y,s-1,o) ) / T(4);
+    H(0, 2) = H(2, 0) = (I(x + 1, y, s + 1, o) - I(x - 1, y, s + 1, o) -
+                         I(x + 1, y, s - 1, o) + I(x - 1, y, s - 1, o)) /
+                        T(4);
     // Iys = Isy
-    H(1,2) = H(2,1) = ( I(x,y+1,s+1,o) - I(x,y-1,s+1,o)
-                      - I(x,y+1,s-1,o) + I(x,y-1,s-1,o) ) / T(4);
+    H(1, 2) = H(2, 1) = (I(x, y + 1, s + 1, o) - I(x, y - 1, s + 1, o) -
+                         I(x, y + 1, s - 1, o) + I(x, y - 1, s - 1, o)) /
+                        T(4);
     // Done!
     return H;
   }

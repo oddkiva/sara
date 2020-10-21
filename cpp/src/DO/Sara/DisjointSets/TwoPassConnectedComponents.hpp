@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Defines.hpp>
 
-#include <DO/Sara/DisjointSets/DisjointSets.hpp>
+#include <DO/Sara/Core/Image/Image.hpp>
 
 
 namespace DO { namespace Sara {
