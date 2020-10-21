@@ -82,7 +82,7 @@ namespace DO { namespace Sara {
       {
         const auto p = Eigen::Vector2i{x, y};
         const auto index_p = index(p);
-        regions[ds.component(index_p)].push_back(p);
+        regions[static_cast<int>(ds.component(index_p))].push_back(p);
       }
     }
 

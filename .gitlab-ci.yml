@@ -20,6 +20,16 @@ before_script:
   - export CCACHE_BASEDIR=${PWD}
   - export CCACHE_DIR=${PWD}/ccache
 
+  # Install the latest CMake please.
+  - apt-get install -y -qq
+      apt-transport-https
+      ca-certificates
+      gnupg
+      software-properties-common
+      wget
+  - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+  - apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+
   # For the documentation.
   - apt-get update -y -qq
   - apt-get install -y -qq
@@ -88,7 +98,7 @@ build:
     - DISPLAY=:1 ctest
         -j$(nproc)
         --output-on-failure
-        --exclude-regex "test_graphics_*|test_core_ipc_cond1"
+        --exclude-regex "test_graphics_*|test_core_ipc_cond1|shakti_test_*"
     # Run coverage (disabled for now).
     #- make -j$(nproc) coverage
 

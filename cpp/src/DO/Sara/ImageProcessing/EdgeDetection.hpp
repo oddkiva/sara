@@ -198,7 +198,7 @@ namespace DO { namespace Sara {
         const auto p = Eigen::Vector2i{x, y};
         const auto index_p = index(p);
         if (is_edgel(p))
-          contours[ds.component(index_p)].push_back(p);
+          contours[static_cast<int>(ds.component(index_p))].push_back(p);
       }
     }
 
@@ -311,7 +311,7 @@ namespace DO { namespace Sara {
         const auto p = Eigen::Vector2i{x, y};
         const auto index_p = index(p);
         if (is_edgel(p))
-          contours[ds.component(index_p)].push_back(p);
+          contours[static_cast<int>(ds.component(index_p))].push_back(p);
       }
     }
 
