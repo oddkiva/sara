@@ -101,10 +101,14 @@ auto test_on_video()
 
   // THE line segment detector.
   auto lsd = LineSegmentDetector{};
+  lsd.parameters.high_threshold_ratio = 20e-2f;
+  lsd.parameters.low_threshold_ratio = 10e-2f;
+  lsd.parameters.angular_threshold = 20. / 180.f * M_PI;
+  lsd.parameters.polish_line_segments = false;
 
   // Loop over the video.
   auto frames_read = 0;
-  const auto skip = 2;
+  const auto skip = 1;
   while (true)
   {
     if (!video_stream.read())
@@ -138,10 +142,11 @@ auto test_on_video()
     for (auto i = 0u; i < lsd.pipeline.line_segments.size(); ++i)
     {
       const auto& [success, l] = lsd.pipeline.line_segments[i];
-      if (success)
-        draw_line(l.p1(), l.p2(),                              //
-                  curve_colors.at(lsd.pipeline.curve_ids[i]),  //
-                  /* line_width */ 2);
+      if (!success || l.length() < 20)
+        continue;
+      draw_line(l.p1(), l.p2(),                              //
+                curve_colors.at(lsd.pipeline.curve_ids[i]),  //
+                /* line_width */ 2);
     }
   }
 }
@@ -151,7 +156,7 @@ GRAPHICS_MAIN()
 {
   omp_set_num_threads(omp_get_max_threads());
 
-  test_on_image();
-  // test_on_video();
+  // test_on_image();
+  test_on_video();
   return 0;
 }

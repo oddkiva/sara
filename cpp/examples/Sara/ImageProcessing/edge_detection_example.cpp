@@ -13,9 +13,9 @@
 
 #include <set>
 
+#include <DO/Sara/FeatureDetectors/EdgeDetectionUtilities.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 
@@ -23,91 +23,62 @@ using namespace std;
 using namespace DO::Sara;
 
 
-auto to_map(const std::map<int, std::vector<Eigen::Vector2i>>& contours,
-            const Eigen::Vector2i& image_sizes)
+auto orientation_histograms(const ImageView<int>& edge_map,  //
+                            int radius = 5, int O = 18)
 {
-  auto labeled_edges = Image<int>{image_sizes};
-  labeled_edges.flat_array().fill(-1);
-  for (const auto& [label, points] : contours)
-  {
-    for (const auto& p : points)
-      labeled_edges(p) = label;
-  }
-  return labeled_edges;
-}
-
-auto random_colors(const std::map<int, std::vector<Eigen::Vector2i>>& contours)
-{
-  auto colors = std::map<int, Rgb8>{};
-  for (const auto& c : contours)
-    colors[c.first] = Rgb8(rand() % 255, rand() % 255, rand() % 255);
-  return colors;
-}
-
-#ifdef HISTOGRAMS
-auto orientation_histogram(const std::vector<Eigen::Vector2i>& contour,  //
-                           const ImageView<float>& orientations,         //
-                           int radius = 5,                               //
-                           int O = 36)
-{
-  const auto N = static_cast<int>(contour.size());
-  auto histograms = Tensor_<float, 2>{N, O};
-  histograms.flat_array().fill(0.f);
+  auto histograms = Image<float, 3>{edge_map.width(), edge_map.height(), O};
+  histograms.flat_array().fill(0);
 
   const auto& r = radius;
 
-  for (auto n = 0; n < histograms.size(0); ++n)
+// #pragma omp parallel for
+  for (auto y = 0; y < edge_map.height(); ++y)
   {
-    const auto& p = contour[n];
-
-    // Loop over the pixels in the patch centered in p.
-    for (auto v = -r; v <= r; ++v)
+    for (auto x = 0; x < edge_map.width(); ++x)
     {
-      for (auto u = -r; u <= r; ++u)
+      if (edge_map(x, y) < 0)
+        continue;
+
+      const auto& label = edge_map(y, x);
+
+      // Loop over the pixels in the patch centered in p.
+      for (auto v = -r; v <= r; ++v)
       {
-        if (u == 0 && v == 0)
-          continue;
+        for (auto u = -r; u <= r; ++u)
+        {
+          if (u == 0 && v == 0)
+            continue;
 
-        const auto delta = Eigen::Vector2i{u, v};
-        const Eigen::Vector2i n = p + delta;
-        if (n.x() < 0 || n.x() >= orientations.width() ||  //
-            n.y() < 0 || n.y() >= orientations.height())
-          continue;
+          const auto n = Eigen::Vector2i{x + u, y + v};
+          if (n.x() < 0 || n.x() >= edge_map.width() ||  //
+              n.y() < 0 || n.y() >= edge_map.height())
+            continue;
 
-        auto ori = orientations(n);
-        if (ori < 0)
-          ori += ori + 2 * M_PI;
+          if  (edge_map(n) != label)
+            continue;
 
-        const auto ori_0O = (ori / 2 * M_PI) * O;
-        auto ori_intf = decltype(ori_0O){};
-        const auto ori_frac = std::modf(ori_0O, &ori_intf);
+          auto orientation = std::atan2(v, u);
+          if (orientation < 0)
+            orientation += M_PI;
 
-        auto ori_0 = int(ori_intf);
-        auto ori_1 = ori_0 + 1;
-        if (ori_1 == O)
-          ori_1 = 0;
+          const auto ori_0O = orientation / M_PI * O;
+          auto ori_intf = decltype(ori_0O){};
+          const auto ori_frac = std::modf(ori_0O, &ori_intf);
 
-        histograms({n, ori_0}) += (1 - ori_frac);
-        histograms({n, ori_1}) += ori_frac;
+          auto ori_0 = int(ori_intf);
+          auto ori_1 = ori_0 + 1;
+          if (ori_1 == O)
+            ori_1 = 0;
+
+          histograms(x, y, ori_0) += (1 - ori_frac);
+          histograms(x, y, ori_1) += ori_frac;
+        }
       }
     }
-    histograms[n].flat_array() /= histograms[n].flat_array().sum();
   }
 
   return histograms;
 }
-
-auto orientation_histograms(
-    const std::map<int, std::vector<Eigen::Vector2i>>& contours,  //
-    const ImageView<float>& orientations,                         //
-    int radius = 5, int O = 36)
-{
-  auto histograms = std::map<int, Tensor_<float, 2>>{};
-  for (const auto& [label, points] : contours)
-    histograms[label] = orientation_histogram(points, orientations, radius, O);
-  return histograms;
-}
-#endif
 
 auto shape_statistics(const std::vector<Eigen::Vector2i>& points)
 {
@@ -217,7 +188,7 @@ auto test_on_video()
   constexpr auto angular_threshold = 20. / 180.f * M_PI;
 
   auto frames_read = 0;
-  const auto skip = 2;
+  const auto skip = 1;
   while (true)
   {
     if (!video_stream.read())
@@ -260,7 +231,7 @@ auto test_on_video()
     const auto curve_colors = random_colors(curves);
 
     // Filter contours.
-    std::map<int, bool> is_good_contours;
+    auto is_good_contours = std::map<int, bool>{};
     for (const auto& [label, points] : contours)
     {
       auto is_good = false;
@@ -318,18 +289,3 @@ GRAPHICS_MAIN()
   test_on_video();
   return 0;
 }
-
-
-#ifdef SHAPE_STATS
-      const auto statistics = shape_statistics(points);
-      const auto& x = statistics(0);
-      const auto& y = statistics(1);
-      const auto& dx2 = statistics(2);
-      const auto& dy2 = statistics(3);
-      const auto& dxy = statistics(4);
-      SARA_CHECK(x);
-      SARA_CHECK(y);
-      SARA_CHECK(dx2);
-      SARA_CHECK(dy2);
-      SARA_CHECK(dxy);
-#endif
