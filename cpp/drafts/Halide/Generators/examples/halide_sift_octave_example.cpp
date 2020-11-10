@@ -73,8 +73,7 @@ auto test_on_video()
   using namespace std::string_literals;
 
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+  const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
 #elif __APPLE__
   const auto
       video_filepath =  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
