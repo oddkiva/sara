@@ -500,7 +500,8 @@ auto test_on_video()
       //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
   // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  const auto video_filepath = "/home/david/Desktop/Datasets/ha/turn_bikes.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/ha/text_5.avi"s;
+  // const auto video_filepath = "/home/david/Desktop/Datasets/ha/GH010175_converted.mp4"s;
 #endif
 
   // Input and output from Sara.
@@ -510,13 +511,15 @@ auto test_on_video()
   auto frame_gray32f = Image<float>{};
 
   // Show the local extrema.
-  create_window(frame.sizes() / downscale_factor);
+  create_window(frame.sizes());
   set_antialiasing();
 
   constexpr auto high_threshold_ratio = 20e-2f;
-  constexpr auto low_threshold_ratio = 15e-2f;
+  constexpr auto low_threshold_ratio = 10e-2f;
   constexpr auto angular_threshold = 20. / 180.f * M_PI;
   const auto sigma = std::sqrt(std::pow(1.6f, 2) - 1);
+  const Eigen::Vector2i& p1 = frame.sizes() / 4;
+  const Eigen::Vector2i& p2 = frame.sizes() * 3 / 4;
 
   auto frames_read = 0;
   const auto skip = 0;
@@ -531,13 +534,19 @@ auto test_on_video()
     if (frames_read % (skip + 1) != 0)
        continue;
 
-    frame_gray32f = frame.convert<float>();
+    // Reduce our attention to the central part of the image.
+    tic();
+    const auto frame_cropped = crop(frame, p1, p2);
+    toc("Crop");
+
+    tic();
+    frame_gray32f = frame_cropped.convert<float>();
+    toc("Grayscale");
 
     tic();
     frame_gray32f = gaussian(frame_gray32f, sigma);
     toc("Blur");
 
-    // Downscale.
     if (downscale_factor > 1)
     {
       tic();
@@ -545,7 +554,6 @@ auto test_on_video()
       toc("Downscale");
     }
 
-    // Canny.
     tic();
     const auto& grad = gradient(frame_gray32f);
     toc("Gradient");
@@ -567,7 +575,6 @@ auto test_on_video()
     toc("Thresholding");
 
 
-    // Group edgels.
 #define SIMULTANEOUS_HYSTERESIS_AND_GROUPING
 #ifdef SIMULTANEOUS_HYSTERESIS_AND_GROUPING
     tic();
@@ -600,21 +607,26 @@ auto test_on_video()
 
 
     // Display the quasi-straight edges.
+    tic();
     const auto labeled_edges = to_map(edges, edgels.sizes());
     const auto edge_colors = random_colors(edges);
 
-    auto edge_map = Image<Rgb8>{edgels.sizes()};
-    edge_map.flat_array().fill(Black8);
+    auto detection = frame;
     for (const auto& [label, points] : edges)
     {
-      if (points.size() < 5)
+      if (points.size() < 4)
         continue;
 
-      for (const auto& p : points)
-        edge_map(p) = edge_colors.at(label);
+      for (const auto& p: points) {
+        const Eigen::Vector2i q = p1 + downscale_factor * p;
+        fill_rect(detection,                   //
+                  q.x() - 1, q.y() - 1, 2, 2,  //
+                  edge_colors.at(label));      //
+      }
     }
 
-    display(edge_map);
+    display(detection);
+    toc("Draw");
   }
 }
 
