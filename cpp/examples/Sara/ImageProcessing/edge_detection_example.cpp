@@ -27,6 +27,7 @@ using namespace std;
 using namespace DO::Sara;
 
 
+#ifdef DETECT_JUNCTIONS
 // ========================================================================== //
 // Utilities.
 // ========================================================================== //
@@ -190,7 +191,7 @@ auto peak_residuals(const TensorView_<float, 3>& circular_data,
 
   return peak_residuals;
 }
-
+#endif
 
 // ========================================================================== //
 // Edge statistics.
@@ -514,7 +515,7 @@ auto test_on_video()
   create_window(frame.sizes());
   set_antialiasing();
 
-  constexpr auto high_threshold_ratio = 20e-2f;
+  constexpr auto high_threshold_ratio = 15e-2f;
   constexpr auto low_threshold_ratio = 10e-2f;
   constexpr auto angular_threshold = 20. / 180.f * M_PI;
   const auto sigma = std::sqrt(std::pow(1.6f, 2) - 1);
@@ -617,11 +618,13 @@ auto test_on_video()
       if (points.size() < 4)
         continue;
 
+      const auto& color = edge_colors.at(label);
       for (const auto& p: points) {
         const Eigen::Vector2i q = p1 + downscale_factor * p;
+        // detection(q) = color;
         fill_rect(detection,                   //
                   q.x() - 1, q.y() - 1, 2, 2,  //
-                  edge_colors.at(label));      //
+                  color);                      //
       }
     }
 

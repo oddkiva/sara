@@ -122,8 +122,8 @@ auto test_on_video()
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
   const auto video_filepath =
-      "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      // "/home/david/Desktop/GOPR0542.MP4"s;
+      // "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+      "/home/david/Desktop/GOPR0542.MP4"s;
       // "/home/david/Desktop/Datasets/ha/turn_bikes.mp4"s;
 #endif
 
@@ -214,7 +214,6 @@ GRAPHICS_MAIN()
   omp_set_num_threads(omp_get_max_threads());
   std::ios_base::sync_with_stdio(false);
 
-  // test_on_image();
   // test_on_image();
   test_on_video();
   return 0;
