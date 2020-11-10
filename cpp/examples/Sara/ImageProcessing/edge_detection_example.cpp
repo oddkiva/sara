@@ -26,6 +26,52 @@
 using namespace std;
 using namespace DO::Sara;
 
+template <typename T>
+auto find_peaks(
+    const Map<const Eigen::Array<T, Eigen::Dynamic, 1>>& circular_data,  //
+    Map<Eigen::Array<std::uint8_t, Eigen::Dynamic, 1>>& peaks,           //
+    T peak_ratio_thres = static_cast<T>(0.8))                            //
+    -> void
+{
+  if (circular_data.size() == 0)
+    return;
+
+  const auto& max = circular_data.maxCoeff();
+  const auto& N = circular_data.size();
+
+  for (auto i = Eigen::Index{}; i < N; ++i)
+  {
+    const auto prev = i > 0 ? i - 1 : N;
+    const auto next = i < N - 1 ? i + 1 : 0;
+    peaks[i] = circular_data(i) >= peak_ratio_thres * max &&
+               circular_data(i) > circular_data(prev) &&
+               circular_data(i) > circular_data(next);
+  }
+}
+
+template <typename T>
+auto peak_residual(
+    const Map<const Eigen::Array<T, Eigen::Dynamic, 1>>& circular_data,  //
+    Eigen::Index i)                                                      //
+    -> T
+{
+  const auto& N = circular_data.size();
+
+  const auto prev = i > 0 ? i - 1 : N;
+  const auto next = i < N - 1 ? i + 1 : 0;
+
+  const auto& y0 = circular_data(prev);
+  const auto& y1 = circular_data(i);
+  const auto& y2 = circular_data(next);
+
+  const auto fprime = (y2 - y0) / 2.f;
+  const auto fsecond = y0 - 2.f * y1 + y2;
+
+  const auto h = -fprime / fsecond;
+
+  return T(i) + T(0.5) + h;
+}
+
 
 auto orientation_histograms(const ImageView<int>& edge_map,  //
                             int radius = 5, int O = 18)
@@ -35,7 +81,7 @@ auto orientation_histograms(const ImageView<int>& edge_map,  //
 
   const auto& r = radius;
 
-// #pragma omp parallel for
+#pragma omp parallel for
   for (auto y = 0; y < edge_map.height(); ++y)
   {
     for (auto x = 0; x < edge_map.width(); ++x)
@@ -53,11 +99,13 @@ auto orientation_histograms(const ImageView<int>& edge_map,  //
           if (u == 0 && v == 0)
             continue;
 
+          // Boundary conditions.
           const auto n = Eigen::Vector2i{x + u, y + v};
           if (n.x() < 0 || n.x() >= edge_map.width() ||  //
               n.y() < 0 || n.y() >= edge_map.height())
             continue;
 
+          // Only consider neighbors with the same label.
           if  (edge_map(n) != label)
             continue;
 
@@ -83,6 +131,48 @@ auto orientation_histograms(const ImageView<int>& edge_map,  //
 
   return histograms;
 }
+
+auto dense_peak(const TensorView_<float, 3>& histograms,
+                float peak_ratio_thres = 0.8f)
+{
+  auto peaks = Tensor_<std::uint8_t, 3>{histograms.sizes()};
+
+#pragma omp parallel for
+  for (auto y = 0; y < histograms.size(0); ++y)
+  {
+    for (auto x = 0; x < histograms.size(1); ++x)
+    {
+      const auto& h = histograms[y][x].flat_array();
+      auto p = peaks[y][x].flat_array();
+      find_peaks(h, p, peak_ratio_thres);
+    }
+  }
+
+  return peaks;
+}
+
+template <typename T>
+auto calculate_peak_residuals(const TensorView_<float, 3>& circular_data,
+                              const TensorView_<std::uint8_t, 3>& peak_indices)
+{
+  auto peak_residuals = Tensor_<float, 3>{circular_data.sizes()};
+
+#pragma omp parallel for
+  for (auto y = 0; y < circular_data.size(0); ++y)
+  {
+    for (auto x = 0; x < circular_data.size(1); ++x)
+    {
+      const auto& h = circular_data[y][x].flat_array();
+      auto p = peak_indices[y][x].flat_array();
+
+      for (auto i = 0; i < p.size(); ++i)
+        peak_residuals(y, x, i) = p[i] == 0 ? 0 : peak_residual(h, i);
+    }
+  }
+
+  return peak_residuals;
+}
+
 
 auto shape_statistics(const std::vector<Eigen::Vector2i>& points)
 {
