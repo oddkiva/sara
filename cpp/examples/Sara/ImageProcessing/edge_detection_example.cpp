@@ -27,6 +27,9 @@ using namespace std;
 using namespace DO::Sara;
 
 
+// ========================================================================== //
+// Utilities.
+// ========================================================================== //
 template <typename T>
 auto find_peaks(
     const Map<const Eigen::Array<T, Eigen::Dynamic, 1>>& circular_data,  //
@@ -74,6 +77,9 @@ auto peak_residual(
 }
 
 
+// ========================================================================== //
+// Operation on tensors.
+// ========================================================================== //
 auto orientation_histograms(const ImageView<std::uint8_t>& edge_map,  //
                             const ImageView<float>& orientation_map,  //
                             int num_bins = 18, int radius = 5)
@@ -186,6 +192,9 @@ auto peak_residuals(const TensorView_<float, 3>& circular_data,
 }
 
 
+// ========================================================================== //
+// Edge statistics.
+// ========================================================================== //
 auto shape_statistics(const std::vector<Eigen::Vector2i>& points)
 {
   auto pmat = Eigen::MatrixXf(2, points.size());
@@ -422,6 +431,9 @@ inline auto group_line_segments(const ImageView<std::uint8_t>& edges,
 }
 
 
+// ========================================================================== //
+// Tests.
+// ========================================================================== //
 auto test_on_image()
 {
   // Read an image.
@@ -504,6 +516,7 @@ auto test_on_video()
   constexpr auto high_threshold_ratio = 20e-2f;
   constexpr auto low_threshold_ratio = 15e-2f;
   constexpr auto angular_threshold = 20. / 180.f * M_PI;
+  const auto sigma = std::sqrt(std::pow(1.6f, 2) - 1);
 
   auto frames_read = 0;
   const auto skip = 0;
@@ -520,13 +533,13 @@ auto test_on_video()
 
     frame_gray32f = frame.convert<float>();
 
+    tic();
+    frame_gray32f = gaussian(frame_gray32f, sigma);
+    toc("Blur");
+
     // Downscale.
     if (downscale_factor > 1)
     {
-      tic();
-      inplace_deriche_blur(frame_gray32f, std::sqrt(std::pow(1.6f, 2) - 1));
-      toc("Deriche");
-
       tic();
       frame_gray32f = downscale(frame_gray32f, downscale_factor);
       toc("Downscale");
@@ -554,21 +567,23 @@ auto test_on_video()
     toc("Thresholding");
 
 
-    // Group edgels by contours.
-    // tic();
-    // hysteresis(edgels);
-    // const auto edges = connected_components(edgels,    //
-    //                                         grad_ori,  //
-    //                                         angular_threshold);
-    // toc("Hysteresis then Edge Grouping");
-
-
-    // Group edgels by edges.
+    // Group edgels.
+#define SIMULTANEOUS_HYSTERESIS_AND_GROUPING
+#ifdef SIMULTANEOUS_HYSTERESIS_AND_GROUPING
     tic();
     const auto edges = perform_hysteresis_and_grouping(edgels,    //
                                                        grad_ori,  //
                                                        angular_threshold);
     toc("Simultaneous Hysteresis & Edge Grouping");
+#else
+    tic();
+    hysteresis(edgels);
+    const auto edges = connected_components(edgels,    //
+                                            grad_ori,  //
+                                            angular_threshold);
+    toc("Hysteresis then Edge Grouping");
+#endif
+
 
 #ifdef DETECT_JUNCTIONS
     // Detect junctions.
@@ -592,6 +607,9 @@ auto test_on_video()
     edge_map.flat_array().fill(Black8);
     for (const auto& [label, points] : edges)
     {
+      if (points.size() < 5)
+        continue;
+
       for (const auto& p : points)
         edge_map(p) = edge_colors.at(label);
     }

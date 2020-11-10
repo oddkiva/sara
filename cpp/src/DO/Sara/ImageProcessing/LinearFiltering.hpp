@@ -86,9 +86,10 @@ namespace DO { namespace Sara {
     const auto h = src.height();
     const auto half_size = kernel_size / 2;
 
-    auto buffer = std::vector<T>(w + half_size * 2);
+#pragma omp parallel for
     for (int y = 0; y < h; ++y)
     {
+      auto buffer = std::vector<T>(w + half_size * 2);
       // Copy to work array and add padding.
       for (int x = 0; x < half_size; ++x)
         buffer[x] = src(0, y);
@@ -127,9 +128,11 @@ namespace DO { namespace Sara {
     const auto h = src.height();
     const auto half_size = kernel_size / 2;
 
-    auto buffer = std::vector<T>(h + half_size * 2);
+#pragma omp parallel for
     for (int x = 0; x < w; ++x)
     {
+      auto buffer = std::vector<T>(h + half_size * 2);
+
       for (int y = 0; y < half_size; ++y)
         buffer[y] = src(x, 0);
       for (int y = 0; y < h; ++y)
