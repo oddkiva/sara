@@ -456,8 +456,8 @@ auto test_on_image()
     const auto grad_ori = grad.cwise_transform(
         [](const auto& v) { return std::atan2(v.y(), v.x()); });
 
-    const auto hi_thres = grad_mag.flat_array().maxCoeff() * 0.2;
-    const auto lo_thres = hi_thres * 0.05;
+    const auto hi_thres = grad_mag.flat_array().maxCoeff() * 0.2f;
+    const auto lo_thres = hi_thres * 0.05f;
 
     auto edges = suppress_non_maximum_edgels(grad_mag, grad_ori,  //
                                              hi_thres, lo_thres);
@@ -478,8 +478,8 @@ auto test_on_image()
 
     millisleep(1);
 
-    const auto delta = std::pow(2., 1. / 100.);
-    const auto sigma = 1.6 * sqrt(pow(delta, 2 * s + 2) - pow(delta, 2 * s));
+    const auto delta = std::pow(2.f, 1 / 100.f);
+    const auto sigma = 1.6f * sqrt(pow(delta, 2 * s + 2) - pow(delta, 2 * s));
     image_curr = deriche_blur(image_curr, sigma);
   }
 
@@ -609,7 +609,7 @@ auto test_on_video()
 
     // Display the quasi-straight edges.
     tic();
-    const auto labeled_edges = to_map(edges, edgels.sizes());
+    // const auto labeled_edges = to_map(edges, edgels.sizes());
     const auto edge_colors = random_colors(edges);
 
     auto detection = frame;
@@ -627,7 +627,6 @@ auto test_on_video()
                   color);                      //
       }
     }
-
     display(detection);
     toc("Draw");
   }

@@ -380,7 +380,8 @@ GRAPHICS_MAIN()
                             : s;
 
         num_residual_successes += dog_successes(i);
-        sara::draw_circle(x1, y1, s1 * std::sqrt(2.f), color, 2);
+        sara::draw_circle(x1, y1, static_cast<int>(s1 * std::sqrt(2.f)), color,
+                          2);
       }
 
       // SARA_CHECK(num_residual_successes);

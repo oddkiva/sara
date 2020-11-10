@@ -89,7 +89,8 @@ namespace DO { namespace Sara {
 
       for (auto s = 0; s < num_scales; ++s)
       {
-        const auto sigma_I = cornerness.scale_relative_to_octave(s);
+        const auto sigma_I =
+            static_cast<float>(cornerness.scale_relative_to_octave(s));
         const auto sigma_D = sigma_I / sqrt(2.f);
         cornerness(s, o) =
             scale_adapted_harris_cornerness(I, sigma_I, sigma_D, kappa);
