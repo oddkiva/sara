@@ -608,7 +608,7 @@ auto test_on_video()
 
     // Display the quasi-straight edges.
     tic();
-    const auto labeled_edges = to_map(edges, edgels.sizes());
+    // const auto labeled_edges = to_map(edges, edgels.sizes());
     const auto edge_colors = random_colors(edges);
 
     auto detection = frame;
@@ -624,7 +624,6 @@ auto test_on_video()
                   edge_colors.at(label));      //
       }
     }
-
     display(detection);
     toc("Draw");
   }
