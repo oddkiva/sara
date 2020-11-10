@@ -24,6 +24,7 @@
 using namespace std;
 using namespace DO::Sara;
 
+
 template <typename T>
 auto find_peaks(
     const Map<const Eigen::Array<T, Eigen::Dynamic, 1>>& circular_data,  //
@@ -71,10 +72,12 @@ auto peak_residual(
 }
 
 
-auto orientation_histograms(const ImageView<int>& edge_map,  //
-                            int radius = 5, int O = 18)
+auto orientation_histograms(const ImageView<std::uint8_t>& edge_map,  //
+                            const ImageView<float>& orientation_map,  //
+                            int num_bins = 18, int radius = 5)
 {
-  auto histograms = Image<float, 3>{edge_map.width(), edge_map.height(), O};
+  auto histograms =
+      Tensor_<float, 3>{edge_map.height(), edge_map.width(), num_bins};
   histograms.flat_array().fill(0);
 
   const auto& r = radius;
@@ -84,19 +87,16 @@ auto orientation_histograms(const ImageView<int>& edge_map,  //
   {
     for (auto x = 0; x < edge_map.width(); ++x)
     {
-      if (edge_map(x, y) < 0)
+      if (edge_map(x, y) == 0)
         continue;
 
-      const auto& label = edge_map(y, x);
+      const auto& label = edge_map(x, y);
 
       // Loop over the pixels in the patch centered in p.
       for (auto v = -r; v <= r; ++v)
       {
         for (auto u = -r; u <= r; ++u)
         {
-          if (u == 0 && v == 0)
-            continue;
-
           // Boundary conditions.
           const auto n = Eigen::Vector2i{x + u, y + v};
           if (n.x() < 0 || n.x() >= edge_map.width() ||  //
@@ -107,21 +107,21 @@ auto orientation_histograms(const ImageView<int>& edge_map,  //
           if  (edge_map(n) != label)
             continue;
 
-          auto orientation = std::atan2(v, u);
-          if (orientation < 0)
-            orientation += M_PI;
+          const auto& orientation = std::abs(orientation_map(n) - orientation_map(x, y));
 
-          const auto ori_0O = orientation / M_PI * O;
+          auto ori_0O = static_cast<float>(orientation / (2 * M_PI) * num_bins);
+          if (ori_0O >= num_bins)
+            ori_0O -= num_bins;
           auto ori_intf = decltype(ori_0O){};
           const auto ori_frac = std::modf(ori_0O, &ori_intf);
 
           auto ori_0 = int(ori_intf);
           auto ori_1 = ori_0 + 1;
-          if (ori_1 == O)
+          if (ori_1 == num_bins)
             ori_1 = 0;
 
-          histograms(x, y, ori_0) += (1 - ori_frac);
-          histograms(x, y, ori_1) += ori_frac;
+          histograms(y, x, ori_0) += (1 - ori_frac);
+          histograms(y, x, ori_1) += ori_frac;
         }
       }
     }
@@ -130,8 +130,8 @@ auto orientation_histograms(const ImageView<int>& edge_map,  //
   return histograms;
 }
 
-auto dense_peak(const TensorView_<float, 3>& histograms,
-                float peak_ratio_thres = 0.8f)
+auto peaks(const TensorView_<float, 3>& histograms,
+           float peak_ratio_thres = 0.8f)
 {
   auto peaks = Tensor_<std::uint8_t, 3>{histograms.sizes()};
 
@@ -149,9 +149,21 @@ auto dense_peak(const TensorView_<float, 3>& histograms,
   return peaks;
 }
 
-template <typename T>
-auto calculate_peak_residuals(const TensorView_<float, 3>& circular_data,
-                              const TensorView_<std::uint8_t, 3>& peak_indices)
+auto peak_counts(const TensorView_<std::uint8_t, 3>& peaks)
+{
+  const Eigen::Vector2i num_peaks_sizes = peaks.sizes().head(2);
+  auto peak_counts = Tensor_<std::uint8_t, 2>{num_peaks_sizes};
+
+#pragma omp parallel for
+  for (auto y = 0; y < peak_counts.size(0); ++y)
+    for (auto x = 0; x < peak_counts.size(1); ++x)
+      peak_counts(y, x) = peaks[y][x].flat_array().count();
+
+  return peak_counts;
+}
+
+auto peak_residuals(const TensorView_<float, 3>& circular_data,
+                    const TensorView_<std::uint8_t, 3>& peak_indices)
 {
   auto peak_residuals = Tensor_<float, 3>{circular_data.sizes()};
 
@@ -263,7 +275,8 @@ auto test_on_video()
       "/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
   //     //"/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/ha/turn_bikes.mp4"s;
 #endif
 
   // Input and output from Sara.
@@ -311,6 +324,18 @@ auto test_on_video()
     auto edges = suppress_non_maximum_edgels(grad_mag, grad_ori,  //
                                              high_thres, low_thres);
     hysteresis(edges);
+
+
+    // Detect junctions.
+    SARA_DEBUG << "Orientation histograms..." << std::endl;
+    const auto ori_hists = orientation_histograms(edges, grad_ori,   //
+                                                  /* num_bins */ 36,  //
+                                                  /* radius */ 3);
+    SARA_DEBUG << "Orientation peaks..." << std::endl;
+    const auto ori_peaks = peaks(ori_hists);
+    SARA_DEBUG << "Orientation peak counts..." << std::endl;
+    const auto ori_peak_counts = peak_counts(ori_peaks);
+
 
     // Group edgels by contours.
     const auto contours = connected_components(edges);
@@ -371,7 +396,12 @@ auto test_on_video()
 
       for (const auto& p : points)
         curve_map(p) = curve_colors.at(label);
+
+      for (const auto& p : points)
+        if (ori_peak_counts(p.y(), p.x()) > 1)
+          fill_circle(curve_map, p.x(), p.y(), 2, White8);
     }
+
     display(curve_map);
   }
 }
@@ -379,6 +409,7 @@ auto test_on_video()
 
 GRAPHICS_MAIN()
 {
+  omp_set_num_threads(omp_get_max_threads());
   test_on_video();
   return 0;
 }
