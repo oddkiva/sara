@@ -15,6 +15,14 @@ endmacro()
 sara_add_example(image_processing_example)
 sara_add_example(infinite_image_example)
 sara_add_example(gemm_based_convolution_example)
+<<<<<<< HEAD
+
+sara_add_example(edge_detection_example)
+target_link_libraries(edge_detection_example
+  PRIVATE $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+=======
+sara_add_example(watershed_example)
+>>>>>>> c7166fc5b1594f14baea5caff556a1cb9ba7b77e
 
 sara_add_example(edge_detection_example)
 target_link_libraries(edge_detection_example

@@ -26,6 +26,20 @@ using namespace std;
 using namespace DO::Sara;
 
 
+// LINE SEGMENT DETECTION.
+// When connecting pixel, also update the statistics of tne line.
+// - orientation (cf. §2.5 in LSD)
+// - rectangular approximation (§2.6)
+// - density of aligned points (§2.8)
+
+struct EdgeStatistics {
+  Eigen::Vector2f orientation_sum;
+  std::float_t total_mass;
+  Eigen::Vector2f unnormalized_center;
+  Eigen::Vector2f unnormalized_inertia;
+};
+
+
 auto test_on_image()
 {
   // Read an image.

@@ -15,9 +15,11 @@
 
 #include <omp.h>
 
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetectionUtilities.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 
@@ -210,6 +212,216 @@ auto shape_statistics(const std::vector<Eigen::Vector2i>& points)
 }
 
 
+// LINE SEGMENT DETECTION.
+// When connecting pixel, also update the statistics of tne line.
+// - orientation (cf. §2.5 in LSD)
+// - rectangular approximation (§2.6)
+// - density of aligned points (§2.8)
+
+struct EdgeStatistics {
+  Eigen::Vector2f orientation_sum = Eigen::Vector2f::Zero();
+  float total_mass = {};
+  Eigen::Vector2f unnormalized_center = Eigen::Vector2f::Zero();
+  Eigen::Vector2f unnormalized_inertia = Eigen::Vector2f::Zero();
+
+  std::vector<Eigen::Vector2i> points;
+
+  auto angle() const -> float
+  {
+    return std::atan2(orientation_sum.y(), orientation_sum.x());
+  }
+
+  auto center() const -> Eigen::Vector2f
+  {
+    return unnormalized_center / total_mass;
+  }
+
+  auto inertia() const -> Eigen::Vector3f {
+    const auto& c = center();
+    const auto& m = unnormalized_inertia;
+    auto m1 = Eigen::Vector3f{};
+    m1(0) = m(0) * m(0) - 2 * c.x() * m(0) + c.x() * c.x();
+    m1(1) = m(1) * m(1) - 2 * c.y() * m(1) + c.y() * c.y();
+    m1(2) = m(0) * m(1) - c.x() * m(1) - m(0) * c.y() + c.x() * c.y();
+    m1 /=  total_mass;
+    return m1;
+  }
+
+  auto rectangle() const -> float {
+    return {};
+  }
+
+  auto density() const -> float;
+};
+
+struct CoordsValue
+{
+  Eigen::Vector2i coords;
+  float value;
+
+  auto operator<(const CoordsValue& other) const
+  {
+    return value > other.value;
+  }
+};
+
+
+inline auto group_line_segments(const ImageView<std::uint8_t>& edges,
+                                const ImageView<float>& mag,
+                                const ImageView<float>& ori,
+                                float angular_threshold)
+{
+  const auto index = [&edges](const Eigen::Vector2i& p) {
+    return p.y() * edges.width() + p.x();
+  };
+
+  const auto is_edgel = [&edges](const Eigen::Vector2i& p) {
+    return edges(p) == 255;
+  };
+
+  const auto vec = [](float o) {
+    return Eigen::Vector2f{cos(o), sin(o)};
+  };
+
+  const auto angular_distance = [](const auto& a, const auto& b) {
+    const auto c = a.dot(b);
+    const auto s = a.homogeneous().cross(b.homogeneous())(2);
+    const auto dist = std::abs(std::atan2(s, c));
+    return dist;
+  };
+
+  auto ds = DisjointSets(edges.size());
+  auto visited = Image<std::uint8_t>{edges.sizes()};
+  visited.flat_array().fill(0);
+
+  auto statistics = std::vector<EdgeStatistics>(edges.size());
+
+  // Collect the edgels and make as many sets as pixels.
+  auto q = std::queue<Eigen::Vector2i>{};
+  for (auto y = 0; y < edges.height(); ++y)
+  {
+    for (auto x = 0; x < edges.width(); ++x)
+    {
+      ds.make_set(index({x, y}));
+      if (is_edgel({x, y}))
+      {
+        q.emplace(x, y);
+
+        statistics[index({x, y})].total_mass = mag(x, y);
+
+        statistics[index({x, y})].orientation_sum(0) += std::cos(ori(x, y));
+        statistics[index({x, y})].orientation_sum(1) += std::sin(ori(x, y));
+
+        statistics[index({x, y})].unnormalized_center(0) += x * mag(x, y);
+        statistics[index({x, y})].unnormalized_center(1) += y * mag(x, y);
+
+        statistics[index({x, y})].unnormalized_inertia(0) += x * x * mag(x, y);
+        statistics[index({x, y})].unnormalized_inertia(1) += x * y * mag(x, y);
+        statistics[index({x, y})].unnormalized_inertia(2) += y * y * mag(x, y);
+      }
+    }
+  }
+
+  // Neighborhood defined by 8-connectivity.
+  const auto dir = std::array<Eigen::Vector2i, 8>{
+      Eigen::Vector2i{1, 0},    //
+      Eigen::Vector2i{1, 1},    //
+      Eigen::Vector2i{0, 1},    //
+      Eigen::Vector2i{-1, 1},   //
+      Eigen::Vector2i{-1, 0},   //
+      Eigen::Vector2i{-1, -1},  //
+      Eigen::Vector2i{0, -1},   //
+      Eigen::Vector2i{1, -1}    //
+  };
+
+  while (!q.empty())
+  {
+    const auto& p = q.front();
+    visited(p) = 2;  // 2 = visited
+
+    if (!is_edgel(p))
+      throw std::runtime_error{"NOT AN EDGEL!"};
+
+    // Find its corresponding node in the disjoint set.
+    const auto node_p = ds.node(index(p));
+
+    // Add nonvisited weak edges.
+    for (const auto& d : dir)
+    {
+      const Eigen::Vector2i n = p + d;
+      // Boundary conditions.
+      if (n.x() < 0 || n.x() >= edges.width() ||  //
+          n.y() < 0 || n.y() >= edges.height())
+        continue;
+
+      // Make sure that the neighbor is an edgel.
+      if (!is_edgel(n))
+        continue;
+
+      const auto& comp_p = ds.component(index(n));
+      const auto& comp_n = ds.component(index(n));
+      const auto& up = vec(statistics[comp_p].angle());
+      const auto& un = vec(statistics[comp_n].angle());
+
+      // Merge component of p and component of n if angularly consistent.
+      if (angular_distance(up, un) < angular_threshold)
+      {
+        const auto node_n = ds.node(index(n));
+        ds.join(node_p, node_n);
+
+        // Update the component statistics.
+        const auto& comp_pn = ds.component(index(n));
+        if (comp_pn == comp_p)
+        {
+          statistics[comp_pn].total_mass += statistics[comp_n].total_mass;
+
+          statistics[comp_pn].orientation_sum +=
+              statistics[comp_n].orientation_sum;
+          statistics[comp_pn].unnormalized_center +=
+              statistics[comp_n].unnormalized_center;
+          statistics[comp_pn].unnormalized_inertia +=
+              statistics[comp_n].unnormalized_inertia;
+        }
+        else  // if (comp_pn == comp_n)
+        {
+          statistics[comp_pn].total_mass += statistics[comp_n].total_mass;
+          statistics[comp_pn].orientation_sum +=
+              statistics[comp_p].orientation_sum;
+          statistics[comp_pn].unnormalized_center +=
+              statistics[comp_p].unnormalized_center;
+          statistics[comp_pn].unnormalized_inertia +=
+              statistics[comp_p].unnormalized_inertia;
+        }
+      }
+
+      // Enqueue the neighbor n if it is not already enqueued
+      if (visited(n) == 0)
+      {
+        // Enqueue the neighbor.
+        q.emplace(n);
+        visited(n) = 1;  // 1 = enqueued
+      }
+    }
+
+    q.pop();
+  }
+
+  auto contours = std::map<int, std::vector<Point2i>>{};
+  for (auto y = 0; y < edges.height(); ++y)
+  {
+    for (auto x = 0; x < edges.width(); ++x)
+    {
+      const auto p = Eigen::Vector2i{x, y};
+      const auto index_p = index(p);
+      if (is_edgel(p))
+        contours[static_cast<int>(ds.component(index_p))].push_back(p);
+    }
+  }
+
+  return contours;
+}
+
+
 auto test_on_image()
 {
   // Read an image.
@@ -269,11 +481,11 @@ auto test_on_video()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  // const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
   const auto video_filepath =
       //"/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
-      "/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
-  //     //"/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
+      //"/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
+      "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
+      //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
   // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/ha/turn_bikes.mp4"s;
@@ -282,18 +494,19 @@ auto test_on_video()
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-  auto frame_gray32f = Image<float>{frame.sizes()};
+  const auto downscale_factor = 2;
+  auto frame_gray32f = Image<float>{};
 
   // Show the local extrema.
-  create_window(frame.sizes());
+  create_window(frame.sizes() / downscale_factor);
   set_antialiasing();
 
-  constexpr auto high_threshold_ratio = 5e-2f;
-  constexpr auto low_threshold_ratio = 2e-2f;
+  constexpr auto high_threshold_ratio = 20e-2f;
+  constexpr auto low_threshold_ratio = 15e-2f;
   constexpr auto angular_threshold = 20. / 180.f * M_PI;
 
   auto frames_read = 0;
-  const auto skip = 1;
+  const auto skip = 0;
   while (true)
   {
     if (!video_stream.read())
@@ -307,102 +520,83 @@ auto test_on_video()
 
     frame_gray32f = frame.convert<float>();
 
-    // Blur.
-    inplace_deriche_blur(frame_gray32f, std::sqrt(std::pow(1.6f, 2) - 1));
+    // Downscale.
+    if (downscale_factor > 1)
+    {
+      tic();
+      inplace_deriche_blur(frame_gray32f, std::sqrt(std::pow(1.6f, 2) - 1));
+      toc("Deriche");
+
+      tic();
+      frame_gray32f = downscale(frame_gray32f, downscale_factor);
+      toc("Downscale");
+    }
 
     // Canny.
+    tic();
     const auto& grad = gradient(frame_gray32f);
+    toc("Gradient");
+
+    tic();
     const auto& grad_mag = grad.cwise_transform(  //
         [](const auto& v) { return v.norm(); });
     const auto& grad_ori = grad.cwise_transform(
         [](const auto& v) { return std::atan2(v.y(), v.x()); });
+    toc("Polar Coordinates");
 
+    tic();
     const auto& grad_mag_max = grad_mag.flat_array().maxCoeff();
     const auto& high_thres = grad_mag_max * high_threshold_ratio;
     const auto& low_thres = grad_mag_max * low_threshold_ratio;
 
-    auto edges = suppress_non_maximum_edgels(grad_mag, grad_ori,  //
-                                             high_thres, low_thres);
-    hysteresis(edges);
+    auto edgels = suppress_non_maximum_edgels(grad_mag, grad_ori,  //
+                                              high_thres, low_thres);
+    toc("Thresholding");
 
 
+    // Group edgels by contours.
+    // tic();
+    // hysteresis(edgels);
+    // const auto edges = connected_components(edgels,    //
+    //                                         grad_ori,  //
+    //                                         angular_threshold);
+    // toc("Hysteresis then Edge Grouping");
+
+
+    // Group edgels by edges.
+    tic();
+    const auto edges = perform_hysteresis_and_grouping(edgels,    //
+                                                       grad_ori,  //
+                                                       angular_threshold);
+    toc("Simultaneous Hysteresis & Edge Grouping");
+
+#ifdef DETECT_JUNCTIONS
     // Detect junctions.
+    tic();
     SARA_DEBUG << "Orientation histograms..." << std::endl;
-    const auto ori_hists = orientation_histograms(edges, grad_ori,   //
+    const auto ori_hists = orientation_histograms(edgels, grad_ori,   //
                                                   /* num_bins */ 36,  //
                                                   /* radius */ 3);
     SARA_DEBUG << "Orientation peaks..." << std::endl;
     const auto ori_peaks = peaks(ori_hists);
     SARA_DEBUG << "Orientation peak counts..." << std::endl;
     const auto ori_peak_counts = peak_counts(ori_peaks);
+#endif
 
 
-    // Group edgels by contours.
-    const auto contours = connected_components(edges);
-    const auto curves = connected_components(edges, grad_ori, angular_threshold);
+    // Display the quasi-straight edges.
+    const auto labeled_edges = to_map(edges, edgels.sizes());
+    const auto edge_colors = random_colors(edges);
 
-    const auto labeled_contours = to_map(contours, edges.sizes());
-    const auto labeled_curves = to_map(curves, edges.sizes());
-
-    const auto contour_colors = random_colors(contours);
-    const auto curve_colors = random_colors(curves);
-
-    // Filter contours.
-    auto is_good_contours = std::map<int, bool>{};
-    for (const auto& [label, points] : contours)
+    auto edge_map = Image<Rgb8>{edgels.sizes()};
+    edge_map.flat_array().fill(Black8);
+    for (const auto& [label, points] : edges)
     {
-      auto is_good = false;
-      for (const auto& p: points)
-      {
-        const auto& curve_id = labeled_curves(p);
-
-        // A contour is good if it contains at least one curve.
-        const auto is_curve_element = curve_id > 0;
-        if (!is_curve_element)
-          continue;
-
-        // And the curve must be long enough.
-        if (curves.at(curve_id).size() < 20)
-          continue;
-
-        is_good = true;
-        break;
-      }
-
-      is_good_contours[label] = is_good;
+      for (const auto& p : points)
+        edge_map(p) = edge_colors.at(label);
     }
 
-    // Display the good contours.
-    auto contour_map = Image<Rgb8>{edges.sizes()};
-    contour_map.flat_array().fill(Black8);
-    // auto contour_map = frame;
-    for (const auto& [label, points] : contours)
-    {
-      if (!is_good_contours.at(label))
-        continue;
-
-      for (const auto& p : points)
-        contour_map(p) = contour_colors.at(label);
-    }
-    // display(contour_map);
-
-    // Display the good contours.
-    auto curve_map = Image<Rgb8>{edges.sizes()};
-    curve_map.flat_array().fill(Black8);
-    for (const auto& [label, points] : curves)
-    {
-      if (points.size() < 10)
-        continue;
-
-      for (const auto& p : points)
-        curve_map(p) = curve_colors.at(label);
-
-      for (const auto& p : points)
-        if (ori_peak_counts(p.y(), p.x()) > 1)
-          fill_circle(curve_map, p.x(), p.y(), 2, White8);
-    }
-
-    display(curve_map);
+    display(edge_map);
   }
 }
 

@@ -119,6 +119,7 @@ namespace DO { namespace Sara {
       {
         return _parent;
       }
+
       int rank() const
       {
         return _rank;
