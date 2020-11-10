@@ -35,6 +35,7 @@ namespace DO { namespace Sara {
   {
     auto edges = Image<uint8_t>{grad_mag.sizes()};
     edges.flat_array().fill(0);
+#pragma omp parallel for
     for (auto y = 1; y < grad_mag.height() - 1; ++y)
     {
       for (auto x = 1; x < grad_mag.width() - 1; ++x)
@@ -112,6 +113,7 @@ namespace DO { namespace Sara {
     }
   }
 
+
   inline auto connected_components(const ImageView<std::uint8_t>& edges)
   {
     const auto index = [&edges](const Eigen::Vector2i& p) {
@@ -119,7 +121,7 @@ namespace DO { namespace Sara {
     };
 
     const auto is_edgel = [&edges](const Eigen::Vector2i& p) {
-      return edges(p) == 255;
+      return edges(p) == 255 || edges(p) == 128;
     };
 
     auto ds = DisjointSets(edges.size());
@@ -206,7 +208,7 @@ namespace DO { namespace Sara {
   }
 
   inline auto connected_components(const ImageView<std::uint8_t>& edges,
-                                   const ImageView<float>& orientations,
+                                   const ImageView<float>& orientation,
                                    float angular_threshold)
   {
     const auto index = [&edges](const Eigen::Vector2i& p) {
@@ -217,8 +219,8 @@ namespace DO { namespace Sara {
       return edges(p) == 255;
     };
 
-    const auto orientation_vector = [&orientations](const Vector2i& p) {
-      const auto& o = orientations(p);
+    const auto orientation_vector = [&orientation](const Vector2i& p) {
+      const auto& o = orientation(p);
       return Eigen::Vector2f{cos(o), sin(o)};
     };
 
@@ -311,6 +313,126 @@ namespace DO { namespace Sara {
         const auto p = Eigen::Vector2i{x, y};
         const auto index_p = index(p);
         if (is_edgel(p))
+          contours[static_cast<int>(ds.component(index_p))].push_back(p);
+      }
+    }
+
+    return contours;
+  }
+
+
+  inline auto
+  perform_hysteresis_and_grouping(ImageView<std::uint8_t>& edges,
+                                  const ImageView<float>& orientations,
+                                  float angular_threshold)
+  {
+    const auto index = [&edges](const Eigen::Vector2i& p) {
+      return p.y() * edges.width() + p.x();
+    };
+
+    const auto is_strong_edgel = [&edges](const Eigen::Vector2i& p) {
+      return edges(p) == 255;
+    };
+
+    const auto is_weak_edgel = [&edges](const Eigen::Vector2i& p) {
+      return edges(p) == 128;
+    };
+
+    const auto orientation_vector = [&orientations](const Vector2i& p) {
+      const auto& o = orientations(p);
+      return Eigen::Vector2f{cos(o), sin(o)};
+    };
+
+    const auto angular_distance = [](const auto& a, const auto& b) {
+      const auto c = a.dot(b);
+      const auto s = a.homogeneous().cross(b.homogeneous())(2);
+      const auto dist = std::abs(std::atan2(s, c));
+      return dist;
+    };
+
+    auto ds = DisjointSets(edges.size());
+    auto visited = Image<std::uint8_t>{edges.sizes()};
+    visited.flat_array().fill(0);
+
+    // Collect the edgels and make as many sets as pixels.
+    auto q = std::queue<Eigen::Vector2i>{};
+    for (auto y = 0; y < edges.height(); ++y)
+    {
+      for (auto x = 0; x < edges.width(); ++x)
+      {
+        ds.make_set(index({x, y}));
+        if (is_strong_edgel({x, y}))
+          q.emplace(x, y);
+      }
+    }
+
+    // Neighborhood defined by 8-connectivity.
+    const auto dir = std::array<Eigen::Vector2i, 8>{
+        Eigen::Vector2i{1, 0},    //
+        Eigen::Vector2i{1, 1},    //
+        Eigen::Vector2i{0, 1},    //
+        Eigen::Vector2i{-1, 1},   //
+        Eigen::Vector2i{-1, 0},   //
+        Eigen::Vector2i{-1, -1},  //
+        Eigen::Vector2i{0, -1},   //
+        Eigen::Vector2i{1, -1}    //
+    };
+
+    while (!q.empty())
+    {
+      const auto& p = q.front();
+      visited(p) = 2;  // 2 = visited
+
+      if (!is_strong_edgel(p) && !is_weak_edgel(p))
+        throw std::runtime_error{"NOT AN EDGEL!"};
+
+      // Find its corresponding node in the disjoint set.
+      const auto node_p = ds.node(index(p));
+      const auto up = orientation_vector(p);
+
+      // Add nonvisited weak edges.
+      for (const auto& d : dir)
+      {
+        const Eigen::Vector2i n = p + d;
+        // Boundary conditions.
+        if (n.x() < 0 || n.x() >= edges.width() ||  //
+            n.y() < 0 || n.y() >= edges.height())
+          continue;
+
+        // Make sure that the neighbor is an edgel.
+        if (!is_strong_edgel(n) && !is_weak_edgel(n))
+          continue;
+
+        const auto un = orientation_vector(n);
+
+        // Merge component of p and component of n if angularly consistent.
+        if (angular_distance(up, un) < angular_threshold)
+        {
+          const auto node_n = ds.node(index(n));
+          ds.join(node_p, node_n);
+        }
+
+        // Enqueue the neighbor n if it is not already enqueued
+        if (visited(n) == 0)
+        {
+          // Enqueue the neighbor.
+          q.emplace(n);
+          visited(n) = 1;  // 1 = enqueued
+          edges(n) = 255;  // Promote to strong edgel!
+        }
+      }
+
+      q.pop();
+    }
+
+    auto contours = std::map<int, std::vector<Point2i>>{};
+    for (auto y = 0; y < edges.height(); ++y)
+    {
+      for (auto x = 0; x < edges.width(); ++x)
+      {
+        const auto p = Eigen::Vector2i{x, y};
+        const auto index_p = index(p);
+        if (is_strong_edgel(p))
           contours[static_cast<int>(ds.component(index_p))].push_back(p);
       }
     }
