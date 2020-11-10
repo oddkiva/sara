@@ -106,7 +106,7 @@ namespace DO { namespace Sara {
       break;
     }
 
-    pos = Vector3f(x, y, I.scale_relative_to_octave(s));
+    pos = Vector3f(x, y, static_cast<float>(I.scale_relative_to_octave(s)));
     const auto oldval = I(x, y, s, o);
     const auto newval = oldval + 0.5f * D_prime.dot(h);
 
@@ -348,7 +348,7 @@ namespace DO { namespace Sara {
     // Compute the blurred patches and their associated scales.
     //
     // Start with the initial patch.
-    scales[0] = G.scale_relative_to_octave(s) / sqrt(2.f);
+    scales[0] = static_cast<float>(G.scale_relative_to_octave(s)) / sqrt(2.f);
     auto inc_sigma = sqrt(pow(scales[0], 2) - pow(nearest_sigma, 2));
     patches[0] =
         inc_sigma > 1e-3f ? gaussian(nearest_patch, inc_sigma) : nearest_patch;

@@ -56,7 +56,7 @@ auto test_on_image()
   auto lsd = LineSegmentDetector{};
   lsd.parameters.high_threshold_ratio = 5e-2f;
   lsd.parameters.low_threshold_ratio = 2e-2f;
-  lsd.parameters.angular_threshold = 20. / 180.f * M_PI;
+  lsd.parameters.angular_threshold = static_cast<float>(20. / 180. * M_PI);
 
   for (auto s = 0; s < 500; ++s)
   {
@@ -78,8 +78,8 @@ auto test_on_image()
     millisleep(1);
 
     // Blur.
-    const auto delta = std::pow(2., 1. / 100.);
-    const auto sigma = 1.6 * sqrt(pow(delta, 2 * s + 2) - pow(delta, 2 * s));
+    const auto delta = std::pow(2.f, 1 / 100.f);
+    const auto sigma = 1.6f * sqrt(pow(delta, 2 * s + 2) - pow(delta, 2 * s));
     image_curr = deriche_blur(image_curr, sigma);
   }
 
@@ -117,7 +117,7 @@ auto test_on_video()
   auto lsd = LineSegmentDetector{};
   lsd.parameters.high_threshold_ratio = 20e-2f;
   lsd.parameters.low_threshold_ratio = 10e-2f;
-  lsd.parameters.angular_threshold = 20. / 180.f * M_PI;
+  lsd.parameters.angular_threshold = static_cast<float>(20. / 180. * M_PI);
   lsd.parameters.polish_line_segments = false;
 
   // Loop over the video.
