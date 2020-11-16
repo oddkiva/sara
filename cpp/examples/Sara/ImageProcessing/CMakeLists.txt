@@ -1,6 +1,9 @@
 find_package(OpenMP)
-find_package(DO_Sara COMPONENTS Core DisjointSets Graphics ImageIO
-  ImageProcessing VideoIO REQUIRED)
+find_package(DO_Sara
+  COMPONENTS
+  Core Graphics ImageIO VideoIO          # Classic stuff
+  DisjointSets Geometry ImageProcessing  # Algorithmic modules
+  REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)

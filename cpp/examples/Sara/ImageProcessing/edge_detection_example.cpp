@@ -17,6 +17,7 @@
 
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetectionUtilities.hpp>
+#include <DO/Sara/Geometry/Algorithms/RamerDouglasPeucker.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
@@ -27,408 +28,64 @@ using namespace std;
 using namespace DO::Sara;
 
 
-#ifdef DETECT_JUNCTIONS
-// ========================================================================== //
-// Utilities.
-// ========================================================================== //
-template <typename T>
-auto find_peaks(
-    const Map<const Eigen::Array<T, Eigen::Dynamic, 1>>& circular_data,  //
-    Map<Eigen::Array<std::uint8_t, Eigen::Dynamic, 1>>& peaks,           //
-    T peak_ratio_thres = static_cast<T>(0.8))                            //
-    -> void
+inline auto
+extract_longest_curve(const std::vector<Eigen::Vector2i>& curve_points,
+                      int connectivity_threshold = 2)
+    -> std::vector<Eigen::Vector2i>
 {
-  if (circular_data.size() == 0)
-    return;
-
-  const auto& max = circular_data.maxCoeff();
-  const auto& N = circular_data.size();
-
-  for (auto i = Eigen::Index{}; i < N; ++i)
+  enum class Axis : std::uint8_t
   {
-    const auto prev = i > 0 ? i - 1 : N;
-    const auto next = i < N - 1 ? i + 1 : 0;
-    peaks[i] = circular_data(i) >= peak_ratio_thres * max &&
-               circular_data(i) > circular_data(prev) &&
-               circular_data(i) > circular_data(next);
-  }
-}
+    X = 0,
+    Y = 1
+  };
 
-template <typename T>
-auto peak_residual(
-    const Map<const Eigen::Array<T, Eigen::Dynamic, 1>>& circular_data,  //
-    Eigen::Index i)                                                      //
-    -> T
-{
-  const auto& N = circular_data.size();
-
-  const auto prev = i > 0 ? i - 1 : N;
-  const auto next = i < N - 1 ? i + 1 : 0;
-
-  const auto& y0 = circular_data(prev);
-  const auto& y1 = circular_data(i);
-  const auto& y2 = circular_data(next);
-
-  const auto fprime = (y2 - y0) / 2.f;
-  const auto fsecond = y0 - 2.f * y1 + y2;
-
-  const auto h = -fprime / fsecond;
-
-  return T(i) + T(0.5) + h;
-}
-
-
-// ========================================================================== //
-// Operation on tensors.
-// ========================================================================== //
-auto orientation_histograms(const ImageView<std::uint8_t>& edge_map,  //
-                            const ImageView<float>& orientation_map,  //
-                            int num_bins = 18, int radius = 5)
-{
-  auto histograms =
-      Tensor_<float, 3>{edge_map.height(), edge_map.width(), num_bins};
-  histograms.flat_array().fill(0);
-
-  const auto& r = radius;
-
-#pragma omp parallel for
-  for (auto y = 0; y < edge_map.height(); ++y)
-  {
-    for (auto x = 0; x < edge_map.width(); ++x)
-    {
-      if (edge_map(x, y) == 0)
-        continue;
-
-      const auto& label = edge_map(x, y);
-
-      // Loop over the pixels in the patch centered in p.
-      for (auto v = -r; v <= r; ++v)
-      {
-        for (auto u = -r; u <= r; ++u)
-        {
-          // Boundary conditions.
-          const auto n = Eigen::Vector2i{x + u, y + v};
-          if (n.x() < 0 || n.x() >= edge_map.width() ||  //
-              n.y() < 0 || n.y() >= edge_map.height())
-            continue;
-
-          // Only consider neighbors with the same label.
-          if  (edge_map(n) != label)
-            continue;
-
-          const auto& orientation = std::abs(orientation_map(n) - orientation_map(x, y));
-
-          auto ori_0O = static_cast<float>(orientation / (2 * M_PI) * num_bins);
-          if (ori_0O >= num_bins)
-            ori_0O -= num_bins;
-          auto ori_intf = decltype(ori_0O){};
-          const auto ori_frac = std::modf(ori_0O, &ori_intf);
-
-          auto ori_0 = int(ori_intf);
-          auto ori_1 = ori_0 + 1;
-          if (ori_1 == num_bins)
-            ori_1 = 0;
-
-          histograms(y, x, ori_0) += (1 - ori_frac);
-          histograms(y, x, ori_1) += ori_frac;
-        }
-      }
-    }
-  }
-
-  return histograms;
-}
-
-auto peaks(const TensorView_<float, 3>& histograms,
-           float peak_ratio_thres = 0.8f)
-{
-  auto peaks = Tensor_<std::uint8_t, 3>{histograms.sizes()};
-
-#pragma omp parallel for
-  for (auto y = 0; y < histograms.size(0); ++y)
-  {
-    for (auto x = 0; x < histograms.size(1); ++x)
-    {
-      const auto& h = histograms[y][x].flat_array();
-      auto p = peaks[y][x].flat_array();
-      find_peaks(h, p, peak_ratio_thres);
-    }
-  }
-
-  return peaks;
-}
-
-auto peak_counts(const TensorView_<std::uint8_t, 3>& peaks)
-{
-  const Eigen::Vector2i num_peaks_sizes = peaks.sizes().head(2);
-  auto peak_counts = Tensor_<std::uint8_t, 2>{num_peaks_sizes};
-
-#pragma omp parallel for
-  for (auto y = 0; y < peak_counts.size(0); ++y)
-    for (auto x = 0; x < peak_counts.size(1); ++x)
-      peak_counts(y, x) = peaks[y][x].flat_array().count();
-
-  return peak_counts;
-}
-
-auto peak_residuals(const TensorView_<float, 3>& circular_data,
-                    const TensorView_<std::uint8_t, 3>& peak_indices)
-{
-  auto peak_residuals = Tensor_<float, 3>{circular_data.sizes()};
-
-#pragma omp parallel for
-  for (auto y = 0; y < circular_data.size(0); ++y)
-  {
-    for (auto x = 0; x < circular_data.size(1); ++x)
-    {
-      const auto& h = circular_data[y][x].flat_array();
-      auto p = peak_indices[y][x].flat_array();
-
-      for (auto i = 0; i < p.size(); ++i)
-        peak_residuals(y, x, i) = p[i] == 0 ? 0 : peak_residual(h, i);
-    }
-  }
-
-  return peak_residuals;
-}
-#endif
-
-// ========================================================================== //
-// Edge statistics.
-// ========================================================================== //
-auto shape_statistics(const std::vector<Eigen::Vector2i>& points)
-{
-  auto pmat = Eigen::MatrixXf(2, points.size());
-  for (auto i = 0u; i < points.size(); ++i)
-    pmat.col(i) = points[i].cast<float>();
-
-  const auto X = pmat.row(0);
-  const auto Y = pmat.row(1);
-
-
-  const auto x_mean = X.array().sum() / points.size();
-  const auto y_mean = Y.array().sum() / points.size();
-
-  const auto x2_mean =
-      X.array().square().sum() / points.size() - std::pow(x_mean, 2);
-  const auto y2_mean =
-      Y.array().square().sum() / points.size() - std::pow(y_mean, 2);
-  const auto xy_mean =
-      (X.array() * Y.array()).sum() / points.size() - x_mean * y_mean;
-
-  auto statistics = Eigen::Matrix<float, 5, 1>{};
-  statistics << x_mean, y_mean, x2_mean, y2_mean, xy_mean;
-  return statistics;
-}
-
-
-// LINE SEGMENT DETECTION.
-// When connecting pixel, also update the statistics of tne line.
-// - orientation (cf. §2.5 in LSD)
-// - rectangular approximation (§2.6)
-// - density of aligned points (§2.8)
-
-struct EdgeStatistics {
-  Eigen::Vector2f orientation_sum = Eigen::Vector2f::Zero();
-  float total_mass = {};
-  Eigen::Vector2f unnormalized_center = Eigen::Vector2f::Zero();
-  Eigen::Vector2f unnormalized_inertia = Eigen::Vector2f::Zero();
-
-  std::vector<Eigen::Vector2i> points;
-
-  auto angle() const -> float
-  {
-    return std::atan2(orientation_sum.y(), orientation_sum.x());
-  }
-
-  auto center() const -> Eigen::Vector2f
-  {
-    return unnormalized_center / total_mass;
-  }
-
-  auto inertia() const -> Eigen::Vector3f {
-    const auto& c = center();
-    const auto& m = unnormalized_inertia;
-    auto m1 = Eigen::Vector3f{};
-    m1(0) = m(0) * m(0) - 2 * c.x() * m(0) + c.x() * c.x();
-    m1(1) = m(1) * m(1) - 2 * c.y() * m(1) + c.y() * c.y();
-    m1(2) = m(0) * m(1) - c.x() * m(1) - m(0) * c.y() + c.x() * c.y();
-    m1 /=  total_mass;
-    return m1;
-  }
-
-  auto rectangle() const -> float {
+  if (curve_points.size() <= 2)
     return {};
-  }
 
-  auto density() const -> float;
-};
+  const Eigen::Vector2i min = std::accumulate(
+      curve_points.begin(), curve_points.end(), curve_points.front(),
+      [](const auto& a, const auto& b) { return a.cwiseMin(b); });
+  const Eigen::Vector2i max = std::accumulate(
+      curve_points.begin(), curve_points.end(), curve_points.front(),
+      [](const auto& a, const auto& b) { return a.cwiseMax(b); });
+  const Eigen::Vector2i delta = (max - min).cwiseAbs();
 
-struct CoordsValue
-{
-  Eigen::Vector2i coords;
-  float value;
+  const auto longest_axis = delta.x() > delta.y() ? Axis::X : Axis::Y;
 
-  auto operator<(const CoordsValue& other) const
+  auto compare_xy = [](const auto& a, const auto& b) {
+    if (a.x() < b.x())
+      return true;
+    if (a.x() == b.x() && a.y() < b.y())
+      return true;
+    return false;
+  };
+
+  auto compare_yx = [](const auto& a, const auto& b) {
+    if (a.y() < b.y())
+      return true;
+    if (a.y() == b.y() && a.x() < b.x())
+      return true;
+    return false;
+  };
+
+  auto curve_points_sorted = curve_points;
+  if (longest_axis == Axis::X)
+    std::sort(curve_points_sorted.begin(), curve_points_sorted.end(),
+              compare_xy);
+  else
+    std::sort(curve_points_sorted.begin(), curve_points_sorted.end(),
+              compare_yx);
+
+  auto curve_points_ordered = std::vector<Eigen::Vector2i>{};
+  curve_points_ordered.emplace_back(curve_points_sorted.front());
+  for (auto i = 1u; i < curve_points_sorted.size(); ++i)
   {
-    return value > other.value;
-  }
-};
-
-
-inline auto group_line_segments(const ImageView<std::uint8_t>& edges,
-                                const ImageView<float>& mag,
-                                const ImageView<float>& ori,
-                                float angular_threshold)
-{
-  const auto index = [&edges](const Eigen::Vector2i& p) {
-    return p.y() * edges.width() + p.x();
-  };
-
-  const auto is_edgel = [&edges](const Eigen::Vector2i& p) {
-    return edges(p) == 255;
-  };
-
-  const auto vec = [](float o) {
-    return Eigen::Vector2f{cos(o), sin(o)};
-  };
-
-  const auto angular_distance = [](const auto& a, const auto& b) {
-    const auto c = a.dot(b);
-    const auto s = a.homogeneous().cross(b.homogeneous())(2);
-    const auto dist = std::abs(std::atan2(s, c));
-    return dist;
-  };
-
-  auto ds = DisjointSets(edges.size());
-  auto visited = Image<std::uint8_t>{edges.sizes()};
-  visited.flat_array().fill(0);
-
-  auto statistics = std::vector<EdgeStatistics>(edges.size());
-
-  // Collect the edgels and make as many sets as pixels.
-  auto q = std::queue<Eigen::Vector2i>{};
-  for (auto y = 0; y < edges.height(); ++y)
-  {
-    for (auto x = 0; x < edges.width(); ++x)
-    {
-      ds.make_set(index({x, y}));
-      if (is_edgel({x, y}))
-      {
-        q.emplace(x, y);
-
-        statistics[index({x, y})].total_mass = mag(x, y);
-
-        statistics[index({x, y})].orientation_sum(0) += std::cos(ori(x, y));
-        statistics[index({x, y})].orientation_sum(1) += std::sin(ori(x, y));
-
-        statistics[index({x, y})].unnormalized_center(0) += x * mag(x, y);
-        statistics[index({x, y})].unnormalized_center(1) += y * mag(x, y);
-
-        statistics[index({x, y})].unnormalized_inertia(0) += x * x * mag(x, y);
-        statistics[index({x, y})].unnormalized_inertia(1) += x * y * mag(x, y);
-        statistics[index({x, y})].unnormalized_inertia(2) += y * y * mag(x, y);
-      }
-    }
+    if ((curve_points_ordered.back() - curve_points_sorted[i])
+            .lpNorm<Eigen::Infinity>() <= connectivity_threshold)
+      curve_points_ordered.emplace_back(curve_points_sorted[i]);
   }
 
-  // Neighborhood defined by 8-connectivity.
-  const auto dir = std::array<Eigen::Vector2i, 8>{
-      Eigen::Vector2i{1, 0},    //
-      Eigen::Vector2i{1, 1},    //
-      Eigen::Vector2i{0, 1},    //
-      Eigen::Vector2i{-1, 1},   //
-      Eigen::Vector2i{-1, 0},   //
-      Eigen::Vector2i{-1, -1},  //
-      Eigen::Vector2i{0, -1},   //
-      Eigen::Vector2i{1, -1}    //
-  };
-
-  while (!q.empty())
-  {
-    const auto& p = q.front();
-    visited(p) = 2;  // 2 = visited
-
-    if (!is_edgel(p))
-      throw std::runtime_error{"NOT AN EDGEL!"};
-
-    // Find its corresponding node in the disjoint set.
-    const auto node_p = ds.node(index(p));
-
-    // Add nonvisited weak edges.
-    for (const auto& d : dir)
-    {
-      const Eigen::Vector2i n = p + d;
-      // Boundary conditions.
-      if (n.x() < 0 || n.x() >= edges.width() ||  //
-          n.y() < 0 || n.y() >= edges.height())
-        continue;
-
-      // Make sure that the neighbor is an edgel.
-      if (!is_edgel(n))
-        continue;
-
-      const auto& comp_p = ds.component(index(n));
-      const auto& comp_n = ds.component(index(n));
-      const auto& up = vec(statistics[comp_p].angle());
-      const auto& un = vec(statistics[comp_n].angle());
-
-      // Merge component of p and component of n if angularly consistent.
-      if (angular_distance(up, un) < angular_threshold)
-      {
-        const auto node_n = ds.node(index(n));
-        ds.join(node_p, node_n);
-
-        // Update the component statistics.
-        const auto& comp_pn = ds.component(index(n));
-        if (comp_pn == comp_p)
-        {
-          statistics[comp_pn].total_mass += statistics[comp_n].total_mass;
-
-          statistics[comp_pn].orientation_sum +=
-              statistics[comp_n].orientation_sum;
-          statistics[comp_pn].unnormalized_center +=
-              statistics[comp_n].unnormalized_center;
-          statistics[comp_pn].unnormalized_inertia +=
-              statistics[comp_n].unnormalized_inertia;
-        }
-        else  // if (comp_pn == comp_n)
-        {
-          statistics[comp_pn].total_mass += statistics[comp_n].total_mass;
-          statistics[comp_pn].orientation_sum +=
-              statistics[comp_p].orientation_sum;
-          statistics[comp_pn].unnormalized_center +=
-              statistics[comp_p].unnormalized_center;
-          statistics[comp_pn].unnormalized_inertia +=
-              statistics[comp_p].unnormalized_inertia;
-        }
-      }
-
-      // Enqueue the neighbor n if it is not already enqueued
-      if (visited(n) == 0)
-      {
-        // Enqueue the neighbor.
-        q.emplace(n);
-        visited(n) = 1;  // 1 = enqueued
-      }
-    }
-
-    q.pop();
-  }
-
-  auto contours = std::map<int, std::vector<Point2i>>{};
-  for (auto y = 0; y < edges.height(); ++y)
-  {
-    for (auto x = 0; x < edges.width(); ++x)
-    {
-      const auto p = Eigen::Vector2i{x, y};
-      const auto index_p = index(p);
-      if (is_edgel(p))
-        contours[static_cast<int>(ds.component(index_p))].push_back(p);
-    }
-  }
-
-  return contours;
+  return curve_points_ordered;
 }
 
 
@@ -498,11 +155,13 @@ auto test_on_video()
       //"/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
       //"/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
-      //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
+  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
   // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  const auto video_filepath = "/home/david/Desktop/Datasets/ha/text_5.avi"s;
-  // const auto video_filepath = "/home/david/Desktop/Datasets/ha/GH010175_converted.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/Datasets/ha/text_5.avi"s;
+  // const auto video_filepath =
+  // "/home/david/Desktop/Datasets/ha/GH010175_converted.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/ha/turn_bikes.mp4"s;
 #endif
 
   // Input and output from Sara.
@@ -516,14 +175,14 @@ auto test_on_video()
   set_antialiasing();
 
   constexpr auto high_threshold_ratio = 15e-2f;
-  constexpr auto low_threshold_ratio = 10e-2f;
+  constexpr auto low_threshold_ratio = 8e-2f;
   constexpr auto angular_threshold = 20. / 180.f * M_PI;
   const auto sigma = std::sqrt(std::pow(1.6f, 2) - 1);
-  const Eigen::Vector2i& p1 = frame.sizes() / 4;
-  const Eigen::Vector2i& p2 = frame.sizes() * 3 / 4;
+  const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
+  const Eigen::Vector2i& p2 = Eigen::Vector2i(frame.width(), 0.7 * frame.height());
 
   auto frames_read = 0;
-  const auto skip = 0;
+  const auto skip = 2;
   while (true)
   {
     if (!video_stream.read())
@@ -533,7 +192,7 @@ auto test_on_video()
     }
     ++frames_read;
     if (frames_read % (skip + 1) != 0)
-       continue;
+      continue;
 
     // Reduce our attention to the central part of the image.
     tic();
@@ -586,45 +245,61 @@ auto test_on_video()
 #else
     tic();
     hysteresis(edgels);
-    const auto edges = connected_components(edgels,    //
-                                            grad_ori,  //
-                                            angular_threshold);
+    // const auto edges = connected_components(edgels,    //
+    //                                         grad_ori,  //
+    //                                         angular_threshold);
+    const auto edges = connected_components(edgels);
     toc("Hysteresis then Edge Grouping");
 #endif
 
-
-#ifdef DETECT_JUNCTIONS
-    // Detect junctions.
     tic();
-    SARA_DEBUG << "Orientation histograms..." << std::endl;
-    const auto ori_hists = orientation_histograms(edgels, grad_ori,   //
-                                                  /* num_bins */ 36,  //
-                                                  /* radius */ 3);
-    SARA_DEBUG << "Orientation peaks..." << std::endl;
-    const auto ori_peaks = peaks(ori_hists);
-    SARA_DEBUG << "Orientation peak counts..." << std::endl;
-    const auto ori_peak_counts = peak_counts(ori_peaks);
-#endif
+    auto edges_as_list = std::vector<std::vector<Eigen::Vector2i>>(edges.size());
+    std::transform(edges.begin(), edges.end(), edges_as_list.begin(),
+                   [](const auto& e) { return e.second; });
+    toc("To vector");
+
+    tic();
+    auto edges_simplified =
+        std::vector<std::vector<Eigen::Vector2d>>(edges_as_list.size());
+#pragma omp parallel for
+    for (auto i = 0u; i < edges_as_list.size(); ++i)
+    {
+      const auto& edge = extract_longest_curve(edges_as_list[i]);
+
+      auto edges_converted = std::vector<Eigen::Vector2d>(edge.size());
+      std::transform(edge.begin(), edge.end(), edges_converted.begin(),
+                     [](const auto& p) { return p.template cast<double>(); });
+
+      edges_simplified[i] = ramer_douglas_peucker(edges_converted, 1.2);
+    }
+    toc("Longest Curve Extraction & Simplification");
 
 
     // Display the quasi-straight edges.
     tic();
-    // const auto labeled_edges = to_map(edges, edgels.sizes());
-    const auto edge_colors = random_colors(edges);
+    auto edge_colors = std::vector<Rgb8>(edges_simplified.size());
+    for (auto& c : edge_colors)
+      c << rand() % 255, rand() % 255, rand() % 255;
 
     auto detection = frame;
-    for (const auto& [label, points] : edges)
+    detection.flat_array().fill(Black8);
+#pragma omp parallel for
+    for (auto e = 0u; e < edges_simplified.size(); ++e)
     {
-      if (points.size() < 4)
+      const auto& edge = edges_simplified[e];
+      if (edge.size() < 2)
         continue;
 
-      const auto& color = edge_colors.at(label);
-      for (const auto& p: points) {
-        const Eigen::Vector2i q = p1 + downscale_factor * p;
-        // detection(q) = color;
-        fill_rect(detection,                   //
-                  q.x() - 1, q.y() - 1, 2, 2,  //
-                  color);                      //
+      const auto& color = edge_colors[e];
+      const auto& s = downscale_factor;
+      for (auto i = 0u; i < edge.size() - 1; ++i)
+      {
+        const auto& a = p1.cast<double>() + s * edge[i];
+        const auto& b = p1.cast<double>() + s * edge[i + 1];
+        draw_line(detection, a.x(), a.y(), b.x(), b.y(), color, 1, false);
+        fill_circle(detection, a.x(), a.y(), 2, color);
+        if (i == edge.size() - 2)
+          fill_circle(detection, b.x(), b.y(), 2, color);
       }
     }
     display(detection);
@@ -639,3 +314,17 @@ GRAPHICS_MAIN()
   test_on_video();
   return 0;
 }
+
+
+#ifdef DETECT_JUNCTIONS
+// Detect junctions.
+tic();
+SARA_DEBUG << "Orientation histograms..." << std::endl;
+const auto ori_hists = orientation_histograms(edgels, grad_ori,   //
+                                              /* num_bins */ 36,  //
+                                              /* radius */ 3);
+SARA_DEBUG << "Orientation peaks..." << std::endl;
+const auto ori_peaks = peaks(ori_hists);
+SARA_DEBUG << "Orientation peak counts..." << std::endl;
+const auto ori_peak_counts = peak_counts(ori_peaks);
+#endif
