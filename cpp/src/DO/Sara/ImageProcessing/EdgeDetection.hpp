@@ -440,6 +440,69 @@ namespace DO { namespace Sara {
     return contours;
   }
 
+
+  //! @brief This is a heuristic approach but it does work well.
+  inline auto
+  extract_longest_curve(const std::vector<Eigen::Vector2i>& curve_points,
+                        int connectivity_threshold = 2)
+      -> std::vector<Eigen::Vector2i>
+  {
+    enum class Axis : std::uint8_t
+    {
+      X = 0,
+      Y = 1
+    };
+
+    if (curve_points.size() <= 2)
+      return {};
+
+    const Eigen::Vector2i min = std::accumulate(
+        curve_points.begin(), curve_points.end(), curve_points.front(),
+        [](const auto& a, const auto& b) { return a.cwiseMin(b); });
+    const Eigen::Vector2i max = std::accumulate(
+        curve_points.begin(), curve_points.end(), curve_points.front(),
+        [](const auto& a, const auto& b) { return a.cwiseMax(b); });
+    const Eigen::Vector2i delta = (max - min).cwiseAbs();
+
+    const auto longest_axis = delta.x() > delta.y() ? Axis::X : Axis::Y;
+
+    auto compare_xy = [](const auto& a, const auto& b) {
+      if (a.x() < b.x())
+        return true;
+      if (a.x() == b.x() && a.y() < b.y())
+        return true;
+      return false;
+    };
+
+    auto compare_yx = [](const auto& a, const auto& b) {
+      if (a.y() < b.y())
+        return true;
+      if (a.y() == b.y() && a.x() < b.x())
+        return true;
+      return false;
+    };
+
+    auto curve_points_sorted = curve_points;
+    if (longest_axis == Axis::X)
+      std::sort(curve_points_sorted.begin(), curve_points_sorted.end(),
+                compare_xy);
+    else
+      std::sort(curve_points_sorted.begin(), curve_points_sorted.end(),
+                compare_yx);
+
+    auto curve_points_ordered = std::vector<Eigen::Vector2i>{};
+    curve_points_ordered.emplace_back(curve_points_sorted.front());
+    for (auto i = 1u; i < curve_points_sorted.size(); ++i)
+    {
+      if ((curve_points_ordered.back() - curve_points_sorted[i])
+              .lpNorm<Eigen::Infinity>() <= connectivity_threshold)
+        curve_points_ordered.emplace_back(curve_points_sorted[i]);
+    }
+
+    return curve_points_ordered;
+  }
+
+
   inline auto canny(const ImageView<float>& frame_gray32f,
                     float high_threshold_ratio = 2e-2f,
                     float low_threshold_ratio = 1e-2f)

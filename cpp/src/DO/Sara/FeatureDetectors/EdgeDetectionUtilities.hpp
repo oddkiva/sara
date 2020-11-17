@@ -45,12 +45,12 @@ namespace DO::Sara {
     return colors;
   }
 
-
-  inline auto fit_line_segment(const std::vector<Eigen::Vector2i>& curve_points,
-                               int num_iterations,   //
-                               bool polish = false,  //
-                               float error_threshold = 1.f,
-                               float min_consensus_ratio = 0.5f)
+  inline auto
+  fit_line_segment_robustly(const std::vector<Eigen::Vector2i>& curve_points,
+                            int num_iterations,   //
+                            bool polish = false,  //
+                            float error_threshold = 1.f,
+                            float min_consensus_ratio = 0.5f)
       -> std::tuple<bool, LineSegment>
   {
     enum class Axis : std::uint8_t

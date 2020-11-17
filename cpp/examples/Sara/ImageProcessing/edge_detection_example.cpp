@@ -28,65 +28,98 @@ using namespace std;
 using namespace DO::Sara;
 
 
-inline auto
-extract_longest_curve(const std::vector<Eigen::Vector2i>& curve_points,
-                      int connectivity_threshold = 2)
-    -> std::vector<Eigen::Vector2i>
+//! TODO: see if reweighting with edge length improves the split.
+template <typename Point>
+auto split(const std::vector<Point>& ordered_points,
+           const float angle_threshold = M_PI / 6)
+    -> std::vector<std::vector<Point>>
 {
-  enum class Axis : std::uint8_t
+  if (angle_threshold >= M_PI)
+    throw std::runtime_error{"Invalid angle threshold!"};
+
+  if (ordered_points.size() < 3)
+    return {ordered_points};
+
+  const auto& p = ordered_points;
+  const auto cos_threshold = std::cos(angle_threshold);
+
+  auto deltas = std::vector<Point>(p.size() - 1);
+  for (auto i = 0u; i < deltas.size(); ++i)
+    deltas[i] = (p[i + 1] - p[i]).normalized();
+
+  auto cuts = std::vector<std::uint8_t>(p.size(), 0);
+  for (auto i = 0u; i < deltas.size() - 1; ++i)
   {
-    X = 0,
-    Y = 1
-  };
-
-  if (curve_points.size() <= 2)
-    return {};
-
-  const Eigen::Vector2i min = std::accumulate(
-      curve_points.begin(), curve_points.end(), curve_points.front(),
-      [](const auto& a, const auto& b) { return a.cwiseMin(b); });
-  const Eigen::Vector2i max = std::accumulate(
-      curve_points.begin(), curve_points.end(), curve_points.front(),
-      [](const auto& a, const auto& b) { return a.cwiseMax(b); });
-  const Eigen::Vector2i delta = (max - min).cwiseAbs();
-
-  const auto longest_axis = delta.x() > delta.y() ? Axis::X : Axis::Y;
-
-  auto compare_xy = [](const auto& a, const auto& b) {
-    if (a.x() < b.x())
-      return true;
-    if (a.x() == b.x() && a.y() < b.y())
-      return true;
-    return false;
-  };
-
-  auto compare_yx = [](const auto& a, const auto& b) {
-    if (a.y() < b.y())
-      return true;
-    if (a.y() == b.y() && a.x() < b.x())
-      return true;
-    return false;
-  };
-
-  auto curve_points_sorted = curve_points;
-  if (longest_axis == Axis::X)
-    std::sort(curve_points_sorted.begin(), curve_points_sorted.end(),
-              compare_xy);
-  else
-    std::sort(curve_points_sorted.begin(), curve_points_sorted.end(),
-              compare_yx);
-
-  auto curve_points_ordered = std::vector<Eigen::Vector2i>{};
-  curve_points_ordered.emplace_back(curve_points_sorted.front());
-  for (auto i = 1u; i < curve_points_sorted.size(); ++i)
-  {
-    if ((curve_points_ordered.back() - curve_points_sorted[i])
-            .lpNorm<Eigen::Infinity>() <= connectivity_threshold)
-      curve_points_ordered.emplace_back(curve_points_sorted[i]);
+    const auto cosine = deltas[i].dot(deltas[i + 1]);
+    const auto cut_at_i = cosine < cos_threshold;
+    cuts[i + 1] = cut_at_i;
   }
 
-  return curve_points_ordered;
+  auto pp = std::vector<std::vector<Point>>{};
+  pp.push_back({p[0]});
+  for (auto i = 1u; i < p.size(); ++i)
+  {
+    pp.back().push_back(p[i]);
+    if (cuts[i] == 1)
+      pp.push_back({p[i]});
+  }
+
+  return pp;
 }
+
+
+template <typename Point>
+auto split(const std::vector<std::vector<Point>>& edges,
+                  const float angle_threshold = M_PI / 6)
+    -> std::vector<std::vector<Point>>
+{
+  auto edges_split = std::vector<std::vector<Point>>{};
+  edges_split.reserve(2 * edges.size());
+  for (const auto& e: edges)
+    append(edges_split, split(e, angle_threshold));
+
+  return edges_split;
+}
+
+// inline auto fit_line_segment(const std::vector<Eigen::Vector2i>& points)
+//     -> LineSegment
+// {
+//   auto coords = MatrixXf{points.size(), 3};
+//   for (auto i = 0; i < coords.rows(); ++i)
+//     coords.row(i) = points[i].homogeneous().transpose().cast<float>();
+//
+//   // Calculate the line equation `l`.
+//   auto svd = Eigen::BDCSVD<MatrixXf>{coords,
+//                                      Eigen::ComputeFullU | Eigen::ComputeFullV};
+//
+//   const Eigen::Vector3f l = svd.matrixV().col(2);
+//
+//   // Direction vector.
+//   const auto t = Projective::tangent(l).cwiseAbs();
+//
+//   enum class Axis : std::uint8_t
+//   {
+//     X = 0,
+//     Y = 1
+//   };
+//   const auto longest_axis = t.x() > t.y() ? Axis::X : Axis::Y;
+//
+//   Eigen::Vector2d p1 = points.front().cast<float>();
+//   Eigen::Vector2d p2 = points.back().cast<float>();
+//
+//   if (longest_axis == Axis::X)
+//   {
+//     p1.y() = -(l(0) * p1.x() + l(2)) / l(1);
+//     p2.y() = -(l(0) * p2.x() + l(2)) / l(1);
+//   }
+//   else
+//   {
+//     p1.x() = -(l(1) * p1.y() + l(2)) / l(0);
+//     p2.x() = -(l(1) * p2.y() + l(2)) / l(0);
+//   }
+//
+//   return {p1.cast<double>(), p2.cast<double>()};
+// }
 
 
 // ========================================================================== //
@@ -155,7 +188,6 @@ auto test_on_video()
       //"/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
       //"/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
-  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
   // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
   // const auto video_filepath = "/home/david/Desktop/Datasets/ha/text_5.avi"s;
@@ -179,7 +211,7 @@ auto test_on_video()
   constexpr auto angular_threshold = 20. / 180.f * M_PI;
   const auto sigma = std::sqrt(std::pow(1.6f, 2) - 1);
   const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
-  const Eigen::Vector2i& p2 = Eigen::Vector2i(frame.width(), 0.7 * frame.height());
+  const Eigen::Vector2i& p2 = frame.sizes();
 
   auto frames_read = 0;
   const auto skip = 2;
@@ -253,7 +285,8 @@ auto test_on_video()
 #endif
 
     tic();
-    auto edges_as_list = std::vector<std::vector<Eigen::Vector2i>>(edges.size());
+    auto edges_as_list =
+        std::vector<std::vector<Eigen::Vector2i>>(edges.size());
     std::transform(edges.begin(), edges.end(), edges_as_list.begin(),
                    [](const auto& e) { return e.second; });
     toc("To vector");
@@ -270,9 +303,13 @@ auto test_on_video()
       std::transform(edge.begin(), edge.end(), edges_converted.begin(),
                      [](const auto& p) { return p.template cast<double>(); });
 
-      edges_simplified[i] = ramer_douglas_peucker(edges_converted, 1.2);
+      edges_simplified[i] = ramer_douglas_peucker(edges_converted, 2.);
     }
     toc("Longest Curve Extraction & Simplification");
+
+    // tic();
+    // edges_simplified = split(edges_simplified);
+    // toc("Edge Split");
 
 
     // Display the quasi-straight edges.
@@ -282,7 +319,6 @@ auto test_on_video()
       c << rand() % 255, rand() % 255, rand() % 255;
 
     auto detection = frame;
-    detection.flat_array().fill(Black8);
 #pragma omp parallel for
     for (auto e = 0u; e < edges_simplified.size(); ++e)
     {
@@ -296,7 +332,7 @@ auto test_on_video()
       {
         const auto& a = p1.cast<double>() + s * edge[i];
         const auto& b = p1.cast<double>() + s * edge[i + 1];
-        draw_line(detection, a.x(), a.y(), b.x(), b.y(), color, 1, false);
+        draw_line(detection, a.x(), a.y(), b.x(), b.y(), color, 1, true);
         fill_circle(detection, a.x(), a.y(), 2, color);
         if (i == edge.size() - 2)
           fill_circle(detection, b.x(), b.y(), 2, color);
@@ -327,4 +363,46 @@ SARA_DEBUG << "Orientation peaks..." << std::endl;
 const auto ori_peaks = peaks(ori_hists);
 SARA_DEBUG << "Orientation peak counts..." << std::endl;
 const auto ori_peak_counts = peak_counts(ori_peaks);
+#endif
+
+
+#ifdef DEBUG
+    tic();
+    const auto& edge = edges_simplified.front();
+    const auto& splits = split(edge, M_PI / 10);
+
+    display(frame);
+
+    // Check the splits.
+    if (edge.size() >= 3)
+    {
+      const auto color = Red8;
+      const auto& s = downscale_factor;
+      for (auto i = 0u; i < edge.size() - 1; ++i)
+      {
+        const auto& a = p1.cast<double>() + s * edge[i];
+        const auto& b = p1.cast<double>() + s * edge[i + 1];
+        draw_line(a.x(), a.y(), b.x(), b.y(), color, 1);
+        fill_circle(a.x(), a.y(), 2, color);
+        if (i == edge.size() - 2)
+          fill_circle(b.x(), b.y(), 2, color);
+      }
+      get_key();
+
+      for (const auto& e : splits)
+      {
+        const auto color = Green8;
+        for (auto i = 0u; i < e.size() - 1; ++i)
+        {
+          const auto& a = p1.cast<double>() + s * e[i];
+          const auto& b = p1.cast<double>() + s * e[i + 1];
+          draw_line(a.x(), a.y(), b.x(), b.y(), color, 1);
+          fill_circle(a.x(), a.y(), 2, color);
+          if (i == e.size() - 2)
+            fill_circle(b.x(), b.y(), 2, color);
+        }
+        get_key();
+      }
+    }
+    toc("Edge Split");
 #endif

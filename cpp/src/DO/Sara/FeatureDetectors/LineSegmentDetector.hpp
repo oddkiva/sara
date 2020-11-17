@@ -108,11 +108,11 @@ namespace DO::Sara {
             num_iterations,                //
             parameters.num_iteration_min,  //
             parameters.num_iteration_max);
-        pipeline.line_segments[i] = fit_line_segment(  //
-            curve,                                     //
-            num_iterations,                            //
-            parameters.polish_line_segments,           //
-            /* line_fit_thresh */ 1.f);                //
+        pipeline.line_segments[i] = fit_line_segment_robustly(  //
+            curve,                                              //
+            num_iterations,                                     //
+            parameters.polish_line_segments,                    //
+            /* line_fit_thresh */ 1.f);                         //
       }
     }
   };
