@@ -141,4 +141,218 @@ namespace DO::Sara {
     return {true, {tl.cast<double>(), br.cast<double>()}};
   }
 
+
+  // ======================================================================== //
+  // Algorithmic building blocks.
+  // ==========================================================================
+  auto residual(const ImageView<float>& g, const Eigen::Vector2i& x,
+                float eps = 1e-6f) -> Eigen::Vector2f
+  {
+    const auto g1 = gradient(g, x);
+    const auto g2 = hessian(g, x);
+
+    if (std::abs(g2.determinant()) < eps)
+      return Eigen::Vector2f::Zero();
+
+    const Eigen::Vector2f r = -g2.inverse() * g1;
+    return r.cwiseAbs().maxCoeff() >= 1 ? Eigen::Vector2f::Zero() : r;
+  }
+
+  auto refine(const ImageView<float>& g, const Eigen::Vector2i& x,
+              float eps = 1e-6f) -> Eigen::Vector2f
+  {
+    return x.cast<float>() + residual(g, x, eps);
+  }
+
+  //! @brief Specifically calcuates the linear directional mean of the polyline
+  //! `p` reweighted by the length of line segment.
+  template <typename Point>
+  auto linear_directional_mean(const std::vector<Point>& p)
+  {
+    const auto dirs = std::vector<Eigen::Vector2f>(p.size() - 1);
+    std::adjacent_difference(p.begin(), p.end(), dirs.begin());
+
+    const auto cosine = std::accumulate(
+        dirs.begin(), dirs.end(), float{},
+        [](const auto& sum, const auto& d) { return sum + d.x(); });
+    const auto sine = std::accumulate(
+        dirs.begin(), dirs.end(), float{},
+        [](const auto& sum, const auto& d) { return sum + d.y(); });
+
+    return std::atan2(sine, cos);
+  }
+
+
+  // template <typename Point>
+  // auto collapse(const std::vector<Point>& p,
+  //               const float length_threshold = 5.e-2f)
+  //     -> std::vector<Point>
+  // {
+  //   auto deltas = std::vector<Eigen::Vector2f>(p.size() - 1);
+  //   std::adjacent_difference(p.begin(), p.end(), deltas.begin());
+  //
+  //   auto lengths = std::vector<float>(deltas.size());
+  //   std::transform(deltas.begin(), deltas.end(), lengths.begin(),
+  //                  [](const auto& d) { return d.norm(); });
+  //
+  //   // Normalize.
+  //   const auto total_length = std::accumulate(lengths.begin(), lengths.end(),
+  //   float{}); std::for_each(lengths.begin(), lengths.end(), lengths.begin(),
+  //                 [&](auto& l) { l /= total_length; });
+  //
+  //   // Find the cuts.
+  //   auto collapse_state = std::vector<std::uint8_t>(p.size(), 0);
+  //   for (auto i = 0; i < p.size() - 1; ++i)
+  //   {
+  //     if (lengths[i] < length_threshold)
+  //     {
+  //       collapse_state[i] = 1;
+  //       collapse_state[i + 1] = 1;
+  //     }
+  //   }
+  //
+  //   auto p_collapsed = std::vector<Point>{};
+  //   for (auto i = 0; i < p.size();)
+  //   {
+  //     if (collapse_state[i] == 0)
+  //     {
+  //       ++i;
+  //       continue;
+  //     }
+  //
+  //     auto a = p.begin() + i;
+  //     auto b = std::find(a, p.end(), 0);
+
+  //     const auto cardinality = b - a;
+
+  //     auto sum =
+  //         std::accumulate(a, b, Eigen::Vector2f{0, 0},
+  //                         [](const auto& a, const auto& b) { return a + b; }) /
+  //         cardinality;
+  //   }
+  //
+  //   // FINISH.
+  // }
+
+
+  //! TODO: see if reweighting with edge length improves the split.
+  template <typename Point>
+  auto split(const std::vector<Point>& ordered_points,
+             const float angle_threshold = M_PI / 6)
+      -> std::vector<std::vector<Point>>
+  {
+    if (angle_threshold >= M_PI)
+      throw std::runtime_error{"Invalid angle threshold!"};
+
+    if (ordered_points.size() < 3)
+      return {ordered_points};
+
+    const auto& p = ordered_points;
+    const auto& cos_threshold = std::cos(angle_threshold);
+
+    // Calculate the orientation of line segments.
+    auto deltas = std::vector<Point>(p.size() - 1);
+    // Subtract.
+    std::adjacent_difference(p.begin(), p.end(), deltas.begin());
+    // Normalize.
+    std::for_each(deltas.begin(), deltas.end(),
+                  [](auto& v) { return v.normalized(); });
+
+    // Find the cuts.
+    auto cuts = std::vector<std::uint8_t>(p.size(), 0);
+    std::adjacent_difference(deltas.begin(), deltas.end(), cuts.begin(),
+                             [&](const auto& a, const auto& b) {
+                               const auto cosine = a.dot(b);
+                               return cosine < cos_threshold;
+                             });
+
+    auto pp = std::vector<std::vector<Point>>{};
+    pp.push_back({p[0]});
+    for (auto i = 1u; i < p.size(); ++i)
+    {
+      pp.back().push_back(p[i]);
+      if (cuts[i] == 1)
+        pp.push_back({p[i]});
+    }
+
+    return pp;
+  }
+
+
+  template <typename Point>
+  auto split(const std::vector<std::vector<Point>>& edges,
+             const float angle_threshold = M_PI / 6)
+      -> std::vector<std::vector<Point>>
+  {
+    auto edges_split = std::vector<std::vector<Point>>{};
+    edges_split.reserve(2 * edges.size());
+    for (const auto& e : edges)
+      append(edges_split, split(e, angle_threshold));
+
+    return edges_split;
+  }
+
+  inline auto fit_line_segment(const std::vector<Eigen::Vector2i>& points)
+      -> LineSegment
+  {
+    auto coords = MatrixXf{points.size(), 3};
+    for (auto i = 0; i < coords.rows(); ++i)
+      coords.row(i) = points[i].homogeneous().transpose().cast<float>();
+
+    // Calculate the line equation `l`.
+    auto svd = Eigen::BDCSVD<MatrixXf>{coords, Eigen::ComputeFullU |
+                                                   Eigen::ComputeFullV};
+
+    const Eigen::Vector3f l = svd.matrixV().col(2);
+
+    // Direction vector.
+    const auto t = Projective::tangent(l).cwiseAbs();
+
+    enum class Axis : std::uint8_t
+    {
+      X = 0,
+      Y = 1
+    };
+    const auto longest_axis = t.x() > t.y() ? Axis::X : Axis::Y;
+
+    Eigen::Vector2f p1 = points.front().cast<float>();
+    Eigen::Vector2f p2 = points.back().cast<float>();
+
+    if (longest_axis == Axis::X)
+    {
+      p1.y() = -(l(0) * p1.x() + l(2)) / l(1);
+      p2.y() = -(l(0) * p2.x() + l(2)) / l(1);
+    }
+    else
+    {
+      p1.x() = -(l(1) * p1.y() + l(2)) / l(0);
+      p2.x() = -(l(1) * p2.y() + l(2)) / l(0);
+    }
+
+    return {p1.cast<double>(), p2.cast<double>()};
+  }
+
+
+  // ======================================================================== //
+  // Draw.
+  // ======================================================================== //
+  template <typename Point>
+  auto draw_polyline(ImageView<Rgb8>& image, const std::vector<Point>& edge,
+                     const Rgb8& color, const Point& offset = Point::Zero(),
+                     float scale = 1)
+  {
+    auto remap = [&](const auto& p) { return offset + scale * p; };
+
+    for (auto i = 0u; i < edge.size() - 1; ++i)
+    {
+      const auto& a = remap(edge[i]).template cast<int>();
+      const auto& b = remap(edge[i + 1]).template cast<int>();
+      draw_line(image, a.x(), a.y(), b.x(), b.y(), color, 1, true);
+      fill_circle(image, a.x(), a.y(), 2, color);
+      if (i == edge.size() - 2)
+        fill_circle(image, b.x(), b.y(), 2, color);
+    }
+  }
+
+
 }  // namespace DO::Sara
