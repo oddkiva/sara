@@ -118,7 +118,7 @@ auto test_on_video()
   create_window(frame.sizes());
   set_antialiasing();
 
-  constexpr auto high_threshold_ratio = 15._percent;
+  constexpr auto high_threshold_ratio = 20._percent;
   constexpr auto low_threshold_ratio = high_threshold_ratio / 2.;
   constexpr auto angular_threshold = 20. / 180.f * M_PI;
   const auto sigma = std::sqrt(std::pow(1.6f, 2) - 1);
@@ -261,7 +261,7 @@ auto test_on_video()
     display(detection);
     toc("Draw");
 
-    get_key();
+    // get_key();
   }
 }
 
