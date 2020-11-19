@@ -32,7 +32,7 @@
 namespace DO { namespace Sara {
 
   // ======================================================================== //
-  // Edge Detection Encoded as a Map.
+  // Edge Detection Encoded as a Dense Feature Map.
   // ==========================================================================
 
   //! @brief Building blocks for Canny's edge detector.
@@ -163,7 +163,7 @@ namespace DO { namespace Sara {
 
 
   // ======================================================================== //
-  // Edge Detection As Feature Detection Where The Feature is a Curve.
+  // Edge Detection As Feature Detection Where a Curve Is The Feature.
   // ==========================================================================
 
   //! @brief Group edgels into **unordered** point sets.
