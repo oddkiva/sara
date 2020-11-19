@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <DO/Sara/Core/TicToc.hpp>
+
 #include <DO/Sara/ImageProcessing.hpp>
 
 #include <DO/Sara/Geometry/Algorithms/RobustEstimation/LineSolver.hpp>
@@ -158,7 +160,7 @@ namespace DO::Sara {
   }
   //! @}
 
-  //! @brief Calcuate the linear directional mean of the polyline.
+  //! @brief Calculate the linear directional mean of the polyline.
   /*!
    *  The linear directional mean is the mean orientation reweighted by the
    *  length of each line segment in the polyline.
@@ -166,7 +168,7 @@ namespace DO::Sara {
   template <typename Point>
   auto linear_directional_mean(const std::vector<Point>& p)
   {
-    const auto dirs = std::vector<Eigen::Vector2f>(p.size() - 1);
+    const auto dirs = std::vector<Eigen::Vector2f>(p.size());
     std::adjacent_difference(p.begin(), p.end(), dirs.begin());
 
     const auto cosine = std::accumulate(
@@ -180,59 +182,62 @@ namespace DO::Sara {
   }
 
 
-  // template <typename Point>
-  // auto collapse(const std::vector<Point>& p,
-  //               const float length_threshold = 5.e-2f)
-  //     -> std::vector<Point>
-  // {
-  //   auto deltas = std::vector<Eigen::Vector2f>(p.size() - 1);
-  //   std::adjacent_difference(p.begin(), p.end(), deltas.begin());
-  //
-  //   auto lengths = std::vector<float>(deltas.size());
-  //   std::transform(deltas.begin(), deltas.end(), lengths.begin(),
-  //                  [](const auto& d) { return d.norm(); });
-  //
-  //   // Normalize.
-  //   const auto total_length = std::accumulate(lengths.begin(), lengths.end(),
-  //   float{}); std::for_each(lengths.begin(), lengths.end(), lengths.begin(),
-  //                 [&](auto& l) { l /= total_length; });
-  //
-  //   // Find the cuts.
-  //   auto collapse_state = std::vector<std::uint8_t>(p.size(), 0);
-  //   for (auto i = 0; i < p.size() - 1; ++i)
-  //   {
-  //     if (lengths[i] < length_threshold)
-  //     {
-  //       collapse_state[i] = 1;
-  //       collapse_state[i + 1] = 1;
-  //     }
-  //   }
-  //
-  //   auto p_collapsed = std::vector<Point>{};
-  //   for (auto i = 0; i < p.size();)
-  //   {
-  //     if (collapse_state[i] == 0)
-  //     {
-  //       ++i;
-  //       continue;
-  //     }
-  //
-  //     auto a = p.begin() + i;
-  //     auto b = std::find(a, p.end(), 0);
+  template <typename Point>
+  auto collapse(const std::vector<Point>& p, const ImageView<float>& gradient,
+                const typename Point::Scalar pixel_threshold = 5)
+      -> std::vector<Point>
+  {
+    if (p.size() < 2)
+      throw std::runtime_error{"Invalid polyline!"};
 
-  //     const auto cardinality = b - a;
+    auto deltas = std::vector<Point>(p.size() - 1);
+    for (auto i = 0u; i < deltas.size(); ++i)
+      deltas[i] = p[i + 1] - p[i];
 
-  //     auto sum =
-  //         std::accumulate(a, b, Eigen::Vector2f{0, 0},
-  //                         [](const auto& a, const auto& b) { return a + b; })
-  //                         /
-  //         cardinality;
-  //   }
-  //
-  //   // FINISH.
-  // }
+    using S = typename Point::Scalar;
+    auto lengths = std::vector<S>(deltas.size());
+    std::transform(deltas.begin(), deltas.end(), lengths.begin(),
+                   [](const auto& d) { return d.norm(); });
+
+    // Find the cuts.
+    auto collapse_state = std::vector<std::uint8_t>(p.size());
+    std::transform(
+        lengths.begin(), lengths.end(), collapse_state.begin(),
+        [pixel_threshold](const auto& l) { return l < pixel_threshold; });
+    collapse_state.back() = lengths.back() < pixel_threshold;
+
+    auto p_collapsed = std::vector<Point>{};
+    p_collapsed.reserve(p.size());
+    for (auto i = 0u; i < p.size(); ++i)
+    {
+      if (collapse_state[i])
+      {
+        p_collapsed.push_back(p[i]);
+        ++i;
+        continue;
+      }
+
+      auto pa = p.begin() + i;
+
+      auto b = std::find(collapse_state.begin() + i, collapse_state.end(), 0) -
+               collapse_state.begin();
+      auto pb = p.begin() + b;
+
+      auto best =
+          std::max_element(pa, pb, [&gradient](const auto& u, const auto& v) {
+            return gradient(u.template cast<int>()) <
+                   gradient(v.template cast<int>());
+          });
+      if (best != p.end())
+        p_collapsed.emplace_back(*best);
+      i = b;
+    }
+
+    return p_collapsed;
+  }
 
 
+#ifdef DEBUG_BECAUSE_STD_ADJACENT_DIFFERENCE  // !!!!!
   //! TODO: see if reweighting with edge length improves the split.
   template <typename Point>
   auto split(const std::vector<Point>& ordered_points,
@@ -249,7 +254,7 @@ namespace DO::Sara {
     const auto& cos_threshold = std::cos(angle_threshold);
 
     // Calculate the orientation of line segments.
-    auto deltas = std::vector<Point>(p.size() - 1);
+    auto deltas = std::vector<Point>(p.size());
     // Subtract.
     std::adjacent_difference(p.begin(), p.end(), deltas.begin());
     // Normalize.
@@ -288,6 +293,7 @@ namespace DO::Sara {
 
     return edges_split;
   }
+#endif
 
 
   inline auto fit_line_segment(const std::vector<Eigen::Vector2i>& points)
@@ -425,6 +431,5 @@ namespace DO::Sara {
 
     return {true, {tl.cast<double>(), br.cast<double>()}};
   }
-
 
 }  // namespace DO::Sara

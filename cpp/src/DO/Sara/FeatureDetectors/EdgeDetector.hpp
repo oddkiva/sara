@@ -111,6 +111,14 @@ namespace DO::Sara {
       }
       toc("Longest Curve Extraction & Simplification");
 
+      // tic();
+      // auto edges_collapsed = std::vector<std::vector<Point2d>>(edges_simplified.size());
+      // for (auto i = 0u; i < edges_simplified.size(); ++i)
+      //   if (edges_simplified[i].size() > 2)
+      //      edges_collapsed[i] = collapse(edges_simplified[i], grad_mag, 0.05);
+      // edges_collapsed.swap(edges_simplified);
+      // toc("Vertex Collapse");
+
 //       tic();
 //       auto& edges_refined = edges_simplified;
 // #pragma omp parallel for
