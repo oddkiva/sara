@@ -17,7 +17,7 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
-#include <DO/Sara/FeatureDetectors/EdgeDetectionUtilities.hpp>
+#include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/Geometry/Algorithms/RamerDouglasPeucker.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
@@ -68,7 +68,7 @@ auto test_on_image()
 
     const auto contours = connected_components(edges);
 
-    const auto labeled_contours = to_map(contours, edges.sizes());
+    const auto labeled_contours = to_dense_map(contours, edges.sizes());
     const auto colors = random_colors(contours);
 
     auto contour_map = Image<Rgb8>{edges.sizes()};
@@ -118,12 +118,18 @@ auto test_on_video()
   create_window(frame.sizes());
   set_antialiasing();
 
-  constexpr auto high_threshold_ratio = 20._percent;
-  constexpr auto low_threshold_ratio = high_threshold_ratio / 2.;
-  constexpr auto angular_threshold = 20. / 180.f * M_PI;
+  constexpr float high_threshold_ratio = 20._percent;
+  constexpr float low_threshold_ratio = high_threshold_ratio / 2.;
+  constexpr float angular_threshold = 20. / 180. * M_PI;
   const auto sigma = std::sqrt(std::pow(1.6f, 2) - 1);
   const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
   const Eigen::Vector2i& p2 = frame.sizes();
+
+  auto ed = EdgeDetector{{
+      high_threshold_ratio,  //
+      low_threshold_ratio,   //
+      angular_threshold      //
+  }};
 
   auto frames_read = 0;
   const auto skip = 0;
@@ -158,84 +164,8 @@ auto test_on_video()
       toc("Downscale");
     }
 
-    tic();
-    const auto& grad = gradient(frame_gray32f);
-    toc("Gradient");
-
-    tic();
-    const auto& grad_mag = grad.cwise_transform(  //
-        [](const auto& v) { return v.norm(); });
-    const auto& grad_ori = grad.cwise_transform(
-        [](const auto& v) { return std::atan2(v.y(), v.x()); });
-    toc("Polar Coordinates");
-
-    tic();
-    const auto& grad_mag_max = grad_mag.flat_array().maxCoeff();
-    const auto& high_thres = grad_mag_max * high_threshold_ratio;
-    const auto& low_thres = grad_mag_max * low_threshold_ratio;
-
-    auto edgels = suppress_non_maximum_edgels(grad_mag, grad_ori,  //
-                                              high_thres, low_thres);
-    toc("Thresholding");
-
-
-#define SIMULTANEOUS_HYSTERESIS_AND_GROUPING
-#ifdef SIMULTANEOUS_HYSTERESIS_AND_GROUPING
-    tic();
-    const auto edges = perform_hysteresis_and_grouping(edgels,    //
-                                                       grad_ori,  //
-                                                       angular_threshold);
-    toc("Simultaneous Hysteresis & Edge Grouping");
-#else
-    tic();
-    hysteresis(edgels);
-    const auto edges = connected_components(edgels,    //
-                                            grad_ori,  //
-                                            angular_threshold);
-    // const auto edges = connected_components(edgels);
-    toc("Hysteresis then Edge Grouping");
-#endif
-
-    tic();
-    auto edges_as_list =
-        std::vector<std::vector<Eigen::Vector2i>>(edges.size());
-    std::transform(edges.begin(), edges.end(), edges_as_list.begin(),
-                   [](const auto& e) { return e.second; });
-    toc("To vector");
-
-    tic();
-    auto edges_simplified =
-        std::vector<std::vector<Eigen::Vector2d>>(edges_as_list.size());
-#pragma omp parallel for
-    for (auto i = 0u; i < edges_as_list.size(); ++i)
-    {
-      const auto& edge = extract_longest_curve(edges_as_list[i]);
-
-      auto edges_converted = std::vector<Eigen::Vector2d>(edge.size());
-      std::transform(edge.begin(), edge.end(), edges_converted.begin(),
-                     [](const auto& p) { return p.template cast<double>(); });
-
-      edges_simplified[i] = ramer_douglas_peucker(edges_converted, 1.);
-    }
-    toc("Longest Curve Extraction & Simplification");
-
-#ifdef REFINE_EDGES
-    tic();
-    auto edges_refined = edges_simplified;
-#  pragma omp parallel for
-    for (auto i = 0u; i < edges_refined.size(); ++i)
-      for (auto& p : edges_refined[i])
-        p = refine(grad_mag, p.cast<int>()).cast<double>();
-    toc("Refine Edge Localisation");
-#else
-    auto edges_refined = edges_simplified;
-#endif
-
-
-    // tic();
-    // edges_refined = split(edges_refined);
-    // toc("Edge Split");
-
+    ed(frame_gray32f);
+    const auto& edges_refined = ed.pipeline.edges_simplified;
 
     // Display the quasi-straight edges.
     tic();
@@ -255,7 +185,6 @@ auto test_on_video()
 
       const auto& color = edge_colors[e];
       const auto& s = downscale_factor;
-      // draw_polyline(detection, edge, White8, p1d, s);
       draw_polyline(detection, edge_refined, color, p1d, s);
     }
     display(detection);
@@ -272,17 +201,3 @@ GRAPHICS_MAIN()
   test_on_video();
   return 0;
 }
-
-
-#ifdef DETECT_JUNCTIONS
-// Detect junctions.
-tic();
-SARA_DEBUG << "Orientation histograms..." << std::endl;
-const auto ori_hists = orientation_histograms(edgels, grad_ori,   //
-                                              /* num_bins */ 36,  //
-                                              /* radius */ 3);
-SARA_DEBUG << "Orientation peaks..." << std::endl;
-const auto ori_peaks = peaks(ori_hists);
-SARA_DEBUG << "Orientation peak counts..." << std::endl;
-const auto ori_peak_counts = peak_counts(ori_peaks);
-#endif

@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <DO/Sara/FeatureDetectors/EdgeDetectionUtilities.hpp>
+#include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 
 
 namespace DO::Sara {
@@ -23,12 +23,12 @@ namespace DO::Sara {
     //! @brief intermediate data.
     struct Pipeline
     {
-      Image<Vector2f> gradient_cartesian;
+      Image<Eigen::Vector2f> gradient_cartesian;
       Image<float> gradient_magnitude;
       Image<float> gradient_orientation;
       Image<std::uint8_t> edge_map;
       std::map<int, std::vector<Point2i>> contours;
-      std::vector<std::vector<Eigen::Vector2i>> curve_list;
+      std::vector<std::vector<Point2i>> curve_list;
       std::vector<int> curve_ids;
       std::vector<std::tuple<bool, LineSegment>> line_segments;
     } pipeline;
@@ -79,7 +79,7 @@ namespace DO::Sara {
           pipeline.gradient_orientation,         //
           parameters.angular_threshold);
       const auto labeled_curves =
-          to_map(pipeline.contours, pipeline.edge_map.sizes());
+          to_dense_map(pipeline.contours, pipeline.edge_map.sizes());
 
       pipeline.curve_list.clear();
       pipeline.curve_ids.clear();

@@ -41,7 +41,7 @@ struct EdgeStatistics {
   Eigen::Vector2f orientation_sum = Eigen::Vector2f::Zero();
   float total_mass = {};
   Eigen::Vector2f unnormalized_center = Eigen::Vector2f::Zero();
-  Eigen::Vector2f unnormalized_inertia = Eigen::Vector2f::Zero();
+  Eigen::Vector3f unnormalized_inertia = Eigen::Vector2f::Zero();
 
   std::vector<Eigen::Vector2i> points;
 
