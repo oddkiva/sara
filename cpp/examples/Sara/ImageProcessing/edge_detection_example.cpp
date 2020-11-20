@@ -33,6 +33,12 @@ constexpr long double operator"" _percent(long double x)
 }
 
 
+// TODO:
+// Rectangular approximation.
+// - linear direction mean
+// - aligned density
+
+
 auto test_on_image()
 {
   // Read an image.
@@ -118,8 +124,8 @@ auto test_on_video()
   constexpr float low_threshold_ratio = high_threshold_ratio / 2.;
   constexpr float angular_threshold = 20. / 180. * M_PI;
   const auto sigma = std::sqrt(std::pow(1.6f, 2) - 1);
-  const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
-  const Eigen::Vector2i& p2 = frame.sizes();
+  const Eigen::Vector2i& p1 = frame.sizes() / 4;  // Eigen::Vector2i::Zero();
+  const Eigen::Vector2i& p2 = frame.sizes() * 3 / 4;  // frame.sizes();
 
   auto ed = EdgeDetector{{
       high_threshold_ratio,  //
@@ -161,16 +167,33 @@ auto test_on_video()
     }
 
     ed(frame_gray32f);
-    const auto& edges_refined = ed.pipeline.edges_simplified;
+    auto edges_refined = ed.pipeline.edges_simplified;
+
+    tic();
+    edges_refined = split(edges_refined, 10. * M_PI / 180.);
+    toc("Edge Split");
+
+    tic();
+    auto line_segments =
+        std::vector<LineSegment>(edges_refined.size(), {{0., 0.}, {0., 0.}});
+    for (auto i = 0u; i < edges_refined.size(); ++i)
+      if (edges_refined[i].size() >= 2)
+        // line_segments[i] = fit_line_segment(edges_refined[i]);
+        line_segments[i] = {edges_refined[i].front(), edges_refined[i].back()};
+    toc("Line Segment Fitting");
 
     // Display the quasi-straight edges.
     tic();
-    auto edge_colors = std::vector<Rgb8>(edges_refined.size());
+    auto edge_colors = std::vector<Rgb8>(edges_refined.size(), Red8);
+#ifdef RANDOM_COLORS
     for (auto& c : edge_colors)
       c << rand() % 255, rand() % 255, rand() % 255;
+#endif
 
     auto detection = frame;
     const Eigen::Vector2d p1d = p1.cast<double>();
+    const auto& s = downscale_factor;
+
 #pragma omp parallel for
     for (auto e = 0u; e < edges_refined.size(); ++e)
     {
@@ -180,13 +203,20 @@ auto test_on_video()
         continue;
 
       const auto& color = edge_colors[e];
-      const auto& s = downscale_factor;
       draw_polyline(detection, edge_refined, color, p1d, s);
+
+      if (edge_refined.size() == 2)
+      {
+        const Point2d a = p1d + s * line_segments[e].p1();
+        const Point2d b = p1d + s * line_segments[e].p2();
+        draw_line(detection, a.x(), a.y(), b.x(), b.y(),  //
+                  Green8,                                 //
+                  /* line_width */ 2);
+      }
     }
     display(detection);
-    toc("Draw");
 
-    // get_key();
+    toc("Draw");
   }
 }
 

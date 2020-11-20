@@ -76,26 +76,21 @@ namespace DO::Sara {
     }
     toc("Longest Curve Extraction & Simplification");
 
-    // tic();
-    // auto edges_collapsed =
-    // std::vector<std::vector<Point2d>>(edges_simplified.size()); for (auto i =
-    // 0u; i < edges_simplified.size(); ++i)
-    //   if (edges_simplified[i].size() > 2)
-    //      edges_collapsed[i] = collapse(edges_simplified[i], grad_mag, 0.05);
-    // edges_collapsed.swap(edges_simplified);
-    // toc("Vertex Collapse");
+    tic();
+#pragma omp parallel for
+    for (auto i = 0u; i < edges_simplified.size(); ++i)
+      if (edges_simplified[i].size() > 2)
+        edges_simplified[i] =
+            collapse(edges_simplified[i], grad_mag, 2e-2, true);
+    toc("Vertex Collapse");
 
-    //       tic();
-    //       auto& edges_refined = edges_simplified;
-    // #pragma omp parallel for
-    //       for (auto i = 0u; i < edges_refined.size(); ++i)
-    //         for (auto& p : edges_refined[i])
-    //           p = refine(grad_mag, p.cast<int>()).cast<double>();
-    //       toc("Refine Edge Localisation");
-
-    // tic();
-    // edges_refined = split(edges_refined);
-    // toc("Edge Split");
+    tic();
+    auto& edges_refined = edges_simplified;
+#pragma omp parallel for
+    for (auto i = 0u; i < edges_refined.size(); ++i)
+      for (auto& p : edges_refined[i])
+        p = refine(grad_mag, p.cast<int>()).cast<double>();
+    toc("Refine Edge Localisation");
   }
 
 }  // namespace DO::Sara
