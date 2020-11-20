@@ -11,32 +11,28 @@
 
 //! @example
 
-#include <set>
-
-#include <omp.h>
-
-#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
-#include <DO/Sara/Geometry/Algorithms/RamerDouglasPeucker.hpp>
+#include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
+#include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
+
+#include <omp.h>
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-constexpr long double operator "" _percent(long double x) {
+constexpr long double operator"" _percent(long double x)
+{
   return x / 100;
 }
 
 
-// ========================================================================== //
-// Tests.
-// ========================================================================== //
 auto test_on_image()
 {
   // Read an image.

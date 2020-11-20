@@ -42,7 +42,7 @@ namespace DO::Sara {
       //! @}
 
       //! @brief Angle tolerance for connected edgel grouping.
-      float angular_threshold = 20. / 180.f * M_PI;
+      float angular_threshold = 20. / 180. * M_PI;
 
       //! @brief RANSAC-based parameters for line segment fitting.
       //! @{
@@ -78,8 +78,6 @@ namespace DO::Sara {
           pipeline.edge_map,                     //
           pipeline.gradient_orientation,         //
           parameters.angular_threshold);
-      const auto labeled_curves =
-          to_dense_map(pipeline.contours, pipeline.edge_map.sizes());
 
       pipeline.curve_list.clear();
       pipeline.curve_ids.clear();
