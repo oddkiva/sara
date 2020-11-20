@@ -18,6 +18,7 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Sara/FeatureDetectors/LineSegmentDetector.hpp>
+#include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 
 #include <omp.h>
 

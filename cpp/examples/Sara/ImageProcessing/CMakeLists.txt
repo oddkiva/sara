@@ -1,8 +1,8 @@
 find_package(OpenMP)
 find_package(DO_Sara
   COMPONENTS
-  Core Graphics ImageIO VideoIO          # Classic stuff
-  DisjointSets Geometry ImageProcessing  # Algorithmic modules
+  Core Graphics ImageIO VideoIO     # Classic stuff
+  FeatureDetectors ImageProcessing  # Algorithmic modules
   REQUIRED)
 
 macro (sara_add_example example)
