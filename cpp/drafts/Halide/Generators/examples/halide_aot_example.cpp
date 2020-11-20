@@ -85,8 +85,7 @@ auto halide_pipeline() -> void
       // - convolving a 1920x1080 image goes down from ~210ms to ~50ms.
       //   which is a dramatic improvement.
       // - Then parallelizing over the columns on the transposed data divides by
-      // more
-      //   than 3 the computation time (from ~50ms to ~15ms)
+      //   more than 3 the computation time (from ~50ms to ~15ms)
       //
       // The cumulated improvements are spectacular (14x faster) all along with
       // very little effort.
@@ -110,6 +109,9 @@ auto halide_pipeline() -> void
 #elif defined(USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION)
       // Sara's unoptimized code takes 240 ms to blur (no SSE instructions and
       // no column-based transposition)
+      //
+      // Parallelizing the implementation of the linear filtering with OpenMP,
+      // we are then down to 25ms, not bad at all for a very minimal change!
       apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, sigma);
       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
       toc("Sara Gaussian");
