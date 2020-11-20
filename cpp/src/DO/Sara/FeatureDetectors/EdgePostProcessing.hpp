@@ -275,8 +275,8 @@ namespace DO::Sara {
 
     // Optimization.
     if (points.size() == 2)
-      return {points.front().template cast<double>(),
-              points.back().template cast<double>()};
+      return {points[0].template cast<double>(),
+              points[1].template cast<double>()};
 
     // General case.
     auto coords = Matrix<T, Eigen::Dynamic, 3>{points.size(), 3};
