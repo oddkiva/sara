@@ -60,42 +60,41 @@ namespace DO::Sara {
                    [](const auto& e) { return e.second; });
     toc("To vector");
 
-    tic();
-    auto& edges_simplified = pipeline.edges_simplified;
-    edges_simplified.resize(edges_as_list.size());
-#pragma omp parallel for
-    for (auto i = 0u; i < edges_as_list.size(); ++i)
+    if (parameters.simplify_edges)
     {
-      const auto& edge = reorder_and_extract_longest_curve(edges_as_list[i]);
+      tic();
+      auto& edges_simplified = pipeline.edges_simplified;
+      edges_simplified.resize(edges_as_list.size());
+#pragma omp parallel for
+      for (auto i = 0u; i < edges_as_list.size(); ++i)
+      {
+        const auto& edge = reorder_and_extract_longest_curve(edges_as_list[i]);
 
-      auto edges_converted = std::vector<Eigen::Vector2d>(edge.size());
-      std::transform(edge.begin(), edge.end(), edges_converted.begin(),
-                     [](const auto& p) { return p.template cast<double>(); });
+        auto edges_converted = std::vector<Eigen::Vector2d>(edge.size());
+        std::transform(edge.begin(), edge.end(), edges_converted.begin(),
+                       [](const auto& p) { return p.template cast<double>(); });
 
-      edges_simplified[i] = ramer_douglas_peucker(edges_converted, 1.);
+        edges_simplified[i] = ramer_douglas_peucker(edges_converted, parameters.eps);
+      }
+      toc("Longest Curve Extraction & Simplification");
+
+      tic();
+#pragma omp parallel for
+      for (auto i = 0u; i < edges_simplified.size(); ++i)
+        if (edges_simplified[i].size() > 2)
+          edges_simplified[i] = collapse(edges_simplified[i], grad_mag,
+                                         parameters.collapse_threshold,
+                                         parameters.collapse_adaptive);
+      toc("Vertex Collapse");
+
+      tic();
+      auto& edges_refined = edges_simplified;
+#pragma omp parallel for
+      for (auto i = 0u; i < edges_refined.size(); ++i)
+        for (auto& p : edges_refined[i])
+          p = refine(grad_mag, p.cast<int>()).cast<double>();
+      toc("Refine Edge Localisation");
     }
-    toc("Longest Curve Extraction & Simplification");
-
-    // tic();
-    // auto edges_collapsed =
-    // std::vector<std::vector<Point2d>>(edges_simplified.size()); for (auto i =
-    // 0u; i < edges_simplified.size(); ++i)
-    //   if (edges_simplified[i].size() > 2)
-    //      edges_collapsed[i] = collapse(edges_simplified[i], grad_mag, 0.05);
-    // edges_collapsed.swap(edges_simplified);
-    // toc("Vertex Collapse");
-
-    //       tic();
-    //       auto& edges_refined = edges_simplified;
-    // #pragma omp parallel for
-    //       for (auto i = 0u; i < edges_refined.size(); ++i)
-    //         for (auto& p : edges_refined[i])
-    //           p = refine(grad_mag, p.cast<int>()).cast<double>();
-    //       toc("Refine Edge Localisation");
-
-    // tic();
-    // edges_refined = split(edges_refined);
-    // toc("Edge Split");
   }
 
 }  // namespace DO::Sara

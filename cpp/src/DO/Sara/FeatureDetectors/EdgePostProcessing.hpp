@@ -137,54 +137,70 @@ namespace DO::Sara {
   }
 
 
-  template <typename Point>
-  auto collapse(const std::vector<Point>& p, const ImageView<float>& gradient,
-                const typename Point::Scalar pixel_threshold = 5)
-      -> std::vector<Point>
+  template <typename T, int N>
+  auto collapse(const std::vector<Eigen::Matrix<T, N, 1>>& p,
+                const ImageView<float>& gradient,  //
+                T threshold = 5e-2, bool adaptive = true)
+      -> std::vector<Eigen::Matrix<T, N, 1>>
   {
     if (p.size() < 2)
       throw std::runtime_error{"Invalid polyline!"};
+
+    using Point = Eigen::Matrix<T, N, 1>;
 
     auto deltas = std::vector<Point>(p.size() - 1);
     for (auto i = 0u; i < deltas.size(); ++i)
       deltas[i] = p[i + 1] - p[i];
 
-    using S = typename Point::Scalar;
-    auto lengths = std::vector<S>(deltas.size());
+    auto lengths = std::vector<T>(deltas.size());
     std::transform(deltas.begin(), deltas.end(), lengths.begin(),
                    [](const auto& d) { return d.norm(); });
 
+    if (adaptive)
+    {
+      const auto total_length =
+          std::accumulate(lengths.begin(), lengths.end(), T{});
+      for (auto& l : lengths)
+        l /= total_length;
+    }
+
     // Find the cuts.
-    auto collapse_state = std::vector<std::uint8_t>(p.size());
-    std::transform(
-        lengths.begin(), lengths.end(), collapse_state.begin(),
-        [pixel_threshold](const auto& l) { return l < pixel_threshold; });
-    collapse_state.back() = lengths.back() < pixel_threshold;
+    auto collapse_state = std::vector<std::uint8_t>(p.size(), 0);
+    for (auto i = 0u; i < lengths.size(); ++i)
+    {
+      if (lengths[i] < threshold)
+      {
+        collapse_state[i] = 1;
+        collapse_state[i + 1] = 1;
+      }
+    }
 
     auto p_collapsed = std::vector<Point>{};
     p_collapsed.reserve(p.size());
-    for (auto i = 0u; i < p.size(); ++i)
+    for (auto i = 0u; i < p.size();)
     {
-      if (collapse_state[i])
+      if (collapse_state[i] == 0)
       {
         p_collapsed.push_back(p[i]);
         ++i;
         continue;
       }
 
-      auto pa = p.begin() + i;
+      const auto& a = i;
+      const auto b =
+          std::find(collapse_state.begin() + a, collapse_state.end(), 0) -
+          collapse_state.begin();
 
-      auto b = std::find(collapse_state.begin() + i, collapse_state.end(), 0) -
-               collapse_state.begin();
-      auto pb = p.begin() + b;
+      const auto pa = p.begin() + a;
+      const auto pb = p.begin() + b;
 
-      auto best =
+      const auto best =
           std::max_element(pa, pb, [&gradient](const auto& u, const auto& v) {
             return gradient(u.template cast<int>()) <
                    gradient(v.template cast<int>());
           });
-      if (best != p.end())
-        p_collapsed.emplace_back(*best);
+      p_collapsed.emplace_back(*best);
+
       i = b;
     }
 
@@ -192,8 +208,6 @@ namespace DO::Sara {
   }
 
 
-#ifdef DEBUG_BECAUSE_STD_ADJACENT_DIFFERENCE  // !!!!!
-  //! TODO: see if reweighting with edge length improves the split.
   template <typename Point>
   auto split(const std::vector<Point>& ordered_points,
              const float angle_threshold = M_PI / 6)
@@ -209,20 +223,21 @@ namespace DO::Sara {
     const auto& cos_threshold = std::cos(angle_threshold);
 
     // Calculate the orientation of line segments.
-    auto deltas = std::vector<Point>(p.size());
-    // Subtract.
-    std::adjacent_difference(p.begin(), p.end(), deltas.begin());
-    // Normalize.
-    std::for_each(deltas.begin() + 1, deltas.end(),
-                  [](auto& v) { return v.normalized(); });
+    auto deltas = std::vector<Point>(p.size() - 1);
+    for (auto i = 0u; i < deltas.size(); ++i)
+      deltas[i] = (p[i + 1] - p[i]).normalized();
 
     // Find the cuts.
     auto cuts = std::vector<std::uint8_t>(p.size(), 0);
-    std::adjacent_difference(deltas.begin(), deltas.end(), cuts.begin(),
-                             [&](const auto& a, const auto& b) {
-                               const auto cosine = a.dot(b);
-                               return cosine < cos_threshold;
-                             });
+    for (auto i = 0u; i < deltas.size() - 1; ++i)
+    {
+      const auto cosine = deltas[i].dot(deltas[i + 1]);
+      // a, b, c
+      // a = p[i]
+      // b = p[i + 1]
+      // c = p[i + 2]
+      cuts[i + 1] = cosine < cos_threshold;
+    }
 
     auto pp = std::vector<std::vector<Point>>{};
     pp.push_back({p[0]});
@@ -248,21 +263,31 @@ namespace DO::Sara {
 
     return edges_split;
   }
-#endif
 
 
-  inline auto fit_line_segment(const std::vector<Eigen::Vector2i>& points)
+  template <typename T>
+  inline auto
+  fit_line_segment(const std::vector<Eigen::Matrix<T, 2, 1>>& points)
       -> LineSegment
   {
-    auto coords = MatrixXf{points.size(), 3};
+    if (points.size() < 2)
+      throw std::runtime_error{"Invalid polyline!"};
+
+    // Optimization.
+    if (points.size() == 2)
+      return {points[0].template cast<double>(),
+              points[1].template cast<double>()};
+
+    // General case.
+    auto coords = Matrix<T, Eigen::Dynamic, 3>{points.size(), 3};
     for (auto i = 0; i < coords.rows(); ++i)
-      coords.row(i) = points[i].homogeneous().transpose().cast<float>();
+      coords.row(i) = points[i].homogeneous().transpose();
 
     // Calculate the line equation `l`.
-    auto svd = Eigen::BDCSVD<MatrixXf>{coords, Eigen::ComputeFullU |
-                                                   Eigen::ComputeFullV};
+    auto svd = Eigen::BDCSVD<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>{
+        coords, Eigen::ComputeFullU | Eigen::ComputeFullV};
 
-    const Eigen::Vector3f l = svd.matrixV().col(2);
+    const Eigen::Matrix<T, 3, 1> l = svd.matrixV().col(2);
 
     // Direction vector.
     const auto t = Projective::tangent(l).cwiseAbs();
@@ -274,8 +299,20 @@ namespace DO::Sara {
     };
     const auto longest_axis = t.x() > t.y() ? Axis::X : Axis::Y;
 
-    Eigen::Vector2f p1 = points.front().cast<float>();
-    Eigen::Vector2f p2 = points.back().cast<float>();
+    auto min_index = 0;
+    auto max_index = 0;
+    if (longest_axis == Axis::X)
+    {
+      coords.col(0).minCoeff(&min_index);
+      coords.col(0).maxCoeff(&max_index);
+    }
+    else
+    {
+      coords.col(1).minCoeff(&min_index);
+      coords.col(1).maxCoeff(&max_index);
+    }
+    Eigen::Matrix<T, 2, 1> p1 = coords.row(min_index).hnormalized().transpose();
+    Eigen::Matrix<T, 2, 1> p2 = coords.row(max_index).hnormalized().transpose();
 
     if (longest_axis == Axis::X)
     {
@@ -288,7 +325,7 @@ namespace DO::Sara {
       p2.x() = -(l(1) * p2.y() + l(2)) / l(0);
     }
 
-    return {p1.cast<double>(), p2.cast<double>()};
+    return {p1.template cast<double>(), p2.template cast<double>()};
   }
 
   inline auto

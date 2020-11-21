@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "FeatureDescriptors/Affine Shape Adaptation"
+#define BOOST_TEST_MODULE "FeatureDetectors/Affine Shape Adaptation"
 
 #include <boost/test/unit_test.hpp>
 
