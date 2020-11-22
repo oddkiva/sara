@@ -109,7 +109,7 @@ function build_library()
   export BOOST_TEST_LOG_LEVEL=all
   export BOOST_TEST_COLOR_OUTPUT=1
 
-  local test_options="--output-on-failure "
+  local test_options="--output-on-failure "  # " -T memcheck"
   if [[ "${build_type}" == "Xcode" ]]; then
     test_options+="-C Debug"
   fi
