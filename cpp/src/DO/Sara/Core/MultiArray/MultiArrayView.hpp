@@ -455,7 +455,6 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! @}
     //! @brief Swap multi-array objects.
     inline void swap(self_type& other)
     {

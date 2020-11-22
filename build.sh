@@ -18,12 +18,18 @@ function install_python_packages_via_pip()
 
 function build_library()
 {
+  # ========================================================================= #
+  # Specify the build type except for Xcode.
+  #
   if [ "${build_type}" == "Xcode" ]; then
     local cmake_options="-G Xcode "
   else
     local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
   fi
 
+  # ========================================================================= #
+  # Specify the C++17 compilers.
+  #
   if [[ "${platform_name}" == "Darwin" ]] &&
      [[ "${build_type}" == "Xcode" ]]; then
     # Workaround for Xcode generator on Apple platforms.
@@ -41,30 +47,55 @@ function build_library()
     fi
   fi
 
-  if [ "${platform_name}" == "Darwin" ]; then
+  # ========================================================================= #
+  # Use the gold linker if available.
+  if [ "$(uname -s)" == "Linux" ]; then
+    cmake_options+="-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold "
+  fi
+
+  # ========================================================================= #
+  # Support for YouCompleteMe code auto-completion.
+  #
+  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
+
+  # ========================================================================= #
+  # Find Qt.
+  #
+  if [ "$(uname -s)" == "Darwin" ]; then
     cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
   else
     cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/Qt/5.12.6/gcc_64 "
   fi
 
-  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
+  # ========================================================================= #
+  # Sara specific options.
+  #
+  # Compile the Video I/O module.
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
+  # Compile with NVIDIA optimized video FFMPEG Codec.
+  cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
+
+  # Compile Python bindings.
   cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=OFF "
   cmake_options+="-DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") "
   cmake_options+="-DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") "
+
+  # Compile shared or static libraries.
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
 
+  # Compile Halide code.
   cmake_options+="-DSARA_USE_HALIDE=ON "
   if [ "${platform_name}" == "Darwin" ]; then
     cmake_options+="-DHALIDE_DISTRIB_DIR=/usr/local "
   else
     cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide "
   fi
-  cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
 
-  # Generate makefile project.
+
+  # ========================================================================= #
+  # Now generate the makefile project.
   if [ "${build_type}" == "emscripten" ]; then
     emconfigure cmake ../sara
   else
