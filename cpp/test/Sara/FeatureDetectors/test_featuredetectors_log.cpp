@@ -28,6 +28,8 @@ BOOST_AUTO_TEST_CASE(test_compute_LoG_extrema)
   auto I = Image<float>{N, N};
   I.flat_array().fill(0);
 
+  using namespace std;
+
   const auto xc = N / 2.f;
   const auto yc = N / 2.f;
   const auto sigma = 1.5f;
@@ -35,8 +37,6 @@ BOOST_AUTO_TEST_CASE(test_compute_LoG_extrema)
     for (int x = 0; x < N; ++x)
       I(x, y) = 1 / sqrt(2 * float(M_PI) * pow(sigma, 2)) *
                 exp(-(pow(x - xc, 2) + pow(y - yc, 2)) / (2 * pow(sigma, 2)));
-
-  using namespace std;
 
   // Create the detector of DoG extrema.
   const auto pyramid_params = ImagePyramidParams{};
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_compute_LoG_extrema)
 
   const auto& f = features.front();
   const auto& L = compute_LoGs.laplacians_of_gaussians();
-  const auto z = L.octave_scaling_factor(o_index);
+  const auto z = static_cast<float>(L.octave_scaling_factor(o_index));
 
   BOOST_CHECK_SMALL(f.x() * z - xc, 1e-2f);
   BOOST_CHECK_SMALL(f.y() * z - yc, 1e-2f);

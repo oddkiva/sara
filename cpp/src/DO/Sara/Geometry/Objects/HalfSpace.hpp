@@ -34,8 +34,8 @@ namespace DO { namespace Sara {
     HalfSpace3() = default;
 
     HalfSpace3(const Vector3d& normal, const Point3d& point)
-      : _n0{ normal }
-      , _p0{ point }
+      : _n0{normal}
+      , _p0{point}
     {
     }
     //! @}

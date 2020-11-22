@@ -24,13 +24,14 @@ namespace DO { namespace Sara {
   //! @addtogroup Color
   //! @{
 
+  //! @brief Pixel traits class.
   template <typename T>
   struct PixelTraits
   {
     using channel_type = T;
     using pixel_type = T;
 
-    static const int num_channels = 1;
+    static constexpr auto num_channels = 1;
 
     //! @brief Return zero color value.
     static inline pixel_type zero()
@@ -69,7 +70,7 @@ namespace DO { namespace Sara {
     using channel_type = T;
     using pixel_type = Matrix<T, M, N>;
 
-    static const int num_channels = M * N;
+    static constexpr auto num_channels = M * N;
 
     //! @brief Return zero color value.
     static inline pixel_type zero()
@@ -114,7 +115,7 @@ namespace DO { namespace Sara {
     using channel_type = T;
     using pixel_type = Pixel<T, ColorSpace>;
 
-    static const int num_channels = ColorSpace::size;
+    static constexpr auto num_channels = ColorSpace::size;
 
     //! @brief Return zero color value.
     static inline pixel_type zero()

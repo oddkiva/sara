@@ -1,7 +1,3 @@
-project(DO_MultiViewGeometry_test)
-
-message(STATUS "  - DO_MultiViewGeometry_Tests")
-
 find_package(HDF5 COMPONENTS CXX REQUIRED)
 find_package(DO_Sara COMPONENTS MultiViewGeometry REQUIRED)
 find_package(Ceres)
@@ -21,7 +17,11 @@ endif ()
 
 foreach (file ${test_multiviewgeometry_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
-  sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "MultiViewGeometry")
+  sara_add_test(
+    NAME ${filename}
+    SOURCES ${file}
+    DEPENDENCIES ${DO_Sara_LIBRARIES}
+    FOLDER MultiViewGeometry)
 endforeach ()
 
 

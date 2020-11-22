@@ -11,7 +11,7 @@
 namespace DO::Sara::Univariate {
 
   //! @ingroup Core
-  //! @defgroup Math
+  //! @defgroup Math Some mathematical tools
   //! @{
 
   template <typename Coeff>

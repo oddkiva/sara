@@ -1,12 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
-
-project(DO_Core_tests)
-
-message(STATUS "  - DO_Core_Tests")
-
 find_package(DO_Sara COMPONENTS Core REQUIRED)
-
-set(TestGroupName "Core")
 
 file(GLOB test_core_SOURCE_FILES FILES *.cpp)
 
@@ -17,12 +9,15 @@ foreach (file ${test_core_SOURCE_FILES})
     continue ()
   endif ()
 
-  sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" ${TestGroupName})
+  sara_add_test(
+    NAME ${filename}
+    SOURCES ${file}
+    DEPENDENCIES ${DO_Sara_LIBRARIES}
+    FOLDER Core)
 endforeach ()
 
-
 if (UNIX AND NOT APPLE)
-  target_link_libraries(test_core_ipc_cond1 rt)
+  target_link_libraries(test_core_ipc_cond1 PRIVATE rt pthread)
 endif ()
 
 find_package(HDF5 COMPONENTS CXX REQUIRED)

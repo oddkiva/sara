@@ -26,26 +26,38 @@ BOOST_AUTO_TEST_SUITE(TestImageResize)
 BOOST_AUTO_TEST_CASE(test_upscale)
 {
   auto src = Image<float>{2, 2};
-  src.matrix() << 0, 1, 2, 3;
+  src.matrix() <<
+    0, 1,
+    2, 3;
 
   auto dst = Image<float>{};
   dst = upscale(src, 2);
 
   auto true_dst = Image<float>{4, 4};
-  true_dst.matrix() << 0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3;
+  true_dst.matrix() <<
+    0, 0, 1, 1,
+    0, 0, 1, 1,
+    2, 2, 3, 3,
+    2, 2, 3, 3;
   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 }
 
 BOOST_AUTO_TEST_CASE(test_downscale)
 {
   auto src = Image<float>{4, 4};
-  src.matrix() << 0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3;
+  src.matrix() <<
+    0, 0, 1, 1,
+    0, 0, 1, 1,
+    2, 2, 3, 3,
+    2, 2, 3, 3;
 
   auto dst = Image<float>{};
   dst = downscale(src, 2);
 
   auto true_dst = Image<float>{2, 2};
-  true_dst.matrix() << 0, 1, 2, 3;
+  true_dst.matrix() <<
+    0, 1,
+    2, 3;
   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 }
 

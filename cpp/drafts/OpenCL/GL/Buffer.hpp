@@ -11,13 +11,7 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
-#if defined(__APPLE__)
-# include <OpenCL/cl_gl.h>
-# include <OpenGL/gl3.h>
-#else
-# include <CL/cl_gl.h>
-# include <GL/glew.h>
-#endif
+#include <drafts/OpenCL/GL/OpenGL.hpp>
 
 
 namespace DO::Sara { namespace GL {

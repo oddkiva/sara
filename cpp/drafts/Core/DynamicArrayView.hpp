@@ -23,7 +23,7 @@
 namespace DO { namespace Sara {
 
   //! @ingroup Drafts
-  //! @defgroup DynamicArrayView
+  //! @defgroup DynamicArrayView Dynamic Array Views
   //! @{
 
   //! @{

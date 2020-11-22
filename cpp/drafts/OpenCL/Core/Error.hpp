@@ -11,11 +11,7 @@
 
 #pragma once
 
-#ifdef __APPLE__
-# include <OpenCL/cl.h>
-#else
-# include <CL/cl.h>
-#endif
+#include <drafts/OpenCL/Core/OpenCL.hpp>
 
 
 namespace DO::Sara {
@@ -23,7 +19,7 @@ namespace DO::Sara {
   //! @addtogroup OpenCL
   //! @{
 
-  const char * get_error_string(cl_int error)
+  const char* get_error_string(cl_int error)
   {
     switch (error)
     {

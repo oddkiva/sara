@@ -206,7 +206,7 @@ macro (kalpana_append_library _library_name
   # 5. Put the library into the folder "DO Kalpana Libraries".
   set_property(
     TARGET DO_Kalpana_${_library_name} PROPERTY
-    FOLDER "DO Kalpana Libraries")
+    FOLDER "Libraries/Kalpana")
 endmacro ()
 
 
@@ -232,7 +232,7 @@ function (kalpana_add_example)
 
    # Add the C++ test executable.
    add_executable(${EXAMPLE_NAME} ${ARGN})
-   set_property(TARGET ${EXAMPLE_NAME} PROPERTY FOLDER "DO Kalpana Examples")
+   set_property(TARGET ${EXAMPLE_NAME} PROPERTY FOLDER "Examples/Kalpana")
    set_target_properties(
      ${EXAMPLE_NAME} PROPERTIES
      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

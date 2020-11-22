@@ -106,13 +106,14 @@ namespace DO { namespace Sara {
       break;
     }
 
-    pos = Vector3f{float(x), float(y), I.scale_relative_to_octave(s)};
+    pos = Vector3f(x, y, static_cast<float>(I.scale_relative_to_octave(s)));
     const auto oldval = I(x, y, s, o);
     const auto newval = oldval + 0.5f * D_prime.dot(h);
 
     if ((type == 1 && oldval <= newval) || (type == -1 && oldval >= newval))
     {
-      pos += h;
+      pos.head(2) += h.head(2);
+      pos(2) *= std::pow(I.scale_geometric_factor(), h(2));
       val = newval;
     }
     else
@@ -134,14 +135,14 @@ namespace DO { namespace Sara {
     for (i = 0; i < num_iter; ++i)
     {
       // Range check at each iteration. The first iteration should always be OK.
-      if (x < border_sz || x >= I.width() - border_sz || y < border_sz ||
-          y >= I.height() - border_sz)
+      if (x < border_sz || x >= I.width() - border_sz ||  //
+          y < border_sz || y >= I.height() - border_sz)
         break;
 
       // Estimate the gradient and the hessian matrix by central finite
       // differentiation.
-      D_prime = gradient(I, Point2i{ x, y });
-      D_second = hessian(I, Point2i{ x, y });
+      D_prime = gradient(I, Point2i{x, y});
+      D_second = hessian(I, Point2i{x, y});
 
       // The interpolation or refinement is done conservatively depending on the
       // quality of the Hessian matrix estimate.
@@ -221,7 +222,7 @@ namespace DO { namespace Sara {
     auto extrema = std::vector<OERegion>{};
     extrema.reserve(10000);
 
-    auto map = Image<int>{ I(s, o).sizes() };
+    auto map = Image<int>{I(s, o).sizes()};
     map.flat_array().setZero();
 
 //#define STRICT_LOCAL_EXTREMA
@@ -347,7 +348,7 @@ namespace DO { namespace Sara {
     // Compute the blurred patches and their associated scales.
     //
     // Start with the initial patch.
-    scales[0] = G.scale_relative_to_octave(s) / sqrt(2.f);
+    scales[0] = static_cast<float>(G.scale_relative_to_octave(s)) / sqrt(2.f);
     auto inc_sigma = sqrt(pow(scales[0], 2) - pow(nearest_sigma, 2));
     patches[0] =
         inc_sigma > 1e-3f ? gaussian(nearest_patch, inc_sigma) : nearest_patch;
@@ -441,7 +442,7 @@ namespace DO { namespace Sara {
           continue;
 
         // Select the optimal scale using the normalized LoG.
-        auto scale = function.scale_relative_to_octave(s);
+        auto scale = static_cast<float>(function.scale_relative_to_octave(s));
 
         if (!select_laplace_scale(scale, x, y, s, o, gauss_pyramid, num_scales))
           continue;

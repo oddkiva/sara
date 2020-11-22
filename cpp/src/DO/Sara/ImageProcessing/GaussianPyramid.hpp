@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -84,7 +84,7 @@ namespace DO { namespace Sara {
       G.octave_scaling_factor(o) =
           (o == 0) ? 1.f / resize_factor : G.octave_scaling_factor(o - 1) * 2;
 
-      // Compute the gaussians in octave \f$o\f$
+      // Compute the gaussians in octave @f$o@f$
       auto sigma_s_1 = init_sigma;
       G(0, o) = o == 0 ? I : downscale(G(downscale_index, o - 1), 2);
 
@@ -142,15 +142,15 @@ namespace DO { namespace Sara {
       {
         LoG(s,o) = laplacian(gaussians(s,o));
         for (auto it = LoG(s, o).begin(); it != LoG(s,o).end(); ++it)
-          *it *= pow(gaussians.scale_relative_to_octave(s), 2);
+          *it *= static_cast<float>(pow(gaussians.scale_relative_to_octave(s), 2));
       }
     }
 
     return LoG;
   }
 
-  //! Computes the gradient vector of \f$I(x,y,\sigma)\f$ at \f$(x,y,\sigma)\f$,
-  //! where \f$\sigma = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per
+  //! Computes the gradient vector of @f$I(x,y,\sigma)@f$ at @f$(x,y,\sigma)@f$,
+  //! where @f$\sigma = 2^{s/S + o}@f$ where @f$S@f$ is the number of scales per
   //! octave.
   template <typename T>
   Matrix<T, 3, 1> gradient(const ImagePyramid<T>& I, int x, int y, int s, int o)
@@ -161,14 +161,14 @@ namespace DO { namespace Sara {
       throw std::out_of_range{"Computing gradient out of image range!"};
 
     auto d = Matrix<T, 3, 1>{};
-    d(0) = (I(x+1,y  ,s  ,o) - I(x-1,y  ,s  ,o)) / T(2);
-    d(1) = (I(x  ,y+1,s  ,o) - I(x  ,y-1,s  ,o)) / T(2);
-    d(2) = (I(x  ,y  ,s+1,o) - I(x  ,y  ,s-1,o)) / T(2);
+    d(0) = (I(x + 1, y    , s  , o) - I(x - 1, y    , s    , o)) / T(2);
+    d(1) = (I(x    , y + 1, s  , o) - I(x    , y - 1, s    , o)) / T(2);
+    d(2) = (I(x    , y    , s+1, o) - I(x    , y    , s - 1, o)) / T(2);
     return d;
   }
 
-  //! Computes the hessian matrix of \f$I(x,y,\sigma)\f$ at \f$(x,y,\sigma)\f$,
-  //! where \f$\sigma = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales
+  //! Computes the hessian matrix of @f$I(x,y,\sigma)@f$ at @f$(x,y,\sigma)@f$,
+  //! where @f$\sigma = 2^{s/S + o}@f$ where @f$S@f$ is the number of scales
   //! per octave.
   template <typename T>
   Matrix<T, 3, 3> hessian(const ImagePyramid<T>& I, int x, int y, int s, int o)
@@ -181,20 +181,23 @@ namespace DO { namespace Sara {
     auto H = Matrix<T, 3, 3>{};
 
     // Ixx
-    H(0,0) = I(x+1,y,s,o) - T(2)*I(x,y,s,o) + I(x-1,y,s,o);
+    H(0, 0) = I(x + 1, y, s, o) - T(2) * I(x, y, s, o) + I(x - 1, y, s, o);
     // Iyy
-    H(1,1) = I(x,y+1,s,o) - T(2)*I(x,y,s,o) + I(x,y-1,s,o);
+    H(1, 1) = I(x, y + 1, s, o) - T(2) * I(x, y, s, o) + I(x, y - 1, s, o);
     // Iss
-    H(2,2) = I(x,y,s+1,o) - T(2)*I(x,y,s,o) + I(x,y,s-1,o);
+    H(2, 2) = I(x, y, s + 1, o) - T(2) * I(x, y, s, o) + I(x, y, s - 1, o);
     // Ixy = Iyx
-    H(0,1) = H(1,0) = ( I(x+1,y+1,s,o) - I(x-1,y+1,s,o)
-                      - I(x+1,y-1,s,o) + I(x-1,y-1,s,o) ) / T(4);
+    H(0, 1) = H(1, 0) = (I(x + 1, y + 1, s, o) - I(x - 1, y + 1, s, o) -
+                         I(x + 1, y - 1, s, o) + I(x - 1, y - 1, s, o)) /
+                        T(4);
     // Ixs = Isx
-    H(0,2) = H(2,0) = ( I(x+1,y,s+1,o) - I(x-1,y,s+1,o)
-                      - I(x+1,y,s-1,o) + I(x-1,y,s-1,o) ) / T(4);
+    H(0, 2) = H(2, 0) = (I(x + 1, y, s + 1, o) - I(x - 1, y, s + 1, o) -
+                         I(x + 1, y, s - 1, o) + I(x - 1, y, s - 1, o)) /
+                        T(4);
     // Iys = Isy
-    H(1,2) = H(2,1) = ( I(x,y+1,s+1,o) - I(x,y-1,s+1,o)
-                      - I(x,y+1,s-1,o) + I(x,y-1,s-1,o) ) / T(4);
+    H(1, 2) = H(2, 1) = (I(x, y + 1, s + 1, o) - I(x, y - 1, s + 1, o) -
+                         I(x, y + 1, s - 1, o) + I(x, y - 1, s - 1, o)) /
+                        T(4);
     // Done!
     return H;
   }

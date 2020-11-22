@@ -101,16 +101,33 @@ namespace DO { namespace Sara {
     {
     public:
       // Constructor
-      inline Node() : _parent(nullptr), _rank(0) {}
+      inline Node() = default;
+
       // Setters.
-      void set_parent(Node *head) { _parent = head; }
-      void set_rank(int rank) { _rank = rank; }
+      void set_parent(Node* head)
+      {
+        _parent = head;
+      }
+
+      void set_rank(int rank)
+      {
+        _rank = rank;
+      }
+
       // Getters.
-      Node * parent() const { return _parent; }
-      int rank() const { return _rank; }
+      Node* parent() const
+      {
+        return _parent;
+      }
+
+      int rank() const
+      {
+        return _rank;
+      }
+
     private:
-      Node *_parent;
-      int _rank;
+      Node* _parent = nullptr;
+      int _rank = 0;
     };
 
   private:

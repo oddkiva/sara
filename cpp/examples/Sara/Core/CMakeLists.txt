@@ -1,10 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
-
-project(DO_Core_Examples)
-
-message(STATUS "  - DO_Core_Examples")
-
-
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 if (UNIX)
   find_package(HDF5 COMPONENTS CXX REQUIRED)
@@ -29,7 +22,7 @@ macro (sara_add_example example)
   target_link_libraries(${example} ${DO_Sara_LIBRARIES})
   set_property(TARGET ${example}
     PROPERTY
-    FOLDER "DO Sara Examples/Core")
+    FOLDER "Examples/Sara/Core")
 endmacro ()
 
 if (UNIX)

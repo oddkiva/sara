@@ -8,10 +8,12 @@ else
   build_type=$1;
 fi
 
+platform_name=$(uname -s)
+
 
 function install_python_packages_via_pip()
 {
-  pip install coverage numpy nose
+  pip install -r ../sara/requirements.txt
 }
 
 function build_library()
@@ -22,24 +24,45 @@ function build_library()
     local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
   fi
 
-  # Use the gold linker.
-  if [ "$(uname -s)" == "Linux" ]; then
-    cmake_options+="-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold "
+  if [[ "${platform_name}" == "Darwin" ]] &&
+     [[ "${build_type}" == "Xcode" ]]; then
+    # Workaround for Xcode generator on Apple platforms.
+    cmake_options+="-DCMAKE_C_COMPILER=$(which clang) "
+    cmake_options+="-DCMAKE_CXX_COMPILER=$(which clang++) "
+
+  elif [ "${platform_name}" == "Linux" ]; then
+    local os_name=$(lsb_release -is)
+    local os_version=$(lsb_release -rs)
+
+    # I really want C++17.
+    if [[ ${os_name} == "Ubuntu" ]] && [[ ${os_version} == "16.04" ]]; then
+      cmake_options+="-DCMAKE_C_COMPILER=$(which gcc-7) "
+      cmake_options+="-DCMAKE_CXX_COMPILER=$(which g++-7) "
+    fi
+  fi
+
+  if [ "${platform_name}" == "Darwin" ]; then
+    cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
+  else
+    cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/Qt/5.12.6/gcc_64 "
   fi
 
   cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
-  cmake_options+="-DCMAKE_PREFIX_PATH=${HOME}/Qt/5.12.6/gcc_64;/opt/boost-1.66.0 "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
-  cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
+  cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=OFF "
+  cmake_options+="-DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") "
+  cmake_options+="-DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") "
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
-  cmake_options+="-DSARA_USE_HALIDE=ON "
 
-  # Qt 5 directory for Darwin.
-  if [ "$(uname -s)" == "Darwin" ]; then
-    cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
+  cmake_options+="-DSARA_USE_HALIDE=ON "
+  if [ "${platform_name}" == "Darwin" ]; then
+    cmake_options+="-DHALIDE_DISTRIB_DIR=/usr/local "
+  else
+    cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide "
   fi
+  cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
 
   # Generate makefile project.
   if [ "${build_type}" == "emscripten" ]; then
@@ -49,12 +72,17 @@ function build_library()
   fi
 
   # Build the library.
-  make -j$(nproc) VERBOSE=1
+  cmake --build . -j$(nproc) -v
 
   # Run C++ tests.
   export BOOST_TEST_LOG_LEVEL=all
   export BOOST_TEST_COLOR_OUTPUT=1
-  ctest --output-on-failure
+
+  local test_options="--output-on-failure "
+  if [[ "${build_type}" == "Xcode" ]]; then
+    test_options+="-C Debug"
+  fi
+  ctest ${test_options}
 
   # Run Python tests.
   make pytest
@@ -91,6 +119,6 @@ cd ../${sara_build_dir}
 {
   install_python_packages_via_pip
   build_library
-  #install_package
+  # install_package
 }
 cd ..

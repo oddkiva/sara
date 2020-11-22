@@ -21,6 +21,7 @@ namespace DO { namespace Sara { namespace Projective {
   //! @addtogroup GeometryTools
   //! @{
 
+  //! @brief Conic class.
   template <typename T, int N>
   class Conic : public MatrixBasedObject<T,N>
   {

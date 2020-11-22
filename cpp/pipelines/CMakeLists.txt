@@ -21,7 +21,7 @@ add_custom_command(TARGET sfm_pipeline_helper
           ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMENT "Copy the Python helper program to use the SfM pipeline")
 set_property(TARGET sfm_pipeline_helper
-  PROPERTY FOLDER "DO Sara Pipelines/SfM")
+  PROPERTY FOLDER "Pipelines/Sara/SfM")
 
 
 file(GLOB pipelines_SOURCE_FILES FILES *.cpp)
@@ -29,17 +29,21 @@ file(GLOB pipelines_SOURCE_FILES FILES *.cpp)
 foreach (file ${pipelines_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   add_executable(${filename} ${file})
-  target_include_directories(${filename} PRIVATE
+  target_include_directories(${filename}
+    PRIVATE
     ${Boost_INCLUDE_DIR}
     ${HDF5_INCLUDE_DIRS})
-  target_link_libraries(${filename} PRIVATE
+  target_link_libraries(${filename}
+    PRIVATE
     ${DO_Sara_LIBRARIES}
     ${Boost_LIBRARIES}
     ${HDF5_LIBRARIES})
-  target_compile_definitions(${filename} PRIVATE
+  target_compile_definitions(${filename}
+    PRIVATE
     ${SARA_DEFINITIONS}  # so that the `src_path()` macro becomes valid.
-    -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
+    BOOST_ALL_DYN_LINK
+    BOOST_ALL_NO_LIB)
   set_property(
       TARGET ${filename}
-      PROPERTY FOLDER "DO Sara Pipelines/SfM")
+      PROPERTY FOLDER "Pipelines/Sara/SfM")
 endforeach ()

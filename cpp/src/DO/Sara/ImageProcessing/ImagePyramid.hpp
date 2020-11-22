@@ -19,9 +19,9 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup ImageProcessing
-    @defgroup ScaleSpace Scale-Space Representation
-    @{
+   *  @ingroup ImageProcessing
+   *  @defgroup ScaleSpace Scale-Space Representation
+   *  @{
    */
 
 
@@ -30,12 +30,13 @@ namespace DO { namespace Sara {
   {
   public:
     //! @brief Constructor.
-    ImagePyramidParams(int first_octave_index = -1,
-                       int num_scales_per_octave = 3+3,
-                       double scale_geometric_factor = std::pow(2., 1./3.),
-                       int image_padding_size = 1,
-                       double scale_camera = 0.5,
-                       double scale_initial = 1.6)
+    ImagePyramidParams(                                         //
+        int first_octave_index = -1,                            //
+        int num_scales_per_octave = 3 + 3,                      //
+        double scale_geometric_factor = std::pow(2., 1. / 3.),  //
+        int image_padding_size = 1,                             //
+        double scale_camera = 0.5,                              //
+        double scale_initial = 1.6)
     {
       _scale_camera = scale_camera;
       _scale_initial = scale_initial;
@@ -46,20 +47,56 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      Let us consider an image \f$I\f$. In the scale-space framework, we work
-      with the scale-space image function
-      \f$ I : (x,y,\sigma) \mapsto (g_\sigma * I)\ (x,y) \f$,
-      where \f$g_\sigma\f$ is the gaussian distribution with zero mean and
-      standard deviation \f$\sigma\f$.
-
-      We also denote by \f$ I_\sigma : (x,y) \mapsto I(x,y,\sigma) \f$ the
-      image \f$I\f$ at scale \f$\sigma\f$.
-      Note that the real image is \f$I_0: (x,y) \mapsto I(x,y)\f$.
-      Because of the spatial sampling, the camera captures the real image
-      \f$I_0\f$ with some blurring and the camera-acquired image is
-      \f$I_{\sigma_\textrm{camera}}\f$.
-
-      Here cameraSigma() thus corresponds to \f$\sigma_\textrm{camera}\f$.
+     *  Let @f$I@f$ be an image function that maps a position @f$(x, y) \in
+     *  \mathbb{R}^2@f$ to an intensity value in @f$\mathbb{R}@f$.
+     *
+     *  In theory, this corresponds to the ideal image function where we would
+     *  know the intensity value with perfect precision at any position @f$(x,
+     *  y)@f$ at any fine resolution @f$\sigma@f$ in meters (millimeters,
+     *  microns, and so on...). The resolution is termed as scale.
+     *
+     *  There is this nice stackexchange answer:
+     *  https://biology.stackexchange.com/questions/26189/whats-the-smallest-size-a-human-eye-can-see.
+     *
+     *  Just like the human eye can perceive small objects whose size is of the
+     *  order of a tens of microns, the camera will capture photographs with
+     *  details at a fixed resolution @f$\sigma@f$ defined by the size of
+     *  photoreceptors. At this resolution and at coarser resolutions, the
+     *  average pixel value can be known with good certainty.
+     *
+     *  Each pixel of a photograph can be viewed as a local averaging of all
+     *  color values @f$I(x, y)@f$ on a patch of size @f$\sigma@f$ meters. And
+     *  these pixel values would be known with infinitesimally small resolution
+     *  @f$\sigma \rightarrow 0@f$.
+     *
+     *  In the scale-space framework, the local averaging is modeled by a
+     *  Gaussian convolution and the image function is augmented with
+     *  an additional dimension which is the scale:
+     *
+     *  @f$ I : (x,y,\sigma) \mapsto (g_\sigma * I)\ (x,y) @f$,
+     *
+     *  where @f$g_\sigma@f$ is the Gaussian distribution with zero mean and
+     *  standard deviation @f$\sigma@f$.
+     *
+     *  We also denote by @f$ I_\sigma : (x,y) \mapsto I(x,y,\sigma) @f$ the
+     *  image @f$I@f$ at scale @f$\sigma@f$.
+     *
+     *  By design, the camera samples the perfect image @f$I_0@f$ at a
+     *  predefined scale and the image acquired by the camera is denoted as
+     *  @f$I_{\sigma_\textrm{camera}}@f$.
+     *
+     *  Here scale_camera() corresponds to camera resolution
+     *  @f$\sigma_\textrm{camera}@f$.
+     *
+     *  The digital image that computers read is
+     *  @f$I_{\sigma_\textrm{camera}}@f$ and not @f$I@f$.
+     *
+     *  Now the caveat here is that @f$\sigma_\textrm{camera}@f$ is not known in
+     *  meters and we work with pixels. The default parameter we use is
+     *  @f$0.5@f$, which means that we assume we can estimate the pixel values
+     *  with good confidence up to half a pixel resolution.
+     *  We can retrieve such color values every half pixels by using bilinear
+     *  interpolation.
      */
     double scale_camera() const
     {
@@ -67,12 +104,12 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      The image pyramid discretizes image function
-      \f$(x,y,\sigma) \mapsto I(x,y,\sigma)\f$ in the scale-space.
-      With the discretization, the image pyramid will consist of a stack of
-      blurred images \f$(I_{\sigma_i})_{1 \leq i \leq N}\f$.
-
-      Here initSigma() corresponds to \f$\sigma_0\f$.
+     *  The image pyramid discretizes image function
+     *  @f$(x,y,\sigma) \mapsto I(x,y,\sigma)@f$ in the scale-space.
+     *  With the discretization, the image pyramid will consist of a stack of
+     *  blurred images @f$(I_{\sigma_i})_{0 \leq i < N}@f$.
+     *
+     *  Here scale_initial() corresponds to @f$\sigma_0@f$.
      */
     double scale_initial() const
     {
@@ -80,20 +117,21 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      The sequence \f$ (\sigma_i)_{1 \leq i \leq N} \f$ follows a geometric
-      progression, i.e., \f$\sigma_i = k^i \sigma_0\f$.
-
-      Laplacians of Gaussians \f$ \nabla^2 I_{\sigma} \f$ can be approximated
-      efficiently with differences of Gaussians \f$ I_{k\sigma} - I_{\sigma} \f$
-      for each \f$ \sigma = \sigma_i \f$*without needing to renormalize*.
-
-      Indeed:
-      \f{eqnarray*}{
-        \frac{\partial I_\sigma}{\partial \sigma} &=& \sigma \nabla^2 I_\sigma \\
-        I_{k\sigma} - I_{\sigma} &\approx& (k-1) \sigma^2 \nabla^2 I_\sigma
-      \f}
-
-      Here scale_geometric_factor() corresponds to the value \f$ k \f$.
+     *  The sequence @f$ (\sigma_i)_{1 \leq i \leq N} @f$ follows a geometric
+     *  progression, i.e., @f$\sigma_i = k^i \sigma_0@f$.
+     *
+     *  Laplacians of Gaussians @f$ \nabla^2 I_{\sigma} @f$ can be approximated
+     *  efficiently with differences of Gaussians @f$ I_{k\sigma} - I_{\sigma} @f$
+     *  for each @f$ \sigma = \sigma_i @f$ without the need to normalize the
+     *  difference of Gaussians.
+     *
+     *  Thus
+     *  \f{eqnarray*}{
+     *    \frac{\partial I_\sigma}{\partial \sigma} &=& \sigma \nabla^2 I_\sigma \\
+     *    I_{k\sigma} - I_{\sigma} &\approx& (k-1) \sigma^2 \nabla^2 I_\sigma
+     *  \f}
+     *
+     *  Here scale_geometric_factor() corresponds to the value @f$ k @f$.
      */
     double scale_geometric_factor() const
     {
@@ -101,15 +139,15 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      The smoothed image \f$I_{2\sigma}\f$ is equivalent to the downsampled
-      image \f$I_{\sigma}\f$. Because of this observation, a pyramid of
-      gaussians is divided into octaves.
-
-      We call an octave a stack of \f$S\f$ blurred images \f$I_{\sigma_i}\f$
-      separated by a constant factor \f$k\f$ in the scale space, i.e.,
-      \f$ \sigma_{i+1} = k \sigma_i \f$.
-      The number of scales in each octave is the integer \f$S\f$ such that
-      \f$k^S \sigma = 2 \sigma\f$, i.e., \f$ k= 2^{1/S} \f$.
+     *  The smoothed image @f$I_{2\sigma}@f$ is equivalent to the downsampled
+     *  image @f$I_{\sigma}@f$. Because of this observation, a pyramid of
+     *  gaussians is divided into octaves.
+     *
+     *  We call an octave a stack of @f$S@f$ blurred images @f$I_{\sigma_i}@f$
+     *  separated by a constant factor @f$k@f$ in the scale space, i.e.,
+     *  @f$ \sigma_{i+1} = k \sigma_i @f$.
+     *  The number of scales in each octave is the integer @f$S@f$ such that
+     *  @f$k^S \sigma = 2 \sigma@f$, i.e., @f$ k= 2^{1/S} @f$.
      */
     int num_scales_per_octave() const
     {
@@ -123,9 +161,9 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      \todo. Improve explanation.
-      \f$(1/2)^i\f$ is the rescaling factor of the downsampled image of octave
-      \f$i\f$.
+     *  @todo. Improve explanation.
+     *  @f$(1/2)^i@f$ is the rescaling factor of the downsampled image of octave
+     *  @f$i@f$.
      */
     int first_octave_index() const
     {
@@ -165,8 +203,8 @@ namespace DO { namespace Sara {
     //! @brief Reset image pyramid with the following parameters.
     void reset(int num_octaves,
                int num_scales_per_octave,
-               scalar_type scale_initial,
-               scalar_type scale_geometric_factor)
+               double scale_initial,
+               double scale_geometric_factor)
     {
       _octaves.clear();
       _oct_scaling_factors.clear();
@@ -199,83 +237,89 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Mutable getter of the octave scaling factor.
-    scalar_type& octave_scaling_factor(int o)
+    auto octave_scaling_factor(int o) -> double&
     {
       return _oct_scaling_factors[o];
     }
 
     //! @brief Immutable octave getter.
-    const octave_type& operator()(int o) const
+    auto operator()(int o) const -> const octave_type&
     {
       return _octaves[o];
     }
 
     //! @brief Immutable image getter.
-    const image_type& operator()(int s, int o) const
+    auto operator()(int s, int o) const -> const image_type&
     {
       return _octaves[o][s];
     }
 
     //! @brief Immutable pixel getter.
-    const pixel_type& operator()(int x, int y, int s, int o) const
+    auto operator()(int x, int y, int s, int o) const -> const pixel_type&
     {
       return _octaves[o][s](x,y);
     }
 
     //! @brief Immutable getter of the octave scaling factor.
-    scalar_type octave_scaling_factor(int o) const
+    auto octave_scaling_factor(int o) const -> double
     {
       return _oct_scaling_factors[o];
     }
 
     //! @brief Immutable getter of the number of octaves.
-    int num_octaves() const
+    auto num_octaves() const
     {
       return static_cast<int>(_octaves.size());
     }
 
     //! @brief Immutable getter of the number of scales per octave.
-    int num_scales_per_octave() const
+    auto num_scales_per_octave() const
     {
       return static_cast<int>(_octaves.front().size());
     }
 
+    //! @brief Returns the number of scales (across all octaves).
+    auto num_scales() const
+    {
+      return num_octaves() * num_scales_per_octave();
+    }
+
     //! @brief Immutable getter of the initial scale.
-    scalar_type scale_initial() const
+    auto scale_initial() const
     {
       return _scale_initial;
     }
 
     //! @brief Immutable getter of the scale geometric factor.
-    scalar_type scale_geometric_factor() const
+    auto scale_geometric_factor() const
     {
       return _scale_geometric_factor;
     }
 
     //! @brief Immutable getter of the relative scale w.r.t. an octave.
-    scalar_type scale_relative_to_octave(int s) const
+    auto scale_relative_to_octave(int s) const
     {
-      return pow(_scale_geometric_factor, s)*_scale_initial;
+      return pow(_scale_geometric_factor, s) * _scale_initial;
     }
 
     //! @brief Immutable getter of the scale relative to an octave.
 
-    scalar_type scale(int s, int o) const
+    auto scale(int s, int o) const
     {
-      return _oct_scaling_factors[o]*scale_relative_to_octave(s);
+      return _oct_scaling_factors[o] * scale_relative_to_octave(s);
     }
 
   protected: /* data members */
     //! @{
     //! @brief Parameters.
-    scalar_type _scale_initial;
-    scalar_type _scale_geometric_factor;
+    double _scale_initial;
+    double _scale_geometric_factor;
     //! @}
 
     //! @{
     //! @brief Image data.
     std::vector<octave_type> _octaves;
-    std::vector<scalar_type> _oct_scaling_factors;
+    std::vector<double> _oct_scaling_factors;
     //! @}
   };
 

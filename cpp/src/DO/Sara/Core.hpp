@@ -27,16 +27,16 @@
 // Sparse N-dimensional array
 #include <DO/Sara/Core/SparseMultiArray.hpp>
 // Image and color data structures
-#include <DO/Sara/Core/Pixel.hpp>
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Core/Pixel.hpp>
 // Tree data structures
 #include <DO/Sara/Core/Tree.hpp>
 // Timer classes
 #include <DO/Sara/Core/Timer.hpp>
 // Miscellaneous
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
-#include <DO/Sara/Core/DebugUtilities.hpp>
 
 
 /*!

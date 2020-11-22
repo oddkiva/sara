@@ -21,9 +21,9 @@
 namespace DO { namespace Sara {
 
   /*!
-    @addtogroup Features
-    @{
-  */
+   *  @addtogroup Features
+   *  @{
+   */
   inline auto draw_oe_regions(const OERegion* begin, const OERegion* end,
                               const Color3ub& color, float scale = 1.f,
                               const Point2f& offset = Point2f::Zero())
@@ -43,5 +43,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

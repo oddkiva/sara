@@ -14,13 +14,13 @@
 #pragma once
 
 
-/*!
- *  @ingroup Core
- *  @defgroup Meta Meta
- *  @{
- */
+namespace DO { namespace Sara { namespace Meta {
 
-namespace DO::Sara::Meta {
+  /*!
+   *  @ingroup Core
+   *  @defgroup Meta Meta
+   *  @{
+   */
 
   //! @brief Static 3D array of integers.
   template <int _Value0, int _Value1, int _Value2>
@@ -38,8 +38,8 @@ namespace DO::Sara::Meta {
   //! @brief Getter class for IntArray_3.
   template <typename IntArray, int index> struct Get;
 
-  //! @{
   //! @brief Specialized getter class for IntArray_3.
+  //! @{
   template <typename IntArray> struct Get<IntArray, 0>
   { enum { value = IntArray::value_0 }; };
 
@@ -80,8 +80,8 @@ namespace DO::Sara::Meta {
   //! @brief Accessor for vectors of types.
   template <typename Vector, unsigned int i> struct At {};
 
-  //! @{
   //! @brief Specialized index getter for Vector3.
+  //! @{
   template <typename Vector> struct At<Vector, 0>
   { using Type = typename Vector::T0; /*!< Return type at index 0. */};
 
@@ -99,8 +99,8 @@ namespace DO::Sara::Meta {
   //! @brief Index getter for vector of types.
   template <typename Vector, typename T> struct IndexOf {};
 
-  //! @{
   //! @brief Specialized index getter for Vector3.
+  //! @{
   template <typename T0, typename T1, typename T2>
   struct IndexOf<Vector3<T0, T1, T2>, T0>
   { enum { value = 0 }; };
@@ -115,8 +115,8 @@ namespace DO::Sara::Meta {
   //! @}
 
 
-  //! @{
   //! @brief Specialized index getter for Vector4.
+  //! @{
   template <typename T0, typename T1, typename T2, typename T3>
   struct IndexOf<Vector4<T0, T1, T2, T3>, T0>
   { enum { value = 0 }; };
@@ -134,6 +134,6 @@ namespace DO::Sara::Meta {
   { enum { value = 3 }; };
   //! @}
 
-}  // namespace DO::Sara::Meta
+  //! @}
 
-//! @}
+}}}  // namespace DO::Sara::Meta

@@ -24,7 +24,8 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @ingroup MultiViewGeometry
+  //! @defgroup PoseGraph Pose Graph
   //! @{
 
   //! @{

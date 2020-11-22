@@ -28,21 +28,58 @@
 #include <vector>
 
 
-
 namespace DO { namespace Sara {
 
   /*!
-    @addtogroup Features
-    @{
-  */
+   *  @addtogroup Features
+   *  @{
+   */
 
+  //! @brief Specialized class to serialize an OERegion::Type value.
+  template <>
+  struct CalculateH5Type<OERegion::Type>
+  {
+    static inline auto value()
+    {
+      return H5::PredType::NATIVE_UINT8;
+    };
+  };
+
+  //! @brief Specialized class to serialize an OERegion::ExtremumType value.
+  template <>
+  struct CalculateH5Type<OERegion::ExtremumType>
+  {
+    static inline auto value()
+    {
+      return H5::PredType::NATIVE_INT8;
+    };
+  };
+
+  //! @brief Specialized class to serialize an OERegion object.
+  template <>
+  struct CalculateH5Type<OERegion>
+  {
+    static inline auto value() -> H5::CompType
+    {
+      auto h5_comp_type = H5::CompType{sizeof(OERegion)};
+      INSERT_MEMBER(h5_comp_type, OERegion, coords);
+      INSERT_MEMBER(h5_comp_type, OERegion, shape_matrix);
+      INSERT_MEMBER(h5_comp_type, OERegion, orientation);
+      INSERT_MEMBER(h5_comp_type, OERegion, extremum_value);
+      INSERT_MEMBER(h5_comp_type, OERegion, type);
+      INSERT_MEMBER(h5_comp_type, OERegion, extremum_type);
+      return h5_comp_type;
+    }
+  };
+
+  //! @brief Keypoints readable serialization API.
+  //! @
   template <typename T>
   bool read_keypoints(std::vector<OERegion>& features,
-                      Tensor_<T, 2>& descriptors,
-                      const std::string& name)
+                      Tensor_<T, 2>& descriptors, const std::string& name)
   {
     using namespace std;
-    ifstream file{ name.c_str() };
+    ifstream file{name.c_str()};
     if (!file.is_open())
     {
       cerr << "Can't open file " << name << endl;
@@ -85,7 +122,7 @@ namespace DO { namespace Sara {
     }
 
     file << features.size() << " " << descriptors.cols() << std::endl;
-    for(size_t i = 0; i < features.size(); ++i)
+    for (size_t i = 0; i < features.size(); ++i)
     {
       const OERegion& feat = features[i];
 
@@ -94,16 +131,20 @@ namespace DO { namespace Sara {
       file << feat.orientation << ' ';
       file << int(feat.type) << ' ';
 
-      file << Map<const Matrix<T, 1, Dynamic> >(
-        descriptors[static_cast<int>(i)].data(),
-        1, descriptors.cols() ) << endl;
+      file << Map<const Matrix<T, 1, Dynamic>>(
+                  descriptors[static_cast<int>(i)].data(), 1,
+                  descriptors.cols())
+           << endl;
     }
 
     file.close();
 
     return true;
   }
+  //! @}
 
+  //! @brief Keypoints HDF5 serialization API.
+  //! @
   inline auto read_keypoints(H5File& h5_file, const std::string& group_name)
       -> KeypointList<OERegion, float>
   {
@@ -125,8 +166,8 @@ namespace DO { namespace Sara {
                           overwrite);
     h5_file.write_dataset(group_name + "/" + "descriptors", v, overwrite);
   }
+  //! @}
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

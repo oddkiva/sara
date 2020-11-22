@@ -44,8 +44,9 @@ namespace DO { namespace Sara {
     @param[in]  penWidth width of the contour.
    */
   DO_SARA_EXPORT
-  void draw_circle(ImageView<Rgb8>& image,
-                   int xc, int yc, int r, const Color3ub& c, int penWidth = 1);
+  void draw_circle(ImageView<Rgb8>& image, int xc, int yc, int r,
+                   const Color3ub& c, int penWidth = 1,
+                   bool antialiasing = true);
   /*!
     @brief Draw line on image.
     @param[in]  image       image.
@@ -54,9 +55,8 @@ namespace DO { namespace Sara {
     @param[in]  penWidth    width of the contour.
    */
   DO_SARA_EXPORT
-  void draw_line(ImageView<Rgb8>& image,
-                 int x1, int y1, int x2, int y2, const Color3ub& c,
-                 int penWidth = 1);
+  void draw_line(ImageView<Rgb8>& image, int x1, int y1, int x2, int y2,
+                 const Color3ub& c, int penWidth = 1, bool antialiasing = true);
   /*!
     @brief Draw rectangle on image.
     @param[in]  image     image.

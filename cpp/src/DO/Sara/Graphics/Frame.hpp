@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <QtOpenGL>
 #ifdef __APPLE__
 #  include <OpenGL/GLU.h>
@@ -31,7 +33,8 @@ namespace DO::Sara::GL {
   constexpr double defaultAxisLength = 10.0;
   constexpr double defaultAxisRadius = 0.125;
 
-  class Frame
+  //! @brief Coordinate system frame class.
+  class DO_SARA_EXPORT Frame
   {
   public:
     //! @brief Default constructor.

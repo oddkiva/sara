@@ -1,11 +1,15 @@
 breathe
 coverage
+exhale
 imageio
 ipdb
 ipdbplugin
 jinja2
 nose
 numpy
+recommonmark
 sphinx
+sphinx-autobuild
 sphinx_rtd_theme
+sphinxcontrib-bibtex
 sphinxcontrib-katex

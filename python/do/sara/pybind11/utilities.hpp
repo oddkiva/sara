@@ -9,7 +9,9 @@ inline auto as_pyarray(Sequence&& seq)
 {
   auto seq_ptr = new Sequence{std::move(seq)};
   auto capsule = pybind11::capsule{
-      seq_ptr, [](void* p) { delete reinterpret_cast<Sequence*>(p); }};
+      seq_ptr,                                                //
+      [](void* p) { delete reinterpret_cast<Sequence*>(p); }  //
+  };
 
   return pybind11::array{
       seq_ptr->size(),  // shape of array

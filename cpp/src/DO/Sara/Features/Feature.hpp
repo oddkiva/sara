@@ -25,9 +25,9 @@
 namespace DO { namespace Sara {
 
   /*!
-    @addtogroup Features
-    @{
-  */
+   *  @addtogroup Features
+   *  @{
+   */
 
   //! @brief The oriented elliptic region class.
   /*!

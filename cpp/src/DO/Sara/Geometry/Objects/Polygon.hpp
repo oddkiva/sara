@@ -13,9 +13,11 @@
 
 #pragma once
 
-#include <vector>
+#include <DO/Sara/Defines.hpp>
 
 #include <DO/Sara/Geometry/Tools/Projective.hpp>
+
+#include <vector>
 
 
 namespace DO { namespace Sara {
@@ -32,14 +34,14 @@ namespace DO { namespace Sara {
     using size_type = std::size_t;
     using point_type = Point2d;
     using line_type = Vector3d;
-    using iterator =  point_type *;
-    using const_iterator = const point_type *;
+    using iterator = point_type*;
+    using const_iterator = const point_type*;
 
     //! @{
     //! Constructors
     SmallPolygon() = default;
 
-    inline SmallPolygon(const point_type *vertices)
+    inline SmallPolygon(const point_type* vertices)
     {
       copy_vertices(vertices);
     }
@@ -72,22 +74,22 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief iterators.
-    inline point_type * begin()
+    inline point_type* begin()
     {
       return _v;
     }
 
-    inline point_type * end()
+    inline point_type* end()
     {
       return _v + N;
     }
 
-    inline const point_type * begin() const
+    inline const point_type* begin() const
     {
       return _v;
     }
 
-    inline const point_type * end() const
+    inline const point_type* end() const
     {
       return _v + N;
     }
@@ -118,8 +120,9 @@ namespace DO { namespace Sara {
       for (std::size_t i = 0, j = N - 1; i < N; j = i++)
       {
         if ((_v[i].y() > p.y()) != (_v[j].y() > p.y()) &&
-          (p.x() < (_v[j].x() - _v[i].x()) * (p.y() - _v[i].y())
-                 / (_v[j].y() - _v[i].y()) + _v[i].x()))
+            (p.x() < (_v[j].x() - _v[i].x()) * (p.y() - _v[i].y()) /
+                             (_v[j].y() - _v[i].y()) +
+                         _v[i].x()))
           c = !c;
       }
       return c;
@@ -145,7 +148,7 @@ namespace DO { namespace Sara {
   std::ostream& operator<<(std::ostream& os, const SmallPolygon<N>& poly)
   {
     typename SmallPolygon<N>::const_iterator p = poly.begin();
-    for ( ; p != poly.end(); ++p)
+    for (; p != poly.end(); ++p)
       os << "[ " << p->transpose() << " ] ";
     return os;
   }
@@ -157,14 +160,14 @@ namespace DO { namespace Sara {
   {
     // Computation derived from Green's formula
     double A = 0.;
-    for (std::size_t i1 = N-1, i2 = 0; i2 < N; i1=i2++)
+    for (std::size_t i1 = N - 1, i2 = 0; i2 < N; i1 = i2++)
     {
       Matrix2d M;
       M.col(0) = polygon[i1];
       M.col(1) = polygon[i2];
       A += M.determinant();
     }
-    return 0.5*A;
+    return 0.5 * A;
   }
 
   template <std::size_t N>
@@ -180,10 +183,10 @@ namespace DO { namespace Sara {
     return area(poly) < eps;
   }
 
+  DO_SARA_EXPORT
   double area(const std::vector<Point2d>& polygon);
   //! @}
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

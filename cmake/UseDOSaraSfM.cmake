@@ -6,6 +6,7 @@ if (SARA_USE_FROM_SOURCE)
     set(Boost_USE_STATIC_LIBS OFF)
     set(Boost_USE_MULTITHREADED ON)
     find_package(Boost COMPONENTS filesystem system REQUIRED)
+    find_package(OpenMP)
 
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/SfM)
     sara_create_common_variables("SfM")
@@ -13,13 +14,17 @@ if (SARA_USE_FROM_SOURCE)
       "Features;FeatureDetectors;FeatureDescriptors;FeatureMatching;MultiViewGeometry")
     sara_generate_library("SfM")
 
-    target_include_directories(DO_Sara_SfM PRIVATE
+    target_include_directories(DO_Sara_SfM
+      PRIVATE
       ${Boost_INCLUDE_DIR}
       ${DO_Sara_ThirdParty_DIR}/eigen
       ${DO_Sara_INCLUDE_DIR})
     target_compile_definitions(DO_Sara_SfM
-      PRIVATE -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
+      PRIVATE
+      BOOST_ALL_DYN_LINK
+      BOOST_ALL_NO_LIB)
     target_link_libraries(DO_Sara_SfM
-      PRIVATE tinyply)
+      PRIVATE tinyply
+      PUBLIC $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
   endif ()
 endif ()

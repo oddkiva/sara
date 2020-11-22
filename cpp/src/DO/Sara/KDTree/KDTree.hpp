@@ -38,9 +38,6 @@ namespace DO { namespace Sara {
                flann::KDTreeIndexParams(1),
            const flann::SearchParams& search_params = flann::SearchParams(-1));
 
-    //! @brief Destructor.
-    ~KDTree();
-
     //! k-NN search for a single query column vector.
     template <int N, int Options, int MaxRows, int MaxCols>
     void
@@ -48,7 +45,7 @@ namespace DO { namespace Sara {
                int num_nearest_neighbors, std::vector<int>& nn_indices,
                std::vector<double>& nn_squared_distances)
     {
-      if (static_cast<int>(_row_major_data_matrix.cols) != query.size())
+      if (static_cast<int>(_row_major_matrix_view.cols) != query.size())
         throw std::runtime_error{"Dimension of query vector do not match "
                                  "dimension of input feature space!"};
       knn_search(query.data(), num_nearest_neighbors, nn_indices,
@@ -83,7 +80,7 @@ namespace DO { namespace Sara {
                   std::vector<double>& nn_squared_distances,
                   int max_num_nearest_neighbors = -1)
     {
-      if (static_cast<int>(_row_major_data_matrix.cols) != query.size())
+      if (static_cast<int>(_row_major_matrix_view.cols) != query.size())
         throw std::runtime_error{"Dimension of query vector do not match "
                                  "dimension of input feature space !"};
 
@@ -127,8 +124,7 @@ namespace DO { namespace Sara {
                       int max_num_nearest_neighbors);
 
   private:
-    bool _has_data_ownership;
-    flann::Matrix<double> _row_major_data_matrix;
+    flann::Matrix<double> _row_major_matrix_view;
     flann::Index<flann::L2<double>> _index;
     flann::KDTreeIndexParams _index_params;
     flann::SearchParams _search_params;

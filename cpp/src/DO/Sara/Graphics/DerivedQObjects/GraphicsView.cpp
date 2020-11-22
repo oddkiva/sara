@@ -9,8 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <QtGlobal>
 #include <QtGui>
 #include <QtOpenGL>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+#  include <QRandomGenerator>
+#endif
 
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsView.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/PixmapItem.hpp>
@@ -53,7 +57,15 @@ namespace DO { namespace Sara {
     m_lastInsertedItem = new GraphicsPixmapItem(QPixmap::fromImage(image));
     addItem(m_lastInsertedItem);
     if (randomPos)
-      m_lastInsertedItem->setPos(QPointF(qrand()%10240, qrand()%7680));
+      m_lastInsertedItem->setPos(QPointF(
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+          QRandomGenerator::global()->bounded(10240u),
+          QRandomGenerator::global()->bounded(7680u)
+#else
+          qrand() % 10240,
+          qrand() % 7680
+#endif
+          ));
   }
 
   void GraphicsView::waitForEvent(int ms)
@@ -71,7 +83,7 @@ namespace DO { namespace Sara {
   {
     if (event->modifiers() == Qt::ControlModifier)
     {
-      scaleView(pow(double(2), event->delta() / 240.0));
+      scaleView(pow(double(2), event->angleDelta().y() / 240.0));
       return;
     }
     QGraphicsView::wheelEvent(event);

@@ -90,7 +90,7 @@ vector<OERegion> compute_hessian_laplace_affine_maxima(const Image<float>& I,
       kept_DoHs.push_back(hessian_laplace_maxima[i]);
       const auto fact = DoHs.octave_scaling_factor(scale_octave_pairs[i](1));
       kept_DoHs.back().shape_matrix *= pow(fact,-2);
-      kept_DoHs.back().coords *= fact;
+      kept_DoHs.back().coords *= static_cast<float>(fact);
     }
   }
 
@@ -121,7 +121,7 @@ vector<OERegion> compute_DoH_extrema(const Image<float>& image,
   {
     const auto fact = DoH.octave_scaling_factor(scale_octave_pairs[i](1));
     DoHs[i].shape_matrix *= pow(fact, -2);
-    DoHs[i].coords *= fact;
+    DoHs[i].coords *= static_cast<float>(fact);
   }
 
   return DoHs;
@@ -183,7 +183,7 @@ vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
       kept_DoHs.push_back(DoHs[i]);
       const auto fact = DoH.octave_scaling_factor(scale_octave_pairs[i](1));
       kept_DoHs.back().shape_matrix *= pow(fact,-2);
-      kept_DoHs.back().coords *= fact;
+      kept_DoHs.back().coords *= static_cast<float>(fact);
     }
   }
 

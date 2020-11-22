@@ -1,48 +1,55 @@
+# If the builds fail again:
+# 1. Update vcpkg and rebuild the image I/O, HDF5 and Ceres.
+#    Disable the build of the Video I/O API.
+#    Disable the tests and samples
+# 2. Reinstate tests and seamples
+# 3. Reinstate FFmpeg
+# 4. Reinstate the build of Video I/O API.
+
 version: 1.0.{build}
 
 image:
   - Visual Studio 2017
 
-cache: c:\tools\vcpkg\installed
+cache: c:\Tools\vcpkg\installed
 
-clone_folder: c:\projects\sara
+clone_folder: C:\projects\sara
 
 environment:
   # These environment variables will be picked up in CMake.
-  VCPKG_TOOLCHAIN_FILE: C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-  QTDIR: C:/Qt/latest/msvc2017_64
-  BOOST_ROOT: C:/Libraries/boost_1_69_0
+  VCPKG_TOOLCHAIN_FILE: C:\Tools\vcpkg\scripts\buildsystems\vcpkg.cmake
+  QTDIR: C:\Qt\latest\msvc2017_64
+  BOOST_ROOT: C:\Libraries\boost_1_69_0
   matrix:
     - generator: "Visual Studio 15 2017 Win64"
 
 init:
-  # This gives us credentials to access the the VM that is building Sara via
-  # RDP.
+  # This gives us credentials to access the VM that is building Sara via RDP.
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
   # Update vcpkg.
-  - cd c:\tools\vcpkg
-  - git pull
-  - .\bootstrap-vcpkg.bat
+  #- cd c:\Tools\vcpkg
+  #- git pull
+  #- .\bootstrap-vcpkg.bat
 
   # Install Image I/O libraries. (less than 5 minutes to build)
-  - vcpkg install libjpeg-turbo:x64-windows
-  - vcpkg install libpng:x64-windows
-  - vcpkg install tiff:x64-windows
+  #- vcpkg install libjpeg-turbo:x64-windows
+  #- vcpkg install libpng:x64-windows
+  #- vcpkg install tiff:x64-windows
 
   # Install Video I/O libraries. (25 minutes to build)
-  - vcpkg install ffmpeg:x64-windows
+  #- vcpkg install ffmpeg:x64-windows
 
   # Install HDF5 libraries. (4 minutes to build).
-  - vcpkg install hdf5[cpp]:x64-windows
+  #- vcpkg install hdf5[cpp]:x64-windows
 
   # Install Ceres libraries. (23 minutes to build)
-  - vcpkg install ceres:x64-windows
+  #- vcpkg install ceres:x64-windows
 
   # Integrate vcpkg with msbuild.
-  - cd c:\tools\vcpkg
-  - vcpkg integrate install
+  #- cd C:\Tools\vcpkg
+  #- vcpkg integrate install
 
 configuration:
   # - Debug
@@ -54,7 +61,7 @@ before_build:
   - cmake -H. -B..\sara-build -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_SHARED_LIBS=ON -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%" -DBOOST_ROOT=%BOOST_ROOT%
 
 build:
-  project: c:\projects\sara-build\Sara.sln
+  project: C:\projects\sara-build\Sara.sln
   parallel: true
   verbosity: minimal
 
@@ -66,4 +73,4 @@ test_script:
 
   # Run the tests.
   - cd ..\sara-build
-  - ctest -C "Release"
+  - ctest --output-on-failure -C %configuration%

@@ -20,46 +20,33 @@ using namespace DO::Sara;
 using namespace std;
 
 
-bool check_descriptors(const TensorView_<float, 2>& descriptors)
-{
-  for (auto i = 0; i < descriptors.rows(); ++i)
-  {
-    for (auto j = 0; j < descriptors.cols(); ++j)
-    {
-      if (!isfinite(descriptors(i, j)))
-      {
-        cerr << "Not a finite number" << endl;
-        return false;
-      }
-    }
-  }
-  cout << "OK all numbers are finite" << endl;
-  return true;
-}
-
 GRAPHICS_MAIN()
 {
-  const auto image_path = src_path("../../../data/sunflowerField.jpg");
+  const auto image_path = src_path("../../../../data/sunflowerField.jpg");
   const auto image = imread<float>(image_path);
 
   print_stage("Detecting SIFT features");
-  auto [features, descriptors] = compute_sift_keypoints(image);
+  const auto pyramid_params = ImagePyramidParams(-1);
+  auto keypoints = compute_sift_keypoints(image, pyramid_params, true);
+  const auto& features = std::get<0>(keypoints);
 
+#ifdef REMOVE_REDUNDANCIES
   print_stage("Removing existing redundancies");
   remove_redundant_features(features, descriptors);
   SARA_CHECK(features.size());
-  SARA_CHECK(descriptors.size());
+  SARA_CHECK(descriptors.sizes().transpose());
+#endif
 
   // Check the features visually.
   print_stage("Draw features");
   create_window(image.width(), image.height());
   set_antialiasing();
   display(image);
-  for (size_t i = 0; i != features.size(); ++i)
+  for (const auto& f: features)
   {
-    const auto color =
-        features[i].extremum_type == OERegion::ExtremumType::Max ? Red8 : Blue8;
-    features[i].draw(color);
+    const auto& color =
+        f.extremum_type == OERegion::ExtremumType::Max ? Red8 : Blue8;
+    f.draw(color);
   }
   get_key();
 

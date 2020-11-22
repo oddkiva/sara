@@ -11,14 +11,14 @@ Language:        Cpp
 AccessModifierOffset: -2
 
 # TODO: understand what these means.
-AlignAfterOpenBracket: true
-AlignEscapedNewlinesLeft: false
+AlignAfterOpenBracket: Align
+AlignEscapedNewlinesLeft: Right
 
 # We want:
 #
 # int aaa = bbbbbbbbbbbbbbb +
 #           ccccccccccccccc;
-AlignOperands:   true
+AlignOperands: true
 
 # We want aligned trailing comments, e.g.:
 # void someFunction()
@@ -52,19 +52,6 @@ AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false
 
-# Do not enforce the following definition declaration style:
-# int
-# function()
-# {
-#   return 0;
-# }
-#
-# Rather the following should also be considered correct:
-# int function()
-# {
-#   return 0;
-# }
-# AlwaysBreakAfterDefinitionReturnType: false  # deprecated
 AlwaysBreakTemplateDeclarations: true
 
 # true:                       false:

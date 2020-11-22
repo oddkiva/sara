@@ -22,23 +22,22 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup ImageProcessing
-    @defgroup LinearFiltering 2D Linear Filtering
-    @{
+   *  @ingroup ImageProcessing
+   *  @defgroup LinearFiltering 2D Linear Filtering
+   *  @{
    */
 
   /*!
-    @brief Convolve a 1D signal \f$f\f$ (or 1D array), with a kernel \f$g\f$.
-    @param[in,out]
-      signal
-      the 1D array containing the 1D signal \f$ f = (f_i)_{1\leq i \leq N}\f$,
-      the resulting signal \f$f*g\f$ is stored in signal.
-    @param[in]
-      kernel
-      the convolution kernel \f$g = (g_i)_{1 \leq i \leq K}\f$.
-    @param[in] signal_size the signal size \f$N\f$.
-    @param[in] kernel_size the kernel size \f$K\f$.
-
+   *  @brief Convolve a 1D signal \f$f\f$ (or 1D array), with a kernel \f$g\f$.
+   *  @param[in,out]
+   *    signal
+   *    the 1D array containing the 1D signal \f$ f = (f_i)_{1\leq i \leq N}\f$,
+   *    the resulting signal \f$f*g\f$ is stored in signal.
+   *  @param[in]
+   *    kernel
+   *    the convolution kernel \f$g = (g_i)_{1 \leq i \leq K}\f$.
+   *  @param[in] signal_size the signal size \f$N\f$.
+   *  @param[in] kernel_size the kernel size \f$K\f$.
    */
   template <typename T>
   void convolve_array(T *signal,
@@ -65,13 +64,13 @@ namespace DO { namespace Sara {
   // ====================================================================== //
   // Linear filters.
   /*!
-    @brief Apply 1D filter to each image row.
-    @param[out] dst the row-filtered image.
-    @param[in] src the input image
-    @param[in] kernel the input kernel
-    @param[in] kernel_size the kernel size
-
-    Note that borders are replicated.
+   *  @brief Apply 1D filter to each image row.
+   *  @param[out] dst the row-filtered image.
+   *  @param[in] src the input image
+   *  @param[in] kernel the input kernel
+   *  @param[in] kernel_size the kernel size
+   *
+   *  Note that borders are replicated.
    */
   template <typename T>
   void
@@ -87,9 +86,10 @@ namespace DO { namespace Sara {
     const auto h = src.height();
     const auto half_size = kernel_size / 2;
 
-    auto buffer = std::vector<T>(w + half_size * 2);
+#pragma omp parallel for
     for (int y = 0; y < h; ++y)
     {
+      auto buffer = std::vector<T>(w + half_size * 2);
       // Copy to work array and add padding.
       for (int x = 0; x < half_size; ++x)
         buffer[x] = src(0, y);
@@ -106,13 +106,13 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    @brief Apply 1D filter to each image column.
-    @param[out] dst the column-filtered image.
-    @param[in] src the input image
-    @param[in] kernel the input kernel
-    @param[in] kernel_size the kernel size
-
-    Note that borders are replicated.
+   *  @brief Apply 1D filter to each image column.
+   *  @param[out] dst the column-filtered image.
+   *  @param[in] src the input image
+   *  @param[in] kernel the input kernel
+   *  @param[in] kernel_size the kernel size
+   *
+   *  Note that borders are replicated.
    */
   template <typename T>
   void
@@ -128,9 +128,11 @@ namespace DO { namespace Sara {
     const auto h = src.height();
     const auto half_size = kernel_size / 2;
 
-    auto buffer = std::vector<T>(h + half_size * 2);
+#pragma omp parallel for
     for (int x = 0; x < w; ++x)
     {
+      auto buffer = std::vector<T>(h + half_size * 2);
+
       for (int y = 0; y < half_size; ++y)
         buffer[y] = src(x, 0);
       for (int y = 0; y < h; ++y)

@@ -1,11 +1,8 @@
 sara_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 
+
 # By default, use the math constants defined in <cmath> header.
 add_definitions(-D_USE_MATH_DEFINES)
-
-# Drop older compiler support in favor of C++17... I know it may be a
-# controversial decision.
-set(CMAKE_CXX_STANDARD 17)
 
 # Visual C++ compiler
 if (MSVC)
@@ -16,19 +13,6 @@ if (MSVC)
     /bigobj
     /wd4251)
   message(STATUS "  - Disabled annoying warnings in MSVC.")
-
-  add_definitions(/EHsc)
-  message(STATUS
-          "  - Using /EHsc: catches C++ exceptions only and tells the "
-          "compiler to assume that extern C functions never throw a C++ "
-          "exception.")
-
-  if (MSVC_VERSION EQUAL 1700)
-    message(STATUS
-            "  - Using version 2012: setting '_VARIADIC_MAX=10' to compile "
-            "'Google Test'")
-    add_definitions(/D_VARIADIC_MAX=10)
-  endif ()
 
 # GNU compiler
 elseif (CMAKE_COMPILER_IS_GNUCXX)
@@ -52,25 +36,20 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpointer-arith")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIE")
-  if (UNIX AND SARA_BUILD_SHARED_LIBS)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-  endif ()
 
-  #Additional flags for Release builds.
+  # Additional flags for Release builds.
   set(CMAKE_CXX_RELEASE_FLAGS "-03 -ffast-math")
-  # Additional flags for Debug builds, which include code coverage.
-  set(CMAKE_CXX_FLAGS_DEBUG
-      "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -DDEBUG -D_DEBUG -fno-inline")
+  # Additional flags for Debug builds to code coverage.
+  set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -D_DEBUG -fno-inline")
   if (NOT APPLE)
     set(CMAKE_CXX_FLAGS_DEBUG
         "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   endif ()
 endif ()
 
-# Activate OpenMP by default.
-find_package(OpenMP QUIET)
-if (OPENMP_FOUND)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+
+# Generate position independent code for static libraries.
+# (cf. EasyExif third-party library)
+if (SARA_BUILD_SHARED_LIBS)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif ()

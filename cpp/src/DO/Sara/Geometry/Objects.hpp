@@ -12,14 +12,14 @@
 #pragma once
 
 // 2D objects but their generalization to higher dimensions is straightforward.
-// \todo: see if generalization can be implemented easily by implementing a Kernel.
-#include <DO/Sara/Geometry/Objects/LineSegment.hpp>
 #include <DO/Sara/Geometry/Objects/BBox.hpp>
-#include <DO/Sara/Geometry/Objects/Polygon.hpp>
-#include <DO/Sara/Geometry/Objects/Triangle.hpp>
-#include <DO/Sara/Geometry/Objects/Quad.hpp>
-#include <DO/Sara/Geometry/Objects/Ellipse.hpp>
+#include <DO/Sara/Geometry/Objects/Circle.hpp>
 #include <DO/Sara/Geometry/Objects/Cone.hpp>
+#include <DO/Sara/Geometry/Objects/Ellipse.hpp>
+#include <DO/Sara/Geometry/Objects/LineSegment.hpp>
+#include <DO/Sara/Geometry/Objects/Polygon.hpp>
+#include <DO/Sara/Geometry/Objects/Quad.hpp>
+#include <DO/Sara/Geometry/Objects/Triangle.hpp>
 
 // 3D objects
 #include <DO/Sara/Geometry/Objects/Cube.hpp>

@@ -320,7 +320,8 @@ namespace DO { namespace Sara {
     QGLWidget::wheelEvent(event);
 
     if (!event->isAccepted()) {
-      event->delta() > 0 ? m_scale += 0.05f*m_scale : m_scale -= 0.05f*m_scale;
+      event->angleDelta().y() > 0 ? m_scale += 0.05f * m_scale :
+                                    m_scale -= 0.05f*m_scale;
       update();
     }
   }

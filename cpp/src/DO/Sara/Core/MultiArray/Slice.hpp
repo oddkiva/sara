@@ -23,6 +23,7 @@ namespace DO::Sara {
    *  @{
    */
 
+  //! @brief Axis slice descriptor structure.
   struct AxisSlice
   {
     int start{0};
@@ -31,6 +32,7 @@ namespace DO::Sara {
   };
 
 
+  //! @brief Sliced ND-view structure.
   template <typename T, int N, int O>
   struct ViewSliced
   {

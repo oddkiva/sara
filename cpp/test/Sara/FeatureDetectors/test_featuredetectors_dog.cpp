@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_compute_dog_extrema)
 
   const auto& f = features.front();
   const auto& D = compute_DoGs.diff_of_gaussians();
-  const auto z = D.octave_scaling_factor(o_index);
+  const auto z = static_cast<float>(D.octave_scaling_factor(o_index));
 
   BOOST_CHECK_SMALL(f.x() * z - xc, 1e-2f);
   BOOST_CHECK_SMALL(f.y() * z - yc, 1e-2f);
