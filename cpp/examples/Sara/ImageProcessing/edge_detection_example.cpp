@@ -187,6 +187,7 @@ auto test_on_video()
     for (auto& c : edge_colors)
       c << rand() % 255, rand() % 255, rand() % 255;
 
+    // TODO: run this asynchronously...
     auto detection = frame;
     const Eigen::Vector2d p1d = p1.cast<double>();
     const auto& s = downscale_factor;
