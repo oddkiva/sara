@@ -126,7 +126,7 @@ struct EndPointGraph
 
       const auto& theta = std::abs(std::atan2(edge_attrs.axes[i](1, 0),  //
                                               edge_attrs.axes[i](0, 0)));
-      if (theta < 10._deg || std::abs(M_PI - theta) < 10._deg)
+      if (theta < 5._deg || std::abs(M_PI - theta) < 5._deg)
         continue;
 
       endpoints.emplace_back(e.front());
@@ -138,6 +138,12 @@ struct EndPointGraph
 
     score = Eigen::MatrixXd(endpoints.size(), endpoints.size());
     score.fill(std::numeric_limits<double>::infinity());
+  }
+
+  auto edge(std::size_t i) const -> const Edge&
+  {
+    const auto& edge_id = edge_ids[i];
+    return edge_attrs.edges[edge_id];
   }
 
   auto rect(std::size_t i) const
@@ -152,6 +158,9 @@ struct EndPointGraph
 
   auto mark_plausible_alignments() -> void
   {
+    // Tolerance of X degrees in the alignment error.
+    const auto thres = std::cos(20._deg);
+
     for (auto i = 0u; i < endpoints.size() / 2; ++i)
     {
       for (auto k = 0; k < 2; ++k)
@@ -173,49 +182,57 @@ struct EndPointGraph
             const auto& r_jl = rect(jl);
             const auto& c_jl = r_jl.center;
 
-            // Because of edge splitting.
+            // Particular case:
             if ((p_ik - p_jl).squaredNorm() < 1e-3)
             {
+              // Check the plausibility that the end points are mutually
+              // aligned?
+              const auto dir = std::array<Eigen::Vector2d, 2>{
+                  (p_ik - c_ik).normalized(),  //
+                  (c_jl - p_jl).normalized()   //
+              };
+
+              const auto cosine = dir[0].dot(dir[1]);
+              if (cosine < thres)
+                continue;
+
               score(ik, jl) = 0;
-              continue;
             }
+            else
+            {
+              const auto dir = std::array<Eigen::Vector2d, 3>{
+                  (p_ik - c_ik).normalized(),  //
+                  (p_jl - p_ik).normalized(),  //
+                  (c_jl - p_jl).normalized()   //
+              };
+              const auto cosines = std::array<double, 2>{
+                  dir[0].dot(dir[1]),
+                  dir[1].dot(dir[2]),
+              };
 
-            // Check the plausibility that the end points are mutually aligned?
-            const auto dir = std::array<Eigen::Vector2d, 3>{
-                (p_ik - c_ik).normalized(),  //
-                (p_jl - p_ik).normalized(),  //
-                (c_jl - p_jl).normalized()   //
-            };
-            const auto cosines = std::array<double, 2>{
-                dir[0].dot(dir[1]),
-                dir[1].dot(dir[2]),
-            };
-            // Tolerance of 20 degrees.
-            const auto thres = std::cos(10._deg);
-            const auto same_sign = (cosines[0] + cosines[1]) > 2 * thres;
-            if (!same_sign)
-              continue;
+              if (cosines[0] + cosines[1] < 2 * thres)
+                continue;
 
-            // // We need the sines to be as small as possible.
-            // const auto sines = std::array<double, 2>{
-            //     std::abs(dir[0].homogeneous().cross(dir[1].homogeneous())(2)),
-            //     std::abs(dir[1].homogeneous().cross(dir[2].homogeneous())(2)),
-            // };
-            // if ((sines[0] + sines[1]) / 2 > std::sin(10._deg))
-            //   continue;
+              if (Projective::point_to_line_distance(p_ik.homogeneous().eval(),
+                                                     r_jl.line()) > 10 &&
+                  Projective::point_to_line_distance(p_jl.homogeneous().eval(),
+                                                     r_ik.line()) > 10)
+                continue;
 
-            if (Projective::point_to_line_distance(p_ik.homogeneous().eval(),
-                                                   r_jl.line()) > 10 &&
-                Projective::point_to_line_distance(p_jl.homogeneous().eval(),
-                                                   r_ik.line()) > 10)
-              continue;
+              // We need this to be as small as possible.
+              const auto dist = (p_ik - p_jl).norm();
 
-            // We need this to be as small as possible.
-            const auto dist = (p_ik - p_jl).norm();
-            if (dist > 100)
-              continue;
+              // We really need to avoid accidental connections like these
+              // situations. Too small edges and too far away, there is little
+              // chance it would correspond to a plausible alignment.
+              if (length(edge(ik)) + length(edge(jl)) < 20 && dist > 20)
+                continue;
 
-            score(ik, jl) = dist;
+              if (dist > 50)
+                continue;
+
+              score(ik, jl) = dist;
+            }
           }
         }
       }
@@ -248,20 +265,26 @@ struct EndPointGraph
 };
 
 
-GRAPHICS_MAIN()
+int main(int argc, char** argv)
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
+}
+
+int __main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
+  const auto video_filepath =
+      argc == 2
+          ? argv[1]
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+          : "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath =
-      //"/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
-      //"/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
-      "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
+          : "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+          : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
 
   // OpenMP.
@@ -280,7 +303,7 @@ GRAPHICS_MAIN()
   constexpr float high_threshold_ratio = 20._percent;
   constexpr float low_threshold_ratio = high_threshold_ratio / 2.;
   constexpr float angular_threshold = 20. / 180. * M_PI;
-  const auto sigma = std::sqrt(std::pow(1.6f, 2) - 1);
+  const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
   const Eigen::Vector2i& p1 = frame.sizes() / 4;  // Eigen::Vector2i::Zero();
   const Eigen::Vector2i& p2 = frame.sizes() * 3 / 4;  // frame.sizes();
 
@@ -312,9 +335,9 @@ GRAPHICS_MAIN()
     frame_gray32f = frame_cropped.convert<float>();
     toc("Grayscale");
 
-    // tic();
-    // frame_gray32f = gaussian(frame_gray32f, sigma);
-    // toc("Blur");
+    tic();
+    frame_gray32f = gaussian(frame_gray32f, sigma);
+    toc("Blur");
 
     if (downscale_factor > 1)
     {
@@ -366,7 +389,6 @@ GRAPHICS_MAIN()
     endpoint_graph.mark_plausible_alignments();
     toc("Alignment Computation");
 
-
     const Eigen::Vector2d p1d = p1.cast<double>();
     const auto& s = downscale_factor;
 
@@ -374,7 +396,7 @@ GRAPHICS_MAIN()
     detection.flat_array().fill(Black8);
 
     for (const auto& e : edges_refined)
-      if (e.size() >=2)
+      if (e.size() >= 2)
         draw_polyline(detection, e, Blue8, p1d, s);
 
     // Draw alignment-based connections.
