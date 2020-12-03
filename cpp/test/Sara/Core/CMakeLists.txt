@@ -1,6 +1,7 @@
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 
-file(GLOB test_core_SOURCE_FILES FILES *.cpp)
+# file(GLOB test_core_SOURCE_FILES FILES *.cpp)
+set(test_core_SOURCE_FILES test_core_array_iterator_basic_functions.cpp)
 
 foreach (file ${test_core_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
@@ -20,6 +21,8 @@ if (UNIX AND NOT APPLE)
   target_link_libraries(test_core_ipc_cond1 PRIVATE rt pthread)
 endif ()
 
-find_package(HDF5 COMPONENTS CXX REQUIRED)
-target_include_directories(test_core_hdf5 PRIVATE ${HDF5_INCLUDE_DIRS})
-target_link_libraries(test_core_hdf5 PRIVATE ${HDF5_LIBRARIES})
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  find_package(HDF5 COMPONENTS CXX REQUIRED)
+  target_include_directories(test_core_hdf5 PRIVATE ${HDF5_INCLUDE_DIRS})
+  target_link_libraries(test_core_hdf5 PRIVATE ${HDF5_LIBRARIES})
+endif ()

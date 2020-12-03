@@ -169,17 +169,17 @@ auto test_on_video()
     ed(frame_gray32f);
     auto edges_refined = ed.pipeline.edges_simplified;
 
-    tic();
-    edges_refined = split(edges_refined, 10. * M_PI / 180.);
-    toc("Edge Split");
+    // tic();
+    // edges_refined = split(edges_refined, 10. * M_PI / 180.);
+    // toc("Edge Split");
 
-    tic();
-    auto line_segments =
-        std::vector<LineSegment>(edges_refined.size(), {{0., 0.}, {0., 0.}});
-    for (auto i = 0u; i < edges_refined.size(); ++i)
-      if (edges_refined[i].size() >= 2)
-        line_segments[i] = fit_line_segment(edges_refined[i]);
-    toc("Line Segment Fitting");
+    // tic();
+    // auto line_segments =
+    //     std::vector<LineSegment>(edges_refined.size(), {{0., 0.}, {0., 0.}});
+    // for (auto i = 0u; i < edges_refined.size(); ++i)
+    //   if (edges_refined[i].size() >= 2)
+    //     line_segments[i] = fit_line_segment(edges_refined[i]);
+    // toc("Line Segment Fitting");
 
     // Display the quasi-straight edges.
     tic();
@@ -203,11 +203,11 @@ auto test_on_video()
       const auto& color = edge_colors[e];
       draw_polyline(detection, edge_refined, color, p1d, s);
 
-      const Point2d a = p1d + s * line_segments[e].p1();
-      const Point2d b = p1d + s * line_segments[e].p2();
-      draw_line(detection, a.x(), a.y(), b.x(), b.y(),  //
-                color,                                  //
-                /* line_width */ 2);
+      // const Point2d a = p1d + s * line_segments[e].p1();
+      // const Point2d b = p1d + s * line_segments[e].p2();
+      // draw_line(detection, a.x(), a.y(), b.x(), b.y(),  //
+      //           color,                                  //
+      //           /* line_width */ 2);
     }
     display(detection);
 

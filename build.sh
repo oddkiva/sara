@@ -88,6 +88,62 @@ function build_library()
   make package
 }
 
+function build_library_for_ios()
+{
+  # Generate an Xcode project.
+  local cmake_options="-G Xcode "
+
+  # Specific options for iOS.
+  #
+  # Build for ARM64 only.
+  cmake_options+="-DCMAKE_SYSTEM_NAME=iOS "
+  cmake_options+="-DCMAKE_OSX_ARCHITECTURES=arm64 "
+  cmake_options+="-DCMAKE_OSX_DEPLOYMENT_TARGET=14.2 "
+  cmake_options+="-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=YES "
+  cmake_options+="-DCMAKE_IOS_INSTALL_COMBINED=YES "
+
+  # Workaround for Xcode generator on Apple platforms.
+  cmake_options+="-DCMAKE_C_COMPILER=$(which clang) "
+  cmake_options+="-DCMAKE_CXX_COMPILER=$(which clang++) "
+
+  # For YouCompleteMe.
+  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
+
+  # We need static builds for iOS.
+  cmake_options+="-DSARA_BUILD_SHARED_LIBS=OFF "
+  cmake_options+="-DBoost_INCLUDE_DIR=/usr/local/include "
+
+  # Vanilla stuff.
+  cmake_options+="-DSARA_BUILD_TESTS=ON "
+  cmake_options+="-DSARA_BUILD_SAMPLES=ON "
+  cmake_options+="-DSARA_USE_HALIDE=ON "
+  if [ "${platform_name}" == "Darwin" ]; then
+    cmake_options+="-DHALIDE_DISTRIB_DIR=/usr/local "
+  else
+    cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide "
+  fi
+
+  # Generate the Xcode project.
+  cmake ../sara ${cmake_options}
+
+  # Build the library.
+  cmake --build . -j$(nproc) -v
+
+  # Run C++ tests.
+  export BOOST_TEST_LOG_LEVEL=all
+  export BOOST_TEST_COLOR_OUTPUT=1
+
+  local test_options="--output-on-failure "
+  if [[ "${build_type}" == "Xcode" ]]; then
+    test_options+="-C Debug"
+  fi
+  ctest ${test_options}
+
+  # Run Python tests.
+  cmake --build . --target pytest
+  cmake --build . --target  package
+}
+
 function install_package()
 {
   if [ -f "/etc/debian_version" ]; then
@@ -116,8 +172,12 @@ mkdir ../${sara_build_dir}
 
 cd ../${sara_build_dir}
 {
-  install_python_packages_via_pip
-  build_library
+  if [[ ${build_type} == "ios" ]]; then
+    build_library_for_ios
+  else
+    install_python_packages_via_pip
+    build_library
+  fi
   #install_package
 }
 cd ..
