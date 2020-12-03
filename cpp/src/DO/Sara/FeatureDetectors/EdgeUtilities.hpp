@@ -55,9 +55,9 @@ namespace DO::Sara {
       const auto& a = remap(edge[i]).template cast<int>();
       const auto& b = remap(edge[i + 1]).template cast<int>();
       draw_line(image, a.x(), a.y(), b.x(), b.y(), color, 1, true);
-      fill_circle(image, a.x(), a.y(), 2, color);
+      draw_circle(image, a.x(), a.y(), 2, color);
       if (i == edge.size() - 2)
-        fill_circle(image, b.x(), b.y(), 2, color);
+        draw_circle(image, b.x(), b.y(), 2, color);
     }
   }
 
