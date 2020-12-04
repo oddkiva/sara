@@ -41,9 +41,9 @@ if (UNIX)
   set(CMAKE_CXX_RELEASE_FLAGS "-03 -ffast-math")
   # Additional flags for Debug builds to code coverage.
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -D_DEBUG -fno-inline")
-  if (NOT APPLE)
+  if (NOT APPLE AND NOT CMAKE_GENERATOR STREQUAL "Ninja")
     set(CMAKE_CXX_FLAGS_DEBUG
-        "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+      "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   endif ()
 endif ()
 

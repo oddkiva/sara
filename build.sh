@@ -33,11 +33,16 @@ function build_library()
     local os_name=$(lsb_release -is)
     local os_version=$(lsb_release -rs)
 
+    local cmake_options="-G Ninja "
+
     # I really want C++17.
     if [[ ${os_name} == "Ubuntu" ]] && [[ ${os_version} == "16.04" ]]; then
       cmake_options+="-DCMAKE_C_COMPILER=$(which gcc-7) "
       cmake_options+="-DCMAKE_CXX_COMPILER=$(which g++-7) "
     fi
+
+    # Use Swift!
+    cmake_options+="-DCMAKE_Swift_COMPILER=$HOME/opt/swift-5.3.1-RELEASE-ubuntu18.04/usr/bin/swiftc "
   fi
 
   if [ "${platform_name}" == "Darwin" ]; then
@@ -84,8 +89,8 @@ function build_library()
   ctest ${test_options}
 
   # Run Python tests.
-  make pytest
-  make package
+  cmake --build . --target pytest
+  cmake --build . --target package
 }
 
 function install_package()
