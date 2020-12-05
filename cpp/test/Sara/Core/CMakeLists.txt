@@ -1,7 +1,6 @@
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 
-# file(GLOB test_core_SOURCE_FILES FILES *.cpp)
-set(test_core_SOURCE_FILES test_core_array_iterator_basic_functions.cpp)
+file(GLOB test_core_SOURCE_FILES FILES *.cpp)
 
 foreach (file ${test_core_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
