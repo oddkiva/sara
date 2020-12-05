@@ -10,7 +10,6 @@
 // ========================================================================== //
 
 #include "IPC.hpp"
-#include "Numpy.hpp"
 
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
@@ -19,8 +18,8 @@
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 
-#include <boost/python.hpp>
-#include <boost/python/numpy.hpp>
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
 
 #include <iostream>
 
