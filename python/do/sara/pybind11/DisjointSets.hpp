@@ -11,5 +11,7 @@
 
 #pragma once
 
+#include <pybind11/pybind11.h>
 
-void expose_disjoint_sets();
+
+auto expose_disjoint_sets(pybind11::module&) -> void;

@@ -11,5 +11,7 @@
 
 #pragma once
 
+#include <pybind11/pybind11.h>
 
-void expose_ipc();
+
+auto expose_ipc(pybind11::module&) -> void;

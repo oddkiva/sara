@@ -9,80 +9,45 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <boost/python.hpp>
-
 #include <DO/Sara/DisjointSets.hpp>
 
 #include "DisjointSets.hpp"
-#include "Numpy.hpp"
+#include "Utilities.hpp"
 
 
-namespace bp = boost::python;
+namespace py = pybind11;
 namespace sara = DO::Sara;
 
 
-bp::list compute_adjacency_list_2d(PyObject* labels)
+auto compute_adjacency_list_2d(py::array_t<int> labels)
 {
   using namespace sara;
 
-  const auto im = image_view_2d<int>(labels);
-  auto adj_list = compute_adjacency_list_2d(im);
+  const auto im = to_image_view(labels);
+  const auto adj_list = compute_adjacency_list_2d(im);
 
-  auto adj_pylist = bp::list{};
-  for (const auto& neighborhood : adj_list)
-  {
-    auto neighborhood_pylist = bp::list{};
-
-    for (const auto& index : neighborhood)
-      neighborhood_pylist.append(index);
-
-    adj_pylist.append(neighborhood_pylist);
-  }
-
-  return adj_pylist;
+  return adj_list;
 }
 
-
-bp::list compute_connected_components(PyObject* labels)
+auto compute_connected_components(py::array_t<int> labels)
 {
   using namespace sara;
 
-  const auto im = image_view_2d<int>(labels);
+  const auto im = to_image_view(labels);
 
   auto adj_list_data = compute_adjacency_list_2d(im);
   AdjacencyList adj_list{adj_list_data};
 
   auto disjoint_sets = DisjointSets{};
   disjoint_sets.compute_connected_components(adj_list);
-  const auto components = disjoint_sets.get_connected_components();
-
-  auto components_pylist = bp::list{};
-  for (const auto& component : components)
-  {
-    auto component_pylist = bp::list{};
-
-    for (const auto& vertex : component)
-      component_pylist.append(vertex);
-
-    components_pylist.append(component_pylist);
-  }
-
-  return components_pylist;
+  return disjoint_sets.get_connected_components();
 }
 
 
-void expose_disjoint_sets()
+auto expose_disjoint_sets(pybind11::module& m) -> void
 {
-#if BOOST_VERSION <= 106300
-  bp::numeric::array::set_module_and_type("numpy", "ndarray");
-#else
-  Py_Initialize();
-  bp::numpy::initialize();
-#endif
-
-  // Import numpy array.
-  import_numpy_array();
-
-  bp::def("compute_adjacency_list_2d", &compute_adjacency_list_2d);
-  bp::def("compute_connected_components", &compute_connected_components);
+  m.def("compute_adjacency_list_2d", &compute_adjacency_list_2d,
+        "Compute the ajdacency list for the 2D image.");
+  m.def("compute_connected_components", &compute_connected_components,
+        "Compute the connected components of 2D image");
 }

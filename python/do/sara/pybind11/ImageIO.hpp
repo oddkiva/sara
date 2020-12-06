@@ -11,5 +11,7 @@
 
 #pragma once
 
+#include <pybind11/pybind11.h>
 
-void expose_image_io();
+
+auto expose_image_io(pybind11::module&) -> void;

@@ -11,8 +11,6 @@
 
 //! @file
 
-#pragma once
-
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>

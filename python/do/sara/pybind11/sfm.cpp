@@ -42,10 +42,13 @@ auto expose_sfm(pybind11::module& m) -> void
 {
   m.doc() = "Sara Python API";  // optional module docstring
 
+
   py::class_<sara::Tensor_<float, 2>>(m, "Tensor2f")
-    .def(py::init<>())
-    .def("data", py::overload_cast<>(&sara::Tensor_<float, 2>::data, py::const_))
-    .def("sizes", py::overload_cast<>(&sara::Tensor_<float, 2>::sizes, py::const_));
+      .def(py::init<>())
+      .def("data",
+           py::overload_cast<>(&sara::Tensor_<float, 2>::data, py::const_))
+      .def("sizes",
+           py::overload_cast<>(&sara::Tensor_<float, 2>::sizes, py::const_));
 
   py::class_<sara::OERegion>(m, "OERegion")
       .def(py::init<>())

@@ -11,15 +11,12 @@
 
 #include <DO/Sara/VideoIO.hpp>
 
+#include "Utilities.hpp"
 #include "VideoIO.hpp"
-#include "utilities.hpp"
 
 
 namespace py = pybind11;
 namespace sara = DO::Sara;
-
-
-using namespace std;
 
 
 class VideoStream : public sara::VideoStream

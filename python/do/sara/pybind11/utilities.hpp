@@ -4,6 +4,7 @@
 #include <pybind11/numpy.h>
 
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
 
 template <typename Sequence>
@@ -31,6 +32,33 @@ inline auto to_pyarray(const Sequence& seq)
 }
 
 
+template <typename T, int N>
+auto wrap_tensor_class(pybind11::module& m, const std::string& name)
+{
+  namespace py = pybind11;
+  namespace sara = DO::Sara;
+
+  auto to_vector = [](const auto& vec) {
+    auto v = std::vector<py::ssize_t>(vec.size());
+    std::transform(vec.data(), vec.data() + vec.size(),
+                   [](const auto& x) { return static_cast<py::ssize_t>(x); });
+  };
+
+  py::class_<sara::Tensor_<T, N>>(m, name, py::buffer_protocol())
+      .def_buffer([](sara::Tensor_<T, N>& m) -> py::buffer_info {
+        return py::buffer_info(
+            m.data(),                           /* Pointer to buffer */
+            sizeof(T),                          /* Size of one scalar */
+            py::format_descriptor<T>::format(), /* Python struct-style
+                                                       format descriptor */
+            N,                                  /* Number of dimensions */
+            to_vector(m.sizes()),               /* Buffer dimensions */
+            to_vector((m.strides() * sizeof(T))
+                          .eval()) /* Strides (in bytes) for each index */
+        );
+      });
+}
+
 template <typename T>
 inline auto to_image_view(pybind11::array_t<T> image)
 {
@@ -43,7 +71,7 @@ inline auto to_image_view(pybind11::array_t<T> image)
   const auto width = static_cast<int>(image.shape(1));
   auto data = const_cast<T*>(image.data());
   auto imview =
-      sara::ImageView<T, 2>{reinterpret_cast<T>(data), {width, height}};
+      sara::ImageView<T, 2>{reinterpret_cast<T*>(data), {width, height}};
   return imview;
 }
 
