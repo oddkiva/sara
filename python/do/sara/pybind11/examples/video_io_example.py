@@ -9,7 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-from pysara_pybind11 import VideoStream
+from do.sara import VideoStream
 
 
 video_stream = VideoStream()

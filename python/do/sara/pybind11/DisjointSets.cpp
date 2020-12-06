@@ -11,6 +11,8 @@
 
 #include <DO/Sara/DisjointSets.hpp>
 
+#include <pybind11/stl.h>
+
 #include "DisjointSets.hpp"
 #include "Utilities.hpp"
 

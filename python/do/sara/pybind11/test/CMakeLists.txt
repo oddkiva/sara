@@ -8,6 +8,7 @@ endif()
 
 # ============================================================================ #
 # Run the unit tests.
+
 add_custom_target(pytest
   COMMAND ${CMAKE_COMMAND}
       -E env PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}

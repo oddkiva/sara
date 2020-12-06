@@ -16,7 +16,6 @@ class TestVideoStream(unittest.TestCase):
                             'orion_1.mpg'))
 
         video_frame = np.zeros(video_stream.sizes(), dtype=np.uint8)
-        print (video_stream.sizes())
 
         video_stream.read(video_frame)
 
