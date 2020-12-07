@@ -3,10 +3,10 @@ import sys
 import numpy as np
 
 import matplotlib
-# try:
-#     matplotlib.use('Qt5Agg')
-# except:
-#     print('Failed to load Qt5 backend for matplotlib')
+try:
+    matplotlib.use('Qt5Agg')
+except:
+    print('Failed to load Qt5 backend for matplotlib')
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -30,5 +30,5 @@ def update_fig(*args):
     return im,
 
 
-ani = animation.FuncAnimation(fig, update_fig, interval=5, blit=True)
+ani = animation.FuncAnimation(fig, update_fig, interval=1, blit=True)
 plt.show()
