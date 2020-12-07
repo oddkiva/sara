@@ -45,12 +45,12 @@ auto wrap_tensor_class(pybind11::module& m, const std::string& name)
   };
 
   py::class_<sara::Tensor_<T, N>>(m, name, py::buffer_protocol())
-      .def_buffer([](sara::Tensor_<T, N>& m) -> py::buffer_info {
+      .def_buffer([&](sara::Tensor_<T, N>& m) -> py::buffer_info {
         return py::buffer_info(
             m.data(),                           /* Pointer to buffer */
             sizeof(T),                          /* Size of one scalar */
-            py::format_descriptor<T>::format(), /* Python struct-style
-                                                       format descriptor */
+            py::format_descriptor<T>::format(), /* Python struct-style format
+                                                   descriptor */
             N,                                  /* Number of dimensions */
             to_vector(m.sizes()),               /* Buffer dimensions */
             to_vector((m.strides() * sizeof(T))

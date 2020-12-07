@@ -11,7 +11,10 @@ class TestVideoStream(unittest.TestCase):
 
     def test_me(self):
         video_stream = pysara.VideoStream()
-        video_stream.open( ('/Users/david/GitLab/DO-CV/'
+        # video_stream.open( ('/Users/david/GitLab/DO-CV/'
+        #                     'sara/cpp/examples/Sara/VideoIO/'
+        #                     'orion_1.mpg'))
+        video_stream.open( ('/home/david/GitLab/DO-CV/'
                             'sara/cpp/examples/Sara/VideoIO/'
                             'orion_1.mpg'))
 
