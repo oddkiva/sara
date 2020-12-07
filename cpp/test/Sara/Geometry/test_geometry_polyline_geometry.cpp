@@ -9,11 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "FeatureDetectors/Edge Collapse"
+#define BOOST_TEST_MODULE "Geometry/Polyline Collapse"
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
+#include <DO/Sara/Geometry/Algorithms/Polyline.hpp>
 
 
 using namespace DO::Sara;
@@ -49,5 +49,38 @@ BOOST_AUTO_TEST_CASE(test_edge_collapse)
   };
 
   BOOST_CHECK(p2 == p2_expected);
+}
 
+BOOST_AUTO_TEST_CASE(test_center_of_mass)
+{
+  const auto p = std::vector<Eigen::Vector2d>{
+    Eigen::Vector2d(0, 0),
+    Eigen::Vector2d(0, 0),
+    Eigen::Vector2d(0, 1),
+  };
+
+  const auto c = center_of_mass(p);
+  std::cout << c.transpose() << std::endl;
+  BOOST_CHECK((c - Point2d(0, 0.5)).norm() < 1e-5f);
+}
+
+BOOST_AUTO_TEST_CASE(test_matrix_of_inertia)
+{
+  const auto p = std::vector<Eigen::Vector2d>{
+    Point2d(0, 0),
+    Point2d(0, 0),
+    Point2d(1, 1),
+  };
+
+  const auto c = center_of_mass(p);
+
+  const auto m = matrix_of_inertia(p, c);
+  std::cout << "m =\n" << m << std::endl;
+
+  SARA_CHECK(std::sqrt(m(1,1)));
+
+  auto svd = m.jacobiSvd(Eigen::ComputeFullU | Eigen::ComputeFullV);
+  std::cout << "U = \n" << svd.matrixU() << std::endl;
+  std::cout << "V = \n" << svd.matrixV() << std::endl;
+  std::cout << "S = \n" << svd.singularValues() << std::endl;
 }

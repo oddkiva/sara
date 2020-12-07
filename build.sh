@@ -43,7 +43,7 @@ function build_library()
   if [ "${platform_name}" == "Darwin" ]; then
     cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
   else
-    cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/Qt/5.12.6/gcc_64 "
+    cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/opt/Qt-5.15.0-amd64 "
   fi
 
   cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
