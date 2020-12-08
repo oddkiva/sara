@@ -37,7 +37,29 @@ set_target_properties(pysara_pybind11 PROPERTIES
   PREFIX "${PYTHON_MODULE_PREFIX}"
   SUFFIX "${PYTHON_MODULE_EXTENSION}"
   FOLDER "Python")
+
+
+
+# ============================================================================ #
+# Copy the Python bindings in the runtime output directory.
+add_custom_target(copy_pysara_module)
+
+# Copy pysara.[so, dll] to the runtime output directory.
+set(pysara_LIBRARY_PATH $<TARGET_FILE:pysara_pybind11>)
+add_custom_command(TARGET copy_pysara_module
+  COMMAND ${CMAKE_COMMAND} -E
+  copy ${pysara_LIBRARY_PATH} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+set_target_properties(copy_pysara_module PROPERTIES FOLDER "Python")
+
 add_dependencies(copy_pysara_module pysara_pybind11)
+
+
+# ============================================================================ #
+# Install the library in the currently active python environment.
+if (SARA_BUILD_TESTS AND SARA_BUILD_PYTHON_BINDINGS)
+  add_subdirectory(test)
+endif ()
+
 
 # ============================================================================ #
 # Install the library in the currently active python environment.

@@ -10,6 +10,9 @@ message(STATUS "  - FLANN")
 add_subdirectory(flann)
 set_property(TARGET flann_cpp_s PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 
+message(STATUS "  - termcolor")
+add_subdirectory(termcolor)
+
 message(STATUS "  - tinyply")
 add_subdirectory(tinyply-2.2)
 set_property(TARGET tinyply PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})

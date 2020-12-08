@@ -28,6 +28,10 @@ class TestRegionInnerBoundary(TestCase):
         ]
 
         actual_boundaries = compute_region_inner_boundaries(regions)
+        actual_boundaries = [
+            [tuple(e) for e in c]
+            for c in actual_boundaries
+        ]
 
         # A boundary is an ordered set of vertices.
         actual_boundaries = [set(vertices) for vertices in actual_boundaries]

@@ -332,7 +332,7 @@ namespace DO { namespace Sara {
     {
       return flat_array_view_type{
           reinterpret_cast<typename ElementTraits<T>::pointer>(data()),
-          static_cast<int64_t>(size())};
+          static_cast<Eigen::Index>(size())};
     }
 
     inline const_flat_array_view_type flat_array() const
@@ -340,7 +340,7 @@ namespace DO { namespace Sara {
       return const_flat_array_view_type{
           reinterpret_cast<const typename ElementTraits<T>::const_pointer>(
               data()),
-          static_cast<int64_t>(size())};
+          static_cast<Eigen::Index>(size())};
     }
     //! @}
 

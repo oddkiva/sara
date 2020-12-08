@@ -9,26 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <boost/python.hpp>
+#pragma once
 
-#include "DisjointSets.hpp"
-#include "Geometry.hpp"
-#include "ImageIO.hpp"
-#ifdef PYSARA_BUILD_VIDEOIO
-#  include "VideoIO.hpp"
-#endif
-#include "IPC.hpp"
+#include <pybind11/pybind11.h>
 
 
-BOOST_PYTHON_MODULE(pysara)
-{
-  using namespace std;
-
-  expose_disjoint_sets();
-  expose_geometry();
-  expose_image_io();
-#ifdef PYSARA_BUILD_VIDEOIO
-  expose_video_io();
-#endif
-  expose_ipc();
-}
+auto expose_video_io(pybind11::module&) -> void;

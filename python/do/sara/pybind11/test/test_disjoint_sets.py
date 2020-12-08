@@ -4,7 +4,8 @@ from unittest import TestCase
 
 import numpy as np
 
-from do.sara import compute_adjacency_list_2d, compute_connected_components
+from do.sara import (compute_adjacency_list_2d,
+                     compute_connected_components)
 
 
 class TestDisjointSets(TestCase):

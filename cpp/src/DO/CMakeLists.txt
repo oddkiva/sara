@@ -1,4 +1,6 @@
-add_subdirectory(Kalpana)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  add_subdirectory(Kalpana)
+endif ()
 
 if (CMAKE_CUDA_COMPILER)
   sara_message("Building DO::Shakti Libraries")
