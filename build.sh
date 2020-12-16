@@ -146,7 +146,7 @@ function build_library_for_ios()
 
   # Run Python tests.
   cmake --build . --target pytest
-  cmake --build . --target  package
+  cmake --build . --target package
 }
 
 function install_package()

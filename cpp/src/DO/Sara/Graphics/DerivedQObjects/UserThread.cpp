@@ -31,7 +31,8 @@ namespace DO { namespace Sara {
     m_doWaitForClick = true;
     m_condition.wait(&m_mutex);
     m_mutex.unlock();
-    x = m_mouseX; y = m_mouseY;
+    x = m_mouseX;
+    y = m_mouseY;
     if (m_mouseButton == Qt::LeftButton)
       return MOUSE_LEFT_BUTTON;
     else if (m_mouseButton == Qt::MiddleButton)
@@ -71,7 +72,9 @@ namespace DO { namespace Sara {
     if (m_doWaitForClick)
     {
       m_doWaitForClick = false;
-      m_mouseButton = buttons; m_mouseX = x; m_mouseY = y;
+      m_mouseButton = buttons;
+      m_mouseX = x;
+      m_mouseY = y;
       m_condition.wakeOne();
     }
     m_mutex.unlock();
@@ -107,21 +110,28 @@ namespace DO { namespace Sara {
       qDebug() << "Window closed unexpectedly while waiting for user input!";
       m_condition.wakeOne();
     }
-    //qDebug() << "Closing window as requested!";
+    // qDebug() << "Closing window as requested!";
     m_mutex.unlock();
   }
 
   void UserThread::run()
   {
-    //qDebug("Running user thread!");
-    if (!m_userMain)
+    // qDebug("Running user thread!");
+    if (m_userMain)
+    {
+      m_userMain(gui_app()->m_argc, gui_app()->m_argv);
+      return;
+    }
+    else if (m_userMain2)
+    {
+      m_userMain2(gui_app()->m_argc, gui_app()->m_argv);
+      return;
+    }
+    else
     {
       qFatal("No registered user main!");
       return;
     }
-    m_userMain(gui_app()->m_argc, gui_app()->m_argv);
-    return;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

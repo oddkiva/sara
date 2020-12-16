@@ -1,4 +1,35 @@
-import SaraSwiftCore
+import Foundation
+
+import SaraCore
+import SaraGraphics
+
+typealias UserMainFunc = () -> Void
+
+public class GraphicsApplication {
+  fileprivate var _cppObject: UnsafeMutableRawPointer
+  fileprivate var _argc: CInt = 0
+  fileprivate var _argv: [CChar] = []
+
+  init() {
+    print("[GraphicsApplication] Init...")
+    self._cppObject = initialize_graphics_application()
+  }
+
+  func registerUserMainFunc(userMainFn: UserMainFunc) {
+    let mainp: @convention(c) () -> Void = main
+    register_user_main(app._cppObject, mainp)
+  }
+
+  func exec() {
+    exec_graphics_application(self._cppObject)
+  }
+
+  deinit {
+    print("[GraphicsApplication] Deinit...")
+    deinitialize_graphics_application(self._cppObject)
+  }
+
+}
 
 func main() {
   let message = "Hello World!"
@@ -16,7 +47,16 @@ func main() {
   }
 
   print("\(numbers)")
+
+  var i = 0
+  while i < 1000 {
+    print("\(i)")
+    usleep(100*1000)
+    i += 1
+  }
 }
 
 
-main()
+let app = GraphicsApplication()
+app.registerUserMainFunc(userMainFn: main)
+app.exec()

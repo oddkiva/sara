@@ -1,4 +1,4 @@
-module SaraSwiftCore {
+module SaraCore {
   header "CCore.hpp"
   export *
 }
