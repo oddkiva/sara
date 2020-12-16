@@ -3,7 +3,9 @@ import Foundation
 import SaraCore
 import SaraGraphics
 
+
 typealias UserMainFunc = () -> Void
+
 
 public class GraphicsApplication {
   fileprivate var _cppObject: UnsafeMutableRawPointer
@@ -15,9 +17,9 @@ public class GraphicsApplication {
     self._cppObject = initialize_graphics_application()
   }
 
-  func registerUserMainFunc(userMainFn: UserMainFunc) {
-    let mainp: @convention(c) () -> Void = main
-    register_user_main(app._cppObject, mainp)
+  func registerUserMainFunc(userMainFn: @escaping UserMainFunc) {
+    // let mainp: @convention(c) () -> Void = userMainFn
+    // register_user_main(app._cppObject, mainp)
   }
 
   func exec() {
@@ -49,14 +51,15 @@ func main() {
   print("\(numbers)")
 
   var i = 0
-  while i < 1000 {
+  while i < 20 {
     print("\(i)")
-    usleep(100*1000)
+    usleep(10*1000)
     i += 1
   }
 }
 
 
 let app = GraphicsApplication()
-app.registerUserMainFunc(userMainFn: main)
+let mainp: @convention(c) () -> Void = main
+register_user_main(app._cppObject, mainp)
 app.exec()
