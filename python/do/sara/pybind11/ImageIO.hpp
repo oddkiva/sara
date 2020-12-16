@@ -11,5 +11,7 @@
 
 #pragma once
 
+#include <pybind11/pybind11.h>
 
-void expose_geometry();
+
+auto expose_image_io(pybind11::module&) -> void;

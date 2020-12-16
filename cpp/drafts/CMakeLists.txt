@@ -25,10 +25,6 @@ if (CUDA_FOUND AND NvidiaVideoCodec_ROOT)
   add_subdirectory(NvCodec)
 endif ()
 
-if (SARA_USE_HPX)
-  add_subdirectory(Parallel)
-endif ()
-
 if (SARA_USE_HALIDE)
   add_subdirectory(Halide)
 endif ()

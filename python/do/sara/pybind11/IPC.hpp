@@ -11,5 +11,7 @@
 
 #pragma once
 
+#include <pybind11/pybind11.h>
 
-void expose_video_io();
+
+auto expose_ipc(pybind11::module&) -> void;

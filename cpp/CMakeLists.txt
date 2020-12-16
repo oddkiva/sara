@@ -6,6 +6,10 @@ if (SARA_BUILD_TESTS)
   add_subdirectory(test)
 endif ()
 
+if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  return()
+endif ()
+
 if (SARA_BUILD_SAMPLES)
   add_subdirectory(examples)
 endif ()

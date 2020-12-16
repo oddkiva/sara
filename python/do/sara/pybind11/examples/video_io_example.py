@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 
 import matplotlib
@@ -8,12 +10,12 @@ except:
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-from do.sara import VideoStream
+from pysara_pybind11 import VideoStream
 
 
+video_file = sys.argv[1]
 video_stream = VideoStream()
-video_stream.open(('/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/'
-                   'orion_1.mpg'))
+video_stream.open(video_file)
 
 video_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
 
@@ -28,5 +30,5 @@ def update_fig(*args):
     return im,
 
 
-ani = animation.FuncAnimation(fig, update_fig, interval=5, blit=True)
+ani = animation.FuncAnimation(fig, update_fig, interval=1, blit=True)
 plt.show()

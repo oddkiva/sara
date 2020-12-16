@@ -10,6 +10,8 @@ class TestRamerDouglasPeucker(TestCase):
                   (0, 1), (0, 0)]
 
         actual_polygon = ramer_douglas_peucker(square, 0.1)
+        actual_polygon = [tuple(a.astype(int))
+                          for a in actual_polygon]
 
         expected_polygon = [(0, 0), (1, 0), (1, 1), (0, 1)]
 

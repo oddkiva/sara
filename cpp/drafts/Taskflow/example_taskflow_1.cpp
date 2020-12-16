@@ -1,11 +1,14 @@
+#include <future>
+#include <mutex>
+#include <queue>
 #include <thread>
 #include <vector>
 
 #include <boost/circular_buffer.hpp>
 
 
-auto m = std::mutex{};
-auto cv = std::condition_variable{};
+std::mutex m;
+std::condition_variable cv;
 auto wait_for_something = false;
 auto quit = false;
 
@@ -15,14 +18,14 @@ auto consumer()
 {
   while (true)
   {
-    std::unique_lock<std::mutex> auto lock{m};
+    std::unique_lock<std::mutex> lock{m};
 
     if (queue.empty())
       continue;
 
-    auto& image = 
+    //auto& image =
 
-    queue.pop()
+    queue.pop();
 
     if (quit)
       break;
@@ -32,7 +35,7 @@ auto consumer()
 auto producer() {
   while (true)
   {
-    std::scoped_lock<std::mutex> lock{m};
+    std::lock_guard<std::mutex> lock{m};
     queue.push(std::vector<float>(320 * 240, 0));
     cv.notify_one();
 
