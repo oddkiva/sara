@@ -4,14 +4,17 @@
 extern "C" {
 #endif
 
-void *initialize_graphics_application();
-// void *initialize_graphics_application(int *argc, char **argv);
+void* GraphicsApplication_initialize();
+// void *GraphicsApplication_initialize(int *argc, char **argv);
+void GraphicsApplication_registerUserMainFunc(void*, void (*user_main)(void));
+void GraphicsApplication_exec(void*);
 
-void deinitialize_graphics_application(void *);
+void* createWindow(int w, int h);
+void closeWindow(void *window);
+void millisleep(int ms);
+int getKey();
 
-void register_user_main(void *, void (*user_main)(void));
-
-void exec_graphics_application(void *);
+void drawPoint(int x, int y, int r, int g, int b);
 
 #ifdef __cplusplus
 }

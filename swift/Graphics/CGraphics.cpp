@@ -8,26 +8,16 @@ namespace sara = DO::Sara;
 int argc = 0;
 char** argv = nullptr;
 
-// void* initialize_graphics_application(int* argc, char** argv)
-void* initialize_graphics_application()
+// void* GraphicsApplication_initialize(int* argc, char** argv)
+void* GraphicsApplication_initialize()
 {
-  auto obj = reinterpret_cast<void*>(            //
-      new sara::GraphicsApplication{argc, argv}  //
-  );
+  static sara::GraphicsApplication app{argc, argv};
+  auto obj = reinterpret_cast<void*>(&app);
   return obj;
 }
 
-void deinitialize_graphics_application(void* obj)
-{
-  if (obj == nullptr)
-    return;
-
-  auto app = reinterpret_cast<sara::GraphicsApplication*>(obj);
-  delete app;
-  app = nullptr;
-}
-
-void register_user_main(void* app_obj, void (*user_main)(void))
+void GraphicsApplication_registerUserMainFunc(void* app_obj,
+                                              void (*user_main)(void))
 {
   if (app_obj == nullptr)
     return;
@@ -41,11 +31,37 @@ void register_user_main(void* app_obj, void (*user_main)(void))
   app->register_user_main(user_main_func);
 }
 
-void exec_graphics_application(void* app_obj)
+void GraphicsApplication_exec(void* app_obj)
 {
   if (app_obj == nullptr)
     return;
   auto app = reinterpret_cast<sara::GraphicsApplication*>(app_obj);
 
   app->exec();
+}
+
+void* createWindow(int w, int h)
+{
+  auto window = reinterpret_cast<void*>(sara::create_window(w, h));
+  return window;
+}
+
+void closeWindow(void *window)
+{
+  sara::close_window(reinterpret_cast<sara::Window>(window));
+}
+
+void millisleep(int ms)
+{
+  return sara::millisleep(ms);
+}
+
+int getKey()
+{
+  return sara::get_key();
+}
+
+void drawPoint(int x, int y, int r, int g, int b)
+{
+  sara::draw_point(x, y, sara::Color3ub(r, g, b));
 }

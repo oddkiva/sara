@@ -4,42 +4,33 @@ import SaraCore
 import SaraGraphics
 
 
-typealias UserMainFunc = () -> Void
-
-
+// Swift wrapper.
 public class GraphicsApplication {
   fileprivate var _cppObject: UnsafeMutableRawPointer
   fileprivate var _argc: CInt = 0
   fileprivate var _argv: [CChar] = []
 
   init() {
-    print("[GraphicsApplication] Init...")
-    self._cppObject = initialize_graphics_application()
+    self._cppObject = GraphicsApplication_initialize()
   }
 
-  func registerUserMainFunc(userMainFn: @escaping UserMainFunc) {
-    // let mainp: @convention(c) () -> Void = userMainFn
-    // register_user_main(app._cppObject, mainp)
+  func registerUserMainFunc(userMainFn: @escaping (@convention(c) () -> Void)) {
+    // The swift function will be called from C++.
+    GraphicsApplication_registerUserMainFunc(app._cppObject, userMainFn)
   }
 
   func exec() {
-    exec_graphics_application(self._cppObject)
+    GraphicsApplication_exec(self._cppObject)
   }
-
-  deinit {
-    print("[GraphicsApplication] Deinit...")
-    deinitialize_graphics_application(self._cppObject)
-  }
-
 }
 
-func main() {
-  let message = "Hello World!"
-  tic()
-  print("\(message)")
-  toc("\(message)")
 
+func main() {
   var numbers: [Int32] = [1, 2, 3, 5]
+  print("Before squaring: \(numbers)")
+
+  tic()
+  // Call a C function from Swift.
   numbers.withUnsafeMutableBufferPointer {
     (numbers) in
     let ptr = UnsafeMutableRawPointer(numbers.baseAddress!).bindMemory(
@@ -47,8 +38,9 @@ func main() {
       capacity: numbers.count)
     square(ptr, CInt(numbers.count))
   }
+  toc("Squaring Operation")
 
-  print("\(numbers)")
+  print("After squaring: \(numbers)")
 
   var i = 0
   while i < 20 {
@@ -56,10 +48,20 @@ func main() {
     usleep(10*1000)
     i += 1
   }
+
+  let w = createWindow(300, 300);
+  let color: [CInt] = [255, 0, 255]
+  for y in 0...10 {
+    for x in 0...10 {
+      drawPoint(Int32(x), Int32(y), Int32.random(in: 0...255), color[1], color[2])
+    }
+  }
+
+  getKey();
+  closeWindow(w);
 }
 
 
 let app = GraphicsApplication()
-let mainp: @convention(c) () -> Void = main
-register_user_main(app._cppObject, mainp)
+app.registerUserMainFunc(userMainFn: main)
 app.exec()
