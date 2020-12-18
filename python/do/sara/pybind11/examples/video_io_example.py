@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 
 import matplotlib
@@ -11,9 +13,9 @@ import matplotlib.animation as animation
 from pysara_pybind11 import VideoStream
 
 
+video_file = sys.argv[1]
 video_stream = VideoStream()
-video_stream.open(
-    '/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4')
+video_stream.open(video_file)
 
 video_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
 

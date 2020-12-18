@@ -7,4 +7,7 @@ foreach (file ${example_taskflow_SOURCE_FILES})
     ${Boost_INCLUDE_DIR})
   target_compile_definitions(${filename} PRIVATE
     -DBOOST_ALL_NO_LIB)
+  if (UNIX AND NOT APPLE)
+    target_link_libraries(${filename} PRIVATE pthread)
+  endif ()
 endforeach ()

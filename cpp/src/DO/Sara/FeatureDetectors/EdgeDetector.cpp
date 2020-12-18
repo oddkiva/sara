@@ -14,6 +14,7 @@
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
+#include <DO/Sara/Geometry/Algorithms/Polyline.hpp>
 #include <DO/Sara/Geometry/Algorithms/RamerDouglasPeucker.hpp>
 
 
@@ -72,7 +73,8 @@ namespace DO::Sara {
         std::transform(edge.begin(), edge.end(), edges_converted.begin(),
                        [](const auto& p) { return p.template cast<double>(); });
 
-        edges_simplified[i] = ramer_douglas_peucker(edges_converted, parameters.eps);
+        edges_simplified[i] =
+            ramer_douglas_peucker(edges_converted, parameters.eps);
       }
       toc("Longest Curve Extraction & Simplification");
 
