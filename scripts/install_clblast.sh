@@ -23,6 +23,7 @@ fi
 
 pushd ${REPOSITORY_DIR}
 {
+  git clean -fdx
   git fetch origin --prune
   git checkout ${VERSION}
 

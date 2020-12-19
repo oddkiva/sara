@@ -10,7 +10,6 @@ fi
 
 platform_name=$(uname -s)
 
-
 function install_python_packages_via_pip()
 {
   pip install -r ../sara/requirements.txt

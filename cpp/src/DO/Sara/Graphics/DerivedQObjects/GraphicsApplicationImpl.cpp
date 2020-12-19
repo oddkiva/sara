@@ -103,7 +103,7 @@ namespace DO { namespace Sara {
   void
   GraphicsApplication::Impl::
   closeWindow(QWidget *w)
-   {
+  {
     QList<QPointer<QWidget>>::iterator wi =
         std::find(m_createdWindows.begin(), m_createdWindows.end(), w);
      if (wi == m_createdWindows.end())
