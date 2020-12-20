@@ -23,6 +23,8 @@ function build_library()
   else
     local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
   fi
+
+  # Setup the C and C++ toolchain.
   if [[ "${platform_name}" == "Darwin" ]] &&
      [[ "${build_type}" == "Xcode" ]]; then
     # Workaround for Xcode generator on Apple platforms.
@@ -40,8 +42,12 @@ function build_library()
       cmake_options+="-DCMAKE_C_COMPILER=$(which gcc-7) "
       cmake_options+="-DCMAKE_CXX_COMPILER=$(which g++-7) "
     fi
+  fi
 
-    # Use Swift!
+  # Setup Swift toolchain.
+  if [[ "${platform_name}" == "Darwin" ]]; then
+    cmake_options+="-DCMAKE_Swift_COMPILER=$(which swiftc) "
+  elif [[ "${platform_name}" == "Linux" ]]; then
     cmake_options+="-DCMAKE_Swift_COMPILER=$HOME/opt/swift-5.3.1-RELEASE-ubuntu18.04/usr/bin/swiftc "
   fi
 
