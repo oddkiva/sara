@@ -80,8 +80,10 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       }
 
       // Hexagon schedule.
-      else if (target.features_any_of(
-                   {Halide::Target::HVX_64, Halide::Target::HVX_128}))
+      else if (target.features_any_of({Halide::Target::HVX_v62,
+                                       Halide::Target::HVX_v65,
+                                       Halide::Target::HVX_v66,
+                                       Halide::Target::HVX_128}))
       {
         const auto vector_size =
             target.has_feature(Halide::Target::HVX_128) ? 128 : 64;
@@ -167,8 +169,10 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       }
 
       // Hexagon schedule.
-      else if (target.features_any_of(
-                   {Halide::Target::HVX_64, Halide::Target::HVX_128}))
+      else if (target.features_any_of({Halide::Target::HVX_v62,
+                                       Halide::Target::HVX_v65,
+                                       Halide::Target::HVX_v66,
+                                       Halide::Target::HVX_128}))
       {
         const auto vector_size =
             target.has_feature(Halide::Target::HVX_128) ? 128 : 64;

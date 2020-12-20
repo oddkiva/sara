@@ -41,13 +41,11 @@ function build_library()
     fi
 
     # Use Swift!
-    cmake_options+="-DCMAKE_Swift_COMPILER=$HOME/opt/swift-5.3.1-RELEASE-ubuntu18.04/usr/bin/swiftc "
+    cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.3.2-RELEASE-ubuntu20.04/usr/bin/swiftc "
   fi
 
   if [ "${platform_name}" == "Darwin" ]; then
     cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
-  else
-    cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/opt/Qt-5.15.0-amd64 "
   fi
 
   cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
@@ -60,12 +58,7 @@ function build_library()
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
 
   cmake_options+="-DSARA_USE_HALIDE=ON "
-  if [ "${platform_name}" == "Darwin" ]; then
-    cmake_options+="-DHALIDE_DISTRIB_DIR=/usr/local "
-  else
-    cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide "
-  fi
-  cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
+  # cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
 
   # Generate makefile project.
   if [ "${build_type}" == "emscripten" ]; then

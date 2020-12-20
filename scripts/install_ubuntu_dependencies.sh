@@ -37,6 +37,7 @@ apt_packages=(
   "libglew-dev"
   "libglfw3-dev"
   "libceres-dev"
+  "libz3-4"  # For swiftc
   "python3-dev"
   "qtbase5-dev"
 )
