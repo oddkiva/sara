@@ -51,9 +51,10 @@ func main() {
 
   let w = createWindow(300, 300);
   let color: [CInt] = [255, 0, 255]
-  for y in 0...10 {
-    for x in 0...10 {
-      drawPoint(Int32(x), Int32(y), Int32.random(in: 0...255), color[1], color[2])
+  for y in 0..<300 {
+    for x in 0..<300 {
+      drawPoint(Int32(x), Int32(y), Int32.random(in: 0...255),
+                Int32.random(in: 0...255), Int32.random(in: 0...255))
     }
   }
 

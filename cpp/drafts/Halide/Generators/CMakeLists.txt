@@ -125,7 +125,7 @@ shakti_halide_library_v2(
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 if (UNIX)
   # Workaround with Linux...
-  target_link_libraries(shakti_dominant_gradient_orientations.generator_library
+  target_link_libraries(shakti_dominant_gradient_orientations.generator
     PRIVATE dl)
 endif ()
 
@@ -175,10 +175,10 @@ shakti_halide_library_v2(
 
 
 if (SARA_BUILD_SAMPLES)
-  add_subdirectory(lessons)
+#   add_subdirectory(lessons)
   add_subdirectory(examples)
 endif ()
-
-if (SARA_BUILD_TESTS)
-  add_subdirectory(test)
-endif ()
+#
+# if (SARA_BUILD_TESTS)
+#   add_subdirectory(test)
+# endif ()

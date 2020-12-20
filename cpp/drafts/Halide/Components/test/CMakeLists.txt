@@ -8,6 +8,8 @@ foreach (file ${test_SOURCE_FILES})
     SOURCES ${file}
     DEPENDENCIES Halide
     FOLDER "DRAFTS/Halide")
+  target_link_libraries(${filename}
+    PRIVATE ${CMAKE_DL_LIBS})
   set_target_properties(${filename}
     PROPERTIES
     CXX_STANDARD 17
