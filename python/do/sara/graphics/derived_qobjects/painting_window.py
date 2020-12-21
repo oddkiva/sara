@@ -81,7 +81,6 @@ class PaintingWindow(QWidget):
         return self._scroll_area.pos().y();
 
     def paintEvent(self, event):
-        print("repainting custom")
         p = QPainter(self);
         p.drawPixmap(0, 0, self._pixmap);
 
@@ -95,7 +94,6 @@ class PaintingWindow(QWidget):
         self._painter.drawLine(x1, y1, x2, y2);
         self.update();
 
-
     @Slot()
     def eventListeningTimerStopped(self):
         pass
@@ -103,9 +101,10 @@ class PaintingWindow(QWidget):
 
 if __name__ == '__main__':
     import sys
-    app = QApplication([])
+    app = QApplication(sys.argv)
     window = PaintingWindow((800, 600))
     sys.exit(app.exec_())
+
 
 #  void PaintingWindow::drawPoint(const QPointF& p, const QColor& c)
 #  {
