@@ -29,6 +29,7 @@ class PaintingWindow(QWidget):
         self._scroll_area = ScrollArea(parent=parent)
         self._pixmap = QPixmap(w, h)
         self._painter = QPainter(self._pixmap)
+        self._painter.end()
 
         self.setParent(self._scroll_area)
         self.setFocusPolicy(Qt.WheelFocus)
@@ -63,11 +64,6 @@ class PaintingWindow(QWidget):
         # Show the widget.
         self._scroll_area.show()
 
-        for y in range(0, 20):
-            for x in  range(0, 20):
-                self.draw_point(x, y, (255, 0, 0))
-        self.draw_line(0, 0, 100, 100, (0, 255,  0), 2)
-
     @property
     def window_title(self):
         return self._scroll_area.windowTitle()
@@ -85,8 +81,10 @@ class PaintingWindow(QWidget):
         p.drawPixmap(0, 0, self._pixmap);
 
     def draw_point(self, x, y, color):
+        self._painter.begin(self._pixmap)
         self._painter.setPen(QColor(*color));
         self._painter.drawPoint(x, y);
+        self._painter.end()
         self.update();
 
     def draw_line(self, x1, y1, x2, y2, color, pen_width):
@@ -97,13 +95,6 @@ class PaintingWindow(QWidget):
     @Slot()
     def eventListeningTimerStopped(self):
         pass
-
-
-if __name__ == '__main__':
-    import sys
-    app = QApplication(sys.argv)
-    window = PaintingWindow((800, 600))
-    sys.exit(app.exec_())
 
 
 #  void PaintingWindow::drawPoint(const QPointF& p, const QColor& c)

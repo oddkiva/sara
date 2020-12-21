@@ -3,3 +3,5 @@ try:
 except:
     print('pysara_pybind11 not found!')
     pass
+
+from do.sara.graphics import *

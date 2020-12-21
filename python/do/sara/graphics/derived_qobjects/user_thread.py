@@ -4,9 +4,11 @@ from PySide2.QtWidgets import QApplication
 
 class Communicate(QObject):
     create_window = Signal(int, int)
+    draw_point = Signal(int, int, object)
 
 
 class UserThread(QThread):
+
     def __init__(self, parent=None):
         super(UserThread, self).__init__(parent)
         self._user_main = None
@@ -25,7 +27,6 @@ class UserThread(QThread):
 
         self.signals = Communicate()
         self.finished.connect(QApplication.instance().quit)
-
 
     def register_user_main(self, user_main):
         self._user_main = user_main

@@ -5,6 +5,37 @@ from do.sara.graphics.derived_qobjects.painting_window import PaintingWindow
 from do.sara.graphics.derived_qobjects.user_thread import UserThread
 
 
+class WindowManager(QObject):
+
+    def __init__(self):
+        self._widgets = []
+        self._active_window = None
+
+    def create_painting_window(self, w, h):
+        pw =  PaintingWindow((w, h))
+        self._widgets.append(pw)
+        if len(self._widgets) == 1:
+            self._active_window = pw
+            self.connect_widget_to_user_thread(self._active_window)
+
+    def connect_widget_to_user_thread(self, widget):
+        if widget is None:
+            return
+
+        user_thread = GraphicsContext().user_thread
+        user_thread.signals.draw_point.connect(
+            self._active_window.draw_point,
+            type=Qt.QueuedConnection)
+
+    @property
+    def widgets(self):
+        return self._widgets
+
+    @property
+    def active_window(self):
+        return self._active_window
+
+
 class Singleton(type):
     _instances = {}
 
@@ -12,21 +43,6 @@ class Singleton(type):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
-
-
-class WindowManager(QObject):
-
-    def __init__(self):
-        self._widgets = []
-
-    def create_painting_window(self, w, h):
-        pw =  PaintingWindow((w, h))
-        self._widgets.append(pw)
-        return pw
-
-    @property
-    def widgets(self):
-        return self._widgets
 
 
 class GraphicsContext(metaclass=Singleton):
@@ -47,36 +63,3 @@ class GraphicsContext(metaclass=Singleton):
     @property
     def window_manager(self):
         return self._window_manager
-
-
-def millisleep(ms):
-    ctx = GraphicsContext()
-    ctx.user_thread.msleep(ms)
-
-
-def create_window(w, h):
-    user_thread = GraphicsContext().user_thread
-    user_thread.signals.create_window.emit(w, h)
-
-
-def user_main():
-    create_window(800, 600)
-
-    print('hello world!')
-    i = 0
-    while i < 100:
-        print(i)
-        i += 1
-        millisleep(20)
-
-
-if __name__ == '__main__':
-    import sys
-
-    app = QApplication(sys.argv)
-
-    graphics_context = GraphicsContext()
-    graphics_context.user_thread.register_user_main(user_main)
-    graphics_context.user_thread.start()
-
-    sys.exit(app.exec_())
