@@ -40,7 +40,7 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-copy")
 
   # Additional flags for Release builds.
-  set(CMAKE_CXX_FLAGS_RELEASE "-03 -ffast-math")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
   # Additional flags for Debug builds to code coverage.
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -D_DEBUG -fno-inline")
