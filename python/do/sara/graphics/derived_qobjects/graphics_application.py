@@ -36,9 +36,9 @@ class GraphicsContext(metaclass=Singleton):
         self._window_manager = WindowManager()
 
         # Create connections between signals and slots.
-        import ipdb; ipdb.set_trace()
         self._user_thread.signals.create_window.connect(
-            self._window_manager.create_painting_window)
+            self._window_manager.create_painting_window,
+            type=Qt.BlockingQueuedConnection)
 
     @property
     def user_thread(self):
