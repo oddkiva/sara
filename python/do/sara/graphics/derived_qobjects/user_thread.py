@@ -5,6 +5,7 @@ from PySide2.QtWidgets import QApplication
 class Communicate(QObject):
     create_window = Signal(int, int)
     draw_point = Signal(int, int, object)
+    draw_image = Signal(object, object, float)
 
 
 class UserThread(QThread):

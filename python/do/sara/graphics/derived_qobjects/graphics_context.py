@@ -1,8 +1,17 @@
-from PySide2.QtCore import QMetaObject, QObject, Qt, QGenericArgument
+from PySide2.QtCore import QObject, Qt
 from PySide2.QtWidgets import QApplication
 
 from do.sara.graphics.derived_qobjects.painting_window import PaintingWindow
 from do.sara.graphics.derived_qobjects.user_thread import UserThread
+
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
 
 class WindowManager(QObject):
@@ -26,6 +35,9 @@ class WindowManager(QObject):
         user_thread.signals.draw_point.connect(
             self._active_window.draw_point,
             type=Qt.QueuedConnection)
+        user_thread.signals.draw_image.connect(
+            self._active_window.draw_image,
+            type=Qt.BlockingQueuedConnection)
 
     @property
     def widgets(self):
@@ -34,15 +46,6 @@ class WindowManager(QObject):
     @property
     def active_window(self):
         return self._active_window
-
-
-class Singleton(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
 
 
 class GraphicsContext(metaclass=Singleton):

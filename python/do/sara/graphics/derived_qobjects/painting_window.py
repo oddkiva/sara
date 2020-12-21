@@ -88,51 +88,33 @@ class PaintingWindow(QWidget):
         self.update();
 
     def draw_line(self, x1, y1, x2, y2, color, pen_width):
+        self._painter.begin(self._pixmap)
         self._painter.setPen(QPen(QColor(*color), pen_width));
         self._painter.drawLine(x1, y1, x2, y2);
+        self._painter.end()
         self.update();
+
+    def draw_image(self, image, offset, scale):
+        xoff, yoff = offset
+        self._painter.begin(self._pixmap)
+        self._painter.translate(xoff, yoff)
+        self._painter.scale(scale, scale)
+        self._painter.drawImage(0, 0, image)
+        self._painter.scale(1 / scale, 1 / scale)
+        self._painter.translate(-xoff, -yoff)
+        self._painter.end()
+        self.update()
 
     @Slot()
     def eventListeningTimerStopped(self):
         pass
 
 
-#  void PaintingWindow::drawPoint(const QPointF& p, const QColor& c)
-#  {
-#    m_painter.setPen(c);
-#    m_painter.drawPoint(p);
-#    update();
-#  }
-#
-#  void PaintingWindow::drawLine(const QPointF& p1, const QPointF& p2,
-#                                const QColor& c, int penWidth)
-#  {
-#    m_painter.setPen(QPen(c, penWidth));
-#    m_painter.drawLine(p1, p2);
-#    update();
-#  }
-#
-#  void PaintingWindow::drawCircle(int xc, int yc, int r, const QColor& c,
-#                                  int penWidth)
-#  {
-#    m_painter.setPen(QPen(c, penWidth));
-#    m_painter.drawEllipse(QPoint(xc, yc), r, r);
-#    update();
-#  }
-#
 #  void PaintingWindow::drawCircle(const QPointF& center, qreal r,
 #                                  const QColor& c, int penWidth)
 #  {
 #    m_painter.setPen(QPen(c, penWidth));
 #    m_painter.drawEllipse(QPointF(center.x(), center.y()), r, r);
-#    update();
-#  }
-#
-#  void PaintingWindow::drawEllipse(int x, int y, int w, int h,
-#                                   const QColor& c, int penWidth)
-#  {
-#    m_painter.setPen(QPen(c, penWidth));
-#    m_painter.drawEllipse(x, y, w, h);
 #    update();
 #  }
 #
@@ -252,17 +234,6 @@ class PaintingWindow(QWidget):
 #        break;
 #    }
 #
-#    update();
-#  }
-#
-#  void PaintingWindow::display(const QImage& image, int xoff, int yoff,
-#                               double fact)
-#  {
-#    m_painter.translate(xoff, yoff);
-#    m_painter.scale(qreal(fact), qreal(fact));
-#    m_painter.drawImage(0, 0, image);
-#    m_painter.scale(qreal(1./fact), qreal(1./fact));
-#    m_painter.translate(-xoff, -yoff);
 #    update();
 #  }
 #

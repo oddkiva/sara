@@ -38,7 +38,7 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable")
 
   # Additional flags for Release builds.
-  set(CMAKE_CXX_RELEASE_FLAGS "-03 -ffast-math")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
   # Additional flags for Debug builds to code coverage.
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -D_DEBUG -fno-inline")
   if (NOT APPLE)
