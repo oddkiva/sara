@@ -6,10 +6,12 @@ from skimage.io import imread
 
 import do.sara as sara
 
+from pysara_pybind11 import VideoStream
+
 
 def user_main():
     video_file = sys.argv[1]
-    video_stream = sara.VideoStream()
+    video_stream = VideoStream()
     video_stream.open(video_file)
 
     video_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
