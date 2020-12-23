@@ -34,8 +34,7 @@ function (shakti_halide_library _source_filepath)
   target_link_libraries(${_source_filename}.generator PRIVATE Halide::Generator)
 
   add_halide_library(${_source_filename}
-    FROM ${_source_filename}.generator
-    TARGETS host)
+    FROM ${_source_filename}.generator)
 
   foreach (suffix IN ITEMS ""
                            .generator
@@ -47,8 +46,8 @@ function (shakti_halide_library _source_filepath)
         FOLDER "Halide/${_source_filename}")
     endif ()
   endforeach ()
-
 endfunction ()
+
 
 function (shakti_halide_gpu_library _source_filepath)
   get_filename_component(_source_filename ${_source_filepath} NAME_WE)

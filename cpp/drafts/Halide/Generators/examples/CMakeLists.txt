@@ -11,14 +11,21 @@ target_compile_definitions(halide_aot_example
 target_link_options(halide_aot_example
   PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
+
+# ARTIFICIAL FIX.
+target_include_directories(halide_aot_example
+  PRIVATE 
+  /Users/david/GitLab/DO-CV/sara-build-Xcode/cpp/drafts/Halide/Generators)
 target_link_libraries(halide_aot_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
+  Halide::Halide
   Halide::Runtime
-  shakti_halide_rgb_to_gray
-  shakti_halide_gray32f_to_rgb
-  shakti_halide_gaussian_blur
-  shakti_gaussian_convolution_v2)
+  /Users/david/GitLab/DO-CV/sara-build-Xcode/cpp/drafts/Halide/Generators/shakti_halide_rgb_to_gray.o
+  /Users/david/GitLab/DO-CV/sara-build-Xcode/cpp/drafts/Halide/Generators/shakti_halide_rgb_to_gray.runtime.o)
+  # shakti_halide_gray32f_to_rgb
+  # shakti_halide_gaussian_blur
+  # shakti_gaussian_convolution_v2)
 set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
 
 
