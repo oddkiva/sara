@@ -4,11 +4,11 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-// #include <drafts/Halide/GaussianConvolution.hpp>
+#include <drafts/Halide/GaussianConvolution.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
-// #include "shakti_halide_gaussian_blur.h"
-// #include "shakti_halide_gray32f_to_rgb.h"
+#include "shakti_halide_gaussian_blur.h"
+#include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_halide_rgb_to_gray.h"
 
 
@@ -68,61 +68,61 @@ auto halide_pipeline() -> void
       // Use parallelization and vectorization.
       shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
 
-// //#define USE_HALIDE_AOT_IMPLEMENTATION_V1
-// #define USE_HALIDE_AOT_IMPLEMENTATION_V2
-// //#define USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION
-// //#define USE_SARA_DERICHE_IMPLEMENTATION
-// #ifdef USE_HALIDE_AOT_IMPLEMENTATION_V1
-//       // The strategy is to transpose the array and then convolve the rows. So
-//       // (1) we transpose the matrix and convolve the (transposed) columns.
-//       // (2) we transpose the matrix and convolve the rows.
-//       //
-//       // The timing are reported on a machine with:
-//       // - CPU Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz (cat /proc/cpuinfo)
-//       // - nVidia Titan X (Pascal) (nvidia-smi)
-//       //
-//       // On the CPU, using SSE instructions to vectorise the data divides by 4
-//       // the computation time:
-//       // - convolving a 1920x1080 image goes down from ~210ms to ~50ms.
-//       //   which is a dramatic improvement.
-//       // - Then parallelizing over the columns on the transposed data divides by
-//       //   more than 3 the computation time (from ~50ms to ~15ms)
-//       //
-//       // The cumulated improvements are spectacular (14x faster) all along with
-//       // very little effort.
-//       //
-//       // On a CUDA-capable GPU, it takes ~7ms to process the same images. So the
-//       // CPU version is quite fast.
-//       // On the GPU, with sigma = 80.f, the processing time is about ~15ms!
-//       {
-//         buffer_gray32f.set_host_dirty();
-//         shakti_halide_gaussian_blur(buffer_gray32f, sigma, truncation_factor,
-//                                     buffer_gray32f_blurred);
-//         buffer_gray32f_blurred.copy_to_host();
-//       }
-//       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
-//       toc("Halide Gaussian V1");
-// #elif defined(USE_HALIDE_AOT_IMPLEMENTATION_V2)
-//       halide::gaussian_convolution(frame_gray32f, frame_gray32f_blurred, sigma,
-//                                    truncation_factor);
-//       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
-//       toc("Halide Gaussian V2");
-// #elif defined(USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION)
-//       // Sara's unoptimized code takes 240 ms to blur (no SSE instructions and
-//       // no column-based transposition)
-//       //
-//       // Parallelizing the implementation of the linear filtering with OpenMP,
-//       // we are then down to 25ms, not bad at all for a very minimal change!
-//       apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, sigma);
-//       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
-//       toc("Sara Gaussian");
-// #elif defined(USE_SARA_DERICHE_IMPLEMENTATION)
-//       // Without parallelization and anything, deriche filter is still running
-//       // reasonably fast (between 45 and 50ms).
-//       inplace_deriche_blur(frame_gray32f, sigma);
-//       shakti_halide_gray32f_to_rgb(buffer_gray32f, buffer_gray8);
-//       toc("Sara Deriche");
-// #endif
+//#define USE_HALIDE_AOT_IMPLEMENTATION_V1
+#define USE_HALIDE_AOT_IMPLEMENTATION_V2
+//#define USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION
+//#define USE_SARA_DERICHE_IMPLEMENTATION
+#ifdef USE_HALIDE_AOT_IMPLEMENTATION_V1
+      // The strategy is to transpose the array and then convolve the rows. So
+      // (1) we transpose the matrix and convolve the (transposed) columns.
+      // (2) we transpose the matrix and convolve the rows.
+      //
+      // The timing are reported on a machine with:
+      // - CPU Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz (cat /proc/cpuinfo)
+      // - nVidia Titan X (Pascal) (nvidia-smi)
+      //
+      // On the CPU, using SSE instructions to vectorise the data divides by 4
+      // the computation time:
+      // - convolving a 1920x1080 image goes down from ~210ms to ~50ms.
+      //   which is a dramatic improvement.
+      // - Then parallelizing over the columns on the transposed data divides by
+      //   more than 3 the computation time (from ~50ms to ~15ms)
+      //
+      // The cumulated improvements are spectacular (14x faster) all along with
+      // very little effort.
+      //
+      // On a CUDA-capable GPU, it takes ~7ms to process the same images. So the
+      // CPU version is quite fast.
+      // On the GPU, with sigma = 80.f, the processing time is about ~15ms!
+      {
+        buffer_gray32f.set_host_dirty();
+        shakti_halide_gaussian_blur(buffer_gray32f, sigma, truncation_factor,
+                                    buffer_gray32f_blurred);
+        buffer_gray32f_blurred.copy_to_host();
+      }
+      shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
+      toc("Halide Gaussian V1");
+#elif defined(USE_HALIDE_AOT_IMPLEMENTATION_V2)
+      halide::gaussian_convolution(frame_gray32f, frame_gray32f_blurred, sigma,
+                                   truncation_factor);
+      shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
+      toc("Halide Gaussian V2");
+#elif defined(USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION)
+      // Sara's unoptimized code takes 240 ms to blur (no SSE instructions and
+      // no column-based transposition)
+      //
+      // Parallelizing the implementation of the linear filtering with OpenMP,
+      // we are then down to 25ms, not bad at all for a very minimal change!
+      apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, sigma);
+      shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
+      toc("Sara Gaussian");
+#elif defined(USE_SARA_DERICHE_IMPLEMENTATION)
+      // Without parallelization and anything, deriche filter is still running
+      // reasonably fast (between 45 and 50ms).
+      inplace_deriche_blur(frame_gray32f, sigma);
+      shakti_halide_gray32f_to_rgb(buffer_gray32f, buffer_gray8);
+      toc("Sara Deriche");
+#endif
     }
 
     display(frame_gray_as_rgb);
