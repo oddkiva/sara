@@ -15,6 +15,8 @@
 # button from the dialog box that popped up.
 # - Follow the instructions in the user guide to allow the use of this file.
 
+find_package(Halide REQUIRED)
+
 if (NOT SHAKTI_HALIDE_GPU_TARGETS)
   if (APPLE)
     set (SHAKTI_HALIDE_GPU_TARGETS metal)
@@ -27,31 +29,37 @@ endif ()
 
 function (shakti_halide_library _source_filepath)
   get_filename_component(_source_filename ${_source_filepath} NAME_WE)
+
   add_executable(${_source_filename}.generator ${_source_filepath})
+  target_link_libraries(${_source_filename}.generator PRIVATE Halide::Generator)
+
   add_halide_library(${_source_filename}
     FROM ${_source_filename}.generator
-    TARGETS x86-64-sse41)
+    TARGETS host)
 
-  foreach (suffix IN ITEMS _cc _cc_gen _lib_gen
-                           .generator_binary
-                           .generator_library
-                           .generator_stub_gen
-                           .run
-                           .rungen)
+  foreach (suffix IN ITEMS ""
+                           .generator
+                           .runtime
+                           .update)
     if (TARGET ${_source_filename}${suffix})
       set_target_properties(${_source_filename}${suffix}
         PROPERTIES
         FOLDER "Halide/${_source_filename}")
     endif ()
   endforeach ()
+
 endfunction ()
 
 function (shakti_halide_gpu_library _source_filepath)
   get_filename_component(_source_filename ${_source_filepath} NAME_WE)
+
   add_executable(${_source_filename}.generator ${_source_filepath})
+  target_link_libraries(${_source_filename}.generator PRIVATE Halide::Generator)
+
   add_halide_library(${_source_filename}
     FROM ${_source_filename}.generator
-    TARGETS ${SHAKTI_HALIDE_GPU_TARGETS})
+    TARGETS host
+    FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
   if (APPLE)
     target_link_libraries(${_source_filename}
@@ -59,12 +67,10 @@ function (shakti_halide_gpu_library _source_filepath)
                 "-framework Metal")
   endif ()
 
-  foreach (suffix IN ITEMS _cc _cc_gen _lib_gen
-                           .generator_binary
-                           .generator_library
-                           .generator_stub_gen
-                           .run
-                           .rungen)
+  foreach (suffix IN ITEMS ""
+                           .generator
+                           .runtime
+                           .update)
     if (TARGET ${_source_filename}${suffix})
       set_target_properties(${_source_filename}${suffix}
         PROPERTIES
@@ -81,20 +87,13 @@ function (shakti_halide_library_v2)
   cmake_parse_arguments(generator
     "${_options}" "${_single_value_args}" "${_multiple_value_args}" ${ARGN})
 
-  ## halide_generator(${generator_NAME}.generator
-  ##   GENERATOR_NAME ${generator_NAME}
-  ##   SRCS ${generator_SRCS}
-  ##   DEPS ${generator_DEPS})
-
-  ## halide_library_from_generator(${generator_NAME}
-  ##   GENERATOR ${generator_NAME}.generator
-  ##   HALIDE_TARGET ${generator_HALIDE_TARGET}
-  ##   HALIDE_TARGET_FEATURES ${generator_HALIDE_TARGET_FEATURES})
-
   add_executable(${generator_NAME}.generator ${generator_SRCS})
+  target_link_libraries(${generator_NAME}.generator PRIVATE Halide::Generator)
+
   add_halide_library(${generator_NAME}
     FROM ${generator_NAME}.generator
-    TARGETS ${generator_HALIDE_TARGET_FEATURES})
+    TARGETS host
+    FEATURES ${generator_HALIDE_TARGET_FEATURES})
 
   if (APPLE)
     target_link_libraries(${generator_NAME}
@@ -103,12 +102,10 @@ function (shakti_halide_library_v2)
       "-framework Metal")
   endif ()
 
-  foreach (suffix IN ITEMS _cc _cc_gen _lib_gen
-                           .generator_binary
-                           .generator_library
-                           .generator_stub_gen
-                           .run
-                           .rungen)
+  foreach (suffix IN ITEMS ""
+                           .generator
+                           .runtime
+                           .update)
     if (TARGET ${generator_NAME}${suffix})
       set_target_properties(${generator_NAME}${suffix}
         PROPERTIES

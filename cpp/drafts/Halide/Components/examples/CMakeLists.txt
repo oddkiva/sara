@@ -1,5 +1,4 @@
 find_package(DO_Sara COMPONENTS Core Graphics ImageIO VideoIO REQUIRED)
-find_package(Halide REQUIRED)
 find_package(OpenMP)
 
 

@@ -6,7 +6,7 @@ foreach (file ${test_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES Halide
+    DEPENDENCIES Halide::Halide
     FOLDER "DRAFTS/Halide")
   target_link_libraries(${filename}
     PRIVATE ${CMAKE_DL_LIBS})

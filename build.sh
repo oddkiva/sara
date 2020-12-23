@@ -70,7 +70,7 @@ function build_library()
   if [ "${build_type}" == "emscripten" ]; then
     emconfigure cmake ../sara
   else
-    cmake ../sara ${cmake_options}
+    time cmake ../sara ${cmake_options}
   fi
 
   # Build the library.
@@ -181,6 +181,6 @@ cd ../${sara_build_dir}
     install_python_packages_via_pip
     build_library
   fi
-  #install_package
+  # install_package
 }
 cd ..
