@@ -81,6 +81,11 @@ namespace DO::Shakti::HalideBackend::v3 {
       type = Halide::Runtime::Buffer<std::int8_t>(size);
     }
 
+    auto empty() const noexcept
+    {
+      return x.dimensions() == 0;
+    }
+
     auto size() const noexcept
     {
       return x.dim(0).extent();
@@ -133,6 +138,12 @@ namespace DO::Shakti::HalideBackend::v3 {
     {
       return {x(i), y(i), s(i), n(i), value(i), type(i)};
     }
+
+    auto empty() const noexcept
+    {
+      return x.dimensions() == 0;
+    }
+
 
     auto size() const noexcept
     {

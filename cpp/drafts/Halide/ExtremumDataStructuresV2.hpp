@@ -47,6 +47,11 @@ namespace DO::Shakti::HalideBackend::v2 {
       type = Halide::Runtime::Buffer<std::int8_t>(size);
     }
 
+    auto empty() const noexcept
+    {
+      return x.dimensions() == 0;
+    }
+
     auto size() const noexcept
     {
       return x.dim(0).extent();
@@ -97,6 +102,11 @@ namespace DO::Shakti::HalideBackend::v2 {
       return {x(i), y(i), s(i), value(i), type(i)};
     }
 
+    auto empty() const noexcept
+    {
+      return x.dimensions() == 0;
+    }
+
     auto size() const noexcept
     {
       return x.dim(0).extent();
@@ -134,6 +144,11 @@ namespace DO::Shakti::HalideBackend::v2 {
           Halide::Runtime::Buffer<bool>{num_orientation_bins, num_keypoints};
       peak_residuals =
           Halide::Runtime::Buffer<float>{num_orientation_bins, num_keypoints};
+    }
+
+    auto empty() const noexcept
+    {
+      return peak_map.dimensions() == 0;
     }
 
     auto num_keypoints() const noexcept

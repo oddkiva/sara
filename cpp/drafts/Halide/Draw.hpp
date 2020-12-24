@@ -122,8 +122,10 @@ auto draw_extrema(const halide::Pyramid<halide::OrientedExtremumArray>& extrema)
       continue;
 
     const auto& extrema_so = eit->second;
+    if (extrema_so.empty())
+      continue;
 
-    for (auto i = 0u; i < extrema_so.x.size(); ++i)
+    for (auto i = 0u; i < extrema_so.size(); ++i)
     {
       const auto color = extrema_so.type[i] == 1 ? sara::Red8 : sara::Blue8;
 
@@ -149,6 +151,9 @@ auto draw_extrema(const halide::Pyramid<halide::OrientedExtremumArray>& extrema)
 auto draw_oriented_extrema(const halide::v2::OrientedExtremumArray& e,
                            float octave_scaling_factor = 1, int width = 2)
 {
+  if (e.empty())
+    return;
+
 #pragma omp parallel for
   for (auto i = 0; i < e.size(); ++i)
   {
@@ -174,6 +179,9 @@ auto draw_oriented_extrema(sara::ImageView<sara::Rgb8>& display,
                            const halide::v2::OrientedExtremumArray& e,
                            float octave_scaling_factor = 1, int width = 3)
 {
+  if (e.empty())
+    return;
+
 #pragma omp parallel for
   for (auto i = 0; i < e.size(); ++i)
   {
@@ -204,6 +212,9 @@ auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
                             const halide::v3::QuantizedExtremumArray& e,
                             float octave_scaling_factor = 1, int width = 2)
 {
+  if (e.empty())
+    return;
+
 #pragma omp parallel for
   for (auto i = 0; i < e.size(); ++i)
   {
@@ -224,6 +235,9 @@ auto draw_extrema(sara::ImageView<sara::Rgb8>& display,
                   const halide::v3::ExtremumArray& e,
                   float octave_scaling_factor = 1, int width = 2)
 {
+  if (e.empty())
+    return;
+
 #pragma omp parallel for
   for (auto i = 0; i < e.size(); ++i)
   {

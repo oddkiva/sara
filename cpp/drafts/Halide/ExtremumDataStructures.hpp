@@ -45,6 +45,11 @@ namespace DO::Shakti::HalideBackend {
       type.resize(size);
     }
 
+    auto empty() const noexcept
+    {
+      return x.empty();
+    }
+
     auto size() const
     {
       return x.size();
@@ -93,6 +98,11 @@ namespace DO::Shakti::HalideBackend {
     auto operator[](int i) const -> ConstView
     {
       return {x[i], y[i], s[i], value[i], type[i]};
+    }
+
+    auto empty() const noexcept
+    {
+      return x.empty();
     }
 
     auto size() const noexcept
