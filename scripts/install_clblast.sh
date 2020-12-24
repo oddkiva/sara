@@ -35,14 +35,21 @@ pushd ${REPOSITORY_DIR}
 
   pushd build
   {
+    # cmake \
+    #   -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+    #   -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+    #   -DTESTS:BOOL=ON -DTUNERS:BOOL=ON \
+    #   ..
+    # cmake --build . -j$(nproc) -v
+    # ctest --verbose -j$(nproc)
+    # sudo make install
+
     cmake \
       -DCMAKE_C_COMPILER_LAUNCHER=ccache \
       -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-      -DTESTS:BOOL=ON -DTUNERS:BOOL=ON \
       ..
     cmake --build . -j$(nproc) -v
-    ctest --verbose -j$(nproc)
-    sudo make install
+    make install
   }
   popd
 }
