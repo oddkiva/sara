@@ -31,6 +31,7 @@ target_compile_definitions(halide_gaussian_convolution_example
 target_link_libraries(halide_gaussian_convolution_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
+  Halide::Halide
   Halide::Runtime
   shakti_gaussian_convolution_v2
   shakti_halide_gaussian_blur)
@@ -48,6 +49,7 @@ target_link_options(halide_resize_example
 target_link_libraries(halide_resize_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
+  Halide::Halide
   Halide::Runtime
   shakti_halide_rgb_to_gray
   shakti_halide_gray32f_to_rgb
@@ -105,6 +107,7 @@ target_link_options(halide_sift_example
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_sift_example
   PRIVATE
+  Halide::Halide
   Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES})
@@ -122,6 +125,7 @@ target_link_options(halide_sift_octave_example
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_sift_octave_example
   PRIVATE
+  Halide::Halide
   Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES})
@@ -138,6 +142,7 @@ target_link_options(halide_sift_pyramid_example
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_sift_pyramid_example
   PRIVATE
+  Halide::Halide
   Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES})
@@ -154,6 +159,7 @@ target_link_options(halide_batched_sift_octave_example
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_batched_sift_octave_example
   PRIVATE
+  Halide::Halide
   Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES})
