@@ -107,8 +107,9 @@ function(sara_add_halide_library TARGET)
     else ()
         # If we're not using an existing runtime, create one.
         if (NOT ARG_USE_RUNTIME)
-            _Halide_add_halide_runtime("${TARGET}.runtime" FROM ${ARG_FROM}
-                                       TARGETS ${ARG_TARGETS})
+          _Halide_add_halide_runtime("${TARGET}.runtime"
+              FROM ${ARG_FROM}
+              TARGETS ${ARG_TARGETS})
             set(ARG_USE_RUNTIME "${TARGET}.runtime")
         elseif (NOT TARGET ${ARG_USE_RUNTIME})
             message(FATAL_ERROR "Invalid runtime target ${ARG_USE_RUNTIME}")
@@ -193,15 +194,8 @@ function(sara_add_halide_library TARGET)
 
     if (crosscompiling)
         add_library("${TARGET}" STATIC IMPORTED GLOBAL)
-        set_target_properties("${TARGET}" PROPERTIES
-                              IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/${GENERATOR_SOURCES}")
     else ()
         add_library("${TARGET}" OBJECT IMPORTED GLOBAL)
-        set_target_properties("${TARGET}" PROPERTIES
-          POSITION_INDEPENDENT_CODE ON
-          IMPORTED_OBJECTS
-          "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.o;${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.runtime.o"
-          LINKER_LANGUAGE CXX)
     endif ()
 
     # Load the plugins and setup dependencies
@@ -230,9 +224,22 @@ function(sara_add_halide_library TARGET)
 
     list(TRANSFORM GENERATOR_OUTPUT_FILES PREPEND "${CMAKE_CURRENT_BINARY_DIR}/")
     add_custom_target("${TARGET}.update" ALL DEPENDS ${GENERATOR_OUTPUT_FILES})
-
+    add_dependencies("${TARGET}.update" "${TARGET}.runtime")
     add_dependencies("${TARGET}" "${TARGET}.update")
 
+    # List the generated files.
+    if (crosscompiling)
+        set_target_properties("${TARGET}" PROPERTIES
+            IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/${GENERATOR_SOURCES}")
+    else ()
+      list(APPEND TARGET_OBJECT_FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}${object_suffix}
+        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.runtime${object_suffix})
+      set_target_properties("${TARGET}" PROPERTIES
+            POSITION_INDEPENDENT_CODE ON
+            IMPORTED_OBJECTS "${TARGET_OBJECT_FILES}"
+            LINKER_LANGUAGE CXX)
+    endif ()
+
     target_include_directories("${TARGET}" INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
-    # target_link_libraries("${TARGET}" INTERFACE "${ARG_USE_RUNTIME}")
 endfunction()

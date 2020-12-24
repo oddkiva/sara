@@ -80,7 +80,7 @@ function build_library()
   fi
 
   # Build the library.
-  cmake --build . -j$(nproc) -v
+  time cmake --build . -j$(nproc) -v
 
   # Run C++ tests.
   export BOOST_TEST_LOG_LEVEL=all
@@ -90,11 +90,11 @@ function build_library()
   if [[ "${build_type}" == "Xcode" ]]; then
     test_options+="-C Debug"
   fi
-  ctest ${test_options}
+  time ctest ${test_options}
 
   # Run Python tests.
-  cmake --build . --target pytest
-  cmake --build . --target package
+  time cmake --build . --target pytest
+  time cmake --build . --target package
 }
 
 function build_library_for_ios()
