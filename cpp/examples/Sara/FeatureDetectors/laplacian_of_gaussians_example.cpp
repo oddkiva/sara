@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 
@@ -22,34 +23,19 @@ using namespace DO::Sara;
 using namespace std;
 
 
-static Timer timer;
-
-void tic()
-{
-  timer.restart();
-}
-
-void toc()
-{
-  auto elapsed = timer.elapsed_ms();
-  cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
-}
-
 vector<OERegion> compute_LoG_extrema(const Image<float>& image,
                                      bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
-  {
-    print_stage("Localizing LoG extrema");
     tic();
-  }
+
   auto pyramid_params = ImagePyramidParams{0, 3 + 2};
   ComputeLoGExtrema computeLoGs{pyramid_params};
   auto scale_octave_pairs = vector<Point2i>{};
   auto LoGs = computeLoGs(image, &scale_octave_pairs);
   if (verbose)
-    toc();
+    toc("LoG Extrema");
   SARA_CHECK(LoGs.size());
 
   // 2. Rescale detected features to original image dimension.
@@ -70,17 +56,14 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& image,
 {
   // 1. Feature extraction.
   if (verbose)
-  {
-    print_stage("Localizing LoG affine-adapted extrema");
     tic();
-  }
 
-  auto pyramid_params = ImagePyramidParams{ 0 };
-  auto compute_LoGs = ComputeLoGExtrema{ pyramid_params };
+  auto pyramid_params = ImagePyramidParams{0};
+  auto compute_LoGs = ComputeLoGExtrema{pyramid_params};
   auto scale_octave_pairs = vector<Point2i>{};
   auto LoGs = compute_LoGs(image, &scale_octave_pairs);
   if (verbose)
-    toc();
+    toc("LoG Extrema");
   SARA_CHECK(LoGs.size());
 
   const auto& G = compute_LoGs.gaussians();
@@ -88,10 +71,8 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& image,
 
   // 2. Affine shape adaptation
   if (verbose)
-  {
-    print_stage("Affine shape adaptation");
     tic();
-  }
+
   auto adapt_shape = AdaptFeatureAffinelyToLocalShape{};
   auto keep_features = vector<unsigned char>(LoGs.size(), 0);
   for (size_t i = 0; i != LoGs.size(); ++i)
@@ -100,18 +81,18 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& image,
     const auto& o = scale_octave_pairs[i](1);
 
     Matrix2f affine_adapt_transform;
-    if (adapt_shape(affine_adapt_transform, G(s,o), LoGs[i]))
+    if (adapt_shape(affine_adapt_transform, G(s, o), LoGs[i]))
     {
       LoGs[i].shape_matrix = affine_adapt_transform * LoGs[i].shape_matrix;
       keep_features[i] = 1;
     }
   }
   if (verbose)
-    toc();
+    toc("Affine Shape Adaptation");
 
   // 3. Rescale the kept features to original image dimensions.
-  size_t num_kept_features = std::accumulate(
-    keep_features.begin(), keep_features.end(), 0);
+  size_t num_kept_features =
+      std::accumulate(keep_features.begin(), keep_features.end(), 0);
 
   auto kept_DoGs = vector<OERegion>{};
   kept_DoGs.reserve(num_kept_features);
@@ -121,9 +102,8 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& image,
     {
       kept_DoGs.push_back(LoGs[i]);
       const float fact = L.octave_scaling_factor(scale_octave_pairs[i](1));
-      kept_DoGs.back().shape_matrix *= pow(fact,-2);
+      kept_DoGs.back().shape_matrix *= pow(fact, -2);
       kept_DoGs.back().coords *= fact;
-
     }
   }
 
