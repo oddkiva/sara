@@ -10,11 +10,9 @@ fi
 
 platform_name=$(uname -s)
 if [[ "${platform_name}" == "Darwin" ]]; then
-  export PATH=/Users/david/Downloads/cmake-3.18.5-Darwin-x86_64/CMake.app/Contents/bin/cmake:${PATH}
+  # export PATH=~/GitHub/CMake/cmake-build/bin:${PATH}
+  export PATH=~/Downloads/cmake-3.18.5-Darwin-x86_64/CMake.app/Contents/bin:$PATH
 fi
-
-echo $(which cmake)
-echo $(cmake --version)
 
 function install_python_packages_via_pip()
 {
@@ -72,11 +70,16 @@ function build_library()
   cmake_options+="-DSARA_USE_HALIDE=ON "
   # cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
 
+  echo $(which cmake)
+  echo $(cmake --version)
+
   # Generate makefile project.
   if [ "${build_type}" == "emscripten" ]; then
     emconfigure cmake ../sara
   else
-    time cmake ../sara ${cmake_options}
+    time cmake ../sara ${cmake_options} \
+      --profiling-format=google-trace \
+      --profiling-output=~/Desktop/cmake-sara.log
   fi
 
   # Build the library.
@@ -133,10 +136,10 @@ function build_library_for_ios()
   fi
 
   # Generate the Xcode project.
-  cmake ../sara ${cmake_options}
+  time cmake ../sara ${cmake_options}
 
   # Build the library.
-  cmake --build . -j$(nproc) -v
+  time cmake --build . -j$(nproc) -v
 
   # Run C++ tests.
   export BOOST_TEST_LOG_LEVEL=all
@@ -146,11 +149,11 @@ function build_library_for_ios()
   if [[ "${build_type}" == "Xcode" ]]; then
     test_options+="-C Debug"
   fi
-  ctest ${test_options}
+  time ctest ${test_options}
 
   # Run Python tests.
-  cmake --build . --target pytest
-  cmake --build . --target package
+  time cmake --build . --target pytest
+  time cmake --build . --target package
 }
 
 function install_package()
