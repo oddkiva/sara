@@ -13,14 +13,14 @@
 
 #pragma once
 
+#include <QDebug>
 #include <QScrollArea>
 #include <QWidget>
 #include <QPainter>
 #include <QTimer>
 
 #include <DO/Sara/Defines.hpp>
-
-#include "../Events.hpp"
+#include <DO/Sara/Graphics/Events.hpp>
 
 
 class QPixmap;
@@ -42,9 +42,12 @@ namespace DO { namespace Sara {
 
   public:
     ScrollArea(QWidget *parent = 0);
+    ~ScrollArea() override {
+      qDebug() << "Destroying ScrollArea object:" << this;
+    }
 
   protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
   };
 
   //! @brief QWidget-derived class on which we draw things.
@@ -59,6 +62,10 @@ namespace DO { namespace Sara {
                    const QString& windowTitle = "Sara",
                    int x = -1, int y = -1,
                    QWidget* parent = 0);
+
+    ~PaintingWindow() {
+      qDebug() << "Destroying PaintingWindow object:" << this;
+    }
 
     QScrollArea *scrollArea() { return m_scrollArea; }
 
