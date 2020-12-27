@@ -116,15 +116,21 @@ namespace DO { namespace Sara {
 
   void UserThread::run()
   {
-    // qDebug("Running user thread!");
+    const auto& args = qApp->arguments();
+    auto argc = static_cast<int>(args.size());
+    auto argvVector = std::vector<char*>(args.size());
+    std::transform(args.begin(), args.end(), argvVector.begin(),
+                   [](const auto& arg) { return arg.toLocal8Bit().data(); });
+    auto argv = &argvVector[0];
+
     if (m_userMain)
     {
-      m_userMain(gui_app()->m_argc, gui_app()->m_argv);
+      m_userMain(argc, argv);
       return;
     }
     else if (m_userMain2)
     {
-      m_userMain2(gui_app()->m_argc, gui_app()->m_argv);
+      m_userMain2(argc, argv);
       return;
     }
     else

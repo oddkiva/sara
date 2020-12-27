@@ -13,7 +13,6 @@
 
 #pragma once
 
-#include <QDebug>
 #include <QScrollArea>
 #include <QWidget>
 #include <QPainter>
@@ -42,9 +41,6 @@ namespace DO { namespace Sara {
 
   public:
     ScrollArea(QWidget *parent = 0);
-    ~ScrollArea() override {
-      qDebug() << "Destroying ScrollArea object:" << this;
-    }
 
   protected:
     void closeEvent(QCloseEvent *event) override;
@@ -62,10 +58,6 @@ namespace DO { namespace Sara {
                    const QString& windowTitle = "Sara",
                    int x = -1, int y = -1,
                    QWidget* parent = 0);
-
-    ~PaintingWindow() {
-      qDebug() << "Destroying PaintingWindow object:" << this;
-    }
 
     QScrollArea *scrollArea() { return m_scrollArea; }
 
