@@ -30,6 +30,12 @@ namespace DO::Sara {
     m_userThread.registerUserMain(user_main);
   }
 
+  auto GraphicsContext::registerUserMain(std::function<int(int, char **)> user_main)
+      -> void
+  {
+    m_userThread.registerUserMain(user_main);
+  }
+
   GraphicsContext::GraphicsContext()
     : m_mutex(QMutex::NonRecursive)
   {

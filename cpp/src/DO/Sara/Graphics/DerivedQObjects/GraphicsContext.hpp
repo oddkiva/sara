@@ -72,6 +72,7 @@ namespace DO { namespace Sara {
   public:
     static auto instance() -> GraphicsContext&;
     auto registerUserMain(int (*userMain)(int, char**)) -> void;
+    auto registerUserMain(std::function<int(int, char **)>) -> void;
     auto userThread() -> UserThread& { return m_userThread; }
     auto activeWindow() -> QWidget *;
 

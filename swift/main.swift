@@ -4,23 +4,27 @@ import SaraCore
 import SaraGraphics
 
 
-// Swift wrapper.
-public class GraphicsApplication {
-  fileprivate var _cppObject: UnsafeMutableRawPointer
-  fileprivate var _argc: CInt = 0
-  fileprivate var _argv: [CChar] = []
+public class GraphicsContext {
+  private var _qApp: UnsafeMutableRawPointer
+  private var _widgetList: UnsafeMutableRawPointer
 
   init() {
-    self._cppObject = GraphicsApplication_initialize()
+    print("Init Graphics Context...")
+    self._qApp = GraphicsContext_initQApp()
+    self._widgetList = GraphicsContext_initWidgetList()
   }
 
   func registerUserMainFunc(userMainFn: @escaping (@convention(c) () -> Void)) {
-    // The swift function will be called from C++.
-    GraphicsApplication_registerUserMainFunc(app._cppObject, userMainFn)
+    GraphicsContext_registerUserMainFunc(userMainFn)
   }
 
   func exec() {
-    GraphicsApplication_exec(self._cppObject)
+    GraphicsContext_exec(self._qApp)
+  }
+
+  deinit {
+    print("Deinit Graphics Context...")
+    GraphicsContext_deinitWidgetList(self._widgetList)
   }
 }
 
@@ -42,14 +46,9 @@ func main() {
 
   print("After squaring: \(numbers)")
 
-  var i = 0
-  while i < 20 {
-    print("\(i)")
-    usleep(10*1000)
-    i += 1
-  }
+  usleep(1000*1000)
 
-  let w = createWindow(300, 300)
+  createWindow(300, 300)
   for y in 0..<300 {
     for x in 0..<300 {
       drawPoint(Int32(x), Int32(y),
@@ -59,11 +58,16 @@ func main() {
     }
   }
 
-  getKey();
-  closeWindow(w);
+  clearWindow()
+
+  drawLine(Int32(10), Int32(10), Int32(200), Int32(200),
+           Int32.random(in: 0...255),
+           Int32.random(in: 0...255),
+           Int32.random(in: 0...255), Int32(10))
+
+  getKey()
 }
 
-
-let app = GraphicsApplication()
-app.registerUserMainFunc(userMainFn: main)
-app.exec()
+let ctx = GraphicsContext()
+ctx.registerUserMainFunc(userMainFn: main)
+ctx.exec()
