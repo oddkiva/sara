@@ -48,9 +48,11 @@ func main() {
 
   usleep(1000*1000)
 
-  createWindow(300, 300)
-  for y in Int32(0)..<Int32(300) {
-    for x in Int32(0)..<Int32(300) {
+  let w: Int32 = 320
+  let h: Int32 = 240
+  createWindow(w, h)
+  for y in 0..<h {
+    for x in 0..<w {
       drawPoint(x, y,
                 Int32.random(in: 0...255),
                 Int32.random(in: 0...255),
@@ -60,7 +62,9 @@ func main() {
 
   clearWindow()
 
-  drawLine(Int32(10), Int32(10), Int32(200), Int32(200),
+  let p1: [Int32] = [10, 10]
+  let p2: [Int32] = [200, 200]
+  drawLine(p1[0], p1[1], p2[0], p2[1],
            Int32.random(in: 0...255),
            Int32.random(in: 0...255),
            Int32.random(in: 0...255), Int32(10))
