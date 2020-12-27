@@ -1,6 +1,7 @@
 #include "CGraphics.hpp"
 
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsContext.hpp>
+#include <DO/Sara/ImageIO/Details/ImageIOObjects.hpp>
 
 #include <QApplication>
 
@@ -47,7 +48,7 @@ auto GraphicsContext_registerUserMainFunc(void (*user_main)(void)) -> void
   ctx.registerUserMain(user_main_func);
 }
 
-void GraphicsContext_exec(void* appObj)
+auto GraphicsContext_exec(void* appObj) -> void
 {
   sara::GraphicsContext::instance().userThread().start();
 
@@ -58,7 +59,7 @@ void GraphicsContext_exec(void* appObj)
 }
 
 
-void* createWindow(int w, int h)
+auto createWindow(int w, int h) -> void*
 {
   auto ctx = &sara::GraphicsContext::instance();
   const auto x = 0;
@@ -71,7 +72,7 @@ void* createWindow(int w, int h)
   return reinterpret_cast<void*>(ctx->activeWindow());
 }
 
-void closeWindow(void* w)
+auto closeWindow(void* w) -> void
 {
   auto ctx = &sara::GraphicsContext::instance();
   QMetaObject::invokeMethod(ctx, "closeWindow", Qt::BlockingQueuedConnection,
@@ -79,25 +80,25 @@ void closeWindow(void* w)
 }
 
 
-static QWidget* activeWindow()
+static auto activeWindow() -> QWidget*
 {
   return sara::GraphicsContext::instance().activeWindow();
 }
 
 
-void drawPoint(int x, int y, int r, int g, int b)
+auto drawPoint(int x, int y, const Color *c) -> void
 {
   QMetaObject::invokeMethod(activeWindow(), "drawPoint", Qt::QueuedConnection,
                             Q_ARG(int, x), Q_ARG(int, y),
-                            Q_ARG(const QColor&, QColor(r, g, b)));
+                            Q_ARG(const QColor&, QColor(c->r, c->g, c->b, c->a)));
 }
 
-void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b, int penWidth)
+void drawLine(int x1, int y1, int x2, int y2, const Color *c, int penWidth)
 {
   QMetaObject::invokeMethod(
       activeWindow(), "drawLine", Qt::QueuedConnection, Q_ARG(int, x1),
       Q_ARG(int, y1), Q_ARG(int, x2), Q_ARG(int, y2),
-      Q_ARG(const QColor&, QColor(r, g, b)), Q_ARG(int, penWidth));
+      Q_ARG(const QColor&, QColor(c->r, c->g, c->b, c->a)), Q_ARG(int, penWidth));
 }
 
 void drawRect(int x, int y, int w, int h, int r, int g, int b, int penWidth)
@@ -155,12 +156,10 @@ void drawText(int x, int y, const char* s, int r, int g, int b, int fontSize,
       Q_ARG(bool, underlined));
 }
 
-void drawImage(const void* rgbDataPtr, int w, int h, int xoff, int yoff,
+void drawImage(const unsigned char* rgbDataPtr, int w, int h, int xoff, int yoff,
                double fact)
 {
-  auto image = QImage{reinterpret_cast<const uchar*>(rgbDataPtr), w, h, w * 3,
-                      QImage::Format_RGB888};
-
+  auto image = QImage{rgbDataPtr, w, h, w * 3, QImage::Format_RGB888};
   QMetaObject::invokeMethod(activeWindow(), "display",
                             Qt::BlockingQueuedConnection,
                             Q_ARG(const QImage&, image), Q_ARG(int, xoff),
@@ -206,4 +205,30 @@ void setAntialiasing(bool on)
   auto ctx = &sara::GraphicsContext::instance();
   QMetaObject::invokeMethod(ctx->activeWindow(), "setAntialiasing",
                             Qt::QueuedConnection, Q_ARG(bool, on));
+}
+
+
+auto ImageReader_init(const char *filepath) -> void *
+{
+  std::cout << "Init image reader" << std::endl;
+  auto reader = new sara::JpegFileReader(filepath);
+  return reinterpret_cast<void*>(reader);
+}
+
+auto ImageReader_deinit(void *reader) -> void
+{
+  std::cout << "Deinit image reader" << std::endl;
+  delete reinterpret_cast<sara::JpegFileReader*>(reader);
+}
+
+auto ImageReader_imageSizes(void *reader, int *w, int *h, int *c) -> void
+{
+  auto r = reinterpret_cast<sara::JpegFileReader*>(reader);
+  std::tie(*w, *h, *c) = r->image_sizes();
+}
+
+auto ImageReader_readImageData(void *reader, unsigned char *dataPtr) -> void
+{
+  auto r = reinterpret_cast<sara::JpegFileReader*>(reader);
+  r->read(dataPtr);
 }

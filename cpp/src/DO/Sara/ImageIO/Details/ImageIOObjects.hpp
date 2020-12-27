@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <DO/Sara/Core/StringFormat.hpp>
+
 extern "C" {
 #include <jpeglib.h>
 #include <png.h>

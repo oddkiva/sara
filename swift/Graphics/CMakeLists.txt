@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Graphics REQUIRED)
+find_package(DO_Sara COMPONENTS Graphics ImageIO REQUIRED)
 
 add_library(SaraSwiftGraphics CGraphics.cpp)
 # This is to find module.modulemap related to CGraphics.hpp

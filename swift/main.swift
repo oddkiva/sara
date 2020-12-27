@@ -4,37 +4,11 @@ import SaraCore
 import SaraGraphics
 
 
-public class GraphicsContext {
-  private var _qApp: UnsafeMutableRawPointer
-  private var _widgetList: UnsafeMutableRawPointer
-
-  init() {
-    print("Init Graphics Context...")
-    self._qApp = GraphicsContext_initQApp()
-    self._widgetList = GraphicsContext_initWidgetList()
-  }
-
-  func registerUserMainFunc(userMainFn: @escaping (@convention(c) () -> Void)) {
-    GraphicsContext_registerUserMainFunc(userMainFn)
-  }
-
-  func exec() {
-    GraphicsContext_exec(self._qApp)
-  }
-
-  deinit {
-    print("Deinit Graphics Context...")
-    GraphicsContext_deinitWidgetList(self._widgetList)
-  }
-}
-
-
 func main() {
   var numbers: [Int32] = [1, 2, 3, 5]
   print("Before squaring: \(numbers)")
 
   tic()
-  // Call a C function from Swift.
   numbers.withUnsafeMutableBufferPointer {
     (numbers) in
     let ptr = UnsafeMutableRawPointer(numbers.baseAddress!).bindMemory(
@@ -46,28 +20,37 @@ func main() {
 
   print("After squaring: \(numbers)")
 
-  usleep(1000*1000)
+  usleep(1000)
 
-  let w: Int32 = 320
-  let h: Int32 = 240
+  let image_filepath = "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+  let image = imread(filepath: image_filepath)
+
+  let w: Int32 = Int32(image.width)
+  let h: Int32 = Int32(image.height)
   createWindow(w, h)
-  for y in 0..<h {
-    for x in 0..<w {
-      drawPoint(x, y,
-                Int32.random(in: 0...255),
-                Int32.random(in: 0...255),
-                Int32.random(in: 0...255))
+
+  for y in 0..<Int32(10) {
+    for x in 0..<Int32(10) {
+      var color = rgb(UInt8.random(in: 0...UInt8.max),
+                      UInt8.random(in: 0...UInt8.max),
+                      UInt8.random(in: 0...UInt8.max))
+      drawPoint(x, y, &color)
     }
   }
+  getKey()
+
+  drawImage(image: image)
+  getKey()
 
   clearWindow()
-
-  let p1: [Int32] = [10, 10]
-  let p2: [Int32] = [200, 200]
-  drawLine(p1[0], p1[1], p2[0], p2[1],
-           Int32.random(in: 0...255),
-           Int32.random(in: 0...255),
-           Int32.random(in: 0...255), Int32(10))
+  typealias Point = (x: Int32, y: Int32)
+  let p1: Point = (10, 10)
+  let p2: Point = (200, 200)
+  var color = rgb(UInt8.random(in: 0...UInt8.max),
+                  UInt8.random(in: 0...UInt8.max),
+                  UInt8.random(in: 0...UInt8.max))
+  let penWidth: Int32 = 10
+  drawLine(p1.x, p1.y, p2.x, p2.y, &color, penWidth)
 
   getKey()
 }
