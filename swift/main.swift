@@ -49,9 +49,9 @@ func main() {
   usleep(1000*1000)
 
   createWindow(300, 300)
-  for y in 0..<300 {
-    for x in 0..<300 {
-      drawPoint(Int32(x), Int32(y),
+  for y in Int32(0)..<Int32(300) {
+    for x in Int32(0)..<Int32(300) {
+      drawPoint(x, y,
                 Int32.random(in: 0...255),
                 Int32.random(in: 0...255),
                 Int32.random(in: 0...255))
@@ -67,6 +67,7 @@ func main() {
 
   getKey()
 }
+
 
 let ctx = GraphicsContext()
 ctx.registerUserMainFunc(userMainFn: main)

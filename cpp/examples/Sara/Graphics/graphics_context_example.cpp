@@ -14,6 +14,7 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsContext.hpp>
 
+
 using namespace std;
 using namespace DO::Sara;
 
@@ -26,6 +27,7 @@ int main(int argc, char** argv)
 
   auto& ctx = GraphicsContext::instance();
   ctx.m_widgetList = &widgetList;
+
   ctx.registerUserMain(__main);
   ctx.userThread().start();
 
@@ -82,11 +84,6 @@ int __main(int, char**)
 
   ::set_antialiasing();
 
-//  QMetaObject::invokeMethod(ctx->m_widgetList->m_activeWindow,
-//                            "setTransparency",
-//                            Qt::QueuedConnection,
-//                            Q_ARG(bool, true));
-
   auto ctx = &GraphicsContext::instance();
   QMetaObject::invokeMethod(ctx->m_widgetList->m_activeWindow,
                             "drawLine",
@@ -105,25 +102,6 @@ int __main(int, char**)
 
   ctx->userThread().getMouse(x, y);
   std::cout << x << " " << y << std::endl;
-
-  // // Draw an oriented ellipse with:
-  // // center = (150, 100)
-  // // r1 = 10
-  // // r2 = 20
-  // // orientation = 45°
-  // // in cyan color, and a pencil width = 1.
-  // draw_ellipse(Point2f(150.f, 100.f), 10.f, 20.f, 45.f, Cyan8, 1);
-  // draw_ellipse(Point2f(50.f, 50.f), 10.f, 20.f, 0.f, Red8, 1);
-
-  // fill_circle(Point2f(100.f, 100.f), 10.f, Blue8);
-  // fill_ellipse(Point2f(150.f, 150.f), 10.f, 20.f, 72.f, Green8);
-
-  // Point2f p1(rand()%300, rand()%200);
-  // Point2f p2(rand()%300, rand()%200);
-  // draw_point((p1*2+p2)/2, Green8);
-
-  // click();
-  // close_window(W);
 
   return 0;
 }
