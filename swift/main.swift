@@ -25,15 +25,14 @@ func main() {
   let image_filepath = "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
   let image = imread(filepath: image_filepath)
 
-  let w: Int32 = Int32(image.width)
-  let h: Int32 = Int32(image.height)
+  let w = Int32(image.width)
+  let h = Int32(image.height)
   createWindow(w, h)
 
-  for y in 0..<Int32(10) {
-    for x in 0..<Int32(10) {
-      var color = rgb(UInt8.random(in: 0...UInt8.max),
-                      UInt8.random(in: 0...UInt8.max),
-                      UInt8.random(in: 0...UInt8.max))
+  for y in 0..<h/2 {
+    for x in 0..<w/2 {
+      let (r, g, b) = image.pixel(Int(x), Int(y))
+      var color = rgb(UInt8(r), UInt8(g), UInt8(b))
       drawPoint(x, y, &color)
     }
   }
