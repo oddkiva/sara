@@ -24,7 +24,8 @@ function build_library()
   if [ "${build_type}" == "Xcode" ]; then
     local cmake_options="-G Xcode "
   else
-    local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
+    local cmake_options="-G Ninja "
+    local cmake_options+="-DCMAKE_BUILD_TYPE=${build_type} "
   fi
 
   # Setup the C and C++ toolchain.
@@ -37,8 +38,6 @@ function build_library()
   elif [ "${platform_name}" == "Linux" ]; then
     local os_name=$(lsb_release -is)
     local os_version=$(lsb_release -rs)
-
-    local cmake_options="-G Ninja "
 
     # I really want C++17.
     if [[ ${os_name} == "Ubuntu" ]] && [[ ${os_version} == "16.04" ]]; then
