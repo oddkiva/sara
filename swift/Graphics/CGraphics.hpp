@@ -15,10 +15,12 @@ void GraphicsContext_exec(void* appObj);
 // Window management API.
 void* createWindow(int w, int h);
 void closeWindow(void* window);
+void resizeWindow(int width, int height);
 int getKey();
 
 
-struct Color {
+struct Color
+{
   unsigned char r;
   unsigned char g;
   unsigned char b;
@@ -27,8 +29,8 @@ struct Color {
 
 
 // Draw API.
-void drawPoint(int x, int y, const struct Color *c);
-void drawLine(int x1, int y1, int x2, int y2, const struct Color *c,
+void drawPoint(int x, int y, const struct Color* c);
+void drawLine(int x1, int y1, int x2, int y2, const struct Color* c,
               int penWidth);
 void drawRect(int x, int y, int w, int h, int r, int g, int b, int penWidth);
 void drawCircle(int xc, int yc, int radius, int r, int g, int b, int penWidth);
@@ -39,8 +41,8 @@ void drawArrow(int x1, int y1, int x2, int y2, int r, int g, int b,
                int arrowWidth, int arrowHeight, int style, int width);
 void drawText(int x, int y, const char* s, int r, int g, int b, int fontSize,
               double alpha, char italic, char bold, char underlined);
-void drawImage(const unsigned char* rgbDataPtr, int w, int h, int xoff, int yoff,
-               double fact);
+void drawImage(const unsigned char* rgbDataPtr, int w, int h, int xoff,
+               int yoff, double fact);
 
 
 // Fill API.
@@ -51,10 +53,18 @@ void fillRect(int x, int y, int w, int h, int r, int g, int b);
 void clearWindow();
 
 // Image I/O.
-void *ImageReader_init(const char *name);
-void ImageReader_deinit(void *reader);
-void ImageReader_imageSizes(void *reader, int *w, int *h, int *c);
-void ImageReader_readImageData(void *reader, unsigned char *dataPtr);
+void* ImageReader_init(const char* name);
+void ImageReader_deinit(void* reader);
+void ImageReader_imageSizes(void* reader, int* w, int* h, int* c);
+void ImageReader_readImageData(void* reader, unsigned char* dataPtr);
+
+// Video I/O.
+void* VideoStream_init(const char* name);
+void VideoStream_deinit(void* stream);
+unsigned char* VideoStream_getFramePtr(void* stream);
+int VideoStream_getFrameWidth(void* stream);
+int VideoStream_getFrameHeight(void* stream);
+int VideoStream_readFrame(void* stream);
 
 
 #ifdef __cplusplus

@@ -9,5 +9,6 @@ add_executable(hello_world
   main.swift
   Graphics.swift
   Image.swift
-  ImageIO.swift)
+  ImageIO.swift
+  VideoIO.swift)
 target_link_libraries(hello_world PRIVATE SaraSwiftCore SaraSwiftGraphics)

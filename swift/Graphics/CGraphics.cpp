@@ -2,6 +2,7 @@
 
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsContext.hpp>
 #include <DO/Sara/ImageIO/Details/ImageIOObjects.hpp>
+#include <DO/Sara/VideoIO.hpp>
 
 #include <QApplication>
 
@@ -59,6 +60,12 @@ auto GraphicsContext_exec(void* appObj) -> void
 }
 
 
+static auto activeWindow() -> QWidget*
+{
+  return sara::GraphicsContext::instance().activeWindow();
+}
+
+
 auto createWindow(int w, int h) -> void*
 {
   auto ctx = &sara::GraphicsContext::instance();
@@ -79,26 +86,28 @@ auto closeWindow(void* w) -> void
                             Q_ARG(QWidget*, reinterpret_cast<QWidget*>(w)));
 }
 
-
-static auto activeWindow() -> QWidget*
+void resizeWindow(int width, int height)
 {
-  return sara::GraphicsContext::instance().activeWindow();
+  QMetaObject::invokeMethod(activeWindow(), "resizeScreen",
+                            Qt::BlockingQueuedConnection,
+                            Q_ARG(int, width), Q_ARG(int, height));
 }
 
 
-auto drawPoint(int x, int y, const Color *c) -> void
+auto drawPoint(int x, int y, const Color* c) -> void
 {
-  QMetaObject::invokeMethod(activeWindow(), "drawPoint", Qt::QueuedConnection,
-                            Q_ARG(int, x), Q_ARG(int, y),
-                            Q_ARG(const QColor&, QColor(c->r, c->g, c->b, c->a)));
+  QMetaObject::invokeMethod(
+      activeWindow(), "drawPoint", Qt::QueuedConnection, Q_ARG(int, x),
+      Q_ARG(int, y), Q_ARG(const QColor&, QColor(c->r, c->g, c->b, c->a)));
 }
 
-void drawLine(int x1, int y1, int x2, int y2, const Color *c, int penWidth)
+void drawLine(int x1, int y1, int x2, int y2, const Color* c, int penWidth)
 {
   QMetaObject::invokeMethod(
       activeWindow(), "drawLine", Qt::QueuedConnection, Q_ARG(int, x1),
       Q_ARG(int, y1), Q_ARG(int, x2), Q_ARG(int, y2),
-      Q_ARG(const QColor&, QColor(c->r, c->g, c->b, c->a)), Q_ARG(int, penWidth));
+      Q_ARG(const QColor&, QColor(c->r, c->g, c->b, c->a)),
+      Q_ARG(int, penWidth));
 }
 
 void drawRect(int x, int y, int w, int h, int r, int g, int b, int penWidth)
@@ -156,8 +165,8 @@ void drawText(int x, int y, const char* s, int r, int g, int b, int fontSize,
       Q_ARG(bool, underlined));
 }
 
-void drawImage(const unsigned char* rgbDataPtr, int w, int h, int xoff, int yoff,
-               double fact)
+void drawImage(const unsigned char* rgbDataPtr, int w, int h, int xoff,
+               int yoff, double fact)
 {
   auto image = QImage{rgbDataPtr, w, h, w * 3, QImage::Format_RGB888};
   QMetaObject::invokeMethod(activeWindow(), "display",
@@ -208,27 +217,67 @@ void setAntialiasing(bool on)
 }
 
 
-auto ImageReader_init(const char *filepath) -> void *
+auto ImageReader_init(const char* filepath) -> void*
 {
   std::cout << "Init image reader" << std::endl;
   auto reader = new sara::JpegFileReader(filepath);
   return reinterpret_cast<void*>(reader);
 }
 
-auto ImageReader_deinit(void *reader) -> void
+auto ImageReader_deinit(void* reader) -> void
 {
   std::cout << "Deinit image reader" << std::endl;
   delete reinterpret_cast<sara::JpegFileReader*>(reader);
 }
 
-auto ImageReader_imageSizes(void *reader, int *w, int *h, int *c) -> void
+auto ImageReader_imageSizes(void* reader, int* w, int* h, int* c) -> void
 {
   auto r = reinterpret_cast<sara::JpegFileReader*>(reader);
   std::tie(*w, *h, *c) = r->image_sizes();
 }
 
-auto ImageReader_readImageData(void *reader, unsigned char *dataPtr) -> void
+auto ImageReader_readImageData(void* reader, unsigned char* dataPtr) -> void
 {
   auto r = reinterpret_cast<sara::JpegFileReader*>(reader);
   r->read(dataPtr);
+}
+
+
+auto VideoStream_init(const char* filepath) -> void*
+{
+  std::cout << "Init video stream" << std::endl;
+  auto reader = new sara::VideoStream{filepath};
+  return reinterpret_cast<void*>(reader);
+}
+
+auto VideoStream_deinit(void* stream) -> void
+{
+  std::cout << "Deinit video stream" << std::endl;
+  delete reinterpret_cast<sara::VideoStream*>(stream);
+}
+
+auto VideoStream_getFramePtr(void* stream) -> unsigned char *
+{
+  auto vstream = reinterpret_cast<sara::VideoStream *>(stream);
+  auto frame = vstream->frame();
+  auto framePtr = reinterpret_cast<unsigned char*>(frame.data());
+  return framePtr;
+}
+
+auto VideoStream_getFrameWidth(void* stream) -> int
+{
+  auto vstream = reinterpret_cast<sara::VideoStream *>(stream);
+  return vstream->width();
+}
+
+auto VideoStream_getFrameHeight(void* stream) -> int
+{
+  auto vstream = reinterpret_cast<sara::VideoStream *>(stream);
+  return vstream->height();
+}
+
+auto VideoStream_readFrame(void *stream) -> int
+{
+  auto vstream = reinterpret_cast<sara::VideoStream *>(stream);
+  return static_cast<int>(vstream->read());
 }
