@@ -53,10 +53,10 @@ void fillRect(int x, int y, int w, int h, int r, int g, int b);
 void clearWindow();
 
 // Image I/O.
-void* ImageReader_init(const char* name);
-void ImageReader_deinit(void* reader);
-void ImageReader_imageSizes(void* reader, int* w, int* h, int* c);
-void ImageReader_readImageData(void* reader, unsigned char* dataPtr);
+void* JpegImageReader_init(const char* name);
+void JpegImageReader_deinit(void* reader);
+void JpegImageReader_imageSizes(void* reader, int* w, int* h, int* c);
+void JpegImageReader_readImageData(void* reader, unsigned char* dataPtr);
 
 // Video I/O.
 void* VideoStream_init(const char* name);

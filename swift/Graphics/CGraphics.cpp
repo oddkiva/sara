@@ -217,26 +217,24 @@ void setAntialiasing(bool on)
 }
 
 
-auto ImageReader_init(const char* filepath) -> void*
+auto JpegImageReader_init(const char* filepath) -> void*
 {
-  std::cout << "Init image reader" << std::endl;
   auto reader = new sara::JpegFileReader(filepath);
   return reinterpret_cast<void*>(reader);
 }
 
-auto ImageReader_deinit(void* reader) -> void
+auto JpegImageReader_deinit(void* reader) -> void
 {
-  std::cout << "Deinit image reader" << std::endl;
   delete reinterpret_cast<sara::JpegFileReader*>(reader);
 }
 
-auto ImageReader_imageSizes(void* reader, int* w, int* h, int* c) -> void
+auto JpegImageReader_imageSizes(void* reader, int* w, int* h, int* c) -> void
 {
   auto r = reinterpret_cast<sara::JpegFileReader*>(reader);
   std::tie(*w, *h, *c) = r->image_sizes();
 }
 
-auto ImageReader_readImageData(void* reader, unsigned char* dataPtr) -> void
+auto JpegImageReader_readImageData(void* reader, unsigned char* dataPtr) -> void
 {
   auto r = reinterpret_cast<sara::JpegFileReader*>(reader);
   r->read(dataPtr);
@@ -245,14 +243,12 @@ auto ImageReader_readImageData(void* reader, unsigned char* dataPtr) -> void
 
 auto VideoStream_init(const char* filepath) -> void*
 {
-  std::cout << "Init video stream" << std::endl;
   auto reader = new sara::VideoStream{filepath};
   return reinterpret_cast<void*>(reader);
 }
 
 auto VideoStream_deinit(void* stream) -> void
 {
-  std::cout << "Deinit video stream" << std::endl;
   delete reinterpret_cast<sara::VideoStream*>(stream);
 }
 
