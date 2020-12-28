@@ -6,8 +6,8 @@ public class VideoStream {
 
     var frame: ImageView<UInt8>
 
-    init(filepath: String) {
-        self._stream = VideoStream_init(filepath.cString(using: .utf8))
+    init(filePath: String) {
+        self._stream = VideoStream_init(filePath.cString(using: .utf8))
         self.frame = ImageView<UInt8>()
 
         let framePtr = VideoStream_getFramePtr(self._stream)

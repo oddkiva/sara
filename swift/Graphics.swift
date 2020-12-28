@@ -18,6 +18,11 @@ public class GraphicsContext {
     func exec() {
         GraphicsContext_exec(self._qApp)
     }
+
+    deinit {
+        print("Deinit Graphics Context...")
+        GraphicsContext_deinitWidgetList(self._widgetList)
+    }
 }
 
 

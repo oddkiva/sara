@@ -38,7 +38,7 @@ func testDrawFunctions() {
 
 func testImageRead() {
     let imageFilepath = "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
-    let image = imread(filepath: imageFilepath)
+    let image = imread(filePath: imageFilepath)
 
     let w = Int32(image.width)
     let h = Int32(image.height)
@@ -61,8 +61,9 @@ func testImageRead() {
 
 func testVideoRead() {
     let videoFilePath = "/Users/david/Desktop/Datasets/videos/sample10.mp4"
-    let videoStream = VideoStream(filepath: videoFilePath)
-    resizeWindow(Int32(videoStream.frame.width), Int32(videoStream.frame.height))
+    let videoStream = VideoStream(filePath: videoFilePath)
+    resizeWindow(Int32(videoStream.frame.width),
+                 Int32(videoStream.frame.height))
     while videoStream.read() {
         drawImage(image: videoStream.frame)
     }
