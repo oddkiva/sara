@@ -13,13 +13,12 @@
 
 #pragma once
 
-#include <QApplication>
+#include <QObject>
 #include <QPixmap>
 #include <QPointer>
 #include <QString>
 #include <QWidget>
 
-#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/UserThread.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/PaintingWindow.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/OpenGLWindow.hpp>
@@ -28,18 +27,40 @@
 
 namespace DO { namespace Sara {
 
-  //! @brief quick-and-dirty thing to read file from dialog box.
-  //! @todo See if it can be done in a more elegant way.
-  struct DialogBoxInfo
+  class WidgetList
   {
-    QPixmap pixmap;
-    QString filename;
+  public:
+    QList<QPointer<QWidget>> m_createdWindows;
+    QPointer<QWidget> m_activeWindow;
+
+    ~WidgetList()
+    {
+      for (auto w = m_createdWindows.begin(); w != m_createdWindows.end(); ++w)
+      {
+        if (!w->isNull())
+        {
+          auto paintingWindow = qobject_cast<PaintingWindow*>(*w);
+          if (paintingWindow)
+            delete paintingWindow->scrollArea();
+          else
+            delete *w;
+        }
+      }
+    }
   };
 
   //! Private implementation of the class GraphicsApplication
-  class DO_SARA_EXPORT GraphicsApplication::Impl : public QApplication
+  class DO_SARA_EXPORT GraphicsContext : public QObject
   {
     Q_OBJECT
+
+    //! @brief quick-and-dirty thing to read file from dialog box.
+    //! @todo See if it can be done in a more elegant way.
+    struct DialogBoxInfo
+    {
+      QPixmap pixmap;
+      QString filename;
+    };
 
   public: /* enum */
     enum WindowType {
@@ -48,10 +69,16 @@ namespace DO { namespace Sara {
       GRAPHICS_VIEW = 2
     };
 
-  public: /* methods */
-    Impl(int& argc, char **argv);
+  public:
+    static auto instance() -> GraphicsContext&;
+    auto registerUserMain(int (*userMain)(int, char**)) -> void;
+    auto registerUserMain(std::function<int(int, char **)>) -> void;
+    auto userThread() -> UserThread& { return m_userThread; }
+    auto activeWindow() -> QWidget *;
 
-    virtual ~Impl();
+  private: /* methods */
+    GraphicsContext();
+    virtual ~GraphicsContext();
 
   public slots:
     void createWindow(int windowType, int w, int h,
@@ -68,8 +95,7 @@ namespace DO { namespace Sara {
 
   public:
     UserThread m_userThread;
-    QList<QPointer<QWidget> > m_createdWindows;
-    QPointer<QWidget> m_activeWindow;
+    WidgetList *m_widgetList = nullptr;
 
     DialogBoxInfo m_dialogBoxInfo;
 

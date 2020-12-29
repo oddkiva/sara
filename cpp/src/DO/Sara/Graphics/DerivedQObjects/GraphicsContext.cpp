@@ -9,60 +9,72 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <QApplication>
 #include <QDebug>
 #include <QFileDialog>
 
-#include <DO/Sara/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp>
+#include <DO/Sara/Graphics/DerivedQObjects/GraphicsContext.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
-  GraphicsApplication::Impl::
-  Impl(int& argc, char **argv)
-    : QApplication(argc, argv)
-    , m_activeWindow(0)
-    , m_mutex(QMutex::NonRecursive)
+  auto GraphicsContext::instance() -> GraphicsContext&
+  {
+    static GraphicsContext singleton{};
+    return singleton;
+  }
+
+  auto GraphicsContext::registerUserMain(int (*user_main)(int, char**))
+      -> void
+  {
+    m_userThread.registerUserMain(user_main);
+  }
+
+  auto GraphicsContext::registerUserMain(std::function<int(int, char **)> user_main)
+      -> void
+  {
+    m_userThread.registerUserMain(user_main);
+  }
+
+  GraphicsContext::GraphicsContext()
+    : m_mutex(QMutex::NonRecursive)
   {
     // Register painting data types.
-    qRegisterMetaType<PaintingWindow *>("PaintingWindow *");
+    qRegisterMetaType<PaintingWindow*>("PaintingWindow *");
     qRegisterMetaType<QPolygonF>("QPolygonF");
 
     // Register mesh data structure.
     qRegisterMetaType<SimpleTriangleMesh3f>("SimpleTriangleMesh3f");
 
     // Register graphics view data types.
-    qRegisterMetaType<QGraphicsPixmapItem *>("QGraphicsPixmapItem *");
+    qRegisterMetaType<QGraphicsPixmapItem*>("QGraphicsPixmapItem *");
 
     // Register Event data types
     qRegisterMetaType<Event>("Event");
 
     // Make sure you quit after the user thread is finished.
-    connect(&m_userThread, SIGNAL(finished()), this, SLOT(quit()));
-    setQuitOnLastWindowClosed(false);
+    QApplication* app = qobject_cast<QApplication*>(qApp);
+    if (app == nullptr)
+      qFatal("Invalid Application!");
+    connect(&m_userThread, SIGNAL(finished()), app, SLOT(quit()));
+    app->setQuitOnLastWindowClosed(false);
   }
 
-  GraphicsApplication::Impl::
-  ~Impl()
+  GraphicsContext::~GraphicsContext()
   {
-    QList<QPointer<QWidget> >::iterator w = m_createdWindows.begin();
-    for ( ; w != m_createdWindows.end(); ++w)
-    {
-      if (!w->isNull())
-      {
-        PaintingWindow *paintingWindow = qobject_cast<PaintingWindow *>(*w);
-        if (paintingWindow)
-          delete paintingWindow->scrollArea();
-        else
-          delete *w;
-      }
-    }
   }
 
-  void
-  GraphicsApplication::Impl::
-  createWindow(int windowType, int w, int h,
-               const QString& windowTitle, int x, int y)
+  auto GraphicsContext::activeWindow() -> QWidget *
   {
+    return m_widgetList->m_activeWindow;
+  }
+
+  void GraphicsContext::createWindow(int windowType, int w, int h,
+                                     const QString& windowTitle, int x, int y)
+  {
+    auto& m_createdWindows = m_widgetList->m_createdWindows;
+    auto& m_activeWindow = m_widgetList->m_activeWindow;
+
     if (windowType == PAINTING_WINDOW)
       m_createdWindows << new PaintingWindow(w, h, windowTitle, x, y);
     if (windowType == OPENGL_WINDOW)
@@ -77,11 +89,9 @@ namespace DO { namespace Sara {
     }
   }
 
-  void
-  GraphicsApplication::Impl::
-  setActiveWindow(QWidget *w)
+  void GraphicsContext::setActiveWindow(QWidget* w)
   {
-    if (w == 0)
+    if (w == nullptr)
     {
       qWarning() << "I can't make a null window active!";
       return;
@@ -94,52 +104,48 @@ namespace DO { namespace Sara {
     disconnectAllWindowsIOEventsToUserThread();
 
     // This is now our current active window
+    auto& m_activeWindow = m_widgetList->m_activeWindow;
     m_activeWindow = w;
     connectWindowIOEventsToUserThread(w);
   }
 
-  void
-  GraphicsApplication::Impl::
-  closeWindow(QWidget *w)
+  void GraphicsContext::closeWindow(QWidget* w)
   {
-    QList<QPointer<QWidget>>::iterator wi =
-        std::find(m_createdWindows.begin(), m_createdWindows.end(), w);
-     if (wi == m_createdWindows.end())
-     {
-       qFatal("Could not find window!");
-       quit();
-     }
+    auto& m_createdWindows = m_widgetList->m_createdWindows;
+    auto wi = std::find(m_createdWindows.begin(), m_createdWindows.end(), w);
+    if (wi == m_createdWindows.end())
+    {
+      qFatal("Could not find window!");
+      qApp->quit();
+    }
 
-     // Store closing result here.
-     auto closed = false;
-     // Close the painting window if it is one.
-     auto paintingWindow = qobject_cast<PaintingWindow *>(*wi);
-     if (paintingWindow)
-       closed = paintingWindow->scrollArea()->close();
-     else
-       closed = (*wi)->close();
-     // Check the closing is successful.
-     if (!closed)
-     {
-       qFatal("Could not close window!");
-       quit();
-     }
+    // Store closing result here.
+    auto closed = false;
+    // Close the painting window if it is one.
+    auto paintingWindow = qobject_cast<PaintingWindow*>(*wi);
+    if (paintingWindow)
+      closed = paintingWindow->scrollArea()->close();
+    else
+      closed = (*wi)->close();
+    // Check the closing is successful.
+    if (!closed)
+    {
+      qFatal("Could not close window!");
+      qApp->quit();
+    }
 
-     m_createdWindows.erase(wi);
-   }
+    m_createdWindows.erase(wi);
+  }
 
-  void
-  GraphicsApplication::Impl::
-  getFileFromDialogBox()
+  void GraphicsContext::getFileFromDialogBox()
   {
     m_dialogBoxInfo.filename = QFileDialog::getOpenFileName(
         0, "Open File", "/home", "Images (*.png *.xpm *.jpg)");
   }
 
-  bool
-  GraphicsApplication::Impl::
-  activeWindowIsVisible()
+  bool GraphicsContext::activeWindowIsVisible()
   {
+    auto& m_activeWindow = m_widgetList->m_activeWindow;
     m_mutex.lock();
     if (m_activeWindow.isNull())
     {
@@ -157,12 +163,10 @@ namespace DO { namespace Sara {
     return true;
   }
 
-  void
-  GraphicsApplication::Impl::
-  connectWindowIOEventsToUserThread(QWidget *w)
+  void GraphicsContext::connectWindowIOEventsToUserThread(QWidget* w)
   {
     // User thread listens to mouse events.
-    if (qobject_cast<PaintingWindow *>(w))
+    if (qobject_cast<PaintingWindow*>(w))
       connect(w, SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)),
               &m_userThread,
               SLOT(pressedMouseButtons(int, int, Qt::MouseButtons)));
@@ -173,12 +177,10 @@ namespace DO { namespace Sara {
             SLOT(receivedEvent(Event)));
   }
 
-  void
-  GraphicsApplication::Impl::
-  connectAllWindowsIOEventsToUserThread()
+  void GraphicsContext::connectAllWindowsIOEventsToUserThread()
   {
-    QList<QPointer<QWidget> >::iterator w = m_createdWindows.begin();
-    for ( ; w != m_createdWindows.end(); )
+    auto& m_createdWindows = m_widgetList->m_createdWindows;
+    for (auto w = m_createdWindows.begin(); w != m_createdWindows.end();)
     {
       if (w->isNull())
       {
@@ -190,12 +192,10 @@ namespace DO { namespace Sara {
     }
   }
 
-  void
-  GraphicsApplication::Impl::
-  disconnectAllWindowsIOEventsToUserThread()
+  void GraphicsContext::disconnectAllWindowsIOEventsToUserThread()
   {
-    QList<QPointer<QWidget> >::iterator w = m_createdWindows.begin();
-    for ( ; w != m_createdWindows.end(); )
+    auto& m_createdWindows = m_widgetList->m_createdWindows;
+    for (auto w = m_createdWindows.begin(); w != m_createdWindows.end();)
     {
       if (w->isNull())
       {
@@ -208,5 +208,4 @@ namespace DO { namespace Sara {
     }
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara

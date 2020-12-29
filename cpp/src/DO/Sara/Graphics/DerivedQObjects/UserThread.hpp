@@ -13,13 +13,15 @@
 
 #pragma once
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
 
 #include <DO/Sara/Defines.hpp>
+#include <DO/Sara/Graphics/Events.hpp>
 
-#include "../Events.hpp"
+#include <QMutex>
+#include <QThread>
+#include <QWaitCondition>
+
+#include <memory>
 
 
 namespace DO { namespace Sara {
@@ -38,11 +40,25 @@ namespace DO { namespace Sara {
   public:
     UserThread(QObject* parent = 0);
 
-    void registerUserMain(int (*userMain)(int, char **)) { m_userMain = userMain; }
+    void registerUserMain(int (*userMain)(int, char**))
+    {
+      m_userMain = userMain;
+    }
+
+    void registerUserMain(std::function<int(int, char**)> userMain)
+    {
+      m_userMain2 = userMain;
+    }
 
   public: /* timing methods */
-    void milliSleep(int msec) { msleep(msec); }
-    void microSleep(int usec) { usleep(usec); }
+    void milliSleep(int msec)
+    {
+      msleep(msec);
+    }
+    void microSleep(int usec)
+    {
+      usleep(usec);
+    }
 
   public: /* I/O handling methods */
     int getMouse(int& x, int& y);
@@ -57,13 +73,14 @@ namespace DO { namespace Sara {
     void receivedEvent(Event e);
 
   signals: /* for debugging and testing purposes */
-    void sendEvent(QEvent *event, int delayMs);
+    void sendEvent(QEvent* event, int delayMs);
 
   protected:
     void run();
 
   private:
-    int (*m_userMain)(int, char **);
+    int (*m_userMain)(int, char**);
+    std::function<int(int, char**)> m_userMain2;
 
     QMutex m_mutex;
     QWaitCondition m_condition;
@@ -78,5 +95,4 @@ namespace DO { namespace Sara {
     Event m_event;
   };
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

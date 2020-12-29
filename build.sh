@@ -9,7 +9,10 @@ else
 fi
 
 platform_name=$(uname -s)
-
+if [[ "${platform_name}" == "Darwin" ]]; then
+  # export PATH=~/GitHub/CMake/cmake-build/bin:${PATH}
+  export PATH=~/Downloads/cmake-3.18.5-Darwin-x86_64/CMake.app/Contents/bin:$PATH
+fi
 
 function install_python_packages_via_pip()
 {
@@ -21,8 +24,11 @@ function build_library()
   if [ "${build_type}" == "Xcode" ]; then
     local cmake_options="-G Xcode "
   else
-    local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
+    local cmake_options="-G Ninja "
+    local cmake_options+="-DCMAKE_BUILD_TYPE=${build_type} "
   fi
+
+  # Setup the C and C++ toolchain.
   if [[ "${platform_name}" == "Darwin" ]] &&
      [[ "${build_type}" == "Xcode" ]]; then
     # Workaround for Xcode generator on Apple platforms.
@@ -40,10 +46,15 @@ function build_library()
     fi
   fi
 
+  # Setup Swift toolchain.
+  if [[ "${platform_name}" == "Darwin" ]]; then
+    cmake_options+="-DCMAKE_Swift_COMPILER=$(which swiftc) "
+  elif [[ "${platform_name}" == "Linux" ]]; then
+    cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.3.2-RELEASE-ubuntu20.04/usr/bin/swiftc "
+  fi
+
   if [ "${platform_name}" == "Darwin" ]; then
     cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
-  else
-    cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/opt/Qt-5.15.0-amd64 "
   fi
 
   cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
@@ -56,22 +67,22 @@ function build_library()
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
 
   cmake_options+="-DSARA_USE_HALIDE=ON "
-  if [ "${platform_name}" == "Darwin" ]; then
-    cmake_options+="-DHALIDE_DISTRIB_DIR=/usr/local "
-  else
-    cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide "
-  fi
-  cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
+  # cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
+
+  echo $(which cmake)
+  echo $(cmake --version)
 
   # Generate makefile project.
   if [ "${build_type}" == "emscripten" ]; then
     emconfigure cmake ../sara
   else
-    cmake ../sara ${cmake_options}
+    time cmake ../sara ${cmake_options} \
+      --profiling-format=google-trace \
+      --profiling-output=~/Desktop/cmake-sara.log
   fi
 
   # Build the library.
-  cmake --build . -j$(nproc) -v
+  time cmake --build . -j$(nproc) -v
 
   # Run C++ tests.
   export BOOST_TEST_LOG_LEVEL=all
@@ -81,11 +92,11 @@ function build_library()
   if [[ "${build_type}" == "Xcode" ]]; then
     test_options+="-C Debug"
   fi
-  ctest ${test_options}
+  time ctest ${test_options}
 
   # Run Python tests.
-  make pytest
-  make package
+  time cmake --build . --target pytest
+  time cmake --build . --target package
 }
 
 function build_library_for_ios()
@@ -124,10 +135,10 @@ function build_library_for_ios()
   fi
 
   # Generate the Xcode project.
-  cmake ../sara ${cmake_options}
+  time cmake ../sara ${cmake_options}
 
   # Build the library.
-  cmake --build . -j$(nproc) -v
+  time cmake --build . -j$(nproc) -v
 
   # Run C++ tests.
   export BOOST_TEST_LOG_LEVEL=all
@@ -137,11 +148,11 @@ function build_library_for_ios()
   if [[ "${build_type}" == "Xcode" ]]; then
     test_options+="-C Debug"
   fi
-  ctest ${test_options}
+  time ctest ${test_options}
 
   # Run Python tests.
-  cmake --build . --target pytest
-  cmake --build . --target  package
+  time cmake --build . --target pytest
+  time cmake --build . --target package
 }
 
 function install_package()
@@ -178,6 +189,6 @@ cd ../${sara_build_dir}
     install_python_packages_via_pip
     build_library
   fi
-  #install_package
+  # install_package
 }
 cd ..

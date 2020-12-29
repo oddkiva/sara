@@ -31,6 +31,11 @@ namespace DO { namespace Sara {
     pimpl_->m_userThread.registerUserMain(userMain);
   }
 
+  void GraphicsApplication::register_user_main(std::function<int(int, char **)> user_main)
+  {
+    pimpl_->m_userThread.registerUserMain(user_main);
+  }
+
   int GraphicsApplication::exec()
   {
     pimpl_->m_userThread.start();

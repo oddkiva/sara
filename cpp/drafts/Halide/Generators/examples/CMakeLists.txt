@@ -11,10 +11,12 @@ target_compile_definitions(halide_aot_example
 target_link_options(halide_aot_example
   PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
+
 target_link_libraries(halide_aot_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
-  Halide
+  Halide::Halide
+  Halide::Runtime
   shakti_halide_rgb_to_gray
   shakti_halide_gray32f_to_rgb
   shakti_halide_gaussian_blur
@@ -29,7 +31,8 @@ target_compile_definitions(halide_gaussian_convolution_example
 target_link_libraries(halide_gaussian_convolution_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
-  Halide
+  Halide::Halide
+  Halide::Runtime
   shakti_gaussian_convolution_v2
   shakti_halide_gaussian_blur)
 set_property(TARGET halide_gaussian_convolution_example
@@ -46,7 +49,8 @@ target_link_options(halide_resize_example
 target_link_libraries(halide_resize_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
-  Halide
+  Halide::Halide
+  Halide::Runtime
   shakti_halide_rgb_to_gray
   shakti_halide_gray32f_to_rgb
   shakti_reduce_32f)
@@ -91,7 +95,7 @@ set(HALIDE_SIFT_LIBRARIES
   # Stream compaction
   shakti_count_extrema
   shakti_stream_compaction
-  )
+)
 
 
 add_executable(halide_sift_example
@@ -103,7 +107,8 @@ target_link_options(halide_sift_example
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_sift_example
   PRIVATE
-  Halide
+  Halide::Halide
+  Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES})
 
@@ -120,7 +125,8 @@ target_link_options(halide_sift_octave_example
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_sift_octave_example
   PRIVATE
-  Halide
+  Halide::Halide
+  Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES})
 set_property(TARGET halide_sift_octave_example
@@ -136,7 +142,8 @@ target_link_options(halide_sift_pyramid_example
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_sift_pyramid_example
   PRIVATE
-  Halide
+  Halide::Halide
+  Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES})
 set_property(TARGET halide_sift_pyramid_example
@@ -152,7 +159,8 @@ target_link_options(halide_batched_sift_octave_example
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_batched_sift_octave_example
   PRIVATE
-  Halide
+  Halide::Halide
+  Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES})
 set_property(TARGET halide_batched_sift_octave_example

@@ -20,6 +20,8 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
     "${CMAKE_CXX_COMPILER_ID} compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
 
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=72")
+  # Turn off Eigen warnings.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-copy")
 
   # Enable colors in gcc log output.
   if (${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER 4.8)
@@ -38,12 +40,13 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable")
 
   # Additional flags for Release builds.
-  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
   # Additional flags for Debug builds to code coverage.
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -D_DEBUG -fno-inline")
-  if (NOT APPLE)
+  if (NOT APPLE AND NOT CMAKE_GENERATOR STREQUAL "Ninja")
     set(CMAKE_CXX_FLAGS_DEBUG
-        "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+      "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   endif ()
 endif ()
 
