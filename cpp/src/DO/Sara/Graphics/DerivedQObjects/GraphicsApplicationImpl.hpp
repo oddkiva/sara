@@ -67,8 +67,6 @@ namespace DO { namespace Sara {
     void disconnectAllWindowsIOEventsToUserThread();
 
   public:
-    int& m_argc;
-    char **m_argv;
     UserThread m_userThread;
     QList<QPointer<QWidget> > m_createdWindows;
     QPointer<QWidget> m_activeWindow;

@@ -20,8 +20,6 @@ namespace DO { namespace Sara {
   GraphicsApplication::Impl::
   Impl(int& argc, char **argv)
     : QApplication(argc, argv)
-    , m_argc(argc)
-    , m_argv(argv)
     , m_activeWindow(0)
     , m_mutex(QMutex::NonRecursive)
   {
