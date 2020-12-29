@@ -150,9 +150,9 @@ struct EndPointGraph
   {
     const auto& edge_id = edge_ids[i];
     return Rectangle{
-        .center = edge_attrs.centers[edge_id],  //
-        .axes = edge_attrs.axes[edge_id],       //
-        .lengths = edge_attrs.lengths[edge_id]  //
+        edge_attrs.centers[edge_id],  //
+        edge_attrs.axes[edge_id],     //
+        edge_attrs.lengths[edge_id]   //
     };
   }
 
