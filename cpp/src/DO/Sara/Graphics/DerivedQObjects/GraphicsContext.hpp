@@ -78,7 +78,6 @@ namespace DO { namespace Sara {
 
   private: /* methods */
     GraphicsContext();
-    virtual ~GraphicsContext();
 
   public slots:
     void createWindow(int windowType, int w, int h,

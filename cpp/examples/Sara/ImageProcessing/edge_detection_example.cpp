@@ -52,6 +52,15 @@ struct Rectangle
   const Eigen::Matrix2d& axes;
   const Eigen::Vector2d& lengths;
 
+  Rectangle(const Eigen::Vector2d& c,  //
+            const Eigen::Matrix2d& a,  //
+            const Eigen::Vector2d& l)
+    : center{c}
+    , axes{a}
+    , lengths{l}
+  {
+  }
+
   auto length_ratio() const
   {
     return lengths(0) / lengths(1);
