@@ -155,7 +155,7 @@ struct EndPointGraph
     return edge_attrs.edges[edge_id];
   }
 
-  auto rect(std::size_t i) const
+  auto rect(std::size_t i) const -> Rectangle
   {
     const auto& edge_id = edge_ids[i];
     return Rectangle{
