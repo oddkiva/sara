@@ -48,7 +48,7 @@ pushd ${REPOSITORY_DIR}
       -DCMAKE_C_COMPILER_LAUNCHER=ccache \
       -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
       ..
-    cmake --build . -j$(nproc) -v
+    make -j$(nproc) -v
     make install
   }
   popd

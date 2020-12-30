@@ -60,10 +60,6 @@ namespace DO::Sara {
     app->setQuitOnLastWindowClosed(false);
   }
 
-  GraphicsContext::~GraphicsContext()
-  {
-  }
-
   auto GraphicsContext::activeWindow() -> QWidget *
   {
     return m_widgetList->m_activeWindow;

@@ -52,6 +52,15 @@ struct Rectangle
   const Eigen::Matrix2d& axes;
   const Eigen::Vector2d& lengths;
 
+  Rectangle(const Eigen::Vector2d& c,  //
+            const Eigen::Matrix2d& a,  //
+            const Eigen::Vector2d& l)
+    : center{c}
+    , axes{a}
+    , lengths{l}
+  {
+  }
+
   auto length_ratio() const
   {
     return lengths(0) / lengths(1);
@@ -150,9 +159,9 @@ struct EndPointGraph
   {
     const auto& edge_id = edge_ids[i];
     return Rectangle{
-        .center = edge_attrs.centers[edge_id],  //
-        .axes = edge_attrs.axes[edge_id],       //
-        .lengths = edge_attrs.lengths[edge_id]  //
+        edge_attrs.centers[edge_id],  //
+        edge_attrs.axes[edge_id],     //
+        edge_attrs.lengths[edge_id]   //
     };
   }
 
