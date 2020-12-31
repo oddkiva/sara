@@ -15,43 +15,73 @@ char** argv = nullptr;
 
 auto GraphicsContext_initQApp() -> void*
 {
-  static QApplication app{argc, argv};
-  return reinterpret_cast<void*>(&app);
+  qDebug() << "Instantiating QApplication...";
+  auto app = new QApplication{argc, argv};
+  return reinterpret_cast<void*>(app);
+}
+
+auto GraphicsContext_deinitQApp(void * app) -> void
+{
+  qDebug() << "Destroying QApplication...";
+  delete reinterpret_cast<QApplication*>(app);
+}
+
+void* GraphicsContext_initContext()
+{
+  qDebug() << "Instantiating graphics context...";
+  auto context = new sara::GraphicsContext;
+  context->makeCurrent();
+  return reinterpret_cast<void*>(context);
+}
+
+void GraphicsContext_deinitContext(void* context)
+{
+  qDebug() << "Destroying graphics context...";
+  delete reinterpret_cast<sara::GraphicsContext *>(context);
 }
 
 auto GraphicsContext_initWidgetList() -> void*
 {
-  auto& ctx = sara::GraphicsContext::instance();
-
+  qDebug() << "Instantiating widget list...";
   auto widgetList = new sara::WidgetList;
-  ctx.m_widgetList = widgetList;
+
+  auto ctx = sara::GraphicsContext::current();
+  if (ctx != nullptr)
+    ctx->setWidgetList(widgetList);
 
   return reinterpret_cast<void*>(widgetList);
 }
 
 auto GraphicsContext_deinitWidgetList(void* widgetListObj) -> void
 {
+  qDebug() << "Destroying widget list...";
   auto widgetList = reinterpret_cast<sara::WidgetList*>(widgetListObj);
   delete widgetList;
 
-  auto& ctx = sara::GraphicsContext::instance();
-  ctx.m_widgetList = nullptr;
+  auto ctx = sara::GraphicsContext::current();
+  if (ctx)
+    ctx->setWidgetList(nullptr);
 }
 
 
 auto GraphicsContext_registerUserMainFunc(void (*user_main)(void)) -> void
 {
-  auto& ctx = sara::GraphicsContext::instance();
+  auto ctx = sara::GraphicsContext::current();
+  if (ctx == nullptr)
+    throw std::runtime_error{"Current graphics context is invalid!"};
+
   auto user_main_func = [=](int, char**) -> int {
     (*user_main)();
     return 0;
   };
-  ctx.registerUserMain(user_main_func);
+  ctx->registerUserMain(user_main_func);
 }
 
 auto GraphicsContext_exec(void* appObj) -> void
 {
-  sara::GraphicsContext::instance().userThread().start();
+  auto ctx = sara::GraphicsContext::current();
+  if (ctx != nullptr)
+    ctx->userThread().start();
 
   if (appObj == nullptr)
     return;
@@ -62,13 +92,13 @@ auto GraphicsContext_exec(void* appObj) -> void
 
 static auto activeWindow() -> QWidget*
 {
-  return sara::GraphicsContext::instance().activeWindow();
+  return sara::GraphicsContext::current()->activeWindow();
 }
 
 
 auto createWindow(int w, int h) -> void*
 {
-  auto ctx = &sara::GraphicsContext::instance();
+  auto ctx = sara::GraphicsContext::current();
   const auto x = 0;
   const auto y = 0;
   QMetaObject::invokeMethod(ctx, "createWindow", Qt::BlockingQueuedConnection,
@@ -81,7 +111,7 @@ auto createWindow(int w, int h) -> void*
 
 auto closeWindow(void* w) -> void
 {
-  auto ctx = &sara::GraphicsContext::instance();
+  auto ctx = sara::GraphicsContext::current();
   QMetaObject::invokeMethod(ctx, "closeWindow", Qt::BlockingQueuedConnection,
                             Q_ARG(QWidget*, reinterpret_cast<QWidget*>(w)));
 }
@@ -206,12 +236,12 @@ void clearWindow()
 
 int getKey()
 {
-  return sara::GraphicsContext::instance().userThread().getKey();
+  return sara::GraphicsContext::current()->userThread().getKey();
 }
 
 void setAntialiasing(bool on)
 {
-  auto ctx = &sara::GraphicsContext::instance();
+  auto ctx = sara::GraphicsContext::current();
   QMetaObject::invokeMethod(ctx->activeWindow(), "setAntialiasing",
                             Qt::QueuedConnection, Q_ARG(bool, on));
 }

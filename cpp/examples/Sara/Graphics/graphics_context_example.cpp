@@ -25,9 +25,9 @@ int main(int argc, char** argv)
 
   auto widgetList = WidgetList{};
 
-  auto& ctx = GraphicsContext::instance();
-  ctx.m_widgetList = &widgetList;
-
+  auto ctx = GraphicsContext{};
+  ctx.makeCurrent();
+  ctx.setWidgetList(&widgetList);
   ctx.registerUserMain(__main);
   ctx.userThread().start();
 
@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 
 
 static Window create_window(int h, int w, int x, int y) {
-  auto ctx = &GraphicsContext::instance();
+  auto ctx = GraphicsContext::current();
   QMetaObject::invokeMethod(ctx, "createWindow",
                             Qt::BlockingQueuedConnection,
                             Q_ARG(int, GraphicsContext::PAINTING_WINDOW),
@@ -47,8 +47,8 @@ static Window create_window(int h, int w, int x, int y) {
 }
 
 static void draw_point(int x, int y, const Rgb8& color) {
-  auto ctx = &GraphicsContext::instance();
-  QMetaObject::invokeMethod(ctx->m_widgetList->m_activeWindow,
+  auto ctx = GraphicsContext::current();
+  QMetaObject::invokeMethod(ctx->activeWindow(),
                             "drawPoint",
                             Qt::QueuedConnection,
                             Q_ARG(int, x), Q_ARG(int, y),
@@ -56,11 +56,11 @@ static void draw_point(int x, int y, const Rgb8& color) {
 }
 
 static void get_key() {
-  GraphicsContext::instance().userThread().getKey();
+  GraphicsContext::current()->userThread().getKey();
 }
 
 static void set_antialiasing(bool on = true) {
-  auto ctx = &GraphicsContext::instance();
+  auto ctx = GraphicsContext::current();
   QMetaObject::invokeMethod(ctx->activeWindow(),
                             "setAntialiasing",
                             Qt::QueuedConnection,
@@ -84,15 +84,15 @@ int __main(int, char**)
 
   ::set_antialiasing();
 
-  auto ctx = &GraphicsContext::instance();
-  QMetaObject::invokeMethod(ctx->m_widgetList->m_activeWindow,
+  auto ctx = GraphicsContext::current();
+  QMetaObject::invokeMethod(ctx->activeWindow(),
                             "drawLine",
                             Qt::QueuedConnection,
                             Q_ARG(const QPointF&, QPointF(10.5f, 10.5f)),
                             Q_ARG(const QPointF&, QPointF(20.8f, 52.8132f)),
                             Q_ARG(const QColor&, QColor(Blue8[0], Blue8[1], Blue8[2])),
                             Q_ARG(int, 5));
-  QMetaObject::invokeMethod(ctx->m_widgetList->m_activeWindow,
+  QMetaObject::invokeMethod(ctx->activeWindow(),
                             "drawLine",
                             Qt::QueuedConnection,
                             Q_ARG(const QPointF&, QPointF(10.5f, 10.5f)),

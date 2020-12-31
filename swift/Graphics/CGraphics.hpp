@@ -6,8 +6,14 @@ extern "C" {
 
 // Graphics context API.
 void* GraphicsContext_initQApp();
+void GraphicsContext_deinitQApp(void *qapp);
+
+void* GraphicsContext_initContext();
+void GraphicsContext_deinitContext(void* context);
+
 void* GraphicsContext_initWidgetList();
 void GraphicsContext_deinitWidgetList(void* widgetList);
+
 void GraphicsContext_registerUserMainFunc(void (*user_main)(void));
 void GraphicsContext_exec(void* appObj);
 

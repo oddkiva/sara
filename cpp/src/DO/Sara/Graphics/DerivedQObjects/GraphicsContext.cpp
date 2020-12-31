@@ -9,35 +9,18 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Graphics/DerivedQObjects/GraphicsContext.hpp>
+
 #include <QApplication>
 #include <QDebug>
 #include <QFileDialog>
 
-#include <DO/Sara/Graphics/DerivedQObjects/GraphicsContext.hpp>
-
 
 namespace DO::Sara {
 
-  auto GraphicsContext::instance() -> GraphicsContext&
-  {
-    static GraphicsContext singleton{};
-    return singleton;
-  }
-
-  auto GraphicsContext::registerUserMain(int (*user_main)(int, char**))
-      -> void
-  {
-    m_userThread.registerUserMain(user_main);
-  }
-
-  auto GraphicsContext::registerUserMain(std::function<int(int, char **)> user_main)
-      -> void
-  {
-    m_userThread.registerUserMain(user_main);
-  }
+  GraphicsContext* GraphicsContext::m_current = nullptr;
 
   GraphicsContext::GraphicsContext()
-    : m_mutex(QMutex::NonRecursive)
   {
     // Register painting data types.
     qRegisterMetaType<PaintingWindow*>("PaintingWindow *");
@@ -57,10 +40,37 @@ namespace DO::Sara {
     if (app == nullptr)
       qFatal("Invalid Application!");
     connect(&m_userThread, SIGNAL(finished()), app, SLOT(quit()));
-    app->setQuitOnLastWindowClosed(false);
+    app->setQuitOnLastWindowClosed(true);
   }
 
-  auto GraphicsContext::activeWindow() -> QWidget *
+  auto GraphicsContext::makeCurrent() -> void
+  {
+    m_current = this;
+  }
+
+  auto GraphicsContext::current() -> GraphicsContext*
+  {
+    return m_current;
+  }
+
+  auto GraphicsContext::registerUserMain(int (*user_main)(int, char**)) -> void
+  {
+    m_userThread.registerUserMain(user_main);
+  }
+
+  auto
+  GraphicsContext::registerUserMain(std::function<int(int, char**)> user_main)
+      -> void
+  {
+    m_userThread.registerUserMain(user_main);
+  }
+
+  auto GraphicsContext::setWidgetList(WidgetList* widgetList) -> void
+  {
+    m_widgetList = widgetList;
+  }
+
+  auto GraphicsContext::activeWindow() -> QWidget*
   {
     return m_widgetList->m_activeWindow;
   }
