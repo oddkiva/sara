@@ -16,84 +16,84 @@
 
 namespace DO::Sara {
 
-//! @{
+  //! @{
 
-//! First-order one-step Euler time integrator
-template <typename T, int N>
-class Euler : public Image<T, N>
-{
-protected:
-  Image<T, N>& I;
-
-public:
-  Euler(Image<T, N>& _I)
-    : Image<T, N>(_I.sizes())
-    , I(_I)
+  //! First-order one-step Euler time integrator
+  template <typename T, int N>
+  class Euler : public ImageView<T, N>
   {
-  }
+  private:
+    ImageView<T, N>& I;
 
-  template <class InputIterator>
-  bool step(InputIterator first, InputIterator last, T dt)
-  {
-    for (InputIterator p = first; p != last; ++p)
+  public:
+    Euler(Image<T, N>& _I)
+      : Image<T, N>(_I.sizes())
+      , I(_I)
     {
-      const size_t o = I.offset(*p);
-      I[o] += dt * (*this)[o];
     }
 
-    return true;
-  }
-};
-
-
-//! Midpoint time integrator
-template <typename T, int N>
-class Midpoint : public Image<T, N>
-{
-protected:
-  Image<T, N>& I;
-  Image<T, N> tmp;
-  int substep{0};
-
-public:
-  Midpoint(Image<T, N>& _I)
-    : Image<T, N>(_I)
-    , I{_I}
-    , tmp{_I}
-  {
-  }
-
-  template <class InputIterator>
-  bool step(InputIterator first, InputIterator last, T dt)
-  {
-    // First substep
-    if (substep == 0)
+    template <typename InputIterator>
+    bool step(InputIterator first, InputIterator last, T dt)
     {
       for (InputIterator p = first; p != last; ++p)
       {
-        const int o = I.offset(*p);
-        tmp[o] = I[o];
-        I[o] += (dt / T(2)) * (*this)[o];
+        const size_t o = I.offset(*p);
+        I[o] += dt * (*this)[o];
       }
 
-      substep++;
-      return false;
+      return true;
     }
+  };
 
-    // Second substep
-    for (InputIterator p = first; p != last; ++p)
+
+  //! Midpoint time integrator
+  template <typename T, int N>
+  class Midpoint : public Image<T, N>
+  {
+  private:
+    Image<T, N>& I;
+    Image<T, N> tmp;
+    int substep{0};
+
+  public:
+    Midpoint(Image<T, N>& _I)
+      : Image<T, N>(_I)
+      , I{_I}
+      , tmp{_I}
     {
-      const int o = I.offset(*p);
-      I[o] = tmp[o] + dt * (*this)[o];
     }
 
-    substep = 0;
+    template <typename InputIterator>
+    bool step(InputIterator first, InputIterator last, T dt)
+    {
+      // First substep
+      if (substep == 0)
+      {
+        for (InputIterator p = first; p != last; ++p)
+        {
+          const int o = I.offset(*p);
+          tmp[o] = I[o];
+          I[o] += (dt / T(2)) * (*this)[o];
+        }
 
-    return true;
-  }
-};
+        substep++;
+        return false;
+      }
 
-// @TODO: Runge-Kutta RK4 integrator.
-//!  @}
+      // Second substep
+      for (InputIterator p = first; p != last; ++p)
+      {
+        const int o = I.offset(*p);
+        I[o] = tmp[o] + dt * (*this)[o];
+      }
+
+      substep = 0;
+
+      return true;
+    }
+  };
+
+  // @TODO: Runge-Kutta RK4 integrator.
+  //!  @}
 
 }  // namespace DO::Sara

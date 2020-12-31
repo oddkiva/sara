@@ -323,7 +323,6 @@ BOOST_AUTO_TEST_CASE(test_sift_v4)
                  });
 
   // SIFT parameters.
-  constexpr auto bin_length_in_scale_unit = 3.f;
   constexpr auto N = 4;
   constexpr auto O = 8;
 
@@ -336,7 +335,6 @@ BOOST_AUTO_TEST_CASE(test_sift_v4)
 
   // Maximum scale.
   auto scale_residual_max = std::pow(2.f, 1.f / 3.f);  // 1.25992...
-  auto scale_max = scale_at_detection * scale_residual_max;
 
   // Keypoint scale.
   auto scale_residual_exponent = 0.5f;             // Between 0 and 1

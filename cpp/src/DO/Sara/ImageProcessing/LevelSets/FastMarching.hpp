@@ -77,8 +77,7 @@ namespace DO::Sara {
 
     //! @brief Time complexity: O(1). (Reusing Dijkstra terminology in CLRS
     //! book).
-    void relax(const coords_type& u, coords_type& v,
-               image_based_graph_type& g)
+    void relax(const coords_type& u, coords_type& v, image_based_graph_type& g)
     {
       const auto dv_candidate = g.distances[u] + w(u, v);
       if (g.distances[v] < dv_candidate)
@@ -117,9 +116,9 @@ namespace DO::Sara {
       initialize();
 
       // Initialize with trial points.
-      //for (auto v : trial_list)
+      // for (auto v : trial_list)
       //  trial.push_back(...);
-      //std::make_heap(std::begin(trial), std::end(trial));
+      // std::make_heap(std::begin(trial), std::end(trial));
 
       while (!trial.empty())
       {
@@ -133,7 +132,7 @@ namespace DO::Sara {
         // @TODO: check if we reach the limit.
 
         // Update the neighbors.
-        for (auto& v: g.neighbors(u))
+        for (auto& v : g.neighbors(u))
         {
           if (g.states[v] == State::Alive || g.states[v] == State::Forbidden)
             continue;
