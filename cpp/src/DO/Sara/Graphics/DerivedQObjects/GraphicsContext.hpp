@@ -19,10 +19,10 @@
 #include <QString>
 #include <QWidget>
 
-#include <DO/Sara/Graphics/DerivedQObjects/UserThread.hpp>
-#include <DO/Sara/Graphics/DerivedQObjects/PaintingWindow.hpp>
-#include <DO/Sara/Graphics/DerivedQObjects/OpenGLWindow.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsView.hpp>
+#include <DO/Sara/Graphics/DerivedQObjects/OpenGLWindow.hpp>
+#include <DO/Sara/Graphics/DerivedQObjects/PaintingWindow.hpp>
+#include <DO/Sara/Graphics/DerivedQObjects/UserThread.hpp>
 
 
 namespace DO { namespace Sara {
@@ -63,43 +63,49 @@ namespace DO { namespace Sara {
     };
 
   public: /* enum */
-    enum WindowType {
+    enum WindowType
+    {
       PAINTING_WINDOW = 0,
       OPENGL_WINDOW = 1,
       GRAPHICS_VIEW = 2
     };
 
-  public:
-    static auto instance() -> GraphicsContext&;
-    auto registerUserMain(int (*userMain)(int, char**)) -> void;
-    auto registerUserMain(std::function<int(int, char **)>) -> void;
-    auto userThread() -> UserThread& { return m_userThread; }
-    auto activeWindow() -> QWidget *;
-
-  private: /* methods */
+  public: /* methods */
     GraphicsContext();
+    auto registerUserMain(int (*userMain)(int, char**)) -> void;
+    auto registerUserMain(std::function<int(int, char**)>) -> void;
+    auto userThread() -> UserThread&
+    {
+      return m_userThread;
+    }
+
+    auto setWidgetList(WidgetList*) -> void;
+    auto activeWindow() -> QWidget*;
+
+    auto makeCurrent() -> void;
+    static auto current() -> GraphicsContext*;
 
   public slots:
-    void createWindow(int windowType, int w, int h,
-                      const QString& windowTitle, int x, int y);
-    void setActiveWindow(QWidget *w);
-    void closeWindow(QWidget *w);
+    void createWindow(int windowType, int w, int h, const QString& windowTitle,
+                      int x, int y);
+    void setActiveWindow(QWidget* w);
+    void closeWindow(QWidget* w);
     void getFileFromDialogBox();
 
   public: /* connection methods for the keyboard and mouse handling. */
     bool activeWindowIsVisible();
-    void connectWindowIOEventsToUserThread(QWidget *w);
+    void connectWindowIOEventsToUserThread(QWidget* w);
     void connectAllWindowsIOEventsToUserThread();
     void disconnectAllWindowsIOEventsToUserThread();
 
-  public:
+  private:
+    static GraphicsContext* m_current;
+
+    QMutex m_mutex{QMutex::NonRecursive};
     UserThread m_userThread;
-    WidgetList *m_widgetList = nullptr;
+    WidgetList* m_widgetList = nullptr;
 
     DialogBoxInfo m_dialogBoxInfo;
-
-    QMutex m_mutex;
   };
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

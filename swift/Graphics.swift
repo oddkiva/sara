@@ -3,11 +3,13 @@ import SaraGraphics
 
 public class GraphicsContext {
     private var _qApp: UnsafeMutableRawPointer
+    private var _context: UnsafeMutableRawPointer
     private var _widgetList: UnsafeMutableRawPointer
 
     init() {
         print("Init Graphics Context...")
         self._qApp = GraphicsContext_initQApp()
+        self._context = GraphicsContext_initContext()
         self._widgetList = GraphicsContext_initWidgetList()
     }
 
@@ -22,7 +24,16 @@ public class GraphicsContext {
     deinit {
         print("Deinit Graphics Context...")
         GraphicsContext_deinitWidgetList(self._widgetList)
+        GraphicsContext_deinitContext(self._context)
+        GraphicsContext_deinitQApp(self._qApp)
     }
+}
+
+
+func runGraphics(userMainFn: @escaping (@convention(c) () -> Void)) {
+    let ctx = GraphicsContext()
+    ctx.registerUserMainFunc(userMainFn: userMainFn)
+    ctx.exec()
 }
 
 

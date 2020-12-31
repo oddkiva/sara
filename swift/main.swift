@@ -78,6 +78,6 @@ func main() {
 }
 
 
-let ctx = GraphicsContext()
-ctx.registerUserMainFunc(userMainFn: main)
-ctx.exec()
+runGraphics {
+    main()
+}
