@@ -91,8 +91,6 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   {
     for (auto o = 0; o < gradient_mag_pyramid.num_octaves(); ++o)
     {
-      const auto oct_scale = gradient_mag_pyramid.octave_scaling_factor(o);
-
       for (auto s = 1; s < gradient_mag_pyramid.num_scales_per_octave() - 1; ++s)
       {
         auto& extrema = dog_extrema.dict[{s - 1, o}];

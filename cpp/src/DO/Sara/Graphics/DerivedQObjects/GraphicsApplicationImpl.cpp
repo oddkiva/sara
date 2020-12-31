@@ -20,8 +20,6 @@ namespace DO { namespace Sara {
   GraphicsApplication::Impl::
   Impl(int& argc, char **argv)
     : QApplication(argc, argv)
-    , m_argc(argc)
-    , m_argv(argv)
     , m_activeWindow(0)
     , m_mutex(QMutex::NonRecursive)
   {
@@ -103,7 +101,7 @@ namespace DO { namespace Sara {
   void
   GraphicsApplication::Impl::
   closeWindow(QWidget *w)
-   {
+  {
     QList<QPointer<QWidget>>::iterator wi =
         std::find(m_createdWindows.begin(), m_createdWindows.end(), w);
      if (wi == m_createdWindows.end())

@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 
@@ -22,43 +23,24 @@ using namespace DO::Sara;
 using namespace std;
 
 
-static Timer timer;
-
-void tic()
-{
-  timer.restart();
-}
-
-void toc()
-{
-  auto elapsed = timer.elapsed_ms();
-  cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
-}
-
 vector<OERegion> compute_hessian_laplace_affine_maxima(const Image<float>& I,
                                                        bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
-  {
-    print_stage("Localizing Hessian-Laplace interest points");
     tic();
-  }
   auto compute_DoHs = ComputeDoHExtrema{};
   auto scale_octave_pairs = vector<Point2i>{};
   auto hessian_laplace_maxima = compute_DoHs(I, &scale_octave_pairs);
   if (verbose)
-    toc();
+    toc("Hessian-Laplace");
 
   const auto& G = compute_DoHs.gaussians();
   const auto& DoHs = compute_DoHs.det_of_hessians();
 
   // 2. Affine shape adaptation
   if (verbose)
-  {
-    print_stage("Affine shape adaptation");
     tic();
-  }
   auto adapt_shape = AdaptFeatureAffinelyToLocalShape{};
   auto keep_features = vector<unsigned char>(hessian_laplace_maxima.size(), 0);
   for (size_t i = 0; i != hessian_laplace_maxima.size(); ++i)
@@ -75,7 +57,7 @@ vector<OERegion> compute_hessian_laplace_affine_maxima(const Image<float>& I,
     }
   }
   if (verbose)
-    toc();
+    toc("Affine-Shape Adaptation");
 
   // 3. Rescale the kept features to original image dimensions.
   auto num_kept_features = std::accumulate(
@@ -102,16 +84,13 @@ vector<OERegion> compute_DoH_extrema(const Image<float>& image,
 {
   // 1. Feature extraction.
   if (verbose)
-  {
-    print_stage("Localizing DoH interest points");
     tic();
-  }
 
   auto compute_DoHs = ComputeDoHExtrema{};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoHs = compute_DoHs(image, &scale_octave_pairs);
   if (verbose)
-    toc();
+    toc("Determinant of Hessians");
   SARA_CHECK(DoHs.size());
 
   const auto& DoH = compute_DoHs.det_of_hessians();
@@ -132,15 +111,12 @@ vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
 {
   // 1. Feature extraction.
   if (verbose)
-  {
-    print_stage("Localizing DoH affine interest points");
     tic();
-  }
   auto compute_DoHs = ComputeDoHExtrema{};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoHs = compute_DoHs(image, &scale_octave_pairs);
   if (verbose)
-    toc();
+    toc("Determinants of Hessian");
   SARA_CHECK(DoHs.size());
 
   const auto& G = compute_DoHs.gaussians();
@@ -148,10 +124,7 @@ vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
 
   // 2. Affine shape adaptation
   if (verbose)
-  {
-    print_stage("Affine shape adaptation");
     tic();
-  }
   auto adapt_shape = AdaptFeatureAffinelyToLocalShape{};
   auto keep_features = vector<unsigned char>(DoHs.size(), 0);
   for (size_t i = 0; i != DoHs.size(); ++i)
@@ -167,7 +140,7 @@ vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
     }
   }
   if (verbose)
-    toc();
+    toc("Affine Shape Adaptation");
 
 
   // 3. Rescale the kept features to original image dimensions.

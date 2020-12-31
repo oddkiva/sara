@@ -44,8 +44,6 @@ namespace DO { namespace Sara {
     , m_pixmap(width, height)
     , m_painter(&m_pixmap)
   {
-    setParent(m_scrollArea);
-
     setFocusPolicy(Qt::WheelFocus);
 
     // Set event listener.

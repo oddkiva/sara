@@ -1,4 +1,5 @@
 #include <DO/Sara/Core.hpp>
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
@@ -27,7 +28,7 @@ auto halide_pipeline() -> void
       "C:/Users/David/Desktop/GOPR0542.MP4"s;
 #elif __APPLE__
   const auto video_filepath =
-      "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
+      "/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
 #else
   // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;

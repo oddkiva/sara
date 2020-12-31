@@ -140,8 +140,9 @@ auto test_on_video()
 
     // Display the fitted lines.
     display(frame_gray32f);
+    const auto num_lines = static_cast<int>(lsd.pipeline.line_segments.size());
 #pragma omp parallel for
-    for (auto i = 0u; i < lsd.pipeline.line_segments.size(); ++i)
+    for (auto i = 0; i < num_lines; ++i)
     {
       const auto& [success, l] = lsd.pipeline.line_segments[i];
       if (!success || l.length() < 20)

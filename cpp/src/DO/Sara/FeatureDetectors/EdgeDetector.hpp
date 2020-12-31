@@ -34,6 +34,7 @@ namespace DO::Sara {
 
       std::vector<std::vector<Eigen::Vector2i>> edges_as_list;
       std::vector<std::vector<Eigen::Vector2d>> edges_simplified;
+
     } pipeline;
 
     struct Parameters
@@ -46,6 +47,12 @@ namespace DO::Sara {
 
       //! @brief Angle tolerance for connected edgel grouping.
       float angular_threshold = 20. / 180.f * M_PI;
+
+      //! @brief Edge simplification parameters.
+      bool simplify_edges = true;
+      double eps = 1.;
+      double collapse_threshold = 2e-2;
+      bool collapse_adaptive = true;
     } parameters;
 
     EdgeDetector() = default;

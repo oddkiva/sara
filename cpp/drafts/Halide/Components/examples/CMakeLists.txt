@@ -1,19 +1,16 @@
-find_package(OpenMP)
 find_package(DO_Sara COMPONENTS Core Graphics ImageIO VideoIO REQUIRED)
+find_package(OpenMP)
+
 
 function (add_halide_executable source_file)
   get_filename_component(name ${source_file} NAME_WE)
   add_executable(${name} ${source_file})
-  target_include_directories(${name}
-    PRIVATE
-    ${HALIDE_DISTRIB_DIR}/include
-    ${HALIDE_DISTRIB_DIR}/tools)
-
   target_link_libraries(${name}
     PRIVATE
+    ${CMAKE_DL_LIBS}
     ${DO_Sara_LIBRARIES}
     ${OpenMP_CXX_LIBRARIES}
-    Halide)
+    Halide::Halide)
 
   target_compile_options(${name}
     PRIVATE

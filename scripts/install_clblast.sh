@@ -6,7 +6,7 @@ GITHUB_URL=https://github.com
 
 ORGANISATION_NAME=CNugteren
 REPOSITORY_NAME=CLBlast
-VERSION=1.5.0
+VERSION=1.5.1
 
 if [ ! -d "${GITHUB_MASTER_REPOSITORY_PATH}" ]; then
   mkdir -p ${GITHUB_MASTER_REPOSITORY_PATH}
@@ -23,6 +23,7 @@ fi
 
 pushd ${REPOSITORY_DIR}
 {
+  git clean -fdx
   git fetch origin --prune
   git checkout ${VERSION}
 
@@ -34,12 +35,20 @@ pushd ${REPOSITORY_DIR}
 
   pushd build
   {
-    # cmake -DTESTS:BOOL=ON -DTUNERS:BOOL=ON ..
+    # cmake \
+    #   -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+    #   -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+    #   -DTESTS:BOOL=ON -DTUNERS:BOOL=ON \
+    #   ..
+    # cmake --build . -j$(nproc) -v
     # ctest --verbose -j$(nproc)
-    # sudo make install
+    # sudo make install
 
-    cmake -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ..
-    make -j$(nproc)
+    cmake \
+      -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+      -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+      ..
+    make -j$(nproc) -v
     make install
   }
   popd

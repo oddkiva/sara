@@ -35,6 +35,7 @@ namespace DO { namespace Sara {
     GraphicsApplication(int& argc, char** argv);
     ~GraphicsApplication();
     void register_user_main(int (*userMain)(int, char**));
+    void register_user_main(std::function<int(int, char **)>);
     int exec();
 
   private:

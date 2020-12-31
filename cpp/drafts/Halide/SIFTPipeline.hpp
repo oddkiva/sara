@@ -261,7 +261,7 @@ namespace DO::Shakti::HalideBackend::v2 {
       {
         auto& quantized = extrema_quantized[s];
         auto& refined = extrema[s];
-        if (quantized.size() == 0)
+        if (quantized.empty())
           continue;
 
         // Resize the buffers.
@@ -294,7 +294,7 @@ namespace DO::Shakti::HalideBackend::v2 {
       {
         // Inputs.
         auto& e = extrema[s];
-        if (e.size() == 0)
+        if (e.empty())
           continue;
 
         // Just copy the array of scales back to find the maximum scale value.
@@ -328,7 +328,7 @@ namespace DO::Shakti::HalideBackend::v2 {
       for (auto s = 0u; s < dominant_orientation_dense_maps.size(); ++s)
       {
         auto& dense = dominant_orientation_dense_maps[s];
-        if (dense.num_keypoints() == 0)
+        if (dense.empty())
           continue;
         auto& sparse = dominant_orientation_sparse_maps[s];
         dense.copy_to_host();
@@ -346,7 +346,7 @@ namespace DO::Shakti::HalideBackend::v2 {
         auto& d = dominant_orientation_sparse_maps[s];
         auto& e = extrema[s];
         auto& e_oriented = extrema_oriented[s];
-        if (e.size() == 0)
+        if (e.empty())
           continue;
 
         // Copy the remaining data of the array of extrema to host.

@@ -20,7 +20,7 @@ REPOSITORY_URLS=(
   "https://git.ffmpeg.org/ffmpeg.git"
 )
 
-FFMPEG_VERSION="4.2.2"
+FFMPEG_VERSION="4.3.1"
 
 
 function url_basename()
@@ -72,8 +72,9 @@ popd
 ffmpeg_dirpath=$(repo_dirpath ${REPOSITORY_URLS[1]})
 pushd ${ffmpeg_dirpath}
 {
+  git clean -fdx
   git fetch origin --prune
-  # git checkout n${FFMPEG_VERSION}
+  git checkout n${FFMPEG_VERSION}
 
   # Disable stripping for debug information.
   ffmpeg_options+="--disable-stripping "

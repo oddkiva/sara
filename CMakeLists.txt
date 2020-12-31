@@ -93,6 +93,9 @@ endif ()
 
 # Build the libraries.
 add_subdirectory(cpp)
+if (CMAKE_Swift_COMPILER)
+  add_subdirectory(swift)
+endif ()
 if (SARA_BUILD_PYTHON_BINDINGS)
   add_subdirectory(python)
 endif ()

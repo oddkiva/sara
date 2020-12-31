@@ -8,7 +8,7 @@ foreach (file ${test_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES ${DO_Sara_LIBRARIES} Halide
+    DEPENDENCIES ${DO_Sara_LIBRARIES} Halide::Halide Halide::Runtime
     FOLDER "DRAFTS/Halide")
   set_target_properties(${filename}
     PROPERTIES

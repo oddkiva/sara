@@ -1,0 +1,4 @@
+module SaraCore {
+  header "CCore.hpp"
+  export *
+}

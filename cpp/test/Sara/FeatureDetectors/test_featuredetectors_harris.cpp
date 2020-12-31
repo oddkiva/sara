@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "FeatureDescriptors/Harris Affine Detector"
+#define BOOST_TEST_MODULE "FeatureDetectors/Harris Affine Detector"
 
 #include <boost/test/unit_test.hpp>
 
