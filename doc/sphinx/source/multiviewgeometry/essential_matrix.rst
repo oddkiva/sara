@@ -88,7 +88,7 @@ In summary the data we know are:
 - the normalized camera coordinates :math:`\tilde{\mathbf{x}}_i = \mathbf{K}^{-1} \mathbf{x}_i`
 - the 3D points are calculated from the relative pose :math:`\mathbf{X}_i`
 
-We want to determine the pose of the third camera:
+We want to determine the pose of the third camera, i.e.:
 
 - the global rotation :math:`\mathbf{R}`
 - the global translation :math:`\mathbf{t}`
