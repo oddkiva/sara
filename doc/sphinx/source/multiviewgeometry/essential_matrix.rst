@@ -54,14 +54,14 @@ successively the relative motion, we retrieve the global pose:
    \mathbf{t}_i = \mathbf{t}_{ji} + \dots + \mathbf{t}_{i_1 i_2} + \mathbf{t}_{0 i_1}
 
 
-Because the relative pose estimations are noisy estimation, the successive
-composition of rotation and translation will induce an accumulation of errors.
+Because the relative pose estimations are noisy, the successive composition of
+rotation and translation will induce an accumulation of errors.
 
 However the addition of translations is the most problematic because the
 relative pose estimation can only recover the translation up to a scale. In
 other words, it can only recover the direction of the translation.
 
-This is not a good approach. Instead as described in Snavely's paper, Bundler
+Thus it is not a good approach. Instead as described in Snavely's paper, Bundler
 starts from two cameras. Then a new camera is added, its pose is initialized
 with the direct linear transform. The internal camera parameters are initialized
 from the extraction of EXIF tags.
@@ -69,6 +69,8 @@ from the extraction of EXIF tags.
 
 Direct Linear Transform for Incremental Bundle Adjustment
 =========================================================
+
+Referenced as [Hartley and Zisserman 2004].
 
 The relative pose estimation allows to recover the position of two cameras. How
 do we choose the third camera and initialize its pose? To do so, we can look the
@@ -80,9 +82,10 @@ tags.
 
 In summary the data we know are:
 
-- the image coordinates in the third image :math:`\mathbf{x}_i`
-- the 3D points are calculated from the relative pose :math:`\mathbf{X}_i`
 - the internal camera matrix :math:`\mathbf{K}`
+- the image coordinates in the third image :math:`\mathbf{x}_i`
+- the normalized camera coordinates :math:`\tilde{\mathbf{x}}_i = \mathbf{K}^{-1} \mathbf{x}_i`
+- the 3D points are calculated from the relative pose :math:`\mathbf{X}_i`
 
 We want to determine the pose of the third camera:
 
@@ -94,7 +97,9 @@ Projecting the 3D points to the image:
 .. math::
    \mathbf{x}_i = \mathbf{K} [\mathbf{R} | \mathbf{t}] \mathbf{X}_i \\
 
-   \mathbf{K}^{-1} \mathbf{x}_i = \mathbf{R} \mathbf{X}_i + \mathbf{t} \\
+   \tilde{\mathbf{x}}_i = \mathbf{R} \mathbf{X}_i + \mathbf{t} \\
+
+   u_i = R
 
 Thus we need :math:`n \geq 6` equations to fully retrieve the third camera pose and then solve
 a least square problem.
@@ -104,3 +109,8 @@ cameras to refine again the 3D points and camera parameters (both external and
 internal).
 
 Proceeding incrementally like this, we can also retrieve the next camera poses.
+
+REFERENCES
+----------
+- Lepetit et al.'s EPnP approach (IJCV 2008) which is better.
+- Lambda-twist
