@@ -83,6 +83,9 @@ extensions = [
     'sphinxcontrib.bibtex',
     'sphinxcontrib.katex'
 ]
+bibtex_bibfiles=['phd.bib']
+bibtex_encoding = 'latin'
+
 # We want to number figures and reference them.
 numfig = True
 

@@ -7,4 +7,5 @@ View Geometry.
 .. toctree::
    :maxdepth: 2
 
+   multiviewgeometry/essential_matrix.rst
    multiviewgeometry/nister.rst

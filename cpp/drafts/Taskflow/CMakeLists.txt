@@ -10,4 +10,7 @@ foreach (file ${example_taskflow_SOURCE_FILES})
   if (UNIX AND NOT APPLE)
     target_link_libraries(${filename} PRIVATE pthread)
   endif ()
+  set_target_properties(${filename}
+    PROPERTIES
+    FOLDER "Examples/DRAFTS")
 endforeach ()

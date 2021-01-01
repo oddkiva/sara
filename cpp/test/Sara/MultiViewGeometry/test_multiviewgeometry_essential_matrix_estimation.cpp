@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/TensorDebug.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/Triangulation.hpp>
@@ -21,78 +22,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <iomanip>
-#include <sstream>
-
 
 using namespace std;
 using namespace DO::Sara;
-
-
-template <typename T>
-void print_3d_array(const TensorView_<T, 3>& x)
-{
-  const auto max = x.flat_array().abs().maxCoeff();
-  std::stringstream ss;
-  ss << max;
-  const auto pad_size = ss.str().size();
-
-
-  cout << "[";
-  for (auto i = 0; i < x.size(0); ++i)
-  {
-    cout << "[";
-    for (auto j = 0; j < x.size(1); ++j)
-    {
-      cout << "[";
-      for (auto k = 0; k < x.size(2); ++k)
-      {
-        cout << std::setw(pad_size) << x(i,j,k);
-        if (k != x.size(2) - 1)
-          cout << ", ";
-      }
-      cout << "]";
-
-      if (j != x.size(1) - 1)
-        cout << ", ";
-      else
-        cout << "]";
-    }
-
-    if (i != x.size(0) - 1)
-      cout << ",\n ";
-  }
-  cout << "]" << endl;
-}
-
-void print_3d_array(const TensorView_<float, 3>& x)
-{
-  cout << "[";
-  for (auto i = 0; i < x.size(0); ++i)
-  {
-    cout << "[";
-    for (auto j = 0; j < x.size(1); ++j)
-    {
-      cout << "[";
-      for (auto k = 0; k < x.size(2); ++k)
-      {
-        cout << fixed << x(i,j,k);
-        if (k != x.size(2) - 1)
-          cout << ", ";
-      }
-      cout << "]";
-
-      if (j != x.size(1) - 1)
-        cout << ", ";
-      else
-        cout << "]";
-    }
-
-    if (i != x.size(0) - 1)
-      cout << ",\n ";
-  }
-  cout << "]" << endl;
-}
 
 
 BOOST_AUTO_TEST_SUITE(TestMultiViewGeometry)
@@ -223,8 +155,8 @@ BOOST_AUTO_TEST_CASE(test_to_coordinates)
     3.f, 3.f,
     2.f, 2.f;
 
-  //print_3d_array(expected_sample1);
-  //print_3d_array(sample1);
+  // print_3d_interleaved_array(expected_sample1);
+  // print_3d_interleaved_array(sample1);
   BOOST_CHECK(expected_sample1.vector() == sample1.vector());
 }
 
@@ -329,9 +261,9 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 
   auto solver = NisterFivePointAlgorithm{};
 
-  const auto Ker = solver.extract_null_space(x1, x2);
+  const auto null = solver.extract_null_space(x1, x2);
   {
-    const auto [A, B, C, D] = solver.reshape_null_space(Ker);
+    const auto [A, B, C, D] = solver.reshape_null_space(null);
 
     for (auto j = 0; j < x1.cols(); ++j)
     {
@@ -369,12 +301,12 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
   {
     const auto& Ei = Es[i].matrix();
 
-    //SARA_DEBUG << "i = " << i << endl;
-    //SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
-    //SARA_DEBUG << "En =\n" << E.normalized() << endl;
-    //SARA_DEBUG << "norm(Ein - En) = "
+    // SARA_DEBUG << "i = " << i << endl;
+    // SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
+    // SARA_DEBUG << "En =\n" << E.normalized() << endl;
+    // SARA_DEBUG << "norm(Ein - En) = "
     //           << (Ei.normalized() - E.normalized()).norm() << endl;
-    //SARA_DEBUG << "norm(Ein + En) = "
+    // SARA_DEBUG << "norm(Ein + En) = "
     //           << (Ei.normalized() + E.normalized()).norm() << endl;
 
     BOOST_CHECK_SMALL(Ei.determinant(), 1e-10);
@@ -414,12 +346,12 @@ BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm)
   {
     const auto& Ei = Es[i].matrix();
 
-    //SARA_DEBUG << "i = " << i << endl;
-    //SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
-    //SARA_DEBUG << "En =\n" << E.normalized() << endl;
-    //SARA_DEBUG << "norm(Ein - En) = "
+    // SARA_DEBUG << "i = " << i << endl;
+    // SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
+    // SARA_DEBUG << "En =\n" << E.normalized() << endl;
+    // SARA_DEBUG << "norm(Ein - En) = "
     //           << (Ei.normalized() - E.normalized()).norm() << endl;
-    //SARA_DEBUG << "norm(Ein + En) = "
+    // SARA_DEBUG << "norm(Ein + En) = "
     //           << (Ei.normalized() + E.normalized()).norm() << endl;
 
     BOOST_CHECK_SMALL(Ei.determinant(), 1e-12);
