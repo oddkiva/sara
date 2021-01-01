@@ -72,7 +72,7 @@ namespace DO::Sara {
 
 
   template <typename T>
-  inline auto sqr(T x)
+  inline auto square(T x)
   {
     return x * x;
   };
@@ -85,7 +85,7 @@ namespace DO::Sara {
     template <typename T>
     static inline T combine(const T v1, const T v2, const T v3)
     {
-      auto s = (T(eps) + sqr(v2 - v1)) / (T(eps) + sqr(v3 - v2));
+      auto s = (T(eps) + square(v2 - v1)) / (T(eps) + square(v3 - v2));
       s = 1 / (1 + 2 * s * s);
       return (v2 + v3 - s * (v1 - 2 * v2 + v3)) / 2;
     }
@@ -131,15 +131,19 @@ namespace DO::Sara {
     static inline T combine(const T v1, const T v2, const T v3, const T v4,
                             const T v5)
     {
-      auto s1 = 13 * sqr(v1 - 2 * v2 + v3) / 12 + sqr(v1 - 4 * v2 + 3 * v3) / 4;
-      auto s2 = 13 * sqr(v2 - 2 * v3 + v4) / 12 + sqr(v2 - v4) / 4;
-      auto s3 = 13 * sqr(v3 - 2 * v4 + v5) / 12 + sqr(3 * v3 - 4 * v4 + v5) / 4;
+      auto s1 = 13 * square(v1 - 2 * v2 + v3) / 12 +  //
+                square(v1 - 4 * v2 + 3 * v3) / 4;
+      auto s2 = 13 * square(v2 - 2 * v3 + v4) / 12 +  //
+                square(v2 - v4) / 4;
+      auto s3 = 13 * square(v3 - 2 * v4 + v5) / 12 +  //
+                square(3 * v3 - 4 * v4 + v5) / 4;
 
-      s1 = 1 / sqr(T(eps) + s1);
-      s2 = 6 / sqr(T(eps) + s2);
-      s3 = 3 / sqr(T(eps) + s3);
+      s1 = 1 / square(T(eps) + s1);
+      s2 = 6 / square(T(eps) + s2);
+      s3 = 3 / square(T(eps) + s3);
 
-      return (s1 * (2 * v1 - 7 * v2 + 11 * v3) + s2 * (-v2 + 5 * v3 + 2 * v4) +
+      return (s1 * (2 * v1 - 7 * v2 + 11 * v3) +  //
+              s2 * (-v2 + 5 * v3 + 2 * v4) +      //
               s3 * (2 * v3 + 5 * v4 - v5)) /
              6 / (s1 + s2 + s3);
     }
