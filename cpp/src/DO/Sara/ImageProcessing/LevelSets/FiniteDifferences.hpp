@@ -18,8 +18,8 @@
 
 namespace DO::Sara {
 
-  //! @brief Centered difference.
-  struct CenteredDifference
+  //! @brief Central difference.
+  struct CentralDifference
   {
     template <typename ArrayView>
     static inline auto at(const ArrayView& u,                        //
