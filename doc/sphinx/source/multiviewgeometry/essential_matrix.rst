@@ -122,7 +122,7 @@ Proceeding incrementally like this, we can also retrieve the next camera poses.
 
 The DLT approach is in theory only applicable to the pinhole camera model. It
 can be a good initialization for the bundle adjustment which will estimate the
-distortion intrinsic parameters of the camera.
+distortion coefficients of the camera.
 
 References
 ----------
