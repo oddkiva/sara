@@ -42,7 +42,10 @@ BOOST_AUTO_TEST_CASE(test_centered_finite_differences)
   auto& f = _src_image;
   Vector2i x{1, 1};
 
-  Vector2f gradf_x{Centered::centered(f, x, 0), Centered::centered(f, x, 1)};
+  Vector2f gradf_x{
+    CenteredDifference::at(f, x, 0),
+    CenteredDifference::at(f, x, 1)
+  };
   BOOST_CHECK_CLOSE_L2_DISTANCE(Vector2f(1, 0), gradf_x, 1e-5f);
 
   auto gradf = gradient(f);
