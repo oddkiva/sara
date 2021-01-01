@@ -47,9 +47,6 @@ namespace DO::Sara {
     if (X.rows() != x.rows())
       throw std::runtime_error{"X and x must have the same number of points!"};
 
-    auto X1 = X.matrix();
-    auto x1 = x.matrix();
-
     const Matrix<T, 1, 4> zero_4 = Matrix<T, 1, 4>::Zero();
 
     auto A = Matrix<T, Eigen::Dynamic, Eigen::Dynamic>{X.rows() * 2, 12};
