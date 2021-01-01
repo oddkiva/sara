@@ -16,8 +16,8 @@ where:
 - :math:`\mathbf{t} \in \mathbf{R}^3` is the relative translation from the
   *first* camera to the *second* camera.
 
-The coordinates of the :math:`\mathbf{t}` is expressed with respect to the
-**first** camera coordinates system.
+The coordinates of the translation vector :math:`\mathbf{t}` is expressed with
+respect to the **first** camera coordinate system.
 
 Rephrasing again, the relative motion :math:`(\mathbf{R}, \mathbf{t})` can be understood
 as follows.
@@ -62,23 +62,24 @@ relative pose estimation can only recover the translation up to a scale. In
 other words, it can only recover the direction of the translation.
 
 Thus it is not a good approach. Instead as described in Snavely's paper, Bundler
-starts from two cameras. Then a new camera is added, its pose is initialized
-with the direct linear transform. The internal camera parameters are initialized
-from the extraction of EXIF tags.
+starts from two cameras. Then a new camera is added and its pose is initialized
+with the Direct Linear Transform (DLT). The internal camera parameters are
+initialized from the extraction of EXIF metadata.
+
+In the next section we describe the DLT method to initialize the pose.
 
 
 Camera Resectioning for Incremental Bundle Adjustment
 =====================================================
 
-This simplest camera resectioning method is [Hartley and Zisserman 2004].
-
 The relative pose estimation allows to recover the position of two cameras. How
-do we choose the third camera and initialize its pose? To do so, we can look the
-third image for which the image correspondences reappears the most
+do we choose the third camera and initialize its pose?
 
-As said early, the direct linear transform aims at recovering the camera pose
-and the internal camera parameters :math:`\mathbf{K}` are extracted from EXIF
-tags.
+To start, we can look for the third image where the 3D points estimated from the
+two-view geometry reappears the most.
+
+The DLT initializes the camera pose and the internal parameters are initialized
+from EXIF metadata. What the DLT solves is also called **camera resectioning**.
 
 In summary the data we know are:
 
@@ -99,19 +100,36 @@ Projecting the 3D points to the image:
 
    \tilde{\mathbf{x}}_i = \mathbf{R} \mathbf{X}_i + \mathbf{t} \\
 
-Thus we need :math:`n \geq 6` 2D-3D point correspondences to fully retrieve the
-third camera pose.
+The third image needs to have at least :math:`n \geq 6` point correspondences
+between 3D points :math:`\mathbf{X}_i` and 2D image points :math:`\mathbf{x}_i`
+to fully retrieve the third camera pose.
 
 We are then able to form a new bundle adjustment problem involving the three
 cameras to refine again the 3D points and camera parameters (both external and
 internal).
 
-More accurate details in:
+It turns out in fact that we may not even need to know the camera internal
+parameters. [Hartley and Zisserman] calculate the whole projection matrix
+
+.. math::
+   \mathbf{P} = \mathbf{K} [\mathbf{R} | \mathbf{t}]
+
+and then decompose the matrix :math:`\mathbf{P}` to fully recover the internal
+and external parameters. More accurate details in:
 https://users.cecs.anu.edu.au/~hartley/Papers/CVPR99-tutorial/tutorial.pdf
 
 Proceeding incrementally like this, we can also retrieve the next camera poses.
 
-REFERENCES
+The DLT approach is in theory only applicable to the pinhole camera model. It
+can be a good initialization for the bundle adjustment which will estimate the
+distortion intrinsic parameters of the camera.
+
+References
 ----------
+The DLT was proposed by [Hartley and Zisserman 1999] and is the simplest one to
+implement.
+
+More robust approaches are proposed later:
+
 - Lepetit et al.'s EPnP approach (IJCV 2008) which is better.
 - Lambda-twist
