@@ -57,6 +57,50 @@ successively the relative motion, we retrieve the global pose:
 Because the relative pose estimations are noisy estimation, the successive
 composition of rotation and translation will induce an accumulation of errors.
 
-The addition of translations is the most problematic because the relative pose
-estimation can only recover the translation up to a scale. In other words, it
-can only recover the direction of the translation.
+However the addition of translations is the most problematic because the
+relative pose estimation can only recover the translation up to a scale. In
+other words, it can only recover the direction of the translation.
+
+This is not a good approach. Instead as described in Snavely's paper, Bundler
+starts from two cameras. Then a new camera is added, its pose is initialized
+with the direct linear transform. The internal camera parameters are initialized
+from the extraction of EXIF tags.
+
+
+Direct Linear Transform for Incremental Bundle Adjustment
+=========================================================
+
+The relative pose estimation allows to recover the position of two cameras. How
+do we choose the third camera and initialize its pose? To do so, we can look the
+third image for which the image correspondences reappears the most
+
+As said early, the direct linear transform aims at recovering the camera pose
+and the internal camera parameters :math:`\mathbf{K}` are extracted from EXIF
+tags.
+
+In summary the data we know are:
+
+- the image coordinates in the third image :math:`\mathbf{x}_i`
+- the 3D points are calculated from the relative pose :math:`\mathbf{X}_i`
+- the internal camera matrix :math:`\mathbf{K}`
+
+We want to determine the pose of the third camera:
+
+- the global rotation :math:`\mathbf{R}`
+- the global translation :math:`\mathbf{t}`
+
+Projecting the 3D points to the image:
+
+.. math::
+   \mathbf{x}_i = \mathbf{K} [\mathbf{R} | \mathbf{t}] \mathbf{X}_i \\
+
+   \mathbf{K}^{-1} \mathbf{x}_i = \mathbf{R} \mathbf{X}_i + \mathbf{t} \\
+
+Thus we need :math:`n \geq 6` equations to fully retrieve the third camera pose and then solve
+a least square problem.
+
+We are then able to form a new bundle adjustment problem involving the three
+cameras to refine again the 3D points and camera parameters (both external and
+internal).
+
+Proceeding incrementally like this, we can also retrieve the next camera poses.
