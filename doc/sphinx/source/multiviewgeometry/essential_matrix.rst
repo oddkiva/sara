@@ -67,10 +67,10 @@ with the direct linear transform. The internal camera parameters are initialized
 from the extraction of EXIF tags.
 
 
-Direct Linear Transform for Incremental Bundle Adjustment
-=========================================================
+Camera Resectioning for Incremental Bundle Adjustment
+=====================================================
 
-Referenced as [Hartley and Zisserman 2004].
+This simplest camera resectioning method is [Hartley and Zisserman 2004].
 
 The relative pose estimation allows to recover the position of two cameras. How
 do we choose the third camera and initialize its pose? To do so, we can look the
@@ -99,14 +99,15 @@ Projecting the 3D points to the image:
 
    \tilde{\mathbf{x}}_i = \mathbf{R} \mathbf{X}_i + \mathbf{t} \\
 
-   u_i = R
-
-Thus we need :math:`n \geq 6` equations to fully retrieve the third camera pose and then solve
-a least square problem.
+Thus we need :math:`n \geq 6` 2D-3D point correspondences to fully retrieve the
+third camera pose.
 
 We are then able to form a new bundle adjustment problem involving the three
 cameras to refine again the 3D points and camera parameters (both external and
 internal).
+
+More accurate details in:
+https://users.cecs.anu.edu.au/~hartley/Papers/CVPR99-tutorial/tutorial.pdf
 
 Proceeding incrementally like this, we can also retrieve the next camera poses.
 
