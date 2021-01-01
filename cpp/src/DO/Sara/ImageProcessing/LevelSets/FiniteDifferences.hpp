@@ -19,11 +19,12 @@
 namespace DO::Sara {
 
   //! @brief Centered difference.
-  struct Centered
+  struct CenteredDifference
   {
     template <typename ArrayView>
-    static inline auto centered(const ArrayView& u,
-                                const typename ArrayView::vector_type& p, int i)
+    static inline auto at(const ArrayView& u,                        //
+                          const typename ArrayView::vector_type& p,  //
+                          int i)
     {
       using vector_type = typename ArrayView::vector_type;
       const auto ei = vector_type::Unit(i);
@@ -34,20 +35,20 @@ namespace DO::Sara {
     static inline auto forward(const ArrayView& u,
                                const typename ArrayView::vector_type& p, int i)
     {
-      return centered(u, p, i);
+      return at(u, p, i);
     }
 
     template <typename ArrayView>
     static inline auto backward(const ArrayView& u,
                                 const typename ArrayView::vector_type& p, int i)
     {
-      return centered(u, p, i);
+      return at(u, p, i);
     }
   };
 
 
   //! @brief Upwind difference.
-  struct Upwind
+  struct UpwindDifference
   {
   public:
     template <typename ArrayView>
@@ -192,8 +193,8 @@ namespace DO::Sara {
     using GradientField = Image<Vector<Field>, Field::Dimension>;
 
     template <typename Field>
-    inline auto forward(const Field& u,
-                        const Coords<Field>& x) const -> Vector<Field>
+    inline auto forward(const Field& u, const Coords<Field>& x) const
+        -> Vector<Field>
     {
       constexpr auto N = Field::Dimension;
 

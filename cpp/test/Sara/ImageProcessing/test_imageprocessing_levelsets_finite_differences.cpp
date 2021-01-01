@@ -45,10 +45,6 @@ BOOST_AUTO_TEST_CASE(test_centered_finite_differences)
   Vector2f gradf_x{Centered::centered(f, x, 0), Centered::centered(f, x, 1)};
   BOOST_CHECK_CLOSE_L2_DISTANCE(Vector2f(1, 0), gradf_x, 1e-5f);
 
-  const auto padding = RepeatPadding{};
-
-  const auto inf_src = make_infinite(f, padding);
-
   auto gradf = gradient(f);
   auto gradf_2 = f.compute<Gradient>();
   for (int y = 0; y < gradf.height(); ++y)

@@ -27,7 +27,7 @@ namespace DO::Sara {
   {
     auto n = Matrix<T, N, 1>{};
     for (auto i = 0; i < N; ++i)
-      n(i) = Centered::centered(u, x, i);
+      n(i) = CenteredDifference::at(u, x, i);
 
     auto norm_n = n.norm();
     if (norm_n < eps)

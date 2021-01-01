@@ -184,8 +184,6 @@ namespace DO::Shakti::HalideBackend {
 
       descriptors.scale_octave_pairs = keypoints.scale_octave_pairs;
 
-      const auto& scale_factor = gradient_magnitudes.scale_geometric_factor();
-
       for (const auto& so : keypoints.scale_octave_pairs)
       {
         const auto& s = so.first.first;
