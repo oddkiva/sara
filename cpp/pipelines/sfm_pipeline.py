@@ -33,7 +33,7 @@ def run(program, dataset_dir, reconstruction_data_h5_filepath, *args, **kwargs):
         raise ValueError('{} does not exist!'.format(program_path))
     print('Running', program_path, ' '.join(cmd_options))
     cmd = [program_path] + cmd_options
-    process = Popen(cmd, stdout=PIPE)
+    process = Popen(cmd, stderr=sys.stderr, stdout=sys.stdout)
     output, err = process.communicate()
     exit_code = process.wait()
 
