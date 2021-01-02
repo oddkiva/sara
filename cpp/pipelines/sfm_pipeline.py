@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import platform
 import sys
 from os import path
 from subprocess import Popen, PIPE
 
 
 SARA_BUILD_DIR = path.abspath(path.dirname(__file__))
+if platform.system() == 'Darwin' and 'Xcode' in SARA_BUILD_DIR:
+    SARA_BUILD_DIR = path.join(SARA_BUILD_DIR, 'Release')
 
 # The dataset.
 DATASET_DIR = path.join(os.environ['HOME'],'Desktop/Datasets/sfm/castle_int')
