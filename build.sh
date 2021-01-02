@@ -9,10 +9,10 @@ else
 fi
 
 platform_name=$(uname -s)
-if [[ "${platform_name}" == "Darwin" ]]; then
-  # export PATH=~/GitHub/CMake/cmake-build/bin:${PATH}
-  export PATH=~/Downloads/cmake-3.18.5-Darwin-x86_64/CMake.app/Contents/bin:$PATH
-fi
+# if [[ "${platform_name}" == "Darwin" ]]; then
+#   # export PATH=~/GitHub/CMake/cmake-build/bin:${PATH}
+#   export PATH=~/Downloads/cmake-3.18.5-Darwin-x86_64/CMake.app/Contents/bin:$PATH
+# fi
 
 function install_python_packages_via_pip()
 {

@@ -1,4 +1,3 @@
-find_package(OpenMP)
 find_package(DO_Sara COMPONENTS Core Graphics ImageIO SfM VideoIO REQUIRED)
 
 # N.B.: with MSVC, this link helped to solve already defined symbol errors:

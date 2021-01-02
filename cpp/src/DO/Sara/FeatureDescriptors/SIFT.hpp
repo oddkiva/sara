@@ -25,7 +25,9 @@
 
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 
 namespace DO { namespace Sara {

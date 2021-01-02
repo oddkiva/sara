@@ -5,8 +5,10 @@ if (SARA_USE_FROM_SOURCE)
     sara_create_common_variables("ImageProcessing")
     sara_generate_library("ImageProcessing")
 
-    target_include_directories(DO_Sara_ImageProcessing PRIVATE
+    target_include_directories(DO_Sara_ImageProcessing
+      PUBLIC
       ${DO_Sara_INCLUDE_DIR}
-      ${DO_ThirdParty_DIR}/eigen)
+      ${DO_Sara_ThirdParty_DIR}
+      ${DO_Sara_ThirdParty_DIR}/eigen)
   endif ()
 endif ()

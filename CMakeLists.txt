@@ -41,8 +41,15 @@ set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 # Add Sara to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+# Import macros and configure Sara library version.
+include(sara_macros)
+sara_dissect_version()
 
-# We are in 2020 now: let's all look to the future please.
+# Use CCache if available to speed up builds.
+include(sara_use_ccache)
+
+
+# We are post-2020 now: let's all look to the future please.
 set(CMAKE_CXX_STANDARD 14)
 
 # Use CUDA if available.
@@ -66,14 +73,37 @@ else ()
   message(STATUS "No CUDA support!")
 endif()
 
+# Find Boost package.
+if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  set(Boost_INCLUDE_DIR
+    /Users/david/GitHub/Apple-Boost-BuildScript/dist/boost.xcframework/Headers)
+  set(Boost_LIBRARIES
+    /Users/david/GitHub/Apple-Boost-BuildScript/dist/boost.xcframework/ios-arm64/libboost.a)
+else ()
+  # set(Boost_DEBUG ON)
+  set(Boost_USE_STATIC_LIBS OFF)
+  set(Boost_USE_MULTITHREADED ON)
+  find_package(Boost
+    COMPONENTS filesystem serialization system unit_test_framework
+    REQUIRED)
+endif ()
 
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  find_package(OpenMP)
 
-# Import macros and configure Sara library version.
-include(sara_macros)
-sara_dissect_version()
+  find_package(HDF5 COMPONENTS CXX REQUIRED)
 
-# Use CCache if available to speed up builds.
-include(sara_use_ccache)
+  find_package(JPEG REQUIRED)
+  find_package(PNG  REQUIRED)
+  find_package(TIFF REQUIRED)
+  find_package(ZLIB REQUIRED)
+
+  find_package(Qt5 COMPONENTS Core Widgets OpenGL OpenGLExtensions REQUIRED)
+  find_package(OpenGL REQUIRED)
+
+  find_package(Ceres REQUIRED)
+endif ()
+
 
 # We are ready to build Sara.
 find_package(DO_Sara REQUIRED)
@@ -89,13 +119,26 @@ if (SARA_BUILD_TESTS)
   include(sara_configure_code_coverage)
   include(CTest)
   enable_testing()
+
+  if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    find_package(XCTest REQUIRED)
+  endif ()
+
+  # Visual leak detector.
+  if (WIN32 AND SARA_USE_VLD)
+    find_package(VisualLeakDetector)
+    include_directories(${VLD_INCLUDE_DIR})
+    link_directories(${VLD_LINK_DIRECTORIES})
+  endif ()
 endif ()
 
 # Build the libraries.
 add_subdirectory(cpp)
+
 if (CMAKE_Swift_COMPILER)
   add_subdirectory(swift)
 endif ()
+
 if (SARA_BUILD_PYTHON_BINDINGS)
   add_subdirectory(python)
 endif ()

@@ -6,9 +6,5 @@ if (SARA_USE_FROM_SOURCE)
     sara_set_internal_dependencies("FeatureDetectors"
       "Core;Features;Geometry;Graphics")
     sara_generate_library("FeatureDetectors")
-
-    target_include_directories(DO_Sara_FeatureDetectors PRIVATE
-      ${DO_Sara_INCLUDE_DIR}
-      ${DO_Sara_ThirdParty_DIR}/eigen)
   endif ()
 endif ()

@@ -164,7 +164,7 @@ endmacro ()
 
 macro (sara_include_modules _dep_list)
   foreach (dep ${_dep_list})
-    include(${DO_Sara_${dep}_USE_FILE})
+    include(${DO_Sara_SOURCE_DIR}/${DO_Sara_${dep}_USE_FILE}.cmake)
   endforeach ()
 endmacro ()
 
@@ -242,7 +242,7 @@ macro (sara_append_library _library_name
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
     add_library(DO_Sara_${_library_name}
-      ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
+      ${DO_Sara_SOURCE_DIR}/UseDOSara${_library_name}.cmake
       ${_hdr_files} ${_src_files})
     add_library(DO::Sara::${_library_name} ALIAS DO_Sara_${_library_name})
 
@@ -387,12 +387,10 @@ function (sara_add_test)
     xctest_add_bundle(${test_NAME} DO_Sara_Core
       ${test_SOURCES}
       /Users/david/GitLab/DO-CV/sara/cpp/test/BoostToXCTest/BoostToXCTest.mm)
-    target_include_directories(${test_NAME}
-      PRIVATE
-      ${Boost_INCLUDE_DIR})
     target_link_libraries(${test_NAME}
       PRIVATE
-      ${Boost_LIBRARIES}
+      Boost::system
+      Boost::unit_test_framework
       ${test_DEPENDENCIES})
     target_compile_definitions(${test_NAME}
       PRIVATE
