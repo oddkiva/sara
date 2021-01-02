@@ -84,7 +84,8 @@ else ()
   set(Boost_USE_STATIC_LIBS OFF)
   set(Boost_USE_MULTITHREADED ON)
   find_package(Boost
-    COMPONENTS filesystem serialization system unit_test_framework
+    COMPONENTS filesystem program_options serialization system
+               unit_test_framework
     REQUIRED)
 endif ()
 
