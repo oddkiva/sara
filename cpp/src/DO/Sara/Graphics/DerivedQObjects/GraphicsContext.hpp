@@ -19,6 +19,8 @@
 #include <QString>
 #include <QWidget>
 
+#include <DO/Sara/Core/Pixel/Typedefs.hpp>
+
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsView.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/OpenGLWindow.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/PaintingWindow.hpp>
@@ -107,5 +109,73 @@ namespace DO { namespace Sara {
 
     DialogBoxInfo m_dialogBoxInfo;
   };
+
+
+  namespace v2 {
+
+    inline auto create_window(int h, int w, int x, int y)
+    {
+      auto ctx = GraphicsContext::current();
+      QMetaObject::invokeMethod(
+          ctx, "createWindow", Qt::BlockingQueuedConnection,
+          Q_ARG(int, GraphicsContext::PAINTING_WINDOW), Q_ARG(int, w),
+          Q_ARG(int, h), Q_ARG(const QString&, QString("TEST")), Q_ARG(int, x),
+          Q_ARG(int, y));
+      return ctx->activeWindow();
+    }
+
+    inline auto close_window(QWidget* w)
+    {
+      auto ctx = GraphicsContext::current();
+      QMetaObject::invokeMethod(
+          ctx, "closeWindow", Qt::BlockingQueuedConnection, Q_ARG(QWidget*, w));
+    }
+
+    inline auto active_window()
+    {
+      auto ctx = GraphicsContext::current();
+      return ctx->activeWindow();
+    }
+
+    inline auto draw_point(int x, int y, const Rgb8& color) -> void
+    {
+      auto ctx = GraphicsContext::current();
+      QMetaObject::invokeMethod(
+          ctx->activeWindow(), "drawPoint", Qt::QueuedConnection, Q_ARG(int, x),
+          Q_ARG(int, y),
+          Q_ARG(const QColor&, QColor(color[0], color[1], color[2])));
+    }
+
+    inline auto draw_line(const Eigen::Vector2f& p1, const Eigen::Vector2f& p2,
+                          const Rgb8& color, int pen_width = 1)
+    {
+      auto ctx = GraphicsContext::current();
+      QMetaObject::invokeMethod(
+          ctx->activeWindow(), "drawLine", Qt::QueuedConnection,
+          Q_ARG(const QPointF&, QPointF(p1.x(), p1.y())),
+          Q_ARG(const QPointF&, QPointF(p2.x(), p2.y())),
+          Q_ARG(const QColor&, QColor(color[0], color[1], color[2])),
+          Q_ARG(int, pen_width));
+    }
+
+    inline auto set_antialiasing(bool on = true)
+    {
+      auto ctx = GraphicsContext::current();
+      QMetaObject::invokeMethod(ctx->activeWindow(), "setAntialiasing",
+                                Qt::QueuedConnection, Q_ARG(bool, on));
+    }
+
+    inline auto get_key()
+    {
+      GraphicsContext::current()->userThread().getKey();
+    }
+
+    inline auto get_mouse(int& x, int& y)
+    {
+      auto ctx = GraphicsContext::current();
+      ctx->userThread().getMouse(x, y);
+    }
+
+  }  // namespace v2
 
 }}  // namespace DO::Sara

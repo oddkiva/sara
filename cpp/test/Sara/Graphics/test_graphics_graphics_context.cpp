@@ -2,42 +2,29 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2019 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2021-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-//! @example
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MODULE "Graphics/Graphics View Commands"
+
+#include <boost/test/unit_test.hpp>
 
 #include <QApplication>
 
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsContext.hpp>
 
+#include "event_scheduler.hpp"
 
-using namespace std;
+
 using namespace DO::Sara;
 
 
-int worker_thread(int, char**);
-
-int main(int argc, char** argv)
-{
-  QApplication app(argc, argv);
-
-  auto widgetList = WidgetList{};
-
-  auto ctx = GraphicsContext{};
-  ctx.makeCurrent();
-  ctx.setWidgetList(&widgetList);
-  ctx.registerUserMain(worker_thread);
-  ctx.userThread().start();
-
-  return app.exec();
-}
-
-int worker_thread(int, char**)
+BOOST_AUTO_TEST_CASE(test_graphics_context_drawing_scenario)
 {
   // Open a 300x200 window.
   auto w = 300;
@@ -50,14 +37,31 @@ int worker_thread(int, char**)
     for (auto x = 0; x < 300; ++x)
       v2::draw_point(x, y, Red8);
 
-  v2::get_key();
-
   v2::set_antialiasing();
   v2::draw_line({10.5f, 10.5f}, {20.8f, 52.8132f}, Blue8, 5);
   v2::draw_line({10.5f, 10.5f}, {20.8f, 52.8132f}, Magenta8, 2);
 
-  v2::get_mouse(x, y);
-  std::cout << x << " " << y << std::endl;
+  v2::close_window(v2::active_window());
+}
 
-  return 0;
+int worker_thread(int argc, char **argv)
+{
+  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
+}
+
+int main(int argc, char **argv)
+{
+  // Create Qt Application.
+  QApplication app{argc, argv};
+
+  // Run the worker thread
+  auto widgetList = WidgetList{};
+
+  auto ctx = GraphicsContext{};
+  ctx.makeCurrent();
+  ctx.setWidgetList(&widgetList);
+  ctx.registerUserMain(worker_thread);
+  ctx.userThread().start();
+
+  return app.exec();
 }

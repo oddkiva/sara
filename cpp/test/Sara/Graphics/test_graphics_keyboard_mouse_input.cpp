@@ -287,11 +287,11 @@ int main(int argc, char** argv)
   QObject::connect(&get_user_thread(), SIGNAL(sendEvent(QEvent*, int)),
                    global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
-  // Run the worker thread
+  // Run the worker thread.
   gui_app_.register_user_main(worker_thread);
   int return_code = gui_app_.exec();
 
-  // Cleanup and terminate
+  // Cleanup and terminate.
   delete global_scheduler;
   return return_code;
 }
