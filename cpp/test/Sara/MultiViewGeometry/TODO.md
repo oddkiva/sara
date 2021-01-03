@@ -16,17 +16,12 @@ the second camera:
 
 
 
-1. Create cube data.
-   Easy but lazy
+1. Enumerate the vertex coordinates of a cube in the world coordinates.
+   *DONE*
 
-2. Create 3 to 4 camera normalized cameras
-   Easy but lazy
-   Generate absolute position.
+2. Create one normalized cameras that displaced from the world center.
 
-3. Calculate the relative poses.
-   Easy but refresh memory.
-
-4. Project the cube vertices to the images.
+3. Project the cube vertices to the images.
    Easy but need to refresh memory
 
 5. Form the bundle adjustment problem.

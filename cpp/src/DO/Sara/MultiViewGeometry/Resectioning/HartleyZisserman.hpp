@@ -11,7 +11,8 @@
 
 #pragma once
 
-#include <Eigen/Eigen>
+#include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 
 namespace DO::Sara {
@@ -36,23 +37,24 @@ namespace DO::Sara {
 
     const auto qr = m_flipped.colPivHouseholderQr();
     q = qr.householderQ();
-    r = qr.matrixQR().triangularView<Eigen::Upper>();
+    r = qr.matrixQR().template triangularView<Eigen::Upper>();
     r = flipud(r);
   }
 
   template <typename T>
   auto resectioning_hartley_zisserman(const TensorView_<T, 2>& X,
                                       const TensorView_<T, 2>& x)
+      -> PinholeCamera
   {
     if (X.rows() != x.rows())
       throw std::runtime_error{"X and x must have the same number of points!"};
 
-    const Matrix<T, 1, 4> zero_4 = Matrix<T, 1, 4>::Zero();
+    const Eigen::Matrix<T, 1, 4> zero_4 = Eigen::Matrix<T, 1, 4>::Zero();
 
-    auto A = Matrix<T, Eigen::Dynamic, Eigen::Dynamic>{X.rows() * 2, 12};
+    auto A = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>{X.rows() * 2, 12};
     for (auto r = 0; r < X.rows(); ++r)
     {
-      const auto Xi_T = Matrix<T, 1, 4>{X(r, 0), X(r, 1), X(r, 2), 1};
+      const auto Xi_T = Eigen::Matrix<T, 1, 4>{X(r, 0), X(r, 1), X(r, 2), 1};
       const auto ui = x(r, 0);
       const auto vi = x(r, 1);
 
@@ -67,16 +69,16 @@ namespace DO::Sara {
     P.row(1) = P_flat.segment(4, 8);
     P.row(2) = P_flat.segment(8, 12);
 
-    const Matrix<T, 3, 3> M = P_reshaped.block<3, 3>(0, 0);
+    const Eigen::Matrix<T, 3, 3> M = P.template block<3, 3>(0, 0);
 
-    auto K = Matrix<T, 3, 3>{};
-    auto R = Matrix<T, 3, 3>{};
-    auto t = Matrix<T, 3, 1>{};
+    auto K = Eigen::Matrix<T, 3, 3>{};
+    auto R = Eigen::Matrix<T, 3, 3>{};
+    auto t = Eigen::Matrix<T, 3, 1>{};
 
     rq_factorization(M, R, K);
     t = K.inverse() * P.col(3);
 
-    return {K, R, t}
+    return {K, R, t};
   }
 
 

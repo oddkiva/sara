@@ -3,29 +3,64 @@
 Essential Matrix and Relative Motion
 ====================================
 
-The essential matrix we implement in Sara has the following form
+Consider two cameras :math:`C_0` and :math:`C_1`. In this setup, the coordinate
+system of the first camera :math:`C_0` is considered to be the world coordinate
+system.
+
+Denoting a 3D point expressed in the world coordinate system a point by
+:math:`\mathbf{X}^0` by, we calculate its coordinates :math:`\mathbf{X}^1` in
+the second coordinate system by the rigid body motion
 
 .. math::
 
-   \mathbf{E} = [\mathbf{t}]_\times \mathbf{R}.
+   \mathbf{X}^1 = \mathbf{R} \mathbf{X}^0 + \mathbf{t} .
 
-where:
+Denoting the coordinates of a 3D vector by :math:`\mathbf{d}^0` in the first
+coordinate system, we calculate its coordinates in the second coordinate system
+as
 
-- :math:`\mathbf{R} \in \mathbf{SO}(3)` is the relative rotation from the *first* camera to the
-  *second* camera.
-- :math:`\mathbf{t} \in \mathbf{R}^3` is the relative translation from the
-  *first* camera to the *second* camera.
+.. math::
 
-The coordinates of the translation vector :math:`\mathbf{t}` is expressed with
-respect to the **first** camera coordinate system.
+   \mathbf{d}^1 = \mathbf{R} \mathbf{d}^0.
 
-Rephrasing again, the relative motion :math:`(\mathbf{R}, \mathbf{t})` can be understood
-as follows.
+Thus the essential matrix we implement in *Sara* has the following form
 
-- The initial camera has moved from to the second camera position by a
-  translational quantity :math:`\mathbf{t}`.
+.. math::
+
+   \mathbf{E} = [\mathbf{t}]_\times \mathbf{R}\ .
+
+Be careful: this is not the same convention described in the wikipedia page.
+
+One way of interpreting the relative motion is as follows.
+
+- The columns of :math:`\mathbf{R}` are the coordinates of the world axes w.r.t.
+  the camera coordinate system.
+- The vector :math:`\mathbf{t}` are the coordinates of the world center w.r.t.
+  the camera coordinate system.
+
+Rephrasing again, the relative motion :math:`(\mathbf{R}, \mathbf{t})` can be
+understood as follows.
+
+- The first camera center wrt to the second camera center by a translational
+  quantity :math:`-\mathbf{t}`. Notice here the negative sign.
 - The initial camera gaze direction has moved to the second camera gaze
   direction by a rotational quantity :math:`\mathbf{R}`.
+
+Caveats
+-------
+The following remarks are useful for debugging purposes:
+
+- The coordinates of the first camera center in the first camera coordinate
+  system is :math:`(0, 0, 0)`.
+- The coordinates of the first camera center in the second camera coordinate
+  system is :math:`\mathbf{t}`.
+- The coordinates of the second camera center in the second camera coordinate
+  system is :math:`(0, 0, 0)`.
+- The coordinates of the second camera center in the first camera coordinate
+  system is :math:`-\mathbf{R}^T \mathbf{t}`.
+
+- :math:`\mathbf{t}` goes from camera :math:`C_1` to camera :math:`C_0` and not
+  the other way around.
 
 
 Bundle Adjustment

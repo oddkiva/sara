@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE
 
 
 SARA_BUILD_DIR = path.abspath(path.dirname(__file__))
-if platform.system() == 'Darwin' and 'Xcode' in SARA_BUILD_DIR:
+if platform.system() == 'Darwin':
     SARA_BUILD_DIR = path.join(SARA_BUILD_DIR, 'Release')
 
 # The dataset.
