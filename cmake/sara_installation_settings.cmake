@@ -47,6 +47,13 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
           FILES_MATCHING PATTERN "*.hpp")
 
   set(CPACK_COMPONENT_Sources_REQUIRED 1)
+
+  # Programs
+  sara_message("Installing binary")
+  install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+          DESTINATION .
+          COMPONENT Programs)
+  set(CPACK_COMPONENT_Programs_REQUIRED 1)
 endif ()
 
 # DO-Sara component libraries
@@ -57,7 +64,7 @@ endforeach (component)
 
 
 # List all available components for installation.
-set(CPACK_COMPONENTS_ALL ThirdParty Sources Libraries)
+set(CPACK_COMPONENTS_ALL ThirdParty Sources Libraries Programs)
 
 
 if (WIN32)
