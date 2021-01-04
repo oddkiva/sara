@@ -7,17 +7,17 @@ Consider two cameras :math:`C_0` and :math:`C_1`. In this setup, the coordinate
 system of the first camera :math:`C_0` is considered to be the world coordinate
 system.
 
-Denoting a 3D point expressed in the world coordinate system a point by
-:math:`\mathbf{X}^0` by, we calculate its coordinates :math:`\mathbf{X}^1` in
+Let us denote a 3D point expressed in the world coordinate system by
+:math:`\mathbf{X}^0`. We can calculate its coordinates :math:`\mathbf{X}^1` in
 the second coordinate system by the rigid body motion
 
 .. math::
 
    \mathbf{X}^1 = \mathbf{R} \mathbf{X}^0 + \mathbf{t} .
 
-Denoting the coordinates of a 3D vector by :math:`\mathbf{d}^0` in the first
-coordinate system, we calculate its coordinates in the second coordinate system
-as
+We also denote the 3D vector expressed in the first coordinate system by
+:math:`\mathbf{d}^0` . We can calculate its coordinates in the second coordinate
+system as
 
 .. math::
 
@@ -44,9 +44,11 @@ understood as follows.
 - The first camera center wrt to the second camera center by a translational
   quantity :math:`-\mathbf{t}`. Notice here the negative sign.
 - The initial camera gaze direction has moved to the second camera gaze
-  direction by a rotational quantity :math:`\mathbf{R}`.
+  direction by a rotational quantity :math:`\mathbf{R}^T`.
+- The coordinates of these displacements are expressed w.r.t. the second camera
+  coordinates.
 
-Caveats
+Remarks
 -------
 The following remarks are useful for debugging purposes:
 
