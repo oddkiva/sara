@@ -60,24 +60,7 @@ if (SARA_BUILD_TESTS AND SARA_BUILD_PYTHON_BINDINGS)
   add_subdirectory(test)
 endif ()
 
-
-# ============================================================================ #
-# Install the library in the currently active python environment.
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-  "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
-  OUTPUT_VARIABLE PYTHON_SITE_PACKAGES_DIR
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-if (SARA_SELF_CONTAINED_INSTALLATION)
-  set(PYTHON_VERSION ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-  set(SARA_PYTHON_INSTALL_DIR
-    ${CMAKE_INSTALL_PREFIX}/lib/python${PYTHON_VERSION}/site-packages)
-else ()
-  set(SARA_PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES_DIR})
-endif ()
-message("Installing sara Pybind11 bindings to ${SARA_PYTHON_INSTALL_DIR}")
-
 install(TARGETS pysara_pybind11
-        RUNTIME DESTINATION ${SARA_PYTHON_INSTALL_DIR}
-        ARCHIVE DESTINATION ${SARA_PYTHON_INSTALL_DIR}
-        LIBRARY DESTINATION ${SARA_PYTHON_INSTALL_DIR})
+  RUNTIME DESTINATION bin COMPONENT Libraries
+  LIBRARY DESTINATION lib COMPONENT Libraries
+  ARCHIVE DESTINATION lib COMPONENT Libraries)

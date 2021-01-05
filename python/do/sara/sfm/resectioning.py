@@ -106,7 +106,7 @@ def make_cube_vertices():
     return X
 
 def make_relative_motion():
-    R = rot_z(0.) @ rot_x(0.) @ rot_y(0.)
+    R = rot_z(0.1) @ rot_x(0.) @ rot_y(0.)
     t = np.array([-2, -0.2, 10])[:, np.newaxis]
     return R, t
 
