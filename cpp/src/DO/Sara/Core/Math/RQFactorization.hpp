@@ -18,6 +18,28 @@
 
 namespace DO::Sara {
 
+  template <typename T, int M, int N>
+  auto flipud(const Eigen::Matrix<T, M, N>& m)
+  {
+    auto m_flipped = Eigen::Matrix<T, M, N>{m.rows(), m.cols()};
+    for (auto r = 0; r < m.rows(); ++r)
+      m_flipped.row(r) = m.row(m.rows() - 1 - r);
+    return m_flipped;
+  }
+
+  template <typename T, int M, int N>
+  auto fliplr(const Eigen::Matrix<T, M, N>& m)
+  {
+    auto m_flipped = Eigen::Matrix<T, M, N>{m.rows(), m.cols()};
+    for (auto c = 0; c < m.cols(); ++c)
+      m_flipped.col(c) = m.col(m.cols() - 1 - c);
+    return m_flipped;
+  }
+
+}  // namespace DO::Sara
+
+namespace DO::Sara {
+
   template <typename  T>
   auto givens_rotation(const T& a, const T& b, T& c, T& s, T& r)
   {
@@ -57,7 +79,7 @@ namespace DO::Sara {
     Mat3 qy = Mat3::Identity();
     Mat3 qz = Mat3::Identity();
 
-    std::cout << "A =\n" << a << std::endl;
+    // std::cout << "A =\n" << a << std::endl;
 
     // Givens rotation about x axis.
     const auto nx = std::hypot(r(2, 2), r(2, 1));
@@ -116,13 +138,14 @@ namespace DO::Sara {
 
     const Eigen::Matrix<T, M, N> a1 = flipud(a).transpose();
     std::cout << "A1 =\n" << a1 << std::endl;
-    const auto qr = a1.colPivHouseholderQr();
+    const auto qr = a1.householderQr();
 
     q = qr.householderQ();
     r = qr.matrixQR().template triangularView<Eigen::Upper>();
-    std::cout << "Q * R =\n" << q * r << std::endl;
-    std::cout << "A1 - Q * R =\n" << a1 - q  * r << std::endl;
-
+    // std::cout << "R =\n" << r << std::endl;
+    // std::cout << "Q =\n" << q << std::endl;
+    // std::cout << "Q * R =\n" << q * r << std::endl;
+    // std::cout << "A1 - Q * R =\n" << a1 - q  * r << std::endl;
     // std::cout << "log |det(A1)| = " << qr.logAbsDeterminant() << std::endl;
 
     r.transposeInPlace();

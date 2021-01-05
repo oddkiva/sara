@@ -19,24 +19,6 @@
 
 namespace DO::Sara {
 
-  template <typename T, int M, int N>
-  auto flipud(const Eigen::Matrix<T, M, N>& m)
-  {
-    auto m_flipped = Eigen::Matrix<T, M, N>{m.rows(), m.cols()};
-    for (auto r = 0; r < m.rows(); ++r)
-      m_flipped.row(r) = m.row(m.rows() - 1 - r);
-    return m_flipped;
-  }
-
-  template <typename T, int M, int N>
-  auto fliplr(const Eigen::Matrix<T, M, N>& m)
-  {
-    auto m_flipped = Eigen::Matrix<T, M, N>{m.rows(), m.cols()};
-    for (auto c = 0; c < m.cols(); ++c)
-      m_flipped.col(c) = m.col(m.cols() - 1 - c);
-    return m_flipped;
-  }
-
   template <typename T>
   auto resectioning_hartley_zisserman(const TensorView_<T, 2>& X,
                                       const TensorView_<T, 2>& x)
@@ -72,8 +54,8 @@ namespace DO::Sara {
     auto R = Eigen::Matrix<T, 3, 3>{};
     auto t = Eigen::Matrix<T, 3, 1>{};
 
-    rq_factorization_3x3(M, K, R);
-    // rq_factorization(M, K, R);
+    // rq_factorization_3x3(M, K, R);
+    rq_factorization(M, K, R);
 
     // Now flip the axes of K.
     const Eigen::Matrix<T, 3, 1> S = K.diagonal().array().sign().matrix();

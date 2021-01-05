@@ -56,7 +56,7 @@ def resectioning_hartley_zisserman(X, x):
     # Recall that the Frobenius norm of P is one, so we have reconstructed the
     # projection matrix only up to a scale.
 
-    # And the canonical form of the K is:
+    # The canonical form of the K matrix is:
     # [ax,  s, u0]
     # [ 0, ay, v0]
     # [ 0,  0,  1]
@@ -106,7 +106,7 @@ def make_cube_vertices():
     return X
 
 def make_relative_motion():
-    R = rot_z(0.1) @ rot_x(0.) @ rot_y(0.)
+    R = rot_z(0.1) @ rot_x(0.2) @ rot_y(0.3)
     t = np.array([-2, -0.2, 10])[:, np.newaxis]
     return R, t
 
@@ -125,7 +125,7 @@ T = rigid_body_transform(R, t)
 P = make_camera_projection_matrix(R, t)
 
 
-np.set_printoptions(precision=3)
+np.set_printoptions(precision=2)
 print('* World coordinates')
 print('  X =\n', X)
 
@@ -146,8 +146,7 @@ print('  t1 =\n', t1)
 
 P1 = K1 @ make_camera_projection_matrix(R1, t1)
 print('  P1 =\n', P1)
-print('  P1 - P =', np.linalg.norm(P - P1))
-
+print('  |P1 - P| =', np.linalg.norm(P - P1))
 
 
 import IPython; IPython.embed()
