@@ -108,7 +108,10 @@ namespace {
       }
 
       // Hexagon schedule.
-      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
+      else if (get_target().features_any_of({Halide::Target::HVX_v62,  //
+                                             Halide::Target::HVX_v65,
+                                             Halide::Target::HVX_v66,
+                                             Halide::Target::HVX_128}))
       {
         throw std::runtime_error{"Schedule not yet implemented for Hexagon!"};
       }

@@ -26,8 +26,8 @@ namespace {
     GeneratorParam<int> tile_o{"tile_o", 8};
 
     // Input data.
-    Input<Buffer<float>[2]> polar_gradient{"gradients", 2};
-    Input<Buffer<float>[4]> xyst{"xyst", 1};
+    Input<Buffer<float>[2]> polar_gradient { "gradients", 2 };
+    Input<Buffer<float>[4]> xyst { "xyst", 1 };
     Input<float> scale_max{"scale_max"};
     Input<float> bin_length_in_scale_unit{"bin_length_in_scale_unit"};
     Input<std::int32_t> N{"N"};
@@ -82,8 +82,10 @@ namespace {
       }
 
       // Hexagon schedule.
-      else if (get_target().features_any_of({Target::HVX_64,
-      Target::HVX_128}))
+      else if (get_target().features_any_of({Halide::Target::HVX_v62,  //
+                                             Halide::Target::HVX_v65,
+                                             Halide::Target::HVX_v66,
+                                             Halide::Target::HVX_128}))
       {
         throw std::runtime_error{"Schedule not yet implemented for Hexagon!"};
       }
@@ -91,7 +93,8 @@ namespace {
       // // CPU schedule.
       else
       {
-        // TODO: study https://halide-lang.org/tutorials/tutorial_lesson_18_parallel_associative_reductions.html
+        // TODO: study
+        // https://halide-lang.org/tutorials/tutorial_lesson_18_parallel_associative_reductions.html
         // And reapply this for dominant gradient orientations.
         descriptors.parallel(k);
       }

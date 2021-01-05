@@ -9,10 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <drafts/Halide/MyHalide.hpp>
 #include <drafts/Halide/Components/GaussianKernel.hpp>
 #include <drafts/Halide/Components/ScaleComponent.hpp>
 #include <drafts/Halide/Components/SeparableConvolution.hpp>
+#include <drafts/Halide/MyHalide.hpp>
 
 
 namespace {
@@ -87,7 +87,10 @@ namespace {
       }
 
       // Hexagon schedule.
-      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
+      else if (get_target().features_any_of({Halide::Target::HVX_v62,  //
+                                             Halide::Target::HVX_v65,
+                                             Halide::Target::HVX_v66,
+                                             Halide::Target::HVX_128}))
       {
         const auto vector_size =
             get_target().has_feature(Target::HVX_128) ? 128 : 64;
@@ -169,11 +172,9 @@ namespace {
       const auto sigma_y = 1.6f * sqrt(sy * sy - 0.99f);
       gy.generate(sigma_y, truncation_factor);
 
-      separable_conv_2d.generate(
-          input,
-          gx.kernel, gx.kernel_size, gx.kernel_shift,
-          gy.kernel, gy.kernel_size, gy.kernel_shift,
-          input_blurred, w_in, h_in);
+      separable_conv_2d.generate(input, gx.kernel, gx.kernel_size,
+                                 gx.kernel_shift, gy.kernel, gy.kernel_size,
+                                 gy.kernel_shift, input_blurred, w_in, h_in);
 
       downscale.generate(input_blurred, output, w_in, h_in, w_out, h_out);
     }
@@ -261,7 +262,10 @@ namespace {
       }
 
       // Hexagon schedule.
-      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
+      else if (get_target().features_any_of({Halide::Target::HVX_v62,  //
+                                             Halide::Target::HVX_v65,
+                                             Halide::Target::HVX_v66,
+                                             Halide::Target::HVX_128}))
       {
         const auto vector_size =
             get_target().has_feature(Target::HVX_128) ? 128 : 64;
