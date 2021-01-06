@@ -54,8 +54,8 @@ namespace DO::Sara {
     auto R = Eigen::Matrix<T, 3, 3>{};
     auto t = Eigen::Matrix<T, 3, 1>{};
 
-    // rq_factorization_3x3(M, K, R);
-    rq_factorization(M, K, R);
+    rq_factorization_3x3(M, K, R);
+    // rq_factorization(M, K, R);
 
     // Now flip the axes of K.
     const Eigen::Matrix<T, 3, 1> S = K.diagonal().array().sign().matrix();
