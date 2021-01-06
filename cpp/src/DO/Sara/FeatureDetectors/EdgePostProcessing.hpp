@@ -198,9 +198,10 @@ namespace DO::Sara {
         error_threshold  //
     };
 
-    auto points = Tensor_<float, 2>(curve_points.size(), 3);
+    const auto num_curve_points = static_cast<int>(curve_points.size());
+    auto points = Tensor_<float, 2>(num_curve_points, 3);
     auto point_matrix = points.matrix();
-    for (auto r = 0u; r < curve_points.size(); ++r)
+    for (auto r = 0; r < num_curve_points; ++r)
       point_matrix.row(r) = curve_points[r]      //
                                 .transpose()     //
                                 .homogeneous()   //

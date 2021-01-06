@@ -46,7 +46,7 @@ namespace DO::Sara {
       //! @}
 
       //! @brief Angle tolerance for connected edgel grouping.
-      float angular_threshold = 20. / 180.f * M_PI;
+      float angular_threshold = static_cast<float>(20. / 180.f * M_PI);
 
       //! @brief Edge simplification parameters.
       bool simplify_edges = true;
