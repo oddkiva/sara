@@ -66,39 +66,42 @@ macro (sara_populate_available_components)
 
   # Base libraries.
   sara_append_components(DO_Sara_COMPONENTS Core)
-  sara_append_components(DO_Sara_COMPONENTS Graphics)
-  sara_append_components(DO_Sara_COMPONENTS FileSystem)
 
-  # Image and Video I/O.
-  sara_append_components(DO_Sara_COMPONENTS ImageIO)
-  if (SARA_BUILD_VIDEOIO)
-    sara_append_components(DO_Sara_COMPONENTS VideoIO)
+  if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    sara_append_components(DO_Sara_COMPONENTS Graphics)
+    sara_append_components(DO_Sara_COMPONENTS FileSystem)
+
+    # Image and Video I/O.
+    sara_append_components(DO_Sara_COMPONENTS ImageIO)
+    if (SARA_BUILD_VIDEOIO)
+      sara_append_components(DO_Sara_COMPONENTS VideoIO)
+    endif ()
+
+    # Image processing.
+    sara_append_components(DO_Sara_COMPONENTS ImageProcessing)
+
+    # Feature detection and description.
+    sara_append_components(DO_Sara_COMPONENTS Features)
+    sara_append_components(DO_Sara_COMPONENTS FeatureDetectors)
+    sara_append_components(DO_Sara_COMPONENTS FeatureDescriptors)
+
+    # Feature matching.
+    sara_append_components(DO_Sara_COMPONENTS Match)
+    sara_append_components(DO_Sara_COMPONENTS FeatureMatching)
+
+    # Multiple view geometry.
+    sara_append_components(DO_Sara_COMPONENTS MultiViewGeometry)
+    sara_append_components(DO_Sara_COMPONENTS SfM)
+
+    # Disjoint sets.
+    sara_append_components(DO_Sara_COMPONENTS DisjointSets)
+
+    # Geometry.
+    sara_append_components(DO_Sara_COMPONENTS Geometry)
+
+    # KDTree for fast neighbor search.
+    sara_append_components(DO_Sara_COMPONENTS KDTree)
   endif ()
-
-  # Image processing.
-  sara_append_components(DO_Sara_COMPONENTS ImageProcessing)
-
-  # Feature detection and description.
-  sara_append_components(DO_Sara_COMPONENTS Features)
-  sara_append_components(DO_Sara_COMPONENTS FeatureDetectors)
-  sara_append_components(DO_Sara_COMPONENTS FeatureDescriptors)
-
-  # Feature matching.
-  sara_append_components(DO_Sara_COMPONENTS Match)
-  sara_append_components(DO_Sara_COMPONENTS FeatureMatching)
-
-  # Multiple view geometry.
-  sara_append_components(DO_Sara_COMPONENTS MultiViewGeometry)
-  sara_append_components(DO_Sara_COMPONENTS SfM)
-
-  # Disjoint sets.
-  sara_append_components(DO_Sara_COMPONENTS DisjointSets)
-
-  # Geometry.
-  sara_append_components(DO_Sara_COMPONENTS Geometry)
-
-  # KDTree for fast neighbor search.
-  sara_append_components(DO_Sara_COMPONENTS KDTree)
 
   # DEBUG: Print the list of component libraries.
   sara_step_message("Currently available components in Sara:")
@@ -161,7 +164,7 @@ endmacro ()
 
 macro (sara_include_modules _dep_list)
   foreach (dep ${_dep_list})
-    include(${DO_Sara_${dep}_USE_FILE})
+    include(${DO_Sara_SOURCE_DIR}/${DO_Sara_${dep}_USE_FILE}.cmake)
   endforeach ()
 endmacro ()
 
@@ -239,7 +242,7 @@ macro (sara_append_library _library_name
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
     add_library(DO_Sara_${_library_name}
-      ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
+      ${DO_Sara_SOURCE_DIR}/UseDOSara${_library_name}.cmake
       ${_hdr_files} ${_src_files})
     add_library(DO::Sara::${_library_name} ALIAS DO_Sara_${_library_name})
 
@@ -379,27 +382,44 @@ function (sara_add_test)
   cmake_parse_arguments(test
     "${_options}" "${_single_value_args}" "${_multiple_value_args}" ${ARGN})
 
-  # message(FATAL_ERROR "${test_NAME}")
-  # Create the unit test project.
-  add_executable(${test_NAME} ${test_SOURCES})
-  target_include_directories(${test_NAME}
-    PRIVATE
-    ${Boost_INCLUDE_DIR})
-  target_link_libraries(${test_NAME}
-    PRIVATE
-    ${Boost_LIBRARIES}
-    ${test_DEPENDENCIES})
-  target_compile_definitions(${test_NAME}
-    PRIVATE
-    BOOST_ALL_NO_LIB
-    BOOST_TEST_DYN_LINK)
 
-  set_target_properties(${test_NAME}
-    PROPERTIES
-    COMPILE_FLAGS ${SARA_DEFINITIONS}
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+  if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    xctest_add_bundle(${test_NAME} DO_Sara_Core
+      ${test_SOURCES}
+      /Users/david/GitLab/DO-CV/sara/cpp/test/BoostToXCTest/BoostToXCTest.mm)
+    target_link_libraries(${test_NAME}
+      PRIVATE
+      Boost::system
+      Boost::unit_test_framework
+      ${test_DEPENDENCIES})
+    target_compile_definitions(${test_NAME}
+      PRIVATE
+      BOOST_ALL_NO_LIB
+      BOOST_TEST_NO_MAIN
+      BOOST_TEST_ALTERNATIVE_INIT_API)
+    xctest_add_test(XCTest.${test_NAME} ${test_NAME})
+  else ()
+    # Create the unit test project.
+    add_executable(${test_NAME} ${test_SOURCES})
+    target_include_directories(${test_NAME}
+      PRIVATE
+      ${Boost_INCLUDE_DIR})
+    target_link_libraries(${test_NAME}
+      PRIVATE
+      ${Boost_LIBRARIES}
+      ${test_DEPENDENCIES})
+    target_compile_definitions(${test_NAME}
+      PRIVATE
+      BOOST_ALL_NO_LIB
+      BOOST_TEST_DYN_LINK)
 
-  add_test(NAME ${test_NAME} COMMAND $<TARGET_FILE:${test_NAME}>)
+    set_target_properties(${test_NAME}
+      PROPERTIES
+      COMPILE_FLAGS ${SARA_DEFINITIONS}
+      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+    add_test(NAME ${test_NAME} COMMAND $<TARGET_FILE:${test_NAME}>)
+  endif ()
 
   if (test_FOLDER)
     set_property(

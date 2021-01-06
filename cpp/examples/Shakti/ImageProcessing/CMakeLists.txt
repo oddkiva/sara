@@ -15,6 +15,5 @@ foreach (file ${examples_SRC_FILES})
     DO::Shakti::MultiArray
     DO::Shakti::ImageProcessing
     DO::Shakti::Utilities
-    gpufilter
     $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
 endforeach ()

@@ -1,3 +1,5 @@
+find_package(DO_Sara COMPONENTS Core REQUIRED)
+
 file(GLOB test_SOURCE_FILES FILES *.cpp)
 
 foreach (file ${test_SOURCE_FILES})
@@ -6,7 +8,7 @@ foreach (file ${test_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES Halide
+    DEPENDENCIES ${DO_Sara_LIBRARIES} Halide::Halide ${CMAKE_DL_LIBS}
     FOLDER "DRAFTS/Halide")
   set_target_properties(${filename}
     PROPERTIES

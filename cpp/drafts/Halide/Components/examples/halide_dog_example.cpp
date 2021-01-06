@@ -185,7 +185,7 @@ GRAPHICS_MAIN()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
+  const auto video_filepath = "/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
 #else
   // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
@@ -380,7 +380,8 @@ GRAPHICS_MAIN()
                             : s;
 
         num_residual_successes += dog_successes(i);
-        sara::draw_circle(x1, y1, s1 * std::sqrt(2.f), color, 2);
+        sara::draw_circle(x1, y1, static_cast<int>(s1 * std::sqrt(2.f)), color,
+                          2);
       }
 
       // SARA_CHECK(num_residual_successes);

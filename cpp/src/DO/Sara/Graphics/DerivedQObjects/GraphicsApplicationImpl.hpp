@@ -29,7 +29,7 @@
 namespace DO { namespace Sara {
 
   //! @brief quick-and-dirty thing to read file from dialog box.
-  //! \todo See if it can be done in a more elegant way.
+  //! @todo See if it can be done in a more elegant way.
   struct DialogBoxInfo
   {
     QPixmap pixmap;
@@ -67,8 +67,6 @@ namespace DO { namespace Sara {
     void disconnectAllWindowsIOEventsToUserThread();
 
   public:
-    int& m_argc;
-    char **m_argv;
     UserThread m_userThread;
     QList<QPointer<QWidget> > m_createdWindows;
     QPointer<QWidget> m_activeWindow;

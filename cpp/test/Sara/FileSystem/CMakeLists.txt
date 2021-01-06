@@ -1,8 +1,10 @@
-find_package(DO_Sara COMPONENTS FileSystem REQUIRED)
+project(DO_Sara_FileSystem_Tests)
 
-file(GLOB test_sfm_SOURCE_FILES FILES test_*.cpp)
+find_package(DO_Sara COMPONENTS Core FileSystem REQUIRED)
 
-foreach (file ${test_sfm_SOURCE_FILES})
+file(GLOB test_filesystem_SOURCE_FILES FILES test_*.cpp)
+
+foreach (file ${test_filesystem_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   sara_add_test(
     NAME ${filename}

@@ -1,5 +1,4 @@
 find_package(OpenCL REQUIRED)
-find_package(OpenGL REQUIRED)
 if (NOT APPLE)
   find_package(GLEW REQUIRED)
 endif ()

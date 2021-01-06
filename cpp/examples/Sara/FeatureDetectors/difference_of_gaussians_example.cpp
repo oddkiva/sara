@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 
@@ -22,41 +23,25 @@ using namespace DO::Sara;
 using namespace std;
 
 
-static Timer timer;
-
-void tic()
-{
-  timer.restart();
-}
-
-void toc()
-{
-  auto elapsed = timer.elapsed_ms();
-  cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
-}
-
 vector<OERegion> compute_dog_extrema(const Image<float>& I, bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
-  {
-    print_stage("Localizing DoG extrema");
     tic();
-  }
   auto pyramid_params = ImagePyramidParams{-1};
   auto compute_DoGs = ComputeDoGExtrema{pyramid_params};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoGs = compute_DoGs(I, &scale_octave_pairs);
   if (verbose)
-    toc();
+    toc("DoG Extrema");
   SARA_CHECK(DoGs.size());
 
   // 2. Rescale detected features to original image dimension.
   const auto& DoG = compute_DoGs.diff_of_gaussians();
   for (size_t i = 0; i < DoGs.size(); ++i)
   {
-    auto octave_scale_factor =
-        DoG.octave_scaling_factor(scale_octave_pairs[i](1));
+    const auto octave_scale_factor =
+        static_cast<float>(DoG.octave_scaling_factor(scale_octave_pairs[i](1)));
     DoGs[i].center() *= octave_scale_factor;
     DoGs[i].shape_matrix /= pow(octave_scale_factor, 2);
   }
@@ -69,17 +54,13 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
 {
   // 1. Feature extraction.
   if (verbose)
-  {
-    print_stage("Localizing DoG affine-adapted extrema");
     tic();
-  }
-
   auto pyramid_params = ImagePyramidParams{0};
   auto compute_DoGs = ComputeDoGExtrema{pyramid_params};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoGs = compute_DoGs(I, &scale_octave_pairs);
   if (verbose)
-    toc();
+    toc("DoG Extrema");
   SARA_CHECK(DoGs.size());
 
   const auto& G = compute_DoGs.gaussians();
@@ -87,10 +68,7 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
 
   // 2. Affine shape adaptation
   if (verbose)
-  {
-    print_stage("Affine shape adaptation");
     tic();
-  }
   auto adapt_shape = AdaptFeatureAffinelyToLocalShape{};
   auto keep_features = vector<unsigned char>(DoGs.size(), 0);
   for (size_t i = 0; i != DoGs.size(); ++i)
@@ -106,7 +84,7 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     }
   }
   if (verbose)
-    toc();
+    toc("DoG Extrema");
 
   // 3. Rescale the kept features to original image dimensions.
   auto num_kept_features =
@@ -119,9 +97,10 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     if (keep_features[i] == 1)
     {
       kept_DoGs.push_back(DoGs[i]);
-      const auto fact = D.octave_scaling_factor(scale_octave_pairs[i](1));
+      const auto fact =
+          static_cast<float>(D.octave_scaling_factor(scale_octave_pairs[i](1)));
       kept_DoGs.back().shape_matrix *= pow(fact, -2);
-      kept_DoGs.back().coords *= fact;
+      kept_DoGs.back().coords *= static_cast<float>(fact);
     }
   }
 

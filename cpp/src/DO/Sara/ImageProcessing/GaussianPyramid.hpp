@@ -142,7 +142,7 @@ namespace DO { namespace Sara {
       {
         LoG(s,o) = laplacian(gaussians(s,o));
         for (auto it = LoG(s, o).begin(); it != LoG(s,o).end(); ++it)
-          *it *= pow(gaussians.scale_relative_to_octave(s), 2);
+          *it *= static_cast<float>(pow(gaussians.scale_relative_to_octave(s), 2));
       }
     }
 

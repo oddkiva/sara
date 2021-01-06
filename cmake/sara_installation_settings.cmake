@@ -49,12 +49,6 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CPACK_COMPONENT_Sources_REQUIRED 1)
 endif ()
 
-# DO-Sara component libraries
-foreach (component ${DO_Sara_COMPONENTS})
-  sara_message("Installing DO_Sara_${component}")
-  include(${DO_Sara_${component}_USE_FILE})
-endforeach (component)
-
 
 # List all available components for installation.
 set(CPACK_COMPONENTS_ALL ThirdParty Sources Libraries)

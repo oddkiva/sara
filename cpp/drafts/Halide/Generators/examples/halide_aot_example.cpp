@@ -1,4 +1,5 @@
 #include <DO/Sara/Core.hpp>
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
@@ -27,7 +28,7 @@ auto halide_pipeline() -> void
       "C:/Users/David/Desktop/GOPR0542.MP4"s;
 #elif __APPLE__
   const auto video_filepath =
-      "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
+      "/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
 #else
   // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
@@ -85,8 +86,7 @@ auto halide_pipeline() -> void
       // - convolving a 1920x1080 image goes down from ~210ms to ~50ms.
       //   which is a dramatic improvement.
       // - Then parallelizing over the columns on the transposed data divides by
-      // more
-      //   than 3 the computation time (from ~50ms to ~15ms)
+      //   more than 3 the computation time (from ~50ms to ~15ms)
       //
       // The cumulated improvements are spectacular (14x faster) all along with
       // very little effort.
@@ -110,6 +110,9 @@ auto halide_pipeline() -> void
 #elif defined(USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION)
       // Sara's unoptimized code takes 240 ms to blur (no SSE instructions and
       // no column-based transposition)
+      //
+      // Parallelizing the implementation of the linear filtering with OpenMP,
+      // we are then down to 25ms, not bad at all for a very minimal change!
       apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, sigma);
       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
       toc("Sara Gaussian");

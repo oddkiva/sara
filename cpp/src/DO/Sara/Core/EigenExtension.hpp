@@ -139,6 +139,9 @@ namespace DO { namespace Sara {
 
   using namespace Eigen;
 
+  template <typename T, int N>
+  using Point = Eigen::Matrix<T, N, 1>;
+
   //! @{
   //! Convenient aliases for geometric point types.
   using Point2i = Vector2i;

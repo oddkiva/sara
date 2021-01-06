@@ -43,6 +43,11 @@ function (shakti_add_test)
   add_test(NAME ${_test_name} COMMAND $<TARGET_FILE:${_test_name}>)
 endfunction ()
 
+# Because we use the old CMake way to use CUDA.
+include_directories(
+  ${CMAKE_SOURCE_DIR}/cpp/src
+  ${CMAKE_SOURCE_DIR}/cpp/third-party)
+
 add_subdirectory(MultiArray)
 add_subdirectory(ImageProcessing)
 add_subdirectory(Segmentation)

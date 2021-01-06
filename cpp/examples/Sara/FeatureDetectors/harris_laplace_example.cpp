@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 
@@ -21,19 +22,6 @@
 using namespace DO::Sara;
 using namespace std;
 
-
-static Timer timer;
-
-void tic()
-{
-  timer.restart();
-}
-
-void toc()
-{
-  auto elapsed = timer.elapsed_ms();
-  cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
-}
 
 // A helper function
 // Be aware that detection parameters are those set by default, e.g.,
@@ -45,25 +33,19 @@ vector<OERegion> compute_harris_laplace_affine_corners(const Image<float>& I,
 {
   // 1. Feature extraction.
   if (verbose)
-  {
-    print_stage("Localizing Harris-Laplace interest points");
     tic();
-  }
   auto compute_corners = ComputeHarrisLaplaceCorners{};
   auto scale_octave_pairs = vector<Point2i>{};
   auto corners = compute_corners(I, &scale_octave_pairs);
   if (verbose)
-    toc();
+    toc("Harris-Laplace Extrema");
 
   const auto& G = compute_corners.gaussians();
   const auto& H = compute_corners.harris();
 
   // 2. Affine shape adaptation
   if (verbose)
-  {
-    print_stage("Affine shape adaptation");
     tic();
-  }
   auto adapt_shape = AdaptFeatureAffinelyToLocalShape{};
   auto keep_features = vector<unsigned char>(corners.size(), 0);
   for (size_t i = 0; i != corners.size(); ++i)
@@ -80,7 +62,7 @@ vector<OERegion> compute_harris_laplace_affine_corners(const Image<float>& I,
     }
   }
   if (verbose)
-    toc();
+    toc("Affine Shape Adaptation");
 
   // 3. Rescale the kept features to original image dimensions.
   auto num_kept_features = std::accumulate(
@@ -95,7 +77,7 @@ vector<OERegion> compute_harris_laplace_affine_corners(const Image<float>& I,
       kept_corners.push_back(corners[i]);
       const auto fact = H.octave_scaling_factor(scale_octave_pairs[i](1));
       kept_corners.back().shape_matrix *= pow(fact, -2);
-      kept_corners.back().coords *= fact;
+      kept_corners.back().coords *= static_cast<float>(fact);
     }
   }
 

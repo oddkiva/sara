@@ -10,6 +10,7 @@
 // ========================================================================== //
 
 #include "sfm.hpp"
+#include "Utilities.hpp"
 
 #include <DO/Sara/Core/MultiArray.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
@@ -26,14 +27,7 @@ namespace sara = DO::Sara;
 
 auto compute_sift_keypoints(py::array_t<float> image)
 {
-  if (!(image.ndim() == 2 or                           //
-        (image.ndim() == 3 and image.shape(2) == 1)))  //
-    throw std::runtime_error{"Invalid image shape!"};
-
-  const auto height = static_cast<int>(image.shape(0));
-  const auto width = static_cast<int>(image.shape(1));
-  const auto imview = sara::ImageView<float, 2>{
-      const_cast<float*>(image.data()), {width, height}};
+  const auto imview = to_image_view<float>(image);
   return sara::compute_sift_keypoints(imview);
 }
 
@@ -42,10 +36,13 @@ auto expose_sfm(pybind11::module& m) -> void
 {
   m.doc() = "Sara Python API";  // optional module docstring
 
+  // TODO: move this to somewhere else.
   py::class_<sara::Tensor_<float, 2>>(m, "Tensor2f")
-    .def(py::init<>())
-    .def("data", py::overload_cast<>(&sara::Tensor_<float, 2>::data, py::const_))
-    .def("sizes", py::overload_cast<>(&sara::Tensor_<float, 2>::sizes, py::const_));
+      .def(py::init<>())
+      .def("data",
+           py::overload_cast<>(&sara::Tensor_<float, 2>::data, py::const_))
+      .def("sizes",
+           py::overload_cast<>(&sara::Tensor_<float, 2>::sizes, py::const_));
 
   py::class_<sara::OERegion>(m, "OERegion")
       .def(py::init<>())

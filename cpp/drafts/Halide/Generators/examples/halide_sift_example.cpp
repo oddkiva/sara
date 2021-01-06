@@ -248,7 +248,6 @@ auto test_on_video()
 #else
   const auto video_filepath =
       "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      // const auto video_filepath =
       // "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
       // "/home/david/Desktop/GOPR0542.MP4"s;
 #endif

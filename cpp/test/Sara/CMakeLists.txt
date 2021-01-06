@@ -1,7 +1,11 @@
-message(STATUS "")
 sara_step_message("Appending test projects:")
 
 add_subdirectory(Core)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  return()
+endif ()
+
 add_subdirectory(FileSystem)
 add_subdirectory(Graphics)
 add_subdirectory(ImageIO)

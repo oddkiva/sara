@@ -20,6 +20,9 @@ before_script:
   - export CCACHE_BASEDIR=${PWD}
   - export CCACHE_DIR=${PWD}/ccache
 
+  # Do this first.
+  - apt-get update -y -qq
+
   # Install the latest CMake please.
   - apt-get install -y -qq
       apt-transport-https
@@ -31,7 +34,6 @@ before_script:
   - apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
 
   # For the documentation.
-  - apt-get update -y -qq
   - apt-get install -y -qq
       doxygen
       graphviz

@@ -98,7 +98,7 @@ namespace DO::Sara {
     auto eval(const std::map<Symbol, T>& values) const
     {
       auto val = T(1);
-      for (const auto x: exponents)
+      for (const auto& x: exponents)
       {
         auto m = values.find(x.first);
         if (m == values.end())
@@ -213,7 +213,7 @@ namespace DO::Sara {
     auto eval(const std::map<Symbol, T>& values) const
     {
       auto val = T(0);
-      for (const auto x: coeffs)
+      for (const auto& x: coeffs)
         val += x.first.template eval<T>(values) * x.second;
       return val;
     }
