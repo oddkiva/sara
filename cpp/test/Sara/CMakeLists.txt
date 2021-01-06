@@ -1,4 +1,3 @@
-message(STATUS "")
 sara_step_message("Appending test projects:")
 
 add_subdirectory(Core)

@@ -1,19 +1,4 @@
 find_package(DO_Sara COMPONENTS Core REQUIRED)
-if (UNIX)
-  find_package(HDF5 COMPONENTS CXX REQUIRED)
-endif ()
-
-
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-find_package(Boost
-  COMPONENTS filesystem serialization system unit_test_framework
-  REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-find_package(Boost REQUIRED)
-
-
-include_directories(${HDF5_INCLUDE_DIRS})
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)
@@ -27,9 +12,6 @@ endmacro ()
 
 if (UNIX)
   sara_add_example(save_to_hdf5_example)
-  # set_target_properties(save_to_hdf5_example
-  #   PROPERTIES
-  #   COMPILE_DEFINITIONS ${HDF5_DEFINITIONS})
   target_link_libraries(save_to_hdf5_example ${HDF5_LIBRARIES})
 endif ()
 

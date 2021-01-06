@@ -15,11 +15,15 @@ option(SHAKTI_BUILD_TESTS "Build unit tests for Shakti libraries"
 option(SHAKTI_SELF_CONTAINED_INSTALLATION
   "Install C++ and Python libraries in a single self-contained directory"
   ${SARA_SELF_CONTAINED_INSTALLATION})
-option(SHAKTI_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"
+option(SHAKTI_BUILD_SHARED_LIBS "Build shared libraries for DO-Shakti libraries"
   ${SARA_BUILD_SHARED_LIBS})
 
-# Find required dependencies from Sara.
-find_package(DO_Sara COMPONENTS Core REQUIRED)
+
+# Because we use the old CMake way to use CUDA.
+include_directories(
+  ${CMAKE_SOURCE_DIR}/cpp/src
+  ${CMAKE_SOURCE_DIR}/cpp/third-party)
+
 
 # Use custom CMake macros.
 set(DO_Shakti_DIR ${CMAKE_CURRENT_SOURCE_DIR})

@@ -1,12 +1,5 @@
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 
-find_package(Boost
-  COMPONENTS filesystem serialization system unit_test_framework
-  REQUIRED)
-find_package(DO_Sara COMPONENTS Core REQUIRED)
-
-find_package(OpenCL REQUIRED)
-
 find_library(CLBlast_LIBRARY clblast)
 if (NOT CLBlast_LIBRARY)
   message(FATAL_ERROR "Could not find CLBlast library!")

@@ -1,6 +1,4 @@
-find_package(HDF5 COMPONENTS CXX REQUIRED)
 find_package(DO_Sara COMPONENTS MultiViewGeometry REQUIRED)
-find_package(Ceres)
 
 file(GLOB test_multiviewgeometry_SOURCE_FILES FILES test_*.cpp)
 file(GLOB test_ceres_SOURCE_FILES FILES test_*ceres*.cpp)

@@ -1,7 +1,6 @@
 find_package(DO_Sara COMPONENTS
   Core Graphics ImageIO Features FeatureDetectors FeatureDescriptors KDTree
   Match FeatureMatching MultiViewGeometry SfM REQUIRED)
-find_package(Ceres)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)
@@ -19,10 +18,10 @@ sara_add_example(fundamental_matrix_estimation_example)
 sara_add_example(essential_matrix_estimation_example)
 target_link_libraries(essential_matrix_estimation_example PRIVATE tinyply)
 
-if (Ceres_FOUND)
-  sara_add_example(two_view_bundle_adjustment_example)
-  target_include_directories(two_view_bundle_adjustment_example
-    PRIVATE ${CERES_INCLUDE_DIRS})
-  target_link_libraries(two_view_bundle_adjustment_example
-    PRIVATE ${CERES_LIBRARIES})
-endif ()
+sara_add_example(two_view_bundle_adjustment_example)
+target_include_directories(two_view_bundle_adjustment_example
+  PRIVATE
+  ${CERES_INCLUDE_DIRS})
+target_link_libraries(two_view_bundle_adjustment_example
+  PRIVATE
+  ${CERES_LIBRARIES})

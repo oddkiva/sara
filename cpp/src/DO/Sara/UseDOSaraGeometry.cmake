@@ -1,5 +1,3 @@
-sara_include_modules("Core;Graphics")
-
 if (SARA_USE_FROM_SOURCE)
   get_property(DO_Sara_Geometry_ADDED GLOBAL PROPERTY _DO_Sara_Geometry_INCLUDED)
   if (NOT DO_Sara_Geometry_ADDED)
