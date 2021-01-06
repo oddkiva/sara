@@ -85,7 +85,7 @@ struct OrientedBox
     };
     auto pi = std::array<Vector2i, 4>{};
     std::transform(p.begin(), p.end(), pi.begin(),
-                   [](const auto& v) { return v.cast<int>(); });
+                   [](const Vector2d& v) { return v.cast<int>(); });
 
     draw_line(detection, pi[0].x(), pi[0].y(), pi[1].x(), pi[1].y(), color, 2);
     draw_line(detection, pi[1].x(), pi[1].y(), pi[2].x(), pi[2].y(), color, 2);
