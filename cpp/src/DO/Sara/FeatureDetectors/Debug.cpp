@@ -55,7 +55,7 @@ namespace DO { namespace Sara {
                        int o)
   {
     const float magnitude_factor = 3.f;
-    float z = D.octave_scaling_factor(o);
+    float z = static_cast<float>(D.octave_scaling_factor(o));
     int r = static_cast<int>(floor(1.5f * s * magnitude_factor * z + 0.5f));
     x *= z;
     y *= z;
