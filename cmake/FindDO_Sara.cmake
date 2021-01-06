@@ -2,7 +2,6 @@
 # Setup Sara once for all for every test and example projects.
 #
 if (NOT DO_Sara_FOUND)
-
   # Convenience variables used later in 'UseDOSaraXXX.cmake' scripts.
   set(DO_Sara_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE STRING "")
   set(DO_Sara_INCLUDE_DIR ${DO_Sara_DIR}/cpp/src CACHE STRING "")
@@ -55,7 +54,8 @@ else ()
 
   # Populate the list of components libraries which we need to link with.
   foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
-    include(UseDOSara${COMPONENT})
+    sara_message("Creating library DO_Sara_${COMPONENT}...")
+    include(${DO_Sara_SOURCE_DIR}/UseDOSara${COMPONENT}.cmake)
 
     if ("${DO_Sara_LIBRARIES}" STREQUAL "" AND
         NOT "${DO_Sara_${COMPONENT}_LIBRARIES}" STREQUAL "")

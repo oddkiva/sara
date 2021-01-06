@@ -1,7 +1,10 @@
-find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
 
 cuda_add_executable(nvidia_decoder_example nvidia_decoder_example.cpp)
+target_include_directories(nvidia_decoder_example
+  PRIVATE
+  ${CMAKE_SOURCE_DIR}/cpp/src
+  ${CMAKE_SOURCE_DIR}/cpp/third-party)
 target_link_libraries(nvidia_decoder_example
   PRIVATE
   ${FFMPEG_LIBRARIES}

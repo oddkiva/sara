@@ -1,9 +1,6 @@
 if (SARA_USE_FROM_SOURCE)
   get_property(DO_Sara_Graphics_ADDED GLOBAL PROPERTY _DO_Sara_Graphics_INCLUDED)
   if (NOT DO_Sara_Graphics_ADDED)
-    find_package(Qt5 COMPONENTS Core Widgets OpenGL REQUIRED)
-    find_package(OpenGL REQUIRED)
-
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -13,7 +10,9 @@ if (SARA_USE_FROM_SOURCE)
 
     target_include_directories(DO_Sara_Graphics
       PUBLIC
-      ${DO_Sara_INCLUDE_DIR})
+      ${DO_Sara_INCLUDE_DIR}
+      ${DO_Sara_ThirdParty_DIR}
+      ${DO_Sara_ThirdParty_DIR}/eigen)
 
     target_link_libraries(DO_Sara_Graphics
       PUBLIC

@@ -1,10 +1,8 @@
-sara_include_modules("Core;Geometry;Graphics")
-
 if (SARA_USE_FROM_SOURCE)
   get_property(DO_Sara_Features_ADDED GLOBAL PROPERTY _DO_Sara_Features_INCLUDED)
 
   if (NOT DO_Sara_Features_ADDED)
-    find_package(HDF5 COMPONENTS CXX REQUIRED)
+    sara_include_modules("Core;Geometry;Graphics")
 
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/Features)
     sara_create_common_variables("Features")

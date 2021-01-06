@@ -12,7 +12,7 @@ $build_dir = "sara-build-vs$vsver-$build_type"
 $cmake_toolset = $cmake_vsver[$vsver]
 
 $boost_dir = "C:\local\boost_1_71_0"
-$halide_dir = "C:\local\halide"
+$halide_dir = "C:\local\Halide-10.0.0-x86-64-windows"
 $cudnn_dir = "C:\local\cudnn"
 $tensorrt_dir = "C:\local\TensorRT-7.0.0.11"
 $nvidia_codec_sdk_dir = "C:\local\Video_Codec_SDK_9.1.23"

@@ -8,8 +8,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(kalpana_macros)
 
-find_package(OpenGL REQUIRED)
-find_package(Qt5 COMPONENTS Core Widgets OpenGL OpenGLExtensions REQUIRED)
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 
 if (Qt5_POSITION_INDEPENDENT_CODE)

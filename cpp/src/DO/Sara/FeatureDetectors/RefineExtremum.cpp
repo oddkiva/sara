@@ -33,7 +33,9 @@ namespace DO { namespace Sara {
     auto h = Vector3f{};
     auto lambda = Vector3f{};
 
-    pos << float(x), float(y), I.scale_relative_to_octave(s);
+    pos << float(x),
+           float(y),
+           static_cast<float>(I.scale_relative_to_octave(s));
 
     auto i = 0;
     for (; i < num_iter; ++i)
@@ -106,14 +108,16 @@ namespace DO { namespace Sara {
       break;
     }
 
-    pos = Vector3f(x, y, static_cast<float>(I.scale_relative_to_octave(s)));
+    pos << float(x),
+           float(y),
+           static_cast<float>(I.scale_relative_to_octave(s));
     const auto oldval = I(x, y, s, o);
     const auto newval = oldval + 0.5f * D_prime.dot(h);
 
     if ((type == 1 && oldval <= newval) || (type == -1 && oldval >= newval))
     {
       pos.head(2) += h.head(2);
-      pos(2) *= std::pow(I.scale_geometric_factor(), h(2));
+      pos(2) *= std::pow(static_cast<float>(I.scale_geometric_factor()), h(2));
       val = newval;
     }
     else

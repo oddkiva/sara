@@ -46,20 +46,11 @@ constexpr long double operator"" _deg(long double x)
 // ========================================================================== //
 // Shape Statistics of the Edge.
 // ========================================================================== //
-struct Rectangle
+struct OrientedBox
 {
   const Eigen::Vector2d& center;
   const Eigen::Matrix2d& axes;
   const Eigen::Vector2d& lengths;
-
-  Rectangle(const Eigen::Vector2d& c,  //
-            const Eigen::Matrix2d& a,  //
-            const Eigen::Vector2d& l)
-    : center{c}
-    , axes{a}
-    , lengths{l}
-  {
-  }
 
   auto length_ratio() const
   {
@@ -77,17 +68,20 @@ struct Rectangle
   {
     const Vector2d u = axes.col(0);
     const Vector2d v = axes.col(1);
-    auto p = std::array<Vector2d, 4>{
+    const auto p = std::array<Vector2d, 4>{
         c1 + s * (center + (lengths(0) + 0) * u + (lengths(1) + 0) * v),
         c1 + s * (center - (lengths(0) + 0) * u + (lengths(1) + 0) * v),
         c1 + s * (center - (lengths(0) + 0) * u - (lengths(1) + 0) * v),
         c1 + s * (center + (lengths(0) + 0) * u - (lengths(1) + 0) * v),
     };
+    auto pi = std::array<Vector2i, 4>{};
+    std::transform(p.begin(), p.end(), pi.begin(),
+                   [](const Vector2d& v) { return v.cast<int>(); });
 
-    draw_line(detection, p[0].x(), p[0].y(), p[1].x(), p[1].y(), color, 2);
-    draw_line(detection, p[1].x(), p[1].y(), p[2].x(), p[2].y(), color, 2);
-    draw_line(detection, p[2].x(), p[2].y(), p[3].x(), p[3].y(), color, 2);
-    draw_line(detection, p[3].x(), p[3].y(), p[0].x(), p[0].y(), color, 2);
+    draw_line(detection, pi[0].x(), pi[0].y(), pi[1].x(), pi[1].y(), color, 2);
+    draw_line(detection, pi[1].x(), pi[1].y(), pi[2].x(), pi[2].y(), color, 2);
+    draw_line(detection, pi[2].x(), pi[2].y(), pi[3].x(), pi[3].y(), color, 2);
+    draw_line(detection, pi[3].x(), pi[3].y(), pi[0].x(), pi[0].y(), color, 2);
   }
 };
 
@@ -155,10 +149,10 @@ struct EndPointGraph
     return edge_attrs.edges[edge_id];
   }
 
-  auto rect(std::size_t i) const -> Rectangle
+  auto oriented_box(std::size_t i) const -> OrientedBox
   {
     const auto& edge_id = edge_ids[i];
-    return Rectangle{
+    return {
         edge_attrs.centers[edge_id],  //
         edge_attrs.axes[edge_id],     //
         edge_attrs.lengths[edge_id]   //
@@ -177,7 +171,7 @@ struct EndPointGraph
         const auto& ik = 2 * i + k;
         const auto& p_ik = endpoints[ik];
 
-        const auto& r_ik = rect(ik);
+        const auto& r_ik = oriented_box(ik);
         const auto& c_ik = r_ik.center;
 
         for (auto j = i + 1; j < endpoints.size() / 2; ++j)
@@ -188,7 +182,7 @@ struct EndPointGraph
             const auto& jl = 2 * j + l;
             const auto& p_jl = endpoints[jl];
 
-            const auto& r_jl = rect(jl);
+            const auto& r_jl = oriented_box(jl);
             const auto& c_jl = r_jl.center;
 
             // Particular case:
@@ -289,7 +283,7 @@ int __main(int argc, char** argv)
       argc == 2
           ? argv[1]
 #ifdef _WIN32
-          : "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+          : "C:/Users/David/Desktop/GOPR0542.MP4"s;
 #elif __APPLE__
           : "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
@@ -309,9 +303,9 @@ int __main(int argc, char** argv)
   create_window(frame.sizes());
   set_antialiasing();
 
-  constexpr float high_threshold_ratio = 20._percent;
-  constexpr float low_threshold_ratio = high_threshold_ratio / 2.;
-  constexpr float angular_threshold = 20. / 180. * M_PI;
+  constexpr float high_threshold_ratio = static_cast<float>(20._percent);
+  constexpr float low_threshold_ratio = static_cast<float>(high_threshold_ratio / 2.);
+  constexpr float angular_threshold = static_cast<float>(20. / 180. * M_PI);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
   const Eigen::Vector2i& p1 = frame.sizes() / 4;  // Eigen::Vector2i::Zero();
   const Eigen::Vector2i& p2 = frame.sizes() * 3 / 4;  // frame.sizes();
@@ -373,7 +367,7 @@ int __main(int argc, char** argv)
     auto axes = std::vector<Matrix2d>(edges_refined.size());
     auto lengths = std::vector<Vector2d>(edges_refined.size());
 #pragma omp parallel for
-    for (auto i = 0u; i < edges_refined.size(); ++i)
+    for (auto i = 0; i < static_cast<int>(edges_refined.size()); ++i)
     {
       const auto& e = edges_refined[i];
       if (e.size() < 2)
@@ -390,16 +384,18 @@ int __main(int argc, char** argv)
     toc("Edge Shape Statistics");
 
     tic();
-    const auto edge_attributes = EdgeAttributes{.edges = edges_refined,
-                                                .centers = centers,
-                                                .axes = axes,
-                                                .lengths = lengths};
+    const auto edge_attributes = EdgeAttributes{
+        edges_refined,  //
+        centers,        //
+        axes,           //
+        lengths         //
+    };
     auto endpoint_graph = EndPointGraph{edge_attributes};
     endpoint_graph.mark_plausible_alignments();
     toc("Alignment Computation");
 
     const Eigen::Vector2d p1d = p1.cast<double>();
-    const auto& s = downscale_factor;
+    const auto s = static_cast<float>(downscale_factor);
 
     auto detection = Image<Rgb8>{frame};
     detection.flat_array().fill(Black8);
@@ -420,11 +416,11 @@ int __main(int argc, char** argv)
 
         if (score(i, j) != std::numeric_limits<double>::infinity())
         {
-          const auto pi1 = remap(pi);
-          const auto pj1 = remap(pj);
+          const auto pi1 = remap(pi).cast<int>();
+          const auto pj1 = remap(pj).cast<int>();
           draw_line(detection, pi1.x(), pi1.y(), pj1.x(), pj1.y(), Yellow8, 2);
-          draw_circle(detection, pi1.x(), pi1.y(), 3., Yellow8, 3);
-          draw_circle(detection, pj1.x(), pj1.y(), 3., Yellow8, 3);
+          draw_circle(detection, pi1.x(), pi1.y(), 3, Yellow8, 3);
+          draw_circle(detection, pj1.x(), pj1.y(), 3, Yellow8, 3);
         }
       }
     }

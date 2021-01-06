@@ -1,7 +1,6 @@
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 
 find_package(TensorRT)
-find_package(CUDA)
 
 file(GLOB test_neuralnetworks_SOURCE_FILES FILES test_*.cpp)
 

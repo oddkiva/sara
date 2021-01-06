@@ -1,4 +1,5 @@
 find_package(NvidiaVideoCodec)
+find_package(GLEW REQUIRED)
 
 set(NvDecoder_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvDecoder/NvDecoder.cpp
@@ -31,12 +32,17 @@ cuda_add_library(nvidia_VideoCodecHelpers STATIC
   ${NvEncoder_SOURCE_FILES}
   ${Utils_SOURCE_FILES})
 target_include_directories(nvidia_VideoCodecHelpers
+  PUBLIC
+  ${GLEW_INCLUDE_DIRS}
   PRIVATE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/NvCodec>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/NvDecoder>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/NvEncoder>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Utils>)
-target_link_libraries(nvidia_VideoCodecHelpers PUBLIC nvidia::VideoCodec)
+target_link_libraries(nvidia_VideoCodecHelpers
+  PUBLIC
+  nvidia::VideoCodec
+  ${GLEW_LIBRARIES})
 target_compile_options(nvidia_VideoCodecHelpers
   PRIVATE
   $<$<CXX_COMPILER_ID:GNU>:-Wno-missing-field-initializers>

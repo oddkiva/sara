@@ -7,9 +7,8 @@ if (SARA_USE_FROM_SOURCE)
     sara_set_internal_dependencies("FeatureDescriptors" "Core;Features;Graphics")
     sara_generate_library("FeatureDescriptors")
 
-    target_include_directories(DO_Sara_FeatureDescriptors PRIVATE
-      ${DO_Sara_INCLUDE_DIR}
-      ${DO_Sara_ThirdParty_DIR}/eigen)
-
+    target_link_libraries(DO_Sara_FeatureDescriptors
+      PUBLIC
+      $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
   endif ()
 endif ()

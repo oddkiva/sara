@@ -2,8 +2,6 @@ project(DO_Kalpana_Examples)
 
 message(STATUS "  - DO_Kalpana_Examples")
 
-find_package(OpenGL REQUIRED)
-find_package(Qt5 COMPONENTS Core Widgets OpenGL OpenGLExtensions REQUIRED)
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 
 file(GLOB examples_SRC_FILES FILES *.cpp)

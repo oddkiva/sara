@@ -1,4 +1,3 @@
-find_package(OpenMP)
 find_package(DO_Sara
   COMPONENTS
   Core Graphics ImageIO VideoIO     # Classic stuff

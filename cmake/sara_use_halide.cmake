@@ -34,6 +34,11 @@ function (shakti_halide_library _source_filepath)
   get_filename_component(_source_filename ${_source_filepath} NAME_WE)
 
   add_executable(${_source_filename}.generator ${_source_filepath})
+  target_include_directories(${_source_filename}.generator
+    PRIVATE
+    ${DO_Sara_DIR}/cpp/src
+    ${DO_Sara_ThirdParty_DIR}
+    ${DO_Sara_ThirdParty_DIR}/eigen)
   target_link_libraries(${_source_filename}.generator PRIVATE Halide::Generator)
 
   sara_add_halide_library(${_source_filename}
@@ -56,6 +61,11 @@ function (shakti_halide_gpu_library _source_filepath)
   get_filename_component(_source_filename ${_source_filepath} NAME_WE)
 
   add_executable(${_source_filename}.generator ${_source_filepath})
+  target_include_directories(${_source_filename}.generator
+    PRIVATE
+    ${DO_Sara_DIR}/cpp/src
+    ${DO_Sara_ThirdParty_DIR}
+    ${DO_Sara_ThirdParty_DIR}/eigen)
   target_link_libraries(${_source_filename}.generator PRIVATE Halide::Generator)
 
   sara_add_halide_library(${_source_filename}
@@ -90,6 +100,11 @@ function (shakti_halide_library_v2)
     "${_options}" "${_single_value_args}" "${_multiple_value_args}" ${ARGN})
 
   add_executable(${generator_NAME}.generator ${generator_SRCS})
+  target_include_directories(${generator_NAME}.generator
+    PRIVATE
+    ${DO_Sara_DIR}/cpp/src
+    ${DO_Sara_ThirdParty_DIR}
+    ${DO_Sara_ThirdParty_DIR}/eigen)
   target_link_libraries(${generator_NAME}.generator PRIVATE Halide::Generator)
 
   sara_add_halide_library(${generator_NAME}
