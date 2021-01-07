@@ -19,7 +19,6 @@
 
 namespace DO::Sara {
 
-
   enum class State : std::uint8_t
   {
     Alive = 0,
