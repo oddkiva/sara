@@ -73,9 +73,12 @@ auto to_camera_coordinates(const sara::PinholeCamera& C,
 auto project_to_film(const sara::PinholeCamera& C, const Eigen::MatrixXd& X)
     -> Eigen::MatrixXd
 {
-  auto x = Eigen::MatrixXd{3, X.cols()};
-  x = C.matrix() * X;
-  x = x.colwise().hnormalized();
+  auto xh = Eigen::MatrixXd{3, X.cols()};
+  xh = C.matrix() * X;
+
+  auto x = Eigen::MatrixXd{2, X.cols()};
+  x = xh.colwise().hnormalized();
+
   return x;
 }
 
@@ -108,11 +111,17 @@ BOOST_AUTO_TEST_CASE(test_flipud)
 BOOST_AUTO_TEST_CASE(test_fliplr)
 {
   auto A = Eigen::Matrix3i{};
-  A << 1, 2, 3, 4, 5, 6, 7, 8, 9;
+  A <<
+    1, 2, 3, //
+    4, 5, 6, //
+    7, 8, 9;
 
   const auto A_flipped = sara::fliplr(A);
   auto A_flipped_true = Eigen::Matrix3i{};
-  A_flipped_true << 3, 2, 1, 6, 5, 4, 9, 8, 7;
+  A_flipped_true <<
+    3, 2, 1, //
+    6, 5, 4, //
+    9, 8, 7;
   BOOST_CHECK(A_flipped_true == A_flipped);
 }
 
@@ -168,7 +177,7 @@ BOOST_AUTO_TEST_CASE(test_hartley_zisserman)
     std::cout << "C1 - C =\n" << C1.matrix() - C.matrix() << std::endl;
     std::cout << std::endl;
 
-    BOOST_CHECK_LE((C1.matrix() - C.matrix()).norm(), 1e-8);
+    BOOST_REQUIRE_LE((C1.matrix() - C.matrix()).norm(), 1e-8);
   };
 
   for (auto i = 0u; i < xa.size(); ++i)
