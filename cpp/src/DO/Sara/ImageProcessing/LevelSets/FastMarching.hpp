@@ -110,7 +110,7 @@ namespace DO::Sara {
       }
     }
 
-    void operator()() const
+    auto run() -> void
     {
       initialize();
 
