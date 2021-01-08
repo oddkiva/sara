@@ -42,10 +42,6 @@ namespace DO { namespace Sara {
 
   public:
     ScrollArea(QWidget *parent = 0);
-    ~ScrollArea()
-    {
-      qDebug() << "Destroying ScrollArea object " << this;
-    }
 
   protected:
     void closeEvent(QCloseEvent *event) override;

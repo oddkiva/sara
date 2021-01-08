@@ -94,6 +94,7 @@ void level_set()
   for (const auto& p : zeros)
     sara::draw_point(p.x(), p.y(), sara::Red8);
   sara::get_key();
+}
 
 
 GRAPHICS_MAIN()

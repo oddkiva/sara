@@ -11,7 +11,9 @@
 
 #pragma once
 
-#include <DO/Sara/ImageProcessing/LevelSets/EikonalEquationSolver.hpp>
+#include <DO/Sara/Core/Image/Image.hpp>
+#include <DO/Sara/ImageProcessing/LevelSets/FastMarching.hpp>
+// #include <DO/Sara/ImageProcessing/LevelSets/EikonalEquationSolver.hpp>
 
 
 namespace DO::Sara {
@@ -19,9 +21,9 @@ namespace DO::Sara {
   template <typename T, int N>
   class NarrowBand
   {
-    Image<T, N>& _curr_level_set_func;
+    ImageView<T, N>& _curr_level_set_func;
     Image<T, N> _prev_level_set_func;
-    Image<std::uint8_t, N> _band_map;
+    Image<bool, N> _band_map;
 
     using coords_type = Matrix<int, N, 1>;
     struct NarrowBandIterator;
@@ -30,7 +32,7 @@ namespace DO::Sara {
     EikonalEquationSolver<T, N, -1> _reinit2;
 
   public:
-    NarrowBand(Image<T, N>& phi)
+    NarrowBand(ImageView<T, N>& phi)
       : _curr_level_set_func{phi}
       , _prev_level_set_func{phi.sizes()}
       , _band_map{phi.sizes()}
@@ -69,29 +71,108 @@ namespace DO::Sara {
       return false;
     }
 
-    void insert(const coords_type& p)
+    auto insert(const coords_type& p) -> void
     {
       (*this)(p) = true;
     }
 
-    void clear()
+    auto clear_band() -> void
     {
-      this->fill(false);
+      _band_map->fill(false);
     }
 
     template <class Approximator, class Integrator>
     void init(T thickness, Integrator& integr, int iter = 0, float dt = 0.4)
     {
-
-      // Initialisation des objets de fast marching
+      // Initializing fast-marching objects.
       _reinit1.init();
       _reinit2.init();
 
-      // On vide la bande
-      clear();
+      clear_band();
 
-      // On ajoute les points voisins du niveau 0 aux points alive
+      // Alive points are neighboring points of the zero level set.
       for (auto p = _curr_level_set_func.begin_array(); p.end(); ++p)
+      {
+        const T _phi = I(*p);
+        coords_type pp, mp;
+
+        for (int i = 0; i < N; i++)
+        {
+          pp = *p;
+          mp = *p;
+          if (mp[i] > 0)
+            --mp[i];
+          if (pp[i] < _curr_level_set_func.size(i) - 1)
+            ++pp[i];
+
+          if (_phi * _curr_level_set_func(pp) <= 0 ||
+              _phi * _curr_level_set_func(mp) <= 0)
+          {
+            add_alive_point(*p);
+            break;
+          }
+        }
+      }
+
+      // Trial points are neighbors of alive points
+      _reinit1.initialize_trial_queue();
+      _reinit2.initialize_trial_queue();
+
+      // Remove points in the band that are neither trial or alive ones.
+      // Set their values to infinite.
+      for (auto p = _curr_level_set_func.begin_array(); !p.end(); ++p)
+      {
+        const size_t o = _curr_level_set_func.offset(*p);
+        const T _phi = _curr_level_set_func[o];
+        if (_phi > 0)
+        {
+          if (_reinit1.getState(o) == FastMarchingState::Far)
+            _curr_level_set_func[o] = T(2);
+          else
+            (*this)[o] = true;
+        }
+        else
+        {
+          if (_reinit2.getState(o) == FastMarchingState::Far)
+            _curr_level_set_func[o] = T(-2);
+          else
+            (*this)[o] = false;
+        }
+      }
+
+      // EDP de reinitialisation
+      reinit_pde<Approximator>(integr, iter, dt);
+
+      // Fast marching
+      reinit_fast_marching(thickness);
+
+      // Assign far point values with the maximum value and appropriate sign.
+      for (auto p = _curr_level_set_func.begin_array(); p.end(); ++p)
+      {
+        const size_t o = _curr_level_set_func.offset(*p);
+        const T _phi = _curr_level_set_func[o];
+        if (_phi > 0 && _reinit1.getState(o) == FastMarchingState::Far)
+          _curr_level_set_func[o] = thickness;
+        else if (_phi < 0 && _reinit2.getState(o) == FastMarchingState::Far)
+          _curr_level_set_func[o] = -thickness;
+      }
+
+      // Recopy the reinitialized data.
+      _prev_level_set_func = _curr_level_set_func;
+    }
+
+    template <typename Approximator, typename Integrator>
+    void reinit(T thickness, Integrator& integr, int iter = 2, T dt = 0.4)
+    {
+      // Reinitialization PDE.
+      reinit_pde<Approximator>(integr, iter, dt);
+
+      // Initializing fast-marching objects.
+      _reinit1.init();
+      _reinit2.init();
+
+      // Alive points are neighboring points of the zero level set.
+      for (iterator p = begin(); p != end(); ++p)
       {
         const T _phi = I(*p);
         coords_type pp, mp;
@@ -111,89 +192,9 @@ namespace DO::Sara {
         }
       }
 
-      // On initialise les points trial a partir des points alive trouves
-      // precedemment
-      _reinit1.initTrialFromAlive();
-      _reinit2.initTrialFromAlive();
-
-      // On ajoute dans la bande les points trial ou alive des deux cotes
-      // On met la valeur des autres a 2 (condition aux bords correcte pour
-      // l'EDP)
-      for (CoordsIterator<N> p = I.coordsBegin(); p != I.coordsEnd(); ++p)
-      {
-        const size_t o = I.offset(*p);
-        const T _phi = I[o];
-        if (_phi > 0)
-        {
-          if (_reinit1.getState(o) == E_FAR)
-            I[o] = T(2);
-          else
-            (*this)[o] = true;
-        }
-        else
-        {
-          if (_reinit2.getState(o) == E_FAR)
-            I[o] = T(-2);
-          else
-            (*this)[o] = false;
-        }
-      }
-
-      // EDP de reinitialisation
-      reinit_pde<Approximator>(integr, iter, dt);
-
-      // Fast marching
-      reinit_fast_marching(thickness);
-
-      // On met les points exterieurs a la valeur maximale du bon signe
-      for (CoordsIterator<N> p = I.coordsBegin(); p != I.coordsEnd(); ++p)
-      {
-        const size_t o = I.offset(*p);
-        const T _phi = I[o];
-        if (_phi > 0 && _reinit1.getState(o) == E_FAR)
-          I[o] = thickness;
-        else if (_phi < 0 && _reinit2.getState(o) == E_FAR)
-          I[o] = -thickness;
-      }
-
-      // On memorise le resultat de l'initialisation
-      _prev_level_set_func = _curr_level_set_func;
-    }
-
-    template <typename Approximator, typename Integrator>
-    void reinit(T thickness, Integrator& integr, int iter = 2, T dt = 0.4)
-    {
-      // Reinitialization PDE.
-      reinit_pde<approximator>(integr, iter, dt);
-
-      // Initializing fast-marching objects.
-      _reinit1.init();
-      _reinit2.init();
-
-      // Alive points are neighboring points of the zero level set.
-      for (iterator p = begin(); p != end(); ++p)
-      {
-        const T _phi = I(*p);
-        Coords<N> pp, mp;
-        for (int i = 0; i < N; i++)
-        {
-          pp = *p;
-          mp = *p;
-          if (mp[i] > 0)
-            mp[i]--;
-          if (pp[i] < I.size(i) - 1)
-            pp[i]++;
-          if (_phi * I(pp) <= 0 || _phi * I(mp) <= 0)
-          {
-            add_alive_point(*p);
-            break;
-          }
-        }
-      }
-
       // Trial points are neighbors of alive points
-      _reinit1.init_trials_from_alive_points();
-      _reinit2.init_trials_from_alive_points();
+      _reinit1.initialize_trial_queue();
+      _reinit2.initialize_trial_queue();
 
       // Remove points in the band that are neither trial or alive ones.
       // Set their values to infinite.
@@ -201,12 +202,12 @@ namespace DO::Sara {
       {
         const auto o = _curr_level_set_func.offset(*p);
         const auto _phi = _curr_level_set_func[o];
-        if (_phi > 0 && _reinit1.getState(o) == E_FAR)
+        if (_phi > 0 && _reinit1.getState(o) == FastMarchingState::Far)
         {
           _curr_level_set_func[o] = thickness;
           _band_map[o] = false;
         }
-        else if (_phi <= 0 && _reinit2.getState(o) == E_FAR)
+        else if (_phi <= 0 && _reinit2.getState(o) == FastMarchingState::Far)
         {
           _curr_level_set_func[o] = -thickness;
           _band_map[o] = false;
@@ -216,7 +217,7 @@ namespace DO::Sara {
       // Fast marching
       reinit_fast_marching(thickness);
 
-      // Recopy the reintialized data.
+      // Recopy the reinitialized data.
       _prev_level_set_func = _curr_level_set_func;
     }
 

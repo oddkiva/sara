@@ -37,7 +37,11 @@ func testDrawFunctions() {
 }
 
 func testImageRead() {
+#if __APPLE__
     let imageFilepath = "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+#else
+    let imageFilepath = "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+#endif
     let image = imread(filePath: imageFilepath)
 
     let w = Int32(image.width)
