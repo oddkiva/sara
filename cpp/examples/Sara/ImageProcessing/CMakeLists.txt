@@ -18,6 +18,7 @@ sara_add_example(image_processing_example)
 sara_add_example(infinite_image_example)
 sara_add_example(gemm_based_convolution_example)
 
+sara_add_example(fast_marching_example)
 sara_add_example(level_set_2d_example)
 
 sara_add_example(birds_eye_view_example)
