@@ -99,11 +99,11 @@ function build_library()
   else
     time cmake ../sara ${cmake_options} \
       --profiling-format=google-trace \
-      --profiling-output=~/Desktop/cmake-sara.log
+      --profiling-output=$(pwd)/cmake-sara.log
   fi
 
   # Build the library.
-  time cmake --build . -j$(nproc) -v
+  time cmake --build . -j$(nproc)
 
   # Run C++ tests.
   export BOOST_TEST_LOG_LEVEL=all

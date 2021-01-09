@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2019 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2019-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -29,26 +29,11 @@ namespace DO::Sara {
   };
 
 
-  template <typename T, int N, typename WeightFn>
+  template <typename T, int N>
   struct FastMarching
   {
     using value_type = T;
     using coords_type = Eigen::Matrix<int, N, 1>;
-    using weight_function_type = WeightFn;
-
-    struct ImageBasedGraph
-    {
-      ImageBasedGraph(const coords_type& sizes)
-        : states{sizes}
-        , distances{sizes}
-        , predecessors{sizes}
-      {
-      }
-
-      Image<FastMarchingState, N> states;
-      Image<T, N> distances;
-      Image<std::optional<coords_type>, N> predecessors;
-    };
 
     struct CoordsVal
     {
@@ -61,8 +46,23 @@ namespace DO::Sara {
       }
     };
 
-    using image_based_graph_type = ImageBasedGraph;
+    struct ImageBasedGraph
+    {
+      ImageBasedGraph() = default;
+      ImageBasedGraph(const coords_type& sizes)
+        : states{sizes}
+        , distances{sizes}
+        , predecessors{sizes}
+      {
+      }
+
+      Image<FastMarchingState, N> states;
+      Image<T, N> distances;
+      Image<std::optional<coords_type>, N> predecessors;
+    };
+
     using coords_val_type = CoordsVal;
+    using image_based_graph_type = ImageBasedGraph;
     using trial_container_type = std::set<coords_val_type>;
     using alive_container_type = std::set<coords_val_type>;
 
@@ -182,9 +182,6 @@ namespace DO::Sara {
     }
 
     image_based_graph_type g;
-
-    // Weight function typically the Eikonal equation.
-    weight_function_type w;
 
     // Dijkstra algorithm.
     trial_container_type trial;
