@@ -140,7 +140,8 @@ namespace DO::Sara {
       {
         // Extract the closest trial point.
         const auto p = _trial_set.begin()->coords;
-        //SARA_DEBUG << "p = " << p.transpose() << "   v = " << _trial_set.begin()->value << std::endl;
+        // SARA_DEBUG << "p = " << p.transpose() << "   v = "
+        //            << _trial_set.begin()->value << std::endl;
         _trial_set.erase(_trial_set.begin());
 
 #ifdef VISUAL_INSPECTION
@@ -230,6 +231,9 @@ namespace DO::Sara {
 
     //! @brief Solve the first order approximation of the Eikonal equation.
     //! This involves solving a second-degree polynomial.
+    //!
+    //! For dimension N >= 3, the implementation is understood from the
+    //! Wikipedia article, so I hope it is correct.
     inline auto solve_eikonal_equation(const coords_type& x,      //
                                        const T fx,                //
                                        const ImageView<T, N>& u)  //

@@ -38,7 +38,7 @@ auto radial_distance(sara::Image<float>& phi, const Eigen::Vector2f& center)
 
 auto fast_marching_2d() -> void
 {
-// #define REAL_IMAGE
+#define REAL_IMAGE
 #ifdef REAL_IMAGE
   const auto image = sara::imread<float>(                       //
 #ifdef __APPLE__
@@ -71,20 +71,12 @@ auto fast_marching_2d() -> void
 #else
   const auto w = 512;
   const auto h = 512;
-  auto image = sara::Image<float, 2>{w, h};
-  radial_distance(image, Eigen::Vector2f(w, h) / 2);
-
-  // const auto grad = sara::gradient(image);
-  // const auto grad_mag =
-  //     grad.cwise_transform([](const auto& v) { return v.norm(); });
-
   auto speed_times_dt = sara::Image<float, 2>{w, h};
   speed_times_dt.flat_array().fill(1);
 
   const auto zeros = std::vector{Eigen::Vector2i(w/2, h/2)};
 
   sara::create_window(image.sizes());
-  sara::display(sara::color_rescale(image));
 #endif
 
   for (const auto& p : zeros)
@@ -156,7 +148,7 @@ auto fast_marching_3d() -> void
 
 GRAPHICS_MAIN()
 {
-  // fast_marching_2d();
-  fast_marching_3d();
+  fast_marching_2d();
+  // fast_marching_3d();
   return 0;
 }
