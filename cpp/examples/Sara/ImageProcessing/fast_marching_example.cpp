@@ -36,28 +36,7 @@ auto radial_distance(sara::Image<float>& phi, const Eigen::Vector2f& center)
 }
 
 
-enum State : std::uint8_t
-{
-  Alive = 0,
-  Trial = 1,
-  Far = 2,
-  Forbidden = 3
-};
-
-struct CoordsValue
-{
-  Eigen::Vector2i coords;
-  float val;
-
-  inline auto operator<(const CoordsValue& other) const
-  {
-    return val < other.val;
-  }
-};
-
-
-
-GRAPHICS_MAIN()
+auto fast_marching_2d() -> void
 {
 // #define REAL_IMAGE
 #ifdef REAL_IMAGE
@@ -130,6 +109,54 @@ GRAPHICS_MAIN()
 
   sara::display(distances);
   sara::get_key();
+}
 
+
+auto fast_marching_3d() -> void
+{
+  const auto w = 128;
+  const auto h = 128;
+  const auto d = 128;
+
+  auto speed_times_dt = sara::Image<float, 3>{w, h, d};
+  speed_times_dt.flat_array().fill(1);
+
+  const auto zeros = std::vector{Eigen::Vector3i(w/2, h/2, d/2)};
+
+  // Fast marching.
+  sara::tic();
+  auto fm = sara::FastMarching<float, 3>{speed_times_dt};
+  fm.initialize_alive_points(zeros);
+  fm.run();
+  sara::toc("Fast Marching 3D");
+
+  auto distances = fm._distances;
+  for (auto z = 0; z < distances.depth(); ++z)
+    for (auto y = 0; y < distances.height(); ++y)
+      for (auto x = 0; x < distances.width(); ++x)
+        if (distances(x, y, z) == std::numeric_limits<float>::max())
+          distances(x, y, z) = 0;
+
+  auto dist = distances.flat_array();
+  const auto dmax = dist.maxCoeff();
+  dist /= dmax;
+
+  auto tensor = sara::tensor_view(distances);
+
+  auto scale = 2;
+  sara::create_window(scale * distances.width(), scale * distances.height());
+  for (auto z = fm._margin.z(); z < d - fm._margin.z(); ++z)
+  {
+    const auto imview = sara::image_view(tensor[z]);
+    sara::display(imview, 0, 0, scale);
+    sara::get_key();
+  }
+}
+
+
+GRAPHICS_MAIN()
+{
+  // fast_marching_2d();
+  fast_marching_3d();
   return 0;
 }

@@ -11,6 +11,7 @@
 
 #define BOOST_TEST_MODULE "ImageProcessing/Level Sets/Fast Marching Method"
 
+#include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/LevelSets/FastMarching.hpp>
 
 #include "../AssertHelpers.hpp"
@@ -21,6 +22,7 @@
 namespace sara = DO::Sara;
 
 
+#ifdef O
 BOOST_AUTO_TEST_CASE(test_min_coeff_in_fast_marching)
 {
   constexpr auto N = 3;
@@ -40,9 +42,8 @@ BOOST_AUTO_TEST_CASE(test_min_coeff_in_fast_marching)
   }
 
   auto umins_true = Eigen::Matrix<float, N - 1, N>{};
-  umins_true <<
-    1, 0, 0,
-    2, 2, 1;
+  umins_true << 1, 0, 0,
+                2, 2, 1;
 
   BOOST_CHECK(umins == umins_true);
 
@@ -53,48 +54,108 @@ BOOST_AUTO_TEST_CASE(test_min_coeff_in_fast_marching)
 
 BOOST_AUTO_TEST_CASE(test_fast_marching_2d)
 {
-  auto gradient = sara::Image<float>(20, 10);
-  auto fm = sara::FastMarching{gradient};
+  auto displacements = sara::Image<float>{10, 10};
+  displacements.flat_array().fill(1);
+  auto fm = sara::FastMarching{displacements};
+  fm.initialize_alive_points({Eigen::Vector2i{5, 5}});
+  fm.run();
+
+  // Check that we have a radial propagation.
+  auto distances = sara::Image<float>{10, 10};
+  for (auto y = 0; y < distances.height(); ++y)
+    for (auto x = 0; x < distances.width(); ++x)
+      distances(x, y) = (Eigen::Vector2f(x, y) - Eigen::Vector2f(5, 5)).norm();
+
+  const Eigen::MatrixXf d = fm._distances.matrix().block(  //
+      fm._margin.y(),                                      //
+      fm._margin.x(),                                      //
+      fm._distances.height() - 2 * fm._margin.y(),         //
+      fm._distances.width() - 2 * fm._margin.x()           //
+  );
+  const Eigen::MatrixXf d_true = distances.matrix().block(  //
+      fm._margin.y(),                                       //
+      fm._margin.x(),                                       //
+      fm._distances.height() - 2 * fm._margin.y(),          //
+      fm._distances.width() - 2 * fm._margin.x()            //
+  );
+
+  // std::cout << "CALCULATED =" << std::endl;
+  // std::cout << d << std::endl;
+  // std::cout << "EXPECTED =" << std::endl;
+  // std::cout << d_true << std::endl;
+
+  BOOST_CHECK_LE((d - d_true).cwiseAbs().maxCoeff(), 0.5f);
 }
+#endif
 
 BOOST_AUTO_TEST_CASE(test_fast_marching_3d)
 {
   namespace sara = DO::Sara;
-  auto gradient = sara::Image<float, 3>(20, 20, 20);
+  auto displacements = sara::Image<float, 3>(10, 10, 10);
+  displacements.flat_array().fill(1);
 
-  auto fm = sara::FastMarching{gradient};
+  auto fm = sara::FastMarching{displacements};
 
-  // Enumerate by hand.
-  const auto deltas_true = std::array{
-    //               x   y   z
-    Eigen::Vector3i{-1, -1, -1},
-    Eigen::Vector3i{ 0, -1, -1},
-    Eigen::Vector3i{ 1, -1, -1},
-    Eigen::Vector3i{-1,  0, -1},
-    Eigen::Vector3i{ 0,  0, -1},
-    Eigen::Vector3i{ 1,  0, -1},
-    Eigen::Vector3i{-1,  1, -1},
-    Eigen::Vector3i{ 0,  1, -1},
-    Eigen::Vector3i{ 1,  1, -1},
-    Eigen::Vector3i{-1, -1,  0},
-    Eigen::Vector3i{ 0, -1,  0},
-    Eigen::Vector3i{ 1, -1,  0},
-    Eigen::Vector3i{-1,  0,  0},
-    Eigen::Vector3i{ 1,  0,  0},
-    Eigen::Vector3i{-1,  1,  0},
-    Eigen::Vector3i{ 0,  1,  0},
-    Eigen::Vector3i{ 1,  1,  0},
-    Eigen::Vector3i{-1, -1,  1},
-    Eigen::Vector3i{ 0, -1,  1},
-    Eigen::Vector3i{ 1, -1,  1},
-    Eigen::Vector3i{-1,  0,  1},
-    Eigen::Vector3i{ 0,  0,  1},
-    Eigen::Vector3i{ 1,  0,  1},
-    Eigen::Vector3i{-1,  1,  1},
-    Eigen::Vector3i{ 0,  1,  1},
-    Eigen::Vector3i{ 1,  1,  1}
+  // Enumerate by hand all neighboring points except the zero vector.
+  const auto deltas_true = std::array<Eigen::Vector3i, 26>{
+      //               x   y   z
+      Eigen::Vector3i{-1, -1, -1},  //
+      Eigen::Vector3i{ 0, -1, -1},  //
+      Eigen::Vector3i{ 1, -1, -1},  //
+
+      Eigen::Vector3i{-1,  0, -1},  //
+      Eigen::Vector3i{ 0,  0, -1},  //
+      Eigen::Vector3i{ 1,  0, -1},  //
+
+      Eigen::Vector3i{-1,  1, -1},  //
+      Eigen::Vector3i{ 0,  1, -1},  //
+      Eigen::Vector3i{ 1,  1, -1},  //
+
+      Eigen::Vector3i{-1, -1,  0},  //
+      Eigen::Vector3i{ 0, -1,  0},  //
+      Eigen::Vector3i{ 1, -1,  0},  //
+
+      Eigen::Vector3i{-1,  0,  0},  //
+      Eigen::Vector3i{ 1,  0,  0},  //
+
+      Eigen::Vector3i{-1,  1,  0},  //
+      Eigen::Vector3i{ 0,  1,  0},  //
+      Eigen::Vector3i{ 1,  1,  0},  //
+
+      Eigen::Vector3i{-1, -1,  1},  //
+      Eigen::Vector3i{ 0, -1,  1},  //
+      Eigen::Vector3i{ 1, -1,  1},  //
+
+      Eigen::Vector3i{-1,  0,  1},  //
+      Eigen::Vector3i{ 0,  0,  1},  //
+      Eigen::Vector3i{ 1,  0,  1},  //
+
+      Eigen::Vector3i{-1,  1,  1},  //
+      Eigen::Vector3i{ 0,  1,  1},  //
+      Eigen::Vector3i{ 1,  1,  1}   //
   };
 
   BOOST_CHECK_EQUAL(fm._deltas.size(), 26);
   BOOST_CHECK(fm._deltas == deltas_true);
+  fm.initialize_alive_points({Eigen::Vector3i{5, 5, 5}});
+  fm.run();
+
+  const auto& distances = fm._distances;
+  const auto& margin = fm._margin;
+
+  for (auto z = margin.z(); z < distances.depth() - margin.z(); ++z)
+  {
+    // std::cout << "Plane z = " << z << std::endl
+    //           << sara::tensor_view(distances)[z].matrix().block(1, 1, 8, 8)
+    //           << std::endl;
+    for (auto y = margin.y(); y < distances.height() - margin.y(); ++y)
+    {
+      for (auto x = margin.x(); x < distances.width() - margin.x(); ++x)
+      {
+        const auto d_xyz =
+            (Eigen::Vector3f(x, y, z) - Eigen::Vector3f(5, 5, 5)).norm();
+        BOOST_REQUIRE_LE(std::abs(distances(x, y, z) - d_xyz), 0.8f);
+      }
+    }
+  }
 }

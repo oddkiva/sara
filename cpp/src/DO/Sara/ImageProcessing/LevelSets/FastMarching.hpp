@@ -58,6 +58,11 @@ namespace DO::Sara {
       inline auto operator<(const CoordsValue& other) const
       {
         return value < other.value;
+        /*if (value < other.value)
+          return true;
+        if (lexicographical_compare(coords, other.coords))
+          return true;
+        return false;*/
       }
     };
 
@@ -66,7 +71,6 @@ namespace DO::Sara {
     using coords_val_type = CoordsValue;
     using trial_set_type = std::multiset<coords_val_type>;
 
-    //! @brief Time complexity: O(V)
     FastMarching(const ImageView<T, N>& displacements,
                  T limit = std::numeric_limits<T>::max())
       : _displacements(displacements)
@@ -92,18 +96,28 @@ namespace DO::Sara {
     {
       // Initialize the alive points to bootstrap the fast marching.
       for (const auto& p : points)
+      {
         _states(p) = FastMarchingState::Alive;
+        _distances(p) = 0;
+      }
 
       // Initialize the trial points to bootstrap the fast marching.
       for (const auto& p : points)
       {
         for (const auto& delta: _deltas)
         {
-          const Eigen::Vector2i n = p + delta;
-          if (n.x() < _margin.x() ||
-              n.x() >= _displacements.width() - _margin.x() ||  //
-              n.y() < _margin.y() ||
-              n.y() >= _displacements.height() - _margin.y())
+          const coords_type n = p + delta;
+          auto in_image_domain = true;
+          for (auto i = 0; i < N; ++i)
+          {
+            if (n(i) < _margin(i) ||
+                n(i) >= _displacements.size(i) - _margin(i))
+            {
+              in_image_domain = false;
+              break;
+            }
+          }
+          if (!in_image_domain)
             continue;
 
           if (_states(n) == FastMarchingState::Alive ||
@@ -126,6 +140,7 @@ namespace DO::Sara {
       {
         // Extract the closest trial point.
         const auto p = _trial_set.begin()->coords;
+        //SARA_DEBUG << "p = " << p.transpose() << "   v = " << _trial_set.begin()->value << std::endl;
         _trial_set.erase(_trial_set.begin());
 
 #ifdef VISUAL_INSPECTION
@@ -142,10 +157,18 @@ namespace DO::Sara {
         for (const auto& delta: _deltas)
         {
           const coords_type n = p + delta;
-          if (n.x() < _margin.x() ||
-              n.x() >= _displacements.width() - _margin.x() ||  //
-              n.y() < _margin.y() ||
-              n.y() >= _displacements.height() - _margin.y())
+
+          auto in_image_domain = true;
+          for (auto i = 0; i < N; ++i)
+          {
+            if (n(i) < _margin(i) ||
+                n(i) >= _displacements.size(i) - _margin(i))
+            {
+              in_image_domain = false;
+              break;
+            }
+          }
+          if (!in_image_domain)
             continue;
 
           if (_states(n) == FastMarchingState::Alive ||
@@ -180,16 +203,29 @@ namespace DO::Sara {
       }
     }
 
-    inline auto to_index(const Eigen::Vector2i& p) const -> std::int32_t
+    inline auto to_index(const coords_type& p) const -> std::int32_t
     {
-      return p.y() * _displacements.width() + p.x();
+      return p.dot(_displacements.strides());
     }
 
-    inline auto to_coords(const std::int32_t i) const -> Eigen::Vector2i
+    inline auto to_coords(std::int32_t index) const -> coords_type
     {
-      const auto y = i / _displacements.width();
-      const auto x = i - y * _displacements.width();
-      return {x, y};
+      const auto c = coords_type{};
+      const auto s = _displacements.strides();
+      if (s[0] != 1)
+        throw std::runtime_error{"Not Implemented!"};
+
+      for (auto i = N - 1; i >= 0; ++i)
+      {
+        if (i == N - 1)
+          c[i] = i / s[i];
+        else
+        {
+          index -= c[i + 1] * s[i + 1];
+          c[i] = index / s[i];
+        }
+      }
+      return c;
     }
 
     //! @brief Solve the first order approximation of the Eikonal equation.
@@ -255,7 +291,29 @@ namespace DO::Sara {
       return umins.colwise().minCoeff().minCoeff();
     }
 
-    static auto initialize_deltas() -> std::array<coords_type, pow<N>(3) - 1>
+    static auto initialize_deltas_4() -> std::array<coords_type, 2 * N>
+    {
+      if constexpr (N == 2)
+        return {
+          // dim 0
+          Eigen::Vector2i{-1,  0},  //
+          Eigen::Vector2i{+1,  0},  //
+          // dim 1
+          Eigen::Vector2i{ 0, -1},  //
+          Eigen::Vector2i{ 0, +1},  //
+        };
+      else
+      {
+        auto deltas = std::array<coords_type, 2 * N>{};
+        for (auto i = 0; i < N; ++i)
+          for (auto s : {-1, 1})
+            deltas.push_back(coords_type::Zero() + s * coords_type::Unit(i));
+
+        return deltas;
+      }
+    }
+
+    static auto initialize_deltas_8() -> std::array<coords_type, pow<N>(3) - 1>
     {
       if constexpr (N == 2)
         return {
@@ -290,7 +348,9 @@ namespace DO::Sara {
       }
     }
 
-    const std::array<coords_type, pow<N>(3) - 1> _deltas = initialize_deltas();
+    // const std::array<coords_type, 2 * N> _deltas = initialize_deltas_4();
+    const std::array<coords_type, pow<N>(3) - 1> _deltas = initialize_deltas_8();
+
     const ImageView<T, N> _displacements;
     Image<FastMarchingState, N> _states;
     Image<T, N> _distances;
