@@ -59,7 +59,7 @@ struct CoordsValue
 
 GRAPHICS_MAIN()
 {
-#define REAL_IMAGE
+// #define REAL_IMAGE
 #ifdef REAL_IMAGE
   const auto image = sara::imread<float>(                       //
 #ifdef __APPLE__
