@@ -88,7 +88,11 @@ GRAPHICS_MAIN()
 #define REAL_IMAGE
 #ifdef REAL_IMAGE
   const auto image = sara::imread<float>(                       //
+#ifdef __APPLE__
       "/Users/david/GitLab/DO-CV/sara/data/stinkbug.png"        //
+#else
+      "/home/david/GitLab/DO-CV/sara/data/stinkbug.png"        //
+#endif
   );
 
   constexpr auto sigma = 3.f;
@@ -198,7 +202,8 @@ GRAPHICS_MAIN()
     if (val < distances(p))
     {
       const auto p_it = trial_set.find({p, distances(p)});
-      trial_set.erase(p_it);
+      if (p_it != trial_set.end() && p_it->coords == p)
+        trial_set.erase(p_it);
       trial_set.insert({p, val});
     }
   };
@@ -212,6 +217,11 @@ GRAPHICS_MAIN()
     trial_set.erase(trial_set.begin());
 
     //  sara::draw_point(p.x(), p.y(), sara::Green8);
+    if (states(p) == State::Alive)
+    {
+      std::cout << "OOPS!!!" << std::endl;
+      continue;
+    }
 
     // Update the neighbors.
     for (const auto& delta : deltas)
