@@ -29,164 +29,210 @@ namespace DO::Sara {
   };
 
 
+  template <int N>
+  constexpr int pow(int x)
+  {
+    if constexpr (N == 0)
+      return 1;
+    else
+      return x * pow<N - 1>(x);
+  }
+
+  static_assert(pow<2>(3) - 1 == 8);
+
   template <typename T, int N>
   struct FastMarching
   {
+    struct CoordsValue
+    {
+      Matrix<int, N, 1> coords;
+      T value;
+
+      inline auto operator<(const CoordsValue& other) const
+      {
+        return value < other.value;
+      }
+    };
+
     using value_type = T;
     using coords_type = Eigen::Matrix<int, N, 1>;
+    using coords_val_type = CoordsValue;
+    using trial_set_type = std::multiset<coords_val_type>;
 
-    struct CoordsVal
-    {
-      T val;
-      coords_type coords;
-
-      inline auto operator<(CoordsVal& other) const
-      {
-        return val < other.val;
-      }
+    std::array<coords_type, pow<N>(3) - 1> deltas = {
+        Eigen::Vector2i{-1, 0},   //
+        Eigen::Vector2i{+1, 0},   //
+        Eigen::Vector2i{0, -1},   //
+        Eigen::Vector2i{0, +1},   //
+        Eigen::Vector2i{-1, -1},  //
+        Eigen::Vector2i{-1, +1},  //
+        Eigen::Vector2i{+1, -1},  //
+        Eigen::Vector2i{+1, +1}   //
     };
-
-    struct ImageBasedGraph
-    {
-      ImageBasedGraph() = default;
-      ImageBasedGraph(const coords_type& sizes)
-        : states{sizes}
-        , distances{sizes}
-        , predecessors{sizes}
-      {
-      }
-
-      Image<FastMarchingState, N> states;
-      Image<T, N> distances;
-      Image<std::optional<coords_type>, N> predecessors;
-    };
-
-    using coords_val_type = CoordsVal;
-    using image_based_graph_type = ImageBasedGraph;
-    using trial_container_type = std::set<coords_val_type>;
-    using alive_container_type = std::set<coords_val_type>;
 
     //! @brief Time complexity: O(V)
-    FastMarching() = default;
-
-    FastMarching(const coords_type& sizes, T limit)
-      : g{sizes}
-      , limit{limit}
+    FastMarching(const ImageView<T, N>& displacements,
+                 T limit = std::numeric_limits<T>::max())
+      : _displacements(displacements)
+      , _states{displacements.sizes()}
+      , _distances{displacements.sizes()}
+      , _predecessors{displacements.sizes()}
+      , _limit{limit}
     {
-      // Initialize all vertices.
-      g.states.fill(FastMarchingState::Far);
-      g.distances.fill(std::numeric_limits<T>::max());
-      g.predecessors.fill(std::nullopt);
+      reset();
     }
 
-    //! @brief Initialize the data points
-    auto initialize_alive_points(const std::vector<coords_type>& points) -> void
+    //! @brief Reset the fast marching state.
+    inline auto reset()
     {
+      _states.flat_array().fill(FastMarchingState::Far);
+      _distances.flat_array().fill(std::numeric_limits<T>::max());
+      _predecessors.flat_array().fill(-1);
+    }
+
+    //! @brief Bootstrap the fast marching.
+    inline auto initialize_alive_points(const std::vector<coords_type>& points) -> void
+    {
+      // Initialize the alive points to bootstrap the fast marching.
       for (const auto& p : points)
-        alive.insert(p);
-    }
+        _states(p) = FastMarchingState::Alive;
 
-    //! @brief Initialize the trial points to bootstrap the fast marching.
-    auto initialize_trial_queue() -> void
-    {
-      for (const auto& p : alive)
+      // Initialize the trial points to bootstrap the fast marching.
+      for (const auto& p : points)
       {
-        for (auto i = 0; i < N; ++i)
+        for (const auto& delta : deltas)
         {
-          const coords_type n1 = p - coords_type::Unit(i);
-          const coords_type n2 = p + coords_type::Unit(i);
+          const Eigen::Vector2i n = p + delta;
+          if (n.x() < _margin.x() ||
+              n.x() >= _displacements.width() - _margin.x() ||  //
+              n.y() < _margin.y() ||
+              n.y() >= _displacements.height() - _margin.y())
+            continue;
 
-          if (alive.find(n1) == alive.end())
-            trial.insert(n1);
-          if (alive.find(n2) == alive.end())
-            trial.insert(n2);
+          if (_states(n) == FastMarchingState::Alive ||
+              _states(n) == FastMarchingState::Forbidden)
+            continue;
+
+          _states(n) = FastMarchingState::Trial;
+          _distances(n) = _displacements(n);
+          _predecessors(n) = to_index(p);
+
+          _trial_set.insert({n, _distances(n)});
         }
-      }
-    }
-
-    //! @brief Time complexity: O(1). (Reusing Dijkstra terminology in CLRS
-    //! book).
-    auto relax(const coords_type& u, coords_type& v, image_based_graph_type& g)
-        -> void
-    {
-      const auto dv_candidate = g.distances[u] + w(u, v);
-      if (g.distances[v] < dv_candidate)
-      {
-        g.distances[v] = dv_candidate;
-        g.predecessors[v] = u;
-      }
-    }
-
-    //! @brief Time complexity: O(1). (Reusing Dijkstra terminology in CLRS
-    //! book).
-    auto extract_min()
-    {
-      auto min_it = std::begin(trial);
-      const auto min = *min_it;
-      trial.erase(min_it);
-      return min;
-    }
-
-    auto increase_priority(const coords_val_type& v) -> void
-    {
-      if (g.distances[v.coords] < v.value)
-      {
-        const auto v_it = trial.find(v);
-        trial.erase(v_it);
-        trial.emplace(v.coords, g.distances[v.coords]);
       }
     }
 
     //! @brief The algorithm (Dijsktra).
-    auto run() -> void
+    inline auto run() -> void
     {
-      initialize_trial_queue();
-
-      while (!trial.empty())
+      while (!_trial_set.empty())
       {
-        // Extract min.
-        const auto u = extract_min();
+        // Extract the closest trial point.
+        const auto p = _trial_set.begin()->coords;
+        _trial_set.erase(_trial_set.begin());
 
-        // Update its state.
-        alive.push_back(u);
-        g.states[u.coords] = FastMarchingState::Alive;
-
-        // @TODO: check if we reach the limit.
+        if (_states(p) == FastMarchingState::Alive)
+        {
+          std::cout << "OOPS!!!" << std::endl;
+          continue;
+        }
 
         // Update the neighbors.
-        for (auto& v : g.neighbors(u))
+        for (const auto& delta : deltas)
         {
-          if (g.states[v] == FastMarchingState::Alive ||
-              g.states[v] == FastMarchingState::Forbidden)
+          const coords_type n = p + delta;
+          if (n.x() < _margin.x() ||
+              n.x() >= _displacements.width() - _margin.x() ||  //
+              n.y() < _margin.y() ||
+              n.y() >= _displacements.height() - _margin.y())
             continue;
 
-          // From there, a point is either `Far` or `Trial` now.
+          if (_states(n) == FastMarchingState::Alive ||
+              _states(n) == FastMarchingState::Forbidden)
+            continue;
+
+          // At this point, a neighbor is either `Far` or `Trial` now.
           //
           // Update its distance value in both cases.
-          relax(u.coords, v.coords, g);
+          const auto new_dist_n =
+              solve_eikonal_equation_2d(n, _displacements(n), _distances);
+          if (new_dist_n < _distances(n))
+          {
+            _distances(n) = new_dist_n;
+            _predecessors(n) = to_index(p);
+          }
 
-          if (g.states[v] == FastMarchingState::Far)
+          if (_states(n) == FastMarchingState::Far)
           {
             // Update its state.
-            g.states[v.coords] = FastMarchingState::Trial;
+            _states(n) = FastMarchingState::Trial;
 
             // Insert it into the list of trial points.
-            trial.emplace(v.coords, g.distance[v.coords]);
+            _trial_set.insert({n, _distances(n)});
           }
 
           // Increase the priority of the point if necessary.
-          if (g.states[v.coords] == FastMarchingState::Trial)
-            increase_priority(v);
+          if (_states(n) == FastMarchingState::Trial)
+            increase_priority(n, _distances(n));
         }
       }
     }
 
-    image_based_graph_type g;
+    inline auto to_index(const Eigen::Vector2i& p) const -> std::int32_t
+    {
+      return p.y() * _displacements.width() + p.x();
+    }
 
-    // Dijkstra algorithm.
-    trial_container_type trial;
-    alive_container_type alive;
-    T limit;
+    inline auto to_coords(const std::int32_t i) const -> Eigen::Vector2i
+    {
+      const auto y = i / _displacements.width();
+      const auto x = i - y * _displacements.width();
+      return {x, y};
+    }
+
+    inline auto solve_eikonal_equation_2d(const Eigen::Vector2i& x, const T fx,
+                                          const Image<T>& u) -> T
+    {
+      const auto u0 = std::min(u(x - Eigen::Vector2i::Unit(0)),
+                               u(x + Eigen::Vector2i::Unit(0)));
+      const auto u1 = std::min(u(x - Eigen::Vector2i::Unit(1)),
+                               u(x + Eigen::Vector2i::Unit(1)));
+
+      const auto fx_inverse = 1 / (fx * fx);
+
+      const auto a = 2.f;
+      const auto b = -2 * (u0 + u1);
+      const auto c = u0 * u0 + u1 * u1 - fx_inverse * fx_inverse;
+
+      const auto delta = b * b - 4 * a * c;
+
+      auto r0 = float{};
+      if (delta >= 0)
+        r0 = (-b + std::sqrt(delta)) / (2 * a);
+      else
+        r0 = std::min(u0, u1) + fx_inverse;
+
+      return r0;
+    }
+
+    inline auto increase_priority(const coords_type& p, T value) -> void
+    {
+      if (value < _distances(p))
+      {
+        const auto p_it = _trial_set.find({p, _distances(p)});
+        if (p_it != _trial_set.end() && p_it->coords == p)
+          _trial_set.erase(p_it);
+        _trial_set.insert({p, value});
+      }
+    }
+
+    const ImageView<T, N>& _displacements;
+    Image<FastMarchingState, N> _states;
+    Image<T, N> _distances;
+    Image<std::int32_t, N> _predecessors;
+    coords_type _margin = coords_type::Ones();
+    trial_set_type _trial_set;
+    T _limit;
   };
 
 }  // namespace DO::Sara

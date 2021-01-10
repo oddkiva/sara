@@ -26,5 +26,5 @@ BOOST_AUTO_TEST_CASE(test_fast_marching)
 
   auto gradient = sara::Image<float>(20, 10);
 
-  auto fm = sara::FastMarching<T, 2>{};
+  // auto fm = sara::FastMarching<T, 2>{gradient};
 }
