@@ -19,9 +19,9 @@
 namespace sara = DO::Sara;
 
 
-auto spherical_distance(sara::Image<float>& phi,        //
-                        const Eigen::Vector2f& center,  //
-                        float radius)
+auto radial_distance(sara::Image<float>& phi,        //
+                     const Eigen::Vector2f& center,  //
+                     float radius)
 {
   for (auto y = 0; y < phi.height(); ++y)
   {
@@ -75,7 +75,7 @@ void level_set()
   const auto h = 96;
   const auto scale = 4;
   auto phi = sara::Image<float, 2>(w, h);
-  // spherical_distance(phi, Eigen::Vector2f(w, h) / 2, w / 5.);
+  // radial_distance(phi, Eigen::Vector2f(w, h) / 2, w / 5.);
   manhattan_distance(phi, Eigen::Vector2f(w, h) / 2, Eigen::Vector2f(w, h) / 4);
 
   // For display purposes.

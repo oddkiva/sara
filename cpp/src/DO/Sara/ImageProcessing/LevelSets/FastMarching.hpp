@@ -58,11 +58,11 @@ namespace DO::Sara {
       inline auto operator<(const CoordsValue& other) const
       {
         return value < other.value;
-        /*if (value < other.value)
-          return true;
-        if (lexicographical_compare(coords, other.coords))
-          return true;
-        return false;*/
+        // if (value < other.value)
+        //   return true;
+        // if (lexicographical_compare(coords, other.coords))
+        //   return true;
+        // return false;
       }
     };
 

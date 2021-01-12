@@ -105,7 +105,7 @@ namespace DO::Sara {
 
     //! Evaluate the magnitude of the velocity as:
     //!   u(x) / sqrt(df^2 + u(x)^2).
-    const auto& u0 = u(x);
+    const auto u0 = u(x);
     const auto s = u0 / sqrt(u0 * u0 + flux_delta * flux_delta);
     v *= s;
 
@@ -119,7 +119,7 @@ namespace DO::Sara {
                                T flux_delta = 1)            //
       -> T
   {
-    const auto& u0 = u(x);
+    const auto u0 = u(x);
     const auto s = u0 / std::sqrt(u0 * u0 + flux_delta * flux_delta);
     return s + normal_motion<FiniteDifference>(u, x, s);
   }

@@ -18,74 +18,68 @@ namespace DO::Sara {
 
   //! @{
 
-  //! First-order one-step Euler time integrator
+  //! Forward Euler time integrator.
   template <typename T, int N>
-  class Euler : public ImageView<T, N>
+  class EulerIntegrator
   {
   private:
-    ImageView<T, N>& I;
+    ImageView<T, N>& _df;
+    Image<T, N> _f;
 
   public:
-    Euler(Image<T, N>& _I)
-      : Image<T, N>(_I.sizes())
-      , I(_I)
+    EulerIntegrator(ImageView<T, N>& df)
+      : _df{df}
+      , _f{df.sizes()}
     {
     }
 
-    template <typename InputIterator>
-    bool step(InputIterator first, InputIterator last, T dt)
+    template <typename CoordsIterator>
+    bool step(CoordsIterator begin, CoordsIterator end, T dt)
     {
-      for (InputIterator p = first; p != last; ++p)
-      {
-        const size_t o = I.offset(*p);
-        I[o] += dt * (*this)[o];
-      }
-
+      for (auto p = begin; p != end; ++p)
+        _f(p.coords()) += dt * _df(p.coords());
       return true;
     }
   };
 
 
-  //! Midpoint time integrator
+  //! Midpoint time integrator.
   template <typename T, int N>
-  class Midpoint : public Image<T, N>
+  class MidpointIntegrator
   {
   private:
-    Image<T, N>& I;
-    Image<T, N> tmp;
-    int substep{0};
+    ImageView<T, N>& _df;
+    Image<T, N> _f;
+
+    Image<T, N> _midpoint;
+    int substep = 0;
 
   public:
-    Midpoint(Image<T, N>& _I)
-      : Image<T, N>(_I)
-      , I{_I}
-      , tmp{_I}
+    MidpointIntegrator(ImageView<T, N>& df)
+      : _df{df}
+      , _f{df}
+      , _midpoint{df}
     {
     }
 
-    template <typename InputIterator>
-    bool step(InputIterator first, InputIterator last, T dt)
+    template <typename CoordsIterator>
+    bool step(CoordsIterator begin, CoordsIterator end, T dt)
     {
-      // First substep
       if (substep == 0)
       {
-        for (InputIterator p = first; p != last; ++p)
+        for (auto p = begin; p != end; ++p)
         {
-          const int o = I.offset(*p);
-          tmp[o] = I[o];
-          I[o] += (dt / T(2)) * (*this)[o];
+          _midpoint(p.coords()) = _f(p.coords());
+          _f(p.coords()) += (dt / T(2)) * _df(p.coords());
         }
 
-        substep++;
+        ++substep;
         return false;
       }
 
       // Second substep
-      for (InputIterator p = first; p != last; ++p)
-      {
-        const int o = I.offset(*p);
-        I[o] = tmp[o] + dt * (*this)[o];
-      }
+      for (auto p = begin; p != end; ++p)
+        _f(p.coords()) = _midpoint(p.coords()) + dt * _df(p.coords());
 
       substep = 0;
 

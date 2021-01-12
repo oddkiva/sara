@@ -22,7 +22,6 @@
 namespace sara = DO::Sara;
 
 
-#ifdef O
 BOOST_AUTO_TEST_CASE(test_min_coeff_in_fast_marching)
 {
   constexpr auto N = 3;
@@ -86,7 +85,6 @@ BOOST_AUTO_TEST_CASE(test_fast_marching_2d)
 
   BOOST_CHECK_LE((d - d_true).cwiseAbs().maxCoeff(), 0.5f);
 }
-#endif
 
 BOOST_AUTO_TEST_CASE(test_fast_marching_3d)
 {
