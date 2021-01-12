@@ -43,34 +43,38 @@ namespace DO::Sara {
       _zeros.reserve(phi.size());
     }
 
+    //! @ brief Check the temporal coherence of the sign of the level set
+    //! function.
+    /*!
+     *  We need to ensure high level set values cannot flip their sign all of
+     *  sudden during an iteration.
+     */
     auto reinit_needed(T threshold) const -> bool
     {
       auto band_map_flat = _band_map.flat_array();
       auto curr_flat = _curr_level_set_func.flat_array();
       auto prev_flat = _prev_level_set_func.flat_array();
+
       for (auto p = 0; p != _band_map.size(); ++p)
       {
         if (!band_map_flat(p))
           continue;
 
-        const auto v = curr_flat(p);
-        const auto w = prev_flat(p);
+        const auto phi_curr = curr_flat(p);
+        const auto phi_prev = prev_flat(p);
 
-        if (w > threshold && v <= 0)
+        if (phi_prev > threshold && phi_curr <= 0)
           return true;
-        if (w < -threshold && v >= 0)
+        if (phi_prev < -threshold && phi_curr >= 0)
           return true;
       }
 
       return false;
     }
 
-    auto reset_band() -> void
-    {
-      _band_map->fill(false);
-    }
-
-    auto locate_zeros(std::vector<coords_type>& zeros)
+    //! @brief Populate the coordinates of level zero-crossing in the level
+    //! set.
+    auto populate_zero_crossings(std::vector<coords_type>& zeros)
     {
       zeros.clear();
       for (auto phi_p = _curr_level_set_func.begin_array(); phi_p.end();
@@ -109,11 +113,10 @@ namespace DO::Sara {
       _reinit2.reset();
 
       // Bootstrap the fast marching method.
-      for (auto phi_p = _curr_level_set_func.begin_array(); !phi_p.end();
-           ++phi_p)
+      for (const auto& p : zeros)
       {
-        const auto& p = phi_p.position();
-        if (*phi_p > 0)
+        const auto& _phi = I(p);
+        if (_phi > 0)
         {
           _reinit1._states(p) = FastMarchingState::Alive;
           _reinit2._states(p) = FastMarchingState::Forbidden;
@@ -124,17 +127,21 @@ namespace DO::Sara {
           _reinit2._states(p) = FastMarchingState::Alive;
         }
       }
+
+      // Manually initialize the trial queues.
+      _reinit1.initialize_trial_set_from_alive_set(zeros);
+      _reinit2.initialize_trial_set_from_alive_set(zeros);
     }
 
-    template <class Approximator, class Integrator>
-    void init(T thickness, Integrator& integr, int iter = 0, float dt = 0.4)
+    template <typename Approximator, typename Integrator>
+    auto init(T thickness, Integrator& integr, int iter = 0, float dt = 0.4)
+        -> void
     {
       // Set the band as the empty set.
       reset_band();
 
       // Locate the zero crossings of the level set function.
-      locate_zeros(_zeros);
-
+      populate_zero_crossings(_zeros);
       initialize_fast_marching(_zeros);
 
       // Initialize the band as the set of points that are either trial or
@@ -145,17 +152,16 @@ namespace DO::Sara {
            ++phi_p)
       {
         const auto& p = phi_p.position();
-        if (*phi_p > 0)
+
+        if (*phi_p > 0)  // We are outside the domain.
         {
-          // We are in the exterior of the shape.
           if (_reinit1._states(p) == FastMarchingState::Far)
             *phi_p = T(2);
           else
             _band_map(p) = true;
         }
-        else  // phi_p <= 0
+        else  // We are inside the domain enclosed by the shape.
         {
-          // We are in the interior of the shape.
           if (_reinit2._states(p) == FastMarchingState::Far)
             *phi_p = T(-2);
           else
@@ -163,12 +169,14 @@ namespace DO::Sara {
         }
       }
 
-      reinit_pde<Approximator>(integr, iter, dt);
+      reinitialize_level_set_function<Approximator>(integr, iter, dt);
 
+      // Calculate the new signed distance functions.
       run_fast_marching_sideways(thickness);
 
       // Assign far point values with the maximum value and appropriate sign.
-      for (auto phi_p = _curr_level_set_func.begin_array(); phi_p.end(); ++phi_p)
+      for (auto phi_p = _curr_level_set_func.begin_array(); phi_p.end();
+           ++phi_p)
       {
         const auto& p = phi_p.position();
         if (*phi_p > 0 && _reinit1._states(p) == FastMarchingState::Far)
@@ -181,30 +189,31 @@ namespace DO::Sara {
     }
 
     template <typename Approximator, typename Integrator>
-    void reinit(T thickness, Integrator& integr, int iter = 2, T dt = 0.4)
+    auto reinit(T thickness, Integrator& integr, int iter = 2, T dt = 0.4)
+        -> void
     {
-      // Reinitialization PDE.
-      reinit_pde<Approximator>(integr, iter, dt);
+      // Reinitialization the level set function.
+      reinitialize_level_set_function<Approximator>(integr, iter, dt);
 
       // Locate the zero crossings of the level set function.
-      locate_zeros(_zeros);
+      populate_zero_crossings(_zeros);
       initialize_fast_marching(_zeros);
 
-      // Remove points in the band that are neither trial or alive ones.
-      // Set their values to infinite.
+      // Remove points in the band that are neither trial or alive.
+      // Set their values to the the maximum band thickness.
       for (auto p = _band_map.begin_array(); !p.end(); ++p)
       {
         if (!(*p))
           continue;
 
         const auto phi = _curr_level_set_func(p.position());
-        if (phi > 0 &&
+        if (phi > 0 &&  //
             _reinit1._states(p.position()) == FastMarchingState::Far)
         {
           _curr_level_set_func(p.position()) = thickness;
           *p = false;
         }
-        else if (phi <= 0 &&
+        else if (phi <= 0 &&  //
                  _reinit2._states(p.position()) == FastMarchingState::Far)
         {
           _curr_level_set_func(p.position()) = -thickness;
@@ -212,48 +221,42 @@ namespace DO::Sara {
         }
       }
 
-      // Fast marching
+      // Compute the distance function.
       run_fast_marching_sideways(thickness);
 
       // Recopy the reinitialized data.
       _prev_level_set_func = _curr_level_set_func;
     }
 
-    // Maintain the signed distance.
+    //! @brief Maintain the signed distance.
     template <typename Approximator, typename Integrator>
     auto maintain(T thickness, Integrator& integr, int expand = 1, int iter = 1,
-                  T dt = 0.4) -> void
+                  T dt = 0.4)  //
+        -> void
     {
       expand_band(expand);
-      reinit_pde<Approximator>(integr, iter, dt);
+      reinitialize_level_set_function<Approximator>(integr, iter, dt);
       shrink_band(thickness);
     }
 
-    auto add_alive_point(const coords_type& p) -> void
-    {
-      const auto& _phi = I(p);
-      if (_phi > 0)
-      {
-        _reinit1._states(p) = FastMarchingState::Alive;
-        _reinit2._states(p) = FastMarchingState::Forbidden;
-      }
-      else
-      {
-        _reinit1._states(p) = FastMarchingState::Forbidden;
-        _reinit2._states(p) = FastMarchingState::Alive;
-      }
-    }
-
-    // Update the level set function using the time integrator.
+    //! @brief Reinitialize the level set function with the same zero level set
+    //! but with |∇Φ| = 1.
+    /*!
+     *  This is for numerical stability reasons and we use the time integration
+     *  approach for a few time steps.
+     *
+     *  cf. https://math.mit.edu/classes/18.086/2008/levelsetpres.pdf
+     */
     template <typename Approximator, typename TimeIntegrator>
-    auto reinit_pde(TimeIntegrator& integrator, int iter = 2, T dt = 0.4)
-        -> void
+    auto reinitialize_level_set_function(TimeIntegrator& integrator,
+                                         int iter = 2, T dt = 0.4) -> void
     {
       for (auto t = 0; t < iter; ++t)
       {
+        // Here we make sure we perform a full step and not substep.
+        // In particular for the midpoint time integrator.
         do
         {
-          // Reinitialization PDE.
           for (auto p = _curr_level_set_func.begin_array(); !p.end(); ++p)
             integrator(p.position()) = reinitialization<Approximator>(  //
                 _curr_level_set_func,                                   //
@@ -263,6 +266,7 @@ namespace DO::Sara {
       }
     }
 
+    //! @brief Calculate the signed distances.
     auto run_fast_marching_sideways(T thickness, T keep = 0) -> void
     {
       // Perform the fast marching sideways.
@@ -308,6 +312,12 @@ namespace DO::Sara {
             _band_map(p.position()) = true;
         }
       }
+    }
+
+    //! @brief Reset the band as an empty set.
+    auto reset_band() -> void
+    {
+      _band_map->fill(false);
     }
 
     auto expand_band(int expand) -> void

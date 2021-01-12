@@ -20,24 +20,23 @@ namespace DO::Sara {
 
   //! Forward Euler time integrator.
   template <typename T, int N>
-  class EulerIntegrator
+  struct EulerIntegrator
   {
-  private:
-    ImageView<T, N>& _df;
-    Image<T, N> _f;
+    Image<T, N> _df;  //!< velocity function.
+    ImageView<T, N>& _f;   //!< level set function.
 
   public:
-    EulerIntegrator(ImageView<T, N>& df)
-      : _df{df}
-      , _f{df.sizes()}
+    EulerIntegrator(const ImageView<T, N>& f0)
+      : _df{f0.sizes()}
+      , _f{f0}
     {
     }
 
-    template <typename CoordsIterator>
-    bool step(CoordsIterator begin, CoordsIterator end, T dt)
+    bool step(const ImageView<bool, N>& domain, T dt)
     {
-      for (auto p = begin; p != end; ++p)
-        _f(p.coords()) += dt * _df(p.coords());
+      for (auto p = domain.begin_array(); !p.end(); ++p)
+        if (*p)
+          _f(p.position()) += dt * _df(p.position());
       return true;
     }
   };
@@ -45,49 +44,51 @@ namespace DO::Sara {
 
   //! Midpoint time integrator.
   template <typename T, int N>
-  class MidpointIntegrator
+  struct MidpointIntegrator
   {
-  private:
-    ImageView<T, N>& _df;
+    Image<T, N> _df;
     Image<T, N> _f;
 
     Image<T, N> _midpoint;
     int substep = 0;
 
-  public:
-    MidpointIntegrator(ImageView<T, N>& df)
-      : _df{df}
-      , _f{df}
-      , _midpoint{df}
+    MidpointIntegrator(const ImageView<T, N>& f0)
+      : _df{f0.sizes()}
+      , _f{f0}
+      , _midpoint{f0}
     {
     }
 
-    template <typename CoordsIterator>
-    bool step(CoordsIterator begin, CoordsIterator end, T dt)
+    bool step(const ImageView<bool, N>& domain, T dt)
     {
+      // First substep
       if (substep == 0)
       {
-        for (auto p = begin; p != end; ++p)
+        for (auto p = domain.begin_array(); !p.end(); ++p)
         {
+          if (!*p)
+            continue;
           _midpoint(p.coords()) = _f(p.coords());
-          _f(p.coords()) += (dt / T(2)) * _df(p.coords());
+          _f(p.coords()) += (dt / T(2)) * _df(p.coords()); // half the time step.
         }
 
         ++substep;
         return false;
       }
 
-      // Second substep
-      for (auto p = begin; p != end; ++p)
+      // Second substep with the full time step.
+      for (auto p = domain.begin_array(); !p.end(); ++p)
+      {
+        if (!*p)
+          continue;
         _f(p.coords()) = _midpoint(p.coords()) + dt * _df(p.coords());
-
+      }
       substep = 0;
 
       return true;
     }
   };
 
-  // @TODO: Runge-Kutta RK4 integrator.
   //!  @}
 
 }  // namespace DO::Sara

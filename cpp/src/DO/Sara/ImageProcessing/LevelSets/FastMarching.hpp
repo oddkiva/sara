@@ -102,7 +102,14 @@ namespace DO::Sara {
       }
 
       // Initialize the trial points to bootstrap the fast marching.
-      for (const auto& p : points)
+      initialize_trial_set_from_alive_set(points);
+    }
+
+    inline auto initialize_trial_set_from_alive_set(
+        const std::vector<coords_type>& alive_set) -> void
+    {
+      // Initialize the trial points to bootstrap the fast marching.
+      for (const auto& p : alive_set)
       {
         for (const auto& delta: _deltas)
         {
@@ -139,12 +146,15 @@ namespace DO::Sara {
       while (!_trial_set.empty())
       {
         // Extract the closest trial point.
-        const auto p = _trial_set.begin()->coords;
-        // SARA_DEBUG << "p = " << p.transpose() << "   v = "
-        //            << _trial_set.begin()->value << std::endl;
+        const auto [p, val] = *_trial_set.begin();
+        if (val > _limit)
+          break;
+
         _trial_set.erase(_trial_set.begin());
 
 #ifdef VISUAL_INSPECTION
+        SARA_DEBUG << "p = " << p.transpose() << "   v = "
+                   << _trial_set.begin()->value << std::endl;
         draw_point(p.x(), p.y(), Green8);
 #endif
 
