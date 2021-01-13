@@ -18,6 +18,8 @@ sara_add_example(image_processing_example)
 sara_add_example(infinite_image_example)
 sara_add_example(gemm_based_convolution_example)
 
+sara_add_example(corner_detection_example)
+
 sara_add_example(birds_eye_view_example)
 
 sara_add_example(watershed_example)
