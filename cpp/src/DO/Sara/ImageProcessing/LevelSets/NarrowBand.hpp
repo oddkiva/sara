@@ -29,16 +29,16 @@ namespace DO::Sara {
 
     std::vector<coords_type> _zeros;
 
-    FastMarching<T, N> _reinit1;
-    FastMarching<T, N> _reinit2;
+    FastMarching<T, N> _exterior_reinitializer;
+    FastMarching<T, N> _interior_reinitializer;
 
   public:
     NarrowBand(ImageView<T, N>& phi)
       : _curr_level_set_func{phi}
       , _prev_level_set_func{phi.sizes()}
       , _band_map{phi.sizes()}
-      , _reinit1(phi)
-      , _reinit2(phi)
+      , _exterior_reinitializer(phi)
+      , _interior_reinitializer(phi)
     {
       _zeros.reserve(phi.size());
     }
@@ -109,8 +109,8 @@ namespace DO::Sara {
     auto initialize_fast_marching(const std::vector<coords_type>& zeros) -> void
     {
       // Reset the fast marching states.
-      _reinit1.reset();
-      _reinit2.reset();
+      _exterior_reinitializer.reset();
+      _interior_reinitializer.reset();
 
       // Bootstrap the fast marching method.
       for (const auto& p : zeros)
@@ -118,19 +118,19 @@ namespace DO::Sara {
         const auto& _phi = I(p);
         if (_phi > 0)
         {
-          _reinit1._states(p) = FastMarchingState::Alive;
-          _reinit2._states(p) = FastMarchingState::Forbidden;
+          _exterior_reinitializer._states(p) = FastMarchingState::Alive;
+          _interior_reinitializer._states(p) = FastMarchingState::Forbidden;
         }
         else
         {
-          _reinit1._states(p) = FastMarchingState::Forbidden;
-          _reinit2._states(p) = FastMarchingState::Alive;
+          _exterior_reinitializer._states(p) = FastMarchingState::Forbidden;
+          _interior_reinitializer._states(p) = FastMarchingState::Alive;
         }
       }
 
       // Manually initialize the trial queues.
-      _reinit1.initialize_trial_set_from_alive_set(zeros);
-      _reinit2.initialize_trial_set_from_alive_set(zeros);
+      _exterior_reinitializer.initialize_trial_set_from_alive_set(zeros);
+      _interior_reinitializer.initialize_trial_set_from_alive_set(zeros);
     }
 
     template <typename Approximator, typename Integrator>
@@ -155,14 +155,14 @@ namespace DO::Sara {
 
         if (*phi_p > 0)  // We are outside the domain.
         {
-          if (_reinit1._states(p) == FastMarchingState::Far)
+          if (_exterior_reinitializer._states(p) == FastMarchingState::Far)
             *phi_p = T(2);
           else
             _band_map(p) = true;
         }
         else  // We are inside the domain enclosed by the shape.
         {
-          if (_reinit2._states(p) == FastMarchingState::Far)
+          if (_interior_reinitializer._states(p) == FastMarchingState::Far)
             *phi_p = T(-2);
           else
             _band_map(p) = true;
@@ -179,9 +179,11 @@ namespace DO::Sara {
            ++phi_p)
       {
         const auto& p = phi_p.position();
-        if (*phi_p > 0 && _reinit1._states(p) == FastMarchingState::Far)
+        if (*phi_p > 0 &&
+            _exterior_reinitializer._states(p) == FastMarchingState::Far)
           *p = thickness;
-        else if (*phi_p < 0 && _reinit2._states(p) == FastMarchingState::Far)
+        else if (*phi_p < 0 &&
+                 _interior_reinitializer._states(p) == FastMarchingState::Far)
           *p = -thickness;
       }
 
@@ -208,13 +210,15 @@ namespace DO::Sara {
 
         const auto phi = _curr_level_set_func(p.position());
         if (phi > 0 &&  //
-            _reinit1._states(p.position()) == FastMarchingState::Far)
+            _exterior_reinitializer._states(p.position()) ==
+                FastMarchingState::Far)
         {
           _curr_level_set_func(p.position()) = thickness;
           *p = false;
         }
         else if (phi <= 0 &&  //
-                 _reinit2._states(p.position()) == FastMarchingState::Far)
+                 _interior_reinitializer._states(p.position()) ==
+                     FastMarchingState::Far)
         {
           _curr_level_set_func(p.position()) = -thickness;
           *p = false;
@@ -270,33 +274,31 @@ namespace DO::Sara {
     auto run_fast_marching_sideways(T thickness, T keep = 0) -> void
     {
       // Perform the fast marching sideways.
-      if (thickness > 0)
-      {
-        _reinit1.run(thickness);
-        _reinit2.run(-thickness);
-      }
-      else
-      {
-        _reinit1.run();
-        _reinit2.run();
-      }
+      thickness = thickness > 0 ? thickness: std::numeric_limits<T>::max();
+      _exterior_reinitializer._limit = thickness;
+      _interior_reinitializer._limit = -thickness;
+      _exterior_reinitializer.run();
+      _interior_reinitializer.run();
 
       // The band is the set of alive points whose level set value is in the
       // range ]-keep, keep[.
       if (keep == 0)
       {
         // TODO: use std::transform instead.
-        for (auto p = _reinit1._states.begin_array(); !p.end(); ++p)
+        for (auto p = _exterior_reinitializer._states.begin_array(); !p.end();
+             ++p)
           if (*p == FastMarchingState::Alive)
             _band_map(p.position()) = true;
-        for (auto p = _reinit2._states.begin_array(); !p.end(); ++p)
+        for (auto p = _interior_reinitializer._states.begin_array(); !p.end();
+             ++p)
           if (*p == FastMarchingState::Alive)
             _band_map(p.position()) = true;
       }
       else
       {
         // TODO: use std::transform instead.
-        for (auto p = _reinit1._states.begin_array(); !p.end(); ++p)
+        for (auto p = _exterior_reinitializer._states.begin_array(); !p.end();
+             ++p)
         {
           if (*p != FastMarchingState::Alive)
             continue;
@@ -304,7 +306,8 @@ namespace DO::Sara {
             _band_map(p.position()) = true;
         }
 
-        for (auto p = _reinit2._states.begin_array(); !p.end(); ++p)
+        for (auto p = _interior_reinitializer._states.begin_array(); !p.end();
+             ++p)
         {
           if (*p != FastMarchingState::Alive)
             continue;
@@ -317,7 +320,7 @@ namespace DO::Sara {
     //! @brief Reset the band as an empty set.
     auto reset_band() -> void
     {
-      _band_map->fill(false);
+      _band_map.flat_array().fill(false);
     }
 
     auto expand_band(int expand) -> void

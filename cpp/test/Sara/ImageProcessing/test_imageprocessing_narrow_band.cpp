@@ -61,10 +61,11 @@ BOOST_AUTO_TEST_CASE(test_narrow_band)
     {
       if (!*p)
         continue;
-      euler._df(*p) = sara::mean_curvature_motion(phi, p.position());
-      // euler._df(*p) = sara::normal_motion<sara::Weno3>(phi, p.position(), -0.1f);
-      // euler._df(*p) = sara::normal_motion<sara::Weno3>(phi, p.position(), 0.1f);
-      // euler._df(*p) = sara::advection<sara::Weno3>(phi, p.position(), {0.1f,  0.0f});
+      const auto& x = p.position();
+      // euler._df(x) = sara::mean_curvature_motion(phi, x);
+      euler._df(x) = sara::normal_motion<sara::Weno3>(phi, x, -0.1f);
+      // euler._df(x) = sara::normal_motion<sara::Weno3>(phi, x, 0.1f);
+      // euler._df(x) = sara::advection<sara::Weno3>(phi, x, {0.1f,  0.0f});
     }
   }
 }
