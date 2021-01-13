@@ -30,13 +30,12 @@ namespace DO::Sara {
     const Matrix<T, 3, 1> du = gradient(u, p);
     const Matrix<T, 3, 3> d2u = hessian(u, p);
     const auto du_norm_2 = du.squaredNorm();
-    const auto du_norm_3 = std::pow(du_norm_2, 3 / 2);
+    const auto du_norm_3_inverse = std::pow(du_norm_2, 1.5f);
 
     if (du_norm_2 < eps)
       return 0;
 
-    return (du.transpose() * d2u * du - du_norm_2 * d2u.trace()) /
-           (2 * du_norm_3);
+    return T(0.5) * (du.transpose() * d2u * du - du_norm_2 * d2u.trace()) * du_norm_3_inverse;
   }
 
 
@@ -44,7 +43,7 @@ namespace DO::Sara {
   //! The mean curvature motion is:
   //!   (∇u Hu ∇u.T - 2 * |∇u|^2 trace(Hu)) / (2 * |∇u|^2).
   template <typename T, int N>
-  auto mean_curvature_motion(const ImageView<T, N>& u,    //
+  auto mean_curvature_flow(const ImageView<T, N>& u,    //
                              const Matrix<int, N, 1>& p,  //
                              T eps = 1e-6) -> T
   {
@@ -55,8 +54,8 @@ namespace DO::Sara {
     if (du_norm_2 < eps)
       return 0;
 
-    return (du.transpose() * d2u * du - du_norm_2 * d2u.trace()) /
-           (2 * du_norm_2);
+    return T(0.5) * (du.transpose() * d2u * du - du_norm_2 * d2u.trace()) /
+           du_norm_2;
   }
 
 
