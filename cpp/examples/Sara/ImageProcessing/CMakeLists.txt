@@ -22,6 +22,8 @@ sara_add_example(curvature_example)
 sara_add_example(fast_marching_example)
 sara_add_example(level_set_2d_example)
 
+sara_add_example(corner_detection_example)
+
 sara_add_example(birds_eye_view_example)
 
 sara_add_example(watershed_example)
