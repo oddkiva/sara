@@ -95,7 +95,7 @@ namespace DO::Sara {
                                const typename ArrayView::vector_type& p, int i)
     {
       using vector_type = typename ArrayView::vector_type;
-      const vector_type ei = vector_type::unit(i);
+      const vector_type ei = vector_type::Unit(i);
 
       const auto us = std::array{u(p - ei), u(p), u(p + ei), u(p + 2 * ei)};
 
@@ -110,7 +110,7 @@ namespace DO::Sara {
                                 const typename ArrayView::vector_type& p, int i)
     {
       using vector_type = typename ArrayView::vector_type;
-      const vector_type ei = vector_type::unit(i);
+      const vector_type ei = vector_type::Unit(i);
 
       const auto us = std::array{u(p - 2 * ei), u(p - ei), u(p), u(p + ei)};
 

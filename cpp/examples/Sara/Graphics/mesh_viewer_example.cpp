@@ -16,28 +16,35 @@
 using namespace std;
 using namespace DO::Sara;
 
-GRAPHICS_MAIN()
+int main(int argc, char** argv)
 {
-  Window w = create_gl_window(300, 300);
-  set_active_window(w);
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
+}
 
-  SimpleTriangleMesh3f mesh;
-  string filename = src_path("../../../../data/pumpkin_tall_10k.obj");
+int __main(int argc, char** argv)
+{
+  const auto filename =
+      argc < 2 ? src_path("../../../../data/pumpkin_tall_10k.obj") : argv[1];
+
+  auto mesh = SimpleTriangleMesh3f{};
   if (!MeshReader().read_object_file(mesh, filename))
   {
-    cout << "Error reading mesh file:\n" << filename << endl;
+    cout << "Cannot reading mesh file:\n" << filename << endl;
     close_window();
     return EXIT_FAILURE;
   }
   cout << "Read " << filename << " successfully" << endl;
 
+  create_gl_window(300, 300);
   display_mesh(mesh);
 
-  bool quit = false;
-  while (!quit)
+  for (;;)
   {
-    int c = get_key();
-    quit = (c==KEY_ESCAPE || c==' ');
+    const auto key = get_key();
+    if (key == KEY_ESCAPE || key == ' ')
+      break;
   }
   close_window();
 

@@ -23,15 +23,17 @@ namespace DO::Sara {
   struct EulerIntegrator
   {
     Image<T, N> _df;  //!< velocity function.
-    ImageView<T, N>& _f;   //!< level set function.
+    ImageView<T, N> _f;   //!< level set function.
 
   public:
-    EulerIntegrator(const ImageView<T, N>& f0)
+    EulerIntegrator(ImageView<T, N>& f0)
       : _df{f0.sizes()}
       , _f{f0}
     {
     }
 
+    //! @brief Update the function `f` on the specific domain and with time step
+    //! `dt`.
     bool step(const ImageView<bool, N>& domain, T dt)
     {
       for (auto p = domain.begin_array(); !p.end(); ++p)
@@ -52,7 +54,7 @@ namespace DO::Sara {
     Image<T, N> _midpoint;
     int substep = 0;
 
-    MidpointIntegrator(const ImageView<T, N>& f0)
+    MidpointIntegrator(ImageView<T, N>& f0)
       : _df{f0.sizes()}
       , _f{f0}
       , _midpoint{f0}

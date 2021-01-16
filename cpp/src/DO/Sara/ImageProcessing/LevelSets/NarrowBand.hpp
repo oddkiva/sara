@@ -55,7 +55,7 @@ namespace DO::Sara {
       auto curr_flat = _curr_level_set_func.flat_array();
       auto prev_flat = _prev_level_set_func.flat_array();
 
-      for (auto p = 0; p != _band_map.size(); ++p)
+      for (auto p = 0u; p != _band_map.size(); ++p)
       {
         if (!band_map_flat(p))
           continue;
@@ -115,7 +115,7 @@ namespace DO::Sara {
       // Bootstrap the fast marching method.
       for (const auto& p : zeros)
       {
-        const auto& _phi = I(p);
+        const auto& _phi = _curr_level_set_func(p);
         if (_phi > 0)
         {
           _exterior_reinitializer._states(p) = FastMarchingState::Alive;
@@ -181,10 +181,10 @@ namespace DO::Sara {
         const auto& p = phi_p.position();
         if (*phi_p > 0 &&
             _exterior_reinitializer._states(p) == FastMarchingState::Far)
-          *p = thickness;
+          *phi_p = thickness;
         else if (*phi_p < 0 &&
                  _interior_reinitializer._states(p) == FastMarchingState::Far)
-          *p = -thickness;
+          *phi_p = -thickness;
       }
 
       _prev_level_set_func = _curr_level_set_func;
@@ -262,11 +262,11 @@ namespace DO::Sara {
         do
         {
           for (auto p = _curr_level_set_func.begin_array(); !p.end(); ++p)
-            integrator(p.position()) = reinitialization<Approximator>(  //
+            integrator._f(p.position()) = reinitialization<Approximator>(  //
                 _curr_level_set_func,                                   //
                 p.position()                                            //
             );
-        } while (!integrator.step(_band_map.begin_array(), dt));
+        } while (!integrator.step(_band_map, dt));
       }
     }
 
