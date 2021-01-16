@@ -8,6 +8,7 @@
 #include <DO/Sara/Graphics/Frame.hpp>
 
 #include <DO/Sara/Graphics/DerivedQObjects/OpenGLWindow.hpp>
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
 
 #ifndef GL_MULTISAMPLE
 # define GL_MULTISAMPLE  0x809D
@@ -184,6 +185,36 @@ namespace DO { namespace Sara {
     glMultMatrixf(mat);
   }
 
+
+  //! @brief Using autonomous driving convention.
+  template <typename T>
+  inline auto yaw(T psi) -> Matrix<T, 3, 3>
+  {
+    using Vec3 = Eigen::Matrix<T, 3, 1>;
+    return Eigen::AngleAxis<T>{psi, Vec3::UnitZ()}.matrix();
+  }
+
+  template <typename T>
+  inline auto pitch(T theta) -> Matrix<T, 3, 3>
+  {
+    using Vec3 = Eigen::Matrix<T, 3, 1>;
+    return Eigen::AngleAxis<T>{theta, Vec3::UnitY()}.matrix();
+  }
+
+  template <typename T>
+  inline auto roll(T phi) -> Matrix<T, 3, 3>
+  {
+    using Vec3 = Eigen::Matrix<T, 3, 1>;
+    return Eigen::AngleAxis<T>{phi, Vec3::UnitX()}.matrix();
+  }
+
+  template <typename T>
+  inline auto rotation(T psi, T theta, T phi) -> Matrix<T, 3, 3>
+  {
+    return yaw(psi) * pitch(theta) * roll(phi);
+  }
+
+
   void OpenGLWindow::paintEvent(QPaintEvent *)
   {
     makeCurrent();
@@ -195,6 +226,7 @@ namespace DO { namespace Sara {
     glEnable(GL_DEPTH_TEST);  // For depth consistent drawing
     // Model-view transform.
     glLoadIdentity();
+
     glTranslatef(0.0f, 0.0f, -15.0f);
     // Display the world frame is at z=-15 w.r.t. the camera frame.
     //frame_.draw(5, 0.1);
@@ -207,6 +239,22 @@ namespace DO { namespace Sara {
     // Display the mesh.
     glPushMatrix();
     {
+      const float psi = -146._deg;
+      const float theta = 90._deg;
+      const float phi = 0._deg;
+      const auto R33 = rotation(psi, theta, phi);
+      Eigen::Matrix4f R44 = Eigen::Matrix4f::Identity();
+
+      // Permutate the axis
+      auto P = Eigen::Matrix3f{};
+      P <<
+        0, 0, 1,
+        1, 0, 0,
+        0, 1, 0;
+
+      R44.topLeftCorner<3, 3>() = R33 * P;
+      glMultMatrixf(R44.data());
+
       // Center the model
       glTranslatef(-m_center.x(), -m_center.y(), -m_center.z());
       // Draw the model
