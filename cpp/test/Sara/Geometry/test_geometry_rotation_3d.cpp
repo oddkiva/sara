@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
+#include <DO/Sara/Core/Math/Rotation.hpp>
 
 #include <boost/test/unit_test.hpp>
 
