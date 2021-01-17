@@ -17,28 +17,28 @@
 namespace DO::Sara {
   //! @brief Using autonomous driving convention.
   template <typename T>
-  inline auto yaw(T psi) -> Matrix<T, 3, 3>
+  inline auto yaw(T psi) -> Eigen::Matrix<T, 3, 3>
   {
     using Vec3 = Eigen::Matrix<T, 3, 1>;
     return Eigen::AngleAxis<T>{psi, Vec3::UnitZ()}.matrix();
   }
 
   template <typename T>
-  inline auto pitch(T theta) -> Matrix<T, 3, 3>
+  inline auto pitch(T theta) -> Eigen::Matrix<T, 3, 3>
   {
     using Vec3 = Eigen::Matrix<T, 3, 1>;
     return Eigen::AngleAxis<T>{theta, Vec3::UnitY()}.matrix();
   }
 
   template <typename T>
-  inline auto roll(T phi) -> Matrix<T, 3, 3>
+  inline auto roll(T phi) -> Eigen::Matrix<T, 3, 3>
   {
     using Vec3 = Eigen::Matrix<T, 3, 1>;
     return Eigen::AngleAxis<T>{phi, Vec3::UnitX()}.matrix();
   }
 
   template <typename T>
-  inline auto rotation(T psi, T theta, T phi) -> Matrix<T, 3, 3>
+  inline auto rotation(T psi, T theta, T phi) -> Eigen::Matrix<T, 3, 3>
   {
     return yaw(psi) * pitch(theta) * roll(phi);
   }
