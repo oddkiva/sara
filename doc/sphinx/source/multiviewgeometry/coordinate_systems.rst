@@ -79,7 +79,7 @@ calculated as:
 Proof
 -----
 
-The composition of rotations is
+The composite rotation is
 
 .. math::
 

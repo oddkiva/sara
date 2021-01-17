@@ -12,6 +12,7 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/Camera Resectioning"
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/Math/Rotation.hpp>
 
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
@@ -44,8 +45,9 @@ auto make_relative_motion(double x = 0.1, double y = 0.3, double z = 0.2)
 {
   using namespace sara;
 
-  const Eigen::Matrix3d R = rotation_z(z) * rotation_x(x) * rotation_y(y);
-  // - The axes of the world coordinate system is has turned by the following
+  // Euler composite rotation.
+  const Eigen::Matrix3d R = rotation(z, y, x);
+  // - The axes of the world coordinate system has turned by the following
   //   rotational quantity.
   // - The columns of R are the vector coordinates of the world axes w.r.t.
   //   the camera coordinate system.

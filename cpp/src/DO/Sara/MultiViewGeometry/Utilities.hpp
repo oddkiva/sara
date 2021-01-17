@@ -92,21 +92,6 @@ namespace DO::Sara {
 
     return A;
   }
-
-  inline Matrix3d rotation_x(double angle)
-  {
-    return Eigen::AngleAxisd(angle, Vector3d::UnitX()).toRotationMatrix();
-  }
-
-  inline Matrix3d rotation_y(double angle)
-  {
-    return Eigen::AngleAxisd(angle, Vector3d::UnitY()).toRotationMatrix();
-  }
-
-  inline Matrix3d rotation_z(double angle)
-  {
-    return Eigen::AngleAxisd(angle, Vector3d::UnitZ()).toRotationMatrix();
-  }
   //! @}
 
   //! @}

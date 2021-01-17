@@ -15,6 +15,7 @@
 
 
 namespace DO::Sara {
+
   //! @brief Using autonomous driving convention.
   template <typename T>
   inline auto yaw(T psi) -> Eigen::Matrix<T, 3, 3>
