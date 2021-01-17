@@ -32,40 +32,49 @@ where:
    \mathbf{R} = \left[ \mathbf{i}_C | \mathbf{j}_C | \mathbf{k}_C \right] \\
 
 In other words, the rotation matrix :math:`\mathbf{R}` whose column vectors are
-**the basis vectors of camera coordinate system expressed in the bus coordinate
+**the basis vectors of camera coordinate system expressed in the world coordinate
 system**.
 
 
 Euler Angles
 ============
 
-The Euler angles :math:`(\psi, \theta, \phi)` are one parameterisation to
-describe a rotation matrix.
+The Euler angles :math:`(\psi, \theta, \phi)` are rotation angles about each
+axis that describe a rotation matrix.
 
-Consider an airplane and the local coordinate system attached to it. The usual
-convention of the local coordinates used in aerospace is as follows:
-- The x-axis is the longitudinal axis pointing to the nose.
-- The y-axis is the transversal axis pointing to the right.
-- The z-axis is the vertical axis pointing downwards
+Let us first describe the rotation axes. Consider an airplane and the local
+coordinate system attached to it. The usual axis convention in aerospace
+engineering is as follows:
+
+- The :math:`z`-axis is the longitudinal axis pointing to the airplane
+  nose.
+- The :math:`y`-axis is the transversal axis pointing to the right.
+- The :math:`x`-axis is the vertical axis pointing downwards to the
+  ground.
 
 In terms of rotation,
-- The z-axis is the yaw axis (NO head movement)
-- The y-axis is the pich axis (YES head movement).
-- The x-axis is the roll axis ("Indian" MAYBE head movement).
 
-Such a rotation is understood the composition of three elementary rotations in
-the following order:
+- The :math:`z`-axis is the (current) yaw axis (NO head movement)
+- The :math:`y`-axis is the (current) pich axis (YES head movement).
+- The :math:`x`-axis is the (current) roll axis ("Indian" MAYBE head movement).
 
-- Yaw about the :math:`z` axis by an angle :math:`\psi`,
-- Pitch about the current :math:`y'` axis by an angle :math:`\theta`,
-- Roll about the current :math:`X''` axis by an angle :math:`\phi`
+A 3D rotation can be decomposed into three elementary rotations in the following
+order:
 
-The rotation matrix must be expressed with respect to the initial axes and it
-can be show that:
+1. Yaw about the :math:`z`-axis by an angle :math:`\psi`,
+2. Pitch about the current :math:`y'`-axis by an angle :math:`\theta`,
+3. Roll about the current :math:`x''`-axis by an angle :math:`\phi`
+
+Let us stress again the rotation order is very important.
+
+The rotation matrix expressed with respect to the initial local coordinates is
+calculated as:
 
 .. math::
 
-   R(\psi, \theta, \phi) = R_z(\psi) R_y(\theta) R_x(\phi)
+   \mathbf{R} (\psi, \theta, \phi) = \mathbf{R}_z (\psi)
+                                     \mathbf{R}_y (\theta)
+                                     \mathbf{R}_x (\phi)
 
 Proof
 -----
@@ -74,25 +83,78 @@ The composition of rotations is
 
 .. math::
 
-   R(\psi, \theta, \phi) = R_{x''}(\phi) R_{y'}(\theta) R_{z}(\psi)
+   \mathbf{\mathbf{R}} (\psi, \theta, \phi) = \mathbf{R}_{x''} (\phi)
+                                              \mathbf{R}_{y'} (\theta)
+                                              \mathbf{R}_{z} (\psi)
 
-To obtain :math:`R_{y'}`, we need to understand that
+In the sequel, we will alleviate the notation by omitting the angles.
+
+To obtain :math:`\mathbf{R}_{y'}`, we need to understand that the pitch rotation
+is done about the current axis :math:`\mathbf{y}' = \mathbf{R}_z \mathbf{y}`.
+
+First notice that the pitch rotation matrix expressed in the current coordinate
+system has a very simple form: :math:`\mathbf{R}_y`. But we want the rotation
+matrix expressed in the original coordinates. So how do we get it?
+
+The key point to understand is that to obtain the coordinates back in the
+original coordinate system, we need to multiply the coordinates in the current
+coordinate system with the inverse rotation :math:`\mathbf{R}_y^T`.
+
+Indeed if we project the coordinates of the original axes to the current axes
+corresponds to the column vectors of the inverse rotation
+:math:`\mathbf{R}_z^T`.
+
+So consider a 3D point :math:`u`. Its coordinates w.r.t. the original axes is
+:math:`\mathbf{u}_0 = u_{i}^0 \mathbf{e}^i` (Einstein notation), where
+:math:`\mathbf{e}^i`, are the column vectors of the identity matrix
+:math:`\mathbf{I}_3`.
+
+By rotating the point :math:`u` yields, we create a new point :math:`v` where:
+
+- In the original coordinate system, its coordinates are
+  :math:`\mathbf{v}_0 = u_i^0 \mathbf{R}_z^i = \mathbf{R}_z \mathbf{u}_0`,
+- In the current coordinate system, its coordinates are :math:`\mathbf{v}_1 = u_i^0 \mathbf{e}^i`.
+
+The original axes has also moved to the current axes by the same rotation
+:math:`\mathbf{R}_z`, and as highlighted by the Einstein notation, we recognize
+that the coordinates of :math:`v` in the current coordinate system are also:
 
 .. math::
 
-   R_{y'}(\theta) = R_{z}(\theta) R_{y}(\theta) R_{z}(\theta)^T
+   \mathbf{v}_1 = \mathbf{u}_0 = \mathbf{R}_z^T \mathbf{v}_0 \\
 
-Likewise:
+If we rotate the point :math:`v` by :math:`\mathbf{R}_y'`, we create a third
+point :math:`w` where:
+
+- In the current axes, its coordinates are :math:`\mathbf{w}_1 = \mathbf{R}_y \mathbf{v}_1`
+- In the current axes, its coordinates are :math:`\mathbf{w}_1 = \mathbf{R}_y \mathbf{R}_z^T \mathbf{v}_0`
+
+Denoting its coordinates in the original axes by :math:`\mathbf{w}_0`
+
+  .. math::
+    \mathbf{w}_1 = \mathbf{R}_z^T \mathbf{w}_0 \\
+    \mathbf{w}_0 = \mathbf{R}_z \mathbf{w}_1 \\
+    \mathbf{w}_0 = \mathbf{R}_z \mathbf{R}_y \mathbf{R}_z^T \mathbf{v}_0
+
+We have just calculated the pitch rotation:
 
 .. math::
 
-   R_{x''}(\psi) = R R_{y}(\theta) R^T
+   \mathbf{R}_{y'} = \mathbf{R}_{z}
+                     \mathbf{R}_{y}
+                     \mathbf{R}_{z}^T
+
+Likewise the rotation :math:`\mathbf{R}_{x''}` is obtained as:
+
+.. math::
+
+   \mathbf{R}_{x''} = \mathbf{R} \mathbf{R}_{y} \mathbf{R}^T
 
 where
 
 .. math::
 
-   R = R_z(\psi) R_{y}(\theta)
+   \mathbf{R} = \mathbf{R}_z \mathbf{R}_{y}
 
 By multiplying the three rotations, the inverse rotations will disappear and we get
 the formula shown above.
