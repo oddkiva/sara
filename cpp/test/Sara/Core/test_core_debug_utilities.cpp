@@ -11,6 +11,8 @@
 
 #define BOOST_TEST_MODULE "Core/Debug Utilities"
 
+#include <regex>
+
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>

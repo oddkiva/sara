@@ -12,14 +12,27 @@
 //! @example
 
 #include <DO/Sara/Graphics.hpp>
-// #include <QApplication>
 #include <DO/Sara/Graphics/DerivedQObjects/OpenGLWindow.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/RotationSliders.hpp>
 
-#include <boost/algorithm/string.hpp>
+#include <regex>
+
 
 using namespace std;
 using namespace DO::Sara;
+
+
+auto split(
+    std::vector<std::string>& tokens, //
+    const std::string& str,
+    const std::string& delimiters = R"([\s,]+)")  // split on space and comma
+{
+  std::regex regex{delimiters.c_str()};
+  std::sregex_token_iterator it{str.begin(), str.end(), regex, -1};
+
+  tokens.clear();
+  tokens.insert(tokens.end(), it, {});
+}
 
 
 namespace DO::Sara::v2 {
@@ -47,7 +60,7 @@ namespace DO::Sara::v2 {
       face_tokens.reserve(3);
       while (std::getline(file, line))
       {
-        boost::split(tokens, line, boost::is_any_of(" "));
+        split(tokens, line, R"([\s]+)");
         const auto& type = tokens.front();
         if (type == "v")
         {
@@ -63,7 +76,7 @@ namespace DO::Sara::v2 {
           auto f = Face3{};
           for (auto i = 0; i < 3; ++i)
           {
-            boost::split(face_tokens, tokens[i + 1], boost::is_any_of("/"));
+            split(face_tokens, tokens[i + 1], R"([//]+)");
             f[i] = std::stoi(face_tokens.front()) - 1;
           }
           mesh.faces().push_back(f);
@@ -146,7 +159,7 @@ namespace DO::Sara::v2 {
 }  // namespace DO::Sara::v2
 
 
-#define USE_SARA_API
+// #define USE_SARA_API
 #ifdef USE_SARA_API
 // Hacky... whatever.
 RotationSliders* some_slider = nullptr;
@@ -198,7 +211,7 @@ int __main(int argc, char** argv)
 int main(int argc, char** argv)
 {
   const auto filename =
-      argc < 2 ? src_path("../../../../data/pumpkin_tall_10k.obj") : argv[1];
+      argc < 2 ? src_path("../../../../data/Boeing_787.obj") : argv[1];
 
   auto mesh = SimpleTriangleMesh3f{};
   if (!v2::MeshReader().read_object_file(mesh, filename))
