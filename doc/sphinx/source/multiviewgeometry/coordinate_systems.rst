@@ -92,51 +92,70 @@ In the sequel, we will alleviate the notation by omitting the angles.
 To obtain :math:`\mathbf{R}_{y'}`, we need to understand that the pitch rotation
 is done about the current axis :math:`\mathbf{y}' = \mathbf{R}_z \mathbf{y}`.
 
-First notice that the pitch rotation matrix expressed in the current coordinate
-system has a very simple form: :math:`\mathbf{R}_y`. But we want the rotation
-matrix expressed in the original coordinates. So how do we get it?
+- Denote by :math:`(x, y, z)` the basis vectors of the original local coordinate
+  system.
+- Denote by :math:`(x', y', z')` the basis vectors of the current local
+  coordinate system.
 
-The key point to understand is that to obtain the coordinates back in the
-original coordinate system, we need to multiply the coordinates in the current
-coordinate system with the inverse rotation :math:`\mathbf{R}_y^T`.
+We see the intrinsic pitch rotation matrix expressed in the current local
+coordinate system :math:`(x', y', z')` has the convenient form:
+:math:`\mathbf{R}_y`. But we want the rotation matrix :math:`\mathbf{R}_{y'}`
+expressed in the original coordinates :math:`(x, y, z)`. So how do we get it?
 
-Indeed if we project the coordinates of the original axes to the current axes
-corresponds to the column vectors of the inverse rotation
-:math:`\mathbf{R}_z^T`.
+As we can see above, the key point to understand is that to go from the current
+coordinates :math:`(x', y', z')` to the original coordinate system :math:`(x, y,
+z)`, we need to multiply the coordinates in the current coordinate system with
+the rotation :math:`\mathbf{R}_z`, which accounts for the missing angle offsets.
 
-So consider a 3D point :math:`u`. Its coordinates w.r.t. the original axes is
-:math:`\mathbf{u}_0 = u_{i}^0 \mathbf{e}^i` (Einstein notation), where
-:math:`\mathbf{e}^i`, are the column vectors of the identity matrix
-:math:`\mathbf{I}_3`.
+Let us detail this point to convince ourselves.
 
-By rotating the point :math:`u` yields, we create a new point :math:`v` where:
+- In the current local coordinate system :math:`(x', y', z')`, the coordinates
+  of its basis vectors :math:`(x', y', z')` are the column vectors
+  :math:`\mathbf{e}^i` of the identity
+  matrix :math:`\mathbf{I}_3`.
+- In the original local coordinate system :math:`(x, y, z)`, the coordinates of
+  the same basis vectors :math:`(x', y', z')` are precisely the column vectors
+  of the rotation matrix :math:`\mathbf{R}_z`.
 
-- In the original coordinate system, its coordinates are
-  :math:`\mathbf{v}_0 = u_i^0 \mathbf{R}_z^i = \mathbf{R}_z \mathbf{u}_0`,
-- In the current coordinate system, its coordinates are :math:`\mathbf{v}_1 = u_i^0 \mathbf{e}^i`.
-
-The original axes has also moved to the current axes by the same rotation
-:math:`\mathbf{R}_z`, and as highlighted by the Einstein notation, we recognize
-that the coordinates of :math:`v` in the current coordinate system are also:
+Thus consider any point :math:`u` of the airplane, if its
+coordinates are :math:`\mathbf{u}'` in the current coordinate system :math:`(x',
+y', z')`:
 
 .. math::
 
-   \mathbf{v}_1 = \mathbf{u}_0 = \mathbf{R}_z^T \mathbf{v}_0 \\
+   \mathbf{u}' = u_i' \mathbf{e}^i
 
-If we rotate the point :math:`v` by :math:`\mathbf{R}_y'`, we create a third
-point :math:`w` where:
+Then its coordinates in the the original local coordinate system :math:`(x, y,
+z)` are
 
-- In the current axes, its coordinates are :math:`\mathbf{w}_1 = \mathbf{R}_y \mathbf{v}_1`
-- In the current axes, its coordinates are :math:`\mathbf{w}_1 = \mathbf{R}_y \mathbf{R}_z^T \mathbf{v}_0`
+.. math::
 
-Denoting its coordinates in the original axes by :math:`\mathbf{w}_0`
+   \mathbf{u} = u_i' \mathbf{R}_z^i \\
+
+And thus in terms of matrix multiplication, for any point :math:`u`
+
+.. math::
+
+   \mathbf{u} = \mathbf{R}_z \mathbf{u}'
+
+If we rotate the point :math:`u` by :math:`\mathbf{R}_{y'}`, we create a second 
+point :math:`v` where:
+
+- In the current coordinate system :math:`(x', y', z')`, its coordinates are
 
   .. math::
-    \mathbf{w}_1 = \mathbf{R}_z^T \mathbf{w}_0 \\
-    \mathbf{w}_0 = \mathbf{R}_z \mathbf{w}_1 \\
-    \mathbf{w}_0 = \mathbf{R}_z \mathbf{R}_y \mathbf{R}_z^T \mathbf{v}_0
 
-We have just calculated the pitch rotation:
+     \mathbf{v}' = \mathbf{R}_y \mathbf{u}'
+
+- In the original coordinate system :math:`(x, y, z)`, its coordinates are
+  :math:`\mathbf{v}` and by injecting the inverse rotation on both sides of the
+  equality
+
+  .. math::
+    (\mathbf{R}_z^T \mathbf{v}) = \mathbf{R}_y\ (\mathbf{R}_z^T \mathbf{u})  \\
+    \mathbf{v} = \mathbf{R}_z \mathbf{R}_y \mathbf{R}_z^T\ \mathbf{u}
+
+We have just calculated the pitch rotation in the original coordinate system:
 
 .. math::
 
@@ -148,7 +167,7 @@ Likewise the rotation :math:`\mathbf{R}_{x''}` is obtained as:
 
 .. math::
 
-   \mathbf{R}_{x''} = \mathbf{R} \mathbf{R}_{y} \mathbf{R}^T
+   \mathbf{R}_{x''} = \mathbf{R} \mathbf{R}_{x} \mathbf{R}^T
 
 where
 
@@ -156,5 +175,12 @@ where
 
    \mathbf{R} = \mathbf{R}_z \mathbf{R}_{y}
 
+And thus
+
+.. math::
+
+   \mathbf{R}_{x''} = \mathbf{R}_z \mathbf{R}_y \mathbf{R}_{x} \mathbf{R}_y^T \mathbf{R}_z^T
+
+
 By multiplying the three rotations, the inverse rotations will disappear and we get
-the formula shown above.
+the formula as exposed in the Wikipedia page about Euler angles.
