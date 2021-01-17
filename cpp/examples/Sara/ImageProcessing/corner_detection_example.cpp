@@ -26,7 +26,8 @@ int __main(int argc, char** argv)
   using namespace std::string_literals;
 
   // Input video.
-  const auto video_filepath = "/Users/david/Desktop/Datasets/videos/sample10.mp4";
+  const auto video_filepath =
+      argc < 2 ? "/Users/david/Desktop/Datasets/videos/sample10.mp4" : argv[1];
   sara::VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
 

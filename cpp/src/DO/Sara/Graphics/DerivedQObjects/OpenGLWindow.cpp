@@ -99,8 +99,6 @@ namespace DO { namespace Sara {
     , m_backgroundColor(QColor::fromCmykF(0.39, 0.39, 0.0, 0.0))
     , m_color(QColor::fromCmykF(0.40, 0.0, 1.0, 0.0))
   {
-    setAttribute(Qt::WA_DeleteOnClose);
-
     // Set event listener.
     m_eventListeningTimer.setSingleShot(true);
     connect(&m_eventListeningTimer, SIGNAL(timeout()), this,
@@ -121,6 +119,15 @@ namespace DO { namespace Sara {
   {
     m_mesh = mesh;
     m_center = mesh.center();
+    update();
+  }
+
+  void OpenGLWindow::setEulerAngles(int yaw, int pitch, int roll)
+  {
+    const auto R = rotation(float(yaw * degree),    //
+                            float(pitch * degree),  //
+                            float(roll * degree));
+    m_eulerRotation.topLeftCorner<3, 3>() = R * m_axisPermutation;
     update();
   }
 
@@ -186,6 +193,14 @@ namespace DO { namespace Sara {
 
     // Normalize the vector for the lighting
     glEnable(GL_NORMALIZE);
+
+    // Specify the axes to conform to the automotive convention.
+    m_axisPermutation << 0, 0, 1,  //
+        1, 0, 0,                   //
+        0, 1, 0;
+
+    // Initialize the Euler rotation.
+    m_eulerRotation.topLeftCorner<3, 3>() = m_axisPermutation;
   }
 
   static void multMatrix(const QMatrix4x4& m)
@@ -210,9 +225,9 @@ namespace DO { namespace Sara {
     // Model-view transform.
     glLoadIdentity();
 
+    // Now stack the transformation matrices.
     glTranslatef(0.0f, 0.0f, -15.0f);
-    // Display the world frame is at z=-15 w.r.t. the camera frame.
-    // frame_.draw(5, 0.1);
+
     // Scale the model
     glScalef(m_scale, m_scale, m_scale);
     // Rotate the model with the trackball.
@@ -222,18 +237,8 @@ namespace DO { namespace Sara {
     // Display the mesh.
     glPushMatrix();
     {
-      const float psi = -146._deg;
-      const float theta = 90._deg;
-      const float phi = 0._deg;
-      const auto R33 = rotation(psi, theta, phi);
-      Eigen::Matrix4f R44 = Eigen::Matrix4f::Identity();
-
-      // Permutate the axis
-      auto P = Eigen::Matrix3f{};
-      P << 0, 0, 1, 1, 0, 0, 0, 1, 0;
-
-      R44.topLeftCorner<3, 3>() = R33 * P;
-      glMultMatrixf(R44.data());
+      // Rotate the model.
+      glMultMatrixf(m_eulerRotation.data());
 
       // Center the model
       glTranslatef(-m_center.x(), -m_center.y(), -m_center.z());
@@ -395,7 +400,6 @@ namespace DO { namespace Sara {
     {
       qWarning() << "\n\nWarning: you closed a window unexpectedly!\n\n";
       qWarning() << "Graphical application is terminating...";
-      qApp->exit(0);
     }
   }
 

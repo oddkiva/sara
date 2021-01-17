@@ -66,6 +66,7 @@ namespace DO { namespace Sara {
 
   public slots:
     void setMesh(const SimpleTriangleMesh3f& mesh_);
+    void setEulerAngles(int yaw, int pitch, int roll);
     void displayMesh();
     void waitForEvent(int ms);
     void eventListeningTimerStopped();
@@ -91,10 +92,15 @@ namespace DO { namespace Sara {
     QPointF normalizePos(const QPointF& localPos) const;
 
   private:
+    // Model view matrix.
     GLfloat m_scale;
     Point3f m_center;
     GL::Frame m_frame;
     TrackBall m_trackball;
+
+    // Euler rotation of the object w.r.t. the OpenGL axes.
+    Eigen::Matrix4f m_eulerRotation = Eigen::Matrix4f::Identity();
+    Eigen::Matrix3f m_axisPermutation = Eigen::Matrix3f::Identity();
 
     SimpleTriangleMesh3f m_mesh;
 
