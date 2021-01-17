@@ -11,8 +11,9 @@
 
 #define BOOST_TEST_MODULE "MultiViewGeometry/Essential Matrix"
 
-#include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/Math/Rotation.hpp>
+#include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/TensorDebug.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
@@ -238,7 +239,7 @@ auto generate_test_data() -> TestData
      1.51121,  0.437918,   1.35859,   1.03883,  0.106923; //
   X.bottomRows<1>().fill(1.);
 
-  const Matrix3d R = rotation_z(0.3) * rotation_x(0.1) * rotation_y(0.2);
+  const Matrix3d R = rotation(0.3, 0.2, 0.1);
   const Vector3d t{0.1, 0.2, 0.3};
 
   const auto E = essential_matrix(R, t);
