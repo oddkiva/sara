@@ -63,4 +63,60 @@ BOOST_AUTO_TEST_CASE(test_mean_curvature)
       radius(x, y) = 1 / curvature(x, y);
 }
 
+BOOST_AUTO_TEST_CASE(test_mean_curvature_flow)
+{
+  const auto w = 10;
+  const auto h = 10;
+  auto phi = Image<float, 2>(w, h);
+  radial_distance(phi, Eigen::Vector2f(w, h) / 2, w / 2.);
 
+  auto grad_phi = gradient(phi);
+  auto grad_phi_x = grad_phi.cwise_transform([](const auto& v) { return v.x(); });
+  auto grad_phi_y = grad_phi.cwise_transform([](const auto& v) { return v.y(); });
+  auto grad_phi_norm = grad_phi.cwise_transform([](const auto& v) { return v.norm(); });
+  std::cout << "grad_x =\n" << grad_phi_x.matrix() << std::endl;
+  std::cout << "grad_y =\n" << grad_phi_y.matrix() << std::endl;
+  std::cout << "grad_norm =\n" << grad_phi_norm.matrix() << std::endl;
+
+  auto curvature = Image<float>{w, h};
+  for (auto y = 0; y < h; ++y)
+    for (auto x = 0; x < w; ++x)
+      curvature(x, y) = mean_curvature_flow(phi, {x, y}, 1e-2f);
+
+
+  std::cout << "Curvature =\n" << curvature.matrix() << std::endl;
+
+  auto radius = Image<float>{w, h};
+  for (auto y = 0; y < h; ++y)
+    for (auto x = 0; x < w; ++x)
+      radius(x, y) = 1 / curvature(x, y);
+}
+
+BOOST_AUTO_TEST_CASE(test_gaussian_curvature)
+{
+  const auto w = 10;
+  const auto h = 10;
+  auto phi = Image<float, 2>(w, h);
+  radial_distance(phi, Eigen::Vector2f(w, h) / 2, w / 2.);
+
+  auto grad_phi = gradient(phi);
+  auto grad_phi_x = grad_phi.cwise_transform([](const auto& v) { return v.x(); });
+  auto grad_phi_y = grad_phi.cwise_transform([](const auto& v) { return v.y(); });
+  auto grad_phi_norm = grad_phi.cwise_transform([](const auto& v) { return v.norm(); });
+  std::cout << "grad_x =\n" << grad_phi_x.matrix() << std::endl;
+  std::cout << "grad_y =\n" << grad_phi_y.matrix() << std::endl;
+  std::cout << "grad_norm =\n" << grad_phi_norm.matrix() << std::endl;
+
+  auto curvature = Image<float>{w, h};
+  for (auto y = 0; y < h; ++y)
+    for (auto x = 0; x < w; ++x)
+      curvature(x, y) = gaussian_curvature(phi, {x, y});
+
+
+  std::cout << "Curvature =\n" << curvature.matrix() << std::endl;
+
+  auto radius = Image<float>{w, h};
+  for (auto y = 0; y < h; ++y)
+    for (auto x = 0; x < w; ++x)
+      radius(x, y) = 1 / curvature(x, y);
+}

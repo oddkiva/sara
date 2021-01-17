@@ -71,40 +71,18 @@ namespace DO::Sara {
     if (Du_norm_2 < eps)
       return 0;
 
-    auto minor = [&Hu](int i, int j) {
-      auto m = Matrix<T, 2, 2>{};
-
-      auto i1 = 0;
-      auto j1 = 0;
-      for (auto jj = 0; jj < 3; ++jj)
-      {
-        if (jj == j)
-          continue;
-
-        i1 = 0;
-        for (auto ii = 0; ii < 3; ++ii)
-        {
-          if (ii == i)
-            continue;
-
-          m(i1, j1) = Hu(ii, jj);
-          ++i1;
-        }
-
-        ++j1;
-      }
-      return m.determinant();
+    auto cofactors = [](const Eigen::Matrix<T, 3, 3>& m) {
+      auto cof_m = Eigen::Matrix<T, 3, 3>{};
+      cof_m.col(0) = m.col(1).cross(m.col(2));
+      cof_m.col(1) = m.col(2).cross(m.col(0));
+      cof_m.col(2) = m.col(0).cross(m.col(1));
+      return cof_m;
     };
 
-    auto M = Matrix<T, 3, 3>{};
-    for (auto j = 0; j < 3; ++j)
-      for (auto i = 0; i < 3; ++i)
-        M(i, j) = minor(i, j);
-
+    const auto cofactors_Hu = cofactors(Hu);
     const auto Du_norm_2_inverse = 1 / Du_norm_2;
 
-    return Du.transpose() * Hu * Du * Du_norm_2_inverse;
+    return Du.transpose() * cofactors_Hu * Du * Du_norm_2_inverse;
   }
-
 
 }  // namespace DO::Sara
