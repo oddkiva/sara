@@ -138,7 +138,7 @@ And thus in terms of matrix multiplication, for any point :math:`u`
 
    \mathbf{u} = \mathbf{R}_z \mathbf{u}'
 
-If we rotate the point :math:`u` by :math:`\mathbf{R}_{y'}`, we create a second 
+If we rotate the point :math:`u` by :math:`\mathbf{R}_{y'}`, we create a second
 point :math:`v` where:
 
 - In the current coordinate system :math:`(x', y', z')`, its coordinates are
