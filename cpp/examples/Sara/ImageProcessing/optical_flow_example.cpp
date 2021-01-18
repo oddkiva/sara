@@ -21,8 +21,13 @@
 namespace sara = DO::Sara;
 
 
+template <int PatchRadius = 3>
 struct LukasKanadeOpticalFlowEstimator
 {
+  static constexpr auto patch_radius = PatchRadius;
+  static constexpr auto patch_size = 2 * PatchRadius + 1;
+  static constexpr auto N = patch_size * patch_size;
+
   auto update_image(const sara::ImageView<float, 2>& I) -> void
   {
     _I0.swap(_I1);
@@ -41,18 +46,14 @@ struct LukasKanadeOpticalFlowEstimator
 
   auto estimate_flow(const Eigen::Vector2i& p) const -> Eigen::Vector2f
   {
-    const auto& w = _patch_sizes.x();
-    const auto& h = _patch_sizes.y();
-    const auto n = w * h;
+    auto A = Eigen::Matrix<float, N, 2>{};
+    auto b = Eigen::Matrix<float, N, 1>{};
 
-    auto A = Eigen::MatrixXf{n, 2};
-    auto b = Eigen::VectorXf{n};
-
-    const Eigen::Vector2i r = _patch_sizes / 2;
+    constexpr auto& r = patch_radius;
     auto i = 0;
-    for (auto y = p.y() - r.y(); y <= p.y() + r.y(); ++y)
+    for (auto y = p.y() - r; y <= p.y() + r; ++y)
     {
-      for (auto x = p.x() - r.x(); x <= p.x() + r.x(); ++x)
+      for (auto x = p.x() - r; x <= p.x() + r; ++x)
       {
         A(i, 0) = _grad_I(x, y).x();
         A(i, 1) = _grad_I(x, y).y();
@@ -78,7 +79,6 @@ struct LukasKanadeOpticalFlowEstimator
   }
 
   bool _blur = true;
-  Eigen::Vector2i _patch_sizes = Eigen::Vector2i{5, 5};
 
   sara::Image<float> _I1;
   sara::Image<float> _I0;
@@ -99,7 +99,7 @@ int __main(int argc, char** argv)
   auto frame = video_stream.frame();
 
   // Preprocessing parameters.
-  const auto downscale_factor = 3;
+  constexpr auto downscale_factor = 2;
 
   // Harris cornerness parameters.
   const auto sigma_D = std::sqrt(std::pow(1.6f, 2) - 1);
@@ -107,16 +107,13 @@ int __main(int argc, char** argv)
   const auto kappa = 0.24f;
 
   // Lukas-Kanade optical flow parameters.
-  const auto square_patch_radius = 3;
-  auto flow_estimator = LukasKanadeOpticalFlowEstimator{};
-  flow_estimator._patch_sizes =
-      Eigen::Vector2i::Ones() * (2 * square_patch_radius + 1);
+  auto flow_estimator = LukasKanadeOpticalFlowEstimator<>{};
 
   sara::create_window(video_stream.sizes());
   sara::set_antialiasing();
 
   auto frames_read = -1;
-  const auto skip = 0;
+  constexpr auto skip = 0;
   while (true)
   {
     if (!video_stream.read())
@@ -141,9 +138,9 @@ int __main(int argc, char** argv)
     );
 
     // Select the local maxima of the cornerness functions.
-    auto select = [square_patch_radius](const auto& cornerness) {
+    auto select = [](const auto& cornerness) {
       const auto extrema = sara::local_maxima(cornerness);
-      const auto& r = square_patch_radius;
+      constexpr auto& r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
 
       auto extrema_filtered = std::vector<sara::Point2i>{};
       extrema_filtered.reserve(extrema.size());
@@ -181,7 +178,7 @@ int __main(int argc, char** argv)
         const Eigen::Vector2f pa = corners[i].cast<float>() * downscale_factor;
         const Eigen::Vector2f pb = pa + flow_vectors[i].normalized() * 20;
 
-        const auto& r = square_patch_radius;
+        constexpr auto& r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
         const auto& l = (2 * r + 1) * downscale_factor;
         const Eigen::Vector2i tl =
             (pa - Eigen::Vector2f::Ones() * r * downscale_factor).cast<int>();
