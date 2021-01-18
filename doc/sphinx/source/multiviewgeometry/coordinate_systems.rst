@@ -1,14 +1,13 @@
 Changing coordinate systems
 ===========================
 
-Let us detail how we change coordinate from the world coordinate system to the
-camera coordinates.
+Let us detail how we change coordinate from the world coordinate system
+:math:`(O_W, \mathbf{i}_W, \mathbf{j}_W,\mathbf{k}_W)` to the
+camera coordinates :math:`(O_C, \mathbf{i}_C, \mathbf{j}_C,\mathbf{k}_C)`.
 
-Firstly we denote the center of the world coordinate system by :math:`O_W` and
-the center of the camera coordinate system :math:`O_C`.
-
-Let :math:`M` denote a 3D point of the world, then
-
+Let :math:`M` denote a 3D point. Suppose that we know its coordinates in the
+camera coordinate system :math:`(x_C, y_C, z_C)`. We can retrieve its
+coordinates in the world coordinate system :math:`(x_W, y_W, z_W)` as follows
 
 .. math::
 
@@ -23,7 +22,15 @@ Let :math:`M` denote a 3D point of the world, then
 
      \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
 
-We recognise the global rigid body motion :math:`(\mathbf{R}, \mathbf{t})`
+   \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] =
+   \overrightarrow{O_W O_C} +
+     \left[ \begin{array}{c|c|c}
+     \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
+     \end{array} \right]
+
+     \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
+
+We recognize the global rigid body motion :math:`(\mathbf{R}, \mathbf{t})`
 where:
 
 .. math::
@@ -31,20 +38,21 @@ where:
 
    \mathbf{R} = \left[ \mathbf{i}_C | \mathbf{j}_C | \mathbf{k}_C \right] \\
 
-In other words, the rotation matrix :math:`\mathbf{R}` whose column vectors are
-**the basis vectors of camera coordinate system expressed in the world coordinate
+In other words, the rotation matrix :math:`\mathbf{R}` is the matrix whose column vectors are
+**the coordinates of the basis vectors of camera coordinate system in the world coordinate
 system**.
 
 
 Euler Angles
 ============
 
-The Euler angles :math:`(\psi, \theta, \phi)` are rotation angles about each
-axis that describe a rotation matrix.
+The Euler angles :math:`(\psi, \theta, \phi)` are the angles about each
+axis of the local coordinate system that are used to parameter any rotation
+matrix.
 
-Let us first describe the rotation axes. Consider an airplane and the local
-coordinate system attached to it. The usual axis convention in aerospace
-engineering is as follows:
+Let us first describe the rotation axes. Consider an airplane and its local
+coordinate system. The usual axis convention used in aerospace engineering is as
+follows:
 
 - The :math:`z`-axis is the longitudinal axis pointing to the airplane
   nose.
@@ -65,7 +73,8 @@ order:
 2. Pitch about the current :math:`y'`-axis by an angle :math:`\theta`,
 3. Roll about the current :math:`x''`-axis by an angle :math:`\phi`
 
-Let us stress again the rotation order is very important.
+Let us stress that again the order to which we apply each elementary rotation is
+very important.
 
 The rotation matrix expressed with respect to the initial local coordinates is
 calculated as:
@@ -97,10 +106,10 @@ is done about the current axis :math:`\mathbf{y}' = \mathbf{R}_z \mathbf{y}`.
 - Denote by :math:`(x', y', z')` the basis vectors of the current local
   coordinate system.
 
-We see the intrinsic pitch rotation matrix expressed in the current local
-coordinate system :math:`(x', y', z')` has the convenient form:
-:math:`\mathbf{R}_y`. But we want the rotation matrix :math:`\mathbf{R}_{y'}`
-expressed in the original coordinates :math:`(x, y, z)`. So how do we get it?
+We can see that the intrinsic pitch rotation matrix expressed in the current
+local coordinate system :math:`(x', y', z')` has the convenient form:
+:math:`\mathbf{R}_y`. But we want the rotation matrix :math:`\mathbf{R}_{y'}` to
+be expressed in the coordinate system :math:`(x, y, z)`. So how do we get it?
 
 As we can see above, the key point to understand is that to go from the current
 coordinates :math:`(x', y', z')` to the original coordinate system :math:`(x, y,
@@ -111,13 +120,12 @@ Let us detail this point to convince ourselves.
 
 - In the current local coordinate system :math:`(x', y', z')`, the coordinates
   of its basis vectors :math:`(x', y', z')` are the column vectors
-  :math:`\mathbf{e}^i` of the identity
-  matrix :math:`\mathbf{I}_3`.
+  :math:`\mathbf{e}^i` of the identity matrix :math:`\mathbf{I}_3`.
 - In the original local coordinate system :math:`(x, y, z)`, the coordinates of
   the same basis vectors :math:`(x', y', z')` are precisely the column vectors
-  of the rotation matrix :math:`\mathbf{R}_z`.
+  :math:`\mathbf{R}_z^i` of the rotation matrix :math:`\mathbf{R}_z`.
 
-Thus consider any point :math:`u` of the airplane, if its
+Now consider any point :math:`u` of the airplane, if its
 coordinates are :math:`\mathbf{u}'` in the current coordinate system :math:`(x',
 y', z')`:
 
@@ -132,7 +140,7 @@ z)` are
 
    \mathbf{u} = u_i' \mathbf{R}_z^i \\
 
-And thus in terms of matrix multiplication, for any point :math:`u`
+And thus we recognize a matrix-vector multiplication
 
 .. math::
 
@@ -142,14 +150,15 @@ If we rotate the point :math:`u` by :math:`\mathbf{R}_{y'}`, we create a second
 point :math:`v` where:
 
 - In the current coordinate system :math:`(x', y', z')`, its coordinates are
+  simply
 
   .. math::
 
      \mathbf{v}' = \mathbf{R}_y \mathbf{u}'
 
 - In the original coordinate system :math:`(x, y, z)`, its coordinates are
-  :math:`\mathbf{v}` and by injecting the inverse rotation on both sides of the
-  equality
+  :math:`\mathbf{v}`, thus by injecting the inverse rotation on both sides of
+  the equality
 
   .. math::
     (\mathbf{R}_z^T \mathbf{v}) = \mathbf{R}_y\ (\mathbf{R}_z^T \mathbf{u})  \\
