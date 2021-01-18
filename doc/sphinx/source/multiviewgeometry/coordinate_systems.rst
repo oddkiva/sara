@@ -119,7 +119,7 @@ the rotation :math:`\mathbf{R}_z`, which accounts for the missing angle offsets.
 Let us detail this point to convince ourselves.
 
 - In the current local coordinate system :math:`(x', y', z')`, the coordinates
-  of its basis vectors :math:`(x', y', z')` are the column vectors
+  of the basis vectors :math:`(x', y', z')` are simply the column vectors
   :math:`\mathbf{e}^i` of the identity matrix :math:`\mathbf{I}_3`.
 - In the original local coordinate system :math:`(x, y, z)`, the coordinates of
   the same basis vectors :math:`(x', y', z')` are precisely the column vectors
