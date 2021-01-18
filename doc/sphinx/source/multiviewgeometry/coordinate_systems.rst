@@ -131,7 +131,7 @@ y', z')`:
 
 .. math::
 
-   \mathbf{u}' = u_i' \mathbf{e}^i
+   \mathbf{u}' = u_i' \mathbf{e}^i \ \text{(using Einstein's notation)}
 
 Then its coordinates in the the original local coordinate system :math:`(x, y,
 z)` are
