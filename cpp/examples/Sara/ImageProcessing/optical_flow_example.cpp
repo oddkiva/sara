@@ -20,6 +20,7 @@
 
 namespace sara = DO::Sara;
 
+
 struct LukasKanadeOpticalFlowEstimator
 {
   auto update_image(const sara::ImageView<float, 2>& I) -> void
@@ -164,6 +165,8 @@ int __main(int argc, char** argv)
     auto flow_vectors = std::vector<Eigen::Vector2f>{};
     if (!flow_estimator._I0.empty())
       flow_vectors = flow_estimator.estimate_flow(corners);
+
+    // TODO: track the corners with optical flow.
 
     // Draw the sparse flow field.
     sara::display(frame);
