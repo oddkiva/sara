@@ -39,16 +39,16 @@ where:
    \mathbf{R} = \left[ \mathbf{i}_C | \mathbf{j}_C | \mathbf{k}_C \right] \\
 
 In other words, the rotation matrix :math:`\mathbf{R}` is the matrix whose column vectors are
-**the coordinates of the basis vectors of camera coordinate system in the world coordinate
+**the basis vector coordinates of the camera axes in the world coordinate
 system**.
 
 
 Euler Angles
 ============
 
-The Euler angles :math:`(\psi, \theta, \phi)` are the angles about each
-axis of the local coordinate system that are used to parameter any rotation
-matrix.
+The Euler angles :math:`(\psi, \theta, \phi)` is one way to a rotation matrix.
+Each angle describes the rotational quantity about each axis of the local
+coordinate system to define the rotation matrix.
 
 Let us first describe the rotation axes. Consider an airplane and its local
 coordinate system. The usual axis convention used in aerospace engineering is as
