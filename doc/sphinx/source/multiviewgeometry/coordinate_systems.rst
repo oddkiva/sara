@@ -1,34 +1,43 @@
 Changing coordinate systems
 ===========================
 
-Let us detail how we change coordinate from the world coordinate system
-:math:`(O_W, \mathbf{i}_W, \mathbf{j}_W,\mathbf{k}_W)` to the
-camera coordinates :math:`(O_C, \mathbf{i}_C, \mathbf{j}_C,\mathbf{k}_C)`.
+Let us detail how we go from the world coordinates :math:`(O_W, \mathbf{i}_W,
+\mathbf{j}_W,\mathbf{k}_W)` to the camera coordinates :math:`(O_C, \mathbf{i}_C,
+\mathbf{j}_C,\mathbf{k}_C)`.
 
 Let :math:`M` denote a 3D point. Suppose that we know its coordinates in the
-camera coordinate system :math:`(x_C, y_C, z_C)`. We can retrieve its
-coordinates in the world coordinate system :math:`(x_W, y_W, z_W)` as follows
+camera coordinate system :math:`(O_C, x_C, y_C, z_C)`. We can retrieve its
+coordinates in the world coordinate system :math:`(O_W, x_W, y_W, z_W)` as follows
 
 .. math::
 
-   \overrightarrow{O_W M} = \overrightarrow{O_W O_C} + \overrightarrow{O_\textrm{C}M} \\
+   \begin{array}{rcl}
+   \overrightarrow{O_W M} &=& \overrightarrow{O_W O_C} + \overrightarrow{O_\textrm{C}M} \\
 
-   \overrightarrow{O_W M} = \overrightarrow{O_W O_C} + x_C \mathbf{i}_C + y_C \mathbf{j}_C + z_C \mathbf{k}_C\\
+   \overrightarrow{O_W M} &=& \overrightarrow{O_W O_C} +
+                              x_C \mathbf{i}_C +
+                              y_C \mathbf{j}_C +
+                              z_C \mathbf{k}_C\\
 
-   \overrightarrow{O_W M} = \overrightarrow{O_W O_C} +
+   \\
+
+   \overrightarrow{O_W M} &=& \overrightarrow{O_W O_C} +
      \left[ \begin{array}{c|c|c}
      \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
      \end{array} \right]
 
      \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
 
-   \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] =
+   \\
+
+   \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] &=&
    \overrightarrow{O_W O_C} +
      \left[ \begin{array}{c|c|c}
      \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
      \end{array} \right]
 
      \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
+   \end{array} \\
 
 We recognize the global rigid body motion :math:`(\mathbf{R}, \mathbf{t})`
 where:
@@ -38,9 +47,9 @@ where:
 
    \mathbf{R} = \left[ \mathbf{i}_C | \mathbf{j}_C | \mathbf{k}_C \right] \\
 
-In other words, the rotation matrix :math:`\mathbf{R}` is the matrix whose column vectors are
-**the basis vector coordinates of the camera axes in the world coordinate
-system**.
+In other words, the rotation matrix :math:`\mathbf{R}` is the matrix whose
+column vectors are **the basis vector coordinates of the camera axes in the
+world coordinate system**.
 
 
 Euler Angles
@@ -101,15 +110,20 @@ In the sequel, we will alleviate the notation by omitting the angles.
 To obtain :math:`\mathbf{R}_{y'}`, we need to understand that the pitch rotation
 is done about the current axis :math:`\mathbf{y}' = \mathbf{R}_z \mathbf{y}`.
 
-- Denote by :math:`(x, y, z)` the basis vectors of the original local coordinate
-  system.
-- Denote by :math:`(x', y', z')` the basis vectors of the current local
-  coordinate system.
+Let us
+
+- denote by :math:`(\mathbf{i}, \mathbf{j}, \mathbf{k})` the basis vectors of
+  the original local coordinate system, and
+- denote by :math:`(\mathbf{i}', \mathbf{j}', \mathbf{k}')` the basis vectors of
+  the current local coordinate system.
+
+In the sequel, we will alleviate the notation by omitting the origin :math:`O`
+of the coordinate systems because there is no translation.
 
 We can see that the intrinsic pitch rotation matrix expressed in the current
 local coordinate system :math:`(x', y', z')` has the convenient form:
 :math:`\mathbf{R}_y`. But we want the rotation matrix :math:`\mathbf{R}_{y'}` to
-be expressed in the coordinate system :math:`(x, y, z)`. So how do we get it?
+be expressed in the coordinate system :math:`(x, y, z)`.  So how do we get it?
 
 As we can see above, the key point to understand is that to go from the current
 coordinates :math:`(x', y', z')` to the original coordinate system :math:`(x, y,
@@ -119,11 +133,13 @@ the rotation :math:`\mathbf{R}_z`, which accounts for the missing angle offsets.
 Let us detail this point to convince ourselves.
 
 - In the current local coordinate system :math:`(x', y', z')`, the coordinates
-  of the basis vectors :math:`(x', y', z')` are simply the column vectors
-  :math:`\mathbf{e}^i` of the identity matrix :math:`\mathbf{I}_3`.
+  of the basis vectors :math:`(\mathbf{i}', \mathbf{j}', \mathbf{k}')` are
+  simply the column vectors :math:`\mathbf{e}^i` of the identity matrix
+  :math:`\mathbf{I}_3`.
 - In the original local coordinate system :math:`(x, y, z)`, the coordinates of
-  the same basis vectors :math:`(x', y', z')` are precisely the column vectors
-  :math:`\mathbf{R}_z^i` of the rotation matrix :math:`\mathbf{R}_z`.
+  the same basis vectors :math:`(\mathbf{i}', \mathbf{j}', \mathbf{k}')` are
+  precisely the column vectors :math:`\mathbf{R}_z^i` of the rotation matrix
+  :math:`\mathbf{R}_z`.
 
 Now consider any point :math:`u` of the airplane, if its
 coordinates are :math:`\mathbf{u}'` in the current coordinate system :math:`(x',
@@ -140,7 +156,7 @@ z)` are
 
    \mathbf{u} = u_i' \mathbf{R}_z^i \\
 
-And thus we recognize a matrix-vector multiplication
+And thus we recognize the matrix-vector multiplication
 
 .. math::
 

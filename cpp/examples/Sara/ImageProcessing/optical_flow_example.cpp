@@ -113,7 +113,7 @@ int __main(int argc, char** argv)
   sara::set_antialiasing();
 
   auto frames_read = -1;
-  constexpr auto skip = 0;
+  constexpr auto skip = 2;
   while (true)
   {
     if (!video_stream.read())
