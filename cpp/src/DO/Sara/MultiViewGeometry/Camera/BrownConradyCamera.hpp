@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <DO/Sara/Core/PixelTraits.hpp>
+#include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 
@@ -32,6 +32,8 @@ namespace DO::Sara {
     Vec2 image_sizes;
     //! @brief Pinhole camera parameters.
     Mat3 K;
+    //! @brief Cached inverse calibration matrix.
+    Mat3 Kinverse_cached = Mat3::Zero();
     //! @brief Radial distortion coefficients.
     Vec3 k;
     //! @brief Tangential distortion coefficients.
@@ -54,28 +56,24 @@ namespace DO::Sara {
       return 2. * tg.atan();
     }
 
-    auto undistort(const Vec2& xd) const -> Vec2
+    inline auto undistort(const Vec2& xd) const -> Vec2
     {
       const auto f = focal_lengths();
       const auto c = principal_point();
 
       // Normalized coordinates
+      // TODO: use K.inverse() in the shear coefficient is not zero.
+      //       and cache it.
       const Vec2 xn = (xd - c).array() / f.array();
 
       // Radial correction.
       const auto r2 = xn.squaredNorm();
-      const auto rpowers = Vec3{r2, pow(r2, T(2)), pow(r2, T(3))};
+      const auto rpowers = Vec3{r2, std::pow(r2, 2), std::pow(r2, 3)};
       const auto radial = Vec2{k.dot(rpowers) * xn};
 
       // Tangential correction.
-      auto Tx = Mat2{};
-      Tx << 3 * p(0), p(1),
-                p(1), p(0);
-      auto Ty = Mat2{};
-      Ty << p(1),     p(0),
-            p(0), 3 * p(1);
-      const Vec2 tangential = {xn.transpose() * Tx * xn,
-                               xn.transpose() * Ty * xn};
+      const Mat2 Tmat = r2 * Mat2::Identity() + 2 * xn * xn.transpose();
+      const Vec2 tangential = Tmat * p;
 
       // Undistorted coordinates.
       const Vec2 xu = xd + ((radial + tangential).array() * f.array()).matrix();
@@ -101,12 +99,18 @@ namespace DO::Sara {
       {
         for (auto x = 0; x < w; ++x)
         {
-          const auto p = undistort(Vec2(x, y));
+          const Eigen::Vector2d p = undistort(Vec2(x, y)).template cast<double>();
           const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
                                        0 <= p.y() && p.y() < h - 1;
-          dst(y, x) = in_image_domain  //
-                          ? interpolate(src, p)
-                          : PixelTraits<PixelType>::template zero();
+          auto color = interpolate(src, p);
+          if constexpr (std::is_same_v<PixelType, Rgb8>)
+            color /= 255;
+
+          auto color_converted = PixelType{};
+          smart_convert_color(color, color_converted);
+          dst(x, y) = in_image_domain  //
+                          ? color_converted
+                          : PixelTraits<PixelType>::zero();
         }
       }
     }

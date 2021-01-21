@@ -5,8 +5,8 @@ This section provides an easily implementable method to calculate distance from
 a camera. To calculate distances from a camera requires the knowledge of the
 internal camera parameters.
 
-Motivating Case
----------------
+Motivating Example
+------------------
 
 Consider a camera at a fixed height :math:`h` above the ground slight looking
 down due to a nonzero pitch angle :math:`\theta`.
@@ -14,39 +14,46 @@ down due to a nonzero pitch angle :math:`\theta`.
 Consider a reference coordinate system centered in the camera center with the z-axis
 still parallel to the ground plane where.
 
-Consider a point :math:`M` on the ground in this reference coordinate system.
+Let :math:`M` denote a point on the ground in this reference coordinate system.
 
 .. math::
 
    M = x\ \mathbf{i} + h\ \mathbf{j} + z\ \mathbf{k}
 
-The basis vectors of the reference coordinates have the following coordinates in the local camera coordinate system.
+The basis vectors of the reference coordinate system have the following
+coordinates in the local camera coordinate system.
 
 .. math::
 
-   \mathbf{i} = \mathbf{i}_C \\
-   \mathbf{j} =  \cos\theta\ \mathbf{j}_C + \sin\theta\ \mathbf{k}_C \\
-   \mathbf{k} = -\sin\theta\ \mathbf{j}_C + \cos\theta\ \mathbf{k}_C
+   \begin{array}{ccl}
+   \mathbf{i} &=&  \mathbf{i}_C \\
+   \mathbf{j} &=&  \cos\theta\ \mathbf{j}_C + \sin\theta\ \mathbf{k}_C \\
+   \mathbf{k} &=& -\sin\theta\ \mathbf{j}_C + \cos\theta\ \mathbf{k}_C
+   \end{array}
 
 Rewriting the coordinates of :math:`M` in the camera coordinates system
 
 .. math::
 
-   M = x\ \mathbf{i}_C +
-       h (\cos\theta\ \mathbf{j}_C + \sin\theta\ \mathbf{k}_C) +
-       z (-\sin\theta\ \mathbf{j}_C + \cos\theta\ \mathbf{k}_C) \\
+   \begin{array}{ccl}
+   M &=& x\ \mathbf{i}_C +
+         h (\cos\theta\ \mathbf{j}_C + \sin\theta\ \mathbf{k}_C) +
+         z (-\sin\theta\ \mathbf{j}_C + \cos\theta\ \mathbf{k}_C) \\
 
-   M = x\ \mathbf{i}_C +
-       (h \cos\theta - z \sin\theta)\ \mathbf{j}_C +
-       (h \sin\theta + z\cos\theta)\ \mathbf{k}_C \\
+   M &=& x\ \mathbf{i}_C +
+         (h \cos\theta - z \sin\theta)\ \mathbf{j}_C +
+         (h \sin\theta + z\cos\theta)\ \mathbf{k}_C \\
+   \end{array}
 
 Thus in the camera coordinate system
 
 .. math::
 
-   x_C = x \\
-   y_C = h \cos\theta - z \sin\theta \\
-   z_C = h \sin\theta + z\cos\theta \\
+   \begin{array}{ccl}
+   x_C &=& x \\
+   y_C &=& h \cos\theta - z \sin\theta \\
+   z_C &=& h \sin\theta + z\cos\theta \\
+   \end{array}
 
 
 The point :math:`M` is projected to the normalized camera plane. Let :math:`(u,
@@ -78,9 +85,9 @@ Reordering in :math:`z`:
 Generalization
 --------------
 
-We can generalize elegantly the reasoning by means of linear algebra. So it will
-not matter which angular direction :math:`(\psi, \theta, \phi)` the camera is
-looking at.
+We can generalize elegantly the reasoning by means of linear algebra. And it
+will not matter which angular direction :math:`(\psi, \theta, \phi)` the camera
+is looking at.
 
 Let us assume that the road is *planar*. Following the usual convention in the
 automotive industry, without loss of generality, any point on the ground is at

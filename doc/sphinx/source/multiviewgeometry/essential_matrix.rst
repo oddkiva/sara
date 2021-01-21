@@ -73,7 +73,7 @@ coordinate system. The position and the gaze direction of the camera is called
 the camera pose.
 
 To start, we choose one camera, say :math:`C_0` and its associated camera
-coordinate system will be set as the the world coordinate.
+coordinate system will be set as the world coordinate system.
 
 The relative motion **from** camera :math:`C_i` **to** camera :math:`C_j` is the
 rotation and translation pair :math:`(\mathbf{R}_{ij}, \mathbf{t}_{ij})`.  The

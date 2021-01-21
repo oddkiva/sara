@@ -55,9 +55,9 @@ world coordinate system**.
 Euler Angles
 ============
 
-The Euler angles :math:`(\psi, \theta, \phi)` is one way to a rotation matrix.
-Each angle describes the rotational quantity about each axis of the local
-coordinate system to define the rotation matrix.
+The Euler angles :math:`(\psi, \theta, \phi)` is one way to parameterize a
+rotation matrix. Each angle describes the rotational quantity about each axis
+of the local coordinate system to define the rotation matrix.
 
 Let us first describe the rotation axes. Consider an airplane and its local
 coordinate system. The usual axis convention used in aerospace engineering is as

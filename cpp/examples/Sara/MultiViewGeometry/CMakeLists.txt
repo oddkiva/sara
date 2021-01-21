@@ -1,6 +1,8 @@
 find_package(DO_Sara COMPONENTS
-  Core Graphics ImageIO Features FeatureDetectors FeatureDescriptors KDTree
-  Match FeatureMatching MultiViewGeometry SfM REQUIRED)
+  Core Graphics ImageIO VideoIO
+  Features FeatureDetectors FeatureDescriptors
+  KDTree Match FeatureMatching
+  MultiViewGeometry SfM REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)
@@ -13,6 +15,7 @@ macro (sara_add_example example)
 endmacro()
 
 
+sara_add_example(metric_birds_eye_viewer)
 sara_add_example(homography_estimation_example)
 sara_add_example(fundamental_matrix_estimation_example)
 sara_add_example(essential_matrix_estimation_example)
