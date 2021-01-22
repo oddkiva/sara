@@ -31,7 +31,7 @@ using sara::operator""_px;
 using sara::operator""_m;
 
 
-const auto camera_height = 1.20_m;
+const auto camera_height = 1.30_m;
 const auto px_per_meter = 8._px / 1._m;
 const auto map_metric_dims = std::array{2.L * 10._m, 100._m};
 const auto map_pixel_dims = std::array{map_metric_dims[0] * px_per_meter,
@@ -99,36 +99,36 @@ int __main(int argc, char**argv)
 
   auto video_stream = sara::VideoStream{video_filepath};
 
-  // // one example of distortion correction.
-  // auto camera_parameters = sara::BrownConradyCamera<float>{};
-  // {
-  //   const auto f = 946.8984425572634_px;
-  //   const auto u0 = 960._px;
-  //   const auto v0 = 540._px;
-  //   const auto p = Eigen::Vector2f{0, 0};
-  //   const auto k = Eigen::Vector3f{
-  //       -0.22996356451342749,  //
-  //       0.05952465745165465,
-  //       -0.007399008111054717  //
-  //   };
-  //   camera_parameters.K << f, 0, u0,
-  //                          0, f, v0,
-  //                          0, 0,  1;
-  //   camera_parameters.k = k;
-  //   camera_parameters.p = p;
-  // }
   // one example of distortion correction.
   auto camera_parameters = sara::BrownConradyCamera<float>{};
   {
-    const auto f = 650._px;
-    const auto u0 = 640._px;
-    const auto v0 = 360._px;
+    const auto f = 946.8984425572634_px;
+    const auto u0 = 960._px;
+    const auto v0 = 540._px;
+    const auto p = Eigen::Vector2f{0, 0};
+    const auto k = Eigen::Vector3f{
+        -0.22996356451342749,  //
+        0.05952465745165465,
+        -0.007399008111054717  //
+    };
     camera_parameters.K << f, 0, u0,
                            0, f, v0,
                            0, 0,  1;
-    camera_parameters.k.setZero();
-    camera_parameters.p.setZero();
+    camera_parameters.k = k;
+    camera_parameters.p = p;
   }
+  // // one example of distortion correction.
+  // auto camera_parameters = sara::BrownConradyCamera<float>{};
+  // {
+  //   const auto f = 650._px;
+  //   const auto u0 = 640._px;
+  //   const auto v0 = 360._px;
+  //   camera_parameters.K << f, 0, u0,
+  //                          0, f, v0,
+  //                          0, 0,  1;
+  //   camera_parameters.k.setZero();
+  //   camera_parameters.p.setZero();
+  // }
 
   auto frame_undistorted = sara::Image<sara::Rgb8>{video_stream.sizes()};
 
@@ -142,7 +142,7 @@ int __main(int argc, char**argv)
 
   while (video_stream.read())
   {
-#define DIRTY
+// #define DIRTY
 #ifdef DIRTY
     frame_undistorted = video_stream.frame();
     const auto map_view = to_map_view(camera_parameters, video_stream.frame());
