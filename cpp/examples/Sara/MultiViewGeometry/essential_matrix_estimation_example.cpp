@@ -139,8 +139,9 @@ GRAPHICS_MAIN()
   // Add the internal camera matrices to the camera.
   two_view_geometry.C1.K = views.cameras[0].K;
   two_view_geometry.C2.K = views.cameras[1].K;
-  auto colors =
-      extract_colors(views.images[0], views.images[1], two_view_geometry);
+  auto colors = extract_colors(views.images[0],  //
+                               views.images[1],  //
+                               two_view_geometry);
   save_to_hdf5(two_view_geometry, colors);
 
   // Inspect the fundamental matrix.
