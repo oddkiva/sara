@@ -24,6 +24,7 @@ namespace DO::Sara {
     //! @brief Types.
     using Vec2 = Eigen::Matrix<T, 2, 1>;
     using Vec3 = Eigen::Matrix<T, 3, 1>;
+    using Vec9 = Eigen::Matrix<T, 5, 1>;
 
     using Mat2 = Eigen::Matrix<T, 2, 2>;
     using Mat3 = Eigen::Matrix<T, 3, 3>;
@@ -41,7 +42,10 @@ namespace DO::Sara {
     Mat3 K_inverse = Mat3::Zero();
 
     //! @brief Cached variable for the inverse distortion calculation.
-    Vec3 k_inverse;
+    //! cf. publication:
+    //!   An Exact Formula for Calculating Inverse Radial Lens Distortions,
+    //!   Drap and Lefevre.
+    Vec9 k_inverse;
 
     inline auto calculate_K_inverse()
     {
@@ -53,6 +57,21 @@ namespace DO::Sara {
       k_inverse(0) = -k(0);
       k_inverse(1) = 3 * std::pow(k(0), 2) - k(1);
       k_inverse(2) = 8 * k(0) * k(1) - 12 * std::pow(k(1), 3) - k(2);
+
+      const auto k3 = 0;
+      k_inverse(3) =   55 * std::pow(k(0), 4)         //
+                     - 55 * std::pow(k(0), 2) * k(1)  //
+                     + 5 * std::pow(k(1), 2)          //
+                     + 10 * k(0) * k(2)               //
+                     - k3;
+      k_inverse(4) = -273 * std::pow(k(0), 5) //
+                     +364 * std::pow(k(0), 3) * k(1) //
+                     -78 * k(0) * std::pow(k(1), 2) //
+                     -78 * std::pow(k(0), 2) * k(2) //
+                     +12 * k(1) * k(2) //
+                     +12 * k(0) * k3;
+      // for (int i = 4; i < 9; ++i)
+      //   k_inverse(i) = 0;
     }
 
     inline auto focal_lengths() const -> Vec2
@@ -81,7 +100,13 @@ namespace DO::Sara {
 
       const Vec2 rvec = (xu - c).array() / f.array();
       const auto r2 = rvec.squaredNorm();
-      const auto rpowers = Vec3{r2, std::pow(r2, 2), std::pow(r2, 3)};
+      auto rpowers = Vec9{};
+      rpowers <<
+        r2,
+        std::pow(r2, 2),
+        std::pow(r2, 3),
+        std::pow(r2, 4),
+        std::pow(r2, 5);
       const auto radial = k_inverse.dot(rpowers);
       const Vec2 xd = xu + ((radial * rvec).array() * f.array()).matrix();
       return xd;

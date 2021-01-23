@@ -153,7 +153,7 @@ int __main(int argc, char**argv)
 
   while (video_stream.read())
   {
-// #define DIRTY
+#define DIRTY
 #ifdef DIRTY
     frame_undistorted = video_stream.frame();
     const auto map_view = to_map_view(camera_parameters, video_stream.frame());
@@ -161,7 +161,6 @@ int __main(int argc, char**argv)
     camera_parameters.undistort(video_stream.frame(), frame_undistorted);
     camera_parameters.distort_drap_lefevre(frame_undistorted, frame_redistorted);
     const auto map_view = to_map_view(camera_parameters, frame_undistorted);
-#endif
 
     for (auto y = 0; y < frame_diff.height(); ++y)
       for (auto x = 0; x < frame_diff.width(); ++x)
@@ -192,6 +191,7 @@ int __main(int argc, char**argv)
         frame_average(x, y)(2) = c(2);
       }
 
+#endif
     sara::set_active_window(wu);
     sara::display(frame_undistorted);
 

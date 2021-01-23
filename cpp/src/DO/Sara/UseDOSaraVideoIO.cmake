@@ -15,6 +15,6 @@ if (SARA_USE_FROM_SOURCE)
       ${DO_Sara_ThirdParty_DIR}
       ${DO_Sara_ThirdParty_DIR}/eigen)
 
-    target_link_libraries(DO_Sara_VideoIO PRIVATE ${FFMPEG_LIBRARIES})
+    target_link_libraries(DO_Sara_VideoIO PRIVATE DO_Sara_Core ${FFMPEG_LIBRARIES})
   endif ()
 endif ()

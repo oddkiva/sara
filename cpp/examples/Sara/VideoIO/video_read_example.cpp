@@ -30,8 +30,7 @@ GRAPHICS_MAIN()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath =
-      "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
+  const auto video_filepath = "/Users/david/Desktop/Datasets/videos/sample10.mp4";
 #else
   // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
@@ -49,6 +48,7 @@ GRAPHICS_MAIN()
       sara::set_active_window(sara::create_window(video_stream.sizes()));
 
     sara::display(video_stream.frame());
+    sara::get_key();
   }
 
   sara::close_window();

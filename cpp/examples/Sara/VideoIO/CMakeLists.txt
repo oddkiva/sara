@@ -9,4 +9,4 @@ macro (sara_add_example example)
 endmacro ()
 
 sara_add_example(video_read_example)
-target_link_libraries(video_read_example PRIVATE ${FFMPEG_LIBRARIES})
+sara_add_example(video_write_example)
