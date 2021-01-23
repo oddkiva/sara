@@ -39,8 +39,21 @@ namespace DO::Sara {
       struct SwrContext* swr_ctx = nullptr;
     };
 
+    /*!
+     *  Possible preset quality:
+     *  - ultrafast
+     *  - superfast
+     *  - veryfast
+     *  - faster
+     *  - fast
+     *  - medium – default preset
+     *  - slow
+     *  - slower
+     *  - veryslow
+     */
     VideoWriter(const std::string& filepath, const Eigen::Vector2i& sizes,
-                int frame_rate = 25);
+                int frame_rate = 25,
+                const std::string& preset_quality = "ultrafast");
 
     ~VideoWriter();
 
@@ -51,11 +64,11 @@ namespace DO::Sara {
   private:
     OutputStream _video_stream;
     OutputStream _audio_stream;
-    AVOutputFormat *_output_format;
-    AVFormatContext *_format_context;
-    AVCodec *_audio_codec;
-    AVCodec *_video_codec;
-    AVDictionary *_options = nullptr;
+    AVOutputFormat* _output_format;
+    AVFormatContext* _format_context;
+    AVCodec* _audio_codec;
+    AVCodec* _video_codec;
+    AVDictionary* _options = nullptr;
 
     int _have_audio = 0;
     int _have_video = 0;
@@ -64,5 +77,3 @@ namespace DO::Sara {
   };
 
 }  // namespace DO::Sara
-
-int muxing(const char *filename);

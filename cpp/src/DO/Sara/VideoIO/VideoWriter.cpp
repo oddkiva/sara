@@ -187,7 +187,7 @@ namespace DO::Sara {
     ostream->encoding_context = c;
 
     c->codec_id = codec_id;
-    c->bit_rate = 400000;
+    // c->bit_rate = 400000;
     /* Resolution must be a multiple of two. */
     c->width = width;
     c->height = height;
@@ -503,12 +503,10 @@ namespace DO::Sara {
 
   VideoWriter::VideoWriter(const std::string& filepath,
                            const Eigen::Vector2i& sizes,  //
-                           int frame_rate)
+                           int frame_rate,
+                           const std::string& preset_quality)
   {
-    // for (i = 2; i+1 < argc; i+=2) {
-    //    if (!strcmp(argv[i], "-flags") || !strcmp(argv[i], "-fflags"))
-    //        av_dict_set(&opt, argv[i]+1, argv[i+1], 0);
-    //}
+    av_dict_set(&_options, "preset", preset_quality.c_str(), 0);
 
     /* allocate the output media context */
     avformat_alloc_output_context2(&_format_context, nullptr, nullptr,
