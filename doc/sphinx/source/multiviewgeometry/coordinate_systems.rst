@@ -44,18 +44,18 @@ where:
 
 - The translation vector :math:`\mathbf{t}` is the camera origin coordinates expressed
   in the world coordinate system.
-- The rotation matrix :math:`\mathbf{R}` are the coordinates of the camera
-  expressed in the world basis vectors.
+- The rotation matrix :math:`\mathbf{R}` are the coordinates of the camera basis
+  vectors expressed in the world basis vectors.
 
 
 Euler Angles
 ============
 
 In engineering, we like to decompose any 3D rotation into Euler angles as they
-are quite intuitive to understand. The convention that is used typically is
-called the Tait-Bryan convention, which we describe as follows.
+are quite intuitive to understand. The usual convention that is followed is
+called the *Tait-Bryan* convention, which we describe as follows.
 
-Specifically the Euler angles :math:`(\psi, \theta, \phi)` is the three
+Specifically the Euler angles :math:`(\psi, \theta, \phi)` are the three
 rotational quantities about each *intrinsic* axis which altogether describes the
 3D rotation.
 
@@ -78,9 +78,9 @@ In terms of rotation,
 A 3D rotation can be decomposed into three elementary rotations that must
 composed in the following order:
 
-1. Yaw about the airplane :math:`z`-axis by an angle :math:`\psi`,
-2. Pitch about the **current** airplane :math:`y'`-axis by an angle :math:`\theta`,
-3. Roll about the **current** airplane :math:`x''`-axis by an angle :math:`\phi`
+1. Yaw about the :math:`z`-axis of the airplane by an angle :math:`\psi`,
+2. Pitch about the **current** :math:`y'`-axis of the airplane by an angle :math:`\theta`,
+3. Roll about the **current** :math:`x''`-axis of the airplane by an angle :math:`\phi`
 
 Once again let us stress the order to which we apply each elementary rotation is
 very important.

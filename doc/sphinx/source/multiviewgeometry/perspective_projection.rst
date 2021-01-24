@@ -20,10 +20,10 @@ and thus the inverse rigid body transform is :math:`(\mathbf{R}^T, -\mathbf{R}^T
 
 Let us make two useful remarks:
 
-- The inverse rotation matrix :math:`\mathbf{R}^T` stores the basis
-  coordinates the world axes expressed in the camera coordinate system.
-- The translation :math:`-\mathbf{R}^T \mathbf{t}` stores the coordinate of the
-  world origin expressed in the camera coordinate system
+- The inverse rotation matrix :math:`\mathbf{R}^T` stores the coordinates the
+  world basis vectors expressed in the camera coordinate system.
+- The translation :math:`-\mathbf{R}^T \mathbf{t}` stores the coordinates of the
+  world origin expressed in the camera coordinate system.
 
 Now a camera is a physical projector that captures incoming lights reflected by
 3D material points into the camera film.
@@ -32,9 +32,9 @@ Following the principles of geometric optics, the imaging process consists of
 projecting 3D points :math:`(x_C, y_C, z_C)` into the film which can be viewed
 as an image plane defined by :math:`z_C = 1`.
 
-The imaged point in the camera film has film coordinates :math:`(u_C, v_C, 1)` in the
-camera coordinate system. Using the basic proportionality theorem, it follows
-that
+The imaged point in the camera film has 3D coordinates :math:`(u_C, v_C, 1)`
+expressed in the camera coordinate system. Using the basic proportionality
+theorem, it follows that
 
 .. math::
 
