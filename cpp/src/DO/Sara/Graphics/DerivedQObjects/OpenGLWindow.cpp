@@ -127,6 +127,7 @@ namespace DO { namespace Sara {
     const auto R = rotation(float(yaw * degree),    //
                             float(pitch * degree),  //
                             float(roll * degree));
+
     m_eulerRotation.topLeftCorner<3, 3>() = R * m_axisPermutation;
     update();
   }
@@ -195,9 +196,11 @@ namespace DO { namespace Sara {
     glEnable(GL_NORMALIZE);
 
     // Specify the axes to conform to the automotive convention.
-    m_axisPermutation << 0, 0, 1,  //
-        1, 0, 0,                   //
+    m_axisPermutation <<
+        0, 0, 1,  //
+       -1, 0, 0,  //
         0, 1, 0;
+    // m_axisPermutation *= -1;
 
     // Initialize the Euler rotation.
     m_eulerRotation.topLeftCorner<3, 3>() = m_axisPermutation;
@@ -248,7 +251,10 @@ namespace DO { namespace Sara {
     glPopMatrix();
     // Object-centered frame.
     if (m_displayFrame)
+    {
+      glScalef(m_frameScale, m_frameScale, m_frameScale);
       m_frame.draw(5, 0.1);
+    }
 
     // Disable the following to properly display the drawing with QPainter.
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -375,6 +381,16 @@ namespace DO { namespace Sara {
     if (event->key() == Qt::Key_F)
     {
       m_displayFrame = !m_displayFrame;
+      update();
+    }
+    if (event->key() == Qt::Key_Plus)
+    {
+      m_frameScale *= 1.2f;
+      update();
+    }
+    if (event->key() == Qt::Key_Minus)
+    {
+      m_frameScale /= 1.2f;
       update();
     }
     if (m_eventListeningTimer.isActive())

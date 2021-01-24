@@ -1,67 +1,67 @@
-Changing coordinate systems
+Changing Coordinate Systems
 ===========================
 
 Let us detail how we go from the world coordinates :math:`(O_W, \mathbf{i}_W,
 \mathbf{j}_W,\mathbf{k}_W)` to the camera coordinates :math:`(O_C, \mathbf{i}_C,
 \mathbf{j}_C,\mathbf{k}_C)`.
 
-Let :math:`M` denote a 3D point. Suppose that we know its coordinates in the
+Denote a 3D point by :math:`M`. Suppose that we know its coordinates in the
 camera coordinate system :math:`(O_C, x_C, y_C, z_C)`. We can retrieve its
-coordinates in the world coordinate system :math:`(O_W, x_W, y_W, z_W)` as follows
+coordinates in the world coordinate system :math:`(O_W, x_W, y_W, z_W)` as
+follows
 
 .. math::
 
-   \begin{array}{rcl}
-   \overrightarrow{O_W M} &=& \overrightarrow{O_W O_C} + \overrightarrow{O_\textrm{C}M} \\
+  \begin{aligned}
 
-   \overrightarrow{O_W M} &=& \overrightarrow{O_W O_C} +
-                              x_C \mathbf{i}_C +
-                              y_C \mathbf{j}_C +
-                              z_C \mathbf{k}_C\\
+  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+                            \overrightarrow{O_\textrm{C}M} \\
 
-   \\
+  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+                            x_C \mathbf{i}_C + y_C \mathbf{j}_C + z_C \mathbf{k}_C\\
 
-   \overrightarrow{O_W M} &=& \overrightarrow{O_W O_C} +
-     \left[ \begin{array}{c|c|c}
-     \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
-     \end{array} \right]
+  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+  \left[ \begin{array}{c|c|c}
+  \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
+  \end{array} \right]
 
-     \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
+  \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
 
-   \\
+  \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] &=
+    \underbrace{\overrightarrow{O_W O_C}}_{\mathbf{t}} +
 
-   \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] &=&
-   \overrightarrow{O_W O_C} +
-     \left[ \begin{array}{c|c|c}
-     \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
-     \end{array} \right]
+    \underbrace{
+      \left[ \begin{array}{c|c|c}
+      \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
+      \end{array} \right]
+    }_{\mathbf{R}}
 
-     \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
-   \end{array} \\
+    \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
+  \end{aligned}
 
 We recognize the global rigid body motion :math:`(\mathbf{R}, \mathbf{t})`
 where:
 
-.. math::
-   \mathbf{t} = \overrightarrow{O_W O_C} \\
-
-   \mathbf{R} = \left[ \mathbf{i}_C | \mathbf{j}_C | \mathbf{k}_C \right] \\
-
-In other words, the rotation matrix :math:`\mathbf{R}` is the matrix whose
-column vectors are **the basis vector coordinates of the camera axes in the
-world coordinate system**.
+- The translation vector :math:`\mathbf{t}` is the camera origin coordinates expressed
+  in the world coordinate system.
+- The rotation matrix :math:`\mathbf{R}` are the coordinates of the camera
+  expressed in the world basis vectors.
 
 
 Euler Angles
 ============
 
-The Euler angles :math:`(\psi, \theta, \phi)` is one way to parameterize a
-rotation matrix. Each angle describes the rotational quantity about each axis
-of the local coordinate system to define the rotation matrix.
+In engineering, we like to decompose any 3D rotation into Euler angles as they
+are quite intuitive to understand. The convention that is used typically is
+called the Tait-Bryan convention, which we describe as follows.
 
-Let us first describe the rotation axes. Consider an airplane and its local
-coordinate system. The usual axis convention used in aerospace engineering is as
-follows:
+Specifically the Euler angles :math:`(\psi, \theta, \phi)` is the three
+rotational quantities about each *intrinsic* axis which altogether describe the
+3D rotation.
+
+Let us first describe the rotation axes by visualizing an airplane. Consider its
+local coordinate system that is fixed to this airplane. The usual axis
+convention used in aerospace engineering is as follows:
 
 - The :math:`z`-axis is the longitudinal axis pointing to the airplane
   nose.
@@ -75,18 +75,18 @@ In terms of rotation,
 - The :math:`y`-axis is the (current) pich axis (YES head movement).
 - The :math:`x`-axis is the (current) roll axis ("Indian" MAYBE head movement).
 
-A 3D rotation can be decomposed into three elementary rotations in the following
-order:
+A 3D rotation can be decomposed into three elementary rotations that must
+composed in the following order:
 
-1. Yaw about the :math:`z`-axis by an angle :math:`\psi`,
-2. Pitch about the current :math:`y'`-axis by an angle :math:`\theta`,
-3. Roll about the current :math:`x''`-axis by an angle :math:`\phi`
+1. Yaw about the airplane :math:`z`-axis by an angle :math:`\psi`,
+2. Pitch about the **current** airplane :math:`y'`-axis by an angle :math:`\theta`,
+3. Roll about the **current** airplane :math:`x''`-axis by an angle :math:`\phi`
 
-Let us stress that again the order to which we apply each elementary rotation is
+Once again let us stress the order to which we apply each elementary rotation is
 very important.
 
-The rotation matrix expressed with respect to the initial local coordinates is
-calculated as:
+The rotation matrix expressed with respect to the *extrinsic* axes (i.e., the axes
+of the original local coordinates before rotating the plane) is calculated as:
 
 .. math::
 
@@ -94,10 +94,61 @@ calculated as:
                                      \mathbf{R}_y (\theta)
                                      \mathbf{R}_x (\phi)
 
+Formula of Elementary Rotations
+-------------------------------
+
+Every now and then we may forget the formula of each elementary rotation and in
+particular we don't remember their signs and orientations.
+
+By a simple reasoning, we can retrieve each matrix coefficient by reasoning
+about a small positive quantity. A small angle will imply a small change, and
+a cosine close to 1 and a sine close to 0. By visualization, we can determine
+whether the coefficient signs.
+
+- When the airplane is slightly yawing positively, it is steering to the right
+  as the :math:`x`-axis is rotating towards the :math:`y`-axis:
+
+  .. math::
+
+    \mathbf{R}_z(\psi) = \left[ \begin{array}{ccc}
+      \cos\psi & -\sin\psi & 0 \\
+      \sin\psi &  \cos\psi & 0 \\
+             0 &         0 & 1 \\
+    \end{array} \right]
+
+- When the airplane is slightly pitching positively, its nose is looking up
+  as the :math:`z`-axis is rotating towards the :math:`x`-axis.
+
+  .. math::
+
+    \mathbf{R}_y(\theta) = \left[ \begin{array}{ccc}
+      \cos\theta & 0 & \sin \theta \\
+               0 & 1 &           0 \\
+     -\sin\theta & 0 & \cos \theta \\
+    \end{array} \right]
+
+- When the airplane is slightly rolling positively, it right wing is tilting
+  down as the :math:`y`-axis is rotating towards the :math:`z`-axis.
+
+  .. math::
+
+    \mathbf{R}_x (\phi) = \left[ \begin{array}{ccc}
+      1 &        0 &         0 \\
+      0 & \cos\phi & -\sin\phi \\
+      0 & \sin\phi &  \cos\phi \\
+    \end{array} \right]
+
+
+This nice visualisation tool can be useful to check our understanding:
+http://danceswithcode.net/engineeringnotes/rotations_in_3d/demo3D/rotations_in_3d_tool.html
+
 Proof
 -----
 
-The composite rotation is
+It is useful to provide a proof that justifies the formula of the Euler rotation
+provided above.
+
+In terms of matrix multiplication, the composite rotation is
 
 .. math::
 
@@ -109,26 +160,37 @@ In the sequel, we will alleviate the notation by omitting the angles.
 
 To obtain :math:`\mathbf{R}_{y'}`, we need to understand that the pitch rotation
 is done about the current axis :math:`\mathbf{y}' = \mathbf{R}_z \mathbf{y}`.
+And the vector :math:`\mathbf{y}'` is the coordinates of the current airplane :math:`y'`-axis
+w.r.t. the original axes.
 
-Let us
+Now we denote
 
-- denote by :math:`(\mathbf{i}, \mathbf{j}, \mathbf{k})` the basis vectors of
-  the original local coordinate system, and
-- denote by :math:`(\mathbf{i}', \mathbf{j}', \mathbf{k}')` the basis vectors of
-  the current local coordinate system.
+- the basis vectors of the original local coordinate system by
+  :math:`(\mathbf{i}, \mathbf{j}, \mathbf{k})` and
+-  the basis vectors of the current local coordinate system by
+  :math:`(\mathbf{i}', \mathbf{j}', \mathbf{k}')`.
 
 In the sequel, we will alleviate the notation by omitting the origin :math:`O`
 of the coordinate systems because there is no translation.
 
-We can see that the intrinsic pitch rotation matrix expressed in the current
+We can see that the intrinsic pitch rotation matrix expressed in the *current*
 local coordinate system :math:`(x', y', z')` has the convenient form:
-:math:`\mathbf{R}_y`. But we want the rotation matrix :math:`\mathbf{R}_{y'}` to
-be expressed in the coordinate system :math:`(x, y, z)`.  So how do we get it?
+
+.. math::
+
+  \mathbf{R}_y = \left[ \begin{array}{ccc}
+    \cos\theta & 0 & \sin \theta \\
+             0 & 1 &           0 \\
+   -\sin\theta & 0 & \cos \theta \\
+  \end{array} \right]
+
+But we want the rotation matrix :math:`\mathbf{R}_{y'}` to be expressed in the
+*original* coordinate system :math:`(x, y, z)`.  So how do we get it?
 
 As we can see above, the key point to understand is that to go from the current
 coordinates :math:`(x', y', z')` to the original coordinate system :math:`(x, y,
-z)`, we need to multiply the coordinates in the current coordinate system with
-the rotation :math:`\mathbf{R}_z`, which accounts for the missing angle offsets.
+z)`, we need to multiply the current coordinates :math:`(x', y', z')` with the
+rotation :math:`\mathbf{R}_z`, which "adds" the necessary angles offsets.
 
 Let us detail this point to convince ourselves.
 
