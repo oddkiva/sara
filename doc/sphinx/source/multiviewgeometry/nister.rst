@@ -344,9 +344,19 @@ the roots of this polynomial.
 
    \langle n \rangle \iff \text{det}(\mathbf{B}) = 0
 
-
 Real Root Extraction
 --------------------
 
 Instead of using Sturm sequences, we extract the roots of the polynomials using
 Jenkins-Traub algorithm.
+
+Recovering the Essential Matrices
+---------------------------------
+
+We get at most 10 possible roots :math:`z_i` from the polynomial root solver.
+Keeping only the real roots, the cofactors of the matrix :math:`\mathbf{B}`
+allow us to retrieve the corresponding scalars :math:`x_i` and :math:`y_i`. From
+there we recover all the candidate essential matrices by linear combination as
+exposed above.
+
+The physically valid essential matrices are those who are cheiral.
