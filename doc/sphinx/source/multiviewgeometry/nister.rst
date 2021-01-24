@@ -226,8 +226,6 @@ elimination. Specifically,
       \hline
       \end{array}
 
-   **TODO** write pseudo-code or sketch C++ code.
-
 2. then in the sweep upward, stop halfway until the system of polynomial
    equations looks like the system of equations :eq:`eq-gaussjordan` below:
 
@@ -288,9 +286,6 @@ elimination. Specifically,
 
       \hline
       \end{array}
-
-   **TODO** write pseudo-code or sketch C++ code.
-
 
 Let's look again at the last :math:`6` equations :eq:`eq-gaussjordan`. We can
 again reduce it by multiplying by :math:`z` and subtracting as follows:
@@ -355,7 +350,3 @@ Real Root Extraction
 
 Instead of using Sturm sequences, we extract the roots of the polynomials using
 Jenkins-Traub algorithm.
-
-
-Under construction...
-~~~~~~~~~~~~~~~~~~~~~
