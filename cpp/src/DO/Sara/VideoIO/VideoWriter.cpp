@@ -18,6 +18,39 @@ extern "C" {
 }
 
 
+#ifdef av_ts2str
+#undef av_ts2str
+av_always_inline char* av_ts2str(int64_t ts)
+{
+  thread_local char str[AV_ERROR_MAX_STRING_SIZE];
+  memset(str, 0, sizeof(str));
+  return av_ts_make_string(str, ts);
+}
+#endif
+
+#ifdef av_ts2timestr
+#undef av_ts2timestr
+av_always_inline char* av_ts2timestr(int64_t ts, AVRational *tb)
+{
+  thread_local char str[AV_ERROR_MAX_STRING_SIZE];
+  memset(str, 0, sizeof(str));
+  return av_ts_make_time_string(str, ts, tb);
+}
+#endif
+
+#ifdef av_err2str
+#undef av_err2str
+av_always_inline char* av_err2str(int errnum)
+{
+  // static char str[AV_ERROR_MAX_STRING_SIZE];
+  // thread_local may be better than static in multi-thread circumstance
+  thread_local char str[AV_ERROR_MAX_STRING_SIZE];
+  memset(str, 0, sizeof(str));
+  return av_make_error_string(str, AV_ERROR_MAX_STRING_SIZE, errnum);
+}
+#endif
+
+
 constexpr auto STREAM_DURATION = 10.0;
 constexpr auto STREAM_FRAME_RATE = 25;              /* 25 images/s */
 constexpr auto STREAM_PIX_FMT = AV_PIX_FMT_YUV420P; /* default pix_fmt */
