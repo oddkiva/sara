@@ -95,6 +95,7 @@ namespace DO { namespace Sara {
     // Model view matrix.
     GLfloat m_scale;
     Point3f m_center;
+    GLfloat m_frameScale = 1;
     GL::Frame m_frame;
     TrackBall m_trackball;
 
