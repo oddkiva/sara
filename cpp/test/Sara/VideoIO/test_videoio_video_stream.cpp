@@ -9,21 +9,21 @@
 using namespace DO::Sara;
 
 
-class TestFixtureForVideoIO
+class TestFixtureForVideoStream
 {
 protected:
   std::string video_filename;
   VideoStream video_stream;
 
 public:
-  TestFixtureForVideoIO()
+  TestFixtureForVideoStream()
   {
     video_filename = src_path("hale_bopp_1.mpg");
   }
 };
 
 
-BOOST_FIXTURE_TEST_SUITE(TestVideoIO, TestFixtureForVideoIO)
+BOOST_FIXTURE_TEST_SUITE(TestVideoIO, TestFixtureForVideoStream)
 
 BOOST_AUTO_TEST_CASE(test_empty_constructor)
 {

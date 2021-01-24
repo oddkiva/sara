@@ -239,8 +239,13 @@ int main()
   auto texture0 = GL::Texture2D{};
   {
     // Read the image from the disk.
-    auto image =
-        imread<Rgb8>("/home/david/GitHub/DO-CV/sara/data/ksmall.jpg");
+    auto image = imread<Rgb8>(
+#ifdef __APPLE__
+                              "/Users/david/GitLab/DO-CV/sara/data/ksmall.jpg"
+#else
+                              "/home/david/GitLab/DO-CV/sara/data/ksmall.jpg"
+#endif
+    );
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);
@@ -253,8 +258,13 @@ int main()
   auto texture1 = GL::Texture2D{};
   {
     // Read the image from the disk.
-    auto image =
-        imread<Rgb8>("/home/david/GitHub/DO-CV/sara/data/sunflowerField.jpg");
+    auto image = imread<Rgb8>(
+#ifdef __APPLE__
+                              "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+#else
+                              "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+#endif
+    );
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);
