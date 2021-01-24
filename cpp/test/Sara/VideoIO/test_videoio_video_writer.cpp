@@ -18,8 +18,9 @@ BOOST_AUTO_TEST_CASE(test_video_writer)
       (std::filesystem::temp_directory_path() / "test.mp4")  //
           .string();
 
-  // Dummy.
+  // TODO: test it more thoroughly later.
   {
+    // Dummy.
     auto image = Image<Rgb8>{320, 240};
     image.flat_array().fill(Red8);
 
@@ -30,7 +31,7 @@ BOOST_AUTO_TEST_CASE(test_video_writer)
   }
   std::filesystem::remove(filepath);
 
-  // Force write.
+  // Test the creation of a dummy audio-video file.
   {
     VideoWriter video_writer{filepath, {320, 240}};
     video_writer.generate_dummy();
