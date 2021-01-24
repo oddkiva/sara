@@ -3,40 +3,55 @@
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <filesystem>
 
 using namespace DO::Sara;
+
+namespace fs = boost::filesystem;
 
 
 BOOST_AUTO_TEST_SUITE(TestVideoWriter)
 
 BOOST_AUTO_TEST_CASE(test_video_writer)
 {
-  const auto filepath =
-      (std::filesystem::temp_directory_path() / "test.mp4")  //
-          .string();
+  const auto filepath = (fs::temp_directory_path() / "test.mp4")  //
+                            .string();
 
-  // TODO: test it more thoroughly later.
   {
-    // Dummy.
+    // Dummy image.
     auto image = Image<Rgb8>{320, 240};
     image.flat_array().fill(Red8);
 
-    VideoWriter video_writer{filepath, image.sizes()};
+    VideoWriter video_writer{filepath, image.sizes(), 25};
     // Dummy write.
     for (auto i = 0; i < 25; ++i)
       video_writer.write(image);
+    video_writer.finish();
+
+    VideoStream video_stream{filepath};
+    BOOST_CHECK_EQUAL(video_stream.sizes(), image.sizes());
+    for (auto i = 0; i < 15; ++i)
+    {
+      BOOST_CHECK(video_stream.read());
+      for (auto p = video_stream.frame().begin(); p != video_stream.frame().end(); ++p)
+        BOOST_REQUIRE_LE((p->cast<int>() - Red8.cast<int>()).lpNorm<Eigen::Infinity>(), 2);
+    }
   }
-  std::filesystem::remove(filepath);
+  fs::remove(filepath);
 
   // Test the creation of a dummy audio-video file.
   {
     VideoWriter video_writer{filepath, {320, 240}};
     video_writer.generate_dummy();
+    video_writer.finish();
+
+    VideoStream video_stream{filepath};
+    BOOST_CHECK_EQUAL(video_stream.sizes(), Eigen::Vector2i(320, 240));
+    BOOST_CHECK(video_stream.read());
   }
-  std::filesystem::remove(filepath);
+  fs::remove(filepath);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -61,10 +61,12 @@ namespace DO::Sara {
       else if (ret < 0)
         throw std::runtime_error{
             format("Error encoding a frame: %s\n", av_err2str(ret))};
-      /* rescale output packet timestamp values from codec to stream timebase */
+
+      // Rescale output packet timestamp values from codec to stream timebase.
       av_packet_rescale_ts(&packet, c->time_base, st->time_base);
       packet.stream_index = st->index;
-      /* Write the compressed frame to the media file. */
+
+      // Write the compressed frame to the media file.
       log_packet(format_context, &packet);
       ret = av_interleaved_write_frame(format_context, &packet);
       av_packet_unref(&packet);
@@ -569,24 +571,7 @@ namespace DO::Sara {
 
   VideoWriter::~VideoWriter()
   {
-    /* Write the trailer, if any. The trailer must be written before you
-     * close the CodecContexts open when you wrote the header; otherwise
-     * av_write_trailer() may try to use memory that was freed on
-     * av_codec_close(). */
-    av_write_trailer(_format_context);
-
-    /* Close each codec. */
-    if (_have_video)
-      close_stream(_format_context, &_video_stream);
-    if (_have_audio)
-      close_stream(_format_context, &_audio_stream);
-
-    /* Close the output file. */
-    if (!(_output_format->flags & AVFMT_NOFILE))
-      avio_closep(&_format_context->pb);
-
-    /* free the stream */
-    avformat_free_context(_format_context);
+    finish();
   }
 
   static AVFrame* get_video_frame(OutputStream* ostream,
@@ -636,6 +621,46 @@ namespace DO::Sara {
     const auto video_frame = get_video_frame(&_video_stream, image);
     write_frame(_format_context, _video_stream.encoding_context,
                 _video_stream.stream, video_frame);
+  }
+
+  auto VideoWriter::finish() -> void
+  {
+    // Write the trailer, if any. The trailer must be written before you close
+    // the CodecContexts open when you wrote the header; otherwise
+    // av_write_trailer() may try to use memory that was freed on
+    // av_codec_close().
+    if (_format_context)
+      av_write_trailer(_format_context);
+
+    // Close the video codec.
+    if (_have_video)
+    {
+      close_stream(_format_context, &_video_stream);
+      _have_video = 0;
+      _video_stream = {};
+    }
+    // Close the audio codec.
+    if (_have_audio)
+    {
+      close_stream(_format_context, &_audio_stream);
+      _have_audio = 0;
+      _audio_stream = {};
+    }
+
+    // Close the output file.
+    if (_output_format)
+    {
+      if (!(_output_format->flags & AVFMT_NOFILE))
+        avio_closep(&_format_context->pb);
+      _output_format = nullptr;
+    }
+
+    // Free the stream.
+    if (_format_context)
+    {
+      avformat_free_context(_format_context);
+      _format_context = nullptr;
+    }
   }
 
   auto VideoWriter::generate_dummy() -> void

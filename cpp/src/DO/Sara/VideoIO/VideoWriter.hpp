@@ -59,6 +59,8 @@ namespace DO::Sara {
 
     auto write(const ImageView<Rgb8>& image) -> void;
 
+    auto finish() -> void;
+
     auto generate_dummy() -> void;
 
   private:
