@@ -56,7 +56,7 @@ are quite intuitive to understand. The convention that is used typically is
 called the Tait-Bryan convention, which we describe as follows.
 
 Specifically the Euler angles :math:`(\psi, \theta, \phi)` is the three
-rotational quantities about each *intrinsic* axis which altogether describe the
+rotational quantities about each *intrinsic* axis which altogether describes the
 3D rotation.
 
 Let us first describe the rotation axes by visualizing an airplane. Consider its

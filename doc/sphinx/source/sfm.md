@@ -8,6 +8,7 @@ View Geometry.
    :maxdepth: 2
 
    multiviewgeometry/coordinate_systems.rst
+   multiviewgeometry/perspective_projection.rst
    multiviewgeometry/distance_calculation.rst
    multiviewgeometry/essential_matrix.rst
    multiviewgeometry/nister.rst

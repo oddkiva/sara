@@ -107,31 +107,19 @@ follows
 
    \mathbf{x} = \mathbf{R} \mathbf{x}' + \mathbf{t} \\
 
-Then we can introduce the camera matrix
-
-.. math::
-
-   \mathbf{C} = \left[ \begin{array}{c|c}
-     \mathbf{R}^T & -\mathbf{R}^T t
-   \end{array} \right]
-
-which encodes the inverse rigid body transform :math:`(\mathbf{R}', \mathbf{t}')`
+The inverse rigid body transform is :math:`(\mathbf{R}', \mathbf{t}')`
 where:
 
 .. math::
 
-   \mathbf{R}' = \mathbf{R}^T \\
-   \mathbf{t}' = -\mathbf{R}^T \mathbf{t}
-
-We can calculate the camera coordinates :math:`\mathbf{x}'` from the reference
-coordinates :math:`\mathbf{x}` as follows
-
-.. math::
-
-   \mathbf{x}' = \mathbf{C} \mathbf{x} \\
+   \begin{aligned}
+   \mathbf{R}' &= \mathbf{R}^T \\
+   \mathbf{t}' &= -\mathbf{R}^T \mathbf{t} \\
+   \mathbf{x}' &= \mathbf{R}' \mathbf{x} + \mathbf{t}' \\
+   \end{aligned}
 
 If the ground point is visible in the image at the following normalized
-coordinates :math:`(u, v)`. then using the basic proportionality theorem in
+coordinates :math:`(u, v)`, then using the basic proportionality theorem in
 geometric optics:
 
 .. math::
@@ -147,11 +135,11 @@ We can derive a system of two equations.
    v z' - y' &=& 0 \\
    \end{array} \right.
 
-Expanding the matrix operation as a linear system:
+Expanding the matrix operation into a linear system:
 
 .. math::
 
-   \mathbf{x}' = \mathbf{C} \mathbf{x} \\
+   \mathbf{x}' = \mathbf{R}' \mathbf{x} + \mathbf{t}' \\
 
 yields
 
