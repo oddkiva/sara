@@ -124,7 +124,9 @@ namespace DO::Sara {
 
       // Radial correction.
       const auto r2 = xn.squaredNorm();
-      const auto rpowers = Vec3{r2, std::pow(r2, 2), std::pow(r2, 3)};
+      const auto r4 = r2 * r2;
+      const auto r6 = r4 * r2;
+      const auto rpowers = Vec3{r2, r4, r6};
       const auto radial = Vec2{k.dot(rpowers) * xn};
 
       // Tangential correction.

@@ -41,8 +41,9 @@ const auto map_pixel_dims = std::array{map_metric_dims[0] * px_per_meter,
                                        map_metric_dims[1] * px_per_meter};
 
 
-sara::Image<sara::Rgb8> to_map_view(const sara::BrownConradyCamera<float>& C,
-                                    const sara::ImageView<sara::Rgb8>& image_plane)
+auto to_map_view(const sara::BrownConradyCamera<float>& C,
+                 const sara::ImageView<sara::Rgb8>& image_plane)
+    -> sara::Image<sara::Rgb8>
 {
   const auto xmin_px = -int(map_pixel_dims[0].value / 2);
   const auto xmax_px = int(map_pixel_dims[0].value / 2);
@@ -68,8 +69,8 @@ sara::Image<sara::Rgb8> to_map_view(const sara::BrownConradyCamera<float>& C,
         continue;
 
       // Convert the corresponding metric coordinates.
-      auto xyz = Eigen::Vector3f{x / px_per_meter.value, camera_height.value,
-                                 y / px_per_meter.value};
+      auto xyz = Eigen::Vector3f(x / px_per_meter.value, camera_height.value,
+                                 y / px_per_meter.value);
 
       // Project to the image.
       Eigen::Vector2d p = (C.K * xyz).hnormalized().cast<double>();
