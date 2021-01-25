@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_fast_marching_3d)
       for (auto x = margin.x(); x < distances.width() - margin.x(); ++x)
       {
         const auto d_xyz =
-            (Eigen::Vector3f(x, y, z) - Eigen::Vector3f(5, 5, 5)).norm();
+            (Eigen::Vector3i(x, y, z).cast<float>() - Eigen::Vector3f(5, 5, 5)).norm();
         BOOST_REQUIRE_LE(std::abs(distances(x, y, z) - d_xyz), 0.8f);
       }
     }

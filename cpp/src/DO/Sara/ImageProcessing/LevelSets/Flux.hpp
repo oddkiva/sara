@@ -121,7 +121,7 @@ namespace DO::Sara {
   {
     const auto u0 = u(x);
     const auto s = u0 / std::sqrt(u0 * u0 + flux_delta * flux_delta);
-    return s + normal_motion<FiniteDifference>(u, x, s);
+    return s + normal_motion<FiniteDifference, T, N>(u, x, s);
   }
 
 }  // namespace DO::Sara

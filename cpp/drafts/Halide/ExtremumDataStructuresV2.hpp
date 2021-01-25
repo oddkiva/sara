@@ -40,7 +40,7 @@ namespace DO::Shakti::HalideBackend::v2 {
       resize(size);
     }
 
-    auto resize(std::size_t size) -> void
+    auto resize(int size) -> void
     {
       x = Halide::Runtime::Buffer<std::int32_t>(size);
       y = Halide::Runtime::Buffer<std::int32_t>(size);

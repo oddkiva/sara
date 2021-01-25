@@ -262,7 +262,7 @@ namespace DO::Sara {
         do
         {
           for (auto p = _curr_level_set_func.begin_array(); !p.end(); ++p)
-            integrator._f(p.position()) = reinitialization<Approximator>(  //
+            integrator._f(p.position()) = reinitialization<Approximator, T, N>(  //
                 _curr_level_set_func,                                   //
                 p.position()                                            //
             );
