@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_narrow_band)
   const auto w = 128;
   const auto h = 128;
   auto phi = sara::Image<float, 2>(w, h);
-  radial_distance(phi, Eigen::Vector2f(w, h) / 2, w / 5.);
+  radial_distance(phi, Eigen::Vector2f(w, h) / 2, w / 5.f);
 
   // Can we instantiate it?
   auto narrow_band = sara::NarrowBand<float, 2>{phi};
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_narrow_band)
         continue;
       const auto& x = p.position();
       // euler._df(x) = sara::mean_curvature_motion(phi, x);
-      euler._df(x) = sara::normal_motion<sara::Weno3>(phi, x, -0.1f);
+      euler._df(x) = sara::normal_motion<sara::Weno3, float, 2>(phi, x, -0.1f);
       // euler._df(x) = sara::normal_motion<sara::Weno3>(phi, x, 0.1f);
       // euler._df(x) = sara::advection<sara::Weno3>(phi, x, {0.1f,  0.0f});
     }

@@ -17,6 +17,7 @@
 #include <DO/Sara/Graphics.hpp>
 #endif
 
+#include <array>
 #include <numeric>
 #include <queue>
 #include <set>
@@ -34,7 +35,7 @@ namespace DO::Sara {
 
 
   template <int N>
-  constexpr auto pow(int x)
+  constexpr auto pow(int x) -> int
   {
     if constexpr (N == 0)
       return 1;
