@@ -19,12 +19,15 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include <array>
+#include <filesystem>
 
 #include <omp.h>
 
 
 using namespace std;
 using namespace std::string_literals;
+
+namespace fs = std::filesystem;
 
 namespace sara = DO::Sara;
 using sara::operator""_px;
@@ -39,7 +42,7 @@ const auto map_pixel_dims = std::array{map_metric_dims[0] * px_per_meter,
 
 
 sara::Image<sara::Rgb8> to_map_view(const sara::BrownConradyCamera<float>& C,
-                                    const sara::Image<sara::Rgb8>& image_plane)
+                                    const sara::ImageView<sara::Rgb8>& image_plane)
 {
   const auto xmin_px = -int(map_pixel_dims[0].value / 2);
   const auto xmax_px = int(map_pixel_dims[0].value / 2);
@@ -98,37 +101,40 @@ int __main(int argc, char**argv)
   omp_set_num_threads(omp_get_max_threads());
 
   auto video_stream = sara::VideoStream{video_filepath};
+  auto video_writer = sara::VideoWriter{
+      "/Users/david/Desktop/test.mp4",
+      Eigen::Vector2i(map_pixel_dims[0].value, map_pixel_dims[1].value)};
 
-  // one example of distortion correction.
-  auto camera_parameters = sara::BrownConradyCamera<float>{};
-  {
-    const auto f = 946.8984425572634_px;
-    const auto u0 = 960._px;
-    const auto v0 = 540._px;
-    const auto p = Eigen::Vector2f{0, 0};
-    const auto k = Eigen::Vector3f{
-        -0.22996356451342749,  //
-        0.05952465745165465,
-        -0.007399008111054717  //
-    };
-    camera_parameters.K << f, 0, u0,
-                           0, f, v0,
-                           0, 0,  1;
-    camera_parameters.k = k;
-    camera_parameters.p = p;
-  }
   // // one example of distortion correction.
   // auto camera_parameters = sara::BrownConradyCamera<float>{};
   // {
-  //   const auto f = 650._px;
-  //   const auto u0 = 640._px;
-  //   const auto v0 = 360._px;
+  //   const auto f = 946.8984425572634_px;
+  //   const auto u0 = 960._px;
+  //   const auto v0 = 540._px;
+  //   const auto p = Eigen::Vector2f{0, 0};
+  //   const auto k = Eigen::Vector3f{
+  //       -0.22996356451342749,  //
+  //       0.05952465745165465,
+  //       -0.007399008111054717  //
+  //   };
   //   camera_parameters.K << f, 0, u0,
   //                          0, f, v0,
   //                          0, 0,  1;
-  //   camera_parameters.k.setZero();
-  //   camera_parameters.p.setZero();
+  //   camera_parameters.k = k;
+  //   camera_parameters.p = p;
   // }
+  // one example of distortion correction.
+  auto camera_parameters = sara::BrownConradyCamera<float>{};
+  {
+    const auto f = 650._px;
+    const auto u0 = 640._px;
+    const auto v0 = 360._px;
+    camera_parameters.K << f, 0, u0,
+                           0, f, v0,
+                           0, 0,  1;
+    camera_parameters.k.setZero();
+    camera_parameters.p.setZero();
+  }
   camera_parameters.calculate_K_inverse();
   camera_parameters.calculate_drap_lefevre_inverse_coefficients();
 
@@ -156,11 +162,11 @@ int __main(int argc, char**argv)
 #define DIRTY
 #ifdef DIRTY
     frame_undistorted = video_stream.frame();
-    const auto map_view = to_map_view(camera_parameters, video_stream.frame());
+    auto map_view = to_map_view(camera_parameters, video_stream.frame());
 #else
     camera_parameters.undistort(video_stream.frame(), frame_undistorted);
     camera_parameters.distort_drap_lefevre(frame_undistorted, frame_redistorted);
-    const auto map_view = to_map_view(camera_parameters, frame_undistorted);
+    auto map_view = to_map_view(camera_parameters, frame_undistorted);
 
     for (auto y = 0; y < frame_diff.height(); ++y)
       for (auto x = 0; x < frame_diff.width(); ++x)
@@ -190,7 +196,6 @@ int __main(int argc, char**argv)
         frame_average(x, y)(1) = c(1);
         frame_average(x, y)(2) = c(2);
       }
-
 #endif
     sara::set_active_window(wu);
     sara::display(frame_undistorted);
@@ -205,13 +210,18 @@ int __main(int argc, char**argv)
     sara::display(frame_average);
 
     sara::set_active_window(wmap);
-    sara::display(map_view);
     constexpr auto interval = 20;
     for (auto i = 0; i < 5; ++i)
-      sara::draw_line(
-          Eigen::Vector2i(0, i * interval * px_per_meter.value),
-          Eigen::Vector2i(map_view.width(), i * interval * px_per_meter.value),
-          sara::Yellow8, 2);
+    {
+      const auto p1 = Eigen::Vector2i(0, i * interval * px_per_meter.value);
+      const auto p2 =
+          Eigen::Vector2i(map_view.width(), i * interval * px_per_meter.value);
+      sara::draw_line(map_view, p1.x(), p1.y(), p2.x(), p2.y(), sara::Yellow8,
+                      2);
+    }
+    sara::display(map_view);
+
+    video_writer.write(map_view);
   }
 
   sara::close_window(wu);
