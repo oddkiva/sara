@@ -19,15 +19,12 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include <array>
-#include <filesystem>
 
 #include <omp.h>
 
 
 using namespace std;
 using namespace std::string_literals;
-
-namespace fs = std::filesystem;
 
 namespace sara = DO::Sara;
 using sara::operator""_px;
@@ -69,7 +66,8 @@ auto to_map_view(const sara::BrownConradyCamera<float>& C,
         continue;
 
       // Convert the corresponding metric coordinates.
-      auto xyz = Eigen::Vector3f(x / px_per_meter.value, camera_height.value,
+      auto xyz = Eigen::Vector3f(x / px_per_meter.value,  //
+                                 camera_height.value,     //
                                  y / px_per_meter.value);
 
       // Project to the image.
