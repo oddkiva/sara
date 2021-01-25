@@ -1,5 +1,6 @@
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/Image.hpp>
 
 #include <array>
@@ -21,7 +22,7 @@ struct SwrContext;
 
 namespace DO::Sara {
 
-  class VideoWriter
+  class DO_SARA_EXPORT VideoWriter
   {
   public:
     // a wrapper around a single output AVStream

@@ -161,7 +161,7 @@ namespace DO::Sara {
         }
       }
       c->channels = av_get_channel_layout_nb_channels(c->channel_layout);
-      out_stream->stream->time_base = (AVRational){1, c->sample_rate};
+      out_stream->stream->time_base = AVRational{1, c->sample_rate};
       break;
     case AVMEDIA_TYPE_VIDEO:
       c->codec_id = codec_id;
@@ -173,7 +173,7 @@ namespace DO::Sara {
        * of which frame timestamps are represented. For fixed-fps content,
        * timebase should be 1/framerate and timestamp increments should be
        * identical to 1. */
-      out_stream->stream->time_base = (AVRational){1, STREAM_FRAME_RATE};
+      out_stream->stream->time_base = {1, STREAM_FRAME_RATE};
       c->time_base = out_stream->stream->time_base;
       c->gop_size = 12; /* emit one intra frame every twelve frames at most */
       c->pix_fmt = STREAM_PIX_FMT;
@@ -230,7 +230,7 @@ namespace DO::Sara {
      * of which frame timestamps are represented. For fixed-fps content,
      * timebase should be 1/framerate and timestamp increments should be
      * identical to 1. */
-    ostream->stream->time_base = (AVRational){1, frame_rate};
+    ostream->stream->time_base = {1, frame_rate};
     c->time_base = ostream->stream->time_base;
     c->gop_size = 12; /* emit one intra frame every twelve frames at most */
     c->pix_fmt = STREAM_PIX_FMT;
@@ -338,7 +338,7 @@ namespace DO::Sara {
     int16_t* q = reinterpret_cast<int16_t*>(frame->data[0]);
     /* check if we want to generate more frames */
     if (av_compare_ts(ost->next_pts, ost->encoding_context->time_base,
-                      STREAM_DURATION, (AVRational){1, 1}) > 0)
+                      STREAM_DURATION, {1, 1}) > 0)
       return nullptr;
     for (j = 0; j < frame->nb_samples; j++)
     {
@@ -390,7 +390,7 @@ namespace DO::Sara {
 
       frame = ost->frame;
       frame->pts = av_rescale_q(ost->samples_count,
-                                (AVRational){1, c->sample_rate}, c->time_base);
+                                {1, c->sample_rate}, c->time_base);
       ost->samples_count += dst_nb_samples;
     }
     return write_frame(oc, c, ost->stream, frame);
@@ -480,7 +480,7 @@ namespace DO::Sara {
     AVCodecContext* c = ostream->encoding_context;
     /* check if we want to generate more frames */
     if (av_compare_ts(ostream->next_pts, c->time_base, STREAM_DURATION,
-                      (AVRational){1, 1}) > 0)
+                      {1, 1}) > 0)
       return nullptr;
     /* when we pass a frame to the encoder, it may keep a reference to it
      * internally; make sure we do not overwrite it here */
