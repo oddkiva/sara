@@ -205,7 +205,7 @@ Let us detail this point to convince ourselves.
 
 Now consider any point :math:`u` of the airplane, if its
 coordinates are :math:`\mathbf{u}'` in the current coordinate system :math:`(x',
-y', z')`:
+y', z')`, then by linear combination
 
 .. math::
 
