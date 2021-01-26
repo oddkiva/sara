@@ -188,8 +188,8 @@ But we want the rotation matrix :math:`\mathbf{R}_{y'}` to be expressed in the
 *original* coordinate system :math:`(x, y, z)`.  So how do we get it?
 
 As we can see above, the key point to understand is that to go from the current
-coordinates :math:`(x', y', z')` to the original coordinate system :math:`(x, y,
-z)`, we need to multiply the current coordinates :math:`(x', y', z')` with the
+coordinates :math:`\mathbf{u}'` to the original coordinates :math:`\mathbf{u}`,
+we need to multiply the current coordinates :math:`\mathbf{u}'` with the
 rotation :math:`\mathbf{R}_z`, which "adds" the necessary angles offsets.
 
 Let us detail this point to convince ourselves.
