@@ -167,7 +167,7 @@ Now we denote
 
 - the basis vectors of the original local coordinate system by
   :math:`(\mathbf{i}, \mathbf{j}, \mathbf{k})` and
--  the basis vectors of the current local coordinate system by
+- the basis vectors of the current local coordinate system by
   :math:`(\mathbf{i}', \mathbf{j}', \mathbf{k}')`.
 
 In the sequel, we will alleviate the notation by omitting the origin :math:`O`
