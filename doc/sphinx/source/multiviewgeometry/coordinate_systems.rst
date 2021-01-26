@@ -102,8 +102,8 @@ particular we don't remember their signs and orientations.
 
 By a simple reasoning, we can retrieve each matrix coefficient by reasoning
 about a small positive quantity. A small angle will imply a small change, and
-a cosine close to 1 and a sine close to 0. By visualization, we can determine
-whether the coefficient signs.
+then a cosine close to 1 and a sine close to 0. By visualization, we can
+determine the sign of each coefficient.
 
 - When the airplane is slightly yawing positively, it is steering to the right
   as the :math:`x`-axis is rotating towards the :math:`y`-axis:
