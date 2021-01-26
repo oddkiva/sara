@@ -146,7 +146,7 @@ Proof
 -----
 
 It is useful to provide a proof that justifies the formula of the Euler rotation
-provided above.
+as we have shown above.
 
 In terms of matrix multiplication, the composite rotation is
 
