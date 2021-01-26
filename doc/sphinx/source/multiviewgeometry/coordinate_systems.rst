@@ -100,10 +100,10 @@ Formula of Elementary Rotations
 Every now and then we may forget the formula of each elementary rotation and in
 particular we don't remember their signs and orientations.
 
-By a simple reasoning, we can retrieve each matrix coefficient by reasoning
-about a small positive quantity. A small angle will imply a small change, and
-then a cosine close to 1 and a sine close to 0. By visualization, we can
-determine the sign of each coefficient.
+We can retrieve each coefficient of the matrix by reasoning about a small
+positive quantity. A small angle will imply a small change, and then a cosine
+close to 1 and a sine close to 0. By visualization, we can determine the sign of
+each coefficient.
 
 - When the airplane is slightly yawing positively, it is steering to the right
   as the :math:`x`-axis is rotating towards the :math:`y`-axis:
