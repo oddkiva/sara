@@ -32,6 +32,14 @@ Unsupervised Vanishing Point Detection and Camera Calibrationfrom a Single Manha
 - centroid of the chord determined from the scattering ellipse
 - angle between the LCC and the x-axis is determined.
 
+OPENGL
+======
+- Learn how to use framebuffer for texture streaming.
+
+VULKAN
+======
+- Hello Triangle tutorial.
+
 HALIDE
 ======
 
