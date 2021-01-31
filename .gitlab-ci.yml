@@ -30,8 +30,17 @@ before_script:
       gnupg
       software-properties-common
       wget
+
+  # Now add the additional APT repositories:
+  #
+  # CMake.
   - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
   - apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+  # Vulkan SDK.
+  - wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+  - wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+  # Update the packages list again.
+  - apt-get update -y -qq
 
   # For the documentation.
   - apt-get install -y -qq
@@ -62,11 +71,10 @@ before_script:
       libpocl-dev
       libceres-dev
       qtbase5-dev
+      vulkan-sdk
 
   # Python dependencies (TODO).
-  - apt-get install -y -qq
-      libboost-python-dev
-      python3-dev
+  - apt-get install -y -qq python3-dev
 
   # Build CLBlast.
   - ./scripts/install_clblast.sh
