@@ -1061,7 +1061,7 @@ private:
     submit_info.commandBufferCount = 1;
     submit_info.pCommandBuffers = &_command_buffers[image_index];
 
-    // - The CPU now tells the GPU to make the first fence display a red light.
+    // - The CPU now tells the GPU to make the first fence close the road.
     vkResetFences(_device, 1, &_in_flight_fences[current_frame]);
 
     // - The CPU submits a drawing command to the GPU (on the graphics queue).
