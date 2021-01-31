@@ -65,7 +65,7 @@ func testImageRead() {
 
 func testVideoRead() {
 #if __APPLE__
-    let videoFilePath = "/Users/david/Desktop/Datasets/videos/sample10.mp4"
+    let videoFilePath = "/Users/david/Desktop/Datasets/videos/sample11.mp4"
 #else
     let videoFilePath = "/home/david/Desktop/GOPR0542.MP4"
 #endif
@@ -81,7 +81,7 @@ func main() {
     createWindow(300, 300)
     testCBasicFunction()
     testDrawFunctions()
-    testImageRead()
+    //testImageRead()
     testVideoRead()
 }
 
