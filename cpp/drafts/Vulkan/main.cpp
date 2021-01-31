@@ -112,7 +112,7 @@ private:
 
   void init_vulkan()
   {
-    create_vulkan_instance();
+    create_instance();
     setup_debug_messenger();
     create_surface();
     pick_physical_device();
@@ -172,7 +172,7 @@ private:
     glfwTerminate();
   }
 
-  void create_vulkan_instance()
+  void create_instance()
   {
     if (enable_validation_layers && !check_validation_layer_support())
       throw std::runtime_error{
