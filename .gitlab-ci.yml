@@ -37,7 +37,7 @@ before_script:
   - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
   - apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
   # Vulkan SDK.
-  - wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+  - wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add -
   - wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
   # Update the packages list again.
   - apt-get update -y -qq
