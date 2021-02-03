@@ -29,6 +29,8 @@ sara_add_example(birds_eye_view_example)
 sara_add_example(watershed_example)
 
 sara_add_example(edge_detection_example)
+target_include_directories(edge_detection_example
+  PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
 target_link_libraries(edge_detection_example
   PRIVATE $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
 
