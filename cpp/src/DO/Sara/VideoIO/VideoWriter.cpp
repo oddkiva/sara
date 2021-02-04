@@ -87,7 +87,7 @@ namespace DO::Sara {
 
     while (ret >= 0)
     {
-      AVPacket packet = {0};
+      AVPacket packet = {};
       ret = avcodec_receive_packet(c, &packet);
       if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         break;

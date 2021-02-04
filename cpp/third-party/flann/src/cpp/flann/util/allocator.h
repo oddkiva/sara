@@ -196,7 +196,7 @@ public:
 
 inline void* operator new (std::size_t size, flann::PooledAllocator& allocator)
 {
-    return allocator.allocateMemory(size) ;
+    return allocator.allocateMemory(static_cast<int>(size));
 }
 
 #endif //FLANN_ALLOCATOR_H_
