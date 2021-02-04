@@ -1163,7 +1163,8 @@ private:
     for (auto& framebuffer : _swapchain_framebuffers)
       vkDestroyFramebuffer(_device, framebuffer, nullptr);
 
-    vkFreeCommandBuffers(_device, _command_pool, _command_buffers.size(),
+    vkFreeCommandBuffers(_device, _command_pool,
+                         static_cast<std::uint32_t>(_command_buffers.size()),
                          _command_buffers.data());
 
     vkDestroyPipeline(_device, _graphics_pipeline, nullptr);

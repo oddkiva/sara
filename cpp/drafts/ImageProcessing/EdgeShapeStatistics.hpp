@@ -148,7 +148,7 @@ namespace DO::Sara {
   auto to_lines(const std::vector<LineSegment>& line_segments)
       -> Tensor_<float, 2>
   {
-    auto lines = Tensor_<float, 2>(line_segments.size(), 3);
+    auto lines = Tensor_<float, 2>(static_cast<int>(line_segments.size()), 3);
     auto lines_as_matrix = lines.matrix();
     for (auto i = 0u; i < line_segments.size(); ++i)
     {

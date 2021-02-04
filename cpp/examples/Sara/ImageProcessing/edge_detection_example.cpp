@@ -166,8 +166,14 @@ int __main(int argc, char** argv)
 
 
     tic();
-    auto edge_stats = CurveStatistics{edges};
+    const auto edge_stats = CurveStatistics{edges};
     toc("Edge Shape Statistics");
+
+
+    tic();
+    const auto line_segments = extract_line_segments_quick_and_dirty(edge_stats);
+    const auto lines = to_lines(line_segments);
+    toc("Line Segment Extraction");
 
 
     const Eigen::Vector2d p1d = p1.cast<double>();
