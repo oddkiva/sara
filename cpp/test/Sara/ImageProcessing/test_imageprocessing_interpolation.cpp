@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_interpolation_with_float_2)
 BOOST_AUTO_TEST_CASE(test_interpolation_with_vector2d)
 {
   Image<Vector2f> f(2, 2);
-  f.matrix()(0,0) = Vector2f::Zero(); f.matrix()(0,1) = Vector2f::Ones(),
+  f.matrix()(0,0) = Vector2f::Zero(); f.matrix()(0,1) = Vector2f::Ones();
   f.matrix()(1,0) = Vector2f::Zero(); f.matrix()(1,1) = Vector2f::Ones();
 
   Vector2d value;
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(test_interpolation_with_vector2d)
   value = interpolate(f, Vector2d(0.5, 1.));
   BOOST_REQUIRE_SMALL_L2_DISTANCE(Vector2d(0.5, 0.5), value, 1e-7);
 
-  f.matrix()(0,0) = Vector2f::Zero(); f.matrix()(0,1) = Vector2f::Zero(),
+  f.matrix()(0,0) = Vector2f::Zero(); f.matrix()(0,1) = Vector2f::Zero();
   f.matrix()(1,0) = Vector2f::Ones(); f.matrix()(1,1) = Vector2f::Ones();
   value = interpolate(f, Vector2d(0.2, 0.5));
   BOOST_REQUIRE_SMALL_L2_DISTANCE(Vector2d(0.5, 0.5), value, 1e-7);
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(test_interpolation_with_vector2d)
 BOOST_AUTO_TEST_CASE(test_interpolation_with_rgb64f)
 {
   Image<Rgb64f> f(2, 2);
-  f.matrix()(0,0) = Rgb64f::Zero(); f.matrix()(0,1) = Rgb64f::Ones(),
+  f.matrix()(0,0) = Rgb64f::Zero(); f.matrix()(0,1) = Rgb64f::Ones();
   f.matrix()(1,0) = Rgb64f::Zero(); f.matrix()(1,1) = Rgb64f::Ones();
 
   Rgb64f value;
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_interpolation_with_rgb64f)
   value = interpolate(f, Vector2d(0.5, 1.));
   BOOST_REQUIRE_SMALL_L2_DISTANCE(Rgb64f(0.5, 0.5, 0.5), value, 1e-7);
 
-  f.matrix()(0,0) = Rgb64f::Zero(); f.matrix()(0,1) = Rgb64f::Zero(),
+  f.matrix()(0,0) = Rgb64f::Zero(); f.matrix()(0,1) = Rgb64f::Zero();
   f.matrix()(1,0) = Rgb64f::Ones(); f.matrix()(1,1) = Rgb64f::Ones();
   value = interpolate(f, Vector2d(0.2, 0.5));
   BOOST_REQUIRE_SMALL_L2_DISTANCE(Rgb64f(0.5, 0.5, 0.5), value, 1e-7);
