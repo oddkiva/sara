@@ -80,8 +80,6 @@ namespace DO::Sara {
 
     CurveStatistics(const std::vector<std::vector<Eigen::Vector2d>>& edges)
     {
-      tic();
-
       // TODO: figure out why the linear directional mean is shaky.
       // auto ldms = std::vector<double>(edges.size());
       // The rectangle approximation.
@@ -104,8 +102,6 @@ namespace DO::Sara {
         axes[i] = svd.matrixU();
         lengths[i] = svd.singularValues().cwiseSqrt();
       }
-
-      toc("Edge Shape Statistics");
     }
 
     auto swap(CurveStatistics& other)

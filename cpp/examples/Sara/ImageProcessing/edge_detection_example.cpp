@@ -119,6 +119,7 @@ int __main(int argc, char** argv)
     ++frames_read;
     if (frames_read % (skip + 1) != 0)
       continue;
+    SARA_DEBUG << "Processing frame " << frames_read << std::endl;
 
     // Reduce our attention to the central part of the image.
     tic();
@@ -175,7 +176,7 @@ int __main(int argc, char** argv)
     const auto lines = to_lines(line_segments);
     toc("Line Segment Extraction");
 
-
+    tic();
     const Eigen::Vector2d p1d = p1.cast<double>();
     const auto s = static_cast<float>(downscale_factor);
 
@@ -185,9 +186,12 @@ int __main(int argc, char** argv)
     for (const auto& e : edges)
       if (e.size() >= 2)
         draw_polyline(detection, e, Blue8, p1d, s);
-
-
     display(detection);
+    toc("Display");
+
+    tic();
+    video_writer.write(detection);
+    toc("Video Write");
   }
 
   return 0;

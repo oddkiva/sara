@@ -14,8 +14,8 @@ target_include_directories(DO_Sara_OpenCL_Core
   $<BUILD_INTERFACE:${DO_Sara_DIR}/cpp>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-target_link_libraries( DO_Sara_OpenCL_Core
-  INTERFACE ${OpenCL_LIBRARY})
+target_link_libraries(DO_Sara_OpenCL_Core
+  INTERFACE ${OpenCL_LIBRARIES})
 
 target_compile_definitions(DO_Sara_OpenCL_Core
   INTERFACE
