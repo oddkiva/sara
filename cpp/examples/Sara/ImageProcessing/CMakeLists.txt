@@ -24,8 +24,6 @@ sara_add_example(level_set_2d_example)
 
 sara_add_example(optical_flow_example)
 
-sara_add_example(birds_eye_view_example)
-
 sara_add_example(watershed_example)
 
 sara_add_example(edge_detection_example)
