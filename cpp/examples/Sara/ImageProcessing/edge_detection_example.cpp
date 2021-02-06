@@ -156,7 +156,7 @@ int __main(int argc, char** argv)
   constexpr float high_threshold_ratio = static_cast<float>(20._percent);
   constexpr float low_threshold_ratio =
       static_cast<float>(high_threshold_ratio / 2.);
-  constexpr float angular_threshold = static_cast<float>(20. / 180. * M_PI);
+  constexpr float angular_threshold = static_cast<float>((20._deg).value);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
 #define CROP
 #ifdef CROP
@@ -296,6 +296,3 @@ int __main(int argc, char** argv)
 
   return 0;
 }
-
-
-
