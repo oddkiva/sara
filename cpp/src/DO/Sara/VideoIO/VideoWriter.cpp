@@ -87,7 +87,7 @@ namespace DO::Sara {
 
     while (ret >= 0)
     {
-      AVPacket packet = {0};
+      AVPacket packet = {};
       ret = avcodec_receive_packet(c, &packet);
       if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         break;
@@ -370,9 +370,9 @@ namespace DO::Sara {
       /* convert samples from native format to destination codec format, using
        * the resampler */
       /* compute destination number of samples */
-      dst_nb_samples = av_rescale_rnd(
+      dst_nb_samples = static_cast<int>(av_rescale_rnd(
           swr_get_delay(ost->swr_ctx, c->sample_rate) + frame->nb_samples,
-          c->sample_rate, c->sample_rate, AV_ROUND_UP);
+          c->sample_rate, c->sample_rate, AV_ROUND_UP));
       av_assert0(dst_nb_samples == frame->nb_samples);
       /* when we pass a frame to the encoder, it may keep a reference to it
        * internally;
@@ -500,15 +500,16 @@ namespace DO::Sara {
           throw std::runtime_error{
               "Could not initialize the conversion context"};
       }
-      fill_yuv_image(ostream->tmp_frame, ostream->next_pts, c->width,
-                     c->height);
+      fill_yuv_image(ostream->tmp_frame, static_cast<int>(ostream->next_pts),
+                     c->width, c->height);
       sws_scale(ostream->sws_ctx,
                 (const uint8_t* const*) ostream->tmp_frame->data,
                 ostream->tmp_frame->linesize, 0, c->height,
                 ostream->frame->data, ostream->frame->linesize);
     }
     else
-      fill_yuv_image(ostream->frame, ostream->next_pts, c->width, c->height);
+      fill_yuv_image(ostream->frame, static_cast<int>(ostream->next_pts),
+                     c->width, c->height);
 
     ostream->frame->pts = ostream->next_pts++;
 

@@ -24,15 +24,15 @@ sara_add_example(level_set_2d_example)
 
 sara_add_example(optical_flow_example)
 
-sara_add_example(birds_eye_view_example)
-
 sara_add_example(watershed_example)
 
 sara_add_example(edge_detection_example)
 target_include_directories(edge_detection_example
   PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
 target_link_libraries(edge_detection_example
-  PRIVATE $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+  PRIVATE
+  Boost::filesystem
+  $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
 
 sara_add_example(line_segment_detection_example)
 target_link_libraries(line_segment_detection_example

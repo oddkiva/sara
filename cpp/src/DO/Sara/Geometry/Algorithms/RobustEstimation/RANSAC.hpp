@@ -63,7 +63,7 @@ namespace DO::Sara {
 
     // S is the list of N random elemental subsets, each of them having
     // cardinality L.
-    const auto S = random_samples(N, L, card_P);
+    const auto S = random_samples(static_cast<int>(N), L, card_P);
 
     // Remap every (sampled) point indices to point coordinates.
     const auto p = to_coordinates(S, points);

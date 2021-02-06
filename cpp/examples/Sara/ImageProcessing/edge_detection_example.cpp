@@ -19,9 +19,14 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
+
 #include <DO/Sara/VideoIO.hpp>
 
 #include <drafts/ImageProcessing/EdgeGrouping.hpp>
+
+#include <boost/filesystem.hpp>
 
 #include <omp.h>
 
@@ -30,14 +35,73 @@ using namespace std;
 using namespace DO::Sara;
 
 
-constexpr long double operator"" _percent(long double x)
+inline constexpr long double operator"" _percent(long double x)
 {
   return x / 100;
 }
 
-constexpr long double operator"" _deg(long double x)
+
+auto initialize_camera_intrinsics_1()
 {
-  return x * M_PI / 180;
+  auto intrinsics = BrownConradyCamera<float>{};
+
+  const auto f = 991.8030424131325;
+  const auto u0 = 960;
+  const auto v0 = 540;
+  intrinsics.image_sizes << 1920, 1080;
+  intrinsics.K  <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  intrinsics.k.setZero();
+  intrinsics.p.setZero();
+
+  return intrinsics;
+}
+
+auto initialize_camera_intrinsics_2()
+{
+  auto intrinsics = BrownConradyCamera<float>{};
+
+  const auto f = 946.8984425572634;
+  const auto u0 = 960;
+  const auto v0 = 540;
+  intrinsics.image_sizes << 1920, 1080;
+  intrinsics.K  <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  intrinsics.k <<
+    -0.22996356451342749,
+    0.05952465745165465,
+    -0.007399008111054717;
+  intrinsics.p.setZero();
+
+  return intrinsics;
+}
+
+
+auto initialize_crop_region_1(const Eigen::Vector2i& sizes)
+{
+  const Eigen::Vector2i& p1 = {0, 0.6 * sizes.y()};
+  const Eigen::Vector2i& p2 = {sizes.x(), 0.9 * sizes.y()};
+  return std::make_pair(p1, p2);
+}
+
+auto initialize_crop_region_2(const Eigen::Vector2i& sizes)
+{
+  const Eigen::Vector2i& p1 = {0.1 * sizes.x(), 0.2 * sizes.y()};
+  const Eigen::Vector2i& p2 = {0.9 * sizes.x(), 0.75 * sizes.y()};
+  return std::make_pair(p1, p2);
+}
+
+
+auto default_camera_matrix()
+{
+  auto P = Eigen::Matrix<float, 3, 4>{};
+  P.setZero();
+  P.block<3, 3>(0, 0).setIdentity();
+  return P;
 }
 
 
@@ -52,15 +116,14 @@ int __main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
-  const auto video_filepath =
-      argc == 2
-          ? argv[1]
+  const auto video_filepath = argc == 2
+                                  ? argv[1]
 #ifdef _WIN32
-          : "C:/Users/David/Desktop/GOPR0542.MP4"s;
+                                  : "C:/Users/David/Desktop/GOPR0542.MP4"s;
 #elif __APPLE__
-          : "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
+                                  : "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
-          : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+                                  : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
 
   // OpenMP.
@@ -72,18 +135,32 @@ int __main(int argc, char** argv)
   const auto downscale_factor = 2;
   auto frame_gray32f = Image<float>{};
 
+
+  // Output save.
+  namespace fs = boost::filesystem;
+  const auto basename = fs::basename(video_filepath);
+  VideoWriter video_writer{
+#ifdef __APPLE__
+      "/Users/david/Desktop/" + basename + ".curve-analysis.mp4",
+#else
+      "/home/david/Desktop/" + basename + ".curve-analysis.mp4",
+#endif
+      frame.sizes()  //
+  };
+
+
   // Show the local extrema.
   create_window(frame.sizes());
   set_antialiasing();
 
   constexpr float high_threshold_ratio = static_cast<float>(20._percent);
-  constexpr float low_threshold_ratio = static_cast<float>(high_threshold_ratio / 2.);
-  constexpr float angular_threshold = static_cast<float>(20. / 180. * M_PI);
+  constexpr float low_threshold_ratio =
+      static_cast<float>(high_threshold_ratio / 2.);
+  constexpr float angular_threshold = static_cast<float>((20._deg).value);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
-// #define CROP
+#define CROP
 #ifdef CROP
-  const Eigen::Vector2i& p1 = frame.sizes() / 4;
-  const Eigen::Vector2i& p2 = frame.sizes() * 3 / 4;
+  const auto [p1, p2] = initialize_crop_region_1(frame.sizes());
 #else
   const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
   const Eigen::Vector2i& p2 = frame.sizes();
@@ -94,6 +171,17 @@ int __main(int argc, char** argv)
       low_threshold_ratio,   //
       angular_threshold      //
   }};
+
+
+  // Initialize the camera matrix.
+  auto intrinsics = initialize_camera_intrinsics_1();
+  intrinsics.downscale_image_sizes(downscale_factor);
+  SARA_CHECK(intrinsics.K);
+  SARA_CHECK(intrinsics.k);
+
+  auto P = default_camera_matrix();
+  P = intrinsics.K * P;
+  const auto Pt = P.transpose().eval();
 
   auto frames_read = 0;
   const auto skip = 0;
@@ -107,6 +195,7 @@ int __main(int argc, char** argv)
     ++frames_read;
     if (frames_read % (skip + 1) != 0)
       continue;
+    SARA_DEBUG << "Processing frame " << frames_read << std::endl;
 
     // Reduce our attention to the central part of the image.
     tic();
@@ -131,84 +220,78 @@ int __main(int argc, char** argv)
     ed(frame_gray32f);
     auto& edges_refined = ed.pipeline.edges_simplified;
 
+// #define SPLIT_EDGES
+#ifdef SPLIT_EDGES
     tic();
     // TODO: split only if the inertias matrix is becoming isotropic.
     edges_refined = split(edges_refined, 10. * M_PI / 180.);
     toc("Edge Split");
-
-
-    tic();
-    // TODO: figure out why the linear directional mean is shaky.
-    // auto ldms = std::vector<double>(edges_refined.size());
-    // The rectangle approximation.
-    auto centers = std::vector<Vector2d>(edges_refined.size());
-    auto inertias = std::vector<Matrix2d>(edges_refined.size());
-    auto axes = std::vector<Matrix2d>(edges_refined.size());
-    auto lengths = std::vector<Vector2d>(edges_refined.size());
-#pragma omp parallel for
-    for (auto i = 0; i < static_cast<int>(edges_refined.size()); ++i)
-    {
-      const auto& e = edges_refined[i];
-      if (e.size() < 2)
-        continue;
-
-      // ldms[i] = linear_directional_mean(e);
-      centers[i] = center_of_mass(e);
-      inertias[i] = matrix_of_inertia(e, centers[i]);
-      const auto svd = inertias[i].jacobiSvd(Eigen::ComputeFullU);
-      axes[i] = svd.matrixU();
-      lengths[i] = svd.singularValues().cwiseSqrt();
-    }
-    SARA_CHECK(edges_refined.size());
-    toc("Edge Shape Statistics");
-
-#ifdef PERFORM_EDGE_GROUPING
-    tic();
-    const auto edge_attributes = EdgeAttributes{
-        edges_refined,  //
-        centers,        //
-        axes,           //
-        lengths         //
-    };
-    auto endpoint_graph = EndPointGraph{edge_attributes};
-    endpoint_graph.mark_plausible_alignments();
-    toc("Alignment Computation");
 #endif
 
+    tic();
+    auto edges = std::vector<std::vector<Eigen::Vector2d>>{};
+    edges.reserve(edges_refined.size());
+    for (const auto& e : edges_refined)
+    {
+      if (e.size() < 2)
+        continue;
+      if (length(e) < 10)
+        continue;
+      edges.emplace_back(e);
+    }
+    toc("Edge Filtering");
+
+
+    tic();
+    const auto edge_stats = CurveStatistics{edges};
+    toc("Edge Shape Statistics");
+
+
+    tic();
+    const auto line_segments =
+        extract_line_segments_quick_and_dirty(edge_stats);
+    const auto lines = to_lines(line_segments);
+    const auto lines_undistorted = to_undistorted_lines(line_segments, intrinsics);
+    toc("Line Segment Extraction");
+
+    tic();
+    const auto [vph, inliers, best_line_pair] =
+        find_dominant_vanishing_point(lines_undistorted);
+    toc("Vanishing Point");
+
+
+    tic();
     const Eigen::Vector2d p1d = p1.cast<double>();
     const auto s = static_cast<float>(downscale_factor);
 
     auto detection = Image<Rgb8>{frame};
+#ifdef CLEAR_IMAGE
     detection.flat_array().fill(Black8);
-
-    for (const auto& e : edges_refined)
-      if (e.size() >= 2)
-        draw_polyline(detection, e, Blue8, p1d, s);
-
-#ifdef PERFORM_EDGE_GROUPING
-    // Draw alignment-based connections.
-    auto remap = [&](const auto p) -> Vector2d { return p1d + s * p; };
-    const auto& score = endpoint_graph.score;
-    for (auto i = 0; i < score.rows(); ++i)
-    {
-      for (auto j = i + 1; j < score.cols(); ++j)
-      {
-        const auto& pi = endpoint_graph.endpoints[i];
-        const auto& pj = endpoint_graph.endpoints[j];
-
-        if (score(i, j) != std::numeric_limits<double>::infinity())
-        {
-          const auto pi1 = remap(pi).cast<int>();
-          const auto pj1 = remap(pj).cast<int>();
-          draw_line(detection, pi1.x(), pi1.y(), pj1.x(), pj1.y(), Yellow8, 2);
-          draw_circle(detection, pi1.x(), pi1.y(), 3, Yellow8, 3);
-          draw_circle(detection, pj1.x(), pj1.y(), 3, Yellow8, 3);
-        }
-      }
-    }
 #endif
 
+
+    for (auto i = 0u; i < line_segments.size(); ++i)
+    {
+      if (!inliers(i))
+        continue;
+
+      const auto& ls = line_segments[i];
+      const Eigen::Vector2d a = s * ls.p1() + p1d;
+      const Eigen::Vector2d b = s * ls.p2() + p1d;
+      draw_line(detection, a.x(), a.y(), b.x(), b.y(), Blue8, 4);
+    }
+
+    const Eigen::Vector2d vp = s * vph.hnormalized().cast<double>() + p1d;
+    fill_circle(detection, vp.x(), vp.y(), 10, Yellow8);
+
     display(detection);
+    toc("Display");
+
+
+
+    tic();
+    video_writer.write(detection);
+    toc("Video Write");
   }
 
   return 0;

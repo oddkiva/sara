@@ -4,6 +4,8 @@ find_package(Vulkan REQUIRED)
 find_program(GLSLC_EXECUTABLE NAMES glslc)
 
 add_executable(hello_vulkan main.cpp)
+target_include_directories(hello_vulkan PRIVATE
+  ${CMAKE_SOURCE_DIR}/cpp/third-party/eigen)
 target_link_libraries(hello_vulkan PRIVATE
   glfw
   Boost::filesystem

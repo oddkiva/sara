@@ -182,3 +182,150 @@ auto check_edge_grouping(const ImageView<Rgb8>& frame,                 //
 }
 
 
+
+
+#ifdef PERFORM_EDGE_GROUPING
+tic();
+const auto edge_attributes = EdgeAttributes{
+    edges,    //
+    centers,  //
+    axes,     //
+    lengths   //
+};
+auto endpoint_graph = EndPointGraph{edge_attributes};
+endpoint_graph.mark_plausible_alignments();
+toc("Alignment Computation");
+#endif
+
+#ifdef PERFORM_EDGE_GROUPING
+// Draw alignment-based connections.
+auto remap = [&](const auto p) -> Vector2d { return p1d + s * p; };
+const auto& score = endpoint_graph.score;
+for (auto i = 0; i < score.rows(); ++i)
+{
+  for (auto j = i + 1; j < score.cols(); ++j)
+  {
+    const auto& pi = endpoint_graph.endpoints[i];
+    const auto& pj = endpoint_graph.endpoints[j];
+
+    if (score(i, j) != std::numeric_limits<double>::infinity())
+    {
+      const auto pi1 = remap(pi).cast<int>();
+      const auto pj1 = remap(pj).cast<int>();
+      draw_line(detection, pi1.x(), pi1.y(), pj1.x(), pj1.y(), Yellow8, 2);
+      draw_circle(detection, pi1.x(), pi1.y(), 3, Yellow8, 3);
+      draw_circle(detection, pj1.x(), pj1.y(), 3, Yellow8, 3);
+    }
+  }
+}
+#endif
+
+
+
+
+#define VP
+#ifdef VP
+    tic();
+    // Statistical line estimation.
+    const auto& line_segments = extract_line_segments_quick_and_dirty(  //
+        curve_matcher.stats_curr                                        //
+    );
+    const auto& lines = to_lines(line_segments);
+
+    const auto [vph, inliers, best_line_pair] =
+        find_horizontal_vanishing_point(lines, 2.5, 100);
+    SARA_CHECK(vph.transpose());
+    SARA_CHECK(inliers.size());
+    toc("VP Detection");
+#endif
+
+#ifdef VP
+    // Draw the line segments.
+    SARA_CHECK(line_segments.size());
+    for (const auto& ls : line_segments)
+    {
+      const auto p1 = (ls.p1() * double(s) + p1d).cast<int>();
+      const auto p2 = (ls.p2() * double(s) + p1d).cast<int>();
+      draw_line(detection, p1.x(), p1.y(), p2.x(), p2.y(), Blue8, 2);
+    }
+
+    // Show the vanishing point.
+    const Eigen::Vector2f vp = vph.hnormalized() * s + p1d.cast<float>();
+    fill_circle(detection, vp.x(), vp.y(), 5, Magenta8);
+#endif
+
+
+
+struct CurveMatcher
+{
+  std::vector<std::vector<Eigen::Vector2d>> curves_prev;
+  std::vector<std::vector<Eigen::Vector2d>> curves_curr;
+
+  CurveStatistics stats_prev;
+  CurveStatistics stats_curr;
+
+  Image<int> curve_map_prev;
+  Image<int> curve_map_curr;
+
+  auto reset_curve_map(int w, int h) -> void
+  {
+    curve_map_prev.resize({w, h});
+    curve_map_curr.resize({w, h});
+
+    curve_map_prev.flat_array().fill(-1);
+    curve_map_curr.flat_array().fill(-1);
+  }
+
+  auto recalculate_curve_map(
+      const std::vector<std::vector<Eigen::Vector2i>>& curve_points) -> void
+  {
+    curve_map_curr.flat_array().fill(-1);
+#pragma omp parallel for
+    for (auto i = 0; i < static_cast<int>(curve_points.size()); ++i)
+    {
+      const auto& points = curve_points[i];
+      for (const auto& p : points)
+        curve_map_curr(p) = i;
+    }
+  }
+
+  auto update_curve_features(
+      const std::vector<std::vector<Eigen::Vector2d>>& curves_as_polylines)
+  {
+    curves_curr.swap(curves_prev);
+    curves_curr = curves_as_polylines;
+
+    stats_curr.swap(stats_prev);
+    stats_curr = CurveStatistics(curves_curr);
+
+    curve_map_curr.swap(curve_map_prev);
+    // recalculate_curve_map(curve_points);
+  }
+};
+
+
+
+
+struct CameraPose
+{
+  Eigen::Matrix3f R;
+  Eigen::Vector3f t;
+  BrownConradyCamera<float> intrinsics;
+
+  auto initialize()
+  {
+    R = rotation(-2._deg, -10._deg, -2._deg);
+    t << -1, 0, 1.15;
+
+    const auto f = 991.8030424131325;
+    const auto u0 = 960;
+    const auto v0 = 540;
+
+    intrinsics.image_sizes << 1920, 1080;
+    intrinsics.K << f, 0, u0,
+                    0, f, v0,
+                    0, 0,  1;
+    intrinsics.k.setZero();
+    intrinsics.p.setZero();
+  }
+};

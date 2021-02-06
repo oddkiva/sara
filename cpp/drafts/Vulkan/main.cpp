@@ -14,6 +14,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <Eigen/Core>
+
 
 namespace fs = boost::filesystem;
 
@@ -85,6 +87,44 @@ namespace vk {
 
 class HelloTriangle
 {
+  struct Vertex
+  {
+    Eigen::Vector2f position;
+    Eigen::Vector3f color;
+
+    static auto get_binding_description() -> VkVertexInputBindingDescription
+    {
+      auto binding_description = VkVertexInputBindingDescription{
+          .binding = 0,
+          .stride = sizeof(Vertex),
+          .inputRate = VK_VERTEX_INPUT_RATE_VERTEX  //
+      };
+      return binding_description;
+    }
+
+    static auto get_attributes_description()
+    {
+      return std::array{
+          VkVertexInputAttributeDescription{
+              .location = 0,
+              .binding = 0,
+              .format = VK_FORMAT_R32G32_SFLOAT,
+              .offset = offsetof(Vertex, position),
+          },
+          VkVertexInputAttributeDescription{
+              .location = 1,
+              .binding = 0,
+              .format = VK_FORMAT_R32G32B32_SFLOAT,
+              .offset = offsetof(Vertex, color)  //
+          }                                      //
+      };
+    }
+  };
+
+  const std::vector<Vertex> vertices = {{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                                        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+                                        {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+
 public:
   HelloTriangle(const std::string& program_path)
     : _program_path{program_path}
@@ -140,6 +180,8 @@ private:
 
   void cleanup()
   {
+    cleanup_swapchain();
+
     for (auto i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
       vkDestroySemaphore(_device, _image_available_semaphores[i], nullptr);
@@ -148,21 +190,9 @@ private:
     }
 
     vkDestroyCommandPool(_device, _command_pool, nullptr);
-
-    for (auto& framebuffer : _swapchain_framebuffers)
-      vkDestroyFramebuffer(_device, framebuffer, nullptr);
-
-    vkDestroyPipeline(_device, _graphics_pipeline, nullptr);
-    vkDestroyPipelineLayout(_device, _pipeline_layout, nullptr);
-    vkDestroyRenderPass(_device, _render_pass, nullptr);
-
-    for (auto& image_view : _swapchain_image_views)
-      vkDestroyImageView(_device, image_view, nullptr);
-
-    vkDestroySwapchainKHR(_device, _swapchain, nullptr);
     vkDestroyDevice(_device, nullptr);
 
-    if (enable_validation_layers)
+    if constexpr (enable_validation_layers)
       vk::DestroyDebugUtilsMessengerEXT(_instance, _debug_messenger, nullptr);
 
     vkDestroySurfaceKHR(_instance, _surface, nullptr);
@@ -199,7 +229,7 @@ private:
     create_info.ppEnabledExtensionNames = extensions.data();
 
     auto debug_create_info = VkDebugUtilsMessengerCreateInfoEXT{};
-    if (enable_validation_layers)
+    if constexpr (enable_validation_layers)
     {
       create_info.enabledLayerCount =
           static_cast<std::uint32_t>(validation_layers.size());
@@ -235,7 +265,7 @@ private:
 
   auto setup_debug_messenger() -> void
   {
-    if (!enable_validation_layers)
+    if constexpr (!enable_validation_layers)
       return;
 
     auto create_info = VkDebugUtilsMessengerCreateInfoEXT{};
@@ -257,7 +287,7 @@ private:
         glfw_extensions + glfw_extension_count   //
     );
 
-    if (enable_validation_layers)
+    if constexpr (enable_validation_layers)
       extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     return extensions;
@@ -715,14 +745,19 @@ private:
         fragment_shader_stage_info  //
     };
 
+    const auto binding_description = Vertex::get_binding_description();
+    const auto attribute_description = Vertex::get_attributes_description();
+
     auto vertex_input_info = VkPipelineVertexInputStateCreateInfo{};
     {
       vertex_input_info.sType =
           VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-      vertex_input_info.vertexBindingDescriptionCount = 0;
-      vertex_input_info.pVertexBindingDescriptions = nullptr;
-      vertex_input_info.vertexAttributeDescriptionCount = 0;
-      vertex_input_info.pVertexAttributeDescriptions = nullptr;
+      vertex_input_info.vertexBindingDescriptionCount = 1;
+      vertex_input_info.pVertexBindingDescriptions = &binding_description;
+      vertex_input_info.vertexAttributeDescriptionCount =
+          static_cast<std::uint32_t>(attribute_description.size());
+      vertex_input_info.pVertexAttributeDescriptions =
+          attribute_description.data();
     };
 
     auto input_assembly = VkPipelineInputAssemblyStateCreateInfo{};
@@ -1023,9 +1058,20 @@ private:
     // The CPU pursues its journey:
     // - it acquires the next image for rendering.
     auto image_index = std::uint32_t{};
-    vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX,
-                          _image_available_semaphores[current_frame],
-                          VK_NULL_HANDLE, &image_index);
+    auto result =
+        vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX,
+                              _image_available_semaphores[current_frame],
+                              VK_NULL_HANDLE, &image_index);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+      // For example when the window is resized, we need to recreate the swap
+      // chain, the images of the swap chains must reinitialized with the new
+      // window extent.
+      recreate_swapchain();
+      return;
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+      throw std::runtime_error("failed to acquire swap chain image!");
 
     // The CPU encounters another fence controlled by the GPU:
     // - The CPU is waiting from the GPU until the image becomes available for
@@ -1096,6 +1142,40 @@ private:
     current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
   }
 
+
+  //
+  auto recreate_swapchain() -> void
+  {
+    vkDeviceWaitIdle(_device);
+
+    cleanup_swapchain();
+
+    create_swapchain();
+    create_image_views();
+    create_render_pass();
+    create_graphics_pipeline();
+    create_framebuffers();
+    create_command_buffers();
+  }
+
+  auto cleanup_swapchain() -> void
+  {
+    for (auto& framebuffer : _swapchain_framebuffers)
+      vkDestroyFramebuffer(_device, framebuffer, nullptr);
+
+    vkFreeCommandBuffers(_device, _command_pool,
+                         static_cast<std::uint32_t>(_command_buffers.size()),
+                         _command_buffers.data());
+
+    vkDestroyPipeline(_device, _graphics_pipeline, nullptr);
+    vkDestroyPipelineLayout(_device, _pipeline_layout, nullptr);
+    vkDestroyRenderPass(_device, _render_pass, nullptr);
+
+    for (auto& image_view : _swapchain_image_views)
+      vkDestroyImageView(_device, image_view, nullptr);
+
+    vkDestroySwapchainKHR(_device, _swapchain, nullptr);
+  }
 
   std::string _program_path;
   GLFWwindow* _window = nullptr;
