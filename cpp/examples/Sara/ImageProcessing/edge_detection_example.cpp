@@ -19,9 +19,14 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
+
 #include <DO/Sara/VideoIO.hpp>
 
 #include <drafts/ImageProcessing/EdgeGrouping.hpp>
+
+#include <boost/filesystem.hpp>
 
 #include <omp.h>
 
@@ -30,14 +35,73 @@ using namespace std;
 using namespace DO::Sara;
 
 
-constexpr long double operator"" _percent(long double x)
+inline constexpr long double operator"" _percent(long double x)
 {
   return x / 100;
 }
 
-constexpr long double operator"" _deg(long double x)
+
+auto initialize_camera_intrinsics_1()
 {
-  return x * M_PI / 180;
+  auto intrinsics = BrownConradyCamera<float>{};
+
+  const auto f = 991.8030424131325;
+  const auto u0 = 960;
+  const auto v0 = 540;
+  intrinsics.image_sizes << 1920, 1080;
+  intrinsics.K  <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  intrinsics.k.setZero();
+  intrinsics.p.setZero();
+
+  return intrinsics;
+}
+
+auto initialize_camera_intrinsics_2()
+{
+  auto intrinsics = BrownConradyCamera<float>{};
+
+  const auto f = 946.8984425572634;
+  const auto u0 = 960;
+  const auto v0 = 540;
+  intrinsics.image_sizes << 1920, 1080;
+  intrinsics.K  <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  intrinsics.k <<
+    -0.22996356451342749,
+    0.05952465745165465,
+    -0.007399008111054717;
+  intrinsics.p.setZero();
+
+  return intrinsics;
+}
+
+
+auto initialize_crop_region_1(const Eigen::Vector2i& sizes)
+{
+  const Eigen::Vector2i& p1 = {0, 0.6 * sizes.y()};
+  const Eigen::Vector2i& p2 = {sizes.x(), 0.9 * sizes.y()};
+  return std::make_pair(p1, p2);
+}
+
+auto initialize_crop_region_2(const Eigen::Vector2i& sizes)
+{
+  const Eigen::Vector2i& p1 = {0.1 * sizes.x(), 0.2 * sizes.y()};
+  const Eigen::Vector2i& p2 = {0.9 * sizes.x(), 0.75 * sizes.y()};
+  return std::make_pair(p1, p2);
+}
+
+
+auto default_camera_matrix()
+{
+  auto P = Eigen::Matrix<float, 3, 4>{};
+  P.setZero();
+  P.block<3, 3>(0, 0).setIdentity();
+  return P;
 }
 
 
@@ -73,11 +137,13 @@ int __main(int argc, char** argv)
 
 
   // Output save.
+  namespace fs = boost::filesystem;
+  const auto basename = fs::basename(video_filepath);
   VideoWriter video_writer{
 #ifdef __APPLE__
-      "/Users/david/Desktop/curve-analysis.mp4",
+      "/Users/david/Desktop/" + basename + ".curve-analysis.mp4",
 #else
-      "/home/david/Desktop/curve-analysis.mp4",
+      "/home/david/Desktop/" + basename + ".curve-analysis.mp4",
 #endif
       frame.sizes()  //
   };
@@ -94,8 +160,7 @@ int __main(int argc, char** argv)
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
 #define CROP
 #ifdef CROP
-  const Eigen::Vector2i& p1 = {0, 0.6 * frame.height()};
-  const Eigen::Vector2i& p2 = {frame.width(), 0.9 * frame.height()};
+  const auto [p1, p2] = initialize_crop_region_1(frame.sizes());
 #else
   const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
   const Eigen::Vector2i& p2 = frame.sizes();
@@ -106,6 +171,17 @@ int __main(int argc, char** argv)
       low_threshold_ratio,   //
       angular_threshold      //
   }};
+
+
+  // Initialize the camera matrix.
+  auto intrinsics = initialize_camera_intrinsics_1();
+  intrinsics.downscale_image_sizes(downscale_factor);
+  SARA_CHECK(intrinsics.K);
+  SARA_CHECK(intrinsics.k);
+
+  auto P = default_camera_matrix();
+  P = intrinsics.K * P;
+  const auto Pt = P.transpose().eval();
 
   auto frames_read = 0;
   const auto skip = 0;
@@ -172,22 +248,46 @@ int __main(int argc, char** argv)
 
 
     tic();
-    const auto line_segments = extract_line_segments_quick_and_dirty(edge_stats);
+    const auto line_segments =
+        extract_line_segments_quick_and_dirty(edge_stats);
     const auto lines = to_lines(line_segments);
+    const auto lines_undistorted = to_undistorted_lines(line_segments, intrinsics);
     toc("Line Segment Extraction");
+
+    tic();
+    const auto [vph, inliers, best_line_pair] =
+        find_dominant_vanishing_point(lines_undistorted);
+    toc("Vanishing Point");
+
 
     tic();
     const Eigen::Vector2d p1d = p1.cast<double>();
     const auto s = static_cast<float>(downscale_factor);
 
     auto detection = Image<Rgb8>{frame};
+#ifdef CLEAR_IMAGE
     detection.flat_array().fill(Black8);
+#endif
 
-    for (const auto& e : edges)
-      if (e.size() >= 2)
-        draw_polyline(detection, e, Blue8, p1d, s);
+
+    for (auto i = 0u; i < line_segments.size(); ++i)
+    {
+      if (!inliers(i))
+        continue;
+
+      const auto& ls = line_segments[i];
+      const Eigen::Vector2d a = s * ls.p1() + p1d;
+      const Eigen::Vector2d b = s * ls.p2() + p1d;
+      draw_line(detection, a.x(), a.y(), b.x(), b.y(), Blue8, 4);
+    }
+
+    const Eigen::Vector2d vp = s * vph.hnormalized().cast<double>() + p1d;
+    fill_circle(detection, vp.x(), vp.y(), 10, Yellow8);
+
     display(detection);
     toc("Display");
+
+
 
     tic();
     video_writer.write(detection);
@@ -196,3 +296,6 @@ int __main(int argc, char** argv)
 
   return 0;
 }
+
+
+
