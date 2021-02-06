@@ -129,9 +129,9 @@ namespace DO { namespace Sara {
   bool refine_extremum(const ImageView<float>& I, int x, int y, int type,
                        Point2f& pos, float& val, int border_sz, int num_iter)
   {
-    auto D_prime = Vector2f{};   // gradient
-    auto D_second = Matrix2f{};  // hessian
-    auto h = Vector2f{};         // offset to estimate
+    auto D_prime = Eigen::Vector2f{};             // gradient
+    auto D_second = Eigen::Matrix2f{};            // hessian
+    Eigen::Vector2f h = Eigen::Vector2f::Zero();  // offset to estimate
 
     pos << float(x), float(y);
 

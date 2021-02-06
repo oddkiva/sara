@@ -231,60 +231,92 @@ namespace DO { namespace Sara {
     // List the interpolation filters.
     auto k = Tensor_<float, 4>{{kh, kw, 2, 2}};
     k.flat_array().fill(0);
-    // k[0][0].matrix() <<
-    //  1, 0,
-    //  0, 0;
-    // k[0][1].matrix() <<
-    //  0.5, 0.5,
-    //  0.0, 0.0;
-    // k[1][0].matrix() <<
-    //  0.5, 0.0,
-    //  0.5, 0.0;
-    // k[1][1].matrix() <<
-    //  0.25, 0.25,
-    //  0.25, 0.25;
 
+    // We want to enlarge each pixel (u, v) of sizes (1, 1) to a block (u, v) of
+    // sizes (kh, kw).
+    //
+    // If (kh, kw) = (2, 2), then the barycentric coefficients are
+    //  k[0][0].matrix() <<
+    //   1, 0,
+    //   0, 0;
+    //  k[0][1].matrix() <<
+    //   0.5, 0.5,
+    //   0.0, 0.0;
+    //  k[1][0].matrix() <<
+    //   0.5, 0.0,
+    //   0.5, 0.0;
+    //  k[1][1].matrix() <<
+    //   0.25, 0.25,
+    //   0.25, 0.25;
+    //
+    // It follows that the barycentric weights can be generalized as follows:
     for (int a = 0; a < kh; ++a)
+    {
       for (int b = 0; b < kw; ++b)
       {
-        k[a][b].matrix()(0, 0) = float((kh - a) * (kw - b)) / (kh * kw);
-        k[a][b].matrix()(1, 1) = float(a * b) / (kh * kw);
-        k[a][b].matrix()(0, 1) = float(b * (kh - a)) / (kh * kw);
-        k[a][b].matrix()(1, 0) = float((kw - b) * a) / (kh * kw);
+        auto k_ab = k[a][b].matrix();
+        k_ab(0, 0) = float((kh - a) * (kw - b)) / (kh * kw);
+        k_ab(1, 1) = float(a * b) / (kh * kw);
+        k_ab(0, 1) = float(b * (kh - a)) / (kh * kw);
+        k_ab(1, 0) = float((kw - b) * a) / (kh * kw);
       }
+    }
 
-
+    // Reshape the kernel into a 2D matrix.
     auto K = k.reshape(Vector2i{kh * kw, 2 * 2});
-    std::cout << K.matrix() << std::endl;
+    const auto K_matrix = K.matrix();
 
+    // The final tensor is also in CHW format with dilated sizes
+    // (kh, kw) o (h, w)  = (kh * h, kw * w).
     auto y = Tensor_<float, 3>{{d, kh * h, kw * w}};
 
-    auto y_block = Tensor_<float, 3>{{d, kh, kw}};
-    auto x_block = Tensor_<float, 3>{{d, 2, 2}};
+    // Input block from (u, v) to (u + 1, v + 1).
+    auto x_block = Tensor_<float, 2>{{2, 2}};
+    // Output block from (kw * u, kh * v) -> (kw * (u + 1), kh * (v + 1)).
+    auto y_block = Tensor_<float, 2>{{kh, kw}};
 
-    auto y_block_2 = y_block.reshape(Vector2i{d, kh * kw}).colmajor_view();
-    auto x_block_2 = x_block.reshape(Vector2i{d, 2 * 2}).colmajor_view();
+    // The input and output blocks viewed as 2D matrices.
+    auto x_block_matrix = x_block.matrix();
+    auto y_block_matrix = y_block.matrix();
+    // The input and output blocks viewed as column vectors.
+    auto x_vectorized = x_block.vector();
+    auto y_vectorized = y_block.vector();
 
-    for (int v = 0; v < h; ++v)
-      for (int u = 0; u < w; ++u)
+    // For cache-friendliness, proceed in this order.
+    for (int c = 0; c < d; ++c)
+    {
+      const auto px_slice = px[c].matrix();
+      auto y_slice = y[c].matrix();
+
+#pragma omp parallel for
+      for (int vu = 0; vu < h * w; ++vu)
       {
-        for (int c = 0; c < d; ++c)
-          x_block[c].matrix() = px[c].matrix().block(v, u, kh, kw);
+        const auto v = vu / w;
+        const auto u = vu - v * w;
+        // For each channel, grab a (2, 2) input block with top-left corner
+        // (u, v).
+        x_block_matrix = px_slice.block(v, u, 2, 2);
 
-        y_block_2.matrix() = K.matrix() * x_block_2.matrix();
+        // Calculate the (kw, kh) output block with top-left corner
+        // (kw * u, kh * v).
+        y_vectorized = K_matrix * x_vectorized;
 
-        for (int c = 0; c < d; ++c)
-          y[c].matrix().block(kh * v, kw * u, kh, kw) = y_block[c].matrix();
+        // Store the result into the output.
+        y_slice.block(kh * v, kw * u, kh, kw) = y_block_matrix;
       }
+    }
 
+    // Transpose back into interleaved format.
     auto out = Image<Rgb32f>{kw * w, kh * h};
     tensor_view(out) = y.transpose({1, 2, 0});
 
     return out;
   }
 
-  inline auto transposed_convolution(const Image<Rgb32f>& image, int kh, int kw)
-      -> Image<Rgb32f>
+  //! A bit more generalized transposed convolution implementation.
+  //! This implementation is simplified (centered, no strides, no offset).
+  inline auto transposed_convolution(const Image<Rgb32f>& image,
+                                     const TensorView_<float, 4>& k) -> Image<Rgb32f>
   {
     const auto h = image.height();
     const auto w = image.width();
@@ -295,47 +327,62 @@ namespace DO { namespace Sara {
     // Initialize the strided subarray iterator.
     auto infx = make_infinite(x, RepeatPadding{});
 
-    // Pad the image.
-    auto px = Tensor_<float, 3>{d, h + kh - 1, w + kw - 1};
+    const auto kh_out = k.size(0);
+    const auto kw_out = k.size(1);
+    const auto kh_in = k.size(2);
+    const auto kw_in = k.size(3);
+
+    // Get the extended image data from:
+    // - top-left corner: (-kw_out / 2, -kh_out / 2)
+    // - bottom-right corner: (w + kw_out / 2, h + kh_out / 2)
+    auto px = Tensor_<float, 3>{d, h + kh_out - 1, w + kw_out - 1};
     crop(px, infx,          //
          Vector3i::Zero(),  //
-         Vector3i{d, h + kh - 1, w + kw - 1});
+         Vector3i{d, h + kh_out - 1, w + kw_out - 1});
 
-    // List the interpolation filters.
-    auto k = Tensor_<float, 4>{{kh, kw, 2, 2}};
-    k.flat_array().fill(0);
-    for (int a = 0; a < kh; ++a)
-      for (int b = 0; b < kw; ++b)
+    auto K = k.reshape(Vector2i{kh_out * kw_out, kh_in * kw_in});
+    const auto K_matrix = K.matrix();
+
+    // The output tensor in CHW format.
+    auto y = Tensor_<float, 3>{{d, kh_out * h, kh_out * w}};
+
+    // Input and output blocks.
+    auto x_block = Tensor_<float, 2>{{kh_in, kw_in}};
+    auto y_block = Tensor_<float, 2>{{kh_out, kw_out}};
+
+    // The input and output blocks viewed as 2D matrices.
+    auto x_block_matrix = x_block.matrix();
+    auto y_block_matrix = y_block.matrix();
+    // The input and output blocks viewed as column vectors.
+    auto x_vectorized = x_block.vector();
+    auto y_vectorized = y_block.vector();
+
+    // For cache-friendliness, proceed in this order.
+    for (int c = 0; c < d; ++c)
+    {
+      const auto px_slice = px[c].matrix();
+      auto y_slice = y[c].matrix();
+
+#pragma omp parallel for
+      for (int vu = 0; vu < h * w; ++vu)
       {
-        k[a][b].matrix()(0, 0) = float((kh - a) * (kw - b)) / (kh * kw);
-        k[a][b].matrix()(1, 1) = float(a * b) / (kh * kw);
-        k[a][b].matrix()(0, 1) = float(b * (kh - a)) / (kh * kw);
-        k[a][b].matrix()(1, 0) = float((kw - b) * a) / (kh * kw);
+        const auto v = vu / w;
+        const auto u = vu - v * w;
+        // For each channel, grab a (2, 2) input block with top-left corner
+        // (u, v).
+        x_block_matrix = px_slice.block(v, u, kh_in, kw_in);
+
+        // Calculate the (kw, kh) output block with top-left corner
+        // (kw * u, kh * v).
+        y_vectorized = K_matrix * x_vectorized;
+
+        // Store the result into the output.
+        y_slice.block(kh_out * v, kw_out * u, kh_out, kw_out) = y_block_matrix;
       }
+    }
 
-    auto K = k.reshape(Vector2i{kh * kw, 2 * 2});
-
-    auto y = Tensor_<float, 3>{{d, kh * h, kw * w}};
-
-    auto y_block = Tensor_<float, 3>{{d, kh, kw}};
-    auto x_block = Tensor_<float, 3>{{d, 2, 2}};
-
-    auto y_block_2 = y_block.reshape(Vector2i{d, kh * kw}).colmajor_view();
-    auto x_block_2 = x_block.reshape(Vector2i{d, 2 * 2}).colmajor_view();
-
-    for (int v = 0; v < h; ++v)
-      for (int u = 0; u < w; ++u)
-      {
-        for (int c = 0; c < d; ++c)
-          x_block[c].matrix() = px[c].matrix().block(v, u, kh, kw);
-
-        y_block_2.matrix() = K.matrix() * x_block_2.matrix();
-
-        for (int c = 0; c < d; ++c)
-          y[c].matrix().block(kh * v, kw * u, kh, kw) = y_block[c].matrix();
-      }
-
-    auto out = Image<Rgb32f>{kw * w, kh * h};
+    // Transpose back to interleaved format.
+    auto out = Image<Rgb32f>{kw_out * w, kh_out * h};
     tensor_view(out) = y.transpose({1, 2, 0});
 
     return out;
