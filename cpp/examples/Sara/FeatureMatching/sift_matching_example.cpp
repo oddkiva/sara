@@ -22,8 +22,8 @@ using namespace std;
 using namespace DO::Sara;
 
 
-const auto file1 = src_path("../../../data/All.tif");
-const auto file2 = src_path("../../../data/GuardOnBlonde.tif");
+const auto file1 = src_path("../../../../data/All.tif");
+const auto file2 = src_path("../../../../data/GuardOnBlonde.tif");
 
 
 void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
