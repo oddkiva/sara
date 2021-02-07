@@ -11,11 +11,12 @@
 
 //! @example
 
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/DisjointSets/DisjointSets.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
-#include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
+#include <DO/Sara/Geometry/Algorithms/Polyline.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
@@ -23,8 +24,6 @@
 #include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
 
 #include <DO/Sara/VideoIO.hpp>
-
-#include <drafts/ImageProcessing/EdgeGrouping.hpp>
 
 #include <boost/filesystem.hpp>
 
@@ -49,10 +48,7 @@ auto initialize_camera_intrinsics_1()
   const auto u0 = 960;
   const auto v0 = 540;
   intrinsics.image_sizes << 1920, 1080;
-  intrinsics.K  <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
+  intrinsics.K << f, 0, u0, 0, f, v0, 0, 0, 1;
   intrinsics.k.setZero();
   intrinsics.p.setZero();
 
@@ -67,14 +63,9 @@ auto initialize_camera_intrinsics_2()
   const auto u0 = 960;
   const auto v0 = 540;
   intrinsics.image_sizes << 1920, 1080;
-  intrinsics.K  <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
-  intrinsics.k <<
-    -0.22996356451342749,
-    0.05952465745165465,
-    -0.007399008111054717;
+  intrinsics.K << f, 0, u0, 0, f, v0, 0, 0, 1;
+  intrinsics.k << -0.22996356451342749, 0.05952465745165465,
+      -0.007399008111054717;
   intrinsics.p.setZero();
 
   return intrinsics;
@@ -103,6 +94,194 @@ auto default_camera_matrix()
   P.block<3, 3>(0, 0).setIdentity();
   return P;
 }
+
+
+struct LocalPhotometricStatistics
+{
+  int patch_radius = 4;
+
+  std::vector<Eigen::Vector2i> point_set;
+
+  // Dense maps.
+  Tensor_<float, 3> rgb;
+  Tensor_<float, 3> rgb_mean;
+  Tensor_<float, 3> rgb_unnormalized_std_dev;
+
+  auto resize(int width, int height)
+  {
+    rgb.resize({3, height, width});
+    rgb_mean.resize({3, height, width});
+    rgb_unnormalized_std_dev.resize({3, height, width});
+  }
+
+  auto swap(LocalPhotometricStatistics& other)
+  {
+    point_set.swap(other.point_set);
+    rgb.swap(other.rgb);
+    rgb_mean.swap(other.rgb_mean);
+    rgb_unnormalized_std_dev.swap(other.rgb_unnormalized_std_dev);
+  }
+
+  auto update_point_set(const std::vector<Eigen::Vector2i>& pts)
+  {
+    const auto& r = patch_radius;
+    const auto w = rgb.size(2);
+    const auto h = rgb.size(1);
+
+    point_set.clear();
+    point_set.reserve(pts.size());
+
+    for (const auto& p : pts)
+      if (r <= p.x() && p.x() < w - r && r <= p.y() && p.y() < h - r)
+        point_set.emplace_back(p);
+  }
+
+  auto update_image(const ImageView<Rgb8>& image)
+  {
+    auto r_ptr = rgb[0].data();
+    auto g_ptr = rgb[1].data();
+    auto b_ptr = rgb[2].data();
+    auto rgb_ptr = image.data();
+
+#pragma omp parallel for
+    for (auto xy = 0u; xy < image.size(); ++xy)
+    {
+      const auto rgb = *(rgb_ptr + xy);
+      *(r_ptr + xy) = float(rgb[0]) / 255;
+      *(g_ptr + xy) = float(rgb[1]) / 255;
+      *(b_ptr + xy) = float(rgb[2]) / 255;
+    }
+
+#ifdef INSPECT
+    for (auto i = 0; i < 3; ++i)
+    {
+      display(image_view(rgb[i]));
+      get_key();
+    }
+#endif
+  }
+
+  auto calculate_mean()
+  {
+    // Reset the mean.
+    for (auto i = 0; i < 3; ++i)
+    {
+      auto plane = rgb_mean[i];
+      plane.flat_array().setZero();
+    }
+
+    const auto& r = patch_radius;
+    const auto area = std::pow(2 * r, 2);
+
+    auto calculate_mean_at = [&](const TensorView_<float, 2>& plane, int x,
+                                 int y) {
+      auto mean = float{};
+
+      const auto xmin = x - r;
+      const auto xmax = x + r;
+      const auto ymin = y - r;
+      const auto ymax = y + r;
+      for (auto v = ymin; v < ymax; ++v)
+        for (auto u = xmin; u < xmax; ++u)
+          mean += plane(v, u);
+      mean /= area;
+
+      return mean;
+    };
+
+    // Loop through the points.
+    for (auto i = 0; i < 3; ++i)
+    {
+      auto f = rgb[i];
+      auto f_mean = rgb_mean[i];
+
+#pragma omp parallel for
+      for (auto i = 0u; i < point_set.size(); ++i)
+      {
+        const auto& p = point_set[i];
+        f_mean(p.y(), p.x()) = calculate_mean_at(f, p.x(), p.y());
+      }
+    }
+
+#ifdef INSPECT
+    // TODO: check each plane on the display.
+    auto rgb_mean_transposed = rgb_mean.transpose({1, 2, 0});
+    auto rgb32f_view = ImageView<Rgb32f>(
+        reinterpret_cast<Rgb32f*>(rgb_mean_transposed.data()),
+        {rgb_mean_transposed.size(1), rgb_mean_transposed.size(0)});
+    display(rgb32f_view);
+#endif
+  }
+
+  auto calculate_unnormalized_std_dev()
+  {
+    // Reset the second order moment.
+    for (auto i = 0; i < 3; ++i)
+    {
+      auto plane = rgb_unnormalized_std_dev[i];
+      plane.flat_array().setZero();
+    }
+
+    const auto& r = patch_radius;
+    auto calculate_unnormalized_std_dev_at =
+        [&](const TensorView_<float, 2>& plane, float mean, int x, int y) {
+          auto sigma = float{};
+
+          const auto xmin = x - r;
+          const auto xmax = x + r;
+          const auto ymin = y - r;
+          const auto ymax = y + r;
+          for (auto v = ymin; v < ymax; ++v)
+            for (auto u = xmin; u < xmax; ++u)
+              sigma += std::pow(plane(v, u) - mean, 2);
+
+          return sigma;
+        };
+
+    // Loop through the points.
+    for (auto i = 0; i < 3; ++i)
+    {
+      auto f = rgb[i];
+      auto f_mean = rgb_mean[i];
+      auto f_sigma = rgb_unnormalized_std_dev[i];
+
+#pragma omp parallel for
+      for (auto i = 0u; i < point_set.size(); ++i)
+      {
+        const auto& p = point_set[i];
+        const auto f_mean_xy = f_mean(p.y(), p.x());
+        f_sigma(p.y(), p.x()) = calculate_unnormalized_std_dev_at(f,          //
+                                                                  f_mean_xy,  //
+                                                                  p.x(), p.y());
+      }
+    }
+
+#ifdef INSPECT
+    // TODO: check each plane on the display.
+    for (auto i = 0; i < 3; ++i)
+    {
+      display(image_view(rgb_unnormalized_std_dev[i]));
+      get_key();
+    }
+#endif
+  }
+};
+
+struct PointMatcher {
+  LocalPhotometricStatistics current;
+  LocalPhotometricStatistics previous;
+
+  auto update_statistics(const std::vector<Eigen::Vector2i>& points,
+                         const ImageView<Rgb8>& frame)
+  {
+    current.swap(previous);
+
+    current.update_point_set(points);
+    current.update_image(frame);
+    current.calculate_mean();
+    current.calculate_unnormalized_std_dev();
+  }
+};
 
 
 int main(int argc, char** argv)
@@ -158,7 +337,7 @@ int __main(int argc, char** argv)
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
-#define CROP
+// #define CROP
 #ifdef CROP
   const auto [p1, p2] = initialize_crop_region_1(frame.sizes());
 #else
@@ -173,16 +352,17 @@ int __main(int argc, char** argv)
   }};
 
 
+  // Image local statistics.
+  auto statistics = LocalPhotometricStatistics{};
+  statistics.resize(frame.width(), frame.height());
+
+
   // Initialize the camera matrix.
-<<<<<<< HEAD
-  const auto intrinsics = initialize_camera_intrinsics_1();
-=======
   auto intrinsics = initialize_camera_intrinsics_1();
   intrinsics.downscale_image_sizes(downscale_factor);
   SARA_CHECK(intrinsics.K);
   SARA_CHECK(intrinsics.k);
   intrinsics.calculate_K_inverse();
->>>>>>> d2632cd8a76f0625e7909b243135ad02c8249a8e
 
   auto P = default_camera_matrix();
   P = intrinsics.K * P;
@@ -200,8 +380,6 @@ int __main(int argc, char** argv)
     ++frames_read;
     if (frames_read % (skip + 1) != 0)
       continue;
-    // if (frames_read < 500)
-    //   continue;
     SARA_DEBUG << "Processing frame " << frames_read << std::endl;
 
     // Reduce our attention to the central part of the image.
@@ -227,14 +405,7 @@ int __main(int argc, char** argv)
     ed(frame_gray32f);
     auto& edges_refined = ed.pipeline.edges_simplified;
 
-<<<<<<< HEAD
-    // TODO: if we know the camera distortion coefficients, it would be a good
-    // idea to undistort the edges.
-
-// #define SPLIT_EDGES
-=======
 #define SPLIT_EDGES
->>>>>>> d2632cd8a76f0625e7909b243135ad02c8249a8e
 #ifdef SPLIT_EDGES
     tic();
     // TODO: split only if the inertias matrix is becoming isotropic.
@@ -255,128 +426,29 @@ int __main(int argc, char** argv)
     }
     toc("Edge Filtering");
 
-    tic();
-    const auto edge_stats = CurveStatistics{edges};
-    toc("Edge Shape Statistics");
 
-    tic();
-    auto line_segments = extract_line_segments_quick_and_dirty(edge_stats);
-    {
-      auto line_segments_filtered = std::vector<LineSegment>{};
-      line_segments_filtered.reserve(line_segments.size());
-
-      for (const auto& s : line_segments)
-      {
-        const auto d = s.direction();
-        const auto angle = std::abs(std::atan2(d.y(), d.x()));
-        if (std::abs(angle - M_PI_2) < 10._deg)
-          continue;
-        line_segments_filtered.emplace_back(s);
-      }
-
-      line_segments.swap(line_segments_filtered);
-    }
-
-    // Go back to the original pixel coordinates for single-view geometry
-    // analysis.
-    const Eigen::Vector2d p1d = p1.cast<double>();
-    const auto s = static_cast<float>(downscale_factor);
-    for (auto& ls: line_segments)
-    {
-      ls.p1() = p1d + s * ls.p1();
-      ls.p2() = p1d + s * ls.p2();
-    }
-    const auto lines = to_lines(line_segments);
-    const auto lines_undistorted = to_undistorted_lines(line_segments, intrinsics);
-    toc("Line Segment Extraction");
-
-    tic();
-<<<<<<< HEAD
-    const Eigen::MatrixXf lines_undistorted_as_matrix = lines_undistorted.matrix().transpose();
-    const Eigen::MatrixXf planes_backprojected =
-        (Pt * lines_undistorted_as_matrix)  //
-            .colwise()                      //
-            .normalized();
-    toc("Planes Backprojected");
-
-    const auto planes_tensor = TensorView_<float, 2>{
-        const_cast<float*>(planes_backprojected.data()),
-        {planes_backprojected.cols(), planes_backprojected.rows()}};
-
-    const auto angle_threshold = static_cast<float>((20._deg).value);
-    const auto ransac_result = find_dominant_orthogonal_direction_triplet(  //
-        planes_tensor,                                                      //
-        angle_threshold,                                                    //
-        100);
-    const auto dirs = std::get<0>(ransac_result);
-    const auto inliers = std::get<1>(ransac_result);
-    const auto best_line_index = std::get<2>(ransac_result).flat_array();
-
-    const auto [vph, inliers, best_line_pair] =
-        find_dominant_vanishing_point(lines_undistorted, 5.f);
-    toc("Vanishing Point");
-
-
-    tic();
-    const Eigen::Vector2d p1d = p1.cast<double>();
-    const auto s = static_cast<float>(downscale_factor);
-
-    auto detection = Image<Rgb8>{frame};
-#ifdef CLEAR_IMAGE
-    detection.flat_array().fill(Black8);
+    auto points = std::vector<Eigen::Vector2i>{};
+// #define INSPECT_ALL
+#ifdef INSPECT_ALL
+    points.reserve(frame.size());
+    for (auto y = 0; y < frame.height(); ++y)
+      for (auto x = 0; x < frame.width(); ++x)
+        points.emplace_back(x, y);
+#else
+    for (auto e = 0u; e < edges.size(); ++e)
+      for (auto p = 0u; p < edges[e].size(); ++p)
+        points.emplace_back(edges[e][p].cast<int>());
 #endif
 
-    if (inliers.flat_array().count() > 0)
-    {
-      SARA_DEBUG << "inliers =  " << inliers.flat_array().count() << std::endl;
-      SARA_DEBUG << "R =\n" << dirs << std::endl;
+    statistics.update_point_set(points);
+    statistics.update_image(frame);
+    statistics.calculate_mean();
+    statistics.calculate_unnormalized_std_dev();
 
-      for (auto i = 0u; i < line_segments.size(); ++i)
-      {
-        if (!inliers(i))
-          continue;
-
-        const auto& ls = line_segments[i];
-        const auto& a = ls.p1();
-        const auto& b = ls.p2();
-
-        const Eigen::Vector3f n = planes_backprojected.col(i).head(3);
-        const auto rn = std::array<float, 3>{std::abs(dirs.col(0).dot(n)),
-                                             std::abs(dirs.col(1).dot(n)),
-                                             std::abs(dirs.col(2).dot(n))};
-
-        const auto imax = std::max_element(rn.begin(), rn.end()) - rn.begin();
-        // std::cout << "n = " << n.transpose() << std::endl;
-        // std::cout << "rn[0] = " << rn[0] << std::endl;
-        // std::cout << "rn[1] = " << rn[1] << std::endl;
-        // std::cout << "rn[2] = " << rn[2] << std::endl;
-
-        if (imax == 0)
-          draw_line(detection, a.x(), a.y(), b.x(), b.y(), Red8, 4);
-        else if (imax == 1)
-          draw_line(detection, a.x(), a.y(), b.x(), b.y(), Green8, 4);
-        else
-          draw_line(detection, a.x(), a.y(), b.x(), b.y(), Blue8, 4);
-        // display(detection);
-        // get_key();
-      }
-    }
-
-    const Eigen::Vector2f vp = (s * vph.hnormalized().cast<double>() + p1d).cast<float>();
-    const Eigen::Vector3f vp1 = (vp / s).homogeneous().cast<float>();
-    const Eigen::Vector3f horizon_dir = (intrinsics.K_inverse * vp1).normalized();
-    const auto pitch = std::asin(horizon_dir.y()) / M_PI * 180;
-
-    fill_circle(detection, vp.x(), vp.y(), 10, Yellow8);
-
+    auto detection = Image<Rgb8>{frame};
+    for (const auto& e: edges)
+      draw_polyline(detection, e, Red8, p1.cast<double>().eval(), downscale_factor);
     display(detection);
-    draw_string(50, 50, format("pitch = %0.2f degree", pitch), Black8, 20, 0, false, true);
-    draw_string(50, 100,
-                format("vx = %0.2f, vy = %0.2f, vz = %0.2f",                //
-                       horizon_dir.x(), horizon_dir.y(), horizon_dir.z()),  //
-                Black8, 20, 0, false, true);
-    toc("Display");
-
 
     // tic();
     // video_writer.write(detection);

@@ -157,7 +157,7 @@ namespace DO { namespace Sara {
         .compute<SecondMomentMatrix>()  //
         .compute<Gaussian>(sigma)       //
         .cwise_transform([kappa](const auto& m) {
-          return m.determinant() - kappa * pow(m.trace(), 2);
+          return m.determinant() - kappa * std::pow(m.trace(), 2);
         });
   }
 
