@@ -131,23 +131,74 @@ namespace DO::Sara {
 
 
   template <typename T>
-  struct DominantOrthgonalDirectionTripletSolver3D
+  struct DominantOrthogonalDirectionTripletSolver3D
   {
     // A rotation matrix.
+    using matrix_type = Eigen::Matrix<T, 3, 3>;
     using model_type = Eigen::Matrix<T, 3, 3>;
 
+    static constexpr auto debug = false;
     static constexpr auto num_points = 3;
 
     template <typename BackProjectedPlane>
     inline auto operator()(const BackProjectedPlane& plane_triplet) const -> model_type
     {
-      const auto normals = plane_triplet.transpose().template block<3, 3>(0, 0);
+      // Each image line backprojects to a plane passing through the camera
+      // center.
+      //
+      // Our matrix data stores plane normals as row vectors.
+      //
+      // So we preprocess the data by:
+      // 1. Transposing the matrix
+      // 2. Keeping the first three rows
+      // to obtain the normals of backprojected planes as column vectors.
+      const matrix_type plane_normals =
+          plane_triplet.transpose().template block<3, 3>(0, 0);
+      if (debug)
+      {
+        std::cout << "Plane triplet dimensions" << std::endl;
+        std::cout << plane_triplet.rows() << "x" << plane_triplet.cols()
+                  << std::endl;
+      }
+      const auto n0 = plane_normals.col(0);
+      const auto n1 = plane_normals.col(1);
+      const auto n2 = plane_normals.col(2);
+
+      // Calculate the principal orthogonal directions.
       auto R = model_type{};
-      R.col(0) = normals.col(0).cross(normals.col(1));
-      R.col(1) = R.col(0).cross(normals.col(2)).normalized();
-      R.col(2) = R.col(0).cross(R.col(1));
-      // std::cout << "planes =\n" << plane_normals << std::endl << std::endl;
-      // std::cout << "R_cand =\n" << R << std::endl << std::endl;
+      auto v0 = R.col(0);
+      auto v1 = R.col(1);
+      auto v2 = R.col(2);
+
+      // Vanishing points are 3D rays passing through the camera centers.
+      //
+      // First vanishing point as a 3D ray.
+      //
+      // If the two image lines intersect in a vanishing point, then that means
+      // that the two corresponding backprojected planes both contains the
+      // backprojected vanishing point.
+      //
+      // The intersecting direction can be computed as the cross-product of the two
+      // plane normals:
+      v0 = n0.cross(n1).normalized();
+
+      // The ray backprojected from the first vanishing point can be viewed as a
+      // normal vector of a plane.
+      //
+      // There are two key observations:
+      // 1. The second (and third orthogonal) direction backprojected from the
+      //    second (orthogonal) VP must lie in this plane.
+      // 2. If the third image line vanishes into this second VP, then that
+      //    means that its backprojected plane contains this backprojected
+      //    direction.
+      //
+      // The backprojected direction is at the intersection of the two planes
+      // orthogonal, in other words it can calculated by the cross-product
+      n1 = v0.cross(n2).normalized();
+
+      // Third vanishing point is straightforwardly calculated as:
+      n2 = n0.cross(n1);
+
       return R;
     }
   };
@@ -169,14 +220,12 @@ namespace DO::Sara {
     inline auto operator()(const Mat& planes_backprojected) const
         -> Eigen::Matrix<T, Eigen::Dynamic, 1>
     {
-      auto distances = Eigen::Matrix<T, Eigen::Dynamic, 1>(planes_backprojected.rows());
+      auto distances = Eigen::Matrix<T, Eigen::Dynamic, 3>(planes_backprojected.rows());
 
-      for (auto i = 0; i < planes_backprojected.rows(); ++i)
-      {
-        const Eigen::Matrix<T, 3, 1> normal = planes_backprojected.row(i).transpose().head(3);
-        const Eigen::Matrix<T, 3, 1> plane_normal_rotated = rotation * plane_normal;
-        distances(i) = plane_normal_rotated.cross(plane_normal).norm();
-      }
+      // distances = (planes_backprojected.leftCols(3) * rotation)
+      //                 .rowwise()
+      //                 .cwiseAbs()
+      //                 .minCoeff();
 
       return distances;
     }
@@ -189,7 +238,7 @@ namespace DO::Sara {
       const TensorView_<T, 2>& planes, T angle_threshold,
       std::size_t num_random_samples = 100)
   {
-    auto vp_solver = DominantOrthgonalDirectionTripletSolver3D<T>{};
+    auto vp_solver = DominantOrthogonalDirectionTripletSolver3D<T>{};
     auto inlier_predicate = InlierPredicate<InvarianceAngularDistance3D<T>>{
         {},                        //
         std::sin(angle_threshold)  //

@@ -146,8 +146,8 @@ namespace DO::Sara {
     }
 
     template <typename PixelType>
-    auto undistort(const ImageView<PixelType>& src,
-                   ImageView<PixelType>& dst) const
+    auto undistort_drap_lefevre(const ImageView<PixelType>& src,
+                                ImageView<PixelType>& dst) const
     {
       const auto& w = dst.width();
       const auto& h = dst.height();
@@ -157,7 +157,7 @@ namespace DO::Sara {
       {
         for (auto x = 0; x < w; ++x)
         {
-          const Eigen::Vector2d p = undistort(Vec2(x, y)).template cast<double>();
+          const Eigen::Vector2d p = distort_drap_lefevre(Vec2(x, y)).template cast<double>();
 
           const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
                                        0 <= p.y() && p.y() < h - 1;
@@ -179,7 +179,7 @@ namespace DO::Sara {
     }
 
     template <typename PixelType>
-    auto distort_drap_lefevre(const ImageView<PixelType>& src,
+    auto distort(const ImageView<PixelType>& src,
                               ImageView<PixelType>& dst) const
     {
       const auto& w = dst.width();
@@ -190,7 +190,7 @@ namespace DO::Sara {
       {
         for (auto x = 0; x < w; ++x)
         {
-          const Eigen::Vector2d p = distort_drap_lefevre(Vec2(x, y))  //
+          const Eigen::Vector2d p = undistort(Vec2(x, y))  //
                                         .template cast<double>();
           const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
                                        0 <= p.y() && p.y() < h - 1;

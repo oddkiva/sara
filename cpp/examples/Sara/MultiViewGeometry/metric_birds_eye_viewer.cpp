@@ -154,14 +154,19 @@ int __main(int argc, char**argv)
   // one example of distortion correction.
   auto camera_parameters = sara::BrownConradyCamera<float>{};
   {
-    const auto f = 946.8984425572634_px;
+    const auto f = 1305._px;
     const auto u0 = 960._px;
     const auto v0 = 540._px;
     const auto p = Eigen::Vector2f{0, 0};
+    // const auto k = Eigen::Vector3f{
+    //     -0.22996356451342749,  //
+    //     0.05952465745165465,
+    //     -0.007399008111054717  //
+    // };
     const auto k = Eigen::Vector3f{
-        -0.22996356451342749,  //
-        0.05952465745165465,
-        -0.007399008111054717  //
+        0.328456,
+        0.0589776,
+        0
     };
     camera_parameters.K << f, 0, u0,
                            0, f, v0,
@@ -209,8 +214,8 @@ int __main(int argc, char**argv)
     frame_undistorted = video_stream.frame();
     auto map_view = to_map_view(camera_parameters, video_stream.frame());
 #else
-    camera_parameters.undistort(video_stream.frame(), frame_undistorted);
-    camera_parameters.distort_drap_lefevre(frame_undistorted, frame_redistorted);
+    camera_parameters.undistort_drap_lefevre(video_stream.frame(), frame_undistorted);
+    camera_parameters.distort(frame_undistorted, frame_redistorted);
     auto map_view = to_map_view(camera_parameters, frame_undistorted);
 
     difference(frame_redistorted, video_stream.frame(), frame_diff);

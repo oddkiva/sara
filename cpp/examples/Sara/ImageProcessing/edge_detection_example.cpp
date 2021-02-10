@@ -174,15 +174,7 @@ int __main(int argc, char** argv)
 
 
   // Initialize the camera matrix.
-<<<<<<< HEAD
   const auto intrinsics = initialize_camera_intrinsics_1();
-=======
-  auto intrinsics = initialize_camera_intrinsics_1();
-  intrinsics.downscale_image_sizes(downscale_factor);
-  SARA_CHECK(intrinsics.K);
-  SARA_CHECK(intrinsics.k);
-  intrinsics.calculate_K_inverse();
->>>>>>> d2632cd8a76f0625e7909b243135ad02c8249a8e
 
   auto P = default_camera_matrix();
   P = intrinsics.K * P;
@@ -227,14 +219,10 @@ int __main(int argc, char** argv)
     ed(frame_gray32f);
     auto& edges_refined = ed.pipeline.edges_simplified;
 
-<<<<<<< HEAD
     // TODO: if we know the camera distortion coefficients, it would be a good
     // idea to undistort the edges.
 
 // #define SPLIT_EDGES
-=======
-#define SPLIT_EDGES
->>>>>>> d2632cd8a76f0625e7909b243135ad02c8249a8e
 #ifdef SPLIT_EDGES
     tic();
     // TODO: split only if the inertias matrix is becoming isotropic.
@@ -291,7 +279,6 @@ int __main(int argc, char** argv)
     toc("Line Segment Extraction");
 
     tic();
-<<<<<<< HEAD
     const Eigen::MatrixXf lines_undistorted_as_matrix = lines_undistorted.matrix().transpose();
     const Eigen::MatrixXf planes_backprojected =
         (Pt * lines_undistorted_as_matrix)  //
@@ -299,83 +286,63 @@ int __main(int argc, char** argv)
             .normalized();
     toc("Planes Backprojected");
 
-    const auto planes_tensor = TensorView_<float, 2>{
-        const_cast<float*>(planes_backprojected.data()),
-        {planes_backprojected.cols(), planes_backprojected.rows()}};
 
-    const auto angle_threshold = static_cast<float>((20._deg).value);
-    const auto ransac_result = find_dominant_orthogonal_direction_triplet(  //
-        planes_tensor,                                                      //
-        angle_threshold,                                                    //
-        100);
-    const auto dirs = std::get<0>(ransac_result);
-    const auto inliers = std::get<1>(ransac_result);
-    const auto best_line_index = std::get<2>(ransac_result).flat_array();
-
-    const auto [vph, inliers, best_line_pair] =
-        find_dominant_vanishing_point(lines_undistorted, 5.f);
-    toc("Vanishing Point");
-
-
-    tic();
-    const Eigen::Vector2d p1d = p1.cast<double>();
-    const auto s = static_cast<float>(downscale_factor);
-
-    auto detection = Image<Rgb8>{frame};
-#ifdef CLEAR_IMAGE
-    detection.flat_array().fill(Black8);
-#endif
-
-    if (inliers.flat_array().count() > 0)
-    {
-      SARA_DEBUG << "inliers =  " << inliers.flat_array().count() << std::endl;
-      SARA_DEBUG << "R =\n" << dirs << std::endl;
-
-      for (auto i = 0u; i < line_segments.size(); ++i)
-      {
-        if (!inliers(i))
-          continue;
-
-        const auto& ls = line_segments[i];
-        const auto& a = ls.p1();
-        const auto& b = ls.p2();
-
-        const Eigen::Vector3f n = planes_backprojected.col(i).head(3);
-        const auto rn = std::array<float, 3>{std::abs(dirs.col(0).dot(n)),
-                                             std::abs(dirs.col(1).dot(n)),
-                                             std::abs(dirs.col(2).dot(n))};
-
-        const auto imax = std::max_element(rn.begin(), rn.end()) - rn.begin();
-        // std::cout << "n = " << n.transpose() << std::endl;
-        // std::cout << "rn[0] = " << rn[0] << std::endl;
-        // std::cout << "rn[1] = " << rn[1] << std::endl;
-        // std::cout << "rn[2] = " << rn[2] << std::endl;
-
-        if (imax == 0)
-          draw_line(detection, a.x(), a.y(), b.x(), b.y(), Red8, 4);
-        else if (imax == 1)
-          draw_line(detection, a.x(), a.y(), b.x(), b.y(), Green8, 4);
-        else
-          draw_line(detection, a.x(), a.y(), b.x(), b.y(), Blue8, 4);
-        // display(detection);
-        // get_key();
-      }
-    }
-
-    const Eigen::Vector2f vp = (s * vph.hnormalized().cast<double>() + p1d).cast<float>();
-    const Eigen::Vector3f vp1 = (vp / s).homogeneous().cast<float>();
-    const Eigen::Vector3f horizon_dir = (intrinsics.K_inverse * vp1).normalized();
-    const auto pitch = std::asin(horizon_dir.y()) / M_PI * 180;
-
-    fill_circle(detection, vp.x(), vp.y(), 10, Yellow8);
-
-    display(detection);
-    draw_string(50, 50, format("pitch = %0.2f degree", pitch), Black8, 20, 0, false, true);
-    draw_string(50, 100,
-                format("vx = %0.2f, vy = %0.2f, vz = %0.2f",                //
-                       horizon_dir.x(), horizon_dir.y(), horizon_dir.z()),  //
-                Black8, 20, 0, false, true);
-    toc("Display");
+//     tic();
+//     const auto planes_tensor = TensorView_<float, 2>{
+//         const_cast<float*>(planes_backprojected.data()),
+//         {planes_backprojected.cols(), planes_backprojected.rows()}};
+// 
+//     const auto angle_threshold = static_cast<float>((20._deg).value);
+//     const auto ransac_result = find_dominant_orthogonal_direction_triplet(  //
+//         planes_tensor,                                                      //
+//         angle_threshold,                                                    //
+//         100);
+//     const auto dirs = std::get<0>(ransac_result);
+//     const auto inliers = std::get<1>(ransac_result);
+//     toc("Vanishing Point");
+// 
+// 
+//     tic();
+//     {
+//       auto detection = Image<Rgb8>{frame};
+// #ifdef CLEAR_IMAGE
+//       detection.flat_array().fill(Black8);
+// #endif
+// 
+//       if (inliers.flat_array().count() > 0)
+//       {
+//         SARA_DEBUG << "inliers =  " << inliers.flat_array().count()
+//                    << std::endl;
+//         SARA_DEBUG << "R =\n" << dirs << std::endl;
+// 
+//         for (auto i = 0u; i < line_segments.size(); ++i)
+//         {
+//           if (!inliers(i))
+//             continue;
+// 
+//           const auto& ls = line_segments[i];
+//           const auto& a = ls.p1();
+//           const auto& b = ls.p2();
+// 
+//           const Eigen::Vector3f n = planes_backprojected.col(i).head(3);
+//           const auto rn = std::array<float, 3>{std::abs(dirs.col(0).dot(n)),
+//                                                std::abs(dirs.col(1).dot(n)),
+//                                                std::abs(dirs.col(2).dot(n))};
+// 
+//           const auto imax = std::max_element(rn.begin(), rn.end()) - rn.begin();
+// 
+//           if (imax == 0)
+//             draw_line(detection, a.x(), a.y(), b.x(), b.y(), Red8, 4);
+//           else if (imax == 1)
+//             draw_line(detection, a.x(), a.y(), b.x(), b.y(), Green8, 4);
+//           else
+//             draw_line(detection, a.x(), a.y(), b.x(), b.y(), Blue8, 4);
+//           // display(detection);
+//           // get_key();
+//         }
+//       }
+//     }
+//     toc("Display");
 
 
     // tic();
@@ -385,3 +352,22 @@ int __main(int argc, char** argv)
 
   return 0;
 }
+
+
+#ifdef BACKUP
+const Eigen::Vector2f vp =
+    (s * vph.hnormalized().cast<double>() + p1d).cast<float>();
+const Eigen::Vector3f vp1 = (vp / s).homogeneous().cast<float>();
+const Eigen::Vector3f horizon_dir = (intrinsics.K_inverse * vp1).normalized();
+const auto pitch = std::asin(horizon_dir.y()) / M_PI * 180;
+
+fill_circle(detection, vp.x(), vp.y(), 10, Yellow8);
+
+display(detection);
+draw_string(50, 50, format("pitch = %0.2f degree", pitch), Black8, 20, 0, false,
+            true);
+draw_string(50, 100,
+            format("vx = %0.2f, vy = %0.2f, vz = %0.2f",                //
+                   horizon_dir.x(), horizon_dir.y(), horizon_dir.z()),  //
+            Black8, 20, 0, false, true);
+#endif
