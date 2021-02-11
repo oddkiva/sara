@@ -180,6 +180,29 @@ int __main(int argc, char** argv)
   P = intrinsics.K * P;
   const auto Pt = P.transpose().eval();
 
+  auto R0 = Eigen::Matrix3f{};
+  auto R1 = Eigen::Matrix3f{};
+  R0.setZero();
+  R1.setZero();
+  auto angular_distance = [](const Eigen::Matrix3f& R1, const Eigen::Matrix3f& R2) {
+    const Eigen::Matrix3f delta = R1 * R2.transpose();
+    const auto cosine = 0.5f * (delta.trace() - 1.f);
+    return std::acos(cosine);
+
+  };
+
+  // Permutation matrices.
+  auto perm = std::array<Eigen::Matrix3f, 3>{};
+  perm[0].setIdentity();
+
+  perm[1].col(0) = perm[0].col(1);
+  perm[1].col(1) = perm[0].col(2);
+  perm[1].col(2) = perm[0].col(0);
+
+  perm[2].col(0) = perm[0].col(2);
+  perm[2].col(1) = perm[0].col(0);
+  perm[2].col(2) = perm[0].col(1);
+
   auto frames_read = 0;
   const auto skip = 0;
   while (true)
@@ -237,7 +260,7 @@ int __main(int argc, char** argv)
     {
       if (e.size() < 2)
         continue;
-      if (length(e) < 10)
+      if (length(e) < 20)
         continue;
       edges.emplace_back(e);
     }
@@ -254,13 +277,7 @@ int __main(int argc, char** argv)
       line_segments_filtered.reserve(line_segments.size());
 
       for (const auto& s : line_segments)
-      {
-        const auto d = s.direction();
-        const auto angle = std::abs(std::atan2(d.y(), d.x()));
-        if (std::abs(angle - M_PI_2) < 10._deg)
-          continue;
         line_segments_filtered.emplace_back(s);
-      }
 
       line_segments.swap(line_segments_filtered);
     }
@@ -287,63 +304,94 @@ int __main(int argc, char** argv)
     toc("Planes Backprojected");
 
 
-//     tic();
-//     const auto planes_tensor = TensorView_<float, 2>{
-//         const_cast<float*>(planes_backprojected.data()),
-//         {planes_backprojected.cols(), planes_backprojected.rows()}};
-// 
-//     const auto angle_threshold = static_cast<float>((20._deg).value);
-//     const auto ransac_result = find_dominant_orthogonal_direction_triplet(  //
-//         planes_tensor,                                                      //
-//         angle_threshold,                                                    //
-//         100);
-//     const auto dirs = std::get<0>(ransac_result);
-//     const auto inliers = std::get<1>(ransac_result);
-//     toc("Vanishing Point");
-// 
-// 
-//     tic();
-//     {
-//       auto detection = Image<Rgb8>{frame};
-// #ifdef CLEAR_IMAGE
-//       detection.flat_array().fill(Black8);
-// #endif
-// 
-//       if (inliers.flat_array().count() > 0)
-//       {
-//         SARA_DEBUG << "inliers =  " << inliers.flat_array().count()
-//                    << std::endl;
-//         SARA_DEBUG << "R =\n" << dirs << std::endl;
-// 
-//         for (auto i = 0u; i < line_segments.size(); ++i)
-//         {
-//           if (!inliers(i))
-//             continue;
-// 
-//           const auto& ls = line_segments[i];
-//           const auto& a = ls.p1();
-//           const auto& b = ls.p2();
-// 
-//           const Eigen::Vector3f n = planes_backprojected.col(i).head(3);
-//           const auto rn = std::array<float, 3>{std::abs(dirs.col(0).dot(n)),
-//                                                std::abs(dirs.col(1).dot(n)),
-//                                                std::abs(dirs.col(2).dot(n))};
-// 
-//           const auto imax = std::max_element(rn.begin(), rn.end()) - rn.begin();
-// 
-//           if (imax == 0)
-//             draw_line(detection, a.x(), a.y(), b.x(), b.y(), Red8, 4);
-//           else if (imax == 1)
-//             draw_line(detection, a.x(), a.y(), b.x(), b.y(), Green8, 4);
-//           else
-//             draw_line(detection, a.x(), a.y(), b.x(), b.y(), Blue8, 4);
-//           // display(detection);
-//           // get_key();
-//         }
-//       }
-//     }
-//     toc("Display");
+    tic();
+    const auto planes_tensor = TensorView_<float, 2>{
+        const_cast<float*>(planes_backprojected.data()),
+        {planes_backprojected.cols(), planes_backprojected.rows()}};
 
+    const auto angle_threshold = std::sin(float((2._deg).value));
+    const auto ransac_result = find_dominant_orthogonal_direction_triplet(  //
+        planes_tensor,                                                      //
+        angle_threshold,                                                    //
+        100);
+    const auto dirs = std::get<0>(ransac_result);
+    const auto inliers = std::get<1>(ransac_result);
+    toc("Vanishing Point");
+
+    const auto inliers_count = inliers.flat_array().count();
+
+    tic();
+    auto dist = std::array<float, 3>{};
+    auto R1s = std::array<Eigen::Matrix3f, 3>{};
+    auto dbest = std::min_element(dist.begin(), dist.end());
+    if (inliers_count > 0)
+    {
+      if (R1.squaredNorm() < 1e-5f)
+        R1 = dirs;
+      else
+      {
+        // Save the previous rotation matrix.
+        R0 = R1;
+
+        // Find the best permutation matrix
+        for (auto i = 0; i < 3; ++i)
+        {
+          R1s[i] = perm[i] * dirs;
+          dist[i] = std::abs(angular_distance(R0, R1s[i]));
+          SARA_CHECK(dist[i]);
+        }
+
+        // This is the best current rotation matrix.
+        dbest = std::min_element(dist.begin(), dist.end());
+        R1 = R1s[dbest - dist.begin()];
+      }
+    }
+    toc("Best Permutation Search");
+    SARA_DEBUG << "min_angle = " << (*dbest) / M_PI * 180 << " degree"
+               << std::endl;
+
+    auto detection = Image<Rgb8>{frame};
+#ifdef CLEAR_IMAGE
+    detection.flat_array().fill(Black8);
+#endif
+
+    tic();
+    {
+      if (inliers_count > 0)
+      {
+        SARA_DEBUG << "inliers =  " << inliers.flat_array().count()
+                   << std::endl;
+        SARA_DEBUG << "R =\n" << R1 << std::endl;
+        SARA_DEBUG << "|R| = " << R1.determinant() << std::endl;
+
+        for (auto i = 0u; i < line_segments.size(); ++i)
+        {
+          if (!inliers(i))
+            continue;
+
+          const auto& ls = line_segments[i];
+          const auto& a = ls.p1();
+          const auto& b = ls.p2();
+
+          const Eigen::Vector3f n = planes_backprojected.col(i).head(3);
+          const auto rn = std::array<float, 3>{std::abs(R1.col(0).dot(n)),
+                                               std::abs(R1.col(1).dot(n)),
+                                               std::abs(R1.col(2).dot(n))};
+          const auto ibest = std::min_element(rn.begin(), rn.end()) - rn.begin();
+
+
+          if (ibest == 0)
+            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Red8, 4);
+          else if (ibest == 1)
+            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Green8, 4);
+          else
+            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Blue8, 4);
+        }
+      }
+
+      display(detection);
+    }
+    toc("Display");
 
     // tic();
     // video_writer.write(detection);

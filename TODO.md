@@ -2,6 +2,12 @@ Level Sets
 ==========
 - fix the fast marching with dealing with negative sign.
 
+Optical Distortion
+==================
+Implement the different inverse distortion method.
+- power series approach
+- bisection method
+
 
 Bundle Adjustment Tests
 =======================
