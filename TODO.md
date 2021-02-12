@@ -8,7 +8,6 @@ Implement the different inverse distortion method.
 - power series approach
 - bisection method
 
-
 Bundle Adjustment Tests
 =======================
 
@@ -19,17 +18,6 @@ TODO:
   As a reminder:
   image #i -> camera #i -> BundleAdjustmentProblem.camera_parameters.row(i)
 - Initialize the absolute camera poses.
-
-Vanishing Point Detection
-=========================
-
-- Barnard's Gaussian sphere:
-  - interpretation line
-  - vp = pole, dual of point = equator
-  - n = (u1 x u2) x (v1 x v2)  (normalized coordinates).
-- 3-line RANSAC: Bazin
-- Rother approach: two nice distance functions:
-  - distance(line, line segment), distance(line segment, vp)
 
 Unsupervised Vanishing Point Detection and Camera Calibrationfrom a Single Manhattan Image with Radial Distortion
 =================================================================================================================

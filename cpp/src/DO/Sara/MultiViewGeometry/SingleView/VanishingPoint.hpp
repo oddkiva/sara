@@ -245,7 +245,7 @@ namespace DO::Sara {
   {
     auto vp_solver = DominantOrthogonalDirectionTripletSolver3D<T>{};
     auto inlier_predicate = InlierPredicate<InvarianceAngularDistance3D<T>>{
-        {},                        //
+        {},        //
         threshold  //
     };
     return ransac(planes,            //

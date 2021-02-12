@@ -393,9 +393,9 @@ int __main(int argc, char** argv)
     }
     toc("Display");
 
-    // tic();
-    // video_writer.write(detection);
-    // toc("Video Write");
+    tic();
+    video_writer.write(detection);
+    toc("Video Write");
   }
 
   return 0;
