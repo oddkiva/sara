@@ -15,12 +15,23 @@ macro (sara_add_example example)
 endmacro()
 
 
+# Single view geometry.
 sara_add_example(metric_birds_eye_viewer)
+sara_add_example(orthogonal_vanishing_point_detection)
+target_include_directories(orthogonal_vanishing_point_detection
+  PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
+target_link_libraries(orthogonal_vanishing_point_detection
+  PRIVATE
+  Boost::filesystem
+  $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+
+# Two-view geometry.
 sara_add_example(homography_estimation_example)
 sara_add_example(fundamental_matrix_estimation_example)
 sara_add_example(essential_matrix_estimation_example)
 target_link_libraries(essential_matrix_estimation_example PRIVATE tinyply)
 
+# Bundle adjustment.
 sara_add_example(two_view_bundle_adjustment_example)
 target_include_directories(two_view_bundle_adjustment_example
   PRIVATE

@@ -51,84 +51,6 @@ namespace DO::Sara {
     Projective::Point2<T> vp;
   };
 
-  template <typename T>
-  auto find_dominant_vanishing_point(const TensorView_<T, 2>& lines,
-                                     T threshold = 5.f /* pixels */,
-                                     std::size_t num_random_samples = 100)
-  {
-    auto vp_solver = VanishingPointSolver<T>{};
-    auto inlier_predicate = InlierPredicate<LineToVanishingPointDistance<T>>{
-        {},        //
-        threshold  //
-    };
-    return ransac(lines,             //
-                  vp_solver,         //
-                  inlier_predicate,  //
-                  num_random_samples);
-  }
-
-
-  template <typename T>
-  struct DominantDirectionSolver3D
-  {
-    using model_type = Eigen::Matrix<T, 3, 1>;
-
-    static constexpr auto num_points = 1;
-
-    template <typename BackProjectedPlane>
-    inline auto operator()(const BackProjectedPlane& plane) const -> model_type
-    {
-      return plane.transpose().template block<3, 1>(0, 0);
-    }
-  };
-
-  template <typename T>
-  struct AngularDistance3D
-  {
-    using model_type = Eigen::Matrix<T, 3, 1>;
-    using scalar_type = T;
-
-    AngularDistance3D() = default;
-
-    AngularDistance3D(const model_type& n) noexcept
-      : normal{n}
-    {
-    }
-
-    template <typename Mat>
-    inline auto operator()(const Mat& planes_backprojected) const
-        -> Eigen::Matrix<T, Eigen::Dynamic, 1>
-    {
-      auto distances = Eigen::Matrix<T, Eigen::Dynamic, 1>(planes_backprojected.rows());
-      for (auto i = 0; i < planes_backprojected.rows(); ++i)
-      {
-        model_type plane_normal = planes_backprojected.row(i).transpose().head(3);
-        model_type n_times_v = plane_normal.cross(normal);
-        distances(i) = n_times_v.norm();
-      }
-
-      return distances;
-    }
-
-    Eigen::Matrix<T, 3, 1> normal;
-  };
-
-  template <typename T>
-  auto find_dominant_direction(const TensorView_<T, 2>& planes,
-                                      T angle_threshold,
-                                      std::size_t num_random_samples = 100)
-  {
-    auto vp_solver = DominantDirectionSolver3D<T>{};
-    auto inlier_predicate = InlierPredicate<AngularDistance3D<T>>{
-        {},                        //
-        std::sin(angle_threshold)  //
-    };
-    return ransac(planes,            //
-                  vp_solver,         //
-                  inlier_predicate,  //
-                  num_random_samples);
-  }
-
 
   template <typename T>
   struct DominantOrthogonalDirectionTripletSolver3D
@@ -204,14 +126,14 @@ namespace DO::Sara {
   };
 
   template <typename T>
-  struct InvarianceAngularDistance3D
+  struct AngularDistance3D
   {
     using model_type = Eigen::Matrix<T, 3, 3>;
     using scalar_type = T;
 
-    InvarianceAngularDistance3D() = default;
+    AngularDistance3D() = default;
 
-    InvarianceAngularDistance3D(const model_type& r) noexcept
+    AngularDistance3D(const model_type& r) noexcept
       : rotation{r}
     {
     }
@@ -220,22 +142,38 @@ namespace DO::Sara {
     inline auto operator()(const Mat& planes_backprojected) const
         -> Eigen::Matrix<T, Eigen::Dynamic, 1>
     {
-      auto distances =
-          Eigen::Matrix<T, Eigen::Dynamic, 1>(planes_backprojected.rows());
+      auto distances = Eigen::Matrix<T, Eigen::Dynamic, 1>(  //
+          planes_backprojected.rows()                        //
+      );
 
       // Check whether a plane contains a vanishing point/direction.
       distances = (planes_backprojected.leftCols(3) * rotation)
                       .cwiseAbs()
                       .rowwise()
                       .minCoeff();
-      // distances =
-      //     (planes_backprojected.leftCols(3) * rotation.col(0)).cwiseAbs();
 
       return distances;
     }
 
     Eigen::Matrix<T, 3, 3> rotation;
   };
+
+
+  template <typename T>
+  auto find_dominant_vanishing_point(const TensorView_<T, 2>& lines,
+                                     T threshold = 5.f /* pixels */,
+                                     std::size_t num_random_samples = 100)
+  {
+    auto vp_solver = VanishingPointSolver<T>{};
+    auto inlier_predicate = InlierPredicate<LineToVanishingPointDistance<T>>{
+        {},        //
+        threshold  //
+    };
+    return ransac(lines,             //
+                  vp_solver,         //
+                  inlier_predicate,  //
+                  num_random_samples);
+  }
 
   template <typename T>
   auto find_dominant_orthogonal_direction_triplet(
@@ -244,7 +182,7 @@ namespace DO::Sara {
       std::size_t num_random_samples = 100)
   {
     auto vp_solver = DominantOrthogonalDirectionTripletSolver3D<T>{};
-    auto inlier_predicate = InlierPredicate<InvarianceAngularDistance3D<T>>{
+    auto inlier_predicate = InlierPredicate<AngularDistance3D<T>>{
         {},        //
         threshold  //
     };

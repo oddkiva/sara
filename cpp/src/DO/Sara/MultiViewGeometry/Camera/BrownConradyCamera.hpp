@@ -153,28 +153,28 @@ namespace DO::Sara {
       const auto& h = dst.height();
 
 #pragma omp parallel for
-      for (auto y = 0; y < h; ++y)
+      for (auto yx = 0; yx < h * w; ++yx)
       {
-        for (auto x = 0; x < w; ++x)
+        const auto y = yx / w;
+        const auto x = yx - y * w;
+        const Eigen::Vector2d p =
+            distort_drap_lefevre(Vec2(x, y)).template cast<double>();
+
+        const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
+                                     0 <= p.y() && p.y() < h - 1;
+        if (!in_image_domain)
         {
-          const Eigen::Vector2d p = distort_drap_lefevre(Vec2(x, y)).template cast<double>();
-
-          const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
-                                       0 <= p.y() && p.y() < h - 1;
-          if (!in_image_domain)
-          {
-            dst(x, y) = PixelTraits<PixelType>::zero();
-            continue;
-          }
-
-          auto color = interpolate(src, p);
-          if constexpr (std::is_same_v<PixelType, Rgb8>)
-            color /= 255;
-
-          auto color_converted = PixelType{};
-          smart_convert_color(color, color_converted);
-          dst(x, y) = color_converted;
+          dst(x, y) = PixelTraits<PixelType>::zero();
+          continue;
         }
+
+        auto color = interpolate(src, p);
+        if constexpr (std::is_same_v<PixelType, Rgb8>)
+          color /= 255;
+
+        auto color_converted = PixelType{};
+        smart_convert_color(color, color_converted);
+        dst(x, y) = color_converted;
       }
     }
 
@@ -186,28 +186,27 @@ namespace DO::Sara {
       const auto& h = dst.height();
 
 #pragma omp parallel for
-      for (auto y = 0; y < h; ++y)
+      for (auto yx = 0; yx < h * w; ++yx)
       {
-        for (auto x = 0; x < w; ++x)
+        const auto y = yx / w;
+        const auto x = yx - y * w;
+        const Eigen::Vector2d p = undistort(Vec2(x, y))  //
+                                      .template cast<double>();
+        const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
+                                     0 <= p.y() && p.y() < h - 1;
+        if (!in_image_domain)
         {
-          const Eigen::Vector2d p = undistort(Vec2(x, y))  //
-                                        .template cast<double>();
-          const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
-                                       0 <= p.y() && p.y() < h - 1;
-          if (!in_image_domain)
-          {
-            dst(x, y) = PixelTraits<PixelType>::zero();
-            continue;
-          }
-
-          auto color = interpolate(src, p);
-          if constexpr (std::is_same_v<PixelType, Rgb8>)
-            color /= 255;
-
-          auto color_converted = PixelType{};
-          smart_convert_color(color, color_converted);
-          dst(x, y) = color_converted;
+          dst(x, y) = PixelTraits<PixelType>::zero();
+          continue;
         }
+
+        auto color = interpolate(src, p);
+        if constexpr (std::is_same_v<PixelType, Rgb8>)
+          color /= 255;
+
+        auto color_converted = PixelType{};
+        smart_convert_color(color, color_converted);
+        dst(x, y) = color_converted;
       }
     }
   };

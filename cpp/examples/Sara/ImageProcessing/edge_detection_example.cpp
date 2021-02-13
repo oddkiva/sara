@@ -41,76 +41,13 @@ inline constexpr long double operator"" _percent(long double x)
 }
 
 
-auto initialize_camera_intrinsics_1()
-{
-  auto intrinsics = BrownConradyCamera<float>{};
-
-  const auto f = 991.8030424131325;
-  const auto u0 = 960;
-  const auto v0 = 540;
-  intrinsics.image_sizes << 1920, 1080;
-  intrinsics.K  <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
-  intrinsics.k.setZero();
-  intrinsics.p.setZero();
-
-  return intrinsics;
-}
-
-auto initialize_camera_intrinsics_2()
-{
-  auto intrinsics = BrownConradyCamera<float>{};
-
-  const auto f = 946.8984425572634;
-  const auto u0 = 960;
-  const auto v0 = 540;
-  intrinsics.image_sizes << 1920, 1080;
-  intrinsics.K  <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
-  intrinsics.k <<
-    -0.22996356451342749,
-    0.05952465745165465,
-    -0.007399008111054717;
-  intrinsics.p.setZero();
-
-  return intrinsics;
-}
-
-
-auto initialize_crop_region_1(const Eigen::Vector2i& sizes)
-{
-  const Eigen::Vector2i& p1 = {0, 0.6 * sizes.y()};
-  const Eigen::Vector2i& p2 = {sizes.x(), 0.9 * sizes.y()};
-  return std::make_pair(p1, p2);
-}
-
-auto initialize_crop_region_2(const Eigen::Vector2i& sizes)
-{
-  const Eigen::Vector2i& p1 = {0.1 * sizes.x(), 0.2 * sizes.y()};
-  const Eigen::Vector2i& p2 = {0.9 * sizes.x(), 0.75 * sizes.y()};
-  return std::make_pair(p1, p2);
-}
-
-
-auto default_camera_matrix()
-{
-  auto P = Eigen::Matrix<float, 3, 4>{};
-  P.setZero();
-  P.block<3, 3>(0, 0).setIdentity();
-  return P;
-}
-
-
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(__main);
   return app.exec();
 }
+
 
 int __main(int argc, char** argv)
 {
@@ -132,6 +69,7 @@ int __main(int argc, char** argv)
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
+  auto frame_undistorted = Image<Rgb8>{video_stream.sizes()};
   const auto downscale_factor = 2;
   auto frame_gray32f = Image<float>{};
 
@@ -158,13 +96,8 @@ int __main(int argc, char** argv)
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
-#define CROP
-#ifdef CROP
-  const auto [p1, p2] = initialize_crop_region_1(frame.sizes());
-#else
   const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
   const Eigen::Vector2i& p2 = frame.sizes();
-#endif
 
   auto ed = EdgeDetector{{
       high_threshold_ratio,  //
@@ -172,36 +105,6 @@ int __main(int argc, char** argv)
       angular_threshold      //
   }};
 
-
-  // Initialize the camera matrix.
-  const auto intrinsics = initialize_camera_intrinsics_1();
-
-  auto P = default_camera_matrix();
-  P = intrinsics.K * P;
-  const auto Pt = P.transpose().eval();
-
-  auto R0 = Eigen::Matrix3f{};
-  auto R1 = Eigen::Matrix3f{};
-  R0.setZero();
-  R1.setZero();
-  auto angular_distance = [](const Eigen::Matrix3f& R1, const Eigen::Matrix3f& R2) {
-    const Eigen::Matrix3f delta = R1 * R2.transpose();
-    const auto cosine = 0.5f * (delta.trace() - 1.f);
-    return std::acos(cosine);
-
-  };
-
-  // Permutation matrices.
-  auto perm = std::array<Eigen::Matrix3f, 3>{};
-  perm[0].setIdentity();
-
-  perm[1].col(0) = perm[0].col(1);
-  perm[1].col(1) = perm[0].col(2);
-  perm[1].col(2) = perm[0].col(0);
-
-  perm[2].col(0) = perm[0].col(2);
-  perm[2].col(1) = perm[0].col(0);
-  perm[2].col(2) = perm[0].col(1);
 
   auto frames_read = 0;
   const auto skip = 0;
@@ -215,17 +118,10 @@ int __main(int argc, char** argv)
     ++frames_read;
     if (frames_read % (skip + 1) != 0)
       continue;
-    // if (frames_read < 500)
-    //   continue;
     SARA_DEBUG << "Processing frame " << frames_read << std::endl;
 
-    // Reduce our attention to the central part of the image.
     tic();
-    const auto frame_cropped = crop(frame, p1, p2);
-    toc("Crop");
-
-    tic();
-    frame_gray32f = frame_cropped.convert<float>();
+    frame_gray32f = frame.convert<float>();
     toc("Grayscale");
 
     tic();
@@ -240,31 +136,12 @@ int __main(int argc, char** argv)
     }
 
     ed(frame_gray32f);
-    auto& edges_refined = ed.pipeline.edges_simplified;
+    auto edges = ed.pipeline.edges_simplified;
 
-    // TODO: if we know the camera distortion coefficients, it would be a good
-    // idea to undistort the edges.
-
-// #define SPLIT_EDGES
-#ifdef SPLIT_EDGES
     tic();
     // TODO: split only if the inertias matrix is becoming isotropic.
-    edges_refined = split(edges_refined, 10. * M_PI / 180.);
+    edges = split(edges, 10. * M_PI / 180.);
     toc("Edge Split");
-#endif
-
-    tic();
-    auto edges = std::vector<std::vector<Eigen::Vector2d>>{};
-    edges.reserve(edges_refined.size());
-    for (const auto& e : edges_refined)
-    {
-      if (e.size() < 2)
-        continue;
-      if (length(e) < 20)
-        continue;
-      edges.emplace_back(e);
-    }
-    toc("Edge Filtering");
 
     tic();
     const auto edge_stats = CurveStatistics{edges};
@@ -282,8 +159,7 @@ int __main(int argc, char** argv)
       line_segments.swap(line_segments_filtered);
     }
 
-    // Go back to the original pixel coordinates for single-view geometry
-    // analysis.
+    // Go back to the original pixel coordinates.
     const Eigen::Vector2d p1d = p1.cast<double>();
     const auto s = static_cast<float>(downscale_factor);
     for (auto& ls: line_segments)
@@ -292,130 +168,18 @@ int __main(int argc, char** argv)
       ls.p2() = p1d + s * ls.p2();
     }
     const auto lines = to_lines(line_segments);
-    const auto lines_undistorted = to_undistorted_lines(line_segments, intrinsics);
     toc("Line Segment Extraction");
 
-    tic();
-    const Eigen::MatrixXf lines_undistorted_as_matrix = lines_undistorted.matrix().transpose();
-    const Eigen::MatrixXf planes_backprojected =
-        (Pt * lines_undistorted_as_matrix)  //
-            .colwise()                      //
-            .normalized();
-    toc("Planes Backprojected");
+    // Draw the detected line segments. 
+    for (const auto& s : line_segments)
+      draw_line(frame, s.x1(), s.y1(), s.x2(), s.y2(), Red8);
+    display(frame);
 
 
     tic();
-    const auto planes_tensor = TensorView_<float, 2>{
-        const_cast<float*>(planes_backprojected.data()),
-        {planes_backprojected.cols(), planes_backprojected.rows()}};
-
-    const auto angle_threshold = std::sin(float((2._deg).value));
-    const auto ransac_result = find_dominant_orthogonal_direction_triplet(  //
-        planes_tensor,                                                      //
-        angle_threshold,                                                    //
-        100);
-    const auto dirs = std::get<0>(ransac_result);
-    const auto inliers = std::get<1>(ransac_result);
-    toc("Vanishing Point");
-
-    const auto inliers_count = inliers.flat_array().count();
-
-    tic();
-    auto dist = std::array<float, 3>{};
-    auto R1s = std::array<Eigen::Matrix3f, 3>{};
-    auto dbest = std::min_element(dist.begin(), dist.end());
-    if (inliers_count > 0)
-    {
-      if (R1.squaredNorm() < 1e-5f)
-        R1 = dirs;
-      else
-      {
-        // Save the previous rotation matrix.
-        R0 = R1;
-
-        // Find the best permutation matrix
-        for (auto i = 0; i < 3; ++i)
-        {
-          R1s[i] = perm[i] * dirs;
-          dist[i] = std::abs(angular_distance(R0, R1s[i]));
-          SARA_CHECK(dist[i]);
-        }
-
-        // This is the best current rotation matrix.
-        dbest = std::min_element(dist.begin(), dist.end());
-        R1 = R1s[dbest - dist.begin()];
-      }
-    }
-    toc("Best Permutation Search");
-    SARA_DEBUG << "min_angle = " << (*dbest) / M_PI * 180 << " degree"
-               << std::endl;
-
-    auto detection = Image<Rgb8>{frame};
-#ifdef CLEAR_IMAGE
-    detection.flat_array().fill(Black8);
-#endif
-
-    tic();
-    {
-      if (inliers_count > 0)
-      {
-        SARA_DEBUG << "inliers =  " << inliers.flat_array().count()
-                   << std::endl;
-        SARA_DEBUG << "R =\n" << R1 << std::endl;
-        SARA_DEBUG << "|R| = " << R1.determinant() << std::endl;
-
-        for (auto i = 0u; i < line_segments.size(); ++i)
-        {
-          if (!inliers(i))
-            continue;
-
-          const auto& ls = line_segments[i];
-          const auto& a = ls.p1();
-          const auto& b = ls.p2();
-
-          const Eigen::Vector3f n = planes_backprojected.col(i).head(3);
-          const auto rn = std::array<float, 3>{std::abs(R1.col(0).dot(n)),
-                                               std::abs(R1.col(1).dot(n)),
-                                               std::abs(R1.col(2).dot(n))};
-          const auto ibest = std::min_element(rn.begin(), rn.end()) - rn.begin();
-
-
-          if (ibest == 0)
-            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Red8, 4);
-          else if (ibest == 1)
-            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Green8, 4);
-          else
-            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Blue8, 4);
-        }
-      }
-
-      display(detection);
-    }
-    toc("Display");
-
-    tic();
-    video_writer.write(detection);
+    video_writer.write(frame);
     toc("Video Write");
   }
 
   return 0;
 }
-
-
-#ifdef BACKUP
-const Eigen::Vector2f vp =
-    (s * vph.hnormalized().cast<double>() + p1d).cast<float>();
-const Eigen::Vector3f vp1 = (vp / s).homogeneous().cast<float>();
-const Eigen::Vector3f horizon_dir = (intrinsics.K_inverse * vp1).normalized();
-const auto pitch = std::asin(horizon_dir.y()) / M_PI * 180;
-
-fill_circle(detection, vp.x(), vp.y(), 10, Yellow8);
-
-display(detection);
-draw_string(50, 50, format("pitch = %0.2f degree", pitch), Black8, 20, 0, false,
-            true);
-draw_string(50, 100,
-            format("vx = %0.2f, vy = %0.2f, vz = %0.2f",                //
-                   horizon_dir.x(), horizon_dir.y(), horizon_dir.z()),  //
-            Black8, 20, 0, false, true);
-#endif
