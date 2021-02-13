@@ -96,8 +96,6 @@ int __main(int argc, char** argv)
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
-  const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
-  const Eigen::Vector2i& p2 = frame.sizes();
 
   auto ed = EdgeDetector{{
       high_threshold_ratio,  //
@@ -154,25 +152,25 @@ int __main(int argc, char** argv)
       line_segments_filtered.reserve(line_segments.size());
 
       for (const auto& s : line_segments)
-        line_segments_filtered.emplace_back(s);
+        if (s.length() > 10)
+          line_segments_filtered.emplace_back(s);
 
       line_segments.swap(line_segments_filtered);
     }
 
     // Go back to the original pixel coordinates.
-    const Eigen::Vector2d p1d = p1.cast<double>();
     const auto s = static_cast<float>(downscale_factor);
     for (auto& ls: line_segments)
     {
-      ls.p1() = p1d + s * ls.p1();
-      ls.p2() = p1d + s * ls.p2();
+      ls.p1() *= s;
+      ls.p2() *= s;
     }
     const auto lines = to_lines(line_segments);
     toc("Line Segment Extraction");
 
-    // Draw the detected line segments. 
+    // Draw the detected line segments.
     for (const auto& s : line_segments)
-      draw_line(frame, s.x1(), s.y1(), s.x2(), s.y2(), Red8);
+      draw_line(frame, s.x1(), s.y1(), s.x2(), s.y2(), Red8, 2);
     display(frame);
 
 
