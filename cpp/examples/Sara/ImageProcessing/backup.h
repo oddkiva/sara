@@ -329,3 +329,24 @@ struct CameraPose
     intrinsics.p.setZero();
   }
 };
+
++  auto curve_matcher = CurveMatcher{};
++  curve_matcher.reset_curve_map(frame.width(), frame.height());
++
+
++    // Perform curve matching.
++    curve_matcher.update_curve_features(edges);
++
+
+-    for (const auto& e : edges_refined)
+-      if (e.size() >= 2)
+-        draw_polyline(detection, e, Blue8, p1d, s);
++// #define INSPECT_CURVES_FOR_MATCHING
++#ifdef INSPECT_CURVES_FOR_MATCHING
++    for (auto i = 0u; i < curve_matcher.curves_prev.size(); ++i)
++    {
++      const auto& e = curve_matcher.curves_prev[i];
++      // curve_matcher.stats_prev.oriented_box(i).draw(detection, Red8, p1d,
++      // s);
++      draw_polyline(detection, e, Magenta8, p1d, s);
++    }

@@ -44,4 +44,12 @@ namespace DO::Sara {
     return yaw(psi) * pitch(theta) * roll(phi);
   }
 
+  template <typename T>
+  inline auto angular_distance(const Eigen::Matrix<T, 3, 3>& R1,
+                               const Eigen::Matrix<T, 3, 3>& R2) -> T
+  {
+    const Eigen::Matrix3f delta = R1 * R2.transpose();
+    const auto cosine = T(0.5) * (delta.trace() - T(1));
+    return std::acos(cosine);
+  }
 }

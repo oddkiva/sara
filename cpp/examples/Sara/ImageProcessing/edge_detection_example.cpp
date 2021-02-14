@@ -69,7 +69,6 @@ int __main(int argc, char** argv)
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-  auto frame_undistorted = Image<Rgb8>{video_stream.sizes()};
   const auto downscale_factor = 2;
   auto frame_gray32f = Image<float>{};
 
@@ -79,9 +78,9 @@ int __main(int argc, char** argv)
   const auto basename = fs::basename(video_filepath);
   VideoWriter video_writer{
 #ifdef __APPLE__
-      "/Users/david/Desktop/" + basename + ".curve-analysis.mp4",
+      "/Users/david/Desktop/" + basename + ".edge-detection.mp4",
 #else
-      "/home/david/Desktop/" + basename + ".curve-analysis.mp4",
+      "/home/david/Desktop/" + basename + ".edge-detection.mp4",
 #endif
       frame.sizes()  //
   };
@@ -134,44 +133,15 @@ int __main(int argc, char** argv)
     }
 
     ed(frame_gray32f);
-    auto edges = ed.pipeline.edges_simplified;
+    const auto& edges_simplified = ed.pipeline.edges_simplified;
 
     tic();
-    // TODO: split only if the inertias matrix is becoming isotropic.
-    edges = split(edges, 10. * M_PI / 180.);
-    toc("Edge Split");
-
-    tic();
-    const auto edge_stats = CurveStatistics{edges};
-    toc("Edge Shape Statistics");
-
-    tic();
-    auto line_segments = extract_line_segments_quick_and_dirty(edge_stats);
-    {
-      auto line_segments_filtered = std::vector<LineSegment>{};
-      line_segments_filtered.reserve(line_segments.size());
-
-      for (const auto& s : line_segments)
-        if (s.length() > 10)
-          line_segments_filtered.emplace_back(s);
-
-      line_segments.swap(line_segments_filtered);
-    }
-
-    // Go back to the original pixel coordinates.
-    const auto s = static_cast<float>(downscale_factor);
-    for (auto& ls: line_segments)
-    {
-      ls.p1() *= s;
-      ls.p2() *= s;
-    }
-    const auto lines = to_lines(line_segments);
-    toc("Line Segment Extraction");
-
-    // Draw the detected line segments.
-    for (const auto& s : line_segments)
-      draw_line(frame, s.x1(), s.y1(), s.x2(), s.y2(), Red8, 2);
+    for (const auto& e : edges_simplified)
+      if (e.size() >= 2 && length(e) > 5)
+        draw_polyline(frame, e, Red8, Eigen::Vector2d(0, 0),
+                      float(downscale_factor));
     display(frame);
+    toc("Display");
 
 
     tic();

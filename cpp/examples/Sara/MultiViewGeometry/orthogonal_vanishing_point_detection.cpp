@@ -11,6 +11,7 @@
 
 //! @example
 
+#include <DO/Sara/Core/Math/Rotation.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/DisjointSets/DisjointSets.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
@@ -104,6 +105,62 @@ auto default_camera_matrix()
   return P;
 }
 
+auto match_rotational_axes(const Eigen::Matrix3f& R0,    //
+                           const Eigen::Matrix3f& dirs,  //
+                           Eigen::Matrix3f& R1)
+{
+  // The best matching axes.
+  struct Match
+  {
+    int j0;
+    int j1;
+  };
+  auto match_scores = std::array<std::pair<float, Match>, 3>{};
+
+  // Find the axes that aligns best.
+  const Eigen::Matrix3f dots = (R0.transpose() * dirs).cwiseAbs();
+  SARA_DEBUG << "dots =\n" << dots << std::endl;
+
+  for (auto i = 0; i < 3; ++i)
+  {
+    auto& [score, match] = match_scores[i];
+    match.j0 = i;
+    score = dots.row(i).maxCoeff(&match.j1);
+  }
+
+  // Best matching axis among the three matches.
+  std::sort(match_scores.begin(), match_scores.end(),
+            [](const auto& a, const auto& b) { return a.first > b.first; }  //
+  );
+
+  // Flimsy algorithm.
+  for (const auto& [score, match] : match_scores)
+  {
+    const auto& [j0, j1] = match;
+
+    R1.col(j0) = dirs.col(j1);
+
+    // Flip the sign if necessary.
+    const auto cosine = R0.col(j0).dot(R1.col(j0));
+    if (cosine < 0)
+      R1.col(j0) *= -1;
+
+    SARA_DEBUG << "Matching: " << j0 << " to  " << j1 << std::endl;
+    SARA_DEBUG << "Matching score: " << score << std::endl;
+    SARA_DEBUG << "  R0.col(" << j0 << ") = " << R0.col(j0).transpose()
+               << std::endl;
+    SARA_DEBUG << "  R1.col(" << j0 << ") = " << R1.col(j0).transpose()
+               << std::endl;
+  }
+
+  SARA_DEBUG << "R1 = \n" << R1 << std::endl;
+}
+
+auto calculate_yaw_and_pitch(const Eigen::Vector3f& v)
+{
+  return std::make_pair(std::atan2(v.x(), v.z()), std::asin(-v.y()));
+}
+
 
 int main(int argc, char** argv)
 {
@@ -143,9 +200,9 @@ int __main(int argc, char** argv)
   const auto basename = fs::basename(video_filepath);
   VideoWriter video_writer{
 #ifdef __APPLE__
-      "/Users/david/Desktop/" + basename + ".curve-analysis.mp4",
+      "/Users/david/Desktop/" + basename + ".ortho-vp.mp4",
 #else
-      "/home/david/Desktop/" + basename + ".curve-analysis.mp4",
+      "/home/david/Desktop/" + basename + ".ortho-vp.mp4",
 #endif
       frame.sizes()  //
   };
@@ -180,12 +237,6 @@ int __main(int argc, char** argv)
   auto R1 = Eigen::Matrix3f{};
   R0.setZero();
   R1.setZero();
-  auto angular_distance = [](const Eigen::Matrix3f& R1,
-                             const Eigen::Matrix3f& R2) {
-    const Eigen::Matrix3f delta = R1 * R2.transpose();
-    const auto cosine = 0.5f * (delta.trace() - 1.f);
-    return std::acos(cosine);
-  };
 
   auto frames_read = 0;
   const auto skip = 0;
@@ -306,55 +357,10 @@ int __main(int argc, char** argv)
       {
         // Save the previous rotation matrix.
         R0 = R1;
-
-        // The best matching axes.
-        struct Match {
-          int j0;
-          int j1;
-        };
-        auto match_scores = std::array<std::pair<float, Match>, 3>{};
-
-        // Find the axes that aligns best.
-        const Eigen::Matrix3f dots = (R0.transpose() * dirs).cwiseAbs();
-        SARA_DEBUG << "dots =\n" << dots << std::endl;
-
-        for (auto i = 0; i < 3; ++i)
-        {
-          auto& [score, match] = match_scores[i];
-          match.j0 = i;
-          score = dots.row(i).maxCoeff(&match.j1);
-        }
-
-        // Best matching axis among the three matches.
-        std::sort(
-            match_scores.begin(), match_scores.end(),
-            [](const auto& a, const auto& b) { return a.first > b.first; }  //
-        );
-
-        // Flimsy algorithm.
-        for (const auto& [score, match]: match_scores)
-        {
-          const auto& [j0, j1] = match;
-
-          R1.col(j0) = dirs.col(j1);
-
-          // Flip the sign if necessary.
-          const auto cosine = R0.col(j0).dot(R1.col(j0));
-          if (cosine < 0)
-            R1.col(j0) *= -1;
-
-          SARA_DEBUG << "Matching: " << j0 << " to  " << j1 << std::endl;
-          SARA_DEBUG << "Matching score: " << score << std::endl;
-          SARA_DEBUG << "  R0.col(" << j0 << ") = " << R0.col(j0).transpose()
-                     << std::endl;
-          SARA_DEBUG << "  R1.col(" << j0 << ") = " << R1.col(j0).transpose()
-                     << std::endl;
-        }
-
-        SARA_DEBUG << "R1 = \n" << R1 << std::endl;
+        match_rotational_axes(R0, dirs, R1);
       }
     }
-    toc("Best Permutation Search");
+    toc("Axis Matching");
 
     auto& detection = frame_undistorted;
 #ifdef CLEAR_IMAGE

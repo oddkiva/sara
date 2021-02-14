@@ -19,8 +19,11 @@ TODO:
   image #i -> camera #i -> BundleAdjustmentProblem.camera_parameters.row(i)
 - Initialize the absolute camera poses.
 
-Unsupervised Vanishing Point Detection and Camera Calibrationfrom a Single Manhattan Image with Radial Distortion
-=================================================================================================================
+Vanishing Point Detection with Radial Distortion
+================================================
+Unsupervised Vanishing Point Detection and Camera Calibration from a Single
+Manhattan Image with Radial Distortion
+
 - Plucker coordinates for 3D line computations.
 - LCC = line of circle center, bisector of the chord.
 - Circle fitting: second moment matrix, scattering ellipse
