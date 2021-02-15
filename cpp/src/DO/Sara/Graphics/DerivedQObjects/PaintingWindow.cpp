@@ -211,9 +211,9 @@ namespace DO { namespace Sara {
                                  int width)
   {
     double sl;
-    double dx = x2-x1;
-    double dy = y2-y1;
-    double norm= qSqrt(dx*dx+dy*dy);
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    double norm = qSqrt(dx * dx + dy * dy);
     if (norm < 0.999) // null vector
     {
       m_painter.setPen(QPen(col, width));
@@ -227,47 +227,48 @@ namespace DO { namespace Sara {
 
     qreal dx_norm = dx / norm;
     qreal dy_norm = dy / norm;
-    qreal p1x = x1 + dx_norm*(norm-arrowWidth) + arrowHeight/2.*dy_norm;
-    qreal p1y = y1 + dy_norm*(norm-arrowWidth) - arrowHeight/2.*dx_norm;
-    qreal p2x = x1 + dx_norm*(norm-arrowWidth) - arrowHeight/2.*dy_norm;
-    qreal p2y = y1 + dy_norm*(norm-arrowWidth) + arrowHeight/2.*dx_norm;
-    switch(style) {
-      case 0:
-        m_painter.setPen(QPen(col, width));
-        m_painter.drawLine(x1, y1, x2, y2);
-        m_painter.drawLine(x2, y2, int(p1x), int(p1y));
-        m_painter.drawLine(x2, y2, int(p2x), int(p2y));
-        break;
-      case 1:
-        pts << QPointF(p2x, p2y);
-        pts << QPointF(x2, y2);
-        pts << QPointF(p1x, p1y);
-        sl = norm-(arrowWidth*.7);
-        pts << QPointF(x1 + dx_norm*sl + dy_norm*width,
-                       y1 + dy_norm*sl - dx_norm*width);
-        pts << QPointF(x1 + dy_norm*width, y1 - dx_norm*width);
-        pts << QPointF(x1 - dy_norm*width, y1 + dx_norm*width);
-        pts << QPointF(x1 + dx_norm*sl - dy_norm*width,
-                       y1 + dy_norm*sl + dx_norm*width);
-        path.addPolygon(pts);
-        m_painter.fillPath(path, col);
-        break;
-      case 2:
-        pts << QPointF(p2x, p2y);
-        pts << QPointF(x2, y2);
-        pts << QPointF(p1x, p1y);
-        sl = norm-arrowWidth;
-        pts << QPointF(x1 + dx_norm*sl + dy_norm*width,
-                       y1 + dy_norm*sl - dx_norm*width);
-        pts << QPointF(x1 + dy_norm*width, y1-dx_norm*width);
-        pts << QPointF(x1 - dy_norm*width, y1+dx_norm*width);
-        pts << QPointF(x1 + dx_norm*sl - dy_norm*width,
-                       y1 + dy_norm*sl + dx_norm*width);
-        path.addPolygon(pts);
-        m_painter.fillPath(path, col);
-        break;
-      default:
-        break;
+    qreal p1x = x1 + dx_norm * (norm - arrowWidth) + arrowHeight / 2. * dy_norm;
+    qreal p1y = y1 + dy_norm * (norm - arrowWidth) - arrowHeight / 2. * dx_norm;
+    qreal p2x = x1 + dx_norm * (norm - arrowWidth) - arrowHeight / 2. * dy_norm;
+    qreal p2y = y1 + dy_norm * (norm - arrowWidth) + arrowHeight / 2. * dx_norm;
+    switch (style)
+    {
+    case 0:
+      m_painter.setPen(QPen(col, width));
+      m_painter.drawLine(x1, y1, x2, y2);
+      m_painter.drawLine(x2, y2, int(p1x), int(p1y));
+      m_painter.drawLine(x2, y2, int(p2x), int(p2y));
+      break;
+    case 1:
+      pts << QPointF(p2x, p2y);
+      pts << QPointF(x2, y2);
+      pts << QPointF(p1x, p1y);
+      sl = norm - (arrowWidth * .7);
+      pts << QPointF(x1 + dx_norm * sl + dy_norm * width,
+                     y1 + dy_norm * sl - dx_norm * width);
+      pts << QPointF(x1 + dy_norm * width, y1 - dx_norm * width);
+      pts << QPointF(x1 - dy_norm * width, y1 + dx_norm * width);
+      pts << QPointF(x1 + dx_norm * sl - dy_norm * width,
+                     y1 + dy_norm * sl + dx_norm * width);
+      path.addPolygon(pts);
+      m_painter.fillPath(path, col);
+      break;
+    case 2:
+      pts << QPointF(p2x, p2y);
+      pts << QPointF(x2, y2);
+      pts << QPointF(p1x, p1y);
+      sl = norm - arrowWidth;
+      pts << QPointF(x1 + dx_norm * sl + dy_norm * width,
+                     y1 + dy_norm * sl - dx_norm * width);
+      pts << QPointF(x1 + dy_norm * width, y1 - dx_norm * width);
+      pts << QPointF(x1 - dy_norm * width, y1 + dx_norm * width);
+      pts << QPointF(x1 + dx_norm * sl - dy_norm * width,
+                     y1 + dy_norm * sl + dx_norm * width);
+      path.addPolygon(pts);
+      m_painter.fillPath(path, col);
+      break;
+    default:
+      break;
     }
 
     update();
@@ -361,7 +362,14 @@ namespace DO { namespace Sara {
   void PaintingWindow::grabScreenContents(std::uint8_t *outBuffer)
   {
     const auto image = m_pixmap.toImage().convertToFormat(QImage::Format_RGB888);
-    std::copy_n(image.constBits(), image.sizeInBytes(), outBuffer);
+    const auto image_byte_size =
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+        std::size_t(image.width()) * std::size_t(image.height()) * 3ul
+#else
+        image.sizeInBytes()
+#endif
+        ;
+    std::copy_n(image.constBits(), image_byte_size, outBuffer);
   }
 
   void PaintingWindow::saveScreen(const QString& filename)
