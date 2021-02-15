@@ -27,12 +27,15 @@
 
 #include <drafts/ImageProcessing/EdgeGrouping.hpp>
 
+#include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
 #include <omp.h>
 
 
-using namespace std;
+namespace fs = boost::filesystem;
+namespace po = boost::program_options;
+
 using namespace DO::Sara;
 
 
@@ -199,15 +202,38 @@ int __main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
-  const auto video_filepath = argc == 2
-                                  ? argv[1]
-#ifdef _WIN32
-                                  : "C:/Users/David/Desktop/GOPR0542.MP4"s;
-#elif __APPLE__
-                                  : "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
-#else
-                                  : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-#endif
+  auto video_filepath = std::string{};
+  auto downscale_factor = int{};
+  auto skip = int{};
+
+  po::options_description desc("Orthogonal Vanishing Point Detector");
+  desc.add_options()     //
+      ("help", "Usage")  //
+      ("video,v", po::value<std::string>(&video_filepath),
+       "input video file")  //
+      ("downscale-factor,d",
+       po::value<int>(&downscale_factor)->default_value(2),
+       "downscale factor")  //
+      ("skip,s", po::value<int>(&skip)->default_value(0),
+       "number of frames to skip")  //
+      ;
+
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+
+  if (vm.count("help"))
+  {
+    std::cout << desc << "\n";
+    return 1;
+  }
+
+  if (!vm.count("video"))
+  {
+    std::cout << "The video file must be specified!\n" << desc << "\n";
+    return 1;
+  }
+
 
   // OpenMP.
   omp_set_num_threads(omp_get_max_threads());
@@ -216,12 +242,11 @@ int __main(int argc, char** argv)
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
   auto frame_undistorted = Image<Rgb8>{video_stream.sizes()};
-  const auto downscale_factor = 2;
   auto frame_gray32f = Image<float>{};
+  auto screen_contents = Image<Rgb8>{frame.sizes()};
 
 
   // Output save.
-  namespace fs = boost::filesystem;
   const auto basename = fs::basename(video_filepath);
   VideoWriter video_writer{
 #ifdef __APPLE__
@@ -242,7 +267,8 @@ int __main(int argc, char** argv)
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
-  const auto [p1, p2] = initialize_no_crop_region(frame.sizes());
+  // const auto [p1, p2] = initialize_no_crop_region(frame.sizes());
+  const auto [p1, p2] = initialize_crop_region_1(frame.sizes());
 
   auto ed = EdgeDetector{{
       high_threshold_ratio,  //
@@ -252,8 +278,8 @@ int __main(int argc, char** argv)
 
 
   // Initialize the camera matrix.
-  // const auto intrinsics = initialize_camera_intrinsics_1();
-  const auto intrinsics = initialize_camera_intrinsics(frame.sizes());
+  const auto intrinsics = initialize_camera_intrinsics_1();
+  // const auto intrinsics = initialize_camera_intrinsics(frame.sizes());
 
   auto P = default_camera_matrix();
   P = intrinsics.K * P;
@@ -265,7 +291,6 @@ int __main(int argc, char** argv)
   R1.setZero();
 
   auto frames_read = 0;
-  const auto skip = 0;
   while (true)
   {
     if (!video_stream.read())
@@ -432,15 +457,16 @@ int __main(int argc, char** argv)
       {
         const auto angular_diff_degree =
             angular_distance(R0, R1) / M_PI * 180.f;
-        draw_string(50, 50,
-                    format("Angle diff = %0.2f degree", angular_diff_degree),
-                    Red8, 20, 0, false, true);
+        draw_text(100, 100,
+                  format("Angle diff = %0.2f degree", angular_diff_degree),
+                  White8, 20, 0, false, true);
       }
     }
     toc("Display");
 
     tic();
-    video_writer.write(detection);
+    grab_screen_contents(screen_contents);
+    video_writer.write(screen_contents);
     toc("Video Write");
   }
 

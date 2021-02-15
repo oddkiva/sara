@@ -189,9 +189,9 @@ namespace DO { namespace Sara {
     return draw_poly(poly, c, width);
   }
 
-  bool draw_string(int x, int y, const std::string &s, const Color3ub& c,
-                   int fontSize, double alpha, bool italic, bool bold,
-                   bool underlined)
+  bool draw_text(int x, int y, const std::string& s, const Color3ub& c,
+                 int fontSize, double alpha, bool italic, bool bold,
+                 bool underlined, int pen_width)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawText",
@@ -202,7 +202,8 @@ namespace DO { namespace Sara {
       Q_ARG(int, fontSize),
       Q_ARG(qreal, qreal(alpha)),
       Q_ARG(bool, italic), Q_ARG(bool, bold),
-      Q_ARG(bool, underlined));
+      Q_ARG(bool, underlined),
+      Q_ARG(int, pen_width));
   }
 
   bool draw_arrow(int a, int b, int c, int d, const Color3ub& col,
@@ -359,13 +360,20 @@ namespace DO { namespace Sara {
 
   bool save_screen(Window w, const std::string& fileName)
   {
-    if (!active_window_is_visible())
-      return false;
     return QMetaObject::invokeMethod(
       w, "saveScreen",
       Qt::BlockingQueuedConnection,
       Q_ARG(const QString&, QString(fileName.c_str())));
-    return true;
+  }
+
+  bool grab_screen_contents(ImageView<Rgb8>& image, Window w)
+  {
+    auto out_buffer = reinterpret_cast<std::uint8_t*>(image.data());
+    return QMetaObject::invokeMethod(     //
+        w, "grabScreenContents",          //
+        Qt::BlockingQueuedConnection,     //
+        Q_ARG(std::uint8_t*, out_buffer)  //
+    );
   }
 
 } /* namespace Sara */

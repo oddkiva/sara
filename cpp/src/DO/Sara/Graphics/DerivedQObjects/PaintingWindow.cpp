@@ -176,22 +176,32 @@ namespace DO { namespace Sara {
   void PaintingWindow::drawText(int x, int y, const QString& text,
                                 const QColor& color, int fontSize,
                                 double orientation, bool italic, bool bold,
-                                bool underline)
+                                bool underline, int penWidth)
   {
+    // Save the current state.
+    m_painter.save();
     QFont font;
     font.setPointSize(fontSize);
     font.setItalic(italic);
     font.setBold(bold);
     font.setUnderline(underline);
 
-    m_painter.save();
-    m_painter.setPen(color);
+    QPainterPath textPath;
+    QPointF baseline(0, 0);
+    textPath.addText(baseline, font, text);
+
+    // Outline the text by default for more visibility.
+    m_painter.setBrush(color);
+    m_painter.setPen(QPen(Qt::black, penWidth));
     m_painter.setFont(font);
 
     m_painter.translate(x, y);
     m_painter.rotate(qreal(orientation));
-    m_painter.drawText(0, 0, text);
+    m_painter.drawPath(textPath);
+
+    // Restore the previous painter state.
     m_painter.restore();
+
     update();
   }
 
@@ -346,6 +356,12 @@ namespace DO { namespace Sara {
       m_painter.setCompositionMode(QPainter::CompositionMode_Multiply);
     else
       m_painter.setCompositionMode(QPainter::CompositionMode_Source);
+  }
+
+  void PaintingWindow::grabScreenContents(std::uint8_t *outBuffer)
+  {
+    const auto image = m_pixmap.toImage().convertToFormat(QImage::Format_RGB888);
+    std::copy_n(image.constBits(), image.sizeInBytes(), outBuffer);
   }
 
   void PaintingWindow::saveScreen(const QString& filename)

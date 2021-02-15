@@ -12,13 +12,15 @@ macro (sara_add_example example)
     FOLDER "Examples/Sara/FeatureMatching")
 endmacro ()
 
-sara_add_example(sift_matching_example)
+sara_add_example(image_sift_matching)
 
-sara_add_example(edge_matching_example)
-target_link_libraries(edge_matching_example PRIVATE Boost::filesystem)
+sara_add_example(video_edge_matching)
+target_link_libraries(video_edge_matching
+  PRIVATE
+  Boost::filesystem)
 
-sara_add_example(sift_matching)
-target_link_libraries(sift_matching
+sara_add_example(video_sift_matching)
+target_link_libraries(video_sift_matching
   PRIVATE
   Boost::filesystem
   Boost::program_options)

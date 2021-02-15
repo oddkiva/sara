@@ -46,6 +46,24 @@ auto initialize_crop_region_2(const Eigen::Vector2i& sizes)
   return std::make_pair(p1, p2);
 }
 
+auto imshow(const std::string& window_name, const ImageView<Rgb8>& image)
+{
+  static auto window_names = std::map<std::string, Window>{};
+  auto w_it = window_names.find(window_name);
+
+  auto w = Window{};
+  if (w_it == window_names.end())
+  {
+    w = create_window(image.sizes(), window_name);
+    window_names[window_name] = w;
+  }
+  else
+    w = w_it->second;
+
+  set_active_window(w);
+  display(image);
+}
+
 
 int main(int argc, char** argv)
 {
@@ -63,20 +81,10 @@ int __main(int argc, char** argv)
   auto downscale_factor = int{};
   auto skip = int{};
 
-  po::options_description desc("live_sift_matching");
+  po::options_description desc("video_sift_matching");
   desc.add_options()     //
       ("help", "Usage")  //
-      ("video,v",
-       po::value<std::string>(&video_filepath)
-           ->default_value(
-#ifdef _WIN32
-               "C:/Users/David/Desktop/GOPR0542.MP4"s
-#elif __APPLE__
-               "/Users/david/Desktop/Datasets/videos/sample10.mp4"s
-#else
-               "/home/david/Desktop/Datasets/sfm/Family.mp4"s
-#endif
-               ),
+      ("video,v", po::value<std::string>(&video_filepath),
        "input video file")  //
       ("downscale-factor,d",
        po::value<int>(&downscale_factor)->default_value(2),
@@ -95,6 +103,12 @@ int __main(int argc, char** argv)
     return 1;
   }
 
+  if (!vm.count("video"))
+  {
+    std::cout << "The video file must be specified!\n" << desc << "\n";
+    return 1;
+  }
+
   // OpenMP.
   omp_set_num_threads(omp_get_max_threads());
 
@@ -102,22 +116,22 @@ int __main(int argc, char** argv)
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
   auto frame_gray32f = Image<float>{};
-
+  auto screen_contents = Image<Rgb8>{frame.sizes()};
 
   // Output save.
   const auto basename = fs::basename(video_filepath);
   VideoWriter video_writer{
 #ifdef __APPLE__
-      "/Users/david/Desktop/" + basename + ".curve-analysis.mp4",
+      "/Users/david/Desktop/" + basename + ".sift-matching.mp4",
 #else
-      "/home/david/Desktop/" + basename + ".curve-analysis.mp4",
+      "/home/david/Desktop/" + basename + ".sift-matching.mp4",
 #endif
       frame.sizes()  //
   };
 
 
   // Show the local extrema.
-  create_window(frame.sizes());
+  auto w1 = create_window(frame.sizes(), "SIFT matching " + basename);
   set_antialiasing();
 
 #define CROP
@@ -182,9 +196,7 @@ int __main(int argc, char** argv)
       SARA_CHECK(matches.size());
     }
 
-    if (!active_window())
-      create_window(frame.sizes());
-
+    set_active_window(w1);
     display(frame);
     const auto s = 1 / float(downscale_factor);
     for (size_t i = 0; i < matches.size(); ++i)
@@ -195,6 +207,11 @@ int __main(int argc, char** argv)
       const Eigen::Vector2f b = p1.cast<float>() + downscale_factor * matches[i].y_pos();
       draw_arrow(a, b, Yellow8, 2);
     }
+    draw_text(100, 100, "SIFT matches = " + std::to_string(matches.size()),
+              White8, 20, 0, false, true, false);
+
+    grab_screen_contents(screen_contents, w1);
+    video_writer.write(screen_contents);
   }
 
   return 0;

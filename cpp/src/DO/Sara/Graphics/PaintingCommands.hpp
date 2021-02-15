@@ -260,9 +260,10 @@ namespace DO { namespace Sara {
     \return false otherwise.
    */
   DO_SARA_EXPORT
-  bool draw_string(int x, int y, const std::string &s, const Color3ub& c,
-                   int fontSize = 12, double alpha = 0, bool italic = false,
-                   bool bold = false, bool underlined = false);
+  bool draw_text(int x, int y, const std::string& s, const Color3ub& c,
+                 int font_size = 12, double alpha = 0, bool italic = false,
+                 bool bold = false, bool underlined = false,
+                 int pen_thickness = 1);
 
   /*!
     @brief Draw an arrow in the active PaintingWindow window.
@@ -639,17 +640,21 @@ namespace DO { namespace Sara {
   bool set_transparency(Window w = active_window(), bool on = true);
 
   // ======================================================================== //
-  // Save screen command on window.
-  /*!
-    @brief Save contents on the screen.
-    @param[in] w a PaintingWindow instance.
-    @param[in] fileName a file name.
-    \return true if save is successful.
-    \return false otherwise.
-   */
+  //! @brief Save contents on the screen.
+  //! @param[in] w a PaintingWindow instance.
+  //! @param[in] fileName a file name.
+  //! @return true if save is successful.
+  //! @return false otherwise.
   DO_SARA_EXPORT
   bool save_screen(Window w, const std::string& fileName);
 
+  //! @brief Save contents on the screen.
+  //! @param[in] w a PaintingWindow instance.
+  //! @param[in] fileName a file name.
+  //! @return true if save is successful.
+  //! @return false otherwise.
+  DO_SARA_EXPORT
+  bool grab_screen_contents(ImageView<Rgb8>& image, Window = active_window());
   //! @}
 
 } /* namespace Sara */

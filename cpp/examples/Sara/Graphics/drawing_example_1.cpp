@@ -18,7 +18,8 @@ using namespace DO::Sara;
 
 GRAPHICS_MAIN()
 {
-  Window W = create_window(512, 512, "2D basics");
+  auto W = create_window(512, 512, "2D basics");
+  set_antialiasing(W);
 
   // Draw a red line from (20, 10) to (300, 100) with 5-pixel thickness.
   draw_line(20, 10, 300, 100, Red8, 5);
@@ -41,36 +42,31 @@ GRAPHICS_MAIN()
   draw_circle(Point2i(200, 200), 40, Red8);
 
   /*
-   Draw an oriented ellipse with
-   - center = (150, 100)
-   - radii r1 = 10, r2 = 20,
-   - orientation = 45 degree
-   - in cyan color,
-   - pencil width = 1.
+   * Draw an oriented ellipse with
+   * - center = (150, 100)
+   * - radii r1 = 10, r2 = 20,
+   * - orientation = 45 degree
+   * - in cyan color,
+   * - pencil width = 1.
    */
   draw_ellipse(Vector2f(150.f, 100.f), 10.f, 20.f, 45.f, Cyan8, 1);
   draw_ellipse(Vector2f(50.f, 50.f), 10.f, 20.f, 0.f, Red8, 1);
 
   // Draw a few black points.
-  for (int i = 0; i < 20; i+= 2)
-    draw_point(i+100, i+200, Black8);
+  for (int i = 0; i < 20; i += 2)
+    draw_point(i + 100, i + 200, Black8);
   // Draw a string.
-  draw_string(50, 250, "a string", Red8);
+  draw_text(50, 250, "a string", Red8);
   // Draw another string but with font size=18 and in italic.
-  draw_string(40, 270, "another string", Magenta8, 18, 0, true);
+  draw_text(40, 270, "another string", Magenta8, 18, 0, true);
   // ... font size=24, rotation angle=-10, bold
-  draw_string(30,300,"yet another string",Black8,24,-10,
-             false,true);
+  draw_text(30, 300, "yet another string", White8, 24, -10, false, true);
   // Draw a polygon with the following points.
-  int px[] = { 201, 200, 260, 240 };
-  int py[] = { 301, 350, 330, 280 };
+  int px[] = {201, 200, 260, 240};
+  int py[] = {301, 350, 330, 280};
   fill_poly(px, py, 4, Blue8);
   // Draw another polygon.
-  Point2i P[]={
-    Point2i(100, 100),
-    Point2i(100, 150),
-    Point2i(150, 120)
-  };
+  Point2i P[] = {Point2i(100, 100), Point2i(100, 150), Point2i(150, 120)};
   draw_poly(P, 3, Red8, 3);  // ... with a red pen with 3-pixel thickness.
 
   // Draw a blue arrow from (100,450) to (200,450).

@@ -37,7 +37,7 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   for (auto s = 0; s < sift_octave.params.num_scales + 3; ++s)
   {
     sara::display(sift_octave.gaussian(s, 0));
-    sara::draw_string(20, 20,
+    sara::draw_text(20, 20,
                       sara::format("Gaussian: scale[%d] = %f", s,
                                    sift_octave.params.scales[s]),
                       sara::Blue8);
@@ -52,14 +52,14 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   for (auto s = 0; s < sift_octave.params.num_scales + 3; ++s)
   {
     sara::display(sara::color_rescale(sift_octave.gradient_magnitude(s, 0)));
-    sara::draw_string(20, 20,
+    sara::draw_text(20, 20,
                       sara::format("Gradient magnitude: scale[%d] = %f", s,
                                    sift_octave.params.scales[s]),
                       sara::Blue8);
     sara::get_key();
 
     sara::display(sara::color_rescale(sift_octave.gradient_orientation(s, 0)));
-    sara::draw_string(20, 20,
+    sara::draw_text(20, 20,
                       sara::format("Gradient orientation: scale[%d] = %f", s,
                                    sift_octave.params.scales[s]),
                       sara::Blue8);
@@ -74,7 +74,7 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   {
     sara::display(
         sara::color_rescale(sift_octave.difference_of_gaussians(s, 0)));
-    sara::draw_string(
+    sara::draw_text(
         20, 20,
         sara::format("DoG: scale[%d] = %f", s, sift_octave.params.scales[s]),
         sara::Blue8);

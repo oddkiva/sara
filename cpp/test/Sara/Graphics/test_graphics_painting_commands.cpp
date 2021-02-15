@@ -91,10 +91,10 @@ BOOST_AUTO_TEST_CASE(test_draw_poly)
   BOOST_CHECK(draw_poly(poly, 2, Red8, 1));
 }
 
-BOOST_AUTO_TEST_CASE(test_draw_string)
+BOOST_AUTO_TEST_CASE(test_draw_text)
 {
   BOOST_CHECK(
-      draw_string(10, 10, "example string", Red8, 14, 0.5, true, false, false));
+      draw_text(10, 10, "example string", Red8, 14, 0.5, true, false, false));
 }
 
 BOOST_AUTO_TEST_CASE(test_draw_arrow)
