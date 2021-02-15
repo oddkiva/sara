@@ -27,7 +27,5 @@ def radial_correction(k1, k2, xd, yd, c = np.zeros(2)):
 
 pxu, pyu = radial_correction(k1, k2, px, py)
 
-import IPython; IPython.embed()
-
 plt.scatter(pxu, pyu)
 plt.show()
