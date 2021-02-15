@@ -81,6 +81,31 @@ auto initialize_camera_intrinsics_2()
   return intrinsics;
 }
 
+auto initialize_camera_intrinsics(const Eigen::Vector2i& sizes)
+{
+  auto intrinsics = BrownConradyCamera<float>{};
+
+  const auto f = 0.5f * (sizes.x() + sizes.y());
+  const auto u0 = 0.5f * sizes.x();
+  const auto v0 = 0.5f * sizes.y();
+  intrinsics.image_sizes = sizes.cast<float>();
+  intrinsics.K  <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  intrinsics.k.setZero();
+  intrinsics.p.setZero();
+
+  return intrinsics;
+}
+
+
+auto initialize_no_crop_region(const Eigen::Vector2i& sizes)
+{
+  const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
+  const Eigen::Vector2i& p2 = sizes;
+  return std::make_pair(p1, p2);
+}
 
 auto initialize_crop_region_1(const Eigen::Vector2i& sizes)
 {
@@ -217,7 +242,7 @@ int __main(int argc, char** argv)
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
-  const auto [p1, p2] = initialize_crop_region_1(frame.sizes());
+  const auto [p1, p2] = initialize_no_crop_region(frame.sizes());
 
   auto ed = EdgeDetector{{
       high_threshold_ratio,  //
@@ -227,7 +252,8 @@ int __main(int argc, char** argv)
 
 
   // Initialize the camera matrix.
-  const auto intrinsics = initialize_camera_intrinsics_1();
+  // const auto intrinsics = initialize_camera_intrinsics_1();
+  const auto intrinsics = initialize_camera_intrinsics(frame.sizes());
 
   auto P = default_camera_matrix();
   P = intrinsics.K * P;

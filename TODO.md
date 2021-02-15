@@ -1,6 +1,22 @@
-Level Sets
-==========
-- fix the fast marching with dealing with negative sign.
+OPENGL
+======
+- Learn how to use framebuffer for texture streaming.
+
+VULKAN
+======
+- Hello Triangle tutorial.
+
+HALIDE
+======
+
+The Halide implementation of SIFT has been written with good confidence regarding the
+implementation details:
+
+Optimization
+------------
+- [ ] Minimize transfers back-and-forth between host memory and device memory.
+      - [ ] Provide API in which only we interact only with
+            `Halide::Runtime::Buffer<T>` objects.
 
 Optical Distortion
 ==================
@@ -30,22 +46,6 @@ Manhattan Image with Radial Distortion
 - centroid of the chord determined from the scattering ellipse
 - angle between the LCC and the x-axis is determined.
 
-OPENGL
-======
-- Learn how to use framebuffer for texture streaming.
-
-VULKAN
-======
-- Hello Triangle tutorial.
-
-HALIDE
-======
-
-The Halide implementation of SIFT has been written with good confidence regarding the
-implementation details:
-
-Optimization
-------------
-- [ ] Minimize transfers back-and-forth between host memory and device memory.
-      - [ ] Provide API in which only we interact only with
-            `Halide::Runtime::Buffer<T>` objects.
+Level Sets
+==========
+- fix the fast marching with dealing with negative sign.
