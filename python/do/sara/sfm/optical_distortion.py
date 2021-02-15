@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+# Important overlooked details: coordinates should to be normalized so that
+# they are in [-1, 1].
 x = np.linspace(-1, 1, 20)
 y = np.linspace(-1, 1, 20)
 xv, yv = np.meshgrid(x, y)
