@@ -30,10 +30,10 @@ Edge Matching
   - two histograms on the left
   - two histograms on the right.
 
-- gradient histogram on the whole 
+- gradient histogram on the whole
 - Describe curve/line in this dominant gradient
 - Define a scale
-- Describe the line 
+- Describe the line
 
 
 Optical Distortion
