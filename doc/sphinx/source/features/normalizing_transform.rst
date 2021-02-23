@@ -3,8 +3,8 @@
 Normalizing Transform of a Feature
 ==================================
 
-Let us remark the following proposition which relates the normalizing transform
-:math:`\bT_x` to the feature shape :math:`\bSigma_x`.
+First let us observing the following proposition which relates the normalizing
+transform :math:`\bT_x` to the feature shape :math:`\bSigma_x`.
 
 
 .. important::
@@ -50,9 +50,9 @@ Let us remark the following proposition which relates the normalizing transform
 Geometric interpretation of the QR factorization
 ------------------------------------------------
 
-Consider the shape matrix :math:`\bSigma_x`. Recall that
-:math:`\bSigma_x` defines the elliptic shape :math:`\Shape_x`. We want
-to retrieve the transformation :math:`L_x` that satisfies
+Now consider a shape matrix :math:`\bSigma_x`. We recall that :math:`\bSigma_x`
+defines the elliptic shape :math:`\Shape_x`. And we want to retrieve the
+transformation :math:`L_x` that satisfies
 
 .. math::
    :label: eq-sigma_l

@@ -42,6 +42,12 @@ Implement the different inverse distortion method.
 - power series approach
 - bisection method
 
+
+Autocalibration with radial distortion
+======================================
+Reimplement Fitzgibbon's approach (fundamental matrix with one radial distortion
+coefficients).
+
 Bundle Adjustment Tests
 =======================
 

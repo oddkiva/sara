@@ -3,22 +3,34 @@
 Ellipse Intersections
 *********************
 
-This section details the implementation of ellipse intersections in **Sara**.
-This section is extracted from the appendix of my thesis
-:cite:`Ok:2013:phdthesis` and has been retouched a bit.
+Context
+-------
 
-:cite:`Eberly` provides a comprehensive study on the computation of ellipses
-intersection, namely the computation of its area and its intersection points.
-This is non a trivial geometric problem. We complement :cite:`Eberly`’s study
-with additional technical details about the area computation of two intersecting
-ellipses.
+I had to calculate ellipse intersections in the feature matching method I
+published in ACCV in :cite:`ok:hal-00743044` and is also shipped with **Sara**.
+I did not want to do polygonal approximations and want to have a closed-form
+approach if possible at all.
+
+Then I found Eberly's paper :cite:`Eberly` that provides a nice explanation
+about the computation of ellipse intersection. It details namely how to
+calculate its intersection points and the intersection area. And it is not that
+a simple geometric problem.
+
+I revisited again :cite:`Eberly`'s study in the appendix of my thesis
+:cite:`Ok:2013:phdthesis` and I have retouched the original text here a bit to
+make it a bit more human (less dry) in this documentation.
+
+The modest contribution of the text is to break down a bit more the
+implementation details about the area computation of two intersecting ellipses,
+when you read the C++ code in **Sara**.
+
 
 Origin-Centered Axis-Aligned Ellipses
 -------------------------------------
 
-Let :math:`\mathcal{E}` be a ellipse with semi-major axis :math:`a` and
-semi-minor axis :math:`b`, *i.e.*, :math:`\, a \geq b > 0`. Let us first suppose
-that :math:`\mathcal{E}` is centered at the origin and is axis-aligned oriented,
+Let us start with an ellipse :math:`\mathcal{E}` with semi-major axis :math:`a`
+and semi-minor axis :math:`b`, *i.e.*, :math:`\, a \geq b > 0`. We suppose that
+:math:`\mathcal{E}` is centered at the origin and is axis-aligned oriented,
 *i.e*., such that the axis :math:`a` is along the :math:`x`-axis and the axis
 :math:`b` along the :math:`y`-axis. Then,
 
@@ -34,6 +46,11 @@ that :math:`\mathcal{E}` is centered at the origin and is axis-aligned oriented,
 Ellipse Area
 ~~~~~~~~~~~~
 
+In case our maths is rusty, it is useful to remind ourselves how we calculate
+the ellipse area as a warm-up.
+
+Observe the ellipse below:
+
 .. _figriemannsum:
 .. figure:: ../figures/ellipsearea.png
     :align: center
@@ -41,8 +58,9 @@ Ellipse Area
 
     Riemann sum approximating the upper quadrant area of the ellipse.
 
-Using the symmetry in the ellipse, the area of ellipse :math:`\mathcal{E}` is
-:math:`4` times the upper quadrant area of the ellipse, *i.e.*,
+Using the ellipse equation and exploiting the symmetry of the ellipse, the area
+of ellipse :math:`\mathcal{E}` is :math:`4` times the upper quadrant area of the
+ellipse, *i.e.*,
 
 .. math:: \mathop{\mathrm{area}}(\mathcal{E}) = 4 \int_{0}^{a} y(x) \mathop{\mathrm{d}x} = 4 b \int_{0}^{a} \sqrt{1 - \frac{x^2}{a^2}} \mathop{\mathrm{d}x} = \pi a b
 

@@ -40,6 +40,7 @@ Table of Contents
    features
    descriptors
    sfm
+   imu
 
    examples
    third_party_libraries

@@ -3,54 +3,79 @@
 Essential Matrix and Relative Motion
 ====================================
 
-Consider two cameras :math:`C_0` and :math:`C_1`. In this setup, the coordinate
-system of the first camera :math:`C_0` is considered to be the world coordinate
-system.
+Consider two cameras :math:`C_0` and :math:`C_1`. In the sequel, we can sort of
+imagine that:
 
-Let us denote a 3D point expressed in the world coordinate system by
-:math:`\mathbf{X}^0`. We can calculate its coordinates :math:`\mathbf{X}^1` in
-the second coordinate system by the rigid body motion
+- the coordinate system of the first camera :math:`C_0` is the world coordinate
+  system.
+- the coordinate system of the second camera :math:`C_1` is a convenient local
+  coordinate system.
+
+Consider a 3D point with world coordinate system :math:`\mathbf{X}^0` and
+suppose we can calculate its coordinates :math:`\mathbf{X}^1` in this local
+coordinate system with the following rigid body motion
 
 .. math::
 
    \mathbf{X}^1 = \mathbf{R} \mathbf{X}^0 + \mathbf{t} .
 
-We also denote the 3D vector expressed in the first coordinate system by
-:math:`\mathbf{d}^0` . We can calculate its coordinates in the second coordinate
-system as
+As a reminder, we can interpret the formula as follows:
 
-.. math::
+- The column vectors of the rotation matrix :math:`\mathbf{R}` are the
+  coordinates of the world axes expressed in the local coordinate system.
+- :math:`\mathbf{t}` are the coordinates of the world origin expressed in the
+  local camera coordinate system.
 
-   \mathbf{d}^1 = \mathbf{R} \mathbf{d}^0.
+Basically this rigid body describes the relative position of camera :math:`C_0`
+w.r.t. camera :math:`C_1` (and in its local coordinate system), such that:
 
-Thus the essential matrix we implement in *Sara* has the following form
+- the local camera axes are rotated to the world camera axes by the rotation
+  :math:`\mathbf{R}`.
+- the origin of local coordinate system is moved to the world origin position by
+  the translation :math:`\mathbf{t}`.
+
+The essential matrix we implement in *Sara* uses *this* rotation matrix and
+*this* translation vector.
 
 .. math::
 
    \mathbf{E} = [\mathbf{t}]_\times \mathbf{R}\ .
 
-Be careful: this is not the same convention described in the wikipedia page.
+The relative *motion* extracted from the essential matrix of camera
+:math:`C_1` w.r.t. :math:`C_0` will mean this rotation and translation pair
+:math:`(\mathbf{R}, \mathbf{t})`. And be careful, this is not the same
+convention described in the wikipedia page.
 
-One way of interpreting the relative motion is as follows.
 
-- The columns of :math:`\mathbf{R}` are the coordinates of the world axes w.r.t.
-  the camera coordinate system.
-- The vector :math:`\mathbf{t}` are the coordinates of the world center w.r.t.
-  the camera coordinate system.
+Now when I talk about the relative **pose** of camera :math:`C_1` w.r.t. to camera
+:math:`C_0`, I will mean the inverse rigid body motion
+:math:`(\mathbf{R}_{0 \rightarrow 1}, \mathbf{t}_{0 \rightarrow 1})`.
 
-Rephrasing again, the relative motion :math:`(\mathbf{R}, \mathbf{t})` can be
-understood as follows.
+The reverse rigid body motion is obtained from:
 
-- The first camera center wrt to the second camera center by a translational
-  quantity :math:`-\mathbf{t}`. Notice here the negative sign.
-- The initial camera gaze direction has moved to the second camera gaze
-  direction by a rotational quantity :math:`\mathbf{R}^T`.
-- The coordinates of these displacements are expressed w.r.t. the second camera
-  coordinates.
+.. math::
 
-Remarks
--------
-The following remarks are useful for debugging purposes:
+   \begin{aligned}
+
+   \mathbf{R} \mathbf{X}^0 + \mathbf{t} &= \mathbf{X}^1 \\
+
+   \mathbf{X}^0 + \mathbf{R^T} \mathbf{t} &= \mathbf{R}^T \mathbf{X}^1 \\
+
+   \mathbf{X}^0 &= \mathbf{R}^T \mathbf{X}^1 - \mathbf{R^T} \mathbf{t} \\
+
+   \end{aligned}
+
+By interpreting the inverse rigid body motion, we see that:
+
+- the position of camera :math:`C_1` w.r.t. camera coordinate system :math:`C_0`,
+  is calculated as :math:`\mathbf{t}_{0 \rightarrow 1} = -\mathbf{R}^T \mathbf{t}`.
+- the "gaze orientation", i.e. the rotation matrix, of camera :math:`C_1` w.r.t. camera
+  coordinate system :math:`C_0` is calculated as :math:`\mathbf{R}_{0
+  \rightarrow 1} = \mathbf{R}^T`
+
+Quick Summary
+-------------
+The following remarks are useful to debug code dealing with structure-from-motion:
 
 - The coordinates of the first camera center in the first camera coordinate
   system is :math:`(0, 0, 0)`.
@@ -72,36 +97,62 @@ direction of each camera :math:`C_i = (\mathbf{R}_i, \mathbf{t}_i)` in a global
 coordinate system. The position and the gaze direction of the camera is called
 the camera pose.
 
-To start, we choose one camera, say :math:`C_0` and its associated camera
+To start, we choose one camera, say :math:`C_0`, and its associated camera
 coordinate system will be set as the world coordinate system.
 
-The relative motion **from** camera :math:`C_i` **to** camera :math:`C_j` is the
-rotation and translation pair :math:`(\mathbf{R}_{ij}, \mathbf{t}_{ij})`.  The
-relative motion is recovered from the estimation of the essential matrix
-:math:`\mathbf{E}_{ij}`.
+The relative pose of camera :math:`C_j` w.r.t. camera :math:`C_i` is the
+rotation and translation pair :math:`(\mathbf{R}_{i \rightarrow j},
+\mathbf{t}_{i \rightarrow j})`. Let us now shorten the notations by writing them
+as :math:`(\mathbf{R}_{ij}, \mathbf{t}_{ij})` The relative motion is recovered
+from the estimation of the essential matrix :math:`\mathbf{E}_{ij}`.
 
 Let us assume the camera network is fully connected from now on. To retrieve
 the absolute pose of each camera :math:`C_i`, we can retrieve the shortest path
-of connected cameras :math:`C_0, C_{i_1}, C_{i_2},\dots, C_i`. Composing
-successively the relative motion, we retrieve the global pose:
+of connected cameras :math:`C_0, C_{i_1}, C_{i_2},\dots, C_{i}`. Composing
+successively the relative motions, we would retrieve the absolute pose by
+applying recursively:
 
 .. math::
-   \mathbf{R}_i = \mathbf{R}_{ji} \dots \mathbf{R}_{i_1 i_2} \mathbf{R}_{0 i_1} \\
+   \mathbf{R}_{j} = \mathbf{R}_{i} \mathbf{R}_{ij} \mathbf{R}_{i}^T \\
 
-   \mathbf{t}_i = \mathbf{t}_{ji} + \dots + \mathbf{t}_{i_1 i_2} + \mathbf{t}_{0 i_1}
-
+.. math::
+   \mathbf{t}_j = \mathbf{t}_{ij} + \mathbf{t}_i
 
 Because the relative pose estimations are noisy, the successive composition of
-rotation and translation will induce an accumulation of errors.
+rotation and translation will induce an accumulation of errors. And as a
+consequence the estimated global camera pose can drift very far from the ground
+truth pose.
 
-However the addition of translations is the most problematic because the
-relative pose estimation can only recover the translation up to a scale. In
-other words, it can only recover the direction of the translation.
+Unfortunately, we cannot add translations together like this because the
+relative pose from the essential matrix allows us to recover the translation
+only up to a scale. In other words, we can only know the direction vector of the
+translation but not the magnitude of the translation. Thus it is not a good
+approach.
 
-Thus it is not a good approach. Instead as described in Snavely's paper, Bundler
-starts from two cameras. Then a new camera is added and its pose is initialized
-with the Direct Linear Transform (DLT). The internal camera parameters are
-initialized from the extraction of EXIF metadata.
+Fortunately, as described in Snavely's paper, we can do like Bundler. Bundler
+starts from two cameras. From these two cameras, we can initialize the 3D
+geometry up to a scale by estimating the essential matrix and then by
+triangulation. A bundle adjustment is then applied to refine the 3D geometry and
+the camera parameters.
+
+Then a third new camera is added if its view overlaps with at least one of the
+two cameras. Because the 3D geometry is initialized, we know the correspondences
+between the 3D world points and the 2D image points in each views. Since the 3D
+image points are also imaged in the third view, we can initialize the third
+camera pose by camera resectioning.
+
+The internal camera parameters are initialized from the extraction of EXIF
+metadata. Again a bundle adjustment is then performed done on all the three
+views to refine the camera parameters and 3D geometry.
+
+By proceeding incrementally in this manner, where each time a new camera is
+added, its pose is initialized by camera resectioning and a bundle adjustment is
+performed.
+
+In the end the epipolar geometry serves mostly to:
+
+- initialize the 3D geometry from the seed two-view geometry.
+- track the correspondence between the 3D world points and the 2D image points.
 
 In the next section we describe the DLT method to initialize the pose.
 
