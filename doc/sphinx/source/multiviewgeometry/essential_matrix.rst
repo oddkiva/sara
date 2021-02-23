@@ -19,7 +19,7 @@ coordinate system with the following rigid body motion
 
    \mathbf{X}^1 = \mathbf{R} \mathbf{X}^0 + \mathbf{t} .
 
-We can interpret the formula as follows:
+As a reminder, we can interpret the formula as follows:
 
 - The column vectors of the rotation matrix :math:`\mathbf{R}` are the
   coordinates of the world axes expressed in the local coordinate system.
