@@ -7,9 +7,9 @@ Context
 -------
 
 I had to calculate ellipse intersections in the feature matching method I
-published in ACCV in :cite:`ok:hal-00743044` and is also shipped with **Sara**.
-I did not want to do polygonal approximations and want to have a closed-form
-approach if possible at all.
+published in ACCV in :cite:`ok:hal-00743044` and which I also made available in
+**Sara**. I did not want to do polygonal approximations and instead wanted to
+have a closed-form approach if possible at all.
 
 Then I found Eberly's paper :cite:`Eberly` that provides a nice explanation
 about the computation of ellipse intersection. It details namely how to
@@ -20,9 +20,8 @@ I revisited again :cite:`Eberly`'s study in the appendix of my thesis
 :cite:`Ok:2013:phdthesis` and I have retouched the original text here a bit to
 make it a bit more human (less dry) in this documentation.
 
-The modest contribution of the text is to break down a bit more the
-implementation details about the area computation of two intersecting ellipses,
-when you read the C++ code in **Sara**.
+The modest contribution of the text is to break down a bit more these
+implementation details, when you read the code in **Sara**.
 
 
 Origin-Centered Axis-Aligned Ellipses
@@ -46,7 +45,7 @@ and semi-minor axis :math:`b`, *i.e.*, :math:`\, a \geq b > 0`. We suppose that
 Ellipse Area
 ~~~~~~~~~~~~
 
-In case our maths is rusty, it is useful to remind ourselves how we calculate
+In case our math feels rusty, it is useful to remind ourselves how we calculate
 the ellipse area as a warm-up.
 
 Observe the ellipse below:

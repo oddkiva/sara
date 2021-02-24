@@ -159,8 +159,8 @@ Gauss-Jordan Elimination
 ------------------------
 
 Using the Gauss-Jordan elimination we can reduce the system of polynomial
-equation so that the left block of the matrix above is zero everywhere except
-one on the diagonal.
+equation so that the lower-triangular part of the left matrix block above is
+zero everywhere except one on the diagonal.
 
 We will realize that it is actually sufficient to apply the Gauss-Jordan
 elimination. Specifically,

@@ -6,20 +6,20 @@ Accelerometer
 Actually What Does It Measure?
 ##############################
 
-In this introductory section, I report my own experience as a beginner in IMU
-data analysis and how I came up with my own intuition. The accelerometer is more
-difficult to interpret than the gyroscope and the measurements noise make
-acceleration readings hard to interpret.
+In this introductory section, I write about my own experience as a beginner in
+IMU data analysis and how I came up with my own intuition.
 
-When I started analysing data from IMU data from a recorded journey by
-bicyle or by car, I was puzzled by what the IMU actually measures.
+The acceleration data is more difficult to interpret than the gyroscopic one and
+the measurement noise makes them all the more difficult to interpret. Analyzing
+for the first time IMU data recorded during a journey by bicyle or by car made
+me ponder what the IMU actually measures.
 
 Initially I thought that the acceleration recorded by the IMU would correspond
 to the sum of all external forces applied on the object, because of Newton's
-second law. My questions:
+second law. I was asking myself:
 
 - Why do we see recorded accelerations close to the gravity vector plus some
-  deltas? Is it just the gravity vector and other things or just noise?
+  deltas? Are the deltas other forces or just noise?
 - If research papers write that the accelerometers measures the gravity vectors,
   why is the norm of recorded acceleration sometimes only about :math:`7.78` or
   :math:`8.4` on a car and not equal to :math:`9.81`?
@@ -32,11 +32,12 @@ Later, I found the following document and post, videos quite informative:
 - https://physics.stackexchange.com/questions/402611/why-an-accelerometer-shows-zero-force-while-in-free-fall
 - https://www.youtube.com/watch?v=-om0eTXsgnY
 
-Previously I downloaded an accelerometer smartphone app and play with it. The
-experiments will contradict this intuition. The smartphone lying on the table
-would record vertical acceleration vector **pointing up to the sky** and with
-magnitude close to :math:`9.81 m/s^2`. Nothing surprising until we start
-questioning ourselves as for what the IMU actually measures.
+A while back ago, I downloaded an accelerometer smartphone app and played with
+it. Sooner would I realize that these experiments did contradict this intuition.
+The smartphone lying on the table would record vertical acceleration vector
+**pointing up to the sky** and with magnitude close to :math:`9.81 m/s^2`.
+Nothing surprised me back then until I started asking myself what the IMU
+actually measures.
 
 Physics Interpretation
 ######################
@@ -53,17 +54,18 @@ body.
 
    m \mathbf{a}^{\text{IMU}} = \Sigma \mathbf{F} - m \mathbf{g}
 
-Then with this formula, when the smartphone is lying on the table, we see that
-what the IMU measures is the reaction force of the table. Because the smartphone
-is immobile, its acceleration is zero. So this reaction force has to cancel the
-gravitational force to prevent the smartphone from "falling down". That is the
-reason why the IMU records acceleration vectors pointing up (positive elevation
-:math:`a_z^{\text{IMU}} > 0`) and close to :math:`9.81 m/s^2`.
+Thus with this formula, when the smartphone is lying on the table, we realize
+that what the IMU measures is **the reaction force of the table**. Indeed,
+because the smartphone is immobile, its acceleration is zero. Necessarily this
+reaction force has to cancel the gravitational force to prevent the smartphone
+from "falling down". That is the reason why the IMU do record acceleration
+vectors pointing up. In other words, they have positive elevation :math:`a_z >
+0` and a magnitude close to :math:`9.81\ m/s^2`.
 
 When the smartphone is falling down on the floor, the only external force
-acting on it is the gravitational force. As we just the accelerometer records all
-forces except the gravitational force and this explains why the recorded
-accelerations are close to zero.
+acting on it is the gravitational force. As we said it earlier, just the
+accelerometer records all forces except the gravitational force and this
+explains why the recorded accelerations are close to zero.
 
 For example, in some recorded IMU data, the accelerations recorded on a car
 every so often has a lower magnitude than the gravity vectord a possible
@@ -74,23 +76,70 @@ slightly more.
 Accelerometer as a Mass on a Spring
 -----------------------------------
 
-The stackoverflow post clarifies these observations by imagining an accelerometer
-as a mass on a spring. So the accelerometric measure is essentially derived from
-the measured elongation or compression of the spring.
+The abovementioned stackoverflow post explains why the acceleration recorded by
+the IMU excludes the gravitational force. It suggests to imagine the
+accelerometer as a mass on a spring. Then the acceleration measurements are
+essentially derived from the measured elongation or compression of the spring.
 
-Thus (knowing the spring constant :math:`k`) we can calculate the corresponding
+Thus, knowing the spring constant :math:`k`, we can calculate the corresponding
 reaction force of the table that maintains the mechanical equilibrium of the
 smartphone.
 
-Under a free fall, if we leave aside the aerodynamic resistance, there is no
-reaction force is acting upon the spring and the spring is in a relaxed state,
-(no elongation no compression). Have a look at the figures drawn in the
-stackoverflow post.
+Let us visualize the smartphone IMU lying on the table as a mass-spring system
+lying on the table. This system is at mechanical equilibrium. Let us list the
+external forces acting upon this system:
+
+- The mass is being pushed:
+
+  - down by the gravitational force :math:`-m_\text{mass} g`.
+  - up by the spring force :math:`k \Delta x`
+
+- The spring is compressed due the mass weight and being pushed:
+
+  - down by the mass reaction force :math:`-m_\text{mass} g`
+  - down by its own mass :math:`-m_\text{spring} g`
+  - up by the reaction force of the table :math:`R_\text{table}`.
+
+Now the mass-spring system as a whole has two forces acting on it only:
+
+  - up by the reaction force of the table :math:`R_\text{table}`.
+  - down by the mass reaction force :math:`-(m_\text{mass} + m_\text{spring}) g`
+
+The mass-spring system is at mechanical equilibrium
+
+.. math::
+
+   k \Delta x = m_\text{mass} g \\
+
+   R_\text{table} = (m_\text{mass} + m_\text{spring}) g \\
+
+The gravity vector is calculated directly from the spring displacement from
+its relaxed position:
+
+.. math::
+
+   g = \frac{k}{m_\text{mass}} \Delta x\\
+
+We can also measure the reaction force of the table as
+
+.. math::
+
+   R_\text{table} = k (1 + \frac{m_\text{spring}}{m_\text{mass}}) \Delta x \\
+
+
+Under a free fall, if we neglect the aerodynamic resistance, there is no
+reaction force acting upon the spring. The spring is in a relaxed state. No
+elongation and no compression, thus :math:`\Delta x = 0`. And the accelerometer
+will measure accelerations close to zero.
+
+See the illustrations drawn in the stackoverflow post for complementary
+information.
+
 
 Challenges
 ##########
 
-The trouble with my current understanding is all the external forces should
+The trouble with my current understanding is that the external forces should
 include at the very least:
 
 - the vehicle spring forces that supports the vehicle chassis on the ground.
@@ -100,11 +149,11 @@ include at the very least:
   altitude, and a constant pitch or roll angles, which we cannot really ignore
   in the IMU.
 
-- the engine force that moves the vehicle.
+- the engine force that moves the vehicle forward.
 
   Another complication is that the engine makes the vehicle vibrate, thus
-  creating non-negligible noise that cannot be easily distinguished from a
-  truly small engine force
+  creating non-negligible noise that is not easily distinguished from a
+  truly small engine force.
 
 - the gravitational force applied to the vehicle chassis, which the IMU is
   attached to and thus forming altogether a solid object.
@@ -146,4 +195,4 @@ They are easily calculable provided we know the GPS coordinates :math:`(\theta,
 the long run the effect of these forces may become non negligible.
 
 I can recommend the reader to this excellent wikicoastal.org page that explains
-these external force: http://www.coastalwiki.org/wiki/Coriolis_acceleration
+these external forces: http://www.coastalwiki.org/wiki/Coriolis_acceleration
