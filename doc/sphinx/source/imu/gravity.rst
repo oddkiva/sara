@@ -20,7 +20,7 @@ second law. I was asking myself:
 
 - Why do we see recorded accelerations close to the gravity vector plus some
   deltas? Are the deltas other forces or just noise?
-- If research papers write that the accelerometers measures the gravity vectors,
+- If research papers write that the accelerometers measures the gravity vector,
   why is the norm of recorded acceleration sometimes only about :math:`7.78` or
   :math:`8.4` on a car and not equal to :math:`9.81`?
 
@@ -33,8 +33,7 @@ Later, I found the following document and post, videos quite informative:
 - https://www.youtube.com/watch?v=-om0eTXsgnY
 
 A while back ago, I downloaded an accelerometer smartphone app and played with
-it. Sooner would I realize that these experiments did contradict this intuition.
-The smartphone lying on the table would record vertical acceleration vector
+it. The smartphone lying on the table would record acceleration vector
 **pointing up to the sky** and with magnitude close to :math:`9.81 m/s^2`.
 Nothing surprised me back then until I started asking myself what the IMU
 actually measures.
@@ -42,8 +41,8 @@ actually measures.
 Physics Interpretation
 ######################
 
-Newton's Law
-------------
+With Newton's Laws
+------------------
 
 Putting all these thoughts, experiments, and the essential bits of the different
 readings together, it turns out indeed that the accelerometer measures the sum
@@ -58,7 +57,7 @@ Thus with this formula, when the smartphone is lying on the table, we realize
 that what the IMU measures is **the reaction force of the table**. Indeed,
 because the smartphone is immobile, its acceleration is zero. Necessarily this
 reaction force has to cancel the gravitational force to prevent the smartphone
-from "falling down". That is the reason why the IMU do record acceleration
+from "falling down". That is the reason why the IMU does record acceleration
 vectors pointing up. In other words, they have positive elevation :math:`a_z >
 0` and a magnitude close to :math:`9.81\ m/s^2`.
 
@@ -68,7 +67,7 @@ accelerometer records all forces except the gravitational force and this
 explains why the recorded accelerations are close to zero.
 
 For example, in some recorded IMU data, the accelerations recorded on a car
-every so often has a lower magnitude than the gravity vectord a possible
+every so often has a lower magnitude than the gravity vector. A possible
 explanation is that the car springs are being compressed or elongated further
 when the car is bumping on the road, causing the car elevation to fluctuate
 slightly more.
@@ -105,7 +104,7 @@ Now the mass-spring system as a whole has two forces acting on it only:
   - up by the reaction force of the table :math:`R_\text{table}`.
   - down by the mass reaction force :math:`-(m_\text{mass} + m_\text{spring}) g`
 
-The mass-spring system is at mechanical equilibrium
+Because the mass-spring system is at mechanical equilibrium
 
 .. math::
 
