@@ -22,5 +22,8 @@ if (SARA_USE_HALIDE)
   add_subdirectory(Halide)
 endif ()
 
-add_subdirectory(GStreamer)
+if (NOT APPLE)
+  add_subdirectory(GStreamer)
+endif ()
+
 add_subdirectory(Vulkan)
