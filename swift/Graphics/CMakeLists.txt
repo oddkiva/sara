@@ -12,3 +12,5 @@ target_include_directories(SaraSwiftGraphics
 target_link_libraries(SaraSwiftGraphics
   PRIVATE
   ${DO_Sara_LIBRARIES})
+set_target_properties(SaraSwiftGraphics PROPERTIES
+  FOLDER "Swift")

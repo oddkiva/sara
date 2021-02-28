@@ -86,6 +86,9 @@ function build_library()
 
   # Compile Halide code.
   cmake_options+="-DSARA_USE_HALIDE=ON "
+  if [ "${platform_name}" == "Darwin" ]; then
+    cmake_options+="-DLLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm "
+  fi
   # cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
 
   echo $(which cmake)
@@ -149,11 +152,6 @@ function build_library_for_ios()
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
   cmake_options+="-DSARA_USE_HALIDE=ON "
-  if [ "${platform_name}" == "Darwin" ]; then
-    cmake_options+="-DHALIDE_DISTRIB_DIR=/usr/local "
-  else
-    cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide "
-  fi
 
   # Generate the Xcode project.
   time cmake ../sara ${cmake_options}

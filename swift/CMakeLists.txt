@@ -11,4 +11,9 @@ add_executable(hello_world
   Image.swift
   ImageIO.swift
   VideoIO.swift)
-target_link_libraries(hello_world PRIVATE SaraSwiftCore SaraSwiftGraphics)
+target_link_libraries(hello_world
+  PRIVATE
+  SaraSwiftCore
+  SaraSwiftGraphics)
+set_target_properties(hello_world PROPERTIES
+  FOLDER "Swift")
