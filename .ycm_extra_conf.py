@@ -27,6 +27,7 @@ flags = [
 # For a C project, you would set this to 'c' instead of 'c++'.
 '-x', 'objective-c++',
 "-isystem", "/usr/include/x86_64-linux-gnu",
+"-isystem", "/usr/include/gstreamer-1.0",
 '-isystem', get_python_inc(),
 '-isystem', 'cpp/llvm/include',
 '-isystem', 'cpp/llvm/tools/clang/include',
