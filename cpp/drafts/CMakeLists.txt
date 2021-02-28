@@ -22,4 +22,5 @@ if (SARA_USE_HALIDE)
   add_subdirectory(Halide)
 endif ()
 
+add_subdirectory(GStreamer)
 add_subdirectory(Vulkan)
