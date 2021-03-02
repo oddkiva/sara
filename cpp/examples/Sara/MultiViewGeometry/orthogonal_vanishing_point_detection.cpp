@@ -389,9 +389,9 @@ int __main(int argc, char** argv)
         {planes_backprojected.cols(), planes_backprojected.rows()}};
 
     const auto angle_threshold = std::sin(float((3._deg).value));
-    const auto ransac_result = find_dominant_orthogonal_direction_triplet(  //
-        planes_tensor,                                                      //
-        angle_threshold,                                                    //
+    const auto ransac_result = find_dominant_orthogonal_directions(  //
+        planes_tensor,                                               //
+        angle_threshold,                                             //
         100);
     const auto dirs = std::get<0>(ransac_result);
     const auto inliers = std::get<1>(ransac_result);

@@ -176,7 +176,7 @@ namespace DO::Sara {
   }
 
   template <typename T>
-  auto find_dominant_orthogonal_direction_triplet(
+  auto find_dominant_orthogonal_directions(
       const TensorView_<T, 2>& planes,  //
       T threshold,                      //
       std::size_t num_random_samples = 100)
