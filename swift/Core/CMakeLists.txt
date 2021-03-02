@@ -5,3 +5,5 @@ add_library(SaraSwiftCore CCore.cpp)
 # swift programs.
 target_include_directories(SaraSwiftCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(SaraSwiftCore PRIVATE ${DO_Sara_LIBRARIES})
+set_target_properties(SaraSwiftCore PROPERTIES
+  FOLDER "Swift")

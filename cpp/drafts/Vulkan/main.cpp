@@ -495,6 +495,8 @@ private:
   {
     auto swapchain_support = query_swapchain_support(_physical_device);
 
+    // Find a valid pixel format of the image in the swap chain and if possible
+    // RGBA 32 bits.
     auto surface_format = choose_swap_surface_format(swapchain_support.formats);
     auto present_mode = choose_swap_present_mode(  //
         swapchain_support.presentModes             //
@@ -543,8 +545,10 @@ private:
         VK_SUCCESS)
       throw std::runtime_error{"Failed to create swap chain!"};
 
+    // Get the count of swap chain images.
     vkGetSwapchainImagesKHR(_device, _swapchain, &image_count, nullptr);
     _swapchain_images.resize(image_count);
+    // Fill the array of swap chain images.
     vkGetSwapchainImagesKHR(_device, _swapchain, &image_count,
                             _swapchain_images.data());
 
