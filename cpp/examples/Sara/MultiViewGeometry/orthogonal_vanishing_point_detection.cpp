@@ -354,15 +354,6 @@ int __main(int argc, char** argv)
 
     tic();
     auto line_segments = extract_line_segments_quick_and_dirty(edge_stats);
-    {
-      auto line_segments_filtered = std::vector<LineSegment>{};
-      line_segments_filtered.reserve(line_segments.size());
-
-      for (const auto& s : line_segments)
-        line_segments_filtered.emplace_back(s);
-
-      line_segments.swap(line_segments_filtered);
-    }
 
     // Go back to the original pixel coordinates for single-view geometry
     // analysis.
