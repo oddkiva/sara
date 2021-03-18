@@ -354,15 +354,6 @@ int __main(int argc, char** argv)
 
     tic();
     auto line_segments = extract_line_segments_quick_and_dirty(edge_stats);
-    {
-      auto line_segments_filtered = std::vector<LineSegment>{};
-      line_segments_filtered.reserve(line_segments.size());
-
-      for (const auto& s : line_segments)
-        line_segments_filtered.emplace_back(s);
-
-      line_segments.swap(line_segments_filtered);
-    }
 
     // Go back to the original pixel coordinates for single-view geometry
     // analysis.
@@ -389,9 +380,9 @@ int __main(int argc, char** argv)
         {planes_backprojected.cols(), planes_backprojected.rows()}};
 
     const auto angle_threshold = std::sin(float((3._deg).value));
-    const auto ransac_result = find_dominant_orthogonal_direction_triplet(  //
-        planes_tensor,                                                      //
-        angle_threshold,                                                    //
+    const auto ransac_result = find_dominant_orthogonal_directions(  //
+        planes_tensor,                                               //
+        angle_threshold,                                             //
         100);
     const auto dirs = std::get<0>(ransac_result);
     const auto inliers = std::get<1>(ransac_result);
