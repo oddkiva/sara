@@ -67,7 +67,8 @@ function build_library()
   fi
 
   if [ "${platform_name}" == "Darwin" ]; then
-    cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
+    # TODO: migrate to Qt6.
+    cmake_options+="-DQt5_DIR=$(brew --prefix qt@5)/lib/cmake/Qt5 "
   fi
 
   # ========================================================================= #

@@ -42,6 +42,8 @@ Table of Contents
    sfm
    imu
 
+   datasets
+
    examples
    third_party_libraries
 

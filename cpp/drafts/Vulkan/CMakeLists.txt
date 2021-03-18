@@ -12,6 +12,8 @@ target_link_libraries(hello_vulkan PRIVATE
   Boost::system
   Vulkan::Vulkan)
 target_compile_features(hello_vulkan PRIVATE cxx_std_17)
+set_target_properties(hello_vulkan PROPERTIES
+  FOLDER "Tutorials")
 
 
 # file(GLOB SHADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.vert *.frag)
