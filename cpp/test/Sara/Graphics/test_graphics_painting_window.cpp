@@ -268,17 +268,21 @@ BOOST_AUTO_TEST_CASE(test_drawText)
   // What text.
   QString text("Sara is awesome!");
   // Where.
-  int x = 130, y = 150;
-  double orientation = 36.6;
+  const int x = 130;
+  const int y = 150;
+  const double orientation = 36.6;
   // Style.
-  QColor color(0, 255, 123);
-  int fontSize = 15;
-  bool italic = true;
-  bool bold = true;
-  bool underline = true;
+  const QColor color(0, 255, 123);
+  const int fontSize = 15;
+  const bool italic = true;
+  const bool bold = true;
+  const bool underline = true;
+  const auto penWidth = 1;
 
-  _test_window->drawText(x, y, text, color, fontSize, orientation, italic, bold,
-                         underline);
+  _test_window->drawText(x, y, text, color, fontSize,  //
+                         orientation,                  //
+                         italic, bold, underline,      //
+                         penWidth);
 
   _painter.setPen(color);
 
@@ -289,9 +293,18 @@ BOOST_AUTO_TEST_CASE(test_drawText)
   font.setUnderline(underline);
   _painter.setFont(font);
 
+  QPainterPath textPath;
+  QPointF baseline(0, 0);
+  textPath.addText(baseline, font, text);
+
+  // Outline the text by default for more visibility.
+  _painter.setBrush(color);
+  _painter.setPen(QPen(Qt::black, penWidth));
+  _painter.setFont(font);
+
   _painter.translate(x, y);
-  _painter.rotate(orientation);
-  _painter.drawText(0, 0, text);
+  _painter.rotate(qreal(orientation));
+  _painter.drawPath(textPath);
 
   BOOST_CHECK(get_image_from_window() == _true_image);
 }

@@ -495,12 +495,15 @@ private:
   {
     auto swapchain_support = query_swapchain_support(_physical_device);
 
-    // Find a valid pixel format of the image in the swap chain and if possible
-    // RGBA 32 bits.
+    // Find a valid pixel format for the swap chain images and if possible
+    // choose RGBA 32 bits.
     auto surface_format = choose_swap_surface_format(swapchain_support.formats);
+    // FIFO/Mailbox presentation mode.
     auto present_mode = choose_swap_present_mode(  //
         swapchain_support.presentModes             //
     );
+    // Set the swap chain image sizes to be equal to the window surface
+    // sizes.
     auto extent = choose_swap_extent(swapchain_support.capabilities);
 
     auto image_count = swapchain_support.capabilities.maxImageCount + 1;
@@ -611,6 +614,8 @@ private:
       if (available_present_mode == VK_PRESENT_MODE_MAILBOX_KHR)
         return available_present_mode;
 
+    // This is always available in any vulkan vendor implementation.
+    // Preferred in mobile development.
     return VK_PRESENT_MODE_FIFO_KHR;
   }
 
@@ -999,7 +1004,7 @@ private:
         render_pass_begin_info.renderArea.offset = {0, 0};
         render_pass_begin_info.renderArea.extent = _swapchain_extent;
 
-        auto clear_color = VkClearValue{{0.f, 0.f, 0.f, 1.f}};
+        auto clear_color = VkClearValue{{{0.f, 0.f, 0.f, 1.f}}};
         render_pass_begin_info.clearValueCount = 1;
         render_pass_begin_info.pClearValues = &clear_color;
       }

@@ -268,7 +268,7 @@ int __main(int argc, char** argv)
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
   // const auto [p1, p2] = initialize_no_crop_region(frame.sizes());
-  const auto [p1, p2] = initialize_crop_region_1(frame.sizes());
+  const auto [p1, p2] = initialize_crop_region_2(frame.sizes());
 
   auto ed = EdgeDetector{{
       high_threshold_ratio,  //
@@ -278,7 +278,7 @@ int __main(int argc, char** argv)
 
 
   // Initialize the camera matrix.
-  const auto intrinsics = initialize_camera_intrinsics_1();
+  const auto intrinsics = initialize_camera_intrinsics_2();
   // const auto intrinsics = initialize_camera_intrinsics(frame.sizes());
 
   auto P = default_camera_matrix();
