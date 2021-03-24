@@ -2,8 +2,8 @@ Framebuffer
 ===========
 
 As explained in a nice StackOverflow post, a framebuffer in OpenGL and in Vulkan
-is not a buffer object but rather be viewed as a **collection of references to
-buffer objects**. Here, a buffer should be understood as an array of bytes.
+is not a buffer object but rather be viewed as a **collection of buffer object
+references**. Here, a buffer should be understood as an array of bytes.
 
 Programmatically a framebuffer can be seen as a **C struct** object as follows.
 
