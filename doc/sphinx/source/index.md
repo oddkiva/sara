@@ -42,6 +42,8 @@ Table of Contents
    sfm
    imu
 
+   computer_graphics
+
    datasets
 
    examples
