@@ -1,20 +1,35 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2010-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #include "MainWindow.hpp"
-#include <QtGui>
-#include <QtOpenGl>
+
 #include <QGraphicsEllipseItem>
 #include <QGraphicsItemGroup>
+#include <QtGui>
+#include <QtOpenGL>
+
 #include <algorithm>
+
 
 // ========================================================================== //
 // File browser class
-FileBrowser::FileBrowser(const QStringList& filters, QWidget *parent)
-  : QListWidget(parent), nameFilters(filters)
+FileBrowser::FileBrowser(const QStringList& filters, QWidget* parent)
+  : QListWidget(parent)
+  , nameFilters(filters)
 {
-  setDir( QDesktopServices::storageLocation(QDesktopServices::DesktopLocation) );
-  connect( this, SIGNAL(itemActivated(QListWidgetItem *)),
-           this, SLOT(selectItem(QListWidgetItem *)) );
-  connect( this, SIGNAL(itemClicked(QListWidgetItem *)),
-           this, SLOT(selectItem(QListWidgetItem *)) );
+  setDir(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
+  connect(this, SIGNAL(itemActivated(QListWidgetItem*)), this,
+          SLOT(selectItem(QListWidgetItem*)));
+  connect(this, SIGNAL(itemClicked(QListWidgetItem*)), this,
+          SLOT(selectItem(QListWidgetItem*)));
 }
 
 void FileBrowser::setDir(const QString& path)
@@ -48,7 +63,7 @@ void FileBrowser::setDir(const QString& path)
   basePath = dir.canonicalPath();
 }
 
-void FileBrowser::selectItem(QListWidgetItem *item)
+void FileBrowser::selectItem(QListWidgetItem* item)
 {
   QString path = basePath + "/" + item->text();
   if (QFileInfo(path).isDir())
@@ -59,7 +74,7 @@ void FileBrowser::selectItem(QListWidgetItem *item)
 
 // ========================================================================== //
 // Painting Widget
-AnnotatingWidget::AnnotatingWidget(QWidget *parent)
+AnnotatingWidget::AnnotatingWidget(QWidget* parent)
   : QWidget(parent)
 {
 }
@@ -90,7 +105,7 @@ void AnnotatingWidget::clear()
 void AnnotatingWidget::undo()
 {
   if (lastBBox != bboxes.begin())
-     --lastBBox;
+    --lastBBox;
   update();
 }
 
@@ -110,47 +125,47 @@ bool AnnotatingWidget::save(const QString& fn)
     return false;
   QTextStream out(&file);
   QList<QRectF>::const_iterator b = bboxes.begin();
-  for ( ; b != lastBBox; ++b)
+  for (; b != lastBBox; ++b)
     out << b->topLeft().x() << " " << b->topLeft().y() << " "
         << b->bottomRight().x() << " " << b->bottomRight().y() << "\n";
   file.close();
   return true;
 }
 
-void AnnotatingWidget::mousePressEvent(QMouseEvent *e)
+void AnnotatingWidget::mousePressEvent(QMouseEvent* e)
 {
   if (e->button() == Qt::LeftButton)
   {
     bboxes.erase(lastBBox, bboxes.end());
 
-    //qDebug() << "mouse pressed";
+    // qDebug() << "mouse pressed";
     bboxes.push_back(QRectF());
     lastBBox = bboxes.end();
-    bboxes.back().setTopLeft(e->posF());
-    bboxes.back().setBottomRight(e->posF());    
-    //qDebug() << bboxes.back();
+    bboxes.back().setTopLeft(e->localPos());
+    bboxes.back().setBottomRight(e->localPos());
+    // qDebug() << bboxes.back();
     update();
   }
 }
 
-void AnnotatingWidget::mouseMoveEvent(QMouseEvent *e)
+void AnnotatingWidget::mouseMoveEvent(QMouseEvent* e)
 {
-  //qDebug() << "mouse moved";
-  bboxes.back().setBottomRight(e->posF());
-  //qDebug() << bboxes.back();
+  // qDebug() << "mouse moved";
+  bboxes.back().setBottomRight(e->localPos());
+  // qDebug() << bboxes.back();
   update();
 }
 
-void AnnotatingWidget::mouseReleaseEvent(QMouseEvent *e)
+void AnnotatingWidget::mouseReleaseEvent(QMouseEvent* e)
 {
-  //qDebug() << "mouse released";
-  bboxes.back().setBottomRight(e->posF());
+  // qDebug() << "mouse released";
+  bboxes.back().setBottomRight(e->localPos());
   update();
   qDebug() << bboxes.back();
   lastBBox = bboxes.end();
 }
 
-void AnnotatingWidget::paintEvent(QPaintEvent *e)
+void AnnotatingWidget::paintEvent(QPaintEvent* e)
 {
   QPainter painter(this);
   QPen pen(Qt::yellow, 2);
@@ -173,13 +188,13 @@ Point::Point(const QPointF& pos)
   setOpacity(0.8);
 }
 
-void Point::addLine(Line *line)
+void Point::addLine(Line* line)
 {
   lineList << line;
   line->adjust();
 }
 
-QList<Line *> Point::lines() const
+QList<Line*> Point::lines() const
 {
   return lineList;
 }
@@ -187,8 +202,7 @@ QList<Line *> Point::lines() const
 QRectF Point::boundingRect() const
 {
   qreal adjust = 2;
-  return QRectF(-10 - adjust, -10 - adjust,
-    23 + adjust, 23 + adjust);
+  return QRectF(-10 - adjust, -10 - adjust, 23 + adjust, 23 + adjust);
 }
 
 QPainterPath Point::shape() const
@@ -198,7 +212,8 @@ QPainterPath Point::shape() const
   return path;
 }
 
-void Point::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
+void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
+                  QWidget*)
 {
   bool selected = isSelected();
   if (parentItem())
@@ -211,12 +226,13 @@ void Point::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
   painter->drawEllipse(-3, -3, 6, 6);
 }
 
-QVariant Point::itemChange(GraphicsItemChange change, const QVariant &value)
+QVariant Point::itemChange(GraphicsItemChange change, const QVariant& value)
 {
-  Quad *q;
-  switch (change) {
+  Quad* q;
+  switch (change)
+  {
   case ItemPositionHasChanged:
-    foreach (Line *line, lineList)
+    foreach (Line* line, lineList)
       line->adjust();
     q = quad();
     if (q)
@@ -229,19 +245,19 @@ QVariant Point::itemChange(GraphicsItemChange change, const QVariant &value)
   return QGraphicsItem::itemChange(change, value);
 }
 
-void Point::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void Point::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
   update();
   QGraphicsItem::mousePressEvent(event);
 }
 
-void Point::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void Point::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
   update();
   QGraphicsItem::mouseReleaseEvent(event);
 }
 
-Line::Line(Point *sourceNode, Point *destNode)
+Line::Line(Point* sourceNode, Point* destNode)
 {
   setAcceptedMouseButtons(0);
   setFlags(ItemIsSelectable);
@@ -253,12 +269,12 @@ Line::Line(Point *sourceNode, Point *destNode)
   adjust();
 }
 
-Point *Line::sourceNode() const
+Point* Line::sourceNode() const
 {
   return source;
 }
 
-Point *Line::destNode() const
+Point* Line::destNode() const
 {
   return dest;
 }
@@ -282,11 +298,11 @@ QRectF Line::boundingRect() const
     return QRectF();
 
   return QRectF(sourcePoint, QSizeF(destPoint.x() - sourcePoint.x(),
-    destPoint.y() - sourcePoint.y()))
-    .normalized();
+                                    destPoint.y() - sourcePoint.y()))
+      .normalized();
 }
 
-void Line::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+void Line::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
   if (!source || !dest)
     return;
@@ -303,7 +319,7 @@ void Line::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
   painter->drawLine(line);
 }
 
-Quad::Quad(Point *points[4])
+Quad::Quad(Point* points[4])
 {
   setFlags(ItemIsSelectable);
   setPen(Qt::NoPen);
@@ -311,17 +327,18 @@ Quad::Quad(Point *points[4])
   {
     p[i] = points[i];
     p[i]->setParentItem(this);
-    foreach (Line *line, p[i]->lines())
+    foreach (Line* line, p[i]->lines())
       line->setParentItem(this);
   }
-  setBrush( QColor(Qt::yellow).lighter() );
+  setBrush(QColor(Qt::yellow).lighter());
   setOpacity(0.5);
   adjust();
 }
 
-Quad::~Quad() {
+Quad::~Quad()
+{
   // Destroy the lines.
-  QList<Line *> lines;
+  QList<Line*> lines;
   for (int i = 0; i < 4; ++i)
     lines << p[i]->lines();
   lines = lines.toSet().toList();
@@ -358,9 +375,10 @@ void Quad::print() const
     qDebug() << i << " " << p[i]->pos();
 }
 
-QVariant Quad::itemChange(GraphicsItemChange change, const QVariant &value)
+QVariant Quad::itemChange(GraphicsItemChange change, const QVariant& value)
 {
-  switch (change) {
+  switch (change)
+  {
   case ItemPositionHasChanged:
     adjust();
     break;
@@ -374,15 +392,17 @@ QVariant Quad::itemChange(GraphicsItemChange change, const QVariant &value)
 // ========================================================================== //
 // Graphics View Widget
 GraphicsAnnotator::GraphicsAnnotator(int w, int h, QWidget* parent)
-  : QGraphicsView(parent), counter(0), creatingRect(false)
+  : QGraphicsView(parent)
+  , counter(0)
+  , creatingRect(false)
 {
-  setViewport( new QGLWidget(QGLFormat(QGL::SampleBuffers)) );
+  setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
   setTransformationAnchor(AnchorUnderMouse);
   setRenderHints(QPainter::Antialiasing);
   setDragMode(RubberBandDrag);
 
   setScene(new QGraphicsScene);
-  
+
   pix = new QGraphicsPixmapItem;
   pix->setTransformationMode(Qt::SmoothTransformation);
   scene()->addItem(pix);
@@ -403,15 +423,15 @@ void GraphicsAnnotator::setQuads(const QList<QPolygonF>& newQuads)
   QList<QPolygonF>::const_iterator q;
   for (q = newQuads.begin(); q != newQuads.end(); ++q)
   {
-    Point *pts[4];
+    Point* pts[4];
     for (int i = 0; i < 4; ++i)
       pts[i] = new Point((*q)[i]);
 
-    Line *lines[4];
+    Line* lines[4];
     for (int i = 0; i < 4; ++i)
-      lines[i] = new Line(pts[i], pts[(i+1)%4]);
+      lines[i] = new Line(pts[i], pts[(i + 1) % 4]);
 
-    Quad *quad = new Quad(pts);
+    Quad* quad = new Quad(pts);
     scene()->addItem(quad);
     quads.push_back(quad);
   }
@@ -423,7 +443,7 @@ void GraphicsAnnotator::setQuads(const QList<QPolygonF>& newQuads)
 void GraphicsAnnotator::clearQuads()
 {
   qDebug() << "\nClearing quads";
-  for (QList<Quad *>::iterator q = quads.begin(); q != quads.end(); ++q)
+  for (QList<Quad*>::iterator q = quads.begin(); q != quads.end(); ++q)
     delete *q;
   quads.clear();
 
@@ -442,12 +462,12 @@ bool GraphicsAnnotator::save(const QString& fn)
 
   out << quads.size() << "\n";
   int poly = 0;
-  for (QList<Quad *>::const_iterator q = quads.begin(); q != quads.end(); ++q)
+  for (QList<Quad*>::const_iterator q = quads.begin(); q != quads.end(); ++q)
   {
     qDebug() << "Saving poly #" << poly;
     ++poly;
     QPolygonF poly = (*q)->polygon();
-    
+
     for (int i = 0; i < 4; ++i)
     {
       out << poly[i].x() << " " << poly[i].y() << " ";
@@ -465,11 +485,12 @@ void GraphicsAnnotator::scaleView(qreal scaleFactor)
   scale(scaleFactor, scaleFactor);
 }
 
-void GraphicsAnnotator::mousePressEvent(QMouseEvent *event)
+void GraphicsAnnotator::mousePressEvent(QMouseEvent* event)
 {
-  if (event->button() == Qt::LeftButton && event->modifiers() == Qt::AltModifier)
+  if (event->button() == Qt::LeftButton &&
+      event->modifiers() == Qt::AltModifier)
   {
-    Point *newPoint = new Point( mapToScene(event->pos()) );
+    Point* newPoint = new Point(mapToScene(event->pos()));
     scene()->addItem(newPoint);
 
     if (counter == 0)
@@ -480,13 +501,13 @@ void GraphicsAnnotator::mousePressEvent(QMouseEvent *event)
     if (counter >= 1 && counter < 4)
     {
       quad[counter] = newPoint;
-      scene()->addItem(new Line(quad[counter-1], quad[counter]));
+      scene()->addItem(new Line(quad[counter - 1], quad[counter]));
     }
     if (counter == 3)
     {
       scene()->addItem(new Line(quad[3], quad[0]));
 
-      Quad *newQuad = new Quad(quad);
+      Quad* newQuad = new Quad(quad);
       scene()->addItem(newQuad);
       quads.push_back(newQuad);
       qDebug() << "\nAdded quad";
@@ -495,74 +516,75 @@ void GraphicsAnnotator::mousePressEvent(QMouseEvent *event)
       creatingRect = false;
     }
 
-    counter = (counter+1)%4;
-    
+    counter = (counter + 1) % 4;
+
     return;
   }
 
   QGraphicsView::mousePressEvent(event);
 }
 
-void GraphicsAnnotator::mouseReleaseEvent(QMouseEvent *event)
+void GraphicsAnnotator::mouseReleaseEvent(QMouseEvent* event)
 {
-  if (event->buttons() == Qt::LeftButton && event->modifiers() == Qt::AltModifier && creatingRect)
+  if (event->buttons() == Qt::LeftButton &&
+      event->modifiers() == Qt::AltModifier && creatingRect)
     creatingRect = false;
   QGraphicsView::mouseReleaseEvent(event);
 }
 
-void GraphicsAnnotator::mouseMoveEvent(QMouseEvent *event)
+void GraphicsAnnotator::mouseMoveEvent(QMouseEvent* event)
 {
-  if (event->buttons() == Qt::LeftButton && event->modifiers() == Qt::AltModifier &&
-      counter == 1)
+  if (event->buttons() == Qt::LeftButton &&
+      event->modifiers() == Qt::AltModifier && counter == 1)
   {
-    QPointF startPoint( quad[0]->pos() );
-    QPointF endPoint( mapToScene(event->pos()) );
+    QPointF startPoint(quad[0]->pos());
+    QPointF endPoint(mapToScene(event->pos()));
 
     if (!creatingRect)
     {
       creatingRect = true;
-      
-      quad[1] = new Point( QPointF(endPoint.x(), startPoint.y()) );
-      quad[2] = new Point( endPoint );
-      quad[3] = new Point( QPointF(startPoint.x(), endPoint.y()) );
+
+      quad[1] = new Point(QPointF(endPoint.x(), startPoint.y()));
+      quad[2] = new Point(endPoint);
+      quad[3] = new Point(QPointF(startPoint.x(), endPoint.y()));
 
       scene()->addItem(new Line(quad[0], quad[1]));
       scene()->addItem(new Line(quad[1], quad[2]));
       scene()->addItem(new Line(quad[2], quad[3]));
       scene()->addItem(new Line(quad[3], quad[0]));
 
-      Quad *newQuad = new Quad(quad);
+      Quad* newQuad = new Quad(quad);
       scene()->addItem(newQuad);
       quads.push_back(newQuad);
       qDebug() << "\nAdded quad";
       quads.back()->print();
       qDebug() << "num quads: " << quads.size();
     }
-    
+
     counter = 0;
   }
 
-  if (event->buttons() == Qt::LeftButton && event->modifiers() == Qt::AltModifier &&
-      creatingRect && counter == 0)
+  if (event->buttons() == Qt::LeftButton &&
+      event->modifiers() == Qt::AltModifier && creatingRect && counter == 0)
   {
-    QPointF startPoint( quad[0]->pos() );
-    QPointF endPoint( mapToScene(event->pos()) );
-    quad[1]->setPos( QPointF(endPoint.x(), startPoint.y()) );
-    quad[2]->setPos( endPoint );
-    quad[3]->setPos( QPointF(startPoint.x(), endPoint.y()) );
+    QPointF startPoint(quad[0]->pos());
+    QPointF endPoint(mapToScene(event->pos()));
+    quad[1]->setPos(QPointF(endPoint.x(), startPoint.y()));
+    quad[2]->setPos(endPoint);
+    quad[3]->setPos(QPointF(startPoint.x(), endPoint.y()));
   }
 
   QGraphicsView::mouseMoveEvent(event);
 }
 
-void GraphicsAnnotator::wheelEvent(QWheelEvent *event)
+void GraphicsAnnotator::wheelEvent(QWheelEvent* event)
 {
   if (event->modifiers() == Qt::ControlModifier)
     scaleView(pow(double(2), event->delta() / 240.0));
   QGraphicsView::wheelEvent(event);
 }
 
-void GraphicsAnnotator::keyPressEvent(QKeyEvent *event)
+void GraphicsAnnotator::keyPressEvent(QKeyEvent* event)
 {
   // Adjust view.
   if (event->key() == Qt::Key_F)
@@ -571,21 +593,21 @@ void GraphicsAnnotator::keyPressEvent(QKeyEvent *event)
   // Delete the quads.
   if (event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete)
   {
-    // Get the selected quads.    
-    QList<Quad *> selectedQuads;
-    QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
-    QList<QGraphicsItem *>::iterator item;
-    for (item = selectedItems.begin() ; item != selectedItems.end(); ++item)
+    // Get the selected quads.
+    QList<Quad*> selectedQuads;
+    QList<QGraphicsItem*> selectedItems = scene()->selectedItems();
+    QList<QGraphicsItem*>::iterator item;
+    for (item = selectedItems.begin(); item != selectedItems.end(); ++item)
     {
-      Point *p = qgraphicsitem_cast<Point *>(*item);
+      Point* p = qgraphicsitem_cast<Point*>(*item);
       if (p && p->quad())
-         selectedQuads << p->quad();
-      
-      Quad *q = qgraphicsitem_cast<Quad *>(*item);
+        selectedQuads << p->quad();
+
+      Quad* q = qgraphicsitem_cast<Quad*>(*item);
       if (q)
         selectedQuads << q;
-    }   
-    
+    }
+
     // Eliminate duplicates.
     selectedQuads = selectedQuads.toSet().toList();
 
@@ -598,7 +620,8 @@ void GraphicsAnnotator::keyPressEvent(QKeyEvent *event)
     // Destroy them.
     for (int i = 0; i < selectedQuads.size(); ++i)
     {
-      QList<Quad *>::iterator q = qFind(quads.begin(), quads.end(), selectedQuads[i]);
+      QList<Quad*>::iterator q =
+          qFind(quads.begin(), quads.end(), selectedQuads[i]);
       if (q != quads.end())
       {
         scene()->removeItem(*q);
@@ -611,13 +634,13 @@ void GraphicsAnnotator::keyPressEvent(QKeyEvent *event)
     qDebug() << "Remaining quads: " << quads.size();
     qDebug() << "Remaining graphic items: " << scene()->items().size() << "\n";
   }
-  
+
   QGraphicsView::keyPressEvent(event);
 }
 
 // ========================================================================== //
 // Main window class
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget* parent)
   : QMainWindow(parent)
 {
   createDockableFileBrowser();
@@ -626,7 +649,7 @@ MainWindow::MainWindow(QWidget *parent)
   createFileActions();
   createQuadActions();
   createHelpActions();
-  
+
   createConnections();
 
   resize(800, 600);
@@ -642,16 +665,17 @@ void MainWindow::displayImageAndBBoxes(const QString& somefilepath)
   annotator->setPixmap(QPixmap(currentFilePath));
 
   annotator->clearQuads();
-  QString QuadFolder( fileBrowser->getBasePath()+"/Quads/" );
-  QString QuadFile( QuadFolder + QFileInfo(currentFilePath).baseName() + ".txt" );
+  QString QuadFolder(fileBrowser->getBasePath() + "/Quads/");
+  QString QuadFile(QuadFolder + QFileInfo(currentFilePath).baseName() + ".txt");
 
-  quadFileBrowser->setDir(fileBrowser->getBasePath()+"/Quads/");
+  quadFileBrowser->setDir(fileBrowser->getBasePath() + "/Quads/");
 
   QFile file(QuadFile);
   if (!file.exists())
   {
     qDebug() << "\nThe following Quad file does not yet exist:\n" << QuadFile;
-    statusBar()->showMessage("The following Quad file does not yet exist: " + QuadFile);
+    statusBar()->showMessage("The following Quad file does not yet exist: " +
+                             QuadFile);
     return;
   }
 
@@ -660,7 +684,7 @@ void MainWindow::displayImageAndBBoxes(const QString& somefilepath)
     qDebug() << "\nCannot open " << QuadFile;
     return;
   }
-  
+
   qDebug() << "\nLoading quads from file:\n" << QuadFile;
   statusBar()->showMessage("Loading quads from file: " + QuadFile);
   QList<QPolygonF> quads;
@@ -676,7 +700,7 @@ void MainWindow::displayImageAndBBoxes(const QString& somefilepath)
     for (int j = 0; j < 4; ++j)
     {
       in >> x >> y;
-      quad << QPointF(x,y);
+      quad << QPointF(x, y);
     }
     quads.push_back(quad);
   }
@@ -688,52 +712,59 @@ void MainWindow::displayImageAndBBoxes(const QString& somefilepath)
 void MainWindow::openFolder()
 {
   QString dir = QFileDialog::getExistingDirectory(
-    this, tr("Open folder"), "/home",
-    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+      this, tr("Open folder"), "/home",
+      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   fileBrowser->setDir(dir);
 }
 
 void MainWindow::saveQuads()
 {
   // Create BBox directory.
-  const QString quadFolder( fileBrowser->getBasePath()+"/Quads" );
+  const QString quadFolder(fileBrowser->getBasePath() + "/Quads");
   if (QDir().mkdir(quadFolder))
     fileBrowser->setDir(fileBrowser->getBasePath());
-  QString basename( QFileInfo(currentFilePath).baseName() );
+  QString basename(QFileInfo(currentFilePath).baseName());
   if (annotator->save(quadFolder + "/" + basename + ".txt"))
   {
     statusBar()->showMessage("Saved " + quadFolder + "/" + basename + ".txt");
     quadFileBrowser->setDir(quadFolder);
   }
   else
-    statusBar()->showMessage("Cannot save " + quadFolder + "/" + basename + ".txt");
+    statusBar()->showMessage("Cannot save " + quadFolder + "/" + basename +
+                             ".txt");
 }
 
 void MainWindow::about()
 {
   QMessageBox::about(
-    this, tr("About Image Annotator"),
-    tr("<p>The <b>Image Annotator</b> is a minimalist program that allows you to select BBoxes. "
-    "Wait and see if more features will be added on the fly...</p>")
-    );
+      this, tr("About Image Annotator"),
+      tr("<p>The <b>Image Annotator</b> is a minimalist program that allows "
+         "you to select BBoxes. "
+         "Wait and see if more features will be added on the fly...</p>"));
 }
 
 void MainWindow::createDockableFileBrowser()
 {
   // Dock file browser
-  QDockWidget *browserDock = new QDockWidget(tr("Image File Browser"), this);
+  QDockWidget* browserDock = new QDockWidget(tr("Image File Browser"), this);
   addDockWidget(Qt::LeftDockWidgetArea, browserDock);
 
   // File browser widget itself
   QStringList filters;
-  filters << "*.bmp" << "*.jpg" << "*.jpeg" << "*.png" << "*.tiff" << "*.tif" << "*.ppm";
+  filters << "*.bmp"
+          << "*.jpg"
+          << "*.jpeg"
+          << "*.png"
+          << "*.tiff"
+          << "*.tif"
+          << "*.ppm";
   fileBrowser = new FileBrowser(filters);
   browserDock->setWidget(fileBrowser);
 }
 
 void MainWindow::createDockableQuadFileBrowser()
 {
-  QDockWidget *browserDock = new QDockWidget(tr("Quad File Browser"), this);
+  QDockWidget* browserDock = new QDockWidget(tr("Quad File Browser"), this);
   addDockWidget(Qt::RightDockWidgetArea, browserDock);
 
   // File browser widget itself
@@ -742,8 +773,8 @@ void MainWindow::createDockableQuadFileBrowser()
   quadFileBrowser = new FileBrowser(filters);
   browserDock->setWidget(quadFileBrowser);
   quadFileBrowser->setDir(
-    QDesktopServices::storageLocation(QDesktopServices::DesktopLocation) +
-    "/Quads" );
+      QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) +
+      "/Quads");
 }
 
 void MainWindow::createCentralGraphicsView()
@@ -756,16 +787,16 @@ void MainWindow::createCentralGraphicsView()
 
 void MainWindow::createFileActions()
 {
-  QMenu *fileMenu = new QMenu(tr("&File"), this);
+  QMenu* fileMenu = new QMenu(tr("&File"), this);
   // Open folder act
-  QAction *openFolderAct = new QAction(tr("Open folder..."), this);
+  QAction* openFolderAct = new QAction(tr("Open folder..."), this);
   openFolderAct->setShortcut(tr("Ctrl+O"));
   connect(openFolderAct, SIGNAL(triggered()), this, SLOT(openFolder()));
   fileMenu->addAction(openFolderAct);
   // Separator
   fileMenu->addSeparator();
   // Quit act
-  QAction *quitAct = new QAction(tr("Quit..."), this);
+  QAction* quitAct = new QAction(tr("Quit..."), this);
   quitAct->setShortcut(tr("Alt+F4"));
   connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
   fileMenu->addAction(quitAct);
@@ -776,14 +807,14 @@ void MainWindow::createFileActions()
 
 void MainWindow::createQuadActions()
 {
-  QToolBar *drawToolBar = new QToolBar(tr("Drawing Tool Bar"), this);
+  QToolBar* drawToolBar = new QToolBar(tr("Drawing Tool Bar"), this);
   // Save
-  QAction *saveAct = new QAction(tr("Save Quads"), this);
+  QAction* saveAct = new QAction(tr("Save Quads"), this);
   saveAct->setShortcut(tr("S"));
   drawToolBar->addAction(saveAct);
   connect(saveAct, SIGNAL(triggered()), this, SLOT(saveQuads()));
 
-  QMenu *actionMenu = new QMenu(tr("Quads"), this);
+  QMenu* actionMenu = new QMenu(tr("Quads"), this);
   actionMenu->addAction(saveAct);
   menuBar()->addMenu(actionMenu);
 
@@ -792,13 +823,13 @@ void MainWindow::createQuadActions()
 
 void MainWindow::createHelpActions()
 {
-  QMenu *helpMenu = new QMenu(tr("Help"), this);
+  QMenu* helpMenu = new QMenu(tr("Help"), this);
   // About act
-  QAction *aboutAct = new QAction(tr("About"), this);
+  QAction* aboutAct = new QAction(tr("About"), this);
   connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
   helpMenu->addAction(aboutAct);
   // About Qt act
-  QAction *aboutQtAct = new QAction(tr("About Qt"), this);
+  QAction* aboutQtAct = new QAction(tr("About Qt"), this);
   connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
   helpMenu->addAction(aboutQtAct);
 
@@ -808,9 +839,8 @@ void MainWindow::createHelpActions()
 
 void MainWindow::createConnections()
 {
-  // Refresh the image as the user picks a different image file in the file browser.
-  connect(
-    fileBrowser, SIGNAL(picked(const QString&)),
-    this, SLOT(displayImageAndBBoxes(const QString&))
-    );
+  // Refresh the image as the user picks a different image file in the file
+  // browser.
+  connect(fileBrowser, SIGNAL(picked(const QString&)), this,
+          SLOT(displayImageAndBBoxes(const QString&)));
 }

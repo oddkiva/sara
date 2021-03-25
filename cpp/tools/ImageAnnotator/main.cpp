@@ -1,35 +1,29 @@
-/*
- * =============================================================================
- *
- *       Filename:  main.cpp
- *
- *    Description:  Image annotator main entry point.
- *
- *        Version:  1.0
- *        Created:  16/06/2010 10:30:30
- *       Revision:  none
- *       Compiler:  msvc
- *
- *         Author:  David OK (DO), david.ok@imagine.enpc.fr 
- *        Company:  IMAGINE, (Ecole des Ponts ParisTech & CSTB)
- *
- * =============================================================================
- */
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2010-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
 
 #include <QApplication>
-#include <QtGui>
+
 #include "MainWindow.hpp"
 
-//#ifdef WIN32
-//int WinMain(int argc, char **argv)
-//#else
-int main(int argc, char **argv)
-//#endif
+
+#ifdef WIN32
+int WinMain(int argc, char** argv)
+#else
+int main(int argc, char** argv)
+#endif
 {
   QApplication app(argc, argv);
 
-  MainWindow *mainWin = new MainWindow;
-  mainWin->showMaximized();
+  MainWindow mainWin;
+  mainWin.showMaximized();
 
   return app.exec();
 }
