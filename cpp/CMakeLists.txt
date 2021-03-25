@@ -15,6 +15,7 @@ if (SARA_BUILD_SAMPLES)
 endif ()
 
 add_subdirectory(pipelines)
+add_subdirectory(tools)
 
 set(cpp_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 add_subdirectory(drafts)
