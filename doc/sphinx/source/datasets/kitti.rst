@@ -100,9 +100,9 @@ where each object annotation contains the following geometry:
        \mathbf{R}_\psi =
        \left[
        \begin{array}{rrr}
-       \cos\psi &  0  & -\sin\psi \\
-              0 &  1  &         0 \\
-       \sin\psi &  0  &  \cos\psi \\
+        \cos\psi &  0  & \sin\psi \\
+               0 &  1  &        0 \\
+       -\sin\psi &  0  & \cos\psi \\
        \end{array}
        \right]
 
@@ -132,9 +132,8 @@ coordinate system associated to Camera #0. Thus the vertices :math:`\mathbf{X}`
 are expressed with respect to Camera #0 coordinate system and not w.r.t. to
 Camera #2 coordinate system!
 
-Indeed the **README** file found in the development kit states that the
-projection of the 3D bounding box to the image is done via the following
-formula
+Indeed the **README** file in the development kit states that the projection of
+the 3D bounding box to the image is done via the following formula
 
 .. math::
 
@@ -214,7 +213,7 @@ equation
      \mathbf{X} \\
 
 
-Then multiplying the matrix blocks
+Then multiplying the matrix blocks,
 
 .. math::
 
@@ -228,8 +227,7 @@ Then multiplying the matrix blocks
 
      \mathbf{X} \\
 
-Upon simplification the equation now has the familiar form exposed in usual
-computer vision textbooks:
+Upon simplification,
 
 .. math::
 
@@ -239,8 +237,9 @@ computer vision textbooks:
        \mathbf{R}_0^{(\text{rect})} & \mathbf{t} \\
        \end{array}
      \right]
-     \mathbf{X}
+     \mathbf{X}.
 
-It follows from this equation that to go from camera coordinate system #0 to
-camera coordinate system #2 is done by the rigid body transform
+Now the equation has the familiar form exposed in usual computer vision
+textbooks. And it follows from this equation that to go from camera coordinate
+system #0 to camera coordinate system #2 is done by the rigid body motion
 :math:`(\mathbf{R}_0^{(\text{rect})}, \mathbf{t})`.
