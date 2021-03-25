@@ -3,8 +3,8 @@
 Accelerometer
 *************
 
-Actually What Does It Measure?
-##############################
+Actually... What Does It Measure?
+#################################
 
 In this introductory section, I write about my own experience as a beginner in
 IMU data analysis and how I came up with my own intuition.
@@ -26,7 +26,8 @@ second law. I was asking myself:
 
 These readings were puzzling to me and conflicting with my intuition.
 
-Later, I found the following document and post, videos quite informative:
+Later, I found the following documents, posts and videos that are quite
+informative:
 
 - http://www.chrobotics.com/docs/AN-1008-SensorsForOrientationEstimation.pdf
 - https://physics.stackexchange.com/questions/402611/why-an-accelerometer-shows-zero-force-while-in-free-fall
@@ -45,32 +46,47 @@ With Newton's Laws
 ------------------
 
 Putting all these thoughts, experiments, and the essential bits of the different
-readings together, it turns out indeed that the accelerometer measures the sum
-of all external forces **except the gravitational force** acting upon the IMU
-body.
+readings together, the accelerometer does measure the sum of all external forces
+**except the gravitational force** acting upon the IMU body.
 
 .. math::
 
    m \mathbf{a}^{\text{IMU}} = \Sigma \mathbf{F} - m \mathbf{g}
 
 Thus with this formula, when the smartphone is lying on the table, we realize
-that what the IMU measures is **the reaction force of the table**. Indeed,
-because the smartphone is immobile, its acceleration is zero. Necessarily this
-reaction force has to cancel the gravitational force to prevent the smartphone
-from "falling down". That is the reason why the IMU does record acceleration
-vectors pointing up. In other words, they have positive elevation :math:`a_z >
-0` and a magnitude close to :math:`9.81\ m/s^2`.
+that what the IMU measures is **the reaction force of the table**.
+
+Empirical Validation with the Smartphone App
+""""""""""""""""""""""""""""""""""""""""""""
+
+Indeed, because the smartphone is immobile, its acceleration is zero.
+Necessarily this reaction force has to cancel the gravitational force to prevent
+the smartphone from "falling down". The sum of all forces is (1) the reaction
+force of the table and (2) the gravitational force and applying the formula
+above, we should indeed expect the IMU to record acceleration vectors pointing
+up. In other words, they have positive elevation :math:`a_z > 0` and a magnitude
+close to :math:`9.81\ m/s^2`.
+
+If we play with the smartphone app and rotate it,
+this should convince use and also validate the formula above.
+
+Empirical Validation on the Free-Fall Case
+""""""""""""""""""""""""""""""""""""""""""
+
+Let us now trust the formula above and the explanations in the YouTube video.
 
 When the smartphone is falling down on the floor, the only external force
-acting on it is the gravitational force. As we said it earlier, just the
+acting on it is the gravitational force. As we said it earlier, the
 accelerometer records all forces except the gravitational force and this
 explains why the recorded accelerations are close to zero.
 
-For example, in some recorded IMU data, the accelerations recorded on a car
-every so often has a lower magnitude than the gravity vector. A possible
-explanation is that the car springs are being compressed or elongated further
-when the car is bumping on the road, causing the car elevation to fluctuate
-slightly more.
+In my experience, the acceleration magnitudes recorded during a car drive can
+have a lower magnitude than the gravity vector. These usually coincides when the
+car is bumping on the road. The car elevation fluctuates. A possible explanation
+is due to the car springs which are being elongated then compressed.
+
+And my personal interpretation is that these phases where the car springs begin
+to compress can be viewed as "mini free-fall" situations.
 
 Accelerometer as a Mass on a Spring
 -----------------------------------
@@ -125,13 +141,12 @@ We can also measure the reaction force of the table as
 
    R_\text{table} = k (1 + \frac{m_\text{spring}}{m_\text{mass}}) \Delta x \\
 
+Under a free fall (and neglecting the aerodynamic resistance), we should observe
+that the spring is in a relaxed state and that that means no elongation and no
+compression, thus :math:`\Delta x \approx 0`. And the accelerometer will measure
+accelerations close to zero since :math:`\Delta x \approx 0`.
 
-Under a free fall, if we neglect the aerodynamic resistance, there is no
-reaction force acting upon the spring. The spring is in a relaxed state. No
-elongation and no compression, thus :math:`\Delta x = 0`. And the accelerometer
-will measure accelerations close to zero.
-
-See the illustrations drawn in the stackoverflow post for complementary
+See the illustrations drawn in the StackOverflow post for complementary
 information.
 
 
