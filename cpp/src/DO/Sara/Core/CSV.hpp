@@ -3,6 +3,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -14,7 +15,7 @@ namespace DO::Sara {
   //! @defgroup CSV CSV  I/O functions
   //! @{
 
-  auto split(const std::string& line, const std::string& delimiters)
+  inline auto split(const std::string& line, const std::string& delimiters)
       -> std::vector<std::string>
   {
     auto tokens = std::vector<std::string>{};
@@ -36,11 +37,33 @@ namespace DO::Sara {
     auto array = std::vector<Tuple>{};
 
     auto line = std::string{};
+    auto line_index = 0;
     while (std::getline(file, line))
     {
-      auto row = split(line, delimiters);
-      auto row_parsed = parse_row_fn(row);
-      array.emplace_back(row_parsed);
+      const auto row = split(line, delimiters);
+      if (line_index == 0)
+      {
+        try
+        {
+          auto row_parsed = parse_row_fn(row);
+          array.emplace_back(row_parsed);
+        }
+        catch (...)
+        {
+#ifdef DEBUG
+          std::cout << "Ignore header: " << std::endl;
+          for (const auto& c : row)
+            std::cout << c << " ";
+          std::cout << std::endl;
+#endif
+        }
+      }
+      else
+      {
+        auto row_parsed = parse_row_fn(row);
+        array.emplace_back(row_parsed);
+      }
+      ++line_index;
     }
 
     return array;
