@@ -137,8 +137,11 @@ endif ()
 # Build the libraries.
 add_subdirectory(cpp)
 
-if (CMAKE_Swift_COMPILER)
-  add_subdirectory(swift)
+# TODO: MIGRATE TO QT6 BECAUSE OF BREW...!!!
+if (NOT APPLE)
+  if (CMAKE_Swift_COMPILER)
+    add_subdirectory(swift)
+  endif ()
 endif ()
 
 if (SARA_BUILD_PYTHON_BINDINGS)

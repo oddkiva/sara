@@ -17,12 +17,6 @@ endif()
 kalpana_dissect_version(${DO_Kalpana_VERSION})
 
 
-# Set output directories.
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-
 # Create the following libraries.
 set(DO_Kalpana_LIBRARIES 2D 3D Math Plot)
 foreach (library ${DO_Kalpana_LIBRARIES})

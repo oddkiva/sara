@@ -233,7 +233,4 @@ function (kalpana_add_example)
    # Add the C++ test executable.
    add_executable(${EXAMPLE_NAME} ${ARGN})
    set_property(TARGET ${EXAMPLE_NAME} PROPERTY FOLDER "Examples/Kalpana")
-   set_target_properties(
-     ${EXAMPLE_NAME} PROPERTIES
-     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 endfunction ()
