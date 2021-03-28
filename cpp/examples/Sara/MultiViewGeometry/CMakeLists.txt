@@ -33,7 +33,7 @@ sara_add_example(essential_matrix_estimation_example)
 target_link_libraries(essential_matrix_estimation_example PRIVATE tinyply)
 
 # Camera resectioning.
-sara_add_example(camera_resectioning_example)
+# sara_add_example(camera_resectioning_example)
 
 # Bundle adjustment.
 sara_add_example(two_view_bundle_adjustment_example)

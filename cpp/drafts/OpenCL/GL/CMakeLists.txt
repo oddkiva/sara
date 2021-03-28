@@ -4,7 +4,6 @@ add_library(DO_Sara_OpenCL_GL ${DO_Sara_OpenCL_GL_FILES})
 
 target_include_directories(DO_Sara_OpenCL_GL
   PUBLIC
-  ${OpenCL_INCLUDE_DIR}
   ${GLEW_INCLUDE_DIR})
 
 target_compile_definitions(DO_Sara_OpenCL_GL
@@ -16,7 +15,7 @@ target_link_libraries(DO_Sara_OpenCL_GL
   ${DO_Sara_LIBRARIES}
 
   PUBLIC
-  ${OpenCL_LIBRARY}
+  OpenCL::OpenCL
   ${OPENGL_LIBRARIES})
 
 if (NOT APPLE)

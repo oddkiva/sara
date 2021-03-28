@@ -68,7 +68,7 @@ up. In other words, they have positive elevation :math:`a_z > 0` and a magnitude
 close to :math:`9.81\ m/s^2`.
 
 If we play with the smartphone app and rotate it,
-this should convince use and also validate the formula above.
+this should convince us and also validate the formula above.
 
 Empirical Validation on the Free-Fall Case
 """"""""""""""""""""""""""""""""""""""""""

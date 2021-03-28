@@ -1,4 +1,7 @@
-find_package(OpenCL REQUIRED)
+if (NOT OpenCL_FOUND)
+  return ()
+endif ()
+
 if (NOT APPLE)
   find_package(GLEW REQUIRED)
 endif ()

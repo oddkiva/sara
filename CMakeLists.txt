@@ -101,6 +101,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
 
   find_package(Qt5 COMPONENTS Core Widgets OpenGL OpenGLExtensions REQUIRED)
   find_package(OpenGL REQUIRED)
+  find_package(OpenCL)
 
   find_package(Ceres REQUIRED)
 endif ()

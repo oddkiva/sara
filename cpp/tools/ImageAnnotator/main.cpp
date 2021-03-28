@@ -14,7 +14,7 @@
 #include "MainWindow.hpp"
 
 
-#ifdef WIN32
+#ifdef _WIN32
 int WinMain(int argc, char** argv)
 #else
 int main(int argc, char** argv)
