@@ -26,8 +26,12 @@ foreach (library ${DO_Kalpana_LIBRARIES})
 
   if (NOT ${library} STREQUAL "Plot")
     target_link_libraries(DO_Kalpana_${library}
-      Qt5::Core Qt5::Widgets Qt5::OpenGL Qt5::OpenGLExtensions
-      ${OPENGL_LIBRARIES} ${DO_Sara_LIBRARIES})
+      Qt5::Core
+      Qt5::Widgets
+      Qt5::OpenGL
+      Qt5::OpenGLExtensions
+      ${OPENGL_LIBRARIES}
+      ${DO_Sara_LIBRARIES})
   endif ()
 endforeach ()
 

@@ -22,7 +22,7 @@ namespace DO { namespace Sara {
   /*!
    *  @ingroup Graphics
    *
-   *  @defgroup GraphicsImageIO Image I/O (slow using Qt5)
+   *  @defgroup GraphicsImageIO Image I/O (slow using Qt)
    *  @{
    */
 

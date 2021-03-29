@@ -18,7 +18,9 @@ foreach (file ${examples_SRC_FILES})
     ${DO_Sara_LIBRARIES}
     ${HDF5_LIBRARIES}
     DO_Kalpana_2D DO_Kalpana_3D DO_Kalpana_Math
-    Qt5::Widgets Qt5::OpenGL Qt5::OpenGLExtensions)
+    Qt5::Widgets
+    Qt5::OpenGL
+    Qt5::OpenGLExtensions)
 
   target_compile_definitions(${filename}
     PRIVATE

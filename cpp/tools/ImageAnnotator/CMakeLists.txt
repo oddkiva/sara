@@ -7,7 +7,7 @@ target_link_libraries(image_annotator
   Qt5::Gui
   Qt5::Widgets
   Qt5::OpenGL
-  $<$<PLATFORM_ID:Windows>:Qt5::WinMain>)
+  $<<PLATFORM_ID:Windows>:Qt5::WinMain>)
 
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
