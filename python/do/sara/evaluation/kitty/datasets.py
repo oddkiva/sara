@@ -1,13 +1,14 @@
 import os
 import csv
 from os import path
+from pathlib import Path
 
 import numpy as np
 
 import cv2
 
 
-KITTI_ROOT_PATH = '/home/david/Downloads/kitti'
+KITTI_ROOT_PATH = path.join(str(Path.home()), 'Downloads', 'kitti')
 KITTI_LABELS_DIR_PATH = path.join(KITTI_ROOT_PATH, 'training', 'label_2')
 KITTI_IMAGE_DIR_PATH = path.join(KITTI_ROOT_PATH, 'data_object_image_2',
                                  'training', 'image_2')

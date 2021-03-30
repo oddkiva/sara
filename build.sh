@@ -63,8 +63,12 @@ function build_library()
     cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.3.2-RELEASE-ubuntu20.04/usr/bin/swiftc "
   fi
 
+  # Use latest Qt version instead of the system Qt.
+  #
+  # TODO: migrate to Qt6.
+  # if [ "${platform_name}" == "Linux" ]; then
+  #   cmake_options+="-DQt5_DIR=${HOME}/opt/Qt-5.15.0-amd64/lib/cmake/Qt5 "
   if [ "${platform_name}" == "Darwin" ]; then
-    # TODO: migrate to Qt6.
     cmake_options+="-DQt5_DIR=$(brew --prefix qt@5)/lib/cmake/Qt5 "
   fi
 
