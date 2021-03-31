@@ -1,0 +1,5 @@
+add_executable(nuscenes_cpp_devkit_usage_example nuscenes_cpp_devkit_usage_example.cpp)
+target_include_directories(nuscenes_cpp_devkit_usage_example
+  PRIVATE
+  ${cpp_INCLUDE_DIR}/third-party)
+target_link_libraries(nuscenes_cpp_devkit_usage_example Boost::filesystem)

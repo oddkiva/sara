@@ -27,3 +27,5 @@ if (NOT APPLE)
 endif ()
 
 add_subdirectory(Vulkan)
+
+add_subdirectory(NuScenes)
