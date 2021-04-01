@@ -10,34 +10,36 @@ camera coordinate system :math:`(O_C, x_C, y_C, z_C)`. We can retrieve its
 coordinates in the world coordinate system :math:`(O_W, x_W, y_W, z_W)` as
 follows
 
-.. math::
+.. important::
 
-  \begin{aligned}
+   .. math::
 
-  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
-                            \overrightarrow{O_\textrm{C}M} \\
+     \begin{aligned}
 
-  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
-                            x_C \mathbf{i}_C + y_C \mathbf{j}_C + z_C \mathbf{k}_C\\
+     \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+                               \overrightarrow{O_\textrm{C}M} \\
 
-  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
-  \left[ \begin{array}{c|c|c}
-  \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
-  \end{array} \right]
+     \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+                               x_C \mathbf{i}_C + y_C \mathbf{j}_C + z_C \mathbf{k}_C\\
 
-  \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
+     \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+     \left[ \begin{array}{c|c|c}
+     \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
+     \end{array} \right]
 
-  \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] &=
-    \underbrace{\overrightarrow{O_W O_C}}_{\mathbf{t}} +
+     \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
 
-    \underbrace{
-      \left[ \begin{array}{c|c|c}
-      \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
-      \end{array} \right]
-    }_{\mathbf{R}}
+     \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] &=
+       \underbrace{\overrightarrow{O_W O_C}}_{\mathbf{t}} +
 
-    \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
-  \end{aligned}
+       \underbrace{
+         \left[ \begin{array}{c|c|c}
+         \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
+         \end{array} \right]
+       }_{\mathbf{R}}
+
+       \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
+     \end{aligned}
 
 We recognize the global rigid body motion :math:`(\mathbf{R}, \mathbf{t})`
 where:
@@ -88,11 +90,13 @@ very important.
 The rotation matrix expressed with respect to the *extrinsic* axes (i.e., the axes
 of the original local coordinates before rotating the plane) is calculated as:
 
-.. math::
+.. important::
 
-   \mathbf{R} (\psi, \theta, \phi) = \mathbf{R}_z (\psi)
-                                     \mathbf{R}_y (\theta)
-                                     \mathbf{R}_x (\phi)
+   .. math::
+
+      \mathbf{R} (\psi, \theta, \phi) = \mathbf{R}_z (\psi)
+                                        \mathbf{R}_y (\theta)
+                                        \mathbf{R}_x (\phi)
 
 Formula of Elementary Rotations
 -------------------------------
@@ -105,38 +109,44 @@ positive quantity. A small angle will imply a small change, and then a cosine
 close to 1 and a sine close to 0. By visualization, we can determine the sign of
 each coefficient.
 
-- When the airplane is slightly yawing positively, it is steering to the right
-  as the :math:`x`-axis is rotating towards the :math:`y`-axis:
+- When the airplane is yawing positively, it is steering to the right as the
+  :math:`x`-axis is rotating towards the :math:`y`-axis:
 
-  .. math::
+  .. note::
 
-    \mathbf{R}_z(\psi) = \left[ \begin{array}{ccc}
-      \cos\psi & -\sin\psi & 0 \\
-      \sin\psi &  \cos\psi & 0 \\
-             0 &         0 & 1 \\
-    \end{array} \right]
+     .. math::
 
-- When the airplane is slightly pitching positively, its nose is looking up
-  as the :math:`z`-axis is rotating towards the :math:`x`-axis.
+       \mathbf{R}_z(\psi) = \left[ \begin{array}{ccc}
+         \cos\psi & -\sin\psi & 0 \\
+         \sin\psi &  \cos\psi & 0 \\
+                0 &         0 & 1 \\
+       \end{array} \right]
 
-  .. math::
+- When the airplane is pitching positively, its nose is looking up as the
+  :math:`z`-axis is rotating towards the :math:`x`-axis.
 
-    \mathbf{R}_y(\theta) = \left[ \begin{array}{ccc}
-      \cos\theta & 0 & \sin \theta \\
-               0 & 1 &           0 \\
-     -\sin\theta & 0 & \cos \theta \\
-    \end{array} \right]
+  .. note::
 
-- When the airplane is slightly rolling positively, it right wing is tilting
-  down as the :math:`y`-axis is rotating towards the :math:`z`-axis.
+     .. math::
 
-  .. math::
+       \mathbf{R}_y(\theta) = \left[ \begin{array}{ccc}
+         \cos\theta & 0 & \sin \theta \\
+                  0 & 1 &           0 \\
+        -\sin\theta & 0 & \cos \theta \\
+       \end{array} \right]
 
-    \mathbf{R}_x (\phi) = \left[ \begin{array}{ccc}
-      1 &        0 &         0 \\
-      0 & \cos\phi & -\sin\phi \\
-      0 & \sin\phi &  \cos\phi \\
-    \end{array} \right]
+- When the airplane is rolling positively, it right wing is tilting down as the
+  :math:`y`-axis is rotating towards the :math:`z`-axis.
+
+  .. note::
+
+     .. math::
+
+       \mathbf{R}_x (\phi) = \left[ \begin{array}{ccc}
+         1 &        0 &         0 \\
+         0 & \cos\phi & -\sin\phi \\
+         0 & \sin\phi &  \cos\phi \\
+       \end{array} \right]
 
 
 This nice visualisation tool can be useful to check our understanding:
@@ -145,8 +155,8 @@ http://danceswithcode.net/engineeringnotes/rotations_in_3d/demo3D/rotations_in_3
 Proof
 -----
 
-It is useful to provide a proof that justifies the formula of the Euler rotation
-as we have shown above.
+It is useful to provide a proof that justifies the Euler decomposition we have
+exhibited above.
 
 In terms of matrix multiplication, the composite rotation is
 

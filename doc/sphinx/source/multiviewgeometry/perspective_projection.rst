@@ -39,7 +39,7 @@ The corresponding point imaged in the camera film has 3D *metric* coordinates
 Now in geometric computer vision, we prefer working in the *normalized* camera
 coordinate system where we assume the focal length is :math:`f = 1`. This
 amounts to dividing the coordinates by :math:`f = 1`. In other words, the base
-length unit in the normalized camera coordinates system is the focal length
+length unit in the normalized camera coordinate system is the focal length
 instead of the metre. And we use the camera calibration matrix to rescale the
 normalized coordinates back to metric coordinates.
 
@@ -68,4 +68,5 @@ By reinjecting the world coordinates we see that
 
    \left[ \begin{array}{c} \mathbf{x}_W \\ 1 \end{array} \right] .
 
-Thus we have introduced by construction a perspective projection matrix :math:`\mathbf{C}`, in which homogeneous coordinates appear naturally.
+Thus we have introduced by construction a perspective projection matrix
+:math:`\mathbf{C}`, in which homogeneous coordinates appear naturally.

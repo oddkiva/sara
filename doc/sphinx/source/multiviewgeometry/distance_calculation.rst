@@ -59,7 +59,7 @@ Thus in the camera coordinate system
 The point :math:`M` is projected to the normalized camera plane. Let :math:`(u,
 v)` denote its normalized camera coordinates.
 
-Using the basic proportionality theorem in geometric optics:
+By similar triangles it follows that
 
 .. math::
 
