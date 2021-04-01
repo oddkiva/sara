@@ -119,11 +119,11 @@ struct NuScenes
     , verbose{verbose_}
   {
     load_samples();
+    load_sample_data();
     load_sample_annotations();
     // load_categories();
   }
 
-private:
   auto load_table(const std::string& table_name) -> nlohmann::json
   {
     namespace fs = boost::filesystem;
@@ -167,8 +167,7 @@ private:
           .is_key_frame = j["is_key_frame"].get<bool>(),
           .width = j["width"].get<int>(),
           .height = j["height"].get<int>(),
-          .filename = j["filename"]
-      };
+          .filename = j["filename"]};
   }
 
   auto load_sample_annotations() -> void
@@ -180,23 +179,23 @@ private:
       sample_annotation.prev = j["prev"];
       sample_annotation.next = j["next"];
       sample_annotation.sample_token = j["sample_token"];
-      sample_annotation.visibility_token = std::stoi(j["visibility_token"].get<std::string>());
+      sample_annotation.visibility_token =
+          std::stoi(j["visibility_token"].get<std::string>());
       sample_annotation.instance_token = j["instance_token"];
-      // for (const auto& jt: j["attributes_tokens"])
-      //   sample_annotation.attributes_tokens.push_back(jt.get<std::string>());
+      for (const auto& jattr : j["attribute_tokens"])
+        sample_annotation.attributes_tokens.emplace_back(
+            jattr.get<std::string>());
 
       for (auto i = 0; i < 3; ++i)
         sample_annotation.translation(i) = j["translation"][i].get<float>();
-      std::cout << sample_annotation.translation.transpose() << std::endl;
 
       for (auto i = 0; i < 3; ++i)
         sample_annotation.size(i) = j["size"][i].get<float>();
 
-      for (auto i = 0; i < 4; ++i)
-        sample_annotation.rotation = Eigen::Quaternionf{
-            j["rotation"][0].get<float>(), j["rotation"][1].get<float>(),
-            j["rotation"][2].get<float>(), j["rotation"][3].get<float>()};
-
+      sample_annotation.rotation = Eigen::Quaternionf{
+          j["rotation"][0].get<float>(), j["rotation"][1].get<float>(),
+          j["rotation"][2].get<float>(), j["rotation"][3].get<float>()  //
+      };
 
       sample_annotation.num_lidar_pts = j["num_lidar_pts"].get<int>();
       sample_annotation.num_radar_pts = j["num_radar_pts"].get<int>();
@@ -217,4 +216,27 @@ private:
       std::cout << token << " " << category.index << " " << category.name
                 << std::endl;
   }
+
+  template <typename T>
+  auto filter_by_sample_token(const std::unordered_map<Token, T>& table,
+                              const Token& value) const
+  {
+    auto rows = std::vector<T>{};
+    std::for_each(table.cbegin(), table.cend(), [&](const auto& row) {
+      if (row.second.sample_token == value)
+        rows.emplace_back(row.second);
+    });
+    return rows;
+  }
+
+  // template <typename T>
+  // auto filter_by_instance_token(const std::unordered_map<Token, T>& table,
+  //                               const Token& value) const
+  // {
+  //   auto rows = std::vector<T>{};
+  //   std::copy_if(
+  //       table.cbegin(), table.cend(), std::back_inserter(rows),
+  //       [&value](const T& row) { return row.instance_token == value; });
+  //   return rows;
+  // }
 };
