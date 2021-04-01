@@ -25,16 +25,25 @@ Let us make two useful remarks:
 - The translation :math:`-\mathbf{R}^T \mathbf{t}` stores the coordinates of the
   world origin expressed in the camera coordinate system.
 
-Now a camera is a physical projector that captures incoming lights reflected by
-3D material points into the camera film.
+In the camera pinhole model, lights reflected by 3D objects that passes through
+the camera aperture have a straight line trajectory.
 
-Following the principles of geometric optics, the imaging process consists of
-projecting 3D points :math:`(x_C, y_C, z_C)` into the film which can be viewed
-as an image plane defined by :math:`z_C = 1`.
+From a geometrical point of view, the camera forms the image by projecting every
+3D material point with *metric* coordinates :math:`(x_C, y_C, z_C)` onto the
+camera film plane defined by :math:`z_C = f` where :math:`f` is the focal
+length.
 
-The imaged point in the camera film has 3D coordinates :math:`(u_C, v_C, 1)`
-expressed in the camera coordinate system. Using the basic proportionality
-theorem, it follows that
+The corresponding point imaged in the camera film has 3D *metric* coordinates
+:math:`(u_C, v_C, f)` also expressed in the camera coordinate system.
+
+Now in geometric computer vision, we prefer working in the *normalized* camera
+coordinate system where we assume the focal length is :math:`f = 1`. This
+amounts to dividing the coordinates by :math:`f = 1`. In other words, the base
+length unit in the normalized camera coordinates system is the focal length
+instead of the metre. And we use the camera calibration matrix to rescale the
+normalized coordinates back to metric coordinates.
+
+In the camera pinhole model, similar triangles holds and thus
 
 .. math::
 
