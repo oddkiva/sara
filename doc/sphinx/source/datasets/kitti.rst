@@ -98,13 +98,11 @@ where each object annotation contains the following geometry:
     .. math::
 
        \mathbf{R}_\psi =
-       \left[
-       \begin{array}{rrr}
+       \begin{bmatrix}
         \cos\psi &  0  & \sin\psi \\
                0 &  1  &        0 \\
        -\sin\psi &  0  & \cos\psi \\
-       \end{array}
-       \right]
+       \end{bmatrix}
 
 It follows that the vertices expressed in the camera coordinate system can be
 calculated as
@@ -112,12 +110,10 @@ calculated as
 .. math::
 
    \mathbf{X} =
-   \left[
-   \begin{array}{c}
+   \begin{bmatrix}
    \mathbf{R}_\psi & \mathbf{t} \\
     \mathbf{0}_3^T &          1 \\
-   \end{array}
-   \right]
+   \end{bmatrix}
    \mathbf{X}_l
 
 We can double-check these by examining the MATLAB code provided in the

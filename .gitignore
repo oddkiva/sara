@@ -196,3 +196,4 @@ test/Features/test_copy.*
 test/Graphics/MARBIBM_write.TIF
 test/Graphics/flower_write.png
 test/Graphics/ksmall_write.jpg
+.Rproj.user

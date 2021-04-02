@@ -37,11 +37,11 @@ The corresponding point imaged in the camera film has 3D *metric* coordinates
 :math:`(u_C, v_C, f)` also expressed in the camera coordinate system.
 
 Now in geometric computer vision, we prefer working in the *normalized* camera
-coordinate system where we assume the focal length is :math:`f = 1`. This
-amounts to dividing the coordinates by :math:`f = 1`. In other words, the base
-length unit in the normalized camera coordinate system is the focal length
-instead of the metre. And we use the camera calibration matrix to rescale the
-normalized coordinates back to metric coordinates.
+coordinate system where we assume the focal length is :math:`f = 1`. In fact,
+this assumption amounts to dividing the coordinates by :math:`f`. In other
+words, the base length unit in the normalized camera coordinate system is the
+focal length instead of the metre. And we use the camera calibration matrix to
+rescale the normalized coordinates back to metric coordinates.
 
 In the camera pinhole model, similar triangles holds and thus
 
