@@ -125,8 +125,8 @@ Projection of 3D World Points to the Camera #2's Film
 
 One important thing to note is that the camera coordinate system refers to the
 coordinate system associated to Camera #0. Thus the vertices :math:`\mathbf{X}`
-are expressed with respect to Camera #0 coordinate system and not w.r.t. to
-Camera #2 coordinate system!
+are expressed with respect to Camera #0's coordinate system and not w.r.t. to
+Camera #2's coordinate system!
 
 Indeed the **README** file in the development kit states that the projection of
 the 3D bounding box to the image is done via the following formula
@@ -235,7 +235,7 @@ Upon simplification,
      \right]
      \mathbf{X}.
 
-Now the equation has the familiar form exposed in usual computer vision
+Now the equation has the familiar form as exposed in usual computer vision
 textbooks. And it follows from this equation that to go from camera coordinate
 system #0 to camera coordinate system #2 is done by the rigid body motion
 :math:`(\mathbf{R}_0^{(\text{rect})}, \mathbf{t})`.
