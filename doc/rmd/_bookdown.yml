@@ -1,0 +1,14 @@
+---
+title: "Sara's Documentation"
+author: "Odd Kiva"
+date: "`r Sys.Date()`"
+site: "bookdown::bookdown_site"
+output:
+  bookdown::gitbook: default
+  html_document:
+    css: "https://latex.now.sh/style.css"
+documentclass: book
+bibliography: ["phd.bib"]
+biblio-style: apalike
+link-citations: yes
+---
