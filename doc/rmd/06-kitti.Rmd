@@ -11,7 +11,7 @@ scattered in many places across the website.
 
 *N.B.: these notes reflect the best of my understanding as of this writing. They
 may still contain errors and I am very interested to know about them if you spot
-any misunderstandings on my part and explain them to me.*
+any misunderstandings on my part and explain to me.*
 
 
 ## Object Detection Challenge

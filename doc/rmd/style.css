@@ -1,0 +1,9 @@
+@import url('http://fonts.cdnfonts.com/css/tex-gyre-heros');
+@import url('http://fonts.cdnfonts.com/css/latin-modern-roman');
+
+.book.font-family-0 {
+  font-family: "LMRoman10", "Computer Modern Serif", times, Georgia, serif;
+}
+.book.font-family-1 {
+  font-family: "TexGyreHeros", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
