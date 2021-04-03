@@ -1,4 +1,16 @@
-# Welcome to Sara's Documentation!
+---
+title: "Sara's Documentation"
+author: "Odd Kiva"
+date: "`r Sys.Date()`"
+site: "bookdown::bookdown_site"
+documentclass: book
+bibliography: ["phd-utf8.bib"]
+biblio-style: apalike
+link-citations: yes
+---
+
+
+# Preface
 
 *Sara* is a small and easy-to-use C++ computer vision library.
 

@@ -3,18 +3,18 @@
 ## Context
 
 I had to calculate ellipse intersections in the feature matching method I
-published in ACCV in :cite:`ok:hal-00743044` and which I also made available in
-**Sara**. I did not want to do polygonal approximations and instead wanted to
-have a closed-form approach if possible at all.
+published in [@ok:hal-00743044] and which I also made available in **Sara**. I
+did not want to do polygonal approximations and instead wanted to have a
+closed-form approach if possible at all.
 
-Then I found Eberly's paper :cite:`Eberly` that provides a nice explanation
+Then I found Eberly's paper [@Eberly] that provides a nice explanation
 about the computation of ellipse intersection. It details namely how to
 calculate its intersection points and the intersection area. And it is not that
 a simple geometric problem.
 
-I revisited again :cite:`Eberly`'s study in the appendix of my thesis
-:cite:`Ok:2013:phdthesis` and I have retouched the original text here a bit to
-make it a bit more human (less dry) in this documentation.
+I revisited again [@Eberly]'s study in the appendix of my thesis
+[@Ok:2013:phdthesis] and I have retouched the original text here a bit to make
+it a bit more human (less dry) in this documentation.
 
 The modest contribution of the text is to break down a bit more these
 implementation details, when you read the code in **Sara**.
@@ -86,7 +86,7 @@ The differential is $\mathop{\mathrm{d}x} = a \cos(\theta)
 ### Area of an Elliptical Sector
 
 In this part, we review the computation of the area of an ellipse sector. We
-complement :cite:`Eberly` with a bit more details.
+complement [@Eberly] with a bit more details.
 
 ```{r ellsector, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector delimited by the polar angles $(\\theta_1, \\theta_2)$ is colored in blue"}
 
@@ -177,7 +177,7 @@ However the integral is properly defined only in the interval $(\theta_1,
 retrieve the elliptical sector for any $(\theta_1, \theta_2) \in ]-\pi, \pi[$
 but this is cumbersome.
 
-Alternatively, :cite:`Eberly` provides a better antiderivative formula because
+Alternatively, [@Eberly] provides a better antiderivative formula because
 it is defined in $]-\pi, \pi]$:
 
 ```{proposition, name="Elliptic Antiderivative"}
@@ -346,7 +346,7 @@ intersection points of two intersecting ellipses.
 ## Intersection Points of Two Ellipses
 
 We explain how we can retrieve the intersection points of two ellipses. Our
-presentation complements :cite:`Eberly`.
+presentation complements [@Eberly].
 
 First let $(\mathcal{E}_i)_{1 \leq i \leq 2}$ be two ellipses defined as
 
@@ -507,7 +507,7 @@ root values.
 
 ## Intersection Area of Two Ellipses
 
-Our presentation complements :cite:`Eberly`. In the rest of the section, we
+Our presentation complements [@Eberly]. In the rest of the section, we
 consider two ellipses :math:`(\mathcal{E}_i)_{1 \leq i \leq 2}` and we
 respectively denote
 
@@ -614,7 +614,7 @@ contained in the other one and then Equation eq:`eq-area01` gives the correct
 intersection area.
 
 Otherwise, we have to consider two cases as illustrated in
-Figure [:ref:`figinter2`], which :cite:`Eberly` apparently forgot to consider.
+Figure [:ref:`figinter2`], which [@Eberly] apparently forgot to consider.
 Namely, the cases correspond to whether the center of ellipses
 :math:`\mathcal{E}_1` and :math:`\mathcal{E}_2` are on the same side or on
 opposite side with respect to the line :math:`(\mathbf{p}_1, \mathbf{p}_2)`.
