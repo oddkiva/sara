@@ -10,3 +10,42 @@ For a circle with the radius `r x`,
 its area is `r pi * x^2`.
 
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{bash}
+echo "Hello Bash!"
+```
+
+```{Rcpp, cache=TRUE}
+
+#include <iostream>
+#include <utility>
+#include <string>
+
+#include <Rcpp.h>
+
+// [[Rcpp::plugins(cpp17)]
+
+// [[Rcpp::export]]
+int fibonacci(int x)
+{
+  const auto [a, b] = std::make_pair(0, 1);
+  if (x == 0 || x == 1)
+    return x;
+  return fibonacci(x-1) + fibonacci(x-2);
+}
+
+// // [[Rcpp::export]]
+// Rcpp::String hello_me()
+// {
+//   return Rcpp::String("hello");
+// }
+```
+
+```{r}
+fibonacci(10L)
+# hello_me()
+```
+

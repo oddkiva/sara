@@ -22,20 +22,31 @@ worth focusing our attention on deciphering the calibration data.
 
 ### Camera Sensors
 
-As depicted in the images from the setup page
-(http://www.cvlibs.net/datasets/kitti/setup.php), the car is equipped with:
+As depicted in the Figure \@ref(fig:kitti-sensors) borrowed from the setup page
+http://www.cvlibs.net/datasets/kitti/setup.php, the car is equipped with:
 
 - 4 cameras
 - 1 Velodyne lidar scanner
 - 1 IMU/GPS device.
 
-Each camera is at a height of $1.65\text{m}$ above the ground plane.
-As highlighted in the images, the camera coordinate system follows OpenCV's
-camera axis convention where:
+```{r kitti-sensors, echo=FALSE, fig.align="center", fig.cap="Sensors mounted on the car. Credits: http://www.cvlibs.net/datasets/kitti/images/setup_top_view.png."}
+
+knitr::include_graphics("http://www.cvlibs.net/datasets/kitti/images/setup_top_view.png")
+```
+
+Each camera is at a height of $1.65\text{m}$ above the ground plane.  As
+highlighted in Figure \@ref(fig:kitti-sensors) and more clearly
+in Figure \@ref(fig:kitti-sensors-2), the camera coordinate system follows OpenCV's camera
+axis convention where:
 
 - The $x$-axis is the horizontal axis pointing to the right of the vehicle.
 - The $y$-axis is the vertical axis pointing down to the ground.
 - The $z$-axis is the axis pointing from the camera center to the camera gaze direction.
+
+```{r kitti-sensors-2, echo=FALSE, fig.align="center", fig.cap="This image shows the coordinate system used for each sensor. Credits: http://www.cvlibs.net/datasets/kitti/images/passat_sensors_920.png."}
+
+knitr::include_graphics("http://www.cvlibs.net/datasets/kitti/images/passat_sensors_920.png")
+```
 
 ### 3D Geometry of Annotations
 
@@ -59,7 +70,7 @@ where each object annotation contains the following geometry:
     $\mathbf{t} = (x, y, z)$.
 
     Visually this corresponds to the center of the bottom face of the 3D
-    bounding box, i.e, the face lying on the ground surface.
+    bounding box, *i.e.*, the face lying on the ground surface.
 
   - the 3D dimensions of the bounding box $(w, h, l)$. This allows us to
     populate the $8$ vertices in the **local object coordinate system**:
@@ -83,7 +94,7 @@ where each object annotation contains the following geometry:
     - The last 4 columns are the vertices of the back-face of the bounding
       box.
 
-    *N.B.: it is possible that I permutated some variables.*
+    *N.B.: it is possible that I permuted some variables.*
 
     In this local object coordinate system, the origin is at the center of the
     bottom face.

@@ -3,20 +3,18 @@
 ## Context
 
 I had to calculate ellipse intersections in the feature matching method I
-published in [@ok:hal-00743044] and which I also made available in **Sara**. I
-did not want to do polygonal approximations and instead wanted to have a
-closed-form approach if possible at all.
+published in [@ok:hal-00743044] and which I also made available in *Sara*.
+Resorting to polygonal approximations seemed like the poor man's choice to me
+and rather I would have a closed-form approach if possible at all.
 
 Then I found Eberly's paper [@Eberly] that provides a nice explanation about
 ellipse intersections. Specifically it details how to calculate the intersection
 points and the intersection area. And it is not that a simple geometric problem.
 
 I revisited again [@Eberly]'s study in the appendix of my thesis
-[@Ok:2013:phdthesis]. I am retouching my writing again to make it less dry in
-this documentation.
-
+[@Ok:2013:phdthesis]. Here I am retouching my writing again to make it less dry.
 The modest contribution of this text is to break down a bit more the
-implementation details when you read the code in **Sara**.
+implementation details when you read the code in *Sara*.
 
 
 ## Origin-Centered Axis-Aligned Ellipses
@@ -87,7 +85,7 @@ The differential is $\mathop{\mathrm{d}x} = a \cos(\theta)
 In this part, we review the computation of the area of an ellipse sector. We
 complement [@Eberly] with a bit more details.
 
-```{r ellsector, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector delimited by the polar angles $(\\theta_1, \\theta_2)$ is colored in blue"}
+```{r ellsector, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector bounded by the polar angles $(\\theta_1, \\theta_2)$ is colored in blue"}
 
 knitr::include_graphics("figures/ellipticalsector.png")
 ```
@@ -207,12 +205,12 @@ quantity
 
 ### Area Bounded by a Line Segment and an Elliptical Arc
 
-```{r ellsector2, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector delimited by a line segment and the elliptical arc $(\\theta_1, \\theta_2)$ is colored in blue."}
+```{r ellsector2, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector bounded by a line segment and the elliptical arc $(\\theta_1, \\theta_2)$ is colored in blue."}
 
 knitr::include_graphics("figures/ellipticalsector2.png")
 ```
 
-We are interested in calculating the elliptic portion delimited by a line
+We are interested in calculating the elliptic portion bounded by a line
 segment and the elliptical arc $(\theta_1, \theta_2)$ such that $|\theta_2 -
 \theta_1| \leq \pi$.
 
@@ -245,7 +243,7 @@ with
 Note that the other portion corresponding to the red one in
 Figure \@ref(fig:ellsector2) has an area which is equal to
 $\pi a b - B(\theta_1, \theta_2) \geq B(\theta_1, \theta_2)$ if
-$|\theta_2 - \theta_1| \leq \pi$.
+$|\theta_2 - \theta_1| > \pi$.
 
 To summarize, our portion of interest, highlighted by the elliptic portion in
 Figure \@ref(fig:ellsector2), has an area which is equal to
@@ -307,7 +305,7 @@ and the diagonal matrix
   \end{bmatrix}.
 \end{equation}
 
-Note by construction Equation \@ref(eq:sigma-eps) is a singular value
+Note by construction that Equation \@ref(eq:sigma-eps) is a singular value
 decomposition of $\mathbf{\Sigma}_{\mathcal{E}}$ if the axis radii satisfy
 $a_{\mathcal{E}} \geq b_{\mathcal{E}}$.
 
@@ -368,8 +366,8 @@ First let $(\mathcal{E}_i)_{1 \leq i \leq 2}$ be two ellipses defined as
 \end{equation}
 
 The intersection points are in both ellipses $(\mathcal{E}_i)_{1 \leq i \leq
-2}$. The two equations \@ref(eq:twoellipses) simultaneously holds, which leads
-us to solve the following system of equation
+2}$. In this case, the two equations \@ref(eq:twoellipses) simultaneously
+holds, which leads us to solve the following system of equation
 
 \begin{equation}
   \left\{ \begin{matrix} E_1(x, y) = 0 \\ E_2(x, y) = 0 \end{matrix} \right.
@@ -423,8 +421,8 @@ $p_2(y)$
   \right.
 \end{equation}
 
-Then subtracting the first equation from the second equation, the monomial $x^2$
-disappears. Thus:
+Then by subtracting the first equation from the second equation, the monomial
+$x^2$ disappears. Thus:
 
 \begin{equation}
   x = \frac{p_0(y)q_2(y) - p_2(y)q_0(y)}{p_1(y)q_2(y) - p_2(y)q_1(y)}.
@@ -492,7 +490,7 @@ Equation \@ref(eq:system) is equivalent to the following quartic equation in
 $y$.
 
 \begin{equation}
-  \det(\mathbf{B}(y)) = R(y) = 0,
+  \det\ \mathbf{B}(y) = R(y) = 0,
   (#eq:detBy)
 \end{equation}
 ```
@@ -503,8 +501,7 @@ i \leq 4}$ are deduced from Equation \@ref(eq:xinter).
 
 ### Implementation Notes
 
-In *Sara*, we can use several solvers to retrieve the roots of polynomial
-:math:`R`.
+In *Sara*, we can use several solvers to retrieve the roots of polynomial $R$.
 
 1. **Companion matrix** approach: since *Sara* depends on *Eigen*, *Eigen* has
    an unsupported Polynomial solver using this simple approach.
@@ -519,76 +516,76 @@ observe Ferrari’s method can sometimes be numerically inaccurate in particular
 ## Intersection Area of Two Ellipses
 
 Our presentation complements [@Eberly]. In the rest of the section, we
-consider two ellipses :math:`(\mathcal{E}_i)_{1 \leq i \leq 2}` and we
+consider two ellipses $(\mathcal{E}_i)_{1 \leq i \leq 2}$ and we
 respectively denote
 
--  the axes of ellipse $\mathcal{E}_i$ by $(a_i, b_i)$, the ellipse center by
-   $\mathbf{x}_i$, the orientation by $\theta_i$, and the direction vectors of
-   axis $a_i$ and $b_i$ by
+- the axes of ellipse $\mathcal{E}_i$ by $(a_i, b_i)$, the ellipse center by
+  $\mathbf{x}_i$, the orientation by $\theta_i$, and the direction vectors of
+  axis $a_i$ and $b_i$ by
 
-   \begin{align}
-     \mathbf{u}_i &\overset{\textrm{def}}{=}
-       \begin{bmatrix} \cos(\theta_i) \\ \sin(\theta_i) \end{bmatrix} &
+  \begin{align}
+    \mathbf{u}_i &\overset{\textrm{def}}{=}
+      \begin{bmatrix} \cos(\theta_i) \\ \sin(\theta_i) \end{bmatrix} &
 
-     \mathbf{v}_i &\overset{\textrm{def}}{=}
-       \begin{bmatrix} -\sin(\theta_i) \\ \cos(\theta_i) \end{bmatrix}
-   \end{align}
+    \mathbf{v}_i &\overset{\textrm{def}}{=}
+      \begin{bmatrix} -\sin(\theta_i) \\ \cos(\theta_i) \end{bmatrix}
+  \end{align}
 
--  the area of the elliptic portion bounded a line segment and an arc
-   for ellipse $\mathcal{E}_i$ by $B_i$,
+- the area of the elliptic portion bounded by a line segment and an arc for
+  ellipse $\mathcal{E}_i$ by $B_i$,
 
--  the number of intersection points by $L$,
+- the number of intersection points by $L$,
 
--  the intersection points by $\mathbf{p}_i$ for
-   $i \in \llbracket 1, L \rrbracket$, sorted in a counter-clockwise order,
-   *i.e.*,
+- the intersection points by $\mathbf{p}_i$ for $i \in [1, L]$, sorted in a
+  counter-clockwise order, *i.e.*,
 
-   \begin{equation}
-     \forall i \in [1, L-1],\quad \angle\left([1,0]^T,
-     \mathbf{p}_i\right) \ < \ \angle\left([1,0]^T, \mathbf{p}_{i+1}\right)
-     (#eq:counterclockwise)
-   \end{equation}
+  \begin{equation}
+    \forall i \in [1, L-1],\quad \angle\left([1,0]^T,
+    \mathbf{p}_i\right) \ < \ \angle\left([1,0]^T, \mathbf{p}_{i+1}\right)
+    (#eq:counterclockwise)
+  \end{equation}
 
-   where $\angle(.,.)$ denotes the angle between two vectors.
+  where $\angle(.,.)$ denotes the angle between two vectors.
 
--  the polar angles of points :math:`(\mathbf{p}_i)_{1\leq i \leq L}`
-   with respect to ellipses :math:`\mathcal{E}_1` and
-   :math:`\mathcal{E}_2` by :math:`(\phi_i)_{1\leq i \leq 2}` and
-   :math:`(\psi_i)_{1\leq i \leq 2}`, *i.e.*,
+- the polar angles of points $(\mathbf{p}_i)_{1\leq i \leq L}$
+  with respect to ellipses $\mathcal{E}_1$ and $\mathcal{E}_2$ by
+  $(\phi_i)_{1\leq i \leq 2}$ and $(\psi_i)_{1\leq i \leq 2}$, *i.e.*,
 
-   .. math::
+  \begin{gathered}
+    \forall i \in [1, L],
+    \phi_i \overset{\textrm{def}}{=}
+      \angle\left(\mathbf{u}_1, \mathbf{p}_i - \mathbf{x}_1\right) \\
 
-      \begin{gathered}
-        \forall i \in \llbracket 1, L\rrbracket,
-          \phi_i \overset{\textrm{def}}{=}\angle\left(\mathbf{u}_1, \mathbf{p}_i - \mathbf{x}_1\right) \\
-          \forall i \in \llbracket 1, L\rrbracket,
-          \psi_i \overset{\textrm{def}}{=}\angle\left(\mathbf{u}_2, \mathbf{p}_i - \mathbf{x}_2\right)\end{gathered}
+      \forall i \in [1, L],
+    \psi_i \overset{\textrm{def}}{=}
+      \angle\left(\mathbf{u}_2, \mathbf{p}_i - \mathbf{x}_2\right)
+  \end{gathered}
 
 ### Retrieving the polar angles
 
 To retrieve the polar angles, we need to place ourselves in the coordinate
-system :math:`(\mathbf{x}_i, \mathbf{u}_i, \mathbf{v}_i)`. Using the convenient
-function :math:`\mathrm{atan2}` giving values in :math:`]-\pi,\pi]`, we
+system $(\mathbf{x}_i, \mathbf{u}_i, \mathbf{v}_i)$. Using the convenient
+function $\mathrm{atan2}$ giving values in $]-\pi,\pi]$, we
 have
 
-.. math::
+\begin{align}
+  \phi_i &= \mathrm{atan2}
+  \left(
+    \langle \mathbf{p}_i-\mathbf{x}_1, \mathbf{v}_1 \rangle,
+    \langle \mathbf{p}_i-\mathbf{x}_1, \mathbf{u}_1 \rangle
+  \right)\\
 
-   \begin{align}
-     \phi_i &= \mathrm{atan2}
-     \left(
-       \langle \mathbf{p}_i-\mathbf{x}_1, \mathbf{v}_1 \rangle,
-       \langle \mathbf{p}_i-\mathbf{x}_1, \mathbf{u}_1 \rangle
-     \right)\\
-     \psi_i &= \mathrm{atan2}
-     \left(
-       \langle \mathbf{p}_i-\mathbf{x}_2, \mathbf{v}_2 \rangle,
-       \langle \mathbf{p}_i-\mathbf{x}_2, \mathbf{u}_2 \rangle
-     \right)\end{align}
+  \psi_i &= \mathrm{atan2}
+  \left(
+    \langle \mathbf{p}_i-\mathbf{x}_2, \mathbf{v}_2 \rangle,
+    \langle \mathbf{p}_i-\mathbf{x}_2, \mathbf{u}_2 \rangle
+  \right)
+\end{align}
 
 ### 0 or 1 intersection point
 
 Either one ellipse is contained in the other or there are separated as
-illustrated in Figure [:ref:`figinter01`].
+illustrated in Figure \@ref(figinter01).
 
 .. _figinter01:
 .. table:: Cases where there is zero or one intersection point.
@@ -599,36 +596,43 @@ illustrated in Figure [:ref:`figinter01`].
    | .. image:: ../figures/test1a.png | .. image:: ../figures/test1b.png |
    +----------------------------------+----------------------------------+
 
-An ellipse, say :math:`\mathcal{E}_1`, is contained in the other
-:math:`\mathcal{E}_2` if and only if its center satisfies
-:math:`E_2(\mathbf{x}_1) < 0`. In that case, the area of the intersection is
-just the area of ellipse :math:`\mathcal{E}_1`.  Otherwise, if there is no
-containment, the intersection area is zero. In summary,
 
-.. math::
-    :label: eq-area01
+```{r, echo = FALSE}
+knitr::include_graphics("figures/test0a.png")
+knitr::include_graphics("figures/test0b.png")
+knitr::include_graphics("figures/test1a.png")
+knitr::include_graphics("figures/test1b.png")
+```
 
-    \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2) = \left\{
-    \begin{array}{ll}
-    \pi a_1 b_1 & \textrm{if}\ E_2(\mathbf{x}_1) < 0\\
-    \pi a_2 b_2 & \textrm{if}\ E_1(\mathbf{x}_2) < 0\\
-    0 & \textrm{otherwise}
-    \end{array}
-    \right.
+An ellipse, say $\mathcal{E}_1$, is contained in the other $\mathcal{E}_2$ if
+and only if its center satisfies $E_2(\mathbf{x}_1) < 0$. In that case, the area
+of the intersection is just the area of ellipse $\mathcal{E}_1$. Otherwise, if
+there is no containment then the intersection area is zero. In summary,
+
+\begin{equation}
+  \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2) = \left\{
+  \begin{array}{ll}
+  \pi a_1 b_1 & \textrm{if}\ E_2(\mathbf{x}_1) < 0\\
+  \pi a_2 b_2 & \textrm{if}\ E_1(\mathbf{x}_2) < 0\\
+  0 & \textrm{otherwise}
+  \end{array}
+  \right.
+  (#eq:area01)
+\end{equation}
 
 ### 2 intersection points
 
-We will not detail the case when Polynomial :eq:`eq-detBy` have :math:`2` roots
-with multiplicity :math:`2`. This still corresponds to the case where there are
-two intersection points. But because of the root multiplicities, one ellipse is
-contained in the other one and then Equation eq:`eq-area01` gives the correct
+We will not detail the case when Polynomial \@ref(eq:detBy) have $2$ roots with
+multiplicity $2$. This still corresponds to the case where there are two
+intersection points. But because of the root multiplicities, one ellipse is
+contained in the other one and then Equation \@ref(eq:area01) gives the correct
 intersection area.
 
-Otherwise, we have to consider two cases as illustrated in
-Figure [:ref:`figinter2`], which [@Eberly] apparently forgot to consider.
-Namely, the cases correspond to whether the center of ellipses
-:math:`\mathcal{E}_1` and :math:`\mathcal{E}_2` are on the same side or on
-opposite side with respect to the line :math:`(\mathbf{p}_1, \mathbf{p}_2)`.
+Otherwise we have to consider two cases as illustrated in
+Figure \@ref(figinter2), which [@Eberly] apparently forgot to consider.  Namely
+the cases correspond to whether the center of ellipses $\mathcal{E}_1$ and
+$\mathcal{E}_2$ are on the same side or on opposite side with respect to the
+line $(\mathbf{p}_1, \mathbf{p}_2)$.
 
 .. _figinter2:
 .. table:: Cases where there are two intersection points.
@@ -638,60 +642,59 @@ opposite side with respect to the line :math:`(\mathbf{p}_1, \mathbf{p}_2)`.
     +-----------------------------------+-----------------------------------+
 
 Denoting a unit normal of the line going across the intersection points
-:math:`(\mathbf{p}_1, \mathbf{p}_2)` by :math:`\mathbf{n}` (cf.
-Figure `1.9 <#fig:inter2>`__). If the ellipse centers
-:math:`\mathbf{x}_1` and :math:`\mathbf{x}_2` are on opposite side with
-respect to the line :math:`(\mathbf{p}_1, \mathbf{p}_2)`, *i.e.*,
+$(\mathbf{p}_1, \mathbf{p}_2)$ by $\mathbf{n}$ (cf.  Figure `1.9
+<#fig:inter2>`__). If the ellipse centers $\mathbf{x}_1$ and $\mathbf{x}_2$ are
+on opposite side with respect to the line $(\mathbf{p}_1, \mathbf{p}_2)$,
+*i.e.*,
 
-.. math::
-
-   \langle \mathbf{n}, \mathbf{x}_1 - \mathbf{p}_1 \rangle \langle \mathbf{n},
-   \mathbf{x}_2 - \mathbf{p}_1 \rangle < 0,
-
-then
-
-.. math::
-
-   \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2) =
-       B_1(\phi_1, \phi_2) + B_2(\psi_1, \psi_2)
-
-If they are on the same side with respect to the line
-:math:`(\mathbf{p}_1, \mathbf{p}_2)`, *i.e.*,
-
-.. math::
-
-    \langle \mathbf{n}, \mathbf{x}_1 - \mathbf{p}_1 \rangle
-    \langle \mathbf{n}, \mathbf{x}_2 - \mathbf{p}_1 \rangle > 0,
+\begin{equation}
+  \langle \mathbf{n}, \mathbf{x}_1 - \mathbf{p}_1 \rangle \langle \mathbf{n},
+  \mathbf{x}_2 - \mathbf{p}_1 \rangle < 0,
+\end{equation}
 
 then
 
-.. math::
-    :label: eqinter2b
+\begin{equation}
+ \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2) =
+   B_1(\phi_1, \phi_2) + B_2(\psi_1, \psi_2)
+\end{equation}
 
-    \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2) =
-    \left\{
-    \begin{array}{ll}
-      \displaystyle \left( \pi a_1 b_1 - B_1(\phi_1, \phi_2) \right) +
-      B_2(\psi_1, \psi_2) &
-      \textrm{if}
-      |\langle\mathbf{n},\mathbf{x}_1-\mathbf{p}_1\rangle| \leq
-      |\langle\mathbf{n},\mathbf{x}_2-\mathbf{p}_1\rangle| \\
-      \\
-      \displaystyle
-      B_1(\phi_1, \phi_2) +
-      \left( \pi a_2 b_2 - B_2(\psi_1, \psi_2) \right) &
-      \textrm{otherwise}.
-    \end{array}
-    \right.
+If they are on the same side with respect to the line $(\mathbf{p}_1,
+\mathbf{p}_2)$, *i.e.*,
 
+\begin{equation}
+  \langle \mathbf{n}, \mathbf{x}_1 - \mathbf{p}_1 \rangle
+  \langle \mathbf{n}, \mathbf{x}_2 - \mathbf{p}_1 \rangle > 0,
+\end{equation}
 
-Note that the condition
-:math:`|\langle\mathbf{n},\mathbf{x}_1-\mathbf{p}_1\rangle| \leq
-|\langle\mathbf{n},\mathbf{x}_2-\mathbf{p}_1\rangle|` in
-Equation :eq:`eqinter2b` just expresses the fact that the distance of ellipse
-center :math:`\mathbf{x}_1` to the line :math:`(\mathbf{p}_1, \mathbf{p}_2)` is
-smaller than the distance of ellipse center :math:`\mathbf{x}_2` to the line
-:math:`(\mathbf{p}_1, \mathbf{p}_2)`.
+then
+
+\begin{equation}
+  \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2) =
+  \left\{
+  \begin{array}{ll}
+    \displaystyle \left( \pi a_1 b_1 - B_1(\phi_1, \phi_2) \right) +
+    B_2(\psi_1, \psi_2) &
+    \textrm{if}
+    |\langle\mathbf{n},\mathbf{x}_1-\mathbf{p}_1\rangle| \leq
+    |\langle\mathbf{n},\mathbf{x}_2-\mathbf{p}_1\rangle| \\
+    \\
+    \displaystyle
+    B_1(\phi_1, \phi_2) +
+    \left( \pi a_2 b_2 - B_2(\psi_1, \psi_2) \right) &
+    \textrm{otherwise}.
+  \end{array}
+  \right.
+
+  (#eq:inter2b)
+\end{equation}
+
+Note that the condition $|\langle\mathbf{n},\mathbf{x}_1-\mathbf{p}_1\rangle|
+\leq |\langle\mathbf{n},\mathbf{x}_2-\mathbf{p}_1\rangle|$ in
+Equation \@ref(eq:inter2b) just expresses the fact that the distance of ellipse
+center $\mathbf{x}_1$ to the line $(\mathbf{p}_1, \mathbf{p}_2)$ is smaller than
+the distance of ellipse center $\mathbf{x}_2$ to the line $(\mathbf{p}_1,
+\mathbf{p}_2)$.
 
 
 ### 3 and 4 intersection points
@@ -703,20 +706,33 @@ smaller than the distance of ellipse center :math:`\mathbf{x}_2` to the line
     | .. image:: ../figures/inter3.png  | .. image:: ../figures/inter4.png  |
     +-----------------------------------+-----------------------------------+
 
+```{r}
+knitr::kable(
+  list(
+    head(iris[, 1:2], 3),
+    head(mtcars[, 1:3], 5)
+  ),
+  caption = 'A Tale of Two Tables.', booktabs = TRUE
+)
+```
+
+
+
 These cases are rather easy to handle. Indeed, we see geometrically from
-Figure [:ref:`fig-inter34`],
+Figure \@ref(fig-inter34),
 
-.. math::
+\begin{equation}
+  \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2) =
+  \sum_{i=1}^{L}
+    \underbrace{\min \left(
+        B_1(\phi_i, \phi_{i+1}),
+        B_2(\psi_i, \psi_{i+1})
+    \right)}_{\textrm{smallest of elliptic portion area}} +
 
-   \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2) =
-       \sum_{i=1}^{L}
-         \underbrace{\min \left(
-           B_1(\phi_i, \phi_{i+1}),
-           B_2(\psi_i, \psi_{i+1})
-         \right)}_{\textrm{smallest of elliptic portion area}} +
-       \underbrace{\frac{1}{2} \sum_{i=1}^{L} \left|
-           \det\left(\mathbf{p}_i, \mathbf{p}_{i+1}\right)
-       \right|}_{\textrm{area of polygon}\ (\mathbf{p}_1, \mathbf{p}_2, \dots, \mathbf{p}_L)}
+    \underbrace{\frac{1}{2} \sum_{i=1}^{L} \left|
+      \det\left(\mathbf{p}_i, \mathbf{p}_{i+1}\right)
+    \right|}_{\textrm{area of polygon}\ (\mathbf{p}_1, \mathbf{p}_2, \dots, \mathbf{p}_L)}
+\end{equation}
 
-with :math:`\phi_{L+1} = \phi_1`, :math:`\psi_{L+1} = \psi_1` and
-:math:`\mathbf{p}_{L+1} = \mathbf{p}_1`.
+with $\phi_{L+1} = \phi_1$, $\psi_{L+1} = \psi_1$ and $\mathbf{p}_{L+1} =
+\mathbf{p}_1$.
