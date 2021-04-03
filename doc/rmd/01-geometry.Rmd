@@ -8,24 +8,24 @@ published in ACCV in :cite:`ok:hal-00743044` and which I also made available in
 have a closed-form approach if possible at all.
 
 Then I found Eberly's paper :cite:`Eberly` that provides a nice explanation
-about the computation of ellipse intersection. It details namely how to
-calculate its intersection points and the intersection area. And it is not that
-a simple geometric problem.
+about ellipse intersections. Specifically it details how to calculate the
+intersection points and the intersection area. And it is not that a simple
+geometric problem.
 
-I revisited again :cite:`Eberly`'s study in the appendix of my thesis
-:cite:`Ok:2013:phdthesis` and I have retouched the original text here a bit to
-make it a bit more human (less dry) in this documentation.
+Originally I revisited :cite:`Eberly`'s study in the appendix of my thesis
+:cite:`Ok:2013:phdthesis`. I am retouching my writing again to make it less dry
+in this documentation.
 
-The modest contribution of the text is to break down a bit more these
-implementation details, when you read the code in **Sara**.
+The modest contribution of this text is to break down a bit more the
+implementation details when you read the code in **Sara**.
 
 
 ## Origin-Centered Axis-Aligned Ellipses
 
-Let us start with an ellipse $\mathcal{E}$ with semi-major axis $a$ and
-semi-minor axis $b$, *i.e.*, $a \geq b > 0$. We suppose that $\mathcal{E}$ is
-centered at the origin and is axis-aligned oriented, *i.e*., such that the axis
-$a$ is along the $x$-axis and the axis $b$ along the $y$-axis. Then,
+Let us start by considering an ellipse $\mathcal{E}$ with semi-major axis $a$
+and semi-minor axis $b$, *i.e.*, $a \geq b > 0$. We suppose that $\mathcal{E}$
+is centered at the origin and has its axis $a$ aligned along the $x$-axis and
+its axis $b$ along the $y$-axis. Then,
 
 ```{proposition, name="Ellipse Equation"}
 The equation of the ellipse $\mathcal{E}$ is
@@ -39,19 +39,19 @@ The equation of the ellipse $\mathcal{E}$ is
 
 ### Ellipse Area
 
-In case our math skill feels rusty, it is worth reminding ourselves how to
+In case our math skills feel rusty, it is worth reminding ourselves how to
 calculate the ellipse area as a warm-up.
 
 Observe the ellipse below:
 
 ```{r riemannsum, echo = FALSE, fig.align = 'center', fig.cap = "Riemann sum approximating the upper quadrant area of the ellipse."}
 
-knitr::include_graphics(rep("../sphinx/source/figures/ellipsearea.png"))
+knitr::include_graphics("figures/ellipsearea.png")
 ```
 
-Using the ellipse equation \@ref(eq:ellipse) and exploiting the symmetry of the
-ellipse, the area of ellipse $\mathcal{E}$ is $4$ times the upper quadrant area
-of the ellipse, *i.e.*,
+By using the ellipse equation \@ref(eq:ellipse) and the ellipse symmetry, the
+area of ellipse $\mathcal{E}$ is $4$ times the upper quadrant area of the
+ellipse, *i.e.*,
 
 ```{proposition, name="Ellipse Area"}
 \begin{align}
@@ -90,7 +90,7 @@ complement :cite:`Eberly` with a bit more details.
 
 ```{r ellsector, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector delimited by the polar angles $(\\theta_1, \\theta_2)$ is colored in blue"}
 
-knitr::include_graphics(rep("../sphinx/source/figures/ellipticalsector.png"))
+knitr::include_graphics("figures/ellipticalsector.png")
 ```
 
 The elliptic sector area is delimited in polar coordinates by $[\theta_1,
@@ -147,8 +147,8 @@ valid for $]-\pi/2, \pi/2[ \rightarrow ]-\infty, \infty[$. Let us first rewrite
             {\cos^2(\theta)}}{a^2 (b/a)^2  + \tan^2(\theta))} \\
 \end{align}
 
-Differentiating $t=\tan\theta$, $\mathop{\mathrm{d}t} =
-\frac{\mathop{\mathrm{d}\theta}}{\cos^2(\theta)}$, it follows that
+Differentiating $t=\tan\theta$ yields $\mathop{\mathrm{d}t} =
+\frac{\mathop{\mathrm{d}\theta}}{\cos^2(\theta)}$, and it follows that
 
 \begin{align}
   A(\theta_1, \theta_2)
@@ -163,7 +163,7 @@ Differentiating $t=\tan\theta$, $\mathop{\mathrm{d}t} =
      \right]_{\tan\theta_1}^{\tan\theta_2} \\
 \end{align}
 
-Thus we arrive to the following first result:
+Thus we arrive to the following result:
 
 ```{proposition, name="Elliptic Sector Area Formula 1"}
 \begin{equation}
@@ -172,9 +172,11 @@ Thus we arrive to the following first result:
        \arctan\left(\frac{a}{b} \tan\theta_1\right) \right)
 \end{equation}
 ```
-However the integral is properly defined only in the interval $(\theta_1,
-\theta_2) \in ]-\pi/2, \pi/2[$. Exploiting the ellipse symmetry, we could
-retrieve the elliptical sector for any $(\theta_1, \theta_2) \in ]-\pi, \pi[$
+
+However the formula is properly defined only in the interval
+$(\theta_1, \theta_2) \in ]-\pi/2, \pi/2[$.
+With the ellipse symmetry, we could retrieve the elliptical sector for any
+$(\theta_1, \theta_2) \in ]-\pi, \pi[$
 but this is cumbersome.
 
 Alternatively, :cite:`Eberly` provides a better antiderivative formula because
@@ -185,9 +187,10 @@ it is defined in $]-\pi, \pi]$:
 \begin{equation}
    F(\theta) = \frac{ab}{2}
      \left[
-         \theta
-       - \arctan \left( \frac{(b-a) \sin 2\theta}{(b+a) + (b-a)\cos 2 \theta}
-                 \right)
+       \theta -
+       \arctan \left(
+         \frac{(b-a) \sin 2\theta}{(b+a) + (b-a)\cos 2 \theta}
+       \right)
      \right].
 \end{equation}
 ```
@@ -205,13 +208,14 @@ quantity
 
 ### Area Bounded by a Line Segment and an Elliptical Arc
 
-```{r ellsector2, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector bounded by a line segment and the elliptical arc $(\\theta_1, \\theta_2)$ is colored in blue."}
+```{r ellsector2, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector delimited by a line segment and the elliptical arc $(\\theta_1, \\theta_2)$ is colored in blue."}
 
-knitr::include_graphics(rep("../sphinx/source/figures/ellipticalsector2.png"))
+knitr::include_graphics("figures/ellipticalsector2.png")
 ```
 
-We are interested in computing the elliptic portion by a line segment and the
-elliptical arc $(\theta_1, \theta_2)$ such that $|\theta_2 - \theta_1| \leq \pi$
+We are interested in calculating the elliptic portion delimited by a line
+segment and the elliptical arc $(\theta_1, \theta_2)$ such that $|\theta_2 -
+\theta_1| \leq \pi$.
 
 This condition *is* important as a such elliptic portion always corresponds to
 the blue elliptic portion in Figure \@ref(fig:ellsector2). Let us denote the
@@ -223,20 +227,29 @@ $|\theta_2 - \theta_1| \leq \pi$ then
     &= \mathop{\mathrm{area}}(\mathrm{sector(\theta_1, \theta_2)})
      - \mathop{\mathrm{area}}(\mathrm{triangle(\theta_1, \theta_2)}) \\
 
-    &= A(\theta_1, \theta_2) - \frac{1}{2} |x_2y_1 - x_1y_2|
+    &= A(\theta_1, \theta_2) - \frac{1}{2} |x_2y_1 - x_1y_2|,
 \end{align}
+where each of the $\begin{bmatrix}x_i \\ y_i \end{bmatrix}$ is the point on the
+ellipse at angle $\theta_i$.
 
-where $(x_i,y_i) = (r_i\cos\theta_i, r_i\sin\theta_i)$ and $\displaystyle r_i =
-\frac{ab}{\sqrt{b^2 \cos^2(\theta_i)+a^2 \sin^2(\theta_i)}}$ for $i \in
-\{1,2\}$.
+And these two points are expressed as
+\begin{equation}
+  \begin{bmatrix}x_i \\ y_i \end{bmatrix} =
+    r_i \begin{bmatrix} \cos\theta_i \\ \sin\theta_i \end{bmatrix} \\
+\end{equation}
+with
+\begin{equation}
+  \displaystyle r_i =
+    \frac{ab}{\sqrt{b^2 \cos^2(\theta_i)+a^2 \sin^2(\theta_i)}} \\
+\end{equation}
 
 Note that the other portion corresponding to the red one in
 Figure \@ref(fig:ellsector2) has an area which is equal to
 $\pi a b - B(\theta_1, \theta_2) \geq B(\theta_1, \theta_2)$ if
 $|\theta_2 - \theta_1| \leq \pi$.
 
-To summarize, our portion of interest, highlighted by the blue elliptic
-portion in Figure \@ref(fig:ellsector2), has an area which is equal to
+To summarize, our portion of interest, highlighted by the elliptic portion in
+Figure \@ref(fig:ellsector2), has an area which is equal to
 
 ```{proposition, name="Truncated Elliptic Sector Area"}
 For any $(\theta_1, \theta_2) \in ]-\pi, \pi]$,
@@ -268,7 +281,7 @@ $\mathcal{E}$ entirely by the following geometric information
 
 or more concisely by the pair $(\mathbf{x}_{\mathcal{E}},
 \mathbf{\Sigma}_{\mathcal{E}})$ where the $\mathbf{\Sigma}_{\mathcal{E}} \in
-\mathcal{S}^{++}_2$ is a positive definite matrix defined
+\mathcal{S}^{++}_2$ is a positive definite matrix defined by
 
 \begin{equation}
   \mathbf{\Sigma}_{\mathcal{E}} = \mathbf{R}_{\mathcal{E}} \mathbf{D}_{\mathcal{E}} \mathbf{R}_{\mathcal{E}}^T
@@ -307,7 +320,7 @@ Thus more generally, the ellipse $\mathcal{E}$ is characterized by the equation
   (\mathbf{x}- \mathbf{x}_{\mathcal{E}}) = 1
 \end{equation}
 
-By expanding this equation,
+By expanding this equation, we arrive to the following proposition.
 
 ```{proposition, name="General Ellipse Parameterization"}
 The quadratic form that characterizes ellipse $\mathcal{E}$ is expressed as
@@ -396,9 +409,10 @@ as
 \end{equation}
 
 Let us suppose for a moment that we know the $y$-coordinate of an intersection
-point. Then we can calculate the $x$-coordinate of this intersection point.
+point. Then we can calculate the $x$-coordinate of this intersection point as
+follows.
 
-To do so, we multiply the first equation by $q_2(y)$ and the second equation by
+Let us multiply the first equation by $q_2(y)$ and the second equation by
 $p_2(y)$
 
 \begin{equation}
@@ -459,31 +473,34 @@ And by rewriting this system in matrix notation we see that
 ```
 
 We observe that the vector $[1, x, x^2, x^3]^T$ is never zero for any real value
-$x$. Thus necessarily the nullspace $\mathrm{Null}(\mathbf{B}(y))$ is always
+$x$. Necessarily the null space $\mathrm{Null}(\mathbf{B}(y))$ is always
 nontrivial and that means the determinant of $\mathbf{B}(y)$ has to be zero.
 
-.. important::
-   Let the polynomial :math:`R` be defined as
+Let us define the polynomial $R$ as
 
-   .. math::
+\begin{equation}
+  R \overset{\textrm{def}}{=}
+  \left( p_{0}q_{2} - p_{2}q_{0} \right)^2 -
+  \left( p_{0}q_{1} - p_{1}q_{0} \right)
+  \left( p_{1}q_{2} - p_{2}q_{1} \right),
+\end{equation}
 
-      R \overset{\textrm{def}}{=}
-      \left( p_{0}q_{2} - p_{2}q_{0} \right)^2 -
-      \left( p_{0}q_{1} - p_{1}q_{0} \right)
-      \left( p_{1}q_{2} - p_{2}q_{1} \right),
+This polynomial is the expanded determinant of $\mathbf{B}(y)$, which enables us
+to formulate the following proposition.
 
-   Equation :eq:`eq-system` is equivalent to the following quartic equation in
-   :math:`y`.
+```{proposition}
+Equation \@ref(eq:system) is equivalent to the following quartic equation in
+$y$.
 
-   .. math::
-      :label: eq-detBy
+\begin{equation}
+  \det(\mathbf{B}(y)) = R(y) = 0,
+  (#eq:detBy)
+\end{equation}
+```
 
-      \det(\mathbf{B}(y)) = R(y) = 0,
-
-Using any polynomial solver, we get the :math:`4` roots :math:`(y_i)_{1\leq
-i\leq 4}` of the quartic polynomial :math:`R` and only keep those that are real.
-Finally :math:`(x_i)_{1\leq i \leq 4}` are deduced from
-Equation :eq:`eq:xinter`.
+Using any polynomial solver, we get the $4$ roots $(y_i)_{1\leq i\leq 4}$ of the
+quartic polynomial $R$ and only keep those that are real. Finally $(x_i)_{1\leq
+i \leq 4}$ are deduced from Equation \@ref(eq:xinter).
 
 ### Implementation Notes
 
@@ -498,47 +515,42 @@ In *Sara*, we can use several solvers to retrieve the roots of polynomial
 
 The implementation in *Sara* uses Ferrari's method. While more tedious to
 implement, the method has the advantage of being direct. Also, we experimentally
-observe Ferrari’s method can sometimes be numerically inaccurate in particular
-situations where for example one of the ellipse is quasi-degenerate.
-
-In the future, depending on the use case, we can polish the roots to refine the
-root values.
-
+observe Ferrari’s method can sometimes be numerically inaccurate in particular situations where for example one of the ellipse is quasi-degenerate.  In the future, depending on the use case, we can polish the roots to refine the root values.
 
 ## Intersection Area of Two Ellipses
 
 Our presentation complements :cite:`Eberly`. In the rest of the section, we
-consider two ellipses :math:`(\mathcal{E}_i)_{1 \leq i \leq 2}` and we
-respectively denote
+consider two ellipses $(\mathcal{E}_i)_{1 \leq i \leq 2}$ and we respectively
+denote
 
--  the axes of ellipse :math:`\mathcal{E}_i` by :math:`(a_i, b_i)`, the
-   ellipse center by :math:`\mathbf{x}_i`, the orientation by
-   :math:`\theta_i`, and the direction vectors of axis :math:`a_i` and
-   :math:`b_i` by
+-  the axes of ellipse $\mathcal{E}_i$ by $(a_i, b_i)$, the ellipse center by
+   $\mathbf{x}_i$, the orientation by $\theta_i$, and the direction vectors of
+   axis $a_i$ and $b_i$ by
 
-   .. math::
+   \begin{align}
+     \mathbf{u}_i &\overset{\textrm{def}}{=}
+       \begin{bmatrix} \cos(\theta_i) \\ \sin(\theta_i) \end{bmatrix} &
 
-      \begin{align}
-          \mathbf{u}_i &\overset{\textrm{def}}{=}\begin{bmatrix}  \cos(\theta_i) \\ \sin(\theta_i) \end{bmatrix} &
-        \mathbf{v}_i &\overset{\textrm{def}}{=}\begin{bmatrix} -\sin(\theta_i) \\ \cos(\theta_i) \end{bmatrix}\end{align}
+     \mathbf{v}_i &\overset{\textrm{def}}{=}
+       \begin{bmatrix} -\sin(\theta_i) \\ \cos(\theta_i) \end{bmatrix}
+   \end{align}
 
 -  the area of the elliptic portion bounded a line segment and an arc
-   for ellipse :math:`\mathcal{E}_i` by :math:`B_i`,
+   for ellipse $\mathcal{E}_i$ by $B_i$,
 
--  the number of intersection points by :math:`L`,
+-  the number of intersection points by $L$,
 
--  the intersection points by :math:`\mathbf{p}_i` for
-   :math:`i \in \llbracket 1, L \rrbracket`, sorted in a
-   counter-clockwise order, *i.e.*,
+-  the intersection points by $\mathbf{p}_i$ for
+   $i \in \llbracket 1, L \rrbracket$, sorted in a counter-clockwise order,
+   *i.e.*,
 
-   .. math::
-       :label: eq:counterclockwise
+   \begin{equation}
+     \forall i \in [1, L-1],\quad \angle\left([1,0]^T,
+     \mathbf{p}_i\right) \ < \ \angle\left([1,0]^T, \mathbf{p}_{i+1}\right)
+     (#eq:counterclockwise)
+   \end{equation}
 
-       \forall i \in \llbracket 1, L-1\rrbracket,\quad \angle\left([1,0]^T,
-       \mathbf{p}_i\right) \ < \ \angle\left([1,0]^T, \mathbf{p}_{i+1}\right)
-
-   where :math:`\angle(.,.)` denotes the angle between two vectors in
-   the plane :math:`\mathbb{R}^2`.
+   where $\angle(.,.)$ denotes the angle between two vectors.
 
 -  the polar angles of points :math:`(\mathbf{p}_i)_{1\leq i \leq L}`
    with respect to ellipses :math:`\mathcal{E}_1` and
