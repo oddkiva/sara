@@ -1,5 +1,5 @@
 ---
-title: "Sara's Documentation"
+title: "Computer Vision with Sara"
 author: "Odd Kiva"
 date: "`r Sys.Date()`"
 site: "bookdown::bookdown_site"
@@ -10,7 +10,7 @@ link-citations: yes
 ---
 
 
-# Preface
+# Welcome {-}
 
 *Sara* is a small and easy-to-use C++ computer vision library.
 
@@ -26,7 +26,7 @@ Sara focuses on:
 3. **rigorous testing**.
 
 Sara is licensed with the _[Mozilla Public License version
-2.0](https://gitlab.com/DO-CV/sara/-/blob/master/LICENSE>)_.
+2.0](https://gitlab.com/DO-CV/sara/-/blob/master/LICENSE)_.
 
 
 The documentation chooses to emphasize more on the mathematical details to
@@ -35,36 +35,11 @@ time straightforward enough. The audience I am targeting here is students,
 scientists or software developers who want to understand those kind of details.
 
 For the reference API documentation, refer to the **Doxygen**-based
-documentation hosted __at Codedocs.xyz__:
+documentation hosted at Codedocs.xyz: https://codedocs.xyz/DO-CV/sara/.
 
 [`r knitr::include_graphics("https://codedocs.xyz/DO-CV/sara.svg")`](https://codedocs.xyz/DO-CV/sara/)
 
-.. _`here at Codedocs.xyz`: https://codedocs.xyz/DO-CV/sara/
+*N.B.: these notes reflect the best of my understanding as of this writing. They
+may still contain errors and I am very interested to know about them if you spot
+any misunderstandings on my part and explain to me.*
 
-Table of Contents
------------------
-.. toctree::
-   :maxdepth: 1
-
-   geometry
-   features
-   descriptors
-   sfm
-   imu
-
-   computer_graphics
-
-   datasets
-
-   examples
-   third_party_libraries
-
-   bibliography
-
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

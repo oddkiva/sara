@@ -1,4 +1,9 @@
-# Understanding the raw data in KITTI
+# Datasets
+
+A few notes about some interesting datasets.
+
+
+## KITTI
 
 KITTI is a very comprehensive benchmark suite that touches upon many relevant
 computer vision tasks. This benchmark is clearly geared towards road safety
@@ -8,13 +13,6 @@ In this section, I provide some more technical notes regarding the available
 data and which I find worth emphasizing again. The raw data in the benchmark is
 very large and it can be quite confusing to find our way as the documentation is
 scattered in many places across the website.
-
-*N.B.: these notes reflect the best of my understanding as of this writing. They
-may still contain errors and I am very interested to know about them if you spot
-any misunderstandings on my part and explain to me.*
-
-
-## Object Detection Challenge
 
 In the object detection challenge -- be it whether 2D or 3D, it does not matter
 since the provided data provided is pretty much the same for both tasks -- it is
@@ -98,6 +96,41 @@ where each object annotation contains the following geometry:
 
     In this local object coordinate system, the origin is at the center of the
     bottom face.
+
+    ```{python}
+    import numpy as np
+
+    l = 1
+    w = 2
+    h = 2
+
+    # Enumeration of the vertices of the 3D bounding box.
+    X_local = [
+        # Front face of the bbox
+        #
+        # Bottom-left.
+        np.array([-l/2,  0, -w/2]),
+        # Bottom-right.
+        np.array([+l/2,  0, -w/2]),
+        # Top-right.
+        np.array([+l/2, -h, -w/2]),
+        # Top-left.
+        np.array([-l/2, -h, -w/2]),
+
+        # Back face of the bbox.
+        #
+        # Bottom-left.
+        np.array([-l/2,  0, +w/2]),
+        # Bottom-right.
+        np.array([+l/2,  0, +w/2]),
+        # Top-right.
+        np.array([+l/2, -h, +w/2]),
+        # Top-left.
+        np.array([-l/2, -h, +w/2]),
+    ]
+
+    print(X_local)
+    ```
 
   - the yaw angle $\psi$ of the bounding box with respect to the $y$-axis of the
     camera coordinate system

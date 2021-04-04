@@ -1,6 +1,16 @@
-book_filename: "anchor_book"
-output_dir: "docs"
+book_filename: "sara_book"
+output_dir: "_book"
 delete_merged_file: true
 language:
   ui:
     chapter_name: "Chapter "
+rmd_files: [
+  "index.Rmd",
+  "literature.Rmd",
+  "geometry.Rmd",
+  "features.Rmd",
+  "descriptors.Rmd",
+  "imu.Rmd",
+  "computer_graphics.Rmd",
+  "datasets.Rmd",
+]
