@@ -5,7 +5,7 @@ language:
   ui:
     chapter_name: "Chapter "
 rmd_files:
-  gitbook: [
+  html: [
     "index.Rmd",
     "literature.Rmd",
     "geometry.Rmd",
@@ -19,6 +19,7 @@ rmd_files:
   latex: [
     "index.Rmd",
     "literature.Rmd",
+    "geometry.Rmd",
     "descriptors.Rmd",
     "computer_graphics.Rmd",
   ]

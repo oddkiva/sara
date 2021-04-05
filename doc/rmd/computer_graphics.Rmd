@@ -9,7 +9,7 @@ is not a buffer object but rather should be viewed as a *collection of
 references to buffer objects*. Here, a buffer should be understood as an array
 of bytes.
 
-To set things straight in our mind, a framebuffer can be seen as a **C struct** object as follows.
+To set things straight in our mind, a framebuffer can be seen as a *C struct* object as follows.
 
 ```cpp
    struct Framebuffer

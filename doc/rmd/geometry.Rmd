@@ -18,7 +18,6 @@ I revisited again [@Eberly]'s study in the appendix of my thesis
 and provided some corrections. The modest contribution of this text is to break
 down a bit more the implementation details when you read the code in *Sara*.
 
-
 ### Origin-Centered Axis-Aligned Ellipses
 
 Let us start by considering an ellipse $\mathcal{E}$ with semi-major axis $a$
@@ -110,7 +109,6 @@ $y = r \sin\theta$ and, thus with Equation \@ref(eq:ellipse),
 $\displaystyle\frac{r^2 \cos^2(\theta)}{a^2} + \frac{r^2 \sin^2(\theta)}{b^2} =
 1$, therefore
 
-
 \begin{equation}
   \displaystyle r^2 = \frac{a^2 b^2}{b^2 \cos^2(\theta) + a^2 \sin^2(\theta)}.
 \end{equation}
@@ -139,11 +137,11 @@ valid for $]-\pi/2, \pi/2[ \rightarrow ]-\infty, \infty[$. Let us first rewrite
   A(\theta_1, \theta_2)
     &= \frac{a^2b^2}{2} \int_{\theta_1}^{\theta_2}
        \frac{\mathop{\mathrm{d}\theta}}{b^2 \cos^2(\theta) + a^2 \sin^2(\theta)} \\
-
+    %
     &= \frac{a^2b^2}{2} \int_{\theta_1}^{\theta_2}
        \frac{\small \frac{\mathop{\mathrm{d}\theta}}
             {\cos^2(\theta)}}{b^2  + a^2 \tan^2(\theta)} \\
-
+    %
     &= \frac{a^2 b^2}{2} \int_{\theta_1}^{\theta_2}
        \frac{\small \frac{\mathop{\mathrm{d}\theta}}
             {\cos^2(\theta)}}{a^2 (b/a)^2  + \tan^2(\theta))} \\
@@ -156,11 +154,11 @@ Differentiating $t=\tan\theta$ yields $\mathop{\mathrm{d}t} =
   A(\theta_1, \theta_2)
   &= \frac{b^2}{2} \int_{\tan\theta_1}^{\tan\theta_2}
      \frac{\mathop{\mathrm{d}t}}{(b/a)^2  + t^2} \\
-
+  %
   &= \frac{b^2}{2} \left[ \frac{a}{b}
      \arctan\left(\frac{a}{b} t\right)
      \right]_{\tan\theta_1}^{\tan\theta_2} \\
-
+  %
   &= \frac{ab}{2} \left[ \arctan\left(\frac{a}{b} t\right)
      \right]_{\tan\theta_1}^{\tan\theta_2} \\
 \end{align}
@@ -230,7 +228,7 @@ $0 \leq \theta_2 - \theta_1 \leq \pi$ then
   B(\theta_1, \theta_2)
     &= \mathop{\mathrm{area}}(\mathrm{sector(\theta_1, \theta_2)})
      - \mathop{\mathrm{area}}(\mathrm{triangle(\theta_1, \theta_2)}) \\
-
+    %
     &= A(\theta_1, \theta_2) - \frac{1}{2} |x_2y_1 - x_1y_2|,
 \end{align}
 where each of the $\begin{bmatrix}x_i \\ y_i \end{bmatrix}$ is the point on the
@@ -269,16 +267,16 @@ portion bounded by the line segment and the arc $(\theta_1,
     \displaystyle \underbrace{A(\theta_1, \theta_2)}_{\geq 0}
                 - \frac{1}{2} |x_2 y_1 - x_1 y_2| &
     \textrm{if} \ 0 \leq \theta_2 - \theta_1 \leq \pi \\
-
+    %
     \displaystyle \underbrace{A(\theta_1, \theta_2)}_{> 0}
                 + \frac{1}{2} |x_2 y_1 - x_1 y_2| &
     \textrm{if} \  \theta_2 - \theta_1 > \pi \\
-
+    %
     \displaystyle \pi a b
                 + \underbrace{A(\theta_1, \theta_2)}_{< 0}
                 - \frac{1}{2} |x_2 y_1 - x_1 y_2| &
     \textrm{if} \ -\pi \leq \theta_2 - \theta_1 < 0 \\
-
+    %
     - \underbrace{A(\theta_1, \theta_2)}_{< 0}
     + \frac{1}{2} |x_2 y_1 - x_1 y_2| &
     \textrm{if} \ -2 \pi < \theta_2 - \theta_1 < -\pi \\
@@ -300,7 +298,6 @@ With this definition:
   \end{equation}
 
   since $A(\theta_1, \theta_2) = -A(\theta_2, \theta_1)$
-
 
 ### General Ellipse Parameterization
 
@@ -366,13 +363,15 @@ The quadratic form that characterizes ellipse $\mathcal{E}$ is expressed as
   \mathbf{b}_{\mathcal{E}}^T \mathbf{x} +
   c_{\mathcal{E}} = 0
 \end{equation}
+
 with:
+
 \begin{align}
   \mathbf{A}_{\mathcal{E}} &= \mathbf{\Sigma}_{\mathcal{E}} \\
-
+  %
   \mathbf{b}_{\mathcal{E}} &= 2 \mathbf{\Sigma}_{\mathcal{E}}
   \mathbf{x}_{\mathcal{E}} \\
-
+  %
   c_{\mathcal{E}} &= \mathbf{x}_{\mathcal{E}}^T \mathbf{\Sigma}_{\mathcal{E}}
   \mathbf{x}_{\mathcal{E}} - 1\\
 \end{align}
@@ -383,7 +382,7 @@ Denoting $\mathbf{x} = \begin{bmatrix} x \\ y \end{bmatrix}$, the ellipse
 $\mathcal{E}$ can be expressed algebraically as
 
 \begin{equation}
-E(x,y) = e_1 x^2 + e_2xy + e_3y^2 + e_4x + e_5y + e_6 = 0,
+  E(x,y) = e_1 x^2 + e_2xy + e_3y^2 + e_4x + e_5y + e_6 = 0,
 \end{equation}
 
 where:
@@ -533,7 +532,7 @@ $y$.
 
 \begin{equation}
   \det\ \mathbf{B}(y) = R(y) = 0,
-  (#eq:detBy)
+  (\#eq:detBy)
 \end{equation}
 ```
 :::
@@ -569,7 +568,7 @@ we respectively denote
   \begin{align}
     \mathbf{u}_i &\overset{\textrm{def}}{=}
       \begin{bmatrix} \cos(\theta_i) \\ \sin(\theta_i) \end{bmatrix} &
-
+    %
     \mathbf{v}_i &\overset{\textrm{def}}{=}
       \begin{bmatrix} -\sin(\theta_i) \\ \cos(\theta_i) \end{bmatrix}
   \end{align}
@@ -585,7 +584,7 @@ we respectively denote
   \begin{equation}
     \forall i \in [1, L-1],\quad \angle\left([1,0]^T,
     \mathbf{p}_i\right) \ < \ \angle\left([1,0]^T, \mathbf{p}_{i+1}\right)
-    (#eq:counterclockwise)
+    (\#eq:counterclockwise)
   \end{equation}
 
   where $\angle(.,.)$ denotes the angle between two vectors.
@@ -594,15 +593,17 @@ we respectively denote
   with respect to ellipses $\mathcal{E}_1$ and $\mathcal{E}_2$ by
   $(\phi_i)_{1\leq i \leq 2}$ and $(\psi_i)_{1\leq i \leq 2}$, *i.e.*,
 
-  \begin{gathered}
-    \forall i \in [1, L],
-    \phi_i \overset{\textrm{def}}{=}
-      \angle\left(\mathbf{u}_1, \mathbf{p}_i - \mathbf{x}_1\right) \\
-
+  \begin{equation}
+    \begin{gathered}
       \forall i \in [1, L],
-    \psi_i \overset{\textrm{def}}{=}
-      \angle\left(\mathbf{u}_2, \mathbf{p}_i - \mathbf{x}_2\right)
-  \end{gathered}
+      \phi_i \overset{\textrm{def}}{=}
+        \angle\left(\mathbf{u}_1, \mathbf{p}_i - \mathbf{x}_1\right) \\
+      %
+      \forall i \in [1, L],
+      \psi_i \overset{\textrm{def}}{=}
+        \angle\left(\mathbf{u}_2, \mathbf{p}_i - \mathbf{x}_2\right)
+    \end{gathered}
+  \end{equation}
 
 #### Retrieving the polar angles
 
@@ -617,7 +618,7 @@ have
     \langle \mathbf{p}_i-\mathbf{x}_1, \mathbf{v}_1 \rangle,
     \langle \mathbf{p}_i-\mathbf{x}_1, \mathbf{u}_1 \rangle
   \right)\\
-
+  %
   \psi_i &= \mathrm{atan2}
   \left(
     \langle \mathbf{p}_i-\mathbf{x}_2, \mathbf{v}_2 \rangle,
@@ -662,7 +663,7 @@ For 0 or 1 intersection point, the intersection area is equal to
   0 & \textrm{otherwise}
   \end{array}
   \right.
-  (#eq:area01)
+  (\#eq:area01)
 \end{equation}
 ```
 :::
@@ -703,13 +704,13 @@ For 2 intersection points, the intersection area is equal to
         B_1(\phi_1, \phi_2),
         B_2(\psi_1, \psi_2)
     \right) \\
-
+    %
     &+
     \min \left(
         B_1(\phi_2, \phi_1),
         B_2(\psi_2, \psi_1)
     \right) \\
-  (#eq:inter2)
+  (\#eq:inter2)
 \end{align}
 ```
 :::
@@ -717,7 +718,6 @@ For 2 intersection points, the intersection area is equal to
 Equation \@ref(eq:inter2) is consistent with the Equation \@ref(eq:inter34)
 obtained for the case of 3 or 4 intersection points because it can be viewed as
 a special case since the polygonal area is zero for $2$ intersection points.
-
 
 #### 3 and 4 intersection points
 
@@ -740,18 +740,18 @@ For 3 or 4 intersection points, the intersection area is equal to
 
 \begin{align}
   \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2)
-
+  %
   &= \sum_{i=1}^{L}
     \underbrace{\min \left(
         B_1(\phi_i, \phi_{i+1}),
         B_2(\psi_i, \psi_{i+1})
     \right)}_{\textrm{smallest of elliptic portion area}} \\
-
+  %
   &+ \underbrace{\frac{1}{2} \sum_{i=1}^{L} \left|
        \det\left(\mathbf{p}_i, \mathbf{p}_{i+1}\right)
      \right|}_{\textrm{area of polygon}\ (\mathbf{p}_1, \mathbf{p}_2, \dots,
    \mathbf{p}_L)}
-  (#eq:inter34)
+  (\#eq:inter34)
 \end{align}
 
 with $\phi_{L+1} = \phi_1$, $\psi_{L+1} = \psi_1$ and $\mathbf{p}_{L+1} =
