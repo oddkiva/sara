@@ -126,8 +126,43 @@ N$ **overlapping** square patches $\mathcal{P}_{ij}$ for ${0 \leq
 i,j < N}$, each of them having a *radius* $s = \lambda_{\text{zoom}}
 \sigma$ pixels. This means that the whole square patch $\mathcal{P}$
 has a side length equal to $(N + 1) s$.
-
 :::
+ 
+```{r, sift_grid_setup}
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+```
+
+```{python}
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MultipleLocator
+import numpy as np
+
+# Two example plots
+fig = plt.figure()
+ax1 = fig.add_subplot(2,2,1)
+ax2 = fig.add_subplot(2,2,2)
+
+spacing = 0.5 # This can be your user specified spacing. 
+minorLocator = MultipleLocator(spacing)
+ax1.plot(9 * np.random.rand(10))
+# Set minor tick locations.
+ax1.yaxis.set_minor_locator(minorLocator)
+ax1.xaxis.set_minor_locator(minorLocator)
+# Set grid to use minor tick locations. 
+ax1.grid(which = 'minor')
+
+spacing = 1
+minorLocator = MultipleLocator(spacing)
+ax2.plot(9 * np.random.rand(10))
+# Set minor tick locations.
+ax2.yaxis.set_minor_locator(minorLocator)
+ax2.xaxis.set_minor_locator(minorLocator)
+# Set grid to use minor tick locations. 
+ax2.grid(which = 'minor')
+plt.show()
+```
+
 
 Now let us explain why the **overlapping** is due to the trilinear interpolation
 before we detail the geometry of the patches $\mathcal{P}_{ij}$ in the
