@@ -690,7 +690,7 @@ inter_2b <- "figures/inter2b.png"
 
 Geometrically speaking, we easily see that the intersection area is the sum of
 the smallest elliptic portions on both sides of the line formed by joining
-$\mathbf{p}_1$ and $\mathbf{p}_2)$.
+$\mathbf{p}_1$ and $\mathbf{p}_2$.
 
 Specifically, we calculate it as
 
@@ -750,7 +750,7 @@ For 3 or 4 intersection points, the intersection area is equal to
   &+ \underbrace{\frac{1}{2} \sum_{i=1}^{L} \left|
        \det\left(\mathbf{p}_i, \mathbf{p}_{i+1}\right)
      \right|}_{\textrm{area of polygon}\ (\mathbf{p}_1, \mathbf{p}_2, \dots,
-   \mathbf{p}_L)} \\
+   \mathbf{p}_L)}
   (#eq:inter34)
 \end{align}
 
