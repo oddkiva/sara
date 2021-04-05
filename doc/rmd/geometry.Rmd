@@ -102,8 +102,7 @@ Figure \@ref(fig:ellsector). Using polar coordinates, it is equal to the
 following nonnegative integral
 
 \begin{equation}
-  A(\theta_1, \theta_2) =
-    \frac{1}{2} \int_{\theta_1}^{\theta_2} r^2 \mathop{\mathrm{d}\theta}.
+  A(\theta_1, \theta_2) = \frac{1}{2} \int_{\theta_1}^{\theta_2} r^2 \mathop{\mathrm{d}\theta} .
 \end{equation}
 
 The change of variable in polar coordinates is $x = r \cos\theta$ and
@@ -738,6 +737,7 @@ from the figures above the following formula.
 :::puzzle
 ```{proposition, name="Intersection Area for 3 or 4 Intersection Points"}
 For 3 or 4 intersection points, the intersection area is equal to
+
 \begin{align}
   \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2)
 

@@ -2,6 +2,7 @@
 title: "Computer Vision with Sara"
 author: "Odd Kiva"
 date: "`r Sys.Date()`"
+lang: en
 site: "bookdown::bookdown_site"
 documentclass: book
 bibliography: ["phd-utf8.bib"]
@@ -37,7 +38,24 @@ scientists or software developers who want to understand those kind of details.
 For the reference API documentation, refer to the **Doxygen**-based
 documentation hosted at Codedocs.xyz: https://codedocs.xyz/DO-CV/sara/.
 
-[`r knitr::include_graphics("https://codedocs.xyz/DO-CV/sara.svg")`](https://codedocs.xyz/DO-CV/sara/)
+```{r, echo = FALSE}
+codedocs_url = 'https://codedocs.xyz/DO-CV/sara.svg'
+if (!file.exists(codedocs_file <- 'sara.svg'))
+  download.file(codedocs_url, codedocs_file, mode = 'wb')
+
+include_svg = function(path) {
+  if (knitr::is_latex_output()) {
+    output = xfun::with_ext(path, 'pdf')
+    # you can compare the timestamp of pdf against svg to avoid conversion if necessary
+    system2('rsvg-convert', c('-f', 'pdf', '-a', '-o', shQuote(c(output, path))))
+  } else {
+    output = path
+  }
+  knitr::include_graphics(output)
+}
+```
+
+[`r include_svg(if (identical(knitr:::pandoc_to(), 'html')) codedocs_url else codedocs_file)`](https://codedocs.xyz/DO-CV/sara/)
 
 *N.B.: these notes reflect the best of my understanding as of this writing. They
 may still contain errors and I am very interested to know about them if you spot

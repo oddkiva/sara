@@ -84,6 +84,7 @@ region, *e.g.*, a corner or blob at different scales and positions,
 then, in such an ideal world, that salient region would be re-detected in each
 image as a keypoint $k_i$ with perfect pixel localisation, scale and
 orientation.
+
 Normalizing the image patch around this salient region with scale $\sigma_i$ and
 orientation with $\theta_i$ would yield the same image. And we would expect that
 the SIFT descriptors $\mathbf{h}_i$ extracted in each normalized patch around
@@ -96,8 +97,8 @@ associated normalizing transform.
 
 #### Local Coordinate System and Normalizing Transform
 
-The orientations are calculated and accumulated with respect to the **local
-coordinate system** $\mathcal{C}_k$ associated to keypoint $k$, where *$\sigma$
+The orientations are calculated and accumulated with respect to the *local
+coordinate system* $\mathcal{C}_k$ associated to keypoint $k$, where *$\sigma$
 is used as the reference scale unit* instead of the pixel.
 
 We characterize this local coordinate system by the following similarity
@@ -114,27 +115,27 @@ transform $\mathbf{T}$ transforms *image coordinates* $\mathbf{u} = (u, v)$ to
 follows
 
 \begin{equation}
-\begin{bmatrix} \tilde{\mathbf{u}} \\ 1 \end{bmatrix}
-= \mathbf{T} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
-= \displaystyle
-  \frac{1}{s}
-  \left[
-  \begin{array}{c|c}
-  \mathbf{I}_2   & \mathbf{0}_2 \\
-  \hline
-  \mathbf{0}_2^T & s
-  \end{array}
-  \right]
-
-  \left[
-  \begin{array}{c|c}
-  \mathbf{R}_{\theta}^T & -\mathbf{R}_{\theta}^T \mathbf{x} \\
-  \hline
-  \mathbf{0}_2^T & 1
-  \end{array}
-  \right]
-
-  \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
+  \begin{bmatrix} \tilde{\mathbf{u}} \\ 1 \end{bmatrix}
+  = \mathbf{T} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
+  = \displaystyle \frac{1}{s}
+    %
+    \left[
+      \begin{array}{c|c}
+      \mathbf{I}_2   & \mathbf{0}_2 \\
+      \hline
+      \mathbf{0}_2^T & s
+      \end{array}
+    \right]
+    %
+    \left[
+      \begin{array}{c|c}
+        \mathbf{R}_{\theta}^T & -\mathbf{R}_{\theta}^T \mathbf{x} \\
+        \hline
+        \mathbf{0}_2^T & 1
+      \end{array}
+    \right]
+    %
+    \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
 \end{equation}
 ```
 :::
@@ -156,13 +157,13 @@ $\mathcal{P}$:
 
 :::note
 We divide the square patch $\mathcal{P}$ into a grid of $N \times
-N$ **overlapping** square patches $\mathcal{P}_{ij}$ for ${0 \leq
+N$ *overlapping* square patches $\mathcal{P}_{ij}$ for ${0 \leq
 i,j < N}$, each of them having a *radius* $s = \lambda_{\text{zoom}}
 \sigma$ pixels. This means that the whole square patch $\mathcal{P}$
 has a side length equal to $(N + 1) s$.
 :::
 
-Now let us explain why the **overlapping** is due to the trilinear interpolation
+Now let us explain why the *overlapping* is due to the trilinear interpolation
 before we detail the geometry of the patches $\mathcal{P}_{ij}$ in the
 next section.
 
@@ -172,7 +173,7 @@ scale-space: *"It is important to avoid all boundary affects in which the
 descriptor abruptly changes as a sample shifts smoothly from being within one
 histogram to another or from one orientation to another."*
 
-In more details, this is so that we can compensate for the **noisy** estimation
+In more details, this is so that we can compensate for the *noisy* estimation
 of keypoint $k$.  If we did not apply the trilinear interpolation, a pixel at
 the boundary of a subpatch patch could fall suddenly in another adjacent image
 patch. With the trilinear interpolation, instead every pixel in $\mathcal{P}$
@@ -190,7 +191,6 @@ compensate for the noisy orientation $\theta$ and as a result,
 The histogram bins $\mathbf{h}[i, j, o]$ overlap as each of them covers the
 interval of orientations $[\frac{2 \pi}{O} (o - 1), \frac{2 \pi}{O} (o + 1)]$.
 :::
-
 
 #### Geometry of Overlapping Patches
 
@@ -277,9 +277,9 @@ Let us consider a pixel $(u, v)$ in the patch $\mathcal{P}$:
   & \displaystyle y - r \leq v \leq y + r \\
   \end{aligned}
   \right.
-
+  %
   \Longleftrightarrow
-
+  %
   \left\{
   \begin{aligned}
   & \displaystyle -\frac{N + 1}{2} \leq \tilde{u} \leq \frac{N + 1}{2} \\
@@ -318,6 +318,21 @@ In matrix notation and using homogeneous coordinates, the normalizing
 transform $\mathbf{T}_\text{SIFT}$ transforms *image coordinates*
 $\mathbf{u}$ to *SIFT coordinates* $\hat{\mathbf{u}}$ as follows
 
+We see equivalently
+
+\begin{equation}
+  \left\{
+  \begin{aligned}
+  -1 \leq \hat{u} \leq N \\
+  -1 \leq \hat{v} \leq N
+  \end{aligned}
+  \right.
+\end{equation}
+
+In matrix notation and using homogeneous coordinates, the normalizing
+transform $\mathbf{T}_\text{SIFT}$ transforms *image coordinates*
+$\mathbf{u}$ to *SIFT coordinates* $\hat{\mathbf{u}}$ as follows
+
 \begin{equation}
   \begin{bmatrix} \hat{\mathbf{u}} \\ 1 \end{bmatrix}
   = \mathbf{T}_{\text{SIFT}} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
@@ -330,7 +345,7 @@ $\mathbf{u}$ to *SIFT coordinates* $\hat{\mathbf{u}}$ as follows
   0 & 0 &              1  \\
   \end{array}
   \right]}_{\text{shift}}
-
+  %
   \mathbf{T}
   \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
 \end{equation}
@@ -375,16 +390,14 @@ histogram $\mathbf{h}_{ij}$ is
 
 \begin{equation}
   \boxed{
-
-  w(\mathbf{u}) =
-  \underbrace{
-  \exp \left( - \frac{\| \tilde{\mathbf{u}} \|^2}{2 (N/2)^2} \right)
-  }_{\text{distance to center}}
-
-  \underbrace{
-  \| \nabla g_\sigma * I(\mathbf{u}) \|_2
-  }_{\text{gradient magnitude}}
-
+    w(\mathbf{u}) =
+    \underbrace{
+    \exp \left( - \frac{\| \tilde{\mathbf{u}} \|^2}{2 (N/2)^2} \right)
+    }_{\text{distance to center}}
+    %
+    \underbrace{
+    \| \nabla g_\sigma * I(\mathbf{u}) \|_2
+    }_{\text{gradient magnitude}}
   }
 \end{equation}
 
@@ -429,7 +442,7 @@ The contribution will be distributed to the two bins as follows
   \displaystyle
   \mathbf{h}[i, j, o] \leftarrow \mathbf{h}[i, j, o] +
   w_\text{final}(\mathbf{u}) \left(1 - (\hat{\phi} - o) \right) \\
-
+  %
   \displaystyle
   \mathbf{h}[i, j, o + 1] \leftarrow \mathbf{h}[i, j, o + 1] +
   w_\text{final}(\mathbf{u}) \left( \hat{\phi} - o \right)
@@ -477,7 +490,6 @@ In the formula above, notice that:
 **TODO: illustrate.**
 
 The SIFT descriptor for keypoint $k$ is calculated as follows:
-
 
 :::note
 For each pixel $\mathbf{u} = (u, v) \in [x-r,x+r] \times [y-r, y+r]$:

@@ -70,9 +70,10 @@ By interpreting the inverse rigid body motion, we see that:
   coordinate system $C_0$ is calculated as $\mathbf{R}_{0
   \rightarrow 1} = \mathbf{R}^T$
 
-### Quick Summary
-
 The following remarks are useful to debug code dealing with structure-from-motion:
+
+:::puzzle
+**Quick Summary**
 
 - The coordinates of the first camera center in the first camera coordinate
   system is $(0, 0, 0)$.
@@ -85,9 +86,15 @@ The following remarks are useful to debug code dealing with structure-from-motio
 
 - $\mathbf{t}$ goes from camera $C_1$ to camera $C_0$ and not
   the other way around.
+:::
 
 
 ## Bundle Adjustment
+
+### Personal Intellectual Journey about Incremental Bundle Adjustment
+
+In this paragraph I describe my personal intellectual journey to understand how
+the incremental bundle adjustment is done.
 
 In the bundle adjustment problem we need to initialize the position and the gaze
 direction of each camera $C_i = (\mathbf{R}_i, \mathbf{t}_i)$ in a global

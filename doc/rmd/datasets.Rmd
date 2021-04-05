@@ -97,38 +97,52 @@ where each object annotation contains the following geometry:
     In this local object coordinate system, the origin is at the center of the
     bottom face.
 
-    ```{python}
+    ```{python, echo = FALSE}
     import numpy as np
+    ```
 
-    l = 1
-    w = 2
-    h = 2
+    ```{python}
+    def get_bounding_box_3d(sizes):
+        l, w, h = sizes
 
-    # Enumeration of the vertices of the 3D bounding box.
-    X_local = [
-        # Front face of the bbox
-        #
-        # Bottom-left.
-        np.array([-l/2,  0, -w/2]),
-        # Bottom-right.
-        np.array([+l/2,  0, -w/2]),
-        # Top-right.
-        np.array([+l/2, -h, -w/2]),
-        # Top-left.
-        np.array([-l/2, -h, -w/2]),
+        X_local = np.array([
+            # Front face of the bbox
+            #
+            # Bottom-left.
+            [-l/2,  0, -w/2],
+            # Bottom-right.
+            [+l/2,  0, -w/2],
+            # Top-right.
+            [+l/2, -h, -w/2],
+            # Top-left.
+            [-l/2, -h, -w/2],
 
-        # Back face of the bbox.
-        #
-        # Bottom-left.
-        np.array([-l/2,  0, +w/2]),
-        # Bottom-right.
-        np.array([+l/2,  0, +w/2]),
-        # Top-right.
-        np.array([+l/2, -h, +w/2]),
-        # Top-left.
-        np.array([-l/2, -h, +w/2]),
-    ]
+            # Back face of the bbox.
+            #
+            # Bottom-left.
+            [-l/2,  0, +w/2],
+            # Bottom-right.
+            [+l/2,  0, +w/2],
+            # Top-right.
+            [+l/2, -h, +w/2],
+            # Top-left.
+            [-l/2, -h, +w/2],
+        ]).T
 
+        ones = np.ones((1, 8))
+        X_local = np.concatenate((X_local, ones))
+
+        return X_local
+    ```
+
+    Which evaluates for the following sizes as
+
+    ```{python}
+    l, w, h = 4, 3, 2
+    X_local = get_bounding_box_3d((l, w, h))
+    ```
+
+    ```{python, echo = FALSE}
     print(X_local)
     ```
 

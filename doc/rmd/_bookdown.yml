@@ -4,18 +4,21 @@ delete_merged_file: true
 language:
   ui:
     chapter_name: "Chapter "
-rmd_files: [
-  "index.Rmd",
-  "literature.Rmd",
-  "geometry.Rmd",
-  "features.Rmd",
-  "descriptors.Rmd",
-  "sfm.Rmd",
-  "multiviewgeometry/coordinate_systems.Rmd",
-  "multiviewgeometry/perspective_projection.Rmd",
-  "multiviewgeometry/distance_calculation.Rmd",
-  "multiviewgeometry/essential_matrix.Rmd",
-  "imu.Rmd",
-  "computer_graphics.Rmd",
-  "datasets.Rmd",
-]
+rmd_files:
+  gitbook: [
+    "index.Rmd",
+    "literature.Rmd",
+    "geometry.Rmd",
+    "features.Rmd",
+    "descriptors.Rmd",
+    "sfm.Rmd",
+    "imu.Rmd",
+    "computer_graphics.Rmd",
+    "datasets.Rmd"
+  ]
+  latex: [
+    "index.Rmd",
+    "literature.Rmd",
+    "descriptors.Rmd",
+    "computer_graphics.Rmd",
+  ]
