@@ -3,7 +3,4 @@
 This chapter details the classical algorithm that *Sara* implements in Multiple
 View Geometry.
 
-multiviewgeometry/perspective_projection.rst
-multiviewgeometry/distance_calculation.rst
-multiviewgeometry/essential_matrix.rst
 multiviewgeometry/nister.rst

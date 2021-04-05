@@ -60,10 +60,10 @@ Let us first describe the rotation axes by visualizing an airplane. Consider its
 local coordinate system that is fixed to this airplane. The usual axis
 convention used in aerospace engineering is as follows:
 
-- The $z$-axis is the longitudinal axis pointing to the airplane
+- The $x$-axis is the longitudinal axis pointing to the airplane
   nose.
 - The $y$-axis is the transversal axis pointing to the right.
-- The $x$-axis is the vertical axis pointing downwards to the
+- The $z$-axis is the vertical axis pointing downwards to the
   ground.
 
 In terms of rotation,
@@ -81,19 +81,6 @@ composed in the following order:
 
 Once again let us stress the order to which we apply each elementary rotation is
 very important.
-
-:::puzzle
-```{proposition, name="Euler Rotation"}
-The rotation matrix expressed with respect to the *extrinsic* axes (i.e., the axes
-of the original local coordinates before rotating the plane) is calculated as:
-
-\begin{equation}
-  \mathbf{R} (\psi, \theta, \phi) = \mathbf{R}_z (\psi)
-                                    \mathbf{R}_y (\theta)
-                                    \mathbf{R}_x (\phi)
-\end{equation}
-```
-:::
 
 ### Formula of Elementary Rotations
 
@@ -143,6 +130,27 @@ each coefficient.
     \end{array} \right]
   \end{equation}
   :::
+
+
+### Composite Euler Rotation
+
+The rotation matrix expressed with respect to the *extrinsic* axes (i.e., the axes
+of the original local coordinates before rotating the plane) is calculated as
+follows.
+
+:::puzzle
+```{proposition, name="Composite Euler Rotation"}
+The composite Euler rotation parameterized by $(\psi, \theta, \phi)$ is
+calculated as
+
+\begin{equation}
+  \mathbf{R} (\psi, \theta, \phi) = \mathbf{R}_z (\psi)
+                                    \mathbf{R}_y (\theta)
+                                    \mathbf{R}_x (\phi)
+\end{equation}
+```
+:::
+
 
 
 This nice visualisation tool can be useful to check our understanding:

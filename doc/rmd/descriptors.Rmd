@@ -1,12 +1,44 @@
 # Descriptors
 
+## SIFT
+
 This section breaks down the SIFT descriptor that *Sara* implements.
 
+Let us remind that in [@Lowe:2004:ijcv], SIFT is originally presented as a
+full-fledged method that jointly (1) detects keypoints in the image and (2)
+describes them with an associate feature vector based on the local texture
+information. We only focus on the *descriptor* part.
+
 In the sequel, let us denote an oriented scale-invariant local keypoint by
-$k = (x, y, \sigma, \theta)$.
+$k = (x, y, \sigma, \theta)$. To keep this page self-contained, we also us
+recall that:
 
+- $(x, y)$ are the 2D pixel coordinates of the keypoint,
+- $\sigma$ is the scale at which the keypoint is detected,
+- $\theta$ is the orientation of the dominant gradient.
 
-## SIFT
+Personally I love SIFT. Despite the popularisation and widespread use of deep
+learning approaches where they do shine in high-level image recognition tasks,
+this hand-engineered descriptor is still state-of-the-art. As shown in
+[@schoenberger2017comparative] on the more specific task of
+structure-from-motion, SIFT is a brilliant demonstration that the human mind can
+still compete and even outshine with machine-learned features.
+
+*Going slightly off-topic, this evaluation fundamentally dispels once more the
+ongoing trend that (1) ever more data and (2) ever bigger models is the way to
+go. Even cognitively, It is hard to believe that humans and animals in general,
+that these such extraordinarily complex biological systems, would go that
+far to learn. As of this writing, once more, this study highlights the need for
+new ideas in order to create smarter learning algorithms. It would be really
+great to create algorithms that can represent or organize the data into
+meaningful concepts instead of behaving like "stochastic parrots"
+[@bender:2021:parrots]^[Let us forget for a moment the outrage caused by Timnit
+Gebru's *unjustified* and *summary* firing and which has been happening in
+the social media. I am of the opinion that this paper is well worth a read and
+does make interesting valid points to advance science. And if scientists are
+arguing with each other in this current context, which is very politically
+charged, something good can happen out of this.]. Doing so would enable us to
+learn not only better from the data but also from far less data.*
 
 ### Interpretation
 
@@ -19,7 +51,7 @@ orientations into $O$ principal orientations.  A single SIFT descriptor about
 can be viewed as a 3D tensor $\mathbf{h} \in \mathbb{R}^{N \times N \times O}$.
 
 The component $\mathbf{h}[i, j, o]$ quantifies the frequency of
-orientation $\frac{2 o \pi}{O}\ \mathrm{rad}$ in the $(i, j)$-th
+orientation $\frac{2 \pi o}{O}\ \mathrm{rad}$ in the $(i, j)$-th
 histogram, where ${0 \leq i,j < N}$ and $0 \leq o < O$.
 
 In the original implementation [@Lowe:2004:ijcv] the parameters are set as $N =
@@ -60,11 +92,13 @@ $k_i$ to be identical.
 This leads us to define specifically the local coordinate system and its
 associated normalizing transform.
 
+**TODO: illustrate.**
+
 #### Local Coordinate System and Normalizing Transform
 
 The orientations are calculated and accumulated with respect to the **local
 coordinate system** $\mathcal{C}_k$ associated to keypoint $k$, where *$\sigma$
-is used as the reference scale unit* instead of the unit pixel.
+is used as the reference scale unit* instead of the pixel.
 
 We characterize this local coordinate system by the following similarity
 transform $\mathbf{T}$.
@@ -127,42 +161,6 @@ i,j < N}$, each of them having a *radius* $s = \lambda_{\text{zoom}}
 \sigma$ pixels. This means that the whole square patch $\mathcal{P}$
 has a side length equal to $(N + 1) s$.
 :::
- 
-```{r, sift_grid_setup}
-matplotlib <- import("matplotlib")
-matplotlib$use("Agg", force = TRUE)
-```
-
-```{python}
-from matplotlib import pyplot as plt
-from matplotlib.ticker import MultipleLocator
-import numpy as np
-
-# Two example plots
-fig = plt.figure()
-ax1 = fig.add_subplot(2,2,1)
-ax2 = fig.add_subplot(2,2,2)
-
-spacing = 0.5 # This can be your user specified spacing. 
-minorLocator = MultipleLocator(spacing)
-ax1.plot(9 * np.random.rand(10))
-# Set minor tick locations.
-ax1.yaxis.set_minor_locator(minorLocator)
-ax1.xaxis.set_minor_locator(minorLocator)
-# Set grid to use minor tick locations. 
-ax1.grid(which = 'minor')
-
-spacing = 1
-minorLocator = MultipleLocator(spacing)
-ax2.plot(9 * np.random.rand(10))
-# Set minor tick locations.
-ax2.yaxis.set_minor_locator(minorLocator)
-ax2.xaxis.set_minor_locator(minorLocator)
-# Set grid to use minor tick locations. 
-ax2.grid(which = 'minor')
-plt.show()
-```
-
 
 Now let us explain why the **overlapping** is due to the trilinear interpolation
 before we detail the geometry of the patches $\mathcal{P}_{ij}$ in the
@@ -266,6 +264,8 @@ Equivalently with array broadcasting (cf. *Numpy* concept):
   - [1.5, 1.5]
 \end{equation}
 
+**TODO: illustrate.**
+
 #### SIFT Coordinate System
 
 Let us consider a pixel $(u, v)$ in the patch $\mathcal{P}$:
@@ -366,6 +366,8 @@ The pixel $(u, v)$ belongs up to $4$ patches:
 We say "up to $4$" because for example a gradient at the boundary
 $(-1,-1)$ contributes only to $\mathcal{P}_{00}$.
 
+**TODO: illustrate.**
+
 #### Histogram of Gradients
 
 Consider a pixel $\mathbf{u} \in \mathcal{P}_{ij}$. Its contribution in
@@ -458,7 +460,7 @@ enough image patch, e.g., radius
   \boxed{r = \sqrt{2} \frac{N + 1}{2} \lambda_{\text{zoom}} \sigma}
 \end{equation}
 
-In the above formula, notice that:
+In the formula above, notice that:
 
 - the factor $\sqrt{2}$: because the square patches are oriented with an angle
   $\theta \neq 0$, we need to make sure we are not missing any pixels in
@@ -468,9 +470,11 @@ In the above formula, notice that:
 - if the orientation $\theta$ was zero, we could check that a radius $r =
   \frac{N + 1}{2} \lambda_{\text{zoom}} \sigma$ would have been sufficient.
 - the factor $\frac{(N + 1)}{2}$: this accounts for gradients for patches
-  "at the border" of the image patch $mathcal{P}$. These gradients "at
+  "at the border" of the image patch $\mathcal{P}$. These gradients "at
   the border" may belong to only one histogram ("at the corners") or two
   histograms ("at the edges").
+
+**TODO: illustrate.**
 
 The SIFT descriptor for keypoint $k$ is calculated as follows:
 
