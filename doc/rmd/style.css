@@ -1,6 +1,7 @@
 @import url('http://fonts.cdnfonts.com/css/tex-gyre-heros');
 @import url('http://fonts.cdnfonts.com/css/latin-modern-roman');
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700');
+/* @import url('https://fonts.googleapis.com/css?family=Crimson+Text:400,600,700'); */
 
 .book.font-family-0 {
   font-family: "LMRoman10", "Computer Modern Serif", times, Georgia, serif;
@@ -36,5 +37,5 @@ div.demo {
 }
 
 div.note {
-  background-image: url("div-icons/lightbulb.png");
+  background-image: url("div-icons/Lightbulb.png");
 }

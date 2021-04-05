@@ -35,7 +35,11 @@ informative:
 
 - http://www.chrobotics.com/docs/AN-1008-SensorsForOrientationEstimation.pdf
 - https://physics.stackexchange.com/questions/402611/why-an-accelerometer-shows-zero-force-while-in-free-fall
-- https://www.youtube.com/watch?v=-om0eTXsgnY
+- https://www.youtube.com/watch?v=-om0eTXsgnY as shown below.
+
+<p align="center">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/-om0eTXsgnY" frameborder="0" allowfullscreen></iframe>
+</p>
 
 A while back ago, I downloaded an accelerometer smartphone app and played with
 it. The smartphone lying on the table would record acceleration vector
