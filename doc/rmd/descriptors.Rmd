@@ -32,13 +32,15 @@ far to learn. As of this writing, once more, this study highlights the need for
 new ideas in order to create smarter learning algorithms. It would be really
 great to create algorithms that can represent or organize the data into
 meaningful concepts instead of behaving like "stochastic parrots"
-[@bender:2021:parrots]^[Let us forget for a moment the outrage caused by Timnit
-Gebru's *unjustified* and *summary* firing and which has been happening in
-the social media. I am of the opinion that this paper is well worth a read and
-does make interesting valid points to advance science. And if scientists are
-arguing with each other in this current context, which is very politically
-charged, something good can happen out of this.]. Doing so would enable us to
-learn not only better from the data but also from far less data.*
+[@bender:2021:parrots]^[Let us forget for a moment the outrage sparked by Timnit
+Gebru's firing and which has been happening in the social media. Clearly this
+was an *unjustified* and *summary* firing and illustrates once more the abusive
+power that Big Tech can exert over its own employees. Now I am of the opinion that
+this paper is well worth a read and does make interesting valid points to
+advance science. And if scientists are arguing with each other in this current
+context, which is very politically charged, something good can happen out of
+this.]. Doing so would enable us to learn not only better from the data but also
+from far less data.*
 
 ### Interpretation
 
@@ -70,8 +72,8 @@ The design of SIFT is geared towards robustness w.r.t. *noisy* estimation of
 keypoint position, scale and orientation, *lossy and noisy* image
 acquisition, *illumination* changes, *etc*.
 
-The SIFT can encode the photometric information of the region around the
-keypoint $k$ in a similarity-invariant manner if we make use of the scale
+The SIFT descriptor can encode the photometric information of the region around
+the keypoint $k$ in a similarity-invariant manner if we make use of the scale
 $\sigma$ and the dominant gradient orientation $\theta$.
 
 By similarity invariance, we mean that
@@ -143,8 +145,7 @@ follows
 The magnification factor $\lambda_{\text{zoom}}$ has been introduced in
 [@Lowe:2004:ijcv]'s original implementation.  In practice it is set as
 $\lambda_\mathrm{zoom} = 3$ scale units to avoid dealing with too small image
-patches and has to be thought as a kind of universal constant reused for all
-image.
+patches and has to be thought as a parameter that is learnt empirically.
 
 #### Grid of Overlapping Patches and Overlapping Histogram Bins
 
@@ -185,7 +186,7 @@ Then we encode the photometric information of each patch
 $\mathcal{P}_{ij}$ into a histogram $\mathbf{h}_{ij} \in
 \mathbb{R}^O$ of *gradient orientations*, where the orientations are binned into
 $O$ principal orientations. Again with trilinear interpolation, we
-compensate for the noisy orientation $\theta$ and as a result,
+compensate for the noisy orientation $\theta$ and as a result:
 
 :::note
 The histogram bins $\mathbf{h}[i, j, o]$ overlap as each of them covers the

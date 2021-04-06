@@ -2,39 +2,96 @@
 
 Let us detail how we go from the world coordinates $(O_W, \mathbf{i}_W,
 \mathbf{j}_W,\mathbf{k}_W)$ to the camera coordinates $(O_C, \mathbf{i}_C,
-\mathbf{j}_C,\mathbf{k}_C)$.
+\mathbf{j}_C,\mathbf{k}_C)$. We assume the basis vectors are *orthonormal*.
 
 Denote a 3D point by $M$. Suppose that we know its coordinates in the
 camera coordinate system $(x_C, y_C, z_C)$. We can retrieve its
 coordinates in the world coordinate system $(x_W, y_W, z_W)$ as
-follows
+follows.
 
+Let us start with Chasles' relation so that the world coordinates are expressed
+as
+
+\begin{equation}
+  \overrightarrow{O_W M} = \overrightarrow{O_W O_C} +
+                           \overrightarrow{O_C M}.
+\end{equation}
+
+The second term can be expressed with the camera coordinates
+
+\begin{equation}
+  \overrightarrow{O_W M} = \overrightarrow{O_W O_C} +
+    x_C \mathbf{i}_C + y_C \mathbf{j}_C + z_C \mathbf{k}_C .
+\end{equation}
+
+Let us denote the camera axes w.r.t. the world coordinate system as
+\begin{equation}
+  \begin{array}{ccc}
+  \mathbf{i}_C = \begin{bmatrix} i_{C1} \\ i_{C2} \\ i_{C3} \end{bmatrix},
+  &
+  \mathbf{j}_C = \begin{bmatrix} j_{C1} \\ j_{C2} \\ j_{C3} \end{bmatrix},
+  &
+  \mathbf{k}_C = \begin{bmatrix} k_{C1} \\ k_{C2} \\ k_{C3} \end{bmatrix}
+  \end{array}
+  .
+\end{equation}
+
+Reorganizing in matrix notation, the matrix-vector product becomes apparent:
 \begin{equation}
   \begin{aligned}
   \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
-                            \overrightarrow{O_\textrm{C}M} \\
+  x_C
+  \begin{bmatrix}
+    i_{C1} \\
+    i_{C2} \\
+    i_{C3}
+  \end{bmatrix} +
+  y_C
+  \begin{bmatrix}
+    j_{C1} \\
+    j_{C2} \\
+    j_{C3}
+  \end{bmatrix} +
+  z_C
+  \begin{bmatrix}
+    k_{C1} \\
+    k_{C2} \\
+    k_{C3}
+  \end{bmatrix} \\
   %
   \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
-    x_C \mathbf{i}_C + y_C \mathbf{j}_C + z_C \mathbf{k}_C \\
+  \begin{bmatrix}
+  i_{C1} & j_{C1} & k_{C1} \\
+  i_{C2} & j_{C2} & k_{C2} \\
+  i_{C3} & j_{C3} & k_{C3}
+  \end{bmatrix}
+  %
+  \begin{bmatrix} x_C \\ y_C \\ z_C \end{bmatrix} \\
   %
   \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
   \left[ \begin{array}{c|c|c}
   \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
   \end{array} \right]
   %
-  \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
+  \begin{bmatrix} x_C \\ y_C \\ z_C \end{bmatrix}
   %
-  \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] &=
-    \underbrace{\overrightarrow{O_W O_C}}_{\mathbf{t}} +
-    %
-    \underbrace{
-      \left[ \begin{array}{c|c|c}
-      \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
-      \end{array} \right]
-    }_{\mathbf{R}}
-    %
-    \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
   \end{aligned}
+\end{equation}
+
+In the end we arrive at the following formula.
+
+:::puzzle
+\begin{equation}
+  \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] =
+    \underbrace{\overrightarrow{O_W O_C}}_{\mathbf{t}} +
+  %
+  \underbrace{
+    \left[ \begin{array}{c|c|c}
+    \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
+    \end{array} \right]
+  }_{\mathbf{R}}
+  %
+  \begin{bmatrix} x_C \\ y_C \\ z_C \end{bmatrix}
 \end{equation}
 
 We recognize the global rigid body motion $(\mathbf{R}, \mathbf{t})$
@@ -43,7 +100,55 @@ where:
 - The translation vector $\mathbf{t}$ is the camera origin coordinates expressed
   in the world coordinate system.
 - The rotation matrix $\mathbf{R}$ are the coordinates of the camera basis
-  vectors expressed in the world basis vectors.
+  vectors expressed in the world coordinate system.
+:::
+
+In general, if this time we are to change from one coordinate
+system $A$ ("camera") to another coordinate system $B$ ("world"), we can calculate
+the rigid body motion as follows:
+
+\begin{align}
+  \mathbf{R}_{A \rightarrow B} &= \begin{bmatrix}
+    \mathbf{i}_A \cdot \mathbf{i}_B &
+    \mathbf{j}_A \cdot \mathbf{i}_B &
+    \mathbf{k}_A \cdot \mathbf{i}_B \\
+    %
+    \mathbf{i}_A \cdot \mathbf{j}_B &
+    \mathbf{j}_A \cdot \mathbf{j}_B &
+    \mathbf{k}_A \cdot \mathbf{j}_B \\
+    %
+    \mathbf{i}_A \cdot \mathbf{k}_B &
+    \mathbf{j}_A \cdot \mathbf{k}_B &
+    \mathbf{k}_A \cdot \mathbf{k}_B \\
+  \end{bmatrix} \\
+  %
+  \mathbf{t}_{A \rightarrow B} &= \begin{bmatrix}
+    \overrightarrow{O_A O_B} \cdot \mathbf{i}_B \\
+    \overrightarrow{O_A O_B} \cdot \mathbf{j}_B \\
+    \overrightarrow{O_A O_B} \cdot \mathbf{k}_B
+  \end{bmatrix}
+\end{align}
+
+These formula are interesting because it does not matter in which reference
+coordinate system the two set of basis vectors are actually expressed.
+
+One observation worth reminding for the remaining sections is the following proposition.
+
+:::puzzle
+```{proposition, name="Inverse Rotation"}
+Let $\mathbf{R}$ be a rotation matrix in $\mathbb{R}^n$ for $n = 2$ or $n = 3$, its
+inverse rotation matrix is calculated by transposition
+
+\begin{equation}
+  \mathbf{R}^{-1} = \mathbf{R}^T
+\end{equation}
+```
+:::
+
+To close the section, in fact by generalizing to higher dimensions $n > 3$, this
+proposition is the very definition of a rotation matrix: any square matrix
+$\mathbf{Q}$ whose tranpose satisfies $\mathbf{Q}^T \mathbf{Q} = \mathbf{I}_n$
+is a rotation matrix.
 
 ## Euler Angles
 

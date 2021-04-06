@@ -1,6 +1,6 @@
 # Geometry
 
-## Ellipse Intersections
+## Ellipse Intersections {#ellipse-intersection}
 
 ### Context
 
@@ -373,7 +373,7 @@ with:
   \mathbf{x}_{\mathcal{E}} \\
   %
   c_{\mathcal{E}} &= \mathbf{x}_{\mathcal{E}}^T \mathbf{\Sigma}_{\mathcal{E}}
-  \mathbf{x}_{\mathcal{E}} - 1\\
+  \mathbf{x}_{\mathcal{E}} - 1
 \end{align}
 ```
 :::
@@ -424,14 +424,14 @@ Now let us rewrite each $E_i(x, y)$ as a quadratic polynomial in $x$
 
 The coefficients for the monomials $1, x, x^2$ are polynomials in $y$
 
-\begin{align}
+\begin{align*}
   p_0(y) &= e_{13} y^2 + e_{15} y + e_{16} &
   q_0(y) &= e_{23} y^2 + e_{25} y + e_{26} \\
   p_1(y) &= e_{12} y + e_{14} &
   q_1(y) &= e_{22} y + e_{24} \\
   p_2(y) &= e_{11} &
   q_2(y) &= e_{21}
-\end{align}
+\end{align*}
 
 By introducing the polynomials above, Equation \@ref(eq:twoellipses) is rewritten
 as

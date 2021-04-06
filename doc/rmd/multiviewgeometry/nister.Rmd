@@ -1,6 +1,8 @@
 ## Nister's Method for the Relative Pose Estimation
 
-This method solves the essential matrix from 5 point correspondences.
+This method is originally published in CVPR [@nister:2003:cvpr] and republished
+at length in PAMI [@nister:2004:pami]. It solves the essential matrix from $5$
+point correspondences. I found the PAMI article [@nister:2004:pami] clearer.
 
 ### Underdetermined System of Linear Equations
 
@@ -18,7 +20,7 @@ Let $\be$ denote the essential matrix in its row-major vectorized
 form, *i.e.*,
 
 \begin{equation}
-  \be = \mathrm{vec}(\bE) \\
+  \be = \mathrm{vec}(\bE)
 \end{equation}
 
 The $\mathrm{vec}(.)$ operator corresponds to the operation `E.flatten()` in
@@ -42,21 +44,38 @@ correspondences.
 
 ### Nullspace Decomposition
 
-We can decompose the nullspace $\mathrm{Null}(\mathbf{Q})$ with basis vectors
-$(\mathbf{x}, \mathbf{y}, \mathbf{z}, \mathbf{w})$ using singular value
-decomposition, the vectorized essential matrix $\be$ is a linear
-combination of these $4$ basis vectors:
+Using a singular value decomposition allows us to express the nullspace
+$\mathrm{Null}(\mathbf{Q})$ as a span of 4 basis vectors $(\mathbf{x},
+\mathbf{y}, \mathbf{z}, \mathbf{w})$
 
 \begin{equation}
-  \mathrm{Null}(\bQ) = \mathrm{span}(\x, \y, \z, \w) \\
-  \be = x \x + y \y + z \z + \w
+  \mathrm{Null}(\bQ) = \mathrm{span}(\x, \y, \z, \w),
+\end{equation}
+
+which allows us to express the vectorized essential matrix $\be$ as a linear
+combination of these $4$ basis vectors
+
+\begin{equation}
+  \be = x \x + y \y + z \z + \w.
 \end{equation}
 
 The goal is to determine the value of the real scalars $x, y, z$.
 
 ### Essential Matrix Constraints
 
-As mentioned in Nister's paper:
+:::fyi
+Before proceeding onwards, let us mention a notational peculiarity used to
+denote polynomials in [@nister:2004:pami]. Perhaps like me, you may find it very
+confusing that angular brackets $\langle p \rangle$ are used instead of the
+usual notation like $p(x, y, z)$ to denote a polynomial $p$. Understandably, the
+latter is a lot heavier than the former and this may distract the flow in the
+mathematical discourse.
+
+Here we reuse the same notation so that you can go back to the original paper
+and check again without additional mental overhead.
+:::
+
+As mentioned in [@nister:2004:pami]:
 
 1. the essential matrix is also characterized equivalently by the matrix
    equation:
@@ -88,7 +107,7 @@ As mentioned in Nister's paper:
 So we have in total $10$ polynomial equations in the monomials
 $x^\alpha y^\beta z^\gamma$. There are 20 monomials in total.
 
-Nister enumerates these monomials in the following order:
+[@nister:2004:pami] enumerates these monomials in the following order:
 
 \begin{equation}
   \scriptsize
@@ -147,12 +166,25 @@ Nister enumerates these monomials in the following order:
   \end{array}
 \end{equation}
 
-In his paper, Nister does not use the Groebner basis to solve the system of
-$10$ polynomial equations. Rather he uses elementary linear algebra
-operations, which is very neat. We detail how he does it.
-
+Contrary to later papers, [@nister:2004:pami] does not use Groebner basis to
+solve the system of $10$ polynomial equations. Rather he uses only elementary
+algebraic operations. This is very neat as we do not need to learn a new
+mathematical theory to solve this specific geometric problem. We detail how he
+does it.
 
 ### Gauss-Jordan Elimination
+
+:::note
+This subsection is the trickiest part to understand in the method. Let us detail
+a bit more the technical details provided by the paper.
+
+In a nutshell, we explain how:
+
+- from this set of $10$ polynomial equations that are simultaneously satisfied
+  amounts to solving only a set of $3$ easier polynomial equations;
+- this set of $3$ equations is equivalently reduced to a polynomial that depends
+  of only one variable and of degree $10$.
+:::
 
 Using the Gauss-Jordan elimination we can reduce the system of polynomial
 equation so that the lower-triangular part of the left matrix block above is
@@ -285,8 +317,9 @@ elimination. Specifically,
      (\#eq:gaussjordan)
    \end{equation}
 
-Let's look again at the last $6$ equations \@ref(eq:gaussjordan). We can again
-reduce it by multiplying by $z$ and subtracting as follows:
+Let us look again at the last $6$ equations \@ref(eq:gaussjordan). *The final
+key set of algebraic operations is to reduce those $6$ polynomials by
+multiplying by $z$ and subtracting as follows:*
 
 \begin{equation}
   \begin{aligned}
@@ -298,22 +331,22 @@ reduce it by multiplying by $z$ and subtracting as follows:
   (\#eq:klm)
 \end{equation}
 
-Now the system of equations \@ref(eq:klm) depends only the following groups of
-monomials:
+So that in the end the system of $3$ equations \@ref(eq:klm) depends only the
+following groups of monomials:
 
 - $\left\{ x, x z, x z^2, x z^3 \right\}$
 - $\left\{ y, y z, y z^2, x z^3 \right\}$
 - $\left\{ 1, z, z^2, z^3, z^4 \right\}$
 
-The nice thing is that when we group coefficients using these three subgroups,
-we see that:
+In turn, the very nice thing is that when we group coefficients using these
+three subgroups, we see respectively that:
 
 - coefficients in the variable $x$ forms a polynomial in $z$ of degree $3$,
 - coefficients in the variable $y$ forms a polynomial in $z$ of degree $3$,
 - coefficients in the variable $z$ forms a polynomial in $z$ of degree $4$.
 
-In Nister's paper, the system of polynomial equations \@ref(eq:klm) is rewritten
-as
+This is interesting because the system of polynomial equations \@ref(eq:klm) is
+rewritten as
 
 \begin{equation}
   \begin{array}{|c|ccc|}
@@ -330,18 +363,31 @@ as
   (\#eq:B)
 \end{equation}
 
-We can see that $[x, y, 1]^T$ is a vector in the nullspace of
-$\mathbf{B}$ where the coefficients are polynomials in the variable
+:::fyi
+Once again, the notations that are used above to characterize coefficients of
+matrix $\mathbf{B}$ confused me a lot. For the sake of brevity,
+[@nister:2004:pami] only wants to emphasize the polynomial degree of each
+coefficient.
+:::
+
+From this matrix notation, it appears that $[x, y, 1]^T$ is a vector in the
+nullspace of $\mathbf{B}$ where the coefficients are polynomials in the variable
 $z$ of degree $3$ or $4$.
 
-Equivalently, the determinant of $\mathbf{B}$ must be zero. This defines a
-polynomial in the variable $z$ of degree $10$.  Hence we can extract
-the roots of this polynomial.
+:::puzzle
+Equivalently, that means that the determinant of $\mathbf{B}$ must be zero. The
+determinant is a polynomial only in the variable $z$ and of degree $10$. Hence
+we can extract the roots of this polynomial with any polynomial solvers.
 
 \begin{equation}
   \langle n \rangle \iff \mathrm{det}(\mathbf{B}) = 0
   (\#eq:n)
 \end{equation}
+:::
+
+Just like in the section about ellipse intersection \@ref(ellipse-intersection),
+the discovery of such clever set of algebraic operations leads to extracting the
+roots of a determinant.
 
 ### Real Root Extraction
 
