@@ -12,6 +12,24 @@ bookdown::gitbook:
     sharing:
       facebook: no
 bookdown::pdf_book:
-  latex_engine: xelatex
+  # Switching to lualatex breaks the integration of extra-dependencies...
+  # Some fonts will disappear... Oh well, I will focus on HTML first.
+  latex_engine: lualatex
   citation_package: natbib
   keep_tex: yes
+  extra_dependencies: [
+    # Change fonts.
+    # "mathpazo",
+    # Font optimization.
+    "microtype",
+    # Minimal math packages.
+    #
+    # Already provided by bookdown.
+    "amsmath",
+    "amssymb",
+    "amsfonts",
+    "amsthm",
+    "bbm",
+    "stmaryrd",
+    "mathrsfs",
+  ]

@@ -43,7 +43,7 @@ informative:
 
 A while back ago, I downloaded an accelerometer smartphone app and played with
 it. The smartphone lying on the table would record acceleration vector
-**pointing up to the sky** and with magnitude close to $9.81 m/s^2$.
+*pointing up to the sky* and with magnitude close to $9.81 m/s^2$.
 Nothing surprised me back then until I started asking myself what the IMU
 actually measures.
 
@@ -53,7 +53,7 @@ actually measures.
 
 Putting all these thoughts, experiments, and the essential bits of the different
 readings together, the accelerometer does measure the sum of all external forces
-**except the gravitational force** acting upon the IMU body.
+*except the gravitational force* acting upon the IMU body.
 
 \begin{equation}
   m \mathbf{a}^{\text{IMU}} = \Sigma \mathbf{F} - m \mathbf{g}

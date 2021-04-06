@@ -1,4 +1,4 @@
-\newcommand{\eqdef}{\overset{\textrm{def}}{=}}
+\renewcommand{\eqdef}{\overset{\textrm{def}}{=}}
 \newcommand{\M}{\mathcal{M}}
 \newcommand{\R}{\mathcal{R}}
 \newcommand{\X}{\mathcal{X}}
@@ -65,7 +65,7 @@ The squared Euclidean norm of the equality yields
 \begin{equation}
   \begin{bmatrix} u & v \end{bmatrix}
   (\bL^{-1})^T \bL^{-1} \begin{bmatrix} u \\ v \end{bmatrix} =
-
+  %
   \begin{bmatrix} \cos(t) & \sin(t) \end{bmatrix}
   \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} = 1
 \end{equation}
@@ -83,7 +83,7 @@ transformation $L_x$ that satisfies
 
 \begin{equation}
   \bSigma_x = (\bL_x^{-1})^T \bL_x^{-1}.
-  (#eq:sigma-l)
+  (\#eq:sigma-l)
 \end{equation}
 
 Observe from the QR factorization $\bL_x = \bQ \bR$ that $L_x$ can
@@ -93,7 +93,7 @@ that combines of shear and scaling transforms. The orthonormal matrix
 $\bQ$ encode a rotation. This geometric interpretation is illustrated in
 Figure \@ref(fig:qrd).
 
-```{r qrd, echo=FALSE, fig.align='center', fig.cap="Geometric interpretation of the QR factorization of linear transform matrix $\bL_x$."}
+```{r qrd, echo=FALSE, fig.align='center', fig.cap="Geometric interpretation of the QR factorization of linear transform matrix $\\bL_x$."}
 knitr::include_graphics("figures/normalizingTransform.png")
 ```
 
@@ -123,7 +123,7 @@ and expanding Equation \@ref(eq:sigma-l) yields
   \begin{aligned}
     \bSigma_x &= (\bL_x^{-1})^T \bL_x^{-1} \\
               &= \bQ (\bR^{-1})^T \bR^{-1} \bQ^{T} \quad \text{since}\ \bQ^T = \bQ^{-1}\\
-
+    %
     \bQ^T \bSigma_x \bQ &=  (\bR^{-1})^T \bR^{-1}
   \end{aligned}
 \end{equation}

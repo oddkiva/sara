@@ -226,8 +226,8 @@ $0 \leq \theta_2 - \theta_1 \leq \pi$ then
 
 \begin{align}
   B(\theta_1, \theta_2)
-    &= \mathop{\mathrm{area}}(\mathrm{sector(\theta_1, \theta_2)})
-     - \mathop{\mathrm{area}}(\mathrm{triangle(\theta_1, \theta_2)}) \\
+    &= \mathop{\mathrm{area}}(\mathrm{sector}(\theta_1, \theta_2))
+     - \mathop{\mathrm{area}}(\mathrm{triangle}(\theta_1, \theta_2)) \\
     %
     &= A(\theta_1, \theta_2) - \frac{1}{2} |x_2y_1 - x_1y_2|,
 \end{align}

@@ -62,7 +62,7 @@ By reinjecting the world coordinates we see that
   \underbrace{\left[ \begin{array}{c|c}
     \mathbf{R}^T & -\mathbf{R}^T t
   \end{array} \right]}_{\mathbf{C}}
-
+  %
   \left[ \begin{array}{c} \mathbf{x}_W \\ 1 \end{array} \right] .
 \end{equation}
 

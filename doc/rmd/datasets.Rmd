@@ -2,7 +2,6 @@
 
 A few notes about some interesting datasets.
 
-
 ## KITTI
 
 KITTI is a very comprehensive benchmark suite that touches upon many relevant
@@ -27,9 +26,18 @@ http://www.cvlibs.net/datasets/kitti/setup.php, the car is equipped with:
 - 1 Velodyne lidar scanner
 - 1 IMU/GPS device.
 
-```{r kitti-sensors, echo=FALSE, fig.align="center", fig.cap="Sensors mounted on the car. Credits: http://www.cvlibs.net/datasets/kitti/images/setup_top_view.png."}
+```{r, echo=FALSE}
+setup_top_view_file = "http://www.cvlibs.net/datasets/kitti/images/setup_top_view.png"
+if (knitr::is_latex_output()) {
+  setup_top_view_local_file = "figures/kitti_setup_top_view.png"
+  if (!file.exists(setup_top_view_local_file))
+    download.file(setup_top_view_file, setup_top_view_local_file, mode = 'wb')
+  setup_top_view_file = setup_top_view_local_file
+}
+```
 
-knitr::include_graphics("http://www.cvlibs.net/datasets/kitti/images/setup_top_view.png")
+```{r kitti-sensors, echo=FALSE, fig.align="center", fig.cap="Sensors mounted on the car. Credits: www.cvlibs.net."}
+knitr::include_graphics(setup_top_view_file)
 ```
 
 Each camera is at a height of $1.65\text{m}$ above the ground plane.  As
@@ -41,9 +49,18 @@ axis convention where:
 - The $y$-axis is the vertical axis pointing down to the ground.
 - The $z$-axis is the axis pointing from the camera center to the camera gaze direction.
 
-```{r kitti-sensors-2, echo=FALSE, fig.align="center", fig.cap="This image shows the coordinate system used for each sensor. Credits: http://www.cvlibs.net/datasets/kitti/images/passat_sensors_920.png."}
+```{r, echo=FALSE}
+sensors_file = "http://www.cvlibs.net/datasets/kitti/images/passat_sensors_920.png"
+if (knitr::is_latex_output()) {
+  sensors_local_file = "figures/kitti_passat_sensors_920.png"
+  if (!file.exists(sensors_local_file))
+    download.file(sensors_file, sensors_local_file, mode = 'wb')
+  sensors_file = sensors_local_file
+}
+```
 
-knitr::include_graphics("http://www.cvlibs.net/datasets/kitti/images/passat_sensors_920.png")
+```{r kitti-sensors-2, echo=FALSE, fig.align="center", fig.cap="This image shows the coordinate system used for each sensor. Credits: www.cvlibs.net."}
+knitr::include_graphics(sensors_file)
 ```
 
 ### 3D Geometry of Annotations
@@ -250,7 +267,7 @@ equation
       \mathbf{I}_3 & \mathbf{t} \\
       \end{array}
     \right]
-
+    %
     \left[
       \begin{array}{c|c}
       \mathbf{R}_0^{(\text{rect})} & \mathbf{0}_3 \\
@@ -258,7 +275,7 @@ equation
                     \mathbf{0}_3^T &            1 \\
       \end{array}
     \right]
-    \mathbf{X} \\
+    \mathbf{X}
 \end{equation}
 
 Then multiplying the matrix blocks,
@@ -266,15 +283,15 @@ Then multiplying the matrix blocks,
 \begin{equation}
   \mathbf{u} =
     \mathbf{K}
-
+    %
     \left[
       \begin{array}{c|c}
       \mathbf{I}_3\ \mathbf{R}_0^{(\text{rect})} + \mathbf{t}\ \mathbf{0}_3^T &
       \mathbf{I}_3\ \mathbf{0}_3 + \mathbf{t}\ 1  \\
       \end{array}
     \right]
-
-    \mathbf{X} \\
+    %
+    \mathbf{X}
 \end{equation}
 
 Upon simplification,

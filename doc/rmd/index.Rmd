@@ -40,7 +40,7 @@ documentation hosted at Codedocs.xyz: https://codedocs.xyz/DO-CV/sara/.
 
 ```{r, echo = FALSE}
 codedocs_url = 'https://codedocs.xyz/DO-CV/sara.svg'
-if (!file.exists(codedocs_file <- 'sara.svg'))
+if (!file.exists(codedocs_file <- 'figures/sara.svg'))
   download.file(codedocs_url, codedocs_file, mode = 'wb')
 
 include_svg = function(path) {

@@ -10,31 +10,31 @@ coordinates in the world coordinate system $(x_W, y_W, z_W)$ as
 follows
 
 \begin{equation}
-\begin{aligned}
-\overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
-                          \overrightarrow{O_\textrm{C}M} \\
-
-\overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
-                          x_C \mathbf{i}_C + y_C \mathbf{j}_C + z_C \mathbf{k}_C\\
-
-\overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
-\left[ \begin{array}{c|c|c}
-\mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
-\end{array} \right]
-
-\left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
-
-\left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] &=
-  \underbrace{\overrightarrow{O_W O_C}}_{\mathbf{t}} +
-
-  \underbrace{
-    \left[ \begin{array}{c|c|c}
-    \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
-    \end{array} \right]
-  }_{\mathbf{R}}
-
+  \begin{aligned}
+  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+                            \overrightarrow{O_\textrm{C}M} \\
+  %
+  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+    x_C \mathbf{i}_C + y_C \mathbf{j}_C + z_C \mathbf{k}_C \\
+  %
+  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+  \left[ \begin{array}{c|c|c}
+  \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
+  \end{array} \right]
+  %
   \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
-\end{aligned}
+  %
+  \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] &=
+    \underbrace{\overrightarrow{O_W O_C}}_{\mathbf{t}} +
+    %
+    \underbrace{
+      \left[ \begin{array}{c|c|c}
+      \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
+      \end{array} \right]
+    }_{\mathbf{R}}
+    %
+    \left[ \begin{array}{c} x_C \\ y_C \\ z_C \end{array} \right] \\
+  \end{aligned}
 \end{equation}
 
 We recognize the global rigid body motion $(\mathbf{R}, \mathbf{t})$
@@ -44,7 +44,6 @@ where:
   in the world coordinate system.
 - The rotation matrix $\mathbf{R}$ are the coordinates of the camera basis
   vectors expressed in the world basis vectors.
-
 
 ## Euler Angles
 
@@ -85,7 +84,7 @@ very important.
 ### Formula of Elementary Rotations
 
 Every now and then we may forget the formula of each elementary rotation and in
-particular we don't remember their signs and orientations.
+particular we do not remember their signs and orientations.
 
 We can retrieve each coefficient of the matrix by reasoning about a small
 positive quantity. A small angle will imply a small change, and then a cosine
@@ -131,7 +130,6 @@ each coefficient.
   \end{equation}
   :::
 
-
 ### Composite Euler Rotation
 
 The rotation matrix expressed with respect to the *extrinsic* axes (i.e., the axes
@@ -150,8 +148,6 @@ calculated as
 \end{equation}
 ```
 :::
-
-
 
 This nice visualisation tool can be useful to check our understanding:
 http://danceswithcode.net/engineeringnotes/rotations_in_3d/demo3D/rotations_in_3d_tool.html
@@ -280,7 +276,6 @@ And thus
 \begin{equation}
   \mathbf{R}_{x''} = \mathbf{R}_z \mathbf{R}_y \mathbf{R}_{x} \mathbf{R}_y^T \mathbf{R}_z^T
 \end{equation}
-
 
 By multiplying the three rotations, the inverse rotations will disappear and we get
 the formula as exposed in the Wikipedia page about Euler angles.

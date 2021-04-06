@@ -52,13 +52,13 @@ The reverse rigid body motion is obtained from:
 
 \begin{equation}
   \begin{aligned}
-
+  %
   \mathbf{R} \mathbf{X}^0 + \mathbf{t} &= \mathbf{X}^1 \\
-
+  %
   \mathbf{X}^0 + \mathbf{R^T} \mathbf{t} &= \mathbf{R}^T \mathbf{X}^1 \\
-
+  %
   \mathbf{X}^0 &= \mathbf{R}^T \mathbf{X}^1 - \mathbf{R^T} \mathbf{t} \\
-
+  %
   \end{aligned}
 \end{equation}
 
@@ -118,7 +118,7 @@ applying recursively:
 
 \begin{equation}
   \mathbf{R}_{j} = \mathbf{R}_{i} \mathbf{R}_{ij} \mathbf{R}_{i}^T \\
-
+  %
   \mathbf{t}_j = \mathbf{t}_{ij} + \mathbf{t}_i
 \end{equation}
 
@@ -170,7 +170,7 @@ To start, we can look for the third image where the 3D points estimated from the
 two-view geometry reappears the most.
 
 The DLT initializes the camera pose and the internal parameters are initialized
-from EXIF metadata. What the DLT solves is also called **camera resectioning**.
+from EXIF metadata. What the DLT solves is also called *camera resectioning*.
 
 In summary the data we know are:
 
@@ -188,7 +188,7 @@ Projecting the 3D points to the image:
 
 \begin{equation}
   \mathbf{x}_i = \mathbf{K} [\mathbf{R} | \mathbf{t}] \mathbf{X}_i \\
-
+  %
   \tilde{\mathbf{x}}_i = \mathbf{R} \mathbf{X}_i + \mathbf{t} \\
 \end{equation}
 

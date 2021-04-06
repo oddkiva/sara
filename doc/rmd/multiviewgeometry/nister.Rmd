@@ -92,57 +92,57 @@ Nister enumerates these monomials in the following order:
 
 \begin{equation}
   \scriptsize
-
+  %
   \begin{array}{|c|cccccccccc|ccc|ccc|cccc|}
   \hline
     &
   x^3 & y^3 & x^2 y & x y^2 & x^2 z & x^2 & y^2 z & y^2 & xyz & xy &
   x & x z & x z^2 & y & y z & y z^2 & 1 & z & z^2 & z^3 \\
-
+  %
   \hline
-
+  %
   \langle e_{00} \rangle &
   . & . & . & . & . & . & . & . & . & . &
   . & . & . & . & . & . & . & . & . & . \\
-
+  %
   \langle e_{01} \rangle &
   . & . & . & . & . & . & . & . & . & . &
   . & . & . & . & . & . & . & . & . & . \\
-
+  %
   \langle e_{02} \rangle &
   . & . & . & . & . & . & . & . & . & . &
   . & . & . & . & . & . & . & . & . & . \\
-
+  %
   \langle e_{10} \rangle &
   . & . & . & . & . & . & . & . & . & . &
   . & . & . & . & . & . & . & . & . & . \\
-
+  %
   \langle e_{11} \rangle &
   . & . & . & . & . & . & . & . & . & . &
   . & . & . & . & . & . & . & . & . & . \\
-
+  %
   \langle e_{12} \rangle &
   . & . & . & . & . & . & . & . & . & . &
   . & . & . & . & . & . & . & . & . & . \\
-
+  %
   \langle e_{20} \rangle &
   . & . & . & . & . & . & . & . & . & . &
   . & . & . & . & . & . & . & . & . & . \\
-
+  %
   \langle e_{21} \rangle &
   . & . & . & . & . & . & . & . & . & . &
   . & . & . & . & . & . & . & . & . & . \\
-
+  %
   \langle e_{22} \rangle &
   . & . & . & . & . & . & . & . & . & . &
   . & . & . & . & . & . & . & . & . & . \\
-
+  %
   \hline
-
+  %
   \langle d \rangle &
   . & . & . & . & . & . & . & . & . & . &
   . & . & . & . & . & . & . & . & . & . \\
-
+  %
   \hline
   \end{array}
 \end{equation}
@@ -168,59 +168,59 @@ elimination. Specifically,
      \scriptsize
      \begin{array}{|c|cccccccccc|ccc|ccc|cccc|}
      \hline
-
+     %
      &
      x^3 & y^3 & x^2 y & x y^2 & x^2 z & x^2 & y^2 z & y^2 & xyz & xy &
      x & x z & x z^2 & y & y z & y z^2 & 1 & z & z^2 & z^3 \\
-
+     %
      \hline
-
+     %
      \langle e_{00} \rangle &
      1 & . & . & . & . & . & . & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{01} \rangle &
      0 & 1 & . & . & . & . & . & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{02} \rangle &
      0 & 0 & 1 & . & . & . & . & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{10} \rangle &
      0 & 0 & 0 & 1 & . & . & . & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{11} \rangle &
      0 & 0 & 0 & 0 & 1 & . & . & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{12} \rangle &
      0 & 0 & 0 & 0 & 0 & 1 & . & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{20} \rangle &
      0 & 0 & 0 & 0 & 0 & 0 & 1 & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{21} \rangle &
      0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{22} \rangle &
      0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \hline
-
+     %
      \langle d \rangle &
      0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \hline
      \end{array}
-
-     (#eq:sweep-downward)
+     %
+     (\#eq:sweep-downward)
    \end{equation}
 
 2. then in the sweep upward, stop halfway until the system of polynomial
@@ -230,60 +230,60 @@ elimination. Specifically,
      \scriptsize
      \begin{array}{|c|cccccccccc|ccc|ccc|cccc|}
      \hline
-
+     %
      &
      x^3 & y^3 & x^2 y & x y^2 & x^2 z & x^2 & y^2 z & y^2 & xyz & xy &
      x & x z & x z^2 & y & y z & y z^2 & 1 & z & z^2 & z^3 \\
-
+     %
      \hline
-
+     %
      \langle e_{00} \rangle &
      1 & . & . & . & . & . & . & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{01} \rangle &
      0 & 1 & . & . & . & . & . & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{02} \rangle &
      0 & 0 & 1 & . & . & . & . & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{10} \rangle &
      0 & 0 & 0 & 1 & . & . & . & . & . & . &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{11} \rangle &
      0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{12} \rangle &
      0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{20} \rangle &
      0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{21} \rangle &
      0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \langle e_{22} \rangle &
      0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \hline
-
+     %
      \langle d \rangle &
      0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 &
      . & . & . & . & . & . & . & . & . & . \\
-
+     %
      \hline
      \end{array}
-
-     (#eq:gaussjordan)
-    \end{equation}
+     %
+     (\#eq:gaussjordan)
+   \end{equation}
 
 Let's look again at the last $6$ equations \@ref(eq:gaussjordan). We can again
 reduce it by multiplying by $z$ and subtracting as follows:
@@ -294,8 +294,8 @@ reduce it by multiplying by $z$ and subtracting as follows:
   \langle l \rangle &= \langle e_{20} \rangle - z \langle e_{21} \rangle \\
   \langle m \rangle &= \langle e_{22} \rangle - z \langle d \rangle
   \end{aligned}
-
-  (#eq:klm)
+  %
+  (\#eq:klm)
 \end{equation}
 
 Now the system of equations \@ref(eq:klm) depends only the following groups of
@@ -325,9 +325,9 @@ as
   \langle m \rangle & [3] & [3] & [4] \\
   \hline
   \end{array}
-
+  %
   \begin{bmatrix} x \\ y \\ 1 \end{bmatrix} = \mathbf{0}_3
-  (#eq:B)
+  (\#eq:B)
 \end{equation}
 
 We can see that $[x, y, 1]^T$ is a vector in the nullspace of
@@ -340,7 +340,7 @@ the roots of this polynomial.
 
 \begin{equation}
   \langle n \rangle \iff \mathrm{det}(\mathbf{B}) = 0
-  (#eq:n)
+  (\#eq:n)
 \end{equation}
 
 ### Real Root Extraction

@@ -18,9 +18,11 @@ rmd_files:
   ]
   latex: [
     "index.Rmd",
-    "literature.Rmd",
     "geometry.Rmd",
+    "features.Rmd",
     "descriptors.Rmd",
+    "sfm.Rmd",
     "imu.Rmd",
     "computer_graphics.Rmd",
+    "datasets.Rmd"
   ]
