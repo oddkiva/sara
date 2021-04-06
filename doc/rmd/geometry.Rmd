@@ -721,7 +721,7 @@ a special case since the polygonal area is zero for $2$ intersection points.
 
 #### 3 and 4 intersection points
 
-```{r inter34, fig.show='hide', echo = FALSE}
+```{r inter34, fig.show = 'hide', echo = FALSE}
 library(knitr)
 inter_3 <- "figures/inter3.png"
 inter_4 <- "figures/inter4.png"
