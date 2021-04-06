@@ -438,15 +438,15 @@ where $o = \lfloor \hat{\phi} \rfloor$.
 
 The contribution will be distributed to the two bins as follows
 
-\begin{equation}
+\begin{align}
   \displaystyle
-  \mathbf{h}[i, j, o] \leftarrow \mathbf{h}[i, j, o] +
+  \mathbf{h}[i, j, o] &\leftarrow \mathbf{h}[i, j, o] +
   w_\text{final}(\mathbf{u}) \left(1 - (\hat{\phi} - o) \right) \\
   %
   \displaystyle
-  \mathbf{h}[i, j, o + 1] \leftarrow \mathbf{h}[i, j, o + 1] +
+  \mathbf{h}[i, j, o + 1] &\leftarrow \mathbf{h}[i, j, o + 1] +
   w_\text{final}(\mathbf{u}) \left( \hat{\phi} - o \right)
-\end{equation}
+\end{align}
 
 :::note
 The histogram bins have an explicit formula but it is not efficient to calculate

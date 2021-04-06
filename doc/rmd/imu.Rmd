@@ -60,7 +60,7 @@ readings together, the accelerometer does measure the sum of all external forces
 \end{equation}
 
 Thus with this formula, when the smartphone is lying on the table, we realize
-that what the IMU measures is **the reaction force of the table**.
+that what the IMU measures is *the reaction force of the table*.
 
 #### Empirical Validation with the Smartphone App
 
@@ -127,8 +127,8 @@ Because the mass-spring system is at mechanical equilibrium
 
 \begin{align}
   k \Delta x &= m_\text{mass} g \\
-
-  R_\text{table} &= (m_\text{mass} + m_\text{spring}) g \\
+  %
+  R_\text{table} &= (m_\text{mass} + m_\text{spring}) g
 \end{align}
 
 The gravity vector is calculated directly from the spring displacement from
