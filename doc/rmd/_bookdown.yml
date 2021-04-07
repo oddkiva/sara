@@ -7,14 +7,16 @@ language:
 rmd_files:
   html: [
     "index.Rmd",
-    "literature.Rmd",
     "geometry.Rmd",
     "features.Rmd",
     "descriptors.Rmd",
     "sfm.Rmd",
     "imu.Rmd",
     "computer_graphics.Rmd",
-    "datasets.Rmd"
+    "datasets.Rmd",
+    "learning_journeys.Rmd",
+    "learning_journey_in_R.Rmd",
+    "bibliography.Rmd"
   ]
   latex: [
     "index.Rmd",

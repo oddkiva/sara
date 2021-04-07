@@ -4,9 +4,9 @@ A few notes about some interesting datasets.
 
 ## KITTI
 
-KITTI is a very comprehensive benchmark suite that touches upon many relevant
-computer vision tasks. This benchmark is clearly geared towards road safety
-applications.
+KITTI [@geiger:2013:ijrr] is a very comprehensive benchmark suite that touches
+upon many relevant computer vision tasks. This benchmark is clearly geared
+towards road safety applications.
 
 In this section, I provide some more technical notes regarding the available
 data and which I find worth emphasizing again. The raw data in the benchmark is

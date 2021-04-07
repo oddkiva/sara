@@ -1,0 +1,200 @@
+# Learning Journey in R
+
+## Preface
+
+The real motivation that made me learn want to learn about R is because of the R
+*bookdown* package [@xie:2020:bookdown], [@xie:2021:bookdown]. Compared to
+Sphinx documentation, This package is so stunning in terms of:
+
+1. pretty default yet customizable aesthetics,
+2. natural $\LaTeX$ support,
+3. and most of all *multilanguage capabilities*, particularly C++^[C++ support is
+   done via Rcpp [@eddelbuettel:2018:rcpp]. While this is not a panacea, it is
+   more than sufficient for the demonstration purposes in practice. In
+   particular, Eigen [@eigenweb] is supported by the existing package RccEigen
+   [@eddelbuettel:2013:rcppeigen]] and Python to support and check my writings
+   with *correct* and *testable* code,
+
+...so much that it pushed me to port my initial Sphinx documentation into this
+technology without further ado.
+
+With the excitement and frustration as a newbie, it took me a few days to
+experiment and eventually port the documentation little by little by finding the
+useful information bits gleaned here and there in StackOverflow, GitHub and
+elsewhere instead of the original documentation.
+
+Namely the bookdown package implements *literate programming*, a term coined by
+[@knuth:1984:lp].
+
+Shortly after I investigated if there are any Python alternative and just learnt
+about *jupyter-book* (https://jupyterbook.org) is also available. However it is
+not yet clear to me whether it has multilanguage support as good as in bookdown.
+So I will stick with bookdown for now.
+
+## Code
+
+Here is a list of toy code examples I found online and which I tested myself.
+They are copy-pasted here so that I don't google them again. You can copy-paste
+them and then experiment on your own.
+
+### R code snippet
+
+Just like a Python notebook, R markdown allows us to write code and break it
+down into multiple chunks and evaluate them as you are writing the report.
+
+```{r}
+x <- 5  # radius of a circle
+```
+The R markdown report you are writing has a state, so the variable `x` written
+above can be reused and evaluated in the sequel.
+
+So for a circle with radius `r x`, its area is `r pi * x^2`.
+
+### Bash example
+
+```{bash}
+echo "Hello Bash!"
+```
+
+### C++ code
+
+This is the language I care the most about since it is my primary language.
+
+- Make sure that some packages are installed, without trying to be exhaustive,
+  since I am currently learning myself. Specifically on the R console:
+
+  ```{r, eval = FALSE}
+  install.packages("Rcpp")
+  install.packages("RcppEigen")
+  ```
+
+- Create your C++ compile environment by creating the file `~/.R/Makevars`.
+
+  ```
+  CXXFLAGS=-std-c++17 -I/path/to/my/favorite/libraries  # etc.
+  ```
+  Here I just want to make sure that C++ 17 is activated.
+
+Let us see the following example in action.
+
+```{Rcpp, cache=TRUE}
+
+#include <iostream>
+#include <utility>
+#include <string>
+
+#include <Rcpp.h>
+
+// [[Rcpp::plugins(cpp17)]
+
+// [[Rcpp::export]]
+int fibonacci(int x)
+{
+  const auto [a, b] = std::make_pair(0, 1);
+  if (x == 0 || x == 1)
+    return x;
+  return fibonacci(x-1) + fibonacci(x-2);
+}
+
+// [[Rcpp::export]]
+Rcpp::String hello_me()
+{
+  return Rcpp::String("hello");
+}
+```
+
+```{r}
+fibonacci(10L)
+hello_me()
+```
+
+One caveat worth noting is that as documented in the web Rcpp does not support
+*trailing return types* which I very much prefer using because of its
+aesthetics.
+
+```{Rcpp, eval = FALSE}
+// Rcpp is not able to compile this code :(
+
+// [[Rcpp::export]]
+auto square(int x) -> int
+{
+  return x * x;
+}
+```
+
+### Python Code Snippet
+
+```{python}
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MultipleLocator
+import numpy as np
+
+# Two example plots
+fig = plt.figure()
+ax1 = fig.add_subplot(2,2,1)
+ax2 = fig.add_subplot(2,2,2)
+
+spacing = 0.5 # This can be your user specified spacing.
+minorLocator = MultipleLocator(spacing)
+ax1.plot(9 * np.random.rand(10))
+# Set minor tick locations.
+ax1.yaxis.set_minor_locator(minorLocator)
+ax1.xaxis.set_minor_locator(minorLocator)
+# Set grid to use minor tick locations.
+ax1.grid(which = 'minor')
+
+spacing = 1
+minorLocator = MultipleLocator(spacing)
+ax2.plot(9 * np.random.rand(10))
+# Set minor tick locations.
+ax2.yaxis.set_minor_locator(minorLocator)
+ax2.xaxis.set_minor_locator(minorLocator)
+# Set grid to use minor tick locations.
+ax2.grid(which = 'minor')
+plt.show()
+```
+
+## Drawing
+
+I am mostly interested in making drawing to better convey my messages in my
+writings. And one question came into my mind: can we do things quickly and
+elegantly instead of matplotlib [@hunter:2007:matplotlib]? After all, we are in
+the R realm.
+
+### Starting Point: One Working Example Code
+I found the following code example at
+https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/rect.html.
+
+```{r}
+require(grDevices)
+## set up the plot region:
+op <- par(bg = "thistle")
+plot(c(100, 250), c(300, 450), type = "n", xlab = "", ylab = "",
+     main = "2 x 11 rectangles; 'rect(100+i,300+i,  150+i,380+i)'")
+i <- 4*(0:10)
+## draw rectangles with bottom left (100, 300)+i
+## and top right (150, 380)+i
+rect(100+i, 300+i, 150+i, 380+i, col = rainbow(11, start = 0.7, end = 0.1))
+rect(240-i, 320+i, 250-i, 410+i, col = heat.colors(11), lwd = i/5)
+## Background alternating  ( transparent / "bg" ) :
+j <- 10*(0:5)
+rect(125+j, 360+j,   141+j, 405+j/2, col = c(NA,0),
+     border = "gold", lwd = 2)
+rect(125+j, 296+j/2, 141+j, 331+j/5, col = c(NA,"midnightblue"))
+mtext("+  2 x 6 rect(*, col = c(NA,0)) and  col = c(NA,\"m..blue\")")
+
+## an example showing colouring and shading
+plot(c(100, 200), c(300, 450), type= "n", xlab = "", ylab = "")
+rect(100, 300, 125, 350) # transparent
+rect(100, 400, 125, 450, col = "green", border = "blue") # coloured
+rect(115, 375, 150, 425, col = par("bg"), border = "transparent")
+rect(150, 300, 175, 350, density = 10, border = "red")
+rect(150, 400, 175, 450, density = 30, col = "blue",
+     angle = -30, border = "transparent")
+
+legend(180, 450, legend = 1:4, fill = c(NA, "green", par("fg"), "blue"),
+       density = c(NA, NA, 10, 30), angle = c(NA, NA, 30, -30))
+
+par(op)
+
+```
