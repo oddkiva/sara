@@ -1,7 +1,7 @@
 # Structure-from-Motion
 
-This chapter details the classical algorithm that *Sara* implements in Multiple
-View Geometry.
+This chapter details some classical algorithms that *Sara* implements in
+Multiple View Geometry.
 
 ```{r, child="multiviewgeometry/coordinate_systems.Rmd"}
 ```

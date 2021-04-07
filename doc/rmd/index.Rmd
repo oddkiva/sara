@@ -11,9 +11,69 @@ link-citations: yes
 ---
 
 
-# Welcome {-}
+# Preface {-}
 
-*Sara* is a small and easy-to-use C++ computer vision library.
+This book aims at sharing my current understanding of various aspects in
+computer vision during my personal learning journey as I have been maintaining
+and extending the library *Sara*. Recently, I have started compiling various
+notes about the different mathematical and practical aspects related to this
+fascinating discipline. By snowball effect, little by little, these notes have
+been becoming more and more structured as I keep learning more and more and
+retouching the writing here and there.
+
+I believe there is value in these notes and it would be a real shame to reduce
+these as either mere blog posts or as parts of documentation regarding *Sara*'s
+API. So this book is my modest contribution as to giving back. Hell yeah! I
+would be very happy to know if it proved to be useful to even just one person.
+
+One particular choice I made in writing this book is to depart from the dry and
+impersonal style commonly used in scientific writings and use a more personal
+narrative through my learning journey. First, this naturally makes sense to me
+as I consider myself as a computer vision practitioner that is continuously
+learning and  willing to acknowledge things that I misunderstood. Second, an
+impersonal style would just sound boring and not particularly engaging to
+younger or less experimented readers that are eager to learn. In this book, I
+aim at detailing more the mathematical contents without sacrificing the
+experimental aspect of computer vision. Too often, publications will
+understandably gloss over mathematical or experimental aspects to sell more the
+novelty or performance of their approaches, I have decided to take the time to
+detail these for algorithms and methods that I understand well.
+
+> "Perfection is the enemy of progress." - Winston Churchill
+
+*Finally, these notes reflect the best of my understanding as of this writing.
+While I do believe most of the contents are factually correct, I, as a human
+being, am not certainly not immune to misunderstanding or errors. Should you
+find any, __please please please__ report back to me and take to explain to me.*
+
+```{r, echo = FALSE}
+cc_by_image_url <- "https://i.creativecommons.org/l/by/4.0/88x31.png"
+cc_by_image_file <- "figures/cc_by_image.png"
+
+cc_by_shield_url <- "https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg"
+cc_by_shield_file <- "figures/cc_by_shield.svg"
+
+if (knitr::is_latex_output() & !file.exists(cc_by_image_file)) {
+  download.file(cc_by_image_url, cc_by_image_file, mode = 'wb')
+}
+if (knitr::is_latex_output() & !file.exists(cc_by_shield_file)) {
+  download.file(cc_by_shield_url, cc_by_shield_file, mode = 'wb')
+}
+```
+
+The online version of this book is licensed under the [Creative Commons Attribution 4.0 International License][cc-by].
+
+[![CC BY 4.0][cc-by-image]][cc-by]
+
+[cc-by]: http://creativecommons.org/licenses/by/4.0/
+[cc-by-image]: `r cc_by_image_file`
+[cc-by-shield]: `r include_svg(cc_by_shield_file)`
+## What is Sara? {-}
+
+*Sara* is mainly a small and easy-to-use C++ computer vision library. It does
+have various stubs that provide binding into other higher-level and elegant
+languages like *Python* and particularly *Swift*, which strikes a good balance
+between elegance and performance to me.
 
 *Sara* (सार) is a *Sanskrit* word meaning *essence*. On a less serious note, I was
 looking for a nice simple *human* name and the Spanish transliteration into this
@@ -28,7 +88,6 @@ Sara focuses on:
 
 Sara is licensed with the _[Mozilla Public License version
 2.0](https://gitlab.com/DO-CV/sara/-/blob/master/LICENSE)_.
-
 
 The documentation chooses to emphasize more on the mathematical details to
 explain some algorithmic implementation. I believe that my API is most of the
@@ -56,16 +115,3 @@ include_svg = function(path) {
 ```
 
 [`r include_svg(if (identical(knitr:::pandoc_to(), 'html')) codedocs_url else codedocs_file)`](https://codedocs.xyz/DO-CV/sara/)
-
-*N.B.: these notes reflect the best of my understanding as of this writing. They
-may still contain errors and I am very interested to know about them if you spot
-any misunderstandings on my part and explain to me.*
-
-
-The online version of this book is licensed under the [Creative Commons Attribution 4.0 International License][cc-by].
-
-[![CC BY 4.0][cc-by-image]][cc-by]
-
-[cc-by]: http://creativecommons.org/licenses/by/4.0/
-[cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
-[cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg

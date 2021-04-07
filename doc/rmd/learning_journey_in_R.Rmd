@@ -5,11 +5,11 @@ The real motivation that made me want to learn about R is because of the R
 Sphinx documentation, This package is stunning in terms of:
 
 1. pretty default yet customizable aesthetics (*gitbook* !),
-2. smooth and natural $\LaTeX$ support,
+2. smooth and natural LaTeX support,
 3. and most of all *multilanguage capabilities*, particularly C++^[C++ support is
    done via Rcpp [@eddelbuettel:2018:rcpp]. While this is not a panacea, it is
    more than sufficient for demonstration purposes in this book. In particular,
-   *Eigen* [@eigenweb] is supported by the existing package *RccEigen*
+   *Eigen* [@eigenweb] is supported by the existing package *RcppEigen*
    [@eddelbuettel:2013:rcppeigen]] and Python to support and check my writings
    with *correct* and *testable* code.
 

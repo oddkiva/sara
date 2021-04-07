@@ -26,5 +26,8 @@ rmd_files:
     "sfm.Rmd",
     "imu.Rmd",
     "computer_graphics.Rmd",
-    "datasets.Rmd"
+    "datasets.Rmd",
+    "learning_journeys.Rmd",
+    "learning_journey_in_R.Rmd",
+    "bibliography.Rmd"
   ]

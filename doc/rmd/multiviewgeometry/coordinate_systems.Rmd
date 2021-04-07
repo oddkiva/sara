@@ -2,7 +2,12 @@
 
 Let us detail how we go from the world coordinates $(O_W, \mathbf{i}_W,
 \mathbf{j}_W,\mathbf{k}_W)$ to the camera coordinates $(O_C, \mathbf{i}_C,
-\mathbf{j}_C,\mathbf{k}_C)$. We assume the basis vectors are *orthonormal*.
+\mathbf{j}_C,\mathbf{k}_C)$. We assume the basis vectors are *orthonormal* and
+*right-handed*, that is,
+
+\begin{equation}
+  \mathbf{i} \times \mathbf{j} = \mathbf{k} .
+\end{equation}
 
 Denote a 3D point by $M$. Suppose that we know its coordinates in the
 camera coordinate system $(x_C, y_C, z_C)$. We can retrieve its
