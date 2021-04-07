@@ -60,6 +60,8 @@ In the original implementation [@Lowe:2004:ijcv] the parameters are set as $N =
 4$ and $O = 8$ which are validated empirically as optimal. And a SIFT descriptor
 is a feature vector $\mathbf{h} \in \mathbb{R}^{128}$.
 
+**TODO: ILLUSTRATE.**
+
 :::note
 A peculiarity with SIFT is that each image patch $(i, j)$ that form the grid
 *overlaps* and that the orientation bins *overlap* as well because of the

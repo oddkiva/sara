@@ -1,29 +1,27 @@
 # Learning Journey in R
 
-## Preface
-
-The real motivation that made me learn want to learn about R is because of the R
+The real motivation that made me want to learn about R is because of the R
 *bookdown* package [@xie:2020:bookdown], [@xie:2021:bookdown]. Compared to
-Sphinx documentation, This package is so stunning in terms of:
+Sphinx documentation, This package is stunning in terms of:
 
-1. pretty default yet customizable aesthetics,
-2. natural $\LaTeX$ support,
+1. pretty default yet customizable aesthetics (*gitbook* !),
+2. smooth and natural $\LaTeX$ support,
 3. and most of all *multilanguage capabilities*, particularly C++^[C++ support is
    done via Rcpp [@eddelbuettel:2018:rcpp]. While this is not a panacea, it is
-   more than sufficient for the demonstration purposes in practice. In
-   particular, Eigen [@eigenweb] is supported by the existing package RccEigen
+   more than sufficient for demonstration purposes in this book. In particular,
+   *Eigen* [@eigenweb] is supported by the existing package *RccEigen*
    [@eddelbuettel:2013:rcppeigen]] and Python to support and check my writings
-   with *correct* and *testable* code,
+   with *correct* and *testable* code.
 
-...so much that it pushed me to port my initial Sphinx documentation into this
+So much that it pushed me to port my initial Sphinx documentation into this
 technology without further ado.
 
-With the excitement and frustration as a newbie, it took me a few days to
-experiment and eventually port the documentation little by little by finding the
-useful information bits gleaned here and there in StackOverflow, GitHub and
-elsewhere instead of the original documentation.
+With feelings of both excitement and frustration as a newbie, it took me a few
+days to experiment and frantically port the documentation by finding the useful
+information bits gleaned here and there in StackOverflow, GitHub and elsewhere
+instead of the original documentation.
 
-Namely the bookdown package implements *literate programming*, a term coined by
+Namely *bookdown* implements *literate programming*, a term coined by
 [@knuth:1984:lp].
 
 Shortly after I investigated if there are any Python alternative and just learnt
@@ -154,16 +152,38 @@ ax2.grid(which = 'minor')
 plt.show()
 ```
 
-## Drawing
+## Drawings
 
 I am mostly interested in making drawing to better convey my messages in my
 writings. And one question came into my mind: can we do things quickly and
 elegantly instead of matplotlib [@hunter:2007:matplotlib]? After all, we are in
-the R realm.
+the realm of R.
 
-### Starting Point: One Working Example Code
+Let us start with a mini project: make additional drawings to improve the
+section about SIFT (section \@ref(sift)).
+
+### Mini-Project: Drawings for the SIFT Section
+
+There is a lot of mathematics in this section \@ref(sift) that could be
+supported with more drawings to better convey my messages. For one thing, I
+write quite a bit about the geometry of overlapping patches with formula and
+only provides formula but no drawings.  So if I were a reader of the book, I
+would probably have a "meh" reaction and not try to understand them at all.
+
+#### Starting Point
+
 I found the following code example at
 https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/rect.html.
+
+Since I am writing a book here, we can just serve the book with the following
+command in the R console:
+
+```{r, eval = FALSE}
+bookdown::serve_book()
+```
+
+Let us copy-paste the code into an existing Rmd file and see it running in
+action:
 
 ```{r}
 require(grDevices)
@@ -198,3 +218,12 @@ legend(180, 450, legend = 1:4, fill = c(NA, "green", par("fg"), "blue"),
 par(op)
 
 ```
+
+#### Analysis
+
+Great! this code is working but it is a bit much for somebody who currently
+knows nothing about R.
+
+Let's peel this code little by little.
+
+TODO: learn to understand this code...
