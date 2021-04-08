@@ -152,7 +152,7 @@ ax2.grid(which = 'minor')
 plt.show()
 ```
 
-## Drawings
+## Visual Communication
 
 I am mostly interested in making drawing to better convey my messages in my
 writings. And one question came into my mind: can we do things quickly and
@@ -219,11 +219,234 @@ par(op)
 
 ```
 
-#### Analysis
+#### Breaking Down the Example
 
-Great! this code is working but it is a bit much for somebody who currently
-knows nothing about R.
+Great! this code is working but there is too much information for somebody who
+currently knows nothing about R and the aesthetics is awful.
 
-Let's peel this code little by little.
+Let's take it slow and simplify the code to the bare minimum, with a few things
+that we experiment.
 
-TODO: learn to understand this code...
+- https://www.r-bloggers.com/2017/10/loading-r-packages-library-or-require/
+  recommends `library(.)` instead of `require(.)` as it makes the program easier
+  to debug. So be it:
+
+  ```{r}
+  library(grDevices)
+  ```
+
+- We want to render the region defined by its bounding box. The parameter
+  `type=n` apparently makes sure that the canvas is blank. The remaining
+  parameters are legends.
+
+  ```{r}
+  # Let's try another background color.
+  op <- par(bg = "#bfd8d8")
+
+  # The region to render.
+  x_domain <- c(100, 250)
+  y_domain <- c(300, 450)
+  plot(x_domain, y_domain, type = "n", xlab = "", ylab = "",
+       main = "Main title: One Rectangle")
+
+  # I just want one rectangle.
+  color <- "#c6c2e2"
+  line_width <- 2
+  rect(120, 340, 180, 410, col = color, lwd = line_width)
+
+  # Subtitle
+  mtext("Subtitle: One Rectangle")
+  ```
+
+### Let's Go!
+
+From now on, let's go all out to draw the geometry of overlapping patches while
+referring back to the code example as a reference.
+
+First, I want to communicate the patch overlap by means of transparent
+rectangles. According to
+https://stackoverflow.com/questions/18056146/how-to-add-a-transparent-rectangle-to-a-r-boxplot-plot#,
+the alpha blending will do the job:
+```
+rect(x0, y0, x1, y1, col = rgb(0, 0, 1, alpha = 0.2))
+```
+
+To make our work manageable and easily debuggable, we will decouple the geometry
+data and the drawing.
+
+#### Geometry Data
+
+SIFT divides the image patch into a grid $N \times N$ of smaller patches. Let
+us define the sequence of indices.
+
+```{r}
+N <- 4
+j <- 0:(N - 1)
+i <- 0:(N - 1)
+```
+
+The patch center is:
+```{r}
+x <- 0
+y <- 0
+```
+
+Each subpatch $(i, j)$ has their center at the following grid coordinates:
+```{r}
+xi <- i - (N - 1) / 2
+yj <- j - (N - 1) / 2
+```
+
+```{r, echo = FALSE}
+xi
+yj
+```
+
+The patch region is exactly
+```{r}
+region_domain_x <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
+region_domain_y <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
+```
+
+```{r, echo = FALSE}
+region_domain_x
+region_domain_y
+```
+
+#### Geometry Rendering
+Let's now move onto the rendering.
+
+The viewing domain will be slightly larger than the patch region:
+
+```{r}
+x_view_domain <- c(region_domain_x[1] - 1, region_domain_x[2] + 1)
+y_view_domain <- c(region_domain_y[1] - 1, region_domain_y[2] + 1)
+```
+
+```{r, echo = FALSE}
+x_view_domain
+y_view_domain
+```
+
+##### Communicating the Pitfalls Due to the Lack of Overlap
+
+```{r}
+op <- par(bg = "#bfd8d8", pty="s")
+plot(x_view_domain, y_view_domain, type = "n", xlab = "x", ylab = "y",
+     main = "SIFT Anatomy")
+
+# Cosmetics.
+r <- 0.5
+line_width <- 0.5
+
+# `rect` actually renders a batch of rectangles.
+for (x in xi) {
+  for (y in yj) {
+    color <- rgb(0.8, 0.8, 0.8, alpha = 0.5)
+    rect(x - r, y - r, x + r, y + r,
+         col = color,
+         lwd = line_width)
+  }
+}
+
+# Image patch center.
+points(0, 0, col="red")
+
+# Patch centers.
+for (x in xi) {
+  for (y in yj) {
+    points(x, y, col = "blue")
+  }
+}
+
+rect(xi[1] - r, yj[4] - r, xi[1] + r, yj[4] + r,
+     col = rgb(1, 0, 0, alpha = 0.2),
+     lwd = line_width)
+rect(xi[2] - r, yj[4] - r, xi[2] + r, yj[4] + r,
+     col = rgb(0, 1, 0, alpha = 0.2),
+     lwd = line_width)
+rect(xi[1] - r, yj[3] - r, xi[1] + r, yj[3] + r,
+     col = rgb(0, 0, 1, alpha = 0.2),
+     lwd = line_width)
+rect(xi[2] - r, yj[3] - r, xi[2] + r, yj[3] + r,
+     col = rgb(0, 1, 1, alpha = 0.2),
+     lwd = line_width)
+
+points(-0.8, 1.1, col="red",
+       pch="+",  # I want a "+" shape
+       cex=2)    # Larger size please
+
+
+mtext("Without Overlapping")
+```
+
+##### Communicating about the Overlapping
+
+Now with overlapping
+
+```{r}
+library(grid)
+library(berryFunctions)
+
+op <- par(bg = "#bfd8d8", pty="s")
+plot(x_view_domain, y_view_domain, type = "n", xlab = "x", ylab = "y",
+     main = "SIFT Anatomy")
+
+grid(lwd = 1)
+
+# Cosmetics.
+color <- rgb(0.8, 0.8, 0.8, alpha = 0.2)
+r <- 1.
+line_width <- 0.5
+
+# `rect` actually renders a batch of rectangles.
+for (x in xi) {
+  for (y in yj) {
+    roundedRect(x - r, y - r, x + r, y + r, rounding = 0.25,
+                col = color,
+                lwd = line_width)
+  }
+}
+
+# Image patch center.
+points(0, 0, col="magenta")
+
+# Patch centers.
+for (x in xi) {
+  for (y in yj) {
+    points(x, y, col = "slateblue")
+  }
+}
+
+roundedRect(xi[1] - r, yj[4] - r, xi[1] + r, yj[4] + r,
+            rounding = 0.25,
+            col = rgb(1, 0, 0, alpha = 0.2),
+            lwd = line_width)
+roundedRect(xi[2] - r, yj[4] - r, xi[2] + r, yj[4] + r,
+            rounding = 0.25,
+            col = rgb(0, 1, 0, alpha = 0.2),
+            lwd = line_width)
+roundedRect(xi[1] - r, yj[3] - r, xi[1] + r, yj[3] + r,
+            rounding = 0.25,
+            col = rgb(0, 0, 1, alpha = 0.2),
+            lwd = line_width)
+roundedRect(xi[2] - r, yj[3] - r, xi[2] + r, yj[3] + r,
+            rounding = 0.25,
+            col = rgb(0, 1, 1, alpha = 0.2),
+            lwd = line_width)
+points(-0.8, 1.1, col="red",
+       pch="+",  # I want a "+" shape
+       cex=2)    # Larger size please
+
+mtext("With Overlapping")
+```
+
+#### Animation
+
+Animating the drawing would communicate better my point in about the overlapping
+patches.
+
+TODO: explore.
+
+1. Move the keypoint center and update the drawing.
+2. Illustrate the overlapping by increasing the radius of each patch $(i, j)$.
