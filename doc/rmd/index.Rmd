@@ -15,13 +15,16 @@ link-citations: yes
 
 This book aims at sharing my current understanding of various aspects in
 computer vision during my personal learning journey as I have been maintaining
-and extending the library *Sara*. Recently, I have started compiling various
-notes about the different mathematical and practical aspects related to this
-fascinating discipline. By snowball effect, little by little, these notes have
-been becoming more and more structured as I keep learning more and more and
-retouching the writing here and there.
+and extending the library *Sara*. The audience I am targeting here are students,
+scientists or software developers who want to understand those kind of details.
 
-I believe there is value in these notes and it would be a real shame to reduce
+Recently, I have started compiling various notes about the different
+mathematical and practical aspects related to this fascinating discipline. By
+snowball effect, little by little, these notes have been becoming more and more
+structured as I keep learning more and more and retouching the writing here and
+there.
+
+I believe these notes carry some value and it would be a real shame to reduce
 these as either mere blog posts or as parts of documentation regarding *Sara*'s
 API. So this book is my modest contribution as to giving back. Hell yeah! I
 would be very happy to know if it proved to be useful to even just one person.
@@ -39,12 +42,25 @@ understandably gloss over mathematical or experimental aspects to sell more the
 novelty or performance of their approaches, I have decided to take the time to
 detail these for algorithms and methods that I understand well.
 
-> "Perfection is the enemy of progress." - Winston Churchill
+> "Perfection is the enemy of good." - Voltaire.
 
 *Finally, these notes reflect the best of my understanding as of this writing.
-While I do believe most of the contents are factually correct, I, as a human
+While I work hard to check that my contents are factually correct, I, as a human
 being, am not certainly not immune to misunderstanding or errors. Should you
 find any, __please please please__ report back to me and take to explain to me.*
+
+```{r, echo = FALSE}
+include_svg = function(path) {
+  if (knitr::is_latex_output()) {
+    output = xfun::with_ext(path, 'pdf')
+    # you can compare the timestamp of pdf against svg to avoid conversion if necessary
+    system2('rsvg-convert', c('-f', 'pdf', '-a', '-o', shQuote(c(output, path))))
+  } else {
+    output = path
+  }
+  knitr::include_graphics(output)
+}
+```
 
 ```{r, echo = FALSE}
 cc_by_image_url <- "https://i.creativecommons.org/l/by/4.0/88x31.png"
@@ -55,9 +71,14 @@ cc_by_shield_file <- "figures/cc_by_shield.svg"
 
 if (knitr::is_latex_output() & !file.exists(cc_by_image_file)) {
   download.file(cc_by_image_url, cc_by_image_file, mode = 'wb')
+} else {
+  cc_by_image_file <- cc_by_image_url
 }
+
 if (knitr::is_latex_output() & !file.exists(cc_by_shield_file)) {
   download.file(cc_by_shield_url, cc_by_shield_file, mode = 'wb')
+} else {
+  cc_by_shield_file <- cc_by_image_url
 }
 ```
 
@@ -89,29 +110,17 @@ Sara focuses on:
 Sara is licensed with the _[Mozilla Public License version
 2.0](https://gitlab.com/DO-CV/sara/-/blob/master/LICENSE)_.
 
-The documentation chooses to emphasize more on the mathematical details to
-explain some algorithmic implementation. I believe that my API is most of the
-time straightforward enough. The audience I am targeting here is students,
-scientists or software developers who want to understand those kind of details.
+The book chooses to emphasize more on the mathematical details to explain
+regarding my algorithmic implementations. I believe that my API is most of the
+time straightforward enough (hopefully!).
 
 For the reference API documentation, refer to the **Doxygen**-based
 documentation hosted at Codedocs.xyz: https://codedocs.xyz/DO-CV/sara/.
 
 ```{r, echo = FALSE}
-codedocs_url = 'https://codedocs.xyz/DO-CV/sara.svg'
+codedocs_url <- 'https://codedocs.xyz/DO-CV/sara.svg'
 if (!file.exists(codedocs_file <- 'figures/sara.svg'))
   download.file(codedocs_url, codedocs_file, mode = 'wb')
-
-include_svg = function(path) {
-  if (knitr::is_latex_output()) {
-    output = xfun::with_ext(path, 'pdf')
-    # you can compare the timestamp of pdf against svg to avoid conversion if necessary
-    system2('rsvg-convert', c('-f', 'pdf', '-a', '-o', shQuote(c(output, path))))
-  } else {
-    output = path
-  }
-  knitr::include_graphics(output)
-}
 ```
 
 [`r include_svg(if (identical(knitr:::pandoc_to(), 'html')) codedocs_url else codedocs_file)`](https://codedocs.xyz/DO-CV/sara/)
