@@ -91,10 +91,12 @@ The following remarks are useful to debug code dealing with structure-from-motio
 
 ## Bundle Adjustment
 
-### Personal Intellectual Journey about Incremental Bundle Adjustment
+### My Personal Intellectual Journey about the Incremental Bundle Adjustment
 
-In this paragraph I describe my personal intellectual journey to understand how
-the incremental bundle adjustment is done.
+In this paragraph I document my first intellectual journey in order to
+understand how the incremental bundle adjustment is done. My reasoning started
+from a wrong premise and how after digging the literature I was able to piece
+things together.
 
 In the bundle adjustment problem we need to initialize the position and the gaze
 direction of each camera $C_i = (\mathbf{R}_i, \mathbf{t}_i)$ in a global
