@@ -176,28 +176,281 @@ scale-space: *"It is important to avoid all boundary affects in which the
 descriptor abruptly changes as a sample shifts smoothly from being within one
 histogram to another or from one orientation to another."*
 
-In more details, this is so that we can compensate for the *noisy* estimation
-of keypoint $k$.  If we did not apply the trilinear interpolation, a pixel at
-the boundary of a subpatch patch could fall suddenly in another adjacent image
-patch. With the trilinear interpolation, instead every pixel in $\mathcal{P}$
-can belong up to $4$ adjacent patches $\mathcal{P}_{i'j'}$ for $i \leq i' \leq i
-+ 1$ and $j \leq j' \leq j + 1$ to compensate for the noisy scale $\sigma$ and
-location $\mathbf{x}$. And that is the reason why by design patches overlap.
+In more details, this is so that we can compensate for the *noisy* estimation of
+keypoint $k$. If we did not apply the trilinear interpolation, a pixel at the
+boundary of a subpatch patch could fall suddenly in another adjacent image
+patch. As illustrated \@ref(fig:patches-nonoverlapping), this could have a
+catastrophic effect in the performance of the SIFT descriptor.
 
-Then we encode the photometric information of each patch
-$\mathcal{P}_{ij}$ into a histogram $\mathbf{h}_{ij} \in
-\mathbb{R}^O$ of *gradient orientations*, where the orientations are binned into
-$O$ principal orientations. Again with trilinear interpolation, we
-compensate for the noisy orientation $\theta$ and as a result:
+**TODO: illustrate the blue cross and the deviation from the true localisation
+in scale-space and orientation. One point belongs to only one patch.**
+
+```{r, echo=FALSE}
+N <- 4
+j <- 0:(N - 1)
+i <- 0:(N - 1)
+
+patch_center <- c(0, 0)
+
+xi <- i - (N - 1) / 2
+yj <- j - (N - 1) / 2
+
+point_in_patch <- c(-0.8, 1.1)
+
+region_min_max_x <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
+region_min_max_y <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
+```
+
+```{r, cache=TRUE, echo=FALSE}
+draw_patch <- function(center, theta, scale, subpatch_radius,
+                       color = "red") {
+  # Alias the variable.
+  r <- subpatch_radius
+
+  # Cosmetics.
+  rect_color <- rgb(0.8, 0.8, 0.8, alpha = 0.5)
+  rect_line_width <- 0.5
+
+  # Transformation matrix
+  T <- scale * matrix(c(cos(theta), -sin(theta), center[1],
+                        sin(theta),  cos(theta), center[2],
+                                 0,           0,         1),
+                      nrow = 3,
+                      byrow = TRUE)
+
+  # Render the grid of patches.
+  for (x in xi) {
+    for (y in yj) {
+      # Enumerate the quad vertices.
+      X <- matrix(c(x - r, x + r, x + r, x - r,
+                    y - r, y - r, y + r, y + r,
+                        1,     1,     1,     1),
+                  nrow = 3,
+                  byrow = TRUE)
+
+      # Transform the vertices.
+      TX <- T %*% X
+
+      # Separate the coordinates.
+      u <- TX[1,]
+      v <- TX[2,]
+      polygon(u, v, col = rect_color, lwd = rect_line_width)
+    }
+  }
+
+  # Draw the center of the image patch.
+  points(center[1], center[2], col = color)
+
+  # Draw the center of each subpatch (i, j).
+  for (x in xi) {
+    for (y in yj) {
+      Txy <- T %*% matrix(c(x, y, 1), nrow=3)
+      u <- Txy[1]
+      v <- Txy[2]
+      points(u, v, col = color)
+    }
+  }
+
+  # Draw the closest subpatches (i, j) to the point in the patch.
+  for (k in 1:2) {
+    for (l in 3:4) {
+      # Enumerate the quad vertices.
+      X <- matrix(c(xi[k] - r, xi[k] + r, xi[k] + r, xi[k] - r,
+                    yj[l] - r, yj[l] - r, yj[l] + r, yj[l] + r,
+                            1,         1,         1,         1),
+                  nrow = 3,
+                  byrow = TRUE)
+
+      # Transform the vertices.
+      TX <- T %*% X
+      u <- TX[1,]
+      v <- TX[2,]
+
+      # Draw the polygon.
+      if (k == 1 & l == 3)
+        color <- rgb(1, 0, 0, alpha = 0.2)
+      if (k == 2 & l == 3)
+        color <- rgb(0, 1, 0, alpha = 0.2)
+      if (k == 1 & l == 4)
+        color <- rgb(0, 0, 1, alpha = 0.2)
+      if (k == 2 & l == 4)
+        color <- rgb(0, 1, 1, alpha = 0.2)
+      polygon(u, v, col = color, lwd = 1)
+    }
+  }
+
+  # Draw the point in the patch.
+  points(point_in_patch[1], point_in_patch[2],
+         col = "darkblue",  # In another color please
+         pch = "+",              # I want a "+" shape
+         cex = 2)                # Thicker size please
+}
+```
+
+```{r, echo=FALSE}
+theta <- seq(0, 0.2, length.out = 30)
+scale_inc <- seq(1, 1.3, length.out = 30)
+scale_dec <- seq(1, 0.8, length.out = 30)
+shift_x <- seq(0, 0.5, length.out = 30)
+shift_y <- seq(0, 0.3, length.out = 30)
+```
+
+```{r patches-nonoverlapping, animation.hook="gifski", interval=0.1, cache=TRUE, echo=FALSE, fig.align='center', fig.cap="SIFT Grid Geometry: Non-Overlapping Sub-Patches"}
+op <- par(bg = "#f7f7f7", pty="s")
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] + shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, 0.5,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, theta[ii], scale[ii], 0.5,
+             color = "orangered")
+
+  mtext("Without Overlapping")
+}
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] - 0.5 * shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, 0.5,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, -theta[ii], scale2[ii], 0.5,
+             color = "orangered")
+
+  mtext("Without Overlapping")
+}
+```
+
+To compensate the boundary effect, the trilinear interpolation means that we
+have to increase the radius of each sub-patch (i, j) that compose the grid, which
+causes them to overlap each other as shown in Figure
+\@ref(fig:patches-radius-increase).
+
+```{r patches-radius-increase, animation.hook="gifski", interval=0.1, cache=TRUE, echo=FALSE, fig.align='center', fig.cap="Increase of the Sub-Patch Radius"}
+op <- par(bg = "#f7f7f7", pty="s")
+
+patch_radius <- c(seq(0.5, 0.9, length.out = 5),
+                  seq(0.9, 0.99, length.out = 5),
+                  seq(0.99, 1, length.out = 20))
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, patch_radius[ii],
+             color = "slateblue")
+
+  mtext("Increase of the Patch Radius for the Patch Overlapping")
+}
+```
+
+With the overlapping of sub-patches in the grid, the histogram of gradients can
+reflect the photometric information more robustly agains the noisy estimation of
+the keypoint localisation because every pixel in $\mathcal{P}$ belongs up to $4$
+adjacent patches $\mathcal{P}_{i'j'}$ for $i \leq i' \leq i + 1$ and $j \leq j'
+\leq j + 1$. We illustrate this benefit in Figure \@ref(fig:patches-overlapping).
+
+```{r patches-overlapping, animation.hook="gifski", interval=0.1, cache=TRUE, echo=FALSE, fig.align='center', fig.cap="SIFT Grid Geometry: Overlapping Sub-Patches."}
+op <- par(bg = "#f7f7f7", pty="s")
+
+subpatch_radius <- 1
+theta <- seq(0, 0.2, length.out = 30)
+scale <- seq(1, 1.3, length.out = 30)
+shift_x <- seq(0, 0.5, length.out = 30)
+shift_y <- seq(0, 0.3, length.out = 30)
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] + shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1,
+             subpatch_radius,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, theta[ii], scale_inc[ii],
+             subpatch_radius,
+             color = "orangered")
+
+  mtext("With Overlapping")
+}
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] - 0.5 * shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1,
+             subpatch_radius,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, -theta[ii], scale_dec[ii],
+             subpatch_radius,
+             color = "orangered")
+
+  mtext("With Overlapping")
+}
+```
+
+Then we can encode the photometric information of each patch $\mathcal{P}_{ij}$
+into a histogram $\mathbf{h}_{ij} \in \mathbb{R}^O$ of *gradient orientations*,
+where the orientations are binned into $O$ principal orientations. Again with
+trilinear interpolation, we compensate for the noisy orientation $\theta$ and as
+a result:
 
 :::note
 The histogram bins $\mathbf{h}[i, j, o]$ overlap as each of them covers the
 interval of orientations $[\frac{2 \pi}{O} (o - 1), \frac{2 \pi}{O} (o + 1)]$.
 :::
 
+The trilinear interpolation reweighs appropriately the contribution of each
+pixel depending on their distance to each sub-patch center. We will detail this
+in a later sections.
+
+
 #### Geometry of Overlapping Patches
 
-In the local coordinate system $\mathcal{C}_k$:
+With the visual interpretation that we provided previously, we can now easily
+relate the geometry analytically with respect to the local coordinate system
+$\mathcal{C}_k$:
 
 - the keypoint center is at the origin $(0, 0)$,
 - each patch $\mathcal{P}_{ij}$ can be viewed as a patch with side length
@@ -250,7 +503,7 @@ Thus the centers are
   \right]
 \end{equation}
 
-Equivalently with array broadcasting (cf. *Numpy* concept):
+Equivalently with array broadcasting (as in *NumPy* concept):
 
 \begin{equation}
   \left[
@@ -266,8 +519,6 @@ Equivalently with array broadcasting (cf. *Numpy* concept):
   \right]
   - [1.5, 1.5]
 \end{equation}
-
-**TODO: illustrate.**
 
 #### SIFT Coordinate System
 
@@ -383,8 +634,6 @@ The pixel $(u, v)$ belongs up to $4$ patches:
 
 We say "up to $4$" because for example a gradient at the boundary
 $(-1,-1)$ contributes only to $\mathcal{P}_{00}$.
-
-**TODO: illustrate.**
 
 #### Histogram of Gradients
 

@@ -122,7 +122,7 @@ auto square(int x) -> int
 
 ### Python Code Snippet
 
-```{python}
+```{python, cache=TRUE}
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator
 import numpy as np
@@ -185,7 +185,7 @@ bookdown::serve_book()
 Let us copy-paste the code into an existing Rmd file and see it running in
 action:
 
-```{r}
+```{r, cache=TRUE}
 require(grDevices)
 ## set up the plot region:
 op <- par(bg = "thistle")
@@ -239,15 +239,16 @@ that we experiment.
   `type=n` apparently makes sure that the canvas is blank. The remaining
   parameters are legends.
 
-  ```{r}
+  ```{r, cache=TRUE}
   # Let's try another background color.
-  op <- par(bg = "#bfd8d8")
+  op <- par(bg = "#f7f7f7")
 
   # The region to render.
-  x_domain <- c(100, 250)
-  y_domain <- c(300, 450)
-  plot(x_domain, y_domain, type = "n", xlab = "", ylab = "",
-       main = "Main title: One Rectangle")
+  x_min_max <- c(100, 250)
+  y_min_max <- c(300, 450)
+  plot(x_min_max, y_min_max,
+       type = "n", xlab = "", ylab = "",
+       main = "Main Title: One Rectangle")
 
   # I just want one rectangle.
   color <- "#c6c2e2"
@@ -258,7 +259,7 @@ that we experiment.
   mtext("Subtitle: One Rectangle")
   ```
 
-### Let's Go!
+#### Let's Go!
 
 From now on, let's go all out to draw the geometry of overlapping patches while
 referring back to the code example as a reference.
@@ -274,7 +275,7 @@ rect(x0, y0, x1, y1, col = rgb(0, 0, 1, alpha = 0.2))
 To make our work manageable and easily debuggable, we will decouple the geometry
 data and the drawing.
 
-#### Geometry Data
+##### Geometry Data
 
 SIFT divides the image patch into a grid $N \times N$ of smaller patches. Let
 us define the sequence of indices.
@@ -287,8 +288,14 @@ i <- 0:(N - 1)
 
 The patch center is:
 ```{r}
-x <- 0
-y <- 0
+patch_center <- c(0, 0)
+```
+
+Let us consider the following point in a the image patch to illustrate our point
+in Section \@ref(sift).
+
+```{r}
+point_in_patch <- c(-0.8, 1.1)
 ```
 
 Each subpatch $(i, j)$ has their center at the following grid coordinates:
@@ -304,149 +311,339 @@ yj
 
 The patch region is exactly
 ```{r}
-region_domain_x <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
-region_domain_y <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
+region_min_max_x <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
+region_min_max_y <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
 ```
 
 ```{r, echo = FALSE}
-region_domain_x
-region_domain_y
+region_min_max_x
+region_min_max_y
 ```
 
 #### Geometry Rendering
-Let's now move onto the rendering.
-
-The viewing domain will be slightly larger than the patch region:
+Moving onto the rendering, let's make the viewing domain will be slightly larger
+than the patch region:
 
 ```{r}
-x_view_domain <- c(region_domain_x[1] - 1, region_domain_x[2] + 1)
-y_view_domain <- c(region_domain_y[1] - 1, region_domain_y[2] + 1)
+x_view_min_max <- c(region_min_max_x[1] - 1, region_min_max_x[2] + 1)
+y_view_min_max <- c(region_min_max_y[1] - 1, region_min_max_y[2] + 1)
 ```
 
 ```{r, echo = FALSE}
-x_view_domain
-y_view_domain
+x_view_min_max
+y_view_min_max
 ```
 
 ##### Communicating the Pitfalls Due to the Lack of Overlap
 
-```{r}
-op <- par(bg = "#bfd8d8", pty="s")
-plot(x_view_domain, y_view_domain, type = "n", xlab = "x", ylab = "y",
-     main = "SIFT Anatomy")
+We are now rendering the geometry of patches when they do not overlap each other.
+
+```{r, cache=TRUE}
+op <- par(bg = "#f7f7f7", pty="s")
+plot(x_view_min_max, y_view_min_max, type = "n", xlab = "x", ylab = "y",
+     main = "SIFT Grid Geometry")
+
+# The radius of each subpatch (i, j).
+r <- 0.5
 
 # Cosmetics.
-r <- 0.5
-line_width <- 0.5
+rect_line_width <- 0.5
+rect_color <- rgb(0.8, 0.8, 0.8, alpha = 0.5)
 
-# `rect` actually renders a batch of rectangles.
 for (x in xi) {
-  for (y in yj) {
-    color <- rgb(0.8, 0.8, 0.8, alpha = 0.5)
-    rect(x - r, y - r, x + r, y + r,
-         col = color,
-         lwd = line_width)
-  }
+  # Render in batch.
+  rect(x - r, yj - r, x + r, yj + r,
+       col = rect_color,
+       lwd = rect_line_width)
 }
 
 # Image patch center.
-points(0, 0, col="red")
+points(patch_center[1], patch_center[2], col="red")
 
 # Patch centers.
 for (x in xi) {
-  for (y in yj) {
+  for (y in yj)
     points(x, y, col = "blue")
-  }
 }
 
+# Draw the 4 closest subpatch to the point in the image patch.
 rect(xi[1] - r, yj[4] - r, xi[1] + r, yj[4] + r,
      col = rgb(1, 0, 0, alpha = 0.2),
-     lwd = line_width)
+     lwd = 1)
 rect(xi[2] - r, yj[4] - r, xi[2] + r, yj[4] + r,
      col = rgb(0, 1, 0, alpha = 0.2),
-     lwd = line_width)
+     lwd = 1)
 rect(xi[1] - r, yj[3] - r, xi[1] + r, yj[3] + r,
      col = rgb(0, 0, 1, alpha = 0.2),
-     lwd = line_width)
+     lwd = 1)
 rect(xi[2] - r, yj[3] - r, xi[2] + r, yj[3] + r,
      col = rgb(0, 1, 1, alpha = 0.2),
-     lwd = line_width)
+     lwd = 1)
 
-points(-0.8, 1.1, col="red",
-       pch="+",  # I want a "+" shape
-       cex=2)    # Larger size please
+points(point_in_patch[1], point_in_patch[2],
+       col="red",  # In red color please
+       pch="+",    # I want a "+" shape
+       cex=2)      # Thicker size please
 
 
 mtext("Without Overlapping")
 ```
 
-##### Communicating about the Overlapping
+So far we have drawn the $N \times N$ grid that divides the patch and crossed in
+red a particular point in the patch, close to the border of the green patch. We
+will focus on the legend later.
 
-Now with overlapping
+##### Animation
 
-```{r}
-library(grid)
-library(berryFunctions)
+It would be great if we could animate the drawing would communicate better my
+point if the patches were not overlapping. This is possible according to:
+https://bookdown.org/yihui/rmarkdown-cookbook/animation.html#ref-R-gifski
 
-op <- par(bg = "#bfd8d8", pty="s")
-plot(x_view_domain, y_view_domain, type = "n", xlab = "x", ylab = "y",
-     main = "SIFT Anatomy")
+In this case, let us use `polygon` instead of `rect` to generalise the drawing.
+First we want to refactor the rendering code with the little R knowledge at our
+hand.
 
-grid(lwd = 1)
+```{r, cache=TRUE}
+draw_patch <- function(center, theta, scale, subpatch_radius,
+                       color = "red") {
+  # Alias the variable.
+  r <- subpatch_radius
 
-# Cosmetics.
-color <- rgb(0.8, 0.8, 0.8, alpha = 0.2)
-r <- 1.
-line_width <- 0.5
+  # Cosmetics.
+  rect_color <- rgb(0.8, 0.8, 0.8, alpha = 0.5)
+  rect_line_width <- 0.5
 
-# `rect` actually renders a batch of rectangles.
-for (x in xi) {
-  for (y in yj) {
-    roundedRect(x - r, y - r, x + r, y + r, rounding = 0.25,
-                col = color,
-                lwd = line_width)
+  # Transformation matrix
+  T <- scale * matrix(c(cos(theta), -sin(theta), center[1],
+                        sin(theta),  cos(theta), center[2],
+                                 0,           0,         1),
+                      nrow = 3,
+                      byrow = TRUE)
+
+  # Render the grid of patches.
+  for (x in xi) {
+    for (y in yj) {
+      # Enumerate the quad vertices.
+      X <- matrix(c(x - r, x + r, x + r, x - r,
+                    y - r, y - r, y + r, y + r,
+                        1,     1,     1,     1),
+                  nrow = 3,
+                  byrow = TRUE)
+
+      # Transform the vertices.
+      TX <- T %*% X
+
+      # Separate the coordinates.
+      u <- TX[1,]
+      v <- TX[2,]
+      polygon(u, v, col = rect_color, lwd = rect_line_width)
+    }
   }
-}
 
-# Image patch center.
-points(0, 0, col="magenta")
+  # Draw the center of the image patch.
+  points(center[1], center[2], col = color)
 
-# Patch centers.
-for (x in xi) {
-  for (y in yj) {
-    points(x, y, col = "slateblue")
+  # Draw the center of each subpatch (i, j).
+  for (x in xi) {
+    for (y in yj) {
+      Txy <- T %*% matrix(c(x, y, 1), nrow=3)
+      u <- Txy[1]
+      v <- Txy[2]
+      points(u, v, col = color)
+    }
   }
+
+  # Draw the closest subpatches (i, j) to the point in the patch.
+  for (k in 1:2) {
+    for (l in 3:4) {
+      # Enumerate the quad vertices.
+      X <- matrix(c(xi[k] - r, xi[k] + r, xi[k] + r, xi[k] - r,
+                    yj[l] - r, yj[l] - r, yj[l] + r, yj[l] + r,
+                            1,         1,         1,         1),
+                  nrow = 3,
+                  byrow = TRUE)
+
+      # Transform the vertices.
+      TX <- T %*% X
+      u <- TX[1,]
+      v <- TX[2,]
+
+      # Draw the polygon.
+      if (k == 1 & l == 3)
+        color <- rgb(1, 0, 0, alpha = 0.2)
+      if (k == 2 & l == 3)
+        color <- rgb(0, 1, 0, alpha = 0.2)
+      if (k == 1 & l == 4)
+        color <- rgb(0, 0, 1, alpha = 0.2)
+      if (k == 2 & l == 4)
+        color <- rgb(0, 1, 1, alpha = 0.2)
+      polygon(u, v, col = color, lwd = 1)
+    }
+  }
+
+  # Draw the point in the patch.
+  points(point_in_patch[1], point_in_patch[2],
+         col = "darkblue",  # In another color please
+         pch = "+",              # I want a "+" shape
+         cex = 2)                # Thicker size please
 }
-
-roundedRect(xi[1] - r, yj[4] - r, xi[1] + r, yj[4] + r,
-            rounding = 0.25,
-            col = rgb(1, 0, 0, alpha = 0.2),
-            lwd = line_width)
-roundedRect(xi[2] - r, yj[4] - r, xi[2] + r, yj[4] + r,
-            rounding = 0.25,
-            col = rgb(0, 1, 0, alpha = 0.2),
-            lwd = line_width)
-roundedRect(xi[1] - r, yj[3] - r, xi[1] + r, yj[3] + r,
-            rounding = 0.25,
-            col = rgb(0, 0, 1, alpha = 0.2),
-            lwd = line_width)
-roundedRect(xi[2] - r, yj[3] - r, xi[2] + r, yj[3] + r,
-            rounding = 0.25,
-            col = rgb(0, 1, 1, alpha = 0.2),
-            lwd = line_width)
-points(-0.8, 1.1, col="red",
-       pch="+",  # I want a "+" shape
-       cex=2)    # Larger size please
-
-mtext("With Overlapping")
 ```
 
-#### Animation
+Finally, after a bit of debugging, we can reuse the function at will and
+generate an animation that illustrates the border effect when the sub-patches do
+not overlap and when the detector detects the keypoint in a noisy manner
 
-Animating the drawing would communicate better my point in about the overlapping
-patches.
+```{r, animation.hook="gifski", interval=0.1, cache=TRUE}
+op <- par(bg = "#f7f7f7", pty="s")
 
-TODO: explore.
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
 
-1. Move the keypoint center and update the drawing.
-2. Illustrate the overlapping by increasing the radius of each patch $(i, j)$.
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] + shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, 0.5,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, theta[ii], scale[ii], 0.5,
+             color = "orangered")
+
+  mtext("Without Overlapping")
+}
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] - 0.5 * shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, 0.5,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, -theta[ii], scale2[ii], 0.5,
+             color = "orangered")
+
+  mtext("Without Overlapping")
+}
+```
+
+##### Communicating about the Overlapping
+
+We have worked hard to create the useful rendering function and can profit from
+it to illustrate the benefit of overlapping patches.
+
+Let us animate the dilation of the patch radius to illustrate that sub-patches
+now overlap each other.
+
+```{r, animation.hook="gifski", interval=0.1, cache=TRUE}
+op <- par(bg = "#f7f7f7", pty="s")
+
+patch_radius <- c(seq(0.5, 0.9, length.out = 5),
+                  seq(0.9, 0.99, length.out = 5),
+                  seq(0.99, 1, length.out = 20))
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, patch_radius[ii],
+             color = "slateblue")
+
+  mtext("Increase of the Patch Radius for the Patch Overlapping")
+}
+```
+
+Now we can communicate the robustness we benefit due to the overlapping between
+sub-patches with another animation.
+
+We are going to vary the following parameters.
+
+```{r}
+theta <- seq(0, 0.2, length.out = 30)
+scale_inc <- seq(1, 1.3, length.out = 30)
+scale_dec <- seq(1, 0.8, length.out = 30)
+shift_x <- seq(0, 0.5, length.out = 30)
+shift_y <- seq(0, 0.3, length.out = 30)
+```
+
+We can now generate the animation in GIF format.
+
+```{r, animation.hook="gifski", interval=0.1, cache=TRUE}
+op <- par(bg = "#f7f7f7", pty="s")
+
+subpatch_radius <- 1
+theta <- seq(0, 0.2, length.out = 30)
+scale <- seq(1, 1.3, length.out = 30)
+shift_x <- seq(0, 0.5, length.out = 30)
+shift_y <- seq(0, 0.3, length.out = 30)
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] + shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1,
+             subpatch_radius,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, theta[ii], scale_inc[ii],
+             subpatch_radius,
+             color = "orangered")
+
+  mtext("With Overlapping")
+}
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] - 0.5 * shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1,
+             subpatch_radius,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, -theta[ii], scale_dec[ii],
+             subpatch_radius,
+             color = "orangered")
+
+  mtext("With Overlapping")
+}
+```
+
+##### Conclusion
+
+We have completed the most challenging part of this mini-project, which is to
+illustrate the different parameters that conditions SIFT's anatomy through
+various animations. This mini-project turns out to be quite time-consuming yet
+rewarding and most of all, it has highlighted how visual communication remains
+an art.
