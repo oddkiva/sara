@@ -81,7 +81,6 @@ if (knitr::is_latex_output() & !file.exists(cc_by_shield_file)) {
   cc_by_shield_file <- cc_by_image_url
 }
 ```
-
 The online version of this book is licensed under the [Creative Commons Attribution 4.0 International License][cc-by].
 
 [![CC BY 4.0][cc-by-image]][cc-by]
@@ -89,6 +88,7 @@ The online version of this book is licensed under the [Creative Commons Attribut
 [cc-by]: http://creativecommons.org/licenses/by/4.0/
 [cc-by-image]: `r cc_by_image_file`
 [cc-by-shield]: `r include_svg(cc_by_shield_file)`
+
 ## What is Sara? {-}
 
 *Sara* is mainly a small and easy-to-use C++ computer vision library. It does
