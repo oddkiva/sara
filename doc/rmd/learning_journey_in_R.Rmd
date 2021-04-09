@@ -22,39 +22,55 @@ information bits gleaned here and there in StackOverflow, GitHub and elsewhere
 instead of the original documentation.
 
 Namely *bookdown* implements *literate programming*, a term coined by
-[@knuth:1984:lp].
+[@knuth:1984:lp]. Thus writing becomes a truly engaging for me as writing a book
+actually becomes akin to a software development project where I can architect
+the outline of the book and writing a section feels like writing a software
+library.
 
 Shortly after I investigated if there are any Python alternative and just learnt
 about *jupyter-book* (https://jupyterbook.org) is also available. However it is
-not yet clear to me whether it has multilanguage support as good as in bookdown.
-So I will stick with bookdown for now.
+not yet clear to me whether it has multilanguage support as good as in
+*bookdown*. So I will stick with *bookdown* for now.
 
 ## Code
 
-Here is a list of toy code examples I found online and which I tested myself.
-They are copy-pasted here so that I don't google them again. You can copy-paste
-them and then experiment on your own.
+If it is not done yet, I would recommend you to read the section 3.1 of the
+online book first: https://bookdown.org/yihui/rmarkdown-cookbook/r-code.html
 
-### R code snippet
+This section is mostly a quick-and-dirty memento for me where I list toy code
+examples I found online and which I tested myself. They are copy-pasted here so
+that I do not have to google them again. You can copy-paste them if you wish to
+experiment on your own.
+
+### R Example
 
 Just like a Python notebook, R markdown allows us to write code and break it
 down into multiple chunks and evaluate them as you are writing the report.
+Shamelessly copying from:
+https://bookdown.org/yihui/rmarkdown-cookbook/r-code.html.
 
 ```{r}
+# Open this code with:
+# ```{r}
+
 x <- 5  # radius of a circle
+
+# Close this with:
+# ```
 ```
-The R markdown report you are writing has a state, so the variable `x` written
-above can be reused and evaluated in the sequel.
+
+The R markdown file we are writing has a state, so the variable `x` written
+above can be reused and evaluated in later parts of our file.
 
 So for a circle with radius `r x`, its area is `r pi * x^2`.
 
-### Bash example
+### Bash Example
 
 ```{bash}
 echo "Hello Bash!"
 ```
 
-### C++ code
+### C++ Example
 
 This is the language I care the most about since it is my primary language.
 
@@ -120,7 +136,10 @@ auto square(int x) -> int
 }
 ```
 
-### Python Code Snippet
+### Python Example
+
+I really care about *Matplotlib* and *NumPy*. So here is one code example I
+found online and tested myself.
 
 ```{python, cache=TRUE}
 from matplotlib import pyplot as plt
@@ -156,18 +175,18 @@ plt.show()
 
 I am mostly interested in making drawing to better convey my messages in my
 writings. And one question came into my mind: can we do things quickly and
-elegantly instead of matplotlib [@hunter:2007:matplotlib]? After all, we are in
-the realm of R.
+elegantly instead of *Matplotlib* [@hunter:2007:matplotlib]? After all, we are
+in the realm of R.
 
 Let us start with a mini project: make additional drawings to improve the
 section about SIFT (section \@ref(sift)).
 
-### Mini-Project: Drawings for the SIFT Section
+### Mini-Project: Drawings for the SIFT Section {#making-sift-drawings}
 
-There is a lot of mathematics in this section \@ref(sift) that could be
+There is a lot of mathematics in this section \@ref(sift) that deserve be
 supported with more drawings to better convey my messages. For one thing, I
 write quite a bit about the geometry of overlapping patches with formula and
-only provides formula but no drawings.  So if I were a reader of the book, I
+only provides formula but no drawings. So if I were a reader of the book, I
 would probably have a "meh" reaction and not try to understand them at all.
 
 #### Starting Point
@@ -182,10 +201,10 @@ command in the R console:
 bookdown::serve_book()
 ```
 
-Let us copy-paste the code into an existing Rmd file and see it running in
+Let us copy-paste the code into an existing `Rmd` file and see it running in
 action:
 
-```{r, cache=TRUE}
+```{r, cache=TRUE, fig.align='center'}
 require(grDevices)
 ## set up the plot region:
 op <- par(bg = "thistle")
@@ -216,7 +235,6 @@ legend(180, 450, legend = 1:4, fill = c(NA, "green", par("fg"), "blue"),
        density = c(NA, NA, 10, 30), angle = c(NA, NA, 30, -30))
 
 par(op)
-
 ```
 
 #### Breaking Down the Example
@@ -239,7 +257,7 @@ that we experiment.
   `type=n` apparently makes sure that the canvas is blank. The remaining
   parameters are legends.
 
-  ```{r, cache=TRUE}
+  ```{r, cache=TRUE, fig.align='center'}
   # Let's try another background color.
   op <- par(bg = "#f7f7f7")
 
@@ -336,11 +354,15 @@ y_view_min_max
 
 ##### Communicating the Pitfalls Due to the Lack of Overlap
 
-We are now rendering the geometry of patches when they do not overlap each other.
+We are now rendering the geometry of patches when they do not overlap each other
+with the following code.
 
-```{r, cache=TRUE}
+```{r, cache=TRUE, fig.align='center'}
+# Define an empty canvas.
 op <- par(bg = "#f7f7f7", pty="s")
-plot(x_view_min_max, y_view_min_max, type = "n", xlab = "x", ylab = "y",
+plot(x_view_min_max, y_view_min_max,
+     type = "n",
+     xlab = "x", ylab = "y",
      main = "SIFT Grid Geometry")
 
 # The radius of each subpatch (i, j).
@@ -493,7 +515,7 @@ Finally, after a bit of debugging, we can reuse the function at will and
 generate an animation that illustrates the border effect when the sub-patches do
 not overlap and when the detector detects the keypoint in a noisy manner
 
-```{r, animation.hook="gifski", interval=0.1, cache=TRUE}
+```{r, animation.hook="gifski", interval=0.1, cache=TRUE, fig.align='center'}
 op <- par(bg = "#f7f7f7", pty="s")
 
 for (ii in 1:30) {
@@ -511,7 +533,7 @@ for (ii in 1:30) {
              color = "slateblue")
 
   # The noisy image patch.
-  draw_patch(patch_center_shifted, theta[ii], scale[ii], 0.5,
+  draw_patch(patch_center_shifted, theta[ii], scale_inc[ii], 0.5,
              color = "orangered")
 
   mtext("Without Overlapping")
@@ -532,7 +554,7 @@ for (ii in 1:30) {
              color = "slateblue")
 
   # The noisy image patch.
-  draw_patch(patch_center_shifted, -theta[ii], scale2[ii], 0.5,
+  draw_patch(patch_center_shifted, -theta[ii], scale_dec[ii], 0.5,
              color = "orangered")
 
   mtext("Without Overlapping")
@@ -547,7 +569,7 @@ it to illustrate the benefit of overlapping patches.
 Let us animate the dilation of the patch radius to illustrate that sub-patches
 now overlap each other.
 
-```{r, animation.hook="gifski", interval=0.1, cache=TRUE}
+```{r, animation.hook="gifski", interval=0.1, cache=TRUE, fig.align='center'}
 op <- par(bg = "#f7f7f7", pty="s")
 
 patch_radius <- c(seq(0.5, 0.9, length.out = 5),
@@ -584,7 +606,7 @@ shift_y <- seq(0, 0.3, length.out = 30)
 
 We can now generate the animation in GIF format.
 
-```{r, animation.hook="gifski", interval=0.1, cache=TRUE}
+```{r, animation.hook="gifski", interval=0.1, cache=TRUE, fig.align='center'}
 op <- par(bg = "#f7f7f7", pty="s")
 
 subpatch_radius <- 1
@@ -642,8 +664,11 @@ for (ii in 1:30) {
 
 ##### Conclusion
 
-We have completed the most challenging part of this mini-project, which is to
+We have completed the most technical part of this mini-project, which is to
 illustrate the different parameters that conditions SIFT's anatomy through
 various animations. This mini-project turns out to be quite time-consuming yet
-rewarding and most of all, it has highlighted how visual communication remains
-an art.
+rewarding and most of all, it has highlighted that visual communication largely
+remains an art.
+
+Much remains to be improved and could be done later while I am learning on the
+way.

@@ -21,8 +21,9 @@ Personally I love SIFT. Despite the popularisation and widespread use of deep
 learning approaches where they do shine in high-level image recognition tasks,
 this hand-engineered descriptor is still state-of-the-art. As shown in
 [@schoenberger2017comparative] on the more specific task of
-structure-from-motion, SIFT is a brilliant demonstration that the human mind can
-still compete and even outshine with machine-learned features.
+structure-from-motion, SIFT is a brilliant demonstration that traditional
+approaches^[crafted through human intelligence :)] can still be outcompete
+machine-learned features in some instances.
 
 *Going slightly off-topic, this evaluation fundamentally dispels once more the
 ongoing trend that (1) ever more data and (2) ever bigger models is the way to
@@ -179,24 +180,43 @@ histogram to another or from one orientation to another."*
 In more details, this is so that we can compensate for the *noisy* estimation of
 keypoint $k$. If we did not apply the trilinear interpolation, a pixel at the
 boundary of a subpatch patch could fall suddenly in another adjacent image
-patch. As illustrated \@ref(fig:patches-nonoverlapping), this could have a
-catastrophic effect in the performance of the SIFT descriptor.
+patch. As illustrated in Figure \@ref(fig:patches-nonoverlapping), this could
+have a catastrophic effect in the performance of the SIFT descriptor.
 
-**TODO: illustrate the blue cross and the deviation from the true localisation
-in scale-space and orientation. One point belongs to only one patch.**
+Figure \@ref(fig:patches-nonoverlapping) tells a much longer story, which goes
+as follows. Suppose that there is an identifiable keypoint with ground-truth
+localization $k = (x = 0, y = 0, \theta = 0, \sigma = 1)$. Translating in R
+language yields:
+
+```{r}
+patch_center <- c(0, 0)
+patch_orientation <- 0
+patch_scale <- 1
+subpatch_radius <- 0.5
+```
 
 ```{r, echo=FALSE}
 N <- 4
 j <- 0:(N - 1)
 i <- 0:(N - 1)
 
-patch_center <- c(0, 0)
-
 xi <- i - (N - 1) / 2
 yj <- j - (N - 1) / 2
+```
 
+
+The ground-truth image patch corresponds to the immobile upright patch centered
+in $(0, 0)$, where each sub-patch has its centers illustrated in blue dots and
+has a square side length equal to $1$, thus a radius equal to $0.5$.
+
+Let us also consider a point in this image patch highlighted by the blue cross
+in Figure \@ref(fig:patches-nonoverlapping) with the following coordinates:
+
+```{r}
 point_in_patch <- c(-0.8, 1.1)
+```
 
+```{r, echo=FALSE}
 region_min_max_x <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
 region_min_max_y <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
 ```
@@ -287,13 +307,29 @@ draw_patch <- function(center, theta, scale, subpatch_radius,
 }
 ```
 
-```{r, echo=FALSE}
+In real life, the feature detector, as imperfect as it is, will not detect
+this feature at the exact location $(x, y, \sigma)$ in the scale-space and with
+the exact orientation $\theta$. Let us imagine that the noisy localization
+of this keypoint by the detector can vary wildly from the ground truth. We will
+deviate the estimated localization $(x, y, \theta, \sigma)$ smoothly in the
+following range:
+
+
+```{r}
 theta <- seq(0, 0.2, length.out = 30)
 scale_inc <- seq(1, 1.3, length.out = 30)
 scale_dec <- seq(1, 0.8, length.out = 30)
 shift_x <- seq(0, 0.5, length.out = 30)
 shift_y <- seq(0, 0.3, length.out = 30)
 ```
+
+As animated in Figure \@ref(fig:patches-overlapping), by smoothly varying these
+parameters, the image patch corresponding to the noisy keypoint localization,
+will drift further and further away from the ground-truth immobile image patch.
+Very early, the blue cross will not fall in the cyan sub-patch anymore and
+instead fall in either the green, red, or lavender subpatch. As a result each
+histogram of gradients computed in each subpatch will sharply diverge represent
+from the ground truth histogram for small deviations.
 
 ```{r patches-nonoverlapping, animation.hook="gifski", interval=0.1, cache=TRUE, echo=FALSE, fig.align='center', fig.cap="SIFT Grid Geometry: Non-Overlapping Sub-Patches"}
 op <- par(bg = "#f7f7f7", pty="s")
@@ -313,7 +349,7 @@ for (ii in 1:30) {
              color = "slateblue")
 
   # The noisy image patch.
-  draw_patch(patch_center_shifted, theta[ii], scale[ii], 0.5,
+  draw_patch(patch_center_shifted, theta[ii], scale_inc[ii], 0.5,
              color = "orangered")
 
   mtext("Without Overlapping")
@@ -334,17 +370,22 @@ for (ii in 1:30) {
              color = "slateblue")
 
   # The noisy image patch.
-  draw_patch(patch_center_shifted, -theta[ii], scale2[ii], 0.5,
+  draw_patch(patch_center_shifted, -theta[ii], scale_dec[ii], 0.5,
              color = "orangered")
 
   mtext("Without Overlapping")
 }
 ```
 
-To compensate the boundary effect, the trilinear interpolation means that we
-have to increase the radius of each sub-patch (i, j) that compose the grid, which
-causes them to overlap each other as shown in Figure
-\@ref(fig:patches-radius-increase).
+To mitigate such boundary effect that could be catastrophic, [@Lowe:2004:ijcv]
+resorts to the trilinear interpolation. That means that we have to increase the
+radius of each subpatch (i, j) in the grid. In turn this causes them to overlap
+each other as shown in Figure \@ref(fig:patches-radius-increase). Each subpatch
+has their radius increase from $0.5$ to $1$.
+
+As highlighted with the color blending in Figure
+\@ref(fig:patches-radius-increase), the blue cross will this time belong to $4$
+subpatches: the lavender, cyan, red and green subpatches.
 
 ```{r patches-radius-increase, animation.hook="gifski", interval=0.1, cache=TRUE, echo=FALSE, fig.align='center', fig.cap="Increase of the Sub-Patch Radius"}
 op <- par(bg = "#f7f7f7", pty="s")
@@ -368,11 +409,28 @@ for (ii in 1:30) {
 }
 ```
 
-With the overlapping of sub-patches in the grid, the histogram of gradients can
-reflect the photometric information more robustly agains the noisy estimation of
-the keypoint localisation because every pixel in $\mathcal{P}$ belongs up to $4$
-adjacent patches $\mathcal{P}_{i'j'}$ for $i \leq i' \leq i + 1$ and $j \leq j'
-\leq j + 1$. We illustrate this benefit in Figure \@ref(fig:patches-overlapping).
+Now this time, Figure \@ref(fig:patches-overlapping) illustrates the following
+behavior with the overlapping of subpatches:
+
+1. If we deviate from the ground-truth keypoint localization again, the blue
+cross will keep belonging to all 4 patches provided that the deviation from the
+ground-truth is moderate. By design, we can hope and expect the histogram of
+gradients to be close to the gound-truth histograms.
+
+2. At some point the noisy patch becomes so different from the ground-truth
+patch and the blue cross will not belong to all the 4 subpatches. When we arrive
+to this point, the histogram of gradients should differ as sharply as possible
+from the ground-truth histogram of gradients.
+
+That is the balance that SIFT strives to achieve and its widespread adoption in
+3D reconstruction is a good testimony of how well the descriptor performs.
+
+:::fyi
+We can make *many many many* more useful comments but hopefully my aim is to
+bring enough insights in helping you to understand SIFT and come up with your
+own descriptor. If you don't like or disagree with some of my explanation, let
+me know and suggest what I can improve.
+:::
 
 ```{r patches-overlapping, animation.hook="gifski", interval=0.1, cache=TRUE, echo=FALSE, fig.align='center', fig.cap="SIFT Grid Geometry: Overlapping Sub-Patches."}
 op <- par(bg = "#f7f7f7", pty="s")
@@ -430,21 +488,23 @@ for (ii in 1:30) {
 }
 ```
 
-Then we can encode the photometric information of each patch $\mathcal{P}_{ij}$
-into a histogram $\mathbf{h}_{ij} \in \mathbb{R}^O$ of *gradient orientations*,
-where the orientations are binned into $O$ principal orientations. Again with
-trilinear interpolation, we compensate for the noisy orientation $\theta$ and as
-a result:
+We talked mostly about the benefit due the patch overlap but for the same
+reason, [@Lowe:2004:ijcv] extends the idea to orientation bins. Orientations are
+binned into $O$ principal orientations and again with the trilinear
+interpolation, we compensate for the noisy orientation $\theta$. This leads us
+to the following note.
 
 :::note
-The histogram bins $\mathbf{h}[i, j, o]$ overlap as each of them covers the
+By design the histogram bins $\mathbf{h}[i, j, o]$ overlap as each of them covers the
 interval of orientations $[\frac{2 \pi}{O} (o - 1), \frac{2 \pi}{O} (o + 1)]$.
+
+In the end, image gradient contributes to at most $8$ SIFT bins $\mathbf{h}[i,
+j, o]$.
 :::
 
 The trilinear interpolation reweighs appropriately the contribution of each
 pixel depending on their distance to each sub-patch center. We will detail this
 in a later sections.
-
 
 #### Geometry of Overlapping Patches
 
