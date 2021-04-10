@@ -1,6 +1,9 @@
+\newcommand{\ji}{\begin{bmatrix} j \\ i \end{bmatrix}}
+\newcommand{\oneone}{\begin{bmatrix} 1 \\ 1 \end{bmatrix}}
+
 # Descriptors
 
-At this time, this chapter contains only one section where I write about the
+At this time, this chapter contains only one section in which I write about the
 SIFT descriptor.
 
 ## SIFT
@@ -34,12 +37,12 @@ this.]. Doing so would enable us to learn not only better from the data but also
 from far less data.*
 
 :::fyi
-In this section, I clarify one big confusion that I had when comparing the
+In this section, I clarify the big confusion that I had when comparing the
 original implementation of [@Lowe:2004:ijcv] and the explanations provided in
 the paper. When I started studying computer vision, many people found the paper
 fairly clear for them but that was not the case for me... far from it!
 
-In fact the drawing that illustrates the local image descriptor in
+For example, the drawing that illustrates the local image descriptor in
 [@Lowe:2004:ijcv] did not match the mental representation I had and I lacked the
 intellectual maturity to actually understand the text at that time. So this text
 would represent how I wished the paper would actually explain the algorithmic
@@ -205,15 +208,16 @@ scale-space: *"It is important to avoid all boundary affects in which the
 descriptor abruptly changes as a sample shifts smoothly from being within one
 histogram to another or from one orientation to another."*
 
-In other words, this is so that we can compensate for the *noisy* estimation of
+In other words, this is so that we can mitigate the *noisy* estimation of
 keypoint $k$. If we did not apply the trilinear interpolation, that actually
-means that the grid of patches are mutually disjoint as illustrated in Figure
-\@ref(fig:patches-nonoverlapping). Because of the noisy estimation, a pixel at the
-boundary of a subpatch patch could then fall suddenly in another adjacent image
-patch. In turn this would have a catastrophic effect in the performance of the
-SIFT descriptor if we cumulate the contributions of all such pixels.
+means that the patches in the grid are mutually disjoint as illustrated in
+Figure \@ref(fig:patches-nonoverlapping). Because of the noisy estimation, a
+pixel at the boundary of a subpatch patch could then fall suddenly in another
+adjacent image patch. In turn this would have a catastrophic effect in the
+performance of the SIFT descriptor if we cumulate the contributions of all such
+pixels.
 
-In fact, Figure \@ref(fig:patches-nonoverlapping) tells a much longer story,
+In fact Figure \@ref(fig:patches-nonoverlapping) tells a much longer story,
 which goes as follows. Suppose that there is an identifiable keypoint with
 ground-truth localization $k = (x = 0, y = 0, \theta = 0, \sigma = 1)$. We will
 forget about $\lambda_\text{zoom}$ and set it to 1 for the purpose of
@@ -532,7 +536,7 @@ for (ii in 1:steps) {
 We talked mostly about the benefit brought by the patch overlap but for the same
 reason, [@Lowe:2004:ijcv] also extends the idea to orientation bins.
 Orientations are binned into $O$ principal orientations and again with the
-trilinear interpolation, we compensate for the noisy orientation $\theta$. This
+trilinear interpolation, we mitigate for the noisy orientation $\theta$. This
 leads us to the following note.
 
 :::note
@@ -561,19 +565,19 @@ $\mathcal{C}_k$:
   - its top-left corner at
 
     \begin{equation}
-      \mathbf{c}_{ij}^{\text{tl}} = [j, i] - \frac{N + 1}{2} [1, 1]
+      \mathbf{c}_{ij}^{\text{tl}} = \ji - \frac{N + 1}{2} \oneone
     \end{equation}
 
   - its bottom-right corner at
 
     \begin{equation}
-      \mathbf{c}_{ij}^{\text{br}} = [j, i] - \frac{N - 3}{2} [1, 1]
+      \mathbf{c}_{ij}^{\text{br}} = \ji - \frac{N - 3}{2} \oneone
     \end{equation}
 
   - its center at
 
     \begin{equation}
-      \mathbf{c}_{ij} = [j, i] - \frac{N - 1}{2} [1, 1]
+      \mathbf{c}_{ij} = \ji - \frac{N - 1}{2} \oneone
     \end{equation}
 
 Clearly a patch $\mathcal{P}_{ij}$ is a closed ball centered in
@@ -587,7 +591,7 @@ indices $(i, j)$ if we shift each coordinate by the quantity $\frac{N - 1}{2}$.
 This observation will be useful to determine which histogram bins needs to be
 accumulated for each given pixel.
 
-Thus the centers are
+As also illustrated in the figures above, the centers are numerically
 
 \begin{equation}
   \left[
@@ -603,7 +607,8 @@ Thus the centers are
   \right]
 \end{equation}
 
-Equivalently with array broadcasting (as in *NumPy* concept):
+Equivalently using array broadcasting (as in a *NumPy* concept), integral
+coordinates appear smoothly as follows:
 
 \begin{equation}
   \left[
@@ -619,6 +624,8 @@ Equivalently with array broadcasting (as in *NumPy* concept):
   \right]
   - [1.5, 1.5]
 \end{equation}
+
+This leads us to define a new coordinate system in the sequel.
 
 #### SIFT Coordinate System
 
@@ -666,6 +673,7 @@ We then see equivalently that
   -1 \leq \hat{v} \leq N
   \end{aligned}
   \right.
+  (\#eq:sift-coords-domain)
 \end{equation}
 
 In matrix notation and using homogeneous coordinates, the normalizing
@@ -739,7 +747,7 @@ histogram $\mathbf{h}_{ij}$ is
 \end{equation}
 
 [@Lowe:2004:ijcv] chooses to give more emphasis to gradients close to the
-keypoint center $\mathbf{x}$ to compensate for the noisy estimation of
+keypoint center $\mathbf{x}$ to mitigate for the noisy estimation of
 keypoint.
 
 With the trilinear interpolation, its contribution to $\mathbf{h}_{ij}$
@@ -810,21 +818,19 @@ enough image patch, e.g., radius
   \boxed{r = \sqrt{2} \frac{N + 1}{2} \lambda_{\text{zoom}} \sigma}
 \end{equation}
 
-In the formula above, notice that:
+In the formula above, we notice the following.
 
-- the factor $\sqrt{2}$: because the square patches are oriented with an angle
-  $\theta \neq 0$, we need to make sure we are not missing any pixels in
-  particular the corners of the patches; granted that we consider pixels that
-  are outside the patch domain and possibly there could be many of them that
-  need to be discarded.
-- if the orientation $\theta$ was zero, we could check that a radius $r =
+- The factor $\frac{N + 1}{2}$ is used instead of $\frac{N}{2}$: as shown in
+  Equation \@ref(eq:sift-coords-domain), this factor accounts for gradients for
+  patches "at the border" of the image patch $\mathcal{P}$. These are gradients
+  "at the border" who belong to either only one histogram ("at the corners") or
+  two histograms ("at the edges").
+- There is the factor $\sqrt{2}$: because the square patches are oriented with
+  an angle $\theta \neq 0$, we need to make sure we are not missing any pixels
+  at the corners of the patches. This is at the cost of considering pixels that
+  are outside the patch domain and possibly there could be many of them.
+- If the orientation $\theta$ was zero, we could check that a radius $r =
   \frac{N + 1}{2} \lambda_{\text{zoom}} \sigma$ would have been sufficient.
-- the factor $\frac{(N + 1)}{2}$: this accounts for gradients for patches
-  "at the border" of the image patch $\mathcal{P}$. These gradients "at
-  the border" may belong to only one histogram ("at the corners") or two
-  histograms ("at the edges").
-
-**TODO: illustrate.**
 
 The SIFT descriptor for keypoint $k$ is calculated as follows:
 
@@ -841,8 +847,8 @@ For each pixel $\mathbf{u} = (u, v) \in [x-r,x+r] \times [y-r, y+r]$:
 
 4. accumulate histograms using trilinear interpolation (*to be cont'd*)
 
-In practice the gradients are precomputed only once in polar coordinates for
-efficiency at every scale of the Gaussian pyramid.
+In practice the gradients are precomputed all at once in polar coordinates for
+efficiency and at every scale of the Gaussian pyramid.
 :::
 
 The computation of SIFT in *C++* can be sketched as follows:

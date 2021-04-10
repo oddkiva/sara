@@ -2,7 +2,8 @@
 
 This method is originally published in CVPR [@nister:2003:cvpr] and republished
 at length in PAMI [@nister:2004:pami]. It solves the essential matrix from $5$
-point correspondences. I found the PAMI article [@nister:2004:pami] clearer.
+point correspondences. Here I revisit the PAMI article [@nister:2004:pami] which
+I found clearer.
 
 ### Underdetermined System of Linear Equations
 
@@ -402,4 +403,4 @@ allow us to retrieve the corresponding scalars $x_i$ and $y_i$. From
 there we recover all the candidate essential matrices by linear combination as
 exposed above.
 
-The physically valid essential matrices are those who are cheiral.
+The essential matrices that are physically valid are those who are cheiral.
