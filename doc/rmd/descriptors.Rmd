@@ -57,9 +57,9 @@ as *descriptor*. We only focus on the *descriptor* part.
 In the sequel, let us denote an oriented scale-invariant local keypoint by $k =
 (x, y, \sigma, \theta)$ where:
 
-- $(x, y)$ are the 2D pixel coordinates of the keypoint,
+- $\mathbf{x} = (x, y)$ is the vector of 2D pixel coordinates of the keypoint,
 - $\sigma$ is the scale at which the keypoint is detected,
-- $\theta$ is the orientation of the dominant gradient.
+- $\theta$ is the orientation of the dominant image gradient.
 
 
 ### Interpretation
@@ -367,7 +367,7 @@ shift_x <- seq(0, 0.5, length.out = steps)
 shift_y <- seq(0, 0.3, length.out = steps)
 ```
 
-As animated in Figure \@ref(fig:patches-overlapping), by smoothly varying these
+As animated in Figure \@ref(fig:patches-nonoverlapping), by smoothly varying these
 parameters, the image patch corresponding to the noisy keypoint localization,
 will drift further and further away from the ground-truth immobile image patch.
 Very early, the blue cross will not fall in the cyan sub-patch anymore and
@@ -422,10 +422,11 @@ for (ii in 1:steps) {
 ```
 
 To mitigate such boundary effect, [@Lowe:2004:ijcv] resorts to the trilinear
-interpolation. That mean that we have to increase the radius of each subpatch
+interpolation. That means that we have to increase the radius of each subpatch
 (i, j) in the grid. In turn this causes them to overlap each other as shown in
 Figure \@ref(fig:patches-radius-increase). Each subpatch has their radius
-increase from $0.5$ to $1$.
+increased from $0.5$ to $1$. Also notice that we don't change the position of the
+centers.
 
 As highlighted with the *color blending* in Figure
 \@ref(fig:patches-radius-increase), the blue cross will this time belong to not

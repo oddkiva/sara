@@ -29,5 +29,4 @@ rmd_files:
     "datasets.Rmd",
     "learning_journeys.Rmd",
     "learning_journey_in_R.Rmd",
-    "bibliography.Rmd"
   ]
