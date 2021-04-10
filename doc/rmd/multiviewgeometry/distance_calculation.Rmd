@@ -66,16 +66,16 @@ By similar triangles it follows that
 
 We can inject the equations to calculate $z$:
 
-\begin{equation}
-  v = \frac{y_C}{z_C} \\
-  v = \frac{h \cos\theta - z \sin\theta}{h \sin\theta + z\cos\theta} \\
-  v (h \sin\theta + z\cos\theta) = h \cos\theta - z \sin\theta \\
-\end{equation}
+\begin{align*}
+  v &= \frac{y_C}{z_C} \\
+  v &= \frac{h \cos\theta - z \sin\theta}{h \sin\theta + z\cos\theta} \\
+  v (h \sin\theta + z\cos\theta) &= h \cos\theta - z \sin\theta \\
+  z (v\cos\theta + \sin\theta) &= h (\cos\theta - v \sin\theta)
+\end{align*}
 
-Reordering in $z$:
+In the end:
 
 \begin{equation}
-  z (v\cos\theta + \sin\theta) = h (\cos\theta - v \sin\theta) \\
   z = h \frac{\cos\theta - v \sin\theta}{\sin\theta + v\cos\theta} \\
 \end{equation}
 

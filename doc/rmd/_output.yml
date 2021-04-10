@@ -32,4 +32,5 @@ bookdown::pdf_book:
     "bbm",
     "stmaryrd",
     "mathrsfs",
+    "animate"
   ]

@@ -47,7 +47,7 @@ detail these for algorithms and methods that I understand well.
 *Finally, these notes reflect the best of my understanding as of this writing.
 While I work hard to check that my contents are factually correct, I, as a human
 being, am not certainly not immune to misunderstanding or errors. Should you
-find any, __please please please__ report back to me and take to explain to me.*
+find any, __please pretty please__ report back to me and explain to me.*
 
 ```{r, echo = FALSE}
 include_svg = function(path) {
@@ -63,21 +63,21 @@ include_svg = function(path) {
 ```
 
 ```{r, echo = FALSE}
-cc_by_image_url <- "https://i.creativecommons.org/l/by/4.0/88x31.png"
-cc_by_image_file <- "figures/cc_by_image.png"
+cc_by_image_url <- 'https://i.creativecommons.org/l/by/4.0/88x31.png'
+cc_by_image_file <- 'figures/cc_by_image.png'
 
 cc_by_shield_url <- "https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg"
 cc_by_shield_file <- "figures/cc_by_shield.svg"
 
 if (knitr::is_latex_output() & !file.exists(cc_by_image_file)) {
   download.file(cc_by_image_url, cc_by_image_file, mode = 'wb')
-} else {
+} else if (!knitr::is_latex_output()) {
   cc_by_image_file <- cc_by_image_url
 }
 
 if (knitr::is_latex_output() & !file.exists(cc_by_shield_file)) {
   download.file(cc_by_shield_url, cc_by_shield_file, mode = 'wb')
-} else {
+} else if (!knitr::is_latex_output()) {
   cc_by_shield_file <- cc_by_image_url
 }
 ```

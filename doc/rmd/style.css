@@ -1,14 +1,13 @@
 @import url('http://fonts.cdnfonts.com/css/tex-gyre-heros');
 @import url('http://fonts.cdnfonts.com/css/latin-modern-roman');
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700');
 /* @import url('https://fonts.googleapis.com/css?family=Crimson+Text:400,600,700'); */
 
 .book.font-family-0 {
-  font-family: "LMRoman10", "Computer Modern Serif", times, Georgia, serif;
+  font-family: "LMRoman10", times, Georgia, serif;
 }
 
 .book.font-family-1 {
-  font-family: "Open Sans", "TexGyreHeros", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "TexGyreHeros", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 div.puzzle, div.fyi, div.demo, div.note {

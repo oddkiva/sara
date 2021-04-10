@@ -254,6 +254,11 @@ region_min_max_x <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
 region_min_max_y <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
 ```
 
+```{r, echo=FALSE}
+x_view_min_max <- c(region_min_max_x[1] - 1, region_min_max_x[2] + 1)
+y_view_min_max <- c(region_min_max_y[1] - 1, region_min_max_y[2] + 1)
+```
+
 ```{r, cache=TRUE, echo=FALSE}
 draw_patch <- function(center, theta, scale, subpatch_radius,
                        color = "red") {
@@ -349,11 +354,13 @@ following range:
 
 
 ```{r}
-theta <- seq(0, 0.2, length.out = 30)
-scale_inc <- seq(1, 1.3, length.out = 30)
-scale_dec <- seq(1, 0.8, length.out = 30)
-shift_x <- seq(0, 0.5, length.out = 30)
-shift_y <- seq(0, 0.3, length.out = 30)
+steps <- 30
+
+theta <- seq(0, 0.2, length.out = steps)
+scale_inc <- seq(1, 1.3, length.out = steps)
+scale_dec <- seq(1, 0.8, length.out = steps)
+shift_x <- seq(0, 0.5, length.out = steps)
+shift_y <- seq(0, 0.3, length.out = steps)
 ```
 
 As animated in Figure \@ref(fig:patches-overlapping), by smoothly varying these
@@ -367,7 +374,7 @@ ground truth histogram for small deviations.
 ```{r patches-nonoverlapping, animation.hook="gifski", interval=0.1, cache=TRUE, echo=FALSE, fig.align='center', fig.cap="SIFT Grid Geometry: Non-Overlapping Sub-Patches"}
 op <- par(bg = "#f7f7f7", pty="s")
 
-for (ii in 1:30) {
+for (ii in 1:steps) {
   # Reset the canvas
   plot(x_view_min_max, y_view_min_max,
        type = "n",                      # Reset the canvas
@@ -388,7 +395,7 @@ for (ii in 1:30) {
   mtext("Without Overlapping")
 }
 
-for (ii in 1:30) {
+for (ii in 1:steps) {
   # Reset the canvas
   plot(x_view_min_max, y_view_min_max,
        type = "n",                      # Reset the canvas
@@ -428,7 +435,7 @@ patch_radius <- c(seq(0.5, 0.9, length.out = 5),
                   seq(0.9, 0.99, length.out = 5),
                   seq(0.99, 1, length.out = 20))
 
-for (ii in 1:30) {
+for (ii in 1:steps) {
   # Reset the canvas
   plot(x_view_min_max, y_view_min_max,
        type = "n",                      # Reset the canvas
@@ -470,12 +477,12 @@ me know and suggest what I can improve.
 op <- par(bg = "#f7f7f7", pty="s")
 
 subpatch_radius <- 1
-theta <- seq(0, 0.2, length.out = 30)
-scale <- seq(1, 1.3, length.out = 30)
-shift_x <- seq(0, 0.5, length.out = 30)
-shift_y <- seq(0, 0.3, length.out = 30)
+theta <- seq(0, 0.2, length.out = steps)
+scale <- seq(1, 1.3, length.out = steps)
+shift_x <- seq(0, 0.5, length.out = steps)
+shift_y <- seq(0, 0.3, length.out = steps)
 
-for (ii in 1:30) {
+for (ii in 1:steps) {
   # Reset the canvas
   plot(x_view_min_max, y_view_min_max,
        type = "n",                      # Reset the canvas
@@ -498,7 +505,7 @@ for (ii in 1:30) {
   mtext("With Overlapping")
 }
 
-for (ii in 1:30) {
+for (ii in 1:steps) {
   # Reset the canvas
   plot(x_view_min_max, y_view_min_max,
        type = "n",                      # Reset the canvas
@@ -538,7 +545,7 @@ $\mathbf{h}[i, j, o]$.
 
 The trilinear interpolation reweighs appropriately the contribution of each
 pixel depending on their distance to each sub-patch center. We will detail this
-in a later sections.
+in a later section.
 
 #### Geometry of Overlapping Patches
 
@@ -650,22 +657,7 @@ coordinates* $\hat{\mathbf{u}} = (\hat{u}, \hat{v})$
 \end{equation}
 ```
 
-We see equivalently
-
-\begin{equation}
-  \left\{
-  \begin{aligned}
-  -1 \leq \hat{u} \leq N \\
-  -1 \leq \hat{v} \leq N
-  \end{aligned}
-  \right.
-\end{equation}
-
-In matrix notation and using homogeneous coordinates, the normalizing
-transform $\mathbf{T}_\text{SIFT}$ transforms *image coordinates*
-$\mathbf{u}$ to *SIFT coordinates* $\hat{\mathbf{u}}$ as follows
-
-We see equivalently
+We then see equivalently that
 
 \begin{equation}
   \left\{
@@ -858,8 +850,9 @@ The computation of SIFT in *C++* can be sketched as follows:
 ```cpp
 using descriptor_type = Eigen::Matrix<float, 128, 1>;
 
-auto compute_sift_descriptor(float x, float y, float sigma, float theta,
-                             const Image<Vector2f, 2>& grad_polar_coords)
+auto compute_sift_descriptor(
+    float x, float y, float sigma, float theta,
+    const Image<Vector2f, 2>& grad_polar_coords)
     -> descriptor_type
 {
   constexpr auto lambda_zoom = 3.f;
@@ -874,7 +867,8 @@ auto compute_sift_descriptor(float x, float y, float sigma, float theta,
   const auto r = sqrt(2.f) * s * (N + 1) / 2.f;
 
   // Linear part of the normalization transform.
-  const Eigen::Matrix2f T = Eigen::Rotation2D<float>{-theta}::toRotationMatrix() / s;
+  const Eigen::Matrix2f T =
+      Eigen::Rotation2D<float>{-theta}::toRotationMatrix() / s;
 
   // Loop to perform interpolation
   const auto rounded_r = static_cast<int>(std::round(r));
@@ -887,17 +881,21 @@ auto compute_sift_descriptor(float x, float y, float sigma, float theta,
       // Retrieve the normalized coordinates.
       const Vector2f pos = T * Vector2f(u, v);
 
+      const auto u1 = rounded_x + u;
+      const auto v1 = rounded_y + v;
+
       // Boundary check.
-      if (rounded_x + u < 0 || rounded_x + u >= grad_polar_coords.width() ||
-          rounded_y + v < 0 || rounded_y + v >= grad_polar_coords.height())
+      if (u1 < 0 || u1 >= grad_polar_coords.width() ||
+          v1 < 0 || v1 >= grad_polar_coords.height())
         continue;
 
       // Gaussian weight contribution.
-      const auto weight = exp(-pos.squaredNorm() / (2.f * pow(N / 2.f, 2)));
+      const auto weight = exp(-pos.squaredNorm()
+                        / (2.f * pow(N / 2.f, 2)));
 
       // Read the precomputed gradient (in polar coordinates).
-      const auto mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);
-      auto ori = grad_polar_coords(rounded_x + u, rounded_y + v)(1) - theta;
+      const auto mag = grad_polar_coords(u1, v1)(0);
+      auto ori = grad_polar_coords(u1, v1)(1) - theta;
 
       // Normalize the orientation.
       ori = ori < 0.f ? ori + 2.f * pi : ori;
@@ -907,10 +905,12 @@ auto compute_sift_descriptor(float x, float y, float sigma, float theta,
       pos.array() += N / 2.f - 0.5f;
 
       // Discard pixels that are not in the oriented patch.
-      if (pos.minCoeff() <= -1.f || pos.maxCoeff() >= static_cast<float>(N))
+      if (pos.minCoeff() <= -1.f ||
+          pos.maxCoeff() >= static_cast<float>(N))
         continue;
 
-      // Accumulate the 4 gradient histograms using trilinear interpolation.
+      // Accumulate the 4 gradient histograms using trilinear
+      // interpolation.
       trilinear_interpolation(h, pos, ori, weight, mag);
     }
   }
@@ -937,7 +937,9 @@ void trilinear_interpolation(descriptor_type& h,
   const auto yi = static_cast<int>(pos.y());
   const auto orii = static_cast<int>(ori);
 
-  auto at = [](int y, int x, int o) { return y * N * O + x * O + o; };
+  auto at = [](int y, int x, int o) {
+    return y * N * O + x * O + o;
+  };
 
   for (auto dy = 0; dy < 2; ++dy)
   {
@@ -986,10 +988,11 @@ void trilinear_interpolation(descriptor_type& h,
 Using *Eigen*, we can express these in *C++*:
 
 ```cpp
-auto enforce_invariance_to_illumination_changes(descriptor_type& h) -> void
+auto enforce_invariance_to_illumination_changes(
+  descriptor_type& h) -> void
 {
-  // SIFT is by construction invariant to brightness change since it is based
-  // on gradients.
+  // SIFT is by construction invariant to brightness change since
+  // it is based on gradients.
 
   // Make the descriptor robust to contrast change.
   h.normalize();

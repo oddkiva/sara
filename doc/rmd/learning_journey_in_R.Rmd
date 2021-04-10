@@ -32,7 +32,7 @@ about *jupyter-book* (https://jupyterbook.org) is also available. However it is
 not yet clear to me whether it has multilanguage support as good as in
 *bookdown*. So I will stick with *bookdown* for now.
 
-## Code
+## Code Cheatsheet
 
 If it is not done yet, I would recommend you to read the section 3.1 of the
 online book first: https://bookdown.org/yihui/rmarkdown-cookbook/r-code.html
@@ -672,3 +672,28 @@ remains an art.
 
 Much remains to be improved and could be done later while I am learning on the
 way.
+
+## Linear Algebra Cheatsheet
+
+Array broadcasting is wonderful in NumPy:
+
+```{python}
+import numpy as np
+
+a = np.arange(0, 10).reshape((2, 5))
+b = np.arange(0, 2).reshape((2, 1))
+
+a + b
+```
+
+In R we have to use a more verbose way to achieve the equivalent operation using
+`sweep`
+
+```{r}
+a <- matrix(0:9, nrow = 2, byrow = TRUE)
+b <- matrix(0:1, nrow = 2)
+
+sweep(a, 1, b, "+")
+```
+
+A bit disappointing in terms in conciseness but it works.
