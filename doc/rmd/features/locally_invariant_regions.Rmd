@@ -1,0 +1,106 @@
+## Geometric Characteristics of a Locally Invariant Region
+
+In general any locally invariant region, *a.k.a.* feature, be it SIFT, SURF,
+MSER, or any affine-covariant features, has a common set of geometric
+characteristics which we detail in the sequel. In practice in multiple view
+geometry and structure-from-motion, they tend to be viewed as mere points in the
+images but they are actually much more than that.
+
+Before moving forward in this chapter, let us denote a feature by the italic
+text letter $x$ for convenience.
+
+More than just being a point indeed, a feature $x$ is fully characterized by:
+
+- a center with pixel coordinates $\x \in \mathbb{R}^2$,
+  which structure-from-motion pipelines only utilize,
+
+- a shape $\Shape_x$, which represents the (possibly anisotropic) scale of
+  feature $x$ and can be summarized^[MSER is a special case as I'll explain
+  further below] as an ellipse as follows:
+
+  \begin{equation}
+    \Shape_x \eqdef \left\{ \x' \in \mathbb{R}^2\ \left|\ (\x'-\x)^T \bSigma_x
+  (\x'-\x) \leq 1 \right. \right\},
+  \end{equation}
+
+  where $\bSigma_x \in \mathbb{R}^{2\times 2}$ is a scale matrix.
+
+- a dominant gradient orientation $\theta_x$ if it is calculated.
+
+The scale matrix $\bSigma_x$ also allows to define a *scale-normalized signed
+distance function* to $x$:
+
+\begin{equation}
+  d_x(\x') \eqdef (\x' - \x)^T \bSigma (\x' - \x) - 1,
+\end{equation}
+
+where the zero level set is the *elliptic* shape of the feature.
+
+An example of a SIFT feature is illustrated in Figure \@ref(fig:sift-feature).
+To be more accurate, what SIFT detects are *local extrema of Difference of
+Gaussians*, which we term simply as DoG for brevity. By design, a DoG feature is
+circular and only guarantees a similarity invariant representation
+(scale+rotation) in contrast to other affine invariant features presented in
+[@MikolajczykTSZMSKVG:2005:ijcv].
+
+```{r sift-feature, echo=FALSE, fig.align='center', fig.cap="Geometric characteristics of a SIFT feature. Credits: http://www.vlfeat.org/overview/sift.html."}
+
+knitr::include_graphics(paste0(getwd(), "/feature.png"))
+```
+
+In fact, MSER features [@MatasCUP:2002:bmvc] are more than just an elliptic
+shape: they are a set of connected pixels. That allows us to represent a much
+richer set of shapes, and we can use them for letter recognition. See for
+example [@GomezK:2014:icpr].
+
+As I carefully said it above, a MSER feature is *summarized* more compactly as
+an elliptic region by calculating a second-order moment matrix. To do so, we
+cumulate the locations of all the pixels in the MSER as follows:
+
+\begin{equation}
+  \bSigma_x^{-1} = \begin{bmatrix}
+    \sum_{\mathbf{x}'} (\mathbf{x}'_1 - \mathbf{x}_1)^2 &
+    %
+    \sum_{\mathbf{x}'}
+      (\mathbf{x}'_1 * \mathbf{x}'_2 -
+      \bar{\mathbf{x}}_1 \bar{\mathbf{x}}_2)^2 \\
+    %
+    \sum_{\mathbf{x}'}
+      (\mathbf{x}'_1 * \mathbf{x}'_2 -
+    \bar{\mathbf{x}}_1 \bar{\mathbf{x}}_2)^2 &
+    %
+    \sum_{\mathbf{x}'} (\mathbf{x}'_2 - \mathbf{x}_2)^2
+  \end{bmatrix},
+\end{equation}
+
+The second-order moment matrix being also the inverse of the scale matrix.
+
+<!--
+Note that, while affine-covariant keypoint scales are elliptic, e.g.,
+with a Harris-affine detector, others such as DoG-SIFT scales are
+isotropic, i.e., circular as shown in Figure \ref{fig:feature}. Examples of elliptic features are shown in Figure \ref{fig:AffineCovariantRegions}.
+
+The orientation is typically given by the
+dominant gradient direction around $x$ at some appropriate scale.
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=\textwidth]{figures/AffineCovariantRegions.png}
+	\caption[Different elliptic features]{Different elliptic features. Credits: \citep{MikolajczykTSZMSKVG:2005:ijcv}.}
+	\label{fig:AffineCovariantRegions}
+\end{figure}
+
+The Feature descriptor abstracts the image
+around $x$, also at some appropriate scale, for comparison
+with other detected features.
+%
+In particular, the SIFT descriptor corresponds to a concatenation of histograms of local gradients on a patch with appropriate size and centered on the feature position as illustrated in Figure \ref{fig:SiftDescriptor}.
+
+\begin{figure}[ht]
+	\centering
+		\includegraphics[width=\textwidth]{figures/SiftDescriptor.png}
+	\caption[The SIFT descriptor]{The SIFT descriptor. Credits: \citep{Lowe:2004:ijcv}.}
+	\label{fig:SiftDescriptor}
+\end{figure}
+
+-->
