@@ -110,9 +110,9 @@ Sara focuses on:
 Sara is licensed with the _[Mozilla Public License version
 2.0](https://gitlab.com/DO-CV/sara/-/blob/master/LICENSE)_.
 
-The book chooses to emphasize more on the mathematical details to explain
-regarding my algorithmic implementations. I believe that my API is most of the
-time straightforward enough (hopefully!).
+The book chooses to emphasize more on the mathematical details in the
+algorithmic implementations. I believe that my API is most of the time
+straightforward enough (hopefully!).
 
 For the reference API documentation, refer to the **Doxygen**-based
 documentation hosted at Codedocs.xyz: https://codedocs.xyz/DO-CV/sara/.

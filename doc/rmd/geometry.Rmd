@@ -1,5 +1,9 @@
 # Geometry
 
+Presently I only write about the ellipse intersections. If I have to solve some more
+interesting topics during my learning journey, I will share a few words about what I
+have learnt here.
+
 ## Ellipse Intersections {#ellipse-intersection}
 
 ### Context
