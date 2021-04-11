@@ -31,16 +31,16 @@ would be very happy to know if it proved to be useful to even just one person.
 
 One particular choice I made in writing this book is to depart from the dry and
 impersonal style commonly used in scientific writings and use a more personal
-narrative through my learning journey. First, this naturally makes sense to me
-as I consider myself as a computer vision practitioner that is continuously
-learning and  willing to acknowledge things that I misunderstood. Second, an
-impersonal style would just sound boring and not particularly engaging to
-younger or less experimented readers that are eager to learn. In this book, I
-aim at detailing more the mathematical contents without sacrificing the
-experimental aspect of computer vision. Too often, publications will
-understandably gloss over mathematical or experimental aspects to sell more the
-novelty or performance of their approaches, I have decided to take the time to
-detail these for algorithms and methods that I understand well.
+narrative through my learning journey. As a humble computer vision practitioner
+continuously learning and inevitably making mistakes along the way, this is more
+natural to me. On top of that, an impersonal style would just sound boring and
+not particularly engaging to younger or less experimented readers that are eager
+to learn. In this book, I aim at detailing more the mathematical contents
+without sacrificing the experimental aspect of computer vision. Too often,
+publications would understandably gloss over some mathematical or practical
+details to sell more the novelty or performance of their approaches, I have
+decided to take the time to detail these for algorithms and methods that I
+understand well.
 
 > "Perfection is the enemy of good." - Voltaire.
 
