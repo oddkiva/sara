@@ -32,7 +32,7 @@ about *jupyter-book* (https://jupyterbook.org) is also available. However it is
 not yet clear to me whether it has multilanguage support as good as in
 *bookdown*. So I will stick with *bookdown* for now.
 
-## Code Cheatsheet
+## Cheatsheet for Code Embedding
 
 If it is not done yet, I would recommend you to read the section 3.1 of the
 online book first: https://bookdown.org/yihui/rmarkdown-cookbook/r-code.html
@@ -339,8 +339,8 @@ region_min_max_y
 ```
 
 #### Geometry Rendering
-Moving onto the rendering, let's make the viewing domain will be slightly larger
-than the patch region:
+Moving onto the rendering, let's make the viewing domain slightly larger than
+the patch region:
 
 ```{r}
 x_view_min_max <- c(region_min_max_x[1] - 1, region_min_max_x[2] + 1)
@@ -523,7 +523,7 @@ for (ii in 1:30) {
   plot(x_view_min_max, y_view_min_max,
        type = "n",                      # Reset the canvas
        xlab = "x", ylab = "y",          # Legend
-       main = "SIFT Grid Geometry")           # Title.
+       main = "SIFT Grid Geometry")     # Title.
 
   patch_center_shifted <- c(patch_center[1] + shift_x[ii],
                             patch_center[2] + shift_y[ii])
@@ -544,7 +544,7 @@ for (ii in 1:30) {
   plot(x_view_min_max, y_view_min_max,
        type = "n",                      # Reset the canvas
        xlab = "x", ylab = "y",          # Legend
-       main = "SIFT Grid Geometry")           # Title.
+       main = "SIFT Grid Geometry")     # Title.
 
   patch_center_shifted <- c(patch_center[1] + shift_x[ii],
                             patch_center[2] - 0.5 * shift_y[ii])
@@ -581,7 +581,7 @@ for (ii in 1:30) {
   plot(x_view_min_max, y_view_min_max,
        type = "n",                      # Reset the canvas
        xlab = "x", ylab = "y",          # Legend
-       main = "SIFT Grid Geometry")           # Title.
+       main = "SIFT Grid Geometry")     # Title.
 
   # The ground truth image patch.
   draw_patch(patch_center, 0, 1, patch_radius[ii],
@@ -620,7 +620,7 @@ for (ii in 1:30) {
   plot(x_view_min_max, y_view_min_max,
        type = "n",                      # Reset the canvas
        xlab = "x", ylab = "y",          # Legend
-       main = "SIFT Grid Geometry")           # Title.
+       main = "SIFT Grid Geometry")     # Title.
 
   patch_center_shifted <- c(patch_center[1] + shift_x[ii],
                             patch_center[2] + shift_y[ii])
@@ -643,7 +643,7 @@ for (ii in 1:30) {
   plot(x_view_min_max, y_view_min_max,
        type = "n",                      # Reset the canvas
        xlab = "x", ylab = "y",          # Legend
-       main = "SIFT Grid Geometry")           # Title.
+       main = "SIFT Grid Geometry")     # Title.
 
   patch_center_shifted <- c(patch_center[1] + shift_x[ii],
                             patch_center[2] - 0.5 * shift_y[ii])
