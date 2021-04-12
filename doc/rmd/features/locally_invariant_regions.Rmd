@@ -67,20 +67,28 @@ enjoy.^[And I should study them someday.]
 
 ### Locally Affine-Invariant Features
 
-In contrast to DoG-SIFT keypoints, the shape of affine-covariant feature are
-elliptic, which are obtained with affine shape adaptation. Without going into
-details about this additional algorithmic procedure, we will just illutrate such
-features with Figure \@ref(fig:affine-covariant-regions).
+In contrast to DoG-SIFT keypoints, the shape of affine-covariant features is
+elliptic. Such an elliptic shape is obtained by an algorithmic process called
+affine shape adaptation, which iteratively refines the localization of the
+initial feature detection. We will not go into details about this method and
+will be content with illutrating such features with Figure
+\@ref(fig:affine-covariant-regions).
 
 ```{r affine-covariant-regions, echo=FALSE, fig.align='center', fig.cap="Locally Affine-Invariant Features. Credits: [@MikolajczykTSZMSKVG:2005:ijcv]"}
 
 knitr::include_graphics(paste0(getwd(), "/AffineCovariantRegions.png"))
 ```
 
-Now in practice, I found that any feature can still performs very well without
-the affine shape adaptation [@MikolajczykTSZMSKVG:2005:ijcv].  I found it adds
-quite a computational burden and is very tricky to implement^[I am not sure I
-got it right in my implementation attempts].
+As shown in Figure \@ref(fig:affine-covariant-regions), it is quite compelling
+that the affine shape is well estimated across different change of viewpoints
+and would bring a superior advantage in the feature matching.
+
+In my experience however, I found that SIFT still performs very well without the
+affine shape adaptation [@MikolajczykTSZMSKVG:2005:ijcv] and performs better
+than affine-invariant features in structure-from-motion. Besides the
+computational burden due to the affine shape adaptation is quite significant and
+tricky to implement^[I am not sure I got it right in my implementation
+attempts], which has led me to conclude they are not really worth it.
 
 
 ### MSER: A Special Case.
@@ -96,7 +104,7 @@ cumulate the locations of all the pixels $\mathbf{x}'$ in the MSER as follows:
 
 \begin{equation}
   \bSigma_x^{-1} = \frac{1}{\mathrm{area}(x)}
-  \displaystyle \int (\x' \x'^T - \x \x^T) \mathop{d}\x'
+  \displaystyle \int (\x' - \x)(\x' - \x)^T \mathop{d}\x'
 \end{equation}
 
 The reason for which I use the integral $\int$ was to avoid the confusion with
@@ -111,10 +119,10 @@ $\x_u$ and $\x_v$, this is simply the following discrete sums:
     \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_u - \mathbf{x}_u)^2 &
     %
     \displaystyle \sum_{\mathbf{x}'}
-      (\mathbf{x}'_u \mathbf{x}'_v - \mathbf{x}_u \mathbf{x}_v)^2 \\
+      (\mathbf{x}'_u - \mathbf{x}_u)(\mathbf{x}'_v - \mathbf{x}_v) \\
     %
     \displaystyle \sum_{\mathbf{x}'}
-      (\mathbf{x}'_u \mathbf{x}'_v - \mathbf{x}_u \mathbf{x}_v)^2 &
+      (\mathbf{x}'_u - \mathbf{x}_u)(\mathbf{x}'_v - \mathbf{x}_v) &
     %
     \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_v - \mathbf{x}_v)^2
   \end{bmatrix},
@@ -133,9 +141,10 @@ literature and should parameter tuning becomes necessary, it is very easy to do
 so as I found them quite straightforward to interpret.
 
 Although only similarity-invariant, SIFT still performs very well compared to
-affine-covariant regions in my experience. My main complaint is the messiness I
-have to deal after the detection. Usually, I have to filter them with non-maxima
-suppression to remove clusters of features.^[Sorry for being too critical... but
-yes I was a long-time user of affine-covariant features.]
+affine-covariant regions in my experience. My main complaint with
+affine-covariant features is the messiness I have to deal after the detection.
+Usually, I have to filter them with non-maxima suppression to remove clusters of
+features.^[Sorry for being too critical... but yes I was a long-time user of
+affine-covariant features.]
 
 That is not the case with SIFT, MSER where the keypoints are very distinctive.
