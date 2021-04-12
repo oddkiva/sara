@@ -1,10 +1,10 @@
 ## Geometric Characteristics of a Locally Invariant Region
 
-In general any locally invariant region, *a.k.a.* feature, be it SIFT, SURF,
-MSER, or any affine-covariant features, has a common set of geometric
-characteristics which we detail in the sequel. In practice in multiple view
-geometry and structure-from-motion, they tend to be viewed as mere points in the
-images but they are actually much more than that.
+In general any locally invariant regions, *a.k.a.* features, present a common
+set of geometric characteristics, be it SIFT, SURF, MSER, or Harris-Affine etc.
+We will detail these in the sequel. Now in practice, in multiple view geometry
+and structure-from-motion, they tend to be viewed as mere points in the images
+but they are actually much more than that.
 
 Before moving forward in this chapter, let us denote a feature by the italic
 text letter $x$ for convenience.
@@ -43,10 +43,14 @@ where the zero level set is the *elliptic* shape of the feature.
 ```
 :::
 
+Let us illustrate some kinds of feature that have been used in previous research.
+
+### Locally Similar-Invariant Features
+
 An example of a SIFT feature is illustrated in Figure \@ref(fig:sift-feature).
 To be more accurate, what SIFT detects are *local extrema of Difference of
 Gaussians*, which we term simply as DoG for brevity. By design, a DoG feature is
-circular and only guarantees a similarity invariant representation
+circular and only guarantees invariance to similarity transforms
 (scale+rotation) in contrast to other affine invariant features presented in
 [@MikolajczykTSZMSKVG:2005:ijcv].
 
@@ -54,6 +58,32 @@ circular and only guarantees a similarity invariant representation
 
 knitr::include_graphics(paste0(getwd(), "/feature.png"))
 ```
+
+Other similarity-invariant detectors enjoy the same similarity invariance as
+SIFT. Let us cite for example: SURF [@BayETVG:2008:cviu], Edge Foci
+[@ZitnickR:2011:iccv], SFOP [@ForstnerDS:2009:iccv]. I don't know much about
+them but I really like the elegant geometric properties that SFOP and Edge Foci
+enjoy.^[And I should study them someday.]
+
+### Locally Affine-Invariant Features
+
+In contrast to DoG-SIFT keypoints, the shape of affine-covariant feature are
+elliptic, which are obtained with affine shape adaptation. Without going into
+details about this additional algorithmic procedure, we will just illutrate such
+features with Figure \@ref(fig:affine-covariant-regions).
+
+```{r affine-covariant-regions, echo=FALSE, fig.align='center', fig.cap="Locally Affine-Invariant Features. Credits: [@MikolajczykTSZMSKVG:2005:ijcv]"}
+
+knitr::include_graphics(paste0(getwd(), "/AffineCovariantRegions.png"))
+```
+
+Now in practice, I found that any feature can still performs very well without
+the affine shape adaptation [@MikolajczykTSZMSKVG:2005:ijcv].  I found it adds
+quite a computational burden and is very tricky to implement^[I am not sure I
+got it right in my implementation attempts].
+
+
+### MSER: A Special Case.
 
 In fact, MSER features [@MatasCUP:2002:bmvc] are more than just an elliptic
 shape: they are a set of connected pixels. That allows us to represent a much
@@ -66,47 +96,46 @@ cumulate the locations of all the pixels $\mathbf{x}'$ in the MSER as follows:
 
 \begin{equation}
   \bSigma_x^{-1} = \frac{1}{\mathrm{area}(x)}
+  \displaystyle \int (\x' \x'^T - \x \x^T) \mathop{d}\x'
+\end{equation}
+
+The reason for which I use the integral $\int$ was to avoid the confusion with
+the discrete sum symbol $\sum$ with the scale symbol $\bSigma$.
+
+Implementation-wise, denoting the $x$- and $y$-coordinates of each 2D vector by
+$\x_u$ and $\x_v$, this is simply the following discrete sums:
+
+\begin{equation}
+  \bSigma_x^{-1} = \frac{1}{\mathrm{area}(x)}
   \begin{bmatrix}
-    \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_1 - \mathbf{x}_1)^2 &
+    \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_u - \mathbf{x}_u)^2 &
     %
     \displaystyle \sum_{\mathbf{x}'}
-      (\mathbf{x}'_1 \mathbf{x}'_2 - \mathbf{x}_1 \mathbf{x}_2)^2 \\
+      (\mathbf{x}'_u \mathbf{x}'_v - \mathbf{x}_u \mathbf{x}_v)^2 \\
     %
     \displaystyle \sum_{\mathbf{x}'}
-      (\mathbf{x}'_1 \mathbf{x}'_2 - \mathbf{x}_1 \mathbf{x}_2)^2 &
+      (\mathbf{x}'_u \mathbf{x}'_v - \mathbf{x}_u \mathbf{x}_v)^2 &
     %
-    \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_2 - \mathbf{x}_2)^2
+    \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_v - \mathbf{x}_v)^2
   \end{bmatrix},
 \end{equation}
 
-The second-order moment matrix being also the inverse of the scale matrix.
+the second-order moment matrix being also the inverse of the scale matrix.
 
-<!--
-Note that, while affine-covariant keypoint scales are elliptic, e.g.,
-with a Harris-affine detector, others such as DoG-SIFT scales are
-isotropic, i.e., circular as shown in Figure \ref{fig:feature}. Examples of elliptic features are shown in Figure \ref{fig:AffineCovariantRegions}.
+### Personal Conclusion
 
-The orientation is typically given by the
-dominant gradient direction around $x$ at some appropriate scale.
+I conclude this section with a personal (biased) note since I am a SIFT fan.
 
-\begin{figure}[htbp]
-	\centering
-		\includegraphics[width=\textwidth]{figures/AffineCovariantRegions.png}
-	\caption[Different elliptic features]{Different elliptic features. Credits: \citep{MikolajczykTSZMSKVG:2005:ijcv}.}
-	\label{fig:AffineCovariantRegions}
-\end{figure}
+Despite the advances in feature detection, SIFT remains a very good option.
+Besides the SIFT patent has expired, so we can use it! The default parameters
+that comes with it are so good and well validated over the past research
+literature and should parameter tuning becomes necessary, it is very to do so as
+I found them very easy to interpret.
 
-The Feature descriptor abstracts the image
-around $x$, also at some appropriate scale, for comparison
-with other detected features.
-%
-In particular, the SIFT descriptor corresponds to a concatenation of histograms of local gradients on a patch with appropriate size and centered on the feature position as illustrated in Figure \ref{fig:SiftDescriptor}.
+Although only similarity-invariant, SIFT still performs very well compared to
+affine-covariant regions in my experience. My main complaint is the messiness I
+have to deal after the detection. Usually, I have to filter them with non-maxima
+suppression to remove clusters of features.^[Sorry for being too critical... but
+yes I was a long-time user of affine-covariant features.]
 
-\begin{figure}[ht]
-	\centering
-		\includegraphics[width=\textwidth]{figures/SiftDescriptor.png}
-	\caption[The SIFT descriptor]{The SIFT descriptor. Credits: \citep{Lowe:2004:ijcv}.}
-	\label{fig:SiftDescriptor}
-\end{figure}
-
--->
+That is not the case with SIFT, MSER where the keypoints are very distinctive.

@@ -28,9 +28,9 @@ the outline of the book and writing a section feels like writing a software
 library.
 
 Shortly after I investigated if there are any Python alternative and just learnt
-about *jupyter-book* (https://jupyterbook.org) is also available. However it is
-not yet clear to me whether it has multilanguage support as good as in
-*bookdown*. So I will stick with *bookdown* for now.
+about *jupyter-book* (https://jupyterbook.org) which also does a similar job.
+However it is not yet clear to me whether it has multilanguage support as good
+as in *bookdown*. So I will stick with *bookdown* for now.
 
 ## Cheatsheet for Code Embedding
 
