@@ -356,10 +356,10 @@ point $v$ where:
   $\mathbf{v}$, thus by injecting the inverse rotation on both sides of
   the equality
 
-  \begin{equation}
-    (\mathbf{R}_z^T \mathbf{v}) = \mathbf{R}_y\ (\mathbf{R}_z^T \mathbf{u})  \\
-    \mathbf{v} = \mathbf{R}_z \mathbf{R}_y \mathbf{R}_z^T\ \mathbf{u}
-  \end{equation}
+  \begin{align*}
+    (\mathbf{R}_z^T \mathbf{v}) &= \mathbf{R}_y\ (\mathbf{R}_z^T \mathbf{u})  \\
+    \mathbf{v} &= \mathbf{R}_z \mathbf{R}_y \mathbf{R}_z^T\ \mathbf{u}
+  \end{align*}
 
 We have just calculated the pitch rotation in the original coordinate system:
 

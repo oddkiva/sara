@@ -65,14 +65,15 @@ an elliptic region by calculating a second-order moment matrix. To do so, we
 cumulate the locations of all the pixels $\mathbf{x}'$ in the MSER as follows:
 
 \begin{equation}
-  \bSigma_x^{-1} = \begin{bmatrix}
+  \bSigma_x^{-1} = \frac{1}{\mathrm{area}(x)}
+  \begin{bmatrix}
     \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_1 - \mathbf{x}_1)^2 &
     %
     \displaystyle \sum_{\mathbf{x}'}
-      (\mathbf{x}'_1 * \mathbf{x}'_2 - \mathbf{x}_1 \mathbf{x}_2)^2 \\
+      (\mathbf{x}'_1 \mathbf{x}'_2 - \mathbf{x}_1 \mathbf{x}_2)^2 \\
     %
     \displaystyle \sum_{\mathbf{x}'}
-      (\mathbf{x}'_1 * \mathbf{x}'_2 - \mathbf{x}_1 \mathbf{x}_2)^2 &
+      (\mathbf{x}'_1 \mathbf{x}'_2 - \mathbf{x}_1 \mathbf{x}_2)^2 &
     %
     \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_2 - \mathbf{x}_2)^2
   \end{bmatrix},
