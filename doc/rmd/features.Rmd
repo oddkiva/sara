@@ -26,9 +26,9 @@
 In this chapter, we will review the geometric characteristics of locally affine
 regions such as *SIFT* [@Lowe:2004:ijcv], *SURF* [@BayETVG:2008:cviu], MSER
 [@MatasCUP:2002:bmvc] and affine-covariant regions
-[@MikolajczykTSZMSKVG:2005:ijcv]. These features play used to be popularly
-utilized for high-level object recognition tasks before the widespread adoption
-of deep learning and are still playing a key ingredient in structure-from-motion
+[@MikolajczykTSZMSKVG:2005:ijcv]. These features used to be popularly utilized
+for high-level object recognition tasks before the widespread adoption of deep
+learning and are still playing a key part in structure-from-motion
 pipelines that I feel compelled to say a few words about them.
 
 N.B.: this chapter contains bits of my thesis [@Ok:2013:phdthesis], which I have

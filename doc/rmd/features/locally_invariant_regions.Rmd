@@ -27,6 +27,11 @@ More than just being a point indeed, a feature $x$ is fully characterized by:
 
 - a dominant gradient orientation $\theta_x$ if it is calculated.
 
+With these information in mind, we can derive the following definition^[I doubt
+you will see this definition anywhere else, so this is my small innovation.].
+
+:::puzzle
+```{definition, name="Scale-Normalized Signed Distance Function"}
 The scale matrix $\bSigma_x$ also allows to define a *scale-normalized signed
 distance function* to $x$:
 
@@ -35,6 +40,8 @@ distance function* to $x$:
 \end{equation}
 
 where the zero level set is the *elliptic* shape of the feature.
+```
+:::
 
 An example of a SIFT feature is illustrated in Figure \@ref(fig:sift-feature).
 To be more accurate, what SIFT detects are *local extrema of Difference of
@@ -55,21 +62,19 @@ example [@GomezK:2014:icpr].
 
 As I carefully said it above, a MSER feature is *summarized* more compactly as
 an elliptic region by calculating a second-order moment matrix. To do so, we
-cumulate the locations of all the pixels in the MSER as follows:
+cumulate the locations of all the pixels $\mathbf{x}'$ in the MSER as follows:
 
 \begin{equation}
   \bSigma_x^{-1} = \begin{bmatrix}
-    \sum_{\mathbf{x}'} (\mathbf{x}'_1 - \mathbf{x}_1)^2 &
+    \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_1 - \mathbf{x}_1)^2 &
     %
-    \sum_{\mathbf{x}'}
-      (\mathbf{x}'_1 * \mathbf{x}'_2 -
-      \bar{\mathbf{x}}_1 \bar{\mathbf{x}}_2)^2 \\
+    \displaystyle \sum_{\mathbf{x}'}
+      (\mathbf{x}'_1 * \mathbf{x}'_2 - \mathbf{x}_1 \mathbf{x}_2)^2 \\
     %
-    \sum_{\mathbf{x}'}
-      (\mathbf{x}'_1 * \mathbf{x}'_2 -
-    \bar{\mathbf{x}}_1 \bar{\mathbf{x}}_2)^2 &
+    \displaystyle \sum_{\mathbf{x}'}
+      (\mathbf{x}'_1 * \mathbf{x}'_2 - \mathbf{x}_1 \mathbf{x}_2)^2 &
     %
-    \sum_{\mathbf{x}'} (\mathbf{x}'_2 - \mathbf{x}_2)^2
+    \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_2 - \mathbf{x}_2)^2
   \end{bmatrix},
 \end{equation}
 
