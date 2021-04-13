@@ -513,8 +513,8 @@ $\mathbf{B}(y)$ is defined as
 \end{equation}
 ```
 
-We observe that the vector $[1, x, x^2, x^3]^T$ is never zero for any real value
-$x$. Necessarily the null space $\mathrm{Null}(\mathbf{B}(y))$ is always
+We observe that the vector $[1, x, x^2, x^3]^T$ can never be zero for any real
+value $x$. Necessarily the null space $\mathrm{Null}(\mathbf{B}(y))$ is always
 nontrivial and that means the determinant of $\mathbf{B}(y)$ has to be zero.
 
 Let us define the polynomial $R$ as
