@@ -150,11 +150,6 @@ inverse rotation matrix is calculated by transposition
 ```
 :::
 
-To close the section, in fact by generalizing to higher dimensions $n > 3$, this
-proposition is the very definition of a rotation matrix: any square matrix
-$\mathbf{Q}$ whose tranpose satisfies $\mathbf{Q}^T \mathbf{Q} = \mathbf{I}_n$
-is a rotation matrix.
-
 ## Euler Angles
 
 In engineering, we like to decompose any 3D rotation into Euler angles as they
