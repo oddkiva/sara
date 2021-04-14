@@ -3,6 +3,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -70,8 +71,8 @@ struct NuScenes
     std::uint64_t timestamp;
     std::string fileformat;
     bool is_key_frame;
-    int width;
-    int height;
+    std::optional<int> width;
+    std::optional<int> height;
 
     //! @brief An image file, lidar point cloud file or radar velocity file.
     std::string filename;
@@ -104,27 +105,93 @@ struct NuScenes
     int index;
   };
 
-  std::unordered_map<Token, Sample> samples;
-  std::unordered_map<Token, SampleData> sample_data;
-  std::unordered_map<Token, SampleAnnotation> sample_annotations;
-  std::unordered_map<Token, Category> categories;
+  struct EgoPose
+  {
+    Eigen::Quaternionf rotation;
+    Eigen::Vector3f translation;
 
+    //! @brief A sample is also referenced by a timestamp.
+    std::uint64_t timestamp;
+  };
+
+  struct CalibratedSensor
+  {
+    Eigen::Quaternionf rotation;
+    Eigen::Vector3f translation;
+    std::optional<Eigen::Matrix3f> calibration_matrix;
+    Token sensor_token;
+  };
+
+  // An object instance should be understood as the same object that is seen
+  // multiple times in multiple image frames, or point cloud data and sensor
+  // data.
+  struct Instance
+  {
+    Token category_token;
+    int number_of_annotations;
+    Token first_annotation_token;
+    Token last_annotation_token;
+  };
+
+  struct Visibility
+  {
+    std::string description;
+    std::string level;
+  };
+
+  struct Attribute
+  {
+    std::string name;
+    std::string description;
+  };
+
+  struct Sensor
+  {
+    std::string channel;
+    std::string modality;
+  };
+
+  std::unordered_map<Token, Sample> sample_table;
+  std::unordered_map<Token, SampleData> sample_data_table;
+  std::unordered_map<Token, SampleAnnotation> sample_annotation_table;
+  std::unordered_map<Token, Category> category_table;
+  std::unordered_map<Token, EgoPose> ego_pose_table;
+  std::unordered_map<Token, CalibratedSensor> calibrated_sensor_table;
+  std::unordered_map<Token, Instance> instance_table;
+  std::unordered_map<Token, Visibility> visibility_table;
+  std::unordered_map<Token, Attribute> attribute_table;
+  std::unordered_map<Token, Sensor> sensor_table;
 
   NuScenes(const std::string& version_,   //
            const std::string& dataroot_,  //
-           bool verbose_,                 //
-           float map_resolution = 0.1)
+           bool verbose_/*,               //
+           float map_resolution = 0.1*/)
     : version{version_}
     , dataroot{dataroot_}
     , verbose{verbose_}
   {
-    load_samples();
-    load_sample_data();
-    load_sample_annotations();
-    // load_categories();
+    // List of annotations.
+    load_sample_table();
+
+    // Sensor data.
+    load_sample_data_table();
+    load_sensor_table();
+
+    // 3D bounding boxes.
+    load_sample_annotation_table();
+
+    // Egomotion.
+    load_ego_pose_table();
+    load_calibrated_sensor_table();
+
+    // Various taxonomy of annotation attributes.
+    load_category_table();
+    load_instance_table();
+    load_visibility_table();
+    load_attribute_table();
   }
 
-  auto load_table(const std::string& table_name) -> nlohmann::json
+  auto load_json(const std::string& table_name) -> nlohmann::json
   {
     namespace fs = boost::filesystem;
 
@@ -140,11 +207,11 @@ struct NuScenes
     return table_json;
   }
 
-  auto load_samples() -> void
+  auto load_sample_table() -> void
   {
-    const auto sample_table = load_table("sample");
-    for (const auto& j : sample_table)
-      samples[j["token"]] = {
+    const auto sample_json = load_json("sample");
+    for (const auto& j : sample_json)
+      sample_table[j["token"]] = {
           .prev = j["prev"],
           .next = j["next"],
           .scene_token = j["scene_token"],
@@ -152,11 +219,11 @@ struct NuScenes
       };
   }
 
-  auto load_sample_data() -> void
+  auto load_sample_data_table() -> void
   {
-    const auto sample_data_table = load_table("sample_data");
-    for (const auto& j : sample_data_table)
-      sample_data[j["token"]] = {
+    const auto sample_data_json = load_json("sample_data");
+    for (const auto& j : sample_data_json)
+      sample_data_table[j["token"]] = {
           .prev = j["prev"],
           .next = j["next"],
           .sample_token = j["sample_token"],
@@ -170,10 +237,10 @@ struct NuScenes
           .filename = j["filename"]};
   }
 
-  auto load_sample_annotations() -> void
+  auto load_sample_annotation_table() -> void
   {
-    const auto sample_annotation_table = load_table("sample_annotation");
-    for (const auto& j : sample_annotation_table)
+    const auto sample_annotation_json = load_json("sample_annotation");
+    for (const auto& j : sample_annotation_json)
     {
       auto sample_annotation = SampleAnnotation{};
       sample_annotation.prev = j["prev"];
@@ -200,21 +267,129 @@ struct NuScenes
       sample_annotation.num_lidar_pts = j["num_lidar_pts"].get<int>();
       sample_annotation.num_radar_pts = j["num_radar_pts"].get<int>();
 
-      sample_annotations[j["token"]] = sample_annotation;
+      sample_annotation_table[j["token"]] = sample_annotation;
     }
   }
 
-  auto load_categories() -> void
+  auto load_category_table() -> void
   {
-    const auto category_table = load_table("category");
+    const auto category_json = load_json("category");
 
-    categories.reserve(category_table.size());
-    for (const auto& j : category_table)
-      categories[j["token"]] = {j["name"], j["description"], j["index"]};
+    category_table.reserve(category_json.size());
+    for (const auto& j : category_json)
+      category_table[j["token"]] = {j["name"], j["description"], j["index"]};
 
-    for (const auto& [token, category] : categories)
+    for (const auto& [token, category] : category_table)
       std::cout << token << " " << category.index << " " << category.name
                 << std::endl;
+  }
+
+  auto load_ego_pose_table() -> void
+  {
+    const auto ego_pose_json = load_json("ego_pose");
+
+    ego_pose_table.reserve(ego_pose_json.size());
+    for (const auto& j : ego_pose_json)
+    {
+      auto ego_pose = EgoPose{};
+
+      for (auto i = 0; i < 3; ++i)
+        ego_pose.translation(i) = j["translation"][i].get<float>();
+
+      ego_pose.rotation = Eigen::Quaternionf{
+          j["rotation"][0].get<float>(), j["rotation"][1].get<float>(),
+          j["rotation"][2].get<float>(), j["rotation"][3].get<float>()  //
+      };
+
+      ego_pose.timestamp = j["timestamp"].get<std::uint64_t>();
+
+      ego_pose_table[j["token"]] = ego_pose;
+    }
+  }
+
+  auto load_calibrated_sensor_table() -> void
+  {
+    const auto calibrated_sensor_json = load_json("calibrated_sensor");
+
+    calibrated_sensor_table.reserve(calibrated_sensor_json.size());
+    for (const auto& j : calibrated_sensor_json)
+    {
+      auto calibrated_sensor = CalibratedSensor{};
+
+      for (auto i = 0; i < 3; ++i)
+        calibrated_sensor.translation(i) = j["translation"][i].get<float>();
+
+      calibrated_sensor.rotation = Eigen::Quaternionf{
+          j["rotation"][0].get<float>(), j["rotation"][1].get<float>(),
+          j["rotation"][2].get<float>(), j["rotation"][3].get<float>()  //
+      };
+
+      if (!j["camera_intrinsic"].empty())
+      {
+        auto K = Eigen::Matrix3f{};
+        for (auto m = 0; m < 3; ++m)
+          for (auto n = 0; n < 3; ++n)
+            K(m, n) = j["camera_intrinsic"][m][n].get<float>();
+        calibrated_sensor.calibration_matrix = K;
+      }
+
+      calibrated_sensor.sensor_token = j["sensor_token"].get<std::string>();
+
+      calibrated_sensor_table[j["token"]] = calibrated_sensor;
+    }
+  }
+
+  auto load_instance_table() -> void
+  {
+    const auto instance_json = load_json("instance");
+
+    instance_table.reserve(instance_json.size());
+    for (const auto& j : instance_json)
+    {
+      auto instance = Instance{};
+
+      instance_table[j["token"]] = {
+          .category_token = j["category_token"],
+          .number_of_annotations = j["nbr_annotations"].get<int>(),
+          .first_annotation_token = j["first_annotation_token"],
+          .last_annotation_token = j["last_annotation_token"]};
+    }
+  }
+
+  auto load_visibility_table() -> void
+  {
+    const auto visibility_json = load_json("visibility");
+
+    visibility_table.reserve(visibility_json.size());
+    for (const auto& j : visibility_json)
+      visibility_table[j["token"]] = {
+          .description = j["description"],  //
+          .level = j["level"]               //
+      };
+  }
+
+  auto load_attribute_table() -> void
+  {
+    const auto attribute_json = load_json("attribute");
+
+    attribute_table.reserve(attribute_json.size());
+    for (const auto& j : attribute_json)
+      attribute_table[j["token"]] = {
+          .name = j["name"],               //
+          .description = j["description"]  //
+      };
+  }
+
+  auto load_sensor_table() -> void
+  {
+    const auto sensor_json = load_json("sensor");
+
+    sensor_table.reserve(sensor_json.size());
+    for (const auto& j : sensor_json)
+      sensor_table[j["token"]] = {
+          .channel = j["channel"],      //
+          .modality = j["modality"]  //
+      };
   }
 
   template <typename T>

@@ -1,25 +1,34 @@
-# Computer Graphics
+# Learning Journey in Computer Graphics
 
-A few notes about elements of computer graphics.
+Disclaimer: this chapter is being born and not mature at all.
+
+At the moment I just reformulate in my own words nice explanations that I found
+online as a mind exercise and mark concepts that I am still not clear with.
+
+While I do have practical experience with OpenGL, computer graphics is quite a
+daunting field in itself, especially when you don't practice it on regular
+basis. With the Vulkan API, things are becoming more complex.
 
 ## Framebuffer
 
-As explained in a nice StackOverflow post, a framebuffer in OpenGL and in Vulkan
-is not a buffer object but rather should be viewed as a *collection of
+This object has been a big source of confusion for me and I am not the only one
+as well. As explained in a nice StackOverflow post, a framebuffer in OpenGL and
+in Vulkan is not a buffer object. Rather it should be viewed as a *collection of
 references to buffer objects*. Here, a buffer should be understood as an array
-of bytes.
+of bytes (1D, 2D or 3D to clarify things in our mind).
 
-To set things straight in our mind, a framebuffer can be seen as a *C struct* object as follows.
+To set things straight in our mind, a framebuffer can be seen as a *C struct*
+object as follows.
 
 ```cpp
-   struct Framebuffer
-   {
-     void *color_buffer = nullptr;
-     void *depth_buffer = nullptr;
-     void *stencil_buffer = nullptr;
-   };
+struct Framebuffer
+{
+  void *color_buffer = nullptr;
+  void *depth_buffer = nullptr;
+  void *stencil_buffer = nullptr;
+};
 
-   using FramebufferId = Framebuffer *;
+using FramebufferId = Framebuffer *;
 ```
 
 Pursuing this explanation, we can understand:
@@ -29,3 +38,12 @@ Pursuing this explanation, we can understand:
   pointer of a color buffer object to the `color_buffer` data member.
 
 And likewise for *depth* and *stencil* attachments.
+
+## Things that I am not clear with Vulkan
+
+I have been digesting the Hello Triangle tutorial in Vulkan.
+
+TODO: things I am still not clear are:
+
+- Fences
+- Semaphores

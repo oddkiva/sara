@@ -1,0 +1,50 @@
+## nuScenes
+
+Similar to the KITTI dataset, the nuScenes dataset has been made available . The
+novelty here is that the data is much larger and is acquired from a multi-camera
+setup supplemented with LIDAR, RADAR, IMU/GPU sensors. KITTI also contains LIDAR
+data and IMU/GPS data but no RADAR data, no CAN bus data.
+
+So with nuScenes, in addition to the usual 2D and 3D bounding boxes and point
+clouds, we also have at our disposal ground-truth velocity data for each
+detected objects and a richer set of information regarding the car egomotion.
+
+### Concepts and Data Organization
+
+Given that the data acquired in nuScenes is much richer and more complex, I
+believe it is important to know what the different data definitions are in
+nuScenes and how they are organized.
+
+On a first approach, a complete data sample is fully characterized by:
+
+- a timestamp;
+- the images acquired from the 6 cameras- point cloud acquired from the lidar device
+- calibration data acquired from the lidar device
+- velocity data acquired from the radar device
+
+Now because each sensor is sampling data asynchronously and at different
+acquisition rate, each sampled data (image, point cloud, etc.) is matched to the
+sample timestamp if its acquisition time is closest to this sample timestamp.
+
+A common category of data termed *Sample Data* is either an image, a point cloud
+or a velocity data (and so on.).
+
+Similarly to *KITTI*, a *Data Annotation* is basically a road user or other
+object detection for which we know its 3D geometry.
+
+### API Replication for C++
+
+Being a hardcore C++ user myself, my goal is to replicate the Python API data in
+my own way, which is available online. Based on my experience with KITTI, it can
+be a good case study to understand how the data is structured without having to
+go line-by-line the Python API.
+
+A typical pattern which the the data tables in nuScenes dataset follows is that:
+
+- Each row of a any table is referenced by a UUID termed as "token" in
+  nuScenes terminology.
+  From a data structure point of view, each row can be stored as a hash
+  table.
+
+- Each table can also be viewed as a doubly-linked list because of "prev"
+  and "next" fields.
