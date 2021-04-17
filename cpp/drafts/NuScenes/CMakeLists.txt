@@ -1,9 +1,19 @@
-add_executable(nuscenes_cpp_devkit_usage_example nuscenes_cpp_devkit_usage_example.cpp)
-target_compile_features(nuscenes_cpp_devkit_usage_example
-  PRIVATE
+find_package(DO_Sara COMPONENTS Core Graphics ImageIO REQUIRED)
+
+add_library(NuScenes NuScenes.hpp NuScenes.cpp)
+target_compile_features(NuScenes
+  PUBLIC
   cxx_std_17)
-target_include_directories(nuscenes_cpp_devkit_usage_example
-  PRIVATE
+target_include_directories(NuScenes
+  PUBLIC
   ${cpp_INCLUDE_DIR}/third-party
   ${cpp_INCLUDE_DIR}/third-party/eigen)
-target_link_libraries(nuscenes_cpp_devkit_usage_example Boost::filesystem)
+target_link_libraries(NuScenes
+  PRIVATE
+  Boost::filesystem)
+
+add_executable(nuscenes_cpp_devkit_usage_example nuscenes_cpp_devkit_usage_example.cpp)
+target_link_libraries(nuscenes_cpp_devkit_usage_example
+  PRIVATE
+  NuScenes
+  ${DO_Sara_LIBRARIES})
