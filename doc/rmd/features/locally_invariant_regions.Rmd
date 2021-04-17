@@ -136,10 +136,11 @@ the second-order moment matrix being also the inverse of the scale matrix.
 I conclude this section with a personal (biased) note since I am a SIFT fan.
 
 Despite the advances in feature detection, SIFT remains a very good option.
-Besides the SIFT patent has expired, so we can use it! The default parameters
-that comes with it are so good and well validated over the past research
-literature and should parameter tuning becomes necessary, it is very easy to do
-so as I found them quite straightforward to interpret.
+Besides the SIFT patent has expired, which now makes it viable for commercial
+applications. The default parameters that comes with it are so good and well
+validated over the widespread adoption in research. If parameter tuning becomes
+necessary, it is very easy to do so as I found them quite straightforward to
+interpret.
 
 Although only similarity-invariant, SIFT still performs very well compared to
 affine-covariant regions in my experience. My main complaint with
