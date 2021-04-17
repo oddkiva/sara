@@ -1,9 +1,10 @@
 ## nuScenes
 
-Similar to the KITTI dataset, the nuScenes dataset has been made available . The
-novelty here is that the data is much larger and is acquired from a multi-camera
-setup supplemented with LIDAR, RADAR, IMU/GPU sensors. KITTI also contains LIDAR
-data and IMU/GPS data but no RADAR data, no CAN bus data.
+Similar to the KITTI dataset, the nuScenes dataset has been made available in
+2019. The novelty here is that the data is much larger and is acquired from a
+multi-camera setup supplemented with LIDAR, RADAR, IMU/GPU sensors. By
+comparison, KITTI also contains LIDAR data and IMU/GPS data but neither RADAR
+data, nor CAN bus data.
 
 So with nuScenes, in addition to the usual 2D and 3D bounding boxes and point
 clouds, we also have at our disposal ground-truth velocity data for each
@@ -11,35 +12,111 @@ detected objects and a richer set of information regarding the car egomotion.
 
 ### Concepts and Data Organization
 
-Given that the data acquired in nuScenes is much richer and more complex, I
-believe it is important to know what the different data definitions are in
-nuScenes and how they are organized.
+Given that the richer and more complex nature of nuScenes data, we
+describe what the data are and how they are structured on a higher
+level.
 
-On a first approach, a complete data sample is fully characterized by:
+Essentially the following groups of concepts appear as follows:
 
-- a timestamp;
-- the images acquired from the 6 cameras- point cloud acquired from the lidar device
-- calibration data acquired from the lidar device
-- velocity data acquired from the radar device
+- a sample and its associated collection of sampled data (images, point clouds,
+  velocity fields)
+- an object annotation:
+  - grouped into tracks (for object tracking purposes)
+  - categorized according to a taxonomy
+  - characterized by a set of attributes and visibility.
+- an ego-pose that quantifies the car global positioning
+- a calibration data to relate the 3D geometry with respect to each sensor.
 
-Now because each sensor is sampling data asynchronously and at different
-acquisition rate, each sampled data (image, point cloud, etc.) is matched to the
-sample timestamp if its acquisition time is closest to this sample timestamp.
+### The Sample Concept
 
-A common category of data termed *Sample Data* is either an image, a point cloud
-or a velocity data (and so on.).
+On a first approach, a complete sample is fully characterized by:
 
-Similarly to *KITTI*, a *Data Annotation* is basically a road user or other
-object detection for which we know its 3D geometry.
+- a timestamp $\tau$ which dates this sample;
+- a collection of images $I[\tau, c]$ acquired by the 6 cameras $c = 1 \dots 6$,
+- a point cloud $\mathbf{x}[\tau]$ acquired from the lidar device,
+- a collection of velocity field $\dot{\mathbf{x}}[\tau, r]$ acquired by the $5$
+  radar devices $r = 1 \dots 5$,
+- an ego-pose, that is, the car position and orientation $\mathbf{R}_\tau,
+  \mathbf{t}_\tau$ w.r.t. to a fixed global coordinate system.
 
-### API Replication for C++
+### The Annotation Concept
+
+Similarly to *KITTI*, one *annotation* is typically a road user, e.g., a
+pedestrian, a vehicle, for which we know its 3D geometry. nuScenes categorises
+road users with a slightly more elaborate taxonomy than KITTI. Like KITTI,
+nuScenes also also have a set of attributes that characterizes each annotation.
+
+Annotations are grouped into tracks which nuScenes terms as *Instances*.
+
+### Ego-Pose and Coordinate Systems
+
+From a careful examination of (1) the documentation, (2) the Python API and (3)
+the different coordinate systems in the picture **TODO: reference me**, (4) the
+table of calibrated sensors, it appears clearly that:
+
+- Each 3D box has a point of reference expressed in the global coordinate
+  system.
+- The ego-pose actually corresponds to the IMU position and orientation with
+  respect the global coordinate system $(\mathbf{R}_\text{IMU},
+  \mathbf{t}_\text{IMU})$.
+- The IMU coordinate system follows the convention in automotive coordinate
+  system.
+- The camera coordinate system adopts the usual axis convention in
+  structure-from-motion.
+
+Now because the IMU coordinate system is used as the reference local coordinate
+system, the table of calibrated sensors lists:
+
+1. the camera parameters with respect to the IMU coordinate system and the
+   camera projection matrix is calculated as
+   \begin{equation}
+     \mathbf{K}
+     \mathbf{R}_{c / \text{IMU}}^T
+     \begin{bmatrix}
+       \mathbf{I}_3 & -\mathbf{t}_{c / \text{IMU}}
+     \end{bmatrix}
+   \end{equation}
+
+2. the radar poses with respect to the IMU coordinate system
+   \begin{equation}
+     \begin{bmatrix}
+       \mathbf{R}_{r / \text{IMU}}^T & \mathbf{0}_3 \\
+       %
+       \mathbf{0}_3^T & 1
+     \end{bmatrix}
+     %
+     \begin{bmatrix}
+       \mathbf{I}_3 & -\mathbf{t}_{r / \text{IMU}} \\
+       %
+       \mathbf{0}_3^T & 1
+     \end{bmatrix}
+   \end{equation}
+
+3. the lidar pose with respect to the IMU coordinate system
+   \begin{equation}
+     \begin{bmatrix}
+       \mathbf{R}_{l / \text{IMU}}^T & \mathbf{0}_3 \\
+       %
+       \mathbf{0}_3^T & 1
+     \end{bmatrix}
+     %
+     \begin{bmatrix}
+       \mathbf{I}_3 & -\mathbf{t}_{l / \text{IMU}} \\
+       %
+       \mathbf{0}_3^T & 1
+     \end{bmatrix}
+   \end{equation}
+
+
+### Data Structures and API Replication for C++
 
 Being a hardcore C++ user myself, my goal is to replicate the Python API data in
 my own way, which is available online. Based on my experience with KITTI, it can
 be a good case study to understand how the data is structured without having to
 go line-by-line the Python API.
 
-A typical pattern which the the data tables in nuScenes dataset follows is that:
+A typical pattern which the the different tables in nuScenes dataset follows is
+that:
 
 - Each row of a any table is referenced by a UUID termed as "token" in
   nuScenes terminology.
@@ -48,3 +125,11 @@ A typical pattern which the the data tables in nuScenes dataset follows is that:
 
 - Each table can also be viewed as a doubly-linked list because of "prev"
   and "next" fields.
+
+In nuScenes, (1) images, (2) point clouds and (3) velocity fields are grouped
+together in a unique table of data category termed as *Sample Data*. Each sample
+data is dated with a timestamp that indeed differ from the sample timestamp.
+
+Because each sensor is sampling data asynchronously and at different acquisition
+rate, each sampled data (image, point cloud, etc.) is matched to the sample
+timestamp if its acquisition time is closest to this sample timestamp.
