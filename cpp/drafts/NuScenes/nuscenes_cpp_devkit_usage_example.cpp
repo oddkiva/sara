@@ -99,6 +99,10 @@ GRAPHICS_MAIN()
     // Get the camera coordinates from the reference local coordinate system.
     const Eigen::Vector3f& x_camera = Rc.transpose() * (x_local - tc);
 
+    // Check the cheirality: z > 0!
+    if (x_camera.z() < 0)
+      continue;
+
     // Project onto the image plane.
     const Eigen::Vector2f x_image = (K.value() * x_camera).hnormalized();
 
