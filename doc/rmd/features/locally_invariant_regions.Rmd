@@ -2,9 +2,9 @@
 
 In general any locally invariant regions, *a.k.a.* features, present a common
 set of geometric characteristics, be it SIFT, SURF, MSER, or Harris-Affine etc.
-We will detail these in the sequel. Now in practice, in multiple view geometry
-and structure-from-motion, they tend to be viewed as mere points in the images
-but they are actually much more than that.
+We will detail these in the sequel. Now in multiple view geometry and
+structure-from-motion, they tend to be viewed as mere points in the images but
+they are actually much more than that.
 
 Before moving forward in this chapter, let us denote a feature by the italic
 text letter $x$ for convenience.
@@ -12,8 +12,8 @@ text letter $x$ for convenience.
 More than just being a point indeed, a feature $x$ is fully characterized by:
 
 - a center with pixel coordinates $\x \in \mathbb{R}^2$,
-  which is the only information that structure-from-motion pipelines use in the
-  end,
+  which in practice is the only information that structure-from-motion pipelines
+  use,
 
 - a shape $\Shape_x$, which represents the (possibly anisotropic) scale of
   feature $x$ and can be summarized^[MSER is a special case as I'll explain
@@ -28,8 +28,9 @@ More than just being a point indeed, a feature $x$ is fully characterized by:
 
 - a dominant gradient orientation $\theta_x$ if it is calculated.
 
-With these information in mind, we can derive the following definition^[I doubt
-you will see this definition anywhere else, so this is my small innovation.].
+While this may seem redundant with the shape definition, we can also derive the
+following definition^[I doubt you will see this definition anywhere else, so
+this is my small innovation.].
 
 :::puzzle
 ```{definition, name="Scale-Normalized Signed Distance Function"}
@@ -44,7 +45,8 @@ where the zero level set is the *elliptic* shape of the feature.
 ```
 :::
 
-Let us illustrate some kinds of feature that have been used in previous research.
+Let us illustrate some kinds of feature that have been used in previous research
+to set things clear in our mind.
 
 ### Locally Similar-Invariant Features
 
@@ -61,7 +63,7 @@ knitr::include_graphics(paste0(getwd(), "/feature.png"))
 ```
 
 Other similarity-invariant detectors enjoy the same similarity invariance as
-SIFT. Let us cite for example: SURF [@BayETVG:2008:cviu], Edge Foci
+SIFT. Let us cite for example SURF [@BayETVG:2008:cviu], Edge Foci
 [@ZitnickR:2011:iccv], SFOP [@ForstnerDS:2009:iccv]. I don't know much about
 them but I really like the elegant geometric properties that SFOP and Edge Foci
 enjoy.^[And I should study them someday.]
@@ -72,7 +74,7 @@ In contrast to DoG-SIFT keypoints, the shape of affine-covariant features is
 elliptic. Such an elliptic shape is obtained by an algorithmic process called
 affine shape adaptation, which iteratively refines the localization of the
 initial feature detection. We will not go into details about this method and
-will be content with illutrating such features with Figure
+will be content with illustrating such features with Figure
 \@ref(fig:affine-covariant-regions).
 
 ```{r affine-covariant-regions, echo=FALSE, fig.align='center', fig.cap="Locally Affine-Invariant Features. Credits: [@MikolajczykTSZMSKVG:2005:ijcv]"}
@@ -81,15 +83,28 @@ knitr::include_graphics(paste0(getwd(), "/AffineCovariantRegions.png"))
 ```
 
 As shown in Figure \@ref(fig:affine-covariant-regions), it is quite compelling
-that the affine shape is well estimated across different change of viewpoints
-and would bring a superior advantage in the feature matching.
+that most of the time the affine shape is well estimated across different change
+of viewpoints and would bring a superior advantage in the feature matching.
 
 In my experience however, I found that SIFT still performs very well without the
 affine shape adaptation [@MikolajczykTSZMSKVG:2005:ijcv] and performs better
-than affine-invariant features in structure-from-motion. Besides the
-computational burden due to the affine shape adaptation is quite significant and
-tricky to implement^[I am not sure I got it right in my implementation
-attempts], which has led me to conclude they are not really worth it.
+than affine-invariant features in structure-from-motion. In fact, we can even
+tell that by closely inspecting the features in Figure
+\@ref(fig:affine-covariant-regions): some Harris-Affine or Hessian-Affine
+features seem to have their center and shape really off by a few noticeable
+pixels between the two viewpoints in this figure.^[Optical illusion? I don't
+think so... my fear is that these are far from being uncommon to the point
+of harming the 3D reconstruction, but this claim needs proper investigation.].
+
+One thing to note about MSER elliptic shapes: they are not obtained from affine
+shape adaptation but from the computation of the second-moment matrix.
+Regardless of their elliptic shape, MSERs are not very popular in
+structure-from-motion pipelines mostly because they tend to be too few at the
+detection.
+
+Besides the affine shape adaptation has a significant computational burden and
+is tricky to implement, which leads us to think this might not be worth going
+through the pain.
 
 
 ### MSER: A Special Case.

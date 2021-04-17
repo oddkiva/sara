@@ -5,6 +5,10 @@ at length in PAMI [@nister:2004:pami]. It solves the essential matrix from $5$
 point correspondences. Here I revisit the PAMI article [@nister:2004:pami] which
 I found clearer.
 
+The method is very technical as it is purely based on simple algebraic
+manipulations. As such, the paper may seem boring but I believe understanding
+these such details are useful.
+
 ### Underdetermined System of Linear Equations
 
 Let $(\mathbf{p}_i, \mathbf{q}_i)$, $0 \leq i < 5$ be $5$ point
@@ -182,9 +186,13 @@ a bit more the technical details provided by the paper.
 In a nutshell, we explain how:
 
 - from this set of $10$ polynomial equations that are simultaneously satisfied
-  amounts to solving only a set of $3$ easier polynomial equations;
+  implies to solving only a set of $3$ easier polynomial equations;
 - this set of $3$ equations is equivalently reduced to a polynomial that depends
   of only one variable and of degree $10$.
+
+Now, from the point of view of mathematical rigor, it is entirely not clear if
+the initial system of $10$ polynomial equations has at most only 10 possible
+solutions but in practice this method gives good results.
 :::
 
 Using the Gauss-Jordan elimination we can reduce the system of polynomial
