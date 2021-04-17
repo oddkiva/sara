@@ -22,7 +22,7 @@ Essentially the following groups of concepts appear as follows:
   velocity fields)
 - an object annotation:
   - grouped into tracks (for object tracking purposes)
-  - categorized according to a taxonomy
+  - categorized according to a taxonomy of road users.
   - characterized by a set of attributes and visibility.
 - an ego-pose that quantifies the car global positioning
 - a calibration data to relate the 3D geometry with respect to each sensor.
@@ -36,8 +36,8 @@ On a first approach, a complete sample is fully characterized by:
 - a point cloud $\mathbf{x}[\tau]$ acquired from the lidar device,
 - a collection of velocity field $\dot{\mathbf{x}}[\tau, r]$ acquired by the $5$
   radar devices $r = 1 \dots 5$,
-- an ego-pose, that is, the car position and orientation $\mathbf{R}_\tau,
-  \mathbf{t}_\tau$ w.r.t. to a fixed global coordinate system.
+- an ego-pose, that is, the car position and orientation $(\mathbf{R}_\tau,
+  \mathbf{t}_\tau)$ w.r.t. to a fixed global coordinate system.
 
 ### The Annotation Concept
 
@@ -46,7 +46,10 @@ pedestrian, a vehicle, for which we know its 3D geometry. nuScenes categorises
 road users with a slightly more elaborate taxonomy than KITTI. Like KITTI,
 nuScenes also also have a set of attributes that characterizes each annotation.
 
-Annotations are grouped into tracks which nuScenes terms as *Instances*.
+Let us already state that each 3D box has a point of reference expressed in the
+global coordinate system. And annotations are grouped into tracks which nuScenes
+terms as *Instances* which is used for the purpose of object tracking
+evaluation.
 
 ### Ego-Pose and Coordinate Systems
 
@@ -54,8 +57,6 @@ From a careful examination of (1) the documentation, (2) the Python API and (3)
 the different coordinate systems in the picture **TODO: reference me**, (4) the
 table of calibrated sensors, it appears clearly that:
 
-- Each 3D box has a point of reference expressed in the global coordinate
-  system.
 - The ego-pose actually corresponds to the IMU position and orientation with
   respect the global coordinate system $(\mathbf{R}_\text{IMU},
   \mathbf{t}_\text{IMU})$.
