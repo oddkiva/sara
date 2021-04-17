@@ -12,7 +12,8 @@ text letter $x$ for convenience.
 More than just being a point indeed, a feature $x$ is fully characterized by:
 
 - a center with pixel coordinates $\x \in \mathbb{R}^2$,
-  which structure-from-motion pipelines only utilize,
+  which is the only information that structure-from-motion pipelines use in the
+  end,
 
 - a shape $\Shape_x$, which represents the (possibly anisotropic) scale of
   feature $x$ and can be summarized^[MSER is a special case as I'll explain
