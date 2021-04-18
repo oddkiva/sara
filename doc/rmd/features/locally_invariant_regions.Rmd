@@ -87,14 +87,14 @@ that most of the time the affine shape is well estimated across different change
 of viewpoints and would bring a superior advantage in the feature matching.
 
 In my experience however, I found that SIFT still performs very well without the
-affine shape adaptation [@MikolajczykTSZMSKVG:2005:ijcv] and performs better
+affine shape adaptation [@MikolajczykTSZMSKVG:2005:ijcv] and actually better
 than affine-invariant features in structure-from-motion. In fact, we can even
 tell that by closely inspecting the features in Figure
 \@ref(fig:affine-covariant-regions): some Harris-Affine or Hessian-Affine
 features seem to have their center and shape really off by a few noticeable
 pixels between the two viewpoints in this figure.^[Optical illusion? I don't
-think so... my fear is that these are far from being uncommon to the point
-of harming the 3D reconstruction, but this claim needs proper investigation.].
+think so... my fear is that these are far from being uncommon to the point of
+harming the 3D reconstruction, but this claim needs proper investigation.].
 
 One thing to note about MSER elliptic shapes: they are not obtained from affine
 shape adaptation but from the computation of the second-moment matrix.
