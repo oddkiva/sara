@@ -6,6 +6,139 @@
 
 namespace sara = DO::Sara;
 
+struct Box
+{
+  //! @brief Height, width, length.
+  Eigen::Vector3f size;
+
+  //! @brief the rotation matrix.
+  Eigen::Matrix3f R;
+
+  //! @brief the translation vector.
+  //!
+  //! This is also the center of the bounding box in the world reference
+  //! coordinate system.
+  Eigen::Vector3f t;
+
+  auto vertices() const
+  {
+    // width -> x-axis
+    const auto& w = size(0);
+    // length -> y-axis
+    const auto& l = size(1);
+    // height -> z-axis
+    const auto& h = size(2);
+
+    // The coordinates follow the automotive axis convention.
+    auto vertices = Eigen::Matrix<float, 3, 8>{};
+    vertices <<
+      // Back face   | Front face
+      +1, +1, +1, +1, -1, -1, -1, -1,
+      +1, -1, -1, +1, +1, -1, -1, +1,
+      +1, +1, -1, -1, +1, +1, -1, -1;
+
+    // The first 4 vertices are the back face, enumerated in the following
+    // order:
+    // 1. Top-left
+    // 2. Top-right
+    // 3. Bottom-right
+    // 4. Bottom-left
+    //
+    // The last 4 vertices are the front face, also  enumerated in the following
+    // order:
+    // 1. Top-left
+    // 2. Top-right
+    // 3. Bottom-right
+    // 4. Bottom-left
+
+    // Multiply the coordinates with the appropriate size.
+    auto x = vertices.row(0);
+    auto y = vertices.row(1);
+    auto z = vertices.row(2);
+
+    x *= l * 0.5f;
+    y *= w * 0.5f;
+    z *= h * 0.5f;
+
+    // Rotation (yaw essentially)
+    vertices = R * vertices;
+    // Then translate in the world reference coordinate system.
+    vertices.colwise() += t;
+
+    return vertices;
+  }
+
+  auto drawBBox3D(const NuScenes::EgoPose& ego_pose,
+                  const NuScenes::CalibratedSensor& calibrated_sensor) const
+  {
+    Eigen::Matrix<float, 4, 8> X = vertices().colwise().homogeneous();
+
+    Eigen::Matrix4f world_to_local_transform = Eigen::Matrix4f::Identity();
+    {
+      const Eigen::Matrix3f Rwt = ego_pose
+                                      .rotation            //
+                                      .toRotationMatrix()  //
+                                      .transpose();        //
+      const auto& tw = ego_pose.translation;
+
+      world_to_local_transform.topLeftCorner(3, 3) = Rwt;
+      world_to_local_transform.block<3, 1>(0, 3) = -Rwt * tw;
+    }
+
+    Eigen::Matrix4f local_to_camera_transform = Eigen::Matrix4f::Identity();
+    {
+      const Eigen::Matrix3f Rct = calibrated_sensor        //
+                                      .rotation            //
+                                      .toRotationMatrix()  //
+                                      .transpose();
+      const auto& tc = calibrated_sensor.translation;
+
+      local_to_camera_transform.topLeftCorner(3, 3) = Rct;
+      local_to_camera_transform.block<3, 1>(0, 3) = -Rct * tc;
+    }
+
+    const Eigen::Matrix4f world_to_camera_transform =
+        local_to_camera_transform * world_to_local_transform;
+
+    X = world_to_camera_transform * X;
+
+    // Project to camera.
+    const auto& K = calibrated_sensor.calibration_matrix.value();
+    const Eigen::Matrix<float, 3, 8> x = K * X.colwise().hnormalized();
+
+    // Draw the vertices.
+    for (auto v = 0; v < 8; ++v)
+    {
+      const Eigen::Vector2f uv = x.col(v).head(2);
+      sara::fill_circle(uv, 3.f, sara::Magenta8);
+    }
+
+    // Draw the edges of the back-face.
+    for (auto v = 0; v < 4; ++v)
+    {
+      const Eigen::Vector2f a = x.col(v).head(2);
+      const Eigen::Vector2f b = x.col((v + 1) % 4).head(2);
+      sara::draw_line(a, b, sara::Red8, 1);
+    }
+
+    // Draw the edges of the front-face.
+    for (auto v = 0; v < 4; ++v)
+    {
+      const Eigen::Vector2f a = x.col(4 + v).head(2);
+      const Eigen::Vector2f b = x.col(4 + (v + 1) % 4).head(2);
+      sara::draw_line(a, b, sara::Red8, 1);
+    }
+
+    // Draw the edges of the left and right side faces.
+    for (auto v = 0; v < 4; ++v)
+    {
+      const Eigen::Vector2f a = x.col(0 + v).head(2);
+      const Eigen::Vector2f b = x.col(4 + v).head(2);
+      sara::draw_line(a, b, sara::Red8, 1);
+    }
+  }
+};
+
 
 GRAPHICS_MAIN()
 {
@@ -64,7 +197,8 @@ GRAPHICS_MAIN()
   //
   // And I am pretty sure the IMU coordinate system is used as the reference
   // local vehicle coordinate system.
-  const auto& calibrated_sensor = nuscenes.get_calibrated_sensor(image_metadata);
+  const auto& calibrated_sensor =
+      nuscenes.get_calibrated_sensor(image_metadata);
   // Get the camera pose w.r.t. the local coordinate system.
   const auto& tc = calibrated_sensor.translation;
   const auto& Rc = calibrated_sensor.rotation.toRotationMatrix();
@@ -86,7 +220,7 @@ GRAPHICS_MAIN()
       sample_token                                                  //
   );
 
-  for (const auto& annotation: sample_annotations)
+  for (const auto& annotation : sample_annotations)
   {
     // For now, just consider the center of the 3D box.
     //
@@ -116,6 +250,8 @@ GRAPHICS_MAIN()
         nuscenes.instance_table.at(annotation.instance_token);
     const auto& category = nuscenes.category_table.at(instance.category_token);
     std::cout << category.name << " " << x_camera.transpose() << std::endl;
+    std::cout << "size = " << annotation.size.transpose() << std::endl;
+
 
     sara::fill_circle(x_image, 3.f, sara::Red8);
 
