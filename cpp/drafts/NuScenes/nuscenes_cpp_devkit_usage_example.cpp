@@ -32,10 +32,10 @@ struct Box
     // The coordinates follow the automotive axis convention.
     auto vertices = Eigen::Matrix<float, 3, 8>{};
     vertices <<
-      // Back face   | Front face
-      +1, +1, +1, +1, -1, -1, -1, -1,
-      +1, -1, -1, +1, +1, -1, -1, +1,
-      +1, +1, -1, -1, +1, +1, -1, -1;
+        // Back face   | Front face
+        +1, +1, +1, +1, -1, -1, -1, -1,  //
+        +1, -1, -1, +1, +1, -1, -1, +1,  //
+        +1, +1, -1, -1, +1, +1, -1, -1;  //
 
     // The first 4 vertices are the back face, enumerated in the following
     // order:
