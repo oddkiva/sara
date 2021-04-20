@@ -68,8 +68,8 @@ struct Box
     return vertices;
   }
 
-  auto drawBBox3D(const NuScenes::EgoPose& ego_pose,
-                  const NuScenes::CalibratedSensor& calibrated_sensor) const
+  auto draw(const NuScenes::EgoPose& ego_pose,
+            const NuScenes::CalibratedSensor& calibrated_sensor) const
   {
     Eigen::Matrix<float, 4, 8> X = vertices().colwise().homogeneous();
 
