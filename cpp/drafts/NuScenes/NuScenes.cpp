@@ -79,6 +79,7 @@ auto NuScenes::load_sample_data_table() -> void
 {
   const auto sample_data_json = load_json(dataroot, version, "sample_data");
   for (const auto& j : sample_data_json)
+  {
     sample_data_table[j["token"]] = {
         .prev = j["prev"],
         .next = j["next"],
@@ -91,6 +92,14 @@ auto NuScenes::load_sample_data_table() -> void
         .width = j["width"].get<int>(),
         .height = j["height"].get<int>(),
         .filename = j["filename"]};
+
+    if (sample_data_table[j["token"]].width == 0 ||
+        sample_data_table[j["token"]].height == 0)
+    {
+      sample_data_table[j["token"]].width = std::nullopt;
+      sample_data_table[j["token"]].height = std::nullopt;
+    }
+  }
 }
 
 auto NuScenes::load_sample_annotation_table() -> void

@@ -6,6 +6,71 @@
 
 namespace sara = DO::Sara;
 
+
+// The following also works.
+// auto rigid_body_transform(const Eigen::Quaternionf& R, const Eigen::Vector3f&
+// t)
+//     -> Eigen::Affine3f
+// {
+//   return R * Eigen::Translation3f{t};
+// }
+
+// In the world reference, the car is:
+// - at the following coordinates given by 'ego_pose.translation'
+// - oriented by the quaternion 'ego_pose.rotation'
+auto local_to_world_transform(const NuScenes::EgoPose& ego_pose)
+{
+  // return rigid_body_transform(ego_pose.rotation, ego_pose.translation)
+
+  const Eigen::Matrix3f R = ego_pose
+                                .rotation            //
+                                .toRotationMatrix()  //
+                                .transpose();        //
+  const auto& t = ego_pose.translation;
+
+  Eigen::Matrix4f T = Eigen::Matrix4f::Identity();
+  T.topLeftCorner(3, 3) = R;
+  T.block<3, 1>(0, 3) = t;
+
+  return T;
+}
+
+auto world_to_local_transform(const NuScenes::EgoPose& ego_pose)
+{
+  // return rigid_body_transform(ego_pose.rotation, ego_pose.translation)
+  //     .inverse();
+
+  const Eigen::Matrix3f Rt = ego_pose
+                                 .rotation            //
+                                 .toRotationMatrix()  //
+                                 .transpose();        //
+  const auto& t = ego_pose.translation;
+
+  Eigen::Matrix4f T = Eigen::Matrix4f::Identity();
+  T.topLeftCorner(3, 3) = Rt;
+  T.block<3, 1>(0, 3) = -Rt * t;
+
+  return T;
+}
+
+auto local_to_sensor_transform(
+    const NuScenes::CalibratedSensor& calibrated_sensor)
+{
+  const Eigen::Matrix3f Rt = calibrated_sensor        //
+                                 .rotation            //
+                                 .toRotationMatrix()  //
+                                 .transpose();
+  const auto& t = calibrated_sensor.translation;
+
+  Eigen::Matrix4f T = Eigen::Matrix4f::Identity();
+
+  T.topLeftCorner(3, 3) = Rt;
+  T.block<3, 1>(0, 3) = -Rt * t;
+
+  return T;
+}
+
+
 struct Box
 {
   //! @brief Height, width, length.
@@ -19,6 +84,8 @@ struct Box
   //! This is also the center of the bounding box in the world reference
   //! coordinate system.
   Eigen::Vector3f t;
+
+  std::string category_name;
 
   auto vertices() const
   {
@@ -71,71 +138,51 @@ struct Box
   auto draw(const NuScenes::EgoPose& ego_pose,
             const NuScenes::CalibratedSensor& calibrated_sensor) const
   {
-    Eigen::Matrix<float, 4, 8> X = vertices().colwise().homogeneous();
+    const Eigen::Matrix4f T = local_to_sensor_transform(calibrated_sensor) *
+                              world_to_local_transform(ego_pose);
 
-    Eigen::Matrix4f world_to_local_transform = Eigen::Matrix4f::Identity();
-    {
-      const Eigen::Matrix3f Rwt = ego_pose
-                                      .rotation            //
-                                      .toRotationMatrix()  //
-                                      .transpose();        //
-      const auto& tw = ego_pose.translation;
-
-      world_to_local_transform.topLeftCorner(3, 3) = Rwt;
-      world_to_local_transform.block<3, 1>(0, 3) = -Rwt * tw;
-    }
-
-    Eigen::Matrix4f local_to_camera_transform = Eigen::Matrix4f::Identity();
-    {
-      const Eigen::Matrix3f Rct = calibrated_sensor        //
-                                      .rotation            //
-                                      .toRotationMatrix()  //
-                                      .transpose();
-      const auto& tc = calibrated_sensor.translation;
-
-      local_to_camera_transform.topLeftCorner(3, 3) = Rct;
-      local_to_camera_transform.block<3, 1>(0, 3) = -Rct * tc;
-    }
-
-    const Eigen::Matrix4f world_to_camera_transform =
-        local_to_camera_transform * world_to_local_transform;
-
-    X = world_to_camera_transform * X;
+    const Eigen::Matrix<float, 4, 8> X = T * vertices().colwise().homogeneous();
 
     // Project to camera.
     const auto& K = calibrated_sensor.calibration_matrix.value();
-    const Eigen::Matrix<float, 3, 8> x = K * X.colwise().hnormalized();
+    const Eigen::Matrix<float, 2, 8> x = (K * X.colwise().hnormalized())  //
+                                             .colwise()
+                                             .hnormalized();
 
     // Draw the vertices.
     for (auto v = 0; v < 8; ++v)
     {
-      const Eigen::Vector2f uv = x.col(v).head(2);
+      const Eigen::Vector2f uv = x.col(v);
       sara::fill_circle(uv, 3.f, sara::Magenta8);
     }
 
     // Draw the edges of the back-face.
     for (auto v = 0; v < 4; ++v)
     {
-      const Eigen::Vector2f a = x.col(v).head(2);
-      const Eigen::Vector2f b = x.col((v + 1) % 4).head(2);
+      const Eigen::Vector2f a = x.col(v);
+      const Eigen::Vector2f b = x.col((v + 1) % 4);
       sara::draw_line(a, b, sara::Red8, 1);
     }
 
     // Draw the edges of the front-face.
     for (auto v = 0; v < 4; ++v)
     {
-      const Eigen::Vector2f a = x.col(4 + v).head(2);
-      const Eigen::Vector2f b = x.col(4 + (v + 1) % 4).head(2);
+      const Eigen::Vector2f a = x.col(4 + v);
+      const Eigen::Vector2f b = x.col(4 + (v + 1) % 4);
       sara::draw_line(a, b, sara::Red8, 1);
     }
 
     // Draw the edges of the left and right side faces.
     for (auto v = 0; v < 4; ++v)
     {
-      const Eigen::Vector2f a = x.col(0 + v).head(2);
-      const Eigen::Vector2f b = x.col(4 + v).head(2);
+      const Eigen::Vector2f a = x.col(0 + v);
+      const Eigen::Vector2f b = x.col(4 + v);
       sara::draw_line(a, b, sara::Red8, 1);
     }
+
+    const Eigen::Vector2f tl = x.rowwise().minCoeff();
+    sara::draw_text(tl.x() - 20, tl.y() - 10, category_name, sara::White8, 16,
+                    0, false, true, false, 2);
   }
 };
 
@@ -149,116 +196,120 @@ GRAPHICS_MAIN()
 
   const auto nuscenes = NuScenes{nuscenes_version, nuscenes_root_path, true};
 
-  // A sample is indexed by its token.
-  //
-  // It also has a unique timestamp.
-  const auto& sample_token = nuscenes.sample_table.begin()->first;
-  std::cout << "sample_token = " << sample_token << std::endl;
-
-  // Retrieve the list of sample data, i.e.:
-  // - images
-  // - lidar point cloud
-  // - radar velocities
-  const auto sample_data = nuscenes.filter_by_sample_token(  //
-      nuscenes.sample_data_table,                            //
-      sample_token                                           //
-  );
-
-  // We just want to pull one image.
-  const auto& image_metadata = *std::find_if(             //
-      sample_data.cbegin(), sample_data.cend(),           //
-      [](const auto& datum) { return datum.is_image(); }  //
-  );
-
-  const auto image = sara::imread<sara::Rgb8>(  //
-      nuscenes.get_data_path(image_metadata)    //
-  );
-
-  // Display the image.
-  sara::create_window(image.sizes());
-  sara::set_antialiasing();
-  sara::display(image);
-
-  // Get the ego pose, which the car vehical position and orientation with
-  // respect to the global coordinate system.
-  const auto& ego_pose = nuscenes.get_ego_pose(image_metadata);
-  // In the world reference, the car is at the following coordinates:
-  const auto& tw = ego_pose.translation;
-  // In the world reference, the car orientation is quantified by a quaternion:
-  // We can transform into a rotation matrix.
-  const auto& Rw = ego_pose.rotation.toRotationMatrix();
-
-  std::cout << "Comparing the timestamps" << std::endl;
-  std::cout << nuscenes.sample_table.at(sample_token).timestamp << std::endl;
-  std::cout << image_metadata.timestamp << std::endl;
-  std::cout << ego_pose.timestamp << std::endl;
-
-  // Camera poses with respect to the reference local vehicle coordinate system.
-  //
-  // And I am pretty sure the IMU coordinate system is used as the reference
-  // local vehicle coordinate system.
-  const auto& calibrated_sensor =
-      nuscenes.get_calibrated_sensor(image_metadata);
-  // Get the camera pose w.r.t. the local coordinate system.
-  const auto& tc = calibrated_sensor.translation;
-  const auto& Rc = calibrated_sensor.rotation.toRotationMatrix();
-  // Get the calibration matrix.
-  const auto& K = calibrated_sensor.calibration_matrix;
-  // Upon visual inspection, this sign of each camera axis coordinate are
-  // consistent with the projection of each axis onto the IMU axes.
-  std::cout << "R(camera/local) =\n" << Rc << std::endl;
-
-  // Now get the sensor type that acquired the image.
-  const auto& sensor = nuscenes.get_sensor(calibrated_sensor);
-  sara::draw_text(10, 20, sensor.modality + ": " + sensor.channel, sara::White8,
-                  16, 0, false, true);
-
-  // Let us now pull the list of annotated objects:
-  std::cout << "Listing the annotated objects..." << std::endl;
-  const auto sample_annotations = nuscenes.filter_by_sample_token(  //
-      nuscenes.sample_annotation_table,                             //
-      sample_token                                                  //
-  );
-
-  for (const auto& annotation : sample_annotations)
+  for (const auto& [sample_token, sample] : nuscenes.sample_table)
   {
-    // For now, just consider the center of the 3D box.
+    // A sample is indexed by its token.
     //
-    // Then we will proceed with all the vertices of the full box after that.
-    const auto& x_global = annotation.translation;
+    // It also has a unique timestamp.
+    std::cout << "sample_token = " << sample_token << std::endl;
 
-    // Get the coordinates in the reference local coordinate system.
-    const Eigen::Vector3f& x_local = Rw.transpose() * (x_global - tw);
+    // Retrieve the list of sample data, i.e.:
+    // - images
+    // - lidar point cloud
+    // - radar velocities
+    const auto sample_data = nuscenes.filter_by_sample_token(  //
+        nuscenes.sample_data_table,                            //
+        sample_token                                           //
+    );
 
-    // Get the camera coordinates from the reference local coordinate system.
-    const Eigen::Vector3f& x_camera = Rc.transpose() * (x_local - tc);
+    // Display all the images.
+    for (const auto& sample_datum : sample_data)
+    {
+      if (!sample_datum.is_image())
+        continue;
 
-    // Check the cheirality: z > 0!
-    if (x_camera.z() < 0)
-      continue;
+      if (!sample_datum.is_key_frame)
+        continue;
 
-    // Project onto the image plane.
-    const Eigen::Vector2f x_image = (K.value() * x_camera).hnormalized();
+      const auto image =
+          sara::imread<sara::Rgb8>(nuscenes.get_data_path(sample_datum));
 
-    // Inspect the label of the annotation to see if they match with what we see
-    // in the image.
-    if (x_image.x() < 0 || x_image.x() > image.width() ||  //
-        x_image.y() < 0 || x_image.y() > image.height())
-      continue;
+      // Get the ego pose, which the car vehical position and orientation with
+      // respect to the global coordinate system.
+      const auto& ego_pose = nuscenes.get_ego_pose(sample_datum);
 
-    const auto& instance =
-        nuscenes.instance_table.at(annotation.instance_token);
-    const auto& category = nuscenes.category_table.at(instance.category_token);
-    std::cout << category.name << " " << x_camera.transpose() << std::endl;
-    std::cout << "size = " << annotation.size.transpose() << std::endl;
+      // Camera poses with respect to the reference local vehicle coordinate
+      // system.
+      //
+      // And I am pretty sure the IMU coordinate system is used as the reference
+      // local vehicle coordinate system.
+      const auto& calibrated_sensor =
+          nuscenes.get_calibrated_sensor(sample_datum);
+      // Get the calibration matrix.
+      const auto& K = calibrated_sensor.calibration_matrix.value();
 
+      // Transformation to go from the world coordinate system to the sensor
+      // coordinate system.
+      const Eigen::Matrix4f T = local_to_sensor_transform(calibrated_sensor) *
+                                world_to_local_transform(ego_pose);
 
-    sara::fill_circle(x_image, 3.f, sara::Red8);
+      // Now get the sensor type that acquired the image.
+      const auto& sensor = nuscenes.get_sensor(calibrated_sensor);
+      sara::draw_text(10, 20, sensor.modality + ": " + sensor.channel,
+                      sara::White8, 16, 0, false, true);
 
-    // There are some errors to me and missing annotations.
+      // Let us now pull the list of annotated objects:
+      const auto sample_annotations = nuscenes.filter_by_sample_token(  //
+          nuscenes.sample_annotation_table,                             //
+          sample_token                                                  //
+      );
+
+      // Display the image.
+      if (!sara::active_window())
+      {
+        sara::create_window(image.sizes());
+        sara::set_antialiasing();
+      }
+      else if (sara::get_sizes(sara::active_window()) != image.sizes())
+        sara::resize_window(image.sizes());
+      sara::display(image);
+
+      sara::draw_text(20, 20, sensor.channel, sara::White8, 16, 0, false, true,
+                      false, 2);
+
+      // Draw the visible bounding boxes.
+      for (const auto& annotation : sample_annotations)
+      {
+        // For now, just consider the center of the 3D box.
+        //
+        // Then we will proceed with all the vertices of the full box after
+        // that.
+        const auto& c_global = annotation.translation;
+
+        // Get the camera coordinates from the reference local coordinate
+        // system.
+        const Eigen::Vector3f& c_camera =
+            (T * c_global.homogeneous()).hnormalized();
+
+        // Check the cheirality: z > 0!
+        if (c_camera.z() < 0)
+          continue;
+
+        // Project onto the image plane.
+        const Eigen::Vector2f c_image = (K * c_camera).hnormalized();
+
+        // Inspect the label of the annotation to see if they match with what we
+        // see in the image.
+        if (c_image.x() < 0 || c_image.x() > image.width() ||  //
+            c_image.y() < 0 || c_image.y() > image.height())
+          continue;
+
+        const auto& instance =
+            nuscenes.instance_table.at(annotation.instance_token);
+        const auto& category =
+            nuscenes.category_table.at(instance.category_token);
+
+        const auto box = Box{.size = annotation.size,
+                             .R = annotation.rotation.toRotationMatrix(),
+                             .t = annotation.translation,
+                             .category_name = category.name};
+
+        box.draw(ego_pose, calibrated_sensor);
+      }
+
+      sara::get_key();
+    }
   }
-
-  sara::get_key();
 
   return 0;
 }

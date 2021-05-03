@@ -87,7 +87,7 @@ struct NuScenes
 
     auto is_image() const
     {
-      return width.has_value() && height.has_value();
+      return width.has_value() && height.has_value() && fileformat == "jpg";
     }
   };
 
@@ -210,17 +210,6 @@ struct NuScenes
     });
     return rows;
   }
-
-  // template <typename T>
-  // auto filter_by_instance_token(const std::unordered_map<Token, T>& table,
-  //                               const Token& value) const
-  // {
-  //   auto rows = std::vector<T>{};
-  //   std::copy_if(
-  //       table.cbegin(), table.cend(), std::back_inserter(rows),
-  //       [&value](const T& row) { return row.instance_token == value; });
-  //   return rows;
-  // }
 
   auto get_data_path(const SampleData& data) const -> std::string;
 
