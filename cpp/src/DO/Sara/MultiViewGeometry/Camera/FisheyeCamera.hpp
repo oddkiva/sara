@@ -8,9 +8,13 @@
 
 namespace DO::Sara {
 
+  // @brief The fisheye camera model is defined for field of views of up to 180
+  // degrees.
   template <typename T>
   struct FisheyeCamera : PinholeCamera<T>
   {
+    static constexpr auto eps = static_cast<T>(1e-8);
+
     using base_type = PinholeCamera<T>;
     using base_type::K;
     using base_type::K_inverse;
@@ -20,7 +24,7 @@ namespace DO::Sara {
     using Vec3 = typename base_type::Vec3;
 
     //! @brief The distortion coefficients.
-    Eigen::Matrix<T, Eigen::Dynamic, 1> k;
+    Eigen::Matrix<T, 4, 1> k;
 
     //! @brief Cached table that maps undistorted coordinates to distorted
     //! coordinates.
@@ -29,29 +33,70 @@ namespace DO::Sara {
     //! coordinates.
     std::optional<Image<Eigen::Vector2f>> from_distorted_to_undistorted_coords;
 
-    inline auto focalLengths() const -> Vec2
+    //! @brief Iterative method based on the first order Taylor approximation.
+    /*!
+     *
+     *  We can consult the details in:
+     *  Geometric camera calibration using circular control points
+     *  Janne Heikkila
+     *
+     *  Equation (7) and (8) provide the insights.
+     *
+     */
+    auto undistort(const Vec2& xd, int num_iterations = 10) const -> Vec2
     {
-      return {K(0, 0), K(1, 1)};
-    }
+      // Get the normalized coordinates from the pixel coordinates.
+      if (!K_inverse.has_value())
+        base_type::cache_inverse_calibration_matrix();
+      const Vec2 xd_normalized = (K_inverse.value() * xd.homogeneous()).head(2);
 
-    inline auto principalPoint() const -> Vec2
-    {
-      return K.col(2).head(2);
-    }
+      // Calculate the radial component r of the normalized(r, z), where z = 1.
+      auto theta_distorted = xd_normalized.norm();
 
-    auto undistort(const Vec2&) const -> Vec2
-    {
-      throw std::runtime_error{"Not implemented"};
-      return {};
+      // Return NaN values for theta larger than pi/2.
+      //
+      // In OpenCV, values are clamped instead, which is actually questionable
+      // from a 3D reconstruction point of view.
+      constexpr auto half_pi = static_cast<T>(M_PI_2);
+      if (std::abs(theta_distorted) > half_pi)
+        return Vec2{std::numeric_limits<T>::quiet_NaN(),
+                    std::numeric_limits<T>::quiet_NaN()};
+
+
+      // If we are close to the optical center, nothing to do.
+      if (theta_distorted < eps)
+        return xd;
+
+      auto theta = theta_distorted;
+      for (auto iter = 0; iter < num_iterations; ++iter)
+      {
+        const auto theta2 = theta * theta;
+        const auto theta4 = theta2 * theta2;
+        const auto theta6 = theta4 * theta2;
+        const auto theta8 = theta4 * theta4;
+        theta = theta_distorted / (1 + k(0) * theta2 + k(1) * theta4 +
+                                   k(2) * theta6 + k(3) * theta8);
+      }
+
+      // Sanity check.
+      const auto theta_sign_flipped = theta_distorted * theta < 0;
+      if (theta_sign_flipped)
+        return Vec2{std::numeric_limits<T>::quiet_NaN(),
+                    std::numeric_limits<T>::quiet_NaN()};
+
+
+      const auto undistortion_factor = std::tan(theta) / theta_distorted;
+      const Vec2 xu_normalized = xd_normalized * undistortion_factor;
+      const Vec2 xu = (K * xu_normalized.homogeneous()).head(2);
+
+      return xu;
     }
 
     auto distort(const Vec2& xu) const -> Vec2
     {
-      static constexpr auto eps = static_cast<T>(1e-8);
-
       // Calculate the normalized coordinates.
       if (!K_inverse.has_value())
-        base_type::calculate_inverse_calibration_matrix();
+        base_type::cache_inverse_calibration_matrix();
       const Vec2 xun = (K_inverse.value() * xu.homogeneous()).head(2);
 
       // Calculate the radial component r of the equivalent cylindric
@@ -60,7 +105,7 @@ namespace DO::Sara {
 
       // Check this edge case: if we are at the center of the image, there is no
       // distortion.
-      if (r > eps)
+      if (r < eps)
         return xu;
 
       // Otherwise we treat the general case.

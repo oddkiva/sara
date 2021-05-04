@@ -33,10 +33,10 @@ namespace DO::Sara {
     Mat3 K;
 
     //! @brief Cached inverse calibration matrix.
-    std::optional<Mat3> K_inverse;
+    mutable std::optional<Mat3> K_inverse;
 
     //! @brief Calculate and cache the inverse of the calibration matrix.
-    inline auto calculate_inverse_calibration_matrix() -> void
+    inline auto cache_inverse_calibration_matrix() const -> void
     {
       K_inverse = K.inverse();
     }

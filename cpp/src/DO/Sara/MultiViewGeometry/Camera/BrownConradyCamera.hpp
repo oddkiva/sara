@@ -118,8 +118,6 @@ namespace DO::Sara {
       const auto c = principal_point();
 
       // Normalized coordinates
-      // TODO: use K.inverse() in the shear coefficient is not zero.
-      //       and cache it.
       const Vec2 xn = (xd - c).array() / f.array();
 
       // Radial correction.

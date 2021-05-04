@@ -32,7 +32,7 @@ namespace DO::Sara {
     {
     }
 
-    inline explicit constexpr operator const scalar_type() const
+    inline explicit constexpr operator scalar_type() const
     {
       return value;
     }
@@ -254,7 +254,7 @@ namespace DO::Sara {
 
     auto operator=(const self_type&) -> self_type& = default;
 
-    inline constexpr operator const scalar_type() const
+    inline constexpr operator scalar_type() const
     {
       return value;
     }
