@@ -16,6 +16,7 @@ namespace DO::Sara {
     static constexpr auto eps = static_cast<T>(1e-8);
 
     using base_type = PinholeCamera<T>;
+    using base_type::image_sizes;
     using base_type::K;
     using base_type::K_inverse;
 
@@ -35,13 +36,11 @@ namespace DO::Sara {
 
     //! @brief Iterative method based on the first order Taylor approximation.
     /*!
-     *
      *  We can consult the details in:
      *  Geometric camera calibration using circular control points
      *  Janne Heikkila
      *
      *  Equation (7) and (8) provide the insights.
-     *
      */
     auto undistort(const Vec2& xd, int num_iterations = 10) const -> Vec2
     {
@@ -135,6 +134,16 @@ namespace DO::Sara {
       const Vec2 xd = (K * xdn.homogeneous()).head(2);
 
       return xd;
+    }
+
+    inline auto project(const Vec3& x) const -> Vec2
+    {
+      return distort(base_type::project(x));
+    }
+
+    inline auto backproject(const Vec2& x) const -> Vec3
+    {
+      base_type::backproject(undistort(x));
     }
   };
 

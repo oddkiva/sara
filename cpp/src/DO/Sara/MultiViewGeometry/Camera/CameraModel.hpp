@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <memory>
 
 #include <Eigen/Core>
@@ -43,17 +44,31 @@ namespace DO::Sara {
 
     CameraModel& operator=(CameraModel&& c) = default;
 
+    friend auto project(const CameraModel& c, const Eigen::Vector3f& x)
+        -> Eigen::Vector2f
+    {
+      return c._self->project(x);
+    }
+
+    friend auto backproject(const CameraModel& c, const Eigen::Vector2f& x)
+        -> Eigen::Vector3f
+    {
+      return c._self->backproject(x);
+    }
+
   private:
     struct CameraModelConcept
     {
       virtual ~CameraModelConcept() = default;
+
       virtual CameraModelConcept* copy() const = 0;
 
-      virtual auto distort(const Eigen::Vector2f&) const -> Eigen::Vector2f = 0;
-      virtual auto undistort(const Eigen::Vector2f&) const
-          -> Eigen::Vector2f = 0;
+      // virtual auto distort(const Eigen::Vector2f&) const -> Eigen::Vector2f = 0;
+      // virtual auto undistort(const Eigen::Vector2f&) const
+      //     -> Eigen::Vector2f = 0;
 
       virtual auto project(const Eigen::Vector3f&) const -> Eigen::Vector2f = 0;
+
       virtual auto backproject(const Eigen::Vector2f&) const
           -> Eigen::Vector3f = 0;
     };
@@ -65,28 +80,21 @@ namespace DO::Sara {
         : _impl(std::move(impl))
       {
       }
+
       CameraModelConcept* copy() const
       {
-        return new CameraModelImpl(*this);
-      }
-
-      virtual auto distort(const Eigen::Vector2f& x) const -> Eigen::Vector2f
-      {
-        return _impl->distort(x);
-      }
-      virtual auto undistort(const Eigen::Vector2f& x) const -> Eigen::Vector2f
-      {
-        return _impl->undistort(x);
+        return new CameraModelImpl{*this};
       }
 
       virtual auto project(const Eigen::Vector3f& x) const -> Eigen::Vector2f
       {
-        return _impl->project(x);
+        return _impl.project(x);
       }
+
       virtual auto backproject(const Eigen::Vector2f& x) const
           -> Eigen::Vector3f
       {
-        return _impl->backproject(x);
+        return _impl.backproject(x);
       }
 
       Impl _impl;

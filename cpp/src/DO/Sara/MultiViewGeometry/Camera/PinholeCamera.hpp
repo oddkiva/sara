@@ -58,11 +58,23 @@ namespace DO::Sara {
       return 2. * tg.atan();
     }
 
-    auto downscale_image_sizes(T factor) -> void
+    inline auto downscale_image_sizes(T factor) -> void
     {
       K.block(0, 0, 2, 3) /= factor;
       image_sizes /= factor;
     }
+
+    inline auto project(const Vec3& x) const -> Vec2
+    {
+      return (K * x).hnormalized();
+    }
+
+    inline auto backproject(const Vec2& x) const -> Vec3
+    {
+      if (!K_inverse.has_value())
+        cache_inverse_calibration_matrix();
+      return K_inverse.value() * x.homogeneous();
+    }
   };
 
-}
+}  // namespace DO::Sara
