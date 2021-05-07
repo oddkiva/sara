@@ -134,6 +134,65 @@ auto average(const sara::ImageView<sara::Rgb8>& a1,
 }
 
 
+auto make_make_conrady_camera_1() {
+  const auto f = 1305._px;
+  const auto u0 = 960._px;
+  const auto v0 = 540._px;
+  const auto p = Eigen::Vector2f{0, 0};
+  const auto k = Eigen::Vector3f{0.328456, 0.0589776, 0};
+
+  auto camera_parameters = sara::BrownConradyCamera<float>{};
+  camera_parameters.image_sizes << 1920, 1080;
+  camera_parameters.K <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  camera_parameters.k = k;
+  camera_parameters.p = p;
+
+  return camera_parameters;
+}
+
+auto make_make_conrady_camera_2() {
+  const auto f = 946.898442557_px;
+  const auto u0 = 960._px;
+  const auto v0 = 540._px;
+  const auto p = Eigen::Vector2f{0, 0};
+  const auto k = Eigen::Vector3f{
+      -0.22996356451342749,  //
+      0.05952465745165465,
+      -0.007399008111054717  //
+  };
+
+  auto camera_parameters = sara::BrownConradyCamera<float>{};
+  camera_parameters.image_sizes << 1920, 1080;
+  camera_parameters.K <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  camera_parameters.k = k;
+  camera_parameters.p = p;
+
+  return camera_parameters;
+}
+
+auto make_make_conrady_camera_3() {
+  const auto f = 650._px;
+  const auto u0 = 640._px;
+  const auto v0 = 360._px;
+
+  auto camera_parameters = sara::BrownConradyCamera<float>{};
+  camera_parameters.K <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  camera_parameters.k.setZero();
+  camera_parameters.p.setZero();
+
+  return camera_parameters;
+}
+
+
 int __main(int argc, char**argv)
 {
   if (argc < 2)
@@ -152,41 +211,7 @@ int __main(int argc, char**argv)
       Eigen::Vector2i(map_pixel_dims[0].value, map_pixel_dims[1].value)};
 
   // one example of distortion correction.
-  auto camera_parameters = sara::BrownConradyCamera<float>{};
-  {
-    const auto f = 1305._px;
-    const auto u0 = 960._px;
-    const auto v0 = 540._px;
-    const auto p = Eigen::Vector2f{0, 0};
-    // const auto k = Eigen::Vector3f{
-    //     -0.22996356451342749,  //
-    //     0.05952465745165465,
-    //     -0.007399008111054717  //
-    // };
-    const auto k = Eigen::Vector3f{
-        0.328456,
-        0.0589776,
-        0
-    };
-    camera_parameters.K << f, 0, u0,
-                           0, f, v0,
-                           0, 0,  1;
-    camera_parameters.k = k;
-    camera_parameters.p = p;
-  }
-  // // one example of distortion correction.
-  // auto camera_parameters = sara::BrownConradyCamera<float>{};
-  // {
-  //   const auto f = 650._px;
-  //   const auto u0 = 640._px;
-  //   const auto v0 = 360._px;
-  //   camera_parameters.K << f, 0, u0,
-  //                          0, f, v0,
-  //                          0, 0,  1;
-  //   camera_parameters.k.setZero();
-  //   camera_parameters.p.setZero();
-  // }
-  camera_parameters.calculate_K_inverse();
+  auto camera_parameters = make_make_conrady_camera_2();
   camera_parameters.calculate_drap_lefevre_inverse_coefficients();
 
   auto frame_undistorted = sara::Image<sara::Rgb8>{video_stream.sizes()};
@@ -214,7 +239,7 @@ int __main(int argc, char**argv)
     frame_undistorted = video_stream.frame();
     auto map_view = to_map_view(camera_parameters, video_stream.frame());
 #else
-    camera_parameters.undistort_drap_lefevre(video_stream.frame(), frame_undistorted);
+    camera_parameters.undistort(video_stream.frame(), frame_undistorted);
     camera_parameters.distort(frame_undistorted, frame_redistorted);
     auto map_view = to_map_view(camera_parameters, frame_undistorted);
 
@@ -246,7 +271,7 @@ int __main(int argc, char**argv)
     }
     sara::display(map_view);
 
-    video_writer.write(map_view);
+    //video_writer.write(map_view);
   }
 
   sara::close_window(wu);
