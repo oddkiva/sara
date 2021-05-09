@@ -8,6 +8,9 @@ target_link_libraries(image_annotator
   Qt5::Widgets
   Qt5::OpenGL
   $<$<PLATFORM_ID:Windows>:Qt5::WinMain>)
+set_property(TARGET image_annotator
+  PROPERTY
+  FOLDER "Tools")
 
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)

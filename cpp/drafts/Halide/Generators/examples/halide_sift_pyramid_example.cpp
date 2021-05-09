@@ -123,7 +123,6 @@ auto test_on_video()
   const auto video_filepath =
       // "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
       "/home/david/Desktop/GOPR0542.MP4"s;
-      // "/home/david/Desktop/Datasets/ha/turn_bikes.mp4"s;
 #endif
 
 

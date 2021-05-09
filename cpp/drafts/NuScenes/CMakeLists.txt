@@ -13,6 +13,9 @@ target_include_directories(NuScenes
 target_link_libraries(NuScenes
   PRIVATE
   Boost::filesystem)
+set_property(TARGET NuScenes
+  PROPERTY
+  FOLDER "Datasets/NuScenes")
 
 add_executable(nuimages_cpp_devkit_usage_example
   nuimages_cpp_devkit_usage_example.cpp)
@@ -20,9 +23,15 @@ target_link_libraries(nuimages_cpp_devkit_usage_example
   PRIVATE
   NuScenes
   ${DO_Sara_LIBRARIES})
+set_property(TARGET nuimages_cpp_devkit_usage_example
+  PROPERTY
+  FOLDER "Datasets/NuScenes")
 
 add_executable(nuscenes_cpp_devkit_usage_example nuscenes_cpp_devkit_usage_example.cpp)
 target_link_libraries(nuscenes_cpp_devkit_usage_example
   PRIVATE
   NuScenes
   ${DO_Sara_LIBRARIES})
+set_property(TARGET nuscenes_cpp_devkit_usage_example
+  PROPERTY
+  FOLDER "Datasets/NuScenes")

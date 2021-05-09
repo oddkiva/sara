@@ -17,6 +17,7 @@ endmacro()
 
 # Camera model.
 sara_add_example(fisheye_camera_example)
+sara_add_example(omnidirectional_camera_example)
 
 # Single view geometry.
 sara_add_example(metric_birds_eye_viewer)

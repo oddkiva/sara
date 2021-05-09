@@ -232,7 +232,7 @@ namespace DO { namespace Sara {
   class TiffFileReader
   {
     TIFF* _tiff;
-    uint32 _width, _height;
+    std::uint32_t _width, _height;
 
   public:
     TiffFileReader(const char* filepath);

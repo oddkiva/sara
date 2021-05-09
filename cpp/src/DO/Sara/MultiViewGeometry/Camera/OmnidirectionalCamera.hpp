@@ -26,13 +26,6 @@ namespace DO::Sara {
     Eigen::Matrix<T, 2, 1> tangential_distortion_coefficients;
     T xi;
 
-    //! @brief Cached table that maps undistorted coordinates to distorted
-    //! coordinates.
-    std::optional<Image<Eigen::Vector2f>> from_undistorted_to_distorted_coords;
-    //! @brief Cached table that maps distorted coordinates to undistorted
-    //! coordinates.
-    std::optional<Image<Eigen::Vector2f>> from_distorted_to_undistorted_coords;
-
     //! @brief Apply only in the normalized coordinates.
     auto distortion_term(const Vec2& m_undistorted) const -> Vec2
     {
@@ -147,14 +140,26 @@ namespace DO::Sara {
       // Undistort the point.
       const Vec2 pu = undistort(pd);
 
-      // Get the corresponding homogeneous equation.
-      const Vec2 m = pu.homogeneous();
-
       // Apply the lifting transformation, that is the inverse of the mirror
       // transformation.
-      const auto Xs = lifting(m);
+      const auto Xs = lifting(pu);
 
       return Xs;
+    }
+
+    auto undistort_v2(const Vec2& x) const -> Vec2
+    {
+      const Vec3 Xs = backproject(x);
+      const Vec2 xu = (K * Xs).hnormalized();
+      return xu;
+    }
+
+    auto distort_v2(const Vec2 &xu) const -> Vec2
+    {
+      const Vec3 xun = (K_inverse.value() * xu.homogeneous());
+      // Project the 3D ray to the normal image.
+      const Vec2 xd = project(xun);
+      return xd;
     }
 
     //! Iterative method to remove distortion.
