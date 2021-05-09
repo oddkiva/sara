@@ -295,7 +295,7 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
     const auto x = p0_z / p2_z;
     const auto y = p1_z / p2_z;
 
-    if (std::isnan(x) || std::isinf(x) || std::isnan(y) || std::isnan(y))
+    if (std::isnan(x) || std::isinf(x) || std::isnan(y) || std::isinf(y))
       continue;
 
     xyzs.push_back({x, y, z});

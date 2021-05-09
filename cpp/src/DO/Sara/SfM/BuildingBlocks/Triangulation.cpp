@@ -60,7 +60,7 @@ void inspect_geometry(const TwoViewGeometry& g,
   SARA_DEBUG << "Residual 1 = " << residual1 << std::endl;
   SARA_DEBUG << "Residual 2 = " << residual2 << std::endl;
 
-  SARA_DEBUG << "Cheirality =\n" << g.cheirality << std::endl;
+  SARA_DEBUG << "Cheirality =\n" << g.cheirality << std::endl << std::endl;
 }
 
 
@@ -89,10 +89,15 @@ auto estimate_two_view_geometry(const TensorView_<int, 2>& M,
                  std::back_inserter(geometries), [&](const Motion& m) {
                    return two_view_geometry(m, un1_s, un2_s);
                  });
-#ifdef DEBUG
+#define DEBUG_CHEIRALITY
+#ifdef DEBUG_CHEIRALITY
   // Check the cheirality.
-  for (const auto& g: geometries)
+  for (auto i = 0u; i != geometries.size(); ++i)
+  {
+    SARA_DEBUG << "INSPECTING CANDIDATE GEOMETRY " << i << std::endl;
+    const auto& g = geometries[i];
     inspect_geometry(g, un1_s, un2_s);
+  }
 #endif
 
   // Find the best geometry, i.e., the one with the high cheirality degree.
