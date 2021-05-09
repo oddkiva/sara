@@ -39,7 +39,7 @@ namespace DO::Sara {
     Vec2 p;
 
     //! @brief Cached inverse calibration matrix.
-    Mat3 K_inverse = Mat3::Zero();
+    mutable std::optional<Mat3> K_inverse;
 
     //! @brief Cached variable for the inverse distortion calculation.
     //! cf. publication:
@@ -47,7 +47,7 @@ namespace DO::Sara {
     //!   Drap and Lefevre.
     Vec9 k_inverse;
 
-    inline auto calculate_K_inverse()
+    inline auto cache_inverse_calibration_matrix() const
     {
       K_inverse = K.inverse();
     }
@@ -93,13 +93,13 @@ namespace DO::Sara {
 
     //! @brief Using Drap-Lefevre method.
     //! Valid only if the tangential coefficients are zero.
-    inline auto distort_drap_lefevre(const Vec2& xu) const -> Vec2
+    inline auto undistort(const Vec2& xu) const -> Vec2
     {
-      const auto f = focal_lengths();
-      const auto c = principal_point();
+      if (!K_inverse.has_value())
+        cache_inverse_calibration_matrix();
+      const Vec2 xun = (K_inverse.value() * xu.homogeneous()).head(2);
 
-      const Vec2 rvec = (xu - c).array() / f.array();
-      const auto r2 = rvec.squaredNorm();
+      const auto r2 = xun.squaredNorm();
       auto rpowers = Vec9{};
       rpowers <<
         r2,
@@ -108,31 +108,91 @@ namespace DO::Sara {
         std::pow(r2, 4),
         std::pow(r2, 5);
       const auto radial = k_inverse.dot(rpowers);
-      const Vec2 xd = xu + ((radial * rvec).array() * f.array()).matrix();
+
+      const Vec2 xdn = xun * (1 + radial);
+
+      const Vec2 xd = (K * xdn.homogeneous()).head(2);
+
       return xd;
     }
 
-    inline auto undistort(const Vec2& xd) const -> Vec2
+    inline auto undistort_with_bisection(const Vec2& xu)  const -> Vec2
     {
-      const auto f = focal_lengths();
-      const auto c = principal_point();
+      static constexpr auto max_iter = 10;
+      static constexpr auto eps = 1e-6f;
 
-      // Normalized coordinates
-      const Vec2 xn = (xd - c).array() / f.array();
+      if (!K_inverse.has_value())
+        cache_inverse_calibration_matrix();
+      const Vec2 xun = (K_inverse.value() * xu.homogeneous()).head(2);
+      const auto ru = xun.norm();
+
+      // The radial distortion function.
+      auto f = [this](float r_distorted) {
+        const auto& rd = r_distorted;
+        const auto rd2 = rd * rd;
+        const auto rd3 = rd2 * rd;
+        const auto rd5 = rd3 * rd2;
+        return rd + k(0) * rd3 + k(1) * rd5;
+      };
+
+      // Calculate the bounds of r_distorted.
+      auto r_lower = 0.f;
+      auto r_upper = 2 * ru;
+      auto f_r_distorted = f(r_upper);
+      while (f_r_distorted < ru)
+      {
+        r_lower = r_upper;
+        r_upper = 2 * r_upper;
+      }
+
+      // THE UNKNOWN.
+      auto r_dist_estimate = 0.5f * (r_lower + r_upper);
+      auto f_at_r_dist_estimate = f(r_dist_estimate);
+
+      // By monotonicity.
+      auto iter = 0;
+      while (std::abs(f_at_r_dist_estimate - ru) > eps &&
+             iter < max_iter)
+      {
+        if (f_at_r_dist_estimate > ru)
+          r_upper = r_dist_estimate;
+        else
+          r_lower = r_dist_estimate;
+
+        r_dist_estimate = 0.5 * (r_lower + r_upper);
+        f_at_r_dist_estimate = f(r_dist_estimate);
+
+        ++iter;
+      }
+
+      const Vec2 xdn = (r_dist_estimate / ru) * xun;
+      const Vec2 xd = (K * xdn.homogeneous()).hnormalized();
+
+      return xd;
+    }
+
+    inline auto distort(const Vec2& xd) const -> Vec2
+    {
+      // Normalized coordinates.
+      if (!K_inverse.has_value())
+        cache_inverse_calibration_matrix();
+      const Vec2 xdn = (K_inverse.value() * xd.homogeneous()).head(2);
 
       // Radial correction.
-      const auto r2 = xn.squaredNorm();
+      const auto r2 = xdn.squaredNorm();
       const auto r4 = r2 * r2;
       const auto r6 = r4 * r2;
       const auto rpowers = Vec3{r2, r4, r6};
-      const auto radial = Vec2{k.dot(rpowers) * xn};
+      const auto radial = Vec2{k.dot(rpowers) * xdn};
 
       // Tangential correction.
-      const Mat2 Tmat = r2 * Mat2::Identity() + 2 * xn * xn.transpose();
+      const Mat2 Tmat = r2 * Mat2::Identity() + 2 * xdn * xdn.transpose();
       const Vec2 tangential = Tmat * p;
 
-      // Undistorted coordinates.
-      const Vec2 xu = xd + ((radial + tangential).array() * f.array()).matrix();
+      const Vec2 xun = xdn + radial + tangential;
+
+      // Go back to pixel coordinates.
+      const Vec2 xu = (K * xun.homogeneous()).head(2);
 
       return xu;
     }
@@ -144,8 +204,8 @@ namespace DO::Sara {
     }
 
     template <typename PixelType>
-    auto undistort_drap_lefevre(const ImageView<PixelType>& src,
-                                ImageView<PixelType>& dst) const
+    auto undistort(const ImageView<PixelType>& src,
+                   ImageView<PixelType>& dst) const
     {
       const auto& w = dst.width();
       const auto& h = dst.height();
@@ -155,8 +215,7 @@ namespace DO::Sara {
       {
         const auto y = yx / w;
         const auto x = yx - y * w;
-        const Eigen::Vector2d p =
-            distort_drap_lefevre(Vec2(x, y)).template cast<double>();
+        const Eigen::Vector2d p = distort(Vec2(x, y)).template cast<double>();
 
         const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
                                      0 <= p.y() && p.y() < h - 1;
@@ -178,7 +237,7 @@ namespace DO::Sara {
 
     template <typename PixelType>
     auto distort(const ImageView<PixelType>& src,
-                              ImageView<PixelType>& dst) const
+                 ImageView<PixelType>& dst) const
     {
       const auto& w = dst.width();
       const auto& h = dst.height();
@@ -188,7 +247,7 @@ namespace DO::Sara {
       {
         const auto y = yx / w;
         const auto x = yx - y * w;
-        const Eigen::Vector2d p = undistort(Vec2(x, y))  //
+        const Eigen::Vector2d p = undistort_with_bisection(Vec2(x, y))  //
                                       .template cast<double>();
         const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
                                      0 <= p.y() && p.y() < h - 1;
