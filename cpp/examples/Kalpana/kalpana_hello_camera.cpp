@@ -838,10 +838,10 @@ public:
     const auto data_dir =
         "/home/david/Desktop/Datasets/sfm/castle_int"s;
 #endif
-    const auto image = "0000.png";
+    const auto image = "0001.png";
     m_imagePlane->set_image(data_dir + "/" + image);
 
-    const auto K = "0000.png.K";
+    const auto K = "0001.png.K";
     auto camera = PinholeCamera{
       read_internal_camera_parameters(data_dir + "/" + K),
       Matrix3d::Identity(),

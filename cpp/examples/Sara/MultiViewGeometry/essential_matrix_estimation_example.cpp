@@ -80,7 +80,8 @@ int __main(int, char** argv)
   print_stage("Loading images...");
   const auto data_dir =
 #ifdef __APPLE__
-      "/Users/david/Desktop/Datasets/sfm/fountain_int"s;
+      // "/Users/david/Desktop/Datasets/sfm/fountain_int"s;
+      "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
       "/home/david/Desktop/Datasets/sfm/castle_int"s;
       // "/home/david/Desktop/Datasets/sfm/fountain_int"s;
@@ -150,7 +151,7 @@ int __main(int, char** argv)
   auto estimator = NisterFivePointAlgorithm{};
   auto distance = EpipolarDistance{};
   {
-    num_samples = 1000;
+    num_samples = 200;
     err_thres = 1e-3;
     std::tie(E, inliers, sample_best) =
         ransac(M, un[0], un[1], estimator, distance, num_samples, err_thres);
@@ -195,8 +196,7 @@ int __main(int, char** argv)
   print_stage("Inspecting the fundamental matrix estimation...");
   check_epipolar_constraints(views.images[0], views.images[1], F, matches,
                              sample_best, inliers,
-                             /* display_step */ 20, /* wait_key */ false);
-  millisleep(2000);
+                             /* display_step */ 20, /* wait_key */ true);
 
   print_stage("Sort the points by depth...");
   const auto& geometry = two_view_geometry;
@@ -246,13 +246,9 @@ int __main(int, char** argv)
   SARA_DEBUG << "Rw =\n" << Rw << std::endl;
   SARA_DEBUG << "tw =\n" << tw << std::endl;
 
-  auto P = Matrix3d{};
-  P <<
-    0, 0, 1,
-    1, 0, 0,
-    0, 1, 0;
   SARA_DEBUG << "yaw pitch roll =\n"
-             << calculate_yaw_pitch_roll(P * Rw) * 180. / M_PI << std::endl;
+             << Rw.eulerAngles(1, 0, 2) * 180. / M_PI << std::endl;
+             // << calculate_yaw_pitch_roll(Rw) * 180. / M_PI << std::endl;
 
   get_key();
 
