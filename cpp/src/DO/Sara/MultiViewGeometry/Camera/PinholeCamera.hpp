@@ -13,8 +13,6 @@
 
 #include <Eigen/Dense>
 
-#include <optional>
-
 
 namespace DO::Sara {
 
@@ -22,58 +20,57 @@ namespace DO::Sara {
   struct PinholeCamera
   {
     //! @brief Types.
-    using Vec2 = Eigen::Matrix<T, 2, 1>;
-    using Vec3 = Eigen::Matrix<T, 3, 1>;
-
-    using Mat3 = Eigen::Matrix<T, 3, 3>;
+    using scalar_type = T;
+    using vector2_type = Eigen::Matrix<T, 2, 1>;
+    using vector3_type = Eigen::Matrix<T, 3, 1>;
+    using matrix3_type = Eigen::Matrix<T, 3, 3>;
 
     //! @brief Original image sizes by the camera.
-    Vec2 image_sizes;
+    vector2_type image_sizes;
     //! @brief Pinhole camera parameters.
-    Mat3 K;
+    matrix3_type K;
 
-    //! @brief Cached inverse calibration matrix.
-    mutable std::optional<Mat3> K_inverse;
+    //! @brief Inverse calibration matrix.
+    matrix3_type K_inverse;
 
     //! @brief Calculate and cache the inverse of the calibration matrix.
-    inline auto cache_inverse_calibration_matrix() const -> void
+    inline auto calculate_inverse_calibration_matrix() const -> void
     {
       K_inverse = K.inverse();
     }
 
-    inline auto focal_lengths() const -> Vec2
+    inline auto focal_lengths() const -> vector2_type
     {
       return {K(0, 0), K(1, 1)};
     }
 
-    inline auto principal_point() const -> Vec2
+    inline auto principal_point() const -> vector2_type
     {
       return K.col(2).head(2);
     }
 
-    inline auto field_of_view() const -> Vec2
+    inline auto field_of_view() const -> vector2_type
     {
       const Eigen::Array<T, 2, 1> tg = image_sizes.array() /  //
                                        focal_lengths().array() / 2.;
       return 2. * tg.atan();
     }
 
-    inline auto downscale_image_sizes(T factor) -> void
-    {
-      K.block(0, 0, 2, 3) /= factor;
-      image_sizes /= factor;
-    }
-
-    inline auto project(const Vec3& x) const -> Vec2
+    inline auto project(const vector3_type& x) const -> vector2_type
     {
       return (K * x).hnormalized();
     }
 
-    inline auto backproject(const Vec2& x) const -> Vec3
+    inline auto backproject(const vector2_type& x) const -> vector3_type
     {
-      if (!K_inverse.has_value())
-        cache_inverse_calibration_matrix();
-      return K_inverse.value() * x.homogeneous();
+      return K_inverse * x.homogeneous();
+    }
+
+    inline auto downscale_image_sizes(T factor) -> void
+    {
+      image_sizes /= factor;
+      K.block(0, 0, 2, 3) /= factor;
+      K_inverse = K.inverse();
     }
   };
 

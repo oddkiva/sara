@@ -165,7 +165,7 @@ void AnnotatingWidget::mouseReleaseEvent(QMouseEvent* e)
   lastBBox = bboxes.end();
 }
 
-void AnnotatingWidget::paintEvent(QPaintEvent* e)
+void AnnotatingWidget::paintEvent(QPaintEvent*)
 {
   QPainter painter(this);
   QPen pen(Qt::yellow, 2);
@@ -220,7 +220,7 @@ void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
     selected = selected || parentItem()->isSelected();
   QColor c(selected ? Qt::red : Qt::yellow);
   if (option->state & QStyle::State_Sunken)
-    c = c.light(120);
+    c = c.lighter(120);
 
   painter->setPen(QPen(c, 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
   painter->drawEllipse(-3, -3, 6, 6);
@@ -391,7 +391,7 @@ QVariant Quad::itemChange(GraphicsItemChange change, const QVariant& value)
 
 // ========================================================================== //
 // Graphics View Widget
-GraphicsAnnotator::GraphicsAnnotator(int w, int h, QWidget* parent)
+GraphicsAnnotator::GraphicsAnnotator(int, int, QWidget* parent)
   : QGraphicsView(parent)
   , counter(0)
   , creatingRect(false)
