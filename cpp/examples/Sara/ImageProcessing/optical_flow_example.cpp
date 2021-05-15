@@ -64,7 +64,15 @@ struct LukasKanadeOpticalFlowEstimator
       }
     }
 
-    const Eigen::Vector2f d = A.colPivHouseholderQr().solve(b);
+    // Check the conditions for solvability.
+    const Eigen::Matrix2f AtA = A.transpose() * A;
+    const Eigen::Vector2f Atb = A.transpose() * b;
+
+    static constexpr auto nan = std::numeric_limits<float>::quiet_NaN();
+    if (std::abs(AtA.determinant()) < 1e-6f)
+      return Eigen::Vector2f{nan, nan};
+
+    const Eigen::Vector2f d = AtA.lu().solve(Atb);
 
     return d;
   }
@@ -104,7 +112,7 @@ int __main(int argc, char** argv)
   // Harris cornerness parameters.
   const auto sigma_D = std::sqrt(std::pow(1.6f, 2) - 1);
   const auto sigma_I = 3.f;
-  const auto kappa = 0.24f;
+  const auto kappa = 0.04f;
 
   // Lukas-Kanade optical flow parameters.
   auto flow_estimator = LukasKanadeOpticalFlowEstimator<>{};
@@ -172,19 +180,32 @@ int __main(int argc, char** argv)
       for (auto i = 0u; i != corners.size(); ++i)
       {
         const auto& v = flow_vectors[i];
+        if (std::isnan(v.x()) || std::isnan(v.y()))
+          continue;
         if (v.squaredNorm() < 0.25f)
           continue;
 
         const Eigen::Vector2f pa = corners[i].cast<float>() * downscale_factor;
-        const Eigen::Vector2f pb = pa + flow_vectors[i].normalized() * 20;
+        const Eigen::Vector2f pb = pa + flow_vectors[i] * 10;
+
+        const auto Y = std::clamp(flow_vectors[i].norm() / 5.f, 0.f, 1.f);
+        const auto U = std::clamp(flow_vectors[i].x() / 5, -1.f, 1.f) * 0.5f;
+        const auto V = std::clamp(flow_vectors[i].y() / 5, -1.f, 1.f) * 0.5f;
+        const auto yuv = sara::Yuv64f(Y, U, V);
+
+        auto rgb32f = sara::Rgb32f{};
+        sara::smart_convert_color(yuv, rgb32f);
+
+        auto rgb8 = sara::Rgb8{};
+        sara::smart_convert_color(rgb32f, rgb8);
 
         constexpr auto& r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
         const auto& l = (2 * r + 1) * downscale_factor;
         const Eigen::Vector2i tl =
             (pa - Eigen::Vector2f::Ones() * r * downscale_factor).cast<int>();
 
-        sara::draw_rect(tl.x(), tl.y(), l, l, sara::Red8);
-        sara::draw_arrow(pa, pb, sara::Red8, 2);
+        sara::draw_rect(tl.x(), tl.y(), l, l, rgb8);
+        sara::draw_arrow(pa, pb, rgb8, 2);
       }
     }
   }
