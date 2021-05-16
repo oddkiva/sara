@@ -36,7 +36,8 @@ namespace DO::Sara {
       const vector3_type Xs = X.normalized();
       // 2. Change coordinates.
       const vector3_type Xe = Xs + xi * vector3_type::UnitZ();
-      // 3. Project the reflected ray by the mirror to the normalized plane z = 1.
+      // 3. Project the reflected ray by the mirror to the normalized plane z
+      // = 1.
       const vector2_type m = Xe.hnormalized();
 
       // Apply the distortion.
@@ -72,7 +73,7 @@ namespace DO::Sara {
       return xu;
     }
 
-    inline auto distort(const vector2_type &xu) const -> vector2_type
+    inline auto distort(const vector2_type& xu) const -> vector2_type
     {
       // Backproject the undistorted coordinates to a 3D ray.
       const vector3_type xun = K_inverse * xu.homogeneous();
@@ -86,17 +87,17 @@ namespace DO::Sara {
      *  The paper terms it as lifting function.
      *
      *  The lifting function is determined by solving a second degree polynomial
-     *  in z by exploiting some key algebraic observation:
-     *  (1) zs > 0
+     *  in z by exploiting one key algebraic observation:
      *  (2) xs^2 + ys^2 + zs^2 = 1 because the world points are reflected the
      *                             spherical mirror of radius = 1.
      *
      *  IMPORTANT:
      *  After observing carefully Figure 4 in the paper:
      *  https://www.robots.ox.ac.uk/~cmei/articles/single_viewpoint_calib_mei_07.pdf
-     *  is that by design the lower hemisphere of the mirror can still project
-     *  world points behind the omnidirectional camera and if the camera film
-     *  plane is wide enough!
+     *  is that by design the lower hemisphere of the mirror can project world
+     *  points behind the omnidirectional camera and if the camera film plane is
+     *  wide enough.
+     *
      */
     inline auto lifting(const vector2_type& m) const -> vector3_type
     {
@@ -104,7 +105,6 @@ namespace DO::Sara {
       const auto xi_squared = xi * xi;
       const auto m_squared_norm = m.squaredNorm();
 
-      // In the paper: https://www.robots.ox.ac.uk/~cmei/articles/single_viewpoint_calib_mei_07.pdf
       const auto discriminant = 1 + (1 - xi_squared) * m_squared_norm;
 
       // Calculate the z-coordinate of Xe.
@@ -124,10 +124,11 @@ namespace DO::Sara {
     }
 
     //! @brief Apply only in the normalized coordinates.
-    inline auto lens_distortion(const vector2_type& m_undistorted) const -> vector2_type
+    inline auto lens_distortion(const vector2_type& m_undistorted) const
+        -> vector2_type
     {
       const auto& m = m_undistorted;
-
+      using CameraModel32f = CameraModel<float>;
       // Distortion.
       const auto& k1 = radial_distortion_coefficients(0);
       const auto& k2 = radial_distortion_coefficients(1);
@@ -151,7 +152,8 @@ namespace DO::Sara {
 
     //! @brief Iterative method to remove distortion.
     inline auto correct_lens_distortion(const vector2_type& pd,
-                                        int num_iterations = 10) const -> vector2_type
+                                        int num_iterations = 10) const
+        -> vector2_type
     {
       // Calculate the normalized coordinates.
       const vector2_type md = (K_inverse * pd.homogeneous()).head(2);
