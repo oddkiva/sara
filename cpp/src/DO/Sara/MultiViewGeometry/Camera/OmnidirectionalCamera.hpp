@@ -128,7 +128,7 @@ namespace DO::Sara {
         -> vector2_type
     {
       const auto& m = m_undistorted;
-      using CameraModel32f = CameraModel<float>;
+
       // Distortion.
       const auto& k1 = radial_distortion_coefficients(0);
       const auto& k2 = radial_distortion_coefficients(1);

@@ -53,7 +53,7 @@ auto make_omnidirectional_camera()
     camera_parameters.xi = 1.50651524;
   }
 
-  camera_parameters.cache_inverse_calibration_matrix();
+  camera_parameters.calculate_inverse_calibration_matrix();
 
   return camera_parameters;
 }
@@ -133,7 +133,6 @@ int __main(int argc, char** argv)
       30                                                      //
   };
 
-  auto i = 0;
   while (video_stream.read())
   {
     const auto frame = video_stream.frame();
@@ -149,7 +148,7 @@ int __main(int argc, char** argv)
       const auto y1 = y_min + y * scale;
 
       const Eigen::Vector2d xyd =
-          camera_parameters.distort_v2(Eigen::Vector2f(x1, y1)).cast<double>();
+          camera_parameters.distort(Eigen::Vector2f(x1, y1)).cast<double>();
       const auto in_image_domain = 0 < xyd.x() && xyd.x() < w - 1 &&  //
                                    0 < xyd.y() && xyd.y() < h - 1;
       if (!in_image_domain)

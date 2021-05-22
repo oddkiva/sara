@@ -212,7 +212,6 @@ int __main(int argc, char**argv)
 
   // one example of distortion correction.
   auto camera_parameters = make_make_conrady_camera_2();
-  camera_parameters.calculate_drap_lefevre_inverse_coefficients();
 
   auto frame_undistorted = sara::Image<sara::Rgb8>{video_stream.sizes()};
   auto frame_redistorted = sara::Image<sara::Rgb8>{video_stream.sizes()};
