@@ -162,7 +162,7 @@ namespace DO::Sara {
   }
 
   auto to_undistorted_lines(const std::vector<LineSegment>& line_segments,
-                            const BrownConradyCamera<float>& intrinsics)
+                            const BrownConradyCamera32<float>& intrinsics)
       -> Tensor_<float, 2>
   {
     auto lines = Tensor_<float, 2>(static_cast<int>(line_segments.size()), 3);

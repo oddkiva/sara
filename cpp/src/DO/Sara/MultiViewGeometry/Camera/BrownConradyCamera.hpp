@@ -16,13 +16,18 @@
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 
 #include <DO/Sara/MultiViewGeometry/Camera/PinholeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/PolynomialDistortionModel.hpp>
 
 
 namespace DO::Sara {
 
-  template <typename T>
+  template <typename T, typename DistortionModel>
   struct BrownConradyCamera: PinholeCamera<T>
   {
+    static constexpr auto eps = static_cast<T>(1e-8);
+
+    using distortion_model_type = DistortionModel;
+
     //! @brief Types.
     using base_type = PinholeCamera<T>;
     using vector2_type = typename base_type::vector2_type;
@@ -34,15 +39,15 @@ namespace DO::Sara {
     using base_type::K;
     using base_type::K_inverse;
 
-    //! @brief Radial distortion coefficients.
-    vector3_type k;
-    //! @brief Tangential distortion coefficients.
-    vector2_type p;
+    // Distortion model (can be centered, decentered, polynomial, division).
+    distortion_model_type distortion_model;
 
-    inline auto undistort(const vector2_type&)  const -> vector2_type
+    inline auto undistort(const vector2_type& xd)  const -> vector2_type
     {
-      throw std::runtime_error{"Not Implemented!"};
-      return {};
+      // Normalized coordinates.
+      const vector2_type xdn = (K_inverse * xd.homogeneous()).head(2);
+      const auto xun  = distortion_model.correct(xdn);
+      return (K * xun.homogeneous()).head(2);
     }
 
     inline auto distort(const vector2_type& xd) const -> vector2_type
@@ -50,18 +55,7 @@ namespace DO::Sara {
       // Normalized coordinates.
       const vector2_type xdn = (K_inverse * xd.homogeneous()).head(2);
 
-      // Radial correction.
-      const auto r2 = xdn.squaredNorm();
-      const auto r4 = r2 * r2;
-      const auto r6 = r4 * r2;
-      const auto rpowers = vector3_type{r2, r4, r6};
-      const auto radial = vector2_type{k.dot(rpowers) * xdn};
-
-      // Tangential correction.
-      const matrix2_type Tmat = r2 * matrix2_type::Identity() + 2 * xdn * xdn.transpose();
-      const vector2_type tangential = Tmat * p;
-
-      const vector2_type xun = xdn + radial + tangential;
+      const vector2_type xun = distortion_model.distort(xdn);
 
       // Go back to pixel coordinates.
       const vector2_type xu = (K * xun.homogeneous()).head(2);
@@ -69,11 +63,14 @@ namespace DO::Sara {
       return xu;
     }
 
-    auto downscale_image_sizes(T factor) -> void
+    inline auto project(const vector3_type& x) const -> vector2_type
     {
-      K.block(0, 0, 2, 3) /= factor;
-      K_inverse = K.inverse();
-      image_sizes /= factor;
+      return distort(base_type::project(x));
+    }
+
+    inline auto backproject(const vector2_type& x) const -> vector3_type
+    {
+      return base_type::backproject(undistort(x));
     }
 
     template <typename PixelType>
@@ -140,5 +137,20 @@ namespace DO::Sara {
       }
     }
   };
+
+  template <typename T>
+  using BrownConradyCamera22 =
+      BrownConradyCamera<T, PolynomialDistortionModel<T, 2, 2>>;
+  template <typename T>
+  using BrownConradyCamera32 =
+      BrownConradyCamera<T, PolynomialDistortionModel<T, 3, 2>>;
+
+  template <typename T>
+  using BrownConradyCameraDecentered22 =
+      BrownConradyCamera<T, PolynomialDistortionModel<T, 2, 2>>;
+
+  template <typename T>
+  using BrownConradyCameraDecentered32 =
+      BrownConradyCamera<T, PolynomialDistortionModel<T, 3, 2>>;
 
 }  // namespace DO::Sara

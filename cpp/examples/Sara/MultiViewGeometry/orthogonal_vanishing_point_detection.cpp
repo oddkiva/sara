@@ -47,7 +47,7 @@ inline constexpr long double operator"" _percent(long double x)
 
 auto initialize_camera_intrinsics_1()
 {
-  auto intrinsics = BrownConradyCamera<float>{};
+  auto intrinsics = BrownConradyCamera32<float>{};
 
   const auto f = 991.8030424131325;
   const auto u0 = 960;
@@ -57,15 +57,15 @@ auto initialize_camera_intrinsics_1()
     f, 0, u0,
     0, f, v0,
     0, 0,  1;
-  intrinsics.k.setZero();
-  intrinsics.p.setZero();
+  intrinsics.distortion_model.k.setZero();
+  intrinsics.distortion_model.p.setZero();
 
   return intrinsics;
 }
 
 auto initialize_camera_intrinsics_2()
 {
-  auto intrinsics = BrownConradyCamera<float>{};
+  auto intrinsics = BrownConradyCamera32<float>{};
 
   const auto f = 946.8984425572634;
   const auto u0 = 960;
@@ -75,18 +75,18 @@ auto initialize_camera_intrinsics_2()
     f, 0, u0,
     0, f, v0,
     0, 0,  1;
-  intrinsics.k <<
+  intrinsics.distortion_model.k <<
     -0.22996356451342749,
     0.05952465745165465,
     -0.007399008111054717;
-  intrinsics.p.setZero();
+  intrinsics.distortion_model.p.setZero();
 
   return intrinsics;
 }
 
 auto initialize_camera_intrinsics(const Eigen::Vector2i& sizes)
 {
-  auto intrinsics = BrownConradyCamera<float>{};
+  auto intrinsics = BrownConradyCamera32<float>{};
 
   const auto f = 0.5f * (sizes.x() + sizes.y());
   const auto u0 = 0.5f * sizes.x();
@@ -96,8 +96,8 @@ auto initialize_camera_intrinsics(const Eigen::Vector2i& sizes)
     f, 0, u0,
     0, f, v0,
     0, 0,  1;
-  intrinsics.k.setZero();
-  intrinsics.p.setZero();
+  intrinsics.distortion_model.k.setZero();
+  intrinsics.distortion_model.p.setZero();
 
   return intrinsics;
 }

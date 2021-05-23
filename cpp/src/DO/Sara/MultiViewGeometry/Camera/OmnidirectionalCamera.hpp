@@ -26,7 +26,7 @@ namespace DO::Sara {
     vector2_type tangential_distortion_coefficients;
     T xi;
 
-    //! @brief Project a 3D scene point expressed in the camera frame to the
+    //! @brief Project a 3D scene point/ray expressed in the camera frame to the
     //! distorted image coordinates.
     inline auto project(const vector3_type& X) const -> vector2_type
     {

@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(test_camera_model_constructor)
   auto cameras = std::vector<CameraModelf>{};
 
   cameras.emplace_back(sara::PinholeCamera<float>{});
-  cameras.emplace_back(sara::BrownConradyCamera<float>{});
+  cameras.emplace_back(sara::BrownConradyCamera32<float>{});
   cameras.emplace_back(sara::FisheyeCamera<float>{});
   cameras.emplace_back(sara::OmnidirectionalCamera<float>{});
 
