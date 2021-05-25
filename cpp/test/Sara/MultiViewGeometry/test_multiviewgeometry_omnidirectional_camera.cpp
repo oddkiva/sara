@@ -75,7 +75,6 @@ BOOST_AUTO_TEST_CASE(test_omnidirectional_camera_model)
 
     // The reprojected ray must hit the center of the image.
     const auto projected_ray = camera.project(ray);
-    std::cout << (projected_ray - center).norm() << std::endl;
     BOOST_CHECK_LE((projected_ray - center).norm(), 1e-3f);
 
     // Another property is that the center should be not too distorted.
@@ -87,8 +86,11 @@ BOOST_AUTO_TEST_CASE(test_omnidirectional_camera_model)
     const auto center_undistorted= camera.undistort(center);
     BOOST_CHECK_LE((center_undistorted - center).norm(), 15.f);
 
-    std::cout << center_distorted.transpose() << std::endl;
-    std::cout << center_undistorted.transpose() << std::endl;
+    // Check the bijectivity between distortion and undistortion.
+    const auto cu = camera.undistort(center);
+    const auto cd = camera.distort(cu);
+
+    BOOST_CHECK_LE((center - cd).norm(), 1e-3f);
   }
 
   // Check the corners.
