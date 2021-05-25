@@ -81,9 +81,9 @@ BOOST_AUTO_TEST_CASE(test_omnidirectional_camera_model)
     //
     // This is not very rigorous but this test is there to serve as a geometric
     // insight.
-    const auto center_distorted= camera.distort(center);
+    const auto center_distorted = camera.distort(center);
     BOOST_CHECK_LE((center_distorted - center).norm(), 10.f);
-    const auto center_undistorted= camera.undistort(center);
+    const auto center_undistorted = camera.undistort(center);
     BOOST_CHECK_LE((center_undistorted - center).norm(), 15.f);
 
     // Check the bijectivity between distortion and undistortion.
@@ -95,12 +95,12 @@ BOOST_AUTO_TEST_CASE(test_omnidirectional_camera_model)
 
   // Check the corners.
   const auto corners = std::array{
-    Eigen::Vector2f{0, 0},
-    Eigen::Vector2f{w, 0},
-    Eigen::Vector2f{w, h},
-    Eigen::Vector2f{0, h},
+      Eigen::Vector2f{0, 0},
+      Eigen::Vector2f{w, 0},
+      Eigen::Vector2f{w, h},
+      Eigen::Vector2f{0, h},
   };
-  for (const auto& c: corners)
+  for (const auto& c : corners)
   {
     // Check that the corners are behind the cameras
     const auto ray = camera.backproject(c);
