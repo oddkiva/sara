@@ -427,10 +427,6 @@ void GraphicsAnnotator::setQuads(const QList<QPolygonF>& newQuads)
     for (int i = 0; i < 4; ++i)
       pts[i] = new Point((*q)[i]);
 
-    Line* lines[4];
-    for (int i = 0; i < 4; ++i)
-      lines[i] = new Line(pts[i], pts[(i + 1) % 4]);
-
     Quad* quad = new Quad(pts);
     scene()->addItem(quad);
     quads.push_back(quad);
