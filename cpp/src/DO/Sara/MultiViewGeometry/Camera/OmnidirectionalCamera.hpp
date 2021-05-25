@@ -151,13 +151,10 @@ namespace DO::Sara {
     }
 
     //! @brief Iterative method to remove distortion.
-    inline auto correct_lens_distortion(const vector2_type& pd,
+    inline auto correct_lens_distortion(const vector2_type& md,
                                         int num_iterations = 10) const
         -> vector2_type
     {
-      // Calculate the normalized coordinates.
-      const vector2_type md = (K_inverse * pd.homogeneous()).head(2);
-
       auto mu = md;
       for (auto iter = 0; iter < num_iterations &&
                           (mu + lens_distortion(mu) - md).norm() > eps;

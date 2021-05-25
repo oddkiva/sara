@@ -46,8 +46,8 @@ namespace DO::Sara {
 
       // Return NaN values for theta larger than pi/2.
       //
-      // In OpenCV, values are clamped instead, which is actually questionable
-      // from a 3D reconstruction point of view.
+      // In OpenCV, values are clamped instead, which I find questionable from a
+      // 3D reconstruction point of view.
       constexpr auto half_pi = static_cast<T>(M_PI_2);
       if (std::abs(theta_distorted) > half_pi)
         return vector2_type{std::numeric_limits<T>::quiet_NaN(),
