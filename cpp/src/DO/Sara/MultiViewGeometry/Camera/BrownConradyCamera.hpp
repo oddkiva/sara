@@ -138,6 +138,7 @@ namespace DO::Sara {
     }
   };
 
+
   template <typename T>
   using BrownConradyCamera22 =
       BrownConradyCamera<T, PolynomialDistortionModel<T, 2, 2>>;
