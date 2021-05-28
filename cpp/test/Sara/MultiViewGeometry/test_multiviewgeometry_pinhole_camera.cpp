@@ -54,5 +54,5 @@ BOOST_AUTO_TEST_CASE(test_pinhole_camera_model)
   const auto camera = make_pinhole_camera();
   const auto& K = camera.K;
   const auto& K_inv = camera.K_inverse;
-  BOOST_CHECK_LE((K * K_inv - Eigen::Matrix3f::Identity()).norm(), 1e-8f);
+  BOOST_CHECK_LE((K * K_inv - Eigen::Matrix3f::Identity()).norm(), 1e-4f);
 }
