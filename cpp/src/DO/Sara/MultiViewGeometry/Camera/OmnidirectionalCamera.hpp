@@ -44,7 +44,7 @@ namespace DO::Sara {
       const vector2_type m_distorted = m + lens_distortion(m);
 
       // Go back to pixel coordinates.
-      const vector2_type p = (K * m_distorted.homogeneous()).head(2);
+      const vector2_type p = (K * m_distorted.homogeneous()).hnormalized();
 
       return p;
     }
@@ -132,13 +132,15 @@ namespace DO::Sara {
       // Distortion.
       const auto& k1 = radial_distortion_coefficients(0);
       const auto& k2 = radial_distortion_coefficients(1);
+      const auto& k3 = radial_distortion_coefficients(2);
       const auto& p1 = tangential_distortion_coefficients(0);
       const auto& p2 = tangential_distortion_coefficients(1);
 
       // Radial component (additive).
       const auto r2 = m.squaredNorm();
       const auto r4 = r2 * r2;
-      const vector2_type radial_factor = m * (k1 * r2 + k2 * r4);
+      const auto r6 = r4 * r2;
+      const vector2_type radial_factor = m * (k1 * r2 + k2 * r4 + k3 * r6);
 
       // Tangential component (additive).
       const auto tx = 2 * p1 * m.x() * m.y() + p2 * (r2 + 2 * p1 * m.x());

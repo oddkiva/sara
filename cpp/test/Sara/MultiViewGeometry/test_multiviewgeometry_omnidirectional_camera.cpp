@@ -114,3 +114,36 @@ BOOST_AUTO_TEST_CASE(test_omnidirectional_camera_model)
     BOOST_CHECK_LE((projected_ray - c).norm(), 6.f);
   }
 }
+
+
+BOOST_AUTO_TEST_CASE(test_omnidirectional_camera_lat_lon_extraction)
+{
+  const auto camera = make_omnidirectional_camera();
+  const auto& w = camera.image_sizes.x();
+  const auto& h = camera.image_sizes.y();
+
+  // Check the corners.
+  const auto corners = std::array{
+      Eigen::Vector2f{0, 0},
+      Eigen::Vector2f{w, 0},
+      Eigen::Vector2f{w, h},
+      Eigen::Vector2f{0, h},
+  };
+
+  for (const auto& c : corners)
+  {
+    // Check that the corners are behind the cameras
+    const Eigen::Vector3f ray = camera.backproject(c).normalized();
+
+    // Longitude.
+    const auto theta = std::acos(ray.y());
+    // Latitude
+    const auto phi = std::atan2(ray.x(), ray.z());
+
+    std::cout << "corner = " << c.transpose() << std::endl;
+    std::cout << "lat = " << phi / M_PI * 180 << " deg" << std::endl;
+    std::cout << "lon = " << theta / M_PI * 180 << " deg" << std::endl;
+    std::cout << std::endl;
+
+  }
+}

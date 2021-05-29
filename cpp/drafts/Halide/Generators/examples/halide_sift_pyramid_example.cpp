@@ -109,7 +109,7 @@ auto test_on_image()
     ;
 }
 
-auto test_on_video()
+auto test_on_video(int argc, char **argv)
 {
   using namespace std::string_literals;
 
@@ -121,8 +121,8 @@ auto test_on_video()
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
   const auto video_filepath =
-      // "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/home/david/Desktop/GOPR0542.MP4"s;
+      argc < 2 ? "/home/david/Desktop/Datasets/sfm/Family.mp4"s
+               : std::string{argv[1]};
 #endif
 
 
@@ -206,13 +206,21 @@ auto test_on_video()
 }
 
 
-GRAPHICS_MAIN()
+int __main(int argc, char** argv)
 {
   // Optimization.
   omp_set_num_threads(omp_get_max_threads());
   std::ios_base::sync_with_stdio(false);
 
   // test_on_image();
-  test_on_video();
+  test_on_video(argc, argv);
   return 0;
+}
+
+
+int main(int argc, char** argv)
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
 }
