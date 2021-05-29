@@ -43,7 +43,8 @@ auto make_omnidirectional_camera()
        0,  0,  1;
   camera_parameters.radial_distortion_coefficients <<
       0.50776095,
-      -0.16478652;
+      -0.16478652,
+      0;
   camera_parameters.tangential_distortion_coefficients <<
       0.00023093,
       0.00078712;
