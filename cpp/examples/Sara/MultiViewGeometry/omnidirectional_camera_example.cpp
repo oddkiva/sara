@@ -58,9 +58,9 @@ auto make_omnidirectional_camera()
   return camera_parameters;
 }
 
-auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& camera)
+auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& omni_camera)
 {
-  auto K = camera.K;
+  auto K = omni_camera.K;
 
   constexpr auto downscale_factor = 3.5f;
   K(0, 0) /= downscale_factor;
@@ -71,27 +71,26 @@ auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& camera)
   auto c = std::cos(t);
   auto s = std::sin(t);
   // clang-format off
-  const auto Rx = (Eigen::Matrix3f{} <<
-                   1,  0,  0,
-                   0,  c, -s,
-                   0,  s,  c).finished();
+  const auto R = (Eigen::Matrix3f{} <<
+                  1,  0,  0,
+                  0,  c, -s,
+                  0,  s,  c).finished();
   // clang-format on
 
-  const auto camera2 = sara::PinholeCamera<float>{
-      .image_sizes = camera.image_sizes,  //
-      .K = K,                             //
-      .K_inverse = K.inverse()            //
+  const auto pinhole_camera = sara::PinholeCamera<float>{
+      .image_sizes = omni_camera.image_sizes,  //
+      .K = K,                                  //
+      .K_inverse = K.inverse()                 //
   };
 
-  return std::make_pair(camera2, Rx);
+  return std::make_pair(pinhole_camera, R);
 }
 
 
 auto undistort_image(const sara::ImageView<sara::Rgb8>& frame,
                      sara::ImageView<sara::Rgb8>& frame_undistorted,
                      const sara::OmnidirectionalCamera<float>& camera,
-                     float x_min, float y_min, float x_max, float y_max,
-                     float scale)
+                     float x_min, float y_min, float scale)
 {
   const auto w = frame.width();
   const auto h = frame.height();
@@ -104,11 +103,11 @@ auto undistort_image(const sara::ImageView<sara::Rgb8>& frame,
     const auto y = p / w;
     const auto x = p - w * y;
 
-    const auto x1 = x_min + x * scale;
-    const auto y1 = y_min + y * scale;
-    const auto xy1 = Eigen::Vector2f(x1, y1);
+    const auto xu = x_min + x * scale;
+    const auto yu = y_min + y * scale;
+    const auto xyu = Eigen::Vector2f(xu, yu);
 
-    const Eigen::Vector2d xyd = camera.distort(xy1).cast<double>();
+    const Eigen::Vector2d xyd = camera.distort(xyu).cast<double>();
     const auto in_image_domain = 0 < xyd.x() && xyd.x() < w - 1 &&  //
                                  0 < xyd.y() && xyd.y() < h - 1;
     if (!in_image_domain)
@@ -333,8 +332,7 @@ int __main(int argc, char** argv)
   {
     const auto frame = video_stream.frame();
 
-    undistort_image(frame, frame_undistorted, camera, x_min, y_min, x_max,
-                    y_max, scale);
+    undistort_image(frame, frame_undistorted, camera, x_min, y_min, scale);
     flag_behind_camera(frame, is_behind_camera, is_behind_camera_map);
     warp(coords_map, frame, stereographic_projection);
 
