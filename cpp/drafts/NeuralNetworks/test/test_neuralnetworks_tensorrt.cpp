@@ -25,38 +25,24 @@ template <typename T, int N>
 using PinnedTensor = sara::Tensor_<float, N, shakti::PinnedAllocator>;
 
 
-template <typename NVInferObject>
-inline auto delete_nvinfer_object(NVInferObject* object) -> void
-{
-  if (object != nullptr)
-  {
-#ifdef DEBUG
-    std::cout << "Deleting " << typeid(object).name() << " " << object
-              << std::endl;
-#endif
-    object->destroy();
-  }
-  object = nullptr;
-}
-
 auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
 {
-  delete_nvinfer_object(engine);
+  sara::TensorRT::delete_nvinfer_object(engine);
 }
 
 auto runtime_deleter(nvinfer1::IRuntime* runtime) -> void
 {
-  delete_nvinfer_object(runtime);
+  sara::TensorRT::delete_nvinfer_object(runtime);
 }
 
 auto config_deleter(nvinfer1::IBuilderConfig* config) -> void
 {
-  delete_nvinfer_object(config);
+  sara::TensorRT::delete_nvinfer_object(config);
 }
 
 auto context_deleter(nvinfer1::IExecutionContext* context) -> void
 {
-  delete_nvinfer_object(context);
+  sara::TensorRT::delete_nvinfer_object(context);
 };
 
 
@@ -106,7 +92,7 @@ auto save_model_weights(nvinfer1::ICudaEngine* engine,
 {
   // Memory management.
   auto model_weights_deleter = [](nvinfer1::IHostMemory* model_stream) {
-    delete_nvinfer_object(model_stream);
+    sara::TensorRT::delete_nvinfer_object(model_stream);
   };
 
   // Serialize the model weights into the following data buffer.
@@ -147,7 +133,6 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
 
   const float scale = 3.f;
 
-
   // Instantiate a network and automatically manager its memory.
   auto network = sara::TensorRT::make_network(builder.get());
   {
@@ -158,13 +143,17 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
     auto image_tensor = network->addInput("image", nvinfer1::DataType::kFLOAT,
                                           nvinfer1::Dims3{n, h, w});
 
-    const auto scale_weights =
-        nvinfer1::Weights{nvinfer1::DataType::kFLOAT,             //
-                          reinterpret_cast<const void*>(&scale),  //
-                          1};
+    const auto scale_weights = nvinfer1::Weights{
+        nvinfer1::DataType::kFLOAT,             //
+        reinterpret_cast<const void*>(&scale),  //
+        1                                       //
+    };
 
-    auto scale_op = network->addScale(
-        *image_tensor, nvinfer1::ScaleMode::kUNIFORM, {}, scale_weights, {});
+    auto scale_op = network->addScale(  //
+        *image_tensor,                  //
+        nvinfer1::ScaleMode::kUNIFORM,  //
+        {}, scale_weights, {}           //
+    );
 
     // Get the ouput tensor.
     auto image_scaled_tensor = scale_op->getOutput(0);
@@ -279,8 +268,7 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
                << std::endl;
 
     // Instantiate an input data.
-    auto image_tensor = network->addInput("image",
-    nvinfer1::DataType::kFLOAT,
+    auto image_tensor = network->addInput("image", nvinfer1::DataType::kFLOAT,
                                           nvinfer1::Dims3{n, h, w});
 
     // Encapsulate the weights using TensorRT data structures.
@@ -373,13 +361,11 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
   // Wait for the completion of GPU operations.
   cudaStreamSynchronize(*cuda_stream);
 
-#ifdef INSPECT
   for (auto c = 0; c < co; ++c)
   {
     SARA_CHECK(c);
     std::cout << image_convolved[c].matrix() << std::endl;
   }
-#endif
 }
 
 BOOST_AUTO_TEST_SUITE_END()
