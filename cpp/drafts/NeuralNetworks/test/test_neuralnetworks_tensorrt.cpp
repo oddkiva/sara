@@ -1,3 +1,7 @@
+#define BOOST_TEST_MODULE "NeuralNetworks/TensorRT"
+
+#include <boost/test/unit_test.hpp>
+
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
@@ -21,33 +25,40 @@ template <typename T, int N>
 using PinnedTensor = sara::Tensor_<float, N, shakti::PinnedAllocator>;
 
 
+template <typename NVInferObject>
+inline auto delete_nvinfer_object(NVInferObject* object) -> void
+{
+  if (object != nullptr)
+  {
+#ifdef DEBUG
+    std::cout << "Deleting " << typeid(object).name() << " " << object
+              << std::endl;
+#endif
+    object->destroy();
+  }
+  object = nullptr;
+}
+
 auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
 {
-  if (engine != nullptr)
-    engine->destroy();
-  engine = nullptr;
+  delete_nvinfer_object(engine);
 }
 
 auto runtime_deleter(nvinfer1::IRuntime* runtime) -> void
 {
-  if (runtime != nullptr)
-    runtime->destroy();
-  runtime = nullptr;
+  delete_nvinfer_object(runtime);
 }
 
 auto config_deleter(nvinfer1::IBuilderConfig* config) -> void
 {
-  if (config != nullptr)
-    config->destroy();
-  config = nullptr;
+  delete_nvinfer_object(config);
 }
 
 auto context_deleter(nvinfer1::IExecutionContext* context) -> void
 {
-  if (context != nullptr)
-    context->destroy();
-  context = nullptr;
+  delete_nvinfer_object(context);
 };
+
 
 using CudaEngineUniquePtr =
     std::unique_ptr<nvinfer1::ICudaEngine, decltype(&engine_deleter)>;
@@ -57,15 +68,6 @@ using ConfigUniquePtr =
     std::unique_ptr<nvinfer1::IBuilderConfig, decltype(&config_deleter)>;
 using ContextUniquePtr =
     std::unique_ptr<nvinfer1::IExecutionContext, decltype(&context_deleter)>;
-
-
-template <typename NVInferObject>
-auto delete_nvinfer_object(NVInferObject* object) -> void
-{
-  if (object != nullptr)
-    object->destroy();
-  object = nullptr;
-}
 
 
 auto load_from_model_weights(const std::string& trt_model_weights_filepath)
@@ -104,9 +106,7 @@ auto save_model_weights(nvinfer1::ICudaEngine* engine,
 {
   // Memory management.
   auto model_weights_deleter = [](nvinfer1::IHostMemory* model_stream) {
-    if (model_stream != nullptr)
-      model_stream->destroy();
-    model_stream = nullptr;
+    delete_nvinfer_object(model_stream);
   };
 
   // Serialize the model weights into the following data buffer.
@@ -126,7 +126,127 @@ auto save_model_weights(nvinfer1::ICudaEngine* engine,
   model_weights_file << model_weights_stream.rdbuf();
 }
 
-auto main() -> int
+
+BOOST_AUTO_TEST_SUITE(TestTensorRT)
+
+BOOST_AUTO_TEST_CASE(test_scale_operation)
+{
+  // List the available GPU devices.
+  const auto devices = shakti::get_devices();
+  for (const auto& device : devices)
+    std::cout << device << std::endl;
+
+  auto cuda_stream = sara::TensorRT::make_cuda_stream();
+
+  auto builder = sara::TensorRT::make_builder();
+
+  // Create a simple scale operation.
+  constexpr auto n = 1;
+  constexpr auto h = 8;
+  constexpr auto w = 8;
+
+  const float scale = 3.f;
+
+
+  // Instantiate a network and automatically manager its memory.
+  auto network = sara::TensorRT::make_network(builder.get());
+  {
+    SARA_DEBUG << termcolor::green << "Creating the network from scratch!"
+               << std::endl;
+
+    // Instantiate an input data.
+    auto image_tensor = network->addInput("image", nvinfer1::DataType::kFLOAT,
+                                          nvinfer1::Dims3{n, h, w});
+
+    const auto scale_weights =
+        nvinfer1::Weights{nvinfer1::DataType::kFLOAT,             //
+                          reinterpret_cast<const void*>(&scale),  //
+                          1};
+
+    auto scale_op = network->addScale(
+        *image_tensor, nvinfer1::ScaleMode::kUNIFORM, {}, scale_weights, {});
+
+    // Get the ouput tensor.
+    auto image_scaled_tensor = scale_op->getOutput(0);
+    network->markOutput(*image_scaled_tensor);
+  }
+
+  SARA_DEBUG << termcolor::green
+             << "Setting the inference engine with the right configuration!"
+             << termcolor::reset << std::endl;
+  // Setup the engine.
+  builder->setMaxBatchSize(1);
+
+  // Create a inference configuration object.
+  auto config = ConfigUniquePtr{builder->createBuilderConfig(),  //
+                                &config_deleter};
+  config->setMaxWorkspaceSize(32);
+  config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
+  // If the GPU supports FP16 operations.
+  // config->setFlag(nvinfer1::BuilderFlag::kFP16);
+
+  // Create or load an engine.
+  auto engine = CudaEngineUniquePtr{nullptr, &engine_deleter};
+  {
+    // Load inference engine from a model weights.
+    constexpr auto load_engine_from_disk = false;
+    if constexpr (load_engine_from_disk)
+      engine = load_from_model_weights("");
+    else
+    {
+      engine = CudaEngineUniquePtr{
+          builder->buildEngineWithConfig(*network, *config),  //
+          &engine_deleter                                     //
+      };
+      // save_model_weights("");
+    }
+  }
+
+  // Perform a context to enqueue inference operations in C++.
+  SARA_DEBUG << termcolor::green << "Setting the inference context!"
+             << termcolor::reset << std::endl;
+  auto context = ContextUniquePtr{engine->createExecutionContext(),  //
+                                  &context_deleter};
+
+  // Create som data and create two GPU device buffers.
+  SARA_DEBUG << termcolor::red << "Creating input data and two device buffers!"
+             << termcolor::reset << std::endl;
+  auto image = PinnedTensor<float, 2>{h, w};
+  image.matrix().fill(0.f);
+  image(h / 2, w / 2) = 2.f;
+
+  // Inspect the TensorRT log output: there is no padding!
+  auto image_convolved = PinnedTensor<float, 2>{{h, w}};
+  image_convolved.flat_array().fill(-1.f);
+
+  // Fill some GPU buffers and perform inference.
+  SARA_DEBUG << termcolor::green << "Perform inference on GPU!"
+             << termcolor::reset << std::endl;
+
+  auto device_buffers = std::vector{
+      reinterpret_cast<void*>(image.data()),           //
+      reinterpret_cast<void*>(image_convolved.data())  //
+  };
+
+  // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
+  if (!context->enqueue(1, device_buffers.data(), *cuda_stream, nullptr))
+  {
+    SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
+               << std::endl;
+  }
+
+  // Wait for the completion of GPU operations.
+  cudaStreamSynchronize(*cuda_stream);
+
+  auto expected_image_output = Eigen::Matrix<float, 8, 8>{};
+  expected_image_output.matrix() = image.matrix() * 3;
+  std::cout << image_convolved.matrix() << std::endl;
+
+  const auto diff = image_convolved.matrix() - expected_image_output.matrix();
+  BOOST_CHECK_LE(diff.norm(), 1e-12f);
+}
+
+BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
 {
   // List the available GPU devices.
   const auto devices = shakti::get_devices();
@@ -158,24 +278,11 @@ auto main() -> int
     SARA_DEBUG << termcolor::green << "Creating the network from scratch!"
                << std::endl;
 
-    // Instantiate an input data.&
-    auto image_tensor = network->addInput("image", nvinfer1::DataType::kFLOAT,
+    // Instantiate an input data.
+    auto image_tensor = network->addInput("image",
+    nvinfer1::DataType::kFLOAT,
                                           nvinfer1::Dims3{n, h, w});
 
-#ifdef CHECK_SCALE_OP
-    const float scale = 3.f;
-    const auto scale_weights =
-        nvinfer1::Weights{nvinfer1::DataType::kFLOAT,             //
-                          reinterpret_cast<const void*>(&scale),  //
-                          1};
-
-    auto scale_op = network->addScale(
-        *image_tensor, nvinfer1::ScaleMode::kUNIFORM, {}, scale_weights, {});
-
-    // Get the ouput tensor.
-    auto image_scaled_tensor = scale_op->getOutput(0);
-    network->markOutput(*image_scaled_tensor);
-#else
     // Encapsulate the weights using TensorRT data structures.
     const auto conv1_kernel_weights = nvinfer1::Weights{
         nvinfer1::DataType::kFLOAT,
@@ -197,7 +304,6 @@ auto main() -> int
     // Get the ouput tensor.
     auto conv1 = conv1_fn->getOutput(0);
     network->markOutput(*conv1);
-#endif
   }
 
   SARA_DEBUG << termcolor::green
@@ -236,7 +342,7 @@ auto main() -> int
   auto context = ContextUniquePtr{engine->createExecutionContext(),  //
                                   &context_deleter};
 
-  // Create som data and create two GPU device buffers.
+  // Create some data and create two GPU device buffers.
   SARA_DEBUG << termcolor::red << "Creating input data and two device buffers!"
              << termcolor::reset << std::endl;
   auto image = PinnedTensor<float, 2>{h, w};
@@ -267,12 +373,13 @@ auto main() -> int
   // Wait for the completion of GPU operations.
   cudaStreamSynchronize(*cuda_stream);
 
-
+#ifdef INSPECT
   for (auto c = 0; c < co; ++c)
   {
     SARA_CHECK(c);
     std::cout << image_convolved[c].matrix() << std::endl;
   }
-
-  return 0;
+#endif
 }
+
+BOOST_AUTO_TEST_SUITE_END()
