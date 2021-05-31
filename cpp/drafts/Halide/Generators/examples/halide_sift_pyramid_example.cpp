@@ -114,11 +114,13 @@ auto test_on_video(int argc, char **argv)
   using namespace std::string_literals;
 
 #ifdef _WIN32
-  const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath =
+    argc < 2 ? "C:/Users/David/Desktop/GOPR0542.MP4"s
+             : std::string{argv[1]};
 #elif __APPLE__
-  const auto
-      video_filepath =  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
+  const auto video_filepath =
+    argc < 2 ? "/Users/david/Desktop/Datasets/videos/sample10.mp4"s
+             : std::string{argv[1]};
 #else
   const auto video_filepath =
       argc < 2 ? "/home/david/Desktop/Datasets/sfm/Family.mp4"s
