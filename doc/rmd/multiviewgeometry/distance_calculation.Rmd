@@ -1,25 +1,92 @@
 ## Distance Calculation From a Camera
 
+Distance calculation is one important problem that must be treated in autonomous
+driving systems and for road safety. It is also useful in computer vision
+applications such as animal conservation. Instead of talking about road safety
+which is largely treated in the computer vision industry, let us treat this
+problem under the prism of animal conservation to bring justice to environmental
+and wildlife topics.
+
+For example, let us imagine that we are biologists or animal conservationists
+aiming at counting a colony of penguins resting on a large ice floe. We are
+flying a drone equipped with multiple cameras and with IMU sensors so that we
+can estimate the altitude of the drone at anytime. The drone embeds a robust
+software that is able to recognize penguins and track them.
+
+For a robust counting of penguins, we aim at mapping their positions in 3D by
+determining the metric coordinates of each penguin. The embedded software is
+able to localize penguins and detect their feet in the images. Then knowing the
+pixel coordinates of each penguin's feet, we are able to determine the metric
+coordinates of each penguin in the ice floe.
+
 This section provides an easily implementable method to calculate distance from
-a camera. To calculate distances from a camera requires the knowledge of the
-internal camera parameters.
+a camera. Calculating distances from a camera requires the knowledge of the
+internal camera parameters. Whenever possible, we will use normalized camera
+coordinates, that is the camera film coordinates, instead of pixel coordinates.
 
-### Motivating Example
+Throughout this section, the main assumption we make is that the ice flow is
+planar.
 
-Consider a camera at a fixed height $h$ above the ground slight looking
-down due to a nonzero pitch angle $\theta$.
+### Ideal Case
 
-Consider a reference coordinate system centered in the camera center with the z-axis
-still parallel to the ground plane where.
+The drone is flying and it is staying still in the air at an altitude $h$
+meters. The drone is equipped with a front camera in upright position at the
+ground looking to the horizon, that is,
 
-Let $M$ denote a point on the ground in this reference coordinate system.
+- its $y$-axis is normal to the ground plane and,
+- its $x$-axis and $z$-axis forms a plane that is parallel to the ground plane.
+
+The front camera sees penguins. Let $M$ denote a point on the ground at a
+penguin's feet position. Its coordinates in the camera frame are
 
 \begin{equation}
   M = x\ \mathbf{i} + h\ \mathbf{j} + z\ \mathbf{k}
 \end{equation}
 
-The basis vectors of the reference coordinate system have the following
-coordinates in the local camera coordinate system.
+The point $M$ is visible on the camera. Let $(u, v)$ denote its normalized
+camera coordinates.
+
+By similar triangles it follows that
+
+\begin{equation}
+  \frac{u}{x} = \frac{v}{h} = \frac{1}{z}
+\end{equation}
+
+Thus the metric coordinates of a penguin are:
+
+\begin{equation}
+  \left\{
+  \begin{array}{ccl}
+    x &=& \frac{u}{v} h \\
+    y &=& h \\
+    z &=& \frac{1}{v} h
+  \end{array}
+  \right.
+\end{equation}
+
+### Nonzero Pitch Angle
+
+Because of the wind, the drone does not necessarily have a perfect a zero pitch
+angle. So this time let us imagine that the drone has to maintain its stationary
+position with a nonzero pitch angle.
+
+Let us imagine that the front camera is at a fixed height $h$ above the ground
+slight looking down due to a nonzero pitch angle $\theta$. Notice that in the
+camera frame the pitch angle is negative.
+
+Now also consider an imaginary camera placed at the same camera position and
+this time gazing at the horizon with a zero pitch angle. The virtual camera
+frame will be considered the reference frame.
+
+Let $M$ denote a point on the ground. Its coordinates in the reference frame are
+still
+
+\begin{equation}
+  M = x\ \mathbf{i} + h\ \mathbf{j} + z\ \mathbf{k}
+\end{equation}
+
+The basis vectors of the reference frame have the following
+coordinates in the actual camera frame
 
 \begin{equation}
   \begin{array}{ccl}
@@ -86,7 +153,7 @@ We can generalize elegantly the reasoning by means of linear algebra. And it
 will not matter which angular direction $(\psi, \theta, \phi)$ the camera
 is looking at.
 
-Let us assume that the road is *planar*. Following the usual convention in the
+We still assume that the road is *planar*. Following the usual convention in the
 automotive industry, without loss of generality, any point on the ground is at
 height $z = 0$. Note this observation stays valid whether the vehicle
 climbs or descends does not matter as long as the road is *planar*.
@@ -193,22 +260,20 @@ what we want.
 So far our mathematical formulation assumes that the image formation is done via
 perspective projection. In words, each pixel $\mathbf{u} =
 \begin{bmatrix} u \\ v \end{bmatrix}$ of the image $I(\mathbf{u})$ is hit by the
-3D light ray vector $-\mathbf{x}$, where $\mathbf{x} = \begin{bmatrix} x \\ y \\
-1 \end{bmatrix}$, which is expressed in the camera frame.
+3D light ray vector $-\mathbf{x}$. With the knowledge of the camera calibration
+matrix $\mathbf{K}$, we can calculate $\mathbf{x}$ as
+
+\begin{equation}
+  \mathbf{x} = \mathbf{K}^{-1} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix},
+\end{equation}
 
 Notice the negative sign in the light ray vector because the light ray is in
 front in the camera and passes through the camera aperture to hit the camera
 film plane.
 
-If we know the camera calibration matrix $\mathbf{K}$, we can calculate
-$\mathbf{x}$ for any pixel $\mathbf{u}$ as
-\begin{equation}
-  \mathbf{x} = \mathbf{K}^{-1} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix},
-\end{equation}
-
-From a mathematical point of view, it is not very practical to talk about the
-light ray vector because of its negative sign. Instead we prefer to say that any
-pixel $\mathbf{u}$ *backprojects* to the semi-line
+From a mathematical point of view, it may not be very practical to talk about
+the light ray vector because of its negative sign. Instead we prefer to say that
+any pixel $\mathbf{u}$ *backprojects* to the semi-line
 
 \begin{equation}
   \{ \lambda \mathbf{x} : \lambda > 0 \}.
@@ -221,27 +286,32 @@ points that
 - projects exactly to the pixel $\mathbf{u}$
 
 because the true corresponding 3D scene point must (1) lie on this semi-line and
-(2) be *in front of the camera* and . The necessary condition $\lambda > 0$
-ensures that the 3D scene point is in front of the camera and is what we call
-the *cheirality* constraint in the literature.
+(2) be *in front of the camera*. The necessary condition $\lambda > 0$ ensures
+that the 3D scene point is in front of the camera and is what we call the
+*cheirality* constraint in the literature.
 
-The perspective projection is a strong assumption nowadays in computer vision
-because it assumes the camera model is the ideal pinhole camera, in which case
-the field-of-view (FOV) of the camera is far less than $180 \deg$.
+The perspective projection is actually a strong assumption nowadays in computer
+vision because it assumes the camera model is the ideal pinhole camera. This is
+not the case when we are dealing with more complicated cameras that have lens
+distortions.
 
-Now what happens if the image is not formed from a normal photographic and
-instead from a fisheye camera with FOV $> 180 \deg$? The fisheye camera is very
-attractive in robotics and in surveillance applications because it can see the
-scene behind it to quite some extent.
-The image formation is more complicated and thus we cannot use the pinhole
-camera model anymore.
+Also what happens if the image is instead formed from a fisheye camera with FOV
+$> 180 \deg$? The fisheye camera is very attractive in robotics and in
+surveillance applications because it can see the scene behind it to quite some
+extent. The image formation is more complicated and the imaging via the pinhole
+camera model is not valid anymore. That means the property of *similar
+triangles* cannot be used anymore and this was key to deriving to estimate
+distances.
 
-However any well-formed mathematical camera model will
-always allow us to retrieve the corresponding direction of the 3D light ray
+However any well-formed and practical mathematical camera model should always
+allow us to retrieve the corresponding direction of the 3D light ray
 $\mathbf{x}$ for any pixel $\mathbf{u}$.
 
-In the case of the fisheye camera model, the direction $\mathbf{x}$ of the 3D
-light ray is parameterized in spherical coordinates as
+Before moving to the more general method for the distance estimation. Let us
+expand the example of the fisheye camera model to fix ideas in our mind. In the
+fisheye camera model, the direction $\mathbf{x}$ of the 3D light ray is
+parameterized in spherical coordinates as
+
 \begin{equation}
 \mathbf{x} =
 \begin{bmatrix}
@@ -258,8 +328,17 @@ Then the image formation in the fisheye camera is summarized by the following fo
 
 where
 
-- $r = \| \mathbf{u} - \mathbf{u}_0 \|_2$
+- $r = \| \mathbf{u} - \mathbf{u}_0 \|_2$ and $\mathbf{u}_0 = \begin{bmatrix}
+u_0 \\ v_0 \end{bmatrix}$ is the principal point,
 - $u - u_0 = f \cos \phi$
 - $v - v_0 = f \sin \phi$
 
-TODO: finish this section.
+A subtle yet important difference is that the light ray vector $\mathbf{x}$
+does not satisfy the similar triangle property anymore.
+
+However we still relate the direction of the light ray with the camera
+extrinsics as follows
+
+\begin{equation}
+  \mathbf{R} \mathbf{x}_W + \mathbf{t} = \lambda \mathbf{x}
+\end{equation}
