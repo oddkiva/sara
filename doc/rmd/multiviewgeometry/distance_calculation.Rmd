@@ -218,10 +218,10 @@ In words any 3D scene point $\lambda \mathbf{x}$ of the semi-line are the only
 points that
 
 - are physically possible, and
-- projects exactly to the point $\mathbf{u}$
+- projects exactly to the pixel $\mathbf{u}$
 
-because the true corresponding 3D scene point must be (1) *in front of the
-camera* and (2) lies on this semi-line. The necessary condition $\lambda > 0$
+because the true corresponding 3D scene point must (1) lie on this semi-line and
+(2) be *in front of the camera* and . The necessary condition $\lambda > 0$
 ensures that the 3D scene point is in front of the camera and is what we call
 the *cheirality* constraint in the literature.
 
