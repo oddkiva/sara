@@ -64,11 +64,15 @@ Thus the metric coordinates of a penguin are:
   \right.
 \end{equation}
 
-### Nonzero Pitch Angle
+### A More Motivating Example: Nonzero Pitch Angle
 
-Because of the wind, the drone does not necessarily have a perfect a zero pitch
-angle. So this time let us imagine that the drone has to maintain its stationary
-position with a nonzero pitch angle.
+In real life, the drone does not necessarily have a perfect a zero pitch angle.
+It could be that because of the wind the drone has to maintain its stationary
+position with a nonzero pitch angle. We show here how we could calculate
+distances between penguins and the drone from the less ideal case.
+
+This section is a prelude to the next section which presents a more general
+approach.
 
 Let us imagine that the front camera is at a fixed height $h$ above the ground
 slight looking down due to a nonzero pitch angle $\theta$. Notice that in the
@@ -76,7 +80,8 @@ camera frame the pitch angle is negative.
 
 Now also consider an imaginary camera placed at the same camera position and
 this time gazing at the horizon with a zero pitch angle. The virtual camera
-frame will be considered the reference frame.
+frame will be considered the reference frame. This virtual camera corresponds to
+the ideal case we described in the previous section.
 
 Let $M$ denote a point on the ground. Its coordinates in the reference frame are
 still
@@ -96,7 +101,7 @@ coordinates in the actual camera frame
   \end{array}
 \end{equation}
 
-Rewriting the coordinates of $M$ in the camera coordinates system
+Rewriting the coordinates of $M$ in the camera frame
 
 \begin{equation}
   \begin{array}{ccl}
@@ -110,7 +115,7 @@ Rewriting the coordinates of $M$ in the camera coordinates system
   \end{array}
 \end{equation}
 
-Thus in the camera coordinate system
+Thus in the camera frame
 
 \begin{equation}
   \begin{array}{ccl}
@@ -119,7 +124,6 @@ Thus in the camera coordinate system
   z_C &=& h \sin\theta + z\cos\theta \\
   \end{array}
 \end{equation}
-
 
 The point $M$ is projected to the normalized camera plane. Let $(u,
 v)$ denote its normalized camera coordinates.
@@ -146,7 +150,6 @@ In the end:
   z = h \frac{\cos\theta - v \sin\theta}{\sin\theta + v\cos\theta} \\
 \end{equation}
 
-
 ### Generalization to Any Global Rigid Transform
 
 We can generalize elegantly the reasoning by means of linear algebra. And it
@@ -159,13 +162,12 @@ height $z = 0$. Note this observation stays valid whether the vehicle
 climbs or descends does not matter as long as the road is *planar*.
 
 Suppose that we know the camera pose parameterised by the rigid body transform
-$(\mathbf{R}, \mathbf{t})$ w.r.t. the vehicle coordinate system.
+$(\mathbf{R}, \mathbf{t})$ w.r.t. the vehicle frame.
 
-As said earlier, a ground point $M$ has more natural coordinates
-$\mathbf{x} = (x, y, 0)$ in the vehicle coordinate system. Let
-$\mathbf{x}'= (x', y', z')$ denote its coordinates in the camera
-coordinate system. The rigid body transform relates the two vector quantities as
-follows
+As said earlier, a ground point $M$ has more natural coordinates $\mathbf{x} =
+(x, y, 0)$ in the vehicle frame. Let $\mathbf{x}'= (x', y', z')$ denote its
+coordinates in the camera frame. The rigid body transform relates the two vector
+quantities as follows
 
 \begin{equation}
   \mathbf{x} = \mathbf{R} \mathbf{x}' + \mathbf{t} \\
@@ -239,29 +241,31 @@ Reordering
   \end{array} \right.
 \end{equation}
 
-```{proposition, name="Top-Down View and Distance Calculation"}
 Because we are dealing with a ground point, $z = 0$ and we obtain an
 invertible linear system:
 
+:::puzzle
+:::{.proposition name="Distance Calculation"}
 \begin{equation}
   \left\{ \begin{array}{lll}
   (u r'_{31} - r'_{11}) x - (u r'_{32} - r'_{12}) y &=& t'_{1} - u t'_{3} \\
   (v r'_{31} - r'_{21}) x - (v r'_{32} - r'_{22}) y &=& t'_{2} - v t'_{3} \\
   \end{array} \right.
 \end{equation}
+:::
+:::
 
 This will determine the missing coordinates $x$ and $y$, which is
 what we want.
-```
-
 
 ### Generalization to Any Camera Model
 
 So far our mathematical formulation assumes that the image formation is done via
-perspective projection. In words, each pixel $\mathbf{u} =
-\begin{bmatrix} u \\ v \end{bmatrix}$ of the image $I(\mathbf{u})$ is hit by the
-3D light ray vector $-\mathbf{x}$. With the knowledge of the camera calibration
-matrix $\mathbf{K}$, we can calculate $\mathbf{x}$ as
+perspective projection because we have assumed a pinhole camera model. In words,
+each pixel $\mathbf{u} = \begin{bmatrix} u \\ v \end{bmatrix}$ of the image
+$I(\mathbf{u})$ is hit by the 3D light ray vector $-\mathbf{x}$. With the
+knowledge of the camera calibration matrix $\mathbf{K}$, we can calculate
+$\mathbf{x}$ as
 
 \begin{equation}
   \mathbf{x} = \mathbf{K}^{-1} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix},

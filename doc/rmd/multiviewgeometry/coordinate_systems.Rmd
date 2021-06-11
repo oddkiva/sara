@@ -1,4 +1,4 @@
-## Changing Coordinate Systems
+## Changing Reference Frames
 
 Let us detail how we go from the world coordinates $(O_W, \mathbf{i}_W,
 \mathbf{j}_W,\mathbf{k}_W)$ to the camera coordinates $(O_C, \mathbf{i}_C,
