@@ -80,7 +80,7 @@ In the end:
 \end{equation}
 
 
-### Generalization
+### Generalization to Any Global Rigid Transform
 
 We can generalize elegantly the reasoning by means of linear algebra. And it
 will not matter which angular direction $(\psi, \theta, \phi)$ the camera
@@ -186,3 +186,80 @@ invertible linear system:
 This will determine the missing coordinates $x$ and $y$, which is
 what we want.
 ```
+
+
+### Generalization to Any Camera Model
+
+So far our mathematical formulation assumes that the image formation is done via
+perspective projection. In words, each pixel $\mathbf{u} =
+\begin{bmatrix} u \\ v \end{bmatrix}$ of the image $I(\mathbf{u})$ is hit by the
+3D light ray vector $-\mathbf{x}$, where $\mathbf{x} = \begin{bmatrix} x \\ y \\
+1 \end{bmatrix}$, which is expressed in the camera frame.
+
+Notice the negative sign in the light ray vector because the light ray is in
+front in the camera and passes through the camera aperture to hit the camera
+film plane.
+
+If we know the camera calibration matrix $\mathbf{K}$, we can calculate
+$\mathbf{x}$ for any pixel $\mathbf{u}$ as
+\begin{equation}
+  \mathbf{x} = \mathbf{K}^{-1} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix},
+\end{equation}
+
+From a mathematical point of view, it is not very practical to talk about the
+light ray vector because of its negative sign. Instead we prefer to say that any
+pixel $\mathbf{u}$ *backprojects* to the semi-line
+
+\begin{equation}
+  \{ \lambda \mathbf{x} : \lambda > 0 \}.
+\end{equation}
+
+In words any 3D scene point $\lambda \mathbf{x}$ of the semi-line are the only
+points that
+
+- are physically possible, and
+- projects exactly to the point $\mathbf{u}$
+
+because the true corresponding 3D scene point must be (1) *in front of the
+camera* and (2) lies on this semi-line. The necessary condition $\lambda > 0$
+ensures that the 3D scene point is in front of the camera and is what we call
+the *cheirality* constraint in the literature.
+
+The perspective projection is a strong assumption nowadays in computer vision
+because it assumes the camera model is the ideal pinhole camera, in which case
+the field-of-view (FOV) of the camera is far less than $180 \deg$.
+
+Now what happens if the image is not formed from a normal photographic and
+instead from a fisheye camera with FOV $> 180 \deg$? The fisheye camera is very
+attractive in robotics and in surveillance applications because it can see the
+scene behind it to quite some extent.
+The image formation is more complicated and thus we cannot use the pinhole
+camera model anymore.
+
+However any well-formed mathematical camera model will
+always allow us to retrieve the corresponding direction of the 3D light ray
+$\mathbf{x}$ for any pixel $\mathbf{u}$.
+
+In the case of the fisheye camera model, the direction $\mathbf{x}$ of the 3D
+light ray is parameterized in spherical coordinates as
+\begin{equation}
+\mathbf{x} =
+\begin{bmatrix}
+  \cos \phi \cos \theta \\
+  \sin \phi \cos \theta \\
+  \sin \theta
+\end{bmatrix}
+\end{equation}
+
+Then the image formation in the fisheye camera is summarized by the following formula
+\begin{equation}
+  r = 2 f \tan \frac{\theta}{2}
+\end{equation}
+
+where
+
+- $r = \| \mathbf{u} - \mathbf{u}_0 \|_2$
+- $u - u_0 = f \cos \phi$
+- $v - v_0 = f \sin \phi$
+
+TODO: finish this section.
