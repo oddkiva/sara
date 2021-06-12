@@ -464,7 +464,7 @@ are calculated by solving the 3x3 linear system:
 :::
 :::
 
-### Visual Metrology
+### Visual Metrology for Animal Measurements
 
 Biologists need to measure animals to get an understanding of a animal
 population's current health and diet and its demographic dynamics. Most of the
