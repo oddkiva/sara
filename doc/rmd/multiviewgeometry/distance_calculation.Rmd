@@ -1,37 +1,50 @@
-## Distance Calculation From a Camera
+## Visual Metrology and Distance Calculation: A Use Case for Animal Conservation
 
-Distance calculation is one important problem that must be treated in autonomous
-driving systems and for road safety. It is also useful in computer vision
-applications such as animal conservation. Instead of talking about road safety
-which is largely treated in the computer vision industry, let us treat this
-problem under the prism of animal conservation to bring justice to environmental
-and wildlife topics.
+Visual metrology and distance calculation are important problem that must be
+treated in autonomous driving systems for the purpose of road safety. It can
+also be useful in other computer vision applications geared towards animal
+conservation. Instead of talking about road safety which is largely treated in
+the computer vision industry, let us treat this problem under the prism of
+animal conservation to bring justice to environmental and wildlife topics.
 
 For example, let us imagine that we are biologists or animal conservationists
-aiming at counting a colony of penguins resting on a large ice floe. We are
-flying a drone equipped with multiple cameras and with IMU sensors so that we
-can estimate the altitude of the drone at anytime. The drone embeds a robust
-software that is able to recognize penguins and track them.
+aiming at counting a colony of penguins resting on a large ice floe. Note, of
+course, we could consider any other animal but let us agree on this choice in
+this section. We are flying a drone equipped with multiple cameras and with IMU
+sensors so that we can estimate the altitude of the drone at anytime. The drone
+embeds a robust software that is able to recognize penguins and track them.
 
-For a robust counting of penguins, we aim at mapping their positions in 3D by
-determining the metric coordinates of each penguin. The embedded software is
-able to localize penguins and detect their feet in the images. Then knowing the
-pixel coordinates of each penguin's feet, we are able to determine the metric
-coordinates of each penguin in the ice floe.
+For a robust counting of penguins, we also aim at mapping their positions in 3D
+by determining the metric coordinates of each penguin. The embedded software is
+able to localize penguins with a retrained object detector such as *YOLO v4*
+[@BochkovskiyA:2020:yolov4-arxiv] or *Mask-RCNN* [@He:2018:mask].
 
-This section provides an easily implementable method to calculate distance from
-a camera. Calculating distances from a camera requires the knowledge of the
-internal camera parameters. Whenever possible, we will use normalized camera
-coordinates, that is the camera film coordinates, instead of pixel coordinates.
+A simple yet efficient approach can be as follows:
 
-Throughout this section, the main assumption we make is that the ice flow is
-planar.
+- Detections are either in the form of bounding boxes or segmentation masks.
+  From these outputs we can infer the coordinates of each penguin's feet in the
+  images by considering *the bottom mid-point of each bounding box*.
+- Then knowing the pixel coordinates of each penguin's feet, we are able to
+  determine the *metric coordinates of each penguin on the ice floe*.
+- Because colonies of penguins are particularly crowded, using an
+  occlusion-aware pose-estimator such as [@Cheng:2019:iccv] would make the
+  detection of penguins more robust and better localize their feet.
+
+This section will not go into further details about these deep-learning based
+tools. Rather it will describe an easily implementable method to calculate
+distance from a camera. Calculating distances from a camera requires the
+knowledge of the internal camera parameters. Whenever possible, we will use
+normalized camera coordinates, that is the camera film coordinates, instead of
+pixel coordinates.
+
+Throughout this section, the main assumption we make is that *the ice flow is
+planar*.
 
 ### Ideal Case
 
-The drone is flying and it is staying still in the air at an altitude $h$
-meters. The drone is equipped with a front camera in upright position at the
-ground looking to the horizon, that is,
+The drone is flying and it is staying still in the air at an altitude of $h$
+meters. It is equipped with a front camera in upright position at the ground
+looking to the horizon, that is,
 
 - its $y$-axis is normal to the ground plane and,
 - its $x$-axis and $z$-axis forms a plane that is parallel to the ground plane.
@@ -43,8 +56,8 @@ penguin's feet position. Its coordinates in the camera frame are
   M = x\ \mathbf{i} + h\ \mathbf{j} + z\ \mathbf{k}
 \end{equation}
 
-The point $M$ is visible on the camera. Let $(u, v)$ denote its normalized
-camera coordinates.
+The point $M$ is visible on the camera. Let $(u, v)$ denote its *normalized
+camera coordinates*.
 
 By similar triangles it follows that
 
@@ -69,10 +82,11 @@ Thus the metric coordinates of a penguin are:
 In real life, the drone does not necessarily have a perfect a zero pitch angle.
 It could be that because of the wind the drone has to maintain its stationary
 position with a nonzero pitch angle. We show here how we could calculate
-distances between penguins and the drone from the less ideal case.
+distances between penguins and the drone from this less ideal case using
+elementary algebraic manipulations.
 
-This section is a prelude to the next section which presents a more general
-approach.
+This section is a prelude to the next sections which presents more general
+approaches.
 
 Let us imagine that the front camera is at a fixed height $h$ above the ground
 slight looking down due to a nonzero pitch angle $\theta$. Notice that in the
@@ -150,27 +164,34 @@ In the end:
   z = h \frac{\cos\theta - v \sin\theta}{\sin\theta + v\cos\theta} \\
 \end{equation}
 
+By reinjecting $z$ in the equations, we determine the $x$ metric coordinate
+of the penguin.
+
 ### Generalization to Any Global Rigid Transform
 
-We can generalize elegantly the reasoning by means of linear algebra. And it
-will not matter which angular direction $(\psi, \theta, \phi)$ the camera
-is looking at.
+The previous subsection has described how we could calculate the metric
+coordinates of each penguin using elementary algebraic manipulations for a very
+particular case.
 
-We still assume that the road is *planar*. Following the usual convention in the
-automotive industry, without loss of generality, any point on the ground is at
-height $z = 0$. Note this observation stays valid whether the vehicle
-climbs or descends does not matter as long as the road is *planar*.
+We can generalize elegantly the reasoning by means of linear algebra. And it
+will not matter which angular direction $(\psi, \theta, \phi)$ the camera is
+looking at.
+
+Just like in the usual axis convention used in the automotive industry, without
+loss of generality, let us choose a reference frame where the ice flow is
+decribed by the plane $z = 0$. Note this would not really matter even if the ice
+flow turns out to be inclined with respect to the sea level.
 
 Suppose that we know the camera pose parameterised by the rigid body transform
-$(\mathbf{R}, \mathbf{t})$ w.r.t. the vehicle frame.
+$(\mathbf{R}, \mathbf{t})$ w.r.t. the ice floe reference frame.
 
-As said earlier, a ground point $M$ has more natural coordinates $\mathbf{x} =
-(x, y, 0)$ in the vehicle frame. Let $\mathbf{x}'= (x', y', z')$ denote its
-coordinates in the camera frame. The rigid body transform relates the two vector
-quantities as follows
+As said earlier, any point $M$ of the ice floe has more natural coordinates
+$\mathbf{x} = (x, y, 0)$ in the ice floe reference frame. Let $\mathbf{x}_C= (x_C, y_C,
+z_C)$ denote its coordinates in the camera frame. The rigid body transform
+relates the two vector quantities as follows
 
 \begin{equation}
-  \mathbf{x} = \mathbf{R} \mathbf{x}' + \mathbf{t} \\
+  \mathbf{x} = \mathbf{R} \mathbf{x}_C + \mathbf{t} \\
 \end{equation}
 
 The inverse rigid body transform is $(\mathbf{R}', \mathbf{t}')$
@@ -180,40 +201,39 @@ where:
   \begin{aligned}
   \mathbf{R}' &= \mathbf{R}^T \\
   \mathbf{t}' &= -\mathbf{R}^T \mathbf{t} \\
-  \mathbf{x}' &= \mathbf{R}' \mathbf{x} + \mathbf{t}' \\
+  \mathbf{x}_C &= \mathbf{R}' \mathbf{x} + \mathbf{t}' \\
   \end{aligned}
 \end{equation}
 
-If the ground point is visible in the image at the following normalized
-coordinates $(u, v)$, then using the basic proportionality theorem in
-geometric optics:
+If the penguin's feet is visible in the image at the following normalized camera
+coordinates $(u, v)$, then again by similar triangles
 
 \begin{equation}
-  \frac{u}{x'} = \frac{v}{y'} = \frac{1}{z'},
+  \frac{u}{x_C} = \frac{v}{y_C} = \frac{1}{z_C},
 \end{equation}
 
 We can derive a system of two equations.
 
 \begin{equation}
   \left\{ \begin{array}{lll}
-  u z' - x' &=& 0 \\
-  v z' - y' &=& 0 \\
+  u z_C - x_C &=& 0 \\
+  v z_C - y_C &=& 0 \\
   \end{array} \right.
 \end{equation}
 
 Expanding the matrix operation into a linear system:
 
 \begin{equation}
-  \mathbf{x}' = \mathbf{R}' \mathbf{x} + \mathbf{t}' \\
+  \mathbf{x}_C = \mathbf{R}' \mathbf{x} + \mathbf{t}' \\
 \end{equation}
 
 yields
 
 \begin{equation}
   \left\{ \begin{array}{lll}
-  x' &=& r'_{11} x + r'_{12} y + r'_{13} z + t'_{1}\\
-  y' &=& r'_{21} x + r'_{22} y + r'_{23} z + t'_{2}\\
-  z' &=& r'_{31} x + r'_{32} y + r'_{33} z + t'_{3}\\
+  x_C &=& r'_{11} x + r'_{12} y + r'_{13} z + t'_{1}\\
+  y_C &=& r'_{21} x + r'_{22} y + r'_{23} z + t'_{2}\\
+  z_C &=& r'_{31} x + r'_{32} y + r'_{33} z + t'_{3}\\
   \end{array} \right.
 \end{equation}
 
@@ -263,12 +283,12 @@ what we want.
 So far our mathematical formulation assumes that the image formation is done via
 perspective projection because we have assumed a pinhole camera model. In words,
 each pixel $\mathbf{u} = \begin{bmatrix} u \\ v \end{bmatrix}$ of the image
-$I(\mathbf{u})$ is hit by the 3D light ray vector $-\mathbf{x}$. With the
+$I(\mathbf{u})$ is hit by the 3D light ray vector $-\mathbf{v}$. With the
 knowledge of the camera calibration matrix $\mathbf{K}$, we can calculate
-$\mathbf{x}$ as
+$\mathbf{v}$ as
 
 \begin{equation}
-  \mathbf{x} = \mathbf{K}^{-1} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix},
+  \mathbf{v} = \mathbf{K}^{-1} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix},
 \end{equation}
 
 Notice the negative sign in the light ray vector because the light ray is in
@@ -280,10 +300,10 @@ the light ray vector because of its negative sign. Instead we prefer to say that
 any pixel $\mathbf{u}$ *backprojects* to the semi-line
 
 \begin{equation}
-  \{ \lambda \mathbf{x} : \lambda > 0 \}.
+  \{ \lambda \mathbf{v} : \lambda > 0 \}.
 \end{equation}
 
-In words any 3D scene point $\lambda \mathbf{x}$ of the semi-line are the only
+In words any 3D scene point $\lambda \mathbf{v}$ of the semi-line are the only
 points that
 
 - are physically possible, and
@@ -299,25 +319,33 @@ vision because it assumes the camera model is the ideal pinhole camera. This is
 not the case when we are dealing with more complicated cameras that have lens
 distortions.
 
-Also what happens if the image is instead formed from a fisheye camera with FOV
-$> 180 \deg$? The fisheye camera is very attractive in robotics and in
-surveillance applications because it can see the scene behind it to quite some
-extent. The image formation is more complicated and the imaging via the pinhole
-camera model is not valid anymore. That means the property of *similar
+#### An Example of Non-Perspective Image Formation: The Fisheye Camera Model
+
+Also what happens if the image is instead formed from a fisheye camera with
+field of view much larger than $180^{\circ}$? The fisheye camera is apparently
+very popular in robotics and surveillance applications because it can even see
+the scene behind it to quite some extent. After all, equipping a drone with only
+one such fisheye camera would be much cheaper than equipping it with multiple
+cameras.
+
+In that case, the image formation is more complicated and the imaging via the
+pinhole camera model is not valid anymore. That means the property of *similar
 triangles* cannot be used anymore and this was key to deriving to estimate
 distances.
 
 However any well-formed and practical mathematical camera model should always
 allow us to retrieve the corresponding direction of the 3D light ray
-$\mathbf{x}$ for any pixel $\mathbf{u}$.
+$\mathbf{v}$ for any given *pixel coordinates* $\mathbf{u}$ (and *not normalized camera
+coordinates* this time).
 
-Before moving to the more general method for the distance estimation. Let us
-expand the example of the fisheye camera model to fix ideas in our mind. In the
-fisheye camera model, the direction $\mathbf{x}$ of the 3D light ray is
+Before moving to the more general method for the distance estimation, let us
+expand the example of the fisheye camera model. This will help us to understand
+what we mean by ``well-formed and practical mathematical camera model"". In the
+fisheye camera model, the direction $\mathbf{v}$ of the 3D light ray is
 parameterized in spherical coordinates as
 
 \begin{equation}
-\mathbf{x} =
+\mathbf{v} =
 \begin{bmatrix}
   \cos \phi \cos \theta \\
   \sin \phi \cos \theta \\
@@ -325,24 +353,129 @@ parameterized in spherical coordinates as
 \end{bmatrix}
 \end{equation}
 
-Then the image formation in the fisheye camera is summarized by the following formula
+Then,
+
+:::note
+The image formation in the ulra-wide angle fisheye camera is summarized by the
+following stereographic projection formula
 \begin{equation}
   r = 2 f \tan \frac{\theta}{2}
 \end{equation}
 
 where
 
+- $f$ is the focal length,
 - $r = \| \mathbf{u} - \mathbf{u}_0 \|_2$ and $\mathbf{u}_0 = \begin{bmatrix}
 u_0 \\ v_0 \end{bmatrix}$ is the principal point,
-- $u - u_0 = f \cos \phi$
+- $u - u_0 = f \cos \phi$,
 - $v - v_0 = f \sin \phi$
+:::
 
-A subtle yet important difference is that the light ray vector $\mathbf{x}$
-does not satisfy the similar triangle property anymore.
+From the stereographic projection formula, observe that
+\begin{aligned}
+  \cos \frac{\theta}{2} &= \frac{r}{\sqrt{r^2 + 4 f^2}} \\
+  \sin \frac{\theta}{2} &= \frac{2f}{\sqrt{r^2 + 4 f^2}}
+\end{aligned}
 
-However we still relate the direction of the light ray with the camera
-extrinsics as follows
+Using trigonometric formula, it follows that
+\begin{aligned}
+  \cos \theta &= 2 \cos^2 \frac{\theta}{2} - 1\\
+  \sin \theta &= 2 \cos\frac{\theta}{2} \sin\frac{\theta}{2}
+\end{aligned}
+
+By reinjecting the equations
+\begin{aligned}
+  \cos \theta &= \frac{r^2 - 4f^2}{r^2 + 4 f^2} \\
+  \sin \theta &= \frac{4 rf}{r^2 + 4 f^2}
+\end{aligned}
+
+Thus,
+
+:::puzzle
+:::{.proposition name="Incident Light Ray in the Fisheye Camera"}
+In the fisheye camera model, the incident light ray -$\mathbf{v}$ that hits the
+image plane at pixel coordinates $\mathbf{u}$ is calculated as
 
 \begin{equation}
-  \mathbf{R} \mathbf{x}_W + \mathbf{t} = \lambda \mathbf{x}
+  \mathbf{v} = \frac{1}{f(r^2 + 4 f^2)}
+  \begin{bmatrix}
+    (u - u_0) (r^2 - 4f^2) \\
+    (v - v_0) 4rf \\
+    4rf^2
+  \end{bmatrix}
 \end{equation}
+:::
+:::
+
+
+#### Mathematical Derivation
+
+A subtle yet important difference is that the light ray vector $\mathbf{x}$ for
+the fisheye camera model and other camera model is that the similar triangle
+property may not be satisfied anymore. And this was key in order to derive the
+distance estimation in the previous subsections.
+
+Fortunately we can still relate the direction of the light ray and a ground
+point $\mathbf{x}$ on the ice floe with the camera extrinsics $(\mathbf{R}',
+\mathbf{t}')$.
+
+\begin{equation}
+  \mathbf{R}' \mathbf{x} + \mathbf{t}' = \lambda \mathbf{v}
+\end{equation}
+
+By expanding the equations, we solve a linear system of 3x3 equations that
+determines $\mathbf{x}$ and the distance $\lambda$ between the camera
+and the penguin.
+
+\begin{equation}
+  \left\{ \begin{array}{lll}
+  r'_{11} x + r'_{12} y + r'_{13} z + t'_{1} = \lambda v_1 \\
+  r'_{21} x + r'_{22} y + r'_{23} z + t'_{2} = \lambda v_2 \\
+  r'_{31} x + r'_{32} y + r'_{33} z + t'_{3} = \lambda v_3 \\
+  \end{array} \right.
+\end{equation}
+
+Finally because the ice floe is defined by the plane $z = 0$ in the ice floe reference
+frame, the system of equations simplifies as follows.
+
+:::puzzle
+:::{.proposition name="Generalized Distance Estimation"}
+Given
+
+- the extrinsic camera parameters $(\mathbf{R}', \mathbf{t}')$ and
+- an incident light ray vector $\mathbf{v}$ that hit the camera film plane at
+  pixel coordinates $\mathbf{u}$,
+
+then
+
+- the metric coordinates $\mathbf{x} = (x, y, 0)$ of a penguin on the ice floe
+  and
+- the distance $\lambda$ between the penguin and the camera
+
+are calculated by solving the 3x3 linear system:
+
+\begin{equation}
+  \left\{ \begin{array}{lll}
+  r'_{11} x + r'_{12} y - \lambda v_1 = -t'_{1} \\
+  r'_{21} x + r'_{22} y - \lambda v_2 = -t'_{2} \\
+  r'_{31} x + r'_{32} y - \lambda v_3 = -t'_{3} \\
+  \end{array} \right.
+\end{equation}
+:::
+:::
+
+### Visual Metrology for Animal Measurements
+
+Biologists need to measure animals to get an understanding of a animal
+population's current health and diet and its demographic dynamics. Most of the
+time this necessitates to capture a few individuals of the animal population and
+put to sleep through sedatives, whic could be a particularly traumatic and
+stressful experience for animals.
+
+One way to avoid that could be to use computer vision methods. Visual metrologic
+approaches could turn out to be sufficiently precise and further robustified
+with machine learning approaches. Another advantage is that these are faster and
+scale very well with the number of animal individual and thereby making such
+human interventions and animal suffering and unnecessary in many cases.
+
+**TODO**.
