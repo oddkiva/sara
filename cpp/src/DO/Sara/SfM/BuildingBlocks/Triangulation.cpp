@@ -37,8 +37,20 @@ void inspect_geometry(const TwoViewGeometry& g,
   const MatrixXd C1X = C1 * g.X;
   const MatrixXd C2X = C2 * g.X;
 
+  SARA_DEBUG << "Check cheirality" << std::endl;
+  const auto R = C2.topLeftCorner<3, 3>();
+  const auto t = C2.col(3);
+  const auto X_euclidean = g.X.topRows(3);
+  const Eigen::Vector3d C = -R.transpose() * t;
+  const Eigen::RowVector3d e3 = R.row(2);
+  const Eigen::VectorXd dots = e3 * (X_euclidean.colwise() - C);
+  const Eigen::Array<bool, 1, Eigen::Dynamic> cheirality = dots.array() > 0;
+  SARA_DEBUG << "cheirality dots =\n" << dots << std::endl;
+  SARA_DEBUG << "cheirality =\n" << cheirality << std::endl;
+
   SARA_DEBUG << "C1 * X =\n" << C1X << std::endl;
   SARA_DEBUG << "C2 * X =\n" << C2X << std::endl;
+
 
   SARA_DEBUG << "Comparison with normalized coordinates" << std::endl;
   SARA_DEBUG << "(C1 * X).hnormalized() =\n"
