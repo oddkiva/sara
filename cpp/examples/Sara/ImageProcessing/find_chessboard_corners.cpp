@@ -293,32 +293,19 @@ int __main(int argc, char** argv)
                               : colors.at(label);
     }
 
+    ed(image_blurred);
+    const auto& edges = ed.pipeline.edges_as_list;
+
     sara::display(partitioning);
+    for (const auto& e : edges)
+    {
+      const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
+      for (const auto& p : e)
+        sara::fill_circle(p.x(), p.y(), 2, color);
+    }
 
-    // ed(image_blurred);
-    // const auto& edges_simplified = ed.pipeline.edges_as_list;
-
-    // auto colors = std::map<int, sara::Rgb8>{};
-    // for (const auto& label : cc)
-    //  colors[label] = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
-    // auto ccmap = sara::Image<sara::Rgb8>{cc.sizes()};
-    // std::transform(cc.begin(), cc.end(), ccmap.begin(),
-    //               [&colors](const auto& label) { return colors.at(label); });
-
-    // for (const auto& e : edges_simplified)
-    // {
-    //   const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() %
-    //   255);
-    //   // if (e.size() >= 2 && sara::length(e) > 5)
-    //   //   sara::draw_polyline(image, e, color);
-    //   for (const auto& p : e)
-    //     sara::fill_circle(image, p.x(), p.y(), 2, color);
-    // }
-    // // sara::display(ccmap);
-    // sara::display(image);
-
-    // for (const auto& p : saddle_points)
-    //   sara::draw_circle(p.p, 5, sara::Black8, 2);
+    for (const auto& p : saddle_points)
+      sara::draw_circle(p.p, 5, sara::Green8, 2);
 
     sara::get_key();
   }
@@ -333,5 +320,4 @@ int main(int argc, char** argv)
   app.register_user_main(__main);
   return app.exec();
 }
-
 
