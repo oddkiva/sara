@@ -1,7 +1,7 @@
 find_package(DO_Sara
   COMPONENTS
-  Core Graphics ImageIO VideoIO     # Classic stuff
-  FeatureDetectors ImageProcessing  # Algorithmic modules
+  Core Graphics ImageIO VideoIO                  # Classic stuff
+  DisjointSets FeatureDetectors ImageProcessing  # Algorithmic modules
   REQUIRED)
 
 macro (sara_add_example example)
@@ -37,3 +37,5 @@ target_link_libraries(edge_detection_example
 sara_add_example(line_segment_detection_example)
 target_link_libraries(line_segment_detection_example
   PRIVATE $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+
+sara_add_example(find_chessboard_corners)

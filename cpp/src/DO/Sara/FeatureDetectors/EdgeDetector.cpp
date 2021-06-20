@@ -86,7 +86,7 @@ namespace DO::Sara {
 //                                          parameters.collapse_threshold,
 //                                          parameters.collapse_adaptive);
 //       toc("Vertex Collapse");
-// 
+//
 //       tic();
 //       auto& edges_refined = edges_simplified;
 // #pragma omp parallel for
