@@ -19,12 +19,11 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/BrownConradyCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
-
 #include <DO/Sara/VideoIO.hpp>
 
-#include <drafts/ImageProcessing/EdgeGrouping.hpp>
 
 #include <boost/filesystem.hpp>
 

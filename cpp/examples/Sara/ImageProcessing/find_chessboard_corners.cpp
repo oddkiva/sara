@@ -1,5 +1,17 @@
-#include <DO/Sara/Core/PhysicalQuantities.hpp>
-#include <DO/Sara/DisjointSets/TwoPassConnectedComponents.hpp>
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2021-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+//! @example
+
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
@@ -7,6 +19,7 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
 
 
 namespace sara = DO::Sara;
@@ -18,7 +31,7 @@ inline constexpr long double operator"" _percent(long double x)
   return x / 100;
 }
 
-// ========================================================================== //
+
 auto edge_signature(const sara::Image<sara::Rgb8>& color,
                     const sara::Image<Eigen::Vector2f>& gradients,
                     const std::vector<Eigen::Vector2i>& edge,  //
@@ -76,7 +89,7 @@ int __main(int argc, char** argv)
   auto ed = sara::EdgeDetector{{high_threshold_ratio,  //
                                 low_threshold_ratio,   //
                                 angular_threshold,     //
-                                false}};
+                                true}};
 
   for (auto i = 0; i <= 1790; i += 10)
   {
@@ -92,12 +105,10 @@ int __main(int argc, char** argv)
       sara::set_antialiasing();
     }
 
-    // Watershed to find the chessboard quadrangles.
-    const auto regions = sara::color_watershed(image, color_threshold);
-
-    // Group segments.
+    // Detect edges.
     ed(image_blurred);
     const auto& edges = ed.pipeline.edges_as_list;
+    const auto& edges_simplified = ed.pipeline.edges_simplified;
 
     auto darks = std::vector<std::vector<sara::Rgb64f>>{};
     auto brights = std::vector<std::vector<sara::Rgb64f>>{};
@@ -112,6 +123,42 @@ int __main(int argc, char** argv)
       brights.push_back(std::move(bright));
       mean_gradients.push_back(g);
     }
+
+    // Calculate edge statistics.
+    sara::tic();
+    const auto edge_stats = sara::CurveStatistics{edges_simplified};
+    sara::toc("Edge Shape Statistics");
+
+    sara::tic();
+    const auto edge_attributes = sara::EdgeAttributes{
+        edges_simplified,    //
+        edge_stats.centers,  //
+        edge_stats.axes,     //
+        edge_stats.lengths   //
+    };
+    auto endpoint_graph = sara::EndPointGraph{edge_attributes};
+    endpoint_graph.mark_plausible_alignments();
+    sara::toc("Alignment Computation");
+
+    // Draw alignment-based connections.
+    const auto& score = endpoint_graph.score;
+    for (auto i = 0; i < score.rows(); ++i)
+    {
+      for (auto j = i + 1; j < score.cols(); ++j)
+      {
+        const auto& pi = endpoint_graph.endpoints[i];
+        const auto& pj = endpoint_graph.endpoints[j];
+
+        if (score(i, j) != std::numeric_limits<double>::infinity())
+        {
+          sara::draw_line(image, pi.x(), pi.y(), pj.x(), pj.y(), sara::Yellow8,
+                          2);
+          sara::draw_circle(image, pi.x(), pi.y(), 3, sara::Yellow8, 3);
+          sara::draw_circle(image, pj.x(), pj.y(), 3, sara::Yellow8, 3);
+        }
+      }
+    }
+
 
     sara::display(image);
     for (const auto& e : edges)
@@ -155,36 +202,3 @@ int main(int argc, char** argv)
   app.register_user_main(__main);
   return app.exec();
 }
-
-
-// auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
-//                  const sara::Image<sara::Rgb8>& image)
-// {
-//   auto colors = std::map<int, sara::Rgb8>{};
-//   for (const auto& [label, points] : regions)
-//   {
-//     const auto num_points = points.size();
-//     Eigen::Vector3f color = Eigen::Vector3f::Zero();
-//     for (const auto& p : points)
-//       color += image(p).cast<float>();
-//     color /= num_points;
-//
-//     colors[label] = color.cast<std::uint8_t>();
-//   }
-//   return colors;
-// }
-//
-// const auto colors = mean_colors(regions, image);
-// auto partitioning = sara::Image<sara::Rgb8>{image.sizes()};
-// for (const auto& [label, points] : regions)
-// {
-//   // Show big segments only.
-//   for (const auto& p : points)
-//     partitioning(p) = points.size() < segment_min_size  //
-//                           ? sara::Black8
-//                           : colors.at(label);
-// }
-// sara::display(partitioning);
-//
-// for (const auto& p : saddle_points)
-//   sara::draw_circle(p.p, 5, sara::Green8, 2);

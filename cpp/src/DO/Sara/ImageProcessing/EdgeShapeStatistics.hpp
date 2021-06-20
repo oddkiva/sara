@@ -161,27 +161,4 @@ namespace DO::Sara {
     return lines;
   }
 
-  auto to_undistorted_lines(const std::vector<LineSegment>& line_segments,
-                            const BrownConradyCamera32<float>& intrinsics)
-      -> Tensor_<float, 2>
-  {
-    auto lines = Tensor_<float, 2>(static_cast<int>(line_segments.size()), 3);
-    auto lines_as_matrix = lines.matrix();
-    for (auto i = 0u; i < line_segments.size(); ++i)
-    {
-      const auto& ls = line_segments[i];
-      const Eigen::Vector3f p1 = intrinsics                             //
-                                     .undistort(ls.p1().cast<float>())  //
-                                     .homogeneous();
-      const Eigen::Vector3f p2 = intrinsics                             //
-                                     .undistort(ls.p2().cast<float>())  //
-                                     .homogeneous();
-      auto line = Projective::line(p1, p2);
-      line /= line.head(2).norm();
-      lines_as_matrix.row(i) = line.transpose();
-    }
-
-    return lines;
-  }
-
 }  // namespace DO::Sara

@@ -184,41 +184,6 @@ auto check_edge_grouping(const ImageView<Rgb8>& frame,                 //
 
 
 
-#ifdef PERFORM_EDGE_GROUPING
-tic();
-const auto edge_attributes = EdgeAttributes{
-    edges,    //
-    centers,  //
-    axes,     //
-    lengths   //
-};
-auto endpoint_graph = EndPointGraph{edge_attributes};
-endpoint_graph.mark_plausible_alignments();
-toc("Alignment Computation");
-#endif
-
-#ifdef PERFORM_EDGE_GROUPING
-// Draw alignment-based connections.
-auto remap = [&](const auto p) -> Vector2d { return p1d + s * p; };
-const auto& score = endpoint_graph.score;
-for (auto i = 0; i < score.rows(); ++i)
-{
-  for (auto j = i + 1; j < score.cols(); ++j)
-  {
-    const auto& pi = endpoint_graph.endpoints[i];
-    const auto& pj = endpoint_graph.endpoints[j];
-
-    if (score(i, j) != std::numeric_limits<double>::infinity())
-    {
-      const auto pi1 = remap(pi).cast<int>();
-      const auto pj1 = remap(pj).cast<int>();
-      draw_line(detection, pi1.x(), pi1.y(), pj1.x(), pj1.y(), Yellow8, 2);
-      draw_circle(detection, pi1.x(), pi1.y(), 3, Yellow8, 3);
-      draw_circle(detection, pj1.x(), pj1.y(), 3, Yellow8, 3);
-    }
-  }
-}
-#endif
 
 
 
@@ -304,31 +269,6 @@ struct CurveMatcher
 };
 
 
-
-
-struct CameraPose
-{
-  Eigen::Matrix3f R;
-  Eigen::Vector3f t;
-  BrownConradyCamera<float> intrinsics;
-
-  auto initialize()
-  {
-    R = rotation(-2._deg, -10._deg, -2._deg);
-    t << -1, 0, 1.15;
-
-    const auto f = 991.8030424131325;
-    const auto u0 = 960;
-    const auto v0 = 540;
-
-    intrinsics.image_sizes << 1920, 1080;
-    intrinsics.K << f, 0, u0,
-                    0, f, v0,
-                    0, 0,  1;
-    intrinsics.k.setZero();
-    intrinsics.p.setZero();
-  }
-};
 
 +  auto curve_matcher = CurveMatcher{};
 +  curve_matcher.reset_curve_map(frame.width(), frame.height());

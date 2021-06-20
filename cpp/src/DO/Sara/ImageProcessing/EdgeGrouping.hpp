@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <drafts/ImageProcessing/EdgeShapeStatistics.hpp>
+#include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
 

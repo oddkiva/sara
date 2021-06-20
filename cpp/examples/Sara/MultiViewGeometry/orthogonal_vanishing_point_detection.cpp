@@ -20,15 +20,13 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/BrownConradyCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
-
 #include <DO/Sara/VideoIO.hpp>
 
-#include <drafts/ImageProcessing/EdgeGrouping.hpp>
-
-#include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 #include <omp.h>
 
@@ -53,10 +51,7 @@ auto initialize_camera_intrinsics_1()
   const auto u0 = 960;
   const auto v0 = 540;
   intrinsics.image_sizes << 1920, 1080;
-  intrinsics.K  <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
+  intrinsics.K << f, 0, u0, 0, f, v0, 0, 0, 1;
   intrinsics.distortion_model.k.setZero();
   intrinsics.distortion_model.p.setZero();
 
@@ -71,14 +66,9 @@ auto initialize_camera_intrinsics_2()
   const auto u0 = 960;
   const auto v0 = 540;
   intrinsics.image_sizes << 1920, 1080;
-  intrinsics.K  <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
-  intrinsics.distortion_model.k <<
-    -0.22996356451342749,
-    0.05952465745165465,
-    -0.007399008111054717;
+  intrinsics.K << f, 0, u0, 0, f, v0, 0, 0, 1;
+  intrinsics.distortion_model.k << -0.22996356451342749, 0.05952465745165465,
+      -0.007399008111054717;
   intrinsics.distortion_model.p.setZero();
 
   return intrinsics;
@@ -92,10 +82,7 @@ auto initialize_camera_intrinsics(const Eigen::Vector2i& sizes)
   const auto u0 = 0.5f * sizes.x();
   const auto v0 = 0.5f * sizes.y();
   intrinsics.image_sizes = sizes.cast<float>();
-  intrinsics.K  <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
+  intrinsics.K << f, 0, u0, 0, f, v0, 0, 0, 1;
   intrinsics.distortion_model.k.setZero();
   intrinsics.distortion_model.p.setZero();
 
@@ -359,7 +346,7 @@ int __main(int argc, char** argv)
     // analysis.
     const Eigen::Vector2d p1d = p1.cast<double>();
     const auto s = static_cast<float>(downscale_factor);
-    for (auto& ls: line_segments)
+    for (auto& ls : line_segments)
     {
       ls.p1() = p1d + s * ls.p1();
       ls.p2() = p1d + s * ls.p2();
@@ -413,8 +400,7 @@ int __main(int argc, char** argv)
     {
       if (inliers_count > 0)
       {
-        SARA_DEBUG << "inliers = " << inliers.flat_array().count()
-                   << std::endl;
+        SARA_DEBUG << "inliers = " << inliers.flat_array().count() << std::endl;
         SARA_DEBUG << "R =\n" << R1 << std::endl;
         SARA_DEBUG << "|R| = " << R1.determinant() << std::endl;
 
@@ -431,7 +417,8 @@ int __main(int argc, char** argv)
           const auto rn = std::array<float, 3>{std::abs(R1.col(0).dot(n)),
                                                std::abs(R1.col(1).dot(n)),
                                                std::abs(R1.col(2).dot(n))};
-          const auto ibest = std::min_element(rn.begin(), rn.end()) - rn.begin();
+          const auto ibest =
+              std::min_element(rn.begin(), rn.end()) - rn.begin();
 
 
           if (ibest == 0)
