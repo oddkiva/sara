@@ -1,5 +1,3 @@
-
-
 #define VP
 #ifdef VP
     tic();

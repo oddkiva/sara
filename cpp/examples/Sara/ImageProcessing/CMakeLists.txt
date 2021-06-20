@@ -38,4 +38,10 @@ sara_add_example(line_segment_detection_example)
 target_link_libraries(line_segment_detection_example
   PRIVATE $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
 
+
+add_library(ChessboardDetection
+  Chessboard/EdgeFusion.hpp
+  Chessboard/EdgeFusion.cpp)
+target_link_libraries(ChessboardDetection PUBLIC ${DO_Sara_LIBRARIES})
 sara_add_example(find_chessboard_corners)
+target_link_libraries(find_chessboard_corners PRIVATE ChessboardDetection)
