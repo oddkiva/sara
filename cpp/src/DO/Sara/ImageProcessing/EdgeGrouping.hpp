@@ -64,11 +64,6 @@ namespace DO::Sara {
         if (length(e) < 5)
           continue;
 
-        const auto& theta = std::abs(std::atan2(edge_attrs.axes[i](1, 0),  //
-                                                edge_attrs.axes[i](0, 0)));
-        if (theta < 5._deg || std::abs(M_PI - theta) < 5._deg)
-          continue;
-
         endpoints.emplace_back(e.front());
         endpoints.emplace_back(e.back());
 

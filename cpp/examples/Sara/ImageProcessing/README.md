@@ -1,5 +1,8 @@
 # Chessboard Detection
 
+- Hessian Detection: very good idea but turns out to be quite tricky to filter
+  and set the appropriate threshold for every case.
+
 - Otsu binarization method works OK, but too unstable w.r.t. illumination
   changes.
 
@@ -28,6 +31,8 @@
 
 
   // Watershed to find the chessboard quadrangles.
+  const auto color_threshold = std::sqrt(std::pow(2, 2) * 3);
+  const auto segment_min_size = 50;
 
   const auto regions = sara::color_watershed(image, color_threshold);
   const auto colors = mean_colors(regions, image);
@@ -52,3 +57,49 @@
   - A chessboard corner is easily interpretable by means of gradient analysis.
     For any line that divides each chessboard square piece, the gradient direction
     is the same, but its gradient flips at each corner.
+
+
+
+
+- Connecting end points of edges.
+
+  ```
+  auto endpoint_graph = sara::EndPointGraph{edge_attributes};
+  endpoint_graph.mark_plausible_alignments();
+  sara::toc("Alignment Computation");
+
+  // Draw alignment-based connections.
+  const auto& score = endpoint_graph.score;
+  for (auto i = 0; i < score.rows(); ++i)
+  {
+    for (auto j = i + 1; j < score.cols(); ++j)
+    {
+      const auto& pi = endpoint_graph.endpoints[i];
+      const auto& pj = endpoint_graph.endpoints[j];
+
+      if (score(i, j) != std::numeric_limits<double>::infinity())
+      {
+        sara::draw_line(image, pi.x(), pi.y(), pj.x(), pj.y(), sara::Yellow8,
+                        2);
+        sara::draw_circle(image, pi.x(), pi.y(), 3, sara::Yellow8, 3);
+        sara::draw_circle(image, pj.x(), pj.y(), 3, sara::Yellow8, 3);
+      }
+    }
+  }
+
+  const auto edge_groups = endpoint_graph.group();
+  auto edge_group_colors = std::map<std::size_t, sara::Rgb8>{};
+  for (const auto& g : edge_groups)
+    edge_group_colors[g.first] << rand() % 255, rand() % 255, rand() % 255;
+
+  for (const auto& g : edge_groups)
+  {
+    for (const auto& e : g.second)
+    {
+      const auto& edge = edges_simplified[e];
+      const auto& color = edge_group_colors[e];
+      for (const auto& p : edge)
+        sara::fill_circle(p.x(), p.y(), 2, color);
+    }
+  }
+  ```

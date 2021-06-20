@@ -26,14 +26,196 @@ namespace sara = DO::Sara;
 using sara::operator""_deg;
 
 
+namespace DO::Sara {
+
+  struct EdgeGraph
+  {
+    const EdgeAttributes& attributes;
+    std::vector<std::size_t> edge_ids;
+
+    sara::Tensor_<std::uint8_t, 2> A;
+
+    EdgeGraph(const EdgeAttributes& attrs)
+      : attributes{attrs}
+    {
+      initialize();
+    }
+
+    auto initialize() -> void
+    {
+      const auto n = static_cast<std::int32_t>(attributes.edges.size());
+      std::iota(edge_ids.begin(), edge_ids.end(), 0u);
+
+      A.resize(n, n);
+      A.flat_array().fill(0);
+      for (auto i = 0; i < n; ++i)
+      {
+        for (auto j = i; j < n; ++j)
+        {
+          if (i == j)
+            A(i, j) = 1;
+          else if (edge(i).size() >= 2 && edge(j).size() >= 2)
+            A(i, j) = is_aligned(i, j);
+          A(j, i) = A(i, j);
+        }
+      }
+    }
+
+    auto edge(std::size_t i) const -> const Edge&
+    {
+      return attributes.edges[i];
+    }
+
+    auto center(std::size_t i) const -> const Eigen::Vector2d&
+    {
+      return attributes.centers[i];
+    }
+
+    auto axes(std::size_t i) const -> const Eigen::Matrix2d&
+    {
+      return attributes.axes[i];
+    }
+
+    auto lengths(std::size_t i) const -> const Eigen::Vector2d&
+    {
+      return attributes.lengths[i];
+    }
+
+    auto rect(std::size_t i) const -> OrientedBox
+    {
+      return {center(i), axes(i), lengths(i)};
+    }
+
+    auto is_aligned(std::size_t i, std::size_t j) const -> bool
+    {
+      const auto& ri = rect(i);
+      const auto& rj = rect(j);
+      const auto& di = ri.axes.col(0);
+      const auto& dj = rj.axes.col(0);
+
+      const auto& ai = attributes.edges[i].front();
+      const auto& bi = attributes.edges[i].back();
+
+      const auto& aj = attributes.edges[j].front();
+      const auto& bj = attributes.edges[j].back();
+
+      constexpr auto dist_thres = 10.f;
+      constexpr auto dist_thres_2 = dist_thres * dist_thres;
+      const auto is_adjacent = (ai - aj).squaredNorm() < dist_thres_2 ||
+                               (ai - bj).squaredNorm() < dist_thres_2 ||
+                               (bi - aj).squaredNorm() < dist_thres_2 ||
+                               (bi - bj).squaredNorm() < dist_thres_2;
+
+      return is_adjacent && std::abs(di.dot(dj)) > std::cos(30._deg);
+    }
+
+    auto group_by_alignment() const
+    {
+      const auto n = A.rows();
+
+      auto ds = sara::DisjointSets(n);
+
+      for (auto i = 0; i < n; ++i)
+        ds.make_set(i);
+
+      for (auto i = 0; i < n; ++i)
+        for (auto j = i; j < n; ++j)
+          if (A(i, j) == 1)
+            ds.join(ds.node(i), ds.node(j));
+
+      auto groups = std::map<std::size_t, std::vector<std::size_t>>{};
+      for (auto i = 0; i < n; ++i)
+      {
+        const auto c = ds.component(i);
+        groups[c].push_back(i);
+      }
+
+      return groups;
+    }
+  };
+
+  auto check_edge_grouping(const sara::ImageView<sara::Rgb8>& frame,     //
+                           const std::vector<Edge>& edges_refined,       //
+                           const std::vector<Eigen::Vector2d>& centers,  //
+                           const std::vector<Eigen::Matrix2d>& axes,     //
+                           const std::vector<Eigen::Vector2d>& lengths,  //
+                           const sara::Point2i& p1,                      //
+                           double downscale_factor)                      //
+      -> void
+  {
+    sara::tic();
+    const auto edge_attributes = EdgeAttributes{.edges = edges_refined,
+                                                .centers = centers,
+                                                .axes = axes,
+                                                .lengths = lengths};
+    const auto edge_graph = EdgeGraph{edge_attributes};
+    const auto edge_groups = edge_graph.group_by_alignment();
+    SARA_CHECK(edges_refined.size());
+    SARA_CHECK(edge_groups.size());
+    sara::toc("Edge Grouping By Alignment");
+
+
+    // Display the quasi-straight edges.
+    auto draw_task = [=]() {
+      auto edge_group_colors = std::map<std::size_t, Rgb8>{};
+      for (const auto& g : edge_groups)
+        edge_group_colors[g.first] << rand() % 255, rand() % 255, rand() % 255;
+
+      auto edge_colors = std::vector<Rgb8>(edges_refined.size(), Red8);
+      // for (auto& c : edge_colors)
+      //   c << rand() % 255, rand() % 255, rand() % 255;
+      for (const auto& g : edge_groups)
+        for (const auto& e : g.second)
+          edge_colors[e] = edge_group_colors[g.first];
+
+      const Eigen::Vector2d p1d = p1.cast<double>();
+      const auto& s = downscale_factor;
+
+      auto detection = Image<Rgb8>{frame};
+      detection.flat_array().fill(Black8);
+      for (const auto& g : edge_groups)
+      {
+        for (const auto& e : g.second)
+        {
+          const auto& edge_refined = edges_refined[e];
+          if (edge_refined.size() < 2)
+            continue;
+
+          const auto& color = edge_colors[e];
+          draw_polyline(detection, edge_refined, color, p1d, s);
+
+// #define DEBUG_SHAPE_STATISTICS
+#ifdef DEBUG_SHAPE_STATISTICS
+          const auto& rect = OrientedBox{.center = c,      //
+                                         .axes = axes[e],  //
+                                         .lengths = lengths[e]};
+          rect.draw(detection, White8, p1d, s);
+#endif
+        }
+
+      }
+
+      display(detection);
+      // get_key();
+    };
+
+    tic();
+    draw_task();
+    toc("Draw");
+  }
+
+
+}  // namespace DO::Sara
+
+
 inline constexpr long double operator"" _percent(long double x)
 {
   return x / 100;
 }
 
 
-auto edge_signature(const sara::Image<sara::Rgb8>& color,
-                    const sara::Image<Eigen::Vector2f>& gradients,
+auto edge_signature(const sara::ImageView<sara::Rgb8>& color,
+                    const sara::ImageView<Eigen::Vector2f>& gradients,
                     const std::vector<Eigen::Vector2i>& edge,  //
                     float delta = 1, int width = 3)
 {
@@ -59,10 +241,13 @@ auto edge_signature(const sara::Image<sara::Rgb8>& color,
   }
 
   Eigen::Vector2f mean_gradient = Eigen::Vector2f::Zero();
-  mean_gradient = std::accumulate(edge.begin(), edge.end(), mean_gradient,
-                                  [&gradients](const auto& g, const auto& e) {
-                                    return g + gradients(e).normalized();  //
-                                  });
+  mean_gradient = std::accumulate(
+      edge.begin(), edge.end(), mean_gradient,
+      [&gradients](const auto& g, const auto& e) -> Eigen::Vector2f {
+        if (gradients(e).squaredNorm() < 1e-6f)
+          return g;
+        return g + gradients(e).normalized();
+      });
   mean_gradient /= edge.size();
 
   return std::make_tuple(darks, brights, mean_gradient);
@@ -73,18 +258,16 @@ int __main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
+  if (argc < 2)
+    return 1;
   const auto folder = std::string{argv[1]};
 
   constexpr auto sigma = 1.6f;
-  constexpr auto nms_radius = 5;
 
   constexpr float high_threshold_ratio = static_cast<float>(10._percent);
   constexpr float low_threshold_ratio =
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((10._deg).value);
-
-  const auto color_threshold = std::sqrt(std::pow(2, 2) * 3);
-  const auto segment_min_size = 50;
 
   auto ed = sara::EdgeDetector{{high_threshold_ratio,  //
                                 low_threshold_ratio,   //
@@ -129,6 +312,7 @@ int __main(int argc, char** argv)
     const auto edge_stats = sara::CurveStatistics{edges_simplified};
     sara::toc("Edge Shape Statistics");
 
+
     sara::tic();
     const auto edge_attributes = sara::EdgeAttributes{
         edges_simplified,    //
@@ -136,37 +320,12 @@ int __main(int argc, char** argv)
         edge_stats.axes,     //
         edge_stats.lengths   //
     };
-    auto endpoint_graph = sara::EndPointGraph{edge_attributes};
-    endpoint_graph.mark_plausible_alignments();
-    sara::toc("Alignment Computation");
 
-    // Draw alignment-based connections.
-    const auto& score = endpoint_graph.score;
-    for (auto i = 0; i < score.rows(); ++i)
-    {
-      for (auto j = i + 1; j < score.cols(); ++j)
-      {
-        const auto& pi = endpoint_graph.endpoints[i];
-        const auto& pj = endpoint_graph.endpoints[j];
+    sara::check_edge_grouping(image, edges_simplified, edge_attributes.centers,
+                              edge_attributes.axes, edge_attributes.lengths,
+                              Eigen::Vector2i::Zero(), 1);
 
-        if (score(i, j) != std::numeric_limits<double>::infinity())
-        {
-          sara::draw_line(image, pi.x(), pi.y(), pj.x(), pj.y(), sara::Yellow8,
-                          2);
-          sara::draw_circle(image, pi.x(), pi.y(), 3, sara::Yellow8, 3);
-          sara::draw_circle(image, pj.x(), pj.y(), 3, sara::Yellow8, 3);
-        }
-      }
-    }
-
-
-    sara::display(image);
-    for (const auto& e : edges)
-    {
-      const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
-      for (const auto& p : e)
-        sara::fill_circle(p.x(), p.y(), 2, color);
-    }
+    // sara::display(image);
 
     for (auto i = 0u; i < edges.size(); ++i)
     {
@@ -179,7 +338,7 @@ int __main(int argc, char** argv)
       const auto& g = mean_gradients[i];
       const Eigen::Vector2f a = std::accumulate(            //
                                     e.begin(), e.end(),     //
-                                    Eigen::Vector2f{0, 0},  //
+                                    Eigen::Vector2f(0, 0),  //
                                     [](const auto& a, const auto& b) {
                                       return a + b.template cast<float>();
                                     }) /
