@@ -212,15 +212,21 @@ auto edge_signature(const sara::Image<sara::Rgb8>& color,
       const Eigen::Vector2d b = e.cast<double>() + s * delta * n;
       const Eigen::Vector2d d = e.cast<double>() - s * delta * n;
 
-      darks.push_back(sara::interpolate(color, d));
-      brights.push_back(sara::interpolate(color, b));
+      if (0 <= d.x() && d.x() < color.width() &&  //
+          0 <= d.y() && d.y() < color.height())
+        darks.push_back(sara::interpolate(color, d));
+
+      if (0 <= b.x() && b.x() < color.width() &&  //
+          0 <= b.y() && b.y() < color.height())
+        brights.push_back(sara::interpolate(color, b));
     }
   }
 
   Eigen::Vector2f mean_gradient = Eigen::Vector2f::Zero();
-  std::accumulate(
-      edge.begin(), edge.end(), mean_gradient,
-      [&gradients](const auto& g, const auto& e) { return g + gradients(e); });
+  mean_gradient = std::accumulate(edge.begin(), edge.end(), mean_gradient,
+                                  [&gradients](const auto& g, const auto& e) {
+                                    return g + gradients(e).normalized();  //
+                                  });
   mean_gradient /= edge.size();
 
   return std::make_tuple(darks, brights, mean_gradient);
@@ -239,7 +245,7 @@ int __main(int argc, char** argv)
   constexpr float high_threshold_ratio = static_cast<float>(10._percent);
   constexpr float low_threshold_ratio =
       static_cast<float>(high_threshold_ratio / 2.);
-  constexpr float angular_threshold = static_cast<float>((20._deg).value);
+  constexpr float angular_threshold = static_cast<float>((10._deg).value);
 
   const auto color_threshold = std::sqrt(std::pow(2, 2) * 3);
   const auto segment_min_size = 50;
@@ -278,25 +284,41 @@ int __main(int argc, char** argv)
       sara::set_antialiasing();
     }
 
-    // Watershed.
+    // Watershed to find the chessboard quadrangles.
     const auto regions = sara::color_watershed(image, color_threshold);
 
-    // Display the good regions.
-    const auto colors = mean_colors(regions, image);
-    auto partitioning = sara::Image<sara::Rgb8>{image.sizes()};
-    for (const auto& [label, points] : regions)
-    {
-      // Show big segments only.
-      for (const auto& p : points)
-        partitioning(p) = points.size() < segment_min_size  //
-                              ? sara::Black8
-                              : colors.at(label);
-    }
-
+    // Group segments.
     ed(image_blurred);
     const auto& edges = ed.pipeline.edges_as_list;
 
-    sara::display(partitioning);
+    auto darks = std::vector<std::vector<sara::Rgb64f>>{};
+    auto brights = std::vector<std::vector<sara::Rgb64f>>{};
+    auto mean_gradients = std::vector<Eigen::Vector2f>{};
+    for (const auto& edge : edges)
+    {
+      auto [dark, bright, g] = edge_signature(  //
+          image,                                //
+          ed.pipeline.gradient_cartesian,       //
+          edge);
+      darks.push_back(std::move(dark));
+      brights.push_back(std::move(bright));
+      mean_gradients.push_back(g);
+    }
+
+    // const auto colors = mean_colors(regions, image);
+    // auto partitioning = sara::Image<sara::Rgb8>{image.sizes()};
+    // for (const auto& [label, points] : regions)
+    // {
+    //   // Show big segments only.
+    //   for (const auto& p : points)
+    //     partitioning(p) = points.size() < segment_min_size  //
+    //                           ? sara::Black8
+    //                           : colors.at(label);
+    // }
+
+    // sara::display(partitioning);
+
+    sara::display(image);
     for (const auto& e : edges)
     {
       const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
@@ -304,8 +326,29 @@ int __main(int argc, char** argv)
         sara::fill_circle(p.x(), p.y(), 2, color);
     }
 
-    for (const auto& p : saddle_points)
-      sara::draw_circle(p.p, 5, sara::Green8, 2);
+    for (auto i = 0u; i < edges.size(); ++i)
+    {
+      const auto& e = edges[i];
+
+      // Discard small edges.
+      if (e.size() < 2)
+        continue;
+
+      const auto& g = mean_gradients[i];
+      const Eigen::Vector2f a = std::accumulate(            //
+                                    e.begin(), e.end(),     //
+                                    Eigen::Vector2f{0, 0},  //
+                                    [](const auto& a, const auto& b) {
+                                      return a + b.template cast<float>();
+                                    }) /
+                                e.size();
+      const Eigen::Vector2f b = a + 20 * g;
+
+      sara::draw_arrow(a, b, sara::Magenta8, 2);
+    }
+
+    // for (const auto& p : saddle_points)
+    //   sara::draw_circle(p.p, 5, sara::Green8, 2);
 
     sara::get_key();
   }
@@ -320,4 +363,3 @@ int main(int argc, char** argv)
   app.register_user_main(__main);
   return app.exec();
 }
-
