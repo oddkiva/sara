@@ -139,6 +139,7 @@ int __main(int argc, char** argv)
 
     sara::check_edge_grouping(image,                    //
                               edges_simplified,         //
+                              edges,                    //
                               mean_gradients,           //
                               edge_attributes.centers,  //
                               edge_attributes.axes,     //

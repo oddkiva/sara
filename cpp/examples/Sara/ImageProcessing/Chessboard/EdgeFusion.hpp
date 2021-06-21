@@ -10,14 +10,17 @@ namespace DO::Sara {
   struct EdgeGraph
   {
     const EdgeAttributes& attributes;
+    const std::vector<std::vector<Eigen::Vector2i>>& edge_chains;
     const std::vector<Eigen::Vector2f>& mean_gradients;
     std::vector<std::size_t> edge_ids;
 
     Tensor_<std::uint8_t, 2> A;
 
     EdgeGraph(const EdgeAttributes& attrs,
+              const std::vector<std::vector<Eigen::Vector2i>>& edges,
               const std::vector<Eigen::Vector2f>& mean_grads)
       : attributes{attrs}
+      , edge_chains{edges}
       , mean_gradients{mean_grads}
     {
       initialize();
@@ -74,8 +77,15 @@ namespace DO::Sara {
       // const auto& rj = rect(j);
       // const auto& di = ri.axes.col(0);
       // const auto& dj = rj.axes.col(0);
+
       const auto& di = mean_gradients[i];
       const auto& dj = mean_gradients[j];
+
+      // const auto& ai = edge_chains[i].front();
+      // const auto& bi = edge_chains[i].back();
+
+      // const auto& aj = edge_chains[j].front();
+      // const auto& bj = edge_chains[j].back();
 
       const auto& ai = attributes.edges[i].front();
       const auto& bi = attributes.edges[i].back();
@@ -119,15 +129,16 @@ namespace DO::Sara {
     }
   };
 
-  auto check_edge_grouping(                                //
-      const ImageView<Rgb8>& frame,                        //
-      const std::vector<Edge>& edges_refined,              //
-      const std::vector<Eigen::Vector2f>& mean_gradients,  //
-      const std::vector<Eigen::Vector2d>& centers,         //
-      const std::vector<Eigen::Matrix2d>& axes,            //
-      const std::vector<Eigen::Vector2d>& lengths,         //
-      const Point2i& p1,                                   //
-      double downscale_factor)                             //
+  auto check_edge_grouping(                                          //
+      const ImageView<Rgb8>& frame,                                  //
+      const std::vector<Edge>& edges_refined,                        //
+      const std::vector<std::vector<Eigen::Vector2i>>& edge_chains,  //
+      const std::vector<Eigen::Vector2f>& mean_gradients,            //
+      const std::vector<Eigen::Vector2d>& centers,                   //
+      const std::vector<Eigen::Matrix2d>& axes,                      //
+      const std::vector<Eigen::Vector2d>& lengths,                   //
+      const Point2i& p1,                                             //
+      double downscale_factor)                                       //
       -> void;
 
 

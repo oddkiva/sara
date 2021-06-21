@@ -1,21 +1,23 @@
 #include "EdgeFusion.hpp"
 
 #include <DO/Sara/Core/TicToc.hpp>
+#include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/Graphics.hpp>
 
 
 namespace DO::Sara {
 
-  auto check_edge_grouping(                                //
-      const ImageView<Rgb8>& frame,                        //
-      const std::vector<Edge>& edges_refined,              //
-      const std::vector<Eigen::Vector2f>& mean_gradients,  //
-      const std::vector<Eigen::Vector2d>& centers,         //
-      const std::vector<Eigen::Matrix2d>& axes,            //
-      const std::vector<Eigen::Vector2d>& lengths,         //
-      const Point2i& p1,                                   //
-      double downscale_factor)                             //
+  auto check_edge_grouping(                                          //
+      const ImageView<Rgb8>& frame,                                  //
+      const std::vector<Edge>& edges_refined,                        //
+      const std::vector<std::vector<Eigen::Vector2i>>& edge_chains,  //
+      const std::vector<Eigen::Vector2f>& mean_gradients,            //
+      const std::vector<Eigen::Vector2d>& centers,                   //
+      const std::vector<Eigen::Matrix2d>& axes,                      //
+      const std::vector<Eigen::Vector2d>& lengths,                   //
+      const Point2i& p1,                                             //
+      double downscale_factor)                                       //
       -> void
   {
     tic();
@@ -23,11 +25,24 @@ namespace DO::Sara {
                                                 .centers = centers,
                                                 .axes = axes,
                                                 .lengths = lengths};
-    const auto edge_graph = EdgeGraph{edge_attributes, mean_gradients};
+    const auto edge_graph = EdgeGraph{edge_attributes, edge_chains, mean_gradients};
+    toc("Edge Graph Initialization");
+
+    tic();
     const auto edge_groups = edge_graph.group_by_alignment();
-    SARA_CHECK(edges_refined.size());
-    SARA_CHECK(edge_groups.size());
     toc("Edge Grouping By Alignment");
+
+    tic();
+    auto edges = std::vector<std::vector<Eigen::Vector2i>>{};
+    edges.reserve(edges_refined.size());
+    for (const auto& g : edge_groups)
+    {
+      auto edge_fused = std::vector<Eigen::Vector2i>{};
+      for (const auto& e : g.second)
+        append(edge_fused, edge_chains[e]);
+      edges.push_back(std::move(edge_fused));
+    }
+    toc("Edge Fusion");
 
     // Display the quasi-straight edges.
     auto draw_task = [&]() {
@@ -66,10 +81,21 @@ namespace DO::Sara {
         }
       }
       display(detection);
+      get_key();
     };
 
     tic();
-    draw_task();
+    // draw_task();
+    fill_rect(0, 0, frame.width(), frame.height(), Black8);
+    for (const auto& edge : edges)
+    {
+      if (edge.size() < 2)
+        continue;
+
+      const auto color = Rgb8(rand() % 255, rand() % 255, rand() % 255);
+      for (const auto& p : edge)
+        fill_circle(p.x(), p.y(), 2, color);
+    }
     toc("Draw");
   }
 
