@@ -1,6 +1,6 @@
-file(GLOB test_OpenCL_SOURCE_FILES FILES test_*.cpp)
+file(GLOB test_AudioIO_SOURCE_FILES FILES test_*.cpp)
 
-foreach (file ${test_OpenCL_SOURCE_FILES})
+foreach (file ${test_AudioIO_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   sara_add_test(
     NAME ${filename}
@@ -8,7 +8,7 @@ foreach (file ${test_OpenCL_SOURCE_FILES})
 
     DEPENDENCIES
     ${DO_Sara_LIBRARIES}
-    DO_Sara_OpenCL_Core
+    DO_Sara_AudioIO
 
-    FOLDER OpenCL)
+    FOLDER AudioIO)
 endforeach ()
