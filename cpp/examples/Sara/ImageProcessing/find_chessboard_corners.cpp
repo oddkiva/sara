@@ -80,7 +80,7 @@ int __main(int argc, char** argv)
 
   constexpr auto sigma = 1.6f;
 
-  constexpr float high_threshold_ratio = static_cast<float>(20._percent);
+  constexpr float high_threshold_ratio = static_cast<float>(10._percent);
   constexpr float low_threshold_ratio =
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((5._deg).value);
@@ -127,7 +127,6 @@ int __main(int argc, char** argv)
     sara::tic();
     const auto edge_stats = sara::CurveStatistics{edges_simplified};
     sara::toc("Edge Shape Statistics");
-
 
     sara::tic();
     const auto edge_attributes = sara::EdgeAttributes{
