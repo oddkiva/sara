@@ -45,13 +45,34 @@ namespace DO::Sara {
 
     tic();
     auto edges = std::vector<std::vector<Eigen::Vector2i>>{};
+    auto edge_gradients = std::vector<Eigen::Vector2f>{};
     edges.reserve(edges_refined.size());
+    edge_gradients.reserve(edges_refined.size());
     for (const auto& g : edge_groups)
     {
       auto edge_fused = std::vector<Eigen::Vector2i>{};
+
+      // Fuse the edges.
       for (const auto& e : g.second)
         append(edge_fused, edge_chains[e]);
+
+      // Calculate the cardinality of the fused edge.
+      const auto fused_edge_cardinality =
+          std::accumulate(g.second.begin(), g.second.end(), 0,
+                          [&](const auto& a, const auto& b) {
+                            return a + edge_chains[b].size();
+                          });
+
+      // Calculate the gradient of the fused edge.
+      const Eigen::Vector2f fused_edge_gradient = std::accumulate(
+          g.second.begin(), g.second.end(), Eigen::Vector2f{0, 0},
+          [&](const auto& a, const auto& b) -> Eigen::Vector2f {
+            return a + edge_chains[b].size() * mean_gradients[b];
+          }) / fused_edge_cardinality;
+
+      // Store the fused edge.
       edges.push_back(std::move(edge_fused));
+      edge_gradients.push_back(fused_edge_gradient);
     }
     toc("Edge Fusion");
 

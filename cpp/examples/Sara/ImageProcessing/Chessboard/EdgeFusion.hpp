@@ -95,10 +95,22 @@ namespace DO::Sara {
 
       constexpr auto dist_thres = 10.f;
       constexpr auto dist_thres_2 = dist_thres * dist_thres;
+#ifdef ANTISYMMETRIC_ADJACENCE
+      const auto is_adjacent = //
+        // [bi, ai] ~ [aj, bj]
+        ((ai - aj).squaredNorm() < dist_thres_2 && (bi - bj).squaredNorm() >= dist_thres_2) ||
+        // [bi, ai] ~ [bj, aj]
+        ((ai - bj).squaredNorm() < dist_thres_2 && (bi - aj).squaredNorm() >= dist_thres_2) ||
+        // [ai, bi] ~ [aj, bj]
+        ((bi - aj).squaredNorm() < dist_thres_2 && (ai - bj).squaredNorm() >= dist_thres_2) ||
+        // [ai, bi] ~ [bj, aj]
+        ((bi - bj).squaredNorm() < dist_thres_2 && (ai - aj).squaredNorm() >= dist_thres_2);
+#else
       const auto is_adjacent = (ai - aj).squaredNorm() < dist_thres_2 ||
                                (ai - bj).squaredNorm() < dist_thres_2 ||
                                (bi - aj).squaredNorm() < dist_thres_2 ||
                                (bi - bj).squaredNorm() < dist_thres_2;
+#endif
 
       // return is_adjacent && std::abs(di.dot(dj)) > std::cos(30._deg);
       return is_adjacent && di.dot(dj) > std::cos(20._deg);
