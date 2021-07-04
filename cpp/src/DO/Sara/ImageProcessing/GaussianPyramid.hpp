@@ -141,8 +141,8 @@ namespace DO { namespace Sara {
       for (auto s = 0; s < LoG.num_scales_per_octave(); ++s)
       {
         LoG(s, o) = laplacian(gaussians(s, o));
-        LoG(s, o).flat_array() *= static_cast<float>(
-            std::pow(gaussians.scale_relative_to_octave(s), 2));
+        for (auto& p: LoG(s, o))
+          p *= std::pow(gaussians.scale_relative_to_octave(s), 2);
       }
     }
 
