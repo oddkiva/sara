@@ -86,10 +86,12 @@ vector<OERegion> compute_DoH_extrema(const Image<float>& image,
   if (verbose)
     tic();
 
-  // const auto image_pyramid_params = ImagePyramidParams(-1, 3 + 2, pow(2.f, 1.f / 3.f), 2);
-  const auto image_pyramid_params = ImagePyramidParams(0, 3 + 2, pow(2.f, 1.f / 3.f), 2);
+  constexpr auto first_scale = 0;
+  constexpr auto num_scales = 3;
+  const auto image_pyramid_params = ImagePyramidParams(first_scale, num_scales + 2,
+                                                       pow(2.f, 1.f / num_scales), 2);
   const auto extremum_thres = 1e-5f;
-  const auto edge_ratio_thres = 1e6f;
+  const auto edge_ratio_thres = 10.f;
   auto compute_DoHs = ComputeDoHExtrema{image_pyramid_params,
                                         extremum_thres,
                                         edge_ratio_thres};
@@ -118,7 +120,16 @@ vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
   // 1. Feature extraction.
   if (verbose)
     tic();
-  auto compute_DoHs = ComputeDoHExtrema{};
+
+  constexpr auto first_scale = 0;
+  constexpr auto num_scales = 3;
+  const auto image_pyramid_params = ImagePyramidParams(first_scale, num_scales + 2,
+                                                       pow(2.f, 1.f / num_scales), 2);
+  const auto extremum_thres = 1e-5f;
+  const auto edge_ratio_thres = 10.f;
+  auto compute_DoHs = ComputeDoHExtrema{image_pyramid_params,
+                                        extremum_thres,
+                                        edge_ratio_thres};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoHs = compute_DoHs(image, &scale_octave_pairs);
   if (verbose)
@@ -173,26 +184,17 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
 {
   display(image);
   set_antialiasing();
-//  for (size_t i = 0; i != features.size(); ++i)
-//    features[i].draw(features[i].extremum_type == OERegion::ExtremumType::Max
-//                         ? Red8
-//                         : Blue8);
-
-  // Only saddle points.
   for (size_t i = 0; i != features.size(); ++i)
-  {
-    if (features[i].extremum_type == OERegion::ExtremumType::Min &&
-        features[i].scale() < 10.f)
-      features[i].draw(Blue8);
-  }
+    features[i].draw(features[i].extremum_type == OERegion::ExtremumType::Max
+                         ? Red8
+                         : Blue8);
   get_key();
 }
 
 GRAPHICS_MAIN()
 {
   // Input.
-  // const auto image_filepath = src_path("../../../../data/sunflowerField.jpg");
-  const auto image_filepath = "/Users/david/Desktop/calibration/luxvision-fisheye/images-2/0.png";
+  const auto image_filepath = src_path("../../../../data/sunflowerField.jpg");
   auto image = Image<float>{};
   if (!load(image, image_filepath))
     return -1;
@@ -203,14 +205,14 @@ GRAPHICS_MAIN()
   // Visualize.
   create_window(image.width(), image.height());
 
-  // features = compute_hessian_laplace_affine_maxima(image);
-  // check_keys(image, features);
+  features = compute_hessian_laplace_affine_maxima(image);
+  check_keys(image, features);
 
   features = compute_DoH_extrema(image);
   check_keys(image, features);
 
-  // features = compute_DoH_affine_extrema(image);
-  // check_keys(image, features);
+  features = compute_DoH_affine_extrema(image);
+  check_keys(image, features);
 
   return 0;
 }
