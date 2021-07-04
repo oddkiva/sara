@@ -74,12 +74,12 @@ namespace DO::Sara {
                                    int nms_radius)
   {
     // Calculate the first derivative.
-    const auto gradient = image_blurred.compute<sara::Gradient>();
+    const auto gradient = image_blurred.compute<Gradient>();
 
     // Chessboard corners are saddle points of the image, which are
     // characterized by the property det(H(x, y)) < 0.
     const auto det_hessian =
-        image_blurred.compute<sara::Hessian>().compute<sara::Determinant>();
+        image_blurred.compute<Hessian>().compute<Determinant>();
 
     // Adaptive thresholding.
     const auto thres = det_hessian.flat_array().minCoeff() * 0.05f;

@@ -124,8 +124,8 @@ GRAPHICS_MAIN()
 {
   try
   {
+    const auto image_filepath = src_path("../../../../data/sunflowerField.jpg");
     auto image = Image<float>{};
-    auto image_filepath = src_path("../../../../data/sunflowerField.jpg");
     if (!load(image, image_filepath))
       return EXIT_FAILURE;
 
