@@ -139,41 +139,20 @@ int __main(int argc, char** argv)
         edge_stats.lengths   //
     };
 
-//    sara::check_edge_grouping(image,                    //
-//                              edges_simplified,         //
-//                              edges,                    //
-//                              mean_gradients,           //
-//                              edge_attributes.centers,  //
-//                              edge_attributes.axes,     //
-//                              edge_attributes.lengths,  //
-//                              Eigen::Vector2i::Zero(), 1);
+    sara::check_edge_grouping(image,                    //
+                              edges_simplified,         //
+                              edges,                    //
+                              mean_gradients,           //
+                              edge_attributes.centers,  //
+                              edge_attributes.axes,     //
+                              edge_attributes.lengths,  //
+                              Eigen::Vector2i::Zero(), 1);
+    sara::toc("Edge Grouping");
 
-    sara::display(image);
-    for (const auto& s: saddle_points)
-      sara::draw_circle(s.p.x(), s.p.y(), 3, sara::Magenta8);
+//    for (const auto& s: saddle_points)
+//      sara::draw_circle(s.p.x(), s.p.y(), 3, sara::Red8, 2);
 
-    for (auto i = 0u; i < edges.size(); ++i)
-    {
-      const auto& e = edges[i];
-
-      // Discard small edges.
-      if (e.size() < 2)
-        continue;
-
-      const auto& g = mean_gradients[i];
-      const Eigen::Vector2f a = std::accumulate(            //
-                                    e.begin(), e.end(),     //
-                                    Eigen::Vector2f(0, 0),  //
-                                    [](const auto& a, const auto& b) {
-                                      return a + b.template cast<float>();
-                                    }) /
-                                e.size();
-      const Eigen::Vector2f b = a + 20 * g;
-
-      sara::draw_arrow(a, b, sara::Magenta8, 2);
-    }
-
-    // sara::get_key();
+    sara::get_key();
   }
 
   return 0;

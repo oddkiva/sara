@@ -113,21 +113,33 @@ namespace DO::Sara {
         }
       }
       display(detection);
-      get_key();
+
+      for (const auto& g : edge_groups)
+      {
+        for (const auto& e : g.second)
+        {
+          const auto& edge_refined = edges_refined[e];
+          if (edge_refined.size() < 2)
+            continue;
+
+          const auto& g = mean_gradients[e];
+          const Eigen::Vector2f a =
+              std::accumulate(edge_refined.begin(), edge_refined.end(),
+                              Eigen::Vector2f(0, 0),
+                              [](const auto& a, const auto& b) {
+                                return a + b.template cast<float>();
+                              }) /
+              edge_refined.size();
+          const Eigen::Vector2f b = a + 20 * g;
+
+          const auto& color = edge_colors[e];
+          draw_arrow(a, b, color, 2);
+        }
+      }
     };
 
     tic();
-    // draw_task();
-    fill_rect(0, 0, frame.width(), frame.height(), Black8);
-    for (const auto& edge : edges)
-    {
-      if (edge.size() < 2)
-        continue;
-
-      const auto color = Rgb8(rand() % 255, rand() % 255, rand() % 255);
-      for (const auto& p : edge)
-        fill_circle(p.x(), p.y(), 2, color);
-    }
+    draw_task();
     toc("Draw");
   }
 

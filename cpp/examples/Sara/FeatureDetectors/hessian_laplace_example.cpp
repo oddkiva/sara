@@ -86,7 +86,13 @@ vector<OERegion> compute_DoH_extrema(const Image<float>& image,
   if (verbose)
     tic();
 
-  auto compute_DoHs = ComputeDoHExtrema{};
+  // const auto image_pyramid_params = ImagePyramidParams(-1, 3 + 2, pow(2.f, 1.f / 3.f), 2);
+  const auto image_pyramid_params = ImagePyramidParams(0, 3 + 2, pow(2.f, 1.f / 3.f), 2);
+  const auto extremum_thres = 1e-5f;
+  const auto edge_ratio_thres = 1e6f;
+  auto compute_DoHs = ComputeDoHExtrema{image_pyramid_params,
+                                        extremum_thres,
+                                        edge_ratio_thres};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoHs = compute_DoHs(image, &scale_octave_pairs);
   if (verbose)
