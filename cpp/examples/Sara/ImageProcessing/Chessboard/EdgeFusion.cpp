@@ -105,13 +105,14 @@ namespace DO::Sara {
 
 // #define DEBUG_SHAPE_STATISTICS
 #ifdef DEBUG_SHAPE_STATISTICS
-          const auto& rect = OrientedBox{.center = c,      //
-                                         .axes = axes[e],  //
+          const auto& rect = OrientedBox{.center = centers[e],  //
+                                         .axes = axes[e],       //
                                          .lengths = lengths[e]};
           rect.draw(detection, White8, p1d, s);
 #endif
         }
       }
+
       display(detection);
 
       for (const auto& g : edge_groups)
@@ -137,6 +138,13 @@ namespace DO::Sara {
         }
       }
     };
+
+    tic();
+    draw_task();
+    // TODO:
+    // 1. reject groups that cannot be approximated very well with lines.
+    // 2. improve the rejection method by implement the ellipse fitting method
+    //    of http://iim.cs.tut.ac.jp/member/kanatani/papers/csdellipse3.pdf
 
     tic();
     draw_task();

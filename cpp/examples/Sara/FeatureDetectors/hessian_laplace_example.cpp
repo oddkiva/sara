@@ -173,18 +173,27 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
 {
   display(image);
   set_antialiasing();
+//  for (size_t i = 0; i != features.size(); ++i)
+//    features[i].draw(features[i].extremum_type == OERegion::ExtremumType::Max
+//                         ? Red8
+//                         : Blue8);
+
+  // Only saddle points.
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremum_type == OERegion::ExtremumType::Max
-                         ? Red8
-                         : Blue8);
+  {
+    if (features[i].extremum_type == OERegion::ExtremumType::Min &&
+        features[i].scale() < 10.f)
+      features[i].draw(Blue8);
+  }
   get_key();
 }
 
 GRAPHICS_MAIN()
 {
   // Input.
+  // const auto image_filepath = src_path("../../../../data/sunflowerField.jpg");
+  const auto image_filepath = "/Users/david/Desktop/calibration/luxvision-fisheye/images-2/0.png";
   auto image = Image<float>{};
-  auto image_filepath = src_path("../../../data/sunflowerField.jpg");
   if (!load(image, image_filepath))
     return -1;
 
@@ -194,14 +203,14 @@ GRAPHICS_MAIN()
   // Visualize.
   create_window(image.width(), image.height());
 
-  features = compute_hessian_laplace_affine_maxima(image);
-  check_keys(image, features);
+  // features = compute_hessian_laplace_affine_maxima(image);
+  // check_keys(image, features);
 
   features = compute_DoH_extrema(image);
   check_keys(image, features);
 
-  features = compute_DoH_affine_extrema(image);
-  check_keys(image, features);
+  // features = compute_DoH_affine_extrema(image);
+  // check_keys(image, features);
 
   return 0;
 }
