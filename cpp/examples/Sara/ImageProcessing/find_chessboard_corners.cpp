@@ -81,6 +81,7 @@ int __main(int argc, char** argv)
 
   constexpr auto sigma = 1.6f;
 
+  constexpr auto nms_radius = 10;
   constexpr float high_threshold_ratio = static_cast<float>(10._percent);
   constexpr float low_threshold_ratio =
       static_cast<float>(high_threshold_ratio / 2.);
@@ -105,7 +106,8 @@ int __main(int argc, char** argv)
       sara::set_antialiasing();
     }
 
-    const auto saddle_points = sara::detect_saddle_points(image_blurred, 10);
+    const auto saddle_points = sara::detect_saddle_points(image_blurred,
+                                                          nms_radius);
 
     // Detect edges.
     ed(image_blurred);
@@ -149,8 +151,8 @@ int __main(int argc, char** argv)
                               Eigen::Vector2i::Zero(), 1);
     sara::toc("Edge Grouping");
 
-//    for (const auto& s: saddle_points)
-//      sara::draw_circle(s.p.x(), s.p.y(), 3, sara::Red8, 2);
+    for (const auto& s: saddle_points)
+      sara::fill_circle(s.p.x(), s.p.y(), 10, sara::Red8);
 
     sara::get_key();
   }

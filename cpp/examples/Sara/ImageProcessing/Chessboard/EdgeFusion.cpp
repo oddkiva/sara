@@ -16,6 +16,8 @@
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/Graphics.hpp>
 
+#include "Otsu.hpp"
+
 
 namespace DO::Sara {
 
@@ -90,8 +92,14 @@ namespace DO::Sara {
       const Eigen::Vector2d p1d = p1.cast<double>();
       const auto& s = downscale_factor;
 
-      auto detection = Image<Rgb8>{frame};
-      detection.flat_array().fill(Black8);
+//      auto detection = Image<Rgb8>{frame};
+//      detection.flat_array().fill(Black8);
+
+      const auto image_gray = frame.convert<float>();
+      const auto image_blurred = image_gray.compute<Gaussian>(1.6f);
+      auto detection = otsu_adaptive_binarization(image_blurred, {256, 256})  //
+                           .convert<Rgb8>();
+
       for (const auto& g : edge_groups)
       {
         for (const auto& e : g.second)

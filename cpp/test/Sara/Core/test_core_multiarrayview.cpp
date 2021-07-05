@@ -102,6 +102,28 @@ BOOST_AUTO_TEST_CASE(test_multiarrayview_flatten)
   BOOST_CHECK(r_flatten == range(10));
 }
 
+template <typename T, int N, int StorageOrder>
+auto cropped_view(const MultiArrayView<T, N, StorageOrder>& x,
+                  const Eigen::Vector<int, N, 1>& start,
+                  const Eigen::Vector<int, N, 1>& end,
+                  const Eigen::Vector<int, N, 1>& steps)
+    -> const MultiArrayView<T, N, StorageOrder>
+{
+  // strides = {4, 1};
+  // steps = {2, 2};
+  // new strides = {4 * 2, 1 * 2};
+  return
+  {
+    const_cast<T*>(&x(start)), const_cast<T*>(&x(end)), (end - start) / steps,
+        x.strides().cwiseMult(steps);
+  };
+}
+
+BOOST_AUTO_TEST_CASE(test_multiarrayview_crop)
+{
+  const auto X = range(24).cast<float>().reshape(Vector2i{6, 4});
+}
+
 BOOST_AUTO_TEST_CASE(test_slice_view)
 {
   const auto X = range(24).cast<float>().reshape(Vector2i{6, 4});

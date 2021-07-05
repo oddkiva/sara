@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 
 
@@ -27,20 +28,36 @@ namespace DO::Sara {
     }
   };
 
-  inline auto extract_saddle_points(const Image<float>& hessian, float thres)
+  inline auto extract_saddle_points(const Image<float>& det_of_hessian,
+                                    const Image<Eigen::Matrix2f>& hessian,
+                                    float thres)
   {
     auto saddle_points = std::vector<Saddle>{};
     saddle_points.reserve(std::max(hessian.width(), hessian.height()));
+
     for (auto y = 0; y < hessian.height(); ++y)
+    {
       for (auto x = 0; x < hessian.width(); ++x)
-        if (hessian(x, y) < thres)
-          saddle_points.push_back({{x, y}, std::abs(hessian(x, y))});
+      {
+        if (det_of_hessian(x, y) > thres)
+          continue;
+
+        auto qr_factorizer = hessian(x, y).householderQr();
+        const Eigen::Matrix2f R = qr_factorizer.matrixQR().triangularView<Eigen::Upper>();
+
+        if (std::abs((R(0, 0) - R(1, 1)) / R(0, 0)) > 0.1f)
+          continue;
+
+        saddle_points.push_back({{x, y}, std::abs(det_of_hessian(x, y))});
+      }
+    }
 
     return saddle_points;
   }
 
   inline auto nms(std::vector<Saddle>& saddle_points,
-                  const Eigen::Vector2i& image_sizes, int nms_radius)
+                  const Eigen::Vector2i& image_sizes,
+                  int nms_radius)
   {
     std::sort(saddle_points.begin(), saddle_points.end());
 
@@ -70,23 +87,23 @@ namespace DO::Sara {
     saddle_points_filtered.swap(saddle_points);
   }
 
-  inline auto detect_saddle_points(const Image<float>& image_blurred,
-                                   int nms_radius)
+  inline auto detect_saddle_points(const Image<float>& image,
+                                   int nms_radius,
+                                   float adaptive_thres = 0.05f)
   {
     // Calculate the first derivative.
-    const auto gradient = image_blurred.compute<Gradient>();
+    const auto hessian = image.compute<Hessian>();
 
     // Chessboard corners are saddle points of the image, which are
     // characterized by the property det(H(x, y)) < 0.
-    const auto det_hessian =
-        image_blurred.compute<Hessian>().compute<Determinant>();
+    const auto det_of_hessian = hessian.compute<Determinant>();
 
     // Adaptive thresholding.
-    const auto thres = det_hessian.flat_array().minCoeff() * 0.05f;
-    auto saddle_points = extract_saddle_points(det_hessian, thres);
+    const auto thres = det_of_hessian.flat_array().minCoeff() * adaptive_thres;
+    auto saddle_points = extract_saddle_points(det_of_hessian, hessian, thres);
 
     // Non-maxima suppression.
-    nms(saddle_points, image_blurred.sizes(), nms_radius);
+    nms(saddle_points, image.sizes(), nms_radius);
 
     return saddle_points;
   }
