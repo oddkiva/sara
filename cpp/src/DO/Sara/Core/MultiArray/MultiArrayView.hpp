@@ -393,6 +393,19 @@ namespace DO { namespace Sara {
     }
     //! @}
 
+    inline auto cropped_view(const vector_type& start,        //
+                             const vector_type& end,          //
+                             const vector_type& steps) const  //
+        -> self_type
+    {
+      auto cropped = self_type{};
+      cropped._begin = const_cast<T *>(_begin + offset(start));
+      cropped._end = const_cast<T *>(std::min(_begin + offset(end), _end));
+      cropped._sizes = (end - start).cwiseQuotient(steps);
+      cropped._strides = _strides.cwiseProduct(steps);
+      return cropped;
+    }
+
     //! @{
     //! @brief Return the begin iterator of the whole multi-array.
     inline array_iterator begin_array()
@@ -632,7 +645,7 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Compute the 1D index of the corresponding coordinates.
-    inline int offset(const vector_type& pos) const
+    inline auto offset(const vector_type& pos) const -> Eigen::Index
     {
       return jump(pos, _strides);
     }
@@ -643,9 +656,9 @@ namespace DO { namespace Sara {
     //! @brief Last element of the internal array.
     value_type* _end{nullptr};
     //! @brief Sizes vector.
-    vector_type _sizes{vector_type::Zero().eval()};
+    vector_type _sizes{vector_type::Zero()};
     //! @brief Strides vector.
-    vector_type _strides{vector_type::Zero().eval()};
+    vector_type _strides{vector_type::Zero()};
   };
 
 

@@ -22,9 +22,6 @@
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
 
-using namespace std;
-
-
 namespace DO { namespace Sara {
 
   // ======================================================================== //
@@ -84,11 +81,13 @@ namespace DO { namespace Sara {
   // If imaginary part precision: 1e-6.
   // If the conic equation produces an almost zero value i.e.: 1e-3.
   // then we decide there is an intersection.
-  pair<bool, Point2d> is_real_root(const complex<double>& y, const double s[6],
-                                   const double t[6])
+  std::pair<bool, Point2d> is_real_root(const complex<double>& y,
+                                        const double s[6], const double t[6])
   {
     if (abs(imag(y)) > 1e-2 * abs(real(y)))
-      return make_pair(false, Point2d());
+      return std::make_pair(
+          false, Point2d::Constant(std::numeric_limits<double>::quiet_NaN()));
+
     const double realY = real(y);
     double sigma[3], tau[3];
     sigma_polynomial(sigma, s, realY);
@@ -98,13 +97,10 @@ namespace DO { namespace Sara {
 
     if (fabs(compute_conic_expression(x, realY, s)) < 1e-2 &&
         fabs(compute_conic_expression(x, realY, t)) < 1e-2)
-    {
-      /*cout << "QO(x,y) = " << computeConicExpression(x, realY, s) << endl;
-      cout << "Q1(x,y) = " << computeConicExpression(x, realY, t) << endl;*/
-      return make_pair(true, Point2d(x, realY));
-    }
+      return std::make_pair(true, Point2d(x, realY));
     else
-      return make_pair(false, Point2d());
+      return std::make_pair(
+          false, Point2d::Constant(std::numeric_limits<double>::quiet_NaN()));
   }
 
   int compute_intersection_points(Point2d intersections[4], const Ellipse& e1,
