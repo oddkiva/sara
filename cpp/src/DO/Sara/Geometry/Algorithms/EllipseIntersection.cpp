@@ -27,10 +27,11 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   // Computation of intersecting points of intersecting ellipses
   // ======================================================================== //
-  void print_conic_equation(double s[6])
+  void print_conic_equation(const double s[6])
   {
-    cout << s[0] << " + " << s[1] << " x + " << s[2] << " y + ";
-    cout << s[3] << " x^2 + " << s[4] << " xy + " << s[5] << " y^2 = 0" << endl;
+    std::cout << s[0] << " + " << s[1] << " x + " << s[2] << " y + " << s[3]
+              << " x^2 + " << s[4] << " xy + " << s[5] << " y^2 = 0"
+              << std::endl;
   }
 
   void conic_equation(double s[6], const Ellipse& e)
@@ -81,7 +82,7 @@ namespace DO { namespace Sara {
   // If imaginary part precision: 1e-6.
   // If the conic equation produces an almost zero value i.e.: 1e-3.
   // then we decide there is an intersection.
-  std::pair<bool, Point2d> is_real_root(const complex<double>& y,
+  std::pair<bool, Point2d> is_real_root(const std::complex<double>& y,
                                         const double s[6], const double t[6])
   {
     if (abs(imag(y)) > 1e-2 * abs(real(y)))
@@ -119,16 +120,16 @@ namespace DO { namespace Sara {
     conic_equation(s, ee1);
     conic_equation(t, ee2);
 
-    Polynomial<double, 4> u(quartic_equation(s, t));
+    const auto u = quartic_equation(s, t);
 
-    complex<double> y[4];
+    std::complex<double> y[4];
     roots(u, y[0], y[1], y[2], y[3]);
 
 
     int numInter = 0;
     for (int i = 0; i < 4; ++i)
     {
-      pair<bool, Point2d> p(is_real_root(y[i], s, t));
+      const auto p = is_real_root(y[i], s, t);
       if (!p.first)
         continue;
       intersections[numInter] = p.second + center;
@@ -141,7 +142,7 @@ namespace DO { namespace Sara {
       return (p - q).squaredNorm() < squared_eps;
     };
 
-    auto it = unique(intersections, intersections + numInter, identicalPoints);
+    auto it = std::unique(intersections, intersections + numInter, identicalPoints);
     return static_cast<int>(it - intersections);
   }
 
@@ -150,7 +151,7 @@ namespace DO { namespace Sara {
   {
     const Vector2d u(unit_vector2(e.orientation()));
     const Vector2d v(-u(1), u(0));
-    transform(pts, pts + numPoints, ori, [&](const Point2d& p) -> double {
+    std::transform(pts, pts + numPoints, ori, [&](const Point2d& p) -> double {
       const Vector2d d(p - e.center());
       return atan2(v.dot(d), u.dot(d));
     });

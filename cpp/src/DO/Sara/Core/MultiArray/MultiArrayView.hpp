@@ -393,19 +393,6 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    inline auto cropped_view(const vector_type& start,        //
-                             const vector_type& end,          //
-                             const vector_type& steps) const  //
-        -> self_type
-    {
-      auto cropped = self_type{};
-      cropped._begin = const_cast<T *>(_begin + offset(start));
-      cropped._end = const_cast<T *>(std::min(_begin + offset(end), _end));
-      cropped._sizes = (end - start).cwiseQuotient(steps);
-      cropped._strides = _strides.cwiseProduct(steps);
-      return cropped;
-    }
-
     //! @{
     //! @brief Return the begin iterator of the whole multi-array.
     inline array_iterator begin_array()
