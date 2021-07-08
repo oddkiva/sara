@@ -23,24 +23,21 @@ using namespace DO::Sara;
 using namespace std;
 
 
-vector<OERegion> compute_hessian_laplace_affine_maxima(const Image<float>& I,
-                                                       bool verbose = true)
+vector<OERegion> compute_hessian_laplace_affine_maxima(const Image<float>& I)
 {
   // 1. Feature extraction.
-  if (verbose)
-    tic();
-  auto compute_DoHs = ComputeDoHExtrema{};
+  tic();
+  auto compute_hessian_laplace = ComputeHessianLaplaceMaxima{};
   auto scale_octave_pairs = vector<Point2i>{};
-  auto hessian_laplace_maxima = compute_DoHs(I, &scale_octave_pairs);
-  if (verbose)
-    toc("Hessian-Laplace");
+  auto hessian_laplace_maxima = compute_hessian_laplace(I, &scale_octave_pairs);
+  toc("Hessian-Laplace");
+  SARA_CHECK(hessian_laplace_maxima.size());
 
-  const auto& G = compute_DoHs.gaussians();
-  const auto& DoHs = compute_DoHs.det_of_hessians();
+  const auto& G = compute_hessian_laplace.gaussians();
+  const auto& DoHs = compute_hessian_laplace.det_of_hessians();
 
   // 2. Affine shape adaptation
-  if (verbose)
-    tic();
+  tic();
   auto adapt_shape = AdaptFeatureAffinelyToLocalShape{};
   auto keep_features = vector<unsigned char>(hessian_laplace_maxima.size(), 0);
   for (size_t i = 0; i != hessian_laplace_maxima.size(); ++i)
@@ -56,12 +53,11 @@ vector<OERegion> compute_hessian_laplace_affine_maxima(const Image<float>& I,
       keep_features[i] = 1;
     }
   }
-  if (verbose)
-    toc("Affine-Shape Adaptation");
+  toc("Affine-Shape Adaptation");
 
   // 3. Rescale the kept features to original image dimensions.
-  auto num_kept_features = std::accumulate(
-    keep_features.begin(), keep_features.end(), 0);
+  auto num_kept_features =
+      std::accumulate(keep_features.begin(), keep_features.end(), 0);
 
   auto kept_DoHs = vector<OERegion>{};
   kept_DoHs.reserve(num_kept_features);
@@ -71,34 +67,31 @@ vector<OERegion> compute_hessian_laplace_affine_maxima(const Image<float>& I,
     {
       kept_DoHs.push_back(hessian_laplace_maxima[i]);
       const auto fact = DoHs.octave_scaling_factor(scale_octave_pairs[i](1));
-      kept_DoHs.back().shape_matrix *= pow(fact,-2);
+      kept_DoHs.back().shape_matrix *= pow(fact, -2);
       kept_DoHs.back().coords *= static_cast<float>(fact);
     }
   }
+  SARA_CHECK(kept_DoHs.size());
 
   return kept_DoHs;
 }
 
-vector<OERegion> compute_DoH_extrema(const Image<float>& image,
-                                     bool verbose = true)
+vector<OERegion> compute_DoH_extrema(const Image<float>& image)
 {
   // 1. Feature extraction.
-  if (verbose)
-    tic();
+  tic();
 
-  constexpr auto first_scale = 0;
+  constexpr auto first_octave = 0;
   constexpr auto num_scales = 3;
-  const auto image_pyramid_params = ImagePyramidParams(first_scale, num_scales + 2,
-                                                       pow(2.f, 1.f / num_scales), 2);
+  const auto image_pyramid_params = ImagePyramidParams(
+      first_octave, num_scales + 2, pow(2.f, 1.f / num_scales), 2);
   const auto extremum_thres = 1e-5f;
   const auto edge_ratio_thres = 10.f;
-  auto compute_DoHs = ComputeDoHExtrema{image_pyramid_params,
-                                        extremum_thres,
-                                        edge_ratio_thres};
+  auto compute_DoHs =
+      ComputeDoHExtrema{image_pyramid_params, extremum_thres, edge_ratio_thres};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoHs = compute_DoHs(image, &scale_octave_pairs);
-  if (verbose)
-    toc("Determinant of Hessians");
+  toc("Determinant of Hessians");
   SARA_CHECK(DoHs.size());
 
   const auto& DoH = compute_DoHs.det_of_hessians();
@@ -114,34 +107,29 @@ vector<OERegion> compute_DoH_extrema(const Image<float>& image,
   return DoHs;
 }
 
-vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
-                                            bool verbose = true)
+vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image)
 {
   // 1. Feature extraction.
-  if (verbose)
-    tic();
+  tic();
 
-  constexpr auto first_scale = 0;
+  constexpr auto first_octave = 0;
   constexpr auto num_scales = 3;
-  const auto image_pyramid_params = ImagePyramidParams(first_scale, num_scales + 2,
-                                                       pow(2.f, 1.f / num_scales), 2);
+  const auto image_pyramid_params = ImagePyramidParams(
+      first_octave, num_scales + 2, pow(2.f, 1.f / num_scales), 2);
   const auto extremum_thres = 1e-5f;
   const auto edge_ratio_thres = 10.f;
-  auto compute_DoHs = ComputeDoHExtrema{image_pyramid_params,
-                                        extremum_thres,
-                                        edge_ratio_thres};
+  auto compute_DoHs =
+      ComputeDoHExtrema{image_pyramid_params, extremum_thres, edge_ratio_thres};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoHs = compute_DoHs(image, &scale_octave_pairs);
-  if (verbose)
-    toc("Determinants of Hessian");
+  toc("Determinants of Hessian");
   SARA_CHECK(DoHs.size());
 
   const auto& G = compute_DoHs.gaussians();
   const auto& DoH = compute_DoHs.det_of_hessians();
 
   // 2. Affine shape adaptation
-  if (verbose)
-    tic();
+  tic();
   auto adapt_shape = AdaptFeatureAffinelyToLocalShape{};
   auto keep_features = vector<unsigned char>(DoHs.size(), 0);
   for (size_t i = 0; i != DoHs.size(); ++i)
@@ -150,19 +138,18 @@ vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
     const auto& o = scale_octave_pairs[i](1);
 
     Matrix2f affine_adapt_transform;
-    if (adapt_shape(affine_adapt_transform, G(s,o), DoHs[i]))
+    if (adapt_shape(affine_adapt_transform, G(s, o), DoHs[i]))
     {
       DoHs[i].shape_matrix = affine_adapt_transform * DoHs[i].shape_matrix;
       keep_features[i] = 1;
     }
   }
-  if (verbose)
-    toc("Affine Shape Adaptation");
+  toc("Affine Shape Adaptation");
 
 
   // 3. Rescale the kept features to original image dimensions.
-  auto num_kept_features = std::accumulate(
-    keep_features.begin(), keep_features.end(), 0);
+  auto num_kept_features =
+      std::accumulate(keep_features.begin(), keep_features.end(), 0);
 
   auto kept_DoHs = vector<OERegion>{};
   kept_DoHs.reserve(num_kept_features);
@@ -172,7 +159,7 @@ vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
     {
       kept_DoHs.push_back(DoHs[i]);
       const auto fact = DoH.octave_scaling_factor(scale_octave_pairs[i](1));
-      kept_DoHs.back().shape_matrix *= pow(fact,-2);
+      kept_DoHs.back().shape_matrix *= pow(fact, -2);
       kept_DoHs.back().coords *= static_cast<float>(fact);
     }
   }
@@ -190,6 +177,7 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
                          : Blue8);
   get_key();
 }
+
 
 GRAPHICS_MAIN()
 {
