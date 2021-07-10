@@ -46,7 +46,7 @@ namespace DO::Sara {
       }
     }
 
-    auto edge(std::size_t i) const -> const Edge&
+    auto edge(std::size_t i) const -> const Edge<double>&
     {
       return attributes.edges[i];
     }
@@ -143,8 +143,8 @@ namespace DO::Sara {
 
   auto check_edge_grouping(                                          //
       const ImageView<Rgb8>& frame,                                  //
-      const std::vector<Edge>& edges_refined,                        //
-      const std::vector<std::vector<Eigen::Vector2i>>& edge_chains,  //
+      const std::vector<Edge<double>>& edges_refined,                //
+      const std::vector<Edge<int>>& edge_chains,                     //
       const std::vector<Eigen::Vector2f>& mean_gradients,            //
       const std::vector<Eigen::Vector2d>& centers,                   //
       const std::vector<Eigen::Matrix2d>& axes,                      //

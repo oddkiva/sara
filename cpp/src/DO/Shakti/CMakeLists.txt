@@ -1,4 +1,4 @@
-project(Shakti CXX CUDA)
+project(Shakti CXX)
 
 
 # Set the version major and minor manually.
@@ -18,6 +18,7 @@ option(SHAKTI_SELF_CONTAINED_INSTALLATION
 option(SHAKTI_BUILD_SHARED_LIBS "Build shared libraries for DO-Shakti libraries"
   ${SARA_BUILD_SHARED_LIBS})
 
+include(shakti_macros)
 
 # Because we use the old CMake way to use CUDA.
 include_directories(
@@ -32,7 +33,10 @@ shakti_dissect_version()
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-add_subdirectory(Cuda)
+if (CMAKE_CUDA_COMPILER)
+  sara_message("Building DO::Shakti CUDA Libraries")
+  add_subdirectory(Cuda)
+endif ()
 if (SARA_USE_HALIDE)
   add_subdirectory(Halide)
 endif ()

@@ -10,21 +10,38 @@
 // ========================================================================== //
 
 #include "EdgeFusion.hpp"
+#include "Otsu.hpp"
 
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/Graphics.hpp>
-
-#include "Otsu.hpp"
+#include <DO/Sara/ImageProcessing.hpp>
 
 
 namespace DO::Sara {
 
+  auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
+                   const Image<Rgb8>& image)
+  {
+    auto colors = std::map<int, Rgb8>{};
+    for (const auto& [label, points] : regions)
+    {
+      const auto num_points = points.size();
+      Eigen::Vector3f color = Vector3f::Zero();
+      for (const auto& p : points)
+        color += image(p).cast<float>();
+      color /= num_points;
+
+      colors[label] = color.cast<std::uint8_t>();
+    }
+    return colors;
+  }
+
   auto check_edge_grouping(                                          //
       const ImageView<Rgb8>& frame,                                  //
-      const std::vector<Edge>& edges_refined,                        //
-      const std::vector<std::vector<Eigen::Vector2i>>& edge_chains,  //
+      const std::vector<Edge<double>>& edges_refined,                //
+      const std::vector<Edge<int>>& edge_chains,  //
       const std::vector<Eigen::Vector2f>& mean_gradients,            //
       const std::vector<Eigen::Vector2d>& centers,                   //
       const std::vector<Eigen::Matrix2d>& axes,                      //
@@ -89,16 +106,26 @@ namespace DO::Sara {
         for (const auto& e : g.second)
           edge_colors[e] = edge_group_colors[g.first];
 
-      const Eigen::Vector2d p1d = p1.cast<double>();
-      const auto& s = downscale_factor;
+//      const Eigen::Vector2d p1d = p1.cast<double>();
+//      const auto& s = downscale_factor;
 
-//      auto detection = Image<Rgb8>{frame};
-//      detection.flat_array().fill(Black8);
+      // Watershed.
+      const auto frame_blurred = frame.convert<Rgb32f>()
+                                      .compute<Gaussian>(1.2f)
+                                      .convert<Rgb8>();
+      const auto color_threshold = std::sqrt(std::pow(1, 2) * 3);
+      const auto regions = color_watershed(frame_blurred, color_threshold);
 
-      const auto image_gray = frame.convert<float>();
-      const auto image_blurred = image_gray.compute<Gaussian>(1.6f);
-      auto detection = otsu_adaptive_binarization(image_blurred, {256, 256})  //
-                           .convert<Rgb8>();
+      // Display the good regions.
+      const auto colors = mean_colors(regions, frame);
+      auto detection = Image<Rgb8>{frame.sizes()};
+      for (const auto& [label, points] : regions)
+      {
+        // Show big segments only.
+        for (const auto& p : points)
+          detection(p) = points.size() < 100 ? Black8 : colors.at(label);
+      }
+      display(detection);
 
       for (const auto& g : edge_groups)
       {
@@ -109,7 +136,9 @@ namespace DO::Sara {
             continue;
 
           const auto& color = edge_colors[e];
-          draw_polyline(detection, edge_refined, color, p1d, s);
+          //draw_polyline(detection, edge_refined, color, p1d, s);
+          for (const auto& p: edge_chains[e])
+            detection(p) = color;
 
 // #define DEBUG_SHAPE_STATISTICS
 #ifdef DEBUG_SHAPE_STATISTICS
@@ -123,6 +152,7 @@ namespace DO::Sara {
 
       display(detection);
 
+#ifdef SHOW_MEAN_IMAGE_GRADIENTS // I am convinced about their robustness.
       for (const auto& g : edge_groups)
       {
         for (const auto& e : g.second)
@@ -145,6 +175,7 @@ namespace DO::Sara {
           draw_arrow(a, b, color, 2);
         }
       }
+#endif
     };
 
     tic();

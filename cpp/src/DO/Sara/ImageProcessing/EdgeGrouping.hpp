@@ -26,11 +26,12 @@ namespace DO::Sara {
   // ==========================================================================
   // Edge Grouping By Alignment
   // ==========================================================================
-  using Edge = std::vector<Eigen::Vector2d>;
+  template <typename T>
+  using Edge = std::vector<Eigen::Matrix<T, 2, 1>>;
 
   struct EdgeAttributes
   {
-    const std::vector<Edge>& edges;
+    const std::vector<Edge<double>>& edges;
     const std::vector<Eigen::Vector2d>& centers;
     const std::vector<Eigen::Matrix2d>& axes;
     const std::vector<Eigen::Vector2d>& lengths;
@@ -75,7 +76,7 @@ namespace DO::Sara {
       score.fill(std::numeric_limits<double>::infinity());
     }
 
-    auto edge(std::size_t i) const -> const Edge&
+    auto edge(std::size_t i) const -> const Edge<double>&
     {
       const auto& edge_id = edge_ids[i];
       return edge_attrs.edges[edge_id];

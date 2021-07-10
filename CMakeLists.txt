@@ -67,8 +67,6 @@ if (CMAKE_CUDA_COMPILER)
   if (UNIX)
     set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -Xcompiler=-Wno-unknown-pragmas)
   endif ()
-
-  include(shakti_macros)
 else ()
   message(STATUS "No CUDA support!")
 endif()

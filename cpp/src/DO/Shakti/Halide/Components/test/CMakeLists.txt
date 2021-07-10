@@ -9,7 +9,7 @@ foreach (file ${test_SOURCE_FILES})
     NAME ${filename}
     SOURCES ${file}
     DEPENDENCIES ${DO_Sara_LIBRARIES} Halide::Halide ${CMAKE_DL_LIBS}
-    FOLDER "DRAFTS/Halide")
+    FOLDER "Shakti/Halide")
   set_target_properties(${filename}
     PROPERTIES
     CXX_STANDARD 17

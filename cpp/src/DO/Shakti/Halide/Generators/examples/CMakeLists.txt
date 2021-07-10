@@ -20,7 +20,7 @@ target_link_libraries(halide_aot_example
   shakti_halide_gray32f_to_rgb
   shakti_halide_gaussian_blur
   shakti_gaussian_convolution_v2)
-set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
+set_property(TARGET halide_aot_example PROPERTY FOLDER "Examples/Shakti/Halide")
 
 
 add_executable(halide_gaussian_convolution_example
@@ -36,7 +36,7 @@ target_link_libraries(halide_gaussian_convolution_example
   shakti_halide_gaussian_blur)
 set_property(TARGET halide_gaussian_convolution_example
   PROPERTY
-  FOLDER "Tutorials/Halide")
+  FOLDER "Examples/Shakti/Halide")
 
 add_executable(halide_resize_example
   halide_resize_example.cpp)
@@ -55,7 +55,7 @@ target_link_libraries(halide_resize_example
   shakti_reduce_32f)
 set_property(TARGET halide_resize_example
   PROPERTY
-  FOLDER "Tutorials/Halide")
+  FOLDER "Examples/Shakti/Halide")
 
 
 set(HALIDE_SIFT_LIBRARIES
@@ -113,7 +113,7 @@ target_link_libraries(halide_sift_example
 
 set_property(TARGET halide_sift_example
   PROPERTY
-  FOLDER "Tutorials/Halide")
+  FOLDER "Examples/Shakti/Halide")
 
 add_executable(halide_sift_octave_example
   halide_sift_octave_example.cpp)
@@ -130,7 +130,7 @@ target_link_libraries(halide_sift_octave_example
   ${HALIDE_SIFT_LIBRARIES})
 set_property(TARGET halide_sift_octave_example
   PROPERTY
-  FOLDER "Tutorials/Halide")
+  FOLDER "Examples/Shakti/Halide")
 
 add_executable(halide_sift_pyramid_example
   halide_sift_pyramid_example.cpp)
@@ -147,7 +147,7 @@ target_link_libraries(halide_sift_pyramid_example
   ${HALIDE_SIFT_LIBRARIES})
 set_property(TARGET halide_sift_pyramid_example
   PROPERTY
-  FOLDER "Tutorials/Halide")
+  FOLDER "Examples/Shakti/Halide")
 
 add_executable(halide_batched_sift_octave_example
   halide_batched_sift_octave_example.cpp)
@@ -164,4 +164,4 @@ target_link_libraries(halide_batched_sift_octave_example
   ${HALIDE_SIFT_LIBRARIES})
 set_property(TARGET halide_batched_sift_octave_example
   PROPERTY
-  FOLDER "Tutorials/Halide")
+  FOLDER "Examples/Shakti/Halide")
