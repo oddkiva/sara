@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Core.hpp>
 
-#include <DO/Shakti/ImageProcessing/Histogram.hpp>
+#include <DO/Shakti/Cuda/ImageProcessing/Histogram.hpp>
 
 #include "../AssertHelpers.hpp"
 

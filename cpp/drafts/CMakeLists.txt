@@ -18,10 +18,6 @@ if (CUDA_FOUND AND NvidiaVideoCodec_ROOT)
   add_subdirectory(NvCodec)
 endif ()
 
-if (SARA_USE_HALIDE)
-  add_subdirectory(Halide)
-endif ()
-
 if (NOT APPLE)
   add_subdirectory(GStreamer)
 endif ()

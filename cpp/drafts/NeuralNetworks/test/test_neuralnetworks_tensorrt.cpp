@@ -6,8 +6,8 @@
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <DO/Shakti/MultiArray.hpp>
-#include <DO/Shakti/Utilities.hpp>
+#include <DO/Shakti/Cuda/MultiArray.hpp>
+#include <DO/Shakti/Cuda/Utilities.hpp>
 
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 

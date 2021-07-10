@@ -2,7 +2,7 @@
 
 #include <NvInfer.h>
 
-#include <DO/Shakti/Utilities/ErrorCheck.hpp>
+#include <DO/Shakti/Cuda/Utilities/ErrorCheck.hpp>
 
 #include <array>
 #include <functional>
