@@ -51,7 +51,7 @@ function (shakti_halide_library _source_filepath)
     if (TARGET ${_source_filename}${suffix})
       set_target_properties(${_source_filename}${suffix}
         PROPERTIES
-        FOLDER "Halide/${_source_filename}")
+        FOLDER "Libraries/Shakti/Halide/${_source_filename}")
     endif ()
   endforeach ()
 endfunction ()
@@ -86,7 +86,7 @@ function (shakti_halide_gpu_library _source_filepath)
     if (TARGET ${_source_filename}${suffix})
       set_target_properties(${_source_filename}${suffix}
         PROPERTIES
-        FOLDER "Halide/${_source_filename}")
+        FOLDER "Libraries/Shakti/Halide/${_source_filename}")
     endif ()
   endforeach ()
 endfunction ()
@@ -126,7 +126,7 @@ function (shakti_halide_library_v2)
     if (TARGET ${generator_NAME}${suffix})
       set_target_properties(${generator_NAME}${suffix}
         PROPERTIES
-        FOLDER "Halide/${generator_NAME}")
+        FOLDER "Libraries/Shakti/Halide/${generator_NAME}")
     endif ()
   endforeach ()
 
