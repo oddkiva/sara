@@ -32,18 +32,30 @@ class WindowManager(QObject):
             return
 
         user_thread = GraphicsContext().user_thread
+
+        # draw_xxx
         user_thread.signals.draw_point.connect(
             self._active_window.draw_point,
             type=Qt.QueuedConnection)
+        user_thread.signals.draw_line.connect(
+            self._active_window.draw_line,
+            type=Qt.BlockingQueuedConnection)
+        user_thread.signals.draw_rect.connect(
+            self._active_window.draw_rect,
+            type=Qt.BlockingQueuedConnection)
         user_thread.signals.draw_circle.connect(
             self._active_window.draw_circle,
             type=Qt.BlockingQueuedConnection)
         user_thread.signals.draw_ellipse.connect(
             self._active_window.draw_ellipse,
             type=Qt.BlockingQueuedConnection)
+        user_thread.signals.draw_text.connect(
+            self._active_window.draw_text,
+            type=Qt.BlockingQueuedConnection)
         user_thread.signals.draw_image.connect(
             self._active_window.draw_image,
             type=Qt.BlockingQueuedConnection)
+
         user_thread.signals.clear.connect(
             self._active_window.clear,
             type=Qt.BlockingQueuedConnection)

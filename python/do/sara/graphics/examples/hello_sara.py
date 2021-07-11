@@ -4,8 +4,6 @@ from PySide2.QtCore import Qt
 
 import numpy as np
 
-from skimage.io import imread
-
 import do.sara as sara
 
 from pysara_pybind11 import VideoStream
@@ -27,15 +25,16 @@ def user_main():
             sara.draw_point(x, y, (255, 0, 0))
             sara.millisleep(1)
 
-    sara.draw_circle((100, 100), 50, (0, 255, 255), 2)
-    sara.draw_ellipse((100, 100), 70, 70, 0, (0, 0, 255), 2)
+    sara.draw_line((100, 100), (200, 200), (0, 0, 127), 2)
+    sara.draw_rect((100, 100), (100, 100), (0, 0, 127), 5)
+    sara.draw_circle((100, 100), 50, (0, 255, 255), 1)
+    sara.draw_ellipse((100, 100), 20, 90, 50, (0, 0, 255), 3)
+    sara.draw_text((300, 300), "Hello Sara!", (255, 0, 127), 20, -30, False, True,
+                    True)
 
     key = sara.get_key()
     if key == Qt.Key_Escape:
         return
-
-    sara.clear()
-    sara.get_key()
 
     while video_stream.read(video_frame):
         sara.draw_image(video_frame)

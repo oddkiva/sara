@@ -1,7 +1,7 @@
 from PySide2.QtCore import (QObject, QPointF, QRectF, QTimer, Qt, qWarning,
                             Signal, Slot)
 from PySide2.QtWidgets import QApplication, QScrollArea, QWidget
-from PySide2.QtGui import QColor, QPainter, QPen, QPixmap
+from PySide2.QtGui import QColor, QFont, QPainter, QPen, QPixmap
 
 
 class ScrollArea(QScrollArea):
@@ -121,44 +121,75 @@ class PaintingWindow(QWidget):
         self._painter.end()
         self.update()
 
-    def draw_line(self, x1, y1, x2, y2, color, pen_width):
+    def draw_line(self, p1, p2, color, pen_width):
         self._painter.begin(self._pixmap)
-        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing)
         self._painter.setPen(QPen(QColor(*color), pen_width))
-        self._painter.drawLine(x1, y1, x2, y2)
+        self._painter.drawLine(QPointF(*p1), QPointF(*p2))
         self._painter.end()
         self.update()
 
-    def draw_image(self, image, offset, scale):
-        xoff, yoff = offset
+    def draw_rect(self, top_left_corner, sizes, color, pen_width):
         self._painter.begin(self._pixmap)
-        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
-        self._painter.translate(xoff, yoff)
-        self._painter.scale(scale, scale)
-        self._painter.drawImage(0, 0, image)
-        self._painter.scale(1 / scale, 1 / scale)
-        self._painter.translate(-xoff, -yoff)
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing)
+        self._painter.setPen(QPen(QColor(*color), pen_width))
+        self._painter.drawRect(top_left_corner[0], top_left_corner[1],
+                               sizes[0], sizes[1]);
         self._painter.end()
         self.update()
 
     def draw_circle(self, center, radius, color, pen_width):
         self._painter.begin(self._pixmap)
         self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
-        self._painter.setPen(QColor(*color))
+        self._painter.setPen(QPen(QColor(*color), pen_width))
         self._painter.drawEllipse(QPointF(*center), radius, radius);
         self._painter.end()
         self.update()
 
     def draw_ellipse(self, center, r1, r2, angle_in_degrees, color, pen_width):
         self._painter.begin(self._pixmap)
-        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing)
         self._painter.save()
-        self._painter.setPen(QColor(*color))
+        self._painter.setPen(QPen(QColor(*color), pen_width))
         self._painter.translate(QPointF(*center))
         self._painter.rotate(angle_in_degrees)
         self._painter.translate(-r1, -r2)
-        self._painter.drawEllipse(QRectF(0, 0, 2 * r1, 2 * r2));
+        self._painter.drawEllipse(QRectF(0, 0, 2 * r1, 2 * r2))
         self._painter.restore()
+        self._painter.end()
+        self.update()
+
+    def draw_text(self, p, text, color, font_size, orientation, italic, bold,
+                  underline):
+        font = QFont()
+        font.setPointSize(font_size)
+        font.setItalic(italic)
+        font.setBold(bold)
+        font.setUnderline(underline)
+
+        self._painter.begin(self._pixmap)
+
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing)
+
+        self._painter.save()
+        self._painter.setPen(QColor(*color))
+        self._painter.setFont(font)
+
+        self._painter.translate(p[0], p[1])
+        self._painter.rotate(orientation)
+        self._painter.drawText(0, 0, text)
+        self._painter.restore()
+        self._painter.end()
+        self.update()
+
+    def draw_image(self, image, offset, scale):
+        xoff, yoff = offset
+        self._painter.begin(self._pixmap)
+        self._painter.translate(xoff, yoff)
+        self._painter.scale(scale, scale)
+        self._painter.drawImage(0, 0, image)
+        self._painter.scale(1 / scale, 1 / scale)
+        self._painter.translate(-xoff, -yoff)
         self._painter.end()
         self.update()
 
@@ -176,37 +207,6 @@ class PaintingWindow(QWidget):
 #    m_painter.drawPolygon(polygon);
 #    update();
 #  }
-#
-#  void PaintingWindow::drawRect(int x, int y, int w, int h, const QColor& c,
-#                                int penWidth)
-#  {
-#    m_painter.setPen(QPen(c, penWidth));
-#    m_painter.drawRect(x, y, w, h);
-#    update();
-#  }
-#
-#  void PaintingWindow::drawText(int x, int y, const QString& text,
-#                                const QColor& color, int fontSize,
-#                                double orientation, bool italic, bool bold,
-#                                bool underline)
-#  {
-#    QFont font;
-#    font.setPointSize(fontSize);
-#    font.setItalic(italic);
-#    font.setBold(bold);
-#    font.setUnderline(underline);
-#
-#    m_painter.save();
-#    m_painter.setPen(color);
-#    m_painter.setFont(font);
-#
-#    m_painter.translate(x, y);
-#    m_painter.rotate(qreal(orientation));
-#    m_painter.drawText(0, 0, text);
-#    m_painter.restore();
-#    update();
-#  }
-#
 #  void PaintingWindow::drawArrow(int x1, int y1, int x2, int y2,
 #                                 const QColor& col,
 #                                 int arrowWidth, int arrowHeight, int style,

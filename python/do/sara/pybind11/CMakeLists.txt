@@ -1,8 +1,5 @@
 # ============================================================================ #
 # Find the needed third-party libraries.
-find_package(NumPy 1.7.1 REQUIRED)
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
 find_package(pybind11 REQUIRED)
 
 
