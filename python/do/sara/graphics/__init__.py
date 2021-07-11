@@ -24,6 +24,14 @@ def draw_point(x, y, color):
     user_thread = GraphicsContext().user_thread
     user_thread.signals.draw_point.emit(x, y, color)
 
+def draw_circle(center, radius, color, pen_width=1):
+    user_thread = GraphicsContext().user_thread
+    user_thread.signals.draw_circle.emit(center, radius, color, pen_width)
+
+def draw_ellipse(center, r1, r2, angle_in_degrees, color, pen_width=1):
+    user_thread = GraphicsContext().user_thread
+    user_thread.signals.draw_ellipse.emit(center, r1, r2, angle_in_degrees,
+                                          color, pen_width)
 
 def draw_image(image, offset=(0, 0), scale=1):
     user_thread = GraphicsContext().user_thread
@@ -33,6 +41,13 @@ def draw_image(image, offset=(0, 0), scale=1):
     qimage = QImage(image.data, w, h, c * w, QImage.Format_RGB888)
     user_thread.signals.draw_image.emit(qimage, offset, scale)
 
+def clear():
+    user_thread = GraphicsContext().user_thread
+    user_thread.signals.clear.emit()
+
+def set_antialiasing(on = True):
+    user_thread = GraphicsContext().user_thread
+    user_thread.signals.set_antialiasing.emit(on)
 
 def run_graphics(user_main):
     import sys

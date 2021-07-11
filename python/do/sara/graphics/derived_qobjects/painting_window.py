@@ -1,4 +1,5 @@
-from PySide2.QtCore import QObject, QTimer, Qt, qWarning, Signal, Slot
+from PySide2.QtCore import (QObject, QPointF, QRectF, QTimer, Qt, qWarning,
+                            Signal, Slot)
 from PySide2.QtWidgets import QApplication, QScrollArea, QWidget
 from PySide2.QtGui import QColor, QPainter, QPen, QPixmap
 
@@ -22,6 +23,7 @@ class ScrollArea(QScrollArea):
 
 class PaintingWindowSignals(QObject):
     pressed_key = Signal(int)
+    released_key = Signal(int)
 
 
 class PaintingWindow(QWidget):
@@ -34,6 +36,8 @@ class PaintingWindow(QWidget):
         self._pixmap = QPixmap(w, h)
         self._painter = QPainter(self._pixmap)
         self._painter.end()
+
+        self._antialiasing = False
 
         self.setParent(self._scroll_area)
         self.setFocusPolicy(Qt.WheelFocus)
@@ -92,9 +96,8 @@ class PaintingWindow(QWidget):
         # }
 
     def keyReleaseEvent(self, event):
-        pass
+        self.signals.released_key.emit(event.key());
         # {
-        #   emit releasedKey(event->key());
         #   if (m_eventListeningTimer.isActive())
         #   {
         #     m_eventListeningTimer.stop();
@@ -102,27 +105,34 @@ class PaintingWindow(QWidget):
         #   }
         # }
 
+    @Slot()
+    def eventListeningTimerStopped(self):
+        pass
+
     def paintEvent(self, event):
-        p = QPainter(self);
-        p.drawPixmap(0, 0, self._pixmap);
+        p = QPainter(self)
+        p.drawPixmap(0, 0, self._pixmap)
 
     def draw_point(self, x, y, color):
         self._painter.begin(self._pixmap)
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
         self._painter.setPen(QColor(*color));
         self._painter.drawPoint(x, y);
         self._painter.end()
-        self.update();
+        self.update()
 
     def draw_line(self, x1, y1, x2, y2, color, pen_width):
         self._painter.begin(self._pixmap)
-        self._painter.setPen(QPen(QColor(*color), pen_width));
-        self._painter.drawLine(x1, y1, x2, y2);
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
+        self._painter.setPen(QPen(QColor(*color), pen_width))
+        self._painter.drawLine(x1, y1, x2, y2)
         self._painter.end()
-        self.update();
+        self.update()
 
     def draw_image(self, image, offset, scale):
         xoff, yoff = offset
         self._painter.begin(self._pixmap)
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
         self._painter.translate(xoff, yoff)
         self._painter.scale(scale, scale)
         self._painter.drawImage(0, 0, image)
@@ -131,32 +141,34 @@ class PaintingWindow(QWidget):
         self._painter.end()
         self.update()
 
-    @Slot()
-    def eventListeningTimerStopped(self):
-        pass
+    def draw_circle(self, center, radius, color, pen_width):
+        self._painter.begin(self._pixmap)
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
+        self._painter.setPen(QColor(*color))
+        self._painter.drawEllipse(QPointF(*center), radius, radius);
+        self._painter.end()
+        self.update()
 
+    def draw_ellipse(self, center, r1, r2, angle_in_degrees, color, pen_width):
+        self._painter.begin(self._pixmap)
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
+        self._painter.save()
+        self._painter.setPen(QColor(*color))
+        self._painter.translate(QPointF(*center))
+        self._painter.rotate(angle_in_degrees)
+        self._painter.translate(-r1, -r2)
+        self._painter.drawEllipse(QRectF(0, 0, 2 * r1, 2 * r2));
+        self._painter.restore()
+        self._painter.end()
+        self.update()
 
-#  void PaintingWindow::drawCircle(const QPointF& center, qreal r,
-#                                  const QColor& c, int penWidth)
-#  {
-#    m_painter.setPen(QPen(c, penWidth));
-#    m_painter.drawEllipse(QPointF(center.x(), center.y()), r, r);
-#    update();
-#  }
-#
-#  void PaintingWindow::drawEllipse(const QPointF& center, qreal r1, qreal r2,
-#                                   qreal degree, const QColor& c, int penWidth)
-#  {
-#    m_painter.save();
-#    m_painter.setPen(QPen(c, penWidth));
-#    m_painter.translate(center);
-#    m_painter.rotate(degree);
-#    m_painter.translate(-r1, -r2);
-#    m_painter.drawEllipse(QRectF(0, 0, 2*r1, 2*r2));
-#    m_painter.restore();
-#    update();
-#  }
-#
+    def clear(self):
+        self._pixmap.fill();
+        self.update();
+
+    def set_antialiasing(self, on):
+        self._antialiasing = on
+
 #  void PaintingWindow::drawPoly(const QPolygonF& polygon, const QColor& c,
 #                                int width)
 #  {
@@ -316,17 +328,6 @@ class PaintingWindow(QWidget):
 #    m_painter.setPen(c);
 #    m_painter.fillRect(x, y, w, h, c);
 #    update();
-#  }
-#
-#  void PaintingWindow::clear()
-#  {
-#    m_pixmap.fill();
-#    update();
-#  }
-#
-#  void PaintingWindow::setAntialiasing(bool on)
-#  {
-#    m_painter.setRenderHints(QPainter::Antialiasing, on);
 #  }
 #
 #  void PaintingWindow::setTransparency(bool on)

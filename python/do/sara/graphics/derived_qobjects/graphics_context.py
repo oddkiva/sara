@@ -35,8 +35,20 @@ class WindowManager(QObject):
         user_thread.signals.draw_point.connect(
             self._active_window.draw_point,
             type=Qt.QueuedConnection)
+        user_thread.signals.draw_circle.connect(
+            self._active_window.draw_circle,
+            type=Qt.BlockingQueuedConnection)
+        user_thread.signals.draw_ellipse.connect(
+            self._active_window.draw_ellipse,
+            type=Qt.BlockingQueuedConnection)
         user_thread.signals.draw_image.connect(
             self._active_window.draw_image,
+            type=Qt.BlockingQueuedConnection)
+        user_thread.signals.clear.connect(
+            self._active_window.clear,
+            type=Qt.BlockingQueuedConnection)
+        user_thread.signals.set_antialiasing.connect(
+            self._active_window.set_antialiasing,
             type=Qt.BlockingQueuedConnection)
 
         widget.signals.pressed_key.connect(user_thread.pressed_key)

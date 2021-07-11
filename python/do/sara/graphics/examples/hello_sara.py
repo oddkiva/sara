@@ -20,15 +20,22 @@ def user_main():
     h, w, _ = video_stream.sizes()
 
     sara.create_window(w, h)
+    sara.set_antialiasing(True)
 
     for y in range(20):
         for x in range(20):
             sara.draw_point(x, y, (255, 0, 0))
             sara.millisleep(1)
 
+    sara.draw_circle((100, 100), 50, (0, 255, 255), 2)
+    sara.draw_ellipse((100, 100), 70, 70, 0, (0, 0, 255), 2)
+
     key = sara.get_key()
     if key == Qt.Key_Escape:
         return
+
+    sara.clear()
+    sara.get_key()
 
     while video_stream.read(video_frame):
         sara.draw_image(video_frame)

@@ -5,7 +5,11 @@ from PySide2.QtWidgets import QApplication
 class UserThreadSignals(QObject):
     create_window = Signal(int, int)
     draw_point = Signal(int, int, object)
+    draw_circle = Signal(object, float, object, int)
+    draw_ellipse = Signal(object, float, float, float, object, int)
     draw_image = Signal(object, object, float)
+    clear = Signal()
+    set_antialiasing = Signal(bool)
 
 
 class UserThread(QThread):
