@@ -101,10 +101,10 @@ before_script:
   - Xvfb :1 -noreset 1>/dev/null 2>&1 &
   - export DISPLAY=:1
 
-cppcheck:
-  stage: build
-  script:
-    - cppcheck --enable=all --inconclusive --verbose cpp/src
+# cppcheck:
+#   stage: build
+#   script:
+#     - cppcheck --enable=all --inconclusive --verbose cpp/src
 
 build:
   stage: build
