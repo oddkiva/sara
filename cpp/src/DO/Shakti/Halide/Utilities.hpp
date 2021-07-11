@@ -15,7 +15,7 @@ namespace DO::Shakti::HalideBackend {
 
   namespace sara = DO::Sara;
 
-  auto find_non_cuda_gpu_target() -> Halide::Target
+  inline auto find_non_cuda_gpu_target() -> Halide::Target
   {
     using namespace Halide;
 
@@ -43,7 +43,7 @@ namespace DO::Shakti::HalideBackend {
     return target;
   }
 
-  auto get_gpu_target() -> Halide::Target
+  inline auto get_gpu_target() -> Halide::Target
   {
     // Configure Halide to use CUDA before we compile the pipeline.
     constexpr auto use_cuda =
@@ -82,7 +82,7 @@ namespace DO::Shakti::HalideBackend {
   }
 
   template <typename T, typename ColorSpace>
-  auto as_interleaved_runtime_buffer(
+  inline auto as_interleaved_runtime_buffer(
       sara::ImageView<sara::Pixel<T, ColorSpace>>& image)
   {
     return Halide::Runtime::Buffer<T>::make_interleaved(
@@ -104,7 +104,7 @@ namespace DO::Shakti::HalideBackend {
   }
 
   template <typename T>
-  auto as_buffer_3d(sara::ImageView<T>& image)
+  inline auto as_buffer_3d(sara::ImageView<T>& image)
   {
     static constexpr auto num_channels = sara::PixelTraits<T>::num_channels;
     return Halide::Buffer<T>(image.data(), image.width(), image.height(),
@@ -112,7 +112,7 @@ namespace DO::Shakti::HalideBackend {
   }
 
   template <typename T>
-  auto as_runtime_buffer(sara::ImageView<T>& image)
+  inline auto as_runtime_buffer(sara::ImageView<T>& image)
   {
     return Halide::Runtime::Buffer<T>(image.data(), image.width(),
                                       image.height());

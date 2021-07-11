@@ -1,14 +1,6 @@
 # ============================================================================ #
-# Find the needed third-party libraries.
-find_package(pybind11 REQUIRED)
-
-
-# ============================================================================ #
 # Compile the library.
-include_directories(
-  ${Boost_INCLUDE_DIRS}
-  ${NUMPY_INCLUDE_DIRS}
-  ${PYTHON_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIRS})
 
 if (SARA_BUILD_VIDEOIO)
   add_definitions(-DPYSARA_BUILD_VIDEOIO)

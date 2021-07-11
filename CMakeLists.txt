@@ -102,6 +102,10 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
   find_package(OpenCL)
 
   find_package(Ceres REQUIRED)
+
+  if (SARA_USE_HALIDE)
+    include(sara_use_halide)
+  endif ()
 endif ()
 
 
