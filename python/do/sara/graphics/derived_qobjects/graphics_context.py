@@ -39,6 +39,8 @@ class WindowManager(QObject):
             self._active_window.draw_image,
             type=Qt.BlockingQueuedConnection)
 
+        widget.signals.pressed_key.connect(user_thread.pressed_key)
+
     @property
     def widgets(self):
         return self._widgets

@@ -1,4 +1,4 @@
-from PySide2.QtCore import QTimer, Qt, qWarning, Slot
+from PySide2.QtCore import QObject, QTimer, Qt, qWarning, Signal, Slot
 from PySide2.QtWidgets import QApplication, QScrollArea, QWidget
 from PySide2.QtGui import QColor, QPainter, QPen, QPixmap
 
@@ -20,6 +20,10 @@ class ScrollArea(QScrollArea):
             ))
 
 
+class PaintingWindowSignals(QObject):
+    pressed_key = Signal(int)
+
+
 class PaintingWindow(QWidget):
 
     def __init__(self, sizes, window_title="Sara", position=None, parent=None):
@@ -33,6 +37,9 @@ class PaintingWindow(QWidget):
 
         self.setParent(self._scroll_area)
         self.setFocusPolicy(Qt.WheelFocus)
+
+        # Populate the signals.
+        self.signals = PaintingWindowSignals()
 
         # Set event listener.
         self._event_listening_timer = QTimer(self)
@@ -75,6 +82,25 @@ class PaintingWindow(QWidget):
     @property
     def y(self):
         return self._scroll_area.pos().y();
+
+    def keyPressEvent(self, event):
+        self.signals.pressed_key.emit(event.key())
+        # if (m_eventListeningTimer.isActive())
+        # {
+        #     m_eventListeningTimer.stop();
+        #     emit sendEvent(key_pressed(event->key(), event->modifiers()));
+        # }
+
+    def keyReleaseEvent(self, event):
+        pass
+        # {
+        #   emit releasedKey(event->key());
+        #   if (m_eventListeningTimer.isActive())
+        #   {
+        #     m_eventListeningTimer.stop();
+        #     emit sendEvent(key_released(event->key(), event->modifiers()));
+        #   }
+        # }
 
     def paintEvent(self, event):
         p = QPainter(self);
@@ -397,25 +423,5 @@ class PaintingWindow(QWidget):
 #      m_eventListeningTimer.stop();
 #      emit sendEvent(mouse_released(event->x(), event->y(),
 #                                   event->buttons(), event->modifiers()));
-#    }
-#  }
-#
-#  void PaintingWindow::keyPressEvent(QKeyEvent *event)
-#  {
-#    emit pressedKey(event->key());
-#    if (m_eventListeningTimer.isActive())
-#    {
-#      m_eventListeningTimer.stop();
-#      emit sendEvent(key_pressed(event->key(), event->modifiers()));
-#    }
-#  }
-#
-#  void PaintingWindow::keyReleaseEvent(QKeyEvent *event)
-#  {
-#    emit releasedKey(event->key());
-#    if (m_eventListeningTimer.isActive())
-#    {
-#      m_eventListeningTimer.stop();
-#      emit sendEvent(key_released(event->key(), event->modifiers()));
 #    }
 #  }

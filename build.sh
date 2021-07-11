@@ -190,8 +190,8 @@ function install_package()
     sudo apt-get update
     sudo apt-get install --reinstall libdo-sara-shared
   else
-    rpm_package_name=$(echo `ls *.rpm`)
-    sudo rpm -ivh --force ${rpm_package_name}
+    cmake --build . --target package --config Release
+    cp libDO-Sara-shared-*-Darwin.tar.gz /Users/david/GitLab/DO-CV/sara-install
   fi
 }
 

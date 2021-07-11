@@ -9,6 +9,12 @@ def millisleep(ms):
     ctx.user_thread.msleep(ms)
 
 
+def get_key():
+    user_thread = GraphicsContext().user_thread
+    user_thread.get_key()
+    return user_thread.key
+
+
 def create_window(w, h):
     user_thread = GraphicsContext().user_thread
     user_thread.signals.create_window.emit(w, h)
