@@ -15,10 +15,9 @@
 
 #include <DO/Sara/Defines.hpp>
 
-#include <DO/Sara/Graphics.hpp>
-
+#include <DO/Sara/Features.hpp>
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
-
+#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 

@@ -10,8 +10,8 @@
 // ========================================================================== //
 
 #include <DO/Sara/FeatureDetectors.hpp>
-
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 
 using namespace std;

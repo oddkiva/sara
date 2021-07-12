@@ -14,11 +14,8 @@
 
 #pragma once
 
-#include <DO/Sara/Defines.hpp>
-
-#include <DO/Sara/Graphics.hpp>
-
 // 2D Geometry drawing utilities.
+#include <DO/Sara/Visualization/FeatureDetectors/Debug.hpp>
 #include <DO/Sara/Visualization/Features/Draw.hpp>
 #include <DO/Sara/Visualization/Geometry/DrawPolygon.hpp>
 #include <DO/Sara/Visualization/Match/Draw.hpp>

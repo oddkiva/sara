@@ -99,6 +99,7 @@ namespace DO { namespace Sara {
     //! Normalize the transform
     void rescale_transform(Matrix2f& transform);
 
+#ifdef DEBUG_AFFINE_SHAPE_ADAPTATION
   private: /* debugging methods. */
     void debug_create_window_to_view_patch();
     void debug_print_affine_adaptation_iteration(int iter);
@@ -110,6 +111,7 @@ namespace DO { namespace Sara {
                                                  float anisotropic_ratio,
                                                  const Matrix2f& U);
     void debug_close_window_used_to_view_patch();
+#endif
 
   private:
     int _patch_size;
