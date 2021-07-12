@@ -10,9 +10,12 @@
 // ========================================================================== //
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
+#include <DO/Sara/FeatureDescriptors.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
 
-#include <omp.h>
+#ifdef _OMP
+#  include <omp.h>
+#endif
 
 
 namespace DO::Sara {
@@ -69,9 +72,11 @@ namespace DO::Sara {
 
     if (parallel)
     {
+#ifdef _OMP
       const auto max_cpu_threads = omp_get_max_threads();
       SARA_CHECK(max_cpu_threads);
       omp_set_num_threads(max_cpu_threads);
+#endif
     }
 
     // 3. Feature description.

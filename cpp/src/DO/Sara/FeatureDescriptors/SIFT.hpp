@@ -185,38 +185,6 @@ namespace DO { namespace Sara {
       return sifts;
     }
 
-  public: /* debugging functions. */
-    //! Check the grid on which we are drawing.
-    void draw_grid(float x, float y, float sigma, float theta,
-                   float octave_scale_factor, int pen_width = 1)
-    {
-      const auto lambda = 3.f;
-      const auto l = lambda * sigma;
-      Vector2f grid[N + 1][N + 1];
-
-      auto T = Matrix2f{};
-      theta = 0;
-      T << cos(theta), -sin(theta),
-           sin(theta),  cos(theta);
-      T *= l;
-
-      for (auto v = 0; v < N + 1; ++v)
-        for (auto u = 0; u < N + 1; ++u)
-          grid[u][v] =
-              (Vector2f{x, y} + T * Vector2f{u - N / 2.f, v - N / 2.f}) *
-              octave_scale_factor;
-      for (auto i = 0; i < N + 1; ++i)
-        draw_line(grid[0][i], grid[N][i], Green8, pen_width);
-      for (auto i = 0; i < N + 1; ++i)
-        draw_line(grid[i][0], grid[i][N], Green8, pen_width);
-
-      auto a = Vector2f{x, y};
-      a *= octave_scale_factor;
-      auto b = Vector2f{};
-      b = a + octave_scale_factor * N / 2.f * T * Vector2f{1.f, 0.f};
-      draw_line(a, b, Red8, pen_width + 2);
-    }
-
   private: /* member functions. */
     //! The accumulation function based on trilinear interpolation.
     void accumulate(descriptor_type& h, const Vector2f& pos, float ori,

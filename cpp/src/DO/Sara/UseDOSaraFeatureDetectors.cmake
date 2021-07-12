@@ -4,7 +4,10 @@ if (SARA_USE_FROM_SOURCE)
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/FeatureDetectors)
     sara_create_common_variables("FeatureDetectors")
     sara_set_internal_dependencies("FeatureDetectors"
-      "Core;Features;Geometry;Graphics")
+      "Core;Features;FeatureDescriptors;Geometry")
     sara_generate_library("FeatureDetectors")
+    target_link_libraries(DO_Sara_FeatureDetectors
+      PUBLIC
+      $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
   endif ()
 endif ()

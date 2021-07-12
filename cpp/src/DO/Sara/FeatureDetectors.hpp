@@ -26,6 +26,9 @@
 #include <DO/Sara/FeatureDetectors/Harris.hpp>
 #include <DO/Sara/FeatureDetectors/Hessian.hpp>
 
+// Detection of DoG+SIFT keypoints.
+#include <DO/Sara/FeatureDetectors/SIFT.hpp>
+
 // Affine shape adaptation (cf. [Mikolajczyk & Schmid, ECCV 2002]).
 #include <DO/Sara/FeatureDetectors/AffineShapeAdaptation.hpp>
 

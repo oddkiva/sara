@@ -12,23 +12,18 @@
 #include <DO/Sara/Defines.hpp>
 
 #include <DO/Sara/Core/Image.hpp>
-#include <DO/Sara/FeatureDescriptors.hpp>
-#include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/FeatureMatching.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
+#include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 
 namespace DO::Sara {
 
-  //! @addtogroup SfM Structure-from-Motion Building Blocks
-  //! @{
-
+  //! @brief Compute SIFT keypoints (DoG+SIFT).
   DO_SARA_EXPORT
   auto compute_sift_keypoints(
       const ImageView<float>& image,
       const ImagePyramidParams& pyramid_params = ImagePyramidParams(),
       bool parallel = false)
       -> KeypointList<OERegion, float>;
-
-  //! @}
 
 } /* namespace DO::Sara */

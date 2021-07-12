@@ -4,7 +4,7 @@ if (SARA_USE_FROM_SOURCE)
   if (NOT DO_Sara_FeatureDescriptors_ADDED)
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/FeatureDescriptors)
     sara_create_common_variables("FeatureDescriptors")
-    sara_set_internal_dependencies("FeatureDescriptors" "Core;Features;Graphics")
+    sara_set_internal_dependencies("FeatureDescriptors" "Core;Features")
     sara_generate_library("FeatureDescriptors")
 
     target_link_libraries(DO_Sara_FeatureDescriptors

@@ -9,13 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/HDF5.hpp>
-#include <DO/Sara/Core/StdVectorHelpers.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
-#include <DO/Sara/FileSystem.hpp>
-#include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/KeypointDetection.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
 #include <DO/Sara/Visualization.hpp>
 
 

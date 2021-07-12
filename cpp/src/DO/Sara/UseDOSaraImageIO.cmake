@@ -12,8 +12,7 @@ if (SARA_USE_FROM_SOURCE)
 
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/ImageIO)
     sara_create_common_variables("ImageIO")
-    sara_set_internal_dependencies(
-      "ImageIO" "Core")
+    sara_set_internal_dependencies("ImageIO" "Core")
     sara_generate_library("ImageIO")
 
     target_compile_definitions(DO_Sara_ImageIO PRIVATE ${PNG_DEFINITIONS})

@@ -18,7 +18,6 @@
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/Match/IndexMatch.hpp>
 #include <DO/Sara/SfM/BuildingBlocks.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
 #include <DO/Sara/Visualization.hpp>
 
 #include <boost/filesystem.hpp>

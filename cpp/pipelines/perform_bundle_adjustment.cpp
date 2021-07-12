@@ -9,12 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Core/StringFormat.hpp>
+#include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/PoseGraph.hpp>
 #include <DO/Sara/SfM/BuildingBlocks.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>

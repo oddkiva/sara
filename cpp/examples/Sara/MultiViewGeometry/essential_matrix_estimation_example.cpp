@@ -11,6 +11,7 @@
 
 //! @example
 
+#include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
@@ -21,7 +22,6 @@
 #include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 
 using namespace std;

@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Visualization.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
+#include <DO/Sara/FeatureDetectors/SIFT.hpp>
 
 
 using namespace DO::Sara;

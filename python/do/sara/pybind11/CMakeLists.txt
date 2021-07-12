@@ -14,11 +14,10 @@ endif ()
 add_library(pysara_pybind11 MODULE ${pysara_SRC_FILES})
 target_link_libraries(pysara_pybind11
   PRIVATE pybind11::module
-          DO_Sara_DisjointSets
-          DO_Sara_Geometry
-          DO_Sara_ImageIO)
-          # DO_Sara_Features
-          # DO_Sara_SfM)
+          DO::Sara::DisjointSets
+          DO::Sara::FeatureDetectors
+          DO::Sara::Geometry
+          DO::Sara::ImageIO)
 if (SARA_BUILD_VIDEOIO)
   target_link_libraries(pysara_pybind11 PRIVATE DO_Sara_VideoIO)
 endif ()
