@@ -14,8 +14,7 @@
 #include <vector>
 #include <cstdlib>
 
-#include <DO/Sara/Features.hpp>
-
+#include <DO/Sara/Features/Feature.hpp>
 #include <DO/Sara/Match/IndexMatch.hpp>
 #include <DO/Sara/Match/Match.hpp>
 
