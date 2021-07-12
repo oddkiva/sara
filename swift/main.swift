@@ -67,7 +67,7 @@ func testVideoRead() {
 #if __APPLE__
     let videoFilePath = "/Users/david/Desktop/Datasets/videos/sample11.mp4"
 #else
-    let videoFilePath = "/home/david/Desktop/GOPR0542.MP4"
+    let videoFilePath = "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.MP4"
 #endif
     let videoStream = VideoStream(filePath: videoFilePath)
     resizeWindow(Int32(videoStream.frame.width),
