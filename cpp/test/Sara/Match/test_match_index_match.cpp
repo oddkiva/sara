@@ -11,6 +11,7 @@
 
 #define BOOST_TEST_MODULE "Match/IndexMatch Data Structures"
 
+#include <DO/Sara/Match/HDF5.hpp>
 #include <DO/Sara/Match/IndexMatch.hpp>
 
 #include <boost/filesystem.hpp>
