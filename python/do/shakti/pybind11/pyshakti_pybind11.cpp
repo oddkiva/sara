@@ -1,12 +1,12 @@
 #include "python/do/sara/pybind11/Utilities.hpp"
 
-#include "shakti_gaussian_convolution_v2.h"
 #include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_halide_rgb_to_gray.h"
 
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <DO/Shakti/Halide/Utilities.hpp>
+#include <DO/Shakti/Halide/GaussianConvolution.hpp>
 
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -57,19 +57,7 @@ auto gaussian_convolution(py::array_t<float> src, py::array_t<float> dst,
   // To Sara API.
   auto src_view = to_image_view(src);
   auto dst_view = to_image_view(dst);
-  auto src_tensor_view = sara::tensor_view(src_view).reshape(
-      Eigen::Vector4i{1, 1, src_view.height(), src_view.width()});
-  auto dst_tensor_view = sara::tensor_view(dst_view).reshape(
-      Eigen::Vector4i{1, 1, dst_view.height(), dst_view.width()});
-
-  // To Halide API.
-  auto src_buffer = halide::as_runtime_buffer(src_tensor_view);
-  auto dst_buffer = halide::as_runtime_buffer(dst_tensor_view);
-
-  // Call the Halide-optimized function.
-  src_buffer.set_host_dirty();
-  shakti_gaussian_convolution_v2(src_buffer, sigma, truncation_factor, dst_buffer);
-  dst_buffer.copy_to_host();
+  halide::gaussian_convolution(src_view, dst_view, sigma, truncation_factor);
 }
 
 PYBIND11_MODULE(pyshakti_pybind11, m)
