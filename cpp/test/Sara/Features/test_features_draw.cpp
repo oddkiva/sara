@@ -14,7 +14,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace std;

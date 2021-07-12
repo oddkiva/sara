@@ -1,7 +1,8 @@
 find_package(DO_Sara COMPONENTS
-  Core Graphics ImageIO VideoIO
+  Core ImageIO VideoIO
   Features FeatureDetectors FeatureDescriptors
-  KDTree Match FeatureMatching SfM REQUIRED)
+  KDTree Match FeatureMatching SfM
+  Visualization REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)

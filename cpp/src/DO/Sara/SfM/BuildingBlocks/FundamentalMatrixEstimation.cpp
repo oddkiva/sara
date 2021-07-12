@@ -12,7 +12,7 @@
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/FileSystem.hpp>
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
 

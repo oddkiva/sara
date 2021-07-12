@@ -11,7 +11,7 @@
 
 //! @example
 
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 

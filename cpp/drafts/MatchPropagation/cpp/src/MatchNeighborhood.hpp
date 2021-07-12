@@ -23,6 +23,7 @@
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/KDTree.hpp>
 #include <DO/Sara/Match.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 namespace DO::Sara {

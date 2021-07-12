@@ -24,7 +24,7 @@
 #include "MatchNeighborhood.hpp"
 
 #include <DO/Sara/FileSystem/FileSystem.hpp>
-#include <DO/Sara/Graphics/Match/PairWiseDrawer.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace std;

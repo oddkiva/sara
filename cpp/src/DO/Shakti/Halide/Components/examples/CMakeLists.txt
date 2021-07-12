@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core Graphics ImageIO VideoIO REQUIRED)
+find_package(DO_Sara COMPONENTS Core Features Graphics ImageIO VideoIO REQUIRED)
 
 function (add_halide_executable source_file)
   get_filename_component(name ${source_file} NAME_WE)

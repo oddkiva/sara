@@ -22,7 +22,7 @@
 
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/Geometry.hpp>
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 #include "DynamicMatchGraph.hpp"
 #include "GrowthParams.hpp"

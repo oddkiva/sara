@@ -101,6 +101,9 @@ macro (sara_populate_available_components)
 
     # KDTree for fast neighbor search.
     sara_append_components(DO_Sara_COMPONENTS KDTree)
+
+    # Visualization
+    sara_append_components(DO_Sara_COMPONENTS Visualization)
   endif ()
 
   # DEBUG: Print the list of component libraries.

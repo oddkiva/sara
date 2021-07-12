@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 #include <map>
 #include <set>

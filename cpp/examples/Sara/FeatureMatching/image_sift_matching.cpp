@@ -12,10 +12,10 @@
 //! @example
 
 #include <DO/Sara/FeatureMatching.hpp>
-#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace std;

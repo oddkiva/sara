@@ -13,10 +13,10 @@
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/FileSystem.hpp>
-#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/KeypointDetection.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 namespace DO::Sara {

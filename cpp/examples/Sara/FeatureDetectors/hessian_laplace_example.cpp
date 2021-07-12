@@ -16,7 +16,7 @@
 
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace DO::Sara;

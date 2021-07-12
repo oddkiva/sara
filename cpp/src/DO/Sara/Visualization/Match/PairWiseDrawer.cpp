@@ -9,10 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   void PairWiseDrawer::display_images() const
   {
@@ -20,14 +20,15 @@ namespace DO { namespace Sara {
     display(image2, (offF(1) * scale(0)).cast<int>(), _z2);
   }
 
-  void PairWiseDrawer::draw_point(int i, const Point2f& p, const Color3ub& c, int r) const
+  void PairWiseDrawer::draw_point(int i, const Point2f& p, const Color3ub& c,
+                                  int r) const
   {
     assert(i == 0 || i == 1);
     fill_circle((p + offF(i)) * scale(i), float(r), c);
   }
 
   void PairWiseDrawer::draw_line(int i, const Point2f& pa, const Point2f& pb,
-                                const Color3ub& c, int penWidth) const
+                                 const Color3ub& c, int penWidth) const
   {
     assert(i == 0 || i == 1);
     const Vector2f a = (pa + offF(i)) * scale(i);
@@ -35,7 +36,8 @@ namespace DO { namespace Sara {
     Sara::draw_line(a, b, c, penWidth);
   }
 
-  void PairWiseDrawer::draw_arrow(int i, const Point2f& pa, const Point2f& pb, const Color3ub& c, int penWidth) const
+  void PairWiseDrawer::draw_arrow(int i, const Point2f& pa, const Point2f& pb,
+                                  const Color3ub& c, int penWidth) const
   {
     assert(i == 0 || i == 1);
     const Vector2f a = (pa + offF(i)) * scale(i);
@@ -43,18 +45,20 @@ namespace DO { namespace Sara {
     Sara::draw_arrow(a, b, c, penWidth);
   }
 
-  void PairWiseDrawer::draw_triangle(int i, const Point2f& pa, const Point2f& pb, const Point2f& pc,
-                                    const Color3ub& c, int r) const
+  void PairWiseDrawer::draw_triangle(int i, const Point2f& pa,
+                                     const Point2f& pb, const Point2f& pc,
+                                     const Color3ub& c, int r) const
   {
-    assert(i == 0 || i ==1);
+    assert(i == 0 || i == 1);
     draw_line(i, pa, pb, c, r);
     draw_line(i, pb, pc, c, r);
     draw_line(i, pa, pc, c, r);
   }
 
-  void PairWiseDrawer::draw_rect(int i, const Point2f& p1, const Point2f& p2, int r, const Color3ub& c) const
+  void PairWiseDrawer::draw_rect(int i, const Point2f& p1, const Point2f& p2,
+                                 int r, const Color3ub& c) const
   {
-    assert(i==0 || i==1);
+    assert(i == 0 || i == 1);
     const Point2i s = (scale(i) * p1 + offF(i) * scale(0))
                           .array()
                           .round()
@@ -70,9 +74,10 @@ namespace DO { namespace Sara {
     Sara::draw_rect(s.x(), s.y(), d.x(), d.y(), c, r);
   }
 
-  void PairWiseDrawer::draw_line_from_eqn(int i, const Vector3f& eqn, const Color3ub& c, int r) const
+  void PairWiseDrawer::draw_line_from_eqn(int i, const Vector3f& eqn,
+                                          const Color3ub& c, int r) const
   {
-    assert(i == 0 || i ==1);
+    assert(i == 0 || i == 1);
     Point2f a, b;
     a.x() = 0;
     a.y() = -eqn[2] / eqn[1];
@@ -83,25 +88,26 @@ namespace DO { namespace Sara {
     draw_line(i, a, b, c, r);
   }
 
-  void PairWiseDrawer::draw_feature(int i, const OERegion& f, const Color3ub& c) const
+  void PairWiseDrawer::draw_feature(int i, const OERegion& f,
+                                    const Color3ub& c) const
   {
     assert(i == 0 || i == 1);
     draw(f, c, _z1, offF(i));
   }
 
-  void PairWiseDrawer::draw_match(const Match& m, const Color3ub& c, bool drawLine) const
+  void PairWiseDrawer::draw_match(const Match& m, const Color3ub& c,
+                                  bool drawLine) const
   {
     draw_feature(0, m.x(), c);
     draw_feature(1, m.y(), c);
 
-    if(drawLine)
+    if (drawLine)
     {
-      Vector2f a,b;
+      Vector2f a, b;
       a = scale(0) * m.x_pos();
       b = scale(1) * (m.y_pos() + offF(1));
       Sara::draw_line(a, b, c);
     }
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara

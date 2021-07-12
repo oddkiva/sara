@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Graphics Features FeatureDetectors REQUIRED)
+find_package(DO_Sara COMPONENTS Features FeatureDetectors Visualization REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)

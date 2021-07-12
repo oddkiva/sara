@@ -5,7 +5,7 @@ if (SARA_USE_FROM_SOURCE)
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/SfM)
     sara_create_common_variables("SfM")
     sara_set_internal_dependencies("SfM"
-      "Features;FeatureDetectors;FeatureDescriptors;FeatureMatching;MultiViewGeometry")
+      "Features;FeatureDetectors;FeatureDescriptors;FeatureMatching;MultiViewGeometry;Visualization")
     sara_generate_library("SfM")
 
     target_include_directories(DO_Sara_SfM

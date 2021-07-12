@@ -13,7 +13,7 @@
 #include <sstream>
 #include <string>
 
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 #include <DO/Sara/Match/Match.hpp>
 
 
@@ -57,7 +57,6 @@ namespace DO::Sara {
         draw_image_pair(I1, I2, z);
       draw_match(*m, Color3ub(rand() % 256, rand() % 256, rand() % 256), off,
                  z);
-      cout << *m << endl;
       get_key();
     }
   }

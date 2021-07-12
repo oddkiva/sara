@@ -6,7 +6,7 @@ if (SARA_USE_FROM_SOURCE)
 
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/Graphics)
     sara_create_common_variables("Graphics")
-    sara_set_internal_dependencies("Graphics" "Features;Match")
+    sara_set_internal_dependencies("Graphics" "Core")
     sara_generate_library("Graphics")
 
     target_include_directories(DO_Sara_Graphics

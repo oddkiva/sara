@@ -20,7 +20,7 @@
 
 #include "StudyAffineMetric.hpp"
 
-#include <DO/Sara/Graphics/Match/PairWiseDrawer.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace std;

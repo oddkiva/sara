@@ -10,8 +10,8 @@
 // ========================================================================== //
 
 #include <DO/Sara/Features.hpp>
-#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace std;
