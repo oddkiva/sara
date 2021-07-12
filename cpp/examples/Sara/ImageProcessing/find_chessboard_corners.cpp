@@ -147,8 +147,7 @@ int __main(int argc, char** argv)
                               mean_gradients,           //
                               edge_attributes.centers,  //
                               edge_attributes.axes,     //
-                              edge_attributes.lengths,  //
-                              Eigen::Vector2i::Zero(), 1);
+                              edge_attributes.lengths);
     sara::toc("Edge Grouping");
 
     for (const auto& s: saddle_points)

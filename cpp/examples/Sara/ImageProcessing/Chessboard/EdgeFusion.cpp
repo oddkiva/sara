@@ -41,13 +41,11 @@ namespace DO::Sara {
   auto check_edge_grouping(                                          //
       const ImageView<Rgb8>& frame,                                  //
       const std::vector<Edge<double>>& edges_refined,                //
-      const std::vector<Edge<int>>& edge_chains,  //
+      const std::vector<Edge<int>>& edge_chains,                     //
       const std::vector<Eigen::Vector2f>& mean_gradients,            //
       const std::vector<Eigen::Vector2d>& centers,                   //
       const std::vector<Eigen::Matrix2d>& axes,                      //
-      const std::vector<Eigen::Vector2d>& lengths,                   //
-      const Point2i& p1,                                             //
-      double downscale_factor)                                       //
+      const std::vector<Eigen::Vector2d>& lengths)                   //
       -> void
   {
     tic();

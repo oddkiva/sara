@@ -44,6 +44,10 @@ add_library(ChessboardDetection
   Chessboard/EdgeFusion.cpp
   Chessboard/Otsu.hpp
   Chessboard/SaddleDetection.hpp)
+set_target_properties(ChessboardDetection
+  PROPERTIES
+  FOLDER "Libraries")
 target_link_libraries(ChessboardDetection PUBLIC ${DO_Sara_LIBRARIES})
+
 sara_add_example(find_chessboard_corners)
 target_link_libraries(find_chessboard_corners PRIVATE ChessboardDetection)

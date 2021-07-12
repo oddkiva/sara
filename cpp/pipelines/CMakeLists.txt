@@ -3,7 +3,7 @@ project(DO_Sara_SfM_Pipelines)
 message(STATUS "  - DO_Sara_SfM_Pipelines")
 
 find_package(DO_Sara
-  COMPONENTS Graphics ImageIO FileSystem FeatureMatching MultiViewGeometry SfM
+  COMPONENTS Graphics ImageIO FileSystem FeatureMatching MultiViewGeometry SfM Visualization
   REQUIRED)
 
 

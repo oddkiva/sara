@@ -8,12 +8,12 @@ foreach (file ${test_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES ${DO_Sara_LIBRARIES} Halide::Halide Halide::Runtime
-    FOLDER "DRAFTS/Halide")
+    DEPENDENCIES ${DO_Sara_LIBRARIES} Halide::Halide Halide::Runtime)
   set_target_properties(${filename}
     PROPERTIES
     CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED YES)
+    CXX_STANDARD_REQUIRED YES
+    FOLDER "Tests/Shakti/Halide")
 endforeach ()
 
 target_link_libraries(test_halide_cast

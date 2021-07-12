@@ -148,9 +148,7 @@ namespace DO::Sara {
       const std::vector<Eigen::Vector2f>& mean_gradients,            //
       const std::vector<Eigen::Vector2d>& centers,                   //
       const std::vector<Eigen::Matrix2d>& axes,                      //
-      const std::vector<Eigen::Vector2d>& lengths,                   //
-      const Point2i& p1,                                             //
-      double downscale_factor)                                       //
+      const std::vector<Eigen::Vector2d>& lengths)                   //
       -> void;
 
 
