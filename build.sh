@@ -60,7 +60,7 @@ function build_library()
   if [[ "${platform_name}" == "Darwin" ]]; then
     cmake_options+="-DCMAKE_Swift_COMPILER=$(which swiftc) "
   elif [[ "${platform_name}" == "Linux" ]]; then
-    cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.3.2-RELEASE-ubuntu20.04/usr/bin/swiftc "
+    cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.4.2-RELEASE-ubuntu20.04/usr/bin/swiftc "
   fi
 
   # Use latest Qt version instead of the system Qt.
