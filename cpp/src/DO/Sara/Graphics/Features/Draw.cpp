@@ -10,8 +10,7 @@
 // ========================================================================== //
 
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Features.hpp>
+#include <DO/Sara/Features/Feature.hpp>
 #include <DO/Sara/Graphics.hpp>
 
 using namespace std;
@@ -19,13 +18,13 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  void OERegion::draw(const Color3ub& color, float scale,
-                      const Point2f& offset) const
+  auto draw(const OERegion& f, const Color3ub& color, float scale,
+            const Point2f& offset) -> void
   {
     const auto& z = scale;
 
     // Solve characteristic equation to find eigenvalues
-    auto svd = JacobiSVD<Matrix2f>{shape_matrix, ComputeFullU};
+    auto svd = JacobiSVD<Matrix2f>{f.shape_matrix, ComputeFullU};
     const Vector2f& D = svd.singularValues();
     const Matrix2f& U = svd.matrixU();
 
@@ -47,8 +46,8 @@ namespace DO { namespace Sara {
                             180 / static_cast<float>(M_PI);
 
     // Start and end points of orientation line.
-    const Matrix2f& L = affinity().block(0, 0, 2, 2);
-    const Vector2f& p1 = z * (center() + offset);
+    const Matrix2f& L = f.affinity().block(0, 0, 2, 2);
+    const Vector2f& p1 = z * (f.center() + offset);
     const Vector2f& p2 = p1 + z * sqrt_two * L * Vector2f::UnitX();
 
     // Draw.
@@ -68,7 +67,7 @@ namespace DO { namespace Sara {
       const auto& z = scale;
       const auto cross_offset = 3.0f;
 
-      const Vector2f& p1 = z * (center() + offset);
+      const Vector2f& p1 = z * (f.center() + offset);
       const Vector2f& c1 = p1 - cross_offset * Vector2f::UnitX();
       const Vector2f& c2 = p1 + cross_offset * Vector2f::UnitX();
       const Vector2f& c3 = p1 - cross_offset * Vector2f::UnitY();

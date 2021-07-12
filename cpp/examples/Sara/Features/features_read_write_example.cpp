@@ -34,7 +34,7 @@ void check_affine_adaptation(const Image<unsigned char>& image,
   patch.flat_array().fill(0.f);
 
   display(image);
-  f.draw(Blue8);
+  draw(f, Blue8);
 
   auto region = OERegion{f};
   region.center().fill(patch_sz / 2.f);
@@ -63,12 +63,12 @@ void check_affine_adaptation(const Image<unsigned char>& image,
   }
 
   auto w1 = active_window();
-  auto w2 =
-      create_window(static_cast<int>(patch_sz), static_cast<int>(patch_sz));
+  auto w2 = create_window(static_cast<int>(patch_sz),  //
+                          static_cast<int>(patch_sz));
   set_active_window(w2);
   set_antialiasing();
   display(patch);
-  region.draw(Blue8);
+  draw(region, Blue8);
   millisleep(1000);
   close_window(w2);
 

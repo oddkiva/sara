@@ -8,6 +8,8 @@
 
 PYBIND11_MODULE(pysara_pybind11, m)
 {
+  m.doc() = "Sara Python API";  // optional module docstring
+
   expose_disjoint_sets(m);
   expose_geometry(m);
 #ifdef PYSARA_BUILD_VIDEOIO

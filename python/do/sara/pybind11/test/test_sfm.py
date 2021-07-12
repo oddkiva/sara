@@ -17,6 +17,6 @@ class TestPybind11(unittest.TestCase):
         b = sara.OERegion()
         self.assertEqual(a, b)
 
-    def test_compute_sift_keypoints(self):
-        image = np.zeros((24, 32), dtype=float)
-        features, descriptors = sara.compute_sift_keypoints(image)
+    # def test_compute_sift_keypoints(self):
+    #     image = np.zeros((24, 32), dtype=float)
+    #     features, descriptors = sara.compute_sift_keypoints(image)

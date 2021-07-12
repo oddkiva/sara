@@ -20,6 +20,11 @@
 
 namespace DO { namespace Sara {
 
+  //! @brief Draw the region.
+  DO_SARA_EXPORT
+  auto draw(const OERegion& f, const Color3ub& c, float scale = 1.f,
+            const Point2f& offset = Point2f::Zero()) -> void;
+
   /*!
    *  @addtogroup Features
    *  @{
@@ -29,7 +34,7 @@ namespace DO { namespace Sara {
                               const Point2f& offset = Point2f::Zero())
   {
     std::for_each(begin, end,
-                  [&](const auto& f) { f.draw(color, scale, offset); });
+                  [&](const auto& f) { draw(f, color, scale, offset); });
   }
 
   inline auto draw_oe_regions(const std::vector<OERegion>& features,

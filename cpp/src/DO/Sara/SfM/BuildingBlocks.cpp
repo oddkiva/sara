@@ -13,7 +13,6 @@
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
-#include <DO/Sara/Features/Draw.hpp>
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>

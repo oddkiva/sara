@@ -3,9 +3,7 @@ if (SARA_USE_FROM_SOURCE)
   if (NOT DO_Sara_Match_ADDED)
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/Match)
     sara_create_common_variables("Match")
-    sara_set_internal_dependencies(
-      "Match"
-      "Core;Features;Graphics")
+    sara_set_internal_dependencies("Match" "Core;Features")
     sara_generate_library("Match")
   endif ()
 endif ()

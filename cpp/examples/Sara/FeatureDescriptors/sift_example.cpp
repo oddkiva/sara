@@ -46,7 +46,7 @@ GRAPHICS_MAIN()
   {
     const auto& color =
         f.extremum_type == OERegion::ExtremumType::Max ? Red8 : Blue8;
-    f.draw(color);
+    draw(f, color);
   }
   get_key();
 

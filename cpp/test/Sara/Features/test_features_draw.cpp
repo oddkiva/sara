@@ -14,8 +14,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/Features/Draw.hpp>
-
 #include <DO/Sara/Graphics.hpp>
 
 
@@ -29,7 +27,7 @@ BOOST_AUTO_TEST_CASE(test_draw_method)
 {
   create_window(300, 300);
   const auto f = OERegion{Point2f{300 / 2.f, 300 / 2.f}, 1.f};
-  f.draw(Red8);
+  draw(f, Red8);
   close_window();
 }
 

@@ -17,7 +17,6 @@
 #include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
 #include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
 #include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
-#include <DO/Sara/Geometry/Graphics/DrawPolygon.hpp>
 #include <DO/Sara/Geometry/Tools/PolynomialRoots.hpp>
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
@@ -173,6 +172,7 @@ namespace DO { namespace Sara {
     const auto num_inter = compute_intersection_points(inter_pts, E_0, E_1);
 #else
       SARA_CHECK(numInter);
+#ifdef DEBUG_ELLIPSE_INTERSECTION_IMPLEMENTATION
       if (!active_window())
         set_antialiasing(create_window(512, 512));
       clear_window();
@@ -191,6 +191,7 @@ namespace DO { namespace Sara {
       draw_quad(Q_1, Blue8, 3);
       draw_bbox(b0, Green8, 3);
       get_key();
+#endif
 
       // now rescale the ellipse.
       Point2d center(b0.center());

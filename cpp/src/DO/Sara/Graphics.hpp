@@ -26,9 +26,14 @@
 
 // The following are still experimental but can be extended very easily.
 
+// 2D Geometry drawing utilities.
+#include <DO/Sara/Graphics/Features/Draw.hpp>
+#include <DO/Sara/Graphics/Geometry/DrawPolygon.hpp>
+#include <DO/Sara/Graphics/Match/Draw.hpp>
+#include <DO/Sara/Graphics/Match/PairWiseDrawer.hpp>
+
 // 3D viewer (still experimental and little features.)
 // \todo: see if we need to separate the Mesh from the Graphics module.
-#include <DO/Sara/Graphics/Mesh.hpp>
 #include <DO/Sara/Graphics/Draw3D.hpp>
 
 // Graphics view for interactive viewing (very little features for now.)

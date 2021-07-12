@@ -201,8 +201,8 @@ int __main(int argc, char** argv)
     const auto s = 1 / float(downscale_factor);
     for (size_t i = 0; i < matches.size(); ++i)
     {
-      matches[i].x().draw(Blue8, downscale_factor, s * p1.cast<float>());
-      matches[i].y().draw(Cyan8, downscale_factor, s * p1.cast<float>());
+      draw(matches[i].x(), Blue8, downscale_factor, s * p1.cast<float>());
+      draw(matches[i].y(), Cyan8, downscale_factor, s * p1.cast<float>());
       const Eigen::Vector2f a = p1.cast<float>() + downscale_factor * matches[i].x_pos();
       const Eigen::Vector2f b = p1.cast<float>() + downscale_factor * matches[i].y_pos();
       draw_arrow(a, b, Yellow8, 2);

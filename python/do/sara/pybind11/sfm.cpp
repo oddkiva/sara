@@ -25,17 +25,15 @@ namespace py = pybind11;
 namespace sara = DO::Sara;
 
 
-auto compute_sift_keypoints(py::array_t<float> image)
-{
-  const auto imview = to_image_view<float>(image);
-  return sara::compute_sift_keypoints(imview);
-}
+// auto compute_sift_keypoints(py::array_t<float> image)
+// {
+//   const auto imview = to_image_view<float>(image);
+//   return sara::compute_sift_keypoints(imview);
+// }
 
 
 auto expose_sfm(pybind11::module& m) -> void
 {
-  m.doc() = "Sara Python API";  // optional module docstring
-
   // TODO: move this to somewhere else.
   py::class_<sara::Tensor_<float, 2>>(m, "Tensor2f")
       .def(py::init<>())
@@ -53,6 +51,6 @@ auto expose_sfm(pybind11::module& m) -> void
       .def_readwrite("extremum_type", &sara::OERegion::extremum_type)
       .def(py::self == py::self);
 
-  m.def("compute_sift_keypoints", &compute_sift_keypoints,
-        "Compute SIFT keypoints for an input float image.");
+  // m.def("compute_sift_keypoints", &compute_sift_keypoints,
+  //       "Compute SIFT keypoints for an input float image.");
 }

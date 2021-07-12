@@ -6,7 +6,7 @@ if (SARA_USE_FROM_SOURCE)
 
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/Features)
     sara_create_common_variables("Features")
-    sara_set_internal_dependencies("Features" "Graphics")
+    sara_set_internal_dependencies("Features" "Core")
     sara_generate_library("Features")
 
     target_include_directories(DO_Sara_Features PUBLIC ${HDF5_INCLUDE_DIRS})
