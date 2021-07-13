@@ -70,8 +70,7 @@ inline auto to_image_view(pybind11::array_t<T> image)
   const auto height = static_cast<int>(image.shape(0));
   const auto width = static_cast<int>(image.shape(1));
   auto data = const_cast<T*>(image.data());
-  auto imview =
-      sara::ImageView<T, 2>{reinterpret_cast<T*>(data), {width, height}};
+  auto imview = sara::ImageView<T, 2>{data, {width, height}};
   return imview;
 }
 

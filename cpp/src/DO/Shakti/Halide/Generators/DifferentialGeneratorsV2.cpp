@@ -92,6 +92,72 @@ namespace v2 {
   };
 
   template <typename T>
+  class Gradient2D : public Generator<Gradient2D<T>>
+  {
+  public:
+    using Base = Generator<Gradient2D<T>>;
+    using Base::get_target;
+
+    template <typename T2>
+    using Input = typename Base::template Input<T2>;
+
+    template <typename T2>
+    using Output = typename Base::template Output<T2>;
+
+    GeneratorParam<int> tile_x{"tile_x", 16};
+    GeneratorParam<int> tile_y{"tile_y", 16};
+
+    Input<Buffer<T>> input{"input", 4};
+    Output<Buffer<>> output{"output", {Float(32), Float(32)}, 4};
+
+    //! 't' as time (since 'c' as channel does not make much sense).
+    Var x{"x"}, y{"y"}, t{"c"}, n{"n"};
+    Var xo{"xo"}, yo{"yo"}, to{"co"};
+    Var xi{"xi"}, yi{"yi"}, ti{"ci"};
+
+    void generate()
+    {
+      using DO::Shakti::HalideBackend::gradient;
+
+      auto input_padded = Halide::BoundaryConditions::repeat_edge(input);
+      output(x, y, t, n) = gradient(input_padded, x, y, t, n);
+    }
+
+    void schedule()
+    {
+      // GPU schedule.
+      if (get_target().has_gpu_feature())
+      {
+        output.gpu_tile(x, y, t, xo, yo, to, xi, yi, ti, tile_x, tile_y, 1,
+                        TailStrategy::GuardWithIf);
+      }
+
+      // Hexagon schedule.
+      else if (get_target().features_any_of({Halide::Target::HVX_v62,  //
+                                             Halide::Target::HVX_v65,
+                                             Halide::Target::HVX_v66,
+                                             Halide::Target::HVX_128}))
+      {
+        const auto vector_size =
+            get_target().has_feature(Target::HVX_128) ? 128 : 64;
+
+        output.hexagon()
+            .split(y, yo, yi, 128)
+            .parallel(yo)
+            .vectorize(x, vector_size, TailStrategy::GuardWithIf);
+      }
+
+      // CPU schedule.
+      else
+      {
+        output.split(y, yo, yi, 8)
+            .parallel(yo)
+            .vectorize(x, 8, TailStrategy::GuardWithIf);
+      }
+    }
+  };
+
+  template <typename T>
   class PolarGradient2D : public Generator<PolarGradient2D<T>>
   {
   public:
@@ -164,6 +230,8 @@ namespace v2 {
 }  // namespace v2
 
 
+HALIDE_REGISTER_GENERATOR(v2::Gradient2D<float>,
+                          shakti_gradient_2d_32f_v2)
 HALIDE_REGISTER_GENERATOR(v2::PolarGradient2D<float>,
                           shakti_polar_gradient_2d_32f_v2)
 HALIDE_REGISTER_GENERATOR(v2::ForwardDifference<float>,

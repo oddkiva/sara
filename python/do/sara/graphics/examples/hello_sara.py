@@ -13,12 +13,14 @@ def user_main():
     video_stream = sara.VideoStream()
     video_stream.open(video_file)
 
+    h, w, _ = video_stream.sizes()
+
     video_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
     video_frame_gray = np.empty(video_stream.sizes()[:2], dtype=np.float32)
     video_frame_gray_convolved = np.empty(video_stream.sizes()[:2],
                                           dtype=np.float32)
+    video_frame_gradient = np.empty((2, h, w), dtype=np.float32)
     video_frame_display = np.empty(video_stream.sizes(), dtype=np.uint8)
-    h, w, _ = video_stream.sizes()
 
     sara.create_window(w, h)
     sara.set_antialiasing(True)
@@ -40,15 +42,27 @@ def user_main():
         return
 
     while video_stream.read(video_frame):
-        with sara.Timer("convert rgb8 to gray32f"):
-            shakti.convert_rgb8_to_gray32f_cpu(video_frame, video_frame_gray)
-        with sara.Timer("Gaussian convolution"):
-            shakti.gaussian_convolution(video_frame_gray,
-                                        video_frame_gray_convolved, 1.6, 4)
-        with sara.Timer("Convert gray32f to rgb8"):
-            shakti.convert_gray32f_to_rgb8_cpu(video_frame_gray_convolved,
-                                               video_frame_display)
-        sara.draw_image(video_frame_display)
+        with sara.Timer("Total"):
+            with sara.Timer("convert rgb8 to gray32f"):
+                shakti.convert_rgb8_to_gray32f_cpu(video_frame, video_frame_gray)
+            with sara.Timer("Gaussian convolution"):
+                shakti.gaussian_convolution(video_frame_gray,
+                                            video_frame_gray_convolved, 1.6, 4)
+            with sara.Timer("Gradient"):
+                shakti.gradient_2d_32f(video_frame_gray_convolved,
+                                       video_frame_gradient[0],
+                                       video_frame_gradient[1])
+            with sara.Timer("Convert gray32f to rgb8"):
+                # video_frame_gradient[1] *= np.pi
+                # video_frame_gradient[1] /= 2 * np.pi
+                # shakti.convert_gray32f_to_rgb8_cpu(video_frame_gradient[1],
+                #                                    video_frame_display)
+                video_frame_gradient[1] += 1
+                video_frame_gradient[1] /= 2
+                shakti.convert_gray32f_to_rgb8_cpu(video_frame_gradient[1],
+                                                   video_frame_display)
+            with sara.Timer("Display"):
+                sara.draw_image(video_frame_display)
 
 if __name__ == '__main__':
     sara.run_graphics(user_main)
