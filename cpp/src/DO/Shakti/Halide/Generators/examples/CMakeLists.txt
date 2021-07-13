@@ -1,4 +1,5 @@
-find_package(DO_Sara COMPONENTS Core Graphics ImageIO SfM VideoIO REQUIRED)
+find_package(DO_Sara
+             COMPONENTS Core Graphics Geometry ImageIO SfM VideoIO REQUIRED)
 
 # N.B.: with MSVC, this link helped to solve already defined symbol errors:
 # https://github.com/halide/Halide/issues/740
@@ -163,5 +164,28 @@ target_link_libraries(halide_batched_sift_octave_example
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES})
 set_property(TARGET halide_batched_sift_octave_example
+  PROPERTY
+  FOLDER "Examples/Shakti/Halide")
+
+
+add_executable(halide_edge_detection_example
+  halide_edge_detection_example.cpp)
+target_compile_definitions(halide_edge_detection_example
+  PRIVATE ${SARA_DEFINITIONS})
+target_link_options(halide_edge_detection_example
+  PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
+target_link_libraries(halide_edge_detection_example
+  PRIVATE
+  Halide::Halide
+  Halide::Runtime
+  Halide::Halide
+  Halide::Runtime
+  shakti_halide_rgb_to_gray
+  shakti_gaussian_convolution_v2
+  shakti_scale_32f
+  shakti_polar_gradient_2d_32f_v2
+  ${DO_Sara_LIBRARIES})
+set_property(TARGET halide_edge_detection_example
   PROPERTY
   FOLDER "Examples/Shakti/Halide")

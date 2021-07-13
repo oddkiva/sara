@@ -1,8 +1,22 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2021-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+#include "shakti_enlarge.h"
 #include "shakti_gaussian_convolution_v2.h"
 #include "shakti_gradient_2d_32f_v2.h"
 #include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_halide_rgb_to_gray.h"
 #include "shakti_polar_gradient_2d_32f_v2.h"
+#include "shakti_reduce_32f.h"
+#include "shakti_scale_32f.h"
 
 #include <DO/Shakti/Halide/MyHalide.hpp>
 
@@ -60,7 +74,7 @@ inline auto as_interleaved_runtime_buffer_2d(py::array_t<T>& image)
 
 
 // ========================================================================== //
-// Color conversion
+// Color conversion.
 // ========================================================================== //
 auto convert_rgb8_to_gray32f_cpu(py::array_t<std::uint8_t> src,
                                  py::array_t<float> dst)
@@ -81,9 +95,10 @@ auto convert_gray32f_to_rgb8_cpu(py::array_t<float> src,
 
 
 // ========================================================================== //
-// Differential Calculus
+// Differential Calculus.
 // ========================================================================== //
-auto gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x, py::array_t<float> grad_y)
+auto gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x,
+                     py::array_t<float> grad_y)
 {
   auto src_buffer = as_runtime_buffer_4d(src);
   auto grad_x_buffer = as_runtime_buffer_4d(grad_x);
@@ -96,7 +111,8 @@ auto gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x, py::arra
 }
 
 
-auto polar_gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x, py::array_t<float> grad_y)
+auto polar_gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x,
+                           py::array_t<float> grad_y)
 {
   auto src_buffer = as_runtime_buffer_4d(src);
   auto grad_x_buffer = as_runtime_buffer_4d(grad_x);
@@ -121,6 +137,48 @@ auto gaussian_convolution(py::array_t<float> src, py::array_t<float> dst,
   src_buffer.set_host_dirty();
   shakti_gaussian_convolution_v2(src_buffer, sigma, truncation_factor,
                                  dst_buffer);
+  dst_buffer.copy_to_host();
+}
+
+
+// ========================================================================== //
+// Resize operations.
+// ========================================================================== //
+auto scale(py::array_t<float> src, py::array_t<float> dst)
+{
+  auto src_buffer = as_runtime_buffer_4d(src);
+  auto dst_buffer = as_runtime_buffer_4d(dst);
+
+  src_buffer.set_host_dirty();
+  dst_buffer.set_host_dirty();
+  shakti_scale_32f(src_buffer, dst_buffer.width(), dst_buffer.height(),
+                   dst_buffer);
+  dst_buffer.copy_to_host();
+}
+
+auto reduce(py::array_t<float> src, py::array_t<float> dst)
+{
+  auto src_buffer = as_runtime_buffer_4d(src);
+  auto dst_buffer = as_runtime_buffer_4d(dst);
+
+  src_buffer.set_host_dirty();
+  dst_buffer.set_host_dirty();
+  shakti_reduce_32f(src_buffer, dst_buffer.width(), dst_buffer.height(),
+                   dst_buffer);
+  dst_buffer.copy_to_host();
+}
+
+auto enlarge(py::array_t<float> src, py::array_t<float> dst)
+{
+  auto src_buffer = as_runtime_buffer_4d(src);
+  auto dst_buffer = as_runtime_buffer_4d(dst);
+
+  src_buffer.set_host_dirty();
+  dst_buffer.set_host_dirty();
+  shakti_enlarge(src_buffer,                               //
+                 src_buffer.width(), src_buffer.height(),  //
+                 dst_buffer.width(), dst_buffer.height(),  //
+                 dst_buffer);
   dst_buffer.copy_to_host();
 }
 

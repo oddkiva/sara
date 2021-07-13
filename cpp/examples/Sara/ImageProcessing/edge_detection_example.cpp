@@ -12,18 +12,13 @@
 //! @example
 
 #include <DO/Sara/Core/TicToc.hpp>
-#include <DO/Sara/DisjointSets/DisjointSets.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
-#include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyCamera.hpp>
-#include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
 #include <DO/Sara/VideoIO.hpp>
-
 
 #include <boost/filesystem.hpp>
 
@@ -70,9 +65,7 @@ int __main(int argc, char** argv)
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-  const auto downscale_factor = 2;
   auto frame_gray32f = Image<float>{};
-
 
   // Output save.
   namespace fs = boost::filesystem;
@@ -85,7 +78,6 @@ int __main(int argc, char** argv)
 #endif
       frame.sizes()  //
   };
-
 
   // Show the local extrema.
   create_window(frame.sizes());
@@ -143,7 +135,6 @@ int __main(int argc, char** argv)
                       float(downscale_factor));
     display(frame);
     toc("Display");
-
 
     tic();
     video_writer.write(frame);
