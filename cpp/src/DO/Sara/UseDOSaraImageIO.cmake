@@ -12,7 +12,6 @@ if (SARA_USE_FROM_SOURCE)
 
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/ImageIO)
     sara_create_common_variables("ImageIO")
-    sara_set_internal_dependencies("ImageIO" "Core")
     sara_generate_library("ImageIO")
 
     target_compile_definitions(DO_Sara_ImageIO PRIVATE ${PNG_DEFINITIONS})
@@ -29,7 +28,10 @@ if (SARA_USE_FROM_SOURCE)
       ${DO_Sara_ThirdParty_DIR}/eigen)
 
     target_link_libraries(DO_Sara_ImageIO
-      PRIVATE ${DO_ImageIO_THIRD_PARTY_LIBRARIES}
-      PUBLIC  easyexif)
+      PRIVATE
+      ${DO_ImageIO_THIRD_PARTY_LIBRARIES}
+      PUBLIC
+      DO::Sara::Core
+      easyexif)
   endif ()
 endif ()

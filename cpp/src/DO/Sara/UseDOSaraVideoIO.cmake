@@ -7,14 +7,7 @@ if (SARA_USE_FROM_SOURCE)
     sara_create_common_variables("VideoIO")
     sara_generate_library("VideoIO")
 
-    target_include_directories(DO_Sara_VideoIO
-      PRIVATE
-      ${FFMPEG_INCLUDE_DIRS}
-      PUBLIC
-      ${DO_Sara_INCLUDE_DIR}
-      ${DO_Sara_ThirdParty_DIR}
-      ${DO_Sara_ThirdParty_DIR}/eigen)
-
+    target_include_directories(DO_Sara_VideoIO PRIVATE ${FFMPEG_INCLUDE_DIRS})
     target_link_libraries(DO_Sara_VideoIO PRIVATE DO_Sara_Core ${FFMPEG_LIBRARIES})
   endif ()
 endif ()

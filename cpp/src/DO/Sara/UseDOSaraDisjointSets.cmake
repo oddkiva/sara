@@ -5,11 +5,5 @@ if (SARA_USE_FROM_SOURCE)
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/DisjointSets)
     sara_create_common_variables("DisjointSets")
     sara_generate_library("DisjointSets")
-
-    target_include_directories(DO_Sara_DisjointSets
-      PUBLIC
-      ${DO_Sara_INCLUDE_DIR}
-      ${DO_Sara_ThirdParty_DIR}
-      ${DO_Sara_ThirdParty_DIR}/eigen)
   endif ()
 endif ()

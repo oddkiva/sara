@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core Graphics REQUIRED)
+find_package(DO_Sara COMPONENTS Graphics REQUIRED)
 find_package(Qt5 COMPONENTS Test REQUIRED)
 
 set(CMAKE_AUTOMOC ON)

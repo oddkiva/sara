@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core ImageIO SfM Visualization REQUIRED)
+find_package(DO_Sara COMPONENTS SfM REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)

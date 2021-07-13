@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core Geometry REQUIRED)
+find_package(DO_Sara COMPONENTS Geometry REQUIRED)
 
 file(GLOB test_geometry_SOURCE_FILES FILES *.cpp)
 

@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Graphics Features FeatureDetectors REQUIRED)
+find_package(DO_Sara COMPONENTS FeatureDetectors REQUIRED)
 
 set(TEST_GROUP_NAME "FeatureDetectors")
 file(GLOB test_feature_detectors_SOURCE_FILES FILES test_*.cpp)

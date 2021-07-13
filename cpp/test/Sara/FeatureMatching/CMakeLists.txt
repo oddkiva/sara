@@ -1,6 +1,4 @@
-find_package(DO_Sara COMPONENTS
-  Geometry Features FeatureDescriptors FeatureDetectors
-  Match FeatureMatching REQUIRED)
+find_package(DO_Sara COMPONENTS FeatureMatching REQUIRED)
 
 file(GLOB test_featurematching_SOURCE_FILES FILES *.cpp)
 

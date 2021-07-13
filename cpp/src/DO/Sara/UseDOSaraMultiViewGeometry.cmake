@@ -3,12 +3,16 @@ if (SARA_USE_FROM_SOURCE)
   if (NOT DO_Sara_MultiViewGeometry_ADDED)
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/MultiViewGeometry)
     sara_create_common_variables("MultiViewGeometry")
-    sara_set_internal_dependencies("MultiViewGeometry"
-      "Core;Features;FileSystem;ImageIO")
     sara_generate_library("MultiViewGeometry")
 
     target_include_directories(DO_Sara_MultiViewGeometry
       PUBLIC
       ${Boost_INCLUDE_DIRS})
+    target_link_libraries(DO_Sara_MultiViewGeometry
+      PUBLIC
+      DO::Sara::Core
+      DO::Sara::Features
+      DO::Sara::FileSystem
+      DO::Sara::ImageIO)
   endif ()
 endif ()

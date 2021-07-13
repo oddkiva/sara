@@ -9,8 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/KeypointDetection.hpp>
+
+#include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Visualization.hpp>
 
 

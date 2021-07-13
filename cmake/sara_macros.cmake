@@ -165,21 +165,6 @@ macro (sara_create_common_variables _library_name)
 endmacro ()
 
 
-macro (sara_include_modules _dep_list)
-  foreach (dep ${_dep_list})
-    include(${DO_Sara_SOURCE_DIR}/${DO_Sara_${dep}_USE_FILE}.cmake)
-  endforeach ()
-endmacro ()
-
-
-macro (sara_set_internal_dependencies _library_name _dep_list)
-  foreach (dep ${_dep_list})
-    list(APPEND DO_Sara_${_library_name}_LINK_LIBRARIES
-      ${DO_Sara_${dep}_LIBRARIES})
-  endforeach ()
-endmacro ()
-
-
 macro (sara_append_subdir_files _parentdir _child_dir _hdr_list_var _src_list_var)
   get_filename_component(parentdir_name "${_parentdir}" NAME)
 
@@ -249,17 +234,13 @@ macro (sara_append_library _library_name
       ${_hdr_files} ${_src_files})
     add_library(DO::Sara::${_library_name} ALIAS DO_Sara_${_library_name})
 
+    # For every single library in Sara.
     target_include_directories(DO_Sara_${_library_name}
       PUBLIC
-      $<BUILD_INTERFACE:${DO_Sara_SOURCE_DIR}>
-      $<BUILD_INTERFACE:${_include_dirs}>
-      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
-    # Link with other libraries.
-    sara_step_message(
-      "Linking project 'DO_Sara_${_library_name}' with "
-      "'${_lib_dependencies}'")
-    target_link_libraries(DO_Sara_${_library_name} PUBLIC ${_lib_dependencies})
+      $<BUILD_INTERFACE:${DO_Sara_INCLUDE_DIR}>
+      $<BUILD_INTERFACE:${DO_Sara_ThirdParty_DIR}>
+      $<BUILD_INTERFACE:${DO_Sara_ThirdParty_DIR}/eigen>
+      $<INSTALL_INTERFACE:include>)
 
     # Form the compiled library output name.
     set(_library_output_basename DO_Sara_${_library_name})

@@ -19,10 +19,8 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  ComputeDominantOrientations::
-  ComputeDominantOrientations(float peak_ratio_thres,
-                              float patch_truncation_factor,
-                              float blur_factor)
+  ComputeDominantOrientations::ComputeDominantOrientations(
+      float peak_ratio_thres, float patch_truncation_factor, float blur_factor)
     : _peak_ratio_thres(peak_ratio_thres)
     , _patch_truncation_factor(patch_truncation_factor)
     , _blur_factor(blur_factor)
@@ -30,9 +28,8 @@ namespace DO { namespace Sara {
   }
 
   std::vector<float>
-  ComputeDominantOrientations::
-  operator()(const ImageView<Vector2f>& gradients,
-             float x, float y, float sigma) const
+  ComputeDominantOrientations::operator()(const ImageView<Vector2f>& gradients,
+                                          float x, float y, float sigma) const
   {
     // Compute histogram of gradients as in [Lowe, IJCV 2004].
     constexpr auto O = 36;
@@ -60,11 +57,9 @@ namespace DO { namespace Sara {
     return peaks;
   }
 
-  std::vector<float>
-  ComputeDominantOrientations::
-  operator()(const ImagePyramid<Vector2f>& pyramid,
-             const OERegion& extremum,
-             const Point2i& scale_octave_pair) const
+  std::vector<float> ComputeDominantOrientations::operator()(
+      const ImagePyramid<Vector2f>& pyramid, const OERegion& extremum,
+      const Point2i& scale_octave_pair) const
   {
     const auto& s_index = scale_octave_pair(0);
     const auto& o_index = scale_octave_pair(1);
@@ -74,11 +69,9 @@ namespace DO { namespace Sara {
     return this->operator()(pyramid(s_index, o_index), x, y, s);
   }
 
-  void
-  ComputeDominantOrientations::
-  operator()(const ImagePyramid<Vector2f>& pyramid,
-             vector<OERegion>& extrema,
-             vector<Point2i>& scale_octave_pairs) const
+  void ComputeDominantOrientations::operator()(
+      const ImagePyramid<Vector2f>& pyramid, vector<OERegion>& extrema,
+      vector<Point2i>& scale_octave_pairs) const
   {
     using namespace std;
 
@@ -91,7 +84,8 @@ namespace DO { namespace Sara {
     for (size_t i = 0; i != extrema.size(); ++i)
     {
       auto orientations = vector<float>{};
-      orientations = this->operator()(pyramid, extrema[i], scale_octave_pairs[i]);
+      orientations =
+          this->operator()(pyramid, extrema[i], scale_octave_pairs[i]);
       for (size_t o = 0; o != orientations.size(); ++o)
       {
         // Recopy.
@@ -106,5 +100,4 @@ namespace DO { namespace Sara {
     so2.swap(scale_octave_pairs);
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara
