@@ -52,7 +52,8 @@ int __main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
-  const auto video_filepath = argc == 2
+  // Parse command line.
+  const auto video_filepath = argc >= 2
                                   ? argv[1]
 #ifdef _WIN32
                                   : "C:/Users/David/Desktop/GOPR0542.MP4"s;
@@ -61,6 +62,7 @@ int __main(int argc, char** argv)
 #else
                                   : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
+  const auto downscale_factor = argc >= 3 ? std::atoi(argv[2]) : 2;
 
   // OpenMP.
   omp_set_num_threads(omp_get_max_threads());

@@ -1,14 +1,10 @@
-#include "python/do/sara/pybind11/Utilities.hpp"
-
+#include "shakti_gaussian_convolution_v2.h"
 #include "shakti_gradient_2d_32f_v2.h"
 #include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_halide_rgb_to_gray.h"
 #include "shakti_polar_gradient_2d_32f_v2.h"
 
-#include <DO/Sara/Core/Tensor.hpp>
-
-#include <DO/Shakti/Halide/Utilities.hpp>
-#include <DO/Shakti/Halide/GaussianConvolution.hpp>
+#include <DO/Shakti/Halide/MyHalide.hpp>
 
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -17,10 +13,11 @@
 
 
 namespace py = pybind11;
-namespace sara = DO::Sara;
-namespace halide = DO::Shakti::HalideBackend;
 
 
+// ========================================================================== //
+// Conversion from Numpy array to Halide runtime buffer.
+// ========================================================================== //
 template <typename T>
 inline auto as_runtime_buffer_2d(py::array_t<T> image)
 {
@@ -62,6 +59,9 @@ inline auto as_interleaved_runtime_buffer_2d(py::array_t<T>& image)
 }
 
 
+// ========================================================================== //
+// Color conversion
+// ========================================================================== //
 auto convert_rgb8_to_gray32f_cpu(py::array_t<std::uint8_t> src,
                                  py::array_t<float> dst)
 {
@@ -79,16 +79,22 @@ auto convert_gray32f_to_rgb8_cpu(py::array_t<float> src,
   shakti_halide_gray32f_to_rgb(src_buffer, dst_buffer);
 }
 
-auto gaussian_convolution(py::array_t<float> src, py::array_t<float> dst,
-                          float sigma, int truncation_factor)
+
+// ========================================================================== //
+// Differential Calculus
+// ========================================================================== //
+auto gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x, py::array_t<float> grad_y)
 {
   auto src_buffer = as_runtime_buffer_4d(src);
-  auto dst_buffer = as_runtime_buffer_4d(dst);
+  auto grad_x_buffer = as_runtime_buffer_4d(grad_x);
+  auto grad_y_buffer = as_runtime_buffer_4d(grad_y);
 
   src_buffer.set_host_dirty();
-  halide::gaussian_convolution(src_buffer, dst_buffer, sigma, truncation_factor);
-  dst_buffer.copy_to_host();
+  shakti_gradient_2d_32f_v2(src_buffer, grad_x_buffer, grad_y_buffer);
+  grad_x_buffer.copy_to_host();
+  grad_y_buffer.copy_to_host();
 }
+
 
 auto polar_gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x, py::array_t<float> grad_y)
 {
@@ -102,16 +108,20 @@ auto polar_gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x, py
   grad_y_buffer.copy_to_host();
 }
 
-auto gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x, py::array_t<float> grad_y)
+
+// ========================================================================== //
+// Convolution
+// ========================================================================== //
+auto gaussian_convolution(py::array_t<float> src, py::array_t<float> dst,
+                          float sigma, int truncation_factor)
 {
   auto src_buffer = as_runtime_buffer_4d(src);
-  auto grad_x_buffer = as_runtime_buffer_4d(grad_x);
-  auto grad_y_buffer = as_runtime_buffer_4d(grad_y);
+  auto dst_buffer = as_runtime_buffer_4d(dst);
 
   src_buffer.set_host_dirty();
-  shakti_gradient_2d_32f_v2(src_buffer, grad_x_buffer, grad_y_buffer);
-  grad_x_buffer.copy_to_host();
-  grad_y_buffer.copy_to_host();
+  shakti_gaussian_convolution_v2(src_buffer, sigma, truncation_factor,
+                                 dst_buffer);
+  dst_buffer.copy_to_host();
 }
 
 
