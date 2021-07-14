@@ -83,5 +83,8 @@ func main() {
 
 
 runGraphics {
+    for arg in CommandLine.arguments {
+        print("arg = \(arg)")
+    }
     main()
 }
