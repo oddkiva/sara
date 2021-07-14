@@ -7,6 +7,7 @@ target_link_libraries(image_annotator
   Qt${QT_VERSION}::Gui
   Qt${QT_VERSION}::Widgets
   Qt${QT_VERSION}::OpenGL
+  $<$<EQUAL:${QT_VERSION},6>:Qt6::OpenGLWidgets>
   $<$<PLATFORM_ID:Windows>:Qt${QT_VERSION}::WinMain>)
 set_property(TARGET image_annotator
   PROPERTY
