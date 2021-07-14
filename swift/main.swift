@@ -37,7 +37,7 @@ func testDrawFunctions() {
 }
 
 func testImageRead() {
-#if __APPLE__
+#if os(macOS)
     let imageFilepath = "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
 #else
     let imageFilepath = "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
@@ -52,7 +52,7 @@ func testImageRead() {
     for y in 0..<h / 8 {
         for x in 0..<w / 8 {
             let (r, g, b) = image.pixel(Int(x), Int(y))
-            var color = rgb(UInt8(r), UInt8(g), UInt8(b))
+            var color = rgb(r, g, b)
             drawPoint(x, y, &color)
         }
     }
@@ -64,7 +64,11 @@ func testImageRead() {
 }
 
 func testVideoRead() {
+#if os(macOS)
     let videoFilePath = "/Users/david/Desktop/Datasets/videos/sample10.mp4"
+#else
+    let videoFilePath = "/home/david/Desktop/Datasets/videos/sample10.mp4"
+#endif
     let videoStream = VideoStream(filePath: videoFilePath)
     resizeWindow(Int32(videoStream.frame.width),
                  Int32(videoStream.frame.height))
@@ -77,14 +81,17 @@ func main() {
     createWindow(300, 300)
     testCBasicFunction()
     testDrawFunctions()
-    //testImageRead()
+    testImageRead()
     testVideoRead()
 }
 
 
 runGraphics {
-    for arg in CommandLine.arguments {
-        print("arg = \(arg)")
+    if (CommandLine.arguments.count > 1) {
+        print("Command line arguments for '\(CommandLine.arguments[0])'")
+        for arg in CommandLine.arguments[1...] {
+            print("* \(arg)")
+        }
     }
     main()
 }
