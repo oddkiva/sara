@@ -15,6 +15,15 @@
 #include <QGraphicsItemGroup>
 #include <QtGui>
 #include <QtOpenGL>
+#include <QDockWidget>
+#include <QFileDialog>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QOpenGLWidget>
+#include <QSet>
+#include <QStatusBar>
+#include <QToolBar>
 
 #include <algorithm>
 
@@ -357,7 +366,11 @@ Quad::~Quad()
   QList<Line*> lines;
   for (int i = 0; i < 4; ++i)
     lines << p[i]->lines();
-  // lines = lines.toSet().toList();
+
+  // Eliminate duplicates.
+  lines = QSet<Line *>(lines.begin(), lines.end()).values();
+
+  // Destroy the lines.
   for (int i = 0; i < lines.size(); ++i)
     delete lines[i];
 
@@ -592,7 +605,7 @@ void GraphicsAnnotator::mouseMoveEvent(QMouseEvent* event)
 void GraphicsAnnotator::wheelEvent(QWheelEvent* event)
 {
   if (event->modifiers() == Qt::ControlModifier)
-    scaleView(pow(double(2), event->delta() / 240.0));
+    scaleView(pow(double(2), event->angleDelta().y() / 240.0));
   QGraphicsView::wheelEvent(event);
 }
 
@@ -621,7 +634,8 @@ void GraphicsAnnotator::keyPressEvent(QKeyEvent* event)
     }
 
     // Eliminate duplicates.
-    selectedQuads = selectedQuads.toSet().toList();
+    selectedQuads = QSet<Quad *>(selectedQuads.begin(),
+                                 selectedQuads.end()).values();
 
     // Print the selected quads.
     qDebug() << "Selected quads";
@@ -632,8 +646,7 @@ void GraphicsAnnotator::keyPressEvent(QKeyEvent* event)
     // Destroy them.
     for (int i = 0; i < selectedQuads.size(); ++i)
     {
-      QList<Quad*>::iterator q =
-          qFind(quads.begin(), quads.end(), selectedQuads[i]);
+      auto q = std::find(quads.begin(), quads.end(), selectedQuads[i]);
       if (q != quads.end())
       {
         scene()->removeItem(*q);

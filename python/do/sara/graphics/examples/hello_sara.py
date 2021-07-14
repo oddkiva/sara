@@ -49,17 +49,18 @@ def user_main():
             shakti.gaussian_convolution(video_frame_gray,
                                         video_frame_gray_convolved, 1.6, 4)
         with sara.Timer("Gradient"):
-            shakti.gradient_2d_32f(video_frame_gray_convolved,
-                                   video_frame_gradient[0],
-                                   video_frame_gradient[1])
+            shakti.polar_gradient_2d_32f(video_frame_gray_convolved,
+                                         video_frame_gradient[0],
+                                         video_frame_gradient[1])
         with sara.Timer("Convert gray32f to rgb8"):
-            # video_frame_gradient[1] *= np.pi
+            video_frame_gradient[0] += 1
+            video_frame_gradient[0] /= 2
+            # video_frame_gradient[1] += np.pi
             # video_frame_gradient[1] /= 2 * np.pi
-            # shakti.convert_gray32f_to_rgb8_cpu(video_frame_gradient[1],
-            #                                    video_frame_display)
-            video_frame_gradient[1] += 1
-            video_frame_gradient[1] /= 2
-            shakti.convert_gray32f_to_rgb8_cpu(video_frame_gradient[1],
+
+            # video_frame_gradient[1] += 1
+            # video_frame_gradient[1] /= 2
+            shakti.convert_gray32f_to_rgb8_cpu(video_frame_gradient[0],
                                                video_frame_display)
         with sara.Timer("Display"):
             sara.draw_image(video_frame_display)

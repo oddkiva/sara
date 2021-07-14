@@ -19,7 +19,8 @@ foreach (file ${examples_SRC_FILES})
     ${HDF5_LIBRARIES}
     DO_Kalpana_2D DO_Kalpana_3D DO_Kalpana_Math
     Qt${QT_VERSION}::Widgets
-    Qt${QT_VERSION}::OpenGL)
+    Qt${QT_VERSION}::OpenGL
+    $<$<EQUAL:${QT_VERSION},6>:Qt6::OpenGLWidgets>)
     # Qt${QT_VERSION}::OpenGLExtensions)
 
   target_compile_definitions(${filename}
