@@ -16,13 +16,14 @@ if (SARA_USE_FROM_SOURCE)
 
     target_link_libraries(DO_Sara_Graphics
       PUBLIC
-      Qt5::Widgets
-      Qt5::OpenGL
+      Qt${QT_VERSION}::Widgets
+      Qt${QT_VERSION}::OpenGLWidgets
+      Qt${QT_VERSION}::OpenGL
       ${OPENGL_LIBRARIES}
       DO::Sara::Core
 
       PRIVATE
-      $<$<PLATFORM_ID:Windows>:Qt5::WinMain>)
+      $<$<PLATFORM_ID:Windows>:Qt${QT_VERSION}::WinMain>)
 
     target_compile_definitions(DO_Sara_Graphics
       PUBLIC

@@ -57,8 +57,9 @@ BOOST_AUTO_TEST_CASE(test_construction_of_PaintingWindow_with_small_size)
 BOOST_AUTO_TEST_CASE(
     test_construction_of_PaintingWindow_with_size_larger_than_desktop)
 {
-  int width = qApp->desktop()->width();
-  int height = qApp->desktop()->height();
+  auto app = reinterpret_cast<QGuiApplication *>(qApp);
+  const auto width = app->screens()[0]->availableSize().width();
+  const auto height = app->screens()[0]->availableSize().height();
 
   PaintingWindow* window = new PaintingWindow(width, height);
 
@@ -546,8 +547,8 @@ public:
     BOOST_CHECK_EQUAL(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
-    BOOST_CHECK_EQUAL(arguments.at(0).toInt(), expected_event.x());
-    BOOST_CHECK_EQUAL(arguments.at(1).toInt(), expected_event.y());
+    BOOST_CHECK_EQUAL(arguments.at(0).toInt(), expected_event.position().x());
+    BOOST_CHECK_EQUAL(arguments.at(1).toInt(), expected_event.position().y());
     BOOST_CHECK_EQUAL(arguments.at(2).value<Qt::MouseButtons>(),
                       expected_event.buttons());
   }

@@ -103,7 +103,7 @@ namespace DO { namespace Sara {
   private:
     static GraphicsContext* m_current;
 
-    QMutex m_mutex{QMutex::NonRecursive};
+    QMutex m_mutex;
     UserThread m_userThread;
     WidgetList* m_widgetList = nullptr;
 

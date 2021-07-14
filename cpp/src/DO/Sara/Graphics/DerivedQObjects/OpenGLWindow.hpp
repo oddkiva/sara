@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QQuaternion>
 #include <QTime>
 #include <QTimer>
@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
   };
 
   //! @brief QGLWidget-derived class used to view 3D scenes.
-  class DO_SARA_EXPORT OpenGLWindow : public QGLWidget
+  class DO_SARA_EXPORT OpenGLWindow : public QOpenGLWidget
   {
     Q_OBJECT
 

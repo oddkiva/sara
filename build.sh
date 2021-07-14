@@ -69,7 +69,8 @@ function build_library()
   # if [ "${platform_name}" == "Linux" ]; then
   #   cmake_options+="-DQt5_DIR=${HOME}/opt/Qt-5.15.0-amd64/lib/cmake/Qt5 "
   if [ "${platform_name}" == "Darwin" ]; then
-    cmake_options+="-DQt5_DIR=$(brew --prefix qt@5)/lib/cmake/Qt5 "
+    cmake_options+="-DSARA_USE_QT6=ON "
+    cmake_options+="-DQt6_DIR=$(brew --prefix qt)/lib/cmake/Qt6 "
   fi
 
   # ========================================================================= #

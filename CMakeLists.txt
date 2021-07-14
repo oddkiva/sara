@@ -24,6 +24,7 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
 
 # Set options.
 option(SARA_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
+option(SARA_USE_QT6 "Switch to Qt6" OFF)
 option(SARA_USE_HALIDE "Enable Halide" OFF)
 option(SARA_BUILD_VIDEOIO "Build Sara's Video I/O module" OFF)
 option(SARA_BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
@@ -97,7 +98,14 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
   find_package(TIFF REQUIRED)
   find_package(ZLIB REQUIRED)
 
-  find_package(Qt5 COMPONENTS Core Widgets OpenGL OpenGLExtensions REQUIRED)
+  if (SARA_USE_QT6)
+    set (QT_VERSION 6)
+    find_package(Qt${QT_VERSION} COMPONENTS Core Widgets OpenGL OpenGLWidgets REQUIRED)
+  else (SARA_USE_QT6)
+    set (QT_VERSION 5)
+    find_package(Qt${QT_VERSION} COMPONENTS Core Widgets OpenGL OpenGLExtensions REQUIRED)
+  endif ()
+
   find_package(OpenGL REQUIRED)
   find_package(OpenCL)
 
@@ -139,11 +147,8 @@ endif ()
 # Build the libraries.
 add_subdirectory(cpp)
 
-# TODO: MIGRATE TO QT6 BECAUSE OF BREW...!!!
-if (NOT APPLE)
-  if (CMAKE_Swift_COMPILER)
-    add_subdirectory(swift)
-  endif ()
+if (CMAKE_Swift_COMPILER)
+  add_subdirectory(swift)
 endif ()
 
 if (SARA_BUILD_PYTHON_BINDINGS)

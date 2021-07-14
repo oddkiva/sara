@@ -11,6 +11,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QGraphicsPixmapItem>
 
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp>
 
@@ -20,8 +21,7 @@ namespace DO { namespace Sara {
   GraphicsApplication::Impl::
   Impl(int& argc, char **argv)
     : QApplication(argc, argv)
-    , m_activeWindow(0)
-    , m_mutex(QMutex::NonRecursive)
+    , m_activeWindow(nullptr)
   {
     // Register painting data types.
     qRegisterMetaType<PaintingWindow *>("PaintingWindow *");

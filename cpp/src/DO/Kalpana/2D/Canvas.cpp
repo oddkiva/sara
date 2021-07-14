@@ -1,5 +1,6 @@
 #include <QtDebug>
 #include <QtOpenGL>
+#include <QOpenGLWidget>
 
 #include <DO/Kalpana/2D.hpp>
 
@@ -9,7 +10,7 @@ namespace DO { namespace Kalpana {
   Canvas::Canvas(QWidget *parent)
     : QGraphicsView{ parent }
   {
-    setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
+    setViewport(new QOpenGLWidget);
     setTransformationAnchor(AnchorUnderMouse);
     setRenderHints(QPainter::Antialiasing);
     setDragMode(RubberBandDrag);

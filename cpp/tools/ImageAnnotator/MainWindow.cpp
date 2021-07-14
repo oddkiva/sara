@@ -141,8 +141,8 @@ void AnnotatingWidget::mousePressEvent(QMouseEvent* e)
     // qDebug() << "mouse pressed";
     bboxes.push_back(QRectF());
     lastBBox = bboxes.end();
-    bboxes.back().setTopLeft(e->localPos());
-    bboxes.back().setBottomRight(e->localPos());
+    bboxes.back().setTopLeft(e->position());
+    bboxes.back().setBottomRight(e->position());
     // qDebug() << bboxes.back();
     update();
   }
@@ -151,7 +151,7 @@ void AnnotatingWidget::mousePressEvent(QMouseEvent* e)
 void AnnotatingWidget::mouseMoveEvent(QMouseEvent* e)
 {
   // qDebug() << "mouse moved";
-  bboxes.back().setBottomRight(e->localPos());
+  bboxes.back().setBottomRight(e->position());
   // qDebug() << bboxes.back();
   update();
 }
@@ -159,7 +159,7 @@ void AnnotatingWidget::mouseMoveEvent(QMouseEvent* e)
 void AnnotatingWidget::mouseReleaseEvent(QMouseEvent* e)
 {
   // qDebug() << "mouse released";
-  bboxes.back().setBottomRight(e->localPos());
+  bboxes.back().setBottomRight(e->position());
   update();
   qDebug() << bboxes.back();
   lastBBox = bboxes.end();
@@ -259,7 +259,7 @@ void Point::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 Line::Line(Point* sourceNode, Point* destNode)
 {
-  setAcceptedMouseButtons(0);
+  setAcceptedMouseButtons(Qt::NoButton);
   setFlags(ItemIsSelectable);
   source = sourceNode;
   dest = destNode;
@@ -341,7 +341,7 @@ Quad::~Quad()
   QList<Line*> lines;
   for (int i = 0; i < 4; ++i)
     lines << p[i]->lines();
-  lines = lines.toSet().toList();
+  // lines = lines.toSet().toList();
   for (int i = 0; i < lines.size(); ++i)
     delete lines[i];
 
@@ -396,7 +396,7 @@ GraphicsAnnotator::GraphicsAnnotator(int, int, QWidget* parent)
   , counter(0)
   , creatingRect(false)
 {
-  setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
+  setViewport(new QOpenGLWidget);
   setTransformationAnchor(AnchorUnderMouse);
   setRenderHints(QPainter::Antialiasing);
   setDragMode(RubberBandDrag);

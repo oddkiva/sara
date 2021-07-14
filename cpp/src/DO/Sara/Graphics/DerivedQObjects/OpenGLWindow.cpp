@@ -94,7 +94,7 @@ namespace DO { namespace Sara {
   // OpenGLWindow implementation
   OpenGLWindow::OpenGLWindow(int width, int height, const QString& windowTitle,
                              int x, int y, QWidget* parent)
-    : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
+    : QOpenGLWidget(parent)
     , m_scale(1.0f)
     , m_backgroundColor(QColor::fromCmykF(0.39, 0.39, 0.0, 0.0))
     , m_color(QColor::fromCmykF(0.40, 0.0, 1.0, 0.0))
@@ -163,7 +163,8 @@ namespace DO { namespace Sara {
   void OpenGLWindow::initializeGL()
   {
     // Set background color
-    qglClearColor(m_backgroundColor);
+    glClearColor(m_backgroundColor.redF(), m_backgroundColor.greenF(),
+                 m_backgroundColor.blueF(), m_backgroundColor.alphaF());
 
     glShadeModel(GL_SMOOTH);  // Enable smooth shading
 
@@ -313,11 +314,11 @@ namespace DO { namespace Sara {
 
   void OpenGLWindow::mousePressEvent(QMouseEvent* event)
   {
-    QGLWidget::mousePressEvent(event);
+    QOpenGLWidget::mousePressEvent(event);
     if (event->isAccepted())
       return;
 
-    QPointF pos(normalizePos(event->localPos()));
+    QPointF pos(normalizePos(event->position()));
     if (event->buttons() & Qt::LeftButton)
     {
       m_trackball.push(pos, m_trackball.rotation());
@@ -328,11 +329,11 @@ namespace DO { namespace Sara {
 
   void OpenGLWindow::mouseReleaseEvent(QMouseEvent* event)
   {
-    QGLWidget::mouseReleaseEvent(event);
+    QOpenGLWidget::mouseReleaseEvent(event);
     if (event->isAccepted())
       return;
 
-    QPointF pos(normalizePos(event->localPos()));
+    QPointF pos(normalizePos(event->position()));
     if (event->button() == Qt::LeftButton)
     {
       m_trackball.release(pos);
@@ -343,14 +344,14 @@ namespace DO { namespace Sara {
 
   void OpenGLWindow::mouseMoveEvent(QMouseEvent* event)
   {
-    QGLWidget::mouseMoveEvent(event);
+    QOpenGLWidget::mouseMoveEvent(event);
     if (event->isAccepted())
     {
       qDebug() << "mouse move event already accepted";
       return;
     }
 
-    QPointF pos(normalizePos(event->localPos()));
+    QPointF pos(normalizePos(event->position()));
     if (event->buttons() & Qt::LeftButton)
     {
       m_trackball.move(pos);
@@ -365,7 +366,7 @@ namespace DO { namespace Sara {
 
   void OpenGLWindow::wheelEvent(QWheelEvent* event)
   {
-    QGLWidget::wheelEvent(event);
+    QOpenGLWidget::wheelEvent(event);
 
     if (!event->isAccepted())
     {

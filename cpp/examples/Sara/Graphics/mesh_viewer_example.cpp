@@ -11,6 +11,8 @@
 
 //! @example
 
+#include <QApplication>
+
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/OpenGLWindow.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/RotationSliders.hpp>
@@ -211,7 +213,7 @@ int __main(int argc, char** argv)
 int main(int argc, char** argv)
 {
   const auto filename =
-      argc < 2 ? src_path("../../../../data/Boeing_787.obj") : argv[1];
+      argc < 2 ? src_path("../../../../data/pumpkin_tall_10k.obj") : argv[1];
 
   auto mesh = SimpleTriangleMesh3f{};
   if (!v2::MeshReader().read_object_file(mesh, filename))

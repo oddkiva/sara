@@ -39,7 +39,7 @@ namespace DO { namespace Sara {
   PaintingWindow::PaintingWindow(int width, int height,
                                  const QString& windowTitle, int x, int y,
                                  QWidget* parent)
-    : QWidget{}
+    : QWidget{parent}
     , m_scrollArea(new ScrollArea(parent))
     , m_pixmap(width, height)
     , m_painter(&m_pixmap)
@@ -59,11 +59,19 @@ namespace DO { namespace Sara {
     m_scrollArea->setFocusProxy(this);
 
     // Maximize if necessary.
-    if (width >= qApp->desktop()->width() ||
-        height >= qApp->desktop()->height())
-      m_scrollArea->showMaximized();
+    auto show_maximized = false;
+    for (auto screen: QGuiApplication::screens())
+    {
+      if (width >= screen->availableSize().width() ||
+          height >= screen->availableSize().height())
+      {
+        show_maximized = true;
+        m_scrollArea->showMaximized();
+        break;
+      }
+    }
     // Resize the scroll area with the size plus a two-pixel offset.
-    else
+    if (!show_maximized)
       m_scrollArea->resize(width+2, height+2);
     resize(width, height);
 
@@ -392,14 +400,24 @@ namespace DO { namespace Sara {
     m_pixmap.fill();
     m_painter.begin(&m_pixmap);
 
-    // Resize the window and the scroll area as follows.
+    // Resize the widget.
     resize(width, height);
-    if (width > qApp->desktop()->width() || height > qApp->desktop()->height())
+
+    // Resize the scroll area as follows.
+    auto show_maximized = false;
+    for (auto screen: QGuiApplication::screens())
     {
-      width = 800;
-      height = 600;
+      if (width >= screen->availableSize().width() ||
+          height >= screen->availableSize().height())
+      {
+        show_maximized = true;
+        m_scrollArea->showMaximized();
+        break;
+      }
     }
-    m_scrollArea->resize(width+2, height+2);
+    // Resize the scroll area with the size plus a two-pixel offset.
+    if (!show_maximized)
+      m_scrollArea->resize(width+2, height+2);
   }
 
   void PaintingWindow::waitForEvent(int ms)
@@ -415,13 +433,14 @@ namespace DO { namespace Sara {
 
   void PaintingWindow::mouseMoveEvent(QMouseEvent *event)
   {
-    emit movedMouse(event->x(), event->y(), event->buttons());
+    emit movedMouse(event->position().x(), event->position().y(),
+                    event->buttons());
 
     if (m_eventListeningTimer.isActive())
     {
       m_eventListeningTimer.stop();
-      emit sendEvent(mouse_moved(event->x(), event->y(), event->buttons(),
-                     event->modifiers()));
+      emit sendEvent(mouse_moved(event->position().x(), event->position().y(),
+                                 event->buttons(), event->modifiers()));
     }
   }
 
@@ -431,15 +450,17 @@ namespace DO { namespace Sara {
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
                   event->buttons() == Qt::LeftButton) ?
     Qt::MiddleButton : event->buttons();
-    emit pressedMouseButtons(event->x(), event->y(), buttons);
+    emit pressedMouseButtons(event->position().x(), event->position().y(),
+                             buttons);
 #else
-    emit pressedMouseButtons(event->x(), event->y(), event->buttons());
+    emit pressedMouseButtons(event->position().x(), event->position().y(),
+                             event->buttons());
 #endif
     if (m_eventListeningTimer.isActive())
     {
       m_eventListeningTimer.stop();
-      emit sendEvent(mouse_pressed(event->x(), event->y(), event->buttons(),
-                     event->modifiers()));
+      emit sendEvent(mouse_pressed(event->position().x(), event->position().y(),
+                                   event->buttons(), event->modifiers()));
     }
   }
 
@@ -449,15 +470,16 @@ namespace DO { namespace Sara {
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
                                 event->buttons() == Qt::LeftButton) ?
       Qt::MiddleButton : event->buttons();
-    emit releasedMouseButtons(event->x(), event->y(), buttons);
+    emit releasedMouseButtons(event->position().x(), event->position().y(),
+                              buttons);
 #else
     emit releasedMouseButtons(event->x(), event->y(), event->button());
 #endif
     if (m_eventListeningTimer.isActive())
     {
       m_eventListeningTimer.stop();
-      emit sendEvent(mouse_released(event->x(), event->y(),
-                                   event->buttons(), event->modifiers()));
+      emit sendEvent(mouse_released(event->position().x(), event->position().y(),
+                                    event->buttons(), event->modifiers()));
     }
   }
 
