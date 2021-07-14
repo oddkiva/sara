@@ -106,10 +106,10 @@ inline auto to_interleaved_rgb_image_view(pybind11::array_t<T> image)
 namespace pybind11::detail {
 
   template <typename T>
-  struct type_caster<DO::Sara::Image<T>>
+  struct type_caster<DO::Sara::ImageView<T>>
   {
   public:
-    PYBIND11_TYPE_CASTER(DO::Sara::Image<T>, _("DO::Sara::Image<T>"));
+    PYBIND11_TYPE_CASTER(DO::Sara::ImageView<T>, _("DO::Sara::ImageView<T>"));
 
     // Cast a NumPy array to C++ DO::Sara::Image object.
     bool load(pybind11::handle src, bool convert)
@@ -127,27 +127,28 @@ namespace pybind11::detail {
       if (buffer.ndim() != 2)
         return false;
 
-      value = DO::Sara::Image<T>(const_cast<T*>(buffer.data()),
-                                     {buffer.shape()[1], buffer.shape()[0]});
+      value.swap(DO::Sara::ImageView<T>{
+          const_cast<T*>(buffer.data()),
+          Eigen::Vector2i(buffer.shape()[1], buffer.shape()[0])});
 
       return true;
     }
 
     // Cast a C++ DO::Sara::Image object to a NumPy array.
-    inline static pybind11::handle cast(const DO::Sara::Image<T>& src,
-                                        pybind11::return_value_policy,
-                                        pybind11::handle)
+    static pybind11::handle cast(const DO::Sara::ImageView<T>& src,
+                                 pybind11::return_value_policy,
+                                 pybind11::handle)
     {
-      std::vector<size_t> shape(3);
-      std::vector<size_t> strides(3);
+      std::vector<size_t> shape(2);
+      std::vector<size_t> strides(2);
 
-      for (int i = 0; i < 3; ++i)
-      {
-        shape[i] = src.shape[i];
-        strides[i] = src.strides[i] * sizeof(T);
-      }
+      shape[0] = src.height();
+      shape[1] = src.width();
 
-      pybind11::array a(std::move(shape), std::move(strides), src.data.data());
+      strides[0] = sizeof(T);
+      strides[1] = shape[1] * sizeof(T);
+
+      pybind11::array a(std::move(shape), std::move(strides), src.data());
 
       return a.release();
     }

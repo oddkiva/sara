@@ -9,10 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "Utilities.hpp"
 #include "FeatureDetectors.hpp"
+#include "Utilities.hpp"
 
 #include <DO/Sara/FeatureDetectors.hpp>
+
+#include <pybind11/stl.h>
 
 
 namespace py = pybind11;
@@ -21,6 +23,14 @@ namespace sara = DO::Sara;
 
 auto expose_feature_detectors(pybind11::module& m) -> void
 {
+  py::class_<sara::EdgeDetector::Pipeline>(m, "EdgeDetectorPipeline")
+      .def(py::init<>())
+      .def_readonly("edge_chains", &sara::EdgeDetector::Pipeline::edges_as_list,
+                    "edge chains")
+      .def_readonly("edge_polylines",
+                    &sara::EdgeDetector::Pipeline::edges_simplified,
+                    "edge polylines");
+
   py::class_<sara::EdgeDetector>(m, "EdgeDetector")
       .def(py::init<>())
       .def(py::init([](float high_threshold_ratio, float low_threshold_ratio,
@@ -31,8 +41,7 @@ auto expose_feature_detectors(pybind11::module& m) -> void
             angular_threshold      //
         }};
       }))
-      // .def_readonly("edge_chains",
-      // &sara::EdgeDetector::Pipeline::edges_as_list,
-      //               "edge chains");
-      ;
+      .def("detect", &sara::EdgeDetector::operator(), "detect edges")
+      .def_readonly("pipeline", &sara::EdgeDetector::pipeline, "pipeline data");
+  ;
 }

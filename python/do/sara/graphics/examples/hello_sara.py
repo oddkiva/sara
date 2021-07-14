@@ -54,21 +54,32 @@ def user_main():
             shakti.polar_gradient_2d_32f(video_frame_gray_convolved,
                                          video_frame_gradient[0],
                                          video_frame_gradient[1])
+
         with sara.Timer("Convert gray32f to rgb8"):
             video_frame_gradient[0] += 1
             video_frame_gradient[0] /= 2
             # video_frame_gradient[1] += np.pi
             # video_frame_gradient[1] /= 2 * np.pi
-
-            # video_frame_gradient[1] += 1
-            # video_frame_gradient[1] /= 2
             shakti.convert_gray32f_to_rgb8_cpu(video_frame_gradient[0],
                                                video_frame_display)
 
         with sara.Timer("Edge detection"):
             ed.detect(video_frame_gray_convolved)
+
         with sara.Timer("Display"):
-            sara.draw_image(video_frame_display)
+            sara.draw_image(video_frame)
+
+            ed_data = ed.pipeline
+            for e in ed_data.edge_polylines:
+                if len(e) < 2:
+                    continue
+                color = np.random.randint(0, 255, size=(3,))
+                for a, b in zip(e[:-1], e[1:]):
+                    sara.draw_circle(a, 3, color, 2)
+                    sara.draw_circle(b, 3, color, 2)
+                    sara.draw_line(a, b, color, 1)
+
+            sara.millisleep(20)
 
 if __name__ == '__main__':
     sara.run_graphics(user_main)
