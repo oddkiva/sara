@@ -67,7 +67,7 @@ def user_main():
             ed.detect(video_frame_gray_convolved)
 
         with sara.Timer("Display"):
-            sara.draw_image(video_frame)
+            sara.draw_image(video_frame_display)
 
             ed_data = ed.pipeline
             for e in ed_data.edge_polylines:
