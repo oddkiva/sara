@@ -368,7 +368,11 @@ Quad::~Quad()
     lines << p[i]->lines();
 
   // Eliminate duplicates.
+#if QT_VERSION_MAJOR == 6
   lines = QSet<Line *>(lines.begin(), lines.end()).values();
+#else
+  lines = lines.toSet().toList();
+#endif
 
   // Destroy the lines.
   for (int i = 0; i < lines.size(); ++i)
@@ -634,8 +638,12 @@ void GraphicsAnnotator::keyPressEvent(QKeyEvent* event)
     }
 
     // Eliminate duplicates.
+#if QT_VERSION_MAJOR == 6
     selectedQuads = QSet<Quad *>(selectedQuads.begin(),
                                  selectedQuads.end()).values();
+#else
+    selectedQuads = selectedQuads.toSet().toList();
+#endif
 
     // Print the selected quads.
     qDebug() << "Selected quads";
