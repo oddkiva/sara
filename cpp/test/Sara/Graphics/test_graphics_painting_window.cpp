@@ -547,8 +547,13 @@ public:
     BOOST_CHECK_EQUAL(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
-    BOOST_CHECK_EQUAL(arguments.at(0).toInt(), expected_event.position().x());
-    BOOST_CHECK_EQUAL(arguments.at(1).toInt(), expected_event.position().y());
+#if QT_VERSION_MAJOR == 6
+    const auto pos = expected_event.position();
+#else
+    const auto pos = expected_event.localPos();
+#endif
+    BOOST_CHECK_EQUAL(arguments.at(0).toInt(), pos.x());
+    BOOST_CHECK_EQUAL(arguments.at(1).toInt(), pos.y());
     BOOST_CHECK_EQUAL(arguments.at(2).value<Qt::MouseButtons>(),
                       expected_event.buttons());
   }

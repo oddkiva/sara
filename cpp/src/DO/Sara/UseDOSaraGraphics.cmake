@@ -17,8 +17,8 @@ if (SARA_USE_FROM_SOURCE)
     target_link_libraries(DO_Sara_Graphics
       PUBLIC
       Qt${QT_VERSION}::Widgets
-      Qt${QT_VERSION}::OpenGLWidgets
       Qt${QT_VERSION}::OpenGL
+      $<$<EQUAL:${QT_VERSION},6>:Qt6::OpenGLWidgets>
       ${OPENGL_LIBRARIES}
       DO::Sara::Core
 

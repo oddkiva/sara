@@ -433,44 +433,58 @@ namespace DO { namespace Sara {
 
   void PaintingWindow::mouseMoveEvent(QMouseEvent *event)
   {
-    emit movedMouse(event->position().x(), event->position().y(),
-                    event->buttons());
+#if QT_VERSION_MAJOR == 6
+    const auto pos = event->position();
+#else
+    const auto pos = event->localPos();
+#endif
+    emit movedMouse(pos.x(), pos.y(), event->buttons());
 
     if (m_eventListeningTimer.isActive())
     {
       m_eventListeningTimer.stop();
-      emit sendEvent(mouse_moved(event->position().x(), event->position().y(),
+      emit sendEvent(mouse_moved(pos.x(), pos.y(),  //
                                  event->buttons(), event->modifiers()));
     }
   }
 
   void PaintingWindow::mousePressEvent(QMouseEvent *event)
   {
+#if QT_VERSION_MAJOR == 6
+    const auto pos = event->position();
+#else
+    const auto pos = event->localPos();
+#endif
+
 #ifdef Q_OS_MAC
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
                   event->buttons() == Qt::LeftButton) ?
     Qt::MiddleButton : event->buttons();
-    emit pressedMouseButtons(event->position().x(), event->position().y(),
-                             buttons);
+    emit pressedMouseButtons(pos.x(), pos.y(), buttons);
 #else
-    emit pressedMouseButtons(event->position().x(), event->position().y(),
-                             event->buttons());
+    emit pressedMouseButtons(pos.x(), pos.y(), event->buttons());
 #endif
     if (m_eventListeningTimer.isActive())
     {
       m_eventListeningTimer.stop();
-      emit sendEvent(mouse_pressed(event->position().x(), event->position().y(),
-                                   event->buttons(), event->modifiers()));
+      emit sendEvent(mouse_pressed(pos.x(), pos.y(), event->buttons(),
+                                   event->modifiers()));
     }
   }
 
   void PaintingWindow::mouseReleaseEvent(QMouseEvent *event)
   {
+#if QT_VERSION_MAJOR == 6
+    const auto pos = event->position();
+#else
+    const auto pos = event->localPos();
+#endif
+
 #ifdef Q_OS_MAC
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
                                 event->buttons() == Qt::LeftButton) ?
       Qt::MiddleButton : event->buttons();
-    emit releasedMouseButtons(event->position().x(), event->position().y(),
+    emit releasedMouseButtons(pos.x(), pos.y(),
                               buttons);
 #else
     emit releasedMouseButtons(event->x(), event->y(), event->button());
@@ -478,8 +492,8 @@ namespace DO { namespace Sara {
     if (m_eventListeningTimer.isActive())
     {
       m_eventListeningTimer.stop();
-      emit sendEvent(mouse_released(event->position().x(), event->position().y(),
-                                    event->buttons(), event->modifiers()));
+      emit sendEvent(mouse_released(pos.x(), pos.y(), event->buttons(),
+                                    event->modifiers()));
     }
   }
 

@@ -318,7 +318,11 @@ namespace DO { namespace Sara {
     if (event->isAccepted())
       return;
 
-    QPointF pos(normalizePos(event->position()));
+#if QT_VERSION_MAJOR == 6
+    const auto pos = normalizePos(event->position());
+#else
+    const auto pos = normalizePos(event->localPos());
+#endif
     if (event->buttons() & Qt::LeftButton)
     {
       m_trackball.push(pos, m_trackball.rotation());
@@ -333,7 +337,11 @@ namespace DO { namespace Sara {
     if (event->isAccepted())
       return;
 
-    QPointF pos(normalizePos(event->position()));
+#if QT_VERSION_MAJOR == 6
+    const auto pos = normalizePos(event->position());
+#else
+    const auto pos = normalizePos(event->localPos());
+#endif
     if (event->button() == Qt::LeftButton)
     {
       m_trackball.release(pos);
@@ -351,7 +359,11 @@ namespace DO { namespace Sara {
       return;
     }
 
-    QPointF pos(normalizePos(event->position()));
+#if QT_VERSION_MAJOR == 6
+    const auto pos = normalizePos(event->position());
+#else
+    const auto pos = normalizePos(event->localPos());
+#endif
     if (event->buttons() & Qt::LeftButton)
     {
       m_trackball.move(pos);

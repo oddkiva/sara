@@ -29,8 +29,7 @@ foreach (library ${DO_Kalpana_LIBRARIES})
       Qt${QT_VERSION}::Core
       Qt${QT_VERSION}::Widgets
       Qt${QT_VERSION}::OpenGL
-      Qt${QT_VERSION}::OpenGLWidgets
-      # Qt${QT_VERSION}::OpenGLExtensions
+      $<$<EQUAL:${QT_VERSION},6>:Qt6::OpenGLWidgets>
       ${OPENGL_LIBRARIES}
       ${DO_Sara_LIBRARIES})
   endif ()

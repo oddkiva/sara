@@ -141,8 +141,14 @@ void AnnotatingWidget::mousePressEvent(QMouseEvent* e)
     // qDebug() << "mouse pressed";
     bboxes.push_back(QRectF());
     lastBBox = bboxes.end();
-    bboxes.back().setTopLeft(e->position());
-    bboxes.back().setBottomRight(e->position());
+
+#if QT_VERSION_MAJOR == 6
+    const auto pos = e->position();
+#else
+    const auto pos = e->localPos();
+#endif
+    bboxes.back().setTopLeft(pos);
+    bboxes.back().setBottomRight(pos);
     // qDebug() << bboxes.back();
     update();
   }
@@ -150,16 +156,26 @@ void AnnotatingWidget::mousePressEvent(QMouseEvent* e)
 
 void AnnotatingWidget::mouseMoveEvent(QMouseEvent* e)
 {
+#if QT_VERSION_MAJOR == 6
+    const auto pos = e->position();
+#else
+    const auto pos = e->localPos();
+#endif
   // qDebug() << "mouse moved";
-  bboxes.back().setBottomRight(e->position());
+  bboxes.back().setBottomRight(pos);
   // qDebug() << bboxes.back();
   update();
 }
 
 void AnnotatingWidget::mouseReleaseEvent(QMouseEvent* e)
 {
+#if QT_VERSION_MAJOR == 6
+    const auto pos = e->position();
+#else
+    const auto pos = e->localPos();
+#endif
   // qDebug() << "mouse released";
-  bboxes.back().setBottomRight(e->position());
+  bboxes.back().setBottomRight(pos);
   update();
   qDebug() << bboxes.back();
   lastBBox = bboxes.end();
