@@ -515,7 +515,11 @@ protected:  // data members.
   QPoint _mouse_pos;
   Qt::Key _key;
   int _mouse_buttons_type_id;
+#if QT_VERSION_MAJOR == 6
   QMetaType _event_type;
+#else
+  int _event_type;
+#endif
 
   int _wait_ms;
   int _event_time_ms;
@@ -525,7 +529,11 @@ public:
   {
     _mouse_buttons_type_id =
         qRegisterMetaType<Qt::MouseButtons>("Qt::MouseButtons");
+#if QT_VERSION_MAJOR == 6
     _event_type = QMetaType(qRegisterMetaType<Event>("Event"));
+#else
+    _event_type = qRegisterMetaType<Event>("Event");
+#endif
     _test_window = new PaintingWindow(300, 300);
     _event_scheduler.set_receiver(_test_window);
     _mouse_pos = QPoint(10, 10);
