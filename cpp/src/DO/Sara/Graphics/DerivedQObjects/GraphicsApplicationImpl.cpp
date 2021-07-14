@@ -66,7 +66,7 @@ namespace DO { namespace Sara {
     if (windowType == PAINTING_WINDOW)
       m_createdWindows << new PaintingWindow(w, h, windowTitle, x, y);
     if (windowType == OPENGL_WINDOW)
-      m_createdWindows << new OpenGLWindow(w, h, windowTitle, x, y);
+      m_createdWindows << new OpenGLWindow(w, h, windowTitle, x, y, nullptr, true);
     if (windowType == GRAPHICS_VIEW)
       m_createdWindows << new GraphicsView(w, h, windowTitle, x, y);
 

@@ -93,12 +93,15 @@ namespace DO { namespace Sara {
   // ====================================================================== //
   // OpenGLWindow implementation
   OpenGLWindow::OpenGLWindow(int width, int height, const QString& windowTitle,
-                             int x, int y, QWidget* parent)
+                             int x, int y, QWidget* parent, bool deleteOnClose)
     : QOpenGLWidget(parent)
     , m_scale(1.0f)
     , m_backgroundColor(QColor::fromCmykF(0.39, 0.39, 0.0, 0.0))
     , m_color(QColor::fromCmykF(0.40, 0.0, 1.0, 0.0))
   {
+    if (deleteOnClose)
+      setAttribute(Qt::WA_DeleteOnClose);
+
     // Set event listener.
     m_eventListeningTimer.setSingleShot(true);
     connect(&m_eventListeningTimer, SIGNAL(timeout()), this,
@@ -223,8 +226,8 @@ namespace DO { namespace Sara {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Setup the viewing mode for the mesh
-    glPolygonMode(GL_FRONT, GL_FILL);  // we make each front face filled
-    glPolygonMode(GL_BACK, GL_LINE);  // we draw only the edges of the back face
+    glPolygonMode(GL_FRONT, GL_LINE); // we make each front face filled
+    glPolygonMode(GL_BACK, GL_FILL);  // we draw only the edges of the back face
     glEnable(GL_DEPTH_TEST);          // For depth consistent drawing
     // Model-view transform.
     glLoadIdentity();

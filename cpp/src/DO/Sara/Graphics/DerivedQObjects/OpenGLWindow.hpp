@@ -62,7 +62,8 @@ namespace DO { namespace Sara {
     OpenGLWindow(int width, int height,
                  const QString& windowTitle = "Sara",
                  int x = -1, int y = -1,
-                 QWidget* parent = 0);
+                 QWidget* parent = nullptr,
+                 bool deleteOnClose = false);
 
   public slots:
     void setMesh(const SimpleTriangleMesh3f& mesh_);

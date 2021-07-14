@@ -71,11 +71,11 @@ namespace DO { namespace Sara {
   //! @brief Open a OpenGLWindow for 3D drawing.
   DO_SARA_EXPORT
   Window create_gl_window(int w, int h, const std::string& windowTitle = "Sara",
-                      int x = -1, int y = -1);
+                          int x = -1, int y = -1);
 
   inline Window create_gl_window(const Vector2i& sizes,
-                             const std::string& windowTitle = "Sara",
-                             int x = -1, int y = -1)
+                                 const std::string& windowTitle = "Sara",
+                                 int x = -1, int y = -1)
   {
     return create_gl_window(sizes(0), sizes(1), windowTitle, x, y);
   }

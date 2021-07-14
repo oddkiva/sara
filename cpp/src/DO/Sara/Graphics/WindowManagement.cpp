@@ -25,8 +25,8 @@ namespace DO { namespace Sara {
     return Point2i(w->width(), w->height());
   }
 
-  Window create_window(int w, int h, const std::string& windowTitle,
-                    int x, int y)
+  Window create_window(int w, int h, const std::string& windowTitle, int x,
+                       int y)
   {
     QMetaObject::invokeMethod(gui_app(), "createWindow",
                               Qt::BlockingQueuedConnection,
@@ -38,8 +38,8 @@ namespace DO { namespace Sara {
     return gui_app()->m_createdWindows.back();
   }
 
-  Window create_gl_window(int w, int h, const std::string& windowTitle,
-                      int x, int y)
+  Window create_gl_window(int w, int h, const std::string& windowTitle, int x,
+                          int y)
   {
     QMetaObject::invokeMethod(gui_app(), "createWindow",
                               Qt::BlockingQueuedConnection,
