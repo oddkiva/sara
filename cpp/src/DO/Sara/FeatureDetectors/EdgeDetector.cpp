@@ -20,7 +20,7 @@
 
 namespace DO::Sara {
 
-  auto EdgeDetector::operator()(const Image<float>& image) -> void
+  auto EdgeDetector::operator()(const ImageView<float>& image) -> void
   {
     tic();
     pipeline.gradient_cartesian = gradient(image);

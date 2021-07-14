@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2021-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <pybind11/eigen.h>
@@ -90,3 +101,56 @@ inline auto to_interleaved_rgb_image_view(pybind11::array_t<T> image)
                                           {width, height}};
   return imview;
 }
+
+
+namespace pybind11::detail {
+
+  template <typename T>
+  struct type_caster<DO::Sara::Image<T>>
+  {
+  public:
+    PYBIND11_TYPE_CASTER(DO::Sara::Image<T>, _("DO::Sara::Image<T>"));
+
+    // Cast a NumPy array to C++ DO::Sara::Image object.
+    bool load(pybind11::handle src, bool convert)
+    {
+      if (!convert and !pybind11::array_t<T>::check_(src))
+        return false;
+
+      // Try converting a generic Python object to a NumPy array object.
+      auto buffer =
+          pybind11::array_t<T, pybind11::array::c_style |
+                                   pybind11::array::forcecast>::ensure(src);
+      if (!buffer)
+        return false;
+
+      if (buffer.ndim() != 2)
+        return false;
+
+      value = DO::Sara::Image<T>(const_cast<T*>(buffer.data()),
+                                     {buffer.shape()[1], buffer.shape()[0]});
+
+      return true;
+    }
+
+    // Cast a C++ DO::Sara::Image object to a NumPy array.
+    inline static pybind11::handle cast(const DO::Sara::Image<T>& src,
+                                        pybind11::return_value_policy,
+                                        pybind11::handle)
+    {
+      std::vector<size_t> shape(3);
+      std::vector<size_t> strides(3);
+
+      for (int i = 0; i < 3; ++i)
+      {
+        shape[i] = src.shape[i];
+        strides[i] = src.strides[i] * sizeof(T);
+      }
+
+      pybind11::array a(std::move(shape), std::move(strides), src.data.data());
+
+      return a.release();
+    }
+  };
+
+}  // namespace pybind11::detail

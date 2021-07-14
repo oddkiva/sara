@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "sfm.hpp"
+#include "SfM.hpp"
 #include "Utilities.hpp"
 
 #include <DO/Sara/Core.hpp>
@@ -34,7 +34,6 @@ auto compute_sift_keypoints(py::array_t<float> image)
 
 auto expose_sfm(pybind11::module& m) -> void
 {
-  // TODO: move this to somewhere else.
   py::class_<sara::Tensor_<float, 2>>(m, "Tensor2f")
       .def(py::init<>())
       .def("data",

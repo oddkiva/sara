@@ -42,6 +42,8 @@ def user_main():
     #     return
     sara.millisleep(100)
 
+    ed = sara.EdgeDetector()
+
     while video_stream.read(video_frame):
         with sara.Timer("convert rgb8 to gray32f"):
             shakti.convert_rgb8_to_gray32f_cpu(video_frame, video_frame_gray)
@@ -62,6 +64,9 @@ def user_main():
             # video_frame_gradient[1] /= 2
             shakti.convert_gray32f_to_rgb8_cpu(video_frame_gradient[0],
                                                video_frame_display)
+
+        with sara.Timer("Edge detection"):
+            ed.detect(video_frame_gray_convolved)
         with sara.Timer("Display"):
             sara.draw_image(video_frame_display)
 

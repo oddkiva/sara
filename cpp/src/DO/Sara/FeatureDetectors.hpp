@@ -20,11 +20,14 @@
 // Extremum filtering and refining.
 #include <DO/Sara/FeatureDetectors/RefineExtremum.hpp>
 
-// Feature detection.
+// Keypoint detection.
 #include <DO/Sara/FeatureDetectors/LoG.hpp>
 #include <DO/Sara/FeatureDetectors/DoG.hpp>
 #include <DO/Sara/FeatureDetectors/Harris.hpp>
 #include <DO/Sara/FeatureDetectors/Hessian.hpp>
+
+// Edge detection.
+#include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 
 // Detection of DoG+SIFT keypoints.
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
