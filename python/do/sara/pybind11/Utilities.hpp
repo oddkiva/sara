@@ -148,7 +148,7 @@ namespace pybind11::detail {
       strides[0] = sizeof(T);
       strides[1] = shape[1] * sizeof(T);
 
-      pybind11::array a(std::move(shape), std::move(strides), src.data());
+      pybind11::array a{std::move(shape), std::move(strides), src.data()};
 
       return a.release();
     }

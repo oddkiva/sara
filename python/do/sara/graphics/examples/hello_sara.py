@@ -67,19 +67,19 @@ def user_main():
             ed.detect(video_frame_gray_convolved)
 
         with sara.Timer("Display"):
-            sara.draw_image(video_frame_display)
-
             ed_data = ed.pipeline
             for e in ed_data.edge_polylines:
                 if len(e) < 2:
                     continue
                 color = np.random.randint(0, 255, size=(3,))
                 for a, b in zip(e[:-1], e[1:]):
-                    sara.draw_circle(a, 3, color, 2)
-                    sara.draw_circle(b, 3, color, 2)
-                    sara.draw_line(a, b, color, 1)
-
-            sara.millisleep(20)
+                    sara.image_draw.draw_circle(video_frame_display, a, 3,
+                                                color, 2)
+                    sara.image_draw.draw_circle(video_frame_display,b, 3,
+                                                color, 2)
+                    sara.image_draw.draw_line(video_frame_display, a, b, color,
+                                              1)
+            sara.draw_image(video_frame_display)
 
 if __name__ == '__main__':
     sara.run_graphics(user_main)
