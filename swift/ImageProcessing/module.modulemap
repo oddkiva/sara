@@ -1,0 +1,4 @@
+module SaraImageProcessing {
+  header "CImageProcessing.hpp"
+  export *
+}

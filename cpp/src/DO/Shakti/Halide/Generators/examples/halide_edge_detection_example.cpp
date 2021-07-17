@@ -13,12 +13,10 @@
 
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
-#include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Geometry.hpp>
-#include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Shakti/Halide/Utilities.hpp>

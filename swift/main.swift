@@ -70,10 +70,20 @@ func testVideoRead() {
     let videoFilePath = "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.MP4"
 #endif
     let videoStream = VideoStream(filePath: videoFilePath)
-    resizeWindow(Int32(videoStream.frame.width),
-                 Int32(videoStream.frame.height))
+
+    let w = videoStream.frame.width
+    let h = videoStream.frame.height
+    resizeWindow(Int32(w), Int32(h))
+
+    var gray32f = Image<Float32>(
+        data: Array<Float32>(repeating: 0, count: w * h),
+        width: w, height: h, numChannels: 1)
+    var display = Image<UInt8>(data: Array<UInt8>(repeating: 0, count: w * h * 3),
+                               width: w, height: h, numChannels: 3)
     while videoStream.read() {
-        drawImage(image: videoStream.frame)
+        rgb8ToGray32f(src: videoStream.frame, dst: view(image: &gray32f))
+        gray32fToRgb8(src: view(image: &gray32f), dst: view(image: &display))
+        drawImage(image: display)
     }
 }
 
