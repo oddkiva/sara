@@ -28,11 +28,14 @@ def user_main():
 
     ed = sara.EdgeDetector()
 
-    sigma = 20.
-    gauss_trunc = 4
+    sigma = 5.
+    gauss_trunc = 3
+    ksize = int(2 * sigma * gauss_trunc + 1)
 
     # Benchmarking on 4K video against Vanilla OpenCV.
     # Should compare with OpenCV CUDA implementation.
+
+    sara.create_window(w, h)
 
     while video_stream.read(video_frame):
         # Shakti wins.
@@ -41,17 +44,20 @@ def user_main():
         with sara.Timer("[OPENCV] rgb8 to gray32f"):
             cv2.cvtColor(video_frame, cv2.COLOR_RGB2GRAY, video_frame_gray8)
             video_frame_gray32f = video_frame_gray8.astype(np.float32) / 255
+        print()
 
         # On CUDA-architecture: Shakti by almost a factor 2.
         # On Macbook Air: OpenCV, CPU-GPU transfer may be the bottleneck.
         with sara.Timer("[SHAKTI] gaussian convolution CPU"):
             shakti.gaussian_convolution(video_frame_gray32f,
-                                        video_frame_convolved, sigma, 4, False)
+                                        video_frame_convolved, sigma,
+                                        gauss_trunc, False)
         with sara.Timer("[SHAKTI] gaussian convolution GPU"):
             shakti.gaussian_convolution(video_frame_gray32f,
-                                        video_frame_convolved, sigma, 4, True)
+                                        video_frame_convolved, sigma,
+                                        gauss_trunc, True)
         with sara.Timer("[OPENCV] gaussian convolution"):
-            cv2.GaussianBlur(video_frame_gray32f, None, sigma,
+            cv2.GaussianBlur(video_frame_gray32f, (ksize, ksize), sigma,
                              video_frame_convolved)
         print()
 
@@ -72,6 +78,12 @@ def user_main():
             cv2.Sobel(video_frame_gray32f, cv2.CV_32F, 0, 1, grady)
             cv2.cartToPolar(gradx, grady, mag, ori)
         print()
+
+        with sara.Timer("[SHAKTI] gray32f to rgb8"):
+            shakti.convert_gray32f_to_rgb8_cpu(video_frame_convolved,
+                                               video_frame)
+
+        sara.draw_image(video_frame)
 
 if __name__ == '__main__':
     sara.run_graphics(user_main)
