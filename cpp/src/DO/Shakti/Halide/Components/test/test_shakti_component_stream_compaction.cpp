@@ -59,11 +59,11 @@ BOOST_AUTO_TEST_CASE(test_stream_compaction)
   auto [non_zeros_x, non_zeros_y, non_zeros_c, non_zeros_n] =
       halide::unflatten_4d(compacted_indices, x, w, h, c);
 
-  Buffer<int32_t> indices = compacted_indices.realize(size);
-  Buffer<int32_t> xs = non_zeros_x.realize(size);
-  Buffer<int32_t> ys = non_zeros_y.realize(size);
-  Buffer<int32_t> cs = non_zeros_c.realize(size);
-  Buffer<int32_t> ns = non_zeros_n.realize(size);
+  Buffer<int32_t> indices = compacted_indices.realize({size});
+  Buffer<int32_t> xs = non_zeros_x.realize({size});
+  Buffer<int32_t> ys = non_zeros_y.realize({size});
+  Buffer<int32_t> cs = non_zeros_c.realize({size});
+  Buffer<int32_t> ns = non_zeros_n.realize({size});
 
   std::cout << "Flat indices =" << std::endl;
   print_1d(indices);

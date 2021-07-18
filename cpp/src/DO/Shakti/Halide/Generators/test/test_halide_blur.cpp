@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_gaussian_blur)
   auto dirac = Func{"dirac"};
 
   dirac(x) = select(x == 10, 1.f, 0.f);
-  Buffer<float> in = dirac.realize(21);
+  Buffer<float> in = dirac.realize({21});
   auto in_padded = BoundaryConditions::repeat_edge(in);
 
   auto conv = Func{"conv"};
@@ -60,8 +60,8 @@ BOOST_AUTO_TEST_CASE(test_gaussian_blur)
   auto conv_custom = Func{"conv_custom"};
   conv_custom(x) = sum(in_padded(x + i) * gaussian_kernel(i));
 
-  Buffer<float> out = conv.realize(21);
-  Buffer<float> out_custom = conv_custom.realize(21);
+  Buffer<float> out = conv.realize({21});
+  Buffer<float> out_custom = conv_custom.realize({21});
 
   SARA_DEBUG << "Input" << std::endl;
   for (auto k = 0; k < in.dim(0).extent(); ++k)

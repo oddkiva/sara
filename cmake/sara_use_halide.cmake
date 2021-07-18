@@ -19,6 +19,7 @@ find_package(Halide REQUIRED)
 
 include(SaraHalideGeneratorHelpers)
 
+
 if (NOT SHAKTI_HALIDE_GPU_TARGETS)
   if (APPLE)
     set (SHAKTI_HALIDE_GPU_TARGETS metal)

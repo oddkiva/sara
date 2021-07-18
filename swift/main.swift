@@ -51,7 +51,7 @@ func testImageRead() {
     // Draw a bit of the image pixel by pixel.
     for y in 0..<h / 8 {
         for x in 0..<w / 8 {
-            let (r, g, b) = image.pixel(Int(x), Int(y))
+            let (r, g, b) = image.rgb(Int(x), Int(y))
             var color = rgb(r, g, b)
             drawPoint(x, y, &color)
         }
@@ -81,8 +81,8 @@ func testVideoRead() {
     var display = Image<UInt8>(data: Array<UInt8>(repeating: 0, count: w * h * 3),
                                width: w, height: h, numChannels: 3)
     while videoStream.read() {
-        rgb8ToGray32f(src: videoStream.frame, dst: view(image: &gray32f))
-        gray32fToRgb8(src: view(image: &gray32f), dst: view(image: &display))
+        rgb8ToGray32f(src: videoStream.frame, dst: gray32f.view())
+        gray32fToRgb8(src: gray32f.view(), dst: display.view())
         drawImage(image: display)
     }
 }

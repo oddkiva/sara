@@ -6,18 +6,6 @@ VULKAN
 ======
 - Hello Triangle tutorial.
 
-HALIDE
-======
-
-The Halide implementation of SIFT has been written with good confidence regarding the
-implementation details:
-
-Optimization
-------------
-- [ ] Minimize transfers back-and-forth between host memory and device memory.
-      - [ ] Provide API in which only we interact only with
-            `Halide::Runtime::Buffer<T>` objects.
-
 Edge Matching
 -------------
 - Determine dominant edge gradient orientation:
@@ -34,13 +22,6 @@ Edge Matching
 - Describe curve/line in this dominant gradient
 - Define a scale
 - Describe the line
-
-
-Optical Distortion
-==================
-Implement the different inverse distortion method.
-- power series approach
-- bisection method
 
 
 Autocalibration with radial distortion

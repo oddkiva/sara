@@ -9,7 +9,7 @@ function(sara_add_halide_library TARGET)
     # - `object` is selected for CMake-target-compile
     # - `static_library` is selected for cross-compile
     # - `cpp_stub` is not available
-    set(EXTRA_OUTPUT_NAMES
+    set(extra_output_names
         ASSEMBLY
         BITCODE
         COMPILER_LOG
@@ -40,7 +40,7 @@ function(sara_add_halide_library TARGET)
     ##
 
     set(options C_BACKEND GRADIENT_DESCENT)
-    set(oneValueArgs FROM GENERATOR FUNCTION_NAME USE_RUNTIME AUTOSCHEDULER ${EXTRA_OUTPUT_NAMES})
+    set(oneValueArgs FROM GENERATOR FUNCTION_NAME NAMESPACE USE_RUNTIME AUTOSCHEDULER HEADER ${extra_output_names})
     set(multiValueArgs TARGETS FEATURES PARAMS PLUGINS)
     cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -52,6 +52,8 @@ function(sara_add_halide_library TARGET)
         message(FATAL_ERROR "Missing FROM argument specifying a Halide generator target")
     endif ()
 
+    _Halide_place_dll(${ARG_FROM})
+
     if (ARG_C_BACKEND)
         if (ARG_USE_RUNTIME)
             message(AUTHOR_WARNING "The C backend does not use a runtime.")
@@ -61,7 +63,7 @@ function(sara_add_halide_library TARGET)
         endif ()
     endif ()
 
-    set(GRADIENT_DESCENT "$<BOOL:${ARG_GRADIENT_DESCENT}>")
+    set(gradient_descent "$<BOOL:${ARG_GRADIENT_DESCENT}>")
 
     if (NOT ARG_GENERATOR)
         set(ARG_GENERATOR "${TARGET}")
@@ -69,6 +71,10 @@ function(sara_add_halide_library TARGET)
 
     if (NOT ARG_FUNCTION_NAME)
         set(ARG_FUNCTION_NAME "${TARGET}")
+    endif ()
+
+    if (ARG_NAMESPACE)
+        set(ARG_FUNCTION_NAME "${ARG_NAMESPACE}::${ARG_FUNCTION_NAME}")
     endif ()
 
     # If no TARGETS argument, use Halide_TARGET instead
@@ -104,18 +110,15 @@ function(sara_add_halide_library TARGET)
     if (ARG_C_BACKEND)
         # The C backend does not provide a runtime, so just supply headers.
         set(ARG_USE_RUNTIME Halide::Runtime)
-    else ()
+    elseif (NOT ARG_USE_RUNTIME)
         # If we're not using an existing runtime, create one.
-        if (NOT ARG_USE_RUNTIME)
-          _Halide_add_halide_runtime("${TARGET}.runtime"
-              FROM ${ARG_FROM}
-              TARGETS ${ARG_TARGETS})
-            set(ARG_USE_RUNTIME "${TARGET}.runtime")
-        elseif (NOT TARGET ${ARG_USE_RUNTIME})
-            message(FATAL_ERROR "Invalid runtime target ${ARG_USE_RUNTIME}")
-        else ()
-            _Halide_add_targets_to_runtime(${ARG_USE_RUNTIME} TARGETS ${ARG_TARGETS})
-        endif ()
+        _Halide_add_halide_runtime("${TARGET}.runtime" FROM ${ARG_FROM}
+                                   TARGETS ${ARG_TARGETS})
+        set(ARG_USE_RUNTIME "${TARGET}.runtime")
+    elseif (NOT TARGET ${ARG_USE_RUNTIME})
+        message(FATAL_ERROR "Invalid runtime target ${ARG_USE_RUNTIME}")
+    else ()
+        _Halide_add_targets_to_runtime(${ARG_USE_RUNTIME} TARGETS ${ARG_TARGETS})
     endif ()
 
     ##
@@ -123,46 +126,48 @@ function(sara_add_halide_library TARGET)
     ##
 
     _Halide_get_platform_details(
-            generator_cmd
-            crosscompiling
+            is_crosscompiling
             object_suffix
             static_library_suffix
             ${ARG_TARGETS})
 
     # Always emit a C header
-    set(GENERATOR_OUTPUTS c_header)
-    set(GENERATOR_OUTPUT_FILES "${TARGET}.h")
+    set(generator_outputs c_header)
+    set(generator_output_files "${TARGET}.h")
+    if (ARG_HEADER)
+        set(${ARG_HEADER} "${TARGET}.h" PARENT_SCOPE)
+    endif ()
 
     # Then either a C source, a set of object files, or a cross-compiled static library.
     if (ARG_C_BACKEND)
-        list(APPEND GENERATOR_OUTPUTS c_source)
-        set(GENERATOR_SOURCES "${TARGET}.halide_generated.cpp")
-    elseif (crosscompiling)
+        list(APPEND generator_outputs c_source)
+        set(generator_sources "${TARGET}.halide_generated.cpp")
+    elseif (is_crosscompiling)
         # When cross-compiling, we need to use a static, imported library
-        list(APPEND GENERATOR_OUTPUTS static_library)
-        set(GENERATOR_SOURCES "${TARGET}${static_library_suffix}")
+        list(APPEND generator_outputs static_library)
+        set(generator_sources "${TARGET}${static_library_suffix}")
     else ()
         # When compiling for the current CMake toolchain, create a native
-        list(APPEND GENERATOR_OUTPUTS object)
+        list(APPEND generator_outputs object)
         list(LENGTH ARG_TARGETS len)
         if (len EQUAL 1)
-            set(GENERATOR_SOURCES "${TARGET}${object_suffix}")
+            set(generator_sources "${TARGET}${object_suffix}")
         else ()
-            set(GENERATOR_SOURCES ${ARG_TARGETS})
-            list(TRANSFORM GENERATOR_SOURCES PREPEND "${TARGET}-")
-            list(TRANSFORM GENERATOR_SOURCES APPEND "${object_suffix}")
-            list(APPEND GENERATOR_SOURCES "${TARGET}_wrapper${object_suffix}")
+            set(generator_sources ${ARG_TARGETS})
+            list(TRANSFORM generator_sources PREPEND "${TARGET}-")
+            list(TRANSFORM generator_sources APPEND "${object_suffix}")
+            list(APPEND generator_sources "${TARGET}_wrapper${object_suffix}")
         endif ()
     endif ()
-    list(APPEND GENERATOR_OUTPUT_FILES ${GENERATOR_SOURCES})
+    list(APPEND generator_output_files ${generator_sources})
 
     # Add in extra outputs using the table defined at the start of this function
-    foreach (out IN LISTS EXTRA_OUTPUT_NAMES)
+    foreach (out IN LISTS extra_output_names)
         if (ARG_${out})
             set(${ARG_${out}} "${TARGET}${${out}_extension}" PARENT_SCOPE)
-            list(APPEND GENERATOR_OUTPUT_FILES "${TARGET}${${out}_extension}")
+            list(APPEND generator_output_files "${TARGET}${${out}_extension}")
             string(TOLOWER "${out}" out)
-            list(APPEND GENERATOR_OUTPUTS ${out})
+            list(APPEND generator_outputs ${out})
         endif ()
     endforeach ()
 
@@ -170,7 +175,7 @@ function(sara_add_halide_library TARGET)
     # Attach an autoscheduler if the user requested it
     ##
 
-    set(GEN_AUTOSCHEDULER "")
+    set(autoscheduler "")
     if (ARG_AUTOSCHEDULER)
         if ("${ARG_AUTOSCHEDULER}" MATCHES "::")
             if (NOT TARGET "${ARG_AUTOSCHEDULER}")
@@ -184,7 +189,7 @@ function(sara_add_halide_library TARGET)
         elseif (NOT ARG_PLUGINS)
             message(AUTHOR_WARNING "AUTOSCHEDULER set to a scheduler name but no plugins were loaded")
         endif ()
-        set(GEN_AUTOSCHEDULER -s "${ARG_AUTOSCHEDULER}")
+        set(autoscheduler -s "${ARG_AUTOSCHEDULER}")
         list(PREPEND ARG_PARAMS auto_schedule=true)
     endif ()
 
@@ -192,54 +197,60 @@ function(sara_add_halide_library TARGET)
     # Main library target for filter.
     ##
 
-    if (crosscompiling)
+    if (is_crosscompiling)
         add_library("${TARGET}" STATIC IMPORTED GLOBAL)
+        set_target_properties("${TARGET}" PROPERTIES
+                              IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/${generator_sources}")
     else ()
+        # THE CORRECT CODE IS AS FOLLOWS:
+        list(APPEND TARGET_OBJECT_FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}${object_suffix}
+            ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.runtime${object_suffix})
+
         add_library("${TARGET}" OBJECT IMPORTED GLOBAL)
+        set_target_properties("${TARGET}" PROPERTIES
+            IMPORTED_OBJECTS "${TARGET_OBJECT_FILES}"
+            POSITION_INDEPENDENT_CODE ON
+            LINKER_LANGUAGE CXX)
+
+        # THE ORIGINAL CODE
+        # add_library("${TARGET}" STATIC ${generator_sources})
+        # set_target_properties("${TARGET}" PROPERTIES
+        #                       POSITION_INDEPENDENT_CODE ON
+        #                       LINKER_LANGUAGE CXX)
     endif ()
 
     # Load the plugins and setup dependencies
-    set(GEN_PLUGINS "")
+    set(generator_plugins "")
     if (ARG_PLUGINS)
         foreach (p IN LISTS ARG_PLUGINS)
-            list(APPEND GEN_PLUGINS "$<TARGET_FILE:${p}>")
+            list(APPEND generator_plugins "$<TARGET_FILE:${p}>")
         endforeach ()
-        set(GEN_PLUGINS -p "$<JOIN:${GEN_PLUGINS},$<COMMA>>")
+        set(generator_plugins -p "$<JOIN:${generator_plugins},$<COMMA>>")
     endif ()
 
-    add_custom_command(OUTPUT ${GENERATOR_OUTPUT_FILES}
-                       COMMAND ${generator_cmd}
+    add_custom_command(OUTPUT ${generator_output_files}
+                       COMMAND ${ARG_FROM}
                        -n "${TARGET}"
-                       -d "${GRADIENT_DESCENT}"
+                       -d "${gradient_descent}"
                        -g "${ARG_GENERATOR}"
                        -f "${ARG_FUNCTION_NAME}"
-                       -e "$<JOIN:${GENERATOR_OUTPUTS},$<COMMA>>"
-                       ${GEN_PLUGINS}
-                       ${GEN_AUTOSCHEDULER}
+                       -e "$<JOIN:${generator_outputs},$<COMMA>>"
+                       ${generator_plugins}
+                       ${autoscheduler}
                        -o .
                        "target=$<JOIN:${ARG_TARGETS},$<COMMA>>"
                        ${ARG_PARAMS}
                        DEPENDS "${ARG_FROM}" ${ARG_PLUGINS}
                        VERBATIM)
 
-    list(TRANSFORM GENERATOR_OUTPUT_FILES PREPEND "${CMAKE_CURRENT_BINARY_DIR}/")
-    add_custom_target("${TARGET}.update" ALL DEPENDS ${GENERATOR_OUTPUT_FILES})
-    add_dependencies("${TARGET}.update" "${TARGET}.runtime")
+    list(TRANSFORM generator_output_files PREPEND "${CMAKE_CURRENT_BINARY_DIR}/")
+    add_custom_target("${TARGET}.update" ALL DEPENDS ${generator_output_files})
+
     add_dependencies("${TARGET}" "${TARGET}.update")
 
-    # List the generated files.
-    if (crosscompiling)
-        set_target_properties("${TARGET}" PROPERTIES
-            IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/${GENERATOR_SOURCES}")
-    else ()
-      list(APPEND TARGET_OBJECT_FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}${object_suffix}
-        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.runtime${object_suffix})
-      set_target_properties("${TARGET}" PROPERTIES
-            POSITION_INDEPENDENT_CODE ON
-            IMPORTED_OBJECTS "${TARGET_OBJECT_FILES}"
-            LINKER_LANGUAGE CXX)
-    endif ()
+    target_include_directories("${TARGET}" INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>")
 
-    target_include_directories("${TARGET}" INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
+    # NOT NEEDED BECAUSE OF OUR WORKAROUND.
+    # target_link_libraries("${TARGET}" INTERFACE "${ARG_USE_RUNTIME}")
 endfunction()

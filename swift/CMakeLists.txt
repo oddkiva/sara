@@ -11,6 +11,7 @@ add_executable(hello_world
   Graphics.swift
   Image.swift
   ImageIO.swift
+  ImageProcessing.swift
   VideoIO.swift)
 target_link_libraries(hello_world
   PRIVATE
