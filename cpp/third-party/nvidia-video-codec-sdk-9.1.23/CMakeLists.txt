@@ -1,5 +1,6 @@
-find_package(NvidiaVideoCodec)
+find_package(NvidiaVideoCodec REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(SaraFFMPEG REQUIRED)
 
 set(NvDecoder_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvDecoder/NvDecoder.cpp
@@ -42,7 +43,8 @@ target_include_directories(nvidia_VideoCodecHelpers
 target_link_libraries(nvidia_VideoCodecHelpers
   PUBLIC
   nvidia::VideoCodec
-  ${GLEW_LIBRARIES})
+  ${GLEW_LIBRARIES}
+  ${FFMPEG_LIBRARIES})
 target_compile_options(nvidia_VideoCodecHelpers
   PRIVATE
   $<$<CXX_COMPILER_ID:GNU>:-Wno-missing-field-initializers>

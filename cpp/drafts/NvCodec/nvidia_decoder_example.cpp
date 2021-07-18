@@ -31,8 +31,8 @@ namespace driver_api {
 
   struct CudaContext
   {
-    CUcontext cuda_context{NULL};
-    CUdevice cuda_device{NULL};
+    CUcontext cuda_context{0};
+    CUdevice cuda_device{0};
     int gpu_id{-1};
 
     CudaContext(int gpu_id_ = 0)
@@ -40,9 +40,9 @@ namespace driver_api {
     {
       ck(cuDeviceGet(&cuda_device, gpu_id));
 
-      char device_name[80];
-      ck(cuDeviceGetName(device_name, sizeof(device_name), cuda_device));
-      std::cout << "GPU in use: " << device_name << std::endl;
+      std::array<char, 80> device_name;
+      ck(cuDeviceGetName(device_name.data(), device_name.size(), cuda_device));
+      std::cout << "GPU in use: " << device_name.data() << std::endl;
 
       ck(cuCtxCreate(&cuda_context, CU_CTX_BLOCKING_SYNC, cuda_device));
     }
@@ -61,8 +61,8 @@ namespace driver_api {
       if (cuda_context)
       {
         ck(cuCtxDestroy(cuda_context));
-        cuda_context = NULL;
-        cuda_device = NULL;
+        cuda_context = 0;
+        cuda_device = 0;
         gpu_id = -1;
       }
     }
