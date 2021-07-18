@@ -82,6 +82,10 @@ def user_main():
         with sara.Timer("[SHAKTI] gray32f to rgb8"):
             shakti.convert_gray32f_to_rgb8_cpu(video_frame_convolved,
                                                video_frame)
+        with sara.Timer("[OPENCV] gray32f to rgb8"):
+            video_frame_gray8 = (video_frame_convolved * 255).astype(np.uint8)
+            cv2.cvtColor(video_frame_gray8, cv2.COLOR_GRAY2RGB, video_frame)
+        print()
 
         sara.draw_image(video_frame)
 
