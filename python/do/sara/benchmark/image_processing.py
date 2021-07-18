@@ -29,8 +29,16 @@ def user_main():
     ed = sara.EdgeDetector()
 
     sigma = 5.
-    gauss_trunc = 3
+    gauss_trunc = 4
     ksize = int(2 * sigma * gauss_trunc + 1)
+
+    shakti_cuda_gaussian_filter = shakti.CudaGaussianFilter(sigma, gauss_trunc)
+
+    # ksize has to be <= 32.
+    # opencv_cuda_gaussian_filter = cv2.cuda.createGaussianFilter(cv2.CV_32F,
+    #                                                             cv2.CV_32F,
+    #                                                             (ksize, ksize),
+    #                                                             sigma)
 
     # Benchmarking on 4K video against Vanilla OpenCV.
     # Should compare with OpenCV CUDA implementation.
@@ -46,19 +54,34 @@ def user_main():
             video_frame_gray32f = video_frame_gray8.astype(np.float32) / 255
         print()
 
-        # On CUDA-architecture: Shakti by almost a factor 2.
-        # On Macbook Air: OpenCV, CPU-GPU transfer may be the bottleneck.
-        with sara.Timer("[SHAKTI] gaussian convolution CPU"):
+        # On CUDA-architecture, in normalized times:
+        # Shakti CUDA impl    ~2.9x
+        # Shakti Halide GPU   ~1.7x
+        # Shakti Halide CPU   ~1.2x
+        # OpenCV CPU           1.0
+        # OpenCV GPU: TODO but the implementation is limited to ksize <= 32.
+        #
+        # So on nVidia platforms, we should prefer coding in CUDA to better
+        # leverage all the hardware acceleration.
+        #
+        # On Macbook Air: OpenCV wins against any Shakti/Halide implementation
+        # The CPU-GPU transfer may be the bottleneck.
+        with sara.Timer("[SHAKTI][Halide-CPU] gaussian convolution"):
             shakti.gaussian_convolution(video_frame_gray32f,
                                         video_frame_convolved, sigma,
                                         gauss_trunc, False)
-        with sara.Timer("[SHAKTI] gaussian convolution GPU"):
+        with sara.Timer("[SHAKTI][Halide-GPU] gaussian convolution"):
             shakti.gaussian_convolution(video_frame_gray32f,
                                         video_frame_convolved, sigma,
                                         gauss_trunc, True)
-        with sara.Timer("[OPENCV] gaussian convolution"):
+        with sara.Timer("[SHAKTI][CUDA] gaussian convolution"):
+            shakti_cuda_gaussian_filter.apply(video_frame_gray32f,
+                                       video_frame_convolved);
+        with sara.Timer("[OPENCV][CPU] gaussian convolution"):
             cv2.GaussianBlur(video_frame_gray32f, (ksize, ksize), sigma,
                              video_frame_convolved)
+        # with sara.Timer("[OPENCV][GPU] gaussian convolution"):
+        #     opencv_cuda_gaussian_filter.apply(video_frame_gray32f, video_frame_convolved)
         print()
 
         # OpenCV wins with a small edge but it also does more arithmetic

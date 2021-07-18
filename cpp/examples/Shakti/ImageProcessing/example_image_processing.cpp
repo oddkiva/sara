@@ -16,10 +16,10 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO/VideoStream.hpp>
 
-#include <DO/Shakti/ImageProcessing.hpp>
-#include <DO/Shakti/MultiArray.hpp>
-#include <DO/Shakti/Utilities/DeviceInfo.hpp>
-#include <DO/Shakti/Utilities/Timer.hpp>
+#include <DO/Shakti/Cuda/ImageProcessing.hpp>
+#include <DO/Shakti/Cuda/MultiArray.hpp>
+#include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
+#include <DO/Shakti/Cuda/Utilities/Timer.hpp>
 
 
 namespace sara = DO::Sara;
@@ -43,8 +43,7 @@ GRAPHICS_MAIN()
 #ifdef _WIN32
           "C:/Users/David/Desktop/GOPR0542.MP4"
 #else
-          "/home/david/Desktop/GOPR0542.MP4"
-          // "/home/david/Desktop/Datasets/sfm/Family.mp4"
+          "/home/david/Desktop/Datasets/sfm/Family.mp4"
 #endif
       ;
   std::cout << video_filepath << std::endl;

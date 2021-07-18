@@ -1,6 +1,10 @@
 file(GLOB pyshakti_SRC_FILES FILES *.cpp)
 
-add_library(pyshakti_pybind11 MODULE ${pyshakti_SRC_FILES})
+if (CMAKE_CUDA_COMPILER)
+  cuda_add_library(pyshakti_pybind11 MODULE ${pyshakti_SRC_FILES})
+else ()
+  add_library(pyshakti_pybind11 MODULE ${pyshakti_SRC_FILES})
+endif ()
 target_include_directories(pyshakti_pybind11
   PRIVATE ${CMAKE_SOURCE_DIR})
 
@@ -18,6 +22,11 @@ target_link_libraries(pyshakti_pybind11
           shakti_enlarge
           shakti_reduce_32f
           shakti_scale_32f)
+if (CMAKE_CUDA_COMPILER)
+  target_link_libraries(pyshakti_pybind11
+    PRIVATE
+    DO::Shakti::ImageProcessing)
+endif ()
 set_target_properties(pyshakti_pybind11 PROPERTIES
   PREFIX "${PYTHON_MODULE_PREFIX}"
   SUFFIX "${PYTHON_MODULE_EXTENSION}"

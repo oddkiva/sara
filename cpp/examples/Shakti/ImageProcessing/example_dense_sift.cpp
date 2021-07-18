@@ -9,8 +9,8 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 
-#include <DO/Shakti/ImageProcessing.hpp>
-#include <DO/Shakti/Utilities.hpp>
+#include <DO/Shakti/Cuda/ImageProcessing.hpp>
+#include <DO/Shakti/Cuda/Utilities.hpp>
 
 
 namespace shakti = DO::Shakti;

@@ -19,7 +19,12 @@
 #include "shakti_reduce_32f.h"
 #include "shakti_scale_32f.h"
 
+#include <DO/Sara/Core.hpp>
+
+#include <DO/Shakti/Cuda/ImageProcessing.hpp>
 #include <DO/Shakti/Halide/MyHalide.hpp>
+
+#include "do/sara/pybind11/Utilities.hpp"
 
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -188,8 +193,27 @@ auto enlarge(py::array_t<float> src, py::array_t<float> dst)
 }
 
 
+// ========================================================================== //
+// Resize operations.
+// ========================================================================== //
+struct CudaGaussianFilter : public DO::Shakti::GaussianFilter
+{
+  CudaGaussianFilter(float sigma, int gauss_trunc_factor)
+    : DO::Shakti::GaussianFilter(sigma, gauss_trunc_factor)
+  {
+  }
+
+  void apply(const DO::Sara::ImageView<float>& src,
+             DO::Sara::ImageView<float>& dst) const
+  {
+    this->operator()(dst.data(), src.data(), src.sizes().data());
+  }
+};
+
+
 PYBIND11_MODULE(pyshakti_pybind11, m)
 {
+  // Halide
   m.def("convert_rgb8_to_gray32f_cpu", &convert_rgb8_to_gray32f_cpu,
         "convert a RGB image buffer to a gray single-precision floating point "
         "image buffer");
@@ -206,4 +230,10 @@ PYBIND11_MODULE(pyshakti_pybind11, m)
         "Calculate the 2D image gradients");
   m.def("polar_gradient_2d_32f", &polar_gradient_2d_32f,
         "Calculate the 2D image gradients");
+
+  // CUDA
+  py::class_<CudaGaussianFilter>(m, "CudaGaussianFilter")
+      .def(py::init<float, int>())
+      .def("apply", &CudaGaussianFilter::apply);
+
 }

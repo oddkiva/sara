@@ -186,7 +186,8 @@ macro (shakti_append_library _library_name
     PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED YES
-    CUDA_SEPARABLE_COMPILATION ON)
+    CUDA_SEPARABLE_COMPILATION ON
+    POSITION_INDEPENDENT_CODE ON)
 
   # 4. Include third-party library directories.
   if (NOT "${_include_dirs}" STREQUAL "")

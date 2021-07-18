@@ -20,8 +20,8 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <DO/Shakti/Segmentation.hpp>
-#include <DO/Shakti/Utilities/DeviceInfo.hpp>
+#include <DO/Shakti/Cuda/Segmentation.hpp>
+#include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
 
 
 namespace sara = DO::Sara;

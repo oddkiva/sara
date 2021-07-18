@@ -66,7 +66,8 @@ if (CMAKE_CUDA_COMPILER)
   set(CUDA_LINK_LIBRARIES_KEYWORD PUBLIC)
   # Since we are still using the old CMake way style to compile CUDA code.
   if (UNIX)
-    set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -Xcompiler=-Wno-unknown-pragmas)
+    set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -Xcompiler=-Wno-unknown-pragmas
+      -Xcompiler=-fPIC)
   endif ()
 else ()
   message(STATUS "No CUDA support!")

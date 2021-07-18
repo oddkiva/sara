@@ -9,8 +9,5 @@ class Timer(object):
         self.tstart = time.time()
 
     def __exit__(self, type, value, traceback):
-        if not self.name:
-            print('Elapsed: {}s'.format(time.time() - self.tstart))
-        else:
-            print('[{}] Elapsed: {}s'.format(self.name,
-                                             time.time() - self.tstart))
+        print('[{}] Elapsed: {} ms'.format(self.name,
+                                           (time.time() - self.tstart) * 1e3))
