@@ -28,7 +28,7 @@ def user_main():
 
     ed = sara.EdgeDetector()
 
-    sigma = 1.6
+    sigma = 20.
     gauss_trunc = 4
 
     # Benchmarking on 4K video against Vanilla OpenCV.
@@ -44,9 +44,12 @@ def user_main():
 
         # On CUDA-architecture: Shakti by almost a factor 2.
         # On Macbook Air: OpenCV, CPU-GPU transfer may be the bottleneck.
-        with sara.Timer("[SHAKTI] gaussian convolution"):
+        with sara.Timer("[SHAKTI] gaussian convolution CPU"):
             shakti.gaussian_convolution(video_frame_gray32f,
-                                        video_frame_convolved, sigma, 4)
+                                        video_frame_convolved, sigma, 4, False)
+        with sara.Timer("[SHAKTI] gaussian convolution GPU"):
+            shakti.gaussian_convolution(video_frame_gray32f,
+                                        video_frame_convolved, sigma, 4, True)
         with sara.Timer("[OPENCV] gaussian convolution"):
             cv2.GaussianBlur(video_frame_gray32f, None, sigma,
                              video_frame_convolved)

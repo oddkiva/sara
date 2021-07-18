@@ -108,10 +108,16 @@ function (shakti_halide_library_v2)
     ${DO_Sara_ThirdParty_DIR}/eigen)
   target_link_libraries(${generator_NAME}.generator PRIVATE Halide::Generator)
 
-  sara_add_halide_library(${generator_NAME}
-    FROM ${generator_NAME}.generator
-    TARGETS host
-    FEATURES ${generator_HALIDE_TARGET_FEATURES})
+  if (generator_HALIDE_TARGET_FEATURES)
+    sara_add_halide_library(${generator_NAME}
+      FROM ${generator_NAME}.generator
+      TARGETS host
+      FEATURES ${generator_HALIDE_TARGET_FEATURES})
+  else ()
+    sara_add_halide_library(${generator_NAME}
+      FROM ${generator_NAME}.generator
+      TARGETS host)
+  endif()
 
   if (APPLE)
     target_link_libraries(${generator_NAME}

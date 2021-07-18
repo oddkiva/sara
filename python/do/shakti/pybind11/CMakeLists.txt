@@ -12,6 +12,7 @@ target_link_libraries(pyshakti_pybind11
           shakti_halide_rgb_to_gray
           shakti_halide_gray32f_to_rgb
           shakti_gaussian_convolution_v2
+          shakti_gaussian_convolution_v2_cpu
           shakti_gradient_2d_32f_v2
           shakti_polar_gradient_2d_32f_v2
           shakti_enlarge

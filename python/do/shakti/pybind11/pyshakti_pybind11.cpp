@@ -11,6 +11,7 @@
 
 #include "shakti_enlarge.h"
 #include "shakti_gaussian_convolution_v2.h"
+#include "shakti_gaussian_convolution_v2_cpu.h"
 #include "shakti_gradient_2d_32f_v2.h"
 #include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_halide_rgb_to_gray.h"
@@ -129,14 +130,18 @@ auto polar_gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x,
 // Convolution
 // ========================================================================== //
 auto gaussian_convolution(py::array_t<float> src, py::array_t<float> dst,
-                          float sigma, int truncation_factor)
+                          float sigma, int truncation_factor, bool gpu)
 {
   auto src_buffer = as_runtime_buffer_4d(src);
   auto dst_buffer = as_runtime_buffer_4d(dst);
 
   src_buffer.set_host_dirty();
-  shakti_gaussian_convolution_v2(src_buffer, sigma, truncation_factor,
-                                 dst_buffer);
+  if (gpu)
+    shakti_gaussian_convolution_v2(src_buffer, sigma, truncation_factor,
+                                   dst_buffer);
+  else
+    shakti_gaussian_convolution_v2_cpu(src_buffer, sigma, truncation_factor,
+                                       dst_buffer);
   dst_buffer.copy_to_host();
 }
 

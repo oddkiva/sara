@@ -57,3 +57,4 @@ namespace {
 }  // namespace
 
 HALIDE_REGISTER_GENERATOR(GaussianConvolutionV2, shakti_gaussian_convolution_v2)
+HALIDE_REGISTER_GENERATOR(GaussianConvolutionV2, shakti_gaussian_convolution_v2_cpu)

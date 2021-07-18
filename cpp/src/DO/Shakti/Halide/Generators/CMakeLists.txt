@@ -23,6 +23,10 @@ shakti_halide_library_v2(
   SRCS GaussianConvolutionV2Generator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+shakti_halide_library_v2(
+  NAME shakti_gaussian_convolution_v2_cpu
+  SRCS GaussianConvolutionV2Generator.cpp)
+
 # Upscale function.
 shakti_halide_library_v2(
   NAME shakti_scale_32f
