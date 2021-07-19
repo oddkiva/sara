@@ -37,6 +37,8 @@ def user_main():
     shakti_cuda_gaussian_filter = shakti.CudaGaussianFilter(sigma, gauss_trunc)
 
     # ksize has to be <= 32.
+    video_frame_gray32f_cuda = cv2.cuda_GpuMat()
+    video_frame_convolved_cuda = cv2.cuda_GpuMat()
     opencv_cuda_gaussian_filter = cv2.cuda.createGaussianFilter(cv2.CV_32F,
                                                                 cv2.CV_32F,
                                                                 (ksize, ksize),
@@ -44,7 +46,6 @@ def user_main():
 
     # Benchmarking on 4K video against Vanilla OpenCV.
     # Should compare with OpenCV CUDA implementation.
-
     sara.create_window(w, h)
 
     while video_stream.read(video_frame):
@@ -57,12 +58,37 @@ def user_main():
             video_frame_gray32f = video_frame_gray8.astype(np.float32) / 255
         print()
 
-        # On CUDA-architecture, in normalized times:
-        # Shakti CUDA impl    ~2.9x
-        # Shakti Halide GPU   ~1.7x
-        # Shakti Halide CPU   ~1.2x
-        # OpenCV CPU           1.0
-        # OpenCV GPU: TODO but the implementation is limited to ksize <= 32.
+        # On a nVidia Titan Xp Pascal, in normalized times:
+        # 1. Shakti CUDA impl    ~0.18
+        # 2. OpenCV GPU          ~0.27
+        # 3. Shakti Halide GPU   ~0.33
+        # 3. Shakti Halide CPU   ~0.70
+        # 4. OpenCV CPU           1.0
+        #
+        # Corresponding speed up :
+        # 1. Shakti CUDA impl    ~5.56x
+        # 2. OpenCV GPU          ~3.70x
+        # 3. Shakti Halide GPU   ~3.03x
+        # 3. Shakti Halide CPU   ~1.42x
+        # 4. OpenCV CPU           1.0
+        #
+        # Representative timing data:
+        # [[SHAKTI][Halide-CPU] gaussian convolution] Elapsed: 37.05859184265137 ms
+        # [[SHAKTI][Halide-GPU] gaussian convolution] Elapsed: 17.3337459564209 ms
+        # [[SHAKTI][CUDA] gaussian convolution] Elapsed: 9.571552276611328 ms
+        # [[OPENCV][CPU] gaussian convolution] Elapsed: 52.51121520996094 ms
+        # [[OPENCV][CUDA] gaussian convolution] Elapsed: 14.25933837890625 ms
+        #
+        # Shakti CPU and Shakti CUDA are the best implementations.
+        # OpenCV GPU is 1.2x faster than Shakti GPU: this is better we can
+        # reduce the performance gap.
+        #
+        # Fundamentally, OpenCV CUDA implementation is very far off from Shakti
+        # CUDA which:
+        # - is already 1.5x faster and,
+        # - has a quite simple implementation.
+        # More problematic, OpenCV GPU implementation only supports kernel size <
+        # 32, which really limits its usability.
         #
         # So on nVidia platforms, we should prefer coding in CUDA to better
         # leverage all the hardware acceleration.
@@ -83,10 +109,11 @@ def user_main():
         with sara.Timer("[OPENCV][CPU] gaussian convolution"):
             cv2.GaussianBlur(video_frame_gray32f, (ksize, ksize), sigma,
                              video_frame_convolved)
-        # TODO: evaluate against OpenCV CUDA implementation.
-        # with sara.Timer("[OPENCV][CUDA] gaussian convolution"):
-        #     opencv_cuda_gaussian_filter.apply(video_frame_gray32f,
-        #                                       video_frame_convolved)
+        with sara.Timer("[OPENCV][CUDA] gaussian convolution"):
+            video_frame_gray32f_cuda.upload(video_frame_gray32f)
+            opencv_cuda_gaussian_filter.apply(video_frame_gray32f_cuda,
+                                              video_frame_convolved_cuda)
+            video_frame_convolved_cuda.download(video_frame_convolved)
         print()
 
         # OpenCV wins with a small edge but it also does more arithmetic
