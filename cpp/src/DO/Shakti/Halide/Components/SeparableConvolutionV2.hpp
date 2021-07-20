@@ -111,7 +111,6 @@ namespace DO::Shakti::HalideBackend {
 
         // 2nd pass.
         conv_y.split(x, xo, xi, 32).parallel(xo).vectorize(y, 8);
-
       }
     }
 

@@ -59,29 +59,34 @@ def user_main():
         print()
 
         # On a nVidia Titan Xp Pascal, in normalized times:
-        # 1. Shakti CUDA impl    ~0.18
-        # 2. OpenCV GPU          ~0.27
-        # 3. Shakti Halide GPU   ~0.33
-        # 3. Shakti Halide CPU   ~0.70
-        # 4. OpenCV CPU           1.0
+        # 1. Shakti CUDA impl      ~0.18
+        # 2. Shakti Halide GPU v2  ~0.25
+        # 3. OpenCV GPU            ~0.27
+        # 4. Shakti Halide GPU v1  ~0.33
+        # 5. Shakti Halide CPU v2  ~0.55
+        # 6. Shakti Halide CPU v1  ~0.70
+        # 7. OpenCV CPU             1.0
         #
         # Corresponding speed up :
-        # 1. Shakti CUDA impl    ~5.56x
-        # 2. OpenCV GPU          ~3.70x
-        # 3. Shakti Halide GPU   ~3.03x
-        # 3. Shakti Halide CPU   ~1.42x
-        # 4. OpenCV CPU           1.0
+        # 1. Shakti CUDA impl      ~5.56x
+        # 2. Shakti Halide GPU v2  ~4.00x
+        # 3. OpenCV GPU            ~3.70x
+        # 4. Shakti Halide GPU v1  ~3.03x
+        # 5. Shakti Halide CPU v2  ~1.82x
+        # 6. Shakti Halide CPU v1  ~1.42x
+        # 7. OpenCV CPU             1.0
         #
         # Representative timing data:
-        # [[SHAKTI][Halide-CPU] gaussian convolution] Elapsed: 37.05859184265137 ms
-        # [[SHAKTI][Halide-GPU] gaussian convolution] Elapsed: 17.3337459564209 ms
-        # [[SHAKTI][CUDA] gaussian convolution] Elapsed: 9.571552276611328 ms
+        # [[SHAKTI][CUDA] gaussian convolution]          Elapsed: 9.571552276611328 ms
+        # [[SHAKTI][Halide-GPU] gaussian convolution v2] Elapsed: 13.216495513916016 ms
+        # [[OPENCV][CUDA] gaussian convolution]          Elapsed: 14.25933837890625 ms
+        # [[SHAKTI][Halide-GPU] gaussian convolution v1] Elapsed: 17.3337459564209 ms
+        # [[SHAKTI][Halide-CPU] gaussian convolution v2] Elapsed: 28.859853744506836 ms
+        # [[SHAKTI][Halide-CPU] gaussian convolution v1] Elapsed: 37.05859184265137 ms
         # [[OPENCV][CPU] gaussian convolution] Elapsed: 52.51121520996094 ms
-        # [[OPENCV][CUDA] gaussian convolution] Elapsed: 14.25933837890625 ms
         #
-        # Shakti CPU and Shakti CUDA are the best implementations.
-        # OpenCV GPU is 1.2x faster than Shakti GPU: this is better we can
-        # reduce the performance gap.
+        # Shakti CPU v2 and Shakti CUDA are the best implementations.
+        # Shakti GPU v2 is 1.08x faster than OpenCV GPU implementation
         #
         # Fundamentally, OpenCV CUDA implementation is very far off from Shakti
         # CUDA which:
