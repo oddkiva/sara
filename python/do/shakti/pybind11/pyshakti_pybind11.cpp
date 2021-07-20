@@ -21,7 +21,7 @@
 
 #include <DO/Sara/Core.hpp>
 
-#ifdef __CUDACC__
+#ifdef USE_SHAKTI_CUDA_LIBRARIES
 #  include <DO/Shakti/Cuda/ImageProcessing.hpp>
 #endif
 #include <DO/Shakti/Halide/MyHalide.hpp>
@@ -198,7 +198,7 @@ auto enlarge(py::array_t<float> src, py::array_t<float> dst)
 // ========================================================================== //
 // Gaussian filtering.
 // ========================================================================== //
-#ifdef __CUDACC__
+#ifdef USE_SHAKTI_CUDA_LIBRARIES
 struct CudaGaussianFilter : public DO::Shakti::GaussianFilter
 {
   CudaGaussianFilter(float sigma, int gauss_trunc_factor)
@@ -236,7 +236,7 @@ PYBIND11_MODULE(pyshakti_pybind11, m)
         "Calculate the 2D image gradients");
 
   // CUDA.
-#ifdef __CUDACC__
+#ifdef USE_SHAKTI_CUDA_LIBRARIES
   py::class_<CudaGaussianFilter>(m, "CudaGaussianFilter")
       .def(py::init<float, int>())
       .def("apply", &CudaGaussianFilter::apply);
