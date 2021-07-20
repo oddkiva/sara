@@ -11,7 +11,8 @@
 
 #include <DO/Shakti/Halide/MyHalide.hpp>
 #include <DO/Shakti/Halide/Components/GaussianKernel.hpp>
-#include <DO/Shakti/Halide/Components/SeparableConvolution.hpp>
+// #include <DO/Shakti/Halide/Components/SeparableConvolution.hpp>
+#include <DO/Shakti/Halide/Components/SeparableConvolutionV2.hpp>
 
 
 namespace {
