@@ -21,7 +21,9 @@
 
 #include <DO/Sara/Core.hpp>
 
-#include <DO/Shakti/Cuda/ImageProcessing.hpp>
+#ifdef __CUDACC__
+#  include <DO/Shakti/Cuda/ImageProcessing.hpp>
+#endif
 #include <DO/Shakti/Halide/MyHalide.hpp>
 
 #include "do/sara/pybind11/Utilities.hpp"
@@ -174,7 +176,7 @@ auto reduce(py::array_t<float> src, py::array_t<float> dst)
   src_buffer.set_host_dirty();
   dst_buffer.set_host_dirty();
   shakti_reduce_32f(src_buffer, dst_buffer.width(), dst_buffer.height(),
-                   dst_buffer);
+                    dst_buffer);
   dst_buffer.copy_to_host();
 }
 
@@ -194,8 +196,9 @@ auto enlarge(py::array_t<float> src, py::array_t<float> dst)
 
 
 // ========================================================================== //
-// Resize operations.
+// Gaussian filtering.
 // ========================================================================== //
+#ifdef __CUDACC__
 struct CudaGaussianFilter : public DO::Shakti::GaussianFilter
 {
   CudaGaussianFilter(float sigma, int gauss_trunc_factor)
@@ -209,6 +212,7 @@ struct CudaGaussianFilter : public DO::Shakti::GaussianFilter
     this->operator()(dst.data(), src.data(), src.sizes().data());
   }
 };
+#endif
 
 
 PYBIND11_MODULE(pyshakti_pybind11, m)
@@ -231,9 +235,10 @@ PYBIND11_MODULE(pyshakti_pybind11, m)
   m.def("polar_gradient_2d_32f", &polar_gradient_2d_32f,
         "Calculate the 2D image gradients");
 
-  // CUDA
+  // CUDA.
+#ifdef __CUDACC__
   py::class_<CudaGaussianFilter>(m, "CudaGaussianFilter")
       .def(py::init<float, int>())
       .def("apply", &CudaGaussianFilter::apply);
-
+#endif
 }
