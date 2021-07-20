@@ -97,9 +97,9 @@ namespace DO::Shakti::HalideBackend {
         // 2nd pass: transpose and convolve the rows.
         conv_y.hexagon()
             .prefetch(conv_x, x, 128)
-            .split(y, yo, yi, 128)
-            .parallel(yo)
-            .vectorize(x, vector_size);
+            .split(x, xo, xi, 128)
+            .parallel(xo)
+            .vectorize(y, vector_size);
       }
 
       // CPU schedule.
@@ -181,9 +181,9 @@ namespace DO::Shakti::HalideBackend {
         // 2nd pass: transpose and convolve the rows.
         conv_y.hexagon()
             .prefetch(conv_x, x, 128)
-            .split(y, yo, yi, 128)
-            .parallel(yo)
-            .vectorize(x, vector_size);
+            .split(x, xo, xi, 128)
+            .parallel(xo)
+            .vectorize(y, vector_size);
       }
 
       // CPU schedule.

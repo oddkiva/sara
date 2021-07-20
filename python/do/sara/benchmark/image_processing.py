@@ -34,15 +34,19 @@ def user_main():
     if ksize % 2 == 0:
         ksize += 1
 
-    shakti_cuda_gaussian_filter = shakti.CudaGaussianFilter(sigma, gauss_trunc)
+    try:
+        shakti_cuda_gaussian_filter = shakti.CudaGaussianFilter(sigma, gauss_trunc)
+    except:
+        shakti_cuda_gaussian_filter = None
 
     # ksize has to be <= 32.
-    video_frame_gray32f_cuda = cv2.cuda_GpuMat()
-    video_frame_convolved_cuda = cv2.cuda_GpuMat()
-    opencv_cuda_gaussian_filter = cv2.cuda.createGaussianFilter(cv2.CV_32F,
-                                                                cv2.CV_32F,
-                                                                (ksize, ksize),
-                                                                sigma)
+    try:
+        video_frame_gray32f_cuda = cv2.cuda_GpuMat()
+        video_frame_convolved_cuda = cv2.cuda_GpuMat()
+        opencv_cuda_gaussian_filter = cv2.cuda.createGaussianFilter(
+            cv2.CV_32F, cv2.CV_32F, (ksize, ksize), sigma)
+    except:
+        opencv_cuda_gaussian_filter = None
 
     # Benchmarking on 4K video against Vanilla OpenCV.
     # Should compare with OpenCV CUDA implementation.
@@ -108,17 +112,19 @@ def user_main():
             shakti.gaussian_convolution(video_frame_gray32f,
                                         video_frame_convolved, sigma,
                                         gauss_trunc, True)
-        with sara.Timer("[SHAKTI][CUDA] gaussian convolution"):
-            shakti_cuda_gaussian_filter.apply(video_frame_gray32f,
-                                              video_frame_convolved);
+        if shakti_cuda_gaussian_filter is not None:
+            with sara.Timer("[SHAKTI][CUDA] gaussian convolution"):
+                shakti_cuda_gaussian_filter.apply(video_frame_gray32f,
+                                                  video_frame_convolved);
         with sara.Timer("[OPENCV][CPU] gaussian convolution"):
             cv2.GaussianBlur(video_frame_gray32f, (ksize, ksize), sigma,
                              video_frame_convolved)
-        with sara.Timer("[OPENCV][CUDA] gaussian convolution"):
-            video_frame_gray32f_cuda.upload(video_frame_gray32f)
-            opencv_cuda_gaussian_filter.apply(video_frame_gray32f_cuda,
-                                              video_frame_convolved_cuda)
-            video_frame_convolved_cuda.download(video_frame_convolved)
+        if opencv_cuda_gaussian_filter is not None:
+            with sara.Timer("[OPENCV][CUDA] gaussian convolution"):
+                video_frame_gray32f_cuda.upload(video_frame_gray32f)
+                opencv_cuda_gaussian_filter.apply(video_frame_gray32f_cuda,
+                                                  video_frame_convolved_cuda)
+                video_frame_convolved_cuda.download(video_frame_convolved)
         print()
 
         # OpenCV wins with a small edge but it also does more arithmetic
