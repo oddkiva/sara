@@ -9,7 +9,13 @@
 #include <cuda.h>
 #include <cudaGL.h>
 
+#include <DO/Sara/Core.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageIO.hpp>
+
+
+namespace sara = DO::Sara;
 
 
 simplelogger::Logger* logger =
@@ -96,6 +102,13 @@ namespace driver_api {
     {
       if (data)
         ck(cuMemFree(data));
+    }
+
+    auto to_host(sara::ImageView<sara::Bgra8>& image) const -> void
+    {
+      ck(cudaMemcpy(reinterpret_cast<void*>(image.data()),
+                    reinterpret_cast<const void*>(data), width * height * 4,
+                    cudaMemcpyDeviceToHost));
     }
   };
 
@@ -454,7 +467,7 @@ inline void show_decoder_capability()
   }
 }
 
-int main()
+int test_with_glfw()
 {
   // Initialize CUDA driver.
   driver_api::init();
@@ -466,15 +479,14 @@ int main()
 
   using namespace std::string_literals;
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
 #elif __APPLE__
   const auto video_filepath =
       "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
 #else
   // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  //const auto video_filepath = "/home/david/Desktop/GOPR0542.MP4"s;
+  // const auto video_filepath = "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
   // Initialize a CUDA-powered video streamer object.
@@ -518,12 +530,17 @@ int main()
   glLoadIdentity();
   glOrtho(0.0, 1.0, 0.0, 1.0, 0.0, 1.0);
 
+  auto host_image = sara::Image<sara::Rgba8>{video_stream.width(),
+                                                     video_stream.height()};
+
 
   // Display stuff.
   while (!glfwWindowShouldClose(window))
   {
     // Read the decoded frame and store it in a CUDA device buffer.
+    sara::tic();
     video_stream.read(device_rgba_buffer);
+    sara::toc("Read frame");
 
     // Copy the device buffer data to the pixel buffer object.
     cuda_async_copy(device_rgba_buffer, pbo);
@@ -549,4 +566,70 @@ int main()
   shader.release();
 
   return 0;
+}
+
+int test_with_sara_graphics()
+{
+  // Initialize CUDA driver.
+  driver_api::init();
+
+  // Create a CUDA context so that we can use the GPU device.
+  const auto gpu_id = 0;
+  auto cuda_context = driver_api::CudaContext{gpu_id};
+  cuda_context.make_current();
+
+  using namespace std::string_literals;
+#ifdef _WIN32
+  const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
+#elif __APPLE__
+  const auto video_filepath =
+      "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
+#else
+  // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/GOPR0542.MP4"s;
+#endif
+
+  // Initialize a CUDA-powered video streamer object.
+  VideoStream video_stream{video_filepath, cuda_context};
+
+  // Create a video frame buffer.
+  driver_api::DeviceBuffer device_rgba_buffer{video_stream.width(),
+                                              video_stream.height()};
+
+
+  // Open a window on which GLFW can operate.
+  const auto w = video_stream.width();
+  const auto h = video_stream.height();
+  sara::create_window(w, h, "Video Stream");
+
+  auto host_image_bgra =
+      sara::Image<sara::Bgra8>{video_stream.width(), video_stream.height()};
+
+  // Display stuff.
+  auto e = sara::Event{};
+  for (;;)
+  {
+    // Read the decoded frame and store it in a CUDA device buffer.
+    sara::tic();
+    video_stream.read(device_rgba_buffer);
+    sara::toc("Read frame");
+
+    sara::tic();
+    device_rgba_buffer.to_host(host_image_bgra);
+    sara::toc("Copy to host");
+
+    sara::tic();
+    sara::display(host_image_bgra);
+    sara::toc("Display");
+  }
+
+  return 0;
+}
+
+
+GRAPHICS_MAIN()
+{
+  // return test_with_glfw();
+  return test_with_sara_graphics();
 }

@@ -319,8 +319,17 @@ namespace DO { namespace Sara {
   bool put_color_image(int x, int y, const Color3ub *data, int w, int h,
                        double fact)
   {
-    QImage image(reinterpret_cast<const uchar*>(data),
-                 w, h, w*3, QImage::Format_RGB888);
+    QImage image(reinterpret_cast<const uchar*>(data), w, h, w * 3,
+                 QImage::Format_RGB888);
+    return display(image, x, y, fact);
+  }
+
+  bool put_color_image(int x, int y, const Bgra8 *data, int w, int h,
+                       double fact)
+  {
+    auto image = QImage{reinterpret_cast<const uchar*>(data), w, h, w * 4,
+                        QImage::Format_RGBX8888}
+                     .rgbSwapped();
     return display(image, x, y, fact);
   }
 

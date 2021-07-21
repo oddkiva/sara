@@ -72,6 +72,7 @@ namespace DO { namespace Sara {
 
   DEFINE_COLOR_TYPES(Rgb)
   DEFINE_COLOR_TYPES(Rgba)
+  DEFINE_COLOR_TYPES(Bgra)
   DEFINE_COLOR_TYPES(Yuv)
 #undef DEFINE_COLOR_TYPES
 

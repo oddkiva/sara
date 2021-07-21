@@ -1,6 +1,8 @@
 #!/bin/bash
 #
 # This script configures and build FFmpeg with CUDA acceleration.
+#
+# For more information: https://docs.nvidia.com/video-technologies/video-codec-sdk/ffmpeg-with-nvidia-gpu/
 set -ex
 
 sudo apt install -y \
@@ -20,7 +22,7 @@ REPOSITORY_URLS=(
   "https://git.ffmpeg.org/ffmpeg.git"
 )
 
-FFMPEG_VERSION="4.3.1"
+FFMPEG_VERSION="4.4"
 
 
 function url_basename()
@@ -133,7 +135,7 @@ pushd ${ffmpeg_dirpath}
   # ffmpeg_options+="--enable-libwavpack "
 
   # Video codecs.
-  ffmpeg_options+="--enable-avisynth "
+  # ffmpeg_options+="--enable-avisynth "
   ffmpeg_options+="--enable-libbluray "
   ffmpeg_options+="--enable-libtheora "
   ffmpeg_options+="--enable-libtwolame "
@@ -147,7 +149,7 @@ pushd ${ffmpeg_dirpath}
   ffmpeg_options+="--enable-libnpp "
   ffmpeg_options+="--enable-nvenc "
   ffmpeg_options+="--enable-cuda "
-  ffmpeg_options+="--enable-cuda-nvcc "
+  ffmpeg_options+="--enable-cuda-sdk "
   ffmpeg_options+="--enable-cuvid "
   ffmpeg_options+="--extra-cflags=-I/usr/local/cuda/include "
   ffmpeg_options+="--extra-ldflags=-L/usr/local/cuda/lib64 "

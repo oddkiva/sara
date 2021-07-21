@@ -465,6 +465,10 @@ namespace DO { namespace Sara {
   bool put_color_image(int x, int y, const Color3ub *data, int w, int h,
                        double fact = 1.);
 
+  DO_SARA_EXPORT
+  bool put_color_image(int x, int y, const Bgra8 *data, int w, int h,
+                       double fact = 1.);
+
   /*!
     @brief Draw a color image in the active PaintingWindow window.
     @param[in] p position of the top-left image corner.
@@ -562,11 +566,19 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  inline bool display(const Image<Rgb8>& image,
+  inline bool display(const ImageView<Rgb8>& image,
                       const Point2i& off,
                       double fact = 1.)
   {
     return display(image, off.x(), off.y(), fact);
+  }
+
+  inline bool display(const ImageView<Bgra8>& image,
+                      const Point2i& off = Point2i::Zero(),
+                      double fact = 1.)
+  {
+    return put_color_image(off.x(), off.y(), image.data(), image.width(),
+                           image.height(), fact);
   }
 
   /*!
