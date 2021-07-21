@@ -62,38 +62,40 @@ def user_main():
             video_frame_gray32f = video_frame_gray8.astype(np.float32) / 255
         print()
 
-        # On a nVidia Titan Xp Pascal, in normalized times:
+        # On a machine with a 12 core CPU and a nVidia Titan Xp Pascal GPU, in normalized times:
         # 1. Shakti CUDA impl      ~0.18
         # 2. Shakti Halide GPU v2  ~0.25
-        # 3. OpenCV GPU            ~0.27
-        # 4. Shakti Halide GPU v1  ~0.33
-        # 5. Shakti Halide CPU v2  ~0.55
+        # 3. Shakti Halide CPU v2  ~0.25
+        # 4. OpenCV GPU            ~0.27
+        # 5. Shakti Halide GPU v1  ~0.33
         # 6. Shakti Halide CPU v1  ~0.70
         # 7. OpenCV CPU             1.0
         #
         # Corresponding speed up :
         # 1. Shakti CUDA impl      ~5.56x
         # 2. Shakti Halide GPU v2  ~4.00x
+        # 5. Shakti Halide CPU v2  ~4.00x
         # 3. OpenCV GPU            ~3.70x
         # 4. Shakti Halide GPU v1  ~3.03x
-        # 5. Shakti Halide CPU v2  ~1.82x
         # 6. Shakti Halide CPU v1  ~1.42x
         # 7. OpenCV CPU             1.0
         #
         # Representative timing data:
         # [[SHAKTI][CUDA] gaussian convolution]          Elapsed: 9.571552276611328 ms
         # [[SHAKTI][Halide-GPU] gaussian convolution v2] Elapsed: 13.216495513916016 ms
+        # [[SHAKTI][Halide-CPU] gaussian convolution v2] Elapsed: 13.631343841552734 ms
         # [[OPENCV][CUDA] gaussian convolution]          Elapsed: 14.25933837890625 ms
         # [[SHAKTI][Halide-GPU] gaussian convolution v1] Elapsed: 17.3337459564209 ms
-        # [[SHAKTI][Halide-CPU] gaussian convolution v2] Elapsed: 28.859853744506836 ms
         # [[SHAKTI][Halide-CPU] gaussian convolution v1] Elapsed: 37.05859184265137 ms
         # [[OPENCV][CPU] gaussian convolution] Elapsed: 52.51121520996094 ms
         #
-        # Shakti CPU v2 and Shakti CUDA are the best implementations.
-        # Shakti GPU v2 is 1.08x faster than OpenCV GPU implementation
+        # Shakti CUDA, Shakti GPUv2 and Shakti CPUv2 are the best
+        # implementations.
+        # The performance of the CPUv2 version is impressive on par with GPUv2
+        # which leads us to believe there are lots of room for improvements.
         #
-        # Fundamentally, OpenCV CUDA implementation is very far off from Shakti
-        # CUDA which:
+        # Fundamentally, OpenCV CUDA implementation is literally put to shame
+        # by Shakti CPUv2 and is quite far off from Shakti CUDA which:
         # - is already 1.5x faster and,
         # - has a quite simple implementation.
         # More problematic, OpenCV GPU implementation only supports kernel size <

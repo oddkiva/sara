@@ -105,12 +105,8 @@ namespace DO::Shakti::HalideBackend {
       // CPU schedule.
       else
       {
-        // 1st pass.
-        conv_x.compute_root();
-        conv_x.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
-
-        // 2nd pass.
-        conv_y.split(x, xo, xi, 32).parallel(xo).vectorize(y, 8);
+        conv_y.tile(x, y, xi, yi, 64, 64).vectorize(xi, 8).parallel(y);
+        conv_x.compute_at(conv_y, x).vectorize(x, 8);
       }
     }
 
