@@ -53,8 +53,8 @@ def user_main():
     sara.create_window(w, h)
 
     while video_stream.read(video_frame):
-        # On the normal desktop: Shakti wins on.
-        # On the MacBook Air 2018: on par with OpenCV a bit more on the edge.
+        # On the normal desktop and on MacBook Air 2018: Shakti is the clear
+        # winner.
         with sara.Timer("[SHAKTI] rgb8 to gray32f"):
             shakti.convert_rgb8_to_gray32f_cpu(video_frame, video_frame_gray32f)
         with sara.Timer("[OPENCV] rgb8 to gray32f"):
@@ -104,8 +104,12 @@ def user_main():
         # So on nVidia platforms, we should prefer coding in CUDA to better
         # leverage all the hardware acceleration.
         #
-        # On Macbook Air: OpenCV wins against any Shakti/Halide implementation
-        # The CPU-GPU transfer may be the bottleneck.
+        # On Macbook Air: Shakti/Halide CPU implementation can clearly win but
+        # sometimes loses to OpenCV CPU implementation depending on the
+        # benchmark runs.
+        #
+        # Shakti/Halide GPU implementations is much slower than the CPU
+        # implementations. It could be because of the CPU-GPU transfer...
         with sara.Timer("[SHAKTI][Halide-CPU] gaussian convolution"):
             shakti.gaussian_convolution(video_frame_gray32f,
                                         video_frame_convolved, sigma,
