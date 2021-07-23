@@ -76,10 +76,15 @@ namespace DO { namespace Sara {
     }
 
   private:
-    auto decode(AVCodecContext* dec_ctx, AVFrame* frame, AVPacket* pkt) -> bool;
+    auto decode(AVPacket* pkt) -> bool;
 
   private:
     static bool _registered_all_codecs;
+
+    // Hardware acceleration type.
+    static int _hw_device_type;
+
+    std::vector<std::uint8_t> _buffer;
 
     // FFmpeg internals.
     int _video_stream_index = -1;
@@ -87,6 +92,7 @@ namespace DO { namespace Sara {
     const AVCodec* _video_codec = nullptr;
     AVFormatContext* _video_format_context = nullptr;
     AVCodecContext* _video_codec_context = nullptr;
+    AVFrame* _device_picture = nullptr;
     AVFrame* _picture = nullptr;
     AVPacket* _pkt = nullptr;
 
