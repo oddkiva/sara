@@ -24,21 +24,6 @@ target_link_libraries(halide_aot_example
 set_property(TARGET halide_aot_example PROPERTY FOLDER "Examples/Shakti/Halide")
 
 
-add_executable(halide_gaussian_convolution_example
-  halide_gaussian_convolution_example.cpp)
-target_compile_definitions(halide_gaussian_convolution_example
-  PRIVATE ${SARA_DEFINITIONS})
-target_link_libraries(halide_gaussian_convolution_example
-  PRIVATE
-  ${DO_Sara_LIBRARIES}
-  Halide::Halide
-  Halide::Runtime
-  shakti_gaussian_convolution_v2
-  shakti_halide_gaussian_blur)
-set_property(TARGET halide_gaussian_convolution_example
-  PROPERTY
-  FOLDER "Examples/Shakti/Halide")
-
 add_executable(halide_resize_example
   halide_resize_example.cpp)
 target_compile_definitions(halide_resize_example
