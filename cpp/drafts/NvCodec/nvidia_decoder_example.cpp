@@ -155,15 +155,19 @@ struct VideoStream
     return demuxer.GetHeight();
   }
 
-  auto decode() -> void
+  auto decode() -> bool
   {
     // Initialize the video stream.
     do
     {
-      demuxer.Demux(&frame_data_compressed.data, &frame_data_compressed.size);
+      if (not demuxer.Demux(&frame_data_compressed.data,
+                            &frame_data_compressed.size))
+        return false;
+
       decoder.Decode(frame_data_compressed.data, frame_data_compressed.size,
                      &raw_frame_packet, &num_frames_decoded);
     } while (num_frames_decoded <= 0);
+    return true;
   }
 
   auto read_decoded_frame_packet(driver_api::DeviceBuffer& rgba_frame_buffer)
@@ -206,13 +210,15 @@ struct VideoStream
 
   auto read(driver_api::DeviceBuffer& rgba_frame_buffer)
   {
-    if (num_frames_decoded == 0)
-      decode();
+    if (num_frames_decoded == 0 and !decode())
+      return false;
 
     LOG(INFO) << decoder.GetVideoInfo();
 
     if (frame_index < num_frames_decoded)
       read_decoded_frame_packet(rgba_frame_buffer);
+
+    return true;
   }
 };
 
@@ -467,7 +473,7 @@ inline void show_decoder_capability()
   }
 }
 
-int test_with_glfw()
+int test_with_glfw(int argc, char** argv)
 {
   // Initialize CUDA driver.
   driver_api::init();
@@ -477,17 +483,17 @@ int test_with_glfw()
   auto cuda_context = driver_api::CudaContext{gpu_id};
   cuda_context.make_current();
 
-  using namespace std::string_literals;
+  const auto video_filepath = argc < 1 ?
 #ifdef _WIN32
-  const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
+                                       "C:/Users/David/Desktop/GOPR0542.MP4"
 #elif __APPLE__
-  const auto video_filepath =
-      "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
+                                       "/Users/david/Desktop/Datasets/"
+                                       "humanising-autonomy/turn_bikes.mp4"
 #else
-  // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  // const auto video_filepath = "/home/david/Desktop/GOPR0542.MP4"s;
+                                       "/home/david/Desktop/Datasets/sfm/"
+                                       "Family.mp4"
 #endif
+                                       : argv[1];
 
   // Initialize a CUDA-powered video streamer object.
   VideoStream video_stream{video_filepath, cuda_context};
@@ -530,8 +536,8 @@ int test_with_glfw()
   glLoadIdentity();
   glOrtho(0.0, 1.0, 0.0, 1.0, 0.0, 1.0);
 
-  auto host_image = sara::Image<sara::Rgba8>{video_stream.width(),
-                                                     video_stream.height()};
+  auto host_image =
+      sara::Image<sara::Rgba8>{video_stream.width(), video_stream.height()};
 
 
   // Display stuff.
@@ -543,19 +549,25 @@ int test_with_glfw()
     sara::toc("Read frame");
 
     // Copy the device buffer data to the pixel buffer object.
+    sara::tic();
     cuda_async_copy(device_rgba_buffer, pbo);
+    sara::toc("Copy to PBO");
 
     // Upload the pixel buffer object data to the texture object.
+    sara::tic();
     pbo.bind();
     texture.bind();
     glTexSubImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, 0, 0, texture.width,
                     texture.height, GL_BGRA, GL_UNSIGNED_BYTE, 0);
     // Unbind PBO.
     glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
+    sara::toc("Binding texture");
 
+    sara::tic();
     shader.enable();
     texture.display();
     shader.disable();
+    sara::toc("Display frame");
 
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -568,7 +580,7 @@ int test_with_glfw()
   return 0;
 }
 
-int test_with_sara_graphics()
+int test_with_sara_graphics(int argc, char** argv)
 {
   // Initialize CUDA driver.
   driver_api::init();
@@ -578,17 +590,17 @@ int test_with_sara_graphics()
   auto cuda_context = driver_api::CudaContext{gpu_id};
   cuda_context.make_current();
 
-  using namespace std::string_literals;
+  const auto video_filepath = argc < 1 ?
 #ifdef _WIN32
-  const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
+                                       "C:/Users/David/Desktop/GOPR0542.MP4"
 #elif __APPLE__
-  const auto video_filepath =
-      "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
+                                       "/Users/david/Desktop/Datasets/"
+                                       "humanising-autonomy/turn_bikes.mp4"
 #else
-  // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  // const auto video_filepath = "/home/david/Desktop/GOPR0542.MP4"s;
+                                       "/home/david/Desktop/Datasets/sfm/"
+                                       "Family.mp4"
 #endif
+                                       : argv[1];
 
   // Initialize a CUDA-powered video streamer object.
   VideoStream video_stream{video_filepath, cuda_context};
@@ -612,8 +624,10 @@ int test_with_sara_graphics()
   {
     // Read the decoded frame and store it in a CUDA device buffer.
     sara::tic();
-    video_stream.read(device_rgba_buffer);
+    const auto has_frame = video_stream.read(device_rgba_buffer);
     sara::toc("Read frame");
+    if (!has_frame)
+      break;
 
     sara::tic();
     device_rgba_buffer.to_host(host_image_bgra);
@@ -628,8 +642,9 @@ int test_with_sara_graphics()
 }
 
 
-GRAPHICS_MAIN()
+int main(int argc, char** argv)
 {
-  // return test_with_glfw();
-  return test_with_sara_graphics();
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(test_with_sara_graphics);
+  return app.exec();
 }
