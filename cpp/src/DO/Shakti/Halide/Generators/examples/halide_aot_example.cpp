@@ -7,7 +7,6 @@
 #include <DO/Shakti/Halide/GaussianConvolution.hpp>
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_halide_gaussian_blur.h"
 #include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_halide_rgb_to_gray.h"
 
@@ -68,11 +67,10 @@ auto halide_pipeline() -> void
       // Use parallelization and vectorization.
       shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
 
-//#define USE_HALIDE_AOT_IMPLEMENTATION_V1
-#define USE_HALIDE_AOT_IMPLEMENTATION_V2
+#define USE_HALIDE_AOT_IMPLEMENTATION
 //#define USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION
 //#define USE_SARA_DERICHE_IMPLEMENTATION
-#ifdef USE_HALIDE_AOT_IMPLEMENTATION_V1
+#if defined(USE_HALIDE_AOT_IMPLEMENTATION)
       // The strategy is to transpose the array and then convolve the rows. So
       // (1) we transpose the matrix and convolve the (transposed) columns.
       // (2) we transpose the matrix and convolve the rows.
@@ -94,19 +92,10 @@ auto halide_pipeline() -> void
       // On a CUDA-capable GPU, it takes ~7ms to process the same images. So the
       // CPU version is quite fast.
       // On the GPU, with sigma = 80.f, the processing time is about ~15ms!
-      {
-        buffer_gray32f.set_host_dirty();
-        shakti_halide_gaussian_blur(buffer_gray32f, sigma, truncation_factor,
-                                    buffer_gray32f_blurred);
-        buffer_gray32f_blurred.copy_to_host();
-      }
-      shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
-      toc("Halide Gaussian V1");
-#elif defined(USE_HALIDE_AOT_IMPLEMENTATION_V2)
       halide::gaussian_convolution(frame_gray32f, frame_gray32f_blurred, sigma,
                                    truncation_factor);
       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
-      toc("Halide Gaussian V2");
+      toc("Halide Gaussian");
 #elif defined(USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION)
       // Sara's unoptimized code takes 240 ms to blur (no SSE instructions and
       // no column-based transposition)

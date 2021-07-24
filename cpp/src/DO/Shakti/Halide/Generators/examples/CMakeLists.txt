@@ -19,7 +19,6 @@ target_link_libraries(halide_aot_example
   Halide::Runtime
   shakti_halide_rgb_to_gray
   shakti_halide_gray32f_to_rgb
-  shakti_halide_gaussian_blur
   shakti_gaussian_convolution_v2)
 set_property(TARGET halide_aot_example PROPERTY FOLDER "Examples/Shakti/Halide")
 
