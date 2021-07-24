@@ -37,7 +37,7 @@ GRAPHICS_MAIN()
   // thickness.
   draw_ellipse(50, 350, 50, 90, Cyan8, 2);
   // Simple exercise: decipher this one.
-  fill_ellipse(350, 150, 90, 100, Color3ub(128, 128, 128));
+  fill_ellipse(350, 150, 90, 100, Rgb8(128, 128, 128));
   // A circle with a center point located at (200, 200) and a 40-pixel radius.
   draw_circle(Point2i(200, 200), 40, Red8);
 

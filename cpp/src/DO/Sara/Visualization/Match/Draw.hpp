@@ -37,7 +37,7 @@ namespace DO::Sara {
   }
 
   DO_SARA_EXPORT
-  void draw_match(const Match& m, const Color3ub& c, const Point2f& off2,
+  void draw_match(const Match& m, const Rgb8& c, const Point2f& off2,
                   float z = 1.f);
 
   DO_SARA_EXPORT

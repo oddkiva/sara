@@ -219,7 +219,7 @@ int __main(int, char** argv)
   std::sort(points.begin(), points.end(),
             [](const auto& a, const auto& b) { return a.second < b.second; });
 
-  display(views.images[0], 0, 0, 0.25);
+  display(views.images[0], Point2i::Zero(), 0.25);
 
   // The brighter the color, the further the point is.
   const auto depth_min = points.front().second;

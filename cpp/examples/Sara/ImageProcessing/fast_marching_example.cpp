@@ -140,7 +140,7 @@ auto fast_marching_3d() -> void
   for (auto z = fm._margin.z(); z < d - fm._margin.z(); ++z)
   {
     const auto imview = sara::image_view(tensor[z]);
-    sara::display(imview, 0, 0, scale);
+    sara::display(imview, sara::Point2i::Zero(), scale);
     sara::get_key();
   }
 }

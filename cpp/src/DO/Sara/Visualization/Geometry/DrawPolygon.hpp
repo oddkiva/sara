@@ -29,24 +29,24 @@ namespace DO { namespace Sara {
   //! @{
   //! Drawing functions
   DO_SARA_EXPORT
-  void draw_line_segment(const LineSegment& s, const Color3ub& c = Black8,
+  void draw_line_segment(const LineSegment& s, const Rgb8& c = Black8,
                          int pen_width = 1);
 
   DO_SARA_EXPORT
-  void draw_bbox(const BBox& bbox, const Color3ub& c, int pen_width = 1);
+  void draw_bbox(const BBox& bbox, const Rgb8& c, int pen_width = 1);
 
   DO_SARA_EXPORT
-  void draw_polygon(const std::vector<Point2d>& p, const Color3ub& color,
+  void draw_polygon(const std::vector<Point2d>& p, const Rgb8& color,
                     int pen_width = 1);
 
   DO_SARA_EXPORT
-  void draw_ellipse(const Ellipse& e, const Color3ub& col, int pen_width = 1);
+  void draw_ellipse(const Ellipse& e, const Rgb8& col, int pen_width = 1);
 
   template <std::size_t N>
-  void draw_poly(const SmallPolygon<N>& poly, const Color3ub& color,
+  void draw_poly(const SmallPolygon<N>& poly, const Rgb8& color,
                  int pen_width = 1)
   {
-    for (int i1 = N-1, i2 = 0; i2 != N; i1=i2++)
+    for (int i1 = N - 1, i2 = 0; i2 != N; i1 = i2++)
       draw_line(poly[i1], poly[i2], color, pen_width);
   }
 
@@ -64,10 +64,9 @@ namespace DO { namespace Sara {
 
   DO_SARA_EXPORT
   void draw_affine_cone(const AffineCone2& K, double arrow_length = 50.,
-                        const Color3ub& color = Black8);
+                        const Rgb8& color = Black8);
   //! @}
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

@@ -36,10 +36,10 @@ namespace DO { namespace Sara {
                     bool rescale_color)
   {
     if (rescale_color)
-      display(color_rescale(pyramid(s, o)), 0, 0,
+      display(color_rescale(pyramid(s, o)), Point2i::Zero(),
               pyramid.octave_scaling_factor(o));
     else
-      display(pyramid(s, o), 0, 0, pyramid.octave_scaling_factor(o));
+      display(pyramid(s, o), Point2i::Zero(), pyramid.octave_scaling_factor(o));
 
     for (size_t i = 0; i != extrema.size(); ++i)
     {
@@ -70,7 +70,7 @@ namespace DO { namespace Sara {
     auto window = create_window(int_round(w * fact), int_round(h * fact),
                                 "Check image patch");
     set_active_window(window);
-    display(patch.compute<ColorRescale>(), 0, 0, fact);
+    display(patch.compute<ColorRescale>(), Point2i::Zero(), fact);
     get_key();
     close_window();
   }

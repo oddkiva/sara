@@ -19,7 +19,7 @@ using namespace DO::Sara;
 GRAPHICS_MAIN()
 {
   // Open 6 windows aligned in 2x3 grid.
-  vector<Window> windows;
+  auto windows = vector<Window>{};
   for (int i = 0; i < 2; ++i)
   {
     for (int j = 0; j < 3; ++j)
@@ -29,7 +29,7 @@ GRAPHICS_MAIN()
                                       300 * j + 300, 300 * i + 50));
       set_active_window(windows.back());
       fill_rect(0, 0, get_width(windows.back()), get_height(windows.back()),
-                Color3ub(rand() % 255, rand() % 255, rand() % 255));
+                Rgb8(rand() % 255, rand() % 255, rand() % 255));
       draw_text(100, 100, to_string(i * 3 + j), Yellow8, 15);
       cout << "Pressed '" << char(any_get_key()) << "'" << endl;
     }

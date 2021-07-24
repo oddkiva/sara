@@ -175,19 +175,19 @@ namespace DO::Sara {
     av_init_packet(_pkt);
 
     SARA_DEBUG << "#[VideoStream] sizes = " << sizes().transpose() << std::endl;
+    SARA_DEBUG << "#[VideoStream] pixel format = "
+               << av_get_pix_fmt_name(_video_codec_context->pix_fmt)
+               << std::endl;
     SARA_DEBUG
-        << "#[VideoStream] time base = " << _video_stream_index << ": "  //
+        << "#[VideoStream] time base = " << _video_stream_index << ": "
         << _video_format_context->streams[_video_stream_index]->time_base.num
         << "/"
         << _video_format_context->streams[_video_stream_index]->time_base.den
         << std::endl;
 
-    SARA_DEBUG << "#[VideoStream] pixel format = "
-               << av_get_pix_fmt_name(_video_codec_context->pix_fmt) << std::endl;
-
     // Get video format converter to RGB24.
     _sws_context = sws_getContext(
-        width(), height(), //
+        width(), height(),
 #ifdef HWACCEL
         AV_PIX_FMT_NV12,
 #else

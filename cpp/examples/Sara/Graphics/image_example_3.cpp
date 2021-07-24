@@ -21,7 +21,7 @@ using namespace DO::Sara;
 
 GRAPHICS_MAIN()
 {
-  Image<Color3ub> I;
+  Image<Rgb8> I;
   cout << src_path("../../../data/ksmall.jpg") << endl;
   if (!load(I, src_path("../../../data/ksmall.jpg")))
   {
@@ -63,13 +63,12 @@ GRAPHICS_MAIN()
   while (true)
   {
     microsleep(10);
-    display(I, x, y);
+    display(I, {x, y});
     clear_window();
 
     x += step;
     if (x < 0 || x > w)
       step *= -1;
-    //cout << x << endl;
 
     if (t.elapsed() > 2)
       break;

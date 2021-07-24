@@ -483,7 +483,7 @@ int test_with_glfw(int argc, char** argv)
   auto cuda_context = driver_api::CudaContext{gpu_id};
   cuda_context.make_current();
 
-  const auto video_filepath = argc < 1 ?
+  const auto video_filepath = argc < 2 ?
 #ifdef _WIN32
                                        "C:/Users/David/Desktop/GOPR0542.MP4"
 #elif __APPLE__
@@ -590,7 +590,7 @@ int test_with_sara_graphics(int argc, char** argv)
   auto cuda_context = driver_api::CudaContext{gpu_id};
   cuda_context.make_current();
 
-  const auto video_filepath = argc < 1 ?
+  const auto video_filepath = argc < 2 ?
 #ifdef _WIN32
                                        "C:/Users/David/Desktop/GOPR0542.MP4"
 #elif __APPLE__
@@ -619,7 +619,6 @@ int test_with_sara_graphics(int argc, char** argv)
       sara::Image<sara::Bgra8>{video_stream.width(), video_stream.height()};
 
   // Display stuff.
-  auto e = sara::Event{};
   for (;;)
   {
     // Read the decoded frame and store it in a CUDA device buffer.
@@ -646,5 +645,6 @@ int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(test_with_sara_graphics);
+  // app.register_user_main(test_with_glfw);
   return app.exec();
 }

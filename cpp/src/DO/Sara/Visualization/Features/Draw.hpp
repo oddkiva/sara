@@ -22,7 +22,7 @@ namespace DO { namespace Sara {
 
   //! @brief Draw the region.
   DO_SARA_EXPORT
-  auto draw(const OERegion& f, const Color3ub& c, float scale = 1.f,
+  auto draw(const OERegion& f, const Rgb8& c, float scale = 1.f,
             const Point2f& offset = Point2f::Zero()) -> void;
 
   /*!
@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
    *  @{
    */
   inline auto draw_oe_regions(const OERegion* begin, const OERegion* end,
-                              const Color3ub& color, float scale = 1.f,
+                              const Rgb8& color, float scale = 1.f,
                               const Point2f& offset = Point2f::Zero())
   {
     std::for_each(begin, end,
@@ -38,7 +38,7 @@ namespace DO { namespace Sara {
   }
 
   inline auto draw_oe_regions(const std::vector<OERegion>& features,
-                              const Color3ub& color, float scale = 1.f,
+                              const Rgb8& color, float scale = 1.f,
                               const Point2f& offset = Point2f::Zero())
   {
     draw_oe_regions(features.data(), features.data() + features.size(), color,

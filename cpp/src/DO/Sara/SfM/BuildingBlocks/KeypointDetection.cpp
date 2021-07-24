@@ -75,7 +75,7 @@ auto read_keypoints(const std::string& dirpath, const std::string& h5_filepath)
         if (get_sizes(active_window()) != image.sizes() / 2)
           resize_window(image.sizes() / 2);
 
-        display(image, 0, 0, 0.5);
+        display(image, Point2i::Zero(), 0.5);
         draw_oe_regions(features, Red8, 0.5f);
         get_key();
       });

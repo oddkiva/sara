@@ -28,9 +28,10 @@ namespace DO { namespace Sara {
   template <typename _T, typename _ColorSpace>
   class Pixel : public Matrix<_T, _ColorSpace::size, 1>
   {
+  public:
+    //! Base type.
     using base_type = Matrix<_T, _ColorSpace::size, 1>;
 
-  public:
     //! Channel type.
     using channel_type = _T;
     using color_space_type = _ColorSpace;

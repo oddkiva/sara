@@ -20,7 +20,7 @@ namespace DO::Sara {
     display(image2, (offF(1) * scale(0)).cast<int>(), _z2);
   }
 
-  void PairWiseDrawer::draw_point(int i, const Point2f& p, const Color3ub& c,
+  void PairWiseDrawer::draw_point(int i, const Point2f& p, const Rgb8& c,
                                   int r) const
   {
     assert(i == 0 || i == 1);
@@ -28,7 +28,7 @@ namespace DO::Sara {
   }
 
   void PairWiseDrawer::draw_line(int i, const Point2f& pa, const Point2f& pb,
-                                 const Color3ub& c, int penWidth) const
+                                 const Rgb8& c, int penWidth) const
   {
     assert(i == 0 || i == 1);
     const Vector2f a = (pa + offF(i)) * scale(i);
@@ -37,7 +37,7 @@ namespace DO::Sara {
   }
 
   void PairWiseDrawer::draw_arrow(int i, const Point2f& pa, const Point2f& pb,
-                                  const Color3ub& c, int penWidth) const
+                                  const Rgb8& c, int penWidth) const
   {
     assert(i == 0 || i == 1);
     const Vector2f a = (pa + offF(i)) * scale(i);
@@ -47,7 +47,7 @@ namespace DO::Sara {
 
   void PairWiseDrawer::draw_triangle(int i, const Point2f& pa,
                                      const Point2f& pb, const Point2f& pc,
-                                     const Color3ub& c, int r) const
+                                     const Rgb8& c, int r) const
   {
     assert(i == 0 || i == 1);
     draw_line(i, pa, pb, c, r);
@@ -56,7 +56,7 @@ namespace DO::Sara {
   }
 
   void PairWiseDrawer::draw_rect(int i, const Point2f& p1, const Point2f& p2,
-                                 int r, const Color3ub& c) const
+                                 int r, const Rgb8& c) const
   {
     assert(i == 0 || i == 1);
     const Point2i s = (scale(i) * p1 + offF(i) * scale(0))
@@ -75,7 +75,7 @@ namespace DO::Sara {
   }
 
   void PairWiseDrawer::draw_line_from_eqn(int i, const Vector3f& eqn,
-                                          const Color3ub& c, int r) const
+                                          const Rgb8& c, int r) const
   {
     assert(i == 0 || i == 1);
     Point2f a, b;
@@ -89,13 +89,13 @@ namespace DO::Sara {
   }
 
   void PairWiseDrawer::draw_feature(int i, const OERegion& f,
-                                    const Color3ub& c) const
+                                    const Rgb8& c) const
   {
     assert(i == 0 || i == 1);
     draw(f, c, _z1, offF(i));
   }
 
-  void PairWiseDrawer::draw_match(const Match& m, const Color3ub& c,
+  void PairWiseDrawer::draw_match(const Match& m, const Rgb8& c,
                                   bool drawLine) const
   {
     draw_feature(0, m.x(), c);

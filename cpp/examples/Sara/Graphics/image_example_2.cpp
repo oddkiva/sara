@@ -27,7 +27,7 @@ GRAPHICS_MAIN()
   auto uni_0_300 = std::uniform_int_distribution<>{0, 300};
 
   auto uniform_color_dist = [&]() {
-    return Color3ub(uni_0_255(rng), uni_0_255(rng), uni_0_255(rng));
+    return Rgb8(uni_0_255(rng), uni_0_255(rng), uni_0_255(rng));
   };
 
   // Create a white image and display it on a window.

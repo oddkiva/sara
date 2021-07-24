@@ -13,8 +13,8 @@
 #include <sstream>
 #include <string>
 
-#include <DO/Sara/Visualization.hpp>
 #include <DO/Sara/Match/Match.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace std;
@@ -29,7 +29,7 @@ namespace DO::Sara {
     display(I2, (off2 * scale).cast<int>(), scale);
   }
 
-  void draw_match(const Match& m, const Color3ub& c, const Point2f& t, float z)
+  void draw_match(const Match& m, const Rgb8& c, const Point2f& t, float z)
   {
     draw(m.x(), c, z);
     draw(m.y(), c, z, t);
@@ -41,8 +41,7 @@ namespace DO::Sara {
   void draw_matches(const vector<Match>& matches, const Point2f& off2, float z)
   {
     for (auto m = matches.begin(); m != matches.end(); ++m)
-      draw_match(*m, Color3ub(rand() % 256, rand() % 256, rand() % 256), off2,
-                 z);
+      draw_match(*m, Rgb8(rand() % 256, rand() % 256, rand() % 256), off2, z);
   }
 
   void check_matches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
@@ -55,8 +54,7 @@ namespace DO::Sara {
     {
       if (redraw_everytime)
         draw_image_pair(I1, I2, z);
-      draw_match(*m, Color3ub(rand() % 256, rand() % 256, rand() % 256), off,
-                 z);
+      draw_match(*m, Rgb8(rand() % 256, rand() % 256, rand() % 256), off, z);
       get_key();
     }
   }

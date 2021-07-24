@@ -25,10 +25,10 @@ GRAPHICS_MAIN()
   do
   {
     get_event(1, e);
-    fill_rect(rand()%300, rand()%300, rand()%50, rand()%50,
-      Color3ub(rand()%256, rand()%256, rand()%256));
-    //microSleep(100);  // TODO: sometimes if you don't put this, the program
-                        // freezes in some machine. Investigate.
+    fill_rect(rand() % 300, rand() % 300, rand() % 50, rand() % 50,
+              Rgb8(rand() % 256, rand() % 256, rand() % 256));
+    // microSleep(100);  // sometimes if you don't put this, the program
+                         // freezes in some machines.
   } while (e.key != KEY_ESCAPE);
 
   cout << "Finished!" << endl;

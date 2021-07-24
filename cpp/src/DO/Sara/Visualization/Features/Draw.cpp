@@ -18,7 +18,7 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  auto draw(const OERegion& f, const Color3ub& color, float scale,
+  auto draw(const OERegion& f, const Rgb8& color, float scale,
             const Point2f& offset) -> void
   {
     const auto& z = scale;

@@ -48,55 +48,54 @@ namespace DO { namespace Sara {
 
     void display_images() const;
 
-    void draw_point(int i, const Point2f& p, const Color3ub& c,
-                    int r = 2) const;
+    void draw_point(int i, const Point2f& p, const Rgb8& c, int r = 2) const;
 
-    void draw_line(int i, const Point2f& pa, const Point2f& pb,
-                   const Color3ub& c, int penWidth = 1) const;
+    void draw_line(int i, const Point2f& pa, const Point2f& pb, const Rgb8& c,
+                   int penWidth = 1) const;
 
-    void draw_arrow(int i, const Point2f& pa, const Point2f& pb,
-                    const Color3ub& c, int penWidth = 1) const;
+    void draw_arrow(int i, const Point2f& pa, const Point2f& pb, const Rgb8& c,
+                    int penWidth = 1) const;
 
     void draw_triangle(int i, const Point2f& pa, const Point2f& pb,
-                       const Point2f& pc, const Color3ub& c = Cyan8,
+                       const Point2f& pc, const Rgb8& c = Cyan8,
                        int r = 2) const;
 
     void draw_rect(int i, const Point2f& p1, const Point2f& p2, int r,
-                   const Color3ub& c = Yellow8) const;
+                   const Rgb8& c = Yellow8) const;
 
     template <typename LineIterator>
     void draw_lines(int i, LineIterator first, LineIterator last,
-                    const Color3ub& c = Black8, int r = 2) const
+                    const Rgb8& c = Black8, int r = 2) const
     {
       assert(i == 0 || i == 1);
       for (LineIterator line = first; line != last; ++line)
         draw_line(i, line->first, line->second, c, r);
     }
 
-    void draw_line_from_eqn(int i, const Vector3f& eqn,
-                            const Color3ub& c = Cyan8, int r = 2) const;
+    void draw_line_from_eqn(int i, const Vector3f& eqn, const Rgb8& c = Cyan8,
+                            int r = 2) const;
 
     template <typename EqnIterator>
     inline void draw_lines_from_eqns(int i, EqnIterator first, EqnIterator last,
-                                     const Color3ub& c = Cyan8, int r = 2) const
+                                     const Rgb8& c = Cyan8, int r = 2) const
     {
       assert(i == 0 || i == 1);
       for (EqnIterator eqn = first; eqn != last; ++eqn)
         draw_line_from_eqn(i, *eqn, c, r);
     }
 
-    template<typename VHIterator>
-    inline void draw_vertices(int i, VHIterator first, VHIterator last, int r = 2,
-                              const Color3ub& c = Yellow8) const
+    template <typename VHIterator>
+    inline void draw_vertices(int i, VHIterator first, VHIterator last,
+                              int r = 2, const Rgb8& c = Yellow8) const
     {
       assert(i == 0 || i == 1);
       for (VHIterator vh = first; vh != last; ++vh)
         draw_point(i, Point2f((*vh)->point().x(), (*vh)->point().y()), c, r);
     }
 
-    void draw_feature(int i, const OERegion& f, const Color3ub& c = Red8) const;
+    void draw_feature(int i, const OERegion& f, const Rgb8& c = Red8) const;
 
-    void draw_match(const Match& m, const Color3ub& c = Magenta8,
+    void draw_match(const Match& m, const Rgb8& c = Magenta8,
                     bool drawLine = false) const;
 
     const Image<Rgb8>& image(int i) const
@@ -133,5 +132,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

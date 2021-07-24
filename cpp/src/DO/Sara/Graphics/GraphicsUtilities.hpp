@@ -55,7 +55,7 @@ namespace DO { namespace Sara {
                   QImage::Format_RGB888};
   }
 
-  inline QColor to_QColor(const Color3ub& c)
+  inline QColor to_QColor(const Rgb8& c)
   {
     return QColor{c[0], c[1], c[2]};
   }
