@@ -4,6 +4,7 @@
 
 # Color conversions.
 shakti_halide_library(shakti_halide_rgb_to_gray.cpp)
+shakti_halide_library(shakti_halide_bgra_to_gray.cpp)
 shakti_halide_library(shakti_halide_gray32f_to_rgb.cpp)
 shakti_halide_gpu_library(shakti_halide_cast_to_float.cpp)
 

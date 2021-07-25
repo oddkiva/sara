@@ -24,10 +24,16 @@
 #include <DO/Shakti/Halide/Draw.hpp>
 #include <DO/Shakti/Halide/SIFTPipeline.hpp>
 
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+#  include <DO/Shakti/Cuda/VideoIO.hpp>
+#endif
+
+#include "shakti_halide_bgra_to_gray.h"
 #include "shakti_halide_rgb_to_gray.h"
 
 
 namespace sara = DO::Sara;
+namespace shakti = DO::Shakti;
 namespace halide = DO::Shakti::HalideBackend;
 
 
@@ -132,8 +138,26 @@ auto test_on_video(int argc, char **argv)
   // SARA PIPELINE
   //
   // Input and output from Sara.
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+  // Initialize CUDA driver.
+  DriverApi::init();
+
+  // Create a CUDA context so that we can use the GPU device.
+  const auto gpu_id = 0;
+  auto cuda_context = DriverApi::CudaContext{gpu_id};
+  cuda_context.make_current();
+
+  // nVidia's hardware accelerated video decoder.
+  shakti::VideoStream video_stream{video_filepath, cuda_context};
+  auto frame =
+      sara::Image<sara::Bgra8>{video_stream.width(), video_stream.height()};
+  auto device_bgra_buffer =
+      DriverApi::DeviceBgraBuffer{video_stream.width(), video_stream.height()};
+#else
   sara::VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
+#endif
+
   auto frame_gray = sara::Image<float>{frame.sizes()};
   auto frame_gray_tensor =
       tensor_view(frame_gray)
@@ -144,7 +168,11 @@ auto test_on_video(int argc, char **argv)
   // HALIDE PIPELINE.
   //
   // RGB-grayscale conversion.
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+  auto buffer_bgra = halide::as_interleaved_runtime_buffer(frame);
+#else
   auto buffer_rgb = halide::as_interleaved_runtime_buffer(frame);
+#endif
   auto buffer_gray = halide::as_runtime_buffer(frame_gray);
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
 
@@ -166,23 +194,35 @@ auto test_on_video(int argc, char **argv)
   while (true)
   {
     sara::tic();
-    if (!video_stream.read())
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+    const auto has_frame = video_stream.read(device_bgra_buffer);
+#else
+    const auto has_frame = video_stream.read();
+#endif
+    sara::toc("Read frame");
+    if (!has_frame)
     {
       std::cout << "Reached the end of the video!" << std::endl;
       break;
     }
-    sara::toc("Video Decoding");
+
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+    sara::tic();
+    device_bgra_buffer.to_host(frame);
+    sara::toc("Copy to host");
+#endif
 
     ++frames_read;
     SARA_CHECK(frames_read);
 
-    // if(frames_read % 3 != 0)
-    //   continue;
-
     timer.restart();
     {
       sara::tic();
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+      shakti_halide_bgra_to_gray(buffer_bgra, buffer_gray);
+#else
       shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray);
+#endif
       sara::toc("CPU RGB to grayscale");
 
       buffer_gray_4d.set_host_dirty();
@@ -194,15 +234,21 @@ auto test_on_video(int argc, char **argv)
                << std::endl;
 
     sara::tic();
+    auto frame_rgb = frame.cwise_transform(  //
+        [](const sara::Bgra8& color) -> sara::Rgb8 {
+          using namespace sara;
+          return {color.channel<R>(), color.channel<G>(), color.channel<B>()};
+        });
     for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
     {
       auto& octave = sift_pipeline.octaves[o];
+#pragma omp parallel for
       for (auto s = 0u; s < octave.extrema_oriented.size(); ++s)
-        draw_oriented_extrema(frame, octave.extrema_oriented[s],
+        draw_oriented_extrema(frame_rgb, octave.extrema_oriented[s],
                               sift_pipeline.octave_scaling_factor(
                                   sift_pipeline.start_octave_index + o));
     }
-    sara::display(frame);
+    sara::display(frame_rgb);
     sara::toc("Display");
   }
 }

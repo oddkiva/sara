@@ -45,6 +45,7 @@ set_property(TARGET halide_resize_example
 
 set(HALIDE_SIFT_LIBRARIES
   shakti_halide_rgb_to_gray
+  shakti_halide_bgra_to_gray
   shakti_halide_gray32f_to_rgb
   # Resize operations.
   shakti_enlarge
@@ -82,10 +83,14 @@ set(HALIDE_SIFT_LIBRARIES
 )
 
 
-add_executable(halide_sift_example
-  halide_sift_example.cpp)
+if (CMAKE_CUDA_COMPILER)
+  cuda_add_executable(halide_sift_example halide_sift_example.cpp)
+else ()
+  add_executable(halide_sift_example halide_sift_example.cpp)
+endif ()
 target_compile_definitions(halide_sift_example
-  PRIVATE ${SARA_DEFINITIONS})
+  PRIVATE ${SARA_DEFINITIONS}
+          $<$<BOOL:CMAKE_CUDA_COMPILER>:USE_SHAKTI_CUDA_VIDEOIO>)
 target_link_options(halide_sift_example
   PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
@@ -94,7 +99,9 @@ target_link_libraries(halide_sift_example
   Halide::Halide
   Halide::Runtime
   ${DO_Sara_LIBRARIES}
-  ${HALIDE_SIFT_LIBRARIES})
+  ${HALIDE_SIFT_LIBRARIES}
+  $<$<BOOL:CMAKE_CUDA_COMPILER>:DO::Shakti::VideoIO>
+  $<$<BOOL:CMAKE_CUDA_COMPILER>:${CUDA_CUDA_LIBRARY}>)
 
 set_property(TARGET halide_sift_example
   PROPERTY
@@ -120,7 +127,8 @@ set_property(TARGET halide_sift_octave_example
 add_executable(halide_sift_pyramid_example
   halide_sift_pyramid_example.cpp)
 target_compile_definitions(halide_sift_pyramid_example
-  PRIVATE ${SARA_DEFINITIONS})
+  PRIVATE ${SARA_DEFINITIONS}
+          $<$<BOOL:CMAKE_CUDA_COMPILER>:USE_SHAKTI_CUDA_VIDEOIO>)
 target_link_options(halide_sift_pyramid_example
   PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
@@ -129,7 +137,9 @@ target_link_libraries(halide_sift_pyramid_example
   Halide::Halide
   Halide::Runtime
   ${DO_Sara_LIBRARIES}
-  ${HALIDE_SIFT_LIBRARIES})
+  ${HALIDE_SIFT_LIBRARIES}
+  $<$<BOOL:CMAKE_CUDA_COMPILER>:DO::Shakti::VideoIO>
+  $<$<BOOL:CMAKE_CUDA_COMPILER>:${CUDA_CUDA_LIBRARY}>)
 set_property(TARGET halide_sift_pyramid_example
   PROPERTY
   FOLDER "Examples/Shakti/Halide")
@@ -161,8 +171,6 @@ target_link_options(halide_edge_detection_example
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_edge_detection_example
   PRIVATE
-  Halide::Halide
-  Halide::Runtime
   Halide::Halide
   Halide::Runtime
   shakti_halide_rgb_to_gray

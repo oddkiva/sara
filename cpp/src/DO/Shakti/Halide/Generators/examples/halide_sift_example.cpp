@@ -30,6 +30,11 @@
 #include <DO/Shakti/Halide/Resize.hpp>
 #include <DO/Shakti/Halide/SIFT.hpp>
 
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+#  include <DO/Shakti/Cuda/VideoIO.hpp>
+#endif
+
+#include "shakti_halide_bgra_to_gray.h"
 #include "shakti_halide_rgb_to_gray.h"
 
 
@@ -162,7 +167,7 @@ namespace DO::Shakti::HalideBackend {
 // #define SIFT_V1
 // #define SIFT_V2
 // #define SIFT_V3
-#define SIFT_V4
+// #define SIFT_V4
 #if defined(SIFT_V1)
       SARA_DEBUG << "RUNNING SIFT V1..." << std::endl;
       timer.restart();
@@ -236,32 +241,55 @@ auto test_on_image()
   sara::get_key();
 }
 
-auto test_on_video()
+auto test_on_video(int argc, char** argv)
 {
   using namespace std::string_literals;
 
+  const auto video_filepath =
+      argc < 2
+          ?
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+          "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s
 #elif __APPLE__
-  const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
+          "/Users/david/Desktop/Datasets/sfm/Family.mp4"s
 #else
-  const auto video_filepath =
-      "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      // "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
-      // "/home/david/Desktop/GOPR0542.MP4"s;
+          "/home/david/Desktop/Datasets/sfm/Family.mp4"s
+  // "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
+  // "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
+          : argv[1];
 
   // Input and output from Sara.
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+  // Initialize CUDA driver.
+  DriverApi::init();
+
+  // Create a CUDA context so that we can use the GPU device.
+  const auto gpu_id = 0;
+  auto cuda_context = DriverApi::CudaContext{gpu_id};
+  cuda_context.make_current();
+
+  // nVidia's hardware accelerated video decoder.
+  shakti::VideoStream video_stream{video_filepath, cuda_context};
+  auto frame =
+      sara::Image<sara::Bgra8>{video_stream.width(), video_stream.height()};
+  auto device_bgra_buffer =
+      DriverApi::DeviceBgraBuffer{video_stream.width(), video_stream.height()};
+#else
   sara::VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
+#endif
   auto frame_gray32f = sara::Image<float>{frame.sizes()};
 
   const auto scale_factor = 1;
   auto frame_downsampled = sara::Image<float>{frame.sizes() / scale_factor};
 
   // Halide buffers.
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+  auto buffer_bgra = halide::as_interleaved_runtime_buffer(frame);
+#else
   auto buffer_rgb = halide::as_interleaved_runtime_buffer(frame);
+#endif
   auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
 
   auto sift_extractor = halide::SIFTExtractor{};
@@ -276,11 +304,22 @@ auto test_on_video()
   while (true)
   {
     sara::tic();
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+    const auto has_frame = video_stream.read(device_bgra_buffer);
+    sara::toc("Read frame");
+    if (!has_frame)
+      break;
+
+    sara::tic();
+    device_bgra_buffer.to_host(frame);
+    sara::toc("Copy to host");
+#else
     if (!video_stream.read())
     {
       std::cout << "Reached the end of the video!" << std::endl;
       break;
     }
+#endif
     sara::toc("Video Decoding");
 
     ++frames_read;
@@ -289,7 +328,11 @@ auto test_on_video()
 
     // Use parallelization and vectorization.
     sara::tic();
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+    shakti_halide_bgra_to_gray(buffer_bgra, buffer_gray32f);
+#else
     shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
+#endif
     sara::toc("Grayscale");
 
     if (scale_factor != 1)
@@ -316,9 +359,16 @@ auto test_on_video()
 }
 
 
-GRAPHICS_MAIN()
+int main(int argc, char** argv)
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
+}
+
+int __main(int argc, char** argv)
 {
   // test_on_image();
-  test_on_video();
+  test_on_video(argc, argv);
   return 0;
 }
