@@ -10,12 +10,11 @@ target_include_directories(
                                  ${CMAKE_SOURCE_DIR}/cpp/third-party)
 target_link_libraries(
   nvidia_decoder_example
-  PRIVATE ${FFMPEG_LIBRARIES}
+  PRIVATE DO::Shakti::VideoIO
           ${CUDA_CUDA_LIBRARY}
           ${OPENGL_LIBRARIES}
           ${GLEW_LIBRARIES}
           ${DO_Sara_LIBRARIES}
-          glfw
-          nvidia::VideoCodecHelpers)
+          glfw)
 set_target_properties(nvidia_decoder_example PROPERTIES FOLDER
                                                         "Examples/DRAFTS")

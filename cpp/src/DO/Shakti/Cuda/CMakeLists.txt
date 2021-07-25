@@ -17,7 +17,7 @@ target_compile_options(DO_Shakti_MultiArray
 add_library(DO::Shakti::MultiArray ALIAS DO_Shakti_MultiArray)
 
 # Create the reamining libraries.
-set(DO_Shakti_LIBRARIES ImageProcessing Segmentation Utilities)
+set(DO_Shakti_LIBRARIES ImageProcessing Segmentation Utilities VideoIO)
 foreach (library ${DO_Shakti_LIBRARIES})
   shakti_glob_directory(${CMAKE_CURRENT_SOURCE_DIR}/${library})
   shakti_create_common_variables("${library}")
@@ -32,3 +32,9 @@ target_link_libraries(DO_Shakti_Segmentation
   PUBLIC
   DO_Shakti_MultiArray
   DO_Shakti_Utilities)
+
+target_link_libraries(DO_Shakti_VideoIO
+  PUBLIC
+  ${FFMPEG_LIBRARIES}
+  DO::Sara::Core
+  nvidia::VideoCodecHelpers)
