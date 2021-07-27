@@ -21,11 +21,19 @@ extern "C" {
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/VideoIO/VideoStream.hpp>
 
+#ifdef __APPLE__
+#define HWACCEL
+#endif
+
 
 namespace DO::Sara {
 
   bool VideoStream::_registered_all_codecs = false;
+#ifdef __APPLE__
+  int VideoStream::_hw_device_type = AV_HWDEVICE_TYPE_VIDEOTOOLBOX;
+#else
   int VideoStream::_hw_device_type = AV_HWDEVICE_TYPE_CUDA;
+#endif
 
   static AVBufferRef* hw_device_ctx = NULL;
   static enum AVPixelFormat hw_pix_fmt;
@@ -37,7 +45,7 @@ namespace DO::Sara {
 
     if ((err = av_hwdevice_ctx_create(&hw_device_ctx, type, NULL, NULL, 0)) < 0)
     {
-      fprintf(stderr, "Failed to create specified HW device.\n");
+      fprintf(stderr, "Failed to create specified hardware device context.\n");
       return err;
     }
     ctx->hw_device_ctx = av_buffer_ref(hw_device_ctx);
@@ -45,7 +53,7 @@ namespace DO::Sara {
     return err;
   }
 
-  static enum AVPixelFormat get_hw_format(AVCodecContext* ctx,
+  static enum AVPixelFormat get_hw_format(AVCodecContext*,
                                           const enum AVPixelFormat* pix_fmts)
   {
     const enum AVPixelFormat* p;
@@ -121,7 +129,8 @@ namespace DO::Sara {
       if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
           config->device_type == _hw_device_type)
       {
-        SARA_DEBUG << "Successfully initialized HW AV codec config!" << std::endl;
+        SARA_DEBUG << "Successfully initialized hardware AV codec config!"
+                   << std::endl;
         hw_pix_fmt = config->pix_fmt;
         break;
       }
@@ -172,7 +181,6 @@ namespace DO::Sara {
       _pkt = av_packet_alloc();
     if (_pkt == nullptr)
       throw std::runtime_error("Could not allocate video packet!");
-    av_init_packet(_pkt);
 
     SARA_DEBUG << "#[VideoStream] sizes = " << sizes().transpose() << std::endl;
     SARA_DEBUG << "#[VideoStream] pixel format = "
@@ -273,7 +281,6 @@ namespace DO::Sara {
         if (_got_frame)
         {
           av_packet_unref(_pkt);
-          av_init_packet(_pkt);
 
           // Convert to RGB24 pixel format.
           sws_scale(_sws_context, _picture->data, _picture->linesize, 0,

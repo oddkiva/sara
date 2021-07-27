@@ -48,7 +48,7 @@ GRAPHICS_MAIN()
 
     sara::tic();
     auto has_frame = video_stream.read();
-    sara::toc("Read Frame");
+    sara::toc("Read frame");
 
     if (!has_frame)
       break;
@@ -56,7 +56,9 @@ GRAPHICS_MAIN()
     if (sara::active_window() == nullptr)
       sara::set_active_window(sara::create_window(video_stream.sizes()));
 
+    sara::tic();
     sara::display(video_stream.frame());
+    sara::toc("Display");
     // sara::get_key();
   }
 
