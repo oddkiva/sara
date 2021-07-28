@@ -14,6 +14,12 @@
 // #define HWACCEL
 #endif
 
+// Deactivate hardware acceleration for now. The CPU multi-threaded decoding is
+// quite good in the meantime.
+#ifdef HWACCEL
+#  undef HWACCEL
+#endif
+
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
