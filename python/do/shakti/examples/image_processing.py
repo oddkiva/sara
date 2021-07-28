@@ -7,7 +7,7 @@ import numpy as np
 import do.sara as sara
 import do.shakti as shakti
 
-USE_OPENCV = True
+USE_OPENCV = False
 
 if USE_OPENCV:
     import cv2

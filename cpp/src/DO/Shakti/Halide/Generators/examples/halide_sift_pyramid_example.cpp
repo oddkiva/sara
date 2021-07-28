@@ -234,21 +234,33 @@ auto test_on_video(int argc, char **argv)
                << std::endl;
 
     sara::tic();
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
     auto frame_rgb = frame.cwise_transform(  //
         [](const sara::Bgra8& color) -> sara::Rgb8 {
           using namespace sara;
-          return {color.channel<R>(), color.channel<G>(), color.channel<B>()};
+      return {color.channel<R>(), color.channel<G>(), color.channel<B>()};
         });
+#endif
     for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
     {
       auto& octave = sift_pipeline.octaves[o];
 #pragma omp parallel for
       for (auto s = 0u; s < octave.extrema_oriented.size(); ++s)
-        draw_oriented_extrema(frame_rgb, octave.extrema_oriented[s],
+        draw_oriented_extrema(
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
+                              frame_rgb,
+#else
+                              frame,
+#endif
+                              octave.extrema_oriented[s],
                               sift_pipeline.octave_scaling_factor(
                                   sift_pipeline.start_octave_index + o));
     }
+#ifdef USE_SHAKTI_CUDA_VIDEOIO
     sara::display(frame_rgb);
+#else
+    sara::display(frame);
+#endif
     sara::toc("Display");
   }
 }

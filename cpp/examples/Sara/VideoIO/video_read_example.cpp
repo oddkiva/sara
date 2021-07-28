@@ -59,7 +59,6 @@ GRAPHICS_MAIN()
     sara::tic();
     sara::display(video_stream.frame());
     sara::toc("Display");
-    // sara::get_key();
   }
 
   sara::close_window();

@@ -15,9 +15,6 @@
 
 #include <DO/Sara/Core/Image.hpp>
 
-#include <cstdio>
-#include <memory>
-
 
 struct AVCodec;
 struct AVCodecContext;

@@ -90,7 +90,7 @@ else ()
 endif ()
 target_compile_definitions(halide_sift_example
   PRIVATE ${SARA_DEFINITIONS}
-          $<$<BOOL:CMAKE_CUDA_COMPILER>:USE_SHAKTI_CUDA_VIDEOIO>)
+          $<$<BOOL:${CMAKE_CUDA_COMPILER}>:USE_SHAKTI_CUDA_VIDEOIO>)
 target_link_options(halide_sift_example
   PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
