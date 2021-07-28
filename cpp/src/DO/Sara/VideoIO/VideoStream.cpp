@@ -165,7 +165,6 @@ namespace DO::Sara {
 
     // Enable multi-threaded decoding.
     _video_codec_context->thread_count = std::thread::hardware_concurrency();
-    std::cout << "num threads = " << _video_codec_context->thread_count << std::endl;
 
     if (avcodec_parameters_to_context(_video_codec_context,
                                       _video_codec_params))
