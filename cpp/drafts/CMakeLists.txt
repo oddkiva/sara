@@ -18,10 +18,12 @@ if (CUDA_FOUND AND NvidiaVideoCodec_ROOT)
   add_subdirectory(NvCodec)
 endif ()
 
-if (NOT APPLE)
+if (NOT APPLE AND NOT WIN32)
   add_subdirectory(GStreamer)
 endif ()
 
-add_subdirectory(Vulkan)
+if (NOT WIN32)
+  add_subdirectory(Vulkan)
+endif ()
 
 add_subdirectory(NuScenes)
