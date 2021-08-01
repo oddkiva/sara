@@ -25,10 +25,35 @@ auto cheirality_predicate(const MatrixXd& X) -> Array<bool, 1, Dynamic>
   throw std::runtime_error{"Error: invalid 3D coordinates!"};
 }
 
+auto relative_cheirality_predicate(const MatrixXd& X, const Matrix34d& P) -> Array<bool, 1, Dynamic>
+{
+  if (X.rows() != 3 && X.rows() != 4)
+    throw std::runtime_error{"Error: invalid 3D coordinates!"};
+
+  // The center of the camera has coordinates [0, 0, 0] in the camera frame.
+  // Its coordinates in the reference frame satisfies the relation R C + t = 0.
+  const auto R = P.block<3, 3>(0, 0);
+  const auto t = P.col(3);
+  const Eigen::Vector3d C = -R.transpose() * t;
+
+  // The z-axis of the second camera has coordinates [0, 0, 1] in the camera frame 
+  // Its coordinates in the reference frame satisfies the relation R z = [0, 0, 1]^T
+  // and is calculated as
+  const Eigen::RowVector3d e3 = R.row(2);
+
+  // The ray (X - C) and the z-axis of the second camera must form a positive angle.
+  // In terms of calculation, its dot product must be positive.
+  if (X.rows() == 3)
+    return (e3 * (X.colwise() - C)).array() > 0;
+
+  const auto X_euclidean = X.topRows(3);
+    return (e3 * (X_euclidean.colwise() - C)).array() > 0;
+}
+
 auto relative_motion_cheirality_predicate(const MatrixXd& X, const Matrix34d& P)
     -> Array<bool, 1, Dynamic>
 {
-  return cheirality_predicate(X) && cheirality_predicate(P * X);
+  return cheirality_predicate(X) && relative_cheirality_predicate(X, P);
 }
 
 } /* namespace DO::Sara */

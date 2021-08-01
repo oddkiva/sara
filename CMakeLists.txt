@@ -24,6 +24,7 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
 
 # Set options.
 option(SARA_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
+option(SARA_USE_QT6 "Switch to Qt6" OFF)
 option(SARA_USE_HALIDE "Enable Halide" OFF)
 option(SARA_BUILD_VIDEOIO "Build Sara's Video I/O module" OFF)
 option(SARA_BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
@@ -65,10 +66,9 @@ if (CMAKE_CUDA_COMPILER)
   set(CUDA_LINK_LIBRARIES_KEYWORD PUBLIC)
   # Since we are still using the old CMake way style to compile CUDA code.
   if (UNIX)
-    set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -Xcompiler=-Wno-unknown-pragmas)
+    set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -Xcompiler=-Wno-unknown-pragmas
+      -Xcompiler=-fPIC)
   endif ()
-
-  include(shakti_macros)
 else ()
   message(STATUS "No CUDA support!")
 endif()
@@ -99,10 +99,22 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
   find_package(TIFF REQUIRED)
   find_package(ZLIB REQUIRED)
 
-  find_package(Qt5 COMPONENTS Core Widgets OpenGL OpenGLExtensions REQUIRED)
+  if (SARA_USE_QT6)
+    set (QT_VERSION 6)
+    find_package(Qt${QT_VERSION} COMPONENTS Core Widgets OpenGL OpenGLWidgets REQUIRED)
+  else (SARA_USE_QT6)
+    set (QT_VERSION 5)
+    find_package(Qt${QT_VERSION} COMPONENTS Core Widgets OpenGL OpenGLExtensions REQUIRED)
+  endif ()
+
   find_package(OpenGL REQUIRED)
+  find_package(OpenCL)
 
   find_package(Ceres REQUIRED)
+
+  if (SARA_USE_HALIDE)
+    include(sara_use_halide)
+  endif ()
 endif ()
 
 

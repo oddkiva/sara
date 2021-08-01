@@ -62,7 +62,7 @@ namespace DO::Sara {
     {
     }
 
-    auto operator()(const Image<float>& image) -> void;
+    auto operator()(const ImageView<float>& image) -> void;
   };
 
 }  // namespace DO::Sara

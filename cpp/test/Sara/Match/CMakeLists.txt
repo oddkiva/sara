@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core Features Match REQUIRED)
+find_package(DO_Sara COMPONENTS Match REQUIRED)
 
 file(GLOB test_match_SOURCE_FILES FILES *.cpp)
 

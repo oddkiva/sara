@@ -15,7 +15,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Shakti/Segmentation/SuperPixel.hpp>
+#include <DO/Shakti/Cuda/Segmentation/SuperPixel.hpp>
 
 
 using namespace std;

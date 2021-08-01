@@ -14,22 +14,23 @@
 #pragma once
 
 #include <DO/Sara/Defines.hpp>
-#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Features.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
-
-// Utilities and debug.
-#include <DO/Sara/FeatureDetectors/Debug.hpp>
 
 // Extremum filtering and refining.
 #include <DO/Sara/FeatureDetectors/RefineExtremum.hpp>
 
-// Feature detection.
+// Keypoint detection.
 #include <DO/Sara/FeatureDetectors/LoG.hpp>
 #include <DO/Sara/FeatureDetectors/DoG.hpp>
 #include <DO/Sara/FeatureDetectors/Harris.hpp>
 #include <DO/Sara/FeatureDetectors/Hessian.hpp>
-//#include "FeatureDetectors/MSER.hpp"
+
+// Edge detection.
+#include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
+
+// Detection of DoG+SIFT keypoints.
+#include <DO/Sara/FeatureDetectors/SIFT.hpp>
 
 // Affine shape adaptation (cf. [Mikolajczyk & Schmid, ECCV 2002]).
 #include <DO/Sara/FeatureDetectors/AffineShapeAdaptation.hpp>

@@ -3,8 +3,14 @@ if (SARA_USE_FROM_SOURCE)
   if (NOT DO_Sara_FeatureDetectors_ADDED)
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/FeatureDetectors)
     sara_create_common_variables("FeatureDetectors")
-    sara_set_internal_dependencies("FeatureDetectors"
-      "Core;Features;Geometry;Graphics")
     sara_generate_library("FeatureDetectors")
+
+    target_link_libraries(DO_Sara_FeatureDetectors
+      PRIVATE
+      DO::Sara::Geometry
+      DO::Sara::FeatureDescriptors
+      PUBLIC
+      DO::Sara::Core
+      $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
   endif ()
 endif ()

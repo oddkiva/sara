@@ -9,10 +9,10 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 
-#include <DO/Shakti/ImageProcessing.hpp>
-#include <DO/Shakti/MultiArray.hpp>
-#include <DO/Shakti/Segmentation.hpp>
-#include <DO/Shakti/Utilities.hpp>
+#include <DO/Shakti/Cuda/ImageProcessing.hpp>
+#include <DO/Shakti/Cuda/MultiArray.hpp>
+#include <DO/Shakti/Cuda/Segmentation.hpp>
+#include <DO/Shakti/Cuda/Utilities.hpp>
 
 
 namespace DO { namespace Sara {

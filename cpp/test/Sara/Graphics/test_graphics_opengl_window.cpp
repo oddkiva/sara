@@ -60,7 +60,11 @@ protected:  // data members.
   QPoint _mouse_pos;
   Qt::Key _key;
   int _mouse_buttons_type_id;
-  int _event_type_id;
+#if QT_VERSION_MAJOR == 6
+  QMetaType _event_type;
+#else
+  int _event_type;
+#endif
 
   int _wait_ms;
   int _event_time_ms;
@@ -70,7 +74,11 @@ public:
   {
     _mouse_buttons_type_id =
         qRegisterMetaType<Qt::MouseButtons>("Qt::MouseButtons");
-    _event_type_id = qRegisterMetaType<Event>("Event");
+#if QT_VERSION_MAJOR == 6
+    _event_type = QMetaType(qRegisterMetaType<Event>("Event"));
+#else
+    _event_type = qRegisterMetaType<Event>("Event");
+#endif
     _test_window = new OpenGLWindow(300, 300);
     _event_scheduler.set_receiver(_test_window);
     _mouse_pos = QPoint(10, 10);
@@ -138,7 +146,7 @@ BOOST_AUTO_TEST_CASE(test_send_no_event)
   BOOST_CHECK_EQUAL(spy.count(), 1);
   auto arguments = spy.takeFirst();
   auto arg = arguments.at(0);
-  arg.convert(_event_type_id);
+  arg.convert(_event_type);
   auto event = arguments.at(0).value<Event>();
   BOOST_CHECK_EQUAL(event.type, DO::Sara::NO_EVENT);
 }
@@ -166,7 +174,7 @@ BOOST_AUTO_TEST_CASE(test_send_pressed_key_event)
   // Check the details of the key press event.
   auto arguments = spy.takeFirst();
   auto arg = arguments.at(0);
-  arg.convert(_event_type_id);
+  arg.convert(_event_type);
   auto event = arguments.at(0).value<Event>();
   BOOST_CHECK_EQUAL(event.type, DO::Sara::KEY_PRESSED);
   BOOST_CHECK_EQUAL(event.key, _key);
@@ -193,7 +201,7 @@ BOOST_AUTO_TEST_CASE(test_send_released_key_event)
   // Check the details of the key release event.
   auto arguments = spy.takeFirst();
   auto arg = arguments.at(0);
-  arg.convert(_event_type_id);
+  arg.convert(_event_type);
   auto event = arguments.at(0).value<Event>();
   BOOST_CHECK_EQUAL(event.type, DO::Sara::KEY_RELEASED);
   BOOST_CHECK_EQUAL(event.key, _key);

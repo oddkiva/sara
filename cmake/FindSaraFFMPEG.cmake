@@ -41,6 +41,11 @@ else ()
     PATHS ${_FFMPEG_AVUTIL_LIBRARY_DIRS}
           /usr/lib /usr/local/lib /opt/local/lib)
 
+  find_library(FFMPEG_LIBSWRESAMPLE
+    NAMES swresample
+    PATHS ${_FFMPEG_AVUTIL_LIBRARY_DIRS}
+          /usr/lib /usr/local/lib /opt/local/lib)
+
   if (FFMPEG_LIBAVCODEC AND FFMPEG_LIBAVFORMAT AND FFMPEG_LIBAVUTIL AND
       FFMPEG_LIBSWSCALE)
     set(FFMPEG_FOUND TRUE)
@@ -50,10 +55,11 @@ else ()
     set(FFMPEG_INCLUDE_DIRS ${FFMPEG_AVCODEC_INCLUDE_DIR})
 
     set(FFMPEG_LIBRARIES
-      ${FFMPEG_LIBAVCODEC}
       ${FFMPEG_LIBAVFORMAT}
+      ${FFMPEG_LIBAVCODEC}
       ${FFMPEG_LIBAVUTIL}
-      ${FFMPEG_LIBSWSCALE})
+      ${FFMPEG_LIBSWSCALE}
+      ${FFMPEG_LIBSWRESAMPLE})
   else ()
       message(FATAL_ERROR "Could not find all FFmpeg libraries!")
   endif ()

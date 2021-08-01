@@ -22,13 +22,9 @@ namespace DO { namespace Sara {
   /*!
    *  @ingroup Graphics
    *
-   *  @defgroup GraphicsImageIO Image I/O (slow using Qt5)
+   *  @defgroup GraphicsImageIO Image I/O (slow using Qt)
    *  @{
    */
-
-  //! @brief Load image.
-  DO_SARA_EXPORT
-  bool load(Image<Color3ub>& I, const std::string& name);
 
   /*!
     @brief Load color image.
@@ -63,18 +59,8 @@ namespace DO { namespace Sara {
     \return true if image is successfully loaded.
     \return false otherwise.
    */
-
   DO_SARA_EXPORT
   bool load_from_dialog_box(Image<Rgb8>& I);
-
-  /*!
-    @brief Load image from a dialog box.
-    @param[in]  I image file.
-    \return true if image is successfully loaded.
-    \return false otherwise.
-   */
-  DO_SARA_EXPORT
-  bool load_from_dialog_box(Image<Color3ub>& I);
 
   /*!
     @brief Save grayscale image.

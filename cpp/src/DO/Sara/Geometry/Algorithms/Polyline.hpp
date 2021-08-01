@@ -165,7 +165,7 @@ namespace DO::Sara {
 
     auto p_collapsed = std::vector<Point>{};
     p_collapsed.reserve(p.size());
-    for (auto i = 0u; i < p.size();)
+    for (auto i = std::size_t{}; i < p.size();)
     {
       if (collapse_state[i] == 0)
       {

@@ -27,6 +27,7 @@ flags = [
 # For a C project, you would set this to 'c' instead of 'c++'.
 '-x', 'objective-c++',
 "-isystem", "/usr/include/x86_64-linux-gnu",
+"-isystem", "/usr/include/gstreamer-1.0",
 '-isystem', get_python_inc(),
 '-isystem', 'cpp/llvm/include',
 '-isystem', 'cpp/llvm/tools/clang/include',
@@ -46,6 +47,7 @@ flags = [
 "-fPIE",
 # Qt5 header directories.
 "-I", "/usr/include",
+"-I", "/usr/include/x86_64-linux-gnu",
 "-I", "/usr/include/x86_64-linux-gnu/qt5",
 "-I", "/usr/include/x86_64-linux-gnu/qt5/QtQuick",
 "-I", "/usr/include/x86_64-linux-gnu/qt5/QtQml",

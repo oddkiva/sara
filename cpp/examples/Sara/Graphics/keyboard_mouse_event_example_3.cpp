@@ -19,12 +19,12 @@ using namespace DO::Sara;
 GRAPHICS_MAIN()
 {
   cout << "Advanced event handling" << endl;
-  Window W = create_window(1024, 768);
-  set_active_window(W);
-  Image<Color3ub> I;
-  load(I, src_path("../../datasets/ksmall.jpg"));
+  create_window(1024, 768);
+  auto I = Image<Rgb8>{};
+  if (!load(I, src_path("../../../../data/ksmall.jpg")))
+    std::cerr << "Failed to load image!" << std::endl;
 
-  Event ev;
+  auto ev = Event{};
   do
   {
     get_event(500, ev);  // Wait an event (return if no event for 500ms)
@@ -53,7 +53,6 @@ GRAPHICS_MAIN()
       break;
     }
   } while (ev.type != KEY_PRESSED || ev.key != KEY_UP);
-  close_window(W);
 
   return 0;
 }

@@ -20,7 +20,7 @@
 
 #include "StudySeedTriple.hpp"
 
-#include <DO/Sara/Match/PairWiseDrawer.hpp>
+#include <DO/Sara/Visualization.hpp>
 #include "GrowRegion.hpp"
 
 

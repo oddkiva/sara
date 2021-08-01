@@ -1,0 +1,19 @@
+# Structure-from-Motion
+
+This chapter details some classical algorithms that *Sara* implements in
+Multiple View Geometry.
+
+```{r, child="multiviewgeometry/coordinate_systems.Rmd"}
+```
+
+```{r, child="multiviewgeometry/perspective_projection.Rmd", echo=FALSE}
+```
+
+```{r, child="multiviewgeometry/distance_calculation.Rmd", echo=FALSE}
+```
+
+```{r, child="multiviewgeometry/essential_matrix.Rmd", echo=FALSE}
+```
+
+```{r, child="multiviewgeometry/nister.Rmd"}
+```

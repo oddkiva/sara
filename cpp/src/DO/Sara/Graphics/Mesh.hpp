@@ -15,8 +15,8 @@
 
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 
@@ -42,27 +42,85 @@ namespace DO { namespace Sara {
     using Point = Vector_;
     using Face = Face_;
 
-    std::vector<Point>& vertices() { return v_; }
-    std::vector<Vector>& normals() { return n_; }
-    std::vector<Face>& faces() { return f_; }
-    Point& vertex(size_t i) { return v_[i]; }
-    Vector& normal(size_t i) { return n_[i]; }
-    Face& face(size_t i) { return f_[i]; }
-    Point& vertex_of_face(size_t v, size_t f)
-    { return vertex(face(f)(v)); }
-    Vector& normal_of_vertex_of_face(size_t v, size_t f)
-    { return normal(face(f)(v)); }
+    std::vector<Point>& vertices()
+    {
+      return v_;
+    }
 
-    const std::vector<Point>& vertices() const { return v_; }
-    const std::vector<Vector>& normals() const { return n_; }
-    const std::vector<Face>& faces() const { return f_; }
-    const Point& vertex(size_t i) const { return v_[i]; }
-    const Vector& normal(size_t i) const { return n_[i]; }
-    const Face& face(size_t i) const { return f_[i]; }
+    std::vector<Vector>& normals()
+    {
+      return n_;
+    }
+
+    std::vector<Face>& faces()
+    {
+      return f_;
+    }
+
+    Point& vertex(size_t i)
+    {
+      return v_[i];
+    }
+
+    Vector& normal(size_t i)
+    {
+      return n_[i];
+    }
+
+    Face& face(size_t i)
+    {
+      return f_[i];
+    }
+
+    Point& vertex_of_face(size_t v, size_t f)
+    {
+      return vertex(face(f)(v));
+    }
+
+    Vector& normal_of_vertex_of_face(size_t v, size_t f)
+    {
+      return normal(face(f)(v));
+    }
+
+    const std::vector<Point>& vertices() const
+    {
+      return v_;
+    }
+
+    const std::vector<Vector>& normals() const
+    {
+      return n_;
+    }
+
+    const std::vector<Face>& faces() const
+    {
+      return f_;
+    }
+
+    const Point& vertex(size_t i) const
+    {
+      return v_[i];
+    }
+
+    const Vector& normal(size_t i) const
+    {
+      return n_[i];
+    }
+
+    const Face& face(size_t i) const
+    {
+      return f_[i];
+    }
+
     const Point& vertex_of_face(size_t v, size_t f) const
-    { return vertex(face(f)(v)); }
+    {
+      return vertex(face(f)(v));
+    }
+
     const Vector& normal_of_vertex_of_face(size_t v, size_t f) const
-    { return normal(face(f)(v)); }
+    {
+      return normal(face(f)(v));
+    }
 
     Point center() const
     {
@@ -72,6 +130,7 @@ namespace DO { namespace Sara {
       c /= static_cast<float>(v_.size());
       return c;
     }
+
     Vector face_normal(size_t f) const
     {
       Vector u(vertex_of_face(1, f) - vertex_of_face(0, f));
@@ -95,14 +154,15 @@ namespace DO { namespace Sara {
   class MeshReader
   {
   public:
-    /* WARNING: this function may not work because I just read the vertices and triangles */
+    /* WARNING: this function may not work because I just read the vertices and
+     * triangles */
     template <typename Vector>
     bool read_object_file(SimpleMesh<Vector, Face3>& mesh,
                           const std::string& fileName)
     {
       // Attempt to read file.
       std::ifstream file(fileName.c_str());
-      if(!file)
+      if (!file)
       {
         std::cerr << "Error reading file!" << std::endl;
         return false;
@@ -131,15 +191,15 @@ namespace DO { namespace Sara {
         }
       }
       // Read mesh successfully.
-      computeFaceRings(mesh);
-      computeVertexRings(mesh);
-      computeNormals(mesh);
+      compute_face_rings(mesh);
+      compute_vertex_rings(mesh);
+      compute_normals(mesh);
       return true;
     }
 
   private:
-    template<typename Vector, typename Face>
-    void computeVertexRings(const SimpleMesh<Vector, Face>& mesh)
+    template <typename Vector, typename Face>
+    void compute_vertex_rings(const SimpleMesh<Vector, Face>& mesh)
     {
       vertex_rings_.resize(mesh.vertices().size());
       // Add neighboring vertices.
@@ -147,9 +207,9 @@ namespace DO { namespace Sara {
       {
         for (int v = 0; v < 3; ++v)
         {
-          size_t v1 = mesh.face(f)(  v      );
-          size_t v2 = mesh.face(f)( (v+1)%3 );
-          size_t v3 = mesh.face(f)( (v+2)%3 );
+          size_t v1 = mesh.face(f)(v);
+          size_t v2 = mesh.face(f)((v + 1) % 3);
+          size_t v3 = mesh.face(f)((v + 2) % 3);
           vertex_rings_[v1].push_back(v2);
           vertex_rings_[v1].push_back(v3);
         }
@@ -159,14 +219,14 @@ namespace DO { namespace Sara {
       {
         std::vector<size_t>& vertexRing = vertex_rings_[r];
         std::sort(vertexRing.begin(), vertexRing.end());
-        typename std::vector<size_t>::iterator
-          it = std::unique(vertexRing.begin(), vertexRing.end());
-        vertexRing.resize(it-vertexRing.begin());
+        typename std::vector<size_t>::iterator it =
+            std::unique(vertexRing.begin(), vertexRing.end());
+        vertexRing.resize(it - vertexRing.begin());
       }
     }
 
-    template<typename Vector, typename Face>
-    void computeFaceRings(const SimpleMesh<Vector, Face>& mesh)
+    template <typename Vector, typename Face>
+    void compute_face_rings(const SimpleMesh<Vector, Face>& mesh)
     {
       face_rings_.resize(mesh.vertices().size());
       for (size_t f = 0; f != mesh.faces().size(); ++f)
@@ -177,9 +237,9 @@ namespace DO { namespace Sara {
       }
     }
 
-    template<typename Vector, typename Face>
-    Vector computeVertexNormal(const SimpleMesh<Vector, Face>& mesh,
-                               size_t v)
+    template <typename Vector, typename Face>
+    Vector compute_vertex_normals(const SimpleMesh<Vector, Face>& mesh,
+                                  size_t v)
     {
       Vector n(Vector::Zero());
       const std::vector<size_t>& faceRing = face_rings_[v];
@@ -190,20 +250,19 @@ namespace DO { namespace Sara {
       return n;
     }
 
-    template<typename Vector, typename Face>
-    void computeNormals(SimpleMesh<Vector, Face>& mesh)
+    template <typename Vector, typename Face>
+    void compute_normals(SimpleMesh<Vector, Face>& mesh)
     {
       mesh.normals().resize(face_rings_.size());
-      for(size_t v = 0; v != face_rings_.size(); ++v)
-        mesh.normal(v) = computeVertexNormal<Vector>(mesh, v);
+      for (size_t v = 0; v != face_rings_.size(); ++v)
+        mesh.normal(v) = compute_vertex_normals(mesh, v);
     }
 
   private:
-    std::vector<std::vector<size_t> > vertex_rings_;
-    std::vector<std::vector<size_t> > face_rings_;
+    std::vector<std::vector<size_t>> vertex_rings_;
+    std::vector<std::vector<size_t>> face_rings_;
   };
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

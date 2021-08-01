@@ -19,7 +19,7 @@
  */
 
 #include "StudyOnMikolajczykDataset.hpp"
-#include <DO/Sara/Match/PairWiseDrawer.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 using namespace std;
 using namespace DO::Sara;

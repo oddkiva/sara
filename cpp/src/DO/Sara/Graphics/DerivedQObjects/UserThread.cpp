@@ -118,10 +118,13 @@ namespace DO { namespace Sara {
   {
     const auto& args = qApp->arguments();
     auto argc = static_cast<int>(args.size());
-    auto argvVector = std::vector<char*>(args.size());
-    std::transform(args.begin(), args.end(), argvVector.begin(),
-                   [](const auto& arg) { return arg.toLocal8Bit().data(); });
-    auto argv = &argvVector[0];
+    auto argStrings = std::vector<std::string>(args.size());
+    std::transform(args.begin(), args.end(), argStrings.begin(),
+                   [](const auto& arg) { return arg.toStdString(); });
+    auto argVector = std::vector<char *>(args.size());
+    std::transform(argStrings.begin(), argStrings.end(), argVector.begin(),
+                   [](auto& arg) { return &arg[0]; });
+    auto argv = &argVector[0];
 
     if (m_userMain)
     {

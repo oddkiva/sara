@@ -11,9 +11,9 @@
 
 //! @example
 
-#include <DO/Sara/Geometry.hpp>
-#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/Geometry.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 using namespace std;
 using namespace DO::Sara;

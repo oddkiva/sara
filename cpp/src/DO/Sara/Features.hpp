@@ -22,7 +22,6 @@
 
 // Utilities, View, I/O
 #include <DO/Sara/Features/Utilities.hpp>
-#include <DO/Sara/Features/Draw.hpp>
 #include <DO/Sara/Features/IO.hpp>
 
 //! @defgroup Features Features

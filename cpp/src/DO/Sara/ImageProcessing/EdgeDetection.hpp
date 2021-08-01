@@ -29,7 +29,7 @@
 #include <queue>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   // ======================================================================== //
   // Edge Detection Encoded as a Dense Feature Map.
@@ -157,7 +157,7 @@ namespace DO { namespace Sara {
         .compute<SecondMomentMatrix>()  //
         .compute<Gaussian>(sigma)       //
         .cwise_transform([kappa](const auto& m) {
-          return m.determinant() - kappa * pow(m.trace(), 2);
+          return m.determinant() - kappa * std::pow(m.trace(), 2);
         });
   }
 
@@ -493,6 +493,125 @@ namespace DO { namespace Sara {
 
     return contours;
   }
-  //! @}
 
-}}  // namespace DO::Sara
+  //  //! @brief Group edgels into **unordered** quasi-straight curves.
+  //  inline auto
+  //  perform_hysteresis_and_grouping_v2(ImageView<std::uint8_t>& edges,
+  //                                     const ImageView<float>& orientations,
+  //                                     float angular_threshold)
+  //  {
+  //    const auto index = [&edges](const Eigen::Vector2i& p) {
+  //      return p.y() * edges.width() + p.x();
+  //    };
+
+  //    const auto is_edgel = [&edges](const Eigen::Vector2i& p) {
+  //      return edges(p) != 0;
+  //    };
+
+  //    const auto orientation_vector = [&orientations](const Vector2i& p) {
+  //      const auto& o = orientations(p);
+  //      return Eigen::Vector2f{cos(o), sin(o)};
+  //    };
+
+  //    const auto cosine_similarity = [](const Vector2f& a, const Vector2f& b)
+  //    {
+  //      return a.dot(b);
+  //    };
+
+  //    const auto cosine_angle_threshold = std::cos(angular_threshold);
+
+  //    const auto angle_consistent = [&](const Vector2i& a, const Vector2i& b)
+  //    {
+  //      const auto oria = orientation_vector(a);
+  //      const auto orib = orientation_vector(b);
+  //      return cosine_similarity(oria, orib) > cosine_angle_threshold;
+  //    };
+
+  //    const auto w = edges.width();
+  //    const auto h = edges.height();
+
+  //    // Initialize labeling.
+  //    auto labels = Image<std::int32_t>{edges.sizes()};
+  //    auto edgels = std::vector<Eigen::Vector2i>{};
+  //    for (auto y = 0; y < h; ++y)
+  //      for (auto x = 0; x < w; ++x)
+  //        labels(x, y) = is_edgel({x, y}) ? y * w + x : -1;
+
+  //    auto ds = DisjointSets(edges.size());
+
+  //    // First pass.
+  //  #pragma omp parallel for
+  //    for (auto i = 0; i < static_cast<std::int32_t>(edgels.size()); ++i)
+  //    {
+  //      // e = (x, y) is the current pixel.
+  //      const auto& e = edgels[i];
+  //      const auto& x = e.x();
+  //      const auto& y = e.y();
+
+  //      // Implement the decision tree in Figure 2(b) in the paper.
+
+  //      // b = (x, y - 1) is the north pixel.
+  //      if (y > 0 &&                                     //
+  //          is_edgel({x, y - 1}) && is_edgel({x, y}) &&  //
+  //          angle_consistent({x, y - 1}, {x, y}))
+  //        labels(x, y) = labels(x, y - 1);
+
+  //      // c = (x + 1, y - 1) is the north-east pixel.
+  //      else if (x + 1 < w && y > 0 &&                            //
+  //               is_edgel({x + 1, y - 1}) && is_edgel({x, y}) &&  //
+  //               angle_consistent({x + 1, y - 1}, {x, y}))
+  //      {
+  //        const auto c = labels(x + 1, y - 1);
+  //        labels(x, y) = c;
+
+  //        // a = (x - 1, y - 1) is the north-west pixel.
+  //        if (x > 0 &&                                         //
+  //            is_edgel({x - 1, y - 1}) && is_edgel({x, y}) &&  //
+  //            angle_consistent({x - 1, y - 1}, {x, y}))
+  //        {
+  //          const auto a = labels(x - 1, y - 1);
+  //          labels(x, y) = a;
+  //        }
+
+  //        else if (x > 0 && labels(x - 1, y) == labels(x, y))
+  //        {
+  //          const auto d = labels(x - 1, y);
+  //          ds.join(ds.node(c), ds.node(d));
+  //        }
+  //      }
+
+  //      else if (x > 0 && y > 0 && labels(x - 1, y - 1) == labels(x, y))
+  //        labels(x, y) = labels(x - 1, y - 1);
+
+  //      else if (x > 0 && labels(x - 1, y) == labels(x, y))
+  //        labels(x, y) = labels(x - 1, y);
+
+  //      else
+  //      {
+  //        ds.make_set(last_label_id);
+  //        labels(x, y) = last_label_id;
+  //        ++last_label_id;
+  //      }
+  //    }
+
+  //    // Second pass.
+  //    for (int y = 0; y < values.height(); ++y)
+  //      for (int x = 0; x < values.width(); ++x)
+  //        labels(x, y) = int(ds.component(labels(x, y)));
+
+  //    auto contours = std::map<int, std::vector<Point2i>>{};
+  //    for (auto y = 0; y < edges.height(); ++y)
+  //    {
+  //      for (auto x = 0; x < edges.width(); ++x)
+  //      {
+  //        const auto p = Eigen::Vector2i{x, y};
+  //        const auto index_p = index(p);
+  //        if (is_strong_edgel(p))
+  //          contours[static_cast<int>(ds.component(index_p))].push_back(p);
+  //      }
+  //    }
+
+  //    return contours;
+  //  }
+
+}  // namespace DO::Sara

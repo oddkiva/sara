@@ -8,8 +8,8 @@ if (SARA_USE_FROM_SOURCE)
 
     target_include_directories(DO_Sara_FileSystem
       PRIVATE
-      ${DO_Sara_ThirdParty_DIR}
-      ${DO_Sara_INCLUDE_DIR})
+      $<BUILD_INTERFACE:${DO_Sara_ThirdParty_DIR}>
+      $<BUILD_INTERFACE:${DO_Sara_INCLUDE_DIR}>)
     target_compile_definitions(DO_Sara_FileSystem
       PRIVATE
       -DBOOST_ALL_DYN_LINK

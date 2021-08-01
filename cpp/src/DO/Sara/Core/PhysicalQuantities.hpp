@@ -32,7 +32,7 @@ namespace DO::Sara {
     {
     }
 
-    inline explicit constexpr operator const scalar_type() const
+    inline explicit constexpr operator scalar_type() const
     {
       return value;
     }
@@ -253,6 +253,16 @@ namespace DO::Sara {
     }
 
     auto operator=(const self_type&) -> self_type& = default;
+
+    inline constexpr operator scalar_type() const
+    {
+      return value;
+    }
+
+    inline operator scalar_type&()
+    {
+      return value;
+    }
   };
 
 
@@ -297,7 +307,7 @@ namespace DO::Sara {
   constexpr auto hertz = Frequency{1};
 
   constexpr auto radian = Angle{1};
-  constexpr auto degree = radian * 180.L / M_PI;
+  constexpr auto degree = Angle{M_PI / 180.L};
 
 
   // User-defined literal operators.
@@ -339,12 +349,12 @@ namespace DO::Sara {
   }
 
 
-  constexpr auto operator""_radian(long double v) -> Angle
+  constexpr auto operator""_rad(long double v) -> Angle
   {
     return {v * radian.value};
   }
 
-  constexpr auto operator""_degree(long double v) -> Angle
+  constexpr auto operator""_deg(long double v) -> Angle
   {
     return {v * degree.value};
   }

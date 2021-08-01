@@ -11,9 +11,8 @@
 
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
-#include <DO/Sara/Features/Draw.hpp>
 #include <DO/Sara/FileSystem.hpp>
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
 
@@ -196,7 +195,7 @@ auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
 
   drawer.display_images();
 
-  for (size_t m = 0; m < Mij.size(); ++m)
+  for (auto m = 0; m < static_cast<int>(Mij.size()); ++m)
   {
     const Eigen::Vector3d X1 = Mij[m].x_pos().cast<double>().homogeneous();
     const Eigen::Vector3d X2 = Mij[m].y_pos().cast<double>().homogeneous();
@@ -216,7 +215,7 @@ auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
     }
   }
 
-  for (size_t m = 0; m < sample_best.size(); ++m)
+  for (auto m = 0; m < static_cast<int>(sample_best.size()); ++m)
   {
     // Draw the best elemental subset drawn by RANSAC.
     drawer.draw_match(Mij[sample_best(m)], Red8, true);

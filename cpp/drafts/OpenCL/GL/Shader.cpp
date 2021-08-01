@@ -197,12 +197,12 @@ namespace DO::Sara { namespace GL {
     glGetProgramInfoLog(program_object, log_max_sz, &log_sz, &log[0]);
     log.resize(log_sz);
 
+    program_object = 0;
+
     throw std::runtime_error{
         DO::Sara::format("Failed to delete shader program: %d."
                          "Delete log:\n%s)log",
                          success, log.data())};
-
-    program_object = 0;
   }
 
   void ShaderProgram::set_uniform_matrix4f(const char* mat_name,

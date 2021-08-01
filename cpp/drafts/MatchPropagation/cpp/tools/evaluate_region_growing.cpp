@@ -18,7 +18,7 @@
  *  ACCV 2012, Daejeon, South Korea.
  */
 
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
 #include "StudyOnMikolajczykDataset.hpp"
 #include "MatchPropagation.hpp"
 

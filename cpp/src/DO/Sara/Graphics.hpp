@@ -28,7 +28,6 @@
 
 // 3D viewer (still experimental and little features.)
 // \todo: see if we need to separate the Mesh from the Graphics module.
-#include <DO/Sara/Graphics/Mesh.hpp>
 #include <DO/Sara/Graphics/Draw3D.hpp>
 
 // Graphics view for interactive viewing (very little features for now.)

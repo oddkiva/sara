@@ -13,12 +13,8 @@
 
 #pragma once
 
-#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Features.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
-
-// Utilities and debug.
-#include <DO/Sara/FeatureDetectors/Debug.hpp>
 
 // Feature description.
 //

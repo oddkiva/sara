@@ -47,7 +47,7 @@ namespace DO::Sara {
 
   std::ostream& operator<<(std::ostream& os, const Device& p)
   {
-    const size_t length = std::string("Compiler available  ").size();
+    const auto length = static_cast<int>(std::string("Compiler available  ").size());
     using std::left;
     using std::setw;
     os << left << setw(length) << "ID"

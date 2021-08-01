@@ -14,11 +14,14 @@ endif ()
 # add_subdirectory(Expression)
 add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
-add_subdirectory(Taskflow)
 if (CUDA_FOUND AND NvidiaVideoCodec_ROOT)
   add_subdirectory(NvCodec)
 endif ()
 
-if (SARA_USE_HALIDE)
-  add_subdirectory(Halide)
+if (NOT APPLE)
+  add_subdirectory(GStreamer)
 endif ()
+
+add_subdirectory(Vulkan)
+
+add_subdirectory(NuScenes)

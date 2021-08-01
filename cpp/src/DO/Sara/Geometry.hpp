@@ -17,7 +17,5 @@
 #include <DO/Sara/Geometry/Objects.hpp>
 //! Basic computational geometry algorithms
 #include <DO/Sara/Geometry/Algorithms.hpp>
-//! Graphics.
-#include <DO/Sara/Geometry/Graphics.hpp>
 
 //! @defgroup Geometry

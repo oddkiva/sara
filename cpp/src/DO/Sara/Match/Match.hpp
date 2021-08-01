@@ -199,39 +199,6 @@ namespace DO { namespace Sara {
                     float score_thres = 10.f);
   //! @}
 
-
-  //! @{
-  //! View matches.
-  DO_SARA_EXPORT
-  void draw_image_pair(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
-                       const Point2f& off2, float scale = 1.0f);
-
-  inline void draw_image_pair(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
-                              float scale = 1.0f)
-  {
-    draw_image_pair(I1, I2, Point2f(I1.width()*scale, 0.f), scale);
-  }
-
-  inline void draw_image_pair_v(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
-                                float scale = 1.0f)
-  {
-    draw_image_pair(I1, I2, Point2f(0.f, I1.height()*scale), scale);
-  }
-
-  DO_SARA_EXPORT
-  void draw_match(const Match& m, const Color3ub& c, const Point2f& off2,
-                  float z = 1.f);
-
-  DO_SARA_EXPORT
-  void draw_matches(const std::vector<Match>& matches,
-                    const Point2f& off2, float z = 1.f);
-
-  DO_SARA_EXPORT
-  void check_matches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
-                     const std::vector<Match>& matches,
-                     bool redraw_everytime = false, float z = 1.f);
-  //! @}
-
   //! @}
 
 } /* namespace Sara */

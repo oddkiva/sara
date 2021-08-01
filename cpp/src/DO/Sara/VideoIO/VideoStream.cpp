@@ -9,20 +9,92 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+// #define PROFILE_VIDEOSTREAM
+#ifdef __APPLE__
+// #define HWACCEL
+#endif
+
+// Deactivate hardware acceleration for now. The CPU multi-threaded decoding is
+// quite good in the meantime.
+#ifdef HWACCEL
+#  undef HWACCEL
+#endif
+
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavutil/hwcontext.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 }
 
+#include <thread>
+
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/StringFormat.hpp>
+#ifdef PROFILE_VIDEOSTREAM
+#  include <DO/Sara/Core/Timer.hpp>
+#endif
+
 #include <DO/Sara/VideoIO/VideoStream.hpp>
 
 
 namespace DO::Sara {
 
+#ifdef PROFILE_VIDEOSTREAM
+  static Timer video_stream_profiler;
+#define VIDEO_STREAM_TIC video_stream_profiler.restart();
+#define VIDEO_STREAM_TOC(what)                                            \
+  {                                                                       \
+    const auto elapsed = video_stream_profiler.elapsed_ms();              \
+    std::cout << "[" << (what) << "] " << elapsed << " ms" << std::endl;  \
+  }
+#else
+#define VIDEO_STREAM_TIC
+#define VIDEO_STREAM_TOC(what) {}
+#endif
+
   bool VideoStream::_registered_all_codecs = false;
+#ifdef HWACCEL
+#ifdef __APPLE__
+  int VideoStream::_hw_device_type = AV_HWDEVICE_TYPE_VIDEOTOOLBOX;
+#else
+  int VideoStream::_hw_device_type = AV_HWDEVICE_TYPE_CUDA;
+#endif
+
+  static AVBufferRef* hw_device_ctx = NULL;
+  static enum AVPixelFormat hw_pix_fmt;
+
+  static int hw_decoder_init(AVCodecContext* ctx,
+                             const enum AVHWDeviceType type)
+  {
+    int err = 0;
+
+    if ((err = av_hwdevice_ctx_create(&hw_device_ctx, type, NULL, NULL, 0)) < 0)
+    {
+      fprintf(stderr, "Failed to create specified hardware device context.\n");
+      return err;
+    }
+    ctx->hw_device_ctx = av_buffer_ref(hw_device_ctx);
+
+    return err;
+  }
+
+  static enum AVPixelFormat get_hw_format(AVCodecContext*,
+                                          const enum AVPixelFormat* pix_fmts)
+  {
+    const enum AVPixelFormat* p;
+
+    for (p = pix_fmts; *p != -1; p++)
+    {
+      if (*p == hw_pix_fmt)
+        return *p;
+    }
+
+    fprintf(stderr, "Failed to get HW surface format.\n");
+    return AV_PIX_FMT_NONE;
+  }
+#endif
 
   VideoStream::VideoStream()
   {
@@ -70,35 +142,83 @@ namespace DO::Sara {
     if (_video_codec == nullptr)
       throw std::runtime_error{"Could not find video decoder!"};
 
+#ifdef HWACCEL
+    // Initialize the audio-video codec hardware config.
+    for (auto i = 0;; i++)
+    {
+      const AVCodecHWConfig* config = avcodec_get_hw_config(_video_codec, i);
+      if (!config)
+      {
+        throw std::runtime_error{format(
+            "Decoder %s does not support device type %s.\n", _video_codec->name,
+            av_hwdevice_get_type_name(AVHWDeviceType(_hw_device_type)))};
+      }
+      if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
+          config->device_type == _hw_device_type)
+      {
+        SARA_DEBUG << "Successfully initialized hardware AV codec config!"
+                   << std::endl;
+        hw_pix_fmt = config->pix_fmt;
+        break;
+      }
+    }
+#endif
+
     // Create a decoder context.
     _video_codec_context = avcodec_alloc_context3(_video_codec);
     if (_video_codec_context == nullptr)
       throw std::runtime_error{"Could not allocate video decoder context!"};
 
+    // Enable multi-threaded decoding.
+    _video_codec_context->thread_count = std::thread::hardware_concurrency();
+
     if (avcodec_parameters_to_context(_video_codec_context,
                                       _video_codec_params))
       throw std::runtime_error{"Could not copy video decoder context!"};
+
+#ifdef HWACCEL
+    auto video_stream = _video_format_context->streams[_video_stream_index];
+    if (avcodec_parameters_to_context(_video_codec_context, video_stream->codecpar) < 0)
+      throw std::runtime_error{"Could not initialize the video codec context!"};
+
+    _video_codec_context->get_format = get_hw_format;
+
+    if (hw_decoder_init(_video_codec_context,  //
+                        AVHWDeviceType(_hw_device_type)) < 0)
+      throw std::runtime_error{"Could not initialize the video codec context"};
+#endif
 
     // Open it.
     if (avcodec_open2(_video_codec_context, _video_codec, nullptr) < 0)
       throw std::runtime_error{"Could not open video decoder!"};
 
+
+#ifdef HWACCEL
+    // Allocate the device picture buffer.
+    if (_device_picture == nullptr)
+      _device_picture = av_frame_alloc();
+    if (_device_picture == nullptr)
+      throw std::runtime_error{"Could not allocate device video frame!"};
+#endif
+
     // Allocate buffer to read the video frame.
     if (_picture == nullptr)
       _picture = av_frame_alloc();
     if (_picture == nullptr)
-      throw std::runtime_error{"Could not allocate video frame!"};
+      throw std::runtime_error{"Could not allocate host video frame!"};
 
     // Initialize a video packet.
     if (_pkt == nullptr)
       _pkt = av_packet_alloc();
     if (_pkt == nullptr)
       throw std::runtime_error("Could not allocate video packet!");
-    av_init_packet(_pkt);
 
     SARA_DEBUG << "#[VideoStream] sizes = " << sizes().transpose() << std::endl;
+    SARA_DEBUG << "#[VideoStream] pixel format = "
+               << av_get_pix_fmt_name(_video_codec_context->pix_fmt)
+               << std::endl;
     SARA_DEBUG
-        << "#[VideoStream] time base = " << _video_stream_index << ": "  //
+        << "#[VideoStream] time base = " << _video_stream_index << ": "
         << _video_format_context->streams[_video_stream_index]->time_base.num
         << "/"
         << _video_format_context->streams[_video_stream_index]->time_base.den
@@ -106,7 +226,13 @@ namespace DO::Sara {
 
     // Get video format converter to RGB24.
     _sws_context = sws_getContext(
-        width(), height(), _video_codec_context->pix_fmt, width(), height(),
+        width(), height(),
+#ifdef HWACCEL
+        AV_PIX_FMT_NV12,
+#else
+        _video_codec_context->pix_fmt,
+#endif
+        width(), height(),
         AV_PIX_FMT_RGB24, SWS_POINT, nullptr, nullptr, nullptr);
     if (_sws_context == nullptr)
       throw std::runtime_error{"Could not allocate SWS context!"};
@@ -117,7 +243,7 @@ namespace DO::Sara {
     if (_picture_rgb == nullptr)
       throw std::runtime_error{"Could not allocate video frame!"};
 
-    // @TODO: make it 32 to optimize for SSE/AVX2.
+    // TODO: make it RGBA 32 bit to optimize for SSE/AVX2?
     constexpr auto alignment_size = 1;
     const auto byte_size =
         av_image_alloc(_picture_rgb->data, _picture_rgb->linesize, width(),
@@ -133,11 +259,12 @@ namespace DO::Sara {
   {
     // Flush the decoder (draining mode.)
     if (_video_format_context != nullptr)
-      this->decode(_video_codec_context, _picture, nullptr);
+      this->decode(nullptr);
 
     // Free the data structures.
     if (_pkt != nullptr)
       av_packet_unref(_pkt);
+    av_frame_free(&_device_picture);
     av_frame_free(&_picture);
     avcodec_close(_video_codec_context);
     avformat_close_input(&_video_format_context);
@@ -161,8 +288,7 @@ namespace DO::Sara {
   {
     do
     {
-      if (!_end_of_stream)
-        if (av_read_frame(_video_format_context, _pkt) < 0)
+      if (!_end_of_stream && av_read_frame(_video_format_context, _pkt) < 0)
           _end_of_stream = true;
 
       if (_end_of_stream)
@@ -180,16 +306,17 @@ namespace DO::Sara {
           _pkt->pts = _pkt->dts = _i;
 
         // Decompress the video frame.
-        _got_frame = decode(_video_codec_context, _picture, _pkt);
+        _got_frame = decode(_pkt);
 
         if (_got_frame)
         {
+          VIDEO_STREAM_TIC
           av_packet_unref(_pkt);
-          av_init_packet(_pkt);
 
           // Convert to RGB24 pixel format.
           sws_scale(_sws_context, _picture->data, _picture->linesize, 0,
                     height(), _picture_rgb->data, _picture_rgb->linesize);
+          VIDEO_STREAM_TOC("To RGB24")
 
           return true;
         }
@@ -211,24 +338,44 @@ namespace DO::Sara {
                   AVSEEK_FLAG_BACKWARD);
   }
 
-  auto VideoStream::decode(AVCodecContext* dec_ctx, AVFrame* frame,
-                           AVPacket* pkt) -> bool
+  auto VideoStream::decode(AVPacket* pkt) -> bool
   {
     auto ret = int{};
 
     // Transfer raw compressed video data to the packet.
-    ret = avcodec_send_packet(dec_ctx, pkt);
+    VIDEO_STREAM_TIC
+    ret = avcodec_send_packet(_video_codec_context, pkt);
     if (ret < 0)
       throw std::runtime_error{"Error sending a packet for decoding!"};
+    VIDEO_STREAM_TOC("Send packet")
+
 
     // Decode the compressed video data into an uncompressed video frame.
-    ret = avcodec_receive_frame(dec_ctx, frame);
+    VIDEO_STREAM_TIC
+#ifdef HWACCEL
+    ret = avcodec_receive_frame(_video_codec_context, _device_picture);
+#else
+    ret = avcodec_receive_frame(_video_codec_context, _picture);
+#endif
+    VIDEO_STREAM_TOC("Receive frame")
 
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
       return false;
 
     if (ret < 0)
       throw std::runtime_error{"Error during decoding!"};
+
+#ifdef HWACCEL
+    // Copy the data from the device buffer to the host buffer.
+    if (_device_picture->format == hw_pix_fmt)
+    {
+      if (av_hwframe_transfer_data(_picture, _device_picture, 0) < 0)
+        throw std::runtime_error{
+            "Error transferring the data to system memory"};
+    }
+    else  // Otherwise do nothing.
+      _picture = _device_picture;
+#endif
 
     return true;
   }
@@ -248,6 +395,5 @@ namespace DO::Sara {
   {
     return _video_codec_context->height;
   }
-
 
 }  // namespace DO::Sara

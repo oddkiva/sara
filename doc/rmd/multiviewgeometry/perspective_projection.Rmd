@@ -1,0 +1,124 @@
+## Imaging via Perspective Projection
+
+In the camera pinhole model, images are formed from lights reflected by 3D
+objects. The lights pass through the camera aperture by following a straight line
+trajectory and hit the film plane inside the camera.
+
+The pinhole model is a simplified yet powerful representation of the physics,
+from which we can derive later a number of useful mathematical methods in 3D
+reconstruction. As an approximation, the camera aperture has no sizes and is
+viewed mathematically as a 3D point located at the origin of the camera
+coordinate system, which we will define now.
+
+The camera coordinate system has its origin located at the camera aperture.
+Because it is viewed as a 3D point, the camera aperture is simply referred as
+the *camera center*. To describe the axes, let us imagine that we hold a camera
+with our two hands in upright position. First the $z$-axis is pointing to camera
+gaze direction and is also called the *principal axis*. The $x$-axis and
+$y$-axis coincide with the image coordinate system. The $x$-axis points to the
+right side, to our right hand holding the camera and the $y$-axis is pointing
+down to the ground.
+
+Geometrically the camera forms the image by projecting every 3D material point
+with *metric* coordinates $(x_C, y_C, z_C)$ onto the camera film plane defined
+by $z_C = -f < 0$ where $f$ is the focal length. In practice, it is not
+convenient to deal with negative signs and we always work in the *virtual* film
+plane $z_C = f > 0$ which is symmetric to the *real* film plane $z_C = -f < 0$
+with respect to the camera center.
+
+The corresponding point imaged in the camera film has 3D *metric* coordinates
+$(u_C, v_C, f)$ also expressed in the camera coordinate system.
+
+Now in geometric computer vision, we prefer working in the *normalized* camera
+coordinate system where we assume the focal length is $f = 1$. In fact,
+this assumption amounts to dividing the coordinates by $f$. In other
+words, the base length unit in the normalized camera coordinate system is the
+focal length instead of the metre.
+
+In the camera pinhole model, similar triangles hold and thus
+
+\begin{equation}
+  \frac{u_C}{x_C} = \frac{v_C}{y_C} = \frac{1}{z_C} \\
+  (\#eq:similar-triangles)
+\end{equation}
+
+
+Previously we have shown how to go from the camera coordinate system to the
+world coordinate system which is defined by a global rigid transform
+$(\mathbf{R}, \mathbf{t})$
+
+\begin{equation}
+  \mathbf{x}_W = \mathbf{R} \mathbf{x}_C + \mathbf{t}
+\end{equation}
+
+Going back to the camera coordinates can be done as
+
+\begin{equation}
+  \mathbf{x}_C = \mathbf{R}^T \mathbf{x}_W - \mathbf{R}^T \mathbf{t}
+  (\#eq:coordinate-change)
+\end{equation}
+
+and thus the inverse rigid body transform is $(\mathbf{R}^T, -\mathbf{R}^T
+\mathbf{t})$:
+
+Let us make two useful remarks:
+
+- The inverse rotation matrix $\mathbf{R}^T$ stores the coordinates the
+  world basis vectors expressed in the camera coordinate system.
+- The translation $-\mathbf{R}^T \mathbf{t}$ stores the coordinates of the
+  world origin expressed in the camera coordinate system.
+
+Rewriting Equation \@ref(eq:similar-triangles) in vector form
+
+\begin{equation}
+  z_C \left[ \begin{array}{c} u_C \\ v_C \\ 1 \end{array} \right] =
+  \mathbf{x}_C
+\end{equation}
+
+By reinjecting the world coordinates from Equation \@ref(eq:coordinate-change)
+we see that
+
+\begin{equation}
+  z_C \left[ \begin{array}{c} u_C \\ v_C \\ 1 \end{array} \right] =
+  \underbrace{\left[ \begin{array}{c|c}
+    \mathbf{R}^T & -\mathbf{R}^T t
+  \end{array} \right]}_{\mathbf{C}}
+  %
+  \left[ \begin{array}{c} \mathbf{x}_W \\ 1 \end{array} \right] .
+\end{equation}
+
+Since we are dealing with homogeneous coordinates, the scale $z_C$ is omitted
+and we have the equivalence
+
+\begin{equation}
+  \left[ \begin{array}{c} u_C \\ v_C \\ 1 \end{array} \right] \equiv
+  \mathbf{C}
+  %
+  \left[ \begin{array}{c} \mathbf{x}_W \\ 1 \end{array} \right] .
+\end{equation}
+
+Thus we have introduced by construction a perspective projection matrix
+$\mathbf{C}$, in which homogeneous coordinates appear naturally.
+
+### Perspective Projection Matrix
+
+**TODO: proof-read this and it is being embryonary.**
+
+In computer vision, the projection matrix is presented as a $4 \times 3$ matrix.
+A such matrix emphasizes the fact that the image formation necessarily implies
+the loss of one dimension as we go from 3D to 2D.
+
+In computer graphics, in particular in educational resources related to OpenGL,
+the projection matrix is presented as a $4 \times 4$ matrix, which may be a
+source of confusion. In linear algebra, being square, this matrix satisfying the
+definition of a projection matrix in linear algebra because in the general case
+a projection matrix $\mathbf{P}$ is by definition square and satisfies
+$\mathbf{P}^2 = \mathbf{P}$.
+
+The equivalent projection matrix is
+\begin{bmatrix}
+  1 & 0 & 0 & 0 \\
+  0 & 1 & 0 & 0 \\
+  0 & 0 & 1 & 0 \\
+  0 & 0 & 1 & 0
+\end{bmatrix}

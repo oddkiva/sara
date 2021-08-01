@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2021-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <pybind11/eigen.h>
@@ -70,8 +81,7 @@ inline auto to_image_view(pybind11::array_t<T> image)
   const auto height = static_cast<int>(image.shape(0));
   const auto width = static_cast<int>(image.shape(1));
   auto data = const_cast<T*>(image.data());
-  auto imview =
-      sara::ImageView<T, 2>{reinterpret_cast<T*>(data), {width, height}};
+  auto imview = sara::ImageView<T, 2>{data, {width, height}};
   return imview;
 }
 
@@ -91,3 +101,57 @@ inline auto to_interleaved_rgb_image_view(pybind11::array_t<T> image)
                                           {width, height}};
   return imview;
 }
+
+
+namespace pybind11::detail {
+
+  template <typename T>
+  struct type_caster<DO::Sara::ImageView<T>>
+  {
+  public:
+    PYBIND11_TYPE_CASTER(DO::Sara::ImageView<T>, _("DO::Sara::ImageView<T>"));
+
+    // Cast a NumPy array to C++ DO::Sara::Image object.
+    bool load(pybind11::handle src, bool convert)
+    {
+      if (!convert and !pybind11::array_t<T>::check_(src))
+        return false;
+
+      // Try converting a generic Python object to a NumPy array object.
+      auto buffer =
+          pybind11::array_t<T, pybind11::array::c_style |
+                                   pybind11::array::forcecast>::ensure(src);
+      if (!buffer)
+        return false;
+
+      if (buffer.ndim() != 2)
+        return false;
+
+      value.swap(DO::Sara::ImageView<T>{
+          const_cast<T*>(buffer.data()),
+          Eigen::Vector2i(buffer.shape()[1], buffer.shape()[0])});
+
+      return true;
+    }
+
+    // Cast a C++ DO::Sara::Image object to a NumPy array.
+    static pybind11::handle cast(const DO::Sara::ImageView<T>& src,
+                                 pybind11::return_value_policy,
+                                 pybind11::handle)
+    {
+      std::vector<size_t> shape(2);
+      std::vector<size_t> strides(2);
+
+      shape[0] = src.height();
+      shape[1] = src.width();
+
+      strides[0] = sizeof(T);
+      strides[1] = shape[1] * sizeof(T);
+
+      pybind11::array a{std::move(shape), std::move(strides), src.data()};
+
+      return a.release();
+    }
+  };
+
+}  // namespace pybind11::detail

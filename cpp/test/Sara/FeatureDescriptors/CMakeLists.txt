@@ -1,7 +1,4 @@
-find_package(DO_Sara COMPONENTS
-  Features FeatureDetectors FeatureDescriptors
-  Graphics ImageIO
-  REQUIRED)
+find_package(DO_Sara COMPONENTS FeatureDescriptors REQUIRED)
 
 file(GLOB test_feature_descriptors_SOURCE_FILES FILES *.cpp)
 foreach (file ${test_feature_descriptors_SOURCE_FILES})

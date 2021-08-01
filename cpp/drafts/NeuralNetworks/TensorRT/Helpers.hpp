@@ -2,7 +2,7 @@
 
 #include <NvInfer.h>
 
-#include <DO/Shakti/Utilities/ErrorCheck.hpp>
+#include <DO/Shakti/Cuda/Utilities/ErrorCheck.hpp>
 
 #include <array>
 #include <functional>
@@ -46,22 +46,30 @@ namespace DO::Sara::TensorRT {
     cuda_stream = nullptr;
   }
 
+  template <typename NVInferObject>
+  inline auto delete_nvinfer_object(NVInferObject* object) -> void
+  {
+    if (object != nullptr)
+    {
+#ifdef DEBUG
+      std::cout << "Deleting " << typeid(object).name() << " " << object
+                << std::endl;
+#endif
+      object->destroy();
+    }
+    object = nullptr;
+  }
+
   inline auto delete_network_def(nvinfer1::INetworkDefinition* network_def)
   {
     SHAKTI_STDOUT << "DELETING NETWORK DEFINITION" << std::endl;
-    if (network_def == nullptr)
-      return;
-    network_def->destroy();
-    network_def = nullptr;
+    delete_nvinfer_object(network_def);
   }
 
   inline auto delete_builder(nvinfer1::IBuilder* builder)
   {
     SHAKTI_STDOUT << "DELETING BUILDER" << std::endl;
-    if (builder == nullptr)
-      return;
-    builder->destroy();
-    builder = nullptr;
+    delete_nvinfer_object(builder);
   };
 
   inline auto make_cuda_stream()

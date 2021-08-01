@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QQuaternion>
 #include <QTime>
 #include <QTimer>
@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
   };
 
   //! @brief QGLWidget-derived class used to view 3D scenes.
-  class DO_SARA_EXPORT OpenGLWindow : public QGLWidget
+  class DO_SARA_EXPORT OpenGLWindow : public QOpenGLWidget
   {
     Q_OBJECT
 
@@ -62,10 +62,12 @@ namespace DO { namespace Sara {
     OpenGLWindow(int width, int height,
                  const QString& windowTitle = "Sara",
                  int x = -1, int y = -1,
-                 QWidget* parent = 0);
+                 QWidget* parent = nullptr,
+                 bool deleteOnClose = false);
 
   public slots:
     void setMesh(const SimpleTriangleMesh3f& mesh_);
+    void setEulerAngles(int yaw, int pitch, int roll);
     void displayMesh();
     void waitForEvent(int ms);
     void eventListeningTimerStopped();
@@ -91,10 +93,16 @@ namespace DO { namespace Sara {
     QPointF normalizePos(const QPointF& localPos) const;
 
   private:
+    // Model view matrix.
     GLfloat m_scale;
     Point3f m_center;
+    GLfloat m_frameScale = 1;
     GL::Frame m_frame;
     TrackBall m_trackball;
+
+    // Euler rotation of the object w.r.t. the OpenGL axes.
+    Eigen::Matrix4f m_eulerRotation = Eigen::Matrix4f::Identity();
+    Eigen::Matrix3f m_axisPermutation = Eigen::Matrix3f::Identity();
 
     SimpleTriangleMesh3f m_mesh;
 

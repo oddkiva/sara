@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Graphics Features ImageProcessing REQUIRED)
+find_package(DO_Sara COMPONENTS Features REQUIRED)
 
 file(GLOB test_features_SOURCE_FILES FILES *.cpp)
 foreach (file ${test_features_SOURCE_FILES})

@@ -19,6 +19,7 @@ find_package(Halide REQUIRED)
 
 include(SaraHalideGeneratorHelpers)
 
+
 if (NOT SHAKTI_HALIDE_GPU_TARGETS)
   if (APPLE)
     set (SHAKTI_HALIDE_GPU_TARGETS metal)
@@ -51,7 +52,7 @@ function (shakti_halide_library _source_filepath)
     if (TARGET ${_source_filename}${suffix})
       set_target_properties(${_source_filename}${suffix}
         PROPERTIES
-        FOLDER "Halide/${_source_filename}")
+        FOLDER "Libraries/Shakti/Halide/${_source_filename}")
     endif ()
   endforeach ()
 endfunction ()
@@ -86,7 +87,7 @@ function (shakti_halide_gpu_library _source_filepath)
     if (TARGET ${_source_filename}${suffix})
       set_target_properties(${_source_filename}${suffix}
         PROPERTIES
-        FOLDER "Halide/${_source_filename}")
+        FOLDER "Libraries/Shakti/Halide/${_source_filename}")
     endif ()
   endforeach ()
 endfunction ()
@@ -107,10 +108,16 @@ function (shakti_halide_library_v2)
     ${DO_Sara_ThirdParty_DIR}/eigen)
   target_link_libraries(${generator_NAME}.generator PRIVATE Halide::Generator)
 
-  sara_add_halide_library(${generator_NAME}
-    FROM ${generator_NAME}.generator
-    TARGETS host
-    FEATURES ${generator_HALIDE_TARGET_FEATURES})
+  if (generator_HALIDE_TARGET_FEATURES)
+    sara_add_halide_library(${generator_NAME}
+      FROM ${generator_NAME}.generator
+      TARGETS host
+      FEATURES ${generator_HALIDE_TARGET_FEATURES})
+  else ()
+    sara_add_halide_library(${generator_NAME}
+      FROM ${generator_NAME}.generator
+      TARGETS host)
+  endif()
 
   if (APPLE)
     target_link_libraries(${generator_NAME}
@@ -126,7 +133,7 @@ function (shakti_halide_library_v2)
     if (TARGET ${generator_NAME}${suffix})
       set_target_properties(${generator_NAME}${suffix}
         PROPERTIES
-        FOLDER "Halide/${generator_NAME}")
+        FOLDER "Libraries/Shakti/Halide/${generator_NAME}")
     endif ()
   endforeach ()
 

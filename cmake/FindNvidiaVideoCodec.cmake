@@ -16,42 +16,39 @@
 set(_NvidiaVideoCodec_SEARCHES)
 
 if (NvidiaVideoCodec_ROOT)
-  set(_NvidiaVideoCodec_SEARCH_ROOT PATHS ${NvidiaVideoCodec_ROOT} NO_DEFAULT_PATH)
-  list(APPEND _NvidiaVideoCodec_SEARCHES _NvidiaVideoCodec_SEARCH_ROOT)
+  list(APPEND _NvidiaVideoCodec_SEARCHES ${NvidiaVideoCodec_ROOT})
 endif ()
 
-# Appends some common paths
-set (_NvidiaVideoCodec_SEARCH_NORMAL PATHS "/usr" "/opt")
-list(APPEND _NvidiaVideoCodec_SEARCHES _NvidiaVideoCodec_SEARCH_NORMAL)
-
 # Include dir
-foreach (search ${_NvidiaVideoCodec_SEARCHES})
+foreach (search IN LISTS _NvidiaVideoCodec_SEARCHES)
   find_path(NvidiaVideoCodec_INCLUDE_DIR
-    NAMES nvcuvid.h ${${search}}
-    PATH_SUFFIXES include)
+    NAMES nvcuvid.h
+    PATHS ${search} NO_DEFAULT_PATH
+    PATHS /usr /opt
+    PATH_SUFFIXES include Interface)
 endforeach ()
 
 if (NOT NvidiaVideoCodec_LIBRARY)
-  foreach (search ${_NvidiaVideoCodec_SEARCHES})
+  foreach (search IN LISTS _NvidiaVideoCodec_SEARCHES)
     if (WIN32)
       find_library(NvidiaVideoCodec_nvcuvid_LIBRARY
         NAMES nvcuvid
-        ${${search}}
+        PATHS ${search}
         PATH_SUFFIXES Lib/x64)
 
       find_library(NvidiaVideoCodec_encode_LIBRARY
         NAMES nvencodeapi
-        ${${search}}
+        ${search}
         PATH_SUFFIXES Lib/x64)
     else ()
       find_library(NvidiaVideoCodec_nvcuvid_LIBRARY
         NAMES nvcuvid
-        ${${search}}
+        PATHS ${search}
         PATH_SUFFIXES Lib/linux/stubs/x86_64)
 
       find_library(NvidiaVideoCodec_encode_LIBRARY
         NAMES nvidia-encode
-        ${${search}}
+        PATHS ${search}
         PATH_SUFFIXES Lib/linux/stubs/x86_64)
     endif ()
   endforeach ()

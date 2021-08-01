@@ -17,12 +17,8 @@
 #include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
 #include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
 #include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
-#include <DO/Sara/Geometry/Graphics/DrawPolygon.hpp>
 #include <DO/Sara/Geometry/Tools/PolynomialRoots.hpp>
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
-
-
-using namespace std;
 
 
 namespace DO { namespace Sara {
@@ -30,10 +26,11 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   // Computation of intersecting points of intersecting ellipses
   // ======================================================================== //
-  void print_conic_equation(double s[6])
+  void print_conic_equation(const double s[6])
   {
-    cout << s[0] << " + " << s[1] << " x + " << s[2] << " y + ";
-    cout << s[3] << " x^2 + " << s[4] << " xy + " << s[5] << " y^2 = 0" << endl;
+    std::cout << s[0] << " + " << s[1] << " x + " << s[2] << " y + " << s[3]
+              << " x^2 + " << s[4] << " xy + " << s[5] << " y^2 = 0"
+              << std::endl;
   }
 
   void conic_equation(double s[6], const Ellipse& e)
@@ -84,11 +81,13 @@ namespace DO { namespace Sara {
   // If imaginary part precision: 1e-6.
   // If the conic equation produces an almost zero value i.e.: 1e-3.
   // then we decide there is an intersection.
-  pair<bool, Point2d> is_real_root(const complex<double>& y, const double s[6],
-                                   const double t[6])
+  std::pair<bool, Point2d> is_real_root(const std::complex<double>& y,
+                                        const double s[6], const double t[6])
   {
     if (abs(imag(y)) > 1e-2 * abs(real(y)))
-      return make_pair(false, Point2d());
+      return std::make_pair(
+          false, Point2d::Constant(std::numeric_limits<double>::quiet_NaN()));
+
     const double realY = real(y);
     double sigma[3], tau[3];
     sigma_polynomial(sigma, s, realY);
@@ -98,13 +97,10 @@ namespace DO { namespace Sara {
 
     if (fabs(compute_conic_expression(x, realY, s)) < 1e-2 &&
         fabs(compute_conic_expression(x, realY, t)) < 1e-2)
-    {
-      /*cout << "QO(x,y) = " << computeConicExpression(x, realY, s) << endl;
-      cout << "Q1(x,y) = " << computeConicExpression(x, realY, t) << endl;*/
-      return make_pair(true, Point2d(x, realY));
-    }
+      return std::make_pair(true, Point2d(x, realY));
     else
-      return make_pair(false, Point2d());
+      return std::make_pair(
+          false, Point2d::Constant(std::numeric_limits<double>::quiet_NaN()));
   }
 
   int compute_intersection_points(Point2d intersections[4], const Ellipse& e1,
@@ -123,16 +119,16 @@ namespace DO { namespace Sara {
     conic_equation(s, ee1);
     conic_equation(t, ee2);
 
-    Polynomial<double, 4> u(quartic_equation(s, t));
+    const auto u = quartic_equation(s, t);
 
-    complex<double> y[4];
+    std::complex<double> y[4];
     roots(u, y[0], y[1], y[2], y[3]);
 
 
     int numInter = 0;
     for (int i = 0; i < 4; ++i)
     {
-      pair<bool, Point2d> p(is_real_root(y[i], s, t));
+      const auto p = is_real_root(y[i], s, t);
       if (!p.first)
         continue;
       intersections[numInter] = p.second + center;
@@ -145,7 +141,7 @@ namespace DO { namespace Sara {
       return (p - q).squaredNorm() < squared_eps;
     };
 
-    auto it = unique(intersections, intersections + numInter, identicalPoints);
+    auto it = std::unique(intersections, intersections + numInter, identicalPoints);
     return static_cast<int>(it - intersections);
   }
 
@@ -154,7 +150,7 @@ namespace DO { namespace Sara {
   {
     const Vector2d u(unit_vector2(e.orientation()));
     const Vector2d v(-u(1), u(0));
-    transform(pts, pts + numPoints, ori, [&](const Point2d& p) -> double {
+    std::transform(pts, pts + numPoints, ori, [&](const Point2d& p) -> double {
       const Vector2d d(p - e.center());
       return atan2(v.dot(d), u.dot(d));
     });
@@ -176,6 +172,7 @@ namespace DO { namespace Sara {
     const auto num_inter = compute_intersection_points(inter_pts, E_0, E_1);
 #else
       SARA_CHECK(numInter);
+#ifdef DEBUG_ELLIPSE_INTERSECTION_IMPLEMENTATION
       if (!active_window())
         set_antialiasing(create_window(512, 512));
       clear_window();
@@ -194,6 +191,7 @@ namespace DO { namespace Sara {
       draw_quad(Q_1, Blue8, 3);
       draw_bbox(b0, Green8, 3);
       get_key();
+#endif
 
       // now rescale the ellipse.
       Point2d center(b0.center());

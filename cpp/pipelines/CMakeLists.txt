@@ -3,7 +3,7 @@ project(DO_Sara_SfM_Pipelines)
 message(STATUS "  - DO_Sara_SfM_Pipelines")
 
 find_package(DO_Sara
-  COMPONENTS Graphics ImageIO FileSystem FeatureMatching MultiViewGeometry SfM
+  COMPONENTS Graphics ImageIO FileSystem FeatureMatching MultiViewGeometry SfM Visualization
   REQUIRED)
 
 
@@ -12,7 +12,7 @@ add_custom_command(TARGET sfm_pipeline_helper
   POST_BUILD
   DEPENDS sfm_pipeline.py
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/sfm_pipeline.py
-          ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+          ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sfm_pipeline.py
   COMMENT "Copy the Python helper program to use the SfM pipeline")
 set_property(TARGET sfm_pipeline_helper
   PROPERTY FOLDER "Pipelines/Sara/SfM")

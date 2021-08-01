@@ -455,7 +455,6 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! @}
     //! @brief Swap multi-array objects.
     inline void swap(self_type& other)
     {
@@ -633,7 +632,7 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Compute the 1D index of the corresponding coordinates.
-    inline int offset(const vector_type& pos) const
+    inline auto offset(const vector_type& pos) const -> Eigen::Index
     {
       return jump(pos, _strides);
     }
@@ -644,9 +643,9 @@ namespace DO { namespace Sara {
     //! @brief Last element of the internal array.
     value_type* _end{nullptr};
     //! @brief Sizes vector.
-    vector_type _sizes{vector_type::Zero().eval()};
+    vector_type _sizes{vector_type::Zero()};
     //! @brief Strides vector.
-    vector_type _strides{vector_type::Zero().eval()};
+    vector_type _strides{vector_type::Zero()};
   };
 
 

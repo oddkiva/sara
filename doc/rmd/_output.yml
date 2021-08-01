@@ -1,0 +1,37 @@
+bookdown::gitbook:
+  css: style.css
+  split_by: section
+  config:
+    toc:
+      collapse: subsection
+      before: |
+        <li><a href="./">Computer Vision with Sara</a></li>
+      after: |
+        <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+    download: ["pdf", "epub"]
+    sharing:
+      facebook: no
+bookdown::pdf_book:
+  # Switching to lualatex breaks the integration of extra-dependencies...
+  # Some fonts will disappear... Oh well, I will focus on HTML first.
+  latex_engine: lualatex
+  citation_package: natbib
+  keep_tex: yes
+  extra_dependencies: [
+    # Change fonts.
+    # "mathpazo",
+    # Font optimization.
+    "microtype",
+    # Minimal math packages.
+    #
+    # Already provided by bookdown.
+    "amsmath",
+    "amssymb",
+    "amsfonts",
+    "amsthm",
+    "bbm",
+    "stmaryrd",
+    "mathrsfs",
+    "animate",
+    "siunitx"
+  ]

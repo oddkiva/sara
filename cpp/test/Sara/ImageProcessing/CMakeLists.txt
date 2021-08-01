@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core ImageProcessing REQUIRED)
+find_package(DO_Sara COMPONENTS ImageProcessing REQUIRED)
 
 file(GLOB test_imageprocessing_SOURCE_FILES FILES test_*.cpp)
 

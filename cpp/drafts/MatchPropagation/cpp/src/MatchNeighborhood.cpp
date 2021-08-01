@@ -18,7 +18,7 @@
  *  ACCV 2012, Daejeon, South Korea.
  */
 
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 #include "MatchNeighborhood.hpp"
 

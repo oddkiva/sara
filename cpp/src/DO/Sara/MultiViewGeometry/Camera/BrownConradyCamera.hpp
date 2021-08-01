@@ -11,82 +11,66 @@
 
 #pragma once
 
-#include <DO/Sara/Core/PixelTraits.hpp>
+#include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
+
+#include <DO/Sara/MultiViewGeometry/Camera/PinholeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/PolynomialDistortionModel.hpp>
 
 
 namespace DO::Sara {
 
-  template <typename T>
-  struct BrownConradyCamera
+  template <typename T, typename DistortionModel>
+  struct BrownConradyCamera: PinholeCamera<T>
   {
+    static constexpr auto eps = static_cast<T>(1e-8);
+
+    using distortion_model_type = DistortionModel;
+
     //! @brief Types.
-    using Vec2 = Eigen::Matrix<T, 2, 1>;
-    using Vec3 = Eigen::Matrix<T, 3, 1>;
+    using base_type = PinholeCamera<T>;
+    using vector2_type = typename base_type::vector2_type;
+    using vector3_type = typename base_type::vector3_type;
+    using matrix2_type = Eigen::Matrix<T, 2, 2>;
+    using matrix3_type = typename base_type::matrix3_type;
 
-    using Mat2 = Eigen::Matrix<T, 2, 2>;
-    using Mat3 = Eigen::Matrix<T, 3, 3>;
+    using base_type::image_sizes;
+    using base_type::K;
+    using base_type::K_inverse;
 
-    //! @brief Original image sizes by the camera.
-    Vec2 image_sizes;
-    //! @brief Pinhole camera parameters.
-    Mat3 K;
-    //! @brief Radial distortion coefficients.
-    Vec3 k;
-    //! @brief Tangential distortion coefficients.
-    Vec2 p;
+    // Distortion model (can be centered, decentered, polynomial, division).
+    distortion_model_type distortion_model;
 
-    inline auto focal_lengths() const -> Vec2
+    inline auto undistort(const vector2_type& xd)  const -> vector2_type
     {
-      return {K(0, 0), K(1, 1)};
+      // Normalized coordinates.
+      const vector2_type xdn = (K_inverse * xd.homogeneous()).head(2);
+      const auto xun  = distortion_model.correct(xdn);
+      return (K * xun.homogeneous()).head(2);
     }
 
-    inline auto principal_point() const -> Vec2
+    inline auto distort(const vector2_type& xd) const -> vector2_type
     {
-      return K.col(2).head(2);
-    }
+      // Normalized coordinates.
+      const vector2_type xdn = (K_inverse * xd.homogeneous()).head(2);
 
-    inline auto field_of_view() const -> Vec2
-    {
-      const Eigen::Array<T, 2, 1> tg = image_sizes.array() /  //
-                                       focal_lengths().array() / 2.;
-      return 2. * tg.atan();
-    }
+      const vector2_type xun = distortion_model.distort(xdn);
 
-    auto undistort(const Vec2& xd) const -> Vec2
-    {
-      const auto f = focal_lengths();
-      const auto c = principal_point();
-
-      // Normalized coordinates
-      const Vec2 xn = (xd - c).array() / f.array();
-
-      // Radial correction.
-      const auto r2 = xn.squaredNorm();
-      const auto rpowers = Vec3{r2, pow(r2, T(2)), pow(r2, T(3))};
-      const auto radial = Vec2{k.dot(rpowers) * xn};
-
-      // Tangential correction.
-      auto Tx = Mat2{};
-      Tx << 3 * p(0), p(1),
-                p(1), p(0);
-      auto Ty = Mat2{};
-      Ty << p(1),     p(0),
-            p(0), 3 * p(1);
-      const Vec2 tangential = {xn.transpose() * Tx * xn,
-                               xn.transpose() * Ty * xn};
-
-      // Undistorted coordinates.
-      const Vec2 xu = xd + ((radial + tangential).array() * f.array()).matrix();
+      // Go back to pixel coordinates.
+      const vector2_type xu = (K * xun.homogeneous()).head(2);
 
       return xu;
     }
 
-    auto downscale_image_sizes(T factor) -> void
+    inline auto project(const vector3_type& x) const -> vector2_type
     {
-      K.block(0, 0, 2, 3) /= factor;
-      image_sizes /= factor;
+      return distort(base_type::project(x));
+    }
+
+    inline auto backproject(const vector2_type& x) const -> vector3_type
+    {
+      return base_type::backproject(undistort(x));
     }
 
     template <typename PixelType>
@@ -97,20 +81,77 @@ namespace DO::Sara {
       const auto& h = dst.height();
 
 #pragma omp parallel for
-      for (auto y = 0; y < h; ++y)
+      for (auto yx = 0; yx < h * w; ++yx)
       {
-        for (auto x = 0; x < w; ++x)
+        const auto y = yx / w;
+        const auto x = yx - y * w;
+        const Eigen::Vector2d p = distort(vector2_type(x, y)).template cast<double>();
+
+        const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
+                                     0 <= p.y() && p.y() < h - 1;
+        if (!in_image_domain)
         {
-          const auto p = undistort(Vec2(x, y));
-          const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
-                                       0 <= p.y() && p.y() < h - 1;
-          dst(y, x) = in_image_domain  //
-                          ? interpolate(src, p)
-                          : PixelTraits<PixelType>::template zero();
+          dst(x, y) = PixelTraits<PixelType>::zero();
+          continue;
         }
+
+        auto color = interpolate(src, p);
+        if constexpr (std::is_same_v<PixelType, Rgb8>)
+          color /= 255;
+
+        auto color_converted = PixelType{};
+        smart_convert_color(color, color_converted);
+        dst(x, y) = color_converted;
+      }
+    }
+
+    template <typename PixelType>
+    auto distort(const ImageView<PixelType>& src,
+                 ImageView<PixelType>& dst) const
+    {
+      const auto& w = dst.width();
+      const auto& h = dst.height();
+
+#pragma omp parallel for
+      for (auto yx = 0; yx < h * w; ++yx)
+      {
+        const auto y = yx / w;
+        const auto x = yx - y * w;
+        const Eigen::Vector2d p = undistort(vector2_type(x, y))  //
+                                      .template cast<double>();
+        const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
+                                     0 <= p.y() && p.y() < h - 1;
+        if (!in_image_domain)
+        {
+          dst(x, y) = PixelTraits<PixelType>::zero();
+          continue;
+        }
+
+        auto color = interpolate(src, p);
+        if constexpr (std::is_same_v<PixelType, Rgb8>)
+          color /= 255;
+
+        auto color_converted = PixelType{};
+        smart_convert_color(color, color_converted);
+        dst(x, y) = color_converted;
       }
     }
   };
 
+
+  template <typename T>
+  using BrownConradyCamera22 =
+      BrownConradyCamera<T, PolynomialDistortionModel<T, 2, 2>>;
+  template <typename T>
+  using BrownConradyCamera32 =
+      BrownConradyCamera<T, PolynomialDistortionModel<T, 3, 2>>;
+
+  template <typename T>
+  using BrownConradyCameraDecentered22 =
+      BrownConradyCamera<T, PolynomialDistortionModel<T, 2, 2>>;
+
+  template <typename T>
+  using BrownConradyCameraDecentered32 =
+      BrownConradyCamera<T, PolynomialDistortionModel<T, 3, 2>>;
 
 }  // namespace DO::Sara

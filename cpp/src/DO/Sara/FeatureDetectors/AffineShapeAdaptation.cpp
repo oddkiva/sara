@@ -106,7 +106,9 @@ namespace DO { namespace Sara {
     A.row(2).head(2).fill(0.f);
 
     const auto success = warp_patch(I, _patch, A);
+#ifdef DEBUG_AFFINE_SHAPE_ADAPTATION
     debug_display_normalized_patch(s);
+#endif
 
     return success;
   }
@@ -114,7 +116,9 @@ namespace DO { namespace Sara {
   Matrix2f AdaptFeatureAffinelyToLocalShape::compute_moment_matrix_from_patch()
   {
     const auto gradients = _patch.compute<Gradient>();
+#ifdef DEBUG_AFFINE_SHAPE_ADAPTATION
     debug_check_weighted_patch(gradients);
+#endif
 
     // Estimate the second moment matrix.
     auto moment = Matrix2f::Zero().eval();
@@ -170,7 +174,9 @@ namespace DO { namespace Sara {
   operator()(Matrix2f& affine_adapt_transform, const Image<float>& image,
              const OERegion& feature)
   {
+#ifdef DEBUG_AFFINE_SHAPE_ADAPTATION
     debug_create_window_to_view_patch();
+#endif
 
     // The affine transform we want to estimate.
     auto U = Matrix2f::Identity().eval();
@@ -178,13 +184,17 @@ namespace DO { namespace Sara {
     // Iterative estimation from the image.
     for (int iter = 0; iter < affine_adaptation_max_iter_; ++iter)
     {
+#ifdef DEBUG_AFFINE_SHAPE_ADAPTATION
       debug_print_affine_adaptation_iteration(iter);
+#endif
 
       // Get the normalized patch.
       if (!update_normalized_patch(image, feature, U))
       {
+#ifdef DEBUG_AFFINE_SHAPE_ADAPTATION
         debug_print_patch_touches_image_boundaries();
         debug_close_window_used_to_view_patch();
+#endif
         return false;
       }
 
@@ -199,13 +209,17 @@ namespace DO { namespace Sara {
       // Accumulate the transform.
       U = delta_U * U;
       rescale_transform(U);
+#ifdef DEBUG_AFFINE_SHAPE_ADAPTATION
       debug_check_moment_matrix_and_transform(mu, delta_U, anisotropic_ratio,
                                               U);
+#endif
 
       // Instability check (cf. [Mikolajczyk & Schmid, ECCV 2002])
       if (1.f / anisotropic_ratio > 6.f)
       {
+#ifdef DEBUG_AFFINE_SHAPE_ADAPTATION
         debug_close_window_used_to_view_patch();
+#endif
         return false;
       }
 
@@ -214,13 +228,16 @@ namespace DO { namespace Sara {
         break;
     }
 
+#ifdef DEBUG_AFFINE_SHAPE_ADAPTATION
     debug_close_window_used_to_view_patch();
+#endif
 
     // Return the shape matrix.
     affine_adapt_transform = U.inverse().transpose() * U.inverse();
     return true;
   }
 
+#ifdef DEBUG_AFFINE_SHAPE_ADAPTATION
   void AdaptFeatureAffinelyToLocalShape::debug_create_window_to_view_patch()
   {
     // Open window to visualize the patch.
@@ -296,6 +313,7 @@ namespace DO { namespace Sara {
     if (_debug)
       cout << "The patch touches the image boundaries" << endl;
   }
+#endif
 
 } /* namespace Sara */
 } /* namespace DO */

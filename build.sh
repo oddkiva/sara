@@ -9,9 +9,6 @@ else
 fi
 
 platform_name=$(uname -s)
-if [[ "${platform_name}" == "Darwin" ]]; then
-  export PATH=~/Downloads/cmake-3.18.5-Darwin-x86_64/CMake.app/Contents/bin:$PATH
-fi
 
 function install_python_packages_via_pip()
 {
@@ -20,6 +17,9 @@ function install_python_packages_via_pip()
 
 function build_library()
 {
+  # ========================================================================= #
+  # Specify the build type except for Xcode.
+  #
   if [ "${build_type}" == "Xcode" ]; then
     local cmake_options="-G Xcode "
   else
@@ -45,43 +45,78 @@ function build_library()
     fi
   fi
 
+  # ========================================================================= #
+  # Use the gold linker if available.
+  if [ "$(uname -s)" == "Linux" ]; then
+    cmake_options+="-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold "
+  fi
+
+  # ========================================================================= #
+  # Support for YouCompleteMe code auto-completion.
+  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
+
+  # ========================================================================= #
   # Setup Swift toolchain.
   if [[ "${platform_name}" == "Darwin" ]]; then
     cmake_options+="-DCMAKE_Swift_COMPILER=$(which swiftc) "
   elif [[ "${platform_name}" == "Linux" ]]; then
-    cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.3.2-RELEASE-ubuntu20.04/usr/bin/swiftc "
+    cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.4.2-RELEASE-ubuntu20.04/usr/bin/swiftc "
   fi
 
+  # Use latest Qt version instead of the system Qt.
+  #
+  # TODO: migrate to Qt6.
+  # if [ "${platform_name}" == "Linux" ]; then
+  #   cmake_options+="-DQt5_DIR=${HOME}/opt/Qt-5.15.0-amd64/lib/cmake/Qt5 "
   if [ "${platform_name}" == "Darwin" ]; then
-    cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
+    cmake_options+="-DSARA_USE_QT6=ON "
+    cmake_options+="-DQt6_DIR=$(brew --prefix qt)/lib/cmake/Qt6 "
   fi
 
-  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
+  # ========================================================================= #
+  # Sara specific options.
+  #
+  # Compile the Video I/O module.
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
   cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
   cmake_options+="-DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") "
   cmake_options+="-DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") "
+
+  # Compile shared or static libraries.
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
 
+  # Compile Halide code.
   cmake_options+="-DSARA_USE_HALIDE=ON "
-  # cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
+  if [ "${platform_name}" == "Linux" ]; then
+    cmake_options+="-DCMAKE_PREFIX_PATH=$HOME/opt/halide-12.0.1 "
+  fi
+  if [ "${platform_name}" == "Darwin" ]; then
+    cmake_options+="-DLLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm "
+  fi
+
+  # nVidia platform's specific options.
+  cmake_options+="-DNvidiaVideoCodec_ROOT=${HOME}/opt/Video_Codec_SDK_11.0.10 "
+  # Use TensorRT.
+  cmake_options+="-DTensorRT_ROOT=${HOME}/opt/TensorRT-7.2.2.3 "
 
   echo $(which cmake)
   echo $(cmake --version)
 
-  # Generate makefile project.
+
+  # ========================================================================= #
+  # Now generate the makefile project.
   if [ "${build_type}" == "emscripten" ]; then
     emconfigure cmake ../sara
   else
     time cmake ../sara ${cmake_options} \
       --profiling-format=google-trace \
-      --profiling-output=~/Desktop/cmake-sara.log
+      --profiling-output=$(pwd)/cmake-sara.log
   fi
 
   # Build the library.
-  time cmake --build . -j$(nproc) -v
+  time cmake --build . -j$(nproc)
 
   # Run C++ tests.
   export BOOST_TEST_LOG_LEVEL=all
@@ -127,11 +162,6 @@ function build_library_for_ios()
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
   cmake_options+="-DSARA_USE_HALIDE=ON "
-  if [ "${platform_name}" == "Darwin" ]; then
-    cmake_options+="-DHALIDE_DISTRIB_DIR=/usr/local "
-  else
-    cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide "
-  fi
 
   # Generate the Xcode project.
   time cmake ../sara ${cmake_options}
@@ -143,7 +173,7 @@ function build_library_for_ios()
   export BOOST_TEST_LOG_LEVEL=all
   export BOOST_TEST_COLOR_OUTPUT=1
 
-  local test_options="--output-on-failure "
+  local test_options="--output-on-failure "  # " -T memcheck"
   if [[ "${build_type}" == "Xcode" ]]; then
     test_options+="-C Debug"
   fi
@@ -164,8 +194,8 @@ function install_package()
     sudo apt-get update
     sudo apt-get install --reinstall libdo-sara-shared
   else
-    rpm_package_name=$(echo `ls *.rpm`)
-    sudo rpm -ivh --force ${rpm_package_name}
+    cmake --build . --target package --config Release
+    cp libDO-Sara-shared-*-Darwin.tar.gz /Users/david/GitLab/DO-CV/sara-install
   fi
 }
 

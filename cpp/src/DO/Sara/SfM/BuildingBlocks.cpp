@@ -13,14 +13,12 @@
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
-#include <DO/Sara/Features/Draw.hpp>
 #include <DO/Sara/FileSystem.hpp>
-#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/Match/IndexMatch.hpp>
 #include <DO/Sara/SfM/BuildingBlocks.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 #include <boost/filesystem.hpp>
 

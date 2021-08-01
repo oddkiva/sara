@@ -17,16 +17,16 @@
 #include <DO/Sara/Core/Timer.hpp>
 
 #include <QGuiApplication>
+#include <QOpenGLBuffer>
+#include <QOpenGLDebugLogger>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLWindow>
 #include <QSurfaceFormat>
 #include <QtCore/QException>
 #include <QtCore/QObject>
 #include <QtCore/QTimer>
-#include <QtGui/QOpenGLBuffer>
-#include <QtGui/QOpenGLDebugLogger>
-#include <QtGui/QOpenGLShaderProgram>
-#include <QtGui/QOpenGLTexture>
-#include <QtGui/QOpenGLVertexArrayObject>
-#include <QtGui/QOpenGLWindow>
 
 #include <map>
 

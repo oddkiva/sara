@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Features/KeypointList.hpp>
 #include <DO/Sara/Match/Match.hpp>
 
@@ -26,19 +25,6 @@ namespace DO::Sara {
     int i;
     int j;
     float score;
-  };
-
-  template <>
-  struct CalculateH5Type<IndexMatch>
-  {
-    static inline auto value() -> H5::CompType
-    {
-      auto h5_comp_type = H5::CompType{sizeof(IndexMatch)};
-      INSERT_MEMBER(h5_comp_type, IndexMatch, i);
-      INSERT_MEMBER(h5_comp_type, IndexMatch, j);
-      INSERT_MEMBER(h5_comp_type, IndexMatch, score);
-      return h5_comp_type;
-    }
   };
 
   inline auto to_match(const IndexMatch& m,

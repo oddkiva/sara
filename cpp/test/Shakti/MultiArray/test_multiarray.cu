@@ -13,7 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Shakti/MultiArray.hpp>
+#include <DO/Shakti/Cuda/MultiArray.hpp>
 
 
 namespace shakti = DO::Shakti;

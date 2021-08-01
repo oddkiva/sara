@@ -102,12 +102,12 @@ BOOST_AUTO_TEST_CASE(test_multiarrayview_flatten)
   BOOST_CHECK(r_flatten == range(10));
 }
 
-BOOST_AUTO_TEST_CASE(test_slice_view)
+BOOST_AUTO_TEST_CASE(test_sliced_view)
 {
   const auto X = range(24).cast<float>().reshape(Vector2i{6, 4});
   SARA_DEBUG << "X =\n" << X.matrix() << std::endl;
 
-  auto X_sliced = slice(X, {{1, 6, 2}, {1, 4, 2}}).make_copy();
+  const auto X_sliced = slice(X, {{1, 6, 2}, {1, 4, 2}}).make_copy();
   SARA_DEBUG << "X_sliced =\n" << X_sliced.matrix() << std::endl;
 
   static_assert(int(decltype(X_sliced)::StorageOrder) == int(Eigen::RowMajor));

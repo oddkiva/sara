@@ -15,7 +15,7 @@
 
 namespace DO { namespace Sara {
 
-  bool draw_point(int x, int y, const Color3ub& c)
+  bool draw_point(int x, int y, const Rgb8& c)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawPoint",
@@ -24,7 +24,7 @@ namespace DO { namespace Sara {
       Q_ARG(const QColor&, QColor(c[0], c[1], c[2])));
   }
 
-  bool draw_point(int x, int y, const Color4ub& c)
+  bool draw_point(int x, int y, const Rgba8& c)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawPoint",
@@ -33,7 +33,7 @@ namespace DO { namespace Sara {
       Q_ARG(const QColor&, QColor(c[0], c[1], c[2], c[3])));
   }
 
-  bool draw_point(const Point2f& p, const Color3ub& c)
+  bool draw_point(const Point2f& p, const Rgb8& c)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawPoint",
@@ -43,7 +43,7 @@ namespace DO { namespace Sara {
       QColor(c[0], c[1], c[2])));
   }
 
-  bool draw_circle(int xc, int yc, int r, const Color3ub& c, int penWidth)
+  bool draw_circle(int xc, int yc, int r, const Rgb8& c, int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawCircle",
@@ -54,8 +54,7 @@ namespace DO { namespace Sara {
       Q_ARG(int, penWidth));
   }
 
-  bool draw_circle(const Point2f& center, float r, const Color3ub& c,
-                   int penWidth)
+  bool draw_circle(const Point2f& center, float r, const Rgb8& c, int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawCircle",
@@ -66,8 +65,7 @@ namespace DO { namespace Sara {
       Q_ARG(int, penWidth));
   }
 
-  bool draw_circle(const Point2d& center, double r, const Color3ub& c,
-                   int penWidth)
+  bool draw_circle(const Point2d& center, double r, const Rgb8& c, int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawCircle",
@@ -78,7 +76,7 @@ namespace DO { namespace Sara {
       Q_ARG(int, penWidth));
   }
 
-  bool draw_ellipse(int x, int y, int w, int h, const Color3ub&c, int penWidth)
+  bool draw_ellipse(int x, int y, int w, int h, const Rgb8&c, int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawEllipse",
@@ -90,7 +88,7 @@ namespace DO { namespace Sara {
   }
 
   bool draw_ellipse(const Point2f& center, float r1, float r2, float degree,
-                    const Color3ub& c, int penWidth)
+                    const Rgb8& c, int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawEllipse",
@@ -103,7 +101,7 @@ namespace DO { namespace Sara {
   }
 
   bool draw_ellipse(const Point2d& center, double r1, double r2, double degree,
-                    const Color3ub& c, int penWidth)
+                    const Rgb8& c, int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawEllipse",
@@ -115,8 +113,7 @@ namespace DO { namespace Sara {
       Q_ARG(int, penWidth));
   }
 
-  bool draw_line(int x1, int y1, int x2, int y2, const Color3ub& c,
-                 int penWidth)
+  bool draw_line(int x1, int y1, int x2, int y2, const Rgb8& c, int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawLine",
@@ -127,7 +124,7 @@ namespace DO { namespace Sara {
       Q_ARG(int, penWidth));
   }
 
-  bool draw_line(const Point2f& p1, const Point2f& p2, const Color3ub& c,
+  bool draw_line(const Point2f& p1, const Point2f& p2, const Rgb8& c,
                  int penWidth)
   {
     return QMetaObject::invokeMethod(
@@ -139,7 +136,7 @@ namespace DO { namespace Sara {
       Q_ARG(int, penWidth));
   }
 
-  bool draw_line(const Point2d& p1, const Point2d& p2, const Color3ub& c,
+  bool draw_line(const Point2d& p1, const Point2d& p2, const Rgb8& c,
                  int penWidth)
   {
     return QMetaObject::invokeMethod(
@@ -151,7 +148,7 @@ namespace DO { namespace Sara {
       Q_ARG(int, penWidth));
   }
 
-  bool draw_rect(int x, int y, int w, int h, const Color3ub& c, int penWidth)
+  bool draw_rect(int x, int y, int w, int h, const Rgb8& c, int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawRect",
@@ -162,7 +159,7 @@ namespace DO { namespace Sara {
       Q_ARG(int, penWidth));
   }
 
-  static bool draw_poly(const QPolygonF& poly, const Color3ub& c, int width)
+  static bool draw_poly(const QPolygonF& poly, const Rgb8& c, int width)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawPoly",
@@ -172,7 +169,7 @@ namespace DO { namespace Sara {
       Q_ARG(int, width));
   }
 
-  bool draw_poly(const int x[], const int y[], int n, const Color3ub& c,
+  bool draw_poly(const int x[], const int y[], int n, const Rgb8& c,
                  int width)
   {
     QPolygonF poly;
@@ -181,7 +178,7 @@ namespace DO { namespace Sara {
     return draw_poly(poly, c, width);
   }
 
-  bool draw_poly(const Point2i* p, int n, const Color3ub& c, int width)
+  bool draw_poly(const Point2i* p, int n, const Rgb8& c, int width)
   {
     QPolygonF poly;
     for (int i = 0; i < n; ++i)
@@ -189,9 +186,9 @@ namespace DO { namespace Sara {
     return draw_poly(poly, c, width);
   }
 
-  bool draw_string(int x, int y, const std::string &s, const Color3ub& c,
-                   int fontSize, double alpha, bool italic, bool bold,
-                   bool underlined)
+  bool draw_text(int x, int y, const std::string& s, const Rgb8& c,
+                 int fontSize, double alpha, bool italic, bool bold,
+                 bool underlined, int pen_width)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawText",
@@ -202,10 +199,11 @@ namespace DO { namespace Sara {
       Q_ARG(int, fontSize),
       Q_ARG(qreal, qreal(alpha)),
       Q_ARG(bool, italic), Q_ARG(bool, bold),
-      Q_ARG(bool, underlined));
+      Q_ARG(bool, underlined),
+      Q_ARG(int, pen_width));
   }
 
-  bool draw_arrow(int a, int b, int c, int d, const Color3ub& col,
+  bool draw_arrow(int a, int b, int c, int d, const Rgb8& col,
                   int arrowWidth, int arrowHeight, int style, int width)
   {
     return QMetaObject::invokeMethod(
@@ -219,7 +217,7 @@ namespace DO { namespace Sara {
       Q_ARG(int, style), Q_ARG(int, width));
   }
 
-  bool fill_ellipse(int x, int y, int w, int h, const Color3ub& c)
+  bool fill_ellipse(int x, int y, int w, int h, const Rgb8& c)
   {
     return QMetaObject::invokeMethod(
       active_window(), "fillEllipse",
@@ -230,7 +228,7 @@ namespace DO { namespace Sara {
   }
 
   bool fill_ellipse(const Point2f& p, float rx, float ry, float degree,
-                   const Color3ub& c)
+                   const Rgb8& c)
   {
     return QMetaObject::invokeMethod(
       active_window(), "fillEllipse",
@@ -242,7 +240,7 @@ namespace DO { namespace Sara {
       Q_ARG(const QColor&, QColor(c[0], c[1], c[2])));
   }
 
-  bool fill_rect(int x, int y, int w, int h, const Color3ub& c)
+  bool fill_rect(int x, int y, int w, int h, const Rgb8& c)
   {
     return QMetaObject::invokeMethod(
       active_window(), "fillRect",
@@ -252,7 +250,7 @@ namespace DO { namespace Sara {
       Q_ARG(const QColor&, QColor(c[0], c[1], c[2])));
   }
 
-  bool fill_circle(int x, int y, int r, const Color3ub& c)
+  bool fill_circle(int x, int y, int r, const Rgb8& c)
   {
     return QMetaObject::invokeMethod(
       active_window(), "fillCircle",
@@ -262,7 +260,7 @@ namespace DO { namespace Sara {
       Q_ARG(const QColor&, QColor(c[0], c[1], c[2])));
   }
 
-  bool fill_circle(const Point2f& p, float r, const Color3ub& c)
+  bool fill_circle(const Point2f& p, float r, const Rgb8& c)
   {
     return QMetaObject::invokeMethod(
       active_window(), "fillCircle",
@@ -272,7 +270,7 @@ namespace DO { namespace Sara {
       Q_ARG(const QColor&, QColor(c[0], c[1], c[2])));
   }
 
-  static bool fill_poly(const QPolygonF& polygon, const Color3ub& c)
+  static bool fill_poly(const QPolygonF& polygon, const Rgb8& c)
   {
     return QMetaObject::invokeMethod(
       active_window(), "fillPoly",
@@ -281,7 +279,7 @@ namespace DO { namespace Sara {
       Q_ARG(const QColor&, QColor(c[0], c[1], c[2])));
   }
 
-  bool fill_poly(const int x[], const int y[], int n, const Color3ub& c)
+  bool fill_poly(const int x[], const int y[], int n, const Rgb8& c)
   {
     QPolygonF poly;
     for (int i = 0; i < n; ++i)
@@ -289,7 +287,7 @@ namespace DO { namespace Sara {
     return fill_poly(poly, c);
   }
 
-  bool fill_poly(const int p[], int n, const Color3ub& c)
+  bool fill_poly(const int p[], int n, const Rgb8& c)
   {
     QPolygonF poly;
     for (int i = 0; i < n; ++i)
@@ -297,7 +295,7 @@ namespace DO { namespace Sara {
     return fill_poly(poly, c);
   }
 
-  bool fill_poly(const Point2i *p, int n, const Color3ub& c)
+  bool fill_poly(const Point2i *p, int n, const Rgb8& c)
   {
     QPolygonF poly;
     for (int i = 0; i < n; ++i)
@@ -315,23 +313,97 @@ namespace DO { namespace Sara {
       Q_ARG(double, fact));
   }
 
-  bool put_color_image(int x, int y, const Color3ub *data, int w, int h,
-                       double fact)
+  static auto to_qimage(const std::uint8_t* data, const Eigen::Vector2i& sizes) -> QImage
   {
-    QImage image(reinterpret_cast<const uchar*>(data),
-                 w, h, w*3, QImage::Format_RGB888);
-    return display(image, x, y, fact);
-  }
-
-  bool put_grey_image(int x, int y, const uchar *data, int w, int h,
-                      double fact)
-  {
-    QImage image(data, w, h, w, QImage::Format_Indexed8);
-    QVector<QRgb> colorTable(256);
+    auto qimage = QImage{data,                             //
+                         sizes.x(), sizes.y(), sizes.x(),  //
+                         QImage::Format_Indexed8};
+    auto colorTable = QVector<QRgb>(256);
     for (int i = 0; i < 256; ++i)
       colorTable[i] = qRgb(i, i, i);
-    image.setColorTable(colorTable);
-    return display(image, x, y, fact);
+    qimage.setColorTable(colorTable);
+    return qimage;
+  }
+
+  static auto to_qimage(const Rgb8* data, const Eigen::Vector2i& sizes) -> QImage
+  {
+    const auto qimage = QImage{reinterpret_cast<const std::uint8_t*>(data),
+                               sizes.x(), sizes.y(), sizes.x() * 3,  //
+                               QImage::Format_RGB888};
+    return qimage;
+  }
+
+  static auto to_qimage(const Rgba8* data, const Eigen::Vector2i& sizes) -> QImage
+  {
+    const auto qimage = QImage{reinterpret_cast<const std::uint8_t*>(data),
+                               sizes.x(), sizes.y(), sizes.x() * 4,  //
+                               QImage::Format_RGBX8888};
+    return qimage;
+  }
+
+  static auto to_qimage(const Bgra8* data, const Eigen::Vector2i& sizes) -> QImage
+  {
+    const auto qimage = QImage{reinterpret_cast<const std::uint8_t*>(data),
+                               sizes.x(), sizes.y(), sizes.x() * 4,  //
+                               QImage::Format_RGBX8888}
+                            .rgbSwapped();
+    return qimage;
+  }
+
+  auto display(const ImageView<const std::uint8_t>& image, const Point2i& offset,
+               double fact) -> bool
+  {
+    const auto qimage = to_qimage(image.data(), image.sizes());
+    return display(qimage, offset.x(), offset.y(), fact);
+  }
+
+  auto display(const ImageView<const Rgb8>& image, const Point2i& offset,
+               double fact) -> bool
+  {
+    const auto qimage = to_qimage(image.data(), image.sizes());
+    return display(qimage, offset.x(), offset.y(), fact);
+  }
+
+  auto display(const ImageView<const Rgba8>& image, const Point2i& offset,
+               double fact) -> bool
+  {
+    const auto qimage = to_qimage(image.data(), image.sizes());
+    return display(qimage, offset.x(), offset.y(), fact);
+  }
+
+  auto display(const ImageView<const Bgra8>& image, const Point2i& offset,
+               double fact) -> bool
+  {
+    const auto qimage = to_qimage(image.data(), image.sizes());
+    return display(qimage, offset.x(), offset.y(), fact);
+  }
+
+  auto display(const ImageView<std::uint8_t>& image, const Point2i& offset,
+               double fact) -> bool
+  {
+    const auto qimage = to_qimage(image.data(), image.sizes());
+    return display(qimage, offset.x(), offset.y(), fact);
+  }
+
+  auto display(const ImageView<Rgb8>& image, const Point2i& offset,
+               double fact) -> bool
+  {
+    const auto qimage = to_qimage(image.data(), image.sizes());
+    return display(qimage, offset.x(), offset.y(), fact);
+  }
+
+  auto display(const ImageView<Rgba8>& image, const Point2i& offset,
+               double fact) -> bool
+  {
+    const auto qimage = to_qimage(image.data(), image.sizes());
+    return display(qimage, offset.x(), offset.y(), fact);
+  }
+
+  auto display(const ImageView<Bgra8>& image, const Point2i& offset,
+               double fact) -> bool
+  {
+    const auto qimage = to_qimage(image.data(), image.sizes());
+    return display(qimage, offset.x(), offset.y(), fact);
   }
 
   bool clear_window()
@@ -359,13 +431,20 @@ namespace DO { namespace Sara {
 
   bool save_screen(Window w, const std::string& fileName)
   {
-    if (!active_window_is_visible())
-      return false;
     return QMetaObject::invokeMethod(
       w, "saveScreen",
       Qt::BlockingQueuedConnection,
       Q_ARG(const QString&, QString(fileName.c_str())));
-    return true;
+  }
+
+  bool grab_screen_contents(ImageView<Rgb8>& image, Window w)
+  {
+    auto out_buffer = reinterpret_cast<std::uint8_t*>(image.data());
+    return QMetaObject::invokeMethod(     //
+        w, "grabScreenContents",          //
+        Qt::BlockingQueuedConnection,     //
+        Q_ARG(std::uint8_t*, out_buffer)  //
+    );
   }
 
 } /* namespace Sara */

@@ -1,0 +1,699 @@
+# Learning Journey in R
+
+The real motivation that made me want to learn about R is because of the R
+*bookdown* package [@xie:2020:bookdown], [@xie:2021:bookdown]. Compared to
+Sphinx documentation, This package is stunning in terms of:
+
+1. pretty default yet customizable aesthetics (*gitbook* !),
+2. smooth and natural LaTeX support,
+3. and most of all *multilanguage capabilities*, particularly C++^[C++ support is
+   done via Rcpp [@eddelbuettel:2018:rcpp]. While this is not a panacea, it is
+   more than sufficient for demonstration purposes in this book. In particular,
+   *Eigen* [@eigenweb] is supported by the existing package *RcppEigen*
+   [@eddelbuettel:2013:rcppeigen]] and Python to support and check my writings
+   with *correct* and *testable* code.
+
+So much that it pushed me to port my initial Sphinx documentation into this
+technology without further ado.
+
+With feelings of both excitement and frustration as a newbie, it took me a few
+days to experiment and frantically port the documentation by finding the useful
+information bits gleaned here and there in StackOverflow, GitHub and elsewhere
+instead of the original documentation.
+
+Namely *bookdown* implements *literate programming*, a term coined by
+[@knuth:1984:lp]. Thus writing becomes a truly engaging for me as writing a book
+actually becomes akin to a software development project where I can architect
+the outline of the book and writing a section feels like writing a software
+library.
+
+Shortly after I investigated if there are any Python alternative and just learnt
+about *jupyter-book* (https://jupyterbook.org) which also does a similar job.
+However it is not yet clear to me whether it has multilanguage support as good
+as in *bookdown*. So I will stick with *bookdown* for now.
+
+## Cheatsheet for Code Embedding
+
+If it is not done yet, I would recommend you to read the section 3.1 of the
+online book first: https://bookdown.org/yihui/rmarkdown-cookbook/r-code.html
+
+This section is mostly a quick-and-dirty memento for me where I list toy code
+examples I found online and which I tested myself. They are copy-pasted here so
+that I do not have to google them again. You can copy-paste them if you wish to
+experiment on your own.
+
+### R Example
+
+Just like a Python notebook, R markdown allows us to write code and break it
+down into multiple chunks and evaluate them as you are writing the report.
+Shamelessly copying from:
+https://bookdown.org/yihui/rmarkdown-cookbook/r-code.html.
+
+```{r}
+# Open this code with:
+# ```{r}
+
+x <- 5  # radius of a circle
+
+# Close this with:
+# ```
+```
+
+The R markdown file we are writing has a state, so the variable `x` written
+above can be reused and evaluated in later parts of our file.
+
+So for a circle with radius `r x`, its area is `r pi * x^2`.
+
+### Bash Example
+
+```{bash}
+echo "Hello Bash!"
+```
+
+### C++ Example
+
+This is the language I care the most about since it is my primary language.
+
+- Make sure that some packages are installed, without trying to be exhaustive,
+  since I am currently learning myself. Specifically on the R console:
+
+  ```{r, eval = FALSE}
+  install.packages("Rcpp")
+  install.packages("RcppEigen")
+  ```
+
+- Create your C++ compile environment by creating the file `~/.R/Makevars`.
+
+  ```
+  CXXFLAGS=-std-c++17 -I/path/to/my/favorite/libraries  # etc.
+  ```
+  Here I just want to make sure that C++ 17 is activated.
+
+Let us see the following example in action.
+
+```{Rcpp, cache=TRUE}
+
+#include <iostream>
+#include <utility>
+#include <string>
+
+#include <Rcpp.h>
+
+// [[Rcpp::plugins(cpp17)]
+
+// [[Rcpp::export]]
+int fibonacci(int x)
+{
+  const auto [a, b] = std::make_pair(0, 1);
+  if (x == 0 || x == 1)
+    return x;
+  return fibonacci(x-1) + fibonacci(x-2);
+}
+
+// [[Rcpp::export]]
+Rcpp::String hello_me()
+{
+  return Rcpp::String("hello");
+}
+```
+
+```{r}
+fibonacci(10L)
+hello_me()
+```
+
+One caveat worth noting is that as documented in the web Rcpp does not support
+*trailing return types* which I very much prefer using because of its
+aesthetics.
+
+```{Rcpp, eval = FALSE}
+// Rcpp is not able to compile this code :(
+
+// [[Rcpp::export]]
+auto square(int x) -> int
+{
+  return x * x;
+}
+```
+
+### Python Example
+
+I really care about *Matplotlib* and *NumPy*. So here is one code example I
+found online and tested myself.
+
+```{python, cache=TRUE}
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MultipleLocator
+import numpy as np
+
+# Two example plots
+fig = plt.figure()
+ax1 = fig.add_subplot(2,2,1)
+ax2 = fig.add_subplot(2,2,2)
+
+spacing = 0.5 # This can be your user specified spacing.
+minorLocator = MultipleLocator(spacing)
+ax1.plot(9 * np.random.rand(10))
+# Set minor tick locations.
+ax1.yaxis.set_minor_locator(minorLocator)
+ax1.xaxis.set_minor_locator(minorLocator)
+# Set grid to use minor tick locations.
+ax1.grid(which = 'minor')
+
+spacing = 1
+minorLocator = MultipleLocator(spacing)
+ax2.plot(9 * np.random.rand(10))
+# Set minor tick locations.
+ax2.yaxis.set_minor_locator(minorLocator)
+ax2.xaxis.set_minor_locator(minorLocator)
+# Set grid to use minor tick locations.
+ax2.grid(which = 'minor')
+plt.show()
+```
+
+## Visual Communication
+
+I am mostly interested in making drawing to better convey my messages in my
+writings. And one question came into my mind: can we do things quickly and
+elegantly instead of *Matplotlib* [@hunter:2007:matplotlib]? After all, we are
+in the realm of R.
+
+Let us start with a mini project: make additional drawings to improve the
+section about SIFT (section \@ref(sift)).
+
+### Mini-Project: Drawings for the SIFT Section {#making-sift-drawings}
+
+There is a lot of mathematics in this section \@ref(sift) that deserve be
+supported with more drawings to better convey my messages. For one thing, I
+write quite a bit about the geometry of overlapping patches with formula and
+only provides formula but no drawings. So if I were a reader of the book, I
+would probably have a "meh" reaction and not try to understand them at all.
+
+#### Starting Point
+
+I found the following code example at
+https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/rect.html.
+
+Since I am writing a book here, we can just serve the book with the following
+command in the R console:
+
+```{r, eval = FALSE}
+bookdown::serve_book()
+```
+
+Let us copy-paste the code into an existing `Rmd` file and see it running in
+action:
+
+```{r, cache=TRUE, fig.align='center'}
+require(grDevices)
+## set up the plot region:
+op <- par(bg = "thistle")
+plot(c(100, 250), c(300, 450), type = "n", xlab = "", ylab = "",
+     main = "2 x 11 rectangles; 'rect(100+i,300+i,  150+i,380+i)'")
+i <- 4*(0:10)
+## draw rectangles with bottom left (100, 300)+i
+## and top right (150, 380)+i
+rect(100+i, 300+i, 150+i, 380+i, col = rainbow(11, start = 0.7, end = 0.1))
+rect(240-i, 320+i, 250-i, 410+i, col = heat.colors(11), lwd = i/5)
+## Background alternating  ( transparent / "bg" ) :
+j <- 10*(0:5)
+rect(125+j, 360+j,   141+j, 405+j/2, col = c(NA,0),
+     border = "gold", lwd = 2)
+rect(125+j, 296+j/2, 141+j, 331+j/5, col = c(NA,"midnightblue"))
+mtext("+  2 x 6 rect(*, col = c(NA,0)) and  col = c(NA,\"m..blue\")")
+
+## an example showing colouring and shading
+plot(c(100, 200), c(300, 450), type= "n", xlab = "", ylab = "")
+rect(100, 300, 125, 350) # transparent
+rect(100, 400, 125, 450, col = "green", border = "blue") # coloured
+rect(115, 375, 150, 425, col = par("bg"), border = "transparent")
+rect(150, 300, 175, 350, density = 10, border = "red")
+rect(150, 400, 175, 450, density = 30, col = "blue",
+     angle = -30, border = "transparent")
+
+legend(180, 450, legend = 1:4, fill = c(NA, "green", par("fg"), "blue"),
+       density = c(NA, NA, 10, 30), angle = c(NA, NA, 30, -30))
+
+par(op)
+```
+
+#### Breaking Down the Example
+
+Great! this code is working but there is too much information for somebody who
+currently knows nothing about R and the aesthetics is awful.
+
+Let's take it slow and simplify the code to the bare minimum, with a few things
+that we experiment.
+
+- https://www.r-bloggers.com/2017/10/loading-r-packages-library-or-require/
+  recommends `library(.)` instead of `require(.)` as it makes the program easier
+  to debug. So be it:
+
+  ```{r}
+  library(grDevices)
+  ```
+
+- We want to render the region defined by its bounding box. The parameter
+  `type=n` apparently makes sure that the canvas is blank. The remaining
+  parameters are legends.
+
+  ```{r, cache=TRUE, fig.align='center'}
+  # Let's try another background color.
+  op <- par(bg = "#f7f7f7")
+
+  # The region to render.
+  x_min_max <- c(100, 250)
+  y_min_max <- c(300, 450)
+  plot(x_min_max, y_min_max,
+       type = "n", xlab = "", ylab = "",
+       main = "Main Title: One Rectangle")
+
+  # I just want one rectangle.
+  color <- "#c6c2e2"
+  line_width <- 2
+  rect(120, 340, 180, 410, col = color, lwd = line_width)
+
+  # Subtitle
+  mtext("Subtitle: One Rectangle")
+  ```
+
+#### Let's Go!
+
+From now on, let's go all out to draw the geometry of overlapping patches while
+referring back to the code example as a reference.
+
+First, I want to communicate the patch overlap by means of transparent
+rectangles. According to
+https://stackoverflow.com/questions/18056146/how-to-add-a-transparent-rectangle-to-a-r-boxplot-plot#,
+the alpha blending will do the job:
+```
+rect(x0, y0, x1, y1, col = rgb(0, 0, 1, alpha = 0.2))
+```
+
+To make our work manageable and easily debuggable, we will decouple the geometry
+data and the drawing.
+
+##### Geometry Data
+
+SIFT divides the image patch into a grid $N \times N$ of smaller patches. Let
+us define the sequence of indices.
+
+```{r}
+N <- 4
+j <- 0:(N - 1)
+i <- 0:(N - 1)
+```
+
+The patch center is:
+```{r}
+patch_center <- c(0, 0)
+```
+
+Let us consider the following point in a the image patch to illustrate our point
+in Section \@ref(sift).
+
+```{r}
+point_in_patch <- c(-0.8, 1.1)
+```
+
+Each subpatch $(i, j)$ has their center at the following grid coordinates:
+```{r}
+xi <- i - (N - 1) / 2
+yj <- j - (N - 1) / 2
+```
+
+```{r, echo = FALSE}
+xi
+yj
+```
+
+The patch region is exactly
+```{r}
+region_min_max_x <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
+region_min_max_y <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
+```
+
+```{r, echo = FALSE}
+region_min_max_x
+region_min_max_y
+```
+
+#### Geometry Rendering
+Moving onto the rendering, let's make the viewing domain slightly larger than
+the patch region:
+
+```{r}
+x_view_min_max <- c(region_min_max_x[1] - 1, region_min_max_x[2] + 1)
+y_view_min_max <- c(region_min_max_y[1] - 1, region_min_max_y[2] + 1)
+```
+
+```{r, echo = FALSE}
+x_view_min_max
+y_view_min_max
+```
+
+##### Communicating the Pitfalls Due to the Lack of Overlap
+
+We are now rendering the geometry of patches when they do not overlap each other
+with the following code.
+
+```{r, cache=TRUE, fig.align='center'}
+# Define an empty canvas.
+op <- par(bg = "#f7f7f7", pty="s")
+plot(x_view_min_max, y_view_min_max,
+     type = "n",
+     xlab = "x", ylab = "y",
+     main = "SIFT Grid Geometry")
+
+# The radius of each subpatch (i, j).
+r <- 0.5
+
+# Cosmetics.
+rect_line_width <- 0.5
+rect_color <- rgb(0.8, 0.8, 0.8, alpha = 0.5)
+
+for (x in xi) {
+  # Render in batch.
+  rect(x - r, yj - r, x + r, yj + r,
+       col = rect_color,
+       lwd = rect_line_width)
+}
+
+# Image patch center.
+points(patch_center[1], patch_center[2], col="red")
+
+# Patch centers.
+for (x in xi) {
+  for (y in yj)
+    points(x, y, col = "blue")
+}
+
+# Draw the 4 closest subpatch to the point in the image patch.
+rect(xi[1] - r, yj[4] - r, xi[1] + r, yj[4] + r,
+     col = rgb(1, 0, 0, alpha = 0.2),
+     lwd = 1)
+rect(xi[2] - r, yj[4] - r, xi[2] + r, yj[4] + r,
+     col = rgb(0, 1, 0, alpha = 0.2),
+     lwd = 1)
+rect(xi[1] - r, yj[3] - r, xi[1] + r, yj[3] + r,
+     col = rgb(0, 0, 1, alpha = 0.2),
+     lwd = 1)
+rect(xi[2] - r, yj[3] - r, xi[2] + r, yj[3] + r,
+     col = rgb(0, 1, 1, alpha = 0.2),
+     lwd = 1)
+
+points(point_in_patch[1], point_in_patch[2],
+       col="red",  # In red color please
+       pch="+",    # I want a "+" shape
+       cex=2)      # Thicker size please
+
+
+mtext("Without Overlapping")
+```
+
+So far we have drawn the $N \times N$ grid that divides the patch and crossed in
+red a particular point in the patch, close to the border of the green patch. We
+will focus on the legend later.
+
+##### Animation
+
+It would be great if we could animate the drawing would communicate better my
+point if the patches were not overlapping. This is possible according to:
+https://bookdown.org/yihui/rmarkdown-cookbook/animation.html#ref-R-gifski
+
+In this case, let us use `polygon` instead of `rect` to generalise the drawing.
+First we want to refactor the rendering code with the little R knowledge at our
+hand.
+
+```{r, cache=TRUE}
+draw_patch <- function(center, theta, scale, subpatch_radius,
+                       color = "red") {
+  # Alias the variable.
+  r <- subpatch_radius
+
+  # Cosmetics.
+  rect_color <- rgb(0.8, 0.8, 0.8, alpha = 0.5)
+  rect_line_width <- 0.5
+
+  # Transformation matrix
+  T <- scale * matrix(c(cos(theta), -sin(theta), center[1],
+                        sin(theta),  cos(theta), center[2],
+                                 0,           0,         1),
+                      nrow = 3,
+                      byrow = TRUE)
+
+  # Render the grid of patches.
+  for (x in xi) {
+    for (y in yj) {
+      # Enumerate the quad vertices.
+      X <- matrix(c(x - r, x + r, x + r, x - r,
+                    y - r, y - r, y + r, y + r,
+                        1,     1,     1,     1),
+                  nrow = 3,
+                  byrow = TRUE)
+
+      # Transform the vertices.
+      TX <- T %*% X
+
+      # Separate the coordinates.
+      u <- TX[1,]
+      v <- TX[2,]
+      polygon(u, v, col = rect_color, lwd = rect_line_width)
+    }
+  }
+
+  # Draw the center of the image patch.
+  points(center[1], center[2], col = color)
+
+  # Draw the center of each subpatch (i, j).
+  for (x in xi) {
+    for (y in yj) {
+      Txy <- T %*% matrix(c(x, y, 1), nrow=3)
+      u <- Txy[1]
+      v <- Txy[2]
+      points(u, v, col = color)
+    }
+  }
+
+  # Draw the closest subpatches (i, j) to the point in the patch.
+  for (k in 1:2) {
+    for (l in 3:4) {
+      # Enumerate the quad vertices.
+      X <- matrix(c(xi[k] - r, xi[k] + r, xi[k] + r, xi[k] - r,
+                    yj[l] - r, yj[l] - r, yj[l] + r, yj[l] + r,
+                            1,         1,         1,         1),
+                  nrow = 3,
+                  byrow = TRUE)
+
+      # Transform the vertices.
+      TX <- T %*% X
+      u <- TX[1,]
+      v <- TX[2,]
+
+      # Draw the polygon.
+      if (k == 1 & l == 3)
+        color <- rgb(1, 0, 0, alpha = 0.2)
+      if (k == 2 & l == 3)
+        color <- rgb(0, 1, 0, alpha = 0.2)
+      if (k == 1 & l == 4)
+        color <- rgb(0, 0, 1, alpha = 0.2)
+      if (k == 2 & l == 4)
+        color <- rgb(0, 1, 1, alpha = 0.2)
+      polygon(u, v, col = color, lwd = 1)
+    }
+  }
+
+  # Draw the point in the patch.
+  points(point_in_patch[1], point_in_patch[2],
+         col = "darkblue",  # In another color please
+         pch = "+",              # I want a "+" shape
+         cex = 2)                # Thicker size please
+}
+```
+
+Finally, after a bit of debugging, we can reuse the function at will and
+generate an animation that illustrates the border effect when the sub-patches do
+not overlap and when the detector detects the keypoint in a noisy manner
+
+```{r, animation.hook="gifski", interval=0.1, cache=TRUE, fig.align='center'}
+op <- par(bg = "#f7f7f7", pty="s")
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")     # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] + shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, 0.5,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, theta[ii], scale_inc[ii], 0.5,
+             color = "orangered")
+
+  mtext("Without Overlapping")
+}
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")     # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] - 0.5 * shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, 0.5,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, -theta[ii], scale_dec[ii], 0.5,
+             color = "orangered")
+
+  mtext("Without Overlapping")
+}
+```
+
+##### Communicating about the Overlapping
+
+We have worked hard to create the useful rendering function and can profit from
+it to illustrate the benefit of overlapping patches.
+
+Let us animate the dilation of the patch radius to illustrate that sub-patches
+now overlap each other.
+
+```{r, animation.hook="gifski", interval=0.1, cache=TRUE, fig.align='center'}
+op <- par(bg = "#f7f7f7", pty="s")
+
+patch_radius <- c(seq(0.5, 0.9, length.out = 5),
+                  seq(0.9, 0.99, length.out = 5),
+                  seq(0.99, 1, length.out = 20))
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")     # Title.
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, patch_radius[ii],
+             color = "slateblue")
+
+  mtext("Increase of the Patch Radius for the Patch Overlapping")
+}
+```
+
+Now we can communicate the robustness we benefit due to the overlapping between
+sub-patches with another animation.
+
+We are going to vary the following parameters.
+
+```{r}
+theta <- seq(0, 0.2, length.out = 30)
+scale_inc <- seq(1, 1.3, length.out = 30)
+scale_dec <- seq(1, 0.8, length.out = 30)
+shift_x <- seq(0, 0.5, length.out = 30)
+shift_y <- seq(0, 0.3, length.out = 30)
+```
+
+We can now generate the animation in GIF format.
+
+```{r, animation.hook="gifski", interval=0.1, cache=TRUE, fig.align='center'}
+op <- par(bg = "#f7f7f7", pty="s")
+
+subpatch_radius <- 1
+theta <- seq(0, 0.2, length.out = 30)
+scale <- seq(1, 1.3, length.out = 30)
+shift_x <- seq(0, 0.5, length.out = 30)
+shift_y <- seq(0, 0.3, length.out = 30)
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")     # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] + shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1,
+             subpatch_radius,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, theta[ii], scale_inc[ii],
+             subpatch_radius,
+             color = "orangered")
+
+  mtext("With Overlapping")
+}
+
+for (ii in 1:30) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")     # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] - 0.5 * shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1,
+             subpatch_radius,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, -theta[ii], scale_dec[ii],
+             subpatch_radius,
+             color = "orangered")
+
+  mtext("With Overlapping")
+}
+```
+
+##### Conclusion
+
+We have completed the most technical part of this mini-project, which is to
+illustrate the different parameters that conditions SIFT's anatomy through
+various animations. This mini-project turns out to be quite time-consuming yet
+rewarding and most of all, it has highlighted that visual communication largely
+remains an art.
+
+Much remains to be improved and could be done later while I am learning on the
+way.
+
+## Linear Algebra Cheatsheet
+
+Array broadcasting is wonderful in NumPy:
+
+```{python}
+import numpy as np
+
+a = np.arange(0, 10).reshape((2, 5))
+b = np.arange(0, 2).reshape((2, 1))
+
+a + b
+```
+
+In R we have to use a more verbose way to achieve the equivalent operation using
+`sweep`
+
+```{r}
+a <- matrix(0:9, nrow = 2, byrow = TRUE)
+b <- matrix(0:1, nrow = 2)
+
+sweep(a, 1, b, "+")
+```
+
+A bit disappointing in terms in conciseness but it works.

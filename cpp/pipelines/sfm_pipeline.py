@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import platform
 import sys
 from os import path
 from subprocess import Popen, PIPE
 
 
 SARA_BUILD_DIR = path.abspath(path.dirname(__file__))
+if platform.system() == 'Darwin':
+    SARA_BUILD_DIR = path.join(SARA_BUILD_DIR, 'Release')
 
 # The dataset.
 DATASET_DIR = path.join(os.environ['HOME'],'Desktop/Datasets/sfm/castle_int')
@@ -30,7 +33,7 @@ def run(program, dataset_dir, reconstruction_data_h5_filepath, *args, **kwargs):
         raise ValueError('{} does not exist!'.format(program_path))
     print('Running', program_path, ' '.join(cmd_options))
     cmd = [program_path] + cmd_options
-    process = Popen(cmd, stdout=PIPE)
+    process = Popen(cmd, stderr=sys.stderr, stdout=sys.stdout)
     output, err = process.communicate()
     exit_code = process.wait()
 

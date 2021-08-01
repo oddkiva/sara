@@ -42,10 +42,6 @@ namespace DO { namespace Sara {
 
   public:
     ScrollArea(QWidget *parent = 0);
-    ~ScrollArea()
-    {
-      qDebug() << "Destroying ScrollArea object " << this;
-    }
 
   protected:
     void closeEvent(QCloseEvent *event) override;
@@ -89,8 +85,9 @@ namespace DO { namespace Sara {
     void drawRect(int x, int y, int w, int h, const QColor& c,
                   int penWidth = 1);
     void drawPoly(const QPolygonF& polygon, const QColor& c, int width);
-    void drawText(int x,int y, const QString& s,const QColor& c, int fontSize,
-                  qreal orientation, bool italic, bool bold, bool underline);
+    void drawText(int x, int y, const QString& s, const QColor& c, int fontSize,
+                  qreal orientation, bool italic, bool bold, bool underline,
+                  int penWidth = 1);
     void drawArrow(int x1, int y1, int x2, int y2, const QColor&  color,
                    int arrowWidth, int arrowHeight, int style, int width);
 
@@ -115,6 +112,7 @@ namespace DO { namespace Sara {
     void setTransparency(bool on = true);
 
     // Save screen.
+    void grabScreenContents(std::uint8_t *outBuffer);
     void saveScreen(const QString& filename);
 
     // Resize screen.
@@ -139,6 +137,7 @@ namespace DO { namespace Sara {
     void pressedKey(int key);
     void releasedKey(int key);
     void sendEvent(Event e);
+    void sendScreenContents(const QImage& image);
 
   private:
     QScrollArea *m_scrollArea;
