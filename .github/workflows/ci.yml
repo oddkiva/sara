@@ -48,7 +48,6 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Prepare ccache timestamp
-          id: ccache_cache_timestamp
           shell: cmake -P {0}
           run: |
             string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
@@ -142,7 +141,7 @@ jobs:
             -DSARA_BUILD_TESTS:BOOL=ON
           cmake --build . -j$(nproc) -v
           # Create deb package.
-          cmake --build --target package -j$(nproc) -v
+          cmake --build . --target package -j$(nproc) -v
           # Run tests.
           DISPLAY=:1 ctest \
             -j$(nproc) \
