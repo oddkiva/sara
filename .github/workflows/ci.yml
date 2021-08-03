@@ -121,10 +121,10 @@ jobs:
             -DSARA_BUILD_SHARED_LIBS:BOOL=ON \
             -DSARA_BUILD_VIDEOIO:BOOL=ON \
             -DSARA_BUILD_SAMPLES:BOOL=ON \
-            -DSARA_BUILD_TESTS:BOOL=ON \
-          make -j$(nproc)
+            -DSARA_BUILD_TESTS:BOOL=ON
+          cmake --build . -j$(nproc) -v
           # Create deb package.
-          make package
+          cmake --build --target package -j$(nproc) -v
           # Run tests.
           DISPLAY=:1 ctest \
             -j$(nproc) \
