@@ -24,7 +24,7 @@ jobs:
             generators: "Visual Studio 16 2019"
           }
         - {
-            name: "Ubuntu_Latest_GCC",
+            name: "Ubuntu Latest GCC",
             os: ubuntu-latest,
             artifact: "ubuntu_gcc.7z",
             build_type: "Release",
@@ -47,7 +47,88 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Print env
+      - name: Install dependencies on ubuntu
+        if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
         run: |
-          echo github.event.action: ${{ github.event.action }}
-          echo github.event_name: ${{ github.event_name }}
+          # Now add the additional APT repositories:
+          #
+          # CMake.
+          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+          sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+          # Vulkan SDK.
+          sudo wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+          # Update the packages list again.
+          sudo apt-get update -y -qq
+
+          # For the documentation.
+          sudo apt-get install -y -qq doxygen graphviz
+
+          # All the packages to compile the C++ codebase.
+          sudo apt-get install -y -qq \
+              build-essential \
+              ccache \
+              cmake \
+              cppcheck \
+              git \
+              lcov \
+              libboost-all-dev \
+              libhdf5-dev \
+              libjpeg-dev \
+              libpng-dev \
+              libtiff5-dev \
+              libavcodec-dev \
+              libavformat-dev \
+              libavutil-dev \
+              libswscale-dev \
+              libglew-dev \
+              libglfw3-dev \
+              ocl-icd-opencl-dev \
+              opencl-headers \
+              libpocl-dev \
+              libceres-dev \
+              qtbase5-dev \
+              vulkan-sdk
+
+          # Install the GStreamer SDK.
+          sudo apt-get install -y -qq \
+            libgstreamer1.0-0         \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good \
+            gstreamer1.0-plugins-bad  \
+            gstreamer1.0-plugins-ugly \
+            gstreamer1.0-libav        \
+            gstreamer1.0-doc          \
+            gstreamer1.0-tools        \
+            gstreamer1.0-x            \
+            gstreamer1.0-alsa         \
+            gstreamer1.0-gl           \
+            gstreamer1.0-gtk3         \
+            gstreamer1.0-qt5          \
+            gstreamer1.0-pulseaudio
+
+          # Python dependencies
+          sudo apt-get install -y -qq python3-dev
+
+      - name: Build on Ubuntu
+        if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
+        run: |
+          # Build Sara.
+          mkdir build
+          cd build
+          cmake .. \
+            -DCMAKE_BUILD_TYPE:STRING=Debug \
+            -DSARA_BUILD_SHARED_LIBS:BOOL=ON \
+            -DSARA_BUILD_VIDEOIO:BOOL=ON \
+            -DSARA_BUILD_SAMPLES:BOOL=ON \
+            -DSARA_BUILD_TESTS:BOOL=ON \
+          make -j$(nproc)
+          # Create deb package.
+          make package
+          # Run tests.
+          DISPLAY=:1 ctest \
+            -j$(nproc) \
+            --output-on-failure \
+            --exclude-regex "test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
+          # Run coverage (disabled for now).
+          #- make -j$(nproc) coverage
