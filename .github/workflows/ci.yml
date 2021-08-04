@@ -133,6 +133,9 @@ jobs:
           Xvfb :1 -noreset 1>/dev/null 2>&1 &
           export DISPLAY=:1
 
+          # Coveralls for code coverage
+          bundle install
+
       - name: Build and test on Ubuntu
         if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
         run: |
@@ -155,3 +158,14 @@ jobs:
             --exclude-regex "test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
           # Run coverage (disabled for now).
           #- make -j$(nproc) coverage
+
+      - name: Send code coverage to Coveralls
+        if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
+        run: |
+          cd ..
+          lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
+          lcov --remove coverage.info '/usr/*' --output-file coverage.info
+          lcov --remove coverage.info '/home/travis/build/DO-CV/sara/cpp/third-party/*' --output-file coverage.info
+          lcov --remove coverage.info '/home/travis/build/DO-CV/sara/cpp/test/*' --output-file coverage.info
+          lcov --remove coverage.info '/home/travis/build/DO-CV/sara/build/*' --output-file coverage.info
+          coveralls-lcov coverage.info
