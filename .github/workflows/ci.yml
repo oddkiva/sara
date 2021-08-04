@@ -134,6 +134,8 @@ jobs:
           export DISPLAY=:1
 
           # Coveralls for code coverage
+          sudo apt install rubygems
+          sudo gem install bundler
           bundle install
 
       - name: Build and test on Ubuntu
