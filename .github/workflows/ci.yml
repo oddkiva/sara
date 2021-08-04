@@ -128,7 +128,7 @@ jobs:
           # Python dependencies
           sudo apt-get install -y -qq python3-dev
 
-      - name: Build on Ubuntu
+      - name: Build and test on Ubuntu
         if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
         run: |
           # Build Sara.
