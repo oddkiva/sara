@@ -62,7 +62,7 @@ jobs:
           restore-keys: |
             ${ { matrix.config.name } }-ccache-
 
-      - name: Install dependencies on ubuntu
+      - name: Install dependencies on Ubuntu
         if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
         run: |
           # Now add the additional APT repositories:
