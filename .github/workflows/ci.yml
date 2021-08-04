@@ -148,9 +148,9 @@ jobs:
             -DSARA_BUILD_VIDEOIO:BOOL=ON \
             -DSARA_BUILD_SAMPLES:BOOL=ON \
             -DSARA_BUILD_TESTS:BOOL=ON
-          cmake --build . -j$(nproc) -v
+          cmake --build . -j$(nproc)
           # Create deb package.
-          cmake --build . --target package -j$(nproc) -v
+          cmake --build . --target package -j$(nproc)
           # Run tests.
           DISPLAY=:1 ctest \
             -j$(nproc) \
