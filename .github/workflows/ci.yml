@@ -161,13 +161,13 @@ jobs:
           # Run coverage (disabled for now).
           #- make -j$(nproc) coverage
 
-          # - name: Send code coverage to Coveralls
-          #   if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
-          #   run: |
-          #     cd ..
-          #     lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
-          #     lcov --remove coverage.info '/usr/*' --output-file coverage.info
-          #     lcov --remove coverage.info '$(pwd)/cpp/third-party/*' --output-file coverage.info
-          #     lcov --remove coverage.info '$(pwd)/cpp/test/*' --output-file coverage.info
-          #     lcov --remove coverage.info '$(pwd)/build/*' --output-file coverage.info
-          #     coveralls-lcov coverage.info
+      - name: Send code coverage to Coveralls
+        if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
+        run: |
+          cd /home/runner/work/sara/sara
+          lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
+          lcov --remove coverage.info '/usr/*' --output-file coverage.info
+          lcov --remove coverage.info '$(pwd)/cpp/third-party/*' --output-file coverage.info
+          lcov --remove coverage.info '$(pwd)/cpp/test/*' --output-file coverage.info
+          lcov --remove coverage.info '$(pwd)/build/*' --output-file coverage.info
+          coveralls-lcov coverage.info
