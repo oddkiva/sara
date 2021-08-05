@@ -157,7 +157,7 @@ jobs:
           DISPLAY=:1 ctest \
             -j$(nproc) \
             --output-on-failure \
-            --exclude-regex "test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
+            --exclude-regex "test_core_ipc_cond1|shakti_test_*"
           # Run coverage (disabled for now).
           #- make -j$(nproc) coverage
 
