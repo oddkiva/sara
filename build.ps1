@@ -1,8 +1,8 @@
-$cmake_vsver = @{2015="v140"; 2017="v141"; 2019="v160"};
+$cmake_vsver = @{2015="v140"; 2017="v141"; 2019="v1421"};
 $cmake_vsver2 = @{2015="14"; 2017="15"; 2019="16"};
 $build_shared_libs = @{"static"="OFF"; "shared"="ON"};
 
-$vsver = 2017
+$vsver = 2019
 $vsver2 = $cmake_vsver2[$vsver]
 
 $build_type = "shared"
@@ -11,14 +11,14 @@ $source_dir = $pwd
 $build_dir = "sara-build-vs$vsver-$build_type"
 $cmake_toolset = $cmake_vsver[$vsver]
 
-$boost_dir = "C:\local\boost_1_71_0"
-$halide_dir = "C:\local\Halide-10.0.0-x86-64-windows"
-$cudnn_dir = "C:\local\cudnn"
-$tensorrt_dir = "C:\local\TensorRT-7.0.0.11"
-$nvidia_codec_sdk_dir = "C:\local\Video_Codec_SDK_9.1.23"
+$qt_dir = "C:\local\qt-everywhere-src-6.1.2\qtbase"
+$cudnn_dir = "C:\local\cudnn-11.4-windows-x64-v8.2.2.26"
+$halide_dir = "C:\local\Halide-12.0.1-x86-64-windows"
+$nvidia_codec_sdk_dir = "C:\local\Video_Codec_SDK_11.1.5"
+$tensorrt_dir = "C:\local\TensorRT-8.0.1.6.Windows10.x86_64.cuda-11.3.cudnn8.2"
 
 $update_vcpkg = $false
-$build_from_scratch = $false
+$build_from_scratch = $true
 
 
 
@@ -28,6 +28,12 @@ if ($update_vcpkg) {
   cd c:/vcpkg/
   git pull
   .\bootstrap-vcpkg.bat
+
+  iex ".\vcpkg.exe update"
+  iex ".\vcpkg.exe upgrade"
+
+  # Install Boost libraries.
+  iex ".\vcpkg.exe install boost:x64-windows"
 
   # Install Image I/O libraries.
   iex ".\vcpkg.exe install libjpeg-turbo:x64-windows"
@@ -42,6 +48,9 @@ if ($update_vcpkg) {
 
   # Install Ceres libraries.
   iex ".\vcpkg.exe install ceres[cxsparse,suitesparse]:x64-windows"
+
+    # Install Halide libraries.
+  iex ".\vcpkg.exe install halide:x64-windows"
 
   # Install GLEW libraries.
   iex ".\vcpkg.exe install glew:x64-windows"
@@ -83,9 +92,10 @@ echo "Configuring for CMake..."
 $vcpkg_toolchain_file = "c:/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
 $cmake_options  = "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=$vcpkg_toolchain_file "
-$cmake_options += "-DBOOST_ROOT:PATH=$boost_dir "
+$cmake_options += "-DCMAKE_PREFIX_PATH=`"$cudnn_dir;$tensorrt_dir;$qt_dir`" "
 $cmake_options += "-DHALIDE_DISTRIB_DIR:PATH=$halide_dir "
-$cmake_options += "-DCMAKE_PREFIX_PATH=`"$cudnn_dir;$tensorrt_dir`" "
+$cmake_options += "-DHalideHelpers_DIR:PATH=$halide_dir\lib\cmake\HalideHelpers "
+$cmake_options += "-DSARA_USE_QT6:BOOL=ON "
 $cmake_options += "-DSARA_BUILD_VIDEOIO:BOOL=ON "
 $cmake_options += "-DSARA_BUILD_SHARED_LIBS:BOOL=$($build_shared_libs[$build_type]) "
 $cmake_options += "-DSARA_BUILD_SAMPLES:BOOL=ON "
@@ -97,8 +107,8 @@ echo "CMake options = $cmake_options"
 echo "`n"
 
 cd ..\$build_dir
-$cmake_command  = "cmake -S `"..\sara`" -B `".`" -G `"Visual Studio $vsver2 $vsver Win64`" "
-$cmake_command += "-T `"$cmake_toolset`" "
+$cmake_command  = "cmake -S `"..\sara`" -B `".`" -G `"Visual Studio $vsver2 $vsver`" "
+# $cmake_command += "-T `"$cmake_toolset`" "
 $cmake_command += "$cmake_options"
 iex "$cmake_command"
 echo "`n"
