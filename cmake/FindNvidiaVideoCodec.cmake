@@ -38,7 +38,7 @@ if (NOT NvidiaVideoCodec_LIBRARY)
 
       find_library(NvidiaVideoCodec_encode_LIBRARY
         NAMES nvencodeapi
-        ${search}
+        PATHS ${search}
         PATH_SUFFIXES Lib/x64)
     else ()
       find_library(NvidiaVideoCodec_nvcuvid_LIBRARY
