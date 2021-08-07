@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(test_send_no_event)
   auto arg = arguments.at(0);
   arg.convert(_event_type);
   auto event = arguments.at(0).value<Event>();
-  BOOST_CHECK_EQUAL(event.type, DO::Sara::NO_EVENT);
+  BOOST_CHECK(event.type == EventType::NO_EVENT);
 }
 
 BOOST_AUTO_TEST_CASE(test_send_pressed_key_event)
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(test_send_pressed_key_event)
   auto arg = arguments.at(0);
   arg.convert(_event_type);
   auto event = arguments.at(0).value<Event>();
-  BOOST_CHECK_EQUAL(event.type, DO::Sara::KEY_PRESSED);
+  BOOST_CHECK(event.type == EventType::KEY_PRESSED);
   BOOST_CHECK_EQUAL(event.key, _key);
 }
 
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(test_send_released_key_event)
   auto arg = arguments.at(0);
   arg.convert(_event_type);
   auto event = arguments.at(0).value<Event>();
-  BOOST_CHECK_EQUAL(event.type, DO::Sara::KEY_RELEASED);
+  BOOST_CHECK(event.type == EventType::KEY_RELEASED);
   BOOST_CHECK_EQUAL(event.key, _key);
 }
 
