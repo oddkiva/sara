@@ -186,5 +186,7 @@ int main(int argc, char *argv[])
   QApplication app(argc, argv);
   app.setAttribute(Qt::AA_Use96Dpi, true);
 
-  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
+  boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
+
+  return app.exec();
 }
