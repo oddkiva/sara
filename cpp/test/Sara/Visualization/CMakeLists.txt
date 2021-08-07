@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Graphics Visualization REQUIRED)
+find_package(DO_Sara COMPONENTS Visualization REQUIRED)
 
 file(GLOB test_visualization_SOURCE_FILES FILES *.cpp)
 foreach (file ${test_visualization_SOURCE_FILES})
