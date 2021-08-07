@@ -48,7 +48,12 @@ auto initialize_camera_intrinsics_1()
   const auto u0 = 960;
   const auto v0 = 540;
   intrinsics.image_sizes << 1920, 1080;
-  intrinsics.K << f, 0, u0, 0, f, v0, 0, 0, 1;
+  // clang-format off
+  intrinsics.K <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  // clang-format on
   intrinsics.distortion_model.k.setZero();
   intrinsics.distortion_model.p.setZero();
 
@@ -63,10 +68,12 @@ auto initialize_camera_intrinsics_2()
   const auto u0 = 960;
   const auto v0 = 540;
   intrinsics.image_sizes << 1920, 1080;
+  // clang-format off
   intrinsics.K <<
     f, 0, u0,
     0, f, v0,
     0, 0,  1;
+  // clang-format on
   intrinsics.distortion_model.k <<
     -0.22996356451342749,
     0.05952465745165465,
