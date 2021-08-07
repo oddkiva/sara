@@ -27,7 +27,7 @@ namespace DO::Sara {
     auto colors = std::map<int, Rgb8>{};
     for (const auto& [label, points] : regions)
     {
-      const auto num_points = points.size();
+      const auto num_points = static_cast<float>(points.size());
       Eigen::Vector3f color = Vector3f::Zero();
       for (const auto& p : points)
         color += image(p).cast<float>();
@@ -49,10 +49,8 @@ namespace DO::Sara {
       -> void
   {
     tic();
-    const auto edge_attributes = EdgeAttributes{.edges = edges_refined,
-                                                .centers = centers,
-                                                .axes = axes,
-                                                .lengths = lengths};
+    const auto edge_attributes =
+        EdgeAttributes{edges_refined, centers, axes, lengths};
     const auto edge_graph = EdgeGraph{edge_attributes, edge_chains, mean_gradients};
     toc("Edge Graph Initialization");
 
@@ -77,7 +75,7 @@ namespace DO::Sara {
       const auto fused_edge_cardinality =
           std::accumulate(g.second.begin(), g.second.end(), 0,
                           [&](const auto& a, const auto& b) {
-                            return a + edge_chains[b].size();
+                            return a + static_cast<int>(edge_chains[b].size());
                           });
 
       // Calculate the gradient of the fused edge.
@@ -111,7 +109,7 @@ namespace DO::Sara {
       const auto frame_blurred = frame.convert<Rgb32f>()
                                       .compute<Gaussian>(1.2f)
                                       .convert<Rgb8>();
-      const auto color_threshold = std::sqrt(std::pow(1, 2) * 3);
+      const auto color_threshold = std::sqrt(std::powf(1, 2) * 3);
       const auto regions = color_watershed(frame_blurred, color_threshold);
 
       // Display the good regions.

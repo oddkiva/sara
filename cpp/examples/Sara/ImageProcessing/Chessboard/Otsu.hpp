@@ -45,7 +45,7 @@ namespace DO::Sara {
     auto cdf_0 = cdf(0);
     auto cdf_1 = 1 - cdf_0;
 
-    auto mean_0_unnormalized = 0;
+    auto mean_0_unnormalized = 0.f;
     auto mean_1_unnormalized = mean;
 
     auto mean_0 = mean_0_unnormalized;
