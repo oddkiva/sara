@@ -68,9 +68,9 @@ auto NuImages::load_sample_table() -> void
   const auto sample_json = load_json(dataroot, version, "sample");
   for (const auto& j : sample_json)
     sample_table[j["token"]] = {
-        .log_token = j["log_token"],
-        .key_camera_token = j["key_camera_token"],
-        .timestamp = j["timestamp"].get<std::uint64_t>()  //
+        j["log_token"],
+        j["key_camera_token"],
+        j["timestamp"].get<std::uint64_t>()  //
     };
 }
 
@@ -79,17 +79,17 @@ auto NuImages::load_sample_data_table() -> void
   const auto sample_data_json = load_json(dataroot, version, "sample_data");
   for (const auto& j : sample_data_json)
     sample_data_table[j["token"]] = {
-        .prev = j["prev"],
-        .next = j["next"],
-        .sample_token = j["sample_token"],
-        .ego_pose_token = j["ego_pose_token"],
-        .calibrated_sensor_token = j["calibrated_sensor_token"],
-        .timestamp = j["timestamp"].get<std::uint64_t>(),
-        .fileformat = j["fileformat"],
-        .is_key_frame = j["is_key_frame"].get<bool>(),
-        .width = j["width"].get<int>(),
-        .height = j["height"].get<int>(),
-        .filename = j["filename"]};
+        j["prev"],
+        j["next"],
+        j["sample_token"],
+        j["ego_pose_token"],
+        j["calibrated_sensor_token"],
+        j["timestamp"].get<std::uint64_t>(),
+        j["fileformat"],
+        j["is_key_frame"].get<bool>(),
+        j["width"].get<int>(),
+        j["height"].get<int>(),
+        j["filename"]};
 }
 
 auto NuImages::load_object_annotation_table() -> void
@@ -200,8 +200,8 @@ auto NuImages::load_attribute_table() -> void
   attribute_table.reserve(attribute_json.size());
   for (const auto& j : attribute_json)
     attribute_table[j["token"]] = {
-        .name = j["name"],               //
-        .description = j["description"]  //
+        j["name"],               //
+        j["description"]  //
     };
 }
 
@@ -212,8 +212,8 @@ auto NuImages::load_sensor_table() -> void
   sensor_table.reserve(sensor_json.size());
   for (const auto& j : sensor_json)
     sensor_table[j["token"]] = {
-        .channel = j["channel"],   //
-        .modality = j["modality"]  //
+        j["channel"],   //
+        j["modality"]  //
     };
 }
 
@@ -224,10 +224,10 @@ auto NuImages::load_log_table() -> void
   log_table.reserve(log_json.size());
   for (const auto& j : log_json)
     log_table[j["token"]] = {
-        .logfile = j["logfile"],             //
-        .location = j["location"],           //
-        .vehicle = j["vehicle"],             //
-        .date_captured = j["date_captured"]  //
+        j["logfile"],             //
+        j["location"],           //
+        j["vehicle"],             //
+        j["date_captured"]  //
     };
 }
 
