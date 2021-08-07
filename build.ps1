@@ -19,6 +19,7 @@ $tensorrt_dir = "C:\local\TensorRT-8.0.1.6.Windows10.x86_64.cuda-11.3.cudnn8.2"
 
 $update_vcpkg = $false
 $build_from_scratch = $true
+$run_cmake_build = $false
 
 
 
@@ -108,6 +109,7 @@ echo "`n"
 
 cd ..\$build_dir
 $cmake_command  = "cmake -S `"..\sara`" -B `".`" -G `"Visual Studio $vsver2 $vsver`" "
+# Not applicable to VS 2019.
 # $cmake_command += "-T `"$cmake_toolset`" "
 $cmake_command += "$cmake_options"
 iex "$cmake_command"
@@ -115,14 +117,16 @@ echo "`n"
 
 
 
-echo "========================================================================="
-echo "Building the libraries in Debug mode..."
-iex "cmake --build . --target ALL_BUILD --config Debug -j12"
-iex "ctest --output-on-failure -C `"Debug`" -j12"
+if ($run_cmake_build) {
+  echo "========================================================================="
+  echo "Building the libraries in Debug mode..."
+  iex "cmake --build . --target ALL_BUILD --config Debug -j12"
+  iex "ctest --output-on-failure -C `"Debug`" -j12"
 
-echo "Building the libraries in Release mode..."
-iex "cmake --build . --target ALL_BUILD --config Release -j12"
-iex "ctest --output-on-failure -C `"Release`" -j12"
+  echo "Building the libraries in Release mode..."
+  iex "cmake --build . --target ALL_BUILD --config Release -j12"
+  iex "ctest --output-on-failure -C `"Release`" -j12"
+}
 
 
 
