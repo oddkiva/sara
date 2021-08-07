@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <QWidget>
 
 
@@ -20,7 +22,7 @@ class QSlider;
 
 namespace DO { namespace Sara {
 
-  class RotationSliders : public QWidget
+  class DO_SARA_EXPORT RotationSliders : public QWidget
   {
     Q_OBJECT
 

@@ -97,7 +97,8 @@ namespace DO { namespace Sara {
 
           // Compute the Gaussian weight which gives less emphasis to gradients
           // further from the keypoint center.
-          const auto weight = exp(-pos.squaredNorm() / (2.f * pow(N / 2.f, 2)));
+          constexpr auto sigma = N * N * 0.25f;  // (N / 2)^2
+          const auto weight = std::exp(-pos.squaredNorm() / (2.f * sigma));
 
           // Read the precomputed gradient (in polar coordinates).
           const auto& mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);

@@ -14,11 +14,7 @@
 #include "MainWindow.hpp"
 
 
-#ifdef _WIN32
-int WinMain(int argc, char** argv)
-#else
 int main(int argc, char** argv)
-#endif
 {
   QApplication app(argc, argv);
 

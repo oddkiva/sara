@@ -128,9 +128,9 @@ namespace DO::Sara {
     const auto folder = string_src_path(dataset().name() + "/P_f");
     mkdir(folder);
 
-    const string name("inlierThres_" + to_string(inlier_thres) + "_squaredEll_" +
-                      to_string(squared_ell) + dataset().feature_type() +
-                      ".txt");
+    const string name("inlierThres_" + to_string(inlier_thres) +
+                      "_squaredEll_" + to_string(squared_ell) +
+                      dataset().feature_type() + ".txt");
 
     if (!save_statistics(folder + "/" + name, stat_overlaps, stat_angles))
     {

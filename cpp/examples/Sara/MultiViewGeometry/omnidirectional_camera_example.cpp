@@ -78,9 +78,9 @@ auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& omni_camera)
   // clang-format on
 
   const auto pinhole_camera = sara::PinholeCamera<float>{
-      .image_sizes = omni_camera.image_sizes,  //
-      .K = K,                                  //
-      .K_inverse = K.inverse()                 //
+      omni_camera.image_sizes,  //
+      K,                        //
+      K.inverse()               //
   };
 
   return std::make_pair(pinhole_camera, R);
