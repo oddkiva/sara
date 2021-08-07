@@ -13,8 +13,6 @@
 
 #include <DO/Sara/Features.hpp>
 
-#include <DO/Sara/Graphics.hpp>
-
 
 using namespace std;
 

@@ -141,7 +141,7 @@ namespace DO { namespace Sara {
     inline MultiArrayView(const self_type&) = default;
 
     //! @brief Move constructor.
-    inline MultiArrayView(self_type&& other)
+    inline MultiArrayView(self_type&& other) noexcept
     {
       swap(other);
     }

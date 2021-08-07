@@ -96,8 +96,8 @@ namespace DO { namespace Sara {
                              int x, int y, QWidget* parent, bool deleteOnClose)
     : QOpenGLWidget(parent)
     , m_scale(1.0f)
-    , m_backgroundColor(QColor::fromCmykF(0.39, 0.39, 0.0, 0.0))
-    , m_color(QColor::fromCmykF(0.40, 0.0, 1.0, 0.0))
+    , m_backgroundColor(QColor::fromCmykF(0.39f, 0.39f, 0.0f, 0.0f))
+    , m_color(QColor::fromCmykF(0.40f, 0.0f, 1.0f, 0.0f))
   {
     if (deleteOnClose)
       setAttribute(Qt::WA_DeleteOnClose);
