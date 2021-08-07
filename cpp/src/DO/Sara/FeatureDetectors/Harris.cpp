@@ -35,7 +35,7 @@ namespace DO { namespace Sara {
                    });
 
     // Rescale the cornerness function.
-    cornerness.flat_array() *= pow(sigma_D, 2);
+    cornerness.flat_array() *= sigma_D * sigma_D;
 
     return cornerness;
   }
@@ -45,7 +45,7 @@ namespace DO { namespace Sara {
                                                 const ImagePyramidParams& params)
   {
     // Resize the image with the appropriate factor.
-    const auto resize_factor = pow(2.f, -params.first_octave_index());
+    const auto resize_factor = std::powf(2.f, -params.first_octave_index());
     auto I = enlarge(image, resize_factor);
 
     // Deduce the new camera sigma with respect to the dilated image.
