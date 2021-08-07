@@ -36,23 +36,27 @@ namespace DO::Sara {
 
   //! @brief Five-point algorithm for the essential matrix.
   //! @{
-  struct DO_SARA_EXPORT FivePointAlgorithmBase
+  struct FivePointAlgorithmBase
   {
     const Monomial x{variable("x")};
     const Monomial y{variable("y")};
     const Monomial z{variable("z")};
     const Monomial one_{one()};
 
+    DO_SARA_EXPORT
     auto extract_null_space(const Matrix<double, 3, 5>& p_left,
                             const Matrix<double, 3, 5>& p_right) const
         -> Matrix<double, 9, 4>;
 
+    DO_SARA_EXPORT
     auto reshape_null_space(const Matrix<double, 9, 4>&) const
         -> std::array<Matrix3d, 4>;
 
+    DO_SARA_EXPORT
     auto essential_matrix_expression(const std::array<Matrix3d, 4>&) const
         -> Polynomial<Matrix3d>;
 
+    DO_SARA_EXPORT
     auto
     build_essential_matrix_constraints(const Polynomial<Matrix3d>&,
                                        const std::array<Monomial, 20>&) const
@@ -60,7 +64,7 @@ namespace DO::Sara {
   };
 
 
-  struct DO_SARA_EXPORT NisterFivePointAlgorithm : FivePointAlgorithmBase
+  struct NisterFivePointAlgorithm : FivePointAlgorithmBase
   {
     using model_type = EssentialMatrix;
     using matrix_type = Eigen::Matrix<double, 3, 5>;
@@ -85,18 +89,22 @@ namespace DO::Sara {
           E, monomials);
     }
 
+    DO_SARA_EXPORT
     auto inplace_gauss_jordan_elimination(Matrix<double, 10, 20>&) const
         -> void;
 
+    DO_SARA_EXPORT
     auto
     form_resultant_matrix(const Matrix<double, 6, 10>&,
                           Univariate::UnivariatePolynomial<double>[3][3]) const
         -> void;
 
+    DO_SARA_EXPORT
     auto solve_essential_matrix_constraints(const std::array<Matrix3d, 4>&,
                                             const Matrix<double, 10, 20>&) const
         -> std::vector<EssentialMatrix>;
 
+    DO_SARA_EXPORT
     auto find_essential_matrices(const Matrix<double, 3, 5>& left,
                                  const Matrix<double, 3, 5>& right) const
         -> std::vector<EssentialMatrix>;
@@ -109,7 +117,7 @@ namespace DO::Sara {
   };
 
 
-  struct DO_SARA_EXPORT SteweniusFivePointAlgorithm : FivePointAlgorithmBase
+  struct SteweniusFivePointAlgorithm : FivePointAlgorithmBase
   {
     using model_type = EssentialMatrix;
     using matrix_type = Eigen::Matrix<double, 3, 5>;
@@ -130,10 +138,12 @@ namespace DO::Sara {
           E, monomials);
     }
 
+    DO_SARA_EXPORT
     auto solve_essential_matrix_constraints(const Matrix<double, 9, 4>&,
                                             const Matrix<double, 10, 20>&) const
         -> std::vector<EssentialMatrix>;
 
+    DO_SARA_EXPORT
     auto find_essential_matrices(const Matrix<double, 3, 5>& left,
                                  const Matrix<double, 3, 5>& right) const
         -> std::vector<EssentialMatrix>;

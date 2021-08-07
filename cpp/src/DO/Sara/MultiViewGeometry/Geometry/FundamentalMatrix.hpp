@@ -24,7 +24,7 @@ namespace DO { namespace Sara {
 
   //! @brief Fundamental matrix API
   //! @{
-  class DO_SARA_EXPORT FundamentalMatrix
+  class FundamentalMatrix
   {
   public:
     using matrix_type = Eigen::Matrix3d;
@@ -32,8 +32,9 @@ namespace DO { namespace Sara {
     using point_type = vector_type;
     using line_type = vector_type;
 
-
-    FundamentalMatrix() = default;
+    FundamentalMatrix()
+    {
+    }
 
     FundamentalMatrix(const matrix_type& m)
       : _m{m}
@@ -60,12 +61,16 @@ namespace DO { namespace Sara {
       return _m;
     }
 
+    DO_SARA_EXPORT
     auto extract_epipoles() const -> std::tuple<point_type, point_type>;
 
+    DO_SARA_EXPORT
     auto right_epipolar_line(const point_type& left) const -> line_type;
 
+    DO_SARA_EXPORT
     auto left_epipolar_line(const point_type& right) const -> line_type;
 
+    DO_SARA_EXPORT
     auto rank_two_predicate() const -> bool;
 
   protected:

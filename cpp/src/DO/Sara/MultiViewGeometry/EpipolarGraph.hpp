@@ -30,7 +30,7 @@ namespace DO::Sara {
   //! @{
 
   //! @brief View attribute structure.
-  struct DO_SARA_EXPORT ViewAttributes
+  struct ViewAttributes
   {
     //! @brief Image metadata.
     std::vector<std::string> group_names;
@@ -45,14 +45,18 @@ namespace DO::Sara {
     //! later on.
     std::vector<PinholeCamera> cameras;
 
+    DO_SARA_EXPORT
     auto list_images(const std::string& dirpath) -> void;
 
+    DO_SARA_EXPORT
     auto read_images() -> void;
+
+    DO_SARA_EXPORT
     auto read_keypoints(H5File& h5_file) -> void;
   };
 
 
-  struct DO_SARA_EXPORT EpipolarEdgeAttributes
+  struct EpipolarEdgeAttributes
   {
     using EEstimator = NisterFivePointAlgorithm;
     using FEstimator = EightPointAlgorithm;
@@ -94,17 +98,28 @@ namespace DO::Sara {
     // Two-view geometry G[i,j] for each edge (i,j).
     std::vector<TwoViewGeometry> two_view_geometries;
 
+    DO_SARA_EXPORT
     auto initialize_edges(int num_vertices) -> void;
+    
+    DO_SARA_EXPORT
     auto resize_fundamental_edge_list() -> void;
+    
+    DO_SARA_EXPORT
     auto resize_essential_edge_list() -> void;
 
+    DO_SARA_EXPORT
     auto read_matches(H5File& h5_file, const ViewAttributes& view_attributes)
         -> void;
 
+    DO_SARA_EXPORT
     auto read_fundamental_matrices(const ViewAttributes& view_attributes,
                                    H5File& h5_file) -> void;
+
+    DO_SARA_EXPORT
     auto read_essential_matrices(const ViewAttributes& view_attributes,
                                  H5File& h5_file) -> void;
+
+    DO_SARA_EXPORT
     auto read_two_view_geometries(const ViewAttributes& view_attributes,
                                   H5File& h5_file) -> void;
   };
