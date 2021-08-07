@@ -68,10 +68,10 @@ auto NuScenes::load_sample_table() -> void
   const auto sample_json = load_json(dataroot, version, "sample");
   for (const auto& j : sample_json)
     sample_table[j["token"]] = {
-        .prev = j["prev"],
-        .next = j["next"],
-        .scene_token = j["scene_token"],
-        .timestamp = j["timestamp"].get<std::uint64_t>()  //
+        j["prev"],
+        j["next"],
+        j["scene_token"],
+        j["timestamp"].get<std::uint64_t>()  //
     };
 }
 
@@ -81,17 +81,17 @@ auto NuScenes::load_sample_data_table() -> void
   for (const auto& j : sample_data_json)
   {
     sample_data_table[j["token"]] = {
-        .prev = j["prev"],
-        .next = j["next"],
-        .sample_token = j["sample_token"],
-        .ego_pose_token = j["ego_pose_token"],
-        .calibrated_sensor_token = j["calibrated_sensor_token"],
-        .timestamp = j["timestamp"].get<std::uint64_t>(),
-        .fileformat = j["fileformat"],
-        .is_key_frame = j["is_key_frame"].get<bool>(),
-        .width = j["width"].get<int>(),
-        .height = j["height"].get<int>(),
-        .filename = j["filename"]};
+        j["prev"],
+        j["next"],
+        j["sample_token"],
+        j["ego_pose_token"],
+        j["calibrated_sensor_token"],
+        j["timestamp"].get<std::uint64_t>(),
+        j["fileformat"],
+        j["is_key_frame"].get<bool>(),
+        j["width"].get<int>(),
+        j["height"].get<int>(),
+        j["filename"]};
 
     if (sample_data_table[j["token"]].width == 0 ||
         sample_data_table[j["token"]].height == 0)
@@ -212,10 +212,10 @@ auto NuScenes::load_instance_table() -> void
     auto instance = Instance{};
 
     instance_table[j["token"]] = {
-        .category_token = j["category_token"],
-        .number_of_annotations = j["nbr_annotations"].get<int>(),
-        .first_annotation_token = j["first_annotation_token"],
-        .last_annotation_token = j["last_annotation_token"]};
+        j["category_token"],
+        j["nbr_annotations"].get<int>(),
+        j["first_annotation_token"],
+        j["last_annotation_token"]};
   }
 }
 
@@ -226,8 +226,8 @@ auto NuScenes::load_visibility_table() -> void
   visibility_table.reserve(visibility_json.size());
   for (const auto& j : visibility_json)
     visibility_table[j["token"]] = {
-        .description = j["description"],  //
-        .level = j["level"]               //
+        j["description"],  //
+        j["level"]               //
     };
 }
 
@@ -238,8 +238,8 @@ auto NuScenes::load_attribute_table() -> void
   attribute_table.reserve(attribute_json.size());
   for (const auto& j : attribute_json)
     attribute_table[j["token"]] = {
-        .name = j["name"],               //
-        .description = j["description"]  //
+        j["name"],               //
+        j["description"]  //
     };
 }
 
@@ -250,8 +250,8 @@ auto NuScenes::load_sensor_table() -> void
   sensor_table.reserve(sensor_json.size());
   for (const auto& j : sensor_json)
     sensor_table[j["token"]] = {
-        .channel = j["channel"],   //
-        .modality = j["modality"]  //
+        j["channel"],   //
+        j["modality"]  //
     };
 }
 

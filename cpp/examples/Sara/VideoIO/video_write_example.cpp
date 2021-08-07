@@ -21,7 +21,11 @@ namespace sara = DO::Sara;
 
 GRAPHICS_MAIN()
 {
+#ifdef _WIN32
+  const auto in_video_filepath = "/home/david/Desktop/GOPR0542.mp4";
+#else
   const auto in_video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4";
+#endif
   sara::VideoStream video_stream{in_video_filepath};
 
   const auto out_video_filepath = "/home/david/Desktop/test.mkv";

@@ -99,10 +99,10 @@ namespace DO::Sara {
     //    octave scale.
     for (size_t i = 0; i != DoGs.size(); ++i)
     {
-      auto octave_scale_factor =
-          nabla_G.octave_scaling_factor(scale_octave_pairs[i](1));
+      const auto octave_scale_factor = static_cast<float>(
+          nabla_G.octave_scaling_factor(scale_octave_pairs[i](1)));
       DoGs[i].center() *= octave_scale_factor;
-      DoGs[i].shape_matrix /= pow(octave_scale_factor, 2);
+      DoGs[i].shape_matrix /= octave_scale_factor * octave_scale_factor;
     }
 
     return {DoGs, SIFTDescriptors};

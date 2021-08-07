@@ -121,8 +121,9 @@ namespace DO::Sara {
   };
 
 
-  auto extract_line_segments_quick_and_dirty(const CurveStatistics& stats,
-                                             float thinness_ratio = 5.f)
+  inline auto
+  extract_line_segments_quick_and_dirty(const CurveStatistics& stats,
+                                        float thinness_ratio = 5.f)
   {
     auto line_segments = std::vector<LineSegment>{};
     line_segments.reserve(stats.axes.size());
@@ -143,7 +144,7 @@ namespace DO::Sara {
     return line_segments;
   }
 
-  auto to_lines(const std::vector<LineSegment>& line_segments)
+  inline auto to_lines(const std::vector<LineSegment>& line_segments)
       -> Tensor_<float, 2>
   {
     auto lines = Tensor_<float, 2>(static_cast<int>(line_segments.size()), 3);

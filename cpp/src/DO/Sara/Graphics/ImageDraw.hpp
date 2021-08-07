@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 
 class QImage;
 

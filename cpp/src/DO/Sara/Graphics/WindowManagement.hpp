@@ -40,14 +40,12 @@ namespace DO { namespace Sara {
   Vector2i get_sizes(Window w);
 
   //! @brief Return the window width.
-  DO_SARA_EXPORT
   inline int get_width(Window w)
   {
     return get_sizes(w)(0);
   }
 
   //! @brief Return the window height.
-  DO_SARA_EXPORT
   inline int get_height(Window w)
   {
     return get_sizes(w)(1);
@@ -88,7 +86,6 @@ namespace DO { namespace Sara {
                               const std::string& windowTitle = "Sara",
                               int x = -1, int y = -1);
 
-  DO_SARA_EXPORT
   inline Window create_graphics_view(const Vector2i& sizes,
                                  const std::string& windowTitle = "Sara",
                                  int x = -1, int y = -1)

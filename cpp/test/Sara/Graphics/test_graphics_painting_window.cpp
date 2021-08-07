@@ -655,7 +655,7 @@ BOOST_AUTO_TEST_CASE(test_send_event)
   QVariant arg = arguments.at(0);
   arg.convert(_event_type);
   Event event(arguments.at(0).value<Event>());
-  BOOST_CHECK_EQUAL(event.type, DO::Sara::NO_EVENT);
+  BOOST_CHECK(event.type == EventType::NO_EVENT);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

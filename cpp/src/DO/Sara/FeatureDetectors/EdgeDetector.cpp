@@ -65,7 +65,7 @@ namespace DO::Sara {
       auto& edges_simplified = pipeline.edges_simplified;
       edges_simplified.resize(edges_as_list.size());
 #pragma omp parallel for
-      for (auto i = 0u; i < edges_as_list.size(); ++i)
+      for (auto i = 0; i < static_cast<int>(edges_as_list.size()); ++i)
       {
         const auto& edge = reorder_and_extract_longest_curve(edges_as_list[i]);
 

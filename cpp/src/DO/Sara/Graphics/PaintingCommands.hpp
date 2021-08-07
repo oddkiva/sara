@@ -177,7 +177,6 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_SARA_EXPORT
   inline bool draw_line(const Point2i& p1, const Point2i& p2, const Rgb8& c,
                         int penWidth = 1)
   {

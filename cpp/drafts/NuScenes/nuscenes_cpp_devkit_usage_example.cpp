@@ -180,7 +180,7 @@ struct Box
       sara::draw_line(a, b, sara::Red8, 1);
     }
 
-    const Eigen::Vector2f tl = x.rowwise().minCoeff();
+    const Eigen::Vector2i tl = x.rowwise().minCoeff().cast<int>();
     sara::draw_text(tl.x() - 20, tl.y() - 10, category_name, sara::White8, 16,
                     0, false, true, false, 2);
   }
@@ -299,10 +299,10 @@ GRAPHICS_MAIN()
         const auto& category =
             nuscenes.category_table.at(instance.category_token);
 
-        const auto box = Box{.size = annotation.size,
-                             .R = annotation.rotation.toRotationMatrix(),
-                             .t = annotation.translation,
-                             .category_name = category.name};
+        const auto box = Box{annotation.size,
+                             annotation.rotation.toRotationMatrix(),
+                             annotation.translation,
+                             category.name};
 
         box.draw(ego_pose, calibrated_sensor);
       }

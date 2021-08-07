@@ -15,6 +15,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <array>
+
 
 using namespace DO::Sara;
 
@@ -26,9 +28,9 @@ auto make_fisheye_camera()
   const auto w = 1920;
   const auto h = 1080;
 
-  const auto f = 677.3246133600308;
-  const auto u0 = 960;
-  const auto v0 = 540;
+  const auto f = 677.3246133600308f;
+  const auto u0 = 960.f;
+  const auto v0 = 540.f;
 
   camera_parameters.image_sizes << w, h;
   // clang-format off
@@ -37,11 +39,11 @@ auto make_fisheye_camera()
       0, f, v0,
       0, 0,  1;
   // clang-format on
-  camera_parameters.k <<     //
-      -0.20,                 //
-      0.1321295087447987,    //
-      -0.06844064024539671,  //
-      0.01237548905484928;
+  camera_parameters.k <<      //
+      -0.20f,                 //
+      0.1321295087447987f,    //
+      -0.06844064024539671f,  //
+      0.01237548905484928f;
 
   camera_parameters.calculate_inverse_calibration_matrix();
 
@@ -81,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_fisheye_camera_model)
   }
 
   // Some chosen points.
-  const auto points = std::array{
+  const auto points = std::array<Eigen::Vector2f, 4>{
       Eigen::Vector2f{w * 0.25f, h * 0.25f},
       Eigen::Vector2f{w * 0.75f, h * 0.25f},
       Eigen::Vector2f{w * 0.75f, h * 0.75f},

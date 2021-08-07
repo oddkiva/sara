@@ -20,10 +20,7 @@ if (SARA_USE_FROM_SOURCE)
       Qt${QT_VERSION}::OpenGL
       $<$<EQUAL:${QT_VERSION},6>:Qt6::OpenGLWidgets>
       ${OPENGL_LIBRARIES}
-      DO::Sara::Core
-
-      PRIVATE
-      $<$<PLATFORM_ID:Windows>:Qt${QT_VERSION}::WinMain>)
+      DO::Sara::Core)
 
     target_compile_definitions(DO_Sara_Graphics
       PUBLIC

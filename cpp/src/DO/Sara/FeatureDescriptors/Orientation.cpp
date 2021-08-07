@@ -63,9 +63,9 @@ namespace DO { namespace Sara {
   {
     const auto& s_index = scale_octave_pair(0);
     const auto& o_index = scale_octave_pair(1);
-    auto x = extremum.x();
-    auto y = extremum.y();
-    auto s = pyramid.scale_relative_to_octave(s_index);
+    const auto x = extremum.x();
+    const auto y = extremum.y();
+    const auto s = static_cast<float>(pyramid.scale_relative_to_octave(s_index));
     return this->operator()(pyramid(s_index, o_index), x, y, s);
   }
 
