@@ -45,7 +45,7 @@ namespace DO { namespace Sara {
                                                 const ImagePyramidParams& params)
   {
     // Resize the image with the appropriate factor.
-    const auto resize_factor = std::powf(2.f, -params.first_octave_index());
+    const auto resize_factor = std::pow(2.f, -params.first_octave_index());
     auto I = enlarge(image, resize_factor);
 
     // Deduce the new camera sigma with respect to the dilated image.
