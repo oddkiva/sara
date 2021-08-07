@@ -220,7 +220,7 @@ struct LocalPhotometricStatistics
 
     // Loop through the points.
 #pragma omp parallel for
-    for (auto i = 0u; i < point_set.size(); ++i)
+    for (auto i = 0; i < static_cast<int>(point_set.size()); ++i)
     {
       const auto& p = point_set[i];
       gray_mean(p) = calculate_mean_at(gray, p.x(), p.y());
@@ -258,7 +258,7 @@ struct LocalPhotometricStatistics
 
     // Loop through the points.
 #pragma omp parallel for
-    for (auto i = 0u; i < point_set.size(); ++i)
+    for (auto i = 0; i < static_cast<int>(point_set.size()); ++i)
     {
       const auto& p = point_set[i];
       const auto mean_xy = gray_mean(p);
@@ -359,7 +359,7 @@ struct EdgeMatcher
     num_candidate_matches = Eigen::RowVectorXi::Zero(current.point_set.size());
 
 #pragma omp parallel for
-    for (auto i = 0u; i < current.point_set.size(); ++i)
+    for (auto i = 0; i < static_cast<int>(current.point_set.size()); ++i)
     {
       const auto& pi = current.point_set[i];
 
