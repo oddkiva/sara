@@ -28,7 +28,7 @@ namespace DO { namespace Sara {
   //! @{
 
   //! @brief Ellipse class
-  class DO_SARA_EXPORT Ellipse
+  class Ellipse
   {
   public:
     //! @brief Default constructor.
@@ -59,10 +59,12 @@ namespace DO { namespace Sara {
 
     //! @brief Get the radial vector at angle $\theta$ w.r.t. orientation $o$
     //! of ellipse.
+    DO_SARA_EXPORT
     Vector2d rho(double theta) const;
 
     //! @brief Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of
     //! ellipse.
+    DO_SARA_EXPORT
     Point2d operator()(double theta) const;
 
     /*!

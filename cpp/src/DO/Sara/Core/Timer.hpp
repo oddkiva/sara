@@ -23,19 +23,23 @@ namespace DO { namespace Sara {
   //! @{
 
   //! @brief Timer class with microsecond accuracy.
-  class DO_SARA_EXPORT Timer
+  class Timer
   {
   public: /* interface. */
     //! Default constructor
+    DO_SARA_EXPORT
     Timer();
 
     //! Reset the timer to zero.
+    DO_SARA_EXPORT
     void restart();
 
     //! Returns the elapsed time in seconds.
+    DO_SARA_EXPORT
     double elapsed();
 
     //! Returns the elapsed time in milliseconds.
+    DO_SARA_EXPORT
     double elapsed_ms();
 
   private: /* data members. */

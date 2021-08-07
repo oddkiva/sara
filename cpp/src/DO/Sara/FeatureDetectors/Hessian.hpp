@@ -58,7 +58,7 @@ namespace DO { namespace Sara {
   }
 
   //! Functor class to compute Hessian-Laplace maxima.
-  class DO_SARA_EXPORT ComputeHessianLaplaceMaxima
+  class ComputeHessianLaplaceMaxima
   {
   public:
     /*!
@@ -113,6 +113,7 @@ namespace DO { namespace Sara {
       \return set of Hessian-Laplace maxima in **std::vector<OERegion>** in each
       scale-normalized determinant of Hessians.
      */
+    DO_SARA_EXPORT
     std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 
@@ -167,7 +168,7 @@ namespace DO { namespace Sara {
 
   //! Functor class to compute local extrema of determinant of Hessians
   //! in scale space.
-  class DO_SARA_EXPORT ComputeDoHExtrema
+  class ComputeDoHExtrema
   {
   public:
     /*!
@@ -225,6 +226,7 @@ namespace DO { namespace Sara {
       \return set of DoHs extrema in **std::vector<OERegion>** in each
       scale-normalized determinant of Hessians.
      */
+    DO_SARA_EXPORT
     std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 

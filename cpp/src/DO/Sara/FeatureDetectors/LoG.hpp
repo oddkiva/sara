@@ -31,7 +31,7 @@ namespace DO { namespace Sara {
    */
 
   //! @brief Functor class to compute LoG extrema
-  class DO_SARA_EXPORT ComputeLoGExtrema
+  class ComputeLoGExtrema
   {
   public:
     /*!
@@ -82,9 +82,8 @@ namespace DO { namespace Sara {
     {
     }
 
-    /*!
-      @brief Localizes LoG extrema for a given image.
-     */
+    //! @brief Localizes LoG extrema for a given image.
+    DO_SARA_EXPORT
     std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 

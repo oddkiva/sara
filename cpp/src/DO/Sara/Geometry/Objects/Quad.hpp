@@ -26,13 +26,15 @@ namespace DO { namespace Sara {
   //! @addtogroup GeometryObjects
   //! @{
 
-  class DO_SARA_EXPORT Quad : public SmallPolygon<4>
+  class Quad : public SmallPolygon<4>
   {
   public:
     //! @{
     //! @brief Constructors.
+    DO_SARA_EXPORT
     Quad(const BBox& bbox);
 
+    DO_SARA_EXPORT
     Quad(const Point2d& a, const Point2d& b,
          const Point2d& c, const Point2d& d);
     //! @}

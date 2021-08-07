@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core Geometry Visualization REQUIRED)
+find_package(DO_Sara COMPONENTS Core Geometry Graphics Visualization REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)

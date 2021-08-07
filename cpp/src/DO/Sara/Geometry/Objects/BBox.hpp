@@ -23,7 +23,7 @@ namespace DO { namespace Sara {
   //! @addtogroup GeometryObjects
   //! @{
 
-  class DO_SARA_EXPORT BBox
+  class BBox
   {
   public:
     //! Default constructor.

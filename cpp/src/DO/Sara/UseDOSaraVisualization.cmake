@@ -5,7 +5,7 @@ if (SARA_USE_FROM_SOURCE)
     sara_create_common_variables("Visualization")
     sara_generate_library("Visualization")
     target_link_libraries(DO_Sara_Visualization
-      PUBLIC
+      PRIVATE
       DO::Sara::Core
       DO::Sara::Graphics
       DO::Sara::Features
