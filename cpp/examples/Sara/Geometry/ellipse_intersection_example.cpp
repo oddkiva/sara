@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2021-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -27,74 +27,62 @@ namespace sara = DO::Sara;
 
 GRAPHICS_MAIN()
 {
-  auto w = 400;
-  auto h = 400;
-
-  create_window(w, h);
-  set_antialiasing();
-
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_real_distribution<> coord_dist(0.0, static_cast<double>(w));
-  std::uniform_real_distribution<> radius_dist(1.0, static_cast<double>(h));
+  std::uniform_real_distribution<> coord_dist(100., 300.);
+  std::uniform_real_distribution<> radius_dist(1.0, 150.);
   std::uniform_real_distribution<> orientation_dist(0., 2 * M_PI);
 
-  for (auto i = 0; i < 1000; ++i)
+  auto bad_computations = 0;
+  auto total = 10000;
+  for (auto i = 0; i < total; ++i)
   {
-    clear_window();
-
-
     const auto e1 =
         sara::Ellipse{radius_dist(gen), radius_dist(gen), orientation_dist(gen),
                       Point2d(coord_dist(gen), coord_dist(gen))};
     const auto e2 =
         sara::Ellipse{radius_dist(gen), radius_dist(gen), orientation_dist(gen),
                       Point2d(coord_dist(gen), coord_dist(gen))};
-    draw_ellipse(e1, Red8, 3);
-    draw_ellipse(e2, Blue8, 3);
 
     const auto intersection_points = compute_intersection_points(e1, e2);
 
+    const auto inter_area_analytic = sara::analytic_intersection_area(e1, e2);
+    const auto inter_area_approx =
+        sara::area(sara::approximate_intersection(e1, e2, 360));
+
+    const auto diff = std::abs(inter_area_analytic - inter_area_approx);
+    const auto diff_relative =
+        inter_area_approx < 1e-2 ? 0 : diff / inter_area_approx;
+    const auto good = diff_relative < 1e-2;
+
+    SARA_CHECK(i);
+    SARA_CHECK(diff_relative);
+    SARA_CHECK(inter_area_analytic);
+    SARA_CHECK(inter_area_approx);
+    SARA_DEBUG << (good ? "OK" : "KOOOOOOOOOOOOOO") << std::endl;
+
+#define INSPECT_VISUALLY
+#ifdef INSPECT_VISUALLY
+    if (!active_window())
+    {
+      create_window(400, 400);
+      set_antialiasing();
+    }
+
+    clear_window();
+    draw_ellipse(e1, Red8, 3);
+    draw_ellipse(e2, Blue8, 3);
     for (const auto& p : intersection_points)
-      fill_circle(p.cast<float>(), 3, Green8);
+      fill_circle(p.cast<float>(), 3.f, Green8);
+    if (!good)
+      get_key();
+#endif
 
-    // Quad Q_0(oriented_bbox(E_0));
-    // Quad Q_1(oriented_bbox(E_1));
-
-    // BBox b0(&Q_0[0], &Q_0[0] + 4);
-    // BBox b1(&Q_1[0], &Q_1[0] + 4);
-    // b0.top_left() = b0.top_left().cwiseMin(b1.top_left());
-    // b0.bottom_right() = b0.bottom_right().cwiseMax(b1.bottom_right());
-
-    // draw_quad(Q_0, Red8, 3);
-    // draw_quad(Q_1, Blue8, 3);
-    // draw_bbox(b0, Green8, 3);
-    // get_key();
-
-    //// now rescale the ellipse.
-    // Point2d center(b0.center());
-    // Vector2d delta(b0.sizes() - center);
-    // delta = delta.cwiseAbs();
-    //
-    // Ellipse EE_0, EE_1;
-    // Matrix2d S_0 = delta.asDiagonal() * shape_matrix(E_0) *
-    // delta.asDiagonal(); Matrix2d S_1 = delta.asDiagonal() * shape_matrix(E_1)
-    // * delta.asDiagonal();
-    //
-    // SARA_CHECK(shape_matrix(E_0));
-    // SARA_CHECK(S_0);
-    //
-    // Vector2d c_0 = E_0.center() - center;
-    // Vector2d c_1 = E_1.center() - center;
-    // EE_0 = construct_from_shape_matrix(S_0, c_0);
-    // EE_1 = construct_from_shape_matrix(S_1, c_1);
-    // int num_inter = compute_intersection_points(inter_pts, EE_0, EE_1);
-    //
-    // for (int i = 0; i < num_inter; ++i)
-    //  inter_pts[i] = delta.asDiagonal() * inter_pts[i] + center;
-    //}
-    get_key();
+    bad_computations += int(!good);
   }
+
+  SARA_CHECK(bad_computations);
+  SARA_CHECK(bad_computations / double(total));
 
   return 0;
 }
