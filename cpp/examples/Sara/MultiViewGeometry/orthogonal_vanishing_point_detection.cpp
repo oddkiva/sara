@@ -47,11 +47,16 @@ auto initialize_camera_intrinsics_1()
 {
   auto intrinsics = BrownConradyCamera32<float>{};
 
-  const auto f = 991.8030424131325;
-  const auto u0 = 960;
-  const auto v0 = 540;
+  const auto f = 991.8030424131325f;
+  const auto u0 = 960.f;
+  const auto v0 = 540.f;
   intrinsics.image_sizes << 1920, 1080;
-  intrinsics.K << f, 0, u0, 0, f, v0, 0, 0, 1;
+  // clang-format off
+  intrinsics.K <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  // clang-format on
   intrinsics.distortion_model.k.setZero();
   intrinsics.distortion_model.p.setZero();
 
@@ -62,13 +67,20 @@ auto initialize_camera_intrinsics_2()
 {
   auto intrinsics = BrownConradyCamera32<float>{};
 
-  const auto f = 946.8984425572634;
-  const auto u0 = 960;
-  const auto v0 = 540;
+  const auto f = 946.8984425572634f;
+  const auto u0 = 960.f;
+  const auto v0 = 540.f;
   intrinsics.image_sizes << 1920, 1080;
-  intrinsics.K << f, 0, u0, 0, f, v0, 0, 0, 1;
-  intrinsics.distortion_model.k << -0.22996356451342749, 0.05952465745165465,
-      -0.007399008111054717;
+  // clang-format off
+  intrinsics.K <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  intrinsics.distortion_model.k <<
+    -0.22996356451342749f,
+    0.05952465745165465f,
+    -0.007399008111054717f;
+  // clang-format on
   intrinsics.distortion_model.p.setZero();
 
   return intrinsics;

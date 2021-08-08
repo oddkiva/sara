@@ -151,13 +151,13 @@ namespace DO::Shakti::HalideBackend {
   template <typename T>
   inline auto as_buffer(std::vector<T>& v)
   {
-    return Halide::Buffer<T>(v.data(), v.size());
+    return Halide::Buffer<T>(v.data(), static_cast<int>(v.size()));
   }
 
   template <typename T>
   inline auto as_runtime_buffer(std::vector<T>& v)
   {
-    return Halide::Runtime::Buffer<T>(v.data(), v.size());
+    return Halide::Runtime::Buffer<T>(v.data(), static_cast<int>(v.size()));
   }
 
 }  // namespace DO::Shakti::HalideBackend

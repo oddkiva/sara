@@ -42,7 +42,7 @@ auto check_curvature_on_image()
   const auto w = 512;
   const auto h = 512;
   auto phi = Image<float, 2>(w, h);
-  radial_distance(phi, Eigen::Vector2f(w, h) / 2, w / 5.);
+  radial_distance(phi, Eigen::Vector2f(w, h) / 2, w / 5.f);
 
   create_window(w, h);
 
