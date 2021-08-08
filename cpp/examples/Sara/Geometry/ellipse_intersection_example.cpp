@@ -50,16 +50,20 @@ GRAPHICS_MAIN()
     const auto inter_area_approx =
         sara::area(sara::approximate_intersection(e1, e2, 360));
 
-    const auto diff = std::abs(inter_area_analytic - inter_area_approx);
+    const auto diff_absolute = std::abs(inter_area_analytic - inter_area_approx);
     const auto diff_relative =
-        inter_area_approx < 1e-2 ? 0 : diff / inter_area_approx;
-    const auto good = diff_relative < 1e-2;
+        inter_area_approx < 1e-2 ? 0 : diff_absolute / inter_area_approx;
+    const auto good = diff_relative < 1e-2 && diff_absolute < 5;
 
-    SARA_CHECK(i);
-    SARA_CHECK(diff_relative);
-    SARA_CHECK(inter_area_analytic);
-    SARA_CHECK(inter_area_approx);
-    SARA_DEBUG << (good ? "OK" : "KOOOOOOOOOOOOOO") << std::endl;
+    if (!good)
+    {
+      SARA_CHECK(i);
+      SARA_CHECK(diff_absolute);
+      SARA_CHECK(diff_relative);
+      SARA_CHECK(inter_area_analytic);
+      SARA_CHECK(inter_area_approx);
+      SARA_DEBUG << (good ? "OK" : "KOOOOOOOOOOOOOO") << std::endl;
+    }
 
 //#define INSPECT_VISUALLY
 #ifdef INSPECT_VISUALLY
