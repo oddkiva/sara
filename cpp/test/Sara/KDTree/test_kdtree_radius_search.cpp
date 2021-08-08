@@ -106,7 +106,8 @@ BOOST_AUTO_TEST_CASE(test_simple_radius_search_default_use)
                     static_cast<int>(num_nearest_neighbors));
 
   // Check the indices of the nearest neighbors.
-  BOOST_CHECK_ITEMS_EQUAL(range(_num_points_in_each_circle), nn_indices);
+  BOOST_CHECK_ITEMS_EQUAL(range(static_cast<int>(_num_points_in_each_circle)),
+                          nn_indices);
 
   // Check the squared distances.
   BOOST_CHECK_EQUAL(nn_squared_distances.size(), num_nearest_neighbors);
@@ -129,9 +130,9 @@ BOOST_AUTO_TEST_CASE(test_simple_radius_search_with_restricted_num_of_neighbors)
 
   // Second use case: we want to limit the number of neighbors to return.
   size_t max_num_nearest_neighbors = 2;
-  int num_found_neighbors =
-      tree.radius_search(query, squared_search_radius, nn_indices,
-                         nn_squared_distances, max_num_nearest_neighbors);
+  int num_found_neighbors = tree.radius_search(
+      query, squared_search_radius, nn_indices, nn_squared_distances,
+      static_cast<int>(max_num_nearest_neighbors));
 
   // Check the number of nearest neighbors.
   BOOST_CHECK_EQUAL(nn_indices.size(), max_num_nearest_neighbors);
@@ -175,7 +176,8 @@ BOOST_AUTO_TEST_CASE(test_simple_radius_search_with_query_point_in_data_default)
                     static_cast<int>(num_nearest_neighbors));
 
   // Check the indices.
-  BOOST_CHECK_ITEMS_EQUAL(nn_indices, range(1, _num_points_in_each_circle));
+  BOOST_CHECK_ITEMS_EQUAL(
+      nn_indices, range(1, static_cast<int>(_num_points_in_each_circle)));
 
   // Check the squared distances.
   for (size_t j = 0; j < nn_indices.size(); ++j)
@@ -199,9 +201,9 @@ BOOST_AUTO_TEST_CASE(
   int num_found_neighbors;
   // Second use case: we want to limit the number of neighbors to return.
   size_t max_num_nearest_neighbors = 2;
-  num_found_neighbors =
-      tree.radius_search(query, squared_search_radius, nn_indices,
-                         nn_squared_distances, max_num_nearest_neighbors);
+  num_found_neighbors = tree.radius_search(
+      query, squared_search_radius, nn_indices, nn_squared_distances,
+      static_cast<int>(max_num_nearest_neighbors));
 
   // Check the number of indices.
   BOOST_CHECK_EQUAL(nn_indices.size(), max_num_nearest_neighbors);
@@ -249,7 +251,8 @@ BOOST_AUTO_TEST_CASE(test_batch_radius_search_default)
   for (auto i = 0u; i < num_queries; ++i)
   {
     BOOST_REQUIRE_EQUAL(nn_indices[i].size(), _num_points_in_each_circle);
-    BOOST_REQUIRE_ITEMS_EQUAL(nn_indices[i], range(_num_points_in_each_circle));
+    BOOST_REQUIRE_ITEMS_EQUAL(
+        nn_indices[i], range(static_cast<int>(_num_points_in_each_circle)));
 
     BOOST_REQUIRE_EQUAL(nn_squared_distances[i].size(),
                       _num_points_in_each_circle);
@@ -273,7 +276,8 @@ BOOST_AUTO_TEST_CASE(test_batch_radius_search_restricted)
   // Use case.
   size_t max_num_nearest_neighbors = 2;
   tree.radius_search(queries, squared_search_radius, nn_indices,
-                     nn_squared_distances, max_num_nearest_neighbors);
+                     nn_squared_distances,
+                     static_cast<int>(max_num_nearest_neighbors));
 
   // Check the number of queries.
   BOOST_CHECK_EQUAL(nn_indices.size(), num_queries);
@@ -320,7 +324,7 @@ BOOST_AUTO_TEST_CASE(test_batch_radius_search_with_query_point_in_data_default)
   // Check the contents of the retrieval.
   for (size_t i = 0; i < num_queries; ++i)
   {
-    vector<int> true_indices = range(_num_points_in_each_circle);
+    auto true_indices = range(static_cast<int>(_num_points_in_each_circle));
     true_indices.erase(true_indices.begin() + i);
 
     // Check the indices.
@@ -351,7 +355,8 @@ BOOST_AUTO_TEST_CASE(
   // Second use case: we want to limit the number of neighbors to return.
   size_t max_num_nearest_neighbors = 2;
   tree.radius_search(queries, squared_search_radius, nn_indices,
-                     nn_squared_distances, max_num_nearest_neighbors);
+                     nn_squared_distances,
+                     static_cast<int>(max_num_nearest_neighbors));
 
   BOOST_CHECK_EQUAL(nn_indices.size(), num_queries);
   BOOST_CHECK_EQUAL(nn_squared_distances.size(), num_queries);

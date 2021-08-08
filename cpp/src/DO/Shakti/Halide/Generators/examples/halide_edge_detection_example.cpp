@@ -138,7 +138,7 @@ namespace v2 {
         auto& edges_simplified = pipeline.edges_simplified;
         edges_simplified.resize(edges_as_list.size());
 #pragma omp parallel for
-        for (auto i = 0u; i < edges_as_list.size(); ++i)
+        for (auto i = 0; i < static_cast<int>(edges_as_list.size()); ++i)
         {
           const auto& edge =
               reorder_and_extract_longest_curve(edges_as_list[i]);
@@ -251,6 +251,9 @@ int __main(int argc, char** argv)
   VideoWriter video_writer{
 #ifdef __APPLE__
       "/Users/david/Desktop/" + basename + ".edge-detection.mp4",
+#elif _WIN32
+      "C:/Users/David/Desktop/" + basename + ".edge - detection.mp4",
+
 #else
       "/home/david/Desktop/" + basename + ".edge-detection.mp4",
 #endif

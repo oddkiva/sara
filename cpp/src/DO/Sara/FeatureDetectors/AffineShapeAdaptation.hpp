@@ -40,13 +40,14 @@ namespace DO { namespace Sara {
    *  which is also the Mahalanobis distance reflecting the anisotropy of the
    *  local shape.
    */
-  class DO_SARA_EXPORT AdaptFeatureAffinelyToLocalShape
+  class AdaptFeatureAffinelyToLocalShape
   {
   public:
     /*!
      *  @todo: redo because there are hard-coded parameters in the default
      *  constructor.
      */
+    DO_SARA_EXPORT
     AdaptFeatureAffinelyToLocalShape();
 
     /*!
@@ -60,6 +61,7 @@ namespace DO { namespace Sara {
      *    feature
      *    the point on which we estimate the local shape in image I.
      */
+    DO_SARA_EXPORT
     bool operator()(Matrix2f& affine_adaptation_transform,
                     const Image<float>& image,
                     const OERegion& feature);
@@ -69,6 +71,7 @@ namespace DO { namespace Sara {
      *  - true if the normalized patch does not touch the image boundaries.
      *  - false otherwise.
      */
+    DO_SARA_EXPORT
     bool warp_patch(const Image<float>& src,
                     Image<float>& dst,
                     const Matrix3f& homography_from_dst_to_src);
@@ -78,6 +81,7 @@ namespace DO { namespace Sara {
      *  - true if the normalized patch does not touch the image boundaries.
      *  - false otherwise.
      */
+    DO_SARA_EXPORT
     bool update_normalized_patch(const Image<float>& image,
                                  const OERegion& feature,
                                  const Matrix2f& affine_adaptation_transform);
@@ -90,13 +94,16 @@ namespace DO { namespace Sara {
      *    (g_\sigma) * (\nabla I) (\nabla I)^T (\mathbf{x})
      *  @f]
      */
+    DO_SARA_EXPORT
     Matrix2f compute_moment_matrix_from_patch();
 
     //! Find one linear transform associated to the second moment matrix.
+    DO_SARA_EXPORT
     Matrix2f compute_transform_from_moment_matrix(const Matrix2f& moment_matrix,
                                                   float& anisotropic_ratio);
 
     //! Normalize the transform
+    DO_SARA_EXPORT
     void rescale_transform(Matrix2f& transform);
 
 #ifdef DEBUG_AFFINE_SHAPE_ADAPTATION

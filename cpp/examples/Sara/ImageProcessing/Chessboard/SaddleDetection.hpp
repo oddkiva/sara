@@ -43,7 +43,8 @@ namespace DO::Sara {
           continue;
 
         auto qr_factorizer = hessian(x, y).householderQr();
-        const Eigen::Matrix2f R = qr_factorizer.matrixQR().triangularView<Eigen::Upper>();
+        const Eigen::Matrix2f R =
+            qr_factorizer.matrixQR().triangularView<Eigen::Upper>();
 
         if (std::abs((R(0, 0) - R(1, 1)) / R(0, 0)) > 0.1f)
           continue;
@@ -56,8 +57,7 @@ namespace DO::Sara {
   }
 
   inline auto nms(std::vector<Saddle>& saddle_points,
-                  const Eigen::Vector2i& image_sizes,
-                  int nms_radius)
+                  const Eigen::Vector2i& image_sizes, int nms_radius)
   {
     std::sort(saddle_points.begin(), saddle_points.end());
 
@@ -87,8 +87,7 @@ namespace DO::Sara {
     saddle_points_filtered.swap(saddle_points);
   }
 
-  inline auto detect_saddle_points(const Image<float>& image,
-                                   int nms_radius,
+  inline auto detect_saddle_points(const Image<float>& image, int nms_radius,
                                    float adaptive_thres = 0.05f)
   {
     // Calculate the first derivative.

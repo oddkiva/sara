@@ -91,7 +91,8 @@ namespace DO::Sara {
       for (auto x = 0; x < image.width(); x += grid_sizes.x())
       {
         const Eigen::Vector2i start = Eigen::Vector2i{x, y};
-        const Eigen::Vector2i end = (start + grid_sizes).cwiseMin(image.sizes());
+        const Eigen::Vector2i end =
+            (start + grid_sizes).cwiseMin(image.sizes());
         const auto patch = safe_crop(image, start, end);
         const auto patch_binarized = otsu_adaptive_binarization(patch);
 

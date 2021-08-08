@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 
 
@@ -30,7 +31,8 @@ namespace DO::Sara {
       std::map<int, std::vector<Point2i>> contours;
       std::vector<std::vector<Point2i>> curve_list;
       std::vector<int> curve_ids;
-      std::vector<std::tuple<bool, LineSegment>> line_segments;
+      std::vector<std::tuple<bool, LineSegment>> line_segments_candidates;
+      std::vector<std::tuple<int, LineSegment>> line_segments;
     } pipeline;
 
     struct Parameters
@@ -42,7 +44,7 @@ namespace DO::Sara {
       //! @}
 
       //! @brief Angle tolerance for connected edgel grouping.
-      float angular_threshold = 20. / 180. * M_PI;
+      float angular_threshold = static_cast<float>(20._deg);
 
       //! @brief RANSAC-based parameters for line segment fitting.
       //! @{
@@ -88,10 +90,12 @@ namespace DO::Sara {
       }
 
       // Fit a line to each curve.
-      pipeline.line_segments = std::vector<std::tuple<bool, LineSegment>>(  //
-          pipeline.curve_list.size(),                                       //
-          {false, {}}                                                       //
-      );
+      pipeline.line_segments_candidates =
+          std::vector<std::tuple<bool, LineSegment>>(
+              pipeline.curve_list.size(),
+              {false, {}}
+          );
+
 #pragma omp parallel for
       for (auto i = 0; i < static_cast<int>(pipeline.curve_list.size()); ++i)
       {
@@ -106,11 +110,24 @@ namespace DO::Sara {
             num_iterations,                //
             parameters.num_iteration_min,  //
             parameters.num_iteration_max);
-        pipeline.line_segments[i] = fit_line_segment_robustly(  //
-            curve,                                              //
-            num_iterations,                                     //
-            parameters.polish_line_segments,                    //
-            /* line_fit_thresh */ 1.f);                         //
+        pipeline.line_segments_candidates[i] = fit_line_segment_robustly(  //
+            curve,                                                         //
+            num_iterations,                                                //
+            parameters.polish_line_segments,                               //
+            /* line_fit_thresh */ 1.f);                                    //
+      }
+
+      // Filter the line segment candidates.
+      pipeline.line_segments.reserve(pipeline.curve_ids.size());
+      for (auto i = 0u; i < pipeline.curve_ids.size(); ++i)
+      {
+        const auto& curve_id = pipeline.curve_ids[i];
+        const auto& [is_line_segment, line_segment] =
+            pipeline.line_segments_candidates[i];
+
+        if (!is_line_segment)
+          continue;
+        pipeline.line_segments.push_back({curve_id, line_segment});
       }
     }
   };

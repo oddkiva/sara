@@ -14,6 +14,9 @@ foreach (file ${test_SOURCE_FILES})
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED YES
     FOLDER "Tests/Shakti/Halide")
+  target_link_options(${filename}
+    PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 endforeach ()
 
 target_link_libraries(test_halide_cast

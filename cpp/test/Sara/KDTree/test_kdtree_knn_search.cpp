@@ -82,11 +82,12 @@ BOOST_AUTO_TEST_CASE(test_simple_knn_search)
   vector<int> nn_indices;
   vector<double> nn_squared_distances;
 
-  tree.knn_search(query, num_nearest_neighbors, nn_indices,
+  tree.knn_search(query, static_cast<int>(num_nearest_neighbors), nn_indices,
                   nn_squared_distances);
 
   // Check equality of items.
-  BOOST_CHECK_ITEMS_EQUAL(nn_indices, range(num_points_in_each_circle));
+  BOOST_CHECK_ITEMS_EQUAL(nn_indices,
+                          range(static_cast<int>(num_points_in_each_circle)));
 
   // Check the squared distances.
   BOOST_CHECK_EQUAL(nn_squared_distances.size(), num_points_in_each_circle);
@@ -104,11 +105,12 @@ BOOST_AUTO_TEST_CASE(test_simple_knn_search_with_query_point_in_data)
   vector<int> indices;
   vector<double> squared_distances;
 
-  tree.knn_search(query_index, num_nearest_neighbors, indices,
+  tree.knn_search(query_index, static_cast<int>(num_nearest_neighbors), indices,
                   squared_distances);
 
   // Check the indices of the neighbors.
-  BOOST_CHECK_ITEMS_EQUAL(indices, range(1, num_points_in_each_circle));
+  BOOST_CHECK_ITEMS_EQUAL(
+      indices, range(1, static_cast<int>(num_points_in_each_circle)));
 
   // Check the squared distances of the neighbors.
   BOOST_CHECK_EQUAL(num_nearest_neighbors, squared_distances.size());
@@ -129,7 +131,8 @@ BOOST_AUTO_TEST_CASE(test_batch_knn_search)
   vector<vector<double>> squared_distances;
 
   // Use case.
-  tree.knn_search(queries, num_nearest_neighbors, indices, squared_distances);
+  tree.knn_search(queries, static_cast<int>(num_nearest_neighbors), indices,
+                  squared_distances);
 
   // Check the contents of the retrieval.
   BOOST_CHECK_EQUAL(indices.size(), num_queries);
@@ -138,7 +141,8 @@ BOOST_AUTO_TEST_CASE(test_batch_knn_search)
   for (size_t i = 0; i < num_queries; ++i)
   {
     // Check the indices.
-    BOOST_CHECK_ITEMS_EQUAL(indices[i], range(num_points_in_each_circle));
+    BOOST_CHECK_ITEMS_EQUAL(indices[i],
+                            range(static_cast<int>(num_points_in_each_circle)));
 
     // Check the squared distances.
     BOOST_CHECK_EQUAL(num_nearest_neighbors, squared_distances.size());
@@ -163,7 +167,8 @@ BOOST_AUTO_TEST_CASE(test_batch_knn_search_with_query_point_in_data)
   vector<vector<double>> squared_distances;
 
   // Use case.
-  tree.knn_search(queries, num_nearest_neighbors, indices, squared_distances);
+  tree.knn_search(queries, static_cast<int>(num_nearest_neighbors), indices,
+                  squared_distances);
 
   // Check the number of queries.
   BOOST_CHECK_EQUAL(indices.size(), num_queries);
@@ -174,7 +179,7 @@ BOOST_AUTO_TEST_CASE(test_batch_knn_search_with_query_point_in_data)
   {
     // The correct list of indices is: {0, 1, 2, 3, 4 } \ {i},
     // where i = 0, 1, ... 4.
-    vector<int> true_indices = range(num_points_in_each_circle);
+    auto true_indices = range(static_cast<int>(num_points_in_each_circle));
     true_indices.erase(true_indices.begin() + i);
 
     BOOST_REQUIRE_ITEMS_EQUAL(indices[i], true_indices);

@@ -87,7 +87,7 @@ namespace DO { namespace Sara {
   bool local_min_y(int x, int y, ImageView<float>& I);
 
   //! Functor class to compute Harris-Laplace corners.
-  class DO_SARA_EXPORT ComputeHarrisLaplaceCorners
+  class ComputeHarrisLaplaceCorners
   {
   public:
     /*!
@@ -153,6 +153,7 @@ namespace DO { namespace Sara {
      *  difference of Gaussians
      *  \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$.
      */
+    DO_SARA_EXPORT
     std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
     /*!

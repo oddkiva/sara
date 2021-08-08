@@ -11,6 +11,7 @@
 
 #include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 namespace DO { namespace Sara {

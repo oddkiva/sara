@@ -11,7 +11,7 @@ if (SARA_USE_FROM_SOURCE)
       $<BUILD_INTERFACE:${DO_Sara_ThirdParty_DIR}>
       $<BUILD_INTERFACE:${DO_Sara_INCLUDE_DIR}>)
     target_compile_definitions(DO_Sara_FileSystem
-      PRIVATE
+      PUBLIC
       -DBOOST_ALL_DYN_LINK
       -DBOOST_ALL_NO_LIB)
 

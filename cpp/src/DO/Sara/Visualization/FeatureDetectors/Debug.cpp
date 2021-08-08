@@ -9,9 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/Geometry/Tools/Utilities.hpp>
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace std;
@@ -86,5 +84,4 @@ namespace DO { namespace Sara {
     check_patch(I, int_round(x - r), int_round(y - r), w, h, fact);
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

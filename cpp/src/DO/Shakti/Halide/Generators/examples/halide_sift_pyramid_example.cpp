@@ -245,7 +245,8 @@ auto test_on_video(int argc, char **argv)
     {
       auto& octave = sift_pipeline.octaves[o];
 #pragma omp parallel for
-      for (auto s = 0u; s < octave.extrema_oriented.size(); ++s)
+      for (auto s = 0; s < static_cast<int>(octave.extrema_oriented.size());
+           ++s)
         draw_oriented_extrema(
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
                               frame_rgb,

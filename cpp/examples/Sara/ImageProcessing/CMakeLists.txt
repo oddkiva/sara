@@ -33,13 +33,17 @@ target_link_libraries(edge_detection_example
   PRIVATE
   Boost::filesystem
   $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+target_compile_definitions(edge_detection_example
+  PRIVATE
+  -DBOOST_ALL_DYN_LINK
+  -DBOOST_ALL_NO_LIB)
 
 sara_add_example(line_segment_detection_example)
 target_link_libraries(line_segment_detection_example
   PRIVATE $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
 
 
-add_library(ChessboardDetection
+add_library(ChessboardDetection STATIC
   Chessboard/EdgeFusion.hpp
   Chessboard/EdgeFusion.cpp
   Chessboard/Otsu.hpp

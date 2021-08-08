@@ -28,7 +28,7 @@ namespace DO { namespace Sara {
   //! @{
 
   //! @brief Ellipse class
-  class DO_SARA_EXPORT Ellipse
+  class Ellipse
   {
   public:
     //! @brief Default constructor.
@@ -37,32 +37,64 @@ namespace DO { namespace Sara {
     //! @brief Constructor.
     Ellipse(double radius1, double radius2, double orientation,
             const Point2d& center)
-      : _a{ radius1 }
-      , _b{ radius2 }
-      , _o{ orientation }
-      , _c{ center }
+      : _a{radius1}
+      , _b{radius2}
+      , _o{orientation}
+      , _c{center}
     {
     }
 
     //! @{
     //! @brief Data member accessor.
-    double radius1() const { return _a; }
-    double radius2() const { return _b; }
-    double orientation() const { return _o; }
-    const Point2d& center() const { return _c; }
+    double radius1() const
+    {
+      return _a;
+    }
 
-    double& radius1() { return _a; }
-    double& radius2() { return _b; }
-    double& orientation() { return _o; }
-    Point2d& center() { return _c; }
+    double radius2() const
+    {
+      return _b;
+    }
+
+    double orientation() const
+    {
+      return _o;
+    }
+
+    const Point2d& center() const
+    {
+      return _c;
+    }
+
+    double& radius1()
+    {
+      return _a;
+    }
+
+    double& radius2()
+    {
+      return _b;
+    }
+
+    double& orientation()
+    {
+      return _o;
+    }
+
+    Point2d& center()
+    {
+      return _c;
+    }
     //! @}
 
     //! @brief Get the radial vector at angle $\theta$ w.r.t. orientation $o$
     //! of ellipse.
+    DO_SARA_EXPORT
     Vector2d rho(double theta) const;
 
     //! @brief Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of
     //! ellipse.
+    DO_SARA_EXPORT
     Point2d operator()(double theta) const;
 
     /*!
@@ -75,9 +107,9 @@ namespace DO { namespace Sara {
     //! @brief Polar anti derivative.
     friend inline double polar_antiderivative(const Ellipse& e, double theta)
     {
-      const double y = (e._b-e._a)*sin(2*theta);
-      const double x = (e._b+e._a) + (e._b-e._a)*cos(2*theta);
-      return e._a*e._b*0.5*( theta - atan2(y,x) );
+      const double y = (e._b - e._a) * sin(2 * theta);
+      const double x = (e._b + e._a) + (e._b - e._a) * cos(2 * theta);
+      return e._a * e._b * 0.5 * (theta - atan2(y, x));
     }
 
     /*!
@@ -106,21 +138,21 @@ namespace DO { namespace Sara {
     //! @brief Returns the ellipse area.
     friend inline double area(const Ellipse& e)
     {
-      return M_PI*e._a*e._b;
+      return M_PI * e._a * e._b;
     }
 
     //! @brief Returns the shape matrix of the ellipse.
     friend inline Matrix2d shape_matrix(const Ellipse& e)
     {
       const Eigen::Rotation2D<double> R(e._o);
-      const Vector2d D{ 1. / (e._a*e._a), 1. / (e._b*e._b) };
-      return R.matrix()*D.asDiagonal()*R.matrix().transpose();
+      const Vector2d D{1. / (e._a * e._a), 1. / (e._b * e._b)};
+      return R.matrix() * D.asDiagonal() * R.matrix().transpose();
     }
 
     //! @brief Check whether the point is inside ellipse.
     inline bool contains(const Point2d& p) const
     {
-      return (p - _c).transpose()*shape_matrix(*this)*(p - _c) < 1.;
+      return (p - _c).transpose() * shape_matrix(*this) * (p - _c) < 1.;
     }
 
     //! @brief Computes the rotated BBox of the ellipse.
@@ -144,5 +176,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

@@ -96,15 +96,19 @@ namespace DO::Sara {
       constexpr auto dist_thres = 10.f;
       constexpr auto dist_thres_2 = dist_thres * dist_thres;
 #ifdef ANTISYMMETRIC_ADJACENCE
-      const auto is_adjacent = //
-        // [bi, ai] ~ [aj, bj]
-        ((ai - aj).squaredNorm() < dist_thres_2 && (bi - bj).squaredNorm() >= dist_thres_2) ||
-        // [bi, ai] ~ [bj, aj]
-        ((ai - bj).squaredNorm() < dist_thres_2 && (bi - aj).squaredNorm() >= dist_thres_2) ||
-        // [ai, bi] ~ [aj, bj]
-        ((bi - aj).squaredNorm() < dist_thres_2 && (ai - bj).squaredNorm() >= dist_thres_2) ||
-        // [ai, bi] ~ [bj, aj]
-        ((bi - bj).squaredNorm() < dist_thres_2 && (ai - aj).squaredNorm() >= dist_thres_2);
+      const auto is_adjacent =  //
+                                // [bi, ai] ~ [aj, bj]
+          ((ai - aj).squaredNorm() < dist_thres_2 &&
+           (bi - bj).squaredNorm() >= dist_thres_2) ||
+          // [bi, ai] ~ [bj, aj]
+          ((ai - bj).squaredNorm() < dist_thres_2 &&
+           (bi - aj).squaredNorm() >= dist_thres_2) ||
+          // [ai, bi] ~ [aj, bj]
+          ((bi - aj).squaredNorm() < dist_thres_2 &&
+           (ai - bj).squaredNorm() >= dist_thres_2) ||
+          // [ai, bi] ~ [bj, aj]
+          ((bi - bj).squaredNorm() < dist_thres_2 &&
+           (ai - aj).squaredNorm() >= dist_thres_2);
 #else
       const auto is_adjacent = (ai - aj).squaredNorm() < dist_thres_2 ||
                                (ai - bj).squaredNorm() < dist_thres_2 ||
@@ -141,15 +145,14 @@ namespace DO::Sara {
     }
   };
 
-  auto check_edge_grouping(                                          //
-      const ImageView<Rgb8>& frame,                                  //
-      const std::vector<Edge<double>>& edges_refined,                //
-      const std::vector<Edge<int>>& edge_chains,                     //
-      const std::vector<Eigen::Vector2f>& mean_gradients,            //
-      const std::vector<Eigen::Vector2d>& centers,                   //
-      const std::vector<Eigen::Matrix2d>& axes,                      //
-      const std::vector<Eigen::Vector2d>& lengths)                   //
+  auto check_edge_grouping(                                //
+      const ImageView<Rgb8>& frame,                        //
+      const std::vector<Edge<double>>& edges_refined,      //
+      const std::vector<Edge<int>>& edge_chains,           //
+      const std::vector<Eigen::Vector2f>& mean_gradients,  //
+      const std::vector<Eigen::Vector2d>& centers,         //
+      const std::vector<Eigen::Matrix2d>& axes,            //
+      const std::vector<Eigen::Vector2d>& lengths)         //
       -> void;
-
 
 }  // namespace DO::Sara
