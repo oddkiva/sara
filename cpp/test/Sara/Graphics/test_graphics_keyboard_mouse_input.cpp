@@ -44,7 +44,6 @@ public:
   virtual ~TestFixtureForKeyboardMouseInputOnSingleWindow()
   {
     close_window(test_window_);
-    test_window_->deleteLater();
   }
 };
 
@@ -194,10 +193,7 @@ protected:
   virtual ~TestFixtureForKeyboardMouseInputOnAnyWindow()
   {
     for (auto& w : test_windows_)
-    {
       close_window(w);
-      w->deleteLater();
-    }
   }
 };
 
