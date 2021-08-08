@@ -28,14 +28,24 @@ namespace DO { namespace Sara {
   //! @brief QApplication-derived class
   //! This graphic application establishes communication between the user
   //! drawing commands and the windows.
-  class DO_SARA_EXPORT GraphicsApplication
+  class GraphicsApplication
   {
   public:
     class Impl;
+
+    DO_SARA_EXPORT
     GraphicsApplication(int& argc, char** argv);
+
+    DO_SARA_EXPORT
     ~GraphicsApplication();
+
+    DO_SARA_EXPORT
     void register_user_main(int (*userMain)(int, char**));
+
+    DO_SARA_EXPORT
     void register_user_main(std::function<int(int, char **)>);
+
+    DO_SARA_EXPORT
     int exec();
 
   private:
