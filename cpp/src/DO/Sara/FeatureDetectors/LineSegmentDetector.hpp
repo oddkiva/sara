@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 
 
@@ -42,7 +43,7 @@ namespace DO::Sara {
       //! @}
 
       //! @brief Angle tolerance for connected edgel grouping.
-      float angular_threshold = 20. / 180. * M_PI;
+      float angular_threshold = static_cast<float>(20._deg);
 
       //! @brief RANSAC-based parameters for line segment fitting.
       //! @{
