@@ -222,6 +222,10 @@ namespace DO { namespace Sara {
           "Ellipse intersections: too many intersections!"};
     intersections.resize(num_intersections);
 
+    // Go back to the original frame by shifting the intersection points.
+    for (auto& p : intersections)
+      p += center;
+
     return intersections;
   }
 
@@ -244,58 +248,7 @@ namespace DO { namespace Sara {
   {
     // The ellipse intersection is not entirely robust numerically. I will
     // investigate later.
-    // 
-    // For now I prefer to have everything working more or
-    // less OK because of the match propagation module.
-#ifndef DEBUG_ELLIPSE_INTERSECTION_IMPLEMENTATION
     auto inter_pts = compute_intersection_points(E_0, E_1);
-#else
-      SARA_CHECK(numInter);
-#ifdef DEBUG_ELLIPSE_INTERSECTION_IMPLEMENTATION
-      if (!active_window())
-        set_antialiasing(create_window(512, 512));
-      clear_window();
-      draw_ellipse(E_0, Red8, 3);
-      draw_ellipse(E_1, Blue8, 3);
-
-      Quad Q_0(oriented_bbox(E_0));
-      Quad Q_1(oriented_bbox(E_1));
-
-      BBox b0(&Q_0[0], &Q_0[0] + 4);
-      BBox b1(&Q_1[0], &Q_1[0] + 4);
-      b0.top_left() = b0.top_left().cwiseMin(b1.top_left());
-      b0.bottom_right() = b0.bottom_right().cwiseMax(b1.bottom_right());
-
-      draw_quad(Q_0, Red8, 3);
-      draw_quad(Q_1, Blue8, 3);
-      draw_bbox(b0, Green8, 3);
-      get_key();
-#endif
-
-      // now rescale the ellipse.
-      Point2d center(b0.center());
-      Vector2d delta(b0.sizes() - center);
-      delta = delta.cwiseAbs();
-
-      Ellipse EE_0, EE_1;
-      Matrix2d S_0 =
-          delta.asDiagonal() * shape_matrix(E_0) * delta.asDiagonal();
-      Matrix2d S_1 =
-          delta.asDiagonal() * shape_matrix(E_1) * delta.asDiagonal();
-
-      SARA_CHECK(shape_matrix(E_0));
-      SARA_CHECK(S_0);
-
-      Vector2d c_0 = E_0.center() - center;
-      Vector2d c_1 = E_1.center() - center;
-      EE_0 = construct_from_shape_matrix(S_0, c_0);
-      EE_1 = construct_from_shape_matrix(S_1, c_1);
-      int num_inter = compute_intersection_points(inter_pts, EE_0, EE_1);
-
-      for (int i = 0; i < num_inter; ++i)
-        inter_pts[i] = delta.asDiagonal() * inter_pts[i] + center;
-    }
-#endif
 
     if (inter_pts.size() > 2)
     {
