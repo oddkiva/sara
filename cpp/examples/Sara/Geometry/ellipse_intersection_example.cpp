@@ -31,7 +31,7 @@ GRAPHICS_MAIN()
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> coord_dist(100., 300.);
   std::uniform_real_distribution<> radius_dist(1.0, 150.);
-  std::uniform_real_distribution<> orientation_dist(0., 2 * M_PI);
+  std::uniform_real_distribution<> orientation_dist(-2 * M_PI, 2 * M_PI);
 
   auto bad_computations = 0;
   auto total = 10000;
