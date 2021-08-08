@@ -39,7 +39,7 @@ target_link_libraries(line_segment_detection_example
   PRIVATE $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
 
 
-add_library(ChessboardDetection
+add_library(ChessboardDetection STATIC
   Chessboard/EdgeFusion.hpp
   Chessboard/EdgeFusion.cpp
   Chessboard/Otsu.hpp

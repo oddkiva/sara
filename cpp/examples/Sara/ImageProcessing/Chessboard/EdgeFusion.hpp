@@ -1,7 +1,5 @@
 #pragma once
 
-#include <DO/Sara/Defines.hpp>
-
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/DisjointSets.hpp>
 #include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
@@ -147,7 +145,6 @@ namespace DO::Sara {
     }
   };
 
-  DO_SARA_EXPORT
   auto check_edge_grouping(                                //
       const ImageView<Rgb8>& frame,                        //
       const std::vector<Edge<double>>& edges_refined,      //
