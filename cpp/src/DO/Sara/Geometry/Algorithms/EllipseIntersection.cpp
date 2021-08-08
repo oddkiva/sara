@@ -9,10 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <array>
 #include <iostream>
 #include <vector>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/Math/NewtonRaphson.hpp>
 
 #include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
 #include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
@@ -26,16 +28,21 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   // Computation of intersecting points of intersecting ellipses
   // ======================================================================== //
-  void print_conic_equation(const double s[6])
+  using ConicEquation = std::array<double, 6>;
+
+  void print_conic_equation(const ConicEquation& s)
   {
     std::cout << s[0] << " + " << s[1] << " x + " << s[2] << " y + " << s[3]
               << " x^2 + " << s[4] << " xy + " << s[5] << " y^2 = 0"
               << std::endl;
   }
 
-  void conic_equation(double s[6], const Ellipse& e)
+  auto conic_equation(const Ellipse& e) -> ConicEquation
   {
-    const Matrix2d M(shape_matrix(e));
+    auto s = ConicEquation{};
+    
+    const auto M = shape_matrix(e);
+
     s[0] = e.center().x() * M(0, 0) * e.center().x() +
            2 * e.center().x() * M(0, 1) * e.center().y() +
            e.center().y() * M(1, 1) * e.center().y() - 1.0;
@@ -44,9 +51,12 @@ namespace DO { namespace Sara {
     s[3] = M(0, 0);
     s[4] = 2.0 * M(0, 1);
     s[5] = M(1, 1);
+
+    return s;
   }
 
-  Polynomial<double, 4> quartic_equation(const double s[6], const double t[6])
+  auto quartic_equation(const ConicEquation& s, const ConicEquation& t)
+      -> Polynomial<double, 4>
   {
     double d[6][6];
     for (int i = 0; i < 6; ++i)
@@ -65,84 +75,154 @@ namespace DO { namespace Sara {
     return u;
   }
 
-  void sigma_polynomial(double sigma[3], const double s[6], double y)
+  auto sigma_polynomial(const ConicEquation& s, double y)
+      -> Polynomial<double, 2>
   {
+    auto sigma = Polynomial<double, 2>{};
     sigma[0] = s[0] + s[2] * y + s[5] * y * y;
     sigma[1] = s[1] + s[4] * y;
     sigma[2] = s[3];
+    return sigma;
   }
 
-  inline double compute_conic_expression(double x, double y, const double s[6])
+  inline auto evaluate_conic_equation_at(double x, double y,
+                                         const ConicEquation& s) -> double
   {
     return s[0] + s[1] * x + s[2] * y + s[3] * x * x + s[4] * x * y +
            s[5] * y * y;
   }
 
-  // If imaginary part precision: 1e-6.
-  // If the conic equation produces an almost zero value i.e.: 1e-3.
-  // then we decide there is an intersection.
-  std::pair<bool, Point2d> is_real_root(const std::complex<double>& y,
-                                        const double s[6], const double t[6])
+  auto add_intersection_point(const ConicEquation& s, const ConicEquation& t,
+                              double y,  //
+                              std::vector<Point2d>& intersections)
+      -> void
   {
-    if (abs(imag(y)) > 1e-2 * abs(real(y)))
-      return std::make_pair(
-          false, Point2d::Constant(std::numeric_limits<double>::quiet_NaN()));
+    const auto sigma = sigma_polynomial(s, y);
+    const auto tau = sigma_polynomial(t, y);
+    const auto x_denom = sigma[1] * tau[2] - sigma[2] * tau[1];
 
-    const double realY = real(y);
-    double sigma[3], tau[3];
-    sigma_polynomial(sigma, s, realY);
-    sigma_polynomial(tau, t, realY);
-    const double x = (sigma[2] * tau[0] - sigma[0] * tau[2]) /
-                     (sigma[1] * tau[2] - sigma[2] * tau[1]);
+    auto intersection_point_is_in_both_ellipse = [&s, &t](double x, double y) {
+      const auto e1_at_x1y = evaluate_conic_equation_at(x, y, s);
+      const auto e2_at_x1y = evaluate_conic_equation_at(x, y, t);
+      return std::abs(e1_at_x1y) < 1e-2 && std::abs(e2_at_x1y) < 1e-2;
+    };
 
-    if (fabs(compute_conic_expression(x, realY, s)) < 1e-2 &&
-        fabs(compute_conic_expression(x, realY, t)) < 1e-2)
-      return std::make_pair(true, Point2d(x, realY));
+    if (x_denom == 0)
+    {
+      auto x1s = std::complex<double>{};
+      auto x2s = std::complex<double>{};
+      auto real_root_s = false;
+      roots(sigma, x1s, x2s, real_root_s);
+
+      if (!real_root_s)
+        return;
+
+      const auto x1 = std::real(x1s);
+      const auto x2 = std::real(x2s);
+
+      if (intersection_point_is_in_both_ellipse(x1, y))
+        intersections.emplace_back(x1, y);
+
+      if (intersection_point_is_in_both_ellipse(x2, y))
+        intersections.emplace_back(x2, y);
+    }
     else
-      return std::make_pair(
-          false, Point2d::Constant(std::numeric_limits<double>::quiet_NaN()));
+    {
+      const auto x_num = sigma[2] * tau[0] - sigma[0] * tau[2];
+      const auto x = x_num / x_denom;
+      if (intersection_point_is_in_both_ellipse(x, y))
+        intersections.emplace_back(x, y);
+    }
   }
 
-  int compute_intersection_points(Point2d intersections[4], const Ellipse& e1,
-                                  const Ellipse& e2)
+  auto compute_intersection_points(const Ellipse& e1, const Ellipse& e2)
+      -> std::vector<Point2d>
   {
     // Rescale ellipse to try to improve numerical accuracy.
     Point2d center;
     center = 0.5 * (e1.center() + e2.center());
 
-
+    // Center the ellipse.
+    // TODO: rescale the ellipses.
     Ellipse ee1(e1), ee2(e2);
     ee1.center() -= center;
     ee2.center() -= center;
 
-    double s[6], t[6];
-    conic_equation(s, ee1);
-    conic_equation(t, ee2);
+    // Form the conic equations.
+    const auto s = conic_equation(ee1);
+    const auto t = conic_equation(ee2);
 
-    const auto u = quartic_equation(s, t);
+    // Extract the quartic equations from the conic equations.
+    auto u = quartic_equation(s, t);
+    // Rescale the polynomial.
+    for (auto i = 0; i < 4; ++i)
+      u[i] /= u[4];
+    u[4] = 1;
 
-    std::complex<double> y[4];
+    // Find the roots using the analytic form.
+    auto y = std::array<std::complex<double>, 4>{};
     roots(u, y[0], y[1], y[2], y[3]);
 
-
-    int numInter = 0;
-    for (int i = 0; i < 4; ++i)
+    // Keep the real roots.
+    auto y_polished = std::vector<double>{};
+    for (auto i = 0; i < 4; ++i)
     {
-      const auto p = is_real_root(y[i], s, t);
-      if (!p.first)
+      // We should be close to the real solution if we are dealing with an
+      // actual intersection point.
+      using std::imag;
+      using std::real;
+
+      const auto is_y_real = std::abs(imag(y[i])) < 1e-2 * std::abs(real(y[i]));
+      if (!is_y_real)
         continue;
-      intersections[numInter] = p.second + center;
-      ++numInter;
+
+      y_polished.push_back(std::real(y[i]));
     }
 
-    const double eps = 1e-2;
-    const double squared_eps = eps * eps;
-    auto identicalPoints = [&](const Point2d& p, const Point2d& q) {
-      return (p - q).squaredNorm() < squared_eps;
-    };
+    constexpr auto eps = 1e-4;
+    constexpr auto squared_eps = eps * eps;
+    std::sort(y_polished.begin(), y_polished.end());
+    const auto y_last =
+        std::unique(y_polished.begin(), y_polished.end(),
+                    [&eps](const double& a, const auto& b) {
+                      return std::abs(a - b) < eps;
+                    });
+    y_polished.resize(y_last - y_polished.begin());
 
-    auto it = std::unique(intersections, intersections + numInter, identicalPoints);
-    return static_cast<int>(it - intersections);
+#define POLISH_ROOTS
+#ifdef POLISH_ROOTS
+    // Now polish the roots with Newton-Raphson optimization method.
+    for (auto& y_polished_i : y_polished)
+    {
+      auto P = Univariate::UnivariatePolynomial<double>{4};
+      for (auto d = 0; d <= u.Degree; ++d)
+        P[d] = u[d];
+
+      auto root_polisher = Univariate::NewtonRaphson{P};
+      y_polished_i = root_polisher(y_polished_i, 10);
+    }
+#endif
+
+    // Finally form the intersection points for which the y-coordinate is real.
+    auto intersections = std::vector<Point2d>{};
+    for (const auto& y_polished_i: y_polished)
+      add_intersection_point(s, t, y_polished_i, intersections);
+ 
+    // Remove any duplicates.
+    const auto intersection_last =
+        std::unique(intersections.begin(), intersections.end(),
+                    [&squared_eps](const Point2d& a, const Point2d& b) {
+                      return (a - b).squaredNorm() < squared_eps;
+                    });
+
+    const auto num_intersections =
+        static_cast<int>(intersection_last - intersections.begin());
+    if (num_intersections > 4)
+      throw std::runtime_error{
+          "Ellipse intersections: too many intersections!"};
+    intersections.resize(num_intersections);
+
+    return intersections;
   }
 
   void orientation(double* ori, const Point2d* pts, int numPoints,
@@ -162,14 +242,13 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   double analytic_intersection_area(const Ellipse& E_0, const Ellipse& E_1)
   {
-    // Find the intersection points of the two ellipses.
-    Point2d inter_pts[4];
-
     // The ellipse intersection is not entirely robust numerically. I will
-    // investigate later. For now I prefer to have everything working more or
+    // investigate later.
+    // 
+    // For now I prefer to have everything working more or
     // less OK because of the match propagation module.
 #ifndef DEBUG_ELLIPSE_INTERSECTION_IMPLEMENTATION
-    const auto num_inter = compute_intersection_points(inter_pts, E_0, E_1);
+    auto inter_pts = compute_intersection_points(E_0, E_1);
 #else
       SARA_CHECK(numInter);
 #ifdef DEBUG_ELLIPSE_INTERSECTION_IMPLEMENTATION
@@ -218,17 +297,17 @@ namespace DO { namespace Sara {
     }
 #endif
 
-    if (num_inter > 2)
+    if (inter_pts.size() > 2)
     {
       Detail::PtCotg work[4];
-      Detail::sort_points_by_polar_angle(inter_pts, work, num_inter);
+      Detail::sort_points_by_polar_angle(&inter_pts[0], work, inter_pts.size());
     }
 
     // SPECIAL CASE.
     //
     // If there is at most one intersection point, then either one of the
     // ellipse is included in the other.
-    if (num_inter < 2)
+    if (inter_pts.size() < 2)
     {
       if (E_0.contains(E_1.center()) || E_1.contains(E_0.center()))
         return std::min(area(E_0), area(E_1));
@@ -240,12 +319,13 @@ namespace DO { namespace Sara {
     // ellipse orientation.
     double o_0[4];
     double o_1[4];
-    orientation(o_0, inter_pts, num_inter, E_0);
-    orientation(o_1, inter_pts, num_inter, E_1);
+    const auto num_intersections = static_cast<int>(inter_pts.size());
+    orientation(o_0, &inter_pts[0], num_intersections, E_0);
+    orientation(o_1, &inter_pts[0], num_intersections, E_1);
 
     // Sum the segment areas.
     double area = 0;
-    for (int i = 0, j = num_inter - 1; i < num_inter; j = i++)
+    for (int i = 0, j = num_intersections - 1; i < num_intersections; j = i++)
     {
       double theta_0 = o_0[j];
       double theta_1 = o_0[i];
@@ -265,9 +345,9 @@ namespace DO { namespace Sara {
 
     // If the number of the intersection > 2, add the area of the polygon
     // whose vertices are p[0], p[1], ..., p[numInter].
-    if (num_inter > 2)
+    if (num_intersections > 2)
     {
-      for (int i = 0, j = num_inter - 1; i < num_inter; j = i++)
+      for (int i = 0, j = num_intersections - 1; i < num_intersections; j = i++)
       {
         Matrix2d M;
         M.col(0) = inter_pts[j];

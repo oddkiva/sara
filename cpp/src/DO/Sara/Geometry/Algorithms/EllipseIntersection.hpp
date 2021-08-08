@@ -44,9 +44,8 @@ namespace DO { namespace Sara {
   //! Compute intersection points between two ellipses and return the number of
   //! intersection points.
   DO_SARA_EXPORT
-  int compute_intersection_points(Point2d intersections[],
-                                  const Ellipse& e1,
-                                  const Ellipse& e2);
+  auto compute_intersection_points(const Ellipse& e1, const Ellipse& e2)
+      -> std::vector<Point2d>;
 
   /*!
      Compute the ellipse intersection area exactly.
