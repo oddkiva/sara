@@ -44,9 +44,9 @@ namespace DO { namespace Sara {
   //! Compute intersection points between two ellipses and return the number of
   //! intersection points.
   DO_SARA_EXPORT
-  int compute_intersection_points(Point2d intersections[],
-                                  const Ellipse& e1,
-                                  const Ellipse& e2);
+  auto compute_intersection_points(const Ellipse& e1, const Ellipse& e2,
+                                   bool polish_intersection_points = false)
+      -> std::vector<Point2d>;
 
   /*!
      Compute the ellipse intersection area exactly.
@@ -56,7 +56,8 @@ namespace DO { namespace Sara {
 
    */
   DO_SARA_EXPORT
-  double analytic_intersection_area(const Ellipse& e1, const Ellipse& e2);
+  double analytic_intersection_area(const Ellipse& e1, const Ellipse& e2,
+                                    bool polish_intersection_points = false);
 
   /*!
       Compute the intersection union ratio exactly.
@@ -65,7 +66,8 @@ namespace DO { namespace Sara {
      @todo Investigate.
    */
   DO_SARA_EXPORT
-  double analytic_jaccard_similarity(const Ellipse& e1, const Ellipse& e2);
+  double analytic_jaccard_similarity(const Ellipse& e1, const Ellipse& e2,
+                                     bool polish_intersection_points = false);
 
   //! @}
 

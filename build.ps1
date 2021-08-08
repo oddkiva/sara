@@ -5,7 +5,7 @@ $build_shared_libs = @{"static"="OFF"; "shared"="ON"};
 $vsver = 2019
 $vsver2 = $cmake_vsver2[$vsver]
 
-$build_type = "shared"
+$build_type = "static"
 
 $source_dir = $pwd
 $build_dir = "sara-build-vs$vsver-$build_type"
