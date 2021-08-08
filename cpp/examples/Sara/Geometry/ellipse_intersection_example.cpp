@@ -61,7 +61,7 @@ GRAPHICS_MAIN()
     SARA_CHECK(inter_area_approx);
     SARA_DEBUG << (good ? "OK" : "KOOOOOOOOOOOOOO") << std::endl;
 
-#define INSPECT_VISUALLY
+//#define INSPECT_VISUALLY
 #ifdef INSPECT_VISUALLY
     if (!active_window())
     {
@@ -81,6 +81,12 @@ GRAPHICS_MAIN()
     bad_computations += int(!good);
   }
 
+  // One run of the program shows that 24 random instances out of 10,000 will
+  // show that the relative difference between the polygonal approach and the
+  // analytic approach is more than 1%.
+  //
+  // There are still some rare corner cases where the analytical form is very wrong.
+  // Find out where in the formula.
   SARA_CHECK(bad_computations);
   SARA_CHECK(bad_computations / double(total));
 

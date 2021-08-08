@@ -286,6 +286,8 @@ namespace DO { namespace Sara {
       double psi_0 = o_1[j];
       double psi_1 = o_1[i];
 
+      // TODO: Check these conditions again. We might have to check some corner
+      // cases.
       if (theta_0 > theta_1)
         theta_1 += 2 * M_PI;
 
