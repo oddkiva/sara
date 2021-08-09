@@ -31,7 +31,7 @@ namespace DO { namespace Sara {
   */
 
   //! Functor class to compute DoG extrema
-  class DO_SARA_EXPORT ComputeDoGExtrema
+  class ComputeDoGExtrema
   {
   public:
     /*!
@@ -105,6 +105,7 @@ namespace DO { namespace Sara {
       difference of Gaussians
       \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$.
      */
+    DO_SARA_EXPORT
     std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 

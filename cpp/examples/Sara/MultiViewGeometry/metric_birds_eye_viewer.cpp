@@ -135,11 +135,11 @@ auto average(const sara::ImageView<sara::Rgb8>& a1,
 
 
 auto make_make_conrady_camera_1() {
-  const auto f = 1305._px;
-  const auto u0 = 960._px;
-  const auto v0 = 540._px;
+  const auto f = 1305.f;
+  const auto u0 = 960.f;
+  const auto v0 = 540.f;
   const auto p = Eigen::Vector2f{0, 0};
-  const auto k = Eigen::Vector3f{0.328456, 0.0589776, 0};
+  const auto k = Eigen::Vector3f{0.328456f, 0.0589776f, 0};
 
   auto camera_parameters = sara::BrownConradyCamera32<float>{};
   camera_parameters.image_sizes << 1920, 1080;
@@ -154,14 +154,14 @@ auto make_make_conrady_camera_1() {
 }
 
 auto make_make_conrady_camera_2() {
-  const auto f = 946.898442557_px;
-  const auto u0 = 960._px;
-  const auto v0 = 540._px;
+  const auto f = 946.898442557f;
+  const auto u0 = 960.f;
+  const auto v0 = 540.f;
   const auto p = Eigen::Vector2f{0, 0};
   const auto k = Eigen::Vector3f{
-      -0.22996356451342749,  //
-      0.05952465745165465,
-      -0.007399008111054717  //
+      -0.22996356451342749f,  //
+      0.05952465745165465f,
+      -0.007399008111054717f  //
   };
 
   auto camera_parameters = sara::BrownConradyCamera32<float>{};

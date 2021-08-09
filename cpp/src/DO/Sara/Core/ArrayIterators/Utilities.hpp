@@ -31,65 +31,68 @@ namespace DO { namespace Sara {
   inline Index jump(const Matrix<Index, N, 1>& offset,
                     const Matrix<Index, N, 1>& strides)
   {
-    static_assert(
-      std::numeric_limits<Index>::is_integer,
-      "Index must be integral");
+    static_assert(std::numeric_limits<Index>::is_integer,
+                  "Index must be integral");
     return offset.dot(strides);
   }
 
   //! @brief Computes the strides from the sizes of an N-dimensional array.
   //! StorageOrder must be either 'Eigen::RowMajor' or 'Eigen::ColMajor'.
-  template <int StorageOrder> struct StrideComputer;
+  template <int StorageOrder>
+  struct StrideComputer;
 
   //! @brief Increment the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::RowMajor' or 'Eigen::ColMajor'.
-  template <int StorageOrder> struct PositionIncrementer;
+  template <int StorageOrder>
+  struct PositionIncrementer;
 
   //! @brief Decrement the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::RowMajor' or 'Eigen::ColMajor'.
-  template <int StorageOrder> struct PositionDecrementer;
+  template <int StorageOrder>
+  struct PositionDecrementer;
 
   //! @brief Computes the strides from the sizes of an N-dimensional array.
   //! Specialized class for 'Eigen::RowMajor'.
-  template <> struct StrideComputer<RowMajor>
+  template <>
+  struct StrideComputer<RowMajor>
   {
     template <typename Index, int N>
     static Matrix<Index, N, 1> eval(const Matrix<Index, N, 1>& sizes)
     {
       static_assert(N > 0, "N must be positive");
-      static_assert(
-        std::numeric_limits<Index>::is_integer,
-        "Index must be integral");
+      static_assert(std::numeric_limits<Index>::is_integer,
+                    "Index must be integral");
       Matrix<Index, N, 1> strides;
-      strides[N-1] = 1;
-      for (int i = N-2; i >= 0; --i)
-        strides[i] = strides[i+1]*sizes[i+1];
+      strides[N - 1] = 1;
+      for (int i = N - 2; i >= 0; --i)
+        strides[i] = strides[i + 1] * sizes[i + 1];
       return strides;
     }
   };
 
   //! @brief Computes the strides from the sizes of an N-dimensional array.
   //! Specialized class for 'Eigen::ColMajor'.
-  template <> struct StrideComputer<ColMajor>
+  template <>
+  struct StrideComputer<ColMajor>
   {
     template <typename Index, int N>
     static Matrix<Index, N, 1> eval(const Matrix<Index, N, 1>& sizes)
     {
       static_assert(N > 0, "N must be positive");
-      static_assert(
-        std::numeric_limits<Index>::is_integer,
-        "Index must be integral");
+      static_assert(std::numeric_limits<Index>::is_integer,
+                    "Index must be integral");
       Matrix<Index, N, 1> strides;
       strides[0] = 1;
       for (int i = 1; i < N; ++i)
-        strides[i] = strides[i-1]*sizes[i-1];
+        strides[i] = strides[i - 1] * sizes[i - 1];
       return strides;
     }
   };
 
   //! @brief Increment the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::RowMajor'.
-  template <> struct PositionIncrementer<RowMajor>
+  template <>
+  struct PositionIncrementer<RowMajor>
   {
     template <typename Index, int N>
     static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
@@ -145,7 +148,8 @@ namespace DO { namespace Sara {
 
   //! @brief Increment the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::ColMajor'.
-  template <> struct PositionIncrementer<ColMajor>
+  template <>
+  struct PositionIncrementer<ColMajor>
   {
     template <typename Index, int N>
     static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
@@ -200,7 +204,8 @@ namespace DO { namespace Sara {
 
   //! @brief Decrement the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::RowMajor'.
-  template <> struct PositionDecrementer<RowMajor>
+  template <>
+  struct PositionDecrementer<RowMajor>
   {
     template <typename Index, int N>
     static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
@@ -261,7 +266,8 @@ namespace DO { namespace Sara {
 
   //! @brief Decrement the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::ColMajor'.
-  template <> struct PositionDecrementer<ColMajor>
+  template <>
+  struct PositionDecrementer<ColMajor>
   {
     template <typename Index, int N>
     static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
@@ -322,5 +328,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

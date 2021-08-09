@@ -30,9 +30,9 @@ auto make_fisheye_camera()
   const auto h = 1080;
 
   {
-    const auto f = 677.3246133600308;
-    const auto u0 = 960;
-    const auto v0 = 540;
+    const auto f = 677.3246133600308f;
+    const auto u0 = 960.f;
+    const auto v0 = 540.f;
 
     camera_parameters.image_sizes << w, h;
     camera_parameters.K <<  //
@@ -45,10 +45,10 @@ auto make_fisheye_camera()
     //     -0.06844064024539671,  //
     //     0.01237548905484928;
     camera_parameters.k <<     //
-        -0.20,                 //
-        0.1321295087447987,    //
-        -0.06844064024539671,  //
-        0.01237548905484928;
+        -0.20f,                 //
+        0.1321295087447987f,    //
+        -0.06844064024539671f,  //
+        0.01237548905484928f;
   }
 
   // {

@@ -22,7 +22,6 @@ namespace DO::Sara {
 
   //! @{
   //! @brief Essential matrix estimation.
-  DO_SARA_EXPORT
   auto estimate_essential_matrix(const std::vector<Match>& Mij,
                                  const KeypointList<OERegion, float>& ki,
                                  const KeypointList<OERegion, float>& kj,
@@ -31,7 +30,6 @@ namespace DO::Sara {
                                  double err_thres)
       -> std::tuple<EssentialMatrix, Tensor_<bool, 1>, Tensor_<int, 1>>;
 
-  DO_SARA_EXPORT
   auto estimate_essential_matrices(const std::string& dirpath,      //
                                    const std::string& h5_filepath,  //
                                    int num_samples,                 //
@@ -40,7 +38,6 @@ namespace DO::Sara {
                                    bool overwrite, bool debug,
                                    bool wait_key = false) -> void;
 
-  DO_SARA_EXPORT
   auto inspect_essential_matrices(const std::string& dirpath,
                                   const std::string& h5_filepath,
                                   int display_step, bool wait_key) -> void;

@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_send_no_event)
   arg.convert(_event_type);
 
   const auto event = arguments.at(0).value<Event>();
-  BOOST_CHECK_EQUAL(event.type, DO::Sara::NO_EVENT);
+  BOOST_CHECK(event.type == EventType::NO_EVENT);
 }
 
 BOOST_AUTO_TEST_CASE(test_send_pressed_key_event)
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(test_send_pressed_key_event)
   arg.convert(_event_type);
 
   const auto event = arguments.at(0).value<Event>();
-  BOOST_CHECK_EQUAL(event.type, DO::Sara::KEY_PRESSED);
+  BOOST_CHECK(event.type == DO::Sara::EventType::KEY_PRESSED);
   BOOST_CHECK_EQUAL(event.key, _key);
 }
 
@@ -186,5 +186,7 @@ int main(int argc, char *argv[])
   QApplication app(argc, argv);
   app.setAttribute(Qt::AA_Use96Dpi, true);
 
-  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
+  boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
+
+  return app.exec();
 }

@@ -22,7 +22,7 @@ namespace DO { namespace Sara {
   //! @{
 
   //! @brief Disjoint-set data structure.
-  class DO_SARA_EXPORT DisjointSets
+  class DisjointSets
   {
     class Node;
 
@@ -40,7 +40,6 @@ namespace DO { namespace Sara {
       : _vertices(num_vertices)
     {
     }
-
 
     inline void clear()
     {
@@ -92,8 +91,10 @@ namespace DO { namespace Sara {
       return n - &_vertices[0];
     }
 
+    DO_SARA_EXPORT
     void compute_connected_components(const AdjacencyList& adj_list);
 
+    DO_SARA_EXPORT
     std::vector<std::vector<vertex_type>> get_connected_components() const;
 
   private:

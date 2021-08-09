@@ -249,7 +249,7 @@ auto test_on_video(int argc, char** argv)
       argc < 2
           ?
 #ifdef _WIN32
-          "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s
+          "C:/Users/David/Desktop/GOPR0542.MP4"s
 #elif __APPLE__
           "/Users/david/Desktop/Datasets/sfm/Family.mp4"s
 #else

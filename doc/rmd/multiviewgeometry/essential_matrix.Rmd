@@ -1,16 +1,14 @@
 ## Essential Matrix and Relative Motion
 
-Consider two cameras $C_0$ and $C_1$. In the sequel, we can sort of
-imagine that:
+Consider two cameras $C_0$ and $C_1$. To fix ideas in our mind, let us imagine
+that:
 
-- the coordinate system of the first camera $C_0$ is the world coordinate
-  system.
-- the coordinate system of the second camera $C_1$ is a convenient local
-  coordinate system.
+- the first camera frame $C_0$ is viewed as the world reference frame.
+- the second camera frame $C_1$ is a convenient local frame.
 
-Consider a 3D point with world coordinate system $\mathbf{X}^0$ and
-suppose we can calculate its coordinates $\mathbf{X}^1$ in this local
-coordinate system with the following rigid body motion
+Consider a 3D point "X" with world coordinates $\mathbf{X}^0$ and suppose we can
+calculate its local coordinates $\mathbf{X}^1$ with the following rigid body
+motion
 
 \begin{equation}
   \mathbf{X}^1 = \mathbf{R} \mathbf{X}^0 + \mathbf{t} .
@@ -19,17 +17,19 @@ coordinate system with the following rigid body motion
 As a reminder, we can interpret the formula as follows:
 
 - The column vectors of the rotation matrix $\mathbf{R}$ are the
-  coordinates of the world axes expressed in the local coordinate system.
+  coordinates of the world axes expressed in the local camera frame.
 - $\mathbf{t}$ are the coordinates of the world origin expressed in the
-  local camera coordinate system.
+  local camera frame.
 
 Basically this rigid body describes the relative position of camera $C_0$
-w.r.t. camera $C_1$ (and in its local coordinate system), such that:
+w.r.t. camera $C_1$ and in the local frame. Specifically:
 
 - the local camera axes are rotated to the world camera axes by the rotation
-  $\mathbf{R}$.
-- the origin of local coordinate system is moved to the world origin position by
-  the translation $\mathbf{t}$.
+  $\mathbf{R}$;
+- the translation $\mathbf{t}$ whose coordinates are expressed in the local
+  frame displaces the origin of the local frame to the world origin;
+  Said differently, the translation $\mathbf{t}$ are the coordinates of the
+  world origin in the **local** frame.
 
 The essential matrix we implement in *Sara* uses *this* rotation matrix and
 *this* translation vector.
@@ -37,6 +37,44 @@ The essential matrix we implement in *Sara* uses *this* rotation matrix and
 \begin{equation}
   \mathbf{E} = [\mathbf{t}]_\times \mathbf{R}\ .
 \end{equation}
+
+:::puzzle
+Let us recall how the essential matrix is derived by construction.
+
+By definition any 3D scene point "X" satisfies
+\begin{equation}
+  \mathbf{X}^1 = \mathbf{R} \mathbf{X}^0 + \mathbf{t}
+\end{equation}
+
+By applying the cross-product with vector $\mathbf{t}$ on the left side:
+\begin{equation}
+  \mathbf{t} \wedge \mathbf{X}^1 = \mathbf{t} \wedge ( \mathbf{R} \mathbf{X}^0 +
+  \mathbf{t} )
+\end{equation}
+
+Since the cross-product $\mathbf{n} = \mathbf{t} \wedge \mathbf{X}^1$ is a
+vector normal to the plane induced by the span $\mathrm{span}(\mathbf{t}$,
+$\mathbf{X}^1)$, applying the dot product yields the following equation
+
+\begin{equation}
+  \langle \mathbf{X}^1, \mathbf{n} \rangle = 0
+\end{equation}
+
+Then injecting the right-hand side of the rigid body equation, we have:
+\begin{equation}
+  \langle \mathbf{X}^1, \mathbf{t} \wedge ( \mathbf{R} \mathbf{X}^0 +
+  \mathbf{t}) \rangle = 0
+\end{equation}
+
+In matrix notation, where in particular the cross-product is written as a
+matrix-vector multiplication, this equation is equivalent to:
+\begin{equation}
+  \mathbf{X}^{1T} [\mathbf{t}]_\times \mathbf{R} \mathbf{X}^0 = 0
+\end{equation}
+
+And we recognize the essential matrix.
+:::
+
 
 The relative *motion* extracted from the essential matrix of camera
 $C_1$ w.r.t. $C_0$ will mean this rotation and translation pair

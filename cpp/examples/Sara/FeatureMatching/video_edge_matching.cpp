@@ -44,11 +44,16 @@ auto initialize_camera_intrinsics_1()
 {
   auto intrinsics = BrownConradyCamera32<float>{};
 
-  const auto f = 991.8030424131325;
-  const auto u0 = 960;
-  const auto v0 = 540;
+  const auto f = 991.8030424131325f;
+  const auto u0 = 960.f;
+  const auto v0 = 540.f;
   intrinsics.image_sizes << 1920, 1080;
-  intrinsics.K << f, 0, u0, 0, f, v0, 0, 0, 1;
+  // clang-format off
+  intrinsics.K <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  // clang-format on
   intrinsics.distortion_model.k.setZero();
   intrinsics.distortion_model.p.setZero();
 
@@ -59,18 +64,20 @@ auto initialize_camera_intrinsics_2()
 {
   auto intrinsics = BrownConradyCamera32<float>{};
 
-  const auto f = 946.8984425572634;
-  const auto u0 = 960;
-  const auto v0 = 540;
+  const auto f = 946.8984425572634f;
+  const auto u0 = 960.f;
+  const auto v0 = 540.f;
   intrinsics.image_sizes << 1920, 1080;
+  // clang-format off
   intrinsics.K <<
     f, 0, u0,
     0, f, v0,
     0, 0,  1;
+  // clang-format on
   intrinsics.distortion_model.k <<
-    -0.22996356451342749,
-    0.05952465745165465,
-    -0.007399008111054717;
+    -0.22996356451342749f,
+    0.05952465745165465f,
+    -0.007399008111054717f;
   intrinsics.distortion_model.p.setZero();
 
   return intrinsics;
@@ -220,7 +227,7 @@ struct LocalPhotometricStatistics
 
     // Loop through the points.
 #pragma omp parallel for
-    for (auto i = 0u; i < point_set.size(); ++i)
+    for (auto i = 0; i < static_cast<int>(point_set.size()); ++i)
     {
       const auto& p = point_set[i];
       gray_mean(p) = calculate_mean_at(gray, p.x(), p.y());
@@ -258,7 +265,7 @@ struct LocalPhotometricStatistics
 
     // Loop through the points.
 #pragma omp parallel for
-    for (auto i = 0u; i < point_set.size(); ++i)
+    for (auto i = 0; i < static_cast<int>(point_set.size()); ++i)
     {
       const auto& p = point_set[i];
       const auto mean_xy = gray_mean(p);
@@ -359,7 +366,7 @@ struct EdgeMatcher
     num_candidate_matches = Eigen::RowVectorXi::Zero(current.point_set.size());
 
 #pragma omp parallel for
-    for (auto i = 0u; i < current.point_set.size(); ++i)
+    for (auto i = 0; i < static_cast<int>(current.point_set.size()); ++i)
     {
       const auto& pi = current.point_set[i];
 

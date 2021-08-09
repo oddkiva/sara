@@ -1,6 +1,6 @@
 find_package(DO_Sara COMPONENTS Core Graphics ImageIO REQUIRED)
 
-add_library(NuScenes
+add_library(NuScenes STATIC
   NuImages.hpp NuImages.cpp
   NuScenes.hpp NuScenes.cpp)
 target_compile_features(NuScenes

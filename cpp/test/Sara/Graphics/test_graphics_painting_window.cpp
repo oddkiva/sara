@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(
   BOOST_CHECK(window->scrollArea()->isMaximized());
   BOOST_CHECK(window->isVisible());
 
-  delete window->scrollArea();
+  window->scrollArea()->deleteLater();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -545,7 +545,7 @@ public:
 
   ~TestFixtureForPaintingWindowEvents()
   {
-    delete _test_window->scrollArea();
+    _test_window->scrollArea()->deleteLater();
   }
 
   void compare_mouse_event(QSignalSpy& spy,
@@ -655,7 +655,7 @@ BOOST_AUTO_TEST_CASE(test_send_event)
   QVariant arg = arguments.at(0);
   arg.convert(_event_type);
   Event event(arguments.at(0).value<Event>());
-  BOOST_CHECK_EQUAL(event.type, DO::Sara::NO_EVENT);
+  BOOST_CHECK(event.type == EventType::NO_EVENT);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -683,5 +683,6 @@ int main(int argc, char* argv[])
 {
   QApplication app(argc, argv);
   app.setAttribute(Qt::AA_Use96Dpi, true);
-  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
+  boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
+  app.exec();
 }

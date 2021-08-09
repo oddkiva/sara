@@ -81,8 +81,7 @@ namespace DO::Sara {
             cout << H_Sx << endl;
           }*/
 
-          Point2d inter[4];
-          const auto num_inter = compute_intersection_points(inter, H_Sx, Sy);
+          const auto inter = compute_intersection_points(H_Sx, Sy);
 
           const auto polygonal_overlap =
               approximate_jaccard_similarity(H_Sx, Sy, 36);
@@ -100,7 +99,7 @@ namespace DO::Sara {
             cout << "diff_center = " << diff_center << endl;
             cout << "diff_shape_mat = \n" << diff_shape_mat << endl;
             cout << "rel_diff_shape_mat = \n" << rel_diff_shape_mat << endl;
-            cout << "num_inter = " << num_inter << endl;
+            cout << "num_inter = " << inter.size() << endl;
 
             drawer.display_images();
             check_reprojected_ellipse(m, drawer, Sy, H_Sx, polygonal_overlap,
@@ -128,9 +127,9 @@ namespace DO::Sara {
     const auto folder = string_src_path(dataset().name() + "/P_f");
     mkdir(folder);
 
-    const string name("inlierThres_" + to_string(inlier_thres) + "_squaredEll_" +
-                      to_string(squared_ell) + dataset().feature_type() +
-                      ".txt");
+    const string name("inlierThres_" + to_string(inlier_thres) +
+                      "_squaredEll_" + to_string(squared_ell) +
+                      dataset().feature_type() + ".txt");
 
     if (!save_statistics(folder + "/" + name, stat_overlaps, stat_angles))
     {

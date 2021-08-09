@@ -21,7 +21,7 @@ namespace DO { namespace Sara {
 
   //! @addtogroup Match
   //! @{
-  class DO_SARA_EXPORT PairWiseDrawer
+  class PairWiseDrawer
   {
   public:
     enum CatType
@@ -46,20 +46,26 @@ namespace DO { namespace Sara {
                                 : Point2i(0, image1.height());
     }
 
+    DO_SARA_EXPORT
     void display_images() const;
 
+    DO_SARA_EXPORT
     void draw_point(int i, const Point2f& p, const Rgb8& c, int r = 2) const;
 
+    DO_SARA_EXPORT
     void draw_line(int i, const Point2f& pa, const Point2f& pb, const Rgb8& c,
                    int penWidth = 1) const;
 
+    DO_SARA_EXPORT
     void draw_arrow(int i, const Point2f& pa, const Point2f& pb, const Rgb8& c,
                     int penWidth = 1) const;
 
+    DO_SARA_EXPORT
     void draw_triangle(int i, const Point2f& pa, const Point2f& pb,
                        const Point2f& pc, const Rgb8& c = Cyan8,
                        int r = 2) const;
 
+    DO_SARA_EXPORT
     void draw_rect(int i, const Point2f& p1, const Point2f& p2, int r,
                    const Rgb8& c = Yellow8) const;
 
@@ -72,6 +78,7 @@ namespace DO { namespace Sara {
         draw_line(i, line->first, line->second, c, r);
     }
 
+    DO_SARA_EXPORT
     void draw_line_from_eqn(int i, const Vector3f& eqn, const Rgb8& c = Cyan8,
                             int r = 2) const;
 
@@ -93,8 +100,10 @@ namespace DO { namespace Sara {
         draw_point(i, Point2f((*vh)->point().x(), (*vh)->point().y()), c, r);
     }
 
+    DO_SARA_EXPORT
     void draw_feature(int i, const OERegion& f, const Rgb8& c = Red8) const;
 
+    DO_SARA_EXPORT
     void draw_match(const Match& m, const Rgb8& c = Magenta8,
                     bool drawLine = false) const;
 

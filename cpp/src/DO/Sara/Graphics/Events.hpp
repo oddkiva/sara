@@ -25,7 +25,7 @@ namespace DO { namespace Sara {
    */
 
   //! @brief I/O event types.
-  enum EventType
+  enum class EventType : std::uint8_t
   {
     NO_EVENT,
     KEY_PRESSED,            /*! QEvent::KeyPress */
@@ -85,18 +85,17 @@ namespace DO { namespace Sara {
   //! @brief I/O event structure.
   struct Event
   {
-    EventType type;
-    int buttons;
+    EventType type = EventType::NO_EVENT;
+    int buttons = MOUSE_NO_BUTTON;
     Point2i mousePos;
-    int key;
-    int keyModifiers;
+    int key = KEY_UNKNOWN;
+    int keyModifiers = KEY_NOMODIFIER;
   };
 
   //! @brief Helper function to return a "no-event" Event.
   inline Event no_event()
   {
     Event e;
-    e.type = NO_EVENT;
     e.key = KEY_UNKNOWN;
     e.keyModifiers = KEY_NOMODIFIER;
     e.buttons = MOUSE_NO_BUTTON;
@@ -108,7 +107,7 @@ namespace DO { namespace Sara {
   inline Event key_pressed(int key, int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
-    e.type = KEY_PRESSED;
+    e.type = EventType::KEY_PRESSED;
     e.key = key;
     e.keyModifiers = keyModifiers;
     e.buttons = MOUSE_NO_BUTTON;
@@ -120,7 +119,7 @@ namespace DO { namespace Sara {
   inline Event key_released(int key, int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
-    e.type = KEY_RELEASED;
+    e.type = EventType::KEY_RELEASED;
     e.key = key;
     e.keyModifiers = keyModifiers;
     e.buttons = MOUSE_NO_BUTTON;
@@ -133,7 +132,7 @@ namespace DO { namespace Sara {
                              int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
-    e.type = MOUSE_PRESSED;
+    e.type = EventType::MOUSE_PRESSED;
     e.key = KEY_UNKNOWN;
     e.keyModifiers = keyModifiers;
     e.buttons = buttons;
@@ -146,7 +145,7 @@ namespace DO { namespace Sara {
                               int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
-    e.type = MOUSE_RELEASED;
+    e.type = EventType::MOUSE_RELEASED;
     e.key = KEY_UNKNOWN;
     e.keyModifiers = keyModifiers;
     e.buttons = buttons;
@@ -159,7 +158,7 @@ namespace DO { namespace Sara {
                            int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
-    e.type = MOUSE_PRESSED_AND_MOVED;
+    e.type = EventType::MOUSE_PRESSED_AND_MOVED;
     e.key = KEY_UNKNOWN;
     e.keyModifiers = keyModifiers;
     e.buttons = buttons;

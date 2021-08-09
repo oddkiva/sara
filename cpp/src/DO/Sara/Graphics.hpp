@@ -15,6 +15,7 @@
 #pragma once
 
 #include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/Image.hpp>
 
 #include <DO/Sara/Graphics/Events.hpp>
@@ -35,7 +36,7 @@
 
 /*!
   @defgroup Graphics Graphics
-  @brief The Graphics module relies on the Qt 5 framework.
+  @brief The Graphics module relies on the Qt framework.
   It covers basic graphical features such as:
   - opening, closing a window,
   - draw 2D things,

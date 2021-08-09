@@ -16,6 +16,8 @@
 #include "nvidia-video-codec-sdk-9.1.23/Utils/FFmpegDemuxer.h"
 #include "nvidia-video-codec-sdk-9.1.23/Utils/NvCodecUtils.h"
 
+#include <array>
+
 
 namespace DriverApi {
 
@@ -37,7 +39,8 @@ namespace DriverApi {
     ck(cuDeviceGet(&cuda_device, gpu_id));
 
     std::array<char, 80> device_name;
-    ck(cuDeviceGetName(device_name.data(), device_name.size(), cuda_device));
+    ck(cuDeviceGetName(device_name.data(), static_cast<int>(device_name.size()),
+                       cuda_device));
     std::cout << "GPU in use: " << device_name.data() << std::endl;
 
     ck(cuCtxCreate(&cuda_context, CU_CTX_BLOCKING_SYNC, cuda_device));
@@ -151,8 +154,8 @@ namespace DO { namespace Shakti {
       // Initialize the video stream.
       do
       {
-        if (not demuxer.Demux(&frame_data_compressed.data,
-                              &frame_data_compressed.size))
+        if (!demuxer.Demux(&frame_data_compressed.data,
+                           &frame_data_compressed.size))
           return false;
 
         decoder.Decode(frame_data_compressed.data, frame_data_compressed.size,
@@ -163,7 +166,7 @@ namespace DO { namespace Shakti {
 
     auto read(DriverApi::DeviceBgraBuffer& bgra_frame_buffer) -> bool
     {
-      if (num_frames_decoded == 0 and !decode())
+      if (num_frames_decoded == 0 && !decode())
         return false;
 
 #ifdef DEBUG

@@ -19,7 +19,7 @@ extern "C" {
 
 
 #ifdef av_ts2str
-#undef av_ts2str
+#  undef av_ts2str
 av_always_inline char* av_ts2str(int64_t ts)
 {
   thread_local char str[AV_ERROR_MAX_STRING_SIZE];
@@ -29,8 +29,8 @@ av_always_inline char* av_ts2str(int64_t ts)
 #endif
 
 #ifdef av_ts2timestr
-#undef av_ts2timestr
-av_always_inline char* av_ts2timestr(int64_t ts, AVRational *tb)
+#  undef av_ts2timestr
+av_always_inline char* av_ts2timestr(int64_t ts, AVRational* tb)
 {
   thread_local char str[AV_ERROR_MAX_STRING_SIZE];
   memset(str, 0, sizeof(str));
@@ -39,7 +39,7 @@ av_always_inline char* av_ts2timestr(int64_t ts, AVRational *tb)
 #endif
 
 #ifdef av_err2str
-#undef av_err2str
+#  undef av_err2str
 av_always_inline char* av_err2str(int errnum)
 {
   // static char str[AV_ERROR_MAX_STRING_SIZE];
@@ -295,9 +295,10 @@ namespace DO::Sara {
 
     /* init signal generator */
     ost->t = 0;
-    ost->tincr = 2 * M_PI * 110.0 / c->sample_rate;
+    ost->tincr = static_cast<float>(2 * M_PI * 110.0 / c->sample_rate);
     /* increment frequency by 110 Hz per second */
-    ost->tincr2 = 2 * M_PI * 110.0 / c->sample_rate / c->sample_rate;
+    ost->tincr2 =
+        static_cast<float>(2 * M_PI * 110.0 / c->sample_rate / c->sample_rate);
     if (c->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE)
       nb_samples = 10000;
     else
@@ -389,8 +390,8 @@ namespace DO::Sara {
         throw std::runtime_error{"Error while converting audio frame!"};
 
       frame = ost->frame;
-      frame->pts = av_rescale_q(ost->samples_count,
-                                {1, c->sample_rate}, c->time_base);
+      frame->pts =
+          av_rescale_q(ost->samples_count, {1, c->sample_rate}, c->time_base);
       ost->samples_count += dst_nb_samples;
     }
     return write_frame(oc, c, ost->stream, frame);
@@ -539,8 +540,7 @@ namespace DO::Sara {
 
   VideoWriter::VideoWriter(const std::string& filepath,
                            const Eigen::Vector2i& sizes,  //
-                           int frame_rate,
-                           const std::string& preset_quality)
+                           int frame_rate, const std::string& preset_quality)
   {
     av_dict_set(&_options, "preset", preset_quality.c_str(), 0);
 

@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core Geometry Visualization REQUIRED)
+find_package(DO_Sara COMPONENTS Core Geometry Graphics Visualization REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)
@@ -10,5 +10,6 @@ endmacro()
 
 sara_add_example(polygon_clipping_sutherland_hodgman_example)
 sara_add_example(ramer_douglas_peucker_example)
+sara_add_example(ellipse_intersection_example)
 
 add_subdirectory(raytracer)

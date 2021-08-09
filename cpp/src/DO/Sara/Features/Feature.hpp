@@ -37,7 +37,7 @@ namespace DO { namespace Sara {
    *  - Harris-Affine
    *  - Hessian-Affine features and so on...
    */
-  class DO_SARA_EXPORT OERegion
+  class OERegion
   {
   public:
     //! @{
@@ -116,6 +116,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @brief Return the anisotropic radius at a given angle in radians.
+    DO_SARA_EXPORT
     float radius(float radian = 0.f) const;
 
     //! @brief Return the anisotropic scale at a given angle in radians.
@@ -132,6 +133,7 @@ namespace DO { namespace Sara {
      *  We compute $A$ from its QR decomposition and by observing that
      *  $M = (A^{-1})^T A^{-1}$ where $M$ is the shape matrix.
      */
+    DO_SARA_EXPORT
     Matrix3f affinity() const;
 
     //! @brief Compare two regions.

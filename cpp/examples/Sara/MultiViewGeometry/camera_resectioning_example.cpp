@@ -5,6 +5,8 @@
 
 #include <algorithm>
 
+#include <array>
+
 
 namespace sara = DO::Sara;
 

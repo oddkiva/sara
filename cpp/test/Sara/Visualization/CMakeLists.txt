@@ -7,5 +7,5 @@ foreach (file ${test_visualization_SOURCE_FILES})
     NAME ${filename}
     SOURCES ${file}
     DEPENDENCIES ${DO_Sara_LIBRARIES}
-    FOLDER Features)
+    FOLDER Visualization)
 endforeach ()

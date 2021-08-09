@@ -487,7 +487,7 @@ namespace DO { namespace Sara {
     emit releasedMouseButtons(pos.x(), pos.y(),
                               buttons);
 #else
-    emit releasedMouseButtons(event->x(), event->y(), event->button());
+    emit releasedMouseButtons(pos.x(), pos.y(), event->button());
 #endif
     if (m_eventListeningTimer.isActive())
     {

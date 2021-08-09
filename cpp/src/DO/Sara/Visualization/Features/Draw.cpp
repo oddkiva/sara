@@ -9,9 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-
-#include <DO/Sara/Features/Feature.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
+
 
 using namespace std;
 

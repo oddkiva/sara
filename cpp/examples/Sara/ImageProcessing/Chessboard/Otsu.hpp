@@ -45,7 +45,7 @@ namespace DO::Sara {
     auto cdf_0 = cdf(0);
     auto cdf_1 = 1 - cdf_0;
 
-    auto mean_0_unnormalized = 0;
+    auto mean_0_unnormalized = 0.f;
     auto mean_1_unnormalized = mean;
 
     auto mean_0 = mean_0_unnormalized;
@@ -91,7 +91,8 @@ namespace DO::Sara {
       for (auto x = 0; x < image.width(); x += grid_sizes.x())
       {
         const Eigen::Vector2i start = Eigen::Vector2i{x, y};
-        const Eigen::Vector2i end = (start + grid_sizes).cwiseMin(image.sizes());
+        const Eigen::Vector2i end =
+            (start + grid_sizes).cwiseMin(image.sizes());
         const auto patch = safe_crop(image, start, end);
         const auto patch_binarized = otsu_adaptive_binarization(patch);
 

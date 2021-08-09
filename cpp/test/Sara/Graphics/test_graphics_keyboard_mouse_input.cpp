@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_get_event_with_no_input_event)
 {
   Event event;
   get_event(50, event);
-  BOOST_CHECK_EQUAL(event.type, NO_EVENT);
+  BOOST_CHECK(event.type == EventType::NO_EVENT);
 }
 
 BOOST_AUTO_TEST_CASE(test_get_event_with_input_key_event)
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(test_get_event_with_input_key_event)
   Event event;
   get_event(50, event);
 
-  BOOST_CHECK_EQUAL(event.type, KEY_PRESSED);
+  BOOST_CHECK(event.type == EventType::KEY_PRESSED);
   BOOST_CHECK_EQUAL(event.key, expected_key);
   BOOST_CHECK_EQUAL(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_pressed_event)
   Event event;
   get_event(50, event);
 
-  BOOST_CHECK_EQUAL(event.type, MOUSE_PRESSED);
+  BOOST_CHECK(event.type == EventType::MOUSE_PRESSED);
   BOOST_CHECK_EQUAL(event.buttons, 1);
   BOOST_CHECK_EQUAL(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_released_event)
   Event event;
   get_event(50, event);
 
-  BOOST_CHECK_EQUAL(event.type, MOUSE_RELEASED);
+  BOOST_CHECK(event.type == EventType::MOUSE_RELEASED);
   BOOST_CHECK_EQUAL(event.buttons, 1);
   BOOST_CHECK_EQUAL(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_moved_event)
   Event event;
   get_event(50, event);
 
-  BOOST_CHECK_EQUAL(event.type, MOUSE_PRESSED_AND_MOVED);
+  BOOST_CHECK(event.type == EventType::MOUSE_PRESSED_AND_MOVED);
   BOOST_CHECK_EQUAL(event.buttons, 1);
   BOOST_CHECK_EQUAL(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
@@ -192,6 +192,8 @@ protected:
 
   virtual ~TestFixtureForKeyboardMouseInputOnAnyWindow()
   {
+    for (auto& w : test_windows_)
+      close_window(w);
   }
 };
 
