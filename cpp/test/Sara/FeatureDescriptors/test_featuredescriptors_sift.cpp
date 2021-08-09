@@ -37,10 +37,21 @@ BOOST_AUTO_TEST_CASE(test_computation)
       grad_polar_coords(x, y) = Vector2f::Zero();
   grad_polar_coords(0, 0) = Vector2f{1.f, theta};
 
+  // Check the API for a single feature.
   auto feature = OERegion{c, 1.f};
   auto sift = ComputeSIFTDescriptor<>{}(feature, grad_polar_coords);
-
   BOOST_CHECK(sift.matrix() != decltype(sift)::Zero());
+
+  // Check the API from a list of features.
+  auto feature_list = std::vector<OERegion>{{feature}};
+  auto scale_octave_pairs = std::vector<Point2i>{{0, 0}};
+  auto polar_gradient_pyramid = ImagePyramid<Vector2f>{};
+  polar_gradient_pyramid.reset(1, 1, 1.6, 1.);
+  polar_gradient_pyramid(0, 0) = grad_polar_coords;
+ 
+  auto sift_list = ComputeSIFTDescriptor<>{}(feature_list, scale_octave_pairs, polar_gradient_pyramid);
+  BOOST_CHECK_EQUAL(sift_list.sizes(), Eigen::Vector2i(1, 128));
+  BOOST_CHECK(sift_list.matrix().row(0) == sift.transpose());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
