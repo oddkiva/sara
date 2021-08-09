@@ -6,8 +6,7 @@ Sara: C++ Computer Vision Library
 **SO LONG GITHUB!**
 
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5980a04834a04289a35752401d502728)](https://www.codacy.com/app/davidok8/sara?utm_source=github.com&utm_medium=referral&utm_content=DO-CV/sara&utm_campaign=badger)
-![GitHub Actions Build Status](https://github.com/DO-CV/sara/actions/workflows/ci.yml/badge.svg?branch=master)
+[![GitHub Actions Build Status](https://github.com/DO-CV/sara/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/DO-CV/sara/actions)
 <a href="https://ci.appveyor.com/project/do-cv/sara"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
 [![Travis Build Status](https://travis-ci.org/DO-CV/sara.svg?branch=master)](https://travis-ci.org/DO-CV/sara)
 [![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
