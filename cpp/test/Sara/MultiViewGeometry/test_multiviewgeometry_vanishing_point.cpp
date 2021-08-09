@@ -25,7 +25,6 @@ using namespace std;
 using namespace DO::Sara;
 
 
-
 BOOST_AUTO_TEST_CASE(test_vp_detection)
 {
   const auto vp = Eigen::Vector3f(500, 500, 1);
@@ -51,6 +50,5 @@ BOOST_AUTO_TEST_CASE(test_vp_detection)
 
   const auto& [vp_estimated, inliers, best_line_pair] =
       find_dominant_vanishing_point(lines, 5.f, 100u);
-  BOOST_CHECK_LE((vp.hnormalized() - vp_estimated.hnormalized()).norm(),
-                 1e-3f);
+  BOOST_CHECK_LE((vp.hnormalized() - vp_estimated.hnormalized()).norm(), 5e-3f);
 }

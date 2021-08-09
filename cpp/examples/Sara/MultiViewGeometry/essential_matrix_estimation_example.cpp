@@ -84,7 +84,7 @@ int __main(int, char** argv)
       "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
       "/home/david/Desktop/Datasets/sfm/castle_int"s;
-      // "/home/david/Desktop/Datasets/sfm/fountain_int"s;
+  // "/home/david/Desktop/Datasets/sfm/fountain_int"s;
 #endif
   const auto image_id1 = std::string{argv[1]};  // "0005"s;
   const auto image_id2 = std::string{argv[2]};  // "0004"s;
@@ -246,9 +246,28 @@ int __main(int, char** argv)
   SARA_DEBUG << "Rw =\n" << Rw << std::endl;
   SARA_DEBUG << "tw =\n" << tw << std::endl;
 
-  SARA_DEBUG << "yaw pitch roll =\n"
-             << Rw.eulerAngles(1, 0, 2) * 180. / M_PI << std::endl;
-             // << calculate_yaw_pitch_roll(Rw) * 180. / M_PI << std::endl;
+  const auto axis_angle = Eigen::AngleAxisd(Rw);
+  SARA_DEBUG << "Axis vector = " << axis_angle.axis().transpose() << std::endl;
+  SARA_DEBUG << "Angle = " << axis_angle.angle() * 180 / M_PI << " deg"
+             << std::endl;
+
+  // Rotation matrix to change from computer vision camera axis-convention to
+  // automotive axis convention.
+  //
+  // clang-format off
+  const auto P = (Eigen::Matrix3d{} <<
+     0,  0, 1,
+    -1,  0, 0,
+     0, -1, 0
+  ).finished();
+  // clang-format on
+
+  const Eigen::Matrix3d Rw1 = Rw * P;
+  const Eigen::Vector3d tw1 = P * tw;
+  SARA_DEBUG << "Rw1 =\n" << Rw1 << std::endl;
+  SARA_DEBUG << "tw1 =\n" << tw1 << std::endl;
+  SARA_DEBUG << "[BUGGY] yaw pitch roll =\n"
+             << Rw1.eulerAngles(2, 1, 0) * 180. / M_PI << std::endl;
 
   get_key();
 
