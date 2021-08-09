@@ -9,9 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #pragma once
 
-//! @file
+#include <DO/Sara/Graphics/Mesh.hpp>
 
 
 namespace DO { namespace Sara {

@@ -37,7 +37,7 @@ namespace DO { namespace Sara {
    *  - Harris-Affine
    *  - Hessian-Affine features and so on...
    */
-  class DO_SARA_EXPORT OERegion
+  class OERegion
   {
   public:
     //! @{
@@ -78,7 +78,7 @@ namespace DO { namespace Sara {
 
     OERegion(const Point2f& coords, float scale)
       : coords{coords}
-      , shape_matrix{Matrix2f::Identity() * (pow(scale, -2))}
+      , shape_matrix{Matrix2f::Identity() * (std::pow(scale, -2))}
     {
     }
 
@@ -116,6 +116,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @brief Return the anisotropic radius at a given angle in radians.
+    DO_SARA_EXPORT
     float radius(float radian = 0.f) const;
 
     //! @brief Return the anisotropic scale at a given angle in radians.
@@ -132,6 +133,7 @@ namespace DO { namespace Sara {
      *  We compute $A$ from its QR decomposition and by observing that
      *  $M = (A^{-1})^T A^{-1}$ where $M$ is the shape matrix.
      */
+    DO_SARA_EXPORT
     Matrix3f affinity() const;
 
     //! @brief Compare two regions.
@@ -142,10 +144,6 @@ namespace DO { namespace Sara {
               orientation == other.orientation &&    //
               type == other.type);
     };
-
-    //! @brief Draw the region.
-    void draw(const Color3ub& c, float scale = 1.f,
-              const Point2f& offset = Point2f::Zero()) const;
 
     DO_SARA_EXPORT
     friend std::ostream& operator<<(std::ostream&, const OERegion&);

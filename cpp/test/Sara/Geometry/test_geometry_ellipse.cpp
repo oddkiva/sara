@@ -19,6 +19,7 @@
 #include <DO/Sara/Geometry/Objects/Ellipse.hpp>
 #include <DO/Sara/Geometry/Objects/Triangle.hpp>
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
+#include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -230,6 +231,68 @@ BOOST_AUTO_TEST_CASE(test_oriented_bbox)
   const auto expected_bbox = Quad{BBox{-Point2d{_a, _b}, Point2d{_a, _b}}};
   for (int i = 0; i < 4; ++i)
     BOOST_CHECK_SMALL_L2_DISTANCE(expected_bbox[i], actual_bbox[i], 1e-8);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(TestEllipseIntersection)
+
+BOOST_AUTO_TEST_CASE(test_first_ellipse_is_inside_the_second_ellipse)
+{
+  const auto e1 = sara::Ellipse{100, 100, 0, Point2d::Zero()};
+  const auto e2 = sara::Ellipse{200, 200, 0, Point2d::Zero()};
+
+  const auto intersection_points = sara::compute_intersection_points(e1, e2);
+  BOOST_CHECK_EQUAL(intersection_points.size(), 0u);
+
+  const auto intersection_area = sara::analytic_intersection_area(e1, e2);
+  const auto e1_area = area(e1);
+  BOOST_CHECK_CLOSE(intersection_area, e1_area, 1e-8);
+}
+
+BOOST_AUTO_TEST_CASE(test_two_intersection_points)
+{
+  const auto e1 = sara::Ellipse{10, 10, 0, Point2d::Zero()};
+  const auto e2 = sara::Ellipse{10, 20, 0, 8 * Point2d::Ones()};
+
+  const auto intersection_points = sara::compute_intersection_points(e1, e2);
+  BOOST_CHECK_EQUAL(intersection_points.size(), 2u);
+
+  const auto m1 = shape_matrix(e1);
+  const auto m2 = shape_matrix(e2);
+  for (auto i = 0u; i < intersection_points.size(); ++i)
+  {
+    const auto& x = intersection_points[i];
+
+    const auto diff1 =
+        std::abs((x - e1.center()).transpose() * m1 * (x - e1.center()) - 1);
+    const auto diff2 =
+        std::abs((x - e2.center()).transpose() * m2 * (x - e2.center()) - 1);
+
+    BOOST_CHECK_SMALL(diff1, 1e-6);
+    BOOST_CHECK_SMALL(diff2, 1e-6);
+  }
+
+  const auto intersection_area = sara::analytic_intersection_area(e1, e2);
+  const auto intersection_area_approx = sara::area(sara::approximate_intersection(e1, e2, 720));
+
+  BOOST_CHECK_CLOSE(intersection_area, intersection_area_approx, 1e-2);
+}
+
+BOOST_AUTO_TEST_CASE(test_four_intersection_points)
+{
+  const auto e1 = sara::Ellipse{10, 10, 0, Point2d::Zero()};
+  const auto e2 = sara::Ellipse{5, 30, 0, Point2d::Zero()};
+
+  const auto intersection_points = sara::compute_intersection_points(e1, e2);
+  BOOST_CHECK_EQUAL(intersection_points.size(), 4u);
+
+  const auto intersection_area = sara::analytic_intersection_area(e1, e2);
+  const auto intersection_area_approx =
+      sara::area(sara::approximate_intersection(e1, e2, 720));
+
+  BOOST_CHECK_CLOSE(intersection_area, intersection_area_approx, 1e-2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,0 +1,32 @@
+book_filename: "sara_book"
+output_dir: "_book"
+delete_merged_file: true
+language:
+  ui:
+    chapter_name: "Chapter "
+rmd_files:
+  html: [
+    "index.Rmd",
+    "geometry.Rmd",
+    "features.Rmd",
+    "descriptors.Rmd",
+    "sfm.Rmd",
+    "imu.Rmd",
+    "datasets.Rmd",
+    "learning_journeys.Rmd",
+    "learning_journey_in_R.Rmd",
+    "computer_graphics.Rmd",
+    "bibliography.Rmd"
+  ]
+  latex: [
+    "index.Rmd",
+    "geometry.Rmd",
+    "features.Rmd",
+    "descriptors.Rmd",
+    "sfm.Rmd",
+    "imu.Rmd",
+    "datasets.Rmd",
+    "learning_journeys.Rmd",
+    "learning_journey_in_R.Rmd",
+    "computer_graphics.Rmd",
+  ]

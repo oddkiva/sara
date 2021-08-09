@@ -12,3 +12,4 @@
 #pragma once
 
 #include <DO/Sara/VideoIO/VideoStream.hpp>
+#include <DO/Sara/VideoIO/VideoWriter.hpp>

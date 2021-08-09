@@ -14,6 +14,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QFileDialog>
+#include <QGraphicsPixmapItem>
 
 
 namespace DO::Sara {

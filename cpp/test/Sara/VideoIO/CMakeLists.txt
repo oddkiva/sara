@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core VideoIO REQUIRED)
+find_package(DO_Sara COMPONENTS VideoIO REQUIRED)
 
 file(GLOB test_videoio_SOURCE_FILES FILES *.cpp)
 

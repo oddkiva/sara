@@ -27,30 +27,6 @@ namespace DO { namespace Sara {
    */
 
   // ======================================================================== //
-  //! Macro for generic color typedefs like in OpenGL.
-#define DEFINE_GENERIC_COLOR_TYPEDEFS(N)            \
-  /*! @brief Color{NumChannels}{ChannelType} */     \
-  using Color##N##ub = Matrix<unsigned char, N, 1>; \
-  /*! @brief Color{NumChannels}{ChannelType} */     \
-  using Color##N##b = Matrix<char, N, 1>;           \
-  /*! @brief Color{NumChannels}{ChannelType} */     \
-  using Color##N##us = Matrix<unsigned short, N, 1>;\
-  /*! @brief Color{NumChannels}{ChannelType} */     \
-  using Color##N##s = Matrix<short, N, 1>;          \
-  /*! @brief Color{NumChannels}{ChannelType}. */    \
-  using Color##N##ui = Matrix<unsigned int, N, 1>;  \
-  /*! @brief Color{NumChannels}{ChannelType} */     \
-  using Color##N##i = Matrix<int, N, 1>;            \
-  /*! @brief Color{NumChannels}{ChannelType} */     \
-  using Color##N##f = Matrix<float, N, 1>;          \
-  /*! @brief Color{NumChannels}{ChannelType} */     \
-  using Color##N##d = Matrix<double, N, 1>;
-
-  DEFINE_GENERIC_COLOR_TYPEDEFS(3)
-  DEFINE_GENERIC_COLOR_TYPEDEFS(4)
-#undef DEFINE_GENERIC_COLOR_TYPEDEFS
-
-  // ======================================================================== //
   //! Macro for color typedefs.
 #define DEFINE_COLOR_TYPES(colorspace)                      \
   /*! @brief {ColorSpace}{BitDepthPerChannel} */            \
@@ -72,6 +48,7 @@ namespace DO { namespace Sara {
 
   DEFINE_COLOR_TYPES(Rgb)
   DEFINE_COLOR_TYPES(Rgba)
+  DEFINE_COLOR_TYPES(Bgra)
   DEFINE_COLOR_TYPES(Yuv)
 #undef DEFINE_COLOR_TYPES
 

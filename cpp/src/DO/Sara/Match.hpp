@@ -14,10 +14,9 @@
 #include <vector>
 #include <cstdlib>
 
-#include <DO/Sara/Features.hpp>
-
+#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Match/HDF5.hpp>
 #include <DO/Sara/Match/IndexMatch.hpp>
 #include <DO/Sara/Match/Match.hpp>
-#include <DO/Sara/Match/PairWiseDrawer.hpp>
 
 //! @defgroup Match

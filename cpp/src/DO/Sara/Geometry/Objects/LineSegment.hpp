@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
@@ -65,6 +67,7 @@ namespace DO { namespace Sara {
     Intersection test between line segments.
     'p' is the intersection point if it exists.
    */
+  DO_SARA_EXPORT
   bool intersection(const LineSegment& s1, const LineSegment& s2, Point2d& p);
 
   //! @}

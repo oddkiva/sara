@@ -32,7 +32,7 @@ namespace DO::Sara {
     {
     }
 
-    inline explicit constexpr operator const scalar_type() const
+    inline explicit constexpr operator scalar_type() const
     {
       return value;
     }
@@ -253,6 +253,16 @@ namespace DO::Sara {
     }
 
     auto operator=(const self_type&) -> self_type& = default;
+
+    inline constexpr operator scalar_type() const
+    {
+      return value;
+    }
+
+    inline operator scalar_type&()
+    {
+      return value;
+    }
   };
 
 
@@ -297,7 +307,7 @@ namespace DO::Sara {
   constexpr auto hertz = Frequency{1};
 
   constexpr auto radian = Angle{1};
-  constexpr auto degree = radian * 180.L / M_PI;
+  constexpr auto degree = Angle{M_PI / 180.L};
 
 
   // User-defined literal operators.
@@ -339,12 +349,12 @@ namespace DO::Sara {
   }
 
 
-  constexpr auto operator""_radian(long double v) -> Angle
+  constexpr auto operator""_rad(long double v) -> Angle
   {
     return {v * radian.value};
   }
 
-  constexpr auto operator""_degree(long double v) -> Angle
+  constexpr auto operator""_deg(long double v) -> Angle
   {
     return {v * degree.value};
   }
@@ -372,12 +382,12 @@ namespace DO::Sara {
   using PixelUnitsPerLength = Eigen::Matrix<PixelUnitPerLength, N, 1>;
 
 
-  constexpr auto operator""_px(long double v) -> PixelUnit
+  inline constexpr auto operator""_px(long double v) -> PixelUnit
   {
     return {v};
   }
 
-  constexpr auto operator""_fps(long double v)
+  inline constexpr auto operator""_fps(long double v)
   {
     return v * hertz;
   }
@@ -385,22 +395,23 @@ namespace DO::Sara {
 
   // Only valid for the pinhole camera model and when there is not distortion
   // and no shear component.
-  auto pixel_sizes(double u, double v) -> Sizes<2>
+  inline auto pixel_sizes(double u, double v) -> Sizes<2>
   {
     return {u, v};
   }
 
 
   // Sizes = [1920, 1080] -> 16/9
-  auto aspect_ratio(Sizes<2> sensor_sizes)
+  inline auto aspect_ratio(Sizes<2> sensor_sizes)
   {
     const auto& sensor_width = sensor_sizes[0];
     const auto& sensor_height = sensor_sizes[0];
     return sensor_width / sensor_height;
   }
 
-  auto pixels_per_length(const PixelUnits<2>& image_sizes,
-                         const Sizes<2>& sensor_sizes) -> PixelUnitsPerLength<2>
+  inline auto pixels_per_length(const PixelUnits<2>& image_sizes,
+                                const Sizes<2>& sensor_sizes)
+      -> PixelUnitsPerLength<2>
   {
     return image_sizes.cast<long double>()
         .cwiseQuotient(sensor_sizes.cast<long double>())
@@ -409,9 +420,9 @@ namespace DO::Sara {
 
 
   // N.B.: this is true only if pixels are square!
-  auto focal_lengths_in_pixels(const PixelUnits<2>& image_sizes,  //
-                               const Sizes<2>& sensor_sizes,      //
-                               Length focal_length)               //
+  inline auto focal_lengths_in_pixels(const PixelUnits<2>& image_sizes,  //
+                                      const Sizes<2>& sensor_sizes,      //
+                                      Length focal_length)               //
       -> PixelUnits<2>
   {
     const auto ratio = sensor_sizes.cast<long double>() / focal_length.value;

@@ -17,16 +17,16 @@
 #include <DO/Sara/Core/Timer.hpp>
 
 #include <QGuiApplication>
+#include <QOpenGLBuffer>
+#include <QOpenGLDebugLogger>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLWindow>
 #include <QSurfaceFormat>
 #include <QtCore/QException>
 #include <QtCore/QObject>
 #include <QtCore/QTimer>
-#include <QtGui/QOpenGLBuffer>
-#include <QtGui/QOpenGLDebugLogger>
-#include <QtGui/QOpenGLShaderProgram>
-#include <QtGui/QOpenGLTexture>
-#include <QtGui/QOpenGLVertexArrayObject>
-#include <QtGui/QOpenGLWindow>
 
 #include <map>
 
@@ -208,11 +208,11 @@ public:
       throw QException{};
 
     const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return data.size(1) * sizeof(float);
+      return data.size(1) * static_cast<int>(sizeof(float));
     };
 
     const auto float_pointer = [](int offset) {
-      return offset * sizeof(float);
+      return offset * static_cast<int>(sizeof(float));
     };
 
     m_vao->bind();
@@ -232,7 +232,7 @@ public:
         /* GL_ENUM */ GL_FLOAT,
         /* offset */ float_pointer(0),
         /* tupleSize */ 3,
-        /* stride */ static_cast<int>(row_bytes(m_vertices)));
+        /* stride */ row_bytes(m_vertices));
 
     // Texture coordinates.
     m_program->enableAttributeArray(arg_pos["in_tex_coords"]);
@@ -241,7 +241,7 @@ public:
         /* GL_ENUM */ GL_FLOAT,
         /* offset */ float_pointer(3),
         /* tupleSize */ 2,
-        /* stride */ static_cast<int>(row_bytes(m_vertices)));
+        /* stride */ row_bytes(m_vertices));
 
     m_vao->release();
   }

@@ -20,7 +20,7 @@
 
 namespace DO::Sara {
 
-  auto EdgeDetector::operator()(const Image<float>& image) -> void
+  auto EdgeDetector::operator()(const ImageView<float>& image) -> void
   {
     tic();
     pipeline.gradient_cartesian = gradient(image);
@@ -65,7 +65,7 @@ namespace DO::Sara {
       auto& edges_simplified = pipeline.edges_simplified;
       edges_simplified.resize(edges_as_list.size());
 #pragma omp parallel for
-      for (auto i = 0u; i < edges_as_list.size(); ++i)
+      for (auto i = 0; i < static_cast<int>(edges_as_list.size()); ++i)
       {
         const auto& edge = reorder_and_extract_longest_curve(edges_as_list[i]);
 
@@ -86,7 +86,7 @@ namespace DO::Sara {
 //                                          parameters.collapse_threshold,
 //                                          parameters.collapse_adaptive);
 //       toc("Vertex Collapse");
-// 
+//
 //       tic();
 //       auto& edges_refined = edges_simplified;
 // #pragma omp parallel for

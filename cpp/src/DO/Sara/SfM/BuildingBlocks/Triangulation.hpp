@@ -17,8 +17,6 @@ namespace DO::Sara {
 
   //! @addtogroup SfM
   //! @{
-
-  DO_SARA_EXPORT
   auto estimate_two_view_geometry(const TensorView_<int, 2>& M,
                                   const TensorView_<double, 2>& un1,
                                   const TensorView_<double, 2>& un2,
@@ -27,11 +25,9 @@ namespace DO::Sara {
                                   const TensorView_<int, 1>& sample_best)
       -> TwoViewGeometry;
 
-  DO_SARA_EXPORT
   auto keep_cheiral_inliers_only(TwoViewGeometry& geometry,
                                  const TensorView_<bool, 1>& inliers) -> void;
 
-  DO_SARA_EXPORT
   auto extract_colors(const Image<Rgb8>& image1,             //
                       const Image<Rgb8>& image2,             //
                       const TwoViewGeometry& complete_geom)  //

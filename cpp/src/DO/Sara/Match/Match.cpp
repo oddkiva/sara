@@ -14,7 +14,6 @@
 #include <sstream>
 
 #include <DO/Sara/Match.hpp>
-#include <DO/Sara/Graphics.hpp>
 
 
 using namespace std;
@@ -112,45 +111,6 @@ namespace DO { namespace Sara {
     }
 
     return true;
-  }
-
-  void draw_image_pair(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
-                       const Point2f& off2, float scale)
-  {
-    display(I1, Point2i::Zero(), scale);
-    display(I2, (off2*scale).cast<int>(), scale);
-  }
-
-  void draw_match(const Match& m, const Color3ub& c, const Point2f& t,
-                  float z)
-  {
-    m.x().draw(c, z);
-    m.y().draw(c, z, t);
-    Point2f p1 = m.x_pos()*z;
-    Point2f p2 = (m.y_pos() + t)*z;
-    draw_line(p1, p2, c);
-  }
-
-  void draw_matches(const vector<Match>& matches, const Point2f& off2, float z)
-  {
-    for (auto m = matches.begin(); m != matches.end(); ++m)
-      draw_match(*m, Color3ub(rand()%256, rand()%256, rand()%256), off2, z);
-  }
-
-  void check_matches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
-                     const vector<Match>& matches,
-                     bool redraw_everytime, float z)
-  {
-    Point2f off{ float(I1.width()), 0.f };
-    draw_image_pair(I1, I2);
-    for (auto m = matches.begin(); m != matches.end(); ++m)
-    {
-      if (redraw_everytime)
-        draw_image_pair(I1, I2, z);
-      draw_match(*m, Color3ub(rand()%256, rand()%256, rand()%256), off, z);
-      cout << *m << endl;
-      get_key();
-    }
   }
 
 } /* namespace Sara */

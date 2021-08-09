@@ -33,6 +33,7 @@
 #include <DO/Sara/Core/Tree.hpp>
 // Timer classes
 #include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/Core/TicToc.hpp>
 // Miscellaneous
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StdVectorHelpers.hpp>

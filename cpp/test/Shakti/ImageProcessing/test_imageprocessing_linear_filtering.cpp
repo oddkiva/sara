@@ -14,7 +14,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core.hpp>
-#include <DO/Shakti/ImageProcessing.hpp>
+#include <DO/Shakti/Cuda/ImageProcessing.hpp>
 
 #include "../AssertHelpers.hpp"
 

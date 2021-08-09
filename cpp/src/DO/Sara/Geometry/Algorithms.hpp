@@ -14,6 +14,7 @@
 #include <DO/Sara/Geometry/Algorithms/CircleFit.hpp>
 #include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
 #include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
+#include <DO/Sara/Geometry/Algorithms/Polyline.hpp>
 #include <DO/Sara/Geometry/Algorithms/RamerDouglasPeucker.hpp>
 #include <DO/Sara/Geometry/Algorithms/Region.hpp>
 #include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>

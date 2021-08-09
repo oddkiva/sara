@@ -178,7 +178,7 @@ namespace DO::Sara::Univariate {
 
 
   //! @brief the pipeline for the root-finding algorithm.
-  struct DO_SARA_EXPORT JenkinsTraub
+  struct JenkinsTraub
   {
     JenkinsTraub(const UnivariatePolynomial<double>& P)
       : P{P}
@@ -211,20 +211,28 @@ namespace DO::Sara::Univariate {
     double root_abs_tol{1e-12};
 
     //! @brief Apply zero shift polynomial.
+    DO_SARA_EXPORT
     auto stage1() -> void;
 
     //! @brief Apply fixed shift polynomial to determine the convergence type
     //! (to a linear factor or to a quadratic factor).
+    DO_SARA_EXPORT
     auto stage2() -> void;
 
     //! @{
     //! @brief Apply variable shift polynomial to refine the factors very fast.
+    DO_SARA_EXPORT
     auto stage3_linear_factor() -> ConvergenceType;
+
+    DO_SARA_EXPORT
     auto stage3_quadratic_factor() -> ConvergenceType;
+
+    DO_SARA_EXPORT
     auto stage3(std::vector<std::complex<double>>& roots) -> ConvergenceType;
     //! @}
 
     //! @brief Find all the roots.
+    DO_SARA_EXPORT
     auto find_roots() -> std::vector<std::complex<double>>;
   };
 

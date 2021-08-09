@@ -11,8 +11,8 @@
 
 #define BOOST_TEST_MODULE "MultiViewGeometry/HDF5 I/O"
 
+#include <DO/Sara/Core/Math/Rotation.hpp>
 #include <DO/Sara/MultiViewGeometry/HDF5.hpp>
-#include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
@@ -32,8 +32,8 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_pinhole_camera)
 
     auto cameras = std::vector<PinholeCamera>{
         // K, R, t.
-        {Matrix3d::Identity(), rotation_x(0.), Vector3d::Zero()},
-        {Matrix3d::Identity() * 2., rotation_y(1.), Vector3d::Ones()},
+        {Matrix3d::Identity(), roll(0.), Vector3d::Zero()},
+        {Matrix3d::Identity() * 2., pitch(1.), Vector3d::Ones()},
     };
     h5file.write_dataset("cameras", tensor_view(cameras));
   }
@@ -48,11 +48,11 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_pinhole_camera)
     const auto& C1 = cameras[1];
 
     BOOST_CHECK_EQUAL(C0.K, Matrix3d::Identity());
-    BOOST_CHECK_EQUAL(C0.R, rotation_x(0.));
+    BOOST_CHECK_EQUAL(C0.R, roll(0.));
     BOOST_CHECK_EQUAL(C0.t, Vector3d::Zero());
 
     BOOST_CHECK_EQUAL(C1.K, Matrix3d::Identity() * 2.);
-    BOOST_CHECK_EQUAL(C1.R, rotation_y(1.));
+    BOOST_CHECK_EQUAL(C1.R, pitch(1.));
     BOOST_CHECK_EQUAL(C1.t, Vector3d::Ones());
   }
 

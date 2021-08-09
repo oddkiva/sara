@@ -16,7 +16,7 @@
 
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace DO::Sara;
@@ -93,12 +93,23 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
   get_key();
 }
 
-GRAPHICS_MAIN()
+int main(int argc, char** argv)
 {
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
+}
+
+int __main(int argc, char** argv)
+{
+  const auto image_filepath =
+      argc < 2 ? src_path("../../../../data/sunflowerField.jpg") : argv[1];
   auto image = Image<float>{};
-  auto image_filepath = src_path("../../../data/sunflowerField.jpg");
   if (!load(image, image_filepath))
+  {
+    cerr << "Could not open file " << image_filepath << endl;
     return -1;
+  }
 
   auto features = compute_harris_laplace_affine_corners(image);
 

@@ -30,8 +30,17 @@ before_script:
       gnupg
       software-properties-common
       wget
+
+  # Now add the additional APT repositories:
+  #
+  # CMake.
   - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
   - apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+  # Vulkan SDK.
+  - wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add -
+  - wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+  # Update the packages list again.
+  - apt-get update -y -qq
 
   # For the documentation.
   - apt-get install -y -qq
@@ -62,11 +71,27 @@ before_script:
       libpocl-dev
       libceres-dev
       qtbase5-dev
+      vulkan-sdk
+
+  # Install the GStreamer SDK.
+  - apt-get install -y -qq
+    libgstreamer1.0-0
+    gstreamer1.0-plugins-base
+    gstreamer1.0-plugins-good
+    gstreamer1.0-plugins-bad
+    gstreamer1.0-plugins-ugly
+    gstreamer1.0-libav
+    gstreamer1.0-doc
+    gstreamer1.0-tools
+    gstreamer1.0-x
+    gstreamer1.0-alsa
+    gstreamer1.0-gl
+    gstreamer1.0-gtk3
+    gstreamer1.0-qt5
+    gstreamer1.0-pulseaudio
 
   # Python dependencies (TODO).
-  - apt-get install -y -qq
-      libboost-python-dev
-      python3-dev
+  - apt-get install -y -qq python3-dev
 
   # Build CLBlast.
   - ./scripts/install_clblast.sh
@@ -76,10 +101,10 @@ before_script:
   - Xvfb :1 -noreset 1>/dev/null 2>&1 &
   - export DISPLAY=:1
 
-cppcheck:
-  stage: build
-  script:
-    - cppcheck --enable=all --inconclusive --verbose cpp/src
+# cppcheck:
+#   stage: build
+#   script:
+#     - cppcheck --enable=all --inconclusive --verbose cpp/src
 
 build:
   stage: build
@@ -100,7 +125,7 @@ build:
     - DISPLAY=:1 ctest
         -j$(nproc)
         --output-on-failure
-        --exclude-regex "test_graphics_*|test_core_ipc_cond1|shakti_test_*"
+        --exclude-regex "test_graphics_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
     # Run coverage (disabled for now).
     #- make -j$(nproc) coverage
 

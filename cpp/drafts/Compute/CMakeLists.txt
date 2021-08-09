@@ -49,15 +49,12 @@ if (APPLE)
     PUBLIC -x objective-c++
     PRIVATE -fobjc-arc)
 
-  target_include_directories(DO_Sara_Compute
-    PUBLIC ${OpenCL_INCLUDE_DIR})
-
   target_link_libraries(DO_Sara_Compute
     PUBLIC
     ${DO_Sara_LIBRARIES}
-    ${OpenCL_LIBRARY}
     ${CLBlast_LIBRARY}
     ${Accelerate_LIBRARY}
+    OpenCL::OpenCL
     "-framework Foundation"
     "-framework Metal"
     "-framework MetalPerformanceShaders")

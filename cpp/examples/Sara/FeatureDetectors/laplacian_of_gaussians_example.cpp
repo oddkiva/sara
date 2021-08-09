@@ -16,7 +16,7 @@
 
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace DO::Sara;
@@ -117,16 +117,16 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
   display(image);
   set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremum_type == OERegion::ExtremumType::Max
-                         ? Red8
-                         : Blue8);
+    draw(features[i], features[i].extremum_type == OERegion::ExtremumType::Max
+                          ? Red8
+                          : Blue8);
   get_key();
 }
 
 GRAPHICS_MAIN()
 {
+  const auto image_filepath = src_path("../../../../data/sunflowerField.jpg");
   auto image = Image<float>{};
-  auto image_filepath = src_path("../../../data/sunflowerField.jpg");
   if (!load(image, image_filepath))
     return -1;
 

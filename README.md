@@ -11,7 +11,6 @@ Sara: C++ Computer Vision Library
 <a href="https://ci.appveyor.com/project/do-cv/sara"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
 [![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
 [![License](https://img.shields.io/badge/license-MPL2-blue.svg)](LICENSE)
-[![Read the Docs Documentation](https://readthedocs.org/projects/sara-github/badge/?version=latest)](https://sara-github.readthedocs.io/en/latest/?badge=latest)
 [![Codedocs Reference API Documentation](https://codedocs.xyz/DO-CV/sara.svg)](https://codedocs.xyz/DO-CV/sara/)
 
 *Sara* (सार) is a Sanskrit word meaning *essence*.

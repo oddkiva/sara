@@ -37,7 +37,11 @@ func testDrawFunctions() {
 }
 
 func testImageRead() {
+#if os(macOS)
     let imageFilepath = "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+#else
+    let imageFilepath = "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+#endif
     let image = imread(filePath: imageFilepath)
 
     let w = Int32(image.width)
@@ -47,8 +51,8 @@ func testImageRead() {
     // Draw a bit of the image pixel by pixel.
     for y in 0..<h / 8 {
         for x in 0..<w / 8 {
-            let (r, g, b) = image.pixel(Int(x), Int(y))
-            var color = rgb(UInt8(r), UInt8(g), UInt8(b))
+            let (r, g, b) = image.rgb(Int(x), Int(y))
+            var color = rgb(r, g, b)
             drawPoint(x, y, &color)
         }
     }
@@ -60,16 +64,26 @@ func testImageRead() {
 }
 
 func testVideoRead() {
-#if __APPLE__
+#if os(macOS)
     let videoFilePath = "/Users/david/Desktop/Datasets/videos/sample10.mp4"
 #else
-    let videoFilePath = "/home/david/Desktop/GOPR0542.MP4"
+    let videoFilePath = "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.MP4"
 #endif
     let videoStream = VideoStream(filePath: videoFilePath)
-    resizeWindow(Int32(videoStream.frame.width),
-                 Int32(videoStream.frame.height))
+
+    let w = videoStream.frame.width
+    let h = videoStream.frame.height
+    resizeWindow(Int32(w), Int32(h))
+
+    var gray32f = Image<Float32>(
+        data: Array<Float32>(repeating: 0, count: w * h),
+        width: w, height: h, numChannels: 1)
+    var display = Image<UInt8>(data: Array<UInt8>(repeating: 0, count: w * h * 3),
+                               width: w, height: h, numChannels: 3)
     while videoStream.read() {
-        drawImage(image: videoStream.frame)
+        rgb8ToGray32f(src: videoStream.frame, dst: gray32f.view())
+        gray32fToRgb8(src: gray32f.view(), dst: display.view())
+        drawImage(image: display)
     }
 }
 
@@ -83,5 +97,11 @@ func main() {
 
 
 runGraphics {
+    if (CommandLine.arguments.count > 1) {
+        print("Command line arguments for '\(CommandLine.arguments[0])'")
+        for arg in CommandLine.arguments[1...] {
+            print("* \(arg)")
+        }
+    }
     main()
 }

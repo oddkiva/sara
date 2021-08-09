@@ -17,7 +17,7 @@
 
 namespace DO { namespace Sara {
 
-  void draw_point(ImageView<Rgb8>& image, int x, int y, const Color3ub& c)
+  void draw_point(ImageView<Rgb8>& image, int x, int y, const Rgb8& c)
   {
     QImage qimage(as_QImage(image));
     QPainter p(&qimage);
@@ -25,8 +25,8 @@ namespace DO { namespace Sara {
     p.drawPoint(x, y);
   }
 
-  void draw_circle(ImageView<Rgb8>& image, int xc, int yc, int r,
-                   const Color3ub& c, int penWidth, bool antialiasing)
+  void draw_circle(ImageView<Rgb8>& image, int xc, int yc, int r, const Rgb8& c,
+                   int penWidth, bool antialiasing)
   {
     QImage qimage(as_QImage(image));
     QPainter p(&qimage);
@@ -35,9 +35,8 @@ namespace DO { namespace Sara {
     p.drawEllipse(QPoint(xc, yc), r, r);
   }
 
-  void draw_line(ImageView<Rgb8>& image,
-                 int x1, int y1, int x2, int y2, const Color3ub& c,
-                 int penWidth, bool antialiasing)
+  void draw_line(ImageView<Rgb8>& image, int x1, int y1, int x2, int y2,
+                 const Rgb8& c, int penWidth, bool antialiasing)
   {
     QImage qimage(as_QImage(image));
     QPainter p(&qimage);
@@ -46,9 +45,8 @@ namespace DO { namespace Sara {
     p.drawLine(x1, y1, x2, y2);
   }
 
-  void draw_rect(ImageView<Rgb8>& image,
-                 int x, int y, int w, int h, const Color3ub& c,
-                 int penWidth)
+  void draw_rect(ImageView<Rgb8>& image, int x, int y, int w, int h,
+                 const Rgb8& c, int penWidth)
   {
     QImage qimage(as_QImage(image));
     QPainter p(&qimage);
@@ -56,23 +54,21 @@ namespace DO { namespace Sara {
     p.drawRect(x, y, w, h);
   }
 
-  void fill_rect(ImageView<Rgb8>& image,
-                 int x, int y, int w, int h, const Color3ub& c)
+  void fill_rect(ImageView<Rgb8>& image, int x, int y, int w, int h,
+                 const Rgb8& c)
   {
     QImage qimage(as_QImage(image));
     QPainter p(&qimage);
     p.fillRect(x, y, w, h, to_QColor(c));
   }
 
-  void fill_circle(ImageView<Rgb8>& image,
-                   int x, int y, int r, const Color3ub& c)
+  void fill_circle(ImageView<Rgb8>& image, int x, int y, int r, const Rgb8& c)
   {
     QImage qimage(as_QImage(image));
     QPainter p(&qimage);
     QPainterPath path;
-    path.addEllipse(QPointF(x,y), qreal(r), qreal(r));
+    path.addEllipse(QPointF(x, y), qreal(r), qreal(r));
     p.fillPath(path, to_QColor(c));
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

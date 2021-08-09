@@ -77,7 +77,7 @@ endmacro ()
 macro (shakti_create_common_variables _library_name)
   set(
     DO_Shakti_${_library_name}_SOURCE_DIR
-    ${DO_Shakti_SOURCE_DIR}/${_library_name}
+    ${DO_Shakti_SOURCE_DIR}/Cuda/${_library_name}
     CACHE STRING "Source directory")
   if ("${DO_Shakti_${_library_name}_SOURCE_FILES}" STREQUAL "")
     set(
@@ -147,16 +147,16 @@ macro(shakti_glob_directory _curdir)
     endif ()
   endforeach ()
 
-  set(DO_Shakti_${curdir_name}_MASTER_HEADER ${DO_Shakti_SOURCE_DIR}/${curdir_name}.hpp)
+  set(DO_Shakti_${curdir_name}_MASTER_HEADER ${DO_Shakti_SOURCE_DIR}/Cuda/${curdir_name}.hpp)
   source_group("Master Header File" FILES ${DO_Shakti_${curdir_name}_MASTER_HEADER})
 
   list(APPEND DO_Shakti_${curdir_name}_HEADER_FILES
        ${DO_Shakti_${curdir_name}_MASTER_HEADER})
 
-  #message(STATUS "Master Header:\n ${DO_Shakti_${curdir_name}_MASTER_HEADER}")
-  #message(STATUS "Header file list:\n ${DO_Shakti_${curdir_name}_HEADER_FILES}")
-  #message(STATUS "C++ Source file list:\n ${DO_Shakti_${curdir_name}_CPP_FILES}")
-  #message(STATUS "CUDA Source file list:\n ${DO_Shakti_${curdir_name}_CU_FILES}")
+  message(STATUS "Master Header:\n ${DO_Shakti_${curdir_name}_MASTER_HEADER}")
+  message(STATUS "Header file list:\n ${DO_Shakti_${curdir_name}_HEADER_FILES}")
+  message(STATUS "C++ Source file list:\n ${DO_Shakti_${curdir_name}_CPP_FILES}")
+  message(STATUS "CUDA Source file list:\n ${DO_Shakti_${curdir_name}_CU_FILES}")
 endmacro()
 
 
@@ -186,7 +186,8 @@ macro (shakti_append_library _library_name
     PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED YES
-    CUDA_SEPARABLE_COMPILATION ON)
+    CUDA_SEPARABLE_COMPILATION ON
+    POSITION_INDEPENDENT_CODE ON)
 
   # 4. Include third-party library directories.
   if (NOT "${_include_dirs}" STREQUAL "")
@@ -252,7 +253,7 @@ endmacro ()
 macro (shakti_generate_library _library_name)
   shakti_append_library(
     ${_library_name}
-    "${DO_Shakti_SOURCE_DIR}"
+    "${DO_Shakti_SOURCE_DIR}/Cuda"
     "${DO_Shakti_${_library_name}_HEADER_FILES}"
     "${DO_Shakti_${_library_name}_CPP_FILES}"
     "${DO_Shakti_${_library_name}_CU_FILES}"

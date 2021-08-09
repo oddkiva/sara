@@ -57,15 +57,16 @@ BOOST_AUTO_TEST_CASE(test_construction_of_PaintingWindow_with_small_size)
 BOOST_AUTO_TEST_CASE(
     test_construction_of_PaintingWindow_with_size_larger_than_desktop)
 {
-  int width = qApp->desktop()->width();
-  int height = qApp->desktop()->height();
+  auto app = reinterpret_cast<QGuiApplication *>(qApp);
+  const auto width = app->screens()[0]->availableSize().width();
+  const auto height = app->screens()[0]->availableSize().height();
 
   PaintingWindow* window = new PaintingWindow(width, height);
 
   BOOST_CHECK(window->scrollArea()->isMaximized());
   BOOST_CHECK(window->isVisible());
 
-  delete window->scrollArea();
+  window->scrollArea()->deleteLater();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -268,17 +269,21 @@ BOOST_AUTO_TEST_CASE(test_drawText)
   // What text.
   QString text("Sara is awesome!");
   // Where.
-  int x = 130, y = 150;
-  double orientation = 36.6;
+  const int x = 130;
+  const int y = 150;
+  const double orientation = 36.6;
   // Style.
-  QColor color(0, 255, 123);
-  int fontSize = 15;
-  bool italic = true;
-  bool bold = true;
-  bool underline = true;
+  const QColor color(0, 255, 123);
+  const int fontSize = 15;
+  const bool italic = true;
+  const bool bold = true;
+  const bool underline = true;
+  const auto penWidth = 1;
 
-  _test_window->drawText(x, y, text, color, fontSize, orientation, italic, bold,
-                         underline);
+  _test_window->drawText(x, y, text, color, fontSize,  //
+                         orientation,                  //
+                         italic, bold, underline,      //
+                         penWidth);
 
   _painter.setPen(color);
 
@@ -289,9 +294,18 @@ BOOST_AUTO_TEST_CASE(test_drawText)
   font.setUnderline(underline);
   _painter.setFont(font);
 
+  QPainterPath textPath;
+  QPointF baseline(0, 0);
+  textPath.addText(baseline, font, text);
+
+  // Outline the text by default for more visibility.
+  _painter.setBrush(color);
+  _painter.setPen(QPen(Qt::black, penWidth));
+  _painter.setFont(font);
+
   _painter.translate(x, y);
-  _painter.rotate(orientation);
-  _painter.drawText(0, 0, text);
+  _painter.rotate(qreal(orientation));
+  _painter.drawPath(textPath);
 
   BOOST_CHECK(get_image_from_window() == _true_image);
 }
@@ -501,7 +515,11 @@ protected:  // data members.
   QPoint _mouse_pos;
   Qt::Key _key;
   int _mouse_buttons_type_id;
-  int _event_type_id;
+#if QT_VERSION_MAJOR == 6
+  QMetaType _event_type;
+#else
+  int _event_type;
+#endif
 
   int _wait_ms;
   int _event_time_ms;
@@ -511,7 +529,11 @@ public:
   {
     _mouse_buttons_type_id =
         qRegisterMetaType<Qt::MouseButtons>("Qt::MouseButtons");
-    _event_type_id = qRegisterMetaType<Event>("Event");
+#if QT_VERSION_MAJOR == 6
+    _event_type = QMetaType(qRegisterMetaType<Event>("Event"));
+#else
+    _event_type = qRegisterMetaType<Event>("Event");
+#endif
     _test_window = new PaintingWindow(300, 300);
     _event_scheduler.set_receiver(_test_window);
     _mouse_pos = QPoint(10, 10);
@@ -523,7 +545,7 @@ public:
 
   ~TestFixtureForPaintingWindowEvents()
   {
-    delete _test_window->scrollArea();
+    _test_window->scrollArea()->deleteLater();
   }
 
   void compare_mouse_event(QSignalSpy& spy,
@@ -533,8 +555,13 @@ public:
     BOOST_CHECK_EQUAL(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
-    BOOST_CHECK_EQUAL(arguments.at(0).toInt(), expected_event.x());
-    BOOST_CHECK_EQUAL(arguments.at(1).toInt(), expected_event.y());
+#if QT_VERSION_MAJOR == 6
+    const auto pos = expected_event.position();
+#else
+    const auto pos = expected_event.localPos();
+#endif
+    BOOST_CHECK_EQUAL(arguments.at(0).toInt(), pos.x());
+    BOOST_CHECK_EQUAL(arguments.at(1).toInt(), pos.y());
     BOOST_CHECK_EQUAL(arguments.at(2).value<Qt::MouseButtons>(),
                       expected_event.buttons());
   }
@@ -626,9 +653,9 @@ BOOST_AUTO_TEST_CASE(test_send_event)
   BOOST_CHECK_EQUAL(spy.count(), 1);
   QList<QVariant> arguments = spy.takeFirst();
   QVariant arg = arguments.at(0);
-  arg.convert(_event_type_id);
+  arg.convert(_event_type);
   Event event(arguments.at(0).value<Event>());
-  BOOST_CHECK_EQUAL(event.type, DO::Sara::NO_EVENT);
+  BOOST_CHECK(event.type == EventType::NO_EVENT);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -656,5 +683,6 @@ int main(int argc, char* argv[])
 {
   QApplication app(argc, argv);
   app.setAttribute(Qt::AA_Use96Dpi, true);
-  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
+  boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
+  app.exec();
 }

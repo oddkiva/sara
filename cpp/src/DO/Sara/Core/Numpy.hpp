@@ -28,7 +28,8 @@ namespace DO::Sara::EigenExt {
     const auto num_samples = static_cast<int>(
         bound - std::floor(bound) > 0 ? std::ceil(bound) : std::floor(bound));
     stop = start + (num_samples - 1) * step;
-    return Eigen::Matrix<T, Eigen::Dynamic, 1>::LinSpaced(num_samples, start, stop);
+    return Eigen::Matrix<T, Eigen::Dynamic, 1>::LinSpaced(num_samples, start,
+                                                          stop);
   }
 
   template <typename Mat>

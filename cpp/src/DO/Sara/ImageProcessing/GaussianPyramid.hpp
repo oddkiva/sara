@@ -37,7 +37,7 @@ namespace DO { namespace Sara {
     using Scalar = typename ImagePyramid<T>::scalar_type;
 
     // Resize the image with the appropriate factor.
-    const auto resize_factor = pow(2.f, -params.first_octave_index());
+    const auto resize_factor = std::pow(2.f, -params.first_octave_index());
     auto I = enlarge(image, resize_factor);
 
     // Deduce the new camera sigma with respect to the dilated image.
@@ -140,9 +140,9 @@ namespace DO { namespace Sara {
       LoG.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
       for (auto s = 0; s < LoG.num_scales_per_octave(); ++s)
       {
-        LoG(s,o) = laplacian(gaussians(s,o));
-        for (auto it = LoG(s, o).begin(); it != LoG(s,o).end(); ++it)
-          *it *= static_cast<float>(pow(gaussians.scale_relative_to_octave(s), 2));
+        LoG(s, o) = laplacian(gaussians(s, o));
+        for (auto& p: LoG(s, o))
+          p *= std::pow(gaussians.scale_relative_to_octave(s), 2);
       }
     }
 

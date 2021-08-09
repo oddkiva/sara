@@ -14,12 +14,12 @@
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <QGuiApplication>
+#include <QOpenGLBuffer>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLWindow>
 #include <QSurfaceFormat>
 #include <QtCore/QException>
-#include <QtGui/QOpenGLBuffer>
-#include <QtGui/QOpenGLShaderProgram>
-#include <QtGui/QOpenGLVertexArrayObject>
-#include <QtGui/QOpenGLWindow>
 
 
 using namespace DO::Sara;
@@ -102,10 +102,10 @@ public:
        0.0f,  0.5f, 0.0f,    0.0f, 0.0f, 1.0f;  // top
 
     const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return data.size(1) * sizeof(float);
+      return data.size(1) * static_cast<int>(sizeof(float));
     };
     const auto float_pointer = [](int offset) {
-      return offset * sizeof(float);
+      return offset * static_cast<int>(sizeof(float));
     };
 
 
@@ -126,7 +126,8 @@ public:
 
       m_vbo->bind();
       m_vbo->setUsagePattern(QOpenGLBuffer::StaticDraw);
-      m_vbo->allocate(m_vertices.data(), m_vertices.size() * sizeof(float));
+      m_vbo->allocate(m_vertices.data(),
+                      static_cast<int>(m_vertices.size() * sizeof(float)));
 
       // Specify that the vertex shader param 0 corresponds to the first 3 float
       // data of the buffer object.

@@ -14,12 +14,12 @@
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <QGuiApplication>
+#include <QOpenGLBuffer>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLWindow>
 #include <QSurfaceFormat>
 #include <QtCore/QException>
-#include <QtGui/QOpenGLBuffer>
-#include <QtGui/QOpenGLShaderProgram>
-#include <QtGui/QOpenGLVertexArrayObject>
-#include <QtGui/QOpenGLWindow>
 
 
 using namespace DO::Sara;
@@ -78,10 +78,10 @@ public:
   void initialize_geometry_on_gpu()
   {
     const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return data.size(1) * sizeof(float);
+      return data.size(1) * static_cast<int>(sizeof(float));
     };
     const auto float_pointer = [](int offset) {
-      return offset * sizeof(float);
+      return offset * static_cast<int>(sizeof(float));
     };
 
     m_vao = new QOpenGLVertexArrayObject{parent()};
@@ -117,7 +117,7 @@ public:
         /* GL_ENUM */ GL_FLOAT,
         /* offset */ float_pointer(0),
         /* tupleSize */ 3,
-        /* stride */ static_cast<int>(row_bytes(m_vertices)));
+        /* stride */ row_bytes(m_vertices));
 
     // Specify that the vertex shader param 1 corresponds to the first 3 float
     // data of the buffer object.
@@ -136,7 +136,8 @@ public:
   {
     m_program->bind();
     m_vao->bind();
-    glDrawElements(GL_TRIANGLES, m_triangles.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_triangles.size()),
+                   GL_UNSIGNED_INT, 0);
     m_program->release();
   }
 

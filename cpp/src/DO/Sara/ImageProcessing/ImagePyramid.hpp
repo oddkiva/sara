@@ -299,7 +299,7 @@ namespace DO { namespace Sara {
     //! @brief Immutable getter of the relative scale w.r.t. an octave.
     auto scale_relative_to_octave(int s) const
     {
-      return pow(_scale_geometric_factor, s) * _scale_initial;
+      return std::pow(_scale_geometric_factor, s) * _scale_initial;
     }
 
     //! @brief Immutable getter of the scale relative to an octave.

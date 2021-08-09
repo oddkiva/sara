@@ -22,6 +22,7 @@
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/Features.hpp>
+#include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>

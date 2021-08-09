@@ -1,6 +1,7 @@
-from PySide2.QtCore import QTimer, Qt, qWarning, Slot
+from PySide2.QtCore import (QObject, QPointF, QRectF, QTimer, Qt, qWarning,
+                            Signal, Slot)
 from PySide2.QtWidgets import QApplication, QScrollArea, QWidget
-from PySide2.QtGui import QColor, QPainter, QPen, QPixmap
+from PySide2.QtGui import QColor, QFont, QPainter, QPen, QPixmap
 
 
 class ScrollArea(QScrollArea):
@@ -20,6 +21,11 @@ class ScrollArea(QScrollArea):
             ))
 
 
+class PaintingWindowSignals(QObject):
+    pressed_key = Signal(int)
+    released_key = Signal(int)
+
+
 class PaintingWindow(QWidget):
 
     def __init__(self, sizes, window_title="Sara", position=None, parent=None):
@@ -31,8 +37,13 @@ class PaintingWindow(QWidget):
         self._painter = QPainter(self._pixmap)
         self._painter.end()
 
+        self._antialiasing = False
+
         self.setParent(self._scroll_area)
         self.setFocusPolicy(Qt.WheelFocus)
+
+        # Populate the signals.
+        self.signals = PaintingWindowSignals()
 
         # Set event listener.
         self._event_listening_timer = QTimer(self)
@@ -76,23 +87,100 @@ class PaintingWindow(QWidget):
     def y(self):
         return self._scroll_area.pos().y();
 
+    def keyPressEvent(self, event):
+        self.signals.pressed_key.emit(event.key())
+        # if (m_eventListeningTimer.isActive())
+        # {
+        #     m_eventListeningTimer.stop();
+        #     emit sendEvent(key_pressed(event->key(), event->modifiers()));
+        # }
+
+    def keyReleaseEvent(self, event):
+        self.signals.released_key.emit(event.key());
+        # {
+        #   if (m_eventListeningTimer.isActive())
+        #   {
+        #     m_eventListeningTimer.stop();
+        #     emit sendEvent(key_released(event->key(), event->modifiers()));
+        #   }
+        # }
+
+    @Slot()
+    def eventListeningTimerStopped(self):
+        pass
+
     def paintEvent(self, event):
-        p = QPainter(self);
-        p.drawPixmap(0, 0, self._pixmap);
+        p = QPainter(self)
+        p.drawPixmap(0, 0, self._pixmap)
 
     def draw_point(self, x, y, color):
         self._painter.begin(self._pixmap)
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
         self._painter.setPen(QColor(*color));
         self._painter.drawPoint(x, y);
         self._painter.end()
-        self.update();
+        self.update()
 
-    def draw_line(self, x1, y1, x2, y2, color, pen_width):
+    def draw_line(self, p1, p2, color, pen_width):
         self._painter.begin(self._pixmap)
-        self._painter.setPen(QPen(QColor(*color), pen_width));
-        self._painter.drawLine(x1, y1, x2, y2);
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing)
+        self._painter.setPen(QPen(QColor(*color), pen_width))
+        self._painter.drawLine(QPointF(*p1), QPointF(*p2))
         self._painter.end()
-        self.update();
+        self.update()
+
+    def draw_rect(self, top_left_corner, sizes, color, pen_width):
+        self._painter.begin(self._pixmap)
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing)
+        self._painter.setPen(QPen(QColor(*color), pen_width))
+        self._painter.drawRect(top_left_corner[0], top_left_corner[1],
+                               sizes[0], sizes[1]);
+        self._painter.end()
+        self.update()
+
+    def draw_circle(self, center, radius, color, pen_width):
+        self._painter.begin(self._pixmap)
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing);
+        self._painter.setPen(QPen(QColor(*color), pen_width))
+        self._painter.drawEllipse(QPointF(*center), radius, radius);
+        self._painter.end()
+        self.update()
+
+    def draw_ellipse(self, center, r1, r2, angle_in_degrees, color, pen_width):
+        self._painter.begin(self._pixmap)
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing)
+        self._painter.save()
+        self._painter.setPen(QPen(QColor(*color), pen_width))
+        self._painter.translate(QPointF(*center))
+        self._painter.rotate(angle_in_degrees)
+        self._painter.translate(-r1, -r2)
+        self._painter.drawEllipse(QRectF(0, 0, 2 * r1, 2 * r2))
+        self._painter.restore()
+        self._painter.end()
+        self.update()
+
+    def draw_text(self, p, text, color, font_size, orientation, italic, bold,
+                  underline):
+        font = QFont()
+        font.setPointSize(font_size)
+        font.setItalic(italic)
+        font.setBold(bold)
+        font.setUnderline(underline)
+
+        self._painter.begin(self._pixmap)
+
+        self._painter.setRenderHints(QPainter.Antialiasing, self._antialiasing)
+
+        self._painter.save()
+        self._painter.setPen(QColor(*color))
+        self._painter.setFont(font)
+
+        self._painter.translate(p[0], p[1])
+        self._painter.rotate(orientation)
+        self._painter.drawText(0, 0, text)
+        self._painter.restore()
+        self._painter.end()
+        self.update()
 
     def draw_image(self, image, offset, scale):
         xoff, yoff = offset
@@ -105,32 +193,13 @@ class PaintingWindow(QWidget):
         self._painter.end()
         self.update()
 
-    @Slot()
-    def eventListeningTimerStopped(self):
-        pass
+    def clear(self):
+        self._pixmap.fill();
+        self.update();
 
+    def set_antialiasing(self, on):
+        self._antialiasing = on
 
-#  void PaintingWindow::drawCircle(const QPointF& center, qreal r,
-#                                  const QColor& c, int penWidth)
-#  {
-#    m_painter.setPen(QPen(c, penWidth));
-#    m_painter.drawEllipse(QPointF(center.x(), center.y()), r, r);
-#    update();
-#  }
-#
-#  void PaintingWindow::drawEllipse(const QPointF& center, qreal r1, qreal r2,
-#                                   qreal degree, const QColor& c, int penWidth)
-#  {
-#    m_painter.save();
-#    m_painter.setPen(QPen(c, penWidth));
-#    m_painter.translate(center);
-#    m_painter.rotate(degree);
-#    m_painter.translate(-r1, -r2);
-#    m_painter.drawEllipse(QRectF(0, 0, 2*r1, 2*r2));
-#    m_painter.restore();
-#    update();
-#  }
-#
 #  void PaintingWindow::drawPoly(const QPolygonF& polygon, const QColor& c,
 #                                int width)
 #  {
@@ -138,37 +207,6 @@ class PaintingWindow(QWidget):
 #    m_painter.drawPolygon(polygon);
 #    update();
 #  }
-#
-#  void PaintingWindow::drawRect(int x, int y, int w, int h, const QColor& c,
-#                                int penWidth)
-#  {
-#    m_painter.setPen(QPen(c, penWidth));
-#    m_painter.drawRect(x, y, w, h);
-#    update();
-#  }
-#
-#  void PaintingWindow::drawText(int x, int y, const QString& text,
-#                                const QColor& color, int fontSize,
-#                                double orientation, bool italic, bool bold,
-#                                bool underline)
-#  {
-#    QFont font;
-#    font.setPointSize(fontSize);
-#    font.setItalic(italic);
-#    font.setBold(bold);
-#    font.setUnderline(underline);
-#
-#    m_painter.save();
-#    m_painter.setPen(color);
-#    m_painter.setFont(font);
-#
-#    m_painter.translate(x, y);
-#    m_painter.rotate(qreal(orientation));
-#    m_painter.drawText(0, 0, text);
-#    m_painter.restore();
-#    update();
-#  }
-#
 #  void PaintingWindow::drawArrow(int x1, int y1, int x2, int y2,
 #                                 const QColor& col,
 #                                 int arrowWidth, int arrowHeight, int style,
@@ -292,17 +330,6 @@ class PaintingWindow(QWidget):
 #    update();
 #  }
 #
-#  void PaintingWindow::clear()
-#  {
-#    m_pixmap.fill();
-#    update();
-#  }
-#
-#  void PaintingWindow::setAntialiasing(bool on)
-#  {
-#    m_painter.setRenderHints(QPainter::Antialiasing, on);
-#  }
-#
 #  void PaintingWindow::setTransparency(bool on)
 #  {
 #    if (on)
@@ -397,25 +424,5 @@ class PaintingWindow(QWidget):
 #      m_eventListeningTimer.stop();
 #      emit sendEvent(mouse_released(event->x(), event->y(),
 #                                   event->buttons(), event->modifiers()));
-#    }
-#  }
-#
-#  void PaintingWindow::keyPressEvent(QKeyEvent *event)
-#  {
-#    emit pressedKey(event->key());
-#    if (m_eventListeningTimer.isActive())
-#    {
-#      m_eventListeningTimer.stop();
-#      emit sendEvent(key_pressed(event->key(), event->modifiers()));
-#    }
-#  }
-#
-#  void PaintingWindow::keyReleaseEvent(QKeyEvent *event)
-#  {
-#    emit releasedKey(event->key());
-#    if (m_eventListeningTimer.isActive())
-#    {
-#      m_eventListeningTimer.stop();
-#      emit sendEvent(key_released(event->key(), event->modifiers()));
 #    }
 #  }

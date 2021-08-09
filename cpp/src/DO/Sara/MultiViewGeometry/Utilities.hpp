@@ -85,24 +85,12 @@ namespace DO::Sara {
   inline auto skew_symmetric_matrix(const Matrix<T, 3, 1>& a) -> Matrix<T, 3, 3>
   {
     auto A = Matrix<T, 3, 3>{};
-    A << T(0), -a(2), a(1), a(2), T(0), -a(0), -a(1), a(0), T(0);
+    A <<
+       T(0), -a(2),  a(1), //
+       a(2),  T(0), -a(0), //
+      -a(1),  a(0),  T(0);
 
     return A;
-  }
-
-  inline Matrix3d rotation_x(double angle)
-  {
-    return Eigen::AngleAxisd(angle, Vector3d::UnitX()).toRotationMatrix();
-  }
-
-  inline Matrix3d rotation_y(double angle)
-  {
-    return Eigen::AngleAxisd(angle, Vector3d::UnitY()).toRotationMatrix();
-  }
-
-  inline Matrix3d rotation_z(double angle)
-  {
-    return Eigen::AngleAxisd(angle, Vector3d::UnitZ()).toRotationMatrix();
   }
   //! @}
 

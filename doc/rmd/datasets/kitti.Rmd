@@ -1,0 +1,312 @@
+## KITTI
+
+KITTI [@geiger:2013:ijrr] is a very comprehensive benchmark suite that touches
+upon many relevant computer vision tasks. This benchmark is clearly geared
+towards road safety applications.
+
+In this section, I provide some more technical notes regarding the available
+data and which I find worth emphasizing again. The raw data in the benchmark is
+very large and it can be quite confusing to find our way as the documentation is
+scattered in many places across the website.
+
+In the object detection challenge -- be it whether 2D or 3D, it does not matter
+since the provided data provided is pretty much the same for both tasks -- it is
+worth focusing our attention on deciphering the calibration data.
+
+### Camera Sensors
+
+As depicted in the Figure \@ref(fig:kitti-sensors) borrowed from the setup page
+http://www.cvlibs.net/datasets/kitti/setup.php, the car is equipped with:
+
+- 4 cameras
+- 1 Velodyne lidar scanner
+- 1 IMU/GPS device.
+
+```{r, echo=FALSE}
+setup_top_view_file = "http://www.cvlibs.net/datasets/kitti/images/setup_top_view.png"
+if (knitr::is_latex_output()) {
+  setup_top_view_local_file = paste0(getwd(),
+                                     "/../figures/kitti_setup_top_view.png")
+  if (!file.exists(setup_top_view_local_file))
+    download.file(setup_top_view_file, setup_top_view_local_file, mode = 'wb')
+  setup_top_view_file = setup_top_view_local_file
+}
+```
+
+```{r kitti-sensors, echo=FALSE, fig.align="center", fig.cap="Sensors mounted on the car. Credits: www.cvlibs.net."}
+knitr::include_graphics(setup_top_view_file)
+```
+
+Each camera is at a height of $1.65\text{m}$ above the ground plane.  As
+highlighted in Figure \@ref(fig:kitti-sensors) and more clearly
+in Figure \@ref(fig:kitti-sensors-2), the camera coordinate system follows OpenCV's camera
+axis convention where:
+
+- The $x$-axis is the horizontal axis pointing to the right of the vehicle.
+- The $y$-axis is the vertical axis pointing down to the ground.
+- The $z$-axis is the axis pointing from the camera center to the camera gaze direction.
+
+```{r, echo=FALSE}
+sensors_file = "http://www.cvlibs.net/datasets/kitti/images/passat_sensors_920.png"
+if (knitr::is_latex_output()) {
+  sensors_local_file = paste0(getwd(),
+                              "/../figures/kitti_passat_sensors_920.png")
+  if (!file.exists(sensors_local_file))
+    download.file(sensors_file, sensors_local_file, mode = 'wb')
+  sensors_file = sensors_local_file
+}
+```
+
+```{r kitti-sensors-2, echo=FALSE, fig.align="center", fig.cap="This image shows the coordinate system used for each sensor. Credits: www.cvlibs.net."}
+knitr::include_graphics(sensors_file)
+```
+
+### 3D Geometry of Annotations
+
+For a given image, we are provided a label file that lists object annotations
+where each object annotation contains the following geometry:
+
+- A __2D bounding box__ in the image (streamed from Camera #2) with 2D image
+  coordinates:
+
+  - `left`
+  - `top`
+  - `right`
+  - `bottom`
+
+  These coordinates are straightforward to understand. Now let us move onto the
+  description of the 3D bounding box which we describe with more details.
+
+- A __3D oriented bounding box__ with:
+
+  - one 3D reference point expressed in the camera coordinate system
+    $\mathbf{t} = (x, y, z)$.
+
+    Visually this corresponds to the center of the bottom face of the 3D
+    bounding box, *i.e.*, the face lying on the ground surface.
+
+  - the 3D dimensions of the bounding box $(w, h, l)$. This allows us to
+    populate the $8$ vertices in the **local object coordinate system**:
+
+    \begin{equation}
+       \mathbf{X}_l =
+       \left[
+       \begin{array}{r|r|r|r|r|r|r|r}
+       -w/2 &  w/2  &  w/2 & -w/2 & -w/2 &  w/2  & w/2 & -w/2 \\
+          0 &    0  &   -h &   -h &    0 &    0  &  -h &   -h \\
+       -l/2 & -l/2  & -l/2 & -l/2 &  l/2 &  l/2  & l/2 &  l/2 \\
+          1 &    1  &    1 &    1  &   1 &    1  &   1 &    1 \\
+       \end{array}
+       \right]
+    \end{equation}
+
+    Upon reading the coordinates:
+
+    - The first 4 columns are the vertices of the front-face of the bounding
+      box.
+    - The last 4 columns are the vertices of the back-face of the bounding
+      box.
+
+    *N.B.: it is possible that I permuted some variables.*
+
+    In this local object coordinate system, the origin is at the center of the
+    bottom face.
+
+    ```{python, echo = FALSE}
+    import numpy as np
+    ```
+
+    ```{python}
+    def get_bounding_box_3d(sizes):
+        l, w, h = sizes
+
+        X_local = np.array([
+            # Front face of the bbox
+            #
+            # Bottom-left.
+            [-l/2,  0, -w/2],
+            # Bottom-right.
+            [+l/2,  0, -w/2],
+            # Top-right.
+            [+l/2, -h, -w/2],
+            # Top-left.
+            [-l/2, -h, -w/2],
+
+            # Back face of the bbox.
+            #
+            # Bottom-left.
+            [-l/2,  0, +w/2],
+            # Bottom-right.
+            [+l/2,  0, +w/2],
+            # Top-right.
+            [+l/2, -h, +w/2],
+            # Top-left.
+            [-l/2, -h, +w/2],
+        ]).T
+
+        ones = np.ones((1, 8))
+        X_local = np.concatenate((X_local, ones))
+
+        return X_local
+    ```
+
+    Which evaluates for the following sizes as
+
+    ```{python}
+    l, w, h = 4, 3, 2
+    X_local = get_bounding_box_3d((l, w, h))
+    ```
+
+    ```{python, echo = FALSE}
+    print(X_local)
+    ```
+
+  - the yaw angle $\psi$ of the bounding box with respect to the $y$-axis of the
+    camera coordinate system
+
+    \begin{equation}
+      \mathbf{R}_\psi =
+      \begin{bmatrix}
+       \cos\psi &  0  & \sin\psi \\
+              0 &  1  &        0 \\
+      -\sin\psi &  0  & \cos\psi \\
+      \end{bmatrix}
+    \end{equation}
+
+It follows that the vertices expressed in the camera coordinate system can be
+calculated as
+
+\begin{equation}
+  \mathbf{X} =
+  \begin{bmatrix}
+  \mathbf{R}_\psi & \mathbf{t} \\
+   \mathbf{0}_3^T &          1 \\
+  \end{bmatrix}
+  \mathbf{X}_l
+\end{equation}
+
+We can double-check these by examining the MATLAB code provided in the
+development kit.
+
+
+### Projection of 3D World Points to the Camera #2's Film
+
+One important thing to note is that the camera coordinate system refers to the
+coordinate system associated to Camera #0. Thus the vertices $\mathbf{X}$
+are expressed with respect to Camera #0 coordinate system and not w.r.t. to
+Camera #2 coordinate system!
+
+Indeed the **README** file in the development kit states that the projection of
+the 3D bounding box to the image is done via the following formula
+
+\begin{equation}
+  \mathbf{u} = \mathbf{P}_2
+    \left[
+      \begin{array}{c|c}
+      \mathbf{R}_0^{(\text{rect})} & \mathbf{0}_3 \\
+      \hline
+                    \mathbf{0}_3^T &            1 \\
+      \end{array}
+    \right]
+    \mathbf{X}
+\end{equation}
+
+where
+
+- $\mathbf{u}$ is the 2D pixel coordinates on camera #2,
+- $\mathbf{X}$ are the 3D vertices of the bounding box in
+  the camera coordinate system which we described in details in the subsection
+  above.
+
+Splitting the projection matrix as
+
+\begin{equation}
+ \mathbf{P}_2 =
+   \left[
+   \begin{array}{c|c}
+     \mathbf{M} & \mathbf{m}
+   \end{array}
+   \right]
+\end{equation}
+
+It appears upon examination of the calibration data (see for example text file
+**0000.txt**) that the projection matrix $\mathbf{P}_2$ can be decomposed
+simply as:
+
+\begin{equation}
+  \mathbf{P}_2 = \mathbf{K}
+    \left[
+    \begin{array}{c|c}
+      \mathbf{I}_3 & \mathbf{t}
+    \end{array}
+    \right]
+\end{equation}
+
+where:
+
+- $\mathbf{K} = \mathbf{M}$ is the usual calibration matrix.
+- $\mathbf{t} = \mathbf{K}^{-1} \mathbf{m}$ relates the metric
+  displacement of camera center #2 w.r.t. camera center #0.
+
+The interpretation we can make from this decomposition is that as a first
+approximation, cameras #0, #1, #2 and #3 have their axes exactly aligned.
+
+This is not the case obviously and the rotation matrix
+$\mathbf{R}_0^{(\text{rect})}$ quantifies the small angular differences between
+cameras #0 and #2.
+
+Now let us reinject the decomposition of $\mathbf{P}_2$ in the projection
+equation
+
+\begin{equation}
+  \mathbf{u} = \mathbf{K}
+    \left[
+      \begin{array}{c|c}
+      \mathbf{I}_3 & \mathbf{t} \\
+      \end{array}
+    \right]
+    %
+    \left[
+      \begin{array}{c|c}
+      \mathbf{R}_0^{(\text{rect})} & \mathbf{0}_3 \\
+      \hline
+                    \mathbf{0}_3^T &            1 \\
+      \end{array}
+    \right]
+    \mathbf{X}
+\end{equation}
+
+Then multiplying the matrix blocks,
+
+\begin{equation}
+  \mathbf{u} =
+    \mathbf{K}
+    %
+    \left[
+      \begin{array}{c|c}
+      \mathbf{I}_3\ \mathbf{R}_0^{(\text{rect})} + \mathbf{t}\ \mathbf{0}_3^T &
+      \mathbf{I}_3\ \mathbf{0}_3 + \mathbf{t}\ 1  \\
+      \end{array}
+    \right]
+    %
+    \mathbf{X}
+\end{equation}
+
+Upon simplification,
+
+\begin{equation}
+  \boxed{
+    \mathbf{u} = \mathbf{K}
+      \left[
+        \begin{array}{c|c}
+        \mathbf{R}_0^{(\text{rect})} & \mathbf{t} \\
+        \end{array}
+      \right]
+      \mathbf{X}
+  }.
+\end{equation}
+
+Now the equation has the familiar form as exposed in usual computer vision
+textbooks. And it follows from this equation that to go from camera coordinate
+system #0 to camera coordinate system #2 is done by the rigid body motion
+$(\mathbf{R}_0^{(\text{rect})}, \mathbf{t})$.

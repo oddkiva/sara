@@ -72,9 +72,9 @@ BOOST_AUTO_TEST_CASE(test_robust_line_fit)
       0.1  //
   };
   const auto& estimation = ransac(points,            //
-                                 line_solver,       //
-                                 inlier_predicate,  //
-                                 10u);
+                                  line_solver,       //
+                                  inlier_predicate,  //
+                                  10u);
   const auto& inliers = std::get<1>(estimation);
   BOOST_CHECK_EQUAL(inliers.flat_array().count(), 4);
 }

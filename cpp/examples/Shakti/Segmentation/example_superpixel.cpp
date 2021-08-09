@@ -20,8 +20,8 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <DO/Shakti/Segmentation.hpp>
-#include <DO/Shakti/Utilities/DeviceInfo.hpp>
+#include <DO/Shakti/Cuda/Segmentation.hpp>
+#include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
 
 
 namespace sara = DO::Sara;
@@ -46,9 +46,9 @@ GRAPHICS_MAIN()
           :
           // Video samples with image sizes (1920 x 1080).
 #ifdef _WIN32
-          "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"
+          "C:/Users/David/Desktop/GOPR0542.MP4"
 #else
-          "/home/david/Desktop/GOPR0542.MP4"
+          "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.MP4"
 #endif
       ;
   std::cout << video_filepath << std::endl;

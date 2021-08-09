@@ -219,7 +219,7 @@ public:
         }
         break;
       }
-      catch (std::bad_alloc)
+      catch (std::bad_alloc&)
       {
         if (!bPartial)
         {

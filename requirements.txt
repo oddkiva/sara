@@ -1,5 +1,5 @@
 breathe
-coverage
+coverage==4.5.4
 exhale
 imageio
 ipdb
@@ -7,7 +7,9 @@ ipdbplugin
 jinja2
 nose
 numpy
+PySide2
 recommonmark
+scipy
 sphinx
 sphinx-autobuild
 sphinx_rtd_theme

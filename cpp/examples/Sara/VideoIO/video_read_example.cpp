@@ -11,6 +11,7 @@
 
 //! @example
 
+#include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
@@ -28,10 +29,9 @@ GRAPHICS_MAIN()
   using namespace std::string_literals;
 #ifdef _WIN32
   const auto video_filepath =
-      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+      "C:/Users/David/Desktop/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath =
-      "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
+  const auto video_filepath = "/Users/david/Desktop/Datasets/videos/sample10.mp4";
 #else
   // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
@@ -43,12 +43,22 @@ GRAPHICS_MAIN()
   SARA_DEBUG << "Frame rate = " << video_stream.frame_rate() << std::endl;
   SARA_DEBUG << "Frame sizes = " << video_stream.sizes().transpose() << std::endl;
 
-  while (video_stream.read())
+  while (true)
   {
+
+    sara::tic();
+    auto has_frame = video_stream.read();
+    sara::toc("Read frame");
+
+    if (!has_frame)
+      break;
+
     if (sara::active_window() == nullptr)
       sara::set_active_window(sara::create_window(video_stream.sizes()));
 
+    sara::tic();
     sara::display(video_stream.frame());
+    sara::toc("Display");
   }
 
   sara::close_window();

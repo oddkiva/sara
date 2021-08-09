@@ -21,6 +21,7 @@
 #pragma once
 
 #include <DO/Sara/Match.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 #include <set>
 #include <vector>

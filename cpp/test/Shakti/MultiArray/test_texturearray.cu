@@ -12,10 +12,10 @@
 #define BOOST_TEST_MODULE "Shakti/MultiArray/Texture Array"
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Shakti/ImageProcessing/Kernels/Globals.hpp>
+#include <DO/Shakti/Cuda/ImageProcessing/Kernels/Globals.hpp>
 
-#include <DO/Shakti/MultiArray.hpp>
-#include <DO/Shakti/MultiArray/Offset.hpp>
+#include <DO/Shakti/Cuda/MultiArray.hpp>
+#include <DO/Shakti/Cuda/MultiArray/Offset.hpp>
 
 
 using namespace std;

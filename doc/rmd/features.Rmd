@@ -1,0 +1,41 @@
+\renewcommand{\eqdef}{\overset{\textrm{def}}{=}}
+\newcommand{\M}{\mathcal{M}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+\newcommand{\Shape}{\mathcal{S}},
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\y}{\mathbf{y}}
+\newcommand{\z}{\mathbf{z}}
+\newcommand{\w}{\mathbf{w}}
+\newcommand{\be}{\mathbf{e}}
+\newcommand{\bo}{\mathbf{o}}
+\newcommand{\bp}{\mathbf{p}}
+\newcommand{\bq}{\mathbf{q}}
+\newcommand{\bE}{\mathbf{E}}
+\newcommand{\bL}{\mathbf{L}}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bQ}{\mathbf{Q}}
+\newcommand{\bR}{\mathbf{R}}
+\newcommand{\bSigma}{\mathbf{\Sigma}}
+\newcommand{\bT}{\mathbf{T}}
+
+
+# Locally Invariant Regions
+
+In this chapter, we will review the geometric characteristics of locally
+invariant regions such as *SIFT* [@Lowe:2004:ijcv], *SURF* [@BayETVG:2008:cviu],
+MSER [@MatasCUP:2002:bmvc] and affine-covariant regions
+[@MikolajczykTSZMSKVG:2005:ijcv]. These features used to be popularly utilized
+for high-level object recognition tasks before the widespread adoption of deep
+learning and are still playing a key part in structure-from-motion pipelines
+that I feel compelled to say a few words about them.
+
+N.B.: this chapter contains bits of my thesis [@Ok:2013:phdthesis], which I have
+simplified.
+
+```{r, child="features/locally_invariant_regions.Rmd"}
+```
+
+```{r, child="features/normalizing_feature_transform.Rmd"}
+```

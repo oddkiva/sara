@@ -58,13 +58,15 @@ namespace DO { namespace Sara {
   //! Grayscale color space.
   struct Gray {};
   //! RGB color space and layout.
-  using Rgb = Meta::Vector3<R,G,B>;
+  using Rgb = Meta::Vector3<R, G, B>;
   //! RGBA color space and layout.
-  using Rgba = Meta::Vector4<R,G,B,A>;
+  using Rgba = Meta::Vector4<R, G, B, A>;
+  //! BGRA color space and layout.
+  using Bgra = Meta::Vector4<B, G, R, A>;
   //! YUV color space and layout.
-  using Yuv = Meta::Vector3<Y,U,V>;
+  using Yuv = Meta::Vector3<Y, U, V>;
   //! HSV color space and layout.
-  using Hsv = Meta::Vector3<H,S,V>;
+  using Hsv = Meta::Vector3<H, S, V>;
   //! @} ColorSpaces
 
 } /* namespace Sara */

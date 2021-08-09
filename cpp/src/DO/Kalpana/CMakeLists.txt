@@ -10,17 +10,11 @@ include(kalpana_macros)
 
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 
-if (Qt5_POSITION_INDEPENDENT_CODE)
+if (Qt${QT_VERSION}_POSITION_INDEPENDENT_CODE)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
 kalpana_dissect_version(${DO_Kalpana_VERSION})
-
-
-# Set output directories.
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
 # Create the following libraries.
@@ -32,11 +26,14 @@ foreach (library ${DO_Kalpana_LIBRARIES})
 
   if (NOT ${library} STREQUAL "Plot")
     target_link_libraries(DO_Kalpana_${library}
-      Qt5::Core Qt5::Widgets Qt5::OpenGL Qt5::OpenGLExtensions
-      ${OPENGL_LIBRARIES} ${DO_Sara_LIBRARIES})
+      Qt${QT_VERSION}::Core
+      Qt${QT_VERSION}::Widgets
+      Qt${QT_VERSION}::OpenGL
+      $<$<EQUAL:${QT_VERSION},6>:Qt6::OpenGLWidgets>
+      ${OPENGL_LIBRARIES}
+      ${DO_Sara_LIBRARIES})
   endif ()
 endforeach ()
 
 target_link_libraries(DO_Kalpana_3D DO_Kalpana_Math)
-# target_compile_definitions(-DGL_GLEXT_PROTOTYPES)
 target_compile_definitions(DO_Kalpana_3D PRIVATE -DGL_SILENCE_DEPRECATION)

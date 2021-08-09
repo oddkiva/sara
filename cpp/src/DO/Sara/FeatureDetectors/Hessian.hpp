@@ -45,15 +45,20 @@ namespace DO { namespace Sara {
     {
       D.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
       for (int s = 0; s < D.num_scales_per_octave(); ++s)
-        D(s,o) = gaussians(s,o).
-          template compute<Hessian>().
-          template compute<Determinant>();
+      {
+        D(s, o) = gaussians(s, o)
+                      .template compute<Hessian>()
+                      .template compute<Determinant>();
+        // Apply the scale normalization.
+        D(s, o).flat_array() *=
+            std::pow(gaussians.scale_relative_to_octave(s), 4);
+      }
     }
     return D;
   }
 
   //! Functor class to compute Hessian-Laplace maxima.
-  class DO_SARA_EXPORT ComputeHessianLaplaceMaxima
+  class ComputeHessianLaplaceMaxima
   {
   public:
     /*!
@@ -108,6 +113,7 @@ namespace DO { namespace Sara {
       \return set of Hessian-Laplace maxima in **std::vector<OERegion>** in each
       scale-normalized determinant of Hessians.
      */
+    DO_SARA_EXPORT
     std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 
@@ -162,7 +168,7 @@ namespace DO { namespace Sara {
 
   //! Functor class to compute local extrema of determinant of Hessians
   //! in scale space.
-  class DO_SARA_EXPORT ComputeDoHExtrema
+  class ComputeDoHExtrema
   {
   public:
     /*!
@@ -189,14 +195,14 @@ namespace DO { namespace Sara {
     ComputeDoHExtrema(const ImagePyramidParams& pyrParams =
                           ImagePyramidParams(-1, 3 + 2, pow(2.f, 1.f / 3.f), 2),
                       float extremum_thres = 1e-6f,
-                      float edgeRatioThres = 10.f,
+                      float edge_ratio_thres = 10.f,
                       int img_padding_sz = 1,
-                      int extremumRefinementIter = 2)
+                      int extremum_refinement_iter = 2)
       : pyr_params_(pyrParams)
       , _extremum_thres(extremum_thres)
-      , _edge_ratio_thres(edgeRatioThres)
+      , _edge_ratio_thres(edge_ratio_thres)
       , _img_padding_sz(img_padding_sz)
-      , _extremum_refinement_iter(extremumRefinementIter)
+      , _extremum_refinement_iter(extremum_refinement_iter)
     {
     }
 
@@ -220,6 +226,7 @@ namespace DO { namespace Sara {
       \return set of DoHs extrema in **std::vector<OERegion>** in each
       scale-normalized determinant of Hessians.
      */
+    DO_SARA_EXPORT
     std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 

@@ -27,9 +27,9 @@ BOOST_AUTO_TEST_SUITE(TestWindow)
 
 BOOST_AUTO_TEST_CASE(test_open_and_close_window)
 {
-  QPointer<PaintingWindow> window = qobject_cast<PaintingWindow*>(
+  auto window = qobject_cast<PaintingWindow*>(
       create_window(300, 300, "My Window", 50, 50));
-  QPointer<QWidget> scroll_area(window->scrollArea());
+  auto scroll_area = window->scrollArea();
 
   // Check window dimensions.
   BOOST_CHECK_EQUAL(get_width(window), window->width());
@@ -47,13 +47,11 @@ BOOST_AUTO_TEST_CASE(test_open_and_close_window)
   // Check that the widget gets destroyed when we close the window.
   close_window(window);
   millisleep(50);
-  BOOST_CHECK(scroll_area.isNull());
-  BOOST_CHECK(window.isNull());
 }
 
 BOOST_AUTO_TEST_CASE(test_open_and_close_gl_window)
 {
-  QPointer<QWidget> window = create_gl_window(300, 300, "My Window", 50, 50);
+  auto window = create_gl_window(300, 300, "My Window", 50, 50);
 
   BOOST_CHECK_EQUAL(get_width(window), window->width());
   BOOST_CHECK_EQUAL(get_height(window), window->height());
@@ -64,13 +62,11 @@ BOOST_AUTO_TEST_CASE(test_open_and_close_gl_window)
 
   close_window(window);
   millisleep(50);
-  BOOST_CHECK(window.isNull());
 }
 
 BOOST_AUTO_TEST_CASE(test_open_and_close_graphics_view)
 {
-  QPointer<QWidget> window =
-      create_graphics_view(300, 300, "My Window", 50, 50);
+  auto window = create_graphics_view(300, 300, "My Window", 50, 50);
 
   BOOST_CHECK_EQUAL(get_width(window), window->width());
   BOOST_CHECK_EQUAL(get_height(window), window->height());
@@ -81,7 +77,6 @@ BOOST_AUTO_TEST_CASE(test_open_and_close_graphics_view)
 
   close_window(window);
   millisleep(50);
-  BOOST_CHECK(window.isNull());
 }
 
 BOOST_AUTO_TEST_CASE(test_set_active_window)

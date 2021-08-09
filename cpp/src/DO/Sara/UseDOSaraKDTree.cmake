@@ -8,10 +8,7 @@ if (SARA_USE_FROM_SOURCE)
 
     target_include_directories(DO_Sara_KDTree
       PUBLIC
-      ${DO_Sara_INCLUDE_DIR}
-      ${DO_Sara_ThirdParty_DIR}
-      ${DO_Sara_ThirdParty_DIR}/eigen
-      ${DO_Sara_ThirdParty_DIR}/flann/src/cpp)
+      $<BUILD_INTERFACE:${DO_Sara_ThirdParty_DIR}/flann/src/cpp>)
     target_link_libraries(DO_Sara_KDTree
       PRIVATE flann_cpp_s
       PUBLIC $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)

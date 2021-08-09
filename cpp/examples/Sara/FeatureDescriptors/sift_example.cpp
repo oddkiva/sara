@@ -11,9 +11,9 @@
 
 //! @example
 
-#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Visualization.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
+#include <DO/Sara/FeatureDetectors/SIFT.hpp>
 
 
 using namespace DO::Sara;
@@ -46,7 +46,7 @@ GRAPHICS_MAIN()
   {
     const auto& color =
         f.extremum_type == OERegion::ExtremumType::Max ? Red8 : Blue8;
-    f.draw(color);
+    draw(f, color);
   }
   get_key();
 

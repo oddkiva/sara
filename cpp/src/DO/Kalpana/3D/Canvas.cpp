@@ -12,7 +12,7 @@
 #include <stdexcept>
 
 #include <QtOpenGL>
-#include <QtOpenGLExtensions>
+// #include <QtOpenGLExtensions>
 
 #include <DO/Kalpana/3D.hpp>
 #include <DO/Kalpana/Math/Projection.hpp>
@@ -189,7 +189,11 @@ namespace DO { namespace Kalpana {
     if (event->isAccepted())
       return;
 
-    auto pos = normalizePos(event->localPos());
+#if QT_VERSION_MAJOR == 6
+    const auto pos = normalizePos(event->position());
+#else
+    const auto pos = normalizePos(event->localPos());
+#endif
     if (event->buttons() & Qt::LeftButton)
     {
       m_trackball.push(pos, m_trackball.rotation());
@@ -204,7 +208,11 @@ namespace DO { namespace Kalpana {
     if (event->isAccepted())
       return;
 
-    auto pos = normalizePos(event->localPos());
+#if QT_VERSION_MAJOR == 6
+    const auto pos = normalizePos(event->position());
+#else
+    const auto pos = normalizePos(event->localPos());
+#endif
     if (event->button() == Qt::LeftButton)
     {
       m_trackball.release(pos);
@@ -222,7 +230,11 @@ namespace DO { namespace Kalpana {
       return;
     }
 
-    auto pos = normalizePos(event->localPos());
+#if QT_VERSION_MAJOR == 6
+    const auto pos = normalizePos(event->position());
+#else
+    const auto pos = normalizePos(event->localPos());
+#endif
     if (event->buttons() & Qt::LeftButton)
     {
       m_trackball.move(pos);

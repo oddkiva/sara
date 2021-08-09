@@ -40,7 +40,7 @@ namespace DO::Sara {
 
     friend inline std::ostream& operator<<(std::ostream& os, const Platform& p)
     {
-      const size_t length = std::string("Extensions  ").size();
+      const auto length = static_cast<int>(std::string("Extensions  ").size());
       using std::left;
       using std::setw;
       os << left << setw(length) << "ID"         << ":  " << p.id << "\n";

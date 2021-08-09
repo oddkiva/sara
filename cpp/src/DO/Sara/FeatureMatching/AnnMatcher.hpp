@@ -28,15 +28,17 @@ namespace DO { namespace Sara {
    */
 
   //! @brief Feature matcher class using FLANN's KD-Tree.
-  class DO_SARA_EXPORT AnnMatcher
+  class AnnMatcher
   {
   public:
     //! @brief Constructors.
     //! @{
+    DO_SARA_EXPORT
     AnnMatcher(const KeypointList<OERegion, float>& keys1,
                const KeypointList<OERegion, float>& keys2,
                float sift_ratio_thres = 1.2f);
 
+    DO_SARA_EXPORT
     AnnMatcher(const KeypointList<OERegion, float>& keys,
                float sift_ratio_thres = 1.2f,
                float min_max_metric_dist_thres = 0.5f,
@@ -45,6 +47,7 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Return matches.
+    DO_SARA_EXPORT
     std::vector<Match> compute_matches();
 
     std::vector<Match> compute_self_matches()

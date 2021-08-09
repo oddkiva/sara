@@ -20,7 +20,7 @@
 
 namespace DO::Sara {
 
-  struct DO_SARA_EXPORT EdgeDetector
+  struct EdgeDetector
   {
     //! @brief intermediate data.
     struct Pipeline
@@ -62,7 +62,8 @@ namespace DO::Sara {
     {
     }
 
-    auto operator()(const Image<float>& image) -> void;
+    DO_SARA_EXPORT
+    auto operator()(const ImageView<float>& image) -> void;
   };
 
 }  // namespace DO::Sara

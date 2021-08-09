@@ -23,7 +23,7 @@
 #include "../EmpiricalValidation/StudyOnMikolajczykDataset.hpp"
 #include "../Statistics.hpp"
 
-#include <DO/Sara/Match/PairWiseDrawer.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 
 namespace DO::Sara {

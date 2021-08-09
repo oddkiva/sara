@@ -20,17 +20,17 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 #include <QGuiApplication>
+#include <QKeyEvent>
+#include <QOpenGLBuffer>
+#include <QOpenGLDebugLogger>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLWindow>
 #include <QSurfaceFormat>
 #include <QtCore/QException>
 #include <QtCore/QObject>
 #include <QtCore/QTimer>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QOpenGLBuffer>
-#include <QtGui/QOpenGLDebugLogger>
-#include <QtGui/QOpenGLShaderProgram>
-#include <QtGui/QOpenGLTexture>
-#include <QtGui/QOpenGLVertexArrayObject>
-#include <QtGui/QOpenGLWindow>
 
 #include <map>
 
@@ -270,11 +270,11 @@ public:
       throw QException{};
 
     const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return data.size(1) * sizeof(float);
+      return data.size(1) * static_cast<int>(sizeof(float));
     };
 
     const auto float_pointer = [](int offset) {
-      return offset * sizeof(float);
+      return offset * static_cast<int>(sizeof(float));
     };
 
     m_vao->bind();
@@ -282,7 +282,8 @@ public:
     // Copy the vertex data into the GPU buffer object.
     m_vbo.bind();
     m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(float));
+    m_vbo.allocate(m_vertices.data(),
+                   static_cast<int>(m_vertices.size() * sizeof(float)));
 
     // Map the parameters to the argument position for the vertex shader.
     //
@@ -467,11 +468,11 @@ public:
       throw QException{};
 
     const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return data.size(1) * sizeof(float);
+      return data.size(1) * static_cast<int>(sizeof(float));
     };
 
     const auto float_pointer = [](int offset) {
-      return offset * sizeof(float);
+      return offset * static_cast<int>(sizeof(float));
     };
 
     m_vao->bind();
@@ -479,13 +480,14 @@ public:
     // Copy the vertex data into the GPU buffer object.
     m_vbo.bind();
     m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(float));
+    m_vbo.allocate(m_vertices.data(),
+                   static_cast<int>(m_vertices.size() * sizeof(float)));
 
     // Copy the triangles data into the GPU buffer object.
     m_ebo.bind();
     m_ebo.setUsagePattern(QOpenGLBuffer::StaticDraw);
     m_ebo.allocate(m_triangles.data(),
-                   m_triangles.size() * sizeof(unsigned int));
+                   static_cast<int>(m_triangles.size() * sizeof(unsigned int)));
 
     // Specify that the vertex shader param 0 corresponds to the first 3 float
     // data of the buffer object.
@@ -520,7 +522,8 @@ public:
       m_program->setUniformValue("transform", transform);
 
       m_vao->bind();
-      glDrawElements(GL_TRIANGLES, m_triangles.size(), GL_UNSIGNED_INT, 0);
+      glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_triangles.size()),
+                     GL_UNSIGNED_INT, 0);
       m_vao->release();
     }
     m_program->release();
@@ -675,11 +678,11 @@ public:
       throw QException{};
 
     const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return data.size(1) * sizeof(float);
+      return data.size(1) * static_cast<int>(sizeof(float));
     };
 
     const auto float_pointer = [](int offset) {
-      return offset * sizeof(float);
+      return offset * static_cast<int>(sizeof(float));
     };
 
     m_vao->bind();
@@ -687,13 +690,14 @@ public:
     // Copy the vertex data into the GPU buffer object.
     m_vbo.bind();
     m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(float));
+    m_vbo.allocate(m_vertices.data(),
+                   static_cast<int>(m_vertices.size() * sizeof(float)));
 
     // Copy the triangles data into the GPU buffer object.
     m_ebo.bind();
     m_ebo.setUsagePattern(QOpenGLBuffer::StaticDraw);
     m_ebo.allocate(m_triangles.data(),
-                   m_triangles.size() * sizeof(unsigned int));
+                   static_cast<int>(m_triangles.size() * sizeof(unsigned int)));
 
     // Specify that the vertex shader param 0 corresponds to the first 3 float
     // data of the buffer object.
@@ -747,7 +751,8 @@ public:
       m_texture->bind(0);
 
       m_vao->bind();
-      glDrawElements(GL_TRIANGLES, m_triangles.size(), GL_UNSIGNED_INT, 0);
+      glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_triangles.size()),
+                     GL_UNSIGNED_INT, 0);
       m_vao->release();
     }
     m_program->release();
@@ -838,10 +843,10 @@ public:
     const auto data_dir =
         "/home/david/Desktop/Datasets/sfm/castle_int"s;
 #endif
-    const auto image = "0000.png";
+    const auto image = "0001.png";
     m_imagePlane->set_image(data_dir + "/" + image);
 
-    const auto K = "0000.png.K";
+    const auto K = "0001.png.K";
     auto camera = PinholeCamera{
       read_internal_camera_parameters(data_dir + "/" + K),
       Matrix3d::Identity(),

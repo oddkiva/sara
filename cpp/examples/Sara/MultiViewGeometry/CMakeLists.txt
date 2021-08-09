@@ -1,6 +1,8 @@
 find_package(DO_Sara COMPONENTS
-  Core Graphics ImageIO Features FeatureDetectors FeatureDescriptors KDTree
-  Match FeatureMatching MultiViewGeometry SfM REQUIRED)
+  Core Graphics ImageIO VideoIO
+  Features FeatureDetectors FeatureDescriptors
+  KDTree Match FeatureMatching
+  MultiViewGeometry SfM Visualization REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)
@@ -13,11 +15,31 @@ macro (sara_add_example example)
 endmacro()
 
 
+# Camera model.
+sara_add_example(fisheye_camera_example)
+sara_add_example(omnidirectional_camera_example)
+
+# Single view geometry.
+sara_add_example(metric_birds_eye_viewer)
+sara_add_example(orthogonal_vanishing_point_detection)
+target_include_directories(orthogonal_vanishing_point_detection
+  PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
+target_link_libraries(orthogonal_vanishing_point_detection
+  PRIVATE
+  Boost::filesystem
+  Boost::program_options
+  $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+
+# Two-view geometry.
 sara_add_example(homography_estimation_example)
 sara_add_example(fundamental_matrix_estimation_example)
 sara_add_example(essential_matrix_estimation_example)
 target_link_libraries(essential_matrix_estimation_example PRIVATE tinyply)
 
+# Camera resectioning.
+sara_add_example(camera_resectioning_example)
+
+# Bundle adjustment.
 sara_add_example(two_view_bundle_adjustment_example)
 target_include_directories(two_view_bundle_adjustment_example
   PRIVATE

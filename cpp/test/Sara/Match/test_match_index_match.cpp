@@ -11,6 +11,7 @@
 
 #define BOOST_TEST_MODULE "Match/IndexMatch Data Structures"
 
+#include <DO/Sara/Match/HDF5.hpp>
 #include <DO/Sara/Match/IndexMatch.hpp>
 
 #include <boost/filesystem.hpp>
@@ -30,9 +31,8 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_index_match)
     auto h5file = H5File{filepath, H5F_ACC_TRUNC};
 
     auto matches = std::vector<IndexMatch>{
-        // K, R, t.
-        {0, 1, 0.f},
-        {1, 2, 1.f},
+        {0, 1, 0.f},  //
+        {1, 2, 1.f}   //
     };
     h5file.write_dataset("matches", tensor_view(matches));
   }

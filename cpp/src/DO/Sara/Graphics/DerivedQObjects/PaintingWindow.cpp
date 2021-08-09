@@ -39,7 +39,7 @@ namespace DO { namespace Sara {
   PaintingWindow::PaintingWindow(int width, int height,
                                  const QString& windowTitle, int x, int y,
                                  QWidget* parent)
-    : QWidget{}
+    : QWidget{parent}
     , m_scrollArea(new ScrollArea(parent))
     , m_pixmap(width, height)
     , m_painter(&m_pixmap)
@@ -59,11 +59,19 @@ namespace DO { namespace Sara {
     m_scrollArea->setFocusProxy(this);
 
     // Maximize if necessary.
-    if (width >= qApp->desktop()->width() ||
-        height >= qApp->desktop()->height())
-      m_scrollArea->showMaximized();
+    auto show_maximized = false;
+    for (auto screen: QGuiApplication::screens())
+    {
+      if (width >= screen->availableSize().width() ||
+          height >= screen->availableSize().height())
+      {
+        show_maximized = true;
+        m_scrollArea->showMaximized();
+        break;
+      }
+    }
     // Resize the scroll area with the size plus a two-pixel offset.
-    else
+    if (!show_maximized)
       m_scrollArea->resize(width+2, height+2);
     resize(width, height);
 
@@ -176,22 +184,32 @@ namespace DO { namespace Sara {
   void PaintingWindow::drawText(int x, int y, const QString& text,
                                 const QColor& color, int fontSize,
                                 double orientation, bool italic, bool bold,
-                                bool underline)
+                                bool underline, int penWidth)
   {
+    // Save the current state.
+    m_painter.save();
     QFont font;
     font.setPointSize(fontSize);
     font.setItalic(italic);
     font.setBold(bold);
     font.setUnderline(underline);
 
-    m_painter.save();
-    m_painter.setPen(color);
+    QPainterPath textPath;
+    QPointF baseline(0, 0);
+    textPath.addText(baseline, font, text);
+
+    // Outline the text by default for more visibility.
+    m_painter.setBrush(color);
+    m_painter.setPen(QPen(Qt::black, penWidth));
     m_painter.setFont(font);
 
     m_painter.translate(x, y);
     m_painter.rotate(qreal(orientation));
-    m_painter.drawText(0, 0, text);
+    m_painter.drawPath(textPath);
+
+    // Restore the previous painter state.
     m_painter.restore();
+
     update();
   }
 
@@ -201,9 +219,9 @@ namespace DO { namespace Sara {
                                  int width)
   {
     double sl;
-    double dx = x2-x1;
-    double dy = y2-y1;
-    double norm= qSqrt(dx*dx+dy*dy);
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    double norm = qSqrt(dx * dx + dy * dy);
     if (norm < 0.999) // null vector
     {
       m_painter.setPen(QPen(col, width));
@@ -217,47 +235,48 @@ namespace DO { namespace Sara {
 
     qreal dx_norm = dx / norm;
     qreal dy_norm = dy / norm;
-    qreal p1x = x1 + dx_norm*(norm-arrowWidth) + arrowHeight/2.*dy_norm;
-    qreal p1y = y1 + dy_norm*(norm-arrowWidth) - arrowHeight/2.*dx_norm;
-    qreal p2x = x1 + dx_norm*(norm-arrowWidth) - arrowHeight/2.*dy_norm;
-    qreal p2y = y1 + dy_norm*(norm-arrowWidth) + arrowHeight/2.*dx_norm;
-    switch(style) {
-      case 0:
-        m_painter.setPen(QPen(col, width));
-        m_painter.drawLine(x1, y1, x2, y2);
-        m_painter.drawLine(x2, y2, int(p1x), int(p1y));
-        m_painter.drawLine(x2, y2, int(p2x), int(p2y));
-        break;
-      case 1:
-        pts << QPointF(p2x, p2y);
-        pts << QPointF(x2, y2);
-        pts << QPointF(p1x, p1y);
-        sl = norm-(arrowWidth*.7);
-        pts << QPointF(x1 + dx_norm*sl + dy_norm*width,
-                       y1 + dy_norm*sl - dx_norm*width);
-        pts << QPointF(x1 + dy_norm*width, y1 - dx_norm*width);
-        pts << QPointF(x1 - dy_norm*width, y1 + dx_norm*width);
-        pts << QPointF(x1 + dx_norm*sl - dy_norm*width,
-                       y1 + dy_norm*sl + dx_norm*width);
-        path.addPolygon(pts);
-        m_painter.fillPath(path, col);
-        break;
-      case 2:
-        pts << QPointF(p2x, p2y);
-        pts << QPointF(x2, y2);
-        pts << QPointF(p1x, p1y);
-        sl = norm-arrowWidth;
-        pts << QPointF(x1 + dx_norm*sl + dy_norm*width,
-                       y1 + dy_norm*sl - dx_norm*width);
-        pts << QPointF(x1 + dy_norm*width, y1-dx_norm*width);
-        pts << QPointF(x1 - dy_norm*width, y1+dx_norm*width);
-        pts << QPointF(x1 + dx_norm*sl - dy_norm*width,
-                       y1 + dy_norm*sl + dx_norm*width);
-        path.addPolygon(pts);
-        m_painter.fillPath(path, col);
-        break;
-      default:
-        break;
+    qreal p1x = x1 + dx_norm * (norm - arrowWidth) + arrowHeight / 2. * dy_norm;
+    qreal p1y = y1 + dy_norm * (norm - arrowWidth) - arrowHeight / 2. * dx_norm;
+    qreal p2x = x1 + dx_norm * (norm - arrowWidth) - arrowHeight / 2. * dy_norm;
+    qreal p2y = y1 + dy_norm * (norm - arrowWidth) + arrowHeight / 2. * dx_norm;
+    switch (style)
+    {
+    case 0:
+      m_painter.setPen(QPen(col, width));
+      m_painter.drawLine(x1, y1, x2, y2);
+      m_painter.drawLine(x2, y2, int(p1x), int(p1y));
+      m_painter.drawLine(x2, y2, int(p2x), int(p2y));
+      break;
+    case 1:
+      pts << QPointF(p2x, p2y);
+      pts << QPointF(x2, y2);
+      pts << QPointF(p1x, p1y);
+      sl = norm - (arrowWidth * .7);
+      pts << QPointF(x1 + dx_norm * sl + dy_norm * width,
+                     y1 + dy_norm * sl - dx_norm * width);
+      pts << QPointF(x1 + dy_norm * width, y1 - dx_norm * width);
+      pts << QPointF(x1 - dy_norm * width, y1 + dx_norm * width);
+      pts << QPointF(x1 + dx_norm * sl - dy_norm * width,
+                     y1 + dy_norm * sl + dx_norm * width);
+      path.addPolygon(pts);
+      m_painter.fillPath(path, col);
+      break;
+    case 2:
+      pts << QPointF(p2x, p2y);
+      pts << QPointF(x2, y2);
+      pts << QPointF(p1x, p1y);
+      sl = norm - arrowWidth;
+      pts << QPointF(x1 + dx_norm * sl + dy_norm * width,
+                     y1 + dy_norm * sl - dx_norm * width);
+      pts << QPointF(x1 + dy_norm * width, y1 - dx_norm * width);
+      pts << QPointF(x1 - dy_norm * width, y1 + dx_norm * width);
+      pts << QPointF(x1 + dx_norm * sl - dy_norm * width,
+                     y1 + dy_norm * sl + dx_norm * width);
+      path.addPolygon(pts);
+      m_painter.fillPath(path, col);
+      break;
+    default:
+      break;
     }
 
     update();
@@ -348,6 +367,19 @@ namespace DO { namespace Sara {
       m_painter.setCompositionMode(QPainter::CompositionMode_Source);
   }
 
+  void PaintingWindow::grabScreenContents(std::uint8_t *outBuffer)
+  {
+    const auto image = m_pixmap.toImage().convertToFormat(QImage::Format_RGB888);
+    const auto image_byte_size =
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+        std::size_t(image.width()) * std::size_t(image.height()) * 3ul
+#else
+        image.sizeInBytes()
+#endif
+        ;
+    std::copy_n(image.constBits(), image_byte_size, outBuffer);
+  }
+
   void PaintingWindow::saveScreen(const QString& filename)
   {
     m_pixmap.save(filename);
@@ -368,14 +400,24 @@ namespace DO { namespace Sara {
     m_pixmap.fill();
     m_painter.begin(&m_pixmap);
 
-    // Resize the window and the scroll area as follows.
+    // Resize the widget.
     resize(width, height);
-    if (width > qApp->desktop()->width() || height > qApp->desktop()->height())
+
+    // Resize the scroll area as follows.
+    auto show_maximized = false;
+    for (auto screen: QGuiApplication::screens())
     {
-      width = 800;
-      height = 600;
+      if (width >= screen->availableSize().width() ||
+          height >= screen->availableSize().height())
+      {
+        show_maximized = true;
+        m_scrollArea->showMaximized();
+        break;
+      }
     }
-    m_scrollArea->resize(width+2, height+2);
+    // Resize the scroll area with the size plus a two-pixel offset.
+    if (!show_maximized)
+      m_scrollArea->resize(width+2, height+2);
   }
 
   void PaintingWindow::waitForEvent(int ms)
@@ -391,49 +433,67 @@ namespace DO { namespace Sara {
 
   void PaintingWindow::mouseMoveEvent(QMouseEvent *event)
   {
-    emit movedMouse(event->x(), event->y(), event->buttons());
+#if QT_VERSION_MAJOR == 6
+    const auto pos = event->position();
+#else
+    const auto pos = event->localPos();
+#endif
+    emit movedMouse(pos.x(), pos.y(), event->buttons());
 
     if (m_eventListeningTimer.isActive())
     {
       m_eventListeningTimer.stop();
-      emit sendEvent(mouse_moved(event->x(), event->y(), event->buttons(),
-                     event->modifiers()));
+      emit sendEvent(mouse_moved(pos.x(), pos.y(),  //
+                                 event->buttons(), event->modifiers()));
     }
   }
 
   void PaintingWindow::mousePressEvent(QMouseEvent *event)
   {
+#if QT_VERSION_MAJOR == 6
+    const auto pos = event->position();
+#else
+    const auto pos = event->localPos();
+#endif
+
 #ifdef Q_OS_MAC
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
                   event->buttons() == Qt::LeftButton) ?
     Qt::MiddleButton : event->buttons();
-    emit pressedMouseButtons(event->x(), event->y(), buttons);
+    emit pressedMouseButtons(pos.x(), pos.y(), buttons);
 #else
-    emit pressedMouseButtons(event->x(), event->y(), event->buttons());
+    emit pressedMouseButtons(pos.x(), pos.y(), event->buttons());
 #endif
     if (m_eventListeningTimer.isActive())
     {
       m_eventListeningTimer.stop();
-      emit sendEvent(mouse_pressed(event->x(), event->y(), event->buttons(),
-                     event->modifiers()));
+      emit sendEvent(mouse_pressed(pos.x(), pos.y(), event->buttons(),
+                                   event->modifiers()));
     }
   }
 
   void PaintingWindow::mouseReleaseEvent(QMouseEvent *event)
   {
+#if QT_VERSION_MAJOR == 6
+    const auto pos = event->position();
+#else
+    const auto pos = event->localPos();
+#endif
+
 #ifdef Q_OS_MAC
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
                                 event->buttons() == Qt::LeftButton) ?
       Qt::MiddleButton : event->buttons();
-    emit releasedMouseButtons(event->x(), event->y(), buttons);
+    emit releasedMouseButtons(pos.x(), pos.y(),
+                              buttons);
 #else
-    emit releasedMouseButtons(event->x(), event->y(), event->button());
+    emit releasedMouseButtons(pos.x(), pos.y(), event->button());
 #endif
     if (m_eventListeningTimer.isActive())
     {
       m_eventListeningTimer.stop();
-      emit sendEvent(mouse_released(event->x(), event->y(),
-                                   event->buttons(), event->modifiers()));
+      emit sendEvent(mouse_released(pos.x(), pos.y(), event->buttons(),
+                                    event->modifiers()));
     }
   }
 

@@ -40,16 +40,16 @@ namespace DO { namespace Sara {
       // Be careful of the bounds. We go from 1 to N-1.
       for (int s = 1; s < det_hess_pyr.num_scales_per_octave(); ++s)
       {
-        vector<OERegion> new_det_hess_maxima(laplace_maxima(
-          det_hess_pyr, gauss_pyr, s, o, _extremum_thres, _img_padding_sz,
-          _num_scales, _extremum_refinement_iter) );
+        const auto new_det_hess_maxima = laplace_maxima(
+            det_hess_pyr, gauss_pyr, s, o, _extremum_thres, _img_padding_sz,
+            _num_scales, _extremum_refinement_iter);
 
         append(det_hess_maxima, new_det_hess_maxima);
 
         if (scale_octave_pairs)
         {
           for (size_t i = 0; i != new_det_hess_maxima.size(); ++i)
-            scale_octave_pairs->push_back(Point2i(s,o));
+            scale_octave_pairs->push_back(Point2i(s, o));
         }
       }
     }
@@ -78,9 +78,9 @@ namespace DO { namespace Sara {
     for (auto o = 0; o < det_hess_pyr.num_octaves(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (auto s = 1; s < det_hess_pyr.num_scales_per_octave()-1; ++s)
+      for (auto s = 1; s < det_hess_pyr.num_scales_per_octave() - 1; ++s)
       {
-        auto new_det_hess_extrema = local_scale_space_extrema(
+        const auto new_det_hess_extrema = local_scale_space_extrema(
             det_hess_pyr, s, o, _extremum_thres, _edge_ratio_thres,
             _img_padding_sz, _extremum_refinement_iter);
 
