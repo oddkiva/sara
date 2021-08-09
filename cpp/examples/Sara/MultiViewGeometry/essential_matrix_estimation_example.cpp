@@ -84,7 +84,7 @@ int __main(int, char** argv)
       "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
       "/home/david/Desktop/Datasets/sfm/castle_int"s;
-      // "/home/david/Desktop/Datasets/sfm/fountain_int"s;
+  // "/home/david/Desktop/Datasets/sfm/fountain_int"s;
 #endif
   const auto image_id1 = std::string{argv[1]};  // "0005"s;
   const auto image_id2 = std::string{argv[2]};  // "0004"s;
@@ -246,9 +246,14 @@ int __main(int, char** argv)
   SARA_DEBUG << "Rw =\n" << Rw << std::endl;
   SARA_DEBUG << "tw =\n" << tw << std::endl;
 
-  SARA_DEBUG << "yaw pitch roll =\n"
+  const auto axis_angle = Eigen::AngleAxisd(Rw);
+  SARA_DEBUG << "Axis vector = " << axis_angle.axis().transpose() << std::endl;
+  SARA_DEBUG << "Angle = " << axis_angle.angle() * 180 / M_PI << " deg"
+             << std::endl;
+
+  SARA_DEBUG << "[BUGGY] yaw pitch roll =\n"
              << Rw.eulerAngles(1, 0, 2) * 180. / M_PI << std::endl;
-             // << calculate_yaw_pitch_roll(Rw) * 180. / M_PI << std::endl;
+  // << calculate_yaw_pitch_roll(Rw) * 180. / M_PI << std::endl;
 
   get_key();
 

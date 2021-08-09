@@ -26,20 +26,14 @@ namespace DO::Sara {
   DO_SARA_EXPORT
   auto triangulate_single_point_linear_eigen(const Matrix34d& P1,
                                              const Matrix34d& P2,
-                                             const Vector3d& u1,
-                                             const Vector3d& u2) -> Vector4d;
-
-  DO_SARA_EXPORT
-  auto triangulate_single_point_linear_eigen_v2(const Matrix34d& P1,
-                                                const Matrix34d& P2,
-                                                const Vector3d& ray1,
-                                                const Vector3d& ray2)
+                                             const Vector3d& ray1,
+                                             const Vector3d& ray2)
       -> std::tuple<Vector4d, double, double>;
 
   DO_SARA_EXPORT
   auto triangulate_linear_eigen(const Matrix34d& P1, const Matrix34d& P2,
-                                const MatrixXd& u1, const MatrixXd& u2)
-      -> MatrixXd;
+                                   const MatrixXd& u1, const MatrixXd& u2)
+      -> std::tuple<MatrixXd, VectorXd, VectorXd>;
   //! @}
 
   //! @}

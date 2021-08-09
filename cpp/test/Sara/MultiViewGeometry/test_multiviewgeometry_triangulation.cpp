@@ -29,10 +29,9 @@ auto generate_test_data()
 {
   // 3D points.
   MatrixXd X(4, 5);  // coefficients are in [-1, 1].
-  X.topRows<3>() <<
-    -1.49998,   -0.5827,  -1.40591,  0.369386,  0.161931, //
-    -1.23692, -0.434466, -0.142271, -0.732996,  -1.43086, //
-     1.51121,  0.437918,   1.35859,   1.03883,  0.106923; //
+  X.topRows<3>() << -1.49998, -0.5827, -1.40591, 0.369386, 0.161931,  //
+      -1.23692, -0.434466, -0.142271, -0.732996, -1.43086,            //
+      1.51121, 0.437918, 1.35859, 1.03883, 0.106923;                  //
   X.bottomRows<1>().fill(1.);
 
   const Matrix3d R = rotation(0.3, 0.2, 0.1);
@@ -43,23 +42,44 @@ auto generate_test_data()
   const Matrix34d C1 = PinholeCamera{Matrix3d::Identity(), Matrix3d::Identity(),
                                      Vector3d::Zero()};
   const Matrix34d C2 = PinholeCamera{Matrix3d::Identity(), R, t};
-  MatrixXd x1 = C1 * X; x1.array().rowwise() /= x1.row(2).array();
-  MatrixXd x2 = C2 * X; x2.array().rowwise() /= x2.row(2).array();
+  MatrixXd x1 = C1 * X;
+  x1.array().rowwise() /= x1.row(2).array();
+  MatrixXd x2 = C2 * X;
+  x2.array().rowwise() /= x2.row(2).array();
 
   return std::make_tuple(X, R, t, E, C1, C2, x1, x2);
 }
 
 
-BOOST_AUTO_TEST_CASE(test_triangulate_linear_eigen)
+BOOST_AUTO_TEST_CASE(test_triangulate_linear_eigen_v2)
 {
   const auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
   (void) R;
   (void) t;
   (void) E;
 
-  MatrixXd X_est = triangulate_linear_eigen(C1, C2, x1, x2);
+  const auto [X_est, s1, s2] = triangulate_linear_eigen(C1, C2, x1, x2);
 
   BOOST_CHECK_SMALL((X - X_est).norm() / X.norm(), 1e-6);
+  // The proper cheirality check is the following for general camera models.
+  //
+  // For camera with angles > 180 degrees, pixels can be imaged from light rays
+  // behind the camera.
+  BOOST_CHECK((s1.array() > 0).all());
+  BOOST_CHECK((s2.array() > 0).all());
+
+  SARA_DEBUG << "C1 * X_est = " << std::endl << C1 * X_est << std::endl;
+  SARA_DEBUG << "s1 * x1 = " << std::endl
+             << x1.array().rowwise() * s1.transpose().array() << std::endl;
+  SARA_DEBUG << "C2 * X_est = " << std::endl << C1 * X_est << std::endl;
+  SARA_DEBUG << "s2 * x2 = " << std::endl
+             << x1.array().rowwise() * s1.transpose().array() << std::endl;
+
+  const auto s1_x1 = (x1.array().rowwise() * s1.transpose().array()).matrix();
+  const auto s2_x2 = (x2.array().rowwise() * s2.transpose().array()).matrix();
+
+  BOOST_CHECK_SMALL((C1 * X_est - s1_x1.matrix()).norm(), 1e-6);
+  BOOST_CHECK_SMALL((C2 * X_est - s2_x2).norm(), 1e-6);
 }
 
 
@@ -120,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
     const Matrix34d P2_est = normalized_camera(motion->R, motion->t);
     BOOST_CHECK(relative_motion_cheirality_predicate(X, P2_est).count() < 5);
 
-    auto X_est = triangulate_linear_eigen(P1, P2_est, x1, x2);
+    auto [X_est, s1, s2] = triangulate_linear_eigen(P1, P2_est, x1, x2);
 
     SARA_DEBUG << "candidate camera =" << std::endl;
     std::cout << P2_est << std::endl;

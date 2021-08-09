@@ -25,6 +25,8 @@ namespace DO::Sara {
     PinholeCamera C1;
     PinholeCamera C2;
     Eigen::MatrixXd X;
+    Eigen::VectorXd scales1;
+    Eigen::VectorXd scales2;
     Eigen::Array<bool, 1, Eigen::Dynamic> cheirality;
   };
 
@@ -35,9 +37,9 @@ namespace DO::Sara {
     const auto C2 = normalized_camera(m.R, m.t.normalized());
     const Matrix34d P1 = C1;
     const Matrix34d P2 = C2;
-    const auto X = triangulate_linear_eigen(P1, P2, u1, u2);
+    const auto [X, s1, s2] = triangulate_linear_eigen(P1, P2, u1, u2);
     const auto cheirality = relative_motion_cheirality_predicate(X, P2);
-    return {C1, C2, X, cheirality};
+    return {C1, C2, X, s1, s2, cheirality};
   }
 
   //! @}
