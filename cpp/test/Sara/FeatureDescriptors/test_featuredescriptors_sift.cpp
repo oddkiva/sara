@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_computation)
   auto feature_list = std::vector<OERegion>{{feature}};
   auto scale_octave_pairs = std::vector<Point2i>{{0, 0}};
   auto polar_gradient_pyramid = ImagePyramid<Vector2f>{};
-  polar_gradient_pyramid.reset(1, 1, 1.6, 1.);
+  polar_gradient_pyramid.reset(1, 1, 1.6f, 1.f);
   polar_gradient_pyramid(0, 0) = grad_polar_coords;
  
   auto sift_list = ComputeSIFTDescriptor<>{}(feature_list, scale_octave_pairs, polar_gradient_pyramid);

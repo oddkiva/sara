@@ -352,8 +352,9 @@ namespace DO { namespace Sara {
     // Compute the blurred patches and their associated scales.
     //
     // Start with the initial patch.
-    scales[0] = static_cast<float>(G.scale_relative_to_octave(s)) / sqrt(2.f);
-    auto inc_sigma = sqrt(pow(scales[0], 2) - pow(nearest_sigma, 2));
+    scales[0] = G.scale_relative_to_octave(s) / std::sqrt(2.f);
+    auto square = [](const auto x) { return x * x; };
+    auto inc_sigma = std::sqrt(square(scales[0]) - square(nearest_sigma));
     patches[0] =
         inc_sigma > 1e-3f ? gaussian(nearest_patch, inc_sigma) : nearest_patch;
 
@@ -369,7 +370,7 @@ namespace DO { namespace Sara {
     for (size_t i = 1; i < patches.size(); ++i)
     {
       scales[i] = scale_common_ratio * scales[i - 1];
-      inc_sigma = sqrt(pow(scales[i], 2) - pow(scales[i - 1], 2));
+      inc_sigma = std::sqrt(square(scales[i]) - square(scales[i - 1]));
       patches[i] = gaussian(patches[i - 1], inc_sigma);
 #ifdef DEBUG_SELECT_SCALE
       print(scales[i]);

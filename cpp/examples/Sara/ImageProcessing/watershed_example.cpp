@@ -29,7 +29,7 @@ auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
   auto colors = std::map<int, Rgb8>{};
   for (const auto& [label, points] : regions)
   {
-    const auto num_points = points.size();
+    const auto num_points = static_cast<float>(points.size());
     Eigen::Vector3f color = Vector3f::Zero();
     for (const auto& p: points)
       color += image(p).cast<float>();

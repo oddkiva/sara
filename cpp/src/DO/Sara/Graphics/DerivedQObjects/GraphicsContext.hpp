@@ -33,7 +33,7 @@ namespace DO { namespace Sara {
   {
   public:
     QList<QPointer<QWidget>> m_createdWindows;
-    QPointer<QWidget> m_activeWindow;
+    QWidget *m_activeWindow = nullptr;
 
     ~WidgetList()
     {

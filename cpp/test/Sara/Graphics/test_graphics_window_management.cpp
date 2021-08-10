@@ -46,7 +46,6 @@ BOOST_AUTO_TEST_CASE(test_open_and_close_window)
 
   // Check that the widget gets destroyed when we close the window.
   close_window(window);
-  millisleep(50);
 }
 
 BOOST_AUTO_TEST_CASE(test_open_and_close_gl_window)
@@ -61,7 +60,6 @@ BOOST_AUTO_TEST_CASE(test_open_and_close_gl_window)
   BOOST_CHECK(window->pos() == QPoint(50, 50));
 
   close_window(window);
-  millisleep(50);
 }
 
 BOOST_AUTO_TEST_CASE(test_open_and_close_graphics_view)
@@ -76,7 +74,6 @@ BOOST_AUTO_TEST_CASE(test_open_and_close_graphics_view)
   BOOST_CHECK(window->pos() == QPoint(50, 50));
 
   close_window(window);
-  millisleep(50);
 }
 
 BOOST_AUTO_TEST_CASE(test_set_active_window)
@@ -114,6 +111,7 @@ BOOST_AUTO_TEST_CASE(test_resize_window)
   BOOST_CHECK_EQUAL(get_sizes(w), Vector2i(500, 500));
 
   fill_circle(100, 100, 30, Red8);
+  close_window(w);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -24,12 +24,12 @@ BOOST_AUTO_TEST_SUITE(TestImagePyramid)
 
 BOOST_AUTO_TEST_CASE(test_image_pyramid_params)
 {
-  int first_octave_index = -1;
-  int num_scales_per_octave = 3;
-  double scale_geometric_factor = std::pow(2., 1. / num_scales_per_octave);
-  int image_padding_size = 1;
-  double scale_camera = 0.5;
-  double scale_initial = 1.6;
+  const auto first_octave_index = -1;
+  const auto num_scales_per_octave = 3;
+  const float scale_geometric_factor = std::pow(2.f, 1.f / num_scales_per_octave);
+  const auto image_padding_size = 1;
+  const float scale_camera = 0.5f;
+  const float scale_initial = 1.6f;
 
   ImagePyramidParams pyramid_params(first_octave_index, num_scales_per_octave,
                                     scale_geometric_factor, image_padding_size,

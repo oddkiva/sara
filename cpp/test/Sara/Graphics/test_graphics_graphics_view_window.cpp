@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(test_send_pressed_key_event)
   arg.convert(_event_type);
 
   const auto event = arguments.at(0).value<Event>();
-  BOOST_CHECK(event.type == DO::Sara::EventType::KEY_PRESSED);
+  BOOST_CHECK(event.type == EventType::KEY_PRESSED);
   BOOST_CHECK_EQUAL(event.key, _key);
 }
 
