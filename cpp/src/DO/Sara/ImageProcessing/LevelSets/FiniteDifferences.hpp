@@ -14,6 +14,7 @@
 #pragma once
 
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 
 
 namespace DO::Sara {
@@ -70,12 +71,6 @@ namespace DO::Sara {
     }
   };
 
-
-  template <typename T>
-  inline auto square(T x)
-  {
-    return x * x;
-  };
 
   //! @brief WENO3.
   struct Weno3

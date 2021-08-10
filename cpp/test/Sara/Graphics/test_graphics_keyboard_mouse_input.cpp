@@ -38,6 +38,7 @@ public:
   TestFixtureForKeyboardMouseInputOnSingleWindow()
   {
     test_window_ = create_window(300, 300);
+    set_active_window(test_window_);
     global_scheduler->set_receiver(test_window_);
   }
 

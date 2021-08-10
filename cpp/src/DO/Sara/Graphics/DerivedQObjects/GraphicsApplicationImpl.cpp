@@ -42,12 +42,11 @@ namespace DO { namespace Sara {
 
   GraphicsApplication::Impl::~Impl()
   {
-    QList<QPointer<QWidget> >::iterator w = m_createdWindows.begin();
-    for ( ; w != m_createdWindows.end(); ++w)
+    for (auto w = m_createdWindows.begin(); w != m_createdWindows.end(); ++w)
     {
       if (!w->isNull())
       {
-        PaintingWindow *paintingWindow = qobject_cast<PaintingWindow *>(*w);
+        PaintingWindow* paintingWindow = qobject_cast<PaintingWindow*>(*w);
         if (paintingWindow)
           delete paintingWindow->scrollArea();
         else
@@ -61,16 +60,16 @@ namespace DO { namespace Sara {
                                                int x, int y)
   {
     if (windowType == PAINTING_WINDOW)
-      m_createdWindows.emplaceBack(new PaintingWindow(w, h, windowTitle, x, y));
+      m_createdWindows << new PaintingWindow(w, h, windowTitle, x, y);
     else if (windowType == OPENGL_WINDOW)
-      m_createdWindows.emplaceBack(
-          new OpenGLWindow(w, h, windowTitle, x, y, nullptr, true));
+      m_createdWindows << new OpenGLWindow(w, h, windowTitle, x, y, nullptr,
+                                           true);
     else if (windowType == GRAPHICS_VIEW)
-      m_createdWindows.emplaceBack(new GraphicsView(w, h, windowTitle, x, y));
+      m_createdWindows << new GraphicsView(w, h, windowTitle, x, y);
 
     if (m_createdWindows.size() == 1)
     {
-      m_activeWindow = m_createdWindows.front().get();
+      m_activeWindow = m_createdWindows.front();
       setActiveWindow(m_activeWindow);
     }
   }
@@ -170,7 +169,7 @@ namespace DO { namespace Sara {
         w = m_createdWindows.erase(w);
         continue;
       }
-      connectWindowIOEventsToUserThread(w->get());
+      connectWindowIOEventsToUserThread(*w);
       ++w;
     }
   }
@@ -185,8 +184,8 @@ namespace DO { namespace Sara {
         w = m_createdWindows.erase(w);
         continue;
       }
-      disconnect(&m_userThread, 0, w->get(), 0);
-      disconnect(w->get(), 0, &m_userThread, 0);
+      disconnect(&m_userThread, 0, *w, 0);
+      disconnect(*w, 0, &m_userThread, 0);
       ++w;
     }
   }
