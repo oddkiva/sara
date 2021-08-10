@@ -117,8 +117,6 @@ namespace DO { namespace Sara {
       qFatal("Could not close window!");
       quit();
     }
-
-    m_createdWindows.erase(wi);
   }
 
   void GraphicsApplication::Impl::getFileFromDialogBox()
