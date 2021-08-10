@@ -21,8 +21,8 @@ Sara: C++ Computer Vision Library
 2. having **easy-to-understand ~~and efficient~~** implementations of computer vision
    algorithms;
    - well "efficient" if you try to use my Halide or CUDA backends
-     for example. "Easy-to-read" thanks to the exciting advances of compiler
-     technology like Halide, so there is no need to explicitly manipulate CPU
+     for example. "Easy-to-read" thanks to the exciting advances in compiler
+     technologies like Halide, so there is no need to explicitly manipulate CPU
      intrinsics on the mainstream architectures.
      I have documented that some of my image processing implementations perform
      much better than OpenCV's CPU/GPU implementations, much to my surprise...
