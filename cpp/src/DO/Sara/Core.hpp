@@ -14,10 +14,13 @@
 
 #pragma once
 
-// Sara specific defines.
+// Sara specific defines
 #include <DO/Sara/Defines.hpp>
+
 // Template meta-programming
 #include <DO/Sara/Core/Meta.hpp>
+// Math utilities
+#include <DO/Sara/Core/Math.hpp>
 // Linear algebra imports and extension from Eigen3
 #include <DO/Sara/Core/EigenExtension.hpp>
 // N-dimensional array and N-dimensional iterators

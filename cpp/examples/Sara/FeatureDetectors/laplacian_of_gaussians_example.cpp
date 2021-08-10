@@ -45,7 +45,7 @@ vector<OERegion> compute_LoG_extrema(const Image<float>& image,
     float octave_scale_factor =
         L.octave_scaling_factor(scale_octave_pairs[i](1));
     LoGs[i].center() *= octave_scale_factor;
-    LoGs[i].shape_matrix /= pow(octave_scale_factor, 2);
+    LoGs[i].shape_matrix /= square(octave_scale_factor);
   }
 
   return LoGs;
@@ -102,7 +102,7 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& image,
     {
       kept_DoGs.push_back(LoGs[i]);
       const float fact = L.octave_scaling_factor(scale_octave_pairs[i](1));
-      kept_DoGs.back().shape_matrix *= pow(fact, -2);
+      kept_DoGs.back().shape_matrix /= square(fact);
       kept_DoGs.back().coords *= fact;
     }
   }

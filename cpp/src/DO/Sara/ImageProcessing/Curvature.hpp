@@ -1,5 +1,6 @@
 #pragma once
 
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 
 
@@ -53,7 +54,7 @@ namespace DO::Sara {
   {
     const auto Du = gradient(u, x);
     const auto Hu = hessian(u, x);
-    const auto denominator = 1 / std::pow(Du.squaredNorm() + 1, 2);
+    const auto denominator = 1 / Sara::square(Du.squaredNorm() + 1);
     return Hu.determinant() * denominator;
   }
 

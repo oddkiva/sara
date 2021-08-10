@@ -9,8 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
 
 
 using namespace std;
@@ -40,12 +40,13 @@ namespace DO { namespace Sara {
     return cornerness;
   }
 
-  ImagePyramid<float> harris_cornerness_pyramid(const ImageView<float>& image,
-                                                float kappa,
-                                                const ImagePyramidParams& params)
+  ImagePyramid<float>
+  harris_cornerness_pyramid(const ImageView<float>& image, float kappa,
+                            const ImagePyramidParams& params)
   {
     // Resize the image with the appropriate factor.
-    const auto resize_factor = std::pow(2.f, -params.first_octave_index());
+    const auto resize_factor =
+        std::pow(2.f, static_cast<float>(-params.first_octave_index()));
     auto I = enlarge(image, resize_factor);
 
     // Deduce the new camera sigma with respect to the dilated image.
@@ -56,8 +57,7 @@ namespace DO { namespace Sara {
     const auto scale_initial = static_cast<float>(params.scale_initial());
     if (camera_sigma < scale_initial)
     {
-      const auto sigma =
-          sqrt(scale_initial * scale_initial - camera_sigma * camera_sigma);
+      const auto sigma = sqrt(square(scale_initial) - square(camera_sigma));
       I = deriche_blur(I, sigma);
     }
 
@@ -67,7 +67,7 @@ namespace DO { namespace Sara {
     // l/2^k > 2b
     // 2^k < l/(2b)
     // k < log(l/(2b))/log(2)
-    const auto num_octaves = static_cast<int>(log(l/(2.f*b))/log(2.f));
+    const auto num_octaves = static_cast<int>(log(l / (2.f * b)) / log(2.f));
 
     // Shorten names.
     const auto num_scales = params.num_scales_per_octave();
@@ -118,7 +118,7 @@ namespace DO { namespace Sara {
 
   vector<OERegion>
   ComputeHarrisLaplaceCorners::operator()(const ImageView<float>& I,
-                                          vector<Point2i> *scale_octave_pairs)
+                                          vector<Point2i>* scale_octave_pairs)
   {
     auto& G = _gaussians;
     auto& cornerness = _harris;
@@ -156,5 +156,4 @@ namespace DO { namespace Sara {
     return corners;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

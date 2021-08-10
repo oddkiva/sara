@@ -66,7 +66,7 @@ GRAPHICS_MAIN()
   create_window(frame_downsampled.sizes());
   set_antialiasing();
 
-  const auto color_threshold = std::sqrt(std::pow(4, 2) * 3);
+  const auto color_threshold = std::sqrt(square(4.f) * 3);
 
   auto frames_read = 0;
   constexpr auto skip = 2;

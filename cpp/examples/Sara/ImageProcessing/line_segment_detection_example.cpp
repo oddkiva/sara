@@ -33,7 +33,7 @@ auto test_on_image()
   const auto image =
       imread<float>(src_path("../../../../data/sunflowerField.jpg"));
 
-  auto sigma = sqrt(pow(1.6f, 2) - pow(0.5f, 2));
+  const auto sigma = sqrt(square(1.6f) - square(0.5f));
   auto image_curr = deriche_blur(image, sigma);
 
   create_window(image.sizes());
@@ -127,7 +127,7 @@ auto test_on_video()
       frame_gray32f = frame.convert<float>();
 
       // Blur.
-      inplace_deriche_blur(frame_gray32f, std::sqrt(std::pow(1.6f, 2) - 1));
+      inplace_deriche_blur(frame_gray32f, std::sqrt(square(1.6f) - 1));
 
       // Downscale.
       if (downscale_factor > 1)
