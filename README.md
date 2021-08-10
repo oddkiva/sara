@@ -103,10 +103,10 @@ which case *OpenCV* may not be able to rescue you, especially in non mainstream
 platforms or low-power devices... However I do want to point out that *Sara* can
 offer the following:
 
-- On CUDA platforms, some of my CUDA implementation are a good start and even
-  better than OpenCV.
-- For low-power devices, the Halide CPU backend provide a good start and we just
-  need to optimize the scheduling code for non desktop architectures.
+- On CUDA platforms, some of my CUDA implementations are a good start and even
+  better than OpenCV ones.
+- For low-power devices, the Halide CPU backend provides a good start and we
+  just need to optimize the scheduling code for non desktop architectures.
 
 Time has flown. Years after years I try to keep the library alive but things
 happen a lot slowly.
