@@ -132,7 +132,7 @@ test:
     - DISPLAY=:1 ctest
         -j$(nproc)
         --output-on-failure
-        --exclude-regex "test_graphics_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
+        --exclude-regex "test_graphics_*|test_visualization_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
 
     # Install coveralls-lcov
     - bundle install
@@ -147,7 +147,6 @@ test:
     - build
 
 pages:
-  stage: documentation
   script:
     # Configure the documentation build.
     - cd build
