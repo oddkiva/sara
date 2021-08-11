@@ -114,10 +114,8 @@ namespace DO { namespace Sara {
       quit();
     }
 
-    // Destroy it!
-    delete *wi;
-    if (!wi->isNull())
-      qFatal("The closed window could not be deleted!");
+    if (m_activeWindow == *wi)
+      m_activeWindow = nullptr;
 
     m_createdWindows.erase(wi);
   }
