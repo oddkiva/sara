@@ -208,7 +208,7 @@ struct LocalPhotometricStatistics
     gray_mean.flat_array().setZero();
 
     const auto& r = patch_radius;
-    const auto area = std::pow(2 * r, 2);
+    const auto area = square(2 * r);
 
     auto calculate_mean_at = [&](const ImageView<float>& plane, int x, int y) {
       auto mean = float{};
@@ -256,7 +256,7 @@ struct LocalPhotometricStatistics
       const auto ymax = y + r;
       for (auto v = ymin; v < ymax; ++v)
         for (auto u = xmin; u < xmax; ++u)
-          sigma += std::pow(plane(u, v) - mean, 2);
+          sigma += square(plane(u, v) - mean);
 
       sigma = std::sqrt(sigma);
 

@@ -50,13 +50,13 @@ BOOST_AUTO_TEST_CASE(test_open_and_close_window)
 
 BOOST_AUTO_TEST_CASE(test_open_and_close_gl_window)
 {
-  auto window = create_gl_window(300, 300, "My Window", 50, 50);
+  auto window = create_gl_window(300, 300, "OpenGL Window", 50, 50);
 
   BOOST_CHECK_EQUAL(get_width(window), window->width());
   BOOST_CHECK_EQUAL(get_height(window), window->height());
   BOOST_CHECK_EQUAL(get_sizes(window),
                     Vector2i(window->width(), window->height()));
-  BOOST_CHECK(window->windowTitle() == QString("My Window"));
+  BOOST_CHECK(window->windowTitle() == QString("OpenGL Window"));
   BOOST_CHECK(window->pos() == QPoint(50, 50));
 
   close_window(window);
@@ -64,13 +64,13 @@ BOOST_AUTO_TEST_CASE(test_open_and_close_gl_window)
 
 BOOST_AUTO_TEST_CASE(test_open_and_close_graphics_view)
 {
-  auto window = create_graphics_view(300, 300, "My Window", 50, 50);
+  auto window = create_graphics_view(300, 300, "GraphicsView Window", 50, 50);
 
   BOOST_CHECK_EQUAL(get_width(window), window->width());
   BOOST_CHECK_EQUAL(get_height(window), window->height());
   BOOST_CHECK_EQUAL(get_sizes(window),
                     Vector2i(window->width(), window->height()));
-  BOOST_CHECK(window->windowTitle() == QString("My Window"));
+  BOOST_CHECK(window->windowTitle() == QString("GraphicsView Window"));
   BOOST_CHECK(window->pos() == QPoint(50, 50));
 
   close_window(window);

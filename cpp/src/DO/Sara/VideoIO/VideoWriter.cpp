@@ -339,7 +339,7 @@ namespace DO::Sara {
     int16_t* q = reinterpret_cast<int16_t*>(frame->data[0]);
     /* check if we want to generate more frames */
     if (av_compare_ts(ost->next_pts, ost->encoding_context->time_base,
-                      STREAM_DURATION, {1, 1}) > 0)
+                      static_cast<std::int64_t>(STREAM_DURATION), {1, 1}) > 0)
       return nullptr;
     for (j = 0; j < frame->nb_samples; j++)
     {
@@ -480,8 +480,8 @@ namespace DO::Sara {
   {
     AVCodecContext* c = ostream->encoding_context;
     /* check if we want to generate more frames */
-    if (av_compare_ts(ostream->next_pts, c->time_base, STREAM_DURATION,
-                      {1, 1}) > 0)
+    if (av_compare_ts(ostream->next_pts, c->time_base,
+                      static_cast<std::int64_t>(STREAM_DURATION), {1, 1}) > 0)
       return nullptr;
     /* when we pass a frame to the encoder, it may keep a reference to it
      * internally; make sure we do not overwrite it here */
