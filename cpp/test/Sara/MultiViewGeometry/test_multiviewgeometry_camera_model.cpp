@@ -44,7 +44,14 @@ BOOST_AUTO_TEST_CASE(test_camera_model)
   BOOST_CHECK(cameras.front().inverse_calibration_matrix() == K.inverse());
   BOOST_CHECK(project(cameras.front(), Eigen::Vector3f{0, 0, 1}) ==
               Eigen::Vector2f(960, 540));
+  BOOST_CHECK_SMALL((backproject(cameras.front(), Eigen::Vector2f{960, 540}) -
+                     Eigen::Vector3f::UnitZ())
+                        .norm(),
+                    1e-6f);
 
-  SARA_CHECK(cameras.front().inverse_calibration_matrix());
-  SARA_CHECK(cameras.front().calibration_matrix());
+  {
+    const auto& K = cameras.front().calibration_matrix();
+    const auto& Kinv = cameras.front().inverse_calibration_matrix();
+    BOOST_CHECK_SMALL((K * Kinv - Eigen::Matrix3f::Identity()).norm(), 1e-6f);
+  }
 }
