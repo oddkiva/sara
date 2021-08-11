@@ -147,6 +147,7 @@ test:
     - build
 
 pages:
+  stage: deploy
   script:
     # Configure the documentation build.
     - cd build
