@@ -141,6 +141,10 @@ namespace DO::Sara {
       qApp->quit();
     }
 
+    delete *wi;
+    if (!wi->isNull())
+      qFatal("The closed window could not be deleted!");
+
     m_createdWindows.erase(wi);
   }
 
