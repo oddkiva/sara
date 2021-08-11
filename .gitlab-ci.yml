@@ -105,6 +105,9 @@ before_script:
   - Xvfb :1 -noreset 1>/dev/null 2>&1 &
   - export DISPLAY=:1
 
+  # Install coveralls-lcov
+  - bundle install
+
 # cppcheck:
 #   stage: build
 #   script:
@@ -125,20 +128,11 @@ build:
     - make -j$(nproc)
     # Create deb package.
     - make package
-  artifacts:
-    paths:
-      - build/
-
-test:
-  stage: test
-  script:
     # Run tests.
     - DISPLAY=:1 ctest
         -j$(nproc)
         --output-on-failure
         --exclude-regex "test_graphics_*|test_visualization_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
-
-    # Install coveralls-lcov
     # TODO: make -j$(nproc) coverage.
     - lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
     - lcov --remove coverage.info '/usr/*' --output-file coverage.info
@@ -146,18 +140,17 @@ test:
     - lcov --remove coverage.info '$(pwd)/cpp/test/*' --output-file coverage.info
     - lcov --remove coverage.info '$(pwd)/build/*' --output-file coverage.info
     - coveralls-lcov coverage.info --token $(cat .coveralls.gitlab.yml)
-  dependencies:
-    - build
 
 pages:
+  stage: deploy
   script:
     # Configure the documentation build.
+    - mkdir build
+    - cmake -DSARA_BUILD_SHARED_LIBS:BOOL=ON ..
     - cd build
     - make -j$(nproc) doc
     # Move the generated documentation in the right place.
     - mv doc/html/ ../public/
-  dependencies:
-    - build
   artifacts:
     paths:
     - public
