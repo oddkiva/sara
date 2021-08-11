@@ -12,6 +12,7 @@
 //! @file
 
 #include <DO/Sara/Core/ArrayIterators/CoordinatesIterator.hpp>
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/Core/Image.hpp>
 #ifdef VISUAL_INSPECTION
 #include <DO/Sara/Graphics.hpp>
@@ -258,8 +259,8 @@ namespace DO::Sara {
       const auto usum = us.array().sum();
 
       // Calculate the reduced discriminant of the trinome we are solving.
-      const auto delta = std::pow(us.sum(), 2) -
-                         N * (us.squaredNorm() - std::pow(fx_inverse, 2));
+      const auto delta =
+          square(us.sum()) - N * (us.squaredNorm() - square(fx_inverse));
 
       auto r0 = T{};
       if (delta >= 0)

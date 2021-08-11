@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 
 #include "../AssertHelpers.hpp"
@@ -166,7 +167,7 @@ BOOST_AUTO_TEST_CASE(test_gaussian)
   true_matrix.resize(9, 9);
   for (int i = 0; i < 9; ++i)
     for (int j = 0; j < 9; ++j)
-      true_matrix(i, j) = exp(-(pow(i - 4.f, 2) + pow(j - 4.f, 2)) / 2.f);
+      true_matrix(i, j) = exp(-(square(i - 4.f) + square(j - 4.f)) / 2.f);
   true_matrix /= true_matrix.sum();
 
   dst_image = _src_image.compute<Gaussian>(1.f);

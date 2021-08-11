@@ -13,10 +13,12 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/FeatureDetectors/DoG.hpp>
 
 
 using namespace DO::Sara;
+
 
 BOOST_AUTO_TEST_SUITE(TestExtremumRefinement)
 
@@ -52,8 +54,8 @@ BOOST_AUTO_TEST_CASE(test_compute_dog_extrema)
   const auto sigma = 1.5f;
   for (int y = 0; y < N; ++y)
     for (int x = 0; x < N; ++x)
-      I(x, y) = 1 / sqrt(2 * float(M_PI) * pow(sigma, 2)) *
-                exp(-(pow(x - xc, 2) + pow(y - yc, 2)) / (2 * pow(sigma, 2)));
+      I(x, y) = 1 / sqrt(2 * float(M_PI) * square(sigma)) *
+                exp(-(square(x - xc) + square(y - yc)) / (2 * square(sigma)));
 
   using namespace std;
 

@@ -30,13 +30,13 @@ namespace DO { namespace Sara {
   {
   public:
     //! @brief Constructor.
-    ImagePyramidParams(                                         //
-        int first_octave_index = -1,                            //
-        int num_scales_per_octave = 3 + 3,                      //
-        double scale_geometric_factor = std::pow(2., 1. / 3.),  //
-        int image_padding_size = 1,                             //
-        double scale_camera = 0.5,                              //
-        double scale_initial = 1.6)
+    ImagePyramidParams(                                           //
+        int first_octave_index = -1,                              //
+        int num_scales_per_octave = 3 + 3,                        //
+        float scale_geometric_factor = std::pow(2.f, 1.f / 3.f),  //
+        int image_padding_size = 1,                               //
+        float scale_camera = 0.5f,                                //
+        float scale_initial = 1.6f)
     {
       _scale_camera = scale_camera;
       _scale_initial = scale_initial;
@@ -98,7 +98,7 @@ namespace DO { namespace Sara {
      *  We can retrieve such color values every half pixels by using bilinear
      *  interpolation.
      */
-    double scale_camera() const
+    float scale_camera() const
     {
       return _scale_camera;
     }
@@ -111,7 +111,7 @@ namespace DO { namespace Sara {
      *
      *  Here scale_initial() corresponds to @f$\sigma_0@f$.
      */
-    double scale_initial() const
+    float scale_initial() const
     {
       return _scale_initial;
     }
@@ -121,19 +121,19 @@ namespace DO { namespace Sara {
      *  progression, i.e., @f$\sigma_i = k^i \sigma_0@f$.
      *
      *  Laplacians of Gaussians @f$ \nabla^2 I_{\sigma} @f$ can be approximated
-     *  efficiently with differences of Gaussians @f$ I_{k\sigma} - I_{\sigma} @f$
-     *  for each @f$ \sigma = \sigma_i @f$ without the need to normalize the
+     *  efficiently with differences of Gaussians @f$ I_{k\sigma} - I_{\sigma}
+     * @f$ for each @f$ \sigma = \sigma_i @f$ without the need to normalize the
      *  difference of Gaussians.
      *
      *  Thus
      *  \f{eqnarray*}{
-     *    \frac{\partial I_\sigma}{\partial \sigma} &=& \sigma \nabla^2 I_\sigma \\
-     *    I_{k\sigma} - I_{\sigma} &\approx& (k-1) \sigma^2 \nabla^2 I_\sigma
+     *    \frac{\partial I_\sigma}{\partial \sigma} &=& \sigma \nabla^2 I_\sigma
+     * \\ I_{k\sigma} - I_{\sigma} &\approx& (k-1) \sigma^2 \nabla^2 I_\sigma
      *  \f}
      *
      *  Here scale_geometric_factor() corresponds to the value @f$ k @f$.
      */
-    double scale_geometric_factor() const
+    float scale_geometric_factor() const
     {
       return _scale_geometric_factor;
     }
@@ -171,10 +171,10 @@ namespace DO { namespace Sara {
     }
 
   private:
-    double _scale_camera;
-    double _scale_initial;
+    float _scale_camera;
+    float _scale_initial;
     int _num_scales_per_octave;
-    double _scale_geometric_factor;
+    float _scale_geometric_factor;
     int _image_padding_size;
     int _first_octave_index;
   };
@@ -185,7 +185,7 @@ namespace DO { namespace Sara {
     - the same number of scales in each octave
     - the same geometric progression factor in the scale in each octave
    */
-  template <typename Pixel, int N=2>
+  template <typename Pixel, int N = 2>
   class ImagePyramid
   {
   public: /* member functions */
@@ -201,10 +201,8 @@ namespace DO { namespace Sara {
     inline ImagePyramid() = default;
 
     //! @brief Reset image pyramid with the following parameters.
-    void reset(int num_octaves,
-               int num_scales_per_octave,
-               double scale_initial,
-               double scale_geometric_factor)
+    void reset(int num_octaves, int num_scales_per_octave, float scale_initial,
+               float scale_geometric_factor)
     {
       _octaves.clear();
       _oct_scaling_factors.clear();
@@ -233,11 +231,11 @@ namespace DO { namespace Sara {
     //! @brief Mutable pixel getter.
     pixel_type& operator()(int x, int y, int s, int o)
     {
-      return _octaves[o][s](x,y);
+      return _octaves[o][s](x, y);
     }
 
     //! @brief Mutable getter of the octave scaling factor.
-    auto octave_scaling_factor(int o) -> double&
+    auto octave_scaling_factor(int o) -> float&
     {
       return _oct_scaling_factors[o];
     }
@@ -257,11 +255,11 @@ namespace DO { namespace Sara {
     //! @brief Immutable pixel getter.
     auto operator()(int x, int y, int s, int o) const -> const pixel_type&
     {
-      return _octaves[o][s](x,y);
+      return _octaves[o][s](x, y);
     }
 
     //! @brief Immutable getter of the octave scaling factor.
-    auto octave_scaling_factor(int o) const -> double
+    auto octave_scaling_factor(int o) const -> float
     {
       return _oct_scaling_factors[o];
     }
@@ -312,18 +310,17 @@ namespace DO { namespace Sara {
   protected: /* data members */
     //! @{
     //! @brief Parameters.
-    double _scale_initial;
-    double _scale_geometric_factor;
+    float _scale_initial;
+    float _scale_geometric_factor;
     //! @}
 
     //! @{
     //! @brief Image data.
     std::vector<octave_type> _octaves;
-    std::vector<double> _oct_scaling_factors;
+    std::vector<float> _oct_scaling_factors;
     //! @}
   };
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

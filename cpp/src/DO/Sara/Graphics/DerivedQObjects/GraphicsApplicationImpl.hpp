@@ -68,8 +68,8 @@ namespace DO { namespace Sara {
 
   public:
     UserThread m_userThread;
-    QList<QPointer<QWidget> > m_createdWindows;
-    QPointer<QWidget> m_activeWindow;
+    QList<QPointer<QWidget>> m_createdWindows;
+    QWidget* m_activeWindow = nullptr;
 
     DialogBoxInfo m_dialogBoxInfo;
 

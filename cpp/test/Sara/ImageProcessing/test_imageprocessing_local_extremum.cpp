@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_local_extremum)
 BOOST_AUTO_TEST_CASE(test_local_scale_space_extremum)
 {
   ImagePyramid<double> I;
-  I.reset(1,3,1.6f,pow(2., 1./3.));
+  I.reset(1, 3, 1.6f, pow(2.f, 1 / 3.f));
   for (int i = 0; i < 3; ++i)
   {
     I(i,0).resize(10,10);

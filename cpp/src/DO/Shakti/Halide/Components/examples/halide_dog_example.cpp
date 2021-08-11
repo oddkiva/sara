@@ -1,5 +1,19 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2021-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+//! @example
+
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
@@ -85,8 +99,8 @@ auto rescale_to_rgb(const Halide::Func& f, int32_t w, int32_t h)
 
   auto f_rescaled = Halide::Func{f.name() + "_rescaled"};
   f_rescaled(x, y, c) = Halide::cast<std::uint8_t>(  //
-      (f(x, y) - f_min()) /                  //
-      (f_max() - f_min()) * 255              //
+      (f(x, y) - f_min()) /                          //
+      (f_max() - f_min()) * 255                      //
   );
 
   return f_rescaled;
@@ -146,14 +160,15 @@ auto schedule_gaussian_octave(const Halide::Func& gray,
   auto gauss_pyr = std::vector<hal::GaussianConvolution2D<>>(sigmas.size());
   for (auto s = 0u; s < sigmas.size(); ++s)
   {
-    const auto scale_factorigma =
-        s == 0 ? sigmas[0]
-               : std::sqrt(std::pow(sigmas[s], 2) - std::pow(sigmas[s - 1], 2));
+    const auto scale_factor =
+        s == 0
+            ? sigmas[0]
+            : std::sqrt(sara::square(sigmas[s]) - sara::square(sigmas[s - 1]));
 
     const auto& prev = s == 0u ? gray : gauss_pyr[s - 1].output;
 
     gauss_pyr[s].output = Halide::Func{"gauss_" + std::to_string(s)};
-    gauss_pyr[s].generate_2d(prev, scale_factorigma, 4, w, h);
+    gauss_pyr[s].generate_2d(prev, scale_factor, 4, w, h);
     gauss_pyr[s].schedule_2d(jit_target);
     gauss_pyr[s].output.compute_root();
   }
@@ -162,8 +177,7 @@ auto schedule_gaussian_octave(const Halide::Func& gray,
 }
 
 auto schedule_subtraction(
-    const std::vector<hal::GaussianConvolution2D<>>& gauss_pyr,
-    bool use_gpu)
+    const std::vector<hal::GaussianConvolution2D<>>& gauss_pyr, bool use_gpu)
 {
   auto dog_pyr = std::vector<Halide::Func>(gauss_pyr.size() - 1);
   for (auto s = 0u; s < gauss_pyr.size() - 1; ++s)
@@ -185,7 +199,8 @@ GRAPHICS_MAIN()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath = "/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
+  const auto video_filepath =
+      "/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
 #else
   // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
@@ -230,7 +245,7 @@ GRAPHICS_MAIN()
   const auto scale_factor = static_cast<float>(std::pow(2, 1. / 3.));
   auto sigmas = std::vector<float>(num_scales);
   for (auto s = 0; s < num_scales; ++s)
-    sigmas[s] = std::pow(scale_factor, s + 1);
+    sigmas[s] = std::pow(scale_factor, static_cast<float>(s + 1));
 
   // 3. Gaussian octave.
   auto gauss_pyr = schedule_gaussian_octave(gray,                           //
@@ -242,7 +257,7 @@ GRAPHICS_MAIN()
 
   // 4. DoG octave.
   auto dog_pyr = schedule_subtraction(gauss_pyr, use_gpu);
-  for(auto& dog: dog_pyr)
+  for (auto& dog : dog_pyr)
     dog.compute_root();
 
   // 5. Local scale-space extrema.
@@ -375,13 +390,12 @@ GRAPHICS_MAIN()
 
         const auto x1 = dog_successes(i) ? x + res_x : x;
         const auto y1 = dog_successes(i) ? y + res_y : y;
-        const auto s1 = dog_successes(i)
-                            ? s * std::pow(scale_factor, res_s)
-                            : s;
+        const auto s1 =
+            dog_successes(i) ? s * std::pow(scale_factor, res_s) : s;
 
         num_residual_successes += dog_successes(i);
-        sara::draw_circle(x1, y1, static_cast<int>(s1 * std::sqrt(2.f)), color,
-                          2);
+        sara::draw_circle(sara::int_round(x1), sara::int_round(y1),
+                          static_cast<int>(s1 * std::sqrt(2.f)), color, 2);
       }
 
       // SARA_CHECK(num_residual_successes);

@@ -16,6 +16,7 @@
 
 namespace DO::Sara {
 
+  //! @{
   //! @brief Using autonomous driving convention.
   template <typename T>
   inline auto yaw(T psi) -> Eigen::Matrix<T, 3, 3>
@@ -43,6 +44,7 @@ namespace DO::Sara {
   {
     return yaw(psi) * pitch(theta) * roll(phi);
   }
+  //! @}
 
   template <typename T>
   inline auto angular_distance(const Eigen::Matrix<T, 3, 3>& R1,

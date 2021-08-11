@@ -154,7 +154,7 @@ namespace DO::Sara {
   {
     auto& m_activeWindow = m_widgetList->m_activeWindow;
     m_mutex.lock();
-    if (m_activeWindow.isNull())
+    if (m_activeWindow == nullptr)
     {
       m_mutex.unlock();
       qWarning() << "No active window!";
