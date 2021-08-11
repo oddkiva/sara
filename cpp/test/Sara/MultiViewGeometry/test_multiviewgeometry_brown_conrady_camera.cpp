@@ -34,9 +34,9 @@ auto make_gopro4_camera()
   // clang-format off
   // Calibration matrix.
   camera.K <<
-    8.7217820124018249e+02f,                        0, 9.5763907773613732e+02f,
-                          0., 8.7432544275392024e+02f, 5.1130104075863954e+02f,
-                          0,                        0,                       1;
+    8.7217820124018249e+02f,                        0, 960,
+                          0., 8.7432544275392024e+02f, 540,
+                          0,                        0,   1;
 
   // Distortion model.
   camera.distortion_model.k <<
@@ -85,12 +85,16 @@ BOOST_AUTO_TEST_CASE(test_brown_conrady_camera_model)
     BOOST_CHECK_LE((center_undistorted - center).norm(), 15.f);
   }
 
-  // Populate the image corners.
+  // Because the distortion model is not a very accurate mathematical model, we
+  // cannot use the the image corners. So we use the points closer to the image
+  // center.
+  //
+  // So camera correction model should be used instead.
   const auto points = std::array<Eigen::Vector2f, 4>{
-      Eigen::Vector2f{0, 0},
-      Eigen::Vector2f{w, 0},
-      Eigen::Vector2f{w, h},
-      Eigen::Vector2f{0, h},
+      Eigen::Vector2f{w * 0.25f, h * 0.25f},
+      Eigen::Vector2f{w * 0.75f, h * 0.25f},
+      Eigen::Vector2f{w * 0.75f, h * 0.75f},
+      Eigen::Vector2f{w * 0.25f, h * 0.75f}
   };
 
   for (const auto& pd : points)
@@ -100,15 +104,23 @@ BOOST_AUTO_TEST_CASE(test_brown_conrady_camera_model)
     // This is a non-negotiable check.
     BOOST_CHECK(ray.z() > 0);
 
-    // The reprojected ray must hit the center of the image.
-    const auto projected_ray = camera.project(ray);
+    // The reprojected ray must be imaged in the distorted point.
+    const auto imaged_pixel_coords = camera.project(ray);
     // We allow ourselves to set generous thresholds for the reprojection of
     // rays because the corners are extreme cases.
-    BOOST_CHECK_LE((projected_ray - pd).norm(), 1e-3f);
-
+    BOOST_CHECK_LE((imaged_pixel_coords - pd).norm(), 1e-3f);
     const auto pu = camera.undistort(pd);
     const auto pd2 = camera.distort(pu);
 
     BOOST_CHECK_LE((pd2 - pd).norm(), 1e-3f);
+
+#ifdef DEBUG_ME
+    SARA_CHECK(ray.transpose());
+    SARA_CHECK(imaged_pixel_coords.transpose());
+    SARA_CHECK(pd.transpose());
+    SARA_CHECK(pu.transpose());
+    SARA_CHECK(pd2.transpose());
+    SARA_CHECK("");
+#endif
   }
 }

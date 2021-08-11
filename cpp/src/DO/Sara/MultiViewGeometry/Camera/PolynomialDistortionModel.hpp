@@ -31,26 +31,27 @@ namespace DO::Sara {
     tangential_coefficient_array p;
 
     //! @brief Apply only in the normalized coordinates.
-    inline auto lens_distortion(const vector2& xdn) const -> vector2
+    inline auto lens_distortion(const vector2& xun) const -> vector2
     {
       // Radial term.
-      const auto r2 = xdn.squaredNorm();
+      const auto r2 = xun.squaredNorm();
       auto rpowers = radial_coefficient_array{};
-      for (auto i = 0; i < K; ++i)
-        rpowers[i] = std::pow(r2, i + 1);
-      const auto radial = vector2{k.dot(rpowers) * xdn};
+      rpowers[0] = r2;
+      for (auto i = 1; i < K; ++i)
+        rpowers[i] = rpowers[i - 1] * r2;
+      const auto radial = vector2{k.dot(rpowers) * xun};
 
       // Tangential term.
-      const matrix2 Tmat = r2 * matrix2::Identity() + 2 * xdn * xdn.transpose();
+      const matrix2 Tmat = r2 * matrix2::Identity() + 2 * xun * xun.transpose();
       const vector2 tangential = Tmat * p;
 
       return radial + tangential;
     }
 
     //! @brief Apply only in the normalized coordinates.
-    inline auto distort(const vector2& xdn) const -> vector2
+    inline auto distort(const vector2& xun) const -> vector2
     {
-      return xdn + lens_distortion(xdn);
+      return xun + lens_distortion(xun);
     }
 
     //! @brief Iterative method to remove distortion.

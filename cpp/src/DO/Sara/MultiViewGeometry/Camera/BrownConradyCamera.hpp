@@ -65,12 +65,14 @@ namespace DO::Sara {
 
     inline auto project(const vector3_type& x) const -> vector2_type
     {
-      return distort(base_type::project(x));
+      const Eigen::Vector2f pixel_coords = (K * x).hnormalized();
+      return distort(pixel_coords);
     }
 
     inline auto backproject(const vector2_type& x) const -> vector3_type
     {
-      return base_type::backproject(undistort(x));
+      const Eigen::Vector2f &xu = undistort (x);
+      return K_inverse * xu.homogeneous ();
     }
 
     template <typename PixelType>
