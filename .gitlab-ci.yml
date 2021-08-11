@@ -93,6 +93,10 @@ before_script:
   # Python dependencies (TODO).
   - apt-get install -y -qq python3-dev
 
+  # Coveralls-lcov
+  - gem install bundler
+  - bundle install
+
   # Build CLBlast.
   - ./scripts/install_clblast.sh
 
@@ -135,7 +139,6 @@ test:
         --exclude-regex "test_graphics_*|test_visualization_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
 
     # Install coveralls-lcov
-    - bundle install
     # TODO: make -j$(nproc) coverage.
     - lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
     - lcov --remove coverage.info '/usr/*' --output-file coverage.info
