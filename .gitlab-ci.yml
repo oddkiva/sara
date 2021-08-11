@@ -94,7 +94,7 @@ before_script:
   - apt-get install -y -qq python3-dev
 
   # Coveralls-lcov
-  - apt-get install rubygems
+  - apt-get install -y -qq rubygems
   - gem install bundler
   - bundle install
 
