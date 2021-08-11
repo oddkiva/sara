@@ -65,7 +65,7 @@ auto edge_signature(const sara::ImageView<sara::Rgb8>& color,
           return g;
         return g + gradients(e).normalized();
       });
-  mean_gradient /= edge.size();
+  mean_gradient /= static_cast<float>(edge.size());
 
   return std::make_tuple(darks, brights, mean_gradient);
 }
