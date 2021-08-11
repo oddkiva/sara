@@ -43,9 +43,14 @@ if (CMAKE_COMPILER_IS_GNUCXX)
               --remove coverage.info '*/numpy/*'
               --output-file coverage.info
 
+      # Remove the examples.
+      COMMAND ${LCOV_PATH}
+              --remove coverage.info '${DO_Sara_DIR}/cpp/examples/*'
+              --output-file coverage.info
+
       # Remove tests in the peculiar folders.
       COMMAND ${LCOV_PATH}
-              --remove coverage.info '${DO_Sara_DIR}/cpp/src/DO/Shakti/Halide/Generators/test/*'
+              --remove coverage.info '${DO_Sara_DIR}/cpp/src/DO/Shakti/Halide/Generators/*'
               --output-file coverage.info
       COMMAND ${LCOV_PATH}
               --remove coverage.info '${DO_Sara_DIR}/cpp/src/DO/Shakti/Halide/Components/test/*'
