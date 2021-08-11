@@ -148,10 +148,10 @@ namespace DO::Sara {
 
   template <typename T>
   using BrownConradyCameraDecentered22 =
-      BrownConradyCamera<T, PolynomialDistortionModel<T, 2, 2>>;
+      BrownConradyCamera<T, DecenteredPolynomialDistortionModel<T, 2, 2>>;
 
   template <typename T>
   using BrownConradyCameraDecentered32 =
-      BrownConradyCamera<T, PolynomialDistortionModel<T, 3, 2>>;
+      BrownConradyCamera<T, DecenteredPolynomialDistortionModel<T, 3, 2>>;
 
 }  // namespace DO::Sara
