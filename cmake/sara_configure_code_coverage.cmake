@@ -4,7 +4,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   find_program(GCOV_PATH gcov)
   find_program(GENHTML_PATH genhtml)
 
-  if (LCOV_PATH AND GCOV_PATH AND GENHTML_PATH)
+  if (LCOV_PATH AND GCOV_PATH)
     add_custom_target(coverage
       COMMAND ${LCOV_PATH} --gcov-tool=${GCOV_PATH} --compat-libtool
                            --directory=${CMAKE_BINARY_DIR}
@@ -35,10 +35,13 @@ if (CMAKE_COMPILER_IS_GNUCXX)
       COMMAND ${LCOV_PATH}
               --remove coverage.info '${DO_Sara_DIR}/cpp/drafts/*/test*'
               --output-file coverage.info
-
-      # Generate HTML report
-      COMMAND ${GENHTML_PATH} coverage.info
-              --output-directory=${CMAKE_BINARY_DIR}/coverage
     )
+  endif ()
+
+  if (GENHTML_PATH)
+    add_custom_target(coverage_html_report
+      COMMAND ${GENHTML_PATH} coverage.info
+              --output-directory=${CMAKE_BINARY_DIR}/coverage)
+    add_dependencies(coverage_html_report coverage)
   endif ()
 endif ()
