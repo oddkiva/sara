@@ -95,6 +95,7 @@ BOOST_AUTO_TEST_CASE(test_intersection)
   const auto b2 = BBox{Point2d{0.5, 0.5}, Point2d{1.5, 1.5}};
 
   const auto inter = BBox{Point2d{0.5, 0.5}, Point2d{1, 1}};
+  BOOST_CHECK(intersect(b1, b2));
   BOOST_CHECK_EQUAL(inter, intersection(b1, b2));
 
   auto expected_jaccard_distance =

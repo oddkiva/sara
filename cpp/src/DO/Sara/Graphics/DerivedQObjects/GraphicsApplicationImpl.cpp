@@ -44,14 +44,11 @@ namespace DO { namespace Sara {
   {
     for (auto w = m_createdWindows.begin(); w != m_createdWindows.end(); ++w)
     {
-      if (!w->isNull())
-      {
-        PaintingWindow* paintingWindow = qobject_cast<PaintingWindow*>(*w);
-        if (paintingWindow)
-          delete paintingWindow->scrollArea();
-        else
-          delete *w;
-      }
+      auto paintingWindow = qobject_cast<PaintingWindow*>(*w);
+      if (paintingWindow)
+        delete paintingWindow->scrollArea();
+      else
+        delete *w;
     }
   }
 
@@ -116,6 +113,11 @@ namespace DO { namespace Sara {
       qFatal("Could not close window!");
       quit();
     }
+
+    if (m_activeWindow == *wi)
+      m_activeWindow = nullptr;
+
+    m_createdWindows.erase(wi);
   }
 
   void GraphicsApplication::Impl::getFileFromDialogBox()
@@ -164,11 +166,6 @@ namespace DO { namespace Sara {
     auto w = m_createdWindows.begin();
     for (; w != m_createdWindows.end();)
     {
-      if (w->isNull())
-      {
-        w = m_createdWindows.erase(w);
-        continue;
-      }
       connectWindowIOEventsToUserThread(*w);
       ++w;
     }
@@ -179,11 +176,6 @@ namespace DO { namespace Sara {
     auto w = m_createdWindows.begin();
     for (; w != m_createdWindows.end();)
     {
-      if (w->isNull())
-      {
-        w = m_createdWindows.erase(w);
-        continue;
-      }
       disconnect(&m_userThread, 0, *w, 0);
       disconnect(*w, 0, &m_userThread, 0);
       ++w;

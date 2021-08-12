@@ -53,6 +53,11 @@ namespace DO::Sara {
 
     inline CameraModel& operator=(CameraModel&& c) = default;
 
+    inline auto set_calibration_matrix(const Eigen::Matrix<T, 3, 3>& K)
+    {
+      _self->set_calibration_matrix(K);
+    }
+
     friend inline auto project(const CameraModel& c,
                                const Eigen::Matrix<T, 3, 1>& x)
         -> Eigen::Matrix<T, 2, 1>
@@ -65,6 +70,16 @@ namespace DO::Sara {
         -> Eigen::Matrix<T, 3, 1>
     {
       return c._self->backproject(x);
+    }
+
+    inline auto calibration_matrix() const -> const Eigen::Matrix<T, 3, 3>&
+    {
+      return _self->calibration_matrix();
+    }
+
+    inline auto inverse_calibration_matrix() const -> const Eigen::Matrix<T, 3, 3>&
+    {
+      return _self->inverse_calibration_matrix();
     }
 
   private:
@@ -82,7 +97,7 @@ namespace DO::Sara {
 
       virtual auto backproject(const Vector2&) const -> Vector3 = 0;
 
-      virtual auto calibration_matrix() -> Matrix3& = 0;
+      virtual auto set_calibration_matrix(const Eigen::Matrix3f&) -> void = 0;
 
       virtual auto calibration_matrix() const -> const Matrix3& = 0;
 
@@ -132,9 +147,10 @@ namespace DO::Sara {
           return _impl.undistort(x);
       }
 
-      inline auto calibration_matrix() -> Matrix3& override
+      inline auto set_calibration_matrix(const Matrix3& K) -> void override
       {
-        return _impl.K;
+        _impl.K = K;
+        _impl.K_inverse = K.inverse();
       }
 
       inline auto calibration_matrix() const -> const Matrix3& override

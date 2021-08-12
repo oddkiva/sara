@@ -76,8 +76,8 @@ vector<OERegion> compute_harris_laplace_affine_corners(const Image<float>& I,
     {
       kept_corners.push_back(corners[i]);
       const auto fact = H.octave_scaling_factor(scale_octave_pairs[i](1));
-      kept_corners.back().shape_matrix *= pow(fact, -2);
-      kept_corners.back().coords *= static_cast<float>(fact);
+      kept_corners.back().shape_matrix /= square(fact);
+      kept_corners.back().coords *= fact;
     }
   }
 

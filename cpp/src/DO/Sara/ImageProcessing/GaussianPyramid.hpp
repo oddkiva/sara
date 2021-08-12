@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <DO/Sara/ImageProcessing/Differential.hpp>
@@ -37,7 +38,8 @@ namespace DO { namespace Sara {
     using Scalar = typename ImagePyramid<T>::scalar_type;
 
     // Resize the image with the appropriate factor.
-    const auto resize_factor = std::pow(2.f, -params.first_octave_index());
+    const auto resize_factor =
+        std::pow(2.f, -static_cast<float>(params.first_octave_index()));
     auto I = enlarge(image, resize_factor);
 
     // Deduce the new camera sigma with respect to the dilated image.
@@ -102,13 +104,12 @@ namespace DO { namespace Sara {
 
   //! Computes a pyramid of difference of Gaussians from the Gaussian pyramid.
   template <typename T>
-  ImagePyramid<T> difference_of_gaussians_pyramid(const ImagePyramid<T>& gaussians)
+  ImagePyramid<T>
+  difference_of_gaussians_pyramid(const ImagePyramid<T>& gaussians)
   {
     auto D = ImagePyramid<T>{};
-    D.reset(gaussians.num_octaves(),
-            gaussians.num_scales_per_octave() - 1,
-            gaussians.scale_initial(),
-            gaussians.scale_geometric_factor());
+    D.reset(gaussians.num_octaves(), gaussians.num_scales_per_octave() - 1,
+            gaussians.scale_initial(), gaussians.scale_geometric_factor());
 
     for (auto o = 0; o < D.num_octaves(); ++o)
     {
@@ -129,11 +130,11 @@ namespace DO { namespace Sara {
   template <typename T>
   ImagePyramid<T> laplacian_pyramid(const ImagePyramid<T>& gaussians)
   {
+    using scalar_type = typename ImagePyramid<T>::scalar_type;
+
     auto LoG = ImagePyramid<T>{};
-    LoG.reset(gaussians.num_octaves(),
-              gaussians.num_scales_per_octave(),
-              gaussians.scale_initial(),
-              gaussians.scale_geometric_factor());
+    LoG.reset(gaussians.num_octaves(), gaussians.num_scales_per_octave(),
+              gaussians.scale_initial(), gaussians.scale_geometric_factor());
 
     for (auto o = 0; o < LoG.num_octaves(); ++o)
     {
@@ -141,8 +142,9 @@ namespace DO { namespace Sara {
       for (auto s = 0; s < LoG.num_scales_per_octave(); ++s)
       {
         LoG(s, o) = laplacian(gaussians(s, o));
-        for (auto& p: LoG(s, o))
-          p *= std::pow(gaussians.scale_relative_to_octave(s), 2);
+        for (auto& p : LoG(s, o))
+          p *= static_cast<scalar_type>(
+              Sara::square(gaussians.scale_relative_to_octave(s)));
       }
     }
 
@@ -161,9 +163,9 @@ namespace DO { namespace Sara {
       throw std::out_of_range{"Computing gradient out of image range!"};
 
     auto d = Matrix<T, 3, 1>{};
-    d(0) = (I(x + 1, y    , s  , o) - I(x - 1, y    , s    , o)) / T(2);
-    d(1) = (I(x    , y + 1, s  , o) - I(x    , y - 1, s    , o)) / T(2);
-    d(2) = (I(x    , y    , s+1, o) - I(x    , y    , s - 1, o)) / T(2);
+    d(0) = (I(x + 1, y, s, o) - I(x - 1, y, s, o)) / T(2);
+    d(1) = (I(x, y + 1, s, o) - I(x, y - 1, s, o)) / T(2);
+    d(2) = (I(x, y, s + 1, o) - I(x, y, s - 1, o)) / T(2);
     return d;
   }
 
@@ -204,5 +206,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

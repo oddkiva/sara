@@ -43,7 +43,7 @@ vector<OERegion> compute_dog_extrema(const Image<float>& I, bool verbose = true)
     const auto octave_scale_factor =
         static_cast<float>(DoG.octave_scaling_factor(scale_octave_pairs[i](1)));
     DoGs[i].center() *= octave_scale_factor;
-    DoGs[i].shape_matrix /= pow(octave_scale_factor, 2);
+    DoGs[i].shape_matrix /= square(octave_scale_factor);
   }
 
   return DoGs;
@@ -99,8 +99,8 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
       kept_DoGs.push_back(DoGs[i]);
       const auto fact =
           static_cast<float>(D.octave_scaling_factor(scale_octave_pairs[i](1)));
-      kept_DoGs.back().shape_matrix *= pow(fact, -2);
-      kept_DoGs.back().coords *= static_cast<float>(fact);
+      kept_DoGs.back().shape_matrix /= square(fact);
+      kept_DoGs.back().coords *= fact;
     }
   }
 

@@ -20,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 
 
-BOOST_AUTO_TEST_CASE(test_camera_model_constructor)
+BOOST_AUTO_TEST_CASE(test_camera_model)
 {
   namespace sara = DO::Sara;
   using CameraModelf = sara::CameraModel<float>;
@@ -31,6 +31,27 @@ BOOST_AUTO_TEST_CASE(test_camera_model_constructor)
   cameras.emplace_back(sara::FisheyeCamera<float>{});
   cameras.emplace_back(sara::OmnidirectionalCamera<float>{});
 
-  project(cameras.front(), Eigen::Vector3f{});
-  project(cameras.back(), Eigen::Vector3f{});
+  // clang-format off
+  auto K = (Eigen::Matrix3f{} <<
+    970,   0, 960,
+      0, 970, 540,
+      0,   0,   1
+  ).finished();
+  // clang-format on
+  cameras.front().set_calibration_matrix(K);
+
+  BOOST_CHECK(cameras.front().calibration_matrix() == K);
+  BOOST_CHECK(cameras.front().inverse_calibration_matrix() == K.inverse());
+  BOOST_CHECK(project(cameras.front(), Eigen::Vector3f{0, 0, 1}) ==
+              Eigen::Vector2f(960, 540));
+  BOOST_CHECK_SMALL((backproject(cameras.front(), Eigen::Vector2f{960, 540}) -
+                     Eigen::Vector3f::UnitZ())
+                        .norm(),
+                    1e-6f);
+
+  {
+    const auto& K = cameras.front().calibration_matrix();
+    const auto& Kinv = cameras.front().inverse_calibration_matrix();
+    BOOST_CHECK_SMALL((K * Kinv - Eigen::Matrix3f::Identity()).norm(), 1e-6f);
+  }
 }
