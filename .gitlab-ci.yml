@@ -135,10 +135,12 @@ build:
     - cd ..
     - lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
     - lcov --remove coverage.info '/usr/*' --output-file coverage.info
-    - lcov --remove coverage.info '$(pwd)/cpp/third-party/*' --output-file coverage.info
-    - lcov --remove coverage.info '$(pwd)/cpp/test/*' --output-file coverage.info
-    - lcov --remove coverage.info '$(pwd)/build/*' --output-file coverage.info
-    - coveralls-lcov coverage.info --token $(cat .coveralls.gitlab.yml)
+    - lcov --remove coverage.info '/tmp/*' --output-file coverage.info
+    - lcov --remove coverage.info '/builds/DO-CV/sara/cpp/third-party/*' --output-file coverage.info
+    - lcov --remove coverage.info '/builds/DO-CV/sara/cpp/test/*' --output-file coverage.info
+    - lcov --remove coverage.info '/builds/DO-CV/sara/cpp/examples/*' --output-file coverage.info
+    - lcov --remove coverage.info '/builds/DO-CV/sara/build/*' --output-file coverage.info
+    - coveralls-lcov coverage.info --repo-token=$(cat .coveralls.gitlab.yml)
 
 pages:
   stage: deploy
