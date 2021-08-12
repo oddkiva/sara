@@ -148,8 +148,8 @@ pages:
   script:
     # Configure the documentation build.
     - mkdir build
-    - cmake -DSARA_BUILD_SHARED_LIBS:BOOL=ON ..
     - cd build
+    - cmake -DSARA_BUILD_SHARED_LIBS:BOOL=ON ..
     - make -j$(nproc) doc
     # Move the generated documentation in the right place.
     - mv doc/html/ ../public/
