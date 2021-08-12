@@ -131,7 +131,7 @@ build:
         -j$(nproc)
         --output-on-failure
         --exclude-regex "test_graphics_*|test_visualization_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
-    # TODO: make -j$(nproc) coverage.
+    - make -j$(nproc) coverage
     # I give up... Will come back to it later.
     # - cd ..
     # - lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
@@ -141,7 +141,7 @@ build:
     # - lcov --remove coverage.info '/builds/DO-CV/sara/cpp/test/*' --output-file coverage.info
     # - lcov --remove coverage.info '/builds/DO-CV/sara/cpp/examples/*' --output-file coverage.info
     # - lcov --remove coverage.info '/builds/DO-CV/sara/build/*' --output-file coverage.info
-    # - coveralls-lcov coverage.info --repo-token=$(cat .coveralls.gitlab.yml)
+    - coveralls-lcov coverage.info --repo-token=$(cat .coveralls.gitlab.yml)
 
 pages:
   stage: deploy
