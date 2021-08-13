@@ -144,7 +144,6 @@ build:
     # - coveralls-lcov coverage.info --repo-token=$(cat .coveralls.gitlab.yml)
 
 pages:
-  stage: deploy
   script:
     # Configure the documentation build.
     - mkdir build
