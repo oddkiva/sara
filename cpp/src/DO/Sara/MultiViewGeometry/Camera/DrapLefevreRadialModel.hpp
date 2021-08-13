@@ -67,5 +67,4 @@ namespace DO::Sara {
     }
   };
 
-
 }  // namespace DO::Sara

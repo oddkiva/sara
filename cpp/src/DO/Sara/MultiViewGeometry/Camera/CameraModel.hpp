@@ -16,12 +16,10 @@
 
 #include <Eigen/Core>
 
+#include <DO/Sara/Core/Image.hpp>
+
 
 namespace DO::Sara {
-
-  template <typename T>
-  struct PinholeCamera;
-
 
   template <typename T>
   class CameraModel
@@ -77,7 +75,8 @@ namespace DO::Sara {
       return _self->calibration_matrix();
     }
 
-    inline auto inverse_calibration_matrix() const -> const Eigen::Matrix<T, 3, 3>&
+    inline auto inverse_calibration_matrix() const
+        -> const Eigen::Matrix<T, 3, 3>&
     {
       return _self->inverse_calibration_matrix();
     }
@@ -173,5 +172,72 @@ namespace DO::Sara {
 
     std::unique_ptr<CameraModelConcept> _self;
   };
+
+
+  template <typename PixelType>
+  auto undistort(const CameraModel& camera, const ImageView<PixelType>& src,
+                 ImageView<PixelType>& dst)
+  {
+    const auto& w = dst.width();
+    const auto& h = dst.height();
+
+#pragma omp parallel for
+    for (auto yx = 0; yx < h * w; ++yx)
+    {
+      const auto y = yx / w;
+      const auto x = yx - y * w;
+      const Eigen::Vector2d p =
+          camera.distort(vector2_type(x, y)).template cast<double>();
+
+      const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
+                                   0 <= p.y() && p.y() < h - 1;
+      if (!in_image_domain)
+      {
+        dst(x, y) = PixelTraits<PixelType>::zero();
+        continue;
+      }
+
+      auto color = interpolate(src, p);
+      if constexpr (std::is_same_v<PixelType, Rgb8>)
+        color /= 255;
+
+      auto color_converted = PixelType{};
+      smart_convert_color(color, color_converted);
+      dst(x, y) = color_converted;
+    }
+  }
+
+  template <typename PixelType>
+  auto distort(const CameraModel& camera, const ImageView<PixelType>& src,
+               ImageView<PixelType>& dst)
+  {
+    const auto& w = dst.width();
+    const auto& h = dst.height();
+
+#pragma omp parallel for
+    for (auto yx = 0; yx < h * w; ++yx)
+    {
+      const auto y = yx / w;
+      const auto x = yx - y * w;
+      const Eigen::Vector2d p = camera
+                                    .undistort(vector2_type(x, y))  //
+                                    .template cast<double>();
+      const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
+                                   0 <= p.y() && p.y() < h - 1;
+      if (!in_image_domain)
+      {
+        dst(x, y) = PixelTraits<PixelType>::zero();
+        continue;
+      }
+
+      auto color = interpolate(src, p);
+      if constexpr (std::is_same_v<PixelType, Rgb8>)
+        color /= 255;
+
+      auto color_converted = PixelType{};
+      smart_convert_color(color, color_converted);
+      dst(x, y) = color_converted;
+    }
+  }
 
 }  // namespace DO::Sara
