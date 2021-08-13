@@ -28,13 +28,19 @@ apt-get update -y -qq
 
 # All the packages to compile the C++ codebase.
 apt_packages=(
+  # C++ toolchain and tools.
   "build-essential"
   "ccache"
   "cmake"
   "cppcheck"
-  "doxygen"
   "git"
+  "lcov"
+  "ninja-build"
+  "rubygems"
+  # Documentation
+  "doxygen"
   "graphviz"
+  # Libraries.
   "gstreamer1.0-plugins-base"
   "gstreamer1.0-plugins-good"
   "gstreamer1.0-plugins-bad"
@@ -48,7 +54,6 @@ apt_packages=(
   "gstreamer1.0-gtk3"
   "gstreamer1.0-qt5"
   "gstreamer1.0-pulseaudio"
-  "lcov"
   "libboost-all-dev"
   "libclblast-dev"
   "libgstreamer1.0-0"
@@ -69,7 +74,6 @@ apt_packages=(
   "opencl-headers"
   "python3-dev"
   "qtbase5-dev"
-  "rubygems"
   "vulkan-sdk"
 )
 apt_packages_str=$(printf "%s " "${apt_packages[@]}")

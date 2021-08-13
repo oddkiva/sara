@@ -5,8 +5,11 @@ MAINTAINER "David OK" <david.ok8@gmail.com>
 # To avoid console interaction with apt.
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN mkdir /provision
-WORKDIR /provision
+ADD . /opt/sara
+WORKDIR /opt/sara
 
-COPY ./scripts/install_ubuntu_dependencies.sh /provision/install_ubuntu_dependencies.sh
-RUN bash /provision/install_ubuntu_dependencies.sh
+RUN bash ./scripts/install_ubuntu_dependencies.sh
+
+RUN apt-get install -y python3-pip
+RUN pip3 install -r requirements.txt
+RUN bash ./build.sh Debug

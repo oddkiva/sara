@@ -12,7 +12,7 @@ platform_name=$(uname -s)
 
 function install_python_packages_via_pip()
 {
-  pip install -r ../sara/requirements.txt
+  pip3 install -r ../sara/requirements.txt
 }
 
 function build_library()
@@ -79,8 +79,8 @@ function build_library()
   # Compile the Video I/O module.
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
   cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
-  cmake_options+="-DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") "
-  cmake_options+="-DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") "
+  cmake_options+="-DPYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") "
+  cmake_options+="-DPYTHON_LIBRARY=$(python3 -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") "
 
   # Compile shared or static libraries.
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
