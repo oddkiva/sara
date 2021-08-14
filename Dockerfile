@@ -10,6 +10,5 @@ WORKDIR /opt/sara
 
 RUN bash ./scripts/install_ubuntu_dependencies.sh
 
-RUN apt-get install -y python3-pip
 RUN pip3 install -r requirements.txt
 RUN bash ./build.sh Debug

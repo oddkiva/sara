@@ -36,6 +36,7 @@ apt_packages=(
   "git"
   "lcov"
   "ninja-build"
+  "python3-pip"
   "rubygems"
   # Documentation
   "doxygen"
