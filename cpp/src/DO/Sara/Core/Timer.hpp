@@ -15,6 +15,8 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <chrono>
+
 
 namespace DO { namespace Sara {
 
@@ -43,13 +45,11 @@ namespace DO { namespace Sara {
     double elapsed_ms();
 
   private: /* data members. */
-    double _start;
-#if defined(_WIN32) || defined(_WIN32_WCE)
-    double _frequency;
-#endif
+    using Clock = std::chrono::high_resolution_clock;
+    std::chrono::high_resolution_clock::time_point _start =
+        std::chrono::high_resolution_clock::now();
   };
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara
