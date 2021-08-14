@@ -116,9 +116,11 @@ a projection matrix $\mathbf{P}$ is by definition square and satisfies
 $\mathbf{P}^2 = \mathbf{P}$.
 
 The equivalent projection matrix is
-\begin{bmatrix}
-  1 & 0 & 0 & 0 \\
-  0 & 1 & 0 & 0 \\
-  0 & 0 & 1 & 0 \\
-  0 & 0 & 1 & 0
-\end{bmatrix}
+\begin{equation}
+  \begin{bmatrix}
+    1 & 0 & 0 & 0 \\
+    0 & 1 & 0 & 0 \\
+    0 & 0 & 1 & 0 \\
+    0 & 0 & 1 & 0
+  \end{bmatrix}
+\end{equation}
