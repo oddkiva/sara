@@ -21,7 +21,8 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/CameraModel.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
 #include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
@@ -52,10 +53,10 @@ auto initialize_camera_intrinsics_1()
   const auto v0 = 540.f;
   intrinsics.image_sizes << 1920, 1080;
   // clang-format off
-  intrinsics.K <<
+  intrinsics.set_calibration_matrix((Eigen::Matrix3f{} <<
     f, 0, u0,
     0, f, v0,
-    0, 0,  1;
+    0, 0,  1).finished());
   // clang-format on
   intrinsics.distortion_model.k.setZero();
   intrinsics.distortion_model.p.setZero();
@@ -72,30 +73,15 @@ auto initialize_camera_intrinsics_2()
   const auto v0 = 540.f;
   intrinsics.image_sizes << 1920, 1080;
   // clang-format off
-  intrinsics.K <<
+  intrinsics.set_calibration_matrix((Eigen::Matrix3f{} <<
     f, 0, u0,
     0, f, v0,
-    0, 0,  1;
+    0, 0,  1).finished());
   intrinsics.distortion_model.k <<
     -0.22996356451342749f,
     0.05952465745165465f,
     -0.007399008111054717f;
   // clang-format on
-  intrinsics.distortion_model.p.setZero();
-
-  return intrinsics;
-}
-
-auto initialize_camera_intrinsics(const Eigen::Vector2i& sizes)
-{
-  auto intrinsics = BrownConradyCamera32<float>{};
-
-  const auto f = 0.5f * (sizes.x() + sizes.y());
-  const auto u0 = 0.5f * sizes.x();
-  const auto v0 = 0.5f * sizes.y();
-  intrinsics.image_sizes = sizes.cast<float>();
-  intrinsics.K << f, 0, u0, 0, f, v0, 0, 0, 1;
-  intrinsics.distortion_model.k.setZero();
   intrinsics.distortion_model.p.setZero();
 
   return intrinsics;
@@ -206,15 +192,15 @@ int __main(int argc, char** argv)
   auto skip = int{};
 
   po::options_description desc("Orthogonal Vanishing Point Detector");
-  desc.add_options()     //
-      ("help", "Usage")  //
+  desc.add_options()
+      ("help", "Usage")
       ("video,v", po::value<std::string>(&video_filepath),
-       "input video file")  //
+       "input video file")
       ("downscale-factor,d",
        po::value<int>(&downscale_factor)->default_value(2),
-       "downscale factor")  //
+       "downscale factor")
       ("skip,s", po::value<int>(&skip)->default_value(0),
-       "number of frames to skip")  //
+       "number of frames to skip")
       ;
 
   po::variables_map vm;
@@ -241,8 +227,8 @@ int __main(int argc, char** argv)
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
   auto frame_undistorted = Image<Rgb8>{video_stream.sizes()};
-  auto frame_gray32f = Image<float>{};
-  auto screen_contents = Image<Rgb8>{frame.sizes()};
+  auto frame_gray32f = Image<float>{video_stream.sizes()};
+  auto screen_contents = Image<Rgb8>{video_stream.sizes()};
 
 
   // Output save.
@@ -253,7 +239,7 @@ int __main(int argc, char** argv)
 #else
       "/home/david/Desktop/" + basename + ".ortho-vp.mp4",
 #endif
-      frame.sizes()  //
+      frame.sizes()
   };
 
 
@@ -270,16 +256,14 @@ int __main(int argc, char** argv)
   const auto [p1, p2] = initialize_crop_region_2(frame.sizes());
 
   auto ed = EdgeDetector{{
-      high_threshold_ratio,  //
-      low_threshold_ratio,   //
-      angular_threshold      //
+      high_threshold_ratio,
+      low_threshold_ratio,
+      angular_threshold
   }};
 
 
   // Initialize the camera matrix.
   const auto intrinsics = initialize_camera_intrinsics_2();
-  // const auto intrinsics = initialize_camera_intrinsics(frame.sizes());
-
   auto P = default_camera_matrix();
   P = intrinsics.K * P;
   const auto Pt = P.transpose().eval();
@@ -303,7 +287,7 @@ int __main(int argc, char** argv)
     SARA_DEBUG << "Processing frame " << frames_read << std::endl;
 
     tic();
-    intrinsics.distort(frame, frame_undistorted);
+    undistort(intrinsics, frame, frame_undistorted);
     toc("Undistort");
 
     // Reduce our attention to the central part of the image.
@@ -353,6 +337,8 @@ int __main(int argc, char** argv)
 
     tic();
     auto line_segments = extract_line_segments_quick_and_dirty(edge_stats);
+    SARA_CHECK(line_segments.size());
+
 
     // Go back to the original pixel coordinates for single-view geometry
     // analysis.
@@ -379,6 +365,7 @@ int __main(int argc, char** argv)
         {planes_backprojected.cols(), planes_backprojected.rows()}};
 
     const auto angle_threshold = std::sin(float((3._deg).value));
+    SARA_DEBUG << "planes_tensor.rows = " << planes_tensor.rows() << std::endl;
     const auto ransac_result = find_dominant_orthogonal_directions(  //
         planes_tensor,                                               //
         angle_threshold,                                             //

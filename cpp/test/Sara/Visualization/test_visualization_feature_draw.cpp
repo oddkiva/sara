@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_draw_method)
 
 BOOST_AUTO_TEST_CASE(test_draw_oe_regions)
 {
-  auto w = create_window(300, 300);
+  create_window(300, 300);
   auto features = vector<OERegion>{OERegion{Point2f{300 / 2.f, 300 / 2.f}, 10.f},
                                    OERegion{Point2f{200.f, 300 / 2.f}, 10.f}};
   draw_oe_regions(features, Red8);

@@ -12,7 +12,7 @@
 #define BOOST_TEST_MODULE                                                      \
   "MultiViewGeometry/Brown-Conrady Camera Distortion Model"
 
-#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -33,10 +33,10 @@ auto make_gopro4_camera()
 
   // clang-format off
   // Calibration matrix.
-  camera.K <<
+  camera.set_calibration_matrix((Eigen::Matrix3f{} <<
     8.7217820124018249e+02f,                        0, 960,
                           0., 8.7432544275392024e+02f, 540,
-                          0,                        0,   1;
+                          0,                        0,   1).finished());
 
   // Distortion model.
   camera.distortion_model.k <<
@@ -47,8 +47,6 @@ auto make_gopro4_camera()
     4.7283170922189409e-03f,
     2.0814815668955206e-03f;
   // clang-format on
-
-  camera.calculate_inverse_calibration_matrix();
 
   return camera;
 }

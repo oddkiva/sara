@@ -33,10 +33,10 @@ namespace DO::Sara {
     //! @brief Inverse calibration matrix.
     matrix3_type K_inverse;
 
-    //! @brief Calculate and cache the inverse of the calibration matrix.
-    inline auto calculate_inverse_calibration_matrix() -> void
+    inline auto set_calibration_matrix(const matrix3_type& K_new) -> void
     {
-      K_inverse = K.inverse();
+      K = K_new;
+      K_inverse = K_new.inverse();
     }
 
     inline auto focal_lengths() const -> vector2_type

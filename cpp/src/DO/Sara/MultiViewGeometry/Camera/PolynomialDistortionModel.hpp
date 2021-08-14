@@ -19,46 +19,46 @@ namespace DO::Sara {
   template <typename T, int K = 3, int P = 2>
   struct PolynomialDistortionModel
   {
-    using vector2 = Eigen::Matrix<T, 2, 1>;
-    using matrix2 = Eigen::Matrix<T, 2, 2>;
+    using Vector2 = Eigen::Matrix<T, 2, 1>;
+    using Matrix2 = Eigen::Matrix<T, 2, 2>;
 
-    using radial_coefficient_array = Eigen::Matrix<T, K, 1>;
-    using tangential_coefficient_array = Eigen::Matrix<T, P, 1>;
+    using RadialCoefficientArray = Eigen::Matrix<T, K, 1>;
+    using TangentialCoefficientArray = Eigen::Matrix<T, P, 1>;
 
     //! @brief Radial distortion coefficients.
-    radial_coefficient_array k;
+    RadialCoefficientArray k;
     //! @brief Tangential distortion coefficients.
-    tangential_coefficient_array p;
+    TangentialCoefficientArray p;
 
     //! @brief Apply only in the normalized coordinates.
-    inline auto lens_distortion(const vector2& xun) const -> vector2
+    inline auto lens_distortion(const Vector2& xun) const -> Vector2
     {
       // Radial term.
       const auto r2 = xun.squaredNorm();
-      auto rpowers = radial_coefficient_array{};
+      auto rpowers = RadialCoefficientArray{};
       rpowers[0] = r2;
       for (auto i = 1; i < K; ++i)
         rpowers[i] = rpowers[i - 1] * r2;
-      const auto radial = vector2{k.dot(rpowers) * xun};
+      const auto radial = Vector2{k.dot(rpowers) * xun};
 
       // Tangential term.
-      const matrix2 Tmat = r2 * matrix2::Identity() + 2 * xun * xun.transpose();
-      const vector2 tangential = Tmat * p;
+      const Matrix2 Tmat = r2 * Matrix2::Identity() + 2 * xun * xun.transpose();
+      const Vector2 tangential = Tmat * p;
 
       return radial + tangential;
     }
 
     //! @brief Apply only in the normalized coordinates.
-    inline auto distort(const vector2& xun) const -> vector2
+    inline auto distort(const Vector2& xun) const -> Vector2
     {
       return xun + lens_distortion(xun);
     }
 
     //! @brief Iterative method to remove distortion.
-    inline auto correct(const vector2& xd,
+    inline auto correct(const Vector2& xd,
                         int num_iterations = 10,
                         T eps = T(1e-8)) const
-        -> vector2
+        -> Vector2
     {
       auto xu = xd;
       for (auto iter = 0; iter < num_iterations &&
@@ -73,44 +73,44 @@ namespace DO::Sara {
   template <typename T, int K = 3, int P = 2>
   struct DecenteredPolynomialDistortionModel : PolynomialDistortionModel<T, K, P>
   {
-    using base_type = PolynomialDistortionModel<T, K, P>;
-    using vector2 = typename base_type::vector2;
-    using matrix2 = typename base_type::matrix2;
-    using radial_coefficient_array = typename base_type::radial_coefficient_array;
-    using tangential_coefficient_array = typename base_type::tangential_coefficient_array;
+    using Base = PolynomialDistortionModel<T, K, P>;
+    using Vector2 = typename Base::Vector2;
+    using Matrix2 = typename Base::Matrix2;
+    using RadialCoefficientArray = typename Base::RadialCoefficientArray;
+    using TangentialCoefficientArray = typename Base::TangentialCoefficientArray;
 
-    using base_type::k;
-    using base_type::p;
-    vector2 dc = vector2::Zero();
+    using Base::k;
+    using Base::p;
+    Vector2 dc = Vector2::Zero();
 
     //! @brief Apply only in the normalized coordinates.
-    inline auto lens_distortion(const vector2& xdn) const -> vector2
+    inline auto lens_distortion(const Vector2& xdn) const -> Vector2
     {
       // Radial term.
       const auto r2 = (xdn - dc).squaredNorm();
-      auto rpowers = radial_coefficient_array{};
+      auto rpowers = RadialCoefficientArray{};
       for (auto i = 0; i < K; ++i)
         rpowers[i] = std::pow(r2, i + 1);
-      const auto radial = vector2{k.dot(rpowers) * xdn};
+      const auto radial = Vector2{k.dot(rpowers) * xdn};
 
       // Tangential term.
-      const matrix2 Tmat = r2 * matrix2::Identity() + 2 * xdn * xdn.transpose();
-      const vector2 tangential = Tmat * p;
+      const Matrix2 Tmat = r2 * Matrix2::Identity() + 2 * xdn * xdn.transpose();
+      const Vector2 tangential = Tmat * p;
 
       return radial + tangential;
     }
 
     //! @brief Apply only in the normalized coordinates.
-    inline auto distort(const vector2& xdn) const -> vector2
+    inline auto distort(const Vector2& xdn) const -> Vector2
     {
       return xdn + lens_distortion(xdn);
     }
 
     //! @brief Iterative method to remove distortion.
-    inline auto correct(const vector2& xd,
+    inline auto correct(const Vector2& xd,
                         int num_iterations = 10,
                         T eps = T(1e-8)) const
-        -> vector2
+        -> Vector2
     {
       auto xu = xd;
       for (auto iter = 0; iter < num_iterations &&

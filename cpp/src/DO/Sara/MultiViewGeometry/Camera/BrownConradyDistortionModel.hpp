@@ -22,7 +22,7 @@
 namespace DO::Sara {
 
   template <typename T, typename DistortionModel>
-  struct BrownConradyCamera: PinholeCamera<T>
+  struct BrownConradyDistortionModel: PinholeCamera<T>
   {
     static constexpr auto eps = static_cast<T>(1e-8);
 
@@ -79,17 +79,17 @@ namespace DO::Sara {
 
   template <typename T>
   using BrownConradyCamera22 =
-      BrownConradyCamera<T, PolynomialDistortionModel<T, 2, 2>>;
+      BrownConradyDistortionModel<T, PolynomialDistortionModel<T, 2, 2>>;
   template <typename T>
   using BrownConradyCamera32 =
-      BrownConradyCamera<T, PolynomialDistortionModel<T, 3, 2>>;
+      BrownConradyDistortionModel<T, PolynomialDistortionModel<T, 3, 2>>;
 
   template <typename T>
   using BrownConradyCameraDecentered22 =
-      BrownConradyCamera<T, DecenteredPolynomialDistortionModel<T, 2, 2>>;
+      BrownConradyDistortionModel<T, DecenteredPolynomialDistortionModel<T, 2, 2>>;
 
   template <typename T>
   using BrownConradyCameraDecentered32 =
-      BrownConradyCamera<T, DecenteredPolynomialDistortionModel<T, 3, 2>>;
+      BrownConradyDistortionModel<T, DecenteredPolynomialDistortionModel<T, 3, 2>>;
 
 }  // namespace DO::Sara

@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/FisheyeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/KannalaBrandtFisheyeDistortionModel.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <omp.h>
@@ -24,7 +24,7 @@ namespace sara = DO::Sara;
 
 auto make_fisheye_camera()
 {
-  auto camera_parameters = sara::FisheyeCamera<float>{};
+  auto camera_parameters = sara::KannalaBrandtFisheyeDistortionModel<float>{};
 
   const auto w = 1920;
   const auto h = 1080;

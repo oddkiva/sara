@@ -15,7 +15,7 @@
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <array>
@@ -93,46 +93,6 @@ auto to_map_view(const sara::BrownConradyCamera32<float>& C,
 
   return map_view;
 }
-
-auto difference(const sara::ImageView<sara::Rgb8>& a1,
-                const sara::ImageView<sara::Rgb8>& a2,
-                sara::ImageView<float>& diff) -> void
-{
-  for (auto y = 0; y < a1.height(); ++y)
-    for (auto x = 0; x < a2.width(); ++x)
-      diff(x, y) = (a1(x, y).cast<float>() - a2(x, y).cast<float>()).norm();
-
-  const auto max_val = diff.flat_array().maxCoeff();
-  const auto min_val = diff.flat_array().minCoeff();
-  diff.flat_array() = (diff.flat_array() - min_val) / (max_val - min_val);
-}
-
-auto average(const sara::ImageView<sara::Rgb8>& a1,
-             const sara::ImageView<sara::Rgb8>& a2,
-             sara::ImageView<sara::Rgb8>& average) -> void
-{
-  for (auto y = 0; y < a1.height(); ++y)
-  {
-    for (auto x = 0; x < a1.width(); ++x)
-    {
-      const auto c1 = a1(x, y);
-      if (c1 == sara::Black8)
-      {
-        average(x, y) = c1;
-        continue;
-      }
-
-      const auto c2 = a2(x, y);
-      const Eigen::Vector3i c = (0.5f *  //
-                                 (c1.cast<float>() + c2.cast<float>()))
-                                    .cast<int>();
-      average(x, y)(0) = c(0);
-      average(x, y)(1) = c(1);
-      average(x, y)(2) = c(2);
-    }
-  }
-}
-
 
 auto make_make_conrady_camera_1() {
   const auto f = 1305.f;
@@ -214,18 +174,9 @@ int __main(int argc, char**argv)
   auto camera_parameters = make_make_conrady_camera_2();
 
   auto frame_undistorted = sara::Image<sara::Rgb8>{video_stream.sizes()};
-  auto frame_redistorted = sara::Image<sara::Rgb8>{video_stream.sizes()};
-  auto frame_diff = sara::Image<float>{video_stream.sizes()};
-  auto frame_average = sara::Image<sara::Rgb8>{video_stream.sizes()};
 
   auto wu = sara::create_window(video_stream.frame().sizes(),  //
                                 "Undistorted Frame");
-  auto wd = sara::create_window(video_stream.frame().sizes(),  //
-                                "Redistorted Frame");
-  auto wdiff = sara::create_window(video_stream.frame().sizes(),  //
-                                   "Absolute frame diff");
-  auto wavg = sara::create_window(video_stream.frame().sizes(),  //
-                                  "Absolute frame average");
   auto wmap = sara::create_window(                          //
       map_pixel_dims[0].value,                              //
       map_pixel_dims[1].value,                              //
@@ -234,29 +185,11 @@ int __main(int argc, char**argv)
 
   while (video_stream.read())
   {
-#ifdef DIRTY
     frame_undistorted = video_stream.frame();
     auto map_view = to_map_view(camera_parameters, video_stream.frame());
-#else
-    camera_parameters.undistort(video_stream.frame(), frame_undistorted);
-    camera_parameters.distort(frame_undistorted, frame_redistorted);
-    auto map_view = to_map_view(camera_parameters, frame_undistorted);
-
-    difference(frame_redistorted, video_stream.frame(), frame_diff);
-    average(frame_redistorted, video_stream.frame(), frame_average);
-#endif
 
     sara::set_active_window(wu);
     sara::display(frame_undistorted);
-
-    sara::set_active_window(wd);
-    sara::display(frame_redistorted);
-
-    sara::set_active_window(wdiff);
-    sara::display(frame_diff);
-
-    sara::set_active_window(wavg);
-    sara::display(frame_average);
 
     sara::set_active_window(wmap);
     constexpr auto interval = 20;
@@ -274,9 +207,6 @@ int __main(int argc, char**argv)
   }
 
   sara::close_window(wu);
-  sara::close_window(wd);
-  sara::close_window(wdiff);
-  sara::close_window(wavg);
   sara::close_window(wmap);
 
   return 0;

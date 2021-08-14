@@ -40,10 +40,10 @@ auto make_omnidirectional_camera()
 
   camera_parameters.image_sizes << w, h;
   // clang-format off
-  camera_parameters.K <<
+  camera_parameters.set_calibration_matrix((Eigen::Matrix3f{} <<
       fx,  s, u0,
        0, fy, v0,
-       0,  0,  1;
+       0,  0,  1).finished());
   camera_parameters.radial_distortion_coefficients <<
       0.50776095,
       -0.16478652;
@@ -52,8 +52,6 @@ auto make_omnidirectional_camera()
       0.00078712;
   // clang-format on
   camera_parameters.xi = 1.50651524;
-
-  camera_parameters.calculate_inverse_calibration_matrix();
 
   return camera_parameters;
 }

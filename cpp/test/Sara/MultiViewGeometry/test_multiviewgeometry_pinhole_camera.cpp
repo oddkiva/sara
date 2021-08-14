@@ -37,13 +37,11 @@ auto make_pinhole_camera()
 
   camera_parameters.image_sizes << w, h;
   // clang-format off
-  camera_parameters.K <<
+  camera_parameters.set_calibration_matrix((Eigen::Matrix3f() <<
       fx,  s, u0,
        0, fy, v0,
-       0,  0,  1;
+       0,  0,  1).finished());
   // clang-format on
-
-  camera_parameters.calculate_inverse_calibration_matrix();
 
   return camera_parameters;
 }
