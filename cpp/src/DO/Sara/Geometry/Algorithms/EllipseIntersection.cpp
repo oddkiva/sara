@@ -213,7 +213,7 @@ namespace DO { namespace Sara {
     // Remove any intersection duplicates.
     const auto intersection_last =
         std::unique(intersections.begin(), intersections.end(),
-                    [&squared_eps](const Point2d& a, const Point2d& b) {
+                    [](const Point2d& a, const Point2d& b) {
                       return (a - b).squaredNorm() < squared_eps;
                     });
 
