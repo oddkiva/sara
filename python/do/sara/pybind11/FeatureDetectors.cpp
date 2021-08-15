@@ -14,15 +14,33 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
+#include <pybind11/operators.h>
 #include <pybind11/stl.h>
 
 
 namespace py = pybind11;
 namespace sara = DO::Sara;
 
+using namespace pybind11::literals;
+
 
 auto expose_feature_detectors(pybind11::module& m) -> void
 {
+  py::class_<sara::KeypointList<sara::OERegion, float>>(m, "KeypointList")
+      .def(py::init<>());
+
+  py::class_<sara::OERegion>(m, "OERegion")
+      .def(py::init<>())
+      .def_readwrite("coords", &sara::OERegion::coords)
+      .def_readwrite("shape_matrix", &sara::OERegion::shape_matrix)
+      .def_readwrite("orientation", &sara::OERegion::orientation)
+      .def_readwrite("type", &sara::OERegion::type)
+      .def_readwrite("extremum_type", &sara::OERegion::extremum_type)
+      .def(py::self == py::self)
+      .def("radius", &sara::OERegion::radius, "radian"_a = 0.f);
+
   py::class_<sara::EdgeDetector::Pipeline>(m, "EdgeDetectorPipeline")
       .def(py::init<>())
       .def_readonly("edge_chains", &sara::EdgeDetector::Pipeline::edges_as_list,
@@ -44,4 +62,12 @@ auto expose_feature_detectors(pybind11::module& m) -> void
       .def("detect", &sara::EdgeDetector::operator(), "detect edges")
       .def_readonly("pipeline", &sara::EdgeDetector::pipeline, "pipeline data");
   ;
+
+  m.def(
+      "compute_sift_keypoints",
+      [](py::array_t<float> image) {
+        const auto imview = to_image_view<float>(image);
+        return sara::compute_sift_keypoints(imview);
+      },
+      "Compute SIFT keypoints for an input float image.");
 }
