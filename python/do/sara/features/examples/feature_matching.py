@@ -7,8 +7,16 @@ import numpy as np
 import do.sara as sara
 import do.shakti as shakti
 
-import cv2
 
+def draw_feature(image, kp, color, pen_width=2):
+    r = kp.radius() * np.sqrt(2.)
+    o = kp.orientation
+    a = kp.coords
+    b = a + r * np.array([np.cos(o), np.sin(o)])
+    sara.image_draw.draw_circle(image, a, r, (0, 0, 0), pen_width + 2)
+    sara.image_draw.draw_line(image, a, b, (0, 0, 0), pen_width + 2)
+    sara.image_draw.draw_circle(image, a, r, color, pen_width)
+    sara.image_draw.draw_line(image, a, b, color, pen_width)
 
 def user_main():
     video_file = sys.argv[1]
@@ -21,33 +29,46 @@ def user_main():
     video_frame_gray32f = np.empty(video_stream.sizes()[:2], dtype=np.float32)
 
     sara.create_window(w, h)
-    sara.set_antialiasing()
 
+    # Feature detection and matching parameters.
+    first_octave = 2
+    image_pyramid_params = sara.ImagePyramidParams(
+        first_octave_index=first_octave)
+    sift_nn_ratio = 0.8
+
+    # Work data.
     kp_prev = None
     kp_curr = None
 
+    f = 0
     while video_stream.read(video_frame):
-        with sara.Timer("[SHAKTI] rgb8 to gray32f"):
+        with sara.Timer("[SHAKTI] RGB8 to Gray32f"):
             shakti.convert_rgb8_to_gray32f_cpu(video_frame, video_frame_gray32f)
 
-        kp_prev = kp_curr
-        kp_curr = sara.compute_sift_keypoints(video_frame_gray32f)
+        with sara.Timer("[SARA] Feature detection"):
+            kp_prev = kp_curr
+            kp_curr = sara.compute_sift_keypoints(video_frame_gray32f,
+                                                  image_pyramid_params,
+                                                  True)
 
         if kp_prev is None:
             continue;
-        ann_matcher = sara.AnnMatcher(kp_prev, kp_curr, 1.2)
-        # matches = ann_matcher.compute_matches()
-        import ipdb; ipdb.set_trace()
+        with sara.Timer("[SARA] Feature matching"):
+            ann_matcher = sara.AnnMatcher(kp_prev, kp_curr, 0.8)
+            matches = ann_matcher.compute_matches()
 
-
-        sara.draw_image(video_frame)
-        for kp in kp_prev[0]:
-            sara.draw_circle(kp.coords, kp.radius() * np.sqrt(np.pi),
-                             (127, 0, 0), 2)
-        for kp in kp_curr[0]:
-            sara.draw_circle(kp.coords, kp.radius() * np.sqrt(np.pi),
-                             (255, 0, 0), 2)
-        sara.millisleep(1)
+        with sara.Timer("[SARA] Draw"):
+            f1 = [f for f in sara.features(kp_prev)]
+            f2 = [f for f in sara.features(kp_curr)]
+            for f in f1:
+                draw_feature(video_frame, f, (127, 0, 0))
+            for f in f2:
+                draw_feature(video_frame, f, (255, 0, 0))
+            for m in matches[:100]:
+                x = f1[m.x].coords
+                y = f2[m.y].coords
+                sara.image_draw.draw_line(video_frame, x, y, (255, 255, 0), 2)
+            sara.draw_image(video_frame)
 
 
 if __name__ == '__main__':

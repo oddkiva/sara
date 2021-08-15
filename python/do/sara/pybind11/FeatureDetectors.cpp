@@ -28,9 +28,6 @@ using namespace pybind11::literals;
 
 auto expose_feature_detectors(pybind11::module& m) -> void
 {
-  py::class_<sara::KeypointList<sara::OERegion, float>>(m, "KeypointList")
-      .def(py::init<>());
-
   py::class_<sara::OERegion>(m, "OERegion")
       .def(py::init<>())
       .def_readwrite("coords", &sara::OERegion::coords)
@@ -40,6 +37,54 @@ auto expose_feature_detectors(pybind11::module& m) -> void
       .def_readwrite("extremum_type", &sara::OERegion::extremum_type)
       .def(py::self == py::self)
       .def("radius", &sara::OERegion::radius, "radian"_a = 0.f);
+
+  py::class_<std::vector<sara::OERegion>>(m, "OERegionVector")
+      .def(py::init<>())
+      .def("clear", &std::vector<sara::OERegion>::clear)
+      .def("pop_back", &std::vector<sara::OERegion>::pop_back)
+      .def("__len__",
+           [](const std::vector<sara::OERegion>& v) { return v.size(); })
+      .def(
+          "__iter__",
+          [](std::vector<sara::OERegion>& v) {
+            return py::make_iterator(v.begin(), v.end());
+          },
+          py::keep_alive<0, 1>());
+
+  py::class_<sara::KeypointList<sara::OERegion, float>>(m, "KeypointList")
+      .def(py::init<>());
+
+  m.def(
+      "features",
+      [](const sara::KeypointList<sara::OERegion, float>& key) {
+        return sara::features(key);
+      },
+      "Extract the geometric features for each keypoint");
+  m.def(
+      "descriptors",
+      [](const sara::KeypointList<sara::OERegion, float>& key) {
+        return sara::descriptors(key);
+      },
+      "Extract the descriptor vectors for each keypoint");
+
+  py::class_<sara::ImagePyramidParams>(m, "ImagePyramidParams")
+      .def(py::init<int, int, float, int, float, float>(),
+           "first_octave_index"_a = 1, "num_scales_per_octaves"_a = 3 + 3,
+           "scale_geometric_factor"_a = std::pow(2.f, 1 / 3.f),
+           "image_padding_size"_a = 1, "scale_camera"_a = 0.5f,
+           "scale_initial"_a = 1.6f)
+      .def_property_readonly("first_octave_index",
+                             &sara::ImagePyramidParams::first_octave_index)
+      .def_property_readonly("num_scales_per_octave",
+                             &sara::ImagePyramidParams::num_scales_per_octave)
+      .def_property_readonly("scale_camera",
+                             &sara::ImagePyramidParams::scale_camera)
+      .def_property_readonly("scale_initial",
+                             &sara::ImagePyramidParams::scale_initial)
+      .def_property_readonly("scale_geometric_factor",
+                             &sara::ImagePyramidParams::scale_geometric_factor)
+      .def_property_readonly("image_padding_size",
+                             &sara::ImagePyramidParams::image_padding_size);
 
   py::class_<sara::EdgeDetector::Pipeline>(m, "EdgeDetectorPipeline")
       .def(py::init<>())
@@ -61,13 +106,7 @@ auto expose_feature_detectors(pybind11::module& m) -> void
       }))
       .def("detect", &sara::EdgeDetector::operator(), "detect edges")
       .def_readonly("pipeline", &sara::EdgeDetector::pipeline, "pipeline data");
-  ;
 
-  m.def(
-      "compute_sift_keypoints",
-      [](py::array_t<float> image) {
-        const auto imview = to_image_view<float>(image);
-        return sara::compute_sift_keypoints(imview);
-      },
-      "Compute SIFT keypoints for an input float image.");
+  m.def("compute_sift_keypoints", sara::compute_sift_keypoints,
+        "Compute SIFT keypoints for an input float image.");
 }

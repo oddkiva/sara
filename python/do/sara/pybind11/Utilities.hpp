@@ -13,9 +13,16 @@
 
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
+#include <pybind11/stl.h>
 
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
+
+
+PYBIND11_MAKE_OPAQUE(DO::Sara::KeypointList<DO::Sara::OERegion, float>);
+PYBIND11_MAKE_OPAQUE(std::vector<DO::Sara::OERegion>);
 
 
 template <typename Sequence>

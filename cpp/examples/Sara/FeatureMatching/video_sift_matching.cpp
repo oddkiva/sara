@@ -32,14 +32,7 @@ using namespace std;
 using namespace DO::Sara;
 
 
-auto initialize_crop_region_1(const Eigen::Vector2i& sizes)
-{
-  const Eigen::Vector2i& p1 = {0, 0.6 * sizes.y()};
-  const Eigen::Vector2i& p2 = {sizes.x(), 0.9 * sizes.y()};
-  return std::make_pair(p1, p2);
-}
-
-auto initialize_crop_region_2(const Eigen::Vector2i& sizes)
+auto initialize_crop_region(const Eigen::Vector2i& sizes)
 {
   const Eigen::Vector2i& p1 = {0.2 * sizes.x(), 0.2 * sizes.y()};
   const Eigen::Vector2i& p2 = {0.8 * sizes.x(), 0.75 * sizes.y()};
@@ -131,12 +124,12 @@ int __main(int argc, char** argv)
 
 
   // Show the local extrema.
-  auto w1 = create_window(frame.sizes(), "SIFT matching " + basename);
+  auto w = create_window(frame.sizes(), "SIFT matching " + basename);
   set_antialiasing();
 
 #define CROP
 #ifdef CROP
-  const auto [p1, p2] = initialize_crop_region_2(frame.sizes());
+  const auto [p1, p2] = initialize_crop_region(frame.sizes());
 #else
   const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
   const Eigen::Vector2i& p2 = frame.sizes();
@@ -196,7 +189,7 @@ int __main(int argc, char** argv)
       SARA_CHECK(matches.size());
     }
 
-    set_active_window(w1);
+    set_active_window(w);
     display(frame);
     const auto s = 1 / float(downscale_factor);
     for (size_t i = 0; i < matches.size(); ++i)
@@ -210,7 +203,7 @@ int __main(int argc, char** argv)
     draw_text(100, 100, "SIFT matches = " + std::to_string(matches.size()),
               White8, 20, 0, false, true, false);
 
-    grab_screen_contents(screen_contents, w1);
+    grab_screen_contents(screen_contents, w);
     video_writer.write(screen_contents);
   }
 

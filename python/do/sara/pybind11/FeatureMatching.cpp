@@ -24,6 +24,8 @@ namespace sara = DO::Sara;
 auto expose_feature_matching(pybind11::module& m) -> void
 {
   py::class_<sara::Tensor_<float, 2>>(m, "Tensor2f", py::buffer_protocol())
+      .def(py::init<const Eigen::Vector2i&>())
+      .def_property_readonly("sizes", &sara::Tensor_<float, 2>::sizes)
       .def_buffer([](sara::Tensor_<float, 2>& m) -> py::buffer_info {
         return py::buffer_info(
             m.data(),                               /* Pointer to buffer */
@@ -38,12 +40,16 @@ auto expose_feature_matching(pybind11::module& m) -> void
 
   py::class_<sara::Match>(m, "Match")
       .def(py::init<>())
-      .def("x", py::overload_cast<>(&sara::Match::x_index, py::const_))
-      .def("y", py::overload_cast<>(&sara::Match::y_index, py::const_));
+      .def_property_readonly("x", py::overload_cast<>(&sara::Match::x_index, py::const_))
+      .def_property_readonly("y", py::overload_cast<>(&sara::Match::y_index, py::const_));
 
   py::class_<sara::AnnMatcher>(m, "AnnMatcher")
       .def(py::init<const sara::KeypointList<sara::OERegion, float>&,
                     const sara::KeypointList<sara::OERegion, float>&,  //
                     float>())
+      .def_property_readonly("keys1",
+                             &sara::AnnMatcher::keys1)
+      .def_property_readonly("keys2",
+                             &sara::AnnMatcher::keys2)
       .def("compute_matches", &sara::AnnMatcher::compute_matches);
 }
