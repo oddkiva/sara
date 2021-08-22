@@ -19,4 +19,12 @@ class TestPybind11(unittest.TestCase):
 
     def test_compute_sift_keypoints(self):
         image = np.zeros((24, 32), dtype=float)
-        features, descriptors = sara.compute_sift_keypoints(image)
+        keypoints = sara.compute_sift_keypoints(image,
+                                                sara.ImagePyramidParams(),
+                                                True)
+        f, d = sara.features(keypoints), sara.descriptors(keypoints)
+
+
+
+if __name__ == '__main__':
+    unittest.main()
