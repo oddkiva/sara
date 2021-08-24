@@ -9,12 +9,12 @@
 #include <DO/Shakti/Halide/GaussianConvolution.hpp>
 #include <DO/Shakti/Halide/Resize.hpp>
 
+#include "shakti_convolve_batch_32f_gpu.h"
 #include "shakti_count_extrema.h"
 #include "shakti_dominant_gradient_orientations_v2.h"
 #include "shakti_dominant_gradient_orientations_v3.h"
-#include "shakti_halide_gray32f_to_rgb.h"
-#include "shakti_convolve_batch_32f.h"
 #include "shakti_forward_difference_32f.h"
+#include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_local_scale_space_extremum_32f_v2.h"
 #include "shakti_local_scale_space_extremum_32f_v3.h"
 #include "shakti_polar_gradient_2d_32f_v2.h"
@@ -681,13 +681,13 @@ namespace DO::Shakti::HalideBackend::v3 {
     auto feed(Halide::Runtime::Buffer<float>& gray_image)
     {
       sara::tic();
-      shakti_convolve_batch_32f(gray_image, params.kernel_x_buffer,
-                                x_convolved);
+      shakti_convolve_batch_32f_gpu(gray_image, params.kernel_x_buffer,
+                                    x_convolved);
       sara::toc("Convolving on x-axis");
 
       sara::tic();
-      shakti_convolve_batch_32f(x_convolved, params.kernel_y_buffer,
-                                y_convolved);
+      shakti_convolve_batch_32f_gpu(x_convolved, params.kernel_y_buffer,
+                                    y_convolved);
       sara::toc("Convolving on y-axis");
 
       auto& gaussian = y_convolved;
@@ -854,7 +854,8 @@ namespace DO::Shakti::HalideBackend::v3 {
           *std::max_element(extrema.s.begin(), extrema.s.end());
 
       //  Outputs.
-      dominant_orientation_dense_map.resize(extrema.size(), params.num_orientation_bins);
+      dominant_orientation_dense_map.resize(extrema.size(),
+                                            params.num_orientation_bins);
 
       // Prepare data for the GPU.
       extrema_quantized.s.set_host_dirty();

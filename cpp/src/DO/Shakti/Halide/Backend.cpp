@@ -9,36 +9,35 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-//! @file
-
-#pragma once
-
 #include <DO/Shakti/Halide/Backend.hpp>
-#include <DO/Shakti/Halide/MyHalide.hpp>
-#include <DO/Shakti/Halide/Utilities.hpp>
+#include <DO/Shakti/Halide/RuntimeUtilities.hpp>
+
+#include "shakti_convolve_batch_32f_cpu.h"
+#include "shakti_gaussian_convolution_cpu.h"
 
 
-namespace DO::Shakti::Halide::cpu {
+namespace DO::Shakti::Halide::CPU {
 
-  template <typename T>
-  auto as_runtime_buffer_4d(const Sara::ImageView<T>& src)
-      -> ::Halide::Runtime::Buffer<T>
+  auto convolve(const Sara::TensorView_<float, 4>& src,
+                const Sara::TensorView_<float, 4>& kernel,
+                Sara::TensorView_<float, 4>& dst) -> void
   {
-    auto src_non_const = const_cast<Sara::ImageView<T>&>(src);
-    auto src_tensor_view =
-        tensor_view(src_non_const)
-            .reshape(Eigen::Vector4i{1, 1, src.height(), src.width()});
-    return as_runtime_buffer(src_tensor_view);
+    auto src_buffer =
+        as_runtime_buffer(const_cast<Sara::TensorView_<float, 4>&>(src));
+    auto kernel_buffer =
+        as_runtime_buffer(const_cast<Sara::TensorView_<float, 4>&>(kernel));
+    auto dst_buffer = as_runtime_buffer(dst);
+    shakti_convolve_batch_32f_cpu(src_buffer, kernel_buffer, dst_buffer);
   }
 
   auto gaussian_convolution(const Sara::ImageView<float>& src,
                             Sara::ImageView<float>& dst, float sigma,
-                            int truncation_factor = 4) -> void
+                            int truncation_factor) -> void
   {
     auto src_buffer = as_runtime_buffer_4d(src);
     auto dst_buffer = as_runtime_buffer_4d(dst);
-    shakti_gaussian_convolution_v2_cpu(src_buffer, sigma, truncation_factor,
-                                       dst_buffer);
+    shakti_gaussian_convolution_cpu(src_buffer, sigma, truncation_factor,
+                                    dst_buffer);
   }
 
-}  // namespace DO::Shakti::Halide::cpu
+}  // namespace DO::Shakti::Halide::CPU

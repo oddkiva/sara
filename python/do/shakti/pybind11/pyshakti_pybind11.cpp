@@ -10,8 +10,8 @@
 // ========================================================================== //
 
 #include "shakti_enlarge.h"
-#include "shakti_gaussian_convolution_v2.h"
-#include "shakti_gaussian_convolution_v2_cpu.h"
+#include "shakti_gaussian_convolution_cpu.h"
+#include "shakti_gaussian_convolution_gpu.h"
 #include "shakti_gradient_2d_32f_v2.h"
 #include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_halide_rgb_to_gray.h"
@@ -144,11 +144,11 @@ auto gaussian_convolution(py::array_t<float> src, py::array_t<float> dst,
 
   src_buffer.set_host_dirty();
   if (gpu)
-    shakti_gaussian_convolution_v2(src_buffer, sigma, truncation_factor,
-                                   dst_buffer);
+    shakti_gaussian_convolution_gpu(src_buffer, sigma, truncation_factor,
+                                    dst_buffer);
   else
-    shakti_gaussian_convolution_v2_cpu(src_buffer, sigma, truncation_factor,
-                                       dst_buffer);
+    shakti_gaussian_convolution_cpu(src_buffer, sigma, truncation_factor,
+                                    dst_buffer);
   dst_buffer.copy_to_host();
 }
 

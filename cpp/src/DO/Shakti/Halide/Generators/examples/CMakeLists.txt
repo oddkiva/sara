@@ -19,7 +19,7 @@ target_link_libraries(halide_aot_example
   Halide::Runtime
   shakti_halide_rgb_to_gray
   shakti_halide_gray32f_to_rgb
-  shakti_gaussian_convolution_v2)
+  shakti_gaussian_convolution_gpu)
 set_property(TARGET halide_aot_example PROPERTY FOLDER "Examples/Shakti/Halide")
 
 
@@ -52,8 +52,8 @@ set(HALIDE_SIFT_LIBRARIES
   shakti_reduce_32f
   shakti_scale_32f
   # Gaussian pyramid.
-  shakti_gaussian_convolution_v2
-  shakti_convolve_batch_32f
+  shakti_gaussian_convolution_gpu
+  shakti_convolve_batch_32f_gpu
   # DoG pyramid.
   shakti_subtract_32f
   shakti_forward_difference_32f
@@ -174,7 +174,7 @@ target_link_libraries(halide_edge_detection_example
   Halide::Halide
   Halide::Runtime
   shakti_halide_rgb_to_gray
-  shakti_gaussian_convolution_v2
+  shakti_gaussian_convolution_gpu
   shakti_scale_32f
   shakti_polar_gradient_2d_32f_v2
   ${DO_Sara_LIBRARIES})

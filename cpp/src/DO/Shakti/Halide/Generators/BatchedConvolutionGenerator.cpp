@@ -100,4 +100,6 @@ namespace {
 }  // namespace
 
 HALIDE_REGISTER_GENERATOR(BatchedConvolutionGenerator<float>,
-                          shakti_convolve_batch_32f)
+                          shakti_convolve_batch_32f_gpu)
+HALIDE_REGISTER_GENERATOR(BatchedConvolutionGenerator<float>,
+                          shakti_convolve_batch_32f_cpu)

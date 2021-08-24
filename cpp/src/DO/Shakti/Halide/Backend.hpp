@@ -14,14 +14,17 @@
 #pragma once
 
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
 
-namespace DO::Shakti::Halide::cpu {
+namespace DO::Shakti::Halide::CPU {
 
-  auto scale(const Sara::ImageView<float>& src, Sara::ImageView<float>& dst) -> void;
+  auto convolve(const Sara::TensorView_<float, 4>& src,
+                const Sara::TensorView_<float, 4>& kernel,
+                Sara::TensorView_<float, 4>& dst) -> void;
 
   auto gaussian_convolution(const Sara::ImageView<float>& src,
                             Sara::ImageView<float>& dst, float sigma,
                             int truncation_factor = 4) -> void;
 
-}  // namespace DO::Shakti::Halide::Cpu
+}  // namespace DO::Shakti::Halide::CPU

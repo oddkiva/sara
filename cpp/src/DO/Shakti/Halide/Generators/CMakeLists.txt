@@ -17,13 +17,13 @@ shakti_halide_library_v2(
 
 # Gaussian convolution.
 shakti_halide_library_v2(
-  NAME shakti_gaussian_convolution_v2
-  SRCS GaussianConvolutionV2Generator.cpp
+  NAME shakti_gaussian_convolution_gpu
+  SRCS GaussianConvolutionGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_gaussian_convolution_v2_cpu
-  SRCS GaussianConvolutionV2Generator.cpp)
+  NAME shakti_gaussian_convolution_cpu
+  SRCS GaussianConvolutionGenerator.cpp)
 
 # Upscale function.
 shakti_halide_library_v2(
@@ -52,10 +52,13 @@ shakti_halide_library_v2(
 
 # Batched convolution.
 shakti_halide_library_v2(
-  NAME shakti_convolve_batch_32f
+  NAME shakti_convolve_batch_32f_gpu
   SRCS BatchedConvolutionGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+shakti_halide_library_v2(
+  NAME shakti_convolve_batch_32f_cpu
+  SRCS BatchedConvolutionGenerator.cpp)
 
 # Binary operators.
 shakti_halide_library_v2(

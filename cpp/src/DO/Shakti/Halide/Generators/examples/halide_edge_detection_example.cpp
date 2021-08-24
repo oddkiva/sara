@@ -11,17 +11,17 @@
 
 //! @example
 
-#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
-#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Geometry.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_gaussian_convolution_v2.h"
+#include "shakti_gaussian_convolution_gpu.h"
 #include "shakti_halide_rgb_to_gray.h"
 #include "shakti_polar_gradient_2d_32f_v2.h"
 #include "shakti_scale_32f.h"
@@ -82,9 +82,11 @@ namespace v2 {
     {
       auto& mag = pipeline.gradient_magnitude;
       auto& ori = pipeline.gradient_orientation;
-      if (mag.width() != image_buffer_4d.width() || mag.height() != image_buffer_4d.height())
+      if (mag.width() != image_buffer_4d.width() ||
+          mag.height() != image_buffer_4d.height())
         mag.resize(image_buffer_4d.width(), image_buffer_4d.height());
-      if (ori.width() != image_buffer_4d.width() || ori.height() != image_buffer_4d.height())
+      if (ori.width() != image_buffer_4d.width() ||
+          ori.height() != image_buffer_4d.height())
         ori.resize(image_buffer_4d.width(), image_buffer_4d.height());
 
       // Sara tensors.
@@ -101,7 +103,8 @@ namespace v2 {
 
       tic();
       // image_buffer_4d.set_host_dirty();
-      shakti_polar_gradient_2d_32f_v2(image_buffer_4d, mag_buffer_4d, ori_buffer_4d);
+      shakti_polar_gradient_2d_32f_v2(image_buffer_4d, mag_buffer_4d,
+                                      ori_buffer_4d);
       mag_buffer_4d.copy_to_host();
       ori_buffer_4d.copy_to_host();
       toc("Polar Coordinates");
@@ -298,8 +301,8 @@ int __main(int argc, char** argv)
 
     tic();
     frame_gray32f_buffer_4d.set_host_dirty();
-    shakti_gaussian_convolution_v2(frame_gray32f_buffer_4d, sigma, 4,
-                                   frame_gray32f_convolved_buffer_4d);
+    shakti_gaussian_convolution_gpu(frame_gray32f_buffer_4d, sigma, 4,
+                                    frame_gray32f_convolved_buffer_4d);
     toc("Blur");
 
     if (downscale_factor > 1)
