@@ -10,3 +10,7 @@ target_link_libraries(DO_Shakti_Halide_Backend
   Halide::Runtime
   shakti_gaussian_convolution_cpu
 )
+set_target_properties(DO_Shakti_Halide_Backend
+  PROPERTIES
+  FOLDER "Libraries/Shakti/Halide"
+)

@@ -15,5 +15,8 @@ Multiple View Geometry.
 ```{r, child="multiviewgeometry/essential_matrix.Rmd", echo=FALSE}
 ```
 
-```{r, child="multiviewgeometry/nister.Rmd"}
+```{r, child="multiviewgeometry/nister.Rmd", echo=FALSE}
+```
+
+```{r, child="multiviewgeometry/resectioning.Rmd", echo=FALSE}
 ```

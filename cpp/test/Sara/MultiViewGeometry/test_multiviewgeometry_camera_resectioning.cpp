@@ -17,6 +17,7 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Resectioning/HartleyZisserman.hpp>
+#include <DO/Sara/MultiViewGeometry/Resectioning/LambdaTwist.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -184,4 +185,31 @@ BOOST_AUTO_TEST_CASE(test_hartley_zisserman)
 
   for (auto i = 0u; i < xa.size(); ++i)
     check(i);
+}
+
+BOOST_AUTO_TEST_CASE(test_lambda_twist)
+{
+  const auto xa = std::array{0.0, 0.1, 0.3, 0.0};
+  const auto ya = std::array{0.0, 0.2, 0.2, 0.1};
+  const auto za = std::array{0.0, 0.3, 0.1, 0.0};
+  auto Xw = make_cube_vertices();
+
+  // Get the test camera matrix.
+  for (auto i = 0; i < 1; ++i)
+  {
+    const auto C = make_camera(xa[i], ya[i], za[i]);
+
+    auto Xc = to_camera_coordinates(C, Xw);
+    std::cout << "* Camera Coordinates:" << std::endl;
+    std::cout << "  Xc =\n" << Xc << std::endl;
+
+    auto Yc = Xc.topRows<3>().colwise().normalized();
+    std::cout << "* Backprojected Light Rays:" << std::endl;
+    std::cout << "  Yc =\n" << Yc << std::endl;
+    std::cout << "* Yc column norms " << std::endl;
+    std::cout << "  column_norm(Yc) = " << Yc.colwise().norm() << std::endl;
+
+    auto lambda_twist = sara::LambdaTwist<double>{Xw.topLeftCorner<3, 3>(),
+                                                  Yc.leftCols<3>()};
+  }
 }

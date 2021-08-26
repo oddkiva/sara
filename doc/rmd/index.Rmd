@@ -29,24 +29,22 @@ these as either mere blog posts or as parts of documentation regarding *Sara*'s
 API. So this book is my modest contribution as to giving back. Hell yeah! I
 would be very happy to know if it proved to be useful to even just one person.
 
-One particular choice I made in writing this book is to depart from the dry and
-impersonal style commonly used in scientific writings and use a more personal
-narrative through my learning journey. As a humble computer vision practitioner
-continuously learning and inevitably making mistakes along the way, this is more
-natural to me. On top of that, an impersonal style would just sound boring and
-not particularly engaging to younger or less experimented readers that are eager
-to learn. In this book, I aim at detailing more the mathematical contents
-without sacrificing the experimental aspect of computer vision. Too often,
-publications would understandably gloss over some mathematical or practical
-details to sell more the novelty or performance of their approaches, I have
-decided to take the time to detail these for algorithms and methods that I
-understand well.
+Upon skimming this book, you will quickly realize my narrative style throughout
+my ongoing learning journey. As I write new pages, I will inevitably make
+mistakes along the way and rewrite them as time goes on. Along the way, I would
+be asking myself questions for which I won't have the answers in an attempt to
+engage readers that might be interested in reading or eager to learn what I do
+know. In this book, I aim at detailing more the mathematical contents without
+sacrificing the experimental aspect of computer vision. Too often, publications
+would understandably gloss over some mathematical or practical details to sell
+more the novelty or performance of their approaches, I have decided to take the
+time to detail these for algorithms and methods that I understand well.
 
 > "Perfection is the enemy of good." - Voltaire.
 
-*Finally, these notes reflect the best of my understanding as of this writing.
+*These notes reflect the current state of my understanding as of this writing.
 While I work hard to check that my contents are factually correct, I, as a human
-being, am not certainly not immune to misunderstanding or errors. Should you
+being, am not certainly not immune to misunderstanding or errors.  Should you
 find any, __please pretty please__ report back to me and explain to me.*
 
 ```{r, echo = FALSE}

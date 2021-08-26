@@ -42,24 +42,26 @@ namespace DO { namespace Sara {
   // Discriminant precision: 1e-3.
   template <typename T>
   void roots(const Polynomial<T, 3>& P, std::complex<T>& z1,
-             std::complex<T>& z2, std::complex<T>& z3, double eps = 1e-3)
+             std::complex<T>& z2, std::complex<T>& z3, T eps = T(1e-3))
   {
-    const T pi = M_PI;  // 3.14159265358979323846;
-
-    T a = P[3], b = P[2], c = P[1], d = P[0];
-    b /= a;
-    c /= a;
-    d /= a;
-    a = 1.0;
+    const auto a = 1, b = P[2] / P[3], c = P[1] / P[3], d = P[0] / P[3];
+    static_assert(std::is_same_v<decltype(a), const T>);
+    static_assert(std::is_same_v<decltype(b), const T>);
+    static_assert(std::is_same_v<decltype(c), const T>);
+    static_assert(std::is_same_v<decltype(d), const T>);
 
     // Cardano's formula.
-    const T p = (3 * c - b * b) / 3;
-    const T q = (-9 * c * b + 27 * d + 2 * b * b * b) / 27;
-    const T delta = q * q + 4 * p * p * p / 27;
+    const auto p = (3 * c - b * b) / 3;
+    const auto q = (-9 * c * b + 27 * d + 2 * b * b * b) / 27;
+    const auto delta = q * q + 4 * p * p * p / 27;
+    static_assert(std::is_same_v<decltype(p), const T>);
+    static_assert(std::is_same_v<decltype(q), const T>);
+    static_assert(std::is_same_v<decltype(delta), const T>);
 
     if (delta < -eps)
     {
-      const T theta = std::acos(-q / 2 * std::sqrt(27 / (-p * p * p))) / 3.0;
+      constexpr auto pi = static_cast<T>(M_PI);
+      const auto theta = std::acos(-q / 2 * std::sqrt(27 / (-p * p * p))) / 3;
       z1 = 2 * std::sqrt(-p / 3) * std::cos(theta);
       z2 = 2 * std::sqrt(-p / 3) * std::cos(theta + 2 * pi / 3);
       z3 = 2 * std::sqrt(-p / 3) * std::cos(theta + 4 * pi / 3);
@@ -71,11 +73,16 @@ namespace DO { namespace Sara {
     }
     else
     {
-      T r1 = (-q + std::sqrt(delta)) / 2.0;
-      T r2 = (-q - std::sqrt(delta)) / 2.0;
-      T u = r1 < 0 ? -std::pow(-r1, 1.0 / 3.0) : std::pow(r1, 1.0 / 3.0);
-      T v = r2 < 0 ? -std::pow(-r2, 1.0 / 3.0) : std::pow(r2, 1.0 / 3.0);
-      std::complex<T> j(-0.5, std::sqrt(3.0) * 0.5);
+      const auto j = std::complex<T>{-1 / T(2), std::sqrt(T(3)) / 2};
+
+      const auto r1 = (-q + std::sqrt(delta)) / 2;
+      const auto r2 = (-q - std::sqrt(delta)) / 2;
+      constexpr auto one_third = 1 / T(3);
+      const auto u =
+          r1 < 0 ? -std::pow(-r1, one_third) : std::pow(r1, one_third);
+      const auto v =
+          r2 < 0 ? -std::pow(-r2, one_third) : std::pow(r2, one_third);
+
       z1 = u + v;
       z2 = j * u + std::conj(j) * v;
       z3 = j * j * u + std::conj(j * j) * v;
@@ -90,26 +97,32 @@ namespace DO { namespace Sara {
   template <typename T>
   void roots(const Polynomial<T, 4>& P, std::complex<T>& z1,
              std::complex<T>& z2, std::complex<T>& z3, std::complex<T>& z4,
-             double eps = 1e-6)
+             T eps = T(1e-6))
   {
-    T a4 = P[4], a3 = P[3], a2 = P[2], a1 = P[1], a0 = P[0];
-    a3 /= a4;
-    a2 /= a4;
-    a1 /= a4;
-    a0 /= a4;
-    a4 = 1.0;
+    const auto a4 = static_cast<T>(1);
+    const auto a3 = P[3] / P[4];
+    const auto a2 = P[2] / P[4];
+    const auto a1 = P[1] / P[4];
+    const auto a0 = P[0] / P[4];
+    static_assert(std::is_same_v<decltype(a0), const T>);
+    static_assert(std::is_same_v<decltype(a1), const T>);
+    static_assert(std::is_same_v<decltype(a2), const T>);
+    static_assert(std::is_same_v<decltype(a3), const T>);
+    static_assert(std::is_same_v<decltype(a4), const T>);
 
-    Polynomial<T, 3> Q;
-    Q[3] = 1.0;
+    auto Q = Polynomial<T, 3>{};
+    Q[3] = 1;
     Q[2] = -a2;
-    Q[1] = a1 * a3 - 4.0 * a0;
-    Q[0] = 4.0 * a2 * a0 - a1 * a1 - a3 * a3 * a0;
+    Q[1] = a1 * a3 - 4 * a0;
+    Q[0] = 4 * a2 * a0 - a1 * a1 - a3 * a3 * a0;
 
-    std::complex<T> y1, y2, y3;
+    auto y1 = std::complex<T>{};
+    auto y2 = std::complex<T>{};
+    auto y3 = std::complex<T>{};
     roots<T>(Q, y1, y2, y3, eps);
 
-    T yr = std::real(y1);
-    T yi = std::abs(std::imag(y1));
+    auto yr = std::real(y1);
+    auto yi = std::abs(std::imag(y1));
     if (yi > std::abs(std::imag(y2)))
     {
       yr = std::real(y2);
@@ -121,29 +134,28 @@ namespace DO { namespace Sara {
       yi = std::abs(std::imag(y3));
     }
 
-    std::complex<T> radicand = a3 * a3 / 4.0 - a2 + yr;
-    std::complex<T> R(std::sqrt(radicand));
-    std::complex<T> D, E;
+    const auto radicand = a3 * a3 / 4 - a2 + yr;
+    const auto R = std::sqrt(radicand);
+    auto D = std::complex<T>{};
+    auto E = std::complex<T>{};
 
     if (abs(R) > 0)
     {
-      D = std::sqrt(3.0 * a3 * a3 / 4.0 - R * R - 2.0 * a2 +
-                    (4.0 * a3 * a2 - 8.0 * a1 - a3 * a3 * a3) / (4.0 * R));
-      E = std::sqrt(3.0 * a3 * a3 / 4.0 - R * R - 2.0 * a2 -
-                    (4.0 * a3 * a2 - 8.0 * a1 - a3 * a3 * a3) / (4.0 * R));
+      D = std::sqrt(3 * a3 * a3 / 4 - R * R - 2 * a2 +
+                    (4 * a3 * a2 - 8 * a1 - a3 * a3 * a3) / (4 * R));
+      E = std::sqrt(3 * a3 * a3 / 4 - R * R - 2 * a2 -
+                    (4 * a3 * a2 - 8 * a1 - a3 * a3 * a3) / (4 * R));
     }
     else
     {
-      D = std::sqrt(3.0 * a3 * a3 / 4.0 - 2.0 * a2 +
-                    2.0 * std::sqrt(yr * yr - 4.0 * a0));
-      E = std::sqrt(3.0 * a3 * a3 / 4.0 - 2.0 * a2 -
-                    2.0 * std::sqrt(yr * yr - 4.0 * a0));
+      D = std::sqrt(3 * a3 * a3 / 4 - 2 * a2 + 2 * std::sqrt(yr * yr - 4 * a0));
+      E = std::sqrt(3 * a3 * a3 / 4 - 2 * a2 - 2 * std::sqrt(yr * yr - 4 * a0));
     }
 
-    z1 = R / 2.0 + D / 2.0;
-    z2 = R / 2.0 - D / 2.0;
-    z3 = -R / 2.0 + E / 2.0;
-    z4 = -R / 2.0 - E / 2.0;
+    z1 = (R + D) / 2;
+    z2 = (R - D) / 2;
+    z3 = (-R + E) / 2;
+    z4 = (-R - E) / 2;
 
     // Check Viete's formula.
     /*double p = a2 - 3*a3*a3/8;

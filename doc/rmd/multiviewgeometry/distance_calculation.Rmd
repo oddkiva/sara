@@ -473,7 +473,7 @@ ideal pinhole camera.
 Biologists need to measure animals to get an understanding of a animal
 population's current health and diet and its demographic dynamics. Most of the
 time this necessitates to capture a few individuals of the animal population and
-put to sleep through sedatives, whic could be a particularly traumatic and
+put to sleep through sedatives, which could be a particularly traumatic and
 stressful experience for animals.
 
 One way to avoid that could be to use computer vision methods. Visual metrologic
