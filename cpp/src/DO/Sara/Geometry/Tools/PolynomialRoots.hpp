@@ -44,7 +44,10 @@ namespace DO { namespace Sara {
   void roots(const Polynomial<T, 3>& P, std::complex<T>& z1,
              std::complex<T>& z2, std::complex<T>& z3, T eps = T(1e-3))
   {
-    const auto a = 1, b = P[2] / P[3], c = P[1] / P[3], d = P[0] / P[3];
+    const auto a = static_cast<T>(1);
+    const auto b = P[2] / P[3];
+    const auto c = P[1] / P[3];
+    const auto d = P[0] / P[3];
     static_assert(std::is_same_v<decltype(a), const T>);
     static_assert(std::is_same_v<decltype(b), const T>);
     static_assert(std::is_same_v<decltype(c), const T>);
@@ -152,10 +155,10 @@ namespace DO { namespace Sara {
       E = std::sqrt(3 * a3 * a3 / 4 - 2 * a2 - 2 * std::sqrt(yr * yr - 4 * a0));
     }
 
-    z1 = (R + D) / 2;
-    z2 = (R - D) / 2;
-    z3 = (-R + E) / 2;
-    z4 = (-R - E) / 2;
+    z1 = (R + D) / static_cast<T>(2);
+    z2 = (R - D) / static_cast<T>(2);
+    z3 = (-R + E) / static_cast<T>(2);
+    z4 = (-R - E) / static_cast<T>(2);
 
     // Check Viete's formula.
     /*double p = a2 - 3*a3*a3/8;

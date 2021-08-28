@@ -1,11 +1,13 @@
-## Camera Resectioning
+## Pose Recovery
 
-The camera resectioning is another important problem that is solved in
-Structure-from-Motion.
+The pose recovery is another important problem that is solved in
+Structure-from-Motion. The pose recovery can be tackled differently depending on
+the situations we are in. They are two situations that I have found in my
+current understanding.
 
 ### Problem Statement
 
-In this problem we assume that a set of 2D image points $\{ \mathbf{u}_i \}_i$
+The pose recovery assumes that a set of 2D image points $\{ \mathbf{u}_i \}_i$
 in an image $I$ are known to respectively correspond to a set of 3D scene points
 $\{ \mathbf{x}_i\}$ in some reference frame.
 
@@ -14,66 +16,116 @@ namely the camera pose, that is its gaze orientation $\mathbf{R}$ and position
 $\mathbf{t}$ with respect to a reference frame, say, an arbitrary world frame
 $\mathcal{W}$.
 
+:::fyi
+In case we are still being confused about which frame or coordinates, let us
+remind again that
+
+- the 2D image points $\mathbf{u}_i$ are the pixel coordinates in the image $I$,
+- the 3D scene points $\mathbf{x}_i$ have their coordinates expressed in the
+  world frame $\mathcal{W}$.
+:::
+
+
 There are two situations in Structure-from-Motion:
 
 1. we do not know the camera intrinsic parameters but we do know that the
-   mathematical camera model that can explain the formation of image $I$ is the
-   pinhole camera model, or a camera model that can account for moderate
-   distortion model;
-2. we do know which mathematical camera model explains best the formation of
-   image $I$ and the parameter value of this camera model.
+   mathematical camera model that can explain the formation of image $I$ is
+   either the pinhole camera model, or a camera model that can account for
+   small distortion;
+2. we are dealing with calibrated camers, that is, we do know which mathematical
+   camera model explains best the formation of image $I$ and we know its
+   associated parameter values of this model.
 
-### First Situation
+### First Situation: Camera Resectioning
 
 The first situation can be solved by means of standard linear algebra.
 Specifically the calibration software Bundler [@SnavelySS:2008:ijcv] uses
 [@HartleyZ:2003:mvg]'s Direct Linear Transform (DLT) method to find a good guess
-of the camera pose. After which, a bundle adjustment will refine the pose
+of the camera pose. After which, a bundle adjustment procedure refines the pose
 $(\mathbf{R}, \mathbf{t})$ of the camera and its intrinsic parameters, which
 include the calibration matrix $\mathbf{K}$ and the distortion coefficients.
 
-### Second Situation: the PnP problem.
+### Second Situation: Perspective-n-Point
 
-The second situation can be solved via Perspective-N-Point methods. Indeed,
-because we know the camera model and its parameters, we can calculate for each
-image point $\mathbf{u}_i$ its corresponding incident 3D light ray vector
-$\mathrm{ray}(\mathbf{u}_i) = \mathbf{y}_i$ with coordinates expressed in the
-camera frame $\mathcal{C}$.
+In the second situation, we know the camera model and its associated parameter
+values. As a result, we can calculate the incident light ray vector
+$\mathrm{ray}(\mathbf{u}_i) = \mathbf{y}_i \in \mathbb{R}^3$ that has hit the
+image plane at any pixel coordinates $\mathbf{u}_i$. The backprojected ray
+$\mathbf{y}_i$ has its coordinates expressed in the camera frame $\mathcal{C}$.
 
-For example, in the simple pinhole camera model with known calibration matrix
-$\mathbf{K}$, the homogeneous film coordinates $\mathbf{K}^{-1} \begin{bmatrix}
-\mathbf{x}_i \\ 1 \end{bmatrix}$ also corresponds to the backprojected light ray
-$\mathbf{y}_i$.
+For example, if we are dealing with the simple pinhole camera model with known
+calibration matrix $\mathbf{K}$, the film (homogeneous) coordinates
 
-The camera resectioning problem starts from the observation that any rigid body
-motion preserves the Euclidean distance $||\mathbf{x}_i - \mathbf{x}_j||_2$ for
-any pair of 3D scene points $\mathbf{x}_i$ and $\mathbf{x}_j$. In particular,
-this is true for the camera pose $(\mathbf{R}, \mathbf{t})$.
+\begin{equation}
+  \begin{bmatrix} \tilde{\mathbf{u}}_i \\ 1 \end{bmatrix} =
+  \mathbf{K}^{-1} \begin{bmatrix} \mathbf{u}_i \\ 1 \end{bmatrix}
+\end{equation}
+
+is also the backprojected light ray vector $\mathbf{y}_i$ from a physics point
+of view.
+
+Now the goal is to calculate the camera pose $(\mathbf{R}, \mathbf{t})$ given
+that we know that each backprojected light ray $\mathbf{y}_i$ respectively
+corresponds to the scene point $\mathbf{x}_i$. This is how the
+Perspective-n-Point (PnP) problem is formulated.
+
+The PnP problem starts by observing that any rigid body motion $(\mathbf{R},
+\mathbf{t})$ preserves the Euclidean distance $||\mathbf{x}_i -
+\mathbf{x}_j||_2$ for any pair of 3D scene points $\mathbf{x}_i$ and
+$\mathbf{x}_j$ for any $i \neq j$. In words, denoting the transformed point by
+any such rigid body motion by
+
+\begin{equation}
+  \mathbf{x}'_i = \mathbf{R} \mathbf{x}_i + \mathbf{t}
+\end{equation}
+
+the following equality holds
+
+\begin{equation}
+  ||\mathbf{x}'_i - \mathbf{x}'_j||_2= ||\mathbf{x}_i - \mathbf{x}_j||_2
+\end{equation}
+
+In particular the distance invariance still holds for the camera pose we aim at
+calculating.
+
+:::fyi
+Let us ponder for a moment about the meaning of the global rigid motion equation
+above. Notice here that in the PnP problem formulation:
+
+- $\mathbf{R}$ actually expresses the axes of the world frame $\mathcal{W}$ with
+  respect to the camera frame $\mathcal{C}$.
+- $\mathbf{t}$ actually expresses the position of the world origin in the camera
+  frame $\mathcal{C}$.
+
+Not the other way around.
+:::
+
+In our context, $\mathbf{x}'_i$ is a the same 3D scene point $\mathbf{x}_i$ but
+this time it is expressed in the camera frame $\mathcal{C}$.  And following the
+basic laws of geometrical optics, the 3D coordinates $\mathbf{x}'_i$ is
+collinear to the backprojected light ray vector $\mathbf{y}_i$
+
+\begin{equation}
+  \mathbf{x}'_i = \lambda_i \mathbf{y}_i,
+\end{equation}
+
+with the additional physics constraint that each scale must be positive
+\begin{equation}
+  \lambda_i > 0,
+\end{equation}
+which ensures that the 3D scene point $\mathbf{x}'_i$ does appear in front of the
+camera.
+
 
 The camera resectioning then consists in determining the appropriate scale
-$\lambda_i$ to each backprojected ray $\mathbf{y}_i$ so the change of coordinate
-via the rigid body motion $(\mathbf{R}, \mathbf{t})$ still preserves the
-distances.
+$\lambda_i$ to each backprojected ray $\mathbf{y}_i$ so that the change of
+coordinate via the rigid body motion $(\mathbf{R}, \mathbf{t})$ still preserves
+the distances.
 
 \begin{equation}
   ||\lambda_i \mathbf{y}_i - \lambda_j \mathbf{y}_j||_2 =
   ||\mathbf{x}_i - \mathbf{x}_j||_2
 \end{equation}
-
-Additionally we know that
-\begin{equation}
-  \lambda_i \mathbf{y}_i = \mathbf{R} \mathbf{x}_i + \mathbf{t}
-\end{equation}
-
-:::fyi
-One caveat to avoid further confusion, notice that in the PnP problem:
-
-- $\mathbf{R}$ actually expresses the axes of the world frame $\mathcal{W}$ with
-  respect to the camera frame $\mathcal{C}$.
-- $\mathbf{t}$ actually expresses the position of the world origin in the camera frame.
-
-Not the other way around.
-:::
 
 Let us assume for a moment that we know each scale $\lambda_i$. We are then able
 to completely determine the rotation $\mathbf{R}$ from the three direction
@@ -89,7 +141,13 @@ vectors, say
   \right.,
 \end{equation}
 
-since the three of these satisfy
+Because we know that
+
+\begin{equation}
+  \lambda_i \mathbf{y}_i = \mathbf{R} \mathbf{x}_i + \mathbf{t},
+\end{equation}
+
+the three direction vectors $\mathbf{z}_{ij}$ satisfy the matrix-vector product
 
 \begin{equation}
   \mathbf{z}_{ij} = \mathbf{R} (\mathbf{x}_i - \mathbf{x}_j)
@@ -100,8 +158,9 @@ This can be rewritten as the matrix system:
   \mathbf{Z} = \mathbf{R} \mathbf{X}
 \end{equation}
 
-Under the assumption that the three scene points $\mathbf{x}_i$ are not
-collinear, the matrix $\mathbf{X}$ is then invertible, thus yielding
+Under the assumption that the three scene points $\mathbf{x}_i$ are not aligned,
+the matrix $\mathbf{X}$ is then invertible, thus enabling us to calculate the
+rotation as
 
 \begin{equation}
   \mathbf{R} = \mathbf{Z} \mathbf{X}^{-1},
@@ -121,9 +180,10 @@ that more recent methods have been proposed in the computer vision literature
 for the general case (EPnP, UPnP to be cited) or for other particular case $N =
 4$ (Quan and Lan).
 
-Over the years, more recent P3P methods have been proposed and more efficient to
-compute. We will focus on reviewing Lambda-Twist [@PerssonN:2018:eccv], which is
-one of the fastest P3P method if not the fastest as of 2021.
+Over the years, newer P3P methods have been proposed and are becoming more
+efficient to compute. We will focus on reviewing Lambda-Twist
+[@PerssonN:2018:eccv], which is one of the fastest P3P method if not the fastest
+as of 2021.
 
 ### Lambda-Twist: a fast P3P solver.
 
@@ -131,16 +191,19 @@ Without loss of generality, Lambda-Twist assumes that each backprojected ray
 $\mathbf{y}_i$ have unit norm, *i.e.*, $||\mathbf{y}_i||_2 = 1$, which otherwise
 we renormalize as a preprocessing step.
 
-Lambda-Twist solves the P3P problems and starts by squaring the distance
-invariants, which yields the following remarkable identity:
+Lambda-Twist starts by squaring the distance invariants, yielding the following
+remarkable identity:
 
 \begin{equation}
   \lambda_i^2 + \lambda_j^2 - 2 \mathbf{y}_i^T \mathbf{y}_j \lambda_i \lambda_j
   = || \mathbf{x}_i - \mathbf{x}_j ||_2^2
 \end{equation}
 
-[@PerssonN:2018:eccv] introduces the following notations by denoting the
-Euclidean squared distance by
+[@PerssonN:2018:eccv] recognize three degenerate quadratic forms in the 3D
+vector $\mathbf{\Lambda} = \begin{bmatrix} \lambda_1 \\ \lambda_2 \\ \lambda_3
+\end{bmatrix}$
+
+By denoting the Euclidean squared distance by
 \begin{equation}
   a_{ij} = || \mathbf{x}_i - \mathbf{x}_j ||_2^2,
 \end{equation}
@@ -151,13 +214,10 @@ and the cosine of the angle between each backprojected light rays by
 
 We can rewrite these into quadratic matrix form as
 \begin{equation}
-  \mathbf{\lambda}^T \mathbf{M}_{ij} \mathbf{\lambda} = a_{ij}
+  \mathbf{\Lambda}^T \mathbf{M}_{ij} \mathbf{\Lambda} = a_{ij}
 \end{equation}
 
-where $\mathbf{\lambda} = \begin{bmatrix} \lambda_1 \\ \lambda_2 \\ \lambda_3
-\end{bmatrix}$
-
-and
+where
 \begin{equation}
   \mathbf{M}_{12} = \begin{bmatrix}
     1 & -b_{12} & 0 \\
@@ -182,16 +242,23 @@ and
   \end{bmatrix}
 \end{equation}
 
-Let's spend some time observing these three matrices.
+Let us take a closer look at these three matrices. Specifically we can
+characterize these three quadratic form geometrically as follows.
 
 - Each of them represents parabolic, elliptic or hyperbolic cylinders since in
-  the affine $\lambda$ 3-space, since the matrices are rank 2.
+  the $\Lambda$ 3-space, since the matrices are rank 2.
   In fact they are elliptic cylinders (parabolic in the worst case), since the
-  discriminant of the conic is nonpositive.
+  discriminant of the conic is nonpositive
   \begin{equation}
     B^2 - 4AC = 4 b_{ij}^2 - 4 \leq 0
   \end{equation}
-  since the cosine of unit vectors $b_ij$ verifies $-1 \leq b_{ij} =
+  since the cosine of unit vectors $b_{ij}$ verifies $-1 \leq b_{ij} =
   \mathbf{y}_i^T \mathbf{y}_j \leq 1$
+
+  Unless we are dealing with 360 cameras (and even then), two backprojected
+  light rays are unlikely to be collinear for two different image points. So we
+  can safely assume that the discriminant is negative and that we are dealing
+  are elliptic cylinders in the general case.
+
 - the axis of each of these cylinders are mutually orthogonal as the zero column vector
   appears at different column index upon examination of the matrices.
