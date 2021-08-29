@@ -28,6 +28,7 @@ namespace {
     Var x{"x"}, y{"y"}, c{"c"};
     Var xo{"xo"}, yo{"yo"}, co{"co"};
     Var xi{"xi"}, yi{"yi"}, ci{"ci"};
+    Var fused;
 
     void generate()
     {
@@ -80,7 +81,10 @@ namespace {
 
         output.specialize(input_is_interleaved && output_is_interleaved)
             .reorder(c, x, y)
-            .unroll(c);
+            .fuse(c, x, fused)
+            .split(y, yo, yi, 8)
+            .parallel(yo)
+            .vectorize(fused, 8);
       }
     }
   };

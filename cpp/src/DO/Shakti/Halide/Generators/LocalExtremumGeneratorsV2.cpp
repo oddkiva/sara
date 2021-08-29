@@ -269,8 +269,9 @@ namespace v3 {
 }  // namespace v3
 
 
-HALIDE_REGISTER_GENERATOR(v2::LocalMax<float>, shakti_local_max_32f_v2)
+HALIDE_REGISTER_GENERATOR(v2::LocalMax<float>,
+                          shakti_local_max_32f_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v2::LocalScaleSpaceExtremum<float>,
-                          shakti_local_scale_space_extremum_32f_v2)
+                          shakti_local_scale_space_extremum_32f_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v3::LocalScaleSpaceExtremum<float>,
-                          shakti_local_scale_space_extremum_32f_v3)
+                          shakti_local_scale_space_extremum_32f_gpu_v3)

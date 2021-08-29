@@ -23,8 +23,8 @@
 
 #include "shakti_gaussian_convolution_gpu.h"
 #include "shakti_halide_rgb_to_gray.h"
-#include "shakti_polar_gradient_2d_32f_v2.h"
-#include "shakti_scale_32f.h"
+#include "shakti_polar_gradient_2d_32f_gpu_v2.h"
+#include "shakti_scale_32f_gpu.h"
 
 #include <boost/filesystem.hpp>
 
@@ -103,8 +103,8 @@ namespace v2 {
 
       tic();
       // image_buffer_4d.set_host_dirty();
-      shakti_polar_gradient_2d_32f_v2(image_buffer_4d, mag_buffer_4d,
-                                      ori_buffer_4d);
+      shakti_polar_gradient_2d_32f_gpu_v2(image_buffer_4d, mag_buffer_4d,
+                                          ori_buffer_4d);
       mag_buffer_4d.copy_to_host();
       ori_buffer_4d.copy_to_host();
       toc("Polar Coordinates");
@@ -308,10 +308,10 @@ int __main(int argc, char** argv)
     if (downscale_factor > 1)
     {
       tic();
-      shakti_scale_32f(frame_gray32f_convolved_buffer_4d,
-                       frame_gray32f_downscaled_buffer_4d.width(),
-                       frame_gray32f_downscaled_buffer_4d.height(),
-                       frame_gray32f_downscaled_buffer_4d);
+      shakti_scale_32f_gpu(frame_gray32f_convolved_buffer_4d,
+                           frame_gray32f_downscaled_buffer_4d.width(),
+                           frame_gray32f_downscaled_buffer_4d.height(),
+                           frame_gray32f_downscaled_buffer_4d);
       toc("Downscale");
     }
 

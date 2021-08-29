@@ -19,7 +19,7 @@
 #include <DO/Shakti/Halide/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_refine_scale_space_extrema.h"
+#include "shakti_refine_scale_space_extrema_gpu.h"
 
 
 namespace DO { namespace Shakti { namespace HalideBackend {
@@ -105,7 +105,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     x_buffer.set_host_dirty();
     y_buffer.set_host_dirty();
 
-    shakti_refine_scale_space_extrema(
+    shakti_refine_scale_space_extrema_gpu(
         a_buffer, b_buffer, c_buffer,            //
         x_buffer, y_buffer,                      //
         w, h,                                    //

@@ -120,5 +120,5 @@ namespace {
 
 
 HALIDE_REGISTER_GENERATOR(SeparableConvolution2d,
-                          shakti_separable_convolution_2d,
+                          shakti_separable_convolution_2d_gpu,
                           DO::Shakti::HalideBackend::SeparableConvolution2d)

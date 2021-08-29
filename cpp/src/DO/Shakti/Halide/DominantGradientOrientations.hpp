@@ -18,7 +18,7 @@
 #include <DO/Shakti/Halide/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_dominant_gradient_orientations.h"
+#include "shakti_dominant_gradient_orientations_gpu.h"
 
 
 namespace DO { namespace Shakti { namespace HalideBackend {
@@ -61,17 +61,17 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     peak_residuals_buffer.set_host_dirty();
 
     // Run the algorithm.
-    shakti_dominant_gradient_orientations(mag_buffer, ori_buffer,      //
-                                          x_buffer,                    //
-                                          y_buffer,                    //
-                                          scale_buffer,                //
-                                          scale_upper_bound,           //
-                                          num_orientation_bins,        //
-                                          gaussian_truncation_factor,  //
-                                          scale_multiplying_factor,    //
-                                          peak_ratio_thres,            //
-                                          peak_map_buffer,             //
-                                          peak_residuals_buffer);
+    shakti_dominant_gradient_orientations_gpu(mag_buffer, ori_buffer,      //
+                                              x_buffer,                    //
+                                              y_buffer,                    //
+                                              scale_buffer,                //
+                                              scale_upper_bound,           //
+                                              num_orientation_bins,        //
+                                              gaussian_truncation_factor,  //
+                                              scale_multiplying_factor,    //
+                                              peak_ratio_thres,            //
+                                              peak_map_buffer,             //
+                                              peak_residuals_buffer);
 
     // Copy back to GPU.
     peak_map_buffer.copy_to_host();

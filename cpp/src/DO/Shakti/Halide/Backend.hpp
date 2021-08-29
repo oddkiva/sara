@@ -19,6 +19,9 @@
 
 namespace DO::Shakti::Halide::CPU {
 
+  auto subtract(Sara::ImageView<float>& a, Sara::ImageView<float>& b,
+                Sara::ImageView<float>& out) -> void;
+
   auto convolve(const Sara::TensorView_<float, 4>& src,
                 const Sara::TensorView_<float, 4>& kernel,
                 Sara::TensorView_<float, 4>& dst) -> void;

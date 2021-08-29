@@ -18,8 +18,8 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_local_max_32f.h"
-#include "shakti_local_scale_space_extremum_32f.h"
+#include "shakti_local_max_32f_gpu.h"
+#include "shakti_local_scale_space_extremum_32f_gpu.h"
 
 
 namespace DO { namespace Shakti { namespace HalideBackend {
@@ -46,7 +46,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     a_buffer.set_host_dirty();
     b_buffer.set_host_dirty();
     c_buffer.set_host_dirty();
-    shakti_local_max_32f(a_buffer, b_buffer, c_buffer, out_buffer);
+    shakti_local_max_32f_gpu(a_buffer, b_buffer, c_buffer, out_buffer);
     out_buffer.copy_to_host();
   }
 
@@ -66,7 +66,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     b_buffer.set_host_dirty();
     c_buffer.set_host_dirty();
 
-    shakti_local_scale_space_extremum_32f(
+    shakti_local_scale_space_extremum_32f_gpu(
         a_buffer, b_buffer, c_buffer, edge_ratio, extremum_thres, out_buffer);
 
     out_buffer.copy_to_host();

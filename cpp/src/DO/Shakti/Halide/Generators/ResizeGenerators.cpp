@@ -296,6 +296,9 @@ namespace {
 }  // namespace
 
 
-HALIDE_REGISTER_GENERATOR(Scale<float>, shakti_scale_32f)
-HALIDE_REGISTER_GENERATOR(Reduce<float>, shakti_reduce_32f)
-HALIDE_REGISTER_GENERATOR(Enlarge, shakti_enlarge)
+HALIDE_REGISTER_GENERATOR(Scale<float>, shakti_scale_32f_cpu)
+HALIDE_REGISTER_GENERATOR(Scale<float>, shakti_scale_32f_gpu)
+HALIDE_REGISTER_GENERATOR(Reduce<float>, shakti_reduce_32f_cpu)
+HALIDE_REGISTER_GENERATOR(Reduce<float>, shakti_reduce_32f_gpu)
+HALIDE_REGISTER_GENERATOR(Enlarge, shakti_enlarge_cpu)
+HALIDE_REGISTER_GENERATOR(Enlarge, shakti_enlarge_gpu)

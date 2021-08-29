@@ -92,4 +92,4 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(CountExtrema<std::int8_t>, shakti_count_extrema)
+HALIDE_REGISTER_GENERATOR(CountExtrema<std::int8_t>, shakti_count_extrema_gpu)

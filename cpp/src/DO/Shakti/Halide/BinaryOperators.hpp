@@ -17,7 +17,7 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_subtract_32f.h"
+#include "shakti_subtract_32f_gpu.h"
 
 
 namespace DO::Shakti::HalideBackend {
@@ -26,7 +26,7 @@ namespace DO::Shakti::HalideBackend {
                 Halide::Runtime::Buffer<float>& b,  //
                 Halide::Runtime::Buffer<float>& out)
   {
-    shakti_subtract_32f(a, b, out);
+    shakti_subtract_32f_gpu(a, b, out);
   }
 
   auto subtract(Sara::ImageView<float>& a,  //

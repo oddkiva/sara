@@ -89,4 +89,5 @@ namespace {
 }  // namespace
 
 
-HALIDE_REGISTER_GENERATOR(PolarGradient2D<float>, shakti_polar_gradient_2d_32f)
+HALIDE_REGISTER_GENERATOR(PolarGradient2D<float>,
+                          shakti_polar_gradient_2d_32f_gpu)
