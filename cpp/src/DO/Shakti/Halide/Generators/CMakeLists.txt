@@ -5,10 +5,21 @@
 # ------------------------------------------------------------------------------
 # Color conversions.
 # ------------------------------------------------------------------------------
-shakti_halide_library(shakti_halide_rgb_to_gray.cpp)
-shakti_halide_library(shakti_halide_bgra_to_gray.cpp)
-shakti_halide_library(shakti_halide_gray32f_to_rgb.cpp)
-shakti_halide_gpu_library(shakti_halide_cast_to_float.cpp)
+shakti_halide_library_v2(
+  NAME shakti_rgb8u_to_gray32f_cpu
+  SRCS FromRgb8uToGray32f.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_bgra8u_to_gray32f_cpu
+  SRCS FromBgra8uToGray32f.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_gray32f_to_rgb8u_cpu
+  SRCS FromGray32fToRgb8u.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_cast_uint8_to_float_cpu
+  SRCS CastUint8ToFloat.cpp)
 
 
 # ------------------------------------------------------------------------------

@@ -5,8 +5,8 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_halide_gray32f_to_rgb.h"
-#include "shakti_halide_rgb_to_gray.h"
+#include "shakti_gray32f_to_rgb8u_cpu.h"
+#include "shakti_rgb8u_to_gray32f_cpu.h"
 #include "shakti_reduce_32f_gpu.h"
 
 
@@ -74,9 +74,9 @@ auto halide_pipeline() -> void
     tic();
     {
       // Use parallelisation and vectorization.
-      shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
+      shakti_rgb8u_to_gray32f_cpu(buffer_rgb, buffer_gray32f);
       reduce(frame_gray32f, frame_gray32f_reduced);
-      shakti_halide_gray32f_to_rgb(buffer_gray32f_reduced, buffer_gray8);
+      shakti_gray32f_to_rgb8u_cpu(buffer_gray32f_reduced, buffer_gray8);
     }
     toc("Halide");
 

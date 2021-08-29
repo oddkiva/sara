@@ -9,12 +9,13 @@
 #include <DO/Shakti/Halide/GaussianConvolution.hpp>
 #include <DO/Shakti/Halide/Resize.hpp>
 
+#include "shakti_gray32f_to_rgb8u_cpu.h"
+
 #include "shakti_convolve_batch_32f_gpu.h"
 #include "shakti_count_extrema_gpu.h"
 #include "shakti_dominant_gradient_orientations_gpu_v2.h"
 #include "shakti_dominant_gradient_orientations_gpu_v3.h"
 #include "shakti_forward_difference_32f_gpu.h"
-#include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_local_scale_space_extremum_32f_gpu_v2.h"
 #include "shakti_local_scale_space_extremum_32f_gpu_v3.h"
 #include "shakti_polar_gradient_2d_32f_gpu_v2.h"

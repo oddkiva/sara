@@ -16,7 +16,7 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_halide_cast_to_float.h"
+#include "shakti_cast_uint8_to_float_cpu.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(test_cast_from_uint8_t_to_float)
     auto dst_buffer = halide::as_interleaved_runtime_buffer(dst);
 
     src_buffer.set_host_dirty();
-    shakti_halide_cast_to_float(src_buffer, dst_buffer);
+    shakti_cast_uint8_to_float_cpu(src_buffer, dst_buffer);
     dst_buffer.copy_to_host();
 
     BOOST_CHECK_EQUAL(dst(0, 0), Rgb32f::Ones().eval());
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_cast_from_uint8_t_to_float)
     auto dst_buffer = halide::as_runtime_buffer(dst);
 
     src_buffer.set_host_dirty();
-    shakti_halide_cast_to_float(src_buffer, dst_buffer);
+    shakti_cast_uint8_to_float_cpu(src_buffer, dst_buffer);
     dst_buffer.copy_to_host();
 
     for (int i = 0; i < 3; ++i)

@@ -16,7 +16,7 @@ namespace {
 
   using namespace Halide;
 
-  class BgraToGray : public Halide::Generator<BgraToGray>
+  class Bgra8uToGray32f : public Halide::Generator<Bgra8uToGray32f>
   {
   public:
     GeneratorParam<int> tile_x{"tile_x", 32};
@@ -74,4 +74,5 @@ namespace {
 }  // namespace
 
 
-HALIDE_REGISTER_GENERATOR(BgraToGray, shakti_halide_bgra_to_gray)
+HALIDE_REGISTER_GENERATOR(Bgra8uToGray32f, shakti_bgra8u_to_gray32f_cpu)
+HALIDE_REGISTER_GENERATOR(Bgra8uToGray32f, shakti_bgra8u_to_gray32f_gpu)

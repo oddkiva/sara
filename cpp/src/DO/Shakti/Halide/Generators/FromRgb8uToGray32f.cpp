@@ -16,27 +16,35 @@ namespace {
 
   using namespace Halide;
 
-  class Gray32fToRgb : public Halide::Generator<Gray32fToRgb>
+  class Rgb8uToGray32f : public Halide::Generator<Rgb8uToGray32f>
   {
   public:
     GeneratorParam<int> tile_x{"tile_x", 32};
     GeneratorParam<int> tile_y{"tile_y", 8};
 
-    Input<Buffer<float>> input{"gray32f", 2};
-    Output<Buffer<std::uint8_t>> output{"packed_rgb888", 3};
+    Input<Buffer<std::uint8_t>> input{"Rgb", 3};
+    Output<Buffer<float>> output{"Gray", 2};
 
-    // Target target{get_gpu_target()};
-
-    Var x{"x"}, y{"y"}, c{"c"}, xi{"xi"}, yi{"yi"};
+    Var x{"x"}, y{"y"}, xi{"xi"}, yi{"yi"};
 
     void generate()
     {
-      output(x, y, c) = cast<uint8_t>(input(x, y) * 255.f);
+      // Deal with interleaved RGB pixel format.
+      input.dim(0).set_stride(3).dim(2).set_stride(1);
+      input.dim(2).set_bounds(0, 3);
 
-      output.dim(0).set_stride(3).dim(2).set_stride(1);
-      output.dim(2).set_bounds(0, 3);
-      output.reorder(c, x, y).unroll(c);
+      auto r = input(x, y, 0) / 255.f;
+      auto g = input(x, y, 1) / 255.f;
+      auto b = input(x, y, 2) / 255.f;
 
+      auto gray = Func{"gray"};
+      output(x, y) = 0.2125f * r + 0.7154f * g + 0.0721f * b;
+
+      schedule_algorithm();
+    }
+
+    void schedule_algorithm()
+    {
       // GPU schedule.
       if (get_target().has_gpu_feature())
         output.gpu_tile(x, y, xi, yi, tile_x, tile_y);
@@ -65,4 +73,6 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(Gray32fToRgb, shakti_halide_gray32f_to_rgb)
+
+HALIDE_REGISTER_GENERATOR(Rgb8uToGray32f, shakti_rgb8u_to_gray32f_cpu)
+HALIDE_REGISTER_GENERATOR(Rgb8uToGray32f, shakti_rgb8u_to_gray32f_gpu)

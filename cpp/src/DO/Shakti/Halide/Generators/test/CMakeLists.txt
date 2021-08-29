@@ -21,7 +21,7 @@ endforeach ()
 
 target_link_libraries(test_halide_cast
   PRIVATE
-  shakti_halide_cast_to_float)
+  shakti_cast_uint8_to_float_cpu)
 
 target_link_libraries(test_halide_resize
   PRIVATE

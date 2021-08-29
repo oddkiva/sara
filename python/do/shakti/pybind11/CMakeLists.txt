@@ -13,10 +13,10 @@ target_link_libraries(
           Halide::Halide
           Halide::Runtime
           DO_Sara_Core
-          shakti_halide_rgb_to_gray
-          shakti_halide_gray32f_to_rgb
-          shakti_gaussian_convolution_gpu
+          shakti_rgb8u_to_gray32f_cpu
+          shakti_gray32f_to_rgb8u_cpu
           shakti_gaussian_convolution_cpu
+          shakti_gaussian_convolution_gpu
           shakti_gradient_2d_32f_gpu_v2
           shakti_polar_gradient_2d_32f_gpu_v2
           shakti_enlarge_cpu

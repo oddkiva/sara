@@ -17,8 +17,8 @@ target_link_libraries(halide_aot_example
   ${DO_Sara_LIBRARIES}
   Halide::Halide
   Halide::Runtime
-  shakti_halide_rgb_to_gray
-  shakti_halide_gray32f_to_rgb
+  shakti_rgb8u_to_gray32f_cpu
+  shakti_gray32f_to_rgb8u_cpu
   shakti_gaussian_convolution_gpu)
 set_property(TARGET halide_aot_example PROPERTY FOLDER "Examples/Shakti/Halide")
 
@@ -35,8 +35,8 @@ target_link_libraries(halide_resize_example
   ${DO_Sara_LIBRARIES}
   Halide::Halide
   Halide::Runtime
-  shakti_halide_rgb_to_gray
-  shakti_halide_gray32f_to_rgb
+  shakti_rgb8u_to_gray32f_cpu
+  shakti_gray32f_to_rgb8u_cpu
   shakti_reduce_32f_gpu)
 set_property(TARGET halide_resize_example
   PROPERTY
@@ -44,9 +44,9 @@ set_property(TARGET halide_resize_example
 
 
 set(HALIDE_SIFT_LIBRARIES
-  shakti_halide_rgb_to_gray
-  shakti_halide_bgra_to_gray
-  shakti_halide_gray32f_to_rgb
+  shakti_rgb8u_to_gray32f_cpu
+  shakti_bgra8u_to_gray32f_cpu
+  shakti_gray32f_to_rgb8u_cpu
   # Resize operations.
   shakti_enlarge_gpu
   shakti_reduce_32f_gpu
@@ -173,7 +173,7 @@ target_link_libraries(halide_edge_detection_example
   PRIVATE
   Halide::Halide
   Halide::Runtime
-  shakti_halide_rgb_to_gray
+  shakti_rgb8u_to_gray32f_cpu
   shakti_gaussian_convolution_gpu
   shakti_scale_32f_gpu
   shakti_polar_gradient_2d_32f_gpu_v2

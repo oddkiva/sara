@@ -21,8 +21,8 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
+#include "shakti_rgb8u_to_gray32f_cpu.h"
 #include "shakti_gaussian_convolution_gpu.h"
-#include "shakti_halide_rgb_to_gray.h"
 #include "shakti_polar_gradient_2d_32f_gpu_v2.h"
 #include "shakti_scale_32f_gpu.h"
 
@@ -296,7 +296,7 @@ int __main(int argc, char** argv)
     SARA_DEBUG << "Processing frame " << frames_read << std::endl;
 
     tic();
-    shakti_halide_rgb_to_gray(frame_buffer, frame_gray32f_buffer);
+    shakti_rgb8u_to_gray32f_cpu(frame_buffer, frame_gray32f_buffer);
     toc("Grayscale");
 
     tic();
