@@ -19,7 +19,8 @@
 
 namespace DO::Shakti::Halide::CPU {
 
-  auto subtract(Sara::ImageView<float>& a, Sara::ImageView<float>& b,
+  auto subtract(const Sara::ImageView<float>& a,  //
+                const Sara::ImageView<float>& b,  //
                 Sara::ImageView<float>& out) -> void;
 
   auto convolve(const Sara::TensorView_<float, 4>& src,
@@ -27,7 +28,8 @@ namespace DO::Shakti::Halide::CPU {
                 Sara::TensorView_<float, 4>& dst) -> void;
 
   auto gaussian_convolution(const Sara::ImageView<float>& src,
-                            Sara::ImageView<float>& dst, float sigma,
+                            Sara::ImageView<float>& dst,  //
+                            float sigma,                  //
                             int truncation_factor = 4) -> void;
 
 }  // namespace DO::Shakti::Halide::CPU

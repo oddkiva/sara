@@ -13,12 +13,29 @@
 #include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
 #include "shakti_subtract_32f_cpu.h"
-#include "shakti_convolve_batch_32f_cpu.h"
-#include "shakti_gaussian_convolution_cpu.h"
+#include "shakti_subtract_32f_gpu.h"
 
+#include "shakti_convolve_batch_32f_cpu.h"
 #include "shakti_convolve_batch_32f_gpu.h"
+
+#include "shakti_gaussian_convolution_cpu.h"
 #include "shakti_gaussian_convolution_gpu.h"
 
+
+namespace DO::Shakti::Halide {
+
+  auto subtract(::Halide::Runtime::Buffer<float>& a,
+                ::Halide::Runtime::Buffer<float>& b,
+                ::Halide::Runtime::Buffer<float>& out,  //
+                bool gpu = true) -> void
+  {
+    if (gpu)
+      shakti_subtract_32f_gpu(a, b, out);
+    else
+      shakti_subtract_32f_cpu(a, b, out);
+  }
+
+}
 
 namespace DO::Shakti::Halide::CPU {
 
@@ -39,7 +56,6 @@ namespace DO::Shakti::Halide::CPU {
 
     shakti_subtract_32f_cpu(a_buffer, b_buffer, out_buffer);
   }
-
 
   auto convolve(const Sara::TensorView_<float, 4>& src,
                 const Sara::TensorView_<float, 4>& kernel,
