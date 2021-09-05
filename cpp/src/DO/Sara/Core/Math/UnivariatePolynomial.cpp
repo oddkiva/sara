@@ -3,6 +3,6 @@
 
 namespace DO::Sara::Univariate {
 
-  template class UnivariatePolynomial<double>;
+  template class UnivariatePolynomial<double, -1>;
 
 } /* namespace DO::Sara::Univariate */
