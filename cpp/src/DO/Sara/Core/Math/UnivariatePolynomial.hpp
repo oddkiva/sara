@@ -53,6 +53,12 @@ namespace DO::Sara::Univariate {
       return *this;
     }
 
+    //! @brief Return the degree of the polynomial.
+    inline constexpr auto degree() const -> int
+    {
+      return N;
+    }
+
     //! @{
     //! Return the polynomial coefficient at degree 'i'.
     inline T& operator[](int degree)
@@ -66,14 +72,10 @@ namespace DO::Sara::Univariate {
     }
     //! @}
 
-    inline constexpr auto degree() const -> int
-    {
-      return N;
-    }
-
     //! @brief Evaluate polynomial at point 'x' using Horner method evaluation.
     template <typename U>
-    auto operator()(const U& x) const -> decltype(coefficient_type{} + U{})
+    inline auto operator()(const U& x) const
+        -> decltype(coefficient_type{} + U{})
     {
       if (x == U{})
         return _coeff[0];
@@ -102,20 +104,32 @@ namespace DO::Sara::Univariate {
     //! @}
 
     //! I/O.
-    friend std::ostream& operator<<(std::ostream& os, const UnivariatePolynomial& P)
+    //! @{
+    auto to_string() const -> std::string
     {
-      for (int i = N; i >= 0; --i)
+      auto str = std::string{};
+      std::ostringstream oss;
+      for (int i = degree(); i >= 0; --i)
       {
         if (signum(P[i]) >= 0)
-          os << "+";
+          oss << "+";
         else
-          os << "-";
-        os << std::abs(P[i]);
+          oss << "-";
+        oss << std::abs(P[i]);
         if (i > 0)
-          os << "X**" << i << " ";
+          oss << "X^" << i << " ";
       }
+      return oss.str();
+    }
+
+    friend inline auto operator<<(std::ostream& os,
+                                  const UnivariatePolynomial& p)
+        -> std::ostream&
+    {
+      os << p.to_string();
       return os;
     }
+    //! @}
 
   private:
     inline void copy(const UnivariatePolynomial& other)
@@ -132,7 +146,7 @@ namespace DO::Sara::Univariate {
   class UnivariatePolynomial<Coeff, -1>
   {
   public:
-    using coeff_type = Coeff;
+    using coefficient_type = Coeff;
 
     inline UnivariatePolynomial() = default;
 
@@ -141,12 +155,12 @@ namespace DO::Sara::Univariate {
     {
     }
 
-    const coeff_type& operator[](int i) const
+    const coefficient_type& operator[](int i) const
     {
       return _coeff[i];
     }
 
-    coeff_type& operator[](int i)
+    coefficient_type& operator[](int i)
     {
       return _coeff[i];
     }
@@ -166,14 +180,14 @@ namespace DO::Sara::Univariate {
       return res;
     }
 
-    UnivariatePolynomial operator+(const coeff_type& other) const
+    UnivariatePolynomial operator+(const coefficient_type& other) const
     {
       auto res = *this;
       res._coeff[0] += other;
       return res;
     }
 
-    UnivariatePolynomial operator-(const coeff_type& other) const
+    UnivariatePolynomial operator-(const coefficient_type& other) const
     {
       return (*this) + (-other);
     }
@@ -228,7 +242,8 @@ namespace DO::Sara::Univariate {
       const auto& b = other;
 
       auto q = UnivariatePolynomial{degree() - other.degree()};
-      q._coeff = std::vector<coeff_type>(degree() - other.degree() + 1, 0);
+      q._coeff =
+          std::vector<coefficient_type>(degree() - other.degree() + 1, 0);
 
       auto qi = q;
 
@@ -248,11 +263,10 @@ namespace DO::Sara::Univariate {
       return {q, a};
     }
 
-    auto operator/(const coeff_type& other) const
-      -> UnivariatePolynomial
+    auto operator/(const coefficient_type& other) const -> UnivariatePolynomial
     {
       auto res = *this;
-      for (auto& c: res._coeff)
+      for (auto& c : res._coeff)
         c /= other;
       return res;
     }
@@ -267,12 +281,12 @@ namespace DO::Sara::Univariate {
 
     //! @brief Horner method evaluation.
     template <typename T>
-    auto operator()(const T& x0) const -> decltype(coeff_type{} + T{})
+    auto operator()(const T& x0) const -> decltype(coefficient_type{} + T{})
     {
       if (x0 == T(0))
         return _coeff[0];
 
-      using result_type = decltype(coeff_type{} + T{});
+      using result_type = decltype(coefficient_type{} + T{});
       auto b = result_type(_coeff[degree()]);
       for (auto i = 1u; i < _coeff.size(); ++i)
         b = _coeff[degree() - i] + b * x0;
@@ -285,7 +299,7 @@ namespace DO::Sara::Univariate {
       std::ostringstream oss;
       for (auto i = 0u; i < _coeff.size(); ++i)
       {
-        oss << _coeff[degree() - i] <<  " X^" << (degree() - i);
+        oss << _coeff[degree() - i] << " X^" << (degree() - i);
         if (int(i) < degree())
           oss << " + ";
       }
@@ -299,7 +313,7 @@ namespace DO::Sara::Univariate {
       return os;
     }
 
-    std::vector<coeff_type> _coeff;
+    std::vector<coefficient_type> _coeff;
   };
 
 
