@@ -60,10 +60,25 @@ namespace DO::Sara::Univariate {
                     double phase = 49. * M_PI / 180.,
                     bool recalculate_root_moduli_lower_bound = false) -> void;
 
-    auto s1() const -> const std::complex<double>& { return roots[0]; }
-    auto s2() const -> const std::complex<double>& { return roots[1]; }
-    auto u() const -> const double& { return polynomial[1]; }
-    auto v() const -> const double& { return polynomial[0]; }
+    auto s1() const -> const std::complex<double>&
+    {
+      return roots[0];
+    }
+
+    auto s2() const -> const std::complex<double>&
+    {
+      return roots[1];
+    }
+
+    auto u() const -> const double&
+    {
+      return polynomial[1];
+    }
+
+    auto v() const -> const double&
+    {
+      return polynomial[0];
+    }
 
     //! @brief The polynomial itself.
     UnivariatePolynomial<double> polynomial;
@@ -127,7 +142,7 @@ namespace DO::Sara::Univariate {
 
   auto next_quadratic_shift_polymomial(const QuadraticFactor& sigma,
                                        const AuxiliaryVariables& aux)
-    -> UnivariatePolynomial<double>;
+      -> UnivariatePolynomial<double>;
   //! @}
 
 
@@ -136,8 +151,7 @@ namespace DO::Sara::Univariate {
   auto next_quadratic_factor(QuadraticFactor& sigma,
                              const UnivariatePolynomial<double>& P,
                              const UnivariatePolynomial<double>& K0,
-                             const AuxiliaryVariables& aux)
-    -> QuadraticFactor;
+                             const AuxiliaryVariables& aux) -> QuadraticFactor;
 
 
   // Weak convergence test for stage 2 of the algorithm.

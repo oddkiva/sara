@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Math/UsualFunctions.hpp>
-#include <DO/Sara/Geometry/Tools/PolynomialRoots.hpp>
+#include <DO/Sara/Core/Math/PolynomialRoots.hpp>
 
 #include <Eigen/Dense>
 
@@ -24,9 +24,10 @@ namespace DO::Sara {
   struct LambdaTwist
   {
     using Vec3 = Eigen::Matrix<T, 3, 1>;
-    using Vec9 = Eigen::Matrix<T, 9, 1>;
     using Mat3 = Eigen::Matrix<T, 3, 3>;
     using Mat34 = Eigen::Matrix<T, 3, 4>;
+
+    using RowVec9 = Eigen::Matrix<T, 1, 9>;
 
     enum Index
     {
@@ -42,7 +43,7 @@ namespace DO::Sara {
       calculate_auxiliary_variables();
       solve_cubic_polynomial();
       solve_for_lambda();
-      recover_all_poses();
+      // recover_all_poses();
     }
 
     inline auto calculate_auxiliary_variables() -> void
@@ -109,38 +110,65 @@ namespace DO::Sara {
 
       // Solve the cubic polynomial.
       roots(c, gamma[0], gamma[1], gamma[2]);
+      SARA_CHECK(gamma[0]);
+      SARA_CHECK(c(gamma[0]));
     }
 
     inline auto solve_for_lambda() -> void
     {
       // The first root is always real in this implementation.
-      Mat3 D0 = D[0] + gamma[0] * D[1];
+      const Mat3 D0 = D[0] + std::real(gamma[0]) * D[1];
+      SARA_DEBUG << "D0 =\n" << D0 << std::endl;
 
       eig3x3xknown0(D0, E, sigma);
+      SARA_DEBUG << "E =\n" << E << std::endl;
+      SARA_DEBUG << "sigma = " << sigma[0] << " " << sigma[1] << std::endl;
 
-      auto s = std::array<T, 2>{};
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_DEBUG << "FIX eig3x3known0!!!!" << std::endl;
+      SARA_CHECK(E * E.transpose());
+      SARA_CHECK(D0 -
+                 E * Vec3(sigma[0], sigma[1], 0).asDiagonal() * E.transpose());
+
       const auto sp = std::sqrt(-sigma[1] / sigma[0]);
       const auto sm = -sp;
 
-      const auto wm = calculate_w(sm);
-      const auto wp = calculate_w(sp);
+      // const auto wm = calculate_w(sm);
+      // const auto wp = calculate_w(sp);
 
-      const auto tau_m = solve_tau_quadratic_polynomial(wm);
-      const auto tau_p = solve_tau_quadratic_polynomial(wp);
+      // const auto tau_m = solve_tau_quadratic_polynomial(wm);
+      // const auto tau_p = solve_tau_quadratic_polynomial(wp);
 
-      for (const auto& tau : tau_m)
-      {
-        if (std::abs(std::imag(tau)) > 1e-10 && std::real(tau) < 0)
-          continue;
-        lambda_k.push_back(calculate_lambda_k(std::real(tau), wm));
-      }
+      // for (const auto& tau : tau_m)
+      // {
+      //   if (std::abs(std::imag(tau)) > 1e-10 && std::real(tau) < 0)
+      //     continue;
+      //   lambda_k.push_back(calculate_lambda(std::real(tau), wm));
+      // }
 
-      for (const auto& tau : tau_p)
-      {
-        if (std::abs(std::imag(tau)) > 1e-10 && std::real(tau) < 0)
-          continue;
-        lambda_k.push_back(calculate_lambda_k(std::real(tau), wp));
-      }
+      // for (const auto& tau : tau_p)
+      // {
+      //   if (std::abs(std::imag(tau)) > 1e-10 && std::real(tau) < 0)
+      //     continue;
+      //   lambda_k.push_back(calculate_lambda(std::real(tau), wp));
+      // }
 
 
       // TODO: refine the lambda_k with Gauss-Newton polishing procedure.
@@ -152,7 +180,7 @@ namespace DO::Sara {
         pose_k.push_back(recover_pose(lambda));
     }
 
-    inline auto get_eigen_vector(const Vec9& m, const T r) -> Vec3
+    inline auto get_eigen_vector(const RowVec9& m, const T r) -> Vec3
     {
       const auto c = square(r) + m(0) * m(4) - r * (m(0) + m(4)) - square(m(1));
       const auto a1 = (r * m(2) + m(1) * m(5) - m(2) * m(4)) / c;
@@ -177,6 +205,7 @@ namespace DO::Sara {
     {
       // lines 8-9
       const Vec3 b2 = M.col(1).cross(M.col(2)).normalized();
+      SARA_CHECK(b2.transpose());
 
       // Ignore line 10 by not using the matrix M instead of its vectorized form
       // m = vec(M) = [M[0, :], M[1, :], M[2, :]].
@@ -184,18 +213,21 @@ namespace DO::Sara {
 
       // Form the quadratic polynomial as described in lines 11-12.
       // but the original matrix M.
-      auto p = Polynomial<T, 2>{};
+      auto p = Univariate::UnivariatePolynomial<T, 2>{};
 #ifdef NON_VECTORIZED_MATRIX
       p[2] = 1;
       p[1] = -M(0, 0) - M(1, 1) - M(2, 2);
       p[0] = -square(M(0, 1)) - square(M(0, 2)) - square(M(1, 2)) +
              M(0, 0) * M(1, 1) + M(2, 2) + M(1, 2) * M(2, 2);
+      SARA_CHECK(M);
 #else
-      const Vec9 m = (Vec9{} << M.row(0), M.row(1), M.row(2)).finished();
+      SARA_DEBUG << "VECTORIZED IMPLEMENTATION" << std::endl;
+      const RowVec9 m = (RowVec9{} << M.row(0), M.row(1), M.row(2)).finished();
       p[2] = 1;
       p[1] = -m(0) - m(4) - m(8);
       p[0] = -square(m(1)) - square(m(2)) - square(m(5)) + m(0) * m(4) + m(8) +
              m(4) * m(8);
+      SARA_CHECK(m);
 #endif
 
       // Line 13: compute the real roots if they exist.
@@ -240,11 +272,11 @@ namespace DO::Sara {
     }
 
     inline auto solve_tau_quadratic_polynomial(const std::array<T, 2>& w) const
-        -> std::array<T, 2>
+        -> std::array<std::complex<T>, 2>
     {
       // The τ-polynomial in tau arises from the quadratic form described in
       // Equation (14) of the paper.
-      auto tau_polynomial = Polynomial<T, 2>{};
+      auto tau_polynomial = Univariate::UnivariatePolynomial<T, 2>{};
       // The coefficients of the τ-polynomial as shown in Equation (15) of the
       // paper.
       tau_polynomial[2] = (a(_02) - a(_01)) * square(w[0])        //
@@ -280,15 +312,15 @@ namespace DO::Sara {
       Y.col(2) = Y.col(0).cross(Y.col(1));
 
       auto X = Mat3{};
-      X(0) = x.col(0) - x.col(1);
-      X(1) = x.col(1) - x.col(2);
-      X(2) = X.col(0).cross(X.col(1));
+      X.col(0) = x.col(0) - x.col(1);
+      X.col(1) = x.col(1) - x.col(2);
+      X.col(2) = X.col(0).cross(X.col(1));
 
       const Mat3 R = Y * X.inverse();
-      const Vec3 t = lambda(0) * y(0) - R * x.col(0);
+      const Vec3 t = lambda(0) * y.col(0) - R * x.col(0);
 
       auto pose = Mat34{};
-      pose.leftCol(3) = R;
+      pose.leftCols(3) = R;
       pose.col(3) = t;
 
       return pose;
@@ -314,7 +346,7 @@ namespace DO::Sara {
 
     //! @brief The cubic polynomial formed by the linear combination of D[0] and
     //! D[1].
-    Polynomial<T, 3> c;
+    Univariate::UnivariatePolynomial<T, 3> c;
     //! @brief The roots of the polynomial.
     std::array<std::complex<T>, 3> gamma;
 
