@@ -65,6 +65,12 @@ namespace DO::Sara::Univariate {
       return *this;
     }
 
+    //! @brief Return the degree of the polynomial.
+    inline constexpr auto degree() const -> int
+    {
+      return N;
+    }
+
     //! @{
     //! Return the polynomial coefficient at degree 'i'.
     inline auto operator[](int degree) -> coefficient_type&
@@ -77,12 +83,6 @@ namespace DO::Sara::Univariate {
       return _coeff[degree];
     }
     //! @}
-
-    //! @brief Return the polynomial degree.
-    inline constexpr auto degree() const -> int
-    {
-      return N;
-    }
 
     //! @brief Evaluate polynomial at point 'x' using Horner's method
     //! evaluation.
@@ -116,21 +116,32 @@ namespace DO::Sara::Univariate {
     //! @}
 
     //! I/O.
-    friend auto operator<<(std::ostream& os, const UnivariatePolynomial& P)
+    //! @{
+    auto to_string() const -> std::string
+    {
+      auto str = std::string{};
+      std::ostringstream oss;
+      for (int i = degree(); i >= 0; --i)
+      {
+        if (_coeff[i] >= 0)
+          oss << "+";
+        else
+          oss << "-";
+        oss << std::abs(_coeff[i]);
+        if (i > 0)
+          oss << "X^" << i << " ";
+      }
+      return oss.str();
+    }
+
+    friend inline auto operator<<(std::ostream& os,
+                                  const UnivariatePolynomial& p)
         -> std::ostream&
     {
-      for (int i = N; i >= 0; --i)
-      {
-        if (signum(P[i]) >= 0)
-          os << "+";
-        else
-          os << "-";
-        os << std::abs(P[i]);
-        if (i > 0)
-          os << "X**" << i << " ";
-      }
+      os << p.to_string();
       return os;
     }
+    //! @}
 
   private:
     inline auto copy(const UnivariatePolynomial& other) -> void
@@ -294,15 +305,15 @@ namespace DO::Sara::Univariate {
 
     //! @brief Horner method evaluation.
     template <typename U>
-    auto operator()(U x0) const -> decltype(T{} + U{})
+    auto operator()(U x) const -> decltype(T{} + U{})
     {
-      if (x0 == U{})
+      if (x == U{})
         return _coeff[0];
 
       using result_type = decltype(T{} + U{});
       auto b = static_cast<result_type>(_coeff[degree()]);
       for (auto i = 1u; i < _coeff.size(); ++i)
-        b = _coeff[degree() - i] + b * x0;
+        b = _coeff[degree() - i] + b * x;
       return b;
     }
 

@@ -147,8 +147,8 @@ namespace DO::Sara {
       SARA_CHECK(D0 -
                  E * Vec3(sigma[0], sigma[1], 0).asDiagonal() * E.transpose());
 
-      const auto sp = std::sqrt(-sigma[1] / sigma[0]);
-      const auto sm = -sp;
+      // const auto sp = std::sqrt(-sigma[1] / sigma[0]);
+      // const auto sm = -sp;
 
       // const auto wm = calculate_w(sm);
       // const auto wp = calculate_w(sp);
