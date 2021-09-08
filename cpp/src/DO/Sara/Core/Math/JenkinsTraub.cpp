@@ -16,7 +16,7 @@ constexpr auto verbose = false;
 using namespace std;
 
 
-namespace DO::Sara::Univariate {
+namespace DO::Sara {
 
   auto compute_root_moduli_lower_bound(const UnivariatePolynomial<double>& P)
       -> double
@@ -815,4 +815,4 @@ namespace DO::Sara::Univariate {
     return solver.find_roots();
   }
 
-} /* namespace DO::Sara::Univariate */
+}  // namespace DO::Sara

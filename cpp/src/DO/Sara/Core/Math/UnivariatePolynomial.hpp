@@ -22,7 +22,7 @@
 #include <vector>
 
 
-namespace DO::Sara::Univariate {
+namespace DO::Sara {
 
   //! @ingroup Core
   //! @defgroup Math Some mathematical tools
@@ -191,7 +191,8 @@ namespace DO::Sara::Univariate {
 
   //! @brief Univariate polynomial class with degree known at compile time.
   template <typename T, int N>
-  class UnivariatePolynomial : public UnivariatePolynomialBase<std::array<T, N + 1>>
+  class UnivariatePolynomial
+    : public UnivariatePolynomialBase<std::array<T, N + 1>>
   {
     using base_type = UnivariatePolynomialBase<std::array<T, N + 1>>;
     using base_type::_coeff;
@@ -228,7 +229,8 @@ namespace DO::Sara::Univariate {
 
   //! @brief Univariate polynomial class with degree known at runtime.
   template <typename T>
-  class UnivariatePolynomial<T, -1> : public UnivariatePolynomialBase<std::vector<T>>
+  class UnivariatePolynomial<T, -1>
+    : public UnivariatePolynomialBase<std::vector<T>>
   {
     using base_type = UnivariatePolynomialBase<std::vector<T>>;
     using base_type::_coeff;
@@ -370,10 +372,10 @@ namespace DO::Sara::Univariate {
 
 
   //! @brief Univariate monomial class with runtime degree.
-  class Monomial
+  class UnivariateMonomial
   {
   public:
-    Monomial() = default;
+    UnivariateMonomial() = default;
 
     template <typename T>
     auto pow(int e) const -> UnivariatePolynomial<T, -1>
@@ -396,12 +398,12 @@ namespace DO::Sara::Univariate {
     int exponent{1};
   };
 
-  constexpr auto X = Monomial{};
-  constexpr auto Z = Monomial{};
+  constexpr auto X = UnivariateMonomial{};
+  constexpr auto Z = UnivariateMonomial{};
 
 
   template <typename T>
-  auto operator+(const Monomial& a, const T& b)
+  auto operator+(const UnivariateMonomial& a, const T& b)
   {
     auto res = UnivariatePolynomial<T, -1>(a.exponent);
     if (a.exponent != 0)
@@ -415,13 +417,13 @@ namespace DO::Sara::Univariate {
   }
 
   template <typename T>
-  auto operator-(const Monomial& a, const T& b)
+  auto operator-(const UnivariateMonomial& a, const T& b)
   {
     return a + (-b);
   }
 
   template <typename T>
-  auto operator*(const T& a, const Monomial& b)
+  auto operator*(const T& a, const UnivariateMonomial& b)
   {
     auto res = UnivariatePolynomial<T, -1>{};
     res.resize(b.exponent);
@@ -430,7 +432,7 @@ namespace DO::Sara::Univariate {
   }
 
   template <typename T>
-  auto operator*(const Monomial& a, const T& b)
+  auto operator*(const UnivariateMonomial& a, const T& b)
   {
     return b * a;
   }
@@ -451,23 +453,26 @@ namespace DO::Sara::Univariate {
   }
 
   template <typename T, int N>
-  auto operator*(const UnivariatePolynomial<T, N>& P, const Monomial& Q)
+  auto operator*(const UnivariatePolynomial<T, N>& P,
+                 const UnivariateMonomial& Q)
   {
     return P * Q.to_polynomial<T>();
   }
 
   template <typename T, int N>
-  auto operator*(const Monomial& P, const UnivariatePolynomial<T, N>& Q)
+  auto operator*(const UnivariateMonomial& P,
+                 const UnivariatePolynomial<T, N>& Q)
   {
     return Q * P;
   }
 
   template <typename T, int N>
-  auto operator/(const UnivariatePolynomial<T, N>& P, const Monomial& Q)
+  auto operator/(const UnivariatePolynomial<T, N>& P,
+                 const UnivariateMonomial& Q)
   {
     return P / Q.to_polynomial<T>();
   }
 
   //! @}
 
-} /* namespace DO::Sara::Univariate */
+}  // namespace DO::Sara

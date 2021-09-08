@@ -56,14 +56,14 @@ namespace DO { namespace Sara {
   }
 
   auto quartic_equation(const ConicEquation& s, const ConicEquation& t)
-      -> Univariate::UnivariatePolynomial<double, 4>
+      -> UnivariatePolynomial<double, 4>
   {
     double d[6][6];
     for (int i = 0; i < 6; ++i)
       for (int j = 0; j < 6; ++j)
         d[i][j] = s[i] * t[j] - s[j] * t[i];
 
-    auto u = Univariate::UnivariatePolynomial<double, 4>{};
+    auto u = UnivariatePolynomial<double, 4>{};
     u[0] = d[3][1] * d[1][0] - d[3][0] * d[3][0];
     u[1] = d[3][4] * d[1][0] + d[3][1] * (d[4][0] + d[1][2]) -
            2 * d[3][2] * d[3][0];
@@ -76,9 +76,9 @@ namespace DO { namespace Sara {
   }
 
   auto sigma_polynomial(const ConicEquation& s, double y)
-      -> Univariate::UnivariatePolynomial<double, 2>
+      -> UnivariatePolynomial<double, 2>
   {
-    auto sigma = Univariate::UnivariatePolynomial<double, 2>{};
+    auto sigma = UnivariatePolynomial<double, 2>{};
     sigma[0] = s[0] + s[2] * y + s[5] * y * y;
     sigma[1] = s[1] + s[4] * y;
     sigma[2] = s[3];
@@ -196,11 +196,11 @@ namespace DO { namespace Sara {
     {
       for (auto& y : ys)
       {
-        auto P = Univariate::UnivariatePolynomial<double, -1>{};
+        auto P = UnivariatePolynomial<double>{};
         for (auto d = 0; d <= u.degree(); ++d)
           P[d] = u[d];
 
-        auto root_polisher = Univariate::NewtonRaphson{P};
+        auto root_polisher = NewtonRaphson{P};
         y = root_polisher(y, 10);
       }
     }

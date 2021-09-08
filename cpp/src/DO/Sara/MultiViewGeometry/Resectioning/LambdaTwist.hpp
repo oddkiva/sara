@@ -213,7 +213,7 @@ namespace DO::Sara {
 
       // Form the quadratic polynomial as described in lines 11-12.
       // but the original matrix M.
-      auto p = Univariate::UnivariatePolynomial<T, 2>{};
+      auto p = UnivariatePolynomial<T, 2>{};
 #ifdef NON_VECTORIZED_MATRIX
       p[2] = 1;
       p[1] = -M(0, 0) - M(1, 1) - M(2, 2);
@@ -276,7 +276,7 @@ namespace DO::Sara {
     {
       // The τ-polynomial in tau arises from the quadratic form described in
       // Equation (14) of the paper.
-      auto tau_polynomial = Univariate::UnivariatePolynomial<T, 2>{};
+      auto tau_polynomial = UnivariatePolynomial<T, 2>{};
       // The coefficients of the τ-polynomial as shown in Equation (15) of the
       // paper.
       tau_polynomial[2] = (a(_02) - a(_01)) * square(w[0])        //
@@ -346,7 +346,7 @@ namespace DO::Sara {
 
     //! @brief The cubic polynomial formed by the linear combination of D[0] and
     //! D[1].
-    Univariate::UnivariatePolynomial<T, 3> c;
+    UnivariatePolynomial<T, 3> c;
     //! @brief The roots of the polynomial.
     std::array<std::complex<T>, 3> gamma;
 

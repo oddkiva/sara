@@ -52,14 +52,22 @@ namespace DO::Sara {
               (-b + sqrt_delta) / (2 * a)};
   }
 
-  template <typename T>
-  void roots(const Univariate::UnivariatePolynomial<T, 2>& P,
-             std::complex<T>& x1, std::complex<T>& x2, bool& real_roots)
+  template <typename T, int N>
+  void roots(const UnivariatePolynomial<T, N>& P, std::complex<T>& x1,
+             std::complex<T>& x2, bool& real_roots)
   {
-    const T& a = P[2];
-    const T& b = P[1];
-    const T& c = P[0];
-    T delta = b * b - 4 * a * c;
+    if constexpr (N == -1)
+    {
+      if (P.degree() != 2)
+        throw std::runtime_error{"Error: the polynomial must be of degree 2!"};
+    }
+    else
+      static_assert(N == 2, "Error: the polynomial must be of degree 2!");
+
+    const auto& a = P[2];
+    const auto& b = P[1];
+    const auto& c = P[0];
+    auto delta = b * b - 4 * a * c;
     x1 = (-b - sqrt(std::complex<T>(delta))) / (2 * a);
     x2 = (-b + sqrt(std::complex<T>(delta))) / (2 * a);
     if (delta >= 0)
@@ -69,11 +77,18 @@ namespace DO::Sara {
   }
 
   // Discriminant precision: 1e-3.
-  template <typename T>
-  void roots(const Univariate::UnivariatePolynomial<T, 3>& P,
-             std::complex<T>& z1, std::complex<T>& z2, std::complex<T>& z3,
-             T eps = T(1e-3))
+  template <typename T, int N>
+  void roots(const UnivariatePolynomial<T, N>& P, std::complex<T>& z1,
+             std::complex<T>& z2, std::complex<T>& z3, T eps = T(1e-3))
   {
+    if constexpr (N == -1)
+    {
+      if (P.degree() != 3)
+        throw std::runtime_error{"Error: the polynomial must be of degree 3!"};
+    }
+    else
+      static_assert(N == 3, "Error: the polynomial must be of degree 3!");
+
     const auto a = static_cast<T>(1);
     const auto b = P[2] / P[3];
     const auto c = P[1] / P[3];
@@ -127,11 +142,19 @@ namespace DO::Sara {
   }
 
   // Involves the precision of the cubic equation solver: (1e-3.)
-  template <typename T>
-  void roots(const Univariate::UnivariatePolynomial<T, 4>& P,
+  template <typename T, int N>
+  void roots(const UnivariatePolynomial<T, N>& P,
              std::complex<T>& z1, std::complex<T>& z2, std::complex<T>& z3,
              std::complex<T>& z4, T eps = T(1e-6))
   {
+    if constexpr (N == -1)
+    {
+      if (P.degree() != 4)
+        throw std::runtime_error{"Error: the polynomial must be of degree 4!"};
+    }
+    else
+      static_assert(N == 4, "Error: the polynomial must be of degree 4!");
+
     const auto a4 = static_cast<T>(1);
     const auto a3 = P[3] / P[4];
     const auto a2 = P[2] / P[4];
@@ -143,7 +166,7 @@ namespace DO::Sara {
     static_assert(std::is_same_v<decltype(a3), const T>);
     static_assert(std::is_same_v<decltype(a4), const T>);
 
-    auto Q = Univariate::UnivariatePolynomial<T, 3>{};
+    auto Q = UnivariatePolynomial<T, 3>{};
     Q[3] = 1;
     Q[2] = -a2;
     Q[1] = a1 * a3 - 4 * a0;

@@ -116,7 +116,7 @@ auto NisterFivePointAlgorithm::inplace_gauss_jordan_elimination(
 
 auto NisterFivePointAlgorithm::form_resultant_matrix(
     const Matrix<double, 6, 10>& B_mat,
-    Univariate::UnivariatePolynomial<double> B[3][3]) const -> void
+    UnivariatePolynomial<double> B[3][3]) const -> void
 {
   auto to_poly = [this](const auto& row_vector) {
     auto p = Polynomial<double>{};
@@ -150,7 +150,6 @@ auto NisterFivePointAlgorithm::form_resultant_matrix(
 #endif
 
   // 3. [x, y, 1]^T is a non-zero null vector in Null(B).
-  using Univariate::UnivariatePolynomial;
   B[0][0] = UnivariatePolynomial<double>{3};
   B[0][1] = UnivariatePolynomial<double>{3};
   B[0][2] = UnivariatePolynomial<double>{4};
@@ -246,7 +245,7 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
   SARA_DEBUG << "Determinant expansion..." << endl;
 #endif
   const auto B_mat = U.bottomRightCorner(6, 10);
-  Univariate::UnivariatePolynomial<double> B[3][3];
+  UnivariatePolynomial<double> B[3][3];
   form_resultant_matrix(B_mat, B);
 
   const auto p0 = B[0][1] * B[1][2] - B[0][2] * B[1][1];

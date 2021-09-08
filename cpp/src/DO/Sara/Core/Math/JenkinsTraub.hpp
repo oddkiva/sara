@@ -11,7 +11,7 @@
 #include <memory>
 
 
-namespace DO::Sara::Univariate {
+namespace DO::Sara {
 
   //! @addtogroup Math
   //! @{
@@ -258,4 +258,4 @@ namespace DO::Sara::Univariate {
 
   //! @}
 
-} /* namespace DO::Sara::Univariate */
+}  // namespace DO::Sara

@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(TestPolynomialRoots)
 
 BOOST_AUTO_TEST_CASE(test_quadratic_polynomial_roots)
 {
-  Univariate::UnivariatePolynomial<double, 2> P{-1., 0., 2.};
+  UnivariatePolynomial<double, 2> P{-1., 0., 2.};
 
   bool real_roots;
   complex<double> x1, x2;
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_quadratic_polynomial_roots)
 
 BOOST_AUTO_TEST_CASE(test_cubic_polynomial_roots)
 {
-  Univariate::UnivariatePolynomial<double, 3> P{-6., 11., -6., 1.};
+  UnivariatePolynomial<double, 3> P{-6., 11., -6., 1.};
 
   // Roots are 1, 2 and 3.
   complex<double> x1, x2, x3;
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_cubic_polynomial_roots)
 BOOST_AUTO_TEST_CASE(test_quartic_polynomial_roots)
 {
   // Roots are 1, 2, 3 and 4.
-  Univariate::UnivariatePolynomial<double, 4> P{24., -50., 35., -10., 1.};
+  UnivariatePolynomial<double, 4> P{24., -50., 35., -10., 1.};
 
   complex<double> x1, x2, x3, x4;
   roots(P, x1, x2, x3, x4);

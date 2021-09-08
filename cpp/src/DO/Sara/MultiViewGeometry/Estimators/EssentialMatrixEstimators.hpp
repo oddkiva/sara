@@ -95,9 +95,8 @@ namespace DO::Sara {
         -> void;
 
     DO_SARA_EXPORT
-    auto
-    form_resultant_matrix(const Matrix<double, 6, 10>&,
-                          Univariate::UnivariatePolynomial<double, -1>[3][3]) const
+    auto form_resultant_matrix(const Matrix<double, 6, 10>&,
+                               UnivariatePolynomial<double, -1>[3][3]) const
         -> void;
 
     DO_SARA_EXPORT
