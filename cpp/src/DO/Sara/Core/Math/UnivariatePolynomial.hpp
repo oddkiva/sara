@@ -181,6 +181,7 @@ namespace DO::Sara::Univariate {
     }
     //! @}
 
+  protected:
     array_type _coeff;
   };
 
@@ -223,7 +224,6 @@ namespace DO::Sara::Univariate {
       std::copy(list.begin(), list.end(), _coeff.begin());
     }
     //! @}
-
   };
 
   //! @brief Univariate polynomial class with degree known at runtime.
@@ -231,11 +231,12 @@ namespace DO::Sara::Univariate {
   class UnivariatePolynomial<T, -1> : public UnivariatePolynomialBase<std::vector<T>>
   {
     using base_type = UnivariatePolynomialBase<std::vector<T>>;
+    using base_type::_coeff;
 
   public:
-    using coefficient_type = T;
-    using base_type::_coeff;
     using base_type::degree;
+    using array_type = typename base_type::array_type;
+    using coefficient_type = typename base_type::coefficient_type;
 
     //! @{
     //! @brief Constructors.
@@ -244,6 +245,11 @@ namespace DO::Sara::Univariate {
     inline explicit UnivariatePolynomial(int degree)
     {
       resize(degree);
+    }
+
+    inline explicit UnivariatePolynomial(const array_type& coeff)
+      : base_type{coeff}
+    {
     }
     //! @}
 
@@ -372,8 +378,8 @@ namespace DO::Sara::Univariate {
     template <typename T>
     auto pow(int e) const -> UnivariatePolynomial<T, -1>
     {
-      auto P = UnivariatePolynomial<T, -1>{};
-      P._coeff = std::vector<T>(exponent * e + 1, 0);
+      auto P = UnivariatePolynomial<T, -1>{exponent * e};
+      P.fill(0);
       P[exponent * e] = 1;
       return P;
     }
@@ -381,8 +387,8 @@ namespace DO::Sara::Univariate {
     template <typename T>
     inline auto to_polynomial() const -> UnivariatePolynomial<T, -1>
     {
-      auto P = UnivariatePolynomial<T, -1>{};
-      P._coeff = std::vector<T>(exponent + 1, T(0));
+      auto P = UnivariatePolynomial<T, -1>{exponent};
+      P.fill(0);
       P[exponent] = T(1);
       return P;
     }
@@ -397,10 +403,14 @@ namespace DO::Sara::Univariate {
   template <typename T>
   auto operator+(const Monomial& a, const T& b)
   {
-    auto res = UnivariatePolynomial<T, -1>{};
-    res._coeff = std::vector<T>(a.exponent + 1, 0);
-    res._coeff[a.exponent] = 1.;
-    res._coeff[0] = b;
+    auto res = UnivariatePolynomial<T, -1>(a.exponent);
+    if (a.exponent != 0)
+    {
+      res[a.exponent] = 1;
+      res[0] = b;
+    }
+    else
+      res[a.exponent] = 1 + b;
     return res;
   }
 
@@ -415,7 +425,7 @@ namespace DO::Sara::Univariate {
   {
     auto res = UnivariatePolynomial<T, -1>{};
     res.resize(b.exponent);
-    res._coeff[b.exponent] = a;
+    res[b.exponent] = a;
     return res;
   }
 
@@ -429,7 +439,7 @@ namespace DO::Sara::Univariate {
   auto operator*(const T& a, const UnivariatePolynomial<T, N>& b)
   {
     auto res = b;
-    for (auto i = 0u; i < res._coeff.size(); ++i)
+    for (auto i = 0; i <= res.degree(); ++i)
       res[i] *= a;
     return res;
   }

@@ -760,8 +760,8 @@ namespace DO::Sara::Univariate {
 
     // Quickly deflate the polynomial.
     auto coeff = std::vector<double>{};
-    coeff.insert(coeff.end(), P._coeff.begin() + degree, P._coeff.end());
-    P._coeff.swap(coeff);
+    coeff.insert(coeff.end(), P.begin() + degree, P.end());
+    P = UnivariatePolynomial<double>{coeff};
 
     // Divide the polynomial by its leading coefficients.
     P = P / P[P.degree()];
@@ -805,7 +805,7 @@ namespace DO::Sara::Univariate {
              double root_abs_tol)
     -> std::vector<std::complex<double>>
   {
-    for (const auto& c: P._coeff)
+    for (const auto& c: P)
       if (std::isnan(c) || std::isinf(c))
         throw std::runtime_error{"Polynomial contains nan or inf coefficients!"};
 
