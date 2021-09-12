@@ -217,11 +217,9 @@ void myeigwithknown0(const Eigen::Matrix<T, 3, 3>& M, Eigen::Matrix<T, 3, 3>& E,
   P[0] = (sara::square(tr_M) - tr_M2) * T(0.5);
 
   // TODO: optimize this.
-  std::complex<T> e1c, e2c;
-  bool are_real = false;
-  sara::roots(P, e1c, e2c, are_real);
-  L(0) = std::real(e1c);
-  L(1) = std::real(e2c);
+  const auto are_real = sara::compute_quadratic_real_roots(P, L(0), L(1));
+  if (!are_real)
+    throw std::runtime_error{"Roots are not real!"};
 
   // Sort the eigenvalues as in the paper.
   if (std::abs(L(1)) > std::abs(L(0)))
@@ -280,13 +278,8 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     auto E1 = Eigen::Matrix3d{};
     auto S1 = Eigen::Vector3d{};
 
-// #define EIGEN_IMPL
-#if defined(PERSSON_IMPL)
-    // NOT ROBUST BECAUSE THE METHOD CAN STILL DIVIDE BY 0.
-    eigwithknown0(M, E, S1);
-    SARA_DEBUG << "E1 = \n" << E1 << std::endl;
-    SARA_DEBUG << "S1 = " << S1.transpose() << std::endl;
-#elif defined(EIGEN_IMPL)
+#define EIGEN_IMPL
+#if defined(EIGEN_IMPL)
     // More robust, much simpler and also direct.
     auto eigenSolver = Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d>{};
     eigenSolver.computeDirect(M);

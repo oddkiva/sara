@@ -11,83 +11,178 @@
 
 #pragma once
 
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/Core/Math/UnivariatePolynomial.hpp>
 
 
 namespace DO::Sara {
 
-  //! @brief Calculates the roots of the quadratic polynomial.
-  //! Implemented as described in:
-  //! http://people.csail.mit.edu/bkph/articles/Quadratics.pdf
-  template <typename T>
-  inline auto compute_quadratic_roots(T a, T b, T c)
-      -> std::array<std::complex<T>, 2>
-  {
-    const auto sqrt_delta = std::sqrt(std::complex<double>(b * b - 4 * a * c));
-
-    if (b >= 0)
-      return {(-b - sqrt_delta) / (2 * a),  //
-              (2 * c) / (-b - sqrt_delta)};
-    else
-      return {(2 * c) / (-b + sqrt_delta),  //
-              (-b + sqrt_delta) / (2 * a)};
-  }
-
-  template <typename T>
-  inline auto compute_quadratic_real_roots(T a, T b, T c) -> std::array<T, 2>
-  {
-    const auto delta = b * b - 4 * a * c;
-    if (delta < 0)
-      return {
-          std::numeric_limits<T>::quiet_NaN(),
-          std::numeric_limits<T>::quiet_NaN(),
-      };
-
-    const auto sqrt_delta = std::sqrt(delta);
-    if (b >= 0)
-      return {(-b - sqrt_delta) / (2 * a),  //
-              (2 * c) / (-b - sqrt_delta)};
-    else
-      return {(2 * c) / (-b + sqrt_delta),  //
-              (-b + sqrt_delta) / (2 * a)};
-  }
-
+  //! @brief Calculate the discriminant of the quadratic polynomial.
   template <typename T, int N>
-  void roots(const UnivariatePolynomial<T, N>& P, std::complex<T>& x1,
-             std::complex<T>& x2, bool& real_roots)
+  inline auto discriminant(const UnivariatePolynomial<T, N>& P) -> T
   {
+    static_assert(N == -1 || N == 2, "Error: the polynomial must be of degree 2!");
     if constexpr (N == -1)
-    {
       if (P.degree() != 2)
-        throw std::runtime_error{"Error: the polynomial must be of degree 2!"};
-    }
-    else
-      static_assert(N == 2, "Error: the polynomial must be of degree 2!");
+        throw std::runtime_error{"Error: polynomial must be of degree 2"};
 
     const auto& a = P[2];
     const auto& b = P[1];
     const auto& c = P[0];
-    auto delta = b * b - 4 * a * c;
-    x1 = (-b - sqrt(std::complex<T>(delta))) / (2 * a);
-    x2 = (-b + sqrt(std::complex<T>(delta))) / (2 * a);
-    if (delta >= 0)
-      real_roots = true;
+    return square(b) - 4 * a * c;
+  };
+
+  //! @brief Calculate the real roots of the quadratic polynomial.
+  //!
+  //! Implemented as described in:
+  //! http://people.csail.mit.edu/bkph/articles/Quadratics.pdf
+  //!
+  //! Return true if the polynomial roots are real, false otherwise.
+  template <typename T>
+  inline auto compute_quadratic_real_roots(const UnivariatePolynomial<T, 2>& P,
+                                           T& x1, T& x2) -> bool
+  {
+    const auto delta = discriminant(P);
+    if (delta < 0)
+      return false;
+
+    const auto& a = P[2];
+    const auto& b = P[1];
+    const auto& c = P[0];
+    const auto sqrt_delta = std::sqrt(delta);
+    if (b >= 0)
+    {
+      x1 = (-b - sqrt_delta) / (2 * a);
+      x2 = (2 * c) / (-b - sqrt_delta);
+    }
     else
-      real_roots = false;
+    {
+      x1 = (2 * c) / (-b + sqrt_delta);
+      x2 = (-b + sqrt_delta) / (2 * a);
+    }
+
+    return true;
   }
 
-  // Discriminant precision: 1e-3.
+  //! @brief Calculate the real roots of the cubic polynomial.
+  //!
+  //! Implemented as described in:
+  //! http://people.csail.mit.edu/bkph/articles/Quadratics.pdf
+  //!
+  //! Return true if the roots are all real, false otherwise.
+  //! At least one root is real.
+  template <typename T, int N>
+  inline auto compute_cubic_real_roots(const UnivariatePolynomial<T, N>& P,
+                                       T& x1, T& x2, T& x3) -> bool
+  {
+    static_assert(N == -1 || N == 3, "Error: the polynomial must be of degree 3!");
+    if constexpr (N == -1)
+    {
+      if (P.degree() != 3)
+        throw std::runtime_error{"Error: the polynomial must be of degree 2!"};
+    }
+
+    const auto a = static_cast<T>(1);
+    const auto b = P[2] / P[3];
+    const auto c = P[1] / P[3];
+    const auto d = P[0] / P[3];
+    static_assert(std::is_same_v<decltype(a), const T>);
+    static_assert(std::is_same_v<decltype(b), const T>);
+    static_assert(std::is_same_v<decltype(c), const T>);
+    static_assert(std::is_same_v<decltype(d), const T>);
+
+    // Cardano's formula.
+    const auto p = (3 * c - b * b) / 3;
+    const auto q = (-9 * c * b + 27 * d + 2 * b * b * b) / 27;
+    const auto delta = q * q + 4 * p * p * p / 27;
+    static_assert(std::is_same_v<decltype(p), const T>);
+    static_assert(std::is_same_v<decltype(q), const T>);
+    static_assert(std::is_same_v<decltype(delta), const T>);
+
+    if (delta < -std::numeric_limits<T>::epsilon())
+    {
+      constexpr auto pi = static_cast<T>(M_PI);
+      const auto theta = std::acos(-q / 2 * std::sqrt(27 / (-p * p * p))) / 3;
+      x1 = 2 * std::sqrt(-p / 3) * std::cos(theta);
+      x2 = 2 * std::sqrt(-p / 3) * std::cos(theta + 2 * pi / 3);
+      x3 = 2 * std::sqrt(-p / 3) * std::cos(theta + 4 * pi / 3);
+
+      x1 -= b / (3 * a);
+      x2 -= b / (3 * a);
+      x3 -= b / (3 * a);
+
+      return true;
+    }
+    else if (delta <= std::numeric_limits<T>::epilon())
+    {
+      x1 = 3 * q / p;
+      x2 = -3 * q / (2 * p);
+
+      x1 -= b / (3 * a);
+      x2 -= b / (3 * a);
+      x3 = x2;
+
+      return true;
+    }
+    else
+    {
+      const auto r1 = (-q + std::sqrt(delta)) / 2;
+      const auto r2 = (-q - std::sqrt(delta)) / 2;
+      constexpr auto one_third = 1 / T(3);
+      const auto u =
+          r1 < 0 ? -std::pow(-r1, one_third) : std::pow(r1, one_third);
+      const auto v =
+          r2 < 0 ? -std::pow(-r2, one_third) : std::pow(r2, one_third);
+
+      x1 = u + v;
+      x1 -= b / (3 * a);
+      return false;
+    }
+  }
+
+  //! @brief Calculates the roots of the quadratic polynomial.
+  //!
+  //! Implemented as described in:
+  //! http://people.csail.mit.edu/bkph/articles/Quadratics.pdf
+  template <typename T, int N>
+  void roots(const UnivariatePolynomial<T, N>& P, std::complex<T>& x1,
+             std::complex<T>& x2)
+  {
+    static_assert(N == -1 || N == 2, "Error: the polynomial must be of degree 2!");
+    if constexpr (N == -1)
+      if (P.degree() != 2)
+        throw std::runtime_error{"Error: polynomial must be of degree 2"};
+
+    const auto sqrt_delta = std::sqrt(std::complex<T>(discriminant(P)));
+
+    const auto& a = P[2];
+    const auto& b = P[1];
+    const auto& c = P[0];
+    if (b >= 0)
+    {
+      x1 = (-b - sqrt_delta) / (2 * a);
+      x2 = (2 * c) / (-b - sqrt_delta);
+    }
+    else
+    {
+      x1 = (2 * c) / (-b + sqrt_delta);
+      x2 = (-b + sqrt_delta) / (2 * a);
+    }
+
+  }
+
+  //! @brief Calculates the roots of the cubic polynomial.
+  //! Discriminant precision: 1e-3.
   template <typename T, int N>
   void roots(const UnivariatePolynomial<T, N>& P, std::complex<T>& z1,
              std::complex<T>& z2, std::complex<T>& z3, T eps = T(1e-3))
   {
+    static_assert(N == -1 || N == 3, "Error: the polynomial must be of degree 3!");
     if constexpr (N == -1)
     {
       if (P.degree() != 3)
         throw std::runtime_error{"Error: the polynomial must be of degree 3!"};
     }
-    else
-      static_assert(N == 3, "Error: the polynomial must be of degree 3!");
 
     const auto a = static_cast<T>(1);
     const auto b = P[2] / P[3];
@@ -141,19 +236,20 @@ namespace DO::Sara {
     z3 -= b / (3 * a);
   }
 
-  // Involves the precision of the cubic equation solver: (1e-3.)
+  //! @brief Calculates the roots of the quartic polynomial.
+  //!
+  //! Involves the precision of the cubic equation solver: (1e-3.)
   template <typename T, int N>
   void roots(const UnivariatePolynomial<T, N>& P,
              std::complex<T>& z1, std::complex<T>& z2, std::complex<T>& z3,
              std::complex<T>& z4, T eps = T(1e-6))
   {
+    static_assert(N == -1 || N == 4, "Error: the polynomial must be of degree 4!");
     if constexpr (N == -1)
     {
       if (P.degree() != 4)
         throw std::runtime_error{"Error: the polynomial must be of degree 4!"};
     }
-    else
-      static_assert(N == 4, "Error: the polynomial must be of degree 4!");
 
     const auto a4 = static_cast<T>(1);
     const auto a3 = P[3] / P[4];

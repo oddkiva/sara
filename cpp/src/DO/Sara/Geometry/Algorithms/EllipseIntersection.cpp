@@ -108,16 +108,12 @@ namespace DO { namespace Sara {
 
     if (x_denom == 0)
     {
-      auto x1s = std::complex<double>{};
-      auto x2s = std::complex<double>{};
-      auto real_root_s = false;
-      roots(sigma, x1s, x2s, real_root_s);
+      auto x1 = double{};
+      auto x2 = double{};
+      const auto real_root = compute_quadratic_real_roots(sigma, x1, x2);
 
-      if (!real_root_s)
+      if (!real_root)
         return;
-
-      const auto x1 = std::real(x1s);
-      const auto x2 = std::real(x2s);
 
       if (intersection_point_is_in_both_ellipse(x1, y))
         intersections.emplace_back(x1, y);
