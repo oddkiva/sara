@@ -29,10 +29,9 @@ namespace sara = DO::Sara;
 auto make_cube_vertices()
 {
   auto cube = Eigen::MatrixXd{4, 8};
-  cube.topRows(3) <<
-      0, 1, 0, 1, 0, 1, 0, 1,  //
-      0, 0, 1, 1, 0, 0, 1, 1,  //
-      0, 0, 0, 0, 1, 1, 1, 1;  //
+  cube.topRows(3) << 0, 1, 0, 1, 0, 1, 0, 1,  //
+      0, 0, 1, 1, 0, 0, 1, 1,                 //
+      0, 0, 0, 0, 1, 1, 1, 1;                 //
   cube.row(3).fill(1);
 
   // Recenter the cube.
@@ -96,17 +95,15 @@ inline auto tensor_view(const Eigen::Matrix<T, M, N>& m)
 BOOST_AUTO_TEST_CASE(test_flipud)
 {
   auto A = Eigen::Matrix3i{};
-  A <<
-    1, 2, 3, //
-    4, 5, 6, //
-    7, 8, 9;
+  A << 1, 2, 3,  //
+      4, 5, 6,   //
+      7, 8, 9;
 
   const auto A_flipped = sara::flipud(A);
   auto A_flipped_true = Eigen::Matrix3i{};
-  A_flipped_true <<
-    7, 8, 9, //
-    4, 5, 6, //
-    1, 2, 3;
+  A_flipped_true << 7, 8, 9,  //
+      4, 5, 6,                //
+      1, 2, 3;
 
   BOOST_CHECK(A_flipped_true == A_flipped);
 }
@@ -114,17 +111,15 @@ BOOST_AUTO_TEST_CASE(test_flipud)
 BOOST_AUTO_TEST_CASE(test_fliplr)
 {
   auto A = Eigen::Matrix3i{};
-  A <<
-    1, 2, 3, //
-    4, 5, 6, //
-    7, 8, 9;
+  A << 1, 2, 3,  //
+      4, 5, 6,   //
+      7, 8, 9;
 
   const auto A_flipped = sara::fliplr(A);
   auto A_flipped_true = Eigen::Matrix3i{};
-  A_flipped_true <<
-    3, 2, 1, //
-    6, 5, 4, //
-    9, 8, 7;
+  A_flipped_true << 3, 2, 1,  //
+      6, 5, 4,                //
+      9, 8, 7;
   BOOST_CHECK(A_flipped_true == A_flipped);
 }
 
@@ -187,6 +182,61 @@ BOOST_AUTO_TEST_CASE(test_hartley_zisserman)
     check(i);
 }
 
+
+template <class T>
+void myeigwithknown0(const Eigen::Matrix<T, 3, 3>& M, Eigen::Matrix<T, 3, 3>& E,
+                     Eigen::Matrix<T, 3, 1>& L)
+{
+  // One eigenvalue is 0, so:
+  L(2) = 0;
+
+  // Solve the polynomial characteristic in dimension 3:
+  //
+  //   X^3 - tr(M) X^2 + ((tr(M)^2 - tr(M^2)) / 2) X + det(M) = 0
+  //
+  // See for example:
+  // https://mathworld.wolfram.com/CharacteristicPolynomial.html
+  //
+  //
+  // Because one eigenvalue is 0, so det(M) = 0, we just need to solve the
+  // quadratic polynomial:
+  //
+  //   X^2 - tr(M) X + ((tr(M)^2 - tr(M^2)) / 2) = 0
+
+  // Let us calculate the auxiliary variables.
+  const auto tr_M = M.trace();
+  // Because M is symmetric, tr(M^2) can be calculated as follows:
+  const auto tr_M2 = M.col(0).array().square().sum() +
+                     M.col(1).array().square().sum() +
+                     M.col(2).array().square().sum();
+
+  // Now form the quadratic polynomial.
+  auto P = sara::UnivariatePolynomial<T, 2>{};
+  P[2] = 1;
+  P[1] = -tr_M;
+  P[0] = (sara::square(tr_M) - tr_M2) * T(0.5);
+
+  // TODO: optimize this.
+  std::complex<T> e1c, e2c;
+  bool are_real = false;
+  sara::roots(P, e1c, e2c, are_real);
+  L(0) = std::real(e1c);
+  L(1) = std::real(e2c);
+
+  // Sort the eigenvalues as in the paper.
+  if (std::abs(L(1)) > std::abs(L(0)))
+    std::swap(L(0), L(1));
+
+  SARA_DEBUG << "Eigenvalues = " << L.transpose() << std::endl;
+
+  // Now let us turn our attention to the eigenvectors.
+  // Let us solve (M - λ I) x = 0.
+  //
+  // We will reuse the formula from this paper:
+  //   https://hal.archives-ouvertes.fr/hal-01501221/document
+  // CAVEAT: it still does not prevent us from dividing by zero...
+}
+
 BOOST_AUTO_TEST_CASE(test_lambda_twist)
 {
   const auto xa = std::array{0.0, 0.1, 0.3, 0.0};
@@ -209,7 +259,59 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     std::cout << "* Yc column norms " << std::endl;
     std::cout << "  column_norm(Yc) = " << Yc.colwise().norm() << std::endl;
 
-    auto lambda_twist = sara::LambdaTwist<double>{Xw.topLeftCorner<3, 3>(),
-                                                  Yc.leftCols<3>()};
+    auto lambda_twist =
+        sara::LambdaTwist<double>{Xw.topLeftCorner<3, 3>(), Yc.leftCols<3>()};
+
+    auto E = Eigen::Matrix3d{};
+    auto theta = static_cast<double>(M_PI) / 6;
+    // clang-format off
+    E <<
+      std::cos(theta), -std::sin(theta), 0,
+      std::sin(theta),  std::cos(theta), 0,
+                    0,                0, 1;
+    // clang-format on
+    SARA_DEBUG << "E**2 =\n" << E.array().square() << std::endl;
+
+    auto S = Eigen::Vector3d{1.1, -0.6, 0};
+
+    const Eigen::Matrix3d M = E * S.asDiagonal() * E.transpose();
+    SARA_DEBUG << "M = \n" << M << std::endl;
+
+    auto E1 = Eigen::Matrix3d{};
+    auto S1 = Eigen::Vector3d{};
+
+// #define EIGEN_IMPL
+#if defined(PERSSON_IMPL)
+    // NOT ROBUST BECAUSE THE METHOD CAN STILL DIVIDE BY 0.
+    eigwithknown0(M, E, S1);
+    SARA_DEBUG << "E1 = \n" << E1 << std::endl;
+    SARA_DEBUG << "S1 = " << S1.transpose() << std::endl;
+#elif defined(EIGEN_IMPL)
+    // More robust, much simpler and also direct.
+    auto eigenSolver = Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d>{};
+    eigenSolver.computeDirect(M);
+    std::cout << "Eigenvalues = " << eigenSolver.eigenvalues().transpose()
+              << std::endl;
+    std::cout << "Eigenvectors = " << std::endl
+              << eigenSolver.eigenvectors() << std::endl;
+
+    // The first eigenvalue is always negative, the second is zero, and the
+    // third one is positive.
+    // The right-handedness is preserved if we rotate the column-vectors.
+    E1.col(0) = eigenSolver.eigenvectors().col(2);
+    E1.col(1) = eigenSolver.eigenvectors().col(0);
+    E1.col(2) = eigenSolver.eigenvectors().col(1);
+
+    S1(0) = eigenSolver.eigenvalues()(2);
+    S1(1) = eigenSolver.eigenvalues()(0);
+    S1(2) = eigenSolver.eigenvalues()(1);
+
+    // Yes it is a bit slower, but this should be OK.
+#else  // MINE
+    myeigwithknown0(M, E, S1);
+#endif
+
+    SARA_DEBUG << "E1 = \n" << E1 << std::endl;
+    SARA_DEBUG << "S1 = " << S1.transpose() << std::endl;
   }
 }

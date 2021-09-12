@@ -40,10 +40,12 @@ namespace DO::Sara {
       : x{scene_points}
       , y{backprojected_rays}
     {
+#ifdef RUN_ALL
       calculate_auxiliary_variables();
       solve_cubic_polynomial();
       solve_for_lambda();
-      // recover_all_poses();
+      recover_all_poses();
+#endif
     }
 
     inline auto calculate_auxiliary_variables() -> void
@@ -180,23 +182,45 @@ namespace DO::Sara {
         pose_k.push_back(recover_pose(lambda));
     }
 
-    inline auto get_eigen_vector(const RowVec9& m, const T r) -> Vec3
-    {
-      const auto c = square(r) + m(0) * m(4) - r * (m(0) + m(4)) - square(m(1));
-      const auto a1 = (r * m(2) + m(1) * m(5) - m(2) * m(4)) / c;
-      const auto a2 = (r * m(5) + m(1) * m(2) - m(0) * m(5)) / c;
-      const Vec3 v = Vec3{a1, a2, 1}.normalized();
-      return v;
-    }
-
     inline auto get_eigen_vector(const Mat3& m, const T r) -> Vec3
     {
-      const auto c = square(r) + m(0, 0) * m(1, 1) -  //
-                     r * (m(0, 0) * m(1, 1)) -        //
-                     square(m(0, 1));
-      const auto a1 = (r * m(0, 2) + m(0, 1) * m(1, 2) - m(0, 2) * m(1, 1)) / c;
-      const auto a2 = (r * m(1, 2) + m(0, 0) * m(0, 2) - m(0, 0) * m(1, 2)) / c;
-      const Vec3 v = Vec3{a1, a2, 1}.normalized();
+      // const auto c = square(r) + m(0, 0) * m(1, 1) -  //
+      //                r * (m(0, 0) * m(1, 1)) -        //
+      //                square(m(0, 1));
+      // const auto a1 = (r * m(0, 2) + m(0, 1) * m(1, 2) - m(0, 2) * m(1, 1)) / c;
+      // const auto a2 = (r * m(1, 2) + m(0, 1) * m(0, 2) - m(0, 0) * m(1, 2)) / c;
+
+      const auto x01_squared = m(0, 1) * m(0, 1);
+      const auto prec_0 = m(0, 1) * m(1, 2) - m(0, 2) * m(1, 1);
+      const auto prec_1 = m(0, 1) * m(0, 2) - m(0, 0) * m(1, 2);
+
+      SARA_DEBUG << "m =\n" << m << std::endl;
+      SARA_CHECK(r);
+      SARA_CHECK(x01_squared);
+      SARA_CHECK(prec_0);
+      SARA_CHECK(prec_1);
+
+      const auto e = r;
+      const auto mx0011 = -m(0, 0) * m(1, 1);
+
+      SARA_CHECK(e);
+      SARA_CHECK(e * (m(0, 0) + m(1, 1)));
+      SARA_CHECK(mx0011);
+      SARA_CHECK(e * e);
+      SARA_CHECK(x01_squared);
+      SARA_CHECK(e * (m(0, 0) + m(1, 1)) + mx0011);
+      SARA_CHECK(e * (m(0, 0) + m(1, 1)) + mx0011 - e * e);
+      SARA_CHECK(e * (m(0, 0) + m(1, 1)) + mx0011 - e * e + x01_squared);
+
+      const auto c = (e * (m(0, 0) + m(1, 1)) + mx0011 - e * e + x01_squared);
+      SARA_CHECK(c);
+
+      const auto a1 = -(e * m(0, 2) + prec_0) / c;
+      const auto a2 = -(e * m(1, 2) + prec_1) / c;
+      SARA_CHECK(a1);
+      SARA_CHECK(a2);
+      const Vec3 v = Vec3{a1, a2, 1};
+
       return v;
     }
 
@@ -204,7 +228,7 @@ namespace DO::Sara {
         -> void
     {
       // lines 8-9
-      const Vec3 b2 = M.col(1).cross(M.col(2)).normalized();
+      const Vec3 b2 = M.col(0).cross(M.col(1)).normalized();
       SARA_CHECK(b2.transpose());
 
       // Ignore line 10 by not using the matrix M instead of its vectorized form
@@ -214,37 +238,27 @@ namespace DO::Sara {
       // Form the quadratic polynomial as described in lines 11-12.
       // but the original matrix M.
       auto p = UnivariatePolynomial<T, 2>{};
-#ifdef NON_VECTORIZED_MATRIX
       p[2] = 1;
       p[1] = -M(0, 0) - M(1, 1) - M(2, 2);
       p[0] = -square(M(0, 1)) - square(M(0, 2)) - square(M(1, 2)) +
-             M(0, 0) * M(1, 1) + M(2, 2) + M(1, 2) * M(2, 2);
-      SARA_CHECK(M);
-#else
-      SARA_DEBUG << "VECTORIZED IMPLEMENTATION" << std::endl;
-      const RowVec9 m = (RowVec9{} << M.row(0), M.row(1), M.row(2)).finished();
-      p[2] = 1;
-      p[1] = -m(0) - m(4) - m(8);
-      p[0] = -square(m(1)) - square(m(2)) - square(m(5)) + m(0) * m(4) + m(8) +
-             m(4) * m(8);
-      SARA_CHECK(m);
-#endif
+             M(0, 0) * (M(1, 1) + M(2, 2)) + M(1, 2) * M(2, 2);
+      SARA_CHECK(p);
 
       // Line 13: compute the real roots if they exist.
       auto are_reals = bool{};
-      auto sigma_complex = std::array<std::complex<T>, 2>{};
+      auto sigma_complex = Eigen::Matrix<std::complex<T>, 2, 1>{};
       roots(p, sigma_complex[0], sigma_complex[1], are_reals);
+      SARA_CHECK(sigma_complex.transpose());
       if (are_reals)
-        sigma = {std::real(sigma_complex[0]), std::real(sigma_complex[1])};
+        s = {std::real(sigma_complex[0]), std::real(sigma_complex[1])};
+      SARA_CHECK(s[0]);
+      SARA_CHECK(s[1]);
 
         // Line 14-15.
-#ifdef NON_VECTORIZED_MATRIX
       const auto b0 = get_eigen_vector(M, s[0]);
       const auto b1 = get_eigen_vector(M, s[1]);
-#else
-      const auto b0 = get_eigen_vector(m, s[0]);
-      const auto b1 = get_eigen_vector(m, s[1]);
-#endif
+      SARA_CHECK(b0.transpose());
+      SARA_CHECK(b1.transpose());
 
       // Line 16-19.
       if (std::abs(s[0]) > std::abs(s[1]))
