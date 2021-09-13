@@ -166,54 +166,6 @@ namespace DO::Sara {
         pose_k.push_back(recover_pose(lambda));
     }
 
-    //! @brief Calculate the eigenvector of a 3x3 matrix associated to the
-    //! eigenvalue r.
-    /*!
-     *  I don't like this implementation because it is not very robust
-     *  numerically: it does not check whether we are dividing by zero...
-     */
-    inline auto get_eigenvector(const Mat3& m, const T r) -> Vec3
-    {
-      // const auto c = square(r) + m(0, 0) * m(1, 1) -  //
-      //                r * (m(0, 0) * m(1, 1)) -        //
-      //                square(m(0, 1));
-      // const auto a1 = (r * m(0, 2) + m(0, 1) * m(1, 2) - m(0, 2) * m(1, 1)) / c;
-      // const auto a2 = (r * m(1, 2) + m(0, 1) * m(0, 2) - m(0, 0) * m(1, 2)) / c;
-
-      const auto x01_squared = m(0, 1) * m(0, 1);
-      const auto prec_0 = m(0, 1) * m(1, 2) - m(0, 2) * m(1, 1);
-      const auto prec_1 = m(0, 1) * m(0, 2) - m(0, 0) * m(1, 2);
-
-      SARA_DEBUG << "m =\n" << m << std::endl;
-      SARA_CHECK(r);
-      SARA_CHECK(x01_squared);
-      SARA_CHECK(prec_0);
-      SARA_CHECK(prec_1);
-
-      const auto e = r;
-      const auto mx0011 = -m(0, 0) * m(1, 1);
-
-      SARA_CHECK(e);
-      SARA_CHECK(e * (m(0, 0) + m(1, 1)));
-      SARA_CHECK(mx0011);
-      SARA_CHECK(e * e);
-      SARA_CHECK(x01_squared);
-      SARA_CHECK(e * (m(0, 0) + m(1, 1)) + mx0011);
-      SARA_CHECK(e * (m(0, 0) + m(1, 1)) + mx0011 - e * e);
-      SARA_CHECK(e * (m(0, 0) + m(1, 1)) + mx0011 - e * e + x01_squared);
-
-      const auto c = (e * (m(0, 0) + m(1, 1)) + mx0011 - e * e + x01_squared);
-      SARA_CHECK(c);
-
-      const auto a1 = -(e * m(0, 2) + prec_0) / c;
-      const auto a2 = -(e * m(1, 2) + prec_1) / c;
-      SARA_CHECK(a1);
-      SARA_CHECK(a2);
-      const Vec3 v = Vec3{a1, a2, 1};
-
-      return v;
-    }
-
     //! @brief Calculate the eigen decomposition of a 3x3 matrix with a zero
     //! eigenvalue as described in the paper.
     /*!
@@ -222,7 +174,7 @@ namespace DO::Sara {
      *  1. Calculate the eigenvalues by solving the characteristic polynomial.
      *  2. Calculate the eigenvectors from the eigenvalues.
      */
-    inline auto eig3x3xknown0(const Mat3& M, Mat3& B, Vec3& s)
+    inline auto eig3x3known0(const Mat3& M, Mat3& B, Vec3& s)
         -> void
     {
       // Calculate the eigen values by solving the polynomial characteristic in
@@ -241,19 +193,13 @@ namespace DO::Sara {
       //
       //   X^2 - tr(M) X + ((tr(M)^2 - tr(M^2)) / 2) = 0
       //
-      // Let us calculate the auxiliary variables.
-      const auto tr_M = M.trace();
-      // Because M is symmetric, tr(M^2) can be calculated as follows:
-      const auto tr_M2 = M.col(0).array().square().sum() +
-                         M.col(1).array().square().sum() +
-                         M.col(2).array().square().sum();
-
-      // Solve the degenerate characteristic polynomial, since det(M) = 0
       auto p = UnivariatePolynomial<T, 2>{};
       p[2] = 1;
-      p[1] = -tr_M;
-      p[0] = (square(tr_M) - tr_M2) * T(0.5);
-      SARA_CHECK(p);
+      p[1] = -M.trace();
+      // (tr(M)^2 - tr(M^2)) / 2 has the following analytical expression.
+      p[0] = (M(0, 0) * M(1, 1) - square(M(0, 1))) +
+             (M(0, 0) * M(2, 2) - square(M(0, 2))) +
+             (M(1, 1) * M(2, 2) - square(M(1, 2)));
 
       // Compute the remaining nonzero eigenvalues (cf. line 13)
       if (!compute_quadratic_real_roots(p, s(0), s(1)))
@@ -261,19 +207,42 @@ namespace DO::Sara {
 
       // Let's swap the eigenvalues as described in the paper once
       // for all. (cf. Line 16-19)
-      if (std::abs(s[0]) > std::abs(s[1]))
+      if (std::abs(s[0]) < std::abs(s[1]))
         std::swap(s(0), s(1));
-      SARA_CHECK(s.transpose());
+
+      auto compute_eigen_vector_0 = [](const Mat3& M, const T eigval) -> Vec3 {
+        const Mat3 A = M - eigval * Mat3::Identity();
+        const auto ri_x_rj = std::array<Vec3, 3>{
+          A.row(0).cross(A.row(1)),
+          A.row(0).cross(A.row(2)),
+          A.row(1).cross(A.row(2))
+        };
+
+        const auto d_ij = std::array{
+          ri_x_rj[0].squaredNorm(),
+          ri_x_rj[1].squaredNorm(),
+          ri_x_rj[2].squaredNorm()
+        };
+
+        const auto best_index = std::max_element(d_ij.begin(), d_ij.end())
+                              - d_ij.begin();
+        SARA_CHECK(best_index);
+
+        const Vec3 eigvec0 = ri_x_rj[best_index] / std::sqrt(d_ij[best_index]);
+        SARA_CHECK(eigvec0.squaredNorm());
+
+        return eigvec0;
+      };
 
       // We calculate the 1st and 2nd eigenvectors (cf. line 14-15).
       // and directly the eigen vectors (we don't need the check in line 16).
-      B.col(0) = get_eigenvector(M, s(0));
-      B.col(1) = get_eigenvector(M, s(1));
+      B.col(0) = compute_eigen_vector_0(M, s(0));
+      // B.col(1) = get_eigenvector(M, s(1));
       // We don't follow line 8-9 to calculate the 3rd eigenvector.
-      // const Vec3 b2 = M.col(0).cross(M.col(1)).normalized();
-      //
       // Instead, let's just use the cross product.
-      const Vec3 b2 = B.col(0).cross(B.col(1));
+      B.col(2) = B.col(0).cross(B.col(1));
+
+      SARA_DEBUG << "B =\n" << B << std::endl;
     }
 
     inline auto calculate_w(T s) const -> std::array<T, 2>

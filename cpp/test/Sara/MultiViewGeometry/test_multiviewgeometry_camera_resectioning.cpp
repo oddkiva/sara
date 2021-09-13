@@ -183,58 +183,6 @@ BOOST_AUTO_TEST_CASE(test_hartley_zisserman)
 }
 
 
-template <class T>
-void myeigwithknown0(const Eigen::Matrix<T, 3, 3>& M, Eigen::Matrix<T, 3, 3>& E,
-                     Eigen::Matrix<T, 3, 1>& L)
-{
-  // One eigenvalue is 0, so:
-  L(2) = 0;
-
-  // Solve the polynomial characteristic in dimension 3:
-  //
-  //   X^3 - tr(M) X^2 + ((tr(M)^2 - tr(M^2)) / 2) X + det(M) = 0
-  //
-  // See for example:
-  // https://mathworld.wolfram.com/CharacteristicPolynomial.html
-  //
-  //
-  // Because one eigenvalue is 0, so det(M) = 0, we just need to solve the
-  // quadratic polynomial:
-  //
-  //   X^2 - tr(M) X + ((tr(M)^2 - tr(M^2)) / 2) = 0
-
-  // Let us calculate the auxiliary variables.
-  const auto tr_M = M.trace();
-  // Because M is symmetric, tr(M^2) can be calculated as follows:
-  const auto tr_M2 = M.col(0).array().square().sum() +
-                     M.col(1).array().square().sum() +
-                     M.col(2).array().square().sum();
-
-  // Now form the quadratic polynomial.
-  auto P = sara::UnivariatePolynomial<T, 2>{};
-  P[2] = 1;
-  P[1] = -tr_M;
-  P[0] = (sara::square(tr_M) - tr_M2) * T(0.5);
-
-  // TODO: optimize this.
-  const auto are_real = sara::compute_quadratic_real_roots(P, L(0), L(1));
-  if (!are_real)
-    throw std::runtime_error{"Roots are not real!"};
-
-  // Sort the eigenvalues as in the paper.
-  if (std::abs(L(1)) > std::abs(L(0)))
-    std::swap(L(0), L(1));
-
-  SARA_DEBUG << "Eigenvalues = " << L.transpose() << std::endl;
-
-  // Now let us turn our attention to the eigenvectors.
-  // Let us solve (M - λ I) x = 0.
-  //
-  // We will reuse the formula from this paper:
-  //   https://hal.archives-ouvertes.fr/hal-01501221/document
-  // CAVEAT: it still does not prevent us from dividing by zero...
-}
-
 BOOST_AUTO_TEST_CASE(test_lambda_twist)
 {
   const auto xa = std::array{0.0, 0.1, 0.3, 0.0};
@@ -278,7 +226,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     auto E1 = Eigen::Matrix3d{};
     auto S1 = Eigen::Vector3d{};
 
-#define EIGEN_IMPL
+// #define EIGEN_IMPL
 #if defined(EIGEN_IMPL)
     // More robust, much simpler and also direct.
     auto eigenSolver = Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d>{};
@@ -301,7 +249,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
 
     // Yes it is a bit slower, but this should be OK.
 #else  // MINE
-    myeigwithknown0(M, E, S1);
+    lambda_twist.eig3x3known0(M, E1, S1);
 #endif
 
     SARA_DEBUG << "E1 = \n" << E1 << std::endl;
