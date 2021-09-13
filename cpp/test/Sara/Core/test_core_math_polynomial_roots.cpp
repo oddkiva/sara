@@ -26,13 +26,18 @@ BOOST_AUTO_TEST_CASE(test_quadratic_polynomial_roots)
 {
   UnivariatePolynomial<double, 2> P{-1., 0., 2.};
 
-  bool real_roots;
   complex<double> x1, x2;
-  roots(P, x1, x2, real_roots);
+  roots(P, x1, x2);
 
-  BOOST_CHECK(real_roots);
   BOOST_CHECK_SMALL(abs(P(x1)), 1e-10);
   BOOST_CHECK_SMALL(abs(P(x2)), 1e-10);
+
+  auto x1r = double{};
+  auto x2r = double{};
+  const auto roots_are_real = compute_quadratic_real_roots(P, x1r, x2r);
+  BOOST_CHECK(roots_are_real);
+  BOOST_CHECK_SMALL(abs(P(x1r)), 1e-10);
+  BOOST_CHECK_SMALL(abs(P(x2r)), 1e-10);
 }
 
 BOOST_AUTO_TEST_CASE(test_cubic_polynomial_roots)
@@ -48,6 +53,15 @@ BOOST_AUTO_TEST_CASE(test_cubic_polynomial_roots)
   BOOST_CHECK_SMALL(abs(P(x1)), eps);
   BOOST_CHECK_SMALL(abs(P(x2)), eps);
   BOOST_CHECK_SMALL(abs(P(x3)), eps);
+
+  auto x1r = double{};
+  auto x2r = double{};
+  auto x3r = double{};
+  const auto roots_are_real = compute_cubic_real_roots(P, x1r, x2r, x3r);
+  BOOST_CHECK(roots_are_real);
+  BOOST_CHECK_SMALL(abs(P(x1r)), eps);
+  BOOST_CHECK_SMALL(abs(P(x2r)), eps);
+  BOOST_CHECK_SMALL(abs(P(x3r)), eps);
 }
 
 BOOST_AUTO_TEST_CASE(test_quartic_polynomial_roots)

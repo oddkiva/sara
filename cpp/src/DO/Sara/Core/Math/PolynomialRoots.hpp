@@ -113,7 +113,7 @@ namespace DO::Sara {
 
       return true;
     }
-    else if (delta <= std::numeric_limits<T>::epilon())
+    else if (delta <= std::numeric_limits<T>::epsilon())
     {
       x1 = 3 * q / p;
       x2 = -3 * q / (2 * p);
