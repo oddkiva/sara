@@ -12,8 +12,8 @@
 #pragma once
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/Core/Math/PolynomialRoots.hpp>
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 
 #include <Eigen/Dense>
 
@@ -174,8 +174,7 @@ namespace DO::Sara {
      *  1. Calculate the eigenvalues by solving the characteristic polynomial.
      *  2. Calculate the eigenvectors from the eigenvalues.
      */
-    inline auto eig3x3known0(const Mat3& M, Mat3& B, Vec3& s)
-        -> void
+    inline auto eig3x3known0(const Mat3& M, Mat3& B, Vec3& s) -> void
     {
       // Calculate the eigen values by solving the polynomial characteristic in
       // dimension 3:
@@ -210,22 +209,38 @@ namespace DO::Sara {
       if (std::abs(s[0]) < std::abs(s[1]))
         std::swap(s(0), s(1));
 
+      auto compute_orthogonal_complement = [](Mat3& M) -> void {
+        const auto W = M.col(0);
+        auto U = M.col(1);
+        auto V = M.col(2);
+
+        auto invLength = T{};
+        if (std::abs(W(0)) > std::abs(W(1)))
+        {
+          invLength = 1 / std::sqrt(square(W(0)) + square(W(2)));
+          U << -W(2) * invLength, 0, W(0) * invLength;
+        }
+        else
+        {
+          invLength = 1 / std::sqrt(square(W(1)) + square(W(2)));
+          U << 0, W(2) * invLength, -W(1) * invLength;
+        }
+
+        V = W.cross(U);
+      };
+
       auto compute_eigen_vector_0 = [](const Mat3& M, const T eigval) -> Vec3 {
         const Mat3 A = M - eigval * Mat3::Identity();
-        const auto ri_x_rj = std::array<Vec3, 3>{
-          A.row(0).cross(A.row(1)),
-          A.row(0).cross(A.row(2)),
-          A.row(1).cross(A.row(2))
-        };
+        const auto ri_x_rj = std::array<Vec3, 3>{A.row(0).cross(A.row(1)),
+                                                 A.row(0).cross(A.row(2)),
+                                                 A.row(1).cross(A.row(2))};
 
-        const auto d_ij = std::array{
-          ri_x_rj[0].squaredNorm(),
-          ri_x_rj[1].squaredNorm(),
-          ri_x_rj[2].squaredNorm()
-        };
+        const auto d_ij =
+            std::array{ri_x_rj[0].squaredNorm(), ri_x_rj[1].squaredNorm(),
+                       ri_x_rj[2].squaredNorm()};
 
-        const auto best_index = std::max_element(d_ij.begin(), d_ij.end())
-                              - d_ij.begin();
+        const auto best_index =
+            std::max_element(d_ij.begin(), d_ij.end()) - d_ij.begin();
         SARA_CHECK(best_index);
 
         const Vec3 eigvec0 = ri_x_rj[best_index] / std::sqrt(d_ij[best_index]);
@@ -234,10 +249,82 @@ namespace DO::Sara {
         return eigvec0;
       };
 
+      auto compute_eigen_vector_1 = [](const Mat3& A, const Mat3& B,
+                                       T eval1) -> Vec3 {
+        const auto evec0 = B.col(0);
+
+        const auto U = B.col(1);
+        const auto V = B.col(2);
+
+        const auto AU = A * B.col(1);
+        const auto AV = A * B.col(2);
+
+        // J = [U, V]
+        // Calculate M = J.T @ (A - eval1 * I)  @ J
+        // M is a 2x2 symmetric matrix where.
+        auto m00 = U.dot(AU) - eval1;
+        auto m01 = V.dot(AU);
+        auto m11 = V.dot(AV) - eval1;
+
+        const auto abs_m00 = std::abs(m00);
+        const auto abs_m01 = std::abs(m01);
+        const auto abs_m11 = std::abs(m11);
+
+        if (abs_m00 > abs_m11)
+        {
+          const auto abs_max_comp = std::max(abs_m00, abs_m01);
+          if (abs_max_comp > 0)
+          {
+            if (abs_m00 >= abs_m01)
+            {
+              m01 /= m00;
+              m00 = 1 / std::sqrt(1 + square(m01));
+              m01 *= m00;
+            }
+            else
+            {
+              m00 /= m01;
+              m01 = 1 / std::sqrt(1 + square(m00));
+              m00 *= m01;
+            }
+            return m01 * U - m00 * V;
+          }
+          else
+            return U;
+        }
+        else
+        {
+          const auto abs_max_comp = std::max(abs_m11, abs_m01);
+          if (abs_max_comp > 0)
+          {
+            if (abs_m11 >= abs_m01)
+            {
+              m01 /= m11;
+              m11 = 1 / std::sqrt(1 + square(m01));
+              m01 *= m11;
+            }
+            else
+            {
+              m11 /= m01;
+              m01 = 1 / std::sqrt(1 + square(m11));
+              m11 *= m01;
+            }
+            return m11 * U - m01 * V;
+          }
+          else
+            return U;
+        }
+      };
+
       // We calculate the 1st and 2nd eigenvectors (cf. line 14-15).
       // and directly the eigen vectors (we don't need the check in line 16).
       B.col(0) = compute_eigen_vector_0(M, s(0));
-      // B.col(1) = get_eigenvector(M, s(1));
+
+      compute_orthogonal_complement(B);
+      SARA_DEBUG << "[Orthgonal complement] B =\n" << B << std::endl;
+
+      B.col(1) = compute_eigen_vector_1(M, B, s(1));
+
       // We don't follow line 8-9 to calculate the 3rd eigenvector.
       // Instead, let's just use the cross product.
       B.col(2) = B.col(0).cross(B.col(1));

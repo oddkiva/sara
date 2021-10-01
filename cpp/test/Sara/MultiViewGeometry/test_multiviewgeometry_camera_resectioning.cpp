@@ -208,15 +208,14 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     auto lambda_twist =
         sara::LambdaTwist<double>{Xw.topLeftCorner<3, 3>(), Yc.leftCols<3>()};
 
+    const auto theta = static_cast<double>(M_PI) / 6;
     auto E = Eigen::Matrix3d{};
-    auto theta = static_cast<double>(M_PI) / 6;
     // clang-format off
     E <<
       std::cos(theta), -std::sin(theta), 0,
       std::sin(theta),  std::cos(theta), 0,
                     0,                0, 1;
     // clang-format on
-    SARA_DEBUG << "E**2 =\n" << E.array().square() << std::endl;
 
     auto S = Eigen::Vector3d{1.1, -0.6, 0};
 
@@ -229,6 +228,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
 // #define EIGEN_IMPL
 #if defined(EIGEN_IMPL)
     // More robust, much simpler and also direct.
+    // Might be slower, but this should be acceptable.
     auto eigenSolver = Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d>{};
     eigenSolver.computeDirect(M);
     std::cout << "Eigenvalues = " << eigenSolver.eigenvalues().transpose()
@@ -246,13 +246,16 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     S1(0) = eigenSolver.eigenvalues()(2);
     S1(1) = eigenSolver.eigenvalues()(0);
     S1(2) = eigenSolver.eigenvalues()(1);
-
-    // Yes it is a bit slower, but this should be OK.
 #else  // MINE
     lambda_twist.eig3x3known0(M, E1, S1);
 #endif
 
     SARA_DEBUG << "E1 = \n" << E1 << std::endl;
     SARA_DEBUG << "S1 = " << S1.transpose() << std::endl;
+    SARA_DEBUG << "M =\n" << M << std::endl;
+    SARA_DEBUG << "E1 * diag(S1) * E1.T =\n"
+               << E1 * S1.asDiagonal() * E1.transpose() << std::endl;
+
+    BOOST_CHECK((M - E1 * S1.asDiagonal() * E1.transpose()).norm() < 1e-6);
   }
 }
