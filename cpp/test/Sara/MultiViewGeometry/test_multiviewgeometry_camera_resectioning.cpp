@@ -29,9 +29,12 @@ namespace sara = DO::Sara;
 auto make_cube_vertices()
 {
   auto cube = Eigen::MatrixXd{4, 8};
-  cube.topRows(3) << 0, 1, 0, 1, 0, 1, 0, 1,  //
-      0, 0, 1, 1, 0, 0, 1, 1,                 //
-      0, 0, 0, 0, 1, 1, 1, 1;                 //
+  // clang-format off
+  cube.topRows(3) <<
+    0, 1, 0, 1, 0, 1, 0, 1,
+    0, 0, 1, 1, 0, 0, 1, 1,
+    0, 0, 0, 0, 1, 1, 1, 1;
+  // clang-format on
   cube.row(3).fill(1);
 
   // Recenter the cube.
@@ -111,15 +114,21 @@ BOOST_AUTO_TEST_CASE(test_flipud)
 BOOST_AUTO_TEST_CASE(test_fliplr)
 {
   auto A = Eigen::Matrix3i{};
-  A << 1, 2, 3,  //
-      4, 5, 6,   //
-      7, 8, 9;
+  // clang-format off
+  A <<
+    1, 2, 3,
+    4, 5, 6,
+    7, 8, 9;
+  // clang-format on
 
   const auto A_flipped = sara::fliplr(A);
   auto A_flipped_true = Eigen::Matrix3i{};
-  A_flipped_true << 3, 2, 1,  //
-      6, 5, 4,                //
-      9, 8, 7;
+  // clang-format off
+  A_flipped_true <<
+    3, 2, 1,
+    6, 5, 4,
+    9, 8, 7;
+  // clang-format on
   BOOST_CHECK(A_flipped_true == A_flipped);
 }
 
@@ -129,7 +138,6 @@ BOOST_AUTO_TEST_CASE(test_hartley_zisserman)
   const auto ya = std::array{0.0, 0.2, 0.2, 0.1};
   const auto za = std::array{0.0, 0.3, 0.1, 0.0};
   auto Xw = make_cube_vertices();
-
 
   auto check = [&](int i) {
     // Translate the cube further 10 meters away from the world center.
@@ -205,57 +213,34 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     std::cout << "* Yc column norms " << std::endl;
     std::cout << "  column_norm(Yc) = " << Yc.colwise().norm() << std::endl;
 
-    auto lambda_twist =
-        sara::LambdaTwist<double>{Xw.topLeftCorner<3, 3>(), Yc.leftCols<3>()};
+    auto lambda_twist = sara::LambdaTwist<double>{
+        Xw.topLeftCorner<3, 3>(),  //
+        Yc.leftCols<3>()           //
+    };
 
-    const auto theta = static_cast<double>(M_PI) / 6;
-    auto E = Eigen::Matrix3d{};
-    // clang-format off
-    E <<
-      std::cos(theta), -std::sin(theta), 0,
-      std::sin(theta),  std::cos(theta), 0,
-                    0,                0, 1;
-    // clang-format on
+    SARA_DEBUG << "C =\n" << C.matrix() << std::endl;
+    // const auto theta = static_cast<double>(M_PI) / 6;
+    // auto E = Eigen::Matrix3d{};
+    // // clang-format off
+    // E <<
+    //   std::cos(theta), -std::sin(theta), 0,
+    //   std::sin(theta),  std::cos(theta), 0,
+    //                 0,                0, 1;
+    // // clang-format on
 
-    auto S = Eigen::Vector3d{1.1, -0.6, 0};
+    // auto S = Eigen::Vector3d{1.1, -0.6, 0};
 
-    const Eigen::Matrix3d M = E * S.asDiagonal() * E.transpose();
-    SARA_DEBUG << "M = \n" << M << std::endl;
+    // const Eigen::Matrix3d M = E * S.asDiagonal() * E.transpose();
+    // SARA_DEBUG << "M = \n" << M << std::endl;
 
-    auto E1 = Eigen::Matrix3d{};
-    auto S1 = Eigen::Vector3d{};
+    // auto E1 = Eigen::Matrix3d{};
+    // auto S1 = Eigen::Vector3d{};
 
-// #define EIGEN_IMPL
-#if defined(EIGEN_IMPL)
-    // More robust, much simpler and also direct.
-    // Might be slower, but this should be acceptable.
-    auto eigenSolver = Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d>{};
-    eigenSolver.computeDirect(M);
-    std::cout << "Eigenvalues = " << eigenSolver.eigenvalues().transpose()
-              << std::endl;
-    std::cout << "Eigenvectors = " << std::endl
-              << eigenSolver.eigenvectors() << std::endl;
-
-    // The first eigenvalue is always negative, the second is zero, and the
-    // third one is positive.
-    // The right-handedness is preserved if we rotate the column-vectors.
-    E1.col(0) = eigenSolver.eigenvectors().col(2);
-    E1.col(1) = eigenSolver.eigenvectors().col(0);
-    E1.col(2) = eigenSolver.eigenvectors().col(1);
-
-    S1(0) = eigenSolver.eigenvalues()(2);
-    S1(1) = eigenSolver.eigenvalues()(0);
-    S1(2) = eigenSolver.eigenvalues()(1);
-#else  // MINE
-    lambda_twist.eig3x3known0(M, E1, S1);
-#endif
-
-    SARA_DEBUG << "E1 = \n" << E1 << std::endl;
-    SARA_DEBUG << "S1 = " << S1.transpose() << std::endl;
-    SARA_DEBUG << "M =\n" << M << std::endl;
-    SARA_DEBUG << "E1 * diag(S1) * E1.T =\n"
-               << E1 * S1.asDiagonal() * E1.transpose() << std::endl;
-
-    BOOST_CHECK((M - E1 * S1.asDiagonal() * E1.transpose()).norm() < 1e-6);
+    // SARA_DEBUG << "E1 = \n" << E1 << std::endl;
+    // SARA_DEBUG << "S1 = " << S1.transpose() << std::endl;
+    // SARA_DEBUG << "M =\n" << M << std::endl;
+    // SARA_DEBUG << "E1 * diag(S1) * E1.T =\n"
+    //            << E1 * S1.asDiagonal() * E1.transpose() << std::endl;
+    // BOOST_CHECK((M - E1 * S1.asDiagonal() * E1.transpose()).norm() < 1e-6);
   }
 }

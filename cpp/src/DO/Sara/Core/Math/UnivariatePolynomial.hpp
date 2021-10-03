@@ -140,6 +140,14 @@ namespace DO::Sara {
       return b;
     }
 
+    inline auto operator/=(const coefficient_type& other)
+        -> UnivariatePolynomialBase&
+    {
+      for (auto& c : _coeff)
+        c /= other;
+      return *this;
+    }
+
     //! @{
     //! Comparison operator.
     inline auto operator==(const UnivariatePolynomialBase& other) const -> bool
