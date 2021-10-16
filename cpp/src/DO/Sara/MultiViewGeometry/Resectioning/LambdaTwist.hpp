@@ -86,6 +86,8 @@ namespace DO::Sara {
       D[1] = M[_02] * a(_12) - M[_12] * a(_02);
       SARA_DEBUG << "D0 =\n" << D[0] << std::endl;
       SARA_DEBUG << "D1 =\n" << D[1] << std::endl;
+      SARA_CHECK(D[0].determinant());
+      SARA_CHECK(D[1].determinant());
     }
 
     inline auto solve_cubic_polynomial() -> void
@@ -157,7 +159,12 @@ namespace DO::Sara {
           continue;
         if (tau <= 0)
           continue;
-        lambda_k.push_back(calculate_lambda(std::real(tau), wm));
+
+        const auto lambda = calculate_lambda(std::real(tau), wm);
+        if (!(lambda.array() > 0).all())
+          continue;
+
+        lambda_k.push_back(lambda);
         SARA_DEBUG << "lambda_km = " << lambda_k.back().transpose() << std::endl;
       }
 
@@ -167,7 +174,12 @@ namespace DO::Sara {
           continue;
         if (tau <= 0)
           continue;
-        lambda_k.push_back(calculate_lambda(std::real(tau), wp));
+
+        const auto lambda = calculate_lambda(std::real(tau), wp);
+        if (!(lambda.array() > 0).all())
+          continue;
+
+        lambda_k.push_back(lambda);
         SARA_DEBUG << "lambda_kp = "<< lambda_k.back().transpose() << std::endl;
       }
     }
@@ -289,8 +301,6 @@ namespace DO::Sara {
 
       auto compute_eigen_vector_1 = [](const Mat3& A, const Mat3& B,
                                        T eval1) -> Vec3 {
-        const auto evec0 = B.col(0);
-
         const auto U = B.col(1);
         const auto V = B.col(2);
 
@@ -412,9 +422,9 @@ namespace DO::Sara {
       tau_polynomial[2] = a_;
       tau_polynomial[1] = b_;
       tau_polynomial[0] = c_;
-      tau_polynomial /= tau_polynomial[2];
       SARA_CHECK(tau_polynomial);
 
+      tau_polynomial /= tau_polynomial[2];
       auto tau = std::array<T, 2>{};
       if (!compute_quadratic_real_roots(tau_polynomial, tau[0], tau[1]))
         std::fill(tau.begin(), tau.end(), std::numeric_limits<T>::quiet_NaN());
@@ -431,6 +441,7 @@ namespace DO::Sara {
       lambda(2) = tau * lambda(1);
       lambda(0) = w[0] * lambda(1) + w[1] * lambda(2);
       SARA_CHECK(tau);
+      SARA_CHECK(lambda.transpose() * D[0] * lambda);
       SARA_CHECK(lambda.transpose() * D[1] * lambda);
       return lambda;
     };
