@@ -111,6 +111,10 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     // We only care about the first root. Our implementation makes sure that
     // the first is always well formed.
     BOOST_REQUIRE_SMALL(lt.c(lt.gamma[0]), 1e-12);
+    // Form the linear combination of the two homogenous quadrics.
+    const Eigen::Matrix3d D0 = lt.D[0] + lt.gamma[0] * lt.D[1];
+    // The goal of the cubic equation was to ensure its determinant is zero.
+    BOOST_REQUIRE_SMALL(D0.determinant(), 1e-12);
 
 
     // -------------------------------------------------------------------------
@@ -118,9 +122,27 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     // -------------------------------------------------------------------------
     sara::print_stage("solve for lambda");
     lt.solve_for_lambda();
+    // Check the eigenvalue decomposition of the linear combination D0.
+    //
+    // First the span of eigenvectors should be right-handed and orthonormal.
+    BOOST_REQUIRE_SMALL(
+        (lt.E.colwise().norm() - Eigen::RowVector3d::Ones()).norm(), 1e-12);
+    BOOST_REQUIRE_CLOSE(lt.E.determinant(), 1, 1e-12);
+    // Second the eigenvalues should be ordered as in the paper:
+    // - the first one > 0
+    // - the second one < 0
+    // - the third one = 0
+    BOOST_REQUIRE_GT(lt.sigma(0), 0);
+    BOOST_REQUIRE_LT(lt.sigma(1), 0);
+    BOOST_REQUIRE_SMALL(lt.sigma(2), 1e-12);
+    // Finally let us ensure that the eigendecomposition is quantitatively
+    // correct.
+    BOOST_REQUIRE_SMALL(
+        (D0 - lt.E * lt.sigma.asDiagonal() * lt.E.transpose()).norm(), 1e-12);
+
     // Check each candidate scale vector λ[k] that they belong in the quadrics.
     for (const auto& lambda: lt.lambda_k) {
-      // Every scale must be positive.
+      // Every scale must be positive to be physically feasible.
       BOOST_REQUIRE((lambda.array() > 0).all());
 
       // The scale vector λ must be in the two homogeneous quadrics.

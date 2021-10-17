@@ -217,18 +217,22 @@ namespace DO::Sara {
      */
     static inline auto eig3x3known0(const Mat3& M, Mat3& B, Vec3& s) -> void
     {
-#define EIGEN_IMPL
+#ifdef DEBUG_LAMBDA_TWIST
+      print_stage("eig3x3known0");
+#endif
+
+// #define EIGEN_IMPL
 #if defined(EIGEN_IMPL)
       // More robust, much simpler and also direct.
       // Might be slower, but this should be acceptable.
       auto eigenSolver = Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d>{};
       eigenSolver.computeDirect(M);
-#ifdef DEBUG_LAMBDA_TWIST
+#  ifdef DEBUG_LAMBDA_TWIST
       std::cout << "Eigenvalues = " << eigenSolver.eigenvalues().transpose()
                 << std::endl;
       std::cout << "Eigenvectors = " << std::endl
                 << eigenSolver.eigenvectors() << std::endl;
-#endif
+#  endif
 
       // The first eigenvalue is always negative, the second is zero, and the
       // third one is positive.
@@ -236,9 +240,9 @@ namespace DO::Sara {
       B.col(0) = eigenSolver.eigenvectors().col(2);
       B.col(1) = eigenSolver.eigenvectors().col(0);
       B.col(2) = eigenSolver.eigenvectors().col(1);
-#ifdef DEBUG_LAMBDA_TWIST
+#  ifdef DEBUG_LAMBDA_TWIST
       SARA_CHECK(B.determinant());
-#endif
+#  endif
 
       s(0) = eigenSolver.eigenvalues()(2);
       s(1) = eigenSolver.eigenvalues()(0);
@@ -274,24 +278,35 @@ namespace DO::Sara {
 
       // Let's swap the eigenvalues as described in the paper once
       // for all. (cf. Line 16-19)
-      if (std::abs(s[0]) < std::abs(s[1]))
+      //
+      // The first eigenvalue is positive and the second one is negative.
+      // So swap the eigenvalues if necessary.
+      if (s[0] < s[1]) 
         std::swap(s(0), s(1));
+
+      // Now we are following D. Eberly's paper instead of the method proposed
+      // in the paper:
+      //
+      // - https://www.geometrictools.com/Documentation/RobustEigenSymmetric3x3.pdf
+      //
+      // I have found that method in the paper is not robust numerically.
 
       auto compute_orthogonal_complement = [](Mat3& M) -> void {
         const auto W = M.col(0);
         auto U = M.col(1);
         auto V = M.col(2);
 
-        auto invLength = T{};
         if (std::abs(W(0)) > std::abs(W(1)))
         {
-          invLength = 1 / std::sqrt(square(W(0)) + square(W(2)));
-          U << -W(2) * invLength, 0, W(0) * invLength;
+          const auto inverse_length =
+              1 / std::sqrt(square(W(0)) + square(W(2)));
+          U << -W(2) * inverse_length, 0, W(0) * inverse_length;
         }
         else
         {
-          invLength = 1 / std::sqrt(square(W(1)) + square(W(2)));
-          U << 0, W(2) * invLength, -W(1) * invLength;
+          const auto inverse_length =
+              1 / std::sqrt(square(W(1)) + square(W(2)));
+          U << 0, W(2) * inverse_length, -W(1) * inverse_length;
         }
 
         V = W.cross(U);
@@ -309,10 +324,14 @@ namespace DO::Sara {
 
         const auto best_index =
             std::max_element(d_ij.begin(), d_ij.end()) - d_ij.begin();
+#  ifdef DEBUG_LAMBDA_TWIST
         SARA_CHECK(best_index);
+#  endif
 
         const Vec3 eigvec0 = ri_x_rj[best_index] / std::sqrt(d_ij[best_index]);
+#  ifdef DEBUG_LAMBDA_TWIST
         SARA_CHECK(eigvec0.squaredNorm());
+#  endif
 
         return eigvec0;
       };
@@ -387,7 +406,9 @@ namespace DO::Sara {
       B.col(0) = compute_eigen_vector_0(M, s(0));
 
       compute_orthogonal_complement(B);
+#  ifdef DEBUG_LAMBDA_TWIST
       SARA_DEBUG << "[Orthgonal complement] B =\n" << B << std::endl;
+#  endif
 
       B.col(1) = compute_eigen_vector_1(M, B, s(1));
 
