@@ -554,9 +554,7 @@ namespace DO::Sara {
       const Mat3 R = Y * X.inverse();
       const Vec3 t = lambda(0) * y.col(0) - R * x.col(0);
 
-      auto pose = Mat34{};
-      pose.leftCols(3) = R;
-      pose.col(3) = t;
+      const auto pose = (Mat34{} << R, t).finished();
 
 #ifdef DEBUG_LAMBDA_TWIST
       const Eigen::Matrix<T, 3, 3> Xc = (pose * x.colwise().homogeneous());
