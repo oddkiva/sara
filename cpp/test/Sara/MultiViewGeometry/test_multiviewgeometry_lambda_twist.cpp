@@ -92,11 +92,12 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
 
 
     // We know the following squared distances between the first 3
-    // vertices because the data consists of cube vertices, 
+    // vertices because the data consists of cube vertices,
     BOOST_REQUIRE_SMALL((lt.a - Eigen::Vector3d{1, 1, 2}).norm(), 1e-12);
     // The angles between the 3 vertices is 90 degrees, because again they are
     // cube vertices.
     BOOST_REQUIRE_SMALL((lt.b - Eigen::Vector3d::Ones()).norm(), 2e-2);
+
 
     // -------------------------------------------------------------------------
     // Solve the cubic equation.
@@ -111,10 +112,59 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     // the first is always well formed.
     BOOST_REQUIRE_SMALL(lt.c(lt.gamma[0]), 1e-12);
 
+
     // -------------------------------------------------------------------------
     // Solve for the scales λ.
     // -------------------------------------------------------------------------
     sara::print_stage("solve for lambda");
     lt.solve_for_lambda();
+    // Check each candidate scale vector λ[k] that they belong in the quadrics.
+    for (const auto& lambda: lt.lambda_k) {
+      // Every scale must be positive.
+      BOOST_REQUIRE((lambda.array() > 0).all());
+
+      // The scale vector λ must be in the two homogeneous quadrics.
+      for (auto i = 0; i < 2; ++i)
+      {
+        const double val = lambda.transpose() * lt.D[i] * lambda;
+        BOOST_REQUIRE_SMALL(val, 1e-12);
+      }
+
+      // The scale vector λ must be in the three inhomogeneous quadrics.
+      for (auto i = 0; i < 3; ++i)
+      {
+        const double val = lambda.transpose() * lt.M[i] * lambda;
+        BOOST_REQUIRE_CLOSE(val, lt.a(i), 1e-6);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Recover the poses from the candidate scale vector λ[k].
+    // -------------------------------------------------------------------------
+    sara::print_stage("Recover poses");
+    lt.recover_all_poses();
+    // Check that there is at least one correct pose.
+    BOOST_REQUIRE(std::any_of(  //
+        std::begin(lt.pose_k), std::end(lt.pose_k),
+        [&C](const Eigen::Matrix<double, 3, 4>& pose) {
+          SARA_DEBUG << "[GT] pose =\n" << C.matrix() << std::endl;
+          SARA_DEBUG << "[US] pose =\n" << pose << std::endl;
+          return (C.matrix() - pose).norm() < 1e-6;
+        })  //
+    );
+
+    // Finally test again with the function that wraps it all.
+    const auto candidate_poses = sara::solve_p3p(  //
+        Xw.topLeftCorner<3, 3>().eval(),           //
+        Yc.leftCols<3>().eval()                    //
+    );
+    BOOST_REQUIRE(std::any_of(  //
+        std::begin(candidate_poses), std::end(candidate_poses),
+        [&C](const Eigen::Matrix<double, 3, 4>& pose) {
+          SARA_DEBUG << "[GT] pose =\n" << C.matrix() << std::endl;
+          SARA_DEBUG << "[US] pose =\n" << pose << std::endl;
+          return (C.matrix() - pose).norm() < 1e-6;
+        })  //
+    );
   }
 }

@@ -17,6 +17,8 @@
 
 #include <Eigen/Dense>
 
+// #define DEBUG_LAMBDA_TWIST
+
 
 namespace DO::Sara {
 
@@ -130,21 +132,20 @@ namespace DO::Sara {
 
       // Solve the cubic polynomial.
       c /= c[3];
-      const auto roots_all_real =
-          compute_cubic_real_roots(c, gamma[0], gamma[1], gamma[2]);
+      compute_cubic_real_roots(c, gamma[0], gamma[1], gamma[2]);
     }
 
     inline auto solve_for_lambda() -> void
     {
       // The first root is always real in this implementation.
       const Mat3 D0 = D[0] + gamma[0] * D[1];
-#ifdef DEBUG
+#ifdef DEBUG_LAMBDA_TWIST
       SARA_DEBUG << "D0 =\n" << D0 << std::endl;
       SARA_DEBUG << "det(D0) = " << D0.determinant() << std::endl;
 #endif
 
       eig3x3known0(D0, E, sigma);
-#ifdef DEBUG
+#ifdef DEBUG_LAMBDA_TWIST
       SARA_DEBUG << "E =\n" << E << std::endl;
       SARA_DEBUG << "sigma = " << sigma.transpose() << std::endl;
       SARA_CHECK((D0 - E * sigma.asDiagonal() * E.transpose()).norm());
@@ -154,14 +155,14 @@ namespace DO::Sara {
 
       const auto sp = std::sqrt(-sigma[1] / sigma[0]);
       const auto sm = -sp;
-#ifdef DEBUG
+#ifdef DEBUG_LAMBDA_TWIST
       SARA_CHECK(sp);
       SARA_CHECK(sm);
 #endif
 
       const auto wm = calculate_w(sm);
       const auto wp = calculate_w(sp);
-#ifdef DEBUG
+#ifdef DEBUG_LAMBDA_TWIST
       SARA_CHECK(wm[0]);
       SARA_CHECK(wm[1]);
       SARA_CHECK(wp[0]);
@@ -183,7 +184,6 @@ namespace DO::Sara {
           continue;
 
         lambda_k.push_back(lambda);
-        SARA_DEBUG << "lambda_km = " << lambda_k.back().transpose() << std::endl;
       }
 
       for (const auto& tau : tau_p)
@@ -198,17 +198,13 @@ namespace DO::Sara {
           continue;
 
         lambda_k.push_back(lambda);
-        SARA_DEBUG << "lambda_kp = "<< lambda_k.back().transpose() << std::endl;
       }
     }
 
     inline auto recover_all_poses() -> void
     {
       for (const auto& lambda : lambda_k)
-      {
         pose_k.push_back(recover_pose(lambda));
-        std::cout << "pose_k =" << std::endl << pose_k.back() << std::endl;
-      }
     }
 
     //! @brief Calculate the eigen decomposition of a 3x3 matrix with a zero
@@ -227,10 +223,12 @@ namespace DO::Sara {
       // Might be slower, but this should be acceptable.
       auto eigenSolver = Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d>{};
       eigenSolver.computeDirect(M);
+#ifdef DEBUG_LAMBDA_TWIST
       std::cout << "Eigenvalues = " << eigenSolver.eigenvalues().transpose()
                 << std::endl;
       std::cout << "Eigenvectors = " << std::endl
                 << eigenSolver.eigenvectors() << std::endl;
+#endif
 
       // The first eigenvalue is always negative, the second is zero, and the
       // third one is positive.
@@ -238,7 +236,9 @@ namespace DO::Sara {
       B.col(0) = eigenSolver.eigenvectors().col(2);
       B.col(1) = eigenSolver.eigenvectors().col(0);
       B.col(2) = eigenSolver.eigenvectors().col(1);
+#ifdef DEBUG_LAMBDA_TWIST
       SARA_CHECK(B.determinant());
+#endif
 
       s(0) = eigenSolver.eigenvalues()(2);
       s(1) = eigenSolver.eigenvalues()(0);
@@ -401,21 +401,27 @@ namespace DO::Sara {
 
     inline auto calculate_w(T s) const -> std::array<T, 2>
     {
+#ifdef DEBUG_LAMBDA_TWIST
       print_stage("Calculate w");
-
       SARA_DEBUG << "E =\n" << E  << std::endl;
+#endif
+
       const auto& e0 = E(0, 0); const auto& e1 = E(0, 1);
       const auto& e3 = E(1, 0); const auto& e4 = E(1, 1);
       const auto& e6 = E(2, 0); const auto& e7 = E(2, 1);
+
       const auto w0 = (e3 - s * e4) / (s * e1 - e0);
       const auto w1 = (e6 - s * e7) / (s * e1 - e0);
+
       return {w0, w1};
     }
 
     inline auto solve_tau_quadratic_polynomial(const std::array<T, 2>& w) const
         -> std::array<T, 2>
     {
+#ifdef DEBUG_LAMBDA_TWIST
       print_stage("Calculate tau roots");
+#endif
 
       // The τ-polynomial in tau arises from the quadratic form described in
       // Equation (14) of the paper.
@@ -435,7 +441,9 @@ namespace DO::Sara {
                           - 2 * a12 * b01 * w1  //
                           + 2 * a12 * w0 * w1;
       tau_polynomial[0] = -a01 - 2 * a12 * b01 * w0 + a12 * square(w0) + a12;
+#ifdef DEBUG_LAMBDA_TWIST
       SARA_CHECK(tau_polynomial);
+#endif
 
       // Normalize the polynomial to its monic equivalent.
       tau_polynomial /= tau_polynomial[2];
@@ -443,23 +451,29 @@ namespace DO::Sara {
       if (!compute_quadratic_real_roots(tau_polynomial, tau[0], tau[1]))
         std::fill(tau.begin(), tau.end(), std::numeric_limits<T>::quiet_NaN());
 
+#ifdef DEBUG_LAMBDA_TWIST
       SARA_CHECK(tau[0]);
       SARA_CHECK(tau[1]);
       SARA_CHECK(tau_polynomial(tau[0]));
       SARA_CHECK(tau_polynomial(tau[1]));
+#endif
 
       return tau;
     };
 
     inline auto calculate_lambda(const T tau, const std::array<T, 2>& w) -> Vec3
     {
+#ifdef DEBUG_LAMBDA_TWIST
       print_stage("Calculate lambda (the distances)");
+#endif
+
       auto lambda = Vec3{};
       lambda(1) = std::sqrt(a(_12) / (square(tau) - 2 * b(_12) * tau + 1));
       lambda(2) = tau * lambda(1);
       lambda(0) = w[0] * lambda(1) + w[1] * lambda(2);
 
-      SARA_DEBUG << "ARE THE LAMBDA CORRECT MATHEMATICALLY?????" << std::endl;
+#ifdef DEBUG_LAMBDA_TWIST
+      SARA_DEBUG << "ARE THE LAMBDA CORRECT?" << std::endl;
       SARA_CHECK(tau);
       SARA_CHECK(lambda.transpose());
       SARA_CHECK(lambda.transpose() * D[0] * lambda);
@@ -467,14 +481,13 @@ namespace DO::Sara {
       SARA_CHECK(lambda.transpose() * M[_01] * lambda - a(_01));
       SARA_CHECK(lambda.transpose() * M[_02] * lambda - a(_02));
       SARA_CHECK(lambda.transpose() * M[_12] * lambda - a(_12));
+#endif
 
       return lambda;
     };
 
     inline auto recover_pose(const Vec3& lambda) -> Mat34
     {
-      print_stage("Recover pose");
-
       auto Y = Mat3{};
       Y.col(0) = lambda(0) * y.col(0) - lambda(1) * y.col(1);
       Y.col(1) = lambda(1) * y.col(1) - lambda(2) * y.col(2);
@@ -493,10 +506,13 @@ namespace DO::Sara {
       pose.col(3) = t;
 
       const Eigen::Matrix<T, 3, 3> Xc = (pose * x.colwise().homogeneous());
+
+#ifdef DEBUG_LAMBDA_TWIST
       SARA_DEBUG << "Recovered R =\n" << R << std::endl;
-      SARA_CHECK(R.determinant());
       SARA_DEBUG << "Recovered t = " << t.transpose() << std::endl;
       SARA_DEBUG << "Xc = camera coordinates =\n" << Xc << std::endl;
+      SARA_DEBUG << "Pose =\n" << pose << std::endl;
+#endif
 
       return pose;
     };
@@ -535,5 +551,19 @@ namespace DO::Sara {
     //! @brief Recovered poses.
     std::vector<Mat34> pose_k;
   };
+
+
+  template <typename T>
+  inline auto solve_p3p(const Eigen::Matrix<T, 3, 3>& scene_points,
+                        const Eigen::Matrix<T, 3, 3>& backprojected_rays)
+      -> std::vector<Eigen::Matrix<T, 3, 4>>
+  {
+    auto lt = LambdaTwist<T>{scene_points, backprojected_rays};
+    lt.calculate_auxiliary_variables();
+    lt.solve_cubic_equation();
+    lt.solve_for_lambda();
+    lt.recover_all_poses();
+    return lt.pose_k;
+  }
 
 }  // namespace DO::Sara
