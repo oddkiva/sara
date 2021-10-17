@@ -38,11 +38,12 @@ namespace DO::Sara {
       : x{scene_points}
       , y{backprojected_rays}
     {
+#ifdef DEBUG
       SARA_DEBUG << "X = scene points =\n" << x << std::endl;
       SARA_DEBUG << "Y = rays =\n" << y << std::endl;
-      SARA_DEBUG << "det(X) = " << x.determinant() << std::endl;
-      SARA_DEBUG << "det(Y) = " << y.determinant() << std::endl;
       SARA_DEBUG << "colwise norm(y) = " << y.colwise().squaredNorm() << std::endl;
+#endif
+
       calculate_auxiliary_variables();
       solve_cubic_polynomial();
       solve_for_lambda();
@@ -51,19 +52,25 @@ namespace DO::Sara {
 
     inline auto calculate_auxiliary_variables() -> void
     {
+#ifdef DEBUG
       print_stage("Auxiliary variables");
-
-      // Calculate the cosine between the 3D rays.
-      b(_01) = y.col(0).dot(y.col(1));
-      b(_02) = y.col(0).dot(y.col(2));
-      b(_12) = y.col(1).dot(y.col(2));
-      SARA_DEBUG << "b = cosines = " << b.transpose() << std::endl;
+#endif
 
       // Calculate the distances between each scene points.
       a(_01) = (x.col(0) - x.col(1)).squaredNorm();
       a(_02) = (x.col(0) - x.col(2)).squaredNorm();
       a(_12) = (x.col(1) - x.col(2)).squaredNorm();
-      SARA_DEBUG << "a = distances = " << a.transpose() << std::endl;
+#ifdef DEBUG
+      SARA_DEBUG << "a = squared distances = " << a.transpose() << std::endl;
+#endif
+
+      // Calculate the cosine between the 3D rays.
+      b(_01) = y.col(0).dot(y.col(1));
+      b(_02) = y.col(0).dot(y.col(2));
+      b(_12) = y.col(1).dot(y.col(2));
+#ifdef DEBUG
+      SARA_DEBUG << "b = angle cosines between rays = " << b.transpose() << std::endl;
+#endif
 
       // clang-format off
       M[_01] <<
@@ -82,22 +89,25 @@ namespace DO::Sara {
               0, -b(_12),      1;
       // clang-format on
 
-      SARA_DEBUG << "M01 =\n" << M[_01] << std::endl;
-      SARA_DEBUG << "M02 =\n" << M[_02] << std::endl;
-      SARA_DEBUG << "M12 =\n" << M[_12] << std::endl;
-
       // Form the conical equations.
       D[0] = M[_01] * a(_12) - M[_12] * a(_01);
       D[1] = M[_02] * a(_12) - M[_12] * a(_02);
+
+#ifdef DEBUG
+      SARA_DEBUG << "M01 =\n" << M[_01] << std::endl;
+      SARA_DEBUG << "M02 =\n" << M[_02] << std::endl;
+      SARA_DEBUG << "M12 =\n" << M[_12] << std::endl;
       SARA_DEBUG << "D0 =\n" << D[0] << std::endl;
       SARA_DEBUG << "D1 =\n" << D[1] << std::endl;
-      SARA_CHECK(D[0].determinant());
-      SARA_CHECK(D[1].determinant());
+#endif
     }
 
     inline auto solve_cubic_polynomial() -> void
     {
+#ifdef DEBUG
       print_stage("Solve cubic polynomial");
+#endif
+
 #define USE_PAPER_FORMULA
 #ifdef USE_PAPER_FORMULA
       // clang-format off
@@ -153,11 +163,13 @@ namespace DO::Sara {
       SARA_CHECK(c);
       const auto roots_all_real =
           compute_cubic_real_roots(c, gamma[0], gamma[1], gamma[2]);
+#ifdef DEBUG
       SARA_CHECK(roots_all_real);
       SARA_CHECK(gamma[0]);
       SARA_CHECK(gamma[1]);
       SARA_CHECK(gamma[2]);
       SARA_CHECK(c(gamma[0]));
+#endif
     }
 
     inline auto solve_for_lambda() -> void
@@ -428,12 +440,6 @@ namespace DO::Sara {
       const auto& e0 = E(0, 0); const auto& e1 = E(0, 1);
       const auto& e3 = E(1, 0); const auto& e4 = E(1, 1);
       const auto& e6 = E(2, 0); const auto& e7 = E(2, 1);
-      SARA_CHECK(e0);
-      SARA_CHECK(e1);
-      SARA_CHECK(e3);
-      SARA_CHECK(e4);
-      SARA_CHECK(e6);
-      SARA_CHECK(e7);
       const auto w0 = (e3 - s * e4) / (s * e1 - e0);
       const auto w1 = (e6 - s * e7) / (s * e1 - e0);
       return {w0, w1};
@@ -447,27 +453,10 @@ namespace DO::Sara {
       // The τ-polynomial in tau arises from the quadratic form described in
       // Equation (14) of the paper.
       auto tau_polynomial = UnivariatePolynomial<T, 2>{};
-// #define USE_PAPER_TAU_FORMULA
-#ifdef USE_PAPER_TAU_FORMULA
       // The coefficients of the τ-polynomial as shown in Equation (15) of the
-      // paper.
-      //
-      // The coefficients reported in the paper are false unfortunately, so we
-      // have to dig into the code published in GitHub.
-      const auto& w0 = w[0];
-      const auto& w1 = w[1];
-      const auto a12 = a(_01);
-      const auto a13 = a(_02);
-      const auto b12 = b(_01);
-      const auto b13 = b(_02);
-      const auto a_ = 1 / ((a13 - a12) * w1 * w1 - a12 * b13 * w1 - a12);
-      const auto b_ =
-          (a13 * b12 * w1 - a12 * b13 * w0 - 2 * w0 * w1 * (a12 - a13)) * a_;
-      const auto c_ = ((a13 - a12) * w0 * w0 + a13 * b12 * w0 + a13) * a_;
-      tau_polynomial[2] = a_;
-      tau_polynomial[1] = b_;
-      tau_polynomial[0] = c_;
-#else  // check with sympy
+      // paper are wrong.
+      // After calculating by hand and double-checking the formula with SymPy,
+      // this is the right formula.
       const auto& w0 = w[0];
       const auto& w1 = w[1];
       const auto& a01 = a(_01);
@@ -479,13 +468,14 @@ namespace DO::Sara {
                           - 2 * a12 * b01 * w1  //
                           + 2 * a12 * w0 * w1;
       tau_polynomial[0] = -a01 - 2 * a12 * b01 * w0 + a12 * square(w0) + a12;
-#endif
-
       SARA_CHECK(tau_polynomial);
+
+      // Normalize the polynomial to its monic equivalent.
       tau_polynomial /= tau_polynomial[2];
       auto tau = std::array<T, 2>{};
       if (!compute_quadratic_real_roots(tau_polynomial, tau[0], tau[1]))
         std::fill(tau.begin(), tau.end(), std::numeric_limits<T>::quiet_NaN());
+
       SARA_CHECK(tau[0]);
       SARA_CHECK(tau[1]);
       SARA_CHECK(tau_polynomial(tau[0]));
@@ -502,12 +492,11 @@ namespace DO::Sara {
       lambda(2) = tau * lambda(1);
       lambda(0) = w[0] * lambda(1) + w[1] * lambda(2);
 
+      SARA_DEBUG << "ARE THE LAMBDA CORRECT MATHEMATICALLY?????" << std::endl;
       SARA_CHECK(tau);
       SARA_CHECK(lambda.transpose());
       SARA_CHECK(lambda.transpose() * D[0] * lambda);
       SARA_CHECK(lambda.transpose() * D[1] * lambda);
-
-      SARA_DEBUG << "ARE THE LAMBDA CORRECT MATHEMATICALLY?????" << std::endl;
       SARA_CHECK(lambda.transpose() * M[_01] * lambda - a(_01));
       SARA_CHECK(lambda.transpose() * M[_02] * lambda - a(_02));
       SARA_CHECK(lambda.transpose() * M[_12] * lambda - a(_12));
@@ -518,13 +507,11 @@ namespace DO::Sara {
     inline auto recover_pose(const Vec3& lambda) -> Mat34
     {
       print_stage("Recover pose");
+
       auto Y = Mat3{};
       Y.col(0) = lambda(0) * y.col(0) - lambda(1) * y.col(1);
       Y.col(1) = lambda(1) * y.col(1) - lambda(2) * y.col(2);
       Y.col(2) = Y.col(0).cross(Y.col(1));
-      SARA_DEBUG << "reconstructed distances = " << Y.colwise().norm()
-                 << std::endl;
-      SARA_DEBUG << "input distances = " << a.transpose() << std::endl;
 
       auto X = Mat3{};
       X.col(0) = x.col(0) - x.col(1);
@@ -539,14 +526,10 @@ namespace DO::Sara {
       pose.col(3) = t;
 
       const Eigen::Matrix<T, 3, 3> Xc = (pose * x.colwise().homogeneous());
-      SARA_DEBUG << "R =\n" << R << std::endl;
+      SARA_DEBUG << "Recovered R =\n" << R << std::endl;
       SARA_CHECK(R.determinant());
-      SARA_DEBUG << "t = " << t.transpose() << std::endl;
-      SARA_DEBUG << "lambda = " << lambda.transpose() << std::endl;
+      SARA_DEBUG << "Recovered t = " << t.transpose() << std::endl;
       SARA_DEBUG << "Xc = camera coordinates =\n" << Xc << std::endl;
-      const Eigen::Matrix<T, 3, 3> Yc = Xc.colwise().normalized();
-      SARA_DEBUG << "Yc = recalculated rays =\n" << Yc << std::endl;
-      SARA_DEBUG << "y = input rays =\n" << y << std::endl;
 
       return pose;
     };
