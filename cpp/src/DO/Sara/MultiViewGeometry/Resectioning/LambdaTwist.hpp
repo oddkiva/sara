@@ -40,10 +40,13 @@ namespace DO::Sara {
     {
       SARA_DEBUG << "X = scene points =\n" << x << std::endl;
       SARA_DEBUG << "Y = rays =\n" << y << std::endl;
+      SARA_DEBUG << "det(X) = " << x.determinant() << std::endl;
+      SARA_DEBUG << "det(Y) = " << y.determinant() << std::endl;
+      SARA_DEBUG << "colwise norm(y) = " << y.colwise().squaredNorm() << std::endl;
       calculate_auxiliary_variables();
       solve_cubic_polynomial();
       solve_for_lambda();
-      recover_all_poses();
+      // recover_all_poses();
     }
 
     inline auto calculate_auxiliary_variables() -> void
@@ -86,6 +89,8 @@ namespace DO::Sara {
       D[1] = M[_02] * a(_12) - M[_12] * a(_02);
       SARA_DEBUG << "D0 =\n" << D[0] << std::endl;
       SARA_DEBUG << "D1 =\n" << D[1] << std::endl;
+      SARA_CHECK(D[0].determinant());
+      SARA_CHECK(D[1].determinant());
     }
 
     inline auto solve_cubic_polynomial() -> void
@@ -289,8 +294,6 @@ namespace DO::Sara {
 
       auto compute_eigen_vector_1 = [](const Mat3& A, const Mat3& B,
                                        T eval1) -> Vec3 {
-        const auto evec0 = B.col(0);
-
         const auto U = B.col(1);
         const auto V = B.col(2);
 
@@ -399,20 +402,29 @@ namespace DO::Sara {
       //
       // The coefficients reported in the paper are false unfortunately, so we
       // have to dig into the code published in GitHub.
-      const auto& w0 = w[0];
-      const auto& w1 = w[1];
-      const auto a12 = a(_01);
-      const auto a13 = a(_02);
-      const auto b12 = b(_01);
-      const auto b13 = b(_02);
-      const auto a_ = 1 / ((a13 - a12) * w1 * w1 - a12 * b13 * w1 - a12);
-      const auto b_ =
-          (a13 * b12 * w1 - a12 * b13 * w0 - 2 * w0 * w1 * (a12 - a13)) * a_;
-      const auto c_ = ((a13 - a12) * w0 * w0 + a13 * b12 * w0 + a13) * a_;
-      tau_polynomial[2] = a_;
-      tau_polynomial[1] = b_;
-      tau_polynomial[0] = c_;
-      tau_polynomial /= tau_polynomial[2];
+//      const auto& w0 = w[0];
+//      const auto& w1 = w[1];
+//      const auto a12 = a(_01);
+//      const auto a13 = a(_02);
+//      const auto b12 = b(_01);
+//      const auto b13 = b(_02);
+//      const auto a_ = 1 / ((a13 - a12) * w1 * w1 - a12 * b13 * w1 - a12);
+//      const auto b_ =
+//          (a13 * b12 * w1 - a12 * b13 * w0 - 2 * w0 * w1 * (a12 - a13)) * a_;
+//      const auto c_ = ((a13 - a12) * w0 * w0 + a13 * b12 * w0 + a13) * a_;
+//      tau_polynomial[2] = a_;
+//      tau_polynomial[1] = b_;
+//      tau_polynomial[0] = c_;
+//      tau_polynomial /= tau_polynomial[2];
+
+      // Calculating myself...
+      tau_polynomial[2] = a(_12) * square(w[1]) - a(_01);
+      tau_polynomial[1] = 2 * (a(_12) * w[0] * w[1]
+                               - a(_12) * b(_01) * w[1]
+                               - a(_01) * b(_12));
+      tau_polynomial[0] = a(_12) * square(w[0]) - 2 * a(_12) * b(_01) * w[0] + a(_12) - a(_01);
+
+
       SARA_CHECK(tau_polynomial);
 
       auto tau = std::array<T, 2>{};
@@ -444,7 +456,7 @@ namespace DO::Sara {
       SARA_DEBUG << "===================================" << std::endl;
       SARA_DEBUG << "RECOVERING CANDIDATE  POSE" << std::endl;
       SARA_DEBUG << "reconstructed distances = "
-                 << Y.colwise().norm().transpose() << std::endl;
+                 << Y.colwise().norm() << std::endl;
       SARA_DEBUG << "input distances = " << a.transpose() << std::endl;
 
       auto X = Mat3{};
