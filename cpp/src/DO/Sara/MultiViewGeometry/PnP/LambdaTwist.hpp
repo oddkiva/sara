@@ -71,7 +71,7 @@ namespace DO::Sara {
               0, -b(_12),      1;
       // clang-format on
 
-      // Form the conical equations.
+      // Form the conic equations.
       D[0] = M[_01] * a(_12) - M[_12] * a(_01);
       D[1] = M[_02] * a(_12) - M[_12] * a(_02);
     }
