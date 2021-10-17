@@ -38,39 +38,19 @@ namespace DO::Sara {
       : x{scene_points}
       , y{backprojected_rays}
     {
-#ifdef DEBUG
-      SARA_DEBUG << "X = scene points =\n" << x << std::endl;
-      SARA_DEBUG << "Y = rays =\n" << y << std::endl;
-      SARA_DEBUG << "colwise norm(y) = " << y.colwise().squaredNorm() << std::endl;
-#endif
-
-      calculate_auxiliary_variables();
-      solve_cubic_polynomial();
-      solve_for_lambda();
-      recover_all_poses();
     }
 
     inline auto calculate_auxiliary_variables() -> void
     {
-#ifdef DEBUG
-      print_stage("Auxiliary variables");
-#endif
-
       // Calculate the distances between each scene points.
       a(_01) = (x.col(0) - x.col(1)).squaredNorm();
       a(_02) = (x.col(0) - x.col(2)).squaredNorm();
       a(_12) = (x.col(1) - x.col(2)).squaredNorm();
-#ifdef DEBUG
-      SARA_DEBUG << "a = squared distances = " << a.transpose() << std::endl;
-#endif
 
       // Calculate the cosine between the 3D rays.
       b(_01) = y.col(0).dot(y.col(1));
       b(_02) = y.col(0).dot(y.col(2));
       b(_12) = y.col(1).dot(y.col(2));
-#ifdef DEBUG
-      SARA_DEBUG << "b = angle cosines between rays = " << b.transpose() << std::endl;
-#endif
 
       // clang-format off
       M[_01] <<
@@ -92,24 +72,14 @@ namespace DO::Sara {
       // Form the conical equations.
       D[0] = M[_01] * a(_12) - M[_12] * a(_01);
       D[1] = M[_02] * a(_12) - M[_12] * a(_02);
-
-#ifdef DEBUG
-      SARA_DEBUG << "M01 =\n" << M[_01] << std::endl;
-      SARA_DEBUG << "M02 =\n" << M[_02] << std::endl;
-      SARA_DEBUG << "M12 =\n" << M[_12] << std::endl;
-      SARA_DEBUG << "D0 =\n" << D[0] << std::endl;
-      SARA_DEBUG << "D1 =\n" << D[1] << std::endl;
-#endif
     }
 
-    inline auto solve_cubic_polynomial() -> void
+    inline auto solve_cubic_equation() -> void
     {
-#ifdef DEBUG
-      print_stage("Solve cubic polynomial");
-#endif
-
 #define USE_PAPER_FORMULA
 #ifdef USE_PAPER_FORMULA
+      // N.B.: the paper wrongly swapped the coefficients c[2] and c[1].
+      //
       // clang-format off
       c[3] = D[1].determinant();
 
@@ -129,7 +99,7 @@ namespace DO::Sara {
 
       c[0] = D[0].determinant();
       // clang-format on
-#else  // Double-check with SymPy.
+#else  // We also double-checked with SymPy: it is correct but not very readable
       const auto& D1 = D[0];
       const auto& D2 = D[1];
       c[3] = D2(0, 0) * D2(1, 1) * D2(2, 2) - D2(0, 0) * D2(1, 2) * D2(2, 1) -
@@ -160,46 +130,43 @@ namespace DO::Sara {
 
       // Solve the cubic polynomial.
       c /= c[3];
-      SARA_CHECK(c);
       const auto roots_all_real =
           compute_cubic_real_roots(c, gamma[0], gamma[1], gamma[2]);
-#ifdef DEBUG
-      SARA_CHECK(roots_all_real);
-      SARA_CHECK(gamma[0]);
-      SARA_CHECK(gamma[1]);
-      SARA_CHECK(gamma[2]);
-      SARA_CHECK(c(gamma[0]));
-#endif
     }
 
     inline auto solve_for_lambda() -> void
     {
-      print_stage("solve for lambda");
-
       // The first root is always real in this implementation.
       const Mat3 D0 = D[0] + gamma[0] * D[1];
+#ifdef DEBUG
       SARA_DEBUG << "D0 =\n" << D0 << std::endl;
       SARA_DEBUG << "det(D0) = " << D0.determinant() << std::endl;
+#endif
 
       eig3x3known0(D0, E, sigma);
+#ifdef DEBUG
       SARA_DEBUG << "E =\n" << E << std::endl;
       SARA_DEBUG << "sigma = " << sigma.transpose() << std::endl;
-
       SARA_CHECK((D0 - E * sigma.asDiagonal() * E.transpose()).norm());
       SARA_CHECK(E.colwise().norm());
       SARA_CHECK(E.determinant());
+#endif
 
       const auto sp = std::sqrt(-sigma[1] / sigma[0]);
       const auto sm = -sp;
+#ifdef DEBUG
       SARA_CHECK(sp);
       SARA_CHECK(sm);
+#endif
 
       const auto wm = calculate_w(sm);
       const auto wp = calculate_w(sp);
+#ifdef DEBUG
       SARA_CHECK(wm[0]);
       SARA_CHECK(wm[1]);
       SARA_CHECK(wp[0]);
       SARA_CHECK(wp[1]);
+#endif
 
       const auto tau_m = solve_tau_quadratic_polynomial(wm);
       const auto tau_p = solve_tau_quadratic_polynomial(wp);
@@ -252,7 +219,7 @@ namespace DO::Sara {
      *  1. Calculate the eigenvalues by solving the characteristic polynomial.
      *  2. Calculate the eigenvectors from the eigenvalues.
      */
-    inline auto eig3x3known0(const Mat3& M, Mat3& B, Vec3& s) -> void
+    static inline auto eig3x3known0(const Mat3& M, Mat3& B, Vec3& s) -> void
     {
 #define EIGEN_IMPL
 #if defined(EIGEN_IMPL)
