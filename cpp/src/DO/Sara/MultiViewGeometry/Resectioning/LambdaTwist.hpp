@@ -46,7 +46,7 @@ namespace DO::Sara {
       calculate_auxiliary_variables();
       solve_cubic_polynomial();
       solve_for_lambda();
-      // recover_all_poses();
+      recover_all_poses();
     }
 
     inline auto calculate_auxiliary_variables() -> void
@@ -498,19 +498,16 @@ namespace DO::Sara {
     {
       print_stage("Calculate lambda (the distances)");
       auto lambda = Vec3{};
-      lambda(1) = std::sqrt(a(_12) / (square(tau) - 2 * b(_12) + tau + 1));
+      lambda(1) = std::sqrt(a(_12) / (square(tau) - 2 * b(_12) * tau + 1));
       lambda(2) = tau * lambda(1);
       lambda(0) = w[0] * lambda(1) + w[1] * lambda(2);
-      SARA_CHECK(lambda.transpose());
 
       SARA_CHECK(tau);
+      SARA_CHECK(lambda.transpose());
       SARA_CHECK(lambda.transpose() * D[0] * lambda);
       SARA_CHECK(lambda.transpose() * D[1] * lambda);
 
       SARA_DEBUG << "ARE THE LAMBDA CORRECT MATHEMATICALLY?????" << std::endl;
-      SARA_CHECK(lambda.transpose() * M[_01] * lambda);
-      SARA_CHECK(lambda.transpose() * M[_02] * lambda);
-      SARA_CHECK(lambda.transpose() * M[_12] * lambda);
       SARA_CHECK(lambda.transpose() * M[_01] * lambda - a(_01));
       SARA_CHECK(lambda.transpose() * M[_02] * lambda - a(_02));
       SARA_CHECK(lambda.transpose() * M[_12] * lambda - a(_12));
