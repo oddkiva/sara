@@ -174,6 +174,11 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
           return (C.matrix() - pose).norm() < 1e-6;
         })  //
     );
+    // Make sure the rotational part of each pose is indeed a rotation.
+    for (const auto& pose: lt.pose_k) {
+      const auto R = pose.topLeftCorner<3, 3>();
+      BOOST_REQUIRE_CLOSE(R.determinant(), 1, 1e-6);
+    }
 
     // Finally test again with the function that wraps it all.
     const auto candidate_poses = sara::solve_p3p(  //

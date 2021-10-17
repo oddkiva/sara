@@ -17,11 +17,17 @@
 
 #include <Eigen/Dense>
 
+// #define EIGEN_IMPL
 // #define DEBUG_LAMBDA_TWIST
 
 
 namespace DO::Sara {
 
+  //! @brief P3P solver.
+  /*!
+   *  This structure implements Lambda-Twist.
+   *  https://openaccess.thecvf.com/content_ECCV_2018/papers/Mikael_Persson_Lambda_Twist_An_ECCV_2018_paper.pdf
+   */
   template <typename T>
   struct LambdaTwist
   {
@@ -29,6 +35,10 @@ namespace DO::Sara {
     using Mat3 = Eigen::Matrix<T, 3, 3>;
     using Mat34 = Eigen::Matrix<T, 3, 4>;
 
+    //! @brief Indices which are zero-based.
+    //!
+    //! The paper mixes zero-based and one-based indices which makes it hard to
+    //! follow at times.
     enum Index
     {
       _01 = 0,
@@ -36,12 +46,14 @@ namespace DO::Sara {
       _12 = 2
     };
 
+    //! @brief Constructor.
     inline LambdaTwist(const Mat3& scene_points, const Mat3& backprojected_rays)
       : x{scene_points}
       , y{backprojected_rays}
     {
     }
 
+    //! @brief Step 1/4.
     inline auto calculate_auxiliary_variables() -> void
     {
       // Calculate the distances between each scene points.
@@ -76,6 +88,7 @@ namespace DO::Sara {
       D[1] = M[_02] * a(_12) - M[_12] * a(_02);
     }
 
+    //! @brief Step 2/4.
     inline auto solve_cubic_equation() -> void
     {
 #define USE_PAPER_FORMULA
@@ -135,6 +148,7 @@ namespace DO::Sara {
       compute_cubic_real_roots(c, gamma[0], gamma[1], gamma[2]);
     }
 
+    //! @brief Step 3/4.
     inline auto solve_for_lambda() -> void
     {
       // The first root is always real in this implementation.
@@ -201,6 +215,7 @@ namespace DO::Sara {
       }
     }
 
+    //! @brief Step 4/4.
     inline auto recover_all_poses() -> void
     {
       for (const auto& lambda : lambda_k)
@@ -214,6 +229,8 @@ namespace DO::Sara {
      *  following approach:
      *  1. Calculate the eigenvalues by solving the characteristic polynomial.
      *  2. Calculate the eigenvectors from the eigenvalues.
+     *
+     *  This is part of step 3/4.
      */
     static inline auto eig3x3known0(const Mat3& M, Mat3& B, Vec3& s) -> void
     {
@@ -221,7 +238,6 @@ namespace DO::Sara {
       print_stage("eig3x3known0");
 #endif
 
-// #define EIGEN_IMPL
 #if defined(EIGEN_IMPL)
       // More robust, much simpler and also direct.
       // Might be slower, but this should be acceptable.
@@ -281,7 +297,7 @@ namespace DO::Sara {
       //
       // The first eigenvalue is positive and the second one is negative.
       // So swap the eigenvalues if necessary.
-      if (s[0] < s[1]) 
+      if (s[0] < s[1])
         std::swap(s(0), s(1));
 
       // Now we are following D. Eberly's paper instead of the method proposed
@@ -416,10 +432,16 @@ namespace DO::Sara {
       // Instead, let's just use the cross product.
       B.col(2) = B.col(0).cross(B.col(1));
 
+#  ifdef DEBUG_LAMBDA_TWIST
       SARA_DEBUG << "B =\n" << B << std::endl;
+#  endif
 #endif
     }
 
+    //! @brief Calculate the linear combination which relates the scales:
+    //! λ[0] = w[0] * λ[1] + w[1] * λ[2].
+    //!
+    //! This is part of step 3/4.
     inline auto calculate_w(T s) const -> std::array<T, 2>
     {
 #ifdef DEBUG_LAMBDA_TWIST
@@ -437,6 +459,10 @@ namespace DO::Sara {
       return {w0, w1};
     }
 
+    //! @brief Solve the auxiliary scale τ that relates the scales:
+    //! λ[1] = τ * λ[2].
+    //!
+    //! This is part of step 3/4.
     inline auto solve_tau_quadratic_polynomial(const std::array<T, 2>& w) const
         -> std::array<T, 2>
     {
@@ -447,6 +473,7 @@ namespace DO::Sara {
       // The τ-polynomial in tau arises from the quadratic form described in
       // Equation (14) of the paper.
       auto tau_polynomial = UnivariatePolynomial<T, 2>{};
+
       // The coefficients of the τ-polynomial as shown in Equation (15) of the
       // paper are wrong.
       // After calculating by hand and double-checking the formula with SymPy,
@@ -482,6 +509,9 @@ namespace DO::Sara {
       return tau;
     };
 
+    //! @brief Determine the scales λ from the auxiliary variables.
+    //!
+    //! This is part of step 3/4.
     inline auto calculate_lambda(const T tau, const std::array<T, 2>& w) -> Vec3
     {
 #ifdef DEBUG_LAMBDA_TWIST
@@ -507,6 +537,8 @@ namespace DO::Sara {
       return lambda;
     };
 
+    //! @brief Recover the candidate poses from the candidate scales λ.
+    //! This is part of step 4/4.
     inline auto recover_pose(const Vec3& lambda) -> Mat34
     {
       auto Y = Mat3{};
@@ -574,6 +606,7 @@ namespace DO::Sara {
   };
 
 
+  //! @brief Solve the P3P problem using Lambda-Twist.
   template <typename T>
   inline auto solve_p3p(const Eigen::Matrix<T, 3, 3>& scene_points,
                         const Eigen::Matrix<T, 3, 3>& backprojected_rays)
