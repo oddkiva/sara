@@ -51,6 +51,8 @@ namespace DO::Sara {
 
     inline auto calculate_auxiliary_variables() -> void
     {
+      print_stage("Auxiliary variables");
+
       // Calculate the cosine between the 3D rays.
       b(_01) = y.col(0).dot(y.col(1));
       b(_02) = y.col(0).dot(y.col(2));
@@ -95,25 +97,56 @@ namespace DO::Sara {
 
     inline auto solve_cubic_polynomial() -> void
     {
+      print_stage("Solve cubic polynomial");
+#define USE_PAPER_FORMULA
+#ifdef USE_PAPER_FORMULA
       // clang-format off
       c[3] = D[1].determinant();
 
-      c[2] = D[1].col(0).dot(D[0].col(1).cross(D[0].col(2))) +
-             // d21.T        (d12        x      d13)         +
-             D[1].col(1).dot(D[0].col(2).cross(D[0].col(0))) +
-             // d22.T       (d13         x      d11)          +
-             D[1].col(2).dot(D[0].col(0).cross(D[0].col(1)));
-             // d23.T       (d11         x      d12)
-
-      c[1] = D[0].col(0).dot(D[1].col(1).cross(D[1].col(2))) +
+      c[2] = D[0].col(0).dot(D[1].col(1).cross(D[1].col(2))) +
              // d11.T       (d22         x      d23)   +
              D[0].col(1).dot(D[1].col(2).cross(D[1].col(0))) +
              // d12.T       (d23         x      d21)   +
              D[0].col(2).dot(D[1].col(0).cross(D[1].col(1)));
              // d13.T       (d21         x      d22)
 
+      c[1] = D[1].col(0).dot(D[0].col(1).cross(D[0].col(2))) +
+             // d21.T        (d12        x      d13)         +
+             D[1].col(1).dot(D[0].col(2).cross(D[0].col(0))) +
+             // d22.T       (d13         x      d11)          +
+             D[1].col(2).dot(D[0].col(0).cross(D[0].col(1)));
+             // d23.T       (d11         x      d12)
+
       c[0] = D[0].determinant();
       // clang-format on
+#else  // Double-check with SymPy.
+      const auto& D1 = D[0];
+      const auto& D2 = D[1];
+      c[3] = D2(0, 0) * D2(1, 1) * D2(2, 2) - D2(0, 0) * D2(1, 2) * D2(2, 1) -
+             D2(0, 1) * D2(1, 0) * D2(2, 2) + D2(0, 1) * D2(1, 2) * D2(2, 0) +
+             D2(0, 2) * D2(1, 0) * D2(2, 1) - D2(0, 2) * D2(1, 1) * D2(2, 0);
+      c[2] = D1(0, 0) * D2(1, 1) * D2(2, 2) - D1(0, 0) * D2(1, 2) * D2(2, 1) -
+             D1(0, 1) * D2(1, 0) * D2(2, 2) + D1(0, 1) * D2(1, 2) * D2(2, 0) +
+             D1(0, 2) * D2(1, 0) * D2(2, 1) - D1(0, 2) * D2(1, 1) * D2(2, 0) -
+             D1(1, 0) * D2(0, 1) * D2(2, 2) + D1(1, 0) * D2(0, 2) * D2(2, 1) +
+             D1(1, 1) * D2(0, 0) * D2(2, 2) - D1(1, 1) * D2(0, 2) * D2(2, 0) -
+             D1(1, 2) * D2(0, 0) * D2(2, 1) + D1(1, 2) * D2(0, 1) * D2(2, 0) +
+             D1(2, 0) * D2(0, 1) * D2(1, 2) - D1(2, 0) * D2(0, 2) * D2(1, 1) -
+             D1(2, 1) * D2(0, 0) * D2(1, 2) + D1(2, 1) * D2(0, 2) * D2(1, 0) +
+             D1(2, 2) * D2(0, 0) * D2(1, 1) - D1(2, 2) * D2(0, 1) * D2(1, 0);
+      c[1] = D1(0, 0) * D1(1, 1) * D2(2, 2) - D1(0, 0) * D1(1, 2) * D2(2, 1) -
+             D1(0, 0) * D1(2, 1) * D2(1, 2) + D1(0, 0) * D1(2, 2) * D2(1, 1) -
+             D1(0, 1) * D1(1, 0) * D2(2, 2) + D1(0, 1) * D1(1, 2) * D2(2, 0) +
+             D1(0, 1) * D1(2, 0) * D2(1, 2) - D1(0, 1) * D1(2, 2) * D2(1, 0) +
+             D1(0, 2) * D1(1, 0) * D2(2, 1) - D1(0, 2) * D1(1, 1) * D2(2, 0) -
+             D1(0, 2) * D1(2, 0) * D2(1, 1) + D1(0, 2) * D1(2, 1) * D2(1, 0) +
+             D1(1, 0) * D1(2, 1) * D2(0, 2) - D1(1, 0) * D1(2, 2) * D2(0, 1) -
+             D1(1, 1) * D1(2, 0) * D2(0, 2) + D1(1, 1) * D1(2, 2) * D2(0, 0) +
+             D1(1, 2) * D1(2, 0) * D2(0, 1) - D1(1, 2) * D1(2, 1) * D2(0, 0);
+      c[0] = D1(0, 0) * D1(1, 1) * D1(2, 2) - D1(0, 0) * D1(1, 2) * D1(2, 1) -
+             D1(0, 1) * D1(1, 0) * D1(2, 2) + D1(0, 1) * D1(1, 2) * D1(2, 0) +
+             D1(0, 2) * D1(1, 0) * D1(2, 1) - D1(0, 2) * D1(1, 1) * D1(2, 0);
+#endif
 
       // Solve the cubic polynomial.
       c /= c[3];
@@ -129,6 +162,8 @@ namespace DO::Sara {
 
     inline auto solve_for_lambda() -> void
     {
+      print_stage("solve for lambda");
+
       // The first root is always real in this implementation.
       const Mat3 D0 = D[0] + gamma[0] * D[1];
       SARA_DEBUG << "D0 =\n" << D0 << std::endl;
@@ -138,8 +173,9 @@ namespace DO::Sara {
       SARA_DEBUG << "E =\n" << E << std::endl;
       SARA_DEBUG << "sigma = " << sigma.transpose() << std::endl;
 
-      SARA_DEBUG << "D0 - E * sigma * E.T =\n"
-                 << D0 - E * sigma.asDiagonal() * E.transpose() << std::endl;
+      SARA_CHECK((D0 - E * sigma.asDiagonal() * E.transpose()).norm());
+      SARA_CHECK(E.colwise().norm());
+      SARA_CHECK(E.determinant());
 
       const auto sp = std::sqrt(-sigma[1] / sigma[0]);
       const auto sm = -sp;
@@ -162,7 +198,12 @@ namespace DO::Sara {
           continue;
         if (tau <= 0)
           continue;
-        lambda_k.push_back(calculate_lambda(std::real(tau), wm));
+
+        const auto lambda = calculate_lambda(tau, wm);
+        if (!(lambda.array() > 0).all())
+          continue;
+
+        lambda_k.push_back(lambda);
         SARA_DEBUG << "lambda_km = " << lambda_k.back().transpose() << std::endl;
       }
 
@@ -172,7 +213,12 @@ namespace DO::Sara {
           continue;
         if (tau <= 0)
           continue;
-        lambda_k.push_back(calculate_lambda(std::real(tau), wp));
+
+        const auto lambda = calculate_lambda(tau, wp);
+        if (!(lambda.array() > 0).all())
+          continue;
+
+        lambda_k.push_back(lambda);
         SARA_DEBUG << "lambda_kp = "<< lambda_k.back().transpose() << std::endl;
       }
     }
@@ -376,6 +422,8 @@ namespace DO::Sara {
 
     inline auto calculate_w(T s) const -> std::array<T, 2>
     {
+      print_stage("Calculate w");
+
       SARA_DEBUG << "E =\n" << E  << std::endl;
       const auto& e0 = E(0, 0); const auto& e1 = E(0, 1);
       const auto& e3 = E(1, 0); const auto& e4 = E(1, 1);
@@ -394,69 +442,91 @@ namespace DO::Sara {
     inline auto solve_tau_quadratic_polynomial(const std::array<T, 2>& w) const
         -> std::array<T, 2>
     {
+      print_stage("Calculate tau roots");
+
       // The τ-polynomial in tau arises from the quadratic form described in
       // Equation (14) of the paper.
       auto tau_polynomial = UnivariatePolynomial<T, 2>{};
+// #define USE_PAPER_TAU_FORMULA
+#ifdef USE_PAPER_TAU_FORMULA
       // The coefficients of the τ-polynomial as shown in Equation (15) of the
       // paper.
       //
       // The coefficients reported in the paper are false unfortunately, so we
       // have to dig into the code published in GitHub.
-//      const auto& w0 = w[0];
-//      const auto& w1 = w[1];
-//      const auto a12 = a(_01);
-//      const auto a13 = a(_02);
-//      const auto b12 = b(_01);
-//      const auto b13 = b(_02);
-//      const auto a_ = 1 / ((a13 - a12) * w1 * w1 - a12 * b13 * w1 - a12);
-//      const auto b_ =
-//          (a13 * b12 * w1 - a12 * b13 * w0 - 2 * w0 * w1 * (a12 - a13)) * a_;
-//      const auto c_ = ((a13 - a12) * w0 * w0 + a13 * b12 * w0 + a13) * a_;
-//      tau_polynomial[2] = a_;
-//      tau_polynomial[1] = b_;
-//      tau_polynomial[0] = c_;
-//      tau_polynomial /= tau_polynomial[2];
-
-      // Calculating myself...
-      tau_polynomial[2] = a(_12) * square(w[1]) - a(_01);
-      tau_polynomial[1] = 2 * (a(_12) * w[0] * w[1]
-                               - a(_12) * b(_01) * w[1]
-                               - a(_01) * b(_12));
-      tau_polynomial[0] = a(_12) * square(w[0]) - 2 * a(_12) * b(_01) * w[0] + a(_12) - a(_01);
-
+      const auto& w0 = w[0];
+      const auto& w1 = w[1];
+      const auto a12 = a(_01);
+      const auto a13 = a(_02);
+      const auto b12 = b(_01);
+      const auto b13 = b(_02);
+      const auto a_ = 1 / ((a13 - a12) * w1 * w1 - a12 * b13 * w1 - a12);
+      const auto b_ =
+          (a13 * b12 * w1 - a12 * b13 * w0 - 2 * w0 * w1 * (a12 - a13)) * a_;
+      const auto c_ = ((a13 - a12) * w0 * w0 + a13 * b12 * w0 + a13) * a_;
+      tau_polynomial[2] = a_;
+      tau_polynomial[1] = b_;
+      tau_polynomial[0] = c_;
+#else  // check with sympy
+      const auto& w0 = w[0];
+      const auto& w1 = w[1];
+      const auto& a01 = a(_01);
+      const auto& a12 = a(_12);
+      const auto& b01 = b(_01);
+      const auto& b12 = b(_12);
+      tau_polynomial[2] = -a01 + a12 * square(w1);
+      tau_polynomial[1] = 2 * a01 * b12         //
+                          - 2 * a12 * b01 * w1  //
+                          + 2 * a12 * w0 * w1;
+      tau_polynomial[0] = -a01 - 2 * a12 * b01 * w0 + a12 * square(w0) + a12;
+#endif
 
       SARA_CHECK(tau_polynomial);
-
+      tau_polynomial /= tau_polynomial[2];
       auto tau = std::array<T, 2>{};
       if (!compute_quadratic_real_roots(tau_polynomial, tau[0], tau[1]))
         std::fill(tau.begin(), tau.end(), std::numeric_limits<T>::quiet_NaN());
       SARA_CHECK(tau[0]);
       SARA_CHECK(tau[1]);
+      SARA_CHECK(tau_polynomial(tau[0]));
+      SARA_CHECK(tau_polynomial(tau[1]));
 
       return tau;
     };
 
     inline auto calculate_lambda(const T tau, const std::array<T, 2>& w) -> Vec3
     {
+      print_stage("Calculate lambda (the distances)");
       auto lambda = Vec3{};
-      lambda(1) = std::sqrt(a(_12) / (tau * (b(_12) + tau) + 1));
+      lambda(1) = std::sqrt(a(_12) / (square(tau) - 2 * b(_12) + tau + 1));
       lambda(2) = tau * lambda(1);
       lambda(0) = w[0] * lambda(1) + w[1] * lambda(2);
+      SARA_CHECK(lambda.transpose());
+
       SARA_CHECK(tau);
+      SARA_CHECK(lambda.transpose() * D[0] * lambda);
       SARA_CHECK(lambda.transpose() * D[1] * lambda);
+
+      SARA_DEBUG << "ARE THE LAMBDA CORRECT MATHEMATICALLY?????" << std::endl;
+      SARA_CHECK(lambda.transpose() * M[_01] * lambda);
+      SARA_CHECK(lambda.transpose() * M[_02] * lambda);
+      SARA_CHECK(lambda.transpose() * M[_12] * lambda);
+      SARA_CHECK(lambda.transpose() * M[_01] * lambda - a(_01));
+      SARA_CHECK(lambda.transpose() * M[_02] * lambda - a(_02));
+      SARA_CHECK(lambda.transpose() * M[_12] * lambda - a(_12));
+
       return lambda;
     };
 
     inline auto recover_pose(const Vec3& lambda) -> Mat34
     {
+      print_stage("Recover pose");
       auto Y = Mat3{};
       Y.col(0) = lambda(0) * y.col(0) - lambda(1) * y.col(1);
       Y.col(1) = lambda(1) * y.col(1) - lambda(2) * y.col(2);
       Y.col(2) = Y.col(0).cross(Y.col(1));
-      SARA_DEBUG << "===================================" << std::endl;
-      SARA_DEBUG << "RECOVERING CANDIDATE  POSE" << std::endl;
-      SARA_DEBUG << "reconstructed distances = "
-                 << Y.colwise().norm() << std::endl;
+      SARA_DEBUG << "reconstructed distances = " << Y.colwise().norm()
+                 << std::endl;
       SARA_DEBUG << "input distances = " << a.transpose() << std::endl;
 
       auto X = Mat3{};
@@ -480,7 +550,6 @@ namespace DO::Sara {
       const Eigen::Matrix<T, 3, 3> Yc = Xc.colwise().normalized();
       SARA_DEBUG << "Yc = recalculated rays =\n" << Yc << std::endl;
       SARA_DEBUG << "y = input rays =\n" << y << std::endl;
-
 
       return pose;
     };
