@@ -241,28 +241,28 @@ namespace DO::Sara {
 #if defined(EIGEN_IMPL)
       // More robust, much simpler and also direct.
       // Might be slower, but this should be acceptable.
-      auto eigenSolver = Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d>{};
-      eigenSolver.computeDirect(M);
+      auto es = Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d>{};
+      es.computeDirect(M);
 #  ifdef DEBUG_LAMBDA_TWIST
-      std::cout << "Eigenvalues = " << eigenSolver.eigenvalues().transpose()
+      std::cout << "Eigenvalues = " << es.eigenvalues().transpose()
                 << std::endl;
       std::cout << "Eigenvectors = " << std::endl
-                << eigenSolver.eigenvectors() << std::endl;
+                << es.eigenvectors() << std::endl;
 #  endif
 
       // The first eigenvalue is always negative, the second is zero, and the
       // third one is positive.
       // The right-handedness is preserved if we rotate the column-vectors.
-      B.col(0) = eigenSolver.eigenvectors().col(2);
-      B.col(1) = eigenSolver.eigenvectors().col(0);
-      B.col(2) = eigenSolver.eigenvectors().col(1);
+      B.col(0) = es.eigenvectors().col(2);
+      B.col(1) = es.eigenvectors().col(0);
+      B.col(2) = es.eigenvectors().col(1);
 #  ifdef DEBUG_LAMBDA_TWIST
       SARA_CHECK(B.determinant());
 #  endif
 
-      s(0) = eigenSolver.eigenvalues()(2);
-      s(1) = eigenSolver.eigenvalues()(0);
-      s(2) = eigenSolver.eigenvalues()(1);
+      s(0) = es.eigenvalues()(2);
+      s(1) = es.eigenvalues()(0);
+      s(2) = es.eigenvalues()(1);
 #else  // MINE
       // Calculate the eigen values by solving the polynomial characteristic in
       // dimension 3:
@@ -558,9 +558,8 @@ namespace DO::Sara {
       pose.leftCols(3) = R;
       pose.col(3) = t;
 
-      const Eigen::Matrix<T, 3, 3> Xc = (pose * x.colwise().homogeneous());
-
 #ifdef DEBUG_LAMBDA_TWIST
+      const Eigen::Matrix<T, 3, 3> Xc = (pose * x.colwise().homogeneous());
       SARA_DEBUG << "Recovered R =\n" << R << std::endl;
       SARA_DEBUG << "Recovered t = " << t.transpose() << std::endl;
       SARA_DEBUG << "Xc = camera coordinates =\n" << Xc << std::endl;
