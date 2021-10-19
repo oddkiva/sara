@@ -127,27 +127,29 @@ the distances.
   ||\mathbf{x}_i - \mathbf{x}_j||_2
 \end{equation}
 
-Let us assume for a moment that we know each scale $\lambda_i$. We are then able
-to completely determine the rotation $\mathbf{R}$ from the three direction
-vectors, say
+Let us assume for a moment that we know each scale $\lambda_i$. Then we are able
+to completely determine the rotation $\mathbf{R}$, by forming three direction
+vectors
 
 \begin{equation}
   \left\{
   \begin{array}{c}
-    \mathbf{z}_{12} = \lambda_1 \mathbf{y}_1 - \lambda_2 \mathbf{y}_2 \\
-    \mathbf{z}_{13} = \lambda_1 \mathbf{y}_1 - \lambda_3 \mathbf{y}_3 \\
-    \mathbf{z}_{23} = \lambda_1 \mathbf{y}_2 - \lambda_3 \mathbf{y}_3
+    \mathbf{z}_{01} = \lambda_0 \mathbf{y}_0 - \lambda_1 \mathbf{y}_1 \\
+    \mathbf{z}_{02} = \lambda_0 \mathbf{y}_0 - \lambda_2 \mathbf{y}_2 \\
+    \mathbf{z}_{12} = \lambda_1 \mathbf{y}_1 - \lambda_2 \mathbf{y}_2
   \end{array}
   \right.,
 \end{equation}
 
-Because we know that
+These direction vectors are fully determined as the scales $\lambda_i$ are
+known. And because we know that
 
 \begin{equation}
   \lambda_i \mathbf{y}_i = \mathbf{R} \mathbf{x}_i + \mathbf{t},
 \end{equation}
 
-the three direction vectors $\mathbf{z}_{ij}$ satisfy the matrix-vector product
+By plugging these equalities into, these three direction vectors $\mathbf{z}_{ij}$
+also satisfy the matrix-vector product
 
 \begin{equation}
   \mathbf{z}_{ij} = \mathbf{R} (\mathbf{x}_i - \mathbf{x}_j)
@@ -155,12 +157,28 @@ the three direction vectors $\mathbf{z}_{ij}$ satisfy the matrix-vector product
 
 This can be rewritten as the matrix system:
 \begin{equation}
+  \left[
+    \begin{array}{c|c|c}
+      \mathbf{z}_{01} & \mathbf{z}_{02} & \mathbf{z}_{12}
+    \end{array}
+  \right] =
+  \mathbf{R}
+  \left[
+    \begin{array}{c|c|c}
+      \mathbf{x}_0 - \mathbf{x}_1 &
+      \mathbf{x}_0 - \mathbf{x}_2 &
+      \mathbf{x}_1 - \mathbf{x}_2
+    \end{array}
+  \right]
+\end{equation}
+
+By introducing some more notations, the above matrix system emerges as follows
+\begin{equation}
   \mathbf{Z} = \mathbf{R} \mathbf{X}
 \end{equation}
 
 Under the assumption that the three scene points $\mathbf{x}_i$ are not aligned,
-the matrix $\mathbf{X}$ is then invertible, thus enabling us to calculate the
-rotation as
+the matrix $\mathbf{X}$ is then invertible and we can calculate the rotation as
 
 \begin{equation}
   \mathbf{R} = \mathbf{Z} \mathbf{X}^{-1},
@@ -199,9 +217,11 @@ remarkable identity:
   = || \mathbf{x}_i - \mathbf{x}_j ||_2^2
 \end{equation}
 
-[@PerssonN:2018:eccv] recognize three degenerate quadratic forms in the 3D
-vector $\mathbf{\Lambda} = \begin{bmatrix} \lambda_1 \\ \lambda_2 \\ \lambda_3
-\end{bmatrix}$
+#### Three Inhomogeneous Quadrics
+
+[@PerssonN:2018:eccv] recognize three degenerate inhomogeneous quadratic forms
+in the 3D vector $\mathbf{\Lambda} = \begin{bmatrix} \lambda_1 \\ \lambda_2 \\
+\lambda_3 \end{bmatrix}$
 
 By denoting the Euclidean squared distance by
 \begin{equation}
@@ -219,25 +239,25 @@ We can rewrite these into quadratic matrix form as
 
 where
 \begin{equation}
+  \mathbf{M}_{01} = \begin{bmatrix}
+    1 & -b_{01} & 0 \\
+    -b_{01} & 1 & 0 \\
+    0 & 0 & 0 \\
+  \end{bmatrix}
+\end{equation}
+
+\begin{equation}
+  \mathbf{M}_{02} = \begin{bmatrix}
+    1 & 0 & -b_{02} \\
+    0 & 0 & 0 \\
+    -b_{02} & 0 & 1 \\
+  \end{bmatrix}
+\end{equation}
+
+\begin{equation}
   \mathbf{M}_{12} = \begin{bmatrix}
-    1 & -b_{12} & 0 \\
-    -b_{12} & 1 & 0 \\
     0 & 0 & 0 \\
-  \end{bmatrix}
-\end{equation}
-
-\begin{equation}
-  \mathbf{M}_{13} = \begin{bmatrix}
-    1 & 0 & -b_{13} \\
-    0 & 0 & 0 \\
-    -b_{12} & 0 & 1 \\
-  \end{bmatrix}
-\end{equation}
-
-\begin{equation}
-  \mathbf{M}_{23} = \begin{bmatrix}
-    0 & 0 & 0 \\
-    0 & 1 & -b_{23} \\
+    0 & 1 & -b_{12} \\
     0 & -b_{12} & 1 \\
   \end{bmatrix}
 \end{equation}
@@ -262,3 +282,60 @@ characterize these three quadratic form geometrically as follows.
 
 - the axis of each of these cylinders are mutually orthogonal as the zero column vector
   appears at different column index upon examination of the matrices.
+
+#### Two Homogeneous Quadrics
+
+The $\mathbf{\Lambda}$ that lie in the three inhomogeneous quadrics necessarily
+lie in two homogeneous quadrics.
+
+They are obtained by linearly combining the three inhomogeneous quadrics.
+
+Specifically, by
+\begin{equation}
+  \mathbf{D}_0 = \mathbf{M}_{01} a_{12} - \mathbf{M}_{12} a_{01}
+\end{equation}
+
+\begin{equation}
+  \mathbf{D}_1 = \mathbf{M}_{02} a_{12} - \mathbf{M}_{12} a_{02}
+\end{equation}
+
+We can easily see that algebraically that
+\begin{equation}
+  \mathbf{\Lambda}^T \mathbf{D}_i \mathbf{\Lambda} = 0
+\end{equation}
+
+These are the equations that characterizes the two homogeneous quadrics.
+
+#### Cubic Equation
+
+[@PerssonN:2018:eccv] goes another step further by linearly combining the two
+homogeneous quadrics, which leads us to solve a cubic equation:
+
+The paper wrongly reports the formula $c_2$ and $c_1$: they are actually swapped
+and we can easily double-check this with SymPy.
+
+TODO.
+
+
+##### The Diagonalization Method
+
+First let us explain the Eigen decomposition proposed by the paper.
+- It first determines the eigenvalues by determining the roots of the
+  characteristic polynomial.
+- Then the method calculates the associated eigenvectors.
+
+Now a few more words are necessary, the proposed eigen decomposition is not
+entirely robust and a better approach has been proposed by David Eberly (TODO
+cite). We follow Eberly's approach, which may introduce a few more operations
+but remains still negligible. But the benefit outweighs the downside.
+
+TODO.
+
+##### The $\tau$ Polynomial.
+
+The coefficients of the $\tau$ polynomial are wrongly reported. By manually
+recalculating the coefficients and double-checking with SymPy, instead the
+coefficients.
+
+That might make the Gauss-Newton unnecessary as advised in the paper, or at
+least require lot less iterations.
