@@ -564,6 +564,8 @@ least require less iterations.
 ##### Proof-reading
 
 ```{python, echo=TRUE, cache=TRUE}
+import sympy as sp
+
 # The squared distances between the scene points x[i].
 a01, a02, a12 = sp.symbols('a01 a02 a12')
 
