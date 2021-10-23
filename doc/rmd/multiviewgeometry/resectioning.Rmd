@@ -230,7 +230,7 @@ efficient to compute. We will focus on reviewing Lambda-Twist
 [@PerssonN:2018:eccv], which is one of the fastest P3P method if not the fastest
 as of 2021.
 
-### Revisiting Lambda-Twist: a fast P3P solver.
+### Revisiting Lambda-Twist: a Fast P3P solver
 
 :::fyi
 You may be tempted to read the paper [@PerssonN:2018:eccv] instead of my
@@ -246,8 +246,8 @@ throughout the paragraph.
 :::
 
 Without loss of generality, Lambda-Twist assumes that each backprojected ray
-$\mathbf{y}_i$ have unit norm, *i.e.*, $||\mathbf{y}_i||_2 = 1$, which otherwise
-we renormalize as a preprocessing step.
+$\mathbf{y}_i$ have unit norm, *i.e.*, $||\mathbf{y}_i||_2 = 1$, which we
+renormalize as a preprocessing step if necessary.
 
 Lambda-Twist starts by squaring the distance invariants, yielding the following
 remarkable identity:
@@ -330,13 +330,16 @@ lie in two homogeneous quadrics.
 
 They are obtained by linearly combining the three inhomogeneous quadrics.
 
-Specifically, by
+Specifically let us define two following matrices
+
 \begin{equation}
   \mathbf{D}_1 = \mathbf{M}_{01} a_{12} - \mathbf{M}_{12} a_{01}
 \end{equation}
 
+and
+
 \begin{equation}
-  \mathbf{D}_2 = \mathbf{M}_{02} a_{12} - \mathbf{M}_{12} a_{02}
+  \mathbf{D}_2 = \mathbf{M}_{02} a_{12} - \mathbf{M}_{12} a_{02}.
 \end{equation}
 
 We can easily see that algebraically that
@@ -347,8 +350,9 @@ We can easily see that algebraically that
 These are the equations that characterizes the two homogeneous quadrics.
 
 :::fyi
-Here I keep the $1$-based enumeration of the matrices $D_i$ because as I will
-start proof-reading the paper [@PerssonN:2018:eccv] to convince you
+Here I keep the $1$-based enumeration of the matrices $D_i$ as I will start
+proof-reading the paper [@PerssonN:2018:eccv] to point out the errors in the
+paper.
 :::
 
 #### Cubic Equation
