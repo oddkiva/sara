@@ -593,7 +593,7 @@ lambda_valid = sp.Matrix([[w0 + tau * w1],
                           [1],
                           [tau]])
 
-# The feasible solution must be in the second homogeneous quadric,
+# The feasible solution must be in the first homogeneous quadric,
 # which gives rise to the tau-polynomial.
 tau_polynomial = lambda_valid.transpose() * D1 * lambda_valid
 tau_polynomial = sp.expand(tau_polynomial)[0, 0]
