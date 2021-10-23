@@ -436,12 +436,14 @@ D0 = sp.Matrix(D1 + gamma * D2)
 
 # Form the cubic polynomial in the variable gamma.
 det_D0, _ = sp.polys.poly_from_expr(D0.det(), gamma)
-
 # Collect the coefficients c[i] of the polynomial as denoted in the paper.
 c = det_D0.all_coeffs()
+
+# The cubic polynomial does not have a very enticing form as we can see below
+print(det_D0)
 ```
 
-Now let us write our own formula of coefficients:
+Now if we write our nicer form for each coefficients of the polynomial $c$:
 
 ```{python, echo=TRUE, cache=TRUE}
 D1 = sp.Matrix(D1)
@@ -465,7 +467,10 @@ our_coeff = [
     # Our c[0]
     D1.det()
 ]
+```
 
+We can see that they are indeed equal:
+```{python, echo=TRUE, cache=TRUE}
 for i in range(0, 4):
     print("c[{}] - our_coeff[{}] = {}".format(3 - i, 3 - i, sp.simplify(c[i] - our_coeff[i])))
 ```
