@@ -483,11 +483,66 @@ the robustness outweighs the slight loss of speed.
 
 **TODO:** I will provide an example where the eigen decomposition indeed fails.
 
+#### The Linear Relationships Between Each Scale $\lambda_i$
+
+Another technical trick that [@PerssonN:2018:eccv] use is that they introduce
+nonzero auxiliary variables by exploiting two linear dependences.
+
+1. The first linear dependence between each $\lambda_i$ results from the Eigen
+   decomposition of the matrix $\mathbf{D}_0$ which encodes the homogeneous
+   quadrics.
+
+   \begin{equation}
+     \lambda_0 = w_0 \lambda_1 + w_1 \lambda_2
+   \end{equation}
+
+   where the $w_i$ are fully determined from the Eigen decomposition.
+
+2. The second linear dependence relates $\lambda_1$ and $\lambda_2$ by a simple
+   scaling factor $\tau$ since the assumption is that each scale are positive,
+   i.e., $\lambda_i > 0$
+
+   \begin{equation}
+     \lambda_1 = \tau \lambda_2
+   \end{equation}
+
+Now because the physically feasible solution $\mathbf{\Lambda}$ lies in the
+first homogeneous quadric, necessarily it has to satisfy
+
+\begin{equation}
+  \mathbf{\Lambda}^T \mathbf{D}_1 \mathbf{\Lambda} = 0
+\end{equation}
+
+By expanding the quadric equation, we arrive to an equation that only depends
+on $\lambda_1$ and $\tau$
+
+\begin{equation}
+  \lambda_1^2
+  \begin{bmatrix} w_0 + \tau w_1 & 1 & \tau \end{bmatrix}
+  \mathbf{D}_1
+  \begin{bmatrix}
+    w_0 + \tau w_1 \\
+    1 \\
+    \tau
+  \end{bmatrix}
+  = 0
+\end{equation}
+
+Because $\lambda_1$ is a positive scalar, this equation amounts to finding the
+roots on the quadratic polynomial in the variable $\tau$.
+
+
 #### The $\tau$ Polynomial.
 
 Again the coefficients of the $\tau$ polynomial are riddled with errors. By
-manually recalculating the coefficients and double-checking with SymPy, instead
-the coefficients.
+manually recalculating the coefficients or double-checking with SymPy, instead
+the coefficients are
+
+\begin{gather}
+  \tau_2 &=& -a_{01} + a_{12} w_1^2 \\
+  \tau_1 &=& 2 a_{01} b_{12} - 2 a_{12} b_{01} w_1 + 2 a_{12} w_0 w_1 \\
+  \tau_0 &=& -a_{01} - 2 a_{12} b_{01} w_0 + a_{12} w_0^2 + a_{12}
+\end{gather}
 
 :::fyi
 Well it turns out that [@PerssonN:2018:eccv] actually forms the
@@ -502,11 +557,6 @@ You can check for yourself with SymPy.
 That might make the Gauss-Newton unnecessary as advised in the paper, or at
 least require less iterations.
 
-\begin{gather}
-  \tau_2 &=& -a_{01} + a_{12} w_1^2 \\
-  \tau_1 &=& 2 a_{01} b_{12} - 2 a_{12} b_{01} w_1 + 2 a_{12} w_0 w_1 \\
-  \tau_0 &=& -a_{01} - 2 a_{12} b_{01} w_0 + a_{12} w_0^2 + a_{12}
-\end{gather}
 
 ##### Proof-reading
 
