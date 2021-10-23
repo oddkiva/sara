@@ -195,9 +195,9 @@ Stacking the column vectors together yields the following matrix system:
 :::fyi
 I prefer enumerating indices from $0$ instead of enumerating them from $1$. This
 will minimize the cognitive overhead if you decide to reimplement for example
-Lambda-Twist [@PerssonN:2018:eccv] yourself in a mainstream computer languages
-such as Python or C++. The publication [@PerssonN:2018:eccv] is a nice paper
-but one criticism I can make is that it mixes $0$-based indices and $1$-based
+Lambda-Twist [@PerssonN:2018:eccv] yourself in a mainstream computer language
+such as Python or C++. The publication [@PerssonN:2018:eccv] is a nice paper but
+one criticism I can make is that it mixes $0$-based indices and $1$-based
 indices. This made the implementation quite troublesome if you try to do it from
 scratch without looking at the reference implementation.
 :::
@@ -481,8 +481,8 @@ First let us explain the Eigen decomposition proposed by the paper.
 
 Now again a few more words are necessary, the proposed eigen decomposition is
 not entirely robust and a better approach has been proposed by
-[@Eberly:2014:eigen3x3]. I prefer follow [@Eberly:2014:eigen3x3]'s method since
-the robustness outweighs the slight loss of speed.
+[@Eberly:2014:eigen3x3]. I prefer to follow [@Eberly:2014:eigen3x3]'s method
+since the robustness outweighs the slight loss of speed.
 
 **TODO:** I will provide an example where the eigen decomposition indeed fails.
 
