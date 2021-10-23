@@ -241,8 +241,7 @@ review, for one thing they did not even notice one blatant math error...
 And yes I am quite upset, because in the end I spent a lot of time proof-reading
 the paper myself.
 
-I will mention the corrections that the paper needs throughout this subsection
-throughout the paragraph.
+I will mention the corrections that the paper needs throughout this subsection.
 :::
 
 Without loss of generality, Lambda-Twist assumes that each backprojected ray
