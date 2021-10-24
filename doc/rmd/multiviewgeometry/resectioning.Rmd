@@ -369,17 +369,18 @@ inhomogeneous quadric defined as
   \mathbf{\Lambda}^T \mathbf{D}_0 \mathbf{\Lambda} = 0.
 \end{equation}
 
-In general the quadric $\mathbf{D}_0$ is nonzero but it also has to be a
-degenerate quadric (why?). This means that necessarily
-
-:::fyi
-I haven't understood why we want a degenerate quadric yet.
-Care to explain to me if you know why? Much appreciated.
-:::
+By using a geometric argument, [@PerssonN:2018:eccv] claims that the quadric
+$\mathbf{D}_0$ is of rank 2. This means that necessarily
 
 \begin{equation}
   \det \mathbf{D}_0 = 0
 \end{equation}
+
+:::fyi
+Visualizing the intersection of the two homogeneous quadrics is not obvious to
+me. So I am still not clear to me as for why the linear combination has rank 2.
+Care to explain to me if you know why? Much appreciated.
+:::
 
 This leads us to finding the roots of a cubic equation $c$ in the variable
 $\gamma$ denoted as
