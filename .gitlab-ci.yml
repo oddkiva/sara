@@ -93,6 +93,11 @@ before_script:
   # Python dependencies (TODO).
   - apt-get install -y -qq python3-dev
 
+  # Coveralls-lcov
+  - apt-get install -y -qq rubygems
+  - gem install bundler
+  - bundle install
+
   # Build CLBlast.
   - ./scripts/install_clblast.sh
 
@@ -125,21 +130,20 @@ build:
     - DISPLAY=:1 ctest
         -j$(nproc)
         --output-on-failure
-        --exclude-regex "test_graphics_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
-    # Run coverage (disabled for now).
-    #- make -j$(nproc) coverage
+        --exclude-regex "test_graphics_*|test_visualization_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
+    # FIXME: I give up the code coverage... Will come back to it later.
+    # - make -j$(nproc) coverage
+    # - coveralls-lcov coverage.info --repo-token=$(cat .coveralls.gitlab.yml)
 
 pages:
   script:
     # Configure the documentation build.
     - mkdir build
     - cd build
-    - cmake .. -DSARA_BUILD_SHARED_LIBS:BOOL=ON
+    - cmake -DSARA_BUILD_SHARED_LIBS:BOOL=ON ..
     - make -j$(nproc) doc
     # Move the generated documentation in the right place.
     - mv doc/html/ ../public/
-  dependencies:
-    - build
   artifacts:
     paths:
     - public
