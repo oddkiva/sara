@@ -11,11 +11,11 @@ diameter of the camera aperture is adjustable in order to control the
 amount of light that can hit the camera film plane.
 
 The camera pinhole model does not care about the diameter of the camera aperture
-and chooses to model the camera aperture as a mere 3D point. While this seems
-oversimplifying, this simple modeling turns out to be a powerful representation
-of the physics, from which we can derive later a number of useful mathematical
-methods in 3D reconstruction.  And as such the camera aperture is simply
-referred as the *camera center* and is the origin of the camera frame. 
+and chooses to model it as a mere 3D point. While this may seem oversimplifying,
+this simple modeling turns out to be a powerful representation of the physics,
+from which we can derive later a number of useful mathematical methods in 3D
+reconstruction.  And as such the camera aperture is simply referred as the
+*camera center* and is the origin of the camera frame.
 
 To describe the axes, let us imagine that we hold a camera with our two hands in
 upright position. First the $z$-axis is pointing to camera gaze direction and is
