@@ -9,9 +9,9 @@ I believe I made a mistake here in this section. I will rework this paragraph as
 the correct decomposition should be an *RQ-decomposition* instead, and **NOT** a
 *QR*-decomposition.
 
-Indeed it makes more sense more logical to transform the elliptic patch into a
-circular patch. Only after that, should we look for the dominant gradient on the
-circular patch, which will determine the appropriate rotation.
+Indeed it makes more sense to transform the elliptic patch into a circular
+patch. Only after that, should we look for the dominant gradient on the circular
+patch, which will determine the appropriate rotation.
 
 This will require some more verification work from my end. Apologies. 🙏🙏🙏
 :::
