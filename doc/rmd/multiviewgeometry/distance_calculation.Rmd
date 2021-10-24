@@ -1,4 +1,4 @@
-## Visual Metrology and Distance Calculation: A Use Case for Animal Conservation
+## A Use Case for Animal Conservation
 
 Visual metrology and distance calculation are important problem that must be
 treated in autonomous driving systems for the purpose of road safety. It can
@@ -77,7 +77,7 @@ Thus the metric coordinates of a penguin are:
   \right.
 \end{equation}
 
-### A More Motivating Example: Nonzero Pitch Angle
+### A Motivating Example: Nonzero Pitch Angle
 
 In real life, the drone does not necessarily have a perfect a zero pitch angle.
 It could be that because of the wind the drone has to maintain its stationary
@@ -372,22 +372,28 @@ u_0 \\ v_0 \end{bmatrix}$ is the principal point,
 :::
 
 From the stereographic projection formula, observe that
+\begin{equation}
 \begin{aligned}
   \cos \frac{\theta}{2} &= \frac{2f}{\sqrt{r^2 + 4 f^2}} \\
   \sin \frac{\theta}{2} &= \frac{r}{\sqrt{r^2 + 4 f^2}}
 \end{aligned}
+\end{equation}
 
 Using trigonometric formula, it follows that
+\begin{equation}
 \begin{aligned}
   \cos \theta &= 2 \cos^2 \frac{\theta}{2} - 1 \\
   \sin \theta &= 2 \cos\frac{\theta}{2} \sin\frac{\theta}{2}
 \end{aligned}
+\end{equation}
 
 By reinjecting the equations
+\begin{equation}
 \begin{aligned}
   \cos \theta &= \frac{4f^2 - r^2}{r^2 + 4 f^2} \\
   \sin \theta &= \frac{4 rf}{r^2 + 4 f^2}
 \end{aligned}
+\end{equation}
 
 Thus,
 
