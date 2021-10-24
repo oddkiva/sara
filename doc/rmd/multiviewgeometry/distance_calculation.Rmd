@@ -1,11 +1,14 @@
 ## A Use Case for Animal Conservation
 
-Visual metrology and distance calculation are important problem that must be
-treated in autonomous driving systems for the purpose of road safety. It can
-also be useful in other computer vision applications geared towards animal
-conservation. Instead of talking about road safety which is largely treated in
-the computer vision industry, let us treat this problem under the prism of
-animal conservation to bring justice to environmental and wildlife topics.
+Visual metrology and distance calculation are important problems that must be
+treated carefully in autonomous driving systems to guarantee the safety of
+pedestrians.
+
+But this can also be useful too for animal conservation. So instead of talking
+about road safety which is already widely treated in the computer vision
+industry, let us to see how these problems could be used to protect animals and
+monitor their demographics as an attempt to bring more awareness and justice to
+environmental and wildlife topics.
 
 For example, let us imagine that we are biologists or animal conservationists
 aiming at counting a colony of penguins resting on a large ice floe. Note, of
