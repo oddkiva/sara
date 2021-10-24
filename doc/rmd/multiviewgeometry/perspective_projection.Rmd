@@ -25,10 +25,23 @@ ground. The $x$-axis and $y$-axis coincide with the image coordinate system.
 
 Geometrically speaking, the camera forms the image by projecting every 3D
 material point with *metric* coordinates $(x_C, y_C, z_C)$ onto the camera film
-plane defined by $z_C = -f < 0$ where $f$ is the focal length. In practice, it
-is not convenient to deal with negative signs and we always work in the
-*virtual* film plane $z_C = f > 0$ which is symmetric to the *real* film plane
-$z_C = -f < 0$ with respect to the camera center.
+plane defined by
+
+\begin{equation}
+  \Pi_\textrm{film plane}:\qquad z_C = -f < 0,
+\end{equation}
+
+where $f$ is the focal length.
+
+In practice, it is not convenient to deal with negative signs and we always work
+in the *virtual* film plane,
+
+\begin{equation}
+  \Pi_\textrm{virtual film plane}:\qquad z_C = f > 0,
+\end{equation}
+
+which is symmetric to the *real* film plane with respect to the
+camera center.
 
 The corresponding point imaged in the camera film has 3D *metric* coordinates
 $(u_C, v_C, f)$ also expressed in the camera coordinate system.
