@@ -42,12 +42,16 @@ instead of the metre.
 :::fyi
 To borrow Robert Collins' terms in his lecture slides like this one:
 http://www.cse.psu.edu/~rtc12/CSE486/lecture13.pdf, we can also think of
-*normalized camera coordinates* as *camera film coordinates* in order to
+*normalized camera coordinates* as *camera film coordinates*. This is so that we
 distinguish them from *pixel coordinates*.
+
+Indeed, as a gentle reminder, the camera film coordinate system has its origin
+located at the center of the camera film plane. the camera coordinate system has
+its origin at the top-left corner of the image.
 
 I really like Robert Collins' term *camera film coordinates* as it does give a
 physical meaning to the normalized coordinates system and I think it helps to
-plant the ideas in our mind.
+plant the right ideas in our mind.
 :::
 
 In the camera pinhole model, similar triangles hold and thus
