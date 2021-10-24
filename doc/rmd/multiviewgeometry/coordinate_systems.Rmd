@@ -1,5 +1,19 @@
 ## Changing Reference Frames
 
+:::fyi
+In this section, I use *reference frame* and *coordinate system*
+interchangeably.
+
+This is inexact since a reference frame has a physical meaning and the
+coordinate system is just a 3D mapping that quantifies object positions with
+respect to a reference point.
+
+On the other hand, it makes the explanation more natural so I prefer to keep the
+text as it is. Now when I refer to the coordinate system, I do refer to the
+Cartesian one. And of course, non-Cartesian coordinate systems such as the
+cylindric one can also be used for any reference frame.
+:::
+
 Let us detail how we go from the world coordinates $(O_W, \mathbf{i}_W,
 \mathbf{j}_W,\mathbf{k}_W)$ to the camera coordinates $(O_C, \mathbf{i}_C,
 \mathbf{j}_C,\mathbf{k}_C)$. We assume the basis vectors are *orthonormal* and
@@ -12,7 +26,7 @@ mutually a right angle between each of them.
   \| i \| &= \| j \| = \| k \| = 1.
 \end{align*}
 
-Denote a 3D point by $M$. Suppose that we know its coordinates in the
+Denote a 3D point by $M$ and suppose that we know its coordinates in the
 camera coordinate system $(x_C, y_C, z_C)$. We can retrieve its
 coordinates in the world coordinate system $(x_W, y_W, z_W)$ as
 follows.
