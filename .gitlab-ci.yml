@@ -147,3 +147,9 @@ pages:
   artifacts:
     paths:
     - public
+
+staging:
+  stage: deploy
+  trigger:
+    project: DO-CV/sara-book
+    branch: master
