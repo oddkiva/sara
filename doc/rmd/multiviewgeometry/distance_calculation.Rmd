@@ -52,7 +52,7 @@ currently capturing the hustle and bustle of penguins on the ice floe.
 To start, we use the camera axis convention and we assume that the camera has
 its axes oriented as follows:
 
-- its $x$-axis is pointing to the right of the drone 
+- its $x$-axis is pointing to the right of the drone
 - its $y$-axis is normal to the ice floe plane and is pointing down,
 - its $z$-axis is pointing to the horizon
 - its $x$-axis and $z$-axis are such that they form a plane that is parallel to
