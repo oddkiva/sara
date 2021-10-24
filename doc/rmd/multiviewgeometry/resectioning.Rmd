@@ -645,5 +645,5 @@ So in our case, since we use $0$-based indexing
 \end{equation}
 
 :::fyi
-This is the one blatant error that the review missed the paper (sigh...)
+This is the one blatant error that the review missed in the paper (sigh...)
 :::
