@@ -412,8 +412,11 @@ follows.
       &+& \mathbf{D}_{21}^T (\mathbf{D}_{12} \times \mathbf{D}_{10}) \\
       &+& \mathbf{D}_{22}^T (\mathbf{D}_{10} \times \mathbf{D}_{11}) \\
   c_0 &=& \det \mathbf{D}_1 \\
-\end{aligned}
+\end{aligned},
 \end{equation}
+
+where $\mathbf{D}_{ij}$ denotes the $j$-th column vector of matrix
+$\mathbf{D}_i$.
 
 
 ##### Proof-Reading
@@ -422,7 +425,7 @@ Let us proof-read the formula of the cubic polynomial with Python and the
 wonderful SymPy package [@SymPy:2017:peerj] via literate programming
 [@knuth:1984:lp].
 
-```{python, echo=TRUE, cache=TRUE}
+```{python, echo=TRUE}
 import sympy as sp
 
 # Let us populate the matrices used for the cubic equation.
@@ -435,20 +438,23 @@ D0 = sp.Matrix(D1 + gamma * D2)
 
 # Form the cubic polynomial in the variable gamma.
 det_D0, _ = sp.polys.poly_from_expr(D0.det(), gamma)
-# Collect the coefficients c[i] of the polynomial as denoted in the paper.
+# Collect the coefficients c[i] of the polynomial as denoted in
+# the paper.
 c = det_D0.all_coeffs()
 
-# The cubic polynomial does not have a very enticing form as we can see below
-print(det_D0)
+# The cubic polynomial does not have a very enticing form if we
+# print it:
+# print(det_D0)
 ```
 
 Now if we write our nicer form for each coefficients of the polynomial $c$:
 
-```{python, echo=TRUE, cache=TRUE}
+```{python, echo=TRUE}
 D1 = sp.Matrix(D1)
 D2 = sp.Matrix(D2)
 
-# CAVEAT: SymPy enumerates coefficients in DECREASING degree order.
+# CAVEAT: SymPy enumerates coefficients in DECREASING degree
+# order.
 our_coeff = [
     # Our c[3]
     D2.det(),
@@ -469,11 +475,13 @@ our_coeff = [
 ```
 
 We can see that they are indeed equal:
-```{python, echo=TRUE, cache=TRUE}
+```{python, echo=TRUE}
 for i in range(0, 4):
-    print("c[{}] - our_coeff[{}] = {}".format(3 - i, 3 - i, sp.simplify(c[i] - our_coeff[i])))
+    print("c[{}] - our_coeff[{}] = {}".format(
+        3 - i,
+        3 - i,
+        sp.simplify(c[i] - our_coeff[i])))
 ```
-
 
 #### The Diagonalization Method
 
@@ -596,7 +604,7 @@ D2 = M02 * a12 - M12 * a02
 # Declare the variables introduced for the tau polynomial.
 w0, w1, tau, l = sp.symbols('w0 w1 tau l')
 
-# The physically feasible solution lambda vector.
+# The feasible solution.
 lambda_valid = sp.Matrix([[w0 + tau * w1],
                           [1],
                           [tau]])
