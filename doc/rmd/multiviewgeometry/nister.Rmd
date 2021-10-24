@@ -351,9 +351,9 @@ Let's look again at these 3 groups of monomials: the very nice thing about these
 is that when we group coefficients using these three subgroups, we see
 respectively that:
 
-- coefficients in the variable $x$ forms a polynomial in $z$ of degree $3$,
-- coefficients in the variable $y$ forms a polynomial in $z$ of degree $3$,
-- coefficients in the variable $z$ forms a polynomial in $z$ of degree $4$.
+- coefficients in the variable $x$ form a polynomial in $z$ of degree $3$,
+- coefficients in the variable $y$ form a polynomial in $z$ of degree $3$,
+- coefficients in the variable $z$ form a polynomial in $z$ of degree $4$.
 
 This is very interesting because the system of polynomial equations
 \@ref(eq:klm) is rewritten in matrix form as
