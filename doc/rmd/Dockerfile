@@ -14,8 +14,9 @@ RUN apt-get install -y -qq python3 python3-pip librsvg2-bin
 RUN pip3 install matplotlib numpy sympy
 
 RUN Rscript -e 'devtools::install_cran(c( \
-      "berryFunctions",\
-      "gifski",\
+      "berryFunctions", \
+      "gifski", \
+      "remotes", \
       "reticulate", \
       "Rcpp", "RcppEigen",\
       "tinytex"\
