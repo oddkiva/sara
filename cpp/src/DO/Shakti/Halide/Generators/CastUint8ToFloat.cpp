@@ -16,7 +16,7 @@ namespace {
 
   using namespace Halide;
 
-  class CastFromUint8ToFloat : public Generator<CastFromUint8ToFloat>
+  class CastUint8ToFloat : public Generator<CastUint8ToFloat>
   {
   public:
     GeneratorParam<int> tile_x{"tile_x", 8};
@@ -28,6 +28,7 @@ namespace {
     Var x{"x"}, y{"y"}, c{"c"};
     Var xo{"xo"}, yo{"yo"}, co{"co"};
     Var xi{"xi"}, yi{"yi"}, ci{"ci"};
+    Var fused;
 
     void generate()
     {
@@ -80,7 +81,10 @@ namespace {
 
         output.specialize(input_is_interleaved && output_is_interleaved)
             .reorder(c, x, y)
-            .unroll(c);
+            .fuse(c, x, fused)
+            .split(y, yo, yi, 8)
+            .parallel(yo)
+            .vectorize(fused, 8);
       }
     }
   };
@@ -88,5 +92,7 @@ namespace {
 }  // namespace
 
 
-HALIDE_REGISTER_GENERATOR(CastFromUint8ToFloat, shakti_halide_cast_to_float,
-                          HalideBackend::CastFromUint8ToFloat)
+HALIDE_REGISTER_GENERATOR(CastUint8ToFloat,
+                          shakti_cast_uint8_to_float_cpu)
+HALIDE_REGISTER_GENERATOR(CastUint8ToFloat,
+                          shakti_cast_uint8_to_float_gpu)

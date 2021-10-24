@@ -11,7 +11,7 @@ namespace DO::Sara {
   // @brief The fisheye camera model is defined for field of views of up to 180
   // degrees.
   template <typename T>
-  struct FisheyeCamera : PinholeCamera<T>
+  struct KannalaBrandtFisheyeDistortionModel : PinholeCamera<T>
   {
     static constexpr auto eps = static_cast<T>(1e-8);
 
@@ -36,7 +36,8 @@ namespace DO::Sara {
      *
      *  Equation (7) and (8) provide the insights.
      */
-    auto undistort(const vector2_type& xd, int num_iterations = 10) const -> vector2_type
+    auto undistort(const vector2_type& xd, int num_iterations = 10) const
+        -> vector2_type
     {
       // Get the normalized coordinates from the pixel coordinates.
       const vector2_type xd_normalized = (K_inverse * xd.homogeneous()).head(2);

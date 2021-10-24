@@ -7,8 +7,8 @@
 #include <DO/Shakti/Halide/GaussianConvolution.hpp>
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_halide_gray32f_to_rgb.h"
-#include "shakti_halide_rgb_to_gray.h"
+#include "shakti_gray32f_to_rgb8u_cpu.h"
+#include "shakti_rgb8u_to_gray32f_cpu.h"
 
 
 namespace halide = DO::Shakti::HalideBackend;
@@ -65,7 +65,7 @@ auto halide_pipeline() -> void
     tic();
     {
       // Use parallelization and vectorization.
-      shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
+      shakti_rgb8u_to_gray32f_cpu(buffer_rgb, buffer_gray32f);
 
 #define USE_HALIDE_AOT_IMPLEMENTATION
 //#define USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION
@@ -94,7 +94,7 @@ auto halide_pipeline() -> void
       // On the GPU, with sigma = 80.f, the processing time is about ~15ms!
       halide::gaussian_convolution(frame_gray32f, frame_gray32f_blurred, sigma,
                                    truncation_factor);
-      shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
+      shakti_gray32f_to_rgb8u_cpu(buffer_gray32f_blurred, buffer_gray8);
       toc("Halide Gaussian");
 #elif defined(USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION)
       // Sara's unoptimized code takes 240 ms to blur (no SSE instructions and
@@ -103,13 +103,13 @@ auto halide_pipeline() -> void
       // Parallelizing the implementation of the linear filtering with OpenMP,
       // we are then down to 25ms, not bad at all for a very minimal change!
       apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, sigma);
-      shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
+      shakti_gray32f_to_rgb8u_cpu(buffer_gray32f_blurred, buffer_gray8);
       toc("Sara Gaussian");
 #elif defined(USE_SARA_DERICHE_IMPLEMENTATION)
       // Without parallelization and anything, deriche filter is still running
       // reasonably fast (between 45 and 50ms).
       inplace_deriche_blur(frame_gray32f, sigma);
-      shakti_halide_gray32f_to_rgb(buffer_gray32f, buffer_gray8);
+      shakti_gray32f_to_rgb8u_cpu(buffer_gray32f, buffer_gray8);
       toc("Sara Deriche");
 #endif
     }

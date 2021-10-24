@@ -17,9 +17,9 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_enlarge.h"
-#include "shakti_reduce_32f.h"
-#include "shakti_scale_32f.h"
+#include "shakti_enlarge_gpu.h"
+#include "shakti_reduce_32f_gpu.h"
+#include "shakti_scale_32f_gpu.h"
 
 
 namespace DO::Shakti::HalideBackend {
@@ -27,22 +27,22 @@ namespace DO::Shakti::HalideBackend {
   auto scale(Halide::Runtime::Buffer<float>& src,
              Halide::Runtime::Buffer<float>& dst)
   {
-    shakti_scale_32f(src, dst.width(), dst.height(), dst);
+    shakti_scale_32f_gpu(src, dst.width(), dst.height(), dst);
   }
 
   auto reduce(Halide::Runtime::Buffer<float>& src,
               Halide::Runtime::Buffer<float>& dst)
   {
-    shakti_reduce_32f(src, dst.width(), dst.height(), dst);
+    shakti_reduce_32f_gpu(src, dst.width(), dst.height(), dst);
   }
 
   auto enlarge(Halide::Runtime::Buffer<float>& src,
                Halide::Runtime::Buffer<float>& dst)
   {
-    shakti_enlarge(src,                        //
-                   src.width(), src.height(),  //
-                   dst.width(), dst.height(),  //
-                   dst);
+    shakti_enlarge_gpu(src,                        //
+                       src.width(), src.height(),  //
+                       dst.width(), dst.height(),  //
+                       dst);
   }
 
 
@@ -103,10 +103,10 @@ namespace DO::Shakti::HalideBackend {
     dst_buffer.add_dimension();
 
     src_buffer.set_host_dirty();
-    shakti_enlarge(src_buffer,                 //
-                   src.width(), src.height(),  //
-                   dst.width(), dst.height(),  //
-                   dst_buffer);
+    shakti_enlarge_gpu(src_buffer,                 //
+                       src.width(), src.height(),  //
+                       dst.width(), dst.height(),  //
+                       dst_buffer);
     dst_buffer.copy_to_host();
   }
 

@@ -16,7 +16,7 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_im2col_32f.h"
+#include "shakti_im2col_32f_gpu.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_im2col)
   auto phi_x_buffer = halide::as_runtime_buffer(phi_x_3d);
 
   x_buffer.set_host_dirty();
-  shakti_im2col_32f(x_buffer, -1, -1, 0, kW, kH, 1, phi_x_buffer);
+  shakti_im2col_32f_gpu(x_buffer, -1, -1, 0, kW, kH, 1, phi_x_buffer);
   phi_x_buffer.copy_to_host();
 
   // Check the reshaped im2col

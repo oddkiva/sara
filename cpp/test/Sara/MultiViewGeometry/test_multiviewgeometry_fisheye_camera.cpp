@@ -11,7 +11,7 @@
 
 #define BOOST_TEST_MODULE "MultiViewGeometry/Fisheye Camera Model"
 
-#include <DO/Sara/MultiViewGeometry/Camera/FisheyeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/KannalaBrandtFisheyeDistortionModel.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -23,7 +23,7 @@ using namespace DO::Sara;
 
 auto make_fisheye_camera()
 {
-  auto camera_parameters = FisheyeCamera<float>{};
+  auto camera_parameters = KannalaBrandtFisheyeDistortionModel<float>{};
 
   const auto w = 1920;
   const auto h = 1080;
@@ -34,18 +34,16 @@ auto make_fisheye_camera()
 
   camera_parameters.image_sizes << w, h;
   // clang-format off
-  camera_parameters.K <<
+  camera_parameters.set_calibration_matrix((Eigen::Matrix3f{} <<
       f, 0, u0,
       0, f, v0,
-      0, 0,  1;
+      0, 0,  1).finished());
   // clang-format on
   camera_parameters.k <<      //
       -0.20f,                 //
       0.1321295087447987f,    //
       -0.06844064024539671f,  //
       0.01237548905484928f;
-
-  camera_parameters.calculate_inverse_calibration_matrix();
 
   return camera_parameters;
 }

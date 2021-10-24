@@ -17,7 +17,7 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_gaussian_convolution_v2.h"
+#include "shakti_gaussian_convolution_gpu.h"
 
 
 namespace DO::Shakti::HalideBackend {
@@ -26,7 +26,7 @@ namespace DO::Shakti::HalideBackend {
                             Halide::Runtime::Buffer<float>& dst,  //
                             float sigma, int truncation_factor)   //
   {
-    shakti_gaussian_convolution_v2(src, sigma, truncation_factor, dst);
+    shakti_gaussian_convolution_gpu(src, sigma, truncation_factor, dst);
   }
 
   auto gaussian_convolution(Sara::ImageView<float>& src,         //

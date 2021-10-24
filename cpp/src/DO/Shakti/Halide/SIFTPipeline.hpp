@@ -9,18 +9,19 @@
 #include <DO/Shakti/Halide/GaussianConvolution.hpp>
 #include <DO/Shakti/Halide/Resize.hpp>
 
-#include "shakti_count_extrema.h"
-#include "shakti_dominant_gradient_orientations_v2.h"
-#include "shakti_dominant_gradient_orientations_v3.h"
-#include "shakti_halide_gray32f_to_rgb.h"
-#include "shakti_convolve_batch_32f.h"
-#include "shakti_forward_difference_32f.h"
-#include "shakti_local_scale_space_extremum_32f_v2.h"
-#include "shakti_local_scale_space_extremum_32f_v3.h"
-#include "shakti_polar_gradient_2d_32f_v2.h"
-#include "shakti_refine_scale_space_extrema_v2.h"
-#include "shakti_refine_scale_space_extrema_v3.h"
-#include "shakti_stream_compaction.h"
+#include "shakti_gray32f_to_rgb8u_cpu.h"
+
+#include "shakti_convolve_batch_32f_gpu.h"
+#include "shakti_count_extrema_gpu.h"
+#include "shakti_dominant_gradient_orientations_gpu_v2.h"
+#include "shakti_dominant_gradient_orientations_gpu_v3.h"
+#include "shakti_forward_difference_32f_gpu.h"
+#include "shakti_local_scale_space_extremum_32f_gpu_v2.h"
+#include "shakti_local_scale_space_extremum_32f_gpu_v3.h"
+#include "shakti_polar_gradient_2d_32f_gpu_v2.h"
+#include "shakti_refine_scale_space_extrema_gpu_v2.h"
+#include "shakti_refine_scale_space_extrema_gpu_v3.h"
+#include "shakti_stream_compaction_gpu.h"
 
 
 namespace DO::Shakti::HalideBackend::v2 {
@@ -184,7 +185,7 @@ namespace DO::Shakti::HalideBackend::v2 {
       for (auto i = 0u; i < extrema_maps.size(); ++i)
       {
         sara::tic();
-        shakti_local_scale_space_extremum_32f_v2(
+        shakti_local_scale_space_extremum_32f_gpu_v2(
             dogs[i], dogs[i + 1], dogs[i + 2],         //
             params.edge_ratio, params.extremum_thres,  //
             extrema_maps[i]);
@@ -195,8 +196,8 @@ namespace DO::Shakti::HalideBackend::v2 {
       for (auto i = 0u; i < gradients.size(); ++i)
       {
         sara::tic();
-        shakti_polar_gradient_2d_32f_v2(gaussians[i + 1], gradients[i][0],
-                                        gradients[i][1]);
+        shakti_polar_gradient_2d_32f_gpu_v2(gaussians[i + 1], gradients[i][0],
+                                            gradients[i][1]);
         sara::toc("Gradients in polar coordinates " + std::to_string(i));
       }
 
@@ -273,7 +274,7 @@ namespace DO::Shakti::HalideBackend::v2 {
         refined.type = quantized.type;  // Should be cheap. (shallow copy).
 
         // Run the operation on the GPU.
-        shakti_refine_scale_space_extrema_v2(
+        shakti_refine_scale_space_extrema_gpu_v2(
             dogs[s], dogs[s + 1], dogs[s + 2],  //
             quantized.x, quantized.y,           //
             dogs[s].width(), dogs[s].height(),  //
@@ -308,7 +309,7 @@ namespace DO::Shakti::HalideBackend::v2 {
         auto& d = dominant_orientation_dense_maps[s];
         d.resize(e.size(), params.num_orientation_bins);
 
-        shakti_dominant_gradient_orientations_v2(
+        shakti_dominant_gradient_orientations_gpu_v2(
             gradients[s][0], gradients[s][1],       //
             e.x, e.y, e.s,                          //
             scale_max,                              //
@@ -681,27 +682,27 @@ namespace DO::Shakti::HalideBackend::v3 {
     auto feed(Halide::Runtime::Buffer<float>& gray_image)
     {
       sara::tic();
-      shakti_convolve_batch_32f(gray_image, params.kernel_x_buffer,
-                                x_convolved);
+      shakti_convolve_batch_32f_gpu(gray_image, params.kernel_x_buffer,
+                                    x_convolved);
       sara::toc("Convolving on x-axis");
 
       sara::tic();
-      shakti_convolve_batch_32f(x_convolved, params.kernel_y_buffer,
-                                y_convolved);
+      shakti_convolve_batch_32f_gpu(x_convolved, params.kernel_y_buffer,
+                                    y_convolved);
       sara::toc("Convolving on y-axis");
 
       auto& gaussian = y_convolved;
 
       sara::tic();
-      shakti_forward_difference_32f(gaussian, 2, dog);
+      shakti_forward_difference_32f_gpu(gaussian, 2, dog);
       sara::toc("DoG");
 
       sara::tic();
-      shakti_polar_gradient_2d_32f_v2(gaussian, gradient_mag, gradient_ori);
+      shakti_polar_gradient_2d_32f_gpu_v2(gaussian, gradient_mag, gradient_ori);
       sara::toc("Gaussian gradients");
 
       sara::tic();
-      shakti_local_scale_space_extremum_32f_v3(
+      shakti_local_scale_space_extremum_32f_gpu_v3(
           dog, params.edge_ratio, params.extremum_thres, extrema_map);
       sara::toc("Extrema maps");
 
@@ -769,7 +770,7 @@ namespace DO::Shakti::HalideBackend::v3 {
       auto extremum_count =
           Halide::Runtime::Buffer<std::int32_t>{&extremum_count_host, 1}.sliced(
               0);
-      shakti_count_extrema(extrema_map, extremum_count);
+      shakti_count_extrema_gpu(extrema_map, extremum_count);
       sara::toc("GPU Counting number of extrema");
 
       sara::tic();
@@ -781,12 +782,12 @@ namespace DO::Shakti::HalideBackend::v3 {
 
       sara::tic();
       extrema_quantized.resize(extremum_count_host);
-      shakti_stream_compaction(extrema_map,          //
-                               extrema_quantized.x,  //
-                               extrema_quantized.y,  //
-                               extrema_quantized.s,  //
-                               extrema_quantized.n,  //
-                               extrema_quantized.type);
+      shakti_stream_compaction_gpu(extrema_map,          //
+                                   extrema_quantized.x,  //
+                                   extrema_quantized.y,  //
+                                   extrema_quantized.s,  //
+                                   extrema_quantized.n,  //
+                                   extrema_quantized.type);
       for (auto i = 0; i < extrema_quantized.s.dim(0).extent(); ++i)
         extrema_quantized.scale(i) = params.scales[extrema_quantized.s(i)];
       sara::toc("GPU stream compaction");
@@ -805,17 +806,17 @@ namespace DO::Shakti::HalideBackend::v3 {
         extrema_quantized.scale.set_host_dirty();
         extrema.resize(extrema_quantized.size());
 
-        shakti_refine_scale_space_extrema_v3(dog,                      //
-                                             extrema_quantized.x,      //
-                                             extrema_quantized.y,      //
-                                             extrema_quantized.s,      //
-                                             extrema_quantized.n,      //
-                                             extrema_quantized.scale,  //
-                                             params.scale_factor,      //
-                                             extrema.x,                //
-                                             extrema.y,                //
-                                             extrema.s,                //
-                                             extrema.value);
+        shakti_refine_scale_space_extrema_gpu_v3(dog,                      //
+                                                 extrema_quantized.x,      //
+                                                 extrema_quantized.y,      //
+                                                 extrema_quantized.s,      //
+                                                 extrema_quantized.n,      //
+                                                 extrema_quantized.scale,  //
+                                                 params.scale_factor,      //
+                                                 extrema.x,                //
+                                                 extrema.y,                //
+                                                 extrema.s,                //
+                                                 extrema.value);
 
         // Copy these as well.
         extrema.n = extrema_quantized.n;
@@ -854,14 +855,15 @@ namespace DO::Shakti::HalideBackend::v3 {
           *std::max_element(extrema.s.begin(), extrema.s.end());
 
       //  Outputs.
-      dominant_orientation_dense_map.resize(extrema.size(), params.num_orientation_bins);
+      dominant_orientation_dense_map.resize(extrema.size(),
+                                            params.num_orientation_bins);
 
       // Prepare data for the GPU.
       extrema_quantized.s.set_host_dirty();
       extrema.n.set_host_dirty();
 
       // Run the operation on the GPU.
-      shakti_dominant_gradient_orientations_v3(
+      shakti_dominant_gradient_orientations_gpu_v3(
           gradient_mag, gradient_ori,               //
           extrema.x,                                //
           extrema.y,                                //

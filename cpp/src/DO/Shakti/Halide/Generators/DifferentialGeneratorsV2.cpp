@@ -231,8 +231,8 @@ namespace v2 {
 
 
 HALIDE_REGISTER_GENERATOR(v2::Gradient2D<float>,
-                          shakti_gradient_2d_32f_v2)
+                          shakti_gradient_2d_32f_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v2::PolarGradient2D<float>,
-                          shakti_polar_gradient_2d_32f_v2)
+                          shakti_polar_gradient_2d_32f_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v2::ForwardDifference<float>,
-                          shakti_forward_difference_32f)
+                          shakti_forward_difference_32f_gpu)

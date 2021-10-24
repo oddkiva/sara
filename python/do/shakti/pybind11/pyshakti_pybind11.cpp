@@ -9,15 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "shakti_enlarge.h"
-#include "shakti_gaussian_convolution_v2.h"
-#include "shakti_gaussian_convolution_v2_cpu.h"
-#include "shakti_gradient_2d_32f_v2.h"
-#include "shakti_halide_gray32f_to_rgb.h"
-#include "shakti_halide_rgb_to_gray.h"
-#include "shakti_polar_gradient_2d_32f_v2.h"
-#include "shakti_reduce_32f.h"
-#include "shakti_scale_32f.h"
+#include "shakti_enlarge_gpu.h"
+#include "shakti_gaussian_convolution_cpu.h"
+#include "shakti_gaussian_convolution_gpu.h"
+#include "shakti_gradient_2d_32f_gpu_v2.h"
+#include "shakti_gray32f_to_rgb8u_cpu.h"
+#include "shakti_rgb8u_to_gray32f_cpu.h"
+#include "shakti_polar_gradient_2d_32f_gpu_v2.h"
+#include "shakti_reduce_32f_gpu.h"
+#include "shakti_scale_32f_gpu.h"
 
 #include <DO/Sara/Core.hpp>
 
@@ -89,7 +89,7 @@ auto convert_rgb8_to_gray32f_cpu(py::array_t<std::uint8_t> src,
 {
   auto src_buffer = as_interleaved_runtime_buffer_2d(src);
   auto dst_buffer = as_runtime_buffer_2d(dst);
-  shakti_halide_rgb_to_gray(src_buffer, dst_buffer);
+  shakti_rgb8u_to_gray32f_cpu(src_buffer, dst_buffer);
 }
 
 
@@ -98,7 +98,7 @@ auto convert_gray32f_to_rgb8_cpu(py::array_t<float> src,
 {
   auto src_buffer = as_runtime_buffer_2d(src);
   auto dst_buffer = as_interleaved_runtime_buffer_2d(dst);
-  shakti_halide_gray32f_to_rgb(src_buffer, dst_buffer);
+  shakti_gray32f_to_rgb8u_cpu(src_buffer, dst_buffer);
 }
 
 
@@ -113,7 +113,7 @@ auto gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x,
   auto grad_y_buffer = as_runtime_buffer_4d(grad_y);
 
   src_buffer.set_host_dirty();
-  shakti_gradient_2d_32f_v2(src_buffer, grad_x_buffer, grad_y_buffer);
+  shakti_gradient_2d_32f_gpu_v2(src_buffer, grad_x_buffer, grad_y_buffer);
   grad_x_buffer.copy_to_host();
   grad_y_buffer.copy_to_host();
 }
@@ -127,7 +127,7 @@ auto polar_gradient_2d_32f(py::array_t<float> src, py::array_t<float> grad_x,
   auto grad_y_buffer = as_runtime_buffer_4d(grad_y);
 
   src_buffer.set_host_dirty();
-  shakti_polar_gradient_2d_32f_v2(src_buffer, grad_x_buffer, grad_y_buffer);
+  shakti_polar_gradient_2d_32f_gpu_v2(src_buffer, grad_x_buffer, grad_y_buffer);
   grad_x_buffer.copy_to_host();
   grad_y_buffer.copy_to_host();
 }
@@ -144,11 +144,11 @@ auto gaussian_convolution(py::array_t<float> src, py::array_t<float> dst,
 
   src_buffer.set_host_dirty();
   if (gpu)
-    shakti_gaussian_convolution_v2(src_buffer, sigma, truncation_factor,
-                                   dst_buffer);
+    shakti_gaussian_convolution_gpu(src_buffer, sigma, truncation_factor,
+                                    dst_buffer);
   else
-    shakti_gaussian_convolution_v2_cpu(src_buffer, sigma, truncation_factor,
-                                       dst_buffer);
+    shakti_gaussian_convolution_cpu(src_buffer, sigma, truncation_factor,
+                                    dst_buffer);
   dst_buffer.copy_to_host();
 }
 
@@ -163,8 +163,8 @@ auto scale(py::array_t<float> src, py::array_t<float> dst)
 
   src_buffer.set_host_dirty();
   dst_buffer.set_host_dirty();
-  shakti_scale_32f(src_buffer, dst_buffer.width(), dst_buffer.height(),
-                   dst_buffer);
+  shakti_scale_32f_gpu(src_buffer, dst_buffer.width(), dst_buffer.height(),
+                       dst_buffer);
   dst_buffer.copy_to_host();
 }
 
@@ -175,8 +175,8 @@ auto reduce(py::array_t<float> src, py::array_t<float> dst)
 
   src_buffer.set_host_dirty();
   dst_buffer.set_host_dirty();
-  shakti_reduce_32f(src_buffer, dst_buffer.width(), dst_buffer.height(),
-                    dst_buffer);
+  shakti_reduce_32f_gpu(src_buffer, dst_buffer.width(), dst_buffer.height(),
+                        dst_buffer);
   dst_buffer.copy_to_host();
 }
 
@@ -187,10 +187,10 @@ auto enlarge(py::array_t<float> src, py::array_t<float> dst)
 
   src_buffer.set_host_dirty();
   dst_buffer.set_host_dirty();
-  shakti_enlarge(src_buffer,                               //
-                 src_buffer.width(), src_buffer.height(),  //
-                 dst_buffer.width(), dst_buffer.height(),  //
-                 dst_buffer);
+  shakti_enlarge_gpu(src_buffer,                               //
+                     src_buffer.width(), src_buffer.height(),  //
+                     dst_buffer.width(), dst_buffer.height(),  //
+                     dst_buffer);
   dst_buffer.copy_to_host();
 }
 

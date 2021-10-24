@@ -17,7 +17,7 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_polar_gradient_2d_32f.h"
+#include "shakti_polar_gradient_2d_32f_gpu.h"
 
 
 namespace DO { namespace Shakti { namespace HalideBackend {
@@ -28,7 +28,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
                                 Halide::Runtime::Buffer<float>& mag,  //
                                 Halide::Runtime::Buffer<float>& ori)  //
   {
-    shakti_polar_gradient_2d_32f(in, mag, ori);
+    shakti_polar_gradient_2d_32f_gpu(in, mag, ori);
   }
 
   inline auto polar_gradient_2d(Sara::ImageView<float>& in,   //

@@ -132,4 +132,5 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(Subtract<float>, shakti_subtract_32f)
+HALIDE_REGISTER_GENERATOR(Subtract<float>, shakti_subtract_32f_cpu)
+HALIDE_REGISTER_GENERATOR(Subtract<float>, shakti_subtract_32f_gpu)

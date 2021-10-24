@@ -185,14 +185,8 @@ namespace DO::Shakti::HalideBackend {
       // CPU schedule.
       else
       {
-        // 2nd pass: convolve the rows.
-        conv_y.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
-
-        // Inside the 2nd pass, schedule the 1st pass.
-        conv_x  //
-            .store_at(conv_y, yo)
-            .compute_at(conv_y, yi)
-            .vectorize(x, 8);
+        conv_y.tile(x, y, xi, yi, 64, 64).vectorize(xi, 8).parallel(y);
+        conv_x.compute_at(conv_y, x).vectorize(x, 8);
       }
     }
   };

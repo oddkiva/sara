@@ -65,7 +65,7 @@ GRAPHICS_MAIN()
       SARA_DEBUG << (good ? "OK" : "KOOOOOOOOOOOOOO") << std::endl;
     }
 
-//#define INSPECT_VISUALLY
+#define INSPECT_VISUALLY
 #ifdef INSPECT_VISUALLY
     if (!active_window())
     {

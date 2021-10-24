@@ -81,15 +81,6 @@ namespace DO::Shakti::HalideBackend {
         sara::Pixel<T, ColorSpace>::num_channels());
   }
 
-  template <typename T, typename ColorSpace>
-  inline auto as_interleaved_runtime_buffer(
-      sara::ImageView<sara::Pixel<T, ColorSpace>>& image)
-  {
-    return Halide::Runtime::Buffer<T>::make_interleaved(
-        reinterpret_cast<T*>(image.data()), image.width(), image.height(),
-        sara::Pixel<T, ColorSpace>::num_channels());
-  }
-
   template <typename T>
   inline auto as_buffer(sara::ImageView<T>& image)
   {
@@ -109,6 +100,21 @@ namespace DO::Shakti::HalideBackend {
     static constexpr auto num_channels = sara::PixelTraits<T>::num_channels;
     return Halide::Buffer<T>(image.data(), image.width(), image.height(),
                              num_channels);
+  }
+
+  template <typename T>
+  inline auto as_buffer(std::vector<T>& v)
+  {
+    return Halide::Buffer<T>(v.data(), static_cast<int>(v.size()));
+  }
+
+  template <typename T, typename ColorSpace>
+  inline auto as_interleaved_runtime_buffer(
+      sara::ImageView<sara::Pixel<T, ColorSpace>>& image)
+  {
+    return Halide::Runtime::Buffer<T>::make_interleaved(
+        reinterpret_cast<T*>(image.data()), image.width(), image.height(),
+        sara::Pixel<T, ColorSpace>::num_channels());
   }
 
   template <typename T>
@@ -146,12 +152,6 @@ namespace DO::Shakti::HalideBackend {
     static constexpr auto num_channels = sara::PixelTraits<T>::num_channels;
     return Halide::Runtime::Buffer<T>(image.data(), image.width(),
                                       image.height(), num_channels);
-  }
-
-  template <typename T>
-  inline auto as_buffer(std::vector<T>& v)
-  {
-    return Halide::Buffer<T>(v.data(), static_cast<int>(v.size()));
   }
 
   template <typename T>

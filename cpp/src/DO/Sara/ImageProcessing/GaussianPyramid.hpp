@@ -40,7 +40,14 @@ namespace DO { namespace Sara {
     // Resize the image with the appropriate factor.
     const auto resize_factor =
         std::pow(2.f, -static_cast<float>(params.first_octave_index()));
-    auto I = enlarge(image, resize_factor);
+
+    auto I = Image<T>{};
+    if (params.first_octave_index() < 0)
+      I = enlarge(image, resize_factor);
+    else if (params.first_octave_index() > 0)
+      I = reduce(image, 1 / resize_factor);
+    else
+      I = image; // TODO: optimize.
 
     // Deduce the new camera sigma with respect to the dilated image.
     const auto camera_sigma = Scalar(params.scale_camera()) * resize_factor;
@@ -56,8 +63,8 @@ namespace DO { namespace Sara {
 
     // Deduce the maximum number of octaves.
     const auto l =
-        std::min(image.width(), image.height());  // l = min image image sizes.
-    const auto b = params.image_padding_size();   // b = image border size.
+        std::min(I.width(), I.height());         // l = min image image sizes.
+    const auto b = params.image_padding_size();  // b = image border size.
 
     /*
      * Calculation details:

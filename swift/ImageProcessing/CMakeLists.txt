@@ -9,7 +9,7 @@ target_link_libraries(SaraSwiftImageProcessing
   ${DO_Sara_LIBRARIES}
   Halide::Halide
   Halide::Runtime
-  shakti_halide_rgb_to_gray
-  shakti_halide_gray32f_to_rgb)
+  shakti_rgb8u_to_gray32f_cpu
+  shakti_gray32f_to_rgb8u_cpu)
 set_target_properties(SaraSwiftImageProcessing PROPERTIES
   FOLDER "Swift")

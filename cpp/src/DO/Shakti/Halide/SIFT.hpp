@@ -19,10 +19,10 @@
 #include <DO/Shakti/Halide/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_sift_descriptor.h"
-#include "shakti_sift_descriptor_v2.h"
-#include "shakti_sift_descriptor_v3.h"
-#include "shakti_sift_descriptor_v4.h"
+#include "shakti_sift_descriptor_gpu.h"
+#include "shakti_sift_descriptor_gpu_v2.h"
+#include "shakti_sift_descriptor_gpu_v3.h"
+#include "shakti_sift_descriptor_gpu_v4.h"
 
 
 namespace DO::Shakti::HalideBackend {
@@ -65,15 +65,15 @@ namespace DO::Shakti::HalideBackend {
       kijo_tensor_buffer.set_host_dirty();
 
       // Run the algorithm.
-      shakti_sift_descriptor(mag_buffer, ori_buffer,    //
-                             x_buffer,                  //
-                             y_buffer,                  //
-                             scale_buffer,              //
-                             orientation_buffer,        //
-                             scale_upper_bound,         //
-                             bin_length_in_scale_unit,  //
-                             N, O,                      //
-                             kijo_tensor_buffer);
+      shakti_sift_descriptor_gpu(mag_buffer, ori_buffer,    //
+                                 x_buffer,                  //
+                                 y_buffer,                  //
+                                 scale_buffer,              //
+                                 orientation_buffer,        //
+                                 scale_upper_bound,         //
+                                 bin_length_in_scale_unit,  //
+                                 N, O,                      //
+                                 kijo_tensor_buffer);
 
       // Copy back to GPU.
       kijo_tensor_buffer.copy_to_host();
@@ -159,14 +159,14 @@ namespace DO::Shakti::HalideBackend {
       sift_tensor_buffer.set_host_dirty();
 
       // Run the algorithm.
-      shakti_sift_descriptor_v2(mag_buffer, ori_buffer,  //
-                                x_buffer,                //
-                                y_buffer,                //
-                                scale_buffer,            //
-                                orientation_buffer,      //
-                                scale_upper_bound,       //
-                                N, O,                    //
-                                sift_tensor_buffer);
+      shakti_sift_descriptor_gpu_v2(mag_buffer, ori_buffer,  //
+                                    x_buffer,                //
+                                    y_buffer,                //
+                                    scale_buffer,            //
+                                    orientation_buffer,      //
+                                    scale_upper_bound,       //
+                                    N, O,                    //
+                                    sift_tensor_buffer);
 
       // Copy back to GPU.
       sift_tensor_buffer.copy_to_host();
@@ -252,14 +252,14 @@ namespace DO::Shakti::HalideBackend {
       sift_tensor_buffer.set_host_dirty();
 
       // Run the algorithm.
-      shakti_sift_descriptor_v3(mag_buffer, ori_buffer,  //
-                                x_buffer,                //
-                                y_buffer,                //
-                                scale_buffer,            //
-                                orientation_buffer,      //
-                                scale_upper_bound,       //
-                                N, O,                    //
-                                sift_tensor_buffer);
+      shakti_sift_descriptor_gpu_v3(mag_buffer, ori_buffer,  //
+                                    x_buffer,                //
+                                    y_buffer,                //
+                                    scale_buffer,            //
+                                    orientation_buffer,      //
+                                    scale_upper_bound,       //
+                                    N, O,                    //
+                                    sift_tensor_buffer);
 
       // Copy back to GPU.
       sift_tensor_buffer.copy_to_host();
@@ -359,12 +359,12 @@ namespace DO::Shakti::HalideBackend {
       sift_tensor_buffer.set_host_dirty();
 
       // Run the algorithm.
-      shakti_sift_descriptor_v4(mag_buffer, ori_buffer,  //
-                                x_buffer,                //
-                                y_buffer,                //
-                                scale_buffer,            //
-                                orientation_buffer,      //
-                                sift_tensor_buffer);
+      shakti_sift_descriptor_gpu_v4(mag_buffer, ori_buffer,  //
+                                    x_buffer,                //
+                                    y_buffer,                //
+                                    scale_buffer,            //
+                                    orientation_buffer,      //
+                                    sift_tensor_buffer);
 
       // Copy back to GPU.
       sift_tensor_buffer.copy_to_host();

@@ -21,7 +21,7 @@
 #include <DO/Shakti/Halide/Draw.hpp>
 #include <DO/Shakti/Halide/SIFTPipeline.hpp>
 
-#include "shakti_halide_rgb_to_gray.h"
+#include "shakti_rgb8u_to_gray32f_cpu.h"
 
 
 namespace sara = DO::Sara;
@@ -153,7 +153,7 @@ auto test_on_video()
     SARA_CHECK(frames_read);
 
     sara::tic();
-    shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray);
+    shakti_rgb8u_to_gray32f_cpu(buffer_rgb, buffer_gray);
     sara::toc("CPU rgb to grayscale");
 
     sara::tic();

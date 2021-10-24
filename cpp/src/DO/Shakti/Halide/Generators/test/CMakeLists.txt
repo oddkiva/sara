@@ -21,37 +21,37 @@ endforeach ()
 
 target_link_libraries(test_halide_cast
   PRIVATE
-  shakti_halide_cast_to_float)
+  shakti_cast_uint8_to_float_cpu)
 
 target_link_libraries(test_halide_resize
   PRIVATE
-  shakti_scale_32f
-  shakti_reduce_32f
-  shakti_enlarge)
+  shakti_scale_32f_gpu
+  shakti_reduce_32f_gpu
+  shakti_enlarge_gpu)
 
 target_link_libraries(test_halide_im2col
   PRIVATE
-  shakti_im2col_32f)
+  shakti_im2col_32f_gpu)
 
 target_link_libraries(test_halide_binary_operators
   PRIVATE
-  shakti_subtract_32f)
+  shakti_subtract_32f_gpu)
 
 target_link_libraries(test_halide_local_extrema
   PRIVATE
-  shakti_local_max_32f
-  shakti_local_scale_space_extremum_32f)
+  shakti_local_max_32f_gpu
+  shakti_local_scale_space_extremum_32f_gpu)
 
 target_link_libraries(test_halide_dominant_gradient_orientations
   PRIVATE
   # Dominant gradient orientations.
-  shakti_polar_gradient_2d_32f
-  shakti_dominant_gradient_orientations)
+  shakti_polar_gradient_2d_32f_gpu
+  shakti_dominant_gradient_orientations_gpu)
 
 target_link_libraries(test_halide_sift_descriptor
   PRIVATE
-  shakti_polar_gradient_2d_32f
-  shakti_sift_descriptor
-  shakti_sift_descriptor_v2
-  shakti_sift_descriptor_v3
-  shakti_sift_descriptor_v4)
+  shakti_polar_gradient_2d_32f_gpu
+  shakti_sift_descriptor_gpu
+  shakti_sift_descriptor_gpu_v2
+  shakti_sift_descriptor_gpu_v3
+  shakti_sift_descriptor_gpu_v4)

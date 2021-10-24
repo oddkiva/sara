@@ -18,7 +18,7 @@ namespace {
 
   using namespace Halide;
 
-  class GaussianConvolutionV2 : public Halide::Generator<GaussianConvolutionV2>
+  class GaussianConvolution : public Halide::Generator<GaussianConvolution>
   {
   public:
     GeneratorParam<int> tile_x{"tile_x", 32};
@@ -56,5 +56,5 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(GaussianConvolutionV2, shakti_gaussian_convolution_v2)
-HALIDE_REGISTER_GENERATOR(GaussianConvolutionV2, shakti_gaussian_convolution_v2_cpu)
+HALIDE_REGISTER_GENERATOR(GaussianConvolution, shakti_gaussian_convolution_gpu)
+HALIDE_REGISTER_GENERATOR(GaussianConvolution, shakti_gaussian_convolution_cpu)

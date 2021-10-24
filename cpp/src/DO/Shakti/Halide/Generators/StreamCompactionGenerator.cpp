@@ -128,4 +128,4 @@ namespace {
 }  // namespace
 
 
-HALIDE_REGISTER_GENERATOR(StreamCompaction, shakti_stream_compaction)
+HALIDE_REGISTER_GENERATOR(StreamCompaction, shakti_stream_compaction_gpu)

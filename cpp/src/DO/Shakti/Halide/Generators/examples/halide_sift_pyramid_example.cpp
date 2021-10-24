@@ -28,8 +28,8 @@
 #  include <DO/Shakti/Cuda/VideoIO.hpp>
 #endif
 
-#include "shakti_halide_bgra_to_gray.h"
-#include "shakti_halide_rgb_to_gray.h"
+#include "shakti_bgra8u_to_gray32f_cpu.h"
+#include "shakti_rgb8u_to_gray32f_cpu.h"
 
 
 namespace sara = DO::Sara;
@@ -219,9 +219,9 @@ auto test_on_video(int argc, char **argv)
     {
       sara::tic();
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
-      shakti_halide_bgra_to_gray(buffer_bgra, buffer_gray);
+      shakti_bgra8u_to_gray32f_cpu(buffer_bgra, buffer_gray);
 #else
-      shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray);
+      shakti_rgb8u_to_gray32f_cpu(buffer_rgb, buffer_gray);
 #endif
       sara::toc("CPU RGB to grayscale");
 

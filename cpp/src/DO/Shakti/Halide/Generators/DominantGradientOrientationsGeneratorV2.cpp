@@ -279,6 +279,6 @@ namespace v3 {
 
 
 HALIDE_REGISTER_GENERATOR(v2::DominantGradientOrientations,
-                          shakti_dominant_gradient_orientations_v2)
+                          shakti_dominant_gradient_orientations_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v3::DominantGradientOrientations,
-                          shakti_dominant_gradient_orientations_v3)
+                          shakti_dominant_gradient_orientations_gpu_v3)

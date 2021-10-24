@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Core/Math/JenkinsTraub.hpp>
 #include <DO/Sara/Core/Math/Polynomial.hpp>
 #include <DO/Sara/Core/Math/UnivariatePolynomial.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
@@ -94,9 +95,8 @@ namespace DO::Sara {
         -> void;
 
     DO_SARA_EXPORT
-    auto
-    form_resultant_matrix(const Matrix<double, 6, 10>&,
-                          Univariate::UnivariatePolynomial<double>[3][3]) const
+    auto form_resultant_matrix(const Matrix<double, 6, 10>&,
+                               UnivariatePolynomial<double, -1>[3][3]) const
         -> void;
 
     DO_SARA_EXPORT

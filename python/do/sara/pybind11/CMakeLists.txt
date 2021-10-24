@@ -16,6 +16,7 @@ target_link_libraries(pysara_pybind11
   PRIVATE pybind11::module
           DO::Sara::DisjointSets
           DO::Sara::FeatureDetectors
+          DO::Sara::FeatureMatching
           DO::Sara::Geometry
           DO::Sara::ImageIO)
 if (SARA_BUILD_VIDEOIO)

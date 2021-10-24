@@ -5,9 +5,9 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_halide_gray32f_to_rgb.h"
-#include "shakti_halide_rgb_to_gray.h"
-#include "shakti_reduce_32f.h"
+#include "shakti_gray32f_to_rgb8u_cpu.h"
+#include "shakti_rgb8u_to_gray32f_cpu.h"
+#include "shakti_reduce_32f_gpu.h"
 
 
 namespace halide = DO::Shakti::HalideBackend;
@@ -28,7 +28,7 @@ auto reduce(ImageView<float>& src, ImageView<float>& dst)
   auto dst_buffer = halide::as_runtime_buffer(dst_tensor_view);
 
   src_buffer.set_host_dirty();
-  shakti_reduce_32f(src_buffer, dst.width(), dst.height(), dst_buffer);
+  shakti_reduce_32f_gpu(src_buffer, dst.width(), dst.height(), dst_buffer);
   dst_buffer.copy_to_host();
 }
 
@@ -37,11 +37,9 @@ auto halide_pipeline() -> void
   using namespace std::string_literals;
 
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath =
-      "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
+  const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
@@ -59,7 +57,8 @@ auto halide_pipeline() -> void
   auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
   auto buffer_gray32f_reduced =
       halide::as_runtime_buffer<float>(frame_gray32f_reduced);
-  auto buffer_gray8 = halide::as_interleaved_runtime_buffer(frame_gray32f_reduced_as_rgb);
+  auto buffer_gray8 =
+      halide::as_interleaved_runtime_buffer(frame_gray32f_reduced_as_rgb);
 
   create_window(video_stream.sizes() / 2);
   while (true)
@@ -75,9 +74,9 @@ auto halide_pipeline() -> void
     tic();
     {
       // Use parallelisation and vectorization.
-      shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
+      shakti_rgb8u_to_gray32f_cpu(buffer_rgb, buffer_gray32f);
       reduce(frame_gray32f, frame_gray32f_reduced);
-      shakti_halide_gray32f_to_rgb(buffer_gray32f_reduced, buffer_gray8);
+      shakti_gray32f_to_rgb8u_cpu(buffer_gray32f_reduced, buffer_gray8);
     }
     toc("Halide");
 

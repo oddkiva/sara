@@ -119,4 +119,4 @@ namespace {
 
 
 HALIDE_REGISTER_GENERATOR(RefineScaleSpaceExtrema,
-                          shakti_refine_scale_space_extrema)
+                          shakti_refine_scale_space_extrema_gpu)

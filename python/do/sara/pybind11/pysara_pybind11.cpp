@@ -2,8 +2,8 @@
 
 #include "DisjointSets.hpp"
 #include "FeatureDetectors.hpp"
+#include "FeatureMatching.hpp"
 #include "Geometry.hpp"
-#include "SfM.hpp"
 #include "VideoIO.hpp"
 
 
@@ -17,5 +17,5 @@ PYBIND11_MODULE(pysara_pybind11, m)
   expose_video_io(m);
 #endif
   expose_feature_detectors(m);
-  expose_sfm(m);
+  expose_feature_matching(m);
 }

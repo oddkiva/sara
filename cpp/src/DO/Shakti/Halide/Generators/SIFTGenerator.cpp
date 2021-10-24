@@ -104,4 +104,4 @@ namespace {
 }  // namespace
 
 
-HALIDE_REGISTER_GENERATOR(SIFT, shakti_sift_descriptor)
+HALIDE_REGISTER_GENERATOR(SIFT, shakti_sift_descriptor_gpu)

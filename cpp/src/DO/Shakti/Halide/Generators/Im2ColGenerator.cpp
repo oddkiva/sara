@@ -116,5 +116,5 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(Im2ColGenerator<float>, shakti_im2col_32f)
-HALIDE_REGISTER_GENERATOR(Im2ColGenerator<double>, shakti_im2col_64f)
+HALIDE_REGISTER_GENERATOR(Im2ColGenerator<float>, shakti_im2col_32f_gpu)
+HALIDE_REGISTER_GENERATOR(Im2ColGenerator<double>, shakti_im2col_64f_gpu)

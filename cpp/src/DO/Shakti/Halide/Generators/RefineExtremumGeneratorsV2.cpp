@@ -220,6 +220,6 @@ namespace v3 {
 }  // namespace
 
 HALIDE_REGISTER_GENERATOR(v2::RefineScaleSpaceExtrema,
-                          shakti_refine_scale_space_extrema_v2)
+                          shakti_refine_scale_space_extrema_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v3::RefineScaleSpaceExtrema,
-                          shakti_refine_scale_space_extrema_v3)
+                          shakti_refine_scale_space_extrema_gpu_v3)

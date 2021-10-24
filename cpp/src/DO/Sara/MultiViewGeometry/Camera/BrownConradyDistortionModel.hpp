@@ -22,7 +22,7 @@
 namespace DO::Sara {
 
   template <typename T, typename DistortionModel>
-  struct BrownConradyCamera: PinholeCamera<T>
+  struct BrownConradyDistortionModel: PinholeCamera<T>
   {
     static constexpr auto eps = static_cast<T>(1e-8);
 
@@ -74,86 +74,22 @@ namespace DO::Sara {
       const Eigen::Vector2f &xu = undistort (x);
       return K_inverse * xu.homogeneous ();
     }
-
-    template <typename PixelType>
-    auto undistort(const ImageView<PixelType>& src,
-                   ImageView<PixelType>& dst) const
-    {
-      const auto& w = dst.width();
-      const auto& h = dst.height();
-
-#pragma omp parallel for
-      for (auto yx = 0; yx < h * w; ++yx)
-      {
-        const auto y = yx / w;
-        const auto x = yx - y * w;
-        const Eigen::Vector2d p = distort(vector2_type(x, y)).template cast<double>();
-
-        const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
-                                     0 <= p.y() && p.y() < h - 1;
-        if (!in_image_domain)
-        {
-          dst(x, y) = PixelTraits<PixelType>::zero();
-          continue;
-        }
-
-        auto color = interpolate(src, p);
-        if constexpr (std::is_same_v<PixelType, Rgb8>)
-          color /= 255;
-
-        auto color_converted = PixelType{};
-        smart_convert_color(color, color_converted);
-        dst(x, y) = color_converted;
-      }
-    }
-
-    template <typename PixelType>
-    auto distort(const ImageView<PixelType>& src,
-                 ImageView<PixelType>& dst) const
-    {
-      const auto& w = dst.width();
-      const auto& h = dst.height();
-
-#pragma omp parallel for
-      for (auto yx = 0; yx < h * w; ++yx)
-      {
-        const auto y = yx / w;
-        const auto x = yx - y * w;
-        const Eigen::Vector2d p = undistort(vector2_type(x, y))  //
-                                      .template cast<double>();
-        const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
-                                     0 <= p.y() && p.y() < h - 1;
-        if (!in_image_domain)
-        {
-          dst(x, y) = PixelTraits<PixelType>::zero();
-          continue;
-        }
-
-        auto color = interpolate(src, p);
-        if constexpr (std::is_same_v<PixelType, Rgb8>)
-          color /= 255;
-
-        auto color_converted = PixelType{};
-        smart_convert_color(color, color_converted);
-        dst(x, y) = color_converted;
-      }
-    }
   };
 
 
   template <typename T>
   using BrownConradyCamera22 =
-      BrownConradyCamera<T, PolynomialDistortionModel<T, 2, 2>>;
+      BrownConradyDistortionModel<T, PolynomialDistortionModel<T, 2, 2>>;
   template <typename T>
   using BrownConradyCamera32 =
-      BrownConradyCamera<T, PolynomialDistortionModel<T, 3, 2>>;
+      BrownConradyDistortionModel<T, PolynomialDistortionModel<T, 3, 2>>;
 
   template <typename T>
   using BrownConradyCameraDecentered22 =
-      BrownConradyCamera<T, DecenteredPolynomialDistortionModel<T, 2, 2>>;
+      BrownConradyDistortionModel<T, DecenteredPolynomialDistortionModel<T, 2, 2>>;
 
   template <typename T>
   using BrownConradyCameraDecentered32 =
-      BrownConradyCamera<T, DecenteredPolynomialDistortionModel<T, 3, 2>>;
+      BrownConradyDistortionModel<T, DecenteredPolynomialDistortionModel<T, 3, 2>>;
 
 }  // namespace DO::Sara

@@ -14,4 +14,4 @@
 #include <pybind11/pybind11.h>
 
 
-auto expose_sfm(pybind11::module&) -> void;
+auto expose_feature_matching(pybind11::module&) -> void;

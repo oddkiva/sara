@@ -2,191 +2,270 @@
 # bug in the CMake script in `Halide.cmake` is using the variable
 # `CMAKE_CFG_INTDIR` incorrectly.
 
+# ------------------------------------------------------------------------------
 # Color conversions.
-shakti_halide_library(shakti_halide_rgb_to_gray.cpp)
-shakti_halide_library(shakti_halide_bgra_to_gray.cpp)
-shakti_halide_library(shakti_halide_gray32f_to_rgb.cpp)
-shakti_halide_gpu_library(shakti_halide_cast_to_float.cpp)
-
-
-# Separable convolution 2D
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_separable_convolution_2d
+  NAME shakti_rgb8u_to_gray32f_cpu
+  SRCS FromRgb8uToGray32f.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_bgra8u_to_gray32f_cpu
+  SRCS FromBgra8uToGray32f.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_gray32f_to_rgb8u_cpu
+  SRCS FromGray32fToRgb8u.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_cast_uint8_to_float_cpu
+  SRCS CastUint8ToFloat.cpp)
+
+
+# ------------------------------------------------------------------------------
+# Separable convolution 2D
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_separable_convolution_2d_gpu
   SRCS SeparableConvolution2dGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
-# Gaussian convolution.
+
+# ------------------------------------------------------------------------------
+# Gaussian convolution
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_gaussian_convolution_v2
-  SRCS GaussianConvolutionV2Generator.cpp
+  NAME shakti_gaussian_convolution_cpu
+  SRCS GaussianConvolutionGenerator.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_gaussian_convolution_gpu
+  SRCS GaussianConvolutionGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
-shakti_halide_library_v2(
-  NAME shakti_gaussian_convolution_v2_cpu
-  SRCS GaussianConvolutionV2Generator.cpp)
 
+# ------------------------------------------------------------------------------
 # Upscale function.
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_scale_32f
-  SRCS ResizeGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+  NAME shakti_scale_32f_cpu
+  SRCS ResizeGenerators.cpp)
 
-# Enlarge function.
 shakti_halide_library_v2(
-  NAME shakti_reduce_32f
-  SRCS ResizeGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-# Enlarge function.
-shakti_halide_library_v2(
-  NAME shakti_enlarge
+  NAME shakti_scale_32f_gpu
   SRCS ResizeGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
-# Im2Col.
+# ------------------------------------------------------------------------------
+# Reduce function
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_im2col_32f
+  NAME shakti_reduce_32f_cpu
+  SRCS ResizeGenerators.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_reduce_32f_gpu
+  SRCS ResizeGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# ------------------------------------------------------------------------------
+# Enlarge function
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_enlarge_cpu
+  SRCS ResizeGenerators.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_enlarge_gpu
+  SRCS ResizeGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# ------------------------------------------------------------------------------
+# Im2Col
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_im2col_32f_gpu
   SRCS Im2ColGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+
+# ------------------------------------------------------------------------------
 # Batched convolution.
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_convolve_batch_32f
+  NAME shakti_convolve_batch_32f_cpu
+  SRCS BatchedConvolutionGenerator.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_convolve_batch_32f_gpu
   SRCS BatchedConvolutionGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
+# ------------------------------------------------------------------------------
 # Binary operators.
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_subtract_32f
+  NAME shakti_subtract_32f_cpu
+  SRCS BinaryOperatorGenerators.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_subtract_32f_gpu
   SRCS BinaryOperatorGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
+# ------------------------------------------------------------------------------
 # Local extrema operators.
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_local_max_32f
+  NAME shakti_local_max_32f_gpu
   SRCS LocalExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_local_scale_space_extremum_32f
+  NAME shakti_local_scale_space_extremum_32f_gpu
   SRCS LocalExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_local_scale_space_extremum_32f_v2
+  NAME shakti_local_scale_space_extremum_32f_gpu_v2
   SRCS LocalExtremumGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_local_scale_space_extremum_32f_v3
+  NAME shakti_local_scale_space_extremum_32f_gpu_v3
   SRCS LocalExtremumGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+
+# ------------------------------------------------------------------------------
+# Scale-space Extremum refinement (using a 2nd-order Taylor expansion)
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_refine_scale_space_extrema
+  NAME shakti_refine_scale_space_extrema_gpu
   SRCS RefineExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_refine_scale_space_extrema_v2
+  NAME shakti_refine_scale_space_extrema_gpu_v2
   SRCS RefineExtremumGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_refine_scale_space_extrema_v3
+  NAME shakti_refine_scale_space_extrema_gpu_v3
   SRCS RefineExtremumGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
+# ------------------------------------------------------------------------------
 # Forward difference operator.
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_forward_difference_32f
+  NAME shakti_forward_difference_32f_gpu
   SRCS DifferentialGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
-# Gradients in Cartesian coordinates.
+# ------------------------------------------------------------------------------
+# Gradients in Cartesian coordinates
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_gradient_2d_32f_v2
+  NAME shakti_gradient_2d_32f_gpu_v2
   SRCS DifferentialGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
-# Gradients in polar coordinates.
+# ------------------------------------------------------------------------------
+# Gradients in polar coordinates
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_polar_gradient_2d_32f
+  NAME shakti_polar_gradient_2d_32f_gpu
   SRCS DifferentialGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_polar_gradient_2d_32f_v2
+  NAME shakti_polar_gradient_2d_32f_gpu_v2
   SRCS DifferentialGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
-# Dominant gradient orientations.
+# ------------------------------------------------------------------------------
+# Dominant gradient orientations
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_dominant_gradient_orientations
+  NAME shakti_dominant_gradient_orientations_gpu
   SRCS DominantGradientOrientationsGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 if (UNIX)
   # Workaround with Linux...
-  target_link_libraries(shakti_dominant_gradient_orientations.generator
+  target_link_libraries(shakti_dominant_gradient_orientations_gpu.generator
     PRIVATE dl)
 endif ()
 
 shakti_halide_library_v2(
-  NAME shakti_dominant_gradient_orientations_v2
+  NAME shakti_dominant_gradient_orientations_gpu_v2
   SRCS DominantGradientOrientationsGeneratorV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_dominant_gradient_orientations_v3
+  NAME shakti_dominant_gradient_orientations_gpu_v3
   SRCS DominantGradientOrientationsGeneratorV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
-# SIFT descriptors.
+# ------------------------------------------------------------------------------
+# SIFT descriptors
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_sift_descriptor
+  NAME shakti_sift_descriptor_gpu
   SRCS SIFTGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_sift_descriptor_v2
+  NAME shakti_sift_descriptor_gpu_v2
   SRCS SIFTGeneratorV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_sift_descriptor_v3
+  NAME shakti_sift_descriptor_gpu_v3
   SRCS SIFTGeneratorV3.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_sift_descriptor_v4
+  NAME shakti_sift_descriptor_gpu_v4
   SRCS SIFTGeneratorV4.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
-# Stream compaction to populate extrema.
+# ------------------------------------------------------------------------------
+# Stream compaction to populate extrema
+# ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_count_extrema
+  NAME shakti_count_extrema_gpu
   SRCS CountGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 shakti_halide_library_v2(
-  NAME shakti_stream_compaction
+  NAME shakti_stream_compaction_gpu
   SRCS StreamCompactionGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
+# ------------------------------------------------------------------------------
+# Examples
+# ------------------------------------------------------------------------------
 if (SARA_BUILD_SAMPLES)
   add_subdirectory(examples)
 endif ()
 
+
+# ------------------------------------------------------------------------------
+# Examples
+# ------------------------------------------------------------------------------
 if (SARA_BUILD_TESTS)
   add_subdirectory(test)
 endif ()

@@ -45,6 +45,19 @@ namespace DO { namespace Sara {
                float pixel_dist_thres = 10.f);
     //! @}
 
+    //! @brief Input keypoints.
+    //! @{
+    auto keys1() const -> const KeypointList<OERegion, float>&
+    {
+      return _keys1;
+    }
+
+    auto keys2() const -> const KeypointList<OERegion, float>&
+    {
+      return _keys2;
+    }
+    //! @}
+
     //! @{
     //! @brief Return matches.
     DO_SARA_EXPORT

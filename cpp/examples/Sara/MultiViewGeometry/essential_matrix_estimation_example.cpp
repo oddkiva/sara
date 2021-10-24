@@ -84,7 +84,7 @@ int __main(int, char** argv)
       "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
       "/home/david/Desktop/Datasets/sfm/castle_int"s;
-  // "/home/david/Desktop/Datasets/sfm/fountain_int"s;
+      // "/home/david/Desktop/Datasets/sfm/fountain_int"s;
 #endif
   const auto image_id1 = std::string{argv[1]};  // "0005"s;
   const auto image_id2 = std::string{argv[2]};  // "0004"s;
@@ -93,6 +93,8 @@ int __main(int, char** argv)
       data_dir + "/" + image_id2 + ".png",
   };
   views.read_images();
+  SARA_CHECK(views.images[0].sizes().transpose());
+  SARA_CHECK(views.images[1].sizes().transpose());
 
 
   print_stage("Loading the internal camera matrices...");
@@ -103,6 +105,8 @@ int __main(int, char** argv)
   views.cameras[1].K =
       read_internal_camera_parameters(data_dir + "/" + image_id2 + ".png.K")
           .cast<double>();
+  SARA_CHECK(views.cameras[0].K);
+  SARA_CHECK(views.cameras[1].K);
 
 
   print_stage("Computing keypoints...");

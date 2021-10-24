@@ -15,11 +15,11 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Math/NewtonRaphson.hpp>
+#include <DO/Sara/Core/Math/PolynomialRoots.hpp>
 
 #include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
 #include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
 #include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
-#include <DO/Sara/Geometry/Tools/PolynomialRoots.hpp>
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
 
@@ -56,14 +56,14 @@ namespace DO { namespace Sara {
   }
 
   auto quartic_equation(const ConicEquation& s, const ConicEquation& t)
-      -> Polynomial<double, 4>
+      -> UnivariatePolynomial<double, 4>
   {
     double d[6][6];
     for (int i = 0; i < 6; ++i)
       for (int j = 0; j < 6; ++j)
         d[i][j] = s[i] * t[j] - s[j] * t[i];
 
-    Polynomial<double, 4> u;
+    auto u = UnivariatePolynomial<double, 4>{};
     u[0] = d[3][1] * d[1][0] - d[3][0] * d[3][0];
     u[1] = d[3][4] * d[1][0] + d[3][1] * (d[4][0] + d[1][2]) -
            2 * d[3][2] * d[3][0];
@@ -76,9 +76,9 @@ namespace DO { namespace Sara {
   }
 
   auto sigma_polynomial(const ConicEquation& s, double y)
-      -> Polynomial<double, 2>
+      -> UnivariatePolynomial<double, 2>
   {
-    auto sigma = Polynomial<double, 2>{};
+    auto sigma = UnivariatePolynomial<double, 2>{};
     sigma[0] = s[0] + s[2] * y + s[5] * y * y;
     sigma[1] = s[1] + s[4] * y;
     sigma[2] = s[3];
@@ -108,16 +108,12 @@ namespace DO { namespace Sara {
 
     if (x_denom == 0)
     {
-      auto x1s = std::complex<double>{};
-      auto x2s = std::complex<double>{};
-      auto real_root_s = false;
-      roots(sigma, x1s, x2s, real_root_s);
+      auto x1 = double{};
+      auto x2 = double{};
+      const auto real_root = compute_quadratic_real_roots(sigma, x1, x2);
 
-      if (!real_root_s)
+      if (!real_root)
         return;
-
-      const auto x1 = std::real(x1s);
-      const auto x2 = std::real(x2s);
 
       if (intersection_point_is_in_both_ellipse(x1, y))
         intersections.emplace_back(x1, y);
@@ -196,11 +192,11 @@ namespace DO { namespace Sara {
     {
       for (auto& y : ys)
       {
-        auto P = Univariate::UnivariatePolynomial<double>{4};
-        for (auto d = 0; d <= u.Degree; ++d)
+        auto P = UnivariatePolynomial<double>{};
+        for (auto d = 0; d <= u.degree(); ++d)
           P[d] = u[d];
 
-        auto root_polisher = Univariate::NewtonRaphson{P};
+        auto root_polisher = NewtonRaphson{P};
         y = root_polisher(y, 10);
       }
     }
@@ -213,7 +209,7 @@ namespace DO { namespace Sara {
     // Remove any intersection duplicates.
     const auto intersection_last =
         std::unique(intersections.begin(), intersections.end(),
-                    [&squared_eps](const Point2d& a, const Point2d& b) {
+                    [](const Point2d& a, const Point2d& b) {
                       return (a - b).squaredNorm() < squared_eps;
                     });
 

@@ -143,4 +143,4 @@ namespace {
 
 
 HALIDE_REGISTER_GENERATOR(DominantGradientOrientations,
-                          shakti_dominant_gradient_orientations)
+                          shakti_dominant_gradient_orientations_gpu)
