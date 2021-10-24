@@ -194,8 +194,9 @@ with respect to the sea level.
 
 :::fyi
 One advantage of using the automotive axis convention is that the semantics is
-more natural: we can image that the ice-floe at the elevation $z = 0 m$ above
-the sea if the ice floe is not inclined with respect to the sea.
+more natural: we can image that the ice-floe at the elevation $z =
+\qty{0}{\metre}$ above the sea if the ice floe is not inclined with respect to
+the sea.
 :::
 
 Now suppose that we know the camera pose parameterised by the rigid body
