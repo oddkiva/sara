@@ -7,14 +7,14 @@ current understanding.
 
 ### Problem Statement
 
-The pose recovery assumes that a set of 2D image points $\{ \mathbf{u}_i \}_i$
-in an image $I$ are known to respectively correspond to a set of 3D scene points
-$\{ \mathbf{x}_i\}$ in some reference frame.
+The problem of pose recovery starts with the following assumption. We know that
+a set of 2D image points $\{ \mathbf{u}_i \}_i$ in an image $I$ respectively
+correspond to a set of 3D scene points $\{ \mathbf{x}_i\}$ in some reference
+frame.
 
 Our goal is to retrieve the camera parameters that formed this very image $I$,
 namely the camera pose, that is its gaze orientation $\mathbf{R}$ and position
-$\mathbf{t}$ with respect to a reference frame, say, an arbitrary world frame
-$\mathcal{W}$.
+$\mathbf{t}$ with respect to some world reference frame $\mathcal{W}$.
 
 :::fyi
 In case we are still being confused about which frame or coordinates, let us
@@ -32,9 +32,9 @@ There are two situations in Structure-from-Motion:
    mathematical camera model that can explain the formation of image $I$ is
    either the pinhole camera model, or a camera model that can account for
    small distortion;
-2. we are dealing with calibrated camers, that is, we do know which mathematical
-   camera model explains best the formation of image $I$ and we know its
-   associated parameter values of this model.
+2. we are dealing with calibrated cameras, that is, we do know which
+   mathematical camera model explains best the formation of image $I$ and we
+   know its associated parameter values of this model.
 
 ### First Situation: Camera Resectioning
 
@@ -50,7 +50,7 @@ include the calibration matrix $\mathbf{K}$ and the distortion coefficients.
 In the second situation, we know the camera model and its associated parameter
 values. As a result, we can calculate the incident light ray vector
 $\mathrm{ray}(\mathbf{u}_i) = \mathbf{y}_i \in \mathbb{R}^3$ that has hit the
-image plane at any pixel coordinates $\mathbf{u}_i$. The backprojected ray
+image plane for any pixel coordinates $\mathbf{u}_i$. The backprojected ray
 $\mathbf{y}_i$ has its coordinates expressed in the camera frame $\mathcal{C}$.
 
 For example, if we are dealing with the simple pinhole camera model with known
@@ -64,10 +64,10 @@ calibration matrix $\mathbf{K}$, the film (homogeneous) coordinates
 is also the backprojected light ray vector $\mathbf{y}_i$ from a physics point
 of view.
 
-Now the goal is to calculate the camera pose $(\mathbf{R}, \mathbf{t})$ given
-that we know that each backprojected light ray $\mathbf{y}_i$ respectively
-corresponds to the scene point $\mathbf{x}_i$. This is how the
-Perspective-n-Point (PnP) problem is formulated.
+Now the goal is to calculate the camera pose $(\mathbf{R}, \mathbf{t})$ knowing
+that each backprojected light ray $\mathbf{y}_i$ respectively corresponds to the
+scene point $\mathbf{x}_i$. This is how the Perspective-n-Point (PnP) problem is
+formulated.
 
 The PnP problem starts by observing that any rigid body motion $(\mathbf{R},
 \mathbf{t})$ preserves the Euclidean distance $||\mathbf{x}_i -
@@ -90,7 +90,7 @@ calculating.
 
 :::fyi
 Let us ponder for a moment about the meaning of the global rigid motion equation
-above. Notice here that in the PnP problem formulation:
+above. Here notice that in the PnP problem formulation:
 
 - $\mathbf{R}$ actually expresses the axes of the world frame $\mathcal{W}$ with
   respect to the camera frame $\mathcal{C}$.
@@ -100,8 +100,8 @@ above. Notice here that in the PnP problem formulation:
 Not the other way around.
 :::
 
-In our context, $\mathbf{x}'_i$ is a the same 3D scene point $\mathbf{x}_i$ but
-this time it is expressed in the camera frame $\mathcal{C}$.  And following the
+In our context, $\mathbf{x}'_i$ is the same 3D scene point $\mathbf{x}_i$ but
+this time it is expressed in the camera frame $\mathcal{C}$.  And because of the
 basic laws of geometrical optics, the 3D coordinates $\mathbf{x}'_i$ is
 collinear to the backprojected light ray vector $\mathbf{y}_i$
 
