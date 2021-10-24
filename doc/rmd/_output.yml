@@ -1,3 +1,10 @@
+# bookdown::bs4_book:
+#   theme:
+#     primary: "#637238"
+#   repo:
+#     base: https://gitlab.com/DO-CV/sara
+#     branch: master
+#     subdir: "doc/rmd"
 bookdown::gitbook:
   css: style.css
   split_by: section
@@ -8,7 +15,7 @@ bookdown::gitbook:
         <li><a href="./">Computer Vision with Sara</a></li>
       after: |
         <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
-    download: ["pdf", "epub"]
+    download: ["pdf"]
     sharing:
       facebook: no
 bookdown::pdf_book:

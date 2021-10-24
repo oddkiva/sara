@@ -8,6 +8,7 @@ documentclass: book
 bibliography: ["phd-utf8.bib"]
 biblio-style: apalike
 link-citations: yes
+url: https://gitlab.com/DO-CV/sara
 ---
 
 
@@ -95,8 +96,8 @@ languages like *Python* and particularly *Swift*, which strikes a good balance
 between elegance and performance to me.
 
 *Sara* (सार) is a *Sanskrit* word meaning *essence*. On a less serious note, I was
-looking for a nice simple *human* name and the Spanish transliteration into this
-lovely female name was then chosen intentionally.
+looking for a nice simple *human* name and I intentionally chose the Spanish
+transliteration into this lovely female name.
 
 Sara focuses on:
 
@@ -121,4 +122,4 @@ if (!file.exists(codedocs_file <- 'figures/sara.svg'))
   download.file(codedocs_url, codedocs_file, mode = 'wb')
 ```
 
-[`r include_svg(if (identical(knitr:::pandoc_to(), 'html')) codedocs_url else codedocs_file)`](https://codedocs.xyz/DO-CV/sara/)
+[`r include_svg(if (identical(knitr:::pandoc_to(), 'html')) codedocs_url else codedocs_file)`](https://do-cv.gitlab.io/sara/)

@@ -254,9 +254,9 @@ each coefficient.
 
 ### Composite Euler Rotation
 
-The rotation matrix expressed with respect to the *extrinsic* axes (i.e., the axes
-of the original local coordinates before rotating the plane) is calculated as
-follows.
+The rotation matrix expressed with respect to the *extrinsic* axes (i.e., the
+axes of the original local coordinates before rotating the airplane) is
+calculated as follows.
 
 :::puzzle
 ```{proposition, name="Composite Euler Rotation"}

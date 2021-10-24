@@ -220,8 +220,8 @@ by Grunert in 1841 who solved it for the case $N = 3$ [@Grunert:1841:grunert].
 
 I will not try to review the literature exhaustively but let us quickly mention
 that more recent methods have been proposed in the computer vision literature
-for the general case (EPnP, UPnP to be cited) or for other particular case $N =
-4$ [@QuanL:1999:pami].
+for the general case such as [@LepetitMNF:2009:ijcv] or [@KneipLS:2014:eccv] or
+for other particular case $N = 4$ [@QuanL:1999:pami].
 
 Over the years, newer P3P methods have been proposed and are becoming more
 efficient to compute. We will focus on reviewing Lambda-Twist
@@ -369,17 +369,18 @@ inhomogeneous quadric defined as
   \mathbf{\Lambda}^T \mathbf{D}_0 \mathbf{\Lambda} = 0.
 \end{equation}
 
-In general the quadric $\mathbf{D}_0$ is nonzero but it also has to be a
-degenerate quadric (why?). This means that necessarily
-
-:::fyi
-I haven't understood why we want a degenerate quadric yet.
-Care to explain to me if you know why? Much appreciated.
-:::
+By using a geometric argument, [@PerssonN:2018:eccv] claims that the quadric
+$\mathbf{D}_0$ is of rank 2. This means that necessarily
 
 \begin{equation}
   \det \mathbf{D}_0 = 0
 \end{equation}
+
+:::fyi
+Visualizing the intersection of the two homogeneous quadrics is not obvious to
+me. So I am still not clear to me as for why the linear combination has rank 2.
+Care to explain to me if you know why? Much appreciated.
+:::
 
 This leads us to finding the roots of a cubic equation $c$ in the variable
 $\gamma$ denoted as
@@ -503,6 +504,8 @@ since the robustness outweighs the slight loss of speed.
 Another technical trick that [@PerssonN:2018:eccv] use is that they introduce
 nonzero auxiliary variables by exploiting two linear dependences.
 
+0. TODO: detail the parameterization of eigenvectors.
+
 1. The first linear dependence between each $\lambda_i$ results from the Eigen
    decomposition of the matrix $\mathbf{D}_0$ which encodes the homogeneous
    quadrics.
@@ -624,3 +627,21 @@ tau_coeff = tau_polynomial.all_coeffs()
 for i in range(3):
     print('tau[{}] = {}'.format(2 - i, tau_coeff[i]))
 ```
+
+
+##### Determinining the Scales $\lambda_i$ from Auxiliary variables
+
+Let us just mention another error in the paper which is the solution of Equation
+(16), it should be instead^[This is the one blatant error that the review
+missed in the paper (sigh...)]
+
+Using $1$-based indexing to
+\begin{equation}
+  \lambda_{2k} = \sqrt{\frac{a_{23}}{\tau_k^2 - 2 b_{23} \tau_k + 1}}
+\end{equation}
+
+So in our case, since we use $0$-based indexing
+\begin{equation}
+  \lambda_{1k} = \sqrt{\frac{a_{12}}{\tau_k^2 - 2 b_{12} \tau_k + 1}}
+\end{equation}
+

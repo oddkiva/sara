@@ -256,13 +256,3 @@ Proceeding incrementally like this, we can also retrieve the next camera poses.
 The DLT approach is in theory only applicable to the pinhole camera model. It
 can be a good initialization for the bundle adjustment which will estimate the
 distortion coefficients of the camera.
-
-### References
-
-The DLT was proposed by [Hartley and Zisserman 1999] and is the simplest one to
-implement.
-
-More robust approaches are proposed later:
-
-- Lepetit et al.'s EPnP approach (IJCV 2008) which is better.
-- Lambda-twist

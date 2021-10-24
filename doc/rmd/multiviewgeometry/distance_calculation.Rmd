@@ -52,7 +52,7 @@ currently capturing the hustle and bustle of penguins on the ice floe.
 To start, we use the camera axis convention and we assume that the camera has
 its axes oriented as follows:
 
-- its $x$-axis is pointing to the right of the drone 
+- its $x$-axis is pointing to the right of the drone
 - its $y$-axis is normal to the ice floe plane and is pointing down,
 - its $z$-axis is pointing to the horizon
 - its $x$-axis and $z$-axis are such that they form a plane that is parallel to
@@ -194,8 +194,9 @@ with respect to the sea level.
 
 :::fyi
 One advantage of using the automotive axis convention is that the semantics is
-more natural: we can image that the ice-floe at the elevation $z = 0 m$ above
-the sea if the ice floe is not inclined with respect to the sea.
+more natural: we can image that the ice-floe at the elevation $z =
+\qty{0}{\metre}$ above the sea if the ice floe is not inclined with respect to
+the sea.
 :::
 
 Now suppose that we know the camera pose parameterised by the rigid body
@@ -501,10 +502,9 @@ time this necessitates to capture a few individuals of the animal population and
 put to sleep through sedatives, which could be a particularly traumatic and
 stressful experience for animals.
 
-One way to avoid that could be to use computer vision methods. Visual metrologic
-approaches could turn out to be sufficiently precise and further robustified
-with machine learning approaches. Another advantage is that these are faster and
-scale very well with the number of animal individual and thereby making such
-human interventions and animal suffering and unnecessary in many cases.
-
-**TODO**.
+One way to avoid that could be the use of computer vision methods. Visual
+metrologic approaches could turn out to be sufficiently precise and further
+robustified with machine learning approaches. Another advantage is that these
+are faster and scale very well with the number of animal individual and thereby
+making such human interventions and animal suffering and unnecessary in many
+cases.
