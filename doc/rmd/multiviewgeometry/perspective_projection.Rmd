@@ -1,34 +1,27 @@
 ## Imaging via Perspective Projection
 
-In the camera pinhole model, images are formed from light rays reflected by 3D
+In classical cameras, images are formed from light rays reflected by 3D
 objects. Each incident light rays passes through the camera aperture by
 following a straight line trajectory and hit the film plane inside the camera.
 
-The pinhole model is a simplified yet powerful representation of the physics,
-from which we can derive later a number of useful mathematical methods in 3D
-reconstruction. As an approximation, the camera aperture has no sizes and is
-modeled mathematically as a 3D point located at the origin of the camera frame,
-which we will define now.
-
-The camera frame has its origin located at the camera aperture. Physically, the
-camera aperture is a hole with a diameter quantified in terms of focal ratio,
-the so-called $f$-number which the following Wikipedia article describes quite
-well in details: https://en.wikipedia.org/wiki/F-number. The diameter of the
-camera aperture is a tunable diameter in order to control the amount of light
-that can hit the camera film plane.
+Physically, the camera aperture is a hole with a diameter quantified in terms of
+focal ratio, the so-called $f$-number which the following Wikipedia article
+describes quite well in details: https://en.wikipedia.org/wiki/F-number. The
+diameter of the camera aperture is adjustable in order to control the
+amount of light that can hit the camera film plane.
 
 The camera pinhole model does not care about the diameter of the camera aperture
 and chooses to model the camera aperture as a mere 3D point. While this seems
-oversimplifying, this mathematical modeling gives very good results in practice
-in photogrammetry. And as such the camera aperture is simply referred as the
-*camera center*.
+oversimplifying, this simple modeling turns out to be a powerful representation
+of the physics, from which we can derive later a number of useful mathematical
+methods in 3D reconstruction.  And as such the camera aperture is simply
+referred as the *camera center* and is the origin of the camera frame. 
 
-To describe the axes, let us imagine that we hold a camera with our two
-hands in upright position. First the $z$-axis is pointing to camera gaze
-direction and is also called the *principal axis*. Then the $x$-axis points to
-the right side, to our right hand holding the camera and the $y$-axis is
-pointing down to the ground. The $x$-axis and $y$-axis coincide with the image
-coordinate system.
+To describe the axes, let us imagine that we hold a camera with our two hands in
+upright position. First the $z$-axis is pointing to camera gaze direction and is
+also called the *principal axis*. Then the $x$-axis points to the right side, to
+our right hand holding the camera and the $y$-axis is pointing down to the
+ground. The $x$-axis and $y$-axis coincide with the image coordinate system.
 
 Geometrically speaking, the camera forms the image by projecting every 3D
 material point with *metric* coordinates $(x_C, y_C, z_C)$ onto the camera film
