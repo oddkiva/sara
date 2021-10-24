@@ -28,16 +28,16 @@ material point with *metric* coordinates $(x_C, y_C, z_C)$ onto the camera film
 plane defined by
 
 \begin{equation}
-  \Pi_\textrm{film plane}:\qquad z_C = -f < 0,
+  \Pi_\textrm{film}:\qquad z_C = -f < 0,
 \end{equation}
 
-where $f$ is the focal length.
+where $f$ is the focal length (in millimeters typically).
 
 In practice, it is not convenient to deal with negative signs and we always work
 in the *virtual* film plane,
 
 \begin{equation}
-  \Pi_\textrm{virtual film plane}:\qquad z_C = f > 0,
+  \Pi_\textrm{virtual film}:\qquad z_C = f > 0,
 \end{equation}
 
 which is symmetric to the *real* film plane with respect to the
