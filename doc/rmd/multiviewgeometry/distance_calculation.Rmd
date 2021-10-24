@@ -506,5 +506,3 @@ approaches could turn out to be sufficiently precise and further robustified
 with machine learning approaches. Another advantage is that these are faster and
 scale very well with the number of animal individual and thereby making such
 human interventions and animal suffering and unnecessary in many cases.
-
-**TODO**.
