@@ -116,7 +116,6 @@ with the additional physics constraint that each scale must be positive
 which ensures that the 3D scene point $\mathbf{x}'_i$ does appear in front of the
 camera.
 
-
 The camera resectioning then consists in determining the appropriate scale
 $\lambda_i$ for each backprojected ray $\mathbf{y}_i$ so that the change of
 coordinate via the rigid body motion $(\mathbf{R}, \mathbf{t})$ still preserves
@@ -201,7 +200,6 @@ one criticism I can make is that it mixes $0$-based indices and $1$-based
 indices. This made the implementation quite troublesome if you try to do it from
 scratch without looking at the reference implementation.
 :::
-
 
 The matrices $\mathbf{Z}$ and $\mathbf{X}$ are fully determined. Thus under the
 assumption that the three scene points $\mathbf{x}_i$ are not aligned, the
@@ -391,7 +389,6 @@ $\gamma$ denoted as
   (\#eq:cubic-polynomial)
 \end{equation}
 
-
 [@PerssonN:2018:eccv] say it is sufficient to extract one real root and we know
 a cubic polynomial has always one real root at least.
 
@@ -405,16 +402,18 @@ So trust me... don't follow the paper as it is and use my coefficients instead.
 Using $0$-based indexing, the correct coefficients of polynomial $c$ are as
 follows.
 
-\begin{gather}
-  c_3 &=& \det \mathbf{D}_2\\
-  c_2 &=& \mathbf{D}_{10}^T (\mathbf{D}_{21} \times \mathbf{D}_{22}) +
-          \mathbf{D}_{11}^T (\mathbf{D}_{22} \times \mathbf{D}_{20}) +
-          \mathbf{D}_{12}^T (\mathbf{D}_{20} \times \mathbf{D}_{21}) \\
-  c_1 &=& \mathbf{D}_{20}^T (\mathbf{D}_{11} \times \mathbf{D}_{12}) +
-          \mathbf{D}_{21}^T (\mathbf{D}_{12} \times \mathbf{D}_{10}) +
-          \mathbf{D}_{22}^T (\mathbf{D}_{10} \times \mathbf{D}_{11}) \\
-  c_0 &=& \det \mathbf{D}_1
-\end{gather}
+\begin{equation}
+\begin{aligned}
+  c_3 &=& \det \mathbf{D}_2 \\
+  c_2 &=& \mathbf{D}_{10}^T (\mathbf{D}_{21} \times \mathbf{D}_{22}) \\
+      &+& \mathbf{D}_{11}^T (\mathbf{D}_{22} \times \mathbf{D}_{20}) \\
+      &+& \mathbf{D}_{12}^T (\mathbf{D}_{20} \times \mathbf{D}_{21}) \\
+  c_1 &=& \mathbf{D}_{20}^T (\mathbf{D}_{11} \times \mathbf{D}_{12}) \\
+      &+& \mathbf{D}_{21}^T (\mathbf{D}_{12} \times \mathbf{D}_{10}) \\
+      &+& \mathbf{D}_{22}^T (\mathbf{D}_{10} \times \mathbf{D}_{11}) \\
+  c_0 &=& \det \mathbf{D}_1 \\
+\end{aligned}
+\end{equation}
 
 
 ##### Proof-Reading
@@ -546,11 +545,13 @@ Again the coefficients of the $\tau$ polynomial are riddled with errors. By
 manually recalculating the coefficients or double-checking with SymPy, instead
 the coefficients are
 
-\begin{gather}
+\begin{equation}
+\begin{aligned}
   \tau_2 &=& -a_{01} + a_{12} w_1^2 \\
   \tau_1 &=& 2 a_{01} b_{12} - 2 a_{12} b_{01} w_1 + 2 a_{12} w_0 w_1 \\
   \tau_0 &=& -a_{01} - 2 a_{12} b_{01} w_0 + a_{12} w_0^2 + a_{12}
-\end{gather}
+\end{aligned}
+\end{equation}
 
 :::fyi
 Well it turns out that [@PerssonN:2018:eccv] actually forms the

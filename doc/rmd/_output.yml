@@ -29,6 +29,7 @@ bookdown::pdf_book:
     "amssymb",
     "amsfonts",
     "amsthm",
+    "bm",
     "bbm",
     "stmaryrd",
     "mathrsfs",
