@@ -10,9 +10,20 @@ reconstruction. As an approximation, the camera aperture has no sizes and is
 modeled mathematically as a 3D point located at the origin of the camera frame,
 which we will define now.
 
-The camera frame has its origin located at the camera aperture. Because it is
-modeled as a 3D point, the camera aperture is simply referred as the *camera
-center*. To describe the axes, let us imagine that we hold a camera with our two
+The camera frame has its origin located at the camera aperture. Physically, the
+camera aperture is a hole with a diameter quantified in terms of focal ratio,
+the so-called $f$-number which the following Wikipedia article describes quite
+well in details: https://en.wikipedia.org/wiki/F-number. The diameter of the
+camera aperture is a tunable diameter in order to control the amount of light
+that can hit the camera film plane.
+
+The camera pinhole model does not care about the diameter of the camera aperture
+and chooses to model the camera aperture as a mere 3D point. While this seems
+oversimplifying, this mathematical modeling gives very good results in practice
+in photogrammetry. And as such the camera aperture is simply referred as the
+*camera center*.
+
+To describe the axes, let us imagine that we hold a camera with our two
 hands in upright position. First the $z$-axis is pointing to camera gaze
 direction and is also called the *principal axis*. Then the $x$-axis points to
 the right side, to our right hand holding the camera and the $y$-axis is
