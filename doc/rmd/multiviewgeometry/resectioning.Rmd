@@ -135,7 +135,7 @@ $(\mathbf{R}, \mathbf{t})$.
 
 The first step is to calculate the rotational part $\mathbf{R}$ of the rigid
 body transform. Then the second step which determines the translational part
-$\mathbf{t}$ will naturally follow naturally from the first step.
+$\mathbf{t}$ will follow naturally from the first step.
 
 To calculate $\mathbf{R}$, let us consider three direction vectors
 
