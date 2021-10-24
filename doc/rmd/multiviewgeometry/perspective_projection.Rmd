@@ -14,7 +14,7 @@ The camera pinhole model does not care about the diameter of the camera aperture
 and chooses to model it as a mere 3D point. While this may seem oversimplifying,
 this simple modeling turns out to be a powerful representation of the physics,
 from which we can derive later a number of useful mathematical methods in 3D
-reconstruction.  And as such the camera aperture is simply referred as the
+reconstruction. And as such the camera aperture is simply referred as the
 *camera center* and is the origin of the camera frame.
 
 To describe the axes, let us imagine that we hold a camera with our two hands in
@@ -34,10 +34,21 @@ The corresponding point imaged in the camera film has 3D *metric* coordinates
 $(u_C, v_C, f)$ also expressed in the camera coordinate system.
 
 Now in geometric computer vision, we prefer working in the *normalized* camera
-coordinate system where we assume the focal length is $f = 1$. In fact,
-this assumption amounts to dividing the coordinates by $f$. In other
-words, the base length unit in the normalized camera coordinate system is the
-focal length instead of the metre.
+coordinate system where we assume the focal length is $f = 1$. In fact, this
+assumption amounts to dividing the coordinates by $f$. In other words, the base
+length unit in the normalized camera coordinate system is the focal length
+instead of the metre.
+
+:::fyi
+To borrow Robert Collins' terms in his lecture slides like this one:
+http://www.cse.psu.edu/~rtc12/CSE486/lecture13.pdf, we can also think of
+*normalized camera coordinates* as *camera film coordinates* in order to
+distinguish them from *pixel coordinates*.
+
+I really like Robert Collins' term *camera film coordinates* as it does give a
+physical meaning to the normalized coordinates system and I think it helps to
+plant the ideas in our mind.
+:::
 
 In the camera pinhole model, similar triangles hold and thus
 
