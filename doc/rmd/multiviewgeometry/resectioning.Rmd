@@ -220,8 +220,8 @@ by Grunert in 1841 who solved it for the case $N = 3$ [@Grunert:1841:grunert].
 
 I will not try to review the literature exhaustively but let us quickly mention
 that more recent methods have been proposed in the computer vision literature
-for the general case (EPnP, UPnP to be cited) or for other particular case $N =
-4$ [@QuanL:1999:pami].
+for the general case such as [@LepetitMNF:2009:ijcv, @KneipLS:2014:eccv] or for
+other particular case $N = 4$ [@QuanL:1999:pami].
 
 Over the years, newer P3P methods have been proposed and are becoming more
 efficient to compute. We will focus on reviewing Lambda-Twist
