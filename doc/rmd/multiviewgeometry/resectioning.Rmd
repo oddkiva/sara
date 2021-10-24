@@ -632,8 +632,8 @@ for i in range(3):
 ##### Determinining the Scales $\lambda_i$ from Auxiliary variables
 
 Let us just mention another error in the paper which is the solution of Equation
-(16), it should be instead.^[This is the one blatant error that the review
-missed in the paper (sigh...)].
+(16), it should be instead^[This is the one blatant error that the review
+missed in the paper (sigh...)]
 
 Using $1$-based indexing to
 \begin{equation}
