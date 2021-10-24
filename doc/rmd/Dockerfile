@@ -9,7 +9,7 @@ WORKDIR /workspace
 COPY . .
 
 RUN apt-get update -y -qq
-RUN apt-get install -y -qq python3 python3-pip
+RUN apt-get install -y -qq python3 python3-pip librsvg2-bin
 
 RUN pip3 install matplotlib numpy sympy
 
