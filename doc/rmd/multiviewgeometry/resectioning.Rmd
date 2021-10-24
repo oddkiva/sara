@@ -632,7 +632,8 @@ for i in range(3):
 ##### Determinining the Scales $\lambda_i$ from Auxiliary variables
 
 Let us just mention another error in the paper which is the solution of Equation
-(16), it should be instead
+(16), it should be instead.^[This is the one blatant error that the review
+missed in the paper (sigh...)].
 
 Using $1$-based indexing to
 \begin{equation}
@@ -644,6 +645,3 @@ So in our case, since we use $0$-based indexing
   \lambda_{1k} = \sqrt{\frac{a_{12}}{\tau_k^2 - 2 b_{12} \tau_k + 1}}
 \end{equation}
 
-:::fyi
-This is the one blatant error that the review missed in the paper (sigh...)
-:::
