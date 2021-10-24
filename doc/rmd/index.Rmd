@@ -122,4 +122,4 @@ if (!file.exists(codedocs_file <- 'figures/sara.svg'))
   download.file(codedocs_url, codedocs_file, mode = 'wb')
 ```
 
-[`r include_svg(if (identical(knitr:::pandoc_to(), 'html')) codedocs_url else codedocs_file)`](https://codedocs.xyz/DO-CV/sara/)
+[`r include_svg(if (identical(knitr:::pandoc_to(), 'html')) codedocs_url else codedocs_file)`](https://do-cv.gitlab.io/sara/)
