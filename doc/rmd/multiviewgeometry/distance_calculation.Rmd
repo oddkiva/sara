@@ -1,18 +1,18 @@
-## A Use Case for Animal Conservation
+## A Possible Use Case for Animal Conservation
 
 Visual metrology and distance calculation are important problems that must be
 treated carefully in autonomous driving systems to guarantee the safety of
 pedestrians.
 
-But this can also be useful too for animal conservation. So instead of talking
-about road safety which is already widely treated in the computer vision
-industry, let us to see how these problems could be used to protect animals and
-monitor their demographics as an attempt to bring more awareness and justice to
-environmental and wildlife topics.
+But this can be useful too for animal conservation. So instead of talking about
+road safety which is already widely treated in the computer vision industry, let
+us to see how these problems could be used to protect animals and monitor their
+demographics as an attempt to bring more awareness and justice to environmental
+and wildlife topics.
 
 For example, let us imagine that we are biologists or animal conservationists
-aiming at counting a colony of penguins resting on a large ice floe. Note, of
-course, we could consider any other animal but let us agree on this choice in
+aiming at counting a colony of penguins resting on a large ice floe. Of course,
+we could consider any other iconic species but let us agree on this choice in
 this section. We are flying a drone equipped with multiple cameras and with IMU
 sensors so that we can estimate the altitude of the drone at anytime. The drone
 embeds a robust software that is able to recognize penguins and track them.
@@ -46,23 +46,28 @@ planar*.
 ### Ideal Case
 
 The drone is flying and it is staying still in the air at an altitude of $h$
-meters. It is equipped with a front camera in upright position at the ground
-looking to the horizon, that is,
+meters. It is equipped with a front camera in an upright position. The camera is
+currently capturing the hustle and bustle of penguins on the ice floe.
 
-- its $y$-axis is normal to the ground plane and,
-- its $x$-axis and $z$-axis forms a plane that is parallel to the ground plane.
+To start, we use the camera axis convention and we assume that the camera has
+its axes oriented as follows:
 
-The front camera sees penguins. Let $M$ denote a point on the ground at a
-penguin's feet position. Its coordinates in the camera frame are
+- its $x$-axis is pointing to the right of the drone 
+- its $y$-axis is normal to the ice floe plane and is pointing down,
+- its $z$-axis is pointing to the horizon
+- its $x$-axis and $z$-axis are such that they form a plane that is parallel to
+  the ice floe plane.
+
+As the front camera sees penguins, let $M$ denote a point at one penguin's feet
+position. Its coordinates in the camera frame are
 
 \begin{equation}
   M = x\ \mathbf{i} + h\ \mathbf{j} + z\ \mathbf{k}
 \end{equation}
 
-The point $M$ is visible on the camera. Let $(u, v)$ denote its *normalized
-camera coordinates*.
-
-By similar triangles it follows that
+The point $M$ is visible on the camera and projected to the camera image plane.
+By letting $(u, v)$ denote its *normalized camera coordinates*, it follows by
+similar triangles that
 
 \begin{equation}
   \frac{u}{x} = \frac{v}{h} = \frac{1}{z}
@@ -82,23 +87,22 @@ Thus the metric coordinates of a penguin are:
 
 ### A Motivating Example: Nonzero Pitch Angle
 
-In real life, the drone does not necessarily have a perfect a zero pitch angle.
-It could be that because of the wind the drone has to maintain its stationary
-position with a nonzero pitch angle. We show here how we could calculate
-distances between penguins and the drone from this less ideal case using
-elementary algebraic manipulations.
+In real life, the drone does not necessarily have a perfect a zero pitch angle
+and this peculiar camera orientation may not be optimal to observe penguins. We
+show here how we could calculate distances between penguins and the drone from
+this less ideal case with elementary algebraic manipulations.
 
 This section is a prelude to the next sections which present more general
 approaches.
 
-Let us imagine that the front camera is at a fixed height $h$ above the ground
-slight looking down due to a nonzero pitch angle $\theta$. Notice that in the
-camera frame the pitch angle is negative.
+Let us now imagine that the front camera is still at a fixed height $h$ above
+the ground but this time it is looking down due to a nonzero pitch angle
+$\theta$. Notice that in the camera frame the pitch angle is negative.
 
 Now also consider an imaginary camera placed at the same camera position and
 this time gazing at the horizon with a zero pitch angle. The virtual camera
-frame will be considered the reference frame. This virtual camera corresponds to
-the ideal case we described in the previous section.
+frame will be considered to be the reference frame. This virtual camera
+corresponds to the ideal case we described in the previous section.
 
 Let $M$ denote a point on the ground. Its coordinates in the reference frame are
 still
@@ -180,13 +184,22 @@ We can generalize elegantly the reasoning by means of linear algebra. And it
 will not matter which angular direction $(\psi, \theta, \phi)$ the camera is
 looking at.
 
-Just like in the usual axis convention used in the automotive industry, without
-loss of generality, let us choose a reference frame where the ice floe is
-decribed by the plane $z = 0$. Note this would not really matter even if the ice
-floe turns out to be inclined with respect to the sea level.
+However this time, we will use the automotive axis convention. This will enable
+use the Euler-Tait-Bryan parameterization of 3D rotations commonly described on
+the Internet. Without loss of generality, let us choose a reference frame where
+the ice floe is decribed by the plane $z = 0$.
 
-Suppose that we know the camera pose parameterised by the rigid body transform
-$(\mathbf{R}, \mathbf{t})$ w.r.t. the ice floe reference frame.
+Note this would not really matter even if the ice floe turns out to be inclined
+with respect to the sea level.
+
+:::fyi
+One advantage of using the automotive axis convention is that the semantics is
+more natural: we can image that the ice-floe at the elevation $z = 0 m$ above
+the sea if the ice floe is not inclined with respect to the sea.
+:::
+
+Now suppose that we know the camera pose parameterised by the rigid body
+transform $(\mathbf{R}, \mathbf{t})$ w.r.t. the ice floe reference frame.
 
 As said earlier, any point $M$ of the ice floe has more natural coordinates
 $\mathbf{x} = (x, y, 0)$ in the ice floe reference frame. Let $\mathbf{x}_C= (x_C, y_C,
@@ -286,28 +299,31 @@ what we want.
 So far our mathematical formulation assumes that the image formation is done via
 perspective projection because we have assumed a pinhole camera model. In words,
 each pixel $\mathbf{u} = \begin{bmatrix} u \\ v \end{bmatrix}$ of the image
-$I(\mathbf{u})$ is hit by the 3D light ray vector $-\mathbf{v}$. With the
-knowledge of the camera calibration matrix $\mathbf{K}$, we can calculate
-$\mathbf{v}$ as
+$I(\mathbf{u})$ is hit by the *incident* 3D light ray vector $-\mathbf{v}$. If
+we know the camera calibration matrix $\mathbf{K}$, we can calculate the
+*backprojected* light ray $\mathbf{v}$ as
 
 \begin{equation}
   \mathbf{v} = \mathbf{K}^{-1} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix},
 \end{equation}
 
-Notice the negative sign in the light ray vector because the light ray is in
-front in the camera and passes through the camera aperture to hit the camera
-film plane.
+Notice the negative sign in the incident light ray vector because the incident
+light ray is in front in the camera and passes through the camera aperture to
+hit the camera film plane, while the backprojected light ray can be imagined as
+a "refracted" ray that goes from the image plane to the camera center.
 
 From a mathematical point of view, it may not be very practical to talk about
-the light ray vector because of its negative sign. Instead we prefer to say that
-any pixel $\mathbf{u}$ *backprojects* to the semi-line
+the incident light ray vector because of its negative sign. Instead we prefer to
+say that any pixel $\mathbf{u}$ *backprojects* to the semi-line
 
 \begin{equation}
-  \{ \lambda \mathbf{v} : \lambda > 0 \}.
+  \{ \lambda \mathbf{v} : \lambda > 0 \},
 \end{equation}
 
-In words any 3D scene point $\lambda \mathbf{v}$ of the semi-line are the only
-points that
+or more tersely to the (backprojected) ray $\mathbf{v}$.
+
+In words the 3D scene points $\lambda \mathbf{v}$ lying on the semi-line are the
+only points that
 
 - are physically possible, and
 - projects exactly to the pixel $\mathbf{u}$
@@ -420,11 +436,11 @@ image plane at pixel coordinates $\mathbf{u}$ is calculated as
 #### Mathematical Derivation
 
 A subtle yet important difference is that the light ray vector $\mathbf{v}$ for
-the fisheye camera model and other camera model is that the similar triangle
-property may not be satisfied anymore. And this was key in order to derive the
+the fisheye camera model and other camera models is that the similar triangle
+property is not be satisfied anymore. And this was key in order to derive the
 distance estimation in the previous subsections.
 
-Fortunately we can still relate the light ray $\mathbf{v}$ and a ground point
+Fortunately we can still relate the light ray $\mathbf{v}$ and a point
 $\mathbf{x}$ on the ice floe with the camera extrinsics $(\mathbf{R}',
 \mathbf{t}')$ as follows
 
