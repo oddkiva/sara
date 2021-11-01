@@ -79,14 +79,14 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
   auto dominant_gradient_orientations(
-      Sara::ImagePyramid<float>& gradient_mag_pyramid,                 //
-      Sara::ImagePyramid<float>& gradient_ori_pyramid,                 //
-      Pyramid<ExtremumArray>& dog_extrema,                             //
-      Pyramid<DominantOrientationDenseMap>& dominant_orientations,     //
-      int num_orientation_bins = 36,                                   //
-      float gaussian_truncation_factor = 3.f,                          //
-      float scale_multiplying_factor = 1.5f,                           //
-      float peak_ratio_thres = 0.8f)                                   //
+      Sara::ImagePyramid<float>& gradient_mag_pyramid,              //
+      Sara::ImagePyramid<float>& gradient_ori_pyramid,              //
+      Pyramid<ExtremumArray>& dog_extrema,                          //
+      Pyramid<DominantOrientationDenseMap>& dominant_orientations,  //
+      int num_orientation_bins = 36,                                //
+      [[maybe_unused]] float gaussian_truncation_factor = 3.f,      //
+      [[maybe_unused]] float scale_multiplying_factor = 1.5f,       //
+      [[maybe_unused]] float peak_ratio_thres = 0.8f)               //
       -> void
   {
     for (auto o = 0; o < gradient_mag_pyramid.num_octaves(); ++o)

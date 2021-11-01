@@ -98,8 +98,6 @@ function build_library()
 
   # nVidia platform's specific options.
   cmake_options+="-DNvidiaVideoCodec_ROOT=${HOME}/opt/Video_Codec_SDK_11.0.10 "
-  # Use TensorRT.
-  cmake_options+="-DTensorRT_ROOT=${HOME}/opt/TensorRT-7.2.2.3 "
 
   echo $(which cmake)
   echo $(cmake --version)
