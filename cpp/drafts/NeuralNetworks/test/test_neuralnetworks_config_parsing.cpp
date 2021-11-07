@@ -46,6 +46,28 @@ auto section_name(const std::string& line)
 }
 
 
+template <typename Type>
+class Layer
+{
+  Type type;
+};
+
+struct Convolution
+{
+  int batch_normalize = 1;
+  int filters;
+  int size;
+  int stride;
+  int pad;
+  int activation;
+};
+
+struct Route
+{
+  std::vector<int> layer_indices;
+};
+
+
 auto parse_option(const std::string& line)
 {
   auto line_split = std::vector<std::string>{};
@@ -74,6 +96,10 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
 
   auto in_current_section = false;
   auto enter_new_section = false;
+
+  auto nodes = std::vector<std::string>{};
+  auto links = std::vector<std::pair<int, int>>{};
+
   while (read_line(file, line))
   {
     if (line.empty())
@@ -85,8 +111,12 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
     // Enter a new section.
     if (is_section(line))
     {
+      const auto section = section_name(line);
       std::cout << "ENTERING NEW SECTION: ";
-      std::cout << section_name(line) << std::endl;
+      std::cout << section << std::endl;
+
+      if (section != "net")
+        nodes.emplace_back(section);
 
       enter_new_section = true;
       in_current_section = false;
@@ -107,6 +137,12 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
       std::cout << std::endl;
     }
   }
+
+  // Parse all the nodes as a first pass.
+  for (auto i = 0u; i < nodes.size(); ++i)
+    std::cout << i << " " << nodes[i] << std::endl;
+
+  // Parse the links as a second pass.
 }
 
 BOOST_AUTO_TEST_SUITE_END()
