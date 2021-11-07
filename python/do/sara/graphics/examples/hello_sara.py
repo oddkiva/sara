@@ -49,7 +49,8 @@ def user_main():
             shakti.convert_rgb8_to_gray32f_cpu(video_frame, video_frame_gray)
         with sara.Timer("Gaussian convolution"):
             shakti.gaussian_convolution(video_frame_gray,
-                                        video_frame_gray_convolved, 1.6, 4)
+                                        video_frame_gray_convolved, 1.6, 4,
+                                        True)
         with sara.Timer("Gradient"):
             shakti.polar_gradient_2d_32f(video_frame_gray_convolved,
                                          video_frame_gradient[0],
