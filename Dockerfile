@@ -87,5 +87,3 @@ RUN apt-get install -y zsh
 # Set up my development workspace.
 ADD . /sara
 WORKDIR /sara
-
-# # RUN bash ./build.sh Debug

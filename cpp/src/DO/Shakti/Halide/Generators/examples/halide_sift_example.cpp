@@ -254,8 +254,7 @@ auto test_on_video(int argc, char** argv)
           "/Users/david/Desktop/Datasets/sfm/Family.mp4"s
 #else
           "/home/david/Desktop/Datasets/sfm/Family.mp4"s
-  // "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
-  // "/home/david/Desktop/GOPR0542.MP4"s;
+          // "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
           : argv[1];
 
