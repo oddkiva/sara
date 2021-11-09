@@ -76,6 +76,8 @@ apt_packages=(
   "python3-dev"
   "qtbase5-dev"
   "vulkan-sdk"
+  # Make my life easier
+  "zsh"
 )
 apt_packages_str=$(printf "%s " "${apt_packages[@]}")
 

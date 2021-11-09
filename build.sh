@@ -2,6 +2,9 @@
 set -ex
 
 
+SARA_DOCKER_IMAGE=sara-ubuntu-20.04-cuda-11.4-cudnn-8
+
+
 if [ -z "$1" ]; then
   build_type=Release;
 else
@@ -90,7 +93,7 @@ function build_library()
   # Compile Halide code.
   cmake_options+="-DSARA_USE_HALIDE=ON "
   if [ "${platform_name}" == "Linux" ]; then
-    cmake_options+="-DCMAKE_PREFIX_PATH=$HOME/opt/halide-12.0.1 "
+    cmake_options+="-DCMAKE_PREFIX_PATH=$HOME/opt/Halide-13.0.0-x86-64-linux "
   fi
   if [ "${platform_name}" == "Darwin" ]; then
     cmake_options+="-DLLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm "
@@ -205,17 +208,30 @@ if [ -d "../${sara_build_dir}" ]; then
   rm -rf ../${sara_build_dir}
 fi
 
-mkdir ../${sara_build_dir}
-
-
-cd ../${sara_build_dir}
-{
-  if [[ ${build_type} == "ios" ]]; then
-    build_library_for_ios
-  else
-    install_python_packages_via_pip
-    build_library
-  fi
-  # install_package
-}
-cd ..
+if [[ ${build_type} == "docker" ]]; then
+  # Build the docker image.
+  docker build -f Dockerfile -t ${SARA_DOCKER_IMAGE}:latest .
+  # Run the docker image.
+  docker run --gpus all -it \
+    -v $PWD:/workspace \
+    -e DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --ipc=host \
+    --net=host \
+    --volume="$HOME/.Xauthority:/root/.Xauthority:rw" \
+    -v /media/Linux\ Data:/media/Linux\ Data \
+    ${SARA_DOCKER_IMAGE} \
+    /bin/zsh
+else
+  mkdir ../${sara_build_dir}
+  {
+    if [[ ${build_type} == "ios" ]]; then
+      build_library_for_ios
+    else
+      install_python_packages_via_pip
+      build_library
+    fi
+    # install_package
+  }
+  cd ..
+fi

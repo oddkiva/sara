@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.4.1-cudnn8-devel-ubuntu20.04
+FROM nvidia/cudagl:11.4.2-devel
 
 MAINTAINER "David OK" <david.ok8@gmail.com>
 
@@ -11,4 +11,5 @@ WORKDIR /opt/sara
 RUN bash ./scripts/install_ubuntu_dependencies.sh
 
 RUN pip3 install -r requirements.txt
-RUN bash ./build.sh Debug
+RUN bash ./scripts/install_halide.sh
+# RUN bash ./build.sh Debug
