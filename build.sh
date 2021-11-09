@@ -201,13 +201,6 @@ function install_package()
 }
 
 
-sara_build_dir="sara-build-${build_type}"
-
-# Create the build directory.
-if [ -d "../${sara_build_dir}" ]; then
-  rm -rf ../${sara_build_dir}
-fi
-
 if [[ ${build_type} == "docker" ]]; then
   # Build the docker image.
   docker build -f Dockerfile -t ${SARA_DOCKER_IMAGE}:latest .
@@ -223,7 +216,15 @@ if [[ ${build_type} == "docker" ]]; then
     ${SARA_DOCKER_IMAGE} \
     /bin/zsh
 else
+  sara_build_dir="sara-build-${build_type}"
+
+  # Create the build directory.
+  if [ -d "../${sara_build_dir}" ]; then
+    rm -rf ../${sara_build_dir}
+  fi
+
   mkdir ../${sara_build_dir}
+  cd ../${sara_build_dir}
   {
     if [[ ${build_type} == "ios" ]]; then
       build_library_for_ios

@@ -615,7 +615,6 @@ int main()
     glBindVertexArray(point_cloud_object.vao);
     glDrawArrays(GL_POINTS, 0, point_cloud_object.vertices.size(0));
 
-
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

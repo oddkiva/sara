@@ -29,37 +29,27 @@ using namespace std::string_literals;
 using namespace DO::Sara;
 
 
-// FIXME: not valid in the camera reference coordinate.
 auto calculate_yaw_pitch_roll(const Eigen::Matrix3d& R) -> Eigen::Vector3d
 {
-  auto angles = Eigen::Vector3d{};
-  // Pitch angle.
-  angles(1) = -std::asin(R(2, 0));
+  const auto q = Eigen::Quaterniond{R};
+  // roll (x-axis rotation)
+  const auto sinr_cosp = 2 * (q.w() * q.x() + q.y() * q.z());
+  const auto cosr_cosp = 1 - 2 * (q.x() * q.x() + q.y() * q.y());
+  const auto roll = std::atan2(sinr_cosp, cosr_cosp);
 
-  // Gymbal lock: pitch = -90
-  if (R(2, 0) == 1)
-  {
-    angles(0) = 0;                               // yaw = 0
-    angles(2) = std::atan2(-R(0, 1), -R(0, 2));  // roll
-    std::cout << "Gimbal lock: pitch = -90" << std::endl;
-  }
+  // pitch (y-axis rotation)
+  const auto sinp = 2 * (q.w() * q.y() - q.z() * q.x());
+  const auto pitch =
+      std::abs(sinp) >= 1
+          ? std::copysign(M_PI / 2, sinp)  // use 90 degrees if out of range
+          : std::asin(sinp);
 
-  // Gymbal lock: pitch = 90
-  else if (R(2, 0) == -1)
-  {
-    angles(0) = 0;                             // yaw = 0
-    angles(2) = std::atan2(R(0, 1), R(0, 2));  // roll
-    std::cout << "Gimbal lock: pitch = +90" << std::endl;
-  }
+  // yaw (z-axis rotation)
+  const auto siny_cosp = 2 * (q.w() * q.z() + q.x() * q.y());
+  const auto cosy_cosp = 1 - 2 * (q.y() * q.y() + q.z() * q.z());
+  const auto yaw = std::atan2(siny_cosp, cosy_cosp);
 
-  // General solution
-  else
-  {
-    angles(0) = std::atan2(R(1, 0), R(0, 0));
-    angles(2) = std::atan2(R(2, 1), R(2, 2));
-  }
-
-  return angles;  // Euler angles in order yaw, pitch, roll
+  return {yaw, pitch, roll};
 }
 
 
@@ -83,8 +73,8 @@ int __main(int, char** argv)
       // "/Users/david/Desktop/Datasets/sfm/fountain_int"s;
       "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
-      "/home/david/Desktop/Datasets/sfm/castle_int"s;
       // "/home/david/Desktop/Datasets/sfm/fountain_int"s;
+      "/home/david/Desktop/Datasets/sfm/castle_int"s;
 #endif
   const auto image_id1 = std::string{argv[1]};  // "0005"s;
   const auto image_id2 = std::string{argv[2]};  // "0004"s;
@@ -234,7 +224,6 @@ int __main(int, char** argv)
 
   for (const auto& [index, depth] : points)
   {
-    SARA_DEBUG << depth << std::endl;
     const Eigen::Vector2d ui = u1.col(index) * 0.25;
 
     auto color = Rgb8{};
@@ -255,23 +244,32 @@ int __main(int, char** argv)
   SARA_DEBUG << "Angle = " << axis_angle.angle() * 180 / M_PI << " deg"
              << std::endl;
 
-  // Rotation matrix to change from computer vision camera axis-convention to
-  // automotive axis convention.
-  //
   // clang-format off
-  const auto P = (Eigen::Matrix3d{} <<
+  // The rotation is expressed in the camera coordinates.
+  // But the calculation is done in the automotive/aeronautics coordinate
+  // system.
+  //
+  // The z-coordinate of the camera coordinates is the x-axis of the automotive
+  // coordinates
+  static const auto P = (Eigen::Matrix3d{} <<
      0,  0, 1,
     -1,  0, 0,
      0, -1, 0
   ).finished();
   // clang-format on
 
-  const Eigen::Matrix3d Rw1 = Rw * P;
+  const Eigen::Matrix3d Rw1 = P * Rw * P.transpose();
   const Eigen::Vector3d tw1 = P * tw;
+  const auto angles = calculate_yaw_pitch_roll(Rw1);
   SARA_DEBUG << "Rw1 =\n" << Rw1 << std::endl;
   SARA_DEBUG << "tw1 =\n" << tw1 << std::endl;
-  SARA_DEBUG << "[BUGGY] yaw pitch roll =\n"
-             << Rw1.eulerAngles(2, 1, 0) * 180. / M_PI << std::endl;
+  // The implementation.
+  SARA_DEBUG << "yaw   = " << angles(0) * 180. / M_PI << " deg" << std::endl;
+  SARA_DEBUG << "pitch = " << angles(1) * 180. / M_PI << " deg" << std::endl;
+  SARA_DEBUG << "roll  = " << angles(2) * 180. / M_PI << " deg" << std::endl;
+  // This works as well.
+  SARA_DEBUG << "Eigen euler angles (Rw1) = " << Rw1.eulerAngles(2, 1, 0) * 180 / M_PI
+             << std::endl;
 
   get_key();
 
