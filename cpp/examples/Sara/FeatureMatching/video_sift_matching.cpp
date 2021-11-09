@@ -127,7 +127,7 @@ int __main(int argc, char** argv)
   auto w = create_window(frame.sizes(), "SIFT matching " + basename);
   set_antialiasing();
 
-#define CROP
+// #define CROP
 #ifdef CROP
   const auto [p1, p2] = initialize_crop_region(frame.sizes());
 #else

@@ -46,36 +46,86 @@ auto section_name(const std::string& line)
 }
 
 
-template <typename Type>
-class Layer
+struct Layer
 {
-  Type type;
+  virtual ~Layer() = default;
+  virtual auto parse_line(const std::string& line) -> void = 0;
+  std::string type;
 };
 
-struct Convolution
+struct Input : Layer
+{
+  int width;
+  int height;
+  int batch;
+
+  auto parse_line(const std::string& line) -> void override
+  {
+    auto line_split = std::vector<std::string>{};
+    boost::split(line_split, line, boost::is_any_of("= "),
+                 boost::token_compress_on);
+
+    const auto& key = line_split[0];
+    if (key == "width")
+      width = std::stoi(line_split[1]);
+    else if (key == "height")
+      height = std::stoi(line_split[1]);
+    else if (key == "batch")
+      batch = std::stoi(line_split[1]);
+  }
+
+  friend inline auto operator<<(std::ostream& os, const Input& c)
+      -> std::ostream&
+  {
+    os << "- width  = " << c.width << "\n";
+    os << "- height = " << c.height << "\n";
+    os << "- batch  = " << c.batch << "\n";
+    return os;
+  }
+};
+
+struct Convolution : Layer
 {
   int batch_normalize = 1;
   int filters;
   int size;
   int stride;
   int pad;
-  int activation;
+  std::string activation;
+
+  auto parse_line(const std::string& line) -> void override
+  {
+    auto line_split = std::vector<std::string>{};
+    boost::split(line_split, line, boost::is_any_of("= "),
+                 boost::token_compress_on);
+
+    const auto& key = line_split[0];
+    if (key == "batch_normalize")
+      batch_normalize = std::stoi(line_split[1]);
+    else if (key == "filters")
+      filters = std::stoi(line_split[1]);
+    else if (key == "size")
+      size = std::stoi(line_split[1]);
+    else if (key == "stride")
+      stride = std::stoi(line_split[1]);
+    else if (key == "pad")
+      pad = std::stoi(line_split[1]);
+    else if (key == "activation")
+      activation = line_split[1];
+  }
+
+  friend inline auto operator<<(std::ostream& os, const Convolution& c)
+      -> std::ostream&
+  {
+    os << "- normalize  = " << c.batch_normalize << "\n";
+    os << "- filters    = " << c.filters << "\n";
+    os << "- size       = " << c.size << "\n";
+    os << "- stride     = " << c.stride << "\n";
+    os << "- pad        = " << c.pad << "\n";
+    os << "- activation = " << c.activation << "\n";
+    return os;
+  }
 };
-
-struct Route
-{
-  std::vector<int> layer_indices;
-};
-
-
-auto parse_option(const std::string& line)
-{
-  auto line_split = std::vector<std::string>{};
-  boost::split(line_split, line, boost::is_any_of("= "),
-               boost::token_compress_on);
-  return line_split;
-}
-
 
 BOOST_AUTO_TEST_SUITE(TestLayers)
 
@@ -94,10 +144,11 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
 
   auto line = std::string{};
 
+  auto section = std::string{};
   auto in_current_section = false;
   auto enter_new_section = false;
 
-  auto nodes = std::vector<std::string>{};
+  auto nodes = std::vector<std::unique_ptr<Layer>>{};
   auto links = std::vector<std::pair<int, int>>{};
 
   while (read_line(file, line))
@@ -111,12 +162,29 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
     // Enter a new section.
     if (is_section(line))
     {
-      const auto section = section_name(line);
+      if (!section.empty())
+      {
+        std::cout << "FINISHED PARSING SECTION: " << section << std::endl;
+        std::cout << "CHECKING PARSED SECTION: " << std::endl;
+
+        if (section == "net")
+          std::cout << dynamic_cast<const Input&>(*nodes.back())
+                    << std::endl;
+        if (section == "convolutional")
+          std::cout << dynamic_cast<const Convolution&>(*nodes.back())
+                    << std::endl;
+      }
+
+      section = section_name(line);
       std::cout << "ENTERING NEW SECTION: ";
       std::cout << section << std::endl;
 
-      if (section != "net")
-        nodes.emplace_back(section);
+      if (section == "net")
+        nodes.emplace_back(new Input);
+      else if (section == "convolutional")
+        nodes.emplace_back(new Convolution);
+
+      nodes.back()->type = section;
 
       enter_new_section = true;
       in_current_section = false;
@@ -130,19 +198,10 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
     }
 
     if (in_current_section)
-    {
-      const auto line_split = parse_option(line);
-      for (const auto& str : line_split)
-        std::cout << str << ";";
-      std::cout << std::endl;
-    }
+      nodes.back()->parse_line(line);
   }
 
-  // Parse all the nodes as a first pass.
-  for (auto i = 0u; i < nodes.size(); ++i)
-    std::cout << i << " " << nodes[i] << std::endl;
-
-  // Parse the links as a second pass.
+  // Parse the model weights in the second pass.
 }
 
 BOOST_AUTO_TEST_SUITE_END()
