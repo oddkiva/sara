@@ -85,7 +85,7 @@ RUN mv Halide-13.0.0-x86-64-linux ${HOME}/opt
 RUN apt-get install -y zsh
 
 # Set up my development workspace.
-ADD . /workspace/sara
-WORKDIR /workspace/sara
+ADD . /sara
+WORKDIR /sara
 
 # # RUN bash ./build.sh Debug
