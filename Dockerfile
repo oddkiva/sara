@@ -74,16 +74,32 @@ RUN apt-get update -y && apt-get install -y \
   qtbase5-dev               \
   vulkan-sdk
 
-# Install Halide
+# Install Python dependencies.
+RUN pip3 install \
+      coverage==4.5.4 \
+      ipdb \
+      ipdbplugin \
+      nose       \
+      numpy      \
+      PySide2    \
+      scipy      \
+      ipython
+
+# Install Halide.
 RUN mkdir ${HOME}/opt
 RUN wget https://github.com/halide/Halide/releases/download/v13.0.0/Halide-13.0.0-x86-64-linux-c3641b6850d156aff6bb01a9c01ef475bd069a31.tar.gz
 RUN tar xvzf Halide-13.0.0-x86-64-linux-c3641b6850d156aff6bb01a9c01ef475bd069a31.tar.gz
 RUN mv Halide-13.0.0-x86-64-linux ${HOME}/opt
+
+# Install Swift toolchain.
+RUN wget https://download.swift.org/swift-5.5.1-release/ubuntu2004/swift-5.5.1-RELEASE/swift-5.5.1-RELEASE-ubuntu20.04.tar.gz \
+      && tar xvzf swift-5.5.1-RELEASE-ubuntu20.04.tar.gz \
+      && mv swift-5.5.1-RELEASE-ubuntu20.04 ${HOME}/opt
 
 # Please make my life easier
 # TODO: install neovim, etc.
 RUN apt-get install -y zsh
 
 # Set up my development workspace.
-ADD . /sara
+COPY . /sara
 WORKDIR /sara

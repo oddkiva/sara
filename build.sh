@@ -63,7 +63,9 @@ function build_library()
   if [[ "${platform_name}" == "Darwin" ]]; then
     cmake_options+="-DCMAKE_Swift_COMPILER=$(which swiftc) "
   elif [[ "${platform_name}" == "Linux" ]]; then
-    cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.4.2-RELEASE-ubuntu20.04/usr/bin/swiftc "
+    if [ -d "${HOME}/opt/swift-5.5.1-RELEASE-ubuntu20.04/usr/bin/swiftc " ]; then
+      cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.5.1-RELEASE-ubuntu20.04/usr/bin/swiftc "
+    fi
   fi
 
   # Use latest Qt version instead of the system Qt.
@@ -100,7 +102,9 @@ function build_library()
   fi
 
   # nVidia platform's specific options.
-  cmake_options+="-DNvidiaVideoCodec_ROOT=${HOME}/opt/Video_Codec_SDK_11.0.10 "
+  if [ -d "${HOME}/opt/Video_Codec_SDK_11.0.10" ]; then
+    cmake_options+="-DNvidiaVideoCodec_ROOT=${HOME}/opt/Video_Codec_SDK_11.0.10 "
+  fi
 
   echo $(which cmake)
   echo $(cmake --version)
@@ -206,7 +210,7 @@ if [[ ${build_type} == "docker" ]]; then
   docker build -f Dockerfile -t ${SARA_DOCKER_IMAGE}:latest .
   # Run the docker image.
   docker run --gpus all -it \
-    -v $PWD:/workspace \
+    -v $PWD:/sara \
     -e DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --ipc=host \
