@@ -66,6 +66,9 @@ function build_library()
     if [ -d "${HOME}/opt/swift-5.5.1-RELEASE-ubuntu20.04/usr/bin/swiftc " ]; then
       cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.5.1-RELEASE-ubuntu20.04/usr/bin/swiftc "
     fi
+
+    PYBIND11_DIR=$(python3 -c "import pybind11; print(pybind11.get_cmake_dir())")
+    cmake_options+="-Dpybind11_DIR=${PYBIND11_DIR} "
   fi
 
   # Use latest Qt version instead of the system Qt.
