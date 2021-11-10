@@ -100,8 +100,10 @@ target_link_libraries(halide_sift_example
   Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES}
-  $<$<BOOL:${CMAKE_CUDA_COMPILER}>:DO::Shakti::VideoIO>
   $<$<BOOL:${CMAKE_CUDA_COMPILER}>:${CUDA_CUDA_LIBRARY}>)
+if (NvidiaVideoCodec_ROOT)
+  target_link_libraries(halide_sift_example PRIVATE DO::Shakti::VideoIO)
+endif ()
 
 set_property(TARGET halide_sift_example
   PROPERTY
@@ -138,8 +140,10 @@ target_link_libraries(halide_sift_pyramid_example
   Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES}
-  $<$<BOOL:${CMAKE_CUDA_COMPILER}>:DO::Shakti::VideoIO>
   $<$<BOOL:${CMAKE_CUDA_COMPILER}>:${CUDA_CUDA_LIBRARY}>)
+if (NvidiaVideoCodec_ROOT)
+  target_link_libraries(halide_sift_pyramid_example PRIVATE DO::Shakti::VideoIO)
+endif ()
 set_property(TARGET halide_sift_pyramid_example
   PROPERTY
   FOLDER "Examples/Shakti/Halide")

@@ -213,13 +213,13 @@ if [[ ${build_type} == "docker" ]]; then
   docker build -f Dockerfile -t ${SARA_DOCKER_IMAGE}:latest .
   # Run the docker image.
   docker run --gpus all -it \
-    -v $PWD:/sara \
-    -e DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v "$HOME/.Xauthority:/root/.Xauthority:rw" \
+    -v /media/Linux\ Data:/media/Linux\ Data \
+    -v $PWD:/workspace/sara \
+    -e DISPLAY \
     --ipc=host \
     --net=host \
-    --volume="$HOME/.Xauthority:/root/.Xauthority:rw" \
-    -v /media/Linux\ Data:/media/Linux\ Data \
     ${SARA_DOCKER_IMAGE} \
     /bin/zsh
 else
