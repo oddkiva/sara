@@ -11,11 +11,11 @@
 
 #define BOOST_TEST_MODULE "NeuralNetworks/Yolo Configuration Parsing"
 
+#include <DO/Sara/Defines.hpp>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
-
-#include <DO/Sara/Defines.hpp>
 
 #include <fstream>
 #include <string>
