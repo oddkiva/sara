@@ -12,9 +12,11 @@
 #define BOOST_TEST_MODULE "NeuralNetworks/Yolo Configuration Parsing"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <filesystem>
+#include <DO/Sara/Defines.hpp>
+
 #include <fstream>
 #include <string>
 
@@ -131,15 +133,13 @@ BOOST_AUTO_TEST_SUITE(TestLayers)
 
 BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
 {
-  namespace fs = std::filesystem;
+  namespace fs = boost::filesystem;
 
-  const auto filepath =                            //
-      fs::path{"/home/david/GitLab/DO-CV/sara"} /  //
-      "data/trained_models/" /                     //
-      "yolov4-tiny.cfg";
-  BOOST_CHECK(fs::exists(filepath));
+  const auto data_dir_path = fs::canonical(fs::path{ src_path("../../../../data") });
+  const auto cfg_filepath = data_dir_path / "trained_models" / "yolov4-tiny.cfg";
+  BOOST_CHECK(fs::exists(cfg_filepath));
 
-  auto file = std::ifstream{filepath.string()};
+  auto file = std::ifstream{cfg_filepath.string()};
   BOOST_CHECK(file.is_open());
 
   auto line = std::string{};
