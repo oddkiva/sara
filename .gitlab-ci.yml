@@ -36,6 +36,8 @@ before_script:
   # CMake.
   - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
   - apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+  # CLBlast.
+  - add-apt-repository ppa:cnugteren/clblast
   # Vulkan SDK.
   - wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add -
   - wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
@@ -63,6 +65,7 @@ before_script:
       libavcodec-dev
       libavformat-dev
       libavutil-dev
+      libclblast-dev
       libswscale-dev
       libglew-dev
       libglfw3-dev
@@ -97,9 +100,6 @@ before_script:
   - apt-get install -y -qq rubygems
   - gem install bundler
   - bundle install
-
-  # Build CLBlast.
-  - ./scripts/install_clblast.sh
 
   # Setup for GUI testing.
   - apt-get install -y xvfb
