@@ -187,6 +187,7 @@ auto test_on_video(int argc, char **argv)
   sara::set_antialiasing();
 
   auto frames_read = 0;
+  const auto skip = argc < 3 ? 0 : std::stoi(argv[2]);
 
   auto timer = sara::Timer{};
   auto elapsed_ms = double{};
@@ -213,6 +214,8 @@ auto test_on_video(int argc, char **argv)
 #endif
 
     ++frames_read;
+    if (frames_read % (skip + 1) != 0)
+      continue;
     SARA_CHECK(frames_read);
 
     timer.restart();
@@ -241,27 +244,35 @@ auto test_on_video(int argc, char **argv)
       return {color.channel<R>(), color.channel<G>(), color.channel<B>()};
         });
 #endif
-    for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
+
+    static constexpr auto draw_sift_features = false;
+    if constexpr (draw_sift_features)
     {
-      auto& octave = sift_pipeline.octaves[o];
+      for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
+      {
+        auto& octave = sift_pipeline.octaves[o];
 #pragma omp parallel for
-      for (auto s = 0; s < static_cast<int>(octave.extrema_oriented.size());
-           ++s)
-        draw_oriented_extrema(
+        for (auto s = 0; s < static_cast<int>(octave.extrema_oriented.size());
+             ++s)
+          draw_oriented_extrema(
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
-                              frame_rgb,
+              frame_rgb,
 #else
-                              frame,
+              frame,
 #endif
-                              octave.extrema_oriented[s],
-                              sift_pipeline.octave_scaling_factor(
-                                  sift_pipeline.start_octave_index + o));
+              octave.extrema_oriented[s],
+              sift_pipeline.octave_scaling_factor(
+                  sift_pipeline.start_octave_index + o));
+      }
     }
+
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
     sara::display(frame_rgb);
 #else
     sara::display(frame);
 #endif
+    sara::draw_text(100, 100, "Frame: " + std::to_string(frames_read),
+                    sara::White8, 20, 0, false, true, false);
     sara::toc("Display");
   }
 }
