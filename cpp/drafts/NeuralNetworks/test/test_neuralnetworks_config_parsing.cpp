@@ -87,14 +87,27 @@ struct Input : Layer
   }
 };
 
+struct BatchNormalization : Layer
+{
+  std::vector<float> bias;
+  std::vector<float> scale;
+  std::vector<float> rolling_mean;
+  std::vector<float> rolling_variance;
+};
+
 struct Convolution : Layer
 {
   int batch_normalize = 1;
+  int groups = 1;
+  int input_channels;
   int filters;
   int size;
   int stride;
   int pad;
   std::string activation;
+
+  std::vector<float> kernel;
+  std::vector<float> bias;
 
   auto parse_line(const std::string& line) -> void override
   {
@@ -117,6 +130,38 @@ struct Convolution : Layer
       activation = line_split[1];
   }
 
+  auto resize() -> void
+  {
+    const auto& kw = size;
+    const auto& kh = size;
+    const auto& ci = input_channels;
+    const auto& co = filters;
+    kernel.resize(kh * kw * (ci / groups) * co);
+    bias.resize(co);
+  }
+
+  auto read(FILE* fp) -> void
+  {
+    // 1. Read bias weights.
+    // 2. Read batch normalization weights.
+    // 3. Read convolution weights.
+
+    // 1.
+    const auto bias_weight_count =
+        fread(bias.data(), sizeof(float), bias.size(), fp);
+    if (bias_weight_count != bias.size())
+      throw std::runtime_error{"Could not read bias weights!"};
+
+    // 2.
+
+    // 3.
+    const auto kernel_weight_count =
+        fread(kernel.data(), sizeof(float), kernel.size(), fp);
+    if (kernel_weight_count != kernel.size())
+      throw std::runtime_error{"Could not read kernel weights!"};
+    // TODO: transpose the kernel.
+  }
+
   friend inline auto operator<<(std::ostream& os, const Convolution& c)
       -> std::ostream&
   {
@@ -130,14 +175,17 @@ struct Convolution : Layer
   }
 };
 
+
 BOOST_AUTO_TEST_SUITE(TestLayers)
 
 BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
 {
   namespace fs = boost::filesystem;
 
-  const auto data_dir_path = fs::canonical(fs::path{ src_path("../../../../data") });
-  const auto cfg_filepath = data_dir_path / "trained_models" / "yolov4-tiny.cfg";
+  const auto data_dir_path =
+      fs::canonical(fs::path{src_path("../../../../data")});
+  const auto cfg_filepath =
+      data_dir_path / "trained_models" / "yolov4-tiny.cfg";
   BOOST_CHECK(fs::exists(cfg_filepath));
 
   auto file = std::ifstream{cfg_filepath.string()};
@@ -169,8 +217,7 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
         std::cout << "CHECKING PARSED SECTION: " << std::endl;
 
         if (section == "net")
-          std::cout << dynamic_cast<const Input&>(*nodes.back())
-                    << std::endl;
+          std::cout << dynamic_cast<const Input&>(*nodes.back()) << std::endl;
         if (section == "convolutional")
           std::cout << dynamic_cast<const Convolution&>(*nodes.back())
                     << std::endl;
