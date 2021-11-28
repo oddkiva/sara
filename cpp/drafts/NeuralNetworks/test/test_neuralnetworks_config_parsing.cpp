@@ -426,8 +426,7 @@ struct DarknetNetworkParser
   auto make_new_layer(const std::string& layer_type,
                       std::vector<std::unique_ptr<Layer>>& nodes) const
   {
-    std::cout << layer_type << std::endl;
-    std::cout << "MAKE NEW LAYER: " << layer_type << std::endl;
+    std::cout << "MAKING NEW LAYER: " << layer_type << std::endl;
 
     if (layer_type == "net")
       nodes.emplace_back(new Input);
