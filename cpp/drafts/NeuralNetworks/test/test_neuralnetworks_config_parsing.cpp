@@ -112,11 +112,6 @@ struct Convolution : Layer
     for (auto& str : line_split)
       boost::trim(str);
 
-    std::cout << "[parsing] ";
-    std::copy(line_split.begin(), line_split.end() - 1,
-              std::ostream_iterator<std::string>{std::cout, " = "});
-    std::cout << *(line_split.end() - 1) << std::endl;
-
     const auto& key = line_split[0];
     if (key == "batch_normalize")
       batch_normalize = static_cast<bool>(std::stoi(line_split[1]));
@@ -431,6 +426,7 @@ struct DarknetNetworkParser
   auto make_new_layer(const std::string& layer_type,
                       std::vector<std::unique_ptr<Layer>>& nodes) const
   {
+    std::cout << layer_type << std::endl;
     std::cout << "MAKE NEW LAYER: " << layer_type << std::endl;
 
     if (layer_type == "net")
@@ -449,7 +445,7 @@ struct DarknetNetworkParser
     nodes.back()->type = layer_type;
   }
 
-  auto finish_layer(std::vector<std::unique_ptr<Layer>>& nodes) const
+  auto finish_layer_init(std::vector<std::unique_ptr<Layer>>& nodes) const
   {
     const auto& layer_type = nodes.back()->type;
     if (layer_type != "net")
@@ -459,6 +455,7 @@ struct DarknetNetworkParser
       const auto& previous_node = *(nodes.rbegin() + 1);
       nodes.back()->input_sizes = previous_node->output_sizes;
     }
+
     if (layer_type == "net")
       dynamic_cast<Input&>(*nodes.back()).update_output_sizes();
     else if (layer_type == "convolutional")
@@ -474,7 +471,7 @@ struct DarknetNetworkParser
     std::cout << *nodes.back() << std::endl;
   }
 
-  auto parse(const std::string& cfg_filepath) const
+  auto parse_config_file(const std::string& cfg_filepath) const
   {
     namespace fs = boost::filesystem;
 
@@ -502,10 +499,13 @@ struct DarknetNetworkParser
       // Enter a new section.
       if (is_section(line))
       {
+        // Finish initialization of the previous layer if there was one.
         if (!section.empty())
-          finish_layer(nodes);
+          finish_layer_init(nodes);
 
-        make_new_layer(section_name(line), nodes);
+        // Create a new layer.
+        section = section_name(line);
+        make_new_layer(section, nodes);
 
         enter_new_section = true;
         in_current_section = false;
@@ -522,7 +522,7 @@ struct DarknetNetworkParser
         nodes.back()->parse_line(line);
     }
 
-    finish_layer(nodes);
+    finish_layer_init(nodes);
 
     return nodes;
   }
@@ -541,7 +541,8 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
       data_dir_path / "trained_models" / "yolov4-tiny.cfg";
   BOOST_CHECK(fs::exists(cfg_filepath));
 
-  const auto net = DarknetNetworkParser{}.parse(cfg_filepath.string());
+  const auto net = DarknetNetworkParser{}  //
+                       .parse_config_file(cfg_filepath.string());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
