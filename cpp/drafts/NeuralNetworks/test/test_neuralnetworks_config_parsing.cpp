@@ -13,6 +13,8 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <Eigen/Core>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
@@ -53,7 +55,18 @@ struct Layer
 {
   virtual ~Layer() = default;
   virtual auto parse_line(const std::string& line) -> void = 0;
+  virtual auto to_output_stream(std::ostream& os) const -> void = 0;
+
+  friend inline auto operator<<(std::ostream& os, const Layer& l)
+      -> std::ostream&
+  {
+    l.to_output_stream(os);
+    return os;
+  }
+
   std::string type;
+  Eigen::Vector4i input_sizes = Eigen::Vector4i::Constant(-1);
+  Eigen::Vector4i output_sizes = Eigen::Vector4i::Constant(-1);
 };
 
 struct Input : Layer
@@ -62,11 +75,18 @@ struct Input : Layer
   int height;
   int batch;
 
+  auto update_output_sizes() -> void
+  {
+    output_sizes << batch, 3, height, width;
+  }
+
   auto parse_line(const std::string& line) -> void override
   {
     auto line_split = std::vector<std::string>{};
-    boost::split(line_split, line, boost::is_any_of("= "),
+    boost::split(line_split, line, boost::is_any_of("="),
                  boost::token_compress_on);
+    for (auto& str: line_split)
+      boost::trim(str);
 
     const auto& key = line_split[0];
     if (key == "width")
@@ -77,34 +97,47 @@ struct Input : Layer
       batch = std::stoi(line_split[1]);
   }
 
-  friend inline auto operator<<(std::ostream& os, const Input& c)
-      -> std::ostream&
+  auto to_output_stream(std::ostream& os) const -> void override
   {
-    os << "- width  = " << c.width << "\n";
-    os << "- height = " << c.height << "\n";
-    os << "- batch  = " << c.batch << "\n";
-    return os;
+    os << "- input width  = " << width << "\n";
+    os << "- input height = " << height << "\n";
+    os << "- input batch  = " << batch << "\n";
   }
 };
 
 struct Convolution : Layer
 {
-  int batch_normalize = 1;
+  bool batch_normalize = true;
+
   int filters;
   int size;
   int stride;
   int pad;
   std::string activation;
 
+  auto update_output_sizes() -> void
+  {
+    output_sizes = input_sizes;
+    output_sizes[1] = filters;
+    output_sizes.tail(2) /= stride;
+  }
+
   auto parse_line(const std::string& line) -> void override
   {
     auto line_split = std::vector<std::string>{};
-    boost::split(line_split, line, boost::is_any_of("= "),
+    boost::split(line_split, line, boost::is_any_of("="),
                  boost::token_compress_on);
+    for (auto& str: line_split)
+      boost::trim(str);
+
+    std::cout << "[parsing] ";
+    std::copy(line_split.begin(), line_split.end() - 1,
+              std::ostream_iterator<std::string>{std::cout, " = "});
+    std::cout << *(line_split.end() - 1) << std::endl;
 
     const auto& key = line_split[0];
     if (key == "batch_normalize")
-      batch_normalize = std::stoi(line_split[1]);
+      batch_normalize = static_cast<bool>(std::stoi(line_split[1]));
     else if (key == "filters")
       filters = std::stoi(line_split[1]);
     else if (key == "size")
@@ -117,18 +150,136 @@ struct Convolution : Layer
       activation = line_split[1];
   }
 
-  friend inline auto operator<<(std::ostream& os, const Convolution& c)
-      -> std::ostream&
+  auto to_output_stream(std::ostream& os) const -> void override
   {
-    os << "- normalize  = " << c.batch_normalize << "\n";
-    os << "- filters    = " << c.filters << "\n";
-    os << "- size       = " << c.size << "\n";
-    os << "- stride     = " << c.stride << "\n";
-    os << "- pad        = " << c.pad << "\n";
-    os << "- activation = " << c.activation << "\n";
-    return os;
+    os << "- normalize      = " << batch_normalize << "\n";
+    os << "- filters        = " << filters << "\n";
+    os << "- size           = " << size << "\n";
+    os << "- stride         = " << stride << "\n";
+    os << "- pad            = " << pad << "\n";
+    os << "- activation     = " << activation << "\n";
+    os << "- input          = " << input_sizes.transpose() << "\n";
+    os << "- output         = " << output_sizes.transpose() << "\n";
   }
 };
+
+struct Route : Layer
+{
+  std::vector<std::int32_t> layers;
+  int groups = 1;
+  int group_id = -1;
+
+  auto update_output_sizes(const std::vector<std::unique_ptr<Layer>>& nodes) -> void
+  {
+    // All layers must have the same width, height, and batch size.
+    // Only the input channels vary.
+    const auto id = layers.front() < 0 ? nodes.size() - 1 + layers.front() : layers.front();
+    input_sizes = nodes[id]->output_sizes;
+    output_sizes = nodes[id]->output_sizes;
+
+    auto channels = 0;
+    for (const auto& rel_id: layers)
+    {
+      const auto id = rel_id < 0 ? nodes.size() - 1 + rel_id : rel_id;
+      channels += nodes[id]->output_sizes[1];
+    }
+    output_sizes[1] = channels;
+
+    output_sizes[1] /= groups;
+  }
+
+  auto parse_line(const std::string& line) -> void override
+  {
+    auto line_split = std::vector<std::string>{};
+    boost::split(line_split, line, boost::is_any_of("="),
+                 boost::token_compress_on);
+    for (auto& str: line_split)
+      boost::trim(str);
+
+    const auto& key = line_split[0];
+    if (key == "groups")
+      groups = std::stoi(line_split[1]);
+    if (key == "group_id")
+      group_id = std::stoi(line_split[1]);
+    if (key == "layers")
+    {
+      auto layer_strings = std::vector<std::string>{};
+      boost::split(layer_strings, line_split[1], boost::is_any_of(", "),
+                   boost::token_compress_on);
+      for (const auto& layer_str : layer_strings)
+        layers.push_back(std::stoi(layer_str));
+    }
+  }
+
+  auto to_output_stream(std::ostream& os) const -> void override
+  {
+    os << "- layers         = ";
+    for (const auto& layer: layers)
+      os << layer << ", ";
+    os << "\n";
+
+    os << "- groups         = " << groups << "\n";
+    os << "- group_id       = " << group_id << "\n";
+    os << "- input          = " << input_sizes.transpose() << "\n";
+    os << "- output         = " << output_sizes.transpose() << "\n";
+  }
+};
+
+struct MaxPool : Layer
+{
+  int size = 2;
+  int stride = 2;
+
+  auto update_output_sizes() -> void
+  {
+    output_sizes = input_sizes;
+    output_sizes.tail(2) /= stride;
+  }
+
+  auto parse_line(const std::string& line) -> void override
+  {
+    auto line_split = std::vector<std::string>{};
+    boost::split(line_split, line, boost::is_any_of("="),
+                 boost::token_compress_on);
+    for (auto& str: line_split)
+      boost::trim(str);
+
+    const auto& key = line_split[0];
+    if (key == "size")
+      size = std::stoi(line_split[1]);
+    if (key == "stride")
+      stride = std::stoi(line_split[1]);
+  }
+
+  auto to_output_stream(std::ostream& os) const -> void override
+  {
+    os << "- size           = " << size << "\n";
+    os << "- stride         = " << stride << "\n";
+    os << "- input          = " << input_sizes.transpose() << "\n";
+    os << "- output         = " << output_sizes.transpose() << "\n";
+  }
+};
+
+struct Yolo : Layer
+{
+  auto parse_line(const std::string& line) -> void override
+  {
+    auto line_split = std::vector<std::string>{};
+    boost::split(line_split, line, boost::is_any_of("="),
+                 boost::token_compress_on);
+    for (auto& str: line_split)
+      boost::trim(str);
+
+    std::cout << "YOLO: TODO" << std::endl;
+  }
+
+  auto to_output_stream(std::ostream& os) const -> void override
+  {
+    os << "- input          = " << input_sizes.transpose() << "\n";
+    os << "- output         = " << output_sizes.transpose() << "\n";
+  }
+};
+
 
 BOOST_AUTO_TEST_SUITE(TestLayers)
 
@@ -150,7 +301,6 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
   auto enter_new_section = false;
 
   auto nodes = std::vector<std::unique_ptr<Layer>>{};
-  auto links = std::vector<std::pair<int, int>>{};
 
   while (read_line(file, line))
   {
@@ -165,15 +315,25 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
     {
       if (!section.empty())
       {
-        std::cout << "FINISHED PARSING SECTION: " << section << std::endl;
-        std::cout << "CHECKING PARSED SECTION: " << std::endl;
-
+        std::cout << "FINISHING PARSED SECTION: " << section << std::endl;
+        if (section != "net")
+        {
+          if (nodes.size() < 2)
+            throw std::runtime_error{"Invalid network!"};
+          const auto &previous_node = *(nodes.rbegin() + 1);
+          nodes.back()->input_sizes = previous_node->output_sizes;
+        }
         if (section == "net")
-          std::cout << dynamic_cast<const Input&>(*nodes.back())
-                    << std::endl;
+          dynamic_cast<Input&>(*nodes.back()).update_output_sizes();
         if (section == "convolutional")
-          std::cout << dynamic_cast<const Convolution&>(*nodes.back())
-                    << std::endl;
+          dynamic_cast<Convolution&>(*nodes.back()).update_output_sizes();
+        if (section == "route")
+          dynamic_cast<Route&>(*nodes.back()).update_output_sizes(nodes);
+        if (section == "maxpool")
+          dynamic_cast<MaxPool&>(*nodes.back()).update_output_sizes();
+
+        std::cout << "CHECKING PARSED SECTION: " << std::endl;
+        std::cout << *nodes.back() << std::endl;
       }
 
       section = section_name(line);
@@ -184,6 +344,12 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
         nodes.emplace_back(new Input);
       else if (section == "convolutional")
         nodes.emplace_back(new Convolution);
+      else if (section == "route")
+        nodes.emplace_back(new Route);
+      else if (section == "maxpool")
+        nodes.emplace_back(new MaxPool);
+      else if (section == "yolo")
+        nodes.emplace_back(new Yolo);
 
       nodes.back()->type = section;
 
