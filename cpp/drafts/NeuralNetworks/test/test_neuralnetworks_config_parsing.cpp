@@ -105,6 +105,14 @@ struct Input : Layer
   }
 };
 
+struct BatchNormalization : Layer
+{
+  std::vector<float> bias;
+  std::vector<float> scale;
+  std::vector<float> rolling_mean;
+  std::vector<float> rolling_variance;
+};
+
 struct Convolution : Layer
 {
   bool batch_normalize = true;
@@ -161,6 +169,28 @@ struct Convolution : Layer
     os << "- input          = " << input_sizes.transpose() << "\n";
     os << "- output         = " << output_sizes.transpose() << "\n";
   }
+
+//  auto read(FILE* fp) -> void
+//  {
+//    // 1. Read bias weights.
+//    // 2. Read batch normalization weights.
+//    // 3. Read convolution weights.
+//
+//    // 1.
+//    const auto bias_weight_count =
+//        fread(bias.data(), sizeof(float), bias.size(), fp);
+//    if (bias_weight_count != bias.size())
+//      throw std::runtime_error{"Could not read bias weights!"};
+//
+//    // 2.
+//
+//    // 3.
+//    const auto kernel_weight_count =
+//        fread(kernel.data(), sizeof(float), kernel.size(), fp);
+//    if (kernel_weight_count != kernel.size())
+//      throw std::runtime_error{"Could not read kernel weights!"};
+//    // TODO: transpose the kernel.
+//  }
 };
 
 struct Route : Layer
@@ -260,6 +290,37 @@ struct MaxPool : Layer
   }
 };
 
+struct Upsample : Layer
+{
+  int stride = 2;
+
+  auto update_output_sizes() -> void
+  {
+    output_sizes = input_sizes;
+    output_sizes.tail(2) *= stride;
+  }
+
+  auto parse_line(const std::string& line) -> void override
+  {
+    auto line_split = std::vector<std::string>{};
+    boost::split(line_split, line, boost::is_any_of("="),
+                 boost::token_compress_on);
+    for (auto& str: line_split)
+      boost::trim(str);
+
+    const auto& key = line_split[0];
+    if (key == "stride")
+      stride = std::stoi(line_split[1]);
+  }
+
+  auto to_output_stream(std::ostream& os) const -> void override
+  {
+    os << "- stride         = " << stride << "\n";
+    os << "- input          = " << input_sizes.transpose() << "\n";
+    os << "- output         = " << output_sizes.transpose() << "\n";
+  }
+};
+
 struct Yolo : Layer
 {
   auto parse_line(const std::string& line) -> void override
@@ -287,8 +348,10 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
 {
   namespace fs = boost::filesystem;
 
-  const auto data_dir_path = fs::canonical(fs::path{ src_path("../../../../data") });
-  const auto cfg_filepath = data_dir_path / "trained_models" / "yolov4-tiny.cfg";
+  const auto data_dir_path =
+      fs::canonical(fs::path{src_path("../../../../data")});
+  const auto cfg_filepath =
+      data_dir_path / "trained_models" / "yolov4-tiny.cfg";
   BOOST_CHECK(fs::exists(cfg_filepath));
 
   auto file = std::ifstream{cfg_filepath.string()};
@@ -331,6 +394,8 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
           dynamic_cast<Route&>(*nodes.back()).update_output_sizes(nodes);
         if (section == "maxpool")
           dynamic_cast<MaxPool&>(*nodes.back()).update_output_sizes();
+        if (section == "upsample")
+          dynamic_cast<Upsample&>(*nodes.back()).update_output_sizes();
 
         std::cout << "CHECKING PARSED SECTION: " << std::endl;
         std::cout << *nodes.back() << std::endl;
@@ -348,6 +413,8 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
         nodes.emplace_back(new Route);
       else if (section == "maxpool")
         nodes.emplace_back(new MaxPool);
+      else if (section == "upsample")
+        nodes.emplace_back(new Upsample);
       else if (section == "yolo")
         nodes.emplace_back(new Yolo);
 

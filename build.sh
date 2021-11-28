@@ -2,7 +2,7 @@
 set -ex
 
 
-SARA_DOCKER_IMAGE=sara-ubuntu-20.04-cuda-11.4-cudnn-8
+SARA_DOCKER_IMAGE=registry.gitlab.com/do-cv/sara
 
 
 if [ -z "$1" ]; then

@@ -89,8 +89,9 @@ else ()
   add_executable(halide_sift_example halide_sift_example.cpp)
 endif ()
 target_compile_definitions(halide_sift_example
-  PRIVATE ${SARA_DEFINITIONS}
-          $<$<BOOL:${CMAKE_CUDA_COMPILER}>:USE_SHAKTI_CUDA_VIDEOIO>)
+  PRIVATE
+  ${SARA_DEFINITIONS}
+  $<$<BOOL:${NvidiaVideoCodec_ROOT}>:USE_SHAKTI_CUDA_VIDEOIO>)
 target_link_options(halide_sift_example
   PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
@@ -100,10 +101,8 @@ target_link_libraries(halide_sift_example
   Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES}
-  $<$<BOOL:${CMAKE_CUDA_COMPILER}>:${CUDA_CUDA_LIBRARY}>)
-if (NvidiaVideoCodec_ROOT)
-  target_link_libraries(halide_sift_example PRIVATE DO::Shakti::VideoIO)
-endif ()
+  $<$<BOOL:${CMAKE_CUDA_COMPILER}>:${CUDA_CUDA_LIBRARY}>
+  $<$<BOOL:${NvidiaVideoCodec_ROOT}>:DO::Shakti::VideoIO>)
 
 set_property(TARGET halide_sift_example
   PROPERTY
@@ -130,7 +129,7 @@ add_executable(halide_sift_pyramid_example
   halide_sift_pyramid_example.cpp)
 target_compile_definitions(halide_sift_pyramid_example
   PRIVATE ${SARA_DEFINITIONS}
-          $<$<BOOL:${CMAKE_CUDA_COMPILER}>:USE_SHAKTI_CUDA_VIDEOIO>)
+          $<$<BOOL:${NvidiaVideoCodec_ROOT}>:USE_SHAKTI_CUDA_VIDEOIO>)
 target_link_options(halide_sift_pyramid_example
   PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
@@ -140,10 +139,8 @@ target_link_libraries(halide_sift_pyramid_example
   Halide::Runtime
   ${DO_Sara_LIBRARIES}
   ${HALIDE_SIFT_LIBRARIES}
-  $<$<BOOL:${CMAKE_CUDA_COMPILER}>:${CUDA_CUDA_LIBRARY}>)
-if (NvidiaVideoCodec_ROOT)
-  target_link_libraries(halide_sift_pyramid_example PRIVATE DO::Shakti::VideoIO)
-endif ()
+  $<$<BOOL:${CMAKE_CUDA_COMPILER}>:${CUDA_CUDA_LIBRARY}>
+  $<$<BOOL:${NvidiaVideoCodec_ROOT}>:DO::Shakti::VideoIO>)
 set_property(TARGET halide_sift_pyramid_example
   PROPERTY
   FOLDER "Examples/Shakti/Halide")
