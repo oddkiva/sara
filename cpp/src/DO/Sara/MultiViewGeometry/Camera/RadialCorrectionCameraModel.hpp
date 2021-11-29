@@ -43,14 +43,14 @@ namespace DO::Sara {
       const auto& c = distortion_center;
       const auto ru = (xu - c).squaredNorm();
 
-      auto P = Univariate::UnivariatePolynomial<T>{4};
+      auto P = UnivariatePolynomial<T>{4};
       P[0] = 1;
       P[1] = -1;
       P[2] = ru * k(0);
       P[3] = 0;
       P[4] = ru * k(1);
 
-      auto solver = Univariate::NewtonRaphson<T>{P};
+      auto solver = NewtonRaphson<T>{P};
       const auto rd = solver(ru);
 
       return c + rd / ru * (xu - c);

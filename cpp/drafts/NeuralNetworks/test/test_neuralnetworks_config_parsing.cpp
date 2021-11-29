@@ -81,10 +81,10 @@ struct Input : Layer
 
 struct BatchNormalization : Layer
 {
-  std::vector<float> bias;
-  std::vector<float> scale;
-  std::vector<float> rolling_mean;
-  std::vector<float> rolling_variance;
+  Eigen::VectorXf bias;
+  Eigen::VectorXf scale;
+  Eigen::VectorXf rolling_mean;
+  Eigen::VectorXf rolling_variance;
 };
 
 struct Convolution : Layer
@@ -96,6 +96,8 @@ struct Convolution : Layer
   int stride;
   int pad;
   std::string activation;
+
+  std::unique_ptr<Layer> bn_layer;
 
   auto update_output_sizes() -> void
   {
