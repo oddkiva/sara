@@ -81,10 +81,10 @@ struct Input : Layer
 
 struct BatchNormalization : Layer
 {
-  std::vector<float> bias;
-  std::vector<float> scale;
-  std::vector<float> rolling_mean;
-  std::vector<float> rolling_variance;
+  Eigen::VectorXf bias;
+  Eigen::VectorXf scale;
+  Eigen::VectorXf rolling_mean;
+  Eigen::VectorXf rolling_variance;
 };
 
 struct Convolution : Layer
@@ -294,9 +294,13 @@ struct Upsample : Layer
 
 struct Yolo : Layer
 {
-  std::vector<std::int32_t> mask;
+  //! @brief  The list of anchor box sizes (w[0], h[0]), ..., (w[N-1], h[N-1])
   std::vector<std::int32_t> anchors;
+  //! @brief The list of anchor box indices to consider.
+  std::vector<std::int32_t> mask;
+  //! @brief The number of object classes.
   std::int32_t classes;
+
   std::int32_t num;
   float jitter;
   float scale_x_y;
