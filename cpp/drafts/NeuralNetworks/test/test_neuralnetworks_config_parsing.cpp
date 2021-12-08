@@ -97,6 +97,8 @@ struct Convolution : Layer
   int pad;
   std::string activation;
 
+  std::unique_ptr<Layer> bn_layer;
+
   auto update_output_sizes() -> void
   {
     output_sizes = input_sizes;
