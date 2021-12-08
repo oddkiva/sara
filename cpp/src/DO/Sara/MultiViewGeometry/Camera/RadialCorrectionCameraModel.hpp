@@ -27,8 +27,7 @@ namespace DO::Sara {
     Eigen::Matrix<T, 2, 1> k;
     Eigen::Matrix<T, 2, 1> distortion_center;
 
-    auto operator()(const Eigen::Matrix<T, 2, 1>& xd) const
-        -> Eigen::Matrix<T, 2, 1>
+    auto apply(const Eigen::Matrix<T, 2, 1>& xd) const -> Eigen::Matrix<T, 2, 1>
     {
       const auto r2 = (xd - distortion_center).squaredNorm();
       const auto r4 = r2 * r2;
@@ -37,21 +36,23 @@ namespace DO::Sara {
       return c + distortion_factor * (xd - c);
     }
 
-    auto inverse(const Eigen::Matrix<T, 2, 1>& xu) const
-        -> Eigen::Matrix<T, 2, 1>
+    auto apply_inverse(const Eigen::Matrix<T, 2, 1>& xu, int max_iter = 20,
+                       T eps = T{1e-6}) const -> Eigen::Matrix<T, 2, 1>
     {
       const auto& c = distortion_center;
-      const auto ru = (xu - c).squaredNorm();
+      const auto ru = (xu - c).norm();
+      if (ru < std::numeric_limits<T>::epsilon())
+        return xu;
 
       auto P = UnivariatePolynomial<T>{4};
       P[0] = 1;
-      P[1] = -1;
-      P[2] = ru * k(0);
+      P[1] = -1 / ru;
+      P[2] = k(0);
       P[3] = 0;
-      P[4] = ru * k(1);
+      P[4] = k(1);
 
       auto solver = NewtonRaphson<T>{P};
-      const auto rd = solver(ru);
+      const auto rd = solver(ru, max_iter, eps);
 
       return c + rd / ru * (xu - c);
     }
@@ -63,8 +64,7 @@ namespace DO::Sara {
     Eigen::Matrix<T, 2, 1> k;
     Eigen::Matrix<T, 2, 1> distortion_center;
 
-    auto operator()(const Eigen::Matrix<T, 2, 1>& xd) const
-        -> Eigen::Matrix<T, 2, 1>
+    auto apply(const Eigen::Matrix<T, 2, 1>& xd) const -> Eigen::Matrix<T, 2, 1>
     {
       const auto r2 = (xd - distortion_center).squaredNorm();
       const auto r4 = r2 * r2;
@@ -73,8 +73,8 @@ namespace DO::Sara {
       return c + distortion_factor * (xd - c);
     }
 
-    auto inverse(const Eigen::Matrix<T, 2, 1>& xu, int max_iter = 20,
-                 T eps = T{1e-6}) const -> Eigen::Matrix<T, 2, 1>
+    auto apply_inverse(const Eigen::Matrix<T, 2, 1>& xu, int max_iter = 20,
+                       T eps = T{1e-6}) const -> Eigen::Matrix<T, 2, 1>
     {
       const auto& c = distortion_center;
       const auto ru = (xu - c).squaredNorm();
@@ -100,8 +100,7 @@ namespace DO::Sara {
       auto rd_estimate = static_cast<T>(0.5) * (rd_min + rd_max);
       auto ru_at_rd_estimate = corrected_radius(rd_estimate);
       auto iter = 0;
-      while (iter < max_iter &&
-             std::abs(ru_at_rd_estimate - ru) > eps)
+      while (iter < max_iter && std::abs(ru_at_rd_estimate - ru) > eps)
       {
         if (ru_at_rd_estimate < ru)
           rd_min = ru_at_rd_estimate;
