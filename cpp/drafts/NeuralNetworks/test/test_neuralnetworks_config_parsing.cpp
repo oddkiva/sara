@@ -28,7 +28,9 @@ namespace sara = DO::Sara;
 struct Layer
 {
   virtual ~Layer() = default;
-  virtual auto parse_line(const std::string& line) -> void = 0;
+
+  virtual auto parse_line(const std::string&) -> void = 0;
+
   virtual auto to_output_stream(std::ostream& os) const -> void = 0;
 
   friend inline auto operator<<(std::ostream& os, const Layer& l)
@@ -81,10 +83,48 @@ struct Input : Layer
 
 struct BatchNormalization : Layer
 {
-  Eigen::VectorXf bias;
-  Eigen::VectorXf scale;
-  Eigen::VectorXf rolling_mean;
-  Eigen::VectorXf rolling_variance;
+  struct Weights
+  {
+    float bias;
+    float scale;
+    Eigen::VectorXf rolling_mean;
+    Eigen::VectorXf rolling_variance;
+  } weights;
+
+  auto resize(const Eigen::Vector4i& sizes)
+  {
+    const auto& num_filters = sizes(1);
+    input_sizes = sizes;
+    output_sizes = sizes;
+    weights.rolling_mean.resize(num_filters);
+    weights.rolling_variance.resize(num_filters);
+  }
+
+  virtual auto parse_line(const std::string&) -> void
+  {
+    throw std::runtime_error{"Not Implemented!"};
+  }
+
+  virtual auto to_output_stream(std::ostream& os) const -> void
+  {
+    os << "- input          = " << input_sizes.transpose() << "\n";
+    os << "- output         = " << output_sizes.transpose() << "\n";
+  }
+
+  auto load_weights(FILE* fp) -> void
+  {
+    const auto rolling_mean_count =
+        fread(weights.rolling_mean.data(), sizeof(float),
+              weights.rolling_mean.size(), fp);
+    if (Eigen::Index(rolling_mean_count) != weights.rolling_mean.size())
+      throw std::runtime_error{"Could not read rolling mean weights!"};
+
+    const auto rolling_variance_count =
+        fread(weights.rolling_variance.data(), sizeof(float),
+              weights.rolling_variance.size(), fp);
+    if (Eigen::Index(rolling_variance_count) != weights.rolling_variance.size())
+      throw std::runtime_error{"Could not read rolling variance weights!"};
+  }
 };
 
 struct Convolution : Layer
@@ -97,7 +137,14 @@ struct Convolution : Layer
   int pad;
   std::string activation;
 
-  std::unique_ptr<Layer> bn_layer;
+  struct Weights
+  {
+    sara::Tensor_<float, 4> w;
+    Eigen::VectorXf b;
+  } weights;
+
+
+  std::unique_ptr<BatchNormalization> bn_layer;
 
   auto update_output_sizes() -> void
   {
@@ -141,27 +188,35 @@ struct Convolution : Layer
     os << "- output         = " << output_sizes.transpose() << "\n";
   }
 
-  //  auto read(FILE* fp) -> void
-  //  {
-  //    // 1. Read bias weights.
-  //    // 2. Read batch normalization weights.
-  //    // 3. Read convolution weights.
-  //
-  //    // 1.
-  //    const auto bias_weight_count =
-  //        fread(bias.data(), sizeof(float), bias.size(), fp);
-  //    if (bias_weight_count != bias.size())
-  //      throw std::runtime_error{"Could not read bias weights!"};
-  //
-  //    // 2.
-  //
-  //    // 3.
-  //    const auto kernel_weight_count =
-  //        fread(kernel.data(), sizeof(float), kernel.size(), fp);
-  //    if (kernel_weight_count != kernel.size())
-  //      throw std::runtime_error{"Could not read kernel weights!"};
-  //    // TODO: transpose the kernel.
-  //  }
+  auto load_weights(FILE* fp) -> void
+  {
+    // 1. Read bias weights.
+    // 2. Read batch normalization weights.
+    // 3. Read convolution weights.
+    weights.b.resize(filters);
+
+    // 1. Convolutional bias weights.
+    const auto bias_weight_count =
+        fread(weights.b.data(), sizeof(float), weights.b.size(), fp);
+    if (Eigen::Index(bias_weight_count) != weights.b.size())
+      throw std::runtime_error{"Could not read bias weights!"};
+
+    // 2. Batch normalization weights.
+    if (batch_normalize)
+    {
+      bn_layer = std::make_unique<BatchNormalization>();
+      bn_layer->resize(output_sizes);
+      bn_layer->load_weights(fp);
+    }
+
+    // 3. Convolution kernel weights.
+    weights.w.resize({filters, input_sizes(1), size, size});
+    const auto kernel_weight_count =
+        fread(weights.w.data(), sizeof(float), weights.w.size(), fp);
+    if (kernel_weight_count != weights.w.size())
+      throw std::runtime_error{"Could not read kernel weights!"};
+    // TODO: transpose the kernel.
+  }
 };
 
 struct Route : Layer
