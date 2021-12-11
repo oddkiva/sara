@@ -85,8 +85,7 @@ struct BatchNormalization : Layer
 {
   struct Weights
   {
-    float bias;
-    float scale;
+    Eigen::VectorXf scales;
     Eigen::VectorXf rolling_mean;
     Eigen::VectorXf rolling_variance;
   } weights;
@@ -96,6 +95,7 @@ struct BatchNormalization : Layer
     const auto& num_filters = sizes(1);
     input_sizes = sizes;
     output_sizes = sizes;
+    weights.scales.resize(num_filters);
     weights.rolling_mean.resize(num_filters);
     weights.rolling_variance.resize(num_filters);
   }
@@ -113,23 +113,33 @@ struct BatchNormalization : Layer
 
   auto load_weights(FILE* fp) -> void
   {
+    std::cout << "Loading BN scales: " << weights.scales.size() << std::endl;
+    const auto scales_count =
+        fread(weights.scales.data(), sizeof(float), weights.scales.size(), fp);
+    if (Eigen::Index(scales_count) != weights.scales.size())
+      throw std::runtime_error{"Failed to read BN scales!"};
+
+    std::cout << "Loading BN rolling mean: " << weights.rolling_mean.size()
+              << std::endl;
     const auto rolling_mean_count =
         fread(weights.rolling_mean.data(), sizeof(float),
               weights.rolling_mean.size(), fp);
     if (Eigen::Index(rolling_mean_count) != weights.rolling_mean.size())
-      throw std::runtime_error{"Could not read rolling mean weights!"};
+      throw std::runtime_error{"Failed to read BN rolling mean!"};
 
+    std::cout << "Loading BN rolling variance: "
+              << weights.rolling_variance.size() << std::endl;
     const auto rolling_variance_count =
         fread(weights.rolling_variance.data(), sizeof(float),
               weights.rolling_variance.size(), fp);
     if (Eigen::Index(rolling_variance_count) != weights.rolling_variance.size())
-      throw std::runtime_error{"Could not read rolling variance weights!"};
+      throw std::runtime_error{"Failed to read BN rolling variance!"};
   }
 };
 
 struct Convolution : Layer
 {
-  bool batch_normalize = true;
+  bool batch_normalize = false;
 
   int filters;
   int size;
@@ -193,13 +203,14 @@ struct Convolution : Layer
     // 1. Read bias weights.
     // 2. Read batch normalization weights.
     // 3. Read convolution weights.
-    weights.b.resize(filters);
-
     // 1. Convolutional bias weights.
+    weights.b.resize(filters);
     const auto bias_weight_count =
         fread(weights.b.data(), sizeof(float), weights.b.size(), fp);
     if (Eigen::Index(bias_weight_count) != weights.b.size())
-      throw std::runtime_error{"Could not read bias weights!"};
+      throw std::runtime_error{"Failed to read bias weights!"};
+    std::cout << "Loading Conv B: " << weights.b.size() << std::endl;
+    // std::cout << weights.b.transpose() << std::endl;
 
     // 2. Batch normalization weights.
     if (batch_normalize)
@@ -211,14 +222,18 @@ struct Convolution : Layer
 
     // 3. Convolution kernel weights.
     weights.w.resize({filters, input_sizes(1), size, size});
+    std::cout << "Loading Conv W: " << weights.w.sizes().transpose()
+              << std::endl;
     const auto kernel_weight_count =
         fread(weights.w.data(), sizeof(float), weights.w.size(), fp);
     if (kernel_weight_count != weights.w.size())
-      throw std::runtime_error{"Could not read kernel weights!"};
+      throw std::runtime_error{"Failed to read kernel weights!"};
     // TODO: transpose the kernel.
+    std::cout << weights.w.flat_array() << std::endl;
   }
 };
 
+//! @brief Concatenates the output of the different layers into a single output.
 struct Route : Layer
 {
   std::vector<std::int32_t> layers;
@@ -588,6 +603,41 @@ struct DarknetNetworkParser
   }
 };
 
+struct DarknetWeightLoader
+{
+  FILE* fp = nullptr;
+
+  inline DarknetWeightLoader() = default;
+
+  inline DarknetWeightLoader(const std::string& filepath)
+  {
+    fp = fopen(filepath.c_str(), "rb");
+    if (fp == nullptr)
+      throw std::runtime_error{"Failed to open file: " + filepath};
+  }
+
+  inline ~DarknetWeightLoader()
+  {
+    if (fp)
+    {
+      fclose(fp);
+      fp = nullptr;
+    }
+  }
+
+  inline auto load(std::vector<std::unique_ptr<Layer>>& net)
+  {
+    for (auto& layer : net)
+    {
+      if (auto d = dynamic_cast<Convolution*>(layer.get()))
+      {
+        std::cout << "LOADING WEIGHTS FOR CONVOLUTIONAL LAYER:\n" << *layer << std::endl;
+        d->load_weights(fp);
+      }
+    }
+  }
+};
+
 
 BOOST_AUTO_TEST_SUITE(TestLayers)
 
@@ -599,10 +649,12 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
       fs::canonical(fs::path{src_path("../../../../data")});
   const auto cfg_filepath =
       data_dir_path / "trained_models" / "yolov4-tiny.cfg";
+  const auto weights_filepath =
+      data_dir_path / "trained_models" / "yolov4-tiny.weights";
   BOOST_CHECK(fs::exists(cfg_filepath));
 
-  const auto net = DarknetNetworkParser{}  //
-                       .parse_config_file(cfg_filepath.string());
+  auto net = DarknetNetworkParser{}.parse_config_file(cfg_filepath.string());
+  DarknetWeightLoader{weights_filepath.string()}.load(net);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
