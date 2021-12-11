@@ -66,6 +66,51 @@ namespace DO { namespace Sara {
   }
   //! @}
 
+  //! @{
+  //! @brief Reimplement the `im2col` function.
+  template <typename T, int N, typename Padding>
+  auto im2col(const TensorView_<T, N>& x,             //
+              const Matrix<int, N, 1>& kernel_sizes,  //
+              const Padding& padding,
+              const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones(),
+              const Matrix<int, N, 1>& shift = Matrix<int, N, 1>::Zero())
+      -> Tensor_<T, 2>
+  {
+    // Pad sizes must be odd.
+    const Matrix<int, N, 1> radius = kernel_sizes / 2;
+    const Matrix<int, N, 1> begin = Matrix<int, N, 1>::Zero();
+    const Matrix<int, N, 1> end = x.sizes();
+
+    // Initialize the strided subarray iterator.
+    auto infx = make_infinite(x, padding);
+    auto xi = infx.begin_stepped_subarray(begin, end, strides);
+
+    const auto sizes = xi.stepped_subarray_sizes();
+
+    // Compute the matrix dimensions.
+    const auto num_cols = std::accumulate(
+        sizes.data(), sizes.data() + sizes.size(), 1, std::multiplies<int>());
+    const auto num_rows =
+        std::accumulate(kernel_sizes.data(), kernel_sizes.data() + N, 1,
+                        std::multiplies<int>());
+
+    auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
+
+    for (int c = 0; !xi.end(); ++xi, ++c)
+    {
+      const Matrix<int, N, 1> s = xi.position() - radius + shift;
+      const Matrix<int, N, 1> e =
+          xi.position() + radius + Matrix<int, N, 1>::Ones() + shift;
+
+      auto p = Tensor_<T, N>{e - s};
+      crop(p, infx, s, e);
+
+      phi_x.matrix().col(c) = p.vector();
+    }
+
+    return phi_x;
+  }
+  //! @}
 
   //! @{
   //! @brief Apply the GEMM-based convolution.
@@ -96,11 +141,26 @@ namespace DO { namespace Sara {
 
     // calculate the feature maps for each nd-pixel.
     k_sizes[0] = 1;
-    auto phi_x = im2row(x, k_sizes, padding, strides, offset);
+    const auto phi_x = im2row(x, k_sizes, padding, strides, offset);
 
     y.colmajor_view()                                                  //
         .reshape(Vector2i{phi_x.matrix().rows(), kt.matrix().cols()})  //
         .matrix() = phi_x.matrix() * kt.matrix();
+  }
+
+  template <typename T, int N, typename Padding>
+  void
+  gemm_convolve_2(TensorView_<T, N>& y,        //
+                  const TensorView_<T, N>& x,  //
+                  const TensorView_<T, N>& k,  //
+                  const Padding& padding,      //
+                  const Matrix<int, N, 1>& strides,
+                  const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
+  {
+    const auto phi_x = im2col(x, k, padding, strides, offset);
+
+    y.reshape(Vector2i{phi_x.matrix().rows(), k.matrix().cols()}).matrix() =
+        k.matrix() * phi_x.matrix();
   }
 
   template <typename T, int N, typename Padding>
@@ -124,7 +184,7 @@ namespace DO { namespace Sara {
 
     // calculate the feature maps for each nd-pixel.
     k_sizes[0] = 1;
-    auto phi_x = im2row(x, k_sizes, padding, strides, offset);
+    const auto phi_x = im2row(x, k_sizes, padding, strides, offset);
 
     // Determine the sizes of the convolutional output.
     auto y_sizes =
