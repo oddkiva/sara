@@ -21,9 +21,9 @@
 namespace DO { namespace Sara {
 
   //! @{
-  //! @brief Reimplement the `im2col` function.
+  //! @brief Reimplement the `im2row` function.
   template <typename T, int N, typename Padding>
-  auto im2col(const TensorView_<T, N>& x,             //
+  auto im2row(const TensorView_<T, N>& x,             //
               const Matrix<int, N, 1>& kernel_sizes,  //
               const Padding& padding,
               const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones(),
@@ -96,7 +96,7 @@ namespace DO { namespace Sara {
 
     // calculate the feature maps for each nd-pixel.
     k_sizes[0] = 1;
-    auto phi_x = im2col(x, k_sizes, padding, strides, offset);
+    auto phi_x = im2row(x, k_sizes, padding, strides, offset);
 
     y.colmajor_view()                                                  //
         .reshape(Vector2i{phi_x.matrix().rows(), kt.matrix().cols()})  //
@@ -124,7 +124,7 @@ namespace DO { namespace Sara {
 
     // calculate the feature maps for each nd-pixel.
     k_sizes[0] = 1;
-    auto phi_x = im2col(x, k_sizes, padding, strides, offset);
+    auto phi_x = im2row(x, k_sizes, padding, strides, offset);
 
     // Determine the sizes of the convolutional output.
     auto y_sizes =

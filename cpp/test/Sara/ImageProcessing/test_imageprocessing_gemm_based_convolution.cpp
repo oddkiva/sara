@@ -21,7 +21,7 @@ using namespace std;
 using namespace DO::Sara;
 
 
-BOOST_AUTO_TEST_CASE(test_im2col_on_nhw_tensor)
+BOOST_AUTO_TEST_CASE(test_im2row_on_nhw_tensor)
 {
   constexpr auto N = 3;
   constexpr auto H = 4;
@@ -43,25 +43,25 @@ BOOST_AUTO_TEST_CASE(test_im2col_on_nhw_tensor)
   constexpr auto kH = 3;
   constexpr auto kW = 3;
 
-  // Apply im2col on each data of the batch.
-  auto im2col_iterated = Tensor_<float, 2>{{N * H * W, kH * kW}};
-  auto im2col_out_as_3d =
-    im2col_iterated.reshape(Vector3i{N, H * W, kH * kW});
+  // Apply im2row on each data of the batch.
+  auto im2row_iterated = Tensor_<float, 2>{{N * H * W, kH * kW}};
+  auto im2row_out_as_3d =
+    im2row_iterated.reshape(Vector3i{N, H * W, kH * kW});
 
-  im2col_out_as_3d[0] = im2col(x[0], {kH, kW}, make_constant_padding(0.f));
-  im2col_out_as_3d[1] = im2col(x[1], {kH, kW}, make_constant_padding(0.f));
-  im2col_out_as_3d[2] = im2col(x[2], {kH, kW}, make_constant_padding(0.f));
+  im2row_out_as_3d[0] = im2row(x[0], {kH, kW}, make_constant_padding(0.f));
+  im2row_out_as_3d[1] = im2row(x[1], {kH, kW}, make_constant_padding(0.f));
+  im2row_out_as_3d[2] = im2row(x[2], {kH, kW}, make_constant_padding(0.f));
 
-  // Apply im2col on the whole batch.
-  auto im2col_batched = im2col(x, {1, kH, kW}, make_constant_padding(0.f));
+  // Apply im2row on the whole batch.
+  auto im2row_batched = im2row(x, {1, kH, kW}, make_constant_padding(0.f));
 
-  BOOST_CHECK(im2col_iterated.sizes() == im2col_batched.sizes());
-  BOOST_CHECK(im2col_iterated.matrix() == im2col_batched.matrix());
+  BOOST_CHECK(im2row_iterated.sizes() == im2row_batched.sizes());
+  BOOST_CHECK(im2row_iterated.matrix() == im2row_batched.matrix());
 
-  // Check the reshaped im2col
+  // Check the reshaped im2row
   auto sizes_5d = Matrix<int, 5, 1>{};
   sizes_5d << N, H, W, kH, kW;
-  auto phi_x_as_5d = im2col_batched.reshape(sizes_5d);
+  auto phi_x_as_5d = im2row_batched.reshape(sizes_5d);
 
   MatrixXf true_neighborhood(kH, kW);
   true_neighborhood <<
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_im2col_on_nhw_tensor)
   //cout << phi_x_as_5d[2][2][1].matrix() << endl << endl;
 }
 
-BOOST_AUTO_TEST_CASE(test_im2col_on_nhwc_tensor)
+BOOST_AUTO_TEST_CASE(test_im2row_on_nhwc_tensor)
 {
   constexpr auto N = 1;
   constexpr auto H = 4;
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(test_im2col_on_nhwc_tensor)
   constexpr auto kW = 3;
   constexpr auto kC = 3;
 
-  // Apply im2col on the whole batch.
+  // Apply im2row on the whole batch.
   //                             kernel_sizes     strides
   //                              N  H   W   C
   // Each row (y, x) describes a patch centered at (y, x) with sizes (3, 3, 3).
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_im2col_on_nhwc_tensor)
   //  [(y  , x  , c-1), (y  , x  , c), (y  , x  , c+1)],
   //  [(y  , x+1, c-1), (y  , x+1, c), (y  , x+1, c+1)]],
   //
-  // Adding the non-zero shift (0, 0, 1) in im2col will do
+  // Adding the non-zero shift (0, 0, 1) in im2row will do
   // ROW 0
   // [[(y-1, x-1, c), (y-1, x-1, c+1), (y-1, x-1, c+2)],
   //  [(y-1, x  , c), (y-1, x  , c+1), (y-1, x  , c+2)],
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(test_im2col_on_nhwc_tensor)
   // [[(y  , x-1, c), (y  , x-1, c+1), (y  , x-1, c+2)],
   //  [(y  , x  , c), (y  , x  , c+1), (y  , x  , c+2)],
   //  [(y  , x+1, c), (y  , x+1, c+1), (y  , x+1, c+2)]],
-  auto phi_x = im2col(x, {1, kH, kW, kC}, make_constant_padding(0.f),
+  auto phi_x = im2row(x, {1, kH, kW, kC}, make_constant_padding(0.f),
                       {1, 1, 1, 3}, {0, 0, 0, 1});
   BOOST_CHECK(phi_x.sizes() == Vector2i(N * H * W, kH * kW * kC));
 
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)
   constexpr auto kW = 3;
   constexpr auto kC = 3;
 
-  auto phi_x = im2col(x, {1, kH, kW, kC}, make_constant_padding(0.f),
+  auto phi_x = im2row(x, {1, kH, kW, kC}, make_constant_padding(0.f),
                       {1, 1, 1, kC}, {0, 0, 0, 1});
 
   Tensor_<float, 2> k{{kH * kW * kC, kC}};
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nchw_tensor)
   constexpr auto kC = 3;
 
 
-  auto phi_x = im2col(x, {N, kC, kH, kW}, make_constant_padding(0.f),
+  auto phi_x = im2row(x, {N, kC, kH, kW}, make_constant_padding(0.f),
                       {1, kC, 1, 1}, {0, 1, 0, 0});
   // [N * C/kC * H/kH * W/kW, kC * kH * kW]
   // cout << phi_x.matrix() << endl;
