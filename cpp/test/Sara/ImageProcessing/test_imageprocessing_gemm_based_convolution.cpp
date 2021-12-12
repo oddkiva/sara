@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(test_compare_im2row_transpose_and_im2col)
                             {1, 1, 1, 3}, {0, 0, 0, 1});
   const auto phi_x_transpose =
       im2col(x, {1, kH, kW, kC}, make_constant_padding(0.f), {1, 1, 1, 3},
-             {0, 0, 0, 1});
+             {0, -1, -1, 0});
 
   const auto difference = phi_x.matrix().transpose() - phi_x_transpose.matrix();
   BOOST_CHECK((difference.array() == 0).all());

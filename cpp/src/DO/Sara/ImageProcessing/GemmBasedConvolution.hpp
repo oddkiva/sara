@@ -77,7 +77,6 @@ namespace DO { namespace Sara {
       -> Tensor_<T, 2>
   {
     // Pad sizes must be odd.
-    const Matrix<int, N, 1> radius = kernel_sizes / 2;
     const Matrix<int, N, 1> begin = Matrix<int, N, 1>::Zero();
     const Matrix<int, N, 1> end = x.sizes();
 
@@ -94,16 +93,33 @@ namespace DO { namespace Sara {
                         std::multiplies<int>());
 
     auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
+#ifdef DEBUG_IM2COL
+    std::cout << "kernel_sizes  = " << kernel_sizes.transpose() << std::endl;
+    std::cout << "start         = " << begin.transpose() << std::endl;
+    std::cout << "end           = " << end.transpose() << std::endl;
+    std::cout << "strides       = " << strides.transpose() << std::endl;
+    std::cout << "shift         = " << shift.transpose() << std::endl;
+
+    std::cout << "x sz          = " << x.sizes().transpose() << std::endl;
+    std::cout << "sampled x sz  = " << sizes.transpose() << std::endl;
+    std::cout << "phi_x.sizes() = " << phi_x.sizes().transpose() << std::endl;
+#endif
 
     for (int c = 0; !xi.end(); ++xi, ++c)
     {
-      const Matrix<int, N, 1> s = xi.position() - radius + shift;
-      const Matrix<int, N, 1> e =
-          xi.position() + radius + Matrix<int, N, 1>::Ones() + shift;
+      const Matrix<int, N, 1> s = xi.position() + shift;
+      const Matrix<int, N, 1> e = xi.position() + shift + kernel_sizes;
 
       auto p = Tensor_<T, N>{e - s};
       crop(p, infx, s, e);
-
+#ifdef DEBUG_IM2COL
+      std::cout << "p = " << xi.position().transpose() << std::endl;
+      std::cout << "s = " << s.transpose() << "    ";
+      std::cout << "e = " << e.transpose() << std::endl;
+      std::cout << "p.size() = " << p.size()
+                << " and col size = " << phi_x.matrix().col(c).size()
+                << std::endl;
+#endif
       phi_x.matrix().col(c) = p.vector();
     }
 
@@ -164,7 +180,11 @@ namespace DO { namespace Sara {
 
     // Rectify the proper kernel sizes for im2col as we did for im2row.
     const Matrix<int, N, 1> ksizes =
-        (Eigen::Matrix<int, N, 1>{} << 0, (k.sizes()).tail(N - 1)).finished();
+        (Eigen::Matrix<int, N, 1>{} << 1, (k.sizes()).tail(N - 1)).finished();
+
+    std::cout << "k.sizes()     = " << k.sizes().transpose() << std::endl;
+    std::cout << "x.sizes()     = " << x.sizes().transpose() << std::endl;
+    std::cout << "y.sizes()     = " << y.sizes().transpose() << std::endl;
 
     // Calculate the feature map.
     const auto phi_x = im2col(x, ksizes, padding, strides, offset);

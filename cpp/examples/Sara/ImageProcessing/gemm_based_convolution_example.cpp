@@ -87,29 +87,30 @@ void convolution_example_2()
   // Convolve the image using the GEMM BLAS routine.
   tic();
   im2row_gemm_convolve(
-      y1,                 // the output signal
-      x,                  // the signal
-      kt,                 // the transposed kernel.
-      PeriodicPadding{},  // the padding type
-      // make_constant_padding(0.f),      // the padding type
-      {1, kt.size(0), 1, 1},  // strides in the convolution
+      y1,                    // the output signal
+      x,                     // the signal
+      kt,                    // the transposed kernel.
+      PeriodicPadding{},     // the padding type
+      {1, x.size(1), 1, 1},  // strides in the convolution
       {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
   toc("im2row-based convolution");
 
   // Convolve the image using the GEMM BLAS routine.
   tic();
+  const auto r = -k.size(2) / 2;
+  const auto s = -k.size(3) / 2;
   im2col_gemm_convolve(
-      y2,                  // the output signal
-      x,                  // the signal
-      k,                  // the transposed kernel.
-      PeriodicPadding{},  // the padding type
-      // make_constant_padding(0.f),      // the padding type
-      {1, k.size(1), 1, 1},  // strides in the convolution
-      {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
+      y2,                    // the output signal
+      x,                     // the signal
+      k,                     // the transposed kernel.
+      PeriodicPadding{},     // the padding type
+      {3, x.size(1), 1, 1},  // strides in the convolution
+      {0, 0, r, s});  // pay attention to the offset here for the C dimension.
   toc("im2col-based convolution");
 
-  if ((y1.vector() - y2.vector()).squaredNorm() > std::numeric_limits<float>::epsilon())
-    throw std::runtime_error{"ERROR CALCULATION!"};
+  const auto diff = (y1.vector() - y2.vector()).squaredNorm();
+  if (diff > std::numeric_limits<float>::epsilon())
+    throw std::runtime_error{"ERROR CALCULATION! diff = " + std::to_string(diff)};
 
   // Transpose the tensor data back to NHWC storage order to view the image.
   y1 = y1.transpose({0, 2, 3, 1});

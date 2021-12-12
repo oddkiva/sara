@@ -35,7 +35,7 @@ namespace DO::Sara::Darknet {
       return line_trimmed;
     }
 
-    auto make_new_layer(const std::string& layer_type,
+    inline auto make_new_layer(const std::string& layer_type,
                         std::vector<std::unique_ptr<Layer>>& nodes) const
     {
       std::cout << "MAKING NEW LAYER: " << layer_type << std::endl;
@@ -56,7 +56,7 @@ namespace DO::Sara::Darknet {
       nodes.back()->type = layer_type;
     }
 
-    auto finish_layer_init(std::vector<std::unique_ptr<Layer>>& nodes) const
+    inline auto finish_layer_init(std::vector<std::unique_ptr<Layer>>& nodes) const
     {
       const auto& layer_type = nodes.back()->type;
       if (layer_type != "net")
@@ -82,7 +82,7 @@ namespace DO::Sara::Darknet {
       std::cout << *nodes.back() << std::endl;
     }
 
-    auto parse_config_file(const std::string& cfg_filepath) const
+    inline auto parse_config_file(const std::string& cfg_filepath) const
     {
       namespace fs = boost::filesystem;
 

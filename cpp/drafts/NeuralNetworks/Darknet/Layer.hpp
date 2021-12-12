@@ -29,9 +29,9 @@ namespace DO::Sara::Darknet {
 
   struct Input : Layer
   {
-    inline auto update_output_sizes() -> void
+    inline auto update_output_sizes(bool inference = true) -> void
     {
-      output_sizes << batch, 3, height, width;
+      output_sizes << (inference ? 1 : batch), 3, height, width;
     }
 
     inline auto parse_line(const std::string& line) -> void override
