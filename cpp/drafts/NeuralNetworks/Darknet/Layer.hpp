@@ -26,6 +26,8 @@ namespace DO::Sara::Darknet {
     std::string type;
     Eigen::Vector4i input_sizes = Eigen::Vector4i::Constant(-1);
     Eigen::Vector4i output_sizes = Eigen::Vector4i::Constant(-1);
+
+    Tensor_<float, 4> output;
   };
 
   struct Input : Layer
@@ -33,6 +35,7 @@ namespace DO::Sara::Darknet {
     inline auto update_output_sizes(bool inference = true) -> void
     {
       output_sizes << (inference ? 1 : batch), 3, height, width;
+      output.resize(output_sizes);
     }
 
     inline auto parse_line(const std::string& line) -> void override
@@ -81,6 +84,8 @@ namespace DO::Sara::Darknet {
       weights.scales.resize(num_filters);
       weights.rolling_mean.resize(num_filters);
       weights.rolling_variance.resize(num_filters);
+
+      output.resize(sizes);
     }
 
     inline virtual auto parse_line(const std::string&) -> void
@@ -148,6 +153,8 @@ namespace DO::Sara::Darknet {
       output_sizes = input_sizes;
       output_sizes[1] = filters;
       output_sizes.tail(2) /= stride;
+
+      output.resize(output_sizes);
     }
 
     inline auto parse_line(const std::string& line) -> void override
@@ -182,7 +189,7 @@ namespace DO::Sara::Darknet {
       os << "- pad            = " << pad << "\n";
       os << "- activation     = " << activation << "\n";
       os << "- input          = " << input_sizes.transpose() << "\n";
-      os << "- output         = " << output_sizes.transpose() << "\n";
+      os << "- output         = " << output_sizes.transpose();
     }
 
     inline auto load_weights(FILE* fp) -> void
@@ -251,6 +258,8 @@ namespace DO::Sara::Darknet {
       output_sizes[1] = channels;
 
       output_sizes[1] /= groups;
+
+      output.resize(output_sizes);
     }
 
     inline auto parse_line(const std::string& line) -> void override
@@ -286,7 +295,7 @@ namespace DO::Sara::Darknet {
       os << "- groups         = " << groups << "\n";
       os << "- group_id       = " << group_id << "\n";
       os << "- input          = " << input_sizes.transpose() << "\n";
-      os << "- output         = " << output_sizes.transpose() << "\n";
+      os << "- output         = " << output_sizes.transpose();
     }
   };
 
@@ -299,6 +308,8 @@ namespace DO::Sara::Darknet {
     {
       output_sizes = input_sizes;
       output_sizes.tail(2) /= stride;
+
+      output.resize(output_sizes);
     }
 
     inline auto parse_line(const std::string& line) -> void override
@@ -321,7 +332,7 @@ namespace DO::Sara::Darknet {
       os << "- size           = " << size << "\n";
       os << "- stride         = " << stride << "\n";
       os << "- input          = " << input_sizes.transpose() << "\n";
-      os << "- output         = " << output_sizes.transpose() << "\n";
+      os << "- output         = " << output_sizes.transpose();
     }
   };
 
@@ -333,6 +344,7 @@ namespace DO::Sara::Darknet {
     {
       output_sizes = input_sizes;
       output_sizes.tail(2) *= stride;
+      output.resize(output_sizes);
     }
 
     inline auto parse_line(const std::string& line) -> void override
@@ -352,7 +364,7 @@ namespace DO::Sara::Darknet {
     {
       os << "- stride         = " << stride << "\n";
       os << "- input          = " << input_sizes.transpose() << "\n";
-      os << "- output         = " << output_sizes.transpose() << "\n";
+      os << "- output         = " << output_sizes.transpose();
     }
   };
 
