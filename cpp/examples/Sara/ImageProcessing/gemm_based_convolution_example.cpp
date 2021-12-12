@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Core/MultiArray/InfiniteMultiArrayView.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
-#include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
@@ -41,7 +41,7 @@ void convolution_example()
   const auto kt = gaussian_tensor_nchw(4.f, 2);
 
   // Convolve the image using the GEMM BLAS routine.
-  auto y = gemm_convolve(
+  auto y = im2row_gemm_convolve(
       x,                  // the signal
       kt,                 // the transposed kernel.
       PeriodicPadding{},  // the padding type
@@ -78,14 +78,15 @@ void convolution_example_2()
                .transpose({0, 3, 1, 2});
 
   // Create the gaussian smoothing kernel for RGB color values.
-  const auto kt = gaussian_tensor_nchw(4.f, 2);
+  const auto kt = gaussian_tensor_nchw(1.2f, 2);
   const auto k = kt.transpose({3, 0, 1, 2});
 
   auto y1 = x;
   auto y2 = x;
 
   // Convolve the image using the GEMM BLAS routine.
-  gemm_convolve(
+  tic();
+  im2row_gemm_convolve(
       y1,                 // the output signal
       x,                  // the signal
       kt,                 // the transposed kernel.
@@ -93,9 +94,11 @@ void convolution_example_2()
       // make_constant_padding(0.f),      // the padding type
       {1, kt.size(0), 1, 1},  // strides in the convolution
       {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
+  toc("im2row-based convolution");
 
   // Convolve the image using the GEMM BLAS routine.
-  gemm_convolve_2(
+  tic();
+  im2col_gemm_convolve(
       y2,                  // the output signal
       x,                  // the signal
       k,                  // the transposed kernel.
@@ -103,6 +106,7 @@ void convolution_example_2()
       // make_constant_padding(0.f),      // the padding type
       {1, k.size(1), 1, 1},  // strides in the convolution
       {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
+  toc("im2col-based convolution");
 
   if ((y1.vector() - y2.vector()).squaredNorm() > std::numeric_limits<float>::epsilon())
     throw std::runtime_error{"ERROR CALCULATION!"};

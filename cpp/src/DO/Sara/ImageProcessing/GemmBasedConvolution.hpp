@@ -77,9 +77,7 @@ namespace DO { namespace Sara {
       -> Tensor_<T, 2>
   {
     // Pad sizes must be odd.
-    const Matrix<int, N, 1> radius =
-        (Eigen::Matrix<int, N, 1>{} << 0, (kernel_sizes / 2).tail(N - 1))
-            .finished();
+    const Matrix<int, N, 1> radius = kernel_sizes / 2;
     const Matrix<int, N, 1> begin = Matrix<int, N, 1>::Zero();
     const Matrix<int, N, 1> end = x.sizes();
 
@@ -122,13 +120,13 @@ namespace DO { namespace Sara {
    *  - NCTDHW  3d video interleaved planar data.
    */
   template <typename T, int N, typename Padding>
-  void
-  gemm_convolve(TensorView_<T, N>& y,                   //
-                const TensorView_<T, N>& x,             //
-                const TensorView_<T, N>& k_transposed,  //
-                const Padding& padding,                 //
-                const Matrix<int, N, 1>& strides,
-                const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
+  void im2row_gemm_convolve(
+      TensorView_<T, N>& y,                   //
+      const TensorView_<T, N>& x,             //
+      const TensorView_<T, N>& k_transposed,  //
+      const Padding& padding,                 //
+      const Matrix<int, N, 1>& strides,
+      const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
   {
     const auto& kt_ = k_transposed;
     Matrix<int, N, 1> k_sizes;
@@ -140,8 +138,8 @@ namespace DO { namespace Sara {
     const auto kcols = k_sizes[0];
     const auto kt = k_transposed.reshape(Vector2i{krows, kcols});
 
-    // calculate the feature maps for each nd-pixel.
-    k_sizes[0] = 1;
+    // Calculate the feature maps for each nd-pixel.
+    k_sizes[0] = 1; // Rectify
     const auto phi_x = im2row(x, k_sizes, padding, strides, offset);
 
     y.colmajor_view()                                                  //
@@ -150,13 +148,13 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N, typename Padding>
-  void
-  gemm_convolve_2(TensorView_<T, N>& y,        //
-                  const TensorView_<T, N>& x,  //
-                  const TensorView_<T, N>& k,  //
-                  const Padding& padding,      //
-                  const Matrix<int, N, 1>& strides,
-                  const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
+  void im2col_gemm_convolve(
+      TensorView_<T, N>& y,        //
+      const TensorView_<T, N>& x,  //
+      const TensorView_<T, N>& k,  //
+      const Padding& padding,      //
+      const Matrix<int, N, 1>& strides,
+      const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
   {
     // Determine the sizes of the kernel.
     const auto krows = k.sizes()(0);
@@ -164,46 +162,35 @@ namespace DO { namespace Sara {
                                        std::multiplies<int>());
     const auto k_ = k.reshape(Vector2i{krows, kcols});
 
-    const auto phi_x = im2col(x, k.sizes(), padding, strides, offset);
+    // Rectify the proper kernel sizes for im2col as we did for im2row.
+    const Matrix<int, N, 1> ksizes =
+        (Eigen::Matrix<int, N, 1>{} << 0, (k.sizes()).tail(N - 1)).finished();
+
+    // Calculate the feature map.
+    const auto phi_x = im2col(x, ksizes, padding, strides, offset);
 
     y.reshape(Vector2i{k_.matrix().rows(), phi_x.matrix().cols()}).matrix() =
         k_.matrix() * phi_x.matrix();
   }
 
   template <typename T, int N, typename Padding>
-  auto
-  gemm_convolve(const TensorView_<T, N>& x,             //
-                const TensorView_<T, N>& k_transposed,  //
-                const Padding& padding,                 //
-                const Matrix<int, N, 1>& strides,
-                const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
+  auto im2row_gemm_convolve(
+      const TensorView_<T, N>& x,             //
+      const TensorView_<T, N>& k_transposed,  //
+      const Padding& padding,                 //
+      const Matrix<int, N, 1>& strides,
+      const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())  //
       -> Tensor_<T, N>
   {
-    const auto& kt_ = k_transposed;
-    Matrix<int, N, 1> k_sizes;
-    k_sizes << kt_.sizes()[N - 1], kt_.sizes().head(N - 1);
-
-    // Determine the sizes of the kernel.
-    const auto krows = std::accumulate(k_sizes.data() + 1, k_sizes.data() + N,
-                                       1, std::multiplies<int>());
-    const auto kcols = k_sizes[0];
-    auto kt = k_transposed.reshape(Vector2i{krows, kcols});
-
-    // calculate the feature maps for each nd-pixel.
-    k_sizes[0] = 1;
-    const auto phi_x = im2row(x, k_sizes, padding, strides, offset);
-
     // Determine the sizes of the convolutional output.
     auto y_sizes =
         x.begin_stepped_subarray(Matrix<int, N, 1>::Zero(), x.sizes(), strides)
             .stepped_subarray_sizes();
-    y_sizes[1] = kcols;
+    y_sizes[1] = k_transposed.size(N - 1);
 
     // Perform the convolution.
     auto y = Tensor_<T, N>{y_sizes};
-    y.colmajor_view()                                                  //
-        .reshape(Vector2i{phi_x.matrix().rows(), kt.matrix().cols()})  //
-        .matrix() = phi_x.matrix() * kt.matrix();
+    im2row_gemm_convolve(y, x, k_transposed, padding, strides, offset);
 
     return y;
   }
