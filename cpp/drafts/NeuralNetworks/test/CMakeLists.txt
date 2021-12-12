@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core REQUIRED)
+find_package(DO_Sara COMPONENTS Core ImageIO REQUIRED)
 
 find_package(TensorRT)
 
