@@ -48,12 +48,13 @@ BOOST_AUTO_TEST_CASE(test_im2row_on_nhw_tensor)
   auto im2row_out_as_3d =
     im2row_iterated.reshape(Vector3i{N, H * W, kH * kW});
 
-  im2row_out_as_3d[0] = im2row(x[0], {kH, kW}, make_constant_padding(0.f));
-  im2row_out_as_3d[1] = im2row(x[1], {kH, kW}, make_constant_padding(0.f));
-  im2row_out_as_3d[2] = im2row(x[2], {kH, kW}, make_constant_padding(0.f));
+  im2row_out_as_3d[0] = im2row(x[0], {kH, kW}, make_constant_padding(0.f), {1, 1}, {-1, -1});
+  im2row_out_as_3d[1] = im2row(x[1], {kH, kW}, make_constant_padding(0.f), {1, 1}, {-1, -1});
+  im2row_out_as_3d[2] = im2row(x[2], {kH, kW}, make_constant_padding(0.f), {1, 1}, {-1, -1});
 
   // Apply im2row on the whole batch.
-  auto im2row_batched = im2row(x, {1, kH, kW}, make_constant_padding(0.f));
+  auto im2row_batched = im2row(x, {1, kH, kW}, make_constant_padding(0.f),
+                               {1, 1, 1}, {0, -1, -1});
 
   BOOST_CHECK(im2row_iterated.sizes() == im2row_batched.sizes());
   BOOST_CHECK(im2row_iterated.matrix() == im2row_batched.matrix());
@@ -70,14 +71,14 @@ BOOST_AUTO_TEST_CASE(test_im2row_on_nhw_tensor)
     4, 5, 0;
   //                      n  y  x
   BOOST_CHECK(phi_x_as_5d[0][0][2].matrix() == true_neighborhood);
-  //cout << phi_x_as_5d[0][0][2].matrix() << endl << endl;
+  // cout << phi_x_as_5d[0][0][2].matrix() << endl << endl;
 
   true_neighborhood <<
     0, 0, 0,
     0, 0, 2,
     0, 6, 8;
   BOOST_CHECK(phi_x_as_5d[1][0][0].matrix() == true_neighborhood);
-  //cout << phi_x_as_5d[1][0][0].matrix() << endl << endl;
+  // cout << phi_x_as_5d[1][0][0].matrix() << endl << endl;
 
   true_neighborhood <<
     2 * 3, 2 * 4, 2 * 5,
@@ -154,11 +155,10 @@ BOOST_AUTO_TEST_CASE(test_im2row_on_nhwc_tensor)
   //  [(y  , x  , c), (y  , x  , c+1), (y  , x  , c+2)],
   //  [(y  , x+1, c), (y  , x+1, c+1), (y  , x+1, c+2)]],
   const auto phi_x = im2row(x, {1, kH, kW, kC}, make_constant_padding(0.f),
-                            {1, 1, 1, 3}, {0, 0, 0, 1});
+                            {1, 1, 1, 3}, {0, -1, -1, 0});
   BOOST_CHECK(phi_x.sizes() == Vector2i(N * H * W, kH * kW * kC));
 
-  auto sizes_6d = Matrix<int, 6, 1>{};
-  sizes_6d << N, H, W, kH, kW, kC;
+  const auto sizes_6d = (Matrix<int, 6, 1>{} << N, H, W, kH, kW, kC).finished();
   auto phi_x_as_6d = phi_x.reshape(sizes_6d);
 
   auto true_neighborhood = Tensor_<float, 3>(kH, kW, kC);
@@ -199,10 +199,10 @@ BOOST_AUTO_TEST_CASE(test_compare_im2row_transpose_and_im2col)
   constexpr auto kC = 3;
 
   const auto phi_x = im2row(x, {1, kH, kW, kC}, make_constant_padding(0.f),
-                            {1, 1, 1, 3}, {0, 0, 0, 1});
+                            {1, 1, 1, C}, {0, -kH / 2, -kW / 2, 0});
   const auto phi_x_transpose =
-      im2col(x, {1, kH, kW, kC}, make_constant_padding(0.f), {1, 1, 1, 3},
-             {0, -1, -1, 0});
+      im2col(x, {1, kH, kW, kC}, make_constant_padding(0.f), {1, 1, 1, C},
+             {0, -kH / 2, -kW / 2, 0});
 
   const auto difference = phi_x.matrix().transpose() - phi_x_transpose.matrix();
   BOOST_CHECK((difference.array() == 0).all());
@@ -229,8 +229,8 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)
   constexpr auto kW = 3;
   constexpr auto kC = 3;
 
-  auto phi_x = im2row(x, {1, kH, kW, kC}, make_constant_padding(0.f),
-                      {1, 1, 1, kC}, {0, 0, 0, 1});
+  const auto phi_x = im2row(x, {1, kH, kW, kC}, make_constant_padding(0.f),
+                            {1, 1, 1, kC}, {0, -kH / 2, -kW / 2, 0});
 
   Tensor_<float, 2> k{{kH * kW * kC, kC}};
 
@@ -301,9 +301,8 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nchw_tensor)
   constexpr auto kW = 3;
   constexpr auto kC = 3;
 
-
-  auto phi_x = im2row(x, {N, kC, kH, kW}, make_constant_padding(0.f),
-                      {1, kC, 1, 1}, {0, 1, 0, 0});
+  const auto phi_x = im2row(x, {N, kC, kH, kW}, make_constant_padding(0.f),
+                            {1, kC, 1, 1}, {0, 0, -kH / 2, -kW / 2});
   // [N * C/kC * H/kH * W/kW, kC * kH * kW]
   // cout << phi_x.matrix() << endl;
 

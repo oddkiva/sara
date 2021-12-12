@@ -41,13 +41,12 @@ void convolution_example()
   const auto kt = gaussian_tensor_nchw(4.f, 2);
 
   // Convolve the image using the GEMM BLAS routine.
-  auto y = im2row_gemm_convolve(
-      x,                  // the signal
-      kt,                 // the transposed kernel.
-      PeriodicPadding{},  // the padding type
-      // make_constant_padding(0.f),      // the padding type
-      {1, kt.size(0), 1, 1},  // strides in the convolution
-      {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
+  auto y = im2row_gemm_convolve(                  //
+      x,                                          // the signal
+      kt,                                         // the transposed kernel.
+      PeriodicPadding{},                          // the padding type
+      {1, kt.size(0), 1, 1},                      // strides in the convolution
+      {0, 0, -kt.size(2) / 2, -kt.size(3) / 2});  // offset
   // Transpose the tensor data back to NHWC storage order to view the image.
   y = y.transpose({0, 2, 3, 1});
 
@@ -81,6 +80,9 @@ void convolution_example_2()
   const auto kt = gaussian_tensor_nchw(1.2f, 2);
   const auto k = kt.transpose({3, 0, 1, 2});
 
+  const auto r = -k.size(2) / 2;
+  const auto s = -k.size(3) / 2;
+
   auto y1 = x;
   auto y2 = x;
 
@@ -92,13 +94,11 @@ void convolution_example_2()
       kt,                    // the transposed kernel.
       PeriodicPadding{},     // the padding type
       {1, x.size(1), 1, 1},  // strides in the convolution
-      {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
+      {0, 0, r, s});  // pay attention to the offset here for the C dimension.
   toc("im2row-based convolution");
 
   // Convolve the image using the GEMM BLAS routine.
   tic();
-  const auto r = -k.size(2) / 2;
-  const auto s = -k.size(3) / 2;
   im2col_gemm_convolve(
       y2,                    // the output signal
       x,                     // the signal

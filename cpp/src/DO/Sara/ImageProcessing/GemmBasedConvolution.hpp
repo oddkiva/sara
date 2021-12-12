@@ -31,7 +31,6 @@ namespace DO { namespace Sara {
       -> Tensor_<T, 2>
   {
     // Pad sizes must be odd.
-    const Matrix<int, N, 1> radius = kernel_sizes / 2;
     const Matrix<int, N, 1> begin = Matrix<int, N, 1>::Zero();
     const Matrix<int, N, 1> end = x.sizes();
 
@@ -52,9 +51,8 @@ namespace DO { namespace Sara {
 
     for (int r = 0; !xi.end(); ++xi, ++r)
     {
-      const Matrix<int, N, 1> s = xi.position() - radius + shift;
-      const Matrix<int, N, 1> e =
-          xi.position() + radius + Matrix<int, N, 1>::Ones() + shift;
+      const Matrix<int, N, 1> s = xi.position() + shift;
+      const Matrix<int, N, 1> e = xi.position() + kernel_sizes + shift;
 
       auto p = Tensor_<T, N>{e - s};
       crop(p, infx, s, e);
@@ -182,9 +180,11 @@ namespace DO { namespace Sara {
     const Matrix<int, N, 1> ksizes =
         (Eigen::Matrix<int, N, 1>{} << 1, (k.sizes()).tail(N - 1)).finished();
 
+#ifdef DEBUG_IM2COL
     std::cout << "k.sizes()     = " << k.sizes().transpose() << std::endl;
     std::cout << "x.sizes()     = " << x.sizes().transpose() << std::endl;
     std::cout << "y.sizes()     = " << y.sizes().transpose() << std::endl;
+#endif
 
     // Calculate the feature map.
     const auto phi_x = im2col(x, ksizes, padding, strides, offset);
