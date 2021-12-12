@@ -10,6 +10,8 @@
 // ========================================================================== //
 
 #include <DO/Sara/Core.hpp>
+#include <DO/Sara/Core/MultiArray/Slice.hpp>
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
@@ -21,7 +23,14 @@
 namespace sara = DO::Sara;
 
 
-GRAPHICS_MAIN()
+int main(int argc, char** argv)
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
+}
+
+int __main(int argc, char** argv)
 {
   namespace fs = boost::filesystem;
 
@@ -33,34 +42,42 @@ GRAPHICS_MAIN()
       data_dir_path / "trained_models" / "yolov4-tiny.weights";
 
   auto net = sara::Darknet::NetworkParser{}.parse_config_file(cfg_filepath.string());
+  using Net = decltype(net);
   sara::Darknet::NetworkWeightLoader{weights_filepath.string()}.load(net);
 
-  const auto image = sara::imread<sara::Rgb32f>((data_dir_path / "GuardOnBlonde.tif").string());
+  const auto image = argc < 2
+                         ? sara::imread<sara::Rgb32f>(
+                               (data_dir_path / "GuardOnBlonde.tif").string())
+                         : sara::imread<sara::Rgb32f>(argv[1]);
   sara::create_window(image.sizes());
   sara::display(image);
-  // sara::get_key();
 
   // Resize the image to the network input sizes.
   // TODO: optimize later.
   const auto& input_layer = dynamic_cast<const sara::Darknet::Input &>(*net.front());
   const auto image_resized = sara::resize(image, {input_layer.width, input_layer.height});
   sara::display(image_resized);
-  // sara::get_key();
 
   // Create the gaussian smoothing kernel for RGB color values.
   const auto& conv_1 = dynamic_cast<const sara::Darknet::Convolution&>(*net[1]);
   const auto& conv_2 = dynamic_cast<const sara::Darknet::Convolution&>(*net[2]);
   const auto& conv_3 = dynamic_cast<const sara::Darknet::Convolution&>(*net[3]);
+  const auto& route = dynamic_cast<const sara::Darknet::Route&>(*net[4]);
+  const auto& conv_4 = dynamic_cast<const sara::Darknet::Convolution&>(*net[5]);
+  const auto& conv_5 = dynamic_cast<const sara::Darknet::Convolution&>(*net[6]);
+
 
   // Implement the convolutional forward function.
-  auto forward = [](const auto& conv_layer, const auto& x, auto& y) {
-    const auto& w = conv_layer.weights.w;
-    const auto& b = conv_layer.weights.b;
-    const auto& stride = conv_layer.stride;
-    std::cout << "Forwarding to\n" << conv_layer << std::endl;
+  auto forward_to_conv = [](const auto& conv, const auto& x, auto& y) {
+    const auto& w = conv.weights.w;
+    const auto& b = conv.weights.b;
+    const auto& stride = conv.stride;
+    std::cout << "Forwarding to\n" << conv << std::endl;
+
+    sara::tic();
 
     // Convolve.
-    im2col_gemm_convolve(
+    sara::im2col_gemm_convolve(
         y,
         x,                                       // the signal
         w,                                       // the transposed kernel.
@@ -73,16 +90,55 @@ GRAPHICS_MAIN()
       for (auto c = 0; c < y.size(1); ++c)
         y[n][c].flat_array() += b(c);
 
-    // TODO: activation.
-    // y.flat_array() = ...
+    if (conv.activation != "leaky")
+      throw std::runtime_error{"Unsupported activation!"};
+
+    // Leaky activation.
+    y.cwise_transform_inplace([](float& x) {
+      if (x < 0)
+        x *= 0.1f;
+    });
+
+    sara::toc("Convoluation Forward Pass");
   };
 
-  auto visualize = [](const auto& y) {
+  auto forward_to_route = [](const sara::Darknet::Route& route,
+                             const sara::Tensor_<float, 4>& x,
+                             sara::Tensor_<float, 4>& y) {
+    sara::tic();
+    if (route.layers.size() != 1)
+      throw std::runtime_error{"Route layer implementation incomplete!"};
+
+    const auto start = (Eigen::Vector4i{} << 0,
+                        route.group_id * (x.size(1) / route.groups), 0, 0)
+                           .finished();
+    const auto end = x.sizes();
+#ifdef DEBUG_ROUTE
+    std::cout << "start = " << start.transpose() << std::endl;
+    std::cout << "end   = " << end.transpose() << std::endl;
+#endif
+
+    y = sara::slice(x,
+                    {
+                        {start(0), end(0), 1},
+                        {start(1), end(1), 1},
+                        {start(2), end(2), 1},
+                        {start(3), end(3), 1},  //
+                    })
+            .make_copy();
+#ifdef DEBUG_ROUTE
+    std::cout << "y sizes = " << y.sizes().transpose() << std::endl;
+#endif
+
+    sara::toc("Route Forward Pass");
+  };
+
+  auto visualize = [](const auto& y, const auto& sizes) {
     for (auto i = 0; i < y.size(1); ++i)
     {
       const auto y_i = y[0][i];
       const auto im_i = sara::image_view(y_i);
-      const auto im_i_rescaled = sara::color_rescale(im_i);
+      const auto im_i_rescaled = sara::resize(sara::color_rescale(im_i), sizes);
       sara::display(im_i_rescaled);
       sara::get_key();
     }
@@ -95,20 +151,30 @@ GRAPHICS_MAIN()
                      .reshape(Eigen::Vector4i{1, image_resized.height(),
                                               image_resized.width(), 3})
                      .transpose({0, 3, 1, 2});
+  const auto x_sizes =
+      Eigen::Vector2i{image_resized.width(), image_resized.height()};
 
   // Intermediate inputs
   auto y1 = sara::Tensor_<float, 4>{conv_1.output_sizes};
   auto y2 = sara::Tensor_<float, 4>{conv_2.output_sizes};
   auto y3 = sara::Tensor_<float, 4>{conv_3.output_sizes};
+  auto y4 = sara::Tensor_<float, 4>{route.output_sizes};
+  auto y5 = sara::Tensor_<float, 4>{conv_4.output_sizes};
+  auto y6 = sara::Tensor_<float, 4>{conv_5.output_sizes};
 
-  forward(conv_1, x, y1);
-  // visualize(y1);
+  forward_to_conv(conv_1, x, y1);
+  forward_to_conv(conv_2, y1, y2);
+  forward_to_conv(conv_3, y2, y3);
+  forward_to_route(route, y3, y4);
+  forward_to_conv(conv_4, y4, y5);
+  forward_to_conv(conv_5, y5, y6);
 
-  forward(conv_2, y1, y2);
-  visualize(y2);
-
-  // forward(conv_3, y2, y3);
-  // visualize(y3);
+  // visualize(y1, x_sizes);
+  // visualize(y2, x_sizes);
+  // visualize(y3, x_sizes);
+  // visualize(y4, x_sizes);
+  // visualize(y5, x_sizes);
+  visualize(y6, x_sizes);
 
   return 0;
 }

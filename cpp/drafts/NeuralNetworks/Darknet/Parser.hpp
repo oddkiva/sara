@@ -149,6 +149,8 @@ namespace DO::Sara::Darknet {
     uint64_t seen;
     int transpose;
 
+    bool debug = false;
+
     inline NetworkWeightLoader() = default;
 
     inline NetworkWeightLoader(const std::string& filepath)
@@ -162,20 +164,23 @@ namespace DO::Sara::Darknet {
       fread(&revision, sizeof(int), 1, fp);
       if ((major * 10 + minor) >= 2)
       {
-        printf("\n seen 64");
+        if (debug)
+          printf("\n seen 64");
         uint64_t iseen = 0;
         fread(&iseen, sizeof(uint64_t), 1, fp);
         seen = iseen;
       }
       else
       {
-        printf("\n seen 32");
+        if (debug)
+          printf("\n seen 32");
         uint32_t iseen = 0;
         fread(&iseen, sizeof(uint32_t), 1, fp);
         seen = iseen;
       }
-      printf(", trained: %.0f K-images (%.0f Kilo-batches_64) \n",
-             (float) (seen / 1000), (float) (seen / 64000));
+      if (debug)
+        printf(", trained: %.0f K-images (%.0f Kilo-batches_64) \n",
+               (float) (seen / 1000), (float) (seen / 64000));
       transpose = (major > 1000) || (minor > 1000);
     }
 
@@ -194,8 +199,9 @@ namespace DO::Sara::Darknet {
       {
         if (auto d = dynamic_cast<Convolution*>(layer.get()))
         {
-          std::cout << "LOADING WEIGHTS FOR CONVOLUTIONAL LAYER:\n"
-                    << *layer << std::endl;
+          if (debug)
+            std::cout << "LOADING WEIGHTS FOR CONVOLUTIONAL LAYER:\n"
+                      << *layer << std::endl;
           d->load_weights(fp);
         }
       }

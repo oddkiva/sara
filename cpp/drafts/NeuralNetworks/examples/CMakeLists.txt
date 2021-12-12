@@ -9,6 +9,10 @@ foreach (file ${neuralnetworks_SOURCE_FILES})
     PRIVATE
     ${DO_Sara_LIBRARIES}
     ${Boost_LIBRARIES})
+  set_target_properties(${filename}
+      PROPERTIES
+      COMPILE_FLAGS ${SARA_DEFINITIONS}
+      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
   set_property(TARGET ${filename}
     PROPERTY
     FOLDER "DRAFTS/NeuralNetworks")

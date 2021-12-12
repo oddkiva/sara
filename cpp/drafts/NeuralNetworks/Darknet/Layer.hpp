@@ -22,6 +22,7 @@ namespace DO::Sara::Darknet {
       return os;
     }
 
+    bool debug = false;
     std::string type;
     Eigen::Vector4i input_sizes = Eigen::Vector4i::Constant(-1);
     Eigen::Vector4i output_sizes = Eigen::Vector4i::Constant(-1);
@@ -95,22 +96,26 @@ namespace DO::Sara::Darknet {
 
     inline auto load_weights(FILE* fp) -> void
     {
-      std::cout << "Loading BN scales: " << weights.scales.size() << std::endl;
+      if (debug)
+        std::cout << "Loading BN scales: " << weights.scales.size()
+                  << std::endl;
       const auto scales_count = fread(weights.scales.data(), sizeof(float),
                                       weights.scales.size(), fp);
       if (Eigen::Index(scales_count) != weights.scales.size())
         throw std::runtime_error{"Failed to read BN scales!"};
 
-      std::cout << "Loading BN rolling mean: " << weights.rolling_mean.size()
-                << std::endl;
+      if (debug)
+        std::cout << "Loading BN rolling mean: " << weights.rolling_mean.size()
+                  << std::endl;
       const auto rolling_mean_count =
           fread(weights.rolling_mean.data(), sizeof(float),
                 weights.rolling_mean.size(), fp);
       if (Eigen::Index(rolling_mean_count) != weights.rolling_mean.size())
         throw std::runtime_error{"Failed to read BN rolling mean!"};
 
-      std::cout << "Loading BN rolling variance: "
-                << weights.rolling_variance.size() << std::endl;
+      if (debug)
+        std::cout << "Loading BN rolling variance: "
+                  << weights.rolling_variance.size() << std::endl;
       const auto rolling_variance_count =
           fread(weights.rolling_variance.data(), sizeof(float),
                 weights.rolling_variance.size(), fp);
@@ -191,8 +196,11 @@ namespace DO::Sara::Darknet {
           fread(weights.b.data(), sizeof(float), weights.b.size(), fp);
       if (Eigen::Index(bias_weight_count) != weights.b.size())
         throw std::runtime_error{"Failed to read bias weights!"};
-      std::cout << "Loading Conv B: " << weights.b.size() << std::endl;
-      // std::cout << weights.b.transpose() << std::endl;
+      if (debug)
+      {
+        std::cout << "Loading Conv B: " << weights.b.size() << std::endl;
+        // std::cout << weights.b.transpose() << std::endl;
+      }
 
       // 2. Batch normalization weights.
       if (batch_normalize)
@@ -204,14 +212,15 @@ namespace DO::Sara::Darknet {
 
       // 3. Convolution kernel weights.
       weights.w.resize({filters, input_sizes(1), size, size});
-      std::cout << "Loading Conv W: " << weights.w.sizes().transpose()
-                << std::endl;
+      if (debug)
+        std::cout << "Loading Conv W: " << weights.w.sizes().transpose()
+                  << std::endl;
       const auto kernel_weight_count =
           fread(weights.w.data(), sizeof(float), weights.w.size(), fp);
       if (kernel_weight_count != weights.w.size())
         throw std::runtime_error{"Failed to read kernel weights!"};
-      // TODO: transpose the kernel.
-      // std::cout << weights.w.flat_array() << std::endl;
+
+      // TODO: transpose the kernel if needed.
     }
   };
 
