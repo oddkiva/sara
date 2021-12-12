@@ -337,18 +337,6 @@ namespace DO { namespace Sara {
     // (kh, kw) o (h, w)  = (kh * h, kw * w).
     auto y = Tensor_<float, 3>{{d, kh * h, kw * w}};
 
-    // Input block from (u, v) to (u + 1, v + 1).
-    auto x_block = Tensor_<float, 2>{{2, 2}};
-    // Output block from (kw * u, kh * v) -> (kw * (u + 1), kh * (v + 1)).
-    auto y_block = Tensor_<float, 2>{{kh, kw}};
-
-    // The input and output blocks viewed as 2D matrices.
-    auto x_block_matrix = x_block.matrix();
-    auto y_block_matrix = y_block.matrix();
-    // The input and output blocks viewed as column vectors.
-    auto x_vectorized = x_block.vector();
-    auto y_vectorized = y_block.vector();
-
     // For cache-friendliness, proceed in this order.
     for (int c = 0; c < d; ++c)
     {
@@ -358,6 +346,20 @@ namespace DO { namespace Sara {
 #pragma omp parallel for
       for (int vu = 0; vu < h * w; ++vu)
       {
+        // Input block from (u, v) to (u + 1, v + 1).
+        auto x_array = std::array<float, 4>{};
+        auto x_block = TensorView_<float, 2>{x_array.data(), {2, 2}};
+
+        // Output block from (kw * u, kh * v) -> (kw * (u + 1), kh * (v + 1)).
+        auto y_block = Tensor_<float, 2>{{kh, kw}};
+
+        // The input and output blocks viewed as 2D matrices.
+        auto x_block_matrix = x_block.matrix();
+
+        // The input and output blocks viewed as column vectors.
+        auto x_vectorized = x_block.vector();
+        auto y_vectorized = y_block.vector();
+
         const auto v = vu / w;
         const auto u = vu - v * w;
         // For each channel, grab a (2, 2) input block with top-left corner
@@ -367,6 +369,7 @@ namespace DO { namespace Sara {
         // Calculate the (kw, kh) output block with top-left corner
         // (kw * u, kh * v).
         y_vectorized = K_matrix * x_vectorized;
+        const auto y_block_matrix = y_block.matrix();
 
         // Store the result into the output.
         y_slice.block(kh * v, kw * u, kh, kw) = y_block_matrix;
