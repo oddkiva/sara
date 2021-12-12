@@ -153,8 +153,8 @@ BOOST_AUTO_TEST_CASE(test_im2row_on_nhwc_tensor)
   // [[(y  , x-1, c), (y  , x-1, c+1), (y  , x-1, c+2)],
   //  [(y  , x  , c), (y  , x  , c+1), (y  , x  , c+2)],
   //  [(y  , x+1, c), (y  , x+1, c+1), (y  , x+1, c+2)]],
-  auto phi_x = im2row(x, {1, kH, kW, kC}, make_constant_padding(0.f),
-                      {1, 1, 1, 3}, {0, 0, 0, 1});
+  const auto phi_x = im2row(x, {1, kH, kW, kC}, make_constant_padding(0.f),
+                            {1, 1, 1, 3}, {0, 0, 0, 1});
   BOOST_CHECK(phi_x.sizes() == Vector2i(N * H * W, kH * kW * kC));
 
   auto sizes_6d = Matrix<int, 6, 1>{};
@@ -175,6 +175,37 @@ BOOST_AUTO_TEST_CASE(test_im2row_on_nhwc_tensor)
     0,0,0, 3,3,3, 4,4,4;
   BOOST_CHECK(phi_x_as_6d[0][0][0] == true_neighborhood);
   //print_3d_array(phi_x_as_6d[0][0][0]);
+}
+
+BOOST_AUTO_TEST_CASE(test_compare_im2row_transpose_and_im2col)
+{
+  constexpr auto N = 1;
+  constexpr auto H = 4;
+  constexpr auto W = 3;
+  constexpr auto C = 3;
+  auto x = Tensor_<float, 4>{{N, H, W, C}};
+
+  x[0].flat_array() <<
+    0,0,0,  1, 1, 1,  2, 2, 2,
+    3,3,3,  4, 4, 4,  5, 5, 5,
+    6,6,6,  7, 7, 7,  8, 8, 8,
+    9,9,9, 10,10,10, 11,11,11;
+
+  for (int i = 1; i < N; ++i)
+    x[i].flat_array() = x[0].flat_array(); //(i + 1) * x[i - 1].flat_array();
+
+  constexpr auto kH = 3;
+  constexpr auto kW = 3;
+  constexpr auto kC = 3;
+
+  const auto phi_x = im2row(x, {1, kH, kW, kC}, make_constant_padding(0.f),
+                            {1, 1, 1, 3}, {0, 0, 0, 1});
+  const auto phi_x_transpose =
+      im2col(x, {1, kH, kW, kC}, make_constant_padding(0.f), {1, 1, 1, 3},
+             {0, 0, 0, 1});
+
+  const auto difference = phi_x.matrix().transpose() - phi_x_transpose.matrix();
+  BOOST_CHECK((difference.array() == 0).all());
 }
 
 BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)

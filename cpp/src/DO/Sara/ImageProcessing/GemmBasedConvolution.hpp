@@ -36,7 +36,7 @@ namespace DO { namespace Sara {
     const Matrix<int, N, 1> end = x.sizes();
 
     // Initialize the strided subarray iterator.
-    auto infx = make_infinite(x, padding);
+    const auto infx = make_infinite(x, padding);
     auto xi = infx.begin_stepped_subarray(begin, end, strides);
 
     const auto sizes = xi.stepped_subarray_sizes();
@@ -77,21 +77,22 @@ namespace DO { namespace Sara {
       -> Tensor_<T, 2>
   {
     // Pad sizes must be odd.
-    const Matrix<int, N, 1> radius = kernel_sizes / 2;
+    const Matrix<int, N, 1> radius =
+        (Eigen::Matrix<int, N, 1>{} << 0, (kernel_sizes / 2).tail(N - 1))
+            .finished();
     const Matrix<int, N, 1> begin = Matrix<int, N, 1>::Zero();
     const Matrix<int, N, 1> end = x.sizes();
 
     // Initialize the strided subarray iterator.
-    auto infx = make_infinite(x, padding);
+    const auto infx = make_infinite(x, padding);
     auto xi = infx.begin_stepped_subarray(begin, end, strides);
 
-    const auto sizes = xi.stepped_subarray_sizes();
-
     // Compute the matrix dimensions.
+    const auto sizes = xi.stepped_subarray_sizes();
     const auto num_cols = std::accumulate(
         sizes.data(), sizes.data() + sizes.size(), 1, std::multiplies<int>());
     const auto num_rows =
-        std::accumulate(kernel_sizes.data(), kernel_sizes.data() + N, 1,
+        std::accumulate(kernel_sizes.data() + 1, kernel_sizes.data() + N, 1,
                         std::multiplies<int>());
 
     auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
@@ -137,7 +138,7 @@ namespace DO { namespace Sara {
     const auto krows = std::accumulate(k_sizes.data() + 1, k_sizes.data() + N, 1,
                                        std::multiplies<int>());
     const auto kcols = k_sizes[0];
-    auto kt = k_transposed.reshape(Vector2i{krows, kcols});
+    const auto kt = k_transposed.reshape(Vector2i{krows, kcols});
 
     // calculate the feature maps for each nd-pixel.
     k_sizes[0] = 1;
@@ -157,10 +158,16 @@ namespace DO { namespace Sara {
                   const Matrix<int, N, 1>& strides,
                   const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
   {
-    const auto phi_x = im2col(x, k, padding, strides, offset);
+    // Determine the sizes of the kernel.
+    const auto krows = k.sizes()(0);
+    const auto kcols = std::accumulate(k.sizes().data() + 1, k.sizes().data() + N, 1,
+                                       std::multiplies<int>());
+    const auto k_ = k.reshape(Vector2i{krows, kcols});
 
-    y.reshape(Vector2i{phi_x.matrix().rows(), k.matrix().cols()}).matrix() =
-        k.matrix() * phi_x.matrix();
+    const auto phi_x = im2col(x, k.sizes(), padding, strides, offset);
+
+    y.reshape(Vector2i{k_.matrix().rows(), phi_x.matrix().cols()}).matrix() =
+        k_.matrix() * phi_x.matrix();
   }
 
   template <typename T, int N, typename Padding>
