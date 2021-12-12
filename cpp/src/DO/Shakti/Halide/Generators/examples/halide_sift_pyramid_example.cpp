@@ -133,6 +133,8 @@ auto test_on_video(int argc, char **argv)
                : std::string{argv[1]};
 #endif
 
+  const auto draw_sift_features = argc < 3 ? false : bool(std::stoi(argv[3]));
+
 
   // ===========================================================================
   // SARA PIPELINE
@@ -245,8 +247,7 @@ auto test_on_video(int argc, char **argv)
         });
 #endif
 
-    static constexpr auto draw_sift_features = false;
-    if constexpr (draw_sift_features)
+    if (draw_sift_features)
     {
       for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
       {
