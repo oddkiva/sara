@@ -21,9 +21,9 @@
 namespace DO { namespace Sara {
 
   //! @{
-  //! @brief Reimplement the `im2col` function.
+  //! @brief Reimplement the `im2row` function.
   template <typename T, int N, typename Padding>
-  auto im2col(const TensorView_<T, N>& x,             //
+  auto im2row(const TensorView_<T, N>& x,             //
               const Matrix<int, N, 1>& kernel_sizes,  //
               const Padding& padding,
               const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones(),
@@ -36,7 +36,7 @@ namespace DO { namespace Sara {
     const Matrix<int, N, 1> end = x.sizes();
 
     // Initialize the strided subarray iterator.
-    auto infx = make_infinite(x, padding);
+    const auto infx = make_infinite(x, padding);
     auto xi = infx.begin_stepped_subarray(begin, end, strides);
 
     const auto sizes = xi.stepped_subarray_sizes();
@@ -66,6 +66,52 @@ namespace DO { namespace Sara {
   }
   //! @}
 
+  //! @{
+  //! @brief Reimplement the `im2col` function.
+  template <typename T, int N, typename Padding>
+  auto im2col(const TensorView_<T, N>& x,             //
+              const Matrix<int, N, 1>& kernel_sizes,  //
+              const Padding& padding,
+              const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones(),
+              const Matrix<int, N, 1>& shift = Matrix<int, N, 1>::Zero())
+      -> Tensor_<T, 2>
+  {
+    // Pad sizes must be odd.
+    const Matrix<int, N, 1> radius =
+        (Eigen::Matrix<int, N, 1>{} << 0, (kernel_sizes / 2).tail(N - 1))
+            .finished();
+    const Matrix<int, N, 1> begin = Matrix<int, N, 1>::Zero();
+    const Matrix<int, N, 1> end = x.sizes();
+
+    // Initialize the strided subarray iterator.
+    const auto infx = make_infinite(x, padding);
+    auto xi = infx.begin_stepped_subarray(begin, end, strides);
+
+    // Compute the matrix dimensions.
+    const auto sizes = xi.stepped_subarray_sizes();
+    const auto num_cols = std::accumulate(
+        sizes.data(), sizes.data() + sizes.size(), 1, std::multiplies<int>());
+    const auto num_rows =
+        std::accumulate(kernel_sizes.data() + 1, kernel_sizes.data() + N, 1,
+                        std::multiplies<int>());
+
+    auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
+
+    for (int c = 0; !xi.end(); ++xi, ++c)
+    {
+      const Matrix<int, N, 1> s = xi.position() - radius + shift;
+      const Matrix<int, N, 1> e =
+          xi.position() + radius + Matrix<int, N, 1>::Ones() + shift;
+
+      auto p = Tensor_<T, N>{e - s};
+      crop(p, infx, s, e);
+
+      phi_x.matrix().col(c) = p.vector();
+    }
+
+    return phi_x;
+  }
+  //! @}
 
   //! @{
   //! @brief Apply the GEMM-based convolution.
@@ -92,15 +138,36 @@ namespace DO { namespace Sara {
     const auto krows = std::accumulate(k_sizes.data() + 1, k_sizes.data() + N, 1,
                                        std::multiplies<int>());
     const auto kcols = k_sizes[0];
-    auto kt = k_transposed.reshape(Vector2i{krows, kcols});
+    const auto kt = k_transposed.reshape(Vector2i{krows, kcols});
 
     // calculate the feature maps for each nd-pixel.
     k_sizes[0] = 1;
-    auto phi_x = im2col(x, k_sizes, padding, strides, offset);
+    const auto phi_x = im2row(x, k_sizes, padding, strides, offset);
 
     y.colmajor_view()                                                  //
         .reshape(Vector2i{phi_x.matrix().rows(), kt.matrix().cols()})  //
         .matrix() = phi_x.matrix() * kt.matrix();
+  }
+
+  template <typename T, int N, typename Padding>
+  void
+  gemm_convolve_2(TensorView_<T, N>& y,        //
+                  const TensorView_<T, N>& x,  //
+                  const TensorView_<T, N>& k,  //
+                  const Padding& padding,      //
+                  const Matrix<int, N, 1>& strides,
+                  const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
+  {
+    // Determine the sizes of the kernel.
+    const auto krows = k.sizes()(0);
+    const auto kcols = std::accumulate(k.sizes().data() + 1, k.sizes().data() + N, 1,
+                                       std::multiplies<int>());
+    const auto k_ = k.reshape(Vector2i{krows, kcols});
+
+    const auto phi_x = im2col(x, k.sizes(), padding, strides, offset);
+
+    y.reshape(Vector2i{k_.matrix().rows(), phi_x.matrix().cols()}).matrix() =
+        k_.matrix() * phi_x.matrix();
   }
 
   template <typename T, int N, typename Padding>
@@ -124,7 +191,7 @@ namespace DO { namespace Sara {
 
     // calculate the feature maps for each nd-pixel.
     k_sizes[0] = 1;
-    auto phi_x = im2col(x, k_sizes, padding, strides, offset);
+    const auto phi_x = im2row(x, k_sizes, padding, strides, offset);
 
     // Determine the sizes of the convolutional output.
     auto y_sizes =
@@ -270,18 +337,6 @@ namespace DO { namespace Sara {
     // (kh, kw) o (h, w)  = (kh * h, kw * w).
     auto y = Tensor_<float, 3>{{d, kh * h, kw * w}};
 
-    // Input block from (u, v) to (u + 1, v + 1).
-    auto x_block = Tensor_<float, 2>{{2, 2}};
-    // Output block from (kw * u, kh * v) -> (kw * (u + 1), kh * (v + 1)).
-    auto y_block = Tensor_<float, 2>{{kh, kw}};
-
-    // The input and output blocks viewed as 2D matrices.
-    auto x_block_matrix = x_block.matrix();
-    auto y_block_matrix = y_block.matrix();
-    // The input and output blocks viewed as column vectors.
-    auto x_vectorized = x_block.vector();
-    auto y_vectorized = y_block.vector();
-
     // For cache-friendliness, proceed in this order.
     for (int c = 0; c < d; ++c)
     {
@@ -291,6 +346,20 @@ namespace DO { namespace Sara {
 #pragma omp parallel for
       for (int vu = 0; vu < h * w; ++vu)
       {
+        // Input block from (u, v) to (u + 1, v + 1).
+        auto x_array = std::array<float, 4>{};
+        auto x_block = TensorView_<float, 2>{x_array.data(), {2, 2}};
+
+        // Output block from (kw * u, kh * v) -> (kw * (u + 1), kh * (v + 1)).
+        auto y_block = Tensor_<float, 2>{{kh, kw}};
+
+        // The input and output blocks viewed as 2D matrices.
+        auto x_block_matrix = x_block.matrix();
+
+        // The input and output blocks viewed as column vectors.
+        auto x_vectorized = x_block.vector();
+        auto y_vectorized = y_block.vector();
+
         const auto v = vu / w;
         const auto u = vu - v * w;
         // For each channel, grab a (2, 2) input block with top-left corner
@@ -300,6 +369,7 @@ namespace DO { namespace Sara {
         // Calculate the (kw, kh) output block with top-left corner
         // (kw * u, kh * v).
         y_vectorized = K_matrix * x_vectorized;
+        const auto y_block_matrix = y_block.matrix();
 
         // Store the result into the output.
         y_slice.block(kh * v, kw * u, kh, kw) = y_block_matrix;
