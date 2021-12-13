@@ -192,7 +192,7 @@ namespace DO::Sara::Darknet {
       os << "- output         = " << output_sizes.transpose();
     }
 
-    inline auto load_weights(FILE* fp) -> void
+    inline auto load_weights(FILE* fp, bool inference = true) -> void
     {
       // 1. Read bias weights.
       // 2. Read batch normalization weights.
@@ -206,7 +206,7 @@ namespace DO::Sara::Darknet {
       if (debug)
       {
         std::cout << "Loading Conv B: " << weights.b.size() << std::endl;
-        // std::cout << weights.b.transpose() << std::endl;
+        std::cout << weights.b.transpose() << std::endl;
       }
 
       // 2. Batch normalization weights.
@@ -226,8 +226,38 @@ namespace DO::Sara::Darknet {
           fread(weights.w.data(), sizeof(float), weights.w.size(), fp);
       if (kernel_weight_count != weights.w.size())
         throw std::runtime_error{"Failed to read kernel weights!"};
+      if (debug)
+      {
+        std::cout << "Loading Conv W: " << weights.w.size() << std::endl;
+        std::cout << weights.w.vector().transpose().head(10) << std::endl;
+        throw 0;
+      }
 
-      // TODO: transpose the kernel if needed.
+      // Fuse the convolution and the batch normalization in a single
+      // operation.
+      const auto fuse_conv_bn_layer = inference && batch_normalize;
+      if (fuse_conv_bn_layer)
+      {
+        std::cout << "Fusing Conv and BN layer" << std::endl;
+        weights.b.array() =
+            (weights.b.array().cast<double>() -
+             bn_layer->weights.scales.array().cast<double>() *
+                 bn_layer->weights.rolling_mean.array().cast<double>() /
+                 (bn_layer->weights.rolling_variance.array().cast<double>() +
+                  .00001)
+                     .sqrt())
+                .cast<float>();
+
+        for (auto n = 0; n < weights.w.size(0); ++n)
+        {
+          const auto precomputed =
+              bn_layer->weights.scales(n) /
+              std::sqrt(double(bn_layer->weights.rolling_variance(n)) + .00001);
+          weights.w[n].flat_array() *= precomputed;
+        }
+
+        bn_layer.reset(nullptr);
+      }
     }
   };
 

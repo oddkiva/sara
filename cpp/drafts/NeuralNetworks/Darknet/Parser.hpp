@@ -159,15 +159,17 @@ namespace DO::Sara::Darknet {
       if (fp == nullptr)
         throw std::runtime_error{"Failed to open file: " + filepath};
 
-      fread(&major, sizeof(int), 1, fp);
-      fread(&minor, sizeof(int), 1, fp);
-      fread(&revision, sizeof(int), 1, fp);
+      auto num_bytes_read = size_t{};
+
+      num_bytes_read += fread(&major, sizeof(int), 1, fp);
+      num_bytes_read += fread(&minor, sizeof(int), 1, fp);
+      num_bytes_read += fread(&revision, sizeof(int), 1, fp);
       if ((major * 10 + minor) >= 2)
       {
         if (debug)
           printf("\n seen 64");
         uint64_t iseen = 0;
-        fread(&iseen, sizeof(uint64_t), 1, fp);
+        num_bytes_read += fread(&iseen, sizeof(uint64_t), 1, fp);
         seen = iseen;
       }
       else
@@ -175,13 +177,15 @@ namespace DO::Sara::Darknet {
         if (debug)
           printf("\n seen 32");
         uint32_t iseen = 0;
-        fread(&iseen, sizeof(uint32_t), 1, fp);
+        num_bytes_read += fread(&iseen, sizeof(uint32_t), 1, fp);
         seen = iseen;
       }
       if (debug)
         printf(", trained: %.0f K-images (%.0f Kilo-batches_64) \n",
                (float) (seen / 1000), (float) (seen / 64000));
       transpose = (major > 1000) || (minor > 1000);
+
+      // std::cout << "Num bytes read = " << num_bytes_read << std::endl;
     }
 
     inline ~NetworkWeightLoader()

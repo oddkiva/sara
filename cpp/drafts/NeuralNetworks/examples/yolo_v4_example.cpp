@@ -19,38 +19,124 @@
 #include <drafts/NeuralNetworks/Darknet/Network.hpp>
 #include <drafts/NeuralNetworks/Darknet/Parser.hpp>
 
+#include <iomanip>
+
 
 namespace sara = DO::Sara;
+namespace fs = boost::filesystem;
 
 
-int main(int argc, char** argv)
+auto read_all_intermediate_outputs(const std::string& dir_path)
 {
-  DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
-  return app.exec();
+  auto stringify = [](int n) {
+    std::ostringstream ss;
+    ss << std::setw(3) << std::setfill('0') << n;
+    return ss.str();
+  };
+
+  auto outputs = std::vector<sara::Tensor_<float, 4>>(38);
+  for (auto i = 0u; i < outputs.size(); ++i)
+  {
+    const auto filepath = fs::path{dir_path} / (stringify(i) + ".bin");
+    std::cout << "Parsing " << filepath << std::endl;
+    outputs[i] = sara::Darknet::read_tensor(filepath.string());
+  }
+
+  return outputs;
 }
 
-int __main(int argc, char** argv)
-{
-  namespace fs = boost::filesystem;
 
+auto visualize(const sara::TensorView_<float, 4>& y,  //
+               const Eigen::Vector2i& sizes)
+{
+  for (auto i = 0; i < y.size(1); ++i)
+  {
+    const auto y_i = y[0][i];
+    const auto im_i = sara::image_view(y_i);
+    const auto im_i_rescaled = sara::resize(sara::color_rescale(im_i), sizes);
+    sara::display(im_i_rescaled);
+    sara::get_key();
+  }
+}
+
+auto visualize2(const sara::TensorView_<float, 4>& y1,
+                const sara::TensorView_<float, 4>& y2,  //
+                const Eigen::Vector2i& sizes)
+{
+  auto reformat = [&sizes](const auto& y) {
+    const auto y_i = y;
+    const auto im_i = sara::image_view(y_i);
+    const auto im_i_rescaled = sara::resize(sara::color_rescale(im_i), sizes);
+    return im_i_rescaled;
+  };
+
+  for (auto i = 0; i < y1.size(1); ++i)
+  {
+    // Calculate on the actual tensor.
+    auto diff = sara::Tensor_<float, 2>{y1[0][i].sizes()};
+    diff.matrix() = y1[0][i].matrix() - y2[0][i].matrix();
+
+    const auto residual = diff.matrix().norm();
+    const auto minDiff = diff.matrix().cwiseAbs().minCoeff();
+    const auto maxDiff = diff.matrix().cwiseAbs().maxCoeff();
+
+    if (maxDiff > 1e-5f)
+    {
+      std::cout << "residual " << i << " = " << residual << std::endl;
+      std::cout << "min residual value " << i << " = " << minDiff << std::endl;
+      std::cout << "max residual value " << i << " = " << maxDiff << std::endl;
+
+      std::cout << "GT\n" << y1[0][i].matrix().block(0, 0, 5, 5) << std::endl;
+      std::cout << "ME\n" << y2[0][i].matrix().block(0, 0, 5, 5) << std::endl;
+
+      // Resize and color rescale the data to show it nicely.
+      const auto im1 = reformat(y1[0][i]);
+      const auto im2 = reformat(y2[0][i]);
+      const auto imdiff = reformat(diff);
+
+      sara::display(im1);
+      sara::display(im2, {im1.width(), 0});
+      sara::display(imdiff, {2 * im1.width(), 0});
+
+      // for (auto y = 0; y < diff.height(); ++y)
+      //   for (auto x = 0; x < diff.width(); ++x)
+      //     if (std::abs(diff(x, y)) >= maxDiff * 0.5f)
+      //     {
+      //       sara::draw_point(x, y, sara::Red8);
+      //       sara::draw_point(x + diff.width(), y, sara::Red8);
+      //     }
+
+      sara::get_key();
+      // throw std::runtime_error{"FISHY COMPUTATION ERROR!"};
+    }
+  }
+}
+
+
+int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
+{
   const auto data_dir_path =
       fs::canonical(fs::path{src_path("../../../../data")});
   const auto cfg_filepath =
       data_dir_path / "trained_models" / "yolov4-tiny.cfg";
   const auto weights_filepath =
       data_dir_path / "trained_models" / "yolov4-tiny.weights";
+  const auto yolov4_tiny_out_dir = "/home/david/GitHub/darknet/yolov4-tiny";
 
   auto model = sara::Darknet::Network{};
   auto& net = model.net;
   net = sara::Darknet::NetworkParser{}.parse_config_file(cfg_filepath.string());
   sara::Darknet::NetworkWeightLoader{weights_filepath.string()}.load(net);
+  // Check the weights.
+  model.check_convolutional_weights(yolov4_tiny_out_dir);
 
-  const auto image = argc < 2
-                         ? sara::imread<sara::Rgb32f>(
-                               (data_dir_path / "GuardOnBlonde.tif").string())
-                         : sara::imread<sara::Rgb32f>(argv[1]);
-  sara::create_window(image.sizes());
+
+#ifdef USE_SARA_IO
+  const auto image =
+      argc < 2
+          ? sara::imread<sara::Rgb32f>((data_dir_path / "dog.jpg").string())
+          : sara::imread<sara::Rgb32f>(argv[1]);
+  sara::create_window(416 * 3, 416);
   sara::display(image);
 
   // Resize the image to the network input sizes.
@@ -59,59 +145,81 @@ int __main(int argc, char** argv)
       dynamic_cast<const sara::Darknet::Input&>(*net.front());
   const auto image_resized =
       sara::resize(image, {input_layer.width, input_layer.height});
+  const auto x_sizes = Eigen::Vector2i{
+      image_resized.width(), image_resized.height()  //
+  };
+
   sara::display(image_resized);
 
 
   // Feed the input to the network.
   model.forward(sara::tensor_view(image_resized)
-                      .reshape(Eigen::Vector4i{1, image_resized.height(),
-                                               image_resized.width(), 3})
-                      .transpose({0, 3, 1, 2}));
+                    .reshape(Eigen::Vector4i{1, image_resized.height(),
+                                             image_resized.width(), 3})
+                    .transpose({0, 3, 1, 2}));
 
-#ifdef CHECK_AGAIN
-  auto& x = net[0]->output;
+#else
+  const auto x = sara::Darknet::read_tensor(                  //
+      (fs::path{yolov4_tiny_out_dir} / "input.bin").string()  //
+  );
+  const auto xt = x.transpose({0, 2, 3, 1});
+  const auto x_image = sara::ImageView<sara::Rgb32f>{
+      reinterpret_cast<sara::Rgb32f*>(const_cast<float*>(xt.data())),
+      {xt.size(2), xt.size(1)}};
+  const auto x_sizes = x_image.sizes();
 
-  // Intermediate inputs
-  auto& y1 = net[1]->output;
-  auto& y2 = net[2]->output;
-  auto& y3 = net[3]->output;
-  auto& y4 = net[4]->output;
-  auto& y5 = net[5]->output;
-  auto& y6 = net[6]->output;
-  auto& y7 = net[7]->output;
-  auto& y8 = net[8]->output;
+  sara::create_window(416 * 3, 416);
+  sara::display(x_image);
+  sara::get_key();
+
+  model.forward(x);
 #endif
-  std::cout << "Layer 18:\n" << *net[18] << std::endl;
-  auto& y18 = net[18]->output;
 
-  std::cout << "Layer 30:\n" << *net[30] << std::endl;
-  auto& y30 = net[30]->output;
+  // Load all the intermediate outputs calculated from Darknet.
+  const auto gt = read_all_intermediate_outputs(yolov4_tiny_out_dir);
+
+  // Until Layer 7, everything is fine.
+  // std::cout << "layer 6\n" << net[6]->output[0][0].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "layer 7\n" << net[7]->output[0][0].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "layer 6\n" << net[6]->output[0][1].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "layer 7\n" << net[7]->output[0][1].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "layer 6\n" << net[6]->output[0][31].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "layer 7\n" << net[7]->output[0][31].matrix().block(0, 0, 5, 5) << std::endl;
+
+  // std::cout << "layer 5\n" << net[5]->output[0][0].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "layer 7\n" << net[7]->output[0][32].matrix().block(0, 0, 5, 5) << std::endl;
+
+  // std::cout << "layer 5\n" << net[5]->output[0][ 1].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "layer 7\n" << net[7]->output[0][33].matrix().block(0, 0, 5, 5) << std::endl;
+
+  // std::cout << "layer 5\n" << net[5]->output[0][31].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "layer 7\n" << net[7]->output[0][63].matrix().block(0, 0, 5, 5) << std::endl;
+
+  // std::cout << "gt 7\n" << gt[6][0][0].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "me 7\n" << net[7]->output[0][0].matrix().block(0, 0, 5, 5) << std::endl;
+
+  // std::cout << "gt 7\n" << gt[6][0][1].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "me 7\n" << net[7]->output[0][1].matrix().block(0, 0, 5, 5) << std::endl;
+
+  // std::cout << "gt 7\n" << gt[6][0][63].matrix().block(0, 0, 5, 5) << std::endl;
+  // std::cout << "me 7\n" << net[7]->output[0][63].matrix().block(0, 0, 5, 5) << std::endl;
 
   // Visualize.
-  auto visualize = [](const auto& y, const auto& sizes) {
-    for (auto i = 0; i < y.size(1); ++i)
-    {
-      const auto y_i = y[0][i];
-      const auto im_i = sara::image_view(y_i);
-      const auto im_i_rescaled = sara::resize(sara::color_rescale(im_i), sizes);
-      sara::display(im_i_rescaled);
-      sara::get_key();
-    }
-  };
-
-  const auto x_sizes = Eigen::Vector2i{
-      image_resized.width(), image_resized.height()  //
-  };
-  // visualize(y1, x_sizes);
-  // visualize(y2, x_sizes);
-  // visualize(y3, x_sizes);
-  // visualize(y4, x_sizes);
-  // visualize(y5, x_sizes);
-  // visualize(y6, x_sizes);
-  // visualize(y7, x_sizes);
-  // visualize(y8, x_sizes);
-  visualize(y18, x_sizes);
-  // visualize(y30, x_sizes);
+  for (auto layer = 1; layer < 30; ++layer)
+  {
+    std::cout << "CHECKING LAYER " << layer << ": "
+              << net[layer]->type << std::endl
+              << *net[layer] << std::endl;
+    visualize2(gt[layer - 1], net[layer]->output, x_sizes);
+  }
 
   return 0;
+}
+
+
+int main(int argc, char** argv)
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
 }

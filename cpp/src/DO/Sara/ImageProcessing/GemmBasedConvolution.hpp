@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Image/Operations.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
@@ -180,17 +182,14 @@ namespace DO { namespace Sara {
     const Matrix<int, N, 1> ksizes =
         (Eigen::Matrix<int, N, 1>{} << 1, (k.sizes()).tail(N - 1)).finished();
 
-#ifdef DEBUG_IM2COL
-    std::cout << "k.sizes()     = " << k.sizes().transpose() << std::endl;
-    std::cout << "x.sizes()     = " << x.sizes().transpose() << std::endl;
-    std::cout << "y.sizes()     = " << y.sizes().transpose() << std::endl;
-#endif
-
     // Calculate the feature map.
     const auto phi_x = im2col(x, ksizes, padding, strides, offset);
 
     y.reshape(Vector2i{k_.matrix().rows(), phi_x.matrix().cols()}).matrix() =
         k_.matrix() * phi_x.matrix();
+
+    // SARA_CHECK(k_.sizes().transpose());
+    // SARA_CHECK(phi_x.sizes().transpose());
   }
 
   template <typename T, int N, typename Padding>

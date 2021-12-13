@@ -7,8 +7,30 @@
 
 #include <drafts/NeuralNetworks/Darknet/Layer.hpp>
 
+#include <iomanip>
+
 
 namespace DO::Sara::Darknet {
+
+  inline auto read_tensor(const std::string& filepath)
+      -> Tensor_<float, 4>
+  {
+    auto file = std::ifstream{filepath, std::ios::binary};
+    if (!file.is_open())
+      throw std::runtime_error{"Error: could not open file: " + filepath + "!"};
+
+    auto sizes = Eigen::Vector4i{};
+    file.read(reinterpret_cast<char*>(sizes.data()), sizeof(float) * 4);
+
+    auto output = Tensor_<float, 4>{sizes};
+    const auto num_elements = std::accumulate(sizes.data(), sizes.data() + 4, 1,
+                                              std::multiplies<int>());
+    file.read(reinterpret_cast<char*>(output.data()),
+              sizeof(float) * num_elements);
+
+    return output;
+  }
+
 
   struct Network
   {
@@ -42,9 +64,9 @@ namespace DO::Sara::Darknet {
 
       if (conv.activation == "leaky")
         y.cwise_transform_inplace([](float& x) {
-          if (x < 0)
-            x *= 0.1f;
-        });
+          x = x > 0 ? x : 0.1 * x;
+        });  // Bad because of the casting to double... but we ensure bitwise
+             // equality at least with darknet...
       else if (conv.activation == "linear")
         std::cout << "linear activation" << std::endl;
       else
@@ -130,10 +152,14 @@ namespace DO::Sara::Darknet {
           std::cout << "y_end         = " << y.sizes().transpose() << std::endl;
           std::cout << std::endl;
 
-          auto xi = x.begin();
-          auto yi = y.begin_subarray(y_start, y_end);
-          for ( ; !yi.end(); ++yi, ++xi)
-            *yi = *xi;
+          for (auto n = 0; n < y.size(0); ++n)
+            for (auto c = 0; c < x.size(1); ++c)
+              y[n][c_start + c] = x[n][c];
+
+          // auto xi = x.begin();
+          // auto yi = y.begin_subarray(y_start, y_end);
+          // for (; !yi.end(); ++yi, ++xi)
+          //   *yi = *xi;
 
           c_start = c_end;
         }
@@ -203,6 +229,41 @@ namespace DO::Sara::Darknet {
           forward_to_maxpool(*maxpool, i);
         else
           break;
+      }
+    }
+
+    inline auto check_convolutional_weights(const std::string& data_dirpath) -> void
+    {
+      const auto stringify = [](int n) {
+        std::ostringstream ss;
+        ss << std::setw(3) << std::setfill('0') << n;
+        return ss.str();
+      };
+
+      for (auto i = 0u; i < net.size(); ++i)
+      {
+        if (auto conv = dynamic_cast<Convolution*>(net[i].get()))
+        {
+          const auto weights_fp =
+              data_dirpath + "/kernel-" + stringify(i - 1) + ".bin";
+          const auto biases_fp =
+              data_dirpath + "/bias-" + stringify(i - 1) + ".bin";
+
+          const auto w = read_tensor(weights_fp).reshape(conv->weights.w.sizes());
+          const auto b = read_tensor(biases_fp);
+
+          const auto diffb = (conv->weights.b - b.vector()).norm();
+          std::cout << i << " diffb = " << diffb << std::endl;
+
+          const auto diffw = (conv->weights.w.vector() - w.vector()).norm();
+          std::cout << i << " diffw = " << diffw << std::endl;
+
+#define OVERRIDE_WEIGHTS_FROM_DARKNET_FUSED_WEIGHTS
+#ifdef OVERRIDE_WEIGHTS_FROM_DARKNET_FUSED_WEIGHTS
+          conv->weights.w = w;
+          conv->weights.b = b.vector();
+#endif
+        }
       }
     }
 
