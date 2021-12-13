@@ -80,7 +80,7 @@ auto visualize2(const sara::TensorView_<float, 4>& y1,
     const auto minDiff = diff.matrix().cwiseAbs().minCoeff();
     const auto maxDiff = diff.matrix().cwiseAbs().maxCoeff();
 
-    if (maxDiff > 1e-4f)
+    if (false)
     {
       std::cout << "residual " << i << " = " << residual << std::endl;
       std::cout << "min residual value " << i << " = " << minDiff << std::endl;
@@ -88,7 +88,10 @@ auto visualize2(const sara::TensorView_<float, 4>& y1,
 
       std::cout << "GT\n" << y1[0][i].matrix().block(0, 0, 5, 5) << std::endl;
       std::cout << "ME\n" << y2[0][i].matrix().block(0, 0, 5, 5) << std::endl;
+    }
 
+    if (maxDiff > 6e-5f)
+    {
       // Resize and color rescale the data to show it nicely.
       const auto im1 = reformat(y1[0][i]);
       const auto im2 = reformat(y2[0][i]);
@@ -165,7 +168,7 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
   sara::display(x_image);
   sara::get_key();
 
-  model.debug = false;
+  model.debug = true;
   model.forward(x);
 #endif
 
@@ -173,7 +176,7 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
   const auto gt = read_all_intermediate_outputs(yolov4_tiny_out_dir);
 
   // TODO: implement the YOLO layer.
-  for (auto layer = 1u; layer < 31; ++layer)
+  for (auto layer = 1u; layer < net.size(); ++layer)
   {
     std::cout << "CHECKING LAYER " << layer << ": "
               << net[layer]->type << std::endl

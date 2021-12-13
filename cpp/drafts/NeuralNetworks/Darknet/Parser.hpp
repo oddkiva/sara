@@ -77,6 +77,8 @@ namespace DO::Sara::Darknet {
         dynamic_cast<MaxPool&>(*nodes.back()).update_output_sizes();
       else if (layer_type == "upsample")
         dynamic_cast<Upsample&>(*nodes.back()).update_output_sizes();
+      else if (layer_type == "yolo")
+        dynamic_cast<Yolo&>(*nodes.back()).update_output_sizes(nodes);
 
       std::cout << "CHECKING CURRENT LAYER: " << std::endl;
       std::cout << *nodes.back() << std::endl;

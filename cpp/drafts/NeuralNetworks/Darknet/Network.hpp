@@ -83,7 +83,9 @@ namespace DO::Sara::Darknet {
           tic();
 
         const auto& rel_idx = route.layers.front();
-        const auto glob_idx = rel_idx < 0 ? i + rel_idx : rel_idx;
+        const auto glob_idx =
+            rel_idx < 0 ? i + rel_idx
+                        : rel_idx + 1 /* because of the input layer. */;
         const auto& x = net[glob_idx]->output;
 
         auto start = Eigen::Vector4i{};
@@ -127,7 +129,9 @@ namespace DO::Sara::Darknet {
         auto c_end = 0;
         for (const auto& rel_idx : route.layers)
         {
-          const auto glob_idx = rel_idx < 0 ? i + rel_idx : rel_idx;
+          const auto glob_idx =
+              rel_idx < 0 ? i + rel_idx
+                          : rel_idx + 1 /* because of the input layer. */;
           const auto& x = net[glob_idx]->output;
 
           c_end += x.size(1);
@@ -200,9 +204,97 @@ namespace DO::Sara::Darknet {
         toc("MaxPool Forward Pass");
     }
 
-    inline auto forward_to_yolo(Darknet::Yolo&, int) -> void
+    inline auto forward_to_yolo(Darknet::Yolo& yolo, int i) -> void
     {
-      throw std::runtime_error{"YOLO layer UNIMPLEMENTED"};
+      if (profile)
+        tic();
+
+      // Specific to COCO dataset.
+      static constexpr auto num_classes = 80;     // Due to COCO
+      static constexpr auto num_coordinates = 4;  // (x, y, w, h)
+      static constexpr auto num_probabilities =
+          1 /* P[object] */ + num_classes /* P[class|object] */;
+      static constexpr auto num_box_features =
+          num_coordinates + num_probabilities;
+
+      static_assert(num_probabilities == 81);
+      static_assert(num_box_features == 85);
+
+      // Logistic activation function.
+      const auto logistic_fn = [](float v) { return 1 / (1 + std::exp(-v)); };
+
+      const auto& x = net[i - 1]->output;
+      auto& y = yolo.output;
+
+      const auto& scale = yolo.scale_x_y;
+      const auto beta = -0.5f * (scale - 1);
+
+      for (auto n = 0; n < x.size(0); ++n)
+      {
+        const auto xn = x[n];
+        auto yn = y[n];
+
+        for (auto box = 0; box < 3; ++box)
+        {
+          const auto x_channel = box * num_box_features + 0;
+          const auto y_channel = box * num_box_features + 1;
+          const auto w_channel = box * num_box_features + 2;
+          const auto h_channel = box * num_box_features + 3;
+
+          // Logistic activation in the (x, y) position.
+          // That means (x, y) is in the cell.
+          yn[x_channel].flat_array() =
+              xn[x_channel].flat_array().unaryExpr(logistic_fn);
+          yn[y_channel].flat_array() =
+              xn[y_channel].flat_array().unaryExpr(logistic_fn);
+
+          // Just copy.
+          yn[w_channel].flat_array() = xn[w_channel].flat_array();
+          yn[h_channel].flat_array() = xn[h_channel].flat_array();
+
+          // Logistic activation for the probabilities.
+          const auto p_start = box * num_box_features + num_coordinates;
+          const auto p_end = (box + 1) * num_box_features;
+          for (auto p = p_start; p < p_end; ++p)
+            yn[p].flat_array() = xn[p].flat_array().unaryExpr(logistic_fn);
+        }
+
+        // Shift and rescale the position.
+        for (auto box = 0; box < 3; ++box)
+        {
+          const auto x_channel = box * num_box_features + 0;
+          const auto y_channel = box * num_box_features + 1;
+
+          yn[x_channel].flat_array() =
+              yn[x_channel].flat_array() * scale + beta;
+          yn[y_channel].flat_array() =
+              yn[y_channel].flat_array() * scale + beta;
+        }
+      }
+
+      if (profile)
+        toc("YOLO forward pass");
+    }
+
+    inline auto forward_to_upsample(Darknet::Upsample& upsample, int i) -> void
+    {
+      const auto& x = net[i - 1]->output;
+      auto& y = upsample.output;
+
+      if (profile)
+        tic();
+
+      const auto& stride = upsample.stride;
+
+      for (auto yi = y.begin_array(); yi != y.end(); ++yi)
+      {
+        Matrix<int, 4, 1> p = yi.position();
+        p.tail(2) /= stride;
+        *yi = x(p);
+      }
+
+      if (profile)
+        toc("Upsample Forward Pass");
     }
 
     inline auto forward(const TensorView_<float, 4>& x) -> void
@@ -220,6 +312,10 @@ namespace DO::Sara::Darknet {
           forward_to_route(*route, i);
         else if (auto maxpool = dynamic_cast<MaxPool*>(net[i].get()))
           forward_to_maxpool(*maxpool, i);
+        else if (auto upsample = dynamic_cast<Upsample*>(net[i].get()))
+          forward_to_upsample(*upsample, i);
+        else if (auto yolo = dynamic_cast<Yolo*>(net[i].get()))
+          forward_to_yolo(*yolo, i);
         else
           break;
 
@@ -251,16 +347,14 @@ namespace DO::Sara::Darknet {
           const auto b = read_tensor(biases_fp);
 
           const auto diffb = (conv->weights.b - b.vector()).norm();
-          std::cout << i << " diffb = " << diffb << std::endl;
-
           const auto diffw = (conv->weights.w.vector() - w.vector()).norm();
-          std::cout << i << " diffw = " << diffw << std::endl;
 
-// #define OVERRIDE_WEIGHTS_FROM_DARKNET_FUSED_WEIGHTS
-#ifdef OVERRIDE_WEIGHTS_FROM_DARKNET_FUSED_WEIGHTS
-          conv->weights.w = w;
-          conv->weights.b = b.vector();
-#endif
+          if (diffb > 5e-6f || diffw > 5e-6f)
+          {
+            std::cout << i << " diffb = " << diffb << std::endl;
+            std::cout << i << " diffw = " << diffw << std::endl;
+            throw std::runtime_error{"Error: convolutional weights are wrong!"};
+          }
         }
       }
     }
