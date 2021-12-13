@@ -80,7 +80,7 @@ auto visualize2(const sara::TensorView_<float, 4>& y1,
     const auto minDiff = diff.matrix().cwiseAbs().minCoeff();
     const auto maxDiff = diff.matrix().cwiseAbs().maxCoeff();
 
-    if (maxDiff > 1e-5f)
+    if (maxDiff > 1e-4f)
     {
       std::cout << "residual " << i << " = " << residual << std::endl;
       std::cout << "min residual value " << i << " = " << minDiff << std::endl;
@@ -98,16 +98,8 @@ auto visualize2(const sara::TensorView_<float, 4>& y1,
       sara::display(im2, {im1.width(), 0});
       sara::display(imdiff, {2 * im1.width(), 0});
 
-      // for (auto y = 0; y < diff.height(); ++y)
-      //   for (auto x = 0; x < diff.width(); ++x)
-      //     if (std::abs(diff(x, y)) >= maxDiff * 0.5f)
-      //     {
-      //       sara::draw_point(x, y, sara::Red8);
-      //       sara::draw_point(x + diff.width(), y, sara::Red8);
-      //     }
-
       sara::get_key();
-      // throw std::runtime_error{"FISHY COMPUTATION ERROR!"};
+      throw std::runtime_error{"FISHY COMPUTATION ERROR!"};
     }
   }
 }
@@ -153,6 +145,7 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 
 
   // Feed the input to the network.
+  model.debug = false;
   model.forward(sara::tensor_view(image_resized)
                     .reshape(Eigen::Vector4i{1, image_resized.height(),
                                              image_resized.width(), 3})
@@ -172,40 +165,15 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
   sara::display(x_image);
   sara::get_key();
 
+  model.debug = false;
   model.forward(x);
 #endif
 
   // Load all the intermediate outputs calculated from Darknet.
   const auto gt = read_all_intermediate_outputs(yolov4_tiny_out_dir);
 
-  // Until Layer 7, everything is fine.
-  // std::cout << "layer 6\n" << net[6]->output[0][0].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "layer 7\n" << net[7]->output[0][0].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "layer 6\n" << net[6]->output[0][1].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "layer 7\n" << net[7]->output[0][1].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "layer 6\n" << net[6]->output[0][31].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "layer 7\n" << net[7]->output[0][31].matrix().block(0, 0, 5, 5) << std::endl;
-
-  // std::cout << "layer 5\n" << net[5]->output[0][0].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "layer 7\n" << net[7]->output[0][32].matrix().block(0, 0, 5, 5) << std::endl;
-
-  // std::cout << "layer 5\n" << net[5]->output[0][ 1].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "layer 7\n" << net[7]->output[0][33].matrix().block(0, 0, 5, 5) << std::endl;
-
-  // std::cout << "layer 5\n" << net[5]->output[0][31].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "layer 7\n" << net[7]->output[0][63].matrix().block(0, 0, 5, 5) << std::endl;
-
-  // std::cout << "gt 7\n" << gt[6][0][0].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "me 7\n" << net[7]->output[0][0].matrix().block(0, 0, 5, 5) << std::endl;
-
-  // std::cout << "gt 7\n" << gt[6][0][1].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "me 7\n" << net[7]->output[0][1].matrix().block(0, 0, 5, 5) << std::endl;
-
-  // std::cout << "gt 7\n" << gt[6][0][63].matrix().block(0, 0, 5, 5) << std::endl;
-  // std::cout << "me 7\n" << net[7]->output[0][63].matrix().block(0, 0, 5, 5) << std::endl;
-
-  // Visualize.
-  for (auto layer = 1; layer < 30; ++layer)
+  // TODO: implement the YOLO layer.
+  for (auto layer = 1u; layer < 31; ++layer)
   {
     std::cout << "CHECKING LAYER " << layer << ": "
               << net[layer]->type << std::endl
