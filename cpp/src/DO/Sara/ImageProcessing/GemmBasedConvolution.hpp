@@ -20,7 +20,7 @@
 #include <DO/Sara/Core/Tensor.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   //! @{
   //! @brief Reimplement the `im2row` function.
@@ -93,17 +93,6 @@ namespace DO { namespace Sara {
                         std::multiplies<int>());
 
     auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
-#ifdef DEBUG_IM2COL
-    std::cout << "kernel_sizes  = " << kernel_sizes.transpose() << std::endl;
-    std::cout << "start         = " << begin.transpose() << std::endl;
-    std::cout << "end           = " << end.transpose() << std::endl;
-    std::cout << "strides       = " << strides.transpose() << std::endl;
-    std::cout << "shift         = " << shift.transpose() << std::endl;
-
-    std::cout << "x sz          = " << x.sizes().transpose() << std::endl;
-    std::cout << "sampled x sz  = " << sizes.transpose() << std::endl;
-    std::cout << "phi_x.sizes() = " << phi_x.sizes().transpose() << std::endl;
-#endif
 
     for (int c = 0; !xi.end(); ++xi, ++c)
     {
@@ -112,14 +101,6 @@ namespace DO { namespace Sara {
 
       auto p = Tensor_<T, N>{e - s};
       crop(p, infx, s, e);
-#ifdef DEBUG_IM2COL
-      std::cout << "p = " << xi.position().transpose() << std::endl;
-      std::cout << "s = " << s.transpose() << "    ";
-      std::cout << "e = " << e.transpose() << std::endl;
-      std::cout << "p.size() = " << p.size()
-                << " and col size = " << phi_x.matrix().col(c).size()
-                << std::endl;
-#endif
       phi_x.matrix().col(c) = p.vector();
     }
 
@@ -149,13 +130,13 @@ namespace DO { namespace Sara {
     k_sizes << kt_.sizes()[N - 1], kt_.sizes().head(N - 1);
 
     // Determine the sizes of the kernel.
-    const auto krows = std::accumulate(k_sizes.data() + 1, k_sizes.data() + N, 1,
-                                       std::multiplies<int>());
+    const auto krows = std::accumulate(k_sizes.data() + 1, k_sizes.data() + N,
+                                       1, std::multiplies<int>());
     const auto kcols = k_sizes[0];
     const auto kt = k_transposed.reshape(Vector2i{krows, kcols});
 
     // Calculate the feature maps for each nd-pixel.
-    k_sizes[0] = 1; // Rectify
+    k_sizes[0] = 1;  // Rectify
     const auto phi_x = im2row(x, k_sizes, padding, strides, offset);
 
     y.colmajor_view()                                                  //
@@ -174,8 +155,8 @@ namespace DO { namespace Sara {
   {
     // Determine the sizes of the kernel.
     const auto krows = k.sizes()(0);
-    const auto kcols = std::accumulate(k.sizes().data() + 1, k.sizes().data() + N, 1,
-                                       std::multiplies<int>());
+    const auto kcols = std::accumulate(
+        k.sizes().data() + 1, k.sizes().data() + N, 1, std::multiplies<int>());
     const auto k_ = k.reshape(Vector2i{krows, kcols});
 
     // Rectify the proper kernel sizes for im2col as we did for im2row.
@@ -187,9 +168,6 @@ namespace DO { namespace Sara {
 
     y.reshape(Vector2i{k_.matrix().rows(), phi_x.matrix().cols()}).matrix() =
         k_.matrix() * phi_x.matrix();
-
-    // SARA_CHECK(k_.sizes().transpose());
-    // SARA_CHECK(phi_x.sizes().transpose());
   }
 
   template <typename T, int N, typename Padding>
@@ -215,12 +193,11 @@ namespace DO { namespace Sara {
   }
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara
 
 
 // Useful examples and applications.
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   //!@ {
   //! Compute the size of the Gaussian kernel.
@@ -392,7 +369,8 @@ namespace DO { namespace Sara {
   //! A bit more generalized transposed convolution implementation.
   //! This implementation is simplified (centered, no strides, no offset).
   inline auto transposed_convolution(const Image<Rgb32f>& image,
-                                     const TensorView_<float, 4>& k) -> Image<Rgb32f>
+                                     const TensorView_<float, 4>& k)
+      -> Image<Rgb32f>
   {
     const auto h = image.height();
     const auto w = image.width();
@@ -464,5 +442,4 @@ namespace DO { namespace Sara {
     return out;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara
