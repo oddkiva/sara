@@ -21,6 +21,8 @@
 
 #include <iomanip>
 
+#include <omp.h>
+
 
 namespace sara = DO::Sara;
 namespace fs = boost::filesystem;
@@ -98,6 +100,10 @@ auto get_yolo_boxes(const sara::TensorView_<float, 3>& output,
 
 int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
+  const auto num_threads = omp_get_max_threads();
+  omp_set_num_threads(num_threads);
+  Eigen::setNbThreads(num_threads);
+
   const auto data_dir_path =
       fs::canonical(fs::path{src_path("../../../../data")});
   const auto cfg_filepath =
@@ -159,6 +165,8 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 
 int main(int argc, char** argv)
 {
+  Eigen::initParallel();
+
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(__main);
   return app.exec();
