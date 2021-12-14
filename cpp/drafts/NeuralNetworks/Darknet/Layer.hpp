@@ -15,6 +15,13 @@ namespace DO::Sara::Darknet {
 
     virtual auto to_output_stream(std::ostream& os) const -> void = 0;
 
+    virtual auto forward(const TensorView_<float, 4>&)
+        -> const TensorView_<float, 4>&
+    {
+      throw std::runtime_error{"Unimplemented!"};
+      return output;
+    }
+
     friend inline auto operator<<(std::ostream& os, const Layer& l)
         -> std::ostream&
     {
@@ -60,6 +67,13 @@ namespace DO::Sara::Darknet {
       os << "- input width  = " << width << "\n";
       os << "- input height = " << height << "\n";
       os << "- input batch  = " << batch << "\n";
+    }
+
+    inline auto forward(const TensorView_<float, 4>& x)
+        -> const TensorView_<float, 4>& override
+    {
+      output = x;
+      return output;
     }
 
     int width;
@@ -279,8 +293,9 @@ namespace DO::Sara::Darknet {
     {
       // All layers must have the same width, height, and batch size.
       // Only the input channels vary.
-      const auto id = layers.front() < 0 ? nodes.size() - 1 + layers.front()
-                                         : layers.front() + 1 /* because of the input layer */;
+      const auto id = layers.front() < 0
+                          ? nodes.size() - 1 + layers.front()
+                          : layers.front() + 1 /* because of the input layer */;
       input_sizes = nodes[id]->output_sizes;
       output_sizes = nodes[id]->output_sizes;
 
@@ -425,7 +440,8 @@ namespace DO::Sara::Darknet {
     std::string nms_kind;
     float beta_nms;
 
-    inline auto update_output_sizes(const std::vector<std::unique_ptr<Layer>>& nodes)
+    inline auto
+    update_output_sizes(const std::vector<std::unique_ptr<Layer>>& nodes)
     {
       output_sizes = (*(nodes.rbegin() + 1))->output_sizes;
       output_sizes[1] = 255;
