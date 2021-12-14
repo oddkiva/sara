@@ -172,16 +172,20 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
   model.forward(x);
 #endif
 
-  // Load all the intermediate outputs calculated from Darknet.
-  const auto gt = read_all_intermediate_outputs(yolov4_tiny_out_dir);
-
-  // TODO: implement the YOLO layer.
-  for (auto layer = 1u; layer < net.size(); ++layer)
+  // OK this is checked.
+  if (false)
   {
-    std::cout << "CHECKING LAYER " << layer << ": "
-              << net[layer]->type << std::endl
-              << *net[layer] << std::endl;
-    visualize2(gt[layer - 1], net[layer]->output, x_sizes);
+    // Load all the intermediate outputs calculated from Darknet.
+    const auto gt = read_all_intermediate_outputs(yolov4_tiny_out_dir);
+
+    // TODO: implement the YOLO layer.
+    for (auto layer = 1u; layer < net.size(); ++layer)
+    {
+      std::cout << "CHECKING LAYER " << layer << ": " << net[layer]->type
+                << std::endl
+                << *net[layer] << std::endl;
+      visualize2(gt[layer - 1], net[layer]->output, x_sizes);
+    }
   }
 
   return 0;
