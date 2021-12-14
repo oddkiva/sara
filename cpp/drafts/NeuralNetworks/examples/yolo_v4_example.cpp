@@ -120,9 +120,10 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
   net = sara::Darknet::NetworkParser{}.parse_config_file(cfg_filepath.string());
   sara::Darknet::NetworkWeightLoader{weights_filepath.string()}.load(net);
   // Check the weights.
-  model.check_convolutional_weights(yolov4_tiny_out_dir);
+  if (fs::exists(yolov4_tiny_out_dir))
+    model.check_convolutional_weights(yolov4_tiny_out_dir);
 
-
+#define USE_SARA_IO
 #ifdef USE_SARA_IO
   const auto image =
       argc < 2
@@ -170,6 +171,9 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 #endif
 
   // Load all the intermediate outputs calculated from Darknet.
+  if (!fs::exists(yolov4_tiny_out_dir))
+    return 0;
+
   const auto gt = read_all_intermediate_outputs(yolov4_tiny_out_dir);
 
   // TODO: implement the YOLO layer.
