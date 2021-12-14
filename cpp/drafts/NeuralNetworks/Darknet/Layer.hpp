@@ -277,6 +277,40 @@ namespace DO::Sara::Darknet {
         bn_layer.reset(nullptr);
       }
     }
+
+    inline virtual auto forward(const TensorView_<float, 4>&x)
+        -> const TensorView_<float, 4>& override
+    {
+      auto& y = output;
+
+      const auto& w = weights.w;
+      const auto& b = weights.b;
+      const auto offset = -size / 2;
+
+      // Convolve.
+      im2col_gemm_convolve(
+                           y,
+                           x,                                       // the signal
+                           w,                                       // the transposed kernel.
+                           make_constant_padding(0.f),              // the padding type
+                           {x.size(0), x.size(1), stride, stride},  // strides in the convolution
+                           {0, 0, offset, offset});                 // offset to center the conv.
+
+      // Bias.
+      for (auto n = 0; n < y.size(0); ++n)
+        for (auto c = 0; c < y.size(1); ++c)
+          y[n][c].flat_array() += b(c);
+
+      if (activation == "leaky")
+        y.cwise_transform_inplace([](float& v) { v = v > 0 ? v : 0.1f * v; });
+      else if (activation == "linear")
+      {
+      }
+      else
+        throw std::runtime_error{"Unsupported activation!"};
+
+      return y;
+    }
   };
 
   //! @brief Concatenates the output of the different layers into a single
@@ -384,6 +418,38 @@ namespace DO::Sara::Darknet {
       os << "- input          = " << input_sizes.transpose() << "\n";
       os << "- output         = " << output_sizes.transpose();
     }
+
+    inline virtual auto forward(const TensorView_<float, 4>&x)
+        -> const TensorView_<float, 4>& override
+    {
+      auto& y = output;
+      if (size != 2)
+        throw std::runtime_error{
+            "MaxPool implementation incomplete! size must be 2"};
+
+      const auto start = Eigen::Vector4i::Zero().eval();
+      const auto& end = x.sizes();
+      const auto steps = (Eigen::Vector4i{} << 1, 1, stride, stride).finished();
+
+      const auto infx = make_infinite(x, make_constant_padding(0.f));
+
+      auto xi = infx.begin_stepped_subarray(start, end, steps);
+      auto yi = y.begin();
+      for (; yi != y.end(); ++yi, ++xi)
+      {
+        const auto& p = xi.position();
+        const Matrix<int, 4, 1> s = p;
+        const Matrix<int, 4, 1> e = p + Eigen::Vector4i{1, 1, size, size};
+
+        auto x_arr = std::array<float, 4>{};
+        auto samples = TensorView_<float, 4>{x_arr.data(), e - s};
+        crop(samples, infx, s, e);
+
+        *yi = *std::max_element(samples.begin(), samples.end());
+      }
+
+      return y;
+    }
   };
 
   struct Upsample : Layer
@@ -415,6 +481,19 @@ namespace DO::Sara::Darknet {
       os << "- stride         = " << stride << "\n";
       os << "- input          = " << input_sizes.transpose() << "\n";
       os << "- output         = " << output_sizes.transpose();
+    }
+
+    virtual auto forward(const TensorView_<float, 4>& x)
+        -> const TensorView_<float, 4>& override
+    {
+      auto& y = output;
+      for (auto yi = y.begin_array(); yi != y.end(); ++yi)
+      {
+        Matrix<int, 4, 1> p = yi.position();
+        p.tail(2) /= stride;
+        *yi = x(p);
+      }
+      return y;
     }
   };
 
@@ -529,6 +608,74 @@ namespace DO::Sara::Darknet {
 
       os << "- input          = " << input_sizes.transpose() << "\n";
       os << "- output         = " << output_sizes.transpose() << "\n";
+    }
+
+    virtual auto forward(const TensorView_<float, 4>& x)
+        -> const TensorView_<float, 4>& override
+    {
+      // Specific to COCO dataset.
+      static constexpr auto num_classes = 80;     // Due to COCO
+      static constexpr auto num_coordinates = 4;  // (x, y, w, h)
+      static constexpr auto num_probabilities =
+          1 /* P[object] */ + num_classes /* P[class|object] */;
+      static constexpr auto num_box_features =
+          num_coordinates + num_probabilities;
+
+      static_assert(num_probabilities == 81);
+      static_assert(num_box_features == 85);
+
+      // Logistic activation function.
+      const auto logistic_fn = [](float v) { return 1 / (1 + std::exp(-v)); };
+
+      auto& y = output;
+
+      const auto& alpha = scale_x_y;
+      const auto beta = -0.5f * (alpha - 1);
+
+      for (auto n = 0; n < x.size(0); ++n)
+      {
+        const auto xn = x[n];
+        auto yn = y[n];
+
+        for (auto box = 0; box < 3; ++box)
+        {
+          const auto x_channel = box * num_box_features + 0;
+          const auto y_channel = box * num_box_features + 1;
+          const auto w_channel = box * num_box_features + 2;
+          const auto h_channel = box * num_box_features + 3;
+
+          // Logistic activation in the (x, y) position.
+          // That means (x, y) is in the cell.
+          yn[x_channel].flat_array() =
+              xn[x_channel].flat_array().unaryExpr(logistic_fn);
+          yn[y_channel].flat_array() =
+              xn[y_channel].flat_array().unaryExpr(logistic_fn);
+
+          // Just copy.
+          yn[w_channel].flat_array() = xn[w_channel].flat_array();
+          yn[h_channel].flat_array() = xn[h_channel].flat_array();
+
+          // Logistic activation for the probabilities.
+          const auto p_start = box * num_box_features + num_coordinates;
+          const auto p_end = (box + 1) * num_box_features;
+          for (auto p = p_start; p < p_end; ++p)
+            yn[p].flat_array() = xn[p].flat_array().unaryExpr(logistic_fn);
+        }
+
+        // Shift and rescale the position.
+        for (auto box = 0; box < 3; ++box)
+        {
+          const auto x_channel = box * num_box_features + 0;
+          const auto y_channel = box * num_box_features + 1;
+
+          yn[x_channel].flat_array() =
+              yn[x_channel].flat_array() * alpha + beta;
+          yn[y_channel].flat_array() =
+              yn[y_channel].flat_array() * alpha + beta;
+        }
+      }
+
+      return output;
     }
   };
 
