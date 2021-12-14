@@ -26,82 +26,73 @@ namespace sara = DO::Sara;
 namespace fs = boost::filesystem;
 
 
-auto read_all_intermediate_outputs(const std::string& dir_path)
+struct Detection
 {
-  auto stringify = [](int n) {
-    std::ostringstream ss;
-    ss << std::setw(3) << std::setfill('0') << n;
-    return ss.str();
-  };
+  Eigen::Vector4f box;
+  float objectness_prob;
+  Eigen::VectorXf class_probs;
+};
 
-  auto outputs = std::vector<sara::Tensor_<float, 4>>(38);
-  for (auto i = 0u; i < outputs.size(); ++i)
+auto get_yolo_boxes(const sara::TensorView_<float, 3>& output,
+                    const std::vector<int>& box_sizes_prior,
+                    const std::vector<int>& masks,
+                    const Eigen::Vector2i& network_input_sizes,
+                    const Eigen::Vector2i& original_sizes,
+                    float objectness_threshold)
+{
+  const Eigen::Vector2f scale = original_sizes.cast<float>().array() /
+                                network_input_sizes.cast<float>().array();
+
+  auto boxes = std::vector<Detection>{};
+  for (auto box = 0; box < 3; ++box)
   {
-    const auto filepath = fs::path{dir_path} / (stringify(i) + ".bin");
-    std::cout << "Parsing " << filepath << std::endl;
-    outputs[i] = sara::Darknet::read_tensor(filepath.string());
+    // Box center
+    const auto rel_x = output[box * 85 + 0];
+    const auto rel_y = output[box * 85 + 1];
+    // Box log sizes
+    const auto log_w = output[box * 85 + 2];
+    const auto log_h = output[box * 85 + 3];
+    // Objectness probability.
+    const auto objectness = output[box * 85 + 4];
+
+    // Fetch the box size prior.
+    const auto& w_prior = box_sizes_prior[2 * masks[box] + 0];
+    const auto& h_prior = box_sizes_prior[2 * masks[box] + 1];
+
+    for (auto i = 0; i < output.size(1); ++i)
+      for (auto j = 0; j < output.size(2); ++j)
+      {
+        if (objectness(i, j) < objectness_threshold)
+          continue;
+
+        // This is the center of the box and not the top-left corner of the box.
+        auto xy = Eigen::Vector2f{
+            (j + rel_x(i, j)) / output.size(2),  //
+            (i + rel_y(i, j)) / output.size(1)   //
+        };
+        xy.array() *= original_sizes.cast<float>().array();
+
+        // Exponentiate and rescale to get the box sizes.
+        auto wh = Eigen::Vector2f{log_w(i, j), log_h(i, j)};
+        wh.array() = wh.array().exp();
+        wh(0) *= w_prior * scale.x();
+        wh(1) *= h_prior * scale.y();
+
+        // The final box.
+        const auto xywh =
+            (Eigen::Vector4f{} << (xy - wh * 0.5f), wh).finished();
+
+        // The probabilities.
+        const auto obj_prob = objectness(i, j);
+        auto class_probs = Eigen::VectorXf{80};
+        for (auto c = 0; c < 80; ++c)
+          class_probs(c) = output[box * 85 + 5 + c](i, j);
+
+        boxes.push_back({xywh, obj_prob, class_probs});
+      }
   }
 
-  return outputs;
-}
-
-
-auto visualize(const sara::TensorView_<float, 4>& y,  //
-               const Eigen::Vector2i& sizes)
-{
-  for (auto i = 0; i < y.size(1); ++i)
-  {
-    const auto y_i = y[0][i];
-    const auto im_i = sara::image_view(y_i);
-    const auto im_i_rescaled = sara::resize(sara::color_rescale(im_i), sizes);
-    sara::display(im_i_rescaled);
-    sara::get_key();
-  }
-}
-
-auto visualize2(const sara::TensorView_<float, 4>& y1,
-                const sara::TensorView_<float, 4>& y2,  //
-                const Eigen::Vector2i& sizes)
-{
-  auto reformat = [&sizes](const auto& y) {
-    const auto y_i = y;
-    const auto im_i = sara::image_view(y_i);
-    const auto im_i_rescaled = sara::resize(sara::color_rescale(im_i), sizes);
-    return im_i_rescaled;
-  };
-
-  for (auto i = 0; i < y1.size(1); ++i)
-  {
-    // Calculate on the actual tensor.
-    auto diff = sara::Tensor_<float, 2>{y1[0][i].sizes()};
-    diff.matrix() = y1[0][i].matrix() - y2[0][i].matrix();
-
-    const auto residual = diff.matrix().norm();
-    const auto minDiff = diff.matrix().cwiseAbs().minCoeff();
-    const auto maxDiff = diff.matrix().cwiseAbs().maxCoeff();
-
-    if (maxDiff > 1e-4f)
-    {
-      std::cout << "residual " << i << " = " << residual << std::endl;
-      std::cout << "min residual value " << i << " = " << minDiff << std::endl;
-      std::cout << "max residual value " << i << " = " << maxDiff << std::endl;
-
-      std::cout << "GT\n" << y1[0][i].matrix().block(0, 0, 5, 5) << std::endl;
-      std::cout << "ME\n" << y2[0][i].matrix().block(0, 0, 5, 5) << std::endl;
-
-      // Resize and color rescale the data to show it nicely.
-      const auto im1 = reformat(y1[0][i]);
-      const auto im2 = reformat(y2[0][i]);
-      const auto imdiff = reformat(diff);
-
-      sara::display(im1);
-      sara::display(im2, {im1.width(), 0});
-      sara::display(imdiff, {2 * im1.width(), 0});
-
-      sara::get_key();
-      throw std::runtime_error{"FISHY COMPUTATION ERROR!"};
-    }
-  }
+  return boxes;
 }
 
 
@@ -113,23 +104,17 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
       data_dir_path / "trained_models" / "yolov4-tiny.cfg";
   const auto weights_filepath =
       data_dir_path / "trained_models" / "yolov4-tiny.weights";
-  const auto yolov4_tiny_out_dir = "/home/david/GitHub/darknet/yolov4-tiny";
 
   auto model = sara::Darknet::Network{};
   auto& net = model.net;
   net = sara::Darknet::NetworkParser{}.parse_config_file(cfg_filepath.string());
   sara::Darknet::NetworkWeightLoader{weights_filepath.string()}.load(net);
-  // Check the weights.
-  if (fs::exists(yolov4_tiny_out_dir))
-    model.check_convolutional_weights(yolov4_tiny_out_dir);
 
-#define USE_SARA_IO
-#ifdef USE_SARA_IO
   const auto image =
       argc < 2
           ? sara::imread<sara::Rgb32f>((data_dir_path / "dog.jpg").string())
           : sara::imread<sara::Rgb32f>(argv[1]);
-  sara::create_window(416 * 3, 416);
+  sara::create_window(image.sizes());
   sara::display(image);
 
   // Resize the image to the network input sizes.
@@ -138,52 +123,35 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
       dynamic_cast<const sara::Darknet::Input&>(*net.front());
   const auto image_resized =
       sara::resize(image, {input_layer.width, input_layer.height});
-  const auto x_sizes = Eigen::Vector2i{
-      image_resized.width(), image_resized.height()  //
-  };
-
-  sara::display(image_resized);
-
+  const auto image_tensor =
+      sara::tensor_view(image_resized)
+          .reshape(Eigen::Vector4i{1, image_resized.height(),
+                                   image_resized.width(), 3})
+          .transpose({0, 3, 1, 2});
 
   // Feed the input to the network.
-  model.debug = false;
-  model.forward(sara::tensor_view(image_resized)
-                    .reshape(Eigen::Vector4i{1, image_resized.height(),
-                                             image_resized.width(), 3})
-                    .transpose({0, 3, 1, 2}));
+  // TODO: optimize this method to avoid recopying again or better, eliminate
+  // the input layer.
+  auto timer = sara::Timer{};
+  timer.restart();
+  model.forward(image_tensor);
+  const auto elapsed = timer.elapsed_ms();
+  std::cout << "Total = " << elapsed << " ms" << std::endl;
 
-#else
-  const auto x = sara::Darknet::read_tensor(                  //
-      (fs::path{yolov4_tiny_out_dir} / "input.bin").string()  //
-  );
-  const auto xt = x.transpose({0, 2, 3, 1});
-  const auto x_image = sara::ImageView<sara::Rgb32f>{
-      reinterpret_cast<sara::Rgb32f*>(const_cast<float*>(xt.data())),
-      {xt.size(2), xt.size(1)}};
-  const auto x_sizes = x_image.sizes();
 
-  sara::create_window(416 * 3, 416);
-  sara::display(x_image);
-  sara::get_key();
-
-  model.debug = false;
-  model.forward(x);
-#endif
-
-  // Load all the intermediate outputs calculated from Darknet.
-  if (!fs::exists(yolov4_tiny_out_dir))
-    return 0;
-
-  const auto gt = read_all_intermediate_outputs(yolov4_tiny_out_dir);
-
-  // TODO: implement the YOLO layer.
-  for (auto layer = 1u; layer < 31; ++layer)
+  for (const auto& layer : net)
   {
-    std::cout << "CHECKING LAYER " << layer << ": "
-              << net[layer]->type << std::endl
-              << *net[layer] << std::endl;
-    visualize2(gt[layer - 1], net[layer]->output, x_sizes);
+    if (const auto yolo = dynamic_cast<const sara::Darknet::Yolo*>(layer.get()))
+    {
+      const auto dets =
+          get_yolo_boxes(yolo->output[0], yolo->anchors, yolo->mask,
+                         image_resized.sizes(), image.sizes(), 0.25f);
+      for (const auto& det : dets)
+        sara::draw_rect(det.box(0), det.box(1), det.box(2), det.box(3),
+                        sara::Red8, 2);
+    }
   }
+  sara::get_key();
 
   return 0;
 }

@@ -238,13 +238,17 @@ namespace DO::Sara::Darknet {
       const auto fuse_conv_bn_layer = inference && batch_normalize;
       if (fuse_conv_bn_layer)
       {
-        std::cout << "Fusing Conv and BN layer" << std::endl;
+        if (debug)
+          std::cout << "Fusing Conv and BN layer" << std::endl;
+
+        static constexpr auto eps = .00001;
+
         weights.b.array() =
             (weights.b.array().cast<double>() -
              bn_layer->weights.scales.array().cast<double>() *
                  bn_layer->weights.rolling_mean.array().cast<double>() /
                  (bn_layer->weights.rolling_variance.array().cast<double>() +
-                  .00001)
+                  eps)
                      .sqrt())
                 .cast<float>();
 
@@ -252,7 +256,7 @@ namespace DO::Sara::Darknet {
         {
           const auto precomputed =
               bn_layer->weights.scales(n) /
-              std::sqrt(double(bn_layer->weights.rolling_variance(n)) + .00001);
+              std::sqrt(double(bn_layer->weights.rolling_variance(n)) + eps);
           weights.w[n].flat_array() *= precomputed;
         }
 
@@ -269,13 +273,14 @@ namespace DO::Sara::Darknet {
     int groups = 1;
     int group_id = -1;
 
-    inline auto update_output_sizes(const std::vector<std::unique_ptr<Layer>>& nodes)
+    inline auto
+    update_output_sizes(const std::vector<std::unique_ptr<Layer>>& nodes)
         -> void
     {
       // All layers must have the same width, height, and batch size.
       // Only the input channels vary.
       const auto id = layers.front() < 0 ? nodes.size() - 1 + layers.front()
-                                         : layers.front();
+                                         : layers.front() + 1 /* because of the input layer */;
       input_sizes = nodes[id]->output_sizes;
       output_sizes = nodes[id]->output_sizes;
 
@@ -420,6 +425,13 @@ namespace DO::Sara::Darknet {
     std::string nms_kind;
     float beta_nms;
 
+    inline auto update_output_sizes(const std::vector<std::unique_ptr<Layer>>& nodes)
+    {
+      output_sizes = (*(nodes.rbegin() + 1))->output_sizes;
+      output_sizes[1] = 255;
+      output.resize(output_sizes);
+    }
+
     inline auto parse_line(const std::string& line) -> void override
     {
       auto line_split = std::vector<std::string>{};
@@ -503,6 +515,5 @@ namespace DO::Sara::Darknet {
       os << "- output         = " << output_sizes.transpose() << "\n";
     }
   };
-
 
 }  // namespace DO::Sara::Darknet
