@@ -63,8 +63,9 @@ function build_library()
   if [[ "${platform_name}" == "Darwin" ]]; then
     cmake_options+="-DCMAKE_Swift_COMPILER=$(which swiftc) "
   elif [[ "${platform_name}" == "Linux" ]]; then
-    if [ -d "${HOME}/opt/swift-5.5.1-RELEASE-ubuntu20.04/usr/bin/swiftc " ]; then
-      cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.5.1-RELEASE-ubuntu20.04/usr/bin/swiftc "
+    SWIFTC_PATH="${HOME}/opt/swift-5.5.1-RELEASE-ubuntu20.04/usr/bin/swiftc"
+    if [ -f "${SWIFTC_PATH}" ]; then
+      cmake_options+="-DCMAKE_Swift_COMPILER=${SWIFTC_PATH} "
     fi
 
     PYBIND11_DIR=$(python3 -c "import pybind11; print(pybind11.get_cmake_dir())")
