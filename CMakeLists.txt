@@ -51,7 +51,7 @@ include(sara_use_ccache)
 
 
 # We are post-2020 now: let's all look to the future please.
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # Use CUDA if available.
 include(CheckLanguage)

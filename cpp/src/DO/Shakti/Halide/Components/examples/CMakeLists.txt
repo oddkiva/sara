@@ -5,7 +5,6 @@ function (add_halide_executable source_file)
   add_executable(${name} ${source_file})
   target_link_libraries(${name}
     PRIVATE
-    ${CMAKE_DL_LIBS}
     ${DO_Sara_LIBRARIES}
     ${OpenMP_CXX_LIBRARIES}
     Halide::Halide)
@@ -13,9 +12,6 @@ function (add_halide_executable source_file)
   target_compile_options(${name}
     PRIVATE
     $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-but-set-variable>)
-  target_compile_features(${name}
-    PRIVATE
-    cxx_std_17)
 
   set_property(TARGET ${name} PROPERTY FOLDER "Tutorials/Halide")
 endfunction ()

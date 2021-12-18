@@ -11,7 +11,5 @@ foreach (file ${test_SOURCE_FILES})
     DEPENDENCIES ${DO_Sara_LIBRARIES} Halide::Halide ${CMAKE_DL_LIBS})
   set_target_properties(${filename}
     PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED YES
     FOLDER "Tests/Shakti/Halide")
 endforeach ()
