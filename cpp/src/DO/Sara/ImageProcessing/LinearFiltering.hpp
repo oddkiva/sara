@@ -166,6 +166,10 @@ namespace DO { namespace Sara {
   }
 
   //! @brief Apply Gaussian smoothing to image.
+  void apply_gaussian_filter(const ImageView<float>& src, ImageView<float>& dst,
+                             float sigma, float gauss_truncate = 4.f);
+
+  //! @brief Apply Gaussian smoothing to image.
   template <typename T>
   void
   apply_gaussian_filter(const ImageView<T>& src, ImageView<T>& dst,

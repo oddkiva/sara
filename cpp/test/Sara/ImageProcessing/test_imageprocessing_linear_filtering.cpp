@@ -150,6 +150,7 @@ BOOST_AUTO_TEST_CASE(test_gaussian)
   auto dst_image = Image<float>{};
   BOOST_CHECK_THROW(apply_gaussian_filter(_src_image, dst_image, 1.f, 1.f),
                     domain_error);
+  SARA_DEBUG << "OK" << std::endl;
 
   dst_image.resize(_src_image.sizes());
   apply_gaussian_filter(_src_image, dst_image, 1.f, 1.f);

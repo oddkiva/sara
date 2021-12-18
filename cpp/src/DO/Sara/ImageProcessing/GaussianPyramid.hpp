@@ -31,9 +31,10 @@ namespace DO { namespace Sara {
 
   //! Computes a pyramid of Gaussians.
   template <typename T>
-  ImagePyramid<T>
+  inline auto
   gaussian_pyramid(const ImageView<T>& image,
                    const ImagePyramidParams& params = ImagePyramidParams())
+      -> ImagePyramid<T>
   {
     using Scalar = typename ImagePyramid<T>::scalar_type;
 
@@ -47,7 +48,7 @@ namespace DO { namespace Sara {
     else if (params.first_octave_index() > 0)
       I = reduce(image, 1 / resize_factor);
     else
-      I = image; // TODO: optimize.
+      I = image;  // TODO: optimize.
 
     // Deduce the new camera sigma with respect to the dilated image.
     const auto camera_sigma = Scalar(params.scale_camera()) * resize_factor;
@@ -109,10 +110,13 @@ namespace DO { namespace Sara {
     return G;
   }
 
+  auto difference_of_gaussians_pyramid(const ImagePyramid<float>& gaussians)
+      -> ImagePyramid<float>;
+
   //! Computes a pyramid of difference of Gaussians from the Gaussian pyramid.
   template <typename T>
-  ImagePyramid<T>
-  difference_of_gaussians_pyramid(const ImagePyramid<T>& gaussians)
+  inline auto difference_of_gaussians_pyramid(const ImagePyramid<T>& gaussians)
+      -> ImagePyramid<T>
   {
     auto D = ImagePyramid<T>{};
     D.reset(gaussians.num_octaves(), gaussians.num_scales_per_octave() - 1,
@@ -135,7 +139,8 @@ namespace DO { namespace Sara {
   //! Computes a pyramid of scale-normalized Laplacians of Gaussians from the
   //! Gaussian pyramid.
   template <typename T>
-  ImagePyramid<T> laplacian_pyramid(const ImagePyramid<T>& gaussians)
+  inline auto laplacian_pyramid(const ImagePyramid<T>& gaussians)
+      -> ImagePyramid<T>
   {
     using scalar_type = typename ImagePyramid<T>::scalar_type;
 
@@ -162,7 +167,8 @@ namespace DO { namespace Sara {
   //! where @f$\sigma = 2^{s/S + o}@f$ where @f$S@f$ is the number of scales per
   //! octave.
   template <typename T>
-  Matrix<T, 3, 1> gradient(const ImagePyramid<T>& I, int x, int y, int s, int o)
+  inline auto gradient(const ImagePyramid<T>& I, int x, int y, int s, int o)
+      -> Matrix<T, 3, 1>
   {
     if (x < 1 || x >= I(s, o).width() - 1 || y < 1 ||
         y >= I(s, o).height() - 1 || s < 1 ||
@@ -180,7 +186,8 @@ namespace DO { namespace Sara {
   //! where @f$\sigma = 2^{s/S + o}@f$ where @f$S@f$ is the number of scales
   //! per octave.
   template <typename T>
-  Matrix<T, 3, 3> hessian(const ImagePyramid<T>& I, int x, int y, int s, int o)
+  inline auto hessian(const ImagePyramid<T>& I, int x, int y, int s, int o)
+      -> Matrix<T, 3, 3>
   {
     if (x < 1 || x >= I(s, o).width() - 1 || y < 1 ||
         y >= I(s, o).height() - 1 || s < 1 ||

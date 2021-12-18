@@ -9,6 +9,7 @@ if (SARA_USE_FROM_SOURCE)
       PRIVATE
       DO::Sara::Geometry
       DO::Sara::FeatureDescriptors
+      DO::Sara::ImageProcessing
       PUBLIC
       DO::Sara::Core
       $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
