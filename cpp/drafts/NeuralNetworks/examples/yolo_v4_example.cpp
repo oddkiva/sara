@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2021-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -100,9 +100,11 @@ auto get_yolo_boxes(const sara::TensorView_<float, 3>& output,
 
 int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
+#ifndef __APPLE__
   const auto num_threads = omp_get_max_threads();
   omp_set_num_threads(num_threads);
   Eigen::setNbThreads(num_threads);
+#endif
 
   const auto data_dir_path =
       fs::canonical(fs::path{src_path("../../../../data")});
@@ -165,7 +167,9 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 
 int main(int argc, char** argv)
 {
+#ifndef __APPLE__
   Eigen::initParallel();
+#endif
 
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(__main);
