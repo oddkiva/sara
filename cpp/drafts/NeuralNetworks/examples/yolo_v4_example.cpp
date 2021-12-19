@@ -130,7 +130,7 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
   const auto& input_layer =
       dynamic_cast<const sara::Darknet::Input&>(*net.front());
   const auto image_resized =
-      sara::resize(image, {input_layer.width, input_layer.height});
+      sara::resize(image, {input_layer.width(), input_layer.height()});
   const auto image_tensor =
       sara::tensor_view(image_resized)
           .reshape(Eigen::Vector4i{1, image_resized.height(),

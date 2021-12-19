@@ -36,7 +36,7 @@ namespace DO::Sara::Darknet {
     }
 
     inline auto make_new_layer(const std::string& layer_type,
-                        std::vector<std::unique_ptr<Layer>>& nodes) const
+                               std::vector<std::unique_ptr<Layer>>& nodes) const
     {
       std::cout << "MAKING NEW LAYER: " << layer_type << std::endl;
 
@@ -56,7 +56,8 @@ namespace DO::Sara::Darknet {
       nodes.back()->type = layer_type;
     }
 
-    inline auto finish_layer_init(std::vector<std::unique_ptr<Layer>>& nodes) const
+    inline auto
+    finish_layer_init(std::vector<std::unique_ptr<Layer>>& nodes) const
     {
       const auto& layer_type = nodes.back()->type;
       if (layer_type != "net")
