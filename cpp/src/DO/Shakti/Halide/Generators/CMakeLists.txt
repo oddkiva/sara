@@ -174,11 +174,6 @@ shakti_halide_library_v2(
 # Gradients in Cartesian coordinates
 # ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_polar_gradient_2d_32f_gpu
-  SRCS DifferentialGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-shakti_halide_library_v2(
   NAME shakti_gradient_2d_32f_cpu
   SRCS DifferentialGeneratorsV2.cpp)
 
