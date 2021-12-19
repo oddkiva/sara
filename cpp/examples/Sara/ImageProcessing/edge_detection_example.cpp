@@ -57,7 +57,7 @@ int __main(int argc, char** argv)
 #else
                                   : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
-  const auto downscale_factor = argc >= 3 ? std::atoi(argv[2]) : 2;
+  const auto downscale_factor = argc >= 3 ? std::atoi(argv[2]) : 1;
 
   // OpenMP.
   omp_set_num_threads(omp_get_max_threads());
