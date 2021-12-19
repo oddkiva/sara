@@ -280,7 +280,7 @@ auto test_on_video(int argc, char** argv)
 #endif
   auto frame_gray32f = sara::Image<float>{frame.sizes()};
 
-  const auto scale_factor = 1;
+  const auto scale_factor = argc < 3 ? 1 : std::stoi(argv[2]);
   auto frame_downsampled = sara::Image<float>{frame.sizes() / scale_factor};
 
   // Halide buffers.
@@ -298,8 +298,7 @@ auto test_on_video(int argc, char** argv)
   sara::set_antialiasing();
 
   auto frames_read = 0;
-  auto skip = 0;
-
+  const auto skip = argc < 4 ? 0 : std::stoi(argv[3]);
   while (true)
   {
     sara::tic();
