@@ -28,8 +28,9 @@ namespace DO::Sara {
       throw std::domain_error{
           "Source and destination image sizes are not equal!"};
 
-    // For some reason, Halide AOT does not like this...
-    if (src.width() < 64 || src.height() < 64)
+    // For some reason, Halide AOT requires the buffer to have a width of size
+    // 64 minimum.
+    if (src.width() < 64)
     {
       // Compute the size of the Gaussian kernel.
       auto kernel_size = int(2 * gauss_truncate * sigma + 1);
@@ -56,16 +57,14 @@ namespace DO::Sara {
 
       apply_row_based_filter(src, dst, &kernel[0], kernel_size);
       apply_column_based_filter(dst, dst, &kernel[0], kernel_size);
-      return;
     }
-
-    auto src_buffer = Shakti::Halide::as_runtime_buffer_4d(src);
-    auto dst_buffer = Shakti::Halide::as_runtime_buffer_4d(dst);
-
-    src_buffer.set_host_dirty();
-    shakti_gaussian_convolution_cpu(src_buffer, sigma, gauss_truncate,
-                                    dst_buffer);
-    dst_buffer.copy_to_host();
+    else
+    {
+      auto src_buffer = Shakti::Halide::as_runtime_buffer_4d(src);
+      auto dst_buffer = Shakti::Halide::as_runtime_buffer_4d(dst);
+      shakti_gaussian_convolution_cpu(src_buffer, sigma, gauss_truncate,
+                                      dst_buffer);
+    }
   }
 
   auto difference_of_gaussians_pyramid(const ImagePyramid<float>& gaussians)
@@ -82,7 +81,7 @@ namespace DO::Sara {
       {
         D(s, o).resize(gaussians(s, o).sizes());
 
-        if (D(s, o).width() < 64 || D(s, o).height() < 64)
+        if (D(s, o).width() < 64)
         {
           tensor_view(D(s, o)).flat_array() =
               tensor_view(gaussians(s + 1, o)).flat_array() -

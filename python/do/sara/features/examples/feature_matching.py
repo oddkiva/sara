@@ -31,7 +31,7 @@ def user_main():
     sara.create_window(w, h)
 
     # Feature detection and matching parameters.
-    first_octave = 2
+    first_octave = 0
     image_pyramid_params = sara.ImagePyramidParams(
         first_octave_index=first_octave)
     sift_nn_ratio = 0.8
@@ -60,9 +60,9 @@ def user_main():
         with sara.Timer("[SARA] Draw"):
             f1 = [f for f in sara.features(kp_prev)]
             f2 = [f for f in sara.features(kp_curr)]
-            for f in f1:
+            for f in f1[:1000]:
                 draw_feature(video_frame, f, (127, 0, 0))
-            for f in f2:
+            for f in f2[:1000]:
                 draw_feature(video_frame, f, (255, 0, 0))
             for m in matches[:100]:
                 x = f1[m.x].coords

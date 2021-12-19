@@ -52,11 +52,11 @@ namespace DO { namespace Sara {
       for (auto i = 0; i < N; ++i)
       {
         if (in.position()[i] == 0)
-          out[i] = (in.delta(i, 1) - *in) / 2; // Replicate the border
+          out[i] = (in.delta(i, 1) - *in) / 2;  // Replicate the border
         else if (in.position()[i] == in.sizes()[i] - 1)
-          out[i] = (*in - in.delta(i,-1)) / 2; // Replicate the border
+          out[i] = (*in - in.delta(i, -1)) / 2;  // Replicate the border
         else
-          out[i] = (in.delta(i, 1) - in.delta(i,-1)) / 2;
+          out[i] = (in.delta(i, 1) - in.delta(i, -1)) / 2;
       }
     }
 
@@ -141,7 +141,7 @@ namespace DO { namespace Sara {
     {
       auto out = Scalar<Field>{};
 
-      auto in =  scalar_field.begin_array();
+      auto in = scalar_field.begin_array();
       in += position;
       operator()<Field>(in, out);
 
@@ -149,17 +149,15 @@ namespace DO { namespace Sara {
     }
 
     template <typename Field>
-    auto operator()(const Field& in, ScalarFieldView<Field>& out) const
-        -> void
+    auto operator()(const Field& in, ScalarFieldView<Field>& out) const -> void
     {
       if (in.sizes() != out.sizes())
         throw std::domain_error{
-          "Source and destination image sizes are not equal!"
-        };
+            "Source and destination image sizes are not equal!"};
 
       auto in_i = in.begin_array();
       auto out_i = out.begin();
-      for ( ; !in_i.end(); ++in_i, ++out_i)
+      for (; !in_i.end(); ++in_i, ++out_i)
         operator()<Field>(in_i, *out_i);
     }
 
@@ -216,10 +214,10 @@ namespace DO { namespace Sara {
             auto prev_j = in.position()[j] == 0 ? 0 : -1;
 
             out(i, j) = (in.delta(i, next_i, j, next_j) -
-                       in.delta(i, prev_i, j, next_j) -
-                       in.delta(i, next_i, j, prev_j) +
-                       in.delta(i, prev_i, j, prev_j)) /
-                      static_cast<T>(4);
+                         in.delta(i, prev_i, j, next_j) -
+                         in.delta(i, next_i, j, prev_j) +
+                         in.delta(i, prev_i, j, prev_j)) /
+                        static_cast<T>(4);
 
             out(j, i) = out(i, j);
           }
@@ -244,7 +242,7 @@ namespace DO { namespace Sara {
     template <typename Field>
     auto operator()(const Field& in) const -> HessianField<Field>
     {
-      auto out = HessianField<Field>{ in.sizes() };
+      auto out = HessianField<Field>{in.sizes()};
 
       auto in_i = in.begin_array();
       auto out_i = out.begin();
@@ -256,6 +254,12 @@ namespace DO { namespace Sara {
   };
 
 
+  //! @brief Computes gradients in polar coordinates.
+  //! This is optimized with Halide.
+  auto gradient_in_polar_coordinates(const ImageView<float>& src,
+                                     ImageView<float>& mag,
+                                     ImageView<float>& ori) -> void;
+
   /*!
     @brief Gradient computation
     @param[in] f input scalar field.
@@ -263,7 +267,8 @@ namespace DO { namespace Sara {
     @return 2D gradient vector.
    */
   template <typename T, int N>
-  Matrix<T,N,1> gradient(const ImageView<T, N>& f, const Matrix<int, N, 1>& x)
+  inline auto gradient(const ImageView<T, N>& f, const Matrix<int, N, 1>& x)
+      -> Matrix<T, N, 1>
   {
     return Gradient{}(f, x);
   }
@@ -274,7 +279,7 @@ namespace DO { namespace Sara {
     @return gradient vector field
    */
   template <typename T, int N>
-  inline Image<Matrix<T, N, 1>, N> gradient(const ImageView<T, N>& in)
+  inline auto gradient(const ImageView<T, N>& in) -> Image<Matrix<T, N, 1>, N>
   {
     return Gradient{}(in);
   }
@@ -286,8 +291,8 @@ namespace DO { namespace Sara {
     @return laplacian value
   */
   template <typename T, int N>
-  inline T laplacian(const ImageView<T, N>& f,
-                     const typename ImageView<T, N>::vector_type& x)
+  inline auto laplacian(const ImageView<T, N>& f,
+                        const typename ImageView<T, N>::vector_type& x) -> T
   {
     const T val = Laplacian{}.operator()<ImageView<T, N>>(f, x);
     return val;
@@ -299,7 +304,7 @@ namespace DO { namespace Sara {
     @return laplacian field.
    */
   template <typename T, int N>
-  inline Image<T, N> laplacian(const ImageView<T, N>& in)
+  inline auto laplacian(const ImageView<T, N>& in) -> Image<T, N>
   {
     return Laplacian{}.operator()<ImageView<T, N>>(in);
   }
@@ -311,8 +316,8 @@ namespace DO { namespace Sara {
     @return Hessian matrix.
    */
   template <typename T, int N>
-  inline Matrix<T, N, N> hessian(const ImageView<T, N>& f,
-                                 const Matrix<int, N, 1>& x)
+  inline auto hessian(const ImageView<T, N>& f, const Matrix<int, N, 1>& x)
+      -> Matrix<T, N, N>
   {
     return Hessian{}(f, x);
   }
@@ -323,12 +328,11 @@ namespace DO { namespace Sara {
     @return Hessian matrix field
    */
   template <typename T, int N>
-  inline Image<Matrix<T, N, N>> hessian(const ImageView<T, N>& in)
+  inline auto hessian(const ImageView<T, N>& in) -> Image<Matrix<T, N, N>>
   {
     return Hessian{}(in);
   }
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

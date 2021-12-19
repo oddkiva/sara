@@ -18,6 +18,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
+#include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <boost/filesystem.hpp>
@@ -58,6 +59,7 @@ int __main(int argc, char** argv)
                                   : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
   const auto downscale_factor = argc >= 3 ? std::atoi(argv[2]) : 1;
+  const auto skip = argc >= 4 ? std::atoi(argv[3]) : 0;
 
   // OpenMP.
   omp_set_num_threads(omp_get_max_threads());
@@ -97,7 +99,6 @@ int __main(int argc, char** argv)
 
 
   auto frames_read = 0;
-  const auto skip = 0;
   while (true)
   {
     if (!video_stream.read())
@@ -111,7 +112,7 @@ int __main(int argc, char** argv)
     SARA_DEBUG << "Processing frame " << frames_read << std::endl;
 
     tic();
-    frame_gray32f = frame.convert<float>();
+    frame_gray32f = from_rgb8_to_gray32f(frame);
     toc("Grayscale");
 
     tic();

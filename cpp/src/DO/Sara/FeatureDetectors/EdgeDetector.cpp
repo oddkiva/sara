@@ -23,14 +23,12 @@ namespace DO::Sara {
   auto EdgeDetector::operator()(const ImageView<float>& image) -> void
   {
     tic();
-    pipeline.gradient_cartesian = gradient(image);
-    toc("Gradient");
-
-    tic();
-    pipeline.gradient_magnitude = pipeline.gradient_cartesian.cwise_transform(
-        [](const auto& v) { return v.norm(); });
-    pipeline.gradient_orientation = pipeline.gradient_cartesian.cwise_transform(
-        [](const auto& v) { return std::atan2(v.y(), v.x()); });
+    if (pipeline.gradient_magnitude.sizes() != image.sizes())
+      pipeline.gradient_magnitude.resize(image.sizes());
+    if (pipeline.gradient_orientation.sizes() != image.sizes())
+      pipeline.gradient_orientation.resize(image.sizes());
+    gradient_in_polar_coordinates(image, pipeline.gradient_magnitude,
+                                  pipeline.gradient_orientation);
     toc("Polar Coordinates");
 
     tic();

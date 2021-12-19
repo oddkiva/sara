@@ -68,7 +68,7 @@ namespace DO { namespace Sara {
 
   //! @brief Convert color of image.
   template <typename SrcImageBase, typename DstImageBase>
-  void convert(const SrcImageBase& src, DstImageBase& dst)
+  auto convert(const SrcImageBase& src, DstImageBase& dst) -> void
   {
     if (src.sizes() != dst.sizes())
       throw std::domain_error{

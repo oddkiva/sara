@@ -37,7 +37,7 @@ namespace DO::Shakti::Halide {
       const Sara::ImageView<Sara::Pixel<T, ColorSpace>>& image)
   {
     auto& image_non_const =
-        const_cast<Sara::Image<Sara::Pixel<T, ColorSpace>>&>(image);
+        const_cast<Sara::ImageView<Sara::Pixel<T, ColorSpace>>&>(image);
     return ::Halide::Runtime::Buffer<T>::make_interleaved(
         reinterpret_cast<T*>(image_non_const.data()),  //
         image.width(),                                 //

@@ -15,55 +15,53 @@
 
 #include <DO/Sara/Core/Image/Image.hpp>
 
+#include <execution>
+
 
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup Differential
-    @{
+   *  @ingroup Differential
+   *  @{
    */
 
   /*!
-    @brief Computes an orientation field from a 2D vector field.
-    @param[in]
-      src
-      an image in which each element **src(x,y)** are 2D vectors, i.e., a discretized
-      2D vector field, e.g. image gradients.
-    @param[in,out]
-      dst
-      an image where each pixel **dst(x,y)** contains the orientation of the 2D
-      vector 'src(x,y)'
+   *  @brief Computes an orientation field from a 2D vector field.
+   *  @param[in]
+   *    src
+   *    an image in which each element **src(x,y)** are 2D vectors, i.e., a
+   *  discretized 2D vector field, e.g. image gradients.
+   *  @param[in,out]
+   *    dst
+   *    an image where each pixel **dst(x,y)** contains the orientation of the 2D
+   *    vector 'src(x,y)'
    */
   template <typename T>
-  void orientation(const ImageView<Matrix<T,2,1> >& src, ImageView<T>& dst)
+  void orientation(const ImageView<Matrix<T, 2, 1>>& src, ImageView<T>& dst)
   {
     if (src.sizes() != dst.sizes())
       throw std::domain_error{
-        "Source and destination image sizes are not equal!"
-      };
+          "Source and destination image sizes are not equal!"};
 
-    auto src_it = src.begin();
-    auto src_it_end = src.end();
-    auto  dst_it = dst.begin();
-    for ( ; src_it != src_it_end; ++src_it, ++dst_it)
-      *dst_it = std::atan2(src_it->y(), src_it->x());
+    std::transform(src.begin(), src.end(), dst.begin(),
+                   [](const auto& v) { return std::atan2(v.y(), v.x()); });
   }
 
   /*!
-    @brief Computes an orientation field from a 2D vector field.
-    @param[in]
-      src
-      an image in which each element **src(x,y)** are 2D vectors, i.e., a discretized
-      2D vector field, e.g. image gradients.
-    @param[out]
-      dst
-      an image where each pixel **dst(x,y)** contains the orientation of the 2D
-      vector **src(x,y)**
+   *  @brief Computes an orientation field from a 2D vector field.
+   *  @param[in]
+   *    src
+   *    an image in which each element **src(x,y)** are 2D vectors, i.e., a
+   *  discretized 2D vector field, e.g. image gradients.
+   *  @param[out]
+   *    dst
+   *    an image where each pixel **dst(x,y)** contains the orientation of the 2D
+   *    vector **src(x,y)**
    */
   template <typename T>
-  Image<T> orientation(const ImageView<Matrix<T,2,1> >& src)
+  Image<T> orientation(const ImageView<Matrix<T, 2, 1>>& src)
   {
-    auto ori = Image<T>{ src.sizes() };
+    auto ori = Image<T>{src.sizes()};
     orientation(src, ori);
     return ori;
   }
@@ -84,5 +82,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

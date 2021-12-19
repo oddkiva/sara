@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core Graphics FeatureDescriptors REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics ImageProcessing FeatureDescriptors REQUIRED)
 
 file(GLOB test_SOURCE_FILES FILES *.cpp)
 
