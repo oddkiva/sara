@@ -8,6 +8,7 @@ rmd_files:
   html: [
     "index.Rmd",
     "geometry.Rmd",
+    "single_view_geometry.Rmd",
     "features.Rmd",
     "descriptors.Rmd",
     "sfm.Rmd",
@@ -21,6 +22,7 @@ rmd_files:
   latex: [
     "index.Rmd",
     "geometry.Rmd",
+    "single_view_geometry.Rmd",
     "features.Rmd",
     "descriptors.Rmd",
     "sfm.Rmd",

@@ -122,18 +122,18 @@ namespace DO::Shakti::HalideBackend {
 
   namespace v2 {
 
-    auto compute_sift_descriptors(                      //
-        Sara::ImageView<float>& gradient_magnitudes,    //
-        Sara::ImageView<float>& gradient_orientations,  //
-        std::vector<float>& x,                          //
-        std::vector<float>& y,                          //
-        std::vector<float>& scale,                      //
-        std::vector<float>& orientation,                //
-        float scale_upper_bound,                        //
-        sara::Tensor_<float, 2>& sifts,                 //
-        float bin_length_in_scale_unit = 3.f,           //
-        int N = 4,                                      //
-        int O = 8)                                      //
+    auto compute_sift_descriptors(                              //
+        Sara::ImageView<float>& gradient_magnitudes,            //
+        Sara::ImageView<float>& gradient_orientations,          //
+        std::vector<float>& x,                                  //
+        std::vector<float>& y,                                  //
+        std::vector<float>& scale,                              //
+        std::vector<float>& orientation,                        //
+        float scale_upper_bound,                                //
+        sara::Tensor_<float, 2>& sifts,                         //
+        [[maybe_unused]] float bin_length_in_scale_unit = 3.f,  //
+        int N = 4,                                              //
+        int O = 8)                                              //
         -> void
     {
       // Input buffers.
@@ -215,18 +215,18 @@ namespace DO::Shakti::HalideBackend {
 
   namespace v3 {
 
-    auto compute_sift_descriptors(                      //
-        Sara::ImageView<float>& gradient_magnitudes,    //
-        Sara::ImageView<float>& gradient_orientations,  //
-        std::vector<float>& x,                          //
-        std::vector<float>& y,                          //
-        std::vector<float>& scale,                      //
-        std::vector<float>& orientation,                //
-        float scale_upper_bound,                        //
-        sara::Tensor_<float, 3>& sifts,                 //
-        float bin_length_in_scale_unit = 3.f,           //
-        int N = 4,                                      //
-        int O = 8)                                      //
+    auto compute_sift_descriptors(                              //
+        Sara::ImageView<float>& gradient_magnitudes,            //
+        Sara::ImageView<float>& gradient_orientations,          //
+        std::vector<float>& x,                                  //
+        std::vector<float>& y,                                  //
+        std::vector<float>& scale,                              //
+        std::vector<float>& orientation,                        //
+        float scale_upper_bound,                                //
+        sara::Tensor_<float, 3>& sifts,                         //
+        [[maybe_unused]] float bin_length_in_scale_unit = 3.f,  //
+        int N = 4,                                              //
+        int O = 8)                                              //
         -> void
     {
       // Input buffers.

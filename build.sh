@@ -2,6 +2,9 @@
 set -ex
 
 
+SARA_DOCKER_IMAGE=registry.gitlab.com/do-cv/sara
+
+
 if [ -z "$1" ]; then
   build_type=Release;
 else
@@ -60,7 +63,12 @@ function build_library()
   if [[ "${platform_name}" == "Darwin" ]]; then
     cmake_options+="-DCMAKE_Swift_COMPILER=$(which swiftc) "
   elif [[ "${platform_name}" == "Linux" ]]; then
-    cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.4.2-RELEASE-ubuntu20.04/usr/bin/swiftc "
+    if [ -d "${HOME}/opt/swift-5.5.1-RELEASE-ubuntu20.04/usr/bin/swiftc " ]; then
+      cmake_options+="-DCMAKE_Swift_COMPILER=${HOME}/opt/swift-5.5.1-RELEASE-ubuntu20.04/usr/bin/swiftc "
+    fi
+
+    PYBIND11_DIR=$(python3 -c "import pybind11; print(pybind11.get_cmake_dir())")
+    cmake_options+="-Dpybind11_DIR=${PYBIND11_DIR} "
   fi
 
   # Use latest Qt version instead of the system Qt.
@@ -90,16 +98,16 @@ function build_library()
   # Compile Halide code.
   cmake_options+="-DSARA_USE_HALIDE=ON "
   if [ "${platform_name}" == "Linux" ]; then
-    cmake_options+="-DCMAKE_PREFIX_PATH=$HOME/opt/halide-12.0.1 "
+    cmake_options+="-DCMAKE_PREFIX_PATH=$HOME/opt/Halide-13.0.0-x86-64-linux "
   fi
   if [ "${platform_name}" == "Darwin" ]; then
     cmake_options+="-DLLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm "
   fi
 
   # nVidia platform's specific options.
-  cmake_options+="-DNvidiaVideoCodec_ROOT=${HOME}/opt/Video_Codec_SDK_11.0.10 "
-  # Use TensorRT.
-  cmake_options+="-DTensorRT_ROOT=${HOME}/opt/TensorRT-7.2.2.3 "
+  if [ -d "${HOME}/opt/Video_Codec_SDK_11.0.10" ]; then
+    cmake_options+="-DNvidiaVideoCodec_ROOT=${HOME}/opt/Video_Codec_SDK_11.0.10 "
+  fi
 
   echo $(which cmake)
   echo $(cmake --version)
@@ -200,24 +208,38 @@ function install_package()
 }
 
 
-sara_build_dir="sara-build-${build_type}"
+if [[ ${build_type} == "docker" ]]; then
+  # Build the docker image.
+  docker build -f Dockerfile -t ${SARA_DOCKER_IMAGE}:latest .
+  # Run the docker image.
+  docker run --gpus all -it \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v "$HOME/.Xauthority:/root/.Xauthority:rw" \
+    -v /media/Linux\ Data:/media/Linux\ Data \
+    -v $PWD:/workspace/sara \
+    -e DISPLAY \
+    --ipc=host \
+    --net=host \
+    ${SARA_DOCKER_IMAGE} \
+    /bin/zsh
+else
+  sara_build_dir="sara-build-${build_type}"
 
-# Create the build directory.
-if [ -d "../${sara_build_dir}" ]; then
-  rm -rf ../${sara_build_dir}
-fi
-
-mkdir ../${sara_build_dir}
-
-
-cd ../${sara_build_dir}
-{
-  if [[ ${build_type} == "ios" ]]; then
-    build_library_for_ios
-  else
-    install_python_packages_via_pip
-    build_library
+  # Create the build directory.
+  if [ -d "../${sara_build_dir}" ]; then
+    rm -rf ../${sara_build_dir}
   fi
-  # install_package
-}
-cd ..
+
+  mkdir ../${sara_build_dir}
+  cd ../${sara_build_dir}
+  {
+    if [[ ${build_type} == "ios" ]]; then
+      build_library_for_ios
+    else
+      install_python_packages_via_pip
+      build_library
+    fi
+    # install_package
+  }
+  cd ..
+fi

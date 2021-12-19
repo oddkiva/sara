@@ -55,7 +55,7 @@ namespace DO::Sara::TensorRT {
       std::cout << "Deleting " << typeid(object).name() << " " << object
                 << std::endl;
 #endif
-      object->destroy();
+      delete object;
     }
     object = nullptr;
   }
@@ -252,8 +252,8 @@ namespace DO::Sara::TensorRT {
                           reinterpret_cast<const void*>(weights[b_name].data()),
                           static_cast<std::int64_t>(weights[b_name].size())};
 
-    const auto conv_op = model->addConvolution(x, num_filters, kernel_sizes,
-                                               w_weights, b_weights);
+    const auto conv_op = model->addConvolutionNd(x, num_filters, kernel_sizes,
+                                                 w_weights, b_weights);
 
     auto y = conv_op->getOutput(0);
 

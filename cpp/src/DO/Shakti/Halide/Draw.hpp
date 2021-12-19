@@ -12,12 +12,12 @@ namespace sara = DO::Sara;
 namespace halide = DO::Shakti::HalideBackend;
 
 
-auto draw_quantized_extrema(const halide::v2::QuantizedExtremumArray& e,
-                            float scale, float octave_scaling_factor = 1,
-                            int width = 2)
+inline auto draw_quantized_extrema(const halide::v2::QuantizedExtremumArray& e,
+                                   float scale, float octave_scaling_factor = 1,
+                                   int width = 2)
 {
 #pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
+  for (auto i = 0; i < static_cast<int>(e.size()); ++i)
   {
     const auto& c = e.type(i) == 1 ? sara::Cyan8 : sara::Blue8;
     const float x = e.x(i) * octave_scaling_factor;
@@ -31,13 +31,13 @@ auto draw_quantized_extrema(const halide::v2::QuantizedExtremumArray& e,
   }
 }
 
-auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
-                            const halide::v2::QuantizedExtremumArray& e,
-                            float scale, float octave_scaling_factor = 1,
-                            int width = 2)
+inline auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
+                                   const halide::v2::QuantizedExtremumArray& e,
+                                   float scale, float octave_scaling_factor = 1,
+                                   int width = 2)
 {
 #pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
+  for (auto i = 0; i < static_cast<int>(e.size()); ++i)
   {
     const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Cyan8;
     const float x = std::round(e.x(i) * octave_scaling_factor);
@@ -45,13 +45,14 @@ auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
 
     // N.B.: the blob radius is the scale multiplied by sqrt(2).
     // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = std::round(scale * octave_scaling_factor * float(M_SQRT2));
+    const float r =
+        std::round(scale * octave_scaling_factor * static_cast<float>(M_SQRT2));
 
     sara::draw_circle(display, x, y, r, c, width);
   }
 }
 
-auto draw_quantized_extrema(
+inline auto draw_quantized_extrema(
     const halide::Pyramid<halide::QuantizedExtremumArray>& extrema)
 {
   for (const auto& so : extrema.scale_octave_pairs)
@@ -88,8 +89,8 @@ auto draw_quantized_extrema(
 }
 
 
-auto draw_extrema(const halide::v2::ExtremumArray& e,
-                  float octave_scaling_factor = 1, int width = 2)
+inline auto draw_extrema(const halide::v2::ExtremumArray& e,
+                         float octave_scaling_factor = 1, int width = 2)
 {
 #pragma omp parallel for
   for (auto i = 0; i < e.size(); ++i)
@@ -108,7 +109,8 @@ auto draw_extrema(const halide::v2::ExtremumArray& e,
 }
 
 
-auto draw_extrema(const halide::Pyramid<halide::OrientedExtremumArray>& extrema)
+inline auto
+draw_extrema(const halide::Pyramid<halide::OrientedExtremumArray>& extrema)
 {
   for (const auto& so : extrema.scale_octave_pairs)
   {
@@ -148,14 +150,15 @@ auto draw_extrema(const halide::Pyramid<halide::OrientedExtremumArray>& extrema)
 }
 
 
-auto draw_oriented_extrema(const halide::v2::OrientedExtremumArray& e,
-                           float octave_scaling_factor = 1, int width = 2)
+inline auto draw_oriented_extrema(const halide::v2::OrientedExtremumArray& e,
+                                  float octave_scaling_factor = 1,
+                                  int width = 2)
 {
   if (e.empty())
     return;
 
 #pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
+  for (auto i = 0; i < static_cast<int>(e.size()); ++i)
   {
     const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Blue8;
     const auto& x = e.x(i) * octave_scaling_factor;
@@ -165,7 +168,7 @@ auto draw_oriented_extrema(const halide::v2::OrientedExtremumArray& e,
 
     // N.B.: the blob radius is the scale multiplied by sqrt(2).
     // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = s * M_SQRT2;
+    const float r = s * static_cast<float>(M_SQRT2);
     const auto& p1 = Eigen::Vector2f{x, y};
     const Eigen::Vector2f& p2 =
         p1 + r * Eigen::Vector2f{cos(theta), sin(theta)};
@@ -175,48 +178,59 @@ auto draw_oriented_extrema(const halide::v2::OrientedExtremumArray& e,
   }
 }
 
-auto draw_oriented_extrema(sara::ImageView<sara::Rgb8>& display,
-                           const halide::v2::OrientedExtremumArray& e,
-                           float octave_scaling_factor = 1, int width = 3)
+inline auto draw_oriented_extrema(sara::ImageView<sara::Rgb8>& display,
+                                  const halide::v2::OrientedExtremumArray& e,
+                                  float octave_scaling_factor = 1,
+                                  int width = 3,
+                                  bool draw_outline = false,
+                                  bool draw_orientation = false)
 {
   if (e.empty())
     return;
 
 #pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
+  for (auto i = 0; i < static_cast<int>(e.size()); ++i)
   {
     const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Cyan8;
     const auto& x = e.x(i) * octave_scaling_factor;
     const auto& y = e.y(i) * octave_scaling_factor;
     const auto& s = e.s(i) * octave_scaling_factor;
-    const auto& theta = e.orientations(i);
 
     // N.B.: the blob radius is the scale multiplied by sqrt(2).
     // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = s * M_SQRT2;
+    const float r = s * static_cast<float>(M_SQRT2);
     const auto& p1 = Eigen::Vector2f{x, y};
-    const Eigen::Vector2f& p2 =
-        p1 + r * Eigen::Vector2f{cos(theta), sin(theta)};
+
+    if (draw_orientation)
+    {
+      const auto& theta = e.orientations(i);
+      const Eigen::Vector2f& p2 =
+          p1 + r * Eigen::Vector2f{cos(theta), sin(theta)};
+
+      if (draw_outline)
+        sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), sara::Black8,
+                        width + 2);
+      sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), c, width);
+    }
 
     // Contour of orientation line.
-    sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), sara::Black8,
-                    width + 2);
-    sara::draw_circle(display, p1.x(), p1.y(), r, sara::Black8, width + 2);
-    sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), c, width);
+    if (draw_outline)
+      sara::draw_circle(display, p1.x(), p1.y(), r, sara::Black8, width + 2);
     sara::draw_circle(display, p1.x(), p1.y(), r, c, width);
   }
 }
 
 
-auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
-                            const halide::v3::QuantizedExtremumArray& e,
-                            float octave_scaling_factor = 1, int width = 2)
+inline auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
+                                   const halide::v3::QuantizedExtremumArray& e,
+                                   float octave_scaling_factor = 1,
+                                   int width = 2)
 {
   if (e.empty())
     return;
 
 #pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
+  for (auto i = 0; i < static_cast<int>(e.size()); ++i)
   {
     const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Blue8;
     const float x = std::round(e.x(i) * octave_scaling_factor);
@@ -224,22 +238,22 @@ auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
 
     // N.B.: the blob radius is the scale multiplied by sqrt(2).
     // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r =
-        std::round(e.scale(i) * octave_scaling_factor * float(M_SQRT2));
+    const float r = std::round(e.scale(i) * octave_scaling_factor *
+                               static_cast<float>(M_SQRT2));
 
     sara::draw_circle(display, x, y, r, c, width);
   }
 }
 
-auto draw_extrema(sara::ImageView<sara::Rgb8>& display,
-                  const halide::v3::ExtremumArray& e,
-                  float octave_scaling_factor = 1, int width = 2)
+inline auto draw_extrema(sara::ImageView<sara::Rgb8>& display,
+                         const halide::v3::ExtremumArray& e,
+                         float octave_scaling_factor = 1, int width = 2)
 {
   if (e.empty())
     return;
 
 #pragma omp parallel for
-  for (auto i = 0; i < e.size(); ++i)
+  for (auto i = 0; i < static_cast<int>(e.size()); ++i)
   {
     const auto& c = e.type(i) == 1 ? sara::Magenta8 : sara::Cyan8;
     const float x = std::round(e.x(i) * octave_scaling_factor);
@@ -247,7 +261,8 @@ auto draw_extrema(sara::ImageView<sara::Rgb8>& display,
 
     // N.B.: the blob radius is the scale multiplied by sqrt(2).
     // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = std::round(e.s(i) * octave_scaling_factor * float(M_SQRT2));
+    const float r = std::round(e.s(i) * octave_scaling_factor *
+                               static_cast<float>(M_SQRT2));
 
     sara::draw_circle(display, x, y, r, c, width);
   }

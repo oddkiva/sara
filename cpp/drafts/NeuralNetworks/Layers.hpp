@@ -63,7 +63,7 @@ namespace DO { namespace Sara {
 
       // Calculate the feature maps for each Nd-pixel.
       k_sizes[0] = 1;
-      auto phi_x = im2col(x, k_sizes, pad, strides, offset);
+      auto phi_x = im2row(x, k_sizes, pad, strides, offset);
 
       return phi_x;
     }

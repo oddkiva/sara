@@ -45,7 +45,14 @@ auto context_deleter(nvinfer1::IExecutionContext* context) -> void
   sara::TensorRT::delete_nvinfer_object(context);
 };
 
+auto host_memory_deleter(nvinfer1::IHostMemory* memory) -> void
+{
+  sara::TensorRT::delete_nvinfer_object(memory);
+}
 
+
+using HostMemoryUniquePtr =
+    std::unique_ptr<nvinfer1::IHostMemory, decltype(&host_memory_deleter)>;
 using CudaEngineUniquePtr =
     std::unique_ptr<nvinfer1::ICudaEngine, decltype(&engine_deleter)>;
 using RuntimeUniquePtr =
@@ -56,13 +63,9 @@ using ContextUniquePtr =
     std::unique_ptr<nvinfer1::IExecutionContext, decltype(&context_deleter)>;
 
 
-auto load_from_model_weights(const std::string& trt_model_weights_filepath)
+auto load_from_model_weights(nvinfer1::IRuntime& runtime,
+                             const std::string& trt_model_weights_filepath)
 {
-  auto runtime =
-      std::unique_ptr<nvinfer1::IRuntime, decltype(&runtime_deleter)>{
-          nvinfer1::createInferRuntime(DO::Sara::TensorRT::Logger::instance()),
-          &runtime_deleter};
-
   auto model_weights_file = std::ifstream{trt_model_weights_filepath};
   if (!model_weights_file)
     throw std::runtime_error{"Failed to open model weights file!"};
@@ -82,9 +85,9 @@ auto load_from_model_weights(const std::string& trt_model_weights_filepath)
   model_weights_stream.read(model_weights.data(), model_weights.size());
 
   // Deserialize the model weights data to initialize the CUDA inference engine.
-  return CudaEngineUniquePtr{runtime->deserializeCudaEngine(
-                                 model_weights.data(), model_weights.size()),
-                             &engine_deleter};
+  return CudaEngineUniquePtr{
+      runtime.deserializeCudaEngine(model_weights.data(), model_weights.size()),
+      &engine_deleter};
 }
 
 auto save_model_weights(nvinfer1::ICudaEngine* engine,
@@ -174,19 +177,28 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
   // If the GPU supports FP16 operations.
   // config->setFlag(nvinfer1::BuilderFlag::kFP16);
 
+  auto plan = HostMemoryUniquePtr{
+      builder->buildSerializedNetwork(*network, *config),  //
+      host_memory_deleter};
+  if (plan.get() == nullptr)
+    throw std::runtime_error{"Failed to build TensorRT plan!"};
+
+  auto runtime = RuntimeUniquePtr{
+      nvinfer1::createInferRuntime(DO::Sara::TensorRT::Logger::instance()),
+      &runtime_deleter};
+
   // Create or load an engine.
   auto engine = CudaEngineUniquePtr{nullptr, &engine_deleter};
   {
     // Load inference engine from a model weights.
     constexpr auto load_engine_from_disk = false;
     if constexpr (load_engine_from_disk)
-      engine = load_from_model_weights("");
+      engine = load_from_model_weights(*runtime, "");
     else
     {
       engine = CudaEngineUniquePtr{
-          builder->buildEngineWithConfig(*network, *config),  //
-          &engine_deleter                                     //
-      };
+          runtime->deserializeCudaEngine(plan->data(), plan->size()),
+          &engine_deleter};
       // save_model_weights("");
     }
   }
@@ -282,12 +294,12 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
         static_cast<std::int64_t>(conv1_bias_weights_vector.size())};
 
     // Create a convolutional function.
-    const auto conv1_fn = network->addConvolution(
+    const auto conv1_fn = network->addConvolutionNd(
         *image_tensor,
-        co,                    // number of filters
-        {kh, kw},              // kernel sizes
-        conv1_kernel_weights,  // convolution kernel weights
-        conv1_bias_weights);   // bias weights
+        co,                        // number of filters
+        nvinfer1::DimsHW{kh, kw},  // kernel sizes
+        conv1_kernel_weights,      // convolution kernel weights
+        conv1_bias_weights);       // bias weights
 
     // Get the ouput tensor.
     auto conv1 = conv1_fn->getOutput(0);
@@ -308,17 +320,27 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
   // If the GPU supports FP16 operations.
   // config->setFlag(nvinfer1::BuilderFlag::kFP16);
 
+  auto plan = HostMemoryUniquePtr{
+      builder->buildSerializedNetwork(*network, *config),  //
+      host_memory_deleter};
+  if (plan.get() == nullptr)
+    throw std::runtime_error{"Failed to build TensorRT plan!"};
+
+  auto runtime = RuntimeUniquePtr{
+      nvinfer1::createInferRuntime(DO::Sara::TensorRT::Logger::instance()),
+      &runtime_deleter};
+
   // Create or load an engine.
   auto engine = CudaEngineUniquePtr{nullptr, &engine_deleter};
   {
     // Load inference engine from a model weights.
     constexpr auto load_engine_from_disk = false;
     if constexpr (load_engine_from_disk)
-      engine = load_from_model_weights("");
+      engine = load_from_model_weights(*runtime, "");
     else
     {
       engine = CudaEngineUniquePtr{
-          builder->buildEngineWithConfig(*network, *config),  //
+          runtime->deserializeCudaEngine(plan->data(), plan->size()),
           &engine_deleter};
       // save_model_weights("");
     }
