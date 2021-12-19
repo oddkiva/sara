@@ -41,7 +41,9 @@ namespace DO::Sara::Darknet {
   {
     inline auto update_output_sizes(bool inference = true) -> void
     {
-      output_sizes << (inference ? 1 : batch), 3, height, width;
+      if (inference)
+        batch() = 1;
+      output_sizes(1) = 3;
       output.resize(output_sizes);
     }
 
@@ -55,18 +57,18 @@ namespace DO::Sara::Darknet {
 
       const auto& key = line_split[0];
       if (key == "width")
-        width = std::stoi(line_split[1]);
+        width() = std::stoi(line_split[1]);
       else if (key == "height")
-        height = std::stoi(line_split[1]);
+        height() = std::stoi(line_split[1]);
       else if (key == "batch")
-        batch = std::stoi(line_split[1]);
+        batch() = std::stoi(line_split[1]);
     }
 
     inline auto to_output_stream(std::ostream& os) const -> void override
     {
-      os << "- input width  = " << width << "\n";
-      os << "- input height = " << height << "\n";
-      os << "- input batch  = " << batch << "\n";
+      os << "- input width  = " << width() << "\n";
+      os << "- input height = " << height() << "\n";
+      os << "- input batch  = " << batch() << "\n";
     }
 
     inline auto forward(const TensorView_<float, 4>& x)
@@ -76,9 +78,35 @@ namespace DO::Sara::Darknet {
       return output;
     }
 
-    int width;
-    int height;
-    int batch;
+    inline auto width() noexcept -> int&
+    {
+      return output_sizes(3);
+    };
+
+    inline auto height() noexcept -> int&
+    {
+      return output_sizes(2);
+    }
+
+    inline auto batch() noexcept -> int&
+    {
+      return output_sizes(0);
+    }
+
+    inline auto width() const noexcept -> const int&
+    {
+      return output_sizes(3);
+    };
+
+    inline auto height() const -> const int&
+    {
+      return output_sizes(2);
+    }
+
+    inline auto batch() const -> const int&
+    {
+      return output_sizes(0);
+    }
   };
 
   struct BatchNormalization : Layer

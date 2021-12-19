@@ -18,6 +18,7 @@
 #include <drafts/NeuralNetworks/Darknet/Layer.hpp>
 #include <drafts/NeuralNetworks/Darknet/Parser.hpp>
 
+#include <boost/endian.hpp>
 #include <boost/test/unit_test.hpp>
 
 
