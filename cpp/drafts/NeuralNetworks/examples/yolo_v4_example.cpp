@@ -98,6 +98,66 @@ auto get_yolo_boxes(const sara::TensorView_<float, 3>& output,
 }
 
 
+// Simple greedy NMS based on area IoU criterion.
+auto nms(const std::vector<Detection>& detections, float iou_threshold = 0.4)
+    -> std::vector<Detection>
+{
+  auto detections_sorted = detections;
+  std::sort(detections_sorted.begin(), detections_sorted.end(),
+            [](const auto& a, const auto& b) {
+              return a.objectness_prob > b.objectness_prob;
+            });
+
+  auto detections_filtered = std::vector<Detection>{};
+  detections_filtered.reserve(detections.size());
+
+  for (const auto& d : detections_sorted)
+  {
+    if (detections_filtered.empty())
+    {
+      detections_filtered.push_back(d);
+      continue;
+    }
+
+    auto boxes_kept = Eigen::MatrixXf(detections_filtered.size(), 4);
+    for (auto i = 0u; i < detections_filtered.size(); ++i)
+      boxes_kept.row(i) = detections_filtered[i].box.transpose();
+
+    const auto x1 = boxes_kept.col(0);
+    const auto y1 = boxes_kept.col(1);
+    const auto w = boxes_kept.col(2);
+    const auto h = boxes_kept.col(3);
+
+    const auto x2 = x1 + w;
+    const auto y2 = y1 + h;
+
+    // Intersection.
+    const auto inter_x1 = x1.array().max(d.box(0));
+    const auto inter_y1 = y1.array().max(d.box(1));
+    const auto inter_x2 = x2.array().min(d.box(0) + d.box(2));
+    const auto inter_y2 = y2.array().min(d.box(1) + d.box(3));
+    const auto intersect = (inter_x1 <= inter_x2) && (inter_y1 <= inter_y2);
+
+    // Intersection areas
+    const Eigen::ArrayXf inter_area =
+        intersect.cast<float>() *
+        ((inter_x2 - inter_x1) * (inter_y2 - inter_y1));
+
+    // Union areas.
+    const Eigen::ArrayXf union_area =
+        w.array() * h.array() + d.box(2) * d.box(3) - inter_area;
+
+    // IoU
+    const Eigen::ArrayXf iou = inter_area / union_area;
+
+    const auto valid = (iou < iou_threshold).all();
+    if (valid)
+      detections_filtered.push_back(d);
+  }
+
+  return detections_filtered;
+}
+
 int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
 #ifndef __APPLE__
@@ -146,7 +206,8 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
   const auto elapsed = timer.elapsed_ms();
   std::cout << "Total = " << elapsed << " ms" << std::endl;
 
-
+  // Accumulate all the detection from each YOLO layer.
+  auto detections = std::vector<Detection>{};
   for (const auto& layer : net)
   {
     if (const auto yolo = dynamic_cast<const sara::Darknet::Yolo*>(layer.get()))
@@ -154,11 +215,16 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
       const auto dets =
           get_yolo_boxes(yolo->output[0], yolo->anchors, yolo->mask,
                          image_resized.sizes(), image.sizes(), 0.25f);
-      for (const auto& det : dets)
-        sara::draw_rect(det.box(0), det.box(1), det.box(2), det.box(3),
-                        sara::Red8, 2);
+      detections.insert(detections.end(), dets.begin(), dets.end());
+
     }
   }
+
+  const auto dets_filtered = nms(detections);
+  sara::display(image);
+  for (const auto& det : dets_filtered)
+    sara::draw_rect(det.box(0), det.box(1), det.box(2), det.box(3), sara::Green8,
+                    2);
   sara::get_key();
 
   return 0;

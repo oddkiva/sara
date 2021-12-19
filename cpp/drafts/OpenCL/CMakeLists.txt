@@ -6,7 +6,7 @@ if (NOT APPLE)
   find_package(GLEW REQUIRED)
 endif ()
 find_package(glfw3 REQUIRED)
-find_package(DO_Sara COMPONENTS Core ImageIO REQUIRED)
+find_package(DO_Sara COMPONENTS Core ImageProcessing ImageIO REQUIRED)
 
 
 add_subdirectory(Core)

@@ -49,7 +49,7 @@ namespace DO { namespace Sara {
 
   //! @brief Scale the source image to the destination image sizes.
   //! The nearest neighbor interpolation is used.
-  auto scale(ImageView<float>& src, ImageView<float>& dst) -> void;
+  auto scale(const ImageView<float>& src, ImageView<float>& dst) -> void;
 
 
   //! @brief Find min and max coefficient of a vector.
@@ -63,8 +63,6 @@ namespace DO { namespace Sara {
 
   //! @{
   //! @brief Reduce image.
-  auto reduce(ImageView<float>& src, ImageView<float>& dst) -> void;
-
   template <typename T, int N>
   void reduce(const ImageView<T, N>& src, ImageView<T, N>& dst)
   {
@@ -149,9 +147,9 @@ namespace DO { namespace Sara {
 
   //! @{
   //! @brief Enlarge image.
-  auto enlarge(ImageView<float>& src, ImageView<float>& dst) -> void;
+  auto enlarge(const ImageView<float>& src, ImageView<float>& dst) -> void;
 
-  auto enlarge(ImageView<Rgb32f>& src, ImageView<Rgb32f>& dst) -> void;
+  auto enlarge(const ImageView<Rgb32f>& src, ImageView<Rgb32f>& dst) -> void;
 
   template <typename T, int N>
   auto enlarge(const ImageView<T, N>& src, ImageView<T, N>& dst) -> void

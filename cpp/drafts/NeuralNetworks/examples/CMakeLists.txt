@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core Graphics ImageIO REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics ImageProcessing ImageIO REQUIRED)
 
 file(GLOB neuralnetworks_SOURCE_FILES FILES *.cpp)
 
