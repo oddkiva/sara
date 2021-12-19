@@ -1,8 +1,10 @@
 ## Vanishing Point
 
+**THIS SECTION IS WIP**
+
 In projective geometry, the projection of 3D lines in the camera film plane are
 still line segments. However, the perspective projection does not preserve the
-paralellism.
+parallelism.
 
 One remarkable property in projective geometry is that the projection of 3D
 parallel lines onto an image plane is a set of 2D lines that intersect
