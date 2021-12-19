@@ -12,11 +12,13 @@
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 
-#include <DO/Shakti/Halide/RuntimeUtilities.hpp>
+#ifdef DO_SARA_USE_HALIDE
+#  include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
-#include "shakti_gaussian_convolution_cpu.h"
-#include "shakti_gaussian_convolution_gpu.h"
-#include "shakti_subtract_32f_cpu.h"
+#  include "shakti_gaussian_convolution_cpu.h"
+#  include "shakti_gaussian_convolution_gpu.h"
+#  include "shakti_subtract_32f_cpu.h"
+#endif
 
 
 namespace DO::Sara {
@@ -28,10 +30,12 @@ namespace DO::Sara {
       throw std::domain_error{
           "Source and destination image sizes are not equal!"};
 
+#ifdef DO_SARA_USE_HALIDE
     // For some reason, Halide AOT requires the buffer to have a width of size
     // 64 minimum.
     if (src.width() < 64)
     {
+#endif
       // Compute the size of the Gaussian kernel.
       auto kernel_size = int(2 * gauss_truncate * sigma + 1);
       // Make sure the Gaussian kernel is at least of size 3 and is of odd size.
@@ -57,6 +61,7 @@ namespace DO::Sara {
 
       apply_row_based_filter(src, dst, &kernel[0], kernel_size);
       apply_column_based_filter(dst, dst, &kernel[0], kernel_size);
+#ifdef DO_SARA_USE_HALIDE
     }
     else
     {
@@ -65,6 +70,7 @@ namespace DO::Sara {
       shakti_gaussian_convolution_cpu(src_buffer, sigma, gauss_truncate,
                                       dst_buffer);
     }
+#endif
   }
 
   auto difference_of_gaussians_pyramid(const ImagePyramid<float>& gaussians)
@@ -81,11 +87,14 @@ namespace DO::Sara {
       {
         D(s, o).resize(gaussians(s, o).sizes());
 
+#ifdef DO_SARA_USE_HALIDE
         if (D(s, o).width() < 64)
         {
+#endif
           tensor_view(D(s, o)).flat_array() =
               tensor_view(gaussians(s + 1, o)).flat_array() -
               tensor_view(gaussians(s, o)).flat_array();
+#ifdef DO_SARA_USE_HALIDE
         }
         else
         {
@@ -107,6 +116,7 @@ namespace DO::Sara {
 
           shakti_subtract_32f_cpu(a_buffer, b_buffer, out_buffer);
         }
+#endif
       }
     }
     return D;
