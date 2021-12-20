@@ -14,6 +14,7 @@
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
@@ -118,7 +119,6 @@ int __main(int argc, char** argv)
   auto frame_gray32f = Image<float>{};
   const Eigen::Vector2i downscaled_sizes = frame.sizes() / downscale_factor;
   auto frame_gray32f_downscaled = Image<float>{downscaled_sizes};
-  auto screen_contents = Image<Rgb8>{frame.sizes()};
 
   // Output save.
   const auto basename = fs::basename(video_filepath);
@@ -183,6 +183,7 @@ int __main(int argc, char** argv)
       keys_prev.swap(keys_curr);
 
       image_curr = frame_gray32f;
+      // On CPU, calculate only one DoG scale per octave.
       static constexpr auto scale_camera = 1.f;
       static constexpr auto num_scales_per_octaves = 1;
       const auto first_octave = static_cast<int>(
@@ -208,28 +209,29 @@ int __main(int argc, char** argv)
     toc("Matching");
 
     tic();
-    set_active_window(w);
-    display(frame);
+    auto frame_annotated = Image<Rgb8>{frame};
     if (!hide_tracks)
     {
       for (size_t i = 0; i < matches.size(); ++i)
       {
         if (show_features)
         {
-          draw(matches[i].x(), Blue8, 1, p1.cast<float>());
-          draw(matches[i].y(), Cyan8, 1, p1.cast<float>());
+          draw(frame_annotated, matches[i].x(), Blue8, 1, p1.cast<float>());
+          draw(frame_annotated, matches[i].y(), Cyan8, 1, p1.cast<float>());
         }
         const Eigen::Vector2f a = p1.cast<float>() + matches[i].x_pos();
         const Eigen::Vector2f b = p1.cast<float>() + matches[i].y_pos();
-        draw_arrow(a, b, Yellow8, 4);
+        draw_arrow(frame_annotated, a, b, Yellow8, 4);
       }
     }
-    draw_text(100, 100, "SIFT matches = " + std::to_string(matches.size()),
-              White8, 40, 0, false, true, false);
+    draw_text(frame_annotated, 100, 100,
+              "SIFT matches = " + std::to_string(matches.size()), White8, 40, 0,
+              false, true);
+    set_active_window(w);
+    display(frame_annotated);
     toc("Display");
 
-    // grab_screen_contents(screen_contents, w);
-    // video_writer.write(screen_contents);
+    video_writer.write(frame_annotated);
   }
 
   return 0;

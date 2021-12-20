@@ -25,6 +25,11 @@ namespace DO { namespace Sara {
   auto draw(const OERegion& f, const Rgb8& c, float scale = 1.f,
             const Point2f& offset = Point2f::Zero()) -> void;
 
+  DO_SARA_EXPORT
+  auto draw(ImageView<Rgb8>& image, const OERegion& f, const Rgb8& c,
+            float scale = 1.f, const Point2f& offset = Point2f::Zero(),
+            bool antialiasing = true) -> void;
+
   /*!
    *  @addtogroup Features
    *  @{
