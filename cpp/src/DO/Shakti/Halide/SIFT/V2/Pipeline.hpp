@@ -13,8 +13,8 @@ namespace DO::Shakti::HalideBackend::v2 {
     //! @{
     float scale_camera = 1.f;
     float scale_initial = 1.6f;
-    float scale_factor = std::pow(2.f, 1 / 3.f);
-    int num_scales = 3;
+    float scale_factor = std::pow(2.f, 1 / 1.f);
+    int num_scales = 1;
     int gaussian_truncation_factor = 4;
     //! @}
 

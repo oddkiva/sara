@@ -14,11 +14,11 @@
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
 #ifdef DO_SARA_USE_HALIDE
-#include <DO/Shakti/Halide/RuntimeUtilities.hpp>
+#  include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
-#include "shakti_enlarge_cpu.h"
-#include "shakti_reduce_32f_cpu.h"
-#include "shakti_scale_32f_cpu.h"
+#  include "shakti_enlarge_cpu.h"
+#  include "shakti_reduce_32f_cpu.h"
+#  include "shakti_scale_32f_cpu.h"
 #endif
 
 
@@ -26,6 +26,7 @@ namespace DO::Sara {
 
   auto scale(const ImageView<float>& src, ImageView<float>& dst) -> void
   {
+#ifdef DO_SARA_USE_HALIDE
     auto src_tensor_view = tensor_view(src).reshape(
         Eigen::Vector4i{1, 1, src.height(), src.width()});
     auto dst_tensor_view = tensor_view(dst).reshape(
@@ -36,10 +37,15 @@ namespace DO::Sara {
 
     shakti_scale_32f_cpu(src_buffer, dst_buffer.width(), dst_buffer.height(),
                          dst_buffer);
+#else
+    throw std::runtime_error{"Not Implemented!"};
+#endif
   }
 
-  auto downscale(const ImageView<float>& src, int fact) -> Image<float>
+  auto downscale([[maybe_unused]] const ImageView<float>& src,
+                 [[maybe_unused]] int fact) -> Image<float>
   {
+#ifdef DO_SARA_USE_HALIDE
     auto timer = Timer{};
     timer.restart();
 
@@ -47,14 +53,19 @@ namespace DO::Sara {
     scale(src, dst);
 
     const auto elapsed = timer.elapsed_ms();
-    SARA_DEBUG << "[CPU Halide Downscale][" << src.sizes().transpose()
-               << "] " << elapsed << " ms" << std::endl;
-
+    SARA_DEBUG << "[CPU Halide Downscale][" << src.sizes().transpose() << "] "
+               << elapsed << " ms" << std::endl;
     return dst;
+#else
+    throw std::runtime_error{"Not Implemented!"};
+    return {};
+#endif
   }
 
-  auto enlarge(const ImageView<float>& src, ImageView<float>& dst) -> void
+  auto enlarge([[maybe_unused]] const ImageView<float>& src,
+               [[maybe_unused]] ImageView<float>& dst) -> void
   {
+#ifdef DO_SARA_USE_HALIDE
     auto src_tensor_view = tensor_view(src).reshape(
         Eigen::Vector4i{1, 1, src.height(), src.width()});
     auto dst_tensor_view = tensor_view(dst).reshape(
@@ -67,10 +78,15 @@ namespace DO::Sara {
                        src_buffer.width(), src_buffer.height(),  //
                        dst_buffer.width(), dst_buffer.height(),  //
                        dst_buffer);
+#else
+    throw std::runtime_error{"Not Implemented!"};
+#endif
   }
 
-  auto enlarge(const ImageView<Rgb32f>& src, ImageView<Rgb32f>& dst) -> void
+  auto enlarge([[maybe_unused]] const ImageView<Rgb32f>& src,
+               [[maybe_unused]] ImageView<Rgb32f>& dst) -> void
   {
+#ifdef DO_SARA_USE_HALIDE
     auto& src_non_const = const_cast<ImageView<Rgb32f>&>(src);
     auto src_buffer = ::Halide::Runtime::Buffer<float>::make_interleaved(
         reinterpret_cast<float*>(src_non_const.data()), src.width(),
@@ -84,6 +100,9 @@ namespace DO::Sara {
                        src.width(), src.height(),  //
                        dst.width(), dst.height(),  //
                        dst_buffer);
+#else
+    throw std::runtime_error{"Not Implemented!"};
+#endif
   }
 
 

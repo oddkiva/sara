@@ -30,6 +30,7 @@ namespace DO::Sara {
       throw std::domain_error{
           "Source and destination image sizes are not equal!"};
 
+#ifdef DO_SARA_USE_HALIDE
     auto timer = Timer{};
     timer.restart();
     auto src_buffer = Shakti::Halide::as_runtime_buffer_4d(src);
@@ -39,6 +40,9 @@ namespace DO::Sara {
     const auto elapsed = timer.elapsed_ms();
     SARA_DEBUG << "[CPU Halide Gaussian][" << src.sizes().transpose() << "] "
                << elapsed << " ms" << std::endl;
+#else
+    throw std::runtime_error{"Not Implemented!"};
+#endif
   }
 
   auto difference_of_gaussians_pyramid(const ImagePyramid<float>& gaussians)
@@ -55,6 +59,7 @@ namespace DO::Sara {
       {
         D(s, o).resize(gaussians(s, o).sizes());
 
+#ifdef DO_SARA_USE_HALIDE
         const auto& a = gaussians(s + 1, o);
         const auto& b = gaussians(s, o);
         auto& out = D(s, o);
@@ -71,6 +76,9 @@ namespace DO::Sara {
         auto out_buffer = Shakti::Halide::as_runtime_buffer(out_tensor_view);
 
         shakti_subtract_32f_cpu(a_buffer, b_buffer, out_buffer);
+#else
+        throw std::runtime_error{"Not Implemented!"};
+#endif
       }
     }
     return D;

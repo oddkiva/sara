@@ -229,13 +229,12 @@ auto test_on_video(int argc, char **argv)
 #endif
       sara::toc("CPU RGB to grayscale");
 
+      sara::tic();
       buffer_gray_4d.set_host_dirty();
       sift_pipeline.feed(buffer_gray_4d);
+      sara::toc("SIFT");
     }
     elapsed_ms = timer.elapsed_ms();
-    SARA_DEBUG << "[Frame: " << frames_read << "] "
-               << "total computation time = " << elapsed_ms << " ms"
-               << std::endl;
 
     sara::tic();
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
@@ -271,8 +270,8 @@ auto test_on_video(int argc, char **argv)
 #else
     sara::display(frame);
 #endif
-    sara::draw_text(100, 100, "Frame: " + std::to_string(frames_read),
-                    sara::White8, 40, 0, false, true, false);
+    const auto text = sara::format("[Frame: %d] Oriented DoG: %0.3f ms", frames_read, elapsed_ms);
+    sara::draw_text(100, 100, text, sara::White8, 40, 0, false, true, false);
     sara::toc("Display");
   }
 }
