@@ -74,7 +74,8 @@ int __main(int argc, char** argv)
   auto video_filepath = std::string{};
   auto downscale_factor = int{};
   auto skip = int{};
-  auto show_tracks = bool{};
+  auto hide_tracks = false;
+  auto show_features = false;
 
   po::options_description desc("video_sift_matching");
   desc.add_options()     //
@@ -86,8 +87,10 @@ int __main(int argc, char** argv)
        "downscale factor")  //
       ("skip,s", po::value<int>(&skip)->default_value(0),
        "number of frames to skip")  //
-      ("show_tracks,t", po::value<bool>(&show_tracks)->default_value(true),
-       "show feature tracking")  //
+      ("hide_tracks,h", po::bool_switch(&hide_tracks),
+       "hide feature tracking")  //
+      ("show_features,f", po::bool_switch(&show_features),
+       "show features")  //
       ;
 
   po::variables_map vm;
@@ -174,15 +177,6 @@ int __main(int argc, char** argv)
     toc("Grayscale");
 #endif
 
-//    if (downscale_factor > 1)
-//    {
-//      tic();
-//      scale(frame_gray32f, frame_gray32f_downscaled);
-//      toc("Downscale");
-//    }
-//    else
-//      frame_gray32f_downscaled.swap(frame_gray32f);
-
     tic();
     {
       image_prev.swap(image_curr);
@@ -191,19 +185,18 @@ int __main(int argc, char** argv)
       image_curr = frame_gray32f;
       static constexpr auto scale_camera = 1.f;
       static constexpr auto num_scales_per_octaves = 1;
-      const auto first_octave = static_cast<int>(std::round(std::log(downscale_factor) / std::log(2)));
-      const auto scale_geometric_factor = std::pow(2.f, 1.f / num_scales_per_octaves);
-      const auto image_pyr_params = ImagePyramidParams(first_octave,
-                                                       num_scales_per_octaves + 3,
-                                                       scale_geometric_factor,
-                                                       /* image_padding_size */ 8,
-                                                       scale_camera,
-                                                       /* scale_initial */ 1.2f);
+      const auto first_octave = static_cast<int>(
+          std::round(std::log(downscale_factor) / std::log(2)));
+      const auto scale_geometric_factor =
+          std::pow(2.f, 1.f / num_scales_per_octaves);
+      const auto image_pyr_params = ImagePyramidParams(
+          first_octave, num_scales_per_octaves + 3, scale_geometric_factor,
+          /* image_padding_size */ 8, scale_camera,
+          /* scale_initial */ 1.2f);
       keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
     }
     toc("SIFT");
 
-    // Compute matches.
     tic();
     auto matches = std::vector<Match>{};
     const auto& fprev = std::get<0>(keys_prev);
@@ -217,23 +210,26 @@ int __main(int argc, char** argv)
     tic();
     set_active_window(w);
     display(frame);
-    if (show_tracks)
+    if (!hide_tracks)
     {
       for (size_t i = 0; i < matches.size(); ++i)
       {
-        draw(matches[i].x(), Blue8, 1, p1.cast<float>());
-        draw(matches[i].y(), Cyan8, 1, p1.cast<float>());
+        if (show_features)
+        {
+          draw(matches[i].x(), Blue8, 1, p1.cast<float>());
+          draw(matches[i].y(), Cyan8, 1, p1.cast<float>());
+        }
         const Eigen::Vector2f a = p1.cast<float>() + matches[i].x_pos();
         const Eigen::Vector2f b = p1.cast<float>() + matches[i].y_pos();
-        draw_arrow(a, b, Yellow8, 2);
+        draw_arrow(a, b, Yellow8, 4);
       }
     }
     draw_text(100, 100, "SIFT matches = " + std::to_string(matches.size()),
               White8, 40, 0, false, true, false);
     toc("Display");
 
-    //grab_screen_contents(screen_contents, w);
-    //video_writer.write(screen_contents);
+    // grab_screen_contents(screen_contents, w);
+    // video_writer.write(screen_contents);
   }
 
   return 0;
