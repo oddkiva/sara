@@ -202,10 +202,8 @@ int __main(int argc, char** argv)
     const auto& fprev = std::get<0>(keys_prev);
     if (!fprev.empty())
     {
-      SARA_DEBUG << "Computing Matches" << endl;
       AnnMatcher matcher{keys_prev, keys_curr, 0.6f};
       matches = matcher.compute_matches();
-      SARA_CHECK(matches.size());
     }
     toc("Matching");
 
