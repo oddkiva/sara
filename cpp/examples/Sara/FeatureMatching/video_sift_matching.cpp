@@ -16,6 +16,7 @@
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
@@ -112,6 +113,8 @@ int __main(int argc, char** argv)
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
   auto frame_gray32f = Image<float>{};
+  const Eigen::Vector2i downscaled_sizes = frame.sizes() / downscale_factor;
+  auto frame_gray32f_downscaled = Image<float>{downscaled_sizes};
   auto screen_contents = Image<Rgb8>{frame.sizes()};
 
   // Output save.
@@ -157,26 +160,35 @@ int __main(int argc, char** argv)
       continue;
     SARA_DEBUG << "Processing frame " << frames_read << std::endl;
 
+#ifdef CROP
     // Reduce our attention to the central part of the image.
     tic();
     const auto frame_cropped = crop(frame, p1, p2);
     toc("Crop");
 
     tic();
-    frame_gray32f = frame_cropped.convert<float>();
+    frame_gray32f = DO::Sara::from_rgb8_to_gray32f(frame_cropped);
     toc("Grayscale");
+#else
+    tic();
+    frame_gray32f = DO::Sara::from_rgb8_to_gray32f(frame);
+    toc("Grayscale");
+#endif
+
 
     if (downscale_factor > 1)
     {
       tic();
-      frame_gray32f = downscale(frame_gray32f, downscale_factor);
+      scale(frame_gray32f, frame_gray32f_downscaled);
       toc("Downscale");
     }
+    else
+      frame_gray32f_downscaled.swap(frame_gray32f);
 
     image_prev.swap(image_curr);
     keys_prev.swap(keys_curr);
 
-    image_curr = frame_gray32f;
+    image_curr = frame_gray32f_downscaled;
     const auto image_pyr_params = ImagePyramidParams(0);
     keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
 
