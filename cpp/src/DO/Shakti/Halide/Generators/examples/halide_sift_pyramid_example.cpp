@@ -273,7 +273,7 @@ auto test_on_video(int argc, char **argv)
     sara::display(frame);
 #endif
     sara::draw_text(100, 100, "Frame: " + std::to_string(frames_read),
-                    sara::White8, 20, 0, false, true, false);
+                    sara::White8, 40, 0, false, true, false);
     sara::toc("Display");
   }
 }

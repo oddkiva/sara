@@ -192,7 +192,7 @@ int __main(int argc, char** argv)
 
       image_curr = frame_gray32f_downscaled;
       const auto image_pyr_params = ImagePyramidParams(0);
-      keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
+      keys_curr = compute_sift_keypoints(frame_gray32f_downscaled, image_pyr_params);
     }
     toc("SIFT");
 
@@ -226,7 +226,7 @@ int __main(int argc, char** argv)
       }
     }
     draw_text(100, 100, "SIFT matches = " + std::to_string(matches.size()),
-              White8, 20, 0, false, true, false);
+              White8, 40, 0, false, true, false);
 
     grab_screen_contents(screen_contents, w);
     video_writer.write(screen_contents);
