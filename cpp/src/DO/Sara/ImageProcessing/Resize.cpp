@@ -53,20 +53,6 @@ namespace DO::Sara {
     return dst;
   }
 
-  // auto reduce(const ImageView<float>& src, ImageView<float>& dst) -> void
-  // {
-  //   auto src_tensor_view = tensor_view(src).reshape(
-  //       Eigen::Vector4i{1, 1, src.height(), src.width()});
-  //   auto dst_tensor_view = tensor_view(dst).reshape(
-  //       Eigen::Vector4i{1, 1, dst.height(), dst.width()});
-
-  //   auto src_buffer = Shakti::Halide::as_runtime_buffer(src_tensor_view);
-  //   auto dst_buffer = Shakti::Halide::as_runtime_buffer(dst_tensor_view);
-
-  //   shakti_reduce_32f_cpu(src_buffer, dst.width(), dst_buffer.height(),
-  //                         dst_buffer);
-  // }
-
   auto enlarge(const ImageView<float>& src, ImageView<float>& dst) -> void
   {
     auto src_tensor_view = tensor_view(src).reshape(
