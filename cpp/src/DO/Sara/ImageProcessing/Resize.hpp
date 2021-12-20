@@ -51,6 +51,8 @@ namespace DO { namespace Sara {
   //! The nearest neighbor interpolation is used.
   auto scale(const ImageView<float>& src, ImageView<float>& dst) -> void;
 
+  auto downscale(const ImageView<float>& src, int fact) -> Image<float>;
+
 
   //! @brief Find min and max coefficient of a vector.
   template <typename T, int N>

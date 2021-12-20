@@ -138,7 +138,6 @@ int __main(int argc, char** argv)
   const auto [p1, p2] = initialize_crop_region(frame.sizes());
 #else
   const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
-  const Eigen::Vector2i& p2 = frame.sizes();
 #endif
 
   auto image_prev = Image<float>{};
@@ -175,28 +174,36 @@ int __main(int argc, char** argv)
     toc("Grayscale");
 #endif
 
-
-    if (downscale_factor > 1)
-    {
-      tic();
-      scale(frame_gray32f, frame_gray32f_downscaled);
-      toc("Downscale");
-    }
-    else
-      frame_gray32f_downscaled.swap(frame_gray32f);
+//    if (downscale_factor > 1)
+//    {
+//      tic();
+//      scale(frame_gray32f, frame_gray32f_downscaled);
+//      toc("Downscale");
+//    }
+//    else
+//      frame_gray32f_downscaled.swap(frame_gray32f);
 
     tic();
     {
       image_prev.swap(image_curr);
       keys_prev.swap(keys_curr);
 
-      image_curr = frame_gray32f_downscaled;
-      const auto image_pyr_params = ImagePyramidParams(0);
-      keys_curr = compute_sift_keypoints(frame_gray32f_downscaled, image_pyr_params);
+      image_curr = frame_gray32f;
+      static constexpr auto scale_camera = 1.f;
+      static constexpr auto num_scales_per_octaves = 1;
+      const auto first_octave = static_cast<int>(std::round(std::log(downscale_factor) / std::log(2)));
+      const auto scale_geometric_factor = std::pow(2.f, 1.f / num_scales_per_octaves);
+      const auto image_pyr_params = ImagePyramidParams(first_octave,
+                                                       num_scales_per_octaves + 3,
+                                                       scale_geometric_factor,
+                                                       /* image_padding_size */ 8,
+                                                       scale_camera,
+                                                       /* scale_initial */ 1.2f);
+      keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
     }
     toc("SIFT");
 
-    // Compute/read matches
+    // Compute matches.
     tic();
     auto matches = std::vector<Match>{};
     const auto& fprev = std::get<0>(keys_prev);
@@ -207,27 +214,26 @@ int __main(int argc, char** argv)
     }
     toc("Matching");
 
+    tic();
     set_active_window(w);
     display(frame);
     if (show_tracks)
     {
-      const auto s = 1 / float(downscale_factor);
       for (size_t i = 0; i < matches.size(); ++i)
       {
-        draw(matches[i].x(), Blue8, downscale_factor, s * p1.cast<float>());
-        draw(matches[i].y(), Cyan8, downscale_factor, s * p1.cast<float>());
-        const Eigen::Vector2f a =
-            p1.cast<float>() + downscale_factor * matches[i].x_pos();
-        const Eigen::Vector2f b =
-            p1.cast<float>() + downscale_factor * matches[i].y_pos();
+        draw(matches[i].x(), Blue8, 1, p1.cast<float>());
+        draw(matches[i].y(), Cyan8, 1, p1.cast<float>());
+        const Eigen::Vector2f a = p1.cast<float>() + matches[i].x_pos();
+        const Eigen::Vector2f b = p1.cast<float>() + matches[i].y_pos();
         draw_arrow(a, b, Yellow8, 2);
       }
     }
     draw_text(100, 100, "SIFT matches = " + std::to_string(matches.size()),
               White8, 40, 0, false, true, false);
+    toc("Display");
 
-    grab_screen_contents(screen_contents, w);
-    video_writer.write(screen_contents);
+    //grab_screen_contents(screen_contents, w);
+    //video_writer.write(screen_contents);
   }
 
   return 0;

@@ -39,7 +39,7 @@ namespace DO::Sara {
     ComputeDoGExtrema compute_DoGs{pyramid_params, 0.01f};
     auto scale_octave_pairs = vector<Point2i>{};
     DoGs = compute_DoGs(image, &scale_octave_pairs);
-    auto dog_detection_time = timer.elapsed_ms();
+    const auto dog_detection_time = timer.elapsed_ms();
     elapsed += dog_detection_time;
     SARA_DEBUG << "[DoG        ] " << dog_detection_time << " ms" << std::endl;
 
@@ -47,7 +47,7 @@ namespace DO::Sara {
     // Prepare the computation of gradients on gaussians.
     timer.restart();
     auto nabla_G = gradient_polar_coordinates(compute_DoGs.gaussians());
-    auto grad_gaussian_time = timer.elapsed_ms();
+    const auto grad_gaussian_time = timer.elapsed_ms();
     elapsed += grad_gaussian_time;
     SARA_DEBUG << "[Gradient   ] " << grad_gaussian_time << " ms" << endl;
 
@@ -55,7 +55,7 @@ namespace DO::Sara {
     timer.restart();
     ComputeDominantOrientations assign_dominant_orientations;
     assign_dominant_orientations(nabla_G, DoGs, scale_octave_pairs);
-    auto ori_assign_time = timer.elapsed_ms();
+    const auto ori_assign_time = timer.elapsed_ms();
     elapsed += ori_assign_time;
     SARA_DEBUG << "[Orientation] " << ori_assign_time << " ms" << std::endl;
 
@@ -72,7 +72,7 @@ namespace DO::Sara {
     timer.restart();
     ComputeSIFTDescriptor<> compute_sift;
     SIFTDescriptors = compute_sift(DoGs, scale_octave_pairs, nabla_G, parallel);
-    auto sift_description_time = timer.elapsed_ms();
+    const auto sift_description_time = timer.elapsed_ms();
 
     // 4. Rescale  the feature position and scale $(x, y, \sigma)$ with the
     //    octave scale.

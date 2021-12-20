@@ -36,6 +36,9 @@ namespace DO::Sara {
     if (src.width() < 64 || src.height() < 64)
     {
 #endif
+      auto timer = Timer{};
+      timer.restart();
+
       // Compute the size of the Gaussian kernel.
       auto kernel_size = int(2 * gauss_truncate * sigma + 1);
       // Make sure the Gaussian kernel is at least of size 3 and is of odd size.
@@ -61,14 +64,23 @@ namespace DO::Sara {
 
       apply_row_based_filter(src, dst, &kernel[0], kernel_size);
       apply_column_based_filter(dst, dst, &kernel[0], kernel_size);
+
+      const auto elapsed = timer.elapsed_ms();
+      SARA_DEBUG << "[CPU Naive Gaussian][" << src.sizes().transpose()
+                 << "] " << elapsed << " ms" << std::endl;
 #ifdef DO_SARA_USE_HALIDE
     }
     else
     {
+      auto timer = Timer{};
+      timer.restart();
       auto src_buffer = Shakti::Halide::as_runtime_buffer_4d(src);
       auto dst_buffer = Shakti::Halide::as_runtime_buffer_4d(dst);
       shakti_gaussian_convolution_cpu(src_buffer, sigma, gauss_truncate,
                                       dst_buffer);
+      const auto elapsed = timer.elapsed_ms();
+      SARA_DEBUG << "[CPU Halide Gaussian][" << src.sizes().transpose()
+                 << "] " << elapsed << " ms" << std::endl;
     }
 #endif
   }

@@ -238,6 +238,9 @@ namespace DO { namespace Sara {
     LocalScaleSpaceExtremum<std::less_equal, float> local_min;
 #endif
 
+#ifdef _OMP
+#pragma omp parallel for collapse(2)
+#endif
     for (int y = img_padding_sz; y < I(s, o).height() - img_padding_sz; ++y)
     {
       for (int x = img_padding_sz; x < I(s, o).width() - img_padding_sz; ++x)
@@ -250,6 +253,7 @@ namespace DO { namespace Sara {
           type = -1;  // minimum
         else
           continue;
+
 #ifndef STRICT_LOCAL_EXTREMA
         // Reject early.
         if (std::abs(I(x, y, s, o)) < 0.8f * extremum_thres)
@@ -258,6 +262,22 @@ namespace DO { namespace Sara {
         // Reject early if located on edge.
         if (on_edge(I(s, o), x, y, edge_ratio_thres))
           continue;
+
+        map(static_cast<int>(x), static_cast<int>(y)) = type;
+      }
+    }
+
+#ifdef _OMP
+#pragma omp parallel for collapse(2)
+#endif
+    for (int y = img_padding_sz; y < I(s, o).height() - img_padding_sz; ++y)
+    {
+      for (int x = img_padding_sz; x < I(s, o).width() - img_padding_sz; ++x)
+      {
+        const auto type = map(x, y);
+        if (type == 0)
+          continue;
+
         // Try to refine extremum.
         auto pos = Point3f{};
         auto val = float{};
@@ -267,22 +287,21 @@ namespace DO { namespace Sara {
         refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
                         refine_iterations);
 
-        // Don't add if already marked.
-        if (map(static_cast<int>(x), static_cast<int>(y)) == 1)
-          continue;
 #ifndef STRICT_LOCAL_EXTREMA
         // Reject if contrast too low.
         if (std::abs(val) < extremum_thres)
           continue;
 #endif
+
         // Store the DoG extremum.
         auto dog = OERegion(pos.head<2>(), pos.z());
-
         dog.extremum_value = val;
         dog.extremum_type = type == 1 ? OERegion::ExtremumType::Max
                                       : OERegion::ExtremumType::Min;
+#ifdef _OMP
+#pragma omp critical
+#endif
         extrema.push_back(dog);
-        map(static_cast<int>(x), static_cast<int>(y)) = 1;
       }
     }
 

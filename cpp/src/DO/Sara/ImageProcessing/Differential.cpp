@@ -11,8 +11,10 @@
 
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 
+#ifdef DO_SARA_USE_HALIDE
 #include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 #include "shakti_polar_gradient_2d_32f_cpu.h"
+#endif
 
 
 namespace DO::Sara {

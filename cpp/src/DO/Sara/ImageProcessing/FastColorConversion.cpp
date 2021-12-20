@@ -11,9 +11,10 @@
 
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 
+#ifdef DO_SARA_USE_HALIDE
 #include <DO/Shakti/Halide/RuntimeUtilities.hpp>
-
 #include "shakti_rgb8u_to_gray32f_cpu.h"
+#endif
 
 
 namespace DO::Sara {

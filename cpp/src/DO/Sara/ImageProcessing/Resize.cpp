@@ -13,11 +13,13 @@
 
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
+#ifdef DO_SARA_USE_HALIDE
 #include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
 #include "shakti_enlarge_cpu.h"
 #include "shakti_reduce_32f_cpu.h"
 #include "shakti_scale_32f_cpu.h"
+#endif
 
 
 namespace DO::Sara {
@@ -34,6 +36,21 @@ namespace DO::Sara {
 
     shakti_scale_32f_cpu(src_buffer, dst_buffer.width(), dst_buffer.height(),
                          dst_buffer);
+  }
+
+  auto downscale(const ImageView<float>& src, int fact) -> Image<float>
+  {
+    auto timer = Timer{};
+    timer.restart();
+
+    auto dst = Image<float>{(src.sizes() / fact).eval()};
+    scale(src, dst);
+
+    const auto elapsed = timer.elapsed_ms();
+    SARA_DEBUG << "[CPU Halide Downscale][" << src.sizes().transpose()
+               << "] " << elapsed << " ms" << std::endl;
+
+    return dst;
   }
 
   // auto reduce(const ImageView<float>& src, ImageView<float>& dst) -> void
