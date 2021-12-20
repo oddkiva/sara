@@ -19,8 +19,8 @@
 #include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
-#include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 #include <omp.h>
 
@@ -73,6 +73,7 @@ int __main(int argc, char** argv)
   auto video_filepath = std::string{};
   auto downscale_factor = int{};
   auto skip = int{};
+  auto show_tracks = bool{};
 
   po::options_description desc("video_sift_matching");
   desc.add_options()     //
@@ -84,6 +85,8 @@ int __main(int argc, char** argv)
        "downscale factor")  //
       ("skip,s", po::value<int>(&skip)->default_value(0),
        "number of frames to skip")  //
+      ("show_tracks,t", po::value<bool>(&show_tracks)->default_value(true),
+       "show feature tracking")  //
       ;
 
   po::variables_map vm;
@@ -191,14 +194,19 @@ int __main(int argc, char** argv)
 
     set_active_window(w);
     display(frame);
-    const auto s = 1 / float(downscale_factor);
-    for (size_t i = 0; i < matches.size(); ++i)
+    if (show_tracks)
     {
-      draw(matches[i].x(), Blue8, downscale_factor, s * p1.cast<float>());
-      draw(matches[i].y(), Cyan8, downscale_factor, s * p1.cast<float>());
-      const Eigen::Vector2f a = p1.cast<float>() + downscale_factor * matches[i].x_pos();
-      const Eigen::Vector2f b = p1.cast<float>() + downscale_factor * matches[i].y_pos();
-      draw_arrow(a, b, Yellow8, 2);
+      const auto s = 1 / float(downscale_factor);
+      for (size_t i = 0; i < matches.size(); ++i)
+      {
+        draw(matches[i].x(), Blue8, downscale_factor, s * p1.cast<float>());
+        draw(matches[i].y(), Cyan8, downscale_factor, s * p1.cast<float>());
+        const Eigen::Vector2f a =
+            p1.cast<float>() + downscale_factor * matches[i].x_pos();
+        const Eigen::Vector2f b =
+            p1.cast<float>() + downscale_factor * matches[i].y_pos();
+        draw_arrow(a, b, Yellow8, 2);
+      }
     }
     draw_text(100, 100, "SIFT matches = " + std::to_string(matches.size()),
               White8, 20, 0, false, true, false);

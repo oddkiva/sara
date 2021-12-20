@@ -33,7 +33,7 @@ namespace DO::Sara {
 #ifdef DO_SARA_USE_HALIDE
     // For some reason, Halide AOT requires the buffer to have a width of size
     // 64 minimum.
-    if (src.width() < 64)
+    if (src.width() < 64 || src.height() < 64)
     {
 #endif
       // Compute the size of the Gaussian kernel.
