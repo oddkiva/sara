@@ -15,8 +15,6 @@
 
 #include <DO/Sara/Core/Image/Image.hpp>
 
-#include <execution>
-
 
 namespace DO { namespace Sara {
 
