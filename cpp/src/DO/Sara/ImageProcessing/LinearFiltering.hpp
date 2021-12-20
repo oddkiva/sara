@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/Core/Pixel.hpp>
 
 
@@ -191,20 +192,22 @@ namespace DO { namespace Sara {
       ++kernel_size;
 
     // Create the 1D Gaussian kernel.
+    //
+    // 1. Compute the value of the unnormalized Gaussian.
+    const auto center = kernel_size / 2;
     auto kernel = std::vector<S>(kernel_size);
-    auto sum = S(0);
-
-    // Compute the value of the Gaussian and the normalizing factor.
     for (int i = 0; i < kernel_size; ++i)
     {
-      auto x = S(i - kernel_size / 2);
-      kernel[i] = exp(-x * x / (S(2) * sigma * sigma));
-      sum += kernel[i];
+      auto x = S(i - center);
+      kernel[i] = exp(-square(x) / (2 * square(sigma)));
     }
+    // 2. Calculate the normalizing factor.
+    const auto sum_inverse =
+        1 / std::accumulate(kernel.begin(), kernel.end(), S{});
 
     // Normalize the kernel.
-    for (int i = 0; i < kernel_size; ++i)
-      kernel[i] /= sum;
+    std::for_each(kernel.begin(), kernel.end(),
+                  [sum_inverse](auto& v) { v *= sum_inverse; });
 
     apply_row_based_filter(src, dst, &kernel[0], kernel_size);
     apply_column_based_filter(dst, dst, &kernel[0], kernel_size);

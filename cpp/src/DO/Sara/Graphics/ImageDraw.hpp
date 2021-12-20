@@ -87,18 +87,18 @@ namespace DO { namespace Sara {
   //! @brief Draw arrow.
   DO_SARA_EXPORT
   auto draw_arrow(ImageView<Rgb8>& image, int x1, int y1, int x2, int y2,
-                  const Rgb8& col, int arrow_width = 8, int arrow_height = 5,
-                  int style = 0, int width = 1, bool antialiasing = true)
+                  const Rgb8& col, int pen_width = 1, int arrow_width = 8,
+                  int arrow_height = 5, int style = 0, bool antialiasing = true)
       -> void;
 
   inline auto draw_arrow(ImageView<Rgb8>& image, const Eigen::Vector2f& a,
                          const Eigen::Vector2f& b, const Rgb8& col,
-                         int arrow_width = 8, int arrow_height = 5,
-                         int style = 0, int width = 1, bool antialiasing = true)
-      -> void
+                         int pen_width = 1, int arrow_width = 8,
+                         int arrow_height = 5, int style = 0,
+                         bool antialiasing = true) -> void
   {
-    draw_arrow(image, a.x(), a.y(), b.x(), b.y(), col, arrow_width,
-               arrow_height, style, width, antialiasing);
+    draw_arrow(image, a.x(), a.y(), b.x(), b.y(), col, pen_width, arrow_width,
+               arrow_height, style, antialiasing);
   }
 
   //! @brief Draw text.

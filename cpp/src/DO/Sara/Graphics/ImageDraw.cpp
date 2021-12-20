@@ -70,8 +70,8 @@ namespace DO { namespace Sara {
   }
 
   auto draw_arrow(ImageView<Rgb8>& image, int x1, int y1, int x2, int y2,
-                  const Rgb8& col, int arrow_width, int arrow_height, int style,
-                  int width, bool antialiasing) -> void
+                  const Rgb8& col, int pen_width, int arrow_width,
+                  int arrow_height, int style, bool antialiasing) -> void
   {
     auto qimage = as_QImage(image);
 
@@ -85,7 +85,7 @@ namespace DO { namespace Sara {
     const qreal norm = qSqrt(dx * dx + dy * dy);
     if (norm < 0.999)  // null vector
     {
-      p.setPen(QPen(qcol, width));
+      p.setPen(QPen(qcol, pen_width));
       p.drawPoint(x1, y1);
       return;
     }
@@ -106,7 +106,7 @@ namespace DO { namespace Sara {
     switch (style)
     {
     case 0:
-      p.setPen(QPen(qcol, width));
+      p.setPen(QPen(qcol, pen_width));
       p.drawLine(x1, y1, x2, y2);
       p.drawLine(x2, y2, int(p1x), int(p1y));
       p.drawLine(x2, y2, int(p2x), int(p2y));
@@ -116,12 +116,12 @@ namespace DO { namespace Sara {
       pts << QPointF(x2, y2);
       pts << QPointF(p1x, p1y);
       sl = norm - (arrow_width * .7);
-      pts << QPointF(x1 + dx_norm * sl + dy_norm * width,
-                     y1 + dy_norm * sl - dx_norm * width);
-      pts << QPointF(x1 + dy_norm * width, y1 - dx_norm * width);
-      pts << QPointF(x1 - dy_norm * width, y1 + dx_norm * width);
-      pts << QPointF(x1 + dx_norm * sl - dy_norm * width,
-                     y1 + dy_norm * sl + dx_norm * width);
+      pts << QPointF(x1 + dx_norm * sl + dy_norm * pen_width,
+                     y1 + dy_norm * sl - dx_norm * pen_width);
+      pts << QPointF(x1 + dy_norm * pen_width, y1 - dx_norm * pen_width);
+      pts << QPointF(x1 - dy_norm * pen_width, y1 + dx_norm * pen_width);
+      pts << QPointF(x1 + dx_norm * sl - dy_norm * pen_width,
+                     y1 + dy_norm * sl + dx_norm * pen_width);
       path.addPolygon(pts);
       p.fillPath(path, qcol);
       break;
@@ -130,12 +130,12 @@ namespace DO { namespace Sara {
       pts << QPointF(x2, y2);
       pts << QPointF(p1x, p1y);
       sl = norm - arrow_width;
-      pts << QPointF(x1 + dx_norm * sl + dy_norm * width,
-                     y1 + dy_norm * sl - dx_norm * width);
-      pts << QPointF(x1 + dy_norm * width, y1 - dx_norm * width);
-      pts << QPointF(x1 - dy_norm * width, y1 + dx_norm * width);
-      pts << QPointF(x1 + dx_norm * sl - dy_norm * width,
-                     y1 + dy_norm * sl + dx_norm * width);
+      pts << QPointF(x1 + dx_norm * sl + dy_norm * pen_width,
+                     y1 + dy_norm * sl - dx_norm * pen_width);
+      pts << QPointF(x1 + dy_norm * pen_width, y1 - dx_norm * pen_width);
+      pts << QPointF(x1 - dy_norm * pen_width, y1 + dx_norm * pen_width);
+      pts << QPointF(x1 + dx_norm * sl - dy_norm * pen_width,
+                     y1 + dy_norm * sl + dx_norm * pen_width);
       path.addPolygon(pts);
       p.fillPath(path, qcol);
       break;

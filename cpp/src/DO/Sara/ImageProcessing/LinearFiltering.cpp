@@ -41,7 +41,36 @@ namespace DO::Sara {
     SARA_DEBUG << "[CPU Halide Gaussian][" << src.sizes().transpose() << "] "
                << elapsed << " ms" << std::endl;
 #else
-    throw std::runtime_error{"Not Implemented!"};
+    // Compute the size of the Gaussian kernel.
+    auto kernel_size = int(2 * gauss_truncate * sigma + 1);
+    // Make sure the Gaussian kernel is at least of size 3 and is of odd size.
+    kernel_size = std::max(3, kernel_size);
+    if (kernel_size % 2 == 0)
+      ++kernel_size;
+
+    // Create the 1D Gaussian kernel.
+    //
+    // 1. Compute the value of the unnormalized Gaussian.
+    const auto center = kernel_size / 2;
+    auto kernel = std::vector<float>(kernel_size);
+    for (int i = 0; i < kernel_size; ++i)
+    {
+      auto x = static_cast<float>(i - center);
+      kernel[i] = exp(-square(x) / (2 * square(sigma)));
+    }
+    // 2. Calculate the normalizing factor.
+    const auto sum_inverse =
+        1 / std::accumulate(kernel.begin(), kernel.end(), 0.f);
+
+    // Normalize the kernel.
+    std::for_each(kernel.begin(), kernel.end(),
+                  [sum_inverse](float& v) { v *= sum_inverse; });
+
+    apply_row_based_filter(src, dst, &kernel[0], kernel_size);
+    apply_column_based_filter(dst, dst, &kernel[0], kernel_size);
+
+    apply_row_based_filter(src, dst, &kernel[0], kernel_size);
+    apply_column_based_filter(dst, dst, &kernel[0], kernel_size);
 #endif
   }
 
