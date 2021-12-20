@@ -185,16 +185,20 @@ int __main(int argc, char** argv)
     else
       frame_gray32f_downscaled.swap(frame_gray32f);
 
-    image_prev.swap(image_curr);
-    keys_prev.swap(keys_curr);
+    tic();
+    {
+      image_prev.swap(image_curr);
+      keys_prev.swap(keys_curr);
 
-    image_curr = frame_gray32f_downscaled;
-    const auto image_pyr_params = ImagePyramidParams(0);
-    keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
+      image_curr = frame_gray32f_downscaled;
+      const auto image_pyr_params = ImagePyramidParams(0);
+      keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
+    }
+    toc("SIFT");
 
     // Compute/read matches
+    tic();
     auto matches = std::vector<Match>{};
-
     const auto& fprev = std::get<0>(keys_prev);
     if (!fprev.empty())
     {
@@ -203,6 +207,7 @@ int __main(int argc, char** argv)
       matches = matcher.compute_matches();
       SARA_CHECK(matches.size());
     }
+    toc("Matching");
 
     set_active_window(w);
     display(frame);
