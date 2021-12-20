@@ -31,7 +31,7 @@ namespace DO { namespace Sara {
    *  @ingroup FeatureDescriptors
    *  @defgroup Orientation Dominant Orientation Assignment
    *  @{
-  */
+   */
 
   //! @brief Computes the image gradients of image @f$I@f$ in polar coordinates.
   /*!
@@ -40,8 +40,13 @@ namespace DO { namespace Sara {
       - @f$r = 2 ||\nabla I(x,y)||@f$,
       - @f$\theta = \mathrm{angle}( \nabla I(x,y) )@f$.
    */
+  //! @}
+  auto gradient_polar_coordinates(const ImageView<float>& f)
+      -> Image<Eigen::Vector2f>;
+
   template <typename T>
-  Image<Matrix<T,2,1>> gradient_polar_coordinates(const ImageView<T>& f)
+  auto gradient_polar_coordinates(const ImageView<T>& f)
+      -> Image<Matrix<T, 2, 1>>
   {
     auto nabla_f = gradient(f);
     for (auto it = nabla_f.begin(); it != nabla_f.end(); ++it)
@@ -52,36 +57,43 @@ namespace DO { namespace Sara {
     }
     return nabla_f;
   }
+  //! @}
 
   //! @brief Computes the image gradients in polar coordinates for each image in
   //! the pyramid.
+  //! @{
+  auto gradient_polar_coordinates(const ImagePyramid<float>& src,
+                                  ImagePyramid<float>& gradient_magnitude,
+                                  ImagePyramid<float>& gradient_orientation)
+      -> void;
+
   template <typename T>
-  ImagePyramid<Matrix<T, 2, 1>> gradient_polar_coordinates(const ImagePyramid<T>& pyramid)
+  ImagePyramid<Matrix<T, 2, 1>>
+  gradient_polar_coordinates(const ImagePyramid<T>& pyramid)
   {
     auto gradient_pyramid = ImagePyramid<Matrix<T, 2, 1>>{};
     gradient_pyramid.reset(
-      pyramid.num_octaves(),
-      pyramid.num_scales_per_octave(),
-      pyramid.scale_initial(),
-      pyramid.scale_geometric_factor() );
+        pyramid.num_octaves(), pyramid.num_scales_per_octave(),
+        pyramid.scale_initial(), pyramid.scale_geometric_factor());
 
     for (int o = 0; o < pyramid.num_octaves(); ++o)
     {
-      gradient_pyramid.octave_scaling_factor(o) = pyramid.octave_scaling_factor(o);
+      gradient_pyramid.octave_scaling_factor(o) =
+          pyramid.octave_scaling_factor(o);
       for (int s = 0; s < pyramid.num_scales_per_octave(); ++s)
-        gradient_pyramid(s,o) = gradient_polar_coordinates(pyramid(s,o));
+        gradient_pyramid(s, o) = gradient_polar_coordinates(pyramid(s, o));
     }
     return gradient_pyramid;
   }
+  //! @}
 
   //! @brief Computes the orientation histogram on a local patch around keypoint
   //! @f$(x,y,\sigma)@f$.
   template <typename T, int N>
-  void compute_orientation_histogram(Array<T, N, 1>& orientation_histogram,
-                                     const ImageView<Matrix<T,2,1>>& grad_polar_coords,
-                                     T x, T y, T s,
-                                     T patch_truncation_factor = T(3),
-                                     T blur_factor = T(1.5))
+  void compute_orientation_histogram(
+      Array<T, N, 1>& orientation_histogram,
+      const ImageView<Matrix<T, 2, 1>>& grad_polar_coords, T x, T y, T s,
+      T patch_truncation_factor = T(3), T blur_factor = T(1.5))
   {
     // Weighted histogram of gradients.
     orientation_histogram.setZero();
@@ -110,7 +122,7 @@ namespace DO { namespace Sara {
 
         // ori is in \f$]-\pi, \pi]\f$, so translate ori by \f$2*\pi\f$ if it is
         // negative.
-        ori = ori < 0 ? ori + T(2.*M_PI) : ori;
+        ori = ori < 0 ? ori + T(2. * M_PI) : ori;
         auto bin_index = int(floor(ori / T(2 * M_PI) * N));
         bin_index %= N;
 
@@ -219,8 +231,8 @@ namespace DO { namespace Sara {
                                 float patch_truncation_factor = 3.f,
                                 float blur_factor = 1.5f);
 
-    std::vector<float> operator()(const ImageView<Vector2f>& gradients,
-                                  float x, float y, float sigma) const;
+    std::vector<float> operator()(const ImageView<Vector2f>& gradients, float x,
+                                  float y, float sigma) const;
 
     std::vector<float> operator()(const ImagePyramid<Vector2f>& pyramid,
                                   const OERegion& extremum,
@@ -238,5 +250,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

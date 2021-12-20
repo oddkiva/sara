@@ -13,11 +13,74 @@
 
 #include <DO/Sara/FeatureDescriptors.hpp>
 
+#include <DO/Sara/ImageProcessing/Differential.hpp>
+
 
 using namespace std;
 
 
 namespace DO { namespace Sara {
+
+  auto gradient_polar_coordinates(const ImageView<float>& f)
+      -> Image<Eigen::Vector2f>
+  {
+    // The impact on SIFT computation is non negligible:
+    //
+    // Typical timing of the naive CPU implementation on a 1080p video:
+    // [compute_sift_keypoints:56] gradient of Gaussian computation time = 307.9 ms
+    //
+    // Typical timing of Halide CPU implementation on a 1080p video:
+    // [compute_sift_keypoints:56] gradient of Gaussian computation time = 82.8392 ms
+
+    // TODO: find out why Halide crashes for small image height...
+    if (f.height() < 8)
+    {
+      auto nabla_f = gradient(f);
+      std::transform(nabla_f.begin(), nabla_f.end(), nabla_f.begin(),
+                     [](const auto& g) -> Eigen::Vector2f {
+                       const auto r = 2 * g.norm();
+                       const auto theta = std::atan2(g.y(), g.x());
+                       return {r, theta};
+                     });
+      return nabla_f;
+    }
+
+    auto mag = Image<float>{f.sizes()};
+    auto ori = Image<float>{f.sizes()};
+    gradient_in_polar_coordinates(f, mag, ori);
+
+    auto nabla_f = Image<Eigen::Vector2f>{f.sizes()};
+    std::transform(mag.begin(), mag.end(), ori.begin(), nabla_f.begin(),
+                   [](float m, float o) -> Eigen::Vector2f {
+                     return {m, o};
+                   });
+
+    return nabla_f;
+  }
+
+  auto gradient_polar_coordinates(const ImagePyramid<float>& src,
+                                  ImagePyramid<float>& gradient_magnitude,
+                                  ImagePyramid<float>& gradient_orientation)
+      -> void
+  {
+    gradient_magnitude.reset(src.num_octaves(), src.num_scales_per_octave(),
+                             src.scale_initial(), src.scale_geometric_factor());
+    gradient_orientation.reset(src.num_octaves(), src.num_scales_per_octave(),
+                               src.scale_initial(),
+                               src.scale_geometric_factor());
+
+    for (int o = 0; o < src.num_octaves(); ++o)
+    {
+      gradient_magnitude.octave_scaling_factor(o) =
+          src.octave_scaling_factor(o);
+      gradient_orientation.octave_scaling_factor(o) =
+          src.octave_scaling_factor(o);
+      for (int s = 0; s < src.num_scales_per_octave(); ++s)
+        gradient_in_polar_coordinates(src(s, o),  //
+                                      gradient_magnitude(s, o),
+                                      gradient_orientation(s, o));
+    }
+  }
 
   ComputeDominantOrientations::ComputeDominantOrientations(
       float peak_ratio_thres, float patch_truncation_factor, float blur_factor)
@@ -65,7 +128,8 @@ namespace DO { namespace Sara {
     const auto& o_index = scale_octave_pair(1);
     const auto x = extremum.x();
     const auto y = extremum.y();
-    const auto s = static_cast<float>(pyramid.scale_relative_to_octave(s_index));
+    const auto s =
+        static_cast<float>(pyramid.scale_relative_to_octave(s_index));
     return this->operator()(pyramid(s_index, o_index), x, y, s);
   }
 
