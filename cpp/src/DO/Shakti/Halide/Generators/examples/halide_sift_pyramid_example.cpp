@@ -22,7 +22,7 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Shakti/Halide/Draw.hpp>
-#include <DO/Shakti/Halide/SIFTPipelineV2.hpp>
+#include <DO/Shakti/Halide/SIFT/PipelineV2.hpp>
 
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
 #  include <DO/Shakti/Cuda/VideoIO.hpp>
