@@ -31,15 +31,19 @@ namespace DO::Sara {
           "Source and destination image sizes are not equal!"};
 
 #ifdef DO_SARA_USE_HALIDE
+#  ifdef PROFILE_ME
     auto timer = Timer{};
     timer.restart();
+#  endif
     auto src_buffer = Shakti::Halide::as_runtime_buffer_4d(src);
     auto dst_buffer = Shakti::Halide::as_runtime_buffer_4d(dst);
     shakti_gaussian_convolution_cpu(src_buffer, sigma, gauss_truncate,
                                     dst_buffer);
+#  ifdef PROFILE_ME
     const auto elapsed = timer.elapsed_ms();
     SARA_DEBUG << "[CPU Halide Gaussian][" << src.sizes().transpose() << "] "
                << elapsed << " ms" << std::endl;
+#  endif
 #else
     // Compute the size of the Gaussian kernel.
     auto kernel_size = int(2 * gauss_truncate * sigma + 1);

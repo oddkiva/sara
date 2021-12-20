@@ -23,8 +23,21 @@ namespace DO { namespace Sara {
   {
     auto& G = _gaussians;
     auto& D = _diff_of_gaussians;
+
+    auto timer = Timer{};
+    auto tic_ = [&timer]() { timer.restart(); };
+    auto toc_ = [&timer](const std::string& what) {
+      const auto elapsed = timer.elapsed_ms();
+      SARA_DEBUG << "[" << what << "] " << elapsed << "ms\n";
+    };
+
+    tic_();
     G = gaussian_pyramid(image, _pyramid_params);
+    toc_("Gaussian Pyramid");
+
+    tic_();
     D = difference_of_gaussians_pyramid(G);
+    toc_("DoG Pyramid");
 
     auto extrema = vector<OERegion>{};
     extrema.reserve(int(1e4));
@@ -34,6 +47,7 @@ namespace DO { namespace Sara {
       scale_octave_pairs->reserve(10000);
     }
 
+    tic_();
     for (int o = 0; o < D.num_octaves(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
@@ -51,6 +65,7 @@ namespace DO { namespace Sara {
         }
       }
     }
+    toc_("DoG Extrema");
     shrink_to_fit(extrema);
     return extrema;
   }

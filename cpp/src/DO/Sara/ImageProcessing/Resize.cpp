@@ -46,15 +46,19 @@ namespace DO::Sara {
                  [[maybe_unused]] int fact) -> Image<float>
   {
 #ifdef DO_SARA_USE_HALIDE
+#ifdef PROFILE_ME
     auto timer = Timer{};
     timer.restart();
+#endif
 
     auto dst = Image<float>{(src.sizes() / fact).eval()};
     scale(src, dst);
 
+#ifdef PROFILE_ME
     const auto elapsed = timer.elapsed_ms();
     SARA_DEBUG << "[CPU Halide Downscale][" << src.sizes().transpose() << "] "
                << elapsed << " ms" << std::endl;
+#endif
     return dst;
 #else
     throw std::runtime_error{"Not Implemented!"};

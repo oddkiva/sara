@@ -238,71 +238,81 @@ namespace DO { namespace Sara {
     LocalScaleSpaceExtremum<std::less_equal, float> local_min;
 #endif
 
+    const auto& w = I(s, o).width();
+    const auto& h = I(s, o).height();
+    const auto wh = w * h;
+
 #ifdef _OMP
-#pragma omp parallel for collapse(2)
+#pragma omp parallel for
 #endif
-    for (int y = img_padding_sz; y < I(s, o).height() - img_padding_sz; ++y)
+    for (int xy = 0; xy < wh; ++xy)
     {
-      for (int x = img_padding_sz; x < I(s, o).width() - img_padding_sz; ++x)
-      {
-        // Identify extremum type if it is one
-        int type = 0;
-        if (local_max(x, y, s, o, I))
-          type = 1;  // maximum
-        else if (local_min(x, y, s, o, I))
-          type = -1;  // minimum
-        else
-          continue;
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const auto in_domain = img_padding_sz <= x && x < w - img_padding_sz &&
+                             img_padding_sz <= y && y < h - img_padding_sz;
+
+      if (!in_domain)
+        continue;
+
+      // Identify extremum type if it is one
+      int type = 0;
+      if (local_max(x, y, s, o, I))
+        type = 1;  // maximum
+      else if (local_min(x, y, s, o, I))
+        type = -1;  // minimum
+      else
+        continue;
 
 #ifndef STRICT_LOCAL_EXTREMA
-        // Reject early.
-        if (std::abs(I(x, y, s, o)) < 0.8f * extremum_thres)
-          continue;
+      // Reject early.
+      if (std::abs(I(x, y, s, o)) < 0.8f * extremum_thres)
+        continue;
 #endif
-        // Reject early if located on edge.
-        if (on_edge(I(s, o), x, y, edge_ratio_thres))
-          continue;
+      // Reject early if located on edge.
+      if (on_edge(I(s, o), x, y, edge_ratio_thres))
+        continue;
 
-        map(static_cast<int>(x), static_cast<int>(y)) = type;
-      }
+      map(static_cast<int>(x), static_cast<int>(y)) = type;
     }
 
 #ifdef _OMP
-#pragma omp parallel for collapse(2)
+#pragma omp parallel for
 #endif
-    for (int y = img_padding_sz; y < I(s, o).height() - img_padding_sz; ++y)
+    for (int xy = 0; xy < wh; ++xy)
     {
-      for (int x = img_padding_sz; x < I(s, o).width() - img_padding_sz; ++x)
-      {
-        const auto type = map(x, y);
-        if (type == 0)
-          continue;
+      const auto y = xy / w;
+      const auto x = xy - y * w;
 
-        // Try to refine extremum.
-        auto pos = Point3f{};
-        auto val = float{};
-        /*if
-          (!refineExtremum(I,x,y,s,o,type,pos,val,img_padding_sz,refine_iterations))
-          continue;*/
-        refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
-                        refine_iterations);
+      const auto type = map(x, y);
+      if (type == 0)
+        continue;
+
+      // Try to refine extremum.
+      auto pos = Point3f{};
+      auto val = float{};
+      // if (!refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
+      //                     refine_iterations))
+      //   continue;
+      refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
+                      refine_iterations);
 
 #ifndef STRICT_LOCAL_EXTREMA
-        // Reject if contrast too low.
-        if (std::abs(val) < extremum_thres)
-          continue;
+      // Reject if contrast too low.
+      if (std::abs(val) < extremum_thres)
+        continue;
 #endif
 
-        // Store the DoG extremum.
-        auto dog = OERegion(pos.head<2>(), pos.z());
-        dog.extremum_value = val;
-        dog.extremum_type = type == 1 ? OERegion::ExtremumType::Max
-                                      : OERegion::ExtremumType::Min;
+      // Store the DoG extremum.
+      auto dog = OERegion(pos.head<2>(), pos.z());
+      dog.extremum_value = val;
+      dog.extremum_type =
+          type == 1 ? OERegion::ExtremumType::Max : OERegion::ExtremumType::Min;
 #ifdef _OMP
-#pragma omp critical
+#  pragma omp critical
 #endif
-        extrema.push_back(dog);
-      }
+      extrema.push_back(dog);
     }
 
     return extrema;
@@ -334,7 +344,7 @@ namespace DO { namespace Sara {
 //#define DEBUG_SELECT_SCALE
 #ifdef DEBUG_SELECT_SCALE
 // verbose.
-#define print(variable) cout << #variable << " = " << variable << endl
+#  define print(variable) cout << #  variable << " = " << variable << endl
     print_stage("Check patch variable");
     print(G.scale_relative_to_octave(s - 1));
     print(G.scale_relative_to_octave(s));
