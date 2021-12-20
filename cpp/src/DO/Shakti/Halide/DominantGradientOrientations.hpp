@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <DO/Shakti/Halide/ExtremumDataStructures.hpp>
+#include <DO/Shakti/Halide/SIFT/V1/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/Utilities.hpp>
 
 #include "shakti_dominant_gradient_orientations_gpu.h"

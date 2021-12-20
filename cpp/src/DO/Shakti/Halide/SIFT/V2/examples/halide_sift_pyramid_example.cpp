@@ -21,8 +21,8 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <DO/Shakti/Halide/Draw.hpp>
-#include <DO/Shakti/Halide/SIFT/PipelineV2.hpp>
+#include <DO/Shakti/Halide/SIFT/Draw.hpp>
+#include <DO/Shakti/Halide/SIFT/V2/Pipeline.hpp>
 
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
 #  include <DO/Shakti/Cuda/VideoIO.hpp>

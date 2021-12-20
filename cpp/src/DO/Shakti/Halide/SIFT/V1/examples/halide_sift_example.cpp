@@ -26,9 +26,9 @@
 #include <DO/Shakti/Halide/Utilities.hpp>
 
 #include <DO/Shakti/Halide/DominantGradientOrientations.hpp>
-#include <DO/Shakti/Halide/Draw.hpp>
-#include <DO/Shakti/Halide/Resize.hpp>
 #include <DO/Shakti/Halide/SIFT.hpp>
+#include <DO/Shakti/Halide/SIFT/Draw.hpp>
+#include <DO/Shakti/Halide/SIFT/Resize.hpp>
 
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
 #  include <DO/Shakti/Cuda/VideoIO.hpp>

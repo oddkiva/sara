@@ -2,9 +2,9 @@
 
 #include <DO/Sara/Graphics.hpp>
 
-#include <DO/Shakti/Halide/ExtremumDataStructures.hpp>
-#include <DO/Shakti/Halide/ExtremumDataStructuresV2.hpp>
-#include <DO/Shakti/Halide/ExtremumDataStructuresV3.hpp>
+#include <DO/Shakti/Halide/SIFT/V1/ExtremumDataStructures.hpp>
+#include <DO/Shakti/Halide/SIFT/V2/ExtremumDataStructures.hpp>
+#include <DO/Shakti/Halide/SIFT/V3/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/Utilities.hpp>
 
 

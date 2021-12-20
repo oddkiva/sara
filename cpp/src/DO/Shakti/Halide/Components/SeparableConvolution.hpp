@@ -105,8 +105,11 @@ namespace DO::Shakti::HalideBackend {
       // CPU schedule.
       else
       {
-        conv_y.tile(x, y, xi, yi, 64, 64).vectorize(xi, 8).parallel(y);
-        conv_x.compute_at(conv_y, x).vectorize(x, 8);
+        conv_y.tile(x, y, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+            .vectorize(xi, 8, Halide::TailStrategy::GuardWithIf)
+            .parallel(y);
+        conv_x.compute_at(conv_y, x).vectorize(
+            x, 8, Halide::TailStrategy::GuardWithIf);
       }
     }
 
@@ -185,8 +188,11 @@ namespace DO::Shakti::HalideBackend {
       // CPU schedule.
       else
       {
-        conv_y.tile(x, y, xi, yi, 64, 64).vectorize(xi, 8).parallel(y);
-        conv_x.compute_at(conv_y, x).vectorize(x, 8);
+        conv_y.tile(x, y, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+            .vectorize(xi, 8, Halide::TailStrategy::GuardWithIf)
+            .parallel(y);
+        conv_x.compute_at(conv_y, x).vectorize(
+            x, 8, Halide::TailStrategy::GuardWithIf);
       }
     }
   };

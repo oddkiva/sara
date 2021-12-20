@@ -150,15 +150,18 @@ BOOST_AUTO_TEST_CASE(test_gaussian)
   auto dst_image = Image<float>{};
   BOOST_CHECK_THROW(apply_gaussian_filter(_src_image, dst_image, 1.f, 1.f),
                     domain_error);
-  SARA_DEBUG << "OK" << std::endl;
 
   dst_image.resize(_src_image.sizes());
   apply_gaussian_filter(_src_image, dst_image, 1.f, 1.f);
   BOOST_CHECK_SMALL_L2_DISTANCE(true_matrix, dst_image.matrix(), 1e-5f);
+  SARA_DEBUG << "true_matrix =\n" << true_matrix.matrix() << std::endl;
+  SARA_DEBUG << "dst_image =\n" << dst_image.matrix() << std::endl;
 
   dst_image.clear();
   dst_image = gaussian(_src_image, 1.f, 1.f);
   BOOST_CHECK_SMALL_L2_DISTANCE(true_matrix, dst_image.matrix(), 1e-5f);
+  SARA_DEBUG << "true_matrix =\n" << true_matrix.matrix() << std::endl;
+  SARA_DEBUG << "dst_image =\n" << dst_image.matrix() << std::endl;
 
   // Last case.
   _src_image.resize(9,
@@ -173,6 +176,24 @@ BOOST_AUTO_TEST_CASE(test_gaussian)
 
   dst_image = _src_image.compute<Gaussian>(1.f);
   BOOST_CHECK_SMALL_L2_DISTANCE(true_matrix, dst_image.matrix(), 1e-5f);
+  SARA_DEBUG << "true_matrix =\n" << true_matrix.matrix() << std::endl;
+  SARA_DEBUG << "dst_image =\n" << dst_image.matrix() << std::endl;
+
+  _src_image.resize(65, 65);
+  _src_image.flat_array().fill(0.f);
+  _src_image(32, 32) = 1.f;
+  true_matrix.resize(65, 65);
+  for (int i = 0; i < 65; ++i)
+    for (int j = 0; j < 65; ++j)
+      true_matrix(i, j) = exp(-(square(i - 32.f) + square(j - 32.f)) / 2.f);
+  true_matrix /= true_matrix.sum();
+
+  dst_image = _src_image.compute<Gaussian>(1.f);
+  BOOST_CHECK_SMALL_L2_DISTANCE(true_matrix, dst_image.matrix(), 1e-5f);
+  SARA_DEBUG << "true_matrix =\n"
+             << true_matrix.matrix().block(20, 28, 30, 9) << std::endl;
+  SARA_DEBUG << "dst_image =\n"
+             << dst_image.matrix().block(20, 28, 30, 9) << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_sobel)

@@ -16,7 +16,7 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
-#include <DO/Shakti/Halide/ExtremumDataStructures.hpp>
+#include <DO/Shakti/Halide/SIFT/V1/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/Utilities.hpp>
 
 #include "shakti_refine_scale_space_extrema_gpu.h"

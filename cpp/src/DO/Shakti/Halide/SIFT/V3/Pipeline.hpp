@@ -3,9 +3,7 @@
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 #include <DO/Shakti/Halide/BinaryOperators.hpp>
-#include <DO/Shakti/Halide/ExtremumDataStructures.hpp>
-#include <DO/Shakti/Halide/ExtremumDataStructuresV2.hpp>
-#include <DO/Shakti/Halide/ExtremumDataStructuresV3.hpp>
+#include <DO/Shakti/Halide/SIFT/V3/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/GaussianConvolution.hpp>
 #include <DO/Shakti/Halide/Resize.hpp>
 

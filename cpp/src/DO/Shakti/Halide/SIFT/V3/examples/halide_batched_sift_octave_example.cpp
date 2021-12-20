@@ -18,8 +18,8 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <DO/Shakti/Halide/Draw.hpp>
-#include <DO/Shakti/Halide/SIFT/PipelineV3.hpp>
+#include <DO/Shakti/Halide/SIFT/Draw.hpp>
+#include <DO/Shakti/Halide/SIFT/V3/Pipeline.hpp>
 
 #include "shakti_rgb8u_to_gray32f_cpu.h"
 

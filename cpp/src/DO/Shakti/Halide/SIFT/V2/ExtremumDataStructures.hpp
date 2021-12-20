@@ -18,7 +18,6 @@
 #include <DO/Shakti/Halide/Utilities.hpp>
 
 
-
 namespace DO::Shakti::HalideBackend::v2 {
 
   //! @brief List of extrema localized in the discretized scale-space.
@@ -33,26 +32,26 @@ namespace DO::Shakti::HalideBackend::v2 {
     //! @brief Extremum type.
     Halide::Runtime::Buffer<std::int8_t> type;
 
-    QuantizedExtremumArray() = default;
+    inline QuantizedExtremumArray() = default;
 
-    QuantizedExtremumArray(std::size_t size)
+    inline QuantizedExtremumArray(std::size_t size)
     {
       resize(size);
     }
 
-    auto resize(int size) -> void
+    inline auto resize(int size) -> void
     {
       x = Halide::Runtime::Buffer<std::int32_t>(size);
       y = Halide::Runtime::Buffer<std::int32_t>(size);
       type = Halide::Runtime::Buffer<std::int8_t>(size);
     }
 
-    auto empty() const noexcept
+    inline auto empty() const noexcept
     {
       return x.dimensions() == 0;
     }
 
-    auto size() const noexcept
+    inline auto size() const noexcept
     {
       return x.dim(0).extent();
     }
@@ -92,27 +91,27 @@ namespace DO::Shakti::HalideBackend::v2 {
       const std::int8_t& type;
     };
 
-    auto operator[](int i) -> View
+    inline auto operator[](int i) -> View
     {
       return {x(i), y(i), s(i), value(i), type(i)};
     }
 
-    auto operator[](int i) const -> ConstView
+    inline auto operator[](int i) const -> ConstView
     {
       return {x(i), y(i), s(i), value(i), type(i)};
     }
 
-    auto empty() const noexcept
+    inline auto empty() const noexcept
     {
       return x.dimensions() == 0;
     }
 
-    auto size() const noexcept
+    inline auto size() const noexcept
     {
       return x.dim(0).extent();
     }
 
-    auto resize(std::size_t size)
+    inline auto resize(std::size_t size)
     {
       x = Halide::Runtime::Buffer<float>(size);
       y = Halide::Runtime::Buffer<float>(size);
@@ -130,15 +129,15 @@ namespace DO::Shakti::HalideBackend::v2 {
     Halide::Runtime::Buffer<bool> peak_map;
     Halide::Runtime::Buffer<float> peak_residuals;
 
-    DominantOrientationDenseMap() = default;
+    inline DominantOrientationDenseMap() = default;
 
-    DominantOrientationDenseMap(int num_keypoints,
-                                int num_orientation_bins = 36)
+    inline DominantOrientationDenseMap(int num_keypoints,
+                                       int num_orientation_bins = 36)
     {
       resize(num_keypoints, num_orientation_bins);
     }
 
-    auto resize(int num_keypoints, int num_orientation_bins = 36) -> void
+    inline auto resize(int num_keypoints, int num_orientation_bins = 36) -> void
     {
       peak_map =
           Halide::Runtime::Buffer<bool>{num_orientation_bins, num_keypoints};
@@ -146,22 +145,22 @@ namespace DO::Shakti::HalideBackend::v2 {
           Halide::Runtime::Buffer<float>{num_orientation_bins, num_keypoints};
     }
 
-    auto empty() const noexcept
+    inline auto empty() const noexcept
     {
       return peak_map.dimensions() == 0;
     }
 
-    auto num_keypoints() const noexcept
+    inline auto num_keypoints() const noexcept
     {
       return peak_map.dim(1).extent();
     }
 
-    auto num_orientation_bins() const noexcept
+    inline auto num_orientation_bins() const noexcept
     {
       return peak_map.dim(0).extent();
     }
 
-    auto copy_to_host()
+    inline auto copy_to_host()
     {
       peak_map.copy_to_host();
       peak_residuals.copy_to_host();
@@ -176,10 +175,11 @@ namespace DO::Shakti::HalideBackend::v2 {
 
     sparse_map_type orientation_map;
 
-    DominantOrientationSparseMap() = default;
+    inline DominantOrientationSparseMap() = default;
 
     //! @brief Make sure the data is copied to host memory.
-    DominantOrientationSparseMap(const DominantOrientationDenseMap& dense)
+    inline DominantOrientationSparseMap(
+        const DominantOrientationDenseMap& dense)
     {
       const auto peak_map_view =
           Sara::TensorView_<bool, 2>{
@@ -219,17 +219,17 @@ namespace DO::Shakti::HalideBackend::v2 {
       }
     }
 
-    operator sparse_map_type&() noexcept
+    inline operator sparse_map_type&() noexcept
     {
       return orientation_map;
     }
 
-    operator const sparse_map_type&() const noexcept
+    inline operator const sparse_map_type&() const noexcept
     {
       return orientation_map;
     }
 
-    auto dominant_orientations(extremum_index_type i) const
+    inline auto dominant_orientations(extremum_index_type i) const
     {
       auto orientations = std::vector<angle_type>{};
       const auto [o_begin, o_end] = orientation_map.equal_range(i);
@@ -246,7 +246,7 @@ namespace DO::Shakti::HalideBackend::v2 {
   {
     Halide::Runtime::Buffer<float> orientations;
 
-    auto resize(std::int32_t size)
+    inline auto resize(std::int32_t size)
     {
       ExtremumArray::resize(size);
       orientations = Halide::Runtime::Buffer<float>{size};

@@ -31,26 +31,26 @@ namespace DO::Shakti::HalideBackend {
     //! @brief Extremum type.
     std::vector<std::int8_t> type;
 
-    QuantizedExtremumArray() = default;
+    inline QuantizedExtremumArray() = default;
 
-    QuantizedExtremumArray(std::size_t size)
+    inline QuantizedExtremumArray(std::size_t size)
     {
       resize(size);
     }
 
-    auto resize(std::size_t size) -> void
+    inline auto resize(std::size_t size) -> void
     {
       x.resize(size);
       y.resize(size);
       type.resize(size);
     }
 
-    auto empty() const noexcept
+    inline auto empty() const noexcept
     {
       return x.empty();
     }
 
-    auto size() const
+    inline auto size() const
     {
       return x.size();
     }
@@ -90,27 +90,27 @@ namespace DO::Shakti::HalideBackend {
       const std::int8_t& type;
     };
 
-    auto operator[](int i) -> View
+    inline auto operator[](int i) -> View
     {
       return {x[i], y[i], s[i], value[i], type[i]};
     }
 
-    auto operator[](int i) const -> ConstView
+    inline auto operator[](int i) const -> ConstView
     {
       return {x[i], y[i], s[i], value[i], type[i]};
     }
 
-    auto empty() const noexcept
+    inline auto empty() const noexcept
     {
       return x.empty();
     }
 
-    auto size() const noexcept
+    inline auto size() const noexcept
     {
       return x.size();
     }
 
-    auto resize(std::size_t size)
+    inline auto resize(std::size_t size)
     {
       x.resize(size);
       y.resize(size);
@@ -127,26 +127,26 @@ namespace DO::Shakti::HalideBackend {
     Sara::Tensor_<bool, 2> peak_map;
     Sara::Tensor_<float, 2> peak_residuals;
 
-    DominantOrientationDenseMap() = default;
+    inline DominantOrientationDenseMap() = default;
 
-    DominantOrientationDenseMap(int num_keypoints,
-                                int num_orientation_bins = 36)
+    inline DominantOrientationDenseMap(int num_keypoints,
+                                       int num_orientation_bins = 36)
     {
       resize(num_keypoints, num_orientation_bins);
     }
 
-    auto resize(int num_keypoints, int num_orientation_bins = 36) -> void
+    inline auto resize(int num_keypoints, int num_orientation_bins = 36) -> void
     {
       peak_map.resize(num_keypoints, num_orientation_bins);
       peak_residuals.resize(num_keypoints, num_orientation_bins);
     }
 
-    auto num_keypoints() const noexcept
+    inline auto num_keypoints() const noexcept
     {
       return peak_map.size(0);
     }
 
-    auto num_orientation_bins() const noexcept
+    inline auto num_orientation_bins() const noexcept
     {
       return peak_map.size(1);
     }
@@ -160,17 +160,17 @@ namespace DO::Shakti::HalideBackend {
 
     OrientationMap orientation_map;
 
-    operator OrientationMap&() noexcept
+    inline operator OrientationMap&() noexcept
     {
       return orientation_map;
     }
 
-    operator const OrientationMap&() const noexcept
+    inline operator const OrientationMap&() const noexcept
     {
       return orientation_map;
     }
 
-    auto dominant_orientations(extremum_index_type i) const
+    inline auto dominant_orientations(extremum_index_type i) const
     {
       auto orientations = std::vector<angle_type>{};
       const auto [o_begin, o_end] = orientation_map.equal_range(i);
@@ -199,17 +199,17 @@ namespace DO::Shakti::HalideBackend {
       const float& orientation;
     };
 
-    auto operator[](int i) -> View
+    inline auto operator[](int i) -> View
     {
       return {{x[i], y[i], s[i], value[i], type[i]}, orientations[i]};
     }
 
-    auto operator[](int i) const -> ConstView
+    inline auto operator[](int i) const -> ConstView
     {
       return {{x[i], y[i], s[i], value[i], type[i]}, orientations[i]};
     }
 
-    auto resize(std::size_t size)
+    inline auto resize(std::size_t size)
     {
       ExtremumArray::resize(size);
       orientations.resize(size);
@@ -225,8 +225,9 @@ namespace DO::Shakti::HalideBackend {
   };
 
 
-  auto to_oriented_extremum_array(const ExtremumArray& extrema,
-                                  const DominantOrientationMap& orientations)
+  inline auto
+  to_oriented_extremum_array(const ExtremumArray& extrema,
+                             const DominantOrientationMap& orientations)
   {
     auto oriented_extrema = OrientedExtremumArray{};
 
@@ -249,7 +250,7 @@ namespace DO::Shakti::HalideBackend {
     return oriented_extrema;
   }
 
-  auto to_oriented_extremum_array(
+  inline auto to_oriented_extremum_array(
       const Pyramid<ExtremumArray>& extrema,
       const Pyramid<DominantOrientationMap>& orientations)
   {

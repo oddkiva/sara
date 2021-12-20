@@ -107,7 +107,7 @@ namespace {
       else
       {
         output.specialize(input_is_planar && output_is_planar)
-            .split(y, yo, yi, 8)
+            .split(y, yo, yi, 8, TailStrategy::GuardWithIf)
             .parallel(yo)
             .vectorize(x, 8, TailStrategy::GuardWithIf);
 
@@ -282,7 +282,7 @@ namespace {
       else
       {
         output.specialize(input_is_planar && output_is_planar)
-            .split(y, yo, yi, 8)
+            .split(y, yo, yi, 8, TailStrategy::GuardWithIf)
             .parallel(yo)
             .vectorize(x, 8, TailStrategy::GuardWithIf);
 
