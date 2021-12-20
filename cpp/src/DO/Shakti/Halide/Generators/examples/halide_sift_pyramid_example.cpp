@@ -22,7 +22,7 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Shakti/Halide/Draw.hpp>
-#include <DO/Shakti/Halide/SIFTPipeline.hpp>
+#include <DO/Shakti/Halide/SIFTPipelineV2.hpp>
 
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
 #  include <DO/Shakti/Cuda/VideoIO.hpp>
@@ -218,7 +218,6 @@ auto test_on_video(int argc, char **argv)
     ++frames_read;
     if (frames_read % (skip + 1) != 0)
       continue;
-    SARA_CHECK(frames_read);
 
     timer.restart();
     {

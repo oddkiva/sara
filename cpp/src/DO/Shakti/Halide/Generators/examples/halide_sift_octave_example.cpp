@@ -22,7 +22,7 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Shakti/Halide/Draw.hpp>
-#include <DO/Shakti/Halide/SIFTPipeline.hpp>
+#include <DO/Shakti/Halide/SIFTPipelineV2.hpp>
 
 #include "shakti_rgb8u_to_gray32f_cpu.h"
 
@@ -81,9 +81,8 @@ auto test_on_video()
 #else
   const auto video_filepath =
       // "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.MP4"s;
+      "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.mp4"s;
 #endif
-
 
 
   // ===========================================================================
