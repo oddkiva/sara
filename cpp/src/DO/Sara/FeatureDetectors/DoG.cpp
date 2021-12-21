@@ -15,11 +15,11 @@
 using namespace std;
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
-  vector<OERegion>
-  ComputeDoGExtrema::operator()(const ImageView<float>& image,
-                                vector<Point2i> *scale_octave_pairs)
+  auto ComputeDoGExtrema::operator()(const ImageView<float>& image,
+                                     vector<Point2i>* scale_octave_pairs)
+      -> vector<OERegion>
   {
     auto& G = _gaussians;
     auto& D = _diff_of_gaussians;
@@ -61,7 +61,7 @@ namespace DO { namespace Sara {
         if (scale_octave_pairs)
         {
           for (size_t i = 0; i != new_extrema.size(); ++i)
-            scale_octave_pairs->push_back(Point2i(s,o));
+            scale_octave_pairs->push_back(Point2i(s, o));
         }
       }
     }
@@ -70,5 +70,4 @@ namespace DO { namespace Sara {
     return extrema;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara

@@ -154,6 +154,9 @@ int __main(int argc, char** argv)
   auto keys_prev = KeypointList<OERegion, float>{};
   auto keys_curr = KeypointList<OERegion, float>{};
 
+  auto feature_timer = Timer{};
+  auto matching_timer = Timer{};
+
   auto frames_read = 0;
   while (true)
   {
@@ -183,6 +186,7 @@ int __main(int argc, char** argv)
 #endif
 
     tic();
+    feature_timer.restart();
     {
       image_prev.swap(image_curr);
       keys_prev.swap(keys_curr);
@@ -201,9 +205,9 @@ int __main(int argc, char** argv)
           /* scale_initial */ 1.2f);
       keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
     }
-    toc("SIFT");
+    const auto feature_time = feature_timer.elapsed_ms();
 
-    tic();
+    matching_timer.restart();
     auto matches = std::vector<Match>{};
     const auto& fprev = std::get<0>(keys_prev);
     if (!fprev.empty())
@@ -211,6 +215,7 @@ int __main(int argc, char** argv)
       AnnMatcher matcher{keys_prev, keys_curr, 0.6f};
       matches = matcher.compute_matches();
     }
+    const auto matching_time = matching_timer.elapsed_ms();
     toc("Matching");
 
     tic();
@@ -229,9 +234,15 @@ int __main(int argc, char** argv)
         draw_arrow(frame_annotated, a, b, Yellow8, 4);
       }
     }
-    draw_text(frame_annotated, 100, 100,
-              "SIFT matches = " + std::to_string(matches.size()), White8, 40, 0,
-              false, true);
+    draw_text(frame_annotated, 100, 50,               //
+              format("SIFT: %0.f ms", feature_time),  //
+              White8, 40, 0, false, false, true);
+    draw_text(frame_annotated, 150, 50,
+              format("Matching: %0.3f ms", matching_time),  //
+              White8, 40, 0, false, true);
+    draw_text(frame_annotated, 200, 50,              //
+              format("Tracks: %u", matches.size()),  //
+              White8, 40, 0, false, false, true);
     set_active_window(w);
     display(frame_annotated);
     toc("Display");
