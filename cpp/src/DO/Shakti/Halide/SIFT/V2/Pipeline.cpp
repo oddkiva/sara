@@ -1,7 +1,10 @@
+#include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
+
 #include <DO/Shakti/Halide/SIFT/V2/Pipeline.hpp>
 
 #include <DO/Shakti/Halide/BinaryOperators.hpp>
 #include <DO/Shakti/Halide/GaussianConvolution.hpp>
+#include <DO/Shakti/Halide/SeparableConvolution2d.hpp>
 #include <DO/Shakti/Halide/Resize.hpp>
 
 #include "shakti_gray32f_to_rgb8u_cpu.h"
@@ -27,33 +30,47 @@ namespace DO::Shakti::HalideBackend::v2 {
               ? std::sqrt(std::pow(scale_initial, 2) -
                           std::pow(scale_camera, 2))
               : std::sqrt(std::pow(scales[i], 2) - std::pow(scales[i - 1], 2));
+
+    kernels = std::vector<::Halide::Runtime::Buffer<float>>(num_scales + 3);
+    std::transform(sigmas.begin(), sigmas.end(), kernels.begin(),
+                   [](const auto& sigma) {
+                     const auto k = Sara::make_gaussian_kernel(sigma);
+                     auto k1 = ::Halide::Runtime::Buffer<float>(k.size());
+                     std::copy_n(k.data(), k.size(), k1.data());
+                     return k1;
+                   });
+    std::for_each(kernels.begin(), kernels.end(),
+                  [](auto& k) { k.set_host_dirty(); });
   }
 
 
-  auto SiftOctavePipeline::initialize_buffers(std::int32_t w, std::int32_t h)
+  auto SiftOctavePipeline::initialize_buffers(std::int32_t num_scales,
+                                              std::int32_t w, std::int32_t h)
       -> void
   {
+    params.num_scales = num_scales;
+
     // Octave of Gaussians.
     gaussians.resize(params.num_scales + 3);
     for (auto& g : gaussians)
-      g = Halide::Runtime::Buffer<float>(w, h, 1, 1);
+      g = ::Halide::Runtime::Buffer<float>(w, h, 1, 1);
     // Octave of Difference of Gaussians.
     dogs.resize(params.num_scales + 2);
     for (auto& dog : dogs)
-      dog = Halide::Runtime::Buffer<float>(w, h, 1, 1);
+      dog = ::Halide::Runtime::Buffer<float>(w, h, 1, 1);
 
     // Octave of DoG extrema maps.
     extrema_maps.resize(params.num_scales);
     for (auto& e : extrema_maps)
-      e = Halide::Runtime::Buffer<std::int8_t>(w, h, 1, 1);
+      e = ::Halide::Runtime::Buffer<std::int8_t>(w, h, 1, 1);
     extrema_quantized.resize(params.num_scales);
     extrema.resize(params.num_scales);
 
     // Octave of Gradients of Gaussians.
     gradients.resize(params.num_scales);
     for (auto& grad : gradients)
-      grad = {Halide::Runtime::Buffer<float>(w, h, 1, 1),
-              Halide::Runtime::Buffer<float>(w, h, 1, 1)};
+      grad = {::Halide::Runtime::Buffer<float>(w, h, 1, 1),
+              ::Halide::Runtime::Buffer<float>(w, h, 1, 1)};
     dominant_orientation_dense_maps.resize(params.num_scales);
     dominant_orientation_sparse_maps.resize(params.num_scales);
 
@@ -61,18 +78,26 @@ namespace DO::Shakti::HalideBackend::v2 {
     extrema_oriented.resize(params.num_scales);
   }
 
-  auto SiftOctavePipeline::feed(Halide::Runtime::Buffer<float>& input,
+  auto SiftOctavePipeline::feed(::Halide::Runtime::Buffer<float>& input,
                                 FirstAction first_action) -> void
   {
     // Compute the Gaussians.
     if (first_action == FirstAction::Convolve)
     {
       tic();
+#ifdef IMPL_V1
       HalideBackend::gaussian_convolution(
           input,                               //
           gaussians[0],                        //
           params.sigmas[0],                    //
           params.gaussian_truncation_factor);  //
+#else
+      HalideBackend::separable_convolution_2d(  //
+          input, params.kernels[0],
+          gaussians[0],                       //
+          params.kernels[0].dim(0).extent(),  //
+          -params.kernels[0].dim(0).extent() / 2);
+#endif
       toc("Convolving for Gaussian 0: " + std::to_string(params.sigmas[0]));
     }
     else if (first_action == FirstAction::Downscale)
@@ -89,11 +114,20 @@ namespace DO::Shakti::HalideBackend::v2 {
     for (auto i = 1u; i < gaussians.size(); ++i)
     {
       tic();
+#ifdef IMPL_V1
       HalideBackend::gaussian_convolution(  //
           gaussians[i - 1],                 //
           gaussians[i],                     //
           params.sigmas[i],                 //
           params.gaussian_truncation_factor);
+#else
+      HalideBackend::separable_convolution_2d(  //
+          gaussians[i - 1],                     //
+          params.kernels[i],
+          gaussians[i],                           //
+          params.kernels[i].dim(0).extent(),  //
+          -params.kernels[i].dim(0).extent() / 2);
+#endif
       toc("Convolving for Gaussian " + std::to_string(i) + ": " +
           std::to_string(params.sigmas[i]));
     }
@@ -326,8 +360,9 @@ namespace DO::Shakti::HalideBackend::v2 {
   }
 
 
-  auto SiftPyramidPipeline::initialize(int start_octave, int width, int height)
-      -> void
+  auto SiftPyramidPipeline::initialize(int start_octave,
+                                       int num_scales_per_octave,  //
+                                       int width, int height) -> void
   {
     start_octave_index = start_octave;
 
@@ -359,11 +394,11 @@ namespace DO::Shakti::HalideBackend::v2 {
     {
       const auto w = width * std::pow(2, -start_octave_index);
       const auto h = height * std::pow(2, -start_octave_index);
-      input_rescaled = Halide::Runtime::Buffer<float>(w, h, 1, 1);
+      input_rescaled = ::Halide::Runtime::Buffer<float>(w, h, 1, 1);
     }
     else if (start_octave_index > 0)
     {
-      input_rescaled = Halide::Runtime::Buffer<float>(width, height, 1, 1);
+      input_rescaled = ::Halide::Runtime::Buffer<float>(width, height, 1, 1);
     }
 
     octaves.resize(num_octaves);
@@ -377,11 +412,12 @@ namespace DO::Shakti::HalideBackend::v2 {
                          : height / std::pow(2, o);
 
       octaves[o - start_octave_index].profile = profile;
-      octaves[o - start_octave_index].initialize_buffers(w, h);
+      octaves[o - start_octave_index].initialize_buffers(num_scales_per_octave,
+                                                         w, h);
     }
   }
 
-  auto SiftPyramidPipeline::feed(Halide::Runtime::Buffer<float>& input) -> void
+  auto SiftPyramidPipeline::feed(::Halide::Runtime::Buffer<float>& input) -> void
   {
     if (start_octave_index < 0)
     {

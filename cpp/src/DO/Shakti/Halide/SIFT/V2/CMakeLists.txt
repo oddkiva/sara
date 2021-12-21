@@ -9,6 +9,7 @@ set(HALIDE_SIFT_BLOCK_LIBRARIES_V2
     shakti_reduce_32f_gpu
     shakti_scale_32f_gpu
     # Gaussian pyramid.
+    shakti_separable_convolution_2d_gpu
     shakti_gaussian_convolution_gpu
     # DoG pyramid.
     shakti_subtract_32f_gpu

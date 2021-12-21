@@ -97,7 +97,7 @@ int __main(int argc, char** argv)
       ("show_features,f", po::bool_switch(&show_features),
        "show features")  //
       ("save_video", po::bool_switch(&save_video),
-       "save features")  //
+       "save video")  //
       ;
 
   po::variables_map vm;

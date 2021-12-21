@@ -16,6 +16,8 @@
 
 #include <omp.h>
 
+#include <boost/program_options.hpp>
+
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
@@ -51,7 +53,9 @@ auto test_on_image()
   auto buffer_4d = halide::as_runtime_buffer(image_tensor);
 
   auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
-  sift_pipeline.initialize(-1, image.width(), image.height());
+
+  sift_pipeline.initialize(-1, 3,  //
+                           image.width(), image.height());
 
   auto timer = sara::Timer{};
 
@@ -117,23 +121,48 @@ auto test_on_image()
 
 auto test_on_video(int argc, char **argv)
 {
+  namespace po = boost::program_options;
+
   using namespace std::string_literals;
 
-#ifdef _WIN32
-  const auto video_filepath =
-    argc < 2 ? "C:/Users/David/Desktop/GOPR0542.MP4"s
-             : std::string{argv[1]};
-#elif __APPLE__
-  const auto video_filepath =
-    argc < 2 ? "/Users/david/Desktop/Datasets/videos/sample10.mp4"s
-             : std::string{argv[1]};
-#else
-  const auto video_filepath =
-      argc < 2 ? "/home/david/Desktop/Datasets/sfm/Family.mp4"s
-               : std::string{argv[1]};
-#endif
+  // Parameter parsing.
+  auto video_filepath = std::string{};
+  auto downscale_factor = int{};
+  auto skip = int{};
+  auto show_features = false;
+  auto num_scales_per_octave = int{};
+  po::options_description desc("Halide SIFT extractor");
 
-  const auto draw_sift_features = argc < 3 ? false : bool(std::stoi(argv[3]));
+  desc.add_options()     //
+      ("help", "Usage")  //
+      ("video,v", po::value<std::string>(&video_filepath),
+       "input video file")  //
+      ("downscale-factor,d",
+       po::value<int>(&downscale_factor)->default_value(2),
+       "downscale factor")  //
+      ("num_scales_per_octave,s", po::value<int>(&num_scales_per_octave)->default_value(1),
+       "number of scales per octave")  //
+      ("skip", po::value<int>(&skip)->default_value(0),
+       "number of frames to skip")  //
+      ("show_features,f", po::bool_switch(&show_features),
+       "show features")  //
+      ;
+
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+
+  if (vm.count("help"))
+  {
+    std::cout << desc << "\n";
+    return 1;
+  }
+
+  if (!vm.count("video"))
+  {
+    std::cout << "The video file must be specified!\n" << desc << "\n";
+    return 1;
+  }
 
 
   // ===========================================================================
@@ -181,7 +210,8 @@ auto test_on_video(int argc, char **argv)
   auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
 
   const auto start_octave_index = 0;
-  sift_pipeline.initialize(start_octave_index, frame.width(), frame.height());
+  sift_pipeline.initialize(start_octave_index, num_scales_per_octave,
+                           frame.width(), frame.height());
 
 
   // Show the local extrema.
@@ -189,7 +219,6 @@ auto test_on_video(int argc, char **argv)
   sara::set_antialiasing();
 
   auto frames_read = 0;
-  const auto skip = argc < 3 ? 0 : std::stoi(argv[2]);
 
   auto timer = sara::Timer{};
   auto elapsed_ms = double{};
@@ -245,7 +274,7 @@ auto test_on_video(int argc, char **argv)
         });
 #endif
 
-    if (draw_sift_features)
+    if (show_features)
     {
       for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
       {

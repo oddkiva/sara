@@ -30,6 +30,7 @@ namespace DO::Shakti::HalideBackend::v2 {
 
     std::vector<float> scales;
     std::vector<float> sigmas;
+    std::vector<Halide::Runtime::Buffer<float>> kernels;
 
     auto initialize_cached_scales() -> void;
   };
@@ -91,7 +92,8 @@ namespace DO::Shakti::HalideBackend::v2 {
       }
     }
 
-    auto initialize_buffers(std::int32_t w, std::int32_t h) -> void;
+    auto initialize_buffers(std::int32_t num_scales, std::int32_t w,
+                            std::int32_t h) -> void;
 
     auto feed(Halide::Runtime::Buffer<float>& input,
               FirstAction first_action = FirstAction::Convolve) -> void;
@@ -152,7 +154,8 @@ namespace DO::Shakti::HalideBackend::v2 {
       }
     }
 
-    auto initialize(int start_octave, int width, int height) -> void;
+    auto initialize(int start_octave, int num_scales_per_octave, int width,
+                    int height) -> void;
 
     auto feed(Halide::Runtime::Buffer<float>& input) -> void;
 

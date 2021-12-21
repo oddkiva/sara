@@ -24,20 +24,20 @@
 
 namespace DO::Shakti::HalideBackend {
 
-  auto scale(Halide::Runtime::Buffer<float>& src,
-             Halide::Runtime::Buffer<float>& dst)
+  auto scale(::Halide::Runtime::Buffer<float>& src,
+             ::Halide::Runtime::Buffer<float>& dst)
   {
     shakti_scale_32f_gpu(src, dst.width(), dst.height(), dst);
   }
 
-  auto reduce(Halide::Runtime::Buffer<float>& src,
-              Halide::Runtime::Buffer<float>& dst)
+  auto reduce(::Halide::Runtime::Buffer<float>& src,
+              ::Halide::Runtime::Buffer<float>& dst)
   {
     shakti_reduce_32f_gpu(src, dst.width(), dst.height(), dst);
   }
 
-  auto enlarge(Halide::Runtime::Buffer<float>& src,
-               Halide::Runtime::Buffer<float>& dst)
+  auto enlarge(::Halide::Runtime::Buffer<float>& src,
+               ::Halide::Runtime::Buffer<float>& dst)
   {
     shakti_enlarge_gpu(src,                        //
                        src.width(), src.height(),  //
@@ -95,9 +95,9 @@ namespace DO::Shakti::HalideBackend {
   auto enlarge(Sara::ImageView<Sara::Rgb32f>& src,
                Sara::ImageView<Sara::Rgb32f>& dst)
   {
-    auto src_buffer = Halide::Runtime::Buffer<float>::make_interleaved(
+    auto src_buffer = ::Halide::Runtime::Buffer<float>::make_interleaved(
         reinterpret_cast<float*>(src.data()), src.width(), src.height(), 3);
-    auto dst_buffer = Halide::Runtime::Buffer<float>::make_interleaved(
+    auto dst_buffer = ::Halide::Runtime::Buffer<float>::make_interleaved(
         reinterpret_cast<float*>(dst.data()), dst.width(), dst.height(), 3);
     src_buffer.add_dimension();
     dst_buffer.add_dimension();

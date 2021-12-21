@@ -33,6 +33,7 @@ target_link_options(halide_sift_pyramid_example
 target_link_libraries(halide_sift_pyramid_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
+  ${Boost_LIBRARIES}
   DO_Shakti_Halide_Sift_gpu_v2
   shakti_bgra8u_to_gray32f_cpu
   shakti_rgb8u_to_gray32f_cpu
