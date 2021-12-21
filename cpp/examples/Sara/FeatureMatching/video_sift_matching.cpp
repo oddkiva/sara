@@ -77,6 +77,7 @@ int __main(int argc, char** argv)
   auto skip = int{};
   auto hide_tracks = false;
   auto show_features = false;
+  auto save_video = false;
 
   po::options_description desc("video_sift_matching");
   desc.add_options()     //
@@ -92,6 +93,8 @@ int __main(int argc, char** argv)
        "hide feature tracking")  //
       ("show_features,f", po::bool_switch(&show_features),
        "show features")  //
+      ("save_video", po::bool_switch(&save_video),
+       "save features")  //
       ;
 
   po::variables_map vm;
@@ -122,14 +125,17 @@ int __main(int argc, char** argv)
 
   // Output save.
   const auto basename = fs::basename(video_filepath);
-  VideoWriter video_writer{
+  auto video_writer = std::unique_ptr<VideoWriter>{};
+
+  if (save_video)
+    video_writer = std::make_unique<VideoWriter>(
 #ifdef __APPLE__
-      "/Users/david/Desktop/" + basename + ".sift-matching.mp4",
+        "/Users/david/Desktop/" + basename + ".sift-matching.mp4",
 #else
-      "/home/david/Desktop/" + basename + ".sift-matching.mp4",
+        "/home/david/Desktop/" + basename + ".sift-matching.mp4",
 #endif
-      frame.sizes()  //
-  };
+        frame.sizes()  //
+    );
 
 
   // Show the local extrema.
@@ -231,7 +237,12 @@ int __main(int argc, char** argv)
     display(frame_annotated);
     toc("Display");
 
-    video_writer.write(frame_annotated);
+    if (save_video)
+    {
+      tic();
+      video_writer->write(frame_annotated);
+      toc("Video-Write");
+    }
   }
 
   return 0;
