@@ -137,7 +137,6 @@ int __main(int argc, char** argv)
         frame.sizes()  //
     );
 
-
   // Show the local extrema.
   auto w = create_window(frame.sizes(), "SIFT matching " + basename);
   set_antialiasing();
