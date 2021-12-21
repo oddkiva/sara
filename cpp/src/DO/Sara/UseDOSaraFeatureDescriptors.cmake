@@ -6,6 +6,10 @@ if(SARA_USE_FROM_SOURCE)
     sara_create_common_variables("FeatureDescriptors")
     sara_generate_library("FeatureDescriptors")
 
+    if(SARA_USE_HALIDE)
+      target_compile_definitions(DO_Sara_FeatureDescriptors
+                                 PRIVATE DO_SARA_USE_HALIDE)
+    endif ()
     target_link_libraries(
       DO_Sara_FeatureDescriptors
       PUBLIC DO::Sara::Features #

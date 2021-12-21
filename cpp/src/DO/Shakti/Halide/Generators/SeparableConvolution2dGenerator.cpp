@@ -11,6 +11,8 @@
 
 #include <DO/Shakti/Halide/MyHalide.hpp>
 
+#include <DO/Shakti/Halide/Components/SeparableConvolution.hpp>
+
 
 namespace {
 
@@ -22,101 +24,30 @@ namespace {
     GeneratorParam<int> tile_x{"tile_x", 32};
     GeneratorParam<int> tile_y{"tile_y", 32};
 
-    Input<Func> input{"input", Float(32), 3};
-    Input<Func> kernel{"kernel", Float(32), 1};
+    Input<Buffer<float>> input{"input", 4};
+    Input<Buffer<float>> kernel{"kernel", 1};
     Input<int32_t> kernel_size{"kernel_size"};
     Input<int32_t> kernel_shift{"kernel_shift"};
 
-    //! @brief Intermediate function
-    //! @{
-    Func conv_y_t{"conv_y_transposed"};
-    Func conv_y{"conv_y"};
-    //! @}
+    Output<Buffer<float>> output{"input_convolved", 4};
 
-    Output<Func> output{"input_convolved", Float(32), 3};
-
-    //! @brief Variables.
-    //! @{
-    Var x{"x"}, y{"y"}, c{"c"};
-    Var xo{"xo"}, yo{"yo"}, co{"co"};
-    Var xi{"xi"}, yi{"yi"}, ci{"ci"};
-    //! @}
+    DO::Shakti::HalideBackend::SeparableConvolution separable_conv_2d;
 
     void generate()
     {
-      // Define the summation variable `k` with its summation domain (a.k.a. the
-      // reduction domain variable).
-      auto k = RDom{kernel_shift, kernel_size};
+      const auto w = input.dim(0).extent();
+      const auto h = input.dim(1).extent();
 
-      // 1st pass: transpose and convolve the columns.
-      auto input_t = Func{"input_transposed"};
-      input_t(x, y, c) = input(y, x, c);
-      conv_y_t(x, y, c) = sum(input_t(x + k, y, c) * kernel(k));
-
-      // 2nd pass: transpose and convolve the rows.
-      auto conv_y = Func{"conv_y"};
-      conv_y(x, y, c) = conv_y_t(y, x, c);
-
-      auto& conv_x = output;
-      conv_x(x, y, c) = sum(conv_y(x + k, y, c) * kernel(k));
+      separable_conv_2d.generate(
+          input,
+          kernel, kernel_size, kernel_shift,
+          kernel, kernel_size, kernel_shift,
+          output, w, h);
     }
 
-    void schedule()
+    void schedule() 
     {
-      auto& conv_x = output;
-
-      // GPU schedule.
-      if (get_target().has_gpu_feature())
-      {
-        // 1st pass: transpose and convolve the columns
-        conv_y_t.compute_root();
-        conv_y_t.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1);
-
-        // 2nd pass: transpose and convolve the rows.
-        conv_x.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1);
-      }
-
-      // Hexagon schedule.
-      else if (get_target().features_any_of({Halide::Target::HVX_v62,  //
-                                             Halide::Target::HVX_v65,
-                                             Halide::Target::HVX_v66,
-                                             Halide::Target::HVX_128}))
-      {
-        const auto vector_size =
-            get_target().has_feature(Target::HVX_128) ? 128 : 64;
-
-        // 1st pass: transpose and convolve the columns
-        conv_y_t.compute_root();
-        conv_y_t.hexagon()
-            .prefetch(conv_y_t, y, y, 2)
-            .split(y, yo, yi, 128)
-            .parallel(yo)
-            .vectorize(x, vector_size);
-
-        // 2nd pass: transpose and convolve the rows.
-        conv_y.compute_root();
-        conv_x.hexagon()
-            .prefetch(conv_y_t, y, y, 2)
-            .split(y, yo, yi, 128, TailStrategy::GuardWithIf)
-            .parallel(yo)
-            .vectorize(x, vector_size, TailStrategy::GuardWithIf);
-      }
-
-      // CPU schedule.
-      else
-      {
-        // 1st pass: transpose and convolve the columns
-        conv_y_t.compute_root();
-        conv_y_t.split(y, yo, yi, 8, TailStrategy::GuardWithIf)
-            .parallel(yo)
-            .vectorize(x, 8, TailStrategy::GuardWithIf);
-
-        // 2nd pass: transpose and convolve the rows.
-        conv_y.compute_root();
-        conv_x.split(y, yo, yi, 8, TailStrategy::GuardWithIf)
-            .parallel(yo)
-            .vectorize(x, 8, TailStrategy::GuardWithIf);
-      }
+      separable_conv_2d.schedule(get_target(), tile_x, tile_y, output);
     }
   };
 

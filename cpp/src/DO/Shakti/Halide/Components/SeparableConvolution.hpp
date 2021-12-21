@@ -28,11 +28,11 @@ namespace DO::Shakti::HalideBackend {
     Halide::Var xi{"xi"}, yi{"yi"}, ci{"ci"};
     //! @}
 
-    template <typename Input, typename Output>
+    template <typename Input, typename Kernel, typename Output>
     void generate(Input& input,                                             //
-                  Halide::Func& kernel_x,                                   //
+                  Kernel& kernel_x,                                   //
                   Halide::Expr kernel_x_size, Halide::Expr kernel_x_shift,  //
-                  Halide::Func& kernel_y,                                   //
+                  Kernel& kernel_y,                                   //
                   Halide::Expr kernel_y_size, Halide::Expr kernel_y_shift,  //
                   Output& output,                                           //
                   Halide::Expr w, Halide::Expr h)
@@ -96,7 +96,7 @@ namespace DO::Shakti::HalideBackend {
 
         // 2nd pass: transpose and convolve the rows.
         conv_y.hexagon()
-            .prefetch(conv_x, x, 128)
+            .prefetch(conv_x, x, x, 128)
             .split(x, xo, xi, 128)
             .parallel(xo)
             .vectorize(y, vector_size);
@@ -179,7 +179,7 @@ namespace DO::Shakti::HalideBackend {
 
         // 2nd pass: transpose and convolve the rows.
         conv_y.hexagon()
-            .prefetch(conv_x, x, 128)
+            .prefetch(conv_x, x, x, 128)
             .split(x, xo, xi, 128)
             .parallel(xo)
             .vectorize(y, vector_size);

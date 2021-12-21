@@ -14,7 +14,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/Math/UsualFunctions.hpp>
-#include <DO/Shakti/Halide/Utilities.hpp>
+#include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
 #include "shakti_separable_convolution_2d_cpu.h"
 
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_gaussian_blur)
   }
   // 2. Calculate the normalizing factor.
   const auto sum_inverse =
-      1 / std::accumulate(kernel.begin(), kernel.end(), S{});
+      1 / std::accumulate(kernel.begin(), kernel.end(), float{});
   // 3. Rescale the Gaussian kernel.
   std::for_each(kernel.begin(), kernel.end(),
                 [sum_inverse](auto& v) { v *= sum_inverse; });
@@ -57,14 +57,26 @@ BOOST_AUTO_TEST_CASE(test_gaussian_blur)
 
   auto dst = sara::Image<float>{n, n};
 
-  auto src_buffer = DO::Shakti::HalideBackend::as_runtime_buffer_3d(src);
-  auto dst_buffer = DO::Shakti::HalideBackend::as_runtime_buffer_3d(dst);
-  shakti_separable_convolution_2d_cpu(
+  SARA_CHECK(kernel_size);
+  SARA_CHECK(-center);
+  SARA_DEBUG << "src =\n" << src.matrix() << std::endl;
+  SARA_DEBUG << "kernel =\n";
+  for (auto i = 0u; i < kernel.size(); ++i)
+    std::cout << kernel[i] << " ";
+  std::cout << std::endl;
 
-  Input<Func> input{"input", Float(32), 3};
-  Input<Func> kernel{"kernel", Float(32), 1};
-  Input<int32_t> kernel_size{"kernel_size"};
-  Input<int32_t> kernel_shift{"kernel_shift"};
+  auto src_buffer = DO::Shakti::Halide::as_runtime_buffer_4d(src);
+  auto kernel_buffer = DO::Shakti::Halide::as_runtime_buffer(kernel);
+  kernel_buffer.dim(0).set_min(-1);
+  auto dst_buffer = DO::Shakti::Halide::as_runtime_buffer_4d(dst);
+  shakti_separable_convolution_2d_cpu(src_buffer, kernel_buffer, kernel_size, -center, dst_buffer);
+
+  SARA_DEBUG << "dst =\n" << dst.matrix() << std::endl;
+
+  // Input<Func> input{"input", Float(32), 3};
+  // Input<Func> kernel{"kernel", Float(32), 1};
+  // Input<int32_t> kernel_size{"kernel_size"};
+  // Input<int32_t> kernel_shift{"kernel_shift"};
 }
 
 // BOOST_FIXTURE_TEST_CASE(test_gaussian, TestFilters)

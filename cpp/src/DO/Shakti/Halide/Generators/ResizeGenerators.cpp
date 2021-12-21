@@ -97,7 +97,7 @@ namespace {
 
         output.specialize(input_is_planar && output_is_planar)
             .hexagon()
-            .prefetch(input, y, 2)
+            .prefetch(input, y, y, 2)
             .split(y, yo, yi, 128)
             .parallel(yo)
             .vectorize(x, vector_size, TailStrategy::GuardWithIf);
@@ -272,7 +272,7 @@ namespace {
 
         output.specialize(input_is_planar && output_is_planar)
             .hexagon()
-            .prefetch(input, y, 2)
+            .prefetch(input, y, y, 2)
             .split(y, yo, yi, 128)
             .parallel(yo)
             .vectorize(x, vector_size, TailStrategy::GuardWithIf);
