@@ -88,7 +88,7 @@ namespace {
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
         conv_y_t.hexagon()
-            .prefetch(conv_y_t, y, 2)
+            .prefetch(conv_y_t, y, y, 2)
             .split(y, yo, yi, 128)
             .parallel(yo)
             .vectorize(x, vector_size);
@@ -96,10 +96,10 @@ namespace {
         // 2nd pass: transpose and convolve the rows.
         conv_y.compute_root();
         conv_x.hexagon()
-            .prefetch(conv_y_t, y, 2)
-            .split(y, yo, yi, 128)
+            .prefetch(conv_y_t, y, y, 2)
+            .split(y, yo, yi, 128, TailStrategy::GuardWithIf)
             .parallel(yo)
-            .vectorize(x, vector_size);
+            .vectorize(x, vector_size, TailStrategy::GuardWithIf);
       }
 
       // CPU schedule.
@@ -107,11 +107,15 @@ namespace {
       {
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
-        conv_y_t.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+        conv_y_t.split(y, yo, yi, 8, TailStrategy::GuardWithIf)
+            .parallel(yo)
+            .vectorize(x, 8, TailStrategy::GuardWithIf);
 
         // 2nd pass: transpose and convolve the rows.
         conv_y.compute_root();
-        conv_x.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+        conv_x.split(y, yo, yi, 8, TailStrategy::GuardWithIf)
+            .parallel(yo)
+            .vectorize(x, 8, TailStrategy::GuardWithIf);
       }
     }
   };
@@ -119,6 +123,9 @@ namespace {
 }  // namespace
 
 
+HALIDE_REGISTER_GENERATOR(SeparableConvolution2d,
+                          shakti_separable_convolution_2d_cpu,
+                          DO::Shakti::HalideBackend::SeparableConvolution2d)
 HALIDE_REGISTER_GENERATOR(SeparableConvolution2d,
                           shakti_separable_convolution_2d_gpu,
                           DO::Shakti::HalideBackend::SeparableConvolution2d)

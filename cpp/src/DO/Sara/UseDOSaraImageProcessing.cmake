@@ -26,6 +26,8 @@ if(SARA_USE_FROM_SOURCE)
                 # Differential operations.
                 shakti_gradient_2d_32f_cpu
                 shakti_polar_gradient_2d_32f_cpu
+                # Separable kernel convolution 2D
+                shakti_separable_convolution_2d_cpu
                 # Gaussian convolutions.
                 shakti_gaussian_convolution_cpu
                 $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)

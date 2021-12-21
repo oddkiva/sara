@@ -26,6 +26,10 @@ shakti_halide_library_v2(
 # Separable convolution 2D
 # ------------------------------------------------------------------------------
 shakti_halide_library_v2(
+  NAME shakti_separable_convolution_2d_cpu
+  SRCS SeparableConvolution2dGenerator.cpp)
+
+shakti_halide_library_v2(
   NAME shakti_separable_convolution_2d_gpu
   SRCS SeparableConvolution2dGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
