@@ -38,14 +38,14 @@ namespace {
       const auto w = input.dim(0).extent();
       const auto h = input.dim(1).extent();
 
-      separable_conv_2d.generate(
+      separable_conv_2d.generate_2(
           input,
           kernel, kernel_size, kernel_shift,
           kernel, kernel_size, kernel_shift,
           output, w, h);
     }
 
-    void schedule() 
+    void schedule()
     {
       separable_conv_2d.schedule(get_target(), tile_x, tile_y, output);
     }

@@ -41,9 +41,9 @@ namespace DO { namespace Sara {
    *  @param[in] kernel_size the kernel size \f$K\f$.
    */
   template <typename T>
-  void convolve_array(T *signal,
+  auto convolve_array(T *signal,
                       const typename PixelTraits<T>::channel_type *kernel,
-                      int signal_size, int kernel_size)
+                      int signal_size, int kernel_size) -> void
   {
     T *yj;
     auto *y = signal;
@@ -74,10 +74,10 @@ namespace DO { namespace Sara {
    *  Note that borders are replicated.
    */
   template <typename T>
-  void
+  auto
   apply_row_based_filter(const ImageView<T>& src, ImageView<T>& dst,
-                         const typename PixelTraits<T>::channel_type *kernel,
-                         int kernel_size)
+                         const typename PixelTraits<T>::channel_type* kernel,
+                         int kernel_size) -> void
   {
     if (src.sizes() != dst.sizes())
       throw std::domain_error{
@@ -116,10 +116,10 @@ namespace DO { namespace Sara {
    *  Note that borders are replicated.
    */
   template <typename T>
-  void
+  auto
   apply_column_based_filter(const ImageView<T>& src, ImageView<T>& dst,
-                            const typename PixelTraits<T>::channel_type *kernel,
-                            int kernel_size)
+                            const typename PixelTraits<T>::channel_type* kernel,
+                            int kernel_size) -> void
   {
     if (src.sizes() != dst.sizes())
       throw std::domain_error{
@@ -150,7 +150,7 @@ namespace DO { namespace Sara {
 
   //! @brief Apply row-derivative to image.
   template <typename T>
-  void apply_row_derivative(const ImageView<T>& src, ImageView<T>& dst)
+  auto apply_row_derivative(const ImageView<T>& src, ImageView<T>& dst) -> void
   {
     using S = typename PixelTraits<T>::channel_type;
     const S diff[] = {S(-1), S(0), S(1)};
@@ -159,63 +159,70 @@ namespace DO { namespace Sara {
 
   //! @brief Apply column-derivative to image.
   template <typename T>
-  void apply_column_derivative(const ImageView<T>& src, ImageView<T>& dst)
+  auto apply_column_derivative(const ImageView<T>& src, ImageView<T>& dst)
+      -> void
   {
     using S = typename PixelTraits<T>::channel_type;
     const S diff[] = {S(-1), S(0), S(1)};
     apply_column_based_filter(src, dst, diff, 3);
   }
 
-  //! @brief Apply Gaussian smoothing to image.
-  void apply_gaussian_filter(const ImageView<float>& src, ImageView<float>& dst,
-                             float sigma, float gauss_truncate = 4.f);
-
-  //! @brief Apply Gaussian smoothing to image.
-  template <typename T>
-  void
-  apply_gaussian_filter(const ImageView<T>& src, ImageView<T>& dst,
-                        typename PixelTraits<T>::channel_type sigma,
-                        typename PixelTraits<T>::channel_type gauss_truncate =
-                            typename PixelTraits<T>::channel_type(4))
+  //! @brief Make Gaussian kernel. This kernel will always have an odd size.
+  template <typename S>
+  inline auto make_gaussian_kernel(S sigma, S gauss_truncate = 4)
+      -> Eigen::Matrix<S, Eigen::Dynamic, 1>
   {
-    static_assert(
-        !std::numeric_limits<typename PixelTraits<T>::channel_type>::is_integer,
-        "Channel type cannot be integral");
+    using Vec = Eigen::Matrix<S, Eigen::Dynamic, 1>;
 
-    using S = typename PixelTraits<T>::channel_type;
+    static_assert(!std::numeric_limits<S>::is_integer,
+                  "Channel type cannot be integral");
 
     // Compute the size of the Gaussian kernel.
     auto kernel_size = int(2 * gauss_truncate * sigma + 1);
+
     // Make sure the Gaussian kernel is at least of size 3 and is of odd size.
     kernel_size = std::max(3, kernel_size);
     if (kernel_size % 2 == 0)
       ++kernel_size;
 
-    // Create the 1D Gaussian kernel.
-    //
+    // The center coordinate.
+    const auto c = kernel_size / 2;
+
     // 1. Compute the value of the unnormalized Gaussian.
-    const auto center = kernel_size / 2;
-    auto kernel = std::vector<S>(kernel_size);
-    for (int i = 0; i < kernel_size; ++i)
-    {
-      auto x = S(i - center);
-      kernel[i] = exp(-square(x) / (2 * square(sigma)));
-    }
-    // 2. Calculate the normalizing factor.
-    const auto sum_inverse =
-        1 / std::accumulate(kernel.begin(), kernel.end(), S{});
+    Vec kernel = Vec::LinSpaced(kernel_size, 0, kernel_size - 1);
+    kernel.array() =
+        (-(kernel.array() - c).square() / (2 * square(sigma))).exp();
 
-    // Normalize the kernel.
-    std::for_each(kernel.begin(), kernel.end(),
-                  [sum_inverse](auto& v) { v *= sum_inverse; });
+    // 2. Normalize the kernel.
+    kernel /= kernel.sum();
 
-    apply_row_based_filter(src, dst, &kernel[0], kernel_size);
-    apply_column_based_filter(dst, dst, &kernel[0], kernel_size);
+    return kernel;
+  }
+
+  //! @brief Apply Gaussian smoothing to image.
+  auto apply_gaussian_filter(const ImageView<float>& src, ImageView<float>& dst,
+                             float sigma, float gauss_truncate = 4.f) -> void;
+
+  //! @brief Apply Gaussian smoothing to image.
+  template <typename T>
+  auto
+  apply_gaussian_filter(const ImageView<T>& src, ImageView<T>& dst,
+                        typename PixelTraits<T>::channel_type sigma,
+                        typename PixelTraits<T>::channel_type gauss_truncate =
+                            typename PixelTraits<T>::channel_type(4)) -> void
+  {
+    using S = typename PixelTraits<T>::channel_type;
+    static_assert(!std::numeric_limits<S>::is_integer,
+                  "Channel type cannot be integral");
+
+    const auto kernel = make_gaussian_kernel(sigma, gauss_truncate);
+    apply_row_based_filter(src, dst, kernel.data(), kernel.size());
+    apply_column_based_filter(dst, dst, kernel.data(), kernel.size());
   }
 
   //! @brief Apply Sobel filter to image.
   template <typename T>
-  void apply_sobel_filter(const ImageView<T>& src, ImageView<T>& dst)
+  auto apply_sobel_filter(const ImageView<T>& src, ImageView<T>& dst) -> void
   {
     using S = typename PixelTraits<T>::channel_type;
     const S mean_kernel[] = {S(1), S(2), S(1)};
@@ -236,7 +243,7 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Scharr filter to image.
   template <typename T>
-  void apply_scharr_filter(const ImageView<T>& src, ImageView<T>& dst)
+  auto apply_scharr_filter(const ImageView<T>& src, ImageView<T>& dst) -> void
   {
     using S = typename PixelTraits<T>::channel_type;
     const S mean_kernel[] = {S(3), S(10), S(3)};
@@ -257,7 +264,7 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Prewitt filter to image.
   template <typename T>
-  void apply_prewitt_filter(const ImageView<T>& src, ImageView<T>& dst)
+  auto apply_prewitt_filter(const ImageView<T>& src, ImageView<T>& dst) -> void
   {
     using S = typename PixelTraits<T>::channel_type;
     const S mean_kernel[] = {S(1), S(1), S(1)};
@@ -280,10 +287,10 @@ namespace DO { namespace Sara {
   // Non-separable filter functions.
   //! @brief Apply 2D non separable filter to image.
   template <typename T>
-  void apply_2d_non_separable_filter(
+  auto apply_2d_non_separable_filter(
       const ImageView<T>& src, ImageView<T>& dst,
       const typename PixelTraits<T>::channel_type* kernel, int kernel_width,
-      int kernel_height)
+      int kernel_height) -> void
   {
     if (src.sizes() != dst.sizes())
       throw std::domain_error{
@@ -351,7 +358,8 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Laplacian filter (slow).
   template <typename T>
-  void apply_laplacian_filter(const ImageView<T>& src, ImageView<T>& dst)
+  auto apply_laplacian_filter(const ImageView<T>& src, ImageView<T>& dst)
+      -> void
   {
     using S = typename PixelTraits<T>::channel_type;
     const S kernel[9] = {
@@ -364,7 +372,8 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Roberts-Cross filter.
   template <typename T>
-  void apply_roberts_cross_filter(const ImageView<T>& src, ImageView<T>& dst)
+  auto apply_roberts_cross_filter(const ImageView<T>& src, ImageView<T>& dst)
+      -> void
   {
     using S = typename PixelTraits<T>::channel_type;
     const S k1[] = {
@@ -388,7 +397,7 @@ namespace DO { namespace Sara {
   // Helper functions for linear filtering
   //! brief Apply row-derivative to image.
   template <typename T>
-  inline Image<T> row_derivative(const ImageView<T>& src)
+  inline auto row_derivative(const ImageView<T>& src) -> Image<T>
   {
     auto dst = Image<T>{src.sizes()};
     apply_row_derivative(src, dst);
@@ -397,7 +406,7 @@ namespace DO { namespace Sara {
 
   //! brief Apply column-derivative to image.
   template <typename T>
-  inline Image<T> column_derivative(const ImageView<T>& src)
+  inline auto column_derivative(const ImageView<T>& src) -> Image<T>
   {
     auto dst = Image<T>{src.sizes()};
     apply_column_derivative(src, dst);
@@ -406,8 +415,8 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Gaussian smoothing to image.
   template <typename T, typename S>
-  inline Image<T> gaussian(const ImageView<T>& src, S sigma,
-                           S gauss_truncate = S(4))
+  inline auto gaussian(const ImageView<T>& src, S sigma,
+                       S gauss_truncate = S(4)) -> Image<T>
   {
     auto dst = Image<T>{src.sizes()};
     apply_gaussian_filter(src, dst, sigma, gauss_truncate);
@@ -416,7 +425,7 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Sobel filter to image.
   template <typename T>
-  inline Image<T> sobel(const ImageView<T>& src)
+  inline auto sobel(const ImageView<T>& src) -> Image<T>
   {
     auto dst = Image<T>{src.sizes()};
     apply_sobel_filter(src, dst);
@@ -425,7 +434,7 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Scharr filter to image.
   template <typename T>
-  inline Image<T> scharr(const ImageView<T>& src)
+  inline auto scharr(const ImageView<T>& src) -> Image<T>
   {
     auto dst = Image<T>{src.sizes()};
     apply_scharr_filter(src, dst);
@@ -434,7 +443,7 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Prewitt filter to image.
   template <typename T>
-  inline Image<T> prewitt(const ImageView<T>& src)
+  inline auto prewitt(const ImageView<T>& src) -> Image<T>
   {
     auto dst = Image<T>{src.sizes()};
     apply_prewitt_filter(src, dst);
@@ -443,7 +452,7 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Roberts-Cross filter to image.
   template <typename T>
-  inline Image<T> roberts_cross(const ImageView<T>& src)
+  inline auto roberts_cross(const ImageView<T>& src) -> Image<T>
   {
     auto dst = Image<T>{src.sizes()};
     apply_roberts_cross_filter(src, dst);
@@ -452,7 +461,7 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Laplacian filter to image (slow).
   template <typename T>
-  inline Image<T> laplacian_filter(const ImageView<T>& src)
+  inline auto laplacian_filter(const ImageView<T>& src) -> Image<T>
   {
     auto dst = Image<T>{src.sizes()};
     apply_laplacian_filter(src, dst);

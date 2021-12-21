@@ -154,14 +154,10 @@ BOOST_AUTO_TEST_CASE(test_gaussian)
   dst_image.resize(_src_image.sizes());
   apply_gaussian_filter(_src_image, dst_image, 1.f, 1.f);
   BOOST_CHECK_SMALL_L2_DISTANCE(true_matrix, dst_image.matrix(), 1e-5f);
-  SARA_DEBUG << "true_matrix =\n" << true_matrix.matrix() << std::endl;
-  SARA_DEBUG << "dst_image =\n" << dst_image.matrix() << std::endl;
 
   dst_image.clear();
   dst_image = gaussian(_src_image, 1.f, 1.f);
   BOOST_CHECK_SMALL_L2_DISTANCE(true_matrix, dst_image.matrix(), 1e-5f);
-  SARA_DEBUG << "true_matrix =\n" << true_matrix.matrix() << std::endl;
-  SARA_DEBUG << "dst_image =\n" << dst_image.matrix() << std::endl;
 
   // Last case.
   _src_image.resize(9,
@@ -176,8 +172,6 @@ BOOST_AUTO_TEST_CASE(test_gaussian)
 
   dst_image = _src_image.compute<Gaussian>(1.f);
   BOOST_CHECK_SMALL_L2_DISTANCE(true_matrix, dst_image.matrix(), 1e-5f);
-  SARA_DEBUG << "true_matrix =\n" << true_matrix.matrix() << std::endl;
-  SARA_DEBUG << "dst_image =\n" << dst_image.matrix() << std::endl;
 
   _src_image.resize(65, 65);
   _src_image.flat_array().fill(0.f);
@@ -190,10 +184,6 @@ BOOST_AUTO_TEST_CASE(test_gaussian)
 
   dst_image = _src_image.compute<Gaussian>(1.f);
   BOOST_CHECK_SMALL_L2_DISTANCE(true_matrix, dst_image.matrix(), 1e-5f);
-  SARA_DEBUG << "true_matrix =\n"
-             << true_matrix.matrix().block(20, 28, 30, 9) << std::endl;
-  SARA_DEBUG << "dst_image =\n"
-             << dst_image.matrix().block(20, 28, 30, 9) << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_sobel)

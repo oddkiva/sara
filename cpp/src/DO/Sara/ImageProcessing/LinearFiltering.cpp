@@ -15,7 +15,11 @@
 #ifdef DO_SARA_USE_HALIDE
 #  include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
-#  include "shakti_gaussian_convolution_cpu.h"
+#  ifdef IMPL_V1
+#    include "shakti_gaussian_convolution_cpu.h"
+#  else
+#    include "shakti_separable_convolution_2d_cpu.h"
+#  endif
 #endif
 
 
@@ -33,46 +37,36 @@ namespace DO::Sara {
     auto timer = Timer{};
     timer.restart();
 #  endif
+
     auto src_buffer = Shakti::Halide::as_runtime_buffer_4d(src);
     auto dst_buffer = Shakti::Halide::as_runtime_buffer_4d(dst);
+
+#  ifdef IMPL_V1
     shakti_gaussian_convolution_cpu(src_buffer, sigma, gauss_truncate,
                                     dst_buffer);
+#  else
+    const auto kernel = make_gaussian_kernel(sigma, gauss_truncate);
+    auto kernel_buffer = Shakti::Halide::as_runtime_buffer(kernel);
+    shakti_separable_convolution_2d_cpu(src_buffer, kernel_buffer,
+                                        kernel.size(), -kernel.size() / 2,
+                                        dst_buffer);
+#  endif
+
 #  ifdef PROFILE_ME
     const auto elapsed = timer.elapsed_ms();
     SARA_DEBUG << "[CPU Halide Gaussian][" << src.sizes().transpose() << "] "
                << elapsed << " ms" << std::endl;
+    auto src_buffer = DO::Shakti::Halide::as_runtime_buffer_4d(src);
+    auto kernel_buffer = DO::Shakti::Halide::as_runtime_buffer(kernel);
+    auto dst_buffer = DO::Shakti::Halide::as_runtime_buffer_4d(dst);
+    shakti_separable_convolution_2d_cpu(src_buffer, kernel_buffer, kernel_size,
+                                        -center, dst_buffer);
 #  endif
 #else
-    // Compute the size of the Gaussian kernel.
-    auto kernel_size = int(2 * gauss_truncate * sigma + 1);
-    // Make sure the Gaussian kernel is at least of size 3 and is of odd size.
-    kernel_size = std::max(3, kernel_size);
-    if (kernel_size % 2 == 0)
-      ++kernel_size;
+    const auto kernel = make_gaussian_kernel(sigma, gauss_truncate);
 
-    // Create the 1D Gaussian kernel.
-    //
-    // 1. Compute the value of the unnormalized Gaussian.
-    const auto center = kernel_size / 2;
-    auto kernel = std::vector<float>(kernel_size);
-    for (int i = 0; i < kernel_size; ++i)
-    {
-      auto x = static_cast<float>(i - center);
-      kernel[i] = exp(-square(x) / (2 * square(sigma)));
-    }
-    // 2. Calculate the normalizing factor.
-    const auto sum_inverse =
-        1 / std::accumulate(kernel.begin(), kernel.end(), 0.f);
-
-    // Normalize the kernel.
-    std::for_each(kernel.begin(), kernel.end(),
-                  [sum_inverse](float& v) { v *= sum_inverse; });
-
-    apply_row_based_filter(src, dst, &kernel[0], kernel_size);
-    apply_column_based_filter(dst, dst, &kernel[0], kernel_size);
-
-    apply_row_based_filter(src, dst, &kernel[0], kernel_size);
-    apply_column_based_filter(dst, dst, &kernel[0], kernel_size);
+    apply_row_based_filter(src, dst, kernel.data(), kernel.size());
+    apply_column_based_filter(dst, dst, kernel.data(), kernel.size());
 #endif
   }
 

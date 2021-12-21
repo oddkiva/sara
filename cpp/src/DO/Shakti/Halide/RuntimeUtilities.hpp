@@ -19,6 +19,20 @@
 
 namespace DO::Shakti::Halide {
 
+  template <typename T, int N>
+  inline auto as_runtime_buffer(const Eigen::Matrix<T, N, 1>& v)
+  {
+    auto& v_mutable = const_cast<Eigen::Matrix<T, N, 1>&>(v);
+    return ::Halide::Runtime::Buffer<T>(v_mutable.data(), v.size());
+  }
+
+  template <typename T, int N>
+  inline auto as_runtime_buffer(const Eigen::Matrix<T, 1, N>& v)
+  {
+    auto& v_mutable = const_cast<Eigen::Matrix<T, 1, N>&>(v);
+    return ::Halide::Runtime::Buffer<T>(v_mutable.data(), v.size());
+  }
+
   template <typename T>
   inline auto as_runtime_buffer(std::vector<T>& v)
   {
