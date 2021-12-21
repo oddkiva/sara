@@ -78,6 +78,7 @@ int __main(int argc, char** argv)
   auto hide_tracks = false;
   auto show_features = false;
   auto save_video = false;
+  auto num_scales_per_octave = int{};
 
   po::options_description desc("video_sift_matching");
   desc.add_options()     //
@@ -87,7 +88,9 @@ int __main(int argc, char** argv)
       ("downscale-factor,d",
        po::value<int>(&downscale_factor)->default_value(2),
        "downscale factor")  //
-      ("skip,s", po::value<int>(&skip)->default_value(0),
+      ("num_scales_per_octave,s", po::value<int>(&num_scales_per_octave)->default_value(1),
+       "number of scales per octave")  //
+      ("skip", po::value<int>(&skip)->default_value(0),
        "number of frames to skip")  //
       ("hide_tracks,h", po::bool_switch(&hide_tracks),
        "hide feature tracking")  //
@@ -192,15 +195,15 @@ int __main(int argc, char** argv)
       keys_prev.swap(keys_curr);
 
       image_curr = frame_gray32f;
-      // On CPU, calculate only one DoG scale per octave.
+
+      // The formula to apply correctly for SIFT.
       static constexpr auto scale_camera = 1.f;
-      static constexpr auto num_scales_per_octaves = 1;
       const auto first_octave = static_cast<int>(
           std::round(std::log(downscale_factor) / std::log(2)));
       const auto scale_geometric_factor =
-          std::pow(2.f, 1.f / num_scales_per_octaves);
+          std::pow(2.f, 1.f / num_scales_per_octave);
       const auto image_pyr_params = ImagePyramidParams(
-          first_octave, num_scales_per_octaves + 3, scale_geometric_factor,
+          first_octave, num_scales_per_octave + 3, scale_geometric_factor,
           /* image_padding_size */ 8, scale_camera,
           /* scale_initial */ 1.2f);
       keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
@@ -236,13 +239,13 @@ int __main(int argc, char** argv)
     }
     draw_text(frame_annotated, 100, 50,               //
               format("SIFT: %0.f ms", feature_time),  //
-              White8, 40, 0, false, false, true);
-    draw_text(frame_annotated, 150, 50,
+              White8, 40, 0, false, true, false);
+    draw_text(frame_annotated, 100, 100,
               format("Matching: %0.3f ms", matching_time),  //
-              White8, 40, 0, false, true);
-    draw_text(frame_annotated, 200, 50,              //
+              White8, 40, 0, false, true, false);
+    draw_text(frame_annotated, 100, 150,              //
               format("Tracks: %u", matches.size()),  //
-              White8, 40, 0, false, false, true);
+              White8, 40, 0, false, true, false);
     set_active_window(w);
     display(frame_annotated);
     toc("Display");
