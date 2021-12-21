@@ -27,7 +27,8 @@ if(SARA_USE_FROM_SOURCE)
                 shakti_gradient_2d_32f_cpu
                 shakti_polar_gradient_2d_32f_cpu
                 # Gaussian convolutions.
-                shakti_gaussian_convolution_cpu)
+                shakti_gaussian_convolution_cpu
+                $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
     endif()
   endif()
 endif()

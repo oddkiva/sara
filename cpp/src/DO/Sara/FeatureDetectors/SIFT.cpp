@@ -13,7 +13,7 @@
 #include <DO/Sara/FeatureDescriptors.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 
-#ifdef _OMP
+#ifdef _OPENMP
 #  include <omp.h>
 #endif
 
@@ -61,7 +61,7 @@ namespace DO::Sara {
 
     if (parallel)
     {
-#ifdef _OMP
+#ifdef _OPENMP
       const auto max_cpu_threads = omp_get_max_threads();
       SARA_CHECK(max_cpu_threads);
       omp_set_num_threads(max_cpu_threads);
@@ -76,7 +76,7 @@ namespace DO::Sara {
 
     // 4. Rescale  the feature position and scale $(x, y, \sigma)$ with the
     //    octave scale.
-#ifdef _OMP
+#ifdef _OPENMP
 #  pragma omp parallel for
 #endif
     for (size_t i = 0; i != DoGs.size(); ++i)

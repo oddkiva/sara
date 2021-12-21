@@ -259,7 +259,7 @@ namespace DO::Sara {
 #  ifdef PROFILE_ME
     tic_();
 #  endif
-#  ifdef _OMP
+#  ifdef _OPENMP
 #    pragma omp parallel for
 #  endif
     for (int xy = 0; xy < wh; ++xy)
@@ -303,7 +303,7 @@ namespace DO::Sara {
 #  ifdef PROFILE_ME
     tic_();
 #  endif
-#  ifdef _OMP
+#  ifdef _OPENMP
 #    pragma omp parallel for
 #  endif
     for (int xy = 0; xy < wh; ++xy)
@@ -344,7 +344,7 @@ namespace DO::Sara {
 #  ifdef PROFILE_ME
     tic_();
 #  endif
-#  ifdef _OMP
+#  ifdef _OPENMP
 #    pragma omp parallel for
 #  endif
     for (int xy = 0; xy < wh; ++xy)
@@ -386,7 +386,7 @@ namespace DO::Sara {
 #  ifdef PROFILE_ME
     tic_();
 #  endif
-#  ifdef _OMP
+#  ifdef _OPENMP
 #    pragma omp parallel for
 #  endif
     for (int xy = 0; xy < wh; ++xy)
@@ -423,7 +423,7 @@ namespace DO::Sara {
     LocalScaleSpaceExtremum<std::less_equal, float> local_min;
 #  endif
     tic_();
-#  ifdef _OMP
+#  ifdef _OPENMP
 #    pragma omp parallel for
 #  endif
     for (int xy = 0; xy < wh; ++xy)
@@ -469,7 +469,7 @@ namespace DO::Sara {
 #endif
     auto location_refined = Image<Vector3f>{I(s, o).sizes()};
     auto extremum_value = Image<float>{I(s, o).sizes()};
-#ifdef _OMP
+#ifdef _OPENMP
 #  pragma omp parallel for
 #endif
     for (int xy = 0; xy < wh; ++xy)

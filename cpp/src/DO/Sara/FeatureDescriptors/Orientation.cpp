@@ -145,14 +145,18 @@ namespace DO { namespace Sara {
     e2.reserve(extrema.size() * 2);
     so2.reserve(extrema.size() * 2);
 
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
     for (size_t i = 0; i != extrema.size(); ++i)
     {
       auto orientations = vector<float>{};
       orientations =
           this->operator()(pyramid, extrema[i], scale_octave_pairs[i]);
 
+#ifdef _OPENMP
 #pragma omp critical
+#endif
       {
         for (size_t o = 0; o != orientations.size(); ++o)
         {
