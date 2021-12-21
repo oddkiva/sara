@@ -71,7 +71,7 @@ namespace {
             get_target().has_feature(Target::HVX_128) ? 128 : 64;
 
         output.hexagon()
-            .split(y, yo, yi, 128)
+            .split(y, yo, yi, 128, TailStrategy::GuardWithIf)
             .parallel(yo)
             .vectorize(x, vector_size, TailStrategy::GuardWithIf);
       }
@@ -79,7 +79,7 @@ namespace {
       // CPU schedule.
       else
       {
-        output.split(y, yo, yi, 8)
+        output.split(y, yo, yi, 8, TailStrategy::GuardWithIf)
             .parallel(yo)
             .vectorize(x, 8, TailStrategy::GuardWithIf);
       }

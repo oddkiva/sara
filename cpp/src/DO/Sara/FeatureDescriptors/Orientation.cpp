@@ -33,18 +33,7 @@ namespace DO { namespace Sara {
     // [compute_sift_keypoints:56] gradient of Gaussian computation time = 82.8392 ms
 
     // TODO: find out why Halide crashes for small image height...
-    if (f.height() < 8)
-    {
-      auto nabla_f = gradient(f);
-      std::transform(nabla_f.begin(), nabla_f.end(), nabla_f.begin(),
-                     [](const auto& g) -> Eigen::Vector2f {
-                       const auto r = 2 * g.norm();
-                       const auto theta = std::atan2(g.y(), g.x());
-                       return {r, theta};
-                     });
-      return nabla_f;
-    }
-
+#ifdef DO_SARA_USE_HALIDE
     auto mag = Image<float>{f.sizes()};
     auto ori = Image<float>{f.sizes()};
     gradient_in_polar_coordinates(f, mag, ori);
@@ -54,7 +43,15 @@ namespace DO { namespace Sara {
                    [](float m, float o) -> Eigen::Vector2f {
                      return {m, o};
                    });
-
+#else
+    auto nabla_f = gradient(f);
+    std::transform(nabla_f.begin(), nabla_f.end(), nabla_f.begin(),
+                   [](const auto& g) -> Eigen::Vector2f {
+                     const auto r = 2 * g.norm();
+                     const auto theta = std::atan2(g.y(), g.x());
+                     return {r, theta};
+                   });
+#endif
     return nabla_f;
   }
 
@@ -145,18 +142,13 @@ namespace DO { namespace Sara {
     e2.reserve(extrema.size() * 2);
     so2.reserve(extrema.size() * 2);
 
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
+    // FIXME: parallelize this.
     for (size_t i = 0; i != extrema.size(); ++i)
     {
       auto orientations = vector<float>{};
       orientations =
           this->operator()(pyramid, extrema[i], scale_octave_pairs[i]);
 
-#ifdef _OPENMP
-#pragma omp critical
-#endif
       {
         for (size_t o = 0; o != orientations.size(); ++o)
         {
