@@ -402,11 +402,19 @@ namespace DO::Sara {
 #  ifndef STRICT_LOCAL_EXTREMA
       // Reject early.
       if (std::abs(I(x, y, s, o)) < 0.8f * extremum_thres)
+      {
+        // SARA_DEBUG << "Reject low contrast " << x << " " << y << std::endl;
         type = 0;
+      }
 #  endif
       // Reject early if located on edge.
       if (on_edge(I(s, o), x, y, edge_ratio_thres))
+      {
+        // SARA_DEBUG << "Reject edge like at " << x << " " << y << std::endl;
         type = 0;
+      }
+
+      // SARA_DEBUG << "Local extremum at " << x << " " << y << std::endl;
     }
 #  ifdef PROFILE_ME
     toc_("Low Contrast and Edge Filter");
@@ -422,7 +430,11 @@ namespace DO::Sara {
     LocalScaleSpaceExtremum<std::greater_equal, float> local_max;
     LocalScaleSpaceExtremum<std::less_equal, float> local_min;
 #  endif
+
+#ifdef PROFILE_ME
     tic_();
+#endif
+
 #  ifdef _OPENMP
 #    pragma omp parallel for
 #  endif
@@ -457,7 +469,11 @@ namespace DO::Sara {
 
       map(static_cast<int>(x), static_cast<int>(y)) = type;
     }
+
+#ifdef PROFILE_ME
     toc_("Classifying Extrema");
+#endif
+
 #endif  // IMPLEMENTATION_V2
 
 
@@ -484,6 +500,10 @@ namespace DO::Sara {
       // Try to refine extremum.
       auto& pos = location_refined(x, y);
       auto& val = extremum_value(x, y);
+      // Initialize the initialize the value
+      val = I(x, y, s, o);
+      // SARA_CHECK(val);
+
       // if (!refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
       //                     refine_iterations))
       //   continue;
@@ -493,7 +513,10 @@ namespace DO::Sara {
 #ifndef STRICT_LOCAL_EXTREMA
       // Reject if contrast too low.
       if (std::abs(val) < extremum_thres)
+      {
+        // SARA_DEBUG << "Reject " << x << " " << y << std::endl;
         map(x, y) = 0;
+      }
 #endif
     }
 #ifdef PROFILE_ME
