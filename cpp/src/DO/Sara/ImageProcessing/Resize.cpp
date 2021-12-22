@@ -13,6 +13,10 @@
 
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
+//#ifdef DO_SARA_USE_HALIDE
+//#undef DO_SARA_USE_HALIDE
+//#endif
+
 #ifdef DO_SARA_USE_HALIDE
 #  include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
@@ -46,8 +50,6 @@ namespace DO::Sara {
 
     // Let's just make a simple implementation with the simplest parallelization
     // without tiling and vectorization.
-    //
-    // This is what Halide helps us to do this very elegantly.
 #  pragma omp parallel for
     for (auto xy = 0; xy < wh; ++xy)
     {
@@ -66,7 +68,7 @@ namespace DO::Sara {
     auto timer = Timer{};
     timer.restart();
 #  endif
-    auto dst = Image<float>{(src.sizes() / fact).eval()};
+    auto dst = Image<float>(src.sizes() / fact);
     scale(src, dst);
 #  ifdef PROFILE_ME
     const auto elapsed = timer.elapsed_ms();
@@ -75,7 +77,7 @@ namespace DO::Sara {
 #  endif
     return dst;
 #else
-    auto dst = Image<float>(src.sizes() * fact);
+    auto dst = Image<float>(src.sizes() / fact);
     scale(src, dst);
     return dst;
 #endif

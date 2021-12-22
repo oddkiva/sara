@@ -79,6 +79,10 @@ namespace DO::Sara {
       , _img_padding_sz(img_padding_sz)
       , _extremum_refinement_iter(extremum_refinement_iter)
     {
+      if (_pyramid_params.scale_count_per_octave() < 4)
+        throw std::runtime_error{
+            "Error: The extraction of DoG extrema needs (1 + 3) = 4 scales per "
+            "octave at the very minimum!"};
     }
 
     //! @brief Localizes DoG extrema for a given image.
@@ -143,9 +147,18 @@ namespace DO::Sara {
       return _diff_of_gaussians;
     }
 
+    //! @brief The list of local scale-space extrema at each index
+    //!   (scale index = s, octave index = o).
+    /*!
+     *  By design the lists of scale-space extrema at:
+     *  - scale index = 0
+     *  - scale index = scale_count - 1
+     *  are always empty in each octave.
+     *  From the scale index >= 1, the list of scale is non-empty in general.
+     */
     inline auto extrema(int s, int o) const -> const std::vector<OERegion>&
     {
-      return _extrema[o * _pyramid_params.num_scales_per_octave() + s];
+      return _extrema[o * _diff_of_gaussians.scale_count_per_octave() + s];
     }
 
   private: /* data members. */

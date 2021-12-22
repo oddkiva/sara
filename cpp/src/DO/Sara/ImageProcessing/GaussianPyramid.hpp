@@ -22,11 +22,11 @@
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   /*!
-    @ingroup ScaleSpace
-    @{
+   *  @ingroup ScaleSpace
+   *  @{
    */
 
   //! Computes a pyramid of Gaussians.
@@ -92,8 +92,9 @@ namespace DO { namespace Sara {
 
     // Shorten names.
     const auto k = static_cast<Scalar>(params.scale_geometric_factor());
-    const auto num_scales = params.num_scales_per_octave();
-    const auto downscale_index = static_cast<int>(floor(log(Scalar(2)) / log(k)));
+    const auto num_scales = params.scale_count_per_octave();
+    const auto downscale_index =
+        static_cast<int>(floor(log(Scalar(2)) / log(k)));
 
     // Create the image pyramid
     auto G = ImagePyramid<T>{};
@@ -129,13 +130,13 @@ namespace DO { namespace Sara {
       -> ImagePyramid<T>
   {
     auto D = ImagePyramid<T>{};
-    D.reset(gaussians.num_octaves(), gaussians.num_scales_per_octave() - 1,
+    D.reset(gaussians.octave_count(), gaussians.scale_count_per_octave() - 1,
             gaussians.scale_initial(), gaussians.scale_geometric_factor());
 
-    for (auto o = 0; o < D.num_octaves(); ++o)
+    for (auto o = 0; o < D.octave_count(); ++o)
     {
       D.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
-      for (auto s = 0; s < D.num_scales_per_octave(); ++s)
+      for (auto s = 0; s < D.scale_count_per_octave(); ++s)
       {
         D(s, o).resize(gaussians(s, o).sizes());
         tensor_view(D(s, o)).flat_array() =
@@ -155,13 +156,13 @@ namespace DO { namespace Sara {
     using scalar_type = typename ImagePyramid<T>::scalar_type;
 
     auto LoG = ImagePyramid<T>{};
-    LoG.reset(gaussians.num_octaves(), gaussians.num_scales_per_octave(),
+    LoG.reset(gaussians.octave_count(), gaussians.scale_count_per_octave(),
               gaussians.scale_initial(), gaussians.scale_geometric_factor());
 
-    for (auto o = 0; o < LoG.num_octaves(); ++o)
+    for (auto o = 0; o < LoG.octave_count(); ++o)
     {
       LoG.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
-      for (auto s = 0; s < LoG.num_scales_per_octave(); ++s)
+      for (auto s = 0; s < LoG.scale_count_per_octave(); ++s)
       {
         LoG(s, o) = laplacian(gaussians(s, o));
         for (auto& p : LoG(s, o))
@@ -230,4 +231,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-}}  // namespace DO::Sara
+}  // namespace DO::Sara

@@ -60,19 +60,19 @@ namespace DO { namespace Sara {
                                   ImagePyramid<float>& gradient_orientation)
       -> void
   {
-    gradient_magnitude.reset(src.num_octaves(), src.num_scales_per_octave(),
+    gradient_magnitude.reset(src.octave_count(), src.scale_count_per_octave(),
                              src.scale_initial(), src.scale_geometric_factor());
-    gradient_orientation.reset(src.num_octaves(), src.num_scales_per_octave(),
+    gradient_orientation.reset(src.octave_count(), src.scale_count_per_octave(),
                                src.scale_initial(),
                                src.scale_geometric_factor());
 
-    for (int o = 0; o < src.num_octaves(); ++o)
+    for (int o = 0; o < src.octave_count(); ++o)
     {
       gradient_magnitude.octave_scaling_factor(o) =
           src.octave_scaling_factor(o);
       gradient_orientation.octave_scaling_factor(o) =
           src.octave_scaling_factor(o);
-      for (int s = 0; s < src.num_scales_per_octave(); ++s)
+      for (int s = 0; s < src.scale_count_per_octave(); ++s)
         gradient_in_polar_coordinates(src(s, o),  //
                                       gradient_magnitude(s, o),
                                       gradient_orientation(s, o));

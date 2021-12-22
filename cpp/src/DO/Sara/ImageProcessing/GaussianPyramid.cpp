@@ -24,13 +24,13 @@ namespace DO::Sara {
       -> ImagePyramid<float>
   {
     auto D = ImagePyramid<float>{};
-    D.reset(gaussians.num_octaves(), gaussians.num_scales_per_octave() - 1,
+    D.reset(gaussians.octave_count(), gaussians.scale_count_per_octave() - 1,
             gaussians.scale_initial(), gaussians.scale_geometric_factor());
 
-    for (auto o = 0; o < D.num_octaves(); ++o)
+    for (auto o = 0; o < D.octave_count(); ++o)
     {
       D.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
-      for (auto s = 0; s < D.num_scales_per_octave(); ++s)
+      for (auto s = 0; s < D.scale_count_per_octave(); ++s)
       {
         D(s, o).resize(gaussians(s, o).sizes());
 

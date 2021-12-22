@@ -288,7 +288,8 @@ auto test_on_video(int argc, char **argv)
 #endif
               octave.extrema_oriented[s],
               sift_pipeline.octave_scaling_factor(
-                  sift_pipeline.start_octave_index + o));
+                  sift_pipeline.start_octave_index + o),
+              3, true, true);
       }
     }
 

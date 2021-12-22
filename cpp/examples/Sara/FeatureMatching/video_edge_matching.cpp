@@ -459,7 +459,6 @@ int __main(int argc, char** argv)
   const auto [p1, p2] = initialize_crop_region_1(frame.sizes());
 #else
   const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
-  const Eigen::Vector2i& p2 = frame.sizes();
 #endif
 
   auto ed = EdgeDetector{{

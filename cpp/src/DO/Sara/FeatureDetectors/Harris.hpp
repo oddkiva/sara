@@ -119,14 +119,14 @@ namespace DO { namespace Sara {
                                     ImagePyramidParams(-1, 2 + 1, sqrt(2.f), 1),
                                 float kappa = 0.04f,
                                 float extremum_thres = 1e-6f,
-                                int img_padding_sz = 1, int numScales = 10,
+                                int img_padding_sz = 1, int scale_count = 10,
                                 int extremumRefinementIter = 5)
       : _pyr_params(pyrParams)
       , _kappa(kappa)
       , _extremum_thres(extremum_thres)
       , _img_padding_sz(img_padding_sz)
       , _extremum_refinement_iter(extremumRefinementIter)
-      , _num_scales(numScales)
+      , _scale_count(scale_count)
     {
     }
 
@@ -195,7 +195,7 @@ namespace DO { namespace Sara {
     float _extremum_thres;
     int _img_padding_sz;
     int _extremum_refinement_iter;
-    int _num_scales;
+    int _scale_count;
     // Difference of Gaussians.
     ImagePyramid<float> _gaussians;
     ImagePyramid<float> _harris;

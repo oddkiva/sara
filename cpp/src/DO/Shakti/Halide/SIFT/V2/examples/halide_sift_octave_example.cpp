@@ -45,7 +45,9 @@ auto test_on_image()
   auto buffer_4d = halide::as_runtime_buffer(image_tensor);
 
   auto sift_octave_pipeline = halide::v2::SiftOctavePipeline{};
-  sift_octave_pipeline.initialize_buffers(image.width(), image.height());
+  static constexpr auto scale_count = 3;
+  sift_octave_pipeline.initialize_buffers(scale_count,
+                                          image.width(), image.height());
 
   auto timer = sara::Timer{};
   timer.restart();
@@ -107,7 +109,9 @@ auto test_on_video()
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
 
   auto sift_octave_pipeline = halide::v2::SiftOctavePipeline{};
-  sift_octave_pipeline.initialize_buffers(frame.width(), frame.height());
+  static constexpr auto scale_count_per_octave = 3;
+  sift_octave_pipeline.initialize_buffers(scale_count_per_octave,
+                                          frame.width(), frame.height());
 
 
   // Show the local extrema.

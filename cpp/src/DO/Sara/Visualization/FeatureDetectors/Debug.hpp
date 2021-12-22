@@ -35,7 +35,7 @@ namespace DO { namespace Sara {
                              bool rescale = false)
   {
     using namespace std;
-    for (int o = 0; o < pyramid.num_octaves(); ++o)
+    for (int o = 0; o < pyramid.octave_count(); ++o)
     {
       cout << "Octave " << o << endl;
       cout << "- scaling factor = " << pyramid.octave_scaling_factor(o) << endl;

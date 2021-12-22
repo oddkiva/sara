@@ -73,14 +73,14 @@ namespace DO { namespace Sara {
   {
     auto gradient_pyramid = ImagePyramid<Matrix<T, 2, 1>>{};
     gradient_pyramid.reset(
-        pyramid.num_octaves(), pyramid.num_scales_per_octave(),
+        pyramid.octave_count(), pyramid.scale_count_per_octave(),
         pyramid.scale_initial(), pyramid.scale_geometric_factor());
 
-    for (int o = 0; o < pyramid.num_octaves(); ++o)
+    for (int o = 0; o < pyramid.octave_count(); ++o)
     {
       gradient_pyramid.octave_scaling_factor(o) =
           pyramid.octave_scaling_factor(o);
-      for (int s = 0; s < pyramid.num_scales_per_octave(); ++s)
+      for (int s = 0; s < pyramid.scale_count_per_octave(); ++s)
         gradient_pyramid(s, o) = gradient_polar_coordinates(pyramid(s, o));
     }
     return gradient_pyramid;

@@ -42,21 +42,20 @@ namespace DO { namespace Sara {
   }
 
   auto compose_with_zooms(const Vector2i& in_image_sizes,
-                          const Vector2i& out_image_sizes,
-                          float zmin, float zmax, int num_scales,
+                          const Vector2i& out_image_sizes, float zmin,
+                          float zmax, int scale_count,
                           const ImageDataTransform& parent_t,
                           bool ignore_zoom_factor_one)
       -> vector<ImageDataTransform>
   {
-    const auto zs = logspace(zmin, zmax, num_scales);
-    const auto z_image_sizes =
-        (in_image_sizes.cast<float>() * zs.transpose());
+    const auto zs = logspace(zmin, zmax, scale_count);
+    const auto z_image_sizes = (in_image_sizes.cast<float>() * zs.transpose());
 
     auto ts = vector<ImageDataTransform>{};
-    for (int j = 0; j < num_scales; ++j)
+    for (int j = 0; j < scale_count; ++j)
     {
-      if (ignore_zoom_factor_one && j == num_scales / 2 &&
-          num_scales % 2 == 1)
+      if (ignore_zoom_factor_one && j == scale_count / 2 &&
+          scale_count % 2 == 1)
         continue;
 
       if (z_image_sizes.col(j).x() < out_image_sizes.x() ||
@@ -105,13 +104,14 @@ namespace DO { namespace Sara {
   };
 
   auto compose_with_random_fancy_pca(const ImageDataTransform& parent_t,
-                                     int num_fancy_pca, float fancy_pca_std_dev,
+                                     int fancy_pca_count,
+                                     float fancy_pca_std_dev,
                                      const NormalDistribution& randn)
       -> vector<ImageDataTransform>
   {
     auto ts = vector<ImageDataTransform>{};
 
-    for (auto i = 0; i < num_fancy_pca; ++i)
+    for (auto i = 0; i < fancy_pca_count; ++i)
     {
       auto alpha = Vector3f{};
       randn(alpha);
@@ -126,13 +126,10 @@ namespace DO { namespace Sara {
   }
 
   auto enumerate_image_data_transforms(
-      const Vector2i& in_sz, const Vector2i& out_sz,
-      bool zoom, float zmin, float zmax, int num_scales,
-      bool shift, const Vector2i& delta,
-      bool flip,
+      const Vector2i& in_sz, const Vector2i& out_sz, bool zoom, float zmin,
+      float zmax, int scale_count, bool shift, const Vector2i& delta, bool flip,
       bool fancy_pca, int num_fancy_pca_alpha, float fancy_pca_std_dev,
-      const NormalDistribution& randn)
-      -> vector<ImageDataTransform>
+      const NormalDistribution& randn) -> vector<ImageDataTransform>
   {
     auto ts = vector<ImageDataTransform>{};
 
@@ -144,8 +141,8 @@ namespace DO { namespace Sara {
 
     if (fancy_pca)
     {
-      const auto f_o_ts = compose_with_random_fancy_pca(t0, num_fancy_pca_alpha,
-                                                    fancy_pca_std_dev, randn);
+      const auto f_o_ts = compose_with_random_fancy_pca(
+          t0, num_fancy_pca_alpha, fancy_pca_std_dev, randn);
       append(ts, f_o_ts);
       range = make_pair(range.first, ts.size());
     }
@@ -155,7 +152,7 @@ namespace DO { namespace Sara {
       for (auto t = range.first, t_end = range.second; t != t_end; ++t)
       {
         const auto z_o_ts =
-            compose_with_zooms(in_sz, out_sz, zmin, zmax, num_scales, ts[t]);
+            compose_with_zooms(in_sz, out_sz, zmin, zmax, scale_count, ts[t]);
         append(ts, z_o_ts);
       }
       range = make_pair(range.first, ts.size());
@@ -165,8 +162,7 @@ namespace DO { namespace Sara {
     {
       for (auto t = range.first, t_end = range.second; t != t_end; ++t)
       {
-        const auto s_o_ts =
-            compose_with_shifts(in_sz, out_sz, delta, ts[t]);
+        const auto s_o_ts = compose_with_shifts(in_sz, out_sz, delta, ts[t]);
         append(ts, s_o_ts);
       }
       range = make_pair(range.first, ts.size());
@@ -184,13 +180,11 @@ namespace DO { namespace Sara {
     return ts;
   }
 
-  auto augment_data(const std::vector<int>& data_indices,
-                    const Vector2i& in_sz, const Vector2i& out_sz,
-                    bool zoom, float zmin, float zmax, int num_scales,
-                    bool shift, const Vector2i& delta,
-                    bool flip,
-                    bool fancy_pca, int num_fancy_pca, float fancy_pca_std_dev,
-                    const NormalDistribution& randn)
+  auto augment_data(const std::vector<int>& data_indices, const Vector2i& in_sz,
+                    const Vector2i& out_sz, bool zoom, float zmin, float zmax,
+                    int scale_count, bool shift, const Vector2i& delta,
+                    bool flip, bool fancy_pca, int num_fancy_pca,
+                    float fancy_pca_std_dev, const NormalDistribution& randn)
       -> vector<pair<int, ImageDataTransform>>
   {
     auto augmented_data = vector<pair<int, ImageDataTransform>>{};
@@ -198,10 +192,7 @@ namespace DO { namespace Sara {
     for (const auto i : data_indices)
     {
       const auto data_transforms = enumerate_image_data_transforms(
-          in_sz, out_sz,
-          zoom, zmin, zmax, num_scales,
-          shift, delta,
-          flip,
+          in_sz, out_sz, zoom, zmin, zmax, scale_count, shift, delta, flip,
           fancy_pca, num_fancy_pca, fancy_pca_std_dev, randn);
 
       for (const auto& t : data_transforms)
@@ -210,5 +201,4 @@ namespace DO { namespace Sara {
     return augmented_data;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

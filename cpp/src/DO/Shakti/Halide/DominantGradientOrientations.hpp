@@ -89,9 +89,9 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       [[maybe_unused]] float peak_ratio_thres = 0.8f)               //
       -> void
   {
-    for (auto o = 0; o < gradient_mag_pyramid.num_octaves(); ++o)
+    for (auto o = 0; o < gradient_mag_pyramid.octave_count(); ++o)
     {
-      for (auto s = 1; s < gradient_mag_pyramid.num_scales_per_octave() - 1; ++s)
+      for (auto s = 1; s < gradient_mag_pyramid.scale_count_per_octave() - 1; ++s)
       {
         auto& extrema = dog_extrema.dict[{s - 1, o}];
         if (extrema.size() == 0)

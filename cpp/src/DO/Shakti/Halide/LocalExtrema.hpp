@@ -78,16 +78,16 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   {
     auto out = Sara::ImagePyramid<std::uint8_t>{};
 
-    out.reset(in.num_octaves(),                                  //
-              in.num_scales_per_octave() - 2,                    //
+    out.reset(in.octave_count(),                                  //
+              in.scale_count_per_octave() - 2,                    //
               in.scale_initial() * in.scale_geometric_factor(),  //
               in.scale_geometric_factor());                      //
 
-    for (auto o = 0; o < in.num_octaves(); ++o)
+    for (auto o = 0; o < in.octave_count(); ++o)
     {
       out.octave_scaling_factor(o) = in.octave_scaling_factor(o);
 
-      for (auto s = 0; s < in.num_scales_per_octave() - 2; ++s)
+      for (auto s = 0; s < in.scale_count_per_octave() - 2; ++s)
       {
         out(s, o).resize(in(s, o).sizes());
         // Sara::tic();
@@ -108,16 +108,16 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   {
     auto out = Sara::ImagePyramid<std::int8_t>{};
 
-    out.reset(in.num_octaves(),                                  //
-              in.num_scales_per_octave() - 2,                    //
+    out.reset(in.octave_count(),                                  //
+              in.scale_count_per_octave() - 2,                    //
               in.scale_initial() * in.scale_geometric_factor(),  //
               in.scale_geometric_factor());                      //
 
-    for (auto o = 0; o < in.num_octaves(); ++o)
+    for (auto o = 0; o < in.octave_count(); ++o)
     {
       out.octave_scaling_factor(o) = in.octave_scaling_factor(o);
 
-      for (auto s = 0; s < in.num_scales_per_octave() - 2; ++s)
+      for (auto s = 0; s < in.scale_count_per_octave() - 2; ++s)
       {
         out(s, o).resize(in(s, o).sizes());
         // Sara::tic();

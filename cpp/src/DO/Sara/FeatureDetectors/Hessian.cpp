@@ -35,10 +35,10 @@ namespace DO { namespace Sara {
       scale_octave_pairs->reserve(int(1e4));
     }
 
-    for (auto o = 0; o < det_hess_pyr.num_octaves(); ++o)
+    for (auto o = 0; o < det_hess_pyr.octave_count(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (int s = 1; s < det_hess_pyr.num_scales_per_octave(); ++s)
+      for (int s = 1; s < det_hess_pyr.scale_count_per_octave(); ++s)
       {
         const auto new_det_hess_maxima = laplace_maxima(
             det_hess_pyr, gauss_pyr, s, o, _extremum_thres, _img_padding_sz,
@@ -75,10 +75,10 @@ namespace DO { namespace Sara {
       scale_octave_pairs->reserve(int(1e4));
     }
 
-    for (auto o = 0; o < det_hess_pyr.num_octaves(); ++o)
+    for (auto o = 0; o < det_hess_pyr.octave_count(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (auto s = 1; s < det_hess_pyr.num_scales_per_octave() - 1; ++s)
+      for (auto s = 1; s < det_hess_pyr.scale_count_per_octave() - 1; ++s)
       {
         const auto new_det_hess_extrema = local_scale_space_extrema(
             det_hess_pyr, s, o, _extremum_thres, _edge_ratio_thres,

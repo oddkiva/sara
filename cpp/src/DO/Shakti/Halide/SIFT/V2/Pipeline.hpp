@@ -94,7 +94,7 @@ namespace DO::Shakti::HalideBackend::v2 {
       }
     }
 
-    auto initialize_buffers(std::int32_t num_scales, std::int32_t w,
+    auto initialize_buffers(std::int32_t scale_count, std::int32_t w,
                             std::int32_t h) -> void;
 
     auto feed(Halide::Runtime::Buffer<float>& input,
