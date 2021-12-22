@@ -38,37 +38,59 @@ namespace DO::Sara {
     shakti_scale_32f_cpu(src_buffer, dst_buffer.width(), dst_buffer.height(),
                          dst_buffer);
 #else
-    throw std::runtime_error{"Not Implemented!"};
+    const Eigen::Array2f scale =
+        src.sizes().cast<float>().array() / dst.sizes().cast<float>().array();
+
+    const auto w = dst.width();
+    const auto wh = dst.width() * dst.height();
+
+    // Let's just make a simple implementation with the simplest parallelization
+    // without tiling and vectorization.
+    //
+    // This is what Halide helps us to do this very elegantly.
+#  pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+      const Eigen::Array2i xy_in = (Eigen::Array2f(x, y) * scale).cast<int>();
+      dst(x, y) = src(xy_in.x(), xy_in.y());
+    }
 #endif
   }
 
-  auto downscale([[maybe_unused]] const ImageView<float>& src,
-                 [[maybe_unused]] int fact) -> Image<float>
+  auto downscale(const ImageView<float>& src, int fact) -> Image<float>
   {
 #ifdef DO_SARA_USE_HALIDE
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     auto timer = Timer{};
     timer.restart();
-#endif
-
+#  endif
     auto dst = Image<float>{(src.sizes() / fact).eval()};
     scale(src, dst);
-
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     const auto elapsed = timer.elapsed_ms();
     SARA_DEBUG << "[CPU Halide Downscale][" << src.sizes().transpose() << "] "
                << elapsed << " ms" << std::endl;
-#endif
+#  endif
     return dst;
 #else
-    throw std::runtime_error{"Not Implemented!"};
-    return {};
+    auto dst = Image<float>(src.sizes() * fact);
+    scale(src, dst);
+    return dst;
 #endif
   }
 
-  auto enlarge([[maybe_unused]] const ImageView<float>& src,
-               [[maybe_unused]] ImageView<float>& dst) -> void
+  auto enlarge(const ImageView<float>& src, ImageView<float>& dst) -> void
   {
+    if (dst.sizes() != dst.sizes().cwiseMax(src.sizes()))
+      throw std::range_error{"The destination image must have smaller sizes "
+                             "than the source image!"};
+
+    if (dst.sizes().minCoeff() <= 0)
+      throw std::range_error{
+          "The sizes of the destination image must be positive!"};
+
 #ifdef DO_SARA_USE_HALIDE
     auto src_tensor_view = tensor_view(src).reshape(
         Eigen::Vector4i{1, 1, src.height(), src.width()});
@@ -83,12 +105,27 @@ namespace DO::Sara {
                        dst_buffer.width(), dst_buffer.height(),  //
                        dst_buffer);
 #else
-    throw std::runtime_error{"Not Implemented!"};
+    const auto wh = dst.width() * dst.height();
+    const auto scale = src.sizes().template cast<double>().array() /
+                       dst.sizes().template cast<double>().array();
+
+    // Just a plain simple parallelization without vectorization.
+#  pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
+    {
+      const auto& w = dst.width();
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const Eigen::Vector2d p = Eigen::Array2d(x, y) * scale;
+
+      const auto pixel = interpolate(src, p);
+      dst(x, y) = static_cast<float>(pixel);
+    }
 #endif
   }
 
-  auto enlarge([[maybe_unused]] const ImageView<Rgb32f>& src,
-               [[maybe_unused]] ImageView<Rgb32f>& dst) -> void
+  auto enlarge(const ImageView<Rgb32f>& src, ImageView<Rgb32f>& dst) -> void
   {
 #ifdef DO_SARA_USE_HALIDE
     auto& src_non_const = const_cast<ImageView<Rgb32f>&>(src);
@@ -105,9 +142,24 @@ namespace DO::Sara {
                        dst.width(), dst.height(),  //
                        dst_buffer);
 #else
-    throw std::runtime_error{"Not Implemented!"};
+    const auto wh = dst.width() * dst.height();
+    const auto scale = src.sizes().template cast<double>().array() /
+                       dst.sizes().template cast<double>().array();
+
+    // Just a plain simple parallelization without vectorization.
+#  pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
+    {
+      const auto& w = dst.width();
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const Eigen::Vector2d p = Eigen::Array2d(x, y) * scale;
+
+      const auto pixel = interpolate(src, p);
+      dst(x, y) = pixel.cast<float>();
+    }
 #endif
   }
-
 
 }  // namespace DO::Sara
