@@ -127,7 +127,7 @@ auto test_on_video(int argc, char **argv)
 
   // Parameter parsing.
   auto video_filepath = std::string{};
-  auto downscale_factor = int{};
+  auto start_octave_index = int{};
   auto skip = int{};
   auto show_features = false;
   auto num_scales_per_octave = int{};
@@ -137,9 +137,9 @@ auto test_on_video(int argc, char **argv)
       ("help", "Usage")  //
       ("video,v", po::value<std::string>(&video_filepath),
        "input video file")  //
-      ("downscale-factor,d",
-       po::value<int>(&downscale_factor)->default_value(2),
-       "downscale factor")  //
+      ("start-octave,o",
+       po::value<int>(&start_octave_index)->default_value(0),
+       "image scale power")  //
       ("num_scales_per_octave,s", po::value<int>(&num_scales_per_octave)->default_value(1),
        "number of scales per octave")  //
       ("skip", po::value<int>(&skip)->default_value(0),
@@ -155,13 +155,13 @@ auto test_on_video(int argc, char **argv)
   if (vm.count("help"))
   {
     std::cout << desc << "\n";
-    return 1;
+    return;
   }
 
   if (!vm.count("video"))
   {
     std::cout << "The video file must be specified!\n" << desc << "\n";
-    return 1;
+    return;
   }
 
 
@@ -209,10 +209,8 @@ auto test_on_video(int argc, char **argv)
 
   auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
 
-  const auto start_octave_index = 0;
   sift_pipeline.initialize(start_octave_index, num_scales_per_octave,
                            frame.width(), frame.height());
-
 
   // Show the local extrema.
   sara::create_window(frame.sizes());
@@ -294,13 +292,27 @@ auto test_on_video(int argc, char **argv)
       }
     }
 
+    auto num_features = 0;
+    for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
+    {
+      auto& octave = sift_pipeline.octaves[o];
+      num_features += std::accumulate(
+          octave.extrema_oriented.begin(), octave.extrema_oriented.end(), 0,
+          [](const auto& a, const auto& b) { return a + b.size(); });
+    }
+
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
     sara::display(frame_rgb);
 #else
     sara::display(frame);
 #endif
-    const auto text = sara::format("[Frame: %d] Oriented DoG: %0.3f ms", frames_read, elapsed_ms);
-    sara::draw_text(100, 100, text, sara::White8, 40, 0, false, true, false);
+    sara::draw_text(100, 50, sara::format("Frame: %d", frames_read),
+                    sara::White8, 40, 0, false, true, false);
+    sara::draw_text(100, 100, sara::format("Time: %0.3f ms", elapsed_ms),
+                    sara::White8, 40, 0, false, true, false);
+    sara::draw_text(100, 150, sara::format("SIFTs: %d", num_features),
+                    sara::White8, 40, 0, false, true, false);
+
     sara::toc("Display");
   }
 }

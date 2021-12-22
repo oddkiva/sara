@@ -17,65 +17,67 @@
 
 namespace DO::Shakti::HalideBackend::v2 {
 
-  auto SiftOctaveParameters::initialize_cached_scales() -> void
+  auto SiftOctaveParameters::initialize_gaussian_kernels() -> void
   {
-    scales = std::vector<float>(num_scales + 3);
-    for (auto i = 0; i < num_scales + 3; ++i)
+    scales = std::vector<float>(scale_count + 3);
+    for (auto i = 0; i < scale_count + 3; ++i)
       scales[i] = scale_initial * std::pow(scale_factor, i);
 
-    sigmas = std::vector<float>(num_scales + 3);
+    sigmas = std::vector<float>(scale_count + 3);
     for (auto i = 0u; i < sigmas.size(); ++i)
+    {
       sigmas[i] =
           i == 0
               ? std::sqrt(std::pow(scale_initial, 2) -
                           std::pow(scale_camera, 2))
               : std::sqrt(std::pow(scales[i], 2) - std::pow(scales[i - 1], 2));
+    }
 
-    kernels = std::vector<::Halide::Runtime::Buffer<float>>(num_scales + 3);
-    std::transform(sigmas.begin(), sigmas.end(), kernels.begin(),
+    kernels = std::vector<::Halide::Runtime::Buffer<float>>{};
+    std::transform(sigmas.begin(), sigmas.end(), std::back_inserter(kernels),
                    [](const auto& sigma) {
                      const auto k = Sara::make_gaussian_kernel(sigma);
-                     auto k1 = ::Halide::Runtime::Buffer<float>(k.size());
-                     std::copy_n(k.data(), k.size(), k1.data());
-                     return k1;
+                     auto k_buffer = ::Halide::Runtime::Buffer<float>(k.size());
+                     std::copy_n(k.data(), k.size(), k_buffer.data());
+                     k_buffer.set_host_dirty();
+                     return k_buffer;
                    });
-    std::for_each(kernels.begin(), kernels.end(),
-                  [](auto& k) { k.set_host_dirty(); });
   }
 
 
-  auto SiftOctavePipeline::initialize_buffers(std::int32_t num_scales,
+  auto SiftOctavePipeline::initialize_buffers(std::int32_t scale_count,
                                               std::int32_t w, std::int32_t h)
       -> void
   {
-    params.num_scales = num_scales;
+    params.set_scale_count(scale_count);
+    params.initialize_gaussian_kernels();
 
     // Octave of Gaussians.
-    gaussians.resize(params.num_scales + 3);
+    gaussians.resize(params.scale_count + 3);
     for (auto& g : gaussians)
       g = ::Halide::Runtime::Buffer<float>(w, h, 1, 1);
     // Octave of Difference of Gaussians.
-    dogs.resize(params.num_scales + 2);
+    dogs.resize(params.scale_count + 2);
     for (auto& dog : dogs)
       dog = ::Halide::Runtime::Buffer<float>(w, h, 1, 1);
 
     // Octave of DoG extrema maps.
-    extrema_maps.resize(params.num_scales);
+    extrema_maps.resize(params.scale_count);
     for (auto& e : extrema_maps)
       e = ::Halide::Runtime::Buffer<std::int8_t>(w, h, 1, 1);
-    extrema_quantized.resize(params.num_scales);
-    extrema.resize(params.num_scales);
+    extrema_quantized.resize(params.scale_count);
+    extrema.resize(params.scale_count);
 
     // Octave of Gradients of Gaussians.
-    gradients.resize(params.num_scales);
+    gradients.resize(params.scale_count);
     for (auto& grad : gradients)
       grad = {::Halide::Runtime::Buffer<float>(w, h, 1, 1),
               ::Halide::Runtime::Buffer<float>(w, h, 1, 1)};
-    dominant_orientation_dense_maps.resize(params.num_scales);
-    dominant_orientation_sparse_maps.resize(params.num_scales);
+    dominant_orientation_dense_maps.resize(params.scale_count);
+    dominant_orientation_sparse_maps.resize(params.scale_count);
 
     // Final output: the list of oriented keypoints.
-    extrema_oriented.resize(params.num_scales);
+    extrema_oriented.resize(params.scale_count);
   }
 
   auto SiftOctavePipeline::feed(::Halide::Runtime::Buffer<float>& input,
@@ -361,7 +363,7 @@ namespace DO::Shakti::HalideBackend::v2 {
 
 
   auto SiftPyramidPipeline::initialize(int start_octave,
-                                       int num_scales_per_octave,  //
+                                       int scale_count_per_octave,  //
                                        int width, int height) -> void
   {
     start_octave_index = start_octave;
@@ -412,7 +414,7 @@ namespace DO::Shakti::HalideBackend::v2 {
                          : height / std::pow(2, o);
 
       octaves[o - start_octave_index].profile = profile;
-      octaves[o - start_octave_index].initialize_buffers(num_scales_per_octave,
+      octaves[o - start_octave_index].initialize_buffers(scale_count_per_octave,
                                                          w, h);
     }
   }
@@ -428,7 +430,7 @@ namespace DO::Shakti::HalideBackend::v2 {
     else if (start_octave_index > 0)
     {
       const auto& scale =
-          octaves.front().params.scales[octaves.front().params.num_scales];
+          octaves.front().params.scales[octaves.front().params.scale_count];
       const auto& sigma = std::sqrt(scale * scale - 1);
       tic();
       HalideBackend::gaussian_convolution(
@@ -456,8 +458,8 @@ namespace DO::Shakti::HalideBackend::v2 {
       else
       {
         auto& prev_octave = octaves[o - 1];
-        const auto& prev_num_scales = prev_octave.params.num_scales;
-        auto& prev_g = prev_octave.gaussians[prev_num_scales];
+        const auto& prev_scale_count = prev_octave.params.scale_count;
+        auto& prev_g = prev_octave.gaussians[prev_scale_count];
         octaves[o].feed(prev_g, SiftOctavePipeline::FirstAction::Downscale);
       }
 

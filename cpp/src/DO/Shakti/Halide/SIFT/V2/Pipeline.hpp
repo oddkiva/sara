@@ -12,9 +12,9 @@ namespace DO::Shakti::HalideBackend::v2 {
     //! @brief Gaussian octave.
     //! @{
     float scale_camera = 1.f;
-    float scale_initial = 1.6f;
+    float scale_initial = 1.2f;
     float scale_factor = std::pow(2.f, 1 / 1.f);
-    int num_scales = 1;
+    int scale_count = 1;
     int gaussian_truncation_factor = 4;
     //! @}
 
@@ -32,7 +32,13 @@ namespace DO::Shakti::HalideBackend::v2 {
     std::vector<float> sigmas;
     std::vector<Halide::Runtime::Buffer<float>> kernels;
 
-    auto initialize_cached_scales() -> void;
+    inline auto set_scale_count(int n) -> void
+    {
+      scale_count = n;
+      scale_factor = std::pow(2.f, 1.f / n);
+    }
+
+    auto initialize_gaussian_kernels() -> void;
   };
 
 
@@ -66,15 +72,11 @@ namespace DO::Shakti::HalideBackend::v2 {
       Downscale = 1,
     };
 
-    inline SiftOctavePipeline()
-    {
-      params.initialize_cached_scales();
-    }
+    inline SiftOctavePipeline() = default;
 
     inline SiftOctavePipeline(const SiftOctaveParameters& params_)
       : params{params_}
     {
-      params.initialize_cached_scales();
     }
 
     inline auto tic() -> void

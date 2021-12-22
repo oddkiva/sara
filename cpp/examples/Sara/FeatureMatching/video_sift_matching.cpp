@@ -116,6 +116,18 @@ int __main(int argc, char** argv)
     return 1;
   }
 
+  // SIFT extraction parameters.
+  // The following to apply correctly for SIFT.
+  static constexpr auto scale_camera = 1.f;
+  const auto first_octave =
+      static_cast<int>(std::round(std::log(downscale_factor) / std::log(2)));
+  const auto scale_geometric_factor =
+      std::pow(2.f, 1.f / num_scales_per_octave);
+  const auto image_pyr_params = ImagePyramidParams(
+      first_octave, num_scales_per_octave + 3, scale_geometric_factor,
+      /* image_padding_size */ 8, scale_camera,
+      /* scale_initial */ 1.2f);
+
   // OpenMP.
   omp_set_num_threads(omp_get_max_threads());
 
@@ -196,16 +208,6 @@ int __main(int argc, char** argv)
 
       image_curr = frame_gray32f;
 
-      // The formula to apply correctly for SIFT.
-      static constexpr auto scale_camera = 1.f;
-      const auto first_octave = static_cast<int>(
-          std::round(std::log(downscale_factor) / std::log(2)));
-      const auto scale_geometric_factor =
-          std::pow(2.f, 1.f / num_scales_per_octave);
-      const auto image_pyr_params = ImagePyramidParams(
-          first_octave, num_scales_per_octave + 3, scale_geometric_factor,
-          /* image_padding_size */ 8, scale_camera,
-          /* scale_initial */ 1.2f);
       keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
     }
     const auto feature_time = feature_timer.elapsed_ms();
