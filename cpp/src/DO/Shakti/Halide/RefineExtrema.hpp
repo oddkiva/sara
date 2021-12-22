@@ -31,9 +31,9 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
     auto extrema = Pyramid<QuantizedExtremumArray>{};
 
-    for (auto o = 0; o < extrema_map_pyramid.num_octaves(); ++o)
+    for (auto o = 0; o < extrema_map_pyramid.octave_count(); ++o)
     {
-      for (auto s = 0; s < extrema_map_pyramid.num_scales_per_octave(); ++s)
+      for (auto s = 0; s < extrema_map_pyramid.scale_count_per_octave(); ++s)
       {
         const auto& dog_ext_map = extrema_map_pyramid(s, o);
         const auto num_extrema = std::count_if(      //
@@ -133,13 +133,13 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     auto extrema_refined = Pyramid<ExtremumArray>{};
     extrema_refined.scale_octave_pairs = extrema_initial.scale_octave_pairs;
 
-    for (auto o = 0; o < dog.num_octaves(); ++o)
-      for (auto s = 0; s < dog.num_scales_per_octave() -  2; ++s)
+    for (auto o = 0; o < dog.octave_count(); ++o)
+      for (auto s = 0; s < dog.scale_count_per_octave() -  2; ++s)
         extrema_refined.dict[{s, o}].resize(extrema_initial.dict[{s, o}].size());
 
-    for (auto o = 0; o < dog.num_octaves(); ++o)
+    for (auto o = 0; o < dog.octave_count(); ++o)
     {
-      for (auto s = 0; s < dog.num_scales_per_octave() - 2; ++s)
+      for (auto s = 0; s < dog.scale_count_per_octave() - 2; ++s)
       {
         if (extrema_initial.dict[{s, o}].x.empty())
           continue;

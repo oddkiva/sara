@@ -140,7 +140,9 @@ pages:
     # Configure the documentation build.
     - mkdir build
     - cd build
-    - cmake -DSARA_BUILD_SHARED_LIBS:BOOL=ON ..
+    - cmake ..
+        -DSARA_BUILD_SHARED_LIBS:BOOL=ON
+        -DSARA_BUILD_VIDEOIO:BOOL=ON
     - make -j$(nproc) doc
     # Move the generated documentation in the right place.
     - mv doc/html/ ../public/
