@@ -67,16 +67,16 @@ namespace DO { namespace Sara {
     // l/2^k > 2b
     // 2^k < l/(2b)
     // k < log(l/(2b))/log(2)
-    const auto num_octaves = static_cast<int>(log(l / (2.f * b)) / log(2.f));
+    const auto octave_count = static_cast<int>(log(l / (2.f * b)) / log(2.f));
 
     // Shorten names.
-    const auto num_scales = params.num_scales_per_octave();
+    const auto scale_count_per_octave = params.scale_count_per_octave();
     const auto k = float(params.scale_geometric_factor());
 
     // Create the image pyramid
     auto cornerness = ImagePyramid<float>{};
-    cornerness.reset(num_octaves, num_scales, scale_initial, k);
-    for (auto o = 0; o < num_octaves; ++o)
+    cornerness.reset(octave_count, scale_count_per_octave, scale_initial, k);
+    for (auto o = 0; o < octave_count; ++o)
     {
       // Compute the octave scaling factor
       cornerness.octave_scaling_factor(o) =
@@ -87,7 +87,7 @@ namespace DO { namespace Sara {
       if (o != 0)
         I = downscale(I, 2);
 
-      for (auto s = 0; s < num_scales; ++s)
+      for (auto s = 0; s < scale_count_per_octave; ++s)
       {
         const auto sigma_I =
             static_cast<float>(cornerness.scale_relative_to_octave(s));
@@ -134,13 +134,13 @@ namespace DO { namespace Sara {
       scale_octave_pairs->reserve(int(1e4));
     }
 
-    for (auto o = 0; o < cornerness.num_octaves(); ++o)
+    for (auto o = 0; o < cornerness.octave_count(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (auto s = 1; s < cornerness.num_scales_per_octave(); ++s)
+      for (auto s = 1; s < cornerness.scale_count_per_octave(); ++s)
       {
         auto new_corners = laplace_maxima(cornerness, G, s, o, _extremum_thres,
-                                          _img_padding_sz, _num_scales,
+                                          _img_padding_sz, _scale_count,
                                           _extremum_refinement_iter);
 
         append(corners, new_corners);

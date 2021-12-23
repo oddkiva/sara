@@ -36,15 +36,15 @@ namespace DO { namespace Sara {
   ImagePyramid<T> det_of_hessian_pyramid(const ImagePyramid<T>& gaussians)
   {
     ImagePyramid<T> D;
-    D.reset(gaussians.num_octaves(),
-            gaussians.num_scales_per_octave(),
+    D.reset(gaussians.octave_count(),
+            gaussians.scale_count_per_octave(),
             gaussians.scale_initial(),
             gaussians.scale_geometric_factor());
 
-    for (int o = 0; o < D.num_octaves(); ++o)
+    for (int o = 0; o < D.octave_count(); ++o)
     {
       D.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
-      for (int s = 0; s < D.num_scales_per_octave(); ++s)
+      for (int s = 0; s < D.scale_count_per_octave(); ++s)
       {
         D(s, o) = gaussians(s, o)
                       .template compute<Hessian>()

@@ -67,7 +67,7 @@ func testVideoRead() {
 #if os(macOS)
     let videoFilePath = "/Users/david/Desktop/Datasets/videos/sample10.mp4"
 #else
-    let videoFilePath = "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.MP4"
+    let videoFilePath = "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.mp4"
 #endif
     let videoStream = VideoStream(filePath: videoFilePath)
 

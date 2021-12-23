@@ -28,11 +28,11 @@ namespace DO::Shakti::HalideBackend {
     Halide::Var xi{"xi"}, yi{"yi"}, ci{"ci"};
     //! @}
 
-    template <typename Input, typename Output>
+    template <typename Input, typename Kernel, typename Output>
     void generate(Input& input,                                             //
-                  Halide::Func& kernel_x,                                   //
+                  Kernel& kernel_x,                                   //
                   Halide::Expr kernel_x_size, Halide::Expr kernel_x_shift,  //
-                  Halide::Func& kernel_y,                                   //
+                  Kernel& kernel_y,                                   //
                   Halide::Expr kernel_y_size, Halide::Expr kernel_y_shift,  //
                   Output& output,                                           //
                   Halide::Expr w, Halide::Expr h)
@@ -58,6 +58,39 @@ namespace DO::Shakti::HalideBackend {
       auto& conv_y = output;
       conv_y(x, y, c, n) =
           Halide::sum(conv_x_padded(x, y + l, c, n) * kernel_y(l));
+    }
+
+    template <typename Input, typename Kernel, typename Output>
+    void generate_2(Input& input,                                             //
+                    Kernel& kernel_x,                                         //
+                    Halide::Expr kernel_x_size, Halide::Expr kernel_x_shift,  //
+                    Kernel& kernel_y,                                         //
+                    Halide::Expr kernel_y_size, Halide::Expr kernel_y_shift,  //
+                    Output& output,                                           //
+                    Halide::Expr w, Halide::Expr h)
+    {
+      // Define the summation variable `k` with its summation domain (a.k.a. the
+      // reduction domain variable).
+      auto k = Halide::RDom{0, kernel_x_size};
+      auto l = Halide::RDom{0, kernel_y_size};
+
+      // 1st pass: convolve in x first.
+      auto input_padded = Halide::BoundaryConditions::repeat_edge(  //
+          input,                                                    //
+          {{0, w}, {}, {}, {}}                                      //
+      );
+      conv_x(x, y, c, n) =
+          sum(input_padded(x + kernel_x_shift + k, y, c, n) * kernel_x(k));
+
+      // 2nd pass: transpose and convolve the rows.
+      auto conv_x_padded = Halide::BoundaryConditions::repeat_edge(  //
+          conv_x,                                                    //
+          {{}, {0, h}, {}, {}}                                       //
+      );
+
+      auto& conv_y = output;
+      conv_y(x, y, c, n) = Halide::sum(
+          conv_x_padded(x, y + kernel_y_shift + l, c, n) * kernel_y(l));
     }
 
     template <typename Output>
@@ -96,7 +129,7 @@ namespace DO::Shakti::HalideBackend {
 
         // 2nd pass: transpose and convolve the rows.
         conv_y.hexagon()
-            .prefetch(conv_x, x, 128)
+            .prefetch(conv_x, x, x, 128)
             .split(x, xo, xi, 128)
             .parallel(xo)
             .vectorize(y, vector_size);
@@ -105,8 +138,11 @@ namespace DO::Shakti::HalideBackend {
       // CPU schedule.
       else
       {
-        conv_y.tile(x, y, xi, yi, 64, 64).vectorize(xi, 8).parallel(y);
-        conv_x.compute_at(conv_y, x).vectorize(x, 8);
+        conv_y.tile(x, y, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+            .vectorize(xi, 8, Halide::TailStrategy::GuardWithIf)
+            .parallel(y);
+        conv_x.compute_at(conv_y, x).vectorize(
+            x, 8, Halide::TailStrategy::GuardWithIf);
       }
     }
 
@@ -176,7 +212,7 @@ namespace DO::Shakti::HalideBackend {
 
         // 2nd pass: transpose and convolve the rows.
         conv_y.hexagon()
-            .prefetch(conv_x, x, 128)
+            .prefetch(conv_x, x, x, 128)
             .split(x, xo, xi, 128)
             .parallel(xo)
             .vectorize(y, vector_size);
@@ -185,8 +221,11 @@ namespace DO::Shakti::HalideBackend {
       // CPU schedule.
       else
       {
-        conv_y.tile(x, y, xi, yi, 64, 64).vectorize(xi, 8).parallel(y);
-        conv_x.compute_at(conv_y, x).vectorize(x, 8);
+        conv_y.tile(x, y, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+            .vectorize(xi, 8, Halide::TailStrategy::GuardWithIf)
+            .parallel(y);
+        conv_x.compute_at(conv_y, x).vectorize(
+            x, 8, Halide::TailStrategy::GuardWithIf);
       }
     }
   };

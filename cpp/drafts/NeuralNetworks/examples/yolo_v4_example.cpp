@@ -10,11 +10,11 @@
 // ========================================================================== //
 
 #include <DO/Sara/Core.hpp>
-#include <DO/Sara/Core/MultiArray/Slice.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/VideoIO.hpp>
 
 #include <drafts/NeuralNetworks/Darknet/Network.hpp>
 #include <drafts/NeuralNetworks/Darknet/Parser.hpp>
@@ -35,6 +35,21 @@ struct Detection
   Eigen::VectorXf class_probs;
 };
 
+auto load_yolov4_tiny_model(const fs::path& model_dir_path)
+{
+  const auto cfg_filepath = model_dir_path / "yolov4-tiny.cfg";
+  const auto weights_filepath = model_dir_path / "yolov4-tiny.weights";
+
+  auto model = sara::Darknet::Network{};
+  auto& net = model.net;
+  net = sara::Darknet::NetworkParser{}.parse_config_file(cfg_filepath.string());
+  sara::Darknet::NetworkWeightLoader{weights_filepath.string()}.load(net);
+
+  return model;
+}
+
+//! @brief Post-processing functions.
+//! @{
 auto get_yolo_boxes(const sara::TensorView_<float, 3>& output,
                     const std::vector<int>& box_sizes_prior,
                     const std::vector<int>& masks,
@@ -97,38 +112,77 @@ auto get_yolo_boxes(const sara::TensorView_<float, 3>& output,
   return boxes;
 }
 
-
-int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
+// Simple greedy NMS based on area IoU criterion.
+auto nms(const std::vector<Detection>& detections, float iou_threshold = 0.4f)
+    -> std::vector<Detection>
 {
-#ifndef __APPLE__
-  const auto num_threads = omp_get_max_threads();
-  omp_set_num_threads(num_threads);
-  Eigen::setNbThreads(num_threads);
-#endif
+  auto detections_sorted = detections;
+  std::sort(detections_sorted.begin(), detections_sorted.end(),
+            [](const auto& a, const auto& b) {
+              return a.objectness_prob > b.objectness_prob;
+            });
 
-  const auto data_dir_path =
-      fs::canonical(fs::path{src_path("../../../../data")});
-  const auto cfg_filepath =
-      data_dir_path / "trained_models" / "yolov4-tiny.cfg";
-  const auto weights_filepath =
-      data_dir_path / "trained_models" / "yolov4-tiny.weights";
+  auto detections_filtered = std::vector<Detection>{};
+  detections_filtered.reserve(detections.size());
 
-  auto model = sara::Darknet::Network{};
+  for (const auto& d : detections_sorted)
+  {
+    if (detections_filtered.empty())
+    {
+      detections_filtered.push_back(d);
+      continue;
+    }
+
+    auto boxes_kept = Eigen::MatrixXf(detections_filtered.size(), 4);
+    for (auto i = 0u; i < detections_filtered.size(); ++i)
+      boxes_kept.row(i) = detections_filtered[i].box.transpose();
+
+    const auto x1 = boxes_kept.col(0);
+    const auto y1 = boxes_kept.col(1);
+    const auto w = boxes_kept.col(2);
+    const auto h = boxes_kept.col(3);
+
+    const auto x2 = x1 + w;
+    const auto y2 = y1 + h;
+
+    // Intersection.
+    const auto inter_x1 = x1.array().max(d.box(0));
+    const auto inter_y1 = y1.array().max(d.box(1));
+    const auto inter_x2 = x2.array().min(d.box(0) + d.box(2));
+    const auto inter_y2 = y2.array().min(d.box(1) + d.box(3));
+    const auto intersect = (inter_x1 <= inter_x2) && (inter_y1 <= inter_y2);
+
+    // Intersection areas
+    const Eigen::ArrayXf inter_area =
+        intersect.cast<float>() *
+        ((inter_x2 - inter_x1) * (inter_y2 - inter_y1));
+
+    // Union areas.
+    const Eigen::ArrayXf union_area =
+        w.array() * h.array() + d.box(2) * d.box(3) - inter_area;
+
+    // IoU
+    const Eigen::ArrayXf iou = inter_area / union_area;
+
+    const auto valid = (iou < iou_threshold).all();
+    if (valid)
+      detections_filtered.push_back(d);
+  }
+
+  return detections_filtered;
+}
+//! @}
+
+// The API.
+auto detect_objects(const sara::ImageView<sara::Rgb32f>& image,
+                    sara::Darknet::Network& model)
+{
   auto& net = model.net;
-  net = sara::Darknet::NetworkParser{}.parse_config_file(cfg_filepath.string());
-  sara::Darknet::NetworkWeightLoader{weights_filepath.string()}.load(net);
-
-  const auto image =
-      argc < 2
-          ? sara::imread<sara::Rgb32f>((data_dir_path / "dog.jpg").string())
-          : sara::imread<sara::Rgb32f>(argv[1]);
-  sara::create_window(image.sizes());
-  sara::display(image);
+  const auto& input_layer =
+      dynamic_cast<const sara::Darknet::Input&>(*net.front());
 
   // Resize the image to the network input sizes.
   // TODO: optimize later.
-  const auto& input_layer =
-      dynamic_cast<const sara::Darknet::Input&>(*net.front());
   const auto image_resized =
       sara::resize(image, {input_layer.width(), input_layer.height()});
   const auto image_tensor =
@@ -140,13 +194,10 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
   // Feed the input to the network.
   // TODO: optimize this method to avoid recopying again or better, eliminate
   // the input layer.
-  auto timer = sara::Timer{};
-  timer.restart();
   model.forward(image_tensor);
-  const auto elapsed = timer.elapsed_ms();
-  std::cout << "Total = " << elapsed << " ms" << std::endl;
 
-
+  // Accumulate all the detection from each YOLO layer.
+  auto detections = std::vector<Detection>{};
   for (const auto& layer : net)
   {
     if (const auto yolo = dynamic_cast<const sara::Darknet::Yolo*>(layer.get()))
@@ -154,13 +205,103 @@ int __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
       const auto dets =
           get_yolo_boxes(yolo->output[0], yolo->anchors, yolo->mask,
                          image_resized.sizes(), image.sizes(), 0.25f);
-      for (const auto& det : dets)
-        sara::draw_rect(det.box(0), det.box(1), det.box(2), det.box(3),
-                        sara::Red8, 2);
+      detections.insert(detections.end(), dets.begin(), dets.end());
     }
   }
-  sara::get_key();
 
+  return nms(detections);
+}
+
+
+auto test_on_image(int argc, char** argv) -> void
+{
+#ifndef __APPLE__
+  const auto num_threads = omp_get_max_threads();
+  omp_set_num_threads(num_threads);
+  Eigen::setNbThreads(num_threads);
+#endif
+
+  const auto data_dir_path =
+      fs::canonical(fs::path{src_path("../../../../data")});
+  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
+  const auto image =
+      argc < 2
+          ? sara::imread<sara::Rgb32f>((data_dir_path / "dog.jpg").string())
+          : sara::imread<sara::Rgb32f>(argv[1]);
+  sara::create_window(image.sizes());
+  sara::display(image);
+
+  auto model = load_yolov4_tiny_model(yolov4_tiny_dirpath);
+
+  sara::display(image);
+  const auto dets = detect_objects(image, model);
+  for (const auto& det : dets)
+    sara::draw_rect(det.box(0), det.box(1), det.box(2), det.box(3),
+                    sara::Green8, 2);
+  sara::get_key();
+}
+
+auto test_on_video(int argc, char** argv) -> void
+{
+#ifndef __APPLE__
+  const auto num_threads = omp_get_max_threads();
+  omp_set_num_threads(num_threads);
+  Eigen::setNbThreads(num_threads);
+#endif
+
+  if (argc < 2)
+  {
+    std::cerr << "Missing video path" << std::endl;
+    return;
+  }
+
+  const auto video_filepath = argv[1];
+  auto video_stream = sara::VideoStream {video_filepath};
+  auto frame = video_stream.frame();
+
+  const auto data_dir_path =
+      fs::canonical(fs::path{src_path("../../../../data")});
+  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
+  auto model = load_yolov4_tiny_model(yolov4_tiny_dirpath);
+  model.profile = false;
+
+  sara::create_window(frame.sizes());
+
+  const auto skip = argc < 3 ? 0 : std::stoi(argv[2]);
+  auto frames_read = 0;
+  while (true)
+  {
+    sara::tic();
+    if (!video_stream.read())
+    {
+      std::cout << "Reached the end of the video!" << std::endl;
+      break;
+    }
+    sara::toc("Video Decoding");
+
+    ++frames_read;
+    if (frames_read % (skip + 1) != 0)
+      continue;
+
+    sara::tic ();
+    const auto frame32f = video_stream.frame().convert<sara::Rgb32f>();
+    sara::toc("Color conversion");
+
+    sara::tic();
+    auto dets = detect_objects(frame32f, model);
+    sara::toc("Yolo");
+
+    sara::display(frame);
+    for (const auto& det : dets)
+      sara::draw_rect(det.box(0), det.box(1), det.box(2), det.box(3),
+                      sara::Green8, 4);
+  }
+}
+
+int __main(int argc, char** argv)
+{
+  // test_on_image(argc, argv);
+  test_on_video(argc, argv);
   return 0;
 }
 

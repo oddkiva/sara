@@ -96,7 +96,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
     // Shorten names.
     const auto k = params.scale_geometric_factor();
-    const auto num_scales = params.num_scales_per_octave();
+    const auto num_scales = params.scale_count_per_octave();
     const auto downscale_index = static_cast<int>(floor(log(2) / log(k)));
 
     // Create the image pyramid
@@ -152,15 +152,15 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     auto& G = gaussian_pyramid;
 
     auto D = Sara::ImagePyramid<float>{};
-    D.reset(G.num_octaves(),                //
-            G.num_scales_per_octave() - 1,  //
+    D.reset(G.octave_count(),                //
+            G.scale_count_per_octave() - 1,  //
             G.scale_initial(),              //
             G.scale_geometric_factor());    //
 
-    for (auto o = 0; o < D.num_octaves(); ++o)
+    for (auto o = 0; o < D.octave_count(); ++o)
     {
       D.octave_scaling_factor(o) = G.octave_scaling_factor(o);
-      for (auto s = 0; s < D.num_scales_per_octave(); ++s)
+      for (auto s = 0; s < D.scale_count_per_octave(); ++s)
       {
         D(s, o).resize(G(s, o).sizes());
 #ifdef DEBUG

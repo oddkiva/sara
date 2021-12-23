@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
-
 project(DO_Segmentation_tests)
 
 message(STATUS "  - DO_Segmentation_tests")

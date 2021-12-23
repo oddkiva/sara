@@ -14,13 +14,15 @@
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
-#include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 #include <omp.h>
 
@@ -39,25 +41,6 @@ auto initialize_crop_region(const Eigen::Vector2i& sizes)
   return std::make_pair(p1, p2);
 }
 
-auto imshow(const std::string& window_name, const ImageView<Rgb8>& image)
-{
-  static auto window_names = std::map<std::string, Window>{};
-  auto w_it = window_names.find(window_name);
-
-  auto w = Window{};
-  if (w_it == window_names.end())
-  {
-    w = create_window(image.sizes(), window_name);
-    window_names[window_name] = w;
-  }
-  else
-    w = w_it->second;
-
-  set_active_window(w);
-  display(image);
-}
-
-
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
@@ -73,6 +56,10 @@ int __main(int argc, char** argv)
   auto video_filepath = std::string{};
   auto downscale_factor = int{};
   auto skip = int{};
+  auto hide_tracks = false;
+  auto show_features = false;
+  auto save_video = false;
+  auto num_scales_per_octave = int{};
 
   po::options_description desc("video_sift_matching");
   desc.add_options()     //
@@ -82,8 +69,16 @@ int __main(int argc, char** argv)
       ("downscale-factor,d",
        po::value<int>(&downscale_factor)->default_value(2),
        "downscale factor")  //
-      ("skip,s", po::value<int>(&skip)->default_value(0),
+      ("num_scales_per_octave,s", po::value<int>(&num_scales_per_octave)->default_value(1),
+       "number of scales per octave")  //
+      ("skip", po::value<int>(&skip)->default_value(0),
        "number of frames to skip")  //
+      ("hide_tracks,h", po::bool_switch(&hide_tracks),
+       "hide feature tracking")  //
+      ("show_features,f", po::bool_switch(&show_features),
+       "show features")  //
+      ("save_video", po::bool_switch(&save_video),
+       "save video")  //
       ;
 
   po::variables_map vm;
@@ -102,6 +97,18 @@ int __main(int argc, char** argv)
     return 1;
   }
 
+  // SIFT extraction parameters.
+  // The following to apply correctly for SIFT.
+  static constexpr auto scale_camera = 1.f;
+  const auto first_octave =
+      static_cast<int>(std::round(std::log(downscale_factor) / std::log(2)));
+  const auto scale_geometric_factor =
+      std::pow(2.f, 1.f / num_scales_per_octave);
+  const auto image_pyr_params = ImagePyramidParams(
+      first_octave, num_scales_per_octave + 3, scale_geometric_factor,
+      /* image_padding_size */ 8, scale_camera,
+      /* scale_initial */ 1.2f);
+
   // OpenMP.
   omp_set_num_threads(omp_get_max_threads());
 
@@ -109,19 +116,22 @@ int __main(int argc, char** argv)
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
   auto frame_gray32f = Image<float>{};
-  auto screen_contents = Image<Rgb8>{frame.sizes()};
+  const Eigen::Vector2i downscaled_sizes = frame.sizes() / downscale_factor;
+  auto frame_gray32f_downscaled = Image<float>{downscaled_sizes};
 
   // Output save.
   const auto basename = fs::basename(video_filepath);
-  VideoWriter video_writer{
-#ifdef __APPLE__
-      "/Users/david/Desktop/" + basename + ".sift-matching.mp4",
-#else
-      "/home/david/Desktop/" + basename + ".sift-matching.mp4",
-#endif
-      frame.sizes()  //
-  };
+  auto video_writer = std::unique_ptr<VideoWriter>{};
 
+  if (save_video)
+    video_writer = std::make_unique<VideoWriter>(
+#ifdef __APPLE__
+        "/Users/david/Desktop/" + basename + ".sift-matching.mp4",
+#else
+        "/home/david/Desktop/" + basename + ".sift-matching.mp4",
+#endif
+        frame.sizes()  //
+    );
 
   // Show the local extrema.
   auto w = create_window(frame.sizes(), "SIFT matching " + basename);
@@ -132,7 +142,6 @@ int __main(int argc, char** argv)
   const auto [p1, p2] = initialize_crop_region(frame.sizes());
 #else
   const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
-  const Eigen::Vector2i& p2 = frame.sizes();
 #endif
 
   auto image_prev = Image<float>{};
@@ -140,6 +149,9 @@ int __main(int argc, char** argv)
 
   auto keys_prev = KeypointList<OERegion, float>{};
   auto keys_curr = KeypointList<OERegion, float>{};
+
+  auto feature_timer = Timer{};
+  auto matching_timer = Timer{};
 
   auto frames_read = 0;
   while (true)
@@ -154,57 +166,79 @@ int __main(int argc, char** argv)
       continue;
     SARA_DEBUG << "Processing frame " << frames_read << std::endl;
 
+#ifdef CROP
     // Reduce our attention to the central part of the image.
     tic();
     const auto frame_cropped = crop(frame, p1, p2);
     toc("Crop");
 
     tic();
-    frame_gray32f = frame_cropped.convert<float>();
+    frame_gray32f = DO::Sara::from_rgb8_to_gray32f(frame_cropped);
     toc("Grayscale");
+#else
+    tic();
+    frame_gray32f = DO::Sara::from_rgb8_to_gray32f(frame);
+    toc("Grayscale");
+#endif
 
-    if (downscale_factor > 1)
+    tic();
+    feature_timer.restart();
     {
-      tic();
-      frame_gray32f = downscale(frame_gray32f, downscale_factor);
-      toc("Downscale");
+      image_prev.swap(image_curr);
+      keys_prev.swap(keys_curr);
+
+      image_curr = frame_gray32f;
+
+      keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
     }
+    const auto feature_time = feature_timer.elapsed_ms();
 
-    image_prev.swap(image_curr);
-    keys_prev.swap(keys_curr);
-
-    image_curr = frame_gray32f;
-    const auto image_pyr_params = ImagePyramidParams(0);
-    keys_curr = compute_sift_keypoints(frame_gray32f, image_pyr_params);
-
-    // Compute/read matches
+    matching_timer.restart();
     auto matches = std::vector<Match>{};
-
     const auto& fprev = std::get<0>(keys_prev);
     if (!fprev.empty())
     {
-      SARA_DEBUG << "Computing Matches" << endl;
       AnnMatcher matcher{keys_prev, keys_curr, 0.6f};
       matches = matcher.compute_matches();
-      SARA_CHECK(matches.size());
     }
+    const auto matching_time = matching_timer.elapsed_ms();
+    toc("Matching");
 
-    set_active_window(w);
-    display(frame);
-    const auto s = 1 / float(downscale_factor);
-    for (size_t i = 0; i < matches.size(); ++i)
+    tic();
+    auto frame_annotated = Image<Rgb8>{frame};
+    if (!hide_tracks)
     {
-      draw(matches[i].x(), Blue8, downscale_factor, s * p1.cast<float>());
-      draw(matches[i].y(), Cyan8, downscale_factor, s * p1.cast<float>());
-      const Eigen::Vector2f a = p1.cast<float>() + downscale_factor * matches[i].x_pos();
-      const Eigen::Vector2f b = p1.cast<float>() + downscale_factor * matches[i].y_pos();
-      draw_arrow(a, b, Yellow8, 2);
+      for (size_t i = 0; i < matches.size(); ++i)
+      {
+        if (show_features)
+        {
+          draw(frame_annotated, matches[i].x(), Blue8, 1, p1.cast<float>());
+          draw(frame_annotated, matches[i].y(), Cyan8, 1, p1.cast<float>());
+        }
+        const Eigen::Vector2f a = p1.cast<float>() + matches[i].x_pos();
+        const Eigen::Vector2f b = p1.cast<float>() + matches[i].y_pos();
+        draw_arrow(frame_annotated, a, b, Yellow8, 4);
+      }
     }
-    draw_text(100, 100, "SIFT matches = " + std::to_string(matches.size()),
-              White8, 20, 0, false, true, false);
+    draw_text(frame_annotated, 100, 50,               //
+              format("SIFT: %0.f ms", feature_time),  //
+              White8, 40, 0, false, true, false);
+    draw_text(frame_annotated, 100, 100,
+              format("Matching: %0.3f ms", matching_time),  //
+              White8, 40, 0, false, true, false);
+    draw_text(frame_annotated, 100, 150,              //
+              format("Tracks: %u", matches.size()),  //
+              White8, 40, 0, false, true, false);
+    set_active_window(w);
+    display(frame_annotated);
+    toc("Display");
 
-    grab_screen_contents(screen_contents, w);
-    video_writer.write(screen_contents);
+    if (save_video)
+    {
+      tic();
+      video_writer->write(frame_annotated);
+      toc("Video-Write");
+    }
   }
 
   return 0;

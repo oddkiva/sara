@@ -37,7 +37,6 @@ auto make_corner_image()
   return image;
 }
 
-
 BOOST_AUTO_TEST_CASE(test_sift_v1)
 {
   auto image = make_corner_image();
@@ -119,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_sift_v1)
       std::cout << std::endl;
 
       // FIXME.
-      // BOOST_CHECK_SMALL((h1_ij - h2_ij).lpNorm<Eigen::Infinity>(), 2e-1f);
+      // BOOST_CHECK_SMALL((h1_ij - h2_ij).lpNorm<Eigen::Infinity>(), 1e-7f);
     }
   }
 }
@@ -392,4 +391,82 @@ BOOST_AUTO_TEST_CASE(test_sift_v4)
       }
     }
   }
+}
+
+BOOST_AUTO_TEST_CASE(test_sift_v5)
+{
+  auto image = make_corner_image();
+
+  // Calculate the image gradients in polar coordinates.
+  auto mag = sara::Image<float>{image.sizes()};
+  auto ori = sara::Image<float>{image.sizes()};
+  halide::polar_gradient_2d(image, mag, ori);
+
+  // SIFT parameters.
+  static constexpr auto N = 4;
+  static constexpr auto O = 8;
+
+  // Keypoint spatial positions.
+  const auto x = image.sizes().x() / 2.f;
+  const auto y = image.sizes().y() / 2.f;
+
+  // The scale at which the keypoint is detected.
+  static const auto scale_at_detection = 1.f;
+
+  // Maximum scale.
+  auto scale_residual_max = std::pow(2.f, 1.f / 3.f);  // 1.25992...
+
+  // Keypoint scale.
+  auto scale_residual_exponent = 0.5f;             // Between 0 and 1
+  auto scale = scale_at_detection *                //
+               std::pow(scale_residual_max,        // Between 1 and ~1.26
+                        scale_residual_exponent);  // Here: ~1.12
+
+  // Keypoint position.
+  const auto theta = 0.f;
+
+  // Row-major tensor.
+  //                                         K  I   J  O
+  static constexpr auto K = 1;
+
+  auto descriptor_v4 = sara::Tensor_<float, 3>{{K, N * N, O}};
+  auto descriptor_v5 = sara::Tensor_<float, 3>{{K, N * N, O}};
+  descriptor_v4.flat_array().setZero();
+  descriptor_v5.flat_array().setZero();
+
+  // Run SIFT V4.
+  {
+    auto x_vec = std::vector(K, x);
+    auto y_vec = std::vector(K, y);
+    auto scale_vec = std::vector<float>(K, scale);
+    auto theta_vec = std::vector<float>(K, theta);
+    halide::v4::compute_sift_descriptors(  //
+        mag, ori,                          //
+        x_vec,                             //
+        y_vec,                             //
+        scale_vec,                         //
+        theta_vec,                         //
+        descriptor_v4                      //
+    );
+  }
+
+  // Run SIFT V5.
+  {
+    auto x_vec = std::vector(K, x);
+    auto y_vec = std::vector(K, y);
+    auto scale_vec = std::vector<float>(K, scale);
+    auto theta_vec = std::vector<float>(K, theta);
+    halide::v5::compute_sift_descriptors(  //
+        mag, ori,                          //
+        x_vec,                             //
+        y_vec,                             //
+        scale_vec,                         //
+        theta_vec,                         //
+        descriptor_v5                      //
+    );
+  }
+
+  BOOST_CHECK_SMALL((descriptor_v4.row_vector() - descriptor_v5.row_vector()).norm(), 1e-6f);
+  const auto v4 = descriptor_v4.row_vector();
+  const auto v5 = descriptor_v5.row_vector();
 }

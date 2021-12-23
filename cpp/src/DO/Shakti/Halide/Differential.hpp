@@ -55,22 +55,22 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     auto mag = Sara::ImagePyramid<float>{};
     auto ori = Sara::ImagePyramid<float>{};
 
-    mag.reset(in.num_octaves(),              //
-              in.num_scales_per_octave(),    //
+    mag.reset(in.octave_count(),              //
+              in.scale_count_per_octave(),    //
               in.scale_initial(),            //
               in.scale_geometric_factor());  //
 
-    ori.reset(in.num_octaves(),              //
-              in.num_scales_per_octave(),    //
+    ori.reset(in.octave_count(),              //
+              in.scale_count_per_octave(),    //
               in.scale_initial(),            //
               in.scale_geometric_factor());  //
 
-    for (auto o = 0; o < in.num_octaves(); ++o)
+    for (auto o = 0; o < in.octave_count(); ++o)
     {
       mag.octave_scaling_factor(o) = in.octave_scaling_factor(o);
       ori.octave_scaling_factor(o) = in.octave_scaling_factor(o);
 
-      for (auto s = 0; s < in.num_scales_per_octave(); ++s)
+      for (auto s = 0; s < in.scale_count_per_octave(); ++s)
       {
         mag(s, o).resize(in(s, o).sizes());
         ori(s, o).resize(in(s, o).sizes());

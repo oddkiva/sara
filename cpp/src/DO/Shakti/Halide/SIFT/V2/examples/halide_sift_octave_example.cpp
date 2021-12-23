@@ -21,8 +21,8 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <DO/Shakti/Halide/Draw.hpp>
-#include <DO/Shakti/Halide/SIFTPipeline.hpp>
+#include <DO/Shakti/Halide/SIFT/Draw.hpp>
+#include <DO/Shakti/Halide/SIFT/V2/Pipeline.hpp>
 
 #include "shakti_rgb8u_to_gray32f_cpu.h"
 
@@ -45,7 +45,9 @@ auto test_on_image()
   auto buffer_4d = halide::as_runtime_buffer(image_tensor);
 
   auto sift_octave_pipeline = halide::v2::SiftOctavePipeline{};
-  sift_octave_pipeline.initialize_buffers(image.width(), image.height());
+  static constexpr auto scale_count = 3;
+  sift_octave_pipeline.initialize_buffers(scale_count,
+                                          image.width(), image.height());
 
   auto timer = sara::Timer{};
   timer.restart();
@@ -81,9 +83,8 @@ auto test_on_video()
 #else
   const auto video_filepath =
       // "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.MP4"s;
+      "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.mp4"s;
 #endif
-
 
 
   // ===========================================================================
@@ -108,7 +109,9 @@ auto test_on_video()
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
 
   auto sift_octave_pipeline = halide::v2::SiftOctavePipeline{};
-  sift_octave_pipeline.initialize_buffers(frame.width(), frame.height());
+  static constexpr auto scale_count_per_octave = 3;
+  sift_octave_pipeline.initialize_buffers(scale_count_per_octave,
+                                          frame.width(), frame.height());
 
 
   // Show the local extrema.

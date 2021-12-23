@@ -1,5 +1,6 @@
 find_package(DO_Sara COMPONENTS
   Core ImageIO VideoIO
+  ImageProcessing
   Features FeatureDetectors FeatureDescriptors
   KDTree Match FeatureMatching SfM
   Visualization REQUIRED)

@@ -29,7 +29,7 @@ namespace DO { namespace Sara {
 
   //! @brief Upscale image.
   template <typename T, int N>
-  Image<T, N> upscale(const ImageView<T, N>& src, int fact)
+  auto upscale(const ImageView<T, N>& src, int fact) -> Image<T, N>
   {
     auto dst = Image<T, N>(src.sizes() * fact);
     for (auto it = dst.begin_array(); !it.end(); ++it)
@@ -39,13 +39,20 @@ namespace DO { namespace Sara {
 
   //! @brief Downscale image.
   template <typename T, int N>
-  Image<T, N> downscale(const ImageView<T, N>& src, int fact)
+  auto downscale(const ImageView<T, N>& src, int fact) -> Image<T, N>
   {
     auto dst = Image<T, N>(src.sizes() / fact);
     for (auto it = dst.begin_array(); !it.end(); ++it)
       *it = src(it.position() * fact);
     return dst;
   }
+
+  //! @brief Scale the source image to the destination image sizes.
+  //! The nearest neighbor interpolation is used.
+  auto scale(const ImageView<float>& src, ImageView<float>& dst) -> void;
+
+  auto downscale(const ImageView<float>& src, int fact) -> Image<float>;
+
 
   //! @brief Find min and max coefficient of a vector.
   template <typename T, int N>
@@ -109,8 +116,8 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N>
-  Image<T, N> reduce(const ImageView<T, N>& src, Matrix<int, N, 1> new_sizes,
-                     bool keep_ratio = false)
+  auto reduce(const ImageView<T, N>& src, Matrix<int, N, 1> new_sizes,
+              bool keep_ratio = false) -> Image<T, N>
   {
     const Matrix<double, N, 1> original_sizes =
         src.sizes().template cast<double>();
@@ -131,7 +138,7 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N>
-  inline Image<T, N> reduce(const ImageView<T, N>& image, double fact)
+  inline auto reduce(const ImageView<T, N>& image, double fact) -> Image<T, N>
   {
     Matrix<double, N, 1> new_sizes;
     new_sizes = image.sizes().template cast<double>() / fact;
@@ -142,8 +149,12 @@ namespace DO { namespace Sara {
 
   //! @{
   //! @brief Enlarge image.
+  auto enlarge(const ImageView<float>& src, ImageView<float>& dst) -> void;
+
+  auto enlarge(const ImageView<Rgb32f>& src, ImageView<Rgb32f>& dst) -> void;
+
   template <typename T, int N>
-  void enlarge(const ImageView<T, N>& src, ImageView<T, N>& dst)
+  auto enlarge(const ImageView<T, N>& src, ImageView<T, N>& dst) -> void
   {
     if (dst.sizes() != dst.sizes().cwiseMax(src.sizes()))
       throw std::range_error{"The destination image must have smaller sizes "
@@ -175,9 +186,8 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N>
-  inline Image<T, N> enlarge(const ImageView<T, N>& image,
-                             Matrix<int, N, 1> new_sizes,
-                             bool keep_ratio = false)
+  auto enlarge(const ImageView<T, N>& image, Matrix<int, N, 1> new_sizes,
+               bool keep_ratio = false) -> Image<T, N>
   {
     // Determine the right blurring factor.
     const auto original_sizes = image.sizes().template cast<double>();
@@ -198,7 +208,7 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N>
-  inline Image<T, N> enlarge(const ImageView<T, N>& image, double fact)
+  inline auto enlarge(const ImageView<T, N>& image, double fact) -> Image<T, N>
   {
     const auto new_sizes = image.sizes().template cast<double>() * fact;
     return enlarge(image, new_sizes.template cast<int>().eval());
@@ -209,7 +219,7 @@ namespace DO { namespace Sara {
   //! @{
   //! @brief Resize the image.
   template <typename T, int N>
-  void resize(const ImageView<T, N>& src, ImageView<T, N>& dst)
+  auto resize(const ImageView<T, N>& src, ImageView<T, N>& dst) -> void
   {
     const auto size_ratio = dst.sizes().template cast<double>().array() /
                             src.sizes().template cast<double>().array();
@@ -238,6 +248,7 @@ namespace DO { namespace Sara {
     return dst;
   }
   //! @}
+
 
   // @brief Image resizing functor that preserves the image size ratio.
   struct SizeRatioPreservingImageResizer
@@ -344,5 +355,4 @@ namespace DO { namespace Sara {
     }
   };
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

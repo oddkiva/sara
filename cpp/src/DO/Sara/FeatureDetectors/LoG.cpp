@@ -35,10 +35,10 @@ namespace DO { namespace Sara {
       scale_octave_pairs->reserve(preallocated_size);
     }
 
-    for (auto o = 0; o < L.num_octaves(); ++o)
+    for (auto o = 0; o < L.octave_count(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (auto s = 1; s < L.num_scales_per_octave() - 1; ++s)
+      for (auto s = 1; s < L.scale_count_per_octave() - 1; ++s)
       {
         auto new_extrema = local_scale_space_extrema(
             L, s, o, _extremum_thres, _edge_ratio_thres, _img_padding_sz,

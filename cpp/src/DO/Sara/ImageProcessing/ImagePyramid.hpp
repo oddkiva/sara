@@ -32,7 +32,7 @@ namespace DO { namespace Sara {
     //! @brief Constructor.
     ImagePyramidParams(                                           //
         int first_octave_index = -1,                              //
-        int num_scales_per_octave = 3 + 3,                        //
+        int scale_count_per_octave = 3 + 3,                       //
         float scale_geometric_factor = std::pow(2.f, 1.f / 3.f),  //
         int image_padding_size = 1,                               //
         float scale_camera = 0.5f,                                //
@@ -40,7 +40,7 @@ namespace DO { namespace Sara {
     {
       _scale_camera = scale_camera;
       _scale_initial = scale_initial;
-      _num_scales_per_octave = num_scales_per_octave;
+      _scale_count_per_octave = scale_count_per_octave;
       _scale_geometric_factor = scale_geometric_factor;
       _image_padding_size = image_padding_size;
       _first_octave_index = first_octave_index;
@@ -149,9 +149,9 @@ namespace DO { namespace Sara {
      *  The number of scales in each octave is the integer @f$S@f$ such that
      *  @f$k^S \sigma = 2 \sigma@f$, i.e., @f$ k= 2^{1/S} @f$.
      */
-    int num_scales_per_octave() const
+    int scale_count_per_octave() const
     {
-      return _num_scales_per_octave;
+      return _scale_count_per_octave;
     }
 
     //! @brief This impacts the maximum number of octaves.
@@ -173,7 +173,7 @@ namespace DO { namespace Sara {
   private:
     float _scale_camera;
     float _scale_initial;
-    int _num_scales_per_octave;
+    int _scale_count_per_octave;
     float _scale_geometric_factor;
     int _image_padding_size;
     int _first_octave_index;
@@ -265,21 +265,21 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Immutable getter of the number of octaves.
-    auto num_octaves() const
+    auto octave_count() const
     {
       return static_cast<int>(_octaves.size());
     }
 
     //! @brief Immutable getter of the number of scales per octave.
-    auto num_scales_per_octave() const
+    auto scale_count_per_octave() const
     {
       return static_cast<int>(_octaves.front().size());
     }
 
     //! @brief Returns the number of scales (across all octaves).
-    auto num_scales() const
+    auto scale_count() const
     {
-      return num_octaves() * num_scales_per_octave();
+      return octave_count() * scale_count_per_octave();
     }
 
     //! @brief Immutable getter of the initial scale.

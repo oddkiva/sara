@@ -86,12 +86,6 @@ namespace DO::Sara::Darknet {
           const auto& x = net[glob_idx]->output;
 
           c_end += x.size(1);
-          const auto y_start =
-              (Eigen::Vector4i{} << 0, c_start, 0, 0).finished();
-          const auto y_end =
-              (Eigen::Vector4i{} << y.size(0), c_end, y.size(2), y.size(3))
-                  .finished();
-
           for (auto n = 0; n < y.size(0); ++n)
             for (auto c = 0; c < x.size(1); ++c)
               y[n][c_start + c] = x[n][c];

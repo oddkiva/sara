@@ -172,6 +172,18 @@ BOOST_AUTO_TEST_CASE(test_gaussian)
 
   dst_image = _src_image.compute<Gaussian>(1.f);
   BOOST_CHECK_SMALL_L2_DISTANCE(true_matrix, dst_image.matrix(), 1e-5f);
+
+  _src_image.resize(65, 65);
+  _src_image.flat_array().fill(0.f);
+  _src_image(32, 32) = 1.f;
+  true_matrix.resize(65, 65);
+  for (int i = 0; i < 65; ++i)
+    for (int j = 0; j < 65; ++j)
+      true_matrix(i, j) = exp(-(square(i - 32.f) + square(j - 32.f)) / 2.f);
+  true_matrix /= true_matrix.sum();
+
+  dst_image = _src_image.compute<Gaussian>(1.f);
+  BOOST_CHECK_SMALL_L2_DISTANCE(true_matrix, dst_image.matrix(), 1e-5f);
 }
 
 BOOST_AUTO_TEST_CASE(test_sobel)

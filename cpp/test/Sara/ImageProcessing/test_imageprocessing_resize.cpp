@@ -26,38 +26,46 @@ BOOST_AUTO_TEST_SUITE(TestImageResize)
 BOOST_AUTO_TEST_CASE(test_upscale)
 {
   auto src = Image<float>{2, 2};
+  // clang-format off
   src.matrix() <<
     0, 1,
     2, 3;
+  // clang-format on
 
   auto dst = Image<float>{};
   dst = upscale(src, 2);
 
   auto true_dst = Image<float>{4, 4};
+  // clang-format off
   true_dst.matrix() <<
     0, 0, 1, 1,
     0, 0, 1, 1,
     2, 2, 3, 3,
     2, 2, 3, 3;
+  // clang-format on
   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 }
 
 BOOST_AUTO_TEST_CASE(test_downscale)
 {
   auto src = Image<float>{4, 4};
+  // clang-format off
   src.matrix() <<
     0, 0, 1, 1,
     0, 0, 1, 1,
     2, 2, 3, 3,
     2, 2, 3, 3;
+  // clang-format on
 
   auto dst = Image<float>{};
   dst = downscale(src, 2);
 
   auto true_dst = Image<float>{2, 2};
+  // clang-format off
   true_dst.matrix() <<
     0, 1,
     2, 3;
+  // clang-format on
   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 }
 
@@ -66,17 +74,20 @@ BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
   auto src = Image<float>{5, 5};
   for (int y = 0; y < src.height(); ++y)
     src.matrix().row(y).fill(static_cast<float>(y));
+  // clang-format off
   src.matrix() <<
     0, 0, 0, 0, 0,
     1, 1, 1, 1, 1,
     2, 2, 2, 2, 2,
     3, 3, 3, 3, 3,
     4, 4, 4, 4, 4;
+  // clang-format on
 
   auto dst = Image<float>{5, 10};
   enlarge(src, dst);
 
   auto true_dst = Image<float>{5, 10};
+  // clang-format off
   true_dst.matrix() <<
     0.0, 0.0, 0.0, 0.0, 0.0,
     0.5, 0.5, 0.5, 0.5, 0.5,
@@ -88,6 +99,7 @@ BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
     3.5, 3.5, 3.5, 3.5, 3.5,
     4.0, 4.0, 4.0, 4.0, 4.0,
     4.0, 4.0, 4.0, 4.0, 4.0;
+  // clang-format on
 
   BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).norm(), 1e-9);
 }
@@ -95,14 +107,20 @@ BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
 BOOST_AUTO_TEST_CASE(test_enlarge)
 {
   auto src = Image<float>{2, 2};
-  src.matrix() << 0, 1, 2, 3;
+  // clang-format off
+  src.matrix() <<
+    0, 1,
+    2, 3;
+  // clang-format on
 
   auto true_dst = Image<float>{4, 4};
+  // clang-format off
   true_dst.matrix() <<
     0, 0.5, 1, 1,
     1, 1.5, 2, 2,
     2, 2.5, 3, 3,
     2, 2.5, 3, 3;
+  // clang-format on
 
   auto dst = Image<float>{};
 
@@ -135,16 +153,20 @@ BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
 BOOST_AUTO_TEST_CASE(test_reduce_single_channel)
 {
   auto src = Image<float>{4, 4};
+  // clang-format off
   src.matrix() <<
     0, 0.5, 1, 1,
     1, 1.5, 2, 2,
     2, 2.5, 3, 3,
     2, 2.5, 3, 3;
+  // clang-format on
 
   auto true_dst = Image<float>{2, 2};
+  // clang-format off
   true_dst.matrix() <<
     0, 1,
     2, 3;
+  // clang-format on
 
   auto dst = Image<float>{};
 
@@ -238,12 +260,15 @@ BOOST_AUTO_TEST_CASE(test_resize)
 BOOST_AUTO_TEST_CASE(test_resize_while_preserving_ratio)
 {
   auto src = Image<float>{4, 3};
+  // clang-format off
   src.matrix() <<
     0, 1, 2, 3,
     4, 5, 6, 7,
     8, 9, 10, 11;
+  // clang-format on
 
   auto true_dst = Image<float>{8, 8};
+  // clang-format off
   true_dst.matrix() <<
     0,   0, 0,   0,  0,    0,  0,  0,
     0, 0.5, 1, 1.5,  2,  2.5,  3,  3,
@@ -253,6 +278,7 @@ BOOST_AUTO_TEST_CASE(test_resize_while_preserving_ratio)
     8, 8.5, 9, 9.5, 10, 10.5, 11, 11,
     8, 8.5, 9, 9.5, 10, 10.5, 11, 11,
     0,   0, 0,   0,  0,    0,  0,  0;
+  // clang-format on
 
   {
     auto dst = Image<float>{8, 8};

@@ -22,20 +22,38 @@
 #include <iostream>
 #include <string>
 
+#define __FILENAME__                                                           \
+  (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#define SARA_DEBUG                                                             \
-  std::cout << termcolor::bold << termcolor::red << "[" << __FUNCTION__ << ":" \
-            << __LINE__ << "] " << termcolor::reset
-#define SARA_CHECK(x)                                                          \
-  std::cout << termcolor::bold << termcolor::red << "[" << __FUNCTION__ << ":" \
-            << __LINE__ << "] " << termcolor::reset << #x << " = " << x        \
-            << std::endl
+#ifdef __APPLE__
+#  define SARA_DEBUG                                                           \
+    std::cout << "🧭[" << __FILENAME__ << "]"                                \
+              << "📑[" << __FUNCTION__ << ":" << __LINE__ << "]🎶 "
+
+#  define SARA_CHECK(x)                                                        \
+    std::cout << "🧭[" << __FILENAME__ << "]"                                \
+              << "📑[" << __FUNCTION__ << ":" << __LINE__ << "]🎶 " << #x        \
+              << " = " << x << std::endl
+#else
+#  define SARA_DEBUG                                                           \
+    std::cout << termcolor::bold << termcolor::green << "🧭["                \
+              << __FILENAME__ << "]"                                           \
+              << "📑" << termcolor::red << "[" << __FUNCTION__ << ":"           \
+              << __LINE__ << "]🎶 " << termcolor::reset
+
+#  define SARA_CHECK(x)                                                        \
+    std::cout << termcolor::bold << termcolor::green << "🧭["                \
+              << __FILENAME__ << "]"                                           \
+              << "📑" << termcolor::red << "[" << __FUNCTION__ << ":"           \
+              << __LINE__ << "]🎶 " << termcolor::reset << #x << " = " << x     \
+              << std::endl
+#endif
 
 
 namespace DO { namespace Sara {
 
   //! @ingroup Utility
-  //! @brief Outputting program stage description on console.
+  //! @brief Output program stage description on console.
   inline void print_stage(const std::string& stageName)
   {
     std::cout << std::endl;

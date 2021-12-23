@@ -20,6 +20,7 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
 #include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
 
@@ -427,7 +428,7 @@ int __main(int argc, char** argv)
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-  const auto downscale_factor = 2;
+  const auto downscale_factor = 1;
   auto frame_gray32f = Image<float>{};
 
 
@@ -458,7 +459,6 @@ int __main(int argc, char** argv)
   const auto [p1, p2] = initialize_crop_region_1(frame.sizes());
 #else
   const Eigen::Vector2i& p1 = Eigen::Vector2i::Zero();
-  const Eigen::Vector2i& p2 = frame.sizes();
 #endif
 
   auto ed = EdgeDetector{{
@@ -492,13 +492,17 @@ int __main(int argc, char** argv)
       continue;
     SARA_DEBUG << "Processing frame " << frames_read << std::endl;
 
+#ifdef CROP
     // Reduce our attention to the central part of the image.
     tic();
     const auto frame_cropped = crop(frame, p1, p2);
     toc("Crop");
+#else
+    const auto& frame_cropped = frame;
+#endif
 
     tic();
-    frame_gray32f = frame_cropped.convert<float>();
+    frame_gray32f = from_rgb8_to_gray32f(frame_cropped);
     toc("Grayscale");
 
     tic();

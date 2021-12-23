@@ -1,4 +1,4 @@
-find_package(DO_Sara COMPONENTS Core Graphics FeatureDescriptors REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics ImageProcessing FeatureDescriptors REQUIRED)
 
 file(GLOB test_SOURCE_FILES FILES *.cpp)
 
@@ -11,8 +11,6 @@ foreach (file ${test_SOURCE_FILES})
     DEPENDENCIES ${DO_Sara_LIBRARIES} Halide::Halide Halide::Runtime)
   set_target_properties(${filename}
     PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED YES
     FOLDER "Tests/Shakti/Halide")
   target_link_options(${filename}
     PRIVATE
@@ -28,6 +26,10 @@ target_link_libraries(test_halide_resize
   shakti_scale_32f_gpu
   shakti_reduce_32f_gpu
   shakti_enlarge_gpu)
+
+target_link_libraries(test_halide_separable_convolution_2d
+  PRIVATE
+  shakti_separable_convolution_2d_cpu)
 
 target_link_libraries(test_halide_im2col
   PRIVATE
@@ -54,4 +56,5 @@ target_link_libraries(test_halide_sift_descriptor
   shakti_sift_descriptor_gpu
   shakti_sift_descriptor_gpu_v2
   shakti_sift_descriptor_gpu_v3
-  shakti_sift_descriptor_gpu_v4)
+  shakti_sift_descriptor_gpu_v4
+  shakti_sift_descriptor_gpu_v5)

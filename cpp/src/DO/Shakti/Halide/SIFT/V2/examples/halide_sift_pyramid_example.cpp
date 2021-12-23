@@ -16,13 +16,18 @@
 
 #include <omp.h>
 
+#include <boost/program_options.hpp>
+
 #include <DO/Sara/Core.hpp>
+#include <DO/Sara/FeatureMatching.hpp>
+#include <DO/Sara/Features.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
+#include <DO/Sara/Visualization.hpp>
 
-#include <DO/Shakti/Halide/Draw.hpp>
-#include <DO/Shakti/Halide/SIFTPipeline.hpp>
+#include <DO/Shakti/Halide/SIFT/Draw.hpp>
+#include <DO/Shakti/Halide/SIFT/V2/Pipeline.hpp>
 
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
 #  include <DO/Shakti/Cuda/VideoIO.hpp>
@@ -51,7 +56,9 @@ auto test_on_image()
   auto buffer_4d = halide::as_runtime_buffer(image_tensor);
 
   auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
-  sift_pipeline.initialize(-1, image.width(), image.height());
+
+  sift_pipeline.initialize(-1, 3,  //
+                           image.width(), image.height());
 
   auto timer = sara::Timer{};
 
@@ -117,23 +124,60 @@ auto test_on_image()
 
 auto test_on_video(int argc, char **argv)
 {
+  namespace po = boost::program_options;
+
   using namespace std::string_literals;
 
-#ifdef _WIN32
-  const auto video_filepath =
-    argc < 2 ? "C:/Users/David/Desktop/GOPR0542.MP4"s
-             : std::string{argv[1]};
-#elif __APPLE__
-  const auto video_filepath =
-    argc < 2 ? "/Users/david/Desktop/Datasets/videos/sample10.mp4"s
-             : std::string{argv[1]};
-#else
-  const auto video_filepath =
-      argc < 2 ? "/home/david/Desktop/Datasets/sfm/Family.mp4"s
-               : std::string{argv[1]};
-#endif
+  // Video.
+  auto video_filepath = std::string{};
+  // Video processing parameters.
+  auto skip = int{};
+  auto start_octave_index = int{};
+  // SIFT parameters.
+  auto num_scales_per_octave = int{};
+  auto nearest_neighbor_ratio = float{};
+  // Performance profiling
+  auto profile = bool{};
+  // Display.
+  auto show_features = false;
 
-  const auto draw_sift_features = argc < 3 ? false : bool(std::stoi(argv[3]));
+  po::options_description desc("Halide SIFT extractor");
+
+  desc.add_options()     //
+      ("help", "Usage")  //
+      ("video,v", po::value<std::string>(&video_filepath),
+       "input video file")  //
+      ("start-octave,o", po::value<int>(&start_octave_index)->default_value(0),
+       "image scale power")  //
+      ("num_scales_per_octave,s",
+       po::value<int>(&num_scales_per_octave)->default_value(1),
+       "number of scales per octave")  //
+      ("nearest_neighbor_ratio,m",
+       po::value<float>(&nearest_neighbor_ratio)->default_value(0.6f),
+       "number of scales per octave")  //
+      ("skip", po::value<int>(&skip)->default_value(0),
+       "number of frames to skip")  //
+      ("profile,p", po::bool_switch(&profile),
+       "profile code")  //
+      ("show_features,f", po::bool_switch(&show_features),
+       "show features")  //
+      ;
+
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+
+  if (vm.count("help"))
+  {
+    std::cout << desc << "\n";
+    return;
+  }
+
+  if (!vm.count("video"))
+  {
+    std::cout << "The video file must be specified!\n" << desc << "\n";
+    return;
+  }
 
 
   // ===========================================================================
@@ -180,19 +224,23 @@ auto test_on_video(int argc, char **argv)
 
   auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
 
-  const auto start_octave_index = 0;
-  sift_pipeline.initialize(start_octave_index, frame.width(), frame.height());
-
+  sift_pipeline.profile = profile;
+  sift_pipeline.initialize(start_octave_index, num_scales_per_octave,
+                           frame.width(), frame.height());
 
   // Show the local extrema.
   sara::create_window(frame.sizes());
   sara::set_antialiasing();
 
   auto frames_read = 0;
-  const auto skip = argc < 3 ? 0 : std::stoi(argv[2]);
 
-  auto timer = sara::Timer{};
-  auto elapsed_ms = double{};
+  auto feature_timer = sara::Timer{};
+  auto matching_timer = sara::Timer{};
+  auto feature_time = double{};
+  auto matching_time = double{};
+
+  auto keys_prev = sara::KeypointList<sara::OERegion, float>{};
+  auto keys_curr = sara::KeypointList<sara::OERegion, float>{};
 
   while (true)
   {
@@ -218,9 +266,8 @@ auto test_on_video(int argc, char **argv)
     ++frames_read;
     if (frames_read % (skip + 1) != 0)
       continue;
-    SARA_CHECK(frames_read);
 
-    timer.restart();
+    feature_timer.restart();
     {
       sara::tic();
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
@@ -230,13 +277,29 @@ auto test_on_video(int argc, char **argv)
 #endif
       sara::toc("CPU RGB to grayscale");
 
+      sara::tic();
       buffer_gray_4d.set_host_dirty();
       sift_pipeline.feed(buffer_gray_4d);
+      sara::toc("SIFT");
+
+      sara::tic();
+      keys_prev.swap(keys_curr);
+      sift_pipeline.get_keypoints(keys_curr);
+      sara::toc("Feature Reformatting");
     }
-    elapsed_ms = timer.elapsed_ms();
-    SARA_DEBUG << "[Frame: " << frames_read << "] "
-               << "total computation time = " << elapsed_ms << " ms"
-               << std::endl;
+    feature_time = feature_timer.elapsed_ms();
+
+    sara::tic();
+    matching_timer.restart();
+    auto matches = std::vector<sara::Match>{};
+    const auto& fprev = std::get<0>(keys_prev);
+    if (!fprev.empty())
+    {
+      sara::AnnMatcher matcher{keys_prev, keys_curr, nearest_neighbor_ratio};
+      matches = matcher.compute_matches();
+    }
+    matching_time = matching_timer.elapsed_ms();
+    sara::toc("Matching");
 
     sara::tic();
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
@@ -247,33 +310,37 @@ auto test_on_video(int argc, char **argv)
         });
 #endif
 
-    if (draw_sift_features)
+    if (show_features)
     {
-      for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
+      for (size_t i = 0; i < matches.size(); ++i)
       {
-        auto& octave = sift_pipeline.octaves[o];
-#pragma omp parallel for
-        for (auto s = 0; s < static_cast<int>(octave.extrema_oriented.size());
-             ++s)
-          draw_oriented_extrema(
-#ifdef USE_SHAKTI_CUDA_VIDEOIO
-              frame_rgb,
-#else
-              frame,
-#endif
-              octave.extrema_oriented[s],
-              sift_pipeline.octave_scaling_factor(
-                  sift_pipeline.start_octave_index + o));
+        if (show_features)
+        {
+          draw(frame, matches[i].x(), sara::Blue8);
+          draw(frame, matches[i].y(), sara::Cyan8);
+        }
+        const Eigen::Vector2f a = matches[i].x_pos();
+        const Eigen::Vector2f b = matches[i].y_pos();
+        sara::draw_arrow(frame, a, b, sara::Yellow8, 4);
       }
     }
+
+    draw_text(frame, 100, 50,               //
+              sara::format("SIFT: %0.f ms", feature_time),  //
+              sara::White8, 40, 0, false, true, false);
+    draw_text(frame, 100, 100,
+              sara::format("Matching: %0.3f ms", matching_time),  //
+              sara::White8, 40, 0, false, true, false);
+    draw_text(frame, 100, 150,              //
+              sara::format("Tracks: %u", matches.size()),  //
+              sara::White8, 40, 0, false, true, false);
 
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
     sara::display(frame_rgb);
 #else
     sara::display(frame);
 #endif
-    sara::draw_text(100, 100, "Frame: " + std::to_string(frames_read),
-                    sara::White8, 20, 0, false, true, false);
+
     sara::toc("Display");
   }
 }

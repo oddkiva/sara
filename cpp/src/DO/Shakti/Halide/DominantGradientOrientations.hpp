@@ -15,7 +15,6 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <DO/Shakti/Halide/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/Utilities.hpp>
 
 #include "shakti_dominant_gradient_orientations_gpu.h"
@@ -76,99 +75,6 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     // Copy back to GPU.
     peak_map_buffer.copy_to_host();
     peak_residuals_buffer.copy_to_host();
-  }
-
-  auto dominant_gradient_orientations(
-      Sara::ImagePyramid<float>& gradient_mag_pyramid,              //
-      Sara::ImagePyramid<float>& gradient_ori_pyramid,              //
-      Pyramid<ExtremumArray>& dog_extrema,                          //
-      Pyramid<DominantOrientationDenseMap>& dominant_orientations,  //
-      int num_orientation_bins = 36,                                //
-      [[maybe_unused]] float gaussian_truncation_factor = 3.f,      //
-      [[maybe_unused]] float scale_multiplying_factor = 1.5f,       //
-      [[maybe_unused]] float peak_ratio_thres = 0.8f)               //
-      -> void
-  {
-    for (auto o = 0; o < gradient_mag_pyramid.num_octaves(); ++o)
-    {
-      for (auto s = 1; s < gradient_mag_pyramid.num_scales_per_octave() - 1; ++s)
-      {
-        auto& extrema = dog_extrema.dict[{s - 1, o}];
-        if (extrema.size() == 0)
-          continue;
-
-        const auto& scale_max = *std::max_element(extrema.s.begin(), extrema.s.end());
-
-        auto& dom_ori = dominant_orientations.dict[{s - 1, o}];
-        dom_ori.resize(static_cast<std::int32_t>(extrema.size()),  //
-                       num_orientation_bins);                      //
-
-        dominant_gradient_orientations(       //
-            gradient_mag_pyramid(s, o),       //
-            gradient_ori_pyramid(s, o),       //
-            extrema.x, extrema.y, extrema.s,  //
-            scale_max,                        //
-            dom_ori.peak_map,                 //
-            dom_ori.peak_residuals);
-      }
-    }
-  }
-
-
-  auto compress(const DominantOrientationDenseMap& dense_view)
-  {
-    auto sparse_view = std::multimap<int, float>{};
-
-    const Eigen::VectorXi peak_count =
-        dense_view.peak_map.matrix().rowwise().count().cast<int>();
-
-    for (auto k = 0; k < dense_view.num_keypoints(); ++k)
-    {
-      if (peak_count(k) == 0)
-      {
-        sparse_view.insert({k, 0});
-        continue;
-      }
-
-      const auto N = dense_view.num_orientation_bins();
-      constexpr auto two_pi = 2 * static_cast<float>(M_PI);
-      for (auto o = 0; o < dense_view.num_orientation_bins(); ++o)
-      {
-        if (!dense_view.peak_map(k, o))
-          continue;
-
-        auto ori = o + dense_view.peak_residuals(k, o);
-
-        // Make sure that the angle is in the interval [0, N[.
-        if (ori < 0)
-          ori += N;
-        else if (ori > N)
-          ori -= N;
-        // Convert to radians.
-        ori = ori * two_pi /  N;
-
-        sparse_view.insert({k, ori});
-      }
-    }
-
-    return sparse_view;
-  }
-
-  auto compress(Pyramid<DominantOrientationDenseMap>& dense_views)
-  {
-    auto sparse_views = Pyramid<DominantOrientationMap>{};
-
-    sparse_views.scale_octave_pairs = dense_views.scale_octave_pairs;
-
-    std::transform(dense_views.dict.begin(), dense_views.dict.end(),
-                   std::inserter(sparse_views.dict, sparse_views.dict.end()),
-                   [](const auto& kv) {
-                     return std::make_pair(                             //
-                         kv.first,                                      //
-                         DominantOrientationMap{compress(kv.second)});  //
-                   });
-
-    return sparse_views;
   }
 
 }}}  // namespace DO::Shakti::HalideBackend

@@ -9,33 +9,34 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 
 
 using namespace std;
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
-  bool on_edge(const ImageView<float>& I, int x, int y, float edge_ratio)
+  auto on_edge(const ImageView<float>& I, int x, int y, float edge_ratio)
+      -> bool
   {
-    auto H = hessian(I, Point2i{ x, y });
-    return pow(H.trace(), 2) * edge_ratio >=
-           pow(edge_ratio + 1.f, 2) * fabs(H.determinant());
+    const auto H = hessian(I, Point2i{x, y});
+    return square(H.trace()) * edge_ratio >=
+           square(edge_ratio + 1.f) * std::abs(H.determinant());
   }
 
-  bool refine_extremum(const ImagePyramid<float>& I, int x, int y, int s, int o,
+  auto refine_extremum(const ImagePyramid<float>& I, int x, int y, int s, int o,
                        int type, Point3f& pos, float& val, int border_sz,
-                       int num_iter)
+                       int num_iter) -> bool
   {
     auto D_prime = Vector3f{};   // gradient
     auto D_second = Matrix3f{};  // hessian
     auto h = Vector3f{};
     auto lambda = Vector3f{};
 
-    pos << float(x),
-           float(y),
-           static_cast<float>(I.scale_relative_to_octave(s));
+    pos << float(x), float(y),
+        static_cast<float>(I.scale_relative_to_octave(s));
 
     auto i = 0;
     for (; i < num_iter; ++i)
@@ -108,9 +109,8 @@ namespace DO { namespace Sara {
       break;
     }
 
-    pos << float(x),
-           float(y),
-           static_cast<float>(I.scale_relative_to_octave(s));
+    pos << float(x), float(y),
+        static_cast<float>(I.scale_relative_to_octave(s));
     const auto oldval = I(x, y, s, o);
     const auto newval = oldval + 0.5f * D_prime.dot(h);
 
@@ -120,14 +120,15 @@ namespace DO { namespace Sara {
       pos(2) *= std::pow(static_cast<float>(I.scale_geometric_factor()), h(2));
       val = newval;
     }
-    else
-      std::cerr << "INTERPOLATION ERROR" << std::endl;
+    // else
+    //   std::cerr << "INTERPOLATION ERROR" << std::endl;
 
     return true;
   }
 
-  bool refine_extremum(const ImageView<float>& I, int x, int y, int type,
+  auto refine_extremum(const ImageView<float>& I, int x, int y, int type,
                        Point2f& pos, float& val, int border_sz, int num_iter)
+      -> bool
   {
     auto D_prime = Eigen::Vector2f{};             // gradient
     auto D_second = Eigen::Matrix2f{};            // hessian
@@ -138,7 +139,8 @@ namespace DO { namespace Sara {
     int i;
     for (i = 0; i < num_iter; ++i)
     {
-      // Range check at each iteration. The first iteration should always be OK.
+      // Range check at each iteration. The first iteration should always be
+      // OK.
       if (x < border_sz || x >= I.width() - border_sz ||  //
           y < border_sz || y >= I.height() - border_sz)
         break;
@@ -148,8 +150,8 @@ namespace DO { namespace Sara {
       D_prime = gradient(I, Point2i{x, y});
       D_second = hessian(I, Point2i{x, y});
 
-      // The interpolation or refinement is done conservatively depending on the
-      // quality of the Hessian matrix estimate.
+      // The interpolation or refinement is done conservatively depending on
+      // the quality of the Hessian matrix estimate.
       //
       // If $(x,y)$ is a local maximum ('type == 1'),
       //   the Hessian matrix $H$ must be ***negative-definite***.
@@ -217,82 +219,348 @@ namespace DO { namespace Sara {
     return true;
   }
 
-  vector<OERegion> local_scale_space_extrema(const ImagePyramid<float>& I,
-                                             int s, int o, float extremum_thres,
-                                             float edge_ratio_thres,
-                                             int img_padding_sz,
-                                             int refine_iterations)
+  auto local_scale_space_extrema(const ImagePyramid<float>& I, int s, int o,
+                                 float extremum_thres, float edge_ratio_thres,
+                                 int img_padding_sz, int refine_iterations)
+      -> vector<OERegion>
   {
-    auto extrema = std::vector<OERegion>{};
-    extrema.reserve(10000);
+// #define PROFILE_ME
+#ifdef PROFILE_ME
+    auto timer = Timer{};
+    auto tic_ = [&timer]() { timer.restart(); };
+    auto toc_ = [&timer](const std::string& what) {
+      const auto elapsed = timer.elapsed_ms();
+      SARA_DEBUG << "[" << what << "] " << elapsed << "ms\n";
+    };
+#endif
 
-    auto map = Image<int>{I(s, o).sizes()};
+    const auto& w = I(s, o).width();
+    const auto& h = I(s, o).height();
+    const auto wh = w * h;
+
+    // ========================================================================
+    // Classify extrema.
+    //
+    // FIXME: THIS IS THE MAIN BOTTLENECK!
+    // ========================================================================
+    auto map = Image<std::uint8_t>{I(s, o).sizes()};
     map.flat_array().setZero();
 
-//#define STRICT_LOCAL_EXTREMA
-#ifdef STRICT_LOCAL_EXTREMA
-    LocalScaleSpaceExtremum<std::greater, float> local_max;
-    LocalScaleSpaceExtremum<std::less, float> local_min;
-#else
-    LocalScaleSpaceExtremum<std::greater_equal, float> local_max;
-    LocalScaleSpaceExtremum<std::less_equal, float> local_min;
-#endif
 
-    for (int y = img_padding_sz; y < I(s, o).height() - img_padding_sz; ++y)
+#define IMPLEMENTATION_V2
+#ifdef IMPLEMENTATION_V2
+    const auto& previous = I(s - 1, o);
+    const auto& me = I(s, o);
+    const auto& next = I(s + 1, o);
+
+    // ========================================================================
+    // Compare with me.
+    // ========================================================================
+#  ifdef PROFILE_ME
+    tic_();
+#  endif
+#  ifdef _OPENMP
+#    pragma omp parallel for
+#  endif
+    for (int xy = 0; xy < wh; ++xy)
     {
-      for (int x = img_padding_sz; x < I(s, o).width() - img_padding_sz; ++x)
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const auto in_domain = img_padding_sz <= x && x < w - img_padding_sz &&
+                             img_padding_sz <= y && y < h - img_padding_sz;
+      if (!in_domain)
+        continue;
+
+      auto vals = std::array<float, 9>{};
+      auto k = 0;
+      for (auto v = -1; v <= 1; ++v)
+        for (auto u = -1; u <= 1; ++u)
+          vals[k++] = me(x + u, y + v);
+
+      const auto& me_at_xy = me(x, y);
+      const auto& local_max = *std::max_element(vals.begin(), vals.end());
+      if (local_max == me_at_xy)
       {
-        // Identify extremum type if it is one
-        int type = 0;
-        if (local_max(x, y, s, o, I))
-          type = 1;  // maximum
-        else if (local_min(x, y, s, o, I))
-          type = -1;  // minimum
-        else
-          continue;
-#ifndef STRICT_LOCAL_EXTREMA
-        // Reject early.
-        if (std::abs(I(x, y, s, o)) < 0.8f * extremum_thres)
-          continue;
-#endif
-        // Reject early if located on edge.
-        if (on_edge(I(s, o), x, y, edge_ratio_thres))
-          continue;
-        // Try to refine extremum.
-        auto pos = Point3f{};
-        auto val = float{};
-        /*if
-          (!refineExtremum(I,x,y,s,o,type,pos,val,img_padding_sz,refine_iterations))
-          continue;*/
-        refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
-                        refine_iterations);
+        map(x, y) = 1;
+        continue;
+      }
 
-        // Don't add if already marked.
-        if (map(static_cast<int>(x), static_cast<int>(y)) == 1)
-          continue;
-#ifndef STRICT_LOCAL_EXTREMA
-        // Reject if contrast too low.
-        if (std::abs(val) < extremum_thres)
-          continue;
-#endif
-        // Store the DoG extremum.
-        auto dog = OERegion(pos.head<2>(), pos.z());
-
-        dog.extremum_value = val;
-        dog.extremum_type = type == 1 ? OERegion::ExtremumType::Max
-                                      : OERegion::ExtremumType::Min;
-        extrema.push_back(dog);
-        map(static_cast<int>(x), static_cast<int>(y)) = 1;
+      const auto& local_min = *std::min_element(vals.begin(), vals.end());
+      if (local_min == me_at_xy)
+      {
+        map(x, y) = -1;
+        continue;
       }
     }
+#  ifdef PROFILE_ME
+    toc_("Compare with me");
+#  endif
+
+    // ========================================================================
+    // Compare with previous.
+    // ========================================================================
+#  ifdef PROFILE_ME
+    tic_();
+#  endif
+#  ifdef _OPENMP
+#    pragma omp parallel for
+#  endif
+    for (int xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      // Not an extrema before, we don't care.
+      auto& type = map(x, y);
+      if (type == 0)
+        continue;
+
+      auto vals = std::array<float, 9>{};
+      auto k = 0;
+      for (auto v = -1; v <= 1; ++v)
+        for (auto u = -1; u <= 1; ++u)
+          vals[k++] = previous(x + u, y + v);
+
+      // Mark me_at_xy as dead if it does not survive.
+      const auto& me_at_xy = me(x, y);
+      if (type == 1)
+      {
+        const auto local_max = *std::max_element(vals.begin(), vals.end());
+        if (me_at_xy < local_max)
+          type = 0;
+      }
+      else
+      {
+        const auto local_min = *std::min_element(vals.begin(), vals.end());
+        if (me_at_xy > local_min)
+          type = 0;
+      }
+    }
+#  ifdef PROFILE_ME
+    toc_("Compare with previous");
+#  endif
+
+#  ifdef PROFILE_ME
+    tic_();
+#  endif
+#  ifdef _OPENMP
+#    pragma omp parallel for
+#  endif
+    for (int xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      // Not an extrema before, we don't care.
+      auto& type = map(x, y);
+      if (type == 0)
+        continue;
+
+      // Accumulate values.
+      auto vals = std::array<float, 9>{};
+      auto k = 0;
+      for (auto v = -1; v <= 1; ++v)
+        for (auto u = -1; u <= 1; ++u)
+          vals[k++] = next(x + u, y + v);
+
+      // Mark me_at_xy as dead if it does not survive.
+      const auto& me_at_xy = me(x, y);
+      if (type == 1)
+      {
+        const auto local_max = *std::max_element(vals.begin(), vals.end());
+        if (me_at_xy < local_max)
+          type = 0;
+      }
+      else
+      {
+        const auto local_min = *std::min_element(vals.begin(), vals.end());
+        if (me_at_xy > local_min)
+          type = 0;
+      }
+    }
+#  ifdef PROFILE_ME
+    toc_("Compare with next");
+#  endif
+
+#  ifdef PROFILE_ME
+    tic_();
+#  endif
+#  ifdef _OPENMP
+#    pragma omp parallel for
+#  endif
+    for (int xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      // Not an extrema before, we don't care.
+      auto& type = map(x, y);
+      if (type == 0)
+        continue;
+
+#  ifndef STRICT_LOCAL_EXTREMA
+      // Reject early.
+      if (std::abs(I(x, y, s, o)) < 0.8f * extremum_thres)
+      {
+        // SARA_DEBUG << "Reject low contrast " << x << " " << y << std::endl;
+        type = 0;
+      }
+#  endif
+      // Reject early if located on edge.
+      if (on_edge(I(s, o), x, y, edge_ratio_thres))
+      {
+        // SARA_DEBUG << "Reject edge like at " << x << " " << y << std::endl;
+        type = 0;
+      }
+
+      // SARA_DEBUG << "Local extremum at " << x << " " << y << std::endl;
+    }
+#  ifdef PROFILE_ME
+    toc_("Low Contrast and Edge Filter");
+#  endif
+
+#else  // IMPLEMENTATION_V2
+
+//#define STRICT_LOCAL_EXTREMA
+#  ifdef STRICT_LOCAL_EXTREMA
+    LocalScaleSpaceExtremum<std::greater, float> local_max;
+    LocalScaleSpaceExtremum<std::less, float> local_min;
+#  else
+    LocalScaleSpaceExtremum<std::greater_equal, float> local_max;
+    LocalScaleSpaceExtremum<std::less_equal, float> local_min;
+#  endif
+
+#ifdef PROFILE_ME
+    tic_();
+#endif
+
+#  ifdef _OPENMP
+#    pragma omp parallel for
+#  endif
+    for (int xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const auto in_domain = img_padding_sz <= x && x < w - img_padding_sz &&
+                             img_padding_sz <= y && y < h - img_padding_sz;
+
+      if (!in_domain)
+        continue;
+
+      // Identify extremum type if it is one
+      int type = 0;
+      if (local_max(x, y, s, o, I))
+        type = 1;  // maximum
+      else if (local_min(x, y, s, o, I))
+        type = -1;  // minimum
+      else
+        continue;
+
+#  ifndef STRICT_LOCAL_EXTREMA
+      // Reject early.
+      if (std::abs(I(x, y, s, o)) < 0.8f * extremum_thres)
+        continue;
+#  endif
+      // Reject early if located on edge.
+      if (on_edge(I(s, o), x, y, edge_ratio_thres))
+        continue;
+
+      map(static_cast<int>(x), static_cast<int>(y)) = type;
+    }
+
+#ifdef PROFILE_ME
+    toc_("Classifying Extrema");
+#endif
+
+#endif  // IMPLEMENTATION_V2
+
+
+    // ========================================================================
+    // Refine the location of extrema.
+    // ========================================================================
+#ifdef PROFILE_ME
+    tic_();
+#endif
+    auto location_refined = Image<Vector3f>{I(s, o).sizes()};
+    auto extremum_value = Image<float>{I(s, o).sizes()};
+#ifdef _OPENMP
+#  pragma omp parallel for
+#endif
+    for (int xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const auto& type = map(x, y);
+      if (type == 0)
+        continue;
+
+      // Try to refine extremum.
+      auto& pos = location_refined(x, y);
+      auto& val = extremum_value(x, y);
+      // Initialize the initialize the value
+      val = I(x, y, s, o);
+      // SARA_CHECK(val);
+
+      // if (!refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
+      //                     refine_iterations))
+      //   continue;
+      refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
+                      refine_iterations);
+
+#ifndef STRICT_LOCAL_EXTREMA
+      // Reject if contrast too low.
+      if (std::abs(val) < extremum_thres)
+      {
+        // SARA_DEBUG << "Reject " << x << " " << y << std::endl;
+        map(x, y) = 0;
+      }
+#endif
+    }
+#ifdef PROFILE_ME
+    toc_("Calculating Location Residual");
+#endif
+
+    // ========================================================================
+    // Fill the list of DoG extrema.
+    // ========================================================================
+#ifdef PROFILE_ME
+    tic_();
+#endif
+    auto extrema = std::vector<OERegion>{};
+    extrema.reserve(10000);
+    for (int xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const auto& type = map(x, y);
+      if (type == 0)
+        continue;
+
+      const auto& pos = location_refined(x, y);
+      const auto& val = extremum_value(x, y);
+
+      // Store the DoG extremum.
+      auto dog = OERegion(pos.head<2>(), pos.z());
+      dog.extremum_value = val;
+      dog.extremum_type =
+          type == 1 ? OERegion::ExtremumType::Max : OERegion::ExtremumType::Min;
+      extrema.push_back(dog);
+    }
+#ifdef PROFILE_ME
+    toc_("Populating Extrema");
+#endif
 
     return extrema;
   }
 
 
-  bool select_laplace_scale(float& scale, int x, int y, int s, int o,
+  auto select_laplace_scale(float& scale, int x, int y, int s, int o,
                             const ImagePyramid<float>& gaussian_pyramid,
-                            int num_scales)
+                            int num_scales) -> bool
   {
     const auto& G = gaussian_pyramid;
 
@@ -315,7 +583,7 @@ namespace DO { namespace Sara {
 //#define DEBUG_SELECT_SCALE
 #ifdef DEBUG_SELECT_SCALE
 // verbose.
-#define print(variable) cout << #variable << " = " << variable << endl
+#  define print(variable) cout << #  variable << " = " << variable << endl
     print_stage("Check patch variable");
     print(G.scale_relative_to_octave(s - 1));
     print(G.scale_relative_to_octave(s));
@@ -334,8 +602,8 @@ namespace DO { namespace Sara {
     get_key();
 #endif
 
-    // Store the blurred patches, their associated scales and LoG values at the
-    // patch centers.
+    // Store the blurred patches, their associated scales and LoG values at
+    // the patch centers.
     auto patches = vector<Image<float>>(num_scales + 1);
     auto scales = vector<float>(num_scales + 1);
     auto LoGs = vector<float>(num_scales + 1);
@@ -424,11 +692,10 @@ namespace DO { namespace Sara {
     return is_extremum;
   }
 
-  vector<OERegion> laplace_maxima(const ImagePyramid<float>& function,
-                                  const ImagePyramid<float>& gauss_pyramid,
-                                  int s, int o, float extremum_thres,
-                                  int img_padding_sz, int num_scales,
-                                  int refine_iterations)
+  auto laplace_maxima(const ImagePyramid<float>& function,
+                      const ImagePyramid<float>& gauss_pyramid, int s, int o,
+                      float extremum_thres, int img_padding_sz, int num_scales,
+                      int refine_iterations) -> vector<OERegion>
   {
     LocalMax<float> local_max;
 
@@ -477,5 +744,4 @@ namespace DO { namespace Sara {
     return corners;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara
