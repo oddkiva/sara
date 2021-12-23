@@ -366,7 +366,7 @@ namespace DO::Shakti::HalideBackend {
                                     orientation_buffer,      //
                                     sift_tensor_buffer);
 
-      // Copy back to GPU.
+      // Copy back to CPU.
       sift_tensor_buffer.copy_to_host();
     }
 

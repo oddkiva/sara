@@ -25,7 +25,7 @@ set(HALIDE_SIFT_BLOCK_LIBRARIES_V2
     # shakti_sift_descriptor_gpu
     # shakti_sift_descriptor_gpu_v2
     # shakti_sift_descriptor_gpu_v3
-    # shakti_sift_descriptor_gpu_v4
+    shakti_sift_descriptor_gpu_v4
 )
 
 add_library(DO_Shakti_Halide_Sift_gpu_v2 Pipeline.hpp Pipeline.cpp)

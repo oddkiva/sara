@@ -14,6 +14,8 @@
 #include "shakti_polar_gradient_2d_32f_gpu_v2.h"
 #include "shakti_refine_scale_space_extrema_gpu_v2.h"
 
+#include "shakti_sift_descriptor_gpu_v4.h"
+
 
 namespace DO::Shakti::HalideBackend::v2 {
 
@@ -172,6 +174,33 @@ namespace DO::Shakti::HalideBackend::v2 {
 
     // The final result.
     populate_oriented_extrema();
+
+    // Calculate SIFT descriptor for each oriented extrema
+    for (auto i = 0u; i < gradients.size(); ++i)
+    {
+      // Gradient buffers.
+      auto& mag = gradients[i][0];
+      auto& ori = gradients[i][1];
+
+      // Extremum data buffers.
+      auto& x = extrema_oriented[i].x;
+      auto& y = extrema_oriented[i].y;
+      auto& s = extrema_oriented[i].s;
+      auto& o = extrema_oriented[i].orientations;
+
+      // Resize the descriptors.
+      static constexpr auto N = 4;
+      static constexpr auto O = 8;
+      descriptors[i].resize({extrema_oriented[i].size(), N * N, O});
+      auto desc_buffer = as_runtime_buffer(descriptors[i]);
+
+      // Calculate on GPU and copy back to CPU host memory.
+      desc_buffer.set_host_dirty();
+      shakti_sift_descriptor_gpu_v4(mag, ori,    //
+                                    x, y, s, o,  //
+                                    desc_buffer);
+      desc_buffer.copy_to_host();
+    }
   }
 
   auto SiftOctavePipeline::compress_quantized_extrema_maps() -> void

@@ -49,21 +49,34 @@ namespace DO::Shakti::HalideBackend::v2 {
     bool profile = false;
     Sara::Timer timer;
 
+    //! @brief GPU map tensors for the localization of scale-space extrema.
+    //! @{
     std::vector<Halide::Runtime::Buffer<float>> gaussians;
     std::vector<Halide::Runtime::Buffer<float>> dogs;
     std::vector<Halide::Runtime::Buffer<std::int8_t>> extrema_maps;
     std::vector<GradientBuffer> gradients;
+    //! @}
 
+    //! @brief List of scale-space extrema (non refined).
     std::vector<v2::QuantizedExtremumArray> extrema_quantized;
+    //! @brief of scale-space extrema (refined).
     std::vector<v2::ExtremumArray> extrema;
 
+    //! @brief This is actually a histogram of gradients for each scale-space
+    //! extremum.
     std::vector<v2::DominantOrientationDenseMap>
         dominant_orientation_dense_maps;
+    //! @brief The list of dominant orientations for each scale-space extremum.
     std::vector<v2::DominantOrientationSparseMap>
         dominant_orientation_sparse_maps;
+    //! @brief Each scale-space extremum may be repeated with a different
+    //! dominant orientation.
     std::vector<v2::OrientedExtremumArray> extrema_oriented;
 
-    // Pipeline parameters.
+    //! @brief The SIFT descriptor for oriented scale-space extremum.
+    std::vector<sara::Tensor_<float, 3>> descriptors;
+
+    //! @brief Pipeline parameters.
     SiftOctaveParameters params;
 
     enum class FirstAction : std::uint8_t
