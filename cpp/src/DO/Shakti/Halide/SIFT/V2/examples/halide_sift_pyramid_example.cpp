@@ -129,6 +129,7 @@ auto test_on_video(int argc, char **argv)
   auto video_filepath = std::string{};
   auto start_octave_index = int{};
   auto skip = int{};
+  auto profile = bool{};
   auto show_features = false;
   auto num_scales_per_octave = int{};
   po::options_description desc("Halide SIFT extractor");
@@ -144,6 +145,8 @@ auto test_on_video(int argc, char **argv)
        "number of scales per octave")  //
       ("skip", po::value<int>(&skip)->default_value(0),
        "number of frames to skip")  //
+      ("profile,p", po::bool_switch(&profile),
+       "profile code")  //
       ("show_features,f", po::bool_switch(&show_features),
        "show features")  //
       ;
@@ -209,6 +212,7 @@ auto test_on_video(int argc, char **argv)
 
   auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
 
+  sift_pipeline.profile = profile;
   sift_pipeline.initialize(start_octave_index, num_scales_per_octave,
                            frame.width(), frame.height());
 

@@ -22,10 +22,7 @@ set(HALIDE_SIFT_BLOCK_LIBRARIES_V2
     shakti_polar_gradient_2d_32f_gpu_v2
     shakti_dominant_gradient_orientations_gpu_v2
     # SIFT descriptor.
-    # shakti_sift_descriptor_gpu
-    # shakti_sift_descriptor_gpu_v2
-    # shakti_sift_descriptor_gpu_v3
-    shakti_sift_descriptor_gpu_v4
+    shakti_sift_descriptor_gpu_v5
 )
 
 add_library(DO_Shakti_Halide_Sift_gpu_v2 Pipeline.hpp Pipeline.cpp)
@@ -35,5 +32,9 @@ target_link_libraries(
          Halide::Runtime #
   PRIVATE DO::Sara::Core #
           ${HALIDE_SIFT_BLOCK_LIBRARIES_V2})
+set_property(
+  TARGET DO_Shakti_Halide_Sift_gpu_v2
+  PROPERTY
+  FOLDER "Libraries/Shakti/Halide")
 
 add_subdirectory(examples)

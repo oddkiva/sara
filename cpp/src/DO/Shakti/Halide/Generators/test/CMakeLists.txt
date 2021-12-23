@@ -56,4 +56,5 @@ target_link_libraries(test_halide_sift_descriptor
   shakti_sift_descriptor_gpu
   shakti_sift_descriptor_gpu_v2
   shakti_sift_descriptor_gpu_v3
-  shakti_sift_descriptor_gpu_v4)
+  shakti_sift_descriptor_gpu_v4
+  shakti_sift_descriptor_gpu_v5)

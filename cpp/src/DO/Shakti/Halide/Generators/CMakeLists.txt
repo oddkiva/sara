@@ -252,6 +252,10 @@ shakti_halide_library_v2(
   SRCS SIFTGeneratorV4.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+shakti_halide_library_v2(
+  NAME shakti_sift_descriptor_gpu_v5
+  SRCS SIFTGeneratorV5.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 # ------------------------------------------------------------------------------
 # Stream compaction to populate extrema

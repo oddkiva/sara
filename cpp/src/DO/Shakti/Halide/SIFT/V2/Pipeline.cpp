@@ -14,7 +14,7 @@
 #include "shakti_polar_gradient_2d_32f_gpu_v2.h"
 #include "shakti_refine_scale_space_extrema_gpu_v2.h"
 
-#include "shakti_sift_descriptor_gpu_v4.h"
+#include "shakti_sift_descriptor_gpu_v5.h"
 
 
 namespace DO::Shakti::HalideBackend::v2 {
@@ -80,6 +80,9 @@ namespace DO::Shakti::HalideBackend::v2 {
 
     // Final output: the list of oriented keypoints.
     extrema_oriented.resize(params.scale_count);
+
+    // Initialize the list of SIFT descriptors.
+    descriptors.resize(gradients.size());
   }
 
   auto SiftOctavePipeline::feed(::Halide::Runtime::Buffer<float>& input,
@@ -175,32 +178,46 @@ namespace DO::Shakti::HalideBackend::v2 {
     // The final result.
     populate_oriented_extrema();
 
+    // Initialize the host and device descriptor buffers.
+    tic();
+
+    auto desc_buffers = std::vector<::Halide::Runtime::Buffer<float>>(gradients.size());
+    static constexpr auto N = 4;
+    static constexpr auto O = 8;
+    for (auto i = 0u; i < gradients.size(); ++i)
+    {
+      descriptors[i].resize({extrema_oriented[i].size(), N * N, O});
+      desc_buffers[i] = as_runtime_buffer(descriptors[i]);
+      desc_buffers[i].set_host_dirty();
+    }
+
     // Calculate SIFT descriptor for each oriented extrema
     for (auto i = 0u; i < gradients.size(); ++i)
     {
       // Gradient buffers.
+      //
+      // Already available in the GPU device memory.
       auto& mag = gradients[i][0];
       auto& ori = gradients[i][1];
 
       // Extremum data buffers.
+      //
+      // Already available in the GPU device memory.
       auto& x = extrema_oriented[i].x;
       auto& y = extrema_oriented[i].y;
       auto& s = extrema_oriented[i].s;
       auto& o = extrema_oriented[i].orientations;
 
       // Resize the descriptors.
-      static constexpr auto N = 4;
-      static constexpr auto O = 8;
-      descriptors[i].resize({extrema_oriented[i].size(), N * N, O});
-      auto desc_buffer = as_runtime_buffer(descriptors[i]);
 
       // Calculate on GPU and copy back to CPU host memory.
-      desc_buffer.set_host_dirty();
-      shakti_sift_descriptor_gpu_v4(mag, ori,    //
+      shakti_sift_descriptor_gpu_v5(mag, ori,    //
                                     x, y, s, o,  //
-                                    desc_buffer);
-      desc_buffer.copy_to_host();
+                                    desc_buffers[i]);
+      desc_buffers[i].copy_to_host();
     }
+
+    toc("Descriptors");
   }
 
   auto SiftOctavePipeline::compress_quantized_extrema_maps() -> void

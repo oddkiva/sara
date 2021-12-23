@@ -155,6 +155,55 @@ namespace DO::Shakti::HalideBackend {
       };
     }
 
+    //! @brief Gradient sample at the normalized image patch but with 4D
+    //! tensors:
+    //! - grad_mag_fn
+    //! - grad_ori_fn
+    auto normalized_gradient_sample_v2(const Halide::Var& u,                //
+                                       const Halide::Var& v,                //
+                                       const Halide::Func& grad_mag_fn,     //
+                                       const Halide::Func& grad_ori_fn,     //
+                                       const Halide::Func& grad_weight_fn,  //
+                                       const Halide::Expr& x,               //
+                                       const Halide::Expr& y,               //
+                                       const Halide::Expr& scale,           //
+                                       const Halide::Expr& theta) const
+    {
+      // Linear part of the patch normalization transform.
+      const auto c = Halide::cos(theta);
+      const auto s = Halide::sin(theta);
+
+      auto T = Matrix2{};
+      T(0, 0) = c; T(0, 1) = -s;
+      T(1, 0) = s; T(1, 1) = c;
+      T *= scale;
+
+      // For each point of the normalized patch, i.e.:
+      auto p = Vector2{};
+      p(0) = Halide::cast<float>(u);
+      p(1) = Halide::cast<float>(v);
+
+      // Find the corresponding point in the image:
+      const auto Tp = T * p;
+      const auto Tu = Halide::cast<std::int32_t>(Halide::round(x + Tp(0)));
+      const auto Tv = Halide::cast<std::int32_t>(Halide::round(y + Tp(1)));
+
+      // Gradient orientation w.r.t. the dominant gradient orientation.
+      auto ori_normalized = grad_ori_fn(Tu, Tv, 0, 0) - theta;
+      // Re-express the orientation in [0, 2π[.
+      ori_normalized = Halide::select(ori_normalized < 0,       //
+                                      ori_normalized + two_pi,  //
+                                      ori_normalized);
+      // Re-express the orientation in [0, O[.
+      ori_normalized *= O / two_pi;
+
+      // The canonical patch of normalized image gradients.
+      return Halide::Tuple{
+          grad_weight_fn(u, v) * grad_mag_fn(Tu, Tv, 0, 0),  //
+          ori_normalized,                                    //
+      };
+    }
+
     //! Precompute the spatial weights used in the trilinear interpolation.
     auto spatial_weight(const Halide::Var& x, //
                         const Halide::Var& y) const
