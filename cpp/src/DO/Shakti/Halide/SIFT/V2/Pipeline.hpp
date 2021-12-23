@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/Features.hpp>
 
 #include <DO/Shakti/Halide/SIFT/V2/ExtremumDataStructures.hpp>
 
@@ -172,7 +173,9 @@ namespace DO::Shakti::HalideBackend::v2 {
     auto initialize(int start_octave, int num_scales_per_octave, int width,
                     int height) -> void;
 
-    auto feed(Halide::Runtime::Buffer<float>& input) -> void;
+    auto feed(Halide::Runtime::Buffer<float>& image) -> void;
+
+    auto get_keypoints(Sara::KeypointList<Sara::OERegion, float>&) const -> void;
 
     auto octave_scaling_factor(int o) const -> float;
 

@@ -16,7 +16,6 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
-#include <DO/Shakti/Halide/SIFT/V1/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/Utilities.hpp>
 #include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
@@ -30,6 +29,7 @@
 namespace DO::Shakti::HalideBackend {
 
   namespace v1 {
+
     auto compute_sift_descriptors(                      //
         Sara::ImageView<float>& gradient_magnitudes,    //
         Sara::ImageView<float>& gradient_orientations,  //
@@ -79,45 +79,6 @@ namespace DO::Shakti::HalideBackend {
 
       // Copy back to GPU.
       kijo_tensor_buffer.copy_to_host();
-    }
-
-    auto compute_sift_descriptors(                         //
-        Sara::ImagePyramid<float>& gradient_magnitudes,    //
-        Sara::ImagePyramid<float>& gradient_orientations,  //
-        Pyramid<OrientedExtremumArray>& keypoints,         //
-        float bin_length_in_scale_unit = 3.f,              //
-        int N = 4,                                         //
-        int O = 8)                                         //
-    {
-      auto descriptors = Pyramid<Sara::Tensor_<float, 4>>{};
-
-      descriptors.scale_octave_pairs = keypoints.scale_octave_pairs;
-
-      for (const auto& so : keypoints.scale_octave_pairs)
-      {
-        const auto& s = so.first.first;
-        const auto& o = so.first.second;
-
-        auto kit = keypoints.dict.find({s, o});
-        if (kit == keypoints.dict.end())
-          continue;
-
-        auto& k = kit->second;
-        const auto& scale_max = *std::max_element(k.s.begin(), k.s.end());
-
-        auto& descriptors_so = descriptors.dict[{s, o}];
-        descriptors_so.resize({static_cast<int>(k.size()), N, N, O});
-
-        compute_sift_descriptors(gradient_magnitudes(s, o),      //
-                                 gradient_orientations(s, o),    //
-                                 k.x, k.y, k.s, k.orientations,  //
-                                 scale_max,                      //
-                                 descriptors_so,                 //
-                                 bin_length_in_scale_unit,       //
-                                 N, O);                          //
-      }
-
-      return descriptors;
     }
 
   }  // namespace v1
@@ -174,45 +135,6 @@ namespace DO::Shakti::HalideBackend {
       sift_tensor_buffer.copy_to_host();
     }
 
-    auto compute_sift_descriptors(                                 //
-        Sara::ImagePyramid<float>& gradient_magnitudes,            //
-        Sara::ImagePyramid<float>& gradient_orientations,          //
-        Pyramid<HalideBackend::OrientedExtremumArray>& keypoints,  //
-        float bin_length_in_scale_unit = 3.f,                      //
-        int N = 4,                                                 //
-        int O = 8)                                                 //
-    {
-      auto descriptors = Pyramid<Sara::Tensor_<float, 2>>{};
-
-      descriptors.scale_octave_pairs = keypoints.scale_octave_pairs;
-
-      for (const auto& so : keypoints.scale_octave_pairs)
-      {
-        const auto& s = so.first.first;
-        const auto& o = so.first.second;
-
-        auto kit = keypoints.dict.find({s, o});
-        if (kit == keypoints.dict.end())
-          continue;
-
-        auto& k = kit->second;
-        const auto& scale_max = *std::max_element(k.s.begin(), k.s.end());
-
-        auto& descriptors_so = descriptors.dict[{s, o}];
-        descriptors_so.resize({static_cast<int>(k.size()), N * N * O});
-
-        v2::compute_sift_descriptors(gradient_magnitudes(s, o),      //
-                                     gradient_orientations(s, o),    //
-                                     k.x, k.y, k.s, k.orientations,  //
-                                     scale_max,                      //
-                                     descriptors_so,                 //
-                                     bin_length_in_scale_unit,       //
-                                     N, O);                          //
-      }
-
-      return descriptors;
-    }
-
   }  // namespace v2
 
   namespace v3 {
@@ -267,63 +189,6 @@ namespace DO::Shakti::HalideBackend {
       sift_tensor_buffer.copy_to_host();
     }
 
-    auto compute_sift_descriptors(                         //
-        Sara::ImagePyramid<float>& gradient_magnitudes,    //
-        Sara::ImagePyramid<float>& gradient_orientations,  //
-        Pyramid<OrientedExtremumArray>& keypoints,         //
-        float bin_length_in_scale_unit = 3.f,              //
-        int N = 4,                                         //
-        int O = 8)                                         //
-    {
-      auto descriptors = Pyramid<Sara::Tensor_<float, 3>>{};
-
-      descriptors.scale_octave_pairs = keypoints.scale_octave_pairs;
-
-      for (const auto& so : keypoints.scale_octave_pairs)
-      {
-        const auto& s = so.first.first;
-        const auto& o = so.first.second;
-
-        auto kit = keypoints.dict.find({s, o});
-        if (kit == keypoints.dict.end())
-          continue;
-
-        auto& k = kit->second;
-        const auto& scale_min = *std::min_element(k.s.begin(), k.s.end());
-        const auto& scale_max = *std::max_element(k.s.begin(), k.s.end());
-        SARA_CHECK(s);
-        SARA_CHECK(o);
-        SARA_CHECK(so.second.first);
-        SARA_CHECK(k.size());
-        SARA_CHECK(k.x.size());
-        SARA_CHECK(k.y.size());
-        SARA_CHECK(k.s.size());
-        SARA_CHECK(k.orientations.size());
-        SARA_CHECK(scale_min);
-        SARA_CHECK(scale_max);
-        SARA_CHECK(scale_min * std::sqrt(2.) * 3 * (4 + 1) / 2.f);
-        SARA_CHECK(scale_max * std::sqrt(2.) * 3 * (4 + 1) / 2.f);
-
-        auto& descriptors_so = descriptors.dict[{s, o}];
-        descriptors_so.resize({static_cast<int>(k.size()), N * N, O});
-
-        auto timer = Sara::Timer{};
-        timer.restart();
-        v3::compute_sift_descriptors(gradient_magnitudes(s, o),      //
-                                     gradient_orientations(s, o),    //
-                                     k.x, k.y, k.s, k.orientations,  //
-                                     scale_max,                      //
-                                     descriptors_so,                 //
-                                     bin_length_in_scale_unit,       //
-                                     N, O);                          //
-        auto elapsed_ms = timer.elapsed_ms();
-        SARA_DEBUG << "SIFT v3 = " << elapsed_ms << "ms" << std::endl
-                   << std::endl;
-      }
-
-      return descriptors;
-    }
-
   }  // namespace v3
 
   namespace v4 {
@@ -372,59 +237,6 @@ namespace DO::Shakti::HalideBackend {
       sift_tensor_buffer.copy_to_host();
     }
 
-    auto compute_sift_descriptors(                         //
-        Sara::ImagePyramid<float>& gradient_magnitudes,    //
-        Sara::ImagePyramid<float>& gradient_orientations,  //
-        Pyramid<OrientedExtremumArray>& keypoints)         //
-    {
-#ifdef DEBUG
-      auto timer = Sara::Timer{};
-#endif
-
-      constexpr auto N = 4;
-      constexpr auto O = 8;
-
-      auto descriptors = Pyramid<Sara::Tensor_<float, 3>>{};
-      descriptors.scale_octave_pairs = keypoints.scale_octave_pairs;
-
-      for (const auto& so : keypoints.scale_octave_pairs)
-      {
-        const auto& s = so.first.first;
-        const auto& o = so.first.second;
-
-        auto kit = keypoints.dict.find({s, o});
-        if (kit == keypoints.dict.end())
-          continue;
-        auto& k = kit->second;
-
-        auto& d = descriptors.dict[{s, o}];
-
-        d.resize({static_cast<int>(k.size()), N * N, O});
-
-#ifdef DEBUG
-        SARA_CHECK(o);
-        SARA_CHECK(s);
-        SARA_CHECK(so.second.first);
-        SARA_CHECK(d.sizes().transpose());
-
-        timer.restart();
-#endif
-
-        v4::compute_sift_descriptors(gradient_magnitudes(s, o),      //
-                                     gradient_orientations(s, o),    //
-                                     k.x, k.y, k.s, k.orientations,  //
-                                     d);                             //
-
-#ifdef DEBUG
-        auto elapsed_ms = timer.elapsed_ms();
-        SARA_DEBUG << "SIFT v4 = " << elapsed_ms << "ms" << std::endl
-                   << std::endl;
-#endif
-      }
-
-      return descriptors;
-    }
-
   }  // namespace v4
 
   namespace v5 {
@@ -471,59 +283,6 @@ namespace DO::Shakti::HalideBackend {
 
       // Copy back to CPU.
       sift_tensor_buffer.copy_to_host();
-    }
-
-    auto compute_sift_descriptors(                         //
-        Sara::ImagePyramid<float>& gradient_magnitudes,    //
-        Sara::ImagePyramid<float>& gradient_orientations,  //
-        Pyramid<OrientedExtremumArray>& keypoints)         //
-    {
-#ifdef DEBUG
-      auto timer = Sara::Timer{};
-#endif
-
-      constexpr auto N = 4;
-      constexpr auto O = 8;
-
-      auto descriptors = Pyramid<Sara::Tensor_<float, 3>>{};
-      descriptors.scale_octave_pairs = keypoints.scale_octave_pairs;
-
-      for (const auto& so : keypoints.scale_octave_pairs)
-      {
-        const auto& s = so.first.first;
-        const auto& o = so.first.second;
-
-        auto kit = keypoints.dict.find({s, o});
-        if (kit == keypoints.dict.end())
-          continue;
-        auto& k = kit->second;
-
-        auto& d = descriptors.dict[{s, o}];
-
-        d.resize({static_cast<int>(k.size()), N * N, O});
-
-#ifdef DEBUG
-        SARA_CHECK(o);
-        SARA_CHECK(s);
-        SARA_CHECK(so.second.first);
-        SARA_CHECK(d.sizes().transpose());
-
-        timer.restart();
-#endif
-
-        v4::compute_sift_descriptors(gradient_magnitudes(s, o),      //
-                                     gradient_orientations(s, o),    //
-                                     k.x, k.y, k.s, k.orientations,  //
-                                     d);                             //
-
-#ifdef DEBUG
-        auto elapsed_ms = timer.elapsed_ms();
-        SARA_DEBUG << "SIFT v4 = " << elapsed_ms << "ms" << std::endl
-                   << std::endl;
-#endif
-      }
-
-      return descriptors;
     }
 
   }  // namespace v5

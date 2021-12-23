@@ -4,8 +4,8 @@
 
 #include <DO/Shakti/Halide/BinaryOperators.hpp>
 #include <DO/Shakti/Halide/GaussianConvolution.hpp>
-#include <DO/Shakti/Halide/SeparableConvolution2d.hpp>
 #include <DO/Shakti/Halide/Resize.hpp>
+#include <DO/Shakti/Halide/SeparableConvolution2d.hpp>
 
 #include "shakti_gray32f_to_rgb8u_cpu.h"
 
@@ -131,7 +131,7 @@ namespace DO::Shakti::HalideBackend::v2 {
       HalideBackend::separable_convolution_2d(  //
           gaussians[i - 1],                     //
           params.kernels[i],
-          gaussians[i],                           //
+          gaussians[i],                       //
           params.kernels[i].dim(0).extent(),  //
           -params.kernels[i].dim(0).extent() / 2);
 #endif
@@ -181,7 +181,8 @@ namespace DO::Shakti::HalideBackend::v2 {
     // Initialize the host and device descriptor buffers.
     tic();
 
-    auto desc_buffers = std::vector<::Halide::Runtime::Buffer<float>>(gradients.size());
+    auto desc_buffers =
+        std::vector<::Halide::Runtime::Buffer<float>>(gradients.size());
     static constexpr auto N = 4;
     static constexpr auto O = 8;
     for (auto i = 0u; i < gradients.size(); ++i)
@@ -465,7 +466,8 @@ namespace DO::Shakti::HalideBackend::v2 {
     }
   }
 
-  auto SiftPyramidPipeline::feed(::Halide::Runtime::Buffer<float>& input) -> void
+  auto SiftPyramidPipeline::feed(::Halide::Runtime::Buffer<float>& input)
+      -> void
   {
     if (start_octave_index < 0)
     {
@@ -512,11 +514,81 @@ namespace DO::Shakti::HalideBackend::v2 {
       if (profile)
       {
         const auto elapsed = timer.elapsed_ms();
-        SARA_DEBUG << sara::format("SIFT Octave %d [%dx%d]: %f ms",
+        SARA_DEBUG << Sara::format("SIFT Octave %d [%dx%d]: %f ms",
                                    start_octave_index + o,
                                    octaves[o].gaussians[0].width(),
                                    octaves[o].gaussians[0].height(), elapsed)
                    << std::endl;
+      }
+    }
+  }
+
+  auto SiftPyramidPipeline::get_keypoints(Sara::KeypointList<Sara::OERegion, float>& keys) const
+      -> void
+  {
+    // Count the number of features.
+    auto num_features = 0;
+    for (auto o = 0u; o < octaves.size(); ++o)
+    {
+      const auto& octave = octaves[o];
+      num_features += std::accumulate(
+          octave.extrema_oriented.begin(), octave.extrema_oriented.end(), 0,
+          [](const auto& a, const auto& b) { return a + b.size(); });
+    }
+
+    // Populate the list of features.
+    auto& features = Sara::features(keys);
+    features.clear();
+    features.reserve(num_features);
+    for (auto o = 0u; o < octaves.size(); ++o)
+    {
+      const auto& octave = octaves[o];
+      const auto oct_scale_factor = octave_scaling_factor(  //
+          start_octave_index + o                            //
+      );
+
+      for (auto s = 0u; s < octave.extrema_oriented.size(); ++s)
+      {
+        const auto& e = octave.extrema_oriented[s];
+
+        for (auto f = 0; f < e.size(); ++f)
+        {
+          const auto& type = e.type(f);
+          const auto& x = e.x(f) * oct_scale_factor;
+          const auto& y = e.y(f) * oct_scale_factor;
+          const auto& scale = e.s(f) * oct_scale_factor;
+          const auto& theta = e.orientations(f);
+
+          auto feature = sara::OERegion{{x, y}, scale};
+          feature.orientation = theta;
+          feature.type = Sara::OERegion::Type::DoG;
+          feature.extremum_type = type == 1  //
+                                      ? sara::OERegion::ExtremumType::Max
+                                      : sara::OERegion::ExtremumType::Min;
+
+          features.push_back(feature);
+        }
+      }
+    }
+
+    // Populate the list of descriptors.
+    auto& descriptors = Sara::descriptors(keys);
+    descriptors.resize(num_features, 128);
+    auto dmat = descriptors.matrix();
+    auto current_row = 0;
+    for (auto o = 0u; o < octaves.size(); ++o)
+    {
+      const auto& octave = octaves[o];
+      for (auto s = 0u; s < octave.extrema_oriented.size(); ++s)
+      {
+        // Accumulate the list of descriptors.
+        const auto& di = octave.descriptors[s];
+        const auto dmat_i =
+            di.reshape(Eigen::Vector2i{di.size(0), di.size(1) * di.size(2)})
+                .matrix();
+
+        dmat.block(current_row, 0, di.size(0), 128) = dmat_i;
+        current_row += dmat_i.rows();
       }
     }
   }
@@ -526,7 +598,7 @@ namespace DO::Shakti::HalideBackend::v2 {
     return std::pow(2, o);
   }
 
-  auto SiftPyramidPipeline::input_rescaled_view() -> sara::ImageView<float>
+  auto SiftPyramidPipeline::input_rescaled_view() -> Sara::ImageView<float>
   {
     input_rescaled.copy_to_host();
     return {input_rescaled.data(),

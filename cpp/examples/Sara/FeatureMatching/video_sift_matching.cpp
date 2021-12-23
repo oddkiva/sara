@@ -41,25 +41,6 @@ auto initialize_crop_region(const Eigen::Vector2i& sizes)
   return std::make_pair(p1, p2);
 }
 
-auto imshow(const std::string& window_name, const ImageView<Rgb8>& image)
-{
-  static auto window_names = std::map<std::string, Window>{};
-  auto w_it = window_names.find(window_name);
-
-  auto w = Window{};
-  if (w_it == window_names.end())
-  {
-    w = create_window(image.sizes(), window_name);
-    window_names[window_name] = w;
-  }
-  else
-    w = w_it->second;
-
-  set_active_window(w);
-  display(image);
-}
-
-
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);

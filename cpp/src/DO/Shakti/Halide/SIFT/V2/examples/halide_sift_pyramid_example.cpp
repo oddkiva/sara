@@ -19,9 +19,12 @@
 #include <boost/program_options.hpp>
 
 #include <DO/Sara/Core.hpp>
+#include <DO/Sara/FeatureMatching.hpp>
+#include <DO/Sara/Features.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
+#include <DO/Sara/Visualization.hpp>
 
 #include <DO/Shakti/Halide/SIFT/Draw.hpp>
 #include <DO/Shakti/Halide/SIFT/V2/Pipeline.hpp>
@@ -125,23 +128,32 @@ auto test_on_video(int argc, char **argv)
 
   using namespace std::string_literals;
 
-  // Parameter parsing.
+  // Video.
   auto video_filepath = std::string{};
-  auto start_octave_index = int{};
+  // Video processing parameters.
   auto skip = int{};
-  auto profile = bool{};
-  auto show_features = false;
+  auto start_octave_index = int{};
+  // SIFT parameters.
   auto num_scales_per_octave = int{};
+  auto nearest_neighbor_ratio = float{};
+  // Performance profiling
+  auto profile = bool{};
+  // Display.
+  auto show_features = false;
+
   po::options_description desc("Halide SIFT extractor");
 
   desc.add_options()     //
       ("help", "Usage")  //
       ("video,v", po::value<std::string>(&video_filepath),
        "input video file")  //
-      ("start-octave,o",
-       po::value<int>(&start_octave_index)->default_value(0),
+      ("start-octave,o", po::value<int>(&start_octave_index)->default_value(0),
        "image scale power")  //
-      ("num_scales_per_octave,s", po::value<int>(&num_scales_per_octave)->default_value(1),
+      ("num_scales_per_octave,s",
+       po::value<int>(&num_scales_per_octave)->default_value(1),
+       "number of scales per octave")  //
+      ("nearest_neighbor_ratio,m",
+       po::value<float>(&nearest_neighbor_ratio)->default_value(0.6f),
        "number of scales per octave")  //
       ("skip", po::value<int>(&skip)->default_value(0),
        "number of frames to skip")  //
@@ -222,8 +234,13 @@ auto test_on_video(int argc, char **argv)
 
   auto frames_read = 0;
 
-  auto timer = sara::Timer{};
-  auto elapsed_ms = double{};
+  auto feature_timer = sara::Timer{};
+  auto matching_timer = sara::Timer{};
+  auto feature_time = double{};
+  auto matching_time = double{};
+
+  auto keys_prev = sara::KeypointList<sara::OERegion, float>{};
+  auto keys_curr = sara::KeypointList<sara::OERegion, float>{};
 
   while (true)
   {
@@ -250,7 +267,7 @@ auto test_on_video(int argc, char **argv)
     if (frames_read % (skip + 1) != 0)
       continue;
 
-    timer.restart();
+    feature_timer.restart();
     {
       sara::tic();
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
@@ -264,8 +281,25 @@ auto test_on_video(int argc, char **argv)
       buffer_gray_4d.set_host_dirty();
       sift_pipeline.feed(buffer_gray_4d);
       sara::toc("SIFT");
+
+      sara::tic();
+      keys_prev.swap(keys_curr);
+      sift_pipeline.get_keypoints(keys_curr);
+      sara::toc("Feature Reformatting");
     }
-    elapsed_ms = timer.elapsed_ms();
+    feature_time = feature_timer.elapsed_ms();
+
+    sara::tic();
+    matching_timer.restart();
+    auto matches = std::vector<sara::Match>{};
+    const auto& fprev = std::get<0>(keys_prev);
+    if (!fprev.empty())
+    {
+      sara::AnnMatcher matcher{keys_prev, keys_curr, nearest_neighbor_ratio};
+      matches = matcher.compute_matches();
+    }
+    matching_time = matching_timer.elapsed_ms();
+    sara::toc("Matching");
 
     sara::tic();
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
@@ -278,45 +312,34 @@ auto test_on_video(int argc, char **argv)
 
     if (show_features)
     {
-      for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
+      for (size_t i = 0; i < matches.size(); ++i)
       {
-        auto& octave = sift_pipeline.octaves[o];
-#pragma omp parallel for
-        for (auto s = 0; s < static_cast<int>(octave.extrema_oriented.size());
-             ++s)
-          draw_oriented_extrema(
-#ifdef USE_SHAKTI_CUDA_VIDEOIO
-              frame_rgb,
-#else
-              frame,
-#endif
-              octave.extrema_oriented[s],
-              sift_pipeline.octave_scaling_factor(
-                  sift_pipeline.start_octave_index + o),
-              3, true, true);
+        if (show_features)
+        {
+          draw(frame, matches[i].x(), sara::Blue8);
+          draw(frame, matches[i].y(), sara::Cyan8);
+        }
+        const Eigen::Vector2f a = matches[i].x_pos();
+        const Eigen::Vector2f b = matches[i].y_pos();
+        sara::draw_arrow(frame, a, b, sara::Yellow8, 4);
       }
     }
 
-    auto num_features = 0;
-    for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
-    {
-      auto& octave = sift_pipeline.octaves[o];
-      num_features += std::accumulate(
-          octave.extrema_oriented.begin(), octave.extrema_oriented.end(), 0,
-          [](const auto& a, const auto& b) { return a + b.size(); });
-    }
+    draw_text(frame, 100, 50,               //
+              sara::format("SIFT: %0.f ms", feature_time),  //
+              sara::White8, 40, 0, false, true, false);
+    draw_text(frame, 100, 100,
+              sara::format("Matching: %0.3f ms", matching_time),  //
+              sara::White8, 40, 0, false, true, false);
+    draw_text(frame, 100, 150,              //
+              sara::format("Tracks: %u", matches.size()),  //
+              sara::White8, 40, 0, false, true, false);
 
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
     sara::display(frame_rgb);
 #else
     sara::display(frame);
 #endif
-    sara::draw_text(100, 50, sara::format("Frame: %d", frames_read),
-                    sara::White8, 40, 0, false, true, false);
-    sara::draw_text(100, 100, sara::format("Time: %0.3f ms", elapsed_ms),
-                    sara::White8, 40, 0, false, true, false);
-    sara::draw_text(100, 150, sara::format("SIFTs: %d", num_features),
-                    sara::White8, 40, 0, false, true, false);
 
     sara::toc("Display");
   }
