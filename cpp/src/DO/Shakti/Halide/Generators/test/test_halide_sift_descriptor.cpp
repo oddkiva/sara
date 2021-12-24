@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(test_sift_v1)
   // Calculate the image gradients in polar coordinates.
   auto mag = sara::Image<float>{image.sizes()};
   auto ori = sara::Image<float>{image.sizes()};
-  halide::polar_gradient_2d(image, mag, ori);
+  DO::Shakti::Halide::polar_gradient_2d(image, mag, ori);
 
   auto polar_gradients = sara::Image<Eigen::Vector2f>{image.sizes()};
   std::transform(mag.begin(), mag.end(), ori.begin(), polar_gradients.begin(),
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(test_sift_v2)
   // Calculate the image gradients in polar coordinates.
   auto mag = sara::Image<float>{image.sizes()};
   auto ori = sara::Image<float>{image.sizes()};
-  halide::polar_gradient_2d(image, mag, ori);
+  DO::Shakti::Halide::polar_gradient_2d(image, mag, ori);
 
   auto polar_gradients = sara::Image<Eigen::Vector2f>{image.sizes()};
   std::transform(mag.begin(), mag.end(), ori.begin(), polar_gradients.begin(),
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(test_sift_v3)
   // Calculate the image gradients in polar coordinates.
   auto mag = sara::Image<float>{image.sizes()};
   auto ori = sara::Image<float>{image.sizes()};
-  halide::polar_gradient_2d(image, mag, ori);
+  DO::Shakti::Halide::polar_gradient_2d(image, mag, ori);
 
   auto polar_gradients = sara::Image<Eigen::Vector2f>{image.sizes()};
   std::transform(mag.begin(), mag.end(), ori.begin(), polar_gradients.begin(),
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(test_sift_v4)
   // Calculate the image gradients in polar coordinates.
   auto mag = sara::Image<float>{image.sizes()};
   auto ori = sara::Image<float>{image.sizes()};
-  halide::polar_gradient_2d(image, mag, ori);
+  DO::Shakti::Halide::polar_gradient_2d(image, mag, ori);
 
   auto polar_gradients = sara::Image<Eigen::Vector2f>{image.sizes()};
   std::transform(mag.begin(), mag.end(), ori.begin(), polar_gradients.begin(),
@@ -400,7 +400,7 @@ BOOST_AUTO_TEST_CASE(test_sift_v5)
   // Calculate the image gradients in polar coordinates.
   auto mag = sara::Image<float>{image.sizes()};
   auto ori = sara::Image<float>{image.sizes()};
-  halide::polar_gradient_2d(image, mag, ori);
+  DO::Shakti::Halide::polar_gradient_2d(image, mag, ori);
 
   // SIFT parameters.
   static constexpr auto N = 4;
@@ -467,6 +467,4 @@ BOOST_AUTO_TEST_CASE(test_sift_v5)
   }
 
   BOOST_CHECK_SMALL((descriptor_v4.row_vector() - descriptor_v5.row_vector()).norm(), 1e-6f);
-  const auto v4 = descriptor_v4.row_vector();
-  const auto v5 = descriptor_v5.row_vector();
 }

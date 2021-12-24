@@ -14,18 +14,19 @@
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/Image.hpp>
-#include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/FeatureDescriptors.hpp>
+#include <DO/Sara/ImageProcessing.hpp>
 
-#include <DO/Shakti/Halide/Differential.hpp>
 #include <DO/Shakti/Halide/Components/DominantGradientOrientations.hpp>
+#include <DO/Shakti/Halide/Differential.hpp>
 #include <DO/Shakti/Halide/DominantGradientOrientations.hpp>
 
 
 namespace sara = DO::Sara;
 namespace halide = DO::Shakti::HalideBackend;
 
-auto make_corner_image() {
+auto make_corner_image()
+{
   auto image = sara::Image<float>{10, 10};
   image.flat_array().fill(0);
 
@@ -43,7 +44,7 @@ BOOST_AUTO_TEST_CASE(test_polar_gradients_2d)
   // Image gradients.
   auto mag = sara::Image<float>{image.sizes()};
   auto ori = sara::Image<float>{image.sizes()};
-  halide::polar_gradient_2d(image, mag, ori);
+  DO::Shakti::Halide::polar_gradient_2d(image, mag, ori);
 
   std::cout << "image =\n" << image.matrix() << std::endl;
   std::cout << "mag =\n" << mag.matrix() << std::endl;
@@ -57,8 +58,8 @@ BOOST_AUTO_TEST_CASE(test_polar_gradients_2d)
     return std::atan2(v(1), v(0));                      //
   });
 
-  BOOST_CHECK_SMALL ((mag.matrix() - mag2.matrix()).norm(), 1e-6f);
-  BOOST_CHECK_SMALL ((ori.matrix() - ori2.matrix()).norm(), 1e-6f);
+  BOOST_CHECK_SMALL((mag.matrix() - mag2.matrix()).norm(), 1e-6f);
+  BOOST_CHECK_SMALL((ori.matrix() - ori2.matrix()).norm(), 1e-6f);
 }
 
 BOOST_AUTO_TEST_CASE(test_box_blur)
@@ -81,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_box_blur)
   auto box_blur_fns = std::vector<Func>(iters);
   for (auto i = 0; i < iters; ++i)
   {
-    box_blur_fns[i] = Func{"box_blurred_histogram"  + std::to_string(i)};
+    box_blur_fns[i] = Func{"box_blurred_histogram" + std::to_string(i)};
     if (i == 0)
       box_blur_fns[i](o, k) = halide::box_blur(h_fn, o, k, O);
     else
@@ -91,10 +92,10 @@ BOOST_AUTO_TEST_CASE(test_box_blur)
   for (auto i = 0; i < iters - 1; ++i)
     box_blur_fns[i].compute_root();
 
-  Buffer<float> h_blurred = box_blur_fns.back().realize({O,  1});
+  Buffer<float> h_blurred = box_blur_fns.back().realize({O, 1});
   BOOST_CHECK_CLOSE(h_blurred(35, 0), 1. / 3., 1e-3f);
-  BOOST_CHECK_CLOSE(h_blurred(0, 0),  1. / 3., 1e-3f);
-  BOOST_CHECK_CLOSE(h_blurred(1, 0),  1. / 3., 1e-3f);
+  BOOST_CHECK_CLOSE(h_blurred(0, 0), 1. / 3., 1e-3f);
+  BOOST_CHECK_CLOSE(h_blurred(1, 0), 1. / 3., 1e-3f);
 
   BOOST_CHECK_CLOSE(h_blurred(13, 0), 1. / 3., 1e-3f);
   BOOST_CHECK_CLOSE(h_blurred(14, 0), 1. / 3., 1e-3f);
@@ -112,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_histogram_of_gradients)
   // Calculate the image gradients in polar coordinates.
   auto mag = sara::Image<float>{image.sizes()};
   auto ori = sara::Image<float>{image.sizes()};
-  halide::polar_gradient_2d(image, mag, ori);
+  DO::Shakti::Halide::polar_gradient_2d(image, mag, ori);
 
   auto mag_buffer = halide::as_buffer(mag);
   auto ori_buffer = halide::as_buffer(ori);
@@ -126,8 +127,8 @@ BOOST_AUTO_TEST_CASE(test_histogram_of_gradients)
   auto ori_fn = BoundaryConditions::constant_exterior(ori_buffer, 0.f);
 
   // Indices of the array buffer.
-  Var o{"o"}; // orientation bin index.
-  Var k{"k"}; // keypoint index.
+  Var o{"o"};  // orientation bin index.
+  Var k{"k"};  // keypoint index.
 
   // Number of bins for the orientation histogram.
   constexpr auto O = 36;  // Bins are centered at the following orientations
@@ -198,7 +199,7 @@ BOOST_AUTO_TEST_CASE(test_histogram_of_gradients)
   auto box_blur_fns = std::vector<Func>(iters);
   for (auto i = 0; i < iters; ++i)
   {
-    box_blur_fns[i] = Func{"box_blurred_histogram"  + std::to_string(i)};
+    box_blur_fns[i] = Func{"box_blurred_histogram" + std::to_string(i)};
     auto& prev = i == 0 ? hog_fn : box_blur_fns[i - 1];
     box_blur_fns[i](o, k) = halide::box_blur(prev, o, k, O);
   }
@@ -218,8 +219,6 @@ BOOST_AUTO_TEST_CASE(test_histogram_of_gradients)
   }
 
 
-
-
   // From now on, calculate the dominant orientations.
   // 1. Localize the peaks.
   // 2. Refine the peaks by calculating the residuals.
@@ -227,13 +226,14 @@ BOOST_AUTO_TEST_CASE(test_histogram_of_gradients)
 
   // Localize peaks.
   auto peak_map_fn = Func{"peak_map"};
-  peak_map_fn(o, k) = halide::is_peak(hog_blurred_fn, o, k, O,
-                                      peak_ratio_thres);
+  peak_map_fn(o, k) =
+      halide::is_peak(hog_blurred_fn, o, k, O, peak_ratio_thres);
 
   // Realize the peak map.
   const Buffer<bool> peak_map_buffer = peak_map_fn.realize({O, K});
   for (auto oi = 0; oi < O; ++oi)
-    SARA_DEBUG << "o = " << oi << " peak_map_buffer = " << peak_map_buffer(oi, 0) << std::endl;
+    SARA_DEBUG << "o = " << oi
+               << " peak_map_buffer = " << peak_map_buffer(oi, 0) << std::endl;
 
   // Calculate peak residuals.
   auto peak_residual_fn = Func{"peak_residual"};
@@ -245,7 +245,8 @@ BOOST_AUTO_TEST_CASE(test_histogram_of_gradients)
   // Realize the peak residual map.
   const Buffer<float> peak_residual_buffer = peak_residual_fn.realize({O, K});
   for (auto oi = 0; oi < O; ++oi)
-    SARA_DEBUG << "o = " << oi << " peak_residual_buffer = " << peak_residual_buffer(oi, 0)
+    SARA_DEBUG << "o = " << oi
+               << " peak_residual_buffer = " << peak_residual_buffer(oi, 0)
                << std::endl;
 
 
@@ -261,17 +262,17 @@ BOOST_AUTO_TEST_CASE(test_histogram_of_gradients)
     auto scale_max = scale_at_detection * scale_residual_max;
 
     // Keypoint scale.
-    auto scale_residual_exponent = 0.5f;                 // Between 0 and 1
-    auto scale = scale_at_detection *                    //
-                 std::pow(scale_residual_max,            // Between 1 and ~1.26
-                          scale_residual_exponent);      // Here: ~1.12
+    auto scale_residual_exponent = 0.5f;             // Between 0 and 1
+    auto scale = scale_at_detection *                //
+                 std::pow(scale_residual_max,        // Between 1 and ~1.26
+                          scale_residual_exponent);  // Here: ~1.12
     auto scale_vec = std::vector<float>{scale};
 
     // Row-major tensors.
     auto peak_map = sara::Tensor_<bool, 2>{1, O};
     auto peak_residuals = sara::Tensor_<float, 2>{1, O};
 
-    halide::dominant_gradient_orientations(
+    DO::Shakti::Halide::dominant_gradient_orientations(
         mag, ori,                                //
         x_vec,                                   //
         y_vec,                                   //
@@ -295,7 +296,8 @@ BOOST_AUTO_TEST_CASE(test_histogram_of_gradients)
     {
       SARA_DEBUG << "o = " << oi << " peak_residual = " << peak_residuals(0, oi)
                  << std::endl;
-      BOOST_CHECK_CLOSE(peak_residuals(0, oi), peak_residual_buffer(oi, 0), 1e-3f);
+      BOOST_CHECK_CLOSE(peak_residuals(0, oi), peak_residual_buffer(oi, 0),
+                        1e-3f);
     }
   }
 }
@@ -307,7 +309,7 @@ BOOST_AUTO_TEST_CASE(check_halide_impl_with_cpu_impl)
   // Calculate the image gradients in polar coordinates.
   auto mag = sara::Image<float>{image.sizes()};
   auto ori = sara::Image<float>{image.sizes()};
-  halide::polar_gradient_2d(image, mag, ori);
+  DO::Shakti::Halide::polar_gradient_2d(image, mag, ori);
 
   auto polar_grad = sara::Image<Eigen::Vector2f>{image.sizes()};
   std::transform(mag.begin(), mag.end(), ori.begin(), polar_grad.begin(),
@@ -315,8 +317,8 @@ BOOST_AUTO_TEST_CASE(check_halide_impl_with_cpu_impl)
                    return Eigen::Vector2f{mag, ori};
                  });
 
-  const auto x  = 5.f;
-  const auto y  = 5.f;
+  const auto x = 5.f;
+  const auto y = 5.f;
 
   // The scale at which the keypoint is detected.
   const auto scale_at_detection = 1.f;
@@ -344,7 +346,7 @@ BOOST_AUTO_TEST_CASE(check_halide_impl_with_cpu_impl)
                                         scale_multiplying_factor};
   const auto h_cpu = compute_dominant_orientations(polar_grad, x, y, scale);
   SARA_DEBUG << "h_cpu" << std::endl;
-  for (const auto& hi: h_cpu)
+  for (const auto& hi : h_cpu)
     std::cout << "orientation = " << hi << " rad" << std::endl;
   std::cout << std::endl;
 
@@ -360,22 +362,22 @@ BOOST_AUTO_TEST_CASE(check_halide_impl_with_cpu_impl)
     auto peak_map = sara::Tensor_<bool, 2>{2, O};
     auto peak_residuals = sara::Tensor_<float, 2>{2, O};
 
-    halide::dominant_gradient_orientations(mag, ori,                    //
-                                           x_vec,                       //
-                                           y_vec,                       //
-                                           scale_vec,                   //
-                                           scale_max,                   //
-                                           peak_map,                    //
-                                           peak_residuals,              //
-                                           num_orientation_bins,        //
-                                           gaussian_truncation_factor,  //
-                                           scale_multiplying_factor,    //
-                                           peak_ratio_thres);           //
+    DO::Shakti::Halide::dominant_gradient_orientations(
+        mag, ori,                    //
+        x_vec,                       //
+        y_vec,                       //
+        scale_vec,                   //
+        scale_max,                   //
+        peak_map,                    //
+        peak_residuals,              //
+        num_orientation_bins,        //
+        gaussian_truncation_factor,  //
+        scale_multiplying_factor,    //
+        peak_ratio_thres);           //
 
     SARA_DEBUG << "peak_map =\n" << peak_map.matrix() << std::endl;
     SARA_DEBUG << "peak_residuals =\n" << peak_residuals.matrix() << std::endl;
-    BOOST_CHECK_EQUAL(peak_map.matrix().row(0),
-                      peak_map.matrix().row(1));
+    BOOST_CHECK_EQUAL(peak_map.matrix().row(0), peak_map.matrix().row(1));
     BOOST_CHECK_EQUAL(peak_residuals.matrix().row(0),
                       peak_residuals.matrix().row(1));
 

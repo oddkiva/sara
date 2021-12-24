@@ -17,9 +17,10 @@
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 #include <DO/Shakti/Halide/Utilities.hpp>
+#include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
 #include "shakti_local_max_32f_gpu.h"
-#include "shakti_local_scale_space_extremum_32f_gpu.h"
+#include "shakti_local_scale_space_extremum_32f_gpu_v2.h"
 
 
 namespace DO { namespace Shakti { namespace HalideBackend {
@@ -29,19 +30,10 @@ namespace DO { namespace Shakti { namespace HalideBackend {
                         Sara::ImageView<float>& c,  //
                         Sara::ImageView<std::uint8_t>& out)
   {
-    auto a_tensor_view =
-        tensor_view(a).reshape(Eigen::Vector3i{1, a.height(), a.width()});
-    auto b_tensor_view =
-        tensor_view(b).reshape(Eigen::Vector3i{1, b.height(), b.width()});
-    auto c_tensor_view =
-        tensor_view(c).reshape(Eigen::Vector3i{1, c.height(), c.width()});
-    auto out_tensor_view =
-        tensor_view(out).reshape(Eigen::Vector3i{1, out.height(), out.width()});
-
-    auto a_buffer = as_runtime_buffer(a_tensor_view);
-    auto b_buffer = as_runtime_buffer(b_tensor_view);
-    auto c_buffer = as_runtime_buffer(c_tensor_view);
-    auto out_buffer = as_runtime_buffer(out_tensor_view);
+    auto a_buffer = Shakti::Halide::as_runtime_buffer_4d(a);
+    auto b_buffer = Shakti::Halide::as_runtime_buffer_4d(b);
+    auto c_buffer = Shakti::Halide::as_runtime_buffer_4d(c);
+    auto out_buffer = Shakti::Halide::as_runtime_buffer_4d(out);
 
     a_buffer.set_host_dirty();
     b_buffer.set_host_dirty();
@@ -66,69 +58,10 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     b_buffer.set_host_dirty();
     c_buffer.set_host_dirty();
 
-    shakti_local_scale_space_extremum_32f_gpu(
+    shakti_local_scale_space_extremum_32f_gpu_v2(
         a_buffer, b_buffer, c_buffer, edge_ratio, extremum_thres, out_buffer);
 
     out_buffer.copy_to_host();
-  }
-
-  //! @brief Extract local scale-space max.
-  inline auto local_max(Sara::ImagePyramid<float>& in)
-      -> Sara::ImagePyramid<std::uint8_t>
-  {
-    auto out = Sara::ImagePyramid<std::uint8_t>{};
-
-    out.reset(in.octave_count(),                                  //
-              in.scale_count_per_octave() - 2,                    //
-              in.scale_initial() * in.scale_geometric_factor(),  //
-              in.scale_geometric_factor());                      //
-
-    for (auto o = 0; o < in.octave_count(); ++o)
-    {
-      out.octave_scaling_factor(o) = in.octave_scaling_factor(o);
-
-      for (auto s = 0; s < in.scale_count_per_octave() - 2; ++s)
-      {
-        out(s, o).resize(in(s, o).sizes());
-        // Sara::tic();
-        local_max(in(s, o), in(s + 1, o), in(s + 2, o), out(s, o));
-        // Sara::toc(Sara::format("Scale-space local max at (s=%d, o=%d)", s,
-        // o));
-      }
-    }
-
-    return out;
-  }
-
-  //! @brief Extract local scale-space extrema.
-  inline auto local_scale_space_extrema(Sara::ImagePyramid<float>& in,
-                                        float edge_ratio = 10.f,
-                                        float extremum_thres = 0.03f)
-      -> Sara::ImagePyramid<std::int8_t>
-  {
-    auto out = Sara::ImagePyramid<std::int8_t>{};
-
-    out.reset(in.octave_count(),                                  //
-              in.scale_count_per_octave() - 2,                    //
-              in.scale_initial() * in.scale_geometric_factor(),  //
-              in.scale_geometric_factor());                      //
-
-    for (auto o = 0; o < in.octave_count(); ++o)
-    {
-      out.octave_scaling_factor(o) = in.octave_scaling_factor(o);
-
-      for (auto s = 0; s < in.scale_count_per_octave() - 2; ++s)
-      {
-        out(s, o).resize(in(s, o).sizes());
-        // Sara::tic();
-        local_scale_space_extrema(in(s, o), in(s + 1, o), in(s + 2, o),
-                                  out(s, o), edge_ratio, extremum_thres);
-        // Sara::toc(Sara::format("Scale-space local extrema at (s=%d, o=%d)",
-        // s, o));
-      }
-    }
-
-    return out;
   }
 
 }}}  // namespace DO::Shakti::HalideBackend

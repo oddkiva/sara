@@ -15,12 +15,12 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <DO/Shakti/Halide/Utilities.hpp>
+#include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
-#include "shakti_dominant_gradient_orientations_gpu.h"
+#include "shakti_dominant_gradient_orientations_gpu_v2.h"
 
 
-namespace DO { namespace Shakti { namespace HalideBackend {
+namespace DO::Shakti::Halide {
 
   auto dominant_gradient_orientations(
       Sara::ImageView<float>& gradient_magnitudes,    //
@@ -29,8 +29,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       std::vector<float>& y,                          //
       std::vector<float>& scale,                      //
       float scale_upper_bound,                        //
-      sara::Tensor_<bool, 2>& peak_map,               //
-      sara::Tensor_<float, 2>& peak_residuals,        //
+      Sara::Tensor_<bool, 2>& peak_map,               //
+      Sara::Tensor_<float, 2>& peak_residuals,        //
       int num_orientation_bins = 36,                  //
       float gaussian_truncation_factor = 3.f,         //
       float scale_multiplying_factor = 1.5f,          //
@@ -38,8 +38,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       -> void
   {
     // Input buffers.
-    auto mag_buffer = as_runtime_buffer(gradient_magnitudes);
-    auto ori_buffer = as_runtime_buffer(gradient_orientations);
+    auto mag_buffer = as_runtime_buffer_4d(gradient_magnitudes);
+    auto ori_buffer = as_runtime_buffer_4d(gradient_orientations);
     auto x_buffer = as_runtime_buffer(x);
     auto y_buffer = as_runtime_buffer(y);
     auto scale_buffer = as_runtime_buffer(scale);
@@ -60,21 +60,21 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     peak_residuals_buffer.set_host_dirty();
 
     // Run the algorithm.
-    shakti_dominant_gradient_orientations_gpu(mag_buffer, ori_buffer,      //
-                                              x_buffer,                    //
-                                              y_buffer,                    //
-                                              scale_buffer,                //
-                                              scale_upper_bound,           //
-                                              num_orientation_bins,        //
-                                              gaussian_truncation_factor,  //
-                                              scale_multiplying_factor,    //
-                                              peak_ratio_thres,            //
-                                              peak_map_buffer,             //
-                                              peak_residuals_buffer);
+    shakti_dominant_gradient_orientations_gpu_v2(mag_buffer, ori_buffer,      //
+                                                 x_buffer,                    //
+                                                 y_buffer,                    //
+                                                 scale_buffer,                //
+                                                 scale_upper_bound,           //
+                                                 num_orientation_bins,        //
+                                                 gaussian_truncation_factor,  //
+                                                 scale_multiplying_factor,    //
+                                                 peak_ratio_thres,            //
+                                                 peak_map_buffer,             //
+                                                 peak_residuals_buffer);
 
     // Copy back to GPU.
     peak_map_buffer.copy_to_host();
     peak_residuals_buffer.copy_to_host();
   }
 
-}}}  // namespace DO::Shakti::HalideBackend
+}  // namespace DO::Shakti::HalideBackend

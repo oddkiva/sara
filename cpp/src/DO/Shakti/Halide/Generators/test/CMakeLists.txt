@@ -42,17 +42,17 @@ target_link_libraries(test_halide_binary_operators
 target_link_libraries(test_halide_local_extrema
   PRIVATE
   shakti_local_max_32f_gpu
-  shakti_local_scale_space_extremum_32f_gpu)
+  shakti_local_scale_space_extremum_32f_gpu_v2)
 
 target_link_libraries(test_halide_dominant_gradient_orientations
   PRIVATE
   # Dominant gradient orientations.
-  shakti_polar_gradient_2d_32f_gpu
-  shakti_dominant_gradient_orientations_gpu)
+  shakti_polar_gradient_2d_32f_gpu_v2
+  shakti_dominant_gradient_orientations_gpu_v2)
 
 target_link_libraries(test_halide_sift_descriptor
   PRIVATE
-  shakti_polar_gradient_2d_32f_gpu
+  shakti_polar_gradient_2d_32f_gpu_v2
   shakti_sift_descriptor_gpu
   shakti_sift_descriptor_gpu_v2
   shakti_sift_descriptor_gpu_v3
