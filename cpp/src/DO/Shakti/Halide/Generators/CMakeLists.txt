@@ -126,16 +126,6 @@ shakti_halide_library_v2(
 # Local extrema operators.
 # ------------------------------------------------------------------------------
 shakti_halide_library_v2(
-  NAME shakti_local_max_32f_gpu
-  SRCS LocalExtremumGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-shakti_halide_library_v2(
-  NAME shakti_local_scale_space_extremum_32f_gpu
-  SRCS LocalExtremumGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-shakti_halide_library_v2(
   NAME shakti_local_scale_space_extremum_32f_gpu_v2
   SRCS LocalExtremumGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
@@ -149,11 +139,6 @@ shakti_halide_library_v2(
 # ------------------------------------------------------------------------------
 # Scale-space Extremum refinement (using a 2nd-order Taylor expansion)
 # ------------------------------------------------------------------------------
-shakti_halide_library_v2(
-  NAME shakti_refine_scale_space_extrema_gpu
-  SRCS RefineExtremumGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
 shakti_halide_library_v2(
   NAME shakti_refine_scale_space_extrema_gpu_v2
   SRCS RefineExtremumGeneratorsV2.cpp
@@ -195,11 +180,6 @@ shakti_halide_library_v2(
   SRCS DifferentialGeneratorsV2.cpp)
 
 shakti_halide_library_v2(
-  NAME shakti_polar_gradient_2d_32f_gpu
-  SRCS DifferentialGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-shakti_halide_library_v2(
   NAME shakti_polar_gradient_2d_32f_gpu_v2
   SRCS DifferentialGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
@@ -208,16 +188,6 @@ shakti_halide_library_v2(
 # ------------------------------------------------------------------------------
 # Dominant gradient orientations
 # ------------------------------------------------------------------------------
-shakti_halide_library_v2(
-  NAME shakti_dominant_gradient_orientations_gpu
-  SRCS DominantGradientOrientationsGenerator.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-if (UNIX)
-  # Workaround with Linux...
-  target_link_libraries(shakti_dominant_gradient_orientations_gpu.generator
-    PRIVATE dl)
-endif ()
-
 shakti_halide_library_v2(
   NAME shakti_dominant_gradient_orientations_gpu_v2
   SRCS DominantGradientOrientationsGeneratorV2.cpp
