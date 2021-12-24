@@ -84,7 +84,7 @@ namespace v2 {
       // CPU schedule.
       else
       {
-        output.split(y, yo, yi, 8)
+        output.split(y, yo, yi, 8, TailStrategy::GuardWithIf)
             .parallel(yo)
             .vectorize(x, 8, TailStrategy::GuardWithIf);
       }
@@ -150,7 +150,7 @@ namespace v2 {
       // CPU schedule.
       else
       {
-        output.split(y, yo, yi, 8)
+        output.split(y, yo, yi, 8, TailStrategy::GuardWithIf)
             .parallel(yo)
             .vectorize(x, 8, TailStrategy::GuardWithIf);
       }
@@ -220,7 +220,7 @@ namespace v2 {
       // CPU schedule.
       else
       {
-        output.split(y, yo, yi, 8)
+        output.split(y, yo, yi, 8, TailStrategy::GuardWithIf)
             .parallel(yo)
             .vectorize(x, 8, TailStrategy::GuardWithIf);
       }

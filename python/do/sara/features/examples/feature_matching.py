@@ -31,17 +31,27 @@ def user_main():
     sara.create_window(w, h)
 
     # Feature detection and matching parameters.
-    first_octave = 0
+    first_octave = 1
+    scale_count_per_octave = 1
     image_pyramid_params = sara.ImagePyramidParams(
-        first_octave_index=first_octave)
-    sift_nn_ratio = 0.8
+        first_octave_index=first_octave,
+        scale_count_per_octave=scale_count_per_octave + 3,
+        scale_geometric_factor=2. ** (1. / scale_count_per_octave),
+        image_padding_size=8,
+        scale_camera=1,
+        scale_initial=1.6)
+    sift_nn_ratio = 0.4
 
     # Work data.
     kp_prev = None
     kp_curr = None
 
-    f = 0
+    frame_index = -1
     while video_stream.read(video_frame):
+        frame_index += 1
+        if frame_index % 5 != 0:
+            continue
+
         with sara.Timer("[SHAKTI] RGB8 to Gray32f"):
             shakti.convert_rgb8_to_gray32f_cpu(video_frame, video_frame_gray32f)
 
@@ -52,7 +62,7 @@ def user_main():
                                                   True)
 
         if kp_prev is None:
-            continue;
+            continue
         with sara.Timer("[SARA] Feature matching"):
             ann_matcher = sara.AnnMatcher(kp_prev, kp_curr, 0.8)
             matches = ann_matcher.compute_matches()
@@ -60,13 +70,11 @@ def user_main():
         with sara.Timer("[SARA] Draw"):
             f1 = [f for f in sara.features(kp_prev)]
             f2 = [f for f in sara.features(kp_curr)]
-            for f in f1[:1000]:
-                draw_feature(video_frame, f, (127, 0, 0))
-            for f in f2[:1000]:
-                draw_feature(video_frame, f, (255, 0, 0))
-            for m in matches[:100]:
+            for m in matches:
                 x = f1[m.x].coords
                 y = f2[m.y].coords
+                draw_feature(video_frame, f1[m.x], (127, 0, 0))
+                draw_feature(video_frame, f2[m.y], (255, 0, 0))
                 sara.image_draw.draw_line(video_frame, x, y, (255, 255, 0), 2)
             sara.draw_image(video_frame)
 

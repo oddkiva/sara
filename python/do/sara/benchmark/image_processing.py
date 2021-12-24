@@ -110,6 +110,15 @@ def user_main():
         #
         # Shakti/Halide GPU implementations is much slower than the CPU
         # implementations. It could be because of the CPU-GPU transfer...
+        with sara.Timer("[OPENCV][CPU] gaussian convolution"):
+            cv2.GaussianBlur(video_frame_gray32f, (ksize, ksize), sigma,
+                             video_frame_convolved)
+        if opencv_cuda_gaussian_filter is not None:
+            with sara.Timer("[OPENCV][CUDA] gaussian convolution"):
+                video_frame_gray32f_cuda.upload(video_frame_gray32f)
+                opencv_cuda_gaussian_filter.apply(video_frame_gray32f_cuda,
+                                                  video_frame_convolved_cuda)
+                video_frame_convolved_cuda.download(video_frame_convolved)
         with sara.Timer("[SHAKTI][Halide-CPU] gaussian convolution"):
             shakti.gaussian_convolution(video_frame_gray32f,
                                         video_frame_convolved, sigma,
@@ -122,15 +131,6 @@ def user_main():
             with sara.Timer("[SHAKTI][CUDA] gaussian convolution"):
                 shakti_cuda_gaussian_filter.apply(video_frame_gray32f,
                                                   video_frame_convolved);
-        with sara.Timer("[OPENCV][CPU] gaussian convolution"):
-            cv2.GaussianBlur(video_frame_gray32f, (ksize, ksize), sigma,
-                             video_frame_convolved)
-        if opencv_cuda_gaussian_filter is not None:
-            with sara.Timer("[OPENCV][CUDA] gaussian convolution"):
-                video_frame_gray32f_cuda.upload(video_frame_gray32f)
-                opencv_cuda_gaussian_filter.apply(video_frame_gray32f_cuda,
-                                                  video_frame_convolved_cuda)
-                video_frame_convolved_cuda.download(video_frame_convolved)
         print()
 
         # OpenCV wins with a small edge but it also does more arithmetic
