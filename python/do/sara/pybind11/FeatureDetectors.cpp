@@ -69,7 +69,7 @@ auto expose_feature_detectors(pybind11::module& m) -> void
 
   py::class_<sara::ImagePyramidParams>(m, "ImagePyramidParams")
       .def(py::init<int, int, float, int, float, float>(),
-           "first_octave_index"_a = 1, "scale_count_per_octaves"_a = 3 + 3,
+           "first_octave_index"_a = 1, "scale_count_per_octave"_a = 3 + 3,
            "scale_geometric_factor"_a = std::pow(2.f, 1 / 3.f),
            "image_padding_size"_a = 1, "scale_camera"_a = 0.5f,
            "scale_initial"_a = 1.6f)
