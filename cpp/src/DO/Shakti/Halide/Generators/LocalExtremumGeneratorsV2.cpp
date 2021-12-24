@@ -38,7 +38,7 @@ namespace v2 {
     Input<Buffer<T>> scale_curr{"curr", 4};
     Input<Buffer<T>> scale_next{"next", 4};
 
-    Output<Buffer<std::uint8_t>> out{"out", 3};
+    Output<Buffer<std::uint8_t>> out{"out", 4};
 
     //! @brief Variables.
     //! @{
@@ -81,9 +81,9 @@ namespace v2 {
             get_target().has_feature(Target::HVX_128) ? 128 : 64;
 
         out.hexagon()
-            .prefetch(prev, y, 2)
-            .prefetch(curr, y, 2)
-            .prefetch(next, y, 2)
+            .prefetch(prev, y, y, 2)
+            .prefetch(curr, y, y, 2)
+            .prefetch(next, y, y, 2)
             .split(y, yo, yi, 128)
             .parallel(yo)
             .vectorize(x, vector_size, TailStrategy::GuardWithIf);
@@ -165,9 +165,9 @@ namespace v2 {
             get_target().has_feature(Target::HVX_128) ? 128 : 64;
 
         out.hexagon()
-            .prefetch(prev, y, 2)
-            .prefetch(curr, y, 2)
-            .prefetch(next, y, 2)
+            .prefetch(prev, y, y, 2)
+            .prefetch(curr, y, y, 2)
+            .prefetch(next, y, y, 2)
             .split(y, yo, yi, 128)
             .parallel(yo)
             .vectorize(x, vector_size, TailStrategy::GuardWithIf);
@@ -250,7 +250,7 @@ namespace v3 {
             get_target().has_feature(Target::HVX_128) ? 128 : 64;
 
         out.hexagon()
-            .prefetch(f, y, 2)
+            .prefetch(f, y, y, 2)
             .split(y, yo, yi, 128)
             .parallel(yo)
             .vectorize(x, vector_size, TailStrategy::GuardWithIf);
@@ -270,7 +270,7 @@ namespace v3 {
 
 
 HALIDE_REGISTER_GENERATOR(v2::LocalMax<float>,
-                          shakti_local_max_32f_gpu_v2)
+                          shakti_local_max_32f_gpu)
 HALIDE_REGISTER_GENERATOR(v2::LocalScaleSpaceExtremum<float>,
                           shakti_local_scale_space_extremum_32f_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v3::LocalScaleSpaceExtremum<float>,

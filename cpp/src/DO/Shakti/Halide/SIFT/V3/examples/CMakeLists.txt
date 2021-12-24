@@ -27,7 +27,6 @@ set(HALIDE_SIFT_LIBRARIES
   shakti_refine_scale_space_extrema_gpu_v2
   shakti_refine_scale_space_extrema_gpu_v3
   # Dominant gradient orientations.
-  shakti_polar_gradient_2d_32f_gpu
   shakti_polar_gradient_2d_32f_gpu_v2
   shakti_dominant_gradient_orientations_gpu_v2
   shakti_dominant_gradient_orientations_gpu_v3
