@@ -23,6 +23,10 @@ namespace DO::Sara {
   auto compute_sift_keypoints(
       const ImageView<float>& image,
       const ImagePyramidParams& pyramid_params = ImagePyramidParams(),
+      float gauss_truncate = 4.f,
+      float extremum_thres = 0.01,
+      float edge_ratio_thres = 10.f,
+      int extremum_refinement_iter = 5,
       bool parallel = false)
       -> KeypointList<OERegion, float>;
 

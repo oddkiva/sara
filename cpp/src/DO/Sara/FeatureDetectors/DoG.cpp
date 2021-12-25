@@ -32,7 +32,7 @@ namespace DO::Sara {
     };
 
     tic_();
-    G = gaussian_pyramid(image, _pyramid_params);
+    G = gaussian_pyramid(image, _pyramid_params, _gauss_truncate);
     toc_("Gaussian Pyramid");
 
     tic_();
