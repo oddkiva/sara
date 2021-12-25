@@ -33,7 +33,9 @@ namespace DO::Sara {
   template <typename T>
   inline auto
   gaussian_pyramid(const ImageView<T>& image,
-                   const ImagePyramidParams& params = ImagePyramidParams())
+                   const ImagePyramidParams& params = ImagePyramidParams(),
+                   typename PixelTraits<T>::channel_type gauss_truncate =
+                       typename PixelTraits<T>::channel_type(4))
       -> ImagePyramid<T>
   {
     using Scalar = typename ImagePyramid<T>::scalar_type;
@@ -56,7 +58,7 @@ namespace DO::Sara {
       if (camera_sigma < init_sigma)
       {
         const auto sigma = std::sqrt(square(init_sigma) - square(camera_sigma));
-        I = gaussian(image, sigma);
+        I = gaussian(image, sigma, gauss_truncate);
       }
       else
         I = image;

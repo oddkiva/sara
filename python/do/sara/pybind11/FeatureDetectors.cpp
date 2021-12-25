@@ -108,5 +108,11 @@ auto expose_feature_detectors(pybind11::module& m) -> void
       .def_readonly("pipeline", &sara::EdgeDetector::pipeline, "pipeline data");
 
   m.def("compute_sift_keypoints", sara::compute_sift_keypoints,
+        "pyramid_params"_a = sara::ImagePyramidParams(),
+        "gauss_truncate"_a = 4.f,
+        "extremum_thres"_a = 0.01f,
+        "edge_ratio_thres"_a = 10.f,
+        "extremum_refinement_iter"_a = 5,
+        "parallel"_a = true,
         "Compute SIFT keypoints for an input float image.");
 }

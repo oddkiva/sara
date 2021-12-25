@@ -71,13 +71,17 @@ namespace DO::Sara {
      */
     inline ComputeDoGExtrema(
         const ImagePyramidParams& pyramid_params = ImagePyramidParams(),
-        float extremum_thres = 0.01f, float edge_ratio_thres = 10.f,
-        int img_padding_sz = 1, int extremum_refinement_iter = 5)
-      : _pyramid_params(pyramid_params)
-      , _extremum_thres(extremum_thres)
-      , _edge_ratio_thres(edge_ratio_thres)
-      , _img_padding_sz(img_padding_sz)
-      , _extremum_refinement_iter(extremum_refinement_iter)
+        float gauss_truncate = 4.f,     //
+        float extremum_thres = 0.01f,   //
+        float edge_ratio_thres = 10.f,  //
+        int img_padding_sz = 1,         //
+        int extremum_refinement_iter = 5)
+      : _pyramid_params{pyramid_params}
+      , _gauss_truncate{gauss_truncate}
+      , _extremum_thres{extremum_thres}
+      , _edge_ratio_thres{edge_ratio_thres}
+      , _img_padding_sz{img_padding_sz}
+      , _extremum_refinement_iter{extremum_refinement_iter}
     {
       if (_pyramid_params.scale_count_per_octave() < 4)
         throw std::runtime_error{
@@ -92,22 +96,21 @@ namespace DO::Sara {
      *  the image @f$I@f$, where \f$(s,o)\f$ are integers. Here:
      *  @f$\sigma(s,o) = 2^{\frac{s}{S} + o}@f$ where @f$S@f$ is the number of
      *  scales per octaves.
-
+     *
      *  2. Localize extrema in each difference of Gaussians
      *  \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$
      *  where \f$(s,o)\f$ are scale and octave indices.
-
+     *
      *  \param[in, out] scale_octave_pairs a pointer to vector of scale and
-     octave
-     *  index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the
-     difference
-     *  of Gaussians
-     *  \f$\left( g_{\sigma(s_i+1,o_i)} - g_{\sigma(s_i,o_i)} \right) * I\f$
-     *  where the extremum \f$(x_i,y_i,\sigma_i)\f$ is detected.
-
+     *                  octave index pairs \f$(s_i,o_i)\f$. This index pair
+     *                  corresponds to the difference of Gaussians \f$\left(
+     *                  g_{\sigma(s_i+1,o_i)} - g_{\sigma(s_i,o_i)} \right) *
+     *                  I\f$ where the extremum \f$(x_i,y_i,\sigma_i)\f$ is
+     *                  detected.
+     *
      *  \return set of DoG extrema in **std::vector<OERegion>** in each
-     *  difference of Gaussians
-     *  \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$.
+     *          difference of Gaussians \f$\left( g_{\sigma(s+1,o)} -
+     *          g_{\sigma(s,o)} \right) * I \f$.
      */
     DO_SARA_EXPORT
     std::vector<OERegion>
@@ -123,9 +126,9 @@ namespace DO::Sara {
      * The Gaussian pyramid is available after calling the function method
      * **ComputeDoGExtrema::operator()(I, scale_octave_pairs)** for the given
      * image **I**.
-
-     * \return the Gaussian pyramid used to localize scale-space extrema
-     * of image **I**.
+     *
+     * \return the Gaussian pyramid used to localize scale-space extrema of
+     * image **I**.
      */
     inline auto gaussians() const -> const ImagePyramid<float>&
     {
@@ -136,9 +139,9 @@ namespace DO::Sara {
     //! scale-space extrema of image **I**.
     /*!
      *  The pyramid of difference of Gaussians is available after calling the
-     *  function method **ComputeDoGExtrema::operator()(I,
-     scale_octave_pairs)**,
-
+     *  function method
+     *  **ComputeDoGExtrema::operator()(I, scale_octave_pairs)**,
+     *
      *  \return the pyramid of difference of Gaussians used to localize
      *  scale-space extrema of image **I**.
      */
@@ -165,6 +168,7 @@ namespace DO::Sara {
     //! Parameters
     //! @{
     ImagePyramidParams _pyramid_params;
+    float _gauss_truncate;
     float _extremum_thres;
     float _edge_ratio_thres;
     int _img_padding_sz;

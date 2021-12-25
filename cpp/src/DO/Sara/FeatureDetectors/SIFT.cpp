@@ -22,6 +22,10 @@ namespace DO::Sara {
 
   auto compute_sift_keypoints(const ImageView<float>& image,
                               const ImagePyramidParams& pyramid_params,
+                              float gauss_truncate,
+                              float extremum_thres,
+                              float edge_ratio_thres,
+                              int extremum_refinement_iter,
                               bool parallel) -> KeypointList<OERegion, float>
   {
     using namespace std;
@@ -36,7 +40,13 @@ namespace DO::Sara {
 
     // 1. Feature extraction.
     timer.restart();
-    ComputeDoGExtrema compute_DoGs{pyramid_params, 0.01f};
+    auto compute_DoGs = ComputeDoGExtrema{
+        pyramid_params,           //
+        gauss_truncate,           //
+        extremum_thres,           //
+        edge_ratio_thres,         //
+        extremum_refinement_iter  //
+    };
     auto scale_octave_pairs = vector<Point2i>{};
     DoGs = compute_DoGs(image, &scale_octave_pairs);
     const auto dog_detection_time = timer.elapsed_ms();
