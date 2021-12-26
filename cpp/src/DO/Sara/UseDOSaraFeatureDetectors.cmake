@@ -5,6 +5,11 @@ if (SARA_USE_FROM_SOURCE)
     sara_create_common_variables("FeatureDetectors")
     sara_generate_library("FeatureDetectors")
 
+    if(SARA_USE_HALIDE)
+      target_compile_definitions(DO_Sara_ImageProcessing
+                                 PRIVATE DO_SARA_USE_HALIDE)
+    endif ()
+
     target_link_libraries(DO_Sara_FeatureDetectors
       PRIVATE
       DO::Sara::Geometry

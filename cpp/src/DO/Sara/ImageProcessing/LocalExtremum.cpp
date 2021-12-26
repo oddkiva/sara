@@ -13,6 +13,7 @@
 
 #include <DO/Sara/ImageProcessing/LocalExtremum.hpp>
 
+#ifdef DO_SARA_USE_HALIDE
 #include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
 #include "shakti_scale_space_dog_extremum_32f_cpu.h"
@@ -36,3 +37,4 @@ namespace DO::Sara {
   }
 
 }  // namespace DO::Sara
+#endif
