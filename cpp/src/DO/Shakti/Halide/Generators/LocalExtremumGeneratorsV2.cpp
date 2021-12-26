@@ -176,7 +176,7 @@ namespace v2 {
       // CPU schedule.
       else
       {
-        out.split(y, yo, yi, 8)
+        out.split(y, yo, yi, 8, TailStrategy::GuardWithIf)
             .parallel(yo)
             .vectorize(x, 8, TailStrategy::GuardWithIf);
       }
@@ -259,15 +259,18 @@ namespace v3 {
       // CPU schedule.
       else
       {
-        out.split(y, yo, yi, 8)
+        out.split(y, yo, yi, 16, TailStrategy::GuardWithIf)
             .parallel(yo)
-            .vectorize(x, 8, TailStrategy::GuardWithIf);
+            .vectorize(x, 16, TailStrategy::GuardWithIf);
       }
     }
   };
 
 }  // namespace v3
 
+
+HALIDE_REGISTER_GENERATOR(v2::LocalScaleSpaceExtremum<float>,
+                          shakti_scale_space_dog_extremum_32f_cpu)
 
 HALIDE_REGISTER_GENERATOR(v2::LocalMax<float>,
                           shakti_local_max_32f_gpu)

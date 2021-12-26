@@ -139,10 +139,10 @@ namespace DO::Shakti::HalideBackend {
       else
       {
         conv_y.tile(x, y, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
-            .vectorize(xi, 8, Halide::TailStrategy::GuardWithIf)
+            .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
             .parallel(y);
         conv_x.compute_at(conv_y, x).vectorize(
-            x, 8, Halide::TailStrategy::GuardWithIf);
+            x, 16, Halide::TailStrategy::GuardWithIf);
       }
     }
 
@@ -222,10 +222,10 @@ namespace DO::Shakti::HalideBackend {
       else
       {
         conv_y.tile(x, y, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
-            .vectorize(xi, 8, Halide::TailStrategy::GuardWithIf)
+            .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
             .parallel(y);
         conv_x.compute_at(conv_y, x).vectorize(
-            x, 8, Halide::TailStrategy::GuardWithIf);
+            x, 16, Halide::TailStrategy::GuardWithIf);
       }
     }
   };
