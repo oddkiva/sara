@@ -126,6 +126,10 @@ shakti_halide_library_v2(
 # Local extrema operators.
 # ------------------------------------------------------------------------------
 shakti_halide_library_v2(
+  NAME shakti_scale_space_dog_extremum_32f_cpu
+  SRCS LocalExtremumGeneratorsV2.cpp)
+
+shakti_halide_library_v2(
   NAME shakti_local_max_32f_gpu
   SRCS LocalExtremumGeneratorsV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})

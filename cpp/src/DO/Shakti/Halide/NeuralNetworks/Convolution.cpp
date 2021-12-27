@@ -1,80 +1,88 @@
-// Copy-pasted from Halide 'apps' source code folder.
+// Readapted from Halide 'apps' source code folder.
 #include <Halide.h>
 
 namespace {
 
   using namespace Halide;
 
-  class ConvolutionLayer : public Halide::Generator<ConvolutionLayer>
+  class Convolution : public Halide::Generator<Convolution>
   {
   public:
     Input<Buffer<float>> input{"input", 4};
     Input<Buffer<float>> filter{"filter", 4};
     Input<Buffer<float>> bias{"bias", 1};
+    Input<float[2]> filter_shift{"shift"};
+    Input<float> pad_value{"pad_value"};
 
-    Output<Buffer<float>> relu{"relu", 4};
+    Output<Buffer<float>> output{"conv", 4};
 
     void generate()
     {
-      const int N = 5, CI = 128, CO = 128, W = 100, H = 80;
+      const auto& w = input.dim(0).extent();
+      const auto& h = input.dim(1).extent();
+      const auto& ci = input.dim(2).extent();
+
+      const auto& kw = filter.dim(0).extent();
+      const auto& kh = filter.dim(1).extent();
+      const auto& co = filter.dim(3).extent();
+
+      const auto& sx = filter.dim(0).extent();
+      const auto& sy = filter.dim(1).extent();
 
       /* THE ALGORITHM */
-
       Var x("x"), y("y"), c("c"), n("n");
 
-      auto input_ext = BoundaryConditions::constant_exterior(input, 0);
+      auto input_ext = BoundaryConditions::constant_exterior(input, pad_value);
 
       // 3x3 convolution.
       Func conv("conv");
-      RDom r(0, CI, 0, 3, 0, 3);
+      RDom r(0, kw, 0, kh, 0, ci);
 
-      conv(c, x, y, n) = bias(c);
-      conv(c, x, y, n) +=
-          filter(c, r.y, r.z, r.x) * input_ext(r.x, x + r.y, y + r.z, n);
-
-      relu(c, x, y, n) = max(0, conv(c, x, y, n));
+      conv(x, y, c, n) = bias(c);
+      conv(x, y, c, n) += filter(r.x, r.y, r.z, c) *
+                          input_ext(x + sx + r.x, y + sy + r.y, r.z, n);
 
       /* THE SCHEDULE */
 
       // MKL JITs code for the specific size and strides, so we'll
       // do the same and ask Halide to compile for this specific
       // size:
+      input.dim(0).set_bounds(0, w).set_stride(1);
+      input.dim(1).set_bounds(0, h).set_stride(w);
+      input.dim(2).set_bounds(0, ci).set_stride(h * w);
+      input.dim(3).set_bounds(0, n).set_stride(ci * h * w);
 
-      relu.dim(0).set_bounds(0, CO).set_stride(1);
-      relu.dim(1).set_bounds(0, W).set_stride(CO);
-      relu.dim(2).set_bounds(0, H).set_stride(CO * W);
-      relu.dim(3).set_bounds(0, N).set_stride(CO * H * W);
+      filter.dim(0).set_bounds(0, kw).set_stride(1);
+      filter.dim(1).set_bounds(0, kh).set_stride(kw);
+      filter.dim(2).set_bounds(0, ci).set_stride(kh * kw);
+      filter.dim(3).set_bounds(0, co).set_stride(ci * kh * kw);
 
-      input.dim(0).set_bounds(0, CI).set_stride(1);
-      input.dim(1).set_bounds(0, W + 2).set_stride(CI);
-      input.dim(2).set_bounds(0, H + 2).set_stride(CI * W);
-      input.dim(3).set_bounds(0, N).set_stride(CI * W * H);
+      output.dim(0).set_bounds(0, w).set_stride(1);
+      output.dim(1).set_bounds(0, h).set_stride(w);
+      output.dim(2).set_bounds(0, co).set_stride(h * w);
+      output.dim(3).set_bounds(0, n).set_stride(co * h * w);
 
-      filter.dim(0).set_bounds(0, CO).set_stride(1);
-      filter.dim(1).set_bounds(0, 3).set_stride(CO);
-      filter.dim(2).set_bounds(0, 3).set_stride(CO * 3);
-      filter.dim(3).set_bounds(0, CI).set_stride(CO * 3 * 3);
 
-      bias.dim(0).set_bounds(0, CO).set_stride(1);
+      bias.dim(0).set_bounds(0, co).set_stride(1);
 
       if (auto_schedule)
       {
-        input.dim(0).set_estimate(0, CI);
-        input.dim(1).set_estimate(0, W + 2);
-        input.dim(2).set_estimate(0, H + 2);
-        input.dim(3).set_estimate(0, N);
+        input.dim(0).set_estimate(-1, w + 1);
+        input.dim(1).set_estimate(-1, h + 1);
+        input.dim(2).set_estimate(0, ci);
+        input.dim(3).set_estimate(0, n);
 
-        filter.dim(0).set_estimate(0, CO);
-        filter.dim(1).set_estimate(0, 3);
-        filter.dim(2).set_estimate(0, 3);
-        filter.dim(3).set_estimate(0, CI);
+        filter.dim(0).set_estimate(0, kw);
+        filter.dim(1).set_estimate(0, kh);
+        filter.dim(2).set_estimate(0, ci);
+        filter.dim(3).set_estimate(0, n);
 
-        bias.dim(0).set_estimate(0, CO);
+        bias.dim(0).set_estimate(0, co);
 
-        relu.dim(0).set_estimate(0, W);
-        relu.dim(1).set_estimate(0, H);
-        relu.dim(2).set_estimate(0, CO);
-        relu.dim(3).set_estimate(0, N);
+        output.dim(0).set_estimate(0, w);
+        output.dim(1).set_estimate(0, h);
+        output.dim(2).set_estimate(0, co);
+        output.dim(3).set_estimate(0, n);
       }
       else if (get_target().has_feature(Target::CUDA))
       {
@@ -90,22 +98,44 @@ namespace {
         // We use cuda-specific scheduling directives (gpu_lanes),
         // so this is not a general GPGPU schedule.
 
-        Var ni, no, xi, xo, yi, yo, ci, co, t;
+        Var ni, no;
+        Var xi, xo;
+        Var yi, yo;
+        Var ci, co;
+        Var t;
         RVar rxo, rxi, rxii;
-        relu.compute_root()
-            .split(x, xo, xi, 5)
-            .split(y, yo, yi, 5)
-            .split(c, co, ci, 32)
-            .reorder(xi, yi, ci, xo, yo, co, n)
-            .gpu_lanes(ci)
-            .unroll(xi)
-            .unroll(yi)
-            .fuse(co, n, t)
-            .gpu_blocks(xo, yo, t);
 
-        conv.compute_at(relu, xo)
+        // relu.compute_root()
+        //     // Split the output in 3D blocks of (cb, cx, cy) = 32 x 5 x 5.
+        //     .split(c, co, ci, 32)
+        //     .split(x, xo, xi, 5)
+        //     .split(y, yo, yi, 5)
+        //     // // For each example n of the batch
+        //     // For n:
+        //     //
+        //     //   // For each 3D block (co, yo, xo)
+        //     //   For co:
+        //     //     For yo:
+        //     //       For xo:
+        //     //
+        //     //         // For each pixel (ci, yi, xi) of the block (co, yo, xo)
+        //     //         For ci:
+        //     //           For yi:
+        //     //             For xi:
+        //     .reorder(xi, yi, ci, xo, yo, co, n)
+        //     // I am unsure about this.
+        //     .gpu_lanes(xi)
+        //     // Unroll the loop for each xi (3x3) as in CUDA kernel programming.
+        //     .unroll(xi)
+        //     .unroll(yi)
+        //     // Fuse the 2D variables (co, n) as a single 1D variable t.
+        //     .fuse(co, n, t)
+        //     // Perform the computation
+        //     .gpu_blocks(xo, yo, t);
+
+        conv.compute_at(output, xo)
             .store_in(MemoryType::Register)
-            .gpu_lanes(c)
+            .gpu_lanes(x)
             .unroll(x)
             .unroll(y)
             .update()
@@ -183,7 +213,7 @@ namespace {
         }
 
         Var co, ci, xo, xi, yo, yi, t;
-        relu.split(c, co, ci, vec * tile_w)
+        output.split(c, co, ci, vec * tile_w)
             .split(x, xo, xi, tile_h)
             .reorder(ci, xi, xo, y, n, co)
             .vectorize(ci, vec)
@@ -192,7 +222,7 @@ namespace {
             .parallel(y)
             .parallel(n)
             .parallel(co);
-        conv.compute_at(relu, xo)
+        conv.compute_at(output, xo)
             .vectorize(c, vec)
             .unroll(c)
             .unroll(x)

@@ -30,6 +30,8 @@ if(SARA_USE_FROM_SOURCE)
                 shakti_separable_convolution_2d_cpu
                 # Gaussian convolutions.
                 shakti_gaussian_convolution_cpu
+                # Local extremum map
+                shakti_scale_space_dog_extremum_32f_cpu
                 $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
     endif()
   endif()

@@ -10,6 +10,9 @@
 // ========================================================================== //
 
 #include <DO/Sara/Core/Math/UsualFunctions.hpp>
+#ifdef DO_SARA_USE_HALIDE
+#  include <DO/Sara/ImageProcessing/LocalExtremum.hpp>
+#endif
 #include <DO/Sara/FeatureDetectors.hpp>
 
 
@@ -219,10 +222,134 @@ namespace DO::Sara {
     return true;
   }
 
+#ifdef DO_SARA_USE_HALIDE
   auto local_scale_space_extrema(const ImagePyramid<float>& I, int s, int o,
                                  float extremum_thres, float edge_ratio_thres,
                                  int img_padding_sz, int refine_iterations)
       -> vector<OERegion>
+  {
+// #define PROFILE_ME
+#ifdef PROFILE_ME
+    auto timer = Timer{};
+    auto tic_ = [&timer]() { timer.restart(); };
+    auto toc_ = [&timer](const std::string& what) {
+      const auto elapsed = timer.elapsed_ms();
+      SARA_DEBUG << "[" << what << "] " << elapsed << "ms\n";
+    };
+#endif
+
+    // ========================================================================
+    // Classify extrema.
+    //
+    // FIXME: THIS IS THE MAIN BOTTLENECK!
+    // ========================================================================
+    auto map = Image<std::int8_t>{I(s, o).sizes()};
+    map.flat_array().setZero();
+
+
+    const auto& previous = I(s - 1, o);
+    const auto& me = I(s, o);
+    const auto& next = I(s + 1, o);
+
+#ifdef PROFILE_ME
+    tic_();
+#endif
+    scale_space_dog_extremum_map(previous, me, next, edge_ratio_thres,
+                                 extremum_thres, map);
+#ifdef PROFILE_ME
+    toc_("[Halide] DoG extremum map");
+#endif
+
+
+    // ========================================================================
+    // Refine the location of extrema.
+    // ========================================================================
+#ifdef PROFILE_ME
+    tic_();
+#endif
+    auto location_refined = Image<Vector3f>{I(s, o).sizes()};
+    auto extremum_value = Image<float>{I(s, o).sizes()};
+
+    const auto& w = I(s, o).width();
+    const auto& h = I(s, o).height();
+    const auto wh = w * h;
+
+#ifdef _OPENMP
+#  pragma omp parallel for
+#endif
+    for (int xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const auto& type = map(x, y);
+      if (type == 0)
+        continue;
+
+      // Try to refine extremum.
+      auto& pos = location_refined(x, y);
+      auto& val = extremum_value(x, y);
+      // Initialize the initialize the value
+      val = I(x, y, s, o);
+      // SARA_CHECK(val);
+
+      // if (!refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
+      //                     refine_iterations))
+      //   continue;
+      refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
+                      refine_iterations);
+
+#ifndef STRICT_LOCAL_EXTREMA
+      // Reject if contrast too low.
+      if (std::abs(val) < extremum_thres)
+      {
+        // SARA_DEBUG << "Reject " << x << " " << y << std::endl;
+        map(x, y) = 0;
+      }
+#endif
+    }
+#ifdef PROFILE_ME
+    toc_("Calculating Location Residual");
+#endif
+
+    // ========================================================================
+    // Fill the list of DoG extrema.
+    // ========================================================================
+#ifdef PROFILE_ME
+    tic_();
+#endif
+    auto extrema = std::vector<OERegion>{};
+    extrema.reserve(10000);
+    for (int xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const auto& type = map(x, y);
+      if (type == 0)
+        continue;
+
+      const auto& pos = location_refined(x, y);
+      const auto& val = extremum_value(x, y);
+
+      // Store the DoG extremum.
+      auto dog = OERegion(pos.head<2>(), pos.z());
+      dog.extremum_value = val;
+      dog.extremum_type =
+          type == 1 ? OERegion::ExtremumType::Max : OERegion::ExtremumType::Min;
+      extrema.push_back(dog);
+    }
+#ifdef PROFILE_ME
+    toc_("Populating Extrema");
+#endif
+
+    return extrema;
+  }
+#else
+  auto local_scale_space_extrema(const ImagePyramid<float>& I, int s, int o,
+                                     float extremum_thres,
+                                     float edge_ratio_thres, int img_padding_sz,
+                                     int refine_iterations) -> vector<OERegion>
   {
 // #define PROFILE_ME
 #ifdef PROFILE_ME
@@ -247,181 +374,6 @@ namespace DO::Sara {
     map.flat_array().setZero();
 
 
-#define IMPLEMENTATION_V2
-#ifdef IMPLEMENTATION_V2
-    const auto& previous = I(s - 1, o);
-    const auto& me = I(s, o);
-    const auto& next = I(s + 1, o);
-
-    // ========================================================================
-    // Compare with me.
-    // ========================================================================
-#  ifdef PROFILE_ME
-    tic_();
-#  endif
-#  ifdef _OPENMP
-#    pragma omp parallel for
-#  endif
-    for (int xy = 0; xy < wh; ++xy)
-    {
-      const auto y = xy / w;
-      const auto x = xy - y * w;
-
-      const auto in_domain = img_padding_sz <= x && x < w - img_padding_sz &&
-                             img_padding_sz <= y && y < h - img_padding_sz;
-      if (!in_domain)
-        continue;
-
-      auto vals = std::array<float, 9>{};
-      auto k = 0;
-      for (auto v = -1; v <= 1; ++v)
-        for (auto u = -1; u <= 1; ++u)
-          vals[k++] = me(x + u, y + v);
-
-      const auto& me_at_xy = me(x, y);
-      const auto& local_max = *std::max_element(vals.begin(), vals.end());
-      if (local_max == me_at_xy)
-      {
-        map(x, y) = 1;
-        continue;
-      }
-
-      const auto& local_min = *std::min_element(vals.begin(), vals.end());
-      if (local_min == me_at_xy)
-      {
-        map(x, y) = -1;
-        continue;
-      }
-    }
-#  ifdef PROFILE_ME
-    toc_("Compare with me");
-#  endif
-
-    // ========================================================================
-    // Compare with previous.
-    // ========================================================================
-#  ifdef PROFILE_ME
-    tic_();
-#  endif
-#  ifdef _OPENMP
-#    pragma omp parallel for
-#  endif
-    for (int xy = 0; xy < wh; ++xy)
-    {
-      const auto y = xy / w;
-      const auto x = xy - y * w;
-
-      // Not an extrema before, we don't care.
-      auto& type = map(x, y);
-      if (type == 0)
-        continue;
-
-      auto vals = std::array<float, 9>{};
-      auto k = 0;
-      for (auto v = -1; v <= 1; ++v)
-        for (auto u = -1; u <= 1; ++u)
-          vals[k++] = previous(x + u, y + v);
-
-      // Mark me_at_xy as dead if it does not survive.
-      const auto& me_at_xy = me(x, y);
-      if (type == 1)
-      {
-        const auto local_max = *std::max_element(vals.begin(), vals.end());
-        if (me_at_xy < local_max)
-          type = 0;
-      }
-      else
-      {
-        const auto local_min = *std::min_element(vals.begin(), vals.end());
-        if (me_at_xy > local_min)
-          type = 0;
-      }
-    }
-#  ifdef PROFILE_ME
-    toc_("Compare with previous");
-#  endif
-
-#  ifdef PROFILE_ME
-    tic_();
-#  endif
-#  ifdef _OPENMP
-#    pragma omp parallel for
-#  endif
-    for (int xy = 0; xy < wh; ++xy)
-    {
-      const auto y = xy / w;
-      const auto x = xy - y * w;
-
-      // Not an extrema before, we don't care.
-      auto& type = map(x, y);
-      if (type == 0)
-        continue;
-
-      // Accumulate values.
-      auto vals = std::array<float, 9>{};
-      auto k = 0;
-      for (auto v = -1; v <= 1; ++v)
-        for (auto u = -1; u <= 1; ++u)
-          vals[k++] = next(x + u, y + v);
-
-      // Mark me_at_xy as dead if it does not survive.
-      const auto& me_at_xy = me(x, y);
-      if (type == 1)
-      {
-        const auto local_max = *std::max_element(vals.begin(), vals.end());
-        if (me_at_xy < local_max)
-          type = 0;
-      }
-      else
-      {
-        const auto local_min = *std::min_element(vals.begin(), vals.end());
-        if (me_at_xy > local_min)
-          type = 0;
-      }
-    }
-#  ifdef PROFILE_ME
-    toc_("Compare with next");
-#  endif
-
-#  ifdef PROFILE_ME
-    tic_();
-#  endif
-#  ifdef _OPENMP
-#    pragma omp parallel for
-#  endif
-    for (int xy = 0; xy < wh; ++xy)
-    {
-      const auto y = xy / w;
-      const auto x = xy - y * w;
-
-      // Not an extrema before, we don't care.
-      auto& type = map(x, y);
-      if (type == 0)
-        continue;
-
-#  ifndef STRICT_LOCAL_EXTREMA
-      // Reject early.
-      if (std::abs(I(x, y, s, o)) < 0.8f * extremum_thres)
-      {
-        // SARA_DEBUG << "Reject low contrast " << x << " " << y << std::endl;
-        type = 0;
-      }
-#  endif
-      // Reject early if located on edge.
-      if (on_edge(I(s, o), x, y, edge_ratio_thres))
-      {
-        // SARA_DEBUG << "Reject edge like at " << x << " " << y << std::endl;
-        type = 0;
-      }
-
-      // SARA_DEBUG << "Local extremum at " << x << " " << y << std::endl;
-    }
-#  ifdef PROFILE_ME
-    toc_("Low Contrast and Edge Filter");
-#  endif
-
-#else  // IMPLEMENTATION_V2
-
 //#define STRICT_LOCAL_EXTREMA
 #  ifdef STRICT_LOCAL_EXTREMA
     LocalScaleSpaceExtremum<std::greater, float> local_max;
@@ -431,9 +383,9 @@ namespace DO::Sara {
     LocalScaleSpaceExtremum<std::less_equal, float> local_min;
 #  endif
 
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     tic_();
-#endif
+#  endif
 
 #  ifdef _OPENMP
 #    pragma omp parallel for
@@ -470,12 +422,9 @@ namespace DO::Sara {
       map(static_cast<int>(x), static_cast<int>(y)) = type;
     }
 
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     toc_("Classifying Extrema");
-#endif
-
-#endif  // IMPLEMENTATION_V2
-
+#  endif
 
     // ========================================================================
     // Refine the location of extrema.
@@ -556,7 +505,7 @@ namespace DO::Sara {
 
     return extrema;
   }
-
+#endif
 
   auto select_laplace_scale(float& scale, int x, int y, int s, int o,
                             const ImagePyramid<float>& gaussian_pyramid,
