@@ -38,7 +38,7 @@ for i in range(10):
                 scale_camera=1,
                 scale_initial=1.6
             ),
-            gauss_truncate=4.,
+            gauss_truncate=3.,
             extremum_thres=0.01,
             edge_ratio_thres=10.,
             extremum_refinement_iter=3,

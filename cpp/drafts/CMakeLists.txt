@@ -14,13 +14,6 @@ endif ()
 # add_subdirectory(Expression)
 add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
-if (CUDA_FOUND AND NvidiaVideoCodec_ROOT)
-  add_subdirectory(NvCodec)
-endif ()
-
-if (NOT APPLE AND NOT WIN32)
-  add_subdirectory(GStreamer)
-endif ()
 
 if (NOT WIN32)
   add_subdirectory(Vulkan)

@@ -181,6 +181,9 @@ auto cuda_async_copy(const DriverApi::DeviceBgraBuffer& src, PixelBuffer& dst)
 
 int test_with_glfw(int argc, char** argv)
 {
+  if (argc < 2)
+    return 1;
+
   // Initialize CUDA driver.
   DriverApi::init();
 
@@ -189,17 +192,7 @@ int test_with_glfw(int argc, char** argv)
   auto cuda_context = DriverApi::CudaContext{gpu_id};
   cuda_context.make_current();
 
-  const auto video_filepath = argc < 2 ?
-#ifdef _WIN32
-                                       "C:/Users/David/Desktop/GOPR0542.MP4"
-#elif __APPLE__
-                                       "/Users/david/Desktop/Datasets/"
-                                       "humanising-autonomy/turn_bikes.mp4"
-#else
-                                       "/home/david/Desktop/Datasets/sfm/"
-                                       "Family.mp4"
-#endif
-                                       : argv[1];
+  const auto video_filepath = argv[1];
 
   // Initialize a CUDA-powered video streamer object.
   auto video_stream = shakti::VideoStream{video_filepath, cuda_context};
