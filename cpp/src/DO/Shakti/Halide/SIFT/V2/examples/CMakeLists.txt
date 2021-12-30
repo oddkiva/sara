@@ -1,5 +1,5 @@
 find_package(DO_Sara
-  COMPONENTS Core Graphics Geometry ImageIO ImageProcesing SfM VideoIO REQUIRED)
+  COMPONENTS Core Graphics Geometry ImageIO ImageProcessing SfM VideoIO REQUIRED)
 
 # N.B.: with MSVC, this link helped to solve already defined symbol errors:
 # https://github.com/halide/Halide/issues/740
