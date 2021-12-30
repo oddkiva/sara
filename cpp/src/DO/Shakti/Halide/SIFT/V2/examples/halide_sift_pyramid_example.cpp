@@ -23,6 +23,7 @@
 #include <DO/Sara/Features.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
@@ -32,9 +33,6 @@
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
 #  include <DO/Shakti/Cuda/VideoIO.hpp>
 #endif
-
-#include "shakti_bgra8u_to_gray32f_cpu.h"
-#include "shakti_rgb8u_to_gray32f_cpu.h"
 
 
 namespace sara = DO::Sara;
@@ -214,12 +212,6 @@ auto test_on_video(int argc, char **argv)
   // HALIDE PIPELINE.
   //
   // RGB-grayscale conversion.
-#ifdef USE_SHAKTI_CUDA_VIDEOIO
-  auto buffer_bgra = halide::as_interleaved_runtime_buffer(frame);
-#else
-  auto buffer_rgb = halide::as_interleaved_runtime_buffer(frame);
-#endif
-  auto buffer_gray = halide::as_runtime_buffer(frame_gray);
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
 
   auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
@@ -271,9 +263,9 @@ auto test_on_video(int argc, char **argv)
     {
       sara::tic();
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
-      shakti_bgra8u_to_gray32f_cpu(buffer_bgra, buffer_gray);
+      from_bgra8_to_gray32f(frame, frame_gray);
 #else
-      shakti_rgb8u_to_gray32f_cpu(buffer_rgb, buffer_gray);
+      from_rgb8_to_gray32f(frame, frame_gray);
 #endif
       sara::toc("CPU RGB to grayscale");
 

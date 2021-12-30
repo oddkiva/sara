@@ -1,5 +1,5 @@
 find_package(DO_Sara
-             COMPONENTS Core Graphics Geometry ImageIO SfM VideoIO REQUIRED)
+  COMPONENTS Core Graphics Geometry ImageIO ImageProcesing SfM VideoIO REQUIRED)
 
 # N.B.: with MSVC, this link helped to solve already defined symbol errors:
 # https://github.com/halide/Halide/issues/740
@@ -14,9 +14,7 @@ target_link_options(halide_sift_octave_example
 target_link_libraries(halide_sift_octave_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
-  DO_Shakti_Halide_Sift_gpu_v2
-  shakti_bgra8u_to_gray32f_cpu
-  shakti_rgb8u_to_gray32f_cpu)
+  DO_Shakti_Halide_Sift_gpu_v2)
 set_property(TARGET halide_sift_octave_example
   PROPERTY
   FOLDER "Examples/Shakti/Halide")
@@ -35,8 +33,6 @@ target_link_libraries(halide_sift_pyramid_example
   ${DO_Sara_LIBRARIES}
   ${Boost_LIBRARIES}
   DO_Shakti_Halide_Sift_gpu_v2
-  shakti_bgra8u_to_gray32f_cpu
-  shakti_rgb8u_to_gray32f_cpu
   $<$<BOOL:${CMAKE_CUDA_COMPILER}>:${CUDA_CUDA_LIBRARY}>
   $<$<BOOL:${NvidiaVideoCodec_ROOT}>:DO::Shakti::VideoIO>)
 set_property(TARGET halide_sift_pyramid_example
