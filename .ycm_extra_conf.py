@@ -59,20 +59,17 @@ flags = [
 "-I", "/usr/include/x86_64-linux-gnu/qt5/QtXml",
 "-I", "/usr/include/x86_64-linux-gnu/qt5/QtSql",
 "-I", "/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64",
-# Boost and HPX headers in /usr/local.
+# Boost, Halide and HPX headers in /usr/local.
 "-I", "/usr/local/include",
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
-# Halide.
-"-I", "/opt/halide/include",
-"-I", "/opt/halide/tools",
 # nVidia Video Codec SDK.
 "-I", "/opt/Video_Codec_SDK_9.1.23/include",
 # Current header directories.
 "-I", "cpp",
 "-I", "cpp/src",
 "-I", "cpp/third-party/nvidia-video-codec-sdk-9.1.23",
-"-I", "cpp/third-party/gpufilter/include",
+"-I", "cpp/third-party/taskflow/include",
 # Build directory.
 "-I", "../sara-build/cpp/src",
 "-I", "../sara-build-Xcode/cpp/src",
