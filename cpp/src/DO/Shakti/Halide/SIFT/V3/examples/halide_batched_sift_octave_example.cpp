@@ -16,12 +16,11 @@
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Shakti/Halide/SIFT/Draw.hpp>
 #include <DO/Shakti/Halide/SIFT/V3/Pipeline.hpp>
-
-#include "shakti_rgb8u_to_gray32f_cpu.h"
 
 
 namespace sara = DO::Sara;
@@ -121,8 +120,6 @@ auto test_on_video()
   // HALIDE PIPELINE.
   //
   // RGB-grayscale conversion.
-  auto buffer_rgb = halide::as_interleaved_runtime_buffer(frame);
-  auto buffer_gray = halide::as_runtime_buffer(frame_gray);
   auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
 
   auto sift_octave = halide::v3::SiftOctavePipeline{};
@@ -153,7 +150,7 @@ auto test_on_video()
     SARA_CHECK(frames_read);
 
     sara::tic();
-    shakti_rgb8u_to_gray32f_cpu(buffer_rgb, buffer_gray);
+    sara::from_rgb8_to_gray32f(frame, frame_gray);
     sara::toc("CPU rgb to grayscale");
 
     sara::tic();
@@ -169,9 +166,6 @@ auto test_on_video()
     sara::toc("Octave computation");
 
     sara::tic();
-    // draw_quantized_extrema(frame, extrema_quantized);
-    // draw_extrema(frame, extrema);
-    // draw_oriented_extrema(extrema_oriented);
     draw_oriented_extrema(frame, sift_octave.extrema_oriented, 1, 2);
     sara::display(frame);
     sara::toc("Display");

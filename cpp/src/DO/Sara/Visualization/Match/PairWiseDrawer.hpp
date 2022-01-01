@@ -30,14 +30,14 @@ namespace DO { namespace Sara {
       CatV
     };
 
-    PairWiseDrawer(const Image<Rgb8>& I1, const Image<Rgb8>& I2)
+    PairWiseDrawer(const ImageView<Rgb8>& I1, const ImageView<Rgb8>& I2)
       : image1(I1)
       , image2(I2)
     {
     }
 
     //! Set visualization parameters.
-    void set_viz_params(float s1, float s2, CatType concatType)
+    inline void set_viz_params(float s1, float s2, CatType concatType)
     {
       _z1 = s1;
       _z2 = s2;
@@ -107,7 +107,7 @@ namespace DO { namespace Sara {
     void draw_match(const Match& m, const Rgb8& c = Magenta8,
                     bool drawLine = false) const;
 
-    const Image<Rgb8>& image(int i) const
+    const ImageView<Rgb8>& image(int i) const
     {
       assert(i == 0 || i == 1);
       return (i == 0) ? image1 : image2;
@@ -131,8 +131,8 @@ namespace DO { namespace Sara {
     }
 
   private:
-    const Image<Rgb8>& image1;
-    const Image<Rgb8>& image2;
+    const ImageView<Rgb8>& image1;
+    const ImageView<Rgb8>& image2;
 
     CatType _cat_type;
     Point2i _off2;

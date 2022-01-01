@@ -168,7 +168,6 @@ int __main(int, char** argv)
     epipolar_edges.F_best_samples = epipolar_edges.E_best_samples;
   }
 
-
   // Extract the two-view geometry.
   print_stage("Estimating the two-view geometry...");
   epipolar_edges.two_view_geometries = {
@@ -232,25 +231,14 @@ int __main(int, char** argv)
     millisleep(1);
   }
 
-  const auto& R = geometry.C2.R;
-  const auto& t = geometry.C2.t;
-  const Eigen::Matrix3d Rw = R.transpose();
-  const Eigen::Vector3d tw = -R.transpose() * t;
-  SARA_DEBUG << "Rw =\n" << Rw << std::endl;
-  SARA_DEBUG << "tw =\n" << tw << std::endl;
-
-  const auto axis_angle = Eigen::AngleAxisd(Rw);
-  SARA_DEBUG << "Axis vector = " << axis_angle.axis().transpose() << std::endl;
-  SARA_DEBUG << "Angle = " << axis_angle.angle() * 180 / M_PI << " deg"
-             << std::endl;
-
-  // clang-format off
   // The rotation is expressed in the camera coordinates.
   // But the calculation is done in the automotive/aeronautics coordinate
   // system.
   //
   // The z-coordinate of the camera coordinates is the x-axis of the automotive
   // coordinates
+  //
+  // clang-format off
   static const auto P = (Eigen::Matrix3d{} <<
      0,  0, 1,
     -1,  0, 0,
@@ -258,18 +246,19 @@ int __main(int, char** argv)
   ).finished();
   // clang-format on
 
-  const Eigen::Matrix3d Rw1 = P * Rw * P.transpose();
-  const Eigen::Vector3d tw1 = P * tw;
-  const auto angles = calculate_yaw_pitch_roll(Rw1);
-  SARA_DEBUG << "Rw1 =\n" << Rw1 << std::endl;
-  SARA_DEBUG << "tw1 =\n" << tw1 << std::endl;
+  const auto& R = geometry.C2.R;
+  const auto& t = geometry.C2.t;
+  const Eigen::Matrix3d Rw = P * R.transpose() * P.transpose();
+  const Eigen::Vector3d tw = P * (-R.transpose() * t);
+
   // The implementation.
+  const auto angles = calculate_yaw_pitch_roll(Rw);
+  SARA_DEBUG << "Rw =\n" << Rw << std::endl;
+  SARA_DEBUG << "tw =\n" << tw << std::endl;
+
   SARA_DEBUG << "yaw   = " << angles(0) * 180. / M_PI << " deg" << std::endl;
   SARA_DEBUG << "pitch = " << angles(1) * 180. / M_PI << " deg" << std::endl;
   SARA_DEBUG << "roll  = " << angles(2) * 180. / M_PI << " deg" << std::endl;
-  // This works as well.
-  SARA_DEBUG << "Eigen euler angles (Rw1) = " << Rw1.eulerAngles(2, 1, 0) * 180 / M_PI
-             << std::endl;
 
   get_key();
 

@@ -17,6 +17,7 @@ if(SARA_USE_FROM_SOURCE)
                 Halide::Runtime
                 # Fast color conversion
                 shakti_rgb8u_to_gray32f_cpu
+                shakti_bgra8u_to_gray32f_cpu
                 # Binary operations.
                 shakti_subtract_32f_cpu
                 # Resize operations.

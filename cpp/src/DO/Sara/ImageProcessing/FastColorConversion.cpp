@@ -14,6 +14,7 @@
 #ifdef DO_SARA_USE_HALIDE
 #include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 #include "shakti_rgb8u_to_gray32f_cpu.h"
+#include "shakti_bgra8u_to_gray32f_cpu.h"
 #endif
 
 
@@ -42,6 +43,28 @@ namespace DO::Sara {
     // [Grayscale] 8.8687 ms
     // This is 15 times slower compared to the Halide optimized CPU implementation
     DO::Sara::convert(src, dst);
+#endif
+  }
+
+  auto from_bgra8_to_gray32f(const ImageView<Bgra8>& src, ImageView<float>& dst) -> void
+  {
+    if (src.sizes() != dst.sizes())
+      throw std::domain_error{
+          "Color conversion error: image sizes are not equal!"};
+
+#ifdef DO_SARA_USE_HALIDE
+    auto src_buffer = Shakti::Halide::as_interleaved_runtime_buffer(src);
+    auto dst_buffer = Shakti::Halide::as_runtime_buffer(dst);
+    shakti_bgra8u_to_gray32f_cpu(src_buffer, dst_buffer);
+#else
+    std::transform(src.begin(), src.end(), dst.begin(), [](const Bgra8& val) {
+      auto gray = float{};
+      rgb_to_gray(Rgb32f{val.channel<R>() / 255.f,  //
+                         val.channel<B>() / 255.f,  //
+                         val.channel<B>() / 255.f},
+                  gray);
+      return gray;
+    });
 #endif
   }
 

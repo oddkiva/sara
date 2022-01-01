@@ -28,7 +28,11 @@ namespace DO { namespace Sara {
   //! Convenience functions.
   inline GraphicsApplication::Impl * gui_app()
   {
-    return qobject_cast<GraphicsApplication::Impl *>(qApp);
+    // For some reason this may fail on MacOS and returns a nullptr.
+    // return qobject_cast<GraphicsApplication::Impl *>(qApp);
+
+    // So we just work around with static_cast instead.
+    return static_cast<GraphicsApplication::Impl *>(qApp);
   }
 
   inline UserThread& get_user_thread()

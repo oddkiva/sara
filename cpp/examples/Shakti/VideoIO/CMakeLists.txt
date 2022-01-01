@@ -16,5 +16,7 @@ target_link_libraries(
           ${GLEW_LIBRARIES}
           ${DO_Sara_LIBRARIES}
           glfw)
-set_target_properties(nvidia_decoder_example PROPERTIES FOLDER
-                                                        "Examples/DRAFTS")
+set_target_properties(
+  nvidia_decoder_example
+  PROPERTIES
+  FOLDER "Examples/Shakti")
