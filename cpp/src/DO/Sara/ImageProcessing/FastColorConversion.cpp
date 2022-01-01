@@ -53,24 +53,19 @@ namespace DO::Sara {
           "Color conversion error: image sizes are not equal!"};
 
 #ifdef DO_SARA_USE_HALIDE
-    // Typical timing with a 4K video on my Desktop CPU:
-    // - model name      : Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz
-    //
-    // [Grayscale] 0.56932 ms
     auto src_buffer = Shakti::Halide::as_interleaved_runtime_buffer(src);
     auto dst_buffer = Shakti::Halide::as_runtime_buffer(dst);
     shakti_bgra8u_to_gray32f_cpu(src_buffer, dst_buffer);
 #else
-    // FALLBACK IMPLEMENTATION.
-    //
-    // Typical timing with a 4K video on my Desktop CPU:
-    // - model name      : Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz
-    //
-    // [Grayscale] 8.8687 ms
-    // This is 15 times slower compared to the Halide optimized CPU implementation
-    DO::Sara::convert(src, dst);
+    std::transform(src.begin(), src.end(), dst.begin(), [](const Bgra8& val) {
+      auto gray = float{};
+      rgb_to_gray(Rgb32f{val.channel<R>() / 255.f,  //
+                         val.channel<B>() / 255.f,  //
+                         val.channel<B>() / 255.f},
+                  gray);
+      return gray;
+    });
 #endif
   }
-
 
 }  // namespace DO::Sara
