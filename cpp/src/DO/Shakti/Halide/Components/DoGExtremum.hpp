@@ -191,7 +191,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     return {res(0), res(1), res(2), new_value, success};
   }
 
-  //! @brief Akward API.
+  //! @brief Awkward API.
   //! @{
   template <typename Input>
   auto is_dog_extremum(                                                    //

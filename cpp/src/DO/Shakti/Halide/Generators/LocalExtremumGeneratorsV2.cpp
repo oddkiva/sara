@@ -121,6 +121,8 @@ namespace v2 {
     Input<T> edge_ratio{"edge_ratio"};
     Input<T> extremum_thres{"extremum_thres"};
 
+    // Func extremum{"extremum"};
+
     Output<Buffer<std::int8_t>> out{"out", 4};
 
     //! @brief Variables.
@@ -137,6 +139,33 @@ namespace v2 {
       const auto next_ext = BoundaryConditions::repeat_edge(scale_next);
 
       using DO::Shakti::HalideBackend::is_dog_extremum;
+
+      // auto is_max =
+      //     local_scale_space_max(prev_ext, curr_ext, next_ext, x, y, c, n);
+      // auto is_min =
+      //     local_scale_space_min(prev_ext, curr_ext, next_ext, x, y, c, n);
+
+      // extremum(x, y, c, n) = Halide::select(
+      //     is_max,                                                          //
+      //     Halide::cast<std::int8_t>(1) /* good local max! */,              //
+      //     Halide::select(                                                  //
+      //         is_min,                                                      //
+      //         Halide::cast<std::int8_t>(-1) /* good local min! */,         //
+      //         Halide::cast<std::int8_t>(0) /* not a local extremum! */));  //
+
+      // auto is_strong = abs(curr_ext(x, y, c, n)) > 0.8f * extremum_thres;
+      // auto is_not_on_edge = !on_edge(curr_ext, edge_ratio, x, y, c, n);
+      // is_max = extremum(x, y, c, n) == 1;
+      // is_min = extremum(x, y, c, n) == -1;
+
+      // out(x, y, c, n) = Halide::select(
+      //     is_max && is_strong && is_not_on_edge,                           //
+      //     Halide::cast<std::int8_t>(1) /* good local max! */,              //
+      //     Halide::select(                                                  //
+      //         is_min && is_strong && is_not_on_edge,                       //
+      //         Halide::cast<std::int8_t>(-1) /* good local min! */,         //
+      //         Halide::cast<std::int8_t>(0) /* not a local extremum! */));  //
+
       out(x, y, c, n) = is_dog_extremum(prev_ext, curr_ext, next_ext,  //
                                         edge_ratio, extremum_thres,    //
                                         x, y, c, n);                   //
@@ -176,6 +205,10 @@ namespace v2 {
       // CPU schedule.
       else
       {
+        // extremum.tile(x, y, xo, yo, xi, yi, 64, 64, TailStrategy::GuardWithIf)
+        //     .parallel(yo)
+        //     .vectorize(x, 8, TailStrategy::GuardWithIf);
+
         out.split(y, yo, yi, 8, TailStrategy::GuardWithIf)
             .parallel(yo)
             .vectorize(x, 8, TailStrategy::GuardWithIf);
@@ -272,8 +305,7 @@ namespace v3 {
 HALIDE_REGISTER_GENERATOR(v2::LocalScaleSpaceExtremum<float>,
                           shakti_scale_space_dog_extremum_32f_cpu)
 
-HALIDE_REGISTER_GENERATOR(v2::LocalMax<float>,
-                          shakti_local_max_32f_gpu)
+HALIDE_REGISTER_GENERATOR(v2::LocalMax<float>, shakti_local_max_32f_gpu)
 HALIDE_REGISTER_GENERATOR(v2::LocalScaleSpaceExtremum<float>,
                           shakti_local_scale_space_extremum_32f_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v3::LocalScaleSpaceExtremum<float>,

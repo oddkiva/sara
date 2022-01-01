@@ -42,6 +42,7 @@ if (UNIX)
   if (APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-copy")
   endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
   # Additional flags for Release builds.
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
