@@ -102,9 +102,6 @@ namespace DO::Sara {
         for (const auto& e : g.second)
           edge_colors[e] = edge_group_colors[g.first];
 
-//      const Eigen::Vector2d p1d = p1.cast<double>();
-//      const auto& s = downscale_factor;
-
       // Watershed.
       const auto frame_blurred = frame.convert<Rgb32f>()
                                       .compute<Gaussian>(1.2f)

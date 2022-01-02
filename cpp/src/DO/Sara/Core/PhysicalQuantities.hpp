@@ -86,6 +86,12 @@ namespace DO::Sara {
       return *this;
     }
 
+    template <typename U>
+    inline constexpr auto as() const -> U
+    {
+      return static_cast<U>(value);
+    }
+
     T value{};
   };
 
