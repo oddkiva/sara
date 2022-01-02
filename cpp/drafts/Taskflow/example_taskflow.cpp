@@ -12,18 +12,11 @@ template <class T>
 class SafeQueue
 {
 public:
-  SafeQueue(void)
-    : q()
-    , m()
-    , c()
-  {
-  }
+  inline SafeQueue() = default;
 
-  ~SafeQueue(void)
-  {
-  }
+  inline ~SafeQueue() = default;
 
-  void enqueue(T t)
+  inline auto enqueue(T&& t) -> void
   {
     std::lock_guard<std::mutex> lock(m);
     q.push(t);
@@ -46,7 +39,7 @@ private:
   std::condition_variable c;
 };
 
-template<typename T = float>
+template <typename T = float>
 struct DisplayTask
 {
   sara::Image<T> image;
@@ -75,7 +68,8 @@ struct DisplayTask
     if (index == -1 || image.data() == nullptr)
       return;
     auto image_rgb = image.template convert<sara::Rgb8>();
-    sara::draw_text(image_rgb, 100, 50, std::to_string(index), sara::White8, 30);
+    sara::draw_text(image_rgb, 100, 50, std::to_string(index), sara::White8,
+                    30);
     sara::display(image_rgb);
     std::cout << "Showing frame " << index << std::endl;
   }
@@ -95,17 +89,16 @@ GRAPHICS_MAIN()
 
   auto display_queue = SafeQueue<DisplayTask<float>>{};
   auto display_async_task = std::thread{
-    [&display_queue, &last_frame_shown, &current_frame, &video_stream_end] {
-      while (!video_stream_end)
-      {
-        auto task = display_queue.dequeue();
-        if (task.index < last_frame_shown || task.index + 3 < current_frame)
-           continue;
-        last_frame_shown = task.index;
-        task.run();
-      }
-    }
-  };
+      [&display_queue, &last_frame_shown, &current_frame, &video_stream_end] {
+        while (!video_stream_end)
+        {
+          auto task = display_queue.dequeue();
+          if (task.index < last_frame_shown || task.index + 3 < current_frame)
+            continue;
+          last_frame_shown = task.index;
+          task.run();
+        }
+      }};
 
   sara::create_window(video_stream.sizes());
 
@@ -133,17 +126,19 @@ GRAPHICS_MAIN()
           })
           .name("To grayscale");
 
-  auto display = taskflow
-                     .emplace([&display_queue, &video_frame_gray, &current_frame] {
-                       display_queue.enqueue({video_frame_gray, current_frame});
-                     })
-                     .name("display");
+  auto display =  //
+      taskflow
+          .emplace([&display_queue, &video_frame_gray, &current_frame] {
+            display_queue.enqueue({video_frame_gray, current_frame});
+          })
+          .name("display");
 
   read_video_frame.precede(color_convert);
   color_convert.precede(display);
 
-  executor.run_until(taskflow,
-                     [&video_stream_end]() { return video_stream_end; }).wait();
+  executor
+      .run_until(taskflow, [&video_stream_end]() { return video_stream_end; })
+      .wait();
   display_async_task.join();
 
   return 0;
