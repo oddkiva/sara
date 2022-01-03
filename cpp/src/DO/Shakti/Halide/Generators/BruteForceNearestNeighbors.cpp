@@ -32,8 +32,10 @@ namespace {
     Input<Buffer<T>> d1{"descriptors_1", 2};
     Input<Buffer<T>> d2{"descriptors_2", 2};
 
-    Output<Buffer<float>> min_dist{"min_dist", 1};
-    Output<Buffer<int32_t>> nn{"nearest_neighbors", 1};
+    Output<Buffer<int32_t>> nn1{"nn1", 1};
+    Output<Buffer<int32_t>> nn2{"nn2", 1};
+    Output<Buffer<float>> dist1{"min_dist1", 1};
+    Output<Buffer<float>> dist2{"min_dist2", 1};
 
     void generate()
     {
@@ -47,58 +49,60 @@ namespace {
       auto i = Var{"i"};
       auto j = Var{"j"};
       auto kk = RDom{0, k};
-      auto jj = RDom{0, n2};
+      auto jj = RDom{2, n2 - 2};
 
       // The L2-distance function.
-      auto dist_func = Func{"l2_dist"};
+      auto dist_func = Func{"l2_distance"};
       const auto diff = d1(kk, i) - d2(kk, j);
       dist_func(j, i) = sum(diff * diff);
 
-      Func j_index{"j"};
-      j_index(j) = cast<int>(j);
+      Func nn2_func{"two_nearest_neighbors"};
 
-      Func best{"Best"};
-      best(i) = argmin(dist_func(jj, i));
-      nn(i) = best(i)[0];
-      min_dist(i) = best(i)[1];
+      Expr init_nn_1 = select(dist_func(0, i) < dist_func(1, i), 0, 1);
+      Expr init_nn_2 = select(dist_func(0, i) < dist_func(1, i), 1, 0);
+
+      Expr init_dist_1 = select(dist_func(0, i) < dist_func(1, i),
+                                dist_func(0, i), dist_func(1, i));
+      Expr init_dist_2 = select(dist_func(0, i) < dist_func(1, i),
+                                dist_func(1, i), dist_func(0, i));
+
+      nn2_func(i) = Tuple{init_nn_1, init_nn_2, init_dist_1, init_dist_2};
+
+      Expr old_nn1 = nn2_func(i)[0];
+      Expr old_nn2 = nn2_func(i)[1];
+      Expr old_min1 = nn2_func(i)[2];
+      Expr old_min2 = nn2_func(i)[3];
+
+      Expr new_nn1 = select(dist_func(jj, i) < old_min1, jj, old_nn1);
+      Expr new_nn2 = select(dist_func(jj, i) < old_min1, old_nn1, old_nn2);
+
+      Expr new_min1 = select(dist_func(jj, i) < old_min1, dist_func(jj, i), old_min1);
+      Expr new_min2 = select(dist_func(jj, i) < old_min1, old_min1, old_min2);
+
+      nn2_func(i) = {new_nn1, new_nn2, new_min1, new_min2};
+
+      nn1(i) = nn2_func(i)[0];
+      nn2(i) = nn2_func(i)[1];
+      dist1(i) = nn2_func(i)[2];
+      dist2(i) = nn2_func(i)[3];
 
 
       // ======================================================================
       // THE SCHEDULE
+      //
+      // HOWTO? That is the question...
       // ======================================================================
       auto io = Var{"io"};
       auto ii = Var{"ii"};
-      auto jo = Var{"jo"};
-      auto ji = Var{"ji"};
+      auto ko = Var{"jo"};
+      auto ki = Var{"ji"};
       if (get_target().has_gpu_feature())
       {
-        // nn.gpu_tile(i, io, ii, 16, TailStrategy::GuardWithIf);
-
-        // min_dist.gpu_tile(i, io, ii, 16, TailStrategy::GuardWithIf);
-
-        best.compute_root();
-        // best.update().atomic().parallel(jj);
-
-        // // Calculate all possible distances for a batch of descriptors 1.
-        // dist_func.gpu_tile(i, jj, io, jo, ii, ji, 16, 128,
-        //                    TailStrategy::GuardWithIf);
-        // dist_func.compute_at(min_dist, i);
-        // // Unroll the loop in the L2-distance calculation.
-        // dist_func.unroll(kk);
+        nn2_func.gpu_tile(i, io, ii, 16, TailStrategy::GuardWithIf);
       }
       else
       {
-        // nn.split(i, io, ii, 8, TailStrategy::GuardWithIf).unroll(ii);
-        // nn.unroll(j);
-
-        // min_dist.compute_at(nn, i);
-        // min_dist.update().atomic().parallel(jj);
-        // // min_dist.unroll(jj);
-
-        // dist_func.compute_at(min_dist, i);
-        // // dist_func.split(i, io, ii, 8, TailStrategy::GuardWithIf);
-        // // dist_func.split(j, jo, ji, 32,
-        // // TailStrategy::GuardWithIf).parallel(jo); dist_func.vectorize(kk, 8);
+        nn2_func.split(i, io, ii, 8, TailStrategy::GuardWithIf).parallel(io).unroll(ii);
       }
     }
   };
