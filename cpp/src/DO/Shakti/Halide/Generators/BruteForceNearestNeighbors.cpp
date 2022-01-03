@@ -54,6 +54,9 @@ namespace {
       const auto diff = d1(kk, i) - d2(kk, j);
       dist_func(j, i) = sum(diff * diff);
 
+      min_dist(i) = 0.f;
+      nn(i) = -1;
+
 #if 0
       // ======================================================================
       // THE SCHEDULE
