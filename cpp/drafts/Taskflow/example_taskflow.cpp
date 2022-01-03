@@ -2,84 +2,31 @@
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <drafts/Taskflow/DisplayTask.hpp>
+#include <drafts/Taskflow/SafeQueue.hpp>
+
 #include <taskflow/taskflow.hpp>
 
 
 namespace sara = DO::Sara;
 
 
-template <class T>
-class SafeQueue
+int main(int argc, char** argv)
 {
-public:
-  inline SafeQueue() = default;
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
+}
 
-  inline ~SafeQueue() = default;
-
-  inline auto enqueue(T&& t) -> void
-  {
-    std::lock_guard<std::mutex> lock(m);
-    q.push(t);
-    c.notify_one();
-  }
-
-  T dequeue(void)
-  {
-    std::unique_lock<std::mutex> lock(m);
-    if (q.empty())
-      return {};
-    T val = q.front();
-    q.pop();
-    return val;
-  }
-
-private:
-  std::queue<T> q;
-  mutable std::mutex m;
-  std::condition_variable c;
-};
-
-template <typename T = float>
-struct DisplayTask
+int __main(int argc, char **argv)
 {
-  sara::Image<T> image;
-  int index = -1;
-
-  inline DisplayTask() = default;
-
-  inline DisplayTask(sara::Image<T> im, int id)
-    : image{std::move(im)}
-    , index{id}
+  if (argc < 2)
   {
+    std::cerr << "Usage: " << argv[0] << "  VIDEO_FILEPATH" << std::endl;
+    return 1;
   }
 
-  inline DisplayTask(const DisplayTask& task) = default;
-
-  inline DisplayTask(DisplayTask&& task)
-    : image{std::move(task.image)}
-    , index{task.index}
-  {
-  }
-
-  inline ~DisplayTask() = default;
-
-  inline auto run() -> void
-  {
-    if (index == -1 || image.data() == nullptr)
-      return;
-    auto image_rgb = image.template convert<sara::Rgb8>();
-    sara::draw_text(image_rgb, 100, 50, std::to_string(index), sara::White8,
-                    30);
-    sara::display(image_rgb);
-    std::cout << "Showing frame " << index << std::endl;
-  }
-};
-
-
-GRAPHICS_MAIN()
-{
-  const auto video_path =
-      "/Users/david/Desktop/Datasets/brockwell-park-varying-focal-length.mov";
+  const auto video_path = argv[1];
   auto video_stream = sara::VideoStream{video_path};
   auto video_frame = video_stream.frame();
   auto video_frame_gray = sara::Image<float>{video_stream.sizes()};
@@ -87,7 +34,7 @@ GRAPHICS_MAIN()
   auto last_frame_shown = std::atomic_int32_t{-1};
   auto video_stream_end = false;
 
-  auto display_queue = SafeQueue<DisplayTask<float>>{};
+  auto display_queue = sara::SafeQueue<sara::DisplayTask<float>>{};
   auto display_async_task = std::thread{
       [&display_queue, &last_frame_shown, &current_frame, &video_stream_end] {
         while (!video_stream_end)

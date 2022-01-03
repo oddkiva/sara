@@ -740,9 +740,11 @@ namespace DO::Shakti::HalideBackend {
       const auto i = ji / N;
       const auto j = ji - i * N;
 
-      const auto r = Halide::RDom(                                      //
-          -bin_length_in_scale_unit, 2 * bin_length_in_scale_unit + 1,  //
-          -bin_length_in_scale_unit, 2 * bin_length_in_scale_unit + 1   //
+      const auto radius = Halide::cast<int>(bin_length_in_scale_unit);
+
+      const auto r = Halide::RDom(  //
+          -radius, 2 * radius + 1,  //
+          -radius, 2 * radius + 1   //
       );
 
       const auto x = Halide::round(                      //
