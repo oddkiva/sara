@@ -17,6 +17,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "shakti_brute_force_nn_l2_32f_cpu.h"
+#include "shakti_brute_force_nn_l2_32f_gpu.h"
 
 
 namespace sara = DO::Sara;
@@ -24,9 +25,10 @@ namespace hl = DO::Shakti::Halide;
 
 BOOST_AUTO_TEST_CASE(test_brute_force_nn)
 {
-  auto d1 = sara::Tensor_<float, 2>{16, 128};
+  auto d1 = sara::Tensor_<float, 2>{16000, 128};
   for (auto i = 0; i < d1.rows(); ++i)
-    d1[i].flat_array().fill(i);
+    d1[i].flat_array().fill(rand() % 1000);
+  d1.flat_array() /= 1000;
 
   auto d2 = d1;
   d2.flat_array() += 0.1f;
@@ -42,9 +44,16 @@ BOOST_AUTO_TEST_CASE(test_brute_force_nn)
   SARA_CHECK(d1_.dim(0).extent());
   SARA_CHECK(d1_.dim(1).extent());
 
-  shakti_brute_force_nn_l2_32f_cpu(d1_, d2_, dist_, nn_);
+  sara::tic();
+  d1_.set_host_dirty();
+  d2_.set_host_dirty();
+  dist_.set_host_dirty();
+  nn_.set_host_dirty();
+  shakti_brute_force_nn_l2_32f_gpu(d1_, d2_, dist_, nn_);
+  dist_.copy_to_host();
+  nn_.copy_to_host();
+  sara::toc("Brute-Force NN");
 
-  SARA_DEBUG << std::endl << dist << std::endl;
-
-  SARA_DEBUG << std::endl << nn << std::endl;
+  // SARA_DEBUG << std::endl << dist << std::endl;
+  // SARA_DEBUG << std::endl << nn << std::endl;
 }

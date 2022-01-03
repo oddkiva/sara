@@ -54,7 +54,15 @@ namespace {
       const auto diff = d1(kk, i) - d2(kk, j);
       dist_func(j, i) = sum(diff * diff);
 
-#if 0
+      Func j_index{"j"};
+      j_index(j) = cast<int>(j);
+
+      Func best{"Best"};
+      best(i) = argmin(dist_func(jj, i));
+      nn(i) = best(i)[0];
+      min_dist(i) = best(i)[1];
+
+
       // ======================================================================
       // THE SCHEDULE
       // ======================================================================
@@ -64,40 +72,34 @@ namespace {
       auto ji = Var{"ji"};
       if (get_target().has_gpu_feature())
       {
-        // Evaluate in parallel:
-        // - 1-NN: nn(i, 0)
-        // - 2-NN: nn(i, 1)
-        nn.gpu_tile(i, j, io, jo, ii, ji, 512, 2, TailStrategy::GuardWithIf);
+        // nn.gpu_tile(i, io, ii, 16, TailStrategy::GuardWithIf);
 
-        // Evaluate min_dist(i, 0) and min_dist(i, 1).
-        min_dist.gpu_tile(i, j, io, jo, ii, ji, 8, 2,
-                          TailStrategy::GuardWithIf);
-        min_dist.compute_at(nn, i);
-        // min_dist.update().atomic().parallel(jj);
-        // min_dist.unroll(jj);
+        // min_dist.gpu_tile(i, io, ii, 16, TailStrategy::GuardWithIf);
 
-        // Calculate all possible distances for a batch of descriptors 1.
-        dist_func.gpu_tile(i, j, io, jo, ii, ji, 8, 128,
-                           TailStrategy::GuardWithIf);
-        dist_func.compute_at(min_dist, i);
-        // Unroll the loop in the L2-distance calculation.
-        //dist_func.unroll(kk);
+        best.compute_root();
+        // best.update().atomic().parallel(jj);
+
+        // // Calculate all possible distances for a batch of descriptors 1.
+        // dist_func.gpu_tile(i, jj, io, jo, ii, ji, 16, 128,
+        //                    TailStrategy::GuardWithIf);
+        // dist_func.compute_at(min_dist, i);
+        // // Unroll the loop in the L2-distance calculation.
+        // dist_func.unroll(kk);
       }
       else
       {
-        nn.split(i, io, ii, 8, TailStrategy::GuardWithIf).unroll(ii);
-        nn.unroll(j);
+        // nn.split(i, io, ii, 8, TailStrategy::GuardWithIf).unroll(ii);
+        // nn.unroll(j);
 
-        min_dist.compute_at(nn, i);
-        min_dist.update().atomic().parallel(jj);
-        // min_dist.unroll(jj);
+        // min_dist.compute_at(nn, i);
+        // min_dist.update().atomic().parallel(jj);
+        // // min_dist.unroll(jj);
 
-        dist_func.compute_at(min_dist, i);
-        //dist_func.split(i, io, ii, 8, TailStrategy::GuardWithIf);
-        //dist_func.split(j, jo, ji, 32, TailStrategy::GuardWithIf).parallel(jo);
-        //dist_func.vectorize(kk, 8);
+        // dist_func.compute_at(min_dist, i);
+        // // dist_func.split(i, io, ii, 8, TailStrategy::GuardWithIf);
+        // // dist_func.split(j, jo, ji, 32,
+        // // TailStrategy::GuardWithIf).parallel(jo); dist_func.vectorize(kk, 8);
       }
-#endif
     }
   };
 
