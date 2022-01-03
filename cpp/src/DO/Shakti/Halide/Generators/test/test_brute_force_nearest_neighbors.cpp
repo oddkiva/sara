@@ -25,7 +25,7 @@ namespace hl = DO::Shakti::Halide;
 
 BOOST_AUTO_TEST_CASE(test_brute_force_nn)
 {
-  auto d1 = sara::Tensor_<float, 2>{20000, 128};
+  auto d1 = sara::Tensor_<float, 2>{16, 128};
   for (auto i = 0; i < d1.rows(); ++i)
     d1[i].flat_array().fill(i); // d1[i].flat_array().fill(rand() % 1000);
   // d1.flat_array() /= 1000;
@@ -45,10 +45,6 @@ BOOST_AUTO_TEST_CASE(test_brute_force_nn)
   auto dist1_ = hl::as_runtime_buffer(dist1);
   auto dist2_ = hl::as_runtime_buffer(dist2);
 
-  SARA_CHECK(d1_.dim(0).extent());
-  SARA_CHECK(d1_.dim(1).extent());
-  // SARA_CHECK(d1.matrix());
-
   sara::tic();
   d1_.set_host_dirty();
   d2_.set_host_dirty();
@@ -56,10 +52,19 @@ BOOST_AUTO_TEST_CASE(test_brute_force_nn)
   nn2_.set_host_dirty();
   dist1_.set_host_dirty();
   dist2_.set_host_dirty();
-  shakti_brute_force_nn_l2_32f_cpu(d1_, d2_, nn1_, nn2_, dist1_, dist2_);
-  // nn1_.copy_to_host();
-  // nn2_.copy_to_host();
-  // dist1_.copy_to_host();
-  // dist2_.copy_to_host();
+  shakti_brute_force_nn_l2_32f_gpu(d1_, d2_, nn1_, nn2_, dist1_, dist2_);
+  nn1_.copy_to_host();
+  nn2_.copy_to_host();
+  dist1_.copy_to_host();
+  dist2_.copy_to_host();
   sara::toc("Brute-Force NN");
+
+
+  if (d1.size(0) > 16)
+    return;
+
+  SARA_DEBUG << nn1.transpose() << std::endl;
+  SARA_DEBUG << nn2.transpose() << std::endl;
+  SARA_DEBUG << dist1.transpose() << std::endl;
+  SARA_DEBUG << dist2.transpose() << std::endl;
 }

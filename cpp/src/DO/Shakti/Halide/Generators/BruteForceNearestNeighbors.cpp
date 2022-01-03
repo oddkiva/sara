@@ -73,11 +73,23 @@ namespace {
       Expr old_min1 = nn2_func(i)[2];
       Expr old_min2 = nn2_func(i)[3];
 
-      Expr new_nn1 = select(dist_func(jj, i) < old_min1, jj, old_nn1);
-      Expr new_nn2 = select(dist_func(jj, i) < old_min1, old_nn1, old_nn2);
+      Expr new_nn1 = select(dist_func(jj, i) < old_min1,  //
+                            jj,                           //
+                            old_nn1);
+      Expr new_min1 = select(dist_func(jj, i) < old_min1,  //
+                             dist_func(jj, i),             //
+                             old_min1);
 
-      Expr new_min1 = select(dist_func(jj, i) < old_min1, dist_func(jj, i), old_min1);
-      Expr new_min2 = select(dist_func(jj, i) < old_min1, old_min1, old_min2);
+      Expr new_nn2 = select(dist_func(jj, i) < old_min1,         //
+                            old_nn1,                             //
+                            select(dist_func(jj, i) < old_min2,  //
+                                   jj,                           //
+                                   old_nn2));
+      Expr new_min2 = select(dist_func(jj, i) < old_min1,         //
+                             old_min1,                            //
+                             select(dist_func(jj, i) < old_min2,  //
+                                    dist_func(jj, i),             //
+                                    old_min2));
 
       nn2_func(i) = {new_nn1, new_nn2, new_min1, new_min2};
 
@@ -102,7 +114,9 @@ namespace {
       }
       else
       {
-        nn2_func.split(i, io, ii, 8, TailStrategy::GuardWithIf).parallel(io).unroll(ii);
+        nn2_func.split(i, io, ii, 8, TailStrategy::GuardWithIf)
+            .parallel(io)
+            .unroll(ii);
       }
     }
   };
