@@ -115,9 +115,8 @@ happen a lot slowly.
 Build the libraries
 -------------------
 
-**The information below is a bit outdated but the detailed steps are still
-useful. Your best bet is to have a look at the CI scripts like `.gitlab-ci.yml`
-or `.travis.yml`**
+You can have a look at the CI scripts like `.gitlab-ci.yml` or `.travis.yml`**
+to have a minimal build.
 
 Better yet, to help you get started, you can try the Docker container. Assuming
 that you have a CUDA GPU device and nvidia-docker installed, then:
