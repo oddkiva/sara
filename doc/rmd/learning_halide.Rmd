@@ -1,0 +1,72 @@
+# My Learning Journey of the Halide language
+
+I started learning the Halide language in 2020 out of curiosity since this has
+been touted as a very programming language that makes it easy to optimize image
+processing algorithms.
+
+It aims at decoupling (1) the implementation details of the algorithm and (2)
+the optimal scheduling that  intrinsically bound to the hardware device.
+In a nutshell, Halide would allow us to implement the algorithm details only
+once and then promises us that we would just need to focus on the
+
+For a major part of my journey in computer vision, I was not very aware of
+hardware-related optimization (CPU intrinsics and so on) and never really
+bothered about low-level optimization since this is not the core of my
+expertise: computer vision algorithms are but not optimization. To me,
+optimization simply meant rewriting algorithms in CUDA.
+
+Indeed there is a lot to like about Halide, a single programming language that
+generates optimized code in C, CUDA, OpenCL, Metal for most mainstream GPU and
+CPU architectures.
+
+I am game! Let us learn this language by reimplementing the naive CPU SIFT for
+GPU. Easier said than done.
+
+There are quite a few attempts at implementing SIFT that are made available in
+GitHub. But I never found a complete implementation. Most of what I have seen
+only implements the feature detection part (DoG extrema), but the orientation
+assignment is missing and the feature descriptor is missing (SIFT as histogram
+of gradients).
+
+I will report the different building blocks that and ends with some open
+questions.
+
+
+One major hurdle in learning Halide is that the language forces us to rethink
+the implementation of each algorithmic step in a SIMD fashion.
+better. In a sense, it
+
+
+## Development experience
+
+- The development of AOT functions is **very very** painful, but fortunately it
+  was worth it.
+- Finding the optimal schedule is non-obvious and very difficult even for
+  somebody knowledgeable in computer vision algorithms.
+
+  For example, the optimal scheduling of linearly separable convolution is far
+  from being obvious for CPUs and eventually I tried one shedule published in
+  Halide's first publication. This schedule is eventually the one that could
+  compete with OpenCV's gaussian blur implementation.
+
+
+## Open Questions (for Halide Developers?)
+
+Based on my learning journey and my current knowledge of Halide as a mere
+library user.
+
+While Halide looks fairly usable for convolutional neural networks, it still
+needs addressing the following points to become more complete for
+traditional computer vision algorithms.
+
+We can write fairly elegantly the following key ingredients for SIFT in Halide:
+- local histograms of gradients (HoG, SIFT, Dalal and Triggs, CVPR 2005)
+- brute-force descriptor matching
+- stream compaction
+
+However from the documentation, it is not clear to me how we can optimally schedule.
+Does Halide even offer such possibilities.
+
+My GPU implementation in GPU is much better than my optimized CPU implementation
+but it is still very far away from what CUDA can do (see CudaSift and PopSift
+implementation). 10x to 20x slower because of that.
