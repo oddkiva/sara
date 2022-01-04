@@ -121,7 +121,7 @@ to have a minimal build.
 Better yet, to help you get started, you can try the Docker container. Assuming
 that you have a CUDA GPU device and nvidia-docker installed, then:
 
-1. Grab the Docker container at `registry.gitlab.com/do-cv/sara`
+1. Grab the Docker image at `registry.gitlab.com/do-cv/sara`
 2. Run the docker container as I do:
    ```
    docker run --gpus all -it \
