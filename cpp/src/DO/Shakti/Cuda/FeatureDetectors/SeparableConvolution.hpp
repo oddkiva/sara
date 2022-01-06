@@ -18,7 +18,6 @@
 
 namespace DO::Shakti::Cuda {
 
-  
   // TODO: apply convolution all at once and see vectorization using float4
   // makes thing faster.
 
