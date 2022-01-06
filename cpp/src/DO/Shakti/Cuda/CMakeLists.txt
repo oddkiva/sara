@@ -43,3 +43,5 @@ if (NvidiaVideoCodec_ROOT)
     DO::Sara::Core
     nvidia::VideoCodecHelpers)
 endif ()
+
+add_subdirectory(FeatureDetectors)

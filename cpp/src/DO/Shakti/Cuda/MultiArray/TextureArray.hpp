@@ -13,6 +13,7 @@
 #define DO_SHAKTI_MULTIARRAY_TEXTUREARRAY_HPP
 
 #include <cuda_runtime.h>
+#include <cuda_fp16.h>
 
 #include <DO/Shakti/Cuda/MultiArray/Matrix.hpp>
 #include <DO/Shakti/Cuda/MultiArray/MultiArray.hpp>
@@ -26,6 +27,15 @@ namespace DO { namespace Shakti {
     static inline cudaChannelFormatDesc type()
     {
       return cudaCreateChannelDesc<T>();
+    }
+  };
+
+  template <>
+  struct ChannelFormatDescriptor<half>
+  {
+    static inline cudaChannelFormatDesc type()
+    {
+      return cudaCreateChannelDescHalf();
     }
   };
 
