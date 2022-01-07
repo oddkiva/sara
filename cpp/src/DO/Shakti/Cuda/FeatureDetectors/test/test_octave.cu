@@ -172,11 +172,17 @@ BOOST_AUTO_TEST_CASE(test_fill)
 }
 
 
+static constexpr auto max_thread_count = 1024;
+static constexpr auto tile_x = 32;
+static constexpr auto tile_y = 32;
+static constexpr auto tile_z = max_thread_count / tile_x / tile_y;
+
 __constant__ float constant_gauss_kernels[512];
 __constant__ int constant_gauss_kernel_sizes[16];
-__constant__ int constant_gauss_kernel_mid;
+__constant__ int constant_gauss_kernel_radius;
 __constant__ int constant_kernel_count;
 __constant__ int constant_kernel_size;
+
 
 __global__ void convolve_x(cudaSurfaceObject_t input,   //
                            cudaSurfaceObject_t output,  //
@@ -197,12 +203,12 @@ __global__ void convolve_x(cudaSurfaceObject_t input,   //
     for (auto k = 0; k <= constant_kernel_size; ++k)
     {
       float val;
-      surf2DLayeredread<float>(                                 //
-          &val,                                                 //
-          input,                                                //
-          (x - constant_gauss_kernel_mid + k) * sizeof(float),  //
-          y,                                                    //
-          input_layer,                                          //
+      surf2DLayeredread(                                           //
+          &val,                                                    //
+          input,                                                   //
+          (x - constant_gauss_kernel_radius + k) * sizeof(float),  //
+          y,                                                       //
+          input_layer,                                             //
           cudaBoundaryModeClamp);
       out += constant_gauss_kernels[z * constant_kernel_size + k] * val;
     }
@@ -229,12 +235,12 @@ __global__ void convolve_y(cudaSurfaceObject_t input,   //
     for (auto k = 0; k <= constant_kernel_size; ++k)
     {
       float val;
-      surf2DLayeredread<float>(               //
-          &val,                               //
-          input,                              //
-          x * sizeof(float),                  //
-          y - constant_gauss_kernel_mid + k,  //
-          z,                                  //
+      surf2DLayeredread(                         //
+          &val,                                  //
+          input,                                 //
+          x * sizeof(float),                     //
+          y - constant_gauss_kernel_radius + k,  //
+          z,                                     //
           cudaBoundaryModeClamp);
       out += constant_gauss_kernels[z * constant_kernel_size + k] * val;
     }
@@ -261,6 +267,16 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   for (auto i = 0u; i < sigmas.size(); ++i)
     sigmas[i] = std::sqrt(std::pow(scales[i], 2) - std::pow(scale_camera, 2));
 
+  auto sigmaDeltas = std::vector<float>(scale_count + 3);
+  for (auto i = 0u; i < sigmas.size(); ++i)
+    sigmaDeltas[i] =
+        i == 0 ? std::sqrt(std::pow(scales[0], 2) - std::pow(scale_camera, 2))
+               : std::sqrt(std::pow(scales[i], 2) - std::pow(scales[i - 1], 2));
+  SARA_CHECK(
+      Eigen::Map<const Eigen::RowVectorXf>(sigmas.data(), sigmas.size()));
+  SARA_CHECK(Eigen::Map<const Eigen::RowVectorXf>(sigmaDeltas.data(),
+                                                  sigmaDeltas.size()));
+
   // Calculater the kernel dimensions.
   auto kernel_sizes = std::vector<int>{};
   for (const auto& sigma : sigmas)
@@ -272,10 +288,13 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   }
 
   const auto kernel_size_max = kernel_sizes.back();
-  const auto kernel_mid = kernel_size_max / 2;
+  const auto kernel_radius = kernel_size_max / 2;
 
   // Fill the Gaussian kernels.
-  auto kernels = sara::Tensor_<float, 2>{scale_count + 3, kernel_size_max};
+  auto kernels = sara::Tensor_<float, 2>{
+      scale_count + 3,  //
+      kernel_size_max   //
+  };
   kernels.flat_array().fill(0);
 
   for (auto n = 0; n < kernels.size(0); ++n)
@@ -286,15 +305,15 @@ BOOST_AUTO_TEST_CASE(test_convolve)
     const auto two_sigma_squared = 2 * sigma * sigma;
 
     for (auto k = 0; k < ksize; ++k)
-      kernels(n, k + kernel_mid - kradius) =
+      kernels(n, k + kernel_radius - kradius) =
           exp(-std::pow(k - kradius, 2) / two_sigma_squared);
 
     const auto kernel_sum =
-        std::accumulate(&kernels(n, kernel_mid - kradius),
-                        &kernels(n, kernel_mid - kradius) + ksize, 0.f);
+        std::accumulate(&kernels(n, kernel_radius - kradius),
+                        &kernels(n, kernel_radius - kradius) + ksize, 0.f);
 
     for (auto k = 0; k < ksize; ++k)
-      kernels(n, k + kernel_mid - kradius) /= kernel_sum;
+      kernels(n, k + kernel_radius - kradius) /= kernel_sum;
   }
 
   Eigen::IOFormat HeavyFmt(3, 0, ", ", ",\n", "[", "]", "[", "]");
@@ -322,10 +341,11 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(constant_kernel_size,  //
                                            kernels.sizes().data() + 1,
                                            sizeof(int)));
-  SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(constant_gauss_kernel_mid,  //
-                                           &kernel_mid, sizeof(int)));
+  SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(constant_gauss_kernel_radius,  //
+                                           &kernel_radius, sizeof(int)));
   shakti::toc("copy to constant memory");
 
+#define THIS_WORKS
 #ifdef THIS_WORKS
   auto kernels_copied = sara::Tensor_<float, 2>{kernels.sizes()};
   kernels_copied.flat_array().fill(-1);
@@ -342,28 +362,24 @@ BOOST_AUTO_TEST_CASE(test_convolve)
 
   auto kernel_size = int{};
   auto kernel_count = int{};
-  auto kernel_mid_point_copied = int{};
-  SARA_CHECK(kernel_size);
-  SARA_CHECK(kernel_count);
-  SARA_CHECK(kernel_mid_point_copied);
-
+  auto kernel_radius_point_copied = int{};
   SHAKTI_SAFE_CUDA_CALL(cudaMemcpyFromSymbol(&kernel_size,  //
                                              constant_kernel_size,
                                              sizeof(int)));
   SHAKTI_SAFE_CUDA_CALL(cudaMemcpyFromSymbol(&kernel_count,  //
                                              constant_kernel_count,
                                              sizeof(int)));
-  SHAKTI_SAFE_CUDA_CALL(cudaMemcpyFromSymbol(&kernel_mid_point_copied,  //
-                                             constant_gauss_kernel_mid,
+  SHAKTI_SAFE_CUDA_CALL(cudaMemcpyFromSymbol(&kernel_radius_point_copied,  //
+                                             constant_gauss_kernel_radius,
                                              sizeof(int)));
 
   SARA_CHECK(kernel_size);
   SARA_CHECK(kernel_count);
-  SARA_CHECK(kernel_mid_point_copied);
+  SARA_CHECK(kernel_radius_point_copied);
 #endif
 
-  static constexpr auto w = 9;
-  static constexpr auto h = 9;
+  const auto w = 5; 2 * 1920;
+  const auto h = 5; 2 * 1080;
 
   // Initialize the octave CUDA surface.
   auto octave = sc::make_gaussian_octave<float>(w, h, scale_count);
@@ -383,8 +399,10 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   conv_x.init_surface();
   conv_y.init_surface();
 
-    const dim3 threadsperBlock(16, 16, 2);
-    const dim3 numBlocks(
+  shakti::tic();
+  {
+    const auto threadsperBlock = dim3(tile_x, tile_y, tile_z);
+    const auto numBlocks = dim3(
         (octave.width() + threadsperBlock.x - 1) / threadsperBlock.x,
         (octave.height() + threadsperBlock.y - 1) / threadsperBlock.y,
         (octave.scale_count() + threadsperBlock.z - 1) / threadsperBlock.z);
@@ -396,34 +414,35 @@ BOOST_AUTO_TEST_CASE(test_convolve)
         /* input_layer */ 0,                                   //
         octave.width(), octave.height(), octave.scale_count()  //
     );
+  }
 
-    // y-convolution.
+  // y-convolution.
+  {
+    const auto threadsperBlock = dim3(tile_x, tile_y, tile_z);
+    const auto numBlocks = dim3(
+        (octave.width() + threadsperBlock.x - 1) / threadsperBlock.x,
+        (octave.height() + threadsperBlock.y - 1) / threadsperBlock.y,
+        (octave.scale_count() + threadsperBlock.z - 1) / threadsperBlock.z);
+
     convolve_y<<<numBlocks, threadsperBlock>>>(                //
         conv_x.surface_object(),                               //
         conv_y.surface_object(),                               //
         octave.width(), octave.height(), octave.scale_count()  //
     );
+  }
+  shakti::toc("Gaussian convolution");
 
-    auto values = dirac;
-    copy(conv_y, values);
 
+  auto values = dirac;
+  copy(conv_y, values);
+
+  if (w < 10 && h < 10)
+  {
     for (auto s = 0; s < values.depth(); ++s)
     {
       SARA_CHECK(s);
       std::cout << sara::tensor_view(values)[s].matrix().format(HeavyFmt)
                 << std::endl;
     }
-
-  // Send GPU operations asynchronously... No need since everything is
-  // sequential for Gaussian pyramid.
-  //
-  // From then on, yes everything can be asynchronous:
-  // - DoG pyramids
-  // - Extremum map pyramids
-  // - Gradient pyramids
-  //
-  // cudaStream_t stream = 0;
-  // cudaStreamCreate(&stream);
-  // cudaStreamSynchronize(stream);
-  // cudaStreamDestroy(stream);
+  }
 }
