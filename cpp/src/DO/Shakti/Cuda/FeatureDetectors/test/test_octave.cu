@@ -9,6 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+// Convolving in batch the input image does not seem very fast.
+// Rather convolving sequentially seems much faster if we base ourselves from
+// the computation time spent in the Halide implementation.
+
+
 #define BOOST_TEST_MODULE "Shakti/CUDA/FeatureDetectors/Octave"
 
 #include <boost/test/unit_test.hpp>
@@ -378,8 +383,8 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   SARA_CHECK(kernel_radius_point_copied);
 #endif
 
-  const auto w = 5; 2 * 1920;
-  const auto h = 5; 2 * 1080;
+  const auto w = 4 * 1920;
+  const auto h = 4 * 1080;
 
   // Initialize the octave CUDA surface.
   auto octave = sc::make_gaussian_octave<float>(w, h, scale_count);

@@ -74,7 +74,7 @@ namespace DO { namespace Shakti {
             _sizes[0] * sizeof(T), _sizes[1], cudaMemcpyDeviceToDevice));
       else if (N == 3)
       {
-        cudaMemcpy3DParms params{};
+        auto params = cudaMemcpy3DParms{};
         params.srcPtr.ptr = (void*) other._data;
         params.srcPtr.pitch = other._pitch;
         params.srcPtr.xsize = other._sizes[0];
