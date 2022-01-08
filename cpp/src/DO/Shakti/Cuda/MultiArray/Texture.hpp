@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <DO/Sara/Core/Image/Image.hpp>
 #include <DO/Shakti/Cuda/MultiArray/TextureArray.hpp>
 
 #include <optional>
@@ -62,12 +63,22 @@ namespace DO::Shakti::Cuda {
       return _begin.has_value() && _end.has_value() ? *_end - *_begin : _sizes;
     }
 
+    inline auto begin() const noexcept -> Vector<int, N>
+    {
+      return _begin.has_value() : *_begin : Vector<int, N>::Zero();
+    }
+
+    inline auto end() const noexcept -> Vector<int, N>
+    {
+      return _end.has_value() : *_end : _sizes;
+    }
+
     inline auto sizes() const noexcept -> const auto&
     {
       return _sizes;
     }
 
-    inline auto copy_from(const ArrayView& other)
+    inline auto copy_from(const ArrayView& other) -> void
     {
       if (sizes() != other.sizes())
         throw std::runtime_error{"Cannot copy array of different sizes"};
@@ -80,6 +91,14 @@ namespace DO::Shakti::Cuda {
           other._begin.has_value() ? other._begin->y() : 0,  //
           _sizes.x(), _sizes.y()));
       return *this;
+    }
+
+    inline auto copy_from(const Sara::ImageView<T, N>& host_data) -> void
+    {
+      static_assert(N == 2, "Not Implemented!");
+      SHAKTI_SAFE_CUDA_CALL(cudaMemcpy2DToArray(
+          _array, begin(0), begin(1), host_data.data(), host_data.width(),
+          host_data.width(), host_data.height(), cudaMemcpyHostToDevice));
     }
 
   protected:
