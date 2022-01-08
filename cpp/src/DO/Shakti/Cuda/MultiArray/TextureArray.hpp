@@ -12,14 +12,14 @@
 #ifndef DO_SHAKTI_MULTIARRAY_TEXTUREARRAY_HPP
 #define DO_SHAKTI_MULTIARRAY_TEXTUREARRAY_HPP
 
-#include <cuda_runtime.h>
 #include <cuda_fp16.h>
+#include <cuda_runtime.h>
 
 #include <DO/Shakti/Cuda/MultiArray/Matrix.hpp>
 #include <DO/Shakti/Cuda/MultiArray/MultiArray.hpp>
 
 
-namespace DO { namespace Shakti {
+namespace DO::Shakti {
 
   template <typename T>
   struct ChannelFormatDescriptor
@@ -152,7 +152,7 @@ namespace DO { namespace Shakti {
     Vector2i _sizes{Vector2i::Zero()};
   };
 
-}}  // namespace DO::Shakti
+}  // namespace DO::Shakti
 
 
 #endif /* DO_SHAKTI_MULTIARRAY_TEXTUREARRAY_HPP */
