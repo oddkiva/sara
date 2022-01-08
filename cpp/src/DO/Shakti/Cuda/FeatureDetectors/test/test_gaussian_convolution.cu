@@ -340,6 +340,9 @@ BOOST_AUTO_TEST_CASE(test_convolve)
 
 // THE TIMING on Titan 1080 Xp
 //
+// No memory error according to the memcheck tool:
+// $> compute-sanitizer --tool memcheck ./bin/shakti_test_gaussian_convolution
+//
 // [gauss-octave][7680x4320x6] 21.212 ms
 // [gauss-octave][3840x2160x6]  5.384 ms
 // [gauss-octave][1920x1080x6]  1.416 ms
