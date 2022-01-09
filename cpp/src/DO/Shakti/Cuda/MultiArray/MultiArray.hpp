@@ -47,7 +47,7 @@ namespace DO { namespace Shakti {
   public:
     //! @{
     //! @brief Constructor.
-    inline MultiArray() = default;
+    inline MultiArray() noexcept = default;
 
     inline MultiArray(const vector_type& sizes)
       : base_type{}
@@ -124,7 +124,7 @@ namespace DO { namespace Shakti {
         throw std::runtime_error{"Unsupported dimension!"};
     }
 
-    inline MultiArray(self_type&& other)
+    inline MultiArray(self_type&& other) noexcept
       : self_type{}
     {
       std::swap(_data, other._data);
@@ -148,7 +148,7 @@ namespace DO { namespace Shakti {
     }
 
     //! @brief Resize the multi-array.
-    inline void resize(const vector_type& sizes)
+    inline auto resize(const vector_type& sizes) -> void
     {
       if (_sizes == sizes)
         return;
@@ -160,17 +160,17 @@ namespace DO { namespace Shakti {
 
       auto void_data = reinterpret_cast<void**>(&_data);
 
-      if (N == 1)
+      if constexpr (N == 1)
       {
         const auto byte_size = sizeof(T) * this->base_type::size();
         SHAKTI_SAFE_CUDA_CALL(cudaMalloc(void_data, byte_size));
       }
-      else if (N == 2)
+      else if constexpr (N == 2)
       {
         SHAKTI_SAFE_CUDA_CALL(cudaMallocPitch(
             void_data, &_pitch, _sizes[0] * sizeof(T), _sizes[1]));
       }
-      else if (N == 3)
+      else if constexpr (N == 3)
       {
         cudaPitchedPtr pitched_device_ptr = {0, 0, 0, 0};
         auto extent = make_cudaExtent(sizes[0] * sizeof(T), sizes[1], sizes[2]);
@@ -183,7 +183,7 @@ namespace DO { namespace Shakti {
     }
 
     //! @brief Swap multi-array objects.
-    void swap(self_type& other)
+    auto swap(self_type& other) noexcept -> void
     {
       using std::swap;
       swap(_sizes, other._sizes);
