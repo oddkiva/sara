@@ -21,8 +21,8 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 
+#include <DO/Shakti/Cuda/Utilities.hpp>
 #include <DO/Shakti/Cuda/FeatureDetectors/Octave.hpp>
-#include <DO/Shakti/Cuda/Utilities/Timer.hpp>
 
 
 namespace sara = DO::Sara;
@@ -256,6 +256,8 @@ __global__ void convolve_y(cudaSurfaceObject_t input,   //
 
 BOOST_AUTO_TEST_CASE(test_convolve)
 {
+  std::cout << shakti::get_devices().front() << std::endl;
+
   static constexpr auto scale_count = 3;
   static constexpr auto scale_camera = 1.f;
   static constexpr auto scale_initial = 1.6f;
