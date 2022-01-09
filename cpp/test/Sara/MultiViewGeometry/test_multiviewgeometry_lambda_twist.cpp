@@ -110,11 +110,11 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     SARA_CHECK(lt.c(lt.gamma[0]));
     // We only care about the first root. Our implementation makes sure that
     // the first is always well formed.
-    BOOST_REQUIRE_SMALL(lt.c(lt.gamma[0]), 1e-12);
+    BOOST_REQUIRE_SMALL(lt.c(lt.gamma[0]), 1.2e-12);
     // Form the linear combination of the two homogenous quadrics.
     const Eigen::Matrix3d D0 = lt.D[0] + lt.gamma[0] * lt.D[1];
     // The goal of the cubic equation was to ensure its determinant is zero.
-    BOOST_REQUIRE_SMALL(D0.determinant(), 1e-12);
+    BOOST_REQUIRE_SMALL(D0.determinant(), 3e-12);
 
 
     // -------------------------------------------------------------------------
