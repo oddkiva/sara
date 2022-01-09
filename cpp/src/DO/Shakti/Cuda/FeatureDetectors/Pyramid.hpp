@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include <DO/Shakti/Cuda/FeatureDetectors/Octave.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/SIFT/Octave.hpp>
 
 
-namespace DO::Shakti::Cuda {
+namespace DO::Shakti::Cuda::v2 {
 
   template <typename T>
   class Pyramid
@@ -22,21 +22,15 @@ namespace DO::Shakti::Cuda {
   public:
     using octave_type = Octave<T>;
 
-    inline Pyramid() = default;
+    inline Pyramid() noexcept = default;
 
-    inline ~Pyramid() = default;
-
-    template <typename Index>
-    inline auto operator[](Index i) -> auto&
+    inline auto operator[](int i) -> auto&
     {
-      static_assert(std::is_integral<Index>::value, "index must be integral");
       return _octaves[i];
     }
 
-    template <typename Index>
-    inline auto operator[](Index i) const -> const auto&
+    inline auto operator[](int i) const -> const auto&
     {
-      static_assert(std::is_integral<Index>::value, "index must be integral");
       return _octaves[i];
     }
 
@@ -44,5 +38,4 @@ namespace DO::Shakti::Cuda {
     std::vector<octave_type> _octaves;
   };
 
-
-}  // namespace DO::Shakti::Cuda
+}  // namespace DO::Shakti::Cuda::v2

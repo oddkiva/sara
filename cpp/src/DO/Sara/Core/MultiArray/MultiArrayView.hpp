@@ -243,7 +243,7 @@ namespace DO { namespace Sara {
       return _begin[offset(pos)];
     }
 
-    inline reference operator()(int i) noexcept;
+    inline reference operator()(int i) noexcept
     {
       static_assert(N == 1, "MultiArray must be 1D");
       return _begin[i];

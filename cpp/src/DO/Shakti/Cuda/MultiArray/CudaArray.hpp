@@ -143,9 +143,10 @@ namespace DO::Shakti::Cuda {
       : base_type::_sizes{sizes}
       , _flags{flags}
     {
+      auto channel_descriptor = ChannelFormatDescriptor<T>::type();
+
       if constexpr (N == 2)
       {
-        _channel_descriptor = ChannelFormatDescriptor<T>::type();
         SHAKTI_SAFE_CUDA_CALL(cudaMallocArray(
             &_array,              //
             &channel_descriptor,  //
@@ -158,14 +159,13 @@ namespace DO::Shakti::Cuda {
 
       else if constexpr (N == 3)
       {
-        auto channel_descriptor = ChannelFormatDescriptor<T>::type();
         SHAKTI_SAFE_CUDA_CALL(cudaMalloc3DArray(
             &_array,              //
             &channel_descriptor,  //
             cudaExtent{
-                .width = static_cast<unsigned long>(width),       //
-                .height = static_cast<unsigned long>(height),     //
-                .depth = static_cast<unsigned long>(scale_count)  //
+                .width = static_cast<unsigned long>(sizes(0)),   //
+                .height = static_cast<unsigned long>(sizes(1)),  //
+                .depth = static_cast<unsigned long>(sizes(2))    //
             },
             flags));
       }
@@ -204,5 +204,36 @@ namespace DO::Shakti::Cuda {
       return *this;
     }
   };
+
+  template <typename T>
+  inline auto make_2d_array(const Vector2i& sizes) -> Array<T, 2>
+  {
+    return {sizes, 0};
+  }
+
+  template <typename T>
+  inline auto make_3d_array(const Vector3i& sizes) -> Array<T, 3>
+  {
+    return {sizes, 0};
+  }
+
+  template <typename T>
+  inline auto make_3d_layered_array(const Vector3i& sizes) -> Array<T, 3>
+  {
+    return {sizes, cudaArrayLayered};
+  }
+
+  template <typename T>
+  inline auto make_3d_surface_array(const Vector3i& sizes) -> Array<T, 3>
+  {
+    return {sizes, cudaArraySurfaceLoadStore};
+  }
+
+  template <typename T>
+  inline auto make_3d_layered_surface_array(const Vector3i& sizes)
+      -> Array<T, 3>
+  {
+    return {sizes, cudaArrayLayered | cudaArraySurfaceLoadStore};
+  }
 
 }  // namespace DO::Shakti::Cuda

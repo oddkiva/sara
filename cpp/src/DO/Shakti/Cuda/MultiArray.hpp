@@ -11,10 +11,12 @@
 
 #pragma once
 
+#include <DO/Shakti/Cuda/MultiArray/ManagedMemoryAllocator.hpp>
+#include <DO/Shakti/Cuda/MultiArray/PinnedMemoryAllocator.hpp>
+
 #include <DO/Shakti/Cuda/MultiArray/Grid.hpp>
 #include <DO/Shakti/Cuda/MultiArray/Matrix.hpp>
 #include <DO/Shakti/Cuda/MultiArray/MultiArray.hpp>
 #include <DO/Shakti/Cuda/MultiArray/MultiArrayView.hpp>
-#include <DO/Shakti/Cuda/MultiArray/PinnedAllocator.hpp>
 #include <DO/Shakti/Cuda/MultiArray/Strides.hpp>
 #include <DO/Shakti/Cuda/MultiArray/TextureArray.hpp>
