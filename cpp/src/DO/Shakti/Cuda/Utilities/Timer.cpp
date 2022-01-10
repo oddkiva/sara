@@ -13,14 +13,14 @@ namespace DO { namespace Shakti {
 
   Timer::Timer()
   {
-    cudaEventCreate(&_start);
-    cudaEventCreate(&_stop);
+    SHAKTI_SAFE_CUDA_CALL(cudaEventCreate(&_start));
+    SHAKTI_SAFE_CUDA_CALL(cudaEventCreate(&_stop));
   }
 
   Timer::~Timer()
   {
-    SHAKTI_SAFE_CUDA_CALL(cudaEventDestroy(_start));
-    SHAKTI_SAFE_CUDA_CALL(cudaEventDestroy(_stop));
+    cudaEventDestroy(_start);
+    cudaEventDestroy(_stop);
   }
 
   void Timer::restart()

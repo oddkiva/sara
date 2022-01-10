@@ -144,7 +144,7 @@ namespace DO { namespace Shakti {
     //! @brief Destructor.
     inline ~MultiArray()
     {
-      SHAKTI_SAFE_CUDA_CALL(cudaFree(_data));
+      cudaFree(_data);
     }
 
     //! @brief Resize the multi-array.

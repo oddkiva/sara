@@ -34,10 +34,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <type_traits>
-
-#include <cuda_fp16.h>
-
 #include <DO/Sara/Core/StringFormat.hpp>
 
 #include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/SmallGaussianConvolutionFP32.hpp>
@@ -48,8 +44,6 @@
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
 namespace sc = DO::Shakti::Cuda;
-
-
 namespace scg = sc::Gaussian;
 
 
@@ -61,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   device_kernels.copy_filters_to_device_constant_memory();
   // device_kernels.peek_filters_in_device_constant_memory();
 
-#define CHECK_IMPL
+// #define CHECK_IMPL
 #ifdef CHECK_IMPL
   auto w = 5;
   auto h = 5;
