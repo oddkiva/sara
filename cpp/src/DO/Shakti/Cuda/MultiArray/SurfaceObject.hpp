@@ -31,14 +31,17 @@ namespace DO::Shakti::Cuda {
       resource_descriptor.res.array.array = _array;
 
       // Create the surface objects
-      cudaCreateSurfaceObject(&_surface_object, &resource_descriptor);
+      SHAKTI_SAFE_CUDA_CALL(cudaCreateSurfaceObject(&_surface_object, &resource_descriptor));
     }
 
     inline ~SurfaceObject()
     {
       if (_surface_object != 0)
       {
-        SHAKTI_SAFE_CUDA_CALL(cudaDestroySurfaceObject(_surface_object));
+        const auto ret = cudaDestroySurfaceObject(_surface_object);
+        if (ret != cudaSuccess)
+          SHAKTI_STDERR << cudaGetErrorString(cudaDeviceSynchronize())
+                        << std::endl;
         _surface_object = 0;
       }
     }

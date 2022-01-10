@@ -277,7 +277,8 @@ BOOST_AUTO_TEST_CASE(test_convolve)
 
   SARA_DEBUG << "Copying the stacked kernels to CUDA constant memory"
              << std::endl;
-  shakti::tic();
+  auto timer = shakti::Timer{};
+  shakti::tic(timer);
   SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(constant_gauss_kernels,  //
                                            kernels.data(),
                                            kernels.size() * sizeof(float)));
@@ -292,7 +293,7 @@ BOOST_AUTO_TEST_CASE(test_convolve)
                                            sizeof(int)));
   SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(constant_gauss_kernel_radius,  //
                                            &kernel_radius, sizeof(int)));
-  shakti::toc("copy to constant memory");
+  shakti::toc(timer, "copy to constant memory");
 
 #define THIS_WORKS
 #ifdef THIS_WORKS
@@ -360,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   auto convx_surface = convx.create_surface_object();
   auto convy_surface = convy.create_surface_object();
 
-  shakti::tic();
+  shakti::tic(timer);
   {
     const auto threadsperBlock = dim3(tile_x, tile_y, tile_z);
     const auto numBlocks =
@@ -389,7 +390,7 @@ BOOST_AUTO_TEST_CASE(test_convolve)
         convy_surface,                           //
         convx.width(), convx.height(), convx.depth());
   }
-  shakti::toc("Gaussian convolution");
+  shakti::toc(timer, "Gaussian convolution");
 
 
   auto values = dirac;

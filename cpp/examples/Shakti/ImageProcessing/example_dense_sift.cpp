@@ -165,10 +165,11 @@ Image<Vector128f> gpu_compute_sifts(const Image<float>& image)
   auto features = Image<Vector128f>{image.sizes()};
   features.flat_array().fill(Vector128f::Zero());
 
-  shakti::tic();
+  auto timer = shakti::Timer{};
+  shakti::tic(timer);
   gpu_sift_computer(reinterpret_cast<float*>(features.data()), image.data(),
                     image.sizes().data());
-  shakti::toc("GPU Dense SIFT");
+  shakti::toc(timer, "GPU Dense SIFT");
 
   return features;
 }

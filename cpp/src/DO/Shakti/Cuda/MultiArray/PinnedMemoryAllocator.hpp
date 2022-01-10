@@ -11,11 +11,13 @@
 
 #pragma once
 
+#include <DO/Shakti/Cuda/Utilities/ErrorCheck.hpp>
+
 #include <cuda_device_runtime_api.h>
 #include <cuda_runtime_api.h>
 
-#include <stdexcept>
 #include <limits>
+#include <stdexcept>
 #include <string>
 
 
@@ -32,12 +34,12 @@ namespace DO { namespace Shakti {
   {
   public:
     using value_type = void;
-    using pointer = void *;
-    using const_pointer = const void *;
+    using pointer = void*;
+    using const_pointer = const void*;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
 
-    template<typename U>
+    template <typename U>
     struct rebind
     {
       using other = PinnedAllocator<U>;
@@ -49,8 +51,8 @@ namespace DO { namespace Shakti {
   {
   public:
     using value_type = T;
-    using pointer = T *;
-    using const_pointer = const T *;
+    using pointer = T*;
+    using const_pointer = const T*;
     using reference = T&;
     using const_reference = const T&;
     using size_type = std::size_t;
@@ -62,66 +64,59 @@ namespace DO { namespace Shakti {
       using other = PinnedAllocator<U>;
     };
 
-    __host__ __device__
-    inline PinnedAllocator()
+    __host__ __device__ inline PinnedAllocator()
     {
     }
 
-    template<typename U>
-    __host__ __device__
-    inline PinnedAllocator(const PinnedAllocator<U>&)
+    template <typename U>
+    __host__ __device__ inline PinnedAllocator(const PinnedAllocator<U>&)
     {
     }
 
-    __host__ __device__
-    inline pointer address(reference r)
+    __host__ __device__ inline pointer address(reference r)
     {
       return &r;
     }
 
-    __host__ __device__
-    inline const_pointer address(const_reference r)
+    __host__ __device__ inline const_pointer address(const_reference r)
     {
       return &r;
     }
 
-    __host__
-    inline pointer allocate(size_type cnt, const_pointer = 0)
+    __host__ inline pointer allocate(size_type cnt, const_pointer = 0)
     {
       if (cnt > this->max_size())
         throw std::bad_alloc{};
 
-      pointer result{ nullptr };
+      pointer result{nullptr};
 
-      auto error = cudaMallocHost(reinterpret_cast<void**>(&result), cnt * sizeof(value_type));
-      if (error)
+      const auto ret = cudaMallocHost(reinterpret_cast<void**>(&result),
+                                  cnt * sizeof(value_type));
+      if (ret != cudaSuccess)
         throw std::bad_alloc{};
 
       return result;
     }
 
-    __host__
-    inline void deallocate(pointer p, size_type)
+    __host__ inline void deallocate(pointer p, size_type)
     {
-      auto error = cudaFreeHost(p);
-      if (error)
-        throw std::runtime_error(std::string("CUDA error: ") + cudaGetErrorString(error));
+      const auto ret = cudaFreeHost(p);
+      if (ret != cudaSuccess)
+        SHAKTI_STDERR << cudaGetErrorString(cudaDeviceSynchronize())
+                      << std::endl;
     }
 
-    __host__ __device__
-    inline size_type max_size() const
+    __host__ __device__ inline size_type max_size() const
     {
       return std::numeric_limits<size_type>::max() / sizeof(T);
     }
 
-    __host__ __device__
-    inline bool operator==(PinnedAllocator const&)
+    __host__ __device__ inline bool operator==(PinnedAllocator const&)
     {
       return true;
     }
 
-    __host__ __device__
-    inline bool operator!=(PinnedAllocator const &x)
+    __host__ __device__ inline bool operator!=(PinnedAllocator const& x)
     {
       return !operator==(x);
     }
@@ -129,5 +124,4 @@ namespace DO { namespace Shakti {
 
   //! @}
 
-} /* namespace Shakti */
-} /* namespace DO */
+}}  // namespace DO::Shakti

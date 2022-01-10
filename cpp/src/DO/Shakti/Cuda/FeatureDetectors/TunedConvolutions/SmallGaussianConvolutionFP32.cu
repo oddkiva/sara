@@ -132,7 +132,8 @@ namespace DO::Shakti::Cuda::Gaussian {
   {
     SARA_DEBUG << "Copying the stacked kernels to CUDA constant memory"
                << std::endl;
-    tic();
+    auto timer = Timer{};
+    tic(timer);
     SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(  //
         kernels,                               //
         _filter_bank.kernels.data(),           //
@@ -149,7 +150,7 @@ namespace DO::Shakti::Cuda::Gaussian {
         kernel_radii,                          //
         _filter_bank.kernel_radii.data(),      //
         _filter_bank.kernel_radii.size() * sizeof(int)));
-    toc("copy to constant memory");
+    toc(timer, "copy to constant memory");
   }
 
   auto DeviceGaussianFilterBank::peek_filters_in_device_constant_memory()

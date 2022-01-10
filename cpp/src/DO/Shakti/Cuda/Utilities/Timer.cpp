@@ -9,7 +9,7 @@
 using namespace std;
 
 
-namespace DO { namespace Shakti {
+namespace DO::Shakti {
 
   Timer::Timer()
   {
@@ -37,24 +37,16 @@ namespace DO { namespace Shakti {
     return ms;
   }
 
-} /* namespace Shakti */
-} /* namespace DO */
 
-
-namespace DO { namespace Shakti {
-
-  static Timer timer;
-
-  void tic()
+  void tic(Timer& timer)
   {
     timer.restart();
   }
 
-  void toc(const char *what)
+  void toc(Timer& timer, const char* what)
   {
     auto time = timer.elapsed_ms();
     cout << "[" << what << "] Elapsed time = " << time << " ms" << endl;
   }
 
-} /* namespace Shakti */
-} /* namespace DO */
+}  // namespace DO::Shakti

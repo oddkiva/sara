@@ -39,7 +39,10 @@ namespace DO::Shakti::Cuda {
     {
       if (_texture_object != 0)
       {
-        SHAKTI_SAFE_CUDA_CALL(cudaDestroyTextureObject(_texture_object));
+        const auto ret = cudaDestroyTextureObject(_texture_object);
+        if (ret != cudaSuccess)
+          SHAKTI_STDERR << cudaGetErrorString(cudaDeviceSynchronize())
+                        << std::endl;
         _texture_object = 0;
       }
     }

@@ -144,7 +144,9 @@ namespace DO { namespace Shakti {
     //! @brief Destructor.
     inline ~MultiArray()
     {
-      cudaFree(_data);
+      const auto ret = cudaFree(_data);
+      if (ret != cudaSuccess)
+        SHAKTI_STDERR << cudaGetErrorString(cudaDeviceSynchronize()) << std::endl;
     }
 
     //! @brief Resize the multi-array.

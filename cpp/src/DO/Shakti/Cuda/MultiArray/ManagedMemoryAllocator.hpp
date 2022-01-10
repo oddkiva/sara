@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <DO/Shakti/Cuda/Utilities/ErrorCheck.hpp>
+
 #include <cuda_device_runtime_api.h>
 #include <cuda_runtime_api.h>
 
@@ -99,10 +101,10 @@ namespace DO { namespace Shakti {
 
     __host__ inline void deallocate(pointer p, size_type)
     {
-      auto error = cudaFree(p);
-      if (error)
-        throw std::runtime_error(std::string("CUDA error: ") +
-                                 cudaGetErrorString(error));
+      const auto ret = cudaFree(p);
+      if (ret != cudaSuccess)
+        SHAKTI_STDERR << cudaGetErrorString(cudaDeviceSynchronize())
+                      << std::endl;
     }
 
     __host__ __device__ inline size_type max_size() const

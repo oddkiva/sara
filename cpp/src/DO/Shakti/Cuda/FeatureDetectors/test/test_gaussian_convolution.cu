@@ -38,6 +38,7 @@
 
 #include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/SmallGaussianConvolutionFP32.hpp>
 #include <DO/Shakti/Cuda/MultiArray.hpp>
+#include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
 #include <DO/Shakti/Cuda/Utilities/Timer.hpp>
 
 
@@ -49,20 +50,29 @@ namespace scg = sc::Gaussian;
 
 BOOST_AUTO_TEST_CASE(test_convolve)
 {
-  const auto host_kernels = sc::GaussianOctaveKernels<float>{};
-
-  auto device_kernels = scg::DeviceGaussianFilterBank{host_kernels};
-  device_kernels.copy_filters_to_device_constant_memory();
-  // device_kernels.peek_filters_in_device_constant_memory();
-
 // #define CHECK_IMPL
 #ifdef CHECK_IMPL
-  auto w = 5;
-  auto h = 5;
+  const auto w0 = 2 * 3840;
+  const auto h0 = 2 * 2160;
 #else
-  auto w = 2 * 3840;
-  auto h = 2 * 2160;
+  const auto w0 = 2 * 3840;
+  const auto h0 = 2 * 2160;
 #endif
+  auto w = w0;
+  auto h = h0;
+
+  auto h_arr = sara::Image<float, 2>{w, h};
+  h_arr.flat_array().fill(0);
+  h_arr(w / 2, h / 2) = 1.f;
+
+  // shakti::tic();
+  auto d_in = shakti::MultiArray<float, 2>{h_arr.data(), {w, h}};
+  // shakti::toc("Copy from host memory");
+
+  const auto host_kernels = sc::GaussianOctaveKernels<float>{};
+  auto device_kernels = scg::DeviceGaussianFilterBank{host_kernels};
+  device_kernels.copy_filters_to_device_constant_memory();
+  device_kernels.peek_filters_in_device_constant_memory();
 
   // Timing stuff.
   auto pyramid_compute_time = double{};
@@ -131,10 +141,12 @@ BOOST_AUTO_TEST_CASE(test_convolve)
     w /= 2;
     h /= 2;
 
+    SARA_CHECK(w);
+
   } while (w >= 32 && h >= 16);
 
   SARA_DEBUG << sara::format("[pyramid][%4dx%4dx%u] %0.3f ms",  //
-                             w, h, host_kernels.scales.size(),
+                             w0, h0, host_kernels.scales.size(),
                              pyramid_compute_time)
              << std::endl;
 }

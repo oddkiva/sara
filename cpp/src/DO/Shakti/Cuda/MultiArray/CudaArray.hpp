@@ -294,7 +294,9 @@ namespace DO::Shakti::Cuda {
 
     ~Array()
     {
-      SHAKTI_SAFE_CUDA_CALL(cudaFreeArray(_array));
+      const auto ret = cudaFreeArray(_array);
+      if (ret != cudaSuccess)
+        SHAKTI_STDERR << cudaGetErrorString(cudaDeviceSynchronize()) << std::endl;
     }
 
     inline auto operator=(const Array& other) const -> auto&
