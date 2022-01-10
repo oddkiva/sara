@@ -59,12 +59,12 @@ BOOST_AUTO_TEST_CASE(test_convolve)
 
   auto device_kernels = scg::DeviceGaussianFilterBank{host_kernels};
   device_kernels.copy_filters_to_device_constant_memory();
-  device_kernels.peek_filters_in_device_constant_memory();
+  // device_kernels.peek_filters_in_device_constant_memory();
 
-// #define CHECK_IMPL
+#define CHECK_IMPL
 #ifdef CHECK_IMPL
-  auto w = 3;
-  auto h = 3;
+  auto w = 5;
+  auto h = 5;
 #else
   auto w = 2 * 3840;
   auto h = 2 * 2160;
@@ -106,11 +106,9 @@ BOOST_AUTO_TEST_CASE(test_convolve)
       }
       elapsed = timer.elapsed_ms();
       gauss_compute_time += elapsed;
-
       SARA_DEBUG << sara::format("[gaussf][s=%d] %0.3f ms", kernel_index,
                                  gauss_compute_time)
                  << std::endl;
-
       octave_compute_time += gauss_compute_time;
 
       if (w < 9 && h < 9)
@@ -128,6 +126,7 @@ BOOST_AUTO_TEST_CASE(test_convolve)
         std::cout << h_convy.matrix().format(HeavyFmt) << std::endl;
       }
     }
+
     SARA_DEBUG << sara::format("[octave][%4dx%4dx%u] %0.3f ms",  //
                                w, h, host_kernels.scales.size(),
                                octave_compute_time)
