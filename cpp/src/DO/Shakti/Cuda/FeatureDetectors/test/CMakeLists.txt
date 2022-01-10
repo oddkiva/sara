@@ -42,5 +42,7 @@ file(GLOB test_FILES FILES test_*.cpp test_*.cu)
 
 foreach(file ${test_FILES})
   shakti_add_test(SOURCES ${file} DEPENDENCIES DO::Sara::Core
-                  DO::Shakti::MultiArray DO::Shakti::Utilities)
+    #DO::Shakti::MultiArray
+    DO::Shakti::Utilities
+    DO::Shakti::Cuda::FeatureDetectors)
 endforeach()

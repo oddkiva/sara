@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <DO/Shakti/Cuda/FeatureDetectors/SIFT/GaussianOctaveKernels.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveKernels.hpp>
 
 
 namespace DO::Shakti::Cuda {

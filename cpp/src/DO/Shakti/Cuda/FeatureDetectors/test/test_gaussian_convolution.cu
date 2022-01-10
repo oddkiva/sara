@@ -12,6 +12,22 @@
 // Convolving in batch the input image does not seem very fast.
 // Rather convolving sequentially seems much faster if we base ourselves from
 // the computation time spent in the Halide implementation.
+//
+// THE TIMING on Titan 1080 Xp
+//
+// No memory error according to the memcheck tool:
+// $> compute-sanitizer --tool memcheck
+// ./bin/shakti_test_gaussian_convolution
+//
+// [gauss-octave][7680x4320x6] 21.212 ms
+// [gauss-octave][3840x2160x6]  5.384 ms
+// [gauss-octave][1920x1080x6]  1.416 ms
+// [gauss-octave][ 960x 540x6]  0.436 ms
+// [gauss-octave][ 480x 270x6]  0.151 ms
+// [gauss-octave][ 240x 135x6]  0.091 ms
+//
+// 4K Gaussian pyramid = 7.797 ms
+// 8K Gaussian pyramid = 29.538 ms
 
 
 #define BOOST_TEST_MODULE "Shakti/CUDA/FeatureDetectors/Gaussian Convolution"
@@ -24,7 +40,7 @@
 
 #include <DO/Sara/Core/StringFormat.hpp>
 
-#include <DO/Shakti/Cuda/FeatureDetectors/SIFT/GaussianOctaveKernels.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/SmallGaussianConvolutionFP32.hpp>
 #include <DO/Shakti/Cuda/MultiArray.hpp>
 #include <DO/Shakti/Cuda/Utilities/Timer.hpp>
 
@@ -34,230 +50,16 @@ namespace shakti = DO::Shakti;
 namespace sc = DO::Shakti::Cuda;
 
 
-namespace DO::Shakti::Cuda::Gaussian {
-
-  static constexpr auto kernel_max_radius = 20;
-  static constexpr auto tile_size = 1024 / kernel_max_radius;
-  static constexpr auto sdata_rows = tile_size + 2 * kernel_max_radius;
-
-  static constexpr auto kernel_count_max = 16;
-  static constexpr auto kernel_capacity = kernel_max_radius * kernel_count_max;
-
-  __constant__ half kernels_fp16[kernel_capacity];
-  __constant__ float kernels[kernel_capacity];
-  __constant__ int kernel_radii[kernel_count_max];
-  __constant__ int kernel_count;
-  __constant__ int kernel_radius_max;
-
-  template <typename T>
-  __global__ auto convx(const T* in, T* out, int w, int h, int pitch,
-                        int kernel_index) -> void
-  {
-    __shared__ T sdata[tile_size * sdata_rows];
-
-    const int x = blockIdx.x * blockDim.x + threadIdx.x;
-    const int y = blockIdx.y * blockDim.y + threadIdx.y;
-    const int& r = kernel_radii[kernel_index];
-
-    if (x >= max(w, r) + r || y >= h)
-      return;
-
-    const auto gi = y * pitch + x;
-    const auto ti = threadIdx.y * sdata_rows + threadIdx.x;
-
-    const auto a = x - r;
-    const auto b = x + r;
-
-    // 1. Accumulate the shared data.
-    if (a < 0)
-      sdata[ti] = in[y * pitch];
-    else if (a < w - 1)
-      sdata[ti] = in[gi - r];
-    else  // if (a <= w + r)
-      sdata[ti] = in[y * pitch + w - 1];
-
-    if (b < 0)
-      sdata[ti + 2 * r] = in[y * pitch];
-    else if (b < w - 1)
-      sdata[ti + 2 * r] = in[gi + r];
-    else  // if (b <= w + r)
-      sdata[ti + 2 * r] = in[y * pitch + w - 1];
-    __syncthreads();
-
-
-    // Pick the right kernel.
-    const auto kernel = kernels + kernel_index * kernel_radius_max;
-
-    // 2. Convolve.
-    auto val = kernel[0] * sdata[ti + r];
-#pragma unroll
-    for (auto k = 1; k <= r; ++k)
-      val += kernel[k] * (sdata[ti + r - k] + sdata[ti + r + k]);
-
-    out[gi] = val;
-  }
-
-  template <typename T>
-  __global__ auto convy(const T* in, T* out, int w, int h, int pitch,
-                        int kernel_index) -> void
-  {
-    __shared__ T sdata[tile_size * sdata_rows];
-
-    const int x = blockIdx.x * blockDim.x + threadIdx.x;
-    const int y = blockIdx.y * blockDim.y + threadIdx.y;
-    const int& r = kernel_radii[kernel_index];
-    if (x >= w || y > max(h, r) + r)
-      return;
-
-    const int gi = y * pitch + x;
-
-    // 1. Accumulate the shared data.
-    const auto& tx = threadIdx.x;
-    const auto& ty = threadIdx.y;
-    const auto t = tx * sdata_rows + ty;
-
-    const auto a = y - r;
-    const auto b = y + r;
-
-    if (a < 0)
-      sdata[t] = in[x];
-    else if (a < h - 1)
-      sdata[t] = in[gi - r * pitch];
-    else  // if (a <= h + 2 * r)
-      sdata[t] = in[(h - 1) * pitch + x];
-
-    if (b < 0)
-      sdata[t + 2 * r] = in[x];
-    else if (b < h - 1)
-      sdata[t + 2 * r] = in[gi + r * pitch];
-    else  // if (b <= h + r)
-      sdata[t + 2 * r] = in[(h - 1) * pitch + x];
-    __syncthreads();
-
-    if (y >= h)
-      return;
-
-    // Pick the right kernel.
-    const auto kernel = kernels + kernel_index * kernel_radius_max;
-
-    // 2. Convolve.
-    auto val = sdata[t + r] * kernel[0];
-#pragma unroll
-    for (auto k = 1; k <= r; ++k)
-      val += kernel[k] * (sdata[t + r - k] + sdata[t + r + k]);
-    out[gi] = val;
-  }
-
-  template <typename T>
-  inline auto copy_gaussian_kernels_to_constant_memory(
-      const Shakti::Cuda::GaussianOctaveKernels<T>& gok) -> void
-  {
-    SARA_DEBUG << "Copying the stacked kernels to CUDA constant memory"
-               << std::endl;
-    shakti::tic();
-    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(  //
-        kernels,                               //
-        gok.kernels.data(),                    //
-        gok.kernels.size() * sizeof(T)));
-    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(  //
-        kernel_count,                          //
-        gok.kernels.sizes().data(),            //
-        sizeof(int)));
-    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(  //
-        kernel_radius_max,                     //
-        gok.kernels.sizes().data() + 1,        //
-        sizeof(int)));
-    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(  //
-        kernel_radii,                          //
-        gok.kernel_radii.data(),               //
-        gok.kernel_radii.size() * sizeof(int)));
-    shakti::toc("copy to constant memory");
-  }
-
-  inline auto peek_gaussian_kernels_in_constant_memory()
-  {
-    const auto HeavyFmt =
-        Eigen::IOFormat(3, 0, ", ", ",\n", "[", "]", "[", "]");
-
-    auto kernel_count_copied = int{};
-    auto kernel_radius_max_copied = int{};
-    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyFromSymbol(&kernel_count_copied,  //
-                                               kernel_count, sizeof(int)));
-    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyFromSymbol(&kernel_radius_max_copied,  //
-                                               kernel_radius_max, sizeof(int)));
-
-    auto kernels_copied = sara::Tensor_<float, 2>{
-        kernel_count_copied,      //
-        kernel_radius_max_copied  //
-    };
-    auto kernel_radii_copied = std::vector<int>(kernel_count_copied);
-
-    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyFromSymbol(
-        kernels_copied.data(), kernels, kernels_copied.size() * sizeof(float)));
-    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyFromSymbol(  //
-        kernel_radii_copied.data(),              //
-        kernel_radii,                            //
-        kernel_count_copied * sizeof(int)));
-
-    SARA_DEBUG << "kernels copied=\n"
-               << kernels_copied.matrix().transpose().format(HeavyFmt)
-               << std::endl;
-    SARA_DEBUG << "kernel radii =\n"
-               << Eigen::Map<const Eigen::RowVectorXi>(
-                      kernel_radii_copied.data(), kernel_radii_copied.size())
-               << std::endl;
-
-    SARA_CHECK(kernel_count_copied);
-    SARA_CHECK(kernel_radius_max_copied);
-  }
-
-  template <typename T>
-  __global__ auto rgba8u_to_gray16f(cudaSurfaceObject_t rgba8u,
-                                    cudaSurfaceObject_t gray16f, int w, int h)
-      -> void
-  {
-
-    // Calculate normalized texture coordinates
-    const int x = blockIdx.x * blockDim.x + threadIdx.x;
-    const int y = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (x >= w / 2 || y >= h / 2)
-      return;
-
-    // uchar4 rgba;
-    // surf2Dread(                   //
-    //     &rgba,                    //
-    //     rgba8u,                   //
-    //     x * int(sizeof(uchar4)),  //
-    //     y,                        //
-    //     cudaBoundaryModeClamp);
-
-    // static constexpr half norminv = half(1. / 255);
-    // const half r = half(rgba.x) * norminv;
-    // const half g = half(rgba.y) * norminv;
-    // const half b = half(rgba.z) * norminv;
-
-    // static constexpr float one_third = half(1.f / 3);
-    // half2 gray;
-    // gray.x = (r + g + b) * one_third;
-    // gray.y = (r + g + b) * one_third;
-    // surf2Dwrite(                //
-    //     gray,                   //
-    //     gray16f,                //
-    //     x * int(sizeof(half2)),  //
-    //     y);
-  }
-
-}  // namespace DO::Shakti::Cuda::Gaussian
-
 namespace scg = sc::Gaussian;
 
 
 BOOST_AUTO_TEST_CASE(test_convolve)
 {
-  auto gok = sc::GaussianOctaveKernels<float>{};
-  scg::copy_gaussian_kernels_to_constant_memory(gok);
-  scg::peek_gaussian_kernels_in_constant_memory();
+  const auto host_kernels = sc::GaussianOctaveKernels<float>{};
+
+  auto device_kernels = scg::DeviceGaussianFilterBank{host_kernels};
+  device_kernels.copy_filters_to_device_constant_memory();
+  device_kernels.peek_filters_in_device_constant_memory();
 
 // #define CHECK_IMPL
 #ifdef CHECK_IMPL
@@ -291,56 +93,19 @@ BOOST_AUTO_TEST_CASE(test_convolve)
 
     auto octave_compute_time = double{};
 #ifdef CHECK_IMPL
-    const auto kernel_index = 0;
+    const auto kernel_index = 0u;
 #else  // BENCHMARK
-    for (auto kernel_index = 0; kernel_index < gok.scales.size();
+    for (auto kernel_index = 0u; kernel_index < host_kernels.scales.size();
          ++kernel_index)
 #endif
     {
       auto gauss_compute_time = double{};
       timer.restart();
       {
-        const auto threadsperBlock =
-            dim3(scg::kernel_max_radius, scg::tile_size);
-        const auto numBlocks = dim3(
-            (d_in.padded_width() + threadsperBlock.x - 1) / threadsperBlock.x,
-            (d_in.height() + threadsperBlock.y - 1) / threadsperBlock.y);
-
-        // x-convolution.
-        scg::convx<<<numBlocks, threadsperBlock>>>(d_in.data(),     //
-                                                   d_convx.data(),  //
-                                                   d_in.width(),
-                                                   d_in.height(),        //
-                                                   d_in.padded_width(),  //
-                                                   kernel_index);
+        device_kernels(d_in, d_convx, d_convy, kernel_index);
       }
       elapsed = timer.elapsed_ms();
       gauss_compute_time += elapsed;
-      // SARA_DEBUG << sara::format("[x-conv][s=%d] %0.3f ms", kernel_index,
-      //                            elapsed)
-      //            << std::endl;
-
-      timer.restart();
-      {
-        const auto threadsperBlock =
-            dim3(scg::tile_size, scg::kernel_max_radius);
-        const auto numBlocks = dim3(
-            (d_in.padded_width() + threadsperBlock.x - 1) / threadsperBlock.x,
-            (d_in.height() + threadsperBlock.y - 1) / threadsperBlock.y);
-
-        // y-convolution.
-        scg::convy<<<numBlocks, threadsperBlock>>>(d_convx.data(),  //
-                                                   d_convy.data(),  //
-                                                   d_convx.width(),
-                                                   d_convx.height(),        //
-                                                   d_convx.padded_width(),  //
-                                                   kernel_index);
-      }
-      elapsed = timer.elapsed_ms();
-      gauss_compute_time += elapsed;
-      // SARA_DEBUG << sara::format("[y-conv][s=%d] %0.3f ms", kernel_index,
-      //                            elapsed)
-      //            << std::endl;
 
       SARA_DEBUG << sara::format("[gaussf][s=%d] %0.3f ms", kernel_index,
                                  gauss_compute_time)
@@ -364,7 +129,8 @@ BOOST_AUTO_TEST_CASE(test_convolve)
       }
     }
     SARA_DEBUG << sara::format("[octave][%4dx%4dx%u] %0.3f ms",  //
-                               w, h, gok.scales.size(), octave_compute_time)
+                               w, h, host_kernels.scales.size(),
+                               octave_compute_time)
                << std::endl;
 
     pyramid_compute_time += octave_compute_time;
@@ -375,35 +141,7 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   } while (w >= 32 && h >= 16);
 
   SARA_DEBUG << sara::format("[pyramid][%4dx%4dx%u] %0.3f ms",  //
-                             w, h, gok.scales.size(), pyramid_compute_time)
+                             w, h, host_kernels.scales.size(),
+                             pyramid_compute_time)
              << std::endl;
-
-  SARA_CHECK(scg::kernel_max_radius);
-  SARA_CHECK(scg::tile_size);
-}
-
-// THE TIMING on Titan 1080 Xp
-//
-// No memory error according to the memcheck tool:
-// $> compute-sanitizer --tool memcheck
-// ./bin/shakti_test_gaussian_convolution
-//
-// [gauss-octave][7680x4320x6] 21.212 ms
-// [gauss-octave][3840x2160x6]  5.384 ms
-// [gauss-octave][1920x1080x6]  1.416 ms
-// [gauss-octave][ 960x 540x6]  0.436 ms
-// [gauss-octave][ 480x 270x6]  0.151 ms
-// [gauss-octave][ 240x 135x6]  0.091 ms
-//
-// 4K Gaussian pyramid = 7.797 ms
-// 8K Gaussian pyramid = 29.538 ms
-
-
-BOOST_AUTO_TEST_CASE(test_convolve_fp16)
-{
-  const half a = __float2half(0.5f);
-  const half b = __float2half(0.3f);
-  // static_assert(std::is_same_v<decltype(a + b), half>);
-
-  // std::cout << c << std::endl;
 }

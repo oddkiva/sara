@@ -34,6 +34,7 @@
   SHAKTI_CHECK_LAST_ERROR();                                                   \
   SHAKTI_SYNCHRONIZE()
 
+
 #define SHAKTI_STDOUT                                                          \
   std::cout << termcolor::bold << termcolor::green << "[" << __FUNCTION__      \
             << ":" << __LINE__ << "] " << termcolor::reset
