@@ -24,7 +24,7 @@
 
 #include <DO/Sara/Core/StringFormat.hpp>
 
-#include <DO/Shakti/Cuda/FeatureDetectors/GaussianOctaveKernels.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/SIFT/GaussianOctaveKernels.hpp>
 #include <DO/Shakti/Cuda/MultiArray.hpp>
 #include <DO/Shakti/Cuda/Utilities/Timer.hpp>
 

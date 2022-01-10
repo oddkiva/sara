@@ -34,6 +34,10 @@ namespace DO::Shakti::Cuda {
       scales = std::vector<T>(scale_count + 3);
       for (auto i = 0; i < scale_count + 3; ++i)
         scales[i] = scale_initial * std::pow(scale_factor, i);
+      SARA_DEBUG << "scales =\n"
+                 << Eigen::Map<const Eigen::RowVectorXf>(scales.data(),
+                                                         scales.size())
+                 << std::endl;
 
       // Calculate the Gaussian smoothing values.
       sigmas = std::vector<T>(scale_count + 3);
@@ -44,11 +48,6 @@ namespace DO::Shakti::Cuda {
                            : std::sqrt(Sara::square(scales[i]) -
                                        Sara::square(scales[i - 1]));
       }
-
-      SARA_DEBUG << "scales =\n"
-                 << Eigen::Map<const Eigen::RowVectorXf>(scales.data(),
-                                                         scales.size())
-                 << std::endl;
       SARA_DEBUG << "sigmas =\n"
                  << Eigen::Map<const Eigen::RowVectorXf>(sigmas.data(),
                                                          sigmas.size())
@@ -91,13 +90,17 @@ namespace DO::Shakti::Cuda {
           kernels(n, k) /= kernel_sum;
       }
 
-      Eigen::IOFormat HeavyFmt(3, 0, ", ", ",\n", "[", "]", "[", "]");
-      SARA_CHECK(Eigen::Map<const Eigen::RowVectorXf>(  //
-          sigmas.data(),                                //
-          sigmas.size())                                //
+      const auto HeavyFmt = Eigen::IOFormat(     //
+          3, 0, ", ", ",\n", "[", "]", "[", "]"  //
       );
-      SARA_CHECK(kernels.sizes().reverse().transpose());
-      SARA_DEBUG << "stacked kernels =\n"
+      SARA_DEBUG << "Half Gaussian sigmas=\n"
+                 << Eigen::Map<const Eigen::RowVectorXf>(  //
+                        sigmas.data(),                     //
+                        sigmas.size())                     //
+                 << std::endl;
+      SARA_DEBUG << "Stacked kernel tensor shape =\n"
+                 << kernels.sizes().reverse().transpose() << std::endl;
+      SARA_DEBUG << "Stacked kernels tensor =\n"
                  << kernels.matrix().transpose().format(HeavyFmt) << std::endl;
     }
 
