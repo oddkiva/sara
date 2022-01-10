@@ -2,7 +2,7 @@
 // This file is part of Shakti, a basic set of CUDA accelerated libraries in
 // C++ for computer vision.
 //
-// Copyright (C) 2021-present David Ok <david.ok8@gmail.com>
+// Copyright (C) 2022-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -11,9 +11,7 @@
 
 #pragma once
 
-#include <cuda_runtime.h>
-
-#include <DO/Shakti/Cuda/MultiArray/TextureArray.hpp>
+#include <DO/Shakti/Cuda/MultiArray/CudaArray.hpp>
 
 
 namespace DO::Shakti::Cuda {
@@ -22,68 +20,32 @@ namespace DO::Shakti::Cuda {
   class Octave
   {
   public:
-    inline Octave() = default;
+    inline Octave() noexcept = default;
 
     inline Octave(int width, int height, int scale_count)
-      : _sizes{width, height, scale_count}
+      : _array{make_3d_layered_surface_array<T>({width, height, scale_count})}
     {
-      auto channel_descriptor = ChannelFormatDescriptor<T>::type();
-      SHAKTI_SAFE_CUDA_CALL(cudaMalloc3DArray(
-          &_array,              //
-          &channel_descriptor,  //
-          cudaExtent{
-              .width = static_cast<unsigned long>(width),       //
-              .height = static_cast<unsigned long>(height),     //
-              .depth = static_cast<unsigned long>(scale_count)  //
-          },
-          cudaArrayLayered | cudaArraySurfaceLoadStore));
     }
 
-    inline ~Octave()
+    inline ~Octave() = default;
+
+    inline auto width() const -> int
     {
-      deinit_layered_texture();
-      deinit_surface();
-      SHAKTI_SAFE_CUDA_CALL(cudaFreeArray(_array));
+      return _array.width();
     }
 
-    inline auto width() noexcept -> auto&
+    inline auto height() const -> int
     {
-      return _sizes(0);
+      return _array.height();
     }
 
-    inline auto height() noexcept -> auto&
+    inline auto scale_count() const -> int
     {
-      return _sizes(1);
+      return _array.depth();
     }
 
-    inline auto scale_count() noexcept -> auto&
+    inline auto init_texture(bool linear_interp = false) -> void
     {
-      return _sizes(2);
-    }
-
-    inline auto width() const noexcept -> const auto&
-    {
-      return _sizes(0);
-    }
-
-    inline auto height() const noexcept -> const auto&
-    {
-      return _sizes(1);
-    }
-
-    inline auto scale_count() const noexcept -> const auto&
-    {
-      return _sizes(2);
-    }
-
-    inline auto init_layered_texture(bool linear_interp = false) -> void
-    {
-      // Specify texture
-      auto resource_descriptor = cudaResourceDesc{};
-      memset(&resource_descriptor, 0, sizeof(resource_descriptor));
-      resource_descriptor.resType = cudaResourceTypeArray;
-      resource_descriptor.res.array.array = _array;
-
       // Specify texture object parameters
       auto texture_descriptor = cudaTextureDesc{};
       memset(&texture_descriptor, 0, sizeof(texture_descriptor));
@@ -95,60 +57,46 @@ namespace DO::Shakti::Cuda {
       texture_descriptor.readMode = cudaReadModeElementType;
       texture_descriptor.normalizedCoords = false;
 
-      cudaCreateTextureObject(&_texture_object, &resource_descriptor,
-                              &texture_descriptor, nullptr);
+      _texture = _array.create_texture_object(texture_descriptor);
     }
 
     inline auto init_surface() -> void
     {
-      auto resource_descriptor = cudaResourceDesc{};
-      memset(&resource_descriptor, 0, sizeof(resource_descriptor));
-      resource_descriptor.resType = cudaResourceTypeArray;
-      resource_descriptor.res.array.array = _array;
-
-      // Create the surface objects
-      cudaCreateSurfaceObject(&_surface_object, &resource_descriptor);
+      _surface = _array.create_surface_object();
     }
 
-    inline auto deinit_layered_texture() -> void
+    inline auto deinit_texture() -> void
     {
-      if (_texture_object != 0)
-      {
-        SHAKTI_SAFE_CUDA_CALL(cudaDestroyTextureObject(_texture_object));
-        _texture_object = 0;
-      }
+      _texture.reset();
     }
 
     inline auto deinit_surface() -> void
     {
-      if (_surface_object != 0)
-      {
-        SHAKTI_SAFE_CUDA_CALL(cudaDestroySurfaceObject(_surface_object));
-        _surface_object = 0;
-      }
+      _surface.reset();
     }
 
-    inline operator cudaArray_t() const
+    inline auto array() const -> const ArrayView<T, 3>&
     {
       return _array;
     }
 
     inline auto texture_object() const noexcept
+        -> const std::optional<TextureObject>&
     {
-      return _texture_object;
+      return _texture;
     }
 
-    inline auto surface_object() const noexcept -> const auto&
+    inline auto surface_object() const noexcept
+        -> const std::optional<SurfaceObject>&
     {
-      return _surface_object;
+      return _surface;
     }
 
   private:
-    cudaArray_t _array = nullptr;
-    Vector3i _sizes = Vector3i::Zero();
+    Array<T, 3> _array;
 
-    cudaTextureObject_t _texture_object = 0ull;
-    cudaSurfaceObject_t _surface_object = 0ull;
+    std::optional<TextureObject> _texture;
+    std::optional<SurfaceObject> _surface;
   };
 
 
