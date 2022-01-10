@@ -137,7 +137,7 @@ namespace DO { namespace Sara {
 
   public: /* methods */
     //! @brief Default constructor.
-    inline MultiArrayView() noexcept = default;
+    inline MultiArrayView() = default;
 
     //! @brief Copy constructor.
     inline MultiArrayView(const self_type&) = default;

@@ -55,7 +55,7 @@ namespace DO { namespace Sara {
 
   public: /* interface */
     //! @brief Default constructor that constructs an empty ND-array.
-    inline MultiArrayBase() noexcept = default;
+    inline MultiArrayBase() = default;
 
     inline explicit MultiArrayBase(const allocator_type& allocator)
       : _allocator{allocator}

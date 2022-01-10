@@ -47,7 +47,7 @@ namespace DO { namespace Shakti {
   public:
     //! @{
     //! @brief Constructor.
-    inline MultiArray() noexcept = default;
+    inline MultiArray() = default;
 
     inline MultiArray(const vector_type& sizes)
       : base_type{}

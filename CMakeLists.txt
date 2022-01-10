@@ -70,6 +70,7 @@ if (CMAKE_CUDA_COMPILER)
     set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
       -Xcompiler=-Wno-unknown-pragmas;
       -Xcompiler=-fPIC;
+      -std=c++17;
       --expt-relaxed-constexpr)
   endif ()
 else ()
