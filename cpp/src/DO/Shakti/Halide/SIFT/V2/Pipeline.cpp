@@ -415,9 +415,6 @@ namespace DO::Shakti::HalideBackend::v2 {
   {
     start_octave_index = start_octave;
 
-    // Adjust the scale of the photograph acquired by the camera.
-    scale_camera = 1.f / std::pow(2, start_octave_index);
-
     // Deduce the maximum number of octaves.
     const auto l = std::min(width, height);  // l = min image image sizes.
     const auto b = 8;                        // b = image border size.

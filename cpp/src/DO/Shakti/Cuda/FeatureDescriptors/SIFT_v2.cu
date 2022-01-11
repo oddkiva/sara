@@ -22,17 +22,54 @@
 
 namespace DO::Shakti {
 
-  __constant__ float bin_scale_unit_length;
-  __constant__ float max_bin_value;
+  //! @brief SIFT build histograms from a grid of NxN patches of image
+  //! gradients.
+  static constexpr auto subpatch_count_per_axis = 4;
+  //! @brief Each histogram of gradients consists of O = 8 orientation bins.
+  /*!
+   *  Each bin are centered around the orientations:
+   *  bin index   = [0,   1,    2,    3, 4,    5,    6,    7]
+   *  orientation = [0, π/4,  π/2, 3π/4, π, 5π/4, 3π/2, 7π/4]
+   */
+  static constexpr auto orientation_bin_count = 8;
+  //! @brief the dimension of the SIFT descriptor.
+  static constexpr auto SIFT_dimension =
+      subpatch_count_per_axis * subpatch_count_per_axis * orientation_bin_count;
+  static_assert(SIFT_dimension == 128);
+
+  //! @brief Each image subpatch has a circular radius equal to:
+  static constexpr auto bin_length_in_scale_unit = 3.f;
+  //! @brief Each image subpatch has a circular diameter equal to:
+  static constexpr auto subpatch_diameter_in_scale_unit =
+      2 * bin_length_in_scale_unit + 1;
+  //! @brief Each image patch has a circular radius equal to:
+  static constexpr auto patch_radius_in_scale_unit =
+      bin_length_in_scale_unit * (subpatch_count_per_axis + 1) / 2;
+  //! @brief Now because we sample on a square patch, we need to calculate the
+  //! radius of the square, but not all pixel in the square patch will
+  //! contribute to the histogram. So this a bound to properly speak.
+  static constexpr auto patch_radius_bound_in_scale_unit =
+      patch_radius_in_scale_unit * static_cast<float>(CUDART_SQRT_TWO);
+
+  //! @brief The magic constant value to enforce invariance to nonlinear
+  //! illumination changes as referenced in the paper.
+  static constexpr auto max_bin_value = 0.2f;
+
+  //! @brief Radius of the whole image patch.
+  __host__ __device__ static inline auto
+  patch_radius_bound_in_pixels(float scale)
+  {
+    return patch_radius_bound_in_scale_unit * scale;
+  }
+
+
   __constant__ float sigma;
-  __constant__ float sample_count_per_axis_per_subpatch;
 
   //! @brief Robustify descriptor w.r.t. illumination changes.
   __global__ void normalize(float* sifts, int w, int h, int pitch)
   {
-    static constexpr auto dim = 128;
     const auto p = coords<3>();
-    if (p.x() >= w || p.y() >= h || p.z() >= dim)
+    if (p.x() >= w || p.y() >= h || p.z() >= SIFT_dimension)
       return;
 
     const auto global_index = p.z() * h * pitch + p.y() * pitch + x;
@@ -40,8 +77,8 @@ namespace DO::Shakti {
     const auto& ty = threadIdx.y;
     const auto& tz = threadIdx.z;
 
-    __shared__ float s_in[4][2][128];
-    __shared__ float s_norm[4][2][128];
+    __shared__ float s_in[2][4][128];
+    __shared__ float s_work[2][4][128];
 
     const auto value_unnormalized = sifts[global_index];
 
@@ -51,12 +88,20 @@ namespace DO::Shakti {
     s_work[ty][tx][tz] = value_unnormalized * value_unnormalized;
     __syncthreads();
 
+    auto calculate_sum_by_reduction =
+        [](volatile float s_work[2][4][SIFT_dimension]) {
+          for (auto i = 64; i > 0; i >>= 1)
+          {
+            if (tz < i)
+              s_work[ty][tx][tz] += s_work[ty][tx][tz + i];
+            __syncthreads();
+          }
+          const float sum = s_work[ty][tx][0];
+          return sum;
+        };
+
     // Calculate the Euclidean norm of the descriptors as follows.
-    for (auto i  = 64; i > 1; i >>= 1)
-      if (tz < i)
-        s_work[ty][tx][tz] += s_work[ty][tx][tz + i];
-    __syncthreads();
-    const auto norm = __sqrtf(s_work[ty][tx][0]);
+    auto norm = __sqrtf(calculate_sum_by_reduction(s_work));
 
     // Normalize to make it robust to linear contrast changes.
     s_in[ty][tx][tz] /= norm;
@@ -68,36 +113,44 @@ namespace DO::Shakti {
     // Re-normalize again.
     s_work[ty][tx][tz] = s_in[ty][tx][tz] * s_in[ty][tx][tz];
     __syncthreads();
-    for (auto i  = 64; i > 1; i >>= 1)
-      if (tz < i)
-        s_work[ty][tx][tz] += s_work[ty][tx][tz + 64];
-    __syncthreads();
-    const auto norm = __sqrtf(s_work[ty][tx][0]);
+    norm = __sqrtf(calculate_sum_by_reduction(s_work));
     s_in[ty][tx][tz] /= norm;
 
+    // The SIFT descriptor is now a unit vector.
     sifts[global_index] = s_in[ty][tx][tz];
   }
 
   __global__ void compute_dense_upright_sift_descriptor(float* sifts, int w,
                                                         int h, int pitch)
   {
-    static constexpr auto dim = N * N * O;
     static constexpr auto pi = static_cast<float>(CUDART_PI);
     static constexpr auto sqrt_two = static_cast<float>(CUDART_SQRT_TWO);
-    static constexpr auto patch_radius = (N + 1) * 0.5f;
+    static constexpr auto half_N = subpatch_count_per_axis * 0.5f;
+    static constexpr auto half_N_squared = half_N * half_N;
+    static constexpr auto two_gradient_sigma_inverted =
+        1 / (2 * half_N * half_N);
 
     const auto p = coords<3>();
-    if (p.x() >= w || p.y() >= h || p.z() >= dim)
+    if (p.x() >= w || p.y() >= h || p.z() >= SIFT_dimension)
       return;
 
+    // SIFT is 3D descriptors encoding:
+    // - local HoG for each of the NxN overlapping subpatches,
+    // - each HoG discretizing the angles in O = 8 bins.
+    //
+    // Which subpatch (i, j) are we in?
+    const auto& N = subpatch_count_per_axis;
+    const auto& O = orientation_bin_count;
     const auto i = p.z() / N * O;
     const auto j = (p.z() - i * N * O) / O;
+    // Which orientation bin o are we in?
     const auto o = p.z() - i * N * O - j * O;
 
-    const auto l = bin_scale_unit_length * sigma;
+    const auto subpatch_radius = bin_scale_unit_length * sigma;
 
-    const auto r = sqrt_two * bin_scale_unit_length * patch_radius;
-    const auto rounded_r = static_cast<int>(r);
+    const auto patch_radius_bound =
+        sqrt_two * bin_scale_unit_length * patch_radius;
+    const auto rounded_r = static_cast<int>(patch_radius_bound);
     const auto total_samples =
         sample_count_per_axis_per_subpatch * sample_count_per_axis_per_subpatch;
 
@@ -115,8 +168,10 @@ namespace DO::Shakti {
       // TODO: locate the coordinates
       // Refresh ourselves about the patch geometry.
 
-      const auto weight = exp(-(u * u + v * v) / (2.f * powf(N / 2.f, 2)));
-      auto grad = tex2D(in_float2_texture, x + u, y + v);
+      const auto r2 = static_cast<float>(u * u + v * v);
+
+      const auto weight = expf(-r2 * two_gradient_sigma_inverted);
+      auto grad = tex2D(in_float2_texture, key_x + u, key_y + v);
       auto mag = grad.x;
       auto ori = grad.y;
 

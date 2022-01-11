@@ -742,6 +742,8 @@ namespace DO::Shakti::HalideBackend {
 
       const auto radius = Halide::cast<int>(bin_length_in_scale_unit);
 
+      // 49 = 7 x 7 gradient samples. That's already a lot and should be
+      // sufficient.
       const auto r = Halide::RDom(  //
           -radius, 2 * radius + 1,  //
           -radius, 2 * radius + 1   //

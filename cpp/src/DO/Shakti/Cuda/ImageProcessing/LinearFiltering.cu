@@ -9,10 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Shakti/Cuda/ImageProcessing.hpp>
-#include <DO/Shakti/Cuda/ImageProcessing/Kernels/Convolution.hpp>
-
 #include <DO/Shakti/Cuda/Utilities.hpp>
+
+#include <DO/Shakti/Cuda/MultiArray/Grid.hpp>
+
+#include <DO/Shakti/Cuda/ImageProcessing/Kernels/Convolution.hpp>
+#include <DO/Shakti/Cuda/ImageProcessing/LinearFiltering.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
@@ -117,7 +119,8 @@ namespace DO { namespace Shakti {
     timer.restart();
     MultiArray<float, 2> out_array{{sizes[0], sizes[1]}};
     elapsed = timer.elapsed_ms();
-    std::cout << "[[GF] init out device memory] " << elapsed << " ms" << std::endl;
+    std::cout << "[[GF] init out device memory] " << elapsed << " ms"
+              << std::endl;
 
     timer.restart();
     SHAKTI_SAFE_CUDA_CALL(
@@ -127,7 +130,8 @@ namespace DO { namespace Shakti {
     const auto block_size = default_block_size_2d();
     const auto grid_size = grid_size_2d(out_array, block_size);
     SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in_array));
-    std::cout << "[[GF] init Gaussian filter] " << elapsed << " ms" << std::endl;
+    std::cout << "[[GF] init Gaussian filter] " << elapsed << " ms"
+              << std::endl;
 
     timer.restart();
     apply_column_based_convolution<<<grid_size, block_size>>>(out_array.data());

@@ -12,6 +12,4 @@
 #pragma once
 
 #include <DO/Shakti/Cuda/ImageProcessing/Differential.hpp>
-#include <DO/Shakti/Cuda/ImageProcessing/Histogram.hpp>
 #include <DO/Shakti/Cuda/ImageProcessing/LinearFiltering.hpp>
-#include <DO/Shakti/Cuda/ImageProcessing/SIFT.hpp>
