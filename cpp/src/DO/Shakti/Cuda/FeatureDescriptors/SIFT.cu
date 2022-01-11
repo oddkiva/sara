@@ -55,6 +55,13 @@ namespace DO::Shakti {
   //! illumination changes as referenced in the paper.
   static constexpr auto max_bin_value = 0.2f;
 
+  //! @brief The number of samples to perform for each local HoG that composes
+  //! the SIFT descriptor.
+  static constexpr auto sample_count_per_axis_per_subpatch =
+      2 * bin_length_in_scale_unit + 1;
+  static constexpr auto sample_count_per_subpatch =
+      sample_count_per_axis_per_subpatch * sample_count_per_axis_per_subpatch;
+
   //! @brief Radius of the whole image patch.
   __host__ __device__ static inline auto
   patch_radius_bound_in_pixels(float scale)
@@ -63,7 +70,7 @@ namespace DO::Shakti {
   }
 
 
-  __constant__ float sigma;
+  __constant__ float scale;
 
   //! @brief Robustify descriptor w.r.t. illumination changes.
   __global__ void normalize(float* sifts, int w, int h, int pitch)
@@ -101,7 +108,7 @@ namespace DO::Shakti {
         };
 
     // Calculate the Euclidean norm of the descriptors as follows.
-    auto norm = __sqrtf(calculate_sum_by_reduction(s_work));
+    auto norm = sqrtf(calculate_sum_by_reduction(s_work));
 
     // Normalize to make it robust to linear contrast changes.
     s_in[ty][tx][tz] /= norm;
@@ -113,74 +120,93 @@ namespace DO::Shakti {
     // Re-normalize again.
     s_work[ty][tx][tz] = s_in[ty][tx][tz] * s_in[ty][tx][tz];
     __syncthreads();
-    norm = __sqrtf(calculate_sum_by_reduction(s_work));
+    norm = sqrtf(calculate_sum_by_reduction(s_work));
     s_in[ty][tx][tz] /= norm;
 
     // The SIFT descriptor is now a unit vector.
     sifts[global_index] = s_in[ty][tx][tz];
   }
 
-  __global__ void compute_dense_upright_sift_descriptor(float* sifts, int w,
-                                                        int h, int pitch)
+  __global__ void compute_dense_upright_sift_descriptor(float* sifts,
+                                                        textureObject_t gradient_mag_texture,
+                                                        textureObject_t gradient_ori_texture,
+                                                        int w, int h, int pitch)
   {
-    static constexpr auto pi = static_cast<float>(CUDART_PI);
-    static constexpr auto sqrt_two = static_cast<float>(CUDART_SQRT_TWO);
-    static constexpr auto half_N = subpatch_count_per_axis * 0.5f;
+    static constexpr auto pi = CUDART_PI_F;
+    static constexpr auto sqrt_two = CUDART_SQRT_TWO_F;
+    const auto& N = subpatch_count_per_axis;
+    static constexpr auto half_N = N * 0.5f;
     static constexpr auto half_N_squared = half_N * half_N;
-    static constexpr auto two_gradient_sigma_inverted =
-        1 / (2 * half_N * half_N);
+    static constexpr auto two_sigma_inverted = 1 / (2 * half_N * half_N);
+    static constexpr auto N_squared = N * N;
 
     const auto p = coords<3>();
-    if (p.x() >= w || p.y() >= h || p.z() >= SIFT_dimension)
+    if (p.x() >= w || p.y() >= h || p.z() >= N_squared)
       return;
+    const auto x = static_cast<float>(p.x());
+    const auto y = static_cast<float>(p.y());
+
 
     // SIFT is 3D descriptors encoding:
     // - local HoG for each of the NxN overlapping subpatches,
     // - each HoG discretizing the angles in O = 8 bins.
     //
     // Which subpatch (i, j) are we in?
-    const auto& N = subpatch_count_per_axis;
-    const auto& O = orientation_bin_count;
     const auto i = p.z() / N * O;
-    const auto j = (p.z() - i * N * O) / O;
-    // Which orientation bin o are we in?
-    const auto o = p.z() - i * N * O - j * O;
+    const auto j = p.z() - i * N;
 
-    const auto subpatch_radius = bin_scale_unit_length * sigma;
+    // The center of the subpatch i, j in image coordinates.
+    const auto x = x + (j - half_N + 0.5f) * bin_length_in_scale_unit * scale;
+    const auto y = y + (i - half_N + 0.5f) * bin_length_in_scale_unit * scale;
 
-    const auto patch_radius_bound =
-        sqrt_two * bin_scale_unit_length * patch_radius;
-    const auto rounded_r = static_cast<int>(patch_radius_bound);
-    const auto total_samples =
-        sample_count_per_axis_per_subpatch * sample_count_per_axis_per_subpatch;
+    
+    // Calculate the local histogram of gradients h[i, j] that composes the SIFT
+    // descriptor.
+    auto h = Vector<float, 8>::Zero();
 
-    // Calculate a histogram in each pixel.
-    //
-    // TODO: sample a fixed number of points instead of scanning every pixel of
-    // the patch.
-
-    auto bin_value = 0.f;
 #pragma unroll
-    for (auto uv = 0; uv < total_samples; ++uv)
+    for (auto r = 0; r < sample_count_per_subpatch; ++r)
     {
-      const auto v = uv / sample_count_per_axis_per_subpatch;
-      const auto u = uv - v * sample_count_per_axis_per_subpatch;
-      // TODO: locate the coordinates
-      // Refresh ourselves about the patch geometry.
+      // Retrieve the normalized integral coordinates (un, vn).
+      const auto vn =
+          r / sample_count_per_axis_per_subpatch - bin_length_in_scale_unit;
+      const auto un = r - ry * sample_count_per_axis_per_subpatch -
+                      bin_length_in_scale_unit;
+      static_assert(std::is_same_v<decltype(un), const float>);
+      static_assert(std::is_same_v<decltype(vn), const float>);
 
-      const auto r2 = static_cast<float>(u * u + v * v);
+      const auto square_normalized_radius = un * un + vn * vn;
+      const auto spatial_weight =
+          expf(-square_normalized_radius * two_gradient_sigma_inverted);
 
-      const auto weight = expf(-r2 * two_gradient_sigma_inverted);
-      auto grad = tex2D(in_float2_texture, key_x + u, key_y + v);
-      auto mag = grad.x;
-      auto ori = grad.y;
+      const auto u = un * bin_length_in_scale_unit * scale;
+      const auto v = vn * bin_length_in_scale_unit * scale;
+
+      const auto mag = tex2D<float>(gradient_mag_texture, x + u , y + v);
+      const auto ori = tex2D<float>(gradient_ori_texture, x + u , y + v);
 
       ori = ori < 0.f ? ori + 2.f * pi : ori;
       ori *= float(O) / (2.f * pi);
+
+      const auto dori = __saturatef(fabs(ori - floorf(ori)));
+      const auto dx = fabs(vn) / bin_length_in_scale_unit;
+      const auto dy = fabs(un) / bin_length_in_scale_unit;
+      const auto wx = 1 - dx;
+      const auto wy = 1 - dy;
+      const auto wo = 1 - dori;
+
+      const auto o1 = int(ori);
+      const auto o2 = o == 7 ? 0 : o1 + 1;
+      h[o1] += (1 - dx) * (1 - dy) * (1 - do) * spatial_weight * mag;
+      h[o2] += dx * dy * dori * spatial_weight * mag;
     }
 
-    const auto global_index = p.z() * h * pitch + p.y() * pitch + x;
-    sifts[global_index] = bin_value;
+    // Copy the histogram
+    //
+    // Check the pitch and so on but the idea seems to be here.
+    const auto global_index = (i * N * O + j) * h * pitch + p.y() * pitch + x;
+    for (auto i = 0; i < 8; ++i)
+      sifts[global_index + i] = h[i];
   }
 
   template <int N, int O>
