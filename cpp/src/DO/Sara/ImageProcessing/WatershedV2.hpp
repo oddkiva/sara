@@ -72,7 +72,7 @@ namespace DO::Sara { namespace v2 {
         }
       }
     }
-    toc("Connected components");
+    toc("Connected components V2");
 
     tic();
     auto regions = std::vector<std::vector<Point2i>>(image.size());
@@ -85,7 +85,7 @@ namespace DO::Sara { namespace v2 {
         regions[ds.parent(index_p)].push_back(p);
       }
     }
-    toc("Region Collection");
+    toc("Region Collection V2");
 
     return regions;
   }
