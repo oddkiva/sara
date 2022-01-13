@@ -28,6 +28,7 @@ BOOST_AUTO_TEST_SUITE(TestDisjointSets)
 BOOST_AUTO_TEST_CASE(test_on_image)
 {
   auto regions = Image<int>{5, 5};
+  // clang-format off
   regions.matrix() <<
 //  0  1  2  3  4
     0, 0, 1, 2, 3,
@@ -39,6 +40,7 @@ BOOST_AUTO_TEST_CASE(test_on_image)
     4, 4, 2, 2, 2,
 // 20 21 22 23 24
     4, 4, 2, 2, 5;
+  // clang-format on
 
   auto adj_list_data = compute_adjacency_list_2d(regions);
   const auto adj_list = AdjacencyList{adj_list_data};

@@ -397,11 +397,12 @@ namespace DO::Sara {
       return Eigen::Vector2f{cos(o), sin(o)};
     };
 
+    const auto sin_threshold = std::sin(angular_threshold);
     const auto angular_distance = [](const auto& a, const auto& b) {
-      const auto c = a.dot(b);
+      // const auto c = a.dot(b);
       const auto s = a.homogeneous().cross(b.homogeneous())(2);
-      const auto dist = std::abs(std::atan2(s, c));
-      return dist;
+      //const auto dist = std::abs(std::atan2(s, c));
+      return std::abs(s);
     };
 
     auto ds = DisjointSets(edges.size());
@@ -432,6 +433,11 @@ namespace DO::Sara {
         Eigen::Vector2i{1, -1}    //
     };
 
+    // TODO:
+    // - just apply the parallel connected component algorithm.
+    // - if connected weak edgels don't get contaminated by a strong edgel in
+    //   their vicinity, it can be discarded by post-processing.
+    //   This is the key idea as for why we can get rid of the queue.
     while (!q.empty())
     {
       const auto& p = q.front();
@@ -460,7 +466,7 @@ namespace DO::Sara {
         const auto un = orientation_vector(n);
 
         // Merge component of p and component of n if angularly consistent.
-        if (angular_distance(up, un) < angular_threshold)
+        if (angular_distance(up, un) < sin_threshold)
         {
           const auto node_n = ds.node(index(n));
           ds.join(node_p, node_n);
