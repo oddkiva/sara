@@ -120,12 +120,11 @@ namespace v2 {
           high_thres, low_thres);
       toc("Thresholding");
 
-      tic();
-      pipeline.edges = perform_hysteresis_and_grouping(  //
+      //pipeline.edges = perform_hysteresis_and_grouping(  //
+      pipeline.edges = perform_parallel_grouping(  //
           pipeline.edge_map,                             //
           pipeline.gradient_orientation,                 //
           parameters.angular_threshold);
-      toc("Hysteresis & Edgel Grouping");
 
       tic();
       const auto& edges = pipeline.edges;
@@ -274,7 +273,7 @@ int __main(int argc, char** argv)
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
 
-  auto ed = v2::EdgeDetector{{
+  auto ed = ::v2::EdgeDetector{{
       high_threshold_ratio,  //
       low_threshold_ratio,   //
       angular_threshold      //

@@ -48,7 +48,7 @@ GRAPHICS_MAIN()
 #ifdef _WIN32
           "C:/Users/David/Desktop/GOPR0542.MP4"
 #else
-          "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.MP4"
+          "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.mp4"
 #endif
       ;
   std::cout << video_filepath << std::endl;

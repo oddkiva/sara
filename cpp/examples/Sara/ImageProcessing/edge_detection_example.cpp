@@ -115,12 +115,12 @@ int __main(int argc, char** argv)
     frame_gray32f = from_rgb8_to_gray32f(frame);
     toc("Grayscale");
 
+    tic();
+    frame_gray32f = gaussian(frame_gray32f, sigma);
+    toc("Blur");
+
     if (downscale_factor > 1)
     {
-      tic();
-      frame_gray32f = gaussian(frame_gray32f, sigma);
-      toc("Blur");
-
       tic();
       frame_gray32f = downscale(frame_gray32f, downscale_factor);
       toc("Downscale");

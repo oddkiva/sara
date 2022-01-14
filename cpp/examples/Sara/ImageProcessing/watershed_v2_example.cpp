@@ -67,7 +67,7 @@ GRAPHICS_MAIN()
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-//#define DOWNSAMPLE
+#define DOWNSAMPLE
 #ifdef DOWNSAMPLE
   auto frame_downsampled = Image<Rgb8>{frame.sizes() / 2};
 #else
