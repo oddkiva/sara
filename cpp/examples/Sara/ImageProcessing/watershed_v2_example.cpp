@@ -30,8 +30,9 @@ auto mean_colors(const std::vector<std::vector<Eigen::Vector2i>>& regions,
                  const Image<Rgb8>& image)
 {
   auto colors = std::vector<Rgb8>(regions.size());
+  const auto region_count = static_cast<int>(regions.size());
 #pragma omp parallel for
-  for (auto i = 0u; i < regions.size(); ++i)
+  for (auto i = 0; i < region_count; ++i)
   {
     const auto& region = regions[i];
     const auto num_points = static_cast<float>(region.size());
@@ -110,8 +111,9 @@ GRAPHICS_MAIN()
 
     tic();
     auto partitioning = Image<Rgb8>{frame_downsampled.sizes()};
+    const auto region_count = static_cast<int>(regions.size());
 #pragma omp parallel for
-    for (auto r = 0u; r < regions.size(); ++r)
+    for (auto r = 0; r < region_count; ++r)
     {
       const auto& region = regions[r];
       if (region.empty())
