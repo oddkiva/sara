@@ -699,14 +699,14 @@ namespace DO { namespace Sara {
         return *this;
       }
 
-      inline self_type operator++(int) const
+      inline self_type operator++(int)
       {
         SiblingIterator prev(*this);
         operator++();
         return prev;
       }
 
-      inline self_type operator--(int) const
+      inline self_type operator--(int)
       {
         SiblingIterator prev(*this);
         operator--();
