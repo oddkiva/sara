@@ -22,7 +22,6 @@ $build_from_scratch = $false
 $run_cmake_build = $false
 
 
-
 if ($update_vcpkg) {
   echo "========================================================================="
   echo "Install dependencies with vcpkg..."
