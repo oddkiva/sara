@@ -11,7 +11,6 @@ target_include_directories(
 target_link_libraries(
   nvidia_decoder_example
   PRIVATE DO::Shakti::Cuda::VideoIO
-          ${CUDA_CUDA_LIBRARY}
           ${OPENGL_LIBRARIES}
           ${GLEW_LIBRARIES}
           ${DO_Sara_LIBRARIES}
