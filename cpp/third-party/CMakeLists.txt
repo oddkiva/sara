@@ -17,7 +17,7 @@ message(STATUS "  - tinyply")
 add_subdirectory(tinyply-2.2)
 set_property(TARGET tinyply PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 
-if (CUDA_FOUND)
+if (CMAKE_CUDA_COMPILER)
   if (NvidiaVideoCodec_ROOT)
     add_subdirectory(nvidia-video-codec-sdk-9.1.23)
   endif ()

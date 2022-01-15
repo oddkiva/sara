@@ -1,6 +1,5 @@
 project(Shakti CXX)
 
-
 # Set the version major and minor manually.
 set(DO_Shakti_VERSION_MAJOR 0)
 set(DO_Shakti_VERSION_MINOR 1)
