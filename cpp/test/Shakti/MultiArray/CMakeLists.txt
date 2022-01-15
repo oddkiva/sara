@@ -8,6 +8,6 @@ foreach (file ${test_multiarray_SOURCE_FILES})
     ${file}
 
     DEPENDENCIES
-    DO::Shakti::MultiArray
-    DO::Shakti::Utilities)
+    DO::Shakti::Cuda::MultiArray
+    DO::Shakti::Cuda::Utilities)
 endforeach ()
