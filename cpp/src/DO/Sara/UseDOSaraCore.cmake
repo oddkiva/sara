@@ -10,7 +10,6 @@ if(NOT DO_Sara_Core_ADDED)
     target_link_libraries(DO_Sara_Core PUBLIC ${HDF5_CXX_LIBRARIES})
     target_compile_definitions(DO_Sara_Core
       PUBLIC
-      $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/wd4996>
       $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:_SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING>
     )
   endif()
