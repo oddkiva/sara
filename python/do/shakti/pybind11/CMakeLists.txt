@@ -1,10 +1,6 @@
 file(GLOB pyshakti_SRC_FILES FILES *.cpp)
 
-if(CMAKE_CUDA_COMPILER)
-  cuda_add_library(pyshakti_pybind11 MODULE ${pyshakti_SRC_FILES})
-else()
-  add_library(pyshakti_pybind11 MODULE ${pyshakti_SRC_FILES})
-endif()
+add_library(pyshakti_pybind11 MODULE ${pyshakti_SRC_FILES})
 target_include_directories(pyshakti_pybind11 PRIVATE ${CMAKE_SOURCE_DIR})
 
 target_link_libraries(
@@ -28,7 +24,8 @@ target_link_libraries(
 if(CMAKE_CUDA_COMPILER)
   target_compile_definitions(pyshakti_pybind11
                              PRIVATE USE_SHAKTI_CUDA_LIBRARIES)
-  target_link_libraries(pyshakti_pybind11 PRIVATE DO::Shakti::ImageProcessing)
+  target_link_libraries(pyshakti_pybind11 PRIVATE
+    DO::Shakti::Cuda::ImageProcessing)
 endif()
 set_target_properties(
   pyshakti_pybind11
