@@ -5,25 +5,7 @@ sara_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 add_definitions(-D_USE_MATH_DEFINES)
 
 # Visual C++ compiler
-if (MSVC)
-  # list (APPEND ANNOYING_WARNINGS
-  #   /D_SCL_SECURE_NO_WARNINGS
-  #   /D_CRT_SECURE_NO_DEPRECATE
-  #   /D_SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING  # Eigen
-  #   /bigobj)
-  #   # /wd4251)
-
-  # foreach (flag IN LISTS ANNOYING_WARNINGS)
-  #   # THE CORRECT WAY BECAUSE OF CUDA!!!
-  #   add_definitions(
-  #     $<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CXX>>:${flag}>
-  #     $<$<BUILD_INTERFACE:$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler=${flag}>
-  #   )
-  # endforeach()
-  # message(STATUS "  - Disabled annoying warnings in MSVC.")
-
-# GNU compiler
-elseif (CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_COMPILER_IS_GNUCXX)
   sara_substep_message(
     "${CMAKE_CXX_COMPILER_ID} compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
 
