@@ -1,6 +1,6 @@
 find_package(OpenMP)
 
-file(GLOB examples_SRC_FILES FILES *.cpp)
+file(GLOB examples_SRC_FILES FILES *.cu)
 
 foreach (file ${examples_SRC_FILES})
   get_filename_component(filename "${file}" NAME_WE)

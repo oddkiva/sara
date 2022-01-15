@@ -1,5 +1,3 @@
-find_package(CUDAToolkit REQUIRED)
-
 add_library(DO_Shakti_Cuda_VideoIO
   ${CMAKE_CURRENT_SOURCE_DIR}/../VideoIO.hpp
   VideoStream.hpp VideoStream.cu)

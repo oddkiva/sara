@@ -25,6 +25,7 @@ if(CMAKE_CUDA_COMPILER)
   target_compile_definitions(pyshakti_pybind11
                              PRIVATE USE_SHAKTI_CUDA_LIBRARIES)
   target_link_libraries(pyshakti_pybind11 PRIVATE
+    CUDA::cudart
     DO::Shakti::Cuda::ImageProcessing)
 endif()
 set_target_properties(
