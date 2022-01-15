@@ -8,6 +8,7 @@ foreach (file ${test_imageprocessing_SOURCE_FILES})
     ${file}
 
     DEPENDENCIES
+    CUDA::cudart
     ${DO_Sara_LIBRARIES}
     DO::Shakti::Cuda::MultiArray
     DO::Shakti::Cuda::Utilities

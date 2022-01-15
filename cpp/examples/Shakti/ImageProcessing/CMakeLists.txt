@@ -1,6 +1,6 @@
 find_package(OpenMP)
 
-file(GLOB examples_SRC_FILES FILES *.cu)
+file(GLOB examples_SRC_FILES FILES *.cpp)
 
 foreach (file ${examples_SRC_FILES})
   get_filename_component(filename "${file}" NAME_WE)
@@ -11,6 +11,7 @@ foreach (file ${examples_SRC_FILES})
     SOURCES ${file}
 
     DEPENDENCIES
+    CUDA::cudart
     ${DO_Sara_LIBRARIES}
     DO::Shakti::Cuda::MultiArray
     DO::Shakti::Cuda::ImageProcessing
