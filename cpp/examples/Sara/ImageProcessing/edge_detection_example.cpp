@@ -89,7 +89,7 @@ int __main(int argc, char** argv)
   constexpr float low_threshold_ratio =
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
-  const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
+  const auto sigma = std::sqrt(std::pow(1.4f, 2) - 1);
 
   auto ed = EdgeDetector{{
       high_threshold_ratio,  //
@@ -115,12 +115,12 @@ int __main(int argc, char** argv)
     frame_gray32f = from_rgb8_to_gray32f(frame);
     toc("Grayscale");
 
-    tic();
-    frame_gray32f = gaussian(frame_gray32f, sigma);
-    toc("Blur");
-
     if (downscale_factor > 1)
     {
+      tic();
+      frame_gray32f = gaussian(frame_gray32f, sigma);
+      toc("Blur");
+
       tic();
       frame_gray32f = downscale(frame_gray32f, downscale_factor);
       toc("Downscale");

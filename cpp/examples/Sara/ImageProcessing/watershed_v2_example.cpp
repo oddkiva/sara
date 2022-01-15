@@ -11,11 +11,14 @@
 
 //! @example
 
+#include <omp.h>
+
 #include <set>
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/ImageProcessing/WatershedV2.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 
@@ -23,25 +26,30 @@ using namespace std;
 using namespace DO::Sara;
 
 
-auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
+auto mean_colors(const std::vector<std::vector<Eigen::Vector2i>>& regions,
                  const Image<Rgb8>& image)
 {
-  auto colors = std::map<int, Rgb8>{};
-  for (const auto& [label, points] : regions)
+  auto colors = std::vector<Rgb8>(regions.size());
+#pragma omp parallel for
+  for (auto i = 0u; i < regions.size(); ++i)
   {
-    const auto num_points = static_cast<float>(points.size());
+    const auto& region = regions[i];
+    const auto num_points = static_cast<float>(region.size());
     Eigen::Vector3f color = Vector3f::Zero();
-    for (const auto& p: points)
+    for (const auto& p : region)
       color += image(p).cast<float>();
-    color /= num_points;
+    if (num_points != 0)
+      color /= num_points;
 
-    colors[label] = color.cast<std::uint8_t>();
+    colors[i] = color.cast<std::uint8_t>();
   }
   return colors;
 }
 
 GRAPHICS_MAIN()
 {
+  omp_set_num_threads(omp_get_max_threads());
+
   using namespace std::string_literals;
 
 #ifdef _WIN32
@@ -49,6 +57,8 @@ GRAPHICS_MAIN()
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
   const auto video_filepath =
+      //     "/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
+      //     //"/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
@@ -57,7 +67,7 @@ GRAPHICS_MAIN()
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-// #define DOWNSAMPLE
+//#define DOWNSAMPLE
 #ifdef DOWNSAMPLE
   auto frame_downsampled = Image<Rgb8>{frame.sizes() / 2};
 #else
@@ -83,24 +93,36 @@ GRAPHICS_MAIN()
     ++frames_read;
 
     if (frames_read % (skip + 1) != 0)
-       continue;
+      continue;
 
+#ifdef DOWNSAMPLE
     reduce(frame, frame_downsampled);
+#endif
 
     // Watershed.
-    tic();
-    const auto regions = color_watershed(frame_downsampled, color_threshold);
-    toc("Watershed");
+    const auto regions =
+        v2::color_watershed(frame_downsampled, color_threshold);
 
     // Display the good regions.
+    tic();
     const auto colors = mean_colors(regions, frame_downsampled);
+    toc("Mean Color");
+
+    tic();
     auto partitioning = Image<Rgb8>{frame_downsampled.sizes()};
-    for (const auto& [label, points] : regions)
+#pragma omp parallel for
+    for (auto r = 0u; r < regions.size(); ++r)
     {
-      // Show big segments only.
-      for (const auto& p : points)
-        partitioning(p) = points.size() < 100 ? Black8 : colors.at(label);
+      const auto& region = regions[r];
+      if (region.empty())
+        continue;
+
+      const auto& color = colors[r];
+      for (auto p = 0u; p < region.size(); ++p)
+        partitioning(region[p]) = region.size() < 100 ? Black8 : color;
     }
+    toc("Filling image");
+
     display(partitioning);
   }
 

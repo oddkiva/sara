@@ -10,3 +10,7 @@ foreach (file ${test_disjoint_sets_SOURCE_FILES})
     DEPENDENCIES ${DO_Sara_LIBRARIES}
     FOLDER DisjointSets)
 endforeach ()
+
+target_link_libraries(test_disjointsets_algorithm_v2
+  PRIVATE
+  $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)

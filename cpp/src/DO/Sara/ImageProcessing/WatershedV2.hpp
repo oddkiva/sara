@@ -14,13 +14,13 @@
 #pragma once
 
 #include <DO/Sara/Core/TicToc.hpp>
-#include <DO/Sara/DisjointSets/DisjointSets.hpp>
+#include <DO/Sara/DisjointSets/DisjointSetsV2.hpp>
 
 #include <array>
 #include <queue>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara { namespace v2 {
 
   inline auto color_watershed(                                //
       const ImageView<Rgb8>& image,                           //
@@ -32,20 +32,16 @@ namespace DO { namespace Sara {
     };
 
     tic();
-    auto ds = DisjointSets(image.size());
+    auto ds = v2::DisjointSets(image.size());
 
-    // Make as many sets as pixels.
-    for (auto y = 0; y < image.height(); ++y)
-      for (auto x = 0; x < image.width(); ++x)
-        ds.make_set(index({x, y}));
-
+#pragma omp parallel for
     for (auto y = 0; y < image.height(); ++y)
     {
       for (auto x = 0; x < image.width(); ++x)
       {
         // Find its corresponding node in the disjoint set.
         const auto p = Eigen::Vector2i{x, y};
-        const auto node_p = ds.node(index(p));
+        const auto node_p = index(p);
 
         const Vector3f& color_p = image(p).cast<float>();
 
@@ -69,29 +65,29 @@ namespace DO { namespace Sara {
             // close.
             if (dist < squared_color_threshold)
             {
-              const auto node_n = ds.node(index(n));
+              const auto node_n = index(n);
               ds.join(node_p, node_n);
             }
           }
         }
       }
     }
-    toc("Connected Components");
+    toc("Connected components V2");
 
     tic();
-    auto regions = std::map<int, std::vector<Point2i>>{};
+    auto regions = std::vector<std::vector<Point2i>>(image.size());
     for (auto y = 0; y < image.height(); ++y)
     {
       for (auto x = 0; x < image.width(); ++x)
       {
         const auto p = Eigen::Vector2i{x, y};
         const auto index_p = index(p);
-        regions[static_cast<int>(ds.component(index_p))].push_back(p);
+        regions[ds.parent(index_p)].push_back(p);
       }
     }
-    toc("Region Collection");
+    toc("Region Collection V2");
 
     return regions;
   }
 
-}}  // namespace DO::Sara
+}}  // namespace DO::Sara::v2
