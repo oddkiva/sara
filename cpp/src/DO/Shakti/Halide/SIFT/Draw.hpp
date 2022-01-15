@@ -129,9 +129,8 @@ inline auto draw_oriented_extrema(sara::ImageView<sara::Rgb8>& display,
           p1 + r * Eigen::Vector2f{cos(theta), sin(theta)};
 
       if (draw_outline)
-        sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), sara::Black8,
-                        width + 2);
-      sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), c, width);
+        sara::draw_line(display, p1, p2, sara::Black8, width + 2);
+      sara::draw_line(display, p1, p2, c, width);
     }
 
     // Contour of orientation line.
