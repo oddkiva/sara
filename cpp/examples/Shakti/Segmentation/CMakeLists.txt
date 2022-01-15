@@ -3,7 +3,7 @@ shakti_add_example(
   shakti_example_superpixel
 
   SOURCES
-  example_superpixel.cpp
+  example_superpixel.cu
 
   DEPENDENCIES
   ${DO_Sara_LIBRARIES}
