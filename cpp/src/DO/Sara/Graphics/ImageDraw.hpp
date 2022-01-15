@@ -53,7 +53,8 @@ namespace DO { namespace Sara {
                         const Eigen::Vector2f& b, const Rgb8& c,
                         int pen_width = 1, bool antialiasing = true) -> void
   {
-    draw_line(image, a.x(), a.y(), b.x(), b.y(), c, pen_width, antialiasing);
+    auto round = [](float x) { return static_cast<int>(x + 0.5f); };
+    draw_line(image, round(a.x()), round(a.y()), round(b.x()), round(b.y()), c, pen_width, antialiasing);
   }
 
   /*!

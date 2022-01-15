@@ -10,7 +10,7 @@ target_include_directories(
                                  ${CMAKE_SOURCE_DIR}/cpp/third-party)
 target_link_libraries(
   nvidia_decoder_example
-  PRIVATE DO::Shakti::VideoIO
+  PRIVATE DO::Shakti::Cuda::VideoIO
           ${CUDA_CUDA_LIBRARY}
           ${OPENGL_LIBRARIES}
           ${GLEW_LIBRARIES}
