@@ -47,5 +47,5 @@ include_directories(
 
 add_subdirectory(Utilities)
 add_subdirectory(MultiArray)
-# add_subdirectory(ImageProcessing)
+add_subdirectory(ImageProcessing)
 # add_subdirectory(Segmentation)
