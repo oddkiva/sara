@@ -7,4 +7,4 @@ if (NvidiaVideoCodec_ROOT)
   add_subdirectory(VideoIO)
 endif ()
 
-# add_subdirectory(FeatureDetectors)
+add_subdirectory(FeatureDetectors)

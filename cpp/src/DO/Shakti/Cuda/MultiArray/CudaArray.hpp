@@ -2,6 +2,8 @@
 
 #include <DO/Sara/Core/Image/Image.hpp>
 
+#include <DO/Shakti/Cuda/Utilities/ErrorCheck.hpp>
+
 #include <DO/Shakti/Cuda/MultiArray/Matrix.hpp>
 #include <DO/Shakti/Cuda/MultiArray/SurfaceObject.hpp>
 #include <DO/Shakti/Cuda/MultiArray/TextureObject.hpp>
@@ -121,8 +123,8 @@ namespace DO::Shakti::Cuda {
       if constexpr (N == 2)
       {
         SHAKTI_SAFE_CUDA_CALL(cudaMemcpy2DToArray(
-            _array, b(0), b(1), host_data.data(), host_data.width(),
-            sizes(0), sizes(1), cudaMemcpyHostToDevice));
+            _array, b(0), b(1), host_data.data(), host_data.width(), sizes(0),
+            sizes(1), cudaMemcpyHostToDevice));
       }
       else if constexpr (N == 3)
       {
@@ -235,34 +237,34 @@ namespace DO::Shakti::Cuda {
   public:
     inline Array() = default;
 
-    inline Array(const Vector<int, N>& sizes, unsigned int flags = 0)
+    inline Array(const Shakti::Vector<int, N>& sizes, unsigned int flags = 0)
       : base_type{nullptr, sizes, flags}
     {
       auto channel_descriptor = ChannelFormatDescriptor<T>::type();
 
       if constexpr (N == 2)
       {
-        SHAKTI_SAFE_CUDA_CALL(cudaMallocArray(
-            &_array,              //
-            &channel_descriptor,  //
-            cudaExtent{
-                .width = static_cast<unsigned long>(sizes(0)),   //
-                .height = static_cast<unsigned long>(sizes(1)),  //
-            },
-            _flags));
+        SHAKTI_SAFE_CUDA_CALL(
+            cudaMallocArray(&_array,              //
+                            &channel_descriptor,  //
+                            cudaExtent{
+                                static_cast<unsigned long>(sizes(0)),  //
+                                static_cast<unsigned long>(sizes(1))   //
+                            },
+                            _flags));
       }
 
       else if constexpr (N == 3)
       {
-        SHAKTI_SAFE_CUDA_CALL(cudaMalloc3DArray(
-            &_array,              //
-            &channel_descriptor,  //
-            cudaExtent{
-                .width = static_cast<unsigned long>(sizes(0)),   //
-                .height = static_cast<unsigned long>(sizes(1)),  //
-                .depth = static_cast<unsigned long>(sizes(2))    //
-            },
-            flags));
+        SHAKTI_SAFE_CUDA_CALL(
+            cudaMalloc3DArray(&_array,              //
+                              &channel_descriptor,  //
+                              cudaExtent{
+                                  static_cast<unsigned long>(sizes(0)),  //
+                                  static_cast<unsigned long>(sizes(1)),  //
+                                  static_cast<unsigned long>(sizes(2))   //
+                              },
+                              flags));
       }
       else
       {
@@ -276,14 +278,14 @@ namespace DO::Shakti::Cuda {
       static_assert(N == 2, "Not implemented");
 
       auto channel_descriptor = ChannelFormatDescriptor<T>::type();
-      SHAKTI_SAFE_CUDA_CALL(cudaMallocArray(
-          &_array,              //
-          &channel_descriptor,  //
-          cudaExtent{
-              .width = static_cast<unsigned long>(_sizes(0)),   //
-              .height = static_cast<unsigned long>(_sizes(1)),  //
-          },
-          _flags));
+      SHAKTI_SAFE_CUDA_CALL(
+          cudaMallocArray(&_array,              //
+                          &channel_descriptor,  //
+                          cudaExtent{
+                              static_cast<unsigned long>(_sizes(0)),  //
+                              static_cast<unsigned long>(_sizes(1)),  //
+                          },
+                          _flags));
       copy_from(other);
     }
 
@@ -296,7 +298,8 @@ namespace DO::Shakti::Cuda {
     {
       const auto ret = cudaFreeArray(_array);
       if (ret != cudaSuccess)
-        SHAKTI_STDERR << cudaGetErrorString(cudaDeviceSynchronize()) << std::endl;
+        SHAKTI_STDERR << cudaGetErrorString(cudaDeviceSynchronize())
+                      << std::endl;
     }
 
     inline auto operator=(const Array& other) const -> auto&
