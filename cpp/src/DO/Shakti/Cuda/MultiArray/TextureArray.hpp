@@ -150,8 +150,8 @@ namespace DO::Shakti {
     }
 
   protected:
-    cudaArray* _array{nullptr};
-    Vector2i _sizes{Vector2i::Zero()};
+    cudaArray* _array = nullptr;
+    Vector2i _sizes = Vector2i::Zero();
   };
 
 }  // namespace DO::Shakti

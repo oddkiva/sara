@@ -31,7 +31,7 @@ namespace DO::Sara::Darknet {
     {
       auto line_trimmed = line;
       boost::algorithm::trim_if(
-          line_trimmed, [](const auto ch) { return ch == '[' or ch == ']'; });
+          line_trimmed, [](const auto ch) { return ch == '[' || ch == ']'; });
       return line_trimmed;
     }
 

@@ -24,7 +24,8 @@ inline auto draw_quantized_extrema(const halide::v2::QuantizedExtremumArray& e,
 
     // N.B.: the blob radius is the scale multiplied by sqrt(2).
     // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = scale * octave_scaling_factor * M_SQRT2;
+    static constexpr auto sqrt_2 = static_cast<float>(M_SQRT2);
+    const float r = scale * octave_scaling_factor * sqrt_2;
 
     sara::draw_circle(sara::Point2f{x, y}, r, c, width);
   }
@@ -44,8 +45,8 @@ inline auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
 
     // N.B.: the blob radius is the scale multiplied by sqrt(2).
     // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r =
-        std::round(scale * octave_scaling_factor * static_cast<float>(M_SQRT2));
+    static constexpr auto sqrt_2 = static_cast<float>(M_SQRT2);
+    const float r = scale * octave_scaling_factor * sqrt_2;
 
     sara::draw_circle(display, x, y, r, c, width);
   }
@@ -64,7 +65,8 @@ inline auto draw_extrema(const halide::v2::ExtremumArray& e,
 
     // N.B.: the blob radius is the scale multiplied by sqrt(2).
     // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = s * octave_scaling_factor * M_SQRT2;
+    static constexpr auto sqrt_2 = static_cast<float>(M_SQRT2);
+    const float r = s * octave_scaling_factor * sqrt_2;
 
     sara::draw_circle(sara::Point2f{x, y}, r, c, width);
   }
@@ -129,15 +131,14 @@ inline auto draw_oriented_extrema(sara::ImageView<sara::Rgb8>& display,
           p1 + r * Eigen::Vector2f{cos(theta), sin(theta)};
 
       if (draw_outline)
-        sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), sara::Black8,
-                        width + 2);
-      sara::draw_line(display, p1.x(), p1.y(), p2.x(), p2.y(), c, width);
+        sara::draw_line(display, p1, p2, sara::Black8, width + 2);
+      sara::draw_line(display, p1, p2, c, width);
     }
 
     // Contour of orientation line.
     if (draw_outline)
-      sara::draw_circle(display, p1.x(), p1.y(), r, sara::Black8, width + 2);
-    sara::draw_circle(display, p1.x(), p1.y(), r, c, width);
+      sara::draw_circle(display, p1, r, sara::Black8, width + 2);
+    sara::draw_circle(display, p1, r, c, width);
   }
 }
 
@@ -162,7 +163,7 @@ inline auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
     const float r = std::round(e.scale(i) * octave_scaling_factor *
                                static_cast<float>(M_SQRT2));
 
-    sara::draw_circle(display, x, y, r, c, width);
+    sara::draw_circle(display, {x, y}, r, c, width);
   }
 }
 
@@ -185,6 +186,6 @@ inline auto draw_extrema(sara::ImageView<sara::Rgb8>& display,
     const float r = std::round(e.s(i) * octave_scaling_factor *
                                static_cast<float>(M_SQRT2));
 
-    sara::draw_circle(display, x, y, r, c, width);
+    sara::draw_circle(display, {x, y}, r, c, width);
   }
 }

@@ -1,7 +1,4 @@
-find_package(
-  DO_Sara
-  COMPONENTS Core
-  REQUIRED)
+find_package(DO_Sara COMPONENTS Core REQUIRED)
 
 function(shakti_add_test)
   set(_options OPTIONAL)
@@ -13,19 +10,13 @@ function(shakti_add_test)
   get_filename_component(_filename "${shakti_add_test_SOURCES}" NAME_WE)
   set(_test_name shakti_${_filename})
 
-  cuda_add_executable(${_test_name} ${shakti_add_test_SOURCES})
+  add_executable(${_test_name} ${shakti_add_test_SOURCES})
   target_include_directories(${_test_name} PRIVATE ${CUDA_TOOLKIT_INCLUDE}
                                                    ${Boost_INCLUDE_DIR})
   target_link_libraries(${_test_name} PRIVATE ${Boost_LIBRARIES}
                                               ${shakti_add_test_DEPENDENCIES})
 
-  target_compile_features(${_test_name} PRIVATE cxx_std_14)
-
-  set_target_properties(
-    ${_test_name}
-    PROPERTIES CUDA_SEPARABLE_COMPILATION ON
-               CUDA_STANDARD 14
-               FOLDER "Tests/Shakti")
+  set_target_properties(${_test_name} PROPERTIES FOLDER "Tests/Shakti")
 
   target_compile_definitions(${_test_name} PRIVATE -DBOOST_TEST_DYN_LINK)
 
@@ -41,8 +32,9 @@ endfunction()
 file(GLOB test_FILES FILES test_*.cpp test_*.cu)
 
 foreach(file ${test_FILES})
-  shakti_add_test(SOURCES ${file} DEPENDENCIES DO::Sara::Core
-    #DO::Shakti::MultiArray
-    DO::Shakti::Utilities
+  shakti_add_test(SOURCES ${file} DEPENDENCIES
+    DO::Sara::Core
+    DO::Shakti::Cuda::MultiArray
+    DO::Shakti::Cuda::Utilities
     DO::Shakti::Cuda::FeatureDetectors)
 endforeach()

@@ -28,7 +28,7 @@ file (GLOB Utils_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/Utils/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/Utils/*.cu)
 
-cuda_add_library(nvidia_VideoCodecHelpers STATIC
+add_library(nvidia_VideoCodecHelpers STATIC
   ${NvDecoder_SOURCE_FILES}
   ${NvEncoder_SOURCE_FILES}
   ${Utils_SOURCE_FILES})

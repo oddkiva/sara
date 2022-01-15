@@ -36,7 +36,7 @@ namespace DO::Shakti::HalideBackend::v2 {
 
     inline QuantizedExtremumArray(std::size_t size)
     {
-      resize(size);
+      resize(static_cast<int>(size));
     }
 
     inline auto resize(int size) -> void
@@ -113,11 +113,11 @@ namespace DO::Shakti::HalideBackend::v2 {
 
     inline auto resize(std::size_t size)
     {
-      x = Halide::Runtime::Buffer<float>(size);
-      y = Halide::Runtime::Buffer<float>(size);
-      s = Halide::Runtime::Buffer<float>(size);
-      value = Halide::Runtime::Buffer<float>(size);
-      type = Halide::Runtime::Buffer<std::int8_t>(size);
+      x = Halide::Runtime::Buffer<float>(static_cast<int>(size));
+      y = Halide::Runtime::Buffer<float>(static_cast<int>(size));
+      s = Halide::Runtime::Buffer<float>(static_cast<int>(size));
+      value = Halide::Runtime::Buffer<float>(static_cast<int>(size));
+      type = Halide::Runtime::Buffer<std::int8_t>(static_cast<int>(size));
     }
   };
 

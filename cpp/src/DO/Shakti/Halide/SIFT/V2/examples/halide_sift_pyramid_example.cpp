@@ -300,6 +300,8 @@ auto test_on_video(int argc, char **argv)
           using namespace sara;
       return {color.channel<R>(), color.channel<G>(), color.channel<B>()};
         });
+#else
+    auto& frame_rgb = frame;
 #endif
 
     if (show_features)
@@ -308,30 +310,26 @@ auto test_on_video(int argc, char **argv)
       {
         if (show_features)
         {
-          draw(frame, matches[i].x(), sara::Blue8);
-          draw(frame, matches[i].y(), sara::Cyan8);
+          draw(frame_rgb, matches[i].x(), sara::Blue8);
+          draw(frame_rgb, matches[i].y(), sara::Cyan8);
         }
         const Eigen::Vector2f a = matches[i].x_pos();
         const Eigen::Vector2f b = matches[i].y_pos();
-        sara::draw_arrow(frame, a, b, sara::Yellow8, 4);
+        sara::draw_arrow(frame_rgb, a, b, sara::Yellow8, 4);
       }
     }
 
-    draw_text(frame, 100, 50,               //
+    draw_text(frame_rgb, 100, 50,                           //
               sara::format("SIFT: %0.f ms", feature_time),  //
               sara::White8, 40, 0, false, true, false);
-    draw_text(frame, 100, 100,
+    draw_text(frame_rgb, 100, 100,
               sara::format("Matching: %0.3f ms", matching_time),  //
               sara::White8, 40, 0, false, true, false);
-    draw_text(frame, 100, 150,              //
+    draw_text(frame_rgb, 100, 150,                         //
               sara::format("Tracks: %u", matches.size()),  //
               sara::White8, 40, 0, false, true, false);
 
-#ifdef USE_SHAKTI_CUDA_VIDEOIO
     sara::display(frame_rgb);
-#else
-    sara::display(frame);
-#endif
 
     sara::toc("Display");
   }

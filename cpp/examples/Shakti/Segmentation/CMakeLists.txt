@@ -7,9 +7,9 @@ shakti_add_example(
 
   DEPENDENCIES
   ${DO_Sara_LIBRARIES}
-  DO::Shakti::ImageProcessing
-  DO::Shakti::Segmentation
-  DO::Shakti::Utilities)
+  DO::Shakti::Cuda::ImageProcessing
+  DO::Shakti::Cuda::Segmentation
+  DO::Shakti::Cuda::Utilities)
 
 
 # TODO: put this in the Video I/O.
@@ -31,7 +31,7 @@ if (LIBQUICKTIME_LIBRARY AND LIBQUICKTIME_INCLUDE_DIRS)
   target_link_libraries(example_quicktime_video_read
     ${LIBQUICKTIME_LIBRARY}
     ${DO_Sara_LIBRARIES}
-    DO::Shakti::ImageProcessing
-    DO::Shakti::Segmentation
-    DO::Shakti::Utilities)
+    DO::Shakti::Cuda::ImageProcessing
+    DO::Shakti::Cuda::Segmentation
+    DO::Shakti::Cuda::Utilities)
 endif ()
