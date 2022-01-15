@@ -16,4 +16,8 @@ foreach (file ${examples_SRC_FILES})
     DO::Shakti::Cuda::ImageProcessing
     DO::Shakti::Cuda::Utilities
     $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+  set_target_properties(
+    shakti_${filename}
+    PROPERTIES
+    FOLDER "Examples/Shakti/Cuda")
 endforeach ()

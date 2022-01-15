@@ -18,4 +18,4 @@ target_link_libraries(
 set_target_properties(
   nvidia_decoder_example
   PROPERTIES
-  FOLDER "Examples/Shakti")
+  FOLDER "Examples/Shakti/Cuda")
