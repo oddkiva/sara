@@ -165,33 +165,34 @@ macro (shakti_append_library _library_name
                              _hdr_files _cpp_files _cu_files
                              _lib_dependencies)
   # 1. Verbose comment.
-  message(STATUS "[Shakti] Creating project 'DO_Shakti_${_library_name}'")
+  message(STATUS "[Shakti] Creating project 'DO_Shakti_Cuda_${_library_name}'")
 
   # 2. Bookmark the project to make sure the library is created only once.
   set_property(GLOBAL PROPERTY _DO_Shakti_${_library_name}_INCLUDED 1)
 
   # 3. Create the project:
-  # if (SHAKTI_BUILD_SHARED_LIBS)
-  #   set(_library_type SHARED)
-  # else ()
-  #   set(_library_type STATIC)
-  # endif ()
+  if (SHAKTI_BUILD_SHARED_LIBS)
+    set(_library_type SHARED)
+  else ()
+    set(_library_type STATIC)
+  endif ()
   # Force to build static libraries for now: for some reason, it does not work
   # on Windows.
-  cuda_add_library(DO_Shakti_${_library_name} STATIC
+  add_library(DO_Shakti_Cuda_${_library_name} STATIC
     ${_hdr_files} ${_cpp_files} ${_cu_files})
-  add_library(DO::Shakti::${_library_name} ALIAS DO_Shakti_${_library_name})
+  add_library(DO::Shakti::Cuda::${_library_name} ALIAS
+    DO_Shakti_Cuda_${_library_name})
 
-  set_target_properties(DO_Shakti_${_library_name}
+  set_target_properties(DO_Shakti_Cuda_${_library_name}
     PROPERTIES
-    CXX_STANDARD 14
+    CXX_STANDARD 17
     CXX_STANDARD_REQUIRED YES
     CUDA_SEPARABLE_COMPILATION ON
     POSITION_INDEPENDENT_CODE ON)
 
   # 4. Include third-party library directories.
   if (NOT "${_include_dirs}" STREQUAL "")
-    target_include_directories(DO_Shakti_${_library_name}
+    target_include_directories(DO_Shakti_Cuda_${_library_name}
       PUBLIC
       $<BUILD_INTERFACE:${_include_dirs}>
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
@@ -201,14 +202,14 @@ macro (shakti_append_library _library_name
   if (NOT "${_cu_files}${_cpp_files}" STREQUAL "")
     # Link with other libraries.
     message(STATUS
-      "[Shakti] Linking project 'DO::Shakti::${_library_name}' with "
+      "[Shakti] Linking project 'DO::Shakti::Cuda::${_library_name}' with "
       "'${_lib_dependencies}'")
 
-    target_link_libraries(DO_Shakti_${_library_name} ${_lib_dependencies})
+    # target_link_libraries(DO_Shakti_Cuda_${_library_name} ${_lib_dependencies})
 
     # Form the compiled library output name.
     set(_library_output_basename
-        DO_Shakti_${_library_name})
+      DO_Shakti_Cuda_${_library_name})
     if (SHAKTI_BUILD_SHARED_LIBS)
       set (_library_output_name "${_library_output_basename}")
       set (_library_output_name_debug "${_library_output_basename}-d")
@@ -219,7 +220,7 @@ macro (shakti_append_library _library_name
 
     # Specify output name and version.
     set_target_properties(
-      DO_Shakti_${_library_name}
+      DO_Shakti_Cuda_${_library_name}
       PROPERTIES
       VERSION ${DO_Shakti_VERSION}
       SOVERSION ${DO_Shakti_SOVERSION}
@@ -227,17 +228,17 @@ macro (shakti_append_library _library_name
       OUTPUT_NAME_DEBUG ${_library_output_name_debug})
 
     # Set correct compile definitions when building the libraries.
-    # if (SHAKTI_BUILD_SHARED_LIBS)
-    #   target_compile_definitions(DO_Shakti_${_library_name}
-    #     PRIVATE DO_SHAKTI_EXPORTS)
-    # else ()
-    target_compile_definitions(DO_Shakti_${_library_name}
-      PUBLIC DO_SHAKTI_STATIC)
-    # endif ()
+    if (SHAKTI_BUILD_SHARED_LIBS)
+      target_compile_definitions(DO_Shakti_Cuda_${_library_name}
+        PRIVATE DO_SHAKTI_EXPORTS)
+    else ()
+      target_compile_definitions(DO_Shakti_Cuda_${_library_name}
+        PUBLIC DO_SHAKTI_STATIC)
+    endif ()
 
     # Specify where to install the static library.
     install(
-      TARGETS DO_Shakti_${_library_name}
+      TARGETS DO_Shakti_Cuda_${_library_name}
       RUNTIME DESTINATION bin COMPONENT Libraries
       LIBRARY DESTINATION lib COMPONENT Libraries
       ARCHIVE DESTINATION lib COMPONENT Libraries)
@@ -245,8 +246,8 @@ macro (shakti_append_library _library_name
 
   # 5. Put the library into the folder "DO Shakti Libraries".
   set_property(
-    TARGET DO_Shakti_${_library_name} PROPERTY
-    FOLDER "Libraries/Shakti")
+    TARGET DO_Shakti_Cuda_${_library_name} PROPERTY
+    FOLDER "Libraries/Shakti/Cuda")
 endmacro ()
 
 
