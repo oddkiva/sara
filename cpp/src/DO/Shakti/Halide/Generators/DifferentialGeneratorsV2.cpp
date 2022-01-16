@@ -195,7 +195,9 @@ namespace v2 {
       const auto fast_atan2 = [](const Expr& y, const Expr& x) -> Expr {
         const auto abs_x = abs(x);
         const auto abs_y = abs(y);
-        const auto a = min(abs_x, abs_y) / max(abs_x, abs_y);
+        const auto max_x_y = max(abs_x, abs_y);
+        const auto a = select(max_x_y != 0,  //
+                              min(abs_x, abs_y) / max_x_y, 0.f);
         const auto s = a * a;
         auto r =
             ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;
@@ -210,10 +212,17 @@ namespace v2 {
       //
       // The speed up is really significant with the fast approximation of
       // atan2.
+      //
+      // On SIFT's CPU implementation, the gradient is much faster.
+      // THIS BECOMES TWICE AS FAST:
+      // 🧭[SIFT.cpp]📑[compute_sift_keypoints:62]🎶 [Gradient   ] 30.9103 ms
       const auto ori = fast_atan2(g(1), g(0));
 #else
       // Typically in the edge detection.
       // [Polar Coordinates] 19.6293 ms
+      //
+      // On SIFT's CPU implementation:
+      // 🧭[SIFT.cpp]📑[compute_sift_keypoints:62]🎶 [Gradient   ] 57.9395 ms
       auto ori = Halide::atan2(g(1), g(0));
 #endif
       output(x, y, t, n) = {mag, ori};

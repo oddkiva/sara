@@ -40,88 +40,12 @@ namespace shakti = DO::Shakti;
 namespace halide = DO::Shakti::HalideBackend;
 
 
-auto test_on_image()
+int __main(int argc, char** argv)
 {
-  const auto image_filepath =
-#ifdef __APPLE__
-      "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg";
-#else
-      "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg";
-#endif
-  auto image = sara::imread<float>(image_filepath);
-  auto image_tensor = tensor_view(image).reshape(
-      Eigen::Vector4i{1, 1, image.height(), image.width()});
-  auto buffer_4d = halide::as_runtime_buffer(image_tensor);
+  // Optimization.
+  omp_set_num_threads(omp_get_max_threads());
+  std::ios_base::sync_with_stdio(false);
 
-  auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
-
-  sift_pipeline.initialize(-1, 3,  //
-                           image.width(), image.height());
-
-  auto timer = sara::Timer{};
-
-  timer.restart();
-  {
-    buffer_4d.set_host_dirty();
-    sift_pipeline.feed(buffer_4d);
-  }
-  const auto elapsed_ms = timer.elapsed_ms();
-  SARA_DEBUG << "SIFT pipeline: " << elapsed_ms << " ms" << std::endl;
-
-
-#ifdef CHECK_INPUT_UPSCALED
-  if (sift_pipeline.start_octave_index < 0)
-  {
-    auto input_upscaled = sift_pipeline.input_upscaled_view();
-    sara::create_window(input_upscaled.sizes());
-    sara::display(input_upscaled);
-    sara::get_key();
-    sara::resize_window(image.sizes());
-  }
-#endif
-
-  if (!sara::active_window())
-    sara::create_window(image.sizes());
-
-// #define CHECK_PYRAMIDS
-#ifdef CHECK_PYRAMIDS
-  for (auto& octave : sift_pipeline.octaves)
-    for (auto s = 0; s < octave.params.num_scales + 3; ++s)
-      sara::display(octave.gaussian_view(s));
-  sara::get_key();
-
-  for (auto& octave : sift_pipeline.octaves)
-    for (auto s = 0; s < octave.params.num_scales + 2; ++s)
-    {
-      sara::display(sara::color_rescale(octave.dog_view(s)));
-      sara::get_key();
-    }
-  sara::get_key();
-#endif
-
-  sara::set_antialiasing();
-  sara::display(image);
-  for (auto o = 0u; o < sift_pipeline.octaves.size(); ++o)
-  {
-    auto& octave = sift_pipeline.octaves[o];
-    for (auto s = 0u; s < octave.extrema_oriented.size(); ++s)
-    {
-      SARA_DEBUG << sara::format("[o = %d, s = %d] Num extrema = %d",
-                                 sift_pipeline.start_octave_index + o, s,
-                                 octave.extrema_oriented[s].size())
-                 << std::endl;
-      draw_oriented_extrema(octave.extrema_oriented[s],
-                            sift_pipeline.octave_scaling_factor(
-                                sift_pipeline.start_octave_index + o));
-    }
-  }
-
-  while (sara::get_key() != sara::KEY_ESCAPE)
-    ;
-}
-
-auto test_on_video(int argc, char **argv)
-{
   namespace po = boost::program_options;
 
   using namespace std::string_literals;
@@ -134,6 +58,7 @@ auto test_on_video(int argc, char **argv)
   // SIFT parameters.
   auto num_scales_per_octave = int{};
   auto nearest_neighbor_ratio = float{};
+  auto match_keypoints = false;
   // Performance profiling
   auto profile = bool{};
   // Display.
@@ -155,6 +80,8 @@ auto test_on_video(int argc, char **argv)
        "number of scales per octave")  //
       ("skip", po::value<int>(&skip)->default_value(0),
        "number of frames to skip")  //
+      ("match_keypoints", po::bool_switch(&match_keypoints),
+       "match SIFT keypoints frame by frame")  //
       ("profile,p", po::bool_switch(&profile),
        "profile code")  //
       ("show_features,f", po::bool_switch(&show_features),
@@ -168,13 +95,13 @@ auto test_on_video(int argc, char **argv)
   if (vm.count("help"))
   {
     std::cout << desc << "\n";
-    return;
+    return 1;
   }
 
   if (!vm.count("video"))
   {
     std::cout << "The video file must be specified!\n" << desc << "\n";
-    return;
+    return 1;
   }
 
 
@@ -233,6 +160,9 @@ auto test_on_video(int argc, char **argv)
 
   auto keys_prev = sara::KeypointList<sara::OERegion, float>{};
   auto keys_curr = sara::KeypointList<sara::OERegion, float>{};
+  auto matches = std::vector<sara::Match>{};
+  static constexpr auto match_count_max_estimate = 20000;
+  matches.reserve(match_count_max_estimate);
 
   while (true)
   {
@@ -281,17 +211,20 @@ auto test_on_video(int argc, char **argv)
     }
     feature_time = feature_timer.elapsed_ms();
 
-    sara::tic();
-    matching_timer.restart();
-    auto matches = std::vector<sara::Match>{};
-    const auto& fprev = std::get<0>(keys_prev);
-    if (!fprev.empty())
+    if (match_keypoints)
     {
-      sara::AnnMatcher matcher{keys_prev, keys_curr, nearest_neighbor_ratio};
-      matches = matcher.compute_matches();
+      sara::tic();
+      matching_timer.restart();
+      matches.clear();
+      const auto& fprev = std::get<0>(keys_prev);
+      if (!fprev.empty())
+      {
+        sara::AnnMatcher matcher{keys_prev, keys_curr, nearest_neighbor_ratio};
+        matches = matcher.compute_matches();
+      }
+      matching_time = matching_timer.elapsed_ms();
+      sara::toc("Matching");
     }
-    matching_time = matching_timer.elapsed_ms();
-    sara::toc("Matching");
 
     sara::tic();
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
@@ -304,8 +237,19 @@ auto test_on_video(int argc, char **argv)
     auto& frame_rgb = frame;
 #endif
 
-    if (show_features)
+    if (!match_keypoints)
     {
+      if (show_features)
+      {
+        const auto& fcurr = sara::features(keys_curr);
+#pragma omp parallel for
+        for (size_t i = 0; i < fcurr.size(); ++i)
+          sara::draw(frame_rgb, fcurr[i], sara::Cyan8);
+      }
+    }
+    else
+    {
+#pragma omp parallel for
       for (size_t i = 0; i < matches.size(); ++i)
       {
         if (show_features)
@@ -333,17 +277,7 @@ auto test_on_video(int argc, char **argv)
 
     sara::toc("Display");
   }
-}
 
-
-int __main(int argc, char** argv)
-{
-  // Optimization.
-  omp_set_num_threads(omp_get_max_threads());
-  std::ios_base::sync_with_stdio(false);
-
-  // test_on_image();
-  test_on_video(argc, argv);
   return 0;
 }
 
