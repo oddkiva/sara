@@ -17,24 +17,13 @@
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <DO/Shakti/Cuda/FeatureDetectors/Octave.hpp>
-#include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/SmallGaussianConvolutionFP32.hpp>
-#include <DO/Shakti/Cuda/MultiArray.hpp>
-#include <DO/Shakti/Cuda/MultiArray/ManagedMemoryAllocator.hpp>
 #include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
-#include <DO/Shakti/Cuda/Utilities/Timer.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveComputer.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/DoG.hpp>
 
 #include <cstdio>
 #include <cstdlib>
 #include <signal.h>
-
-auto do_shutdown = sig_atomic_t{};
-void my_handler(int s)
-{
-  printf("Caught signal %d\n", s);
-  do_shutdown = 1;
-}
-
 
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
@@ -42,53 +31,12 @@ namespace sc = shakti::Cuda;
 namespace scg = sc::Gaussian;
 
 
-struct GaussianOctaveComputer
+auto do_shutdown = sig_atomic_t{};
+void my_handler(int s)
 {
-  inline GaussianOctaveComputer(int w, int h, int scale_count = 3)
-    : host_kernels{scale_count}
-    , device_kernels{host_kernels}
-    , d_convx{{w, h}}
-    , d_octave{sc::make_gaussian_octave<float>(w, h, scale_count)}
-  {
-    device_kernels.copy_filters_to_device_constant_memory();
-  }
-
-  inline auto
-  operator()(shakti::MultiArrayView<float, 2, shakti::RowMajorStrides>& d_in)
-      -> void
-  {
-    shakti::tic(d_timer);
-    device_kernels(d_in, d_convx, d_octave);
-    shakti::toc(d_timer, "Gaussian Octave");
-  }
-
-  inline auto copy_to_host() -> void
-  {
-    if (!h_octave.has_value())
-      h_octave = sara::Image<float, 3, shakti::PinnedMemoryAllocator>{
-          d_octave.width(), d_octave.height(), d_octave.scale_count()};
-
-    // This is an extremely expensive copy.
-    shakti::tic(d_timer);
-    d_octave.array().copy_to(*h_octave);
-    shakti::toc(d_timer, "Device to Host");
-  }
-
-  // Gaussian kernels.
-  sc::GaussianOctaveKernels<float> host_kernels;
-  scg::DeviceGaussianFilterBank device_kernels;
-
-  // Device work buffer for intermediate x-convolution results.
-  shakti::MultiArray<float, 2> d_convx;
-  // Device buffer for the Gaussian octave.
-  sc::Octave<float> d_octave;
-
-  // Optional host buffer to read back the result.
-  std::optional<sara::Image<float, 3, shakti::PinnedMemoryAllocator>> h_octave;
-
-  // Profile.
-  shakti::Timer d_timer;
-};
+  printf("Caught signal %d\n", s);
+  do_shutdown = 1;
+}
 
 
 auto example_1() -> void
@@ -220,16 +168,25 @@ auto example_2() -> void
   // Use pinned memory, it's much much faster.
   auto frame_gray32f =
       sara::Image<float, 2, shakti::PinnedMemoryAllocator>{w, h};
-  auto frame_blurred =
-      sara::Image<float, 2, shakti::PinnedMemoryAllocator>{w, h};
 
   static constexpr auto scale_count = 3;
-  auto goc = GaussianOctaveComputer{w, h, scale_count};
+  auto goc = sc::GaussianOctaveComputer{w, h, scale_count};
 
   // Host and device input grayscale data.
   auto& h_in = frame_gray32f;
   auto d_in = shakti::MultiArray<float, 2, shakti::RowMajorStrides>{
       frame_gray32f.data(), {w, h}};
+
+  auto d_dog_octave = sc::make_DoG_octave<float>(w, h, scale_count);
+  d_dog_octave.init_surface();
+  SARA_CHECK(d_dog_octave.width());
+  SARA_CHECK(d_dog_octave.height());
+  SARA_CHECK(d_dog_octave.scale_count());
+
+  auto h_dog_octave = sara::Image<float, 3, shakti::PinnedMemoryAllocator>{
+      w, h, d_dog_octave.scale_count()};
+  SARA_CHECK(h_dog_octave.sizes().transpose());
+
 
   // Profile.
   auto d_timer = shakti::Timer{};
@@ -249,24 +206,37 @@ auto example_2() -> void
 
     shakti::tic(d_timer);
     d_in.copy_from_host(h_in.data(), w, h);
-    shakti::toc(d_timer, "Transfer to Device");
+    shakti::toc(d_timer, "Host to Device");
 
     goc(d_in);
+
+    // shakti::tic(d_timer);
+    // sc::compute_dog_octave(goc.d_octave, d_dog_octave);
+    // shakti::toc(d_timer, "DoG");
+
+    // shakti::tic(d_timer);
+    // d_dog_octave.array().copy_to(h_dog_octave);
+    // shakti::toc(d_timer, "Device To Host");
+
     goc.copy_to_host();
 
 
+// #define INSPECT_ALL
 #ifdef INSPECT_ALL
-    for (auto s = 0; s < goc.d_octave.scale_count(); ++s)
+    for (auto s = 0; s < d_dog_octave.scale_count(); ++s)
 #else
-      const auto s = goc.d_octave.scale_count() - 1;
+      const auto s = d_dog_octave.scale_count() - 1;
 #endif
     {
-      const auto layer_s =
-          sara::image_view(sara::tensor_view(*goc.h_octave)[s]);
+      const auto layer_s = sara::image_view(sara::tensor_view(*goc.h_octave)[s]);
+      // const auto layer_s = sara::image_view(sara::tensor_view(h_dog_octave)[s]);
 
       sara::tic();
+      SARA_CHECK(s);
+      SARA_CHECK(layer_s.sizes().transpose());
       sara::display(layer_s);
       sara::toc("Display");
+      // sara::get_key();
     }
 
     if (do_shutdown)

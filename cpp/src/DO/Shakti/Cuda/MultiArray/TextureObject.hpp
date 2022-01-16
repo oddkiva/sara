@@ -35,6 +35,10 @@ namespace DO::Shakti::Cuda {
                               &texture_descriptor, nullptr);
     }
 
+    inline TextureObject(const TextureObject&) noexcept = delete;
+
+    inline TextureObject(TextureObject&&) noexcept = default;
+
     inline ~TextureObject()
     {
       if (_texture_object != 0)

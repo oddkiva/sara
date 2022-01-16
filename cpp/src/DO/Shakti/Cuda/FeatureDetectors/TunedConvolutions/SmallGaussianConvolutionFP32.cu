@@ -348,8 +348,11 @@ namespace DO::Shakti::Cuda::Gaussian {
       MultiArrayView<float, 2, RowMajorStrides>& d_convx,
       Octave<float>& gaussian_octave) const -> void
   {
-    if (!gaussian_octave.surface_object().has_value())
+    if (gaussian_octave.surface_object().initialized())
+    {
+      SHAKTI_STDOUT << "INIT GAUSSIAN OCTAVE SURFACE" << std::endl;
       gaussian_octave.init_surface();
+    }
 
     compute_zero_scale(d_in, d_convx, gaussian_octave);
     for (auto s = 1; s < gaussian_octave.scale_count(); ++s)
@@ -397,11 +400,11 @@ namespace DO::Shakti::Cuda::Gaussian {
 
       // y-convolution.
       convy_at_scale<<<numBlocks, threadsperBlock>>>(
-          d_convx.data(),                     //
-          *gaussian_octave.surface_object(),  //
-          0,                                  //
-          d_convx.width(),                    //
-          d_convx.height(),                   //
+          d_convx.data(),                    //
+          gaussian_octave.surface_object(),  //
+          0,                                 //
+          d_convx.width(),                   //
+          d_convx.height(),                  //
           d_convx.padded_width());
     }
 #ifdef PROFILE_GAUSSIAN_CONVOLUTION
@@ -428,11 +431,11 @@ namespace DO::Shakti::Cuda::Gaussian {
 
       // x-convolution.
       convx_at_scale<<<numBlocks, threadsperBlock>>>(
-          *gaussian_octave.surface_object(),  //
-          d_convx.data(),                     //
-          scale,                              //
-          d_convx.width(),                    //
-          d_convx.height(),                   //
+          gaussian_octave.surface_object(),  //
+          d_convx.data(),                    //
+          scale,                             //
+          d_convx.width(),                   //
+          d_convx.height(),                  //
           d_convx.padded_width());
     }
 #ifdef PROFILE_GAUSSIAN_CONVOLUTION
@@ -452,11 +455,11 @@ namespace DO::Shakti::Cuda::Gaussian {
 
       // y-convolution.
       convy_at_scale<<<numBlocks, threadsperBlock>>>(
-          d_convx.data(),                     //
-          *gaussian_octave.surface_object(),  //
-          scale,                              //
-          d_convx.width(),                    //
-          d_convx.height(),                   //
+          d_convx.data(),                    //
+          gaussian_octave.surface_object(),  //
+          scale,                             //
+          d_convx.width(),                   //
+          d_convx.height(),                  //
           d_convx.padded_width());
     }
 #ifdef PROFILE_GAUSSIAN_CONVOLUTION

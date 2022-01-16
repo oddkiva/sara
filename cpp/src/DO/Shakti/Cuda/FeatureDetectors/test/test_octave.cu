@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_fill)
       (octave.width() + threadsperBlock.x - 1) / threadsperBlock.x,
       (octave.height() + threadsperBlock.y - 1) / threadsperBlock.y,
       (octave.scale_count() + threadsperBlock.z - 1) / threadsperBlock.z);
-  fill<<<numBlocks, threadsperBlock>>>(octave.surface_object().value(),  //
+  fill<<<numBlocks, threadsperBlock>>>(octave.surface_object(),  //
                                        octave.width(), octave.height(),
                                        octave.scale_count());
 
@@ -78,4 +78,53 @@ BOOST_AUTO_TEST_CASE(test_fill)
   //   SARA_DEBUG << s << "\n"
   //              << sara::tensor_view(result)[s].matrix() << std::endl;
   BOOST_CHECK(result == gt);
+}
+
+BOOST_AUTO_TEST_CASE(test_surface_object_id)
+{
+  static constexpr auto w = 3;
+  static constexpr auto h = 5;
+  static constexpr auto scale_count = 1;
+
+  auto o1 = sc::make_3d_layered_surface_array<float>({w, h, scale_count});
+  auto s1 = o1.create_surface_object();
+
+  auto o2 = sc::make_3d_layered_surface_array<float>({w, h, scale_count});
+  auto s2 = o2.create_surface_object();
+
+  auto o3 = sc::make_3d_layered_surface_array<float>({w, h, scale_count});
+  auto s3 = o3.create_surface_object();
+
+  BOOST_CHECK_EQUAL(s1, 1);
+  BOOST_CHECK_EQUAL(s2, 2);
+  BOOST_CHECK_EQUAL(s3, 3);
+}
+
+BOOST_AUTO_TEST_CASE(test_surface_object_id_2)
+{
+  SARA_DEBUG << "CHECK SURFACE OBJECT IDs FROM THE OCTAVE OBJECT" << std::endl;
+  static constexpr auto w = 3;
+  static constexpr auto h = 5;
+  static constexpr auto scale_count = 1;
+
+  auto octave1 = sc::make_gaussian_octave<float>(w, h, scale_count);
+  auto& s1 = octave1.init_surface();
+
+  // auto octave1 = sc::make_gaussian_octave<float>(w, h, scale_count);
+  // const sc::ArrayView<float, 3>& arr1 = octave1.array();
+  // auto s1 = arr1.create_surface_object();
+  // // BOOST_CHECK_EQUAL(octave1.surface_object().value(), 1);
+
+  auto octave2 = sc::make_gaussian_octave<float>(w, h, scale_count);
+  auto& s2 = octave2.init_surface();
+  // const sc::ArrayView<float, 3>& arr2 = octave2.array();
+  // auto s2 = arr2.create_surface_object();
+  // BOOST_CHECK_EQUAL(octave2.surface_object().value(), 2);
+
+  auto octave3 = sc::make_gaussian_octave<float>(w, h, scale_count);
+  auto& s3 = octave3.init_surface();
+
+  // SARA_CHECK(octave1.surface_object().value());
+  // SARA_CHECK(octave2.surface_object().value());
+  // SARA_CHECK(octave3.surface_object().value());
 }
