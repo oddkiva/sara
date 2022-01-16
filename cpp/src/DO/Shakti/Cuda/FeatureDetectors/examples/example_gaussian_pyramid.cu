@@ -17,9 +17,9 @@
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
-#include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveComputer.hpp>
 #include <DO/Shakti/Cuda/FeatureDetectors/DoG.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveComputer.hpp>
+#include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -178,15 +178,8 @@ auto example_2() -> void
       frame_gray32f.data(), {w, h}};
 
   auto d_dog_octave = sc::make_DoG_octave<float>(w, h, scale_count);
-  d_dog_octave.init_surface();
-  SARA_CHECK(d_dog_octave.width());
-  SARA_CHECK(d_dog_octave.height());
-  SARA_CHECK(d_dog_octave.scale_count());
-
   auto h_dog_octave = sara::Image<float, 3, shakti::PinnedMemoryAllocator>{
       w, h, d_dog_octave.scale_count()};
-  SARA_CHECK(h_dog_octave.sizes().transpose());
-
 
   // Profile.
   auto d_timer = shakti::Timer{};
@@ -210,33 +203,27 @@ auto example_2() -> void
 
     goc(d_in);
 
-    // shakti::tic(d_timer);
-    // sc::compute_dog_octave(goc.d_octave, d_dog_octave);
-    // shakti::toc(d_timer, "DoG");
+    shakti::tic(d_timer);
+    sc::compute_dog_octave(goc.d_octave, d_dog_octave);
+    shakti::toc(d_timer, "DoG");
 
-    // shakti::tic(d_timer);
-    // d_dog_octave.array().copy_to(h_dog_octave);
-    // shakti::toc(d_timer, "Device To Host");
-
-    goc.copy_to_host();
+    shakti::tic(d_timer);
+    d_dog_octave.array().copy_to(h_dog_octave);
+    shakti::toc(d_timer, "Device To Host");
 
 
-// #define INSPECT_ALL
+#define INSPECT_ALL
 #ifdef INSPECT_ALL
     for (auto s = 0; s < d_dog_octave.scale_count(); ++s)
 #else
-      const auto s = d_dog_octave.scale_count() - 1;
+    const auto s = d_dog_octave.scale_count() - 1;
 #endif
     {
-      const auto layer_s = sara::image_view(sara::tensor_view(*goc.h_octave)[s]);
-      // const auto layer_s = sara::image_view(sara::tensor_view(h_dog_octave)[s]);
+      const auto layer_s = sara::image_view(sara::tensor_view(h_dog_octave)[s]);
 
       sara::tic();
-      SARA_CHECK(s);
-      SARA_CHECK(layer_s.sizes().transpose());
-      sara::display(layer_s);
+      sara::display(sara::color_rescale(layer_s));
       sara::toc("Display");
-      // sara::get_key();
     }
 
     if (do_shutdown)

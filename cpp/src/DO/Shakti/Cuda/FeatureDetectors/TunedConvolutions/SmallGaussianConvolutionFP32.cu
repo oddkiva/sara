@@ -348,7 +348,7 @@ namespace DO::Shakti::Cuda::Gaussian {
       MultiArrayView<float, 2, RowMajorStrides>& d_convx,
       Octave<float>& gaussian_octave) const -> void
   {
-    if (gaussian_octave.surface_object().initialized())
+    if (!gaussian_octave.surface_object().initialized())
     {
       SHAKTI_STDOUT << "INIT GAUSSIAN OCTAVE SURFACE" << std::endl;
       gaussian_octave.init_surface();

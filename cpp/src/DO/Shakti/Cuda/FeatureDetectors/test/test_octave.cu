@@ -110,21 +110,18 @@ BOOST_AUTO_TEST_CASE(test_surface_object_id_2)
   auto octave1 = sc::make_gaussian_octave<float>(w, h, scale_count);
   auto& s1 = octave1.init_surface();
 
-  // auto octave1 = sc::make_gaussian_octave<float>(w, h, scale_count);
-  // const sc::ArrayView<float, 3>& arr1 = octave1.array();
-  // auto s1 = arr1.create_surface_object();
-  // // BOOST_CHECK_EQUAL(octave1.surface_object().value(), 1);
-
   auto octave2 = sc::make_gaussian_octave<float>(w, h, scale_count);
   auto& s2 = octave2.init_surface();
-  // const sc::ArrayView<float, 3>& arr2 = octave2.array();
-  // auto s2 = arr2.create_surface_object();
-  // BOOST_CHECK_EQUAL(octave2.surface_object().value(), 2);
 
   auto octave3 = sc::make_gaussian_octave<float>(w, h, scale_count);
   auto& s3 = octave3.init_surface();
+}
 
-  // SARA_CHECK(octave1.surface_object().value());
-  // SARA_CHECK(octave2.surface_object().value());
-  // SARA_CHECK(octave3.surface_object().value());
+BOOST_AUTO_TEST_CASE(test_with_integral_data_type)
+{
+  SARA_DEBUG << "CHECK SURFACE OBJECT IDs FROM THE OCTAVE OBJECT" << std::endl;
+  static constexpr auto w = 3;
+  static constexpr auto h = 5;
+  static constexpr auto scale_count = 1;
+  auto o = sc::make_extremum_octave(w, h, scale_count);
 }
