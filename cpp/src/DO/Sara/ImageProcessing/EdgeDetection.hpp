@@ -399,6 +399,7 @@ namespace DO::Sara {
       return Eigen::Vector2f{cos(o), sin(o)};
     };
 
+    tic();
     const auto sin_threshold = std::sin(angular_threshold);
     const auto angular_distance = [](const auto& a, const auto& b) {
       // const auto c = a.dot(b);
@@ -486,7 +487,9 @@ namespace DO::Sara {
 
       q.pop();
     }
+    toc("Serial Connected Components");
 
+    tic();
     auto contours = std::map<int, std::vector<Point2i>>{};
     for (auto y = 0; y < edges.height(); ++y)
     {
@@ -498,6 +501,7 @@ namespace DO::Sara {
           contours[static_cast<int>(ds.component(index_p))].push_back(p);
       }
     }
+    toc("Serial Contour Collection");
 
     return contours;
   }

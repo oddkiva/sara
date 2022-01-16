@@ -45,13 +45,8 @@ namespace DO::Sara {
         high_thres, low_thres);
     toc("Thresholding");
 
-    // tic();
-    // pipeline.edges = perform_hysteresis_and_grouping(  //
-    //     pipeline.edge_map,                             //
-    //     pipeline.gradient_orientation,                 //
-    //     parameters.angular_threshold);
-    // toc("Hysteresis & Edgel Grouping");
-    pipeline.edges = perform_parallel_grouping(  //
+    pipeline.edges = perform_hysteresis_and_grouping(  //
+    // pipeline.edges = perform_parallel_grouping(  //
         pipeline.edge_map,                       //
         pipeline.gradient_orientation,           //
         parameters.angular_threshold);

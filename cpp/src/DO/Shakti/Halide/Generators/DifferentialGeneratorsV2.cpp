@@ -191,6 +191,7 @@ namespace v2 {
       auto mag = norm(g);
 #define USE_FAST_ATAN2
 #ifdef USE_FAST_ATAN2
+      // https://math.stackexchange.com/questions/1098487/atan2-faster-approximation/1105038
       const auto fast_atan2 = [](const Expr& y, const Expr& x) -> Expr {
         const auto abs_x = abs(x);
         const auto abs_y = abs(y);
@@ -204,8 +205,15 @@ namespace v2 {
 
         return r;
       };
+      // Typically in the edge detection.
+      // [Polar Coordinates] 3.45664 ms
+      //
+      // The speed up is really significant with the fast approximation of
+      // atan2.
       const auto ori = fast_atan2(g(1), g(0));
 #else
+      // Typically in the edge detection.
+      // [Polar Coordinates] 19.6293 ms
       auto ori = Halide::atan2(g(1), g(0));
 #endif
       output(x, y, t, n) = {mag, ori};
@@ -247,13 +255,11 @@ namespace v2 {
 
 }  // namespace v2
 
-HALIDE_REGISTER_GENERATOR(v2::Gradient2D<float>,
-                          shakti_gradient_2d_32f_cpu)
+HALIDE_REGISTER_GENERATOR(v2::Gradient2D<float>, shakti_gradient_2d_32f_cpu)
 HALIDE_REGISTER_GENERATOR(v2::PolarGradient2D<float>,
                           shakti_polar_gradient_2d_32f_cpu)
 
-HALIDE_REGISTER_GENERATOR(v2::Gradient2D<float>,
-                          shakti_gradient_2d_32f_gpu_v2)
+HALIDE_REGISTER_GENERATOR(v2::Gradient2D<float>, shakti_gradient_2d_32f_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v2::PolarGradient2D<float>,
                           shakti_polar_gradient_2d_32f_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v2::ForwardDifference<float>,

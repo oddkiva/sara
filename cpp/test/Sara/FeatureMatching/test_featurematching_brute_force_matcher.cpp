@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_dot_product_128)
   {
     auto v1 = Eigen::Matrix<float, 128, 1>{};
     v1.setRandom();
-    // a = dot_product(v1.data(), v1.data());
+    a = dot_product(v1.data(), v1.data());
   }
   toc("AVX");
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_dot_product_128)
     // b = v1.squaredNorm();
   }
   toc("Eigen");
-  //BOOST_CHECK_CLOSE(a, b, std::numeric_limits<float>::epsilon());
+  BOOST_CHECK_CLOSE(a, b, std::numeric_limits<float>::epsilon());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -85,7 +85,7 @@ int __main(int argc, char** argv)
   create_window(frame.sizes());
   set_antialiasing();
 
-  constexpr float high_threshold_ratio = static_cast<float>(20._percent);
+  constexpr float high_threshold_ratio = static_cast<float>(8._percent);
   constexpr float low_threshold_ratio =
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
