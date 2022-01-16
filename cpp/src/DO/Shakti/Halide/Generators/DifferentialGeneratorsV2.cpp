@@ -191,13 +191,24 @@ namespace v2 {
       auto mag = norm(g);
 #define USE_FAST_ATAN2
 #ifdef USE_FAST_ATAN2
+      // See njuffa's answer where he exposes Remez's polynomial approximation.
+      // He reports that the relative error is 1/360, which is more than
+      // acceptable for image processing applications.
+      //
       // https://math.stackexchange.com/questions/1098487/atan2-faster-approximation/1105038
+      //
+      // We translate his pseudo-code as-is.
       const auto fast_atan2 = [](const Expr& y, const Expr& x) -> Expr {
         const auto abs_x = abs(x);
         const auto abs_y = abs(y);
         const auto max_x_y = max(abs_x, abs_y);
+
+        // Here is a boundary condition we need to take care to avoid NaN values
+        // which the post did not address.
         const auto a = select(max_x_y != 0,  //
                               min(abs_x, abs_y) / max_x_y, 0.f);
+
+        // Calculate the 7-th order polynomial using Horner's method.
         const auto s = a * a;
         auto r =
             ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;
@@ -207,6 +218,10 @@ namespace v2 {
 
         return r;
       };
+      // In my experiments, the speed improvements is appreciable and from a
+      // visual inspection of both edge detection and SIFT feature matching
+      // tasks, the quality of the features did not seem to degrade at all.
+      //
       // Typically in the edge detection.
       // [Polar Coordinates] 3.45664 ms
       //
@@ -218,6 +233,9 @@ namespace v2 {
       // 🧭[SIFT.cpp]📑[compute_sift_keypoints:62]🎶 [Gradient   ] 30.9103 ms
       const auto ori = fast_atan2(g(1), g(0));
 #else
+      // Whereas with the standard atan2 implementation, we have the following
+      // timings:
+      //
       // Typically in the edge detection.
       // [Polar Coordinates] 19.6293 ms
       //
