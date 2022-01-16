@@ -58,10 +58,11 @@ GRAPHICS_MAIN()
 
   // The pipeline is far from being optimized but despite that we get real-time
   // image processing.
-  const auto apply_gaussian_filter = shakti::GaussianFilter{10.f};
+  const auto apply_gaussian_filter = shakti::GaussianFilter{3.2f};
 
   auto cpu_timer = sara::Timer{};
   auto cpu_time = 0.;
+  auto gpu_timer = shakti::Timer{};
 
   sara::create_window(video_frame.sizes());
 
@@ -84,10 +85,10 @@ GRAPHICS_MAIN()
     std::cout << "[CPU color conversion time] " << cpu_time << "ms"
               << std::endl;
 
-    shakti::tic();
+    shakti::tic(gpu_timer);
     apply_gaussian_filter(out_frame.data(), in_frame.data(),
                           in_frame.sizes().data());
-    shakti::toc("GPU gaussian filter");
+    shakti::toc(gpu_timer, "GPU gaussian filter");
 
     sara::display(out_frame);
 

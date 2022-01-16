@@ -6,6 +6,6 @@ if (DO_Sara_VideoIO_FOUND)
   add_subdirectory(Segmentation)
 endif ()
 
-if (CUDA_FOUND AND NvidiaVideoCodec_ROOT)
+if (CMAKE_CUDA_COMPILER AND NvidiaVideoCodec_ROOT)
   add_subdirectory(VideoIO)
 endif ()

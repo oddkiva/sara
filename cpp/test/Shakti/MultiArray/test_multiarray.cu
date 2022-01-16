@@ -18,8 +18,6 @@
 
 namespace shakti = DO::Shakti;
 
-using namespace std;
-
 
 BOOST_AUTO_TEST_CASE(test_constructor_1d)
 {
@@ -55,7 +53,14 @@ BOOST_AUTO_TEST_CASE(test_copy_between_host_and_device_2d)
 {
   const int w = 3;
   const int h = 4;
-  float in_host_data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+  // clang-format off
+  float in_host_data[] = {
+    0, 1, 2,
+    3, 4, 5,
+    6, 7, 8,
+    9, 10, 11
+  };
+  // clang-format on
 
   // Copy to device.
   shakti::MultiArray<float, 2> out_device_image{in_host_data, {w, h}};
@@ -64,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_copy_between_host_and_device_2d)
   float out_host_data[w * h];
   out_device_image.copy_to_host(out_host_data);
 
-  BOOST_CHECK(equal(in_host_data, in_host_data + w * h, out_host_data));
+  BOOST_CHECK(std::equal(in_host_data, in_host_data + w * h, out_host_data));
 }
 
 BOOST_AUTO_TEST_CASE(test_copy_between_host_and_device_3d)
@@ -83,5 +88,6 @@ BOOST_AUTO_TEST_CASE(test_copy_between_host_and_device_3d)
   float out_host_data[w * h * d];
   out_device_image.copy_to_host(out_host_data);
 
-  BOOST_CHECK(equal(in_host_data, in_host_data + w * h * d, out_host_data));
+  BOOST_CHECK(std::equal(in_host_data, in_host_data + w * h * d,  //
+                         out_host_data));
 }

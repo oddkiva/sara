@@ -35,10 +35,10 @@ namespace DO { namespace Shakti {
   };
 
   DO_SHAKTI_EXPORT
-  void tic();
+  void tic(Timer& t);
 
   DO_SHAKTI_EXPORT
-  void toc(const char *what);
+  void toc(Timer& t, const char *what);
 
 } /* namespace Shakti */
 } /* namespace DO */

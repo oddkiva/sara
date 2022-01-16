@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/DisjointSets/DisjointSets.hpp>
 
 #include <array>
@@ -30,6 +31,7 @@ namespace DO { namespace Sara {
       return p.y() * image.width() + p.x();
     };
 
+    tic();
     auto ds = DisjointSets(image.size());
 
     // Make as many sets as pixels.
@@ -74,7 +76,9 @@ namespace DO { namespace Sara {
         }
       }
     }
+    toc("Connected Components");
 
+    tic();
     auto regions = std::map<int, std::vector<Point2i>>{};
     for (auto y = 0; y < image.height(); ++y)
     {
@@ -85,6 +89,7 @@ namespace DO { namespace Sara {
         regions[static_cast<int>(ds.component(index_p))].push_back(p);
       }
     }
+    toc("Region Collection");
 
     return regions;
   }

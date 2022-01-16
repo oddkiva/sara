@@ -6,10 +6,15 @@ shakti_add_example(
   example_superpixel.cpp
 
   DEPENDENCIES
+  CUDA::cudart
   ${DO_Sara_LIBRARIES}
-  DO::Shakti::ImageProcessing
-  DO::Shakti::Segmentation
-  DO::Shakti::Utilities)
+  DO::Shakti::Cuda::ImageProcessing
+  DO::Shakti::Cuda::Segmentation
+  DO::Shakti::Cuda::Utilities)
+set_target_properties(
+  shakti_example_superpixel
+  PROPERTIES
+  FOLDER "Examples/Shakti/Cuda")
 
 
 # TODO: put this in the Video I/O.
@@ -31,7 +36,10 @@ if (LIBQUICKTIME_LIBRARY AND LIBQUICKTIME_INCLUDE_DIRS)
   target_link_libraries(example_quicktime_video_read
     ${LIBQUICKTIME_LIBRARY}
     ${DO_Sara_LIBRARIES}
-    DO::Shakti::ImageProcessing
-    DO::Shakti::Segmentation
-    DO::Shakti::Utilities)
+    DO::Shakti::Cuda::ImageProcessing
+    DO::Shakti::Cuda::Segmentation
+    DO::Shakti::Cuda::Utilities)
+  set_target_properties(example_quicktime_video_read
+    PROPERTIES
+    FOLDER "Examples/Shakti/Cuda")
 endif ()

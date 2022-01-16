@@ -115,83 +115,27 @@ happen a lot slowly.
 Build the libraries
 -------------------
 
-**The information below is a bit outdated but the detailed steps are still
-useful. Your best bet is to have a look at the CI scripts like `.gitlab-ci.yml`
-or `.travis.yml`**
+You can have a look at the CI scripts like `.gitlab-ci.yml` or `.travis.yml`**
+to have a minimal build.
 
-To build the libraries, run:
+Better yet, to help you get started, you can try the Docker container. Assuming
+that you have a CUDA GPU device and nvidia-docker installed, then:
 
-1. Install the following packages:
-
-   - On Debian-based distributions:
-     ```
-     sudo apt-get install -qq \
-       cmake \
-       doxygen \
-       libjpeg8-dev \
-       libpng12-dev \
-       libtiff5-dev \
-       libavcodec-ffmpeg-dev \
-       libavformat-ffmpeg-dev \
-       libavutil-ffmpeg-dev \
-       qtbase5-dev
-
-     # To install Python bindings.
-     sudo apt-get install -qq \
-       boost-python-dev \
-       python3-dev
-     ```
-
-   - On Red Hat-based distributions:
-     ```
-     sudo yum install -y
-       cmake \
-       doxygen \
-       libboost-test-dev \
-       libjpeg-devel \
-       libpng-devel \
-       libtiff-devel \
-       ffmpeg \
-       ffmpeg-devel \
-       qt-devel
-
-     # To install Python bindings.
-     sudo apt-get install -qq \
-       libboost-python-dev \
-       libpython3-devel
-     ```
-
-2. Build the library:
-
+1. Grab the Docker image at `registry.gitlab.com/do-cv/sara`
+2. Run the docker container as I do:
    ```
-   mkdir build
-   cd build
-   cmake .. \
-     -DCMAKE_BUILD_TYPE=Release \
-     -DSARA_BUILD_SHARED_LIBS=ON \
-     -DSARA_BUILD_SAMPLES=ON \
-     -DSARA_BUILD_TESTS=ON
-   make  -j`nproc`  # to build with all your CPU cores.
+   docker run --gpus all -it \
+       -v /tmp/.X11-unix:/tmp/.X11-unix \
+       -v "$HOME/.Xauthority:/root/.Xauthority:rw" \
+       -v /media/Linux\ Data:/media/Linux\ Data \
+       -v $PWD:/workspace/sara \
+       -e DISPLAY \
+       --ipc=host \
+       --net=host \
+       ${SARA_DOCKER_IMAGE} \
+       /bin/zsh
    ```
+3. Simply try running the build script: `./build.sh Release`.
+4. Pray that it will work.
 
-3. Run the tests to make sure everything is alright.
-
-   ```
-   ctest --output-on-failure
-   ```
-
-4. Create DEB and RPM package.
-
-   ```
-   make package
-   ```
-
-5. Deploy by install the Debian package with Ubuntu Software Center, or type:
-
-   ```
-   # Debian-based distros:
-   sudo dpkg -i libDO-Sara-shared-{version}.deb
-
-   # Red Hat-based distros:
-   sudo rpm -i libDO-Sara-shared-{version}.deb
-   ```
+If it does not work, help me and try fixing it? =P

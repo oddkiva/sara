@@ -1,6 +1,6 @@
 import time
 import numpy as np
-import cv2 as cv
+import cv2
 
 
 class Timer(object):
@@ -16,9 +16,9 @@ class Timer(object):
         print('Elapsed: %s s' % (time.time() - self.tstart))
 
 
-img = cv.imread('/Users/david/Desktop/Datasets/sfm/castle_int/0000.png')
-gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
-sift = cv.SIFT_create()
+img = cv2.imread('/home/david/Desktop/Datasets/sfm/castle_int/0000.png')
+gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+sift = cv2.SIFT_create()
 
 for i in range(10):
     with Timer("OpenCV SIFT"):

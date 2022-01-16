@@ -118,12 +118,12 @@ namespace DO { namespace Sara {
       deallocate();
     }
 
-    inline auto const_view() const -> const base_type&
+    inline auto const_view() const noexcept -> const base_type&
     {
       return *this;
     }
 
-    inline auto view() -> base_type&
+    inline auto view() noexcept -> base_type&
     {
       return *this;
     }

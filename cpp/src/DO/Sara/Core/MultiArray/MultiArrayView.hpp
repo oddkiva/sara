@@ -46,6 +46,8 @@ namespace DO { namespace Sara {
   template <typename T, int N, int S>
   class MultiArrayView
   {
+    static_assert(N > 0, "MultiArray dimension must be positive!");
+
     using self_type = MultiArrayView;
 
   public: /* typedefs. */
@@ -148,7 +150,7 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Constructor that wraps plain data with its known sizes.
-    inline explicit MultiArrayView(value_type* data, int size)
+    inline explicit MultiArrayView(value_type* data, int size) noexcept
       : _begin{data}
       , _end{data + size}
       , _sizes{size}
@@ -167,19 +169,19 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @brief Check if the MultiArray object is empty.
-    inline auto empty() const -> bool
+    inline auto empty() const noexcept -> bool
     {
       return _end - _begin == 0;
     }
 
     //! @brief Return the size vector of the MultiArray object.
-    inline const vector_type& sizes() const
+    inline auto sizes() const noexcept -> const vector_type&
     {
       return _sizes;
     }
 
     //! @brief Return the number of elements in the internal data array.
-    inline size_type size() const
+    inline auto size() const noexcept -> size_type
     {
       return _end - _begin;
     }
@@ -192,7 +194,7 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Return the number of rows.
-    inline int rows() const
+    inline int rows() const noexcept
     {
       return _sizes[0];
     }
@@ -210,7 +212,7 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Return the stride vector of the MultiArray object.
-    inline const vector_type& strides() const
+    inline const vector_type& strides() const noexcept
     {
       return _strides;
     }
@@ -223,12 +225,12 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Return the array pointer
-    inline pointer data()
+    inline pointer data() noexcept
     {
       return _begin;
     }
 
-    inline const_pointer data() const
+    inline const_pointer data() const noexcept
     {
       return _begin;
     }
@@ -241,7 +243,7 @@ namespace DO { namespace Sara {
       return _begin[offset(pos)];
     }
 
-    inline reference operator()(int i)
+    inline reference operator()(int i) noexcept
     {
       static_assert(N == 1, "MultiArray must be 1D");
       return _begin[i];
@@ -264,7 +266,7 @@ namespace DO { namespace Sara {
       return _begin[offset(pos)];
     }
 
-    inline const_reference operator()(int i) const
+    inline const_reference operator()(int i) const noexcept
     {
       static_assert(N == 1, "MultiArray must be 1D");
       return _begin[i];
@@ -302,12 +304,12 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Return the begin iterator.
-    inline iterator begin()
+    inline iterator begin() noexcept
     {
       return _begin;
     }
 
-    inline const_iterator begin() const
+    inline const_iterator begin() const noexcept
     {
       return _begin;
     }
@@ -315,12 +317,12 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Return the end iterator.
-    inline iterator end()
+    inline iterator end() noexcept
     {
       return _end;
     }
 
-    inline const_iterator end() const
+    inline const_iterator end() const noexcept
     {
       return _end;
     }
@@ -456,7 +458,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @brief Swap multi-array objects.
-    inline void swap(self_type& other)
+    inline void swap(self_type& other) noexcept
     {
       using std::swap;
       swap(_begin, other._begin);
@@ -465,7 +467,7 @@ namespace DO { namespace Sara {
       swap(_strides, other._strides);
     }
 
-    inline void swap(self_type&& other)
+    inline void swap(self_type&& other) noexcept
     {
       using std::swap;
       swap(_begin, other._begin);
@@ -476,14 +478,14 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Equality comparison.
-    inline bool operator==(const self_type& other) const
+    inline bool operator==(const self_type& other) const noexcept
     {
       if (_sizes != other._sizes)
         return false;
       return std::equal(_begin, _end, other._begin);
     }
 
-    inline bool operator!=(const self_type& other) const
+    inline bool operator!=(const self_type& other) const noexcept
     {
       return !(*this == other);
     }

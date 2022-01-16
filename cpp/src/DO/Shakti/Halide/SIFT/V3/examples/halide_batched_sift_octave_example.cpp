@@ -33,7 +33,7 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   sift_octave.y_convolved.copy_to_host();
   sara::toc("Copy gaussians to host");
 
-  for (auto s = 0; s < sift_octave.params.num_scales + 3; ++s)
+  for (auto s = 0; s < sift_octave.params.scale_count + 3; ++s)
   {
     sara::display(sift_octave.gaussian(s, 0));
     sara::draw_text(20, 20,
@@ -48,7 +48,7 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   sift_octave.gradient_ori.copy_to_host();
   sara::toc("Copy gradients to host");
 
-  for (auto s = 0; s < sift_octave.params.num_scales + 3; ++s)
+  for (auto s = 0; s < sift_octave.params.scale_count + 3; ++s)
   {
     sara::display(sara::color_rescale(sift_octave.gradient_magnitude(s, 0)));
     sara::draw_text(20, 20,
@@ -69,7 +69,7 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   sift_octave.dog.copy_to_host();
   sara::toc("Copy dog to host");
 
-  for (auto s = 0; s < sift_octave.params.num_scales + 2; ++s)
+  for (auto s = 0; s < sift_octave.params.scale_count + 2; ++s)
   {
     sara::display(
         sara::color_rescale(sift_octave.difference_of_gaussians(s, 0)));

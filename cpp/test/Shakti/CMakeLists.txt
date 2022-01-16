@@ -15,7 +15,7 @@ function (shakti_add_test)
   get_filename_component(_filename "${shakti_add_test_SOURCES}" NAME_WE)
   set (_test_name shakti_${_filename})
 
-  cuda_add_executable(${_test_name} ${shakti_add_test_SOURCES})
+  add_executable(${_test_name} ${shakti_add_test_SOURCES})
   target_include_directories(${_test_name}
     PRIVATE
     ${CUDA_TOOLKIT_INCLUDE}
@@ -25,12 +25,9 @@ function (shakti_add_test)
     ${Boost_LIBRARIES}
     ${shakti_add_test_DEPENDENCIES})
 
-  target_compile_features(${_test_name} PRIVATE cxx_std_14)
-
   set_target_properties(${_test_name}
     PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
-    CUDA_STANDARD 14
     FOLDER "Tests/Shakti")
 
   target_compile_definitions(${_test_name}
@@ -48,6 +45,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/cpp/src
   ${CMAKE_SOURCE_DIR}/cpp/third-party)
 
+add_subdirectory(Utilities)
 add_subdirectory(MultiArray)
 add_subdirectory(ImageProcessing)
 add_subdirectory(Segmentation)

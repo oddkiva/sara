@@ -15,7 +15,7 @@ worth focusing our attention on deciphering the calibration data.
 
 ### Camera Sensors
 
-As depicted in the Figure \@ref(fig:kitti-sensors) borrowed from the setup page
+In the Figure \@ref(fig:kitti-sensors) borrowed from the setup page
 http://www.cvlibs.net/datasets/kitti/setup.php, the car is equipped with:
 
 - 4 cameras

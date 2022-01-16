@@ -9,10 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Shakti/Cuda/ImageProcessing.hpp>
-#include <DO/Shakti/Cuda/ImageProcessing/Kernels/Convolution.hpp>
-
 #include <DO/Shakti/Cuda/Utilities.hpp>
+
+#include <DO/Shakti/Cuda/MultiArray/Grid.hpp>
+
+#include <DO/Shakti/Cuda/ImageProcessing/Kernels/Convolution.hpp>
+#include <DO/Shakti/Cuda/ImageProcessing/LinearFiltering.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
@@ -105,31 +107,58 @@ namespace DO { namespace Shakti {
   void GaussianFilter::operator()(float* out, const float* in,
                                   const int* sizes) const
   {
+    auto timer = Shakti::Timer{};
+    auto elapsed = double{};
+
+    timer.restart();
     TextureArray<float> in_array{
         in, {sizes[0], sizes[1]}, sizes[0] * sizeof(float)};
-    MultiArray<float, 2> out_array{{sizes[0], sizes[1]}};
+    elapsed = timer.elapsed_ms();
+    std::cout << "[[GF] init GPU texture] " << elapsed << " ms" << std::endl;
 
+    timer.restart();
+    MultiArray<float, 2> out_array{{sizes[0], sizes[1]}};
+    elapsed = timer.elapsed_ms();
+    std::cout << "[[GF] init out device memory] " << elapsed << " ms"
+              << std::endl;
+
+    timer.restart();
     SHAKTI_SAFE_CUDA_CALL(
         cudaMemcpyToSymbol(Shakti::image_sizes, sizes, sizeof(int2)));
+    elapsed = timer.elapsed_ms();
 
     const auto block_size = default_block_size_2d();
     const auto grid_size = grid_size_2d(out_array, block_size);
-
     SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in_array));
-    {
-      apply_column_based_convolution<<<grid_size, block_size>>>(
-          out_array.data());
-      SHAKTI_CHECK_LAST_ERROR();
+    std::cout << "[[GF] init Gaussian filter] " << elapsed << " ms"
+              << std::endl;
 
-      in_array.copy_from(out_array.data(), out_array.sizes(), out_array.pitch(),
-                         cudaMemcpyDeviceToDevice);
+    timer.restart();
+    apply_column_based_convolution<<<grid_size, block_size>>>(out_array.data());
+    SHAKTI_CHECK_LAST_ERROR();
+    elapsed = timer.elapsed_ms();
+    std::cout << "[[GF] apply X-Gaussian filter] " << elapsed << " ms"
+              << std::endl;
 
-      apply_row_based_convolution<<<grid_size, block_size>>>(out_array.data());
-      SHAKTI_CHECK_LAST_ERROR();
-    }
+    timer.restart();
+    in_array.copy_from(out_array.data(), out_array.sizes(), out_array.pitch(),
+                       cudaMemcpyDeviceToDevice);
+    elapsed = timer.elapsed_ms();
+    std::cout << "[[GF] copy device-to-device] " << elapsed << " ms"
+              << std::endl;
+
+    timer.restart();
+    apply_row_based_convolution<<<grid_size, block_size>>>(out_array.data());
+    SHAKTI_CHECK_LAST_ERROR();
     SHAKTI_SAFE_CUDA_CALL(cudaUnbindTexture(in_float_texture));
+    elapsed = timer.elapsed_ms();
+    std::cout << "[[GF] apply Y-Gaussian filter] " << elapsed << " ms"
+              << std::endl;
 
+    timer.restart();
     out_array.copy_to_host(out);
+    elapsed = timer.elapsed_ms();
+    std::cout << "[[GF] copy to host] " << elapsed << " ms" << std::endl;
   }
 
   MultiArray<float, 2> GaussianFilter::operator()(TextureArray<float>& in) const

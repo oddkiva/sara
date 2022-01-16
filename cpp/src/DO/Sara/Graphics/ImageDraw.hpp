@@ -53,7 +53,9 @@ namespace DO { namespace Sara {
                         const Eigen::Vector2f& b, const Rgb8& c,
                         int pen_width = 1, bool antialiasing = true) -> void
   {
-    draw_line(image, a.x(), a.y(), b.x(), b.y(), c, pen_width, antialiasing);
+    auto round = [](float x) { return static_cast<int>(x + 0.5f); };
+    draw_line(image, round(a.x()), round(a.y()), round(b.x()), round(b.y()), c,
+              pen_width, antialiasing);
   }
 
   /*!
@@ -79,6 +81,15 @@ namespace DO { namespace Sara {
   auto draw_circle(ImageView<Rgb8>& image, int xc, int yc, int r, const Rgb8& c,
                    int pen_width = 1, bool antialiasing = true) -> void;
 
+  inline auto draw_circle(ImageView<Rgb8>& image, const Eigen::Vector2f& c,
+                          int r, const Rgb8& color, int pen_width = 1,
+                          bool antialiasing = true) -> void
+  {
+    auto round = [](float x) { return static_cast<int>(x + 0.5f); };
+    draw_circle(image, round(c.x()), round(c.y()), r, color, pen_width,
+                antialiasing);
+  }
+
   //! @brief Draw ellipse.
   auto draw_ellipse(ImageView<Rgb8>& image, const Eigen::Vector2f& center,
                     float r1, float r2, float degree, const Rgb8& c,
@@ -97,8 +108,9 @@ namespace DO { namespace Sara {
                          int arrow_height = 5, int style = 0,
                          bool antialiasing = true) -> void
   {
-    draw_arrow(image, a.x(), a.y(), b.x(), b.y(), col, pen_width, arrow_width,
-               arrow_height, style, antialiasing);
+    auto round = [](float x) { return static_cast<int>(x + 0.5f); };
+    draw_arrow(image, round(a.x()), round(a.y()), round(b.x()), round(b.y()),
+               col, pen_width, arrow_width, arrow_height, style, antialiasing);
   }
 
   //! @brief Draw text.

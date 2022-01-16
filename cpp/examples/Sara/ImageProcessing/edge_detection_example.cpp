@@ -89,7 +89,7 @@ int __main(int argc, char** argv)
   constexpr float low_threshold_ratio =
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
-  const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
+  const auto sigma = std::sqrt(std::pow(1.4f, 2) - 1);
 
   auto ed = EdgeDetector{{
       high_threshold_ratio,  //

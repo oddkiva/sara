@@ -26,10 +26,10 @@ namespace DO { namespace Shakti {
     if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
       return;
 
-    Vector2f nabla_f{tex2D(in_float_texture, p.x() + 1, p.y()) -
-                         tex2D(in_float_texture, p.x() - 1, p.y()),
-                     tex2D(in_float_texture, p.x(), p.y() + 1) -
-                         tex2D(in_float_texture, p.x(), p.y() - 1)};
+    Vector2f nabla_f{tex2D<float>(in_float_texture, p.x() + 1, p.y()) -
+                         tex2D<float>(in_float_texture, p.x() - 1, p.y()),
+                     tex2D<float>(in_float_texture, p.x(), p.y() + 1) -
+                         tex2D<float>(in_float_texture, p.x(), p.y() - 1)};
     nabla_f *= 0.5f;
     dst[i] = nabla_f;
   }
@@ -43,10 +43,10 @@ namespace DO { namespace Shakti {
     if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
       return;
 
-    const auto f_x = tex2D(in_float_texture, p.x() + 1, p.y()) -
-                     tex2D(in_float_texture, p.x() - 1, p.y());
-    const auto f_y = tex2D(in_float_texture, p.x(), p.y() + 1) -
-                     tex2D(in_float_texture, p.x(), p.y() - 1);
+    const auto f_x = tex2D<float>(in_float_texture, p.x() + 1, p.y()) -
+                     tex2D<float>(in_float_texture, p.x() - 1, p.y());
+    const auto f_y = tex2D<float>(in_float_texture, p.x(), p.y() + 1) -
+                     tex2D<float>(in_float_texture, p.x(), p.y() - 1);
 
     dst[i] = {
       sqrt(f_x*f_x + f_y*f_y),
@@ -77,10 +77,10 @@ namespace DO { namespace Shakti {
     if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
       return;
 
-    auto u_x = 0.5f * (tex2D(in_float_texture, p.x() + 1, p.y()) -
-                       tex2D(in_float_texture, p.x() - 1, p.y()));
-    auto u_y = 0.5f * (tex2D(in_float_texture, p.x(), p.y() + 1) -
-                       tex2D(in_float_texture, p.x(), p.y() - 1));
+    auto u_x = 0.5f * (tex2D<float>(in_float_texture, p.x() + 1, p.y()) -
+                       tex2D<float>(in_float_texture, p.x() - 1, p.y()));
+    auto u_y = 0.5f * (tex2D<float>(in_float_texture, p.x(), p.y() + 1) -
+                       tex2D<float>(in_float_texture, p.x(), p.y() - 1));
     dst[i] = u_x*u_x + u_y*u_y;
   }
 
@@ -93,11 +93,11 @@ namespace DO { namespace Shakti {
     if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
       return;
 
-    const auto u_x = tex2D(in_float_texture, p.x(), p.y());
-    const auto u_e = tex2D(in_float_texture, p.x() + 1, p.y());
-    const auto u_w = tex2D(in_float_texture, p.x() - 1, p.y());
-    const auto u_n = tex2D(in_float_texture, p.x(), p.y() - 1);
-    const auto u_s = tex2D(in_float_texture, p.x(), p.y() + 1);
+    const auto u_x = tex2D<float>(in_float_texture, p.x(), p.y());
+    const auto u_e = tex2D<float>(in_float_texture, p.x() + 1, p.y());
+    const auto u_w = tex2D<float>(in_float_texture, p.x() - 1, p.y());
+    const auto u_n = tex2D<float>(in_float_texture, p.x(), p.y() - 1);
+    const auto u_s = tex2D<float>(in_float_texture, p.x(), p.y() + 1);
 
     dst[i] = u_e + u_w + u_n + u_s - 4 * u_x;
   }

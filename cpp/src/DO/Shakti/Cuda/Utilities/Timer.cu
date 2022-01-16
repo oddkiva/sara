@@ -9,18 +9,18 @@
 using namespace std;
 
 
-namespace DO { namespace Shakti {
+namespace DO::Shakti {
 
   Timer::Timer()
   {
-    cudaEventCreate(&_start);
-    cudaEventCreate(&_stop);
+    SHAKTI_SAFE_CUDA_CALL(cudaEventCreate(&_start));
+    SHAKTI_SAFE_CUDA_CALL(cudaEventCreate(&_stop));
   }
 
   Timer::~Timer()
   {
-    SHAKTI_SAFE_CUDA_CALL(cudaEventDestroy(_start));
-    SHAKTI_SAFE_CUDA_CALL(cudaEventDestroy(_stop));
+    cudaEventDestroy(_start);
+    cudaEventDestroy(_stop);
   }
 
   void Timer::restart()
@@ -37,24 +37,16 @@ namespace DO { namespace Shakti {
     return ms;
   }
 
-} /* namespace Shakti */
-} /* namespace DO */
 
-
-namespace DO { namespace Shakti {
-
-  static Timer timer;
-
-  void tic()
+  void tic(Timer& timer)
   {
     timer.restart();
   }
 
-  void toc(const char *what)
+  void toc(Timer& timer, const char* what)
   {
     auto time = timer.elapsed_ms();
     cout << "[" << what << "] Elapsed time = " << time << " ms" << endl;
   }
 
-} /* namespace Shakti */
-} /* namespace DO */
+}  // namespace DO::Shakti

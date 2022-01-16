@@ -11,9 +11,14 @@ foreach (file ${examples_SRC_FILES})
     SOURCES ${file}
 
     DEPENDENCIES
+    CUDA::cudart
     ${DO_Sara_LIBRARIES}
-    DO::Shakti::MultiArray
-    DO::Shakti::ImageProcessing
-    DO::Shakti::Utilities
+    DO::Shakti::Cuda::MultiArray
+    DO::Shakti::Cuda::ImageProcessing
+    DO::Shakti::Cuda::Utilities
     $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+  set_target_properties(
+    shakti_${filename}
+    PROPERTIES
+    FOLDER "Examples/Shakti/Cuda")
 endforeach ()

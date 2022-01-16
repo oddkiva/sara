@@ -249,6 +249,17 @@ shakti_halide_library_v2(
   SRCS StreamCompactionGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+# ------------------------------------------------------------------------------
+# Brute-force nearest neighbors
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_brute_force_nn_l2_32f_gpu
+  SRCS BruteForceNearestNeighbors.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
+  NAME shakti_brute_force_nn_l2_32f_cpu
+  SRCS BruteForceNearestNeighbors.cpp)
 
 # ------------------------------------------------------------------------------
 # Examples

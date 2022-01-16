@@ -48,11 +48,8 @@ GRAPHICS_MAIN()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
-  // const auto video_filepath =
-  //     "/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
-  //     //"/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
-  //     //"/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
+  const auto video_filepath =
+      "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
@@ -60,7 +57,12 @@ GRAPHICS_MAIN()
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-  auto frame_downsampled = Image<Rgb8>{frame.sizes() / 4};
+// #define DOWNSAMPLE
+#ifdef DOWNSAMPLE
+  auto frame_downsampled = Image<Rgb8>{frame.sizes() / 2};
+#else
+  auto& frame_downsampled = frame;
+#endif
 
   // Show the local extrema.
   create_window(frame_downsampled.sizes());
@@ -86,7 +88,9 @@ GRAPHICS_MAIN()
     reduce(frame, frame_downsampled);
 
     // Watershed.
+    tic();
     const auto regions = color_watershed(frame_downsampled, color_threshold);
+    toc("Watershed");
 
     // Display the good regions.
     const auto colors = mean_colors(regions, frame_downsampled);

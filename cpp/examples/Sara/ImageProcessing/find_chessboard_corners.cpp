@@ -25,6 +25,33 @@ namespace sara = DO::Sara;
 using sara::operator""_deg;
 
 
+// TODO:
+// 1. Group adjacent edges if their mean gradients are aligned.
+//    This will merge adjacent edges that were split too early.
+//    THIS IS ✔️
+//
+// 2. Group aligned edges with alternating gradient orientation.
+//    This will group edge chessboard corners with alternating colors.
+//    Using the mean gradient signature and std dev.
+//    THIS IS ❌
+//
+// 3. Group perpendicular long edges.
+//    HOW?
+//    Exploit the mean gradient signature and the std dev.
+//    THIS IS ❌
+//
+// 4. Identify saddle points that are chessboard corners.
+//    Label them with an index (i, j).
+//    HOW?
+//    This is ❌
+//
+// 5. Refine chessboard corners:
+//    Optimizing the Determinant of Hessian:
+//    It must be negative and have the largest possible absolute value.
+//    This should be a locally convex problem
+//    This is ❌
+
+
 inline constexpr long double operator"" _percent(long double x)
 {
   return x / 100;
@@ -32,7 +59,8 @@ inline constexpr long double operator"" _percent(long double x)
 
 
 auto edge_signature(const sara::ImageView<sara::Rgb8>& color,
-                    const sara::ImageView<Eigen::Vector2f>& gradients,
+                    const sara::ImageView<float>& gradient_mag,
+                    const sara::ImageView<float>& gradient_ori,
                     const std::vector<Eigen::Vector2i>& edge,  //
                     float delta = 1, int width = 3)
 {
@@ -42,7 +70,8 @@ auto edge_signature(const sara::ImageView<sara::Rgb8>& color,
   {
     for (const auto& e : edge)
     {
-      const Eigen::Vector2d n = gradients(e).cast<double>().normalized();
+      const auto ori = gradient_ori(e);
+      const auto n = Eigen::Vector2d(std::cos(ori), std::sin(ori));
 
       const Eigen::Vector2d b = e.cast<double>() + s * delta * n;
       const Eigen::Vector2d d = e.cast<double>() - s * delta * n;
@@ -58,12 +87,16 @@ auto edge_signature(const sara::ImageView<sara::Rgb8>& color,
   }
 
   Eigen::Vector2f mean_gradient = Eigen::Vector2f::Zero();
-  mean_gradient = std::accumulate(
+  mean_gradient = std::accumulate(  //
       edge.begin(), edge.end(), mean_gradient,
-      [&gradients](const auto& g, const auto& e) -> Eigen::Vector2f {
-        if (gradients(e).squaredNorm() < 1e-6f)
+      [&gradient_mag, &gradient_ori](const auto& g,
+                                     const auto& e) -> Eigen::Vector2f {
+        if (gradient_mag(e) < 1e-3f)
           return g;
-        return g + gradients(e).normalized();
+        const auto ori = gradient_ori(e);
+        const auto n = Eigen::Vector2f(std::cos(ori), std::sin(ori));
+
+        return g + n;
       });
   mean_gradient /= static_cast<float>(edge.size());
 
@@ -79,13 +112,11 @@ int __main(int argc, char** argv)
     return 1;
   const auto folder = std::string{argv[1]};
 
-  constexpr auto sigma = 1.6f;
-
-  constexpr auto nms_radius = 10;
-  constexpr float high_threshold_ratio = static_cast<float>(10._percent);
-  constexpr float low_threshold_ratio =
-      static_cast<float>(high_threshold_ratio / 2.);
-  constexpr float angular_threshold = static_cast<float>((5._deg).value);
+  static constexpr auto sigma = 1.6f;
+  static constexpr auto nms_radius = 10;
+  static constexpr auto high_threshold_ratio = static_cast<float>(10._percent);
+  static constexpr auto low_threshold_ratio = high_threshold_ratio / 2;
+  static constexpr auto angular_threshold = (5._deg).as<float>();
 
   auto ed = sara::EdgeDetector{{high_threshold_ratio,  //
                                 low_threshold_ratio,   //
@@ -106,8 +137,8 @@ int __main(int argc, char** argv)
       sara::set_antialiasing();
     }
 
-    const auto saddle_points = sara::detect_saddle_points(image_blurred,
-                                                          nms_radius);
+    const auto saddle_points =
+        sara::detect_saddle_points(image_blurred, nms_radius);
 
     // Detect edges.
     ed(image_blurred);
@@ -121,7 +152,8 @@ int __main(int argc, char** argv)
     {
       auto [dark, bright, g] = edge_signature(  //
           image,                                //
-          ed.pipeline.gradient_cartesian,       //
+          ed.pipeline.gradient_magnitude,       //
+          ed.pipeline.gradient_orientation,     //
           edge);
       darks.push_back(std::move(dark));
       brights.push_back(std::move(bright));
@@ -150,10 +182,9 @@ int __main(int argc, char** argv)
                               edge_attributes.lengths);
     sara::toc("Edge Grouping");
 
-    for (const auto& s: saddle_points)
+    for (const auto& s : saddle_points)
       sara::fill_circle(s.p.x(), s.p.y(), 10, sara::Red8);
 
-    sara::get_key();
   }
 
   return 0;

@@ -14,7 +14,10 @@ if (SARA_USE_FROM_SOURCE)
     sara_create_common_variables("ImageIO")
     sara_generate_library("ImageIO")
 
-    target_compile_definitions(DO_Sara_ImageIO PRIVATE ${PNG_DEFINITIONS})
+    target_compile_definitions(DO_Sara_ImageIO PRIVATE
+      ${PNG_DEFINITIONS}
+      $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:_CRT_SECURE_NO_WARNINGS>
+    )
     target_include_directories(DO_Sara_ImageIO PRIVATE
       ${JPEG_INCLUDE_DIR}
       ${PNG_INCLUDE_DIRS}

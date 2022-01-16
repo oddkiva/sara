@@ -20,7 +20,7 @@ class Timer(object):
 
 
 
-img = cv2.imread('/Users/david/Desktop/Datasets/sfm/castle_int/0000.png')
+img = cv2.imread('/home/david/Desktop/Datasets/sfm/castle_int/0000.png')
 gray32f = np.empty(img.shape[:2], dtype=np.float32)
 shakti.convert_rgb8_to_gray32f_cpu(img, gray32f)
 

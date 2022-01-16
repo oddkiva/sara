@@ -106,8 +106,6 @@ namespace {
           x, y, s, theta                                                     //
       );
 
-#define NORMALIZE_SIFT
-#ifdef NORMALIZE_SIFT
       descriptors_unnormalized(o, ji, k) = 0.f;
       sift.accumulate_subhistogram_v3(descriptors_unnormalized,  //
                                       ji, k,                     //
@@ -116,13 +114,6 @@ namespace {
 
       sift.normalize_histogram(descriptors_unnormalized, o, ji, k);
       descriptors(o, ji, k) = sift.hist_illumination_invariant(o, ji, k);
-#else
-      descriptors(o, ji, k) = 0.f;
-      sift.accumulate_subhistogram_v3(descriptors,  //
-                                      ji, k,        //
-                                      normalized_gradient_fn,
-                                      spatial_weight_fn);
-#endif
     }
 
     void schedule()
@@ -142,14 +133,12 @@ namespace {
           tile_u, tile_v, tile_k,       //
           Halide::TailStrategy::GuardWithIf);
 
-#ifdef NORMALIZE_SIFT
       descriptors_unnormalized.compute_root();
       descriptors_unnormalized.gpu_tile(o, ji, k,                 //
                                         oo, jio, ko,              //
                                         oi, jii, ki,              //
                                         tile_o, tile_ji, tile_k,  //
                                         TailStrategy::GuardWithIf);
-#endif
 
       descriptors.gpu_tile(o, ji, k,                 //
                            oo, jio, ko,              //
