@@ -27,10 +27,10 @@ namespace DO { namespace Shakti {
   //! @{
 
   template <typename T>
-  class PinnedAllocator;
+  class PinnedMemoryAllocator;
 
   template <>
-  class PinnedAllocator<void>
+  class PinnedMemoryAllocator<void>
   {
   public:
     using value_type = void;
@@ -42,12 +42,12 @@ namespace DO { namespace Shakti {
     template <typename U>
     struct rebind
     {
-      using other = PinnedAllocator<U>;
+      using other = PinnedMemoryAllocator<U>;
     };
   };
 
   template <typename T>
-  class PinnedAllocator
+  class PinnedMemoryAllocator
   {
   public:
     using value_type = T;
@@ -61,15 +61,15 @@ namespace DO { namespace Shakti {
     template <typename U>
     struct rebind
     {
-      using other = PinnedAllocator<U>;
+      using other = PinnedMemoryAllocator<U>;
     };
 
-    __host__ __device__ inline PinnedAllocator()
+    __host__ __device__ inline PinnedMemoryAllocator()
     {
     }
 
     template <typename U>
-    __host__ __device__ inline PinnedAllocator(const PinnedAllocator<U>&)
+    __host__ __device__ inline PinnedMemoryAllocator(const PinnedMemoryAllocator<U>&)
     {
     }
 
@@ -111,12 +111,12 @@ namespace DO { namespace Shakti {
       return std::numeric_limits<size_type>::max() / sizeof(T);
     }
 
-    __host__ __device__ inline bool operator==(PinnedAllocator const&)
+    __host__ __device__ inline bool operator==(PinnedMemoryAllocator const&)
     {
       return true;
     }
 
-    __host__ __device__ inline bool operator!=(PinnedAllocator const& x)
+    __host__ __device__ inline bool operator!=(PinnedMemoryAllocator const& x)
     {
       return !operator==(x);
     }

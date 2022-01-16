@@ -18,7 +18,7 @@
 
 namespace DO::Shakti::Cuda::Gaussian {
 
-  static constexpr auto kernel_max_radius = 20;
+  static constexpr auto kernel_max_radius = 24;
   static constexpr auto tile_size = 1024 / kernel_max_radius;
   static constexpr auto sdata_rows = tile_size + 2 * kernel_max_radius;
 

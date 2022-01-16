@@ -23,4 +23,5 @@ target_link_libraries(DO_Shakti_Cuda_FeatureDetectors
 add_library(DO::Shakti::Cuda::FeatureDetectors ALIAS
             DO_Shakti_Cuda_FeatureDetectors)
 
+add_subdirectory(examples)
 add_subdirectory(test)
