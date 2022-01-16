@@ -24,11 +24,71 @@
 #include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
 #include <DO/Shakti/Cuda/Utilities/Timer.hpp>
 
+#include <cstdio>
+#include <cstdlib>
+#include <signal.h>
+
+auto do_shutdown = sig_atomic_t{};
+void my_handler(int s)
+{
+  printf("Caught signal %d\n", s);
+  do_shutdown = 1;
+}
+
 
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
 namespace sc = shakti::Cuda;
 namespace scg = sc::Gaussian;
+
+
+struct GaussianOctaveComputer
+{
+  inline GaussianOctaveComputer(int w, int h, int scale_count = 3)
+    : host_kernels{scale_count}
+    , device_kernels{host_kernels}
+    , d_convx{{w, h}}
+    , d_octave{sc::make_gaussian_octave<float>(w, h, scale_count)}
+  {
+    device_kernels.copy_filters_to_device_constant_memory();
+  }
+
+  inline auto
+  operator()(shakti::MultiArrayView<float, 2, shakti::RowMajorStrides>& d_in)
+      -> void
+  {
+    shakti::tic(d_timer);
+    device_kernels(d_in, d_convx, d_octave);
+    shakti::toc(d_timer, "Gaussian Octave");
+  }
+
+  inline auto copy_to_host() -> void
+  {
+    if (!h_octave.has_value())
+      h_octave = sara::Image<float, 3, shakti::PinnedMemoryAllocator>{
+          d_octave.width(), d_octave.height(), d_octave.scale_count()};
+
+    // This is an extremely expensive copy.
+    shakti::tic(d_timer);
+    d_octave.array().copy_to(*h_octave);
+    shakti::toc(d_timer, "Device to Host");
+  }
+
+  // Gaussian kernels.
+  sc::GaussianOctaveKernels<float> host_kernels;
+  scg::DeviceGaussianFilterBank device_kernels;
+
+  // Device work buffer for intermediate x-convolution results.
+  shakti::MultiArray<float, 2> d_convx;
+  // Device buffer for the Gaussian octave.
+  sc::Octave<float> d_octave;
+
+  // Optional host buffer to read back the result.
+  std::optional<sara::Image<float, 3, shakti::PinnedMemoryAllocator>> h_octave;
+
+  // Profile.
+  shakti::Timer d_timer;
+};
 
 
 auto example_1() -> void
@@ -132,6 +192,14 @@ auto example_1() -> void
 
 auto example_2() -> void
 {
+  struct sigaction sig_int_handler;
+  {
+    sig_int_handler.sa_handler = my_handler;
+    sigemptyset(&sig_int_handler.sa_mask);
+    sig_int_handler.sa_flags = 0;
+    sigaction(SIGINT, &sig_int_handler, nullptr);
+  }
+
   auto devices = shakti::get_devices();
   auto& device = devices.back();
   device.make_current_device();
@@ -140,8 +208,8 @@ auto example_2() -> void
 #ifdef _WIN32
       "C:/Users/David/Desktop/GOPR0542.MP4"
 #else
-        "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.mp4"
-        // "/home/david/Desktop/Datasets/sfm/Family.mp4"
+        // "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.mp4"
+        "/home/david/Desktop/Datasets/sfm/Family.mp4"
 #endif
       ;
   std::cout << video_filepath << std::endl;
@@ -155,25 +223,13 @@ auto example_2() -> void
   auto frame_blurred =
       sara::Image<float, 2, shakti::PinnedMemoryAllocator>{w, h};
 
-  static constexpr auto scale_count = 4;
-  const auto host_kernels = sc::GaussianOctaveKernels<float>{scale_count};
-  auto device_kernels = scg::DeviceGaussianFilterBank{host_kernels};
-  device_kernels.copy_filters_to_device_constant_memory();
-  device_kernels.peek_filters_in_device_constant_memory();
+  static constexpr auto scale_count = 3;
+  auto goc = GaussianOctaveComputer{w, h, scale_count};
 
   // Host and device input grayscale data.
   auto& h_in = frame_gray32f;
   auto d_in = shakti::MultiArray<float, 2, shakti::RowMajorStrides>{
       frame_gray32f.data(), {w, h}};
-
-  // Work array.
-  auto d_convx = shakti::MultiArray<float, 2>{{w, h}};
-
-  // Initialize the octave CUDA surface.
-  auto d_octave = sc::make_gaussian_octave<float>(w, h, scale_count);
-  d_octave.init_surface();
-  auto h_octave = sara::Image<float, 3, shakti::PinnedMemoryAllocator>{
-      w, h, d_octave.scale_count()};
 
   // Profile.
   auto d_timer = shakti::Timer{};
@@ -195,26 +251,28 @@ auto example_2() -> void
     d_in.copy_from_host(h_in.data(), w, h);
     shakti::toc(d_timer, "Transfer to Device");
 
-    shakti::tic(d_timer);
-    device_kernels(d_in, d_convx, d_octave);
-    shakti::toc(d_timer, "Gaussian Octave");
+    goc(d_in);
+    goc.copy_to_host();
 
-    // This is an extremely expensive copy.
-    shakti::tic(d_timer);
-    d_octave.array().copy_to(h_octave);
-    shakti::toc(d_timer, "Device to Host");
 
 #ifdef INSPECT_ALL
-    for (auto s = 0; s < d_octave.scale_count(); ++s)
+    for (auto s = 0; s < goc.d_octave.scale_count(); ++s)
 #else
-    const auto s = d_octave.scale_count() - 1;
+      const auto s = goc.d_octave.scale_count() - 1;
 #endif
     {
-      const auto layer_s = sara::image_view(sara::tensor_view(h_octave)[s]);
+      const auto layer_s =
+          sara::image_view(sara::tensor_view(*goc.h_octave)[s]);
 
       sara::tic();
       sara::display(layer_s);
       sara::toc("Display");
+    }
+
+    if (do_shutdown)
+    {
+      SARA_DEBUG << "CTRL+C triggered: quitting cleanly..." << std::endl;
+      break;
     }
   }
 }
