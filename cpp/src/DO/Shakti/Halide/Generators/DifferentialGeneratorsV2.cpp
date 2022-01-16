@@ -189,7 +189,25 @@ namespace v2 {
       auto input_padded = Halide::BoundaryConditions::repeat_edge(input);
       auto g = gradient(input_padded, x, y, t, n);
       auto mag = norm(g);
+#define USE_FAST_ATAN2
+#ifdef USE_FAST_ATAN2
+      const auto fast_atan2 = [](const Expr& y, const Expr& x) -> Expr {
+        const auto abs_x = abs(x);
+        const auto abs_y = abs(y);
+        const auto a = min(abs_x, abs_y) / max(abs_x, abs_y);
+        const auto s = a * a;
+        auto r =
+            ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;
+        r = select(abs_y > abs_x, 1.57079637f - r, r);
+        r = select(x < 0, 3.14159274f - r, r);
+        r = select(y < 0, -r, r);
+
+        return r;
+      };
+      const auto ori = fast_atan2(g(1), g(0));
+#else
       auto ori = Halide::atan2(g(1), g(0));
+#endif
       output(x, y, t, n) = {mag, ori};
     }
 
