@@ -177,9 +177,16 @@ auto example_2() -> void
   auto d_in = shakti::MultiArray<float, 2, shakti::RowMajorStrides>{
       frame_gray32f.data(), {w, h}};
 
+  auto d_gaussian_octave = sc::make_gaussian_octave<float>(w, h, scale_count);
   auto d_dog_octave = sc::make_DoG_octave<float>(w, h, scale_count);
   auto h_dog_octave = sara::Image<float, 3, shakti::PinnedMemoryAllocator>{
       w, h, d_dog_octave.scale_count()};
+
+  auto d_extremum_map = shakti::MultiArray<std::int8_t, 3>(  //
+      {w, h, d_dog_octave.scale_count()});
+  auto h_extremum_map =
+      sara::Image<std::int8_t, 3, shakti::PinnedMemoryAllocator>{
+          w, h, d_extremum_map.depth()};
 
   // Profile.
   auto d_timer = shakti::Timer{};
@@ -201,30 +208,55 @@ auto example_2() -> void
     d_in.copy_from_host(h_in.data(), w, h);
     shakti::toc(d_timer, "Host to Device");
 
-    goc(d_in);
+    goc(d_in, d_gaussian_octave);
 
     shakti::tic(d_timer);
-    sc::compute_dog_octave(goc.d_octave, d_dog_octave);
+    sc::compute_dog_octave(d_gaussian_octave, d_dog_octave);
     shakti::toc(d_timer, "DoG");
 
     shakti::tic(d_timer);
-    d_dog_octave.array().copy_to(h_dog_octave);
+    sc::compute_scale_space_extremum_map(d_dog_octave, d_extremum_map);
+    shakti::toc(d_timer, "Extremum Map");
+
+#define INSPECT
+#ifdef INSPECT
+    // shakti::tic(d_timer);
+    // d_dog_octave.array().copy_to(h_dog_octave);
+    // shakti::toc(d_timer, "Device To Host");
+
+    shakti::tic(d_timer);
+    d_extremum_map.copy_to_host(h_extremum_map.data());
     shakti::toc(d_timer, "Device To Host");
 
+    // // #define INSPECT_ALL
+    // #  ifdef INSPECT_ALL
+    //     for (auto s = 0; s < d_dog_octave.scale_count(); ++s)
+    // #  else
+    //     const auto s = d_dog_octave.scale_count() - 1;
+    // #  endif
+    //     {
+    //       const auto layer_s =
+    //       sara::image_view(sara::tensor_view(h_dog_octave)[s]);
+    //
+    //       sara::tic();
+    //       sara::display(sara::color_rescale(layer_s));
+    //       sara::toc("Display");
+    //     }
+    // #endif
 
-#define INSPECT_ALL
-#ifdef INSPECT_ALL
-    for (auto s = 0; s < d_dog_octave.scale_count(); ++s)
-#else
-    const auto s = d_dog_octave.scale_count() - 1;
+    sara::tic();
+    for (auto s = 1; s < h_extremum_map.depth() - 1; ++s)
+      for (auto y = 1; y < h_extremum_map.height() - 1; ++y)
+        for (auto x = 1; x < h_extremum_map.width() - 1; ++x)
+        {
+          if (h_extremum_map(x, y, s) == 1)
+            sara::draw_circle(frame, x, y, 3, sara::Red8);
+          else if (h_extremum_map(x, y, s) == -1)
+            sara::draw_circle(frame, x, y, 3, sara::Blue8);
+        }
+    sara::display(frame);
+    sara::toc("Display");
 #endif
-    {
-      const auto layer_s = sara::image_view(sara::tensor_view(h_dog_octave)[s]);
-
-      sara::tic();
-      sara::display(sara::color_rescale(layer_s));
-      sara::toc("Display");
-    }
 
     if (do_shutdown)
     {

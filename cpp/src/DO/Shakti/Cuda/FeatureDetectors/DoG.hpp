@@ -16,11 +16,11 @@
 
 namespace DO::Shakti::Cuda {
 
-  auto compute_dog_octave(const Octave<float>& gaussian_octave,
-                          Octave<float>& dog_octave) -> void;
-
-  auto compute_scale_space_extrema_map(const Octave<float>& dog_octave,
-                                       Octave<std::uint8_t>& extrema_octave)
+  auto compute_dog_octave(const Octave<float>& gaussians, Octave<float>& dogs)
       -> void;
+
+  auto compute_scale_space_extremum_map(
+      const Octave<float>& dogs,
+      MultiArrayView<std::int8_t, 3, RowMajorStrides>& extremum_map) -> void;
 
 }  // namespace DO::Shakti::Cuda

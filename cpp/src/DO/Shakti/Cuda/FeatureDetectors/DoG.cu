@@ -25,8 +25,6 @@ namespace DO::Shakti::Cuda {
     if (x >= w || y >= h || z >= d)
       return;
 
-    __shared__ float sdata[32][32][2];
-
     float val1;
     surf2DLayeredread(&val1, gaussian_octave, x * sizeof(float), y, z,
                       cudaBoundaryModeClamp);
@@ -36,6 +34,8 @@ namespace DO::Shakti::Cuda {
                       cudaBoundaryModeClamp);
 
 #ifdef USE_SMEM
+    __shared__ float sdata[32][32][2];
+
     // No real benefit in using the shared memory with a 4K video:
     //
     // [DoG] Elapsed time = 1.44467 ms
@@ -53,28 +53,31 @@ namespace DO::Shakti::Cuda {
     surf2DLayeredwrite(diff, dog_octave, x * sizeof(float), y, z);
   }
 
-  __global__ auto local_scale_extremum(cudaSurfaceObject_t dog_octave,
-                                       cudaSurfaceObject_t extremum_map, int w,
-                                       int h, int d) -> void
+  // TODO: speed this up as it is very slow.
+  __global__ auto local_scale_space_extremum(cudaSurfaceObject_t dog_octave,
+                                             std::int8_t* ext_map,  //
+                                             int dog_w, int dog_h, int dog_d,
+                                             int ext_pitch) -> void
   {
     const int x = blockIdx.x * blockDim.x + threadIdx.x;
     const int y = blockIdx.y * blockDim.y + threadIdx.y;
     const int z = blockIdx.z * blockDim.z + threadIdx.z;
 
-    if (x >= w || y >= h || z >= d)
+    if (x >= dog_w || y >= dog_h || z >= dog_d)
       return;
 
-    if (x == 0 || y == 0 || z == 0 || x == w - 1 || y == h - 1 || z == d - 1)
+    const auto gi = (z * dog_h + y) * ext_pitch + x;
+
+    if (x == 0 || y == 0 || z == 0 ||  //
+        x == dog_w - 1 || y == dog_h - 1 || z == dog_d - 1)
     {
-      surf2DLayeredwrite(0, extremum_map, x * sizeof(int), y, z);
+      ext_map[gi] = 0;
       return;
     }
 
-    // upper-left
     float val;
-    surf2DLayeredread(&val, gaussian_octave, x * sizeof(float), y, z,
+    surf2DLayeredread(&val, dog_octave, x * sizeof(float), y, z,
                       cudaBoundaryModeClamp);
-
 
     float val_ext;
     if (val > 0)
@@ -88,11 +91,11 @@ namespace DO::Shakti::Cuda {
 #pragma unroll
           for (auto dx = -1; dx <= 1; ++dx)
           {
-            if (dz == 0 && dy == 0 && dx == 0)
-              continue;
+            // if (dz == 0 && dy == 0 && dx == 0)
+            //   continue;
 
             float val1;
-            surf2DLayeredread(&val1, gaussian_octave, (x + dx) * sizeof(float),
+            surf2DLayeredread(&val1, dog_octave, (x + dx) * sizeof(float),
                               y + dy, z + dz, cudaBoundaryModeClamp);
 
             val_ext = max(val1, val_ext);
@@ -111,11 +114,8 @@ namespace DO::Shakti::Cuda {
 #pragma unroll
           for (auto dx = -1; dx <= 1; ++dx)
           {
-            if (dz == 0 && dy == 0 && dx == 0)
-              continue;
-
             float val1;
-            surf2DLayeredread(&val1, gaussian_octave, (x + dx) * sizeof(float),
+            surf2DLayeredread(&val1, dog_octave, (x + dx) * sizeof(float),
                               y + dy, z + dz, cudaBoundaryModeClamp);
 
             val_ext = min(val1, val_ext);
@@ -124,12 +124,13 @@ namespace DO::Shakti::Cuda {
       }
     }
 
-    auto extremum_type = int{};
-    if (val >= val_ext && val > 0)
+    auto extremum_type = std::int8_t{};
+    if (val == val_ext && val > 0)
       extremum_type = 1;
-    else if (val <= val_ext && val < 0)
-      extremum_type = -1 surf2DLayeredwrite(extremum_type, dog_octave,
-                                            x * sizeof(float), y, z);
+    else if (val == val_ext && val < 0)
+      extremum_type = -1;
+
+    ext_map[gi] = extremum_type;
   }
 
   auto compute_dog_octave(const Octave<float>& gaussians, Octave<float>& dogs)
@@ -141,19 +142,42 @@ namespace DO::Shakti::Cuda {
       throw std::runtime_error{"Invalid octave sizes!"};
 
     if (!gaussians.surface_object().initialized())
-      throw std::runtime_error{"Gaussian surface object is unitialized!"};
+      throw std::runtime_error{"Gaussian surface object is uninitialized!"};
 
     if (!dogs.surface_object().initialized())
       dogs.init_surface();
 
-    const auto threadsperBlock = dim3(32, 32, 1);
-    const auto numBlocks =
+    static constexpr auto threadsperBlock = dim3(32, 32, 1);
+    static const auto numBlocks =
         dim3((dogs.width() + threadsperBlock.x - 1) / threadsperBlock.x,
              (dogs.height() + threadsperBlock.y - 1) / threadsperBlock.y,
              (dogs.scale_count() + threadsperBlock.z - 1) / threadsperBlock.z);
     dog<<<numBlocks, threadsperBlock>>>(gaussians.surface_object(),
                                         dogs.surface_object(), dogs.width(),
                                         dogs.height(), dogs.scale_count());
+  }
+
+  auto compute_scale_space_extremum_map(
+      const Octave<float>& dogs,
+      MultiArrayView<std::int8_t, 3, RowMajorStrides>& extremum_map) -> void
+  {
+    if (extremum_map.width() != dogs.width() ||
+        extremum_map.height() != dogs.height() ||
+        extremum_map.depth() != dogs.scale_count())
+      throw std::runtime_error{"Invalid octave sizes!"};
+
+    if (!dogs.surface_object().initialized())
+      throw std::runtime_error{"DoG surface object is uninitialized!"};
+
+    static constexpr auto threadsperBlock = dim3(32, 16, 2);
+    static const auto numBlocks =
+        dim3((dogs.width() + threadsperBlock.x - 1) / threadsperBlock.x,
+             (dogs.height() + threadsperBlock.y - 1) / threadsperBlock.y,
+             (dogs.scale_count() + threadsperBlock.z - 1) / threadsperBlock.z);
+    local_scale_space_extremum<<<numBlocks, threadsperBlock>>>(
+        dogs.surface_object(), extremum_map.data(),       //
+        dogs.width(), dogs.height(), dogs.scale_count(),  //
+        extremum_map.padded_width());
   }
 
 }  // namespace DO::Shakti::Cuda

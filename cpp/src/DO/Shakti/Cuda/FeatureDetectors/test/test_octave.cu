@@ -115,6 +115,10 @@ BOOST_AUTO_TEST_CASE(test_surface_object_id_2)
 
   auto octave3 = sc::make_gaussian_octave<float>(w, h, scale_count);
   auto& s3 = octave3.init_surface();
+
+  BOOST_CHECK_EQUAL(s1, 1);
+  BOOST_CHECK_EQUAL(s2, 2);
+  BOOST_CHECK_EQUAL(s3, 3);
 }
 
 BOOST_AUTO_TEST_CASE(test_with_integral_data_type)

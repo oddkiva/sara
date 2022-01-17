@@ -25,9 +25,8 @@ namespace DO::Shakti::Cuda {
   {
     GaussianOctaveComputer(int w, int h, int scale_count = 3);
 
-    auto operator()(MultiArrayView<float, 2, RowMajorStrides>& d_in) -> void;
-
-    auto copy_to_host() -> void;
+    auto operator()(const MultiArrayView<float, 2, RowMajorStrides>& d_in,
+                    Octave<float>& d_octave) -> void;
 
     // Gaussian kernels.
     GaussianOctaveKernels<float> host_kernels;
@@ -35,11 +34,6 @@ namespace DO::Shakti::Cuda {
 
     // Device work buffer for intermediate x-convolution results.
     MultiArray<float, 2> d_convx;
-    // Device buffer for the Gaussian octave.
-    Octave<float> d_octave;
-
-    // Optional host buffer to read back the result.
-    std::optional<Sara::Image<float, 3, PinnedMemoryAllocator>> h_octave;
 
     // Profile.
     Timer d_timer;

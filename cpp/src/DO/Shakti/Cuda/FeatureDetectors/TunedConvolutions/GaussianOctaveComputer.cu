@@ -18,29 +18,17 @@ namespace DO::Shakti::Cuda {
     : host_kernels{scale_count}
     , device_kernels{host_kernels}
     , d_convx{{w, h}}
-    , d_octave{make_gaussian_octave<float>(w, h, scale_count)}
   {
     device_kernels.copy_filters_to_device_constant_memory();
   }
 
   auto GaussianOctaveComputer::operator()(
-      MultiArrayView<float, 2, RowMajorStrides>& d_in) -> void
+      const MultiArrayView<float, 2, RowMajorStrides>& d_in,
+      Octave<float>& d_octave) -> void
   {
     tic(d_timer);
     device_kernels(d_in, d_convx, d_octave);
     toc(d_timer, "Gaussian Octave");
-  }
-
-  auto GaussianOctaveComputer::copy_to_host() -> void
-  {
-    if (!h_octave.has_value())
-      h_octave = Sara::Image<float, 3, PinnedMemoryAllocator>{
-          d_octave.width(), d_octave.height(), d_octave.scale_count()};
-
-    // This is an extremely expensive copy.
-    tic(d_timer);
-    d_octave.array().copy_to(*h_octave);
-    toc(d_timer, "Device to Host");
   }
 
 }  // namespace DO::Shakti::Cuda
