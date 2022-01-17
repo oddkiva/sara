@@ -9,7 +9,9 @@ add_library(
   TunedConvolutions/GaussianOctaveComputer.hpp
   TunedConvolutions/GaussianOctaveComputer.cu
   DoG.hpp
-  DoG.cu)
+  DoG.cu
+  ScaleSpaceExtremum.hpp
+  ScaleSpaceExtremum.cu)
 
 set_target_properties(
   DO_Shakti_Cuda_FeatureDetectors
@@ -18,9 +20,10 @@ set_target_properties(
              POSITION_INDEPENDENT_CODE ON
              FOLDER "Libraries/Shakti/Cuda")
 
+set(compile_options --expt-relaxed-constexpr --extended-lambda)
 target_compile_options(
   DO_Shakti_Cuda_FeatureDetectors
-  PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
+  PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:${compile_options}>)
 
 target_link_libraries(DO_Shakti_Cuda_FeatureDetectors
                       PRIVATE DO::Sara::Core DO::Shakti::Cuda::Utilities)
