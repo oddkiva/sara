@@ -21,6 +21,8 @@ namespace DO::Shakti::Cuda {
 
   auto compute_scale_space_extremum_map(
       const Octave<float>& dogs,
-      MultiArrayView<std::int8_t, 3, RowMajorStrides>& extremum_map) -> void;
+      MultiArrayView<std::int8_t, 3, RowMajorStrides>& extremum_map,
+      float min_extremum_abs_value = 0.03f,  //
+      float edge_ratio_thres = 10.f) -> void;
 
 }  // namespace DO::Shakti::Cuda

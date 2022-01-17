@@ -21,6 +21,8 @@
 #include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveComputer.hpp>
 #include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
 
+#include <omp.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <signal.h>
@@ -138,8 +140,23 @@ auto example_1() -> void
   }
 }
 
-auto example_2() -> void
+int main(int argc, char** argv)
 {
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
+}
+
+int __main(int argc, char** argv)
+{
+  if (argc < 2)
+  {
+    std::cerr << "Usage: " << argv[0] << " VIDEO_FILE" << std::endl;
+    return 1;
+  }
+
+  omp_set_num_threads(omp_get_max_threads());
+
   struct sigaction sig_int_handler;
   {
     sig_int_handler.sa_handler = my_handler;
@@ -152,18 +169,11 @@ auto example_2() -> void
   auto& device = devices.back();
   device.make_current_device();
 
-  constexpr auto video_filepath =
-#ifdef _WIN32
-      "C:/Users/David/Desktop/GOPR0542.MP4"
-#else
-        // "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.mp4"
-        "/home/david/Desktop/Datasets/sfm/Family.mp4"
-#endif
-      ;
-  std::cout << video_filepath << std::endl;
+  const auto video_filepath = argv[1];
   sara::VideoStream video_stream{video_filepath};
   const auto w = video_stream.width();
   const auto h = video_stream.height();
+  SARA_CHECK(video_filepath);
 
   // Use pinned memory, it's much much faster.
   auto frame_gray32f =
@@ -215,7 +225,9 @@ auto example_2() -> void
     shakti::toc(d_timer, "DoG");
 
     shakti::tic(d_timer);
-    sc::compute_scale_space_extremum_map(d_dog_octave, d_extremum_map);
+    static constexpr auto min_extremum_abs_value = 0.03f;
+    sc::compute_scale_space_extremum_map(d_dog_octave, d_extremum_map,
+                                         min_extremum_abs_value);
     shakti::toc(d_timer, "Extremum Map");
 
 #define INSPECT
@@ -245,14 +257,15 @@ auto example_2() -> void
     // #endif
 
     sara::tic();
+#pragma omp parallel for
     for (auto s = 1; s < h_extremum_map.depth() - 1; ++s)
       for (auto y = 1; y < h_extremum_map.height() - 1; ++y)
         for (auto x = 1; x < h_extremum_map.width() - 1; ++x)
         {
           if (h_extremum_map(x, y, s) == 1)
-            sara::draw_circle(frame, x, y, 3, sara::Red8);
+            sara::draw_circle(frame, x, y, 4, sara::Red8, 3);
           else if (h_extremum_map(x, y, s) == -1)
-            sara::draw_circle(frame, x, y, 3, sara::Blue8);
+            sara::draw_circle(frame, x, y, 4, sara::Blue8, 3);
         }
     sara::display(frame);
     sara::toc("Display");
@@ -264,11 +277,6 @@ auto example_2() -> void
       break;
     }
   }
-}
 
-
-GRAPHICS_MAIN()
-{
-  example_2();
   return 0;
 }

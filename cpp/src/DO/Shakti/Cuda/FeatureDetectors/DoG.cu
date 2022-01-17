@@ -33,7 +33,7 @@ namespace DO::Shakti::Cuda {
     surf2DLayeredread(&val2, gaussian_octave, x * sizeof(float), y, z + 1,
                       cudaBoundaryModeClamp);
 
-#ifdef USE_SMEM
+#ifdef USE_SHARED_MEMORY
     __shared__ float sdata[32][32][2];
 
     // No real benefit in using the shared memory with a 4K video:
@@ -54,10 +54,15 @@ namespace DO::Shakti::Cuda {
   }
 
   // TODO: speed this up as it is very slow.
+  static constexpr auto tile_x = 32;
+  static constexpr auto tile_y = 16;
+  static constexpr auto tile_z = 2;
   __global__ auto local_scale_space_extremum(cudaSurfaceObject_t dog_octave,
                                              std::int8_t* ext_map,  //
                                              int dog_w, int dog_h, int dog_d,
-                                             int ext_pitch) -> void
+                                             int ext_pitch,
+                                             float min_extremum_abs_value,
+                                             float edge_ratio_thres) -> void
   {
     const int x = blockIdx.x * blockDim.x + threadIdx.x;
     const int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -75,51 +80,159 @@ namespace DO::Shakti::Cuda {
       return;
     }
 
+    // Avoid the local extremum loops.
     float val;
     surf2DLayeredread(&val, dog_octave, x * sizeof(float), y, z,
                       cudaBoundaryModeClamp);
+    if (abs(val) < 0.8f * min_extremum_abs_value)  // 0.8f prefiltering ratio.
+    {
+      ext_map[gi] = 0;
+      return;
+    }
 
-    float val_ext;
+    // Use the shared memory to fully leverage the GPU speed.
+    __shared__ float s_prev[tile_z][tile_y + 2][tile_x + 2];
+    __shared__ float s_curr[tile_z][tile_y + 2][tile_x + 2];
+    __shared__ float s_next[tile_z][tile_y + 2][tile_x + 2];
+
+    const auto& tx = threadIdx.x;
+    const auto& ty = threadIdx.y;
+    const auto& tz = threadIdx.z;
+
+    // Populate the previous scale.
+    //
+    // Top-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y - 1, z - 1,
+                      cudaBoundaryModeClamp);
+    s_prev[tz][ty + 0][tx + 0] = val;
+    // Top-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y - 1, z - 1,
+                      cudaBoundaryModeClamp);
+    s_prev[tz][ty + 0][tx + 2] = val;
+    // Bottom-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y + 1, z - 1,
+                      cudaBoundaryModeClamp);
+    s_prev[tz][ty + 2][tx + 0] = val;
+    // Bottom-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y + 1, z - 1,
+                      cudaBoundaryModeClamp);
+    s_prev[tz][ty + 2][tx + 2] = val;
+
+    // Populate the current scale.
+    //
+    // Top-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y - 1, z,
+                      cudaBoundaryModeClamp);
+    s_curr[tz][ty + 0][tx + 0] = val;
+    // Top-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y - 1, z,
+                      cudaBoundaryModeClamp);
+    s_curr[tz][ty + 0][tx + 2] = val;
+    // Bottom-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y + 1, z,
+                      cudaBoundaryModeClamp);
+    s_curr[tz][ty + 2][tx + 0] = val;
+    // Bottom-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y + 1, z,
+                      cudaBoundaryModeClamp);
+    s_curr[tz][ty + 2][tx + 2] = val;
+
+    // Populate the next scale.
+    //
+    // Top-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y - 1, z + 1,
+                      cudaBoundaryModeClamp);
+    s_next[tz][ty + 0][tx + 0] = val;
+    // Top-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y - 1, z + 1,
+                      cudaBoundaryModeClamp);
+    s_next[tz][ty + 0][tx + 2] = val;
+    // Bottom-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y + 1, z + 1,
+                      cudaBoundaryModeClamp);
+    s_next[tz][ty + 2][tx + 0] = val;
+    // Bottom-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y + 1, z + 1,
+                      cudaBoundaryModeClamp);
+    s_next[tz][ty + 2][tx + 2] = val;
+    __syncthreads();
+
+    // Make this check first.
+    const auto on_edge =
+        [&edge_ratio_thres](
+            const volatile decltype(s_curr) s_data,  //
+            auto tx, auto ty, auto tz) -> bool {
+      //   const auto H = hessian(I, Point2i{x, y});
+      //   return square(H.trace()) * edge_ratio >=
+      //          square(edge_ratio + 1.f) * std::abs(H.determinant());
+      return false;
+    };
+
+    if (on_edge(s_curr, tx, ty, tz))
+    {
+      ext_map[gi] = 0;
+      return;
+    }
+
+    // Now the most expensive check.
+    auto val_ext = val;
     if (val > 0)
     {
 #pragma unroll
-      for (auto dz = -1; dz <= 1; ++dz)
+      for (auto dy = 0; dy <= 2; ++dy)
       {
 #pragma unroll
-        for (auto dy = -1; dy <= 1; ++dy)
+        for (auto dx = 0; dx <= 2; ++dx)
         {
+          val_ext = max(val_ext, s_prev[tz][ty + dy][tx + dx]);
+        }
+      }
 #pragma unroll
-          for (auto dx = -1; dx <= 1; ++dx)
-          {
-            // if (dz == 0 && dy == 0 && dx == 0)
-            //   continue;
-
-            float val1;
-            surf2DLayeredread(&val1, dog_octave, (x + dx) * sizeof(float),
-                              y + dy, z + dz, cudaBoundaryModeClamp);
-
-            val_ext = max(val1, val_ext);
-          }
+      for (auto dy = 0; dy <= 2; ++dy)
+      {
+#pragma unroll
+        for (auto dx = 0; dx <= 2; ++dx)
+        {
+          val_ext = max(val_ext, s_curr[tz][ty + dy][tx + dx]);
+        }
+      }
+#pragma unroll
+      for (auto dy = 0; dy <= 2; ++dy)
+      {
+#pragma unroll
+        for (auto dx = 0; dx <= 2; ++dx)
+        {
+          val_ext = max(val_ext, s_next[tz][ty + dy][tx + dx]);
         }
       }
     }
     else
     {
 #pragma unroll
-      for (auto dz = -1; dz <= 1; ++dz)
+      for (auto dy = 0; dy <= 2; ++dy)
       {
 #pragma unroll
-        for (auto dy = -1; dy <= 1; ++dy)
+        for (auto dx = 0; dx <= 2; ++dx)
         {
+          val_ext = min(val_ext, s_prev[tz][ty + dy][tx + dx]);
+        }
+      }
 #pragma unroll
-          for (auto dx = -1; dx <= 1; ++dx)
-          {
-            float val1;
-            surf2DLayeredread(&val1, dog_octave, (x + dx) * sizeof(float),
-                              y + dy, z + dz, cudaBoundaryModeClamp);
-
-            val_ext = min(val1, val_ext);
-          }
+      for (auto dy = 0; dy <= 2; ++dy)
+      {
+#pragma unroll
+        for (auto dx = 0; dx <= 2; ++dx)
+        {
+          val_ext = min(val_ext, s_curr[tz][ty + dy][tx + dx]);
+        }
+      }
+#pragma unroll
+      for (auto dy = 0; dy <= 2; ++dy)
+      {
+#pragma unroll
+        for (auto dx = 0; dx <= 2; ++dx)
+        {
+          val_ext = min(val_ext, s_next[tz][ty + dy][tx + dx]);
         }
       }
     }
@@ -159,7 +272,8 @@ namespace DO::Shakti::Cuda {
 
   auto compute_scale_space_extremum_map(
       const Octave<float>& dogs,
-      MultiArrayView<std::int8_t, 3, RowMajorStrides>& extremum_map) -> void
+      MultiArrayView<std::int8_t, 3, RowMajorStrides>& extremum_map,
+      float min_extremum_abs_value, float edge_ratio_thres) -> void
   {
     if (extremum_map.width() != dogs.width() ||
         extremum_map.height() != dogs.height() ||
@@ -169,7 +283,7 @@ namespace DO::Shakti::Cuda {
     if (!dogs.surface_object().initialized())
       throw std::runtime_error{"DoG surface object is uninitialized!"};
 
-    static constexpr auto threadsperBlock = dim3(32, 16, 2);
+    static constexpr auto threadsperBlock = dim3(tile_x, tile_y, tile_z);
     static const auto numBlocks =
         dim3((dogs.width() + threadsperBlock.x - 1) / threadsperBlock.x,
              (dogs.height() + threadsperBlock.y - 1) / threadsperBlock.y,
@@ -177,7 +291,7 @@ namespace DO::Shakti::Cuda {
     local_scale_space_extremum<<<numBlocks, threadsperBlock>>>(
         dogs.surface_object(), extremum_map.data(),       //
         dogs.width(), dogs.height(), dogs.scale_count(),  //
-        extremum_map.padded_width());
+        extremum_map.padded_width(), min_extremum_abs_value, edge_ratio_thres);
   }
 
 }  // namespace DO::Shakti::Cuda
