@@ -303,11 +303,12 @@ namespace DO::Shakti::Cuda {
   }
 
 
-  __global__ auto to_3d_coords(const int* index, float* x, float* y, float* s, int N,
-                               int w, int h, int d) -> void
+  __global__ auto flat_index_to_3d_coords(const int* index, float* x, float* y,
+                                          float* s, int n, int w, int h, int d)
+      -> void
   {
     const auto i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= N)
+    if (i >= n)
       return;
 
     const auto wh = w * h;
@@ -335,8 +336,8 @@ namespace DO::Shakti::Cuda {
 
     static const auto block_size = dim3(32);
     static const auto grid_size = dim3(1024 / block_size.x);
-    to_3d_coords<<<grid_size, block_size>>>(index_ptr, x_ptr, y_ptr, s_ptr,
-                                            qe.indices.size(), w, h, d);
+    flat_index_to_3d_coords<<<grid_size, block_size>>>(
+        index_ptr, x_ptr, y_ptr, s_ptr, qe.indices.size(), w, h, d);
   };
 
 }  // namespace DO::Shakti::Cuda
