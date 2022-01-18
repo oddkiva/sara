@@ -10,7 +10,8 @@ function(shakti_add_example)
 
   add_executable(${name} ${shakti_add_example_SOURCES})
   target_include_directories(${name} PRIVATE ${CUDA_TOOLKIT_INCLUDE}
-                                             ${Boost_INCLUDE_DIR})
+                                             ${Boost_INCLUDE_DIR}
+                                             ${CMAKE_SOURCE_DIR}/cpp)
   target_link_libraries(${name} PRIVATE ${Boost_LIBRARIES}
                                         ${shakti_add_example_DEPENDENCIES})
 

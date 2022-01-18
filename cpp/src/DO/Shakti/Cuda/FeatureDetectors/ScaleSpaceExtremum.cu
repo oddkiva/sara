@@ -10,6 +10,7 @@
 // ========================================================================== //
 
 #include <DO/Shakti/Cuda/FeatureDetectors/DoG.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/ScaleSpaceExtremum.hpp>
 
 #include <thrust/copy.h>
 #include <thrust/count.h>
@@ -240,15 +241,6 @@ namespace DO::Shakti::Cuda {
     }
   };
 
-  auto count_extrema(
-      const MultiArrayView<std::int8_t, 1, RowMajorStrides>& extremum_map)
-  {
-    const auto dev_ptr = thrust::device_pointer_cast(extremum_map.data());
-    const int num_extrema = thrust::count_if(
-        thrust::device, dev_ptr, dev_ptr + extremum_map.size(), IsExtremum());
-    return num_extrema;
-  }
-
   auto compute_scale_space_extremum_map(
       const Octave<float>& dogs,
       MultiArrayView<std::int8_t, 1, RowMajorStrides>& extremum_flat_map,
@@ -273,5 +265,78 @@ namespace DO::Shakti::Cuda {
         dogs.width(), dogs.height(), dogs.scale_count(),  //
         min_extremum_abs_value, edge_ratio_thres);
   }
+
+  auto count_extrema(
+      const MultiArrayView<std::int8_t, 1, RowMajorStrides>& extremum_map)
+      -> int
+  {
+    const auto dev_ptr = thrust::device_pointer_cast(extremum_map.data());
+    const int num_extrema = thrust::count_if(
+        thrust::device, dev_ptr, dev_ptr + extremum_map.size(), IsExtremum());
+    return num_extrema;
+  }
+
+  auto
+  compress_extremum_map(const MultiArrayView<std::int8_t, 1, RowMajorStrides>&
+                            d_extremum_flat_map) -> QuantizedExtrema
+  {
+    // Count the number of extrema.
+    const auto num_extrema = count_extrema(d_extremum_flat_map);
+
+    const auto dev_ptr =
+        thrust::device_pointer_cast(d_extremum_flat_map.data());
+
+    // Recopy nonzero elements only.
+    auto d_indices = thrust::device_vector<int>(num_extrema);
+    thrust::copy_if(thrust::make_counting_iterator(0),
+                    thrust::make_counting_iterator(
+                        static_cast<int>(d_extremum_flat_map.size())),
+                    dev_ptr, d_indices.begin(), thrust::identity());
+
+    // Recopy extremum types.
+    auto d_extremum_sparse_map =
+        thrust::device_vector<std::int8_t>(num_extrema);
+    thrust::copy_if(dev_ptr, dev_ptr + d_extremum_flat_map.size(),
+                    d_extremum_sparse_map.begin(), IsExtremum{});
+
+    return {d_indices, d_extremum_sparse_map};
+  }
+
+
+  __global__ auto to_3d_coords(const int* index, float* x, float* y, float* s, int N,
+                               int w, int h, int d) -> void
+  {
+    const auto i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= N)
+      return;
+
+    const auto wh = w * h;
+    const auto ii = index[i];
+    const auto si = ii / wh;
+    const auto yi = (ii - si * wh) / w;
+    const auto xi = ii - si * wh - yi * w;
+
+    x[i] = static_cast<float>(xi);
+    y[i] = static_cast<float>(yi);
+    s[i] = static_cast<float>(si);
+  }
+
+  auto initialize_oriented_extrema(QuantizedExtrema& qe, OrientedExtrema& oe,
+                                   int w, int h, int d) -> void
+  {
+    oe.x.resize(qe.indices.size());
+    oe.y.resize(qe.indices.size());
+    oe.s.resize(qe.indices.size());
+
+    const auto index_ptr = thrust::raw_pointer_cast(qe.indices.data());
+    auto x_ptr = thrust::raw_pointer_cast(oe.x.data());
+    auto y_ptr = thrust::raw_pointer_cast(oe.y.data());
+    auto s_ptr = thrust::raw_pointer_cast(oe.s.data());
+
+    static const auto block_size = dim3(32);
+    static const auto grid_size = dim3(1024 / block_size.x);
+    to_3d_coords<<<grid_size, block_size>>>(index_ptr, x_ptr, y_ptr, s_ptr,
+                                            qe.indices.size(), w, h, d);
+  };
 
 }  // namespace DO::Shakti::Cuda
