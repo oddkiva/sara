@@ -16,7 +16,7 @@
 #include <DO/Sara/Core/Pixel/Typedefs.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

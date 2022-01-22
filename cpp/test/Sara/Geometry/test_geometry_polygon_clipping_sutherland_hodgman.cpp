@@ -17,7 +17,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

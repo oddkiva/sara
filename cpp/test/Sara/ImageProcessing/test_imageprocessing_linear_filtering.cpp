@@ -16,7 +16,7 @@
 #include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Geometry/Objects/LineSegment.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

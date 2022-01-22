@@ -20,7 +20,7 @@
 
 #include <DO/Sara/KDTree.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace DO::Sara;

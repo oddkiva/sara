@@ -68,6 +68,7 @@ flags = [
 # Current header directories.
 "-I", "cpp",
 "-I", "cpp/src",
+"-I", "cpp/test",
 "-I", "cpp/third-party/nvidia-video-codec-sdk-9.1.23",
 "-I", "cpp/third-party/taskflow/include",
 # Build directory.

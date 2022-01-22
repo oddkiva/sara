@@ -18,7 +18,7 @@
 
 #include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

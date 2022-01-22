@@ -16,7 +16,7 @@
 #include <DO/Sara/Core/MultiArray/InfiniteMultiArrayView.hpp>
 #include <DO/Sara/Core/Image.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;
