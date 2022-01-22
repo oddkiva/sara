@@ -22,8 +22,6 @@
 #include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveComputer.hpp>
 #include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
 
-#include <drafts/Taskflow/SafeQueue.hpp>
-
 #include <omp.h>
 
 #include <atomic>
@@ -37,11 +35,7 @@
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 
-
-namespace sara = DO::Sara;
-namespace shakti = DO::Shakti;
-namespace sc = shakti::Cuda;
-namespace scg = sc::Gaussian;
+#include "Utilities.hpp"
 
 
 auto do_shutdown = sig_atomic_t{};
@@ -51,74 +45,6 @@ void my_handler(int s)
   do_shutdown = 1;
 }
 
-struct IsExtremum
-{
-  __host__ __device__ inline auto operator()(std::int8_t val) -> bool
-  {
-    return val != 0;
-  }
-};
-
-struct DisplayTask
-{
-  sara::Image<sara::Rgb8> image;
-  sc::QuantizedExtrema data;
-  int index = -1;
-
-  inline DisplayTask() = default;
-
-  inline DisplayTask(sara::Image<sara::Rgb8> im, sc::QuantizedExtrema&& data,
-                     int id)
-    : image{std::move(im)}
-    , data{std::move(data)}
-    , index{id}
-  {
-  }
-
-  inline DisplayTask(const DisplayTask& task) = default;
-
-  inline DisplayTask(DisplayTask&& task) noexcept
-    : image{std::move(task.image)}
-    , data{std::move(task.data)}
-    , index{task.index}
-  {
-  }
-
-  inline ~DisplayTask() = default;
-
-  inline auto run() -> void
-  {
-    if (index == -1 || image.data() == nullptr)
-      return;
-
-    const auto w = image.width();
-    const auto h = image.height();
-
-    sara::draw_text(image, 100, 50, std::to_string(index), sara::White8, 30);
-    const auto num_extrema = static_cast<int>(data.indices.size());
-
-#pragma omp parallel for
-    for (auto k = 0; k < num_extrema; ++k)
-    {
-      const auto& i = data.indices[k];
-
-      const auto s = i / (w * h);
-      const auto y = (i - s * w * h) / w;
-      const auto x = i - s * w * h - y * w;
-
-      if (data.types[k] == 1)
-        sara::draw_circle(image, x, y, 4, sara::Red8, 3);
-      else if (data.types[k] == -1)
-        sara::draw_circle(image, x, y, 4, sara::Blue8, 3);
-    }
-
-    sara::display(image);
-
-    std::cout << "[" << index << "] " << num_extrema << " keypoints"
-              << std::endl;
-  }
-};
-
 
 int main(int argc, char** argv)
 {
@@ -126,6 +52,7 @@ int main(int argc, char** argv)
   app.register_user_main(__main);
   return app.exec();
 }
+
 
 int __main(int argc, char** argv)
 {
@@ -159,7 +86,6 @@ int __main(int argc, char** argv)
           last_frame_shown = task.index;
           task.run();
         }
-        std::cout << "Finished display task" << std::endl;
       }};
 
   auto devices = shakti::get_devices();
@@ -192,10 +118,8 @@ int __main(int argc, char** argv)
   // TODO: because we need to pass it to thrust, so it cannot be pitched
   // memory.
   auto d_extremum_flat_map =
-      shakti::MultiArray<std::int8_t, 1>{w * h * d_dog_octave.scale_count()};
-  auto h_extremum_map =
-      sara::Image<std::int8_t, 3, shakti::PinnedMemoryAllocator>{
-          w, h, d_dog_octave.scale_count()};
+      shakti::MultiArray<std::int8_t, 1>(w * h * d_dog_octave.scale_count());
+  auto d_extrema = sc::DeviceExtrema{};
 
   // Profile.
   auto d_timer = shakti::Timer{};
@@ -229,22 +153,29 @@ int __main(int argc, char** argv)
     shakti::toc(d_timer, "Extremum Map");
 
     shakti::tic(d_timer);
-    const auto [d_indices, d_extremum_sparse_map] =
-        sc::compress_extremum_map(d_extremum_flat_map);
+    d_extrema = sc::compress_extremum_map(d_extremum_flat_map);
     shakti::toc(d_timer, "Stream Compaction");
 
     shakti::tic(d_timer);
-    auto extrema = sc::QuantizedExtrema{};
-    const auto& num_extrema = d_indices.size();
-    extrema.indices = thrust::host_vector<int>(num_extrema);
-    extrema.types = thrust::host_vector<std::int8_t>(num_extrema);
-    thrust::copy(d_indices.begin(), d_indices.end(), extrema.indices.begin());
-    thrust::copy(d_extremum_sparse_map.begin(), d_extremum_sparse_map.end(),
-                 extrema.types.begin());
+    sc::initialize_extrema(d_extrema, w, h, d_dog_octave.scale_count());
+    shakti::toc(d_timer, "Extrema Init");
+
+    shakti::tic(d_timer);
+    sc::refine_extrema(d_dog_octave, d_extrema);
+    shakti::toc(d_timer, "Extrema Refinement");
+
+    shakti::tic(d_timer);
+    auto h_extrema = d_extrema.copy_to_host();
     shakti::toc(d_timer, "Extrema Copy to Host");
 
     sara::tic();
-    display_queue.enqueue(DisplayTask{frame, std::move(extrema), frame_index});
+#ifdef ASYNC
+    display_queue.enqueue({frame, std::move(h_extrema), frame_index});
+#else
+    auto task = DisplayTask{frame, std::move(h_extrema), frame_index};
+    task.run();
+    sara::get_key();
+#endif
     sara::toc("Display Enqueue");
 
     if (do_shutdown)

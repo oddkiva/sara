@@ -255,12 +255,12 @@ namespace DO::Shakti::Cuda {
     if (!dogs.surface_object().initialized())
       throw std::runtime_error{"DoG surface object is uninitialized!"};
 
-    static constexpr auto threadsperBlock = dim3(tile_x, tile_y, tile_z);
-    static const auto numBlocks =
-        dim3((dogs.width() + threadsperBlock.x - 1) / threadsperBlock.x,
-             (dogs.height() + threadsperBlock.y - 1) / threadsperBlock.y,
-             (dogs.scale_count() + threadsperBlock.z - 1) / threadsperBlock.z);
-    local_scale_space_extremum<<<numBlocks, threadsperBlock>>>(
+    static constexpr auto block_sizes = dim3(tile_x, tile_y, tile_z);
+    static const auto grid_sizes =
+        dim3((dogs.width() + block_sizes.x - 1) / block_sizes.x,
+             (dogs.height() + block_sizes.y - 1) / block_sizes.y,
+             (dogs.scale_count() + block_sizes.z - 1) / block_sizes.z);
+    local_scale_space_extremum<<<grid_sizes, block_sizes>>>(
         dogs.surface_object(), extremum_flat_map.data(),  //
         dogs.width(), dogs.height(), dogs.scale_count(),  //
         min_extremum_abs_value, edge_ratio_thres);
@@ -278,8 +278,10 @@ namespace DO::Shakti::Cuda {
 
   auto
   compress_extremum_map(const MultiArrayView<std::int8_t, 1, RowMajorStrides>&
-                            d_extremum_flat_map) -> QuantizedExtrema
+                            d_extremum_flat_map) -> DeviceExtrema
   {
+    auto e = DeviceExtrema{};
+
     // Count the number of extrema.
     const auto num_extrema = count_extrema(d_extremum_flat_map);
 
@@ -287,19 +289,20 @@ namespace DO::Shakti::Cuda {
         thrust::device_pointer_cast(d_extremum_flat_map.data());
 
     // Recopy nonzero elements only.
-    auto d_indices = thrust::device_vector<int>(num_extrema);
+    auto& d_indices = e.indices;
+    d_indices = thrust::device_vector<int>(num_extrema);
     thrust::copy_if(thrust::make_counting_iterator(0),
                     thrust::make_counting_iterator(
                         static_cast<int>(d_extremum_flat_map.size())),
                     dev_ptr, d_indices.begin(), thrust::identity());
 
     // Recopy extremum types.
-    auto d_extremum_sparse_map =
-        thrust::device_vector<std::int8_t>(num_extrema);
+    auto& d_types = e.types;
+    d_types = thrust::device_vector<std::int8_t>(num_extrema);
     thrust::copy_if(dev_ptr, dev_ptr + d_extremum_flat_map.size(),
-                    d_extremum_sparse_map.begin(), IsExtremum{});
+                    d_types.begin(), IsExtremum{});
 
-    return {d_indices, d_extremum_sparse_map};
+    return e;
   }
 
 
@@ -322,22 +325,169 @@ namespace DO::Shakti::Cuda {
     s[i] = static_cast<float>(si);
   }
 
-  auto initialize_oriented_extrema(QuantizedExtrema& qe, OrientedExtrema& oe,
-                                   int w, int h, int d) -> void
+  auto initialize_extrema(DeviceExtrema& e, int w, int h, int d) -> void
   {
-    oe.x.resize(qe.indices.size());
-    oe.y.resize(qe.indices.size());
-    oe.s.resize(qe.indices.size());
+    e.x.resize(e.indices.size());
+    e.y.resize(e.indices.size());
+    e.s.resize(e.indices.size());
 
-    const auto index_ptr = thrust::raw_pointer_cast(qe.indices.data());
-    auto x_ptr = thrust::raw_pointer_cast(oe.x.data());
-    auto y_ptr = thrust::raw_pointer_cast(oe.y.data());
-    auto s_ptr = thrust::raw_pointer_cast(oe.s.data());
+    const auto index_ptr = thrust::raw_pointer_cast(e.indices.data());
+    auto x_ptr = thrust::raw_pointer_cast(e.x.data());
+    auto y_ptr = thrust::raw_pointer_cast(e.y.data());
+    auto s_ptr = thrust::raw_pointer_cast(e.s.data());
 
-    static const auto block_size = dim3(32);
-    static const auto grid_size = dim3(1024 / block_size.x);
-    flat_index_to_3d_coords<<<grid_size, block_size>>>(
-        index_ptr, x_ptr, y_ptr, s_ptr, qe.indices.size(), w, h, d);
+    static constexpr auto block_sizes = dim3(1024);
+    static const auto grid_sizes =
+        dim3((e.indices.size() + block_sizes.x - 1) / block_sizes.x);
+    flat_index_to_3d_coords<<<grid_sizes, block_sizes>>>(
+        index_ptr, x_ptr, y_ptr, s_ptr, e.indices.size(), w, h, d);
   };
+
+  __device__ auto gradient_3d(cudaSurfaceObject_t surface,  //
+                              int x,                        //
+                              int y,                        //
+                              int z) -> Vector<float, 3>
+  {
+    auto g = Vector<float, 3>{};
+    auto f = [surface](int x, int y, int z) {
+      float val;
+      surf2DLayeredread(&val, surface, x * sizeof(float), y, z);
+      return val;
+    };
+
+    g(0) = (f(x + 1, y, z) - f(x - 1, y, z)) * 0.5f;
+    g(1) = (f(x, y + 1, z) - f(x, y - 1, z)) * 0.5f;
+    g(2) = (f(x, y, z + 1) - f(x, y, z - 1)) * 0.5f;
+
+    return g;
+  }
+
+  __device__ inline auto hessian_3d(cudaSurfaceObject_t surface,  //
+                                    int x, int y, int z) -> Matrix<float, 3, 3>
+  {
+    auto f = [surface](int x, int y, int z) {
+      float val;
+      surf2DLayeredread(&val, surface, x * sizeof(float), y, z);
+      return val;
+    };
+
+    const auto dxx = f(x + 1, y, z) - 2 * f(x, y, z) + f(x - 1, y, z);
+    const auto dyy = f(x, y + 1, z) - 2 * f(x, y, z) + f(x, y - 1, z);
+    const auto dss = f(x, y, z + 1) - 2 * f(x, y, z) + f(x, y, z - 1);
+
+    const auto dxy = (f(x + 1, y + 1, z) - f(x - 1, y - 1, z) -  //
+                      f(x + 1, y - 1, z) + f(x - 1, y - 1, z)) *
+                     0.25f;
+
+    const auto dxs = (f(x + 1, y, z + 1) - f(x - 1, y, z + 1) -  //
+                      f(x + 1, y, z - 1) + f(x - 1, y, z - 1)) *
+                     0.25f;
+
+    const auto dys = (f(x, y + 1, z + 1) - f(x, y - 1, z + 1) -  //
+                      f(x, y + 1, z - 1) + f(x, y - 1, z - 1)) *
+                     0.25f;
+
+    auto h = Matrix<float, 3, 3>{};
+    // clang-format off
+    h(0, 0) = dxx; h(0, 1) = dxy; h(0, 2) = dxs;
+    h(1, 0) = dxy; h(1, 1) = dyy; h(1, 2) = dys;
+    h(2, 0) = dxs; h(2, 1) = dys; h(2, 2) = dss;
+    // clang-format on
+
+    return h;
+  }
+
+  __global__ auto refine_extremum(cudaSurfaceObject_t surface,        //
+                                  float* x, float* y, float* s,       //
+                                  float* val, std::uint8_t* success,  //
+                                  float scale, int n) -> void
+  {
+    const auto i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= n)
+      return;
+
+    const auto xi = int(x[i]);
+    const auto yi = int(y[i]);
+    const auto si = int(s[i]);
+
+    const auto gradient = gradient_3d(surface, xi, yi, si);
+    static_assert(std::is_same_v<decltype(gradient), const Vector3f>);
+
+    const auto hessian = hessian_3d(surface, xi, yi, si);
+    static_assert(std::is_same_v<decltype(hessian), const Matrix3f>);
+
+    // printf("Coords\n");
+    // printf("%3d %3d %3d\n", xi, yi, si);
+
+    // printf("Gradient\n");
+    //printf("%0.4f %0.4f %0.4f\n", gradient(0), gradient(1), gradient(2));
+
+    // printf("Hessian\n");
+    // for (auto k = 0; k < 3; ++k)
+    //   printf("%0.4f %0.4f %0.4f\n",  //
+    //          hessian(k, 0), hessian(k, 1), hessian(k, 2));
+
+    // printf("det_h = %f\n", det(hessian));
+    const auto residual = -(inverse(hessian) * gradient);
+    static_assert(std::is_same_v<decltype(residual), const Vector3f>);
+    // printf("%0.4f %0.4f %0.4f\n", residual(0), residual(1), residual(2));
+
+    float current_value;
+    surf2DLayeredread(&current_value, surface, xi * sizeof(float), yi, si);
+
+    const auto new_value = current_value + 0.5f * gradient.dot(residual);
+
+    const auto successi = abs(residual.x()) < 1.5f &&           //
+                          abs(residual.y()) < 1.5f &&           //
+                          abs(current_value) < abs(new_value);  //
+
+    if (successi)
+    {
+      x[i] += residual.x();
+      y[i] += residual.y();
+      s[i] += residual.z();
+      val[i] = new_value;
+    }
+    else
+    {
+      val[i] = current_value;
+    }
+    success[i] = successi;
+  }
+
+  auto refine_extrema(const Octave<float>& dogs, DeviceExtrema& e) -> void
+  {
+    const auto& w = dogs.width();
+    const auto& h = dogs.height();
+    const auto& d = dogs.scale_count();
+    if (!dogs.surface_object().initialized())
+      throw std::runtime_error{"DoG surface object is uninitialized!"};
+
+    static constexpr auto block_sizes = dim3(1024);
+    static const auto grid_sizes =
+        dim3((e.indices.size() + block_sizes.x - 1) / block_sizes.x);
+
+    e.values.resize(e.indices.size());
+    e.refined.resize(e.indices.size());
+
+    SARA_CHECK(e.x.size());
+    SARA_CHECK(e.y.size());
+    SARA_CHECK(e.s.size());
+    SARA_CHECK(e.values.size());
+    SARA_CHECK(e.refined.size());
+
+    auto x_ptr = thrust::raw_pointer_cast(e.x.data());
+    auto y_ptr = thrust::raw_pointer_cast(e.y.data());
+    auto s_ptr = thrust::raw_pointer_cast(e.s.data());
+    auto val_ptr = thrust::raw_pointer_cast(e.values.data());
+    auto refined_ptr = thrust::raw_pointer_cast(e.refined.data());
+
+    refine_extremum<<<grid_sizes, block_sizes>>>(dogs.surface_object(),  //
+                                                 x_ptr, y_ptr, s_ptr,    //
+                                                 val_ptr, refined_ptr,   //
+                                                 0.f,                    //
+                                                 int(e.indices.size())   //
+    );
+  }
 
 }  // namespace DO::Shakti::Cuda
