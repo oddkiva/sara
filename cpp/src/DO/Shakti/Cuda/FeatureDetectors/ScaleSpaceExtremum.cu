@@ -132,16 +132,13 @@ namespace DO::Shakti::Cuda {
     }
 
     // Avoid the local extremum loops.
-    surf2DLayeredread(&val, dog_octave, x * sizeof(float), y, z,
-                      cudaBoundaryModeClamp);
+    val = s_curr[at(tx, ty, tz)];
     if (abs(val) < min_extremum_abs_value)
     {
       ext_map[gi] = 0;
       return;
     }
 
-
-    val = s_curr[at(tx, ty, tz)];
 
     // Make this check first.
     const auto on_edge = [&edge_ratio_thres](          //
@@ -228,8 +225,6 @@ namespace DO::Shakti::Cuda {
 #pragma unroll
         for (auto dx = -1; dx <= 1; ++dx)
         {
-          // if (dy == 0 && dx == 0)
-          //   continue;
           val_ext = max(val_ext, s_curr[at(tx + dx, ty + dy, tz)]);
         }
       }
@@ -260,8 +255,6 @@ namespace DO::Shakti::Cuda {
 #pragma unroll
         for (auto dx = -1; dx <= 1; ++dx)
         {
-          // if (dy == 0 && dx == 0)
-          //   continue;
           val_ext = min(val_ext, s_curr[at(tx + dx, ty + dy, tz)]);
         }
       }
