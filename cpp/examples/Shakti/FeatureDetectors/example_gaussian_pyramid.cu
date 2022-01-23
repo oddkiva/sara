@@ -69,12 +69,12 @@ int __main(int argc, char** argv)
   const auto min_extremum_abs_value = argc < 4 ? 0.01f : std::stof(argv[3]);
   const auto sync_display = argc > 4;
 
-  if (scale_count < 3)
-  {
-    SARA_DEBUG << "Our implementation requires 3 scales in the octave at least!"
-               << std::endl;
-    return 1;
-  }
+  // if (scale_count < 3)
+  // {
+  //   SARA_DEBUG << "Our implementation requires 3 scales in the octave at least!"
+  //              << std::endl;
+  //   return 1;
+  // }
 
   omp_set_num_threads(omp_get_max_threads());
 
@@ -190,18 +190,21 @@ int __main(int argc, char** argv)
     if (sync_display)
     {
       auto quit = false;
-      // view_octave(d_gaussian_octave, quit);
-      // if (quit)
-      //   break;
-      // view_octave(d_dog_octave, quit);
-      // if (quit)
-      //   break;
-      view_octave(d_grad_mag, quit);
+
+#ifdef INSPECT_STEPS
+      view_octave(d_gaussian_octave, quit);
+      if (quit)
+        break;
+      view_octave(d_dog_octave, quit, true);
+      if (quit)
+        break;
+      view_octave(d_grad_mag, quit, true);
       if (quit)
         break;
       view_octave(d_grad_ori, quit, true);
       if (quit)
         break;
+#endif
 
       task.run();
       quit = sara::get_key() == sara::KEY_ESCAPE;

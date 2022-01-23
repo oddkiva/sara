@@ -85,7 +85,7 @@ namespace DO::Shakti::Cuda::Gaussian {
     const int x = blockIdx.x * blockDim.x + threadIdx.x;
     const int y = blockIdx.y * blockDim.y + threadIdx.y;
     const int& r = kernel_radii[kernel_index];
-    if (x >= w || y > max(h, r) + r)
+    if (x >= w || y >= max(h, r) + r)
       return;
 
     const int gi = y * pitch + x;

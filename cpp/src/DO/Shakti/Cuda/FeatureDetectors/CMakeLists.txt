@@ -12,6 +12,8 @@ add_library(
   DoG.cu
   Gradient.hpp
   Gradient.cu
+  DominantOrientations.hpp
+  DominantOrientations.cu
   ScaleSpaceExtremum.hpp
   ScaleSpaceExtremum.cu)
 

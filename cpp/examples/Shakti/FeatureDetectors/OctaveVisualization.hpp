@@ -21,5 +21,7 @@ inline auto view_octave(sc::Octave<float>& octave, bool& quit,
     else
       sara::display(slice_s);
     quit = sara::get_key() == sara::KEY_ESCAPE;
+    if (quit)
+      break;
   }
 }
