@@ -70,10 +70,6 @@ struct DisplayTask
     sara::draw_text(image, 100, 100, sara::format("#Extrema: %d", num_extrema),
                     sara::White8, 30);
 
-
     sara::display(image);
-
-    std::cout << "[" << index << "] " << num_extrema << " keypoints"
-              << std::endl;
   }
 };

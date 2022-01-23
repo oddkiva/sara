@@ -33,23 +33,7 @@ namespace DO::Shakti::Cuda {
     surf2DLayeredread(&val2, gaussian_octave, x * sizeof(float), y, z + 1,
                       cudaBoundaryModeClamp);
 
-#ifdef USE_SHARED_MEMORY
-    __shared__ float sdata[32][32][2];
-
-    // No real benefit in using the shared memory with a 4K video:
-    //
-    // [DoG] Elapsed time = 1.44467 ms
-    const auto& tx = threadIdx.x;
-    const auto& ty = threadIdx.y;
-    sdata[ty][tx][0] = val1;
-    sdata[ty][tx][1] = val2;
-    __syncthreads();
-
-    const float diff = sdata[ty][tx][1] - sdata[ty][tx][0];
-#else
-    // [DoG] Elapsed time = 1.42746 ms
-    const float diff = val2 - val1;
-#endif
+    const auto diff = val2 - val1;
     surf2DLayeredwrite(diff, dog_octave, x * sizeof(float), y, z);
   }
 

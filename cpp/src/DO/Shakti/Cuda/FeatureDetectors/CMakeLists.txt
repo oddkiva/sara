@@ -10,6 +10,8 @@ add_library(
   TunedConvolutions/GaussianOctaveComputer.cu
   DoG.hpp
   DoG.cu
+  Gradient.hpp
+  Gradient.cu
   ScaleSpaceExtremum.hpp
   ScaleSpaceExtremum.cu)
 

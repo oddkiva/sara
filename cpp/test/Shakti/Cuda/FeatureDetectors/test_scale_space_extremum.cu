@@ -99,14 +99,14 @@ BOOST_AUTO_TEST_CASE(test_extremum_localization)
   BOOST_CHECK_EQUAL(d_extrema.y[0], 1);
   BOOST_CHECK_EQUAL(d_extrema.s[0], 1);
 
-  sc::refine_extrema(d_octave, d_extrema);
+  sc::refine_extrema(d_octave, d_extrema, 1, 1);
   const auto h_extrema = d_extrema.copy_to_host();
   BOOST_CHECK_EQUAL(h_extrema.indices.size(), 1u);
   BOOST_CHECK_EQUAL(h_extrema.x.size(), 1u);
   BOOST_CHECK_EQUAL(h_extrema.y.size(), 1u);
   BOOST_CHECK_EQUAL(h_extrema.s.size(), 1u);
   BOOST_CHECK_EQUAL(h_extrema.types.size(), 1u);
-  BOOST_CHECK_EQUAL(h_extrema.types.size(), 1u);
+  BOOST_CHECK_EQUAL(h_extrema.values.size(), 1u);
 
   BOOST_CHECK_EQUAL(h_extrema.indices[0], 9 + 5 - 1);
   BOOST_CHECK_EQUAL(h_extrema.types[0], 1);
@@ -114,7 +114,5 @@ BOOST_AUTO_TEST_CASE(test_extremum_localization)
   BOOST_CHECK_LE(std::abs(h_extrema.y[0] - 1), .2f);
   BOOST_CHECK_LE(std::abs(h_extrema.s[0] - 1), .2f);
   BOOST_CHECK_GE(h_extrema.values[0], 10);
-  BOOST_CHECK_EQUAL(h_extrema.refined[0], 1);
   SARA_CHECK(h_extrema.values[0]);
-  SARA_CHECK(int(h_extrema.refined[0]));
 }

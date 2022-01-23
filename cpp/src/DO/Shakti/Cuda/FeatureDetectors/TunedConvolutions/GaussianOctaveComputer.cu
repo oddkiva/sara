@@ -19,6 +19,9 @@ namespace DO::Shakti::Cuda {
     , device_kernels{host_kernels}
     , d_convx{{w, h}}
   {
+    if (scale_count < 3)
+      throw std::runtime_error{
+          "Unsupported scale count at this time: make it >= 3 and try again!"};
     device_kernels.copy_filters_to_device_constant_memory();
   }
 

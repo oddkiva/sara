@@ -18,6 +18,7 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Shakti/Cuda/FeatureDetectors/DoG.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/Gradient.hpp>
 #include <DO/Shakti/Cuda/FeatureDetectors/ScaleSpaceExtremum.hpp>
 #include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveComputer.hpp>
 #include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
@@ -35,7 +36,8 @@
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 
-#include "Utilities.hpp"
+#include "AsyncDisplayTask.hpp"
+#include "OctaveVisualization.hpp"
 
 
 auto do_shutdown = sig_atomic_t{};
@@ -59,6 +61,18 @@ int __main(int argc, char** argv)
   if (argc < 2)
   {
     std::cerr << "Usage: " << argv[0] << " VIDEO_FILE" << std::endl;
+    return 1;
+  }
+
+  const auto video_filepath = argv[1];
+  const auto scale_count = argc < 3 ? 3 : std::stoi(argv[2]);
+  const auto min_extremum_abs_value = argc < 4 ? 0.01f : std::stof(argv[3]);
+  const auto sync_display = argc > 4;
+
+  if (scale_count < 3)
+  {
+    SARA_DEBUG << "Our implementation requires 3 scales in the octave at least!"
+               << std::endl;
     return 1;
   }
 
@@ -92,7 +106,6 @@ int __main(int argc, char** argv)
   auto& device = devices.back();
   device.make_current_device();
 
-  const auto video_filepath = argv[1];
   sara::VideoStream video_stream{video_filepath};
   const auto w = video_stream.width();
   const auto h = video_stream.height();
@@ -102,7 +115,6 @@ int __main(int argc, char** argv)
   auto frame_gray32f =
       sara::Image<float, 2, shakti::PinnedMemoryAllocator>{w, h};
 
-  static constexpr auto scale_count = 3;
   auto goc = sc::GaussianOctaveComputer{w, h, scale_count};
 
   // Host and device input grayscale data.
@@ -112,8 +124,8 @@ int __main(int argc, char** argv)
 
   auto d_gaussian_octave = sc::make_gaussian_octave<float>(w, h, scale_count);
   auto d_dog_octave = sc::make_DoG_octave<float>(w, h, scale_count);
-  auto h_dog_octave = sara::Image<float, 3, shakti::PinnedMemoryAllocator>{
-      w, h, d_dog_octave.scale_count()};
+  auto d_grad_mag = sc::make_gaussian_octave<float>(w, h, scale_count);
+  auto d_grad_ori = sc::make_gaussian_octave<float>(w, h, scale_count);
 
   // TODO: because we need to pass it to thrust, so it cannot be pitched
   // memory.
@@ -147,7 +159,6 @@ int __main(int argc, char** argv)
     shakti::toc(d_timer, "DoG");
 
     shakti::tic(d_timer);
-    static constexpr auto min_extremum_abs_value = 0.04f;
     sc::compute_scale_space_extremum_map(d_dog_octave, d_extremum_flat_map,
                                          min_extremum_abs_value);
     shakti::toc(d_timer, "Extremum Map");
@@ -161,8 +172,14 @@ int __main(int argc, char** argv)
     shakti::toc(d_timer, "Extrema Init");
 
     shakti::tic(d_timer);
-    sc::refine_extrema(d_dog_octave, d_extrema, goc.host_kernels.scale_initial, goc.host_kernels.scale_factor);
+    sc::refine_extrema(d_dog_octave, d_extrema, goc.host_kernels.scale_initial,
+                       goc.host_kernels.scale_factor);
     shakti::toc(d_timer, "Extrema Refinement");
+
+    // TODO: do this only for the necessary keypoints.
+    shakti::tic(d_timer);
+    sc::compute_polar_gradient_octave(d_gaussian_octave, d_grad_mag, d_grad_ori);
+    shakti::toc(d_timer, "Gradient");
 
     shakti::tic(d_timer);
     auto h_extrema = d_extrema.copy_to_host();
@@ -170,14 +187,31 @@ int __main(int argc, char** argv)
 
     sara::tic();
     auto task = DisplayTask{frame, std::move(h_extrema), frame_index};
-#define ASYNC
-#ifdef ASYNC
-    display_queue.enqueue(std::move(task));
-#else
-    task.run();
-    sara::get_key();
-#endif
+    if (sync_display)
+    {
+      auto quit = false;
+      // view_octave(d_gaussian_octave, quit);
+      // if (quit)
+      //   break;
+      // view_octave(d_dog_octave, quit);
+      // if (quit)
+      //   break;
+      view_octave(d_grad_mag, quit);
+      if (quit)
+        break;
+      view_octave(d_grad_ori, quit, true);
+      if (quit)
+        break;
+
+      task.run();
+      quit = sara::get_key() == sara::KEY_ESCAPE;
+      if (quit)
+        break;
+    }
+    else
+      display_queue.enqueue(std::move(task));
     sara::toc("Display Enqueue");
+
 
     if (do_shutdown)
     {

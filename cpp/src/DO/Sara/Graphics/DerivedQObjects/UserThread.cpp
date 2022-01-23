@@ -120,9 +120,7 @@ namespace DO { namespace Sara {
     auto argc = static_cast<int>(args.size());
     auto argStrings = std::vector<std::string>(args.size());
     std::transform(args.begin(), args.end(), argStrings.begin(),
-                   [](const auto& arg) {
-                     return arg.toUtf8().constData();
-                   });
+                   [](const auto& arg) { return arg.toUtf8().constData(); });
     auto argVector = std::vector<char*>(args.size());
     std::transform(argStrings.begin(), argStrings.end(), argVector.begin(),
                    [](auto& arg) { return &arg[0]; });

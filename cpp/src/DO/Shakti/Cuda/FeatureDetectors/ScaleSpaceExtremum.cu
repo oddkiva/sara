@@ -26,13 +26,16 @@ namespace DO::Shakti::Cuda {
 
   // TODO: speed this up as it is very slow.
   static constexpr auto tile_x = 32;
-  static constexpr auto tile_y = 16;
-  static constexpr auto tile_z = 2;
+  static constexpr auto tile_y = 32;
+  static constexpr auto tile_z = 1;
 
-  __device__ inline auto at(int tx, int ty, int tz)
+  template <typename Index>
+  __device__ inline auto at(Index tx, Index ty, Index tz)
   {
-    static constexpr auto offset = 1;
-    return (tz * (tile_y + 2) + ty + offset) * (tile_y + 2) + tx + offset;
+    static constexpr auto offset = Index{1};
+    static constexpr auto tile_height = tile_y + Index{2};
+    static constexpr auto tile_width = tile_x + Index{2};
+    return (tz * tile_height + ty + offset) * tile_width + tx + offset;
   };
 
   __global__ auto local_scale_space_extremum(cudaSurfaceObject_t dog_octave,
@@ -56,6 +59,7 @@ namespace DO::Shakti::Cuda {
     const auto& tx = threadIdx.x;
     const auto& ty = threadIdx.y;
     const auto& tz = threadIdx.z;
+    static_assert(std::is_same_v<decltype(tx), const unsigned int&>);
 
     float val;
 
@@ -116,11 +120,11 @@ namespace DO::Shakti::Cuda {
                       cudaBoundaryModeClamp);
     s_next[at(tx + 1, ty + 1, tz)] = val;
 
-
     // ========================================================================
     __syncthreads();
     // ========================================================================
 
+    val = s_curr[at(tx, ty, tz)];
 
     const auto gi = (z * dog_h + y) * dog_w + x;
 
@@ -131,9 +135,7 @@ namespace DO::Shakti::Cuda {
       return;
     }
 
-    // Avoid the local extremum loops.
-    val = s_curr[at(tx, ty, tz)];
-    if (abs(val) < min_extremum_abs_value)
+    if (fabsf(val) < min_extremum_abs_value)
     {
       ext_map[gi] = 0;
       return;
@@ -144,7 +146,7 @@ namespace DO::Shakti::Cuda {
     const auto on_edge = [&edge_ratio_thres](          //
                              const volatile float* I,  //
                              auto x, auto y, auto z) -> bool {
-#ifdef DEBUG_ME
+#ifdef DEBUG_EXTREMUM_MAP_LOCALIZATION
       printf("x=%d y=%d z=%d -> val=%f\n", x, y, z, I[at(x, y, z)]);
 #endif
 
@@ -161,7 +163,7 @@ namespace DO::Shakti::Cuda {
       const auto det_H = h00 * h11 - h01 * h10;
 
       const auto trace_squared = trace_H * trace_H;
-      const auto abs_det_H = abs(det_H);
+      const auto abs_det_H = fabsf(det_H);
 
       auto edge_ratio_1 = edge_ratio_thres + 1;
       edge_ratio_1 *= edge_ratio_1;
@@ -179,9 +181,7 @@ namespace DO::Shakti::Cuda {
     }
 
 
-    val = s_curr[at(tx, ty, tz)];
-
-#ifdef DEBUG_ME
+#ifdef DEBUG_EXTREMUM_MAP_LOCALIZATION
     printf("me = %f\n", val);
     printf("s_prev\n");
     for (auto dy = -1; dy <= 1; ++dy)
@@ -215,27 +215,21 @@ namespace DO::Shakti::Cuda {
       {
 #pragma unroll
         for (auto dx = -1; dx <= 1; ++dx)
-        {
-          val_ext = max(val_ext, s_prev[at(tx + dx, ty + dy, tz)]);
-        }
+          val_ext = fmaxf(val_ext, s_prev[at(tx + dx, ty + dy, tz)]);
       }
 #pragma unroll
       for (auto dy = -1; dy <= 1; ++dy)
       {
 #pragma unroll
         for (auto dx = -1; dx <= 1; ++dx)
-        {
-          val_ext = max(val_ext, s_curr[at(tx + dx, ty + dy, tz)]);
-        }
+          val_ext = fmaxf(val_ext, s_curr[at(tx + dx, ty + dy, tz)]);
       }
 #pragma unroll
       for (auto dy = -1; dy <= 1; ++dy)
       {
 #pragma unroll
         for (auto dx = -1; dx <= 1; ++dx)
-        {
-          val_ext = max(val_ext, s_next[at(tx + dx, ty + dy, tz)]);
-        }
+          val_ext = fmaxf(val_ext, s_next[at(tx + dx, ty + dy, tz)]);
       }
     }
     else
@@ -245,27 +239,21 @@ namespace DO::Shakti::Cuda {
       {
 #pragma unroll
         for (auto dx = -1; dx <= 1; ++dx)
-        {
-          val_ext = min(val_ext, s_prev[at(tx + dx, ty + dy, tz)]);
-        }
+          val_ext = fminf(val_ext, s_prev[at(tx + dx, ty + dy, tz)]);
       }
 #pragma unroll
       for (auto dy = -1; dy <= 1; ++dy)
       {
 #pragma unroll
         for (auto dx = -1; dx <= 1; ++dx)
-        {
-          val_ext = min(val_ext, s_curr[at(tx + dx, ty + dy, tz)]);
-        }
+          val_ext = fminf(val_ext, s_curr[at(tx + dx, ty + dy, tz)]);
       }
 #pragma unroll
       for (auto dy = -1; dy <= 1; ++dy)
       {
 #pragma unroll
         for (auto dx = -1; dx <= 1; ++dx)
-        {
-          val_ext = min(val_ext, s_next[at(tx + dx, ty + dy, tz)]);
-        }
+          val_ext = fminf(val_ext, s_next[at(tx + dx, ty + dy, tz)]);
       }
     }
 
@@ -463,7 +451,7 @@ namespace DO::Shakti::Cuda {
     const auto hessian = hessian_3d(surface, xi, yi, si);
     static_assert(std::is_same_v<decltype(hessian), const Matrix3f>);
 
-#ifdef DEBUG_ME
+#ifdef DEBUG_REFINE_EXTREMUM
     printf("Coords   %3d %3d %3d\n", xi, yi, si);
     printf("Gradient %0.4f %0.4f %0.4f\n", gradient(0), gradient(1),
            gradient(2));
@@ -475,7 +463,7 @@ namespace DO::Shakti::Cuda {
 #endif
 
     const auto hessian_inv = inverse(hessian);
-#ifdef DEBUG_ME
+#ifdef DEBUG_REFINE_EXTREMUM
     printf("HessianInverse\n");
     for (auto k = 0; k < 3; ++k)
       printf("%0.4f %0.4f %0.4f\n",  //
@@ -484,7 +472,7 @@ namespace DO::Shakti::Cuda {
 
     const auto residual = -(hessian_inv * gradient);
     static_assert(std::is_same_v<decltype(residual), const Vector3f>);
-#ifdef DEBUG_ME
+#ifdef DEBUG_REFINE_EXTREMUM
     printf("%0.4f %0.4f %0.4f\n", residual(0), residual(1), residual(2));
 #endif
 
@@ -495,10 +483,11 @@ namespace DO::Shakti::Cuda {
 
     // Sometimes the residual explodes, probably because the matrix inversion
     // is not very stable.
-    const auto refinement_successful = abs(residual.x()) < 1.5f &&           //
-                                       abs(residual.y()) < 1.5f &&           //
-                                       abs(residual.z()) < 1.5f &&           //
-                                       abs(current_value) < abs(new_value);  //
+    const auto refinement_successful =
+        fabsf(residual.x()) < 1.5f &&             //
+        fabsf(residual.y()) < 1.5f &&             //
+        fabsf(residual.z()) < 1.5f &&             //
+        fabsf(current_value) < fabsf(new_value);  //
 
     const auto log_scale = refinement_successful ? si + residual.z() : si;
     const auto scale = scale_initial * powf(scale_exponent, log_scale);
