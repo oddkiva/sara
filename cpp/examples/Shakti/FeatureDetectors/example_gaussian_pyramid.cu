@@ -18,6 +18,7 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Shakti/Cuda/FeatureDetectors/DoG.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/DominantOrientations.hpp>
 #include <DO/Shakti/Cuda/FeatureDetectors/Gradient.hpp>
 #include <DO/Shakti/Cuda/FeatureDetectors/ScaleSpaceExtremum.hpp>
 #include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveComputer.hpp>
@@ -127,6 +128,8 @@ int __main(int argc, char** argv)
   auto d_grad_mag = sc::make_gaussian_octave<float>(w, h, scale_count);
   auto d_grad_ori = sc::make_gaussian_octave<float>(w, h, scale_count);
 
+  auto d_orientations = shakti::MultiArray<float, 2, shakti::RowMajorStrides>{};
+
   // TODO: because we need to pass it to thrust, so it cannot be pitched
   // memory.
   auto d_extremum_flat_map =
@@ -176,9 +179,13 @@ int __main(int argc, char** argv)
                        goc.host_kernels.scale_factor);
     shakti::toc(d_timer, "Extrema Refinement");
 
-    // TODO: do this only for the necessary keypoints.
     shakti::tic(d_timer);
+#define DENSE_GRADIENT
+#ifdef DENSE_GRADIENT
     sc::compute_polar_gradient_octave(d_gaussian_octave, d_grad_mag, d_grad_ori);
+#else
+    sc::compute_histogram_of_gradients(d_gaussian_octave, d_extrema.x, d_extrema.y, d_extrema.s);
+#endif
     shakti::toc(d_timer, "Gradient");
 
     shakti::tic(d_timer);

@@ -31,18 +31,28 @@ namespace DO::Shakti::Cuda {
     thrust::host_vector<float> x;
     thrust::host_vector<float> y;
     thrust::host_vector<float> s;
+    thrust::host_vector<std::int8_t> log_s_quantized;
     thrust::host_vector<std::int8_t> types;
     thrust::host_vector<float> values;
   };
 
   struct DeviceExtrema
   {
-    //! @brief Flat indices
+    //! @brief Flattened and quantized 1D-indices.
     thrust::device_vector<int> indices;
+
+    //! @brief 3D scale-space coordinates
+    //! @{
     thrust::device_vector<float> x;
     thrust::device_vector<float> y;
     thrust::device_vector<float> s;
+    thrust::host_vector<std::int8_t> log_s_quantized;
+    //! @}
+
+    //! @brief Extremum type.
     thrust::device_vector<std::int8_t> types;
+
+    //! @brief Extremum response value.
     thrust::device_vector<float> values;
 
     inline auto copy_to_host() const -> HostExtrema
