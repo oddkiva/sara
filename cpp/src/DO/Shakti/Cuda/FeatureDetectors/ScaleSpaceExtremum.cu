@@ -451,7 +451,7 @@ namespace DO::Shakti::Cuda {
 
   __global__ auto refine_extremum(cudaSurfaceObject_t surface,                //
                                   float* x, float* y, float* s,               //
-                                  float* val, std::uint8_t* success,          //
+                                  float* val,                                 //
                                   float scale_initial, float scale_exponent,  //
                                   int n) -> void
   {
@@ -500,15 +500,17 @@ namespace DO::Shakti::Cuda {
 
     const auto new_value = current_value + 0.5f * gradient.dot(residual);
 
-    const auto successi = abs(residual.x()) < 1.5f &&           //
-                          abs(residual.y()) < 1.5f &&           //
-                          abs(residual.z()) < 1.5f &&           //
-                          abs(current_value) < abs(new_value);  //
+    // Sometimes the residual explodes, probably because the matrix inversion
+    // is not very stable.
+    const auto refinement_successful = abs(residual.x()) < 1.5f &&           //
+                                       abs(residual.y()) < 1.5f &&           //
+                                       abs(residual.z()) < 1.5f &&           //
+                                       abs(current_value) < abs(new_value);  //
 
-    const auto log_scale = successi ? si + residual.z() : si;
+    const auto log_scale = refinement_successful ? si + residual.z() : si;
     const auto scale = scale_initial * powf(scale_exponent, log_scale);
 
-    if (successi)
+    if (refinement_successful)
     {
       x[i] += residual.x();
       y[i] += residual.y();
@@ -519,7 +521,6 @@ namespace DO::Shakti::Cuda {
       val[i] = current_value;
     }
     s[i] = scale;
-    success[i] = successi;
   }
 
   auto refine_extrema(const Octave<float>& dogs, DeviceExtrema& e,
@@ -536,17 +537,15 @@ namespace DO::Shakti::Cuda {
         dim3((e.indices.size() + block_sizes.x - 1) / block_sizes.x);
 
     e.values.resize(e.indices.size());
-    e.refined.resize(e.indices.size());
 
     auto x_ptr = thrust::raw_pointer_cast(e.x.data());
     auto y_ptr = thrust::raw_pointer_cast(e.y.data());
     auto s_ptr = thrust::raw_pointer_cast(e.s.data());
     auto val_ptr = thrust::raw_pointer_cast(e.values.data());
-    auto refined_ptr = thrust::raw_pointer_cast(e.refined.data());
 
     refine_extremum<<<grid_sizes, block_sizes>>>(dogs.surface_object(),  //
                                                  x_ptr, y_ptr, s_ptr,    //
-                                                 val_ptr, refined_ptr,   //
+                                                 val_ptr,                //
                                                  scale_initial,          //
                                                  scale_exponent,         //
                                                  int(e.indices.size())   //

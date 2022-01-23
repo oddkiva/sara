@@ -32,7 +32,7 @@ namespace DO::Shakti::Cuda {
     thrust::host_vector<float> y;
     thrust::host_vector<float> s;
     thrust::host_vector<std::int8_t> types;
-    thrust::device_vector<float> values;
+    thrust::host_vector<float> values;
   };
 
   struct DeviceExtrema
@@ -44,7 +44,6 @@ namespace DO::Shakti::Cuda {
     thrust::device_vector<float> s;
     thrust::device_vector<std::int8_t> types;
     thrust::device_vector<float> values;
-    thrust::device_vector<std::uint8_t> refined;
 
     inline auto copy_to_host() const -> HostExtrema
     {
@@ -55,18 +54,14 @@ namespace DO::Shakti::Cuda {
       h_extrema.y.resize(y.size());
       h_extrema.s.resize(s.size());
       h_extrema.types.resize(types.size());
-
-      // SARA_CHECK(values.size());
-      // h_extrema.values.resize(values.size());
-      // h_extrema.refined = thrust::host_vector<std::uint8_t>(refined.size());
+      h_extrema.values.resize(values.size());
 
       thrust::copy(indices.begin(), indices.end(), h_extrema.indices.begin());
       thrust::copy(x.begin(), x.end(), h_extrema.x.begin());
       thrust::copy(y.begin(), y.end(), h_extrema.y.begin());
       thrust::copy(s.begin(), s.end(), h_extrema.s.begin());
       thrust::copy(types.begin(), types.end(), h_extrema.types.begin());
-      // thrust::copy(values.begin(), values.end(), h_extrema.values.begin());
-      // thrust::copy(refined.begin(), refined.end(), h_extrema.refined.begin());
+      thrust::copy(values.begin(), values.end(), h_extrema.values.begin());
 
       return h_extrema;
     }
