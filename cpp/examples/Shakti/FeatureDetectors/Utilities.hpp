@@ -48,12 +48,6 @@ struct DisplayTask
       return;
 
     const auto num_extrema = static_cast<int>(data.x.size());
-    // SARA_CHECK(data.x.size());
-    // SARA_CHECK(data.y.size());
-    // SARA_CHECK(data.s.size());
-    // SARA_CHECK(data.types.size());
-    // SARA_CHECK(data.values.size());
-    // SARA_CHECK(data.refined.size());
 
 #pragma omp parallel for
     for (auto k = 0; k < num_extrema; ++k)
