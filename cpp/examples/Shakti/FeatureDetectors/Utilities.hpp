@@ -50,12 +50,10 @@ struct DisplayTask
     const auto num_extrema = static_cast<int>(data.x.size());
     // SARA_CHECK(data.x.size());
     // SARA_CHECK(data.y.size());
+    // SARA_CHECK(data.s.size());
     // SARA_CHECK(data.types.size());
-
-    sara::draw_text(image, 100, 50, sara::format("Frame: %d", index),
-                    sara::White8, 30);
-    sara::draw_text(image, 100, 100, sara::format("#Extrema: %d", num_extrema),
-                    sara::White8, 30);
+    // SARA_CHECK(data.values.size());
+    // SARA_CHECK(data.refined.size());
 
 #pragma omp parallel for
     for (auto k = 0; k < num_extrema; ++k)
@@ -63,21 +61,21 @@ struct DisplayTask
       const auto& x = data.x[k];
       const auto& y = data.y[k];
       const auto& s = data.s[k];
-      const auto& value = data.values[k];
-      const auto& refined = data.refined[k];
       const auto& type = data.types[k];
-      SARA_CHECK(x);
-      SARA_CHECK(y);
-      SARA_CHECK(s);
-      SARA_CHECK(value);
-      SARA_CHECK(int(type));
-      SARA_CHECK(int(refined));
+      static constexpr auto sqrt_2 = static_cast<float>(M_SQRT2);
+      const auto r = s * sqrt_2;
 
       if (type == 1)
-        sara::draw_circle(image, x, y, 4, sara::Red8, 3);
+        sara::draw_circle(image, x, y, r, sara::Red8, 3);
       else if (type == -1)
-        sara::draw_circle(image, x, y, 4, sara::Blue8, 3);
+        sara::draw_circle(image, x, y, r, sara::Blue8, 3);
     }
+
+    sara::draw_text(image, 100, 50, sara::format("Frame: %d", index),
+                    sara::White8, 30);
+    sara::draw_text(image, 100, 100, sara::format("#Extrema: %d", num_extrema),
+                    sara::White8, 30);
+
 
     sara::display(image);
 

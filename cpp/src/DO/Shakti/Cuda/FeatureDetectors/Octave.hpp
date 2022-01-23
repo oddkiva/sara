@@ -76,6 +76,11 @@ namespace DO::Shakti::Cuda {
       _surface.~SurfaceObject();
     }
 
+    inline auto array() -> ArrayView<T, 3>&
+    {
+      return _array;
+    }
+
     inline auto array() const -> const ArrayView<T, 3>&
     {
       return _array;

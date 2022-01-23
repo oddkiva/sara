@@ -29,6 +29,12 @@ namespace DO::Shakti::Cuda {
   static constexpr auto tile_y = 16;
   static constexpr auto tile_z = 2;
 
+  __device__ inline auto at(int tx, int ty, int tz)
+  {
+    static constexpr auto offset = 1;
+    return (tz * (tile_y + 2) + ty + offset) * (tile_y + 2) + tx + offset;
+  };
+
   __global__ auto local_scale_space_extremum(cudaSurfaceObject_t dog_octave,
                                              std::int8_t* ext_map,  //
                                              int dog_w, int dog_h, int dog_d,
@@ -42,6 +48,80 @@ namespace DO::Shakti::Cuda {
     if (x >= dog_w || y >= dog_h || z >= dog_d)
       return;
 
+    // Use the shared memory to fully leverage the GPU speed.
+    __shared__ float s_prev[tile_z * (tile_y + 2) * (tile_x + 2)];
+    __shared__ float s_curr[tile_z * (tile_y + 2) * (tile_x + 2)];
+    __shared__ float s_next[tile_z * (tile_y + 2) * (tile_x + 2)];
+
+    const auto& tx = threadIdx.x;
+    const auto& ty = threadIdx.y;
+    const auto& tz = threadIdx.z;
+
+    float val;
+
+    // Populate the previous scale.
+    //
+    // Top-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y - 1, z - 1,
+                      cudaBoundaryModeClamp);
+    s_prev[at(tx - 1, ty - 1, tz)] = val;
+    // Top-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y - 1, z - 1,
+                      cudaBoundaryModeClamp);
+    s_prev[at(tx + 1, ty - 1, tz)] = val;
+    // Bottom-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y + 1, z - 1,
+                      cudaBoundaryModeClamp);
+    s_prev[at(tx - 1, ty + 1, tz)] = val;
+    // Bottom-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y + 1, z - 1,
+                      cudaBoundaryModeClamp);
+    s_prev[at(tx + 1, ty + 1, tz)] = val;
+
+    // Populate the current scale.
+    //
+    // Top-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y - 1, z,
+                      cudaBoundaryModeClamp);
+    s_curr[at(tx - 1, ty - 1, tz)] = val;
+    // Top-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y - 1, z,
+                      cudaBoundaryModeClamp);
+    s_curr[at(tx + 1, ty - 1, tz)] = val;
+    // Bottom-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y + 1, z,
+                      cudaBoundaryModeClamp);
+    s_curr[at(tx - 1, ty + 1, tz)] = val;
+    // Bottom-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y + 1, z,
+                      cudaBoundaryModeClamp);
+    s_curr[at(tx + 1, ty + 1, tz)] = val;
+
+    // Populate the next scale.
+    //
+    // Top-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y - 1, z + 1,
+                      cudaBoundaryModeClamp);
+    s_next[at(tx - 1, ty - 1, tz)] = val;
+    // Top-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y - 1, z + 1,
+                      cudaBoundaryModeClamp);
+    s_next[at(tx + 1, ty - 1, tz)] = val;
+    // Bottom-left
+    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y + 1, z + 1,
+                      cudaBoundaryModeClamp);
+    s_next[at(tx - 1, ty + 1, tz)] = val;
+    // Bottom-right
+    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y + 1, z + 1,
+                      cudaBoundaryModeClamp);
+    s_next[at(tx + 1, ty + 1, tz)] = val;
+
+
+    // ========================================================================
+    __syncthreads();
+    // ========================================================================
+
+
     const auto gi = (z * dog_h + y) * dog_w + x;
 
     if (x == 0 || y == 0 || z == 0 ||  //
@@ -52,90 +132,31 @@ namespace DO::Shakti::Cuda {
     }
 
     // Avoid the local extremum loops.
-    float val;
     surf2DLayeredread(&val, dog_octave, x * sizeof(float), y, z,
                       cudaBoundaryModeClamp);
-    if (abs(val) < 0.8f * min_extremum_abs_value)  // 0.8f prefiltering ratio.
+    if (abs(val) < min_extremum_abs_value)
     {
       ext_map[gi] = 0;
       return;
     }
 
-    // Use the shared memory to fully leverage the GPU speed.
-    __shared__ float s_prev[tile_z][tile_y + 2][tile_x + 2];
-    __shared__ float s_curr[tile_z][tile_y + 2][tile_x + 2];
-    __shared__ float s_next[tile_z][tile_y + 2][tile_x + 2];
 
-    const auto& tx = threadIdx.x;
-    const auto& ty = threadIdx.y;
-    const auto& tz = threadIdx.z;
-
-    // Populate the previous scale.
-    //
-    // Top-left
-    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y - 1, z - 1,
-                      cudaBoundaryModeClamp);
-    s_prev[tz][ty + 0][tx + 0] = val;
-    // Top-right
-    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y - 1, z - 1,
-                      cudaBoundaryModeClamp);
-    s_prev[tz][ty + 0][tx + 2] = val;
-    // Bottom-left
-    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y + 1, z - 1,
-                      cudaBoundaryModeClamp);
-    s_prev[tz][ty + 2][tx + 0] = val;
-    // Bottom-right
-    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y + 1, z - 1,
-                      cudaBoundaryModeClamp);
-    s_prev[tz][ty + 2][tx + 2] = val;
-
-    // Populate the current scale.
-    //
-    // Top-left
-    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y - 1, z,
-                      cudaBoundaryModeClamp);
-    s_curr[tz][ty + 0][tx + 0] = val;
-    // Top-right
-    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y - 1, z,
-                      cudaBoundaryModeClamp);
-    s_curr[tz][ty + 0][tx + 2] = val;
-    // Bottom-left
-    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y + 1, z,
-                      cudaBoundaryModeClamp);
-    s_curr[tz][ty + 2][tx + 0] = val;
-    // Bottom-right
-    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y + 1, z,
-                      cudaBoundaryModeClamp);
-    s_curr[tz][ty + 2][tx + 2] = val;
-
-    // Populate the next scale.
-    //
-    // Top-left
-    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y - 1, z + 1,
-                      cudaBoundaryModeClamp);
-    s_next[tz][ty + 0][tx + 0] = val;
-    // Top-right
-    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y - 1, z + 1,
-                      cudaBoundaryModeClamp);
-    s_next[tz][ty + 0][tx + 2] = val;
-    // Bottom-left
-    surf2DLayeredread(&val, dog_octave, (x - 1) * sizeof(float), y + 1, z + 1,
-                      cudaBoundaryModeClamp);
-    s_next[tz][ty + 2][tx + 0] = val;
-    // Bottom-right
-    surf2DLayeredread(&val, dog_octave, (x + 1) * sizeof(float), y + 1, z + 1,
-                      cudaBoundaryModeClamp);
-    s_next[tz][ty + 2][tx + 2] = val;
-    __syncthreads();
+    val = s_curr[at(tx, ty, tz)];
 
     // Make this check first.
-    const auto on_edge =
-        [&edge_ratio_thres](const volatile decltype(s_curr) I,  //
-                            auto x, auto y, auto z) -> bool {
-      const auto h00 = I[z][y][x + 1] - 2 * I[z][y][x] + I[z][y][x - 1];
-      const auto h11 = I[z][y + 1][x] - 2 * I[z][y][x] + I[z][y - 1][x];
-      const auto h01 = (I[z][y + 1][x + 1] - I[z][y + 1][x - 1] -
-                        I[z][y - 1][x + 1] + I[z][y - 1][x - 1]) *
+    const auto on_edge = [&edge_ratio_thres](          //
+                             const volatile float* I,  //
+                             auto x, auto y, auto z) -> bool {
+#ifdef DEBUG_ME
+      printf("x=%d y=%d z=%d -> val=%f\n", x, y, z, I[at(x, y, z)]);
+#endif
+
+      const auto h00 =
+          I[at(x + 1, y, z)] - 2 * I[at(x, y, z)] + I[at(x - 1, y, z)];
+      const auto h11 =
+          I[at(x, y + 1, z)] - 2 * I[at(x, y, z)] + I[at(x, y - 1, z)];
+      const auto h01 = (I[at(x + 1, y + 1, z)] - I[at(x - 1, y + 1, z)] -
+                        I[at(x + 1, y - 1, z)] + I[at(x - 1, y - 1, z)]) *
                        0.25f;
       const auto& h10 = h01;
 
@@ -154,71 +175,103 @@ namespace DO::Shakti::Cuda {
       return quantity >= 0;
     };
 
-    if (on_edge(s_curr, tx + 1, ty + 1, tz))
+    if (on_edge(s_curr, tx, ty, tz))
     {
       ext_map[gi] = 0;
       return;
     }
 
+
+    val = s_curr[at(tx, ty, tz)];
+
+#ifdef DEBUG_ME
+    printf("me = %f\n", val);
+    printf("s_prev\n");
+    for (auto dy = -1; dy <= 1; ++dy)
+    {
+      for (auto dx = -1; dx <= 1; ++dx)
+        printf("%f ", s_prev[at(tx + dx, ty + dy, tz)]);
+      printf("\n");
+    }
+    printf("s_curr\n");
+    for (auto dy = -1; dy <= 1; ++dy)
+    {
+      for (auto dx = -1; dx <= 1; ++dx)
+        printf("%f ", s_curr[at(tx + dx, ty + dy, tz)]);
+      printf("\n");
+    }
+    printf("s_next\n");
+    for (auto dy = -1; dy <= 1; ++dy)
+    {
+      for (auto dx = -1; dx <= 1; ++dx)
+        printf("%f ", s_next[at(tx + dx, ty + dy, tz)]);
+      printf("\n");
+    }
+#endif
+
     // Now the most expensive check.
-    auto val_ext = val;
+    auto val_ext = s_prev[at(tx - 1, ty - 1, tz)];
     if (val > 0)
     {
 #pragma unroll
-      for (auto dy = 0; dy <= 2; ++dy)
+      for (auto dy = -1; dy <= 1; ++dy)
       {
 #pragma unroll
-        for (auto dx = 0; dx <= 2; ++dx)
+        for (auto dx = -1; dx <= 1; ++dx)
         {
-          val_ext = max(val_ext, s_prev[tz][ty + dy][tx + dx]);
+          val_ext = max(val_ext, s_prev[at(tx + dx, ty + dy, tz)]);
         }
       }
 #pragma unroll
-      for (auto dy = 0; dy <= 2; ++dy)
+      for (auto dy = -1; dy <= 1; ++dy)
       {
 #pragma unroll
-        for (auto dx = 0; dx <= 2; ++dx)
+        for (auto dx = -1; dx <= 1; ++dx)
         {
-          val_ext = max(val_ext, s_curr[tz][ty + dy][tx + dx]);
+          // if (dy == 0 && dx == 0)
+          //   continue;
+          val_ext = max(val_ext, s_curr[at(tx + dx, ty + dy, tz)]);
         }
       }
 #pragma unroll
-      for (auto dy = 0; dy <= 2; ++dy)
+      for (auto dy = -1; dy <= 1; ++dy)
       {
 #pragma unroll
-        for (auto dx = 0; dx <= 2; ++dx)
+        for (auto dx = -1; dx <= 1; ++dx)
         {
-          val_ext = max(val_ext, s_next[tz][ty + dy][tx + dx]);
+          val_ext = max(val_ext, s_next[at(tx + dx, ty + dy, tz)]);
         }
       }
     }
     else
     {
 #pragma unroll
-      for (auto dy = 0; dy <= 2; ++dy)
+      for (auto dy = -1; dy <= 1; ++dy)
       {
 #pragma unroll
-        for (auto dx = 0; dx <= 2; ++dx)
+        for (auto dx = -1; dx <= 1; ++dx)
         {
-          val_ext = min(val_ext, s_prev[tz][ty + dy][tx + dx]);
+          val_ext = min(val_ext, s_prev[at(tx + dx, ty + dy, tz)]);
         }
       }
 #pragma unroll
-      for (auto dy = 0; dy <= 2; ++dy)
+      for (auto dy = -1; dy <= 1; ++dy)
       {
 #pragma unroll
-        for (auto dx = 0; dx <= 2; ++dx)
+        for (auto dx = -1; dx <= 1; ++dx)
         {
-          val_ext = min(val_ext, s_curr[tz][ty + dy][tx + dx]);
+          // if (dy == 0 && dx == 0)
+          //   continue;
+          val_ext = min(val_ext, s_curr[at(tx + dx, ty + dy, tz)]);
         }
       }
 #pragma unroll
-      for (auto dy = 0; dy <= 2; ++dy)
+      for (auto dy = -1; dy <= 1; ++dy)
       {
 #pragma unroll
-        for (auto dx = 0; dx <= 2; ++dx)
+        for (auto dx = -1; dx <= 1; ++dx)
         {
-          val_ext = min(val_ext, s_next[tz][ty + dy][tx + dx]);
+          val_ext = min(val_ext, s_next[at(tx + dx, ty + dy, tz)]);
         }
       }
     }
@@ -231,7 +284,6 @@ namespace DO::Shakti::Cuda {
 
     ext_map[gi] = extremum_type;
   }
-
 
   struct IsExtremum
   {
@@ -355,9 +407,9 @@ namespace DO::Shakti::Cuda {
       return val;
     };
 
-    g(0) = (f(x + 1, y, z) - f(x - 1, y, z)) * 0.5f;
-    g(1) = (f(x, y + 1, z) - f(x, y - 1, z)) * 0.5f;
-    g(2) = (f(x, y, z + 1) - f(x, y, z - 1)) * 0.5f;
+    g.x() = (f(x + 1, y, z) - f(x - 1, y, z)) * 0.5f;
+    g.y() = (f(x, y + 1, z) - f(x, y - 1, z)) * 0.5f;
+    g.z() = (f(x, y, z + 1) - f(x, y, z - 1)) * 0.5f;
 
     return g;
   }
@@ -397,12 +449,14 @@ namespace DO::Shakti::Cuda {
     return h;
   }
 
-  __global__ auto refine_extremum(cudaSurfaceObject_t surface,        //
-                                  float* x, float* y, float* s,       //
-                                  float* val, std::uint8_t* success,  //
-                                  float scale, int n) -> void
+  __global__ auto refine_extremum(cudaSurfaceObject_t surface,                //
+                                  float* x, float* y, float* s,               //
+                                  float* val, std::uint8_t* success,          //
+                                  float scale_initial, float scale_exponent,  //
+                                  int n) -> void
   {
     const auto i = blockIdx.x * blockDim.x + threadIdx.x;
+    // printf("i=%d\n", i);
     if (i >= n)
       return;
 
@@ -416,21 +470,30 @@ namespace DO::Shakti::Cuda {
     const auto hessian = hessian_3d(surface, xi, yi, si);
     static_assert(std::is_same_v<decltype(hessian), const Matrix3f>);
 
-    // printf("Coords\n");
-    // printf("%3d %3d %3d\n", xi, yi, si);
+#ifdef DEBUG_ME
+    printf("Coords   %3d %3d %3d\n", xi, yi, si);
+    printf("Gradient %0.4f %0.4f %0.4f\n", gradient(0), gradient(1),
+           gradient(2));
 
-    // printf("Gradient\n");
-    //printf("%0.4f %0.4f %0.4f\n", gradient(0), gradient(1), gradient(2));
+    printf("Hessian\n");
+    for (auto k = 0; k < 3; ++k)
+      printf("%0.4f %0.4f %0.4f\n",  //
+             hessian(k, 0), hessian(k, 1), hessian(k, 2));
+#endif
 
-    // printf("Hessian\n");
-    // for (auto k = 0; k < 3; ++k)
-    //   printf("%0.4f %0.4f %0.4f\n",  //
-    //          hessian(k, 0), hessian(k, 1), hessian(k, 2));
+    const auto hessian_inv = inverse(hessian);
+#ifdef DEBUG_ME
+    printf("HessianInverse\n");
+    for (auto k = 0; k < 3; ++k)
+      printf("%0.4f %0.4f %0.4f\n",  //
+             hessian_inv(k, 0), hessian_inv(k, 1), hessian_inv(k, 2));
+#endif
 
-    // printf("det_h = %f\n", det(hessian));
-    const auto residual = -(inverse(hessian) * gradient);
+    const auto residual = -(hessian_inv * gradient);
     static_assert(std::is_same_v<decltype(residual), const Vector3f>);
-    // printf("%0.4f %0.4f %0.4f\n", residual(0), residual(1), residual(2));
+#ifdef DEBUG_ME
+    printf("%0.4f %0.4f %0.4f\n", residual(0), residual(1), residual(2));
+#endif
 
     float current_value;
     surf2DLayeredread(&current_value, surface, xi * sizeof(float), yi, si);
@@ -439,23 +502,28 @@ namespace DO::Shakti::Cuda {
 
     const auto successi = abs(residual.x()) < 1.5f &&           //
                           abs(residual.y()) < 1.5f &&           //
+                          abs(residual.z()) < 1.5f &&           //
                           abs(current_value) < abs(new_value);  //
+
+    const auto log_scale = successi ? si + residual.z() : si;
+    const auto scale = scale_initial * powf(scale_exponent, log_scale);
 
     if (successi)
     {
       x[i] += residual.x();
       y[i] += residual.y();
-      s[i] += residual.z();
       val[i] = new_value;
     }
     else
     {
       val[i] = current_value;
     }
+    s[i] = scale;
     success[i] = successi;
   }
 
-  auto refine_extrema(const Octave<float>& dogs, DeviceExtrema& e) -> void
+  auto refine_extrema(const Octave<float>& dogs, DeviceExtrema& e,
+                      float scale_initial, float scale_exponent) -> void
   {
     const auto& w = dogs.width();
     const auto& h = dogs.height();
@@ -470,12 +538,6 @@ namespace DO::Shakti::Cuda {
     e.values.resize(e.indices.size());
     e.refined.resize(e.indices.size());
 
-    SARA_CHECK(e.x.size());
-    SARA_CHECK(e.y.size());
-    SARA_CHECK(e.s.size());
-    SARA_CHECK(e.values.size());
-    SARA_CHECK(e.refined.size());
-
     auto x_ptr = thrust::raw_pointer_cast(e.x.data());
     auto y_ptr = thrust::raw_pointer_cast(e.y.data());
     auto s_ptr = thrust::raw_pointer_cast(e.s.data());
@@ -485,7 +547,8 @@ namespace DO::Shakti::Cuda {
     refine_extremum<<<grid_sizes, block_sizes>>>(dogs.surface_object(),  //
                                                  x_ptr, y_ptr, s_ptr,    //
                                                  val_ptr, refined_ptr,   //
-                                                 0.f,                    //
+                                                 scale_initial,          //
+                                                 scale_exponent,         //
                                                  int(e.indices.size())   //
     );
   }

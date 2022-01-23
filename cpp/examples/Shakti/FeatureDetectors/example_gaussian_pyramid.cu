@@ -161,7 +161,7 @@ int __main(int argc, char** argv)
     shakti::toc(d_timer, "Extrema Init");
 
     shakti::tic(d_timer);
-    sc::refine_extrema(d_dog_octave, d_extrema);
+    sc::refine_extrema(d_dog_octave, d_extrema, goc.host_kernels.scale_initial, goc.host_kernels.scale_factor);
     shakti::toc(d_timer, "Extrema Refinement");
 
     shakti::tic(d_timer);
@@ -169,10 +169,11 @@ int __main(int argc, char** argv)
     shakti::toc(d_timer, "Extrema Copy to Host");
 
     sara::tic();
-#ifdef ASYNC
-    display_queue.enqueue({frame, std::move(h_extrema), frame_index});
-#else
     auto task = DisplayTask{frame, std::move(h_extrema), frame_index};
+#define ASYNC
+#ifdef ASYNC
+    display_queue.enqueue(std::move(task));
+#else
     task.run();
     sara::get_key();
 #endif

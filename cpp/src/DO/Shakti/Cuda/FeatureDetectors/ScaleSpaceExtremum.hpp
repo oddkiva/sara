@@ -33,7 +33,6 @@ namespace DO::Shakti::Cuda {
     thrust::host_vector<float> s;
     thrust::host_vector<std::int8_t> types;
     thrust::device_vector<float> values;
-    thrust::device_vector<std::uint8_t> refined;
   };
 
   struct DeviceExtrema
@@ -51,21 +50,23 @@ namespace DO::Shakti::Cuda {
     {
       auto h_extrema = HostExtrema{};
 
-      h_extrema.indices = thrust::host_vector<int>(indices.size());
-      h_extrema.x = thrust::host_vector<float>(x.size());
-      h_extrema.y = thrust::host_vector<float>(y.size());
-      h_extrema.s = thrust::host_vector<float>(s.size());
-      h_extrema.types = thrust::host_vector<std::int8_t>(types.size());
-      h_extrema.values = thrust::host_vector<float>(values.size());
-      h_extrema.refined = thrust::host_vector<std::uint8_t>(refined.size());
+      h_extrema.indices.resize(indices.size());
+      h_extrema.x.resize(x.size());
+      h_extrema.y.resize(y.size());
+      h_extrema.s.resize(s.size());
+      h_extrema.types.resize(types.size());
+
+      // SARA_CHECK(values.size());
+      // h_extrema.values.resize(values.size());
+      // h_extrema.refined = thrust::host_vector<std::uint8_t>(refined.size());
 
       thrust::copy(indices.begin(), indices.end(), h_extrema.indices.begin());
       thrust::copy(x.begin(), x.end(), h_extrema.x.begin());
       thrust::copy(y.begin(), y.end(), h_extrema.y.begin());
       thrust::copy(s.begin(), s.end(), h_extrema.s.begin());
       thrust::copy(types.begin(), types.end(), h_extrema.types.begin());
-      thrust::copy(values.begin(), values.end(), h_extrema.values.begin());
-      thrust::copy(refined.begin(), refined.end(), h_extrema.refined.begin());
+      // thrust::copy(values.begin(), values.end(), h_extrema.values.begin());
+      // thrust::copy(refined.begin(), refined.end(), h_extrema.refined.begin());
 
       return h_extrema;
     }
@@ -80,6 +81,7 @@ namespace DO::Shakti::Cuda {
 
   auto initialize_extrema(DeviceExtrema&, int w, int h, int d) -> void;
 
-  auto refine_extrema(const Octave<float>& dogs, DeviceExtrema& e) -> void;
+  auto refine_extrema(const Octave<float>& dogs, DeviceExtrema& e,
+                      float scale_initial, float scale_exponent) -> void;
 
 }  // namespace DO::Shakti::Cuda

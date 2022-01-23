@@ -69,6 +69,23 @@ namespace DO::Shakti {
         _data[i] = data[i];
     }
 
+    __host__ __device__ inline static Matrix Identity()
+    {
+      static_assert(M == N, "The matrix must be square!");
+
+      auto eye = Matrix{};
+
+#pragma unroll
+      for (int i = 0; i < M; ++i)
+      {
+#pragma unroll
+        for (int j = 0; j < N; ++j)
+          eye(i, j) = static_cast<T>(i == j);
+      }
+
+      return eye;
+    }
+
     __host__ __device__ inline static Matrix Zero()
     {
       Matrix zero;
@@ -295,10 +312,11 @@ namespace DO::Shakti {
 #pragma unroll
         for (int j = 0; j < O; ++j)
         {
-          T res(0);
+          auto val = T{};
 #pragma unroll
           for (int k = 0; k < N; ++k)
-            res += (*this)(i, k) * other(k, j);
+            val += (*this)(i, k) * other(k, j);
+          res(i, j) = val;
         }
       }
       return res;
@@ -315,10 +333,11 @@ namespace DO::Shakti {
 #pragma unroll
         for (int j = 0; j < N; ++j)
         {
-          T res(0);
+          auto val = T{};
 #pragma unroll
           for (int k = 0; k < N; ++k)
-            res += (*this)(i, k) * other(k, j);
+            val += (*this)(i, k) * other(k, j);
+          res(i, j) = val;
         }
       }
       return res;
