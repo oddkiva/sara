@@ -45,8 +45,8 @@
     std::cout << termcolor::bold << termcolor::green << "🧭["                \
               << __FILENAME__ << "]"                                           \
               << "📑" << termcolor::red << "[" << __FUNCTION__ << ":"           \
-              << __LINE__ << "]🎶 " << termcolor::reset << #x << " = " << x     \
-              << std::endl
+              << __LINE__ << "]🎶" << termcolor::reset << "\n"                  \
+              << #x << " = " << x << std::endl
 #endif
 
 
