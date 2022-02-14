@@ -20,9 +20,10 @@ namespace DO::Sara {
   struct Saddle
   {
     Eigen::Vector2i p;
+    Eigen::Matrix2f hessian;
     float score;
 
-    auto operator<(const Saddle& other) const
+    inline auto operator<(const Saddle& other) const
     {
       return score < other.score;
     }
@@ -49,7 +50,9 @@ namespace DO::Sara {
         if (std::abs((R(0, 0) - R(1, 1)) / R(0, 0)) > 0.1f)
           continue;
 
-        saddle_points.push_back({{x, y}, std::abs(det_of_hessian(x, y))});
+        saddle_points.push_back({
+            {x, y}, hessian(x, y), std::abs(det_of_hessian(x, y))  //
+        });
       }
     }
 

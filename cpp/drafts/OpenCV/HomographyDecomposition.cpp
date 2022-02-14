@@ -15,6 +15,7 @@ auto decompose_H_RQ_factorization(const Eigen::Matrix3d& H,
 {
   const Eigen::Matrix3d invK = K.inverse();
   const Eigen::Matrix3d P = (invK * H).normalized();
+  std::cout << "P =\n" << P << std::endl;
 
   const Eigen::Vector3d n = Eigen::Vector3d::UnitZ();
 

@@ -114,14 +114,7 @@ int __main(int argc, char** argv)
 
   static constexpr auto sigma = 1.6f;
   static constexpr auto nms_radius = 10;
-  static constexpr auto high_threshold_ratio = static_cast<float>(10._percent);
-  static constexpr auto low_threshold_ratio = high_threshold_ratio / 2;
-  static constexpr auto angular_threshold = (5._deg).as<float>();
-
-  auto ed = sara::EdgeDetector{{high_threshold_ratio,  //
-                                low_threshold_ratio,   //
-                                angular_threshold,     //
-                                true}};
+  static constexpr float adaptive_thres = 0.05f;
 
   for (auto i = 0; i <= 1790; i += 10)
   {
@@ -137,54 +130,39 @@ int __main(int argc, char** argv)
       sara::set_antialiasing();
     }
 
-    const auto saddle_points =
-        sara::detect_saddle_points(image_blurred, nms_radius);
+    // Calculate the first derivative.
+    const auto hessian = image_blurred.compute<sara::Hessian>();
 
-    // Detect edges.
-    ed(image_blurred);
-    const auto& edges = ed.pipeline.edges_as_list;
-    const auto& edges_simplified = ed.pipeline.edges_simplified;
+    // Chessboard corners are saddle points of the image, which are
+    // characterized by the property det(H(x, y)) < 0.
+    const auto det_of_hessian = hessian.compute<sara::Determinant>();
 
-    auto darks = std::vector<std::vector<sara::Rgb64f>>{};
-    auto brights = std::vector<std::vector<sara::Rgb64f>>{};
-    auto mean_gradients = std::vector<Eigen::Vector2f>{};
-    for (const auto& edge : edges)
-    {
-      auto [dark, bright, g] = edge_signature(  //
-          image,                                //
-          ed.pipeline.gradient_magnitude,       //
-          ed.pipeline.gradient_orientation,     //
-          edge);
-      darks.push_back(std::move(dark));
-      brights.push_back(std::move(bright));
-      mean_gradients.push_back(g);
-    }
+    // Adaptive thresholding.
+    const auto thres = det_of_hessian.flat_array().minCoeff() * adaptive_thres;
+    auto saddle_points = extract_saddle_points(det_of_hessian, hessian, thres);
 
-    // Calculate edge statistics.
-    sara::tic();
-    const auto edge_stats = sara::CurveStatistics{edges_simplified};
-    sara::toc("Edge Shape Statistics");
-
-    sara::tic();
-    const auto edge_attributes = sara::EdgeAttributes{
-        edges_simplified,    //
-        edge_stats.centers,  //
-        edge_stats.axes,     //
-        edge_stats.lengths   //
-    };
-
-    sara::check_edge_grouping(image,                    //
-                              edges_simplified,         //
-                              edges,                    //
-                              mean_gradients,           //
-                              edge_attributes.centers,  //
-                              edge_attributes.axes,     //
-                              edge_attributes.lengths);
-    sara::toc("Edge Grouping");
+    // Non-maxima suppression.
+    nms(saddle_points, image.sizes(), nms_radius);
 
     for (const auto& s : saddle_points)
-      sara::fill_circle(s.p.x(), s.p.y(), 10, sara::Red8);
+    {
+      sara::fill_circle(image, s.p.x(), s.p.y(), 5, sara::Red8);
 
+      const auto svd = s.hessian.jacobiSvd(Eigen::ComputeFullU | Eigen::ComputeFullV);
+      const Eigen::Vector2f S = svd.singularValues();
+      const auto& axes = svd.matrixU();
+
+      const auto a = Eigen::Vector2f(s.p.x(), s.p.y());
+      static constexpr auto radius = 20.f;
+      const Eigen::Vector2f b = a + radius * axes.col(0);
+      const Eigen::Vector2f c = a + radius * axes.col(1);
+
+      sara::draw_arrow(image, a, b, sara::Cyan8, 2);
+      sara::draw_arrow(image, a, c, sara::Cyan8, 2);
+    }
+
+    sara::display(image);
+    sara::get_key();
   }
 
   return 0;
