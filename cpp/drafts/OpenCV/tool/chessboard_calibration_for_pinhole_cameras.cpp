@@ -36,61 +36,6 @@ inline auto init_K(int w, int h) -> Eigen::Matrix3d
   return K;
 }
 
-auto inspect(sara::ImageView<sara::Rgb8>& image,    //
-             const sara::OpenCV::Chessboard& chessboard,  //
-             const Eigen::Matrix3d& K,              //
-             const Eigen::Matrix3d& R,              //
-             const Eigen::Vector3d& t,
-             bool pause = false) -> void
-{
-  auto Hr = Eigen::Matrix3f{};
-  Hr.col(0) = R.col(0).cast<float>();
-  Hr.col(1) = R.col(1).cast<float>();
-  Hr.col(2) = t.cast<float>();
-  Hr = (K.cast<float>() * Hr).normalized();
-
-  const auto a = chessboard.image_point(0, 0);
-  const auto b = chessboard.image_point(0, 1);
-  const auto c = chessboard.image_point(1, 0);
-
-  const Eigen::Vector2f d = (K * (R * Eigen::Vector3d::UnitZ() + t))  //
-                                .hnormalized()
-                                .cast<float>();
-
-
-  static const auto red = sara::Rgb8{167, 0, 0};
-  sara::draw_arrow(image, a, b, red, 6);
-  sara::draw_circle(image, a, 5.f, red, 6);
-  sara::draw_circle(image, b, 5.f, red, 6);
-
-  static const auto green = sara::Rgb8{89, 216, 26};
-  sara::draw_arrow(image, a, c, green, 6);
-  sara::draw_circle(image, a, 5.f, green, 6);
-  sara::draw_circle(image, c, 5.f, green, 6);
-
-  sara::draw_arrow(image, a, d, sara::Blue8, 6);
-  sara::draw_circle(image, a, 5.f, sara::Blue8, 6);
-  sara::draw_circle(image, d, 5.f, sara::Blue8, 6);
-
-  for (auto y = 0; y < chessboard.height(); ++y)
-  {
-    for (auto x = 0; x < chessboard.width(); ++x)
-    {
-      const Eigen::Vector3f P = chessboard.scene_point(x, y).homogeneous();
-      const Eigen::Vector2f p1 = chessboard.image_point(x, y);
-      const Eigen::Vector2f p2 = (Hr * P).hnormalized();
-
-      sara::draw_circle(image, p1, 3.f, sara::Cyan8, 3);
-      sara::draw_circle(image, p2, 3.f, sara::Magenta8, 3);
-      if (pause)
-      {
-        sara::display(image);
-        sara::get_key();
-      }
-    }
-  }
-}
-
 
 struct ReprojectionError
 {
@@ -106,8 +51,8 @@ struct ReprojectionError
   }
 
   // We optimize:
-  // - only one set of intrinsics
-  // - as many set of extrinsics as there are images
+  // - the single calibration matrix across all images
+  // - as many camera poses (R, t) as there are images
   template <typename T>
   inline auto operator()(const T* const intrinsics, const T* const extrinsics,
                          T* residuals) const -> bool
@@ -175,9 +120,6 @@ public:
     _intrinsics[0] = K(0, 0);
     _intrinsics[1] = K(0, 2);
     _intrinsics[2] = K(1, 2);
-    SARA_CHECK(_intrinsics[0]);
-    SARA_CHECK(_intrinsics[1]);
-    SARA_CHECK(_intrinsics[2]);
   }
 
   inline auto initialize_obs_3d(int w, int h, double square_size) -> void
@@ -192,7 +134,6 @@ public:
       {
         _observations_3d.push_back(x * square_size);
         _observations_3d.push_back(y * square_size);
-        SARA_DEBUG << "scene " << x << " " << y << std::endl;
       }
     }
   }
@@ -206,9 +147,6 @@ public:
     const auto angle_axis = Eigen::AngleAxisd{R};
     const auto& angle = angle_axis.angle();
     const auto& axis = angle_axis.axis();
-    SARA_DEBUG << "angle = " << angle << std::endl;
-    SARA_DEBUG << "axis = " << axis.transpose() << std::endl;
-    SARA_DEBUG << "axis.norm = " << axis.norm() << std::endl;
     for (auto i = 0; i < 3; ++i)
       _extrinsics.push_back(angle * axis(i));
 
@@ -271,7 +209,10 @@ public:
 
   inline auto transform_into_ceres_problem(ceres::Problem& problem) -> void
   {
+#ifdef DEBUG_CALIBRATION_PROBLEM
     SARA_CHECK(_num_images);
+#endif
+
     for (auto n = 0; n < _num_images; ++n)
     {
       for (auto y = 0; y < _h; ++y)
@@ -290,6 +231,7 @@ public:
           const auto scene_y =
               static_cast<double>(_observations_3d[2 * corner_index + 1]);
 
+#ifdef DEBUG_CALIBRATION_PROBLEM
           SARA_CHECK(n);
           SARA_CHECK(corner_index);
           SARA_DEBUG << "image: " << image_x << " " << image_y << std::endl;
@@ -305,10 +247,12 @@ public:
                      << extrinsics[3 + 1] << " "  //
                      << extrinsics[3 + 2] << std::endl;
           sara::draw_circle(image_x, image_y, 3., sara::Blue8, 4);
-          // sara::get_key();
+          sara::get_key();
+#endif
 
-          auto cost_function =
-              ReprojectionError::create(image_x, image_y, scene_x, scene_y);
+          auto cost_function = ReprojectionError::create(image_x, image_y,  //
+                                                         scene_x, scene_y);
+
           problem.AddResidualBlock(cost_function, nullptr, mutable_intrinsics(),
                                    mutable_extrinsics(n));
         }
@@ -331,26 +275,27 @@ private:
 
 GRAPHICS_MAIN()
 {
-// #define SAMSUNG_GALAXY_J6
+#define SAMSUNG_GALAXY_J6
 // #define GOPRO4
 // #define GOPRO7_WIDE
 // #define GOPRO7_SUPERVIEW
-#define LUXVISION
+// #define LUXVISION
 
-  auto video_stream = sara::VideoStream{
+  auto video_stream = sara::VideoStream
+  {
 #if defined(SAMSUNG_GALAXY_J6)
-      "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
+    "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
 #elif defined(GOPRO4)
-      "/home/david/Desktop/calibration/gopro-hero4/chessboard.mp4"
+    "/home/david/Desktop/calibration/gopro-hero4/chessboard.mp4"
 #elif defined(GOPRO7_WIDE)
-      "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
+    "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
 #elif defined(GOPRO7_SUPERVIEW)
-      "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
-      "GH010053.MP4"
+    "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
+    "GH010053.MP4"
 #elif defined(LUXVISION)
-      "/media/Linux Data/"
-      "ha/safetytech/210330_FishEye/calibration_luxvision_cameras/"
-      "checkboard_luxvision_1.MP4"
+    "/media/Linux Data/"
+    "ha/safetytech/210330_FishEye/calibration_luxvision_cameras/"
+    "checkboard_luxvision_1.MP4"
 #else
 #  pragma error "INVALID!"
 #endif
@@ -378,10 +323,11 @@ GRAPHICS_MAIN()
   // Initialize the calibration problem.
   auto calibration_problem = ChessboardCalibrationProblem{};
   calibration_problem.initialize_intrinsics(K);
-  calibration_problem.initialize_obs_3d(pattern_size.x(), pattern_size.y(), square_size.value);
+  calibration_problem.initialize_obs_3d(pattern_size.x(), pattern_size.y(),
+                                        square_size.value);
 
 
-  static constexpr auto num_frames = 90;
+  static constexpr auto num_frames = 1000;
   auto selected_frames = std::vector<sara::Image<sara::Rgb8>>{};
   sara::create_window(frame.sizes());
   sara::set_antialiasing();
@@ -390,7 +336,7 @@ GRAPHICS_MAIN()
     if (!video_stream.read())
       break;
 
-    if (i % 5 != 0)
+    if (i % 3 != 0)
       continue;
 
     SARA_CHECK(i);
@@ -410,10 +356,7 @@ GRAPHICS_MAIN()
       auto ts = std::vector<Eigen::Vector3d>{};
       auto ns = std::vector<Eigen::Vector3d>{};
 
-      // TODO: take the time to better understand the math underneath.
-      // decompose_H_faugeras(H, K, Rs, ts, ns);
-
-      // So far this simple approach gave the best results.
+      // This simple approach gives the best results.
       decompose_H_RQ_factorization(H, K, Rs, ts, ns);
 
       calibration_problem.add(chessboard, Rs[0], ts[0]);
@@ -426,34 +369,29 @@ GRAPHICS_MAIN()
 
       inspect(frame_copy, chessboard, K, Rs[0], ts[0]);
       sara::display(frame_copy);
-      sara::get_key();
 
       chessboards.emplace_back(std::move(chessboard));
     }
   }
 
-  sara::get_key();
-
+  SARA_DEBUG << "Instantiating Ceres Problem..." << std::endl;
   auto problem = ceres::Problem{};
   calibration_problem.transform_into_ceres_problem(problem);
 
+  SARA_DEBUG << "Solving Ceres Problem..." << std::endl;
   auto options = ceres::Solver::Options{};
-  options.linear_solver_type = ceres::DENSE_SCHUR;
+  options.linear_solver_type = ceres::SPARSE_SCHUR;
   options.minimizer_progress_to_stdout = true;
-
   auto summary = ceres::Solver::Summary{};
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";
 
-  std::cout << "RMS[INITIAL] = "
-            << std::sqrt(summary.initial_cost / chessboards.size() /
-                         chessboards.front().corner_count())
-            << std::endl;
-  std::cout << "RMS[FINAL] = "
-            << std::sqrt(summary.final_cost / chessboards.size() /
-                         chessboards.front().corner_count())
-            << std::endl;
-
+  const auto num_data_pts =
+      chessboards.size() * chessboards.front().corner_count();
+  const auto rms_init = std::sqrt(summary.initial_cost / num_data_pts);
+  const auto rms_final = std::sqrt(summary.final_cost / num_data_pts);
+  SARA_DEBUG << "RMS[INITIAL] = " << rms_init << std::endl;
+  SARA_DEBUG << "RMS[FINAL  ] = " << rms_final << std::endl;
 
   const auto f = calibration_problem.mutable_intrinsics()[0];
   const auto u0 = calibration_problem.mutable_intrinsics()[1];
@@ -469,8 +407,6 @@ GRAPHICS_MAIN()
   {
     const auto R = calibration_problem.rotation(i).toRotationMatrix();
     const auto t = calibration_problem.translation(i);
-    SARA_DEBUG << "R =\n" << R << std::endl;
-    SARA_DEBUG << "t =\n" << t << std::endl;
 
     auto frame_copy = selected_frames[i];
     inspect(frame_copy, chessboards[i], K, R, t);

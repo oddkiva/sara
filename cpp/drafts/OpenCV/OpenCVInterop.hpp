@@ -144,5 +144,59 @@ namespace DO::Sara::OpenCV {
     }
   }
 
+  inline auto inspect(ImageView<Rgb8>& image,          //
+                      const OpenCV::Chessboard& chessboard,  //
+                      const Eigen::Matrix3d& K,                    //
+                      const Eigen::Matrix3d& R,                    //
+                      const Eigen::Vector3d& t, bool pause = false) -> void
+  {
+    auto Hr = Eigen::Matrix3f{};
+    Hr.col(0) = R.col(0).cast<float>();
+    Hr.col(1) = R.col(1).cast<float>();
+    Hr.col(2) = t.cast<float>();
+    Hr = (K.cast<float>() * Hr).normalized();
+
+    const auto a = chessboard.image_point(0, 0);
+    const auto b = chessboard.image_point(0, 1);
+    const auto c = chessboard.image_point(1, 0);
+
+    const Eigen::Vector2f d = (K * (R * Eigen::Vector3d::UnitZ() + t))  //
+                                  .hnormalized()
+                                  .cast<float>();
+
+
+    static const auto red = Rgb8{167, 0, 0};
+    draw_arrow(image, a, b, red, 6);
+    draw_circle(image, a, 5.f, red, 6);
+    draw_circle(image, b, 5.f, red, 6);
+
+    static const auto green = Rgb8{89, 216, 26};
+    draw_arrow(image, a, c, green, 6);
+    draw_circle(image, a, 5.f, green, 6);
+    draw_circle(image, c, 5.f, green, 6);
+
+    draw_arrow(image, a, d, Blue8, 6);
+    draw_circle(image, a, 5.f, Blue8, 6);
+    draw_circle(image, d, 5.f, Blue8, 6);
+
+    for (auto y = 0; y < chessboard.height(); ++y)
+    {
+      for (auto x = 0; x < chessboard.width(); ++x)
+      {
+        const Eigen::Vector3f P = chessboard.scene_point(x, y).homogeneous();
+        const Eigen::Vector2f p1 = chessboard.image_point(x, y);
+        const Eigen::Vector2f p2 = (Hr * P).hnormalized();
+
+        draw_circle(image, p1, 3.f, Cyan8, 3);
+        draw_circle(image, p2, 3.f, Magenta8, 3);
+        if (pause)
+        {
+          display(image);
+          get_key();
+        }
+      }
+    }
+  }
+
 
 }  // namespace DO::Sara::OpenCV
