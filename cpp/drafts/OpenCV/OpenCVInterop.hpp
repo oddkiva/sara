@@ -69,9 +69,14 @@ namespace DO::Sara::OpenCV {
       return {_square_size_in_meters * x, _square_size_in_meters * y};
     }
 
-    inline auto corners_count_per_axis() const -> const Eigen::Vector2i
+    inline auto corners_count_per_axis() const -> Eigen::Vector2i
     {
       return {_corner_count_per_axis.width, _corner_count_per_axis.height};
+    }
+
+    inline auto square_size_in_meters() const -> float
+    {
+      return _square_size_in_meters;
     }
 
   private:
@@ -157,13 +162,14 @@ namespace DO::Sara::OpenCV {
     Hr = (K.cast<float>() * Hr).normalized();
 
     const auto a = chessboard.image_point(0, 0);
-    const auto b = chessboard.image_point(0, 1);
-    const auto c = chessboard.image_point(1, 0);
+    const auto b = chessboard.image_point(1, 0);
+    const auto c = chessboard.image_point(0, 1);
 
-    const Eigen::Vector2f d = (K * (R * Eigen::Vector3d::UnitZ() + t))  //
-                                  .hnormalized()
-                                  .cast<float>();
-
+    const Eigen::Vector3f d3 = (K * (R * Eigen::Vector3d::UnitZ() *
+                                         chessboard.square_size_in_meters() +
+                                     t))
+                                   .cast<float>();
+    const Eigen::Vector2f d = d3.hnormalized();
 
     static const auto red = Rgb8{167, 0, 0};
     draw_arrow(image, a, b, red, 6);

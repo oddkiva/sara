@@ -21,7 +21,7 @@ using sara::operator""_cm;
 
 
 // This seems to work well...
-inline auto init_K(int w, int h) -> Eigen::Matrix3d
+static inline auto init_K(int w, int h) -> Eigen::Matrix3d
 {
   const auto d = static_cast<double>(std::max(w, h));
   const auto f = 0.5 * d;
@@ -40,7 +40,7 @@ inline auto init_K(int w, int h) -> Eigen::Matrix3d
 struct ReprojectionError
 {
   static constexpr auto residual_dimension = 2;
-  static constexpr auto intrinsic_parameter_count = 3;
+  static constexpr auto intrinsic_parameter_count = 4;
   static constexpr auto extrinsic_parameter_count = 6;
 
   inline ReprojectionError(double imaged_x, double imaged_y,  //
@@ -76,11 +76,12 @@ struct ReprojectionError
     const auto yp = camera_coords[1] / camera_coords[2];
 
     // 3. Apply the calibration matrix.
-    const auto& focal = intrinsics[0];
-    const auto& u0 = intrinsics[1];
-    const auto& v0 = intrinsics[2];
-    const auto predicted_x = focal * xp + u0;
-    const auto predicted_y = focal * yp + v0;
+    const auto& fx = intrinsics[0];
+    const auto& fy = intrinsics[1];
+    const auto& u0 = intrinsics[2];
+    const auto& v0 = intrinsics[3];
+    const auto predicted_x = fx * xp + u0;
+    const auto predicted_y = fy * yp + v0;
 
     // The error is the difference between the predicted and observed position.
     residuals[0] = predicted_x - static_cast<T>(image_point[0]);
@@ -277,6 +278,7 @@ GRAPHICS_MAIN()
 {
 #define SAMSUNG_GALAXY_J6
 // #define GOPRO4
+// #define IPHONE12
 // #define GOPRO7_WIDE
 // #define GOPRO7_SUPERVIEW
 // #define LUXVISION
@@ -287,6 +289,8 @@ GRAPHICS_MAIN()
     "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
 #elif defined(GOPRO4)
     "/home/david/Desktop/calibration/gopro-hero4/chessboard.mp4"
+#elif defined(IPHONE12)
+    "/home/david/Desktop/calibration/iphone12/chessboard.mov"
 #elif defined(GOPRO7_WIDE)
     "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
 #elif defined(GOPRO7_SUPERVIEW)
@@ -305,10 +309,7 @@ GRAPHICS_MAIN()
 #if defined(LUXVISION)
   static const auto pattern_size = Eigen::Vector2i{7, 12};
   static constexpr auto square_size = 7._cm;
-#elif defined(SAMSUNG_GALAXY_J6)
-  static const auto pattern_size = Eigen::Vector2i{5, 7};
-  static constexpr auto square_size = 3._cm;
-#elif defined(GOPRO4)
+#elif defined(SAMSUNG_GALAXY_J6) || defined(GOPRO4) || defined(IPHONE12)
   static const auto pattern_size = Eigen::Vector2i{5, 7};
   static constexpr auto square_size = 3._cm;
 #elif defined(GOPRO7_WIDE) || defined(GOPRO7_SUPERVIEW)
@@ -336,7 +337,7 @@ GRAPHICS_MAIN()
     if (!video_stream.read())
       break;
 
-    if (i % 3 != 0)
+    if (i % 5 != 0)
       continue;
 
     SARA_CHECK(i);
@@ -393,12 +394,13 @@ GRAPHICS_MAIN()
   SARA_DEBUG << "RMS[INITIAL] = " << rms_init << std::endl;
   SARA_DEBUG << "RMS[FINAL  ] = " << rms_final << std::endl;
 
-  const auto f = calibration_problem.mutable_intrinsics()[0];
-  const auto u0 = calibration_problem.mutable_intrinsics()[1];
-  const auto v0 = calibration_problem.mutable_intrinsics()[2];
+  const auto fx = calibration_problem.mutable_intrinsics()[0];
+  const auto fy = calibration_problem.mutable_intrinsics()[1];
+  const auto u0 = calibration_problem.mutable_intrinsics()[2];
+  const auto v0 = calibration_problem.mutable_intrinsics()[3];
 
-  K(0, 0) = f;
-  K(1, 1) = f;
+  K(0, 0) = fx;
+  K(1, 1) = fy;
   K(0, 2) = u0;
   K(1, 2) = v0;
   SARA_DEBUG << "K =\n" << K << std::endl;
