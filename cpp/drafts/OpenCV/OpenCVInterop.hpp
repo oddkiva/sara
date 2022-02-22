@@ -57,16 +57,16 @@ namespace DO::Sara::OpenCV {
       return corners_found;
     }
 
-    inline auto operator()(int i, int j) const -> const Eigen::Vector2f
+    inline auto image_point(int x, int y) const -> Eigen::Vector2f
     {
-      const auto index = i * _corner_count_per_axis.width + j;
+      const auto index = y * _corner_count_per_axis.width + x;
       const auto& p = _corners[index];
       return {p.x, p.y};
     }
 
-    inline auto point_3d(int i, int j) const -> Eigen::Vector2f
+    inline auto scene_point(int x, int y) const -> Eigen::Vector2f
     {
-      return {_square_size_in_meters * i, _square_size_in_meters * j};
+      return {_square_size_in_meters * x, _square_size_in_meters * y};
     }
 
     inline auto corners_count_per_axis() const -> const Eigen::Vector2i
@@ -126,18 +126,18 @@ namespace DO::Sara::OpenCV {
 
     auto c0 = Eigen::Vector2f{};
     auto c1 = Eigen::Vector2f{};
-    for (auto i = 0; i < h; ++i)
+    for (auto y = 0; y < h; ++y)
     {
-      const auto ratio = static_cast<float>(i) / h;
+      const auto ratio = static_cast<float>(y) / h;
       const auto color = rainbow_color(ratio);
 
-      for (auto j = 0; j < w; ++j)
+      for (auto x = 0; x < w; ++x)
       {
         c0 = c1;
-        c1 = chessboard(i, j);
+        c1 = chessboard.image_point(x, y);
         draw_circle(image, c1, 3.f, color, 2);
 
-        if (i == 0 && j == 0)
+        if (x == 0 && y == 0)
           continue;
         draw_arrow(image, c0, c1, color, 2);
       }
