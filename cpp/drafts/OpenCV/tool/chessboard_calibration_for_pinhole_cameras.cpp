@@ -347,7 +347,7 @@ GRAPHICS_MAIN()
   static const auto pattern_size = Eigen::Vector2i{7, 12};
   static constexpr auto square_size = 7._cm;
 #elif defined(GOPRO4)
-  static const auto pattern_size = Eigen::Vector2i{7, 5};
+  static const auto pattern_size = Eigen::Vector2i{5, 7};
   static constexpr auto square_size = 3._cm;
 #elif defined(GOPRO7_WIDE) || defined(GOPRO7_SUPERVIEW)
   static const auto pattern_size = Eigen::Vector2i{7, 9};
@@ -361,6 +361,8 @@ GRAPHICS_MAIN()
   auto calibration_problem = ChessboardCalibrationProblem{};
   calibration_problem.initialize_intrinsics(K);
   calibration_problem.initialize_obs_3d(pattern_size.x(), pattern_size.y(), square_size.value);
+
+  auto selected_frames = std::vector<sara::Image<sara::Rgb8>>{};
 
 
   sara::create_window(frame.sizes());
@@ -376,6 +378,7 @@ GRAPHICS_MAIN()
       continue;
 
     SARA_CHECK(i);
+    selected_frames.emplace_back(video_stream.frame());
 
     sara::tic();
     auto chessboard = sara::OpenCV::Chessboard(pattern_size, square_size.value);
@@ -401,21 +404,20 @@ GRAPHICS_MAIN()
 
       auto frame_copy = sara::Image<sara::Rgb8>{frame};
 
-#ifdef DEBUG_POSE_INITIALIZATION
-      SARA_DEBUG << "\nRi =\n" << Rs[i] << std::endl;
-      SARA_DEBUG << "\nti =\n" << ts[i] << std::endl;
-      SARA_DEBUG << "\nni =\n" << ns[i] << std::endl;
+      SARA_DEBUG << "\nRi =\n" << Rs[0] << std::endl;
+      SARA_DEBUG << "\nti =\n" << ts[0] << std::endl;
+      SARA_DEBUG << "\nni =\n" << ns[0] << std::endl;
       SARA_DEBUG << "H =\n" << H << "\n";
-      SARA_DEBUG << "H_rec_i =\n" << Hr << "\n\n";
-#endif
 
       inspect(frame_copy, chessboard, K, Rs[0], ts[0]);
       sara::display(frame_copy);
-      // sara::get_key();
+      sara::get_key();
 
       chessboards.emplace_back(std::move(chessboard));
     }
   }
+
+  sara::get_key();
 
   auto problem = ceres::Problem{};
   calibration_problem.transform_into_ceres_problem(problem);
@@ -447,7 +449,7 @@ GRAPHICS_MAIN()
     SARA_DEBUG << "R =\n" << R << std::endl;
     SARA_DEBUG << "t =\n" << t << std::endl;
 
-    auto frame_copy = sara::Image<sara::Rgb8>{frame};
+    auto frame_copy = selected_frames[i];
     inspect(frame_copy, chessboard, K, R, t);
     sara::display(frame_copy);
     sara::get_key();
