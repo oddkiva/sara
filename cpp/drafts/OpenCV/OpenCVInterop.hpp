@@ -172,18 +172,10 @@ namespace DO::Sara::OpenCV {
     const Eigen::Vector2f d = d3.hnormalized();
 
     static const auto red = Rgb8{167, 0, 0};
-    draw_arrow(image, a, b, red, 6);
-    draw_circle(image, a, 5.f, red, 6);
-    draw_circle(image, b, 5.f, red, 6);
-
     static const auto green = Rgb8{89, 216, 26};
+    draw_arrow(image, a, b, red, 6);
     draw_arrow(image, a, c, green, 6);
-    draw_circle(image, a, 5.f, green, 6);
-    draw_circle(image, c, 5.f, green, 6);
-
     draw_arrow(image, a, d, Blue8, 6);
-    draw_circle(image, a, 5.f, Blue8, 6);
-    draw_circle(image, d, 5.f, Blue8, 6);
 
     for (auto y = 0; y < chessboard.height(); ++y)
     {
