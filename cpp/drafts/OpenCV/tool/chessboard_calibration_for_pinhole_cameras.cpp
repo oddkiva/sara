@@ -310,7 +310,7 @@ GRAPHICS_MAIN()
   static const auto pattern_size = Eigen::Vector2i{7, 12};
   static constexpr auto square_size = 7._cm;
 #elif defined(SAMSUNG_GALAXY_J6) || defined(GOPRO4) || defined(IPHONE12)
-  static const auto pattern_size = Eigen::Vector2i{5, 7};
+  static const auto pattern_size = Eigen::Vector2i{7, 5};
   static constexpr auto square_size = 3._cm;
 #elif defined(GOPRO7_WIDE) || defined(GOPRO7_SUPERVIEW)
   static const auto pattern_size = Eigen::Vector2i{7, 9};

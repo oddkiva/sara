@@ -161,21 +161,19 @@ namespace DO::Sara::OpenCV {
     Hr.col(2) = t.cast<float>();
     Hr = (K.cast<float>() * Hr).normalized();
 
-    const auto a = chessboard.image_point(0, 0);
-    const auto b = chessboard.image_point(1, 0);
-    const auto c = chessboard.image_point(0, 1);
+    const auto o = chessboard.image_point(0, 0);
+    const auto i = chessboard.image_point(1, 0);
+    const auto j = chessboard.image_point(0, 1);
+    const auto s = chessboard.square_size_in_meters();
 
-    const Eigen::Vector3f d3 = (K * (R * Eigen::Vector3d::UnitZ() *
-                                         chessboard.square_size_in_meters() +
-                                     t))
-                                   .cast<float>();
-    const Eigen::Vector2f d = d3.hnormalized();
+    const Eigen::Vector3f k3 = (R * Eigen::Vector3d::UnitZ() * s + t).cast<float>();
+    const Eigen::Vector2f k = (K.cast<float>() * k3).hnormalized();
 
     static const auto red = Rgb8{167, 0, 0};
     static const auto green = Rgb8{89, 216, 26};
-    draw_arrow(image, a, b, red, 6);
-    draw_arrow(image, a, c, green, 6);
-    draw_arrow(image, a, d, Blue8, 6);
+    draw_arrow(image, o, i, red, 6);
+    draw_arrow(image, o, j, green, 6);
+    draw_arrow(image, o, k, Blue8, 6);
 
     for (auto y = 0; y < chessboard.height(); ++y)
     {
