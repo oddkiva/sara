@@ -7,6 +7,7 @@
 #include <cstring>
 
 extern "C" {
+#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
