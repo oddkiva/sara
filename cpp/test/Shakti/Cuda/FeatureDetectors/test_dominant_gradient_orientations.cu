@@ -18,6 +18,7 @@
 #include <DO/Sara/ImageProcessing.hpp>
 
 #include <DO/Shakti/Cuda/FeatureDetectors/DominantOrientations.hpp>
+#include <DO/Shakti/Cuda/MultiArray/ManagedMemoryAllocator.hpp>
 
 
 namespace sara = DO::Sara;
@@ -41,8 +42,8 @@ BOOST_AUTO_TEST_CASE(test_polar_gradients_2d)
   auto image = make_corner_image();
 
   // Image gradients.
-  auto mag = sara::Image<float>{image.sizes()};
-  auto ori = sara::Image<float>{image.sizes()};
+  auto mag = sara::Image<float, shakti::ManagedMemoryAllocator>{image.sizes()};
+  auto ori = sara::Image<float, shakti::ManagedMemoryAllocator>{image.sizes()};
   // shakti::Cuda::polar_gradient_2d(image, mag, ori);
 
   std::cout << "image =\n" << image.matrix() << std::endl;

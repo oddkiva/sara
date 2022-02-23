@@ -71,6 +71,7 @@ flags = [
 "-I", "cpp/test",
 "-I", "cpp/third-party/nvidia-video-codec-sdk-9.1.23",
 "-I", "cpp/third-party/taskflow/include",
+"-I", "cpp/third-party/libcbdetect/include",
 # Build directory.
 "-I", "../sara-build/cpp/src",
 "-I", "../sara-build-Xcode/cpp/src",
