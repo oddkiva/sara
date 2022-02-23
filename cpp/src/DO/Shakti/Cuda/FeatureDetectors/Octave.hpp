@@ -68,7 +68,7 @@ namespace DO::Shakti::Cuda {
 
     inline auto deinit_texture() -> void
     {
-      _texture.reset();
+      _texture.~TextureObject();
     }
 
     inline auto deinit_surface() -> void
@@ -86,8 +86,7 @@ namespace DO::Shakti::Cuda {
       return _array;
     }
 
-    inline auto texture_object() const noexcept
-        -> const std::optional<TextureObject>&
+    inline auto texture_object() const noexcept -> const TextureObject&
     {
       return _texture;
     }
@@ -100,7 +99,7 @@ namespace DO::Shakti::Cuda {
   private:
     Array<T, 3> _array;
 
-    std::optional<TextureObject> _texture;
+    TextureObject _texture;
     SurfaceObject _surface;
   };
 

@@ -12,6 +12,7 @@
 #pragma once
 
 #include <DO/Shakti/Cuda/MultiArray/CudaArray.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/Octave.hpp>
 
 #include <math_constants.h>
 
@@ -240,6 +241,15 @@ namespace DO::Shakti::Cuda {
 
     const auto gi = i * orientation_pitch + o;
     histogram[gi] = s_hist[ti * tile_o + to];
+  }
+
+  auto compute_histogram_of_gradients(const Octave<float>& gaussians,  //
+                                      const float* x,                  //
+                                      const float* y,                  //
+                                      const float* s) -> void
+  {
+    if (gaussians.texture_object() == 0)
+      throw std::runtime_error{"Error: texture object must be initialized!"};
   }
 
 }  // namespace DO::Shakti::Cuda
