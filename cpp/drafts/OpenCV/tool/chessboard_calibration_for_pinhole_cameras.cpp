@@ -276,9 +276,9 @@ private:
 
 GRAPHICS_MAIN()
 {
-#define SAMSUNG_GALAXY_J6
+// #define SAMSUNG_GALAXY_J6
 // #define GOPRO4
-// #define IPHONE12
+#define IPHONE12
 // #define GOPRO7_WIDE
 // #define GOPRO7_SUPERVIEW
 // #define LUXVISION
