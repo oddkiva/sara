@@ -40,7 +40,7 @@ static inline auto init_K(int w, int h) -> Eigen::Matrix3d
 struct ReprojectionError
 {
   static constexpr auto residual_dimension = 2;
-  static constexpr auto intrinsic_parameter_count = 4;
+  static constexpr auto intrinsic_parameter_count = 5;
   static constexpr auto extrinsic_parameter_count = 6;
 
   inline ReprojectionError(double imaged_x, double imaged_y,  //
@@ -78,10 +78,11 @@ struct ReprojectionError
     // 3. Apply the calibration matrix.
     const auto& fx = intrinsics[0];
     const auto& fy = intrinsics[1];
-    const auto& u0 = intrinsics[2];
-    const auto& v0 = intrinsics[3];
-    const auto predicted_x = fx * xp + u0;
-    const auto predicted_y = fy * yp + v0;
+    const auto& s  = intrinsics[2];
+    const auto& u0 = intrinsics[3];
+    const auto& v0 = intrinsics[4];
+    const auto predicted_x = fx * xp + s * yp + u0;
+    const auto predicted_y = fy * yp          + v0;
 
     // The error is the difference between the predicted and observed position.
     residuals[0] = predicted_x - static_cast<T>(image_point[0]);
@@ -396,13 +397,12 @@ GRAPHICS_MAIN()
 
   const auto fx = calibration_problem.mutable_intrinsics()[0];
   const auto fy = calibration_problem.mutable_intrinsics()[1];
-  const auto u0 = calibration_problem.mutable_intrinsics()[2];
-  const auto v0 = calibration_problem.mutable_intrinsics()[3];
+  const auto s  = calibration_problem.mutable_intrinsics()[2];
+  const auto u0 = calibration_problem.mutable_intrinsics()[3];
+  const auto v0 = calibration_problem.mutable_intrinsics()[4];
 
-  K(0, 0) = fx;
-  K(1, 1) = fy;
-  K(0, 2) = u0;
-  K(1, 2) = v0;
+  K(0, 0) = fx; K(0, 1) =  s; K(0, 2) = u0;
+                K(1, 1) = fy; K(1, 2) = v0;
   SARA_DEBUG << "K =\n" << K << std::endl;
 
   for (auto i = 0u; i < chessboards.size(); ++i)
