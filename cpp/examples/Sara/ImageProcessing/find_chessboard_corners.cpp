@@ -20,6 +20,9 @@
 #include "Chessboard/EdgeFusion.hpp"
 #include "Chessboard/SaddleDetection.hpp"
 
+#include <functional>
+#include <optional>
+
 
 namespace sara = DO::Sara;
 using sara::operator""_deg;
@@ -140,50 +143,53 @@ int __main(int argc, char** argv)
     const auto saddle_points =
         sara::detect_saddle_points(image_blurred, nms_radius);
 
-    // Detect edges.
-    ed(image_blurred);
-    const auto& edges = ed.pipeline.edges_as_list;
-    const auto& edges_simplified = ed.pipeline.edges_simplified;
+    // // Detect edges.
+    // ed(image_blurred);
+    // const auto& edges = ed.pipeline.edges_as_list;
+    // const auto& edges_simplified = ed.pipeline.edges_simplified;
 
-    auto darks = std::vector<std::vector<sara::Rgb64f>>{};
-    auto brights = std::vector<std::vector<sara::Rgb64f>>{};
-    auto mean_gradients = std::vector<Eigen::Vector2f>{};
-    for (const auto& edge : edges)
-    {
-      auto [dark, bright, g] = edge_signature(  //
-          image,                                //
-          ed.pipeline.gradient_magnitude,       //
-          ed.pipeline.gradient_orientation,     //
-          edge);
-      darks.push_back(std::move(dark));
-      brights.push_back(std::move(bright));
-      mean_gradients.push_back(g);
-    }
+    // auto darks = std::vector<std::vector<sara::Rgb64f>>{};
+    // auto brights = std::vector<std::vector<sara::Rgb64f>>{};
+    // auto mean_gradients = std::vector<Eigen::Vector2f>{};
+    // for (const auto& edge : edges)
+    // {
+    //   auto [dark, bright, g] = edge_signature(  //
+    //       image,                                //
+    //       ed.pipeline.gradient_magnitude,       //
+    //       ed.pipeline.gradient_orientation,     //
+    //       edge);
+    //   darks.push_back(std::move(dark));
+    //   brights.push_back(std::move(bright));
+    //   mean_gradients.push_back(g);
+    // }
 
-    // Calculate edge statistics.
-    sara::tic();
-    const auto edge_stats = sara::CurveStatistics{edges_simplified};
-    sara::toc("Edge Shape Statistics");
+    // // Calculate edge statistics.
+    // sara::tic();
+    // const auto edge_stats = sara::CurveStatistics{edges_simplified};
+    // sara::toc("Edge Shape Statistics");
 
-    sara::tic();
-    const auto edge_attributes = sara::EdgeAttributes{
-        edges_simplified,    //
-        edge_stats.centers,  //
-        edge_stats.axes,     //
-        edge_stats.lengths   //
-    };
+    // sara::tic();
+    // const auto edge_attributes = sara::EdgeAttributes{
+    //     edges_simplified,    //
+    //     edge_stats.centers,  //
+    //     edge_stats.axes,     //
+    //     edge_stats.lengths   //
+    // };
 
-    sara::check_edge_grouping(image,                    //
-                              edges_simplified,         //
-                              edges,                    //
-                              mean_gradients,           //
-                              edge_attributes.centers,  //
-                              edge_attributes.axes,     //
-                              edge_attributes.lengths);
-    sara::toc("Edge Grouping");
+    // sara::check_edge_grouping(image,                    //
+    //                           edges_simplified,         //
+    //                           edges,                    //
+    //                           mean_gradients,           //
+    //                           edge_attributes.centers,  //
+    //                           edge_attributes.axes,     //
+    //                           edge_attributes.lengths);
+    // sara::toc("Edge Grouping");
 
     for (const auto& s : saddle_points)
-      sara::fill_circle(s.p.x(), s.p.y(), 10, sara::Red8);
+      sara::fill_circle(image, s.p.x(), s.p.y(), 5, sara::Red8);
+
+    sara::display(image);
+    sara::get_key();
 
   }
 
