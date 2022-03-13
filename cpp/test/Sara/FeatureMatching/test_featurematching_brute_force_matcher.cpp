@@ -16,6 +16,7 @@
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
 
+#if 0
 #ifndef _WIN32
 #ifdef __AVX__
 #  include <immintrin.h>
@@ -91,5 +92,7 @@ BOOST_AUTO_TEST_CASE(test_dot_product_128)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif
 
 #endif

@@ -14,6 +14,7 @@
 
 #include <DO/Sara/FeatureMatching/BruteForceMatcher.hpp>
 
+#if 0
 #ifndef _WIN32
 #ifdef __AVX__
 #  include <immintrin.h>
@@ -236,4 +237,5 @@ namespace DO::Sara {
 
 }  // namespace DO::Sara
 
+#endif
 #endif

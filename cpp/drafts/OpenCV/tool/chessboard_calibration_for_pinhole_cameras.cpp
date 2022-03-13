@@ -342,7 +342,6 @@ GRAPHICS_MAIN()
       continue;
 
     SARA_CHECK(i);
-    selected_frames.emplace_back(video_stream.frame());
 
     sara::tic();
     auto chessboard = sara::OpenCV::Chessboard(pattern_size, square_size.value);
@@ -351,7 +350,8 @@ GRAPHICS_MAIN()
 
     if (corners_found)
     {
-      draw_chessboard(frame, chessboard);
+      auto frame_copy = sara::Image<sara::Rgb8>{frame};
+      draw_chessboard(frame_copy, chessboard);
 
       const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
       auto Rs = std::vector<Eigen::Matrix3d>{};
@@ -363,8 +363,6 @@ GRAPHICS_MAIN()
 
       calibration_problem.add(chessboard, Rs[0], ts[0]);
 
-      auto frame_copy = sara::Image<sara::Rgb8>{frame};
-
       SARA_DEBUG << "\nRi =\n" << Rs[0] << std::endl;
       SARA_DEBUG << "\nti =\n" << ts[0] << std::endl;
       SARA_DEBUG << "\nni =\n" << ns[0] << std::endl;
@@ -372,6 +370,7 @@ GRAPHICS_MAIN()
       inspect(frame_copy, chessboard, K, Rs[0], ts[0]);
       sara::display(frame_copy);
 
+      selected_frames.emplace_back(video_stream.frame());
       chessboards.emplace_back(std::move(chessboard));
     }
   }
