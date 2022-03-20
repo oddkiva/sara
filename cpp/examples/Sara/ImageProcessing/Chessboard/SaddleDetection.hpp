@@ -17,13 +17,13 @@
 
 namespace DO::Sara {
 
-  struct Saddle
+  struct SaddlePoint
   {
     Eigen::Vector2i p;
     Eigen::Matrix2f hessian;
     float score;
 
-    inline auto operator<(const Saddle& other) const
+    inline auto operator<(const SaddlePoint& other) const
     {
       return score < other.score;
     }
@@ -33,7 +33,7 @@ namespace DO::Sara {
                                     const Image<Eigen::Matrix2f>& hessian,
                                     float thres)
   {
-    auto saddle_points = std::vector<Saddle>{};
+    auto saddle_points = std::vector<SaddlePoint>{};
     saddle_points.reserve(std::max(hessian.width(), hessian.height()));
 
     for (auto y = 0; y < hessian.height(); ++y)
@@ -43,12 +43,16 @@ namespace DO::Sara {
         if (det_of_hessian(x, y) > thres)
           continue;
 
+        // One simple filter...
         auto qr_factorizer = hessian(x, y).householderQr();
         const Eigen::Matrix2f R =
             qr_factorizer.matrixQR().triangularView<Eigen::Upper>();
 
         if (std::abs((R(0, 0) - R(1, 1)) / R(0, 0)) > 0.1f)
           continue;
+
+        // TODO: corner filtering by counting the number of zero crossing over a
+        // small cicle.
 
         saddle_points.push_back({
             {x, y}, hessian(x, y), std::abs(det_of_hessian(x, y))  //
@@ -59,12 +63,12 @@ namespace DO::Sara {
     return saddle_points;
   }
 
-  inline auto nms(std::vector<Saddle>& saddle_points,
+  inline auto nms(std::vector<SaddlePoint>& saddle_points,
                   const Eigen::Vector2i& image_sizes, int nms_radius)
   {
     std::sort(saddle_points.begin(), saddle_points.end());
 
-    auto saddle_points_filtered = std::vector<Saddle>{};
+    auto saddle_points_filtered = std::vector<SaddlePoint>{};
     saddle_points_filtered.reserve(saddle_points.size());
 
     auto saddle_map = Image<std::uint8_t>{image_sizes};

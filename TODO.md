@@ -6,23 +6,6 @@ VULKAN
 ======
 - Hello Triangle tutorial.
 
-Edge Matching
--------------
-- Determine dominant edge gradient orientation:
-
-  left  -> darker
-  right -> brighter
-
-  two bands and two bands on the right, for which we can calculate histogram  of
-  gradients.
-  - two histograms on the left
-  - two histograms on the right.
-
-- gradient histogram on the whole
-- Describe curve/line in this dominant gradient
-- Define a scale
-- Describe the line
-
 
 Autocalibration with radial distortion
 ======================================
@@ -54,3 +37,8 @@ Manhattan Image with Radial Distortion
 Level Sets
 ==========
 - fix the fast marching with dealing with negative sign.
+
+
+WEBASSEMBLY+EMSCRIPTEN
+======================
+Explore!!!

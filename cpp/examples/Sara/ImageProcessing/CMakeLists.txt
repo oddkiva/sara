@@ -48,8 +48,6 @@ target_link_libraries(line_segment_detection_example
 
 
 add_library(ChessboardDetection STATIC
-  Chessboard/EdgeFusion.hpp
-  Chessboard/EdgeFusion.cpp
   Chessboard/Otsu.hpp
   Chessboard/SaddleDetection.hpp)
 set_target_properties(ChessboardDetection

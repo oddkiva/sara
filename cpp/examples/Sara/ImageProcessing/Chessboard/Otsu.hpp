@@ -27,7 +27,7 @@ namespace DO::Sara {
       pdf(pixel) += 1;
     pdf /= pdf.sum();
 
-    // Calculate the cumulated distribution function for the 0 class (i.e., the
+    // Calculate the cumulative distribution function for the 0 class (i.e., the
     // black color class).
     auto cdf = Eigen::Array<float, 256, 1>{};
     std::partial_sum(pdf.data(), pdf.data() + pdf.size(), cdf.data());
