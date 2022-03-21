@@ -27,6 +27,30 @@ namespace DO::Sara {
 
   auto weight_mask(const std::vector<int>& radius)
   {
+    std::unordered_map<int, Image<float>> masks;
+    static constexpr auto ring_radius = 0.3f;
+    static constexpr auto dist_min = 1 - ring_radius;
+    static constexpr auto dist_max = 1 + ring_radius;
+    static constexpr auto weight_typical = 0.6f;
+
+    for (const auto& r : radius)
+    {
+      auto& mask = masks[r];
+      mask.resize(2 * r + 1, 2 * r + 1);
+      for (auto v = 0; v < mask.height(); ++v)
+      {
+        for (auto u = 0; u < mask.width(); ++u)
+        {
+          // Calculate the normalized distance.
+          const auto dist =
+              (Eigen::Vector2f(u, v) - r * Eigen::Vector2f::Ones()).norm() / r;
+          const auto clamped_dist = std::clamp(dist, dist_min, dist_max);
+          // Linear function.
+          mask(u, v) = (dist_max - clamped_dist) / weight_typical;
+        }
+      }
+    }
+    return masks;
   }
 
   auto filter_saddle_points(const ImageView<float>& image,
@@ -41,9 +65,6 @@ namespace DO::Sara {
     static constexpr auto need_mode = 2;
 
     static constexpr auto radius = 5.;
-
-    const auto w = image.width();
-    const auto h = image.height();
 
     auto ori_vectors = std::array<Eigen::Vector2d, num_circle_points>{};
     for (auto i = 0; i < num_circle_points; ++i)
