@@ -7,6 +7,7 @@
 #include <cstring>
 
 extern "C" {
+#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
@@ -115,7 +116,7 @@ namespace DO::Sara {
   // ======================================================================== //
   // Add an output stream.
   static void add_stream(OutputStream* out_stream, AVFormatContext* out_context,
-                         AVCodec** codec, enum AVCodecID codec_id)
+                         const AVCodec** codec, enum AVCodecID codec_id)
   {
     AVCodecContext* c;
     /* find the encoder */
@@ -199,7 +200,8 @@ namespace DO::Sara {
   }
 
   static void add_video_stream(OutputStream* ostream,
-                               AVFormatContext* format_context, AVCodec** codec,
+                               AVFormatContext* format_context,
+                               const AVCodec** codec,
                                enum AVCodecID codec_id, int width, int height,
                                int frame_rate)
   {
@@ -277,7 +279,9 @@ namespace DO::Sara {
     return frame;
   }
 
-  static void open_audio(AVFormatContext*, AVCodec* codec, OutputStream* ost,
+  static void open_audio(AVFormatContext*,
+                         const AVCodec* codec,
+                         OutputStream* ost,
                          AVDictionary* opt_arg)
   {
     AVCodecContext* c;
@@ -419,7 +423,7 @@ namespace DO::Sara {
     return picture;
   }
 
-  static void open_video(AVFormatContext*, AVCodec* codec,
+  static void open_video(AVFormatContext*, const AVCodec* codec,
                          OutputStream* ostream, AVDictionary* opt_arg)
   {
     int ret;
