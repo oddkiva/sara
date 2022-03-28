@@ -2,36 +2,21 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2021-present David Ok <david.ok8@gmail.com>
+// Copyright (C) 2022-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#pragma once
-
-#include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/ImageProcessing.hpp>
+#include "SaddlePointDetection.hpp"
 
 
 namespace DO::Sara {
 
-  struct SaddlePoint
-  {
-    Eigen::Vector2i p;
-    Eigen::Matrix2f hessian;
-    float score;
-
-    inline auto operator<(const SaddlePoint& other) const
-    {
-      return score < other.score;
-    }
-  };
-
-  inline auto extract_saddle_points(const Image<float>& det_of_hessian,
-                                    const Image<Eigen::Matrix2f>& hessian,
-                                    float thres)
+  auto extract_saddle_points(const ImageView<float>& det_of_hessian,
+                             const ImageView<Eigen::Matrix2f>& hessian,
+                             float thres) -> std::vector<SaddlePoint>
   {
     auto saddle_points = std::vector<SaddlePoint>{};
     saddle_points.reserve(std::max(hessian.width(), hessian.height()));
@@ -63,8 +48,8 @@ namespace DO::Sara {
     return saddle_points;
   }
 
-  inline auto nms(std::vector<SaddlePoint>& saddle_points,
-                  const Eigen::Vector2i& image_sizes, int nms_radius)
+  auto nms(std::vector<SaddlePoint>& saddle_points,
+           const Eigen::Vector2i& image_sizes, int nms_radius) -> void
   {
     std::sort(saddle_points.begin(), saddle_points.end());
 
@@ -92,26 +77,6 @@ namespace DO::Sara {
       saddle_points_filtered.push_back(p);
     }
     saddle_points_filtered.swap(saddle_points);
-  }
-
-  inline auto detect_saddle_points(const Image<float>& image, int nms_radius,
-                                   float adaptive_thres = 0.05f)
-  {
-    // Calculate the first derivative.
-    const auto hessian = image.compute<Hessian>();
-
-    // Chessboard corners are saddle points of the image, which are
-    // characterized by the property det(H(x, y)) < 0.
-    const auto det_of_hessian = hessian.compute<Determinant>();
-
-    // Adaptive thresholding.
-    const auto thres = det_of_hessian.flat_array().minCoeff() * adaptive_thres;
-    auto saddle_points = extract_saddle_points(det_of_hessian, hessian, thres);
-
-    // Non-maxima suppression.
-    nms(saddle_points, image.sizes(), nms_radius);
-
-    return saddle_points;
   }
 
 }  // namespace DO::Sara

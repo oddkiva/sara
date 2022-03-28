@@ -2,6 +2,7 @@ find_package(DO_Sara
   COMPONENTS
   Core Graphics ImageIO VideoIO                  # Classic stuff
   DisjointSets FeatureDetectors ImageProcessing  # Algorithmic modules
+  Visualization
   REQUIRED)
 
 macro (sara_add_example example)
@@ -48,8 +49,8 @@ target_link_libraries(line_segment_detection_example
 
 
 add_library(ChessboardDetection STATIC
-  Chessboard/Otsu.hpp
-  Chessboard/SaddleDetection.hpp)
+  Chessboard/SaddlePointDetection.hpp
+  Chessboard/SaddlePointDetection.cpp)
 set_target_properties(ChessboardDetection
   PROPERTIES
   FOLDER "Libraries")
