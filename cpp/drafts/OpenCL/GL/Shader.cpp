@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Core/StringFormat.hpp>
 
+#include <iostream>
 #include <fstream>
 
 

@@ -16,5 +16,7 @@
 #  include <OpenGL/gl3.h>
 #else
 #  include <GL/glew.h>
-#  include <CL/cl_gl.h>
+#  if !(defined EMSCRIPTEN)
+#    include <CL/cl_gl.h>
+#  endif
 #endif

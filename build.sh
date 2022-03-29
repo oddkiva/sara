@@ -23,7 +23,10 @@ function build_library()
   # ========================================================================= #
   # Specify the build type except for Xcode.
   #
-  if [ "${build_type}" == "Xcode" ]; then
+  if [ "${build_type}" == "emscripten" ]; then
+    local cmake_options="-G Ninja "
+    local cmake_options+="-DCMAKE_BUILD_TYPE=${build_type} "
+  elif [ "${build_type}" == "Xcode" ]; then
     local cmake_options="-G Xcode "
   else
     local cmake_options="-G Ninja "
@@ -117,7 +120,7 @@ function build_library()
   # ========================================================================= #
   # Now generate the makefile project.
   if [ "${build_type}" == "emscripten" ]; then
-    emconfigure cmake ../sara
+    emcmake cmake ../sara
   else
     time cmake ../sara ${cmake_options} \
       --profiling-format=google-trace \
@@ -137,9 +140,11 @@ function build_library()
   fi
   time ctest ${test_options}
 
-  # Run Python tests.
-  time cmake --build . --target pytest
-  time cmake --build . --target package
+  if [ "${build_type}" != "emscripten" ]; then
+    # Run Python tests.
+    time cmake --build . --target pytest
+    time cmake --build . --target package
+  fi
 }
 
 function build_library_for_ios()
@@ -188,8 +193,6 @@ function build_library_for_ios()
   fi
   time ctest ${test_options}
 
-  # Run Python tests.
-  time cmake --build . --target pytest
   time cmake --build . --target package
 }
 

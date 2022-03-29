@@ -1,3 +1,12 @@
+if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fexceptions")
+  include(${CMAKE_SOURCE_DIR}/cpp/src/DO/Sara/UseDOSaraCore.cmake)
+  add_subdirectory(drafts/OpenCL/GL)
+  add_subdirectory(drafts/Emscripten)
+  return ()
+endif ()
+
 add_subdirectory(third-party)
 
 add_subdirectory(src/DO)

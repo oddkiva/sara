@@ -4,6 +4,7 @@ add_library(DO_Sara_OpenCL_GL ${DO_Sara_OpenCL_GL_FILES})
 
 target_include_directories(DO_Sara_OpenCL_GL
   PUBLIC
+  ${CMAKE_SOURCE_DIR}/cpp
   ${GLEW_INCLUDE_DIR})
 
 target_compile_definitions(DO_Sara_OpenCL_GL
@@ -12,10 +13,10 @@ target_compile_definitions(DO_Sara_OpenCL_GL
 
 target_link_libraries(DO_Sara_OpenCL_GL
   PRIVATE
-  ${DO_Sara_LIBRARIES}
+  DO::Sara::Core
 
   PUBLIC
-  OpenCL::OpenCL
+  $<$<STREQUAL:PLATFORM_ID,Emscripten>:OpenCL::OpenCL>
   ${OPENGL_LIBRARIES})
 
 if (NOT APPLE)

@@ -54,17 +54,24 @@ include(sara_use_ccache)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set (EMSCRIPTEN TRUE)
+  set (CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
+endif ()
+
 # Use CUDA if available.
-include(CheckLanguage)
-check_language(CUDA)
-if (CMAKE_CUDA_COMPILER)
-  set(CMAKE_CUDA_STANDARD 17)
-  set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-  enable_language(CUDA)
-  find_package(CUDAToolkit REQUIRED)
-else ()
-  message(STATUS "No CUDA support!")
-endif()
+if (NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  include(CheckLanguage)
+  check_language(CUDA)
+  if (CMAKE_CUDA_COMPILER)
+    set(CMAKE_CUDA_STANDARD 17)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+    enable_language(CUDA)
+    find_package(CUDAToolkit REQUIRED)
+  else ()
+    message(STATUS "No CUDA support!")
+  endif()
+endif ()
 
 # Find Boost package.
 if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
@@ -72,7 +79,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
     /Users/david/GitHub/Apple-Boost-BuildScript/dist/boost.xcframework/Headers)
   set(Boost_LIBRARIES
     /Users/david/GitHub/Apple-Boost-BuildScript/dist/boost.xcframework/ios-arm64/libboost.a)
-else ()
+elseif (NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   # set(Boost_DEBUG ON)
   set(Boost_USE_STATIC_LIBS OFF)
   set(Boost_USE_MULTITHREADED ON)
@@ -82,7 +89,8 @@ else ()
     REQUIRED)
 endif ()
 
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND
+    NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
   find_package(OpenMP)
 
   find_package(HDF5 COMPONENTS CXX REQUIRED)
@@ -141,16 +149,20 @@ endif ()
 # Build the libraries.
 add_subdirectory(cpp)
 
-if (CMAKE_Swift_COMPILER)
-  add_subdirectory(swift)
+
+if (NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  if (CMAKE_Swift_COMPILER)
+    add_subdirectory(swift)
+  endif ()
+
+  if (SARA_BUILD_PYTHON_BINDINGS)
+    add_subdirectory(python)
+  endif ()
+
+  # To create Windows installer and Linux packages.
+  include(CPack)
 endif ()
 
-if (SARA_BUILD_PYTHON_BINDINGS)
-  add_subdirectory(python)
-endif ()
 
 # Make documentation
 add_subdirectory(doc)
-
-# To create Windows installer and Linux packages.
-include(CPack)
