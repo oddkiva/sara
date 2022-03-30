@@ -144,6 +144,8 @@ struct Scene
 
     // Create a fragment shader.
     const auto fragment_shader_source = R"shader(#version 300 es
+    precision mediump float;
+
     in vec3 out_color;
     in vec2 out_tex_coords;
     out vec4 frag_color;
@@ -227,8 +229,7 @@ struct Scene
     // Texture data.
     {
       // Read the image from the disk.
-      auto image =
-          sara::imread<sara::Rgb8>(src_path("../../../../data/ksmall.jpg"));
+      auto image = sara::imread<sara::Rgb8>("./ksmall.jpg");
       // Flip vertically so that the image data matches OpenGL image coordinate
       // system.
       sara::flip_vertically(image);
@@ -267,35 +268,43 @@ std::unique_ptr<Scene> Scene::_scene = nullptr;
 
 int main()
 {
-  if (!MyGLFW::initialize())
-    return EXIT_FAILURE;
+  try
+  {
+    if (!MyGLFW::initialize())
+      return EXIT_FAILURE;
 
-  Scene::initialize();
-  Scene::instance().shader_program.use(true);
+    Scene::initialize();
+    Scene::instance().shader_program.use(true);
 
-  // Activate the texture 0 once for all.
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, Scene::instance().texture);
+    // Activate the texture 0 once for all.
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, Scene::instance().texture);
 
-  // Specific rendering options.
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_PROGRAM_POINT_SIZE);
-  glEnable(GL_DEPTH_TEST);
+    // Specific rendering options.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_DEPTH_TEST);
 
-  // Initialize the background.
-  glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
+    // Initialize the background.
+    glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
 
 #ifdef EMSCRIPTEN
-  emscripten_set_main_loop(Scene::render_frame, 0, 1);
+    emscripten_set_main_loop(Scene::render_frame, 0, 1);
 #else
-  while (!glfwWindowShouldClose(MyGLFW::window))
-    Scene::render_frame();
+    while (!glfwWindowShouldClose(MyGLFW::window))
+      Scene::render_frame();
 #endif
 
-  Scene::destroy_opengl_data();
+    Scene::destroy_opengl_data();
 
-  glfwTerminate();
+    glfwTerminate();
+  }
+  catch (std::exception& e)
+  {
+    std::cout << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }
