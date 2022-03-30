@@ -16,7 +16,7 @@ target_link_libraries(DO_Sara_OpenCL_GL
   DO::Sara::Core
 
   PUBLIC
-  $<$<STREQUAL:PLATFORM_ID,Emscripten>:OpenCL::OpenCL>
+  $<$<NOT:$<PLATFORM_ID:Emscripten>>:OpenCL::OpenCL>
   ${OPENGL_LIBRARIES})
 
 if (NOT APPLE)

@@ -44,7 +44,7 @@ function build_library()
     local os_name=$(lsb_release -is)
     local os_version=$(lsb_release -rs)
 
-    # I really want C++17.
+    # I really want C++17 on older Ubuntu distributions.
     if [[ ${os_name} == "Ubuntu" ]] && [[ ${os_version} == "16.04" ]]; then
       cmake_options+="-DCMAKE_C_COMPILER=$(which gcc-7) "
       cmake_options+="-DCMAKE_CXX_COMPILER=$(which g++-7) "
