@@ -3,6 +3,10 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 
+#include <DO/Sara/ImageIO.hpp>
+
+#include <DO/Sara/ImageProcessing/Flip.hpp>
+
 #include <iostream>
 #include <map>
 #include <memory>
@@ -17,7 +21,6 @@
 
 namespace sara = DO::Sara;
 
-using namespace DO::Sara;
 using namespace std;
 
 
@@ -87,16 +90,19 @@ int MyGLFW::height = -1;
 struct Scene
 {
   // Host geometry data
-  Tensor_<float, 2> vertices;
+  sara::Tensor_<float, 2> vertices;
+  sara::Tensor_<std::uint32_t, 2> triangles;
 
   // OpenGL/Device geometry data.
   sara::GL::VertexArray vao;
   sara::GL::Buffer vbo;
+  sara::GL::Buffer ebo;
 
   // OpenGL shaders.
   sara::GL::Shader vertex_shader;
   sara::GL::Shader fragment_shader;
   sara::GL::ShaderProgram shader_program;
+  sara::GL::Texture2D texture;
 
   static std::unique_ptr<Scene> _scene;
 
@@ -112,23 +118,6 @@ struct Scene
     if (_scene == nullptr)
       _scene.reset(new Scene);
 
-    // Initialize the host CPU data.
-    _scene->vertices.resize(3, 6);
-    // clang-format off
-    _scene->vertices.flat_array() <<
-    // coords           color
-      -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // left
-       0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // right
-       0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f;  // top
-    // clang-format on
-
-    const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return data.size(1) * sizeof(float);
-    };
-    const auto float_pointer = [](int offset) {
-      return reinterpret_cast<void*>(offset * sizeof(float));
-    };
-
     // Create a vertex shader.
     std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
                                           {"in_color", 1},   //
@@ -137,14 +126,17 @@ struct Scene
     const auto vertex_shader_source = R"shader(#version 300 es
     layout (location = 0) in vec3 in_coords;
     layout (location = 1) in vec3 in_color;
+    layout (location = 2) in vec2 in_tex_coords;
 
     out vec3 out_color;
+    out vec2 out_tex_coords;
 
     void main()
     {
       gl_Position = vec4(in_coords, 1.0);
       gl_PointSize = 200.0;
       out_color = in_color;
+      out_tex_coords = vec2(in_tex_coords.x, in_tex_coords.y);
     }
     )shader";
     _scene->vertex_shader.create_from_source(GL_VERTEX_SHADER,
@@ -152,27 +144,20 @@ struct Scene
 
     // Create a fragment shader.
     const auto fragment_shader_source = R"shader(#version 300 es
-    precision mediump float;
-
     in vec3 out_color;
+    in vec2 out_tex_coords;
     out vec4 frag_color;
+
+    uniform sampler2D texture1;
 
     void main()
     {
-      vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-
-      float dist = length(gl_PointCoord - vec2(0.5));
-
-      if (dot(circCoord, circCoord) > 1.0)
-          discard;
-      float alpha = 1.0 - smoothstep(0.2, 0.5, dist);
-      frag_color = vec4(out_color, alpha);
+      frag_color = texture(texture1, out_tex_coords) * vec4(out_color, 1.0);
     }
     )shader";
     _scene->fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
                                                fragment_shader_source);
 
-    // Create the whole shader program.
     _scene->shader_program.create();
     _scene->shader_program.attach(_scene->vertex_shader,
                                   _scene->fragment_shader);
@@ -180,30 +165,76 @@ struct Scene
     _scene->vao.generate();
     _scene->vbo.generate();
 
-    // Specify the vertex attributes here.
+    // Encode the vertex data in a tensor.
+    _scene->vertices = sara::Tensor_<float, 2>{{4, 8}};
+    // clang-format off
+    _scene->vertices.flat_array() << //
+      // coords            color              texture coords
+       0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // bottom-right
+       0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // top-right
+      -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,  // top-left
+      -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f;  // bottom-left
+    // clang-format on
+
+    _scene->triangles.resize(2, 3);
+    _scene->triangles.flat_array() << 0, 1, 2, 2, 3, 0;
+
+    const auto row_bytes = [](const sara::TensorView_<float, 2>& data) {
+      return data.size(1) * sizeof(float);
+    };
+    const auto float_pointer = [](int offset) {
+      return reinterpret_cast<void*>(offset * sizeof(float));
+    };
+
+    _scene->vao.generate();
+
+    // Vertex attributes.
+    _scene->vbo.generate();
+
+    // Triangles data.
+    _scene->ebo.generate();
+
     {
       glBindVertexArray(_scene->vao);
 
-      // Copy the vertex data into the GPU buffer object.
+      // Copy vertex data.
       _scene->vbo.bind_vertex_data(_scene->vertices);
 
-      // Specify that the vertex shader param 0 corresponds to the first 3 float
-      // data of the buffer object.
+      // Copy geometry data.
+      _scene->ebo.bind_triangles_data(_scene->triangles);
+
+      // Map the parameters to the argument position for the vertex shader.
+      //
+      // Vertex coordinates.
       glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
                             GL_FALSE, row_bytes(_scene->vertices),
                             float_pointer(0));
       glEnableVertexAttribArray(arg_pos["in_coords"]);
 
-      // Specify that the vertex shader param 1 corresponds to the first 3 float
-      // data of the buffer object.
+      // Colors.
       glVertexAttribPointer(arg_pos["in_color"], 3 /* 3D colors */, GL_FLOAT,
                             GL_FALSE, row_bytes(_scene->vertices),
                             float_pointer(3));
       glEnableVertexAttribArray(arg_pos["in_color"]);
 
-      // Unbind the vbo to protect its data.
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      // Texture coordinates.
+      glVertexAttribPointer(arg_pos["in_tex_coords"], 2 /* 3D colors */,
+                            GL_FLOAT, GL_FALSE, row_bytes(_scene->vertices),
+                            float_pointer(6));
+      glEnableVertexAttribArray(arg_pos["in_tex_coords"]);
+    }
+
+    // Texture data.
+    {
+      // Read the image from the disk.
+      auto image =
+          sara::imread<sara::Rgb8>(src_path("../../../../data/ksmall.jpg"));
+      // Flip vertically so that the image data matches OpenGL image coordinate
+      // system.
+      sara::flip_vertically(image);
+
+      // Copy the image to the GPU texture.
+      _scene->texture.setup_with_pretty_defaults(image, 0);
     }
   }
 
@@ -213,17 +244,18 @@ struct Scene
     _scene->fragment_shader.destroy();
     _scene->vao.destroy();
     _scene->vbo.destroy();
+    _scene->ebo.destroy();
   }
 
   static auto render_frame()
   {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-    // Draw triangles
+    // Draw triangles.
     const auto& scene = instance();
     glBindVertexArray(scene.vao);  // geometry specified by the VAO.
-    glDrawArrays(GL_POINTS, 0, scene.vertices.size(0));  //
+    glDrawElements(GL_TRIANGLES, scene.triangles.size(), GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(MyGLFW::window);
     glfwPollEvents();
@@ -240,6 +272,10 @@ int main()
 
   Scene::initialize();
   Scene::instance().shader_program.use(true);
+
+  // Activate the texture 0 once for all.
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, Scene::instance().texture);
 
   // Specific rendering options.
   glEnable(GL_BLEND);
@@ -263,4 +299,3 @@ int main()
 
   return EXIT_SUCCESS;
 }
-

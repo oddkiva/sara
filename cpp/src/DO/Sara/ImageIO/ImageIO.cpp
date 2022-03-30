@@ -141,8 +141,10 @@ namespace DO { namespace Sara {
         read_image_with<JpegFileReader>(image, filepath.c_str());
       else if (is_png_file_ext(ext))
         read_image_with<PngFileReader>(image, filepath.c_str());
+#ifndef EMSCRIPTEN
       else if (is_tiff_file_ext(ext))
         read_image_with<TiffFileReader>(image, filepath.c_str());
+#endif
       else
         throw std::runtime_error{
             format("Image format: %s is either unsupported or invalid",
@@ -162,8 +164,10 @@ namespace DO { namespace Sara {
         read_image_with<JpegFileReader>(image, filepath.c_str());
       else if (is_png_file_ext(ext))
         read_image_with<PngFileReader>(image, filepath.c_str());
+#ifndef EMSCRIPTEN
       else if (is_tiff_file_ext(ext))
         read_image_with<TiffFileReader>(image, filepath.c_str());
+#endif
       else
         throw std::runtime_error{
             format("Image format: %s is either unsupported or invalid",
@@ -196,12 +200,14 @@ namespace DO { namespace Sara {
           .write(filepath.c_str());
     }
 
+#ifndef EMSCRIPTEN
     else if (is_tiff_file_ext(ext))
     {
       TiffFileWriter{reinterpret_cast<const unsigned char*>(image.data()),
                      image.width(), image.height(), 3}
           .write(filepath.c_str());
     }
+#endif
     else
       throw std::runtime_error{"Not a supported or valid image format!"};
   }

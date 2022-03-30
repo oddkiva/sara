@@ -298,6 +298,7 @@ namespace DO { namespace Sara {
 } /* namespace DO */
 
 
+#if !defined(EMSCRIPTEN)
 // Tiff I/O.
 namespace DO { namespace Sara {
 
@@ -367,3 +368,4 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+#endif

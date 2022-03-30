@@ -12,10 +12,14 @@ macro(sara_add_wasm_executable file)
 
     target_include_directories(${filename} PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
     target_compile_definitions(${filename} PRIVATE -DEMSCRIPTEN=1)
-    target_link_libraries(${filename} PRIVATE DO_Sara_OpenCL_GL DO::Sara::Core)
+    target_link_libraries(
+      ${filename}
+      PRIVATE DO_Sara_OpenCL_GL #
+              DO::Sara::Core #
+              DO::Sara::ImageIO)
     set_target_properties(
       ${filename} PROPERTIES LINK_FLAGS
-                             "-s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1")
+      "-s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s USE_LIBJPEG=1 -s USE_LIBPNG=1")
   else()
     target_link_libraries(${filename} PRIVATE glfw)
     if(MSVC)
@@ -24,6 +28,5 @@ macro(sara_add_wasm_executable file)
   endif()
 endmacro()
 
-
-sara_add_wasm_executable(hello_triangle.cpp)
-sara_add_wasm_executable(hello_texture.cpp)
+sara_add_wasm_executable(emscripten_hello_triangle.cpp)
+sara_add_wasm_executable(emscripten_hello_texture.cpp)
