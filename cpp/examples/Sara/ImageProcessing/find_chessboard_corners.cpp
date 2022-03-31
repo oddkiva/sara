@@ -119,7 +119,6 @@ auto __main(int argc, char** argv) -> int
   if (argc < 2)
     return 1;
 
-  static constexpr auto nms_radius = 5;
   static constexpr auto adaptive_thres = 0.05f;
   static constexpr auto sigma = 1.6f;
 
