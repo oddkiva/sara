@@ -156,9 +156,32 @@ struct Scene
 
     uniform sampler2D image;
 
+    float sdf_line_segment(in vec2 p, in vec2 a, in vec2 b) {
+      vec2 ba = b - a;
+      vec2 pa = p - a;
+      float t = clamp(dot(pa, ba) / dot(ba, ba), 0., 1.);
+      return length(pa - t * ba);
+    }
+
     void main()
     {
-      frag_color = texture(image, out_tex_coords) * vec4(out_color, 1.0);
+      vec2 a = vec2(0.2, 0.2);
+      vec2 b = vec2(0.8, 0.8);
+      vec2 c = vec2(0.3, 0.8);
+      float thickness = 0.02;
+
+      float d1 = sdf_line_segment(out_tex_coords, a, b) - thickness;
+      float d2 = sdf_line_segment(out_tex_coords, b, c) - thickness;
+      float d = min(d1, d2);
+
+      vec4 out_color = texture(image, out_tex_coords) * vec4(out_color, 1.0);
+
+      vec4 line_color = mix(vec4(1.0), out_color, 1. - smoothstep(.0, .015, abs(d)));
+
+      if (d < 1e-7)
+        frag_color = line_color;
+      else
+        frag_color = out_color;
     }
     )shader";
     _scene->fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
@@ -242,10 +265,7 @@ struct Scene
       // system.
       sara::flip_vertically(image);
 
-      std::cout << image.sizes().transpose() << std::endl;
-
       // Copy the image to the GPU texture.
-      // _scene->texture.setup_with_pretty_defaults(image, 0);
       _scene->texture.generate();
       _scene->texture.bind();
       _scene->texture.set_border_type(GL_CLAMP_TO_EDGE);
@@ -282,6 +302,13 @@ struct Scene
 std::unique_ptr<Scene> Scene::_scene = nullptr;
 
 
+struct Painter
+{
+  sara::GL::Shader fragment_shader;
+  sara::GL::ShaderProgram shader_program;
+};
+
+
 int main()
 {
   try
@@ -293,19 +320,21 @@ int main()
     // Activate the texture 0 once for all.
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, Scene::instance().texture);
-    const auto tex_location =
-        glGetUniformLocation(Scene::instance().shader_program, "image2");
-    if (tex_location == GL_INVALID_VALUE)
-      throw std::runtime_error{"Cannot find texture location!"};
-    glUniform1i(tex_location, 0);
-    std::cout << "Bind texture ID: " << Scene::instance().texture << std::endl;
 
     // Specific rendering options.
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
 
+    // We must use the shader program first before specifying the textures!
     Scene::instance().shader_program.use(true);
+
+    // Only then can we specify the texture.
+    const auto tex_location =
+        glGetUniformLocation(Scene::instance().shader_program, "image");
+    if (tex_location == GL_INVALID_VALUE)
+      throw std::runtime_error{"Cannot find texture location!"};
+    glUniform1i(tex_location, 0);
 
 #ifdef EMSCRIPTEN
     emscripten_set_main_loop(Scene::render_frame, 0, 1);

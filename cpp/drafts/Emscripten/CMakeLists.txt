@@ -24,7 +24,7 @@ macro(sara_add_wasm_executable file)
       ${filename}
       PROPERTIES
         LINK_FLAGS
-        "-s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s USE_LIBJPEG=1 -s USE_LIBPNG=1 --preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/sunflowerField.jpg"
+        "-s ALLOW_MEMORY_GROWTH=1 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s USE_LIBJPEG=1 -s USE_LIBPNG=1 --preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/sunflowerField.jpg"
     )
   else()
     target_link_libraries(${filename} PRIVATE glfw)

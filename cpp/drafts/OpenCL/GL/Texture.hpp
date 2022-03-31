@@ -98,7 +98,7 @@ namespace DO::Sara { namespace GL {
                    /* border */ 0, GL::PixelTraits<T>::PixelFormat,
                    GL::PixelTraits<T>::ChannelType,
                    reinterpret_cast<const void*>(image.data()));
-      // glGenerateMipmap(GL_TEXTURE_2D);
+      glGenerateMipmap(GL_TEXTURE_2D);
     }
 
     template <typename T>
