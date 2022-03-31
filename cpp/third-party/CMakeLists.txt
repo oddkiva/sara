@@ -6,6 +6,10 @@ message(STATUS "  - easyexif")
 add_subdirectory(easyexif)
 set_property(TARGET easyexif PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 
+if (CMAKE_SYSTEM_NAME STREQUAL EMSCRIPTEN)
+  return ()
+endif ()
+
 message(STATUS "  - FLANN")
 add_subdirectory(flann)
 set_property(TARGET flann_cpp_s PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})

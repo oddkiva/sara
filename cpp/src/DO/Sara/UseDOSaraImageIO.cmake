@@ -34,13 +34,16 @@ if(SARA_USE_FROM_SOURCE)
 
     target_compile_definitions(DO_Sara_ImageIO #
                                PUBLIC $<$<PLATFORM_ID:Emscripten>:EMSCRIPTEN>)
-    target_compile_options(
-      DO_Sara_ImageIO #
-      PUBLIC "SHELL:-s USE_LIBJPEG=1" #
-             "SHELL:-s USE_LIBPNG=1" #
-    )
 
-    set_target_properties(DO_Sara_ImageIO #
-                          PROPERTIES LINK_FLAGS "-s USE_LIBJPEG -s WASM=1")
+    if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+      target_compile_options(
+        DO_Sara_ImageIO #
+        PUBLIC "SHELL:-s USE_LIBJPEG=1" #
+               "SHELL:-s USE_LIBPNG=1" #
+      )
+
+      set_target_properties(DO_Sara_ImageIO #
+                            PROPERTIES LINK_FLAGS "-s USE_LIBJPEG -s WASM=1")
+    endif ()
   endif()
 endif()
