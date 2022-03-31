@@ -55,6 +55,8 @@ struct MyGLFW
     glfwSetMouseButtonCallback(window, mouse_callback);
     glfwSetKeyCallback(window, key_callback);
 
+    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+
     return true;
   }
 
@@ -119,9 +121,10 @@ struct Scene
       _scene.reset(new Scene);
 
     // Create a vertex shader.
-    std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                          {"in_color", 1},   //
-                                          {"out_color", 0}};
+    const std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
+                                                {"in_color", 1},       //
+                                                {"in_tex_coords", 2},  //
+                                                {"out_color", 0}};
 
     const auto vertex_shader_source = R"shader(#version 300 es
     layout (location = 0) in vec3 in_coords;
@@ -134,9 +137,8 @@ struct Scene
     void main()
     {
       gl_Position = vec4(in_coords, 1.0);
-      gl_PointSize = 200.0;
       out_color = in_color;
-      out_tex_coords = vec2(in_tex_coords.x, in_tex_coords.y);
+      out_tex_coords = in_tex_coords;
     }
     )shader";
     _scene->vertex_shader.create_from_source(GL_VERTEX_SHADER,
@@ -144,17 +146,19 @@ struct Scene
 
     // Create a fragment shader.
     const auto fragment_shader_source = R"shader(#version 300 es
-    precision mediump float;
+    #ifdef GL_ES
+    precision highp float;
+    #endif
 
     in vec3 out_color;
     in vec2 out_tex_coords;
     out vec4 frag_color;
 
-    uniform sampler2D texture1;
+    uniform sampler2D image;
 
     void main()
     {
-      frag_color = texture(texture1, out_tex_coords) * vec4(out_color, 1.0);
+      frag_color = texture(image, out_tex_coords) * vec4(out_color, 1.0);
     }
     )shader";
     _scene->fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
@@ -170,7 +174,7 @@ struct Scene
     // Encode the vertex data in a tensor.
     _scene->vertices = sara::Tensor_<float, 2>{{4, 8}};
     // clang-format off
-    _scene->vertices.flat_array() << //
+    _scene->vertices.flat_array() <<
       // coords            color              texture coords
        0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // bottom-right
        0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // top-right
@@ -179,7 +183,11 @@ struct Scene
     // clang-format on
 
     _scene->triangles.resize(2, 3);
-    _scene->triangles.flat_array() << 0, 1, 2, 2, 3, 0;
+    // clang-format off
+    _scene->triangles.flat_array() <<
+      0, 1, 2,
+      2, 3, 0;
+    // clang-format on
 
     const auto row_bytes = [](const sara::TensorView_<float, 2>& data) {
       return data.size(1) * sizeof(float);
@@ -208,34 +216,41 @@ struct Scene
       // Map the parameters to the argument position for the vertex shader.
       //
       // Vertex coordinates.
-      glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
-                            GL_FALSE, row_bytes(_scene->vertices),
+      glVertexAttribPointer(arg_pos.at("in_coords"), 3 /* 3D points */,
+                            GL_FLOAT, GL_FALSE, row_bytes(_scene->vertices),
                             float_pointer(0));
-      glEnableVertexAttribArray(arg_pos["in_coords"]);
+      glEnableVertexAttribArray(arg_pos.at("in_coords"));
 
       // Colors.
-      glVertexAttribPointer(arg_pos["in_color"], 3 /* 3D colors */, GL_FLOAT,
+      glVertexAttribPointer(arg_pos.at("in_color"), 3 /* 3D colors */, GL_FLOAT,
                             GL_FALSE, row_bytes(_scene->vertices),
                             float_pointer(3));
-      glEnableVertexAttribArray(arg_pos["in_color"]);
+      glEnableVertexAttribArray(arg_pos.at("in_color"));
 
       // Texture coordinates.
-      glVertexAttribPointer(arg_pos["in_tex_coords"], 2 /* 3D colors */,
+      glVertexAttribPointer(arg_pos.at("in_tex_coords"), 2 /* 3D colors */,
                             GL_FLOAT, GL_FALSE, row_bytes(_scene->vertices),
                             float_pointer(6));
-      glEnableVertexAttribArray(arg_pos["in_tex_coords"]);
+      glEnableVertexAttribArray(arg_pos.at("in_tex_coords"));
     }
 
     // Texture data.
     {
       // Read the image from the disk.
-      auto image = sara::imread<sara::Rgb8>("./ksmall.jpg");
+      auto image = sara::imread<sara::Rgb8>("assets/sunflowerField.jpg");
       // Flip vertically so that the image data matches OpenGL image coordinate
       // system.
       sara::flip_vertically(image);
 
+      std::cout << image.sizes().transpose() << std::endl;
+
       // Copy the image to the GPU texture.
-      _scene->texture.setup_with_pretty_defaults(image, 0);
+      // _scene->texture.setup_with_pretty_defaults(image, 0);
+      _scene->texture.generate();
+      _scene->texture.bind();
+      _scene->texture.set_border_type(GL_CLAMP_TO_EDGE);
+      _scene->texture.set_interpolation_type(GL_LINEAR);
+      _scene->texture.initialize_data(image, 0);
     }
   }
 
@@ -246,12 +261,13 @@ struct Scene
     _scene->vao.destroy();
     _scene->vbo.destroy();
     _scene->ebo.destroy();
+    _scene->texture.destroy();
   }
 
   static auto render_frame()
   {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw triangles.
     const auto& scene = instance();
@@ -274,20 +290,22 @@ int main()
       return EXIT_FAILURE;
 
     Scene::initialize();
-    Scene::instance().shader_program.use(true);
-
     // Activate the texture 0 once for all.
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, Scene::instance().texture);
+    const auto tex_location =
+        glGetUniformLocation(Scene::instance().shader_program, "image2");
+    if (tex_location == GL_INVALID_VALUE)
+      throw std::runtime_error{"Cannot find texture location!"};
+    glUniform1i(tex_location, 0);
+    std::cout << "Bind texture ID: " << Scene::instance().texture << std::endl;
 
     // Specific rendering options.
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_DEPTH_TEST);
 
-    // Initialize the background.
-    glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
+    Scene::instance().shader_program.use(true);
 
 #ifdef EMSCRIPTEN
     emscripten_set_main_loop(Scene::render_frame, 0, 1);

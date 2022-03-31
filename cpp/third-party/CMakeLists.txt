@@ -6,7 +6,7 @@ message(STATUS "  - easyexif")
 add_subdirectory(easyexif)
 set_property(TARGET easyexif PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 
-if (CMAKE_SYSTEM_NAME STREQUAL EMSCRIPTEN)
+if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   return ()
 endif ()
 

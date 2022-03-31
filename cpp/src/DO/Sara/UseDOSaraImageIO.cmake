@@ -40,6 +40,7 @@ if(SARA_USE_FROM_SOURCE)
         DO_Sara_ImageIO #
         PUBLIC "SHELL:-s USE_LIBJPEG=1" #
                "SHELL:-s USE_LIBPNG=1" #
+               "SHELL:-O3" #
       )
 
       set_target_properties(DO_Sara_ImageIO #

@@ -130,9 +130,9 @@ struct Scene
     };
 
     // Create a vertex shader.
-    std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                          {"in_color", 1},   //
-                                          {"out_color", 0}};
+    const std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
+                                                {"in_color", 1},   //
+                                                {"out_color", 0}};
 
     const auto vertex_shader_source = R"shader(#version 300 es
     layout (location = 0) in vec3 in_coords;
@@ -189,17 +189,17 @@ struct Scene
 
       // Specify that the vertex shader param 0 corresponds to the first 3 float
       // data of the buffer object.
-      glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
+      glVertexAttribPointer(arg_pos.at("in_coords"), 3 /* 3D points */, GL_FLOAT,
                             GL_FALSE, row_bytes(_scene->vertices),
                             float_pointer(0));
-      glEnableVertexAttribArray(arg_pos["in_coords"]);
+      glEnableVertexAttribArray(arg_pos.at("in_coords"));
 
       // Specify that the vertex shader param 1 corresponds to the first 3 float
       // data of the buffer object.
-      glVertexAttribPointer(arg_pos["in_color"], 3 /* 3D colors */, GL_FLOAT,
+      glVertexAttribPointer(arg_pos.at("in_color"), 3 /* 3D colors */, GL_FLOAT,
                             GL_FALSE, row_bytes(_scene->vertices),
                             float_pointer(3));
-      glEnableVertexAttribArray(arg_pos["in_color"]);
+      glEnableVertexAttribArray(arg_pos.at("in_color"));
 
       // Unbind the vbo to protect its data.
       glBindBuffer(GL_ARRAY_BUFFER, 0);

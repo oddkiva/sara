@@ -189,10 +189,12 @@ int main()
   auto texture = GL::Texture2D{};
   {
     // Read the image from the disk.
-    auto image = imread<Rgb8>(src_path("../../../../data/ksmall.jpg"));
+    auto image = imread<Rgb8>(src_path("../../../../data/ksmall.jpg")).convert<float>();
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);
+
+    std::cout << image.matrix().topLeftCorner(10, 10) << std::endl;
 
     // Copy the image to the GPU texture.
     texture.setup_with_pretty_defaults(image, 0);
