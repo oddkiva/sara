@@ -206,8 +206,7 @@ struct Scene
 
     void main()
     {
-      // gl_Position = projection * view * transform * vec4(in_coords, 1.0);
-      gl_Position = vec4(in_coords, 1.0);
+      gl_Position = projection * view * transform * vec4(in_coords, 1.0);
       out_color = in_color;
       out_tex_coords = in_tex_coords;
     }
@@ -345,14 +344,8 @@ struct Scene
       glEnableVertexAttribArray(arg_pos.at("in_tex_coords"));
     }
 
-    _scene->projection = perspective(45., 800. / 600., .1, 1000.).cast<float>();
-
-    const Eigen::Vector3f position = 10.f * Eigen::Vector3f::UnitY();
-    const Eigen::Vector3f front = -Eigen::Vector3f::UnitZ();
-    const Eigen::Vector3f up = Eigen::Vector3f::UnitY();
-    const Eigen::Vector3f world_up{Eigen::Vector3f::UnitY()};
-    _scene->view = look_at(position, position + front, up);
-
+    _scene->projection.setIdentity();
+    _scene->view.setIdentity();
     _scene->transform.setIdentity();
   }
 
@@ -562,16 +555,6 @@ struct PolylinePainter
                             float_pointer(6));
       glEnableVertexAttribArray(arg_pos.at("in_tex_coords"));
     }
-
-    projection = perspective(45., 800. / 600., .1, 1000.).cast<float>();
-
-    const Eigen::Vector3f position = 10.f * Eigen::Vector3f::UnitY();
-    const Eigen::Vector3f front = -Eigen::Vector3f::UnitZ();
-    const Eigen::Vector3f up = Eigen::Vector3f::UnitY();
-    const Eigen::Vector3f world_up{Eigen::Vector3f::UnitY()};
-    view = look_at(position, position + front, up);
-
-    transform.setIdentity();
 #endif
   }
 };
@@ -585,9 +568,11 @@ int main()
       return EXIT_FAILURE;
 
     Scene::initialize();
+    auto& scene = Scene::instance();
+
     // Activate the texture 0 once for all.
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, Scene::instance().texture);
+    glBindTexture(GL_TEXTURE_2D, scene.texture);
 
     // Specific rendering options.
     glEnable(GL_BLEND);
@@ -595,34 +580,31 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
     // We must use the shader program first before specifying the textures!
-    Scene::instance().shader_program.use(true);
+    scene.shader_program.use(true);
 
-    // From then on, can we set the projective transformation.
-    Scene::instance().shader_program.set_uniform_matrix4f(
-        "transform", Scene::instance().transform.matrix().data());
-    Scene::instance().shader_program.set_uniform_matrix4f(
-        "view", Scene::instance().view.data());
-    Scene::instance().shader_program.set_uniform_matrix4f(
-        "projection", Scene::instance().projection.data());
-    std::cout << Scene::instance().transform.matrix() << std::endl;
-    std::cout << Scene::instance().view << std::endl;
-    std::cout << Scene::instance().projection << std::endl;
+    // From then on, we can set the projective transformation for this specific
+    // shader program.
+    scene.shader_program.set_uniform_matrix4f("transform",
+                                              scene.transform.matrix().data());
+    scene.shader_program.set_uniform_matrix4f("view", scene.view.data());
+    scene.shader_program.set_uniform_matrix4f("projection",
+                                              scene.projection.data());
 
     // Also specify the texture.
     const auto tex_location =
-        glGetUniformLocation(Scene::instance().shader_program, "image");
+        glGetUniformLocation(scene.shader_program, "image");
     if (tex_location == GL_INVALID_VALUE)
       throw std::runtime_error{"Cannot find texture location!"};
     glUniform1i(tex_location, 0);
 
-#  ifdef EMSCRIPTEN
-    emscripten_set_main_loop(Scene::render_frame, 0, 1);
-#  else
+#ifdef EMSCRIPTEN
+    emscripten_set_main_loop(&Scene::render_frame, 0, 1);
+#else
     while (!glfwWindowShouldClose(MyGLFW::window))
-      Scene::render_frame();
-#  endif
+      scene.render_frame();
+#endif
 
-    Scene::destroy_opengl_data();
+    scene.destroy_opengl_data();
 
     glfwTerminate();
   }
