@@ -12,5 +12,8 @@ if(NOT DO_Sara_Core_ADDED)
       PUBLIC
       $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:_SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING>
     )
+    if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+      target_compile_options(DO_Sara_Core PUBLIC "SHELL:-O3")
+    endif ()
   endif()
 endif()

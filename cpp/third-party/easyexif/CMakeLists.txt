@@ -2,6 +2,9 @@ project (easyexif)
 
 add_library (easyexif STATIC exif.h exif.cpp)
 set_target_properties(easyexif PROPERTIES OUTPUT_NAME_DEBUG easyexif-d)
+if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  target_compile_options(easyexif PUBLIC "SHELL:-O3")
+endif ()
 
 configure_file(${DO_Sara_DIR}/cmake/FindEasyEXIF.cmake.in
                ${CMAKE_BINARY_DIR}/cmake/FindEasyEXIF.cmake @ONLY)
