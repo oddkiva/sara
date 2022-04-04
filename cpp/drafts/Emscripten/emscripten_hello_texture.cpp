@@ -261,9 +261,6 @@ struct Scene
     _scene->shader_program.attach(_scene->vertex_shader,
                                   _scene->fragment_shader);
 
-    _scene->vao.generate();
-    _scene->vbo.generate();
-
     // Read the image from the disk.
     auto image = sara::imread<sara::Rgb8>("assets/sunflowerField.jpg");
     // Flip vertically so that the image data matches OpenGL image coordinate
@@ -414,6 +411,7 @@ struct PolylinePainter
     const Eigen::Vector2f a1 = a - (w * 0.5f + r) * (t + o);
     const Eigen::Vector2f b0 = b + (w * 0.5f + r) * (t + o);
     const Eigen::Vector2f b1 = b + (w * 0.5f + r) * (t - o);
+
     _vertices.push_back(a0.x());
     _vertices.push_back(a0.y());
     _vertices.push_back(0.f);
@@ -451,7 +449,6 @@ struct PolylinePainter
     const auto vertex_shader_source = R"shader(#version 300 es
     layout (location = 0) in vec3 in_coords;
     layout (location = 1) in vec3 in_color;
-    layout (location = 2) in vec2 in_tex_coords;
 
     out vec3 out_color;
 
@@ -508,54 +505,39 @@ struct PolylinePainter
     shader_program.create();
     shader_program.attach(vertex_shader, fragment_shader);
 
-#ifdef WIP
+    // Allocate the GL buffers.
     vao.generate();
     vbo.generate();
-
-    const auto row_bytes = [](const sara::TensorView_<float, 2>& data) {
-      return data.size(1) * sizeof(float);
-    };
-    const auto float_pointer = [](int offset) {
-      return reinterpret_cast<void*>(offset * sizeof(float));
-    };
-
-    vao.generate();
-
-    // Vertex attributes.
-    vbo.generate();
-
-    // Triangles data.
     ebo.generate();
+  }
+
+  auto transfer_line_tesselation_to_gl_buffers(const std::vector<float>& /* vertices */,
+                                               const std::vector<std::uint32_t>& /* triangles */)
+  {
+    static constexpr auto row_bytes = 2 * sizeof(float);
 
     {
       glBindVertexArray(vao);
 
-      // Copy vertex data.
-      vbo.bind_vertex_data(vertices);
+#ifdef TODO
+      // Copy vertex coordinates data.
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(),
+                   GL_STATIC_DRAW);
 
-      // Copy geometry data.
-      ebo.bind_triangles_data(triangles);
+      // Copy triangles data.
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangles.size() * sizeof(std::uint32_t),
+                   triangles.data(), GL_STATIC_DRAW);
+#endif
 
       // Map the parameters to the argument position for the vertex shader.
       //
       // Vertex coordinates.
-      glVertexAttribPointer(arg_pos.at("in_coords"), 3 /* 3D points */,
-                            GL_FLOAT, GL_FALSE, row_bytes(vertices),
-                            float_pointer(0));
-      glEnableVertexAttribArray(arg_pos.at("in_coords"));
-
-      // Colors.
-      glVertexAttribPointer(arg_pos.at("in_color"), 3 /* 3D colors */, GL_FLOAT,
-                            GL_FALSE, row_bytes(vertices), float_pointer(3));
-      glEnableVertexAttribArray(arg_pos.at("in_color"));
-
-      // Texture coordinates.
-      glVertexAttribPointer(arg_pos.at("in_tex_coords"), 2 /* 3D colors */,
-                            GL_FLOAT, GL_FALSE, row_bytes(vertices),
-                            float_pointer(6));
-      glEnableVertexAttribArray(arg_pos.at("in_tex_coords"));
+      glVertexAttribPointer(0, 2 /* 2D points */, GL_FLOAT, GL_FALSE, row_bytes,
+                            0);
+      glEnableVertexAttribArray(0);
     }
-#endif
   }
 };
 
