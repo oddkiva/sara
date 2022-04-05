@@ -1,0 +1,34 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2022-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+//! @file
+
+#pragma once
+
+#include <GLFW/glfw3.h>
+
+struct MyGLFW
+{
+  static GLFWwindow* window;
+  static int width;
+  static int height;
+
+  static auto initialize() -> bool;
+
+  static void window_size_callback(GLFWwindow* /* window */, int width,
+                                   int height);
+
+  static void key_callback(GLFWwindow* /* window */, int key,
+                           int /* scancode */, int action, int /* modifier */);
+
+  static void mouse_callback(GLFWwindow* /* window */, int button,
+                             int /* action */, int /* modifiers */);
+};

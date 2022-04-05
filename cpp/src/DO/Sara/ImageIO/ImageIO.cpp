@@ -56,12 +56,14 @@ namespace DO { namespace Sara {
     return ext == ".png";
   }
 
+#ifndef EMSCRIPTEN
   static inline bool is_tiff_file_ext(const string& ext)
   {
     return
       ext == ".tif" ||
       ext == ".tiff";
   }
+#endif
 
 } /* namespace Sara */
 } /* namespace DO */
