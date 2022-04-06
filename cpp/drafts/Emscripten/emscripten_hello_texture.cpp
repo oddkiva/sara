@@ -29,8 +29,10 @@
 
 #include "Geometry.hpp"
 #include "LinePainter.hpp"
-#include "MyGLFW.hpp"
+#include "MetricGridRenderer.hpp"
 #include "Scene.hpp"
+
+#include "MyGLFW.hpp"
 
 
 namespace sara = DO::Sara;
@@ -53,6 +55,8 @@ auto render_frame() -> void
   static constexpr auto thickness = 10.f / 1080.f; // 10 pixels in normalized coordinates...
   static constexpr auto antialias_radius = 0.5f / 1080.f;
 
+  // Dummy animation, just to show the possibilities.
+  //
   // Transfer line data to GPU.
   auto& line_painter = LinePainter::instance();
   {
@@ -69,13 +73,15 @@ auto render_frame() -> void
                                   thickness, antialias_radius);
     line_painter.transfer_line_tesselation_to_gl_buffers();
 
-    // Dummy animation, just to show the possibilities.
     t += dt;
     if (t > 2 * M_PI)
       t = 0.f;
   }
 
   line_painter.render();
+
+  auto& grid_renderer = MetricGridRenderer::instance();
+  grid_renderer.render();
 
   glfwSwapBuffers(MyGLFW::window);
   glfwPollEvents();
@@ -88,12 +94,17 @@ int main()
     if (!MyGLFW::initialize())
       return EXIT_FAILURE;
 
-    auto& painter = LinePainter::instance();
-    painter.initialize();
-
     auto& scene = Scene::instance();
     const auto image = sara::imread<sara::Rgb8>("assets/image.png");
     scene.initialize(image);
+
+    auto& painter = LinePainter::instance();
+    painter.initialize();
+
+    auto& grid_renderer = MetricGridRenderer::instance();
+    grid_renderer.initialize();
+    grid_renderer.add_line_segment({-0.4f, -0.4f}, {+0.4f, +0.4f});
+    grid_renderer.transfer_line_tesselation_to_gl_buffers();
 
     // Activate the texture 0 once for all.
     glActiveTexture(GL_TEXTURE0);
@@ -113,6 +124,7 @@ int main()
 
     scene.destroy_opengl_data();
     painter.destroy_opengl_data();
+    grid_renderer.destroy_opengl_data();
 
     glfwTerminate();
   }

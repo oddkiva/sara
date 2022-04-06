@@ -77,7 +77,13 @@ namespace DO::Sara { namespace GL {
         throw std::runtime_error{"Error: not implemented!"};
     }
 
+    void set_uniform_vector2f(const char* mat_name, const float* mat_coeffs);
+
+    void set_uniform_matrix3f(const char* mat_name, const float* mat_coeffs);
+
     void set_uniform_matrix4f(const char* mat_name, const float* mat_coeffs);
+
+    void set_uniform_texture(const char* texture_name, GLuint texture_id);
 
     GLuint program_object{0};
     GLuint vertex_shader{0};

@@ -185,10 +185,11 @@ auto Scene::render() -> void
     _shader_program.set_uniform_matrix4f("projection", _projection.data());
 
     // Texture.
-    const auto tex_location = glGetUniformLocation(_shader_program, "image");
-    if (tex_location == GL_INVALID_VALUE)
-      throw std::runtime_error{"Cannot find texture location!"};
-    glUniform1i(tex_location, 0);
+    // const auto tex_location = glGetUniformLocation(_shader_program, "image");
+    // if (tex_location == GL_INVALID_VALUE)
+    //   throw std::runtime_error{"Cannot find texture location!"};
+    // glUniform1i(tex_location, 0);
+    _shader_program.set_uniform_texture("image", _texture);
   }
 
   glBindVertexArray(_vao);

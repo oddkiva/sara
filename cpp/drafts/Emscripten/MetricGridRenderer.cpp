@@ -101,12 +101,11 @@ auto MetricGridRenderer::initialize() -> void
       // Radial component (additive).
       float r2 = dot(m, m);
       float r4 = r2 * r2;
-      float r6 = r4 * r2;
-      vec2 radial_factor = m * (k1 * r2 + k2 * r4);
+      vec2 radial_factor = (k1 * r2 + k2 * r4) * m;
 
       // Tangential component (additive).
-      float tx = 2 * p1 * m.x() * m.y() + p2 * (r2 + 2 * p1 * m.x());
-      float ty = p1 * (r2 + 2 * p1 * m.y()) + 2 * p2 * m.x() * m.y();
+      float tx = 2. * p1 * m.x * m.y + p2 * (r2 + 2. * p1 * m.x);
+      float ty = p1 * (r2 + 2. * p1 * m.y) + 2. * p2 * m.x * m.y;
 
       // Apply the distortion.
       vec2 delta = radial_factor + vec2(tx, ty);
@@ -114,25 +113,36 @@ auto MetricGridRenderer::initialize() -> void
       return delta;
     }
 
-    void main()
+    vec2 project_to_image(vec2 coords)
     {
       // 1. Project the metric grid to the image.
       //
       // 1.a) Calculate the camera coordinates.
-      vec4 Xc = C * vec4(in_coords, 0., 1.);
+      vec4 Xc = C * vec4(coords, 0., 1.);
       // 1.b) Project to the image.
       vec3 Xs = normalize(Xc.xyz);
       vec3 Xe = Xs + xi * vec3(0., 0., 1.);
-      vec2 m = normalize(Xe);
+      vec2 m = (Xe / Xe.z).xy;
       vec2 m_distorted = m + lens_distortion(m);
       vec3 p = K * vec3(m_distorted, 1.);
-      vec2 pn = p / p.z;
-      pn.x /= image_sizes.x;
-      pn.y /= image_sizes.y;
+      vec2 pn = (p / p.z).xy;
+      return pn;
+    }
 
+    vec2 rescale(vec2 pn)
+    {
+      float ratio = image_sizes.x / image_sizes.y;
+      pn = pn - 0.5 * image_sizes;
+      pn /= image_sizes.y;
+      return pn;
+    }
+
+    void main()
+    {
       // 2. Rescale the pixel coordinates of the metric in the normalized
       //    coordinates.
       // 3. Apply the global projection-model-view transform.
+      vec2 pn = in_coords;
       gl_Position = projection * view * transform * vec4(pn, 0, 1.);
     }
     )shader";
@@ -144,13 +154,14 @@ auto MetricGridRenderer::initialize() -> void
     precision highp float;
     #endif
 
+    uniform sampler2D image;
     // uniform vec4 color;
 
     out vec4 frag_color;
 
     void main()
     {
-      frag_color = vec4(0.4, 0.5, 0.0, 1.);
+      frag_color = vec4(0.4, 0.0, 0.0, 0.8);
     }
     )shader";
   _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
@@ -197,22 +208,15 @@ auto MetricGridRenderer::render() -> void
   // Set the projection-model-view matrix uniforms.
   {
     auto& scene = Scene::instance();
+
+    _shader_program.set_uniform_texture("image", scene._texture);
+
+    _shader_program.set_uniform_matrix3f("K", _intrinsics.K.data());
     _shader_program.set_uniform_matrix4f("transform",
                                          scene._transform.matrix().data());
     _shader_program.set_uniform_matrix4f("view", scene._view.data());
     _shader_program.set_uniform_matrix4f("projection",
                                          scene._projection.data());
-
-    // TODO
-    // TODO
-    // TODO
-    // TODO
-    // TODO
-    // TODO
-    // TODO
-    // TODO
-    // TODO
-    // TODO
   }
 
   glBindVertexArray(_vao);
