@@ -47,12 +47,11 @@ struct Scene
 
   static auto instance() -> Scene&;
 
-  auto initialize() -> void;
+  auto initialize(const DO::Sara::ImageView<DO::Sara::Rgb8>& image) -> void;
 
   auto destroy_opengl_data() -> void;
 
   auto render() -> void;
 };
-
 
 

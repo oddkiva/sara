@@ -92,7 +92,8 @@ int main()
     painter.initialize();
 
     auto& scene = Scene::instance();
-    scene.initialize();
+    const auto image = sara::imread<sara::Rgb8>("assets/image.png");
+    scene.initialize(image);
 
     // Activate the texture 0 once for all.
     glActiveTexture(GL_TEXTURE0);

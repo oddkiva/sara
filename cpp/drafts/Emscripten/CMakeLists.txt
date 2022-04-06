@@ -1,7 +1,7 @@
 if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   find_package(glew REQUIRED CONFIG)
   find_package(glfw3 REQUIRED)
-else ()
+else()
   set(BASE_LINK_FLAGS "-s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1")
   set(SARA_IMAGEIO_LINK_FLAGS "-s USE_LIBJPEG=1 -s USE_LIBPNG=1")
 endif()
@@ -59,7 +59,9 @@ list(
   Scene.hpp
   Scene.cpp
   LinePainter.hpp
-  LinePainter.cpp #
+  LinePainter.cpp
+  MetricGridRenderer.hpp
+  MetricGridRenderer.cpp #
 )
 sara_add_wasm_library(emscripten_gl_utilities "${GL_UTILS}")
 
@@ -73,5 +75,5 @@ set_target_properties(
   emscripten_hello_texture
   PROPERTIES
     LINK_FLAGS
-    "${BASE_LINK_FLAGS} ${SARA_IMAGEIO_LINK_FLAGS} -s ALLOW_MEMORY_GROWTH=1 --preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/sunflowerField.jpg"
+    "${BASE_LINK_FLAGS} ${SARA_IMAGEIO_LINK_FLAGS} -s ALLOW_MEMORY_GROWTH=1 --preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image.png"
 )

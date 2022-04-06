@@ -30,7 +30,7 @@ auto Scene::instance() -> Scene&
   return *_scene;
 }
 
-auto Scene::initialize() -> void
+auto Scene::initialize(const sara::ImageView<sara::Rgb8>& image_view) -> void
 {
   // Create a vertex shader.
   const std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
@@ -47,13 +47,11 @@ auto Scene::initialize() -> void
     uniform mat4 view;
     uniform mat4 projection;
 
-    out vec3 out_color;
     out vec2 out_tex_coords;
 
     void main()
     {
       gl_Position = projection * view * transform * vec4(in_coords, 1.0);
-      out_color = in_color;
       out_tex_coords = in_tex_coords;
     }
     )shader";
@@ -65,7 +63,6 @@ auto Scene::initialize() -> void
     precision highp float;
     #endif
 
-    in vec3 out_color;
     in vec2 out_tex_coords;
     out vec4 frag_color;
 
@@ -73,8 +70,7 @@ auto Scene::initialize() -> void
 
     void main()
     {
-      vec4 out_color = texture(image, out_tex_coords) * vec4(out_color, 1.0);
-      frag_color = out_color;
+      frag_color = texture(image, out_tex_coords);
     }
     )shader";
   _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
@@ -84,7 +80,7 @@ auto Scene::initialize() -> void
   _shader_program.attach(_vertex_shader, _fragment_shader);
 
   // Read the image from the disk.
-  auto image = sara::imread<sara::Rgb8>("assets/sunflowerField.jpg");
+  auto image = sara::Image<sara::Rgb8>{image_view};
   // Flip vertically so that the image data matches OpenGL image coordinate
   // system.
   sara::flip_vertically(image);

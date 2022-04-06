@@ -35,7 +35,7 @@ auto MyGLFW::initialize() -> bool
     return false;
   }
 
-  window = glfwCreateWindow(512, 512, "OpenGL Window", NULL, NULL);
+  window = glfwCreateWindow(1024, 1024, "OpenGL Window", NULL, NULL);
   if (!MyGLFW::window)
   {
     std::cout << "Failed to create window!" << std::endl;
@@ -51,7 +51,7 @@ auto MyGLFW::initialize() -> bool
   glfwSetMouseButtonCallback(window, mouse_callback);
   glfwSetKeyCallback(window, key_callback);
 
-  std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+  // std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
   return true;
 }
@@ -68,9 +68,6 @@ auto MyGLFW::key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
 {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
     glfwSetWindowShouldClose(window, 1);
-
-  if (key == GLFW_KEY_ENTER)
-    std::cout << "Hit Enter!" << std::endl;
 
   auto& scene = Scene::instance();
   switch (key) {
