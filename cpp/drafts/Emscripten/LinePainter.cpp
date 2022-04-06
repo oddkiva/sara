@@ -12,6 +12,7 @@
 //! @file
 
 #include "LinePainter.hpp"
+#include "Scene.hpp"
 
 
 std::unique_ptr<LinePainter> LinePainter::_painter = nullptr;
@@ -74,9 +75,13 @@ auto LinePainter::initialize() -> void
   const auto vertex_shader_source = R"shader(#version 300 es
     layout (location = 0) in vec2 in_coords;
 
+    uniform mat4 transform;
+    uniform mat4 view;
+    uniform mat4 projection;
+
     void main()
     {
-      gl_Position = vec4(in_coords, 0, 1.);
+      gl_Position = projection * view * transform * vec4(in_coords, 0, 1.);
     }
     )shader";
   _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
@@ -88,8 +93,6 @@ auto LinePainter::initialize() -> void
     #endif
 
     out vec4 frag_color;
-
-    uniform sampler2D image;
 
     void main()
     {
@@ -112,16 +115,9 @@ auto LinePainter::transfer_line_tesselation_to_gl_buffers() -> void
 {
   glBindVertexArray(_vao);
 
-  // Copy vertex coordinates data.
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-  glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(float),
-               _vertices.data(), GL_STATIC_DRAW);
-
-  // Copy triangles data.
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-               _triangles.size() * sizeof(std::uint32_t), _triangles.data(),
-               GL_STATIC_DRAW);
+  // Copy vertex coordinates and triangles to the GPU.
+  _vbo.bind_vertex_data(_vertices);
+  _ebo.bind_triangles_data(_triangles);
 
   // Map the parameters to the argument position for the vertex shader.
   //
@@ -145,6 +141,17 @@ auto LinePainter::destroy_opengl_data() -> void
 auto LinePainter::render() -> void
 {
   _shader_program.use(true);
+
+  // Set the projection-model-view matrix uniforms.
+  {
+    auto& scene = Scene::instance();
+    _shader_program.set_uniform_matrix4f("transform",
+                                         scene._transform.matrix().data());
+    _shader_program.set_uniform_matrix4f("view", scene._view.data());
+    _shader_program.set_uniform_matrix4f("projection",
+                                         scene._projection.data());
+  }
+
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, _triangles.size(), GL_UNSIGNED_INT, 0);
 }

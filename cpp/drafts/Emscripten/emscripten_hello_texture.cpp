@@ -28,8 +28,8 @@
 #endif
 
 #include "Geometry.hpp"
-#include "MyGLFW.hpp"
 #include "LinePainter.hpp"
+#include "MyGLFW.hpp"
 #include "Scene.hpp"
 
 
@@ -37,6 +37,49 @@ namespace sara = DO::Sara;
 
 using namespace std;
 
+
+// Frame render function.
+auto render_frame() -> void
+{
+  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  auto& scene = Scene::instance();
+  scene.render();
+
+  static float t = 0;
+  static constexpr auto dt = 1.f / (180.f) * float(M_PI);
+
+  static constexpr auto thickness = 10.f / 1080.f; // 10 pixels in normalized coordinates...
+  static constexpr auto antialias_radius = 0.5f / 1080.f;
+
+  // Transfer line data to GPU.
+  auto& line_painter = LinePainter::instance();
+  {
+    line_painter._vertices.clear();
+    line_painter._triangles.clear();
+    line_painter.add_line_segment(Eigen::Vector2f(-0.4 + std::cos(t), -0.4),
+                                  Eigen::Vector2f(+0.4, -0.4),  //
+                                  thickness, antialias_radius);
+    line_painter.add_line_segment(Eigen::Vector2f(+0.4, -0.4 + std::sin(t)),
+                                  Eigen::Vector2f(+0.4, +0.4),  //
+                                  thickness, antialias_radius);
+    line_painter.add_line_segment(Eigen::Vector2f(+0.4, +0.4),
+                                  Eigen::Vector2f(-0.4, +0.4),  //
+                                  thickness, antialias_radius);
+    line_painter.transfer_line_tesselation_to_gl_buffers();
+
+    // Dummy animation, just to show the possibilities.
+    t += dt;
+    if (t > 2 * M_PI)
+      t = 0.f;
+  }
+
+  line_painter.render();
+
+  glfwSwapBuffers(MyGLFW::window);
+  glfwPollEvents();
+}
 
 int main()
 {
@@ -59,50 +102,6 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // glEnable(GL_DEPTH_TEST);
-
-    // We must use the shader program first before specifying the textures!
-    scene._shader_program.use(true);
-    {
-      // Specify all the matrix uniforms.
-      scene._shader_program.set_uniform_matrix4f(
-          "transform", scene._transform.matrix().data());
-      scene._shader_program.set_uniform_matrix4f("view", scene._view.data());
-      scene._shader_program.set_uniform_matrix4f("projection",
-                                                 scene._projection.data());
-
-      // Specify the texture uniform.
-      const auto tex_location =
-          glGetUniformLocation(scene._shader_program, "image");
-      if (tex_location == GL_INVALID_VALUE)
-        throw std::runtime_error{"Cannot find texture location!"};
-      glUniform1i(tex_location, 0);
-    }
-
-    // Transfer line data to GPU.
-    {
-      painter.add_line_segment(Eigen::Vector2f(-0.4, -0.4),
-                               Eigen::Vector2f(+0.4, -0.4));
-      painter.add_line_segment(Eigen::Vector2f(+0.4, -0.4),
-                               Eigen::Vector2f(+0.4, +0.4));
-      painter.add_line_segment(Eigen::Vector2f(+0.4, +0.4),
-                               Eigen::Vector2f(-0.4, +0.4));
-      painter.transfer_line_tesselation_to_gl_buffers();
-    }
-
-    // Frame render function.
-    auto render_frame = []() {
-      glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      auto& scene = Scene::instance();
-      scene.render();
-
-      auto& line_painter = LinePainter::instance();
-      line_painter.render();
-
-      glfwSwapBuffers(MyGLFW::window);
-      glfwPollEvents();
-    };
 
 #ifdef EMSCRIPTEN
     emscripten_set_main_loop(render_frame, 0, 1);

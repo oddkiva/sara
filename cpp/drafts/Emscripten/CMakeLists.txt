@@ -1,6 +1,9 @@
 if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   find_package(glew REQUIRED CONFIG)
   find_package(glfw3 REQUIRED)
+else ()
+  set(BASE_LINK_FLAGS "-s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1")
+  set(SARA_IMAGEIO_LINK_FLAGS "-s USE_LIBJPEG=1 -s USE_LIBPNG=1")
 endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
@@ -59,9 +62,6 @@ list(
   LinePainter.cpp #
 )
 sara_add_wasm_library(emscripten_gl_utilities "${GL_UTILS}")
-
-set(BASE_LINK_FLAGS "-s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1")
-set(SARA_IMAGEIO_LINK_FLAGS "-s USE_LIBJPEG=1 -s USE_LIBPNG=1")
 
 sara_add_wasm_executable(emscripten_hello_triangle.cpp)
 set_target_properties(emscripten_hello_triangle PROPERTIES LINK_FLAGS

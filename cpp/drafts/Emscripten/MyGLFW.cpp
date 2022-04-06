@@ -11,7 +11,12 @@
 
 //! @file
 
+// Include this first before GLFW otherwise the compilation will fail.
+#include "Scene.hpp"
+
 #include "MyGLFW.hpp"
+
+#include <Eigen/Core>
 
 #include <iostream>
 
@@ -66,6 +71,18 @@ auto MyGLFW::key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
 
   if (key == GLFW_KEY_ENTER)
     std::cout << "Hit Enter!" << std::endl;
+
+  auto& scene = Scene::instance();
+  switch (key) {
+  case GLFW_KEY_A:
+    scene._view.topLeftCorner(3, 3) *= 1.01f;
+    break;
+  case GLFW_KEY_S:
+    scene._view.topLeftCorner(3, 3) /= 1.01f;
+    break;
+  default:
+    break;
+  };
 }
 
 auto MyGLFW::mouse_callback(GLFWwindow* /* window */, int button,

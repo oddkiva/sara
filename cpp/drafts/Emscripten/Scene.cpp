@@ -179,6 +179,22 @@ auto Scene::destroy_opengl_data() -> void
 auto Scene::render() -> void
 {
   _shader_program.use(true);
+
+  // Reset the uniforms.
+  {
+    // Projection-Model-View matrices.
+    _shader_program.set_uniform_matrix4f("transform",
+                                         _transform.matrix().data());
+    _shader_program.set_uniform_matrix4f("view", _view.data());
+    _shader_program.set_uniform_matrix4f("projection", _projection.data());
+
+    // Texture.
+    const auto tex_location = glGetUniformLocation(_shader_program, "image");
+    if (tex_location == GL_INVALID_VALUE)
+      throw std::runtime_error{"Cannot find texture location!"};
+    glUniform1i(tex_location, 0);
+  }
+
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, _triangles.size(), GL_UNSIGNED_INT, 0);
 }

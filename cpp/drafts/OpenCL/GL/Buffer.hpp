@@ -48,11 +48,27 @@ namespace DO::Sara { namespace GL {
     }
 
     template <typename T>
+    auto bind_vertex_data(const std::vector<T>& data) const
+    {
+      glBindBuffer(GL_ARRAY_BUFFER, object);
+      glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), data.data(),
+                   GL_STATIC_DRAW);
+    }
+
+    template <typename T>
     auto bind_vertex_data(const DO::Sara::TensorView_<T, 2>& data) const
     {
       glBindBuffer(GL_ARRAY_BUFFER, object);
       glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), data.data(),
                    GL_STATIC_DRAW);
+    }
+
+    template <typename T>
+    auto bind_triangles_data(const std::vector<T>& data) const
+    {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.size() * sizeof(T),
+                   data.data(), GL_STATIC_DRAW);
     }
 
     template <typename T>
