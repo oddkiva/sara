@@ -42,6 +42,8 @@ struct Scene
   Eigen::Matrix4f _view;
   Eigen::Transform<float, 3, Eigen::Projective> _transform;
 
+  Eigen::Vector2f _image_sizes;
+
   // The singleton.
   static std::unique_ptr<Scene> _scene;
 

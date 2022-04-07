@@ -40,45 +40,78 @@ namespace sara = DO::Sara;
 using namespace std;
 
 
-// Frame render function.
+auto initialize_camera_parameters() -> void
+{
+  auto& grid_renderer = MetricGridRenderer::instance();
+  auto& intrinsics = grid_renderer._intrinsics;
+  // clang-format off
+  const auto K = (Eigen::Matrix3f{} <<
+    1041.55762f, -2.31719828f, 942.885742f,
+            0.f,  1041.53857f, 589.198425f,
+            0.f,          0.f,         1.f
+  ).finished();
+  intrinsics.set_calibration_matrix(K);
+  intrinsics.radial_distortion_coefficients <<
+       0.442631334f,
+      -0.156340882f,
+       0;
+  intrinsics.tangential_distortion_coefficients <<
+      -0.000787709199f,
+      -0.000381082471f;
+  // clang-format on
+  intrinsics.xi = 1.43936455f;
+
+  std::cout << intrinsics.K << std::endl;
+}
+
+auto initialize_metric_grid(const std::pair<std::int32_t, std::int32_t>& xrange,
+                            const std::pair<std::int32_t, int32_t>& yrange,
+                            float square_size_in_meters = 1.f,
+                            float line_discretization_step = 0.25f) -> void
+{
+  auto& grid_renderer = MetricGridRenderer::instance();
+
+  grid_renderer._vertices.clear();
+  grid_renderer._triangles.clear();
+
+  const auto& sq_size = square_size_in_meters;
+  const auto& s = line_discretization_step;
+
+  // Draw y-level sets.
+  for (auto y = static_cast<float>(yrange.first); y <= yrange.second;
+       y += sq_size)
+  {
+    for (auto x = static_cast<float>(xrange.first); x < xrange.second; x += s)
+    {
+      const auto a = Eigen::Vector2f(x, y);
+      const auto b = Eigen::Vector2f(x + s, y);
+      grid_renderer.add_line_segment(a, b, 10.f / 1080, 0.5f / 1080);
+    }
+  }
+
+  // Draw x-level sets.
+  for (auto x = static_cast<float>(xrange.first); x <= yrange.second;
+       x += sq_size)
+  {
+    for (auto y = static_cast<float>(yrange.first); y < yrange.second; y += s)
+    {
+      const auto a = Eigen::Vector2f(x, y);
+      const auto b = Eigen::Vector2f(x, y + s);
+      grid_renderer.add_line_segment(a, b, 10.f / 1080, 0.5f / 1080);
+    }
+  }
+}
+
 auto render_frame() -> void
 {
+  // TODO: sort the projective transformation later and so on.
+  glViewport(0, 0, MyGLFW::height, MyGLFW::height);
+
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   auto& scene = Scene::instance();
   scene.render();
-
-  static float t = 0;
-  static constexpr auto dt = 1.f / (180.f) * float(M_PI);
-
-  static constexpr auto thickness = 10.f / 1080.f; // 10 pixels in normalized coordinates...
-  static constexpr auto antialias_radius = 0.5f / 1080.f;
-
-  // Dummy animation, just to show the possibilities.
-  //
-  // Transfer line data to GPU.
-  auto& line_painter = LinePainter::instance();
-  {
-    line_painter._vertices.clear();
-    line_painter._triangles.clear();
-    line_painter.add_line_segment(Eigen::Vector2f(-0.4 + std::cos(t), -0.4),
-                                  Eigen::Vector2f(+0.4, -0.4),  //
-                                  thickness, antialias_radius);
-    line_painter.add_line_segment(Eigen::Vector2f(+0.4, -0.4 + std::sin(t)),
-                                  Eigen::Vector2f(+0.4, +0.4),  //
-                                  thickness, antialias_radius);
-    line_painter.add_line_segment(Eigen::Vector2f(+0.4, +0.4),
-                                  Eigen::Vector2f(-0.4, +0.4),  //
-                                  thickness, antialias_radius);
-    line_painter.transfer_line_tesselation_to_gl_buffers();
-
-    t += dt;
-    if (t > 2 * M_PI)
-      t = 0.f;
-  }
-
-  line_painter.render();
 
   auto& grid_renderer = MetricGridRenderer::instance();
   grid_renderer.render();
@@ -86,6 +119,7 @@ auto render_frame() -> void
   glfwSwapBuffers(MyGLFW::window);
   glfwPollEvents();
 }
+
 
 int main()
 {
@@ -98,12 +132,10 @@ int main()
     const auto image = sara::imread<sara::Rgb8>("assets/image.png");
     scene.initialize(image);
 
-    auto& painter = LinePainter::instance();
-    painter.initialize();
-
     auto& grid_renderer = MetricGridRenderer::instance();
     grid_renderer.initialize();
-    grid_renderer.add_line_segment({-0.4f, -0.4f}, {+0.4f, +0.4f});
+    initialize_camera_parameters();
+    initialize_metric_grid({-10, 10}, {-10, 10});
     grid_renderer.transfer_line_tesselation_to_gl_buffers();
 
     // Activate the texture 0 once for all.
@@ -123,7 +155,6 @@ int main()
 #endif
 
     scene.destroy_opengl_data();
-    painter.destroy_opengl_data();
     grid_renderer.destroy_opengl_data();
 
     glfwTerminate();

@@ -115,34 +115,33 @@ auto MetricGridRenderer::initialize() -> void
 
     vec2 project_to_image(vec2 coords)
     {
-      // 1. Project the metric grid to the image.
-      //
-      // 1.a) Calculate the camera coordinates.
-      vec4 Xc = C * vec4(coords, 0., 1.);
-      // 1.b) Project to the image.
+      // vec3 Xc = K * vec3(-coords.y, -1.51, coords.x);
+      // Xc /= Xc.z;
+      // vec2 pn = Xc.xy;
+
+      vec4 Xc = vec4(-coords.y, -1.51, coords.x, 1.);
+
       vec3 Xs = normalize(Xc.xyz);
       vec3 Xe = Xs + xi * vec3(0., 0., 1.);
       vec2 m = (Xe / Xe.z).xy;
       vec2 m_distorted = m + lens_distortion(m);
       vec3 p = K * vec3(m_distorted, 1.);
       vec2 pn = (p / p.z).xy;
+
       return pn;
     }
 
-    vec2 rescale(vec2 pn)
+    vec2 to_texture_coordinates(vec2 pn)
     {
-      float ratio = image_sizes.x / image_sizes.y;
-      pn = pn - 0.5 * image_sizes;
       pn /= image_sizes.y;
+      // pn.y = 1. - pn.y;
       return pn;
     }
 
     void main()
     {
-      // 2. Rescale the pixel coordinates of the metric in the normalized
-      //    coordinates.
-      // 3. Apply the global projection-model-view transform.
-      vec2 pn = in_coords;
+      vec2 pn = project_to_image(in_coords);
+      pn = to_texture_coordinates(pn);
       gl_Position = projection * view * transform * vec4(pn, 0, 1.);
     }
     )shader";
@@ -210,15 +209,23 @@ auto MetricGridRenderer::render() -> void
     auto& scene = Scene::instance();
 
     _shader_program.set_uniform_texture("image", scene._texture);
+    _shader_program.set_uniform_vector2f("image_sizes", scene._image_sizes.data());
 
-    _shader_program.set_uniform_matrix3f("K", _intrinsics.K.data());
     _shader_program.set_uniform_matrix4f("transform",
                                          scene._transform.matrix().data());
     _shader_program.set_uniform_matrix4f("view", scene._view.data());
     _shader_program.set_uniform_matrix4f("projection",
                                          scene._projection.data());
+
+    _shader_program.set_uniform_matrix4f("C", _extrinsics.data());
+    _shader_program.set_uniform_matrix3f("K", _intrinsics.K.data());
+    _shader_program.set_uniform_vector2f("k", _intrinsics.radial_distortion_coefficients.data());
+    _shader_program.set_uniform_vector2f("p", _intrinsics.radial_distortion_coefficients.data());
+    _shader_program.set_uniform_param("xi", _intrinsics.xi);
+
   }
 
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, _triangles.size(), GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_LINES, _triangles.size(), GL_UNSIGNED_INT, 0);
 }

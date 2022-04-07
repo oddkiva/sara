@@ -214,7 +214,7 @@ namespace DO::Sara { namespace GL {
         GL_INVALID_OPERATION == mat_location)
       throw std::runtime_error{"Invalid uniform parameter"};
 
-    glUniform2fv(0, 1, mat_coeffs);
+    glUniform2fv(mat_location, 1, mat_coeffs);
   }
 
   void ShaderProgram::set_uniform_matrix3f(const char* mat_name,

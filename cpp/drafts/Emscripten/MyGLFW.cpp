@@ -51,16 +51,14 @@ auto MyGLFW::initialize() -> bool
   glfwSetMouseButtonCallback(window, mouse_callback);
   glfwSetKeyCallback(window, key_callback);
 
-  // std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-
   return true;
 }
 
 auto MyGLFW::window_size_callback(GLFWwindow* /* window */, int width,
                                   int height) -> void
 {
-  std::cout << "window_size_callback received width: " << width
-            << "  height: " << height << std::endl;
+  MyGLFW::width = width;
+  MyGLFW::height = height;
 }
 
 auto MyGLFW::key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
