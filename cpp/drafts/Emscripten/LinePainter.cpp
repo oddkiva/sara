@@ -65,6 +65,24 @@ auto LinePainter::add_line_segment(const Eigen::Vector2f& a,
   _triangles.push_back(n + 1);  // a1
 }
 
+auto LinePainter::add_line_segment_in_pixel_coordinates(
+    const Eigen::Vector2f& a1, const Eigen::Vector2f& b1,  //
+    float thickness, float antialias_radius) -> void
+{
+  const auto& scene = Scene::instance();
+  const auto& image_sizes = scene._image_sizes;
+  const auto h = static_cast<float>(image_sizes.y());
+
+  Eigen::Vector2f a = a1 / h;
+  Eigen::Vector2f b = b1 / h;
+
+  a.y() = 1 - a.y();
+  b.y() = 1 - b.y();
+
+  add_line_segment(a, b, thickness / h, antialias_radius / h);
+}
+
+
 auto LinePainter::initialize() -> void
 {
   // Create a vertex shader.
@@ -75,13 +93,21 @@ auto LinePainter::initialize() -> void
   const auto vertex_shader_source = R"shader(#version 300 es
     layout (location = 0) in vec2 in_coords;
 
-    uniform mat4 transform;
+    uniform vec2 image_sizes;
     uniform mat4 view;
     uniform mat4 projection;
 
+    vec2 to_texture_coordinates(vec2 pn)
+    {
+      float aspect_ratio = image_sizes.x / image_sizes.y;
+      pn.x -= 0.5 * aspect_ratio;
+      pn.y -= 0.5;
+      return pn;
+    }
+
     void main()
     {
-      gl_Position = projection * view * transform * vec4(in_coords, 0, 1.);
+      gl_Position = projection * view * vec4(to_texture_coordinates(in_coords), 0., 1.);
     }
     )shader";
   _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
@@ -96,7 +122,7 @@ auto LinePainter::initialize() -> void
 
     void main()
     {
-      frag_color = vec4(0.4, 0.5, 0.0, 1.);
+      frag_color = vec4(0.8, 0.4, 0.4, 0.8);
     }
     )shader";
   _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
@@ -145,9 +171,9 @@ auto LinePainter::render() -> void
   // Set the projection-model-view matrix uniforms.
   {
     auto& scene = Scene::instance();
-    _shader_program.set_uniform_matrix4f("transform",
-                                         scene._transform.matrix().data());
-    _shader_program.set_uniform_matrix4f("view", scene._view.data());
+    _shader_program.set_uniform_vector2f("image_sizes",
+                                         scene._image_sizes.data());
+    _shader_program.set_uniform_matrix4f("view", scene._model_view.data());
     _shader_program.set_uniform_matrix4f("projection",
                                          scene._projection.data());
   }

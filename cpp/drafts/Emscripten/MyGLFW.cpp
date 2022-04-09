@@ -12,6 +12,7 @@
 //! @file
 
 // Include this first before GLFW otherwise the compilation will fail.
+#include "Geometry.hpp"
 #include "Scene.hpp"
 
 #include "MyGLFW.hpp"
@@ -59,6 +60,11 @@ auto MyGLFW::window_size_callback(GLFWwindow* /* window */, int width,
 {
   MyGLFW::width = width;
   MyGLFW::height = height;
+
+  auto& scene = Scene::instance();
+
+  const auto aspect_ratio = static_cast<float>(width) / height;
+  scene._projection = orthographic(-0.5f * aspect_ratio, 0.5f * aspect_ratio, -0.5f, 0.5f, -0.5f, 0.5f);
 }
 
 auto MyGLFW::key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
@@ -70,10 +76,10 @@ auto MyGLFW::key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
   auto& scene = Scene::instance();
   switch (key) {
   case GLFW_KEY_A:
-    scene._view.topLeftCorner(3, 3) *= 1.01f;
+    scene._model_view.topLeftCorner(3, 3) *= 1.01f;
     break;
   case GLFW_KEY_S:
-    scene._view.topLeftCorner(3, 3) /= 1.01f;
+    scene._model_view.topLeftCorner(3, 3) /= 1.01f;
     break;
   default:
     break;

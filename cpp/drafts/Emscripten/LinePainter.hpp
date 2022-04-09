@@ -47,6 +47,12 @@ struct LinePainter
                         float thickness = 0.02f,   //
                         float antialias_radius = 0.01f) -> void;
 
+  auto add_line_segment_in_pixel_coordinates(const Eigen::Vector2f& a,  //
+                                             const Eigen::Vector2f& b,  //
+                                             float thickness = 2.f,     //
+                                             float antialias_radius = 1.f)
+      -> void;
+
   auto initialize() -> void;
 
   auto transfer_line_tesselation_to_gl_buffers() -> void;

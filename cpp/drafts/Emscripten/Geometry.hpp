@@ -19,6 +19,22 @@ inline auto frustum(T l, T r, T b, T t, T n, T f) -> Eigen::Matrix<T, 4, 4>
 }
 
 template <typename T>
+inline auto orthographic(T l, T r, T b, T t, T n, T f) -> Eigen::Matrix<T, 4, 4>
+{
+  auto proj = Eigen::Matrix<T, 4, 4>{};
+
+  // clang-format off
+  proj <<
+    2/(r-l),       0,  0, -(r+l)/(r-l),
+          0, 2/(t-b),  0, -(t+b)/(t-b),
+          0,       0,  0, -(f+n)/(f-n),
+          0,       0,  0,            1;
+  // clang-format on
+
+  return proj;
+}
+
+template <typename T>
 inline auto perspective(T fov, T aspect, T z_near, T z_far)
     -> Eigen::Matrix<T, 4, 4>
 {

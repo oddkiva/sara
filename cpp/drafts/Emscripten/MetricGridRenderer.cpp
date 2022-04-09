@@ -115,26 +115,33 @@ auto MetricGridRenderer::initialize() -> void
 
     vec2 project_to_image(vec2 coords)
     {
-      // vec3 Xc = K * vec3(-coords.y, -1.51, coords.x);
-      // Xc /= Xc.z;
-      // vec2 pn = Xc.xy;
-
+    // #define DEBUG
+    #ifdef DEBUG
+      vec3 Xc = K * vec3(-coords.y, 1.51, coords.x);
+      Xc /= Xc.z;
+      vec2 pn = Xc.xy;
+      return pn;
+    #else
       vec4 Xc = vec4(-coords.y, -1.51, coords.x, 1.);
 
       vec3 Xs = normalize(Xc.xyz);
       vec3 Xe = Xs + xi * vec3(0., 0., 1.);
       vec2 m = (Xe / Xe.z).xy;
       vec2 m_distorted = m + lens_distortion(m);
+
       vec3 p = K * vec3(m_distorted, 1.);
       vec2 pn = (p / p.z).xy;
 
       return pn;
+    #endif
     }
 
     vec2 to_texture_coordinates(vec2 pn)
     {
       pn /= image_sizes.y;
-      // pn.y = 1. - pn.y;
+      float aspect_ratio = image_sizes.x / image_sizes.y;
+      pn.x -= 0.5 * aspect_ratio;
+      pn.y = 0.5 - pn.y;
       return pn;
     }
 
@@ -142,7 +149,7 @@ auto MetricGridRenderer::initialize() -> void
     {
       vec2 pn = project_to_image(in_coords);
       pn = to_texture_coordinates(pn);
-      gl_Position = projection * view * transform * vec4(pn, 0, 1.);
+      gl_Position = projection * view * vec4(pn, 0, 1.);
     }
     )shader";
   _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
@@ -211,9 +218,7 @@ auto MetricGridRenderer::render() -> void
     _shader_program.set_uniform_texture("image", scene._texture);
     _shader_program.set_uniform_vector2f("image_sizes", scene._image_sizes.data());
 
-    _shader_program.set_uniform_matrix4f("transform",
-                                         scene._transform.matrix().data());
-    _shader_program.set_uniform_matrix4f("view", scene._view.data());
+    _shader_program.set_uniform_matrix4f("view", scene._model_view.data());
     _shader_program.set_uniform_matrix4f("projection",
                                          scene._projection.data());
 

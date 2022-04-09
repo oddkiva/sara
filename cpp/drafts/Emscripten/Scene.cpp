@@ -43,15 +43,14 @@ auto Scene::initialize(const sara::ImageView<sara::Rgb8>& image_view) -> void
     layout (location = 1) in vec3 in_color;
     layout (location = 2) in vec2 in_tex_coords;
 
-    uniform mat4 transform;
-    uniform mat4 view;
+    uniform mat4 model_view;
     uniform mat4 projection;
 
     out vec2 out_tex_coords;
 
     void main()
     {
-      gl_Position = projection * view * transform * vec4(in_coords, 1.0);
+      gl_Position = projection * model_view * vec4(in_coords, 1.0);
       out_tex_coords = in_tex_coords;
     }
     )shader";
@@ -103,8 +102,8 @@ auto Scene::initialize(const sara::ImageView<sara::Rgb8>& image_view) -> void
     -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,  // top-left
     -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f;  // bottom-left
   // clang-format on
-  _vertices.matrix().col(0).array() += 0.5f;
-  _vertices.matrix().col(1).array() += 0.5f;
+  // _vertices.matrix().col(0).array() += 0.5f;
+  // _vertices.matrix().col(1).array() += 0.5f;
 
   // Resize the quad vertices with the appropriate image ratio.
   const auto image_ratio = static_cast<float>(image.width()) / image.height();
@@ -159,8 +158,7 @@ auto Scene::initialize(const sara::ImageView<sara::Rgb8>& image_view) -> void
   }
 
   _projection.setIdentity();
-  _view.setIdentity();
-  _transform.setIdentity();
+  _model_view.setIdentity();
 }
 
 auto Scene::destroy_opengl_data() -> void
@@ -182,8 +180,7 @@ auto Scene::render() -> void
   // Set the uniforms.
   //
   // Projection-Model-View matrices.
-  _shader_program.set_uniform_matrix4f("transform", _transform.matrix().data());
-  _shader_program.set_uniform_matrix4f("view", _view.data());
+  _shader_program.set_uniform_matrix4f("model_view", _model_view.data());
   _shader_program.set_uniform_matrix4f("projection", _projection.data());
   // Texture.
   _shader_program.set_uniform_texture("image", 0); // 0 as in GL_TEXTURE0

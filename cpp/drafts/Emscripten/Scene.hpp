@@ -39,8 +39,7 @@ struct Scene
 
   // Initialize the projection matrix once for all.
   Eigen::Matrix4f _projection;
-  Eigen::Matrix4f _view;
-  Eigen::Transform<float, 3, Eigen::Projective> _transform;
+  Eigen::Matrix4f _model_view;
 
   Eigen::Vector2f _image_sizes;
 

@@ -81,8 +81,10 @@ auto initialize_metric_grid(const std::pair<std::int32_t, std::int32_t>& xrange,
   for (auto y = static_cast<float>(yrange.first); y <= yrange.second;
        y += sq_size)
   {
+    // std::cout << "y = " << y << std::endl;
     for (auto x = static_cast<float>(xrange.first); x < xrange.second; x += s)
     {
+      // std::cout << "x = " << x << std::endl;
       const auto a = Eigen::Vector2f(x, y);
       const auto b = Eigen::Vector2f(x + s, y);
       grid_renderer.add_line_segment(a, b, 10.f / 1080, 0.5f / 1080);
@@ -90,11 +92,13 @@ auto initialize_metric_grid(const std::pair<std::int32_t, std::int32_t>& xrange,
   }
 
   // Draw x-level sets.
-  for (auto x = static_cast<float>(xrange.first); x <= yrange.second;
+  for (auto x = static_cast<float>(xrange.first); x <= xrange.second;
        x += sq_size)
   {
+    // std::cout << "x = " << x << std::endl;
     for (auto y = static_cast<float>(yrange.first); y < yrange.second; y += s)
     {
+      // std::cout << "y = " << y << std::endl;
       const auto a = Eigen::Vector2f(x, y);
       const auto b = Eigen::Vector2f(x, y + s);
       grid_renderer.add_line_segment(a, b, 10.f / 1080, 0.5f / 1080);
@@ -105,7 +109,7 @@ auto initialize_metric_grid(const std::pair<std::int32_t, std::int32_t>& xrange,
 auto render_frame() -> void
 {
   // TODO: sort the projective transformation later and so on.
-  glViewport(0, 0, MyGLFW::height, MyGLFW::height);
+  glViewport(0, 0, MyGLFW::width, MyGLFW::height);
 
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -115,6 +119,9 @@ auto render_frame() -> void
 
   auto& grid_renderer = MetricGridRenderer::instance();
   grid_renderer.render();
+
+  auto& line_renderer = LinePainter::instance();
+  line_renderer.render();
 
   glfwSwapBuffers(MyGLFW::window);
   glfwPollEvents();
@@ -132,10 +139,18 @@ int main()
     const auto image = sara::imread<sara::Rgb8>("assets/image.png");
     scene.initialize(image);
 
+    auto& line_renderer = LinePainter::instance();
+    line_renderer.initialize();
+    line_renderer.add_line_segment_in_pixel_coordinates(
+        {0.f, 0.f}, {1920.f, 0.f}, 3.f, 1.f);
+    line_renderer.add_line_segment_in_pixel_coordinates(
+        {1920.f, 0.f}, {1920.f, 1080.f}, 3.f, 1.f);
+    line_renderer.transfer_line_tesselation_to_gl_buffers();
+
     auto& grid_renderer = MetricGridRenderer::instance();
     grid_renderer.initialize();
     initialize_camera_parameters();
-    initialize_metric_grid({-10, 10}, {-10, 10});
+    initialize_metric_grid({5, 100}, {-100, 100});
     grid_renderer.transfer_line_tesselation_to_gl_buffers();
 
     // Activate the texture 0 once for all.
