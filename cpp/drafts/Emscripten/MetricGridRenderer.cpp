@@ -161,7 +161,7 @@ auto MetricGridRenderer::initialize() -> void
 
     void main()
     {
-      frag_color = vec4(0.3, 0.0, 0.5, 0.4);
+      frag_color = vec4(0.3, 0.0, 0.8, 0.4);
     }
     )shader";
   _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
