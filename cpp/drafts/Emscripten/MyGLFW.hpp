@@ -29,6 +29,9 @@ struct MyGLFW
   static void key_callback(GLFWwindow* /* window */, int key,
                            int /* scancode */, int action, int /* modifier */);
 
+  static void scroll_callback(GLFWwindow* /*window*/, double /*xoffset */,
+                              double yoffset);
+
   static void mouse_callback(GLFWwindow* /* window */, int button,
                              int /* action */, int /* modifiers */);
 };
