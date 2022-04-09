@@ -90,6 +90,9 @@ auto MyGLFW::key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
   ).finished();
   // clang-format on
 
+
+  static constexpr auto angle_step = 0.5f * static_cast<float>(M_PI) / 180;
+
   switch (key)
   {
   case GLFW_KEY_LEFT:
@@ -105,27 +108,27 @@ auto MyGLFW::key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
     scene._model_view(1, 3) -= 0.01f;
     break;
   case GLFW_KEY_A:
-    yaw_pitch_roll[0] += static_cast<float>(M_PI) / 180;
+    yaw_pitch_roll[0] += angle_step;
     rotation_changed = true;
     break;
   case GLFW_KEY_D:
-    yaw_pitch_roll[0] -= static_cast<float>(M_PI) / 180;
+    yaw_pitch_roll[0] -= angle_step;
     rotation_changed = true;
     break;
   case GLFW_KEY_W:
-    yaw_pitch_roll[1] += static_cast<float>(M_PI) / 180;
+    yaw_pitch_roll[1] += angle_step;
     rotation_changed = true;
     break;
   case GLFW_KEY_S:
-    yaw_pitch_roll[1] -= static_cast<float>(M_PI) / 180;
+    yaw_pitch_roll[1] -= angle_step;
     rotation_changed = true;
     break;
   case GLFW_KEY_Q:
-    yaw_pitch_roll[2] += static_cast<float>(M_PI) / 180;
+    yaw_pitch_roll[2] += angle_step;
     rotation_changed = true;
     break;
   case GLFW_KEY_E:
-    yaw_pitch_roll[2] -= static_cast<float>(M_PI) / 180;
+    yaw_pitch_roll[2] -= angle_step;
     rotation_changed = true;
     break;
   default:

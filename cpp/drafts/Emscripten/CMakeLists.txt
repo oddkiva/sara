@@ -71,9 +71,14 @@ set_target_properties(emscripten_hello_triangle PROPERTIES LINK_FLAGS
 
 sara_add_wasm_executable(emscripten_hello_texture.cpp)
 target_link_libraries(emscripten_hello_texture PRIVATE emscripten_gl_utilities)
-set_target_properties(
-  emscripten_hello_texture
-  PROPERTIES
-    LINK_FLAGS
-    "${BASE_LINK_FLAGS} ${SARA_IMAGEIO_LINK_FLAGS} -s ALLOW_MEMORY_GROWTH=1 --preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image.png"
+
+set(ALL_FLAGS
+    "${BASE_LINK_FLAGS} ${SARA_IMAGEIO_LINK_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
+set(ALL_FLAGS
+    "${ALL_FLAGS} --preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image-pinhole.png"
 )
+set(ALL_FLAGS
+    "${ALL_FLAGS} --preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image-omni.png"
+)
+set_target_properties(emscripten_hello_texture #
+                      PROPERTIES LINK_FLAGS ${ALL_FLAGS})

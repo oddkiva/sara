@@ -72,12 +72,6 @@ auto MetricGridRenderer::initialize() -> void
   const std::map<std::string, int> arg_pos = {{"in_coords", 0}};
 
   const auto vertex_shader_source = R"shader(#version 300 es
-    #ifdef GL_ES
-    precision highp float;
-    #endif
-
-    #define INFTY 1e6
-
     // The metric grid are in the vehicle coordinate frame.
     layout (location = 0) in vec2 in_coords;
 
@@ -92,26 +86,19 @@ auto MetricGridRenderer::initialize() -> void
     uniform mat4 C;  // as in C = [R, t]
 
     // Scene projection.
-    uniform mat4 transform;
     uniform mat4 view;
     uniform mat4 projection;
 
     vec2 lens_distortion(vec2 m)
     {
-      // Distortion.
-      float k1 = k.x;
-      float k2 = k.y;
-      float p1 = p.x;
-      float p2 = p.y;
-
       // Radial component (additive).
       float r2 = dot(m, m);
       float r4 = r2 * r2;
-      vec2 radial_factor = (k1 * r2 + k2 * r4) * m;
+      vec2 radial_factor = (k[0] * r2 + k[1] * r4) * m;
 
       // Tangential component (additive).
-      float tx = 2. * p1 * m.x * m.y + p2 * (r2 + 2. * p1 * m.x);
-      float ty = p1 * (r2 + 2. * p1 * m.y) + 2. * p2 * m.x * m.y;
+      float tx = 2. * p[0] * m.x * m.y + p[1] * (r2 + 2. * p[0] * m.x);
+      float ty = p[0] * (r2 + 2. * p[0] * m.y) + 2. * p[1] * m.x * m.y;
 
       // Apply the distortion.
       vec2 delta = radial_factor + vec2(tx, ty);
@@ -121,11 +108,20 @@ auto MetricGridRenderer::initialize() -> void
 
     vec3 project_to_image(vec2 coords)
     {
+      // Apply the camera extrinsic parameters.
       vec4 Xc = C * vec4(coords.x, coords.y, 0., 1.);
 
+      // 3D ray in the camera frame.
       vec3 Xs = normalize(Xc.xyz);
-      vec3 Xe = Xs + xi * vec3(0., 0., 1.);
-      vec2 m = (Xe / Xe.z).xy;
+
+      // Change coordinates.
+      vec3 Xe = Xs + vec3(0., 0., xi);
+
+      // Project to the camera film plane.
+      Xe /= Xe.z;
+      vec2 m = Xe.xy;
+
+      // Add distortion.
       vec2 m_distorted = m + lens_distortion(m);
 
       vec3 p = K * vec3(m_distorted, 1.);
@@ -161,14 +157,11 @@ auto MetricGridRenderer::initialize() -> void
     precision highp float;
     #endif
 
-    uniform sampler2D image;
-    // uniform vec4 color;
-
     out vec4 frag_color;
 
     void main()
     {
-      frag_color = vec4(0.4, 0.0, 0.0, 0.4);
+      frag_color = vec4(0.3, 0.0, 0.5, 0.4);
     }
     )shader";
   _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
@@ -226,7 +219,7 @@ auto MetricGridRenderer::render() -> void
     _shader_program.set_uniform_matrix4f("C", _extrinsics.data());
     _shader_program.set_uniform_matrix3f("K", _intrinsics.K.data());
     _shader_program.set_uniform_vector2f("k", _intrinsics.radial_distortion_coefficients.data());
-    _shader_program.set_uniform_vector2f("p", _intrinsics.radial_distortion_coefficients.data());
+    _shader_program.set_uniform_vector2f("p", _intrinsics.tangential_distortion_coefficients.data());
     _shader_program.set_uniform_param("xi", _intrinsics.xi);
 
   }

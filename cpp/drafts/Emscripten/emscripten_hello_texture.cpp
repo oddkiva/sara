@@ -45,6 +45,9 @@ auto initialize_camera_parameters() -> void
   auto& grid_renderer = MetricGridRenderer::instance();
   auto& intrinsics = grid_renderer._intrinsics;
 
+  // The conversion from the automotive axis convention to the computer vision
+  // convention.
+  //
   // clang-format off
   const Eigen::Matrix3f P = (Eigen::Matrix3f{} <<
      0,  0, 1,
@@ -57,7 +60,6 @@ auto initialize_camera_parameters() -> void
   C.setIdentity();
   C.topLeftCorner<3, 3>() = P.transpose();
   C.col(3).head(3) = -P.transpose() * Eigen::Vector3f{0.f, 0.f, 1.51f};
-  std::cout << "C =\n" << C << std::endl;
 
 #ifdef CHECK_PINHOLE
   // clang-format off
@@ -72,7 +74,6 @@ auto initialize_camera_parameters() -> void
   intrinsics.tangential_distortion_coefficients.setZero();
   intrinsics.xi = 0.f;
 #else
-
   // clang-format off
   const auto K = (Eigen::Matrix3f{} <<
     1041.55762f, -2.31719828f, 942.885742f,
@@ -81,17 +82,15 @@ auto initialize_camera_parameters() -> void
   ).finished();
   intrinsics.set_calibration_matrix(K);
   intrinsics.radial_distortion_coefficients <<
-       0.442631334f,
-      -0.156340882f,
-       0;
+     0.442631334f,
+    -0.156340882f,
+     0;
   intrinsics.tangential_distortion_coefficients <<
-      -0.000787709199f,
-      -0.000381082471f;
+    -0.000787709199f,
+    -0.000381082471f;
   // clang-format on
   intrinsics.xi = 1.43936455f;
 #endif
-
-  std::cout << intrinsics.K << std::endl;
 }
 
 auto initialize_metric_grid(const std::pair<std::int32_t, std::int32_t>& xrange,
@@ -134,7 +133,6 @@ auto initialize_metric_grid(const std::pair<std::int32_t, std::int32_t>& xrange,
 
 auto render_frame() -> void
 {
-  // TODO: sort the projective transformation later and so on.
   glViewport(0, 0, MyGLFW::width, MyGLFW::height);
 
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -162,7 +160,11 @@ int main()
       return EXIT_FAILURE;
 
     auto& scene = Scene::instance();
-    const auto image = sara::imread<sara::Rgb8>("assets/image.png");
+#ifdef CHECK_PINHOLE
+    const auto image = sara::imread<sara::Rgb8>("assets/image-pinhole.png");
+#else
+    const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
+#endif
     scene.initialize(image);
 
     auto& line_renderer = LinePainter::instance();
@@ -180,7 +182,7 @@ int main()
     auto& grid_renderer = MetricGridRenderer::instance();
     grid_renderer.initialize();
     initialize_camera_parameters();
-    initialize_metric_grid({5, 50}, {-10, 10});
+    initialize_metric_grid({-10, 50}, {-50, 50});
     grid_renderer.transfer_line_tesselation_to_gl_buffers();
 
     // Activate the texture 0 once for all.
