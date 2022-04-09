@@ -76,10 +76,22 @@ auto MyGLFW::key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
   auto& scene = Scene::instance();
   switch (key) {
   case GLFW_KEY_A:
-    scene._model_view.topLeftCorner(3, 3) *= 1.01f;
+    scene._model_view(0, 3) += 0.01f;
+    break;
+  case GLFW_KEY_D:
+    scene._model_view(0, 3) -= 0.01f;
+    break;
+  case GLFW_KEY_W:
+    scene._model_view(1, 3) += 0.01f;
     break;
   case GLFW_KEY_S:
-    scene._model_view.topLeftCorner(3, 3) /= 1.01f;
+    scene._model_view(1, 3) -= 0.01f;
+    break;
+  case GLFW_KEY_R:
+    scene._model_view.topLeftCorner(3, 4) *= 1.01f;
+    break;
+  case GLFW_KEY_F:
+    scene._model_view.topLeftCorner(3, 4) /= 1.01f;
     break;
   default:
     break;
