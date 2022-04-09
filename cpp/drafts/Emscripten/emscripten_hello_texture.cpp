@@ -44,6 +44,35 @@ auto initialize_camera_parameters() -> void
 {
   auto& grid_renderer = MetricGridRenderer::instance();
   auto& intrinsics = grid_renderer._intrinsics;
+
+  // clang-format off
+  const Eigen::Matrix3f P = (Eigen::Matrix3f{} <<
+     0,  0, 1,
+    -1,  0, 0,
+     0, -1, 0
+  ).finished();
+  // clang-format on
+
+  auto& C = grid_renderer._extrinsics;
+  C.setIdentity();
+  C.topLeftCorner<3, 3>() = P.transpose();
+  C.col(3).head(3) = -P.transpose() * Eigen::Vector3f{0.f, 0.f, 1.51f};
+  std::cout << "C =\n" << C << std::endl;
+
+#ifdef CHECK_PINHOLE
+  // clang-format off
+  const auto K = (Eigen::Matrix3f{} <<
+    1055.78f,      0.f, 960.f,
+         0.f, 1055.78f, 540.f,
+         0.f,      0.f,   1.f
+  ).finished();
+  // clang-format on
+  intrinsics.set_calibration_matrix(K);
+  intrinsics.radial_distortion_coefficients.setZero();
+  intrinsics.tangential_distortion_coefficients.setZero();
+  intrinsics.xi = 0.f;
+#else
+
   // clang-format off
   const auto K = (Eigen::Matrix3f{} <<
     1041.55762f, -2.31719828f, 942.885742f,
@@ -60,6 +89,7 @@ auto initialize_camera_parameters() -> void
       -0.000381082471f;
   // clang-format on
   intrinsics.xi = 1.43936455f;
+#endif
 
   std::cout << intrinsics.K << std::endl;
 }
@@ -81,10 +111,8 @@ auto initialize_metric_grid(const std::pair<std::int32_t, std::int32_t>& xrange,
   for (auto y = static_cast<float>(yrange.first); y <= yrange.second;
        y += sq_size)
   {
-    // std::cout << "y = " << y << std::endl;
     for (auto x = static_cast<float>(xrange.first); x < xrange.second; x += s)
     {
-      // std::cout << "x = " << x << std::endl;
       const auto a = Eigen::Vector2f(x, y);
       const auto b = Eigen::Vector2f(x + s, y);
       grid_renderer.add_line_segment(a, b, 10.f / 1080, 0.5f / 1080);
@@ -95,10 +123,8 @@ auto initialize_metric_grid(const std::pair<std::int32_t, std::int32_t>& xrange,
   for (auto x = static_cast<float>(xrange.first); x <= xrange.second;
        x += sq_size)
   {
-    // std::cout << "x = " << x << std::endl;
     for (auto y = static_cast<float>(yrange.first); y < yrange.second; y += s)
     {
-      // std::cout << "y = " << y << std::endl;
       const auto a = Eigen::Vector2f(x, y);
       const auto b = Eigen::Vector2f(x, y + s);
       grid_renderer.add_line_segment(a, b, 10.f / 1080, 0.5f / 1080);
@@ -145,12 +171,16 @@ int main()
         {0.f, 0.f}, {1920.f, 0.f}, 3.f, 1.f);
     line_renderer.add_line_segment_in_pixel_coordinates(
         {1920.f, 0.f}, {1920.f, 1080.f}, 3.f, 1.f);
+    line_renderer.add_line_segment_in_pixel_coordinates(
+        {1920.f, 1080.f}, {0.f, 1080.f}, 3.f, 1.f);
+    line_renderer.add_line_segment_in_pixel_coordinates(  //
+        {0.f, 1080.f}, {0.f, 0.f}, 3.f, 1.f);
     line_renderer.transfer_line_tesselation_to_gl_buffers();
 
     auto& grid_renderer = MetricGridRenderer::instance();
     grid_renderer.initialize();
     initialize_camera_parameters();
-    initialize_metric_grid({5, 100}, {-100, 100});
+    initialize_metric_grid({5, 50}, {-10, 10});
     grid_renderer.transfer_line_tesselation_to_gl_buffers();
 
     // Activate the texture 0 once for all.
@@ -160,7 +190,7 @@ int main()
     // Specific rendering options.
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
 #ifdef EMSCRIPTEN
     emscripten_set_main_loop(render_frame, 0, 1);

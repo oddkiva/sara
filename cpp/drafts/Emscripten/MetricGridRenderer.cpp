@@ -72,6 +72,12 @@ auto MetricGridRenderer::initialize() -> void
   const std::map<std::string, int> arg_pos = {{"in_coords", 0}};
 
   const auto vertex_shader_source = R"shader(#version 300 es
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+
+    #define INFTY 1e6
+
     // The metric grid are in the vehicle coordinate frame.
     layout (location = 0) in vec2 in_coords;
 
@@ -113,16 +119,9 @@ auto MetricGridRenderer::initialize() -> void
       return delta;
     }
 
-    vec2 project_to_image(vec2 coords)
+    vec3 project_to_image(vec2 coords)
     {
-    // #define DEBUG
-    #ifdef DEBUG
-      vec3 Xc = K * vec3(-coords.y, 1.51, coords.x);
-      Xc /= Xc.z;
-      vec2 pn = Xc.xy;
-      return pn;
-    #else
-      vec4 Xc = vec4(-coords.y, -1.51, coords.x, 1.);
+      vec4 Xc = C * vec4(coords.x, coords.y, 0., 1.);
 
       vec3 Xs = normalize(Xc.xyz);
       vec3 Xe = Xs + xi * vec3(0., 0., 1.);
@@ -130,10 +129,8 @@ auto MetricGridRenderer::initialize() -> void
       vec2 m_distorted = m + lens_distortion(m);
 
       vec3 p = K * vec3(m_distorted, 1.);
-      vec2 pn = (p / p.z).xy;
 
-      return pn;
-    #endif
+      return p;
     }
 
     vec2 to_texture_coordinates(vec2 pn)
@@ -147,9 +144,13 @@ auto MetricGridRenderer::initialize() -> void
 
     void main()
     {
-      vec2 pn = project_to_image(in_coords);
+      vec3 p = project_to_image(in_coords);
+      vec2 pn = (p / p.z).xy;
       pn = to_texture_coordinates(pn);
-      gl_Position = projection * view * vec4(pn, 0, 1.);
+
+      gl_Position = projection * view * vec4(pn, 0.0, 1.0);
+      // Modify the depth.
+      gl_Position.z = -0.15;
     }
     )shader";
   _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
@@ -167,7 +168,7 @@ auto MetricGridRenderer::initialize() -> void
 
     void main()
     {
-      frag_color = vec4(0.4, 0.0, 0.0, 0.8);
+      frag_color = vec4(0.4, 0.0, 0.0, 0.4);
     }
     )shader";
   _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
