@@ -54,19 +54,20 @@ list(
   APPEND
   GL_UTILS
   Geometry.hpp
+  # Implementation V1
   MyGLFW.hpp
   MyGLFW.cpp
   Scene.hpp
   Scene.cpp
-  LinePainter.hpp
-  LinePainter.cpp
+  # Implementation V2
+  ImagePlaneRenderer.hpp
+  ImagePlaneRenderer.cpp
+  LineRenderer.hpp
+  LineRenderer.cpp
   MetricGridRenderer.hpp
   MetricGridRenderer.cpp #
 )
 sara_add_wasm_library(emscripten_gl_utilities "${GL_UTILS}")
-
-sara_add_wasm_executable(emscripten_hello_texture.cpp)
-target_link_libraries(emscripten_hello_texture PRIVATE emscripten_gl_utilities)
 
 set(ALL_FLAGS
     "${BASE_LINK_FLAGS} ${SARA_IMAGEIO_LINK_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
@@ -76,5 +77,24 @@ set(ALL_FLAGS
 set(ALL_FLAGS
     "${ALL_FLAGS} --preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image-omni.png"
 )
-set_target_properties(emscripten_hello_texture #
+
+# -----------------------------------------------------------------------------
+# TESTS
+# -----------------------------------------------------------------------------
+sara_add_wasm_executable(test_image_plane_renderer.cpp)
+target_link_libraries(test_image_plane_renderer #
+                      PRIVATE emscripten_gl_utilities)
+set_target_properties(test_image_plane_renderer #
+                      PROPERTIES LINK_FLAGS ${ALL_FLAGS})
+
+sara_add_wasm_executable(test_line_renderer.cpp)
+target_link_libraries(test_line_renderer #
+                      PRIVATE emscripten_gl_utilities)
+set_target_properties(test_line_renderer #
+                      PROPERTIES LINK_FLAGS ${ALL_FLAGS})
+
+sara_add_wasm_executable(test_metric_grid_renderer_v2.cpp)
+target_link_libraries(test_metric_grid_renderer_v2 #
+                      PRIVATE emscripten_gl_utilities)
+set_target_properties(test_metric_grid_renderer_v2 #
                       PROPERTIES LINK_FLAGS ${ALL_FLAGS})

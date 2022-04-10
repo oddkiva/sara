@@ -30,7 +30,7 @@ int MyGLFW::width = -1;
 int MyGLFW::height = -1;
 
 
-auto MyGLFW::initialize() -> bool
+auto MyGLFW::initialize(int width, int height) -> bool
 {
   if (glfwInit() != GL_TRUE)
   {
@@ -39,7 +39,7 @@ auto MyGLFW::initialize() -> bool
     return false;
   }
 
-  window = glfwCreateWindow(1024, 1024, "OpenGL Window", NULL, NULL);
+  window = glfwCreateWindow(width, height, "OpenGL Window", NULL, NULL);
   if (!MyGLFW::window)
   {
     std::cout << "Failed to create window!" << std::endl;
@@ -47,10 +47,13 @@ auto MyGLFW::initialize() -> bool
     return false;
   }
 
+  MyGLFW::width = width;
+  MyGLFW::height = height;
+
   glfwMakeContextCurrent(window);
 
   // Set the appropriate mouse and keyboard callbacks.
-  glfwGetFramebufferSize(window, &width, &height);
+  glfwGetFramebufferSize(window, &MyGLFW::width, &MyGLFW::height);
   glfwSetWindowSizeCallback(window, window_size_callback);
   glfwSetMouseButtonCallback(window, mouse_callback);
   glfwSetKeyCallback(window, key_callback);

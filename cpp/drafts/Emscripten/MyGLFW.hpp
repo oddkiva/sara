@@ -21,7 +21,7 @@ struct MyGLFW
   static int width;
   static int height;
 
-  static auto initialize() -> bool;
+  static auto initialize(int width = 1024, int height = 1024) -> bool;
 
   static void window_size_callback(GLFWwindow* /* window */, int width,
                                    int height);

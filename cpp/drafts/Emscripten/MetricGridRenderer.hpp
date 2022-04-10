@@ -13,56 +13,72 @@
 
 #pragma once
 
+#include "ImagePlaneRenderer.hpp"
+
 #include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
 
 #include <drafts/OpenCL/GL.hpp>
 
-#include <Eigen/Geometry>
-
 #include <memory>
 
 
-struct MetricGridRenderer
-{
-  //! @brief The extrinsic camera parameters.
-  Eigen::Matrix4f _extrinsics;
-  //! @brief The intrinsic camera parameters.
-  DO::Sara::OmnidirectionalCamera<float> _intrinsics;
+namespace v2 {
 
-  //! @brief Line geometry data.
-  //!
-  //! A line can be thought a "thick" rectangular line. This thick line can then
-  //! be thought as a quad.
-  //!
-  //! In turn this quad can be decomposed into two right triangles adjacent at
-  //! their hypotenuse.
-  std::vector<float> _vertices;
-  std::vector<std::uint32_t> _triangles;
+  struct MetricGridRenderer
+  {
+    struct LineHostData
+    {
+      std::vector<float> _vertices;
+      std::vector<std::uint32_t> _triangles;
 
-  // OpenGL geometry data.
-  DO::Sara::GL::VertexArray _vao;
-  DO::Sara::GL::Buffer _vbo;
-  DO::Sara::GL::Buffer _ebo;
+      inline auto clear() -> void
+      {
+        _vertices.clear();
+        _triangles.clear();
+      }
 
-  // OpenGL Shader program.
-  DO::Sara::GL::Shader _vertex_shader;
-  DO::Sara::GL::Shader _fragment_shader;
-  DO::Sara::GL::ShaderProgram _shader_program;
+      auto add_line_segment(const Eigen::Vector2f& a,  //
+                            const Eigen::Vector2f& b,  //
+                            float thickness = 0.02f,   //
+                            float antialias_radius = 0.01f) -> void;
+    };
 
-  static std::unique_ptr<MetricGridRenderer> _renderer;
+    struct LineShaderData
+    {
+      //! @brief The extrinsic camera matrix as a uniform variables.
+      Eigen::Matrix4f _extrinsics;
+      //! @brief The intrinsic camera parameters as uniform variables.
+      DO::Sara::OmnidirectionalCamera<float> _intrinsics;
 
-  static auto instance() -> MetricGridRenderer&;
+      //! @brief OpenGL buffer objects.
+      DO::Sara::GL::VertexArray _vao;
+      DO::Sara::GL::Buffer _vbo;
+      DO::Sara::GL::Buffer _ebo;
 
-  auto add_line_segment(const Eigen::Vector2f& a,  //
-                        const Eigen::Vector2f& b,  //
-                        float thickness = 0.02f,   //
-                        float antialias_radius = 0.01f) -> void;
+      Eigen::Vector4f _color;
+      std::size_t _triangle_index_count;
 
-  auto initialize() -> void;
+      auto set_data(const LineHostData&) -> void;
+      auto destroy() -> void;
+    };
 
-  auto transfer_line_tesselation_to_gl_buffers() -> void;
+    // OpenGL Shader program.
+    DO::Sara::GL::Shader _vertex_shader;
+    DO::Sara::GL::Shader _fragment_shader;
+    DO::Sara::GL::ShaderProgram _shader_program;
 
-  auto destroy_gl_objects() -> void;
+    std::vector<LineShaderData> _lines;
 
-  auto render() -> void;
-};
+    static std::unique_ptr<MetricGridRenderer> _instance;
+
+    static auto instance() -> MetricGridRenderer&;
+
+    auto initialize() -> void;
+
+    auto destroy_gl_objects() -> void;
+
+    auto render(const ImagePlaneRenderer::ImageTexture&, const LineShaderData&)
+        -> void;
+  };
+
+}  // namespace v2

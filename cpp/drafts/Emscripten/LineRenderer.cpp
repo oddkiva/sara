@@ -11,23 +11,14 @@
 
 //! @file
 
-#include "LinePainter.hpp"
-#include "Scene.hpp"
+#include "LineRenderer.hpp"
 
 
-std::unique_ptr<LinePainter> LinePainter::_painter = nullptr;
-
-
-auto LinePainter::instance() -> LinePainter&
-{
-  if (_painter == nullptr)
-    _painter.reset(new LinePainter{});
-  return *_painter;
-}
-
-auto LinePainter::add_line_segment(const Eigen::Vector2f& a,
-                                   const Eigen::Vector2f& b, float thickness,
-                                   float antialias_radius) -> void
+auto LineRenderer::LineHostData::add_line_segment(const Eigen::Vector2f& a,
+                                                  const Eigen::Vector2f& b,
+                                                  float thickness,
+                                                  float antialias_radius)
+    -> void
 {
   // First calculate the quad vertices.
   const Eigen::Vector2f t = (b - a).normalized();
@@ -45,15 +36,19 @@ auto LinePainter::add_line_segment(const Eigen::Vector2f& a,
   // Store the quad vertices.
   _vertices.push_back(a0.x());
   _vertices.push_back(a0.y());
+  std::cout << a0.transpose() << std::endl;
 
   _vertices.push_back(a1.x());
   _vertices.push_back(a1.y());
+  std::cout << a1.transpose() << std::endl;
 
   _vertices.push_back(b0.x());
   _vertices.push_back(b0.y());
+  std::cout << b0.transpose() << std::endl;
 
   _vertices.push_back(b1.x());
   _vertices.push_back(b1.y());
+  std::cout << b1.transpose() << std::endl;
 
   // Tesselate the quad into two right triangles.
   _triangles.push_back(n + 0);  // a0
@@ -63,14 +58,19 @@ auto LinePainter::add_line_segment(const Eigen::Vector2f& a,
   _triangles.push_back(n + 2);  // b0
   _triangles.push_back(n + 3);  // b1
   _triangles.push_back(n + 1);  // a1
+
+  for (const auto& i : _triangles)
+    std::cout << i << " ";
+  std::cout << std::endl;
 }
 
-auto LinePainter::add_line_segment_in_pixel_coordinates(
-    const Eigen::Vector2f& a1, const Eigen::Vector2f& b1,  //
-    float thickness, float antialias_radius) -> void
+auto LineRenderer::LineHostData::add_line_segment_in_pixel_coordinates(
+    const Eigen::Vector2f& a1,           //
+    const Eigen::Vector2f& b1,           //
+    const Eigen::Vector2f& image_sizes,  //
+    float thickness,                     //
+    float antialias_radius) -> void
 {
-  const auto& scene = Scene::instance();
-  const auto& image_sizes = scene._image_sizes;
   const auto h = static_cast<float>(image_sizes.y());
 
   Eigen::Vector2f a = a1 / h;
@@ -83,12 +83,57 @@ auto LinePainter::add_line_segment_in_pixel_coordinates(
 }
 
 
-auto LinePainter::initialize() -> void
+auto LineRenderer::LineGLObjects::set_data(const LineHostData& host_data)
+    -> void
+{
+  // Bind the VAO.
+  if (_vao == 0)
+    _vao.generate();
+  // Allocate the GL buffers.
+  if (_vbo == 0)
+  {
+    std::cout << "Generating VBO" << std::endl;
+    _vbo.generate();
+  }
+  if (_ebo == 0)
+    _ebo.generate();
+
+  _triangle_index_count = host_data._triangles.size();
+  std::cout << _triangle_index_count << std::endl;
+
+  glBindVertexArray(_vao);
+  glEnableVertexAttribArray(0);
+
+  // Copy vertex coordinates and triangles to the GPU.
+  _vbo.bind_vertex_data(host_data._vertices);
+  _ebo.bind_triangles_data(host_data._triangles);
+
+  // Specify the VAO descriptor.
+  static constexpr auto row_bytes = 2 * sizeof(float);
+  glVertexAttribPointer(0, 2 /* 2D points */, GL_FLOAT, GL_FALSE, row_bytes, 0);
+}
+
+auto LineRenderer::LineGLObjects::destroy() -> void
+{
+  _vbo.destroy();
+  _ebo.destroy();
+}
+
+
+std::unique_ptr<LineRenderer> LineRenderer::_instance = nullptr;
+
+
+auto LineRenderer::instance() -> LineRenderer&
+{
+  if (_instance == nullptr)
+    _instance.reset(new LineRenderer{});
+  return *_instance;
+}
+
+auto LineRenderer::initialize() -> void
 {
   // Create a vertex shader.
-  const std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                              {"in_color", 1},   //
-                                              {"out_color", 0}};
+  static const std::map<std::string, int> arg_pos = {{"in_coords", 0}};
 
   const auto vertex_shader_source = R"shader(#version 300 es
     layout (location = 0) in vec2 in_coords;
@@ -107,9 +152,10 @@ auto LinePainter::initialize() -> void
 
     void main()
     {
-      gl_Position = projection * view * vec4(to_texture_coordinates(in_coords), 0., 1.);
+      vec4 coords = vec4(to_texture_coordinates(in_coords), 0., 1.);
+      gl_Position = projection * view * coords;
     }
-    )shader";
+  )shader";
   _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
 
   // Create a fragment shader.
@@ -118,13 +164,15 @@ auto LinePainter::initialize() -> void
     precision highp float;
     #endif
 
+    uniform vec4 color;
+
     out vec4 frag_color;
 
     void main()
     {
-      frag_color = vec4(0.8, 0.4, 0.4, 0.8);
+      frag_color = color;
     }
-    )shader";
+  )shader";
   _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
                                       fragment_shader_source);
 
@@ -132,60 +180,40 @@ auto LinePainter::initialize() -> void
   _shader_program.attach(_vertex_shader, _fragment_shader);
   _shader_program.validate();
 
+#ifndef EMSCRIPTEN
   // Clearing the shaders after attaching them to the shader program does not
   // work on WebGL 2.0/OpenGL ES 3.0... I don't know why.
-  //
-  // _shader_program.use();
-  // _shader_program.detach();
-  // _vertex_shader.destroy();
-  // _fragment_shader.destroy();
-
-  // Allocate the GL buffers.
-  _vao.generate();
-  _vbo.generate();
-  _ebo.generate();
+  _shader_program.use();
+  _shader_program.detach();
+  _vertex_shader.destroy();
+  _fragment_shader.destroy();
+#endif
 }
 
-auto LinePainter::transfer_line_tesselation_to_gl_buffers() -> void
-{
-  glBindVertexArray(_vao);
-
-  // Copy vertex coordinates and triangles to the GPU.
-  _vbo.bind_vertex_data(_vertices);
-  _ebo.bind_triangles_data(_triangles);
-
-  // Map the parameters to the argument position for the vertex shader.
-  //
-  // Vertex coordinates.
-  static constexpr auto row_bytes = 2 * sizeof(float);
-  glVertexAttribPointer(0, 2 /* 2D points */, GL_FLOAT, GL_FALSE, row_bytes, 0);
-  glEnableVertexAttribArray(0);
-}
-
-auto LinePainter::destroy_gl_objects() -> void
+auto LineRenderer::destroy_gl_objects() -> void
 {
   _shader_program.use();
   _shader_program.detach();
   _shader_program.clear();
   _vertex_shader.destroy();
   _fragment_shader.destroy();
-
-  _vao.destroy();
-  _vbo.destroy();
-  _ebo.destroy();
 }
 
-auto LinePainter::render() -> void
+auto LineRenderer::render(const ImagePlaneRenderer::ImageTexture& image_plane,
+                          const LineGLObjects& lines) -> void
 {
+  // Select the shader program.
   _shader_program.use(true);
-
   // Set the projection-model-view matrix uniforms.
-  auto& scene = Scene::instance();
   _shader_program.set_uniform_vector2f("image_sizes",
-                                       scene._image_sizes.data());
-  _shader_program.set_uniform_matrix4f("view", scene._model_view.data());
-  _shader_program.set_uniform_matrix4f("projection", scene._projection.data());
+                                       image_plane._image_sizes.data());
+  _shader_program.set_uniform_vector4f("color",
+                                       lines._color.data());
+  _shader_program.set_uniform_matrix4f("view", image_plane._model_view.data());
+  _shader_program.set_uniform_matrix4f("projection",
+                                       image_plane._projection.data());
 
-  glBindVertexArray(_vao);
-  glDrawElements(GL_TRIANGLES, _triangles.size(), GL_UNSIGNED_INT, 0);
+  // Select the vertex array descriptor.
+  glBindVertexArray(lines._vao);
+  glDrawElements(GL_TRIANGLES, lines._triangle_index_count, GL_UNSIGNED_INT, 0);
 }
