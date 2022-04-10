@@ -62,6 +62,8 @@ list(
   # Implementation V2
   ImagePlaneRenderer.hpp
   ImagePlaneRenderer.cpp
+  ImageDewarpRenderer.hpp
+  ImageDewarpRenderer.cpp
   LineRenderer.hpp
   LineRenderer.cpp
   MetricGridRenderer.hpp
@@ -93,8 +95,14 @@ target_link_libraries(test_line_renderer #
 set_target_properties(test_line_renderer #
                       PROPERTIES LINK_FLAGS ${ALL_FLAGS})
 
-sara_add_wasm_executable(test_metric_grid_renderer_v2.cpp)
-target_link_libraries(test_metric_grid_renderer_v2 #
+sara_add_wasm_executable(test_metric_grid_renderer.cpp)
+target_link_libraries(test_metric_grid_renderer #
                       PRIVATE emscripten_gl_utilities)
-set_target_properties(test_metric_grid_renderer_v2 #
+set_target_properties(test_metric_grid_renderer #
+                      PROPERTIES LINK_FLAGS ${ALL_FLAGS})
+
+sara_add_wasm_executable(test_image_dewarp_renderer.cpp)
+target_link_libraries(test_image_dewarp_renderer #
+                      PRIVATE emscripten_gl_utilities)
+set_target_properties(test_image_dewarp_renderer #
                       PROPERTIES LINK_FLAGS ${ALL_FLAGS})
