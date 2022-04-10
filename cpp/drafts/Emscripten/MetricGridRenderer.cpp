@@ -190,7 +190,7 @@ auto MetricGridRenderer::transfer_line_tesselation_to_gl_buffers() -> void
   glEnableVertexAttribArray(0);
 }
 
-auto MetricGridRenderer::destroy_opengl_data() -> void
+auto MetricGridRenderer::destroy_gl_objects() -> void
 {
   _shader_program.detach();
   _vertex_shader.destroy();

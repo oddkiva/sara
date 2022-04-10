@@ -161,7 +161,7 @@ auto Scene::initialize(const sara::ImageView<sara::Rgb8>& image_view) -> void
   _model_view.setIdentity();
 }
 
-auto Scene::destroy_opengl_data() -> void
+auto Scene::destroy_gl_objects() -> void
 {
   _shader_program.detach();
   _vertex_shader.destroy();

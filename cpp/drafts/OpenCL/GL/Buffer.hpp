@@ -21,34 +21,34 @@ namespace DO::Sara { namespace GL {
 
   struct Buffer
   {
-    static void generate(Buffer* begin, Buffer* end)
+    inline static auto generate(Buffer* begin, Buffer* end) -> void
     {
       glGenBuffers(int(end - begin), reinterpret_cast<GLuint*>(begin));
     }
 
-    void generate()
+    inline auto generate() -> void
     {
       Buffer::generate(this, this + 1);
     }
 
-    void destroy()
+    inline auto destroy() -> void
     {
       glDeleteBuffers(1, &object);
       object = 0;
     }
 
-    operator GLuint&()
+    inline operator GLuint&()
     {
       return object;
     }
 
-    operator GLuint() const
+    inline operator GLuint() const
     {
       return object;
     }
 
     template <typename T>
-    auto bind_vertex_data(const std::vector<T>& data) const
+    inline auto bind_vertex_data(const std::vector<T>& data) const -> void
     {
       glBindBuffer(GL_ARRAY_BUFFER, object);
       glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), data.data(),
@@ -56,7 +56,8 @@ namespace DO::Sara { namespace GL {
     }
 
     template <typename T>
-    auto bind_vertex_data(const DO::Sara::TensorView_<T, 2>& data) const
+    inline auto bind_vertex_data(const DO::Sara::TensorView_<T, 2>& data) const
+        -> void
     {
       glBindBuffer(GL_ARRAY_BUFFER, object);
       glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), data.data(),
@@ -64,7 +65,7 @@ namespace DO::Sara { namespace GL {
     }
 
     template <typename T>
-    auto bind_triangles_data(const std::vector<T>& data) const
+    inline auto bind_triangles_data(const std::vector<T>& data) const -> void
     {
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.size() * sizeof(T),
@@ -72,7 +73,8 @@ namespace DO::Sara { namespace GL {
     }
 
     template <typename T>
-    auto bind_triangles_data(const DO::Sara::TensorView_<T, 2>& data) const
+    inline auto
+    bind_triangles_data(const DO::Sara::TensorView_<T, 2>& data) const -> void
     {
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.size() * sizeof(T),
@@ -84,5 +86,4 @@ namespace DO::Sara { namespace GL {
 
   //! @}
 
-} /* namespace GL */
-} /* namespace DO::Sara */
+}}  // namespace DO::Sara::GL

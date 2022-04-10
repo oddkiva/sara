@@ -201,8 +201,9 @@ int main()
       render_frame();
 #endif
 
-    scene.destroy_opengl_data();
-    grid_renderer.destroy_opengl_data();
+    scene.destroy_gl_objects();
+    line_renderer.destroy_gl_objects();
+    grid_renderer.destroy_gl_objects();
 
     glfwTerminate();
   }

@@ -65,10 +65,6 @@ list(
 )
 sara_add_wasm_library(emscripten_gl_utilities "${GL_UTILS}")
 
-sara_add_wasm_executable(emscripten_hello_triangle.cpp)
-set_target_properties(emscripten_hello_triangle PROPERTIES LINK_FLAGS
-                                                           ${BASE_LINK_FLAGS})
-
 sara_add_wasm_executable(emscripten_hello_texture.cpp)
 target_link_libraries(emscripten_hello_texture PRIVATE emscripten_gl_utilities)
 

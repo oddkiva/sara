@@ -62,7 +62,7 @@ struct MetricGridRenderer
 
   auto transfer_line_tesselation_to_gl_buffers() -> void;
 
-  auto destroy_opengl_data() -> void;
+  auto destroy_gl_objects() -> void;
 
   auto render() -> void;
 };

@@ -50,9 +50,7 @@ struct Scene
 
   auto initialize(const DO::Sara::ImageView<DO::Sara::Rgb8>& image) -> void;
 
-  auto destroy_opengl_data() -> void;
+  auto destroy_gl_objects() -> void;
 
   auto render() -> void;
 };
-
-

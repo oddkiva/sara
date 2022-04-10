@@ -13,15 +13,15 @@
 
 #include <drafts/OpenCL/GL.hpp>
 
-#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 #include <GLFW/glfw3.h>
@@ -45,7 +45,6 @@ inline auto init_glfw_boilerplate()
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-
 }
 
 inline auto init_glew_boilerplate()
@@ -76,9 +75,9 @@ int main()
 
   init_glew_boilerplate();
 
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                        {"in_color", 1},   //
-                                        {"in_tex_coords", 2},   //
+  std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
+                                        {"in_color", 1},       //
+                                        {"in_tex_coords", 2},  //
                                         {"out_color", 0}};
 
   const auto vertex_shader_source = R"shader(
@@ -123,22 +122,23 @@ int main()
   shader_program.create();
   shader_program.attach(vertex_shader, fragment_shader);
 
+  shader_program.detach();
   vertex_shader.destroy();
   fragment_shader.destroy();
 
   // Encode the vertex data in a tensor.
   auto vertices = Tensor_<float, 2>{{4, 8}};
-  vertices.flat_array() << //
-    // coords            color              texture coords
+  // clang-format off
+  vertices.flat_array() <<
+  // coords              color              texture coords
      0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // bottom-right
      0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // top-right
     -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,  // top-left
     -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f;  // bottom-left
+  // clang-format on
 
   auto triangles = Tensor_<unsigned int, 2>{{2, 3}};
-  triangles.flat_array() <<
-    0, 1, 2,
-    2, 3, 0;
+  triangles.flat_array() << 0, 1, 2, 2, 3, 0;
 
   const auto row_bytes = [](const TensorView_<float, 2>& data) {
     return data.size(1) * sizeof(float);
@@ -180,8 +180,9 @@ int main()
     glEnableVertexAttribArray(arg_pos["in_color"]);
 
     // Texture coordinates.
-    glVertexAttribPointer(arg_pos["in_tex_coords"], 2 /* 3D colors */, GL_FLOAT,
-                          GL_FALSE, row_bytes(vertices), float_pointer(6));
+    glVertexAttribPointer(arg_pos["in_tex_coords"], 2 /* 2D texture coords */,
+                          GL_FLOAT, GL_FALSE, row_bytes(vertices),
+                          float_pointer(6));
     glEnableVertexAttribArray(arg_pos["in_tex_coords"]);
   }
 
@@ -189,12 +190,10 @@ int main()
   auto texture = GL::Texture2D{};
   {
     // Read the image from the disk.
-    auto image = imread<Rgb8>(src_path("../../../../data/ksmall.jpg")).convert<float>();
+    auto image = imread<Rgb8>(src_path("../../../../data/ksmall.jpg"));
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);
-
-    std::cout << image.matrix().topLeftCorner(10, 10) << std::endl;
 
     // Copy the image to the GPU texture.
     texture.setup_with_pretty_defaults(image, 0);
@@ -222,9 +221,11 @@ int main()
     glfwPollEvents();
   }
 
+  shader_program.clear();
   vao.destroy();
   vbo.destroy();
   ebo.destroy();
+  texture.destroy();
 
   // Clean up resources.
   glfwDestroyWindow(window);

@@ -130,6 +130,15 @@ auto LinePainter::initialize() -> void
 
   _shader_program.create();
   _shader_program.attach(_vertex_shader, _fragment_shader);
+  _shader_program.validate();
+
+  // Clearing the shaders after attaching them to the shader program does not
+  // work on WebGL 2.0/OpenGL ES 3.0... I don't know why.
+  //
+  // _shader_program.use();
+  // _shader_program.detach();
+  // _vertex_shader.destroy();
+  // _fragment_shader.destroy();
 
   // Allocate the GL buffers.
   _vao.generate();
@@ -153,9 +162,11 @@ auto LinePainter::transfer_line_tesselation_to_gl_buffers() -> void
   glEnableVertexAttribArray(0);
 }
 
-auto LinePainter::destroy_opengl_data() -> void
+auto LinePainter::destroy_gl_objects() -> void
 {
+  _shader_program.use();
   _shader_program.detach();
+  _shader_program.clear();
   _vertex_shader.destroy();
   _fragment_shader.destroy();
 
@@ -169,14 +180,11 @@ auto LinePainter::render() -> void
   _shader_program.use(true);
 
   // Set the projection-model-view matrix uniforms.
-  {
-    auto& scene = Scene::instance();
-    _shader_program.set_uniform_vector2f("image_sizes",
-                                         scene._image_sizes.data());
-    _shader_program.set_uniform_matrix4f("view", scene._model_view.data());
-    _shader_program.set_uniform_matrix4f("projection",
-                                         scene._projection.data());
-  }
+  auto& scene = Scene::instance();
+  _shader_program.set_uniform_vector2f("image_sizes",
+                                       scene._image_sizes.data());
+  _shader_program.set_uniform_matrix4f("view", scene._model_view.data());
+  _shader_program.set_uniform_matrix4f("projection", scene._projection.data());
 
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, _triangles.size(), GL_UNSIGNED_INT, 0);
