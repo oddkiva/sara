@@ -83,7 +83,7 @@ auto LineRenderer::LineHostData::add_line_segment_in_pixel_coordinates(
 }
 
 
-auto LineRenderer::LineGLObjects::set_data(const LineHostData& host_data)
+auto LineRenderer::LineShaderData::set_data(const LineHostData& host_data)
     -> void
 {
   // Bind the VAO.
@@ -113,7 +113,7 @@ auto LineRenderer::LineGLObjects::set_data(const LineHostData& host_data)
   glVertexAttribPointer(0, 2 /* 2D points */, GL_FLOAT, GL_FALSE, row_bytes, 0);
 }
 
-auto LineRenderer::LineGLObjects::destroy() -> void
+auto LineRenderer::LineShaderData::destroy() -> void
 {
   _vbo.destroy();
   _ebo.destroy();
@@ -200,7 +200,7 @@ auto LineRenderer::destroy_gl_objects() -> void
 }
 
 auto LineRenderer::render(const ImagePlaneRenderer::ImageTexture& image_plane,
-                          const LineGLObjects& lines) -> void
+                          const LineShaderData& lines) -> void
 {
   // Select the shader program.
   _shader_program.use(true);

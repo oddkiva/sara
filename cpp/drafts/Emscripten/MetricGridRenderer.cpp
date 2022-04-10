@@ -11,104 +11,100 @@
 
 //! @file
 
-#include "MetricGridRendererV2.hpp"
-#include "Scene.hpp"
+#include "MetricGridRenderer.hpp"
 
 
-namespace v2 {
+auto MetricGridRenderer::LineHostData::add_line_segment(
+    const Eigen::Vector2f& a,  //
+    const Eigen::Vector2f& b,  //
+    float thickness,           //
+    float antialias_radius) -> void
+{
+  // First calculate the quad vertices.
+  const Eigen::Vector2f t = (b - a).normalized();
+  const Eigen::Vector2f o = Eigen::Vector2f(-t.y(), t.x());
 
-  auto MetricGridRenderer::LineHostData::add_line_segment(
-      const Eigen::Vector2f& a,  //
-      const Eigen::Vector2f& b,  //
-      float thickness,           //
-      float antialias_radius) -> void
-  {
-    // First calculate the quad vertices.
-    const Eigen::Vector2f t = (b - a).normalized();
-    const Eigen::Vector2f o = Eigen::Vector2f(-t.y(), t.x());
+  const auto& w = thickness;
+  const auto& r = antialias_radius;
+  const Eigen::Vector2f a0 = a - (w * 0.5f + r) * (t - o);
+  const Eigen::Vector2f a1 = a - (w * 0.5f + r) * (t + o);
+  const Eigen::Vector2f b0 = b + (w * 0.5f + r) * (t + o);
+  const Eigen::Vector2f b1 = b + (w * 0.5f + r) * (t - o);
 
-    const auto& w = thickness;
-    const auto& r = antialias_radius;
-    const Eigen::Vector2f a0 = a - (w * 0.5f + r) * (t - o);
-    const Eigen::Vector2f a1 = a - (w * 0.5f + r) * (t + o);
-    const Eigen::Vector2f b0 = b + (w * 0.5f + r) * (t + o);
-    const Eigen::Vector2f b1 = b + (w * 0.5f + r) * (t - o);
+  const auto n = _vertices.size() / 2;
 
-    const auto n = _vertices.size() / 2;
+  // Store the quad vertices.
+  _vertices.push_back(a0.x());
+  _vertices.push_back(a0.y());
 
-    // Store the quad vertices.
-    _vertices.push_back(a0.x());
-    _vertices.push_back(a0.y());
+  _vertices.push_back(a1.x());
+  _vertices.push_back(a1.y());
 
-    _vertices.push_back(a1.x());
-    _vertices.push_back(a1.y());
+  _vertices.push_back(b0.x());
+  _vertices.push_back(b0.y());
 
-    _vertices.push_back(b0.x());
-    _vertices.push_back(b0.y());
+  _vertices.push_back(b1.x());
+  _vertices.push_back(b1.y());
 
-    _vertices.push_back(b1.x());
-    _vertices.push_back(b1.y());
+  // Tesselate the quad into two right triangles.
+  _triangles.push_back(n + 0);  // a0
+  _triangles.push_back(n + 1);  // b0
+  _triangles.push_back(n + 2);  // a1
 
-    // Tesselate the quad into two right triangles.
-    _triangles.push_back(n + 0);  // a0
-    _triangles.push_back(n + 1);  // b0
-    _triangles.push_back(n + 2);  // a1
+  _triangles.push_back(n + 2);  // b0
+  _triangles.push_back(n + 3);  // b1
+  _triangles.push_back(n + 1);  // a1
+}
 
-    _triangles.push_back(n + 2);  // b0
-    _triangles.push_back(n + 3);  // b1
-    _triangles.push_back(n + 1);  // a1
-  }
+auto MetricGridRenderer::LineShaderData::set_data(const LineHostData& lines)
+    -> void
+{
+  if (_vao == 0)
+    _vao.generate();
+  if (_vbo == 0)
+    _vbo.generate();
+  if (_ebo == 0)
+    _ebo.generate();
 
-  auto MetricGridRenderer::LineShaderData::set_data(const LineHostData& lines)
-      -> void
-  {
-    if (_vao == 0)
-      _vao.generate();
-    if (_vbo == 0)
-      _vbo.generate();
-    if (_ebo == 0)
-      _ebo.generate();
+  glBindVertexArray(_vao);
 
-    glBindVertexArray(_vao);
+  // Copy vertex coordinates and triangles to the GPU.
+  _vbo.bind_vertex_data(lines._vertices);
+  _ebo.bind_triangles_data(lines._triangles);
 
-    // Copy vertex coordinates and triangles to the GPU.
-    _vbo.bind_vertex_data(lines._vertices);
-    _ebo.bind_triangles_data(lines._triangles);
+  // Map the vertex coordinates to the argument position for the vertex
+  // shader.
+  static constexpr auto row_bytes = 2 * sizeof(float);
+  glVertexAttribPointer(0, 2 /* 2D points */, GL_FLOAT, GL_FALSE, row_bytes, 0);
+  glEnableVertexAttribArray(0);
 
-    // Map the vertex coordinates to the argument position for the vertex
-    // shader.
-    static constexpr auto row_bytes = 2 * sizeof(float);
-    glVertexAttribPointer(0, 2 /* 2D points */, GL_FLOAT, GL_FALSE, row_bytes,
-                          0);
-    glEnableVertexAttribArray(0);
+  // Don't forget this.
+  _triangle_index_count = lines._triangles.size();
+}
 
-    // Don't forget this.
-    _triangle_index_count = lines._triangles.size();
-  }
+auto MetricGridRenderer::LineShaderData::destroy() -> void
+{
+  _vao.destroy();
+  _vbo.destroy();
+  _ebo.destroy();
+}
 
-  auto MetricGridRenderer::LineShaderData::destroy() -> void
-  {
-    _vao.destroy();
-    _vbo.destroy();
-    _ebo.destroy();
-  }
-
-  std::unique_ptr<MetricGridRenderer> MetricGridRenderer::_instance = nullptr;
+std::unique_ptr<MetricGridRenderer> MetricGridRenderer::_instance = nullptr;
 
 
-  auto MetricGridRenderer::instance() -> MetricGridRenderer&
-  {
-    if (_instance == nullptr)
-      _instance.reset(new MetricGridRenderer{});
-    return *_instance;
-  }
+auto MetricGridRenderer::instance() -> MetricGridRenderer&
+{
+  if (_instance == nullptr)
+    _instance.reset(new MetricGridRenderer{});
+  return *_instance;
+}
 
-  auto MetricGridRenderer::initialize() -> void
-  {
-    // Create a vertex shader.
-    const std::map<std::string, int> arg_pos = {{"in_coords", 0}};
+auto MetricGridRenderer::initialize() -> void
+{
+  // Create a vertex shader.
+  const std::map<std::string, int> arg_pos = {{"in_coords", 0}};
 
-    const auto vertex_shader_source = R"shader(#version 300 es
+  const auto vertex_shader_source = R"shader(#version 300 es
     // The metric grid are in the vehicle coordinate frame.
     layout (location = 0) in vec2 in_coords;
 
@@ -186,10 +182,10 @@ namespace v2 {
       gl_Position.z = -0.15;
     }
     )shader";
-    _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
+  _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
 
-    // Create a fragment shader.
-    const auto fragment_shader_source = R"shader(#version 300 es
+  // Create a fragment shader.
+  const auto fragment_shader_source = R"shader(#version 300 es
     #ifdef GL_ES
     precision highp float;
     #endif
@@ -202,49 +198,45 @@ namespace v2 {
       frag_color = color;
     }
     )shader";
-    _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
-                                        fragment_shader_source);
+  _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
+                                      fragment_shader_source);
 
-    _shader_program.create();
-    _shader_program.attach(_vertex_shader, _fragment_shader);
-  }
+  _shader_program.create();
+  _shader_program.attach(_vertex_shader, _fragment_shader);
+}
 
-  auto MetricGridRenderer::destroy_gl_objects() -> void
-  {
-    _shader_program.detach();
-    _vertex_shader.destroy();
-    _fragment_shader.destroy();
-  }
+auto MetricGridRenderer::destroy_gl_objects() -> void
+{
+  _shader_program.detach();
+  _vertex_shader.destroy();
+  _fragment_shader.destroy();
+}
 
-  auto MetricGridRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
-                                  const LineShaderData& lines) -> void
-  {
-    _shader_program.use(true);
+auto MetricGridRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
+                                const LineShaderData& lines) -> void
+{
+  _shader_program.use(true);
 
-    // Set the projection-model-view matrix uniforms.
-    _shader_program.set_uniform_texture("image", image._texture_unit);
-    _shader_program.set_uniform_vector2f("image_sizes",
-                                         image._image_sizes.data());
-    _shader_program.set_uniform_matrix4f("view", image._model_view.data());
-    _shader_program.set_uniform_matrix4f("projection",
-                                         image._projection.data());
+  // Set the projection-model-view matrix uniforms.
+  _shader_program.set_uniform_texture("image", image._texture_unit);
+  _shader_program.set_uniform_vector2f("image_sizes",
+                                       image._image_sizes.data());
+  _shader_program.set_uniform_matrix4f("view", image._model_view.data());
+  _shader_program.set_uniform_matrix4f("projection", image._projection.data());
 
-    // Camera parameters.
-    _shader_program.set_uniform_matrix4f("C", lines._extrinsics.data());
-    _shader_program.set_uniform_matrix3f("K", lines._intrinsics.K.data());
-    _shader_program.set_uniform_vector2f(
-        "k", lines._intrinsics.radial_distortion_coefficients.data());
-    _shader_program.set_uniform_vector2f(
-        "p", lines._intrinsics.tangential_distortion_coefficients.data());
-    _shader_program.set_uniform_param("xi", lines._intrinsics.xi);
+  // Camera parameters.
+  _shader_program.set_uniform_matrix4f("C", lines._extrinsics.data());
+  _shader_program.set_uniform_matrix3f("K", lines._intrinsics.K.data());
+  _shader_program.set_uniform_vector2f(
+      "k", lines._intrinsics.radial_distortion_coefficients.data());
+  _shader_program.set_uniform_vector2f(
+      "p", lines._intrinsics.tangential_distortion_coefficients.data());
+  _shader_program.set_uniform_param("xi", lines._intrinsics.xi);
 
-    // Color.
-    _shader_program.set_uniform_vector4f("color", lines._color.data());
+  // Color.
+  _shader_program.set_uniform_vector4f("color", lines._color.data());
 
-    glBindVertexArray(lines._vao);
-    glDrawElements(GL_TRIANGLES, lines._triangle_index_count, GL_UNSIGNED_INT,
-                   0);
-    glDrawElements(GL_LINES, lines._triangle_index_count, GL_UNSIGNED_INT, 0);
-  }
-
-}  // namespace v2
+  glBindVertexArray(lines._vao);
+  glDrawElements(GL_TRIANGLES, lines._triangle_index_count, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_LINES, lines._triangle_index_count, GL_UNSIGNED_INT, 0);
+}

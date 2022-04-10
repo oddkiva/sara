@@ -82,20 +82,6 @@ auto MyGLFW::key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
     glfwSetWindowShouldClose(window, 1);
 
   auto& scene = Scene::instance();
-  auto& grid_renderer = MetricGridRenderer::instance();
-  static auto yaw_pitch_roll = std::array<float, 3>{0, 0, 0};
-  static auto rotation_changed = false;
-  // clang-format off
-  static const Eigen::Matrix3f P = (Eigen::Matrix3f{} <<
-     0,  0, 1, // Camera Z =          Automotive X
-    -1,  0, 0, // Camera X = Negative Automotive Y
-     0, -1, 0  // Camera Y = Negative Automotive Z
-  ).finished();
-  // clang-format on
-
-
-  static constexpr auto angle_step = 0.5f * static_cast<float>(M_PI) / 180;
-
   switch (key)
   {
   case GLFW_KEY_LEFT:
@@ -110,44 +96,9 @@ auto MyGLFW::key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
   case GLFW_KEY_DOWN:
     scene._model_view(1, 3) -= 0.01f;
     break;
-  case GLFW_KEY_A:
-    yaw_pitch_roll[0] += angle_step;
-    rotation_changed = true;
-    break;
-  case GLFW_KEY_D:
-    yaw_pitch_roll[0] -= angle_step;
-    rotation_changed = true;
-    break;
-  case GLFW_KEY_W:
-    yaw_pitch_roll[1] += angle_step;
-    rotation_changed = true;
-    break;
-  case GLFW_KEY_S:
-    yaw_pitch_roll[1] -= angle_step;
-    rotation_changed = true;
-    break;
-  case GLFW_KEY_Q:
-    yaw_pitch_roll[2] += angle_step;
-    rotation_changed = true;
-    break;
-  case GLFW_KEY_E:
-    yaw_pitch_roll[2] -= angle_step;
-    rotation_changed = true;
-    break;
   default:
     break;
   };
-
-  if (rotation_changed)
-  {
-    const auto R = DO::Sara::rotation(yaw_pitch_roll[0], yaw_pitch_roll[1],
-                                      yaw_pitch_roll[2]) *
-                   P;
-    const auto t = Eigen::Vector3f(0, 0, 1.51);
-    grid_renderer._extrinsics.topLeftCorner(3, 3) = R.transpose();
-    grid_renderer._extrinsics.block<3, 1>(0, 3) = -R.transpose() * t;
-    rotation_changed = false;
-  }
 }
 
 void MyGLFW::scroll_callback(GLFWwindow* /*window*/, double /*xoffset */,

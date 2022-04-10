@@ -50,7 +50,7 @@ struct LineRenderer
         float antialias_radius = 1.f) -> void;
   };
 
-  struct LineGLObjects
+  struct LineShaderData
   {
     //! We choose one VAO per object.
     DO::Sara::GL::VertexArray _vao;
@@ -69,7 +69,7 @@ struct LineRenderer
   DO::Sara::GL::ShaderProgram _shader_program;
 
   // Line data.
-  std::vector<LineGLObjects> _lines;
+  std::vector<LineShaderData> _lines;
 
   static std::unique_ptr<LineRenderer> _instance;
 
@@ -79,5 +79,5 @@ struct LineRenderer
 
   auto destroy_gl_objects() -> void;
 
-  auto render(const ImagePlaneRenderer::ImageTexture&, const LineGLObjects&) -> void;
+  auto render(const ImagePlaneRenderer::ImageTexture&, const LineShaderData&) -> void;
 };

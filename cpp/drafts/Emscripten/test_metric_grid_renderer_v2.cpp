@@ -25,7 +25,7 @@
 
 #include "Geometry.hpp"
 #include "ImagePlaneRenderer.hpp"
-#include "MetricGridRendererV2.hpp"
+#include "MetricGridRenderer.hpp"
 
 
 namespace sara = DO::Sara;
@@ -115,7 +115,7 @@ auto key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
                    P;
     const auto t = Eigen::Vector3f(0, 0, 1.51);
 
-    auto& grid_renderer = v2::MetricGridRenderer::instance();
+    auto& grid_renderer = MetricGridRenderer::instance();
     auto& line_batches = grid_renderer._lines;
     for (auto& lines: line_batches)
     {
@@ -162,7 +162,7 @@ auto render_frame() -> void
   const auto& image_texture = image_plane_renderer._textures.front();
   image_plane_renderer.render(image_texture);
 
-  auto& grid_renderer = v2::MetricGridRenderer::instance();
+  auto& grid_renderer = MetricGridRenderer::instance();
   const auto& lines = grid_renderer._lines;
   for (auto i = 0u; i < lines.size(); ++i)
     grid_renderer.render(image_texture, lines[i]);
@@ -189,7 +189,7 @@ auto initialize_image_texture()
   image_textures[0]._projection.setIdentity();
 }
 
-auto initialize_camera_parameters(v2::MetricGridRenderer::LineShaderData& lines)
+auto initialize_camera_parameters(MetricGridRenderer::LineShaderData& lines)
     -> void
 {
   // The conversion from the automotive axis convention to the computer vision
@@ -237,11 +237,11 @@ auto initialize_metric_grid(const std::pair<std::int32_t, std::int32_t>& xrange,
   const auto& sq_size = square_size_in_meters;
   const auto& s = line_discretization_step;
 
-  auto& grid_renderer = v2::MetricGridRenderer::instance();
+  auto& grid_renderer = MetricGridRenderer::instance();
   auto& gl_lines = grid_renderer._lines;
   gl_lines.resize(2);
 
-  auto line_data = v2::MetricGridRenderer::LineHostData{};
+  auto line_data = MetricGridRenderer::LineHostData{};
 
   // Draw y-level sets.
   for (auto y = static_cast<float>(yrange.first); y <= yrange.second;
@@ -283,7 +283,7 @@ auto cleanup_gl_objects() -> void
   auto& image_plane_renderer = ImagePlaneRenderer::instance();
   image_plane_renderer.destroy_gl_objects();
 
-  auto& grid_renderer = v2::MetricGridRenderer::instance();
+  auto& grid_renderer = MetricGridRenderer::instance();
   grid_renderer.destroy_gl_objects();
 
   // Destroy the image textures.
@@ -311,7 +311,7 @@ int main()
     image_plane_renderer.initialize();
     initialize_image_texture();
 
-    auto& metric_grid_renderer = v2::MetricGridRenderer::instance();
+    auto& metric_grid_renderer = MetricGridRenderer::instance();
     metric_grid_renderer.initialize();
     initialize_metric_grid({-50, 50}, {-50, 50});
 
@@ -321,7 +321,7 @@ int main()
     // Specific rendering options.
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
 #ifdef EMSCRIPTEN
     emscripten_set_main_loop(render_frame, 0, 1);
