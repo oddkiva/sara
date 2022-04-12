@@ -28,6 +28,8 @@
 GLFWwindow* MyGLFW::window = nullptr;
 int MyGLFW::width = -1;
 int MyGLFW::height = -1;
+int MyGLFW::high_dpi_scale_factor = 1.0f;
+std::string MyGLFW::glsl_version = "#version 300 es";
 
 
 auto MyGLFW::initialize(int width, int height) -> bool
@@ -49,6 +51,42 @@ auto MyGLFW::initialize(int width, int height) -> bool
 
   MyGLFW::width = width;
   MyGLFW::height = height;
+
+
+// #ifdef __APPLE__
+//   // GL 3.2 + GLSL 150
+//   MyGLFW::glsl_version = "#version 150";
+//   glfwWindowHint(  // required on Mac OS
+//       GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+//   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+//   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+// #elif __linux__
+//   // GL 3.2 + GLSL 150
+//   glsl_version = "#version 150";
+//   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+//   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+// #elif _WIN32
+//   // GL 3.0 + GLSL 130
+//   glsl_version = "#version 130";
+//   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+// #endif
+
+#ifdef _WIN32
+  // if it's a HighDPI monitor, try to scale everything
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  float xscale, yscale;
+  glfwGetMonitorContentScale(monitor, &xscale, &yscale);
+  if (xscale > 1 || yscale > 1)
+  {
+    high_dpi_scale_factor = xscale;
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+  }
+#elif __APPLE__
+  // to prevent 1200x800 from becoming 2400x1600
+  glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+#endif
+
 
   glfwMakeContextCurrent(window);
 

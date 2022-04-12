@@ -28,8 +28,6 @@
 
 namespace sara = DO::Sara;
 
-using namespace std;
-
 
 auto render_frame() -> void
 {
@@ -145,6 +143,10 @@ int main()
   {
     if (!MyGLFW::initialize())
       return EXIT_FAILURE;
+
+#ifndef EMSCRIPTEN
+    glewInit();
+#endif
 
     auto& image_plane_renderer = ImagePlaneRenderer::instance();
     image_plane_renderer.initialize();

@@ -11,6 +11,12 @@
 
 //! @file
 
+#include "Geometry.hpp"
+#include "ImagePlaneRenderer.hpp"
+#include "MetricGridRenderer.hpp"
+
+#include "MyGLFW.hpp"
+
 #include <drafts/OpenCL/GL.hpp>
 
 #include <DO/Sara/Core/Math/Rotation.hpp>
@@ -21,17 +27,45 @@
 #  define GLFW_INCLUDE_ES3
 #endif
 
-#include "MyGLFW.hpp"
-
-#include "Geometry.hpp"
-#include "ImagePlaneRenderer.hpp"
-#include "MetricGridRenderer.hpp"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 
 namespace sara = DO::Sara;
 
-using namespace std;
 
+// Extrinsic camera parameter state.
+static auto ypr_deg = std::array<float, 3>{0, 0, 0};
+static auto rotation_changed = false;
+
+auto update_rotation()
+{
+  if (!rotation_changed)
+    return;
+
+  // clang-format off
+  static const Eigen::Matrix3f P = (Eigen::Matrix3f{} <<
+     0,  0, 1, // Camera Z =          Automotive X
+    -1,  0, 0, // Camera X = Negative Automotive Y
+     0, -1, 0  // Camera Y = Negative Automotive Z
+  ).finished();
+  // clang-format on
+  const auto R = sara::rotation(ypr_deg[0] * static_cast<float>(M_PI) / 180.f,
+                                ypr_deg[1] * static_cast<float>(M_PI) / 180.f,
+                                ypr_deg[2] * static_cast<float>(M_PI) / 180.f) *
+                 P;
+  const auto t = Eigen::Vector3f(0, 0, 1.51);
+
+  auto& grid_renderer = MetricGridRenderer::instance();
+  auto& line_batches = grid_renderer._lines;
+  for (auto& lines : line_batches)
+  {
+    lines._extrinsics.topLeftCorner(3, 3) = R.transpose();
+    lines._extrinsics.block<3, 1>(0, 3) = -R.transpose() * t;
+  }
+
+  rotation_changed = false;
+}
 
 auto window_size_callback(GLFWwindow* /* window */, int width, int height)
     -> void
@@ -53,18 +87,7 @@ auto key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
 
   auto& image = ImagePlaneRenderer::instance()._textures.front();
 
-  static auto yaw_pitch_roll = std::array<float, 3>{0, 0, 0};
-  static auto rotation_changed = false;
-  // clang-format off
-  static const Eigen::Matrix3f P = (Eigen::Matrix3f{} <<
-     0,  0, 1, // Camera Z =          Automotive X
-    -1,  0, 0, // Camera X = Negative Automotive Y
-     0, -1, 0  // Camera Y = Negative Automotive Z
-  ).finished();
-  // clang-format on
-
-
-  static constexpr auto angle_step = 0.5f * static_cast<float>(M_PI) / 180;
+  static constexpr auto angle_step = 0.5f;
 
   switch (key)
   {
@@ -81,49 +104,34 @@ auto key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
     image._model_view(1, 3) -= 0.01f;
     break;
   case GLFW_KEY_A:
-    yaw_pitch_roll[0] += angle_step;
+    ypr_deg[0] += angle_step;
     rotation_changed = true;
     break;
   case GLFW_KEY_D:
-    yaw_pitch_roll[0] -= angle_step;
+    ypr_deg[0] -= angle_step;
     rotation_changed = true;
     break;
   case GLFW_KEY_W:
-    yaw_pitch_roll[1] += angle_step;
+    ypr_deg[1] += angle_step;
     rotation_changed = true;
     break;
   case GLFW_KEY_S:
-    yaw_pitch_roll[1] -= angle_step;
+    ypr_deg[1] -= angle_step;
     rotation_changed = true;
     break;
   case GLFW_KEY_Q:
-    yaw_pitch_roll[2] += angle_step;
+    ypr_deg[2] += angle_step;
     rotation_changed = true;
     break;
   case GLFW_KEY_E:
-    yaw_pitch_roll[2] -= angle_step;
+    ypr_deg[2] -= angle_step;
     rotation_changed = true;
     break;
   default:
     break;
   };
 
-  if (rotation_changed)
-  {
-    const auto R = sara::rotation(yaw_pitch_roll[0], yaw_pitch_roll[1],
-                                      yaw_pitch_roll[2]) *
-                   P;
-    const auto t = Eigen::Vector3f(0, 0, 1.51);
-
-    auto& grid_renderer = MetricGridRenderer::instance();
-    auto& line_batches = grid_renderer._lines;
-    for (auto& lines: line_batches)
-    {
-      lines._extrinsics.topLeftCorner(3, 3) = R.transpose();
-      lines._extrinsics.block<3, 1>(0, 3) = -R.transpose() * t;
-    }
-    rotation_changed = false;
-  }
+  update_rotation();
 }
 
 void scroll_callback(GLFWwindow* /*window*/, double /*xoffset */,
@@ -143,7 +151,8 @@ void scroll_callback(GLFWwindow* /*window*/, double /*xoffset */,
   }
 }
 
-void override_callbacks() {
+void override_callbacks()
+{
   // Set the appropriate mouse and keyboard callbacks.
   glfwSetWindowSizeCallback(MyGLFW::window, window_size_callback);
   glfwSetKeyCallback(MyGLFW::window, key_callback);
@@ -153,22 +162,49 @@ void override_callbacks() {
 
 auto render_frame() -> void
 {
-  glViewport(0, 0, MyGLFW::width, MyGLFW::height);
+  glfwPollEvents();
 
+  // Start the Dear ImGui frame
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+  // Render your GUI
+  {
+    const auto ypr_old = ypr_deg;
+    ImGui::Begin("Camera Orientation");
+    ImGui::SliderFloat("Yaw", &ypr_deg[0], -180.f, 180.f);
+    ImGui::SliderFloat("Pitch", &ypr_deg[1], -90.f, 90.f);
+    ImGui::SliderFloat("Roll", &ypr_deg[2], -180.f, 180.f);
+    ImGui::End();
+
+    rotation_changed = !std::equal(ypr_old.begin(), ypr_old.end(),  //
+                                   ypr_deg.begin());
+    update_rotation();
+  }
+  ImGui::Render();
+
+
+  // Clear the screen.
+  glViewport(0, 0, MyGLFW::width, MyGLFW::height);
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  auto& image_plane_renderer = ImagePlaneRenderer::instance();
-  const auto& image_texture = image_plane_renderer._textures.front();
-  image_plane_renderer.render(image_texture);
+  // Render the scene.
+  {
+    auto& image_plane_renderer = ImagePlaneRenderer::instance();
+    const auto& image_texture = image_plane_renderer._textures.front();
+    image_plane_renderer.render(image_texture);
 
-  auto& grid_renderer = MetricGridRenderer::instance();
-  const auto& lines = grid_renderer._lines;
-  for (auto i = 0u; i < lines.size(); ++i)
-    grid_renderer.render(image_texture, lines[i]);
+    auto& grid_renderer = MetricGridRenderer::instance();
+    const auto& lines = grid_renderer._lines;
+    for (auto i = 0u; i < lines.size(); ++i)
+      grid_renderer.render(image_texture, lines[i]);
+  }
+
+  // Render ImGUI.
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   glfwSwapBuffers(MyGLFW::window);
-  glfwPollEvents();
 }
 
 
@@ -308,6 +344,17 @@ int main()
     if (!MyGLFW::initialize())
       return EXIT_FAILURE;
 
+#ifndef EMSCRIPTEN
+    glewInit();  // Otherwise shaders won't work and the program crashes.
+#endif
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    // ImGuiIO &io = ImGui::GetIO();
+    ImGui_ImplGlfw_InitForOpenGL(MyGLFW::window, true);
+    ImGui_ImplOpenGL3_Init(MyGLFW::glsl_version.c_str());
+    ImGui::StyleColorsDark();
+
     auto& image_plane_renderer = ImagePlaneRenderer::instance();
     image_plane_renderer.initialize();
     initialize_image_texture();
@@ -332,6 +379,10 @@ int main()
 #endif
 
     cleanup_gl_objects();
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
   }

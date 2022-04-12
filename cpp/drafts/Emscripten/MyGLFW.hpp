@@ -15,11 +15,16 @@
 
 #include <GLFW/glfw3.h>
 
+#include <string>
+
+
 struct MyGLFW
 {
   static GLFWwindow* window;
   static int width;
   static int height;
+  static int high_dpi_scale_factor;
+  static std::string glsl_version;
 
   static auto initialize(int width = 1024, int height = 1024) -> bool;
 

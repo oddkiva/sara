@@ -31,8 +31,6 @@
 
 namespace sara = DO::Sara;
 
-using namespace std;
-
 
 static auto camera_params = ImageDewarpRenderer::CameraParameters{};
 
@@ -124,8 +122,6 @@ auto key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
 void scroll_callback(GLFWwindow* /*window*/, double /*xoffset */,
                      double yoffset)
 {
-  auto& image = ImagePlaneRenderer::instance()._textures.front();
-
   if (yoffset > 0)
   {
     camera_params.K(0, 0) *= 1.05f;
@@ -235,6 +231,10 @@ int main()
   {
     if (!MyGLFW::initialize())
       return EXIT_FAILURE;
+
+#ifndef EMSCRIPTEN
+    glewInit();
+#endif
 
     auto& image_plane_renderer = ImagePlaneRenderer::instance();
     image_plane_renderer.initialize();
