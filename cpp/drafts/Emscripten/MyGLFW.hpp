@@ -26,7 +26,7 @@ struct MyGLFW
   static int high_dpi_scale_factor;
   static std::string glsl_version;
 
-  static auto initialize(int width = 1024, int height = 1024) -> bool;
+  static auto initialize(int width = 1200, int height = 540) -> bool;
 
   static void window_size_callback(GLFWwindow* /* window */, int width,
                                    int height);

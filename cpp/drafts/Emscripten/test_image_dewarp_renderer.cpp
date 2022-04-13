@@ -68,23 +68,24 @@ auto key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
   static auto rotation_changed = false;
 
   static constexpr auto angle_step = 0.5f * static_cast<float>(M_PI) / 180;
+  static constexpr auto delta = 10.f;
 
   switch (key)
   {
   case GLFW_KEY_LEFT:
-    camera_params.K(0, 2) += 5.f;
+    camera_params.K(0, 2) += delta;
     K_changed = true;
     break;
   case GLFW_KEY_RIGHT:
-    camera_params.K(0, 2) -= 5.f;
+    camera_params.K(0, 2) -= delta;
     K_changed = true;
     break;
   case GLFW_KEY_UP:
-    camera_params.K(1, 2) += 5.f;
+    camera_params.K(1, 2) += delta;
     K_changed = true;
     break;
   case GLFW_KEY_DOWN:
-    camera_params.K(1, 2) -= 5.f;
+    camera_params.K(1, 2) -= delta;
     K_changed = true;
     break;
   case GLFW_KEY_A:
@@ -197,7 +198,11 @@ auto initialize_image_textures()
 
   // Geometry
   image_texture._model_view.setIdentity();
-  image_texture._projection.setIdentity();
+  const auto aspect_ratio = static_cast<float>(MyGLFW::width) / MyGLFW::height;
+  image_texture._projection =
+      orthographic(-0.5f * aspect_ratio, 0.5f * aspect_ratio,  //
+                   -0.5f, 0.5f,                                //
+                   -0.5f, 0.5f);
 }
 
 auto initialize_camera_parameters() -> void

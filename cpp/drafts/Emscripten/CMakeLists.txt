@@ -112,3 +112,9 @@ sara_add_wasm_executable(test_image_dewarp_renderer.cpp)
 target_link_libraries(test_image_dewarp_renderer #
                       PRIVATE emscripten_gl_utilities)
 target_link_options(test_image_dewarp_renderer PRIVATE ${ALL_FLAGS})
+
+target_link_options(
+  test_metric_grid_renderer
+  PRIVATE
+  "$<$<PLATFORM_ID:Emscripten>:SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/http/index.html>"
+)

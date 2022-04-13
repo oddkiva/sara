@@ -72,6 +72,19 @@ auto update_rotation()
     lines._extrinsics.block<3, 1>(0, 3) = -R.transpose() * t;
   }
 
+#ifdef EMSCRIPTEN
+  // clang-format off
+  EM_ASM({
+    var angles = document.getElementById('angles');
+    angles.innerHTML = "<ul>";
+    angles.innerHTML += "<li>YAW = " + $0 + "</li>";
+    angles.innerHTML += "<li>PITCH = " + $1 + "</li>";
+    angles.innerHTML += "<li>ROLL = " + $2 + "</li>";
+    angles.innerHTML += "</ul>";
+  }, ypr_deg[0], ypr_deg[1], ypr_deg[2]);
+  // clang-format on
+#endif
+
   rotation_changed = false;
 }
 
@@ -238,8 +251,10 @@ auto initialize_image_texture()
   image_texture.set_texture(image, texture_unit);
 
   // Geometry
+  const auto aspect_ratio = static_cast<float>(MyGLFW::width) / MyGLFW::height;
   image_texture._model_view.setIdentity();
-  image_texture._projection.setIdentity();
+  image_texture._projection = orthographic(
+      -0.5f * aspect_ratio, 0.5f * aspect_ratio, -0.5f, 0.5f, -0.5f, 0.5f);
 }
 
 auto initialize_camera_parameters(MetricGridRenderer::LineShaderData& lines)
