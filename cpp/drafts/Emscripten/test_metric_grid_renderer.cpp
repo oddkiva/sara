@@ -27,12 +27,19 @@
 #  define GLFW_INCLUDE_ES3
 #endif
 
+#include <filesystem>
+
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
 
+namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 
+
+#ifndef EMSCRIPTEN
+static auto program_dir_path = fs::path{};
+#endif
 
 // Extrinsic camera parameter state.
 static auto ypr_deg = std::array<float, 3>{0, 0, 0};
@@ -50,10 +57,11 @@ auto update_rotation()
      0, -1, 0  // Camera Y = Negative Automotive Z
   ).finished();
   // clang-format on
-  const auto R = sara::rotation(ypr_deg[0] * static_cast<float>(M_PI) / 180.f,
-                                ypr_deg[1] * static_cast<float>(M_PI) / 180.f,
-                                ypr_deg[2] * static_cast<float>(M_PI) / 180.f) *
-                 P;
+  const Eigen::Matrix3f R =
+      sara::rotation(ypr_deg[0] * static_cast<float>(M_PI) / 180.f,
+                     ypr_deg[1] * static_cast<float>(M_PI) / 180.f,
+                     ypr_deg[2] * static_cast<float>(M_PI) / 180.f) *
+      P;
   const auto t = Eigen::Vector3f(0, 0, 1.51);
 
   auto& grid_renderer = MetricGridRenderer::instance();
@@ -84,6 +92,9 @@ auto key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
 {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
     glfwSetWindowShouldClose(MyGLFW::window, 1);
+
+  if (action == GLFW_RELEASE)
+    return;
 
   auto& image = ImagePlaneRenderer::instance()._textures.front();
 
@@ -210,20 +221,25 @@ auto render_frame() -> void
 
 auto initialize_image_texture()
 {
+#ifdef EMSCRIPTEN
   const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
+#else
+  const auto image = sara::imread<sara::Rgb8>(
+      (program_dir_path / "assets/image-omni.png").string());
+#endif
 
   auto& image_plane_renderer = ImagePlaneRenderer::instance();
   auto& image_textures = image_plane_renderer._textures;
-
   image_textures.resize(1);
 
   // Transfer the CPU image data to the GPU texture.
   static constexpr auto texture_unit = 0;
-  image_textures[0].set_texture(image, texture_unit);
+  auto& image_texture = image_plane_renderer._textures.front();
+  image_texture.set_texture(image, texture_unit);
 
   // Geometry
-  image_textures[0]._model_view.setIdentity();
-  image_textures[0]._projection.setIdentity();
+  image_texture._model_view.setIdentity();
+  image_texture._projection.setIdentity();
 }
 
 auto initialize_camera_parameters(MetricGridRenderer::LineShaderData& lines)
@@ -337,10 +353,14 @@ auto cleanup_gl_objects() -> void
 }
 
 
-int main()
+int main(int, [[maybe_unused]] char** argv)
 {
   try
   {
+#ifndef EMSCRIPTEN
+    program_dir_path = fs::path{argv[0]}.parent_path();
+#endif
+
     if (!MyGLFW::initialize())
       return EXIT_FAILURE;
 

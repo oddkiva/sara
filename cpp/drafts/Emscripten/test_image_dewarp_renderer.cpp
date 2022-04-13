@@ -22,6 +22,8 @@
 #  define GLFW_INCLUDE_ES3
 #endif
 
+#include <filesystem>
+
 #include "MyGLFW.hpp"
 
 #include "Geometry.hpp"
@@ -29,9 +31,14 @@
 #include "ImagePlaneRenderer.hpp"
 
 
+namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 
 
+#ifndef EMSCRIPTEN
+static auto program_dir_path = fs::path{};
+#endif
+static auto dewarp_mode = 0;
 static auto camera_params = ImageDewarpRenderer::CameraParameters{};
 
 
@@ -52,6 +59,9 @@ auto key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
 {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
     glfwSetWindowShouldClose(MyGLFW::window, 1);
+
+  if (action == GLFW_RELEASE)
+    return;
 
   static auto yaw_pitch_roll = std::array<float, 3>{0, 0, 0};
   static auto K_changed = false;
@@ -101,6 +111,9 @@ auto key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
     yaw_pitch_roll[1] -= angle_step;
     rotation_changed = true;
     break;
+  case GLFW_KEY_SPACE:
+    dewarp_mode = (dewarp_mode + 1) % 2;
+    break;
   default:
     break;
   };
@@ -113,8 +126,8 @@ auto key_callback(GLFWwindow* /* window */, int key, int /* scancode */,
 
   if (rotation_changed)
   {
-    camera_params.R = sara::rotation(yaw_pitch_roll[0], yaw_pitch_roll[1],
-                                  yaw_pitch_roll[2]);
+    camera_params.R =
+        sara::rotation(yaw_pitch_roll[0], yaw_pitch_roll[1], yaw_pitch_roll[2]);
     rotation_changed = false;
   }
 }
@@ -158,7 +171,7 @@ auto render_frame() -> void
   const auto& image_texture = image_plane_renderer._textures.front();
 
   auto& image_dewarp_renderer = ImageDewarpRenderer::instance();
-  image_dewarp_renderer.render(image_texture, camera_params);
+  image_dewarp_renderer.render(image_texture, camera_params, dewarp_mode);
 
   glfwSwapBuffers(MyGLFW::window);
   glfwPollEvents();
@@ -166,7 +179,12 @@ auto render_frame() -> void
 
 auto initialize_image_textures()
 {
+#ifdef EMSCRIPTEN
   const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
+#else
+  const auto image = sara::imread<sara::Rgb8>(
+      (program_dir_path / "assets/image-omni.png").string());
+#endif
 
   auto& image_plane_renderer = ImagePlaneRenderer::instance();
   auto& image_textures = image_plane_renderer._textures;
@@ -205,7 +223,6 @@ auto initialize_camera_parameters() -> void
   camera_params.R.setIdentity();
   camera_params.K = K;
   camera_params.K_inverse = K.inverse();
-
 }
 
 
@@ -225,10 +242,14 @@ auto cleanup_gl_objects() -> void
   image_dewarp_renderer.destroy_gl_objects();
 }
 
-int main()
+int main(int, [[maybe_unused]] char** argv)
 {
   try
   {
+#ifndef EMSCRIPTEN
+    program_dir_path = fs::path{argv[0]}.parent_path();
+#endif
+
     if (!MyGLFW::initialize())
       return EXIT_FAILURE;
 

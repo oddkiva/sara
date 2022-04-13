@@ -104,7 +104,14 @@ elseif (NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     find_package(Qt${QT_VERSION} COMPONENTS Core Widgets OpenGL OpenGLExtensions REQUIRED)
   endif ()
 
+  # OpenGL/GLFW/ImGui
   find_package(OpenGL REQUIRED)
+  if (NOT APPLE)
+    find_package(GLEW REQUIRED)
+  endif ()
+  find_package(glfw3 REQUIRED)
+  find_package(Freetype)
+
   find_package(OpenCL)
 
   find_package(Ceres REQUIRED)

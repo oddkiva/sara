@@ -53,6 +53,6 @@ struct ImageDewarpRenderer
 
   auto destroy_gl_objects() -> void;
 
-  auto render(const ImagePlaneRenderer::ImageTexture&, const CameraParameters&)
-      -> void;
+  auto render(const ImagePlaneRenderer::ImageTexture&, const CameraParameters&,
+              int dewarp_mode) -> void;
 };

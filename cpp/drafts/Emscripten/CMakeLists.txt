@@ -1,10 +1,21 @@
-if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-  find_package(glew REQUIRED)
-  find_package(glfw3 REQUIRED)
+if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten AND NOT GLEW_FOUND)
+  return()
 endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  add_custom_target(emscripten_copy_assets)
+  add_custom_command(
+    TARGET emscripten_copy_assets
+    COMMAND
+      ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets
+      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets)
+else()
+  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
+       DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 
 list(
   APPEND
@@ -36,7 +47,7 @@ target_link_libraries(
   INTERFACE $<$<NOT:$<PLATFORM_ID:Emscripten>>:glfw>)
 
 if(MSVC)
-  target_link_libraries(emscripten_gl_utilities INTERFACE GLEW::glew_s)
+  target_link_libraries(emscripten_gl_utilities INTERFACE GLEW::GLEW)
 endif()
 target_link_options(
   emscripten_gl_utilities #
@@ -49,7 +60,9 @@ macro(sara_add_wasm_executable file)
   get_filename_component(filename "${file}" NAME_WE)
 
   add_executable(${filename} ${file})
-  set_target_properties(${filename} PROPERTIES SUFFIX ".html")
+  if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+    set_target_properties(${filename} PROPERTIES SUFFIX ".html")
+  endif()
 
   target_include_directories(${filename} PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
   target_link_libraries(
@@ -59,17 +72,23 @@ macro(sara_add_wasm_executable file)
             DO::Sara::ImageIO #
             $<$<NOT:$<PLATFORM_ID:Emscripten>>:glfw>)
   if(MSVC)
-    target_link_libraries(${filename} PRIVATE GLEW::glew_s)
+    target_link_libraries(${filename} PRIVATE GLEW::GLEW)
+  endif()
+
+  if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+    add_dependencies(emscripten_copy_assets ${filename})
   endif()
 endmacro()
 
-set(ALL_FLAGS "SHELL:-s ALLOW_MEMORY_GROWTH=1")
+set(ALL_FLAGS "$<$<PLATFORM_ID:Emscripten>:SHELL:-s ALLOW_MEMORY_GROWTH=1>")
 set(ALL_FLAGS
     ${ALL_FLAGS}
-    "SHELL:--preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image-pinhole.png")
+    "$<$<PLATFORM_ID:Emscripten>:SHELL:--preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image-pinhole.png>"
+)
 set(ALL_FLAGS
     ${ALL_FLAGS}
-    "SHELL:--preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image-omni.png")
+    "$<$<PLATFORM_ID:Emscripten>:SHELL:--preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image-omni.png>"
+)
 
 # -----------------------------------------------------------------------------
 # TESTS

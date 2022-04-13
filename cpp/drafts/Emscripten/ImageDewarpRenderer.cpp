@@ -65,6 +65,8 @@ auto ImageDewarpRenderer::initialize() -> void
     in vec2 out_tex_coords;
     out vec4 frag_color;
 
+    uniform int dewarp_mode;
+
     // Relative rotation of the destination stereographic camera.
     uniform mat3 R;
     // Intrinsic parameters of the destination stereographic camera.
@@ -118,6 +120,9 @@ auto ImageDewarpRenderer::initialize() -> void
       // Backproject the pixel from the destination camera plane.
       // const Eigen::Vector2f xy_dst = camera_dst.backproject(uv).head(2);
       vec3 p3 = K_inverse * vec3(pix_dst, 1.);
+
+      if (dewarp_mode == 0)
+        return p3;
 
       vec2 xy_dst = (p3 / p3.z).xy;
 
@@ -264,7 +269,8 @@ auto ImageDewarpRenderer::destroy_gl_objects() -> void
 }
 
 auto ImageDewarpRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
-                                 const CameraParameters& camera) -> void
+                                 const CameraParameters& camera,
+                                 int dewarp_mode) -> void
 {
   _shader_program.use(true);
 
@@ -272,12 +278,16 @@ auto ImageDewarpRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   _shader_program.set_uniform_texture("image", image._texture_unit);
   _shader_program.set_uniform_vector2f("image_sizes",
                                        image._image_sizes.data());
-  _shader_program.set_uniform_matrix4f("model_view", image._model_view.data());
+  static const Eigen::Matrix4f identity = Eigen::Matrix4f::Identity();
+  _shader_program.set_uniform_matrix4f("model_view", identity.data());
   _shader_program.set_uniform_matrix4f("projection", image._projection.data());
 
   // Destination stereographic camera.
   _shader_program.set_uniform_matrix3f("R", camera.R.data());
   _shader_program.set_uniform_matrix3f("K_inverse", camera.K_inverse.data());
+
+  // Dewarp mode.
+  _shader_program.set_uniform_param("dewarp_mode", dewarp_mode);
 
   // Source omnidirectional camera parameters.
   _shader_program.set_uniform_matrix3f(  //

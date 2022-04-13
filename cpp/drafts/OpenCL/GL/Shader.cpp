@@ -154,9 +154,7 @@ namespace DO::Sara { namespace GL {
     if (!program_object)
       return;
 
-    std::cout << "Detaching vertex shader" << std::endl;
     glDetachShader(program_object, vertex_shader);
-    std::cout << "Detaching fragment shader" << std::endl;
     glDetachShader(program_object, fragment_shader);
   }
 
