@@ -180,6 +180,12 @@ auto LineRenderer::initialize() -> void
   _shader_program.attach(_vertex_shader, _fragment_shader);
   _shader_program.validate();
 
+  // Locate the uniform variables in the compiled shader.
+  _image_sizes_loc = _shader_program.get_uniform_location("image_sizes");
+  _color_loc = _shader_program.get_uniform_location("color");
+  _view_loc = _shader_program.get_uniform_location("view");
+  _projection_loc = _shader_program.get_uniform_location("projection");
+
 #ifndef EMSCRIPTEN
   // Clearing the shaders after attaching them to the shader program does not
   // work on WebGL 2.0/OpenGL ES 3.0... I don't know why.
@@ -205,12 +211,12 @@ auto LineRenderer::render(const ImagePlaneRenderer::ImageTexture& image_plane,
   // Select the shader program.
   _shader_program.use(true);
   // Set the projection-model-view matrix uniforms.
-  _shader_program.set_uniform_vector2f("image_sizes",
+  _shader_program.set_uniform_vector2f(_image_sizes_loc,
                                        image_plane._image_sizes.data());
-  _shader_program.set_uniform_vector4f("color",
-                                       lines._color.data());
-  _shader_program.set_uniform_matrix4f("view", image_plane._model_view.data());
-  _shader_program.set_uniform_matrix4f("projection",
+  _shader_program.set_uniform_vector4f(_color_loc, lines._color.data());
+  _shader_program.set_uniform_matrix4f(_view_loc,
+                                       image_plane._model_view.data());
+  _shader_program.set_uniform_matrix4f(_projection_loc,
                                        image_plane._projection.data());
 
   // Select the vertex array descriptor.

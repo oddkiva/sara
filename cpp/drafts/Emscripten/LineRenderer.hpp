@@ -67,6 +67,11 @@ struct LineRenderer
   DO::Sara::GL::Shader _vertex_shader;
   DO::Sara::GL::Shader _fragment_shader;
   DO::Sara::GL::ShaderProgram _shader_program;
+  // Uniform variables.
+  GLint _image_sizes_loc;
+  GLint _color_loc;
+  GLint _view_loc;
+  GLint _projection_loc;
 
   // Line data.
   std::vector<LineShaderData> _lines;

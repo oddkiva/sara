@@ -49,6 +49,11 @@ struct ImagePlaneRenderer
   DO::Sara::GL::Shader _vertex_shader;
   DO::Sara::GL::Shader _fragment_shader;
   DO::Sara::GL::ShaderProgram _shader_program;
+  // Uniform locations.
+  GLint _model_view_loc;
+  GLint _projection_loc;
+  GLint _image_sizes_loc;
+  GLint _image_loc;
 
 
   // The singleton.

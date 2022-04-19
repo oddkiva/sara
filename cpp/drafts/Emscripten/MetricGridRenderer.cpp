@@ -203,6 +203,20 @@ auto MetricGridRenderer::initialize() -> void
 
   _shader_program.create();
   _shader_program.attach(_vertex_shader, _fragment_shader);
+
+  // Locate the uniform variables in the compiled shader.
+  _image_sizes_loc = _shader_program.get_uniform_location("image_sizes");
+  _color_loc = _shader_program.get_uniform_location("color");
+  _view_loc = _shader_program.get_uniform_location("view");
+  _projection_loc = _shader_program.get_uniform_location("projection");
+  // Line color
+  _color_loc = _shader_program.get_uniform_location("color");
+  // Source omnidirectional camera parameters.
+  _C_loc = _shader_program.get_uniform_location("C");
+  _K_loc = _shader_program.get_uniform_location("K");
+  _k_loc = _shader_program.get_uniform_location("k");
+  _p_loc = _shader_program.get_uniform_location("p");
+  _xi_loc = _shader_program.get_uniform_location("xi");
 }
 
 auto MetricGridRenderer::destroy_gl_objects() -> void
@@ -218,20 +232,30 @@ auto MetricGridRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   _shader_program.use(true);
 
   // Set the projection-model-view matrix uniforms.
-  _shader_program.set_uniform_texture("image", image._texture_unit);
-  _shader_program.set_uniform_vector2f("image_sizes",
+  _shader_program.set_uniform_vector2f(_image_sizes_loc,
                                        image._image_sizes.data());
-  _shader_program.set_uniform_matrix4f("view", image._model_view.data());
-  _shader_program.set_uniform_matrix4f("projection", image._projection.data());
+  _shader_program.set_uniform_matrix4f(_view_loc,
+                                       image._model_view.data());
+  _shader_program.set_uniform_matrix4f(_projection_loc,
+                                       image._projection.data());
+
+  // Texture uniform.
+  _shader_program.set_uniform_texture(_image_loc,
+                                       image._texture_unit);
+
+  // Line color.
+  _shader_program.set_uniform_vector4f(_color_loc, lines._color.data());
 
   // Camera parameters.
-  _shader_program.set_uniform_matrix4f("C", lines._extrinsics.data());
-  _shader_program.set_uniform_matrix3f("K", lines._intrinsics.K.data());
-  _shader_program.set_uniform_vector2f(
-      "k", lines._intrinsics.radial_distortion_coefficients.data());
-  _shader_program.set_uniform_vector2f(
-      "p", lines._intrinsics.tangential_distortion_coefficients.data());
-  _shader_program.set_uniform_param("xi", lines._intrinsics.xi);
+  _shader_program.set_uniform_matrix4f(  //
+      _C_loc, lines._extrinsics.data());
+  _shader_program.set_uniform_matrix3f(  //
+      _K_loc, lines._intrinsics.K.data());
+  _shader_program.set_uniform_vector2f(  //
+      _k_loc, lines._intrinsics.radial_distortion_coefficients.data());
+  _shader_program.set_uniform_vector2f(  //
+      _p_loc, lines._intrinsics.tangential_distortion_coefficients.data());
+  _shader_program.set_uniform_param(_xi_loc, lines._intrinsics.xi);
 
   // Color.
   _shader_program.set_uniform_vector4f("color", lines._color.data());

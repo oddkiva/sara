@@ -61,14 +61,20 @@ namespace DO::Sara { namespace GL {
 
     void clear();
 
-    template <typename T>
-    void set_uniform_param(const char* param_name, const T& param_value)
+    inline auto get_uniform_location(const char* param_name) const -> GLint
     {
-      auto param_location = glGetUniformLocation(program_object, param_name);
+      const auto param_location =
+          glGetUniformLocation(program_object, param_name);
       if (GL_INVALID_VALUE == param_location ||
           GL_INVALID_OPERATION == param_location)
         throw std::runtime_error{"Invalid uniform parameter"};
+      return param_location;
+    }
 
+    template <typename T>
+    inline auto set_uniform_param(GLint param_location,
+                                  const T& param_value) const -> void
+    {
       if constexpr (std::is_same_v<T, int>)
         glUniform1i(param_location, param_value);
       else if constexpr (std::is_same_v<T, float>)
@@ -77,15 +83,59 @@ namespace DO::Sara { namespace GL {
         throw std::runtime_error{"Error: not implemented!"};
     }
 
-    void set_uniform_vector2f(const char* mat_name, const float* mat_coeffs);
 
-    void set_uniform_vector4f(const char* mat_name, const float* mat_coeffs);
+    template <typename T>
+    inline auto set_uniform_param(const char* param_name,
+                                  const T& param_value) const -> void
+    {
+      const auto param_location = get_uniform_location(param_name);
+      set_uniform_param(param_location, param_value);
+    }
 
-    void set_uniform_matrix3f(const char* mat_name, const float* mat_coeffs);
+    inline auto set_uniform_vector2f(GLint mat_location,
+                                     const float* mat_coeffs) const -> void
+    {
+      glUniform2fv(mat_location, 1, mat_coeffs);
+    }
 
-    void set_uniform_matrix4f(const char* mat_name, const float* mat_coeffs);
+    inline auto set_uniform_vector4f(GLint mat_location,
+                                     const float* mat_coeffs) const -> void
+    {
+      glUniform4fv(mat_location, 1, mat_coeffs);
+    }
 
-    void set_uniform_texture(const char* texture_name, GLuint texture_unit);
+    inline auto set_uniform_matrix3f(GLint mat_location,
+                                     const float* mat_coeffs) const -> void
+    {
+      glUniformMatrix3fv(mat_location, 1, GL_FALSE, mat_coeffs);
+    }
+
+    inline auto set_uniform_matrix4f(GLint mat_location,
+                                     const float* mat_coeffs) const -> void
+    {
+      glUniformMatrix4fv(mat_location, 1, GL_FALSE, mat_coeffs);
+    }
+
+    inline auto set_uniform_texture(GLint tex_location,
+                                    GLuint texture_unit) const -> void
+    {
+      glUniform1i(tex_location, texture_unit);
+    }
+
+    auto set_uniform_vector2f(const char* mat_name,
+                              const float* mat_coeffs) const -> void;
+
+    auto set_uniform_vector4f(const char* mat_name,
+                              const float* mat_coeffs) const -> void;
+
+    auto set_uniform_matrix3f(const char* mat_name,
+                              const float* mat_coeffs) const -> void;
+
+    auto set_uniform_matrix4f(const char* mat_name,
+                              const float* mat_coeffs) const -> void;
+
+    auto set_uniform_texture(const char* texture_name,
+                             GLuint texture_unit) const -> void;
 
     GLuint program_object{0};
     GLuint vertex_shader{0};

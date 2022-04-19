@@ -26,12 +26,20 @@
 #  define GLFW_INCLUDE_ES3
 #endif
 
+#include <filesystem>
+
 #include "MyGLFW.hpp"
 
 #include "ImagePlaneRenderer.hpp"
 
 
+namespace fs = std::filesystem;
 namespace sara = DO::Sara;
+
+
+#ifndef EMSCRIPTEN
+static auto program_dir_path = fs::path{};
+#endif
 
 
 auto render_frame() -> void
@@ -52,10 +60,18 @@ auto render_frame() -> void
 
 auto initialize_image_textures()
 {
+#ifdef EMSCRIPTEN
   const auto images = std::array<sara::Image<sara::Rgb8>, 2>{
       sara::imread<sara::Rgb8>("assets/image-omni.png"),
       sara::imread<sara::Rgb8>("assets/image-pinhole.png"),
   };
+#else
+  const auto images = std::array<sara::Image<sara::Rgb8>, 2>{
+      sara::imread<sara::Rgb8>(
+          (program_dir_path / "assets/image-omni.png").string()),
+      sara::imread<sara::Rgb8>(
+          (program_dir_path / "assets/image-pinhole.png").string())};
+#endif
 
   auto& image_plane_renderer = ImagePlaneRenderer::instance();
   auto& image_textures = image_plane_renderer._textures;
@@ -90,12 +106,17 @@ auto cleanup_gl_objects() -> void
   image_textures.clear();
 }
 
-int main()
+int main(int, char** argv)
 {
   try
   {
     if (!MyGLFW::initialize())
       return EXIT_FAILURE;
+
+#ifndef EMSCRIPTEN
+    program_dir_path = fs::path{argv[0]}.parent_path();
+#endif
+
 
 #ifndef EMSCRIPTEN
     glewInit();
