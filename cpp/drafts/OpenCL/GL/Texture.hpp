@@ -91,6 +91,15 @@ namespace DO::Sara { namespace GL {
     }
 
     template <typename T>
+    inline auto initialize_data(const Eigen::Vector2i& sizes, int mipmap_level = 0) -> void
+    {
+      glTexImage2D(GL_TEXTURE_2D, mipmap_level, GL::PixelTraits<T>::PixelFormat,
+                   sizes.x(), sizes.y(),
+                   /* border */ 0, GL::PixelTraits<T>::PixelFormat,
+                   GL::PixelTraits<T>::ChannelType, nullptr);
+    }
+
+    template <typename T>
     inline void initialize_data(const ImageView<T>& image, int mipmap_level = 0)
     {
       glTexImage2D(GL_TEXTURE_2D, mipmap_level, GL::PixelTraits<T>::PixelFormat,
