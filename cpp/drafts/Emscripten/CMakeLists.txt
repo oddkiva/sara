@@ -2,6 +2,8 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten AND NOT GLEW_FOUND)
   return()
 endif()
 
+set(SARA_EMSCRIPTEN_BUILD_HTML NO)
+
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -54,13 +56,23 @@ target_link_options(
   INTERFACE
   "$<$<PLATFORM_ID:Emscripten>:SHELL:-s USE_GLFW=3>" #
   "$<$<PLATFORM_ID:Emscripten>:SHELL:-s USE_WEBGL2=1>" #
-  "$<$<PLATFORM_ID:Emscripten>:SHELL:-s FULL_ES3=1>")
+  "$<$<PLATFORM_ID:Emscripten>:SHELL:-s FULL_ES3=1>"
+)
+
+if (NOT SARA_EMSCRIPTEN_BUILD_HTML)
+  target_link_options(emscripten_gl_utilities
+    INTERFACE
+    "$<$<PLATFORM_ID:Emscripten>:SHELL:-s MODULARIZE=1>"
+    "$<$<PLATFORM_ID:Emscripten>:SHELL:-s ENVIRONMENT='web'>"
+    "$<$<PLATFORM_ID:Emscripten>:SHELL:-s EXPORTED_RUNTIME_METHODS=\"['specialHTMLTargets', 'JSEvents', 'GL', 'callMain', 'abort']\">"
+  )
+endif ()
 
 macro(sara_add_wasm_executable file)
   get_filename_component(filename "${file}" NAME_WE)
 
   add_executable(${filename} ${file})
-  if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  if(CMAKE_SYSTEM_NAME STREQUAL Emscripten AND SARA_EMSCRIPTEN_BUILD_HTML)
     set_target_properties(${filename} PROPERTIES SUFFIX ".html")
   endif()
 

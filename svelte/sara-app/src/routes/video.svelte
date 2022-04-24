@@ -1,11 +1,11 @@
 <script>
 	import { onMount } from 'svelte';
 	import { setupVideo, gltest } from '../components/utilities.js';
+	import Emscripten from '../components/emscripten.svelte';
 
 	let files;
 	let videoUrl;
 	let renderVideo = false;
-	let copyVideo = false;
 
 	$: if (files) {
 		const URL = window.URL || window.webkitURL;
@@ -26,17 +26,10 @@
 
 <div class="py-4 w-full text-center">
 	<input class="btn btn-blue" accept="video/*" bind:files type="file" />
-	<!--
-	{#if renderVideo}
-		<video class="p-8" controls autoplay>
-			<track kind="caption" />
-			<source src={videoUrl} type="video/mp4" />
-		</video>
-	{/if}
-  -->
-
 	<canvas class="p-8 items-center" hidden id="gl-canvas" width="640" height="480" display="none" />
 </div>
+
+<Emscripten />
 
 <style>
 	.btn {
