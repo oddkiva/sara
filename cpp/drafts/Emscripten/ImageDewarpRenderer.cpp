@@ -190,6 +190,26 @@ auto ImageDewarpRenderer::initialize() -> void
   _shader_program.create();
   _shader_program.attach(_vertex_shader, _fragment_shader);
 
+  // Get the projection-model-view matrix uniforms.
+  _image_loc = _shader_program.get_uniform_location("image");
+  _image_sizes_loc = _shader_program.get_uniform_location("image_sizes");
+  _model_view_loc = _shader_program.get_uniform_location("model_view");
+  _projection_loc = _shader_program.get_uniform_location("projection");
+
+  // Destination stereographic camera.
+  _R_loc = _shader_program.get_uniform_location("R");
+  _K_inverse_loc = _shader_program.get_uniform_location("K_inverse");
+
+  // Dewarp mode.
+  _dewarp_mode_loc = _shader_program.get_uniform_location("dewarp_mode");
+
+  // Source omnidirectional camera parameters.
+  _K_loc = _shader_program.get_uniform_location("K");
+  _k_loc = _shader_program.get_uniform_location("k");
+  _p_loc = _shader_program.get_uniform_location("p");
+  _xi_loc = _shader_program.get_uniform_location("xi");
+
+
 #ifndef EMSCRIPTEN
   // Clearing the shaders after attaching them to the shader program does not
   // work on WebGL 2.0/OpenGL ES 3.0... I don't know why.
@@ -275,29 +295,30 @@ auto ImageDewarpRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   _shader_program.use(true);
 
   // Set the projection-model-view matrix uniforms.
-  _shader_program.set_uniform_texture("image", image._texture_unit);
-  _shader_program.set_uniform_vector2f("image_sizes",
+  _shader_program.set_uniform_texture(_image_loc, image._texture_unit);
+  _shader_program.set_uniform_vector2f(_image_sizes_loc,
                                        image._image_sizes.data());
   static const Eigen::Matrix4f identity = Eigen::Matrix4f::Identity();
-  _shader_program.set_uniform_matrix4f("model_view", identity.data());
-  _shader_program.set_uniform_matrix4f("projection", image._projection.data());
+  _shader_program.set_uniform_matrix4f(_model_view_loc, identity.data());
+  _shader_program.set_uniform_matrix4f(_projection_loc,
+                                       image._projection.data());
 
   // Destination stereographic camera.
-  _shader_program.set_uniform_matrix3f("R", camera.R.data());
-  _shader_program.set_uniform_matrix3f("K_inverse", camera.K_inverse.data());
+  _shader_program.set_uniform_matrix3f(_R_loc, camera.R.data());
+  _shader_program.set_uniform_matrix3f(_K_inverse_loc, camera.K_inverse.data());
 
   // Dewarp mode.
-  _shader_program.set_uniform_param("dewarp_mode", dewarp_mode);
+  _shader_program.set_uniform_param(_dewarp_mode_loc, dewarp_mode);
 
   // Source omnidirectional camera parameters.
   _shader_program.set_uniform_matrix3f(  //
-      "K", camera._intrinsics.K.data());
+      _K_loc, camera._intrinsics.K.data());
   _shader_program.set_uniform_vector2f(
-      "k", camera._intrinsics.radial_distortion_coefficients.data());
+      _k_loc, camera._intrinsics.radial_distortion_coefficients.data());
   _shader_program.set_uniform_vector2f(
-      "p", camera._intrinsics.tangential_distortion_coefficients.data());
+      _p_loc, camera._intrinsics.tangential_distortion_coefficients.data());
   _shader_program.set_uniform_param(  //
-      "xi", camera._intrinsics.xi);
+      _xi_loc, camera._intrinsics.xi);
 
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

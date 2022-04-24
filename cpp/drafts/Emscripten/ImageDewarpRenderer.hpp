@@ -39,6 +39,20 @@ struct ImageDewarpRenderer
   DO::Sara::GL::Shader _vertex_shader;
   DO::Sara::GL::Shader _fragment_shader;
   DO::Sara::GL::ShaderProgram _shader_program;
+  // MVP uniform locations.
+  GLint _image_loc;
+  GLint _image_sizes_loc;
+  GLint _model_view_loc;
+  GLint _projection_loc;
+  // Destination camera params locations.
+  GLint _R_loc;
+  GLint _K_inverse_loc;
+  GLint _dewarp_mode_loc;
+  // Source camera params locations.
+  GLint _K_loc;
+  GLint _k_loc;
+  GLint _p_loc;
+  GLint _xi_loc;
 
   // OpenGL geometry data.
   DO::Sara::GL::VertexArray _vao;

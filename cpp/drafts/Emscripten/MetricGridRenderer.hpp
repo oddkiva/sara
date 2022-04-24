@@ -64,6 +64,19 @@ struct MetricGridRenderer
   DO::Sara::GL::Shader _vertex_shader;
   DO::Sara::GL::Shader _fragment_shader;
   DO::Sara::GL::ShaderProgram _shader_program;
+  // Uniform locations.
+  GLint _image_loc;
+  GLint _image_sizes_loc;
+  GLint _view_loc;
+  GLint _projection_loc;
+  // Source camera params locations.
+  GLint _C_loc;
+  GLint _K_loc;
+  GLint _k_loc;
+  GLint _p_loc;
+  GLint _xi_loc;
+  // Line color.
+  GLint _color_loc;
 
   std::vector<LineShaderData> _lines;
 

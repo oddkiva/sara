@@ -116,6 +116,11 @@ auto ImagePlaneRenderer::initialize() -> void
   _shader_program.create();
   _shader_program.attach(_vertex_shader, _fragment_shader);
 
+  _model_view_loc = _shader_program.get_uniform_location("model_view");
+  _projection_loc = _shader_program.get_uniform_location("projection");
+  _image_sizes_loc = _shader_program.get_uniform_location("image_sizes");
+  _image_loc = _shader_program.get_uniform_location("image");
+
 #ifndef EMSCRIPTEN
   // Clearing the shaders after attaching them to the shader program does not
   // work on WebGL 2.0/OpenGL ES 3.0... I don't know why.
@@ -203,12 +208,14 @@ auto ImagePlaneRenderer::render(const ImagePlaneRenderer::ImageTexture& image)
   // Set the uniforms.
   //
   // Projection-Model-View matrices.
-  _shader_program.set_uniform_matrix4f("model_view", image._model_view.data());
-  _shader_program.set_uniform_matrix4f("projection", image._projection.data());
+  _shader_program.set_uniform_matrix4f(_model_view_loc,
+                                       image._model_view.data());
+  _shader_program.set_uniform_matrix4f(_projection_loc,
+                                       image._projection.data());
   // Image ratio.
-  _shader_program.set_uniform_vector2f("image_sizes",
+  _shader_program.set_uniform_vector2f(_image_sizes_loc,
                                        image._image_sizes.data());
-  _shader_program.set_uniform_texture("image", image._texture_unit);
+  _shader_program.set_uniform_texture(_image_loc, image._texture_unit);
 
   glBindVertexArray(_vao);
 

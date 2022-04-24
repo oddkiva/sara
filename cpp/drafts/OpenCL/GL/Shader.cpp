@@ -17,7 +17,7 @@
 #include <iostream>
 
 
-namespace DO::Sara { namespace GL {
+namespace DO::Sara::GL {
 
   void Shader::create_from_source(GLenum shader_type_,
                                   const std::string& source)
@@ -206,60 +206,43 @@ namespace DO::Sara { namespace GL {
                          success, log.data())};
   }
 
-  void ShaderProgram::set_uniform_vector2f(const char* mat_name,
-                                           const float* mat_coeffs)
+  auto ShaderProgram::set_uniform_vector2f(const char* mat_name,
+                                           const float* mat_coeffs) const
+      -> void
   {
-    auto mat_location = glGetUniformLocation(program_object, mat_name);
-    if (GL_INVALID_VALUE == mat_location ||
-        GL_INVALID_OPERATION == mat_location)
-      throw std::runtime_error{"Invalid uniform parameter"};
-
-    glUniform2fv(mat_location, 1, mat_coeffs);
+    const auto mat_location = get_uniform_location(mat_name);
+    set_uniform_vector2f(mat_location, mat_coeffs);
   }
 
-  void ShaderProgram::set_uniform_vector4f(const char* mat_name,
-                                           const float* mat_coeffs)
+  auto ShaderProgram::set_uniform_vector4f(const char* mat_name,
+                                           const float* mat_coeffs) const
+      -> void
   {
-    auto mat_location = glGetUniformLocation(program_object, mat_name);
-    if (GL_INVALID_VALUE == mat_location ||
-        GL_INVALID_OPERATION == mat_location)
-      throw std::runtime_error{"Invalid uniform parameter"};
-
-    glUniform4fv(mat_location, 1, mat_coeffs);
+    const auto mat_location = get_uniform_location(mat_name);
+    set_uniform_vector4f(mat_location, mat_coeffs);
   }
 
-  void ShaderProgram::set_uniform_matrix3f(const char* mat_name,
-                                           const float* mat_coeffs)
+  auto ShaderProgram::set_uniform_matrix3f(const char* mat_name,
+                                           const float* mat_coeffs) const
+      -> void
   {
-    auto mat_location = glGetUniformLocation(program_object, mat_name);
-    if (GL_INVALID_VALUE == mat_location ||
-        GL_INVALID_OPERATION == mat_location)
-      throw std::runtime_error{"Invalid uniform parameter"};
-
-    glUniformMatrix3fv(mat_location, 1, GL_FALSE, mat_coeffs);
+    const auto mat_location = get_uniform_location(mat_name);
+    set_uniform_matrix3f(mat_location, mat_coeffs);
   }
 
-  void ShaderProgram::set_uniform_matrix4f(const char* mat_name,
-                                           const float* mat_coeffs)
+  auto ShaderProgram::set_uniform_matrix4f(const char* mat_name,
+                                           const float* mat_coeffs) const
+      -> void
   {
-    auto mat_location = glGetUniformLocation(program_object, mat_name);
-    if (GL_INVALID_VALUE == mat_location ||
-        GL_INVALID_OPERATION == mat_location)
-      throw std::runtime_error{"Invalid uniform parameter"};
-
-    glUniformMatrix4fv(mat_location, 1, GL_FALSE, mat_coeffs);
+    const auto mat_location = get_uniform_location(mat_name);
+    set_uniform_matrix4f(mat_location, mat_coeffs);
   }
 
-  void ShaderProgram::set_uniform_texture(const char* texture_name,
-                                          GLuint texture_id)
+  auto ShaderProgram::set_uniform_texture(const char* texture_name,
+                                          GLuint texture_unit) const -> void
   {
-    const auto tex_location = glGetUniformLocation(program_object,  //
-                                                   texture_name);
-    if (GL_INVALID_VALUE == tex_location ||
-        GL_INVALID_OPERATION == tex_location)
-      throw std::runtime_error{"Invalid uniform texture!"};
-
-    glUniform1i(tex_location, texture_id);
+    const auto tex_location = get_uniform_location(texture_name);
+    set_uniform_texture(tex_location, texture_unit);
   }
 
-}}  // namespace DO::Sara::GL
+}  // namespace DO::Sara::GL
