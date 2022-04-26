@@ -1,4 +1,6 @@
 <script>
+	import { pokemons } from '../stores/photostore.js';
+
 	export let pokemon;
 </script>
 

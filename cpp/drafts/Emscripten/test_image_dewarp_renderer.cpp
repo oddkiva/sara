@@ -181,7 +181,9 @@ auto render_frame() -> void
 auto initialize_image_textures()
 {
 #ifdef EMSCRIPTEN
-  const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
+  //const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
+  auto image = sara::Image<sara::Rgb8>{1920, 1080};
+  image.flat_array().fill(sara::White8);
 #else
   const auto image = sara::imread<sara::Rgb8>(
       (program_dir_path / "assets/image-omni.png").string());

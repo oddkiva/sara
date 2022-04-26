@@ -57,6 +57,7 @@ target_link_options(
   "$<$<PLATFORM_ID:Emscripten>:SHELL:-s USE_GLFW=3>" #
   "$<$<PLATFORM_ID:Emscripten>:SHELL:-s USE_WEBGL2=1>" #
   "$<$<PLATFORM_ID:Emscripten>:SHELL:-s FULL_ES3=1>"
+  "$<$<PLATFORM_ID:Emscripten>:SHELL:-s EXPORT_ES6=1>"
 )
 
 if (NOT SARA_EMSCRIPTEN_BUILD_HTML)
@@ -123,7 +124,8 @@ target_link_options(test_metric_grid_renderer PRIVATE ${ALL_FLAGS})
 sara_add_wasm_executable(test_image_dewarp_renderer.cpp)
 target_link_libraries(test_image_dewarp_renderer #
                       PRIVATE emscripten_gl_utilities)
-target_link_options(test_image_dewarp_renderer PRIVATE ${ALL_FLAGS})
+target_link_options(test_image_dewarp_renderer
+  PRIVATE "$<$<PLATFORM_ID:Emscripten>:SHELL:-s ALLOW_MEMORY_GROWTH=1>")
 
 target_link_options(
   test_metric_grid_renderer
