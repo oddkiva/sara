@@ -30,8 +30,7 @@ if(SARA_USE_FROM_SOURCE)
     target_compile_definitions(
       DO_Sara_ImageIO
       PRIVATE ${PNG_DEFINITIONS}
-              $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:_CRT_SECURE_NO_WARNINGS>
-              $<$<PLATFORM_ID:Emscripten>:EMSCRIPTEN>)
+              $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:_CRT_SECURE_NO_WARNINGS>)
 
     target_compile_options(
       DO_Sara_ImageIO #

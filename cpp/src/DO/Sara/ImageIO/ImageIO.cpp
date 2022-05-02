@@ -56,7 +56,7 @@ namespace DO { namespace Sara {
     return ext == ".png";
   }
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
   static inline bool is_tiff_file_ext(const string& ext)
   {
     return
@@ -143,7 +143,7 @@ namespace DO { namespace Sara {
         read_image_with<JpegFileReader>(image, filepath.c_str());
       else if (is_png_file_ext(ext))
         read_image_with<PngFileReader>(image, filepath.c_str());
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
       else if (is_tiff_file_ext(ext))
         read_image_with<TiffFileReader>(image, filepath.c_str());
 #endif
@@ -166,7 +166,7 @@ namespace DO { namespace Sara {
         read_image_with<JpegFileReader>(image, filepath.c_str());
       else if (is_png_file_ext(ext))
         read_image_with<PngFileReader>(image, filepath.c_str());
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
       else if (is_tiff_file_ext(ext))
         read_image_with<TiffFileReader>(image, filepath.c_str());
 #endif
@@ -202,7 +202,7 @@ namespace DO { namespace Sara {
           .write(filepath.c_str());
     }
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
     else if (is_tiff_file_ext(ext))
     {
       TiffFileWriter{reinterpret_cast<const unsigned char*>(image.data()),

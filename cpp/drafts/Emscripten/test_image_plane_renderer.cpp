@@ -21,7 +21,7 @@
 #include <map>
 #include <memory>
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 #  include <emscripten/emscripten.h>
 #  define GLFW_INCLUDE_ES3
 #endif
@@ -37,7 +37,7 @@ namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static auto program_dir_path = fs::path{};
 #endif
 
@@ -60,7 +60,7 @@ auto render_frame() -> void
 
 auto initialize_image_textures()
 {
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
   const auto images = std::array<sara::Image<sara::Rgb8>, 2>{
       sara::imread<sara::Rgb8>("assets/image-omni.png"),
       sara::imread<sara::Rgb8>("assets/image-pinhole.png"),
@@ -113,12 +113,12 @@ int main(int, char** argv)
     if (!MyGLFW::initialize())
       return EXIT_FAILURE;
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
     program_dir_path = fs::path{argv[0]}.parent_path();
 #endif
 
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
     glewInit();
 #endif
 
@@ -131,7 +131,7 @@ int main(int, char** argv)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(render_frame, 0, 1);
 #else
     while (!glfwWindowShouldClose(MyGLFW::window))

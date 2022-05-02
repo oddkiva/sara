@@ -17,7 +17,7 @@
 
 #include <DO/Sara/ImageIO.hpp>
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 #  include <emscripten/emscripten.h>
 #  define GLFW_INCLUDE_ES3
 #endif
@@ -35,7 +35,7 @@ namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 static auto program_dir_path = fs::path{};
 #endif
 static auto dewarp_mode = 0;
@@ -180,7 +180,7 @@ auto render_frame() -> void
 
 auto initialize_image_textures()
 {
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
   //const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
   auto image = sara::Image<sara::Rgb8>{1920, 1080};
   image.flat_array().fill(sara::White8);
@@ -253,14 +253,14 @@ int main(int, [[maybe_unused]] char** argv)
 {
   try
   {
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
     program_dir_path = fs::path{argv[0]}.parent_path();
 #endif
 
     if (!MyGLFW::initialize())
       return EXIT_FAILURE;
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
     glewInit();
 #endif
 
@@ -279,7 +279,7 @@ int main(int, [[maybe_unused]] char** argv)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(render_frame, 0, 1);
 #else
     while (!glfwWindowShouldClose(MyGLFW::window))

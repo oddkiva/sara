@@ -298,7 +298,7 @@ namespace DO { namespace Sara {
 } /* namespace DO */
 
 
-#if !defined(EMSCRIPTEN)
+#if !defined(__EMSCRIPTEN__)
 // Tiff I/O.
 namespace DO { namespace Sara {
 

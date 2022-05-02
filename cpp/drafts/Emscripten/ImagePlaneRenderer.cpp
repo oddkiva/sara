@@ -121,7 +121,7 @@ auto ImagePlaneRenderer::initialize() -> void
   _image_sizes_loc = _shader_program.get_uniform_location("image_sizes");
   _image_loc = _shader_program.get_uniform_location("image");
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
   // Clearing the shaders after attaching them to the shader program does not
   // work on WebGL 2.0/OpenGL ES 3.0... I don't know why.
   _shader_program.use();
