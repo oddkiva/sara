@@ -72,6 +72,9 @@
 			srcType,
 			video
 		);
+    // We have got no choice but to do this. Otherwise zooming out will fail for
+    // videos.
+    gl.generateMipmap(gl.TEXTURE_2D);
 	};
 
 	onMount(async () => {

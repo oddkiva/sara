@@ -224,13 +224,19 @@ auto ImageDewarpRenderer::initialize() -> void
   //
   // Encode the vertex data of the square in a tensor.
   auto vertices = sara::Tensor_<float, 2>{{4, 5}};
+
+  // ==========================================================================
+  // CAVEAT: FLIP THE TEXTURE COORDINATES BY DEFAULT HERE!!!
+  // CAVEAT: FLIP THE TEXTURE COORDINATES BY DEFAULT HERE!!!
+  // CAVEAT: FLIP THE TEXTURE COORDINATES BY DEFAULT HERE!!!
+  //
   // clang-format off
   vertices.flat_array() <<
   // coords              texture coords
-     0.5f, -0.5f, 0.0f,  1.0f, 0.0f,  // bottom-right
-     0.5f,  0.5f, 0.0f,  1.0f, 1.0f,  // top-right
-    -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,  // top-left
-    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f;  // bottom-left
+     0.5f, -0.5f, 0.0f,  1.0f, 1.0f,  // bottom-right
+     0.5f,  0.5f, 0.0f,  1.0f, 0.0f,  // top-right
+    -0.5f,  0.5f, 0.0f,  0.0f, 0.0f,  // top-left
+    -0.5f, -0.5f, 0.0f,  0.0f, 1.0f;  // bottom-left
   // clang-format on
 
   auto triangles = sara::Tensor_<std::uint32_t, 2>{{2, 3}};
