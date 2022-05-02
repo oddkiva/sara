@@ -1,5 +1,5 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { default as Module } from '../components/test_image_dewarp_renderer.js';
 
 	let files;
