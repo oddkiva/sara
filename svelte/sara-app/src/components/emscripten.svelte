@@ -1,12 +1,16 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { default as Module } from '../components/test_image_dewarp_renderer.js';
 
 	let files;
 	let videoUrl;
 	let video;
 	let copyVideo = false;
-	let renderVideo = false;
+
+	// UI interactions.
+	let _stopVideo = false;
+	let _resizeCanvas = false;
+	let _hideMousePointer = false;
 
 	// Our reference to the Emscripten module.
 	let _emmodule;
@@ -72,9 +76,10 @@
 			srcType,
 			video
 		);
-    // We have got no choice but to do this. Otherwise zooming out will fail for
-    // videos.
-    gl.generateMipmap(gl.TEXTURE_2D);
+		// We have got no other choice but to keep regenerating mipmaps. Otherwise
+		// we will see white artefacts when zooming out on videos.
+		gl.generateMipmap(gl.TEXTURE_2D);
+		console.log('update texture');
 	};
 
 	onMount(async () => {
@@ -91,8 +96,8 @@
 		_emmodule.callMain();
 		_emglctx = _emmodule.GL.currentContext.GLctx;
 
-		window.emmodule = _emmodule;
-		window.GLctx = _emglctx;
+		// window.emmodule = _emmodule;
+		// window.GLctx = _emglctx;
 
 		setInterval(() => {
 			if (files) {
@@ -108,20 +113,40 @@
 			const newVideoUrl = URL.createObjectURL(files[0]);
 
 			if (videoUrl !== newVideoUrl) {
-				console.log('setup video');
 				videoUrl = newVideoUrl;
-				renderVideo = false;
 				setupVideo(videoUrl);
-				setTimeout(() => (renderVideo = true), 0);
 			}
 
 			_emcanvas.hidden = false;
 		}
+
+		if (typeof video !== 'undefined' && video !== null && videoUrl !== null) {
+			if (_stopVideo) video.pause();
+			else video.play();
+		}
 	}
 </script>
 
-<div class="w-full m-8 items-center">
+<div class="w-full items-center">
 	<video bind:this={video} hidden="true" />
-	<input class="btn btn-blue" accept="video/*" bind:files type="file" />
+
+	<input
+		class="m-1 p-1 bg-gray-100 hover:bg-gray-500 rounded-md"
+		accept="video/*"
+		bind:files
+		type="file"
+	/>
+
+	<input class="btn btn-blue" type="checkbox" bind:checked={_stopVideo} />Stop video
+	<input class="btn btn-blue" type="checkbox" bind:checked={_resizeCanvas} />Resize canvas
+	<input class="btn btn-blue" type="checkbox" bind:checked={_hideMousePointer} />Lock/hide mouse
+	pointer &nbsp;&nbsp;&nbsp;
+	<button
+		class="m-1 p-1 bg-gray-100 hover:bg-gray-500 rounded-md"
+		on:click={_emmodule.requestFullscreen(_hideMousePointer, _resizeCanvas)}>Fullscreen</button
+	>
+
+	<hr />
+
 	<canvas class="p-8 items-center" bind:this={_emcanvas} width="640" height="480" />
 </div>
