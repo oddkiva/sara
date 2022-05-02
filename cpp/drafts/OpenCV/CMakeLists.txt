@@ -1,14 +1,6 @@
-find_package(
-  DO_Sara
-  COMPONENTS Core Graphics ImageProcessing ImageIO VideoIO
-  REQUIRED)
+return()
 
 find_package(OpenCV)
-
-
-if (NOT OpenCV_FOUND)
-  return ()
-endif ()
 
 add_library(
   HomographyUtilities HomographyDecomposition.cpp HomographyDecomposition.hpp
