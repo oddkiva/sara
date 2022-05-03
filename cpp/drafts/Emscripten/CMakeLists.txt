@@ -4,8 +4,10 @@ endif()
 
 set(SARA_EMSCRIPTEN_BUILD_HTML NO)
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/assets)
+  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
+       DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+ endif ()
 
 if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   add_custom_target(emscripten_copy_assets)
