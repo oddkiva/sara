@@ -33,13 +33,13 @@ if (UNIX)
   # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
   # Additional flags for Release builds.
-  set(CMAKE_CXX_FLAGS_RELEASE -O3)
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO -O2 -g -DNDEBUG)
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
   # Additional flags for Debug builds to code coverage.
-  set(CMAKE_CXX_FLAGS_DEBUG -g -O0 -DDEBUG -D_DEBUG -fno-inline)
+  set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -D_DEBUG -fno-inline")
   if (NOT APPLE)
     set(CMAKE_CXX_FLAGS_DEBUG
-      ${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage)
+      "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   endif ()
 endif ()
 
