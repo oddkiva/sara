@@ -36,6 +36,10 @@ auto make_corner_image()
   return image;
 }
 
+BOOST_AUTO_TEST_CASE(test_dummy)
+{
+}
+
 // BOOST_AUTO_TEST_CASE(test_polar_gradients_2d)
 // {
 //   auto image = make_corner_image();
