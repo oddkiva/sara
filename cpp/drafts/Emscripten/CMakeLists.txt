@@ -4,18 +4,13 @@ endif()
 
 set(SARA_EMSCRIPTEN_BUILD_HTML NO)
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/assets)
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
-       DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
- endif ()
-
 if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   add_custom_target(emscripten_copy_assets)
   add_custom_command(
     TARGET emscripten_copy_assets
     COMMAND
       ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets
-      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets)
+      ${CMAKE_BINARY_DIR}/bin/assets)
 else()
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
        DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -48,7 +43,8 @@ target_link_libraries(
   PRIVATE DO_Sara_OpenCL_GL #
           DO::Sara::Core #
           DO::Sara::ImageIO
-  INTERFACE $<$<NOT:$<PLATFORM_ID:Emscripten>>:glfw>)
+  INTERFACE $<$<NOT:$<PLATFORM_ID:Emscripten>>:Boost::filesystem>
+            $<$<NOT:$<PLATFORM_ID:Emscripten>>:glfw>)
 
 if(MSVC)
   target_link_libraries(emscripten_gl_utilities INTERFACE GLEW::GLEW)

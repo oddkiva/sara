@@ -20,9 +20,10 @@
 #ifdef __EMSCRIPTEN__
 #  include <emscripten/emscripten.h>
 #  define GLFW_INCLUDE_ES3
+#else
+#  include <boost/filesystem.hpp>
 #endif
 
-#include <filesystem>
 
 #include "MyGLFW.hpp"
 
@@ -31,7 +32,11 @@
 #include "ImagePlaneRenderer.hpp"
 
 
+#ifdef __EMSCRIPTEN
 namespace fs = std::filesystem;
+#else
+namespace fs = boost::filesystem;
+#endif
 namespace sara = DO::Sara;
 
 
@@ -181,7 +186,7 @@ auto render_frame() -> void
 auto initialize_image_textures()
 {
 #ifdef __EMSCRIPTEN__
-  //const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
+  // const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
   auto image = sara::Image<sara::Rgb8>{1920, 1080};
   image.flat_array().fill(sara::White8);
 #else

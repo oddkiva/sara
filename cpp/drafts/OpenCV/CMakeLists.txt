@@ -1,4 +1,6 @@
-return()
+if (NOT SARA_USE_OPENCV)
+  return()
+endif ()
 
 find_package(OpenCV)
 

@@ -29,7 +29,6 @@ auto ImagePlaneRenderer::ImageTexture::set_texture(
   // Flip vertically so that the image data matches OpenGL image coordinate
   // system.
   auto image = sara::Image<sara::Rgb8>{image_view};
-  sara::flip_vertically(image);
 
   // Bind the texture unit: GL_TEXTURE0 + i.
   _texture_unit = texture_unit;
@@ -138,10 +137,10 @@ auto ImagePlaneRenderer::initialize() -> void
   // clang-format off
   vertices.flat_array() <<
   // coords              texture coords
-     0.5f, -0.5f, 0.0f,  1.0f, 0.0f,  // bottom-right
-     0.5f,  0.5f, 0.0f,  1.0f, 1.0f,  // top-right
-    -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,  // top-left
-    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f;  // bottom-left
+     0.5f, -0.5f, 0.0f,  1.0f, 1.0f,  // bottom-right
+     0.5f,  0.5f, 0.0f,  1.0f, 0.0f,  // top-right
+    -0.5f,  0.5f, 0.0f,  0.0f, 0.0f,  // top-left
+    -0.5f, -0.5f, 0.0f,  0.0f, 1.0f;  // bottom-left
   // clang-format on
 
   auto triangles = sara::Tensor_<std::uint32_t, 2>{{2, 3}};

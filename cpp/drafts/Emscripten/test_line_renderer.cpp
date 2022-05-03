@@ -18,9 +18,10 @@
 #ifdef __EMSCRIPTEN__
 #  include <emscripten/emscripten.h>
 #  define GLFW_INCLUDE_ES3
+#  include <filesystem>
+#else
+#  include <boost/filesystem.hpp>
 #endif
-
-#include <filesystem>
 
 #include "MyGLFW.hpp"
 
@@ -28,7 +29,11 @@
 #include "LineRenderer.hpp"
 
 
+#ifdef __EMSCRIPTEN
 namespace fs = std::filesystem;
+#else
+namespace fs = boost::filesystem;
+#endif
 namespace sara = DO::Sara;
 
 
