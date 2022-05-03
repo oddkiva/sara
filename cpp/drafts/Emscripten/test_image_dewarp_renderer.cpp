@@ -32,7 +32,7 @@
 #include "ImagePlaneRenderer.hpp"
 
 
-#ifdef __EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 namespace fs = std::filesystem;
 #else
 namespace fs = boost::filesystem;

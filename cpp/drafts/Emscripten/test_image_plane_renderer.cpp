@@ -34,7 +34,7 @@
 #include "ImagePlaneRenderer.hpp"
 
 
-#ifdef __EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 namespace fs = std::filesystem;
 #else
 namespace fs = boost::filesystem;
@@ -111,7 +111,7 @@ auto cleanup_gl_objects() -> void
   image_textures.clear();
 }
 
-int main(int, char** argv)
+int main(int, [[maybe_unused]] char** argv)
 {
   try
   {

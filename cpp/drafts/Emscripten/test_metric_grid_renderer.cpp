@@ -30,13 +30,11 @@
 #  include <boost/filesystem.hpp>
 #endif
 
-#include <filesystem>
-
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
 
-#ifdef __EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 namespace fs = std::filesystem;
 #else
 namespace fs = boost::filesystem;
