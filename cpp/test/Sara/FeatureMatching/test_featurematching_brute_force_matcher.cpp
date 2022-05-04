@@ -79,31 +79,15 @@ BOOST_AUTO_TEST_CASE(test_dot_product_128)
   };
 
   auto v1 = Eigen::Matrix<float, 128, 1>{};
+  v1.setRandom();
 
   auto a = float{};
   auto b = float{};
   const auto keys_count = 2000;
   const auto dot_count = keys_count * keys_count;
-  tic();
-#pragma omp parallel for
-  for (auto i = 0; i < dot_count; ++i)
-  {
-    auto v1 = Eigen::Matrix<float, 128, 1>{};
-    v1.setRandom();
-    // a = dot_product(v1.data(), v1.data());
-  }
-  toc("AVX");
-
-  tic();
-#pragma omp parallel for
-  for (auto i = 0; i < dot_count; ++i)
-  {
-    auto v1 = Eigen::Matrix<float, 128, 1>{};
-    v1.setRandom();
-    // b = v1.squaredNorm();
-  }
-  toc("Eigen");
-  //BOOST_CHECK_CLOSE(a, b, std::numeric_limits<float>::epsilon());
+  a = dot_product(v1.data(), v1.data());
+  b = v1.squaredNorm();
+  BOOST_CHECK_CLOSE(a, b, std::numeric_limits<float>::epsilon());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -11,14 +11,17 @@
 
 #pragma once
 
-#include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveKernels.hpp>
 #include <DO/Shakti/Cuda/MultiArray/MultiArrayView.hpp>
+
+#include <DO/Shakti/Cuda/FeatureDetectors/Octave.hpp>
+#include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveKernels.hpp>
 
 
 namespace DO::Shakti::Cuda::Gaussian {
 
-  struct DeviceGaussianFilterBank
+  class DeviceGaussianFilterBank
   {
+  public:
     DeviceGaussianFilterBank(const GaussianOctaveKernels<float>& filter_bank)
       : _filter_bank{filter_bank}
     {
@@ -33,6 +36,26 @@ namespace DO::Shakti::Cuda::Gaussian {
                     MultiArrayView<float, 2, RowMajorStrides>& d_convy,  //
                     int kernel_index) const -> void;
 
+    auto operator()(const MultiArrayView<float, 2, RowMajorStrides>& d_in,
+                    MultiArrayView<float, 2, RowMajorStrides>& d_work_convx,
+                    Octave<float>& gaussian_octave) const -> void;
+
+    auto operator()(const Octave<float>& d_in,
+                    MultiArrayView<float, 2, RowMajorStrides>& d_work_convx,
+                    Octave<float>& gaussian_octave) const -> void;
+
+  private:
+    auto compute_zero_scale(  //
+        const MultiArrayView<float, 2, RowMajorStrides>& d_in,
+        MultiArrayView<float, 2, RowMajorStrides>& d_work_convx,
+        Octave<float>& gaussian_octave) const -> void;
+
+    auto compute_nonzero_scale(
+        Octave<float>& gaussian_octave,
+        MultiArrayView<float, 2, RowMajorStrides>& d_work_convx,
+        int scale) const -> void;
+
+  private:
     const GaussianOctaveKernels<float>& _filter_bank;
   };
 

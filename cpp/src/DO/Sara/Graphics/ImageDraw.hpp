@@ -108,9 +108,9 @@ namespace DO { namespace Sara {
                          int arrow_height = 5, int style = 0,
                          bool antialiasing = true) -> void
   {
-    auto round = [](float x) { return static_cast<int>(x + 0.5f); };
-    draw_arrow(image, round(a.x()), round(a.y()), round(b.x()), round(b.y()),
-               col, pen_width, arrow_width, arrow_height, style, antialiasing);
+    draw_arrow(image, std::round(a.x()), std::round(a.y()), std::round(b.x()),
+               std::round(b.y()), col, pen_width, arrow_width, arrow_height,
+               style, antialiasing);
   }
 
   //! @brief Draw text.

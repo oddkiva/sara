@@ -189,7 +189,60 @@ namespace v2 {
       auto input_padded = Halide::BoundaryConditions::repeat_edge(input);
       auto g = gradient(input_padded, x, y, t, n);
       auto mag = norm(g);
+#define USE_FAST_ATAN2
+#ifdef USE_FAST_ATAN2
+      // See njuffa's answer where he exposes Remez's polynomial approximation.
+      // He reports that the relative error is 1/360, which is more than
+      // acceptable for image processing applications.
+      //
+      // https://math.stackexchange.com/questions/1098487/atan2-faster-approximation/1105038
+      //
+      // We translate his pseudo-code as-is.
+      const auto fast_atan2 = [](const Expr& y, const Expr& x) -> Expr {
+        const auto abs_x = abs(x);
+        const auto abs_y = abs(y);
+        const auto max_x_y = max(abs_x, abs_y);
+
+        // Here is a boundary condition we need to take care to avoid NaN values
+        // which the post did not address.
+        const auto a = select(max_x_y != 0,  //
+                              min(abs_x, abs_y) / max_x_y, 0.f);
+
+        // Calculate the 7-th order polynomial using Horner's method.
+        const auto s = a * a;
+        auto r =
+            ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;
+        r = select(abs_y > abs_x, 1.57079637f - r, r);
+        r = select(x < 0, 3.14159274f - r, r);
+        r = select(y < 0, -r, r);
+
+        return r;
+      };
+      // In my experiments, the speed improvements is appreciable and from a
+      // visual inspection of both edge detection and SIFT feature matching
+      // tasks, the quality of the features did not seem to degrade at all.
+      //
+      // Typically in the edge detection.
+      // [Polar Coordinates] 3.45664 ms
+      //
+      // The speed up is really significant with the fast approximation of
+      // atan2.
+      //
+      // On SIFT's CPU implementation, the gradient is much faster.
+      // THIS BECOMES TWICE AS FAST:
+      // 🧭[SIFT.cpp]📑[compute_sift_keypoints:62]🎶 [Gradient   ] 30.9103 ms
+      const auto ori = fast_atan2(g(1), g(0));
+#else
+      // Whereas with the standard atan2 implementation, we have the following
+      // timings:
+      //
+      // Typically in the edge detection.
+      // [Polar Coordinates] 19.6293 ms
+      //
+      // On SIFT's CPU implementation:
+      // 🧭[SIFT.cpp]📑[compute_sift_keypoints:62]🎶 [Gradient   ] 57.9395 ms
       auto ori = Halide::atan2(g(1), g(0));
+#endif
       output(x, y, t, n) = {mag, ori};
     }
 
@@ -229,13 +282,11 @@ namespace v2 {
 
 }  // namespace v2
 
-HALIDE_REGISTER_GENERATOR(v2::Gradient2D<float>,
-                          shakti_gradient_2d_32f_cpu)
+HALIDE_REGISTER_GENERATOR(v2::Gradient2D<float>, shakti_gradient_2d_32f_cpu)
 HALIDE_REGISTER_GENERATOR(v2::PolarGradient2D<float>,
                           shakti_polar_gradient_2d_32f_cpu)
 
-HALIDE_REGISTER_GENERATOR(v2::Gradient2D<float>,
-                          shakti_gradient_2d_32f_gpu_v2)
+HALIDE_REGISTER_GENERATOR(v2::Gradient2D<float>, shakti_gradient_2d_32f_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v2::PolarGradient2D<float>,
                           shakti_polar_gradient_2d_32f_gpu_v2)
 HALIDE_REGISTER_GENERATOR(v2::ForwardDifference<float>,

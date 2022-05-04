@@ -67,7 +67,7 @@ namespace DO::Sara {
   private:
     OutputStream _video_stream;
     OutputStream _audio_stream;
-    AVOutputFormat* _output_format;
+    const AVOutputFormat* _output_format;
     AVFormatContext* _format_context;
     AVCodec* _audio_codec;
     AVCodec* _video_codec;

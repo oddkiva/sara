@@ -32,16 +32,26 @@ namespace DO::Shakti::Cuda {
 
       // Create the surface objects
       SHAKTI_SAFE_CUDA_CALL(cudaCreateSurfaceObject(&_surface_object, &resource_descriptor));
+      SHAKTI_STDOUT << "Attaching surface object = " << _surface_object << " to array " << _array << std::endl;
     }
+
+    // The copy constructor is forbidden. Only one surface object per
+    // cudaArray_t object!
+    inline SurfaceObject(const SurfaceObject& other) = delete;
+
+    //! @brief We can move surface object but not copy.
+    inline SurfaceObject(SurfaceObject&& other) noexcept = default;
 
     inline ~SurfaceObject()
     {
       if (_surface_object != 0)
       {
+        SHAKTI_STDOUT << "Destroying surface object" << std::endl;
         const auto ret = cudaDestroySurfaceObject(_surface_object);
         if (ret != cudaSuccess)
           SHAKTI_STDERR << cudaGetErrorString(cudaDeviceSynchronize())
                         << std::endl;
+        _array = nullptr;
         _surface_object = 0;
       }
     }
@@ -49,6 +59,23 @@ namespace DO::Shakti::Cuda {
     inline operator cudaSurfaceObject_t() const noexcept
     {
       return _surface_object;
+    }
+
+    inline auto initialized() const -> bool
+    {
+      return _array != nullptr && _surface_object != 0ull;
+    }
+
+    inline auto operator=(SurfaceObject other) -> SurfaceObject&
+    {
+      swap(other);
+      return *this;
+    }
+
+    inline auto swap(SurfaceObject& other) -> void
+    {
+      std::swap(_array, other._array);
+      std::swap(_surface_object, other._surface_object);
     }
 
   protected:

@@ -59,7 +59,14 @@ BOOST_AUTO_TEST_CASE(test_polar_gradients_2d)
   });
 
   BOOST_CHECK_SMALL((mag.matrix() - mag2.matrix()).norm(), 1e-6f);
-  BOOST_CHECK_SMALL((ori.matrix() - ori2.matrix()).norm(), 1e-6f);
+  // Our implementation implements a fast approximate of atan2.
+  // With the classical atan2 implementation, the following assert would be
+  // true.
+  // BOOST_CHECK_SMALL((ori.matrix() - ori2.matrix()).norm(), 1e-6f);
+  //
+  // In this test case, we satisfy the following order or error magnitude...
+  // That's decent.
+  BOOST_CHECK_SMALL((ori.matrix() - ori2.matrix()).norm(), 5e-4f);
 }
 
 BOOST_AUTO_TEST_CASE(test_box_blur)

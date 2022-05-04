@@ -16,7 +16,7 @@
 #include <DO/Sara/Core.hpp>
 #include <DO/Shakti/Cuda/ImageProcessing.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 namespace sara = DO::Sara;

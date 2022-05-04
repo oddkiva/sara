@@ -43,9 +43,7 @@ endfunction ()
 # Because we use the old CMake way to use CUDA.
 include_directories(
   ${CMAKE_SOURCE_DIR}/cpp/src
-  ${CMAKE_SOURCE_DIR}/cpp/third-party)
+  ${CMAKE_SOURCE_DIR}/cpp/third-party
+  ${CMAKE_CURRENT_SOURCE_DIR}/../)
 
-add_subdirectory(Utilities)
-add_subdirectory(MultiArray)
-add_subdirectory(ImageProcessing)
-add_subdirectory(Segmentation)
+add_subdirectory(Cuda)

@@ -17,7 +17,7 @@
 
 #include <DO/Shakti/Cuda/ImageProcessing/Differential.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 namespace sara = DO::Sara;

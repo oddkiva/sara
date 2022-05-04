@@ -60,19 +60,25 @@ namespace DO::Shakti::Cuda {
       _texture = _array.create_texture_object(texture_descriptor);
     }
 
-    inline auto init_surface() -> void
+    inline auto init_surface() -> const SurfaceObject&
     {
       _surface = _array.create_surface_object();
+      return _surface;
     }
 
     inline auto deinit_texture() -> void
     {
-      _texture.reset();
+      _texture.~TextureObject();
     }
 
     inline auto deinit_surface() -> void
     {
-      _surface.reset();
+      _surface.~SurfaceObject();
+    }
+
+    inline auto array() -> ArrayView<T, 3>&
+    {
+      return _array;
     }
 
     inline auto array() const -> const ArrayView<T, 3>&
@@ -80,14 +86,12 @@ namespace DO::Shakti::Cuda {
       return _array;
     }
 
-    inline auto texture_object() const noexcept
-        -> const std::optional<TextureObject>&
+    inline auto texture_object() const noexcept -> const TextureObject&
     {
       return _texture;
     }
 
-    inline auto surface_object() const noexcept
-        -> const std::optional<SurfaceObject>&
+    inline auto surface_object() const noexcept -> const SurfaceObject&
     {
       return _surface;
     }
@@ -95,8 +99,8 @@ namespace DO::Shakti::Cuda {
   private:
     Array<T, 3> _array;
 
-    std::optional<TextureObject> _texture;
-    std::optional<SurfaceObject> _surface;
+    TextureObject _texture;
+    SurfaceObject _surface;
   };
 
 

@@ -46,3 +46,32 @@ BOOST_AUTO_TEST_CASE(test_constructor_2d)
   BOOST_CHECK_EQUAL(p.x(), sizes[0]);
   BOOST_CHECK_EQUAL(p.y(), sizes[1]);
 }
+
+BOOST_AUTO_TEST_CASE(test_simple_linear_algebra)
+{
+  auto a = Matrix3f{};
+  a(0, 0) = 2; a(0, 1) = 0; a(0, 2) = 0;
+  a(1, 0) = 0; a(1, 1) = 1; a(1, 2) = 0;
+  a(2, 0) = 0; a(2, 1) = 0; a(2, 2) = 1;
+
+  std::cout << a << std::endl;
+
+  BOOST_CHECK_EQUAL(det(a), 2);
+  BOOST_CHECK_EQUAL(trace(a), 4);
+
+  auto b = Matrix3f{};
+  b(0, 0) = 0.5; b(0, 1) = 0; b(0, 2) = 0;
+  b(1, 0) = 0.0; b(1, 1) = 1; b(1, 2) = 0;
+  b(2, 0) = 0.0; b(2, 1) = 0; b(2, 2) = 1;
+
+  BOOST_CHECK_EQUAL(inverse(a), b);
+  BOOST_CHECK_EQUAL(inverse(a) * a, Matrix3f::Identity());
+
+  std::cout << b << std::endl;
+
+  const auto c = Vector3f::Ones();
+
+  const auto d = -(b * c);
+  BOOST_CHECK_EQUAL(d, Vector3f(-0.5, -1, -1));
+  std::cout << d << std::endl;
+}

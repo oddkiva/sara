@@ -61,6 +61,7 @@ flags = [
 "-I", "/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64",
 # Boost, Halide and HPX headers in /usr/local.
 "-I", "/usr/local/include",
+"-I", "/usr/local/include/opencv4",
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
 # nVidia Video Codec SDK.
@@ -68,8 +69,10 @@ flags = [
 # Current header directories.
 "-I", "cpp",
 "-I", "cpp/src",
+"-I", "cpp/test",
 "-I", "cpp/third-party/nvidia-video-codec-sdk-9.1.23",
 "-I", "cpp/third-party/taskflow/include",
+"-I", "cpp/third-party/libcbdetect/include",
 # Build directory.
 "-I", "../sara-build/cpp/src",
 "-I", "../sara-build-Xcode/cpp/src",

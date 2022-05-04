@@ -15,7 +15,7 @@
 
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

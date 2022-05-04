@@ -16,7 +16,7 @@
 #include <DO/Sara/Geometry/Algorithms/RobustEstimation/RANSAC.hpp>
 #include <DO/Sara/Geometry/Algorithms/RobustEstimation/LineSolver.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;
