@@ -9,7 +9,7 @@
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 
-#include "OpenCVInterop.hpp"
+#include "../OpenCVInterop.hpp"
 
 
 namespace sara = DO::Sara;

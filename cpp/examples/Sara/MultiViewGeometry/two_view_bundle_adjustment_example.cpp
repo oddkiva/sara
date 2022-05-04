@@ -79,10 +79,10 @@ struct ReprojectionError
     return true;
   }
 
-  static ceres::CostFunction* Create(const double observed_x,
+  static ceres::CostFunction* create(const double observed_x,
                                      const double observed_y)
   {
-    constexpr auto NumParams = 6 /* camera paramters */ + 3 /* points */;
+    constexpr auto NumParams = 6 /* camera parameters */ + 3 /* points */;
     return new ceres::AutoDiffCostFunction<ReprojectionError, 2, NumParams, 3>{
         new ReprojectionError{observed_x, observed_y}};
   }
@@ -269,7 +269,7 @@ GRAPHICS_MAIN()
   ceres::Problem problem;
   for (int i = 0; i < ba_problem.observations.size(0); ++i)
   {
-    auto cost_fn = ReprojectionError::Create(ba_problem.observations(i, 0),
+    auto cost_fn = ReprojectionError::create(ba_problem.observations(i, 0),
                                              ba_problem.observations(i, 1));
 
     problem.AddResidualBlock(cost_fn, nullptr /* squared loss */,
