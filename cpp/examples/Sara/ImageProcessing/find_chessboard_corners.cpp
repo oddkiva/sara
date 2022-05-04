@@ -21,6 +21,9 @@
 
 #include "Chessboard/SaddlePointDetection.hpp"
 
+#include <functional>
+#include <optional>
+
 
 namespace sara = DO::Sara;
 
@@ -156,7 +159,6 @@ auto __main(int argc, char** argv) -> int
     const auto image_gray = video_frame.convert<float>();
     const auto image_blurred = image_gray.compute<sara::Gaussian>(sigma);
     video_frame_copy = image_blurred.convert<sara::Rgb8>();
-
 
     // Calculate the hessian matrix.
     const auto hessian = image_blurred.compute<sara::Hessian>();

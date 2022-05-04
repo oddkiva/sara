@@ -3,6 +3,11 @@ if (NOT SARA_USE_OPENCV)
 endif ()
 
 find_package(OpenCV)
+find_package(OpenCV)
+
+if (NOT OpenCV_FOUND)
+  return ()
+endif ()
 
 add_library(
   HomographyUtilities HomographyDecomposition.cpp HomographyDecomposition.hpp

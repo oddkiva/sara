@@ -75,6 +75,7 @@ flags = [
 "-I", "cpp/third-party/taskflow/include",
 "-I", "cpp/third-party/imgui",
 "-I", "cpp/third-party/imgui/backends",
+"-I", "cpp/third-party/libcbdetect/include",
 # Build directory.
 "-I", "../sara-build/cpp/src",
 "-I", "../sara-build-Xcode/cpp/src",

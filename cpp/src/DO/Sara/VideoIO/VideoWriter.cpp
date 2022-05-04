@@ -116,7 +116,7 @@ namespace DO::Sara {
   // ======================================================================== //
   // Add an output stream.
   static void add_stream(OutputStream* out_stream, AVFormatContext* out_context,
-                         const AVCodec** codec, enum AVCodecID codec_id)
+                         AVCodec** codec, enum AVCodecID codec_id)
   {
     AVCodecContext* c;
     /* find the encoder */
@@ -200,8 +200,7 @@ namespace DO::Sara {
   }
 
   static void add_video_stream(OutputStream* ostream,
-                               AVFormatContext* format_context,
-                               const AVCodec** codec,
+                               AVFormatContext* format_context, AVCodec** codec,
                                enum AVCodecID codec_id, int width, int height,
                                int frame_rate)
   {
@@ -279,10 +278,8 @@ namespace DO::Sara {
     return frame;
   }
 
-  static void open_audio(AVFormatContext*,
-                         const AVCodec* codec,
-                         OutputStream* ost,
-                         AVDictionary* opt_arg)
+  static void open_audio(AVFormatContext*, const AVCodec* codec,
+                         OutputStream* ost, AVDictionary* opt_arg)
   {
     AVCodecContext* c;
     int nb_samples;
