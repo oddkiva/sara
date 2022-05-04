@@ -279,8 +279,8 @@ namespace DO::Sara {
     return frame;
   }
 
-  static void open_audio(AVFormatContext*, AVCodec* codec, OutputStream* ost,
-                         AVDictionary* opt_arg)
+  static void open_audio(AVFormatContext*, const AVCodec* codec,
+                         OutputStream* ost, AVDictionary* opt_arg)
   {
     AVCodecContext* c;
     int nb_samples;
@@ -421,7 +421,7 @@ namespace DO::Sara {
     return picture;
   }
 
-  static void open_video(AVFormatContext*, AVCodec* codec,
+  static void open_video(AVFormatContext*, const AVCodec* codec,
                          OutputStream* ostream, AVDictionary* opt_arg)
   {
     int ret;

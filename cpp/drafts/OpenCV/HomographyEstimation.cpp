@@ -1,3 +1,16 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2022-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+//! @file
+
 #include "OpenCVInterop.hpp"
 
 
@@ -12,13 +25,13 @@ auto estimate_H(const sara::OpenCV::Chessboard& chessboard) -> Eigen::Matrix3d
 
   auto A = Eigen::MatrixXd{N * 2, 9};
 
-  auto x = Eigen::MatrixXd{3, N};
-  auto y = Eigen::MatrixXd{3, N};
+  auto p1 = Eigen::MatrixXd{3, N};
+  auto p2 = Eigen::MatrixXd{3, N};
 
   // Collect the 2D pixel coordinates.
-  for (auto i = 0; i < h; ++i)
-    for (auto j = 0; j < w; ++j)
-      x.col(i * w + j) = chessboard(i, j).homogeneous().cast<double>();
+  for (auto y = 0; y < h; ++y)
+    for (auto x = 0; x < w; ++x)
+      p1.col(y * w + x) = chessboard.image_point(x, y).homogeneous().cast<double>();
 
   // Keep it simple by just divide by 1000. Lazy but it works.
   //
@@ -31,24 +44,24 @@ auto estimate_H(const sara::OpenCV::Chessboard& chessboard) -> Eigen::Matrix3d
   const Eigen::Matrix3d invT = T.inverse();
 
   // Rescale the coordinates.
-  x = T * x;
+  p1 = T * p1;
 
   // Collect the 3D coordinates on the chessboard plane.
-  for (auto i = 0; i < h; ++i)
-    for (auto j = 0; j < w; ++j)
-      y.col(i * w + j) = chessboard.point_3d(i, j).homogeneous().cast<double>();
+  for (auto y = 0; y < h; ++y)
+    for (auto x = 0; x < w; ++x)
+      p2.col(y * w + x) = chessboard.scene_point(x, y).homogeneous().cast<double>();
 
   // Form the data matrix used to determine H.
   for (auto i = 0; i < N; ++i)
   {
     // The image point
-    const auto xi = x.col(i);
+    const auto xi = p1.col(i);
     const auto ui = xi(0);
     const auto vi = xi(1);
 
     // The 3D coordinate on the chessboard plane.
     static const auto zero = Eigen::RowVector3d::Zero();
-    const auto yiT = y.col(i).transpose();
+    const auto yiT = p2.col(i).transpose();
 
     A.row(2 * i + 0) << -yiT, zero, ui * yiT;
     A.row(2 * i + 1) << zero, -yiT, vi * yiT;

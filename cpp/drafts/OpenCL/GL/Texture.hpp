@@ -48,13 +48,13 @@ namespace DO::Sara { namespace GL {
 
   struct Texture2D
   {
-    void generate()
+    inline void generate()
     {
       if (!object)
         glGenTextures(1, &object);
     }
 
-    void destroy()
+    inline void destroy()
     {
       if (object)
       {
@@ -68,30 +68,39 @@ namespace DO::Sara { namespace GL {
       return object;
     }
 
-    void bind() const
+    inline void bind() const
     {
       glBindTexture(GL_TEXTURE_2D, object);
     }
 
-    void unbind() const
+    inline void unbind() const
     {
       glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    void set_border_type(GLenum border_type = GL_REPEAT)
+    inline void set_border_type(GLenum border_type = GL_REPEAT)
     {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, border_type);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, border_type);
     }
 
-    void set_interpolation_type(GLenum type = GL_LINEAR)
+    inline void set_interpolation_type(GLenum type = GL_LINEAR)
     {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, type);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, type);
     }
 
     template <typename T>
-    void initialize_data(const Image<T>& image, int mipmap_level = 0)
+    inline auto initialize_data(const Eigen::Vector2i& sizes, int mipmap_level = 0) -> void
+    {
+      glTexImage2D(GL_TEXTURE_2D, mipmap_level, GL::PixelTraits<T>::PixelFormat,
+                   sizes.x(), sizes.y(),
+                   /* border */ 0, GL::PixelTraits<T>::PixelFormat,
+                   GL::PixelTraits<T>::ChannelType, nullptr);
+    }
+
+    template <typename T>
+    inline void initialize_data(const ImageView<T>& image, int mipmap_level = 0)
     {
       glTexImage2D(GL_TEXTURE_2D, mipmap_level, GL::PixelTraits<T>::PixelFormat,
                    image.width(), image.height(),
@@ -102,11 +111,12 @@ namespace DO::Sara { namespace GL {
     }
 
     template <typename T>
-    void setup_with_pretty_defaults(const Image<T>& image, int mipmap_level = 0)
+    inline void setup_with_pretty_defaults(const ImageView<T>& image,
+                                           int mipmap_level = 0)
     {
       generate();
       bind();
-      set_border_type(GL_REPEAT);
+      set_border_type(GL_CLAMP_TO_EDGE);
       set_interpolation_type(GL_LINEAR);
       initialize_data(image, mipmap_level);
     }

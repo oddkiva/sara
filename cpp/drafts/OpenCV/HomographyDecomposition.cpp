@@ -1,3 +1,16 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2022-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+//! @file
+
 #include "HomographyDecomposition.hpp"
 
 #include <DO/Sara/Core.hpp>
@@ -15,6 +28,7 @@ auto decompose_H_RQ_factorization(const Eigen::Matrix3d& H,
 {
   const Eigen::Matrix3d invK = K.inverse();
   const Eigen::Matrix3d P = (invK * H).normalized();
+  std::cout << "P =\n" << P << std::endl;
 
   const Eigen::Vector3d n = Eigen::Vector3d::UnitZ();
 

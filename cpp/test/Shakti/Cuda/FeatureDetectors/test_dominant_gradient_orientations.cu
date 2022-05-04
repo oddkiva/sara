@@ -44,16 +44,16 @@ BOOST_AUTO_TEST_CASE(test_dummy_because_unfinished)
 // BOOST_AUTO_TEST_CASE(test_polar_gradients_2d)
 // {
 //   auto image = make_corner_image();
-// 
+//
 //   // Image gradients.
-//   auto mag = sara::Image<float/*, shakti::ManagedMemoryAllocator */>{image.sizes()};
-//   auto ori = sara::Image<float/*, shakti::ManagedMemoryAllocator */>{image.sizes()};
-//   shakti::Cuda::polar_gradient_2d(image, mag, ori);
-// 
+//   auto mag = sara::Image<float>{image.sizes()};
+//   auto ori = sara::Image<float>{image.sizes()};
+//   // shakti::Cuda::polar_gradient_2d(image, mag, ori);
+//
 //   std::cout << "image =\n" << image.matrix() << std::endl;
 //   std::cout << "mag =\n" << mag.matrix() << std::endl;
 //   std::cout << "ori =\n" << ori.matrix() << std::endl;
-// 
+//
 //   auto grad = sara::gradient(image);
 //   auto mag2 = grad.cwise_transform([](const auto& v) {  //
 //     return v.norm();                                    //
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_dummy_because_unfinished)
 //   auto ori2 = grad.cwise_transform([](const auto& v) {  //
 //     return std::atan2(v(1), v(0));                      //
 //   });
-// 
+//
 //   BOOST_CHECK_SMALL((mag.matrix() - mag2.matrix()).norm(), 1e-6f);
 //   // Our implementation implements a fast approximate of atan2.
 //   // With the classical atan2 implementation, the following assert would be
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_dummy_because_unfinished)
 //   // That's decent.
 //   BOOST_CHECK_SMALL((ori.matrix() - ori2.matrix()).norm(), 5e-4f);
 // }
-
+//
 // BOOST_AUTO_TEST_CASE(test_box_blur)
 // {
 //   constexpr auto O = 36;

@@ -1,7 +1,7 @@
-find_package(
-  DO_Sara
-  COMPONENTS Core Graphics ImageProcessing ImageIO VideoIO
-  REQUIRED)
+if (NOT SARA_USE_OPENCV)
+  return()
+endif ()
+
 find_package(OpenCV)
 
 if (NOT OpenCV_FOUND)

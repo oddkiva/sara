@@ -17,7 +17,9 @@ extern "C" {
 #include <jpeglib.h>
 #include <png.h>
 #include <setjmp.h>
-#include <tiffio.h>
+#ifndef __EMSCRIPTEN__
+#  include <tiffio.h>
+#endif
 }
 
 #include <array>
@@ -222,8 +224,9 @@ namespace DO { namespace Sara {
 }}  // namespace DO::Sara
 
 
+#ifndef __EMSCRIPTEN__
 // Tiff I/O.
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   //! @addtogroup ImageIO
   //! @{
@@ -263,6 +266,7 @@ namespace DO { namespace Sara {
 
   //! @}
 
-}}  // namespace DO::Sara
+}  // namespace DO::Sara
+#endif
 
 //! @}
