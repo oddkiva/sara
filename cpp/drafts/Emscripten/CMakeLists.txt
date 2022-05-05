@@ -8,9 +8,8 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   add_custom_target(emscripten_copy_assets)
   add_custom_command(
     TARGET emscripten_copy_assets
-    COMMAND
-      ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets
-      ${CMAKE_BINARY_DIR}/bin/assets)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_BINARY_DIR}/bin/assets)
 else()
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
        DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -55,17 +54,17 @@ target_link_options(
   "$<$<PLATFORM_ID:Emscripten>:SHELL:-s USE_GLFW=3>" #
   "$<$<PLATFORM_ID:Emscripten>:SHELL:-s USE_WEBGL2=1>" #
   "$<$<PLATFORM_ID:Emscripten>:SHELL:-s FULL_ES3=1>"
-  "$<$<PLATFORM_ID:Emscripten>:SHELL:-s EXPORT_ES6=1>"
-)
+  "$<$<PLATFORM_ID:Emscripten>:SHELL:-s EXPORT_ES6=1>")
 
-if (NOT SARA_EMSCRIPTEN_BUILD_HTML)
-  target_link_options(emscripten_gl_utilities
+if(NOT SARA_EMSCRIPTEN_BUILD_HTML)
+  target_link_options(
+    emscripten_gl_utilities
     INTERFACE
     "$<$<PLATFORM_ID:Emscripten>:SHELL:-s MODULARIZE=1>"
     "$<$<PLATFORM_ID:Emscripten>:SHELL:-s ENVIRONMENT='web'>"
     "$<$<PLATFORM_ID:Emscripten>:SHELL:-s EXPORTED_RUNTIME_METHODS=\"['specialHTMLTargets', 'JSEvents', 'GL', 'callMain', 'abort']\">"
   )
-endif ()
+endif()
 
 macro(sara_add_wasm_executable file)
   get_filename_component(filename "${file}" NAME_WE)
@@ -122,8 +121,9 @@ target_link_options(test_metric_grid_renderer PRIVATE ${ALL_FLAGS})
 sara_add_wasm_executable(test_image_dewarp_renderer.cpp)
 target_link_libraries(test_image_dewarp_renderer #
                       PRIVATE emscripten_gl_utilities)
-target_link_options(test_image_dewarp_renderer
-  PRIVATE "$<$<PLATFORM_ID:Emscripten>:SHELL:-s ALLOW_MEMORY_GROWTH=1>")
+target_link_options(
+  test_image_dewarp_renderer PRIVATE
+  "$<$<PLATFORM_ID:Emscripten>:SHELL:-s ALLOW_MEMORY_GROWTH=1>")
 
 target_link_options(
   test_metric_grid_renderer
