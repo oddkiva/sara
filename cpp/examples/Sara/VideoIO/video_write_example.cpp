@@ -30,7 +30,11 @@ GRAPHICS_MAIN()
 #endif
   sara::VideoStream video_stream{in_video_filepath};
 
+#ifdef __APPLE__
+  const auto out_video_filepath = "/Users/david/Desktop/test.mkv";
+#else
   const auto out_video_filepath = "/home/david/Desktop/test.mkv";
+#endif
   sara::VideoWriter video_writer{out_video_filepath, video_stream.sizes(), 30};
 
   sara::create_window(video_stream.sizes());
