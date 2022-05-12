@@ -116,12 +116,12 @@ namespace DO::Sara {
   // ======================================================================== //
   // Add an output stream.
   static void add_stream(OutputStream* out_stream, AVFormatContext* out_context,
-                         const AVCodec* codec, enum AVCodecID codec_id)
+                         const AVCodec** codec, enum AVCodecID codec_id)
   {
     AVCodecContext* c;
     /* find the encoder */
-    codec = avcodec_find_encoder(codec_id);
-    if (!codec)
+    *codec = avcodec_find_encoder(codec_id);
+    if (!(*codec))
       throw std::runtime_error{format("Could not find encoder for '%s'",
                                       avcodec_get_name(codec_id))};
     out_stream->stream = avformat_new_stream(out_context, nullptr);
@@ -129,35 +129,35 @@ namespace DO::Sara {
       throw std::runtime_error{"Could not allocate stream"};
 
     out_stream->stream->id = out_context->nb_streams - 1;
-    c = avcodec_alloc_context3(codec);
+    c = avcodec_alloc_context3(*codec);
     if (!c)
       throw std::runtime_error{"Could not alloc an encoding context"};
 
     out_stream->encoding_context = c;
-    switch (codec->type)
+    switch ((*codec)->type)
     {
     case AVMEDIA_TYPE_AUDIO:
       c->sample_fmt =
-          codec->sample_fmts ? codec->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
+          (*codec)->sample_fmts ? (*codec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
       c->bit_rate = 64000;
       c->sample_rate = 44100;
-      if (codec->supported_samplerates)
+      if ((*codec)->supported_samplerates)
       {
-        c->sample_rate = codec->supported_samplerates[0];
-        for (int i = 0;  codec->supported_samplerates[i]; ++i)
+        c->sample_rate = (*codec)->supported_samplerates[0];
+        for (int i = 0; (*codec)->supported_samplerates[i]; ++i)
         {
-          if (codec->supported_samplerates[i] == 44100)
+          if ((*codec)->supported_samplerates[i] == 44100)
             c->sample_rate = 44100;
         }
       }
       c->channels = av_get_channel_layout_nb_channels(c->channel_layout);
       c->channel_layout = AV_CH_LAYOUT_STEREO;
-      if (codec->channel_layouts)
+      if ((*codec)->channel_layouts)
       {
-        c->channel_layout = codec->channel_layouts[0];
-        for (int i = 0; codec->channel_layouts[i]; ++i)
+        c->channel_layout = (*codec)->channel_layouts[0];
+        for (int i = 0; (*codec)->channel_layouts[i]; ++i)
         {
-          if (codec->channel_layouts[i] == AV_CH_LAYOUT_STEREO)
+          if ((*codec)->channel_layouts[i] == AV_CH_LAYOUT_STEREO)
             c->channel_layout = AV_CH_LAYOUT_STEREO;
         }
       }
@@ -201,14 +201,14 @@ namespace DO::Sara {
 
   static void add_video_stream(OutputStream* ostream,
                                AVFormatContext* format_context,
-                               const AVCodec* codec,
+                               const AVCodec** codec,
                                enum AVCodecID codec_id, int width, int height,
                                int frame_rate)
   {
     AVCodecContext* c;
     /* find the encoder */
-    codec = avcodec_find_encoder(codec_id);
-    if (!codec)
+    *codec = avcodec_find_encoder(codec_id);
+    if (!(*codec))
       throw std::runtime_error{format("Could not find encoder for '%s'",
                                       avcodec_get_name(codec_id))};
 
@@ -217,7 +217,7 @@ namespace DO::Sara {
       throw std::runtime_error{"Could not allocate stream"};
 
     ostream->stream->id = format_context->nb_streams - 1;
-    c = avcodec_alloc_context3(codec);
+    c = avcodec_alloc_context3(*codec);
     if (!c)
       throw std::runtime_error{"Could not allocate an encoding context"};
 
@@ -279,8 +279,10 @@ namespace DO::Sara {
     return frame;
   }
 
-  static void open_audio(AVFormatContext*, const AVCodec* codec,
-                         OutputStream* ost, AVDictionary* opt_arg)
+  static void open_audio(AVFormatContext*,
+                         const AVCodec* codec,
+                         OutputStream* ost,
+                         AVDictionary* opt_arg)
   {
     AVCodecContext* c;
     int nb_samples;
@@ -566,7 +568,7 @@ namespace DO::Sara {
     if (_output_format->video_codec != AV_CODEC_ID_NONE)
     {
       // add_stream(&video_st, oc, &video_codec, fmt->video_codec);
-      add_video_stream(&_video_stream, _format_context, _video_codec,
+      add_video_stream(&_video_stream, _format_context, &_video_codec,
                        _output_format->video_codec, sizes.x(), sizes.y(),
                        frame_rate);
       _have_video = 1;
@@ -574,7 +576,7 @@ namespace DO::Sara {
     }
     if (_output_format->audio_codec != AV_CODEC_ID_NONE)
     {
-      add_stream(&_audio_stream, _format_context, _audio_codec,
+      add_stream(&_audio_stream, _format_context, &_audio_codec,
                  _output_format->audio_codec);
       _have_audio = 1;
       _encode_audio = 1;
