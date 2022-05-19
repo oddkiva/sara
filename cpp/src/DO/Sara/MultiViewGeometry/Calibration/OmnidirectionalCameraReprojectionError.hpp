@@ -17,18 +17,75 @@
 
 namespace DO::Sara {
 
+  template <typename T>
+  struct OmnidirectionalCameraParameterVector
+  {
+    static constexpr auto size = 11;
+    enum Index
+    {
+      FX = 0,
+      FY = 1,
+      SHEAR = 2,
+      U0 = 3,
+      V0 = 4,
+      K0 = 5,
+      K1 = 6,
+      K2 = 7,
+      P0 = 8,
+      P1 = 9,
+      XI = 10
+    };
+
+    const T* data = nullptr;
+
+    inline auto f(const int i) const -> const T&
+    {
+      return data[FX + i];
+    }
+
+    inline auto shear() const -> const T&
+    {
+      return data[SHEAR];
+    }
+
+    inline auto u0() const -> const T&
+    {
+      return data[U0];
+    }
+
+    inline auto v0() const -> const T&
+    {
+      return data[U0];
+    }
+
+    inline auto k(const int i) const -> const T&
+    {
+      return data[K0 + i];
+    }
+
+    inline auto p(const int i) const -> const T&
+    {
+      return data[P0 + i];
+    }
+
+    inline auto xi() const -> const T&
+    {
+      return data[XI];
+    }
+  };
+
   struct OmnidirectionalCameraReprojectionError
   {
     static constexpr auto residual_dimension = 2;
-    static constexpr auto intrinsic_parameter_count = 10;
+    static constexpr auto intrinsic_parameter_count =
+        OmnidirectionalCameraParameterVector<double>::size;
     static constexpr auto extrinsic_parameter_count = 6;
 
-    inline OmnidirectionalCameraReprojectionError(double imaged_x,
-                                                  double imaged_y,  //
-                                                  double scene_x,
-                                                  double scene_y)
-      : image_point{imaged_x, imaged_y}
-      , scene_point{scene_x, scene_y}
+    inline OmnidirectionalCameraReprojectionError(
+        const Eigen::Vector2d& image_point,  //
+        const Eigen::Vector2d& scene_point)
+      : image_point{image_point}
+      , scene_point{scene_point}
     {
     }
 
@@ -81,7 +138,7 @@ namespace DO::Sara {
       const Vector2 radial_factor = m * (k1 * r2 + k2 * r4 + k3 * r6);
 
       // Tangential component (additive).
-      static constexpr auto two = static_cast<T>(2);
+      static constexpr auto two = 2.;
       const auto tx = two * p1 * m.x() * m.y() + p2 * (r2 + two * p1 * m.x());
       const auto ty = p1 * (r2 + two * p1 * m.y()) + two * p2 * m.x() * m.y();
 
@@ -107,16 +164,14 @@ namespace DO::Sara {
       return true;
     }
 
-    static inline auto create(const double image_x, const double image_y,
-                              const double scene_x, const double scene_y)
+    static inline auto create(const Eigen::Vector2d& image_point,
+                              const Eigen::Vector2d& scene_point)
     {
       return new ceres::AutoDiffCostFunction<
           OmnidirectionalCameraReprojectionError,  //
           residual_dimension, intrinsic_parameter_count,
           extrinsic_parameter_count>(
-          new OmnidirectionalCameraReprojectionError(image_x, image_y,  //
-                                                     scene_x, scene_y)  //
-      );
+          new OmnidirectionalCameraReprojectionError(image_point, scene_point));
     }
 
     Eigen::Vector2d image_point;
