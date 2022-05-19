@@ -267,28 +267,30 @@ GRAPHICS_MAIN()
 // #define GOPRO7_SUPERVIEW
 #define FISHEYE
 
-  auto video_stream = sara::VideoStream
-  {
+  const auto video_filepath =
 #if defined(SAMSUNG_GALAXY_J6)
-    "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
+      "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
 #elif defined(GOPRO4)
-    "/home/david/Desktop/calibration/gopro-hero4/chessboard.mp4"
+      "/home/david/Desktop/calibration/gopro-hero4/chessboard.mp4"
 #elif defined(IPHONE12)
-    "/home/david/Desktop/calibration/iphone12/chessboard.mov"
+      "/home/david/Desktop/calibration/iphone12/chessboard.mov"
 #elif defined(GOPRO7_WIDE)
-    "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
+      "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
 #elif defined(GOPRO7_SUPERVIEW)
-    "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
-    "GH010053.MP4"
+      "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
+      "GH010053.MP4"
 #elif defined(FISHEYE)
-    "/home/david/Desktop/calibration/fisheye/chessboard3.MP4"
+      "/home/david/Desktop/calibration/fisheye/chessboard3.MP4"
 #else
+      ""
 #  pragma error "INVALID!"
 #endif
-  };
+      ;
+
+  auto video_stream = sara::VideoStream{video_filepath};
   auto frame = video_stream.frame();
 
-#if defined(LUXVISION)
+#if defined(FISHEYE)
   static const auto pattern_size = Eigen::Vector2i{7, 12};
   static constexpr auto square_size = 7._cm;
 #elif defined(SAMSUNG_GALAXY_J6) || defined(GOPRO4) || defined(IPHONE12)
