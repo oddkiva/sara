@@ -11,6 +11,8 @@
 
 //! @example
 
+#include <unordered_map>
+
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
