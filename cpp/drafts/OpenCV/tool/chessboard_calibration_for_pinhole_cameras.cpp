@@ -1,15 +1,12 @@
+#include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/MultiViewGeometry/Calibration/PinholeCameraReprojectionError.hpp>
 #include <DO/Sara/MultiViewGeometry/Resectioning/HartleyZisserman.hpp>
 #include <DO/Sara/VideoIO.hpp>
-
-#include <ceres/ceres.h>
-#include <ceres/rotation.h>
-
-#include <opencv2/core/eigen.hpp>
 
 #include <drafts/OpenCV/HomographyDecomposition.hpp>
 #include <drafts/OpenCV/HomographyEstimation.hpp>
@@ -37,85 +34,13 @@ static inline auto init_K(int w, int h) -> Eigen::Matrix3d
 }
 
 
-struct ReprojectionError
-{
-  static constexpr auto residual_dimension = 2;
-  static constexpr auto intrinsic_parameter_count = 5;
-  static constexpr auto extrinsic_parameter_count = 6;
-
-  inline ReprojectionError(double imaged_x, double imaged_y,  //
-                           double scene_x, double scene_y)
-    : image_point{imaged_x, imaged_y}
-    , scene_point{scene_x, scene_y}
-  {
-  }
-
-  // We optimize:
-  // - the single calibration matrix across all images
-  // - as many camera poses (R, t) as there are images
-  template <typename T>
-  inline auto operator()(const T* const intrinsics, const T* const extrinsics,
-                         T* residuals) const -> bool
-  {
-    // 1. Apply [R|t] = extrinsics[...]
-    //
-    // a) extrinsics[0, 1, 2] are the angle-axis rotation.
-    auto scene_coords =
-        std::array<T, 3>{T(scene_point.x()), T(scene_point.y()), T{}};
-    auto camera_coords = std::array<T, 3>{};
-    ceres::AngleAxisRotatePoint(extrinsics, scene_coords.data(),
-                                camera_coords.data());
-
-    // b) extrinsics[3, 4, 5] are the translation.
-    camera_coords[0] += extrinsics[3];
-    camera_coords[1] += extrinsics[4];
-    camera_coords[2] += extrinsics[5];
-
-    // 2. Calculate the normalized camera coordinates.
-    const auto xp = camera_coords[0] / camera_coords[2];
-    const auto yp = camera_coords[1] / camera_coords[2];
-
-    // 3. Apply the calibration matrix.
-    const auto& fx = intrinsics[0];
-    const auto& fy = intrinsics[1];
-    const auto& s  = intrinsics[2];
-    const auto& u0 = intrinsics[3];
-    const auto& v0 = intrinsics[4];
-    const auto predicted_x = fx * xp + s * yp + u0;
-    const auto predicted_y = fy * yp          + v0;
-
-    // The error is the difference between the predicted and observed position.
-    residuals[0] = predicted_x - static_cast<T>(image_point[0]);
-    residuals[1] = predicted_y - static_cast<T>(image_point[1]);
-
-    return true;
-  }
-
-  // Factory to hide the construction of the CostFunction object from
-  // the client code.
-  static inline auto create(const double imaged_x, const double imaged_y,
-                            const double scene_x, const double scene_y)
-  {
-    return new ceres::AutoDiffCostFunction<ReprojectionError,  //
-                                           residual_dimension,
-                                           intrinsic_parameter_count,
-                                           extrinsic_parameter_count>(
-        new ReprojectionError(imaged_x, imaged_y, scene_x, scene_y)  //
-    );
-  }
-
-  Eigen::Vector2d image_point;
-  Eigen::Vector2d scene_point;
-};
-
-
 class ChessboardCalibrationProblem
 {
 public:
   static constexpr auto intrinsic_parameter_count =
-      ReprojectionError::intrinsic_parameter_count;
+      sara::PinholeCameraReprojectionError::intrinsic_parameter_count;
   static constexpr auto extrinsic_parameter_count =
-      ReprojectionError::extrinsic_parameter_count;
+      sara::PinholeCameraReprojectionError::extrinsic_parameter_count;
 
   inline auto initialize_intrinsics(const Eigen::Matrix3d& K) -> void
   {
@@ -211,10 +136,6 @@ public:
 
   inline auto transform_into_ceres_problem(ceres::Problem& problem) -> void
   {
-#ifdef DEBUG_CALIBRATION_PROBLEM
-    SARA_CHECK(_num_images);
-#endif
-
     for (auto n = 0; n < _num_images; ++n)
     {
       for (auto y = 0; y < _h; ++y)
@@ -233,27 +154,9 @@ public:
           const auto scene_y =
               static_cast<double>(_observations_3d[2 * corner_index + 1]);
 
-#ifdef DEBUG_CALIBRATION_PROBLEM
-          SARA_CHECK(n);
-          SARA_CHECK(corner_index);
-          SARA_DEBUG << "image: " << image_x << " " << image_y << std::endl;
-          SARA_DEBUG << "scene: " << scene_x << " " << scene_y << std::endl;
-
-          auto extrinsics = mutable_extrinsics(n);
-          SARA_DEBUG << "angle-axis: "        //
-                     << extrinsics[0] << " "  //
-                     << extrinsics[1] << " "  //
-                     << extrinsics[2] << std::endl;
-          SARA_DEBUG << "translation: "           //
-                     << extrinsics[3 + 0] << " "  //
-                     << extrinsics[3 + 1] << " "  //
-                     << extrinsics[3 + 2] << std::endl;
-          sara::draw_circle(image_x, image_y, 3., sara::Blue8, 4);
-          sara::get_key();
-#endif
-
-          auto cost_function = ReprojectionError::create(image_x, image_y,  //
-                                                         scene_x, scene_y);
+          auto cost_function = sara::PinholeCameraReprojectionError::create(  //
+              image_x, image_y,                                               //
+              scene_x, scene_y);
 
           problem.AddResidualBlock(cost_function, nullptr, mutable_intrinsics(),
                                    mutable_extrinsics(n));
@@ -282,7 +185,7 @@ GRAPHICS_MAIN()
 // #define IPHONE12
 // #define GOPRO7_WIDE
 // #define GOPRO7_SUPERVIEW
-#define LUXVISION
+#define FISHEYE
 
   auto video_stream = sara::VideoStream
   {
@@ -297,18 +200,15 @@ GRAPHICS_MAIN()
 #elif defined(GOPRO7_SUPERVIEW)
     "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
     "GH010053.MP4"
-#elif defined(LUXVISION)
-    // "/media/Linux Data/"
-    // "ha/safetytech/210330_FishEye/calibration_luxvision_cameras/"
-    // "checkboard_luxvision_1.MP4"
-    "/home/david/Desktop/calibration/safetytech/chessboard3.MP4"
+#elif defined(FISHEYE)
+    "/home/david/Desktop/calibration/fisheye/chessboard3.MP4"
 #else
 #  pragma error "INVALID!"
 #endif
   };
   auto frame = video_stream.frame();
 
-#if defined(LUXVISION)
+#if defined(FISHEYE)
   static const auto pattern_size = Eigen::Vector2i{7, 12};
   static constexpr auto square_size = 7._cm;
 #elif defined(SAMSUNG_GALAXY_J6) || defined(GOPRO4) || defined(IPHONE12)
@@ -397,12 +297,14 @@ GRAPHICS_MAIN()
 
   const auto fx = calibration_problem.mutable_intrinsics()[0];
   const auto fy = calibration_problem.mutable_intrinsics()[1];
-  const auto s  = calibration_problem.mutable_intrinsics()[2];
+  const auto s = calibration_problem.mutable_intrinsics()[2];
   const auto u0 = calibration_problem.mutable_intrinsics()[3];
   const auto v0 = calibration_problem.mutable_intrinsics()[4];
 
+  // clang-format off
   K(0, 0) = fx; K(0, 1) =  s; K(0, 2) = u0;
                 K(1, 1) = fy; K(1, 2) = v0;
+  // clang-format on
   SARA_DEBUG << "K =\n" << K << std::endl;
 
   for (auto i = 0u; i < chessboards.size(); ++i)
