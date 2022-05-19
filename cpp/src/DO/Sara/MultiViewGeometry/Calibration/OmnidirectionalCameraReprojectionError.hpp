@@ -20,7 +20,7 @@ namespace DO::Sara {
   template <typename T>
   struct OmnidirectionalCameraParameterVector
   {
-    static constexpr auto size = 11;
+    static constexpr auto size = 10;
     enum Index
     {
       FX = 0,
@@ -30,10 +30,9 @@ namespace DO::Sara {
       V0 = 4,
       K0 = 5,
       K1 = 6,
-      K2 = 7,
-      P0 = 8,
-      P1 = 9,
-      XI = 10
+      P0 = 7,
+      P1 = 8,
+      XI = 9
     };
 
     const T* data = nullptr;
@@ -118,7 +117,7 @@ namespace DO::Sara {
       // 1. Project on the unit sphere (reflection from the spherical mirror).
       const Vector3 Xs = camera_coords.normalized();
       // 2. Change coordinates.
-      const auto& xi = intrinsics[10];
+      const auto& xi = intrinsics[9];
       const Vector3 Xe = Xs + xi * Vector3::UnitZ();
       // 3. Project the reflected ray by the mirror to the normalized plane z
       // = 1.
@@ -127,15 +126,13 @@ namespace DO::Sara {
       // Distortion.
       const auto& k1 = intrinsics[5];
       const auto& k2 = intrinsics[6];
-      const auto& k3 = intrinsics[7];
-      const auto& p1 = intrinsics[8];
-      const auto& p2 = intrinsics[9];
+      const auto& p1 = intrinsics[7];
+      const auto& p2 = intrinsics[8];
 
       // Radial component (additive).
       const auto r2 = m.squaredNorm();
       const auto r4 = r2 * r2;
-      const auto r6 = r4 * r2;
-      const Vector2 radial_factor = m * (k1 * r2 + k2 * r4 + k3 * r6);
+      const Vector2 radial_factor = m * (k1 * r2 + k2 * r4);
 
       // Tangential component (additive).
       static constexpr auto two = 2.;
@@ -178,4 +175,42 @@ namespace DO::Sara {
     Eigen::Vector2d scene_point;
   };
 
+  struct DistortionParamRegularizer
+  {
+    static constexpr auto residual_dimension = 4;
+    static constexpr auto intrinsic_parameter_count =
+        OmnidirectionalCameraParameterVector<double>::size;
+
+    inline DistortionParamRegularizer(double scale = 1.0)
+      : scale{scale}
+    {
+    }
+
+    template <typename T>
+    inline auto operator()(const T* const intrinsics, T* residuals) const
+        -> bool
+    {
+      const auto& k1 = intrinsics[5];
+      const auto& k2 = intrinsics[6];
+      const auto& p1 = intrinsics[7];
+      const auto& p2 = intrinsics[8];
+
+      residuals[0] = scale * k1;
+      residuals[1] = scale * k2;
+      residuals[0] = scale * p1;
+      residuals[1] = scale * p2;
+
+      return true;
+    }
+
+    static inline auto create(double scale)
+    {
+      return new ceres::AutoDiffCostFunction<DistortionParamRegularizer,  //
+                                             residual_dimension,
+                                             intrinsic_parameter_count>(
+          new DistortionParamRegularizer{scale});
+    }
+
+    double scale;
+  };
 }  // namespace DO::Sara

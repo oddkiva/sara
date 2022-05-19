@@ -16,5 +16,8 @@
 #include "OpenCVInterop.hpp"
 
 
+auto estimate_H(const Eigen::MatrixXd& p1, const Eigen::MatrixXd& p2)
+    -> Eigen::Matrix3d;
+
 auto estimate_H(const DO::Sara::OpenCV::Chessboard& chessboard)
     -> Eigen::Matrix3d;
