@@ -19,7 +19,10 @@ add_library(
   imgui_tables.cpp
   imgui_widgets.cpp)
 
-target_link_libraries(ImGui PUBLIC $<$<BOOL:${FREETYPE_FOUND}>:Freetype::Freetype>)
+target_link_libraries(ImGui PUBLIC
+  $<$<BOOL:${FREETYPE_FOUND}>:Freetype::Freetype>
+  $<$<BOOL:${glfw3_FOUND}>:glfw>
+)
 target_include_directories(ImGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
                                         ${CMAKE_CURRENT_SOURCE_DIR}/backends)
 
