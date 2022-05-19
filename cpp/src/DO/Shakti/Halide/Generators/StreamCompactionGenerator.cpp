@@ -80,10 +80,10 @@ namespace {
       n_index_fn.compute_root();
       value_fn.compute_root();
 
-      auto& x_indices = xysn[0];
-      auto& y_indices = xysn[1];
-      auto& s_indices = xysn[2];
-      auto& n_indices = xysn[3];
+      auto x_indices = xysn[0];
+      auto y_indices = xysn[1];
+      auto s_indices = xysn[2];
+      auto n_indices = xysn[3];
       x_indices(x) = x_index_fn(x);
       y_indices(x) = y_index_fn(x);
       s_indices(x) = s_index_fn(x) + 1;  // Notice the +1 offset because we are processing SIFT.

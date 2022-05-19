@@ -37,8 +37,3 @@ Manhattan Image with Radial Distortion
 Level Sets
 ==========
 - fix the fast marching with dealing with negative sign.
-
-
-WEBASSEMBLY+EMSCRIPTEN
-======================
-Explore!!!

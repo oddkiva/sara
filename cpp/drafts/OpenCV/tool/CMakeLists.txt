@@ -7,11 +7,13 @@ foreach(file ${SOURCE_FILES})
   target_link_libraries(
     ${filename}
     PRIVATE
-      ${DO_Sara_LIBRARIES} ${OpenCV_LIBS} ${CERES_LIBRARIES}
-      HomographyUtilities # $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
-  )
+    DO::Sara::Core DO::Sara::VideoIO DO::Sara::Graphics #
+    ${OpenCV_LIBS} #
+    ${CERES_LIBRARIES}
+    HomographyUtilities
+    $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
   set_target_properties(
     ${filename} PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS}
-                           RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
   set_property(TARGET ${filename} PROPERTY FOLDER "DRAFTS/OpenCV")
 endforeach()

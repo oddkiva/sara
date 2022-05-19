@@ -21,6 +21,12 @@
 
 #include "Chessboard/SaddlePointDetection.hpp"
 
+#include <functional>
+#include <optional>
+
+#include <functional>
+#include <optional>
+
 
 namespace sara = DO::Sara;
 
@@ -61,11 +67,24 @@ struct CircularProfileExtractor
       intensity_profile(n) = interpolate(image, pn);
     }
 
+    // // Collect all the intensity values in the disk for more robustness.
+    // const auto image_patch =
+    //     sara::safe_crop(image, center.cast<int>(), circle_radius)
+    //         .compute<sara::Gaussian>(1.6f);
+    // sara::display(image_patch);
+    // sara::get_key();
+
+    // // Normalize the intensities.
+    // const auto min_intensity = image_patch.flat_array().minCoeff();
+    // const auto max_intensity = image_patch.flat_array().maxCoeff();
+
     // Normalize the intensities.
     const auto min_intensity = intensity_profile.minCoeff();
     const auto max_intensity = intensity_profile.maxCoeff();
-    const auto mid_intensity = (max_intensity + min_intensity) * 0.5f;
-    intensity_profile -= mid_intensity;
+
+    // The intensity treshold is the mid-point value.
+    const auto intensity_threshold = (max_intensity + min_intensity) * 0.5f;
+    intensity_profile -= intensity_threshold;
 
     return intensity_profile;
   }
@@ -117,13 +136,13 @@ auto __main(int argc, char** argv) -> int
   if (argc < 2)
     return 1;
 
-  static constexpr auto nms_radius = 5;
   static constexpr auto adaptive_thres = 0.05f;
   static constexpr auto sigma = 1.6f;
 
   const auto video_file = std::string{argv[1]};
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
+  auto video_frame_copy = sara::Image<sara::Rgb8>{};
   auto frame_number = -1;
 
   auto profile_extractor = CircularProfileExtractor{};
@@ -142,6 +161,7 @@ auto __main(int argc, char** argv) -> int
 
     const auto image_gray = video_frame.convert<float>();
     const auto image_blurred = image_gray.compute<sara::Gaussian>(sigma);
+    video_frame_copy = image_blurred.convert<sara::Rgb8>();
 
     // Calculate the hessian matrix.
     const auto hessian = image_blurred.compute<sara::Hessian>();
@@ -170,13 +190,12 @@ auto __main(int argc, char** argv) -> int
           profile_extractor.num_circle_sample_points        //
       );
 
-      // ANALYSIS ON IMAGE INTENSITY:
-      //
       // Count the number of zero-crossings: there must be 4 zero-crossings
       // because of the chessboard pattern.
       if (zero_crossings.size() != 4u)
         continue;
 
+#ifdef FILTER
       auto angle_deltas = std::vector<double>{};
       for (auto i = 0; i < 4; ++i)
       {
@@ -207,8 +226,9 @@ auto __main(int argc, char** argv) -> int
         }
       if (bad)
         continue;
+#endif
 
-      sara::draw_circle(video_frame, s.p.x(), s.p.y(),
+      sara::draw_circle(video_frame_copy, s.p.x(), s.p.y(),
                         profile_extractor.circle_radius, sara::Red8);
       sara::draw(video_frame, s);
 
@@ -217,11 +237,11 @@ auto __main(int argc, char** argv) -> int
         const auto& r = profile_extractor.circle_radius;
         const auto e = Eigen::Vector2d{std::cos(angle), std::sin(angle)};
         const auto p = s.p.cast<double>() + r * e;
-        sara::fill_circle(video_frame, p.x(), p.y(), 2, sara::Yellow8);
+        sara::fill_circle(video_frame_copy, p.x(), p.y(), 2, sara::Yellow8);
       }
     }
 
-    sara::display(video_frame);
+    sara::display(video_frame_copy);
     sara::get_key();
   }
 

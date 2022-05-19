@@ -28,13 +28,13 @@ namespace DO::Sara {
         if (det_of_hessian(x, y) > thres)
           continue;
 
-        // One simple filter...
-        auto qr_factorizer = hessian(x, y).householderQr();
-        const Eigen::Matrix2f R =
-            qr_factorizer.matrixQR().triangularView<Eigen::Upper>();
+        // // One simple filter...
+        // auto qr_factorizer = hessian(x, y).householderQr();
+        // const Eigen::Matrix2f R =
+        //     qr_factorizer.matrixQR().triangularView<Eigen::Upper>();
 
-        if (std::abs((R(0, 0) - R(1, 1)) / R(0, 0)) > 0.1f)
-          continue;
+        // if (std::abs((R(0, 0) - R(1, 1)) / R(0, 0)) > 0.1f)
+        //   continue;
 
         // TODO: corner filtering by counting the number of zero crossing over a
         // small cicle.
