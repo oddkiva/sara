@@ -78,11 +78,13 @@ struct ReprojectionError
     // 3. Apply the calibration matrix.
     const auto& fx = intrinsics[0];
     const auto& fy = intrinsics[1];
-    const auto& s  = intrinsics[2];
+    const auto& s = intrinsics[2];
     const auto& u0 = intrinsics[3];
     const auto& v0 = intrinsics[4];
-    const auto predicted_x = fx * xp + s * yp + u0;
-    const auto predicted_y = fy * yp          + v0;
+    // clang-format off
+    const auto predicted_x = fx * xp +  s * yp + u0;
+    const auto predicted_y =           fy * yp + v0;
+    // clang-format on
 
     // The error is the difference between the predicted and observed position.
     residuals[0] = predicted_x - static_cast<T>(image_point[0]);
@@ -211,10 +213,6 @@ public:
 
   inline auto transform_into_ceres_problem(ceres::Problem& problem) -> void
   {
-#ifdef DEBUG_CALIBRATION_PROBLEM
-    SARA_CHECK(_num_images);
-#endif
-
     for (auto n = 0; n < _num_images; ++n)
     {
       for (auto y = 0; y < _h; ++y)
@@ -233,30 +231,15 @@ public:
           const auto scene_y =
               static_cast<double>(_observations_3d[2 * corner_index + 1]);
 
-#ifdef DEBUG_CALIBRATION_PROBLEM
-          SARA_CHECK(n);
-          SARA_CHECK(corner_index);
-          SARA_DEBUG << "image: " << image_x << " " << image_y << std::endl;
-          SARA_DEBUG << "scene: " << scene_x << " " << scene_y << std::endl;
-
-          auto extrinsics = mutable_extrinsics(n);
-          SARA_DEBUG << "angle-axis: "        //
-                     << extrinsics[0] << " "  //
-                     << extrinsics[1] << " "  //
-                     << extrinsics[2] << std::endl;
-          SARA_DEBUG << "translation: "           //
-                     << extrinsics[3 + 0] << " "  //
-                     << extrinsics[3 + 1] << " "  //
-                     << extrinsics[3 + 2] << std::endl;
-          sara::draw_circle(image_x, image_y, 3., sara::Blue8, 4);
-          sara::get_key();
-#endif
-
           auto cost_function = ReprojectionError::create(image_x, image_y,  //
                                                          scene_x, scene_y);
 
-          problem.AddResidualBlock(cost_function, nullptr, mutable_intrinsics(),
-                                   mutable_extrinsics(n));
+          problem.AddResidualBlock(  //
+              cost_function,         //
+              nullptr,               //
+              mutable_intrinsics(),  //
+              mutable_extrinsics(n)  //
+          );
         }
       }
     }
@@ -282,33 +265,32 @@ GRAPHICS_MAIN()
 // #define IPHONE12
 // #define GOPRO7_WIDE
 // #define GOPRO7_SUPERVIEW
-#define LUXVISION
+#define FISHEYE
 
-  auto video_stream = sara::VideoStream
-  {
+  const auto video_filepath =
 #if defined(SAMSUNG_GALAXY_J6)
-    "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
+      "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
 #elif defined(GOPRO4)
-    "/home/david/Desktop/calibration/gopro-hero4/chessboard.mp4"
+      "/home/david/Desktop/calibration/gopro-hero4/chessboard.mp4"
 #elif defined(IPHONE12)
-    "/home/david/Desktop/calibration/iphone12/chessboard.mov"
+      "/home/david/Desktop/calibration/iphone12/chessboard.mov"
 #elif defined(GOPRO7_WIDE)
-    "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
+      "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
 #elif defined(GOPRO7_SUPERVIEW)
-    "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
-    "GH010053.MP4"
-#elif defined(LUXVISION)
-    // "/media/Linux Data/"
-    // "ha/safetytech/210330_FishEye/calibration_luxvision_cameras/"
-    // "checkboard_luxvision_1.MP4"
-    "/home/david/Desktop/calibration/safetytech/chessboard3.MP4"
+      "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
+      "GH010053.MP4"
+#elif defined(FISHEYE)
+      "/home/david/Desktop/calibration/fisheye/chessboard3.MP4"
 #else
+      ""
 #  pragma error "INVALID!"
 #endif
-  };
+      ;
+
+  auto video_stream = sara::VideoStream{video_filepath};
   auto frame = video_stream.frame();
 
-#if defined(LUXVISION)
+#if defined(FISHEYE)
   static const auto pattern_size = Eigen::Vector2i{7, 12};
   static constexpr auto square_size = 7._cm;
 #elif defined(SAMSUNG_GALAXY_J6) || defined(GOPRO4) || defined(IPHONE12)
@@ -397,12 +379,14 @@ GRAPHICS_MAIN()
 
   const auto fx = calibration_problem.mutable_intrinsics()[0];
   const auto fy = calibration_problem.mutable_intrinsics()[1];
-  const auto s  = calibration_problem.mutable_intrinsics()[2];
+  const auto s = calibration_problem.mutable_intrinsics()[2];
   const auto u0 = calibration_problem.mutable_intrinsics()[3];
   const auto v0 = calibration_problem.mutable_intrinsics()[4];
 
+  // clang-format off
   K(0, 0) = fx; K(0, 1) =  s; K(0, 2) = u0;
                 K(1, 1) = fy; K(1, 2) = v0;
+  // clang-format on
   SARA_DEBUG << "K =\n" << K << std::endl;
 
   for (auto i = 0u; i < chessboards.size(); ++i)
