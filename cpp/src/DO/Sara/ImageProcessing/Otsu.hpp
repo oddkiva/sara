@@ -76,32 +76,9 @@ namespace DO::Sara {
     auto binary = Image<std::uint8_t>{image.sizes()};
     std::transform(image_quantized.begin(), image_quantized.end(),
                    binary.begin(),
-                   [best_t](const auto& v) { return v < best_t ? 0 : 255; });
+                   [best_t](const auto& v) { return v < best_t ? 0 : 1; });
 
     return binary;
-  }
-
-  // Implemented from Wikipedia's explanation.
-  inline auto otsu_adaptive_binarization(const ImageView<float>& image,
-                                         const Eigen::Vector2i& grid_sizes)
-  {
-    auto image_binarized = Image<std::uint8_t>{image.sizes()};
-    for (auto y = 0; y < image.height(); y += grid_sizes.y())
-    {
-      for (auto x = 0; x < image.width(); x += grid_sizes.x())
-      {
-        const Eigen::Vector2i start = Eigen::Vector2i{x, y};
-        const Eigen::Vector2i end =
-            (start + grid_sizes).cwiseMin(image.sizes());
-        const auto patch = safe_crop(image, start, end);
-        const auto patch_binarized = otsu_adaptive_binarization(patch);
-
-        for (auto v = 0; v < patch_binarized.height(); ++v)
-          for (auto u = 0; u < patch_binarized.width(); ++u)
-            image_binarized(x + u, y + v) = patch_binarized(u, v);
-      }
-    }
-    return image_binarized;
   }
 
 }  // namespace DO::Sara
