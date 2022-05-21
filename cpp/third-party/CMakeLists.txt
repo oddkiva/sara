@@ -4,7 +4,13 @@ set(THIRDPARTY_FOLDER_NAME "Third-Party")
 
 message(STATUS "  - easyexif")
 add_subdirectory(easyexif)
-set_property(TARGET easyexif PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
+
+message(STATUS "  - imgui")
+add_subdirectory(imgui)
+
+if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  return ()
+endif ()
 
 message(STATUS "  - FLANN")
 add_subdirectory(flann)

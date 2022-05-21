@@ -24,3 +24,5 @@ add_subdirectory(NuScenes)
 add_subdirectory(Taskflow)
 
 add_subdirectory(OpenCV)
+
+add_subdirectory(Emscripten)

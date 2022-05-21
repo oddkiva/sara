@@ -279,10 +279,10 @@ GRAPHICS_MAIN()
 {
 // #define SAMSUNG_GALAXY_J6
 // #define GOPRO4
-#define IPHONE12
+// #define IPHONE12
 // #define GOPRO7_WIDE
 // #define GOPRO7_SUPERVIEW
-// #define LUXVISION
+#define LUXVISION
 
   auto video_stream = sara::VideoStream
   {
@@ -298,9 +298,10 @@ GRAPHICS_MAIN()
     "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
     "GH010053.MP4"
 #elif defined(LUXVISION)
-    "/media/Linux Data/"
-    "ha/safetytech/210330_FishEye/calibration_luxvision_cameras/"
-    "checkboard_luxvision_1.MP4"
+    // "/media/Linux Data/"
+    // "ha/safetytech/210330_FishEye/calibration_luxvision_cameras/"
+    // "checkboard_luxvision_1.MP4"
+    "/home/david/Desktop/calibration/safetytech/chessboard3.MP4"
 #else
 #  pragma error "INVALID!"
 #endif

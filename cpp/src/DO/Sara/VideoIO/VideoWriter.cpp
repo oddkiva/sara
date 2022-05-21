@@ -52,10 +52,10 @@ av_always_inline char* av_err2str(int errnum)
 #endif
 
 
-constexpr auto STREAM_DURATION = 10.0;
-constexpr auto STREAM_FRAME_RATE = 25;              /* 25 images/s */
-constexpr auto STREAM_PIX_FMT = AV_PIX_FMT_YUV420P; /* default pix_fmt */
-constexpr auto SCALE_FLAGS = SWS_BICUBIC;
+static constexpr auto STREAM_DURATION = 10.0;
+static constexpr auto STREAM_FRAME_RATE = 25;              /* 25 images/s */
+static constexpr auto STREAM_PIX_FMT = AV_PIX_FMT_YUV420P; /* default pix_fmt */
+static constexpr auto SCALE_FLAGS = SWS_BICUBIC;
 
 
 namespace DO::Sara {

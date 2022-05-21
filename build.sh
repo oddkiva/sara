@@ -23,7 +23,10 @@ function build_library()
   # ========================================================================= #
   # Specify the build type except for Xcode.
   #
-  if [ "${build_type}" == "Xcode" ]; then
+  if [ "${build_type}" == "emscripten" ]; then
+    local cmake_options="-G Ninja "
+    local cmake_options+="-DCMAKE_BUILD_TYPE=${build_type} "
+  elif [ "${build_type}" == "Xcode" ]; then
     local cmake_options="-G Xcode "
   else
     local cmake_options="-G Ninja "
@@ -41,7 +44,7 @@ function build_library()
     local os_name=$(lsb_release -is)
     local os_version=$(lsb_release -rs)
 
-    # I really want C++17.
+    # I really want C++17 on older Ubuntu distributions.
     if [[ ${os_name} == "Ubuntu" ]] && [[ ${os_version} == "16.04" ]]; then
       cmake_options+="-DCMAKE_C_COMPILER=$(which gcc-7) "
       cmake_options+="-DCMAKE_CXX_COMPILER=$(which g++-7) "
@@ -56,7 +59,7 @@ function build_library()
 
   # ========================================================================= #
   # Support for YouCompleteMe code auto-completion.
-  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
+  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON "
 
   # ========================================================================= #
   # Setup Swift toolchain.
@@ -78,7 +81,7 @@ function build_library()
   # if [ "${platform_name}" == "Linux" ]; then
   #   cmake_options+="-DQt5_DIR=${HOME}/opt/Qt-5.15.0-amd64/lib/cmake/Qt5 "
   if [ "${platform_name}" == "Darwin" ]; then
-    cmake_options+="-DSARA_USE_QT6=ON "
+    cmake_options+="-DSARA_USE_QT6:BOOL=ON "
     cmake_options+="-DQt6_DIR=$(brew --prefix qt)/lib/cmake/Qt6 "
   fi
 
@@ -86,18 +89,18 @@ function build_library()
   # Sara specific options.
   #
   # Compile the Video I/O module.
-  cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
-  cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
+  cmake_options+="-DSARA_BUILD_VIDEOIO:BOOL=ON "
+  cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS:BOOL=ON "
   cmake_options+="-DPYTHON_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") "
   cmake_options+="-DPYTHON_LIBRARY=$(python3 -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") "
 
   # Compile shared or static libraries.
-  cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
-  cmake_options+="-DSARA_BUILD_TESTS=ON "
-  cmake_options+="-DSARA_BUILD_SAMPLES=ON "
+  cmake_options+="-DSARA_BUILD_SHARED_LIBS:BOOL=ON "
+  cmake_options+="-DSARA_BUILD_TESTS:BOOL=ON "
+  cmake_options+="-DSARA_BUILD_SAMPLES:BOOL=ON "
 
   # Compile Halide code.
-  cmake_options+="-DSARA_USE_HALIDE=ON "
+  cmake_options+="-DSARA_USE_HALIDE:BOOL=ON "
   if [ "${platform_name}" == "Linux" ]; then
     cmake_options+="-DCMAKE_PREFIX_PATH=$HOME/opt/Halide-13.0.0-x86-64-linux "
   fi
@@ -110,6 +113,9 @@ function build_library()
     cmake_options+="-DNvidiaVideoCodec_ROOT=${HOME}/opt/Video_Codec_SDK_11.0.10 "
   fi
 
+  # Use OpenCV tools
+  cmake_options+="-DSARA_USE_OPENCV:BOOL=ON"
+
   echo $(which cmake)
   echo $(cmake --version)
 
@@ -117,7 +123,7 @@ function build_library()
   # ========================================================================= #
   # Now generate the makefile project.
   if [ "${build_type}" == "emscripten" ]; then
-    emconfigure cmake ../sara
+    emcmake cmake ../sara
   else
     time cmake ../sara ${cmake_options} \
       --profiling-format=google-trace \
@@ -137,9 +143,11 @@ function build_library()
   fi
   time ctest ${test_options}
 
-  # Run Python tests.
-  time cmake --build . --target pytest
-  time cmake --build . --target package
+  if [ "${build_type}" != "emscripten" ]; then
+    # Run Python tests.
+    time cmake --build . --target pytest
+    time cmake --build . --target package
+  fi
 }
 
 function build_library_for_ios()
@@ -161,16 +169,16 @@ function build_library_for_ios()
   cmake_options+="-DCMAKE_CXX_COMPILER=$(which clang++) "
 
   # For YouCompleteMe.
-  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
+  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON "
 
   # We need static builds for iOS.
-  cmake_options+="-DSARA_BUILD_SHARED_LIBS=OFF "
+  cmake_options+="-DSARA_BUILD_SHARED_LIBS:BOOL=OFF "
   cmake_options+="-DBoost_INCLUDE_DIR=/usr/local/include "
 
   # Vanilla stuff.
-  cmake_options+="-DSARA_BUILD_TESTS=ON "
-  cmake_options+="-DSARA_BUILD_SAMPLES=ON "
-  cmake_options+="-DSARA_USE_HALIDE=ON "
+  cmake_options+="-DSARA_BUILD_TESTS:BOOL=ON "
+  cmake_options+="-DSARA_BUILD_SAMPLES:BOOL=ON "
+  cmake_options+="-DSARA_USE_HALIDE:BOOL=ON "
 
   # Generate the Xcode project.
   time cmake ../sara ${cmake_options}
@@ -188,8 +196,6 @@ function build_library_for_ios()
   fi
   time ctest ${test_options}
 
-  # Run Python tests.
-  time cmake --build . --target pytest
   time cmake --build . --target package
 }
 

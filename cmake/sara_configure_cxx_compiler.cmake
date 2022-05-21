@@ -1,10 +1,8 @@
 sara_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 
-
 # By default, use the math constants defined in <cmath> header.
 add_definitions(-D_USE_MATH_DEFINES)
 
-# Visual C++ compiler
 if (CMAKE_COMPILER_IS_GNUCXX)
   sara_substep_message(
     "${CMAKE_CXX_COMPILER_ID} compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
@@ -43,6 +41,31 @@ if (UNIX)
     set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   endif ()
+endif ()
+
+if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  # Support exceptions.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
+  set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -fexceptions)
+
+  # Silence Eigen compile warnings.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-copy-with-user-provided-copy")
+
+  # Additional flags for Release builds.
+  set(CMAKE_CXX_FLAGS_RELEASE -O3)
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO -O2)
+  # Additional flags for Debug builds to code coverage.
+  set(CMAKE_CXX_FLAGS_DEBUG -O0 -DDEBUG -D_DEBUG -fno-inline)
+
+  if (CMAKE_BUILD_TYPE STREQUAL "" OR CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options(${CMAKE_CXX_FLAGS_RELEASE})
+  elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    add_compile_options(${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
+  elseif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(${CMAKE_CXX_FLAGS_DEBUG})
+  endif ()
+  add_link_options(${CMAKE_EXE_LINKER_FLAGS})
 endif ()
 
 

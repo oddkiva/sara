@@ -1,18 +1,19 @@
-project (easyexif)
+project(easyexif)
 
-add_library (easyexif STATIC exif.h exif.cpp)
-set_target_properties(easyexif PROPERTIES OUTPUT_NAME_DEBUG easyexif-d)
+add_library(easyexif STATIC exif.h exif.cpp)
+set_target_properties(easyexif PROPERTIES OUTPUT_NAME_DEBUG easyexif-d
+                                          FOLDER ${THIRDPARTY_FOLDER_NAME})
 
 configure_file(${DO_Sara_DIR}/cmake/FindEasyEXIF.cmake.in
                ${CMAKE_BINARY_DIR}/cmake/FindEasyEXIF.cmake @ONLY)
 
-if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-  install(DIRECTORY ${DO_Sara_ThirdParty_DIR}/easyexif
-          DESTINATION include
-          COMPONENT ThirdParty)
-endif ()
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+  install(
+    DIRECTORY ${DO_Sara_ThirdParty_DIR}/easyexif
+    DESTINATION include
+    COMPONENT ThirdParty)
+endif()
 install(
   TARGETS easyexif
   LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  COMPONENT ThirdParty)
+  ARCHIVE DESTINATION lib COMPONENT ThirdParty)
