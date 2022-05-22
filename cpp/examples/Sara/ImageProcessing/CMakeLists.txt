@@ -50,7 +50,9 @@ target_link_libraries(line_segment_detection_example
 
 add_library(ChessboardDetection STATIC
   Chessboard/SaddlePointDetection.hpp
-  Chessboard/SaddlePointDetection.cpp)
+  Chessboard/SaddlePointDetection.cpp
+  Chessboard/JunctionDetection.hpp
+  Chessboard/JunctionDetection.cpp)
 set_target_properties(ChessboardDetection
   PROPERTIES
   FOLDER "Libraries")
