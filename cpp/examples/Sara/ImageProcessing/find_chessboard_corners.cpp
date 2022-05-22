@@ -127,7 +127,53 @@ auto localize_zero_crossings(const Eigen::ArrayXf& profile, int num_bins)
 }
 
 
-auto knn_graph(const std::vector<sara::SaddlePoint>& points, const int k)
+auto filter_junctions(std::vector<sara::Junction<int>>& junctions,
+                      const sara::ImageView<float>& f,
+                      const sara::ImageView<float>& grad_f_norm,
+                      const float grad_thres, const int radius)
+{
+  auto profile_extractor = CircularProfileExtractor{};
+  profile_extractor.circle_radius = radius;
+
+  auto junctions_filtered = std::vector<sara::Junction<int>>{};
+  junctions_filtered.reserve(junctions.size());
+  for (auto u = 0u; u < junctions.size(); ++u)
+  {
+    const auto& j = junctions[u];
+
+    // Local gradient average.
+    auto grad_norm = 0.f;
+    for (auto v = -radius; v <= radius; ++v)
+    {
+      for (auto u = -radius; u <= radius; ++u)
+      {
+        const Eigen::Vector2i q = j.p + Eigen::Vector2i{u, v};
+        grad_norm += grad_f_norm(q);
+      }
+    }
+    grad_norm /= sara::square(2 * radius + 1);
+    if (grad_norm < grad_thres)
+      continue;
+
+    const auto profile = profile_extractor(f, j.p.cast<double>());
+    const auto zero_crossings = localize_zero_crossings(  //
+        profile,                                          //
+        profile_extractor.num_circle_sample_points        //
+    );
+
+    // Count the number of zero-crossings: there must be 4 zero-crossings
+    // because of the chessboard pattern.
+    if (zero_crossings.size() != 4u)
+      continue;
+
+    junctions_filtered.emplace_back(j);
+  }
+
+  junctions_filtered.swap(junctions);
+}
+
+template <typename Feature>
+auto knn_graph(const std::vector<Feature>& points, const int k)
     -> std::pair<Eigen::MatrixXi, Eigen::MatrixXf>
 {
   const auto n = points.size();
@@ -139,13 +185,13 @@ auto knn_graph(const std::vector<sara::SaddlePoint>& points, const int k)
 
   for (auto u = 0u; u < n; ++u)
   {
-    const auto& pu = points[u].p;
+    const auto& pu = points[u].position();
     for (auto v = 0u; v < n; ++v)
     {
       if (v == u)
         continue;
 
-      const auto& pv = points[v].p;
+      const auto& pv = points[v].position();
       const auto d_uv = static_cast<float>((pu - pv).squaredNorm());
 
       for (auto a = 0; a < k; ++a)
@@ -204,11 +250,9 @@ auto __main(int argc, char** argv) -> int
   auto video_frame_copy = sara::Image<sara::Rgb8>{};
   auto frame_number = -1;
 
+  static constexpr auto k = 6;
   static constexpr auto radius = 5;
   static constexpr auto grad_adaptive_thres = 1e-2f;
-
-  auto profile_extractor = CircularProfileExtractor{};
-  profile_extractor.circle_radius = radius;
 
   while (video_stream.read())
   {
@@ -225,9 +269,35 @@ auto __main(int argc, char** argv) -> int
     const auto f = video_frame.convert<float>().compute<sara::Gaussian>(1.6f);
     const auto grad_f = f.compute<sara::Gradient>();
     const auto junction_map = sara::junction_map(f, grad_f, radius);
-    auto junctions = sara::extract_junctions(junction_map, radius);
-    sara::nms(junctions, f.sizes(), radius);
 
+    auto grad_f_norm = grad_f.compute<sara::SquaredNorm>();
+    grad_f_norm.flat_array() = grad_f_norm.flat_array().sqrt();
+    const auto grad_max = grad_f_norm.flat_array().maxCoeff();
+    const auto grad_thres = grad_adaptive_thres * grad_max;
+
+    auto graph = KnnGraph<sara::Junction<int>>{};
+    graph._k = k;
+    auto& junctions = graph._vertices;
+
+    // Detect the junctions.
+    sara::tic();
+    {
+      junctions = sara::extract_junctions(junction_map, radius);
+      sara::nms(junctions, f.sizes(), radius);
+      filter_junctions(junctions, f, grad_f_norm, grad_thres, radius);
+    }
+    sara::toc("junction");
+
+    // Link the junctions together.
+    sara::tic();
+    {
+      auto [nn, dists] = knn_graph(junctions, k);
+      graph._neighbors = std::move(nn);
+      graph._distances = std::move(dists);
+    }
+    sara::toc("knn-graph");
+
+    // TODO: calculate the k-nn graph on the refined junctions.
     auto junctions_refined = std::vector<sara::Junction<float>>{};
     junctions_refined.reserve(junctions.size());
     std::transform(
@@ -251,74 +321,25 @@ auto __main(int argc, char** argv) -> int
           return {p, j.score};
         });
 
-    auto grad_f_norm = grad_f.compute<sara::SquaredNorm>();
-    grad_f_norm.flat_array() = grad_f_norm.flat_array().sqrt();
-    const auto grad_max = grad_f_norm.flat_array().maxCoeff();
-    const auto grad_thres = grad_adaptive_thres * grad_max;
 
     video_frame_copy = video_frame;
 
-    static constexpr auto k = 4;
-    auto graph = KnnGraph<sara::Junction<float>>{};
-    graph._k = k;
-    auto& saddle_points = graph._vertices;
-
-    auto [nn, dists] = knn_graph(saddle_points, k);
-    graph._vertices = std::move(junctions_refined);
-    graph._neighbors = std::move(nn);
-    graph._distances = std::move(dists);
 
     for (auto u = 0u; u < junctions.size(); ++u)
     {
       const auto& j = junctions[u];
 
-      // Local gradient average.
-      auto grad_norm = 0.f;
-      for (auto v = -radius; v <= radius; ++v)
-      {
-        for (auto u = -radius; u <= radius; ++u)
-        {
-          const Eigen::Vector2i q = j.p + Eigen::Vector2i{u, v};
-          grad_norm += grad_f_norm(q);
-        }
-      }
-      grad_norm /= sara::square(2 * radius + 1);
-      if (grad_norm < grad_thres)
-        continue;
-
-      const auto profile = profile_extractor(f, j.p.cast<double>());
-      const auto zero_crossings = localize_zero_crossings(  //
-          profile,                                          //
-          profile_extractor.num_circle_sample_points        //
-      );
-
-      // Count the number of zero-crossings: there must be 4 zero-crossings
-      // because of the chessboard pattern.
-      if (zero_crossings.size() != 4u)
-        continue;
-
       const auto& jr = junctions_refined[u];
-      sara::draw_circle(video_frame_copy, jr.p, profile_extractor.circle_radius,
-                        sara::Yellow8, 1);
-
-
-      // for (const auto& angle : zero_crossings)
-      // {
-      //   const auto& r = profile_extractor.circle_radius;
-      //   const auto e = Eigen::Vector2d{std::cos(angle), std::sin(angle)};
-      //   const auto p = j.p.cast<double>() + r * e;
-      //   sara::fill_circle(video_frame_copy, p.x(), p.y(), 2, sara::Yellow8);
-      // }
+      sara::draw_circle(video_frame_copy, jr.p, radius, sara::Yellow8, 1);
 
       for (auto v = 0; v < k; ++v)
       {
         const auto& pv = graph.nearest_neighbor(u, v).p;
-        sara::draw_arrow(video_frame_copy, jr.p.cast<float>(), pv.cast<float>(),
-                         sara::Blue8, 2);
+        sara::draw_arrow(video_frame_copy, j.p.cast<float>(), pv.cast<float>(),
+                         sara::Green8, 2);
       }
     }
 
-    // sara::display(sara::color_rescale(junction_map));
     sara::display(video_frame_copy);
     sara::get_key();
   }
