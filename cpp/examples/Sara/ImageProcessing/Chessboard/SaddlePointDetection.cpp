@@ -48,35 +48,4 @@ namespace DO::Sara {
     return saddle_points;
   }
 
-  auto nms(std::vector<SaddlePoint>& saddle_points,
-           const Eigen::Vector2i& image_sizes, int nms_radius) -> void
-  {
-    std::sort(saddle_points.begin(), saddle_points.end());
-
-    auto saddle_points_filtered = std::vector<SaddlePoint>{};
-    saddle_points_filtered.reserve(saddle_points.size());
-
-    auto saddle_map = Image<std::uint8_t>{image_sizes};
-    saddle_map.flat_array().fill(0);
-
-    for (const auto& p : saddle_points)
-    {
-      if (saddle_map(p.p) == 1)
-        continue;
-
-      const auto vmin =
-          std::clamp(p.p.y() - nms_radius, 0, saddle_map.height());
-      const auto vmax =
-          std::clamp(p.p.y() + nms_radius, 0, saddle_map.height());
-      const auto umin = std::clamp(p.p.x() - nms_radius, 0, saddle_map.width());
-      const auto umax = std::clamp(p.p.x() + nms_radius, 0, saddle_map.width());
-      for (auto v = vmin; v < vmax; ++v)
-        for (auto u = umin; u < umax; ++u)
-          saddle_map(u, v) = 1;
-
-      saddle_points_filtered.push_back(p);
-    }
-    saddle_points_filtered.swap(saddle_points);
-  }
-
 }  // namespace DO::Sara

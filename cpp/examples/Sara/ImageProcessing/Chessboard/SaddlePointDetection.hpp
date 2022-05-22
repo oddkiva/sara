@@ -23,6 +23,11 @@ namespace DO::Sara {
     Eigen::Matrix2f hessian;
     float score;
 
+    inline auto position() const -> const Eigen::Vector2i&
+    {
+      return p;
+    }
+
     inline auto operator<(const SaddlePoint& other) const
     {
       return score < other.score;
@@ -54,8 +59,5 @@ namespace DO::Sara {
   auto extract_saddle_points(const ImageView<float>& det_of_hessian,
                              const ImageView<Eigen::Matrix2f>& hessian,
                              float thres) -> std::vector<SaddlePoint>;
-
-  auto nms(std::vector<SaddlePoint>& saddle_points,
-           const Eigen::Vector2i& image_sizes, int nms_radius) -> void;
 
 }  // namespace DO::Sara

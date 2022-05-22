@@ -13,14 +13,14 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/ImageProcessing/CornerRefinement.hpp>
+#include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 
 
 namespace sara = DO::Sara;
 
 
-BOOST_AUTO_TEST_CASE(test_corner_refinement)
+BOOST_AUTO_TEST_CASE(test_junction_refinement)
 {
   auto f = sara::Image<float>{9, 9};
   // clang-format off
@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(test_corner_refinement)
 
   const auto corner = Eigen::Vector2i{5, 3};
   const auto corner_refined =
-      sara::refine_corner_location_unsafe(grad_f, corner, 3);
+      sara::refine_junction_location_unsafe(grad_f, corner, 3);
   std::cout << "refined_corner = " << corner_refined.transpose() << std::endl;
-  BOOST_CHECK_CLOSE(corner_refined.x(), 3.5, 1e-6);
-  BOOST_CHECK_CLOSE(corner_refined.y(), 4.5, 1e-6);
+  BOOST_CHECK_CLOSE(corner_refined.x(), 3.4, 1e-5);
+  BOOST_CHECK_CLOSE(corner_refined.y(), 4.6, 1e-5);
 }

@@ -11,23 +11,17 @@
 
 //! @example
 
-#include <unordered_map>
+#include <omp.h>
 
-#include <DO/Sara/Core/TicToc.hpp>
-#include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 #include <DO/Sara/VideoIO.hpp>
-#include <DO/Sara/Visualization.hpp>
 
+#include "Chessboard/JunctionDetection.hpp"
+#include "Chessboard/NonMaximumSuppression.hpp"
 #include "Chessboard/SaddlePointDetection.hpp"
-
-#include <functional>
-#include <optional>
-
-#include <functional>
-#include <optional>
 
 
 namespace sara = DO::Sara;
@@ -194,41 +188,8 @@ auto __main(int argc, char** argv) -> int
 
       // Count the number of zero-crossings: there must be 4 zero-crossings
       // because of the chessboard pattern.
-      if (zero_crossings.size() != 4u)
+      if (zero_crossings.size() < 4u)
         continue;
-
-#ifdef FILTER
-      auto angle_deltas = std::vector<double>{};
-      for (auto i = 0; i < 4; ++i)
-      {
-        const auto ia = i;
-        const auto ib = (i + 1) % 4;
-
-        const auto anglea = zero_crossings[ia];
-        const auto angleb = zero_crossings[ib];
-
-        const auto ea = Eigen::Vector2d{std::cos(anglea), std::sin(anglea)};
-        const auto eb = Eigen::Vector2d{std::cos(angleb), std::sin(angleb)};
-
-        auto e = Eigen::Matrix2d{};
-        e << ea, eb;
-
-        const auto c_ab = ea.dot(eb);
-        const auto s_ab = e.determinant();
-        const auto angle = std::atan2(s_ab, c_ab);
-        angle_deltas.push_back(std::abs(angle));
-      }
-
-      auto bad = false;
-      for (auto i = 0; i < 4; ++i)
-        if (std::abs(angle_deltas[i] - M_PI / 2) > M_PI / 3)
-        {
-          bad = true;
-          break;
-        }
-      if (bad)
-        continue;
-#endif
 
       sara::draw_circle(video_frame_copy, s.p.x(), s.p.y(),
                         profile_extractor.circle_radius, sara::Red8);
@@ -251,24 +212,128 @@ auto __main(int argc, char** argv) -> int
 }
 
 
-auto main(int argc, char** argv) -> int
+auto __main2(int argc, char** argv) -> int
 {
-  DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
-  return app.exec();
+  if (argc < 2)
+    return 1;
+
+  omp_set_num_threads(omp_get_max_threads());
+
+  const auto video_file = std::string{argv[1]};
+  auto video_stream = sara::VideoStream{video_file};
+  auto video_frame = video_stream.frame();
+  auto video_frame_copy = sara::Image<sara::Rgb8>{};
+  auto frame_number = -1;
+
+  static constexpr auto radius = 5;
+  static constexpr auto grad_adaptive_thres = 1e-2f;
+
+  auto profile_extractor = CircularProfileExtractor{};
+  profile_extractor.circle_radius = radius;
+
+  while (video_stream.read())
+  {
+    ++frame_number;
+    if (frame_number % 3 != 0)
+      continue;
+
+    if (sara::active_window() == nullptr)
+    {
+      sara::create_window(video_frame.sizes());
+      sara::set_antialiasing();
+    }
+
+    const auto f = video_frame.convert<float>().compute<sara::Gaussian>(1.6f);
+    const auto grad_f = f.compute<sara::Gradient>();
+    const auto junction_map = sara::junction_map(f, grad_f, radius);
+    auto junctions = sara::extract_junctions(junction_map, radius);
+    sara::nms(junctions, f.sizes(), radius);
+
+    auto junctions_refined = std::vector<sara::Junction<float>>{};
+    junctions_refined.reserve(junctions.size());
+    std::transform(
+        junctions.begin(), junctions.end(),
+        std::back_inserter(junctions_refined),
+        [&grad_f /*, &junction_map */](const auto& j) -> sara::Junction<float> {
+          const auto w = grad_f.width();
+          const auto h = grad_f.height();
+          const auto in_image_domain =
+              radius <= j.p.x() && j.p.x() < w - radius &&  //
+              radius <= j.p.y() && j.p.y() < h - radius;
+          if (!in_image_domain)
+          {
+            throw std::runtime_error{"That can't be!!!"};
+            return {j.p.template cast<float>(), j.score};
+          }
+
+          const auto p = sara::refine_junction_location_unsafe(
+              grad_f, j.position(), radius);
+          const Eigen::Vector2d pd = p.template cast<double>();
+          return {p, j.score};
+        });
+
+    auto grad_f_norm = grad_f.compute<sara::SquaredNorm>();
+    grad_f_norm.flat_array() = grad_f_norm.flat_array().sqrt();
+    const auto grad_max = grad_f_norm.flat_array().maxCoeff();
+    const auto grad_thres = grad_adaptive_thres * grad_max;
+
+    video_frame_copy = video_frame;
+
+    for (auto i = 0u; i < junctions.size(); ++i)
+    {
+      const auto& j = junctions[i];
+
+      // Local gradient average.
+      auto grad_norm = 0.f;
+      for (auto v = -radius; v <= radius; ++v)
+      {
+        for (auto u = -radius; u <= radius; ++u)
+        {
+          const Eigen::Vector2i q = j.p + Eigen::Vector2i{u, v};
+          grad_norm += grad_f_norm(q);
+        }
+      }
+      grad_norm /= sara::square(2 * radius + 1);
+      if (grad_norm < grad_thres)
+        continue;
+
+      const auto profile = profile_extractor(f, j.p.cast<double>());
+      const auto zero_crossings = localize_zero_crossings(  //
+          profile,                                          //
+          profile_extractor.num_circle_sample_points        //
+      );
+
+      // Count the number of zero-crossings: there must be 4 zero-crossings
+      // because of the chessboard pattern.
+      if (zero_crossings.size() != 4u)
+        continue;
+
+      const auto& jr = junctions_refined[i];
+      sara::draw_circle(video_frame_copy, jr.p, profile_extractor.circle_radius,
+                        sara::Yellow8, 1);
+
+
+      // for (const auto& angle : zero_crossings)
+      // {
+      //   const auto& r = profile_extractor.circle_radius;
+      //   const auto e = Eigen::Vector2d{std::cos(angle), std::sin(angle)};
+      //   const auto p = j.p.cast<double>() + r * e;
+      //   sara::fill_circle(video_frame_copy, p.x(), p.y(), 2, sara::Yellow8);
+      // }
+    }
+
+    // sara::display(sara::color_rescale(junction_map));
+    sara::display(video_frame_copy);
+    sara::get_key();
+  }
+
+  return 0;
 }
 
 
-// auto gradient_hist_extractor = SymGradientHistogramExtractor{};
-
-// Calculate the gradient map in the polar coordinates.
-// auto grad_mag = sara::Image<float>{image_blurred.sizes()};
-// auto grad_ori = sara::Image<float>{image_blurred.sizes()};
-// sara::gradient_in_polar_coordinates(image_blurred, grad_mag, grad_ori);
-
-
-// const auto ori_hist = gradient_hist_extractor(grad_mag, grad_ori, s.p);
-// const auto ori_peaks = find_peaks(ori_hist);
-
-// if (ori_peaks.size() != 2)
-//   continue;
+auto main(int argc, char** argv) -> int
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main2);
+  return app.exec();
+}
