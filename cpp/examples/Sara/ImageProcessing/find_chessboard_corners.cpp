@@ -23,12 +23,6 @@
 
 #include "Chessboard/SaddlePointDetection.hpp"
 
-#include <functional>
-#include <optional>
-
-#include <functional>
-#include <optional>
-
 
 namespace sara = DO::Sara;
 
@@ -133,6 +127,70 @@ auto localize_zero_crossings(const Eigen::ArrayXf& profile, int num_bins)
 }
 
 
+auto knn_graph(const std::vector<sara::SaddlePoint>& points, const int k)
+    -> std::pair<Eigen::MatrixXi, Eigen::MatrixXf>
+{
+  const auto n = points.size();
+
+  auto neighbors = Eigen::MatrixXi{k, n};
+  auto distances = Eigen::MatrixXf{k, n};
+  neighbors.setConstant(-1);
+  distances.setConstant(std::numeric_limits<float>::infinity());
+
+  for (auto u = 0u; u < n; ++u)
+  {
+    const auto& pu = points[u].p;
+    for (auto v = 0u; v < n; ++v)
+    {
+      if (v == u)
+        continue;
+
+      const auto& pv = points[v].p;
+      const auto d_uv = static_cast<float>((pu - pv).squaredNorm());
+
+      for (auto a = 0; a < k; ++a)
+      {
+        if (d_uv < distances(a, u))
+        {
+          // Shift the neighbors and distances.
+          auto neighbor = static_cast<int>(v);
+          auto dist = d_uv;
+          for (auto b = a; b < k; ++b)
+          {
+            std::swap(neighbor, neighbors(b, u));
+            std::swap(dist, distances(b, u));
+          }
+
+          break;
+        }
+      }
+    }
+  }
+
+  return std::make_pair(neighbors, distances);
+}
+
+
+template <typename V>
+struct KnnGraph
+{
+  int _k;
+  std::vector<V> _vertices;
+  Eigen::MatrixXi _neighbors;
+  Eigen::MatrixXf _distances;
+
+  inline auto vertex(int v) const -> const V&
+  {
+    return _vertices[v];
+  }
+
+  inline auto nearest_neighbor(const int v, const int k) const -> const V&
+  {
+    return _vertices[_neighbors(k, v)];
+  };
+};
+
+
 auto __main(int argc, char** argv) -> int
 {
   if (argc < 2)
@@ -172,15 +230,26 @@ auto __main(int argc, char** argv) -> int
     // characterized by the property det(H(x, y)) < 0.
     const auto det_of_hessian = hessian.compute<sara::Determinant>();
 
+    static constexpr auto k = 4;
+    auto graph = KnnGraph<sara::SaddlePoint>{};
+    graph._k = k;
+    auto& saddle_points = graph._vertices;
+
     // Adaptive thresholding.
     const auto thres = det_of_hessian.flat_array().minCoeff() * adaptive_thres;
-    auto saddle_points = extract_saddle_points(det_of_hessian, hessian, thres);
+    saddle_points = extract_saddle_points(det_of_hessian, hessian, thres);
 
     // Non-maxima suppression.
     nms(saddle_points, video_frame.sizes(), profile_extractor.circle_radius);
 
-    for (const auto& s : saddle_points)
+    auto [nn, dists] = knn_graph(saddle_points, k);
+    graph._neighbors = std::move(nn);
+    graph._distances = std::move(dists);
+
+    for (auto u = 0u; u < saddle_points.size(); ++u)
     {
+      const auto& s = saddle_points[u];
+
       const auto r = profile_extractor.circle_radius;
       if (s.p.x() < r || s.p.x() >= video_frame.width() - r ||  //
           s.p.y() < r || s.p.y() >= video_frame.height() - r)
@@ -197,39 +266,6 @@ auto __main(int argc, char** argv) -> int
       if (zero_crossings.size() != 4u)
         continue;
 
-#ifdef FILTER
-      auto angle_deltas = std::vector<double>{};
-      for (auto i = 0; i < 4; ++i)
-      {
-        const auto ia = i;
-        const auto ib = (i + 1) % 4;
-
-        const auto anglea = zero_crossings[ia];
-        const auto angleb = zero_crossings[ib];
-
-        const auto ea = Eigen::Vector2d{std::cos(anglea), std::sin(anglea)};
-        const auto eb = Eigen::Vector2d{std::cos(angleb), std::sin(angleb)};
-
-        auto e = Eigen::Matrix2d{};
-        e << ea, eb;
-
-        const auto c_ab = ea.dot(eb);
-        const auto s_ab = e.determinant();
-        const auto angle = std::atan2(s_ab, c_ab);
-        angle_deltas.push_back(std::abs(angle));
-      }
-
-      auto bad = false;
-      for (auto i = 0; i < 4; ++i)
-        if (std::abs(angle_deltas[i] - M_PI / 2) > M_PI / 3)
-        {
-          bad = true;
-          break;
-        }
-      if (bad)
-        continue;
-#endif
-
       sara::draw_circle(video_frame_copy, s.p.x(), s.p.y(),
                         profile_extractor.circle_radius, sara::Red8);
       sara::draw(video_frame, s);
@@ -240,6 +276,13 @@ auto __main(int argc, char** argv) -> int
         const auto e = Eigen::Vector2d{std::cos(angle), std::sin(angle)};
         const auto p = s.p.cast<double>() + r * e;
         sara::fill_circle(video_frame_copy, p.x(), p.y(), 2, sara::Yellow8);
+      }
+
+      for (auto v = 0; v < k; ++v)
+      {
+        const auto& pv = graph.nearest_neighbor(u, v).p;
+        sara::draw_arrow(video_frame_copy, s.p.cast<float>(), pv.cast<float>(),
+                         sara::Blue8, 2);
       }
     }
 
@@ -257,18 +300,3 @@ auto main(int argc, char** argv) -> int
   app.register_user_main(__main);
   return app.exec();
 }
-
-
-// auto gradient_hist_extractor = SymGradientHistogramExtractor{};
-
-// Calculate the gradient map in the polar coordinates.
-// auto grad_mag = sara::Image<float>{image_blurred.sizes()};
-// auto grad_ori = sara::Image<float>{image_blurred.sizes()};
-// sara::gradient_in_polar_coordinates(image_blurred, grad_mag, grad_ori);
-
-
-// const auto ori_hist = gradient_hist_extractor(grad_mag, grad_ori, s.p);
-// const auto ori_peaks = find_peaks(ori_hist);
-
-// if (ori_peaks.size() != 2)
-//   continue;
