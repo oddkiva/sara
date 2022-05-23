@@ -34,6 +34,9 @@ that I feel compelled to say a few words about them.
 N.B.: this chapter contains bits of my thesis [@Ok:2013:phdthesis], which I have
 simplified.
 
+```{r, child="features/structure_tensor.Rmd"}
+```
+
 ```{r, child="features/locally_invariant_regions.Rmd"}
 ```
 
