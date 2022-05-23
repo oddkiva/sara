@@ -42,12 +42,10 @@ namespace DO::Sara {
         const Eigen::Vector2i x1 = x0 + Eigen::Vector2i(dx, dy);
         const auto& g = grad(x1);
 
-        // Update A.
-        A (0, 0) += g.x() * g.x(); A(0, 1) += g.x() * g.y();
-        A (1, 0) += g.x() * g.y(); A (1, 1) += g.y() * g.y();
+        const Eigen::Matrix2f G = g * g.transpose();
 
-        // Update b.
-        b += g * g.dot(x1.cast<float>());
+        A += G;
+        b += G * x1.cast<float>();
       }
     }
 

@@ -250,9 +250,10 @@ auto __main(int argc, char** argv) -> int
   auto video_frame_copy = sara::Image<sara::Rgb8>{};
   auto frame_number = -1;
 
+  static constexpr auto sigma = 2.f;
   static constexpr auto k = 6;
-  static constexpr auto radius = 5;
-  static constexpr auto grad_adaptive_thres = 1e-2f;
+  static constexpr auto radius = sigma * 4;
+  static constexpr auto grad_adaptive_thres = 2e-2f;
 
   while (video_stream.read())
   {
@@ -266,7 +267,8 @@ auto __main(int argc, char** argv) -> int
       sara::set_antialiasing();
     }
 
-    const auto f = video_frame.convert<float>().compute<sara::Gaussian>(1.6f);
+    sara::tic();
+    const auto f = video_frame.convert<float>().compute<sara::Gaussian>(sigma);
     const auto grad_f = f.compute<sara::Gradient>();
     const auto junction_map = sara::junction_map(f, grad_f, radius);
 
@@ -274,6 +276,7 @@ auto __main(int argc, char** argv) -> int
     grad_f_norm.flat_array() = grad_f_norm.flat_array().sqrt();
     const auto grad_max = grad_f_norm.flat_array().maxCoeff();
     const auto grad_thres = grad_adaptive_thres * grad_max;
+    sara::toc("feature maps");
 
     auto graph = KnnGraph<sara::Junction<int>>{};
     graph._k = k;
@@ -317,7 +320,6 @@ auto __main(int argc, char** argv) -> int
 
           const auto p = sara::refine_junction_location_unsafe(
               grad_f, j.position(), radius);
-          const Eigen::Vector2d pd = p.template cast<double>();
           return {p, j.score};
         });
 
@@ -327,21 +329,22 @@ auto __main(int argc, char** argv) -> int
 
     for (auto u = 0u; u < junctions.size(); ++u)
     {
-      const auto& j = junctions[u];
-
       const auto& jr = junctions_refined[u];
       sara::draw_circle(video_frame_copy, jr.p, radius, sara::Yellow8, 1);
 
-      for (auto v = 0; v < k; ++v)
-      {
-        const auto& pv = graph.nearest_neighbor(u, v).p;
-        sara::draw_arrow(video_frame_copy, j.p.cast<float>(), pv.cast<float>(),
-                         sara::Green8, 2);
-      }
+      const Eigen::Vector2i jri = (jr.p.array() + 0.5f).matrix().cast<int>();
+      sara::fill_circle(video_frame_copy, jri.x(), jri.y(), 1, sara::Red8);
+
+      // for (auto v = 0; v < k; ++v)
+      // {
+      //   const auto& pv = graph.nearest_neighbor(u, v).p;
+      //   sara::draw_arrow(video_frame_copy, j.p.cast<float>(), pv.cast<float>(),
+      //                    sara::Green8, 2);
+      // }
     }
 
     sara::display(video_frame_copy);
-    sara::get_key();
+    // sara::get_key();
   }
 
   return 0;
