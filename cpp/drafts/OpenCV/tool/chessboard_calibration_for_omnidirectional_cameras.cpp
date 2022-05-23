@@ -230,6 +230,36 @@ public:
         }
       }
     }
+
+    static constexpr auto fx = 0;
+    static constexpr auto fy = 1;
+    static constexpr auto shear = 2;
+    static constexpr auto k0 = 5;
+    static constexpr auto k1 = 6;
+    static constexpr auto p0 = 7;
+    static constexpr auto p1 = 8;
+    static constexpr auto xi = 9;
+
+    // Bounds on the calibration matrix.
+    for (const auto& f : {fx, fy})
+    {
+      problem.SetParameterLowerBound(mutable_intrinsics(), f, 500);
+      problem.SetParameterUpperBound(mutable_intrinsics(), f, 5000);
+    }
+    problem.SetParameterLowerBound(mutable_intrinsics(), shear, -10);
+    problem.SetParameterUpperBound(mutable_intrinsics(), shear, 10);
+    // So far no need for (u0, v0)
+
+    // Bounds on the distortion coefficients.
+    for (const auto& dist_coeff: {k0, k1, p0, p1})
+    {
+      problem.SetParameterLowerBound(mutable_intrinsics(), dist_coeff, -1);
+      problem.SetParameterUpperBound(mutable_intrinsics(), dist_coeff, 1);
+    }
+
+    // Bounds on mirror parameter.
+    problem.SetParameterLowerBound(mutable_intrinsics(), xi, -10.);
+    problem.SetParameterUpperBound(mutable_intrinsics(), xi, 10.);
   }
 
   inline auto
@@ -297,43 +327,26 @@ public:
         }
       }
 
-      const auto H = estimate_H(p2ns, p3s);
-      auto Rs = std::vector<Eigen::Matrix3d>{};
-      auto ts = std::vector<Eigen::Vector3d>{};
-      auto ns = std::vector<Eigen::Vector3d>{};
-      static const Eigen::Matrix3d I3 = Eigen::Matrix3d::Identity();
-      decompose_H_RQ_factorization(H, I3, Rs, ts, ns);
+      // const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
+      // auto Rs = std::vector<Eigen::Matrix3d>{};
+      // auto ts = std::vector<Eigen::Vector3d>{};
+      // auto ns = std::vector<Eigen::Vector3d>{};
 
-      const auto& R = Rs.front();
-      auto& t = ts.front();
-      SARA_DEBUG << "\nR =\n" << Rs.front() << std::endl;
-      SARA_DEBUG << "\nt =\n" << ts.front() << std::endl;
-      const auto invalid_translation =
-          std::any_of(t.data(), t.data() + 3, [](const auto& v) {
-            return std::isnan(v) || std::isinf(v);
-          });
-      if (invalid_translation)
-      {
-        t.setZero();
-        continue;
-      }
+      // // This simple approach gives the best results.
+      // decompose_H_RQ_factorization(H, camera.K, Rs, ts, ns);
 
       auto extrinsics = mutable_extrinsics(image_index);
       auto angle_axis_ptr = extrinsics;
-
-      const auto angle_axis = Eigen::AngleAxisd{R};
-      const auto& angle = angle_axis.angle();
-      const auto& axis = angle_axis.axis();
-      for (auto k = 0; k < 3; ++k)
-        angle_axis_ptr[k] = angle * axis(k);
-
       auto translation_ptr = extrinsics + 3;
-      for (auto k = 0; k < 3; ++k)
-        translation_ptr[k] = t(k);
 
-      inspect(frame_copy, chessboard, camera, R, t);
-      sara::display(frame_copy);
-      sara::get_key();
+      // const auto angle_axis = Eigen::AngleAxisd{Rs.front()};
+      // const auto& angle = angle_axis.angle();
+      // const auto& axis = angle_axis.axis();
+      for (auto k = 0; k < 3; ++k)
+        angle_axis_ptr[k] = 0;  // angle * axis(k);
+
+      for (auto k = 0; k < 3; ++k)
+        translation_ptr[k] = 0;  // ts.front()(k);
     }
   }
 
@@ -352,13 +365,29 @@ private:
 
 GRAPHICS_MAIN()
 {
-  auto video_stream = sara::VideoStream{
-      "/home/david/Desktop/calibration/fisheye/chessboard3.MP4"  //
-  };
+  // #define SAMSUNG_GALAXY_J6
+
+  const auto video_filepath =
+#ifdef SAMSUNG_GALAXY_J6
+      "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
+#else
+      "/home/david/Desktop/calibration/fisheye/after/chessboard3.MP4"
+#endif
+      // "/home/david/Desktop/calibration/gopro-hero4/chessboard.mp4"
+      // "/home/david/Desktop/calibration/iphone12/chessboard.mov"
+      // "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
+      ;
+
+  auto video_stream = sara::VideoStream{video_filepath};
   auto frame = video_stream.frame();
 
+#if defined(SAMSUNG_GALAXY_J6) || defined(GOPRO4) || defined(IPHONE12)
+  static const auto pattern_size = Eigen::Vector2i{7, 5};
+  static constexpr auto square_size = 3._cm;
+#else
   static const auto pattern_size = Eigen::Vector2i{7, 12};
   static constexpr auto square_size = 7._cm;
+#endif
   auto chessboards = std::vector<sara::OpenCV::Chessboard>{};
 
   // Initialize the calibration matrix.
@@ -366,7 +395,7 @@ GRAPHICS_MAIN()
   camera.K = init_K(frame.width(), frame.height());
   camera.radial_distortion_coefficients.setZero();
   camera.tangential_distortion_coefficients.setZero();
-  camera.xi = 0;
+  camera.xi = 1;
 
 
   // Initialize the calibration problem.
@@ -384,9 +413,6 @@ GRAPHICS_MAIN()
   for (auto i = 0;; ++i)
   {
     if (!video_stream.read())
-      break;
-
-    if (selected_frames.size() > 50)
       break;
 
     if (i % 10 != 0)
@@ -426,7 +452,7 @@ GRAPHICS_MAIN()
     }
   }
 
-  for (auto i = 0; i < 2; ++i)
+  for (auto i = 0; i < 10; ++i)
   {
     // The optimization of the camera parameters will lead to a local minimum
     // because the starting values are actually very far from the global
@@ -466,9 +492,6 @@ GRAPHICS_MAIN()
                << std::endl;
     SARA_DEBUG << "xi = " << camera.xi << std::endl;
 
-    // calibration_problem.reinitialize_extrinsic_parameters(
-    //     camera, selected_frames, chessboards);
-
     for (auto i = 0u; i < chessboards.size(); ++i)
     {
       const auto R = calibration_problem.rotation(i).toRotationMatrix();
@@ -479,6 +502,9 @@ GRAPHICS_MAIN()
       sara::display(frame_copy);
       sara::get_key();
     }
+
+    // calibration_problem.reinitialize_extrinsic_parameters(
+    //     camera, selected_frames, chessboards);
   }
 
   return 0;
