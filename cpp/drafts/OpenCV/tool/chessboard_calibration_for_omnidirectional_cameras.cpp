@@ -488,29 +488,46 @@ GRAPHICS_MAIN()
 #endif
   calibration_problem.transform_into_ceres_problem(problem);
 
-  SARA_DEBUG << "Solving Ceres Problem..." << std::endl;
-  auto solver_options = ceres::Solver::Options{};
-  solver_options.max_num_iterations = 2000;
-  solver_options.linear_solver_type = ceres::SPARSE_SCHUR;
-  solver_options.update_state_every_iteration = true;
-  solver_options.minimizer_progress_to_stdout = true;
-  auto summary = ceres::Solver::Summary{};
-  ceres::Solve(solver_options, &problem, &summary);
-  std::cout << summary.FullReport() << "\n";
+  // Restarting the optimization solver is better than increasing the number of
+  // iterations.
+  //
+  // cf. https://groups.google.com/g/ceres-solver/c/SEtXIMQwq88
+  // Quoting Sameer Agarwal:
+  // "my guess is that this is because the LBFGS direction is poor and
+  // re-starting the solver resets it to an identity matrix."
+  auto convergence = false;
+  for (auto i = 0; i < 10 && !convergence; ++i)
+  {
+    SARA_DEBUG << "Solving Ceres Problem..." << std::endl;
+    auto solver_options = ceres::Solver::Options{};
+    solver_options.max_num_iterations = 100;
+    solver_options.linear_solver_type = ceres::SPARSE_SCHUR;
+    solver_options.update_state_every_iteration = true;
+    solver_options.minimizer_progress_to_stdout = true;
+    auto summary = ceres::Solver::Summary{};
+    ceres::Solve(solver_options, &problem, &summary);
+    std::cout << summary.FullReport() << "\n";
 
-  const auto rms_init = std::sqrt(summary.initial_cost / summary.num_residuals);
-  const auto rms_final = std::sqrt(summary.final_cost / summary.num_residuals);
-  SARA_DEBUG << "RMS[INITIAL] = " << rms_init << std::endl;
-  SARA_DEBUG << "RMS[FINAL  ] = " << rms_final << std::endl;
+    if (summary.termination_type == ceres::CONVERGENCE)
+      convergence = true;
 
-  calibration_problem.copy_camera_intrinsics(camera);
+    const auto rms_init =
+        std::sqrt(summary.initial_cost / summary.num_residuals);
+    const auto rms_final =
+        std::sqrt(summary.final_cost / summary.num_residuals);
+    SARA_DEBUG << "RMS[INITIAL] = " << rms_init << std::endl;
+    SARA_DEBUG << "RMS[FINAL  ] = " << rms_final << std::endl;
 
-  SARA_DEBUG << "K =\n" << camera.K << std::endl;
-  SARA_DEBUG << "k = " << camera.radial_distortion_coefficients.transpose()
-             << std::endl;
-  SARA_DEBUG << "p = " << camera.tangential_distortion_coefficients.transpose()
-             << std::endl;
-  SARA_DEBUG << "xi = " << camera.xi << std::endl;
+    calibration_problem.copy_camera_intrinsics(camera);
+
+    SARA_DEBUG << "K =\n" << camera.K << std::endl;
+    SARA_DEBUG << "k = " << camera.radial_distortion_coefficients.transpose()
+               << std::endl;
+    SARA_DEBUG << "p = "
+               << camera.tangential_distortion_coefficients.transpose()
+               << std::endl;
+    SARA_DEBUG << "xi = " << camera.xi << std::endl;
+  }
 
   for (auto i = 0u; i < chessboards.size(); ++i)
   {
