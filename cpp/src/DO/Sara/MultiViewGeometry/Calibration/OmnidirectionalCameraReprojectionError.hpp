@@ -94,6 +94,49 @@ namespace DO::Sara {
     }
 
     template <typename T>
+    inline auto apply_mirror_transformation(const Eigen::Matrix<T, 3, 1>& Xc,
+                                            const T& xi) const
+        -> Eigen::Matrix<T, 2, 1>
+    {
+      using Vector2 = Eigen::Matrix<T, 2, 1>;
+      using Vector3 = Eigen::Matrix<T, 3, 1>;
+
+      // Mirror transformation
+      //
+      // 1. Project on the unit sphere (reflection from the spherical mirror).
+      const Vector3 Xs = Xc.normalized();
+      const Vector3 Xe = Xs + xi * Vector3::UnitZ();
+      // 3. Project the reflected ray by the mirror to the normalized plane z
+      // = 1.
+      const Vector2 m = Xe.hnormalized();
+
+      return m;
+    }
+
+    template <typename T>
+    inline auto apply_distortion(const Eigen::Matrix<T, 2, 1>& mu, const T& k1,
+                                 const T& k2, const T& p1, const T& p2) const
+        -> Eigen::Matrix<T, 2, 1>
+    {
+      using Vector2 = Eigen::Matrix<T, 2, 1>;
+
+      // Radial component (additive).
+      const auto r2 = mu.squaredNorm();
+      const auto r4 = r2 * r2;
+      const Vector2 radial_factor = mu * (k1 * r2 + k2 * r4);
+
+      // Tangential component (additive).
+      static constexpr auto two = 2.;
+      const auto tx =
+          two * p1 * mu.x() * mu.y() + p2 * (r2 + two * p1 * mu.x());
+      const auto ty =
+          p1 * (r2 + two * p1 * mu.y()) + two * p2 * mu.x() * mu.y();
+
+      // Apply the distortion.
+      return mu + radial_factor + Vector2{tx, ty};
+    }
+
+    template <typename T>
     inline auto operator()(const T* const intrinsics, const T* const extrinsics,
                            T* residuals) const -> bool
     {
@@ -116,36 +159,15 @@ namespace DO::Sara {
       const auto t = Eigen::Map<const Eigen::Matrix<T, 3, 1>>{extrinsics + 3};
       camera_coords += t;
 
-
-      // Mirror transformation
-      //
-      // 1. Project on the unit sphere (reflection from the spherical mirror).
-      const Vector3 Xs = camera_coords.normalized();
-      // 2. Change coordinates.
       const auto& xi = intrinsics[9];
-      const Vector3 Xe = Xs + xi * Vector3::UnitZ();
-      // 3. Project the reflected ray by the mirror to the normalized plane z
-      // = 1.
-      const Vector2 m = Xe.hnormalized();
+      const auto m = apply_mirror_transformation(camera_coords, xi);
 
       // Distortion.
       const auto& k1 = intrinsics[5];
       const auto& k2 = intrinsics[6];
       const auto& p1 = intrinsics[7];
       const auto& p2 = intrinsics[8];
-
-      // Radial component (additive).
-      const auto r2 = m.squaredNorm();
-      const auto r4 = r2 * r2;
-      const Vector2 radial_factor = m * (k1 * r2 + k2 * r4);
-
-      // Tangential component (additive).
-      static constexpr auto two = 2.;
-      const auto tx = two * p1 * m.x() * m.y() + p2 * (r2 + two * p1 * m.x());
-      const auto ty = p1 * (r2 + two * p1 * m.y()) + two * p2 * m.x() * m.y();
-
-      // Apply the distortion.
-      const Vector2 m_distorted = m + radial_factor + Vector2{tx, ty};
+      const Vector2 m_distorted = apply_distortion(m, k1, k2, p1, p2);
 
       // Apply the calibration matrix.
       const auto& fx = intrinsics[0];

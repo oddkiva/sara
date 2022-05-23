@@ -266,7 +266,7 @@ public:
       problem.SetParameterUpperBound(mutable_intrinsics(), dist_coeff, 1);
     }
 
-    // Bounds on mirror parameter.
+    // Bounds on the mirror parameter.
     //
     // - If we are dealing with a fisheye camera, we should freeze the xi
     //   parameter to 1.
@@ -400,11 +400,10 @@ GRAPHICS_MAIN()
 #ifdef SAMSUNG_GALAXY_J6
       "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
 #else
-      "/home/david/Desktop/calibration/fisheye/after/chessboard3.MP4"
+      // "/home/david/Desktop/calibration/fisheye/after/chessboard3.MP4"
+      "/home/david/Desktop/calibration/fisheye/before/"
+      "checkboard_luxvision_2.MP4"
 #endif
-      // "/home/david/Desktop/calibration/gopro-hero4/chessboard.mp4"
-      // "/home/david/Desktop/calibration/iphone12/chessboard.mov"
-      // "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
       ;
 
   auto video_stream = sara::VideoStream{video_filepath};
@@ -484,7 +483,7 @@ GRAPHICS_MAIN()
   SARA_DEBUG << "Instantiating Ceres Problem..." << std::endl;
   auto problem = ceres::Problem{};
 #ifndef SAMSUNG_GALAXY_J6
-  calibration_problem.optimize_for_fisheye_camera_model();
+  // calibration_problem.optimize_for_fisheye_camera_model();
 #endif
   calibration_problem.transform_into_ceres_problem(problem);
 
@@ -500,7 +499,7 @@ GRAPHICS_MAIN()
   {
     SARA_DEBUG << "Solving Ceres Problem..." << std::endl;
     auto solver_options = ceres::Solver::Options{};
-    solver_options.max_num_iterations = 100;
+    solver_options.max_num_iterations = 500;
     solver_options.linear_solver_type = ceres::SPARSE_SCHUR;
     solver_options.update_state_every_iteration = true;
     solver_options.minimizer_progress_to_stdout = true;
@@ -508,15 +507,15 @@ GRAPHICS_MAIN()
     ceres::Solve(solver_options, &problem, &summary);
     std::cout << summary.FullReport() << "\n";
 
-    if (summary.termination_type == ceres::CONVERGENCE)
-      convergence = true;
-
     const auto rms_init =
         std::sqrt(summary.initial_cost / summary.num_residuals);
     const auto rms_final =
         std::sqrt(summary.final_cost / summary.num_residuals);
     SARA_DEBUG << "RMS[INITIAL] = " << rms_init << std::endl;
     SARA_DEBUG << "RMS[FINAL  ] = " << rms_final << std::endl;
+
+    if (summary.termination_type == ceres::CONVERGENCE && rms_final < 1.)
+      convergence = true;
 
     calibration_problem.copy_camera_intrinsics(camera);
 
