@@ -88,6 +88,11 @@ public:
   static constexpr auto extrinsic_parameter_count =
       sara::OmnidirectionalCameraReprojectionError::extrinsic_parameter_count;
 
+  inline auto optimize_for_fisheye_camera_model(bool on = true) -> void
+  {
+    _is_fisheye_camera = on;
+  }
+
   inline auto initialize_intrinsics(const Eigen::Matrix3d& K,
                                     const Eigen::Vector3d& k,
                                     const Eigen::Vector2d& p,  //
@@ -98,7 +103,7 @@ public:
     // fy
     _intrinsics[1] = K(1, 1);
     // shear
-    _intrinsics[2] = K(0, 1);
+    _intrinsics[2] = K(0, 1) / K(0, 0);
     // u0
     _intrinsics[3] = K(0, 2);
     // v0
@@ -233,7 +238,8 @@ public:
 
     static constexpr auto fx = 0;
     static constexpr auto fy = 1;
-    static constexpr auto shear = 2;
+    // alpha is the normalized_shear.
+    static constexpr auto alpha = 2;  // shear = alpha * fx
     static constexpr auto k0 = 5;
     static constexpr auto k1 = 6;
     static constexpr auto p0 = 7;
@@ -246,20 +252,41 @@ public:
       problem.SetParameterLowerBound(mutable_intrinsics(), f, 500);
       problem.SetParameterUpperBound(mutable_intrinsics(), f, 5000);
     }
-    problem.SetParameterLowerBound(mutable_intrinsics(), shear, -10);
-    problem.SetParameterUpperBound(mutable_intrinsics(), shear, 10);
+    // Normalized shear.
+    // - We should not need any further adjustment on the bounds.
+    problem.SetParameterLowerBound(mutable_intrinsics(), alpha, -1.);
+    problem.SetParameterUpperBound(mutable_intrinsics(), alpha, 1.);
     // So far no need for (u0, v0)
 
     // Bounds on the distortion coefficients.
-    for (const auto& dist_coeff: {k0, k1, p0, p1})
+    // - We should not need any further adjustment on the bounds.
+    for (const auto& dist_coeff : {k0, k1, p0, p1})
     {
       problem.SetParameterLowerBound(mutable_intrinsics(), dist_coeff, -1);
       problem.SetParameterUpperBound(mutable_intrinsics(), dist_coeff, 1);
     }
 
     // Bounds on mirror parameter.
-    problem.SetParameterLowerBound(mutable_intrinsics(), xi, -10.);
-    problem.SetParameterUpperBound(mutable_intrinsics(), xi, 10.);
+    //
+    // - If we are dealing with a fisheye camera, we should freeze the xi
+    //   parameter to 1.
+    if (_is_fisheye_camera)
+    {
+      // - This is a quick and dirty approach...
+      static constexpr auto eps = 0.01;  // too little... and the optimizer may
+                                         // get stuck into a bad local minimum.
+      problem.SetParameterLowerBound(mutable_intrinsics(), xi, 1 - eps);
+      problem.SetParameterUpperBound(mutable_intrinsics(), xi, 1 + eps);
+
+      // Otherwise add a penalty residual block:
+      // auto penalty_block = /* TODO */;
+      // problem.AddResidualBlock(penalty_block, nullptr, mutable_intrinsics());
+    }
+    else
+    {
+      problem.SetParameterLowerBound(mutable_intrinsics(), xi, -10.);
+      problem.SetParameterUpperBound(mutable_intrinsics(), xi, 10.);
+    }
   }
 
   inline auto
@@ -269,7 +296,8 @@ public:
     // object.
     const auto fx = mutable_intrinsics()[0];
     const auto fy = mutable_intrinsics()[1];
-    const auto s = mutable_intrinsics()[2];
+    const auto alpha = mutable_intrinsics()[2];
+    const auto shear = fx * alpha;
     const auto u0 = mutable_intrinsics()[3];
     const auto v0 = mutable_intrinsics()[4];
     const auto k0 = mutable_intrinsics()[5];
@@ -279,9 +307,9 @@ public:
     const auto xi = mutable_intrinsics()[9];
     // clang-format off
     auto K = Eigen::Matrix3d{};
-    K << fx,  s, u0,
-          0, fy, v0,
-          0,  0,  1;
+    K << fx, shear, u0,
+          0,   fy, v0,
+          0,    0,  1;
     // clang-format on
     camera.set_calibration_matrix(K);
     camera.radial_distortion_coefficients << k0, k1, 0;
@@ -360,6 +388,7 @@ private:
   std::vector<double> _observations_3d;
   std::array<double, intrinsic_parameter_count> _intrinsics;
   std::vector<double> _extrinsics;
+  bool _is_fisheye_camera = false;
 };
 
 
@@ -452,59 +481,53 @@ GRAPHICS_MAIN()
     }
   }
 
-  for (auto i = 0; i < 10; ++i)
+  // The optimization of the camera parameters will lead to a local minimum
+  // because the starting values are actually very far from the global
+  // minimum.
+  SARA_DEBUG << "Instantiating Ceres Problem..." << std::endl;
+  auto problem = ceres::Problem{};
+#ifndef SAMSUNG_GALAXY_J6
+  calibration_problem.optimize_for_fisheye_camera_model();
+#endif
+  calibration_problem.transform_into_ceres_problem(problem);
+
+  SARA_DEBUG << "Solving Ceres Problem..." << std::endl;
+  auto solver_options = ceres::Solver::Options{};
+  solver_options.max_num_iterations = 1000;
+  solver_options.linear_solver_type = ceres::SPARSE_SCHUR;
+  solver_options.update_state_every_iteration = true;
+  solver_options.minimizer_progress_to_stdout = true;
+  auto summary = ceres::Solver::Summary{};
+  ceres::Solve(solver_options, &problem, &summary);
+  std::cout << summary.FullReport() << "\n";
+
+  // Start again by reusing the proper homography estimation on the virtual
+  // normalized pinhole camera.
+
+  const auto rms_init = std::sqrt(summary.initial_cost / summary.num_residuals);
+  const auto rms_final = std::sqrt(summary.final_cost / summary.num_residuals);
+  SARA_DEBUG << "RMS[INITIAL] = " << rms_init << std::endl;
+  SARA_DEBUG << "RMS[FINAL  ] = " << rms_final << std::endl;
+
+
+  calibration_problem.copy_camera_intrinsics(camera);
+
+  SARA_DEBUG << "K =\n" << camera.K << std::endl;
+  SARA_DEBUG << "k = " << camera.radial_distortion_coefficients.transpose()
+             << std::endl;
+  SARA_DEBUG << "p = " << camera.tangential_distortion_coefficients.transpose()
+             << std::endl;
+  SARA_DEBUG << "xi = " << camera.xi << std::endl;
+
+  for (auto i = 0u; i < chessboards.size(); ++i)
   {
-    // The optimization of the camera parameters will lead to a local minimum
-    // because the starting values are actually very far from the global
-    // minimum.
-    SARA_DEBUG << "Instantiating Ceres Problem..." << std::endl;
-    auto problem = ceres::Problem{};
-    calibration_problem.transform_into_ceres_problem(problem);
+    const auto R = calibration_problem.rotation(i).toRotationMatrix();
+    const auto t = calibration_problem.translation(i);
 
-    SARA_DEBUG << "Solving Ceres Problem..." << std::endl;
-    auto solver_options = ceres::Solver::Options{};
-    solver_options.max_num_iterations = 500;
-    solver_options.linear_solver_type = ceres::SPARSE_SCHUR;
-    solver_options.update_state_every_iteration = true;
-    solver_options.minimizer_progress_to_stdout = true;
-    auto summary = ceres::Solver::Summary{};
-    ceres::Solve(solver_options, &problem, &summary);
-    std::cout << summary.FullReport() << "\n";
-
-    // Start again by reusing the proper homography estimation on the virtual
-    // normalized pinhole camera.
-
-    const auto rms_init =
-        std::sqrt(summary.initial_cost / summary.num_residuals);
-    const auto rms_final =
-        std::sqrt(summary.final_cost / summary.num_residuals);
-    SARA_DEBUG << "RMS[INITIAL] = " << rms_init << std::endl;
-    SARA_DEBUG << "RMS[FINAL  ] = " << rms_final << std::endl;
-
-
-    calibration_problem.copy_camera_intrinsics(camera);
-
-    SARA_DEBUG << "K =\n" << camera.K << std::endl;
-    SARA_DEBUG << "k = " << camera.radial_distortion_coefficients.transpose()
-               << std::endl;
-    SARA_DEBUG << "p = "
-               << camera.tangential_distortion_coefficients.transpose()
-               << std::endl;
-    SARA_DEBUG << "xi = " << camera.xi << std::endl;
-
-    for (auto i = 0u; i < chessboards.size(); ++i)
-    {
-      const auto R = calibration_problem.rotation(i).toRotationMatrix();
-      const auto t = calibration_problem.translation(i);
-
-      auto frame_copy = selected_frames[i];
-      inspect(frame_copy, chessboards[i], camera, R, t);
-      sara::display(frame_copy);
-      sara::get_key();
-    }
-
-    // calibration_problem.reinitialize_extrinsic_parameters(
-    //     camera, selected_frames, chessboards);
+    auto frame_copy = selected_frames[i];
+    inspect(frame_copy, chessboards[i], camera, R, t);
+    sara::display(frame_copy);
+    sara::get_key();
   }
 
   return 0;

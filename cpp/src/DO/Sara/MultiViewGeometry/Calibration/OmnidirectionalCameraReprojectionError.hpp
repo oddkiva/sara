@@ -25,7 +25,7 @@ namespace DO::Sara {
     {
       FX = 0,
       FY = 1,
-      SHEAR = 2,
+      NORMALIZED_SHEAR = 2,
       U0 = 3,
       V0 = 4,
       K0 = 5,
@@ -42,9 +42,14 @@ namespace DO::Sara {
       return data[FX + i];
     }
 
-    inline auto shear() const -> const T&
+    inline auto normalized_shear() const -> const T&
     {
-      return data[SHEAR];
+      return data[NORMALIZED_SHEAR];
+    }
+
+    inline auto shear() const -> T
+    {
+      return data[NORMALIZED_SHEAR] * data[FX];
     }
 
     inline auto u0() const -> const T&
@@ -145,12 +150,13 @@ namespace DO::Sara {
       // Apply the calibration matrix.
       const auto& fx = intrinsics[0];
       const auto& fy = intrinsics[1];
-      const auto& s = intrinsics[2];
+      const auto& alpha = intrinsics[2];
+      const auto shear = fx * alpha;
       const auto& u0 = intrinsics[3];
       const auto& v0 = intrinsics[4];
       // clang-format off
-      const auto predicted_x = fx * m_distorted.x() +  s * m_distorted.y() + u0;
-      const auto predicted_y =                        fy * m_distorted.y() + v0;
+      const auto predicted_x = fx * m_distorted.x() + shear * m_distorted.y() + u0;
+      const auto predicted_y =                           fy * m_distorted.y() + v0;
       // clang-format on
 
       // The error is the difference between the predicted and observed
