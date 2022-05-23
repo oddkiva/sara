@@ -481,9 +481,6 @@ GRAPHICS_MAIN()
     }
   }
 
-  // The optimization of the camera parameters will lead to a local minimum
-  // because the starting values are actually very far from the global
-  // minimum.
   SARA_DEBUG << "Instantiating Ceres Problem..." << std::endl;
   auto problem = ceres::Problem{};
 #ifndef SAMSUNG_GALAXY_J6
@@ -493,7 +490,7 @@ GRAPHICS_MAIN()
 
   SARA_DEBUG << "Solving Ceres Problem..." << std::endl;
   auto solver_options = ceres::Solver::Options{};
-  solver_options.max_num_iterations = 1000;
+  solver_options.max_num_iterations = 2000;
   solver_options.linear_solver_type = ceres::SPARSE_SCHUR;
   solver_options.update_state_every_iteration = true;
   solver_options.minimizer_progress_to_stdout = true;
@@ -501,14 +498,10 @@ GRAPHICS_MAIN()
   ceres::Solve(solver_options, &problem, &summary);
   std::cout << summary.FullReport() << "\n";
 
-  // Start again by reusing the proper homography estimation on the virtual
-  // normalized pinhole camera.
-
   const auto rms_init = std::sqrt(summary.initial_cost / summary.num_residuals);
   const auto rms_final = std::sqrt(summary.final_cost / summary.num_residuals);
   SARA_DEBUG << "RMS[INITIAL] = " << rms_init << std::endl;
   SARA_DEBUG << "RMS[FINAL  ] = " << rms_final << std::endl;
-
 
   calibration_problem.copy_camera_intrinsics(camera);
 
