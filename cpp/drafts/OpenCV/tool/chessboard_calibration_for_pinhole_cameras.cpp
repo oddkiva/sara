@@ -185,9 +185,9 @@ private:
 
 GRAPHICS_MAIN()
 {
-#define SAMSUNG_GALAXY_J6
+  // #define SAMSUNG_GALAXY_J6
   // #define GOPRO4
-  // #define IPHONE12
+#define IPHONE12
   // #define GOPRO7_WIDE
   // #define GOPRO7_SUPERVIEW
 
@@ -201,8 +201,8 @@ GRAPHICS_MAIN()
 #elif defined(GOPRO7_WIDE)
       "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
 #elif defined(GOPRO7_SUPERVIEW)
-    "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
-    "GH010053.MP4"
+      "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
+      "GH010053.MP4"
 #  pragma error "INVALID!"
 #endif
       ;

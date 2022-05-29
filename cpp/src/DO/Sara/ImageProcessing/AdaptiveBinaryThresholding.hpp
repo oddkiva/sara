@@ -35,9 +35,10 @@ namespace DO::Sara {
 
     const auto sum = kernel.flat_array().sum();
 
+#pragma omp parallel for collapse(2)
     for (auto y = 0; y < src.height(); ++y)
     {
-      for (auto x = 0; x < src.height(); ++x)
+      for (auto x = 0; x < src.width(); ++x)
       {
         auto mean = T{};
         for (auto v = -r.y(); v <= r.y(); ++v)

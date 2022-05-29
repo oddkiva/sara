@@ -88,9 +88,16 @@ public:
   static constexpr auto extrinsic_parameter_count =
       sara::OmnidirectionalCameraReprojectionError::extrinsic_parameter_count;
 
-  inline auto optimize_for_fisheye_camera_model(bool on = true) -> void
+  enum CameraType : std::uint8_t
   {
-    _is_fisheye_camera = on;
+    Pinhole,
+    Fisheye,
+    General
+  };
+
+  inline auto set_camera_type(CameraType camera_type) -> void
+  {
+    _camera_type = camera_type;
   }
 
   inline auto initialize_intrinsics(const Eigen::Matrix3d& K,
@@ -270,22 +277,28 @@ public:
     //
     // - If we are dealing with a fisheye camera, we should freeze the xi
     //   parameter to 1.
-    if (_is_fisheye_camera)
+    static constexpr auto tolerance =
+        0.01;  // too little... and the optimizer may
+               // get stuck into a bad local minimum.
+    switch (_camera_type)
     {
+    case CameraType::Fisheye:
       // - This is a quick and dirty approach...
-      static constexpr auto eps = 0.01;  // too little... and the optimizer may
-                                         // get stuck into a bad local minimum.
-      problem.SetParameterLowerBound(mutable_intrinsics(), xi, 1 - eps);
-      problem.SetParameterUpperBound(mutable_intrinsics(), xi, 1 + eps);
+      problem.SetParameterLowerBound(mutable_intrinsics(), xi, 1 - tolerance);
+      problem.SetParameterUpperBound(mutable_intrinsics(), xi, 1 + tolerance);
 
       // Otherwise add a penalty residual block:
       // auto penalty_block = /* TODO */;
       // problem.AddResidualBlock(penalty_block, nullptr, mutable_intrinsics());
-    }
-    else
-    {
+      break;
+    case CameraType::Pinhole:
+      problem.SetParameterLowerBound(mutable_intrinsics(), xi, -tolerance);
+      problem.SetParameterUpperBound(mutable_intrinsics(), xi, tolerance);
+      break;
+    default:
       problem.SetParameterLowerBound(mutable_intrinsics(), xi, -10.);
       problem.SetParameterUpperBound(mutable_intrinsics(), xi, 10.);
+      break;
     }
   }
 
@@ -388,21 +401,25 @@ private:
   std::vector<double> _observations_3d;
   std::array<double, intrinsic_parameter_count> _intrinsics;
   std::vector<double> _extrinsics;
-  bool _is_fisheye_camera = false;
+  CameraType _camera_type = CameraType::General;
 };
 
 
 GRAPHICS_MAIN()
 {
-  // #define SAMSUNG_GALAXY_J6
+// #define SAMSUNG_GALAXY_J6
+#define GOPRO7_SUPERVIEW
 
   const auto video_filepath =
 #ifdef SAMSUNG_GALAXY_J6
       "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
+#elif defined(GOPRO7_SUPERVIEW)
+      "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
+      "GH010053.MP4"
 #else
-      // "/home/david/Desktop/calibration/fisheye/after/chessboard3.MP4"
-      "/home/david/Desktop/calibration/fisheye/before/"
-      "checkboard_luxvision_2.MP4"
+      "/home/david/Desktop/calibration/fisheye/after/chessboard3.MP4"
+  // "/home/david/Desktop/calibration/fisheye/before/"
+  // "checkboard_luxvision_2.MP4"
 #endif
       ;
 
@@ -412,6 +429,9 @@ GRAPHICS_MAIN()
 #if defined(SAMSUNG_GALAXY_J6) || defined(GOPRO4) || defined(IPHONE12)
   static const auto pattern_size = Eigen::Vector2i{7, 5};
   static constexpr auto square_size = 3._cm;
+#elif defined(GOPRO7_SUPERVIEW)
+  static const auto pattern_size = Eigen::Vector2i{7, 9};
+  static constexpr auto square_size = 2._cm;
 #else
   static const auto pattern_size = Eigen::Vector2i{7, 12};
   static constexpr auto square_size = 7._cm;
@@ -423,8 +443,11 @@ GRAPHICS_MAIN()
   camera.K = init_K(frame.width(), frame.height());
   camera.radial_distortion_coefficients.setZero();
   camera.tangential_distortion_coefficients.setZero();
+#ifdef SAMSUNG_GALAXY_J6
+  camera.xi = 0;
+#else
   camera.xi = 1;
-
+#endif
 
   // Initialize the calibration problem.
   auto calibration_problem = ChessboardCalibrationProblem{};
@@ -443,10 +466,11 @@ GRAPHICS_MAIN()
     if (!video_stream.read())
       break;
 
-    if (i % 10 != 0)
+    if (i % 2 != 0)
       continue;
 
-    SARA_CHECK(i);
+    if (selected_frames.size() > 200)
+      break;
 
     sara::tic();
     auto chessboard = sara::OpenCV::Chessboard(pattern_size, square_size.value);
@@ -478,12 +502,26 @@ GRAPHICS_MAIN()
       selected_frames.emplace_back(video_stream.frame());
       chessboards.emplace_back(std::move(chessboard));
     }
+    else
+    {
+      sara::display(frame);
+      SARA_DEBUG << "[" << i
+                 << "] No chessboard found or chessboard is incomplete!"
+                 << std::endl;
+    }
   }
 
   SARA_DEBUG << "Instantiating Ceres Problem..." << std::endl;
   auto problem = ceres::Problem{};
-#ifndef SAMSUNG_GALAXY_J6
-  // calibration_problem.optimize_for_fisheye_camera_model();
+#ifdef SAMSUNG_GALAXY_J6
+  calibration_problem.set_camera_type(
+      ChessboardCalibrationProblem::CameraType::Pinhole);
+#elif defined(GOPRO7_SUPERVIEW)
+  calibration_problem.set_camera_type(
+      ChessboardCalibrationProblem::CameraType::Fisheye);
+#else
+  calibration_problem.set_camera_type(
+      ChessboardCalibrationProblem::CameraType::General);
 #endif
   calibration_problem.transform_into_ceres_problem(problem);
 
@@ -495,7 +533,7 @@ GRAPHICS_MAIN()
   // "my guess is that this is because the LBFGS direction is poor and
   // re-starting the solver resets it to an identity matrix."
   auto convergence = false;
-  for (auto i = 0; i < 10 && !convergence; ++i)
+  for (auto i = 0; i < 20 && !convergence; ++i)
   {
     SARA_DEBUG << "Solving Ceres Problem..." << std::endl;
     auto solver_options = ceres::Solver::Options{};

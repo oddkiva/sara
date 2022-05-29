@@ -146,17 +146,17 @@ namespace DO::Sara {
       // 1. Apply [R|t] = extrinsics[...]
       //
       // a) extrinsics[0, 1, 2] are the angle-axis rotation.
-      const auto scene_coords = Eigen::Matrix<T, 3, 1>{
+      const auto scene_coords = Vector3{
           static_cast<T>(scene_point.x()),  //
           static_cast<T>(scene_point.y()),  //
           T{}                               //
       };
-      auto camera_coords = Eigen::Matrix<T, 3, 1>{};
+      auto camera_coords = Vector3{};
       ceres::AngleAxisRotatePoint(extrinsics, scene_coords.data(),
                                   camera_coords.data());
 
       // b) extrinsics[3, 4, 5] are the translation.
-      const auto t = Eigen::Map<const Eigen::Matrix<T, 3, 1>>{extrinsics + 3};
+      const auto t = Eigen::Map<const Vector3>{extrinsics + 3};
       camera_coords += t;
 
       const auto& xi = intrinsics[9];
