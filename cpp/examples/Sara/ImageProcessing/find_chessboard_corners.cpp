@@ -404,8 +404,6 @@ struct KnnGraph
     const auto k = _neighbors.rows();
     const auto s = downscale_factor;
 
-    auto image_copy = sara::upscale(image, s).convert<sara::Rgb8>();
-
     auto vs = std::vector<VertexScore>{};
     vs.resize(_vertices.size());
     for (auto v = 0u; v < vs.size(); ++v)
@@ -439,7 +437,7 @@ struct KnnGraph
       ++num_corners_added;
 
       // Debug.
-      sara::fill_circle(image_copy, s * pu.x(), s * pu.y(), 8, sara::Green8);
+      sara::fill_circle(s * pu.x(), s * pu.y(), 4, sara::Green8);
 
       for (auto nn = 0; nn < k; ++nn)
       {
@@ -451,14 +449,10 @@ struct KnnGraph
 
         const auto N = edge_gradients.cols();
 
-        const auto amin = edge_gradients.row(0).minCoeff();
-        const auto amax = edge_gradients.row(0).maxCoeff();
         const auto amean = edge_gradients.row(0).sum() / N;
         const auto adev = std::sqrt(
             (edge_gradients.row(0).array() - amean).square().sum() / N);
 
-        const auto bmin = edge_gradients.row(1).minCoeff();
-        const auto bmax = edge_gradients.row(1).maxCoeff();
         const auto bmean = edge_gradients.row(1).sum() / edge_gradients.cols();
         const auto bdev = std::sqrt(
             (edge_gradients.row(1).array() - bmean).square().sum() / N);
@@ -485,8 +479,8 @@ struct KnnGraph
           thres = diff * 0.5f;
         }
 
-        sara::draw_line(image_copy, s * pu.x(), s * pu.y(), s * pv.x(),
-                        s * pv.y(), sara::Green8, 2);
+        sara::draw_line(s * pu.x(), s * pu.y(), s * pv.x(), s * pv.y(),
+                        sara::Green8, 8);
 
         if (!visited[v])
         {
@@ -497,12 +491,9 @@ struct KnnGraph
 #endif
 
           // Debug.
-          sara::fill_circle(image_copy, s * pv.x(), s * pv.y(), 8, sara::Red8);
+          sara::fill_circle(s * pv.x(), s * pv.y(), 4, sara::Red8);
         }
       }
-
-      // Debug.
-      sara::display(image_copy);
     }
     if (num_corners_added != corner_count(0) * corner_count(1))
       sara::get_key();
@@ -529,7 +520,7 @@ auto __main(int argc, char** argv) -> int
   else
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
-  static constexpr auto downscale_factor = 2;
+  static constexpr auto downscale_factor = 1;
   static constexpr auto sigma = 1.6f;
   static constexpr auto k = 6;
   static constexpr auto radius = 5;
