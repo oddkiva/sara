@@ -252,6 +252,32 @@ auto k_nearest_neighbors(const std::vector<Feature>& points, const int k)
   return std::make_pair(neighbors, distances);
 }
 
+auto sample_edge_gradient(const Eigen::Vector2f& a, const Eigen::Vector2f& b, const float sigma, const sara::ImageView<float>& image)
+  -> Eigen::MatrixXf
+{
+  const Eigen::Vector2f t = (b - a).normalized();
+  const Eigen::Vector2f n = Eigen::Vector2f{-t.y(), t.x()};
+  const auto num_samples = static_cast<int>(std::floor((b - a).norm() / sigma)) - 1;
+  if (num_samples <= 0)
+    return {};
+  auto intensity_samples = Eigen::MatrixXf{2, num_samples};
+
+  for (auto i = 0; i < num_samples; ++i)
+  {
+    const Eigen::Vector2d ai = (a + ((i + 1) * t + 2.5f * n) * sigma).cast<double>();
+    const Eigen::Vector2d bi = (a + ((i + 1) * t - 2.5f * n) * sigma).cast<double>();
+    const auto intensity_ai = static_cast<float>(sara::interpolate(image, ai));
+    const auto intensity_bi = static_cast<float>(sara::interpolate(image, bi));
+
+    intensity_samples.col(i) << intensity_ai, intensity_bi;
+  }
+
+  // TODO: calculate statistics: mean and std-dev for a robust inference.
+
+  return intensity_samples;
+}
+
+
 template <typename V>
 struct KnnGraph
 {
@@ -285,7 +311,7 @@ struct KnnGraph
     return _vertices[_neighbors(k, v)];
   };
 
-  inline auto compute_affinity_scores() -> void
+  inline auto compute_affinity_scores(const sara::ImageView<float>& image, const float sigma) -> void
   {
     const auto n = _vertices.size();
     const auto k = _neighbors.rows();
@@ -306,6 +332,7 @@ struct KnnGraph
       {
         const auto v = _neighbors(nn, u);
         const auto fv = _circular_profiles.col(v);
+        const auto pv = _vertices[v].position();
 #if 0
         std::cout << "[" << u << "] -> [" << v << "]" << std::endl;
         std::cout << "fv = " << fv.transpose() << std::endl;
@@ -371,24 +398,32 @@ struct KnnGraph
     }
   }
 
-  inline auto grow(sara::ImageView<sara::Rgb8>& image, int scale_factor = 2)
-      -> void
+  inline auto grow(const sara::ImageView<float>& image, const float sigma,
+                   const int downscale_factor, const Eigen::Vector2i& corner_count) -> void
   {
     const auto k = _neighbors.rows();
-    const auto s = scale_factor;
+    const auto s = downscale_factor;
+
+    auto image_copy = sara::upscale(image, s).convert<sara::Rgb8>();
 
     auto vs = std::vector<VertexScore>{};
     vs.resize(_vertices.size());
     for (auto v = 0u; v < vs.size(); ++v)
       vs[v] = {v, _unary_scores(v)};
 
+#if 0
     for (const auto& [v, score]: vs)
       SARA_DEBUG << "v = " << v << " score = " << score << std::endl;
+#endif
 
     auto q = std::priority_queue<VertexScore>{};
     q.emplace(*std::max_element(vs.begin(), vs.end()));
 
     auto visited = std::vector<std::uint8_t>(_vertices.size(), 0);
+
+    auto num_corners_added = 0;
+    auto thres = 1e-2f;
+    auto thres_set_from_data = false;
 
     while (!q.empty())
     {
@@ -396,32 +431,81 @@ struct KnnGraph
       const auto& u = best.vertex;
       const auto& pu = _vertices[u].position();
       visited[u] = 1;
+#if 0
       SARA_DEBUG << "current best " << u << " score = " << best.score << std::endl;
+#endif
 
       q.pop();
+      ++num_corners_added;
 
       // Debug.
-      sara::fill_circle(image, s * pu.x(), s * pu.y(), 8, sara::Green8);
+      sara::fill_circle(image_copy, s * pu.x(), s * pu.y(), 8, sara::Green8);
 
       for (auto nn = 0; nn < k; ++nn)
       {
         const auto& v = _neighbors(nn, best.vertex);
         const auto& pv = _vertices[v].position();
+
+        const auto edge_gradients = sample_edge_gradient(
+            pu.template cast<float>(), pv.template cast<float>(), sigma, image);
+
+        const auto N = edge_gradients.cols();
+
+        const auto amin = edge_gradients.row(0).minCoeff();
+        const auto amax = edge_gradients.row(0).maxCoeff();
+        const auto amean = edge_gradients.row(0).sum() / N;
+        const auto adev = std::sqrt(
+            (edge_gradients.row(0).array() - amean).square().sum() / N);
+
+        const auto bmin = edge_gradients.row(1).minCoeff();
+        const auto bmax = edge_gradients.row(1).maxCoeff();
+        const auto bmean = edge_gradients.row(1).sum() / edge_gradients.cols();
+        const auto bdev = std::sqrt(
+            (edge_gradients.row(1).array() - bmean).square().sum() / N);
+
+        auto good_edge = false;
+        auto diff =  float{};
+        static constexpr auto lambda = 1.0f;
+        if (amean < bmean)
+        {
+          diff = bmean - lambda * bdev - amean - lambda * adev;
+          good_edge = diff > thres;
+        }
+        else
+        {
+          diff = amean - lambda * adev - bmean - lambda * bdev;
+          good_edge = diff > thres;
+        }
+        if (!good_edge)
+          continue;
+
+        if (diff > 1e-3f)
+        {
+          // thres_set_from_data = true;
+          thres = diff * 0.5f;
+        }
+
+        sara::draw_line(image_copy, s * pu.x(), s * pu.y(), s * pv.x(),
+                        s * pv.y(), sara::Green8, 2);
+
         if (!visited[v])
         {
           visited[v] = 1;
           q.push(vs[v]);
+#if 0
           SARA_DEBUG << "Adding vertex = " << vs[v].vertex << " score " << vs[v].score << std::endl;
+#endif
 
           // Debug.
-          sara::fill_circle(image, s * pv.x(), s * pv.y(), 8, sara::Red8);
+          sara::fill_circle(image_copy, s * pv.x(), s * pv.y(), 8, sara::Red8);
         }
       }
 
       // Debug.
-      sara::display(image);
-      sara::get_key();
+      sara::display(image_copy);
     }
+    if (num_corners_added != corner_count(0) * corner_count(1))
+      sara::get_key();
   }
 };
 
@@ -439,13 +523,19 @@ auto __main(int argc, char** argv) -> int
   auto video_frame_copy = sara::Image<sara::Rgb8>{};
   auto frame_number = -1;
 
+  auto corner_count = Eigen::Vector2i{};
+  if (argc < 4)
+    corner_count << 7, 12;
+  else
+    corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
+
   static constexpr auto downscale_factor = 2;
   static constexpr auto sigma = 1.6f;
   static constexpr auto k = 6;
   static constexpr auto radius = 5;
   static constexpr auto grad_adaptive_thres = 2e-2f;
 
-  static constexpr auto tolerance_parameter = 0.0f;
+  // static constexpr auto tolerance_parameter = 0.0f;
   static const auto kernel_2d = sara::make_gaussian_kernel_2d(16.f);
 
   while (video_stream.read())
@@ -515,7 +605,7 @@ auto __main(int argc, char** argv) -> int
     }
     sara::toc("knn-graph");
 
-    graph.compute_affinity_scores();
+    graph.compute_affinity_scores(f, sigma);
 
     // TODO: calculate the k-nn graph on the refined junctions.
     auto junctions_refined = std::vector<sara::Junction<float>>{};
@@ -563,7 +653,7 @@ auto __main(int argc, char** argv) -> int
 
     sara::display(video_frame_copy);
 
-    graph.grow(video_frame_copy);
+    graph.grow(f, sigma, downscale_factor, corner_count);
   }
 
   return 0;
