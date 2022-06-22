@@ -29,7 +29,8 @@
 
 namespace sara = DO::Sara;
 
-auto dir(const float angle) -> Eigen::Vector2f
+
+inline auto dir(const float angle) -> Eigen::Vector2f
 {
   return Eigen::Vector2f{std::cos(angle), std::sin(angle)};
 };
@@ -180,7 +181,7 @@ auto filter_junctions(std::vector<sara::Junction<int>>& junctions,
     for (auto i = 0; i < 4; ++i)
       circular_profiles(i, junctions_filtered.size()) = zero_crossings[i];
 
-    static const auto angle_threshold = std::cos(M_PI / 180.f * 20.f);
+    static const auto angle_threshold = std::cos(M_PI / 180.f * 10.f);
     auto good = true;
     for (auto i = 0; i < 4; ++i)
     {
@@ -205,11 +206,12 @@ auto filter_junctions(std::vector<sara::Junction<int>>& junctions,
   }
 
   junctions_filtered.swap(junctions);
-  circular_profiles.conservativeResize(4, junctions_filtered.size());
+  circular_profiles.conservativeResize(4, junctions.size());
 }
 
-template <typename Feature>
-auto k_nearest_neighbors(const std::vector<Feature>& points, const int k)
+template <typename T>
+auto k_nearest_neighbors(const std::vector<sara::Junction<T>>& points,
+                         const int k, const Eigen::MatrixXf& circular_profiles)
     -> std::pair<Eigen::MatrixXi, Eigen::MatrixXf>
 {
   const auto n = points.size();
@@ -222,6 +224,15 @@ auto k_nearest_neighbors(const std::vector<Feature>& points, const int k)
   for (auto u = 0u; u < n; ++u)
   {
     const auto& pu = points[u].position();
+
+    // Calculate the direction of the edge gradients.
+    auto gradient_dirs = Eigen::MatrixXf{2, circular_profiles.rows()};
+    for (auto i = 0; i < gradient_dirs.cols(); ++i)
+    {
+      const auto& angle = circular_profiles(i, u);
+      gradient_dirs.col(i) << std::cos(angle), std::sin(angle);
+    }
+
     for (auto v = 0u; v < n; ++v)
     {
       if (v == u)
@@ -229,6 +240,17 @@ auto k_nearest_neighbors(const std::vector<Feature>& points, const int k)
 
       const auto& pv = points[v].position();
       const auto d_uv = static_cast<float>((pu - pv).squaredNorm());
+
+      // A good neighbor is valid if it is consistent with the image gradient.
+      const Eigen::Vector2f dir_uv =
+          (pv - pu).template cast<float>().normalized();
+      auto dot_uv = Eigen::VectorXf{circular_profiles.rows()};
+      for (auto i = 0; i < gradient_dirs.cols(); ++i)
+        dot_uv(i) = std::abs(gradient_dirs.col(i).dot(dir_uv));
+      const auto max_dot_uv = dot_uv.maxCoeff();
+      static const auto dot_thres = std::cos(10.f / 180.f * M_PI);
+      if (max_dot_uv < dot_thres)
+        continue;
 
       for (auto a = 0; a < k; ++a)
       {
@@ -252,20 +274,26 @@ auto k_nearest_neighbors(const std::vector<Feature>& points, const int k)
   return std::make_pair(neighbors, distances);
 }
 
-auto sample_edge_gradient(const Eigen::Vector2f& a, const Eigen::Vector2f& b, const float sigma, const sara::ImageView<float>& image)
-  -> Eigen::MatrixXf
+
+auto sample_edge_gradient(const Eigen::Vector2f& a, const Eigen::Vector2f& b,
+                          const float sigma,
+                          const sara::ImageView<float>& image)
+    -> Eigen::MatrixXf
 {
   const Eigen::Vector2f t = (b - a).normalized();
   const Eigen::Vector2f n = Eigen::Vector2f{-t.y(), t.x()};
-  const auto num_samples = static_cast<int>(std::floor((b - a).norm() / sigma)) - 1;
+  const auto num_samples =
+      static_cast<int>(std::floor((b - a).norm() / sigma)) - 1;
   if (num_samples <= 0)
     return {};
   auto intensity_samples = Eigen::MatrixXf{2, num_samples};
 
   for (auto i = 0; i < num_samples; ++i)
   {
-    const Eigen::Vector2d ai = (a + ((i + 1) * t + 2.5f * n) * sigma).cast<double>();
-    const Eigen::Vector2d bi = (a + ((i + 1) * t - 2.5f * n) * sigma).cast<double>();
+    const Eigen::Vector2d ai =
+        (a + ((i + 1) * t + 2.5f * n) * sigma).cast<double>();
+    const Eigen::Vector2d bi =
+        (a + ((i + 1) * t - 2.5f * n) * sigma).cast<double>();
     const auto intensity_ai = static_cast<float>(sara::interpolate(image, ai));
     const auto intensity_bi = static_cast<float>(sara::interpolate(image, bi));
 
@@ -311,7 +339,8 @@ struct KnnGraph
     return _vertices[_neighbors(k, v)];
   };
 
-  inline auto compute_affinity_scores(const sara::ImageView<float>& image, const float sigma) -> void
+  inline auto compute_affinity_scores(const sara::ImageView<float>& image,
+                                      const float sigma) -> void
   {
     const auto n = _vertices.size();
     const auto k = _neighbors.rows();
@@ -380,41 +409,17 @@ struct KnnGraph
     }
   }
 
-  inline auto sort(sara::ImageView<sara::Rgb8>& image) -> void
-  {
-    auto vs = std::vector<VertexScore>{};
-    vs.resize(_vertices.size());
-    for (auto v = 0u; v < vs.size(); ++v)
-      vs[v] = {v, _unary_scores(v)};
-    std::sort(vs.rbegin(), vs.rend());
-
-    for (const auto& [v, score] : vs)
-    {
-      const auto& pv = _vertices[v].position();
-      std::cout << pv.transpose() << std::endl;
-      sara::fill_circle(image, pv.x(), pv.y(), 8, sara::Green8);
-      sara::display(image);
-      sara::get_key();
-    }
-  }
-
   inline auto grow(const sara::ImageView<float>& image, const float sigma,
-                   const int downscale_factor, const Eigen::Vector2i& corner_count) -> void
+                   const int downscale_factor,
+                   const Eigen::Vector2i& corner_count) -> void
   {
     const auto k = _neighbors.rows();
     const auto s = downscale_factor;
 
-    auto image_copy = sara::upscale(image, s).convert<sara::Rgb8>();
-
     auto vs = std::vector<VertexScore>{};
-    vs.resize(_vertices.size());
-    for (auto v = 0u; v < vs.size(); ++v)
-      vs[v] = {v, _unary_scores(v)};
-
-#if 0
-    for (const auto& [v, score]: vs)
-      SARA_DEBUG << "v = " << v << " score = " << score << std::endl;
-#endif
+    vs.reserve(_vertices.size());
+    for (auto u = 0u; u < _vertices.size(); ++u)
+      vs.push_back({u, _unary_scores(u)});
 
     auto q = std::priority_queue<VertexScore>{};
     q.emplace(*std::max_element(vs.begin(), vs.end()));
@@ -422,8 +427,7 @@ struct KnnGraph
     auto visited = std::vector<std::uint8_t>(_vertices.size(), 0);
 
     auto num_corners_added = 0;
-    auto thres = 1e-2f;
-    auto thres_set_from_data = false;
+    static constexpr auto thres = 1e-2f;
 
     while (!q.empty())
     {
@@ -431,19 +435,21 @@ struct KnnGraph
       const auto& u = best.vertex;
       const auto& pu = _vertices[u].position();
       visited[u] = 1;
-#if 0
-      SARA_DEBUG << "current best " << u << " score = " << best.score << std::endl;
-#endif
 
       q.pop();
       ++num_corners_added;
 
       // Debug.
-      sara::fill_circle(image_copy, s * pu.x(), s * pu.y(), 8, sara::Green8);
+      sara::fill_circle(s * pu.x(), s * pu.y(), 8, sara::Green8);
 
       for (auto nn = 0; nn < k; ++nn)
       {
         const auto& v = _neighbors(nn, best.vertex);
+        if (v == -1)
+        {
+          SARA_DEBUG << "SKIPPING INVALID NEIGHBOR..." << std::endl;
+          continue;
+        }
         const auto& pv = _vertices[v].position();
 
         const auto edge_gradients = sample_edge_gradient(
@@ -464,7 +470,7 @@ struct KnnGraph
             (edge_gradients.row(1).array() - bmean).square().sum() / N);
 
         auto good_edge = false;
-        auto diff =  float{};
+        auto diff = float{};
         static constexpr auto lambda = 1.0f;
         if (amean < bmean)
         {
@@ -476,33 +482,22 @@ struct KnnGraph
           diff = amean - lambda * adev - bmean - lambda * bdev;
           good_edge = diff > thres;
         }
+
         if (!good_edge)
           continue;
 
-        if (diff > 1e-3f)
-        {
-          // thres_set_from_data = true;
-          thres = diff * 0.5f;
-        }
-
-        sara::draw_line(image_copy, s * pu.x(), s * pu.y(), s * pv.x(),
-                        s * pv.y(), sara::Green8, 2);
+        sara::draw_line(s * pu.x(), s * pu.y(), s * pv.x(), s * pv.y(),
+                        sara::Green8, 2);
 
         if (!visited[v])
         {
           visited[v] = 1;
           q.push(vs[v]);
-#if 0
-          SARA_DEBUG << "Adding vertex = " << vs[v].vertex << " score " << vs[v].score << std::endl;
-#endif
 
           // Debug.
-          sara::fill_circle(image_copy, s * pv.x(), s * pv.y(), 8, sara::Red8);
+          sara::fill_circle(s * pv.x(), s * pv.y(), 8, sara::Red8);
         }
       }
-
-      // Debug.
-      sara::display(image_copy);
     }
     if (num_corners_added != corner_count(0) * corner_count(1))
       sara::get_key();
@@ -536,16 +531,13 @@ auto __main(int argc, char** argv) -> int
   static constexpr auto grad_adaptive_thres = 2e-2f;
 
   // static constexpr auto tolerance_parameter = 0.0f;
-  static const auto kernel_2d = sara::make_gaussian_kernel_2d(16.f);
+  // static const auto kernel_2d = sara::make_gaussian_kernel_2d(16.f);
 
   while (video_stream.read())
   {
     ++frame_number;
     if (frame_number % 3 != 0)
       continue;
-
-    // if (frame_number < 1000)
-    //   continue;
 
     if (sara::active_window() == nullptr)
     {
@@ -559,11 +551,17 @@ auto __main(int argc, char** argv) -> int
         downscale_factor);
     const auto grad_f = f.compute<sara::Gradient>();
     const auto junction_map = sara::junction_map(f, grad_f, radius);
-    auto grad_f_norm = grad_f.compute<sara::SquaredNorm>();
-    grad_f_norm.flat_array() = grad_f_norm.flat_array().sqrt();
+    auto grad_f_norm = sara::Image<float>{f.sizes()};
+    auto grad_f_ori = sara::Image<float>{f.sizes()};
+    sara::gradient_in_polar_coordinates(f, grad_f_norm, grad_f_ori);
     const auto grad_max = grad_f_norm.flat_array().maxCoeff();
     const auto grad_thres = grad_adaptive_thres * grad_max;
+    const auto edge_map = sara::suppress_non_maximum_edgels(
+        grad_f_norm, grad_f_ori, 2 * grad_thres, grad_thres);
     sara::toc("Feature maps");
+
+    sara::display(edge_map);
+    sara::get_key();
 
     sara::tic();
     auto f_pyr = std::vector<sara::Image<float>>{};
@@ -599,7 +597,7 @@ auto __main(int argc, char** argv) -> int
     // Link the junctions together.
     sara::tic();
     {
-      auto [nn, dists] = k_nearest_neighbors(junctions, k);
+      auto [nn, dists] = k_nearest_neighbors(junctions, k, circular_profiles);
       graph._neighbors = std::move(nn);
       graph._distances = std::move(dists);
     }
@@ -610,29 +608,27 @@ auto __main(int argc, char** argv) -> int
     // TODO: calculate the k-nn graph on the refined junctions.
     auto junctions_refined = std::vector<sara::Junction<float>>{};
     junctions_refined.reserve(junctions.size());
-    std::transform(
-        junctions.begin(), junctions.end(),
-        std::back_inserter(junctions_refined),
-        [&grad_f /*, &junction_map */](const auto& j) -> sara::Junction<float> {
-          const auto w = grad_f.width();
-          const auto h = grad_f.height();
-          const auto in_image_domain =
-              radius <= j.p.x() && j.p.x() < w - radius &&  //
-              radius <= j.p.y() && j.p.y() < h - radius;
-          if (!in_image_domain)
-          {
-            throw std::runtime_error{"That can't be!!!"};
-            return {j.p.template cast<float>(), j.score};
-          }
+    std::transform(junctions.begin(), junctions.end(),
+                   std::back_inserter(junctions_refined),
+                   [&grad_f](const auto& j) -> sara::Junction<float> {
+                     const auto w = grad_f.width();
+                     const auto h = grad_f.height();
+                     const auto in_image_domain =
+                         radius <= j.p.x() && j.p.x() < w - radius &&  //
+                         radius <= j.p.y() && j.p.y() < h - radius;
+                     if (!in_image_domain)
+                     {
+                       throw std::runtime_error{"That can't be!!!"};
+                       return {j.p.template cast<float>(), j.score};
+                     }
 
-          const auto p = sara::refine_junction_location_unsafe(
-              grad_f, j.position(), radius);
-          return {p, j.score};
-        });
+                     const auto p = sara::refine_junction_location_unsafe(
+                         grad_f, j.position(), radius);
+                     return {p, j.score};
+                   });
 
 
     video_frame_copy = video_frame;
-    // video_frame_copy = sara::upscale(binary_mask, 2).convert<sara::Rgb8>();
     for (auto u = 0u; u < junctions.size(); ++u)
     {
       const auto& jr = junctions_refined[u];
@@ -641,17 +637,11 @@ auto __main(int argc, char** argv) -> int
 
       sara::draw_circle(video_frame_copy, jri, radius, sara::Magenta8, 3);
       sara::fill_circle(video_frame_copy, jri.x(), jri.y(), 1, sara::Red8);
-
-      // for (auto v = 0; v < k; ++v)
-      // {
-      //   const auto& pv = graph.nearest_neighbor(u, v).p;
-      //   sara::draw_arrow(video_frame_copy, j.p.cast<float>(),
-      //   pv.cast<float>(),
-      //                    sara::Green8, 2);
-      // }
     }
 
     sara::display(video_frame_copy);
+    sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
+                    false, true);
 
     graph.grow(f, sigma, downscale_factor, corner_count);
   }
