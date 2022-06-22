@@ -457,14 +457,10 @@ struct KnnGraph
 
         const auto N = edge_gradients.cols();
 
-        const auto amin = edge_gradients.row(0).minCoeff();
-        const auto amax = edge_gradients.row(0).maxCoeff();
         const auto amean = edge_gradients.row(0).sum() / N;
         const auto adev = std::sqrt(
             (edge_gradients.row(0).array() - amean).square().sum() / N);
 
-        const auto bmin = edge_gradients.row(1).minCoeff();
-        const auto bmax = edge_gradients.row(1).maxCoeff();
         const auto bmean = edge_gradients.row(1).sum() / edge_gradients.cols();
         const auto bdev = std::sqrt(
             (edge_gradients.row(1).array() - bmean).square().sum() / N);
@@ -524,7 +520,7 @@ auto __main(int argc, char** argv) -> int
   else
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
-  static constexpr auto downscale_factor = 2;
+  static constexpr auto downscale_factor = 1;
   static constexpr auto sigma = 1.6f;
   static constexpr auto k = 6;
   static constexpr auto radius = 5;
