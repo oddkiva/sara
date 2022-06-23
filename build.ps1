@@ -18,7 +18,7 @@ $nvidia_codec_sdk_dir = "C:\local\Video_Codec_SDK_11.1.5"
 $tensorrt_dir = "C:\local\TensorRT-8.0.1.6.Windows10.x86_64.cuda-11.3.cudnn8.2"
 
 $update_vcpkg = $false
-$build_from_scratch = $false
+$build_from_scratch = $true
 $run_cmake_build = $false
 
 
