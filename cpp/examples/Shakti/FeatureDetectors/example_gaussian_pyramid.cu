@@ -41,12 +41,14 @@
 #include "OctaveVisualization.hpp"
 
 
+#ifndef _WIN32
 auto do_shutdown = sig_atomic_t{};
 void my_handler(int s)
 {
   printf("Caught signal %d\n", s);
   do_shutdown = 1;
 }
+#endif
 
 
 int main(int argc, char** argv)
@@ -72,13 +74,15 @@ int __main(int argc, char** argv)
 
   // if (scale_count < 3)
   // {
-  //   SARA_DEBUG << "Our implementation requires 3 scales in the octave at least!"
+  //   SARA_DEBUG << "Our implementation requires 3 scales in the octave at
+  //   least!"
   //              << std::endl;
   //   return 1;
   // }
 
   omp_set_num_threads(omp_get_max_threads());
 
+#ifndef _WIN32
   struct sigaction sig_int_handler;
   {
     sig_int_handler.sa_handler = my_handler;
@@ -86,6 +90,7 @@ int __main(int argc, char** argv)
     sig_int_handler.sa_flags = 0;
     sigaction(SIGINT, &sig_int_handler, nullptr);
   }
+#endif
 
   auto display_queue = sara::SafeQueue<DisplayTask>{};
   auto frame_index = std::atomic_int32_t{-1};
@@ -182,9 +187,11 @@ int __main(int argc, char** argv)
     shakti::tic(d_timer);
 #define DENSE_GRADIENT
 #ifdef DENSE_GRADIENT
-    sc::compute_polar_gradient_octave(d_gaussian_octave, d_grad_mag, d_grad_ori);
+    sc::compute_polar_gradient_octave(d_gaussian_octave, d_grad_mag,
+                                      d_grad_ori);
 #else
-    sc::compute_histogram_of_gradients(d_gaussian_octave, d_extrema.x, d_extrema.y, d_extrema.s);
+    sc::compute_histogram_of_gradients(d_gaussian_octave, d_extrema.x,
+                                       d_extrema.y, d_extrema.s);
 #endif
     shakti::toc(d_timer, "Gradient");
 
@@ -222,12 +229,13 @@ int __main(int argc, char** argv)
       display_queue.enqueue(std::move(task));
     sara::toc("Display Enqueue");
 
-
+#ifndef _WIN32
     if (do_shutdown)
     {
       SARA_DEBUG << "CTRL+C triggered: quitting cleanly..." << std::endl;
       break;
     }
+#endif
   }
   video_stream_end = true;
 

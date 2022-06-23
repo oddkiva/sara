@@ -51,7 +51,7 @@ namespace DO::Shakti::Cuda {
     if (!dogs.surface_object().initialized())
       dogs.init_surface();
 
-    static constexpr auto threadsperBlock = dim3(32, 32, 1);
+    static const auto threadsperBlock = dim3(32, 32, 1);
     static const auto numBlocks =
         dim3((dogs.width() + threadsperBlock.x - 1) / threadsperBlock.x,
              (dogs.height() + threadsperBlock.y - 1) / threadsperBlock.y,
