@@ -455,6 +455,11 @@ struct KnnGraph
       for (auto nn = 0; nn < k; ++nn)
       {
         const auto v = _neighbors(nn, u);
+        if (v == -1)
+        {
+          _affinity_scores(nn, u) = -std::numeric_limits<float>::max();
+          continue;
+        }
         const auto fv = _circular_profiles.col(v);
         const auto pv = _vertices[v].position();
 
@@ -612,6 +617,7 @@ auto __main(int argc, char** argv) -> int
       sara::create_window(video_frame.sizes());
       sara::set_antialiasing();
     }
+    SARA_CHECK(frame_number);
 
     sara::tic();
     const auto f = sara::downscale(
@@ -671,7 +677,9 @@ auto __main(int argc, char** argv) -> int
     }
     sara::toc("knn-graph");
 
+    sara::tic();
     graph.compute_affinity_scores(f, sigma);
+    sara::toc("affinity scores");
 
     // TODO: calculate the k-nn graph on the refined junctions.
     auto junctions_refined = std::vector<sara::Junction<float>>{};
