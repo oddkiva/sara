@@ -514,13 +514,18 @@ struct KnnGraph
 
 auto __main(int argc, char** argv) -> int
 {
-  if (argc < 2)
-    return 1;
-
   omp_set_num_threads(omp_get_max_threads());
 
+#ifdef _WIN32
+  const auto video_file = sara::select_video_file_from_dialog_box();
+#else
+  if (argc < 2)
+    return 1;
   const auto video_file = std::string{argv[1]};
-  auto video_stream = sara::VideoStream{video_file};
+  
+#endif
+
+  auto video_stream = sara::VideoStream{video_file};  
   auto video_frame = video_stream.frame();
   auto video_frame_copy = sara::Image<sara::Rgb8>{};
   auto frame_number = -1;
