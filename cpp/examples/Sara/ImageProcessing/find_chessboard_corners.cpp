@@ -306,6 +306,105 @@ auto sample_edge_gradient(const Eigen::Vector2f& a, const Eigen::Vector2f& b,
 }
 
 
+// TODO: use Dijsktra instead.
+auto find_edge_path(const Eigen::Vector2i& a, const Eigen::Vector2i& b,
+                    sara::ImageView<std::uint8_t>& edge_map)
+    -> std::vector<Eigen::Vector2i>
+{
+  const auto is_strong_edgel = [&edge_map](const Eigen::Vector2i& p) {
+    return edge_map(p) == 255;
+  };
+  const auto w = edge_map.width();
+  const auto to_index = [w](const Eigen::Vector2i& p) {
+    return p.x() + p.y() * w;
+  };
+  const auto to_coords = [w](std::int32_t i) -> Eigen::Vector2i {
+    const auto y = i / w;
+    const auto x = i - y * w;
+    return {x, y};
+  };
+
+  const auto dilate_on_point = [&edge_map](const Eigen::Vector2i& a, int r) {
+    for (auto y = a.y() - r; y <= a.y() + r; ++y)
+      for (auto x = a.x() - r; x <= a.x() + r; ++x)
+        if (0 <= x && x < edge_map.width() && 0 <= y && y < edge_map.height())
+          edge_map(x, y) = 255;
+  };
+  dilate_on_point(a, 3);
+  dilate_on_point(b, 3);
+
+
+  // const auto r = 1.2 * (b - a).cast<float>().norm();
+  auto predecessor = sara::Image<std::int32_t>{edge_map.sizes()};
+  predecessor.flat_array().fill(-1);
+
+  // Neighborhood defined by 8-connectivity.
+  static const auto dir = std::array<Eigen::Vector2i, 8>{
+      Eigen::Vector2i{1, 0},    //
+      Eigen::Vector2i{1, 1},    //
+      Eigen::Vector2i{0, 1},    //
+      Eigen::Vector2i{-1, 1},   //
+      Eigen::Vector2i{-1, 0},   //
+      Eigen::Vector2i{-1, -1},  //
+      Eigen::Vector2i{0, -1},   //
+      Eigen::Vector2i{1, -1}    //
+  };
+
+  auto q = std::queue<Eigen::Vector2i>{};
+  q.push(a);
+  auto joined = false;
+  while (!q.empty())
+  {
+    const auto p = q.front();
+    if (!is_strong_edgel(p))
+      throw std::runtime_error{"NOT AN EDGEL!"};
+    if (p == b)
+    {
+      joined = true;
+      break;
+    }
+    q.pop();
+
+    // Add nonvisited edgel.
+    for (const auto& d : dir)
+    {
+      const Eigen::Vector2i n = p + d;
+      // Boundary conditions.
+      if (n.x() < 0 || n.x() >= edge_map.width() ||  //
+          n.y() < 0 || n.y() >= edge_map.height())
+        continue;
+
+      // Make sure that the neighbor is an edgel.
+      if (!is_strong_edgel(n))
+        continue;
+
+      // Enqueue the neighbor n if it is not already enqueued
+      if (predecessor(n) == -1)
+      {
+        predecessor(n) = to_index(p);
+        q.emplace(n);
+      }
+    }
+  }
+
+  if (!joined)
+    return {};
+
+  // Reconstruct the path.
+  auto path = std::vector<Eigen::Vector2i>{};
+  path.push_back(b);
+  auto p = b;
+  while (predecessor(p) != a.y() * w + a.x())
+  {
+    path.push_back(p);
+    p = to_coords(predecessor(p));
+  }
+
+  std::reverse(path.begin(), path.end());
+
+  return path;
+}
+
 template <typename V>
 struct KnnGraph
 {
@@ -352,20 +451,17 @@ struct KnnGraph
     {
       const auto fu = _circular_profiles.col(u);
       const auto pu = _vertices[u].position();
-#if 0
-      std::cout << "[" << u << "]" << std::endl;
-      std::cout << "fu = " << fu.transpose() << std::endl;
-#endif
 
       for (auto nn = 0; nn < k; ++nn)
       {
         const auto v = _neighbors(nn, u);
+        if (v == -1)
+        {
+          _affinity_scores(nn, u) = -std::numeric_limits<float>::max();
+          continue;
+        }
         const auto fv = _circular_profiles.col(v);
         const auto pv = _vertices[v].position();
-#if 0
-        std::cout << "[" << u << "] -> [" << v << "]" << std::endl;
-        std::cout << "fv = " << fv.transpose() << std::endl;
-#endif
 
         auto affinities = Eigen::Matrix4f{};
         for (auto i = 0; i < fu.size(); ++i)
@@ -376,34 +472,7 @@ struct KnnGraph
             affinities.colwise().maxCoeff();
         _affinity_scores(nn, u) = best_affinities.sum();
 
-#if 0
-        std::cout << "affinities =\n" << affinities << std::endl;
-        std::cout << "best_affinities =\n" << best_affinities << std::endl;
-        std::cout << "best_affinities =\n"
-                  << best_affinities.array().acos().abs() * 180.f / float(M_PI)
-                  << std::endl;
-        sara::get_key();
-#endif
       }
-
-#if 0
-      Eigen::Vector2f laplacian = Eigen::Vector2f::Zero();
-      auto mean_sq_dist = float{};
-      const Eigen::Vector2f puf = pu.template cast<float>();
-      for (auto nn = 0; nn < k; ++nn)
-      {
-        const auto v = _neighbors(nn, u);
-        const Eigen::Vector2f pv =
-            _vertices[v].position().template cast<float>();
-        laplacian += pv - puf;
-        mean_sq_dist = (pv - puf).squaredNorm();
-      }
-
-      const auto equidistance_score =
-          std::exp(-0.5f * laplacian.squaredNorm() / mean_sq_dist);
-
-      _unary_scores(u) = _affinity_scores.col(u).sum() * equidistance_score;
-#endif
 
       _unary_scores(u) = _affinity_scores.col(u).sum();
     }
@@ -411,6 +480,7 @@ struct KnnGraph
 
   inline auto grow(const sara::ImageView<float>& image, const float sigma,
                    const int downscale_factor,
+                   sara::ImageView<std::uint8_t>& edge_map,
                    const Eigen::Vector2i& corner_count) -> void
   {
     const auto k = _neighbors.rows();
@@ -427,7 +497,6 @@ struct KnnGraph
     auto visited = std::vector<std::uint8_t>(_vertices.size(), 0);
 
     auto num_corners_added = 0;
-    static constexpr auto thres = 1e-2f;
 
     while (!q.empty())
     {
@@ -452,6 +521,7 @@ struct KnnGraph
         }
         const auto& pv = _vertices[v].position();
 
+        static constexpr auto thres = 1e-3f;
         const auto edge_gradients = sample_edge_gradient(
             pu.template cast<float>(), pv.template cast<float>(), sigma, image);
 
@@ -479,11 +549,16 @@ struct KnnGraph
           good_edge = diff > thres;
         }
 
-        if (!good_edge)
+        const auto path = find_edge_path(pu, pv, edge_map);
+        const auto good_edge2 = !path.empty();
+
+        if (!good_edge || !good_edge2)
           continue;
 
-        sara::draw_line(s * pu.x(), s * pu.y(), s * pv.x(), s * pv.y(),
-                        sara::Green8, 2);
+        for (const auto& p : path)
+          sara::fill_circle(s * p.x(), s * p.y(), 2, sara::Blue8);
+        // sara::draw_line(s * pu.x(), s * pu.y(), s * pv.x(), s * pv.y(),
+        //                 sara::Green8, 2);
 
         if (!visited[v])
         {
@@ -526,8 +601,10 @@ auto __main(int argc, char** argv) -> int
   static constexpr auto radius = 5;
   static constexpr auto grad_adaptive_thres = 2e-2f;
 
-  // static constexpr auto tolerance_parameter = 0.0f;
-  // static const auto kernel_2d = sara::make_gaussian_kernel_2d(16.f);
+#if 0
+  static constexpr auto tolerance_parameter = 0.0f;
+  static const auto kernel_2d = sara::make_gaussian_kernel_2d(16.f);
+#endif
 
   while (video_stream.read())
   {
@@ -540,11 +617,12 @@ auto __main(int argc, char** argv) -> int
       sara::create_window(video_frame.sizes());
       sara::set_antialiasing();
     }
+    SARA_CHECK(frame_number);
 
     sara::tic();
-    const auto f = sara::downscale(
-        video_frame.convert<float>().compute<sara::Gaussian>(sigma),
-        downscale_factor);
+    auto f = video_frame.convert<float>().compute<sara::Gaussian>(sigma);
+    if (downscale_factor > 1)
+      f = sara::downscale(f, downscale_factor);
     const auto grad_f = f.compute<sara::Gradient>();
     const auto junction_map = sara::junction_map(f, grad_f, radius);
     auto grad_f_norm = sara::Image<float>{f.sizes()};
@@ -552,13 +630,14 @@ auto __main(int argc, char** argv) -> int
     sara::gradient_in_polar_coordinates(f, grad_f_norm, grad_f_ori);
     const auto grad_max = grad_f_norm.flat_array().maxCoeff();
     const auto grad_thres = grad_adaptive_thres * grad_max;
-    const auto edge_map = sara::suppress_non_maximum_edgels(
+    auto edge_map = sara::suppress_non_maximum_edgels(
         grad_f_norm, grad_f_ori, 2 * grad_thres, grad_thres);
+    for (auto e = edge_map.begin(); e != edge_map.end(); ++e)
+      if (*e == 127)
+        *e = 0;
     sara::toc("Feature maps");
 
-    sara::display(edge_map);
-    sara::get_key();
-
+#if 0
     sara::tic();
     auto f_pyr = std::vector<sara::Image<float>>{};
     f_pyr.push_back(f);
@@ -566,7 +645,6 @@ auto __main(int argc, char** argv) -> int
     // f_pyr.push_back(sara::downscale(f_pyr.back(), 2));
     sara::toc("Gaussian pyramid");
 
-#if 0
     sara::tic();
     auto binary_mask = sara::Image<std::uint8_t>{f_pyr.back().sizes()};
     sara::adaptive_thresholding(f_pyr.back(), kernel_2d, binary_mask,
@@ -584,7 +662,7 @@ auto __main(int argc, char** argv) -> int
     sara::tic();
     {
       junctions = sara::extract_junctions(junction_map, radius);
-      sara::nms(junctions, f.sizes(), radius);
+      sara::nms(junctions, f.sizes(), radius * 2);
       filter_junctions(junctions, circular_profiles, f, grad_f_norm, grad_thres,
                        radius);
     }
@@ -599,7 +677,9 @@ auto __main(int argc, char** argv) -> int
     }
     sara::toc("knn-graph");
 
+    sara::tic();
     graph.compute_affinity_scores(f, sigma);
+    sara::toc("affinity scores");
 
     // TODO: calculate the k-nn graph on the refined junctions.
     auto junctions_refined = std::vector<sara::Junction<float>>{};
@@ -624,7 +704,10 @@ auto __main(int argc, char** argv) -> int
                    });
 
 
-    video_frame_copy = video_frame;
+    video_frame_copy = edge_map.convert<sara::Rgb8>();
+    video_frame_copy.flat_array() /= sara::Rgb8{8, 8, 8};
+    if (downscale_factor > 1)
+      video_frame_copy = sara::upscale(video_frame_copy, downscale_factor);
     for (auto u = 0u; u < junctions.size(); ++u)
     {
       const auto& jr = junctions_refined[u];
@@ -639,7 +722,7 @@ auto __main(int argc, char** argv) -> int
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);
 
-    graph.grow(f, sigma, downscale_factor, corner_count);
+    graph.grow(f, sigma, downscale_factor, edge_map, corner_count);
   }
 
   return 0;
