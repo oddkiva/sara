@@ -530,7 +530,7 @@ namespace DO::Sara {
     };
 
     tic();
-    auto ds = v2::DisjointSets(edges.size());
+    auto ds = v2::DisjointSets{static_cast<std::uint32_t>(edges.size())};
 
     // Neighborhood defined by 8-connectivity.
     const auto dir = std::array<Eigen::Vector2i, 8>{

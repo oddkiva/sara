@@ -240,8 +240,8 @@ namespace DO::Sara {
                   "Channel type cannot be integral");
 
     const auto kernel = make_gaussian_kernel(sigma, gauss_truncate);
-    apply_row_based_filter(src, dst, kernel.data(), kernel.size());
-    apply_column_based_filter(dst, dst, kernel.data(), kernel.size());
+    apply_row_based_filter(src, dst, kernel.data(), static_cast<int>(kernel.size()));
+    apply_column_based_filter(dst, dst, kernel.data(), static_cast<int>(kernel.size()));
   }
 
   //! @brief Apply Sobel filter to image.

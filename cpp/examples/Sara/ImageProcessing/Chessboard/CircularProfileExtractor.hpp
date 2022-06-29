@@ -26,7 +26,7 @@ struct CircularProfileExtractor
 
     for (auto i = 0; i < n; ++i)
     {
-      const auto angle = i * 2 * pi / n;
+      const auto angle = i * 2. * pi / n;
       circle_sample_points[i] << std::cos(angle), std::sin(angle);
     }
   }
@@ -42,7 +42,7 @@ struct CircularProfileExtractor
           center + circle_radius * circle_sample_points[n];
 
       // Get the interpolated intensity value.
-      intensity_profile(n) = interpolate(image, pn);
+      intensity_profile(n) = static_cast<float>(interpolate(image, pn));
     }
 
     // // Collect all the intensity values in the disk for more robustness.
