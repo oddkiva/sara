@@ -190,7 +190,9 @@ namespace DO::Sara {
     const auto c = kernel_size / 2;
 
     // 1. Compute the value of the unnormalized Gaussian.
-    Vec kernel = Vec::LinSpaced(kernel_size, 0, kernel_size - 1);
+    Vec kernel = Vec::LinSpaced(                      //
+        kernel_size, 0, static_cast<S>(kernel_size - 1)  //
+    );
     kernel.array() =
         (-(kernel.array() - c).square() / (2 * square(sigma))).exp();
 
