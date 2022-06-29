@@ -6,6 +6,9 @@
 #include <DO/Sara/Core.hpp>
 
 
+namespace sara = DO::Sara;
+
+
 struct CircularProfileExtractor
 {
   inline CircularProfileExtractor()
