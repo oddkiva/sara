@@ -419,6 +419,12 @@ struct KnnGraph
                    sara::ImageView<std::uint8_t>& edge_map,
                    const Eigen::Vector2i& corner_count) -> void
   {
+    if (_vertices.empty())
+    {
+      SARA_DEBUG << "No corners found!" << std::endl;
+      return;
+    }
+
     const auto k = _neighbors.rows();
     const auto s = downscale_factor;
 
