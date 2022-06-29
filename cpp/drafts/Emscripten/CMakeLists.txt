@@ -44,6 +44,9 @@ target_link_libraries(
           DO::Sara::ImageIO
   INTERFACE $<$<NOT:$<PLATFORM_ID:Emscripten>>:Boost::filesystem>
             $<$<NOT:$<PLATFORM_ID:Emscripten>>:glfw>)
+set_property(TARGET emscripten_gl_utilities
+  PROPERTY
+  FOLDER "Libraries/Sara/Emscripten")
 
 if(MSVC)
   target_link_libraries(emscripten_gl_utilities INTERFACE GLEW::GLEW)
@@ -84,6 +87,10 @@ macro(sara_add_wasm_executable file)
   if(MSVC)
     target_link_libraries(${filename} PRIVATE GLEW::GLEW)
   endif()
+
+  set_property(TARGET ${filename}
+    PROPERTY
+    FOLDER "Libraries/Sara/Emscripten")
 
   if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     add_dependencies(emscripten_copy_assets ${filename})
