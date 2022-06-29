@@ -620,9 +620,9 @@ auto __main(int argc, char** argv) -> int
     SARA_CHECK(frame_number);
 
     sara::tic();
-    const auto f = sara::downscale(
-        video_frame.convert<float>().compute<sara::Gaussian>(sigma),
-        downscale_factor);
+    auto f = video_frame.convert<float>().compute<sara::Gaussian>(sigma);
+    if (downscale_factor > 1)
+      f = sara::downscale(f, downscale_factor);
     const auto grad_f = f.compute<sara::Gradient>();
     const auto junction_map = sara::junction_map(f, grad_f, radius);
     auto grad_f_norm = sara::Image<float>{f.sizes()};
@@ -637,6 +637,7 @@ auto __main(int argc, char** argv) -> int
         *e = 0;
     sara::toc("Feature maps");
 
+#if 0
     sara::tic();
     auto f_pyr = std::vector<sara::Image<float>>{};
     f_pyr.push_back(f);
@@ -644,7 +645,6 @@ auto __main(int argc, char** argv) -> int
     // f_pyr.push_back(sara::downscale(f_pyr.back(), 2));
     sara::toc("Gaussian pyramid");
 
-#if 0
     sara::tic();
     auto binary_mask = sara::Image<std::uint8_t>{f_pyr.back().sizes()};
     sara::adaptive_thresholding(f_pyr.back(), kernel_2d, binary_mask,
@@ -705,6 +705,8 @@ auto __main(int argc, char** argv) -> int
 
 
     video_frame_copy = edge_map.convert<sara::Rgb8>();
+    if (downscale_factor > 1)
+      video_frame_copy = sara::upscale(video_frame_copy, downscale_factor);
     for (auto u = 0u; u < junctions.size(); ++u)
     {
       const auto& jr = junctions_refined[u];
