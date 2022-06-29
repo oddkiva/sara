@@ -442,6 +442,12 @@ struct KnnGraph
                    const Eigen::Vector2i& corner_count,
                    const int dilation_radius) -> void
   {
+    if (_vertices.empty())
+    {
+      SARA_DEBUG << "No corners found!" << std::endl;
+      return;
+    }
+
     const auto k = _neighbors.rows();
     const auto s = downscale_factor;
 
