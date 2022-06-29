@@ -40,16 +40,17 @@ auto localize_zero_crossings(const Eigen::ArrayXf& profile, int num_bins)
     -> std::vector<float>
 {
   auto zero_crossings = std::vector<float>{};
-  for (auto n = 0; n < profile.size(); ++n)
+  for (auto n = Eigen::Index{}; n < profile.size(); ++n)
   {
     const auto ia = n;
-    const auto ib = (n + 1) % profile.size();
+    const auto ib = (n + Eigen::Index{1}) % profile.size();
 
     const auto& a = profile[ia];
     const auto& b = profile[ib];
 
-    const auto angle_a = ia * 2 * M_PI / num_bins;
-    const auto angle_b = ib * 2 * M_PI / num_bins;
+    static constexpr auto pi = static_cast<float>(M_PI);
+    const auto angle_a = ia * 2.f * M_PI / num_bins;
+    const auto angle_b = ib * 2.f * M_PI / num_bins;
 
     const auto ea = Eigen::Vector2d{std::cos(angle_a),  //
                                     std::sin(angle_a)};
@@ -60,12 +61,12 @@ auto localize_zero_crossings(const Eigen::ArrayXf& profile, int num_bins)
     const Eigen::Vector2d dir = (ea + eb) * 0.5;
     auto angle = std::atan2(dir.y(), dir.x());
     if (angle < 0)
-      angle += 2 * M_PI;
+      angle += 2 * pi;
 
     // A zero-crossing is characterized by a negative sign between
     // consecutive intensity values.
     if (a * b < 0)
-      zero_crossings.push_back(angle);
+      zero_crossings.push_back(static_cast<float>(angle));
   }
 
   return zero_crossings;
@@ -242,14 +243,11 @@ auto sample_edge_gradient(const Eigen::Vector2f& a, const Eigen::Vector2f& b,
 }
 
 
-// TODO: use Dijsktra instead.
 auto find_edge_path(const Eigen::Vector2i& a, const Eigen::Vector2i& b,
-                    sara::ImageView<std::uint8_t>& edge_map)
+                    sara::ImageView<std::uint8_t>& edge_map,
+                    const int dilation_radius)
     -> std::vector<Eigen::Vector2i>
 {
-  const auto is_strong_edgel = [&edge_map](const Eigen::Vector2i& p) {
-    return edge_map(p) == 255;
-  };
   const auto w = edge_map.width();
   const auto to_index = [w](const Eigen::Vector2i& p) {
     return p.x() + p.y() * w;
@@ -260,19 +258,26 @@ auto find_edge_path(const Eigen::Vector2i& a, const Eigen::Vector2i& b,
     return {x, y};
   };
 
+  const auto is_strong_edgel = [&edge_map](const Eigen::Vector2i& p) {
+    return edge_map(p) == 255;
+  };
+
   const auto dilate_on_point = [&edge_map](const Eigen::Vector2i& a, int r) {
     for (auto y = a.y() - r; y <= a.y() + r; ++y)
       for (auto x = a.x() - r; x <= a.x() + r; ++x)
         if (0 <= x && x < edge_map.width() && 0 <= y && y < edge_map.height())
           edge_map(x, y) = 255;
   };
-  dilate_on_point(a, 3);
-  dilate_on_point(b, 3);
+  dilate_on_point(a, dilation_radius);
+  dilate_on_point(b, dilation_radius);
 
+  auto predecessor_map = sara::Image<std::int32_t>{edge_map.sizes()};
+  static constexpr auto undefined_predecessor = -1;
+  predecessor_map.flat_array().fill(undefined_predecessor);
 
-  // const auto r = 1.2 * (b - a).cast<float>().norm();
-  auto predecessor = sara::Image<std::int32_t>{edge_map.sizes()};
-  predecessor.flat_array().fill(-1);
+  auto distance_map = sara::Image<std::int32_t>{edge_map.sizes()};
+  static constexpr auto infinity = std::numeric_limits<std::int32_t>::max();
+  distance_map.flat_array().fill(infinity);
 
   // Neighborhood defined by 8-connectivity.
   static const auto dir = std::array<Eigen::Vector2i, 8>{
@@ -286,39 +291,56 @@ auto find_edge_path(const Eigen::Vector2i& a, const Eigen::Vector2i& b,
       Eigen::Vector2i{1, -1}    //
   };
 
-  auto q = std::queue<Eigen::Vector2i>{};
-  q.push(a);
+  struct PointDistance
+  {
+    Eigen::Vector2i coords;
+    std::int32_t distance;
+    auto operator<(const PointDistance& other) const -> bool
+    {
+      return distance > other.distance;
+    }
+  };
+
+  auto q = std::priority_queue<PointDistance>{};
+  
+  // Initialize Dijkstra.
+  q.push({a, 0});
+  distance_map(a) = 0;
   auto joined = false;
+  
+  // Run Dijkstra's algorithm from a.
   while (!q.empty())
   {
-    const auto p = q.front();
-    if (!is_strong_edgel(p))
+    const auto p = q.top();
+    q.pop();
+    if (!is_strong_edgel(p.coords))
       throw std::runtime_error{"NOT AN EDGEL!"};
-    if (p == b)
+    if (p.coords == b)
     {
       joined = true;
       break;
     }
-    q.pop();
 
     // Add nonvisited edgel.
     for (const auto& d : dir)
     {
-      const Eigen::Vector2i n = p + d;
+      const Eigen::Vector2i n = p.coords + d;
       // Boundary conditions.
       if (n.x() < 0 || n.x() >= edge_map.width() ||  //
           n.y() < 0 || n.y() >= edge_map.height())
         continue;
+      const auto distance = p.distance + 1;
 
       // Make sure that the neighbor is an edgel.
       if (!is_strong_edgel(n))
         continue;
 
       // Enqueue the neighbor n if it is not already enqueued
-      if (predecessor(n) == -1)
+      if (distance < distance_map(n))
       {
-        predecessor(n) = to_index(p);
-        q.emplace(n);
+        distance_map(n) = distance;
+        predecessor_map(n) = to_index(p.coords);
+        q.push({n, distance});
       }
     }
   }
@@ -330,10 +352,10 @@ auto find_edge_path(const Eigen::Vector2i& a, const Eigen::Vector2i& b,
   auto path = std::vector<Eigen::Vector2i>{};
   path.push_back(b);
   auto p = b;
-  while (predecessor(p) != a.y() * w + a.x())
+  while (predecessor_map(p) != a.y() * w + a.x())
   {
     path.push_back(p);
-    p = to_coords(predecessor(p));
+    p = to_coords(predecessor_map(p));
   }
 
   std::reverse(path.begin(), path.end());
@@ -417,7 +439,8 @@ struct KnnGraph
   inline auto grow(const sara::ImageView<float>& image, const float sigma,
                    const int downscale_factor,
                    sara::ImageView<std::uint8_t>& edge_map,
-                   const Eigen::Vector2i& corner_count) -> void
+                   const Eigen::Vector2i& corner_count,
+                   const int dilation_radius) -> void
   {
     const auto k = _neighbors.rows();
     const auto s = downscale_factor;
@@ -485,7 +508,7 @@ struct KnnGraph
           good_edge = diff > thres;
         }
 
-        const auto path = find_edge_path(pu, pv, edge_map);
+        const auto path = find_edge_path(pu, pv, edge_map, dilation_radius);
         const auto good_edge2 = !path.empty();
 
         if (!good_edge || !good_edge2)
@@ -539,8 +562,8 @@ auto __main(int argc, char** argv) -> int
   static constexpr auto downscale_factor = 1;
   static constexpr auto sigma = 1.6f;
   static constexpr auto k = 6;
-  static constexpr auto radius = 5;
-  static constexpr auto grad_adaptive_thres = 2e-2f;
+  static constexpr auto radius = 7;
+  static constexpr auto grad_adaptive_thres = 1e-2f;
 
 #if 0
   static constexpr auto tolerance_parameter = 0.0f;
@@ -552,6 +575,9 @@ auto __main(int argc, char** argv) -> int
     ++frame_number;
     if (frame_number % 3 != 0)
       continue;
+
+    //if (frame_number < 36)
+    //  continue;
 
     if (sara::active_window() == nullptr)
     {
@@ -663,7 +689,7 @@ auto __main(int argc, char** argv) -> int
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);
 
-    graph.grow(f, sigma, downscale_factor, edge_map, corner_count);
+    graph.grow(f, sigma, downscale_factor, edge_map, corner_count, radius);
   }
 
   return 0;
