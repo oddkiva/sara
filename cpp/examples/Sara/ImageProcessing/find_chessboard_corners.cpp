@@ -705,6 +705,7 @@ auto __main(int argc, char** argv) -> int
 
 
     video_frame_copy = edge_map.convert<sara::Rgb8>();
+    video_frame_copy.flat_array() /= sara::Rgb8{8, 8, 8};
     if (downscale_factor > 1)
       video_frame_copy = sara::upscale(video_frame_copy, downscale_factor);
     for (auto u = 0u; u < junctions.size(); ++u)
