@@ -16,6 +16,7 @@
 #include <execution>
 #include <unordered_map>
 
+#include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
@@ -109,9 +110,29 @@ auto __main(int argc, char** argv) -> int
     auto partitioning = sara::Image<sara::Rgb8>{video_frame.sizes()};
     for (const auto& [label, points] : regions)
     {
+      auto good = false;
+      auto ch = std::vector<Eigen::Vector2d>{};
+
+      if (points.size() > 100)
+      {
+        auto points_2d = std::vector<Eigen::Vector2d>{};
+        points_2d.resize(points.size());
+        SARA_CHECK(points_2d.size());
+        std::transform(points.begin(), points.end(), points_2d.begin(),
+                       [](const auto& p) {
+                         return p.template cast<double>();
+                       });
+        ch = sara::graham_scan_convex_hull(points_2d);
+
+        const auto area_1 = static_cast<double>(points.size());
+        const auto area_2 = sara::area(ch);
+        const auto diff = std::abs(area_1 - area_2) / area_1;
+        good = diff < 0.3;
+      }
+
       // Show big segments only.
       for (const auto& p : points)
-        partitioning(p) = points.size() < 100 ? sara::Black8 : colors.at(label);
+        partitioning(p) = good ? colors.at(label) : sara::Red8;
     }
     sara::display(partitioning);
 #endif
