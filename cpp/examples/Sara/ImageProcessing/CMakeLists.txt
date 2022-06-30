@@ -60,3 +60,6 @@ target_link_libraries(ChessboardDetection PUBLIC ${DO_Sara_LIBRARIES})
 
 sara_add_example(find_chessboard_corners)
 target_link_libraries(find_chessboard_corners PRIVATE ChessboardDetection)
+
+sara_add_example(find_chessboard_corners_2)
+target_link_libraries(find_chessboard_corners PRIVATE ChessboardDetection)

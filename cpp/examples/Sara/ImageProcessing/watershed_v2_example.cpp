@@ -54,8 +54,10 @@ GRAPHICS_MAIN()
   using namespace std::string_literals;
 
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+  // const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath = select_video_file_from_dialog_box();
+  if (video_filepath.empty())
+    return 1;
 #elif __APPLE__
   const auto video_filepath =
       //     "/Users/david/Desktop/Datasets/videos/sample1.mp4"s;

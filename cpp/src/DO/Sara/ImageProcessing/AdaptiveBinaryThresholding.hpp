@@ -13,6 +13,9 @@
 
 #pragma once
 
+#include <algorithm>
+#include <execution>
+
 #include <DO/Sara/Core/Image.hpp>
 
 
@@ -58,5 +61,19 @@ namespace DO::Sara {
     }
   }
 
+  auto gaussian_adaptive_threshold(const ImageView<float>& src,
+                                   const float sigma,
+                                   const float gauss_truncate,
+                                   const float tolerance_parameter,
+                                   ImageView<std::uint8_t>& segmentation)
+      -> void
+  {
+    const auto src_conv = gaussian(src, sigma, gauss_truncate);
+    std::transform(std::execution::par_unseq, src_conv.begin(), src_conv.end(),
+                   src.begin(), segmentation.begin(),
+                   [tolerance_parameter](const auto& mean, const auto& val) {
+                     return val > (mean - tolerance_parameter) ? 255 : 0;
+                   });
+  };
 
 }  // namespace DO::Sara

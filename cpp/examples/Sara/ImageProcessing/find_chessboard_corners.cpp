@@ -547,6 +547,8 @@ auto __main(int argc, char** argv) -> int
 
 #ifdef _WIN32
   const auto video_file = sara::select_video_file_from_dialog_box();
+  if (video_file.empty())
+    return 1;
 #else
   if (argc < 2)
     return 1;
@@ -561,7 +563,8 @@ auto __main(int argc, char** argv) -> int
 
   auto corner_count = Eigen::Vector2i{};
   if (argc < 4)
-    corner_count << 7, 12;
+    // corner_count << 7, 12;
+    corner_count << 5, 7;
   else
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
