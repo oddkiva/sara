@@ -13,7 +13,6 @@
 
 #include <omp.h>
 
-#include <execution>
 #include <unordered_map>
 
 #include <DO/Sara/Geometry.hpp>
@@ -67,6 +66,7 @@ auto __main(int argc, char** argv) -> int
   auto f = sara::Image<float>{video_frame.sizes()};
   auto f_conv = sara::Image<float>{video_frame.sizes()};
 
+#define ADAPTIVE_THRESHOLDING
 #ifdef ADAPTIVE_THRESHOLDING
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
   static constexpr auto tolerance_parameter = 0.0f;
@@ -94,7 +94,7 @@ auto __main(int argc, char** argv) -> int
     sara::toc("Grayscale conversion");
 
     sara::tic();
-    sara::gaussian_adaptive_threshold(f, 64.f, 2.f, tolerance_parameter,
+    sara::gaussian_adaptive_threshold(f, 32.f, 3.f, tolerance_parameter,
                                       segmentation_map);
     sara::toc("Adaptive thresholding");
 
