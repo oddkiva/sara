@@ -14,9 +14,11 @@
 #pragma once
 
 #include <algorithm>
-#include <execution>
+#ifdef _WIN32
+#  include <execution>
+#endif
 
-#include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 
 
 namespace DO::Sara {
@@ -69,11 +71,14 @@ namespace DO::Sara {
       -> void
   {
     const auto src_conv = gaussian(src, sigma, gauss_truncate);
-    std::transform(std::execution::par_unseq, src_conv.begin(), src_conv.end(),
-                   src.begin(), segmentation.begin(),
-                   [tolerance_parameter](const auto& mean, const auto& val) {
-                     return val > (mean - tolerance_parameter) ? 255 : 0;
-                   });
+    std::transform(
+#ifdef _WIN32
+        std::execution::par_unseq,
+#endif
+        src_conv.begin(), src_conv.end(), src.begin(), segmentation.begin(),
+        [tolerance_parameter](const auto& mean, const auto& val) {
+          return val > (mean - tolerance_parameter) ? 255 : 0;
+        });
   };
 
 }  // namespace DO::Sara
