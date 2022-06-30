@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(Sara LANGUAGES CXX)
+project(Sara LANGUAGES C CXX)
 
 
 # Set the version major and minor manually.

@@ -22,10 +22,10 @@
 #include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
+#include "Chessboard/CircularProfileExtractor.hpp"
 #include "Chessboard/JunctionDetection.hpp"
 #include "Chessboard/NonMaximumSuppression.hpp"
 #include "Chessboard/SaddlePointDetection.hpp"
-#include "Chessboard/CircularProfileExtractor.hpp"
 
 
 namespace sara = DO::Sara;
@@ -245,8 +245,7 @@ auto sample_edge_gradient(const Eigen::Vector2f& a, const Eigen::Vector2f& b,
 
 auto find_edge_path(const Eigen::Vector2i& a, const Eigen::Vector2i& b,
                     sara::ImageView<std::uint8_t>& edge_map,
-                    const int dilation_radius)
-    -> std::vector<Eigen::Vector2i>
+                    const int dilation_radius) -> std::vector<Eigen::Vector2i>
 {
   const auto w = edge_map.width();
   const auto to_index = [w](const Eigen::Vector2i& p) {
@@ -302,12 +301,12 @@ auto find_edge_path(const Eigen::Vector2i& a, const Eigen::Vector2i& b,
   };
 
   auto q = std::priority_queue<PointDistance>{};
-  
+
   // Initialize Dijkstra.
   q.push({a, 0});
   distance_map(a) = 0;
   auto joined = false;
-  
+
   // Run Dijkstra's algorithm from a.
   while (!q.empty())
   {
@@ -429,7 +428,6 @@ struct KnnGraph
         const Eigen::RowVector4f best_affinities =
             affinities.colwise().maxCoeff();
         _affinity_scores(nn, u) = best_affinities.sum();
-
       }
 
       _unary_scores(u) = _affinity_scores.col(u).sum();
@@ -553,10 +551,10 @@ auto __main(int argc, char** argv) -> int
   if (argc < 2)
     return 1;
   const auto video_file = std::string{argv[1]};
-  
+
 #endif
 
-  auto video_stream = sara::VideoStream{video_file};  
+  auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
   auto video_frame_copy = sara::Image<sara::Rgb8>{};
   auto frame_number = -1;
@@ -585,8 +583,8 @@ auto __main(int argc, char** argv) -> int
     if (frame_number % 3 != 0)
       continue;
 
-    //if (frame_number < 36)
-    //  continue;
+    // if (frame_number < 36)
+    //   continue;
 
     if (sara::active_window() == nullptr)
     {
