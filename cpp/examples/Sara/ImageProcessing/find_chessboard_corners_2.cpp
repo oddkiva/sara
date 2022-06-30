@@ -66,7 +66,7 @@ auto __main(int argc, char** argv) -> int
   auto f = sara::Image<float>{video_frame.sizes()};
   auto f_conv = sara::Image<float>{video_frame.sizes()};
 
-#define ADAPTIVE_THRESHOLDING
+//#define ADAPTIVE_THRESHOLDING
 #ifdef ADAPTIVE_THRESHOLDING
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
   static constexpr auto tolerance_parameter = 0.0f;
@@ -118,9 +118,7 @@ auto __main(int argc, char** argv) -> int
         auto points_2d = std::vector<Eigen::Vector2d>{};
         points_2d.resize(points.size());
         std::transform(points.begin(), points.end(), points_2d.begin(),
-                       [](const auto& p) {
-                         return p.template cast<double>();
-                       });
+                       [](const auto& p) { return p.template cast<double>(); });
         ch = sara::graham_scan_convex_hull(points_2d);
 
         const auto area_1 = static_cast<double>(points.size());
@@ -132,8 +130,17 @@ auto __main(int argc, char** argv) -> int
       // Show big segments only.
       for (const auto& p : points)
         partitioning(p) = good ? colors.at(label) : sara::Red8;
+      if (good)
+      {
+        SARA_CHECK(points.size());
+        SARA_CHECK(ch.size());
+
+        for (auto i = 0u; i < ch.size(); ++i)
+          sara::draw_line(ch[i], ch[(i + 1) % ch.size()], sara::White8, 3);
+      }
     }
     sara::display(partitioning);
+    sara::get_key();
 #endif
 
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,

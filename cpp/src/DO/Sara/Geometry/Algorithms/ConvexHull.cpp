@@ -86,7 +86,8 @@ namespace DO { namespace Sara {
     {
       while (ccw(convex_hull[convex_hull.size() - 2],
                  convex_hull[convex_hull.size() - 1],
-                 point_cotangents_pairs[i].first) < 0)
+                 point_cotangents_pairs[i].first) <
+             std::numeric_limits<double>::epsilon())
         convex_hull.pop_back();
       convex_hull.push_back(point_cotangents_pairs[i].first);
     }
