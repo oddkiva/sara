@@ -113,11 +113,10 @@ auto __main(int argc, char** argv) -> int
       auto good = false;
       auto ch = std::vector<Eigen::Vector2d>{};
 
-      if (points.size() > 100)
+      if (points.size() > 50)
       {
         auto points_2d = std::vector<Eigen::Vector2d>{};
         points_2d.resize(points.size());
-        SARA_CHECK(points_2d.size());
         std::transform(points.begin(), points.end(), points_2d.begin(),
                        [](const auto& p) {
                          return p.template cast<double>();
@@ -127,7 +126,7 @@ auto __main(int argc, char** argv) -> int
         const auto area_1 = static_cast<double>(points.size());
         const auto area_2 = sara::area(ch);
         const auto diff = std::abs(area_1 - area_2) / area_1;
-        good = diff < 0.3;
+        good = diff < 0.25;
       }
 
       // Show big segments only.
