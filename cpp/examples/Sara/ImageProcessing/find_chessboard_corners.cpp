@@ -534,7 +534,10 @@ struct KnnGraph
       }
     }
     if (num_corners_added != corner_count(0) * corner_count(1))
+    {
+      SARA_CHECK(num_corners_added);
       sara::get_key();
+    }
   }
 };
 
@@ -566,11 +569,11 @@ auto __main(int argc, char** argv) -> int
   else
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
-  static constexpr auto downscale_factor = 1;
+  static constexpr auto downscale_factor = 2;
   static constexpr auto sigma = 1.6f;
   static constexpr auto k = 6;
-  static constexpr auto radius = 7;
-  static constexpr auto grad_adaptive_thres = 1e-2f;
+  static constexpr auto radius = 3;
+  static constexpr auto grad_adaptive_thres = 2e-2f;
 
 #if 0
   static constexpr auto tolerance_parameter = 0.0f;
