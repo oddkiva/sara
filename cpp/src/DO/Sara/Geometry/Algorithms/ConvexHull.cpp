@@ -111,7 +111,6 @@ namespace DO::Sara {
     }
 
     // Weed out the points inside the convex hull.
-
     auto convex_hull = std::vector<Point2d>{};
     convex_hull.reserve(points.size());
     convex_hull.push_back(point_cotangents_pairs[0].first);
