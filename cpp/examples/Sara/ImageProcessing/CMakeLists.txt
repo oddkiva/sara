@@ -1,7 +1,7 @@
 find_package(DO_Sara
   COMPONENTS
-  Core Graphics ImageIO VideoIO                  # Classic stuff
-  DisjointSets FeatureDetectors ImageProcessing  # Algorithmic modules
+  Core Graphics ImageIO VideoIO                           # Classic stuff
+  DisjointSets FeatureDetectors Geometry ImageProcessing  # Algorithmic modules
   Visualization
   REQUIRED)
 
