@@ -21,34 +21,33 @@ namespace DO::Sara::Detail {
                                          std::size_t num_points)
   {
     // Copy.
-    for (size_t i = 0; i < num_points; ++i)
-      out[i].first = in[i];
+    std::transform(in, in + num_points, out, [](const auto& val) -> PtCotg {
+      return {val, 0};
+    });
 
     // Find origin and swap with first element.
     auto origin = std::min_element(
         out, out + num_points, [](const PtCotg& p, const PtCotg& q) {
-          return (p.first.x() < q.first.x()) ||
-                 (p.first.x() == q.first.x() && p.first.y() < q.first.y());
+          return (p.first.y() < q.first.y()) ||
+                 (p.first.y() == q.first.y() && p.first.x() < q.first.x());
         });
 
     std::swap(*origin, *out);
 
     // Compute the polar angle w.r.t. origin and sort by polar angle.
-    for (auto i = std::size_t{1}; i < num_points; ++i)
-    {
+    std::for_each(out + 1, out + num_points, [out](auto& pt_cotg) {
       // This is slow because of arctan2, but the algorithm is correct.
-      const auto diff = Eigen::Vector2d(out[i].first - out[0].first);
-      // This detail is important. It cannot be less than -Pi / 2.
-      out[i].second = std::atan2(diff.y(), diff.x());
-      if (out[i].second < -M_PI_2)
-        out[i].second += 2 * M_PI;
-    }
+      const auto diff = Eigen::Vector2d(pt_cotg.first - out->first);
+      if (diff.y() == 0)
+        pt_cotg.second =
+            std::copysign(std::numeric_limits<double>::max(), diff.x());
+      else
+        pt_cotg.second = diff.x() / diff.y();
+    });
     // Compute the polar angle w.r.t. origin and sort by polar angle.
-    sort(out + 1, out + num_points,
-         [](const std::pair<Point2d, double>& p,
-            const std::pair<Point2d, double>& q) {
-           return p.second < q.second;
-         });
+    std::sort(out + 1, out + num_points, [](const PtCotg& p, const PtCotg& q) {
+      return p.second > q.second;
+    });
   }
 
   void sort_points_by_polar_angle(Point2d* inout, PtCotg* work,
