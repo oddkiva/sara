@@ -54,8 +54,8 @@ namespace DO::Sara::Detail {
                                   size_t num_points)
   {
     sort_points_by_polar_angle(work, inout, num_points);
-    for (size_t i = 0; i < num_points; ++i)
-      inout[i] = work[i].first;
+    std::transform(work, work + num_points, inout,
+                   [](const auto& val) { return val.first; });
   }
 
 }  // namespace DO::Sara::Detail
