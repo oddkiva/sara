@@ -105,6 +105,8 @@ auto __main(int argc, char** argv) -> int
     const auto regions = sara::color_watershed(video_frame, color_threshold);
     sara::toc("Watershed");
 
+    sara::display(video_frame);
+
     // Display the good regions.
     const auto colors = mean_colors(regions, video_frame);
     auto partitioning = sara::Image<sara::Rgb8>{video_frame.sizes()};
@@ -120,11 +122,14 @@ auto __main(int argc, char** argv) -> int
         std::transform(points.begin(), points.end(), points_2d.begin(),
                        [](const auto& p) { return p.template cast<double>(); });
         ch = sara::graham_scan_convex_hull(points_2d);
-
-        const auto area_1 = static_cast<double>(points.size());
-        const auto area_2 = sara::area(ch);
-        const auto diff = std::abs(area_1 - area_2) / area_1;
-        good = diff < 0.25;
+        ch = sara::ramer_douglas_peucker(ch, 5.);
+        if (!ch.empty())
+        {
+          const auto area_1 = static_cast<double>(points.size());
+          const auto area_2 = sara::area(ch);
+          const auto diff = std::abs(area_1 - area_2) / area_1;
+          good = diff < 0.2;
+        }
       }
 
       // Show big segments only.
@@ -132,14 +137,11 @@ auto __main(int argc, char** argv) -> int
         partitioning(p) = good ? colors.at(label) : sara::Red8;
       if (good)
       {
-        SARA_CHECK(points.size());
-        SARA_CHECK(ch.size());
-
         for (auto i = 0u; i < ch.size(); ++i)
-          sara::draw_line(ch[i], ch[(i + 1) % ch.size()], sara::White8, 3);
+          sara::draw_line(ch[i], ch[(i + 1) % ch.size()], sara::Red8, 3);
       }
     }
-    sara::display(partitioning);
+    //  sara::display(partitioning);
     sara::get_key();
 #endif
 
