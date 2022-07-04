@@ -25,7 +25,6 @@
 #include "Chessboard/CircularProfileExtractor.hpp"
 #include "Chessboard/JunctionDetection.hpp"
 #include "Chessboard/NonMaximumSuppression.hpp"
-#include "Chessboard/SaddlePointDetection.hpp"
 
 
 namespace sara = DO::Sara;
