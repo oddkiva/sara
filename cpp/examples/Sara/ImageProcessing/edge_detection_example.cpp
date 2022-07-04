@@ -52,7 +52,7 @@ int __main(int argc, char** argv)
   const auto video_filepath = argc >= 2
                                   ? argv[1]
 #ifdef _WIN32
-                                  : "C:/Users/David/Desktop/GOPR0542.MP4"s;
+                                  : "C:/Users/David/Desktop/IMG_1895.MOV"s;
 #elif __APPLE__
                                   : "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
@@ -73,7 +73,9 @@ int __main(int argc, char** argv)
   namespace fs = boost::filesystem;
   const auto basename = fs::basename(video_filepath);
   VideoWriter video_writer{
-#ifdef __APPLE__
+#ifdef _WIN32
+      "C:/Users/David/Desktop/" + basename + ".edge-detection.mp4",
+#elif __APPLE__
       "/Users/david/Desktop/" + basename + ".edge-detection.mp4",
 #else
       "/home/david/Desktop/" + basename + ".edge-detection.mp4",

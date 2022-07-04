@@ -1,7 +1,7 @@
 find_package(DO_Sara
   COMPONENTS
-  Core Graphics ImageIO VideoIO                  # Classic stuff
-  DisjointSets FeatureDetectors ImageProcessing  # Algorithmic modules
+  Core Graphics ImageIO VideoIO                           # Classic stuff
+  DisjointSets FeatureDetectors Geometry ImageProcessing  # Algorithmic modules
   Visualization
   REQUIRED)
 
@@ -50,11 +50,16 @@ target_link_libraries(line_segment_detection_example
 
 add_library(ChessboardDetection STATIC
   Chessboard/SaddlePointDetection.hpp
-  Chessboard/SaddlePointDetection.cpp)
+  Chessboard/SaddlePointDetection.cpp
+  Chessboard/JunctionDetection.hpp
+  Chessboard/JunctionDetection.cpp)
 set_target_properties(ChessboardDetection
   PROPERTIES
   FOLDER "Libraries")
 target_link_libraries(ChessboardDetection PUBLIC ${DO_Sara_LIBRARIES})
 
 sara_add_example(find_chessboard_corners)
+target_link_libraries(find_chessboard_corners PRIVATE ChessboardDetection)
+
+sara_add_example(find_chessboard_corners_2)
 target_link_libraries(find_chessboard_corners PRIVATE ChessboardDetection)

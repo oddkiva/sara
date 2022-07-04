@@ -49,8 +49,8 @@ auto decompose_H_RQ_factorization(const Eigen::Matrix3d& H,
   auto t = Eigen::Vector3d{};
   t = P.col(2);
 
-  SARA_DEBUG << "R1=\n" << R1 << std::endl;
-  SARA_CHECK(R1.determinant());
+  // SARA_DEBUG << "R1=\n" << R1 << std::endl;
+  // SARA_CHECK(R1.determinant());
 
   // And voila!
   Rs = {R1};

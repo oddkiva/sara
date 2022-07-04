@@ -25,6 +25,8 @@ target_link_libraries(ImGui PUBLIC
 )
 target_include_directories(ImGui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
                                         ${CMAKE_CURRENT_SOURCE_DIR}/backends)
+set_property(TARGET ImGui PROPERTY FOLDER "Third-Party")
 
 add_library(ImGui_demo imgui_demo.cpp)
 target_link_libraries(ImGui_demo PUBLIC ImGui)
+set_property(TARGET ImGui_demo PROPERTY FOLDER "Third-Party")

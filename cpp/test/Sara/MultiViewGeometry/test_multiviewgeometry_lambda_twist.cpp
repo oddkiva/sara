@@ -81,8 +81,8 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
     SARA_DEBUG << "D1 =\n" << lt.D[1] << std::endl;
     // Let us check the cylindric property for each of three inhomogeneous
     // quadrics.
-    for (auto i = 0; i < 3; ++i)
-      BOOST_REQUIRE_EQUAL(lt.M[i].determinant(), 0);
+    for (auto k = 0; k < 3; ++k)
+      BOOST_REQUIRE_EQUAL(lt.M[k].determinant(), 0);
     // Check that these three inhomogeneous quadrics are also cylindric ellipses.
     const auto M01_planar = lt.M[0].topLeftCorner<2, 2>();
     const auto M12_planar = lt.M[2].bottomRightCorner<2, 2>();
@@ -146,17 +146,17 @@ BOOST_AUTO_TEST_CASE(test_lambda_twist)
       BOOST_REQUIRE((lambda.array() > 0).all());
 
       // The scale vector λ must be in the two homogeneous quadrics.
-      for (auto i = 0; i < 2; ++i)
+      for (auto k = 0; k < 2; ++k)
       {
-        const double val = lambda.transpose() * lt.D[i] * lambda;
+        const double val = lambda.transpose() * lt.D[k] * lambda;
         BOOST_REQUIRE_SMALL(val, 1e-12);
       }
 
       // The scale vector λ must be in the three inhomogeneous quadrics.
-      for (auto i = 0; i < 3; ++i)
+      for (auto k = 0; k < 3; ++k)
       {
-        const double val = lambda.transpose() * lt.M[i] * lambda;
-        BOOST_REQUIRE_CLOSE(val, lt.a(i), 1e-6);
+        const double val = lambda.transpose() * lt.M[k] * lambda;
+        BOOST_REQUIRE_CLOSE(val, lt.a(k), 1e-6);
       }
     }
 

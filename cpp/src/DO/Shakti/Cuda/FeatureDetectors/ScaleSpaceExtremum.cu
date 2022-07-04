@@ -288,7 +288,7 @@ namespace DO::Shakti::Cuda {
     if (!dogs.surface_object().initialized())
       throw std::runtime_error{"DoG surface object is uninitialized!"};
 
-    static constexpr auto block_sizes = dim3(tile_x, tile_y, tile_z);
+    static const auto block_sizes = dim3(tile_x, tile_y, tile_z);
     static const auto grid_sizes =
         dim3((dogs.width() + block_sizes.x - 1) / block_sizes.x,
              (dogs.height() + block_sizes.y - 1) / block_sizes.y,
@@ -369,7 +369,7 @@ namespace DO::Shakti::Cuda {
     auto y_ptr = thrust::raw_pointer_cast(e.y.data());
     auto s_ptr = thrust::raw_pointer_cast(e.s.data());
 
-    static constexpr auto block_sizes = dim3(1024);
+    static const auto block_sizes = dim3(1024);
     static const auto grid_sizes =
         dim3((e.indices.size() + block_sizes.x - 1) / block_sizes.x);
     flat_index_to_3d_coords<<<grid_sizes, block_sizes>>>(
@@ -514,7 +514,7 @@ namespace DO::Shakti::Cuda {
     if (!dogs.surface_object().initialized())
       throw std::runtime_error{"DoG surface object is uninitialized!"};
 
-    static constexpr auto block_sizes = dim3(1024);
+    static const auto block_sizes = dim3(1024);
     static const auto grid_sizes =
         dim3((e.indices.size() + block_sizes.x - 1) / block_sizes.x);
 

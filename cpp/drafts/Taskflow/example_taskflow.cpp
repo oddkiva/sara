@@ -18,7 +18,7 @@ int main(int argc, char** argv)
   return app.exec();
 }
 
-int __main(int argc, char **argv)
+int __main(int argc, char** argv)
 {
   if (argc < 2)
   {

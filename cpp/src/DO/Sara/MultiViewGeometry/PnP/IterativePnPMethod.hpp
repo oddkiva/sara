@@ -9,15 +9,24 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-//! @file
-
 #pragma once
 
-#include "OpenCVInterop.hpp"
+#include <memory>
 
 
-auto estimate_H(const Eigen::MatrixXd& p1, const Eigen::MatrixXd& p2)
-    -> Eigen::Matrix3d;
+namespace DO::Sara {
 
-auto estimate_H(const DO::Sara::OpenCV::Chessboard& chessboard)
-    -> Eigen::Matrix3d;
+  struct IterativePnPMethod
+  {
+    struct Impl;
+    struct ImplDeleter
+    {
+      auto operator()(const Impl* p) const -> void;
+    };
+
+    IterativePnPMethod();
+
+    std::unique_ptr<Impl, ImplDeleter> _pimpl;
+  };
+
+}  // namespace DO::Sara

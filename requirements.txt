@@ -6,3 +6,4 @@ numpy
 PySide2
 scipy
 ipython
+pybind11

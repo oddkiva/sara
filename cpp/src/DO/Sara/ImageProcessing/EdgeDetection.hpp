@@ -45,7 +45,7 @@ namespace DO::Sara {
   {
     auto edges = Image<uint8_t>{grad_mag.sizes()};
     edges.flat_array().fill(0);
-#pragma omp parallel for
+#pragma omp parallel for collapse(2)
     for (auto y = 1; y < grad_mag.height() - 1; ++y)
     {
       for (auto x = 1; x < grad_mag.width() - 1; ++x)
@@ -67,7 +67,7 @@ namespace DO::Sara {
         if (!is_max)
           continue;
 
-        edges(x, y) = grad_curr > high_thres ? 255 : 128;
+        edges(x, y) = grad_curr > high_thres ? 255 : 127;
       }
     }
     return edges;
@@ -112,7 +112,7 @@ namespace DO::Sara {
             n.y() < 0 || n.y() >= edges.height())
           continue;
 
-        if (edges(n) == 128 && !visited(n))
+        if (edges(n) == 127 && !visited(n))
         {
           visited(n) = 1;
           queue.emplace(n);
@@ -176,7 +176,7 @@ namespace DO::Sara {
     };
 
     const auto is_edgel = [&edges](const Eigen::Vector2i& p) {
-      return edges(p) == 255 || edges(p) == 128;
+      return edges(p) == 255 || edges(p) == 127;
     };
 
     auto ds = DisjointSets(edges.size());
@@ -391,7 +391,7 @@ namespace DO::Sara {
     };
 
     const auto is_weak_edgel = [&edges](const Eigen::Vector2i& p) {
-      return edges(p) == 128;
+      return edges(p) == 127;
     };
 
     const auto orientation_vector = [&orientations](const Vector2i& p) {
@@ -530,7 +530,7 @@ namespace DO::Sara {
     };
 
     tic();
-    auto ds = v2::DisjointSets(edges.size());
+    auto ds = v2::DisjointSets{static_cast<std::uint32_t>(edges.size())};
 
     // Neighborhood defined by 8-connectivity.
     const auto dir = std::array<Eigen::Vector2i, 8>{

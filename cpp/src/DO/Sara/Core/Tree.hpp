@@ -565,8 +565,6 @@ namespace DO { namespace Sara {
     template <bool IsConst>
     class NodeHandle
     {
-      template <bool IsConst2> friend class NodeHandle;
-
     public:
       //! @{
       //! @brief STL style typedefs.
@@ -582,11 +580,11 @@ namespace DO { namespace Sara {
       }
 
       inline NodeHandle(const NodeHandle<false>& other)
-        : _node_ptr{ other._node_ptr }
+        : _node_ptr{ other }
       {
       }
 
-      inline operator node_pointer()
+      inline operator node_pointer() const
       {
         return _node_ptr;
       }
@@ -619,7 +617,7 @@ namespace DO { namespace Sara {
       template <bool IsConst2>
       inline bool operator==(const NodeHandle<IsConst2>& other) const
       {
-        return _node_ptr == other._node_ptr;
+        return _node_ptr == other.self();
       }
 
       template <bool IsConst2>

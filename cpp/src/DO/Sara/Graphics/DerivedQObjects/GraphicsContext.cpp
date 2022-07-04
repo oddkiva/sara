@@ -144,7 +144,7 @@ namespace DO::Sara {
     m_createdWindows.erase(wi);
   }
 
-  void GraphicsContext::getFileFromDialogBox()
+  void GraphicsContext::getImageFileFromDialogBox()
   {
     m_dialogBoxInfo.filename = QFileDialog::getOpenFileName(
         0, "Open File", "/home", "Images (*.png *.xpm *.jpg)");

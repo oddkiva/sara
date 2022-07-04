@@ -15,10 +15,10 @@ function(shakti_add_example)
   target_link_libraries(${name} PRIVATE ${Boost_LIBRARIES}
                                         ${shakti_add_example_DEPENDENCIES})
 
-  set_target_properties(${name} PROPERTIES FOLDER "Example/Shakti/Cuda")
+  set_target_properties(${name} PROPERTIES FOLDER "Examples/Shakti/Cuda")
 
-  target_compile_options(
-    ${name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
+  #target_compile_options(
+  #  ${name} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
 
   set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                            ${CMAKE_BINARY_DIR}/bin)

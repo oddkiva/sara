@@ -207,5 +207,4 @@ namespace DO::Sara::OpenCV {
     }
   }
 
-
 }  // namespace DO::Sara::OpenCV

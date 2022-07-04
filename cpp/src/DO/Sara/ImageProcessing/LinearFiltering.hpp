@@ -20,7 +20,7 @@
 #include <DO/Sara/Core/Pixel.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   /*!
    *  @ingroup ImageProcessing
@@ -41,13 +41,13 @@ namespace DO { namespace Sara {
    *  @param[in] kernel_size the kernel size \f$K\f$.
    */
   template <typename T>
-  auto convolve_array(T *signal,
-                      const typename PixelTraits<T>::channel_type *kernel,
+  auto convolve_array(T* signal,
+                      const typename PixelTraits<T>::channel_type* kernel,
                       int signal_size, int kernel_size) -> void
   {
-    T *yj;
-    auto *y = signal;
-    const typename PixelTraits<T>::channel_type *kj;
+    T* yj;
+    auto* y = signal;
+    const typename PixelTraits<T>::channel_type* kj;
 
     for (int i = 0; i < signal_size; ++i, ++y)
     {
@@ -169,7 +169,8 @@ namespace DO { namespace Sara {
 
   //! @brief Make Gaussian kernel. This kernel will always have an odd size.
   template <typename S>
-  inline auto make_gaussian_kernel(S sigma, S gauss_truncate = 4)
+  inline auto make_gaussian_kernel(S sigma,
+                                   S gauss_truncate = static_cast<S>(4))
       -> Eigen::Matrix<S, Eigen::Dynamic, 1>
   {
     using Vec = Eigen::Matrix<S, Eigen::Dynamic, 1>;
@@ -189,7 +190,9 @@ namespace DO { namespace Sara {
     const auto c = kernel_size / 2;
 
     // 1. Compute the value of the unnormalized Gaussian.
-    Vec kernel = Vec::LinSpaced(kernel_size, 0, kernel_size - 1);
+    Vec kernel = Vec::LinSpaced(                      //
+        kernel_size, 0, static_cast<S>(kernel_size - 1)  //
+    );
     kernel.array() =
         (-(kernel.array() - c).square() / (2 * square(sigma))).exp();
 
@@ -197,6 +200,27 @@ namespace DO { namespace Sara {
     kernel /= kernel.sum();
 
     return kernel;
+  }
+
+  template <typename S>
+  inline auto make_gaussian_kernel_2d(S sigma,
+                                      S gauss_truncate = static_cast<S>(4))
+      -> Image<S>
+  {
+    const auto kernel_1d = make_gaussian_kernel(sigma, gauss_truncate);
+    auto kernel_2d = Image<S>(kernel_1d.size(), kernel_1d.size());
+    kernel_2d.matrix() = kernel_1d * kernel_1d.transpose();
+    return kernel_2d;
+  }
+
+  template <typename S>
+  inline auto make_gaussian_kernel_2d(const int diameter) -> Image<S>
+  {
+    static constexpr auto gauss_truncate = static_cast<S>(4);
+    const auto radius = diameter / 2;
+    const auto sigma = radius / gauss_truncate;
+
+    return make_gaussian_kernel_2d(sigma, gauss_truncate);
   }
 
   //! @brief Apply Gaussian smoothing to image.
@@ -216,8 +240,8 @@ namespace DO { namespace Sara {
                   "Channel type cannot be integral");
 
     const auto kernel = make_gaussian_kernel(sigma, gauss_truncate);
-    apply_row_based_filter(src, dst, kernel.data(), kernel.size());
-    apply_column_based_filter(dst, dst, kernel.data(), kernel.size());
+    apply_row_based_filter(src, dst, kernel.data(), static_cast<int>(kernel.size()));
+    apply_column_based_filter(dst, dst, kernel.data(), static_cast<int>(kernel.size()));
   }
 
   //! @brief Apply Sobel filter to image.
@@ -362,11 +386,13 @@ namespace DO { namespace Sara {
       -> void
   {
     using S = typename PixelTraits<T>::channel_type;
+    // clang-format off
     const S kernel[9] = {
       S(0), S( 1), S(0),
       S(1), S(-4), S(1),
       S(0), S( 1), S(0)
     };
+    // clang-format on
     apply_2d_non_separable_filter(src, dst, kernel, 3, 3);
   }
 
@@ -376,14 +402,16 @@ namespace DO { namespace Sara {
       -> void
   {
     using S = typename PixelTraits<T>::channel_type;
+    // clang-format off
     const S k1[] = {
-      S( 1), S( 0),
-      S( 0), S(-1)
+      S(1), S( 0),
+      S(0), S(-1)
     };
     const S k2[] = {
-      S( 0), S( 1),
-      S(-1), S( 0)
+      S( 0), S(1),
+      S(-1), S(0)
     };
+    // clang-format on
 
     auto tmp = Image<T>{src.sizes()};
     apply_2d_non_separable_filter(src, tmp, k1, 2, 2);
@@ -469,8 +497,8 @@ namespace DO { namespace Sara {
   }
 
 
-// ======================================================================== //
-// Helper 2D linear filtering functors
+  // ======================================================================== //
+  // Helper 2D linear filtering functors
 #define CREATE_2D_FILTER_FUNCTOR(FilterName, function)                         \
   /*! @brief Helper class to use Image<T,N>::compute<FilterName>() */          \
   struct FilterName                                                            \
@@ -512,5 +540,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara

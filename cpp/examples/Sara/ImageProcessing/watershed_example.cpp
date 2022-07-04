@@ -31,7 +31,7 @@ auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
   {
     const auto num_points = static_cast<float>(points.size());
     Eigen::Vector3f color = Vector3f::Zero();
-    for (const auto& p: points)
+    for (const auto& p : points)
       color += image(p).cast<float>();
     color /= num_points;
 
@@ -45,8 +45,10 @@ GRAPHICS_MAIN()
   using namespace std::string_literals;
 
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+  // const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath = select_video_file_from_dialog_box();
+  if (video_filepath.empty())
+    return 1;
 #elif __APPLE__
   const auto video_filepath =
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
@@ -57,7 +59,7 @@ GRAPHICS_MAIN()
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-// #define DOWNSAMPLE
+#define DOWNSAMPLE
 #ifdef DOWNSAMPLE
   auto frame_downsampled = Image<Rgb8>{frame.sizes() / 2};
 #else
@@ -68,7 +70,7 @@ GRAPHICS_MAIN()
   create_window(frame_downsampled.sizes());
   set_antialiasing();
 
-  const auto color_threshold = std::sqrt(square(4.f) * 3);
+  const auto color_threshold = std::sqrt(square(2.f) * 3);
 
   auto frames_read = 0;
   constexpr auto skip = 2;
@@ -83,7 +85,7 @@ GRAPHICS_MAIN()
     ++frames_read;
 
     if (frames_read % (skip + 1) != 0)
-       continue;
+      continue;
 
     reduce(frame, frame_downsampled);
 

@@ -1,0 +1,65 @@
+## Corner and Junction Detection
+
+The corner detection relies on the analysis of one statistical object called the
+structure tensor.
+
+In each point of the image, we want to describe its shape locally on a
+small region.
+
+With the structure tensor, we can to classify each of these small regions
+into three categories:
+
+1. Is it a uniform region?
+2. Is the small region more like an edge? Can we calculate its orientation?
+3. Is the small region more like a corner? Can we calculate its orientation?
+
+Thus we build the structure tensor by accumulating all the image gradients into
+a second moment matrix.
+
+### Structure Tensor
+
+Formally we define the structure tensor as
+
+\begin{equation}
+  \mathbf{M} = \begin{bmatrix}
+    \int_\mathbf{x} w(\mathbf{x}) \frac{\partial I(\mathbf{x})}{\partial x}^2 d\mathbf{x}&&
+    %
+    \int_\mathbf{x} w(\mathbf{x})
+    \frac{\partial I(\mathbf{x})}{\partial x} \frac{\partial I(\mathbf{x})}{\partial y} d\mathbf{x}\\
+    %
+    \int_\mathbf{x} w(\mathbf{x})
+    \frac{\partial I(\mathbf{x})}{\partial x} \frac{\partial I(\mathbf{x})}{\partial y} d\mathbf{x} &&
+    %
+    \int_\mathbf{x} w(\mathbf{x}) \frac{\partial I(\mathbf{x})}{\partial y}^2 d\mathbf{x}\\
+  \end{bmatrix}
+\end{equation}
+
+We can rewrite this with a bit of linear algebra
+
+\begin{equation}
+  \mathbf{M} = \displaystyle \int_\mathbf{x} w(\mathbf{x})
+    \nabla I(\mathbf{x}) \nabla I(\mathbf{x})^T
+    d\mathbf{x}
+\end{equation}
+
+This form is convenient from an implementation point of view.
+
+By extracting the eigenvalues and eigenvectors, we can calculate the two
+principal directions of the gradients, that is, those that appears most
+frequently, and then compare the "frequency" ratio between the two principal
+directions
+
+### Spiral Model
+
+I learnt from [@ForstnerDS:2009:iccv] that the spiral model is an extension of
+the structure tensor. This time, the structure is also parameterized with a 2D
+rotation matrix parameterized by an angle $\alpha$ in the structure tensor.
+
+\begin{equation}
+  \mathbf{M}(\alpha) = \displaystyle \int_\mathbf{x} w(\mathbf{x})
+  \mathbf{R}_\alpha \nabla I(\mathbf{x})
+  \nabla I(\mathbf{x})^T
+  \mathbf{R}_\alpha^T
+  d\mathbf{x}
+\end{equation}
+

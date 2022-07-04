@@ -67,7 +67,7 @@ namespace DO::Shakti::Cuda {
     if (!grad_ori.surface_object().initialized())
       grad_ori.init_surface();
 
-    static constexpr auto block_sizes = dim3(32, 32, 1);
+    static const auto block_sizes = dim3(32, 32, 1);
     static const auto grid_sizes =
         dim3((gaussians.width() + block_sizes.x - 1) / block_sizes.x,
              (gaussians.height() + block_sizes.y - 1) / block_sizes.y,

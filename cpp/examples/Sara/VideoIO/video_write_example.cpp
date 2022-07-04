@@ -22,19 +22,17 @@ namespace sara = DO::Sara;
 GRAPHICS_MAIN()
 {
 #ifdef _WIN32
-  const auto in_video_filepath = "/home/david/Desktop/GOPR0542.mp4";
+  const auto in_video_filepath = "C:/Users/David/Desktop/GOPR0542.mp4";
+  const auto out_video_filepath = "C:/Users/David/Desktop/test.mkv";
 #elif __APPLE__
   const auto in_video_filepath = "/Users/david/Desktop/Datasets/videos/sample10.mp4";
-#else
-  const auto in_video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4";
-#endif
-  sara::VideoStream video_stream{in_video_filepath};
-
-#ifdef __APPLE__
   const auto out_video_filepath = "/Users/david/Desktop/test.mkv";
 #else
+  const auto in_video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4";
   const auto out_video_filepath = "/home/david/Desktop/test.mkv";
 #endif
+
+  sara::VideoStream video_stream{in_video_filepath};
   sara::VideoWriter video_writer{out_video_filepath, video_stream.sizes(), 30};
 
   sara::create_window(video_stream.sizes());
