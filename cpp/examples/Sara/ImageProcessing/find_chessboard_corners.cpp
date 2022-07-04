@@ -569,10 +569,10 @@ auto __main(int argc, char** argv) -> int
   else
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
-  static constexpr auto downscale_factor = 2;
+  const auto downscale_factor = argc < 5 ? 1 : std::atoi(argv[4]);
   static constexpr auto sigma = 1.6f;
   static constexpr auto k = 6;
-  static constexpr auto radius = 3;
+  static const auto radius = 6 / downscale_factor;
   static constexpr auto grad_adaptive_thres = 2e-2f;
 
 #if 0
@@ -585,9 +585,6 @@ auto __main(int argc, char** argv) -> int
     ++frame_number;
     if (frame_number % 3 != 0)
       continue;
-
-    // if (frame_number < 36)
-    //   continue;
 
     if (sara::active_window() == nullptr)
     {

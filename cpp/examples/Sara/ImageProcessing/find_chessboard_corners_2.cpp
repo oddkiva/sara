@@ -69,7 +69,7 @@ auto __main(int argc, char** argv) -> int
 #define ADAPTIVE_THRESHOLDING
 #ifdef ADAPTIVE_THRESHOLDING
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
-  static constexpr auto tolerance_parameter = 0.0f;
+  static constexpr auto tolerance_parameter = 0.f;
 #else
   static const auto color_threshold = std::sqrt(sara::square(2.f) * 3);
 #endif
@@ -105,7 +105,7 @@ auto __main(int argc, char** argv) -> int
     const auto regions = sara::color_watershed(video_frame, color_threshold);
     sara::toc("Watershed");
 
-    sara::display(video_frame);
+    // sara::display(video_frame);
 
     // Display the good regions.
     const auto colors = mean_colors(regions, video_frame);
@@ -122,7 +122,7 @@ auto __main(int argc, char** argv) -> int
         std::transform(points.begin(), points.end(), points_2d.begin(),
                        [](const auto& p) { return p.template cast<double>(); });
         ch = sara::graham_scan_convex_hull(points_2d);
-        ch = sara::ramer_douglas_peucker(ch, 5.);
+        ch = sara::ramer_douglas_peucker(ch, 1.);
         if (!ch.empty())
         {
           const auto area_1 = static_cast<double>(points.size());
@@ -135,14 +135,15 @@ auto __main(int argc, char** argv) -> int
       // Show big segments only.
       for (const auto& p : points)
         partitioning(p) = good ? colors.at(label) : sara::Red8;
-      if (good)
-      {
-        for (auto i = 0u; i < ch.size(); ++i)
-          sara::draw_line(ch[i], ch[(i + 1) % ch.size()], sara::Red8, 3);
-      }
+      // if (good)
+      // {
+      //   for (auto i = 0u; i < ch.size(); ++i)
+      //     sara::draw_line(ch[i], ch[(i + 1) % ch.size()], sara::Red8, 3);
+      // }
+
     }
-    //  sara::display(partitioning);
-    sara::get_key();
+
+    sara::display(partitioning);
 #endif
 
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
