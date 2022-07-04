@@ -499,8 +499,6 @@ struct KnnGraph
 
         for (const auto& p : path)
           sara::fill_circle(s * p.x(), s * p.y(), 2, sara::Blue8);
-        // sara::draw_line(s * pu.x(), s * pu.y(), s * pv.x(), s * pv.y(),
-        //                 sara::Green8, 2);
 
         if (!visited[v])
         {
