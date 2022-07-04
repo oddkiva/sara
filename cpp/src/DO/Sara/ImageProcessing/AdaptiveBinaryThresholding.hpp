@@ -29,7 +29,6 @@ namespace DO::Sara {
                              ImageView<std::uint8_t>& dst,  //
                              const T tolerance_param) -> void
   {
-    const Eigen::Vector2i c = kernel.sizes() / 2;
     const Eigen::Vector2i r = kernel.sizes() / 2;
 
     const Eigen::Vector2i a = Eigen::Vector2i::Zero();

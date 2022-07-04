@@ -118,27 +118,6 @@ auto filter_junctions(std::vector<sara::Junction<int>>& junctions,
     for (auto i = 0; i < 4; ++i)
       circular_profiles(i, junctions_filtered.size()) = zero_crossings[i];
 
-    static const auto angle_threshold = std::cos(M_PI / 180.f * 10.f);
-    auto good = true;
-    for (auto i = 0; i < 4; ++i)
-    {
-      const auto ia = i == 0 ? 3 : i - 1;
-      const auto ib = i;
-      const auto ic = i == 3 ? 0 : i + 1;
-      const auto a = dir(zero_crossings[ia]);
-      const auto b = dir(zero_crossings[ib]);
-      const auto c = dir(zero_crossings[ic]);
-      const auto good_i = std::abs(a.dot(b)) < angle_threshold &&
-                          std::abs(b.dot(c)) < angle_threshold;
-      if (!good_i)
-      {
-        good = false;
-        break;
-      }
-    }
-    if (!good)
-      continue;
-
     junctions_filtered.emplace_back(j);
   }
 
@@ -534,10 +513,10 @@ struct KnnGraph
       }
     }
     if (num_corners_added != corner_count(0) * corner_count(1))
-    {
-      SARA_CHECK(num_corners_added);
-      sara::get_key();
-    }
+      sara::draw_text(400, 400, "NO!!!!" + std::to_string(num_corners_added),
+                      sara::White8, 60, 0, false, true);
+    else
+      sara::draw_text(400, 400, "YES!!!", sara::White8, 60, 0, false, true);
   }
 };
 
@@ -575,11 +554,6 @@ auto __main(int argc, char** argv) -> int
   static const auto radius = 6 / downscale_factor;
   static constexpr auto grad_adaptive_thres = 2e-2f;
 
-#if 0
-  static constexpr auto tolerance_parameter = 0.0f;
-  static const auto kernel_2d = sara::make_gaussian_kernel_2d(16.f);
-#endif
-
   while (video_stream.read())
   {
     ++frame_number;
@@ -610,22 +584,6 @@ auto __main(int argc, char** argv) -> int
       if (*e == 127)
         *e = 0;
     sara::toc("Feature maps");
-
-#if 0
-    sara::tic();
-    auto f_pyr = std::vector<sara::Image<float>>{};
-    f_pyr.push_back(f);
-    // f_pyr.push_back(sara::downscale(f_pyr.back(), 2));
-    // f_pyr.push_back(sara::downscale(f_pyr.back(), 2));
-    sara::toc("Gaussian pyramid");
-
-    sara::tic();
-    auto binary_mask = sara::Image<std::uint8_t>{f_pyr.back().sizes()};
-    sara::adaptive_thresholding(f_pyr.back(), kernel_2d, binary_mask,
-                                tolerance_parameter);
-    binary_mask.flat_array() *= 255;
-    sara::toc("Adaptive thresholding");
-#endif
 
     auto graph = KnnGraph<sara::Junction<int>>{};
     graph._k = k;
