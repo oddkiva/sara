@@ -416,12 +416,12 @@ struct KnnGraph
                    const int downscale_factor,
                    sara::ImageView<std::uint8_t>& edge_map,
                    const Eigen::Vector2i& corner_count,
-                   const int dilation_radius) -> void
+                   const int dilation_radius) -> bool
   {
     if (_vertices.empty())
     {
       SARA_DEBUG << "No corners found!" << std::endl;
-      return;
+      return false;
     }
 
     const auto k = _neighbors.rows();
@@ -509,11 +509,15 @@ struct KnnGraph
         }
       }
     }
-    if (num_corners_added != corner_count(0) * corner_count(1))
+
+    const auto found = num_corners_added == corner_count(0) * corner_count(1);
+    if (!found)
       sara::draw_text(400, 400, "NO!!!!" + std::to_string(num_corners_added),
                       sara::White8, 60, 0, false, true);
     else
       sara::draw_text(400, 400, "YES!!!", sara::White8, 60, 0, false, true);
+
+    return found;
   }
 };
 
@@ -546,11 +550,12 @@ auto __main(int argc, char** argv) -> int
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
   const auto downscale_factor = argc < 5 ? 1 : std::atoi(argv[4]);
-  static constexpr auto sigma = 1.6f;
+  static constexpr auto sigma = 1.2f;
   static constexpr auto k = 6;
   static const auto radius = 6 / downscale_factor;
   static constexpr auto grad_adaptive_thres = 2e-2f;
 
+  auto found_count = 0;
   while (video_stream.read())
   {
     ++frame_number;
@@ -651,7 +656,15 @@ auto __main(int argc, char** argv) -> int
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);
 
-    graph.grow(f, sigma, downscale_factor, edge_map, corner_count, radius);
+    const auto found =
+        graph.grow(f, sigma, downscale_factor, edge_map, corner_count, radius);
+    if (found)
+      ++found_count;
+
+    sara::draw_text(80, 200,
+                    std::to_string(found_count) + "/" +
+                        std::to_string(frame_number / 3 + 1),
+                    sara::White8, 60, 0, false, true);
   }
 
   return 0;
