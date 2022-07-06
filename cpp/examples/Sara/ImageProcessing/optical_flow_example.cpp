@@ -107,12 +107,15 @@ int __main(int argc, char** argv)
   auto frame = video_stream.frame();
 
   // Preprocessing parameters.
-  constexpr auto downscale_factor = 2;
+  static constexpr auto downscale_factor = 1;
 
   // Harris cornerness parameters.
-  const auto sigma_D = std::sqrt(std::pow(1.6f, 2) - 1);
-  const auto sigma_I = 3.f;
-  const auto kappa = 0.04f;
+  //
+  // Blur parameter before gradient calculation.
+  static const auto sigma_D = std::sqrt(std::pow(1.6f, 2) - 1);
+  // Integration domain of the second moment.
+  static const auto sigma_I = 3.f;
+  static const auto kappa = 0.04f;
 
   // Lukas-Kanade optical flow parameters.
   auto flow_estimator = LukasKanadeOpticalFlowEstimator<>{};
@@ -146,23 +149,29 @@ int __main(int argc, char** argv)
     );
 
     // Select the local maxima of the cornerness functions.
-    auto select = [](const auto& cornerness) {
-      const auto extrema = sara::local_maxima(cornerness);
-      constexpr auto& r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
+    static constexpr auto select =
+        [](const sara::ImageView<float>& cornerness) {
+          static constexpr auto r =
+              LukasKanadeOpticalFlowEstimator<>::patch_radius;
 
-      auto extrema_filtered = std::vector<sara::Point2i>{};
-      extrema_filtered.reserve(extrema.size());
-      for (const auto& p : extrema)
-      {
-        const auto in_image_domain =
-            (r <= p.x() && p.x() < cornerness.width() - r) &&
-            (r <= p.y() && p.y() < cornerness.height() - r);
+          const auto extrema = sara::local_maxima(cornerness);
 
-        if (cornerness(p) > 0 && in_image_domain)
-          extrema_filtered.emplace_back(p);
-      }
-      return extrema_filtered;
-    };
+          const auto cornerness_max = cornerness.flat_array().maxCoeff();
+          const auto cornerness_thres = 1e-5f * cornerness_max;
+
+          auto extrema_filtered = std::vector<sara::Point2i>{};
+          extrema_filtered.reserve(extrema.size());
+          for (const auto& p : extrema)
+          {
+            const auto in_image_domain =
+                (r <= p.x() && p.x() < cornerness.width() - r) &&
+                (r <= p.y() && p.y() < cornerness.height() - r);
+
+            if (cornerness(p) > cornerness_thres && in_image_domain)
+              extrema_filtered.emplace_back(p);
+          }
+          return extrema_filtered;
+        };
     const auto corners = select(cornerness);
 
     // Calculate the optical flow.
@@ -174,7 +183,6 @@ int __main(int argc, char** argv)
     // TODO: track the corners with optical flow.
 
     // Draw the sparse flow field.
-    sara::display(frame);
     if (!flow_estimator._I0.empty())
     {
       for (auto i = 0u; i != corners.size(); ++i)
@@ -182,12 +190,11 @@ int __main(int argc, char** argv)
         const auto& v = flow_vectors[i];
         if (std::isnan(v.x()) || std::isnan(v.y()))
           continue;
-        if (v.squaredNorm() < 0.25f)
-          continue;
 
         const Eigen::Vector2f pa = corners[i].cast<float>() * downscale_factor;
         const Eigen::Vector2f pb = pa + flow_vectors[i] * 10;
 
+#ifdef SHOW_FLOW
         const auto Y = std::clamp(flow_vectors[i].norm() / 5.f, 0.f, 1.f);
         const auto U = std::clamp(flow_vectors[i].x() / 5, -1.f, 1.f) * 0.5f;
         const auto V = std::clamp(flow_vectors[i].y() / 5, -1.f, 1.f) * 0.5f;
@@ -198,15 +205,21 @@ int __main(int argc, char** argv)
 
         auto rgb8 = sara::Rgb8{};
         sara::smart_convert_color(rgb32f, rgb8);
+#else
+        const auto rgb8 = sara::Red8;
+#endif
 
         constexpr auto& r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
         const auto& l = (2 * r + 1) * downscale_factor;
         const Eigen::Vector2i tl =
             (pa - Eigen::Vector2f::Ones() * r * downscale_factor).cast<int>();
 
-        sara::draw_rect(tl.x(), tl.y(), l, l, rgb8);
-        sara::draw_arrow(pa, pb, rgb8, 2);
+        sara::draw_rect(frame, tl.x(), tl.y(), l, l, rgb8);
+        sara::draw_arrow(frame, pa, pb, rgb8, 2);
+        sara::fill_circle(frame, int(pa.x() + 0.5f), int(pa.y() + 0.5f), 2,
+                          sara::Green8);
       }
+      sara::display(frame);
     }
   }
 

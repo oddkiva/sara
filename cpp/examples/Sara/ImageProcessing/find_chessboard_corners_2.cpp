@@ -137,10 +137,13 @@ auto __main(int argc, char** argv) -> int
     const auto colors = mean_colors(regions, video_frame);
     auto partitioning = sara::Image<sara::Rgb8>{video_frame.sizes()};
     partitioning.flat_array().fill(sara::Red8);
-    sara::display(partitioning);
+    // sara::display(partitioning);
     for (const auto& [label, points] : regions)
     {
       auto good = false;
+      if (segmentation_map(points.front()) != 0)
+        continue;
+
       auto ch = std::vector<Eigen::Vector2d>{};
 
       if (points.size() > 50)
@@ -164,21 +167,21 @@ auto __main(int argc, char** argv) -> int
       if (good)
       {
         const auto color = colors.at(label);
-        // for (const auto& p : points)
-        //   partitioning(p) = color;
+        for (const auto& p : points)
+          partitioning(p) = color;
 
         // sara::display(partitioning);
-        for (auto i = 0u; i < ch.size(); ++i)
-        {
-          const auto& a = ch[i];
-          const auto& b = ch[(i + 1) % ch.size()];
-          sara::draw_line(a, b, color, 3);
-        }
+        // for (auto i = 0u; i < ch.size(); ++i)
+        // {
+        //   const auto& a = ch[i];
+        //   const auto& b = ch[(i + 1) % ch.size()];
+        //   sara::draw_line(a, b, color, 3);
+        // }
         // sara::get_key();
       }
     }
 
-    // sara::display(partitioning);
+    sara::display(partitioning);
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);
   }

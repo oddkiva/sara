@@ -550,7 +550,7 @@ auto __main(int argc, char** argv) -> int
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
   const auto downscale_factor = argc < 5 ? 1 : std::atoi(argv[4]);
-  static constexpr auto sigma = 1.2f;
+  static constexpr auto sigma = 1.4f;
   static constexpr auto k = 6;
   static const auto radius = 6 / downscale_factor;
   static constexpr auto grad_adaptive_thres = 2e-2f;
