@@ -17,6 +17,7 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include "Chessboard/CircularProfileExtractor.hpp"
 
 namespace sara = DO::Sara;
 
@@ -96,6 +97,43 @@ struct LukasKanadeOpticalFlowEstimator
 };
 
 
+auto localize_zero_crossings(const Eigen::ArrayXf& profile, int num_bins)
+    -> std::vector<float>
+{
+  auto zero_crossings = std::vector<float>{};
+  for (auto n = Eigen::Index{}; n < profile.size(); ++n)
+  {
+    const auto ia = n;
+    const auto ib = (n + Eigen::Index{1}) % profile.size();
+
+    const auto& a = profile[ia];
+    const auto& b = profile[ib];
+
+    static constexpr auto pi = static_cast<float>(M_PI);
+    const auto angle_a = ia * 2.f * M_PI / num_bins;
+    const auto angle_b = ib * 2.f * M_PI / num_bins;
+
+    const auto ea = Eigen::Vector2d{std::cos(angle_a),  //
+                                    std::sin(angle_a)};
+    const auto eb = Eigen::Vector2d{std::cos(angle_b),  //
+                                    std::sin(angle_b)};
+
+    // TODO: this all could have been simplified.
+    const Eigen::Vector2d dir = (ea + eb) * 0.5;
+    auto angle = std::atan2(dir.y(), dir.x());
+    if (angle < 0)
+      angle += 2 * pi;
+
+    // A zero-crossing is characterized by a negative sign between
+    // consecutive intensity values.
+    if (a * b < 0)
+      zero_crossings.push_back(static_cast<float>(angle));
+  }
+
+  return zero_crossings;
+}
+
+
 int __main(int argc, char** argv)
 {
   using namespace std::string_literals;
@@ -150,30 +188,49 @@ int __main(int argc, char** argv)
     );
 
     // Select the local maxima of the cornerness functions.
-    static constexpr auto select =
-        [](const sara::ImageView<float>& cornerness, const float cornerness_adaptive_thres) {
-          static constexpr auto r =
-              LukasKanadeOpticalFlowEstimator<>::patch_radius;
+    static constexpr auto select = [](const sara::ImageView<float>& cornerness,
+                                      const sara::ImageView<float>& f,
+                                      const float cornerness_adaptive_thres) {
+      static constexpr auto r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
 
-          const auto extrema = sara::local_maxima(cornerness);
+      const auto extrema = sara::local_maxima(cornerness);
 
-          const auto cornerness_max = cornerness.flat_array().maxCoeff();
-          const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
+#ifdef CHESSBOARD_CORNER_FILTERING
+      auto profile_extractor = CircularProfileExtractor{};
+      profile_extractor.circle_radius = r;
+#endif
 
-          auto extrema_filtered = std::vector<sara::Point2i>{};
-          extrema_filtered.reserve(extrema.size());
-          for (const auto& p : extrema)
-          {
-            const auto in_image_domain =
-                (r <= p.x() && p.x() < cornerness.width() - r) &&
-                (r <= p.y() && p.y() < cornerness.height() - r);
+      const auto cornerness_max = cornerness.flat_array().maxCoeff();
+      const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
 
-            if (cornerness(p) > cornerness_thres && in_image_domain)
-              extrema_filtered.emplace_back(p);
-          }
-          return extrema_filtered;
-        };
-    const auto corners = select(cornerness, cornerness_adaptive_thres);
+      auto extrema_filtered = std::vector<sara::Point2i>{};
+      extrema_filtered.reserve(extrema.size());
+      for (const auto& p : extrema)
+      {
+        const auto in_image_domain =
+            (r <= p.x() && p.x() < cornerness.width() - r) &&
+            (r <= p.y() && p.y() < cornerness.height() - r);
+
+        if (!in_image_domain)
+          continue;
+
+#ifdef CHESSBOARD_CORNER_FILTERING
+        const auto profile = profile_extractor(f, p.cast<double>());
+        const auto zero_crossings = localize_zero_crossings(  //
+            profile,                                          //
+            profile_extractor.num_circle_sample_points        //
+        );
+        if (zero_crossings.size() != 4u)
+          continue;
+#endif
+
+        if (cornerness(p) > cornerness_thres)
+          extrema_filtered.emplace_back(p);
+      }
+      return extrema_filtered;
+    };
+    const auto corners =
+        select(cornerness, frame_gray, cornerness_adaptive_thres);
 
     // Calculate the optical flow.
     flow_estimator.update_image(frame_gray);
