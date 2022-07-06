@@ -107,7 +107,8 @@ int __main(int argc, char** argv)
   auto frame = video_stream.frame();
 
   // Preprocessing parameters.
-  static constexpr auto downscale_factor = 1;
+  const auto downscale_factor = argc < 3 ? 1 : std::stoi(argv[2]);
+  const auto cornerness_adaptive_thres = argc < 4 ? 0 : std::stof(argv[3]);
 
   // Harris cornerness parameters.
   //
@@ -150,14 +151,14 @@ int __main(int argc, char** argv)
 
     // Select the local maxima of the cornerness functions.
     static constexpr auto select =
-        [](const sara::ImageView<float>& cornerness) {
+        [](const sara::ImageView<float>& cornerness, const float cornerness_adaptive_thres) {
           static constexpr auto r =
               LukasKanadeOpticalFlowEstimator<>::patch_radius;
 
           const auto extrema = sara::local_maxima(cornerness);
 
           const auto cornerness_max = cornerness.flat_array().maxCoeff();
-          const auto cornerness_thres = 1e-5f * cornerness_max;
+          const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
 
           auto extrema_filtered = std::vector<sara::Point2i>{};
           extrema_filtered.reserve(extrema.size());
@@ -172,7 +173,7 @@ int __main(int argc, char** argv)
           }
           return extrema_filtered;
         };
-    const auto corners = select(cornerness);
+    const auto corners = select(cornerness, cornerness_adaptive_thres);
 
     // Calculate the optical flow.
     flow_estimator.update_image(frame_gray);
