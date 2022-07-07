@@ -58,7 +58,7 @@ namespace DO { namespace Sara {
     if (camera_sigma < scale_initial)
     {
       const auto sigma = sqrt(square(scale_initial) - square(camera_sigma));
-      I = deriche_blur(I, sigma);
+      I = gaussian(I, sigma);
     }
 
     // Deduce the maximum number of octaves.
@@ -124,14 +124,37 @@ namespace DO { namespace Sara {
     auto& cornerness = _harris;
 
     G = Sara::gaussian_pyramid(I, _pyr_params);
-    cornerness = harris_cornerness_pyramid(I, _kappa, _pyr_params);
+    cornerness = G;
+    for (auto o = 0; o < cornerness.octave_count(); ++o)
+    {
+      for (auto s = 0; s < cornerness.scale_count_per_octave(); ++s)
+      {
+        static const auto scale_factor = 1 / std::sqrt(2.f);
+        const auto& sigma_I = G.scale_relative_to_octave(s);
+        const auto& sigma_D = sigma_I * scale_factor;
 
+        auto M = G(s, o)
+                     .compute<Gradient>()
+                     .compute<SecondMomentMatrix>()
+                     .compute<Gaussian>(sigma_I);
+
+        std::transform(M.begin(), M.end(), cornerness(s, o).begin(),
+                       [this](const auto& m) {
+                         return m.determinant() - _kappa * pow(m.trace(), 2);
+                       });
+
+        // Rescale the cornerness function.
+        cornerness(s, o).flat_array() *= sigma_D * sigma_D;
+      }
+    }
+
+    static constexpr auto preallocated_size = static_cast<int>(1e4);
     auto corners = vector<OERegion>{};
-    corners.reserve(int(1e4));
+    corners.reserve(preallocated_size);
     if (scale_octave_pairs)
     {
       scale_octave_pairs->clear();
-      scale_octave_pairs->reserve(int(1e4));
+      scale_octave_pairs->reserve(preallocated_size);
     }
 
     for (auto o = 0; o < cornerness.octave_count(); ++o)

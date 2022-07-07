@@ -116,8 +116,11 @@ auto __main(int argc, char** argv) -> int
 
     sara::tic();
     sara::from_rgb8_to_gray32f(video_frame, frame_gray);
-    sara::reduce(frame_gray, frame_gray_ds);
     sara::toc("Grayscale conversion");
+
+    sara::tic();
+    sara::scale(frame_gray.compute<sara::Gaussian>(1.2f), frame_gray_ds);
+    sara::toc("Downsample");
 
 #ifdef ADAPTIVE_THRESHOLD
     sara::tic();
