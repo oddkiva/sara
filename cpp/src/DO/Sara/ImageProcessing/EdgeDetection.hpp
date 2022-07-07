@@ -45,30 +45,37 @@ namespace DO::Sara {
   {
     auto edges = Image<uint8_t>{grad_mag.sizes()};
     edges.flat_array().fill(0);
-#pragma omp parallel for collapse(2)
-    for (auto y = 1; y < grad_mag.height() - 1; ++y)
+
+    const auto w = grad_mag.width();
+    const auto h = grad_mag.height();
+    const auto wh = w * h;
+
+#pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
     {
-      for (auto x = 1; x < grad_mag.width() - 1; ++x)
-      {
-        const auto& grad_curr = grad_mag(x, y);
-        if (grad_curr < low_thres)
-          continue;
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+      if (x == 0 || x == w - 1 || y == 0 || y == h - 1)
+        continue;
 
-        const auto& theta = grad_ori(x, y);
-        const Vector2d p = Vector2i(x, y).cast<double>();
-        const Vector2d d = Vector2f{cos(theta), sin(theta)}.cast<double>();
-        const Vector2d p0 = p - d;
-        const Vector2d p2 = p + d;
-        const auto grad_prev = interpolate(grad_mag, p0);
-        const auto grad_next = interpolate(grad_mag, p2);
+      const auto& grad_curr = grad_mag(x, y);
+      if (grad_curr < low_thres)
+        continue;
 
-        const auto is_max = grad_curr > grad_prev &&  //
-                            grad_curr > grad_next;
-        if (!is_max)
-          continue;
+      const auto& theta = grad_ori(x, y);
+      const Vector2d p = Vector2i(x, y).cast<double>();
+      const Vector2d d = Vector2f{cos(theta), sin(theta)}.cast<double>();
+      const Vector2d p0 = p - d;
+      const Vector2d p2 = p + d;
+      const auto grad_prev = interpolate(grad_mag, p0);
+      const auto grad_next = interpolate(grad_mag, p2);
 
-        edges(x, y) = grad_curr > high_thres ? 255 : 127;
-      }
+      const auto is_max = grad_curr > grad_prev &&  //
+                          grad_curr > grad_next;
+      if (!is_max)
+        continue;
+
+      edges(x, y) = grad_curr > high_thres ? 255 : 127;
     }
     return edges;
   }
@@ -556,7 +563,7 @@ namespace DO::Sara {
       {
         const auto p = Eigen::Vector2i{x, y};
         if (!is_edgel(p))
-            continue;
+          continue;
 
         // Find its corresponding node in the disjoint set.
         const auto node_p = index(p);
