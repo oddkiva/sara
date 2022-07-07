@@ -544,12 +544,12 @@ auto __main(int argc, char** argv) -> int
 
   auto corner_count = Eigen::Vector2i{};
   if (argc < 4)
-    // corner_count << 7, 12;
-    corner_count << 5, 7;
+    corner_count << 7, 12;
+  // corner_count << 5, 7;
   else
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
-  const auto downscale_factor = argc < 5 ? 1 : std::atoi(argv[4]);
+  const auto downscale_factor = argc < 5 ? 2 : std::atoi(argv[4]);
   static constexpr auto sigma = 1.4f;
   static constexpr auto k = 6;
   static const auto radius = 6 / downscale_factor;
@@ -623,15 +623,6 @@ auto __main(int argc, char** argv) -> int
                    [&grad_f](const auto& j) -> sara::Junction<float> {
                      const auto w = grad_f.width();
                      const auto h = grad_f.height();
-                     const auto in_image_domain =
-                         radius <= j.p.x() && j.p.x() < w - radius &&  //
-                         radius <= j.p.y() && j.p.y() < h - radius;
-                     if (!in_image_domain)
-                     {
-                       throw std::runtime_error{"That can't be!!!"};
-                       return {j.p.template cast<float>(), j.score};
-                     }
-
                      const auto p = sara::refine_junction_location_unsafe(
                          grad_f, j.position(), radius);
                      return {p, j.score};
@@ -649,15 +640,21 @@ auto __main(int argc, char** argv) -> int
       const Eigen::Vector2f jri = jr.p * downscale_factor;
 
       sara::draw_circle(video_frame_copy, jri, radius, sara::Magenta8, 3);
-      sara::fill_circle(video_frame_copy, jri.x(), jri.y(), 1, sara::Red8);
+      sara::fill_circle(     //
+          video_frame_copy,  //
+          static_cast<int>(std::round(jri.x())),
+          static_cast<int>(std::round(jri.y())),  //
+          1, sara::Red8);
     }
 
     sara::display(video_frame_copy);
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);
 
-    const auto found =
-        graph.grow(f, sigma, downscale_factor, edge_map, corner_count, radius);
+    const auto found = graph.grow(f,                        //
+                                  sigma, downscale_factor,  //
+                                  edge_map,                 //
+                                  corner_count, radius);
     if (found)
       ++found_count;
 

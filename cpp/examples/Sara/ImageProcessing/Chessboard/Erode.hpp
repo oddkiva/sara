@@ -26,17 +26,22 @@ namespace DO::Sara {
   inline auto binary_erode_3x3(const ImageView<std::uint8_t>& src,
                                ImageView<std::uint8_t>& dst) -> void
   {
-#pragma omp parallel for collapse(2)
-    for (auto y = 1; y < src.height() - 1; ++y)
+    const auto w = src.width();
+    const auto h = src.height();
+    const auto wh = w * h;
+#pragma omp parallel for
+    for (auto xy = 1; xy < wh; ++xy)
     {
-      for (auto x = 1; x < src.width() - 1; ++x)
-      {
-        auto val = src(x, y) == 0;
-        for (auto v = -1; v <= 1; ++v)
-          for (auto u = -1; u <= 1; ++u)
-            val = val && src(x + u, y + v) == 0;
-        dst(x, y) = val ? 0 : 255;
-      }
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+      if (x == 0 || x == w - 1 || y == 0 || y == h - 1)
+        continue;
+
+      auto val = src(x, y) == 0;
+      for (auto v = -1; v <= 1; ++v)
+        for (auto u = -1; u <= 1; ++u)
+          val = val && src(x + u, y + v) == 0;
+      dst(x, y) = val ? 0 : 255;
     }
   }
 

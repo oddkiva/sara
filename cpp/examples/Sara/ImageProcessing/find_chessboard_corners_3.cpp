@@ -82,7 +82,7 @@ auto __main(int argc, char** argv) -> int
   //
   // Blur parameter before gradient calculation.
   const auto sigma_D =
-      argc < 3 ? std::sqrt(std::pow(1.6f, 2) - 1) : std::stof(argv[2]);
+      argc < 3 ? std::sqrt(std::pow(1.6f, 2.f) - 1) : std::stof(argv[2]);
   // Integration domain of the second moment.
   const auto sigma_I = argc < 4 ? 3.f : std::stof(argv[3]);
   // Threshold parameter.
