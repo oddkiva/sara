@@ -89,16 +89,19 @@ auto __main(int argc, char** argv) -> int
   const auto kappa = argc < 5 ? 0.04f : std::stof(argv[4]);
   const auto cornerness_adaptive_thres = argc < 6 ? 1e-5f : std::stof(argv[5]);
 
-  static constexpr auto nms_radius = 10;
+  // Corner filtering.
+  const auto nms_radius = argc < 7 ? 10 : std::stoi(argv[6]);
   static constexpr auto grad_adaptive_thres = 2e-2f;
-  static constexpr auto tolerance_parameter = 0.f;
 
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
   auto frame_number = -1;
 
   auto frame_gray = sara::Image<float>{video_frame.sizes()};
+  auto frame_gray_blurred = sara::Image<float>{video_frame.sizes()};
   auto frame_gray_ds = sara::Image<float>{video_frame.sizes() / 2};
+  auto grad_f_norm = sara::Image<float>{video_frame.sizes()};
+  auto grad_f_ori = sara::Image<float>{video_frame.sizes()};
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
   auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
 
@@ -116,11 +119,16 @@ auto __main(int argc, char** argv) -> int
 
     sara::tic();
     sara::from_rgb8_to_gray32f(video_frame, frame_gray);
-    sara::reduce(frame_gray, frame_gray_ds);
     sara::toc("Grayscale conversion");
+
+    sara::tic();
+    sara::apply_gaussian_filter(frame_gray, frame_gray_blurred, 1.2f);
+    sara::scale(frame_gray_blurred, frame_gray_ds);
+    sara::toc("Downscale");
 
 #ifdef ADAPTIVE_THRESHOLD
     sara::tic();
+    static constexpr auto tolerance_parameter = 0.f;
     sara::gaussian_adaptive_threshold(frame_gray, 32.f, 3.f,
                                       tolerance_parameter, segmentation_map);
     sara::toc("Adaptive thresholding");
@@ -134,14 +142,14 @@ auto __main(int argc, char** argv) -> int
     }
     sara::toc("Erosion 3x3");
 #else
-    const auto f = frame_gray.compute<sara::Gaussian>(1.2f);
-    auto grad_f_norm = sara::Image<float>{f.sizes()};
-    auto grad_f_ori = sara::Image<float>{f.sizes()};
-    sara::gradient_in_polar_coordinates(f, grad_f_norm, grad_f_ori);
+    sara::tic();
+    sara::gradient_in_polar_coordinates(frame_gray_blurred, grad_f_norm,
+                                        grad_f_ori);
     const auto grad_max = grad_f_norm.flat_array().maxCoeff();
     const auto grad_thres = grad_adaptive_thres * grad_max;
     auto edge_map = sara::suppress_non_maximum_edgels(
         grad_f_norm, grad_f_ori, 2 * grad_thres, grad_thres);
+#  pragma omp parallel for
     for (auto e = edge_map.begin(); e != edge_map.end(); ++e)
       if (*e == 127)
         *e = 0;
@@ -156,7 +164,7 @@ auto __main(int argc, char** argv) -> int
         kappa                                                       //
     );
     auto corners = select(cornerness, cornerness_adaptive_thres);
-    // sara::nms(corners, cornerness.sizes(), nms_radius);
+    sara::nms(corners, cornerness.sizes(), nms_radius);
     sara::toc("Corner detection");
 
 #ifdef ADAPTIVE_THRESHOLD

@@ -71,7 +71,7 @@ auto __main(int argc, char** argv) -> int
   auto f = sara::Image<float>{video_frame.sizes()};
   auto f_conv = sara::Image<float>{video_frame.sizes()};
 
-// #define ADAPTIVE_THRESHOLDING
+#define ADAPTIVE_THRESHOLDING
 #ifdef ADAPTIVE_THRESHOLDING
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
   static constexpr auto tolerance_parameter = 0.f;
