@@ -242,15 +242,17 @@ int __main(int argc, char** argv)
       if (show_features)
       {
         const auto& fcurr = sara::features(keys_curr);
+        const auto num_features = static_cast<int>(fcurr.size());
 #pragma omp parallel for
-        for (size_t i = 0; i < fcurr.size(); ++i)
+        for (auto i = 0; i < num_features; ++i)
           sara::draw(frame_rgb, fcurr[i], sara::Cyan8);
       }
     }
     else
     {
+      const auto num_matches = static_cast<int>(matches.size());
 #pragma omp parallel for
-      for (size_t i = 0; i < matches.size(); ++i)
+      for (auto i = 0; i < num_matches; ++i)
       {
         if (show_features)
         {
