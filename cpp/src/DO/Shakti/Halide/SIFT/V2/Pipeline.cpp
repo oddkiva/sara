@@ -592,7 +592,7 @@ namespace DO::Shakti::HalideBackend::v2 {
 
   auto SiftPyramidPipeline::octave_scaling_factor(int o) const -> float
   {
-    return std::pow(2, o);
+    return std::pow(2.f, static_cast<float>(o));
   }
 
   auto SiftPyramidPipeline::input_rescaled_view() -> Sara::ImageView<float>

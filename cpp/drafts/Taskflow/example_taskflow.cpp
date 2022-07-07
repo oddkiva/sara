@@ -5,7 +5,13 @@
 #include <drafts/Taskflow/DisplayTask.hpp>
 #include <drafts/Taskflow/SafeQueue.hpp>
 
+#ifdef _WIN32
+#pragma warning(push, 0)
+#endif
 #include <taskflow/taskflow.hpp>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 
 namespace sara = DO::Sara;

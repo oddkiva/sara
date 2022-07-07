@@ -20,6 +20,10 @@
 #  pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 
+#ifdef _WIN32
+#  pragma warning(push, 0)
+#endif
+
 #include <Halide.h>
 
 #ifdef __GNUC__
@@ -28,4 +32,8 @@
 
 #ifdef __clang__
 #  pragma clang diagnostic pop
+#endif
+
+#ifdef _WIN32
+#  pragma warning(pop)
 #endif
