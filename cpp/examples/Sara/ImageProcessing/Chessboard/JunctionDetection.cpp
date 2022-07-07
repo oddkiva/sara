@@ -25,32 +25,32 @@ namespace DO::Sara {
 
     const auto w = image.width();
     const auto h = image.height();
+    const auto wh = w * h;
 
-#pragma omp parallel for collapse(2)
-    for (auto y = 0; y < image.height(); ++y)
+#pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
     {
-      for (auto x = 0; x < image.width(); ++x)
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+      const auto in_valid_domain = r <= x && x < w - r &&  //
+                                   r <= y && y < h - r;
+      if (!in_valid_domain)
+        continue;
+
+      auto score = float{};
+
+      const auto p = Eigen::Vector2i{x, y};
+
+      for (auto v = -r; v <= r; ++v)
       {
-        const auto in_valid_domain = r <= x && x < w - r &&  //
-                                     r <= y && y < h - r;
-        if (!in_valid_domain)
-          continue;
-
-        auto score = float{};
-
-        const auto p = Eigen::Vector2i{x, y};
-
-        for (auto v = -r; v <= r; ++v)
+        for (auto u = -r; u <= r; ++u)
         {
-          for (auto u = -r; u <= r; ++u)
-          {
-            const auto q = Eigen::Vector2i{x + u, y + v};
-            score += square((q - p).cast<float>().dot(gradients(q)));
-          }
+          const auto q = Eigen::Vector2i{x + u, y + v};
+          score += square((q - p).cast<float>().dot(gradients(q)));
         }
-
-        junction_map(x, y) = score;
       }
+
+      junction_map(x, y) = score;
     }
 
     return junction_map;
@@ -62,13 +62,27 @@ namespace DO::Sara {
     auto junctions = std::vector<Junction<int>>{};
 
     static const auto is_local_min = LocalExtremum<std::less_equal, float>{};
+
+    const auto& r = radius;
     const auto w = junction_map.width();
     const auto h = junction_map.height();
+    const auto wh = w * h;
 
-    for (int y = radius; y < h - radius; ++y)
-      for (int x = radius; x < w - radius; ++x)
-        if (is_local_min(x, y, junction_map))
-          junctions.push_back({Eigen::Vector2i(x, y), junction_map(x, y)});
+#pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+      const auto in_valid_domain = r <= x && x < w - r &&  //
+                                   r <= y && y < h - r;
+      if (!in_valid_domain)
+        continue;
+      if (is_local_min(x, y, junction_map))
+      {
+#pragma omp critical
+        junctions.push_back({Eigen::Vector2i(x, y), junction_map(x, y)});
+      }
+    }
 
     return junctions;
   }
