@@ -20,13 +20,18 @@ int main(int argc, char** argv)
 
 int __main(int argc, char** argv)
 {
+#ifdef _WIN32
+  const auto video_path = sara::select_video_file_from_dialog_box();
+  if (video_path.empty())
+    return 1;
+#else
   if (argc < 2)
   {
     std::cerr << "Usage: " << argv[0] << "  VIDEO_FILEPATH" << std::endl;
     return 1;
   }
-
-  const auto video_path = argv[1];
+  const auto video_path = std::string{argv[1]};
+#endif
   auto video_stream = sara::VideoStream{video_path};
   auto video_frame = video_stream.frame();
   auto video_frame_gray = sara::Image<float>{video_stream.sizes()};
