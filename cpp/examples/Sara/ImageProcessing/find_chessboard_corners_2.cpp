@@ -62,7 +62,6 @@ auto __main(int argc, char** argv) -> int
   if (argc < 2)
     return 1;
   const auto video_file = std::string{argv[1]};
-
 #endif
 
   auto video_stream = sara::VideoStream{video_file};
@@ -72,7 +71,7 @@ auto __main(int argc, char** argv) -> int
   auto f = sara::Image<float>{video_frame.sizes()};
   auto f_conv = sara::Image<float>{video_frame.sizes()};
 
-#define ADAPTIVE_THRESHOLDING
+// #define ADAPTIVE_THRESHOLDING
 #ifdef ADAPTIVE_THRESHOLDING
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
   static constexpr auto tolerance_parameter = 0.f;
@@ -141,8 +140,10 @@ auto __main(int argc, char** argv) -> int
     for (const auto& [label, points] : regions)
     {
       auto good = false;
+#ifdef ADAPTIVE_THRESHOLDING
       if (segmentation_map(points.front()) != 0)
         continue;
+#endif
 
       auto ch = std::vector<Eigen::Vector2d>{};
 
