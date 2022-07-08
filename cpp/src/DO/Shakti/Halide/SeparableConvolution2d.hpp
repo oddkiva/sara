@@ -47,7 +47,7 @@ namespace DO::Shakti::HalideBackend {
 
     src_buffer.set_host_dirty();
     separable_convolution_2d(src_buffer, kernel_buffer, dst_buffer,
-                             kernel.size(), kernel_shift);
+                             static_cast<int>(kernel.size()), kernel_shift);
     dst_buffer.copy_to_host();
   }
 

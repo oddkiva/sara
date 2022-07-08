@@ -17,7 +17,13 @@
 #include <DO/Sara/Core/Tensor.hpp>
 
 #if defined(__APPLE__) || defined(_WIN32)
+#  ifdef _WIN32
+#    pragma warning(push, 0)
+#endif
 #  include <H5Cpp.h>
+#ifdef _WIN32
+#    pragma warning(pop)
+#endif
 #else
 #  include <hdf5/serial/H5Cpp.h>
 #endif

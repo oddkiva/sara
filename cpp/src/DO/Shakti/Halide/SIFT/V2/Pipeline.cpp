@@ -572,7 +572,7 @@ namespace DO::Shakti::HalideBackend::v2 {
     auto& descriptors = Sara::descriptors(keys);
     descriptors.resize(num_features, 128);
     auto dmat = descriptors.matrix();
-    auto current_row = 0;
+    auto current_row = Eigen::Index{};
     for (auto o = 0u; o < octaves.size(); ++o)
     {
       const auto& octave = octaves[o];
