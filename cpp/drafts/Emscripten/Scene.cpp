@@ -80,7 +80,7 @@ auto Scene::initialize(const sara::ImageView<sara::Rgb8>& image_view) -> void
 
   // Read the image from the disk.
   auto image = sara::Image<sara::Rgb8>{image_view};
-  _image_sizes << image.width(), image.height();
+  _image_sizes = image.sizes().cast<float>();
   // Flip vertically so that the image data matches OpenGL image coordinate
   // system.
   sara::flip_vertically(image);
@@ -117,7 +117,7 @@ auto Scene::initialize(const sara::ImageView<sara::Rgb8>& image_view) -> void
   // clang-format on
 
   const auto row_bytes = [](const sara::TensorView_<float, 2>& data) {
-    return data.size(1) * sizeof(float);
+    return static_cast<GLsizei>(data.size(1) * sizeof(float));
   };
   const auto float_pointer = [](int offset) {
     return reinterpret_cast<void*>(offset * sizeof(float));

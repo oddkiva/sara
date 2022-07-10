@@ -221,5 +221,7 @@ auto LineRenderer::render(const ImagePlaneRenderer::ImageTexture& image_plane,
 
   // Select the vertex array descriptor.
   glBindVertexArray(lines._vao);
-  glDrawElements(GL_TRIANGLES, lines._triangle_index_count, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES,
+                 static_cast<GLsizei>(lines._triangle_index_count),
+                 GL_UNSIGNED_INT, 0);
 }
