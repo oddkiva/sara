@@ -17,6 +17,7 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include "Chessboard/CircularProfileExtractor.hpp"
 
 namespace sara = DO::Sara;
 
@@ -96,6 +97,43 @@ struct LukasKanadeOpticalFlowEstimator
 };
 
 
+auto localize_zero_crossings(const Eigen::ArrayXf& profile, int num_bins)
+    -> std::vector<float>
+{
+  auto zero_crossings = std::vector<float>{};
+  for (auto n = Eigen::Index{}; n < profile.size(); ++n)
+  {
+    const auto ia = n;
+    const auto ib = (n + Eigen::Index{1}) % profile.size();
+
+    const auto& a = profile[ia];
+    const auto& b = profile[ib];
+
+    static constexpr auto pi = static_cast<float>(M_PI);
+    const auto angle_a = ia * 2.f * M_PI / num_bins;
+    const auto angle_b = ib * 2.f * M_PI / num_bins;
+
+    const auto ea = Eigen::Vector2d{std::cos(angle_a),  //
+                                    std::sin(angle_a)};
+    const auto eb = Eigen::Vector2d{std::cos(angle_b),  //
+                                    std::sin(angle_b)};
+
+    // TODO: this all could have been simplified.
+    const Eigen::Vector2d dir = (ea + eb) * 0.5;
+    auto angle = std::atan2(dir.y(), dir.x());
+    if (angle < 0)
+      angle += 2 * pi;
+
+    // A zero-crossing is characterized by a negative sign between
+    // consecutive intensity values.
+    if (a * b < 0)
+      zero_crossings.push_back(static_cast<float>(angle));
+  }
+
+  return zero_crossings;
+}
+
+
 int __main(int argc, char** argv)
 {
   using namespace std::string_literals;
@@ -107,12 +145,16 @@ int __main(int argc, char** argv)
   auto frame = video_stream.frame();
 
   // Preprocessing parameters.
-  constexpr auto downscale_factor = 2;
+  const auto downscale_factor = argc < 3 ? 1 : std::stoi(argv[2]);
+  const auto cornerness_adaptive_thres = argc < 4 ? 0 : std::stof(argv[3]);
 
   // Harris cornerness parameters.
-  const auto sigma_D = std::sqrt(std::pow(1.6f, 2) - 1);
-  const auto sigma_I = 3.f;
-  const auto kappa = 0.04f;
+  //
+  // Blur parameter before gradient calculation.
+  static const auto sigma_D = std::sqrt(std::pow(1.6f, 2) - 1);
+  // Integration domain of the second moment.
+  static const auto sigma_I = 3.f;
+  static const auto kappa = 0.04f;
 
   // Lukas-Kanade optical flow parameters.
   auto flow_estimator = LukasKanadeOpticalFlowEstimator<>{};
@@ -146,9 +188,20 @@ int __main(int argc, char** argv)
     );
 
     // Select the local maxima of the cornerness functions.
-    auto select = [](const auto& cornerness) {
+    static constexpr auto select = [](const sara::ImageView<float>& cornerness,
+                                      const sara::ImageView<float>& f,
+                                      const float cornerness_adaptive_thres) {
+      static constexpr auto r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
+
       const auto extrema = sara::local_maxima(cornerness);
-      constexpr auto& r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
+
+#ifdef CHESSBOARD_CORNER_FILTERING
+      auto profile_extractor = CircularProfileExtractor{};
+      profile_extractor.circle_radius = r;
+#endif
+
+      const auto cornerness_max = cornerness.flat_array().maxCoeff();
+      const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
 
       auto extrema_filtered = std::vector<sara::Point2i>{};
       extrema_filtered.reserve(extrema.size());
@@ -158,12 +211,26 @@ int __main(int argc, char** argv)
             (r <= p.x() && p.x() < cornerness.width() - r) &&
             (r <= p.y() && p.y() < cornerness.height() - r);
 
-        if (cornerness(p) > 0 && in_image_domain)
+        if (!in_image_domain)
+          continue;
+
+#ifdef CHESSBOARD_CORNER_FILTERING
+        const auto profile = profile_extractor(f, p.cast<double>());
+        const auto zero_crossings = localize_zero_crossings(  //
+            profile,                                          //
+            profile_extractor.num_circle_sample_points        //
+        );
+        if (zero_crossings.size() != 4u)
+          continue;
+#endif
+
+        if (cornerness(p) > cornerness_thres)
           extrema_filtered.emplace_back(p);
       }
       return extrema_filtered;
     };
-    const auto corners = select(cornerness);
+    const auto corners =
+        select(cornerness, frame_gray, cornerness_adaptive_thres);
 
     // Calculate the optical flow.
     flow_estimator.update_image(frame_gray);
@@ -174,7 +241,6 @@ int __main(int argc, char** argv)
     // TODO: track the corners with optical flow.
 
     // Draw the sparse flow field.
-    sara::display(frame);
     if (!flow_estimator._I0.empty())
     {
       for (auto i = 0u; i != corners.size(); ++i)
@@ -182,12 +248,11 @@ int __main(int argc, char** argv)
         const auto& v = flow_vectors[i];
         if (std::isnan(v.x()) || std::isnan(v.y()))
           continue;
-        if (v.squaredNorm() < 0.25f)
-          continue;
 
         const Eigen::Vector2f pa = corners[i].cast<float>() * downscale_factor;
         const Eigen::Vector2f pb = pa + flow_vectors[i] * 10;
 
+#ifdef SHOW_FLOW
         const auto Y = std::clamp(flow_vectors[i].norm() / 5.f, 0.f, 1.f);
         const auto U = std::clamp(flow_vectors[i].x() / 5, -1.f, 1.f) * 0.5f;
         const auto V = std::clamp(flow_vectors[i].y() / 5, -1.f, 1.f) * 0.5f;
@@ -198,15 +263,21 @@ int __main(int argc, char** argv)
 
         auto rgb8 = sara::Rgb8{};
         sara::smart_convert_color(rgb32f, rgb8);
+#else
+        const auto rgb8 = sara::Red8;
+#endif
 
         constexpr auto& r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
         const auto& l = (2 * r + 1) * downscale_factor;
         const Eigen::Vector2i tl =
             (pa - Eigen::Vector2f::Ones() * r * downscale_factor).cast<int>();
 
-        sara::draw_rect(tl.x(), tl.y(), l, l, rgb8);
-        sara::draw_arrow(pa, pb, rgb8, 2);
+        sara::draw_rect(frame, tl.x(), tl.y(), l, l, rgb8);
+        sara::draw_arrow(frame, pa, pb, rgb8, 2);
+        sara::fill_circle(frame, int(pa.x() + 0.5f), int(pa.y() + 0.5f), 2,
+                          sara::Green8);
       }
+      sara::display(frame);
     }
   }
 

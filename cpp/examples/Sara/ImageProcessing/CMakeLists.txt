@@ -49,10 +49,11 @@ target_link_libraries(line_segment_detection_example
 
 
 add_library(ChessboardDetection STATIC
-  Chessboard/SaddlePointDetection.hpp
-  Chessboard/SaddlePointDetection.cpp
+  Chessboard/CircularProfileExtractor.hpp
+  Chessboard/Erode.hpp
   Chessboard/JunctionDetection.hpp
-  Chessboard/JunctionDetection.cpp)
+  Chessboard/JunctionDetection.cpp
+  Chessboard/NonMaximumSuppression.hpp)
 set_target_properties(ChessboardDetection
   PROPERTIES
   FOLDER "Libraries")
@@ -62,4 +63,9 @@ sara_add_example(find_chessboard_corners)
 target_link_libraries(find_chessboard_corners PRIVATE ChessboardDetection)
 
 sara_add_example(find_chessboard_corners_2)
-target_link_libraries(find_chessboard_corners PRIVATE ChessboardDetection)
+target_link_libraries(find_chessboard_corners_2 PRIVATE ChessboardDetection)
+
+sara_add_example(find_chessboard_corners_3)
+target_link_libraries(find_chessboard_corners_3 PRIVATE ChessboardDetection)
+
+sara_add_example(find_aruco_marker)

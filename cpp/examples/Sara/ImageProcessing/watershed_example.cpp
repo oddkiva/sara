@@ -40,8 +40,10 @@ auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
   return colors;
 }
 
-GRAPHICS_MAIN()
+auto __main(int argc, char** argv) -> int
 {
+  omp_set_num_threads(omp_get_max_threads());
+
   using namespace std::string_literals;
 
 #ifdef _WIN32
@@ -53,7 +55,11 @@ GRAPHICS_MAIN()
   const auto video_filepath =
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  if (argc < 2)
+    return 1;
+  const auto video_filepath =
+      argc < 2 ? "/home/david/Desktop/Datasets/sfm/Family.mp4"s
+               : std::string{argv[1]};
 #endif
 
   // Input and output from Sara.
@@ -107,4 +113,11 @@ GRAPHICS_MAIN()
   }
 
   return 0;
+}
+
+auto main(int argc, char** argv) -> int
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
 }

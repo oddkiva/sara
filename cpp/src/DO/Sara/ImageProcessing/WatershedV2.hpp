@@ -32,42 +32,46 @@ namespace DO::Sara { namespace v2 {
     };
 
     tic();
-    auto ds = v2::DisjointSets(image.size());
+    auto ds = v2::DisjointSets(static_cast<std::uint32_t>(image.size()));
 
+    const auto w = image.width();
+    const auto h = image.height();
+    const auto wh = w * h;
 #pragma omp parallel for
-    for (auto y = 0; y < image.height(); ++y)
+    for (auto xy = 0; xy < wh; ++xy)
     {
-      for (auto x = 0; x < image.width(); ++x)
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      // Find its corresponding node in the disjoint set.
+      const auto p = Eigen::Vector2i{x, y};
+      const auto node_p = index(p);
+
+      const Vector3f& color_p = image(p).cast<float>();
+
+      for (auto v = 0; v <= 1; ++v)
       {
-        // Find its corresponding node in the disjoint set.
-        const auto p = Eigen::Vector2i{x, y};
-        const auto node_p = index(p);
-
-        const Vector3f& color_p = image(p).cast<float>();
-
-        for (auto v = 0; v <= 1; ++v)
+        for (auto u = 0; u <= 1; ++u)
         {
-          for (auto u = 0; u <= 1; ++u)
+          if (u == 0 && v == 0)
+            continue;
+
+          const Eigen::Vector2i& n = p + Eigen::Vector2i{u, v};
+          // Boundary conditions.
+          if (n.x() >= image.width() || n.y() >= image.height())
+            continue;
+
+          const Vector3f& color_n = image(n).cast<float>();
+
+          const auto dist = (color_p - color_n).squaredNorm();
+
+          // Merge component of p and component of n if their colors are
+          // close.
+          if (dist < squared_color_threshold)
           {
-            if (u == 0 && v == 0)
-              continue;
-
-            const Eigen::Vector2i& n = p + Eigen::Vector2i{u, v};
-            // Boundary conditions.
-            if (n.x() >= image.width() || n.y() >= image.height())
-              continue;
-
-            const Vector3f& color_n = image(n).cast<float>();
-
-            const auto dist = (color_p - color_n).squaredNorm();
-
-            // Merge component of p and component of n if their colors are
-            // close.
-            if (dist < squared_color_threshold)
-            {
-              const auto node_n = index(n);
-              ds.join(node_p, node_n);
-            }
+            const auto node_n = index(n);
+#pragma omp critical
+            ds.join(node_p, node_n);
           }
         }
       }
@@ -76,14 +80,15 @@ namespace DO::Sara { namespace v2 {
 
     tic();
     auto regions = std::vector<std::vector<Point2i>>(image.size());
-    for (auto y = 0; y < image.height(); ++y)
+#pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
     {
-      for (auto x = 0; x < image.width(); ++x)
-      {
-        const auto p = Eigen::Vector2i{x, y};
-        const auto index_p = index(p);
-        regions[ds.parent(index_p)].push_back(p);
-      }
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+      const auto p = Eigen::Vector2i{x, y};
+      const auto index_p = index(p);
+#pragma omp critical
+      regions[ds.parent(index_p)].push_back(p);
     }
     toc("Region Collection V2");
 

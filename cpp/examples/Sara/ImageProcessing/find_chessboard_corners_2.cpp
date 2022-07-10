@@ -13,14 +13,20 @@
 
 #include <omp.h>
 
+#include <map>
 #include <unordered_map>
 
+#include <DO/Sara/Core/TicToc.hpp>
+#include <DO/Sara/DisjointSets/TwoPassConnectedComponents.hpp>
 #include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
+#include <DO/Sara/ImageProcessing/Watershed.hpp>
 #include <DO/Sara/VideoIO.hpp>
+
+
+#include "Chessboard/Erode.hpp"
 
 
 namespace sara = DO::Sara;
@@ -56,7 +62,6 @@ auto __main(int argc, char** argv) -> int
   if (argc < 2)
     return 1;
   const auto video_file = std::string{argv[1]};
-
 #endif
 
   auto video_stream = sara::VideoStream{video_file};
@@ -69,7 +74,7 @@ auto __main(int argc, char** argv) -> int
 #define ADAPTIVE_THRESHOLDING
 #ifdef ADAPTIVE_THRESHOLDING
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
-  static constexpr auto tolerance_parameter = 0.0f;
+  static constexpr auto tolerance_parameter = 0.f;
 #else
   static const auto color_threshold = std::sqrt(sara::square(2.f) * 3);
 #endif
@@ -98,21 +103,48 @@ auto __main(int argc, char** argv) -> int
                                       segmentation_map);
     sara::toc("Adaptive thresholding");
 
-    sara::display(segmentation_map);
+    sara::tic();
+    auto segmentation_map_eroded = segmentation_map;
+    for (auto i = 0; i < 1; ++i)
+    {
+      sara::binary_erode_3x3(segmentation_map, segmentation_map_eroded);
+      segmentation_map.swap(segmentation_map_eroded);
+    }
+    sara::toc("Erosion 3x3");
+
+    sara::tic();
+    const auto labels = sara::two_pass_connected_components(  //
+        segmentation_map.convert<int>());
+    auto regions = std::map<int, std::vector<Eigen::Vector2i>>{};
+    for (auto y = 0; y < labels.height(); ++y)
+    {
+      for (auto x = 0; x < labels.width(); ++x)
+      {
+        const auto label = labels(x, y);
+        regions[label].emplace_back(x, y);
+      }
+    }
+    sara::toc("Connected components");
 #else
     // Watershed.
     sara::tic();
     const auto regions = sara::color_watershed(video_frame, color_threshold);
     sara::toc("Watershed");
-
-    sara::display(video_frame);
+#endif
 
     // Display the good regions.
     const auto colors = mean_colors(regions, video_frame);
     auto partitioning = sara::Image<sara::Rgb8>{video_frame.sizes()};
+    partitioning.flat_array().fill(sara::Red8);
+    // sara::display(partitioning);
     for (const auto& [label, points] : regions)
     {
       auto good = false;
+#ifdef ADAPTIVE_THRESHOLDING
+      if (segmentation_map(points.front()) != 0)
+        continue;
+#endif
+
       auto ch = std::vector<Eigen::Vector2d>{};
 
       if (points.size() > 50)
@@ -122,7 +154,7 @@ auto __main(int argc, char** argv) -> int
         std::transform(points.begin(), points.end(), points_2d.begin(),
                        [](const auto& p) { return p.template cast<double>(); });
         ch = sara::graham_scan_convex_hull(points_2d);
-        ch = sara::ramer_douglas_peucker(ch, 5.);
+        // ch = sara::ramer_douglas_peucker(ch, 1.);
         if (!ch.empty())
         {
           const auto area_1 = static_cast<double>(points.size());
@@ -133,18 +165,24 @@ auto __main(int argc, char** argv) -> int
       }
 
       // Show big segments only.
-      for (const auto& p : points)
-        partitioning(p) = good ? colors.at(label) : sara::Red8;
       if (good)
       {
-        for (auto i = 0u; i < ch.size(); ++i)
-          sara::draw_line(ch[i], ch[(i + 1) % ch.size()], sara::Red8, 3);
+        const auto color = colors.at(label);
+        for (const auto& p : points)
+          partitioning(p) = color;
+
+        // sara::display(partitioning);
+        // for (auto i = 0u; i < ch.size(); ++i)
+        // {
+        //   const auto& a = ch[i];
+        //   const auto& b = ch[(i + 1) % ch.size()];
+        //   sara::draw_line(a, b, color, 3);
+        // }
+        // sara::get_key();
       }
     }
-    //  sara::display(partitioning);
-    sara::get_key();
-#endif
 
+    sara::display(partitioning);
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);
   }
