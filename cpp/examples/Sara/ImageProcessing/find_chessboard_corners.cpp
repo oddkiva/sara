@@ -205,17 +205,21 @@ auto sample_edge_gradient(const Eigen::Vector2f& a, const Eigen::Vector2f& b,
 
   for (auto i = 0; i < num_samples; ++i)
   {
+    const auto in_valid_domain = [&image](const auto& p) {
+      return 1 <= p.x() && p.x() < image.width() - 1 &&  //
+             1 <= p.y() && p.y() < image.height() - 1;
+    };
     const Eigen::Vector2d ai =
         (a + ((i + 1) * t + 2.5f * n) * sigma).cast<double>();
     const Eigen::Vector2d bi =
         (a + ((i + 1) * t - 2.5f * n) * sigma).cast<double>();
+    if (!in_valid_domain(ai) || !in_valid_domain(bi))
+      continue;
     const auto intensity_ai = static_cast<float>(sara::interpolate(image, ai));
     const auto intensity_bi = static_cast<float>(sara::interpolate(image, bi));
 
     intensity_samples.col(i) << intensity_ai, intensity_bi;
   }
-
-  // TODO: calculate statistics: mean and std-dev for a robust inference.
 
   return intensity_samples;
 }
@@ -373,8 +377,7 @@ struct KnnGraph
     return _vertices[_neighbors(k, v)];
   };
 
-  inline auto compute_affinity_scores(const sara::ImageView<float>& image,
-                                      const float sigma) -> void
+  inline auto compute_affinity_scores() -> void
   {
     const auto n = _vertices.size();
     const auto k = _neighbors.rows();
@@ -412,8 +415,8 @@ struct KnnGraph
     }
   }
 
-  inline auto grow(const sara::ImageView<float>& image, const float sigma,
-                   const int downscale_factor,
+  inline auto grow(const sara::ImageView<float>& image,  //
+                   const float sigma, const int downscale_factor,
                    sara::ImageView<std::uint8_t>& edge_map,
                    const Eigen::Vector2i& corner_count,
                    const int dilation_radius) -> bool
@@ -455,7 +458,8 @@ struct KnnGraph
       for (auto nn = 0; nn < k; ++nn)
       {
         const auto& v = _neighbors(nn, best.vertex);
-        if (v == -1)
+        static constexpr auto undefined_neighbor = -1;
+        if (v == undefined_neighbor)
         {
           SARA_DEBUG << "SKIPPING INVALID NEIGHBOR..." << std::endl;
           continue;
@@ -489,15 +493,22 @@ struct KnnGraph
           diff = amean - lambda * adev - bmean - lambda * bdev;
           good_edge = diff > thres;
         }
+        if (!good_edge)
+          continue;
 
+#define ROBUST_EDGE_VERIFICATION
+#ifdef ROBUST_EDGE_VERIFICATION
         const auto path = find_edge_path(pu, pv, edge_map, dilation_radius);
         const auto good_edge2 = !path.empty();
-
-        if (!good_edge || !good_edge2)
+        if (!good_edge2)
           continue;
 
         for (const auto& p : path)
           sara::fill_circle(s * p.x(), s * p.y(), 2, sara::Blue8);
+#else
+        sara::draw_line(s * pu.x(), s * pu.y(), s * pv.x(), s * pv.y(),
+                        sara::Blue8, 2);
+#endif
 
         if (!visited[v])
         {
@@ -550,9 +561,9 @@ auto __main(int argc, char** argv) -> int
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
   const auto downscale_factor = argc < 5 ? 2 : std::atoi(argv[4]);
-  static constexpr auto sigma = 1.4f;
+  static constexpr auto sigma_D = 1.6f;
+  static const auto sigma_I = 6.f / downscale_factor;
   static constexpr auto k = 6;
-  static const auto radius = 6 / downscale_factor;
   static constexpr auto grad_adaptive_thres = 2e-2f;
 
   auto found_count = 0;
@@ -570,11 +581,11 @@ auto __main(int argc, char** argv) -> int
     SARA_CHECK(frame_number);
 
     sara::tic();
-    auto f = video_frame.convert<float>().compute<sara::Gaussian>(sigma);
+    auto f = video_frame.convert<float>().compute<sara::Gaussian>(sigma_D);
     if (downscale_factor > 1)
       f = sara::downscale(f, downscale_factor);
     const auto grad_f = f.compute<sara::Gradient>();
-    const auto junction_map = sara::junction_map(f, grad_f, radius);
+    const auto junction_map = sara::junction_map(f, grad_f, sigma_I);
     auto grad_f_norm = sara::Image<float>{f.sizes()};
     auto grad_f_ori = sara::Image<float>{f.sizes()};
     sara::gradient_in_polar_coordinates(f, grad_f_norm, grad_f_ori);
@@ -595,10 +606,10 @@ auto __main(int argc, char** argv) -> int
     // Detect the junctions.
     sara::tic();
     {
-      junctions = sara::extract_junctions(junction_map, radius);
-      sara::nms(junctions, f.sizes(), radius * 2);
+      junctions = sara::extract_junctions(junction_map, sigma_I);
+      sara::nms(junctions, f.sizes(), sigma_I * 2);
       filter_junctions(junctions, circular_profiles, f, grad_f_norm, grad_thres,
-                       radius);
+                       sigma_I);
     }
     sara::toc("junction");
 
@@ -612,23 +623,23 @@ auto __main(int argc, char** argv) -> int
     sara::toc("knn-graph");
 
     sara::tic();
-    graph.compute_affinity_scores(f, sigma);
+    graph.compute_affinity_scores();
     sara::toc("affinity scores");
 
     // TODO: calculate the k-nn graph on the refined junctions.
+    sara::tic();
     auto junctions_refined = std::vector<sara::Junction<float>>{};
     junctions_refined.reserve(junctions.size());
     std::transform(junctions.begin(), junctions.end(),
                    std::back_inserter(junctions_refined),
                    [&grad_f](const auto& j) -> sara::Junction<float> {
-                     const auto w = grad_f.width();
-                     const auto h = grad_f.height();
                      const auto p = sara::refine_junction_location_unsafe(
-                         grad_f, j.position(), radius);
+                         grad_f, j.position(), sigma_I);
                      return {p, j.score};
                    });
+    sara::toc("refine junction");
 
-
+    sara::tic();
     video_frame_copy = edge_map.convert<sara::Rgb8>();
     video_frame_copy.flat_array() /= sara::Rgb8{8, 8, 8};
     if (downscale_factor > 1)
@@ -639,22 +650,24 @@ auto __main(int argc, char** argv) -> int
 
       const Eigen::Vector2f jri = jr.p * downscale_factor;
 
-      sara::draw_circle(video_frame_copy, jri, radius, sara::Magenta8, 3);
+      sara::draw_circle(video_frame_copy, jri, sigma_D, sara::Magenta8, 3);
       sara::fill_circle(     //
           video_frame_copy,  //
           static_cast<int>(std::round(jri.x())),
           static_cast<int>(std::round(jri.y())),  //
           1, sara::Red8);
     }
-
     sara::display(video_frame_copy);
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);
+    sara::toc("display junctions");
 
-    const auto found = graph.grow(f,                        //
-                                  sigma, downscale_factor,  //
-                                  edge_map,                 //
-                                  corner_count, radius);
+    sara::tic();
+    const auto found = graph.grow(f,                          //
+                                  sigma_I, downscale_factor,  //
+                                  edge_map,                   //
+                                  corner_count, sigma_I);
+    sara::toc("grow");
     if (found)
       ++found_count;
 

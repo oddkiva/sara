@@ -35,8 +35,8 @@ namespace DO::Sara {
   };
 
   auto junction_map(const ImageView<float>& image,
-                    const ImageView<Eigen::Vector2f>& gradients, const int r)
-      -> Image<float>;
+                    const ImageView<Eigen::Vector2f>& gradients,
+                    const float sigma) -> Image<float>;
 
   auto extract_junctions(const ImageView<float>& junction_map, const int radius)
       -> std::vector<Junction<int>>;
