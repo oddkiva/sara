@@ -67,7 +67,7 @@ auto update_rotation()
                      ypr_deg[1] * static_cast<float>(M_PI) / 180.f,
                      ypr_deg[2] * static_cast<float>(M_PI) / 180.f) *
       P;
-  const auto t = Eigen::Vector3f(0, 0, 1.51);
+  const auto t = Eigen::Vector3f(0, 0, 1.51f);
 
   auto& grid_renderer = MetricGridRenderer::instance();
   auto& line_batches = grid_renderer._lines;
