@@ -36,35 +36,32 @@ BOOST_AUTO_TEST_CASE(test_adaptive_thresholding)
     1, 0.7, 1, 1, 0, 0, 0.1, 0.0, 0;
   // clang-format on
 
-  auto kernel_2d = sara::Image<float>{7, 7};
-  kernel_2d.flat_array().fill(1.f);
-
-  static constexpr auto tolerance_parameter = 0.2f;
+  static constexpr auto sigma = 9.f;
+  static constexpr auto gauss_truncate = 4.f;
+  static constexpr auto tolerance_parameter = 0.f;
 
   auto binary_mask = sara::Image<std::uint8_t>{src.sizes()};
-  sara::adaptive_thresholding(src, kernel_2d, binary_mask, tolerance_parameter);
+  sara::gaussian_adaptive_threshold(src, sigma, gauss_truncate, tolerance_parameter, binary_mask);
 
   // Keep printing the result so that later on we can still understand the data
   // when we want to perfect the unit test.
   std::cout << binary_mask.matrix().cast<int>() << std::endl;
 
   auto corner_mask = sara::Image<std::uint8_t>{src.sizes()};
+  static constexpr auto v = 255u;
   // clang-format off
   corner_mask.matrix() <<
+    0, 0, 0, 0, 0, 0, 0, v, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, v, v, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 0, 0, 0, 0, 0;
+    0, 0, 0, 0, 0, 0, v, 0, 0,
+    v, v, v, v, 0, 0, 0, 0, 0,
+    v, v, v, v, 0, 0, 0, 0, 0,
+    v, v, v, v, 0, 0, 0, 0, 0,
+    v, v, v, v, 0, 0, 0, 0, 0;
   // clang-format on
 
-  auto res = sara::Image<std::uint8_t>{src.sizes()};
-  res.flat_array() = binary_mask.flat_array() * corner_mask.flat_array();
-
   // Flimsy check but it is better than nothing.
-  BOOST_CHECK(res.matrix() == corner_mask.matrix());
+  BOOST_CHECK(binary_mask.matrix() == corner_mask.matrix());
 }
