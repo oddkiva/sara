@@ -16,10 +16,11 @@
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
+#include <DO/Sara/ImageProcessing/EdgeDetection.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
+#include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 
@@ -40,12 +41,17 @@ auto __main(int argc, char** argv) -> int
   const auto video_file = std::string{argv[1]};
 #endif
 
+  const auto grad_adaptive_thres = argc < 3 ? 2e-2f : std::stof(argv[2]);
+
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
   auto video_frame_copy = sara::Image<sara::Rgb8>{};
   auto frame_number = -1;
 
   auto f = sara::Image<float>{video_frame.sizes()};
+  auto f_blurred = sara::Image<float>{video_frame.sizes()};
+  auto grad_f_norm = sara::Image<float>{video_frame.sizes()};
+  auto grad_f_ori = sara::Image<float>{video_frame.sizes()};
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
 
   static constexpr auto tolerance_parameter = 0.f;
@@ -67,12 +73,31 @@ auto __main(int argc, char** argv) -> int
     sara::from_rgb8_to_gray32f(video_frame, f);
     sara::toc("Grayscale conversion");
 
+#ifdef ADAPTIVE_THRESHOLD
     sara::tic();
+    static constexpr auto tolerance_parameter = 0.f;
     sara::gaussian_adaptive_threshold(f, 32.f, 3.f, tolerance_parameter,
                                       segmentation_map);
     sara::toc("Adaptive thresholding");
 
     sara::display(segmentation_map);
+#else
+    sara::tic();
+    sara::apply_gaussian_filter(f, f_blurred, 1.2f, 4.f);
+    sara::gradient_in_polar_coordinates(f_blurred, grad_f_norm, grad_f_ori);
+    const auto grad_max = grad_f_norm.flat_array().maxCoeff();
+    const auto grad_thres = grad_adaptive_thres * grad_max;
+    auto edge_map = sara::suppress_non_maximum_edgels(
+        grad_f_norm, grad_f_ori, 2 * grad_thres, grad_thres);
+#  pragma omp parallel for
+    for (auto e = edge_map.begin(); e != edge_map.end(); ++e)
+      if (*e == 127)
+        *e = 0;
+    sara::toc("Feature maps");
+
+    sara::display(edge_map);
+#endif
+
     sara::get_key();
   }
 
