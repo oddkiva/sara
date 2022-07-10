@@ -20,6 +20,7 @@
 #include <drafts/OpenCL/GL.hpp>
 
 #include <DO/Sara/Core/Math/Rotation.hpp>
+#include <DO/Sara/ImageProcessing/Resize.hpp>
 #include <DO/Sara/ImageIO.hpp>
 
 #ifdef __EMSCRIPTEN__
@@ -241,6 +242,11 @@ auto initialize_image_texture()
 {
 #ifdef __EMSCRIPTEN__
   const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
+#elif defined _WIN32
+  const auto image =
+      sara::resize(sara::imread<sara::Rgb8>(
+                       "C:/Users/David/Desktop/GitLab/sara/data/stinkbug.png"),
+                   {1920, 1080});
 #else
   const auto image = sara::imread<sara::Rgb8>(
       (program_dir_path / "assets/image-omni.png").string());
