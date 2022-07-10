@@ -89,7 +89,6 @@ auto __main(int argc, char** argv) -> int
     const auto grad_thres = grad_adaptive_thres * grad_max;
     auto edge_map = sara::suppress_non_maximum_edgels(
         grad_f_norm, grad_f_ori, 2 * grad_thres, grad_thres);
-#  pragma omp parallel for
     for (auto e = edge_map.begin(); e != edge_map.end(); ++e)
       if (*e == 127)
         *e = 0;
