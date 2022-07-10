@@ -562,7 +562,7 @@ auto __main(int argc, char** argv) -> int
 
   const auto downscale_factor = argc < 5 ? 2 : std::atoi(argv[4]);
   static constexpr auto sigma_D = 1.6f;
-  static const auto sigma_I = 6.f / downscale_factor;
+  static const auto sigma_I = argc < 6 ? 6.f / downscale_factor : std::atof(argv[5]);
   static constexpr auto k = 6;
   static constexpr auto grad_adaptive_thres = 2e-2f;
 

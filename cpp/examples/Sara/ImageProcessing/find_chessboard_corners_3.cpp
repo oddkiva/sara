@@ -92,6 +92,7 @@ auto __main(int argc, char** argv) -> int
   // Corner filtering.
   const auto nms_radius = argc < 7 ? 10 : std::stoi(argv[6]);
   static constexpr auto grad_adaptive_thres = 2e-2f;
+  static constexpr auto downscale_factor = 2;
 
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
@@ -99,7 +100,8 @@ auto __main(int argc, char** argv) -> int
 
   auto frame_gray = sara::Image<float>{video_frame.sizes()};
   auto frame_gray_blurred = sara::Image<float>{video_frame.sizes()};
-  auto frame_gray_ds = sara::Image<float>{video_frame.sizes() / 2};
+  auto frame_gray_ds =
+      sara::Image<float>{video_frame.sizes() / downscale_factor};
   auto grad_f_norm = sara::Image<float>{video_frame.sizes()};
   auto grad_f_ori = sara::Image<float>{video_frame.sizes()};
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
@@ -174,8 +176,8 @@ auto __main(int argc, char** argv) -> int
 #endif
     for (const auto& p : corners)
     {
-      sara::fill_circle(display, 2 * p.coords.x(), 2 * p.coords.y(), 4,
-                        sara::Magenta8);
+      sara::fill_circle(display, downscale_factor * p.coords.x(),
+                        downscale_factor * p.coords.y(), 4, sara::Magenta8);
       // sara::draw_circle(display, 2 * p.coords.x(), 2 * p.coords.y(), 6,
       //                   sara::Magenta8, 3);
     }
