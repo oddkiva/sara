@@ -54,8 +54,6 @@ auto __main(int argc, char** argv) -> int
   auto grad_f_ori = sara::Image<float>{video_frame.sizes()};
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
 
-  static constexpr auto tolerance_parameter = 0.f;
-
   while (video_stream.read())
   {
     ++frame_number;
