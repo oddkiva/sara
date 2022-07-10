@@ -12,25 +12,26 @@
 //! @example
 
 #ifdef _WIN32
-# include <windows.h>
+#  define NOMINMAX
+#  include <windows.h>
 #endif
 
 #if defined(__APPLE__)
-# include <OpenCL/cl_gl.h>
+#  include <OpenCL/cl_gl.h>
 #else
-# include <CL/cl_gl.h>
-# include <GL/glew.h>
+#  include <CL/cl_gl.h>
+#  include <GL/glew.h>
 #endif
 
 #include <GLFW/glfw3.h>
 
-#include <drafts/OpenCL/Core/CommandQueue.hpp>
-#include <drafts/OpenCL/Core/DeviceImage.hpp>
-#include <drafts/OpenCL/GL/PixelBuffer.hpp>
-
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
+
+#include <drafts/OpenCL/Core/CommandQueue.hpp>
+#include <drafts/OpenCL/Core/DeviceImage.hpp>
+#include <drafts/OpenCL/GL/PixelBuffer.hpp>
 
 
 #ifdef _WIN32
@@ -66,8 +67,14 @@ int main()
 
   // Create a 2D pixel buffer.
   auto cpu_image =
+#ifdef _WIN32
+      imread<float>(
+          "C:/Users/David/Desktop/GitLab/sara/data/sunflowerField.jpg")
+          .compute<Resize>(Vector2i{640, 480});
+#else
       imread<float>("/home/david/Desktop/Datasets/sfm/herzjesu_int/0000.png")
           .compute<Resize>(Vector2i{640, 480});
+#endif
   SARA_DEBUG << "Read image OK" << std::endl;
   SARA_DEBUG << "cpu_image.sizes() = " << cpu_image.sizes().transpose()
              << std::endl;
@@ -112,7 +119,7 @@ int main()
 
   // Create a pixel buffer from the host image.
   GL::PixelBuffer<float> pixel_buffer(cpu_image.width(), cpu_image.height(),
-                                  cpu_image.data());
+                                      cpu_image.data());
   SARA_DEBUG << "Pixel buffer OK" << std::endl;
 
   // Flush OpenGL operations before using OpenCL.
@@ -142,8 +149,8 @@ int main()
   // Execute the kernel.
   size_t work_group_size[] = {size_t(cpu_image.width()),
                               size_t(cpu_image.height())};
-  command_queue.enqueue_nd_range_kernel(
-    kernel, 2, nullptr, work_group_size, nullptr);
+  command_queue.enqueue_nd_range_kernel(kernel, 2, nullptr, work_group_size,
+                                        nullptr);
 
   // Read the results.
   command_queue.enqueue_read_image(dst_image, cpu_image.data());
@@ -161,7 +168,8 @@ int main()
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glDrawPixels(cpu_image.width(), cpu_image.height(), GL_LUMINANCE, GL_FLOAT, 0);
+    glDrawPixels(cpu_image.width(), cpu_image.height(), GL_LUMINANCE, GL_FLOAT,
+                 0);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

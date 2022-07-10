@@ -11,7 +11,16 @@
 
 #pragma once
 
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable : 4267)
+#pragma warning(disable : 4334)
+#pragma warning(disable : 4996)
+#endif
 #include <flann/flann.hpp>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #include <DO/Sara/Defines.hpp>
 

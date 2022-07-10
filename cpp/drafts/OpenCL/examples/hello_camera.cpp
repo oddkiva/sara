@@ -11,7 +11,10 @@
 
 //! @example
 
-#include <drafts/OpenCL/GL.hpp>
+#ifdef _WIN32
+#  define NOMINMAX
+#  include <windows.h>
+#endif
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/HDF5.hpp>
@@ -22,9 +25,7 @@
 
 #include <DO/Kalpana/Math/Projection.hpp>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
+#include <drafts/OpenCL/GL.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -58,7 +59,6 @@ inline auto init_glfw_boilerplate()
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-
 }
 
 inline auto init_glew_boilerplate()
@@ -88,7 +88,8 @@ struct Camera
 {
   Vector3f position{10.f * Vector3f::UnitY()};
   Vector3f front{-Vector3f::UnitZ()};
-  Vector3f up{Vector3f::UnitY()}; Vector3f right;
+  Vector3f up{Vector3f::UnitY()};
+  Vector3f right;
   Vector3f world_up{Vector3f::UnitY()};
 
   float yaw{YAW};
@@ -150,14 +151,14 @@ struct Camera
   {
     Vector3f front1;
 
-    front1 << cos(yaw * M_PI / 180) * cos(pitch * M_PI / 180.f),
-              sin(pitch * M_PI / 180.f),
-              sin(yaw * M_PI / 180.f) * cos(pitch * M_PI / 180.f);
+    static constexpr auto pi = static_cast<float>(M_PI);
+    front1 << cos(yaw * pi / 180) * cos(pitch * pi / 180.f),
+        sin(pitch * pi / 180.f),
+        sin(yaw * pi / 180.f) * cos(pitch * pi / 180.f);
     front = front1.normalized();
 
     right = front.cross(world_up).normalized();
-    right =
-        AngleAxisf(roll * float(M_PI) / 180, front).toRotationMatrix() * right;
+    right = AngleAxisf(roll * pi / 180, front).toRotationMatrix() * right;
     right.normalize();
 
     up = right.cross(front).normalized();
@@ -197,9 +198,9 @@ auto move_camera_from_keyboard(GLFWwindow* window, Camera& camera, Time& time)
     camera.move_right(time.delta_time);
 
   if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS)
-    camera.no_head_movement(-time.delta_time); // CCW
+    camera.no_head_movement(-time.delta_time);  // CCW
   if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
-    camera.no_head_movement(+time.delta_time); // CW
+    camera.no_head_movement(+time.delta_time);  // CW
 
   if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS)
     camera.yes_head_movement(+time.delta_time);
@@ -400,7 +401,7 @@ struct CheckerBoardObject
           v_mat.block(4 * ij, 3, 4, 3).setOnes();
         else if (i % 2 == 1 and j % 2 == 0)
           v_mat.block(4 * ij, 3, 4, 3).setOnes();
-        else // (i % 2 == 1 and j % 2 == 0)
+        else  // (i % 2 == 1 and j % 2 == 0)
           v_mat.block(4 * ij, 3, 4, 3).setZero();
 
         t_mat.block(2 * ij, 0, 2, 3) <<
@@ -415,7 +416,7 @@ struct CheckerBoardObject
     v_mat.leftCols(3) *= scale;
 
     const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return data.size(1) * sizeof(float);
+      return static_cast<GLsizei>(data.size(1) * sizeof(float));
     };
     const auto float_pointer = [](int offset) {
       return reinterpret_cast<void*>(offset * sizeof(float));
@@ -536,7 +537,7 @@ int main()
       glfwCreateWindow(width, height, "Hello Point Cloud", nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
-  //glfwSetCursorPosCallback(window, move_camera_from_mouse);
+  // glfwSetCursorPosCallback(window, move_camera_from_mouse);
 
   init_glew_boilerplate();
 
@@ -589,14 +590,15 @@ int main()
 
     // Draw the checkerboard.
     checkerboard.shader_program.use();
-    checkerboard.shader_program.set_uniform_matrix4f(
-        "transform", transform.matrix().data());
+    checkerboard.shader_program.set_uniform_matrix4f("transform",
+                                                     transform.matrix().data());
     checkerboard.shader_program.set_uniform_matrix4f("view",
                                                      view_matrix.data());
     checkerboard.shader_program.set_uniform_matrix4f("projection",
                                                      projection.data());
     glBindVertexArray(checkerboard.vao);
-    glDrawElements(GL_TRIANGLES, checkerboard.triangles.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, checkerboard.triangles.size(), GL_UNSIGNED_INT,
+                   0);
 
 
     // Rotate the point cloud.

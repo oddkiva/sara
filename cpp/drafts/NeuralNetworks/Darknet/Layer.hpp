@@ -299,7 +299,7 @@ namespace DO::Sara::Darknet {
           const auto precomputed =
               bn_layer->weights.scales(n) /
               std::sqrt(double(bn_layer->weights.rolling_variance(n)) + eps);
-          weights.w[n].flat_array() *= precomputed;
+          weights.w[n].flat_array() *= static_cast<float>(precomputed);
         }
 
         bn_layer.reset(nullptr);

@@ -79,7 +79,7 @@ auto MyGLFW::initialize(int width, int height) -> bool
   glfwGetMonitorContentScale(monitor, &xscale, &yscale);
   if (xscale > 1 || yscale > 1)
   {
-    high_dpi_scale_factor = xscale;
+    high_dpi_scale_factor = static_cast<int>(xscale);
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
   }
 #elif __APPLE__

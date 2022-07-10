@@ -572,7 +572,7 @@ namespace DO::Shakti::HalideBackend::v2 {
     auto& descriptors = Sara::descriptors(keys);
     descriptors.resize(num_features, 128);
     auto dmat = descriptors.matrix();
-    auto current_row = 0;
+    auto current_row = Eigen::Index{};
     for (auto o = 0u; o < octaves.size(); ++o)
     {
       const auto& octave = octaves[o];
@@ -592,7 +592,7 @@ namespace DO::Shakti::HalideBackend::v2 {
 
   auto SiftPyramidPipeline::octave_scaling_factor(int o) const -> float
   {
-    return std::pow(2, o);
+    return std::pow(2.f, static_cast<float>(o));
   }
 
   auto SiftPyramidPipeline::input_rescaled_view() -> Sara::ImageView<float>

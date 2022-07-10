@@ -14,8 +14,8 @@
 #include <drafts/OpenCL/GL.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/ImageProcessing/Resize.hpp>
 
 #include <iostream>
 #include <map>
@@ -70,6 +70,13 @@ auto initialize_image_textures()
       sara::imread<sara::Rgb8>("assets/image-omni.png"),
       sara::imread<sara::Rgb8>("assets/image-pinhole.png"),
   };
+#elif defined _WIN32
+  auto images = std::array<sara::Image<sara::Rgb8>, 2>{};
+  for (auto i = 0; i < 2; ++i)
+    images[i] = sara::resize(
+        sara::imread<sara::Rgb8>(
+            "C:/Users/David/Desktop/GitLab/sara/data/stinkbug.png"),
+        {1920, 1080});
 #else
   const auto images = std::array<sara::Image<sara::Rgb8>, 2>{
       sara::imread<sara::Rgb8>(

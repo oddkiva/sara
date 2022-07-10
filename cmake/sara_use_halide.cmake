@@ -136,7 +136,8 @@ function (shakti_halide_library_v2)
         FOLDER "Libraries/Shakti/Halide/${generator_NAME}")
     endif ()
   endforeach ()
-
+  target_link_options(${generator_NAME}.runtime INTERFACE
+    "$<$<CXX_COMPILER_ID:MSVC>:/ignore:4006>")
   # I want C++17 here.
   target_compile_features(${generator_NAME}.generator
     PRIVATE

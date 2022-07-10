@@ -236,8 +236,14 @@ auto test_on_image(int argc, char** argv) -> void
   sara::display(image);
   const auto dets = detect_objects(image, model);
   for (const auto& det : dets)
-    sara::draw_rect(det.box(0), det.box(1), det.box(2), det.box(3),
+  {
+    static constexpr auto int_round = [](const float v) {
+      return static_cast<int>(std::round(v));
+    };
+    sara::draw_rect(int_round(det.box(0)), int_round(det.box(1)),
+                    int_round(det.box(2)), int_round(det.box(3)),  //
                     sara::Green8, 2);
+  }
   sara::get_key();
 }
 
@@ -256,7 +262,7 @@ auto test_on_video(int argc, char** argv) -> void
   }
 
   const auto video_filepath = argv[1];
-  auto video_stream = sara::VideoStream {video_filepath};
+  auto video_stream = sara::VideoStream{video_filepath};
   auto frame = video_stream.frame();
 
   const auto data_dir_path =
@@ -283,7 +289,7 @@ auto test_on_video(int argc, char** argv) -> void
     if (frames_read % (skip + 1) != 0)
       continue;
 
-    sara::tic ();
+    sara::tic();
     const auto frame32f = video_stream.frame().convert<sara::Rgb32f>();
     sara::toc("Color conversion");
 

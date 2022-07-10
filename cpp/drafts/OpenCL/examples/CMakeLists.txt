@@ -23,11 +23,10 @@ foreach (file ${example_FILES})
     $<$<PLATFORM_ID:Darwin>:
       GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED>)
 
-  if (MSVC)
-    add_custom_command(TARGET ${filename} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${GLEW_DLL}"
-      "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/glew32.dll")
+  if (NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(${filename}
+      PRIVATE
+      DO_KALPANA_STATIC)
   endif ()
 
   set_property(TARGET ${filename} PROPERTY FOLDER "Tutorials/OpenGL")
