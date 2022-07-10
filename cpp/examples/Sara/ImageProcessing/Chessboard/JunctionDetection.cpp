@@ -17,7 +17,8 @@
 namespace DO::Sara {
 
   auto junction_map(const ImageView<float>& image,
-                    const ImageView<Eigen::Vector2f>& gradients, const int r)
+                    const ImageView<Eigen::Vector2f>& gradients,
+                    const float sigma)
       -> Image<float>
   {
     auto junction_map = Image<float>{image.sizes()};
@@ -26,6 +27,10 @@ namespace DO::Sara {
     const auto w = image.width();
     const auto h = image.height();
     const auto wh = w * h;
+
+    const auto kernel = make_gaussian_kernel(sigma);
+    const auto r = kernel.size() / 2;
+    const auto normalization_factor = 1 / square(kernel.sum());
 
 #pragma omp parallel for
     for (auto xy = 0; xy < wh; ++xy)
@@ -46,11 +51,12 @@ namespace DO::Sara {
         for (auto u = -r; u <= r; ++u)
         {
           const auto q = Eigen::Vector2i{x + u, y + v};
-          score += square((q - p).cast<float>().dot(gradients(q)));
+          const auto w = kernel(v + r) * kernel(u + r);
+          score += w * square((q - p).cast<float>().dot(gradients(q)));
         }
       }
 
-      junction_map(x, y) = score;
+      junction_map(x, y) = score * normalization_factor;
     }
 
     return junction_map;

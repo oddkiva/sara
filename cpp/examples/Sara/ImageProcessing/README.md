@@ -1,12 +1,11 @@
 # Chessboard Detection
 
-- Hessian Detection: very good idea but turns out to be quite tricky to filter
-  and set the appropriate threshold for every case.
+- The vanilla junction detector works very well in practice.
 
-- Otsu binarization method works OK, but too unstable w.r.t. illumination
-  changes.
+- Harris' corner detection works very well.
 
-  - See the implementation in `drafts/ImageProcessing/Otsu.hpp`.
+- Hessian Detection: it's a good idea, but it turns out to be quite tricky to
+  filter and set the appropriate threshold for every case.
 
 - Color-based grouping via watershed works, but unstable w.r.t. illumination
   changes
