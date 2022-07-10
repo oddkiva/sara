@@ -83,7 +83,7 @@ GRAPHICS_MAIN()
 
 #ifdef _WIN32
   const auto video_filepath =
-      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+      "C:/Users/David/Desktop/GOPR0542.MP4"s;
 #elif __APPLE__
   const auto video_filepath =
       "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
