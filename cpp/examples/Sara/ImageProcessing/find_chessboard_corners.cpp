@@ -379,11 +379,10 @@ struct KnnGraph
     }
   }
 
-  inline auto grow(const sara::ImageView<float>& image,  //
-                   const float sigma, const int downscale_factor,
-                   sara::ImageView<std::uint8_t>& edge_map,
+  inline auto grow(sara::ImageView<std::uint8_t>& edge_map,
                    const Eigen::Vector2i& corner_count,
-                   const int dilation_radius) -> bool
+                   const int downscale_factor, const int dilation_radius)
+      -> bool
   {
     if (_vertices.empty())
     {
@@ -430,12 +429,12 @@ struct KnnGraph
         }
         const auto& pv = _vertices[v].position();
 
-        const auto path = find_edge_path(pu, pv, edge_map, dilation_radius);
-        const auto good_edge2 = !path.empty();
-        if (!good_edge2)
+        const auto edge_path =
+            find_edge_path(pu, pv, edge_map, dilation_radius);
+        if (edge_path.empty())
           continue;
 
-        for (const auto& p : path)
+        for (const auto& p : edge_path)
           sara::fill_circle(s * p.x(), s * p.y(), 2, sara::Blue8);
 
         if (!visited[v])
@@ -592,10 +591,9 @@ auto __main(int argc, char** argv) -> int
     sara::toc("display junctions");
 
     sara::tic();
-    const auto found = graph.grow(f,                          //
-                                  sigma_I, downscale_factor,  //
-                                  edge_map,                   //
-                                  corner_count, sigma_I);
+    const auto found = graph.grow(edge_map,                        //
+                                  corner_count, downscale_factor,  //
+                                  sigma_I);
     sara::toc("grow");
     if (found)
       ++found_count;
