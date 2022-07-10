@@ -392,7 +392,8 @@ struct KnnGraph
       for (auto nn = 0; nn < k; ++nn)
       {
         const auto v = _neighbors(nn, u);
-        if (v == -1)
+        static constexpr auto undefined_neighbor = -1;
+        if (v == undefined_neighbor)
         {
           _affinity_scores(nn, u) = -std::numeric_limits<float>::max();
           continue;
