@@ -190,41 +190,6 @@ auto k_nearest_neighbors(const std::vector<sara::Junction<T>>& points,
 }
 
 
-auto sample_edge_gradient(const Eigen::Vector2f& a, const Eigen::Vector2f& b,
-                          const float sigma,
-                          const sara::ImageView<float>& image)
-    -> Eigen::MatrixXf
-{
-  const Eigen::Vector2f t = (b - a).normalized();
-  const Eigen::Vector2f n = Eigen::Vector2f{-t.y(), t.x()};
-  const auto num_samples =
-      static_cast<int>(std::floor((b - a).norm() / sigma)) - 1;
-  if (num_samples <= 0)
-    return {};
-  auto intensity_samples = Eigen::MatrixXf{2, num_samples};
-
-  for (auto i = 0; i < num_samples; ++i)
-  {
-    const auto in_valid_domain = [&image](const auto& p) {
-      return 1 <= p.x() && p.x() < image.width() - 1 &&  //
-             1 <= p.y() && p.y() < image.height() - 1;
-    };
-    const Eigen::Vector2d ai =
-        (a + ((i + 1) * t + 2.5f * n) * sigma).cast<double>();
-    const Eigen::Vector2d bi =
-        (a + ((i + 1) * t - 2.5f * n) * sigma).cast<double>();
-    if (!in_valid_domain(ai) || !in_valid_domain(bi))
-      continue;
-    const auto intensity_ai = static_cast<float>(sara::interpolate(image, ai));
-    const auto intensity_bi = static_cast<float>(sara::interpolate(image, bi));
-
-    intensity_samples.col(i) << intensity_ai, intensity_bi;
-  }
-
-  return intensity_samples;
-}
-
-
 auto find_edge_path(const Eigen::Vector2i& a, const Eigen::Vector2i& b,
                     sara::ImageView<std::uint8_t>& edge_map,
                     const int dilation_radius) -> std::vector<Eigen::Vector2i>
@@ -465,38 +430,6 @@ struct KnnGraph
         }
         const auto& pv = _vertices[v].position();
 
-        static constexpr auto thres = 1e-3f;
-        const auto edge_gradients = sample_edge_gradient(
-            pu.template cast<float>(), pv.template cast<float>(), sigma, image);
-
-        const auto N = edge_gradients.cols();
-
-        const auto amean = edge_gradients.row(0).sum() / N;
-        const auto adev = std::sqrt(
-            (edge_gradients.row(0).array() - amean).square().sum() / N);
-
-        const auto bmean = edge_gradients.row(1).sum() / edge_gradients.cols();
-        const auto bdev = std::sqrt(
-            (edge_gradients.row(1).array() - bmean).square().sum() / N);
-
-        auto good_edge = false;
-        auto diff = float{};
-        static constexpr auto lambda = 1.0f;
-        if (amean < bmean)
-        {
-          diff = bmean - lambda * bdev - amean - lambda * adev;
-          good_edge = diff > thres;
-        }
-        else
-        {
-          diff = amean - lambda * adev - bmean - lambda * bdev;
-          good_edge = diff > thres;
-        }
-        if (!good_edge)
-          continue;
-
-#define ROBUST_EDGE_VERIFICATION
-#ifdef ROBUST_EDGE_VERIFICATION
         const auto path = find_edge_path(pu, pv, edge_map, dilation_radius);
         const auto good_edge2 = !path.empty();
         if (!good_edge2)
@@ -504,10 +437,6 @@ struct KnnGraph
 
         for (const auto& p : path)
           sara::fill_circle(s * p.x(), s * p.y(), 2, sara::Blue8);
-#else
-        sara::draw_line(s * pu.x(), s * pu.y(), s * pv.x(), s * pv.y(),
-                        sara::Blue8, 2);
-#endif
 
         if (!visited[v])
         {
@@ -671,10 +600,11 @@ auto __main(int argc, char** argv) -> int
     if (found)
       ++found_count;
 
-    sara::draw_text(80, 200,
-                    std::to_string(found_count) + "/" +
-                        std::to_string(frame_number / 3 + 1),
-                    sara::White8, 60, 0, false, true);
+    const auto detection_rate_text = std::to_string(found_count) + "/" +
+                                     std::to_string(frame_number / 3 + 1);
+    sara::draw_text(80, 200, detection_rate_text, sara::White8, 60, 0, false,
+                    true);
+    SARA_DEBUG << "detection rate = " << detection_rate_text << std::endl;
   }
 
   return 0;
