@@ -388,7 +388,6 @@ struct KnnGraph
     for (auto u = 0u; u < n; ++u)
     {
       const auto fu = _circular_profiles.col(u);
-      const auto pu = _vertices[u].position();
 
       for (auto nn = 0; nn < k; ++nn)
       {
@@ -399,7 +398,6 @@ struct KnnGraph
           continue;
         }
         const auto fv = _circular_profiles.col(v);
-        const auto pv = _vertices[v].position();
 
         auto affinities = Eigen::Matrix4f{};
         for (auto i = 0; i < fu.size(); ++i)
@@ -562,7 +560,8 @@ auto __main(int argc, char** argv) -> int
 
   const auto downscale_factor = argc < 5 ? 2 : std::atoi(argv[4]);
   static constexpr auto sigma_D = 1.6f;
-  static const auto sigma_I = argc < 6 ? 6.f / downscale_factor : std::atof(argv[5]);
+  static const auto sigma_I =
+      argc < 6 ? 6.f / downscale_factor : std::atof(argv[5]);
   static constexpr auto k = 6;
   static constexpr auto grad_adaptive_thres = 2e-2f;
 
