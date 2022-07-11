@@ -163,6 +163,11 @@ auto __main(int argc, char** argv) -> int
       {
         for (auto u = x - r; u <= x + r; ++u)
         {
+          const auto in_image_domain = 0 <= u && u < f.width() &&  //
+                                       0 <= v && v < f.height();
+          if (!in_image_domain)
+            continue;
+
           const auto& label = edge_label(u, v);
           if (label != -1 && visited(corner.coords) == 0)
           {
