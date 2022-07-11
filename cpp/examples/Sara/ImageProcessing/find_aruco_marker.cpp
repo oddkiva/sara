@@ -120,7 +120,7 @@ auto __main(int argc, char** argv) -> int
     sara::display(segmentation_map);
 #else
     sara::tic();
-    sara::apply_gaussian_filter(f, f_blurred, 1.2f, 4.f);
+    sara::apply_gaussian_filter(f, f_blurred, 1.f, 4.f);
     sara::gradient_in_polar_coordinates(f_blurred, grad_f_norm, grad_f_ori);
     const auto grad_max = grad_f_norm.flat_array().maxCoeff();
     const auto grad_thres = grad_adaptive_thres * grad_max;
@@ -135,7 +135,7 @@ auto __main(int argc, char** argv) -> int
     sara::tic();
     const auto M = f_blurred.compute<sara::Gradient>()
                        .compute<sara::SecondMomentMatrix>()
-                       .compute<sara::Gaussian>(2.f);
+                       .compute<sara::Gaussian>(3.f);
     auto cornerness = sara::Image<float>{f_blurred.sizes()};
     std::transform(M.begin(), M.end(), cornerness.begin(),
                    [kappa](const auto& m) {

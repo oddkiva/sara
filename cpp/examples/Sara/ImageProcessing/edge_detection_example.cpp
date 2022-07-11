@@ -99,7 +99,6 @@ int __main(int argc, char** argv)
       angular_threshold      //
   }};
 
-
   auto frames_read = 0;
   while (true)
   {
@@ -134,12 +133,14 @@ int __main(int argc, char** argv)
     tic();
     auto disp = frame.convert<float>().convert<Rgb8>();
     for (const auto& e : edges_simplified)
+    {
       if (e.size() >= 2 && length(e) > 3)
       {
         const auto color = Rgb8(rand() % 255, rand() % 255, rand() % 255);
         draw_polyline(disp, e, color, Eigen::Vector2d{0, 0},
                       static_cast<float>(downscale_factor));
       }
+    }
     display(disp);
     toc("Display");
     get_key();
