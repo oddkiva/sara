@@ -23,7 +23,7 @@
 #include <DO/Kalpana/Math/Projection.hpp>
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 #include <GLFW/glfw3.h>
@@ -58,7 +58,6 @@ inline auto init_glfw_boilerplate()
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-
 }
 
 inline auto init_glew_boilerplate()
@@ -195,7 +194,7 @@ int main()
   auto vertices = make_point_cloud();
 
   const auto row_bytes = [](const TensorView_<float, 2>& data) {
-    return data.size(1) * sizeof(float);
+    return static_cast<GLsizei>(data.size(1) * sizeof(float));
   };
   const auto float_pointer = [](int offset) {
     return reinterpret_cast<void*>(offset * sizeof(float));
@@ -254,9 +253,9 @@ int main()
     // Transform matrix.
     auto transform = Transform<float, 3, Eigen::Projective>{};
     transform.setIdentity();
-    transform.rotate(
-        AngleAxisf(std::pow(1.5, 5) * timer.elapsed_ms() / 10000,
-                   Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
+    transform.rotate(AngleAxisf(
+        static_cast<float>(std::pow(1.5, 5) * timer.elapsed_ms() / 10000),
+        Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
     shader_program.set_uniform_matrix4f("transform", transform.matrix().data());
 
     // View matrix.
