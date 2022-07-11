@@ -98,10 +98,16 @@ namespace DO::Sara {
       }
     }
 
-    const auto dir = std::array<Eigen::Vector2i, 8>{
-        Eigen::Vector2i{1, 0},  Eigen::Vector2i{1, 1},  Eigen::Vector2i{0, 1},
-        Eigen::Vector2i{-1, 1}, Eigen::Vector2i{-1, 0}, Eigen::Vector2i{-1, -1},
-        Eigen::Vector2i{0, -1}, Eigen::Vector2i{1, -1}};
+    static const auto dir = std::array<Eigen::Vector2i, 8>{
+        Eigen::Vector2i{1, 0},    //
+        Eigen::Vector2i{1, 1},    //
+        Eigen::Vector2i{0, 1},    //
+        Eigen::Vector2i{-1, 1},   //
+        Eigen::Vector2i{-1, 0},   //
+        Eigen::Vector2i{-1, -1},  //
+        Eigen::Vector2i{0, -1},   //
+        Eigen::Vector2i{1, -1}    //
+    };
     while (!queue.empty())
     {
       const auto& p = queue.front();
@@ -203,7 +209,7 @@ namespace DO::Sara {
     }
 
     // Neighborhood defined by 8-connectivity.
-    const auto dir = std::array<Eigen::Vector2i, 8>{
+    static const auto dir = std::array<Eigen::Vector2i, 8>{
         Eigen::Vector2i{1, 0},    //
         Eigen::Vector2i{1, 1},    //
         Eigen::Vector2i{0, 1},    //
@@ -311,7 +317,7 @@ namespace DO::Sara {
     }
 
     // Neighborhood defined by 8-connectivity.
-    const auto dir = std::array<Eigen::Vector2i, 8>{
+    static const auto dir = std::array<Eigen::Vector2i, 8>{
         Eigen::Vector2i{1, 0},    //
         Eigen::Vector2i{1, 1},    //
         Eigen::Vector2i{0, 1},    //
@@ -432,7 +438,7 @@ namespace DO::Sara {
     }
 
     // Neighborhood defined by 8-connectivity.
-    const auto dir = std::array<Eigen::Vector2i, 8>{
+    static const auto dir = std::array<Eigen::Vector2i, 8>{
         Eigen::Vector2i{1, 0},    //
         Eigen::Vector2i{1, 1},    //
         Eigen::Vector2i{0, 1},    //
@@ -540,7 +546,7 @@ namespace DO::Sara {
     auto ds = v2::DisjointSets{static_cast<std::uint32_t>(edges.size())};
 
     // Neighborhood defined by 8-connectivity.
-    const auto dir = std::array<Eigen::Vector2i, 8>{
+    static const auto dir = std::array<Eigen::Vector2i, 8>{
         Eigen::Vector2i{1, 0},    //
         Eigen::Vector2i{1, 1},    //
         Eigen::Vector2i{0, 1},    //

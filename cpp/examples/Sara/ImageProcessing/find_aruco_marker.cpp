@@ -18,6 +18,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
+#include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
@@ -130,6 +131,16 @@ auto __main(int argc, char** argv) -> int
       if (*e == 127)
         *e = 0;
     sara::toc("Feature maps");
+
+    sara::tic();
+    const auto edges = sara::connected_components(edge_map);
+    auto edge_label = sara::Image<std::int32_t>{edge_map.sizes()};
+    edge_label.flat_array().fill(-1);
+    for (const auto& [label, e] : edges)
+      for (const auto& p : e)
+        edge_label(p) = label;
+    sara::toc("Edge grouping");
+
 #endif
 
     sara::tic();
@@ -145,11 +156,50 @@ auto __main(int argc, char** argv) -> int
     sara::nms(corners, cornerness.sizes(), nms_radius);
     sara::toc("Corner detection");
 
-    auto disp = edge_map.convert<sara::Rgb8>();
-    for (const auto& p : corners)
-      sara::fill_circle(disp, p.coords.x(), p.coords.y(), 3, sara::Magenta8);
+    auto corners_per_curve = std::map<std::int32_t, std::vector<Corner>>{};
+    auto visited = sara::Image<std::uint8_t>{f.sizes()};
+    visited.flat_array().fill(0);
+    for (const auto& corner : corners)
+    {
+      const auto x = corner.coords.x();
+      const auto y = corner.coords.y();
+      const auto r = nms_radius;
+
+      for (auto v = y - r; v <= y + r; ++v)
+      {
+        for (auto u = x - r; u <= x + r; ++u)
+        {
+          const auto& label = edge_label(u, v);
+          if (label != -1 && visited(corner.coords) == 0)
+          {
+            corners_per_curve[label].push_back(corner);
+            visited(corner.coords) = 1;
+          }
+        }
+      }
+    }
+
+    auto disp = video_frame;
+    for (const auto& [label, edge] : edges)
+    {
+      if (edge.size() < 10)
+        continue;
+
+      auto cs = corners_per_curve.find(label);
+      if (cs == corners_per_curve.end())
+        continue;
+
+      if (cs->second.size() != 4)
+        continue;
+
+      const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
+      std::for_each(edge.begin(), edge.end(),
+                    [&disp, color](const auto& p) { disp(p) = color; });
+
+      for (const auto& p : cs->second)
+        sara::fill_circle(disp, p.coords.x(), p.coords.y(), 3, sara::Magenta8);
+    }
     sara::display(disp);
-    sara::get_key();
   }
 
   return 0;
