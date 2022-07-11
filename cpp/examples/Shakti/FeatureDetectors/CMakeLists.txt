@@ -23,6 +23,7 @@ function(shakti_add_example)
   set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                            ${CMAKE_BINARY_DIR}/bin)
 
+  target_link_libraries(${name} PRIVATE CUDA::cudart)
 endfunction()
 
 file(GLOB SRC_FILES FILES *.cpp *.cu)
