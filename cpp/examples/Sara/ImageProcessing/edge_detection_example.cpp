@@ -142,6 +142,7 @@ int __main(int argc, char** argv)
       }
     display(disp);
     toc("Display");
+    get_key();
 
     tic();
     video_writer.write(frame);

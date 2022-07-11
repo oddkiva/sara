@@ -17,8 +17,9 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <DO/Sara/FeatureDetectors/LineSegmentDetector.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
+#include <DO/Sara/FeatureDetectors/LineSegmentDetector.hpp>
+#include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 
 #include <omp.h>
 
@@ -81,7 +82,8 @@ auto test_on_video()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  // const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // const auto video_filepath =
+  // "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
   const auto video_filepath =
       //"/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
       //"/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
@@ -94,7 +96,8 @@ auto test_on_video()
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
   const auto downscale_factor = 1;
-  auto frame_gray32f = Image<float>{frame.sizes() / downscale_factor};
+  auto f = Image<float>{frame.sizes()};
+  auto f_ds = Image<float>{frame.sizes() / downscale_factor};
 
   // Show the local extrema.
   create_window(frame.sizes() / downscale_factor);
@@ -119,27 +122,29 @@ auto test_on_video()
     }
     ++frames_read;
     if (frames_read % (skip + 1) != 0)
-       continue;
+      continue;
 
     // Preprocess the image.
     {
       // Convert to grayscale
-      frame_gray32f = frame.convert<float>();
+      from_rgb8_to_gray32f(frame, f);
 
       // Blur.
-      inplace_deriche_blur(frame_gray32f, std::sqrt(square(1.6f) - 1));
+      f = f.compute<Gaussian>(std::sqrt(square(1.6f) - 1));
 
       // Downscale.
       if (downscale_factor > 1)
-        frame_gray32f = downscale(frame_gray32f, downscale_factor);
+      {
+        scale(f, f_ds);
+        f_ds.swap(f);
+      }
     }
 
     // Detect the line segments.
-    lsd(frame_gray32f);
-    const auto curve_colors = random_colors(lsd.pipeline.contours);
+    lsd(f);
 
     // Display the fitted lines.
-    display(frame_gray32f);
+    auto disp = f.convert<Rgb8>();
     const auto num_lines = static_cast<int>(lsd.pipeline.line_segments.size());
 #pragma omp parallel for
     for (auto i = 0; i < num_lines; ++i)
@@ -147,10 +152,11 @@ auto test_on_video()
       const auto& [success, l] = lsd.pipeline.line_segments[i];
       if (!success || l.length() < 20)
         continue;
-      draw_line(l.p1(), l.p2(),                              //
-                curve_colors.at(lsd.pipeline.curve_ids[i]),  //
+      draw_line(disp, l.p1().cast<float>(), l.p2().cast<float>(),  //
+                Rgb8(rand() % 255, rand() % 255, rand() % 255),    //
                 /* line_width */ 2);
     }
+    display(disp);
   }
 }
 
