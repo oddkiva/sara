@@ -381,8 +381,8 @@ struct KnnGraph
 
   inline auto grow(sara::ImageView<std::uint8_t>& edge_map,
                    const Eigen::Vector2i& corner_count,
-                   const int downscale_factor, const int dilation_radius)
-      -> bool
+                   [[maybe_unused]] const int downscale_factor,
+                   const int dilation_radius) -> bool
   {
     if (_vertices.empty())
     {
