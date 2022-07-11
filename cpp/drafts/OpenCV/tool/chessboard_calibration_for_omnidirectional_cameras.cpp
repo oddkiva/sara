@@ -408,7 +408,7 @@ private:
 GRAPHICS_MAIN()
 {
 // #define SAMSUNG_GALAXY_J6
-#define GOPRO7_SUPERVIEW
+// #define GOPRO7_SUPERVIEW
 
   const auto video_filepath =
 #ifdef SAMSUNG_GALAXY_J6

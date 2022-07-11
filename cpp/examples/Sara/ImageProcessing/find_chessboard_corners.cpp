@@ -391,7 +391,10 @@ struct KnnGraph
     }
 
     const auto k = _neighbors.rows();
+#define DEBUG_GROW
+#ifdef DEBUG_GROW
     const auto s = downscale_factor;
+#endif
 
     auto vs = std::vector<VertexScore>{};
     vs.reserve(_vertices.size());
@@ -415,8 +418,9 @@ struct KnnGraph
       q.pop();
       ++num_corners_added;
 
-      // Debug.
+#ifdef DEBUG_GROW
       sara::fill_circle(s * pu.x(), s * pu.y(), 8, sara::Green8);
+#endif
 
       for (auto nn = 0; nn < k; ++nn)
       {
@@ -434,16 +438,19 @@ struct KnnGraph
         if (edge_path.empty())
           continue;
 
+#ifdef DEBUG_GROW
         for (const auto& p : edge_path)
           sara::fill_circle(s * p.x(), s * p.y(), 2, sara::Blue8);
+#endif
 
         if (!visited[v])
         {
           visited[v] = 1;
           q.push(vs[v]);
 
-          // Debug.
+#ifdef DEBUG_GROW
           sara::fill_circle(s * pv.x(), s * pv.y(), 8, sara::Red8);
+#endif
         }
       }
     }
