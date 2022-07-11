@@ -85,8 +85,8 @@ auto __main(int argc, char** argv) -> int
   const auto kappa = argc < 4 ? 0.04f : std::stof(argv[3]);
   const auto cornerness_adaptive_thres = argc < 5 ? 1e-4f : std::stof(argv[4]);
   const auto nms_radius = argc < 6 ? 2 : std::stoi(argv[5]);
-  static constexpr auto sigma_D = 1.f;
-  static constexpr auto sigma_I = 2.f;
+  static constexpr auto sigma_D = 0.8f;
+  static constexpr auto sigma_I = 2.0f;
 
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
@@ -173,7 +173,7 @@ auto __main(int argc, char** argv) -> int
       }
     }
 
-    auto disp = f_blurred.convert<sara::Rgb8>();
+    auto disp = edge_map.convert<sara::Rgb8>();
     for (const auto& [label, edge] : edges)
     {
       if (edge.size() < 10)
@@ -201,11 +201,12 @@ auto __main(int argc, char** argv) -> int
       const auto quad = sara::graham_scan_convex_hull(q);
 
       // Convex hull based filtering
-      // TODO: improve because it is a bit fiddly...
+      const auto inter = sara::sutherland_hodgman(ch, quad);
+      const auto area_inter = sara::area(inter);
       const auto area_ch = sara::area(ch);
       const auto area_q = sara::area(quad);
-      const auto error = std::abs(area_ch - area_q) / area_q;
-      if (error > 0.3)
+      const auto iou = area_inter / (area_ch + area_q - area_inter);
+      if (iou < 0.5)
         continue;
 
       std::for_each(edge.begin(), edge.end(),
