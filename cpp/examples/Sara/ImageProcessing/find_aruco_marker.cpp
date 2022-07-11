@@ -16,15 +16,49 @@
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
-#include <DO/Sara/ImageProcessing/EdgeDetection.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include "Chessboard/NonMaximumSuppression.hpp"
+
 
 namespace sara = DO::Sara;
+
+
+struct Corner
+{
+  Eigen::Vector2i coords;
+  float score;
+  auto position() const -> const Eigen::Vector2i&
+  {
+    return coords;
+  }
+  auto operator<(const Corner& other) const -> bool
+  {
+    return score < other.score;
+  }
+};
+
+// Select the local maxima of the cornerness functions.
+auto select(const sara::ImageView<float>& cornerness,
+            const float cornerness_adaptive_thres) -> std::vector<Corner>
+{
+  const auto extrema = sara::local_maxima(cornerness);
+
+  const auto cornerness_max = cornerness.flat_array().maxCoeff();
+  const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
+
+  auto extrema_filtered = std::vector<Corner>{};
+  extrema_filtered.reserve(extrema.size());
+  for (const auto& p : extrema)
+    if (cornerness(p) > cornerness_thres)
+      extrema_filtered.push_back({p, cornerness(p)});
+  return extrema_filtered;
+};
 
 
 auto __main(int argc, char** argv) -> int
@@ -42,6 +76,11 @@ auto __main(int argc, char** argv) -> int
 #endif
 
   const auto grad_adaptive_thres = argc < 3 ? 2e-2f : std::stof(argv[2]);
+
+  // Corner filtering.
+  const auto kappa = argc < 4 ? 0.04f : std::stof(argv[3]);
+  const auto cornerness_adaptive_thres = argc < 5 ? 1e-4f : std::stof(argv[4]);
+  const auto nms_radius = argc < 6 ? 2 : std::stoi(argv[5]);
 
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
@@ -91,10 +130,25 @@ auto __main(int argc, char** argv) -> int
       if (*e == 127)
         *e = 0;
     sara::toc("Feature maps");
-
-    sara::display(edge_map);
 #endif
 
+    sara::tic();
+    const auto M = f_blurred.compute<sara::Gradient>()
+                       .compute<sara::SecondMomentMatrix>()
+                       .compute<sara::Gaussian>(2.f);
+    auto cornerness = sara::Image<float>{f_blurred.sizes()};
+    std::transform(M.begin(), M.end(), cornerness.begin(),
+                   [kappa](const auto& m) {
+                     return m.determinant() - kappa * pow(m.trace(), 2);
+                   });
+    auto corners = select(cornerness, cornerness_adaptive_thres);
+    sara::nms(corners, cornerness.sizes(), nms_radius);
+    sara::toc("Corner detection");
+
+    auto disp = edge_map.convert<sara::Rgb8>();
+    for (const auto& p : corners)
+      sara::fill_circle(disp, p.coords.x(), p.coords.y(), 3, sara::Magenta8);
+    sara::display(disp);
     sara::get_key();
   }
 
