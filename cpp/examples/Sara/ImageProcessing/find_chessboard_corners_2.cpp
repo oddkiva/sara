@@ -139,6 +139,7 @@ auto __main(int argc, char** argv) -> int
     // sara::display(partitioning);
     for (const auto& [label, points] : regions)
     {
+#if 0
       auto good = false;
 #ifdef ADAPTIVE_THRESHOLDING
       if (segmentation_map(points.front()) != 0)
@@ -163,6 +164,9 @@ auto __main(int argc, char** argv) -> int
           good = diff < 0.2;
         }
       }
+#else
+      const auto good = segmentation_map(points.front()) == 0;
+#endif
 
       // Show big segments only.
       if (good)
@@ -170,15 +174,6 @@ auto __main(int argc, char** argv) -> int
         const auto color = colors.at(label);
         for (const auto& p : points)
           partitioning(p) = color;
-
-        // sara::display(partitioning);
-        // for (auto i = 0u; i < ch.size(); ++i)
-        // {
-        //   const auto& a = ch[i];
-        //   const auto& b = ch[(i + 1) % ch.size()];
-        //   sara::draw_line(a, b, color, 3);
-        // }
-        // sara::get_key();
       }
     }
 
