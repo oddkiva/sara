@@ -178,7 +178,7 @@ auto __main(int argc, char** argv) -> int
       }
     }
 
-    auto disp = edge_map.convert<sara::Rgb8>();
+    auto disp = video_frame;// edge_map.convert<sara::Rgb8>();
 #ifdef DEBUG
     for (const auto& p : corners)
       sara::fill_circle(disp, p.coords.x(), p.coords.y(), nms_radius,
@@ -238,7 +238,7 @@ auto __main(int argc, char** argv) -> int
         const Eigen::Vector2d bc = c - b;
         const auto area_parallelogram = std::sqrt(
             ba.squaredNorm() * bc.squaredNorm() - sara::square(ba.dot(bc)));
-        const auto error = std::abs(area_parallelogram - area_ch) / area_ch;
+        const auto error = std::abs(area_parallelogram - area_ch) / std::max(area_ch, area_parallelogram);
         good = error < 0.3;
       }
 #else
@@ -266,6 +266,14 @@ auto __main(int argc, char** argv) -> int
 
       for (const auto& q : quad)
         sara::fill_circle(disp, q.x(), q.y(), 2, sara::Magenta8);
+      if (quad.size() == 3)
+      {
+        const auto& a = quad[0];
+        const auto& b = quad[1];
+        const auto& c = quad[2];
+        const auto d = a + c - b;
+        sara::fill_circle(disp, d.x(), d.y(), 2, sara::Red8);
+      }
     }
     sara::display(disp);
   }
