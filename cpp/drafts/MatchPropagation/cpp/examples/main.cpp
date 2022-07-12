@@ -143,7 +143,8 @@ public:
     assign_orientations(gradients, DoGs, scale_octave_pairs);
     orientation_assignment_time = timer.elapsed_ms();
     elapsed += orientation_assignment_time;
-    cout << "orientation assignment time = " << orientation_assignment_time << " ms" << endl;
+    cout << "orientation assignment time = " << orientation_assignment_time
+         << " ms" << endl;
     cout << "DoGs.size() = " << DoGs.size() << endl;
 
 
@@ -200,7 +201,7 @@ private:
   // Max ratio of Hessian eigenvalues.
   float edgeThresh{10.f};
   // Min contrast.
-  float peakThresh{0.04};
+  float peakThresh{0.04f};
 };
 
 
@@ -212,8 +213,7 @@ GRAPHICS_MAIN()
   auto elapsed = double{};
 
   // Where are the images?
-  const string query_image_path =
-      src_path("products/garnier-shampoing.jpg");
+  const string query_image_path = src_path("products/garnier-shampoing.jpg");
   const string target_image_path = src_path("shelves/shelf-1.jpg");
 
   // Load the query and target images.
@@ -253,8 +253,7 @@ GRAPHICS_MAIN()
   // Compute initial matches.
   print_stage("Compute initial matches");
   const auto nearest_neighbor_ratio = 1.f;
-  AnnMatcher matcher(target_keypoints, query_keypoints,
-                     nearest_neighbor_ratio);
+  AnnMatcher matcher(target_keypoints, query_keypoints, nearest_neighbor_ratio);
   const auto initial_matches = matcher.compute_matches();
 
   // Match keypoints.
@@ -265,7 +264,8 @@ GRAPHICS_MAIN()
   const auto num_region_growing = 2000;
   const auto growth_params = GrowthParams{};
   const auto verbose_level = 0;
-  GrowMultipleRegions grow_regions(initial_matches, growth_params, verbose_level);
+  GrowMultipleRegions grow_regions(initial_matches, growth_params,
+                                   verbose_level);
   regions = grow_regions(num_region_growing, 0, &drawer);
   elapsed = timer.elapsed_ms();
   cout << "Matching time = " << elapsed << " ms" << endl << endl;
