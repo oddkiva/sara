@@ -304,8 +304,14 @@ auto test_on_video(int argc, char** argv) -> void
 
     sara::display(frame);
     for (const auto& det : dets)
-      sara::draw_rect(det.box(0), det.box(1), det.box(2), det.box(3),
-                      sara::Green8, 4);
+    {
+      static constexpr auto int_round = [](const float v) {
+        return static_cast<int>(std::round(v));
+      };
+      sara::draw_rect(int_round(det.box(0)), int_round(det.box(1)),
+                      int_round(det.box(2)), int_round(det.box(3)),  //
+                      sara::Green8, 2);
+    }
   }
 }
 
