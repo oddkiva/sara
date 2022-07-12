@@ -73,12 +73,13 @@ namespace DO::Shakti::HalideBackend::v3 {
 
     auto resize(std::size_t size) -> void
     {
-      x = Halide::Runtime::Buffer<std::int32_t>(size);
-      y = Halide::Runtime::Buffer<std::int32_t>(size);
-      s = Halide::Runtime::Buffer<std::int32_t>(size);
-      n = Halide::Runtime::Buffer<std::int32_t>(size);
-      scale = Halide::Runtime::Buffer<float>(size);
-      type = Halide::Runtime::Buffer<std::int8_t>(size);
+      const auto sizei = static_cast<int>(size);
+      x = Halide::Runtime::Buffer<std::int32_t>(sizei);
+      y = Halide::Runtime::Buffer<std::int32_t>(sizei);
+      s = Halide::Runtime::Buffer<std::int32_t>(sizei);
+      n = Halide::Runtime::Buffer<std::int32_t>(sizei);
+      scale = Halide::Runtime::Buffer<float>(sizei);
+      type = Halide::Runtime::Buffer<std::int8_t>(sizei);
     }
 
     auto empty() const noexcept

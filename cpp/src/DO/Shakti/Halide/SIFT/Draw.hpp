@@ -40,8 +40,8 @@ inline auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
   for (auto i = 0; i < static_cast<int>(e.size()); ++i)
   {
     const auto& c = e.type(i) == 1 ? sara::Red8 : sara::Cyan8;
-    const float x = std::round(e.x(i) * octave_scaling_factor);
-    const float y = std::round(e.y(i) * octave_scaling_factor);
+    const auto x = static_cast<int>(std::round(e.x(i) * octave_scaling_factor));
+    const auto y = static_cast<int>(std::round(e.y(i) * octave_scaling_factor));
 
     // N.B.: the blob radius is the scale multiplied by sqrt(2).
     // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
@@ -161,8 +161,8 @@ inline auto draw_quantized_extrema(sara::ImageView<sara::Rgb8>& display,
 
     // N.B.: the blob radius is the scale multiplied by sqrt(2).
     // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
-    const float r = std::round(e.scale(i) * octave_scaling_factor *
-                               static_cast<float>(M_SQRT2));
+    const auto r = static_cast<int>(std::round(
+        e.scale(i) * octave_scaling_factor * static_cast<float>(M_SQRT2)));
 
     sara::draw_circle(display, {x, y}, r, c, width);
   }

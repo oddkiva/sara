@@ -17,7 +17,7 @@
 #include <DO/Sara/Core/StringFormat.hpp>
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 #include <GLFW/glfw3.h>
@@ -182,8 +182,9 @@ int main()
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Draw triangles
-    glBindVertexArray(vao); // geometry specified by the VAO.
-    glDrawElements(GL_TRIANGLES, triangles.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(vao);  // geometry specified by the VAO.
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(triangles.size()),
+                   GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
