@@ -23,7 +23,7 @@
 #include <DO/Kalpana/Math/Projection.hpp>
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 #include <GLFW/glfw3.h>
@@ -58,7 +58,6 @@ inline auto init_glfw_boilerplate()
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-
 }
 
 inline auto init_glew_boilerplate()
@@ -79,6 +78,7 @@ inline auto init_glew_boilerplate()
 auto make_cube()
 {
   auto cube = Tensor_<float, 2>{6 * 6, 5};
+  // clang-format off
   cube.flat_array() <<
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
      0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -121,6 +121,7 @@ auto make_cube()
      0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
     -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f;
+  // clang-format on
   return cube;
 }
 
@@ -139,8 +140,8 @@ int main()
 
   init_glew_boilerplate();
 
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                        {"in_tex_coords", 1},   //
+  std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
+                                        {"in_tex_coords", 1},  //
                                         {"out_color", 0}};
 
   const auto vertex_shader_source = R"shader(
@@ -204,7 +205,7 @@ int main()
       Vector3f(1.5f, 0.2f, -1.5f),   Vector3f(-1.3f, 1.0f, -1.5f)};
 
   const auto row_bytes = [](const TensorView_<float, 2>& data) {
-    return data.size(1) * sizeof(float);
+    return static_cast<GLsizei>(data.size(1) * sizeof(float));
   };
   const auto float_pointer = [](int offset) {
     return reinterpret_cast<void*>(offset * sizeof(float));
@@ -230,8 +231,9 @@ int main()
     glEnableVertexAttribArray(arg_pos["in_coords"]);
 
     // Texture coordinates.
-    glVertexAttribPointer(arg_pos["in_tex_coords"], 2 /* texture coords */, GL_FLOAT,
-                          GL_FALSE, row_bytes(vertices), float_pointer(3));
+    glVertexAttribPointer(arg_pos["in_tex_coords"], 2 /* texture coords */,
+                          GL_FLOAT, GL_FALSE, row_bytes(vertices),
+                          float_pointer(3));
     glEnableVertexAttribArray(arg_pos["in_tex_coords"]);
   }
 
@@ -241,9 +243,9 @@ int main()
     // Read the image from the disk.
     auto image = imread<Rgb8>(
 #ifdef __APPLE__
-                              "/Users/david/GitLab/DO-CV/sara/data/ksmall.jpg"
+        "/Users/david/GitLab/DO-CV/sara/data/ksmall.jpg"
 #else
-                              "/home/david/GitLab/DO-CV/sara/data/ksmall.jpg"
+        "/home/david/GitLab/DO-CV/sara/data/ksmall.jpg"
 #endif
     );
     // Flip vertically so that the image data matches OpenGL image coordinate
@@ -260,9 +262,9 @@ int main()
     // Read the image from the disk.
     auto image = imread<Rgb8>(
 #ifdef __APPLE__
-                              "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+        "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
 #else
-                              "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+        "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
 #endif
     );
     // Flip vertically so that the image data matches OpenGL image coordinate
@@ -311,8 +313,7 @@ int main()
 
     const Matrix4f projection =
         kalpana::perspective(45., 800. / 600., .1, 100.).cast<float>();
-    shader_program.set_uniform_matrix4f("projection",
-                                        projection.data());
+    shader_program.set_uniform_matrix4f("projection", projection.data());
 
     // Draw triangles.
     glBindVertexArray(vao);
@@ -321,8 +322,10 @@ int main()
       auto transform = Transform<float, 3, Eigen::Projective>{};
       transform.setIdentity();
       transform.translate(cubePositions[i]);
-      transform.rotate(AngleAxisf(std::pow(1.2, (i + 1) * 5) * timer.elapsed_ms() / 10000,
-                                  Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
+      transform.rotate(
+          AngleAxisf(static_cast<float>(std::pow(1.2, (i + 1) * 5) *
+                                        timer.elapsed_ms() / 10000),
+                     Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
       shader_program.set_uniform_matrix4f("transform",
                                           transform.matrix().data());
 

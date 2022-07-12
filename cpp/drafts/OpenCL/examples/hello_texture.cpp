@@ -141,7 +141,7 @@ int main()
   triangles.flat_array() << 0, 1, 2, 2, 3, 0;
 
   const auto row_bytes = [](const TensorView_<float, 2>& data) {
-    return data.size(1) * sizeof(float);
+    return static_cast<GLsizei>(data.size(1) * sizeof(float));
   };
   const auto float_pointer = [](int offset) {
     return reinterpret_cast<void*>(offset * sizeof(float));
@@ -215,7 +215,8 @@ int main()
 
     // Draw triangles.
     glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, triangles.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(triangles.size()),
+                   GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

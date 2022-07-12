@@ -175,12 +175,8 @@ auto __main(int argc, char** argv) -> int
     display = edge_map.convert<sara::Rgb8>();
 #endif
     for (const auto& p : corners)
-    {
       sara::fill_circle(display, downscale_factor * p.coords.x(),
                         downscale_factor * p.coords.y(), 4, sara::Magenta8);
-      // sara::draw_circle(display, 2 * p.coords.x(), 2 * p.coords.y(), 6,
-      //                   sara::Magenta8, 3);
-    }
     sara::draw_text(display, 80, 80, std::to_string(frame_number), sara::White8,
                     60, 0, false, true);
 

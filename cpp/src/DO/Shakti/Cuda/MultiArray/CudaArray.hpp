@@ -25,8 +25,8 @@ namespace DO::Shakti::Cuda {
     inline ArrayView(cudaArray_t arr, const Vector<int, N>& sizes,
                      unsigned flags = 0)
       : _array{arr}
-      , _sizes{sizes}
       , _flags{flags}
+      , _sizes{sizes}
     {
     }
 

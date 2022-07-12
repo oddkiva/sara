@@ -76,6 +76,7 @@ namespace DO::Sara {
     }
 
     // Filter the line segment candidates.
+    pipeline.line_segments.clear();
     pipeline.line_segments.reserve(pipeline.curve_ids.size());
     for (auto i = 0u; i < pipeline.curve_ids.size(); ++i)
     {

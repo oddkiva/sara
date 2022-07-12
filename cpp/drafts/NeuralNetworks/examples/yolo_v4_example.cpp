@@ -255,13 +255,18 @@ auto test_on_video(int argc, char** argv) -> void
   Eigen::setNbThreads(num_threads);
 #endif
 
+#ifdef _WIN32
+  const auto video_filepath = sara::select_video_file_from_dialog_box();
+  if (video_filepath.empty())
+    return;
+#else
   if (argc < 2)
   {
     std::cerr << "Missing video path" << std::endl;
     return;
   }
-
   const auto video_filepath = argv[1];
+#endif
   auto video_stream = sara::VideoStream{video_filepath};
   auto frame = video_stream.frame();
 

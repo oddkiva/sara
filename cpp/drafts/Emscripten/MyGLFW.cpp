@@ -28,7 +28,7 @@
 GLFWwindow* MyGLFW::window = nullptr;
 int MyGLFW::width = -1;
 int MyGLFW::height = -1;
-int MyGLFW::high_dpi_scale_factor = 1.0f;
+int MyGLFW::high_dpi_scale_factor = 1;
 std::string MyGLFW::glsl_version = "#version 300 es";
 
 

@@ -176,7 +176,7 @@ struct Time
   void update()
   {
     last_frame = current_frame;
-    current_frame = timer.elapsed_ms();
+    current_frame = static_cast<float>(timer.elapsed_ms());
     delta_time = current_frame - last_frame;
   }
 
@@ -264,7 +264,7 @@ struct PointCloudObject
     // Encode the vertex data in a tensor.
     //
     const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return data.size(1) * sizeof(float);
+      return static_cast<GLsizei>(data.size(1) * sizeof(float));
     };
     const auto float_pointer = [](int offset) {
       return reinterpret_cast<void*>(offset * sizeof(float));
