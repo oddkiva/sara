@@ -264,8 +264,8 @@ auto __main(int argc, char** argv) -> int
       std::for_each(edge.begin(), edge.end(),
                     [&disp](const auto& p) { disp(p) = sara::Cyan8; });
 
-      for (const auto& p : cs->second)
-        sara::fill_circle(disp, p.coords.x(), p.coords.y(), 2, sara::Magenta8);
+      for (const auto& q : quad)
+        sara::fill_circle(disp, q.x(), q.y(), 2, sara::Magenta8);
     }
     sara::display(disp);
   }
