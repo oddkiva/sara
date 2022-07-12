@@ -18,18 +18,52 @@
 
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/DisjointSets/TwoPassConnectedComponents.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/Watershed.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-
 #include "Chessboard/Erode.hpp"
+#include "Chessboard/NonMaximumSuppression.hpp"
 
 
 namespace sara = DO::Sara;
+
+
+struct Corner
+{
+  Eigen::Vector2i coords;
+  float score;
+  auto position() const -> const Eigen::Vector2i&
+  {
+    return coords;
+  }
+  auto operator<(const Corner& other) const -> bool
+  {
+    return score < other.score;
+  }
+};
+
+// Select the local maxima of the cornerness functions.
+auto select(const sara::ImageView<float>& cornerness,
+            const float cornerness_adaptive_thres) -> std::vector<Corner>
+{
+  const auto extrema = sara::local_maxima(cornerness);
+
+  const auto cornerness_max = cornerness.flat_array().maxCoeff();
+  const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
+
+  auto extrema_filtered = std::vector<Corner>{};
+  extrema_filtered.reserve(extrema.size());
+  for (const auto& p : extrema)
+    if (cornerness(p) > cornerness_thres)
+      extrema_filtered.push_back({p, cornerness(p)});
+  return extrema_filtered;
+};
 
 
 auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
@@ -64,19 +98,32 @@ auto __main(int argc, char** argv) -> int
   const auto video_file = std::string{argv[1]};
 #endif
 
+  // Harris cornerness parameters.
+  //
+  // Blur parameter before gradient calculation.
+  const auto sigma_D =
+      argc < 3 ? std::sqrt(std::pow(1.6f, 2.f) - 1) : std::stof(argv[2]);
+  // Integration domain of the second moment.
+  const auto sigma_I = argc < 4 ? 3.f : std::stof(argv[3]);
+  // Threshold parameter.
+  const auto kappa = argc < 5 ? 0.04f : std::stof(argv[4]);
+  const auto cornerness_adaptive_thres = argc < 6 ? 1e-5f : std::stof(argv[5]);
+  // Corner filtering.
+  const auto nms_radius = argc < 7 ? 10 : std::stoi(argv[6]);
+  static constexpr auto grad_adaptive_thres = 2e-2f;
+  static constexpr auto downscale_factor = 2;
+
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
   auto frame_number = -1;
 
   auto f = sara::Image<float>{video_frame.sizes()};
   auto f_conv = sara::Image<float>{video_frame.sizes()};
+  auto f_ds = sara::Image<float>{video_frame.sizes() / downscale_factor};
 
 #define ADAPTIVE_THRESHOLDING
 #ifdef ADAPTIVE_THRESHOLDING
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
-  static constexpr auto tolerance_parameter = 0.f;
-#else
-  static const auto color_threshold = std::sqrt(sara::square(2.f) * 3);
 #endif
 
 
@@ -99,6 +146,7 @@ auto __main(int argc, char** argv) -> int
     sara::toc("Grayscale conversion");
 
     sara::tic();
+    static constexpr auto tolerance_parameter = 0.f;
     sara::gaussian_adaptive_threshold(f, 32.f, 3.f, tolerance_parameter,
                                       segmentation_map);
     sara::toc("Adaptive thresholding");
@@ -128,15 +176,28 @@ auto __main(int argc, char** argv) -> int
 #else
     // Watershed.
     sara::tic();
+    static const auto color_threshold = std::sqrt(sara::square(2.f) * 3);
     const auto regions = sara::color_watershed(video_frame, color_threshold);
     sara::toc("Watershed");
 #endif
+
+    // Calculate Harris cornerness functions.
+    sara::tic();
+    sara::scale(f, f_ds);
+    const auto cornerness = sara::scale_adapted_harris_cornerness(  //
+        f_ds,                                                       //
+        sigma_I, sigma_D,                                           //
+        kappa                                                       //
+    );
+    auto corners = select(cornerness, cornerness_adaptive_thres);
+    sara::nms(corners, cornerness.sizes(), nms_radius);
+    sara::toc("Corner detection");
 
     // Display the good regions.
     const auto colors = mean_colors(regions, video_frame);
     auto partitioning = sara::Image<sara::Rgb8>{video_frame.sizes()};
     partitioning.flat_array().fill(sara::Red8);
-    // sara::display(partitioning);
+
     for (const auto& [label, points] : regions)
     {
 #if 0
@@ -177,6 +238,11 @@ auto __main(int argc, char** argv) -> int
       }
     }
 
+    for (const auto& p : corners)
+      sara::fill_circle(partitioning, downscale_factor * p.coords.x(),
+                        downscale_factor * p.coords.y(), 4, sara::Magenta8);
+
+    SARA_CHECK(corners.size());
     sara::display(partitioning);
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);

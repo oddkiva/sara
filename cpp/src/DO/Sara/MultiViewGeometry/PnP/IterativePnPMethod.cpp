@@ -12,7 +12,13 @@
 #include <DO/Sara/MultiViewGeometry/Calibration/OmnidirectionalCameraReprojectionError.hpp>
 #include <DO/Sara/MultiViewGeometry/PnP/IterativePnPMethod.hpp>
 
+#ifdef _WIN32
+#  pragma warning(push, 0)
+#endif
 #include <ceres/ceres.h>
+#ifdef _WIN32
+#  pragma warning(pop)
+#endif
 
 
 namespace DO::Sara {
@@ -28,7 +34,8 @@ namespace DO::Sara {
     std::vector<std::size_t> _pose_positions;
 
     auto add_data(const std::vector<Eigen::Vector2d>& /* image_points */,
-                  const std::vector<Eigen::Vector3d>& /* scene_points */) -> void
+                  const std::vector<Eigen::Vector3d>& /* scene_points */)
+        -> void
     {
       // for (auto i=0u; i < image_points.size(); ++i)
       // {
