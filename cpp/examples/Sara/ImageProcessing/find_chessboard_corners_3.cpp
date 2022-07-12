@@ -13,13 +13,11 @@
 
 #include <omp.h>
 
-#include <map>
-#include <unordered_map>
+#include <unordered_set>
 
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
@@ -28,8 +26,6 @@
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-
-#include "Chessboard/Erode.hpp"
 #include "Chessboard/NonMaximumSuppression.hpp"
 
 
@@ -100,7 +96,6 @@ auto __main(int argc, char** argv) -> int
   const auto cornerness_adaptive_thres = argc < 6 ? 1e-5f : std::stof(argv[5]);
 
   // Corner filtering.
-  const auto nms_radius = argc < 7 ? 10 : std::stoi(argv[6]);
   static constexpr auto downscale_factor = 2;
 
   // Edge detection.
@@ -156,17 +151,16 @@ auto __main(int argc, char** argv) -> int
     ed(frame_gray_ds);
     sara::toc("Curve detection");
 
-    // Calculate Harris cornerness functions.
     sara::tic();
     const auto cornerness = sara::scale_adapted_harris_cornerness(  //
         frame_gray_ds,                                              //
         sigma_I, sigma_D,                                           //
         kappa                                                       //
     );
-    const auto grad_f = frame_gray_ds.compute<sara::Gradient>();
+    const auto grad_f =
+        frame_gray_ds.compute<sara::Gaussian>(0.5f).compute<sara::Gradient>();
     auto corners_int = select(cornerness, cornerness_adaptive_thres);
     sara::toc("Corner detection");
-
 
     sara::tic();
     auto corners = std::vector<Corner<float>>{};
@@ -179,29 +173,86 @@ auto __main(int argc, char** argv) -> int
         });
     sara::toc("Corner refinement");
 
-    const auto& curves = ed.pipeline.edges_as_list;
-    auto display = frame_gray.convert<sara::Rgb8>();
+    sara::tic();
+    auto edge_label_map = sara::Image<int>{ed.pipeline.edge_map.sizes()};
+    edge_label_map.flat_array().fill(-1);
+    const auto& curves = ed.pipeline.edges_simplified;
     for (auto label = 0u; label < curves.size(); ++label)
     {
-      const auto& curve_simplified = ed.pipeline.edges_simplified[label];
-      if (curve_simplified.size() < 2u || sara::length(curve_simplified) < 5)
+      const auto& curve = curves[label];
+      if (curve.size() < 2)
         continue;
-      const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
-
-      for (auto i = 0u; i < curve_simplified.size() - 1; ++i)
-      {
-        const auto a = curve_simplified[i].cast<float>() * downscale_factor;
-        const auto b = curve_simplified[i + 1].cast<float>() * downscale_factor;
-        sara::draw_line(display, a, b, color, 2);
-      }
+      edge_label_map(curve.front().array().round().matrix().cast<int>()) =
+          label;
+      edge_label_map(curve.back().array().round().matrix().cast<int>()) = label;
     }
-    for (const auto& p : corners)
-      sara::draw_circle(display, downscale_factor * p.coords.x(),
-                        downscale_factor * p.coords.y(), 4, sara::Magenta8);
+    auto adjacent_edges = std::vector<std::unordered_set<int>>{};
+    adjacent_edges.resize(corners.size());
+    std::transform(  //
+        corners.begin(), corners.end(), adjacent_edges.begin(),
+        [&edge_label_map](const Corner<float>& c) {
+          auto edges = std::unordered_set<int>{};
+
+          static constexpr auto r = 4;
+          for (auto v = -r; v <= r; ++v)
+          {
+            for (auto u = -r; u <= r; ++u)
+            {
+              const Eigen::Vector2i p =
+                  c.coords.cast<int>() + Eigen::Vector2i{u, v};
+
+              const auto in_image_domain =
+                  0 <= p.x() && p.x() < edge_label_map.width() &&  //
+                  0 <= p.y() && p.y() < edge_label_map.height();
+              if (!in_image_domain)
+                continue;
+
+              const auto label = edge_label_map(p);
+              if (label != -1)
+                edges.insert(label);
+            }
+          }
+          return edges;
+        });
+    sara::toc("X-junction filter");
+
+    sara::tic();
+    auto display = frame_gray.convert<sara::Rgb8>();
+    for (auto c = 0u; c < corners.size(); ++c)
+    {
+      const auto& p = corners[c];
+      const auto& edges = adjacent_edges[c];
+      if (edges.size() != 4)
+        continue;
+
+      for (const auto& curve_index : edges)
+      {
+        const auto& curve_simplified =
+            ed.pipeline.edges_simplified[curve_index];
+
+        // const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() %
+        // 255);
+        const auto color = sara::Cyan8;
+        for (auto i = 0u; i < curve_simplified.size() - 1; ++i)
+        {
+          const auto a = curve_simplified[i].cast<float>() * downscale_factor;
+          const auto b =
+              curve_simplified[i + 1].cast<float>() * downscale_factor;
+          sara::draw_line(display, a, b, color, 2);
+        }
+      }
+
+      sara::fill_circle(display, std::round(downscale_factor * p.coords.x()),
+                        std::round(downscale_factor * p.coords.y()), 1,
+                        sara::Yellow8);
+      sara::draw_circle(display, std::round(downscale_factor * p.coords.x()),
+                        std::round(downscale_factor * p.coords.y()), 4,
+                        sara::Red8, 2);
+    }
     sara::draw_text(display, 80, 80, std::to_string(frame_number), sara::White8,
                     60, 0, false, true);
-
     sara::display(display);
+    sara::toc("Display");
     sara::get_key();
   }
 
