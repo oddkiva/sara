@@ -110,7 +110,6 @@ auto __main(int argc, char** argv) -> int
   const auto cornerness_adaptive_thres = argc < 6 ? 1e-5f : std::stof(argv[5]);
   // Corner filtering.
   const auto nms_radius = argc < 7 ? 10 : std::stoi(argv[6]);
-  static constexpr auto grad_adaptive_thres = 2e-2f;
   static constexpr auto downscale_factor = 2;
 
   auto video_stream = sara::VideoStream{video_file};

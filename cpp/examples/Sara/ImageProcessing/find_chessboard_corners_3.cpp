@@ -16,11 +16,15 @@
 #include <map>
 #include <unordered_map>
 
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
+#include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
+#include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
@@ -32,9 +36,16 @@
 namespace sara = DO::Sara;
 
 
+inline constexpr long double operator"" _percent(long double x)
+{
+  return x / 100;
+}
+
+
+template <typename T>
 struct Corner
 {
-  Eigen::Vector2i coords;
+  Eigen::Vector2<T> coords;
   float score;
   auto position() const -> const Eigen::Vector2i&
   {
@@ -48,14 +59,14 @@ struct Corner
 
 // Select the local maxima of the cornerness functions.
 auto select(const sara::ImageView<float>& cornerness,
-            const float cornerness_adaptive_thres) -> std::vector<Corner>
+            const float cornerness_adaptive_thres) -> std::vector<Corner<int>>
 {
   const auto extrema = sara::local_maxima(cornerness);
 
   const auto cornerness_max = cornerness.flat_array().maxCoeff();
   const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
 
-  auto extrema_filtered = std::vector<Corner>{};
+  auto extrema_filtered = std::vector<Corner<int>>{};
   extrema_filtered.reserve(extrema.size());
   for (const auto& p : extrema)
     if (cornerness(p) > cornerness_thres)
@@ -81,8 +92,7 @@ auto __main(int argc, char** argv) -> int
   // Harris cornerness parameters.
   //
   // Blur parameter before gradient calculation.
-  const auto sigma_D =
-      argc < 3 ? std::sqrt(std::pow(1.6f, 2.f) - 1) : std::stof(argv[2]);
+  const auto sigma_D = argc < 3 ? 0.8f : std::stof(argv[2]);
   // Integration domain of the second moment.
   const auto sigma_I = argc < 4 ? 3.f : std::stof(argv[3]);
   // Threshold parameter.
@@ -91,8 +101,21 @@ auto __main(int argc, char** argv) -> int
 
   // Corner filtering.
   const auto nms_radius = argc < 7 ? 10 : std::stoi(argv[6]);
-  static constexpr auto grad_adaptive_thres = 2e-2f;
   static constexpr auto downscale_factor = 2;
+
+  // Edge detection.
+  static constexpr auto high_threshold_ratio = static_cast<float>(4._percent);
+  static constexpr auto low_threshold_ratio =
+      static_cast<float>(high_threshold_ratio / 2.);
+  using sara::operator""_deg;
+  static constexpr auto angular_threshold = static_cast<float>((20._deg).value);
+
+  auto ed = sara::EdgeDetector{{
+      high_threshold_ratio,  //
+      low_threshold_ratio,   //
+      angular_threshold      //
+  }};
+
 
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
@@ -112,6 +135,7 @@ auto __main(int argc, char** argv) -> int
     ++frame_number;
     if (frame_number % 3 != 0)
       continue;
+    SARA_CHECK(frame_number);
 
     if (sara::active_window() == nullptr)
     {
@@ -124,39 +148,13 @@ auto __main(int argc, char** argv) -> int
     sara::toc("Grayscale conversion");
 
     sara::tic();
-    sara::apply_gaussian_filter(frame_gray, frame_gray_blurred, 1.2f);
+    sara::apply_gaussian_filter(frame_gray, frame_gray_blurred, 1.f);
     sara::scale(frame_gray_blurred, frame_gray_ds);
     sara::toc("Downscale");
 
-#ifdef ADAPTIVE_THRESHOLD
     sara::tic();
-    static constexpr auto tolerance_parameter = 0.f;
-    sara::gaussian_adaptive_threshold(frame_gray, 32.f, 3.f,
-                                      tolerance_parameter, segmentation_map);
-    sara::toc("Adaptive thresholding");
-
-    sara::tic();
-    auto segmentation_map_eroded = segmentation_map;
-    for (auto i = 0; i < 1; ++i)
-    {
-      sara::binary_erode_3x3(segmentation_map, segmentation_map_eroded);
-      segmentation_map.swap(segmentation_map_eroded);
-    }
-    sara::toc("Erosion 3x3");
-#else
-    sara::tic();
-    sara::gradient_in_polar_coordinates(frame_gray_blurred, grad_f_norm,
-                                        grad_f_ori);
-    const auto grad_max = grad_f_norm.flat_array().maxCoeff();
-    const auto grad_thres = grad_adaptive_thres * grad_max;
-    auto edge_map = sara::suppress_non_maximum_edgels(
-        grad_f_norm, grad_f_ori, 2 * grad_thres, grad_thres);
-    std::for_each(edge_map.begin(), edge_map.end(), [](auto& v) {
-      if (v != 255)
-        v = 0;
-    });
-    sara::toc("Feature maps");
-#endif
+    ed(frame_gray_ds);
+    sara::toc("Curve detection");
 
     // Calculate Harris cornerness functions.
     sara::tic();
@@ -165,17 +163,40 @@ auto __main(int argc, char** argv) -> int
         sigma_I, sigma_D,                                           //
         kappa                                                       //
     );
-    auto corners = select(cornerness, cornerness_adaptive_thres);
-    sara::nms(corners, cornerness.sizes(), nms_radius);
+    const auto grad_f = frame_gray_ds.compute<sara::Gradient>();
+    auto corners_int = select(cornerness, cornerness_adaptive_thres);
     sara::toc("Corner detection");
 
-#ifdef ADAPTIVE_THRESHOLD
-    display = segmentation_map.convert<sara::Rgb8>();
-#else
-    display = edge_map.convert<sara::Rgb8>();
-#endif
+
+    sara::tic();
+    auto corners = std::vector<Corner<float>>{};
+    std::transform(
+        corners_int.begin(), corners_int.end(), std::back_inserter(corners),
+        [&grad_f, sigma_I](const Corner<int>& c) -> Corner<float> {
+          const auto p =
+              sara::refine_junction_location_unsafe(grad_f, c.coords, sigma_I);
+          return {p, c.score};
+        });
+    sara::toc("Corner refinement");
+
+    const auto& curves = ed.pipeline.edges_as_list;
+    auto display = frame_gray.convert<sara::Rgb8>();
+    for (auto label = 0u; label < curves.size(); ++label)
+    {
+      const auto& curve_simplified = ed.pipeline.edges_simplified[label];
+      if (curve_simplified.size() < 2u || sara::length(curve_simplified) < 5)
+        continue;
+      const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
+
+      for (auto i = 0u; i < curve_simplified.size() - 1; ++i)
+      {
+        const auto a = curve_simplified[i].cast<float>() * downscale_factor;
+        const auto b = curve_simplified[i + 1].cast<float>() * downscale_factor;
+        sara::draw_line(display, a, b, color, 2);
+      }
+    }
     for (const auto& p : corners)
-      sara::fill_circle(display, downscale_factor * p.coords.x(),
+      sara::draw_circle(display, downscale_factor * p.coords.x(),
                         downscale_factor * p.coords.y(), 4, sara::Magenta8);
     sara::draw_text(display, 80, 80, std::to_string(frame_number), sara::White8,
                     60, 0, false, true);

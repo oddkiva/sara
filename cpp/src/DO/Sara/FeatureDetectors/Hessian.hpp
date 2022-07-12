@@ -193,7 +193,7 @@ namespace DO { namespace Sara {
         based on the function **DO::refineExtremum()**.
      */
     ComputeDoHExtrema(const ImagePyramidParams& pyrParams =
-                          ImagePyramidParams(-1, 3 + 2, pow(2.f, 1.f / 3.f), 2),
+                          ImagePyramidParams(-1, 3 + 2, std::pow(2.f, 1.f / 3.f), 2),
                       float extremum_thres = 1e-6f,
                       float edge_ratio_thres = 10.f,
                       int img_padding_sz = 1,

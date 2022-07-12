@@ -102,8 +102,10 @@ auto __main(int argc, char** argv) -> int
   while (video_stream.read())
   {
     ++frame_number;
+#if 0
     if (frame_number % 3 != 0)
       continue;
+#endif
 
     if (sara::active_window() == nullptr)
     {
