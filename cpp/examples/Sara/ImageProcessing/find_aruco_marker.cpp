@@ -209,12 +209,14 @@ auto __main(int argc, char** argv) -> int
       std::transform(
           cs->second.begin(), cs->second.end(), std::back_inserter(q),
           [](const auto& c) { return c.coords.template cast<double>(); });
-      const auto quad = sara::graham_scan_convex_hull(q);
+      auto quad = sara::graham_scan_convex_hull(q);
 
+#define METHOD1
+#ifdef METHOD1
       auto good = false;
 
       // If the quadrangle is complete.
-      if (cs->second.size() == 4)
+      if (quad.size() == 4)
       {
         // Convex hull based filtering
         const auto inter = sara::sutherland_hodgman(ch, quad);
@@ -225,12 +227,13 @@ auto __main(int argc, char** argv) -> int
       }
 
       // If the quadrangle is incomplete.
-      else if (quad.size() == 3)
+      else if (quad.size() == 3)  // CAVEAT: The convex hull algorithm can
+                                  // collapse collinear points.
       {
         // Calculate the parallelogram area.
-        const auto &a = quad[0];
-        const auto &b = quad[1];
-        const auto &c = quad[2];
+        const auto& a = quad[0];
+        const auto& b = quad[1];
+        const auto& c = quad[2];
         const Eigen::Vector2d ba = a - b;
         const Eigen::Vector2d bc = c - b;
         const auto area_parallelogram = std::sqrt(
@@ -238,6 +241,23 @@ auto __main(int argc, char** argv) -> int
         const auto error = std::abs(area_parallelogram - area_ch) / area_ch;
         good = error < 0.3;
       }
+#else
+      if (quad.size() == 3)
+      {
+        const auto& a = quad[0];
+        const auto& b = quad[1];
+        const auto& c = quad[2];
+        const auto d = a + c - b;
+        quad.push_back(d);
+      }
+
+      // Convex hull based filtering
+      const auto inter = sara::sutherland_hodgman(ch, quad);
+      const auto area_inter = sara::area(inter);
+      const auto area_q = sara::area(quad);
+      const auto iou = area_inter / (area_ch + area_q - area_inter);
+      const auto good = iou > 0.4;
+#endif
       if (!good)
         continue;
 
@@ -245,8 +265,7 @@ auto __main(int argc, char** argv) -> int
                     [&disp](const auto& p) { disp(p) = sara::Cyan8; });
 
       for (const auto& p : cs->second)
-        sara::fill_circle(disp, p.coords.x(), p.coords.y(), 2,
-                          sara::Magenta8);
+        sara::fill_circle(disp, p.coords.x(), p.coords.y(), 2, sara::Magenta8);
     }
     sara::display(disp);
   }
