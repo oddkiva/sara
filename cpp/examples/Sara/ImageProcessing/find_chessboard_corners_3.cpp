@@ -55,7 +55,8 @@ struct Corner
 
 // Select the local maxima of the cornerness functions.
 auto select(const sara::ImageView<float>& cornerness,
-            const float cornerness_adaptive_thres) -> std::vector<Corner<int>>
+            const float cornerness_adaptive_thres, const int border)
+    -> std::vector<Corner<int>>
 {
   const auto extrema = sara::local_maxima(cornerness);
 
@@ -65,8 +66,14 @@ auto select(const sara::ImageView<float>& cornerness,
   auto extrema_filtered = std::vector<Corner<int>>{};
   extrema_filtered.reserve(extrema.size());
   for (const auto& p : extrema)
-    if (cornerness(p) > cornerness_thres)
+  {
+    const auto in_image_domain =
+        border <= p.x() && p.x() < cornerness.width() - border &&  //
+        border <= p.y() && p.y() < cornerness.height() - border;
+    if (in_image_domain && cornerness(p) > cornerness_thres)
       extrema_filtered.push_back({p, cornerness(p)});
+  }
+
   return extrema_filtered;
 };
 
@@ -159,7 +166,8 @@ auto __main(int argc, char** argv) -> int
     );
     const auto grad_f =
         frame_gray_ds.compute<sara::Gaussian>(0.5f).compute<sara::Gradient>();
-    auto corners_int = select(cornerness, cornerness_adaptive_thres);
+    static const auto border = static_cast<int>(std::round(sigma_I));
+    auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
     sara::toc("Corner detection");
 
     sara::tic();
@@ -167,8 +175,9 @@ auto __main(int argc, char** argv) -> int
     std::transform(
         corners_int.begin(), corners_int.end(), std::back_inserter(corners),
         [&grad_f, sigma_I](const Corner<int>& c) -> Corner<float> {
-          const auto p = sara::refine_junction_location_unsafe(
-              grad_f, c.coords, static_cast<int>(std::round(sigma_I)));
+          static const auto radius = static_cast<int>(std::round(sigma_I));
+          const auto p =
+              sara::refine_junction_location_unsafe(grad_f, c.coords, radius);
           return {p, c.score};
         });
     sara::toc("Corner refinement");
@@ -237,7 +246,7 @@ auto __main(int argc, char** argv) -> int
         {
           const auto a = curve_simplified[i].cast<float>() * downscale_factor;
           const auto b =
-              curve_simplified[i + 1].cast<float>() * downscale_factor;
+              curve_simplified[i + 1u].cast<float>() * downscale_factor;
           sara::draw_line(display, a, b, color, 2);
         }
       }
@@ -257,7 +266,7 @@ auto __main(int argc, char** argv) -> int
                     60, 0, false, true);
     sara::display(display);
     sara::toc("Display");
-    sara::get_key();
+    // sara::get_key();
   }
 
   return 0;
