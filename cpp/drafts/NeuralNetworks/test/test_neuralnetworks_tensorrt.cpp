@@ -22,7 +22,7 @@ namespace shakti = DO::Shakti;
 
 
 template <typename T, int N>
-using PinnedTensor = sara::Tensor_<float, N, shakti::PinnedAllocator>;
+using PinnedTensor = sara::Tensor_<float, N, shakti::Cuda::PinnedAllocator>;
 
 
 auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
