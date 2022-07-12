@@ -167,8 +167,8 @@ auto __main(int argc, char** argv) -> int
     std::transform(
         corners_int.begin(), corners_int.end(), std::back_inserter(corners),
         [&grad_f, sigma_I](const Corner<int>& c) -> Corner<float> {
-          const auto p =
-              sara::refine_junction_location_unsafe(grad_f, c.coords, sigma_I);
+          const auto p = sara::refine_junction_location_unsafe(
+              grad_f, c.coords, static_cast<int>(std::round(sigma_I)));
           return {p, c.score};
         });
     sara::toc("Corner refinement");
@@ -242,12 +242,16 @@ auto __main(int argc, char** argv) -> int
         }
       }
 
-      sara::fill_circle(display, std::round(downscale_factor * p.coords.x()),
-                        std::round(downscale_factor * p.coords.y()), 1,
-                        sara::Yellow8);
-      sara::draw_circle(display, std::round(downscale_factor * p.coords.x()),
-                        std::round(downscale_factor * p.coords.y()), 4,
-                        sara::Red8, 2);
+      sara::fill_circle(
+          display,
+          static_cast<int>(std::round(downscale_factor * p.coords.x())),
+          static_cast<int>(std::round(downscale_factor * p.coords.y())), 1,
+          sara::Yellow8);
+      sara::draw_circle(
+          display,
+          static_cast<int>(std::round(downscale_factor * p.coords.x())),
+          static_cast<int>(std::round(downscale_factor * p.coords.y())), 4,
+          sara::Red8, 2);
     }
     sara::draw_text(display, 80, 80, std::to_string(frame_number), sara::White8,
                     60, 0, false, true);

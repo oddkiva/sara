@@ -3,9 +3,9 @@
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 #include <DO/Shakti/Halide/BinaryOperators.hpp>
-#include <DO/Shakti/Halide/SIFT/V3/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/GaussianConvolution.hpp>
 #include <DO/Shakti/Halide/Resize.hpp>
+#include <DO/Shakti/Halide/SIFT/V3/ExtremumDataStructures.hpp>
 
 #include "shakti_gray32f_to_rgb8u_cpu.h"
 
@@ -84,9 +84,9 @@ namespace DO::Shakti::HalideBackend::v3 {
 
       // Calculate the Gaussian smoothing values.
       sigmas = std::vector<float>(scale_count + 3);
+      using DO::Sara::square;
       for (auto i = 0u; i < sigmas.size(); ++i)
-        sigmas[i] =
-            std::sqrt(std::pow(scales[i], 2) - std::pow(scale_camera, 2));
+        sigmas[i] = std::sqrt(square(scales[i]) - square(scale_camera));
 
       // Fill the Gaussian kernels.
       const auto kernel_size_max = kernel_size(sigmas.back());
@@ -104,7 +104,7 @@ namespace DO::Shakti::HalideBackend::v3 {
 
         for (auto k = 0; k < ksize; ++k)
           kernels(n, k + kernel_mid - kradius) =
-              exp(-std::pow(k - kradius, 2) / two_sigma_squared);
+              exp(-square(k - kradius) / two_sigma_squared);
 
         const auto kernel_sum =
             std::accumulate(&kernels(n, kernel_mid - kradius),
@@ -231,7 +231,7 @@ namespace DO::Shakti::HalideBackend::v3 {
       extrema_quantized.resize(num_extrema);
 
       auto i = 0;
-#pragma omp parallel for schedule(dynamic) reduction(+:i)
+#pragma omp parallel for schedule(dynamic) reduction(+ : i)
       for (auto n = 0; n < extrema_map.dim(3).extent(); ++n)
       {
         for (auto s = 0; s < extrema_map.dim(2).extent(); ++s)
@@ -403,7 +403,7 @@ namespace DO::Shakti::HalideBackend::v3 {
       e.value.copy_to_host();
       // No need to copy e.type because it is already in the host memory.
 
-      e_oriented.resize(d.orientation_map.size());
+      e_oriented.resize(static_cast<std::int32_t>(d.orientation_map.size()));
 
       auto k = 0;
       for (auto i = 0; i < e.size(); ++i)
