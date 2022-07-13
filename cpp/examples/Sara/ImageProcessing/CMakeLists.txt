@@ -69,3 +69,4 @@ sara_add_example(find_chessboard_corners_3)
 target_link_libraries(find_chessboard_corners_3 PRIVATE ChessboardDetection)
 
 sara_add_example(find_aruco_marker)
+target_link_libraries(find_aruco_marker PRIVATE $<$<BOOL:TBB_FOUND>:TBB::tbb>)

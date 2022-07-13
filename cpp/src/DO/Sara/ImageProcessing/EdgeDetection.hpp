@@ -50,6 +50,31 @@ namespace DO::Sara {
     const auto h = grad_mag.height();
     const auto wh = w * h;
 
+#define FAST_COS_AND_SIN
+#ifdef FAST_COS_AND_SIN
+    static constexpr auto fast_cos = [](float x) {
+      float u = 1.2467379e-32f;
+      u = u * x + -9.6966799e-4f;
+      u = u * x + -1.8279663e-31f;
+      u = u * x + 3.922768e-2f;
+      u = u * x + 7.4160361e-31f;
+      u = u * x + -4.9534958e-1f;
+      u = u * x + -7.1721109e-31f;
+      return u * x + 9.986066e-1f;
+    };
+
+    static constexpr auto fast_sin = [](const float x) {
+      float u = -1.4507699e-4f;
+      u = u * x + -9.7064129e-41f;
+      u = u * x + 7.9580618e-3f;
+      u = u * x + 1.118603e-39f;
+      u = u * x + -1.6566699e-1f;
+      u = u * x + -1.7063928e-39f;
+      u = u * x + 9.9927587e-1f;
+      return u * x + 7.7202328e-42f;
+    };
+#endif
+
 #pragma omp parallel for
     for (auto xy = 0; xy < wh; ++xy)
     {
@@ -62,9 +87,18 @@ namespace DO::Sara {
       if (grad_curr < low_thres)
         continue;
 
-      const auto& theta = grad_ori(x, y);
       const Vector2d p = Vector2i(x, y).cast<double>();
+#ifdef FAST_COS_AND_SIN
+      auto theta = grad_ori(x, y);
+      if (theta >= M_PI)
+        theta -= 2 * M_PI;
+      const auto c = fast_cos(theta);
+      const auto s = fast_sin(theta);
+      const Vector2d d = Vector2f{c, s}.cast<double>().normalized();
+#else
+      const auto theta = grad_ori(x, y);
       const Vector2d d = Vector2f{cos(theta), sin(theta)}.cast<double>();
+#endif
       const Vector2d p0 = p - d;
       const Vector2d p2 = p + d;
       const auto grad_prev = interpolate(grad_mag, p0);
