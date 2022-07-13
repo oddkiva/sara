@@ -13,7 +13,7 @@
 
 #include <omp.h>
 
-#if __has_include(<execution>)
+#if __has_include(<execution>) && !defined(__APPLE__)
 #include <execution>
 #endif
 
@@ -128,7 +128,7 @@ auto __main(int argc, char** argv) -> int
     sara::tic();
     sara::apply_gaussian_filter(f, f_blurred, sigma_D);
     sara::gradient_in_polar_coordinates(f_blurred, grad_f_norm, grad_f_ori);
-#if __has_include(<execution>)
+#if __has_include(<execution>) && !defined(__APPLE__)
     const auto grad_max = *std::max_element(
         std::execution::par_unseq, grad_f_norm.begin(), grad_f_norm.end());
 #else
@@ -138,7 +138,7 @@ auto __main(int argc, char** argv) -> int
     auto edge_map = sara::suppress_non_maximum_edgels(
         grad_f_norm, grad_f_ori, 2 * grad_thres, grad_thres);
     std::for_each(
-#if __has_include(<execution>)
+#if __has_include(<execution>) && !defined(__APPLE__)
         std::execution::par_unseq,
 #endif
         edge_map.begin(), edge_map.end(), [](auto& e) {
