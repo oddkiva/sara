@@ -14,7 +14,7 @@
 #include <omp.h>
 
 #if __has_include(<execution>) && !defined(__APPLE__)
-#include <execution>
+#  include <execution>
 #endif
 
 #include <DO/Sara/Core/TicToc.hpp>
@@ -212,14 +212,25 @@ auto __main(int argc, char** argv) -> int
       }
     }
 
+    auto candidate_quads = std::vector<sara::SmallPolygon<4>>{};
+
     auto disp = f.convert<sara::Rgb8>();
-    for (const auto& [label, edge] : edges)
+    for (const auto& [label, edge_curve] : edges)
     {
-      if (edge.size() < 10)
+      // We assume the aruco square has a side at least 10 pixel wide.
+      //
+      // - If a detected curve corresponds to the perimeter of an ARUCO square,
+      //   we need it to contain at least 3 sides to qualify as a potential
+      //   quadrangle candidate.
+      // - It should therefore contain 3 sufficiently sharp corners, which is
+      //   the job of Harris's corner detector.
+      static constexpr auto minimum_aruco_side_length = 10;
+      static constexpr auto minimum_corners = 3;
+      static constexpr auto minimum_curve_length = 10;
+      if (edge_curve.size() < 10 * 3)
         continue;
 
       // Quadrangle filtering.
-      // 4 corners.
       auto cs = corners_per_curve.find(label);
       if (cs == corners_per_curve.end())
         continue;
@@ -227,13 +238,14 @@ auto __main(int argc, char** argv) -> int
         continue;
 
       // The convex hull of the point set.
-      auto point_set = std::vector<Eigen::Vector2d>{};
-      std::transform(edge.begin(), edge.end(), std::back_inserter(point_set),
+      auto curve_points = std::vector<Eigen::Vector2d>{};
+      std::transform(edge_curve.begin(), edge_curve.end(),
+                     std::back_inserter(curve_points),
                      [](const auto& p) { return p.template cast<double>(); });
-      const auto ch = sara::graham_scan_convex_hull(point_set);
+      const auto ch = sara::graham_scan_convex_hull(curve_points);
       const auto area_ch = sara::area(ch);
 
-      // The convex hull from the possibly imcomplete quadrangle.
+      // The convex hull of the candidate edge is a good quadrangle candidate.
       auto q = std::vector<Eigen::Vector2d>{};
       std::transform(
           cs->second.begin(), cs->second.end(), std::back_inserter(q),
@@ -245,13 +257,15 @@ auto __main(int argc, char** argv) -> int
       auto good = false;
       if (incomplete)
       {
+        // Find the best quad if partially reconstructed.
         auto quads = std::array<std::vector<Eigen::Vector2d>, 3>{
             quad, quad, quad  //
         };
         for (auto i = 1; i < 3; ++i)
-          std::rotate(quads[i].rbegin(), quads[i].rbegin() + i, quads[i].rend());
+          std::rotate(quads[i].rbegin(), quads[i].rbegin() + i,
+                      quads[i].rend());
 
-        for (auto& q: quads)
+        for (auto& q : quads)
         {
           const auto& a = q[0];
           const auto& b = q[1];
@@ -261,18 +275,28 @@ auto __main(int argc, char** argv) -> int
           q = sara::graham_scan_convex_hull(q);
         }
 
+        // The convex hull should be a good approximation of the partially
+        // detected quad.
+        //
+        // Therefore the best reconstructed quad has to be as close as possible
+        // to the convex hull.
+        //
+        // On hard cases, this is very useful to try not missing the ARUCO
+        // squares that are hard to detect because of their small sizes, the
+        // blur and noise altogether.
         auto ious = std::array<double, 3>{};
-        std::transform(
-            quads.begin(), quads.end(), ious.begin(), [&ch, area_ch](const auto& q) {
-              // Convex hull based filtering
-              const auto inter = sara::sutherland_hodgman(ch, q);
-              const auto area_inter = sara::area(inter);
-              const auto area_q = sara::area(q);
-              const auto iou = area_inter / (area_ch + area_q - area_inter);
-              return iou;
-            });
+        std::transform(quads.begin(), quads.end(), ious.begin(),
+                       [&ch, area_ch](const auto& q) {
+                         const auto inter = sara::sutherland_hodgman(ch, q);
+                         const auto area_inter = sara::area(inter);
+                         const auto area_q = sara::area(q);
+                         const auto iou =
+                             area_inter / (area_ch + area_q - area_inter);
+                         return iou;
+                       });
 
-        const auto best_quad_index = std::max_element(ious.begin(), ious.end()) - ious.begin();
+        const auto best_quad_index =
+            std::max_element(ious.begin(), ious.end()) - ious.begin();
         quad = quads[best_quad_index];
         iou = ious[best_quad_index];
       }
@@ -288,7 +312,9 @@ auto __main(int argc, char** argv) -> int
       if (!good)
         continue;
 
-      std::for_each(edge.begin(), edge.end(),
+      candidate_quads.emplace_back(quad.data());
+
+      std::for_each(edge_curve.begin(), edge_curve.end(),
                     [&disp](const auto& p) { disp(p) = sara::Cyan8; });
 
       for (const auto& q : quad)
@@ -299,6 +325,7 @@ auto __main(int argc, char** argv) -> int
         sara::fill_circle(disp, d.x(), d.y(), 2, sara::Blue8);
       }
     }
+    SARA_CHECK(candidate_quads.size());
     sara::display(disp);
   }
 
