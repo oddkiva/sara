@@ -224,10 +224,11 @@ auto __main(int argc, char** argv) -> int
       //   quadrangle candidate.
       // - It should therefore contain 3 sufficiently sharp corners, which is
       //   the job of Harris's corner detector.
-      static constexpr auto minimum_aruco_side_length = 10;
-      static constexpr auto minimum_corners = 3;
-      static constexpr auto minimum_curve_length = 10;
-      if (edge_curve.size() < 10 * 3)
+      static constexpr auto minimum_side_length = 10;
+      static constexpr auto minimum_num_corners = 3;
+      static constexpr auto minimum_curve_length =
+          minimum_side_length * minimum_num_corners;
+      if (edge_curve.size() < minimum_curve_length)
         continue;
 
       // Quadrangle filtering.
