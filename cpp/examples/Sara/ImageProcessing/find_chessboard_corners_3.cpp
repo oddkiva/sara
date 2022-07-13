@@ -266,7 +266,7 @@ auto __main(int argc, char** argv) -> int
                     60, 0, false, true);
     sara::display(display);
     sara::toc("Display");
-    // sara::get_key();
+    sara::get_key();
   }
 
   return 0;

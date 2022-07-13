@@ -31,11 +31,11 @@
 namespace sara = DO::Sara;
 
 
+template <typename T>
 struct Corner
 {
-  Eigen::Vector2i coords;
+  Eigen::Vector2<T> coords;
   float score;
-
   auto position() const -> const Eigen::Vector2i&
   {
     return coords;
@@ -48,18 +48,24 @@ struct Corner
 
 // Select the local maxima of the cornerness functions.
 auto select(const sara::ImageView<float>& cornerness,
-            const float cornerness_adaptive_thres) -> std::vector<Corner>
+            const float cornerness_adaptive_thres, const int border)
+    -> std::vector<Corner<int>>
 {
   const auto extrema = sara::local_maxima(cornerness);
 
   const auto cornerness_max = cornerness.flat_array().maxCoeff();
   const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
 
-  auto extrema_filtered = std::vector<Corner>{};
+  auto extrema_filtered = std::vector<Corner<int>>{};
   extrema_filtered.reserve(extrema.size());
   for (const auto& p : extrema)
-    if (cornerness(p) > cornerness_thres)
+  {
+    const auto in_image_domain =
+        border <= p.x() && p.x() < cornerness.width() - border &&  //
+        border <= p.y() && p.y() < cornerness.height() - border;
+    if (in_image_domain && cornerness(p) > cornerness_thres)
       extrema_filtered.push_back({p, cornerness(p)});
+  }
 
   return extrema_filtered;
 };
@@ -84,7 +90,6 @@ auto __main(int argc, char** argv) -> int
   // Corner filtering.
   const auto kappa = argc < 4 ? 0.04f : std::stof(argv[3]);
   const auto cornerness_adaptive_thres = argc < 5 ? 1e-4f : std::stof(argv[4]);
-  const auto nms_radius = argc < 6 ? 2 : std::stoi(argv[5]);
   static constexpr auto sigma_D = 0.8f;
   static constexpr auto sigma_I = 2.0f;
 
@@ -102,10 +107,8 @@ auto __main(int argc, char** argv) -> int
   while (video_stream.read())
   {
     ++frame_number;
-#if 0
     if (frame_number % 3 != 0)
       continue;
-#endif
 
     if (sara::active_window() == nullptr)
     {
@@ -140,26 +143,41 @@ auto __main(int argc, char** argv) -> int
     sara::toc("Edge grouping");
 
     sara::tic();
-    const auto M = f_blurred.compute<sara::Gradient>()
-                       .compute<sara::SecondMomentMatrix>()
+    const auto grad_f = f_blurred.compute<sara::Gradient>();
+    const auto M = grad_f
+                       .compute<sara::SecondMomentMatrix>()  //
                        .compute<sara::Gaussian>(sigma_I);
     auto cornerness = sara::Image<float>{f_blurred.sizes()};
     std::transform(M.begin(), M.end(), cornerness.begin(),
                    [kappa](const auto& m) {
                      return m.determinant() - kappa * pow(m.trace(), 2);
                    });
-    auto corners = select(cornerness, cornerness_adaptive_thres);
-    sara::nms(corners, cornerness.sizes(), nms_radius);
+    static const auto border = static_cast<int>(std::round(sigma_I));
+    auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
     sara::toc("Corner detection");
 
-    auto corners_per_curve = std::map<std::int32_t, std::vector<Corner>>{};
+    sara::tic();
+    auto corners = std::vector<Corner<float>>{};
+    std::transform(corners_int.begin(), corners_int.end(),
+                   std::back_inserter(corners),
+                   [&grad_f](const Corner<int>& c) -> Corner<float> {
+                     const auto p = sara::refine_junction_location_unsafe(  //
+                         grad_f, c.coords, border);
+                     return {p, c.score};
+                   });
+    sara::toc("Corner refinement");
+
+    auto corners_per_curve =
+        std::map<std::int32_t, std::vector<Corner<float>>>{};
     auto visited = sara::Image<std::uint8_t>{f.sizes()};
     visited.flat_array().fill(0);
     for (const auto& corner : corners)
     {
-      const auto x = corner.coords.x();
-      const auto y = corner.coords.y();
-      const auto r = nms_radius;
+      const Eigen::Array2i p = corner.coords.array().round().cast<int>();
+      const auto& x = p.x();
+      const auto& y = p.y();
+      static constexpr auto r = 1;  // This is a very sensitive parameter...
+                                    // (cannot be 0 and cannot be 2... so 1).
 
       for (auto v = y - r; v <= y + r; ++v)
       {
@@ -171,20 +189,20 @@ auto __main(int argc, char** argv) -> int
             continue;
 
           const auto& label = edge_label(u, v);
-          if (label != -1 && visited(corner.coords) == 0)
+          if (label != -1 && visited(p) == 0)
           {
             corners_per_curve[label].push_back(corner);
-            visited(corner.coords) = 1;
+            visited(p) = 1;
           }
         }
       }
     }
 
-    auto disp = video_frame;// edge_map.convert<sara::Rgb8>();
-#ifdef DEBUG
+    auto disp = video_frame.convert<float>().convert<sara::Rgb8>();
+// #define SHOW_CORNERS
+#ifdef SHOW_CORNERS
     for (const auto& p : corners)
-      sara::fill_circle(disp, p.coords.x(), p.coords.y(), nms_radius,
-                        sara::Red8);
+      sara::fill_circle(disp, p.coords.x(), p.coords.y(), 2, sara::Yellow8);
 #endif
     for (const auto& [label, edge] : edges)
     {
@@ -213,53 +231,51 @@ auto __main(int argc, char** argv) -> int
           [](const auto& c) { return c.coords.template cast<double>(); });
       auto quad = sara::graham_scan_convex_hull(q);
 
-#define METHOD1
-#ifdef METHOD1
+      const auto incomplete = quad.size() == 3;
+      auto iou = double{};
       auto good = false;
-
-      // If the quadrangle is complete.
-      if (quad.size() == 4)
+      if (incomplete)
       {
-        // Convex hull based filtering
+        auto quads = std::array<std::vector<Eigen::Vector2d>, 3>{
+            quad, quad, quad  //
+        };
+        for (auto i = 1; i < 3; ++i)
+          std::rotate(quads[i].rbegin(), quads[i].rbegin() + i, quads[i].rend());
+
+        for (auto& q: quads)
+        {
+          const auto& a = q[0];
+          const auto& b = q[1];
+          const auto& c = q[2];
+          const auto d = b + c - a;
+          q.push_back(d);
+          q = sara::graham_scan_convex_hull(q);
+        }
+
+        auto ious = std::array<double, 3>{};
+        std::transform(
+            quads.begin(), quads.end(), ious.begin(), [&ch, area_ch](const auto& q) {
+              // Convex hull based filtering
+              const auto inter = sara::sutherland_hodgman(ch, q);
+              const auto area_inter = sara::area(inter);
+              const auto area_q = sara::area(q);
+              const auto iou = area_inter / (area_ch + area_q - area_inter);
+              return iou;
+            });
+
+        const auto best_quad_index = std::max_element(ious.begin(), ious.end()) - ious.begin();
+        quad = quads[best_quad_index];
+        iou = ious[best_quad_index];
+      }
+      else
+      {
         const auto inter = sara::sutherland_hodgman(ch, quad);
         const auto area_inter = sara::area(inter);
         const auto area_q = sara::area(quad);
-        const auto iou = area_inter / (area_ch + area_q - area_inter);
-        good = iou > 0.5;
+        iou = area_inter / (area_ch + area_q - area_inter);
       }
 
-      // If the quadrangle is incomplete.
-      else if (quad.size() == 3)  // CAVEAT: The convex hull algorithm can
-                                  // collapse collinear points.
-      {
-        // Calculate the parallelogram area.
-        const auto& a = quad[0];
-        const auto& b = quad[1];
-        const auto& c = quad[2];
-        const Eigen::Vector2d ba = a - b;
-        const Eigen::Vector2d bc = c - b;
-        const auto area_parallelogram = std::sqrt(
-            ba.squaredNorm() * bc.squaredNorm() - sara::square(ba.dot(bc)));
-        const auto error = std::abs(area_parallelogram - area_ch) / std::max(area_ch, area_parallelogram);
-        good = error < 0.3;
-      }
-#else
-      if (quad.size() == 3)
-      {
-        const auto& a = quad[0];
-        const auto& b = quad[1];
-        const auto& c = quad[2];
-        const auto d = a + c - b;
-        quad.push_back(d);
-      }
-
-      // Convex hull based filtering
-      const auto inter = sara::sutherland_hodgman(ch, quad);
-      const auto area_inter = sara::area(inter);
-      const auto area_q = sara::area(quad);
-      const auto iou = area_inter / (area_ch + area_q - area_inter);
-      const auto good = iou > 0.4;
-#endif
+      good = iou > 0.6;
       if (!good)
         continue;
 
@@ -268,13 +284,10 @@ auto __main(int argc, char** argv) -> int
 
       for (const auto& q : quad)
         sara::fill_circle(disp, q.x(), q.y(), 2, sara::Magenta8);
-      if (quad.size() == 3)
+      if (incomplete)
       {
-        const auto& a = quad[0];
-        const auto& b = quad[1];
-        const auto& c = quad[2];
-        const auto d = a + c - b;
-        sara::fill_circle(disp, d.x(), d.y(), 2, sara::Red8);
+        const auto d = quad[3];
+        sara::fill_circle(disp, d.x(), d.y(), 2, sara::Blue8);
       }
     }
     sara::display(disp);
