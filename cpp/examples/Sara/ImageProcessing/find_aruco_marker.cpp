@@ -89,13 +89,13 @@ auto __main(int argc, char** argv) -> int
   const auto video_file = std::string{argv[1]};
 #endif
 
-  const auto grad_adaptive_thres = argc < 3 ? 2e-2f : std::stof(argv[2]);
+  const auto grad_adaptive_thres = argc < 3 ? 1e-1f : std::stof(argv[2]);
 
   // Corner filtering.
   const auto kappa = argc < 4 ? 0.04f : std::stof(argv[3]);
-  const auto cornerness_adaptive_thres = argc < 5 ? 1e-4f : std::stof(argv[4]);
+  const auto cornerness_adaptive_thres = argc < 5 ? 1e-5f : std::stof(argv[4]);
   static constexpr auto sigma_D = 0.8f;
-  static constexpr auto sigma_I = 2.0f;
+  static constexpr auto sigma_I = 1.5f;
 
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
@@ -213,11 +213,6 @@ auto __main(int argc, char** argv) -> int
     }
 
     auto disp = f.convert<sara::Rgb8>();
-// #define SHOW_CORNERS
-#ifdef SHOW_CORNERS
-    for (const auto& p : corners)
-      sara::fill_circle(disp, p.coords.x(), p.coords.y(), 2, sara::Yellow8);
-#endif
     for (const auto& [label, edge] : edges)
     {
       if (edge.size() < 10)
