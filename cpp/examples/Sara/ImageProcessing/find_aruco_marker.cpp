@@ -127,6 +127,18 @@ auto __main(int argc, char** argv) -> int
 
     sara::tic();
     sara::apply_gaussian_filter(f, f_blurred, sigma_D);
+    const auto grad_f = f_blurred.compute<sara::Gradient>();
+    const auto M =
+        grad_f.compute<sara::SecondMomentMatrix>().compute<sara::Gaussian>(
+            sigma_I);
+    auto cornerness = sara::Image<float>{M.sizes()};
+    std::transform(
+#if __has_include(<execution>) && !defined(__APPLE__)
+        std::execution::par_unseq,
+#endif
+        M.begin(), M.end(), cornerness.begin(), [kappa](const auto& m) {
+          return m.determinant() - kappa * pow(m.trace(), 2);
+        });
     sara::gradient_in_polar_coordinates(f_blurred, grad_f_norm, grad_f_ori);
 #if __has_include(<execution>) && !defined(__APPLE__)
     const auto grad_max = *std::max_element(
@@ -157,85 +169,10 @@ auto __main(int argc, char** argv) -> int
     sara::toc("Edge grouping");
 
     sara::tic();
-    const auto grad_f = f_blurred.compute<sara::Gradient>();
-    const auto M = grad_f
-                       .compute<sara::SecondMomentMatrix>()  //
-                       .compute<sara::Gaussian>(sigma_I);
-    auto cornerness = sara::Image<float>{f_blurred.sizes()};
-    std::transform(M.begin(), M.end(), cornerness.begin(),
-                   [kappa](const auto& m) {
-                     return m.determinant() - kappa * pow(m.trace(), 2);
-                   });
-    static const auto border = static_cast<int>(std::round(sigma_I));
-    auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
-    sara::toc("Corner detection");
-
-    sara::tic();
-    auto corners = std::vector<Corner<float>>{};
-    std::transform(corners_int.begin(), corners_int.end(),
-                   std::back_inserter(corners),
-                   [&grad_f](const Corner<int>& c) -> Corner<float> {
-                     const auto p = sara::refine_junction_location_unsafe(  //
-                         grad_f, c.coords, border);
-                     return {p, c.score};
-                   });
-    sara::toc("Corner refinement");
-
-    auto corners_per_curve =
-        std::map<std::int32_t, std::vector<Corner<float>>>{};
-    auto visited = sara::Image<std::uint8_t>{f.sizes()};
-    visited.flat_array().fill(0);
-    for (const auto& corner : corners)
-    {
-      const Eigen::Array2i p = corner.coords.array().round().cast<int>();
-      const auto& x = p.x();
-      const auto& y = p.y();
-      static constexpr auto r = 1;  // This is a very sensitive parameter...
-                                    // (cannot be 0 and cannot be 2... so 1).
-
-      for (auto v = y - r; v <= y + r; ++v)
-      {
-        for (auto u = x - r; u <= x + r; ++u)
-        {
-          const auto in_image_domain = 0 <= u && u < f.width() &&  //
-                                       0 <= v && v < f.height();
-          if (!in_image_domain)
-            continue;
-
-          const auto& label = edge_label(u, v);
-          if (label != -1 && visited(p) == 0)
-          {
-            corners_per_curve[label].push_back(corner);
-            visited(p) = 1;
-          }
-        }
-      }
-    }
-
-    auto candidate_quads = std::vector<sara::SmallPolygon<4>>{};
-
-    auto disp = edge_map.convert<sara::Rgb8>();  // f.convert<sara::Rgb8>();
+    auto candidate_quads = std::vector<std::vector<Eigen::Vector2d>>{};
     for (const auto& [label, edge_curve] : edges)
     {
-      // We assume the aruco square has a side at least 10 pixel wide.
-      //
-      // - If a detected curve corresponds to the perimeter of an ARUCO square,
-      //   we need it to contain at least 3 sides to qualify as a potential
-      //   quadrangle candidate.
-      // - It should therefore contain 3 sufficiently sharp corners, which is
-      //   the job of Harris's corner detector.
-      static constexpr auto minimum_side_length = 10;
-      static constexpr auto minimum_num_corners = 3;
-      static constexpr auto minimum_curve_length =
-          minimum_side_length * minimum_num_corners;
-      if (edge_curve.size() < minimum_curve_length)
-        continue;
-
-      // Quadrangle filtering.
-      auto cs = corners_per_curve.find(label);
-      if (cs == corners_per_curve.end())
-        continue;
-      if (cs->second.size() != 3 && cs->second.size() != 4)
+      if (edge_curve.size() < 10)
         continue;
 
       // The convex hull of the point set.
@@ -243,110 +180,99 @@ auto __main(int argc, char** argv) -> int
       std::transform(edge_curve.begin(), edge_curve.end(),
                      std::back_inserter(curve_points),
                      [](const auto& p) { return p.template cast<double>(); });
-      auto ch = sara::graham_scan_convex_hull(curve_points);
-      // ch = sara::ramer_douglas_peucker(ch, 1.f);
-      // if (ch.size() == 4)
-      //   SARA_DEBUG << "GOOD CONVEX HULL!!!" << std::endl;
-      const auto area_ch = sara::area(ch);
-
-      // The convex hull of the candidate edge is a good quadrangle candidate.
-      auto q = std::vector<Eigen::Vector2d>{};
-      std::transform(
-          cs->second.begin(), cs->second.end(), std::back_inserter(q),
-          [](const auto& c) { return c.coords.template cast<double>(); });
-      auto quad = sara::graham_scan_convex_hull(q);
-
-      const auto incomplete = quad.size() == 3;
-      auto iou = double{};
-      auto good = false;
-      if (incomplete)
-      {
-        // Find the best quad if partially reconstructed.
-        auto quads = std::array<std::vector<Eigen::Vector2d>, 3>{
-            quad, quad, quad  //
-        };
-        for (auto i = 1; i < 3; ++i)
-          std::rotate(quads[i].rbegin(), quads[i].rbegin() + i,
-                      quads[i].rend());
-
-        for (auto& q : quads)
-        {
-          const auto& a = q[0];
-          const auto& b = q[1];
-          const auto& c = q[2];
-          const auto d = b + c - a;
-          q.push_back(d);
-          q = sara::graham_scan_convex_hull(q);
-        }
-
-        // The convex hull should be a good approximation of the partially
-        // detected quad.
-        //
-        // Therefore the best reconstructed quad has to be as close as possible
-        // to the convex hull.
-        //
-        // On hard cases, this is very useful to try not missing the ARUCO
-        // squares that are hard to detect because of their small sizes, the
-        // blur and noise altogether.
-        auto ious = std::array<double, 3>{};
-        std::transform(quads.begin(), quads.end(), ious.begin(),
-                       [&ch, area_ch](const auto& q) {
-                         const auto inter = sara::sutherland_hodgman(ch, q);
-                         const auto area_inter = sara::area(inter);
-                         const auto area_q = sara::area(q);
-                         const auto iou =
-                             area_inter / (area_ch + area_q - area_inter);
-                         return iou;
-                       });
-
-        const auto best_quad_index =
-            std::max_element(ious.begin(), ious.end()) - ious.begin();
-        quad = quads[best_quad_index];
-        iou = ious[best_quad_index];
-      }
-      else
-      {
-        const auto inter = sara::sutherland_hodgman(ch, quad);
-        const auto area_inter = sara::area(inter);
-        const auto area_q = sara::area(quad);
-        iou = area_inter / (area_ch + area_q - area_inter);
-      }
-
-      good = iou > 0.6;
-      if (!good)
+      const auto ch = sara::graham_scan_convex_hull(curve_points);
+      if (sara::length(ch) < 10 * 4 || sara::area(ch) < 100)
         continue;
 
-      candidate_quads.emplace_back(quad.data());
-
-      // std::for_each(edge_curve.begin(), edge_curve.end(),
-      //               [&disp](const auto& p) { disp(p) = sara::Cyan8; });
-      for (auto i = 0u; i < ch.size(); ++i)
+      // Collect the dominant points, they must have some good cornerness
+      // measure.
+      auto dominant_points = std::vector<Corner<double>>{};
+      const auto n = ch.size();
+      for (auto i = 0u; i < n; ++i)
       {
-        const Eigen::Vector2i a = ch[i].array().round().cast<int>();
-        const Eigen::Vector2i b =
-            ch[(i + 1) % ch.size()].array().round().cast<int>();
-        sara::draw_line(disp, a.x(), a.y(), b.x(), b.y(), sara::Cyan8, 1);
+        const Eigen::Vector2i p = ch[i].array().round().cast<int>();
+        const auto score = cornerness(p);
+        if (score > cornerness_adaptive_thres)
+          dominant_points.push_back({ch[i], score});
+      }
+      // No point continuing at this point.
+      if (dominant_points.size() < 4)
+        continue;
+
+      // There must be 4 clusters of dominant points.
+      static constexpr auto min_sep_length = 4.;
+      static constexpr auto min_sep_length_2 = sara::square(min_sep_length);
+      auto cluster_cuts = std::vector<std::size_t>{};
+      for (auto i = 0u; i < dominant_points.size(); ++i)
+      {
+        const auto& p = dominant_points[i];
+        const auto& q = i == dominant_points.size() - 1 ? dominant_points[0]
+                                                        : dominant_points[i + 1];
+        if ((p.coords - q.coords).squaredNorm() > min_sep_length_2)
+          cluster_cuts.push_back(i == dominant_points.size() - 1 ? 0 : i + 1);
+      }
+      if (cluster_cuts.size() != 4)
+        continue;
+
+      // Form the quad by finding the best dominant point in each cluster.
+      const auto num_cuts = cluster_cuts.size();
+      const auto num_points = dominant_points.size();
+      auto quad = std::vector<Eigen::Vector2d>{};
+      quad.reserve(4);
+      for (auto i = 0u; i < cluster_cuts.size(); ++i)
+      {
+
+        // Form the cluster open interval [a, b).
+        auto a = cluster_cuts[i];
+        const auto& b = i == num_cuts - 1 ? cluster_cuts[0] : cluster_cuts[i + 1];
+
+        // Find the best corner.
+        auto best_corner = dominant_points[a];
+        while(a != b)
+        {
+          if (best_corner.score < dominant_points[a].score)
+            best_corner = dominant_points[a];
+          a = (a == num_points - 1) ? 0 : a + 1;
+        }
+        quad.push_back(best_corner.coords);
       }
 
-      for (const auto& q : quad)
-        sara::fill_circle(disp, q.x(), q.y(), 2, sara::Magenta8);
-      if (incomplete)
+      // Refine the corner location.
+      std::transform(quad.begin(), quad.end(), quad.begin(),
+                     [&grad_f](const Eigen::Vector2d& c) -> Eigen::Vector2d {
+                       static const auto radius =
+                           static_cast<int>(std::round(sigma_I));
+                       const Eigen::Vector2i ci = c.array().round().cast<int>();
+                       const auto p = sara::refine_junction_location_unsafe(
+                           grad_f, ci, radius);
+                       return p.cast<double>();
+                     });
+
+      candidate_quads.push_back(quad);
+    }
+    sara::toc("Candidate Quads");
+    SARA_CHECK(candidate_quads.size());
+
+    sara::tic();
+    auto disp = f.convert<sara::Rgb8>();
+    for (const auto& q : candidate_quads)
+    {
+      const auto n = q.size();
+      const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
+      for (auto i = 0u; i < n; ++i)
       {
-        const auto d = quad[3];
-        sara::fill_circle(disp, d.x(), d.y(), 2, sara::Blue8);
+        const Eigen::Vector2i a = q[i].array().round().cast<int>();
+        sara::fill_circle(disp, a.x(), a.y(), 2, color);
+      }
+      for (auto i = 0u; i < n; ++i)
+      {
+        const Eigen::Vector2i a = q[i].array().round().cast<int>();
+        const Eigen::Vector2i b = q[(i + 1) % n].array().round().cast<int>();
+        sara::draw_line(disp, a.x(), a.y(), b.x(), b.y(), color, 1);
       }
     }
-    SARA_CHECK(candidate_quads.size());
-    // for (const auto& q : candidate_quads)
-    // {
-    //   for (auto i = 0; i < 4; ++i)
-    //   {
-    //     const Eigen::Vector2i a = q[i].array().round().cast<int>();
-    //     const Eigen::Vector2i b = q[(i + 1) % 4].array().round().cast<int>();
-    //     sara::draw_line(disp, a.x(), a.y(), b.x(), b.y(), sara::Red8, 1);
-    //   }
-    // }
     sara::display(disp);
+    sara::toc("Display");
     sara::get_key();
   }
 
