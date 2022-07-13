@@ -111,8 +111,6 @@ auto __main(int argc, char** argv) -> int
   while (video_stream.read())
   {
     ++frame_number;
-    if (frame_number % 3 != 0)
-      continue;
 
     if (sara::active_window() == nullptr)
     {
@@ -271,7 +269,6 @@ auto __main(int argc, char** argv) -> int
     }
     sara::display(disp);
     sara::toc("Display");
-    sara::get_key();
   }
 
   return 0;
