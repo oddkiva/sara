@@ -214,7 +214,7 @@ auto __main(int argc, char** argv) -> int
 
     auto candidate_quads = std::vector<sara::SmallPolygon<4>>{};
 
-    auto disp = f.convert<sara::Rgb8>();
+    auto disp = edge_map.convert<sara::Rgb8>();  // f.convert<sara::Rgb8>();
     for (const auto& [label, edge_curve] : edges)
     {
       // We assume the aruco square has a side at least 10 pixel wide.
@@ -243,7 +243,10 @@ auto __main(int argc, char** argv) -> int
       std::transform(edge_curve.begin(), edge_curve.end(),
                      std::back_inserter(curve_points),
                      [](const auto& p) { return p.template cast<double>(); });
-      const auto ch = sara::graham_scan_convex_hull(curve_points);
+      auto ch = sara::graham_scan_convex_hull(curve_points);
+      // ch = sara::ramer_douglas_peucker(ch, 1.f);
+      // if (ch.size() == 4)
+      //   SARA_DEBUG << "GOOD CONVEX HULL!!!" << std::endl;
       const auto area_ch = sara::area(ch);
 
       // The convex hull of the candidate edge is a good quadrangle candidate.
@@ -315,8 +318,15 @@ auto __main(int argc, char** argv) -> int
 
       candidate_quads.emplace_back(quad.data());
 
-      std::for_each(edge_curve.begin(), edge_curve.end(),
-                    [&disp](const auto& p) { disp(p) = sara::Cyan8; });
+      // std::for_each(edge_curve.begin(), edge_curve.end(),
+      //               [&disp](const auto& p) { disp(p) = sara::Cyan8; });
+      for (auto i = 0u; i < ch.size(); ++i)
+      {
+        const Eigen::Vector2i a = ch[i].array().round().cast<int>();
+        const Eigen::Vector2i b =
+            ch[(i + 1) % ch.size()].array().round().cast<int>();
+        sara::draw_line(disp, a.x(), a.y(), b.x(), b.y(), sara::Cyan8, 1);
+      }
 
       for (const auto& q : quad)
         sara::fill_circle(disp, q.x(), q.y(), 2, sara::Magenta8);
@@ -327,7 +337,17 @@ auto __main(int argc, char** argv) -> int
       }
     }
     SARA_CHECK(candidate_quads.size());
+    // for (const auto& q : candidate_quads)
+    // {
+    //   for (auto i = 0; i < 4; ++i)
+    //   {
+    //     const Eigen::Vector2i a = q[i].array().round().cast<int>();
+    //     const Eigen::Vector2i b = q[(i + 1) % 4].array().round().cast<int>();
+    //     sara::draw_line(disp, a.x(), a.y(), b.x(), b.y(), sara::Red8, 1);
+    //   }
+    // }
     sara::display(disp);
+    sara::get_key();
   }
 
   return 0;
