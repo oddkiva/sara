@@ -9,10 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#pragma once
-
-#include <DO/Shakti/Cuda/MultiArray/CudaArray.hpp>
 #include <DO/Shakti/Cuda/FeatureDetectors/Octave.hpp>
+#include <DO/Shakti/Cuda/MultiArray/CudaArray.hpp>
 
 #include <math_constants.h>
 
@@ -81,8 +79,9 @@ namespace DO::Shakti::Cuda {
         const auto x_rel_in_scale_units = x0 + dx;
         const auto x_abs_in_pixels = x + x_rel_in_scale_units * sigma;
 
-        const auto square_dist = x_rel_in_scale_units * x_rel_in_scale_units +  //
-                                 y_rel_in_scale_units * y_rel_in_scale_units;
+        const auto square_dist =
+            x_rel_in_scale_units * x_rel_in_scale_units +  //
+            y_rel_in_scale_units * y_rel_in_scale_units;
 
         // Get the gradient.
         const auto gradient_norm =
@@ -92,7 +91,7 @@ namespace DO::Shakti::Cuda {
         const auto w_spatial = expf(-square_dist);
 
         // Calculate the total weight increment.
-        const auto w_increment = w_spatial * gradient_norm;
+        [[maybe_unused]] const auto w_increment = w_spatial * gradient_norm;
 
         // Now find out the two closest orientation bins which we will
         // distribute the weight increment to.
@@ -100,7 +99,7 @@ namespace DO::Shakti::Cuda {
         // 1. Get the absolute orientation, which is in [-Pi, Pi].
         const auto ori = tex2D<float>(ori_fn, x_abs_in_pixels, y_abs_in_pixels);
         // 2. Retransform it to [0, 2*Pi].
-        auto ori_normalized = ori < 0 ? ori + two_pi : ori;
+        [[maybe_unused]] auto ori_normalized = ori < 0 ? ori + two_pi : ori;
         // 3. Renormalize in [0, N].
         ori_normalized = ori * ori_norm_factor;
 
@@ -132,14 +131,14 @@ namespace DO::Shakti::Cuda {
     histogram[gi] = s_hist[ti * tile_o + to];
   }
 
-  __global__ auto compute_histogram_of_gradients(cudaTextureObject_t gaussian_fn,  //
-                                                 float* histogram,
-                                                 const float* x_arr,  //
-                                                 const float* y_arr,  //
-                                                 const int* s_arr,
-                                                 const int* s_layer_arr,
-                                                 int extremum_count,
-                                                 int orientation_pitch) -> void
+  __global__ auto
+  compute_histogram_of_gradients(cudaTextureObject_t gaussian_fn,  //
+                                 float* histogram,
+                                 const float* x_arr,  //
+                                 const float* y_arr,  //
+                                 const int* s_arr, const int* s_layer_arr,
+                                 int extremum_count, int orientation_pitch)
+      -> void
   {
     const auto o = blockIdx.x * blockDim.x + threadIdx.x;
     const auto i = blockIdx.y * blockDim.y + threadIdx.y;
@@ -148,7 +147,7 @@ namespace DO::Shakti::Cuda {
 
     const auto x = x_arr[i];
     const auto y = y_arr[i];
-    const auto s = s_layer_arr[i];
+    [[maybe_unused]] const auto s = s_layer_arr[i];
     const auto sigma = s_arr[i];
 
     const auto& to = threadIdx.x;
@@ -193,8 +192,9 @@ namespace DO::Shakti::Cuda {
         const auto x_rel_in_scale_units = x0 + dx;
         const auto x_abs_in_pixels = x + x_rel_in_scale_units * sigma;
 
-        const auto square_dist = x_rel_in_scale_units * x_rel_in_scale_units +  //
-                                 y_rel_in_scale_units * y_rel_in_scale_units;
+        const auto square_dist =
+            x_rel_in_scale_units * x_rel_in_scale_units +  //
+            y_rel_in_scale_units * y_rel_in_scale_units;
 
         // Get the gradient.
         auto [gradient_norm, ori] =
@@ -204,14 +204,14 @@ namespace DO::Shakti::Cuda {
         const auto w_spatial = expf(-square_dist);
 
         // Calculate the weight increment.
-        const auto w_increment = w_spatial * gradient_norm;
+        [[maybe_unused]] const auto w_increment = w_spatial * gradient_norm;
 
         // Now find out the two closest orientation bins. We will distribute the
         // weight increment to both bins.
         //
         // 1. Get the absolute orientation, which is in [-Pi, Pi].
         // 2. Retransform it to [0, 2*Pi].
-        auto ori_normalized = ori < 0 ? ori + two_pi : ori;
+        [[maybe_unused]] auto ori_normalized = ori < 0 ? ori + two_pi : ori;
         // 3. Renormalize in [0, N].
         ori_normalized = ori * ori_norm_factor;
 

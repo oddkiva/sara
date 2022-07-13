@@ -166,7 +166,7 @@ void inspect_homography_estimation(const Image<Rgb8>& image1,
   Matrix<double, 3, L> proj_Y = H.inverse() * Y;
   proj_Y.array().rowwise() /= proj_Y.row(2).array();
 
-  for (size_t i = 0; i < L; ++i)
+  for (auto i = 0; i < L; ++i)
   {
     // Draw the corresponding projected points.
     drawer.draw_point(1, proj_X.col(i).head(2).cast<float>(), Magenta8, 7);

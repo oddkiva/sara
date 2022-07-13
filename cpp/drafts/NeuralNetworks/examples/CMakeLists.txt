@@ -16,5 +16,5 @@ foreach (file ${neuralnetworks_SOURCE_FILES})
       RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
   set_property(TARGET ${filename}
     PROPERTY
-    FOLDER "DRAFTS/NeuralNetworks")
+    FOLDER "Examples/Sara/NeuralNetworks")
 endforeach ()

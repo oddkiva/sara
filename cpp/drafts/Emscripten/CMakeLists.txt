@@ -94,6 +94,9 @@ macro(sara_add_wasm_executable file)
 
   if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     add_dependencies(emscripten_copy_assets ${filename})
+    set_property(TARGET emscripten_copy_assets
+      PROPERTY
+      FOLDER "Libraries/Sara/Emscripten")
   endif()
 endmacro()
 

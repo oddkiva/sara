@@ -15,10 +15,10 @@ foreach (file ${test_neuralnetworks_SOURCE_FILES})
     NAME ${filename}
     SOURCES ${file}
     DEPENDENCIES ${DO_Sara_LIBRARIES}
-    FOLDER "DRAFTS/NeuralNetworks")
+    FOLDER "NeuralNetworks")
 endforeach ()
 
-if (CUDA_FOUND AND TensorRT_FOUND)
+if (CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
   foreach(file ${test_tensorrt_SOURCE_FILES})
     get_filename_component(filename ${file} NAME_WE)
 
@@ -37,11 +37,11 @@ if (CUDA_FOUND AND TensorRT_FOUND)
 
     target_link_libraries(${filename}
       ${Boost_LIBRARIES}
-      ${CUDA_LIBRARIES}
+      CUDA::cudart
       ${TensorRT_LIBRARIES}
       ${DO_Sara_LIBRARIES}
-      DO::Shakti::MultiArray
-      DO::Shakti::Utilities)
+      DO::Shakti::Cuda::MultiArray
+      DO::Shakti::Cuda::Utilities)
 
     set_target_properties(${filename}
       PROPERTIES
@@ -49,7 +49,7 @@ if (CUDA_FOUND AND TensorRT_FOUND)
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
     set_property(TARGET ${filename} PROPERTY
-      FOLDER "Tests/Sara/DRAFTS/NeuralNetworks")
+      FOLDER "Tests/Shakti/NeuralNetworks")
 
     add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
   endforeach()

@@ -22,13 +22,13 @@ namespace DO::Sara::TensorRT {
   class Logger : public nvinfer1::ILogger
   {
   public:
-    static auto instance() -> Logger&
+    static inline auto instance() -> Logger&
     {
       static Logger instance;
       return instance;
     }
 
-    void log(Severity severity, const char* msg) noexcept override
+    inline auto log(Severity severity, const char* msg) noexcept -> void override
     {
       if (severity != Severity::kINFO)
         std::cout << msg << std::endl;
@@ -101,7 +101,7 @@ namespace DO::Sara::TensorRT {
         decltype(make_network(std::declval<nvinfer1::IBuilder*>()));
     using model_weights_dict_type = std::map<std::string, std::vector<float>>;
 
-    Network(nvinfer1::IBuilder* builder)
+    inline Network(nvinfer1::IBuilder* builder)
       : _model{make_network(builder)}
     {
     }
@@ -116,12 +116,12 @@ namespace DO::Sara::TensorRT {
       return _model_weights;
     }
 
-    static auto set_current(Network& net)
+    static inline auto set_current(Network& net)
     {
       _current_network = &net;
     }
 
-    static auto current() -> Network&
+    static inline auto current() -> Network&
     {
       if (_current_network == nullptr)
         throw std::runtime_error{"Error: the current network is invalid!"};
@@ -129,12 +129,12 @@ namespace DO::Sara::TensorRT {
       return *_current_network;
     }
 
-    static auto current_var_index() -> int
+    static inline auto current_var_index() -> int
     {
       return _current_var_index;
     }
 
-    static auto increment_current_var_index() -> int
+    static inline auto increment_current_var_index() -> int
     {
       return ++_current_var_index;
     }

@@ -597,13 +597,15 @@ int main()
     checkerboard.shader_program.set_uniform_matrix4f("projection",
                                                      projection.data());
     glBindVertexArray(checkerboard.vao);
-    glDrawElements(GL_TRIANGLES, checkerboard.triangles.size(), GL_UNSIGNED_INT,
-                   0);
+    glDrawElements(GL_TRIANGLES,
+                   static_cast<GLsizei>(checkerboard.triangles.size()),
+                   GL_UNSIGNED_INT, 0);
 
 
     // Rotate the point cloud.
-    transform.rotate(AngleAxisf(std::pow(1.5, 5) * time.last_frame / 10000,
-                                Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
+    transform.rotate(AngleAxisf(
+        static_cast<float>(std::pow(1.5, 5) * time.last_frame / 10000),
+        Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
 
     // Draw point cloud.
     point_cloud_object.shader_program.use();

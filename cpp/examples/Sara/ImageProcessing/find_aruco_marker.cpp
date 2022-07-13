@@ -102,8 +102,10 @@ auto __main(int argc, char** argv) -> int
   while (video_stream.read())
   {
     ++frame_number;
+#if 0
     if (frame_number % 3 != 0)
       continue;
+#endif
 
     if (sara::active_window() == nullptr)
     {
@@ -178,7 +180,12 @@ auto __main(int argc, char** argv) -> int
       }
     }
 
-    auto disp = edge_map.convert<sara::Rgb8>();
+    auto disp = video_frame;// edge_map.convert<sara::Rgb8>();
+#ifdef DEBUG
+    for (const auto& p : corners)
+      sara::fill_circle(disp, p.coords.x(), p.coords.y(), nms_radius,
+                        sara::Red8);
+#endif
     for (const auto& [label, edge] : edges)
     {
       if (edge.size() < 10)
@@ -189,7 +196,7 @@ auto __main(int argc, char** argv) -> int
       auto cs = corners_per_curve.find(label);
       if (cs == corners_per_curve.end())
         continue;
-      if (cs->second.size() != 4)
+      if (cs->second.size() != 3 && cs->second.size() != 4)
         continue;
 
       // The convex hull of the point set.
@@ -197,29 +204,78 @@ auto __main(int argc, char** argv) -> int
       std::transform(edge.begin(), edge.end(), std::back_inserter(point_set),
                      [](const auto& p) { return p.template cast<double>(); });
       const auto ch = sara::graham_scan_convex_hull(point_set);
+      const auto area_ch = sara::area(ch);
 
-      // The convex hull from the quadrangle.
+      // The convex hull from the possibly imcomplete quadrangle.
       auto q = std::vector<Eigen::Vector2d>{};
       std::transform(
           cs->second.begin(), cs->second.end(), std::back_inserter(q),
           [](const auto& c) { return c.coords.template cast<double>(); });
-      const auto quad = sara::graham_scan_convex_hull(q);
+      auto quad = sara::graham_scan_convex_hull(q);
+
+#define METHOD1
+#ifdef METHOD1
+      auto good = false;
+
+      // If the quadrangle is complete.
+      if (quad.size() == 4)
+      {
+        // Convex hull based filtering
+        const auto inter = sara::sutherland_hodgman(ch, quad);
+        const auto area_inter = sara::area(inter);
+        const auto area_q = sara::area(quad);
+        const auto iou = area_inter / (area_ch + area_q - area_inter);
+        good = iou > 0.5;
+      }
+
+      // If the quadrangle is incomplete.
+      else if (quad.size() == 3)  // CAVEAT: The convex hull algorithm can
+                                  // collapse collinear points.
+      {
+        // Calculate the parallelogram area.
+        const auto& a = quad[0];
+        const auto& b = quad[1];
+        const auto& c = quad[2];
+        const Eigen::Vector2d ba = a - b;
+        const Eigen::Vector2d bc = c - b;
+        const auto area_parallelogram = std::sqrt(
+            ba.squaredNorm() * bc.squaredNorm() - sara::square(ba.dot(bc)));
+        const auto error = std::abs(area_parallelogram - area_ch) / std::max(area_ch, area_parallelogram);
+        good = error < 0.3;
+      }
+#else
+      if (quad.size() == 3)
+      {
+        const auto& a = quad[0];
+        const auto& b = quad[1];
+        const auto& c = quad[2];
+        const auto d = a + c - b;
+        quad.push_back(d);
+      }
 
       // Convex hull based filtering
       const auto inter = sara::sutherland_hodgman(ch, quad);
       const auto area_inter = sara::area(inter);
-      const auto area_ch = sara::area(ch);
       const auto area_q = sara::area(quad);
       const auto iou = area_inter / (area_ch + area_q - area_inter);
-      if (iou < 0.5)
+      const auto good = iou > 0.4;
+#endif
+      if (!good)
         continue;
 
       std::for_each(edge.begin(), edge.end(),
                     [&disp](const auto& p) { disp(p) = sara::Cyan8; });
 
-      for (const auto& p : cs->second)
-        sara::fill_circle(disp, p.coords.x(), p.coords.y(), nms_radius,
-                          sara::Magenta8);
+      for (const auto& q : quad)
+        sara::fill_circle(disp, q.x(), q.y(), 2, sara::Magenta8);
+      if (quad.size() == 3)
+      {
+        const auto& a = quad[0];
+        const auto& b = quad[1];
+        const auto& c = quad[2];
+        const auto d = a + c - b;
+        sara::fill_circle(disp, d.x(), d.y(), 2, sara::Red8);
+      }
     }
     sara::display(disp);
   }

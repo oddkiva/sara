@@ -32,7 +32,7 @@ namespace DO::Sara {
       pipeline.gradient_orientation.resize(image.sizes());
     gradient_in_polar_coordinates(image, pipeline.gradient_magnitude,
                                   pipeline.gradient_orientation);
-    toc("Polar Coordinates");
+    toc("Gradient Polar Coordinates");
 
     tic();
     const auto& grad_mag = pipeline.gradient_magnitude;
