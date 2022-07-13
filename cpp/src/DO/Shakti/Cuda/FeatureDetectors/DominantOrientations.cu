@@ -99,7 +99,7 @@ namespace DO::Shakti::Cuda {
         // 1. Get the absolute orientation, which is in [-Pi, Pi].
         const auto ori = tex2D<float>(ori_fn, x_abs_in_pixels, y_abs_in_pixels);
         // 2. Retransform it to [0, 2*Pi].
-        auto ori_normalized = ori < 0 ? ori + two_pi : ori;
+        [[maybe_unused]] auto ori_normalized = ori < 0 ? ori + two_pi : ori;
         // 3. Renormalize in [0, N].
         ori_normalized = ori * ori_norm_factor;
 
@@ -147,7 +147,7 @@ namespace DO::Shakti::Cuda {
 
     const auto x = x_arr[i];
     const auto y = y_arr[i];
-    const auto s = s_layer_arr[i];
+    [[maybe_unused]] const auto s = s_layer_arr[i];
     const auto sigma = s_arr[i];
 
     const auto& to = threadIdx.x;
@@ -211,7 +211,7 @@ namespace DO::Shakti::Cuda {
         //
         // 1. Get the absolute orientation, which is in [-Pi, Pi].
         // 2. Retransform it to [0, 2*Pi].
-        auto ori_normalized = ori < 0 ? ori + two_pi : ori;
+        [[maybe_unused]] auto ori_normalized = ori < 0 ? ori + two_pi : ori;
         // 3. Renormalize in [0, N].
         ori_normalized = ori * ori_norm_factor;
 

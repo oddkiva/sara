@@ -33,7 +33,14 @@
                        // applied to reference type; ignored"
 #endif
 
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #include <Eigen/Eigen>
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
 
 #include <sstream>
 

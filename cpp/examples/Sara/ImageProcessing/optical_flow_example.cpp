@@ -17,7 +17,6 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "Chessboard/CircularProfileExtractor.hpp"
 
 namespace sara = DO::Sara;
 
@@ -189,16 +188,10 @@ int __main(int argc, char** argv)
 
     // Select the local maxima of the cornerness functions.
     static constexpr auto select = [](const sara::ImageView<float>& cornerness,
-                                      const sara::ImageView<float>& f,
                                       const float cornerness_adaptive_thres) {
       static constexpr auto r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
 
       const auto extrema = sara::local_maxima(cornerness);
-
-#ifdef CHESSBOARD_CORNER_FILTERING
-      auto profile_extractor = CircularProfileExtractor{};
-      profile_extractor.circle_radius = r;
-#endif
 
       const auto cornerness_max = cornerness.flat_array().maxCoeff();
       const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
@@ -214,23 +207,12 @@ int __main(int argc, char** argv)
         if (!in_image_domain)
           continue;
 
-#ifdef CHESSBOARD_CORNER_FILTERING
-        const auto profile = profile_extractor(f, p.cast<double>());
-        const auto zero_crossings = localize_zero_crossings(  //
-            profile,                                          //
-            profile_extractor.num_circle_sample_points        //
-        );
-        if (zero_crossings.size() != 4u)
-          continue;
-#endif
-
         if (cornerness(p) > cornerness_thres)
           extrema_filtered.emplace_back(p);
       }
       return extrema_filtered;
     };
-    const auto corners =
-        select(cornerness, frame_gray, cornerness_adaptive_thres);
+    const auto corners = select(cornerness, cornerness_adaptive_thres);
 
     // Calculate the optical flow.
     flow_estimator.update_image(frame_gray);
