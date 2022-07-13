@@ -221,7 +221,6 @@ auto __main(int argc, char** argv) -> int
       quad.reserve(4);
       for (auto i = 0u; i < cluster_cuts.size(); ++i)
       {
-
         // Form the cluster open interval [a, b).
         auto a = cluster_cuts[i];
         const auto& b = i == num_cuts - 1 ? cluster_cuts[0] : cluster_cuts[i + 1];
@@ -258,17 +257,16 @@ auto __main(int argc, char** argv) -> int
     for (const auto& q : candidate_quads)
     {
       const auto n = q.size();
-      const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
-      for (auto i = 0u; i < n; ++i)
-      {
-        const Eigen::Vector2i a = q[i].array().round().cast<int>();
-        sara::fill_circle(disp, a.x(), a.y(), 2, color);
-      }
       for (auto i = 0u; i < n; ++i)
       {
         const Eigen::Vector2i a = q[i].array().round().cast<int>();
         const Eigen::Vector2i b = q[(i + 1) % n].array().round().cast<int>();
-        sara::draw_line(disp, a.x(), a.y(), b.x(), b.y(), color, 1);
+        sara::draw_line(disp, a.x(), a.y(), b.x(), b.y(), sara::Magenta8, 1);
+      }
+      for (auto i = 0u; i < n; ++i)
+      {
+        const Eigen::Vector2i a = q[i].array().round().cast<int>();
+        sara::fill_circle(disp, a.x(), a.y(), 2, sara::Red8);
       }
     }
     sara::display(disp);
