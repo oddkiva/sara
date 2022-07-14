@@ -52,7 +52,12 @@ struct Corner
   }
 };
 
+#define INSPECT_PATCH
+#ifdef INSPECT_PATCH
+static constexpr auto square_size = 20;
+#else
 static constexpr auto square_size = 5;
+#endif
 static constexpr auto num_squares = 4;
 static constexpr auto l = (num_squares + 2) * square_size;
 static constexpr auto ld = static_cast<double>(l);
@@ -333,7 +338,7 @@ auto __main(int argc, char** argv) -> int
             if (i == 0 || i == num_squares + 1 ||  //
                 j == 0 || j == num_squares + 1)
               black_border_count += static_cast<int>(code(i, j) == 0);
-        plausible_codes[k] = (black_border_count >= (aruco_perimeter) -4);
+        plausible_codes[k] = (black_border_count >= (aruco_perimeter) -2);
       }
       const auto plausible_code_count =
           std::accumulate(plausible_codes.begin(), plausible_codes.end(), int{},
