@@ -261,6 +261,9 @@ auto MetricGridRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   _shader_program.set_uniform_vector4f("color", lines._color.data());
 
   glBindVertexArray(lines._vao);
-  glDrawElements(GL_TRIANGLES, lines._triangle_index_count, GL_UNSIGNED_INT, 0);
-  glDrawElements(GL_LINES, lines._triangle_index_count, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES,
+                 static_cast<GLsizei>(lines._triangle_index_count),
+                 GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_LINES, static_cast<GLsizei>(lines._triangle_index_count),
+                 GL_UNSIGNED_INT, 0);
 }
