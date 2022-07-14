@@ -185,11 +185,6 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       const auto edges = sara::connected_components(edge_map);
-      auto edge_label = sara::Image<std::int32_t>{edge_map.sizes()};
-      edge_label.flat_array().fill(-1);
-      for (const auto& [label, e] : edges)
-        for (const auto& p : e)
-          edge_label(p) = label;
       sara::toc("Edge grouping");
 
       sara::tic();
