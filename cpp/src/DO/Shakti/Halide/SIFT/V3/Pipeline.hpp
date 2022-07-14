@@ -80,7 +80,7 @@ namespace DO::Shakti::HalideBackend::v3 {
       // Set up the list of scales in the discrete octave.
       scales = std::vector<float>(scale_count + 3);
       for (auto i = 0; i < scale_count + 3; ++i)
-        scales[i] = scale_initial * std::pow(scale_factor, i);
+        scales[i] = scale_initial * std::pow(scale_factor, static_cast<float>(i));
 
       // Calculate the Gaussian smoothing values.
       sigmas = std::vector<float>(scale_count + 3);

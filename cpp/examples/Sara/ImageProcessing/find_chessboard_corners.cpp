@@ -494,10 +494,10 @@ auto __main(int argc, char** argv) -> int
   else
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
-  const auto downscale_factor = argc < 5 ? 2 : std::atoi(argv[4]);
+  const auto downscale_factor = argc < 5 ? 2 : std::stoi(argv[4]);
   static constexpr auto sigma_D = 1.6f;
   static const auto sigma_I =
-      argc < 6 ? 6.f / downscale_factor : std::atof(argv[5]);
+      argc < 6 ? 6.f / downscale_factor : std::stof(argv[5]);
   static constexpr auto k = 6;
   static constexpr auto grad_adaptive_thres = 2e-2f;
 
@@ -541,10 +541,12 @@ auto __main(int argc, char** argv) -> int
     // Detect the junctions.
     sara::tic();
     {
-      junctions = sara::extract_junctions(junction_map, sigma_I);
-      sara::nms(junctions, f.sizes(), sigma_I * 2);
+      junctions = sara::extract_junctions(
+          junction_map, static_cast<int>(std::round(sigma_I)));
+      sara::nms(junctions, f.sizes(),
+                static_cast<int>(std::round(sigma_I * 2)));
       filter_junctions(junctions, circular_profiles, f, grad_f_norm, grad_thres,
-                       sigma_I);
+                       static_cast<int>(std::round(sigma_I)));
     }
     sara::toc("junction");
 
@@ -585,7 +587,9 @@ auto __main(int argc, char** argv) -> int
 
       const Eigen::Vector2f jri = jr.p * downscale_factor;
 
-      sara::draw_circle(video_frame_copy, jri, sigma_D, sara::Magenta8, 3);
+      sara::draw_circle(video_frame_copy, jri,
+                        static_cast<int>(std::round(sigma_D)), sara::Magenta8,
+                        3);
       sara::fill_circle(     //
           video_frame_copy,  //
           static_cast<int>(std::round(jri.x())),
@@ -600,7 +604,7 @@ auto __main(int argc, char** argv) -> int
     sara::tic();
     const auto found = graph.grow(edge_map,                        //
                                   corner_count, downscale_factor,  //
-                                  sigma_I);
+                                  static_cast<int>(std::round(sigma_I)));
     sara::toc("grow");
     if (found)
       ++found_count;
