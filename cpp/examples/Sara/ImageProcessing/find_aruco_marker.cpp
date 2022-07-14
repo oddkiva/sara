@@ -52,12 +52,16 @@ struct Corner
   }
 };
 
-#define INSPECT_PATCH
+// #define INSPECT_PATCH
 #ifdef INSPECT_PATCH
 static constexpr auto square_size = 20;
+static constexpr auto square_padding = 4;
 #else
 static constexpr auto square_size = 5;
+static constexpr auto square_padding = 1;
 #endif
+static constexpr auto half_area =
+    sara::square(square_size - 2 * square_padding) / 2;
 static constexpr auto num_squares = 4;
 static constexpr auto l = (num_squares + 2) * square_size;
 static constexpr auto ld = static_cast<double>(l);
@@ -117,11 +121,15 @@ auto __main(int argc, char** argv) -> int
     const auto grad_adaptive_thres = argc < 3 ? 1e-1f : std::stof(argv[2]);
 
     // Corner filtering.
-    const auto kappa = argc < 4 ? 0.04f : std::stof(argv[3]);
-    const auto cornerness_adaptive_thres =
-        argc < 5 ? 1e-5f : std::stof(argv[4]);
-    static constexpr auto sigma_D = 0.8f;
-    static constexpr auto sigma_I = 1.5f;
+    const auto sigma_D = argc < 4 ? 0.5f : std::stof(argv[3]);
+    const auto sigma_I = argc < 5 ? 1.2f : std::stof(argv[4]);
+    const auto kappa = argc < 6 ? 0.04f : std::stof(argv[5]);
+    const auto cornerness_thres = argc < 7 ? 1e-5f : std::stof(argv[6]);
+    SARA_CHECK(grad_adaptive_thres);
+    SARA_CHECK(sigma_D);
+    SARA_CHECK(sigma_I);
+    SARA_CHECK(kappa);
+    SARA_CHECK(cornerness_thres);
 
     auto video_stream = sara::VideoStream{video_file};
     auto video_frame = video_stream.frame();
@@ -211,7 +219,7 @@ auto __main(int argc, char** argv) -> int
         {
           const Eigen::Vector2i p = ch[i].array().round().cast<int>();
           const auto score = cornerness(p);
-          if (score > cornerness_adaptive_thres)
+          if (score > cornerness_thres)
             dominant_points.push_back({ch[i], score});
         }
         // No point continuing at this point.
@@ -260,11 +268,11 @@ auto __main(int argc, char** argv) -> int
         // Refine the corner location.
         std::transform(
             quad.begin(), quad.end(), quad.begin(),
-            [&grad_f](const Eigen::Vector2d& c) -> Eigen::Vector2d {
+            [&grad_f, sigma_I](const Eigen::Vector2d& c) -> Eigen::Vector2d {
               static const auto radius = static_cast<int>(std::round(sigma_I));
               const Eigen::Vector2i ci = c.array().round().cast<int>();
-              const auto p =
-                  sara::refine_junction_location_unsafe(grad_f, ci, radius);
+              const auto p = sara::refine_junction_location_unsafe(  //
+                  grad_f, ci, radius);
               return p.cast<double>();
             });
 
@@ -294,9 +302,10 @@ auto __main(int argc, char** argv) -> int
           for (auto j = 0; j < num_squares + 2; ++j)
           {
             auto count = 0;
-            for (auto v = 0; v < square_size; ++v)
+            static constexpr auto& b = square_padding;
+            for (auto v = b; v < square_size - b; ++v)
             {
-              for (auto u = 0; u < square_size; ++u)
+              for (auto u = b; u < square_size - b; ++u)
               {
                 const auto p = Eigen::Vector2i{square_size * j + u,  //
                                                square_size * i + v};
@@ -304,8 +313,6 @@ auto __main(int argc, char** argv) -> int
                   ++count;
               }
             }
-
-            static constexpr auto half_area = square_size * square_size / 2;
             code(i, j) = count > half_area ? 1 : 0;
 
             for (auto v = 0; v < square_size; ++v)
