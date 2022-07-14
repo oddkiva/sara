@@ -69,3 +69,6 @@ sara_add_example(find_chessboard_corners_3)
 target_link_libraries(find_chessboard_corners_3 PRIVATE ChessboardDetection)
 
 sara_add_example(find_aruco_marker)
+if (TBB_FOUND)
+  target_link_libraries(find_aruco_marker PRIVATE TBB::tbb)
+endif ()
