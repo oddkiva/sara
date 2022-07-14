@@ -52,12 +52,12 @@ struct DisplayTask
 #pragma omp parallel for
     for (auto k = 0; k < num_extrema; ++k)
     {
-      const auto& x = data.x[k];
-      const auto& y = data.y[k];
+      const auto& x = static_cast<int>(std::round(data.x[k]));
+      const auto& y = static_cast<int>(std::round(data.y[k]));
       const auto& s = data.s[k];
       const auto& type = data.types[k];
       static constexpr auto sqrt_2 = static_cast<float>(M_SQRT2);
-      const auto r = s * sqrt_2;
+      const auto r = static_cast<int>(std::round(s * sqrt_2));
 
       if (type == 1)
         sara::draw_circle(image, x, y, r, sara::Red8, 3);

@@ -48,8 +48,9 @@ BOOST_AUTO_TEST_CASE(test_separable_convolution_2d_with_gaussian_kernel)
   auto src_buffer = DO::Shakti::Halide::as_runtime_buffer_4d(src);
   auto kernel_buffer = DO::Shakti::Halide::as_runtime_buffer(kernel);
   auto dst_buffer = DO::Shakti::Halide::as_runtime_buffer_4d(dst);
-  shakti_separable_convolution_2d_cpu(src_buffer, kernel_buffer, kernel.size(),
-                                      -kernel.size() / 2, dst_buffer);
+  const auto kernel_size = static_cast<std::int32_t>(kernel.size());
+  shakti_separable_convolution_2d_cpu(src_buffer, kernel_buffer, kernel_size,
+                                      -kernel_size / 2, dst_buffer);
 
   // Write down the expected convolution.
   auto dst_true = Eigen::Matrix3f{};
