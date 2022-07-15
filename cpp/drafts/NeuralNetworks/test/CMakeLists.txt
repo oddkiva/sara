@@ -37,7 +37,7 @@ if (CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
 
     target_link_libraries(${filename}
       ${Boost_LIBRARIES}
-      CUDA::cudart
+      $<$<PLATFORM_ID:Linux>>:CUDA::cudart>
       ${TensorRT_LIBRARIES}
       ${DO_Sara_LIBRARIES}
       DO::Shakti::Cuda::MultiArray
