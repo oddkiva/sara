@@ -28,6 +28,7 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include "Chessboard/Erode.hpp"
+#include "Chessboard/BorderFollowing.hpp"
 #include "Chessboard/NonMaximumSuppression.hpp"
 
 
@@ -98,11 +99,11 @@ auto __main(int argc, char** argv) -> int
   const auto video_file = std::string{argv[1]};
 #endif
 
+#if 0
   // Harris cornerness parameters.
   //
   // Blur parameter before gradient calculation.
-  const auto sigma_D =
-      argc < 3 ? std::sqrt(std::pow(1.6f, 2.f) - 1) : std::stof(argv[2]);
+  const auto sigma_D = argc < 3 ? 0.8f : std::stof(argv[2]);
   // Integration domain of the second moment.
   const auto sigma_I = argc < 4 ? 3.f : std::stof(argv[3]);
   // Threshold parameter.
@@ -110,6 +111,7 @@ auto __main(int argc, char** argv) -> int
   const auto cornerness_adaptive_thres = argc < 6 ? 1e-5f : std::stof(argv[5]);
   // Corner filtering.
   const auto nms_radius = argc < 7 ? 10 : std::stoi(argv[6]);
+#endif
   static constexpr auto downscale_factor = 2;
 
   auto video_stream = sara::VideoStream{video_file};
@@ -139,47 +141,30 @@ auto __main(int argc, char** argv) -> int
     }
     SARA_CHECK(frame_number);
 
-#ifdef ADAPTIVE_THRESHOLDING
     sara::tic();
     sara::from_rgb8_to_gray32f(video_frame, f);
     sara::toc("Grayscale conversion");
 
     sara::tic();
     static constexpr auto tolerance_parameter = 0.f;
-    sara::gaussian_adaptive_threshold(f, 32.f, 3.f, tolerance_parameter,
+    sara::gaussian_adaptive_threshold(f, 24.f, 2.f, tolerance_parameter,
                                       segmentation_map);
     sara::toc("Adaptive thresholding");
 
     sara::tic();
-    auto segmentation_map_eroded = segmentation_map;
-    for (auto i = 0; i < 1; ++i)
     {
+      auto segmentation_map_eroded = segmentation_map;
       sara::binary_erode_3x3(segmentation_map, segmentation_map_eroded);
       segmentation_map.swap(segmentation_map_eroded);
     }
     sara::toc("Erosion 3x3");
 
     sara::tic();
-    const auto labels = sara::two_pass_connected_components(  //
-        segmentation_map.convert<int>());
-    auto regions = std::map<int, std::vector<Eigen::Vector2i>>{};
-    for (auto y = 0; y < labels.height(); ++y)
-    {
-      for (auto x = 0; x < labels.width(); ++x)
-      {
-        const auto label = labels(x, y);
-        regions[label].emplace_back(x, y);
-      }
-    }
-    sara::toc("Connected components");
-#else
-    // Watershed.
-    sara::tic();
-    static const auto color_threshold = std::sqrt(sara::square(2.f) * 3);
-    const auto regions = sara::color_watershed(video_frame, color_threshold);
-    sara::toc("Watershed");
-#endif
+    auto border_map = sara::Image<int>{segmentation_map.sizes()};
+    const auto border_curves = sara::suzuki_abe_algo_1(segmentation_map, border_map);
+    sara::toc("Border Following");
 
+#if 0
     // Calculate Harris cornerness functions.
     sara::tic();
     sara::scale(f, f_ds);
@@ -191,42 +176,27 @@ auto __main(int argc, char** argv) -> int
     auto corners = select(cornerness, cornerness_adaptive_thres);
     sara::nms(corners, cornerness.sizes(), nms_radius);
     sara::toc("Corner detection");
+#endif
 
-    // Display the good regions.
-    const auto colors = mean_colors(regions, video_frame);
-    auto partitioning = sara::Image<sara::Rgb8>{video_frame.sizes()};
-    partitioning.flat_array().fill(sara::Red8);
 
+#if 0
     for (const auto& [label, points] : regions)
     {
-#if 0
-      auto good = false;
-#ifdef ADAPTIVE_THRESHOLDING
-      if (segmentation_map(points.front()) != 0)
-        continue;
-#endif
+      auto good = segmentation_map(points.front()) == 0;
 
-      auto ch = std::vector<Eigen::Vector2d>{};
-
-      if (points.size() > 50)
-      {
-        auto points_2d = std::vector<Eigen::Vector2d>{};
-        points_2d.resize(points.size());
-        std::transform(points.begin(), points.end(), points_2d.begin(),
-                       [](const auto& p) { return p.template cast<double>(); });
-        ch = sara::graham_scan_convex_hull(points_2d);
-        // ch = sara::ramer_douglas_peucker(ch, 1.);
-        if (!ch.empty())
-        {
-          const auto area_1 = static_cast<double>(points.size());
-          const auto area_2 = sara::area(ch);
-          const auto diff = std::abs(area_1 - area_2) / area_1;
-          good = diff < 0.2;
-        }
-      }
-#else
-      const auto good = segmentation_map(points.front()) == 0;
-#endif
+      // The convex hull of the point set.
+      auto curve_points = std::vector<Eigen::Vector2d>{};
+      std::transform(points.begin(), points.end(),
+                     std::back_inserter(curve_points),
+                     [](const auto& p) { return p.template cast<double>(); });
+      const auto ch = sara::ramer_douglas_peucker(
+          sara::graham_scan_convex_hull(curve_points), 1.);
+      const auto area_ch = sara::area(ch);
+      const auto num_points = static_cast<double>(points.size());
+      const auto area_ratio =
+          std::min(area_ch, num_points) / std::max(area_ch, num_points);
+      good = good && ch.size() >= 4 && ch.size() < 20 && area_ratio > 0.8 &&
+             area_ch > 100;
 
       // Show big segments only.
       if (good)
@@ -236,13 +206,25 @@ auto __main(int argc, char** argv) -> int
           partitioning(p) = color;
       }
     }
+#endif
 
+#if 0
     for (const auto& p : corners)
       sara::fill_circle(partitioning, downscale_factor * p.coords.x(),
                         downscale_factor * p.coords.y(), 4, sara::Magenta8);
-
     SARA_CHECK(corners.size());
-    sara::display(partitioning);
+#endif
+
+    auto display = segmentation_map.convert<sara::Rgb8>();
+    sara::display(segmentation_map);
+    SARA_CHECK(border_curves.size());
+    for (const auto& b: border_curves)
+    {
+      const auto& curve = b.second;
+      const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
+      for(const auto &p: curve)
+        display(p) = color;
+    }
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);
   }
