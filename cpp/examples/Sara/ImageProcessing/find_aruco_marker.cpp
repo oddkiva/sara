@@ -31,6 +31,8 @@
 #include <DO/Sara/ImageProcessing/Otsu.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <DO/Sara/VideoIO/VideoWriter.hpp>
+
 #include "Chessboard/NonMaximumSuppression.hpp"
 
 
@@ -52,7 +54,7 @@ struct Corner
   }
 };
 
-// #define INSPECT_PATCH
+#define INSPECT_PATCH
 #ifdef INSPECT_PATCH
 static constexpr auto square_size = 20;
 static constexpr auto square_padding = 4;
@@ -145,6 +147,9 @@ auto __main(int argc, char** argv) -> int
     while (video_stream.read())
     {
       ++frame_number;
+      if (frame_number % 3 != 0)
+        continue;
+
 
       if (sara::active_window() == nullptr)
       {

@@ -20,8 +20,9 @@ namespace DO { namespace Sara {
   vector<Point2i>
   compute_region_inner_boundary(const ImageView<int>& regions, int region_id)
   {
+    // clang-format off
 #ifndef CONNECTIVITY_4
-    const Vector2i dirs[] = {
+    static const auto dirs = std::array{
       Vector2i{ 1,  0 },
       Vector2i{ 1,  1 },
       Vector2i{ 0,  1 },
@@ -32,15 +33,16 @@ namespace DO { namespace Sara {
       Vector2i{ 1, -1 }
     };
 #else
-    const Vector2i dirs[] = {
+    static const auto dirs = std::array{
       Vector2i{ 1,  0 },
       Vector2i{ 0,  1 },
       Vector2i{-1,  0 },
       Vector2i{ 0, -1 }
     };
 #endif
+    // clang-format on
 
-    const int num_dirs{ sizeof(dirs) / sizeof(Vector2i) };
+    static const auto num_dirs = static_cast<int>(dirs.size());
 
     // Find the starting point.
     auto start_point = Point2i{ -1, -1 };
