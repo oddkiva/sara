@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/ImageProcessing/GemmBasedConvolution.hpp>
 
 #include <boost/algorithm/string.hpp>
 
@@ -317,12 +318,12 @@ namespace DO::Sara::Darknet {
 
       // Convolve.
       im2col_gemm_convolve(
-                           y,
-                           x,                                       // the signal
-                           w,                                       // the transposed kernel.
-                           make_constant_padding(0.f),              // the padding type
-                           {x.size(0), x.size(1), stride, stride},  // strides in the convolution
-                           {0, 0, offset, offset});                 // offset to center the conv.
+          y,
+          x,                                       // the signal
+          w,                                       // the transposed kernel.
+          make_constant_padding(0.f),              // the padding type
+          {x.size(0), x.size(1), stride, stride},  // strides in the convolution
+          {0, 0, offset, offset});                 // offset to center the conv.
 
       // Bias.
       for (auto n = 0; n < y.size(0); ++n)
