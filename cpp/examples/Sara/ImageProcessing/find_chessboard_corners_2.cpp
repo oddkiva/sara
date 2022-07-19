@@ -161,7 +161,7 @@ auto __main(int argc, char** argv) -> int
 
     sara::tic();
     auto border_map = sara::Image<int>{segmentation_map.sizes()};
-    const auto border_curves = sara::suzuki_abe_algo_1(segmentation_map);
+    const auto border_curves = sara::suzuki_abe_follow_border(segmentation_map);
     sara::toc("Border Following");
 
 #if 0
@@ -189,7 +189,7 @@ auto __main(int argc, char** argv) -> int
     display.flat_array().fill(sara::Black8);
     for (const auto& b: border_curves)
     {
-      const auto& curve = b.second;
+      const auto& curve = b.second.curve;
       if (curve.size() < 50 * 4)
         continue;
       const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
