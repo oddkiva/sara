@@ -11,6 +11,8 @@
 
 //! @example
 
+#include <omp.h>
+
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
@@ -69,26 +71,27 @@ auto rescale_to_rgb(const Halide::Func& f, int32_t w, int32_t h)
 
   auto f_rescaled = Halide::Func{f.name() + "_rescaled"};
   f_rescaled(x, y, c) = Halide::cast<std::uint8_t>(  //
-      (f(x, y) - f_min()) /                  //
-      (f_max() - f_min()) * 255              //
+      (f(x, y) - f_min()) /                          //
+      (f_max() - f_min()) * 255                      //
   );
 
   return f_rescaled;
 }
 
 
-GRAPHICS_MAIN()
+int __main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
+  omp_set_num_threads(omp_get_max_threads());
+
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath =
-      "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
+  if (argc < 2)
+    return 1;
+  const auto video_filepath = std::string{argv[1]};
 #else
-  // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
 
@@ -155,7 +158,7 @@ GRAPHICS_MAIN()
     }
   }
 
-  const auto kappa = 4.f;
+  const auto kappa = 0.04f;
   auto harris = Halide::Func{};
   {
     auto m = hal::Matrix<2, 2>{};
@@ -176,6 +179,8 @@ GRAPHICS_MAIN()
     auto r = Halide::RDom{-1, 3, -1, 3};
     harris_local_max(x, y) =
         Halide::maximum(harris(x + r.x, y + r.y)) == harris(x, y);
+    harris_local_max(x, y) =
+        Halide::select(harris(x, y) > 1e-5f, harris_local_max(x, y), 0);
   }
   // auto harris_local_max= hal::local_max(harris, x, y);
 #ifdef USE_SCHEDULE
@@ -208,13 +213,33 @@ GRAPHICS_MAIN()
     sara::toc("Video Decoding");
 
     sara::tic();
-    {
-      //harris_rescaled.realize(output);
-      harris_local_max_rgb.realize(output);
-    }
+    harris_local_max_rgb.realize(output);
     sara::toc("Harris cornerness function");
 
-    sara::display(harris_frame);
+    sara::tic();
+    auto display_frame = frame;
+    const auto w = harris_frame.width();
+    const auto h = harris_frame.height();
+    const auto wh = w * h;
+#pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - w * y;
+      if (harris_frame(x, y) == sara::Black8)
+        continue;
+      sara::fill_circle(display_frame, x, y, 2, sara::Red8);
+    }
+    sara::display(display_frame);
+    sara::toc("Display");
   }
   return 0;
+}
+
+
+int main(int argc, char** argv)
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
 }
