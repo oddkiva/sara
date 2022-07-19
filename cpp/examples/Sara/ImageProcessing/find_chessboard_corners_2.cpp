@@ -20,6 +20,7 @@
 #include <DO/Sara/DisjointSets/TwoPassConnectedComponents.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Geometry.hpp>
+#include <DO/Sara/Geometry/Algorithms/BorderFollowing.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
@@ -28,7 +29,6 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include "Chessboard/Erode.hpp"
-#include "Chessboard/BorderFollowing.hpp"
 #include "Chessboard/NonMaximumSuppression.hpp"
 
 
@@ -161,7 +161,7 @@ auto __main(int argc, char** argv) -> int
 
     sara::tic();
     auto border_map = sara::Image<int>{segmentation_map.sizes()};
-    const auto border_curves = sara::suzuki_abe_algo_1(segmentation_map, border_map);
+    const auto border_curves = sara::suzuki_abe_algo_1(segmentation_map);
     sara::toc("Border Following");
 
 #if 0
@@ -178,36 +178,6 @@ auto __main(int argc, char** argv) -> int
     sara::toc("Corner detection");
 #endif
 
-
-#if 0
-    for (const auto& [label, points] : regions)
-    {
-      auto good = segmentation_map(points.front()) == 0;
-
-      // The convex hull of the point set.
-      auto curve_points = std::vector<Eigen::Vector2d>{};
-      std::transform(points.begin(), points.end(),
-                     std::back_inserter(curve_points),
-                     [](const auto& p) { return p.template cast<double>(); });
-      const auto ch = sara::ramer_douglas_peucker(
-          sara::graham_scan_convex_hull(curve_points), 1.);
-      const auto area_ch = sara::area(ch);
-      const auto num_points = static_cast<double>(points.size());
-      const auto area_ratio =
-          std::min(area_ch, num_points) / std::max(area_ch, num_points);
-      good = good && ch.size() >= 4 && ch.size() < 20 && area_ratio > 0.8 &&
-             area_ch > 100;
-
-      // Show big segments only.
-      if (good)
-      {
-        const auto color = colors.at(label);
-        for (const auto& p : points)
-          partitioning(p) = color;
-      }
-    }
-#endif
-
 #if 0
     for (const auto& p : corners)
       sara::fill_circle(partitioning, downscale_factor * p.coords.x(),
@@ -215,18 +185,21 @@ auto __main(int argc, char** argv) -> int
     SARA_CHECK(corners.size());
 #endif
 
-    auto display = segmentation_map.convert<sara::Rgb8>();
-    sara::display(segmentation_map);
-    SARA_CHECK(border_curves.size());
+    auto display = sara::Image<sara::Rgb8>{segmentation_map.sizes()};
+    display.flat_array().fill(sara::Black8);
     for (const auto& b: border_curves)
     {
       const auto& curve = b.second;
+      if (curve.size() < 50 * 4)
+        continue;
       const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
       for(const auto &p: curve)
         display(p) = color;
     }
+    sara::display(display);
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);
+    sara::get_key();
   }
 
   return 0;
