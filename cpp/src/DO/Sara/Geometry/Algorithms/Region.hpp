@@ -18,7 +18,7 @@
 #include <DO/Sara/Core/Image.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   //! @addtogroup GeometryAlgorithms
   //! @{
@@ -33,5 +33,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara
