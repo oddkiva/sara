@@ -204,6 +204,38 @@ BOOST_AUTO_TEST_CASE(test_on_shape_3)
     SARA_CHECK(border.second.id);
     SARA_CHECK(border.second.parent);
     SARA_CHECK(static_cast<int>(border.second.type));
+    SARA_CHECK(border.second.curve.size());
+    for (const auto& p : border.second.curve)
+      std::cout << p.transpose() << std::endl;
+    std::cout << std::endl;
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_on_shape_4)
+{
+  auto pic = Image<std::uint8_t>{10, 10};
+  // clang-format off
+  pic.matrix() <<
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 0, 1, 1, 0, 1, 0, 0, 1, 0,
+    0, 0, 1, 1, 0, 1, 0, 0, 1, 0,
+    0, 0, 1, 1, 0, 1, 0, 0, 1, 0,
+    0, 0, 1, 1, 0, 1, 0, 0, 1, 0,
+    0, 0, 1, 1, 0, 1, 0, 0, 1, 0,
+    0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+  // clang-format on
+
+  const auto borders = suzuki_abe_follow_border(pic);
+  BOOST_CHECK_EQUAL(borders.size(), 3u);
+  for (const auto& border : borders)
+  {
+    SARA_CHECK(border.second.id);
+    SARA_CHECK(border.second.parent);
+    SARA_CHECK(static_cast<int>(border.second.type));
+    SARA_CHECK(border.second.curve.size());
     for (const auto& p : border.second.curve)
       std::cout << p.transpose() << std::endl;
     std::cout << std::endl;

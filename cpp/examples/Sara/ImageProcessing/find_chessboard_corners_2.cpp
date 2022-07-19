@@ -120,12 +120,11 @@ auto __main(int argc, char** argv) -> int
 
   auto f = sara::Image<float>{video_frame.sizes()};
   auto f_conv = sara::Image<float>{video_frame.sizes()};
+#if 0
   auto f_ds = sara::Image<float>{video_frame.sizes() / downscale_factor};
-
-#define ADAPTIVE_THRESHOLDING
-#ifdef ADAPTIVE_THRESHOLDING
-  auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
 #endif
+
+  auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
 
 
   while (video_stream.read())
@@ -160,8 +159,13 @@ auto __main(int argc, char** argv) -> int
     sara::toc("Erosion 3x3");
 
     sara::tic();
-    auto border_map = sara::Image<int>{segmentation_map.sizes()};
-    const auto border_curves = sara::suzuki_abe_follow_border(segmentation_map);
+    auto segmentation_map_inverted =
+        sara::Image<std::uint8_t>{segmentation_map.sizes()};
+    std::transform(segmentation_map.begin(), segmentation_map.end(),
+                   segmentation_map_inverted.begin(),
+                   [](const auto& v) { return v == 0 ? 255 : 0; });
+    const auto border_curves =
+        sara::suzuki_abe_follow_border(segmentation_map_inverted);
     sara::toc("Border Following");
 
 #if 0
@@ -187,13 +191,15 @@ auto __main(int argc, char** argv) -> int
 
     auto display = sara::Image<sara::Rgb8>{segmentation_map.sizes()};
     display.flat_array().fill(sara::Black8);
-    for (const auto& b: border_curves)
+    for (const auto& b : border_curves)
     {
       const auto& curve = b.second.curve;
+      if (b.second.type == sara::Border::Type::HoleBorder)
+        continue;
       if (curve.size() < 50 * 4)
         continue;
       const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
-      for(const auto &p: curve)
+      for (const auto& p : curve)
         display(p) = color;
     }
     sara::display(display);
