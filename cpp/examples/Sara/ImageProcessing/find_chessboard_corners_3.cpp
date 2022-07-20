@@ -17,8 +17,8 @@
 
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
-#include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureDescriptors.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
@@ -225,7 +225,7 @@ auto __main(int argc, char** argv) -> int
         sigma_I, sigma_D,                                           //
         kappa                                                       //
     );
-    const  auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(0.3f);
+    const auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(1.f);
     const auto grad_f = f_ds_blurred.compute<sara::Gradient>();
     static const auto border = static_cast<int>(std::round(sigma_I));
     auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
@@ -246,7 +246,8 @@ auto __main(int argc, char** argv) -> int
     sara::tic();
     auto grad_f_ds_norm = sara::Image<float>{f_ds_blurred.sizes()};
     auto grad_f_ds_ori = sara::Image<float>{f_ds_blurred.sizes()};
-    sara::gradient_in_polar_coordinates(f_ds_blurred, grad_f_ds_norm, grad_f_ds_ori);
+    sara::gradient_in_polar_coordinates(f_ds_blurred, grad_f_ds_norm,
+                                        grad_f_ds_ori);
 
     static constexpr auto N = 72;
     auto hists = std::vector<Eigen::Array<float, N, 1>>{};
@@ -330,37 +331,54 @@ auto __main(int argc, char** argv) -> int
     sara::toc("X-junction filter");
 
     sara::tic();
+#if 0
+    const auto display_u8 = sara::upscale(ed.pipeline.edge_map, 2);
+    auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
+    std::transform(
+        display_u8.begin(), display_u8.end(), display.begin(),
+        [](const auto& v) { return v != 0 ? sara::White8 : sara::Black8; });
+#else
     auto display = frame_gray.convert<sara::Rgb8>();
+#endif
+
     auto count = 0;
     for (auto c = 0u; c < corners.size(); ++c)
     {
       const auto& p = corners[c];
       const auto& edges = adjacent_edges[c];
+
+      const auto good = gradient_peaks_refined[c].size() == 4;
       // if (edges.size() != 4)
       //   continue;
 
-      if (gradient_peaks_refined[c].size() != 4)
-        continue;
-
       ++count;
-      //  SARA_CHECK(c);
-      //  for (const auto& g : gradient_peaks_refined[c])
-      //    SARA_CHECK(g * 10);
 
-      for (const auto& curve_index : edges)
+      if (good)
       {
-        const auto& curve_simplified =
-            ed.pipeline.edges_simplified[curve_index];
-
-        // const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() %
-        // 255);
-        const auto color = sara::Cyan8;
-        for (auto i = 0u; i < curve_simplified.size() - 1; ++i)
+        for (const auto& curve_index : edges)
         {
-          const auto a = curve_simplified[i].cast<float>() * downscale_factor;
-          const auto b =
-              curve_simplified[i + 1u].cast<float>() * downscale_factor;
-          sara::draw_line(display, a, b, color, 2);
+          const auto color = sara::Rgb8(rand() % 255,
+                                        rand() % 255,
+                                        rand() % 255);
+          // const auto color = sara::Cyan8;
+#if 0
+          const auto& curve = ed.pipeline.edges_simplified[curve_index];
+          for (auto i = 0u; i < curve.size() - 1; ++i)
+          {
+            const auto a = curve[i].cast<float>() * downscale_factor;
+            const auto b =
+                curve[i + 1u].cast<float>() * downscale_factor;
+            sara::draw_line(display, a, b, color, 2);
+          }
+#else
+          const auto& curve = ed.pipeline.edges_as_list[curve_index];
+          for (const auto& p : curve)
+            display(p * downscale_factor) = color;
+            // sara::fill_circle(display,                   //
+            //                   downscale_factor * p.x(),  //
+            //                   downscale_factor * p.y(),  //
+            //                   1, color);
+#endif
         }
       }
 
@@ -373,7 +391,7 @@ auto __main(int argc, char** argv) -> int
           display,
           static_cast<int>(std::round(downscale_factor * p.coords.x())),
           static_cast<int>(std::round(downscale_factor * p.coords.y())), 4,
-          sara::Red8, 2);
+          good ? sara::Red8 : sara::Blue8, 2);
     }
     SARA_CHECK(count);
     sara::draw_text(display, 80, 80, std::to_string(frame_number), sara::White8,
