@@ -18,6 +18,7 @@
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/FeatureDescriptors.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
@@ -76,6 +77,66 @@ auto select(const sara::ImageView<float>& cornerness,
 
   return extrema_filtered;
 };
+
+
+void compute_orientation_histogram(
+    Eigen::Array<float, 36, 1>& orientation_histogram,
+    const sara::ImageView<float>& grad_f_norm,
+    const sara::ImageView<float>& grad_f_ori,     //
+    const float x, const float y, const float s,  //
+    const float patch_truncation_factor = 3.f,    //
+    const float blur_factor = 1.5f)
+{
+  // Weighted histogram of gradients.
+  orientation_histogram.setZero();
+
+  // Rounding of the coordinates.
+  static constexpr auto int_round = [](const float x) {
+    return static_cast<int>(std::round(x));
+  };
+  auto rounded_x = int_round(x);
+  auto rounded_y = int_round(y);
+
+  // std deviation of the gaussian weight (cf. [Lowe, IJCV 2004])
+  auto sigma = s * blur_factor;
+
+  // Patch radius on which the histogram of gradients is performed.
+  auto patch_radius = int_round(sigma * patch_truncation_factor);
+  const auto w = grad_f_norm.width();
+  const auto h = grad_f_norm.height();
+
+  const auto one_over_two_sigma_square = 1 / (2.f * sigma * sigma);
+
+  // Accumulate the histogram of orientations.
+  for (auto v = -patch_radius; v <= patch_radius; ++v)
+  {
+    for (auto u = -patch_radius; u <= patch_radius; ++u)
+    {
+      if (rounded_x + u < 0 || rounded_x + u >= w ||  //
+          rounded_y + v < 0 || rounded_y + v >= h)
+        continue;
+
+      const auto mag = grad_f_norm(rounded_x + u, rounded_y + v);
+      auto ori = grad_f_ori(rounded_x + u, rounded_y + v);
+
+      // ori is in \f$]-\pi, \pi]\f$, so translate ori by \f$2*\pi\f$ if it is
+      // negative.
+      static constexpr auto N = 36;
+      static constexpr auto two_pi = static_cast<float>(2 * M_PI);
+      static constexpr auto normalization_factor = N / two_pi;
+
+      ori = ori < 0 ? ori + two_pi : ori;
+      auto bin_index = static_cast<int>(std::floor(ori * normalization_factor));
+      bin_index %= N;
+
+      // Give more emphasis to gradient orientations that lie closer to the
+      // keypoint location.
+      auto weight = exp(-(u * u + v * v) * one_over_two_sigma_square);
+      // Also give more emphasis to gradient with large magnitude.
+      orientation_histogram(bin_index) += weight * mag;
+    }
+  }
+}
 
 
 auto __main(int argc, char** argv) -> int
@@ -164,8 +225,8 @@ auto __main(int argc, char** argv) -> int
         sigma_I, sigma_D,                                           //
         kappa                                                       //
     );
-    const auto grad_f =
-        frame_gray_ds.compute<sara::Gaussian>(0.5f).compute<sara::Gradient>();
+    const  auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(0.5f);
+    const auto grad_f = f_ds_blurred.compute<sara::Gradient>();
     static const auto border = static_cast<int>(std::round(sigma_I));
     auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
     sara::toc("Corner detection");
@@ -181,6 +242,48 @@ auto __main(int argc, char** argv) -> int
           return {p, c.score};
         });
     sara::toc("Corner refinement");
+
+    sara::tic();
+    auto grad_f_ds_norm = sara::Image<float>{f_ds_blurred.sizes()};
+    auto grad_f_ds_ori = sara::Image<float>{f_ds_blurred.sizes()};
+    sara::gradient_in_polar_coordinates(f_ds_blurred, grad_f_ds_norm, grad_f_ds_ori);
+
+    auto hists = std::vector<Eigen::Array<float, 36, 1>>{};
+    hists.resize(corners.size());
+    std::transform(corners.begin(), corners.end(), hists.begin(),
+                   [&grad_f_ds_norm, &grad_f_ds_ori,
+                    sigma_D](const Corner<float>& corner) {
+                     auto h = Eigen::Array<float, 36, 1>{};
+                     compute_orientation_histogram(
+                         h, grad_f_ds_norm, grad_f_ds_ori, corner.coords.x(),
+                         corner.coords.y(), sigma_D);
+                     return h;
+                   });
+    std::for_each(hists.begin(), hists.end(), [](auto& h) {
+      sara::lowe_smooth_histogram(h);
+      h.matrix().normalize();
+    });
+    sara::toc("Gradient histograms");
+
+    sara::tic();
+    auto gradient_peaks = std::vector<std::vector<int>>{};
+    gradient_peaks.resize(hists.size());
+    std::transform(hists.begin(), hists.end(), gradient_peaks.begin(),
+                   [](const auto& h) { return sara::find_peaks(h, 0.1f); });
+    auto gradient_peaks_refined = std::vector<std::vector<float>>{};
+    gradient_peaks_refined.resize(gradient_peaks.size());
+    std::transform(gradient_peaks.begin(), gradient_peaks.end(), hists.begin(),
+                   gradient_peaks_refined.begin(),
+                   [](const auto& peaks, const auto& hist) {
+                     auto peaks_ref = std::vector<float>{};
+                     std::transform(peaks.begin(), peaks.end(),
+                                    std::back_inserter(peaks_ref),
+                                    [&hist](const auto& i) {
+                                      return sara::refine_peak(hist, i);
+                                    });
+                     return peaks_ref;
+                   });
+    sara::toc("Gradient Dominant Orientations");
 
     sara::tic();
     auto edge_label_map = sara::Image<int>{ed.pipeline.edge_map.sizes()};
@@ -227,12 +330,21 @@ auto __main(int argc, char** argv) -> int
 
     sara::tic();
     auto display = frame_gray.convert<sara::Rgb8>();
+    auto count = 0;
     for (auto c = 0u; c < corners.size(); ++c)
     {
       const auto& p = corners[c];
       const auto& edges = adjacent_edges[c];
       if (edges.size() != 4)
         continue;
+
+      // if (gradient_peaks_refined[c].size() != 4)
+      //   continue;
+
+      ++count;
+      //  SARA_CHECK(c);
+      //  for (const auto& g : gradient_peaks_refined[c])
+      //    SARA_CHECK(g * 10);
 
       for (const auto& curve_index : edges)
       {
@@ -262,6 +374,7 @@ auto __main(int argc, char** argv) -> int
           static_cast<int>(std::round(downscale_factor * p.coords.y())), 4,
           sara::Red8, 2);
     }
+    SARA_CHECK(count);
     sara::draw_text(display, 80, 80, std::to_string(frame_number), sara::White8,
                     60, 0, false, true);
     sara::display(display);
