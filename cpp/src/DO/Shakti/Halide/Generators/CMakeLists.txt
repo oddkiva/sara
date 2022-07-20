@@ -199,11 +199,11 @@ shakti_halide_library_v2(
 # ------------------------------------------------------------------------------
 shakti_halide_library_v2(
   NAME shakti_moment_matrix_32f_cpu
-  SRCS MomentMatrixGenerators.cpp)
+  SRCS MomentMatrixGenerator.cpp)
 
 shakti_halide_library_v2(
   NAME shakti_moment_matrix_32f_gpu
-  SRCS MomentMatrixGenerators.cpp
+  SRCS MomentMatrixGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
@@ -212,11 +212,11 @@ shakti_halide_library_v2(
 # ------------------------------------------------------------------------------
 shakti_halide_library_v2(
   NAME shakti_cornerness_32f_cpu
-  SRCS MomentMatrixGenerators.cpp)
+  SRCS MomentMatrixGenerator.cpp)
 
 shakti_halide_library_v2(
   NAME shakti_cornerness_32f_gpu
-  SRCS MomentMatrixGenerators.cpp
+  SRCS MomentMatrixGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
