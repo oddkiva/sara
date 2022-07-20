@@ -58,8 +58,3 @@ target_link_libraries(test_halide_sift_descriptor
   shakti_sift_descriptor_gpu_v3
   shakti_sift_descriptor_gpu_v4
   shakti_sift_descriptor_gpu_v5)
-
-target_link_libraries(test_brute_force_nearest_neighbors
-  PRIVATE
-  shakti_brute_force_nn_l2_32f_cpu
-  shakti_brute_force_nn_l2_32f_gpu)

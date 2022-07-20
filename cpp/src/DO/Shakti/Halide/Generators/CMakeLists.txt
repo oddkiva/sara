@@ -195,6 +195,45 @@ shakti_halide_library_v2(
 
 
 # ------------------------------------------------------------------------------
+# Moment matrix
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_moment_matrix_32f_cpu
+  SRCS MomentMatrixGenerators.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_moment_matrix_32f_gpu
+  SRCS MomentMatrixGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# ------------------------------------------------------------------------------
+# Cornerness
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_cornerness_32f_cpu
+  SRCS MomentMatrixGenerators.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_cornerness_32f_gpu
+  SRCS MomentMatrixGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# ------------------------------------------------------------------------------
+# Cartesian to polar coordinates
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_cartesian_to_polar_32f_cpu
+  SRCS CartesianToPolarCoordinateGenerator.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_cartesian_to_polar_32f_gpu
+  SRCS CartesianToPolarCoordinateGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# ------------------------------------------------------------------------------
 # Dominant gradient orientations
 # ------------------------------------------------------------------------------
 shakti_halide_library_v2(
@@ -248,18 +287,6 @@ shakti_halide_library_v2(
   NAME shakti_stream_compaction_gpu
   SRCS StreamCompactionGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-# ------------------------------------------------------------------------------
-# Brute-force nearest neighbors
-# ------------------------------------------------------------------------------
-shakti_halide_library_v2(
-  NAME shakti_brute_force_nn_l2_32f_gpu
-  SRCS BruteForceNearestNeighbors.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-shakti_halide_library_v2(
-  NAME shakti_brute_force_nn_l2_32f_cpu
-  SRCS BruteForceNearestNeighbors.cpp)
 
 # ------------------------------------------------------------------------------
 # Examples
