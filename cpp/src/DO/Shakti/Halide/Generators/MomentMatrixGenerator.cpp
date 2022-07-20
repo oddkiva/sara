@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Shakti/Halide/MyHalide.hpp>
+
 
 namespace v2 {
 
@@ -30,8 +32,7 @@ namespace v2 {
     GeneratorParam<int> tile_y{"tile_y", 16};
 
     Input<Buffer<float>[2]> v { "v", 4 };
-    Output<Buffer<float>> moment{
-        "moment", {Float(32), Float(32), Float(32)}, 4};
+    Output<Buffer<>> moment{"moment", {Float(32), Float(32), Float(32)}, 4};
 
     //! 't' as time (since 'c' as channel does not make much sense).
     Var x{"x"}, y{"y"}, t{"c"}, n{"n"};
@@ -40,8 +41,6 @@ namespace v2 {
 
     void generate()
     {
-      using DO::Shakti::HalideBackend::norm;
-
       auto fx = v[0](x, y, t, n);
       auto fy = v[1](x, y, t, n);
 
@@ -111,8 +110,6 @@ namespace v2 {
 
     void generate()
     {
-      using DO::Shakti::HalideBackend::norm;
-
       const auto mxx = moment[0](x, y, t, n);
       const auto myy = moment[1](x, y, t, n);
       const auto mxy = moment[2](x, y, t, n);

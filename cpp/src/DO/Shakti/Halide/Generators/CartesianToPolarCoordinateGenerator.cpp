@@ -33,7 +33,7 @@ namespace v2 {
     GeneratorParam<int> tile_y{"tile_y", 16};
 
     Input<Buffer<float>[2]> cart { "cartesian", 4 };
-    Output<Buffer<float>> polar{"polar", {Float(32), Float(32)}, 4};
+    Output<Buffer<>> polar{"polar", {Float(32), Float(32)}, 4};
 
     //! 't' as time (since 'c' as channel does not make much sense).
     Var x{"x"}, y{"y"}, t{"c"}, n{"n"};
