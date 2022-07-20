@@ -79,8 +79,9 @@ auto select(const sara::ImageView<float>& cornerness,
 };
 
 
+template <Eigen::Index N>
 void compute_orientation_histogram(
-    Eigen::Array<float, 36, 1>& orientation_histogram,
+    Eigen::Array<float, N, 1>& orientation_histogram,
     const sara::ImageView<float>& grad_f_norm,
     const sara::ImageView<float>& grad_f_ori,     //
     const float x, const float y, const float s,  //
@@ -121,7 +122,6 @@ void compute_orientation_histogram(
 
       // ori is in \f$]-\pi, \pi]\f$, so translate ori by \f$2*\pi\f$ if it is
       // negative.
-      static constexpr auto N = 36;
       static constexpr auto two_pi = static_cast<float>(2 * M_PI);
       static constexpr auto normalization_factor = N / two_pi;
 
@@ -225,7 +225,7 @@ auto __main(int argc, char** argv) -> int
         sigma_I, sigma_D,                                           //
         kappa                                                       //
     );
-    const  auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(0.5f);
+    const  auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(0.3f);
     const auto grad_f = f_ds_blurred.compute<sara::Gradient>();
     static const auto border = static_cast<int>(std::round(sigma_I));
     auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
@@ -248,15 +248,16 @@ auto __main(int argc, char** argv) -> int
     auto grad_f_ds_ori = sara::Image<float>{f_ds_blurred.sizes()};
     sara::gradient_in_polar_coordinates(f_ds_blurred, grad_f_ds_norm, grad_f_ds_ori);
 
-    auto hists = std::vector<Eigen::Array<float, 36, 1>>{};
+    static constexpr auto N = 72;
+    auto hists = std::vector<Eigen::Array<float, N, 1>>{};
     hists.resize(corners.size());
     std::transform(corners.begin(), corners.end(), hists.begin(),
                    [&grad_f_ds_norm, &grad_f_ds_ori,
                     sigma_D](const Corner<float>& corner) {
-                     auto h = Eigen::Array<float, 36, 1>{};
-                     compute_orientation_histogram(
+                     auto h = Eigen::Array<float, N, 1>{};
+                     compute_orientation_histogram<N>(
                          h, grad_f_ds_norm, grad_f_ds_ori, corner.coords.x(),
-                         corner.coords.y(), sigma_D);
+                         corner.coords.y(), sigma_D * 4.);
                      return h;
                    });
     std::for_each(hists.begin(), hists.end(), [](auto& h) {
@@ -269,7 +270,7 @@ auto __main(int argc, char** argv) -> int
     auto gradient_peaks = std::vector<std::vector<int>>{};
     gradient_peaks.resize(hists.size());
     std::transform(hists.begin(), hists.end(), gradient_peaks.begin(),
-                   [](const auto& h) { return sara::find_peaks(h, 0.1f); });
+                   [](const auto& h) { return sara::find_peaks(h, 0.5f); });
     auto gradient_peaks_refined = std::vector<std::vector<float>>{};
     gradient_peaks_refined.resize(gradient_peaks.size());
     std::transform(gradient_peaks.begin(), gradient_peaks.end(), hists.begin(),
@@ -335,11 +336,11 @@ auto __main(int argc, char** argv) -> int
     {
       const auto& p = corners[c];
       const auto& edges = adjacent_edges[c];
-      if (edges.size() != 4)
-        continue;
-
-      // if (gradient_peaks_refined[c].size() != 4)
+      // if (edges.size() != 4)
       //   continue;
+
+      if (gradient_peaks_refined[c].size() != 4)
+        continue;
 
       ++count;
       //  SARA_CHECK(c);
