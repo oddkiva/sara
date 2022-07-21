@@ -21,6 +21,14 @@ target_link_libraries(test_halide_cast
   PRIVATE
   shakti_cast_uint8_to_float_cpu)
 
+target_link_libraries(test_halide_cartesian_to_polar
+  PRIVATE
+  shakti_cartesian_to_polar_32f_cpu)
+
+target_link_libraries(test_halide_moment_matrix
+  PRIVATE
+  shakti_moment_matrix_32f_cpu)
+
 target_link_libraries(test_halide_resize
   PRIVATE
   shakti_scale_32f_gpu

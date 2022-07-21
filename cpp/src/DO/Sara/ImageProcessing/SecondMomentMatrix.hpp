@@ -43,11 +43,11 @@ namespace DO { namespace Sara {
     template <typename GradientField>
     auto operator()(const GradientField& in) -> MatrixField<GradientField>
     {
-      auto out = MatrixField<GradientField>{ in.sizes() };
+      auto out = MatrixField<GradientField>{in.sizes()};
 
       auto out_i = out.begin();
       auto in_i = in.begin();
-      for ( ; in_i != in.end(); ++in_i, ++out_i)
+      for (; in_i != in.end(); ++in_i, ++out_i)
         *out_i = *in_i * in_i->transpose();
 
       return out;
@@ -56,5 +56,10 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+  auto second_moment_matrix(const ImageView<float>& fx,
+                            const ImageView<float>& fy,  //
+                            ImageView<float>& mxx,       //
+                            ImageView<float>& myy,       //
+                            ImageView<float>& mxy) -> void;
+
+}}  // namespace DO::Sara

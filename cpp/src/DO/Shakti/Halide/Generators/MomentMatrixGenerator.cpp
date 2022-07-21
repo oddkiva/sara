@@ -46,7 +46,7 @@ namespace v2 {
 
       auto fx_fx = fx * fx;
       auto fy_fy = fy * fy;
-      auto fx_fy = fy * fy;
+      auto fx_fy = fx * fy;
       moment(x, y, t, n) = {fx_fx, fy_fy, fx_fy};
     }
 
