@@ -11,10 +11,13 @@
 
 //! @example
 
+#include <omp.h>
+
 #include <set>
 
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 
@@ -28,15 +31,15 @@ struct LukasKanadeOpticalFlowEstimator
   static constexpr auto patch_size = 2 * PatchRadius + 1;
   static constexpr auto N = patch_size * patch_size;
 
-  auto update_image(const sara::ImageView<float, 2>& I) -> void
+  auto update_image(const sara::ImageView<float, 2>& I,
+                    const sara::ImageView<float, 2>& Ix,
+                    const sara::ImageView<float, 2>& Iy) -> void
   {
     _I0.swap(_I1);
 
     _I1 = I;
-    if (_blur)
-      _I1 = sara::gaussian(_I1, 0.5f);
 
-    _grad_I = sara::gradient(_I1);
+    _grad_I = {Ix, Iy};
 
     if (_dI_dt.sizes() != _I1.sizes())
       _dI_dt.resize(_I1.sizes());
@@ -55,8 +58,8 @@ struct LukasKanadeOpticalFlowEstimator
     {
       for (auto x = p.x() - r; x <= p.x() + r; ++x)
       {
-        A(i, 0) = _grad_I(x, y).x();
-        A(i, 1) = _grad_I(x, y).y();
+        A(i, 0) = _grad_I[0](x, y);
+        A(i, 1) = _grad_I[1](x, y);
 
         b(i) = -_dI_dt(x, y);
 
@@ -86,12 +89,10 @@ struct LukasKanadeOpticalFlowEstimator
     return flows;
   }
 
-  bool _blur = true;
-
   sara::Image<float> _I1;
   sara::Image<float> _I0;
 
-  sara::Image<Eigen::Vector2f> _grad_I;
+  std::array<sara::Image<float>, 2> _grad_I;
   sara::Image<float> _dI_dt;
 };
 
@@ -137,6 +138,8 @@ int __main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
+  omp_set_num_threads(omp_get_max_threads());
+
   // Input video.
   const auto video_filepath =
       argc < 2 ? "/Users/david/Desktop/Datasets/videos/sample10.mp4" : argv[1];
@@ -145,15 +148,16 @@ int __main(int argc, char** argv)
 
   // Preprocessing parameters.
   const auto downscale_factor = argc < 3 ? 1 : std::stoi(argv[2]);
-  const auto cornerness_adaptive_thres = argc < 4 ? 0 : std::stof(argv[3]);
+  const auto cornerness_thres = argc < 4 ? 0 : std::stof(argv[3]);
 
   // Harris cornerness parameters.
   //
   // Blur parameter before gradient calculation.
-  static const auto sigma_D = std::sqrt(std::pow(1.6f, 2) - 1);
+  static constexpr auto sigma_D = 0.8f;
   // Integration domain of the second moment.
-  static const auto sigma_I = 3.f;
-  static const auto kappa = 0.04f;
+  static constexpr auto sigma_I = 2 * sigma_D;
+  // Harris cornerness free parameter.
+  static constexpr auto kappa = 0.04f;
 
   // Lukas-Kanade optical flow parameters.
   auto flow_estimator = LukasKanadeOpticalFlowEstimator<>{};
@@ -173,28 +177,46 @@ int __main(int argc, char** argv)
     ++frames_read;
     if (frames_read % (skip + 1) != 0)
       continue;
+    SARA_CHECK(frames_read);
 
     // Convert to grayscale, downsample.
-    auto frame_gray = frame.convert<float>();
+    sara::tic();
+    auto frame_gray = sara::Image<float>{frame.sizes()};
+    sara::from_rgb8_to_gray32f(frame, frame_gray);
+    sara::toc("Color conversion");
+
     if (downscale_factor > 1)
-      frame_gray = sara::reduce(frame_gray, downscale_factor);
+    {
+      sara::tic();
+      frame_gray = frame_gray.compute<sara::Gaussian>(0.5f);
+      frame_gray = sara::downscale(frame_gray, downscale_factor);
+      sara::toc("Downscale");
+    }
+
+    // Calculate the image gradients.
+    sara::tic();
+    auto frame_gray_blurred = frame_gray.compute<sara::Gaussian>(sigma_D);
+    auto gradient = std::array<sara::Image<float>, 2>{};
+    std::for_each(gradient.begin(), gradient.end(),
+                  [&frame_gray](auto& g) { g.resize(frame_gray.sizes()); });
+    sara::gradient(frame_gray_blurred, gradient[0], gradient[1]);
+    sara::toc("Gradient");
+
 
     // Calculate Harris cornerness functions.
-    const auto cornerness = sara::scale_adapted_harris_cornerness(  //
-        frame_gray,                                                 //
-        sigma_I, sigma_D,                                           //
-        kappa                                                       //
-    );
+    sara::tic();
+    const auto cornerness = sara::harris_cornerness(  //
+        gradient[0], gradient[1],                     //
+        sigma_I, kappa);
+    sara::toc("Harris Cornerness");
 
     // Select the local maxima of the cornerness functions.
+    sara::tic();
     static constexpr auto select = [](const sara::ImageView<float>& cornerness,
-                                      const float cornerness_adaptive_thres) {
+                                      const float cornerness_thres) {
       static constexpr auto r = LukasKanadeOpticalFlowEstimator<>::patch_radius;
 
       const auto extrema = sara::local_maxima(cornerness);
-
-      const auto cornerness_max = cornerness.flat_array().maxCoeff();
-      const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
 
       auto extrema_filtered = std::vector<sara::Point2i>{};
       extrema_filtered.reserve(extrema.size());
@@ -212,19 +234,23 @@ int __main(int argc, char** argv)
       }
       return extrema_filtered;
     };
-    const auto corners = select(cornerness, cornerness_adaptive_thres);
+    const auto corners = select(cornerness, cornerness_thres);
+    sara::toc("Corner selection");
 
     // Calculate the optical flow.
-    flow_estimator.update_image(frame_gray);
+    sara::tic();
+    flow_estimator.update_image(frame_gray_blurred, gradient[0], gradient[1]);
     auto flow_vectors = std::vector<Eigen::Vector2f>{};
     if (!flow_estimator._I0.empty())
       flow_vectors = flow_estimator.estimate_flow(corners);
+    sara::toc("Optical Flow");
 
     // TODO: track the corners with optical flow.
 
     // Draw the sparse flow field.
     if (!flow_estimator._I0.empty())
     {
+#pragma omp parallel for
       for (auto i = 0u; i != corners.size(); ++i)
       {
         const auto& v = flow_vectors[i];
@@ -234,6 +260,7 @@ int __main(int argc, char** argv)
         const Eigen::Vector2f pa = corners[i].cast<float>() * downscale_factor;
         const Eigen::Vector2f pb = pa + flow_vectors[i] * 10;
 
+// #define SHOW_FLOW
 #ifdef SHOW_FLOW
         const auto Y = std::clamp(flow_vectors[i].norm() / 5.f, 0.f, 1.f);
         const auto U = std::clamp(flow_vectors[i].x() / 5, -1.f, 1.f) * 0.5f;

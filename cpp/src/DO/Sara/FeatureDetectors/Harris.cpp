@@ -19,43 +19,61 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  Image<float> scale_adapted_harris_cornerness(const ImageView<float>& I,
-                                               float sigma_I, float sigma_D,
-                                               float kappa)
+  auto harris_cornerness(const ImageView<float>& gx, const ImageView<float>& gy,
+                         float sigma_I, float kappa) -> Image<float>
+  {
+    auto m = Tensor_<float, 3>{3, gx.height(), gx.width()};
+    auto mxx = image_view(m[0]);
+    auto myy = image_view(m[1]);
+    auto mxy = image_view(m[2]);
+    second_moment_matrix(gx, gy, mxx, myy, mxy);
+
+    auto m_sigma_I = Tensor_<float, 3>{m.sizes()};
+    for (auto i = 0; i < 3; ++i)
+      image_view(m_sigma_I[i]) = image_view(m[i]).compute<Gaussian>(sigma_I);
+
+    auto cornerness = Image<float>{gx.sizes()};
+    compute_cornerness(image_view(m_sigma_I[0]),  //
+                       image_view(m_sigma_I[1]),  //
+                       image_view(m_sigma_I[2]),  //
+                       kappa,                     //
+                       cornerness);
+
+    return cornerness;
+  }
+
+  auto scale_adapted_harris_cornerness(const ImageView<float>& I, float sigma_I,
+                                       float sigma_D, float kappa)
+      -> Image<float>
   {
 #ifdef DO_SARA_USE_HALIDE
-    // Derive the smoothed function $g_{\sigma_I} * I$
-    const auto M = I.compute<Gaussian>(sigma_D)
+    const auto I_sigma_D = I.compute<Gaussian>(sigma_D);
+
+    auto g = Tensor_<float, 3>{2, I.height(), I.width()};
+    auto gx = image_view(g[0]);
+    auto gy = image_view(g[1]);
+    gradient(I_sigma_D, gx, gy);
+
+    const auto m = second_moment_matrix(g);
+
+    auto m_sigma_I = Tensor_<float, 3>{m.sizes()};
+    for (auto i = 0; i < 3; ++i)
+      image_view(m_sigma_I[i]) = image_view(m[i]).compute<Gaussian>(sigma_I);
+
+    auto cornerness = Image<float>{I.sizes()};
+    compute_cornerness(image_view(m_sigma_I[0]),  //
+                       image_view(m_sigma_I[1]),  //
+                       image_view(m_sigma_I[2]),  //
+                       kappa,                     //
+                       cornerness);
+#else
+    const auto M = I  //
+                       .compute<Gaussian>(sigma_D)
                        .compute<Gradient>()
                        .compute<SecondMomentMatrix>()
                        .compute<Gaussian>(sigma_I);
 
-    const auto I_sigma_D = I.compute<Gaussian>(sigma_D);
-
-    auto g = std::array<Image<float>, 2>{};
-    std::for_each(g.begin(), g.end(), [&I](auto& gi) { gi.resize(I.sizes()); });
-    gradient(I_sigma_D, g[0], g[1]);
-
-    auto m = std::array<Image<float>, 3>{};
-    std::for_each(m.begin(), m.end(), [&I](auto& mi) { mi.resize(I.sizes()); });
-    second_moment_matrix(g[0], g[1], m[0], m[1], m[2]);
-
-    auto m_sigma_I = std::array<Image<float>, 3>{};
-    std::transform(m.begin(), m.end(), m_sigma_I.begin(),
-                   [sigma_I](const auto& mi) {
-                     return mi.template compute<Gaussian>(sigma_I);
-                   });
-
     auto cornerness = Image<float>{I.sizes()};
-    compute_cornerness_map(m_sigma_I[0], m_sigma_I[1], m_sigma_I[2], kappa,
-                           cornerness);
-#else
-    auto cornerness = Image<float>{I.sizes()};
-    auto M = I  //
-                 .compute<Gaussian>(sigma_D)
-                 .compute<Gradient>()
-                 .compute<SecondMomentMatrix>()
-                 .compute<Gaussian>(sigma_I);
     std::transform(M.begin(), M.end(), cornerness.begin(),
                    [kappa](const auto& m) {
                      return m.determinant() - kappa * pow(m.trace(), 2);
