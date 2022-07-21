@@ -11,19 +11,22 @@
 
 #include <DO/Sara/ImageProcessing/Cornerness.hpp>
 
+#ifdef DO_SARA_USE_HALIDE
 #include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
 #include "shakti_cornerness_32f_cpu.h"
+#endif
 
 
 namespace DO::Sara {
 
-  inline auto cornerness(const ImageView<float>& mxx,  //
-                         const ImageView<float>& myy,  //
-                         const ImageView<float>& mxy,  //
-                         const float kappa,            //
-                         ImageView<float>& cornerness) -> void;
+  inline auto compute_cornerness_map(const ImageView<float>& mxx,  //
+                                     const ImageView<float>& myy,  //
+                                     const ImageView<float>& mxy,  //
+                                     const float kappa,            //
+                                     ImageView<float>& cornerness) -> void
   {
+#ifdef DO_SARA_USE_HALIDE
     if (mxx.sizes() != myy.sizes() ||  //
         mxx.sizes() != mxy.sizes() ||  //
         mxx.sizes() != cornerness.sizes())
@@ -34,8 +37,11 @@ namespace DO::Sara {
     auto mxy_buffer = Shakti::Halide::as_runtime_buffer_4d(mxy);
     auto cornerness_buffer = Shakti::Halide::as_runtime_buffer_4d(cornerness);
 
-    shakti_cornerness_32f_cpu(mxx_buffer, myy_buffer, mxy_buffer, kappa,
-                              cornerness_buffer);
+    shakti_cornerness_32f_cpu(mxx_buffer, myy_buffer, mxy_buffer,
+                              kappa, cornerness_buffer);
+#else
+    throw std::runtime_error{"Not Implemented!"};
+#endif
   }
 
 }  // namespace DO::Sara

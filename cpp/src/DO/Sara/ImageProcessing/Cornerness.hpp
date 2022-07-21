@@ -18,10 +18,10 @@
 
 namespace DO::Sara {
 
-  inline auto cornerness(const ImageView<float>& mxx,  //
-                         const ImageView<float>& myy,  //
-                         const ImageView<float>& mxy,  //
-                         const float kappa,            //
-                         ImageView<float>& cornerness) -> void;
+  inline auto compute_cornerness_map(const ImageView<float>& mxx,  //
+                                     const ImageView<float>& myy,  //
+                                     const ImageView<float>& mxy,  //
+                                     const float kappa,            //
+                                     ImageView<float>& cornerness) -> void;
 
 }  // namespace DO::Sara

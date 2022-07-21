@@ -11,6 +11,7 @@
 
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/ImageProcessing/Cornerness.hpp>
 
 
 using namespace std;
@@ -22,17 +23,44 @@ namespace DO { namespace Sara {
                                                float sigma_I, float sigma_D,
                                                float kappa)
   {
+#ifdef DO_SARA_USE_HALIDE
     // Derive the smoothed function $g_{\sigma_I} * I$
     const auto M = I.compute<Gaussian>(sigma_D)
                        .compute<Gradient>()
                        .compute<SecondMomentMatrix>()
                        .compute<Gaussian>(sigma_I);
 
+    const auto I_sigma_D = I.compute<Gaussian>(sigma_D);
+
+    auto g = std::array<Image<float>, 2>{};
+    std::for_each(g.begin(), g.end(), [&I](auto& gi) { gi.resize(I.sizes()); });
+    gradient(I_sigma_D, g[0], g[1]);
+
+    auto m = std::array<Image<float>, 3>{};
+    std::for_each(m.begin(), m.end(), [&I](auto& mi) { mi.resize(I.sizes()); });
+    second_moment_matrix(g[0], g[1], m[0], m[1], m[2]);
+
+    auto m_sigma_I = std::array<Image<float>, 3>{};
+    std::transform(m.begin(), m.end(), m_sigma_I.begin(),
+                   [sigma_I](const auto& mi) {
+                     return mi.template compute<Gaussian>(sigma_I);
+                   });
+
     auto cornerness = Image<float>{I.sizes()};
+    compute_cornerness_map(m_sigma_I[0], m_sigma_I[1], m_sigma_I[2], kappa,
+                           cornerness);
+#else
+    auto cornerness = Image<float>{I.sizes()};
+    auto M = I  //
+                 .compute<Gaussian>(sigma_D)
+                 .compute<Gradient>()
+                 .compute<SecondMomentMatrix>()
+                 .compute<Gaussian>(sigma_I);
     std::transform(M.begin(), M.end(), cornerness.begin(),
                    [kappa](const auto& m) {
                      return m.determinant() - kappa * pow(m.trace(), 2);
                    });
+#endif
 
     // Rescale the cornerness function.
     cornerness.flat_array() *= sigma_D * sigma_D;

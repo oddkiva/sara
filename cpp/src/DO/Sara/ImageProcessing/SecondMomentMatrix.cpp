@@ -15,9 +15,11 @@
 
 #include <DO/Sara/Core/Image/Image.hpp>
 
+#ifdef DO_SARA_USE_HALIDE
 #include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
-#include "shakti_cartesian_to_polar_32f_cpu.h"
+#include "shakti_moment_matrix_32f_cpu.h"
+#endif
 
 
 namespace DO::Sara {
@@ -28,6 +30,7 @@ namespace DO::Sara {
                             ImageView<float>& myy,       //
                             ImageView<float>& mxy) -> void
   {
+#ifdef DO_SARA_USE_HALIDE
     if (fx.sizes() != fy.sizes() ||   //
         fx.sizes() != mxx.sizes() ||  //
         fx.sizes() != myy.sizes() ||  //
@@ -42,6 +45,9 @@ namespace DO::Sara {
 
     shakti_moment_matrix_32f_cpu(fx_buffer, fy_buffer, mxx_buffer, myy_buffer,
                                  mxy_buffer);
+#else
+    throw std::runtime_error{"Not Implemented!"};
+#endif
   }
 
 }  // namespace DO::Sara
