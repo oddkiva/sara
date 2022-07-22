@@ -250,7 +250,7 @@ int __main(int argc, char** argv)
     // Draw the sparse flow field.
     if (!flow_estimator._I0.empty())
     {
-#pragma omp parallel for
+// #pragma omp parallel for
       for (auto i = 0u; i != corners.size(); ++i)
       {
         const auto& v = flow_vectors[i];
