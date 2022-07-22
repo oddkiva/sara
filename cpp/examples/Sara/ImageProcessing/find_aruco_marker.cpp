@@ -138,9 +138,9 @@ auto __main(int argc, char** argv) -> int
     auto frame_number = -1;
 
     auto video_writer = sara::VideoWriter{
-        "/Users/david/Desktop/aruco_test.mp4",       //
-        video_stream.sizes(),                        //
-        static_cast<int>(video_stream.frame_rate())  //
+        "/Users/david/Desktop/aruco_test.mp4",  //
+        video_stream.sizes(),                   //
+        30                                      //
     };
 
     auto f = sara::Image<float>{video_frame.sizes()};
@@ -159,7 +159,6 @@ auto __main(int argc, char** argv) -> int
       ++frame_number;
       if (frame_number % 3 != 0)
         continue;
-
 
       if (sara::active_window() == nullptr)
       {
