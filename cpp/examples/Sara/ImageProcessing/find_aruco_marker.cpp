@@ -142,8 +142,13 @@ auto __main(int argc, char** argv) -> int
 
     auto f = sara::Image<float>{video_frame.sizes()};
     auto f_blurred = sara::Image<float>{video_frame.sizes()};
+
+    auto grad_f = std::array{sara::Image<float>{f.sizes()},
+                             sara::Image<float>{f.sizes()}};
     auto grad_f_norm = sara::Image<float>{video_frame.sizes()};
     auto grad_f_ori = sara::Image<float>{video_frame.sizes()};
+
+    auto cornerness = sara::Image<float>{video_frame.sizes()};
     auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
 
     while (video_stream.read())
@@ -166,12 +171,13 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       sara::apply_gaussian_filter(f, f_blurred, sigma_D);
+
 #ifdef SLOW_IMPL
-      const auto grad_f = f_blurred.compute<sara::Gradient>();
+      grad_f = f_blurred.compute<sara::Gradient>();
       const auto M =
           grad_f.compute<sara::SecondMomentMatrix>().compute<sara::Gaussian>(
               sigma_I);
-      auto cornerness = sara::Image<float>{M.sizes()};
+      cornerness = sara::Image<float>{M.sizes()};
       std::transform(
 #  if __has_include(<execution>) && !defined(__APPLE__)
           std::execution::par_unseq,
@@ -181,17 +187,12 @@ auto __main(int argc, char** argv) -> int
           });
       sara::gradient_in_polar_coordinates(f_blurred, grad_f_norm, grad_f_ori);
 #else
-      auto grad_f = std::array{sara::Image<float>{f.sizes()},
-                               sara::Image<float>{f.sizes()}};
       sara::gradient(f_blurred, grad_f[0], grad_f[1]);
-
-      const auto cornerness =
-          sara::harris_cornerness(grad_f[0], grad_f[1], sigma_I, kappa);
-
-      auto grad_f_norm = sara::Image<float>{f.sizes()};
-      auto grad_f_ori = sara::Image<float>{f.sizes()};
       sara::cartesian_to_polar_coordinates(grad_f[0], grad_f[1],  //
                                            grad_f_norm, grad_f_ori);
+
+      cornerness = sara::harris_cornerness(grad_f[0], grad_f[1],  //
+                                           sigma_I, kappa);
 #endif
 
 #if __has_include(<execution>) && !defined(__APPLE__)
@@ -309,8 +310,7 @@ auto __main(int argc, char** argv) -> int
                   grad_f[0], grad_f[1], ci, radius);
 #endif
               return p.cast<double>();
-            }
-        );
+            });
 
         candidate_quads.push_back(quad);
       }
