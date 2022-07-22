@@ -19,10 +19,12 @@
 #include <exception>
 
 #include <DO/Sara/Core/TicToc.hpp>
-#include <DO/Sara/FeatureDetectors/Harris.hpp>
-#include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/VideoIO.hpp>
+
+#include <DO/Sara/FeatureDetectors/Harris.hpp>
+#include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/CartesianToPolarCoordinates.hpp>
@@ -31,11 +33,6 @@
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/ImageProcessing/Otsu.hpp>
-#include <DO/Sara/VideoIO.hpp>
-
-#include <DO/Sara/VideoIO/VideoWriter.hpp>
-
-#include "Chessboard/NonMaximumSuppression.hpp"
 
 
 namespace sara = DO::Sara;
@@ -139,6 +136,12 @@ auto __main(int argc, char** argv) -> int
     auto video_frame = video_stream.frame();
     auto video_frame_copy = sara::Image<sara::Rgb8>{};
     auto frame_number = -1;
+
+    auto video_writer = sara::VideoWriter{
+        "/Users/david/Desktop/aruco_test.mp4",       //
+        video_stream.sizes(),                        //
+        static_cast<int>(video_stream.frame_rate())  //
+    };
 
     auto f = sara::Image<float>{video_frame.sizes()};
     auto f_blurred = sara::Image<float>{video_frame.sizes()};
@@ -426,6 +429,10 @@ auto __main(int argc, char** argv) -> int
       }
 #endif
       sara::toc("Display");
+
+      sara::tic();
+      video_writer.write(disp);
+      sara::toc("Video write");
     }
   }
   catch (std::exception& e)
