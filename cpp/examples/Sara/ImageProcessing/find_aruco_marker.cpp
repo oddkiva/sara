@@ -19,11 +19,13 @@
 #include <exception>
 
 #include <DO/Sara/Core/TicToc.hpp>
+#include <DO/Sara/FeatureDetectors/Harris.hpp>
 #include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
+#include <DO/Sara/ImageProcessing/CartesianToPolarCoordinates.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
@@ -54,7 +56,7 @@ struct Corner
   }
 };
 
-#define INSPECT_PATCH
+// #define INSPECT_PATCH
 #ifdef INSPECT_PATCH
 static constexpr auto square_size = 20;
 static constexpr auto square_padding = 4;
@@ -147,9 +149,8 @@ auto __main(int argc, char** argv) -> int
     while (video_stream.read())
     {
       ++frame_number;
-      if (frame_number % 3 != 0)
-        continue;
-
+      // if (frame_number % 3 != 0)
+      //   continue;
 
       if (sara::active_window() == nullptr)
       {
@@ -164,19 +165,18 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       sara::apply_gaussian_filter(f, f_blurred, sigma_D);
-      const auto grad_f = f_blurred.compute<sara::Gradient>();
-      const auto M =
-          grad_f.compute<sara::SecondMomentMatrix>().compute<sara::Gaussian>(
-              sigma_I);
-      auto cornerness = sara::Image<float>{M.sizes()};
-      std::transform(
-#if __has_include(<execution>) && !defined(__APPLE__)
-          std::execution::par_unseq,
-#endif
-          M.begin(), M.end(), cornerness.begin(), [kappa](const auto& m) {
-            return m.determinant() - kappa * pow(m.trace(), 2);
-          });
-      sara::gradient_in_polar_coordinates(f_blurred, grad_f_norm, grad_f_ori);
+      auto grad_f = std::array{sara::Image<float>{f.sizes()},
+                               sara::Image<float>{f.sizes()}};
+      sara::gradient(f_blurred, grad_f[0], grad_f[1]);
+
+      const auto cornerness =
+          sara::harris_cornerness(grad_f[0], grad_f[1], sigma_I, kappa);
+
+      auto grad_f_norm = sara::Image<float>{f.sizes()};
+      auto grad_f_ori = sara::Image<float>{f.sizes()};
+      sara::cartesian_to_polar_coordinates(grad_f[0], grad_f[1],  //
+                                           grad_f_norm, grad_f_ori);
+
 #if __has_include(<execution>) && !defined(__APPLE__)
       const auto grad_max = *std::max_element(
           std::execution::par_unseq, grad_f_norm.begin(), grad_f_norm.end());
@@ -277,7 +277,7 @@ auto __main(int argc, char** argv) -> int
               static const auto radius = static_cast<int>(std::round(sigma_I));
               const Eigen::Vector2i ci = c.array().round().cast<int>();
               const auto p = sara::refine_junction_location_unsafe(  //
-                  grad_f, ci, radius);
+                  grad_f[0], grad_f[1], ci, radius);
               return p.cast<double>();
             });
 

@@ -52,4 +52,29 @@ namespace DO::Sara {
     return (A.transpose() * A).ldlt().solve(A.transpose() * b);
   }
 
+  inline auto
+  refine_junction_location_unsafe(const ImageView<float>& grad_x,
+                                  const ImageView<float>& grad_y,
+                                  const Eigen::Vector2i& x0,  //
+                                  const std::int32_t r) -> Eigen::Vector2f
+  {
+    Eigen::Matrix2f A = Eigen::Matrix2f::Zero();
+    Eigen::Vector2f b = Eigen::Vector2f::Zero();
+    for (auto dy = -r; dy <= r; ++dy)
+    {
+      for (auto dx = -r; dx <= r; ++dx)
+      {
+        const Eigen::Vector2i x1 = x0 + Eigen::Vector2i(dx, dy);
+        const auto g = Eigen::Vector2f{grad_x(x1), grad_y(x1)};
+
+        const Eigen::Matrix2f G = g * g.transpose();
+
+        A += G;
+        b += G * x1.cast<float>();
+      }
+    }
+
+    return (A.transpose() * A).ldlt().solve(A.transpose() * b);
+  }
+
 }  // namespace DO::Sara

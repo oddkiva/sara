@@ -21,6 +21,7 @@
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
+#include <DO/Sara/ImageProcessing/CartesianToPolarCoordinates.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
@@ -156,7 +157,7 @@ auto __main(int argc, char** argv) -> int
   // Harris cornerness parameters.
   //
   // Blur parameter before gradient calculation.
-  const auto sigma_D = argc < 3 ? 0.8f : std::stof(argv[2]);
+  const auto sigma_D = argc < 3 ? 1.f : std::stof(argv[2]);
   // Integration domain of the second moment.
   const auto sigma_I = argc < 4 ? 3.f : std::stof(argv[3]);
   // Threshold parameter.
@@ -216,17 +217,16 @@ auto __main(int argc, char** argv) -> int
     sara::toc("Downscale");
 
     sara::tic();
-    ed(frame_gray_ds);
+    const auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(sigma_D);
+    ed(f_ds_blurred);
     sara::toc("Curve detection");
 
     sara::tic();
-    const auto cornerness = sara::scale_adapted_harris_cornerness(  //
-        frame_gray_ds,                                              //
-        sigma_I, sigma_D,                                           //
-        kappa                                                       //
-    );
-    const auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(1.f);
-    const auto grad_f = f_ds_blurred.compute<sara::Gradient>();
+    auto grad_x = sara::Image<float>{f_ds_blurred.sizes()};
+    auto grad_y = sara::Image<float>{f_ds_blurred.sizes()};
+    sara::gradient(f_ds_blurred, grad_x, grad_y);
+    const auto cornerness =
+        sara::harris_cornerness(grad_x, grad_y, sigma_I, kappa);
     static const auto border = static_cast<int>(std::round(sigma_I));
     auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
     sara::toc("Corner detection");
@@ -235,32 +235,30 @@ auto __main(int argc, char** argv) -> int
     auto corners = std::vector<Corner<float>>{};
     std::transform(
         corners_int.begin(), corners_int.end(), std::back_inserter(corners),
-        [&grad_f, sigma_I](const Corner<int>& c) -> Corner<float> {
+        [&grad_x, &grad_y, sigma_I](const Corner<int>& c) -> Corner<float> {
           static const auto radius = static_cast<int>(std::round(sigma_I));
-          const auto p =
-              sara::refine_junction_location_unsafe(grad_f, c.coords, radius);
+          const auto p = sara::refine_junction_location_unsafe(
+              grad_x, grad_y, c.coords, radius);
           return {p, c.score};
         });
     sara::toc("Corner refinement");
 
     sara::tic();
-    auto grad_f_ds_norm = sara::Image<float>{f_ds_blurred.sizes()};
-    auto grad_f_ds_ori = sara::Image<float>{f_ds_blurred.sizes()};
-    sara::gradient_in_polar_coordinates(f_ds_blurred, grad_f_ds_norm,
-                                        grad_f_ds_ori);
+    const auto& grad_norm = ed.pipeline.gradient_magnitude;
+    const auto& grad_ori = ed.pipeline.gradient_orientation;
 
-    static constexpr auto N = 72;
+    static constexpr auto N = 36;
     auto hists = std::vector<Eigen::Array<float, N, 1>>{};
     hists.resize(corners.size());
-    std::transform(corners.begin(), corners.end(), hists.begin(),
-                   [&grad_f_ds_norm, &grad_f_ds_ori,
-                    sigma_D](const Corner<float>& corner) {
-                     auto h = Eigen::Array<float, N, 1>{};
-                     compute_orientation_histogram<N>(
-                         h, grad_f_ds_norm, grad_f_ds_ori, corner.coords.x(),
-                         corner.coords.y(), sigma_D * 4.);
-                     return h;
-                   });
+    std::transform(
+        corners.begin(), corners.end(), hists.begin(),
+        [&grad_norm, &grad_ori, sigma_D](const Corner<float>& corner) {
+          auto h = Eigen::Array<float, N, 1>{};
+          compute_orientation_histogram<N>(h, grad_norm, grad_ori,
+                                           corner.coords.x(), corner.coords.y(),
+                                           sigma_D * 4.);
+          return h;
+        });
     std::for_each(hists.begin(), hists.end(), [](auto& h) {
       sara::lowe_smooth_histogram(h);
       h.matrix().normalize();
@@ -331,12 +329,14 @@ auto __main(int argc, char** argv) -> int
     sara::toc("X-junction filter");
 
     sara::tic();
-#if 0
+#define SHOW_EDGE_MAP
+#ifdef SHOW_EDGE_MAP
     const auto display_u8 = sara::upscale(ed.pipeline.edge_map, 2);
     auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
-    std::transform(
-        display_u8.begin(), display_u8.end(), display.begin(),
-        [](const auto& v) { return v != 0 ? sara::White8 : sara::Black8; });
+    std::transform(display_u8.begin(), display_u8.end(), display.begin(),
+                   [](const auto& v) {
+                     return v != 0 ? sara::Rgb8(64, 64, 64) : sara::Black8;
+                   });
 #else
     auto display = frame_gray.convert<sara::Rgb8>();
 #endif
@@ -357,9 +357,8 @@ auto __main(int argc, char** argv) -> int
       {
         for (const auto& curve_index : edges)
         {
-          const auto color = sara::Rgb8(rand() % 255,
-                                        rand() % 255,
-                                        rand() % 255);
+          const auto color =
+              sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
           // const auto color = sara::Cyan8;
 #if 0
           const auto& curve = ed.pipeline.edges_simplified[curve_index];

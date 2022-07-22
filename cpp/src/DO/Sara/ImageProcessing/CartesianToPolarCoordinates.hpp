@@ -18,10 +18,9 @@
 
 namespace DO::Sara {
 
-  inline auto cartesian_to_polar_coordinates(const ImageView<float>& fx,
-                                             const ImageView<float>& fy,
-                                             const ImageView<float>& f_mag,
-                                             const ImageView<float>& f_ori)
-      -> void;
+  auto cartesian_to_polar_coordinates(const ImageView<float>& fx,
+                                      const ImageView<float>& fy,
+                                      ImageView<float>& f_mag,
+                                      ImageView<float>& f_ori) -> void;
 
 }  // namespace DO::Sara
