@@ -11,9 +11,11 @@
 
 #include <DO/Sara/ImageProcessing/CartesianToPolarCoordinates.hpp>
 
+#ifdef DO_SARA_USE_HALIDE
 #include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
 #include "shakti_cartesian_to_polar_32f_cpu.h"
+#endif
 
 
 namespace DO::Sara {
@@ -23,6 +25,7 @@ namespace DO::Sara {
                                       ImageView<float>& mag,
                                       ImageView<float>& ori) -> void
   {
+#ifdef DO_SARA_USE_HALIDE
     if (fx.sizes() != fy.sizes() ||   //
         fx.sizes() != mag.sizes() ||  //
         fx.sizes() != ori.sizes())
@@ -36,6 +39,9 @@ namespace DO::Sara {
 
     shakti_cartesian_to_polar_32f_cpu(fx_buffer, fy_buffer, mag_buffer,
                                       ori_buffer);
+#else
+    throw std::runtime_error{"Not Implemented!"};
+#endif
   }
 
 }  // namespace DO::Sara
