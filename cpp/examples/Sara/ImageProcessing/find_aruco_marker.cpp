@@ -149,8 +149,9 @@ auto __main(int argc, char** argv) -> int
     while (video_stream.read())
     {
       ++frame_number;
-      // if (frame_number % 3 != 0)
-      //   continue;
+      if (frame_number % 3 != 0)
+        continue;
+
 
       if (sara::active_window() == nullptr)
       {
@@ -165,6 +166,21 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       sara::apply_gaussian_filter(f, f_blurred, sigma_D);
+#ifdef SLOW_IMPL
+      const auto grad_f = f_blurred.compute<sara::Gradient>();
+      const auto M =
+          grad_f.compute<sara::SecondMomentMatrix>().compute<sara::Gaussian>(
+              sigma_I);
+      auto cornerness = sara::Image<float>{M.sizes()};
+      std::transform(
+#  if __has_include(<execution>) && !defined(__APPLE__)
+          std::execution::par_unseq,
+#  endif
+          M.begin(), M.end(), cornerness.begin(), [kappa](const auto& m) {
+            return m.determinant() - kappa * pow(m.trace(), 2);
+          });
+      sara::gradient_in_polar_coordinates(f_blurred, grad_f_norm, grad_f_ori);
+#else
       auto grad_f = std::array{sara::Image<float>{f.sizes()},
                                sara::Image<float>{f.sizes()}};
       sara::gradient(f_blurred, grad_f[0], grad_f[1]);
@@ -176,6 +192,7 @@ auto __main(int argc, char** argv) -> int
       auto grad_f_ori = sara::Image<float>{f.sizes()};
       sara::cartesian_to_polar_coordinates(grad_f[0], grad_f[1],  //
                                            grad_f_norm, grad_f_ori);
+#endif
 
 #if __has_include(<execution>) && !defined(__APPLE__)
       const auto grad_max = *std::max_element(
@@ -275,11 +292,25 @@ auto __main(int argc, char** argv) -> int
             quad.begin(), quad.end(), quad.begin(),
             [&grad_f, sigma_I](const Eigen::Vector2d& c) -> Eigen::Vector2d {
               static const auto radius = static_cast<int>(std::round(sigma_I));
+              const auto w = grad_f[0].width();
+              const auto h = grad_f[0].height();
               const Eigen::Vector2i ci = c.array().round().cast<int>();
+              const auto in_domain =                          //
+                  radius <= ci.x() && ci.x() < w - radius &&  //
+                  radius <= ci.y() && ci.y() < h - radius;
+              if (!in_domain)
+                return ci.cast<double>();
+
+#ifdef SLOW_IMPL
+              const auto p = sara::refine_junction_location_unsafe(  //
+                  grad_f, ci, radius);
+#else
               const auto p = sara::refine_junction_location_unsafe(  //
                   grad_f[0], grad_f[1], ci, radius);
+#endif
               return p.cast<double>();
-            });
+            }
+        );
 
         candidate_quads.push_back(quad);
       }
