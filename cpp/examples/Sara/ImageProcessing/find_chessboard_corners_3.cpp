@@ -28,7 +28,8 @@
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "Chessboard/NonMaximumSuppression.hpp"
+#include "Chessboard/Corner.hpp"
+#include "Chessboard/OrientationHistogram.hpp"
 
 
 namespace sara = DO::Sara;
@@ -37,106 +38,6 @@ namespace sara = DO::Sara;
 inline constexpr long double operator"" _percent(long double x)
 {
   return x / 100;
-}
-
-
-template <typename T>
-struct Corner
-{
-  Eigen::Vector2<T> coords;
-  float score;
-  auto position() const -> const Eigen::Vector2i&
-  {
-    return coords;
-  }
-  auto operator<(const Corner& other) const -> bool
-  {
-    return score < other.score;
-  }
-};
-
-// Select the local maxima of the cornerness functions.
-auto select(const sara::ImageView<float>& cornerness,
-            const float cornerness_adaptive_thres, const int border)
-    -> std::vector<Corner<int>>
-{
-  const auto extrema = sara::local_maxima(cornerness);
-
-  const auto cornerness_max = cornerness.flat_array().maxCoeff();
-  const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
-
-  auto extrema_filtered = std::vector<Corner<int>>{};
-  extrema_filtered.reserve(extrema.size());
-  for (const auto& p : extrema)
-  {
-    const auto in_image_domain =
-        border <= p.x() && p.x() < cornerness.width() - border &&  //
-        border <= p.y() && p.y() < cornerness.height() - border;
-    if (in_image_domain && cornerness(p) > cornerness_thres)
-      extrema_filtered.push_back({p, cornerness(p)});
-  }
-
-  return extrema_filtered;
-};
-
-
-template <Eigen::Index N>
-void compute_orientation_histogram(
-    Eigen::Array<float, N, 1>& orientation_histogram,
-    const sara::ImageView<float>& grad_f_norm,
-    const sara::ImageView<float>& grad_f_ori,     //
-    const float x, const float y, const float s,  //
-    const float patch_truncation_factor = 3.f,    //
-    const float blur_factor = 1.5f)
-{
-  // Weighted histogram of gradients.
-  orientation_histogram.setZero();
-
-  // Rounding of the coordinates.
-  static constexpr auto int_round = [](const float x) {
-    return static_cast<int>(std::round(x));
-  };
-  auto rounded_x = int_round(x);
-  auto rounded_y = int_round(y);
-
-  // std deviation of the gaussian weight (cf. [Lowe, IJCV 2004])
-  auto sigma = s * blur_factor;
-
-  // Patch radius on which the histogram of gradients is performed.
-  auto patch_radius = int_round(sigma * patch_truncation_factor);
-  const auto w = grad_f_norm.width();
-  const auto h = grad_f_norm.height();
-
-  const auto one_over_two_sigma_square = 1 / (2.f * sigma * sigma);
-
-  // Accumulate the histogram of orientations.
-  for (auto v = -patch_radius; v <= patch_radius; ++v)
-  {
-    for (auto u = -patch_radius; u <= patch_radius; ++u)
-    {
-      if (rounded_x + u < 0 || rounded_x + u >= w ||  //
-          rounded_y + v < 0 || rounded_y + v >= h)
-        continue;
-
-      const auto mag = grad_f_norm(rounded_x + u, rounded_y + v);
-      auto ori = grad_f_ori(rounded_x + u, rounded_y + v);
-
-      // ori is in \f$]-\pi, \pi]\f$, so translate ori by \f$2*\pi\f$ if it is
-      // negative.
-      static constexpr auto two_pi = static_cast<float>(2 * M_PI);
-      static constexpr auto normalization_factor = N / two_pi;
-
-      ori = ori < 0 ? ori + two_pi : ori;
-      auto bin_index = static_cast<int>(std::floor(ori * normalization_factor));
-      bin_index %= N;
-
-      // Give more emphasis to gradient orientations that lie closer to the
-      // keypoint location.
-      auto weight = exp(-(u * u + v * v) * one_over_two_sigma_square);
-      // Also give more emphasis to gradient with large magnitude.
-      orientation_histogram(bin_index) += weight * mag;
-    }
-  }
 }
 
 
@@ -167,6 +68,8 @@ auto __main(int argc, char** argv) -> int
   // Corner filtering.
   static constexpr auto downscale_factor = 2;
 
+#define EDGE_DETECTION
+#ifdef EDGE_DETECTION
   // Edge detection.
   static constexpr auto high_threshold_ratio = static_cast<float>(4._percent);
   static constexpr auto low_threshold_ratio =
@@ -179,7 +82,7 @@ auto __main(int argc, char** argv) -> int
       low_threshold_ratio,   //
       angular_threshold      //
   }};
-
+#endif
 
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
@@ -189,8 +92,10 @@ auto __main(int argc, char** argv) -> int
   auto frame_gray_blurred = sara::Image<float>{video_frame.sizes()};
   auto frame_gray_ds =
       sara::Image<float>{video_frame.sizes() / downscale_factor};
-  auto grad_f_norm = sara::Image<float>{video_frame.sizes()};
-  auto grad_f_ori = sara::Image<float>{video_frame.sizes()};
+#ifndef EDGE_DETECTION
+  auto grad_norm = sara::Image<float>{video_frame.sizes() / downscale_factor};
+  auto grad_ori = sara::Image<float>{video_frame.sizes() / downscale_factor};
+#endif
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
   auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
 
@@ -218,8 +123,13 @@ auto __main(int argc, char** argv) -> int
 
     sara::tic();
     const auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(sigma_D);
+    sara::toc("Blur");
+
+#ifdef EDGE_DETECTION
+    sara::tic();
     ed(f_ds_blurred);
     sara::toc("Curve detection");
+#endif
 
     sara::tic();
     auto grad_x = sara::Image<float>{f_ds_blurred.sizes()};
@@ -244,32 +154,33 @@ auto __main(int argc, char** argv) -> int
     sara::toc("Corner refinement");
 
     sara::tic();
+#ifdef EDGE_DETECTION
     const auto& grad_norm = ed.pipeline.gradient_magnitude;
     const auto& grad_ori = ed.pipeline.gradient_orientation;
+#else
+    sara::cartesian_to_polar_coordinates(grad_x, grad_y, grad_norm, grad_ori);
+#endif
 
-    static constexpr auto N = 36;
+    static constexpr auto N = 72;
     auto hists = std::vector<Eigen::Array<float, N, 1>>{};
     hists.resize(corners.size());
-    std::transform(
-        corners.begin(), corners.end(), hists.begin(),
-        [&grad_norm, &grad_ori, sigma_D](const Corner<float>& corner) {
-          auto h = Eigen::Array<float, N, 1>{};
-          compute_orientation_histogram<N>(h, grad_norm, grad_ori,
-                                           corner.coords.x(), corner.coords.y(),
-                                           sigma_D * 4.);
-          return h;
-        });
-    std::for_each(hists.begin(), hists.end(), [](auto& h) {
-      sara::lowe_smooth_histogram(h);
-      h.matrix().normalize();
-    });
+    const auto num_corners = static_cast<int>(corners.size());
+#pragma omp parallel for
+    for (auto i = 0; i < num_corners; ++i)
+    {
+      compute_orientation_histogram<N>(hists[i], grad_norm, grad_ori,
+                                       corners[i].coords.x(),
+                                       corners[i].coords.y(), sigma_D, 4, 5.0f);
+      sara::lowe_smooth_histogram(hists[i]);
+      hists[i].matrix().normalize();
+    };
     sara::toc("Gradient histograms");
 
     sara::tic();
     auto gradient_peaks = std::vector<std::vector<int>>{};
     gradient_peaks.resize(hists.size());
     std::transform(hists.begin(), hists.end(), gradient_peaks.begin(),
-                   [](const auto& h) { return sara::find_peaks(h, 0.5f); });
+                   [](const auto& h) { return sara::find_peaks(h, 0.3f); });
     auto gradient_peaks_refined = std::vector<std::vector<float>>{};
     gradient_peaks_refined.resize(gradient_peaks.size());
     std::transform(gradient_peaks.begin(), gradient_peaks.end(), hists.begin(),
@@ -285,6 +196,8 @@ auto __main(int argc, char** argv) -> int
                    });
     sara::toc("Gradient Dominant Orientations");
 
+
+#ifdef EDGE_DETECTION
     sara::tic();
     auto edge_label_map = sara::Image<int>{ed.pipeline.edge_map.sizes()};
     edge_label_map.flat_array().fill(-1);
@@ -327,10 +240,10 @@ auto __main(int argc, char** argv) -> int
           return edges;
         });
     sara::toc("X-junction filter");
+#endif
 
     sara::tic();
-#define SHOW_EDGE_MAP
-#ifdef SHOW_EDGE_MAP
+#ifdef EDGE_DETECTION
     const auto display_u8 = sara::upscale(ed.pipeline.edge_map, 2);
     auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
     std::transform(display_u8.begin(), display_u8.end(), display.begin(),
@@ -341,44 +254,38 @@ auto __main(int argc, char** argv) -> int
     auto display = frame_gray.convert<sara::Rgb8>();
 #endif
 
-    auto count = 0;
     for (auto c = 0u; c < corners.size(); ++c)
     {
       const auto& p = corners[c];
-      const auto& edges = adjacent_edges[c];
+      const auto& gradient_peaks = gradient_peaks_refined[c];
 
-      const auto good = gradient_peaks_refined[c].size() == 4;
-      // if (edges.size() != 4)
-      //   continue;
+      // A chessboard corners should have 4 gradient orientation peaks.
+      const auto four_contrast_changes = gradient_peaks_refined[c].size() == 4;
 
-      ++count;
+      // The 4 peaks are due to 2 lines crossing each other.
+      static constexpr auto angle_degree_thres = 20.f;
+      const auto two_crossing_lines =
+          std::abs((gradient_peaks[2] - gradient_peaks[0]) * 360.f / N -
+                   180.f) < angle_degree_thres &&
+          std::abs((gradient_peaks[3] - gradient_peaks[1]) * 360.f / N -
+                   180.f) < angle_degree_thres;
+
+      const auto good = four_contrast_changes && two_crossing_lines;
 
       if (good)
       {
+#ifdef EDGE_DETECTION
+        const auto& edges = adjacent_edges[c];
         for (const auto& curve_index : edges)
         {
           const auto color =
               sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
           // const auto color = sara::Cyan8;
-#if 0
-          const auto& curve = ed.pipeline.edges_simplified[curve_index];
-          for (auto i = 0u; i < curve.size() - 1; ++i)
-          {
-            const auto a = curve[i].cast<float>() * downscale_factor;
-            const auto b =
-                curve[i + 1u].cast<float>() * downscale_factor;
-            sara::draw_line(display, a, b, color, 2);
-          }
-#else
           const auto& curve = ed.pipeline.edges_as_list[curve_index];
           for (const auto& p : curve)
             display(p * downscale_factor) = color;
-            // sara::fill_circle(display,                   //
-            //                   downscale_factor * p.x(),  //
-            //                   downscale_factor * p.y(),  //
-            //                   1, color);
-#endif
         }
+#endif
       }
 
       sara::fill_circle(
@@ -392,7 +299,6 @@ auto __main(int argc, char** argv) -> int
           static_cast<int>(std::round(downscale_factor * p.coords.y())), 4,
           good ? sara::Red8 : sara::Blue8, 2);
     }
-    SARA_CHECK(count);
     sara::draw_text(display, 80, 80, std::to_string(frame_number), sara::White8,
                     60, 0, false, true);
     sara::display(display);

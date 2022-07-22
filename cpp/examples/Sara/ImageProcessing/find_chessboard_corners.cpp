@@ -30,48 +30,6 @@
 namespace sara = DO::Sara;
 
 
-inline auto dir(const float angle) -> Eigen::Vector2f
-{
-  return Eigen::Vector2f{std::cos(angle), std::sin(angle)};
-};
-
-auto localize_zero_crossings(const Eigen::ArrayXf& profile, int num_bins)
-    -> std::vector<float>
-{
-  auto zero_crossings = std::vector<float>{};
-  for (auto n = Eigen::Index{}; n < profile.size(); ++n)
-  {
-    const auto ia = n;
-    const auto ib = (n + Eigen::Index{1}) % profile.size();
-
-    const auto& a = profile[ia];
-    const auto& b = profile[ib];
-
-    static constexpr auto pi = static_cast<float>(M_PI);
-    const auto angle_a = ia * 2.f * M_PI / num_bins;
-    const auto angle_b = ib * 2.f * M_PI / num_bins;
-
-    const auto ea = Eigen::Vector2d{std::cos(angle_a),  //
-                                    std::sin(angle_a)};
-    const auto eb = Eigen::Vector2d{std::cos(angle_b),  //
-                                    std::sin(angle_b)};
-
-    // TODO: this all could have been simplified.
-    const Eigen::Vector2d dir = (ea + eb) * 0.5;
-    auto angle = std::atan2(dir.y(), dir.x());
-    if (angle < 0)
-      angle += 2 * pi;
-
-    // A zero-crossing is characterized by a negative sign between
-    // consecutive intensity values.
-    if (a * b < 0)
-      zero_crossings.push_back(static_cast<float>(angle));
-  }
-
-  return zero_crossings;
-}
-
-
 auto filter_junctions(std::vector<sara::Junction<int>>& junctions,
                       Eigen::MatrixXf& circular_profiles,
                       const sara::ImageView<float>& f,
