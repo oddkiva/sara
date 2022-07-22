@@ -19,21 +19,20 @@
 #include <exception>
 
 #include <DO/Sara/Core/TicToc.hpp>
-#include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/VideoIO.hpp>
+
+#include <DO/Sara/FeatureDetectors/Harris.hpp>
+#include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
+#include <DO/Sara/ImageProcessing/CartesianToPolarCoordinates.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/ImageProcessing/Otsu.hpp>
-#include <DO/Sara/VideoIO.hpp>
-
-#include <DO/Sara/VideoIO/VideoWriter.hpp>
-
-#include "Chessboard/NonMaximumSuppression.hpp"
 
 
 namespace sara = DO::Sara;
@@ -54,7 +53,7 @@ struct Corner
   }
 };
 
-#define INSPECT_PATCH
+// #define INSPECT_PATCH
 #ifdef INSPECT_PATCH
 static constexpr auto square_size = 20;
 static constexpr auto square_padding = 4;
@@ -138,10 +137,21 @@ auto __main(int argc, char** argv) -> int
     auto video_frame_copy = sara::Image<sara::Rgb8>{};
     auto frame_number = -1;
 
+    auto video_writer = sara::VideoWriter{
+        "/Users/david/Desktop/aruco_test.mp4",  //
+        video_stream.sizes(),                   //
+        30                                      //
+    };
+
     auto f = sara::Image<float>{video_frame.sizes()};
     auto f_blurred = sara::Image<float>{video_frame.sizes()};
+
+    auto grad_f = std::array{sara::Image<float>{f.sizes()},
+                             sara::Image<float>{f.sizes()}};
     auto grad_f_norm = sara::Image<float>{video_frame.sizes()};
     auto grad_f_ori = sara::Image<float>{video_frame.sizes()};
+
+    auto cornerness = sara::Image<float>{video_frame.sizes()};
     auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
 
     while (video_stream.read())
@@ -149,7 +159,6 @@ auto __main(int argc, char** argv) -> int
       ++frame_number;
       if (frame_number % 3 != 0)
         continue;
-
 
       if (sara::active_window() == nullptr)
       {
@@ -164,19 +173,30 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       sara::apply_gaussian_filter(f, f_blurred, sigma_D);
-      const auto grad_f = f_blurred.compute<sara::Gradient>();
+
+#ifdef SLOW_IMPL
+      grad_f = f_blurred.compute<sara::Gradient>();
       const auto M =
           grad_f.compute<sara::SecondMomentMatrix>().compute<sara::Gaussian>(
               sigma_I);
-      auto cornerness = sara::Image<float>{M.sizes()};
+      cornerness = sara::Image<float>{M.sizes()};
       std::transform(
-#if __has_include(<execution>) && !defined(__APPLE__)
+#  if __has_include(<execution>) && !defined(__APPLE__)
           std::execution::par_unseq,
-#endif
+#  endif
           M.begin(), M.end(), cornerness.begin(), [kappa](const auto& m) {
             return m.determinant() - kappa * pow(m.trace(), 2);
           });
       sara::gradient_in_polar_coordinates(f_blurred, grad_f_norm, grad_f_ori);
+#else
+      sara::gradient(f_blurred, grad_f[0], grad_f[1]);
+      sara::cartesian_to_polar_coordinates(grad_f[0], grad_f[1],  //
+                                           grad_f_norm, grad_f_ori);
+
+      cornerness = sara::harris_cornerness(grad_f[0], grad_f[1],  //
+                                           sigma_I, kappa);
+#endif
+
 #if __has_include(<execution>) && !defined(__APPLE__)
       const auto grad_max = *std::max_element(
           std::execution::par_unseq, grad_f_norm.begin(), grad_f_norm.end());
@@ -275,9 +295,22 @@ auto __main(int argc, char** argv) -> int
             quad.begin(), quad.end(), quad.begin(),
             [&grad_f, sigma_I](const Eigen::Vector2d& c) -> Eigen::Vector2d {
               static const auto radius = static_cast<int>(std::round(sigma_I));
+              const auto w = grad_f[0].width();
+              const auto h = grad_f[0].height();
               const Eigen::Vector2i ci = c.array().round().cast<int>();
+              const auto in_domain =                          //
+                  radius <= ci.x() && ci.x() < w - radius &&  //
+                  radius <= ci.y() && ci.y() < h - radius;
+              if (!in_domain)
+                return ci.cast<double>();
+
+#ifdef SLOW_IMPL
               const auto p = sara::refine_junction_location_unsafe(  //
                   grad_f, ci, radius);
+#else
+              const auto p = sara::refine_junction_location_unsafe(  //
+                  grad_f[0], grad_f[1], ci, radius);
+#endif
               return p.cast<double>();
             });
 
@@ -395,6 +428,10 @@ auto __main(int argc, char** argv) -> int
       }
 #endif
       sara::toc("Display");
+
+      sara::tic();
+      video_writer.write(disp);
+      sara::toc("Video write");
     }
   }
   catch (std::exception& e)

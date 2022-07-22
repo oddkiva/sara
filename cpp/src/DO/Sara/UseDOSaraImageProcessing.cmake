@@ -20,6 +20,8 @@ if(SARA_USE_FROM_SOURCE)
                 shakti_bgra8u_to_gray32f_cpu
                 # Binary operations.
                 shakti_subtract_32f_cpu
+                # Cartesian to polar coordinates.
+                shakti_cartesian_to_polar_32f_cpu
                 # Resize operations.
                 shakti_scale_32f_cpu
                 shakti_reduce_32f_cpu
@@ -31,6 +33,10 @@ if(SARA_USE_FROM_SOURCE)
                 shakti_separable_convolution_2d_cpu
                 # Gaussian convolutions.
                 shakti_gaussian_convolution_cpu
+                # Moment matrix
+                shakti_moment_matrix_32f_cpu
+                # Cornerness
+                shakti_cornerness_32f_cpu
                 # Local extremum map
                 shakti_scale_space_dog_extremum_32f_cpu
                 $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
