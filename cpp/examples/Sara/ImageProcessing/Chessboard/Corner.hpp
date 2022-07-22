@@ -8,11 +8,13 @@ struct Corner
 {
   Eigen::Vector2<T> coords;
   float score;
-  auto position() const -> const Eigen::Vector2i&
+
+  inline auto position() const -> const Eigen::Vector2<T>&
   {
     return coords;
   }
-  auto operator<(const Corner& other) const -> bool
+
+  inline auto operator<(const Corner& other) const -> bool
   {
     return score < other.score;
   }

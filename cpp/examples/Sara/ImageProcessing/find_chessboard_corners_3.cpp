@@ -29,6 +29,7 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include "Chessboard/Corner.hpp"
+#include "Chessboard/KNN.hpp"
 #include "Chessboard/OrientationHistogram.hpp"
 
 
@@ -43,6 +44,8 @@ inline constexpr long double operator"" _percent(long double x)
 
 auto __main(int argc, char** argv) -> int
 {
+  using sara::operator""_deg;
+
   omp_set_num_threads(omp_get_max_threads());
 
 #ifdef _WIN32
@@ -74,7 +77,6 @@ auto __main(int argc, char** argv) -> int
   static constexpr auto high_threshold_ratio = static_cast<float>(4._percent);
   static constexpr auto low_threshold_ratio =
       static_cast<float>(high_threshold_ratio / 2.);
-  using sara::operator""_deg;
   static constexpr auto angular_threshold = static_cast<float>((20._deg).value);
 
   auto ed = sara::EdgeDetector{{
@@ -196,6 +198,19 @@ auto __main(int argc, char** argv) -> int
                    });
     sara::toc("Gradient Dominant Orientations");
 
+#ifdef KNN
+    // Link the junctions together.
+    sara::tic();
+    auto graph = KnnGraph<Corner<float>>{};
+    static constexpr auto k = 10;
+    graph._k = k;
+    graph._vertices = corners;
+    auto [nn, dists] = k_nearest_neighbors(graph._vertices, k);
+    graph._neighbors = std::move(nn);
+    graph._distances = std::move(dists);
+    sara::toc("knn-graph");
+#endif
+
 
 #ifdef EDGE_DETECTION
     sara::tic();
@@ -244,12 +259,13 @@ auto __main(int argc, char** argv) -> int
 
     sara::tic();
 #ifdef EDGE_DETECTION
-    const auto display_u8 = sara::upscale(ed.pipeline.edge_map, 2);
+    // const auto display_u8 = sara::upscale(ed.pipeline.edge_map, 2);
     auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
-    std::transform(display_u8.begin(), display_u8.end(), display.begin(),
-                   [](const auto& v) {
-                     return v != 0 ? sara::Rgb8(64, 64, 64) : sara::Black8;
-                   });
+    display.flat_array().fill(sara::Black8);
+    // std::transform(display_u8.begin(), display_u8.end(), display.begin(),
+    //                [](const auto& v) {
+    //                  return v != 0 ? sara::Rgb8(64, 64, 64) : sara::Black8;
+    //                });
 #else
     auto display = frame_gray.convert<sara::Rgb8>();
 #endif
@@ -272,9 +288,9 @@ auto __main(int argc, char** argv) -> int
 
       const auto good = four_contrast_changes && two_crossing_lines;
 
+#ifdef EDGE_DETECTION
       if (good)
       {
-#ifdef EDGE_DETECTION
         const auto& edges = adjacent_edges[c];
         for (const auto& curve_index : edges)
         {
@@ -283,10 +299,42 @@ auto __main(int argc, char** argv) -> int
           // const auto color = sara::Cyan8;
           const auto& curve = ed.pipeline.edges_as_list[curve_index];
           for (const auto& p : curve)
-            display(p * downscale_factor) = color;
+          {
+            const Eigen::Vector2i q = p * downscale_factor;
+            display(q.x(), q.y()) = color;
+            display(q.x() + 1, q.y()) = color;
+            display(q.x() + 1, q.y() + 1) = color;
+            display(q.x(), q.y() + 1) = color;
+          }
         }
-#endif
       }
+#endif
+
+#ifdef KNN
+      const Eigen::Vector2f a =
+          (p.coords * float(downscale_factor)).array().round();
+      for (auto k = 0; k < graph._k; ++k)
+      {
+        const auto v = graph.nearest_neighbor(c, k);
+        const Eigen::Vector2f b =
+            (v.coords * float(downscale_factor)).array().round();
+        const Eigen::Vector2f dir = (b -a).normalized();
+
+        const auto& gradient_peaks = gradient_peaks_refined[c];
+        auto grad_dir = Eigen::Matrix<float, 2, 4>{};
+        for (auto i = 0; i < 4; ++i)
+        {
+          const auto t = gradient_peaks[i] * 2 * M_PI / N;
+          grad_dir.col(i) << std::cos(t), std::sin(t);
+        }
+        const Eigen::Vector4f dots = (dir.transpose() * grad_dir).cwiseAbs();
+        const auto min_dot = dots.minCoeff();
+        if (min_dot > std::cos((80._deg).value))
+          continue;
+
+        sara::draw_line(display, a, b, sara::Cyan8, 2);
+      }
+#endif
 
       sara::fill_circle(
           display,
