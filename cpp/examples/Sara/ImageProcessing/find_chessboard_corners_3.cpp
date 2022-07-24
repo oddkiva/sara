@@ -20,6 +20,7 @@
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDescriptors.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
@@ -32,6 +33,7 @@
 #include "Chessboard/Corner.hpp"
 #include "Chessboard/NonMaximumSuppression.hpp"
 #include "Chessboard/OrientationHistogram.hpp"
+#include "Chessboard/SquareReconstruction.hpp"
 
 
 namespace sara = DO::Sara;
@@ -88,48 +90,8 @@ auto mean_gradient(
   return mean_gradients;
 }
 
-auto kl_divergence(const Eigen::Matrix2f& A, const Eigen::Matrix2f& B)
-{
-  return 0.5f * ((A.inverse() * B).trace() - std::log(B.norm() / A.norm()));
-}
 
-enum class Direction : std::uint8_t
-{
-  Up = 0,
-  Right = 1,
-  Down = 2,
-  Left = 3
-};
-
-inline auto direction_type(const float angle)
-{
-  static constexpr auto pi = static_cast<float>(M_PI);
-  static constexpr auto pi_over_4 = static_cast<float>(M_PI / 4.);
-  static constexpr auto three_pi_over_4 = static_cast<float>(3. * M_PI / 4.);
-  static constexpr auto five_pi_over_4 = static_cast<float>(5. * M_PI / 4.);
-  static constexpr auto seven_pi_over_4 = static_cast<float>(7. * M_PI / 4.);
-  if (-pi <= angle && angle < -three_pi_over_4)
-    return Direction::Left;
-  if (-three_pi_over_4 <= angle && angle < -pi_over_4)
-    return Direction::Up;
-  if (-pi_over_4 <= angle && angle < pi_over_4)
-    return Direction::Right;
-  if (pi_over_4 <= angle && angle < three_pi_over_4)
-    return Direction::Down;
-  if (three_pi_over_4 <= angle && angle < five_pi_over_4)
-    return Direction::Left;
-  if (five_pi_over_4 <= angle && angle < seven_pi_over_4)
-    return Direction::Up;
-  else  // seven_pi_over_4 -> two_pi
-    return Direction::Right;
-}
-
-inline auto direction_type(const Eigen::Vector2f& d)
-{
-  const auto angle = std::atan2(d.y(), d.x());
-  return direction_type(angle);
-}
-
+//  Seed corner selection.
 inline auto is_good_x_corner(  //
     const std::unordered_set<int>& adjacent_edges,
     const std::vector<float>& gradient_peaks,  //
@@ -160,112 +122,6 @@ inline auto is_good_x_corner(  //
   return two_crossing_lines;
 }
 
-auto reconstruct_black_square_from_corner(
-    int c,                //
-    int start_direction,  //
-    const std::vector<Corner<float>>& corners,
-    const std::vector<Eigen::Vector2f>& edge_grads,
-    const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
-    const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
-    -> std::optional<std::array<int, 4>>
-{
-  auto find_edge = [&](const std::unordered_set<int>& edges, Direction what) {
-    for (const auto& e : edges)
-      if (direction_type(edge_grads[e]) == what)
-        return e;
-    return -1;
-  };
-
-  auto find_next_square_vertex = [&](int edge, Direction what,
-                                     int current_vertex) -> int {
-    struct Vertex
-    {
-      int id;
-      float score;
-      auto operator<(const Vertex& other) const
-      {
-        return score < other.score;
-      }
-    };
-
-    const auto& cs = corners_adjacent_to_edge[edge];
-    auto vs = std::vector<Vertex>(corners_adjacent_to_edge[edge].size());
-    std::transform(cs.begin(), cs.end(), vs.begin(),
-                   [&corners](const auto& v) -> Vertex {
-                     return {v, corners[v].score};
-                   });
-    std::sort(vs.rbegin(), vs.rend());
-
-    for (const auto& v : vs)
-    {
-      if (v.id == current_vertex)
-        continue;
-
-      const auto& a = corners[current_vertex].coords;
-      const auto& b = corners[v.id].coords;
-      const Eigen::Vector2f dir = (b - a).normalized();
-
-      if (what == Direction::Up && dir.x() > 0)
-        return v.id;
-      if (what == Direction::Right && dir.y() > 0)
-        return v.id;
-      if (what == Direction::Down && dir.x() < 0)
-        return v.id;
-      if (what == Direction::Left && dir.y() < 0)
-        return v.id;
-    }
-    return -1;
-  };
-
-  static const auto dirs = std::array{
-      Direction::Up,
-      Direction::Right,
-      Direction::Down,
-      Direction::Left,
-  };
-
-  auto square = std::array<int, 4>{};
-  std::fill(square.begin(), square.end(), -1);
-
-  square[0] = c;
-
-  for (auto i = 1; i <= 4; ++i)
-  {
-    const auto dir = dirs[(i - 1 + start_direction) % 4];
-    const auto edge = find_edge(edges_adjacent_to_corner[square[i - 1]], dir);
-    if (edge == -1)
-      return std::nullopt;
-
-    square[i % 4] = find_next_square_vertex(edge, dir, square[i - 1]);
-    if (square[i % 4] == -1)
-      return std::nullopt;
-  }
-
-  // I want unambiguously good square.
-  if (square[0] != c)
-    return std::nullopt;  // Ambiguity.
-
-  return square;
-}
-
-auto reconstruct_black_square_from_corner(
-    const int c, const std::vector<Corner<float>>& corners,
-    const std::vector<Eigen::Vector2f>& edge_grads,
-    const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
-    const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
-    -> std::optional<std::array<int, 4>>
-{
-  auto square = std::optional<std::array<int, 4>>{};
-  for (auto d = 0; d < 4; ++d)
-  {
-    square = reconstruct_black_square_from_corner(c, d, corners, edge_grads,
-                                                  edges_adjacent_to_corner,
-                                                  corners_adjacent_to_edge);
-    if (square != std::nullopt)
-      return square;
-  }
-  return std::nullopt;
-}
 
 auto __main(int argc, char** argv) -> int
 {
@@ -328,6 +184,8 @@ auto __main(int argc, char** argv) -> int
     auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
     auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
 
+    auto timer = sara::Timer{};
+
     while (video_stream.read())
     {
       ++frame_number;
@@ -340,6 +198,8 @@ auto __main(int argc, char** argv) -> int
         sara::create_window(video_frame.sizes());
         sara::set_antialiasing();
       }
+
+      timer.restart();
 
       sara::tic();
       sara::from_rgb8_to_gray32f(video_frame, frame_gray);
@@ -447,10 +307,19 @@ auto __main(int argc, char** argv) -> int
       sara::tic();
       auto edge_label_map = sara::Image<int>{ed.pipeline.edge_map.sizes()};
       edge_label_map.flat_array().fill(-1);
+#if 0
       const auto& edges = ed.pipeline.edges_simplified;
+#else
+      const auto& edges = ed.pipeline.edges_as_list;
+#endif
       for (auto edge_id = 0u; edge_id < edges.size(); ++edge_id)
       {
-        const auto& curve = edges[edge_id];
+        const auto& curvei = edges[edge_id];
+        const auto& edgei = sara::reorder_and_extract_longest_curve(curvei);
+        auto curve = std::vector<Eigen::Vector2d>(edgei.size());
+        std::transform(edgei.begin(), edgei.end(), curve.begin(),
+                       [](const auto& p) { return p.template cast<double>(); });
+
         if (curve.size() < 2)
           continue;
         edge_label_map(curve.front().array().round().matrix().cast<int>()) =
@@ -516,6 +385,7 @@ auto __main(int argc, char** argv) -> int
         }
       }
 
+#ifdef DO_WE_NEED_THIS
       auto edges_adjacent_to_edge = std::vector<std::unordered_set<int>>{};
       edges_adjacent_to_edge.resize(edges.size());
       for (const auto& edge_ids : edges_adjacent_to_corner)
@@ -523,6 +393,7 @@ auto __main(int argc, char** argv) -> int
           for (const auto& ej : edge_ids)
             if (ei != ej)
               edges_adjacent_to_edge[ei].insert(ej);
+#endif
       sara::toc("Topological Linking");
 
       sara::tic();
@@ -532,20 +403,6 @@ auto __main(int argc, char** argv) -> int
           ed.pipeline.edges_as_list,          //
           grad_x, grad_y);
       sara::toc("Edge Shape Stats");
-
-      sara::tic();
-      auto edge_dirs = std::vector<std::unordered_map<int, Direction>>(  //
-          edge_grads.size());
-      for (auto c = 0u; c < corners.size(); ++c)
-      {
-        const auto& edge_ids = edges_adjacent_to_corner[c];
-        for (const auto& edge_id : edge_ids)
-        {
-          const auto& g = edge_grads[edge_id];
-          edge_dirs[c][edge_id] = direction_type(g);
-        }
-      }
-      sara::toc("Edge Direction");
 
 
       sara::tic();
@@ -572,14 +429,13 @@ auto __main(int argc, char** argv) -> int
       sara::toc("Black square reconstruction");
       SARA_CHECK(black_squares.size());
 
-      sara::tic();
-#if 0
-      auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
-      display.flat_array().fill(sara::Black8);
-#else
-      auto display = frame_gray.convert<sara::Rgb8>();
-#endif
 
+      const auto pipeline_time = timer.elapsed_ms();
+      SARA_DEBUG << "Processing time = " << pipeline_time << "ms" << std::endl;
+
+
+      sara::tic();
+      auto display = frame_gray.convert<sara::Rgb8>();
 #pragma omp parallel for
       for (auto c = 0; c < num_corners; ++c)
       {
@@ -589,6 +445,7 @@ auto __main(int argc, char** argv) -> int
                                            zero_crossings[c],            //
                                            N);
 
+#ifdef INSPECT_EDGE_GEOMETRY
         if (good)
         {
           const auto& edges = edges_adjacent_to_corner[c];
@@ -614,6 +471,7 @@ auto __main(int argc, char** argv) -> int
                      Eigen::Vector2d::Zero(), downscale_factor);
           }
         }
+#endif
 
         sara::fill_circle(
             display,
@@ -644,7 +502,7 @@ auto __main(int argc, char** argv) -> int
       sara::display(display);
       sara::toc("Display");
 
-      sara::get_key();
+      // sara::get_key();
     }
   }
   catch (std::exception& e)
