@@ -169,7 +169,7 @@ auto __main(int argc, char** argv) -> int
 
     // Circular profile extractor.
     auto profile_extractor = CircularProfileExtractor{};
-    profile_extractor.circle_radius = 2 * sigma_I;
+    profile_extractor.circle_radius = static_cast<int>(std::round(2 * sigma_I));
 
     auto video_stream = sara::VideoStream{video_file};
     auto video_frame = video_stream.frame();
@@ -195,7 +195,7 @@ auto __main(int argc, char** argv) -> int
 
       if (sara::active_window() == nullptr)
       {
-        sara::create_window(video_frame.sizes());
+        sara::create_window(video_frame.sizes(), video_file);
         sara::set_antialiasing();
       }
 
