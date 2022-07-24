@@ -152,8 +152,8 @@ inline auto is_good_x_corner(  //
 
   const auto four_zero_crossings = zero_crossings.size() == 4;
 
-  return (four_adjacent_edges && four_contrast_changes && two_crossing_lines) ||
-         four_zero_crossings;
+  return four_adjacent_edges &&
+         ((four_contrast_changes && two_crossing_lines) || four_zero_crossings);
 }
 
 auto reconstruct_black_square_from_corner(
@@ -176,11 +176,15 @@ auto reconstruct_black_square_from_corner(
                                      int current_vertex) -> int {
     for (const auto& v : corners_adjacent_to_edge[edge])
     {
+#ifdef TOO_STRICT
       const auto vi = best_corners.find(v);
       if (vi != best_corners.end() && v != current_vertex)
+#else
+      if (v != current_vertex)
+#endif
       {
         const auto& a = corners[current_vertex].coords;
-        const auto& b = corners[*vi].coords;
+        const auto& b = corners[v].coords;
         const Eigen::Vector2f dir = (b - a).normalized();
         using sara::operator""_deg;
         // const auto perpendicular =
@@ -188,13 +192,13 @@ auto reconstruct_black_square_from_corner(
         // if (!perpendicular)
         //   continue;
         if (what == Direction::Up && dir.x() > 0)
-          return *vi;
+          return v;
         if (what == Direction::Right && dir.y() > 0)
-          return *vi;
+          return v;
         if (what == Direction::Down && dir.x() < 0)
-          return *vi;
+          return v;
         if (what == Direction::Left && dir.y() < 0)
-          return *vi;
+          return v;
       }
     }
     return -1;
@@ -329,16 +333,16 @@ auto __main(int argc, char** argv) -> int
                                                       sigma_I, kappa);
       static const auto border = static_cast<int>(std::round(sigma_I));
       auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
-      sara::nms(corners_int, cornerness.sizes(), 10);
-      const auto grad_mag_thres =
-          ed.pipeline.gradient_magnitude.flat_array().maxCoeff() *
-          low_threshold_ratio;
-      const auto last_corner = std::remove_if(
-          corners_int.begin(), corners_int.end(),
-          [&ed, grad_mag_thres](const auto& c) {
-            return ed.pipeline.gradient_magnitude(c.coords) < grad_mag_thres;
-          });
-      corners_int.resize(last_corner - corners_int.begin());
+      // sara::nms(corners_int, cornerness.sizes(), 10);
+      // const auto grad_mag_thres =
+      //     ed.pipeline.gradient_magnitude.flat_array().maxCoeff() *
+      //     low_threshold_ratio;
+      // const auto last_corner = std::remove_if(
+      //     corners_int.begin(), corners_int.end(),
+      //     [&ed, grad_mag_thres](const auto& c) {
+      //       return ed.pipeline.gradient_magnitude(c.coords) < grad_mag_thres;
+      //     });
+      // corners_int.resize(last_corner - corners_int.begin());
       sara::toc("Corner detection");
 
       sara::tic();
