@@ -16,7 +16,7 @@ struct Corner
 
   inline auto operator<(const Corner& other) const -> bool
   {
-    return score < other.score;
+    return score > other.score;
   }
 };
 

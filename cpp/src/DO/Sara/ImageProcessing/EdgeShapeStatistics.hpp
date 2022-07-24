@@ -41,17 +41,18 @@ namespace DO::Sara {
     }
 
     auto draw(ImageView<Rgb8>& detection, const Rgb8& color,  //
-              const Point2d& c1, const double s) const -> void
+              const Point2d& c1 = Point2d::Zero(), const double s = 1.) const
+        -> void
     {
-      const Vector2d u = axes.col(0);
-      const Vector2d v = axes.col(1);
-      const auto p = std::array<Vector2d, 4>{
+      const Eigen::Vector2d u = axes.col(0);
+      const Eigen::Vector2d v = axes.col(1);
+      const auto p = std::array<Eigen::Vector2d, 4>{
           c1 + s * (center + (lengths(0) + 0) * u + (lengths(1) + 0) * v),
           c1 + s * (center - (lengths(0) + 0) * u + (lengths(1) + 0) * v),
           c1 + s * (center - (lengths(0) + 0) * u - (lengths(1) + 0) * v),
           c1 + s * (center + (lengths(0) + 0) * u - (lengths(1) + 0) * v),
       };
-      auto pi = std::array<Vector2i, 4>{};
+      auto pi = std::array<Eigen::Vector2i, 4>{};
       std::transform(p.begin(), p.end(), pi.begin(),
                      [](const Vector2d& v) { return v.cast<int>(); });
 
