@@ -161,10 +161,10 @@ inline auto is_good_x_corner(  //
 }
 
 auto reconstruct_black_square_from_corner(
-    int c,  //
+    int c,                //
+    int start_direction,  //
     const std::vector<Corner<float>>& corners,
     const std::vector<Eigen::Vector2f>& edge_grads,
-    const std::unordered_set<int>& best_corners,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::optional<std::array<int, 4>>
@@ -178,7 +178,8 @@ auto reconstruct_black_square_from_corner(
 
   auto find_next_square_vertex = [&](int edge, Direction what,
                                      int current_vertex) -> int {
-    struct Vertex {
+    struct Vertex
+    {
       int id;
       float score;
       auto operator<(const Vertex& other) const
@@ -197,21 +198,21 @@ auto reconstruct_black_square_from_corner(
 
     for (const auto& v : vs)
     {
-      if (v.id != current_vertex)
-      {
-        const auto& a = corners[current_vertex].coords;
-        const auto& b = corners[v.id].coords;
-        const Eigen::Vector2f dir = (b - a).normalized();
-        using sara::operator""_deg;
-        if (what == Direction::Up && dir.x() > 0)
-          return v.id;
-        if (what == Direction::Right && dir.y() > 0)
-          return v.id;
-        if (what == Direction::Down && dir.x() < 0)
-          return v.id;
-        if (what == Direction::Left && dir.y() < 0)
-          return v.id;
-      }
+      if (v.id == current_vertex)
+        continue;
+
+      const auto& a = corners[current_vertex].coords;
+      const auto& b = corners[v.id].coords;
+      const Eigen::Vector2f dir = (b - a).normalized();
+
+      if (what == Direction::Up && dir.x() > 0)
+        return v.id;
+      if (what == Direction::Right && dir.y() > 0)
+        return v.id;
+      if (what == Direction::Down && dir.x() < 0)
+        return v.id;
+      if (what == Direction::Left && dir.y() < 0)
+        return v.id;
     }
     return -1;
   };
@@ -230,12 +231,12 @@ auto reconstruct_black_square_from_corner(
 
   for (auto i = 1; i <= 4; ++i)
   {
-    const auto edge = find_edge(edges_adjacent_to_corner[square[i - 1]],  //
-                                dirs[i - 1]);
+    const auto dir = dirs[(i - 1 + start_direction) % 4];
+    const auto edge = find_edge(edges_adjacent_to_corner[square[i - 1]], dir);
     if (edge == -1)
       return std::nullopt;
 
-    square[i % 4] = find_next_square_vertex(edge, dirs[i - 1], square[i - 1]);
+    square[i % 4] = find_next_square_vertex(edge, dir, square[i - 1]);
     if (square[i % 4] == -1)
       return std::nullopt;
   }
@@ -245,6 +246,25 @@ auto reconstruct_black_square_from_corner(
     return std::nullopt;  // Ambiguity.
 
   return square;
+}
+
+auto reconstruct_black_square_from_corner(
+    const int c, const std::vector<Corner<float>>& corners,
+    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
+    const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
+    -> std::optional<std::array<int, 4>>
+{
+  auto square = std::optional<std::array<int, 4>>{};
+  for (auto d = 0; d < 4; ++d)
+  {
+    square = reconstruct_black_square_from_corner(c, d, corners, edge_grads,
+                                                  edges_adjacent_to_corner,
+                                                  corners_adjacent_to_edge);
+    if (square != std::nullopt)
+      return square;
+  }
+  return std::nullopt;
 }
 
 auto __main(int argc, char** argv) -> int
@@ -537,6 +557,22 @@ auto __main(int argc, char** argv) -> int
       sara::toc("Best corner selection");
 
       sara::tic();
+      auto black_squares = std::vector<std::array<int, 4>>{};
+      black_squares.reserve(corners.size());
+      for (const auto& c : best_corners)
+      {
+        const auto square = reconstruct_black_square_from_corner(
+            c, corners, edge_grads, edges_adjacent_to_corner,
+            corners_adjacent_to_edge);
+        if (square == std::nullopt)
+          continue;
+
+        black_squares.push_back(*square);
+      }
+      sara::toc("Black square reconstruction");
+      SARA_CHECK(black_squares.size());
+
+      sara::tic();
 #if 0
       auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
       display.flat_array().fill(sara::Black8);
@@ -592,29 +628,21 @@ auto __main(int argc, char** argv) -> int
       }
       sara::draw_text(display, 80, 80, std::to_string(frame_number),
                       sara::White8, 60, 0, false, true);
-      sara::display(display);
-      sara::toc("Display");
 
-      sara::tic();
-      for (const auto& c : best_corners)
+      for (const auto& square : black_squares)
       {
-        const auto square = reconstruct_black_square_from_corner(
-            c, corners, edge_grads, best_corners, edges_adjacent_to_corner,
-            corners_adjacent_to_edge);
-        if (square == std::nullopt)
-          continue;
-
         for (auto i = 0; i < 4; ++i)
         {
           const Eigen::Vector2f a =
-              corners[(*square)[i]].coords * downscale_factor;
+              corners[square[i]].coords * downscale_factor;
           const Eigen::Vector2f b =
-              corners[(*square)[(i + 1) % 4]].coords * downscale_factor;
+              corners[square[(i + 1) % 4]].coords * downscale_factor;
           sara::draw_line(display, a, b, sara::Green8, 6);
         }
       }
+
       sara::display(display);
-      sara::toc("Black Square Reconstruction");
+      sara::toc("Display");
 
       sara::get_key();
     }
