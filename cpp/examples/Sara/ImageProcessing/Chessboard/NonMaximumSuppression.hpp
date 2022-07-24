@@ -11,7 +11,7 @@ namespace DO::Sara {
   auto nms(std::vector<Feature>& features, const Eigen::Vector2i& image_sizes,
            int nms_radius) -> void
   {
-    std::sort(features.begin(), features.end());
+    std::sort(features.rbegin(), features.rend());
 
     auto features_filtered = std::vector<Feature>{};
     features_filtered.reserve(features.size());

@@ -138,9 +138,17 @@ inline auto is_good_x_corner(  //
 {
   // Topological constraints from the image.
   const auto four_adjacent_edges = adjacent_edges.size() == 4;
+  if (!four_adjacent_edges)
+    return false;
+
+  const auto four_zero_crossings = zero_crossings.size() == 4;
+  if (four_zero_crossings)
+    return true;
 
   // A chessboard corner should have 4 gradient orientation peaks.
   const auto four_contrast_changes = gradient_peaks.size() == 4;
+  if (!four_contrast_changes)
+    return false;
 
   // The 4 peaks are due to 2 lines crossing each other.
   static constexpr auto angle_degree_thres = 20.f;
@@ -149,11 +157,7 @@ inline auto is_good_x_corner(  //
           angle_degree_thres &&
       std::abs((gradient_peaks[3] - gradient_peaks[1]) * 360.f / N - 180.f) <
           angle_degree_thres;
-
-  const auto four_zero_crossings = zero_crossings.size() == 4;
-
-  return four_adjacent_edges &&
-         ((four_contrast_changes && two_crossing_lines) || four_zero_crossings);
+  return two_crossing_lines;
 }
 
 auto reconstruct_black_square_from_corner(
@@ -174,31 +178,39 @@ auto reconstruct_black_square_from_corner(
 
   auto find_next_square_vertex = [&](int edge, Direction what,
                                      int current_vertex) -> int {
-    for (const auto& v : corners_adjacent_to_edge[edge])
+    struct Vertex {
+      int id;
+      float score;
+      auto operator<(const Vertex& other) const
+      {
+        return score < other.score;
+      }
+    };
+
+    const auto& cs = corners_adjacent_to_edge[edge];
+    auto vs = std::vector<Vertex>(corners_adjacent_to_edge[edge].size());
+    std::transform(cs.begin(), cs.end(), vs.begin(),
+                   [&corners](const auto& v) -> Vertex {
+                     return {v, corners[v].score};
+                   });
+    std::sort(vs.rbegin(), vs.rend());
+
+    for (const auto& v : vs)
     {
-#ifdef TOO_STRICT
-      const auto vi = best_corners.find(v);
-      if (vi != best_corners.end() && v != current_vertex)
-#else
-      if (v != current_vertex)
-#endif
+      if (v.id != current_vertex)
       {
         const auto& a = corners[current_vertex].coords;
-        const auto& b = corners[v].coords;
+        const auto& b = corners[v.id].coords;
         const Eigen::Vector2f dir = (b - a).normalized();
         using sara::operator""_deg;
-        // const auto perpendicular =
-        //     std::abs(dir.dot(edge_grads[edge])) < 1e-2f;
-        // if (!perpendicular)
-        //   continue;
         if (what == Direction::Up && dir.x() > 0)
-          return v;
+          return v.id;
         if (what == Direction::Right && dir.y() > 0)
-          return v;
+          return v.id;
         if (what == Direction::Down && dir.x() < 0)
-          return v;
+          return v.id;
         if (what == Direction::Left && dir.y() < 0)
-          return v;
+          return v.id;
       }
     }
     return -1;
@@ -228,6 +240,7 @@ auto reconstruct_black_square_from_corner(
       return std::nullopt;
   }
 
+  // I want unambiguously good square.
   if (square[0] != c)
     return std::nullopt;  // Ambiguity.
 
@@ -331,18 +344,8 @@ auto __main(int argc, char** argv) -> int
       sara::gradient(f_ds_blurred, grad_x, grad_y);
       const auto cornerness = sara::harris_cornerness(grad_x, grad_y,  //
                                                       sigma_I, kappa);
-      static const auto border = static_cast<int>(std::round(sigma_I));
+      static const auto border = 2 * static_cast<int>(std::round(sigma_I));
       auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
-      // sara::nms(corners_int, cornerness.sizes(), 10);
-      // const auto grad_mag_thres =
-      //     ed.pipeline.gradient_magnitude.flat_array().maxCoeff() *
-      //     low_threshold_ratio;
-      // const auto last_corner = std::remove_if(
-      //     corners_int.begin(), corners_int.end(),
-      //     [&ed, grad_mag_thres](const auto& c) {
-      //       return ed.pipeline.gradient_magnitude(c.coords) < grad_mag_thres;
-      //     });
-      // corners_int.resize(last_corner - corners_int.begin());
       sara::toc("Corner detection");
 
       sara::tic();
@@ -350,12 +353,13 @@ auto __main(int argc, char** argv) -> int
       std::transform(
           corners_int.begin(), corners_int.end(), std::back_inserter(corners),
           [&grad_x, &grad_y, sigma_I](const Corner<int>& c) -> Corner<float> {
-            static const auto radius = static_cast<int>(std::round(sigma_I));
+            static const auto radius =
+                2 * static_cast<int>(std::round(sigma_I));
             const auto p = sara::refine_junction_location_unsafe(
                 grad_x, grad_y, c.coords, radius);
             return {p, c.score};
           });
-      std::sort(corners.begin(), corners.end());
+      sara::nms(corners, cornerness.sizes(), border);
       sara::toc("Corner refinement");
 
       sara::tic();
