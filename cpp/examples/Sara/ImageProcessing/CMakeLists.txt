@@ -54,6 +54,8 @@ add_library(ChessboardDetection STATIC
   Chessboard/CircularProfileExtractor.hpp
   Chessboard/CircularProfileExtractor.cpp
   Chessboard/Erode.hpp
+  Chessboard/EdgeStatistics.hpp
+  Chessboard/EdgeStatistics.cpp
   Chessboard/JunctionDetection.hpp
   Chessboard/JunctionDetection.cpp
   Chessboard/NonMaximumSuppression.hpp

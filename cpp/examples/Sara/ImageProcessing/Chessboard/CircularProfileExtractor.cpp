@@ -2,6 +2,8 @@
 
 #include "CircularProfileExtractor.hpp"
 
+#include <DO/Sara/ImageProcessing/Interpolation.hpp>
+
 
 CircularProfileExtractor ::CircularProfileExtractor()
 {
@@ -34,7 +36,7 @@ auto CircularProfileExtractor::operator()(const sara::ImageView<float>& image,
     const Eigen::Vector2d pn = center + circle_radius * circle_sample_points[n];
 
     // Get the interpolated intensity value.
-    intensity_profile(n) = static_cast<float>(interpolate(image, pn));
+    intensity_profile(n) = static_cast<float>(DO::Sara::interpolate(image, pn));
   }
 
   // // Collect all the intensity values in the disk for more robustness.
