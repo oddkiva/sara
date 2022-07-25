@@ -555,6 +555,7 @@ auto __main(int argc, char** argv) -> int
                     false, true);
     sara::toc("display junctions");
 
+#ifdef GROW
     sara::tic();
     const auto found = graph.grow(edge_map,                        //
                                   corner_count, downscale_factor,  //
@@ -562,6 +563,7 @@ auto __main(int argc, char** argv) -> int
     sara::toc("grow");
     if (found)
       ++found_count;
+#endif
 
     const auto detection_rate_text = std::to_string(found_count) + "/" +
                                      std::to_string(frame_number / 3 + 1);

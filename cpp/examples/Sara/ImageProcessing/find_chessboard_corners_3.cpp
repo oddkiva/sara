@@ -13,6 +13,8 @@
 
 #include <omp.h>
 
+#include <boost/filesystem.hpp>
+
 #include <unordered_map>
 #include <unordered_set>
 
@@ -122,6 +124,61 @@ inline auto is_good_x_corner(  //
   return two_crossing_lines;
 }
 
+struct ImageOrVideoReader : public sara::VideoStream
+{
+  inline ImageOrVideoReader() = default;
+
+  inline ImageOrVideoReader(const std::string& p)
+  {
+    open(p);
+    read();
+  }
+
+  inline auto open(const std::string& path) -> void
+  {
+    namespace fs = boost::filesystem;
+    if (fs::path{path}.extension().string() == ".png")
+    {
+      _path = path;
+      _is_image = true;
+    }
+    else
+      VideoStream::open(path);
+  }
+
+  inline auto read() -> bool
+  {
+    if (_is_image && _frame.empty())
+    {
+      _frame = sara::imread<sara::Rgb8>(_path);
+      return true;
+    }
+    else if (!_is_image)
+      return VideoStream::read();
+
+    if (!_read_once)
+    {
+      _read_once = true;
+      return true;
+    }
+    else
+      return false;
+  }
+
+  inline auto frame() -> sara::ImageView<sara::Rgb8>
+  {
+    if (_is_image)
+      return {_frame.data(), _frame.sizes()};
+    else
+      return VideoStream::frame();
+  }
+
+  bool _is_image;
+  std::string _path;
+  sara::Image<sara::Rgb8> _frame;
+  bool _read_once = false;
+};
+
 
 auto __main(int argc, char** argv) -> int
 {
@@ -153,11 +210,12 @@ auto __main(int argc, char** argv) -> int
         argc < 6 ? 1e-5f : std::stof(argv[5]);
 
     // Corner filtering.
-    static constexpr auto downscale_factor = 2;
+    const auto downscale_factor = argc < 7 ? 2 : std::stoi(argv[6]);
 
     // Edge detection.
-    static constexpr auto high_threshold_ratio = static_cast<float>(4._percent);
-    static constexpr auto low_threshold_ratio =
+    const auto high_threshold_ratio =
+        argc < 8 ? static_cast<float>(4._percent) : std::stof(argv[7]);
+    const auto low_threshold_ratio =
         static_cast<float>(high_threshold_ratio / 2.);
     static constexpr auto angular_threshold =
         static_cast<float>((10._deg).value);
@@ -169,9 +227,10 @@ auto __main(int argc, char** argv) -> int
 
     // Circular profile extractor.
     auto profile_extractor = CircularProfileExtractor{};
-    profile_extractor.circle_radius = static_cast<int>(std::round(2 * sigma_I));
+    profile_extractor.circle_radius =
+        static_cast<int>(std::round(downscale_factor * sigma_I));
 
-    auto video_stream = sara::VideoStream{video_file};
+    auto video_stream = ImageOrVideoReader{video_file};
     auto video_frame = video_stream.frame();
     auto frame_number = -1;
 
@@ -224,7 +283,8 @@ auto __main(int argc, char** argv) -> int
       sara::gradient(f_ds_blurred, grad_x, grad_y);
       const auto cornerness = sara::harris_cornerness(grad_x, grad_y,  //
                                                       sigma_I, kappa);
-      static const auto border = 2 * static_cast<int>(std::round(sigma_I));
+      static const auto border =
+          downscale_factor * static_cast<int>(std::round(sigma_I));
       auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
       sara::toc("Corner detection");
 
@@ -232,9 +292,10 @@ auto __main(int argc, char** argv) -> int
       auto corners = std::vector<Corner<float>>{};
       std::transform(
           corners_int.begin(), corners_int.end(), std::back_inserter(corners),
-          [&grad_x, &grad_y, sigma_I](const Corner<int>& c) -> Corner<float> {
+          [&grad_x, &grad_y, downscale_factor,
+           sigma_I](const Corner<int>& c) -> Corner<float> {
             static const auto radius =
-                2 * static_cast<int>(std::round(sigma_I));
+                downscale_factor * static_cast<int>(std::round(sigma_I));
             const auto p = sara::refine_junction_location_unsafe(
                 grad_x, grad_y, c.coords, radius);
             return {p, c.score};
@@ -495,14 +556,14 @@ auto __main(int argc, char** argv) -> int
               corners[square[i]].coords * downscale_factor;
           const Eigen::Vector2f b =
               corners[square[(i + 1) % 4]].coords * downscale_factor;
-          sara::draw_line(display, a, b, sara::Green8, 6);
+          sara::draw_line(display, a, b, sara::Green8, 3);
         }
       }
 
       sara::display(display);
       sara::toc("Display");
 
-      // sara::get_key();
+      sara::get_key();
     }
   }
   catch (std::exception& e)
