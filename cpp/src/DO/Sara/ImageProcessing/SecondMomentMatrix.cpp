@@ -11,8 +11,6 @@
 
 //! @file
 
-#pragma once
-
 #include <DO/Sara/Core/Image/Image.hpp>
 
 #ifdef DO_SARA_USE_HALIDE
