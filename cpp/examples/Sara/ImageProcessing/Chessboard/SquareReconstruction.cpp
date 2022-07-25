@@ -41,7 +41,8 @@ auto reconstruct_black_square_from_corner(
   };
 
   auto find_next_square_vertex = [&](int edge, Direction what,
-                                     int current_vertex) -> int {
+                                     int current_vertex
+                                     /*, bool counterclockwise*/) -> int {
     struct Vertex
     {
       int id;
@@ -95,7 +96,11 @@ auto reconstruct_black_square_from_corner(
 
   for (auto i = 1; i <= 4; ++i)
   {
+#ifdef WHITE_SQUARE
+    const auto dir = dirs[(4 - (i - 1 + start_direction)) % 4];
+#else // BLACK_SQUARE
     const auto dir = dirs[(i - 1 + start_direction) % 4];
+#endif
     const auto edge = find_edge(edges_adjacent_to_corner[square[i - 1]], dir);
     if (edge == -1)
       return std::nullopt;

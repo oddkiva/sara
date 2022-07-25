@@ -123,10 +123,12 @@ auto __main(int argc, char** argv) -> int
         angular_threshold      //
     }};
 
+    static const auto image_border = static_cast<int>(std::round(2 * sigma_I));
+    static const auto& radius = image_border;
+
     // Circular profile extractor.
     auto profile_extractor = CircularProfileExtractor{};
-    profile_extractor.circle_radius =
-        static_cast<int>(std::round(downscale_factor * sigma_I));
+    profile_extractor.circle_radius = radius;
 
     auto video_stream = sara::ImageOrVideoReader{video_file};
     auto video_frame = video_stream.frame();
@@ -181,24 +183,20 @@ auto __main(int argc, char** argv) -> int
       sara::gradient(f_ds_blurred, grad_x, grad_y);
       const auto cornerness = sara::harris_cornerness(grad_x, grad_y,  //
                                                       sigma_I, kappa);
-      static const auto border =
-          downscale_factor * static_cast<int>(std::round(sigma_I));
-      auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
+      auto corners_int = select(cornerness, cornerness_adaptive_thres,  //
+                                image_border);
       sara::toc("Corner detection");
 
       sara::tic();
       auto corners = std::vector<Corner<float>>{};
-      std::transform(
-          corners_int.begin(), corners_int.end(), std::back_inserter(corners),
-          [&grad_x, &grad_y, downscale_factor,
-           sigma_I](const Corner<int>& c) -> Corner<float> {
-            static const auto radius =
-                downscale_factor * static_cast<int>(std::round(sigma_I));
-            const auto p = sara::refine_junction_location_unsafe(
-                grad_x, grad_y, c.coords, radius);
-            return {p, c.score};
-          });
-      sara::nms(corners, cornerness.sizes(), border);
+      std::transform(corners_int.begin(), corners_int.end(),
+                     std::back_inserter(corners),
+                     [&grad_x, &grad_y](const Corner<int>& c) -> Corner<float> {
+                       const auto p = sara::refine_junction_location_unsafe(
+                           grad_x, grad_y, c.coords, radius);
+                       return {p, c.score};
+                     });
+      sara::nms(corners, cornerness.sizes(), radius);
       sara::toc("Corner refinement");
 
       sara::tic();
@@ -343,16 +341,6 @@ auto __main(int argc, char** argv) -> int
           }
         }
       }
-
-#ifdef DO_WE_NEED_THIS
-      auto edges_adjacent_to_edge = std::vector<std::unordered_set<int>>{};
-      edges_adjacent_to_edge.resize(edges.size());
-      for (const auto& edge_ids : edges_adjacent_to_corner)
-        for (const auto& ei : edge_ids)
-          for (const auto& ej : edge_ids)
-            if (ei != ej)
-              edges_adjacent_to_edge[ei].insert(ej);
-#endif
       sara::toc("Topological Linking");
 
       sara::tic();
@@ -394,7 +382,13 @@ auto __main(int argc, char** argv) -> int
 
 
       sara::tic();
+// #define CHECK_EDGE_MAP
+#ifdef CHECK_EDGE_MAP
+      auto display = sara::upscale(ed.pipeline.edge_map, downscale_factor)
+                         .convert<sara::Rgb8>();
+#else
       auto display = frame_gray.convert<sara::Rgb8>();
+#endif
 #pragma omp parallel for
       for (auto c = 0; c < num_corners; ++c)
       {

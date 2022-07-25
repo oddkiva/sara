@@ -18,9 +18,9 @@ namespace DO::Sara {
 
     auto read() -> bool;
 
-    auto frame() -> ImageView<Rgb8>
+    auto frame() -> ImageView<Rgb8>;
 
-        bool _is_image;
+    bool _is_image;
     std::string _path;
     Image<Rgb8> _frame;
     bool _read_once = false;
