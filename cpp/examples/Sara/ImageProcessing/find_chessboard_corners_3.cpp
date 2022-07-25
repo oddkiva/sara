@@ -13,8 +13,6 @@
 
 #include <omp.h>
 
-#include <boost/filesystem.hpp>
-
 #include <unordered_map>
 #include <unordered_set>
 
@@ -29,7 +27,8 @@
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
-#include <DO/Sara/VideoIO.hpp>
+
+#include "Utilities/ImageOrVideoReader.hpp"
 
 #include "Chessboard/CircularProfileExtractor.hpp"
 #include "Chessboard/Corner.hpp"
@@ -77,62 +76,6 @@ inline auto is_good_x_corner(  //
           angle_degree_thres;
   return two_crossing_lines;
 }
-
-struct ImageOrVideoReader : public sara::VideoStream
-{
-  inline ImageOrVideoReader() = default;
-
-  inline ImageOrVideoReader(const std::string& p)
-  {
-    open(p);
-    read();
-  }
-
-  inline auto open(const std::string& path) -> void
-  {
-    namespace fs = boost::filesystem;
-    if (fs::path{path}.extension().string() == ".png")
-    {
-      _path = path;
-      _is_image = true;
-    }
-    else
-      VideoStream::open(path);
-  }
-
-  inline auto read() -> bool
-  {
-    if (_is_image && _frame.empty())
-    {
-      _frame = sara::imread<sara::Rgb8>(_path);
-      return true;
-    }
-    else if (!_is_image)
-      return VideoStream::read();
-
-    // Horrible hack, well...
-    if (!_read_once)
-    {
-      _read_once = true;
-      return true;
-    }
-    else
-      return false;
-  }
-
-  inline auto frame() -> sara::ImageView<sara::Rgb8>
-  {
-    if (_is_image)
-      return {_frame.data(), _frame.sizes()};
-    else
-      return VideoStream::frame();
-  }
-
-  bool _is_image;
-  std::string _path;
-  sara::Image<sara::Rgb8> _frame;
-  bool _read_once = false;
-};
 
 
 auto __main(int argc, char** argv) -> int
@@ -185,7 +128,7 @@ auto __main(int argc, char** argv) -> int
     profile_extractor.circle_radius =
         static_cast<int>(std::round(downscale_factor * sigma_I));
 
-    auto video_stream = ImageOrVideoReader{video_file};
+    auto video_stream = sara::ImageOrVideoReader{video_file};
     auto video_frame = video_stream.frame();
     auto frame_number = -1;
 

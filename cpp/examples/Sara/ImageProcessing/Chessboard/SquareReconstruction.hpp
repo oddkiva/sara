@@ -32,7 +32,7 @@ auto reconstruct_black_square_from_corner(
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::optional<std::array<int, 4>>;
 
-inline auto reconstruct_black_square_from_corner(
+auto reconstruct_black_square_from_corner(
     const int c, const std::vector<Corner<float>>& corners,
     const std::vector<Eigen::Vector2f>& edge_grads,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,

@@ -15,12 +15,12 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
-#include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization.hpp>
+
+#include "Utilities/ImageOrVideoReader.hpp"
 
 #include "Chessboard/CircularProfileExtractor.hpp"
 #include "Chessboard/JunctionDetection.hpp"
@@ -437,10 +437,9 @@ auto __main(int argc, char** argv) -> int
   if (argc < 2)
     return 1;
   const auto video_file = std::string{argv[1]};
-
 #endif
 
-  auto video_stream = sara::VideoStream{video_file};
+  auto video_stream = sara::ImageOrVideoReader{video_file};
   auto video_frame = video_stream.frame();
   auto video_frame_copy = sara::Image<sara::Rgb8>{};
   auto frame_number = -1;
