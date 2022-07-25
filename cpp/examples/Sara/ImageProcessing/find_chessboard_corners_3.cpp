@@ -156,6 +156,7 @@ struct ImageOrVideoReader : public sara::VideoStream
     else if (!_is_image)
       return VideoStream::read();
 
+    // Horrible hack, well...
     if (!_read_once)
     {
       _read_once = true;
