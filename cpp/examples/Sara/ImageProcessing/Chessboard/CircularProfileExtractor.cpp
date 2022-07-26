@@ -1,5 +1,3 @@
-#pragma once
-
 #include "CircularProfileExtractor.hpp"
 
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>

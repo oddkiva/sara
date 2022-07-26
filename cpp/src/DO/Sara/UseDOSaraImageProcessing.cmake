@@ -14,7 +14,6 @@ if(SARA_USE_FROM_SOURCE)
         PUBLIC ${CMAKE_DL_LIBS}
         PRIVATE DO::Sara::Core
                 Halide::Halide
-                Halide::Runtime
                 # Fast color conversion
                 shakti_rgb8u_to_gray32f_cpu
                 shakti_bgra8u_to_gray32f_cpu

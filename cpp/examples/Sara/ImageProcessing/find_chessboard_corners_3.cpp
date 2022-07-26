@@ -162,12 +162,13 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       sara::from_rgb8_to_gray32f(video_frame, frame_gray);
+      sara::apply_gaussian_filter(frame_gray, frame_gray_blurred, 1.f);
       sara::toc("Grayscale conversion");
 
       sara::tic();
-      sara::apply_gaussian_filter(frame_gray, frame_gray_blurred, 1.f);
       sara::scale(frame_gray_blurred, frame_gray_ds);
       sara::toc("Downscale");
+
 
       sara::tic();
       const auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(sigma_D);
@@ -293,7 +294,7 @@ auto __main(int argc, char** argv) -> int
           [&edge_label_map](const Corner<float>& c) {
             auto edges = std::unordered_set<int>{};
 
-            static constexpr auto r = 4;
+            static constexpr auto r = 3;
             for (auto v = -r; v <= r; ++v)
             {
               for (auto u = -r; u <= r; ++u)

@@ -1,5 +1,15 @@
 # Chessboard Detection
 
+# TODO
+- robustify the line segment detection...
+- the edge detection should be done at the lower scale, to avoid noisy edges...
+- make the chessboard detection multiscale
+  2w   x 2h
+   w   x  h
+   w/2 x  h/2
+- Improve the x-corner filter...
+
+## Notes
 - The vanilla junction detector works very well in practice.
 
 - Harris' corner detection works very well.
@@ -16,7 +26,6 @@
 - We can reconstruct squares, but we still need the network of corners in the
   form: (i, j) -> (x_ij, y_ij)
 
-- TODO: robustify the line segment detection...
 
 
 - Connecting end points of edges: use Harris's corner detector to join edges,
