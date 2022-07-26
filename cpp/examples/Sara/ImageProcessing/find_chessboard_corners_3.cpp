@@ -27,10 +27,12 @@
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
-#include <DO/Sara/VideoIO.hpp>
+
+#include "Utilities/ImageOrVideoReader.hpp"
 
 #include "Chessboard/CircularProfileExtractor.hpp"
 #include "Chessboard/Corner.hpp"
+#include "Chessboard/EdgeStatistics.hpp"
 #include "Chessboard/NonMaximumSuppression.hpp"
 #include "Chessboard/OrientationHistogram.hpp"
 #include "Chessboard/SquareReconstruction.hpp"
@@ -43,53 +45,6 @@ inline constexpr long double operator"" _percent(long double x)
 {
   return x / 100;
 }
-
-auto get_curve_shape_statistics(
-    const std::vector<std::vector<Eigen::Vector2i>>& curve_pts)
-    -> sara::CurveStatistics
-{
-  auto curves_64f = std::vector<std::vector<Eigen::Vector2d>>{};
-  curves_64f.resize(curve_pts.size());
-  std::transform(curve_pts.begin(), curve_pts.end(), curves_64f.begin(),
-                 [](const auto& points) {
-                   auto points_2d = std::vector<Eigen::Vector2d>{};
-                   points_2d.resize(points.size());
-                   std::transform(
-                       points.begin(), points.end(), points_2d.begin(),
-                       [](const auto& p) { return p.template cast<double>(); });
-                   return points_2d;
-                 });
-
-  return sara::CurveStatistics{curves_64f};
-}
-
-auto mean_gradient(
-    const std::vector<std::vector<Eigen::Vector2i>>& curve_pts,  //
-    const sara::ImageView<float>& Ix,                            //
-    const sara::ImageView<float>& Iy)                            //
-    -> std::vector<Eigen::Vector2f>
-{
-  auto mean_gradients = std::vector<Eigen::Vector2f>(curve_pts.size());
-
-  std::transform(
-      curve_pts.begin(), curve_pts.end(), mean_gradients.begin(),
-      [&Ix, &Iy](const std::vector<Eigen::Vector2i>& points) {
-        static const Eigen::Vector2f zero2f = Eigen::Vector2f::Zero();
-        Eigen::Vector2f g = std::accumulate(
-            points.begin(), points.end(), zero2f,
-            [&Ix, &Iy](const Eigen::Vector2f& gradient,
-                       const Eigen::Vector2i& point) -> Eigen::Vector2f {
-              const Eigen::Vector2f g =
-                  gradient + Eigen::Vector2f{Ix(point), Iy(point)};
-              return g;
-            });
-        const Eigen::Vector2f mean = g / points.size();
-        return mean;
-      });
-
-  return mean_gradients;
-}
-
 
 //  Seed corner selection.
 inline auto is_good_x_corner(  //
@@ -153,11 +108,12 @@ auto __main(int argc, char** argv) -> int
         argc < 6 ? 1e-5f : std::stof(argv[5]);
 
     // Corner filtering.
-    static constexpr auto downscale_factor = 2;
+    const auto downscale_factor = argc < 7 ? 2 : std::stoi(argv[6]);
 
     // Edge detection.
-    static constexpr auto high_threshold_ratio = static_cast<float>(4._percent);
-    static constexpr auto low_threshold_ratio =
+    const auto high_threshold_ratio =
+        argc < 8 ? static_cast<float>(4._percent) : std::stof(argv[7]);
+    const auto low_threshold_ratio =
         static_cast<float>(high_threshold_ratio / 2.);
     static constexpr auto angular_threshold =
         static_cast<float>((10._deg).value);
@@ -167,11 +123,14 @@ auto __main(int argc, char** argv) -> int
         angular_threshold      //
     }};
 
+    static const auto image_border = static_cast<int>(std::round(2 * sigma_I));
+    static const auto& radius = image_border;
+
     // Circular profile extractor.
     auto profile_extractor = CircularProfileExtractor{};
-    profile_extractor.circle_radius = static_cast<int>(std::round(2 * sigma_I));
+    profile_extractor.circle_radius = radius;
 
-    auto video_stream = sara::VideoStream{video_file};
+    auto video_stream = sara::ImageOrVideoReader{video_file};
     auto video_frame = video_stream.frame();
     auto frame_number = -1;
 
@@ -203,12 +162,13 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       sara::from_rgb8_to_gray32f(video_frame, frame_gray);
+      sara::apply_gaussian_filter(frame_gray, frame_gray_blurred, 1.f);
       sara::toc("Grayscale conversion");
 
       sara::tic();
-      sara::apply_gaussian_filter(frame_gray, frame_gray_blurred, 1.f);
       sara::scale(frame_gray_blurred, frame_gray_ds);
       sara::toc("Downscale");
+
 
       sara::tic();
       const auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(sigma_D);
@@ -224,22 +184,20 @@ auto __main(int argc, char** argv) -> int
       sara::gradient(f_ds_blurred, grad_x, grad_y);
       const auto cornerness = sara::harris_cornerness(grad_x, grad_y,  //
                                                       sigma_I, kappa);
-      static const auto border = 2 * static_cast<int>(std::round(sigma_I));
-      auto corners_int = select(cornerness, cornerness_adaptive_thres, border);
+      auto corners_int = select(cornerness, cornerness_adaptive_thres,  //
+                                image_border);
       sara::toc("Corner detection");
 
       sara::tic();
       auto corners = std::vector<Corner<float>>{};
-      std::transform(
-          corners_int.begin(), corners_int.end(), std::back_inserter(corners),
-          [&grad_x, &grad_y, sigma_I](const Corner<int>& c) -> Corner<float> {
-            static const auto radius =
-                2 * static_cast<int>(std::round(sigma_I));
-            const auto p = sara::refine_junction_location_unsafe(
-                grad_x, grad_y, c.coords, radius);
-            return {p, c.score};
-          });
-      sara::nms(corners, cornerness.sizes(), border);
+      std::transform(corners_int.begin(), corners_int.end(),
+                     std::back_inserter(corners),
+                     [&grad_x, &grad_y](const Corner<int>& c) -> Corner<float> {
+                       const auto p = sara::refine_junction_location_unsafe(
+                           grad_x, grad_y, c.coords, radius);
+                       return {p, c.score};
+                     });
+      sara::nms(corners, cornerness.sizes(), radius);
       sara::toc("Corner refinement");
 
       sara::tic();
@@ -384,16 +342,6 @@ auto __main(int argc, char** argv) -> int
           }
         }
       }
-
-#ifdef DO_WE_NEED_THIS
-      auto edges_adjacent_to_edge = std::vector<std::unordered_set<int>>{};
-      edges_adjacent_to_edge.resize(edges.size());
-      for (const auto& edge_ids : edges_adjacent_to_corner)
-        for (const auto& ei : edge_ids)
-          for (const auto& ej : edge_ids)
-            if (ei != ej)
-              edges_adjacent_to_edge[ei].insert(ej);
-#endif
       sara::toc("Topological Linking");
 
       sara::tic();
@@ -435,7 +383,13 @@ auto __main(int argc, char** argv) -> int
 
 
       sara::tic();
+// #define CHECK_EDGE_MAP
+#ifdef CHECK_EDGE_MAP
+      auto display = sara::upscale(ed.pipeline.edge_map, downscale_factor)
+                         .convert<sara::Rgb8>();
+#else
       auto display = frame_gray.convert<sara::Rgb8>();
+#endif
 #pragma omp parallel for
       for (auto c = 0; c < num_corners; ++c)
       {
@@ -495,14 +449,14 @@ auto __main(int argc, char** argv) -> int
               corners[square[i]].coords * downscale_factor;
           const Eigen::Vector2f b =
               corners[square[(i + 1) % 4]].coords * downscale_factor;
-          sara::draw_line(display, a, b, sara::Green8, 6);
+          sara::draw_line(display, a, b, sara::Green8, 3);
         }
       }
 
       sara::display(display);
       sara::toc("Display");
 
-      // sara::get_key();
+      sara::get_key();
     }
   }
   catch (std::exception& e)

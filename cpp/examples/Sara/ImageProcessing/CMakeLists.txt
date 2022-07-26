@@ -49,15 +49,31 @@ target_link_libraries(line_segment_detection_example
 
 
 add_library(ChessboardDetection STATIC
+  Utilities/ImageOrVideoReader.hpp
+  Utilities/ImageOrVideoReader.cpp
+
+  Chessboard/Corner.hpp
+  Chessboard/Corner.cpp
   Chessboard/CircularProfileExtractor.hpp
+  Chessboard/CircularProfileExtractor.cpp
   Chessboard/Erode.hpp
+  Chessboard/EdgeStatistics.hpp
+  Chessboard/EdgeStatistics.cpp
   Chessboard/JunctionDetection.hpp
   Chessboard/JunctionDetection.cpp
-  Chessboard/NonMaximumSuppression.hpp)
+  Chessboard/NonMaximumSuppression.hpp
+  Chessboard/SquareReconstruction.hpp
+  Chessboard/SquareReconstruction.cpp)
 set_target_properties(ChessboardDetection
   PROPERTIES
   FOLDER "Libraries")
-target_link_libraries(ChessboardDetection PUBLIC ${DO_Sara_LIBRARIES})
+target_link_libraries(ChessboardDetection
+  PUBLIC ${DO_Sara_LIBRARIES}
+  PRIVATE Boost::filesystem)
+target_compile_definitions(ChessboardDetection
+  PRIVATE
+  -DBOOST_ALL_DYN_LINK
+  -DBOOST_ALL_NO_LIB)
 
 sara_add_example(find_chessboard_corners)
 target_link_libraries(find_chessboard_corners PRIVATE ChessboardDetection)

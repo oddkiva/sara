@@ -138,7 +138,11 @@ auto __main(int argc, char** argv) -> int
     auto frame_number = -1;
 
     auto video_writer = sara::VideoWriter{
+#ifdef __APPLE__
         "/Users/david/Desktop/aruco_test.mp4",  //
+#else
+        "/home/david/Desktop/aruco_test.mp4",  //
+#endif
         video_stream.sizes(),                   //
         30                                      //
     };
