@@ -407,6 +407,14 @@ auto __main(int argc, char** argv) -> int
 
         lines.insert(lines.end(), new_lines.begin(), new_lines.end());
       }
+      for (const auto& square : white_squares)
+      {
+        const auto new_lines = grow_lines_from_square(
+            square, corners, edge_stats, edge_grads, edges_adjacent_to_corner,
+            corners_adjacent_to_edge);
+
+        lines.insert(lines.end(), new_lines.begin(), new_lines.end());
+      }
       sara::toc("Line Reconstruction");
 
 
