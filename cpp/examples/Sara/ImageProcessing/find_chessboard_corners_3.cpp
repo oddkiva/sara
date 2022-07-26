@@ -294,7 +294,7 @@ auto __main(int argc, char** argv) -> int
           [&edge_label_map](const Corner<float>& c) {
             auto edges = std::unordered_set<int>{};
 
-            static constexpr auto r = 3;
+            static constexpr auto r = 4;
             for (auto v = -r; v <= r; ++v)
             {
               for (auto u = -r; u <= r; ++u)
