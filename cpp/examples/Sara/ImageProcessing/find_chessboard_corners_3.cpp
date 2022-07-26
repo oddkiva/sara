@@ -33,6 +33,7 @@
 #include "Chessboard/CircularProfileExtractor.hpp"
 #include "Chessboard/Corner.hpp"
 #include "Chessboard/EdgeStatistics.hpp"
+#include "Chessboard/LineReconstruction.hpp"
 #include "Chessboard/NonMaximumSuppression.hpp"
 #include "Chessboard/OrientationHistogram.hpp"
 #include "Chessboard/SquareReconstruction.hpp"
@@ -450,6 +451,38 @@ auto __main(int argc, char** argv) -> int
           const Eigen::Vector2f b =
               corners[square[(i + 1) % 4]].coords * downscale_factor;
           sara::draw_line(display, a, b, sara::Green8, 3);
+        }
+
+#if 0
+        // Grow a line from side of the square.
+        for (auto i = 0; i < 4; ++i)
+        {
+          const auto ia = square[i];
+          const auto ib = square[(i + 1) % 4];
+          const Eigen::Vector2f a = corners[ia].coords * downscale_factor;
+          const Eigen::Vector2f b = corners[ib].coords * downscale_factor;
+
+          auto line = reconstruct_line(ia, b - a, corners, edge_grads,
+                                       edges_adjacent_to_corner,
+                                       corners_adjacent_to_edge);
+        }
+#endif
+
+        for (auto side = 0; side < 4; ++side)
+        {
+          auto line = grow_line_from_square(square, side, corners, edge_grads,
+                                            edges_adjacent_to_corner,
+                                            corners_adjacent_to_edge);
+          if (line.size() < 2)
+            throw std::runtime_error{"ERROR IN LINE GROWING!"};
+          for (auto i = 0u; i < line.size() - 1; ++i)
+          {
+            const Eigen::Vector2f a =
+                corners[line[i]].coords * downscale_factor;
+            const Eigen::Vector2f b =
+                corners[line[i + 1]].coords * downscale_factor;
+            sara::draw_line(display, a, b, sara::Magenta8, 3);
+          }
         }
       }
 

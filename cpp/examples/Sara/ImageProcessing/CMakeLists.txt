@@ -52,6 +52,7 @@ add_library(ChessboardDetection STATIC
   Utilities/ImageOrVideoReader.hpp
   Utilities/ImageOrVideoReader.cpp
 
+  # Feature detection.
   Chessboard/Corner.hpp
   Chessboard/Corner.cpp
   Chessboard/CircularProfileExtractor.hpp
@@ -62,6 +63,10 @@ add_library(ChessboardDetection STATIC
   Chessboard/JunctionDetection.hpp
   Chessboard/JunctionDetection.cpp
   Chessboard/NonMaximumSuppression.hpp
+
+  # Edge parsing.
+  Chessboard/LineReconstruction.hpp
+  Chessboard/LineReconstruction.cpp
   Chessboard/SquareReconstruction.hpp
   Chessboard/SquareReconstruction.cpp)
 set_target_properties(ChessboardDetection
