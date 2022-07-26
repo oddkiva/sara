@@ -382,6 +382,22 @@ auto __main(int argc, char** argv) -> int
       SARA_CHECK(black_squares.size());
 
       sara::tic();
+      auto white_squares = std::vector<std::array<int, 4>>{};
+      white_squares.reserve(corners.size());
+      for (const auto& c : best_corners)
+      {
+        const auto square = reconstruct_white_square_from_corner(
+            c, corners, edge_grads, edges_adjacent_to_corner,
+            corners_adjacent_to_edge);
+        if (square == std::nullopt)
+          continue;
+
+        white_squares.push_back(*square);
+      }
+      sara::toc("White square reconstruction");
+      SARA_CHECK(white_squares.size());
+
+      sara::tic();
       auto lines = std::vector<std::vector<int>>{};
       for (const auto& square : black_squares)
       {
@@ -468,17 +484,25 @@ auto __main(int argc, char** argv) -> int
         }
       }
 
-      for (const auto& square : black_squares)
-      {
+      const auto draw_square = [&corners, downscale_factor,
+                                &display](const auto& square,  //
+                                          const auto& color,   //
+                                          const int thickness) {
         for (auto i = 0; i < 4; ++i)
         {
           const Eigen::Vector2f a =
               corners[square[i]].coords * downscale_factor;
           const Eigen::Vector2f b =
               corners[square[(i + 1) % 4]].coords * downscale_factor;
-          sara::draw_line(display, a, b, sara::Green8, 3);
+          sara::draw_line(display, a, b, color, thickness);
         }
-      }
+      };
+
+      for (const auto& square : white_squares)
+        draw_square(square, sara::Red8, 6);
+
+      for (const auto& square : black_squares)
+        draw_square(square, sara::Green8, 3);
 
       sara::display(display);
       sara::toc("Display");

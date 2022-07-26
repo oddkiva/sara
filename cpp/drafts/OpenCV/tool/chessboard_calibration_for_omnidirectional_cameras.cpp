@@ -405,21 +405,22 @@ private:
 };
 
 
-GRAPHICS_MAIN()
+int __main(int argc, char** argv)
 {
-// #define SAMSUNG_GALAXY_J6
-// #define GOPRO7_SUPERVIEW
+  // #define SAMSUNG_GALAXY_J6
+  // #define GOPRO7_SUPERVIEW
 
   const auto video_filepath =
+      argc >= 2
+          ? argv[1]
+          :
 #ifdef SAMSUNG_GALAXY_J6
-      "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
+          "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
 #elif defined(GOPRO7_SUPERVIEW)
-      "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
-      "GH010053.MP4"
+          "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
+          "GH010053.MP4"
 #else
-      "/home/david/Desktop/calibration/fisheye/after/chessboard3.MP4"
-  // "/home/david/Desktop/calibration/fisheye/before/"
-  // "checkboard_luxvision_2.MP4"
+          "/home/david/Desktop/calibration/fisheye/after/chessboard3.MP4"
 #endif
       ;
 
@@ -466,11 +467,11 @@ GRAPHICS_MAIN()
     if (!video_stream.read())
       break;
 
-    if (i % 2 != 0)
+    if (i % 3 != 0)
       continue;
 
-    if (selected_frames.size() > 200)
-      break;
+    // if (selected_frames.size() > 200)
+    //   break;
 
     sara::tic();
     auto chessboard = sara::OpenCV::Chessboard(pattern_size, square_size.value);
@@ -497,6 +498,8 @@ GRAPHICS_MAIN()
       SARA_DEBUG << "\nn =\n" << ns[0] << std::endl;
 
       inspect(frame_copy, chessboard, camera.K, Rs[0], ts[0]);
+      sara::draw_text(frame_copy, 80, 80, "Chessboard: FOUND!", sara::White8,
+                      60, 0, false, true);
       sara::display(frame_copy);
 
       selected_frames.emplace_back(video_stream.frame());
@@ -505,6 +508,8 @@ GRAPHICS_MAIN()
     else
     {
       sara::display(frame);
+      sara::draw_text(80, 80, "Chessboard: NOT FOUND!", sara::White8, 60, 0,
+                      false, true);
       SARA_DEBUG << "[" << i
                  << "] No chessboard found or chessboard is incomplete!"
                  << std::endl;
@@ -578,4 +583,12 @@ GRAPHICS_MAIN()
   }
 
   return 0;
+}
+
+
+auto main(int argc, char** argv) -> int
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
 }

@@ -31,6 +31,11 @@ auto find_next_line_segment(
     -> std::pair<int, int>
 {
   const Eigen::Vector2f current_g = edge_grads[current_edge_id].normalized();
+  const auto& current_inertia = edge_stats.inertias[current_edge_id];
+
+  auto similarity = [](const Eigen::Matrix2d& a, const Eigen::Matrix2d& b) {
+    return (a * b).trace() / (a.norm() * b.norm());
+  };
 
   // Find the valid edges (those that are sufficiently good).
   auto valid_edges = std::vector<std::pair<int, float>>{};
@@ -41,12 +46,17 @@ auto find_next_line_segment(
       continue;
     const Eigen::Vector2f ge = edge_grads[edge_id].normalized();
     const auto dot_g_ge = current_g.dot(ge);
-    if (dot_g_ge > cos(170. / 180. * M_PI))
+    if (dot_g_ge > cos(170.f / 180.f * M_PI))
+      continue;
+
+    const auto& inertia = edge_stats.inertias[edge_id];
+    const auto sim = similarity(current_inertia, inertia);
+    if (sim < cos(20.f / 180.f * M_PI))
       continue;
 
     const auto& box = edge_stats.oriented_box(edge_id);
     const auto thickness = box.lengths(1) / box.lengths(0);
-    const auto is_thick = thickness > 0.1 && box.lengths(1) > 3.;
+    const auto is_thick = thickness > 0.1 || box.lengths(1) > 3.;
     if (is_thick)
       continue;
 
