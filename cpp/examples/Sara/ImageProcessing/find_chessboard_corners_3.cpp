@@ -453,21 +453,6 @@ auto __main(int argc, char** argv) -> int
           sara::draw_line(display, a, b, sara::Green8, 3);
         }
 
-#if 0
-        // Grow a line from side of the square.
-        for (auto i = 0; i < 4; ++i)
-        {
-          const auto ia = square[i];
-          const auto ib = square[(i + 1) % 4];
-          const Eigen::Vector2f a = corners[ia].coords * downscale_factor;
-          const Eigen::Vector2f b = corners[ib].coords * downscale_factor;
-
-          auto line = reconstruct_line(ia, b - a, corners, edge_grads,
-                                       edges_adjacent_to_corner,
-                                       corners_adjacent_to_edge);
-        }
-#endif
-
         for (auto side = 0; side < 4; ++side)
         {
           auto line = grow_line_from_square(square, side, corners, edge_grads,
@@ -481,7 +466,7 @@ auto __main(int argc, char** argv) -> int
                 corners[line[i]].coords * downscale_factor;
             const Eigen::Vector2f b =
                 corners[line[i + 1]].coords * downscale_factor;
-            sara::draw_line(display, a, b, sara::Magenta8, 3);
+            sara::draw_line(display, a, b, sara::Yellow8, 2);
           }
         }
       }
