@@ -13,6 +13,8 @@
 
 #include <omp.h>
 
+#include <array>
+
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDescriptors.hpp>
@@ -59,6 +61,10 @@ auto __main(int argc, char** argv) -> int
     auto frame_number = -1;
 
     auto f = sara::Image<sara::Rgb8>{video_frame.width(), video_frame.width()};
+    auto fs = std::array{
+     sara::Image<sara::Rgb8>{video_frame.width(), video_frame.width()},
+     sara::Image<sara::Rgb8>{video_frame.height(), video_frame.width()},
+    };
 
     auto T = Eigen::Matrix3f{};
     const Eigen::Vector2f c = video_frame.sizes().cast<float>() * 0.5f;
@@ -66,6 +72,13 @@ auto __main(int argc, char** argv) -> int
     T.setIdentity();
     T.topLeftCorner<2, 2>() = R;
     T.col(2).head(2) = c - R * c;
+
+    auto T2 = Eigen::Matrix3f{};
+    const Eigen::Vector2f c2 = fs[1].sizes().cast<float>() * 0.5f;
+    const Eigen::Matrix2f R2 = sara::rotation2<float>(90._deg);
+    T2.setIdentity();
+    T2.topLeftCorner<2, 2>() = R2;
+    T2.col(2).head(2) = c2 - R2 * c2;
 
     while (video_stream.read())
     {
@@ -76,13 +89,13 @@ auto __main(int argc, char** argv) -> int
 
       if (sara::active_window() == nullptr)
       {
-        sara::create_window(f.sizes(), video_file);
+        sara::create_window(fs[1].sizes(), video_file);
         sara::set_antialiasing();
       }
 
-      sara::warp(video_frame, f, T);
+      sara::warp(video_frame, fs[1], T2);
 
-      sara::display(f);
+      sara::display(fs[1]);
       sara::toc("Display");
       sara::get_key();
     }
