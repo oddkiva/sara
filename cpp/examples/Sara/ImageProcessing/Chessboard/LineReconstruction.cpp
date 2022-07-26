@@ -24,6 +24,7 @@ auto find_next_line_segment(
     const int ia, const int ib, const int current_edge_id,
     const std::vector<int>& edges_added,
     const std::vector<Corner<float>>& corners,
+    const DO::Sara::CurveStatistics& edge_stats,
     const std::vector<Eigen::Vector2f>& edge_grads,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
@@ -40,8 +41,15 @@ auto find_next_line_segment(
       continue;
     const Eigen::Vector2f ge = edge_grads[edge_id].normalized();
     const auto dot_g_ge = current_g.dot(ge);
-    if (dot_g_ge > cos(160. / 180. * M_PI))
+    if (dot_g_ge > cos(170. / 180. * M_PI))
       continue;
+
+    const auto& box = edge_stats.oriented_box(edge_id);
+    const auto thickness = box.lengths(1) / box.lengths(0);
+    const auto is_thick = thickness > 0.1 && box.lengths(1) > 3.;
+    if (is_thick)
+      continue;
+
     valid_edges.emplace_back(edge_id, dot_g_ge);
   }
 
@@ -69,7 +77,7 @@ auto find_next_line_segment(
     const auto& c = corners[ic].coords;
     const auto bc = (c - b).norm();
     const auto ratio = std::min(ab, bc) / std::max(ab, bc);
-    if (ratio > 0.5 && ratio > best_ratio)
+    if (ratio > 0.75 && ratio > best_ratio)
     {
       best_ic = ic;
       best_ratio = ratio;
@@ -86,6 +94,7 @@ auto find_next_line_segment(
 auto grow_line_from_square(
     const std::array<int, 4>& square, const int side,
     const std::vector<Corner<float>>& corners,
+    const DO::Sara::CurveStatistics& edge_stats,
     const std::vector<Eigen::Vector2f>& edge_grads,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
@@ -108,7 +117,7 @@ auto grow_line_from_square(
   while (true)
   {
     std::tie(ia, ib) = find_next_line_segment(
-        ia, ib, e_ab, edges_added, corners, edge_grads,
+        ia, ib, e_ab, edges_added, corners, edge_stats, edge_grads,
         edges_adjacent_to_corner, corners_adjacent_to_edge);
     if (ia == -1 || ib == -1)
       break;
@@ -118,7 +127,6 @@ auto grow_line_from_square(
     line.push_back(ib);
     edges_added.push_back(e_ab);
   }
-
 
 
   ia = square[(side + 1) % 4];
@@ -134,7 +142,7 @@ auto grow_line_from_square(
   while (true)
   {
     std::tie(ia, ib) = find_next_line_segment(
-        ia, ib, e_ab, edges_added, corners, edge_grads,
+        ia, ib, e_ab, edges_added, corners, edge_stats, edge_grads,
         edges_adjacent_to_corner, corners_adjacent_to_edge);
     if (ia == -1 || ib == -1)
       break;
@@ -149,4 +157,26 @@ auto grow_line_from_square(
   std::copy(line.begin() + 2, line.end(), std::back_inserter(line2));
 
   return line2;
+}
+
+
+auto grow_lines_from_square(
+    const std::array<int, 4>& square,  //
+    const std::vector<Corner<float>>& corners,
+    const DO::Sara::CurveStatistics& edge_stats,
+    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
+    const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
+    -> std::vector<std::vector<int>>
+{
+  auto lines = std::vector<std::vector<int>>{};
+  for (auto side = 0; side < 4; ++side)
+  {
+    auto line = grow_line_from_square(square, side, corners, edge_stats,
+                                      edge_grads, edges_adjacent_to_corner,
+                                      corners_adjacent_to_edge);
+    lines.emplace_back(std::move(line));
+  }
+
+  return lines;
 }

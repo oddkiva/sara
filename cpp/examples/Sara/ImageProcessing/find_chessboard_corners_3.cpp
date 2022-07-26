@@ -124,6 +124,9 @@ auto __main(int argc, char** argv) -> int
         angular_threshold      //
     }};
 
+    // Visual inspection option
+    const auto pause = argc < 9 ? false : static_cast<bool>(std::stoi(argv[8]));
+
     static const auto image_border = static_cast<int>(std::round(2 * sigma_I));
     static const auto& radius = image_border;
 
@@ -378,6 +381,18 @@ auto __main(int argc, char** argv) -> int
       sara::toc("Black square reconstruction");
       SARA_CHECK(black_squares.size());
 
+      sara::tic();
+      auto lines = std::vector<std::vector<int>>{};
+      for (const auto& square : black_squares)
+      {
+        const auto new_lines = grow_lines_from_square(
+            square, corners, edge_stats, edge_grads, edges_adjacent_to_corner,
+            corners_adjacent_to_edge);
+
+        lines.insert(lines.end(), new_lines.begin(), new_lines.end());
+      }
+      sara::toc("Line Reconstruction");
+
 
       const auto pipeline_time = timer.elapsed_ms();
       SARA_DEBUG << "Processing time = " << pipeline_time << "ms" << std::endl;
@@ -442,6 +457,17 @@ auto __main(int argc, char** argv) -> int
       sara::draw_text(display, 80, 80, std::to_string(frame_number),
                       sara::White8, 60, 0, false, true);
 
+      for (const auto& line : lines)
+      {
+        for (auto i = 0u; i < line.size() - 1; ++i)
+        {
+          const Eigen::Vector2f a = corners[line[i]].coords * downscale_factor;
+          const Eigen::Vector2f b =
+              corners[line[i + 1]].coords * downscale_factor;
+          sara::draw_line(display, a, b, sara::Cyan8, 1);
+        }
+      }
+
       for (const auto& square : black_squares)
       {
         for (auto i = 0; i < 4; ++i)
@@ -452,29 +478,13 @@ auto __main(int argc, char** argv) -> int
               corners[square[(i + 1) % 4]].coords * downscale_factor;
           sara::draw_line(display, a, b, sara::Green8, 3);
         }
-
-        for (auto side = 0; side < 4; ++side)
-        {
-          auto line = grow_line_from_square(square, side, corners, edge_grads,
-                                            edges_adjacent_to_corner,
-                                            corners_adjacent_to_edge);
-          if (line.size() < 2)
-            throw std::runtime_error{"ERROR IN LINE GROWING!"};
-          for (auto i = 0u; i < line.size() - 1; ++i)
-          {
-            const Eigen::Vector2f a =
-                corners[line[i]].coords * downscale_factor;
-            const Eigen::Vector2f b =
-                corners[line[i + 1]].coords * downscale_factor;
-            sara::draw_line(display, a, b, sara::Yellow8, 2);
-          }
-        }
       }
 
       sara::display(display);
       sara::toc("Display");
 
-      sara::get_key();
+      if (pause)
+        sara::get_key();
     }
   }
   catch (std::exception& e)
