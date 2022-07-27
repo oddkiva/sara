@@ -8,7 +8,8 @@ namespace DO::Sara {
   ImageOrVideoReader::ImageOrVideoReader(const std::string& p)
   {
     open(p);
-    read();
+    if (_is_image)
+      read();
   }
 
   auto ImageOrVideoReader::open(const std::string& path) -> void
