@@ -69,14 +69,20 @@ auto reconstruct_black_square_from_corner(
       const auto& b = corners[v.id].coords;
       const Eigen::Vector2f dir = (b - a).normalized();
 
-      if (what == Direction::Up && dir.x() > 0)
+      auto rotation = Eigen::Matrix2f{};
+      rotation.col(0) = edge_grads[edge].normalized();
+      rotation.col(1) = dir;
+      if (rotation.determinant() > 0.8f)
         return v.id;
-      if (what == Direction::Right && dir.y() > 0)
-        return v.id;
-      if (what == Direction::Down && dir.x() < 0)
-        return v.id;
-      if (what == Direction::Left && dir.y() < 0)
-        return v.id;
+
+      // if (what == Direction::Up && dir.x() > 0)
+      //   return v.id;
+      // if (what == Direction::Right && dir.y() > 0)
+      //   return v.id;
+      // if (what == Direction::Down && dir.x() < 0)
+      //   return v.id;
+      // if (what == Direction::Left && dir.y() < 0)
+      //   return v.id;
     }
     return -1;
   };
@@ -108,6 +114,11 @@ auto reconstruct_black_square_from_corner(
   // I want unambiguously good square.
   if (square[0] != c)
     return std::nullopt;  // Ambiguity.
+
+  // Reorder the square vertices as follows:
+  const auto vmin = std::min_element(square.begin(), square.end());
+  if (vmin != square.begin())
+    std::rotate(square.begin(), vmin, square.end());
 
   return square;
 }
@@ -216,6 +227,11 @@ auto reconstruct_white_square_from_corner(
   // I want unambiguously good square.
   if (square[0] != c)
     return std::nullopt;  // Ambiguity.
+
+  // Reorder the square vertices as follows:
+  const auto vmin = std::min_element(square.begin(), square.end());
+  if (vmin != square.begin())
+    std::rotate(square.begin(), vmin, square.end());
 
   return square;
 }

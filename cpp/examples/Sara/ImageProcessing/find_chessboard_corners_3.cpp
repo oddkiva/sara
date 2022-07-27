@@ -13,6 +13,7 @@
 
 #include <omp.h>
 
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -126,6 +127,7 @@ auto __main(int argc, char** argv) -> int
 
     // Visual inspection option
     const auto pause = argc < 9 ? false : static_cast<bool>(std::stoi(argv[8]));
+    const auto check_edge_map = argc < 10 ? false : static_cast<bool>(std::stoi(argv[9]));
 
     static const auto image_border = static_cast<int>(std::round(2 * sigma_I));
     static const auto& radius = image_border;
@@ -154,7 +156,7 @@ auto __main(int argc, char** argv) -> int
       ++frame_number;
       if (frame_number % 3 != 0)
         continue;
-      SARA_CHECK(frame_number);
+      SARA_DEBUG << "Frame #" << frame_number << std::endl;
 
       if (sara::active_window() == nullptr)
       {
@@ -366,8 +368,13 @@ auto __main(int argc, char** argv) -> int
       sara::toc("Best corner selection");
 
       sara::tic();
-      auto black_squares = std::vector<std::array<int, 4>>{};
-      black_squares.reserve(corners.size());
+      using Square = std::array<int, 4>;
+      const auto compare_square = [](const Square& a, const Square& b) {
+        return std::lexicographical_compare(a.begin(), a.end(),  //
+                                            b.begin(), b.end());
+      };
+      auto black_squares =
+          std::set<Square, decltype(compare_square)>{compare_square};
       for (const auto& c : best_corners)
       {
         const auto square = reconstruct_black_square_from_corner(
@@ -375,15 +382,13 @@ auto __main(int argc, char** argv) -> int
             corners_adjacent_to_edge);
         if (square == std::nullopt)
           continue;
-
-        black_squares.push_back(*square);
+        black_squares.insert(*square);
       }
       sara::toc("Black square reconstruction");
-      SARA_CHECK(black_squares.size());
 
       sara::tic();
-      auto white_squares = std::vector<std::array<int, 4>>{};
-      white_squares.reserve(corners.size());
+      auto white_squares =
+          std::set<Square, decltype(compare_square)>{compare_square};
       for (const auto& c : best_corners)
       {
         const auto square = reconstruct_white_square_from_corner(
@@ -392,10 +397,9 @@ auto __main(int argc, char** argv) -> int
         if (square == std::nullopt)
           continue;
 
-        white_squares.push_back(*square);
+        white_squares.insert(*square);
       }
       sara::toc("White square reconstruction");
-      SARA_CHECK(white_squares.size());
 
       sara::tic();
       auto lines = std::vector<std::vector<int>>{};
@@ -423,13 +427,13 @@ auto __main(int argc, char** argv) -> int
 
 
       sara::tic();
-// #define CHECK_EDGE_MAP
-#ifdef CHECK_EDGE_MAP
-      auto display = sara::upscale(ed.pipeline.edge_map, downscale_factor)
-                         .convert<sara::Rgb8>();
-#else
-      auto display = frame_gray.convert<sara::Rgb8>();
-#endif
+      auto display = sara::Image<sara::Rgb8>{};
+      if (check_edge_map)
+        display = sara::upscale(ed.pipeline.edge_map, downscale_factor)
+                      .convert<sara::Rgb8>();
+      else
+        display = frame_gray.convert<sara::Rgb8>();
+
 #pragma omp parallel for
       for (auto c = 0; c < num_corners; ++c)
       {
@@ -438,6 +442,11 @@ auto __main(int argc, char** argv) -> int
                                            gradient_peaks_refined[c],    //
                                            zero_crossings[c],            //
                                            N);
+
+        // Remove noisy corners to understand better the behaviour of the
+        // algorithm.
+        if (edges_adjacent_to_corner[c].empty())
+          continue;
 
 #ifdef INSPECT_EDGE_GEOMETRY
         if (good)
