@@ -25,13 +25,15 @@ auto find_next_line_segment(
     const std::vector<int>& edges_added,
     const std::vector<Corner<float>>& corners,
     const DO::Sara::CurveStatistics& edge_stats,
-    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<Eigen::Vector2f>& edge_grad_mean,
+    const std::vector<Eigen::Matrix2f>& edge_grad_cov,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::pair<int, int>
 {
-  const Eigen::Vector2f current_g = edge_grads[current_edge_id].normalized();
-  const auto& current_inertia = edge_stats.inertias[current_edge_id];
+  const Eigen::Vector2f current_grad_mean =
+      edge_grad_mean[current_edge_id].normalized();
+  const auto& current_edge_inertia = edge_stats.inertias[current_edge_id];
 
   auto similarity = [](const Eigen::Matrix2d& a, const Eigen::Matrix2d& b) {
     return (a * b).trace() / (a.norm() * b.norm());
@@ -44,23 +46,26 @@ auto find_next_line_segment(
     if (std::find(edges_added.begin(), edges_added.end(), edge_id) !=
         edges_added.end())
       continue;
-    const Eigen::Vector2f ge = edge_grads[edge_id].normalized();
-    const auto dot_g_ge = current_g.dot(ge);
-    if (dot_g_ge > cos(170.f / 180.f * M_PI))
+    const Eigen::Vector2f ge = edge_grad_mean[edge_id].normalized();
+    const auto gradient_oppositeness = current_grad_mean.dot(ge);
+    if (gradient_oppositeness > cos(160.f / 180.f * M_PI))
       continue;
 
-    const auto& inertia = edge_stats.inertias[edge_id];
-    const auto sim = similarity(current_inertia, inertia);
+    const auto& edge_inertia = edge_stats.inertias[edge_id];
+    const auto sim = similarity(current_edge_inertia, edge_inertia);
     if (sim < cos(20.f / 180.f * M_PI))
       continue;
 
-    const auto& box = edge_stats.oriented_box(edge_id);
-    const auto thickness = box.lengths(1) / box.lengths(0);
-    const auto is_thick = thickness > 0.1 || box.lengths(1) > 3.;
-    if (is_thick)
+    const auto& grad_cov = edge_grad_cov[edge_id];
+    // No corners in this edge, please.
+    static constexpr auto kappa = 0.05f;
+    using DO::Sara::square;
+    const auto cornerness = grad_cov.determinant() -  //
+                            kappa * square(grad_cov.trace());
+    if (cornerness > 0)
       continue;
 
-    valid_edges.emplace_back(edge_id, dot_g_ge);
+    valid_edges.emplace_back(edge_id, gradient_oppositeness);
   }
 
   if (valid_edges.empty())
@@ -105,7 +110,8 @@ auto grow_line_from_square(
     const std::array<int, 4>& square, const int side,
     const std::vector<Corner<float>>& corners,
     const DO::Sara::CurveStatistics& edge_stats,
-    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<Eigen::Vector2f>& edge_grad_mean,
+    const std::vector<Eigen::Matrix2f>& edge_grad_cov,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::vector<int>
@@ -126,8 +132,11 @@ auto grow_line_from_square(
 
   while (true)
   {
-    std::tie(ia, ib) = find_next_line_segment(
-        ia, ib, e_ab, edges_added, corners, edge_stats, edge_grads,
+    std::tie(ia, ib) = find_next_line_segment(      //
+        ia, ib, e_ab,                               //
+        edges_added,                                //
+        corners,                                    //
+        edge_stats, edge_grad_mean, edge_grad_cov,  //
         edges_adjacent_to_corner, corners_adjacent_to_edge);
     if (ia == -1 || ib == -1)
       break;
@@ -152,8 +161,8 @@ auto grow_line_from_square(
   while (true)
   {
     std::tie(ia, ib) = find_next_line_segment(
-        ia, ib, e_ab, edges_added, corners, edge_stats, edge_grads,
-        edges_adjacent_to_corner, corners_adjacent_to_edge);
+        ia, ib, e_ab, edges_added, corners, edge_stats, edge_grad_mean,
+        edge_grad_cov, edges_adjacent_to_corner, corners_adjacent_to_edge);
     if (ia == -1 || ib == -1)
       break;
     e_ab = find_edge(ia, ib,  //
@@ -174,7 +183,8 @@ auto grow_lines_from_square(
     const std::array<int, 4>& square,  //
     const std::vector<Corner<float>>& corners,
     const DO::Sara::CurveStatistics& edge_stats,
-    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<Eigen::Vector2f>& edge_grad_mean,
+    const std::vector<Eigen::Matrix2f>& edge_grad_cov,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::vector<std::vector<int>>
@@ -182,8 +192,10 @@ auto grow_lines_from_square(
   auto lines = std::vector<std::vector<int>>{};
   for (auto side = 0; side < 4; ++side)
   {
-    auto line = grow_line_from_square(square, side, corners, edge_stats,
-                                      edge_grads, edges_adjacent_to_corner,
+    auto line = grow_line_from_square(square, side,  //
+                                      corners,       //
+                                      edge_stats, edge_grad_mean, edge_grad_cov,
+                                      edges_adjacent_to_corner,
                                       corners_adjacent_to_edge);
     lines.emplace_back(std::move(line));
   }

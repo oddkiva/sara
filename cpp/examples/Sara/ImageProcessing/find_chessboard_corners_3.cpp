@@ -127,7 +127,8 @@ auto __main(int argc, char** argv) -> int
 
     // Visual inspection option
     const auto pause = argc < 9 ? false : static_cast<bool>(std::stoi(argv[8]));
-    const auto check_edge_map = argc < 10 ? false : static_cast<bool>(std::stoi(argv[9]));
+    const auto check_edge_map =
+        argc < 10 ? false : static_cast<bool>(std::stoi(argv[9]));
 
     static const auto image_border = static_cast<int>(std::round(2 * sigma_I));
     static const auto& radius = image_border;
@@ -286,10 +287,16 @@ auto __main(int argc, char** argv) -> int
 
         if (curve.size() < 2)
           continue;
-        edge_label_map(curve.front().array().round().matrix().cast<int>()) =
-            edge_id;
-        edge_label_map(curve.back().array().round().matrix().cast<int>()) =
-            edge_id;
+
+        const Eigen::Vector2i s = curve.front().array().round().matrix().cast<int>();
+        const Eigen::Vector2i e = curve.back().array().round().matrix().cast<int>();
+
+        // Ignore weak edges, they make the edge map less interpretable.
+        if (ed.pipeline.edge_map(s) == 127 || ed.pipeline.edge_map(e) == 127)
+          continue;
+
+        edge_label_map(s) = edge_id;
+        edge_label_map(e) = edge_id;
       }
 
       auto edges_adjacent_to_corner = std::vector<std::unordered_set<int>>{};
@@ -353,8 +360,11 @@ auto __main(int argc, char** argv) -> int
       sara::tic();
       const auto edge_stats = get_curve_shape_statistics(  //
           ed.pipeline.edges_as_list);
-      const auto edge_grads = mean_gradient(  //
-          ed.pipeline.edges_as_list,          //
+      const auto edge_grad_means = gradient_mean(  //
+          ed.pipeline.edges_as_list,               //
+          grad_x, grad_y);
+      const auto edge_grad_covs = gradient_covariance(  //
+          ed.pipeline.edges_as_list,                    //
           grad_x, grad_y);
       sara::toc("Edge Shape Stats");
 
@@ -378,7 +388,7 @@ auto __main(int argc, char** argv) -> int
       for (const auto& c : best_corners)
       {
         const auto square = reconstruct_black_square_from_corner(
-            c, corners, edge_grads, edges_adjacent_to_corner,
+            c, corners, edge_grad_means, edges_adjacent_to_corner,
             corners_adjacent_to_edge);
         if (square == std::nullopt)
           continue;
@@ -392,7 +402,7 @@ auto __main(int argc, char** argv) -> int
       for (const auto& c : best_corners)
       {
         const auto square = reconstruct_white_square_from_corner(
-            c, corners, edge_grads, edges_adjacent_to_corner,
+            c, corners, edge_grad_means, edges_adjacent_to_corner,
             corners_adjacent_to_edge);
         if (square == std::nullopt)
           continue;
@@ -406,16 +416,16 @@ auto __main(int argc, char** argv) -> int
       for (const auto& square : black_squares)
       {
         const auto new_lines = grow_lines_from_square(
-            square, corners, edge_stats, edge_grads, edges_adjacent_to_corner,
-            corners_adjacent_to_edge);
+            square, corners, edge_stats, edge_grad_means, edge_grad_covs,
+            edges_adjacent_to_corner, corners_adjacent_to_edge);
 
         lines.insert(lines.end(), new_lines.begin(), new_lines.end());
       }
       for (const auto& square : white_squares)
       {
         const auto new_lines = grow_lines_from_square(
-            square, corners, edge_stats, edge_grads, edges_adjacent_to_corner,
-            corners_adjacent_to_edge);
+            square, corners, edge_stats, edge_grad_means, edge_grad_covs,
+            edges_adjacent_to_corner, corners_adjacent_to_edge);
 
         lines.insert(lines.end(), new_lines.begin(), new_lines.end());
       }

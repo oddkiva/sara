@@ -1,6 +1,14 @@
 #include "SquareReconstruction.hpp"
 
 
+static const auto dirs = std::array{
+    Direction::Up,
+    Direction::Right,
+    Direction::Down,
+    Direction::Left,
+};
+
+
 auto direction_type(const float angle) -> Direction
 {
   static constexpr auto pi = static_cast<float>(M_PI);
@@ -24,6 +32,57 @@ auto direction_type(const float angle) -> Direction
     return Direction::Right;
 }
 
+static auto find_edge(const std::unordered_set<int>& edges, Direction what,
+                      const std::vector<Eigen::Vector2f>& edge_grads)
+{
+  for (const auto& e : edges)
+    if (direction_type(edge_grads[e]) == what)
+      return e;
+  return -1;
+};
+
+static auto find_next_square_vertex(  //
+    int edge, int current_vertex,     //
+    const std::vector<Corner<float>>& corners,
+    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge) -> int
+{
+  struct Vertex
+  {
+    int id;
+    float score;
+    auto operator<(const Vertex& other) const
+    {
+      return score < other.score;
+    }
+  };
+
+  const auto& cs = corners_adjacent_to_edge[edge];
+  auto vs = std::vector<Vertex>(corners_adjacent_to_edge[edge].size());
+  std::transform(cs.begin(), cs.end(), vs.begin(),
+                 [&corners](const auto& v) -> Vertex {
+                   return {v, corners[v].score};
+                 });
+  std::sort(vs.rbegin(), vs.rend());
+
+  for (const auto& v : vs)
+  {
+    if (v.id == current_vertex)
+      continue;
+
+    const auto& a = corners[current_vertex].coords;
+    const auto& b = corners[v.id].coords;
+
+    auto rotation = Eigen::Matrix2f{};
+    rotation.col(0) = edge_grads[edge].normalized();
+    rotation.col(1) = (b - a).normalized();
+    if (rotation.determinant() > 0.8f)
+      return v.id;
+  }
+  return -1;
+}
+
+
 auto reconstruct_black_square_from_corner(
     int c,                //
     int start_direction,  //
@@ -33,67 +92,6 @@ auto reconstruct_black_square_from_corner(
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::optional<std::array<int, 4>>
 {
-  auto find_edge = [&](const std::unordered_set<int>& edges, Direction what) {
-    for (const auto& e : edges)
-      if (direction_type(edge_grads[e]) == what)
-        return e;
-    return -1;
-  };
-
-  auto find_next_square_vertex = [&](int edge, Direction what,
-                                     int current_vertex) -> int {
-    struct Vertex
-    {
-      int id;
-      float score;
-      auto operator<(const Vertex& other) const
-      {
-        return score < other.score;
-      }
-    };
-
-    const auto& cs = corners_adjacent_to_edge[edge];
-    auto vs = std::vector<Vertex>(corners_adjacent_to_edge[edge].size());
-    std::transform(cs.begin(), cs.end(), vs.begin(),
-                   [&corners](const auto& v) -> Vertex {
-                     return {v, corners[v].score};
-                   });
-    std::sort(vs.rbegin(), vs.rend());
-
-    for (const auto& v : vs)
-    {
-      if (v.id == current_vertex)
-        continue;
-
-      const auto& a = corners[current_vertex].coords;
-      const auto& b = corners[v.id].coords;
-      const Eigen::Vector2f dir = (b - a).normalized();
-
-      auto rotation = Eigen::Matrix2f{};
-      rotation.col(0) = edge_grads[edge].normalized();
-      rotation.col(1) = dir;
-      if (rotation.determinant() > 0.8f)
-        return v.id;
-
-      // if (what == Direction::Up && dir.x() > 0)
-      //   return v.id;
-      // if (what == Direction::Right && dir.y() > 0)
-      //   return v.id;
-      // if (what == Direction::Down && dir.x() < 0)
-      //   return v.id;
-      // if (what == Direction::Left && dir.y() < 0)
-      //   return v.id;
-    }
-    return -1;
-  };
-
-  static const auto dirs = std::array{
-      Direction::Up,
-      Direction::Right,
-      Direction::Down,
-      Direction::Left,
-  };
-
   auto square = std::array<int, 4>{};
   std::fill(square.begin(), square.end(), -1);
 
@@ -102,16 +100,19 @@ auto reconstruct_black_square_from_corner(
   for (auto i = 1; i <= 4; ++i)
   {
     const auto dir = dirs[(i - 1 + start_direction) % 4];
-    const auto edge = find_edge(edges_adjacent_to_corner[square[i - 1]], dir);
+    const auto edge =
+        find_edge(edges_adjacent_to_corner[square[i - 1]], dir, edge_grads);
     if (edge == -1)
       return std::nullopt;
 
-    square[i % 4] = find_next_square_vertex(edge, dir, square[i - 1]);
+    square[i % 4] = find_next_square_vertex(edge, square[i - 1],  //
+                                            corners, edge_grads,  //
+                                            corners_adjacent_to_edge);
     if (square[i % 4] == -1)
       return std::nullopt;
   }
 
-  // I want unambiguously good square.
+  // I want unambiguously good squares.
   if (square[0] != c)
     return std::nullopt;  // Ambiguity.
 
@@ -152,54 +153,6 @@ auto reconstruct_white_square_from_corner(
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::optional<std::array<int, 4>>
 {
-  auto find_edge = [&](const std::unordered_set<int>& edges, Direction what) {
-    for (const auto& e : edges)
-      if (direction_type(edge_grads[e]) == what)
-        return e;
-    return -1;
-  };
-
-  auto find_next_square_vertex = [&](int edge, Direction what,
-                                     int current_vertex) -> int {
-    struct Vertex
-    {
-      int id;
-      float score;
-      auto operator<(const Vertex& other) const
-      {
-        return score < other.score;
-      }
-    };
-
-    const auto& cs = corners_adjacent_to_edge[edge];
-    auto vs = std::vector<Vertex>(corners_adjacent_to_edge[edge].size());
-    std::transform(cs.begin(), cs.end(), vs.begin(),
-                   [&corners](const auto& v) -> Vertex {
-                     return {v, corners[v].score};
-                   });
-    std::sort(vs.rbegin(), vs.rend());
-
-    for (const auto& v : vs)
-    {
-      if (v.id == current_vertex)
-        continue;
-
-      const auto& a = corners[current_vertex].coords;
-      const auto& b = corners[v.id].coords;
-      const Eigen::Vector2f dir = (b - a).normalized();
-
-      if (what == Direction::Up && dir.x() > 0)
-        return v.id;
-      if (what == Direction::Right && dir.y() > 0)
-        return v.id;
-      if (what == Direction::Down && dir.x() < 0)
-        return v.id;
-      if (what == Direction::Left && dir.y() < 0)
-        return v.id;
-    }
-    return -1;
-  };
-
   static const auto dirs = std::array{
       Direction::Up,
       Direction::Right,
@@ -215,16 +168,19 @@ auto reconstruct_white_square_from_corner(
   for (auto i = 1; i <= 4; ++i)
   {
     const auto dir = dirs[(4 - (i - 1 + start_direction)) % 4];
-    const auto edge = find_edge(edges_adjacent_to_corner[square[i - 1]], dir);
+    const auto edge =
+        find_edge(edges_adjacent_to_corner[square[i - 1]], dir, edge_grads);
     if (edge == -1)
       return std::nullopt;
 
-    square[i % 4] = find_next_square_vertex(edge, dir, square[i - 1]);
+    square[i % 4] = find_next_square_vertex(edge, square[i - 1],  //
+                                            corners, edge_grads,  //
+                                            corners_adjacent_to_edge);
     if (square[i % 4] == -1)
       return std::nullopt;
   }
 
-  // I want unambiguously good square.
+  // I want unambiguously good squares.
   if (square[0] != c)
     return std::nullopt;  // Ambiguity.
 
