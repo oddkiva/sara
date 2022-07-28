@@ -58,8 +58,9 @@ int __main(int argc, char** argv)
 #else
                                   : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
-  const auto downscale_factor = argc >= 3 ? std::atoi(argv[2]) : 1;
-  const auto skip = argc >= 4 ? std::atoi(argv[3]) : 0;
+  const auto downscale_factor = argc >= 3 ? std::stof(argv[2]) : 1.f;
+  const auto skip = argc >= 4 ? std::stoi(argv[3]) : 0;
+  const auto sigma = argc >= 5 ? std::stof(argv[4]) : 1.f;
 
   // OpenMP.
   omp_set_num_threads(omp_get_max_threads());
@@ -67,7 +68,15 @@ int __main(int argc, char** argv)
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-  auto frame_gray32f = Image<float>{};
+  auto frame_gray32f = Image<float>{frame.sizes()};
+
+  const Eigen::Vector2i image_ds_sizes =
+      (frame.sizes().cast<float>() / downscale_factor)
+          .array()
+          .round()
+          .matrix()
+          .cast<int>();
+  auto frame_gray32f_ds = Image<float>{image_ds_sizes};
 
   // Output save.
   namespace fs = boost::filesystem;
@@ -91,7 +100,6 @@ int __main(int argc, char** argv)
   constexpr float low_threshold_ratio =
       static_cast<float>(high_threshold_ratio / 2.);
   constexpr float angular_threshold = static_cast<float>((10._deg).value);
-  const auto sigma = 3.f;  // std::sqrt(square(1.6f) - square(0.5f));
 
   auto ed = EdgeDetector{{
       high_threshold_ratio,  //
@@ -120,25 +128,21 @@ int __main(int argc, char** argv)
     frame_gray32f = gaussian(frame_gray32f, sigma);
     toc("Blur");
 
-    if (downscale_factor > 1)
-    {
-      tic();
-      frame_gray32f = downscale(frame_gray32f, downscale_factor);
-      toc("Downscale");
-    }
+    tic();
+    resize_v2(frame_gray32f, frame_gray32f_ds);
+    toc("Downscale");
 
-    ed(frame_gray32f);
+    ed(frame_gray32f_ds);
     const auto& edges_simplified = ed.pipeline.edges_simplified;
 
     tic();
     auto disp = frame.convert<float>().convert<Rgb8>();
     for (const auto& e : edges_simplified)
     {
-      if (e.size() >= 2 && length(e) > 3)
+      if (e.size() >= 2 && length(e) > 10)
       {
         const auto color = Rgb8(rand() % 255, rand() % 255, rand() % 255);
-        draw_polyline(disp, e, color, Eigen::Vector2d{0, 0},
-                      static_cast<float>(downscale_factor));
+        draw_polyline(disp, e, color, Eigen::Vector2d{0, 0}, downscale_factor);
       }
     }
     display(disp);

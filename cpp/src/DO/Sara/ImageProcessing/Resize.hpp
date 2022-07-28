@@ -248,6 +248,8 @@ namespace DO { namespace Sara {
     resize(src, dst);
     return dst;
   }
+
+  auto resize_v2(const ImageView<float>& src, ImageView<float>& dst) -> void;
   //! @}
 
 
