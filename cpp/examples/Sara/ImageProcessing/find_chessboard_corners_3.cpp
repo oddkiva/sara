@@ -270,6 +270,56 @@ auto __main(int argc, char** argv) -> int
       sara::toc("Gradient Dominant Orientations");
 
       sara::tic();
+      const auto edge_stats = get_curve_shape_statistics(  //
+          ed.pipeline.edges_as_list);
+      const auto edge_grad_means = gradient_mean(  //
+          ed.pipeline.edges_as_list,               //
+          grad_x, grad_y);
+      const auto edge_grad_covs = gradient_covariance(  //
+          ed.pipeline.edges_as_list,                    //
+          grad_x, grad_y);
+      sara::toc("Edge Shape Stats");
+
+
+
+
+#ifdef LETS_UNDERSTAND_THE_EDGES
+      auto edge_map_labeled = sara::Image<sara::Rgb8>{ed.pipeline.edge_map.sizes()};
+      edge_map_labeled.flat_array().fill(sara::Black8);
+      for (auto edge_id = 0u; edge_id < ed.pipeline.edges_as_list.size(); ++edge_id)
+      {
+        const auto& points = ed.pipeline.edges_as_list[edge_id];
+        const auto& s = points.front();
+        const auto& e = points.back();
+
+        // Ignore weak edges, they make the edge map less interpretable.
+        if (ed.pipeline.edge_map(s) == 127 || ed.pipeline.edge_map(e) == 127)
+          continue;
+
+        const auto& curve = ed.pipeline.edges_simplified[edge_id];
+        if (curve.size() < 2 || sara::length(curve) < 10 / downscale_factor)
+          continue;
+
+        // Edge gradient distribution similar to cornerness measure.
+        const auto& grad_cov = edge_grad_covs[edge_id];
+        const auto grad_dist_param = 0.2f;
+        const auto cornerness = grad_cov.determinant() -  //
+                                grad_dist_param * sara::square(grad_cov.trace());
+        if (cornerness > 0)
+          continue;
+
+        const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
+        for (const auto& p : points)
+          edge_map_labeled(p) = color;
+      }
+      sara::display(sara::upscale(edge_map_labeled, downscale_factor));
+      sara::get_key();
+      continue;
+#endif
+
+
+
+      sara::tic();
       auto edge_label_map = sara::Image<int>{ed.pipeline.edge_map.sizes()};
       edge_label_map.flat_array().fill(-1);
 #if 0
@@ -284,7 +334,6 @@ auto __main(int argc, char** argv) -> int
         auto curve = std::vector<Eigen::Vector2d>(edgei.size());
         std::transform(edgei.begin(), edgei.end(), curve.begin(),
                        [](const auto& p) { return p.template cast<double>(); });
-
         if (curve.size() < 2)
           continue;
 
@@ -295,6 +344,20 @@ auto __main(int argc, char** argv) -> int
 
         // Ignore weak edges, they make the edge map less interpretable.
         if (ed.pipeline.edge_map(s) == 127 || ed.pipeline.edge_map(e) == 127)
+          continue;
+
+        // Ignore small edges.
+        const auto& curve_simplified = ed.pipeline.edges_simplified[edge_id];
+        if (curve_simplified.size() < 2 ||
+            sara::length(curve_simplified) < 10 / downscale_factor)
+          continue;
+
+        // Edge gradient distribution similar to cornerness measure.
+        const auto& grad_cov = edge_grad_covs[edge_id];
+        const auto grad_dist_param = 0.2f;
+        const auto cornerness = grad_cov.determinant() -  //
+                                grad_dist_param * sara::square(grad_cov.trace());
+        if (cornerness > 0)
           continue;
 
         edge_label_map(s) = edge_id;
@@ -358,17 +421,6 @@ auto __main(int argc, char** argv) -> int
         }
       }
       sara::toc("Topological Linking");
-
-      sara::tic();
-      const auto edge_stats = get_curve_shape_statistics(  //
-          ed.pipeline.edges_as_list);
-      const auto edge_grad_means = gradient_mean(  //
-          ed.pipeline.edges_as_list,               //
-          grad_x, grad_y);
-      const auto edge_grad_covs = gradient_covariance(  //
-          ed.pipeline.edges_as_list,                    //
-          grad_x, grad_y);
-      sara::toc("Edge Shape Stats");
 
 
       sara::tic();
@@ -446,7 +498,10 @@ auto __main(int argc, char** argv) -> int
       else
         display = frame_gray.convert<sara::Rgb8>();
 
+// #define INVESTIGATE_X_CORNER_HISTOGRAMS
+#ifndef INVESTIGATE_X_CORNER_HISTOGRAMS
 #pragma omp parallel for
+#endif
       for (auto c = 0; c < num_corners; ++c)
       {
         const auto& p = corners[c];
@@ -460,20 +515,34 @@ auto __main(int argc, char** argv) -> int
         if (edges_adjacent_to_corner[c].empty())
           continue;
 
+#ifdef INVESTIGATE_X_CORNER_HISTOGRAMS
         if (good)
         {
-          SARA_DEBUG << "[GOOD] histogram[" << c << "]\n"
-                     << hists[c] << std::endl;
-          SARA_DEBUG << "[GOOD] profile  [" << c << "]\n"
-                     << profiles[c] << std::endl;
+          SARA_DEBUG << "[GOOD] gradient ori peaks[" << c << "]\n"
+                     << Eigen::Map<const Eigen::ArrayXf>(
+                            gradient_peaks_refined[c].data(),
+                            gradient_peaks_refined[c].size())  * 360.f / N
+                     << std::endl;
+          SARA_DEBUG << "[GOOD] zero crossings[" << c << "]\n"
+                     << Eigen::Map<const Eigen::ArrayXf>(
+                            zero_crossings[c].data(),
+                            zero_crossings[c].size()) * 180.f / static_cast<float>(M_PI)
+                     << std::endl;
         }
         else
         {
-          SARA_DEBUG << "[BAD ] histogram[" << c << "]\n"
-                     << hists[c] << std::endl;
-          SARA_DEBUG << "[BAD ] profile  [" << c << "]\n"
-                     << profiles[c] << std::endl;
+          SARA_DEBUG << "[BAD] gradient ori peaks[" << c << "]\n"
+                     << Eigen::Map<const Eigen::ArrayXf>(
+                            gradient_peaks_refined[c].data(),
+                            gradient_peaks_refined[c].size()) * 360.f / N
+                     << std::endl;
+          SARA_DEBUG << "[BAD] zero crossings[" << c << "]\n"
+                     << Eigen::Map<const Eigen::ArrayXf>(
+                            zero_crossings[c].data(),
+                            zero_crossings[c].size()) * 180.f / static_cast<float>(M_PI)
+                     << std::endl;
         }
+#endif
 
 #ifdef INSPECT_EDGE_GEOMETRY
         if (good)
@@ -513,6 +582,11 @@ auto __main(int argc, char** argv) -> int
             static_cast<int>(std::round(downscale_factor * p.coords.x())),
             static_cast<int>(std::round(downscale_factor * p.coords.y())), 4,
             good ? sara::Red8 : sara::Blue8, 2);
+
+#ifdef INVESTIGATE_X_CORNER_HISTOGRAMS
+        sara::display(display);
+        sara::get_key();
+#endif
       }
       sara::draw_text(display, 80, 80, std::to_string(frame_number),
                       sara::White8, 60, 0, false, true);
