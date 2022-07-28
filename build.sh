@@ -107,7 +107,7 @@ function build_library()
   # Compile Halide code.
   cmake_options+="-DSARA_USE_HALIDE:BOOL=ON "
   if [ "${platform_name}" == "Linux" ]; then
-    cmake_options+="-DCMAKE_PREFIX_PATH=$HOME/opt/Halide-13.0.0-x86-64-linux "
+    cmake_options+="-DCMAKE_PREFIX_PATH=$HOME/opt/Halide-14.0.0-x86-64-linux "
   fi
   if [ "${platform_name}" == "Darwin" ]; then
     cmake_options+="-DLLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm "
