@@ -3,6 +3,8 @@
 # TODO
 - robustify the line segment detection...
 - the edge detection should be done at the lower scale, to avoid noisy edges...
+- Merge the line segments if their end points are close and the mean edge
+  gradient are collinear *AND* on the **same side**.
 - make the chessboard detection multiscale
   2w   x 2h
    w   x  h
