@@ -110,7 +110,7 @@ auto __main(int argc, char** argv) -> int
         argc < 6 ? 1e-5f : std::stof(argv[5]);
 
     // Corner filtering.
-    const auto downscale_factor = argc < 7 ? 2 : std::stoi(argv[6]);
+    const auto downscale_factor = argc < 7 ? 2.f : std::stof(argv[6]);
 
     // Edge detection.
     const auto high_threshold_ratio =
@@ -143,11 +143,16 @@ auto __main(int argc, char** argv) -> int
 
     auto frame_gray = sara::Image<float>{video_frame.sizes()};
     auto frame_gray_blurred = sara::Image<float>{video_frame.sizes()};
-    auto frame_gray_ds =
-        sara::Image<float>{video_frame.sizes() / downscale_factor};
-    auto grad_norm = sara::Image<float>{video_frame.sizes() / downscale_factor};
-    auto grad_ori = sara::Image<float>{video_frame.sizes() / downscale_factor};
-    auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
+
+    const Eigen::Vector2i image_ds_sizes =
+        (frame_gray.sizes().cast<float>() / downscale_factor)
+            .array()
+            .round()
+            .matrix()
+            .cast<int>();
+    auto frame_gray_ds = sara::Image<float>{image_ds_sizes};
+    auto grad_norm = sara::Image<float>{image_ds_sizes};
+    auto grad_ori = sara::Image<float>{image_ds_sizes};
     auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
 
     auto timer = sara::Timer{};
@@ -169,11 +174,11 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       sara::from_rgb8_to_gray32f(video_frame, frame_gray);
-      sara::apply_gaussian_filter(frame_gray, frame_gray_blurred, 1.f);
+      sara::apply_gaussian_filter(frame_gray, frame_gray_blurred, downscale_factor);
       sara::toc("Grayscale conversion");
 
       sara::tic();
-      sara::scale(frame_gray_blurred, frame_gray_ds);
+      sara::resize_v2(frame_gray_blurred, frame_gray_ds);
       sara::toc("Downscale");
 
 
@@ -493,8 +498,14 @@ auto __main(int argc, char** argv) -> int
       sara::tic();
       auto display = sara::Image<sara::Rgb8>{};
       if (check_edge_map)
-        display = sara::upscale(ed.pipeline.edge_map, downscale_factor)
-                      .convert<sara::Rgb8>();
+      {
+        // Resize
+        auto display_32f_ds = ed.pipeline.edge_map.convert<float>();
+        auto display_32f = sara::Image<float>{video_frame.sizes()};
+        sara::scale(display_32f_ds, display_32f);
+
+        display = display_32f.convert<sara::Rgb8>();
+      }
       else
         display = frame_gray.convert<sara::Rgb8>();
 
@@ -581,7 +592,7 @@ auto __main(int argc, char** argv) -> int
             display,
             static_cast<int>(std::round(downscale_factor * p.coords.x())),
             static_cast<int>(std::round(downscale_factor * p.coords.y())), 4,
-            good ? sara::Red8 : sara::Blue8, 2);
+            good ? sara::Red8 : sara::Cyan8, 2);
 
 #ifdef INVESTIGATE_X_CORNER_HISTOGRAMS
         sara::display(display);
