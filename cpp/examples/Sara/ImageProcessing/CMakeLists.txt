@@ -89,8 +89,8 @@ target_link_libraries(find_chessboard_corners_2 PRIVATE ChessboardDetection)
 sara_add_example(find_chessboard_corners_3)
 target_link_libraries(find_chessboard_corners_3 PRIVATE ChessboardDetection)
 
-sara_add_example(radon_transform_example)
-target_link_libraries(radon_transform_example PRIVATE ChessboardDetection)
+sara_add_example(local_radon_transform_for_corner_detection)
+target_link_libraries(local_radon_transform_for_corner_detection PRIVATE ChessboardDetection)
 
 sara_add_example(find_aruco_marker)
 target_link_libraries(find_aruco_marker PRIVATE Boost::filesystem)

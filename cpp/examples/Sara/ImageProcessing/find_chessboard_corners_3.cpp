@@ -288,8 +288,10 @@ auto __main(int argc, char** argv) -> int
         if (curve.size() < 2)
           continue;
 
-        const Eigen::Vector2i s = curve.front().array().round().matrix().cast<int>();
-        const Eigen::Vector2i e = curve.back().array().round().matrix().cast<int>();
+        const Eigen::Vector2i s =
+            curve.front().array().round().matrix().cast<int>();
+        const Eigen::Vector2i e =
+            curve.back().array().round().matrix().cast<int>();
 
         // Ignore weak edges, they make the edge map less interpretable.
         if (ed.pipeline.edge_map(s) == 127 || ed.pipeline.edge_map(e) == 127)
@@ -383,8 +385,9 @@ auto __main(int argc, char** argv) -> int
         return std::lexicographical_compare(a.begin(), a.end(),  //
                                             b.begin(), b.end());
       };
-      auto black_squares =
-          std::set<Square, decltype(compare_square)>{compare_square};
+      using SquareSet = std::set<Square, decltype(compare_square)>;
+
+      auto black_squares = SquareSet{compare_square};
       for (const auto& c : best_corners)
       {
         const auto square = reconstruct_black_square_from_corner(
@@ -397,8 +400,7 @@ auto __main(int argc, char** argv) -> int
       sara::toc("Black square reconstruction");
 
       sara::tic();
-      auto white_squares =
-          std::set<Square, decltype(compare_square)>{compare_square};
+      auto white_squares = SquareSet{compare_square};
       for (const auto& c : best_corners)
       {
         const auto square = reconstruct_white_square_from_corner(
@@ -457,6 +459,21 @@ auto __main(int argc, char** argv) -> int
         // algorithm.
         if (edges_adjacent_to_corner[c].empty())
           continue;
+
+        if (good)
+        {
+          SARA_DEBUG << "[GOOD] histogram[" << c << "]\n"
+                     << hists[c] << std::endl;
+          SARA_DEBUG << "[GOOD] profile  [" << c << "]\n"
+                     << profiles[c] << std::endl;
+        }
+        else
+        {
+          SARA_DEBUG << "[BAD ] histogram[" << c << "]\n"
+                     << hists[c] << std::endl;
+          SARA_DEBUG << "[BAD ] profile  [" << c << "]\n"
+                     << profiles[c] << std::endl;
+        }
 
 #ifdef INSPECT_EDGE_GEOMETRY
         if (good)
