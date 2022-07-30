@@ -1,0 +1,7 @@
+# Some system/driver libraries that the address sanitizer complain about.
+leak:libdbus-1.so.3
+leak:libnvidia-glcore.so
+leak:libnvidia-opencl.so
+
+# Qt
+leak:libQt6Core.so
