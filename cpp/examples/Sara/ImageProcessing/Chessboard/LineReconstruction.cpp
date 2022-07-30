@@ -121,7 +121,7 @@ auto grow_line_from_square(
   auto e_ab =
       find_edge(ia, ib, edges_adjacent_to_corner, corners_adjacent_to_edge);
   if (e_ab == -1)
-    return {};
+    return {ia, ib};
 
   auto line = std::vector<int>{};
   line.push_back(ia);

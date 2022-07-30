@@ -349,7 +349,6 @@ namespace DO::Sara {
       throw std::runtime_error{"Error sending a packet for decoding!"};
     VIDEO_STREAM_TOC("Send packet")
 
-
     // Decode the compressed video data into an uncompressed video frame.
     VIDEO_STREAM_TIC
 #ifdef HWACCEL
