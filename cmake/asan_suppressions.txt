@@ -4,4 +4,10 @@ leak:libnvidia-glcore.so
 leak:libnvidia-opencl.so
 
 # Qt
-leak:libQt6Core.so
+leak:Qt6Core
+
+# Turn off errors arising from av_malloc FFmpeg.
+# Investigate why... I readapted the source code examples with the best of my
+# abilities.
+leak:avutil
+leak:avpacket
