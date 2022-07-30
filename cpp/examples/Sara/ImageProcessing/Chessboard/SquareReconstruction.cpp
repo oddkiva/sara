@@ -97,7 +97,7 @@ auto reconstruct_black_square_from_corner(
 
   square[0] = c;
 
-  for (auto i = 1; i <= 4; ++i)
+  for (auto i = 1; i < 4; ++i)
   {
     const auto dir = dirs[(i - 1 + start_direction) % 4];
     const auto edge =
@@ -165,9 +165,9 @@ auto reconstruct_white_square_from_corner(
 
   square[0] = c;
 
-  for (auto i = 1; i <= 4; ++i)
+  for (auto i = 1; i < 4; ++i)
   {
-    const auto dir = dirs[(4 - (i - 1 + start_direction)) % 4];
+    const auto dir = dirs[((4 - i + 1) + start_direction) % 4];
     const auto edge =
         find_edge(edges_adjacent_to_corner[square[i - 1]], dir, edge_grads);
     if (edge == -1)
