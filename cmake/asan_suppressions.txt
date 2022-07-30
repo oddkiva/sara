@@ -2,12 +2,11 @@
 leak:libdbus-1.so.3
 leak:libnvidia-glcore.so
 leak:libnvidia-opencl.so
+leak:Foundation
 
 # Qt
 leak:Qt6Core
 
 # Turn off errors arising from av_malloc FFmpeg.
-# Investigate why... I readapted the source code examples with the best of my
-# abilities.
-leak:avutil
+leak:avutil  # There is definitely a memory leak in how I use FFmpeg. Investigate why...
 leak:avpacket
