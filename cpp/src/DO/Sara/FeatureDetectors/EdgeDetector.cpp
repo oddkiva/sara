@@ -77,23 +77,23 @@ namespace DO::Sara {
       }
       toc("Longest Curve Extraction & Simplification");
 
-//       tic();
+//    tic();
 // #pragma omp parallel for
-//       for (auto i = 0u; i < edges_simplified.size(); ++i)
-//         if (edges_simplified[i].size() > 2)
-//           edges_simplified[i] = collapse(edges_simplified[i], grad_mag,
-//                                          parameters.collapse_threshold,
-//                                          parameters.collapse_adaptive);
-//       toc("Vertex Collapse");
+//    for (auto i = 0u; i < edges_simplified.size(); ++i)
+//      if (edges_simplified[i].size() > 2)
+//        edges_simplified[i] = collapse(edges_simplified[i], grad_mag,
+//                                       parameters.collapse_threshold,
+//                                       parameters.collapse_adaptive);
+//    toc("Vertex Collapse");
 //
-//       tic();
-//       auto& edges_refined = edges_simplified;
+//    tic();
+//    auto& edges_refined = edges_simplified;
 // #pragma omp parallel for
-//       for (auto i = 0u; i < edges_refined.size(); ++i)
-//         for (auto& p : edges_refined[i])
-//           p = refine(grad_mag, p.cast<int>()).cast<double>();
-//       toc("Refine Edge Localisation");
-     }
+//    for (auto i = 0u; i < edges_refined.size(); ++i)
+//      for (auto& p : edges_refined[i])
+//        p = refine(grad_mag, p.cast<int>()).cast<double>();
+//    toc("Refine Edge Localisation");
+    }
   }
 
 }  // namespace DO::Sara

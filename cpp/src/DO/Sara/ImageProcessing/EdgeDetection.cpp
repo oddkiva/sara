@@ -135,18 +135,11 @@ namespace DO::Sara {
       {
         const auto p = Eigen::Vector2i{x, y};
         const auto index_p = index(p);
+        static_assert(std::is_same_v<const Eigen::Vector2i, decltype(p)>);
         if (is_strong_edgel(p))
         {
           const auto component_id = static_cast<int>(ds.component(index_p));
-          if (component_id < 0 ||
-              component_id >= edges.width() * edges.height())
-            throw std::runtime_error{"Just noooooooo!!!!!!" +
-                                     std::to_string(component_id)};
-          auto ci = contours.find(component_id);
-          if (ci == contours.end())
-            contours[component_id] = {p};
-          else
-            ci->second.push_back(p);
+          contours[component_id].push_back(p);
         }
       }
     }

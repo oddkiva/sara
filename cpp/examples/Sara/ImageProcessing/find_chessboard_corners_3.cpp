@@ -113,8 +113,9 @@ auto __main(int argc, char** argv) -> int
     const auto downscale_factor = argc < 7 ? 2.f : std::stof(argv[6]);
 
     // Edge detection.
-    const auto high_threshold_ratio =
-        argc < 8 ? static_cast<float>(4._percent) : std::stof(argv[7]);
+    const auto high_threshold_ratio = argc < 8
+                                          ? static_cast<float>(4._percent)  //
+                                          : std::stof(argv[7]);
     const auto low_threshold_ratio =
         static_cast<float>(high_threshold_ratio / 2.);
     static constexpr auto angular_threshold =
@@ -127,8 +128,9 @@ auto __main(int argc, char** argv) -> int
 
     // Visual inspection option
     const auto pause = argc < 9 ? false : static_cast<bool>(std::stoi(argv[8]));
-    const auto check_edge_map =
-        argc < 10 ? false : static_cast<bool>(std::stoi(argv[9]));
+    const auto check_edge_map = argc < 10
+                                    ? false  //
+                                    : static_cast<bool>(std::stoi(argv[9]));
 
     static const auto image_border = static_cast<int>(std::round(2 * sigma_I));
     static const auto& radius = image_border;
@@ -174,7 +176,8 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       sara::from_rgb8_to_gray32f(video_frame, frame_gray);
-      sara::apply_gaussian_filter(frame_gray, frame_gray_blurred, downscale_factor);
+      sara::apply_gaussian_filter(frame_gray, frame_gray_blurred,
+                                  downscale_factor);
       sara::toc("Grayscale conversion");
 
       sara::tic();
@@ -286,12 +289,12 @@ auto __main(int argc, char** argv) -> int
       sara::toc("Edge Shape Stats");
 
 
-
-
 #ifdef LETS_UNDERSTAND_THE_EDGES
-      auto edge_map_labeled = sara::Image<sara::Rgb8>{ed.pipeline.edge_map.sizes()};
+      auto edge_map_labeled =
+          sara::Image<sara::Rgb8>{ed.pipeline.edge_map.sizes()};
       edge_map_labeled.flat_array().fill(sara::Black8);
-      for (auto edge_id = 0u; edge_id < ed.pipeline.edges_as_list.size(); ++edge_id)
+      for (auto edge_id = 0u; edge_id < ed.pipeline.edges_as_list.size();
+           ++edge_id)
       {
         const auto& points = ed.pipeline.edges_as_list[edge_id];
         const auto& s = points.front();
@@ -308,8 +311,9 @@ auto __main(int argc, char** argv) -> int
         // Edge gradient distribution similar to cornerness measure.
         const auto& grad_cov = edge_grad_covs[edge_id];
         const auto grad_dist_param = 0.2f;
-        const auto cornerness = grad_cov.determinant() -  //
-                                grad_dist_param * sara::square(grad_cov.trace());
+        const auto cornerness =
+            grad_cov.determinant() -  //
+            grad_dist_param * sara::square(grad_cov.trace());
         if (cornerness > 0)
           continue;
 
@@ -321,7 +325,6 @@ auto __main(int argc, char** argv) -> int
       sara::get_key();
       continue;
 #endif
-
 
 
       sara::tic();
@@ -360,8 +363,9 @@ auto __main(int argc, char** argv) -> int
         // Edge gradient distribution similar to cornerness measure.
         const auto& grad_cov = edge_grad_covs[edge_id];
         const auto grad_dist_param = 0.2f;
-        const auto cornerness = grad_cov.determinant() -  //
-                                grad_dist_param * sara::square(grad_cov.trace());
+        const auto cornerness =
+            grad_cov.determinant() -  //
+            grad_dist_param * sara::square(grad_cov.trace());
         if (cornerness > 0)
           continue;
 
@@ -511,7 +515,7 @@ auto __main(int argc, char** argv) -> int
 
 // #define INVESTIGATE_X_CORNER_HISTOGRAMS
 #ifndef INVESTIGATE_X_CORNER_HISTOGRAMS
-#pragma omp parallel for
+#  pragma omp parallel for
 #endif
       for (auto c = 0; c < num_corners; ++c)
       {
@@ -532,12 +536,14 @@ auto __main(int argc, char** argv) -> int
           SARA_DEBUG << "[GOOD] gradient ori peaks[" << c << "]\n"
                      << Eigen::Map<const Eigen::ArrayXf>(
                             gradient_peaks_refined[c].data(),
-                            gradient_peaks_refined[c].size())  * 360.f / N
+                            gradient_peaks_refined[c].size()) *
+                            360.f / N
                      << std::endl;
           SARA_DEBUG << "[GOOD] zero crossings[" << c << "]\n"
                      << Eigen::Map<const Eigen::ArrayXf>(
                             zero_crossings[c].data(),
-                            zero_crossings[c].size()) * 180.f / static_cast<float>(M_PI)
+                            zero_crossings[c].size()) *
+                            180.f / static_cast<float>(M_PI)
                      << std::endl;
         }
         else
@@ -545,12 +551,14 @@ auto __main(int argc, char** argv) -> int
           SARA_DEBUG << "[BAD] gradient ori peaks[" << c << "]\n"
                      << Eigen::Map<const Eigen::ArrayXf>(
                             gradient_peaks_refined[c].data(),
-                            gradient_peaks_refined[c].size()) * 360.f / N
+                            gradient_peaks_refined[c].size()) *
+                            360.f / N
                      << std::endl;
           SARA_DEBUG << "[BAD] zero crossings[" << c << "]\n"
                      << Eigen::Map<const Eigen::ArrayXf>(
                             zero_crossings[c].data(),
-                            zero_crossings[c].size()) * 180.f / static_cast<float>(M_PI)
+                            zero_crossings[c].size()) *
+                            180.f / static_cast<float>(M_PI)
                      << std::endl;
         }
 #endif
