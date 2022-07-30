@@ -13,9 +13,9 @@
 
 #include <DO/Sara/Core/TicToc.hpp>
 
-#include <DO/Sara/ImageProcessing/EdgeDetection.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
+#include <DO/Sara/ImageProcessing/EdgeDetection.hpp>
 
 #include <DO/Sara/Geometry/Algorithms/Polyline.hpp>
 #include <DO/Sara/Geometry/Algorithms/RamerDouglasPeucker.hpp>
@@ -46,9 +46,8 @@ namespace DO::Sara {
     toc("Thresholding");
 
     pipeline.edges = perform_hysteresis_and_grouping(  //
-    // pipeline.edges = perform_parallel_grouping(  //
-        pipeline.edge_map,                       //
-        pipeline.gradient_orientation,           //
+        pipeline.edge_map,                             //
+        pipeline.gradient_orientation,                 //
         parameters.angular_threshold);
 
     tic();
