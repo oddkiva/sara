@@ -26,7 +26,7 @@ auto FivePointAlgorithmBase::extract_null_space(
     const Matrix<double, 3, 5>& p_left,
     const Matrix<double, 3, 5>& p_right) const -> Matrix<double, 9, 4>
 {
-  Matrix<double, 5, 9> A;
+  auto A = Matrix<double, 5, 9>{};
 
   for (int i = 0; i < 5; ++i)
     A.row(i) <<                                     //
@@ -35,7 +35,8 @@ auto FivePointAlgorithmBase::extract_null_space(
         p_right(2, i) * p_left.col(i).transpose();
 
   // The essential matrix lives in right null space of A.
-  const auto K = A.bdcSvd(Eigen::ComputeFullV).matrixV().rightCols(4);
+  const Matrix<double, 9, 4> K =
+      A.bdcSvd(Eigen::ComputeFullV).matrixV().rightCols(4);
   return K;
 }
 
