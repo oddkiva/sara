@@ -77,11 +77,10 @@ function build_library()
 
   # Use latest Qt version instead of the system Qt.
   #
-  # TODO: migrate to Qt6.
-  # if [ "${platform_name}" == "Linux" ]; then
-  #   cmake_options+="-DQt5_DIR=${HOME}/opt/Qt-5.15.0-amd64/lib/cmake/Qt5 "
-  if [ "${platform_name}" == "Darwin" ]; then
-    cmake_options+="-DSARA_USE_QT6:BOOL=ON "
+  cmake_options+="-DSARA_USE_QT6:BOOL=ON "
+  if [ "${platform_name}" == "Linux" ]; then
+    my_cmake_prefix_paths="/usr/local/Qt-6.3.1"
+  elif [ "${platform_name}" == "Darwin" ]; then
     cmake_options+="-DQt6_DIR=$(brew --prefix qt)/lib/cmake/Qt6 "
   fi
 
@@ -107,9 +106,8 @@ function build_library()
   # Compile Halide code.
   cmake_options+="-DSARA_USE_HALIDE:BOOL=ON "
   if [ "${platform_name}" == "Linux" ]; then
-    cmake_options+="-DCMAKE_PREFIX_PATH=$HOME/opt/Halide-14.0.0-x86-64-linux "
-  fi
-  if [ "${platform_name}" == "Darwin" ]; then
+    my_cmake_prefix_paths="${my_cmake_prefix_paths};$HOME/opt/Halide-14.0.0-x86-64-linux"
+  elif [ "${platform_name}" == "Darwin" ]; then
     cmake_options+="-DLLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm "
   fi
 
@@ -117,6 +115,8 @@ function build_library()
   if [ -d "${HOME}/opt/Video_Codec_SDK_11.0.10" ]; then
     cmake_options+="-DNvidiaVideoCodec_ROOT=${HOME}/opt/Video_Codec_SDK_11.0.10 "
   fi
+
+  cmake_options+="-DCMAKE_PREFIX_PATH=${my_cmake_prefix_paths} "
 
   # Use OpenCV tools
   cmake_options+="-DSARA_USE_OPENCV:BOOL=ON"
