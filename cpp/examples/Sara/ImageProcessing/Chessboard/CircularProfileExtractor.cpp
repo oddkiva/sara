@@ -29,10 +29,10 @@ auto CircularProfileExtractor::operator()(const sara::ImageView<float>& image,
 {
   auto intensity_profile = Eigen::ArrayXf(num_circle_sample_points);
 
-  SARA_CHECK(circle_radius);
   for (auto n = 0; n < num_circle_sample_points; ++n)
   {
-    // Use Abeles' spoke idea.
+    // Use Abeles' spoke pattern, which really helps to filter out non
+    // chessboard x-corners.
     auto mean_intensity = 0.f;
     for (auto r = 0; r < static_cast<int>(circle_radius); ++r)
     {

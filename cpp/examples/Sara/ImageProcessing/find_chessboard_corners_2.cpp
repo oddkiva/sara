@@ -100,6 +100,9 @@ auto __main(int argc, char** argv) -> int
   const auto video_file = std::string{argv[1]};
 #endif
 
+  const auto do_erosion =
+      argc < 3 ? true : static_cast<bool>(std::stoi(argv[2]));
+
 
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
@@ -134,13 +137,14 @@ auto __main(int argc, char** argv) -> int
                                       segmentation_map);
     sara::toc("Adaptive thresholding");
 
-    sara::tic();
+    if (do_erosion)
     {
+      sara::tic();
       auto segmentation_map_eroded = segmentation_map;
       sara::binary_erode_3x3(segmentation_map, segmentation_map_eroded);
       segmentation_map.swap(segmentation_map_eroded);
+      sara::toc("Erosion 3x3");
     }
-    sara::toc("Erosion 3x3");
 
     sara::tic();
     auto segmentation_map_inverted =
@@ -160,7 +164,8 @@ auto __main(int argc, char** argv) -> int
     //   auto curve = std::vector<Eigen::Vector2d>{};
     //   std::transform(border.curve.begin(), border.curve.end(),
     //                  std::back_inserter(curve),
-    //                  [](const auto& p) { return p.template cast<double>(); });
+    //                  [](const auto& p) { return p.template cast<double>();
+    //                  });
     //   curve = sara::ramer_douglas_peucker(curve, 2.);
     //   border_curves_d[border_id] = curve;
     // }
@@ -173,7 +178,7 @@ auto __main(int argc, char** argv) -> int
       const auto& curve = b.second.curve;
       if (b.second.type == sara::Border::Type::HoleBorder)
         continue;
-      if (curve.size() < 50 * 4)
+      if (curve.size() < 5 * 4)
         continue;
       const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
       for (const auto& p : curve)

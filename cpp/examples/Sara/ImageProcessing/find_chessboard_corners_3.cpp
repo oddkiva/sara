@@ -158,10 +158,19 @@ auto __main(int argc, char** argv) -> int
                                     ? false  //
                                     : static_cast<bool>(std::stoi(argv[9]));
 
-    static const auto image_border = static_cast<int>(std::round(4 * sigma_I));
-    static const auto& radius = image_border;
+    // 4 is kind of a magic number, but the idea is that we assume that
+    // x-corners on the chessboard are separated by 10 pixels at the minimum.
+    //
+    // This is important when we analyze the circular intensity profile for each
+    // corner because this will decide whether we filter a corner out.
+    const auto image_border = argc < 11
+                                  ? static_cast<int>(std::round(4 * sigma_I))
+                                  : std::stoi(argv[10]);
+    const auto& radius = image_border;
 
     // Circular profile extractor.
+    //
+    // This is simple and works really well.
     auto profile_extractor = CircularProfileExtractor{};
     profile_extractor.circle_radius = radius;
 
@@ -233,7 +242,7 @@ auto __main(int argc, char** argv) -> int
       auto corners = std::vector<Corner<float>>{};
       std::transform(corners_int.begin(), corners_int.end(),
                      std::back_inserter(corners),
-                     [&grad_x, &grad_y](const Corner<int>& c) -> Corner<float> {
+                     [&grad_x, &grad_y, radius](const Corner<int>& c) -> Corner<float> {
                        const auto p = sara::refine_junction_location_unsafe(
                            grad_x, grad_y, c.coords, radius);
                        return {p, c.score};
@@ -646,7 +655,7 @@ auto __main(int argc, char** argv) -> int
       };
 
       for (const auto& square : white_squares)
-        draw_square(square, sara::Red8, 6);
+        draw_square(square, sara::Red8, 5);
 
       for (const auto& square : black_squares)
         draw_square(square, sara::Green8, 3);
