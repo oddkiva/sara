@@ -29,24 +29,21 @@ auto CircularProfileExtractor::operator()(const sara::ImageView<float>& image,
 {
   auto intensity_profile = Eigen::ArrayXf(num_circle_sample_points);
 
+  SARA_CHECK(circle_radius);
   for (auto n = 0; n < num_circle_sample_points; ++n)
   {
-    const Eigen::Vector2d pn = center + circle_radius * circle_sample_points[n];
-
+    // Use Abeles' spoke idea.
+    auto mean_intensity = 0.f;
+    for (auto r = 0; r < static_cast<int>(circle_radius); ++r)
+    {
+      const Eigen::Vector2d pn = center +  //
+                                 circle_radius * circle_sample_points[n];
+      mean_intensity += static_cast<float>(DO::Sara::interpolate(image, pn));
+    }
+    mean_intensity /= static_cast<int>(circle_radius);
     // Get the interpolated intensity value.
-    intensity_profile(n) = static_cast<float>(DO::Sara::interpolate(image, pn));
+    intensity_profile(n) = mean_intensity;
   }
-
-  // // Collect all the intensity values in the disk for more robustness.
-  // const auto image_patch =
-  //     sara::safe_crop(image, center.cast<int>(), circle_radius)
-  //         .compute<sara::Gaussian>(1.6f);
-  // sara::display(image_patch);
-  // sara::get_key();
-
-  // // Normalize the intensities.
-  // const auto min_intensity = image_patch.flat_array().minCoeff();
-  // const auto max_intensity = image_patch.flat_array().maxCoeff();
 
   // Normalize the intensities.
   const auto min_intensity = intensity_profile.minCoeff();

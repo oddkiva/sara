@@ -49,7 +49,33 @@ inline constexpr long double operator"" _percent(long double x)
 }
 
 //  Seed corner selection.
-inline auto is_good_x_corner(  //
+inline auto is_good_x_corner(const std::vector<float>& zero_crossings) -> bool
+{
+  const auto four_zero_crossings = zero_crossings.size() == 4;
+  return four_zero_crossings;
+#if 0
+  if (!four_zero_crossings)
+    return false;
+
+  auto dirs = Eigen::Matrix<float, 2, 4>{};
+  for (auto i = 0; i < 4; ++i)
+    dirs.col(i) = dir(zero_crossings[i]);
+
+  // The 4 peaks are due to 2 lines crossing each other.
+  using sara::operator""_deg;
+  static constexpr auto angle_thres = static_cast<float>((160._deg).value);
+
+  const auto two_crossing_lines =
+      dirs.col(0).dot(dirs.col(2)) < std::cos(angle_thres) &&
+      dirs.col(1).dot(dirs.col(3)) < std::cos(angle_thres);
+
+  return two_crossing_lines;
+#endif
+}
+
+
+//  Seed corner selection.
+inline auto is_seed_corner(  //
     const std::unordered_set<int>& adjacent_edges,
     const std::vector<float>& gradient_peaks,  //
     const std::vector<float>& zero_crossings,  //
@@ -132,7 +158,7 @@ auto __main(int argc, char** argv) -> int
                                     ? false  //
                                     : static_cast<bool>(std::stoi(argv[9]));
 
-    static const auto image_border = static_cast<int>(std::round(2 * sigma_I));
+    static const auto image_border = static_cast<int>(std::round(4 * sigma_I));
     static const auto& radius = image_border;
 
     // Circular profile extractor.
@@ -234,7 +260,29 @@ auto __main(int argc, char** argv) -> int
         zero_crossings[c] = localize_zero_crossings(
             profiles[c], profile_extractor.num_circle_sample_points);
       }
-      sara::toc("Circular profile");
+      sara::toc("Circular intensity profile");
+
+      sara::tic();
+      {
+        auto corners_filtered = std::vector<Corner<float>>{};
+        auto profiles_filtered = std::vector<Eigen::ArrayXf>{};
+        auto zero_crossings_filtered = std::vector<std::vector<float>>{};
+
+        for (auto c = 0u; c < corners.size(); ++c)
+        {
+          if (is_good_x_corner(zero_crossings[c]))
+          {
+            corners_filtered.emplace_back(corners[c]);
+            profiles_filtered.emplace_back(profiles[c]);
+            zero_crossings_filtered.emplace_back(zero_crossings[c]);
+          }
+        }
+
+        corners_filtered.swap(corners);
+        profiles_filtered.swap(profiles);
+        zero_crossings_filtered.swap(zero_crossings);
+      }
+      sara::toc("Filtering from intensity profile");
 
       sara::tic();
       const auto& grad_norm = ed.pipeline.gradient_magnitude;
@@ -287,44 +335,6 @@ auto __main(int argc, char** argv) -> int
           ed.pipeline.edges_as_list,                    //
           grad_x, grad_y);
       sara::toc("Edge Shape Stats");
-
-
-#ifdef LETS_UNDERSTAND_THE_EDGES
-      auto edge_map_labeled =
-          sara::Image<sara::Rgb8>{ed.pipeline.edge_map.sizes()};
-      edge_map_labeled.flat_array().fill(sara::Black8);
-      for (auto edge_id = 0u; edge_id < ed.pipeline.edges_as_list.size();
-           ++edge_id)
-      {
-        const auto& points = ed.pipeline.edges_as_list[edge_id];
-        const auto& s = points.front();
-        const auto& e = points.back();
-
-        // Ignore weak edges, they make the edge map less interpretable.
-        if (ed.pipeline.edge_map(s) == 127 || ed.pipeline.edge_map(e) == 127)
-          continue;
-
-        const auto& curve = ed.pipeline.edges_simplified[edge_id];
-        if (curve.size() < 2 || sara::length(curve) < 10 / downscale_factor)
-          continue;
-
-        // Edge gradient distribution similar to cornerness measure.
-        const auto& grad_cov = edge_grad_covs[edge_id];
-        const auto grad_dist_param = 0.2f;
-        const auto cornerness =
-            grad_cov.determinant() -  //
-            grad_dist_param * sara::square(grad_cov.trace());
-        if (cornerness > 0)
-          continue;
-
-        const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
-        for (const auto& p : points)
-          edge_map_labeled(p) = color;
-      }
-      sara::display(sara::upscale(edge_map_labeled, downscale_factor));
-      sara::get_key();
-      continue;
-#endif
 
 
       sara::tic();
@@ -435,8 +445,8 @@ auto __main(int argc, char** argv) -> int
       sara::tic();
       auto best_corners = std::unordered_set<int>{};
       for (auto c = 0; c < num_corners; ++c)
-        if (is_good_x_corner(edges_adjacent_to_corner[c],
-                             gradient_peaks_refined[c], zero_crossings[c], N))
+        if (is_seed_corner(edges_adjacent_to_corner[c],
+                           gradient_peaks_refined[c], zero_crossings[c], N))
           best_corners.insert(c);
       sara::toc("Best corner selection");
 
@@ -520,10 +530,10 @@ auto __main(int argc, char** argv) -> int
       for (auto c = 0; c < num_corners; ++c)
       {
         const auto& p = corners[c];
-        const auto good = is_good_x_corner(edges_adjacent_to_corner[c],  //
-                                           gradient_peaks_refined[c],    //
-                                           zero_crossings[c],            //
-                                           N);
+        const auto good = is_seed_corner(edges_adjacent_to_corner[c],  //
+                                         gradient_peaks_refined[c],    //
+                                         zero_crossings[c],            //
+                                         N);
 
         // Remove noisy corners to understand better the behaviour of the
         // algorithm.
@@ -599,8 +609,8 @@ auto __main(int argc, char** argv) -> int
         sara::draw_circle(
             display,
             static_cast<int>(std::round(downscale_factor * p.coords.x())),
-            static_cast<int>(std::round(downscale_factor * p.coords.y())), 4,
-            good ? sara::Red8 : sara::Cyan8, 2);
+            static_cast<int>(std::round(downscale_factor * p.coords.y())),
+            radius, good ? sara::Red8 : sara::Cyan8, 2);
 
 #ifdef INVESTIGATE_X_CORNER_HISTOGRAMS
         sara::display(display);
