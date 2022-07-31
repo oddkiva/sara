@@ -655,10 +655,10 @@ auto __main(int argc, char** argv) -> int
       };
 
       for (const auto& square : white_squares)
-        draw_square(square, sara::Red8, 4);
+        draw_square(square, sara::Red8, 3);
 
       for (const auto& square : black_squares)
-        draw_square(square, sara::Green8, 3);
+        draw_square(square, sara::Green8, 2);
 
       sara::display(display);
       sara::toc("Display");
