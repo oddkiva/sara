@@ -619,7 +619,7 @@ auto __main(int argc, char** argv) -> int
             display,
             static_cast<int>(std::round(downscale_factor * p.coords.x())),
             static_cast<int>(std::round(downscale_factor * p.coords.y())),
-            radius, good ? sara::Red8 : sara::Cyan8, 2);
+            radius * downscale_factor, good ? sara::Red8 : sara::Cyan8, 2);
 
 #ifdef INVESTIGATE_X_CORNER_HISTOGRAMS
         sara::display(display);
@@ -655,7 +655,7 @@ auto __main(int argc, char** argv) -> int
       };
 
       for (const auto& square : white_squares)
-        draw_square(square, sara::Red8, 5);
+        draw_square(square, sara::Red8, 4);
 
       for (const auto& square : black_squares)
         draw_square(square, sara::Green8, 3);
