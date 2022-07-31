@@ -1,7 +1,5 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-# add_subdirectory(BoostToXCTest)
-
 add_subdirectory(Sara)
 
 if (CMAKE_CUDA_COMPILER)
