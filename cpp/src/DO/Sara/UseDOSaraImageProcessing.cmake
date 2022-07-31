@@ -6,14 +6,15 @@ if(SARA_USE_FROM_SOURCE)
     sara_create_common_variables("ImageProcessing")
     sara_generate_library("ImageProcessing")
 
+    target_link_libraries(DO_Sara_ImageProcessing PRIVATE DO::Sara::Core)
+
     if(SARA_USE_HALIDE)
       target_compile_definitions(DO_Sara_ImageProcessing
                                  PRIVATE DO_SARA_USE_HALIDE)
       target_link_libraries(
         DO_Sara_ImageProcessing
         PUBLIC ${CMAKE_DL_LIBS}
-        PRIVATE DO::Sara::Core
-                Halide::Halide
+        PRIVATE Halide::Halide
                 # Fast color conversion
                 shakti_rgb8u_to_gray32f_cpu
                 shakti_bgra8u_to_gray32f_cpu
