@@ -163,9 +163,9 @@ auto __main(int argc, char** argv) -> int
     //
     // This is important when we analyze the circular intensity profile for each
     // corner because this will decide whether we filter a corner out.
-    const auto image_border = argc < 11
-                                  ? static_cast<int>(std::round(4 * sigma_I))
-                                  : std::stoi(argv[10]);
+    const auto image_border =
+        argc < 11 ? static_cast<int>(std::round(4 * sigma_I / downscale_factor))
+                  : std::stoi(argv[10]);
     const auto& radius = image_border;
 
     // Circular profile extractor.
@@ -240,13 +240,13 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       auto corners = std::vector<Corner<float>>{};
-      std::transform(corners_int.begin(), corners_int.end(),
-                     std::back_inserter(corners),
-                     [&grad_x, &grad_y, radius](const Corner<int>& c) -> Corner<float> {
-                       const auto p = sara::refine_junction_location_unsafe(
-                           grad_x, grad_y, c.coords, radius);
-                       return {p, c.score};
-                     });
+      std::transform(
+          corners_int.begin(), corners_int.end(), std::back_inserter(corners),
+          [&grad_x, &grad_y, radius](const Corner<int>& c) -> Corner<float> {
+            const auto p = sara::refine_junction_location_unsafe(
+                grad_x, grad_y, c.coords, radius);
+            return {p, c.score};
+          });
       sara::nms(corners, cornerness.sizes(), radius);
       sara::toc("Corner refinement");
 
@@ -376,7 +376,7 @@ auto __main(int argc, char** argv) -> int
         // Ignore small edges.
         const auto& curve_simplified = ed.pipeline.edges_simplified[edge_id];
         if (curve_simplified.size() < 2 ||
-            sara::length(curve_simplified) < 10 / downscale_factor)
+            sara::length(curve_simplified) < radius)
           continue;
 
         // Edge gradient distribution similar to cornerness measure.

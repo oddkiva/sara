@@ -21,7 +21,10 @@ namespace DO::Sara {
       _is_image = true;
     }
     else
+    {
+      // FFmpeg can also decode jpeg images =).
       VideoStream::open(path);
+    }
   }
 
   auto ImageOrVideoReader::read() -> bool
