@@ -309,11 +309,13 @@ namespace DO::Sara {
 
         // Decompress the video frame.
         _got_frame = decode(_pkt);
+        // N.B.: always unreference the packet after decoding even if the frame
+        // is not complete.
+        av_packet_unref(_pkt);
 
         if (_got_frame)
         {
           VIDEO_STREAM_TIC
-          av_packet_unref(_pkt);
 
           // Convert to RGB24 pixel format.
           sws_scale(_sws_context, _picture->data, _picture->linesize, 0,
