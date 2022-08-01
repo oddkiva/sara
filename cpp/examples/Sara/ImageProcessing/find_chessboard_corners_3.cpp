@@ -471,8 +471,8 @@ auto __main(int argc, char** argv) -> int
       for (const auto& c : best_corners)
       {
         const auto square = reconstruct_black_square_from_corner(
-            c, corners, edge_grad_means, edges_adjacent_to_corner,
-            corners_adjacent_to_edge);
+            c, corners, edge_grad_means, edge_grad_covs,
+            edges_adjacent_to_corner, corners_adjacent_to_edge);
         if (square == std::nullopt)
           continue;
         black_squares.insert(*square);
@@ -484,8 +484,8 @@ auto __main(int argc, char** argv) -> int
       for (const auto& c : best_corners)
       {
         const auto square = reconstruct_white_square_from_corner(
-            c, corners, edge_grad_means, edges_adjacent_to_corner,
-            corners_adjacent_to_edge);
+            c, corners, edge_grad_means, edge_grad_covs,
+            edges_adjacent_to_corner, corners_adjacent_to_edge);
         if (square == std::nullopt)
           continue;
 

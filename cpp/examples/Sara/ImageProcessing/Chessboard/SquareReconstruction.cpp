@@ -4,7 +4,7 @@
 static auto find_next_square_vertex(  //
     int edge, int current_vertex,     //
     const std::vector<Corner<float>>& corners,
-    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<Eigen::Vector2f>& edge_grad_mean,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge) -> int
 {
   struct Vertex
@@ -34,7 +34,7 @@ static auto find_next_square_vertex(  //
     const auto& b = corners[v.id].coords;
 
     auto rotation = Eigen::Matrix2f{};
-    rotation.col(0) = edge_grads[edge].normalized();
+    rotation.col(0) = edge_grad_mean[edge].normalized();
     rotation.col(1) = (b - a).normalized();
     if (rotation.determinant() > 0.8f)
       return v.id;
@@ -47,7 +47,8 @@ auto reconstruct_black_square_from_corner(
     int c,                //
     int start_direction,  //
     const std::vector<Corner<float>>& corners,
-    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<Eigen::Vector2f>& edge_grad_mean,
+    const std::vector<Eigen::Matrix2f>& edge_grad_cov,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::optional<std::array<int, 4>>
@@ -60,17 +61,30 @@ auto reconstruct_black_square_from_corner(
 
   // There is always be 4 edges from the seed corner, otherwise it's a bug.
   if (edges_adjacent_to_corner[c].size() != 4)
-    throw std::runtime_error{"There must be exactly 4 adjacent edges from the seed corner!"};
+    throw std::runtime_error{
+        "There must be exactly 4 adjacent edges from the seed corner!"};
   auto edge_it = edges_adjacent_to_corner[square[0]].begin();
   for (auto it = 0; it < start_direction; ++it)
     ++edge_it;
   auto edge = *edge_it;
 
+  // The edge must be straight otherwise it's over.
+  {
+    const auto& grad_cov = edge_grad_cov[edge];
+    static constexpr auto kappa = 0.2f;
+    using DO::Sara::square;
+    const auto cornerness = grad_cov.determinant() -  //
+                            kappa * square(grad_cov.trace());
+    if (cornerness > 0)
+      return std::nullopt;
+  }
+
+  // Pursue the square reconstruction.
   for (auto i = 1; i < 4; ++i)
   {
     square[i] = find_next_square_vertex(edge, square[i - 1],  //
-                                            corners, edge_grads,  //
-                                            corners_adjacent_to_edge);
+                                        corners, edge_grad_mean,
+                                        corners_adjacent_to_edge);
     if (square[i] == -1)
       return std::nullopt;
 
@@ -79,16 +93,25 @@ auto reconstruct_black_square_from_corner(
     const auto& edges = edges_adjacent_to_corner[square[i]];
     auto next_edge = -1;
     auto det = -1.f;
-    for (const auto& e: edges)
+    for (const auto& e : edges)
     {
       if (e == edge)
         continue;
 
+      // The edge must be straight.
+      const auto& grad_cov = edge_grad_cov[edge];
+      static constexpr auto kappa = 0.05f;
+      using DO::Sara::square;
+      const auto cornerness = grad_cov.determinant() -  //
+                              kappa * square(grad_cov.trace());
+      if (cornerness > 0)
+        continue;
+
       auto rotation = Eigen::Matrix2f{};
-      rotation.col(0) = edge_grads[edge].normalized();
-      rotation.col(1) = edge_grads[e].normalized();
+      rotation.col(0) = edge_grad_mean[edge].normalized();
+      rotation.col(1) = edge_grad_mean[e].normalized();
       const auto d = rotation.determinant();
-      if (d > det && d > 0) // Important check the sign.
+      if (d > det && d > 0)  // Important check the sign.
       {
         next_edge = e;
         det = d;
@@ -113,7 +136,8 @@ auto reconstruct_black_square_from_corner(
 
 auto reconstruct_black_square_from_corner(
     const int c, const std::vector<Corner<float>>& corners,
-    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<Eigen::Vector2f>& edge_grad_mean,
+    const std::vector<Eigen::Matrix2f>& edge_grad_cov,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::optional<std::array<int, 4>>
@@ -121,7 +145,8 @@ auto reconstruct_black_square_from_corner(
   auto square = std::optional<std::array<int, 4>>{};
   for (auto d = 0; d < 4; ++d)
   {
-    square = reconstruct_black_square_from_corner(c, d, corners, edge_grads,
+    square = reconstruct_black_square_from_corner(c, d, corners,  //
+                                                  edge_grad_mean, edge_grad_cov,
                                                   edges_adjacent_to_corner,
                                                   corners_adjacent_to_edge);
     if (square != std::nullopt)
@@ -135,7 +160,8 @@ auto reconstruct_white_square_from_corner(
     int c,                //
     int start_direction,  //
     const std::vector<Corner<float>>& corners,
-    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<Eigen::Vector2f>& edge_grad_mean,
+    const std::vector<Eigen::Matrix2f>& edge_grad_cov,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::optional<std::array<int, 4>>
@@ -148,16 +174,30 @@ auto reconstruct_white_square_from_corner(
 
   // There is always be 4 edges from the seed corner, otherwise it's a bug.
   if (edges_adjacent_to_corner[c].size() != 4)
-    throw std::runtime_error{"There must be exactly 4 adjacent edges from the seed corner!"};
+    throw std::runtime_error{
+        "There must be exactly 4 adjacent edges from the seed corner!"};
   auto edge_it = edges_adjacent_to_corner[square[0]].begin();
   for (auto it = 0; it < start_direction; ++it)
     ++edge_it;
   auto edge = *edge_it;
 
+  // The edge must be straight otherwise it's over.
+  {
+    const auto& grad_cov = edge_grad_cov[edge];
+    static constexpr auto kappa = 0.05f;
+    using DO::Sara::square;
+    const auto cornerness = grad_cov.determinant() -  //
+                            kappa * square(grad_cov.trace());
+    if (cornerness > 0)
+      return std::nullopt;
+  }
+
+  // Pursue the square reconstruction.
   for (auto i = 1; i < 4; ++i)
   {
     square[i] = find_next_square_vertex(edge, square[i - 1],  //
-                                        corners, edge_grads,  //
+                                        corners,              //
+                                        edge_grad_mean,       //
                                         corners_adjacent_to_edge);
     if (square[i] == -1)
       return std::nullopt;
@@ -166,15 +206,25 @@ auto reconstruct_white_square_from_corner(
     const auto& edges = edges_adjacent_to_corner[square[i]];
     auto next_edge = -1;
     auto det = 1.f;
-    for (const auto& e: edges)
+    for (const auto& e : edges)
     {
       if (e == edge)
         continue;
+
+      // The edge must be straight.
+      const auto& grad_cov = edge_grad_cov[edge];
+      static constexpr auto kappa = 0.05f;
+      using DO::Sara::square;
+      const auto cornerness = grad_cov.determinant() -  //
+                              kappa * square(grad_cov.trace());
+      if (cornerness > 0)
+        continue;
+
       auto rotation = Eigen::Matrix2f{};
-      rotation.col(0) = edge_grads[edge].normalized();
-      rotation.col(1) = edge_grads[e].normalized();
+      rotation.col(0) = edge_grad_mean[edge].normalized();
+      rotation.col(1) = edge_grad_mean[e].normalized();
       const auto d = rotation.determinant();
-      if (d < det && d < 0) // Important check the sign.
+      if (d < det && d < 0)  // Important check the sign.
       {
         next_edge = e;
         det = d;
@@ -199,7 +249,8 @@ auto reconstruct_white_square_from_corner(
 
 auto reconstruct_white_square_from_corner(
     const int c, const std::vector<Corner<float>>& corners,
-    const std::vector<Eigen::Vector2f>& edge_grads,
+    const std::vector<Eigen::Vector2f>& edge_grad_mean,
+    const std::vector<Eigen::Matrix2f>& edge_grad_cov,
     const std::vector<std::unordered_set<int>>& edges_adjacent_to_corner,
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::optional<std::array<int, 4>>
@@ -207,9 +258,10 @@ auto reconstruct_white_square_from_corner(
   auto square = std::optional<std::array<int, 4>>{};
   for (auto d = 0; d < 4; ++d)
   {
-    square = reconstruct_white_square_from_corner(c, d, corners, edge_grads,
-                                                  edges_adjacent_to_corner,
-                                                  corners_adjacent_to_edge);
+    square = reconstruct_white_square_from_corner(
+        c, d, corners,                  //
+        edge_grad_mean, edge_grad_cov,  //
+        edges_adjacent_to_corner, corners_adjacent_to_edge);
     if (square != std::nullopt)
       return square;
   }
