@@ -47,8 +47,6 @@ namespace DO::Sara {
                          "Error: failed to release buffer in device memory! %s",
                          get_error_string(err))
                   << std::endl;
-      else
-        std::cout << "Released device buffer..." << std::endl;
     }
 
     inline operator cl_mem&()

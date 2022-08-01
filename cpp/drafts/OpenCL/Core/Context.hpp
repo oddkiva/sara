@@ -49,8 +49,6 @@ namespace DO::Sara {
         std::cerr << format("Error: failed to release OpenCL context! %s\n",
                             get_error_string(err))
                   << std::endl;
-      else
-        std::cout << "Released context" << std::endl;
     }
 
     inline operator cl_context() const
