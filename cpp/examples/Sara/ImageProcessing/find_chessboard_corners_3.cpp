@@ -636,7 +636,7 @@ auto __main(int argc, char** argv) -> int
           const Eigen::Vector2f a = corners[line[i]].coords * downscale_factor;
           const Eigen::Vector2f b =
               corners[line[i + 1]].coords * downscale_factor;
-          sara::draw_line(display, a, b, sara::Cyan8, 1);
+          sara::draw_line(display, a, b, sara::Cyan8, 2);
         }
       }
 
