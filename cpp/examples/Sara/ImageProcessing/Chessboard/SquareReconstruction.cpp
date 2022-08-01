@@ -1,46 +1,6 @@
 #include "SquareReconstruction.hpp"
 
 
-static const auto dirs = std::array{
-    Direction::Up,
-    Direction::Right,
-    Direction::Down,
-    Direction::Left,
-};
-
-
-auto direction_type(const float angle) -> Direction
-{
-  static constexpr auto pi = static_cast<float>(M_PI);
-  static constexpr auto pi_over_4 = static_cast<float>(M_PI / 4.);
-  static constexpr auto three_pi_over_4 = static_cast<float>(3. * M_PI / 4.);
-  static constexpr auto five_pi_over_4 = static_cast<float>(5. * M_PI / 4.);
-  static constexpr auto seven_pi_over_4 = static_cast<float>(7. * M_PI / 4.);
-  if (-pi <= angle && angle < -three_pi_over_4)
-    return Direction::Left;
-  if (-three_pi_over_4 <= angle && angle < -pi_over_4)
-    return Direction::Up;
-  if (-pi_over_4 <= angle && angle < pi_over_4)
-    return Direction::Right;
-  if (pi_over_4 <= angle && angle < three_pi_over_4)
-    return Direction::Down;
-  if (three_pi_over_4 <= angle && angle < five_pi_over_4)
-    return Direction::Left;
-  if (five_pi_over_4 <= angle && angle < seven_pi_over_4)
-    return Direction::Up;
-  else  // seven_pi_over_4 -> two_pi
-    return Direction::Right;
-}
-
-static auto find_edge(const std::unordered_set<int>& edges, Direction what,
-                      const std::vector<Eigen::Vector2f>& edge_grads)
-{
-  for (const auto& e : edges)
-    if (direction_type(edge_grads[e]) == what)
-      return e;
-  return -1;
-};
-
 static auto find_next_square_vertex(  //
     int edge, int current_vertex,     //
     const std::vector<Corner<float>>& corners,
@@ -95,21 +55,45 @@ auto reconstruct_black_square_from_corner(
   auto square = std::array<int, 4>{};
   std::fill(square.begin(), square.end(), -1);
 
+  // Initialize the square with the seed corner.
   square[0] = c;
+
+  // There is always be 4 edges from the seed corner, otherwise it's a bug.
+  if (edges_adjacent_to_corner[c].size() != 4)
+    throw std::runtime_error{"There must be exactly 4 adjacent edges from the seed corner!"};
+  auto edge_it = edges_adjacent_to_corner[square[0]].begin();
+  for (auto it = 0; it < start_direction; ++it)
+    ++edge_it;
+  auto edge = *edge_it;
 
   for (auto i = 1; i < 4; ++i)
   {
-    const auto dir = dirs[(i - 1 + start_direction) % 4];
-    const auto edge =
-        find_edge(edges_adjacent_to_corner[square[i - 1]], dir, edge_grads);
-    if (edge == -1)
-      return std::nullopt;
-
-    square[i % 4] = find_next_square_vertex(edge, square[i - 1],  //
+    square[i] = find_next_square_vertex(edge, square[i - 1],  //
                                             corners, edge_grads,  //
                                             corners_adjacent_to_edge);
-    if (square[i % 4] == -1)
+    if (square[i] == -1)
       return std::nullopt;
+
+    // Choose the next edge: the next edge is the one that forms the rightmost
+    // angle with the previous edge.
+    const auto& edges = edges_adjacent_to_corner[square[i]];
+    auto next_edge = -1;
+    auto det = -1.f;
+    for (const auto& e: edges)
+    {
+      auto rotation = Eigen::Matrix2f{};
+      rotation.col(0) = edge_grads[edge].normalized();
+      rotation.col(1) = edge_grads[e].normalized();
+      const auto d = rotation.determinant();
+      if (d > det && d > 0) // Important check the sign.
+      {
+        next_edge = e;
+        det = d;
+      }
+    }
+    if (det <= 0)
+      return std::nullopt;
+    edge = next_edge;
   }
 
   // I want unambiguously good squares.
@@ -153,31 +137,47 @@ auto reconstruct_white_square_from_corner(
     const std::vector<std::unordered_set<int>>& corners_adjacent_to_edge)
     -> std::optional<std::array<int, 4>>
 {
-  static const auto dirs = std::array{
-      Direction::Up,
-      Direction::Right,
-      Direction::Down,
-      Direction::Left,
-  };
-
   auto square = std::array<int, 4>{};
   std::fill(square.begin(), square.end(), -1);
 
+  // Initialize the square with the seed corner.
   square[0] = c;
+
+  // There is always be 4 edges from the seed corner, otherwise it's a bug.
+  if (edges_adjacent_to_corner[c].size() != 4)
+    throw std::runtime_error{"There must be exactly 4 adjacent edges from the seed corner!"};
+  auto edge_it = edges_adjacent_to_corner[square[0]].begin();
+  for (auto it = 0; it < start_direction; ++it)
+    ++edge_it;
+  auto edge = *edge_it;
 
   for (auto i = 1; i < 4; ++i)
   {
-    const auto dir = dirs[((4 - i + 1) + start_direction) % 4];
-    const auto edge =
-        find_edge(edges_adjacent_to_corner[square[i - 1]], dir, edge_grads);
-    if (edge == -1)
+    square[i] = find_next_square_vertex(edge, square[i - 1],  //
+                                        corners, edge_grads,  //
+                                        corners_adjacent_to_edge);
+    if (square[i] == -1)
       return std::nullopt;
 
-    square[i % 4] = find_next_square_vertex(edge, square[i - 1],  //
-                                            corners, edge_grads,  //
-                                            corners_adjacent_to_edge);
-    if (square[i % 4] == -1)
+    // The next edge is the one that form the rightmost angle.
+    const auto& edges = edges_adjacent_to_corner[square[i]];
+    auto next_edge = -1;
+    auto det = 1.f;
+    for (const auto& e: edges)
+    {
+      auto rotation = Eigen::Matrix2f{};
+      rotation.col(0) = edge_grads[edge].normalized();
+      rotation.col(1) = edge_grads[e].normalized();
+      const auto d = rotation.determinant();
+      if (d < det && d < 0) // Important check the sign.
+      {
+        next_edge = e;
+        det = d;
+      }
+    }
+    if (det >= 0)
       return std::nullopt;
+    edge = next_edge;
   }
 
   // I want unambiguously good squares.
