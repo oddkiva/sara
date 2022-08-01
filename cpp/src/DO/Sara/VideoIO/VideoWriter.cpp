@@ -663,6 +663,9 @@ namespace DO::Sara {
 
   auto VideoWriter::finish() -> void
   {
+    if (_options)
+      av_dict_free(&_options);
+
     // Write the trailer, if any. The trailer must be written before you close
     // the CodecContexts open when you wrote the header; otherwise
     // av_write_trailer() may try to use memory that was freed on
