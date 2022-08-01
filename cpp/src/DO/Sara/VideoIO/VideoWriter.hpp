@@ -62,8 +62,6 @@ namespace DO::Sara {
 
     auto finish() -> void;
 
-    auto generate_dummy() -> void;
-
   private:
     OutputStream _video_stream;
     OutputStream _audio_stream;

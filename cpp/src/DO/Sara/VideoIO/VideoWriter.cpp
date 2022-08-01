@@ -704,21 +704,4 @@ namespace DO::Sara {
     }
   }
 
-  auto VideoWriter::generate_dummy() -> void
-  {
-    while (_encode_video || _encode_audio)
-    {
-      /* select the stream to encode */
-      if (_encode_video &&
-          (!_encode_audio ||
-           av_compare_ts(_video_stream.next_pts,
-                         _video_stream.encoding_context->time_base,
-                         _audio_stream.next_pts,
-                         _audio_stream.encoding_context->time_base) <= 0))
-        _encode_video = !write_video_frame(_format_context, &_video_stream);
-      else
-        _encode_audio = !write_audio_frame(_format_context, &_audio_stream);
-    }
-  }
-
 }  // namespace DO::Sara
