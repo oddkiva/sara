@@ -76,10 +76,12 @@ BOOST_AUTO_TEST_CASE(test_compute_dog_extrema)
 
   BOOST_REQUIRE(!features.empty());
 
+#if 0
   // There should be only one extrema at only one scale.
   SARA_CHECK(features.size());
   for (const auto& f: features)
     SARA_DEBUG << f << std::endl;
+#endif
 
   // N.B.: the other are detected at the corners if we use Halide
   // implementation, these are artefacts because of the boundary checks... It

@@ -61,10 +61,12 @@ BOOST_AUTO_TEST_CASE(test_compute_LoG_extrema)
   auto features = compute_LoGs(I, &scale_octave_pairs);
   const auto& o_index = scale_octave_pairs[0](1);
 
+#if 0
   // There should be only one extrema at only one scale.
   SARA_CHECK(features.size());
   for (const auto& f: features)
     SARA_DEBUG << f << std::endl;
+#endif
 
   // N.B.: the other are detected at the corners if we use Halide
   // implementation, these are artefacts because of the boundary checks... It
