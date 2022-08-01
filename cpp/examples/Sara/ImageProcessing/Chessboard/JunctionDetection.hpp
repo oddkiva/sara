@@ -30,7 +30,7 @@ namespace DO::Sara {
 
     inline auto operator<(const Junction& other) const
     {
-      return score > other.score;
+      return score < other.score;
     }
   };
 

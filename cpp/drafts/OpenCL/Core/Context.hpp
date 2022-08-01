@@ -27,7 +27,7 @@ namespace DO::Sara {
   class Context
   {
   public:
-    Context(const Device& device)
+    inline Context(const Device& device)
     {
       auto err = cl_int{};
       _context =
@@ -42,22 +42,22 @@ namespace DO::Sara {
                              sizeof(_ref_count), &_ref_count, nullptr);
     }
 
-    ~Context()
+    inline ~Context()
     {
       auto err = clReleaseContext(_context);
       if (err < 0)
-        std::cerr << format("Error: failed to release OpenCL program! %s\n",
+        std::cerr << format("Error: failed to release OpenCL context! %s\n",
                             get_error_string(err))
                   << std::endl;
     }
 
-    operator cl_context() const
+    inline operator cl_context() const
     {
       return _context;
     }
 
     template <typename T>
-    void push_property(cl_uint key, T value)
+    inline void push_property(cl_uint key, T value)
     {
       _properties.push_back(key);
       _properties.push_back(reinterpret_cast<cl_context_properties>(value));

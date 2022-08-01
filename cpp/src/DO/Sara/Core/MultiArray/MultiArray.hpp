@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
   {
     //! @{
     //! Convenience typedefs.
-    using self_type =  MultiArrayBase;
+    using self_type = MultiArrayBase;
     using base_type = MultiArrayView;
     //! @}
 
@@ -180,14 +180,15 @@ namespace DO { namespace Sara {
 
     //! @brief Reshape the array with the new sizes.
     template <typename Array>
-    inline auto reshape(const Array& new_sizes) &&
-        -> MultiArray<value_type, ElementTraits<Array>::size, StorageOrder>
+    inline auto reshape(const Array& new_sizes) && -> MultiArray<
+        value_type, ElementTraits<Array>::size, StorageOrder>
     {
       using T = value_type;
       constexpr int Rank = ElementTraits<Array>::size;
       using array_type = MultiArray<T, Rank, StorageOrder>;
 
-      if (base_type::template compute_size<Rank>(new_sizes) != base_type::size())
+      if (base_type::template compute_size<Rank>(new_sizes) !=
+          base_type::size())
         throw std::domain_error{"Invalid shape!"};
 
       // Swap the data members;
@@ -224,9 +225,10 @@ namespace DO { namespace Sara {
           empty ? 0 : base_type::template compute_size<Dimension>(sizes);
 
       _sizes = sizes;
-      _strides = empty ? sizes : base_type::compute_strides(sizes);
-      _begin = empty ? 0 : allocate(num_elements);
-      _end = empty ? 0 : _begin + num_elements;
+      _strides = empty ? vector_type::Zero()  //
+                       : base_type::compute_strides(sizes);
+      _begin = empty ? nullptr : allocate(num_elements);
+      _end = empty ? nullptr : _begin + num_elements;
     }
 
     inline pointer allocate(std::size_t count)
@@ -251,5 +253,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

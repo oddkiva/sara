@@ -13,14 +13,15 @@
 
 #include <omp.h>
 
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
-#include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization.hpp>
+
+#include "Utilities/ImageOrVideoReader.hpp"
 
 #include "Chessboard/CircularProfileExtractor.hpp"
 #include "Chessboard/JunctionDetection.hpp"
@@ -28,48 +29,6 @@
 
 
 namespace sara = DO::Sara;
-
-
-inline auto dir(const float angle) -> Eigen::Vector2f
-{
-  return Eigen::Vector2f{std::cos(angle), std::sin(angle)};
-};
-
-auto localize_zero_crossings(const Eigen::ArrayXf& profile, int num_bins)
-    -> std::vector<float>
-{
-  auto zero_crossings = std::vector<float>{};
-  for (auto n = Eigen::Index{}; n < profile.size(); ++n)
-  {
-    const auto ia = n;
-    const auto ib = (n + Eigen::Index{1}) % profile.size();
-
-    const auto& a = profile[ia];
-    const auto& b = profile[ib];
-
-    static constexpr auto pi = static_cast<float>(M_PI);
-    const auto angle_a = ia * 2.f * M_PI / num_bins;
-    const auto angle_b = ib * 2.f * M_PI / num_bins;
-
-    const auto ea = Eigen::Vector2d{std::cos(angle_a),  //
-                                    std::sin(angle_a)};
-    const auto eb = Eigen::Vector2d{std::cos(angle_b),  //
-                                    std::sin(angle_b)};
-
-    // TODO: this all could have been simplified.
-    const Eigen::Vector2d dir = (ea + eb) * 0.5;
-    auto angle = std::atan2(dir.y(), dir.x());
-    if (angle < 0)
-      angle += 2 * pi;
-
-    // A zero-crossing is characterized by a negative sign between
-    // consecutive intensity values.
-    if (a * b < 0)
-      zero_crossings.push_back(static_cast<float>(angle));
-  }
-
-  return zero_crossings;
-}
 
 
 auto filter_junctions(std::vector<sara::Junction<int>>& junctions,
@@ -113,6 +72,20 @@ auto filter_junctions(std::vector<sara::Junction<int>>& junctions,
     // because of the chessboard pattern.
     if (zero_crossings.size() != 4u)
       continue;
+
+// #define TWO_CROSSING_LINES
+#ifdef TWO_CROSSING_LINES
+    // The 4 peaks are due to 2 lines crossing each other.
+    using sara::operator""_deg;
+    static constexpr auto angle_degree_thres = 20._deg;
+    const auto two_crossing_lines =
+        std::abs((zero_crossings[2] - zero_crossings[0]) - M_PI) <
+            angle_degree_thres &&
+        std::abs((zero_crossings[3] - zero_crossings[1]) - M_PI) <
+            angle_degree_thres;
+    if (!two_crossing_lines)
+      continue;
+#endif
 
     for (auto i = 0; i < 4; ++i)
       circular_profiles(i, junctions_filtered.size()) = zero_crossings[i];
@@ -479,10 +452,9 @@ auto __main(int argc, char** argv) -> int
   if (argc < 2)
     return 1;
   const auto video_file = std::string{argv[1]};
-
 #endif
 
-  auto video_stream = sara::VideoStream{video_file};
+  auto video_stream = sara::ImageOrVideoReader{video_file};
   auto video_frame = video_stream.frame();
   auto video_frame_copy = sara::Image<sara::Rgb8>{};
   auto frame_number = -1;
@@ -494,14 +466,15 @@ auto __main(int argc, char** argv) -> int
   else
     corner_count << std::atoi(argv[2]), std::atoi(argv[3]);
 
-  const auto downscale_factor = argc < 5 ? 2 : std::atoi(argv[4]);
-  static constexpr auto sigma_D = 1.6f;
-  static const auto sigma_I =
-      argc < 6 ? 6.f / downscale_factor : std::atof(argv[5]);
+  const auto downscale_factor = argc < 5 ? 2 : std::stoi(argv[4]);
+  const auto sigma_D = argc < 6 ? 1.0f : std::stof(argv[5]);
+  const auto sigma_I = argc < 7 ? 4.f / downscale_factor : std::atof(argv[6]);
   static constexpr auto k = 6;
   static constexpr auto grad_adaptive_thres = 2e-2f;
 
+#ifdef GROW
   auto found_count = 0;
+#endif
   while (video_stream.read())
   {
     ++frame_number;
@@ -516,9 +489,13 @@ auto __main(int argc, char** argv) -> int
     SARA_CHECK(frame_number);
 
     sara::tic();
-    auto f = video_frame.convert<float>().compute<sara::Gaussian>(sigma_D);
+    auto f = video_frame.convert<float>();
     if (downscale_factor > 1)
+    {
+      f = f.compute<sara::Gaussian>(1.f);
       f = sara::downscale(f, downscale_factor);
+    }
+    f = f.compute<sara::Gaussian>(sigma_D);
     const auto grad_f = f.compute<sara::Gradient>();
     const auto junction_map = sara::junction_map(f, grad_f, sigma_I);
     auto grad_f_norm = sara::Image<float>{f.sizes()};
@@ -542,7 +519,7 @@ auto __main(int argc, char** argv) -> int
     sara::tic();
     {
       junctions = sara::extract_junctions(junction_map, sigma_I);
-      sara::nms(junctions, f.sizes(), sigma_I * 2);
+      sara::nms(junctions, f.sizes(), sigma_I);
       filter_junctions(junctions, circular_profiles, f, grad_f_norm, grad_thres,
                        sigma_I);
     }
@@ -567,7 +544,7 @@ auto __main(int argc, char** argv) -> int
     junctions_refined.reserve(junctions.size());
     std::transform(junctions.begin(), junctions.end(),
                    std::back_inserter(junctions_refined),
-                   [&grad_f](const auto& j) -> sara::Junction<float> {
+                   [&grad_f, sigma_I](const auto& j) -> sara::Junction<float> {
                      const auto p = sara::refine_junction_location_unsafe(
                          grad_f, j.position(), sigma_I);
                      return {p, j.score};
@@ -585,18 +562,18 @@ auto __main(int argc, char** argv) -> int
 
       const Eigen::Vector2f jri = jr.p * downscale_factor;
 
-      sara::draw_circle(video_frame_copy, jri, sigma_D, sara::Magenta8, 3);
+      sara::draw_circle(video_frame_copy, jri, sigma_D, sara::Magenta8, 4);
       sara::fill_circle(     //
           video_frame_copy,  //
-          static_cast<int>(std::round(jri.x())),
-          static_cast<int>(std::round(jri.y())),  //
-          1, sara::Red8);
+          jri.x(), jri.y(),  //
+          1, sara::Yellow8);
     }
     sara::display(video_frame_copy);
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,
                     false, true);
     sara::toc("display junctions");
 
+#ifdef GROW
     sara::tic();
     const auto found = graph.grow(edge_map,                        //
                                   corner_count, downscale_factor,  //
@@ -610,6 +587,9 @@ auto __main(int argc, char** argv) -> int
     sara::draw_text(80, 200, detection_rate_text, sara::White8, 60, 0, false,
                     true);
     SARA_DEBUG << "detection rate = " << detection_rate_text << std::endl;
+#endif
+
+    sara::get_key();
   }
 
   return 0;

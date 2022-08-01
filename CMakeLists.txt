@@ -42,6 +42,8 @@ set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 # Add Sara to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+include(sara_create_asan_build_type)
+
 # Import macros and configure Sara library version.
 include(sara_macros)
 sara_dissect_version()

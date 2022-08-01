@@ -125,7 +125,7 @@ namespace DO { namespace Sara {
 #ifdef _WIN32
                      return arg.toLocal8Bit().constData();
 #else
-                     return arg.toUtf8().constData();
+                     return arg.toStdString();
 #endif
                    });
     auto argVector = std::vector<char*>(args.size());

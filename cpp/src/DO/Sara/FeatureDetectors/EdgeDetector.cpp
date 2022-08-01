@@ -13,9 +13,9 @@
 
 #include <DO/Sara/Core/TicToc.hpp>
 
-#include <DO/Sara/ImageProcessing/EdgeDetection.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
+#include <DO/Sara/ImageProcessing/EdgeDetection.hpp>
 
 #include <DO/Sara/Geometry/Algorithms/Polyline.hpp>
 #include <DO/Sara/Geometry/Algorithms/RamerDouglasPeucker.hpp>
@@ -46,9 +46,8 @@ namespace DO::Sara {
     toc("Thresholding");
 
     pipeline.edges = perform_hysteresis_and_grouping(  //
-    // pipeline.edges = perform_parallel_grouping(  //
-        pipeline.edge_map,                       //
-        pipeline.gradient_orientation,           //
+        pipeline.edge_map,                             //
+        pipeline.gradient_orientation,                 //
         parameters.angular_threshold);
 
     tic();
@@ -78,23 +77,23 @@ namespace DO::Sara {
       }
       toc("Longest Curve Extraction & Simplification");
 
-//       tic();
+//    tic();
 // #pragma omp parallel for
-//       for (auto i = 0u; i < edges_simplified.size(); ++i)
-//         if (edges_simplified[i].size() > 2)
-//           edges_simplified[i] = collapse(edges_simplified[i], grad_mag,
-//                                          parameters.collapse_threshold,
-//                                          parameters.collapse_adaptive);
-//       toc("Vertex Collapse");
+//    for (auto i = 0u; i < edges_simplified.size(); ++i)
+//      if (edges_simplified[i].size() > 2)
+//        edges_simplified[i] = collapse(edges_simplified[i], grad_mag,
+//                                       parameters.collapse_threshold,
+//                                       parameters.collapse_adaptive);
+//    toc("Vertex Collapse");
 //
-//       tic();
-//       auto& edges_refined = edges_simplified;
+//    tic();
+//    auto& edges_refined = edges_simplified;
 // #pragma omp parallel for
-//       for (auto i = 0u; i < edges_refined.size(); ++i)
-//         for (auto& p : edges_refined[i])
-//           p = refine(grad_mag, p.cast<int>()).cast<double>();
-//       toc("Refine Edge Localisation");
-     }
+//    for (auto i = 0u; i < edges_refined.size(); ++i)
+//      for (auto& p : edges_refined[i])
+//        p = refine(grad_mag, p.cast<int>()).cast<double>();
+//    toc("Refine Edge Localisation");
+    }
   }
 
 }  // namespace DO::Sara

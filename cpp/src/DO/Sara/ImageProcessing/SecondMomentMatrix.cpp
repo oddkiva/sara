@@ -11,31 +11,30 @@
 
 //! @file
 
-#pragma once
-
 #include <DO/Sara/Core/Image/Image.hpp>
 
 #ifdef DO_SARA_USE_HALIDE
-#include <DO/Shakti/Halide/RuntimeUtilities.hpp>
+#  include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
-#include "shakti_moment_matrix_32f_cpu.h"
+#  include "shakti_moment_matrix_32f_cpu.h"
 #endif
 
 
 namespace DO::Sara {
 
-  auto second_moment_matrix(const ImageView<float>& fx,
-                            const ImageView<float>& fy,  //
-                            ImageView<float>& mxx,       //
-                            ImageView<float>& myy,       //
-                            ImageView<float>& mxy) -> void
+  auto second_moment_matrix([[maybe_unused]] const ImageView<float>& fx,
+                            [[maybe_unused]] const ImageView<float>& fy,  //
+                            [[maybe_unused]] ImageView<float>& mxx,       //
+                            [[maybe_unused]] ImageView<float>& myy,       //
+                            [[maybe_unused]] ImageView<float>& mxy) -> void
   {
 #ifdef DO_SARA_USE_HALIDE
     if (fx.sizes() != fy.sizes() ||   //
         fx.sizes() != mxx.sizes() ||  //
         fx.sizes() != myy.sizes() ||  //
         fx.sizes() != mxy.sizes())    //
-      throw std::domain_error{"Second moment matrix: image sizes are not equal!"};
+      throw std::domain_error{
+          "Second moment matrix: image sizes are not equal!"};
 
     auto fx_buffer = Shakti::Halide::as_runtime_buffer_4d(fx);
     auto fy_buffer = Shakti::Halide::as_runtime_buffer_4d(fy);

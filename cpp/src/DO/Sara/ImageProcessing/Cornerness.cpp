@@ -20,11 +20,11 @@
 
 namespace DO::Sara {
 
-  auto compute_cornerness(const ImageView<float>& mxx,  //
-                          const ImageView<float>& myy,  //
-                          const ImageView<float>& mxy,  //
-                          const float kappa,            //
-                          ImageView<float>& cornerness) -> void
+  auto compute_cornerness([[maybe_unused]] const ImageView<float>& mxx,  //
+                          [[maybe_unused]] const ImageView<float>& myy,  //
+                          [[maybe_unused]] const ImageView<float>& mxy,  //
+                          [[maybe_unused]] const float kappa,            //
+                          [[maybe_unused]] ImageView<float>& cornerness) -> void
   {
 #ifdef DO_SARA_USE_HALIDE
     if (mxx.sizes() != myy.sizes() ||  //

@@ -19,6 +19,7 @@
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/DisjointSets/TwoPassConnectedComponents.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Geometry/Algorithms/BorderFollowing.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -99,20 +100,9 @@ auto __main(int argc, char** argv) -> int
   const auto video_file = std::string{argv[1]};
 #endif
 
-#if 0
-  // Harris cornerness parameters.
-  //
-  // Blur parameter before gradient calculation.
-  const auto sigma_D = argc < 3 ? 0.8f : std::stof(argv[2]);
-  // Integration domain of the second moment.
-  const auto sigma_I = argc < 4 ? 3.f : std::stof(argv[3]);
-  // Threshold parameter.
-  const auto kappa = argc < 5 ? 0.04f : std::stof(argv[4]);
-  const auto cornerness_adaptive_thres = argc < 6 ? 1e-5f : std::stof(argv[5]);
-  // Corner filtering.
-  const auto nms_radius = argc < 7 ? 10 : std::stoi(argv[6]);
-#endif
-  static constexpr auto downscale_factor = 2;
+  const auto do_erosion =
+      argc < 3 ? true : static_cast<bool>(std::stoi(argv[2]));
+
 
   auto video_stream = sara::VideoStream{video_file};
   auto video_frame = video_stream.frame();
@@ -120,9 +110,6 @@ auto __main(int argc, char** argv) -> int
 
   auto f = sara::Image<float>{video_frame.sizes()};
   auto f_conv = sara::Image<float>{video_frame.sizes()};
-#if 0
-  auto f_ds = sara::Image<float>{video_frame.sizes() / downscale_factor};
-#endif
 
   auto segmentation_map = sara::Image<std::uint8_t>{video_frame.sizes()};
 
@@ -146,17 +133,18 @@ auto __main(int argc, char** argv) -> int
 
     sara::tic();
     static constexpr auto tolerance_parameter = 0.f;
-    sara::gaussian_adaptive_threshold(f, 24.f, 2.f, tolerance_parameter,
+    sara::gaussian_adaptive_threshold(f, 32.f, 2.f, tolerance_parameter,
                                       segmentation_map);
     sara::toc("Adaptive thresholding");
 
-    sara::tic();
+    if (do_erosion)
     {
+      sara::tic();
       auto segmentation_map_eroded = segmentation_map;
       sara::binary_erode_3x3(segmentation_map, segmentation_map_eroded);
       segmentation_map.swap(segmentation_map_eroded);
+      sara::toc("Erosion 3x3");
     }
-    sara::toc("Erosion 3x3");
 
     sara::tic();
     auto segmentation_map_inverted =
@@ -168,26 +156,20 @@ auto __main(int argc, char** argv) -> int
         sara::suzuki_abe_follow_border(segmentation_map_inverted);
     sara::toc("Border Following");
 
-#if 0
-    // Calculate Harris cornerness functions.
-    sara::tic();
-    sara::scale(f, f_ds);
-    const auto cornerness = sara::scale_adapted_harris_cornerness(  //
-        f_ds,                                                       //
-        sigma_I, sigma_D,                                           //
-        kappa                                                       //
-    );
-    auto corners = select(cornerness, cornerness_adaptive_thres);
-    sara::nms(corners, cornerness.sizes(), nms_radius);
-    sara::toc("Corner detection");
-#endif
-
-#if 0
-    for (const auto& p : corners)
-      sara::fill_circle(partitioning, downscale_factor * p.coords.x(),
-                        downscale_factor * p.coords.y(), 4, sara::Magenta8);
-    SARA_CHECK(corners.size());
-#endif
+    // sara::tic();
+    // auto border_curves_d =
+    //     std::unordered_map<int, std::vector<Eigen::Vector2d>>{};
+    // for (const auto& [border_id, border] : border_curves)
+    // {
+    //   auto curve = std::vector<Eigen::Vector2d>{};
+    //   std::transform(border.curve.begin(), border.curve.end(),
+    //                  std::back_inserter(curve),
+    //                  [](const auto& p) { return p.template cast<double>();
+    //                  });
+    //   curve = sara::ramer_douglas_peucker(curve, 2.);
+    //   border_curves_d[border_id] = curve;
+    // }
+    // sara::toc("Border Simplification");
 
     auto display = sara::Image<sara::Rgb8>{segmentation_map.sizes()};
     display.flat_array().fill(sara::Black8);
@@ -196,11 +178,12 @@ auto __main(int argc, char** argv) -> int
       const auto& curve = b.second.curve;
       if (b.second.type == sara::Border::Type::HoleBorder)
         continue;
-      if (curve.size() < 50 * 4)
+      if (curve.size() < 5 * 4)
         continue;
       const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
       for (const auto& p : curve)
         display(p) = color;
+      // sara::draw_polyline(display, border_curves_d[b.first], color);
     }
     sara::display(display);
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,

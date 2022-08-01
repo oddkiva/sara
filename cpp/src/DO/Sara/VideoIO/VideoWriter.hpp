@@ -62,15 +62,13 @@ namespace DO::Sara {
 
     auto finish() -> void;
 
-    auto generate_dummy() -> void;
-
   private:
     OutputStream _video_stream;
     OutputStream _audio_stream;
-    const AVOutputFormat* _output_format;
+    const AVOutputFormat* _output_format = nullptr;
     AVFormatContext* _format_context;
-    const AVCodec* _audio_codec;
-    const AVCodec* _video_codec;
+    const AVCodec* _audio_codec = nullptr;
+    const AVCodec* _video_codec = nullptr;
     AVDictionary* _options = nullptr;
 
     int _have_audio = 0;

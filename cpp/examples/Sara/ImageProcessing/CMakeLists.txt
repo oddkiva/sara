@@ -49,15 +49,36 @@ target_link_libraries(line_segment_detection_example
 
 
 add_library(ChessboardDetection STATIC
+  Utilities/ImageOrVideoReader.hpp
+  Utilities/ImageOrVideoReader.cpp
+
+  # Feature detection.
+  Chessboard/Corner.hpp
+  Chessboard/Corner.cpp
   Chessboard/CircularProfileExtractor.hpp
+  Chessboard/CircularProfileExtractor.cpp
   Chessboard/Erode.hpp
+  Chessboard/EdgeStatistics.hpp
+  Chessboard/EdgeStatistics.cpp
   Chessboard/JunctionDetection.hpp
   Chessboard/JunctionDetection.cpp
-  Chessboard/NonMaximumSuppression.hpp)
+  Chessboard/NonMaximumSuppression.hpp
+
+  # Edge parsing.
+  Chessboard/LineReconstruction.hpp
+  Chessboard/LineReconstruction.cpp
+  Chessboard/SquareReconstruction.hpp
+  Chessboard/SquareReconstruction.cpp)
 set_target_properties(ChessboardDetection
   PROPERTIES
   FOLDER "Libraries")
-target_link_libraries(ChessboardDetection PUBLIC ${DO_Sara_LIBRARIES})
+target_link_libraries(ChessboardDetection
+  PUBLIC ${DO_Sara_LIBRARIES}
+  PRIVATE Boost::filesystem)
+target_compile_definitions(ChessboardDetection
+  PRIVATE
+  -DBOOST_ALL_DYN_LINK
+  -DBOOST_ALL_NO_LIB)
 
 sara_add_example(find_chessboard_corners)
 target_link_libraries(find_chessboard_corners PRIVATE ChessboardDetection)
@@ -68,7 +89,11 @@ target_link_libraries(find_chessboard_corners_2 PRIVATE ChessboardDetection)
 sara_add_example(find_chessboard_corners_3)
 target_link_libraries(find_chessboard_corners_3 PRIVATE ChessboardDetection)
 
+sara_add_example(local_radon_transform_for_corner_detection)
+target_link_libraries(local_radon_transform_for_corner_detection PRIVATE ChessboardDetection)
+
 sara_add_example(find_aruco_marker)
+target_link_libraries(find_aruco_marker PRIVATE Boost::filesystem)
 if (TBB_FOUND)
   target_link_libraries(find_aruco_marker PRIVATE TBB::tbb)
 endif ()
