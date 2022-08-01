@@ -1,11 +1,15 @@
 # Some system/driver libraries that the address sanitizer complain about.
-leak:libdbus-1.so.3
-leak:libnvidia-glcore.so
-leak:libnvidia-opencl.so
+# leak:libnvidia-opencl.so
 leak:Foundation
 
 # Qt
-leak:Qt6Core
+# On NVIDIA platforms, there seems to be memory leaks related to OpenGL...
+# Maybe it is related to this:
+# https://forums.developer.nvidia.com/t/possible-memory-leak-in-the-510-60-linux-driver/214123
+#
+# N.B.: the memory leak does not show up on the GitLab CI.
+leak:dbus
+leak:nvidia-glcore
 
 # Turn off errors arising from av_malloc FFmpeg.
 leak:avutil  # There is definitely a memory leak in how I use FFmpeg. Investigate why...

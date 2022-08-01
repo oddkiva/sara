@@ -55,7 +55,7 @@ namespace DO::Sara {
 
   //! @brief Read the OpenCL platform.
   template <int _InfoType>
-  std::string get_platform_info(cl_platform_id platform_id)
+  inline std::string get_platform_info(cl_platform_id platform_id)
   {
     cl_int err;
 
@@ -79,7 +79,7 @@ namespace DO::Sara {
   }
 
 
-  std::vector<Platform> get_platforms()
+  inline std::vector<Platform> get_platforms()
   {
     cl_int err;
 

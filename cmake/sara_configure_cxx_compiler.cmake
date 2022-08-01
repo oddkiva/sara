@@ -36,7 +36,7 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
   # Additional flags for Debug builds to code coverage.
-  set(CMAKE_CXX_FLAGS_DEBUG "-O1 -g -DDEBUG -D_DEBUG -fno-omit-frame-pointer -fsanitize=address")
+  set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -DDEBUG -D_DEBUG -fno-omit-frame-pointer -fsanitize=address")
   if (NOT APPLE)
     set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
