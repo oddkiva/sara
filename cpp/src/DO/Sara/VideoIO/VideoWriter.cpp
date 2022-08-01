@@ -334,6 +334,7 @@ namespace DO::Sara {
   }
 
 
+#if 0
   /* Prepare a 16 bit dummy audio frame of 'frame_size' samples and
    * 'nb_channels' channels. */
   static AVFrame* get_audio_frame(OutputStream* ost)
@@ -400,6 +401,7 @@ namespace DO::Sara {
     }
     return write_frame(oc, c, ost->stream, frame);
   }
+#endif
 
 
   // ======================================================================== //
@@ -521,6 +523,7 @@ namespace DO::Sara {
     return ostream->frame;
   }
 
+#if 0
   /*
    * encode one video frame and send it to the muxer
    * return 1 when encoding is finished, 0 otherwise
@@ -531,6 +534,7 @@ namespace DO::Sara {
     return write_frame(format_context, ostream->encoding_context,
                        ostream->stream, get_video_frame(ostream));
   }
+#endif
 
   static void close_stream(AVFormatContext*, OutputStream* os)
   {
