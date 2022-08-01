@@ -36,13 +36,18 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
   # Additional flags for Debug builds to code coverage.
-  set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -DDEBUG -D_DEBUG -fno-omit-frame-pointer -fsanitize=address")
+  set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -DDEBUG -D_DEBUG")
+  if (SARA_BUILD_WITH_ASAN)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+  endif ()
   if (NOT APPLE)
     set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   endif ()
 
-  set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=address")
+  if (SARA_BUILD_WITH_ASAN)
+    set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=address")
+  endif ()
 endif ()
 
 if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
