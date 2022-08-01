@@ -81,6 +81,9 @@ auto reconstruct_black_square_from_corner(
     auto det = -1.f;
     for (const auto& e: edges)
     {
+      if (e == edge)
+        continue;
+
       auto rotation = Eigen::Matrix2f{};
       rotation.col(0) = edge_grads[edge].normalized();
       rotation.col(1) = edge_grads[e].normalized();
@@ -165,6 +168,8 @@ auto reconstruct_white_square_from_corner(
     auto det = 1.f;
     for (const auto& e: edges)
     {
+      if (e == edge)
+        continue;
       auto rotation = Eigen::Matrix2f{};
       rotation.col(0) = edge_grads[edge].normalized();
       rotation.col(1) = edge_grads[e].normalized();
