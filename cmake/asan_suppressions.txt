@@ -1,13 +1,19 @@
-# Some system/driver libraries that the address sanitizer complain about.
-# leak:libnvidia-opencl.so
+# The address sanitizer has problem with OpenCL.
+#
+# This is documented in:
+# - https://github.com/ddemidov/vexcl/issues/204
+# In particular, it complains `clGetPlatformIDs`.
+
+# Turn off complaints related to Swift bindings.
 leak:Foundation
 
 # Qt
+#
 # On NVIDIA platforms, there seems to be memory leaks related to OpenGL...
 # Maybe it is related to this:
 # https://forums.developer.nvidia.com/t/possible-memory-leak-in-the-510-60-linux-driver/214123
 #
-# N.B.: the memory leak does not show up on the GitLab CI.
+# Luckily the memory leak does not show up on the GitLab CI.
 leak:dbus
 leak:nvidia-glcore
 

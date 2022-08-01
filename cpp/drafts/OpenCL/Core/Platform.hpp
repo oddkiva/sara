@@ -22,7 +22,6 @@
 #include <vector>
 
 
-
 namespace DO::Sara {
 
   //! @addtogroup OpenCL
@@ -38,48 +37,53 @@ namespace DO::Sara {
     std::string profile;
     std::string extensions;
 
-    friend inline std::ostream& operator<<(std::ostream& os, const Platform& p)
+    friend inline auto operator<<(std::ostream& os, const Platform& p)
+        -> std::ostream&
     {
       const auto length = static_cast<int>(std::string("Extensions  ").size());
       using std::left;
       using std::setw;
-      os << left << setw(length) << "ID"         << ":  " << p.id << "\n";
-      os << left << setw(length) << "Name"       << ":  " << p.name << "\n";
-      os << left << setw(length) << "Vendor"     << ":  " << p.vendor << "\n";
-      os << left << setw(length) << "Version"    << ":  " << p.version << "\n";
-      os << left << setw(length) << "Profile"    << ":  " << p.profile << "\n";
-      os << left << setw(length) << "Extensions" << ":  " << p.extensions << "\n";
+      os << left << setw(length) << "ID"
+         << ":  " << p.id << "\n";
+      os << left << setw(length) << "Name"
+         << ":  " << p.name << "\n";
+      os << left << setw(length) << "Vendor"
+         << ":  " << p.vendor << "\n";
+      os << left << setw(length) << "Version"
+         << ":  " << p.version << "\n";
+      os << left << setw(length) << "Profile"
+         << ":  " << p.profile << "\n";
+      os << left << setw(length) << "Extensions"
+         << ":  " << p.extensions << "\n";
       return os;
     }
   };
 
   //! @brief Read the OpenCL platform.
   template <int _InfoType>
-  inline std::string get_platform_info(cl_platform_id platform_id)
+  inline auto get_platform_info(cl_platform_id platform_id) -> std::string
   {
     cl_int err;
 
     size_t buffer_length;
     err = clGetPlatformInfo(platform_id, _InfoType, 0, nullptr, &buffer_length);
     if (err < 0)
-      throw std::runtime_error(format(
-      "Error: cannot get platform info! %s",
-      get_error_string(err)));
+      throw std::runtime_error(
+          format("Error: cannot get platform info! %s", get_error_string(err)));
 
     std::vector<char> buffer;
     buffer.resize(buffer_length);
     err = clGetPlatformInfo(platform_id, _InfoType, buffer_length, &buffer[0],
                             nullptr);
     if (err < 0)
-      throw std::runtime_error(format(
-      "Error: cannot get platform info! %s",
-      get_error_string(err)));
+      throw std::runtime_error(
+          format("Error: cannot get platform info! %s", get_error_string(err)));
 
     return std::string(buffer.begin(), buffer.end());
   }
 
 
-  inline std::vector<Platform> get_platforms()
+  inline auto get_platforms() -> std::vector<Platform>
   {
     cl_int err;
 
@@ -87,14 +91,14 @@ namespace DO::Sara {
     err = clGetPlatformIDs(1, nullptr, &num_platforms);
     if (err < 0)
       throw std::runtime_error(format(
-      "Error: cannot get number of platforms! %s", get_error_string(err)));
+          "Error: cannot get number of platforms! %s", get_error_string(err)));
 
     std::vector<cl_platform_id> platform_ids(num_platforms);
     err = clGetPlatformIDs(num_platforms, &platform_ids[0], nullptr);
     if (err < 0)
-      throw std::runtime_error(format(
-      "Error: cannot get the list of platforms",
-      get_error_string(err)));
+      throw std::runtime_error(format("Error: cannot get the list of platforms",
+                                      get_error_string(err)));
+
 
     std::vector<Platform> platforms(num_platforms);
     for (cl_uint i = 0; i < num_platforms; ++i)

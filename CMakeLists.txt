@@ -27,7 +27,6 @@ option(SARA_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
 option(SARA_USE_QT6 "Switch to Qt6" OFF)
 option(SARA_USE_HALIDE "Enable Halide" OFF)
 option(SARA_BUILD_VIDEOIO "Build Sara's Video I/O module" OFF)
-option(SARA_BUILD_WITH_ASAN "Build with Address Sanitizer" OFF)
 option(SARA_BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
 option(SARA_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
 option(SARA_BUILD_SAMPLES "Build sample programs using DO-Sara libraries" OFF)
@@ -42,6 +41,8 @@ set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 
 # Add Sara to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+include(sara_create_asan_build_type)
 
 # Import macros and configure Sara library version.
 include(sara_macros)
