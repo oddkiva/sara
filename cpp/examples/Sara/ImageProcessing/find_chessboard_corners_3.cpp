@@ -207,8 +207,10 @@ auto __main(int argc, char** argv) -> int
             .matrix()
             .cast<int>();
     auto frame_gray_ds = sara::Image<float>{image_ds_sizes};
-    auto grad_norm = sara::Image<float>{image_ds_sizes};
-    auto grad_ori = sara::Image<float>{image_ds_sizes};
+
+    auto grad_x = sara::Image<float>{frame_gray_ds.sizes()};
+    auto grad_y = sara::Image<float>{frame_gray_ds.sizes()};
+
     auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
 
     auto timer = sara::Timer{};
@@ -238,19 +240,18 @@ auto __main(int argc, char** argv) -> int
       sara::resize_v2(frame_gray_blurred, frame_gray_ds);
       sara::toc("Downscale");
 
-
       sara::tic();
       const auto f_ds_blurred = frame_gray_ds.compute<sara::Gaussian>(sigma_D);
       sara::toc("Blur");
 
       sara::tic();
-      ed(f_ds_blurred);
-      sara::toc("Curve detection");
+      sara::gradient(f_ds_blurred, grad_x, grad_y);
+      sara::toc("Gradient Cartesian Coordinate");
+
+      // No need to profile this, it is done internally...
+      ed.operator()(grad_x, grad_y);
 
       sara::tic();
-      auto grad_x = sara::Image<float>{f_ds_blurred.sizes()};
-      auto grad_y = sara::Image<float>{f_ds_blurred.sizes()};
-      sara::gradient(f_ds_blurred, grad_x, grad_y);
       const auto cornerness = sara::harris_cornerness(grad_x, grad_y,  //
                                                       sigma_I, kappa);
       auto corners_int = select(cornerness, cornerness_adaptive_thres,  //
@@ -274,7 +275,9 @@ auto __main(int argc, char** argv) -> int
       profiles.resize(corners.size());
       auto zero_crossings = std::vector<std::vector<float>>{};
       zero_crossings.resize(corners.size());
-      for (auto c = 0u; c < corners.size(); ++c)
+      auto num_corners = static_cast<int>(corners.size());
+#pragma omp parallel for
+      for (auto c = 0; c < num_corners; ++c)
       {
         const auto& p = corners[c].coords;
         const auto& r = profile_extractor.circle_radius;
@@ -309,6 +312,7 @@ auto __main(int argc, char** argv) -> int
         corners_filtered.swap(corners);
         profiles_filtered.swap(profiles);
         zero_crossings_filtered.swap(zero_crossings);
+        num_corners = static_cast<int>(corners.size());
       }
       sara::toc("Filtering from intensity profile");
 
@@ -319,7 +323,6 @@ auto __main(int argc, char** argv) -> int
       static constexpr auto N = 72;
       auto hists = std::vector<Eigen::Array<float, N, 1>>{};
       hists.resize(corners.size());
-      const auto num_corners = static_cast<int>(corners.size());
 #pragma omp parallel for
       for (auto i = 0; i < num_corners; ++i)
       {
@@ -369,7 +372,6 @@ auto __main(int argc, char** argv) -> int
       auto edge_label_map = sara::Image<int>{ed.pipeline.edge_map.sizes()};
       edge_label_map.flat_array().fill(-1);
 
-// #define DEBUG_FILTERED_EDGES
 #ifdef DEBUG_FILTERED_EDGES
       auto edge_map_filtered =
           sara::Image<std::uint8_t>{ed.pipeline.edge_map.sizes()};
@@ -426,6 +428,7 @@ auto __main(int argc, char** argv) -> int
       const auto corner_edge_linking_radius = 4;
 #else
       const auto& corner_edge_linking_radius = radius;
+      SARA_CHECK(corner_edge_linking_radius);
 #endif
 
       auto edges_adjacent_to_corner = std::vector<std::unordered_set<int>>{};
@@ -550,7 +553,6 @@ auto __main(int argc, char** argv) -> int
       }
       sara::toc("Line Reconstruction");
 
-
       const auto pipeline_time = timer.elapsed_ms();
       SARA_DEBUG << "Processing time = " << pipeline_time << "ms" << std::endl;
 
@@ -569,10 +571,7 @@ auto __main(int argc, char** argv) -> int
       else
         display = frame_gray.convert<sara::Rgb8>();
 
-// #define INVESTIGATE_X_CORNER_HISTOGRAMS
-#ifndef INVESTIGATE_X_CORNER_HISTOGRAMS
-#  pragma omp parallel for
-#endif
+#pragma omp parallel for
       for (auto c = 0; c < num_corners; ++c)
       {
         const auto& p = corners[c];
