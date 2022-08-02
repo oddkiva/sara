@@ -89,9 +89,11 @@ namespace DO::Sara {
 
       const Vector2d p = Vector2i(x, y).cast<double>();
 #ifdef FAST_COS_AND_SIN
+      static constexpr auto pi = static_cast<float>(M_PI);
+      static constexpr auto two_pi = static_cast<float>(2 * M_PI);
       auto theta = grad_ori(x, y);
-      if (theta >= M_PI)
-        theta -= 2 * M_PI;
+      if (theta >= pi)
+        theta -= two_pi;
       const auto c = fast_cos(theta);
       const auto s = fast_sin(theta);
       const Vector2d d = Vector2f{c, s}.cast<double>().normalized();

@@ -13,6 +13,7 @@
 
 #include <omp.h>
 
+#include <optional>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -619,7 +620,8 @@ auto __main(int argc, char** argv) -> int
             display,
             static_cast<int>(std::round(downscale_factor * p.coords.x())),
             static_cast<int>(std::round(downscale_factor * p.coords.y())),
-            radius * downscale_factor, good ? sara::Red8 : sara::Cyan8, 2);
+            static_cast<int>(std::round(radius * downscale_factor)),
+            good ? sara::Red8 : sara::Cyan8, 2);
 
 #ifdef INVESTIGATE_X_CORNER_HISTOGRAMS
         sara::display(display);
