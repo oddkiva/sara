@@ -97,7 +97,7 @@ namespace DO::Sara {
 
       for (size_t lb = 0; lb != thres.size() - 1; ++lb)
       {
-        int ub = lb + 1;
+        const auto ub = lb + 1;
         Statistics stat_overlap, stat_angle;
         run(stat_overlap, stat_angle, M, M_sorted, H, thres[lb],
             thres[ub] /*, &drawer*/);

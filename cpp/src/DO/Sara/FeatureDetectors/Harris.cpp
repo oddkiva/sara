@@ -190,7 +190,7 @@ namespace DO { namespace Sara {
                        });
 
         // Rescale the cornerness function.
-        cornerness(s, o).flat_array() *= sigma_D * sigma_D;
+        cornerness(s, o).flat_array() *= static_cast<float>(sigma_D * sigma_D);
       }
     }
 
