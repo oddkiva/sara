@@ -49,7 +49,8 @@ namespace DO { namespace Sara {
                       .template compute<Determinant>();
 
         // Apply the scale normalization.
-        D(s, o).flat_array() *= quartic(gaussians.scale_relative_to_octave(s));
+        D(s, o).flat_array() *=
+            static_cast<float>(quartic(gaussians.scale_relative_to_octave(s)));
       }
     }
     return D;
