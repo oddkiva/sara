@@ -1,26 +1,9 @@
 #pragma once
 
+#include <optional>
 #include <unordered_set>
 
 #include "Corner.hpp"
-
-
-enum class Direction : std::uint8_t
-{
-  Up = 0,
-  Right = 1,
-  Down = 2,
-  Left = 3
-};
-
-
-auto direction_type(const float angle) -> Direction;
-
-inline auto direction_type(const Eigen::Vector2f& d) -> Direction
-{
-  const auto angle = std::atan2(d.y(), d.x());
-  return direction_type(angle);
-}
 
 
 auto reconstruct_black_square_from_corner(
