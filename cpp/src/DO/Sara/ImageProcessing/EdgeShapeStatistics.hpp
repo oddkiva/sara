@@ -18,8 +18,6 @@
 #include <DO/Sara/Geometry/Objects/LineSegment.hpp>
 #include <DO/Sara/Geometry/Tools/Projective.hpp>
 
-#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
-
 #include <DO/Sara/Graphics/ImageDraw.hpp>
 
 

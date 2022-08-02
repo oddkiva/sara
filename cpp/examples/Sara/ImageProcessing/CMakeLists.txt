@@ -31,23 +31,6 @@ target_link_libraries(watershed_v2_example
   PRIVATE
   $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
 
-sara_add_example(edge_detection_example)
-target_include_directories(edge_detection_example
-  PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
-target_link_libraries(edge_detection_example
-  PRIVATE
-  Boost::filesystem
-  $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
-target_compile_definitions(edge_detection_example
-  PRIVATE
-  -DBOOST_ALL_DYN_LINK
-  -DBOOST_ALL_NO_LIB)
-
-sara_add_example(line_segment_detection_example)
-target_link_libraries(line_segment_detection_example
-  PRIVATE $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
-
-
 add_library(ChessboardDetection STATIC
   Utilities/ImageOrVideoReader.hpp
   Utilities/ImageOrVideoReader.cpp

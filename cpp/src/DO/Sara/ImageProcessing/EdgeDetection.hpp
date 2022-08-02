@@ -41,7 +41,8 @@ namespace DO::Sara {
   //! @{
   inline auto suppress_non_maximum_edgels(const ImageView<float>& grad_mag,
                                           const ImageView<float>& grad_ori,
-                                          float high_thres, float low_thres)
+                                          const float high_thres,
+                                          const float low_thres)
   {
     auto edges = Image<uint8_t>{grad_mag.sizes()};
     edges.flat_array().fill(0);
@@ -275,7 +276,7 @@ namespace DO::Sara {
   //! @brief Group edgels into **unordered** quasi-straight curves.
   inline auto connected_components(const ImageView<std::uint8_t>& edges,
                                    const ImageView<float>& orientation,
-                                   float angular_threshold)
+                                   const float angular_threshold)
   {
     const auto index = [&edges](const Eigen::Vector2i& p) {
       return p.y() * edges.width() + p.x();
@@ -389,7 +390,7 @@ namespace DO::Sara {
   //! @brief Group edgels into **unordered** quasi-straight curves.
   auto perform_hysteresis_and_grouping(ImageView<std::uint8_t>& edges,  //
                                        const ImageView<float>& orientations,
-                                       float angular_threshold)
+                                       const float angular_threshold)
       -> std::map<int, std::vector<Point2i>>;
 
 }  // namespace DO::Sara

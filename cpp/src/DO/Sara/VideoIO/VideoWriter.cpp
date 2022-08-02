@@ -461,6 +461,7 @@ namespace DO::Sara {
       throw std::runtime_error{"Could not copy the stream parameters!"};
   }
 
+#if 0
   /* Prepare a dummy image. */
   static void fill_yuv_image(AVFrame* pict, int frame_index, int width,
                              int height)
@@ -523,7 +524,6 @@ namespace DO::Sara {
     return ostream->frame;
   }
 
-#if 0
   /*
    * encode one video frame and send it to the muxer
    * return 1 when encoding is finished, 0 otherwise
