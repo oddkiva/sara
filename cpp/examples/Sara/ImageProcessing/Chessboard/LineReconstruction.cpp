@@ -83,7 +83,7 @@ auto find_next_line_segment(
   const auto ab = (b - a).norm();
 
   auto best_ic = -1;
-  auto best_ratio = 0;
+  auto best_ratio = 0.f;
 
   for (auto& ic : corners_adjacent_to_edge[best_edge_id])
   {
