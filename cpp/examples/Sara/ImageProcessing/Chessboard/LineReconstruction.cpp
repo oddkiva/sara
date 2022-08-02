@@ -58,7 +58,7 @@ auto find_next_line_segment(
 
     const auto& grad_cov = edge_grad_cov[edge_id];
     // No corners in this edge, please.
-    static constexpr auto kappa = 0.05f;
+    static constexpr auto kappa = 0.1f;
     using DO::Sara::square;
     const auto cornerness = grad_cov.determinant() -  //
                             kappa * square(grad_cov.trace());

@@ -53,7 +53,6 @@ inline constexpr long double operator"" _percent(long double x)
 inline auto is_good_x_corner(const std::vector<float>& zero_crossings) -> bool
 {
   const auto four_zero_crossings = zero_crossings.size() == 4;
-  return four_zero_crossings;
 #if 0
   if (!four_zero_crossings)
     return false;
@@ -71,6 +70,8 @@ inline auto is_good_x_corner(const std::vector<float>& zero_crossings) -> bool
       dirs.col(1).dot(dirs.col(3)) < std::cos(angle_thres);
 
   return two_crossing_lines;
+#else
+  return four_zero_crossings;
 #endif
 }
 
