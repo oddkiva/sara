@@ -146,9 +146,9 @@ auto __main(int argc, char** argv) -> int
     // Harris cornerness parameters.
     //
     // Blur parameter before gradient calculation.
-    const auto sigma_D = argc < 3 ? 1.f : std::stof(argv[2]);
+    const auto sigma_D = argc < 3 ? 0.8f : std::stof(argv[2]);
     // Integration domain of the second moment.
-    const auto sigma_I = argc < 4 ? 3.f : std::stof(argv[3]);
+    const auto sigma_I = argc < 4 ? 2.4f : std::stof(argv[3]);
     // Threshold parameter.
     const auto kappa = argc < 5 ? 0.04f : std::stof(argv[4]);
     const auto cornerness_adaptive_thres =
@@ -392,7 +392,7 @@ auto __main(int argc, char** argv) -> int
         const Eigen::Vector2i e =
             curve.back().array().round().matrix().cast<int>();
 
-        static constexpr auto strong_edge_thres = 4.f / 255.f;
+        static constexpr auto strong_edge_thres = 2.f / 255.f;
         if (!is_strong_edge(ed.pipeline.gradient_magnitude, curvei,
                             strong_edge_thres))
           continue;
@@ -420,11 +420,12 @@ auto __main(int argc, char** argv) -> int
       sara::get_key();
 #endif
 
+// #define USE_MAGIC_CONSTANT
+#ifdef USE_MAGIC_CONSTANT
       // This magic constant works well in my experiments.
-#if 0
       const auto corner_edge_linking_radius = 4;
 #else
-      const auto& corner_edge_linking_radius = static_cast<int>(std::round(radius * 0.5f));
+      const auto& corner_edge_linking_radius = radius;
 #endif
 
       auto edges_adjacent_to_corner = std::vector<std::unordered_set<int>>{};
