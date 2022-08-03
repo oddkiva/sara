@@ -119,10 +119,23 @@ auto __main(int argc, char** argv) -> int
         display = frame_gray.convert<sara::Rgb8>();
 
       const auto num_corners = static_cast<int>(detect._corners.size());
+
+      const auto& radius = detect._params.corner_filtering_radius;
+      const auto& scale = detect._params.downscale_factor;
+      const auto draw_corner = [radius, scale](sara::ImageView<sara::Rgb8>& display,
+                                         const Corner<float>& c,
+                                         const sara::Rgb8& color,
+                                         int thickness) {
+        const Eigen::Vector2i p1 = (scale * c.coords).array().round().cast<int>();
+        sara::fill_circle(display, p1.x(), p1.y(), 1, sara::Yellow8);
+        sara::draw_circle(display, p1.x(), p1.y(),
+                          static_cast<int>(std::round(radius * scale)), color,
+                          thickness);
+      };
+
 #pragma omp parallel for
       for (auto c = 0; c < num_corners; ++c)
       {
-        const auto& p = detect._corners[c];
         const auto good = sara::is_seed_corner(   //
             detect._edges_adjacent_to_corner[c],  //
             detect._gradient_peaks_refined[c],    //
@@ -134,34 +147,30 @@ auto __main(int argc, char** argv) -> int
         if (detect._edges_adjacent_to_corner[c].empty())
           continue;
 
-        const auto& radius = detect._params.corner_filtering_radius;
-        const auto& scale = detect._params.downscale_factor;
-        sara::fill_circle(display,
-                          static_cast<int>(std::round(scale * p.coords.x())),
-                          static_cast<int>(std::round(scale * p.coords.y())), 1,
-                          sara::Yellow8);
-        sara::draw_circle(display,
-                          static_cast<int>(std::round(scale * p.coords.x())),
-                          static_cast<int>(std::round(scale * p.coords.y())),
-                          static_cast<int>(std::round(radius * scale)),
-                          good ? sara::Red8 : sara::Cyan8, 2);
+        const auto& corner = detect._corners[c];
+        draw_corner(display, corner, good ? sara::Red8 : sara::Cyan8, 2);
       }
       sara::draw_text(display, 80, 80, std::to_string(frame_number),
                       sara::White8, 60, 0, false, true);
 
       const auto& corners = detect._corners;
       const auto& lines = detect._lines;
-      const auto& scale = detect._params.downscale_factor;
       for (const auto& line : lines)
       {
         for (auto i = 0u; i < line.size() - 1; ++i)
         {
-          const Eigen::Vector2f a = corners[line[i]].coords * scale;
-          const Eigen::Vector2f b = corners[line[i + 1]].coords * scale;
+          const auto& ca = corners[line[i]];
+          const auto& cb = corners[line[i + 1]];
+          const Eigen::Vector2f a = ca.coords * scale;
+          const Eigen::Vector2f b = cb.coords * scale;
           sara::draw_line(display, a, b, sara::Cyan8, 2);
+          draw_corner(display, ca, sara::Green8, 3);
+          draw_corner(display, cb, sara::Green8, 3);
         }
       }
 
+#define SHOW_SQUARES
+#ifdef SHOW_SQUARES
       const auto draw_square = [&corners, scale,
                                 &display](const auto& square,  //
                                           const auto& color,   //
@@ -179,6 +188,7 @@ auto __main(int argc, char** argv) -> int
 
       for (const auto& square : detect._black_squares)
         draw_square(square, sara::Green8, 2);
+#endif
 
       sara::display(display);
       if (pause)

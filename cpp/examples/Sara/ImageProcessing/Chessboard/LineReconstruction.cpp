@@ -20,6 +20,7 @@ find_edge(const int a, const int b,
 }
 
 // Greedy strategy...
+// Lots of parameters and dirty thresholds... see if we can do better.
 auto find_next_line_segment(
     const int ia, const int ib, const int current_edge_id,
     const std::vector<int>& edges_added,
@@ -48,17 +49,24 @@ auto find_next_line_segment(
       continue;
     const Eigen::Vector2f ge = edge_grad_mean[edge_id].normalized();
     const auto gradient_oppositeness = current_grad_mean.dot(ge);
-    if (gradient_oppositeness > cos(160.f / 180.f * M_PI))
+    if (gradient_oppositeness > cos(145.f / 180.f * M_PI))
       continue;
 
     const auto& edge_inertia = edge_stats.inertias[edge_id];
     const auto sim = similarity(current_edge_inertia, edge_inertia);
-    if (sim < cos(20.f / 180.f * M_PI))
+    if (sim < cos(45.f / 180.f * M_PI))
       continue;
 
+    const auto& box = edge_stats.oriented_box(edge_id);
+    const auto relative_thickness = box.lengths(1) / box.lengths(0);
+    const auto is_thick = relative_thickness > 0.2 && box.lengths(1) > 5.;
+    if (is_thick)
+      continue;
+
+
+    // The distribution of gradients should not show a broken edges.
     const auto& grad_cov = edge_grad_cov[edge_id];
-    // No corners in this edge, please.
-    static constexpr auto kappa = 0.1f;
+    static constexpr auto kappa = 0.2f;
     using DO::Sara::square;
     const auto cornerness = grad_cov.determinant() -  //
                             kappa * square(grad_cov.trace());
