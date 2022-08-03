@@ -164,8 +164,8 @@ auto __main(int argc, char** argv) -> int
           const Eigen::Vector2f a = ca.coords * scale;
           const Eigen::Vector2f b = cb.coords * scale;
           sara::draw_line(display, a, b, sara::Cyan8, 2);
-          draw_corner(display, ca, sara::Green8, 3);
-          draw_corner(display, cb, sara::Green8, 3);
+          draw_corner(display, ca, sara::Green8, 2);
+          draw_corner(display, cb, sara::Green8, 2);
         }
       }
 

@@ -131,6 +131,26 @@ auto reconstruct_black_square_from_corner(
   if (vmin != square.begin())
     std::rotate(square.begin(), vmin, square.end());
 
+  // Validate the square.
+  auto distinct_vertices = std::unordered_set<int>{};
+  for (const auto& v: square)
+    distinct_vertices.insert(v);
+  if (distinct_vertices.size() != 4)
+    return std::nullopt;
+
+  // Validation with the side lengths.
+  auto side_lengths = std::array<float, 4>{};
+  for (auto i = 0; i < 4; ++i)
+  {
+    const auto& a = corners[square[i]].coords;
+    const auto& b = corners[square[(i + 1) % 4]].coords;
+    side_lengths[i] = (b - a).norm();
+  }
+  const auto [lmin, lmax] = std::minmax_element(side_lengths.begin(), side_lengths.end());
+  const auto ratio = *lmin / *lmax;
+  if (ratio < 0.1)
+    return std::nullopt;
+
   return square;
 }
 
