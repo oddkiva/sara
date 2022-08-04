@@ -134,6 +134,7 @@ namespace DO::Sara {
     auto select_seed_corners() -> void;
 
     auto parse_squares() -> void;
+    // TODO: redo this.
     auto parse_lines() -> void;
 
     Image<float> _f_blurred;

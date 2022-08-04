@@ -154,6 +154,7 @@ auto __main(int argc, char** argv) -> int
                       sara::White8, 60, 0, false, true);
 
       const auto& corners = detect._corners;
+#ifdef SHOW_LINES
       const auto& lines = detect._lines;
       for (const auto& line : lines)
       {
@@ -168,6 +169,7 @@ auto __main(int argc, char** argv) -> int
           draw_corner(display, cb, sara::Green8, 2);
         }
       }
+#endif
 
 #define SHOW_SQUARES
 #ifdef SHOW_SQUARES
@@ -182,10 +184,8 @@ auto __main(int argc, char** argv) -> int
           sara::draw_line(display, a, b, color, thickness);
         }
       };
-
       for (const auto& square : detect._white_squares)
         draw_square(square, sara::Red8, 3);
-
       for (const auto& square : detect._black_squares)
         draw_square(square, sara::Green8, 2);
 #endif

@@ -117,7 +117,7 @@ auto reconstruct_black_square_from_corner(
         det = d;
       }
     }
-    if (det <= 0)
+    if (det <= 0.5)
       return std::nullopt;
     edge = next_edge;
   }
@@ -138,6 +138,8 @@ auto reconstruct_black_square_from_corner(
   if (distinct_vertices.size() != 4)
     return std::nullopt;
 
+#define OLD
+#ifdef OLD
   // Validation with the side lengths.
   auto side_lengths = std::array<float, 4>{};
   for (auto i = 0; i < 4; ++i)
@@ -148,8 +150,29 @@ auto reconstruct_black_square_from_corner(
   }
   const auto [lmin, lmax] = std::minmax_element(side_lengths.begin(), side_lengths.end());
   const auto ratio = *lmin / *lmax;
-  if (ratio < 0.1)
+  if (ratio < 0.1f)
     return std::nullopt;
+#else
+  {
+    // Even if very strongly distorted, the putative square should look like a
+    // parallelogram.
+    const auto& a = corners[square[0]].coords;
+    const auto& b = corners[square[1]].coords;
+    const auto& c = corners[square[2]].coords;
+    const auto& d = corners[square[3]].coords;
+    const Eigen::Vector2f ac = c - a;
+    const Eigen::Vector2f bd = d - b;
+
+    // calculate the mid-point.
+    const Eigen::Vector2f m1 = (a + c) * 0.5f;
+    const Eigen::Vector2f m2 = (b + d) * 0.5f;
+
+    const float rel_diff = (m1 - m2).norm() / std::min(ac.norm(), bd.norm());
+    if (rel_diff > 0.1f)
+      return std::nullopt;
+  }
+
+#endif
 
   return square;
 }
@@ -250,7 +273,7 @@ auto reconstruct_white_square_from_corner(
         det = d;
       }
     }
-    if (det >= 0)
+    if (det >= -0.5f)
       return std::nullopt;
     edge = next_edge;
   }
