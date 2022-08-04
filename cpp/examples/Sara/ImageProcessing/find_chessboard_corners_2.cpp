@@ -17,7 +17,6 @@
 #include <unordered_map>
 
 #include <DO/Sara/Core/TicToc.hpp>
-#include <DO/Sara/DisjointSets/TwoPassConnectedComponents.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
@@ -27,11 +26,9 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
-#include <DO/Sara/ImageProcessing/Watershed.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include "Chessboard/Erode.hpp"
-#include "Chessboard/NonMaximumSuppression.hpp"
 
 
 namespace sara = DO::Sara;
