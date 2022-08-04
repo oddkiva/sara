@@ -209,17 +209,23 @@ auto resize_chessboard_if_necessary(Chessboard& cb,
 }
 
 auto grow_chessboard(const std::int32_t seed_square_id,
-                     const std::vector<Square>& squares,
-                     const EdgeIdList& edge_ids,
+                     const std::vector<Corner<float>>& corners,
+                     std::vector<Square>& squares, const EdgeIdList& edge_ids,
                      const SquaresAdjacentToEdge& squares_adj_to_edge,
                      std::vector<std::uint8_t>& is_square_visited) -> Chessboard
 {
   // Initialize the chessboard with seed square.
-  const auto seed_sq = ChessboardSquare{
-      .id = seed_square_id,            //
-      .pos = Eigen::Vector2i::Zero(),  //
-      .dirs = {}                       //
-  };
+  auto seed_sq = ChessboardSquare{};
+  seed_sq.id = seed_square_id;
+  seed_sq.pos = Eigen::Vector2i::Zero();
+
+  const auto& square = squares[seed_square_id].v;
+  for (auto i = 0; i < 4; ++i)
+  {
+    const auto& a = corners[square[i]].coords;
+    const auto& b = corners[square[(i + 1) % 4]].coords;
+    seed_sq.dirs[i] = (b - a).normalized();
+  }
 
   auto cb = Chessboard{{seed_sq}};
 
@@ -284,11 +290,36 @@ auto grow_chessboard(const std::int32_t seed_square_id,
       else if (allocated_square.id != neighbor_square_id)
         std::cerr << "TODO: choose the best neighbor..." << std::endl;
 
-      queue.push(ChessboardSquare{
-          .id = neighbor_square_id,      //
-          .pos = curr_sq.pos + dirs[i],  //
-          .dirs = {}                     //
-      });
+      // Change the order of the neighbor square vertices so that its sides are
+      // enumerated in the same order.
+      auto& neighbor_vertices = squares[neighbor_square_id].v;
+      const auto curr_dirs = curr_sq.dirs;
+      auto neighbor_dirs = std::array<Eigen::Vector2f, 4>{};
+      for (auto i = 0; i < 4; ++i)
+      {
+        std::rotate(neighbor_vertices.begin(), neighbor_vertices.begin() + 1,
+                    neighbor_vertices.end());
+        for (auto k = 0; k < 4; ++k)
+        {
+          const auto& a = corners[neighbor_vertices[i]].coords;
+          const auto& b = corners[neighbor_vertices[(i + 1) % 4]].coords;
+          neighbor_dirs[k] = (b - a).normalized();
+        }
+
+        auto dots = std::array<float, 4>{};
+        std::transform(curr_dirs.begin(), curr_dirs.end(),
+                       neighbor_dirs.begin(), dots.begin(),
+                       [](const Eigen::Vector2f& a, const Eigen::Vector2f& b) {
+                         return a.dot(b);
+                       });
+        if (std::all_of(dots.begin(), dots.end(),
+                        [](const auto& dot) { return dot > 0.8f; }))
+          break;
+      }
+      // Save the new direction.
+      allocated_square.dirs = neighbor_dirs;
+
+      queue.push(allocated_square);
     }
   }
 
@@ -469,7 +500,7 @@ auto __main(int argc, char** argv) -> int
       const auto& black_squares = detect._black_squares;
       const auto& white_squares = detect._black_squares;
 
-      const auto squares = to_list(black_squares, white_squares);
+      auto squares = to_list(black_squares, white_squares);
 
       // Populate edge IDs.
       const auto edge_ids = populate_edge_ids(squares);
@@ -483,16 +514,17 @@ auto __main(int argc, char** argv) -> int
       for (auto s = 0u; s < squares.size(); ++s)
         square_ids.push(s);
 
-
+      // Build chessboards.
       auto chessboards = std::vector<Chessboard>{};
       while (!square_ids.empty())
       {
         // The seed square.
-        const auto s = square_ids.front();
-        const auto square = squares[s];
+        const auto square_id = square_ids.front();
         square_ids.pop();
-        if (is_square_visited[s])
+        if (is_square_visited[square_id])
           continue;
+        grow_chessboard(square_id, corners, squares, edge_ids,
+                        squares_adj_to_edge, is_square_visited);
       }
 
       if (pause)
