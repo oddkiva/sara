@@ -37,56 +37,6 @@
 namespace sara = DO::Sara;
 
 
-struct Corner
-{
-  Eigen::Vector2i coords;
-  float score;
-  auto position() const -> const Eigen::Vector2i&
-  {
-    return coords;
-  }
-  auto operator<(const Corner& other) const -> bool
-  {
-    return score < other.score;
-  }
-};
-
-// Select the local maxima of the cornerness functions.
-auto select(const sara::ImageView<float>& cornerness,
-            const float cornerness_adaptive_thres) -> std::vector<Corner>
-{
-  const auto extrema = sara::local_maxima(cornerness);
-
-  const auto cornerness_max = cornerness.flat_array().maxCoeff();
-  const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
-
-  auto extrema_filtered = std::vector<Corner>{};
-  extrema_filtered.reserve(extrema.size());
-  for (const auto& p : extrema)
-    if (cornerness(p) > cornerness_thres)
-      extrema_filtered.push_back({p, cornerness(p)});
-  return extrema_filtered;
-};
-
-
-auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
-                 const sara::ImageView<sara::Rgb8>& image)
-{
-  auto colors = std::unordered_map<int, sara::Rgb8>{};
-  for (const auto& [label, points] : regions)
-  {
-    const auto num_points = static_cast<float>(points.size());
-    Eigen::Vector3f color = Eigen::Vector3f::Zero();
-    for (const auto& p : points)
-      color += image(p).cast<float>();
-    color /= num_points;
-
-    colors[label] = color.cast<std::uint8_t>();
-  }
-  return colors;
-}
-
-
 auto __main(int argc, char** argv) -> int
 {
   omp_set_num_threads(omp_get_max_threads());
