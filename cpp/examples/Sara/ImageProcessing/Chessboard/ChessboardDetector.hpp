@@ -107,6 +107,14 @@ namespace DO::Sara {
       }
     };
 
+    using Square = std::array<int, 4>;
+    static constexpr auto compare_square = [](const Square& a,
+                                              const Square& b) {
+      return std::lexicographical_compare(a.begin(), a.end(),  //
+                                          b.begin(), b.end());
+    };
+    using SquareSet = std::set<Square, decltype(compare_square)>;
+
     inline ChessboardDetector() = default;
 
     inline explicit ChessboardDetector(const Parameters& params)
@@ -166,14 +174,6 @@ namespace DO::Sara {
     std::vector<Eigen::Matrix2f> _edge_grad_covs;
 
     std::unordered_set<int> _best_corners;
-
-    using Square = std::array<int, 4>;
-    static constexpr auto compare_square = [](const Square& a,
-                                              const Square& b) {
-      return std::lexicographical_compare(a.begin(), a.end(),  //
-                                          b.begin(), b.end());
-    };
-    using SquareSet = std::set<Square, decltype(compare_square)>;
 
     SquareSet _black_squares = SquareSet{compare_square};
     SquareSet _white_squares = SquareSet{compare_square};
