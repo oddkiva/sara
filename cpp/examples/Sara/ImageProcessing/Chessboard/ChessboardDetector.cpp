@@ -117,7 +117,7 @@ namespace DO::Sara {
 
 
   auto ChessboardDetector::operator()(const ImageView<float>& image)
-      -> Chessboard
+      -> const std::vector<Chessboard>&
   {
     preprocess_image(image);
     filter_edges();
@@ -133,9 +133,12 @@ namespace DO::Sara {
 
     select_seed_corners();
     parse_squares();
+    grow_chessboards();
+
+    // TODO:
     parse_lines();
 
-    return {};
+    return _chessboards;
   }
 
   auto ChessboardDetector::preprocess_image(const ImageView<float>& image)
@@ -432,7 +435,7 @@ namespace DO::Sara {
           _edges_adjacent_to_corner, _corners_adjacent_to_edge);
       if (square == std::nullopt)
         continue;
-      _black_squares.insert(*square);
+      _black_squares.insert({*square, Square::Type::Black});
     }
     toc("Black square reconstruction");
 
@@ -446,7 +449,7 @@ namespace DO::Sara {
       if (square == std::nullopt)
         continue;
 
-      _white_squares.insert(*square);
+      _white_squares.insert({*square, Square::Type::White});
     }
     toc("White square reconstruction");
   }
@@ -460,7 +463,7 @@ namespace DO::Sara {
     for (const auto& square : _black_squares)
     {
       const auto new_lines = grow_lines_from_square(
-          square, _corners, _edge_stats, _edge_grad_means, _edge_grad_covs,
+          square.v, _corners, _edge_stats, _edge_grad_means, _edge_grad_covs,
           _edges_adjacent_to_corner, _corners_adjacent_to_edge);
 
       _lines.insert(_lines.end(), new_lines.begin(), new_lines.end());
@@ -469,13 +472,60 @@ namespace DO::Sara {
     for (const auto& square : _white_squares)
     {
       const auto new_lines = grow_lines_from_square(
-          square, _corners, _edge_stats, _edge_grad_means, _edge_grad_covs,
+          square.v, _corners, _edge_stats, _edge_grad_means, _edge_grad_covs,
           _edges_adjacent_to_corner, _corners_adjacent_to_edge);
 
       _lines.insert(_lines.end(), new_lines.begin(), new_lines.end());
     }
 
-    toc("Line Reconstruction");
+    toc("Line reconstruction");
+  }
+
+  auto ChessboardDetector::grow_chessboards() -> void
+  {
+    tic();
+
+    _squares = to_list(_black_squares, _white_squares);
+
+    // Create IDs for each square edge.
+    const auto edge_ids = populate_edge_ids(_squares);
+    // Populate the list of squares adjacent to each edge.
+    const auto squares_adj_to_edge =
+        populate_squares_adj_to_edge(edge_ids, _squares);
+
+    // The state of the region growing procedure..
+    auto is_square_visited = std::vector<std::uint8_t>(_squares.size(), 0);
+
+    // Initialize the list of squares from which we will grow chessboards.
+    auto square_ids = std::queue<int>{};
+    for (auto s = 0u; s < _squares.size(); ++s)
+      square_ids.push(s);
+
+    // For debugging purposes
+    auto display = _f_blurred.convert<sara::Rgb8>();
+
+    // Recover the chessboards.
+    _chessboards.clear();
+    while (!square_ids.empty())
+    {
+      // The seed square.
+      const auto square_id = square_ids.front();
+      square_ids.pop();
+      if (is_square_visited[square_id])
+        continue;
+
+      // Grow the chessboard from the seed square.
+      auto cb = grow_chessboard(                    //
+          square_id,                                // Seed square
+          _corners,                                 // Corner locations
+          _squares, edge_ids, squares_adj_to_edge,  // Square graph
+          is_square_visited,                        // Region growing state
+          _params.downscale_factor, display);
+
+      _chessboards.emplace_back(std::move(cb));
+    }
+
+    toc("Chessboard growing");
   }
 
 }  // namespace DO::Sara

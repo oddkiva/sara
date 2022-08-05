@@ -13,14 +13,14 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/Image.hpp>
-
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 
-#include "Chessboard.hpp"
 #include "CircularProfileExtractor.hpp"
 #include "Corner.hpp"
+#include "SquareGraph.hpp"
 
 #include <set>
 #include <unordered_set>
@@ -107,14 +107,6 @@ namespace DO::Sara {
       }
     };
 
-    using Square = std::array<int, 4>;
-    static constexpr auto compare_square = [](const Square& a,
-                                              const Square& b) {
-      return std::lexicographical_compare(a.begin(), a.end(),  //
-                                          b.begin(), b.end());
-    };
-    using SquareSet = std::set<Square, decltype(compare_square)>;
-
     inline ChessboardDetector() = default;
 
     inline explicit ChessboardDetector(const Parameters& params)
@@ -129,7 +121,7 @@ namespace DO::Sara {
     }
 
     DO_SARA_EXPORT
-    auto operator()(const ImageView<float>& image) -> Chessboard;
+    auto operator()(const ImageView<float>& image) -> const std::vector<::Chessboard>&;
 
     auto preprocess_image(const ImageView<float>& image) -> void;
     auto filter_edges() -> void;
@@ -142,7 +134,10 @@ namespace DO::Sara {
     auto select_seed_corners() -> void;
 
     auto parse_squares() -> void;
-    // TODO: redo this.
+    auto grow_chessboards() -> void;
+
+    // TODO: redo this but this time with a smarter geometric modelling of the
+    // distorted lines.
     auto parse_lines() -> void;
 
     Image<float> _f_blurred;
@@ -178,6 +173,12 @@ namespace DO::Sara {
 
     SquareSet _black_squares = SquareSet{compare_square};
     SquareSet _white_squares = SquareSet{compare_square};
+
+    // Chessboards grown from the list of squares.
+    std::vector<::Square> _squares;
+    std::vector<Chessboard> _chessboards;
+
+    // TODO: Recover missed corners.
     std::vector<std::vector<int>> _lines;
 
     Parameters _params;
