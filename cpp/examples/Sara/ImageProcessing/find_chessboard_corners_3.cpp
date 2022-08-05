@@ -26,16 +26,42 @@
 namespace sara = DO::Sara;
 
 
+struct PairHash final
+{
+  template <typename T, typename U>
+  size_t operator()(const std::pair<T, U>& p) const noexcept
+  {
+    uintmax_t hash = std::hash<T>{}(p.first);
+    hash <<= sizeof(uintmax_t) * 4;
+    hash ^= std::hash<U>{}(p.second);
+    return std::hash<uintmax_t>{}(hash);
+  }
+};
+
 using corner_id_t = std::int32_t;
 using edge_id_t = std::int32_t;
 using edge_t = std::pair<int, int>;
 using square_id_t = std::int32_t;
-using EdgeIdList = std::unordered_map<edge_t, edge_id_t>;
+using EdgeIdList = std::map<edge_t, edge_id_t>;
 using SquareSet = sara::ChessboardDetector::SquareSet;
 using SquaresAdjacentToEdge =
     std::unordered_map<edge_id_t, std::unordered_set<square_id_t>>;
 using EdgesAdjacentToCorner =
     std::unordered_map<corner_id_t, std::unordered_set<edge_id_t>>;
+
+auto draw_square(const std::vector<Corner<float>>& corners, float scale,
+                 sara::ImageView<sara::Rgb8>& disp,
+                 const std::array<int, 4>& square,  //
+                 const sara::Rgb8& color,           //
+                 const int thickness) -> void
+{
+  for (auto i = 0; i < 4; ++i)
+  {
+    const Eigen::Vector2f a = corners[square[i]].coords * scale;
+    const Eigen::Vector2f b = corners[square[(i + 1) % 4]].coords * scale;
+    sara::draw_line(disp, a, b, color, thickness);
+  }
+};
 
 struct ChessboardSquare
 {
@@ -74,6 +100,15 @@ auto to_list(const SquareSet& black_squares, const SquareSet& white_squares)
   return squares;
 }
 
+auto to_matrix(const Chessboard& cb) -> Eigen::MatrixXi
+{
+  auto m = Eigen::MatrixXi{cb.size(), cb.front().size()};
+  for (auto i = 0; i < m.rows(); ++i)
+    for (auto j = 0; j < m.cols(); ++j)
+      m(i, j) = cb[i][j].id;
+  return m;
+}
+
 auto populate_edge_ids(const std::vector<Square>& squares) -> EdgeIdList
 {
   auto edge_ids = EdgeIdList{};
@@ -83,12 +118,23 @@ auto populate_edge_ids(const std::vector<Square>& squares) -> EdgeIdList
   {
     for (auto i = 0; i < 4; ++i)
     {
+#ifdef DEBUG_EDGE_IDS
+      SARA_CHECK(edge_id);
+#endif
       const auto& a = square.v[i];
       const auto& b = square.v[(i + 1) % 4];
-      edge_ids[{a, b}] = edge_id++;
-      edge_ids[{b, a}] = edge_id++;
+      if (edge_ids.find({a, b}) == edge_ids.end())
+        edge_ids[{a, b}] = edge_id++;
+      if (edge_ids.find({b, a}) == edge_ids.end())
+        edge_ids[{b, a}] = edge_id++;
     }
   }
+
+#ifdef DEBUG_EDGE_IDS
+  for (const auto& [edge, edge_id] : edge_ids)
+    SARA_DEBUG << edge_id << " = " << edge.first << " -> " << edge.second
+               << std::endl;
+#endif
 
   return edge_ids;
 }
@@ -99,10 +145,14 @@ auto populate_squares_adj_to_edge(const EdgeIdList& edge_ids,
 {
   auto squares_adj_to_edge = SquaresAdjacentToEdge{};
 
+  SARA_CHECK(squares.size());
   for (auto s = 0u; s < squares.size(); ++s)
   {
     const auto s_id = static_cast<int>(s);
     const auto& square = squares[s];
+    SARA_DEBUG << "square " << s_id << " -> "
+               << Eigen::Map<const Eigen::RowVector4i>(square.v.data())
+               << std::endl;
     for (auto i = 0; i < 4; ++i)
     {
       const auto& a = square.v[i];
@@ -149,10 +199,15 @@ auto resize_chessboard_if_necessary(Chessboard& cb,
                                     const Eigen::Vector2i& curr_pos,
                                     const Eigen::Vector2i& dir) -> void
 {
-  const Eigen::Vector2i curr_pos_in_cb = curr_pos - cb.front().front().pos;
+  SARA_DEBUG << "RESIZING CHESSBOARD" << std::endl;
+  const auto& anchor_pos = cb.front().front().pos;
+  const Eigen::Vector2i curr_pos_in_cb = curr_pos - anchor_pos;
   const Eigen::Vector2i next_pos_in_cb = curr_pos_in_cb + dir;
+  SARA_DEBUG << "- CURR = " << curr_pos_in_cb.transpose() << std::endl;
+  SARA_DEBUG << "- DIR  = " << dir.transpose() << std::endl;
+  SARA_DEBUG << "- NEXT = " << next_pos_in_cb.transpose() << std::endl;
   const auto row = next_pos_in_cb.y();
-  const auto col = next_pos_in_cb.y();
+  const auto col = next_pos_in_cb.x();
 
   if (row < 0)
   {
@@ -161,12 +216,12 @@ auto resize_chessboard_if_necessary(Chessboard& cb,
     for (auto x = 0; x <= curr_pos_in_cb.x(); ++x)
     {
       new_row.push_back(ChessboardSquare{
-          .id = -1,                                     //
-          .pos = Eigen::Vector2i{x, curr_pos.y() - 1},  //
-          .dirs = {}                                    //
+          .id = -1,                                                      //
+          .pos = Eigen::Vector2i{anchor_pos.x() + x, curr_pos.y() - 1},  //
+          .dirs = {}                                                     //
       });
     }
-    cb.emplace_front(new_row);
+    cb.emplace_front(std::move(new_row));
   }
   else if (row == static_cast<int>(cb.size()))
   {
@@ -175,12 +230,12 @@ auto resize_chessboard_if_necessary(Chessboard& cb,
     for (auto x = 0; x <= curr_pos_in_cb.x(); ++x)
     {
       new_row.push_back(ChessboardSquare{
-          .id = -1,                                     //
-          .pos = Eigen::Vector2i{x, curr_pos.y() + 1},  //
-          .dirs = {}                                    //
+          .id = -1,                                                      //
+          .pos = Eigen::Vector2i{anchor_pos.x() + x, curr_pos.y() + 1},  //
+          .dirs = {}                                                     //
       });
     }
-    cb.emplace_back(new_row);
+    cb.emplace_back(std::move(new_row));
   }
   if (col < 0)
   {
@@ -189,19 +244,19 @@ auto resize_chessboard_if_necessary(Chessboard& cb,
     {
       cb[y].push_front(ChessboardSquare{
           .id = -1,
-          .pos = Eigen::Vector2i{curr_pos_in_cb.x() - 1, y},
+          .pos = Eigen::Vector2i{curr_pos_in_cb.x() - 1, anchor_pos.y() + y},
           .dirs = {}  //
       });
     }
   }
-  else if (col == static_cast<int>(cb.size()))
+  else if (col == static_cast<int>(cb.front().size()))
   {
     // Add a new column at the end.
     for (auto y = 0u; y < cb.size(); ++y)
     {
-      cb[y].push_front(ChessboardSquare{
+      cb[y].push_back(ChessboardSquare{
           .id = -1,
-          .pos = Eigen::Vector2i{curr_pos_in_cb.x() - 1, y},
+          .pos = Eigen::Vector2i{curr_pos_in_cb.x() + 1, anchor_pos.y() + y},
           .dirs = {}  //
       });
     }
@@ -210,9 +265,12 @@ auto resize_chessboard_if_necessary(Chessboard& cb,
 
 auto grow_chessboard(const std::int32_t seed_square_id,
                      const std::vector<Corner<float>>& corners,
-                     std::vector<Square>& squares, const EdgeIdList& edge_ids,
+                     std::vector<Square>& squares,  //
+                     const EdgeIdList& edge_ids,
                      const SquaresAdjacentToEdge& squares_adj_to_edge,
-                     std::vector<std::uint8_t>& is_square_visited) -> Chessboard
+                     std::vector<std::uint8_t>& is_square_visited,
+                     const float scale, sara::ImageView<sara::Rgb8>& display)
+    -> Chessboard
 {
   // Initialize the chessboard with seed square.
   auto seed_sq = ChessboardSquare{};
@@ -250,8 +308,21 @@ auto grow_chessboard(const std::int32_t seed_square_id,
 
     // Look in each cardinal direction.
     const auto& square = squares[curr_sq.id];
+
+#define INSPECT_REGION_GROWING
+#ifdef INSPECT_REGION_GROWING
+    SARA_DEBUG << "SQUARE: " << curr_sq.id << "\n"
+               << Eigen::Map<const Eigen::RowVector4i>(square.v.data())
+               << std::endl;
+    SARA_DEBUG << "CHESSBOARD:\n" << to_matrix(cb) << std::endl;
+    draw_square(corners, scale, display, square.v, sara::Green8, 3);
+    sara::display(display);
+#endif
+
     for (auto i = 0; i < 4; ++i)
     {
+      SARA_DEBUG << "SEARCH DIRECTION " << i << std::endl;
+      SARA_DEBUG << "DIR VECTOR     = " << dirs[i].transpose() << std::endl;
       const auto& a = square.v[i];
       const auto& b = square.v[(i + 1) % 4];
       const auto& ab = edge_ids.at({a, b});
@@ -272,16 +343,32 @@ auto grow_chessboard(const std::int32_t seed_square_id,
         std::cerr << "TODO: address ambiguity later..." << std::endl;
         continue;
       }
+      SARA_DEBUG << "Neighbor squares: ";
+      for (const auto& square : neighbor_squares)
+        std::cout << square << ", ";
+      std::cout << std::endl;
+
+      if (neighbor_squares.empty())
+        continue;
+
+      const auto& neighbor_square_id = *neighbor_squares.begin();
+      SARA_DEBUG << "NEIGHBOR ID = " << neighbor_square_id << std::endl;
 
       // Reallocate the chessboard.
       resize_chessboard_if_necessary(cb, curr_sq.pos, dirs[i]);
+      SARA_DEBUG << "[BEFORE] CHESSBOARD:\n" << to_matrix(cb) << std::endl;
+      SARA_DEBUG << "CB ANCHOR COORDS = " << cb.front().front().pos.transpose()
+                 << std::endl;
 
       // Retrieve the allocated square in the chessboard.
-      const auto& neighbor_square_id = *neighbor_squares.begin();
       const Eigen::Vector2i neighbor_pos = curr_sq.pos -             //
                                            cb.front().front().pos +  //
                                            dirs[i];
+      SARA_DEBUG << "CB NEIGHB COORDS = " << neighbor_pos.transpose()
+                 << std::endl;
 
+
+      // Retrieve the corresponding square in the chessboard.
       auto& allocated_square = cb[neighbor_pos.y()][neighbor_pos.x()];
       // Update the chessboard with the newsquare.
       if (allocated_square.id == -1)
@@ -293,6 +380,11 @@ auto grow_chessboard(const std::int32_t seed_square_id,
       // Change the order of the neighbor square vertices so that its sides are
       // enumerated in the same order.
       auto& neighbor_vertices = squares[neighbor_square_id].v;
+      SARA_DEBUG << "NEIGHBOR SQUARE: "
+                 << Eigen::Map<const Eigen::RowVector4i>(
+                        neighbor_vertices.data())
+                 << std::endl;
+
       const auto curr_dirs = curr_sq.dirs;
       auto neighbor_dirs = std::array<Eigen::Vector2f, 4>{};
       for (auto i = 0; i < 4; ++i)
@@ -319,7 +411,16 @@ auto grow_chessboard(const std::int32_t seed_square_id,
       // Save the new direction.
       allocated_square.dirs = neighbor_dirs;
 
-      queue.push(allocated_square);
+#ifdef INSPECT_REGION_GROWING
+      SARA_DEBUG << "[AFTER ] CHESSBOARD:\n" << to_matrix(cb) << std::endl;
+      draw_square(corners, scale, display, neighbor_vertices, sara::Magenta8,
+                  3);
+      sara::display(display);
+      sara::get_key();
+#endif
+
+      if (!is_square_visited[neighbor_square_id])
+        queue.push(allocated_square);
     }
   }
 
@@ -477,28 +578,17 @@ auto __main(int argc, char** argv) -> int
 
 #define SHOW_SQUARES
 #ifdef SHOW_SQUARES
-      const auto draw_square = [&corners, scale,
-                                &display](const auto& square,  //
-                                          const auto& color,   //
-                                          const int thickness) {
-        for (auto i = 0; i < 4; ++i)
-        {
-          const Eigen::Vector2f a = corners[square[i]].coords * scale;
-          const Eigen::Vector2f b = corners[square[(i + 1) % 4]].coords * scale;
-          sara::draw_line(display, a, b, color, thickness);
-        }
-      };
       for (const auto& square : detect._white_squares)
-        draw_square(square, sara::Red8, 3);
+        draw_square(corners, scale, display, square, sara::Red8, 3);
       for (const auto& square : detect._black_squares)
-        draw_square(square, sara::Green8, 2);
+        draw_square(corners, scale, display, square, sara::Green8, 2);
 #endif
 
       sara::display(display);
-      sara::get_key();
+      sara::millisleep(20);
 
       const auto& black_squares = detect._black_squares;
-      const auto& white_squares = detect._black_squares;
+      const auto& white_squares = detect._white_squares;
 
       auto squares = to_list(black_squares, white_squares);
 
@@ -508,6 +598,11 @@ auto __main(int argc, char** argv) -> int
           populate_squares_adj_to_edge(edge_ids, squares);
       const auto [in_edges, out_edges] =
           populate_edges_adj_to_corner(edge_ids, squares);
+
+      SARA_CHECK(edge_ids.size());
+      SARA_CHECK(squares_adj_to_edge.size());
+      SARA_CHECK(in_edges.size());
+      SARA_CHECK(out_edges.size());
 
       auto is_square_visited = std::vector<std::uint8_t>(squares.size(), 0);
       auto square_ids = std::queue<int>{};
@@ -523,8 +618,14 @@ auto __main(int argc, char** argv) -> int
         square_ids.pop();
         if (is_square_visited[square_id])
           continue;
+
+        SARA_DEBUG << "SEED SQUARE = " << square_id << std::endl;
+
+        auto display = frame_gray.convert<sara::Rgb8>();
+        sara::display(display);
         grow_chessboard(square_id, corners, squares, edge_ids,
-                        squares_adj_to_edge, is_square_visited);
+                        squares_adj_to_edge, is_square_visited,  //
+                        scale, display);
       }
 
       if (pause)
