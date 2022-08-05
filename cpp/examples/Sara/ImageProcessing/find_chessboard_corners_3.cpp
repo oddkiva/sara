@@ -375,6 +375,51 @@ auto __main(int argc, char** argv) -> int
         sara::toc("Grayscale conversion");
         detect(frame_gray);
       }
+
+      // ==================================================================== //
+      // REGION GROWING
+      // ==================================================================== //
+      const auto& scale = detect._params.downscale_factor;
+      const auto& corners = detect._corners;
+      const auto& black_squares = detect._black_squares;
+      const auto& white_squares = detect._white_squares;
+
+      auto squares = to_list(black_squares, white_squares);
+
+      // Populate edge IDs.
+      const auto edge_ids = populate_edge_ids(squares);
+      const auto squares_adj_to_edge =
+          populate_squares_adj_to_edge(edge_ids, squares);
+
+      auto is_square_visited = std::vector<std::uint8_t>(squares.size(), 0);
+      auto square_ids = std::queue<int>{};
+      for (auto s = 0u; s < squares.size(); ++s)
+        square_ids.push(s);
+
+      // Build chessboards.
+      auto chessboards = std::vector<Chessboard>{};
+
+      while (!square_ids.empty())
+      {
+        // The seed square.
+        const auto square_id = square_ids.front();
+        square_ids.pop();
+        if (is_square_visited[square_id])
+          continue;
+
+        auto cb = grow_chessboard(                   //
+            square_id,                               // Seed square
+            corners,                                 // Geometry
+            squares, edge_ids, squares_adj_to_edge,  // Graph structure
+            is_square_visited,                       //
+            scale, display);
+
+        chessboards.emplace_back(std::move(cb));
+      }
+      // ==================================================================== //
+      // END OF REGION GROWING
+      // ==================================================================== //
+
       const auto pipeline_time = timer.elapsed_ms();
       SARA_DEBUG << "Processing time = " << pipeline_time << "ms" << std::endl;
 
@@ -394,7 +439,6 @@ auto __main(int argc, char** argv) -> int
       const auto num_corners = static_cast<int>(detect._corners.size());
 
       const auto& radius = detect._params.corner_filtering_radius;
-      const auto& scale = detect._params.downscale_factor;
       const auto draw_corner = [radius,
                                 scale](sara::ImageView<sara::Rgb8>& display,
                                        const Corner<float>& c,
@@ -427,7 +471,6 @@ auto __main(int argc, char** argv) -> int
       sara::draw_text(display, 80, 80, std::to_string(frame_number),
                       sara::White8, 60, 0, false, true);
 
-      const auto& corners = detect._corners;
 #ifdef SHOW_LINES
       const auto& lines = detect._lines;
       for (const auto& line : lines)
@@ -454,51 +497,6 @@ auto __main(int argc, char** argv) -> int
       sara::display(display);
       sara::millisleep(20);
 #endif
-
-      const auto& black_squares = detect._black_squares;
-      const auto& white_squares = detect._white_squares;
-
-      auto squares = to_list(black_squares, white_squares);
-
-      // Populate edge IDs.
-      const auto edge_ids = populate_edge_ids(squares);
-      const auto squares_adj_to_edge =
-          populate_squares_adj_to_edge(edge_ids, squares);
-      // const auto [in_edges, out_edges] =
-      //     populate_edges_adj_to_corner(edge_ids, squares);
-
-      // SARA_CHECK(edge_ids.size());
-      // SARA_CHECK(squares_adj_to_edge.size());
-      // SARA_CHECK(in_edges.size());
-      // SARA_CHECK(out_edges.size());
-
-      auto is_square_visited = std::vector<std::uint8_t>(squares.size(), 0);
-      auto square_ids = std::queue<int>{};
-      for (auto s = 0u; s < squares.size(); ++s)
-        square_ids.push(s);
-
-      // Build chessboards.
-      auto chessboards = std::vector<Chessboard>{};
-
-      while (!square_ids.empty())
-      {
-        // The seed square.
-        const auto square_id = square_ids.front();
-        square_ids.pop();
-        if (is_square_visited[square_id])
-          continue;
-
-        SARA_DEBUG << "SEED SQUARE = " << square_id << std::endl;
-
-        auto cb = grow_chessboard(                   //
-            square_id,                               // Seed square
-            corners,                                 // Geometry
-            squares, edge_ids, squares_adj_to_edge,  // Graph structure
-            is_square_visited,                       //
-            scale, display);
-
-        chessboards.emplace_back(std::move(cb));
-      }
 
       auto display = frame_gray.convert<sara::Rgb8>();
       for (const auto& cb : chessboards)
