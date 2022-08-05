@@ -274,10 +274,10 @@ namespace DO::Sara {
 #pragma omp parallel for
     for (auto i = 0; i < num_corners; ++i)
     {
-      ::compute_orientation_histogram<N>(_hists[i], _grad_norm, _grad_ori,
-                                         _corners[i].coords.x(),
-                                         _corners[i].coords.y(),  //
-                                         _params.sigma_D, 4, 5.0f);
+      compute_orientation_histogram<N>(_hists[i], _grad_norm, _grad_ori,
+                                       _corners[i].coords.x(),
+                                       _corners[i].coords.y(),  //
+                                       _params.sigma_D, 4, 5.0f);
       lowe_smooth_histogram(_hists[i]);
       _hists[i].matrix().normalize();
     };
@@ -338,7 +338,7 @@ namespace DO::Sara {
       const auto& grad_cov = _edge_grad_covs[edge_id];
       const auto grad_dist_param = 0.2f;
       const auto cornerness = grad_cov.determinant() -  //
-                              grad_dist_param * sara::square(grad_cov.trace());
+                              grad_dist_param * square(grad_cov.trace());
       if (cornerness > 0)
         continue;
 
@@ -502,7 +502,7 @@ namespace DO::Sara {
       square_ids.push(s);
 
     // For debugging purposes
-    auto display = _f_blurred.convert<sara::Rgb8>();
+    auto display = _f_blurred.convert<Rgb8>();
 
     // Recover the chessboards.
     _chessboards.clear();

@@ -67,13 +67,20 @@ namespace DO::Sara {
 
     std::array<int, 4> v;
     Type type;
+
+    inline auto operator<(const Square& other) const -> bool
+    {
+      return std::lexicographical_compare(v.begin(), v.end(),  //
+                                          other.v.begin(), other.v.end());
+    };
+
+    inline auto operator==(const Square& other) const -> bool
+    {
+      return std::equal(v.begin(), v.end(), other.v.begin());
+    }
   };
 
-  static constexpr auto compare_square = [](const Square& a, const Square& b) {
-    return std::lexicographical_compare(a.v.begin(), a.v.end(),  //
-                                        b.v.begin(), b.v.end());
-  };
-  using SquareSet = std::set<Square, decltype(compare_square)>;
+  using SquareSet = std::set<Square>;
 
 
   struct ChessboardSquare

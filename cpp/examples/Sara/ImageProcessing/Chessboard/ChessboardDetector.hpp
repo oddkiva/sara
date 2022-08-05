@@ -13,8 +13,8 @@
 
 #include <DO/Sara/Defines.hpp>
 
-#include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 
@@ -38,6 +38,7 @@ namespace DO::Sara {
       const std::vector<float>& gradient_peaks,  //
       const std::vector<float>& zero_crossings,  //
       int N) -> bool;
+
 
   class ChessboardDetector
   {
@@ -121,7 +122,8 @@ namespace DO::Sara {
     }
 
     DO_SARA_EXPORT
-    auto operator()(const ImageView<float>& image) -> const std::vector<::Chessboard>&;
+    auto operator()(const ImageView<float>& image)
+        -> const std::vector<Chessboard>&;
 
     auto preprocess_image(const ImageView<float>& image) -> void;
     auto filter_edges() -> void;
@@ -171,16 +173,17 @@ namespace DO::Sara {
 
     std::unordered_set<int> _best_corners;
 
-    SquareSet _black_squares = SquareSet{compare_square};
-    SquareSet _white_squares = SquareSet{compare_square};
+    SquareSet _black_squares;
+    SquareSet _white_squares;
 
     // Chessboards grown from the list of squares.
-    std::vector<::Square> _squares;
+    std::vector<Square> _squares;
     std::vector<Chessboard> _chessboards;
 
     // TODO: Recover missed corners.
     std::vector<std::vector<int>> _lines;
 
+    // The list of parameters.
     Parameters _params;
   };
 

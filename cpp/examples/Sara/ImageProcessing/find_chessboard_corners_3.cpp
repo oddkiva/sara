@@ -26,9 +26,10 @@
 namespace sara = DO::Sara;
 
 
-auto draw_corner(sara::ImageView<sara::Rgb8>& display, const Corner<float>& c,
-                 const int radius, const float scale, const sara::Rgb8& color,
-                 int thickness) -> void
+auto draw_corner(sara::ImageView<sara::Rgb8>& display,
+                 const sara::Corner<float>& c, const int radius,
+                 const float scale, const sara::Rgb8& color, int thickness)
+    -> void
 {
   const Eigen::Vector2i p1 = (scale * c.coords).array().round().cast<int>();
   sara::fill_circle(display, p1.x(), p1.y(), 1, sara::Yellow8);
@@ -37,11 +38,12 @@ auto draw_corner(sara::ImageView<sara::Rgb8>& display, const Corner<float>& c,
                     thickness);
 };
 
-auto draw_chessboard(sara::ImageView<sara::Rgb8>& display, const Chessboard& cb,
-                     const std::vector<Corner<float>>& corners,
-                     const std::vector<Square>& squares, const float scale,
-                     const sara::Rgb8& color,
-                     const int chessboard_edge_thickness) -> void
+auto draw_chessboard(sara::ImageView<sara::Rgb8>& display,  //
+                     const sara::Chessboard& cb,
+                     const std::vector<sara::Corner<float>>& corners,
+                     const std::vector<sara::Square>& squares,
+                     const float scale, const sara::Rgb8& color,
+                     const int thickness) -> void
 {
   for (const auto& row : cb)
   {
@@ -50,9 +52,8 @@ auto draw_chessboard(sara::ImageView<sara::Rgb8>& display, const Chessboard& cb,
       if (sq.id == -1)
         continue;
       draw_square(corners, scale, display, squares[sq.id].v, sara::White8,
-                  chessboard_edge_thickness + 1);
-      draw_square(corners, scale, display, squares[sq.id].v, color,
-                  chessboard_edge_thickness);
+                  thickness + 1);
+      draw_square(corners, scale, display, squares[sq.id].v, color, thickness);
     }
   }
 };
@@ -186,7 +187,9 @@ auto __main(int argc, char** argv) -> int
 #pragma omp parallel for
       for (auto c = 0; c < num_chessboards; ++c)
       {
-        const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
+        const auto color =
+            c == 0 ? sara::Red8
+                   : sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
         const auto& cb = chessboards[c];
         draw_chessboard(display, cb, corners, squares, scale, color,
                         chessboard_edge_thickness);
