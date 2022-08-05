@@ -26,10 +26,6 @@ sara_add_example(level_set_2d_example)
 sara_add_example(optical_flow_example)
 
 sara_add_example(watershed_example)
-sara_add_example(watershed_v2_example)
-target_link_libraries(watershed_v2_example
-  PRIVATE
-  $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
 
 add_library(ChessboardDetection STATIC
   # Utilities
