@@ -24,10 +24,10 @@
 
 
 namespace DO::Sara {
+
   // --------------------------------------------------------------------------
-  // // ID types.
+  // ID types.
   // --------------------------------------------------------------------------
-  // //
   using corner_id_t = std::int32_t;
   using edge_id_t = std::int32_t;
   using edge_t = std::pair<int, int>;
@@ -35,9 +35,8 @@ namespace DO::Sara {
 
 
   // --------------------------------------------------------------------------
-  // // Containers.
+  // Containers.
   // --------------------------------------------------------------------------
-  // //
   struct PairHash final
   {
     template <typename T, typename U>
@@ -105,9 +104,8 @@ namespace DO::Sara {
 
 
   // --------------------------------------------------------------------------
-  // // Print functions
+  // Print functions
   // --------------------------------------------------------------------------
-  // //
   inline auto print_square(const std::array<int, 4>& s)
   {
     std::cout << Eigen::Map<const Eigen::RowVector4i>(s.data());
@@ -134,9 +132,8 @@ namespace DO::Sara {
 
 
   // --------------------------------------------------------------------------
-  // // Draw functions
+  // Draw functions
   // --------------------------------------------------------------------------
-  // //
   inline auto draw_square(const std::vector<Corner<float>>& corners,
                           float scale, ImageView<Rgb8>& disp,
                           const std::array<int, 4>& square,  //
@@ -161,9 +158,8 @@ namespace DO::Sara {
 
 
   // --------------------------------------------------------------------------
-  // // Utility functions to build the graph of chessboard squares
+  // Utility functions to build the graph of chessboard squares
   // --------------------------------------------------------------------------
-  // //
   inline auto to_list(const SquareSet& black_squares,
                       const SquareSet& white_squares) -> std::vector<Square>
   {
@@ -273,9 +269,8 @@ namespace DO::Sara {
 
 
   // --------------------------------------------------------------------------
-  // // Region growing
+  // Region growing
   // --------------------------------------------------------------------------
-  // //
   inline auto resize_chessboard_if_necessary(Chessboard& cb,
                                              const Eigen::Vector2i& curr_coords,
                                              const Eigen::Vector2i& dir) -> void
