@@ -138,9 +138,10 @@ namespace DO::Sara {
 
     auto parse_squares() -> void;
     auto grow_chessboards() -> void;
+    auto extract_chessboard_corners_from_chessboard_squares() -> void;
 
-    // TODO: redo this but this time with a smarter geometric modelling of the
-    // distorted lines.
+    // TODO: redo this but this time with a smarter geometric modelling of
+    // the distorted lines.
     auto parse_lines() -> void;
 
     Image<float> _f_blurred;

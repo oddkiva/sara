@@ -134,6 +134,7 @@ namespace DO::Sara {
     select_seed_corners();
     parse_squares();
     grow_chessboards();
+    extract_chessboard_corners_from_chessboard_squares();
 
     // TODO:
     // parse_lines();
@@ -536,7 +537,11 @@ namespace DO::Sara {
     }
 
     toc("Chessboard growing");
+  }
 
+  auto ChessboardDetector::extract_chessboard_corners_from_chessboard_squares()
+      -> void
+  {
     tic();
     // Each grown chessboard consists of an ordered list of squares.
     // We want to retrieve the ordered list of corners.
