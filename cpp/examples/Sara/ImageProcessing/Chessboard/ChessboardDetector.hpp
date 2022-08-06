@@ -144,21 +144,37 @@ namespace DO::Sara {
     // the distorted lines.
     auto parse_lines() -> void;
 
+    //! @brief Preprocessed images.
+    //! @{
     Image<float> _f_blurred;
     Image<float> _f_ds;
     Image<float> _f_ds_blurred;
+    //! @}
+
+    //! @brief Intermediate feature maps used for the edge filtering and for the
+    //! corner detection.
+    //! @{
     Image<float> _grad_x, _grad_y;
     Image<float> _grad_mag, _grad_ori;
+    //! @}
 
+    //! @brief Cornerness map.
     Image<float> _cornerness;
+    //! @brief The quantized locations of corners
+    //! They are extracted from the cornerness map.
     std::vector<Corner<int>> _corners_int;
+    //! @brief The refined locations of corners.
     std::vector<Corner<float>> _corners;
 
+    //! @brief The edge detector
     EdgeDetector _ed;
 
+    //! @brief Data structures to analyze the topological structures
     std::vector<std::unordered_set<int>> _edges_adjacent_to_corner;
     std::vector<std::unordered_set<int>> _corners_adjacent_to_edge;
 
+    //! @brief Descriptors for the corners
+    //! @{
     CircularProfileExtractor _profile_extractor;
     std::vector<Eigen::ArrayXf> _profiles;
     std::vector<std::vector<float>> _zero_crossings;
@@ -167,27 +183,38 @@ namespace DO::Sara {
     std::vector<Eigen::Array<float, N, 1>> _hists;
     std::vector<std::vector<int>> _gradient_peaks;
     std::vector<std::vector<float>> _gradient_peaks_refined;
+    //! @}
 
+    //! @brief Edge shape statistics.
+    //! @{
     Image<int> _edge_label_map;
     CurveStatistics _edge_stats;
     std::vector<Eigen::Vector2f> _edge_grad_means;
     std::vector<Eigen::Matrix2f> _edge_grad_covs;
+    //! @}
 
+    //! @brief The best corners.
     std::unordered_set<int> _best_corners;
 
+    //! @brief The list of seed squares constructed in a greedy manner.
+    //! @{
     SquareSet _black_squares;
     SquareSet _white_squares;
+    //! @}
 
-    // Chessboards grown from the list of squares.
+    //! @brief Chessboards grown from the list of squares.
+    //! @{
     std::vector<Square> _squares;
     std::vector<Chessboard> _chessboards;
+    //! @}
 
-    std::vector<OrderedChessboardCorners> _cb_corners;
-
-    // TODO: Recover missed corners.
+    //! @brief TODO: Recover missed corners.
     std::vector<std::vector<int>> _lines;
 
-    // The list of parameters.
+    //! @brief The final output.
+    std::vector<OrderedChessboardCorners> _cb_corners;
+
+    //! @brief The list of parameters.
     Parameters _params;
   };
 
