@@ -23,9 +23,9 @@
 
 #include "Utilities/ImageOrVideoReader.hpp"
 
-#include "Chessboard/CircularProfileExtractor.hpp"
-#include "Chessboard/JunctionDetection.hpp"
-#include "Chessboard/NonMaximumSuppression.hpp"
+#include <drafts/ChessboardDetection/CircularProfileExtractor.hpp>
+#include <drafts/ChessboardDetection/JunctionDetection.hpp>
+#include <drafts/ChessboardDetection/NonMaximumSuppression.hpp>
 
 
 namespace sara = DO::Sara;
@@ -37,7 +37,7 @@ auto filter_junctions(std::vector<sara::Junction<int>>& junctions,
                       const sara::ImageView<float>& grad_f_norm,
                       const float grad_thres, const int radius)
 {
-  auto profile_extractor = CircularProfileExtractor{};
+  auto profile_extractor = sara::CircularProfileExtractor{};
   profile_extractor.circle_radius = radius;
 
   circular_profiles.resize(4, junctions.size());
@@ -63,7 +63,7 @@ auto filter_junctions(std::vector<sara::Junction<int>>& junctions,
       continue;
 
     const auto profile = profile_extractor(f, j.p.cast<double>());
-    const auto zero_crossings = localize_zero_crossings(  //
+    const auto zero_crossings = sara::localize_zero_crossings(  //
         profile,                                          //
         profile_extractor.num_circle_sample_points        //
     );
@@ -341,7 +341,7 @@ struct KnnGraph
         auto affinities = Eigen::Matrix4f{};
         for (auto i = 0; i < fu.size(); ++i)
           for (auto j = 0; j < fv.size(); ++j)
-            affinities(i, j) = std::abs(dir(fu(i)).dot(dir(fv(j))));
+            affinities(i, j) = std::abs(sara::dir(fu(i)).dot(sara::dir(fv(j))));
 
         const Eigen::RowVector4f best_affinities =
             affinities.colwise().maxCoeff();

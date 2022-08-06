@@ -37,11 +37,13 @@ if (CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
 
     target_link_libraries(${filename}
       ${Boost_LIBRARIES}
-      CUDA::cudart
       ${TensorRT_LIBRARIES}
       ${DO_Sara_LIBRARIES}
       DO::Shakti::Cuda::MultiArray
       DO::Shakti::Cuda::Utilities)
+    if (NOT WIN32)
+      target_link_libraries(${filename} CUDA::cudart)
+    endif ()
 
     set_target_properties(${filename}
       PROPERTIES

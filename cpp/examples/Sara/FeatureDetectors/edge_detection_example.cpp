@@ -11,15 +11,18 @@
 
 //! @example
 
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
+#include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/VideoIO.hpp>
+
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
+#include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
-#include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
+#include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
-#include <DO/Sara/VideoIO.hpp>
 
 #include <boost/filesystem.hpp>
 
@@ -33,6 +36,23 @@ using namespace DO::Sara;
 inline constexpr long double operator"" _percent(long double x)
 {
   return x / 100;
+}
+
+
+auto is_strong_edge(const ImageView<float>& grad_mag,
+                    const std::vector<Eigen::Vector2i>& edge,
+                    const float grad_thres) -> float
+{
+  if (edge.empty())
+    return 0.f;
+  const auto mean_edge_gradient =
+      std::accumulate(
+          edge.begin(), edge.end(), 0.f,
+          [&grad_mag](const float& grad, const Eigen::Vector2i& p) -> float {
+            return grad + grad_mag(p);
+          }) /
+      edge.size();
+  return mean_edge_gradient > grad_thres;
 }
 
 
@@ -61,6 +81,7 @@ int __main(int argc, char** argv)
   const auto downscale_factor = argc >= 3 ? std::stof(argv[2]) : 1.f;
   const auto skip = argc >= 4 ? std::stoi(argv[3]) : 0;
   const auto sigma = argc >= 5 ? std::stof(argv[4]) : 1.f;
+  const auto strong_edge_thres = argc >= 6 ? std::stof(argv[5]) : 4.f / 255.f;
 
   // OpenMP.
   omp_set_num_threads(omp_get_max_threads());
@@ -134,15 +155,21 @@ int __main(int argc, char** argv)
 
     ed(frame_gray32f_ds);
     const auto& edges_simplified = ed.pipeline.edges_simplified;
+    const auto& edges_as_list = ed.pipeline.edges_as_list;
 
     tic();
     auto disp = frame.convert<float>().convert<Rgb8>();
-    for (const auto& e : edges_simplified)
+    for (auto e = 0u; e < edges_as_list.size(); ++e)
     {
-      if (e.size() >= 2 && length(e) > 5)
+      const auto& edge = edges_simplified[e];
+      const auto& edge_pts = edges_as_list[e];
+      if (edge.size() >= 2 && length(edge) > 5 &&
+          is_strong_edge(ed.pipeline.gradient_magnitude, edge_pts,
+                         strong_edge_thres))
       {
         const auto color = Rgb8(rand() % 255, rand() % 255, rand() % 255);
-        draw_polyline(disp, e, color, Eigen::Vector2d{0, 0}, downscale_factor);
+        draw_polyline(disp, edge, color, Eigen::Vector2d{0, 0},
+                      downscale_factor);
       }
     }
     display(disp);

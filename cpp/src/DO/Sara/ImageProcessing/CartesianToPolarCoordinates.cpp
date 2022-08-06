@@ -20,10 +20,11 @@
 
 namespace DO::Sara {
 
-  auto cartesian_to_polar_coordinates(const ImageView<float>& fx,
-                                      const ImageView<float>& fy,
-                                      ImageView<float>& mag,
-                                      ImageView<float>& ori) -> void
+  auto
+  cartesian_to_polar_coordinates([[maybe_unused]] const ImageView<float>& fx,
+                                 [[maybe_unused]] const ImageView<float>& fy,
+                                 [[maybe_unused]] ImageView<float>& mag,
+                                 [[maybe_unused]] ImageView<float>& ori) -> void
   {
 #ifdef DO_SARA_USE_HALIDE
     if (fx.sizes() != fy.sizes() ||   //

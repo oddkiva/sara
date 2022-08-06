@@ -5,6 +5,8 @@ if (SARA_BUILD_TESTS)
   add_definitions(-DBOOST_ALL_NO_LIB)
 endif ()
 
+add_subdirectory(ChessboardDetection)
+
 if (NOT WIN32)
   add_subdirectory(Compute)
 endif ()

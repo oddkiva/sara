@@ -12,18 +12,18 @@
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 
 #ifdef DO_SARA_USE_HALIDE
-#include <DO/Shakti/Halide/RuntimeUtilities.hpp>
+#  include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
-#include "shakti_gradient_2d_32f_cpu.h"
-#include "shakti_polar_gradient_2d_32f_cpu.h"
+#  include "shakti_gradient_2d_32f_cpu.h"
+#  include "shakti_polar_gradient_2d_32f_cpu.h"
 #endif
 
 
 namespace DO::Sara {
 
-  auto gradient(const ImageView<float>& f,    //
-                ImageView<float>& nabla_f_x,  //
-                ImageView<float>& nabla_f_y) -> void
+  auto gradient([[maybe_unused]] const ImageView<float>& f,    //
+                [[maybe_unused]] ImageView<float>& nabla_f_x,  //
+                [[maybe_unused]] ImageView<float>& nabla_f_y) -> void
   {
 #ifdef DO_SARA_USE_HALIDE
     if (f.sizes() != nabla_f_x.sizes() || f.sizes() != nabla_f_y.sizes())

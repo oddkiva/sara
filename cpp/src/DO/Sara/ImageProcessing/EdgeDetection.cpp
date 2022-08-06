@@ -145,8 +145,6 @@ namespace DO::Sara {
     }
     toc("Serial Contour Collection");
 
-    SARA_DEBUG << "#{contours} = " << contours.size() << std::endl;
-
     return contours;
   }
 

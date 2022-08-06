@@ -36,10 +36,8 @@ namespace DO { namespace Sara {
   ImagePyramid<T> det_of_hessian_pyramid(const ImagePyramid<T>& gaussians)
   {
     ImagePyramid<T> D;
-    D.reset(gaussians.octave_count(),
-            gaussians.scale_count_per_octave(),
-            gaussians.scale_initial(),
-            gaussians.scale_geometric_factor());
+    D.reset(gaussians.octave_count(), gaussians.scale_count_per_octave(),
+            gaussians.scale_initial(), gaussians.scale_geometric_factor());
 
     for (int o = 0; o < D.octave_count(); ++o)
     {
@@ -49,9 +47,10 @@ namespace DO { namespace Sara {
         D(s, o) = gaussians(s, o)
                       .template compute<Hessian>()
                       .template compute<Determinant>();
+
         // Apply the scale normalization.
         D(s, o).flat_array() *=
-            std::pow(gaussians.scale_relative_to_octave(s), 4);
+            static_cast<float>(quartic(gaussians.scale_relative_to_octave(s)));
       }
     }
     return D;
@@ -107,15 +106,16 @@ namespace DO { namespace Sara {
          \f$\sigma(s,o)\f$.
 
       \param[in, out] scale_octave_pairs a pointer to vector of scale and octave
-      index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the determinant
-      of Hessians.
+      index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the
+      determinant of Hessians.
 
       \return set of Hessian-Laplace maxima in **std::vector<OERegion>** in each
       scale-normalized determinant of Hessians.
      */
     DO_SARA_EXPORT
-    std::vector<OERegion> operator()(const ImageView<float>& I,
-                                     std::vector<Point2i> *scale_octave_pairs = 0);
+    std::vector<OERegion>
+    operator()(const ImageView<float>& I,
+               std::vector<Point2i>* scale_octave_pairs = 0);
 
     /*!
       @brief Returns the Gaussian pyramid used to select characteristic scales
@@ -192,11 +192,10 @@ namespace DO { namespace Sara {
         localization of DoG extrema in scale-space. The refinement process is
         based on the function **DO::refineExtremum()**.
      */
-    ComputeDoHExtrema(const ImagePyramidParams& pyrParams =
-                          ImagePyramidParams(-1, 3 + 2, std::pow(2.f, 1.f / 3.f), 2),
+    ComputeDoHExtrema(const ImagePyramidParams& pyrParams = ImagePyramidParams(
+                          -1, 3 + 2, std::pow(2.f, 1.f / 3.f), 2),
                       float extremum_thres = 1e-6f,
-                      float edge_ratio_thres = 10.f,
-                      int img_padding_sz = 1,
+                      float edge_ratio_thres = 10.f, int img_padding_sz = 1,
                       int extremum_refinement_iter = 2)
       : pyr_params_(pyrParams)
       , _extremum_thres(extremum_thres)
@@ -220,15 +219,16 @@ namespace DO { namespace Sara {
          \f$\sigma(s,o)\f$.
 
       \param[in, out] scale_octave_pairs a pointer to vector of scale and octave
-      index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the determinant
-      of Hessians.
+      index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the
+      determinant of Hessians.
 
       \return set of DoHs extrema in **std::vector<OERegion>** in each
       scale-normalized determinant of Hessians.
      */
     DO_SARA_EXPORT
-    std::vector<OERegion> operator()(const ImageView<float>& I,
-                                     std::vector<Point2i> *scale_octave_pairs = 0);
+    std::vector<OERegion>
+    operator()(const ImageView<float>& I,
+               std::vector<Point2i>* scale_octave_pairs = 0);
 
     /*!
       @brief Returns the Gaussian pyramid used to compute DoH extrema.
@@ -275,5 +275,4 @@ namespace DO { namespace Sara {
   //! @}
 
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

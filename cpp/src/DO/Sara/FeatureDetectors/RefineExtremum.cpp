@@ -569,7 +569,8 @@ namespace DO::Sara {
     // Compute the blurred patches and their associated scales.
     //
     // Start with the initial patch.
-    scales[0] = G.scale_relative_to_octave(s) / std::sqrt(2.f);
+    scales[0] =
+        static_cast<float>(G.scale_relative_to_octave(s)) / std::sqrt(2.f);
     auto square = [](const auto x) { return x * x; };
     auto inc_sigma = std::sqrt(square(scales[0]) - square(nearest_sigma));
     patches[0] =
@@ -600,7 +601,7 @@ namespace DO::Sara {
     // Compute the scale normalized LoG values in each patch centers
     for (size_t i = 0; i != patches.size(); ++i)
       LoGs[i] = laplacian(patches[i], Point2i(patch_radius, patch_radius)) *
-                pow(scales[i], 2);
+                square(scales[i]);
 
     // Search local extremum.
     auto is_extremum = false;

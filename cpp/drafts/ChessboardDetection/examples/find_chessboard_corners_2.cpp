@@ -17,73 +17,21 @@
 #include <unordered_map>
 
 #include <DO/Sara/Core/TicToc.hpp>
-#include <DO/Sara/DisjointSets/TwoPassConnectedComponents.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
+#include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Geometry/Algorithms/BorderFollowing.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/AdaptiveBinaryThresholding.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
-#include <DO/Sara/ImageProcessing/Watershed.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "Chessboard/Erode.hpp"
-#include "Chessboard/NonMaximumSuppression.hpp"
+#include <drafts/ChessboardDetection/Erode.hpp>
 
 
 namespace sara = DO::Sara;
-
-
-struct Corner
-{
-  Eigen::Vector2i coords;
-  float score;
-  auto position() const -> const Eigen::Vector2i&
-  {
-    return coords;
-  }
-  auto operator<(const Corner& other) const -> bool
-  {
-    return score < other.score;
-  }
-};
-
-// Select the local maxima of the cornerness functions.
-auto select(const sara::ImageView<float>& cornerness,
-            const float cornerness_adaptive_thres) -> std::vector<Corner>
-{
-  const auto extrema = sara::local_maxima(cornerness);
-
-  const auto cornerness_max = cornerness.flat_array().maxCoeff();
-  const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
-
-  auto extrema_filtered = std::vector<Corner>{};
-  extrema_filtered.reserve(extrema.size());
-  for (const auto& p : extrema)
-    if (cornerness(p) > cornerness_thres)
-      extrema_filtered.push_back({p, cornerness(p)});
-  return extrema_filtered;
-};
-
-
-auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
-                 const sara::ImageView<sara::Rgb8>& image)
-{
-  auto colors = std::unordered_map<int, sara::Rgb8>{};
-  for (const auto& [label, points] : regions)
-  {
-    const auto num_points = static_cast<float>(points.size());
-    Eigen::Vector3f color = Eigen::Vector3f::Zero();
-    for (const auto& p : points)
-      color += image(p).cast<float>();
-    color /= num_points;
-
-    colors[label] = color.cast<std::uint8_t>();
-  }
-  return colors;
-}
 
 
 auto __main(int argc, char** argv) -> int
@@ -100,8 +48,9 @@ auto __main(int argc, char** argv) -> int
   const auto video_file = std::string{argv[1]};
 #endif
 
-  const auto do_erosion =
-      argc < 3 ? true : static_cast<bool>(std::stoi(argv[2]));
+  const auto erosion_iterations = argc < 3 ? 0 : std::stoi(argv[2]);
+  const auto simplification_eps =
+      argc < 4 ? 0.5 : static_cast<double>(std::stof(argv[3]));
 
 
   auto video_stream = sara::VideoStream{video_file};
@@ -137,12 +86,15 @@ auto __main(int argc, char** argv) -> int
                                       segmentation_map);
     sara::toc("Adaptive thresholding");
 
-    if (do_erosion)
+    if (erosion_iterations > 0)
     {
       sara::tic();
-      auto segmentation_map_eroded = segmentation_map;
-      sara::binary_erode_3x3(segmentation_map, segmentation_map_eroded);
-      segmentation_map.swap(segmentation_map_eroded);
+      for (auto i = 0; i < erosion_iterations; ++i)
+      {
+        auto segmentation_map_eroded = segmentation_map;
+        sara::binary_erode_3x3(segmentation_map, segmentation_map_eroded);
+        segmentation_map.swap(segmentation_map_eroded);
+      }
       sara::toc("Erosion 3x3");
     }
 
@@ -156,34 +108,40 @@ auto __main(int argc, char** argv) -> int
         sara::suzuki_abe_follow_border(segmentation_map_inverted);
     sara::toc("Border Following");
 
-    // sara::tic();
-    // auto border_curves_d =
-    //     std::unordered_map<int, std::vector<Eigen::Vector2d>>{};
-    // for (const auto& [border_id, border] : border_curves)
-    // {
-    //   auto curve = std::vector<Eigen::Vector2d>{};
-    //   std::transform(border.curve.begin(), border.curve.end(),
-    //                  std::back_inserter(curve),
-    //                  [](const auto& p) { return p.template cast<double>();
-    //                  });
-    //   curve = sara::ramer_douglas_peucker(curve, 2.);
-    //   border_curves_d[border_id] = curve;
-    // }
-    // sara::toc("Border Simplification");
+    sara::tic();
+    auto border_curves_d =
+        std::unordered_map<int, std::vector<Eigen::Vector2d>>{};
+    for (const auto& [border_id, border] : border_curves)
+    {
+      auto curve = std::vector<Eigen::Vector2d>{};
+      std::transform(border.curve.begin(), border.curve.end(),
+                     std::back_inserter(curve),
+                     [](const auto& p) { return p.template cast<double>(); });
+      if (curve.size() > 3)
+      {
+        curve = sara::graham_scan_convex_hull(curve);
+        curve = sara::ramer_douglas_peucker(curve, simplification_eps);
+        // Little hack.
+        curve.push_back(curve.front());
+      }
+      border_curves_d[border_id] = curve;
+    }
+    sara::toc("Border Simplification");
 
     auto display = sara::Image<sara::Rgb8>{segmentation_map.sizes()};
     display.flat_array().fill(sara::Black8);
     for (const auto& b : border_curves)
     {
-      const auto& curve = b.second.curve;
+      // const auto& curve = b.second.curve;
       if (b.second.type == sara::Border::Type::HoleBorder)
         continue;
-      if (curve.size() < 5 * 4)
+      // if (curve.size() < 5 * 4)
+      //   continue;
+      const auto& curve = border_curves_d.at(b.first);
+      if (curve.size() < 2 || sara::length(curve) < 10)
         continue;
       const auto color = sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
-      for (const auto& p : curve)
-        display(p) = color;
-      // sara::draw_polyline(display, border_curves_d[b.first], color);
+      sara::draw_polyline(display, curve, color);
     }
     sara::display(display);
     sara::draw_text(80, 80, std::to_string(frame_number), sara::White8, 60, 0,

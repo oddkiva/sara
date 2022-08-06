@@ -234,14 +234,12 @@ auto MetricGridRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   // Set the projection-model-view matrix uniforms.
   _shader_program.set_uniform_vector2f(_image_sizes_loc,
                                        image._image_sizes.data());
-  _shader_program.set_uniform_matrix4f(_view_loc,
-                                       image._model_view.data());
+  _shader_program.set_uniform_matrix4f(_view_loc, image._model_view.data());
   _shader_program.set_uniform_matrix4f(_projection_loc,
                                        image._projection.data());
 
   // Texture uniform.
-  _shader_program.set_uniform_texture(_image_loc,
-                                       image._texture_unit);
+  _shader_program.set_uniform_texture(_image_loc, image._texture_unit);
 
   // Line color.
   _shader_program.set_uniform_vector4f(_color_loc, lines._color.data());
@@ -261,6 +259,9 @@ auto MetricGridRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   _shader_program.set_uniform_vector4f("color", lines._color.data());
 
   glBindVertexArray(lines._vao);
-  glDrawElements(GL_TRIANGLES, lines._triangle_index_count, GL_UNSIGNED_INT, 0);
-  glDrawElements(GL_LINES, lines._triangle_index_count, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES,
+                 static_cast<GLsizei>(lines._triangle_index_count),
+                 GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_LINES, static_cast<GLsizei>(lines._triangle_index_count),
+                 GL_UNSIGNED_INT, 0);
 }
