@@ -13,7 +13,6 @@ endif ()
 
 add_subdirectory(OpenCL)
 
-# add_subdirectory(Expression)
 add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
 
