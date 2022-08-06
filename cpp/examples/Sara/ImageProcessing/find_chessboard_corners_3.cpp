@@ -58,6 +58,66 @@ auto draw_chessboard(sara::ImageView<sara::Rgb8>& display,  //
   }
 };
 
+auto draw_chessboard_corners(
+    sara::ImageView<sara::Rgb8>& display,
+    const sara::ChessboardDetector::OrderedChessboardCorners& cb_corners,
+    const int thickness) -> void
+{
+  // Draw the arrows along one axis.
+  for (auto i = 0u; i < cb_corners.size(); ++i)
+  {
+    auto color = sara::Red8;
+    color[0] = std::clamp(255 / int(cb_corners.size()) * int(i),  //
+                          0, 255);
+    for (auto j = 0u; j < cb_corners[i].size() - 1; ++j)
+    {
+      const auto& a = cb_corners[i][j];
+      const auto& b = cb_corners[i][j + 1];
+      if (std::isnan(a.x()) || std::isnan(b.x()))
+        continue;
+      sara::draw_arrow(display, a, b, color, thickness);
+    }
+  }
+
+  // Draw the arrows along the other orthogonal axis.
+  for (auto j = 0u; j < cb_corners[0].size(); ++j)
+  {
+    auto color = sara::Green8;
+    color[1] = std::clamp(255 / int(cb_corners[0].size()) * int(j),  //
+                          0, 255);
+
+    for (auto i = 0u; i < cb_corners.size() - 1; ++i)
+    {
+      const auto& a = cb_corners[i][j];
+      const auto& b = cb_corners[i + 1][j];
+      if (std::isnan(a.x()) || std::isnan(b.x()))
+        continue;
+      sara::draw_arrow(display, a, b, color, thickness);
+    }
+  }
+}
+
+
+auto transpose(const sara::ChessboardDetector::OrderedChessboardCorners& in)
+    -> sara::ChessboardDetector::OrderedChessboardCorners
+{
+  const auto m = in.size();
+  const auto n = in.front().size();
+
+  auto out = sara::ChessboardDetector::OrderedChessboardCorners{};
+  out.resize(n);
+  for (auto i = 0u; i < n; ++i)
+    out[i].resize(m);
+
+
+  for (auto i = 0u; i < m; ++i)
+    for (auto j = 0u; j < n; ++j)
+      out[j][i] = in[i][j];
+
+  return out;
+}
+
+
 auto __main(int argc, char** argv) -> int
 {
   try
@@ -179,12 +239,14 @@ auto __main(int argc, char** argv) -> int
       }
 #endif
 
+      const auto& chessboards = detect._chessboards;
+      const auto num_chessboards = static_cast<int>(chessboards.size());
+
+#ifdef SHOW_CHESSBOARD_SQUARES
       const auto& corners = detect._corners;
       const auto& squares = detect._squares;
       const auto& scale = detect._params.downscale_factor;
-      const auto& chessboards = detect._chessboards;
-      const auto num_chessboards = static_cast<int>(chessboards.size());
-#pragma omp parallel for
+#  pragma omp parallel for
       for (auto c = 0; c < num_chessboards; ++c)
       {
         const auto color =
@@ -194,44 +256,15 @@ auto __main(int argc, char** argv) -> int
         draw_chessboard(display, cb, corners, squares, scale, color,
                         chessboard_edge_thickness);
       }
+#endif
 
       // Check the enumeration of corners.
-      for (const auto& cb_corners : detect._cb_corners)
+      for (const auto& cb_corners_untransposed : detect._cb_corners)
       {
-        // Draw the arrows along one axis.
-        for (auto i = 0u; i < cb_corners.size(); ++i)
-        {
-          auto color = sara::Red8;
-          color[0] = std::clamp(255 / int(cb_corners.size()) * int(i),  //
-                                0, 255);
-          for (auto j = 0u; j < cb_corners[i].size() - 1; ++j)
-          {
-            const Eigen::Vector2f a = scale * cb_corners[i][j];
-            const Eigen::Vector2f b = scale * cb_corners[i][j + 1];
-            if (std::isnan(a.x()) || std::isnan(b.x()))
-              continue;
-            sara::draw_arrow(display, a, b, color, 3);
-          }
-        }
-
-        // Draw the arrows along the other orthogonal axis.
-        for (auto j = 0u; j < cb_corners[0].size(); ++j)
-        {
-          auto color = sara::Green8;
-          color[1] = std::clamp(255 / int(cb_corners[0].size()) * int(j),  //
-                                0, 255);
-
-          for (auto i = 0u; i < cb_corners.size() - 1; ++i)
-          {
-            const Eigen::Vector2f a = scale * cb_corners[i][j];
-            const Eigen::Vector2f b = scale * cb_corners[i + 1][j];
-            if (std::isnan(a.x()) || std::isnan(b.x()))
-              continue;
-            sara::draw_arrow(display, a, b, color, 3);
-          }
-        }
+        // Transpose the chessboard.
+        const auto cb_corners = transpose(cb_corners_untransposed);
+        draw_chessboard_corners(display, cb_corners, chessboard_edge_thickness);
       }
-
 
       sara::draw_text(display, 80, 80, "Frame: " + std::to_string(frame_number),
                       sara::White8, 30, 0, false, true);

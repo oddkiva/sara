@@ -588,6 +588,11 @@ namespace DO::Sara {
         }
       }
 
+      // Important rescale the coordinates back to the original image sizes.
+      for (auto i = 0; i < m; ++i)
+        for (auto j = 0; j < n; ++j)
+          corners[i][j] *= _params.downscale_factor;
+
       _cb_corners.emplace_back(std::move(corners));
     }
 
