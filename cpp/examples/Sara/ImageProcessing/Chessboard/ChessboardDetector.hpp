@@ -104,7 +104,6 @@ namespace DO::Sara {
           -> void
       {
         corner_edge_linking_radius = corner_filtering_radius;
-        SARA_CHECK(corner_edge_linking_radius);
       }
     };
 

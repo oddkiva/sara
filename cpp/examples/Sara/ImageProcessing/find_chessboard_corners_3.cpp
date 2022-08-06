@@ -197,12 +197,19 @@ auto __main(int argc, char** argv) -> int
 
       sara::draw_text(display, 80, 80, "Frame: " + std::to_string(frame_number),
                       sara::White8, 30, 0, false, true);
-
       sara::draw_text(display, 80, 120,
                       "Chessboards: " + std::to_string(chessboards.size()),
                       sara::White8, 30, 0, false, true);
-
       sara::display(display);
+      sara::toc("Display");
+
+      for (auto c = 0; c < num_chessboards; ++c)
+      {
+        const auto& cb = chessboards[c];
+        SARA_DEBUG << "Chessboard " << c << std::endl;
+        std::cout << sara::to_matrix(cb) << std::endl << std::endl;
+      }
+
       if (pause)
         sara::get_key();
     }
