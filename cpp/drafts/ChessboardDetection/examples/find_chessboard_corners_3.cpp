@@ -49,9 +49,10 @@ auto draw_chessboard(sara::ImageView<sara::Rgb8>& display,  //
     {
       if (sq.id == -1)
         continue;
-      draw_square(corners, scale, display, squares[sq.id].v, sara::White8,
+      const auto& vertices = squares[sq.id].v;
+      draw_square(display, vertices, corners, scale, sara::White8,
                   thickness + 1);
-      draw_square(corners, scale, display, squares[sq.id].v, color, thickness);
+      draw_square(display, vertices, corners, scale, color, thickness);
     }
   }
 };

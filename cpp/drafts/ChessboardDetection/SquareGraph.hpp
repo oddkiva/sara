@@ -141,10 +141,11 @@ namespace DO::Sara {
   // --------------------------------------------------------------------------
   // Draw functions
   // --------------------------------------------------------------------------
-  inline auto draw_square(const std::vector<Corner<float>>& corners,
-                          float scale, ImageView<Rgb8>& disp,
-                          const std::array<int, 4>& square,  //
-                          const Rgb8& color,                 //
+  inline auto draw_square(ImageView<Rgb8>& disp,
+                          const std::array<int, 4>& square,           //
+                          const std::vector<Corner<float>>& corners,  //
+                          const float scale,
+                          const Rgb8& color,  //
                           const int thickness) -> void
   {
 #ifdef DEBUG_ME
