@@ -16,6 +16,9 @@ add_library(
   LineReconstruction.cpp
   SquareReconstruction.hpp
   SquareReconstruction.cpp
+  # Experimental
+  EllipseFitting.hpp
+  EllipseFitting.cpp
   # The class that wraps everything.
   ChessboardDetector.hpp
   ChessboardDetector.cpp)

@@ -604,4 +604,61 @@ namespace DO::Sara {
     toc("Chessboard ordered corners");
   }
 
+  auto ChessboardDetector::extract_chessboard_vertices_from_chessboard_squares()
+      -> void
+  {
+    tic();
+    // Each grown chessboard consists of an ordered list of squares.
+    // We want to retrieve the ordered list of corners.
+    _cb_vertices.clear();
+    _cb_vertices.reserve(_chessboards.size());
+    for (const auto& chessboard : _chessboards)
+    {
+      const auto m = rows(chessboard) + 1;
+      const auto n = cols(chessboard) + 1;
+
+      auto vertices = OrderedChessboardVertices{};
+      // Preallocate and initialize the list of ordered corners.
+      vertices.resize(m);
+      std::for_each(vertices.begin(), vertices.end(), [n](auto& row) {
+        row.resize(n);
+        std::fill(row.begin(), row.end(), -1);
+      });
+
+      // Get the chessboard x-corners.
+      for (auto i = 0; i < m - 1; ++i)
+      {
+        for (auto j = 0; j < n - 1; ++j)
+        {
+          const auto is_square_undefined = chessboard[i][j].id == -1;
+          if (is_square_undefined)
+            continue;
+
+          const auto& square = _squares[chessboard[i][j].id];
+
+          // top-left
+          const auto& a = square.v[0];
+          // top-right
+          const auto& b = square.v[1];
+          // bottom-right
+          const auto& c = square.v[2];
+          // bottom-left
+          const auto& d = square.v[3];
+
+          // Update the list of coordinates.
+          //
+          // N.B.: it does not matter if we rewrite the coordinates, they are
+          // guaranteed to be the same.
+          vertices[i][j] = a;
+          vertices[i][j + 1] = b;
+          vertices[i + 1][j + 1] = c;
+          vertices[i + 1][j] = d;
+        }
+      }
+
+      _cb_vertices.emplace_back(std::move(vertices));
+    }
+
+    toc("Chessboard ordered corners");
+  }
 }  // namespace DO::Sara

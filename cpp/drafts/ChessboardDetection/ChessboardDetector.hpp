@@ -44,6 +44,7 @@ namespace DO::Sara {
   {
   public:
     using OrderedChessboardCorners = std::vector<std::vector<Eigen::Vector2f>>;
+    using OrderedChessboardVertices = std::vector<std::vector<int>>;
 
     struct Parameters
     {
@@ -139,6 +140,7 @@ namespace DO::Sara {
     auto parse_squares() -> void;
     auto grow_chessboards() -> void;
     auto extract_chessboard_corners_from_chessboard_squares() -> void;
+    auto extract_chessboard_vertices_from_chessboard_squares() -> void;
 
     // TODO: redo this but this time with a smarter geometric modelling of
     // the distorted lines.
@@ -213,9 +215,30 @@ namespace DO::Sara {
 
     //! @brief The final output.
     std::vector<OrderedChessboardCorners> _cb_corners;
+    std::vector<OrderedChessboardVertices> _cb_vertices;
 
     //! @brief The list of parameters.
     Parameters _params;
   };
+
+
+  inline auto transpose(const ChessboardDetector::OrderedChessboardCorners& in)
+      -> ChessboardDetector::OrderedChessboardCorners
+  {
+    const auto m = in.size();
+    const auto n = in.front().size();
+
+    auto out = ChessboardDetector::OrderedChessboardCorners{};
+    out.resize(n);
+    for (auto i = 0u; i < n; ++i)
+      out[i].resize(m);
+
+    for (auto i = 0u; i < m; ++i)
+      for (auto j = 0u; j < n; ++j)
+        out[j][i] = in[i][j];
+
+    return out;
+  }
+
 
 }  // namespace DO::Sara
