@@ -43,6 +43,8 @@ namespace DO::Sara {
   class ChessboardDetector
   {
   public:
+    using OrderedChessboardCorners = std::vector<std::vector<Eigen::Vector2f>>;
+
     struct Parameters
     {
       // The Harris's cornerness parameters.
@@ -122,7 +124,7 @@ namespace DO::Sara {
 
     DO_SARA_EXPORT
     auto operator()(const ImageView<float>& image)
-        -> const std::vector<Chessboard>&;
+        -> const std::vector<OrderedChessboardCorners>&;
 
     auto preprocess_image(const ImageView<float>& image) -> void;
     auto filter_edges() -> void;
@@ -178,6 +180,8 @@ namespace DO::Sara {
     // Chessboards grown from the list of squares.
     std::vector<Square> _squares;
     std::vector<Chessboard> _chessboards;
+
+    std::vector<OrderedChessboardCorners> _cb_corners;
 
     // TODO: Recover missed corners.
     std::vector<std::vector<int>> _lines;

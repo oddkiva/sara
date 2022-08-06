@@ -117,7 +117,7 @@ namespace DO::Sara {
 
 
   auto ChessboardDetector::operator()(const ImageView<float>& image)
-      -> const std::vector<Chessboard>&
+      -> const std::vector<OrderedChessboardCorners>&
   {
     preprocess_image(image);
     filter_edges();
@@ -136,9 +136,9 @@ namespace DO::Sara {
     grow_chessboards();
 
     // TODO:
-    parse_lines();
+    // parse_lines();
 
-    return _chessboards;
+    return _cb_corners;
   }
 
   auto ChessboardDetector::preprocess_image(const ImageView<float>& image)
@@ -523,6 +523,58 @@ namespace DO::Sara {
           _params.downscale_factor, display);
 
       _chessboards.emplace_back(std::move(cb));
+    }
+
+    // Each grown chessboard consists of an ordered list of squares.
+    // We want to retrieve the ordered list of corners.
+    _cb_corners.clear();
+    for (const auto& chessboard : _chessboards)
+    {
+      const auto m = rows(chessboard) + 1;
+      const auto n = cols(chessboard) + 1;
+
+      auto corners = OrderedChessboardCorners{};
+      // Preallocate and initialize the list of ordered corners.
+      corners.resize(m);
+      std::for_each(corners.begin(), corners.end(), [n](auto& row) {
+        row.resize(n);
+        static const Eigen::Vector2f nan2d = Eigen::Vector2f::Constant(  //
+            std::numeric_limits<float>::quiet_NaN());
+        std::fill(row.begin(), row.end(), nan2d);
+      });
+
+      // Now preallocate.
+      for (auto i = 0; i < m - 1; ++i)
+      {
+        for (auto j = 0; j < n - 1; ++j)
+        {
+          const auto is_square_undefined = chessboard[i][j].id == -1;
+          if (is_square_undefined)
+            continue;
+
+          const auto& square = _squares[chessboard[i][j].id];
+
+          // top-left
+          const auto& a = square.v[0];
+          // top-right
+          const auto& b = square.v[1];
+          // bottom-right
+          const auto& c = square.v[2];
+          // bottom-left
+          const auto& d = square.v[3];
+
+          // Update the list of coordinates.
+          //
+          // N.B.: it does not matter if we rewrite the coordinates, they are
+          // guaranteed to be the same.
+          corners[i][j] = _corners[a].coords;
+          corners[i][j + 1] = _corners[b].coords;
+          corners[i + 1][j + 1] = _corners[c].coords;
+          corners[i + 1][j] = _corners[d].coords;
+        }
+      }
+
+      _cb_corners.emplace_back(std::move(corners));
     }
 
     toc("Chessboard growing");

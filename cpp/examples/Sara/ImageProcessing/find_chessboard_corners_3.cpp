@@ -203,6 +203,45 @@ auto __main(int argc, char** argv) -> int
       sara::display(display);
       sara::toc("Display");
 
+      // Check the enumeration of corners.
+      for (const auto& cb_corners : detect._cb_corners)
+      {
+        // Draw the arrows along one axis.
+        for (auto i = 0u; i < cb_corners.size(); ++i)
+        {
+          auto color = sara::Red8;
+          color[0] = std::clamp(255 / int(cb_corners.size()) * int(i),  //
+                                0, 255);
+          for (auto j = 0u; j < cb_corners[i].size() - 1; ++j)
+          {
+            const Eigen::Vector2f a = scale * cb_corners[i][j];
+            const Eigen::Vector2f b = scale * cb_corners[i][j + 1];
+            if (std::isnan(a.x()) || std::isnan(b.x()))
+              continue;
+            sara::draw_arrow(display, a, b, color, 3);
+          }
+        }
+
+        // Draw the arrows along the other orthogonal axis.
+        for (auto j = 0u; j < cb_corners[0].size(); ++j)
+        {
+          auto color = sara::Green8;
+          color[1] = std::clamp(255 / int(cb_corners[0].size()) * int(j),  //
+                                0, 255);
+
+          for (auto i = 0u; i < cb_corners.size() - 1; ++i)
+          {
+            const Eigen::Vector2f a = scale * cb_corners[i][j];
+            const Eigen::Vector2f b = scale * cb_corners[i + 1][j];
+            if (std::isnan(a.x()) || std::isnan(b.x()))
+              continue;
+            sara::draw_arrow(display, a, b, color, 3);
+          }
+        }
+      }
+      sara::display(display);
+      sara::get_key();
+
       for (auto c = 0; c < num_chessboards; ++c)
       {
         const auto& cb = chessboards[c];
