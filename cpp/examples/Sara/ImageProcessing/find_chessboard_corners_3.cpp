@@ -195,14 +195,6 @@ auto __main(int argc, char** argv) -> int
                         chessboard_edge_thickness);
       }
 
-      sara::draw_text(display, 80, 80, "Frame: " + std::to_string(frame_number),
-                      sara::White8, 30, 0, false, true);
-      sara::draw_text(display, 80, 120,
-                      "Chessboards: " + std::to_string(chessboards.size()),
-                      sara::White8, 30, 0, false, true);
-      sara::display(display);
-      sara::toc("Display");
-
       // Check the enumeration of corners.
       for (const auto& cb_corners : detect._cb_corners)
       {
@@ -239,7 +231,16 @@ auto __main(int argc, char** argv) -> int
           }
         }
       }
+
+
+      sara::draw_text(display, 80, 80, "Frame: " + std::to_string(frame_number),
+                      sara::White8, 30, 0, false, true);
+      sara::draw_text(display, 80, 120,
+                      "Chessboards: " + std::to_string(chessboards.size()),
+                      sara::White8, 30, 0, false, true);
+
       sara::display(display);
+      sara::toc("Display");
       sara::get_key();
 
       for (auto c = 0; c < num_chessboards; ++c)

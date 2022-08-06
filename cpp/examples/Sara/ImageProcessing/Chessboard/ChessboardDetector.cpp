@@ -196,9 +196,12 @@ namespace DO::Sara {
       _cornerness.resize(image_ds_sizes);
     _cornerness = harris_cornerness(_grad_x, _grad_y,  //
                                     _params.sigma_I, _params.kappa);
+    toc("Cornerness map");
+
+    tic();
     _corners_int = select(_cornerness, _params.cornerness_adaptive_thres,  //
                           _params.corner_filtering_radius);
-    toc("Corner detection");
+    toc("Corner selection");
 
     tic();
     _corners.clear();
@@ -216,6 +219,8 @@ namespace DO::Sara {
   auto ChessboardDetector::calculate_circular_intensity_profiles() -> void
   {
     tic();
+    _profiles.clear();
+    _zero_crossings.clear();
     _profiles.resize(_corners.size());
     _zero_crossings.resize(_corners.size());
     auto num_corners = static_cast<int>(_corners.size());
@@ -501,8 +506,13 @@ namespace DO::Sara {
     for (auto s = 0u; s < _squares.size(); ++s)
       square_ids.push(s);
 
-    // For debugging purposes
+#ifdef DEBUG_REGION_GROWING
+    // For debugging purposes only, otherwise this will slow down the
+    // algorithm...
     auto display = _f_blurred.convert<Rgb8>();
+#else
+    auto display = Image<Rgb8>{};
+#endif
 
     // Recover the chessboards.
     _chessboards.clear();
@@ -525,9 +535,13 @@ namespace DO::Sara {
       _chessboards.emplace_back(std::move(cb));
     }
 
+    toc("Chessboard growing");
+
+    tic();
     // Each grown chessboard consists of an ordered list of squares.
     // We want to retrieve the ordered list of corners.
     _cb_corners.clear();
+    _cb_corners.reserve(_chessboards.size());
     for (const auto& chessboard : _chessboards)
     {
       const auto m = rows(chessboard) + 1;
@@ -543,7 +557,7 @@ namespace DO::Sara {
         std::fill(row.begin(), row.end(), nan2d);
       });
 
-      // Now preallocate.
+      // Get the chessboard x-corners.
       for (auto i = 0; i < m - 1; ++i)
       {
         for (auto j = 0; j < n - 1; ++j)
@@ -577,7 +591,7 @@ namespace DO::Sara {
       _cb_corners.emplace_back(std::move(corners));
     }
 
-    toc("Chessboard growing");
+    toc("Chessboard ordered corners");
   }
 
 }  // namespace DO::Sara
