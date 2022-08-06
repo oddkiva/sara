@@ -23,9 +23,9 @@
 
 #include "Utilities/ImageOrVideoReader.hpp"
 
-#include "Chessboard/CircularProfileExtractor.hpp"
-#include "Chessboard/JunctionDetection.hpp"
-#include "Chessboard/NonMaximumSuppression.hpp"
+#include <drafts/ChessboardDetection/CircularProfileExtractor.hpp>
+#include <drafts/ChessboardDetection/JunctionDetection.hpp>
+#include <drafts/ChessboardDetection/NonMaximumSuppression.hpp>
 
 
 namespace sara = DO::Sara;

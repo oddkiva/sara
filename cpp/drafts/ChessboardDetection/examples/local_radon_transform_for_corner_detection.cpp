@@ -27,8 +27,8 @@
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
-#include "Chessboard/Corner.hpp"
-#include "Chessboard/NonMaximumSuppression.hpp"
+#include <drafts/ChessboardDetection/Corner.hpp>
+#include <drafts/ChessboardDetection/NonMaximumSuppression.hpp>
 
 #include "Utilities/ImageOrVideoReader.hpp"
 

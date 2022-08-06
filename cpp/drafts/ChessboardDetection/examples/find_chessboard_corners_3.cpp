@@ -13,13 +13,11 @@
 
 #include <omp.h>
 
-#include <unordered_map>
-#include <unordered_set>
-
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 
-#include "Chessboard/ChessboardDetector.hpp"
+#include <drafts/ChessboardDetection/ChessboardDetector.hpp>
+
 #include "Utilities/ImageOrVideoReader.hpp"
 
 

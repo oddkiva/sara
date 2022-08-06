@@ -28,7 +28,7 @@
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "Chessboard/Erode.hpp"
+#include <drafts/ChessboardDetection/Erode.hpp>
 
 
 namespace sara = DO::Sara;
