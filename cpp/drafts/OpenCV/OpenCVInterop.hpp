@@ -162,10 +162,10 @@ namespace DO::Sara::OpenCV {
     }
   }
 
-  inline auto inspect(ImageView<Rgb8>& image,          //
+  inline auto inspect(ImageView<Rgb8>& image,                //
                       const OpenCV::Chessboard& chessboard,  //
-                      const Eigen::Matrix3d& K,                    //
-                      const Eigen::Matrix3d& R,                    //
+                      const Eigen::Matrix3d& K,              //
+                      const Eigen::Matrix3d& R,              //
                       const Eigen::Vector3d& t, bool pause = false) -> void
   {
     auto Hr = Eigen::Matrix3f{};
@@ -179,7 +179,8 @@ namespace DO::Sara::OpenCV {
     const auto j = chessboard.image_point(0, 1);
     const auto s = chessboard.square_size_in_meters();
 
-    const Eigen::Vector3f k3 = (R * Eigen::Vector3d::UnitZ() * s + t).cast<float>();
+    const Eigen::Vector3f k3 =
+        (R * Eigen::Vector3d::UnitZ() * s + t).cast<float>();
     const Eigen::Vector2f k = (K.cast<float>() * k3).hnormalized();
 
     static const auto red = Rgb8{167, 0, 0};

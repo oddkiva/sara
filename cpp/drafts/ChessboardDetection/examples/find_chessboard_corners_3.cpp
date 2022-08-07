@@ -76,7 +76,8 @@ auto draw_chessboard_corners(
       const auto& b = cb_corners[i][j + 1];
       if (std::isnan(a.x()) || std::isnan(b.x()))
         continue;
-      sara::draw_arrow(display, a, b, color, thickness);
+      sara::draw_arrow(display, a, b, color, thickness + 2);
+      sara::draw_arrow(display, a, b, sara::White8, 1);
     }
   }
 
@@ -93,7 +94,8 @@ auto draw_chessboard_corners(
       const auto& b = cb_corners[i + 1][j];
       if (std::isnan(a.x()) || std::isnan(b.x()))
         continue;
-      sara::draw_arrow(display, a, b, color, thickness);
+      sara::draw_arrow(display, a, b, color, thickness + 2);
+      sara::draw_arrow(display, a, b, sara::White8, 1);
     }
   }
 }
@@ -264,8 +266,10 @@ auto __main(int argc, char** argv) -> int
 
       for (auto cb_id = 0u; cb_id < detect._chessboards.size(); ++cb_id)
       {
-        const auto line_supports = sara::collect_lines(detect._cb_corners[cb_id]);
-        const auto lines = sara::collect_lines(detect._cb_vertices[cb_id], detect);
+        const auto line_supports =
+            sara::collect_lines(detect._cb_corners[cb_id]);
+        const auto lines =
+            sara::collect_lines(detect._cb_vertices[cb_id], detect);
 
         for (auto l = 0u; l < lines.size(); ++l)
         {
