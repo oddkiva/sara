@@ -15,17 +15,31 @@ else()
   endif()
 endif()
 
-set(CMAKE_C_FLAGS_ASAN
-    "${CMAKE_C_FLAGS_DEBUG} -O1 -g -fsanitize=address -fno-omit-frame-pointer"
-    CACHE STRING
-          "Flags used by the C compiler for Asan build type or configuration."
-          FORCE)
+if (WIN32)
+  set(CMAKE_C_FLAGS_ASAN
+      "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address"
+      CACHE STRING
+            "Flags used by the C compiler for Asan build type or configuration."
+            FORCE)
 
-set(CMAKE_CXX_FLAGS_ASAN
-    "${CMAKE_CXX_FLAGS_DEBUG} -O1 -g -DDEBUG -D_DEBUG -fsanitize=address -fno-omit-frame-pointer"
-    CACHE STRING
-          "Flags used by the C++ compiler for Asan build type or configuration."
-          FORCE)
+  set(CMAKE_CXX_FLAGS_ASAN
+      "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address"
+      CACHE STRING
+            "Flags used by the C++ compiler for Asan build type or configuration."
+            FORCE)
+else ()
+  set(CMAKE_C_FLAGS_ASAN
+      "${CMAKE_C_FLAGS_DEBUG} -O1 -g -fsanitize=address -fno-omit-frame-pointer"
+      CACHE STRING
+            "Flags used by the C compiler for Asan build type or configuration."
+            FORCE)
+
+  set(CMAKE_CXX_FLAGS_ASAN
+      "${CMAKE_CXX_FLAGS_DEBUG} -O1 -g -DDEBUG -D_DEBUG -fsanitize=address -fno-omit-frame-pointer"
+      CACHE STRING
+            "Flags used by the C++ compiler for Asan build type or configuration."
+            FORCE)
+endif ()
 
 set(CMAKE_EXE_LINKER_FLAGS_ASAN
     "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=address"
