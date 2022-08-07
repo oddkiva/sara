@@ -53,7 +53,7 @@ namespace DO::Sara {
                     gradient + Eigen::Vector2f{Ix(point), Iy(point)};
                 return g;
               });
-          mean /= points.size();
+          mean /= static_cast<float>(points.size());
           return mean;
         });
 

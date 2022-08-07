@@ -9,7 +9,11 @@ endmacro()
 add_library(ImageOrVideoReader STATIC Utilities/ImageOrVideoReader.hpp
                                       Utilities/ImageOrVideoReader.cpp)
 target_link_libraries(ImageOrVideoReader PUBLIC DO::Sara::ImageIO
-                                                DO::Sara::VideoIO)
+                                                DO::Sara::VideoIO
+                                                Boost::filesystem)
+
+target_compile_definitions(ImageOrVideoReader PRIVATE -DBOOST_ALL_DYN_LINK #
+                                                      -DBOOST_ALL_NO_LIB)
 
 sara_add_example(find_chessboard_corners)
 target_link_libraries(
