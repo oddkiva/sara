@@ -3,7 +3,7 @@ macro(sara_add_example example)
   set_target_properties(${example} PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS})
   target_link_libraries(${example} PRIVATE ${DO_Sara_LIBRARIES})
   set_property(TARGET ${example} PROPERTY FOLDER
-                                          "Examples/Sara/ImageProcessing")
+                                          "Examples/Sara/ChessboardDetection")
 endmacro()
 
 add_library(ImageOrVideoReader STATIC Utilities/ImageOrVideoReader.hpp
