@@ -89,7 +89,7 @@ namespace DO::Sara {
       //
       // For small images, we may need to upscale image, so the downscale factor
       // should be 0.5f.
-      float downscale_factor = 1.25f;
+      float downscale_factor = 1.5f;
       // This is a good magic constant that connects edge to corners.
       int corner_edge_linking_radius = 4;
 
