@@ -8,7 +8,7 @@
 
 namespace DO::Sara {
 
-  struct ImageOrVideoReader : public VideoStream
+  struct ImageOrVideoReader
   {
     inline ImageOrVideoReader() = default;
 
@@ -20,7 +20,10 @@ namespace DO::Sara {
 
     auto frame() -> ImageView<Rgb8>;
 
-    bool _is_image;
+    bool _is_png_image = false;
+
+    VideoStream _video_stream;
+
     std::string _path;
     Image<Rgb8> _frame;
     bool _read_once = false;
