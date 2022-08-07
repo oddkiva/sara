@@ -69,7 +69,7 @@ auto estimate_H(const sara::OpenCV::Chessboard& chessboard) -> Eigen::Matrix3d
     for (auto x = 0; x < w; ++x)
       p1.col(y * w + x) = chessboard.image_point(x, y).homogeneous().cast<double>();
 
-  // Keep it simple by just divide by 1000. Lazy but it works.
+  // Keep it simple by just dividing by 1000. Lazy but it works.
   //
   // clang-format off
   const auto T = (Eigen::Matrix3d{} <<

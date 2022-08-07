@@ -3,13 +3,17 @@ macro(sara_add_example example)
   set_target_properties(${example} PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS})
   target_link_libraries(${example} PRIVATE ${DO_Sara_LIBRARIES})
   set_property(TARGET ${example} PROPERTY FOLDER
-                                          "Examples/Sara/ImageProcessing")
+                                          "Examples/Sara/ChessboardDetection")
 endmacro()
 
 add_library(ImageOrVideoReader STATIC Utilities/ImageOrVideoReader.hpp
                                       Utilities/ImageOrVideoReader.cpp)
 target_link_libraries(ImageOrVideoReader PUBLIC DO::Sara::ImageIO
-                                                DO::Sara::VideoIO)
+                                                DO::Sara::VideoIO
+                                                Boost::filesystem)
+
+target_compile_definitions(ImageOrVideoReader PRIVATE -DBOOST_ALL_DYN_LINK #
+                                                      -DBOOST_ALL_NO_LIB)
 
 sara_add_example(find_chessboard_corners)
 target_link_libraries(
