@@ -26,9 +26,9 @@
 namespace DO::Sara {
 
   // Strong edge filter.
-  static inline auto is_strong_edge(const ImageView<float>& grad_mag,
-                                    const std::vector<Eigen::Vector2i>& edge,
-                                    const float grad_thres) -> float
+  auto is_strong_edge(const ImageView<float>& grad_mag,
+                      const std::vector<Eigen::Vector2i>& edge,
+                      const float grad_thres) -> bool
   {
     if (edge.empty())
       return 0.f;
@@ -149,7 +149,19 @@ namespace DO::Sara {
     // First blur the original image to reduce anti-aliasing.
     if (_f_blurred.sizes() != image.sizes())
       _f_blurred.resize(image.sizes());
-    apply_gaussian_filter(image, _f_blurred, _params.downscale_factor);
+    // Reduce the anti aliasing
+    static constexpr auto image_scale = 1.f;
+    const auto sigma_antialias = std::sqrt(square(_params.scale_initial) -  //
+                                           square(image_scale));
+    apply_gaussian_filter(image, _f_blurred, sigma_antialias);
+
+    if (_params.downscale_factor > _params.scale_initial)
+    {
+      const auto delta_sigma = std::sqrt(square(_params.downscale_factor) -
+                                         square(_params.scale_initial));
+      if (delta_sigma > 0.25f)
+        _f_blurred = _f_blurred.compute<Gaussian>(delta_sigma);
+    }
 
     // Now we can downscale the image.
     const Eigen::Vector2i image_ds_sizes =
@@ -191,6 +203,10 @@ namespace DO::Sara {
   auto ChessboardDetector::detect_corners() -> void
   {
     const auto& image_ds_sizes = _f_ds.sizes();
+    const auto& scale_initial = _params.downscale_factor;
+    const auto image_scale =
+        scale_initial * std::sqrt(1 + square(_params.sigma_D));
+
     tic();
     if (_cornerness.sizes() != image_ds_sizes)
       _cornerness.resize(image_ds_sizes);
@@ -199,7 +215,9 @@ namespace DO::Sara {
     toc("Cornerness map");
 
     tic();
-    _corners_int = select(_cornerness, _params.cornerness_adaptive_thres,  //
+    _corners_int = select(_cornerness,                        //
+                          image_scale, _params.sigma_I,       //
+                          _params.cornerness_adaptive_thres,  //
                           _params.corner_filtering_radius);
     toc("Corner selection");
 
@@ -207,10 +225,10 @@ namespace DO::Sara {
     _corners.clear();
     std::transform(
         _corners_int.begin(), _corners_int.end(), std::back_inserter(_corners),
-        [this](const Corner<int>& c) -> Corner<float> {
+        [this, image_scale](const Corner<int>& c) -> Corner<float> {
           const auto p = refine_junction_location_unsafe(
               _grad_x, _grad_y, c.coords, _params.corner_filtering_radius);
-          return {p, c.score};
+          return {p, c.score, image_scale * _params.sigma_I};
         });
     nms(_corners, _cornerness.sizes(), _params.corner_filtering_radius);
     toc("Corner refinement");

@@ -40,6 +40,9 @@ namespace DO::Sara {
       const std::vector<float>& zero_crossings,  //
       int N) -> bool;
 
+  auto is_strong_edge(const ImageView<float>& grad_mag,
+                      const std::vector<Eigen::Vector2i>& edge,
+                      const float grad_thres) -> bool;
 
   class ChessboardDetector
   {
@@ -49,6 +52,7 @@ namespace DO::Sara {
 
     struct Parameters
     {
+      float scale_initial = 1.2f;
       // The Harris's cornerness parameters.
       //
       // @brief Blur parameter before the gradient calculation.
