@@ -37,6 +37,13 @@ target_link_libraries(
           ImageOrVideoReader #
           DO_Sara_ChessboardDetection)
 
+sara_add_example(harris_corner_detector)
+target_link_libraries(
+  harris_corner_detector
+  PRIVATE DO::Sara::Graphics #
+          ImageOrVideoReader #
+          DO_Sara_ChessboardDetection)
+
 sara_add_example(local_radon_transform_for_corner_detection)
 target_link_libraries(
   local_radon_transform_for_corner_detection

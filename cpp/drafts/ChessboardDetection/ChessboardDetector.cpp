@@ -43,8 +43,7 @@ namespace DO::Sara {
   }
 
   // Seed corner selection.
-  static inline auto is_good_x_corner(const std::vector<float>& zero_crossings)
-      -> bool
+  auto is_good_x_corner(const std::vector<float>& zero_crossings) -> bool
   {
     const auto four_zero_crossings = zero_crossings.size() == 4;
 #if 0
