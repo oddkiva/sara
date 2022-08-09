@@ -240,7 +240,7 @@ auto __main(int argc, char** argv) -> int
 
       sara::tic();
       static constexpr auto radius = 10;
-      auto corners_int = select(fc, cornerness_adaptive_thres, radius);
+      auto corners_int = sara::select(fc, 1.f, 1.f, cornerness_adaptive_thres, radius);
       sara::nms(corners_int, fc.sizes(), radius);
       sara::toc("Corner detection");
 
