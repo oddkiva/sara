@@ -136,6 +136,9 @@ function build_library()
   fi
 
   # Build the library.
+  if [ "${build_type}" == "Asan" ]; then
+    export ASAN_OPTIONS=protect_shadow_gap=0
+  fi
   time cmake --build . -j$(nproc)
 
   # Run C++ tests.
