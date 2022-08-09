@@ -16,20 +16,20 @@
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
-   /*!
-    @ingroup ImageProcessing
-    @defgroup Extrema Extremum Localization
-    @{
+  /*!
+   *  @ingroup ImageProcessing
+   *  @defgroup Extrema Extremum Localization
+   *  @{
    */
 
   //! @brief Generic neighborhood comparison functor.
   template <template <typename> class Compare, typename T>
   struct CompareWithNeighborhood3
   {
-    bool operator()(T val, int x, int y, const ImageView<T>& I,
-                    bool compareWithCenter) const
+    inline bool operator()(T val, int x, int y, const ImageView<T>& I,
+                           bool compareWithCenter) const
     {
       for (int v = -1; v <= 1; ++v)
       {
@@ -80,10 +80,27 @@ namespace DO { namespace Sara {
   {
     LocalExtremum<Compare, T> local_extremum;
     auto extrema = std::vector<Point2i>{};
-    for (int y = 1; y < I.height() - 1; ++y)
-      for (int x = 1; x < I.width() - 1; ++x)
-        if (local_extremum(x, y, I))
-          extrema.push_back(Point2i(x, y));
+    const auto w = I.width();
+    const auto h = I.height();
+    const auto wh = w * h;
+
+#pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const auto in_domain = 1 <= x && x < w - 1 && 1 <= y && y < h - 1;
+      if (!in_domain)
+        continue;
+
+      if (local_extremum(x, y, I))
+      {
+#pragma omp critical
+        extrema.push_back(Point2i(x, y));
+      }
+    }
+
     return extrema;
   }
 
@@ -98,40 +115,77 @@ namespace DO { namespace Sara {
       for (int x = 1; x < I(s, o).width() - 1; ++x)
         if (local_extremum(x, y, s, o, I))
           extrema.push_back(Point2i(x, y));
+
+    const auto w = I(s, o).width();
+    const auto h = I(s, o).height();
+    const auto wh = w * h;
+
+#pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
+    {
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const auto in_domain = 1 <= x && x < w - 1 && 1 <= y && y < h - 1;
+      if (!in_domain)
+        continue;
+
+      if (local_extremum(x, y, s, o, I))
+      {
+#pragma omp critical
+        extrema.push_back(Point2i(x, y));
+      }
+    }
     return extrema;
   }
 
   //! @brief Local spatial maximum test.
   template <typename T>
-  struct LocalMax : LocalExtremum<std::greater_equal, T> {};
+  struct LocalMax : LocalExtremum<std::greater_equal, T>
+  {
+  };
 
   //! @brief Local spatial minimum test.
   template <typename T>
-  struct LocalMin : LocalExtremum<std::less_equal, T> {};
+  struct LocalMin : LocalExtremum<std::less_equal, T>
+  {
+  };
 
   //! @brief Local scale-space maximum test.
   template <typename T>
-  struct LocalScaleSpaceMax : LocalScaleSpaceExtremum<std::greater_equal, T> {};
+  struct LocalScaleSpaceMax : LocalScaleSpaceExtremum<std::greater_equal, T>
+  {
+  };
 
   //! @brief Local scale-space minimum test.
   template <typename T>
-  struct LocalScaleSpaceMin : LocalScaleSpaceExtremum<std::less_equal, T> {};
+  struct LocalScaleSpaceMin : LocalScaleSpaceExtremum<std::less_equal, T>
+  {
+  };
 
   //! @brief Strict local spatial maximum test.
   template <typename T>
-  struct StrictLocalMax : LocalExtremum<std::greater, T> {};
+  struct StrictLocalMax : LocalExtremum<std::greater, T>
+  {
+  };
 
   //! @brief Strict local spatial minimum test.
   template <typename T>
-  struct StrictLocalMin : LocalExtremum<std::less, T> {};
+  struct StrictLocalMin : LocalExtremum<std::less, T>
+  {
+  };
 
   //! @brief Strict local scale-space maximum test.
   template <typename T>
-  struct StrictLocalScaleSpaceMax : LocalScaleSpaceExtremum<std::greater, T> {};
+  struct StrictLocalScaleSpaceMax : LocalScaleSpaceExtremum<std::greater, T>
+  {
+  };
 
   //! @brief Strict local scale-space minimum test.
   template <typename T>
-  struct StrictLocalScaleSpaceMin : LocalScaleSpaceExtremum<std::less, T> {};
+  struct StrictLocalScaleSpaceMin : LocalScaleSpaceExtremum<std::less, T>
+  {
+  };
 
   //! @brief Get local spatial maxima.
   template <typename T>
@@ -163,16 +217,16 @@ namespace DO { namespace Sara {
 
   //! @brief Get local scale space maxima.
   template <typename T>
-  inline std::vector<Point2i>
-  local_scale_space_maxima(const ImagePyramid<T>& I, int s, int o)
+  inline std::vector<Point2i> local_scale_space_maxima(const ImagePyramid<T>& I,
+                                                       int s, int o)
   {
     return local_scale_space_extrema<std::greater_equal, T>(I, s, o);
   }
 
   //! @brief Get local scale space minima.
   template <typename T>
-  inline std::vector<Point2i>
-  local_scale_space_minima(const ImagePyramid<T>& I, int s, int o)
+  inline std::vector<Point2i> local_scale_space_minima(const ImagePyramid<T>& I,
+                                                       int s, int o)
   {
     return local_scale_space_extrema<std::less_equal, T>(I, s, o);
   }
@@ -195,5 +249,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara

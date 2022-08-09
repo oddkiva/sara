@@ -96,6 +96,7 @@ auto detect_corners(const sara::ImageView<float>& cornerness,
   return corners;
 }
 
+
 auto __main(int argc, char** argv) -> int
 {
   try
@@ -123,26 +124,26 @@ auto __main(int argc, char** argv) -> int
     auto frame_number = -1;
 
     auto frame_gray = sara::Image<float>{video_frame.sizes()};
-    auto frame_pyramid = std::array{
+    auto frame_pyramid = std::vector{
         sara::Image<float>{video_frame.sizes()},
         sara::Image<float>{video_frame.sizes() / 2}  //
     };
 
-    auto grad_x_pyramid = std::array{
+    auto grad_x_pyramid = std::vector{
         sara::Image<float>{video_frame.sizes()},
         sara::Image<float>{video_frame.sizes() / 2}  //
     };
-    auto grad_y_pyramid = std::array{
-        sara::Image<float>{video_frame.sizes()},
-        sara::Image<float>{video_frame.sizes() / 2}  //
-    };
-
-    auto cornerness_pyramid = std::array{
+    auto grad_y_pyramid = std::vector{
         sara::Image<float>{video_frame.sizes()},
         sara::Image<float>{video_frame.sizes() / 2}  //
     };
 
-    auto corners = std::array<std::vector<sara::Corner<float>>, 2>{};
+    auto cornerness_pyramid = std::vector{
+        sara::Image<float>{video_frame.sizes()},
+        sara::Image<float>{video_frame.sizes() / 2}  //
+    };
+
+    auto corners_per_scale = std::vector<std::vector<sara::Corner<float>>>{};
 
     auto fused_corners = std::vector<sara::Corner<float>>{};
     auto profiles = std::vector<Eigen::ArrayXf>{};
@@ -202,14 +203,15 @@ auto __main(int argc, char** argv) -> int
         sara::toc("Cornerness pyramid");
 
         for (auto i = 0; i < 2; ++i)
-          corners[i] = detect_corners(cornerness_pyramid[i],  //
-                                      grad_x_pyramid[i], grad_y_pyramid[i],
-                                      scale_initial, sigma_I);
+          corners_per_scale[i] = detect_corners(     //
+              cornerness_pyramid[i],                 //
+              grad_x_pyramid[i], grad_y_pyramid[i],  //
+              scale_initial, sigma_I);
 
 
         sara::tic();
-        static const auto scale_inter_delta =
-            std::sqrt(sara::square(scale_inter) - sara::square(scale_initial));
+        static const auto scale_inter_delta = std::sqrt(  //
+            sara::square(scale_inter) - sara::square(scale_initial));
         static const auto sizes_inter =
             (video_frame.sizes().cast<float>() / scale_inter)
                 .array()
@@ -253,9 +255,9 @@ auto __main(int argc, char** argv) -> int
 
         sara::tic();
         fused_corners.clear();
-        std::copy(corners[0].begin(), corners[0].end(),
+        std::copy(corners_per_scale[0].begin(), corners_per_scale[0].end(),
                   std::back_inserter(fused_corners));
-        std::transform(corners[1].begin(), corners[1].end(),
+        std::transform(corners_per_scale[1].begin(), corners_per_scale[1].end(),
                        std::back_inserter(fused_corners),
                        [](const sara::Corner<float>& corner) {
                          auto c = corner;
@@ -280,8 +282,8 @@ auto __main(int argc, char** argv) -> int
                                               .round()
                                               .matrix()
                                               .cast<int>();
-                const auto r = static_cast<int>(std::round(
-                    M_SQRT2 * 2 * c.scale / scale_inter));
+                const auto r = static_cast<int>(
+                    std::round(M_SQRT2 * 2 * c.scale / scale_inter));
 
                 const auto umin = std::clamp(p.x() - r, 0, edge_map.width());
                 const auto umax = std::clamp(p.x() + r, 0, edge_map.width());
