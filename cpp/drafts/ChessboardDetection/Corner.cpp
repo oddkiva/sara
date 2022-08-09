@@ -19,13 +19,16 @@ namespace DO::Sara {
               const float cornerness_adaptive_thres, const int border)
       -> std::vector<Corner<int>>
   {
-    namespace sara = DO::Sara;
+    tic();
+    const auto extrema = local_maxima(cornerness);
+    toc("local maxima");
 
-    const auto extrema = sara::local_maxima(cornerness);
-
+    tic();
     const auto cornerness_max = cornerness.flat_array().maxCoeff();
     const auto cornerness_thres = cornerness_adaptive_thres * cornerness_max;
+    toc("cornerness thres");
 
+    tic();
     auto extrema_filtered = std::vector<Corner<int>>{};
     extrema_filtered.reserve(extrema.size());
     for (const auto& p : extrema)
@@ -36,6 +39,7 @@ namespace DO::Sara {
       if (in_image_domain && cornerness(p) > cornerness_thres)
         extrema_filtered.push_back({p, cornerness(p), image_scale * sigma_I});
     }
+    toc("corner population");
 
     return extrema_filtered;
   };
