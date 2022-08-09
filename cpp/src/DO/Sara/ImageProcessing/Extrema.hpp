@@ -28,8 +28,8 @@ namespace DO::Sara {
   template <template <typename> class Compare, typename T>
   struct CompareWithNeighborhood3
   {
-    inline bool operator()(T val, int x, int y, const ImageView<T>& I,
-                           bool compareWithCenter) const
+    bool operator()(T val, int x, int y, const ImageView<T>& I,
+                    bool compareWithCenter) const
     {
       for (int v = -1; v <= 1; ++v)
       {
@@ -80,27 +80,10 @@ namespace DO::Sara {
   {
     LocalExtremum<Compare, T> local_extremum;
     auto extrema = std::vector<Point2i>{};
-    const auto w = I.width();
-    const auto h = I.height();
-    const auto wh = w * h;
-
-#pragma omp parallel for
-    for (auto xy = 0; xy < wh; ++xy)
-    {
-      const auto y = xy / w;
-      const auto x = xy - y * w;
-
-      const auto in_domain = 1 <= x && x < w - 1 && 1 <= y && y < h - 1;
-      if (!in_domain)
-        continue;
-
-      if (local_extremum(x, y, I))
-      {
-#pragma omp critical
-        extrema.push_back(Point2i(x, y));
-      }
-    }
-
+    for (int y = 1; y < I.height() - 1; ++y)
+      for (int x = 1; x < I.width() - 1; ++x)
+        if (local_extremum(x, y, I))
+          extrema.push_back(Point2i(x, y));
     return extrema;
   }
 
@@ -115,27 +98,6 @@ namespace DO::Sara {
       for (int x = 1; x < I(s, o).width() - 1; ++x)
         if (local_extremum(x, y, s, o, I))
           extrema.push_back(Point2i(x, y));
-
-    const auto w = I(s, o).width();
-    const auto h = I(s, o).height();
-    const auto wh = w * h;
-
-#pragma omp parallel for
-    for (auto xy = 0; xy < wh; ++xy)
-    {
-      const auto y = xy / w;
-      const auto x = xy - y * w;
-
-      const auto in_domain = 1 <= x && x < w - 1 && 1 <= y && y < h - 1;
-      if (!in_domain)
-        continue;
-
-      if (local_extremum(x, y, s, o, I))
-      {
-#pragma omp critical
-        extrema.push_back(Point2i(x, y));
-      }
-    }
     return extrema;
   }
 

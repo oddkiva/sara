@@ -57,6 +57,24 @@ auto draw_corner(sara::ImageView<sara::Rgb8>& display,
   sara::fill_circle(display, p1.x(), p1.y(), 1, sara::Yellow8);
 };
 
+auto create_image_pyramid(const Eigen::Vector2i& image_sizes,
+                          const float start_scale,  //
+                          const int num_scales)
+    -> std::vector<sara::Image<float>>
+{
+  auto image_pyramid = std::vector<sara::Image<float>>(num_scales);
+
+  auto scale_factor = 1 / start_scale;
+  for (auto s = 0; s < num_scales; ++s)
+  {
+    const Eigen::Vector2i sizes =
+        (image_sizes.cast<float>() * scale_factor).cast<int>();
+    image_pyramid[s].resize(sizes);
+    scale_factor *= 0.5f;
+  }
+
+  return image_pyramid;
+}
 
 auto detect_corners(const sara::ImageView<float>& cornerness,
                     const sara::ImageView<float>& grad_x,
@@ -113,8 +131,14 @@ auto __main(int argc, char** argv) -> int
     const auto video_file = std::string{argv[1]};
 #endif
 
+    const auto upscale =
+        argc < 3 ? false : static_cast<bool>(std::stoi(argv[2]));
+    SARA_CHECK(upscale);
+    const auto num_scales = argc < 4 ? 2 : std::stoi(argv[3]);
+    SARA_CHECK(num_scales);
+
     // Visual inspection option
-    const auto pause = argc < 3 ? false : static_cast<bool>(std::stoi(argv[2]));
+    const auto pause = argc < 5 ? false : static_cast<bool>(std::stoi(argv[4]));
 
 
     auto timer = sara::Timer{};
@@ -123,32 +147,40 @@ auto __main(int argc, char** argv) -> int
     auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
     auto frame_number = -1;
 
+    const auto create_image_pyramid_shortcut = [&video_frame, upscale,
+                                                num_scales]() {
+      return create_image_pyramid(video_frame.sizes(), upscale ? 0.5f : 1.f,
+                                  num_scales);
+    };
+
+    const auto image_pyramid_params = sara::ImagePyramidParams(  //
+        upscale ? -1 : 0,      // first octave index
+        2,                     // 2 scales per octave
+        2.f,                   // scale geom factor
+        1,                     // image border
+        upscale ? 0.5f : 1.f,  // scale camera
+        scale_initial);
+
+    // Preprocessed image.
     auto frame_gray = sara::Image<float>{video_frame.sizes()};
-    auto frame_pyramid = std::vector{
-        sara::Image<float>{video_frame.sizes()},
-        sara::Image<float>{video_frame.sizes() / 2}  //
-    };
 
-    auto grad_x_pyramid = std::vector{
-        sara::Image<float>{video_frame.sizes()},
-        sara::Image<float>{video_frame.sizes() / 2}  //
-    };
-    auto grad_y_pyramid = std::vector{
-        sara::Image<float>{video_frame.sizes()},
-        sara::Image<float>{video_frame.sizes() / 2}  //
-    };
 
-    auto cornerness_pyramid = std::vector{
-        sara::Image<float>{video_frame.sizes()},
-        sara::Image<float>{video_frame.sizes() / 2}  //
-    };
+    // The feature pyramids.
+#ifdef OLD
+    auto frame_pyramid = create_image_pyramid_shortcut();
+#else
+    auto frame_pyramid = sara::ImagePyramid<float>{};
+#endif
+    auto grad_x_pyramid = create_image_pyramid_shortcut();
+    auto grad_y_pyramid = create_image_pyramid_shortcut();
+    auto cornerness_pyramid = create_image_pyramid_shortcut();
 
-    auto corners_per_scale = std::vector<std::vector<sara::Corner<float>>>{};
+    auto corners_per_scale = std::vector<std::vector<sara::Corner<float>>>(
+        cornerness_pyramid.size());
 
     auto fused_corners = std::vector<sara::Corner<float>>{};
     auto profiles = std::vector<Eigen::ArrayXf>{};
     auto zero_crossings = std::vector<std::vector<float>>{};
-
 
     auto profile_extractor = sara::CircularProfileExtractor{};
 
@@ -180,6 +212,7 @@ auto __main(int argc, char** argv) -> int
         sara::from_rgb8_to_gray32f(video_frame, frame_gray);
         sara::toc("Grayscale conversion");
 
+#ifdef OLD
         sara::tic();
         sara::apply_gaussian_filter(frame_gray, frame_pyramid[0], sigma_D);
         const auto sigma = std::sqrt(sara::square(2 * scale_initial) -
@@ -188,24 +221,30 @@ auto __main(int argc, char** argv) -> int
             frame_pyramid[0].compute<sara::Gaussian>(sigma);
         sara::scale(frame_before_downscale, frame_pyramid[1]);
         sara::toc("Frame pyramid");
+#else
+        sara::tic();
+        frame_pyramid =
+            sara::gaussian_pyramid(frame_gray, image_pyramid_params);
+        sara::toc("Frame pyramid");
+#endif
 
         sara::tic();
-        for (auto i = 0; i < 2; ++i)
-          sara::gradient(frame_pyramid[i], grad_x_pyramid[i],
-                         grad_y_pyramid[i]);
+        for (auto o = 0; o < num_scales; ++o)
+          sara::gradient(frame_pyramid(0, o),  //
+                         grad_x_pyramid[o], grad_y_pyramid[o]);
         sara::toc("Gradient pyramid");
 
         sara::tic();
-        for (auto i = 0; i < 2; ++i)
-          cornerness_pyramid[i] = sara::harris_cornerness(  //
-              grad_x_pyramid[i], grad_y_pyramid[i],         //
+        for (auto o = 0; o < num_scales; ++o)
+          cornerness_pyramid[o] = sara::harris_cornerness(  //
+              grad_x_pyramid[o], grad_y_pyramid[o],         //
               sigma_I, kappa);
         sara::toc("Cornerness pyramid");
 
-        for (auto i = 0; i < 2; ++i)
-          corners_per_scale[i] = detect_corners(     //
-              cornerness_pyramid[i],                 //
-              grad_x_pyramid[i], grad_y_pyramid[i],  //
+        for (auto o = 0; o < num_scales; ++o)
+          corners_per_scale[o] = detect_corners(     //
+              cornerness_pyramid[o],                 //
+              grad_x_pyramid[o], grad_y_pyramid[o],  //
               scale_initial, sigma_I);
 
 
@@ -218,7 +257,7 @@ auto __main(int argc, char** argv) -> int
                 .round()
                 .cast<int>();
         auto frame_blurred_inter =
-            frame_pyramid[0].compute<sara::Gaussian>(scale_inter_delta);
+            frame_pyramid(0, 0).compute<sara::Gaussian>(scale_inter_delta);
         auto frame_inter = sara::Image<float>{sizes_inter};
         sara::resize_v2(frame_blurred_inter, frame_inter);
         ed(frame_inter);
@@ -255,17 +294,20 @@ auto __main(int argc, char** argv) -> int
 
         sara::tic();
         fused_corners.clear();
-        std::copy(corners_per_scale[0].begin(), corners_per_scale[0].end(),
-                  std::back_inserter(fused_corners));
-        std::transform(corners_per_scale[1].begin(), corners_per_scale[1].end(),
-                       std::back_inserter(fused_corners),
-                       [](const sara::Corner<float>& corner) {
-                         auto c = corner;
-                         c.coords *= 2;
-                         c.score /= 2;
-                         c.scale *= 2;
-                         return c;
-                       });
+        for (auto o = 0; o < num_scales; ++o)
+        {
+          const auto scale_factor = frame_pyramid.octave_scaling_factor(o);
+          std::transform(corners_per_scale[o].begin(),
+                         corners_per_scale[o].end(),
+                         std::back_inserter(fused_corners),
+                         [scale_factor](const sara::Corner<float>& corner) {
+                           auto c = corner;
+                           c.coords *= scale_factor;
+                           c.score /= scale_factor;
+                           c.scale *= scale_factor;
+                           return c;
+                         });
+        }
         sara::scale_aware_nms(fused_corners, video_frame.sizes(),
                               radius_factor);
         sara::toc("Corner grouping and NMS");
@@ -312,17 +354,17 @@ auto __main(int argc, char** argv) -> int
           const auto& corner = fused_corners[c];
           const auto& p = corner.coords;
           const auto& r = profile_extractor.circle_radius;
-          const auto w = frame_pyramid[0].width();
-          const auto h = frame_pyramid[0].height();
+          const auto w = frame_gray.width();
+          const auto h = frame_gray.height();
           if (!(r + 1 <= p.x() && p.x() < w - r - 1 &&  //
                 r + 1 <= p.y() && p.y() < h - r - 1))
             continue;
 
           const auto radius = M_SQRT2 * corner.scale * radius_factor;
-          profiles[c] = profile_extractor(             //
-              frame_pyramid[0],                        //
-              fused_corners[c].coords.cast<double>(),  //
-              radius);
+          const auto& frame =
+              upscale ? frame_pyramid(0, 1) : frame_pyramid(0, 0);
+          profiles[c] = profile_extractor(
+              frame, fused_corners[c].coords.cast<double>(), radius);
 
           zero_crossings[c] = sara::localize_zero_crossings(
               profiles[c], profile_extractor.num_circle_sample_points);
