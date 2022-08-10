@@ -43,10 +43,3 @@ target_link_libraries(
   PRIVATE DO::Sara::Graphics #
           ImageOrVideoReader #
           DO_Sara_ChessboardDetection)
-
-sara_add_example(local_radon_transform_for_corner_detection)
-target_link_libraries(
-  local_radon_transform_for_corner_detection
-  PRIVATE DO::Sara::Graphics #
-          ImageOrVideoReader #
-          DO_Sara_ChessboardDetection)
