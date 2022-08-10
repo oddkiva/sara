@@ -15,17 +15,21 @@
 
 #include <DO/Sara/Graphics.hpp>
 
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
-#include <DO/Sara/FeatureDetectors/Harris.hpp>
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 
-#include <drafts/ChessboardDetection/ChessboardDetector.hpp>
+#include <drafts/ChessboardDetection/CircularProfileExtractor.hpp>
 #include <drafts/ChessboardDetection/Corner.hpp>
+#include <drafts/ChessboardDetection/EdgeStatistics.hpp>
 #include <drafts/ChessboardDetection/NonMaximumSuppression.hpp>
 
 #include "Utilities/ImageOrVideoReader.hpp"
+
+#include <set>
 
 
 namespace sara = DO::Sara;
@@ -77,46 +81,6 @@ auto create_image_pyramid(const Eigen::Vector2i& image_sizes,
 
   return image_pyramid;
 }
-
-auto detect_corners(const sara::ImageView<float>& cornerness,
-                    const sara::ImageView<float>& grad_x,
-                    const sara::ImageView<float>& grad_y,  //
-                    const float image_scale,               //
-                    const float sigma_I, const int octave)
-{
-  static constexpr auto cornerness_adaptive_thres = 0.f;
-  static const auto corner_filtering_radius =
-      static_cast<int>(std::round(M_SQRT2 * image_scale * sigma_I));
-
-  sara::tic();
-  const auto corners_quantized = select(  //
-      cornerness,                         //
-      image_scale, sigma_I, octave,       //
-      cornerness_adaptive_thres,          //
-      corner_filtering_radius);
-  sara::toc("Corner selection");
-
-  sara::tic();
-  auto corners = std::vector<sara::Corner<float>>(corners_quantized.size());
-  const auto num_corners = static_cast<int>(corners.size());
-#pragma omp parallel for
-  for (auto c = 0; c < num_corners; ++c)
-  {
-    const auto& cq = corners_quantized[c];
-    const auto p = sara::refine_junction_location_unsafe(
-        grad_x, grad_y, cq.coords, corner_filtering_radius);
-    // TODO: interpolate the cornerness.
-    corners[c] = {p, cq.score, image_scale * sigma_I, octave};
-  }
-  sara::toc("Corner refinement");
-
-  sara::tic();
-  sara::scale_aware_nms(corners, cornerness.sizes(), radius_factor);
-  sara::toc("Corner NMS");
-
-  return corners;
-}
-
 
 auto __main(int argc, char** argv) -> int
 {
@@ -250,7 +214,8 @@ auto __main(int argc, char** argv) -> int
               cornerness_pyramid[o],                 //
               grad_x_pyramid[o], grad_y_pyramid[o],  //
               scale_initial, sigma_I,                //
-              static_cast<int>(o));
+              static_cast<int>(o),
+              radius_factor);
         }
 
 
@@ -343,8 +308,9 @@ auto __main(int argc, char** argv) -> int
 
           const auto w = endpoint_map.width();
           const auto h = endpoint_map.height();
-          const auto r = static_cast<int>(std::round(
-              radius_factor * M_SQRT2 * scale_initial * sigma_I / scale_inter));
+          const auto corner_endpoint_linking_radius = static_cast<int>(
+              std::round(radius_factor * M_SQRT2 * scale_initial * sigma_I /
+                         scale_inter));
 
           const auto num_corners = static_cast<int>(fused_corners.size());
           for (auto c = 0; c < num_corners; ++c)
@@ -357,6 +323,7 @@ auto __main(int argc, char** argv) -> int
                                           .matrix()
                                           .cast<int>();
 
+            const auto& r = corner_endpoint_linking_radius;
             const auto umin = std::clamp(p.x() - r, 0, w);
             const auto umax = std::clamp(p.x() + r, 0, w);
             const auto vmin = std::clamp(p.y() - r, 0, h);

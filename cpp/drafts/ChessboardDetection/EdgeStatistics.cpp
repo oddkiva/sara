@@ -14,6 +14,23 @@
 
 namespace DO::Sara {
 
+  // Strong edge filter.
+  auto is_strong_edge(const ImageView<float>& grad_mag,
+                      const std::vector<Eigen::Vector2i>& edge,
+                      const float grad_thres) -> bool
+  {
+    if (edge.empty())
+      return 0.f;
+    const auto mean_edge_gradient =
+        std::accumulate(
+            edge.begin(), edge.end(), 0.f,
+            [&grad_mag](const float& grad, const Eigen::Vector2i& p) -> float {
+              return grad + grad_mag(p);
+            }) /
+        edge.size();
+    return mean_edge_gradient > grad_thres;
+  }
+
   auto get_curve_shape_statistics(
       const std::vector<std::vector<Eigen::Vector2i>>& curve_pts)
       -> CurveStatistics

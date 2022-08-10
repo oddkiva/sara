@@ -20,29 +20,13 @@
 
 #include "CircularProfileExtractor.hpp"
 #include "Corner.hpp"
+#include "EdgeStatistics.hpp"
 #include "SquareGraph.hpp"
 
 #include <set>
-#include <unordered_set>
 
 
 namespace DO::Sara {
-
-  inline constexpr auto operator"" _percent(long double x) -> long double
-  {
-    return x / 100;
-  }
-
-  auto is_good_x_corner(const std::vector<float>& zero_crossings) -> bool;
-  auto is_seed_corner(  //
-      const std::unordered_set<int>& adjacent_edges,
-      const std::vector<float>& gradient_peaks,  //
-      const std::vector<float>& zero_crossings,  //
-      int N) -> bool;
-
-  auto is_strong_edge(const ImageView<float>& grad_mag,
-                      const std::vector<Eigen::Vector2i>& edge,
-                      const float grad_thres) -> bool;
 
   class ChessboardDetector
   {

@@ -16,6 +16,15 @@
 
 namespace DO::Sara {
 
+  inline constexpr auto operator"" _percent(long double x) -> long double
+  {
+    return x / 100;
+  }
+
+  auto is_strong_edge(const ImageView<float>& grad_mag,
+                      const std::vector<Eigen::Vector2i>& edge,
+                      const float grad_thres) -> bool;
+
   auto get_curve_shape_statistics(
       const std::vector<std::vector<Eigen::Vector2i>>& curve_pts)
       -> CurveStatistics;

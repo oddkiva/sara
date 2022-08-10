@@ -20,6 +20,7 @@
 
 #include "CircularProfileExtractor.hpp"
 #include "Corner.hpp"
+#include "EdgeStatistics.hpp"
 #include "SquareGraph.hpp"
 
 #include <set>
@@ -28,47 +29,35 @@
 
 namespace DO::Sara {
 
-  inline constexpr auto operator"" _percent(long double x) -> long double
-  {
-    return x / 100;
-  }
-
-
-  auto is_good_x_corner(const std::vector<float>& zero_crossings) -> bool;
-
-  auto is_seed_corner(const std::unordered_set<int>& adjacent_edges,
-                      const std::vector<float>& gradient_peaks,  //
-                      const std::vector<float>& zero_crossings,  //
-                      int N) -> bool;
-
-  auto is_strong_edge(const ImageView<float>& grad_mag,
-                      const std::vector<Eigen::Vector2i>& edge,
-                      const float grad_thres) -> bool;
-
-
-  //! @brief Harris's corner detection parameters.
-  struct HarrisCornerDetectionParameters
-  {
-    // @brief Integration domain of the second moment.
-    // This is a good default parameter and there is little reason to change
-    // it in my experience.
-    //
-    // A good rule to sigma_I is set it as sigma_I = 3 sigma_D.
-    float sigma_I = 2.4f;
-
-    // @brief The threshold parameter.
-    // This is a good default parameter and there is little reason to change
-    // it in my experience.
-    float kappa = 0.04f;
-  };
-
-  class ChessboardDetector
+  class ChessboardDetectorV2
   {
   public:
     using OrderedChessboardCorners = std::vector<std::vector<Eigen::Vector2f>>;
     using OrderedChessboardVertices = std::vector<std::vector<int>>;
 
+    //! @brief Harris's corner detection parameters.
+    struct HarrisCornerDetectionParameters
+    {
+      //! @brief Blur parameter before the gradient calculation.
+      //! This is a good default parameter and there is little reason to change
+      //! it in my experience.
+      float sigma_D = 0.8f;
+
+      //! @brief Integration domain of the second moment.
+      //! This is a good default parameter and there is little reason to change
+      //! it in my experience.
+      //!
+      //! A good rule to sigma_I is set it as sigma_I = 3 sigma_D.
+      float sigma_I = 2.4f;
+
+      //! @brief The threshold parameter.
+      //! This is a good default parameter and there is little reason to change
+      //! it in my experience.
+      float kappa = 0.04f;
+    };
+
     //! @brief Parameters used to construct the Gaussian pyramid.
+    bool upscale = false;
     ImagePyramidParams gaussian_pyramid_params = ImagePyramidParams(  //
         0,     // first octave index
         2,     // 2 scales per octave
@@ -106,18 +95,23 @@ namespace DO::Sara {
         .collapse_adaptive = false,
     };
 
-    // This is a good magic constant that connects edge to corners.
-    int corner_edge_linking_radius = 4;
+    //! The default value seems to be a very good value for the analysis
+    //! of the patch centered in each corner in my experience.
+    float corner_edge_linking_radius;
+    static constexpr auto radius_factor = 2.f;
 
-    inline auto set_multiscale_harris_corner_detection_params(
+    inline ChessboardDetectorV2() = default;
+
+    inline auto initialize_multiscale_harris_corner_detection_params(
         const float sigma_D = 0.8f,      //
         const float sigma_I = 3 * 0.8f,  //
         const float kappa = 0.04f,       //
         const int num_scales = 2,        //
-        bool upscale = false)
+        bool upscale_image = false) -> void
     {
+      // First set up the Gaussian pyramid parameters.
+      upscale = upscale_image;
       const auto scale_initial = std::sqrt(1.f + square(sigma_D));
-
       gaussian_pyramid_params = ImagePyramidParams{
           upscale ? -1 : 0,      // First octave index
           2,                     // 2 scales per octave, i.e.:
@@ -131,138 +125,77 @@ namespace DO::Sara {
           num_scales      // The maximum number of octaves
       };
 
+      // Now set the Harris corner detection parameters that will be applied at
+      // each scale of the pyramid.
       corner_detection_params.sigma_I = sigma_I;
       corner_detection_params.kappa = kappa;
     }
 
-    // This may behave better or worse, this is a moving part.
-    inline auto set_corner_edge_linking_radius_according_to_scale() -> void
+    inline auto initialize_filter_radius_according_to_scale() -> void
     {
       corner_edge_linking_radius = static_cast<int>(  //
-          std::round(2 * gaussian_pyramid_params.scale_initial() *
+          std::round(radius_factor * gaussian_pyramid_params.scale_initial() *
                      corner_detection_params.sigma_I /
                      edge_detection_downscale_factor));
-      SARA_CHECK(corner_filtering_radius);
+      SARA_CHECK(corner_edge_linking_radius);
     }
 
-    inline ChessboardDetector() = default;
+    inline auto initialize_edge_detector() -> void
+    {
+      _ed = EdgeDetector{edge_detection_params};
+    }
 
-    DO_SARA_EXPORT
-    auto operator()(const ImageView<float>& image)
+    DO_SARA_EXPORT auto operator()(const ImageView<float>& image)
         -> const std::vector<OrderedChessboardCorners>&;
 
-    auto preprocess_image(const ImageView<float>& image) -> void;
+    auto calculate_feature_pyramids(const ImageView<float>& image) -> void;
+    auto extract_corners() -> void;
+    auto detect_edges() -> void;
     auto filter_edges() -> void;
-    auto detect_corners() -> void;
-    auto calculate_circular_intensity_profiles() -> void;
-    auto filter_corners_with_intensity_profiles() -> void;
-    auto calculate_orientation_histograms() -> void;
-    auto calculate_edge_shape_statistics() -> void;
-    auto link_edges_and_corners() -> void;
-    auto select_seed_corners() -> void;
+    auto group_and_filter_corners() -> void;
+    auto filter_corners_topologically() -> void;
 
-    auto parse_squares() -> void;
-    auto grow_chessboards() -> void;
-    auto extract_chessboard_corners_from_chessboard_squares() -> void;
-    auto extract_chessboard_vertices_from_chessboard_squares() -> void;
+    //! @brief The edge detector.
+    EdgeDetector _ed;
+    //! @brief Circular intensity profile extractor.
+    CircularProfileExtractor _profile_extractor;
 
-    // TODO: redo this but this time with a smarter geometric modelling of
-    // the distorted lines.
-    auto parse_lines() -> void;
-
-    //! @brief Preprocessed images.
+    //! @brief The feature pyramids.
     //! @{
-    Image<float> _f_blurred;
-    Image<float> _f_ds;
-    Image<float> _f_ds_blurred;
+    ImagePyramid<float> _gauss_pyr;
+    std::vector<Image<float>> _grad_x_pyr;
+    std::vector<Image<float>> _grad_y_pyr;
+    std::vector<Image<float>> _cornerness_pyr;
     //! @}
 
-    //! @brief Intermediate feature maps used for the edge filtering and for the
-    //! corner detection.
-    //! @{
-    Image<float> _grad_x, _grad_y;
-    Image<float> _grad_mag, _grad_ori;
-    //! @}
-
-    //! @brief Cornerness map.
-    Image<float> _cornerness;
-    //! @brief The quantized locations of corners
-    //! They are extracted from the cornerness map.
-    std::vector<Corner<int>> _corners_int;
-    //! @brief The refined locations of corners.
+    //! @brief The list of corners at each scale.
+    std::vector<std::vector<Corner<float>>> _corners_per_scale;
+    //! @brief The list of corners filtered and merged together.
     std::vector<Corner<float>> _corners;
 
-    //! @brief The edge detector
-    EdgeDetector _ed;
-
-    //! @brief Data structures to analyze the topological structures
-    std::vector<std::unordered_set<int>> _edges_adjacent_to_corner;
-    std::vector<std::unordered_set<int>> _corners_adjacent_to_edge;
-
-    //! @brief Descriptors for the corners
-    //! @{
-    CircularProfileExtractor _profile_extractor;
+    //! @brief Corner local region descriptors.
     std::vector<Eigen::ArrayXf> _profiles;
     std::vector<std::vector<float>> _zero_crossings;
 
-    static constexpr auto N = 72;
-    std::vector<Eigen::Array<float, N, 1>> _hists;
-    std::vector<std::vector<int>> _gradient_peaks;
-    std::vector<std::vector<float>> _gradient_peaks_refined;
-    //! @}
+    //! @brief Data structures to analyze the topological structures
+    Image<std::uint8_t> _edge_map;
+    Image<std::int32_t> _endpoint_map;
+    std::vector<std::uint8_t> _is_strong_edge;
 
-    //! @brief Edge shape statistics.
-    //! @{
-    Image<int> _edge_label_map;
-    CurveStatistics _edge_stats;
-    std::vector<Eigen::Vector2f> _edge_grad_means;
-    std::vector<Eigen::Matrix2f> _edge_grad_covs;
-    //! @}
+    struct CornerRef
+    {
+      std::int32_t id;
+      float score;
+      inline auto operator<(const CornerRef& other) const -> bool
+      {
+        return score < other.score;
+      }
+    };
+    std::vector<std::set<CornerRef>> _corners_adjacent_to_endpoints;
 
-    //! @brief The best corners.
-    std::unordered_set<int> _best_corners;
-
-    //! @brief The list of seed squares constructed in a greedy manner.
-    //! @{
-    SquareSet _black_squares;
-    SquareSet _white_squares;
-    //! @}
-
-    //! @brief Chessboards grown from the list of squares.
-    //! @{
-    std::vector<Square> _squares;
-    std::vector<Chessboard> _chessboards;
-    //! @}
-
-    //! @brief TODO: Recover missed corners.
-    std::vector<std::vector<int>> _lines;
-
-    //! @brief The final output.
-    std::vector<OrderedChessboardCorners> _cb_corners;
-    std::vector<OrderedChessboardVertices> _cb_vertices;
-
-    //! @brief The list of parameters.
-    Parameters _params;
+    //! @brief For the square reconstruction.
+    std::vector<std::unordered_set<int>> _edges_adjacent_to_corner;
   };
-
-
-  inline auto transpose(const ChessboardDetector::OrderedChessboardCorners& in)
-      -> ChessboardDetector::OrderedChessboardCorners
-  {
-    const auto m = in.size();
-    const auto n = in.front().size();
-
-    auto out = ChessboardDetector::OrderedChessboardCorners{};
-    out.resize(n);
-    for (auto i = 0u; i < n; ++i)
-      out[i].resize(m);
-
-    for (auto i = 0u; i < m; ++i)
-      for (auto j = 0u; j < n; ++j)
-        out[j][i] = in[i][j];
-
-    return out;
-  }
 
 
 }  // namespace DO::Sara

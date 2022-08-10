@@ -13,6 +13,8 @@
 
 #include <DO/Sara/ImageProcessing.hpp>
 
+#include <unordered_set>
+
 
 namespace DO::Sara {
 
@@ -29,6 +31,11 @@ namespace DO::Sara {
       return coords;
     }
 
+    inline auto radius() const -> float
+    {
+      return static_cast<float>(M_SQRT2 * scale);
+    }
+
     inline auto operator<(const Corner& other) const -> bool
     {
       return score < other.score;
@@ -40,5 +47,21 @@ namespace DO::Sara {
               const float image_scale, const float sigma_I, int octave,
               const float cornerness_adaptive_thres, const int border)
       -> std::vector<Corner<int>>;
+
+  auto detect_corners(const ImageView<float>& cornerness,
+                      const ImageView<float>& grad_x,
+                      const ImageView<float>& grad_y,  //
+                      const float image_scale,         //
+                      const float sigma_I,             //
+                      const int octave,                //
+                      const float radius_factor) -> std::vector<Corner<float>>;
+
+  auto is_good_x_corner(const std::vector<float>& zero_crossings) -> bool;
+
+  auto is_seed_corner(  //
+      const std::unordered_set<int>& adjacent_edges,
+      const std::vector<float>& gradient_peaks,  //
+      const std::vector<float>& zero_crossings,  //
+      int N) -> bool;
 
 }  // namespace DO::Sara
