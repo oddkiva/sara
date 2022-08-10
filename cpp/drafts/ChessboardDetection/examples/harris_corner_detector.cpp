@@ -302,7 +302,8 @@ auto __main(int argc, char** argv) -> int
             continue;
 
           const auto& edge = edges[e];
-          const auto& edge_ordered = sara::reorder_and_extract_longest_curve(edge);
+          const auto& edge_ordered =
+              sara::reorder_and_extract_longest_curve(edge);
           auto curve = std::vector<Eigen::Vector2d>(edge_ordered.size());
           std::transform(
               edge_ordered.begin(), edge_ordered.end(), curve.begin(),
@@ -377,6 +378,7 @@ auto __main(int argc, char** argv) -> int
 
         sara::tic();
         {
+          SARA_CHECK(corners_adjacent_to_endpoints.size());
           corners_adjacent_to_endpoints.clear();
           corners_adjacent_to_endpoints.resize(2 * edges.size());
           const auto num_corners = static_cast<int>(fused_corners.size());
@@ -396,9 +398,9 @@ auto __main(int argc, char** argv) -> int
             const auto umax = std::clamp(p.x() + r, 0, edge_map.width());
             const auto vmin = std::clamp(p.y() - r, 0, edge_map.height());
             const auto vmax = std::clamp(p.y() + r, 0, edge_map.height());
-            for (auto v = vmin; v <= vmax; ++v)
+            for (auto v = vmin; v < vmax; ++v)
             {
-              for (auto u = umin; u <= umax; ++u)
+              for (auto u = umin; u < umax; ++u)
               {
                 const auto endpoint_id = endpoint_map(u, v);
                 if (endpoint_id != -1)
@@ -413,7 +415,8 @@ auto __main(int argc, char** argv) -> int
         sara::tic();
         {
           auto best_corner_ids = std::unordered_set<int>{};
-          for (const auto& corners_adj_to_endpoint: corners_adjacent_to_endpoints)
+          for (const auto& corners_adj_to_endpoint :
+               corners_adjacent_to_endpoints)
           {
             if (corners_adj_to_endpoint.empty())
               continue;
@@ -421,11 +424,10 @@ auto __main(int argc, char** argv) -> int
             best_corner_ids.insert(best_corner->id);
           }
           auto fused_corners_filtered = std::vector<sara::Corner<float>>{};
-          std::transform(best_corner_ids.begin(), best_corner_ids.end(),
-                         std::back_inserter(fused_corners_filtered),
-                         [&fused_corners](const auto& id) {
-                           return fused_corners[id];
-                         });
+          std::transform(
+              best_corner_ids.begin(), best_corner_ids.end(),
+              std::back_inserter(fused_corners_filtered),
+              [&fused_corners](const auto& id) { return fused_corners[id]; });
           fused_corners_filtered.swap(fused_corners);
         }
         sara::toc("Corner filtering (end-point)");
@@ -484,7 +486,6 @@ auto __main(int argc, char** argv) -> int
           zero_crossings_filtered.swap(zero_crossings);
         }
         sara::toc("Corner filtering from intensity profile");
-
       }
       const auto pipeline_time = timer.elapsed_ms();
       SARA_DEBUG << "Processing time = " << pipeline_time << "ms" << std::endl;
