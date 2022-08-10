@@ -161,7 +161,8 @@ auto __main(int argc, char** argv) -> int
         2.f,                   // scale geom factor
         1,                     // image border
         upscale ? 0.5f : 1.f,  // scale camera
-        scale_initial);
+        scale_initial,         // start scale of the gaussian pyramid
+        num_scales);           // maximum number of scales
 
     // Preprocessed image.
     auto frame_gray = sara::Image<float>{video_frame.sizes()};
@@ -228,19 +229,21 @@ auto __main(int argc, char** argv) -> int
         sara::toc("Frame pyramid");
 
         sara::tic();
-        for (auto o = 0; o < num_scales; ++o)
+        if (frame_pyramid.octave_count() != num_scales)
+          throw std::runtime_error{"The number of octave is wrong!"};
+        for (auto o = 0; o < frame_pyramid.octave_count(); ++o)
           sara::gradient(frame_pyramid(0, o),  //
                          grad_x_pyramid[o], grad_y_pyramid[o]);
         sara::toc("Gradient pyramid");
 
         sara::tic();
-        for (auto o = 0; o < num_scales; ++o)
+        for (auto o = 0u; o < cornerness_pyramid.size(); ++o)
           cornerness_pyramid[o] = sara::harris_cornerness(  //
               grad_x_pyramid[o], grad_y_pyramid[o],         //
               sigma_I, kappa);
         sara::toc("Cornerness pyramid");
 
-        for (auto o = 0; o < num_scales; ++o)
+        for (auto o = 0u; o < corners_per_scale.size(); ++o)
           corners_per_scale[o] = detect_corners(     //
               cornerness_pyramid[o],                 //
               grad_x_pyramid[o], grad_y_pyramid[o],  //
@@ -311,7 +314,7 @@ auto __main(int argc, char** argv) -> int
 
         sara::tic();
         fused_corners.clear();
-        for (auto o = 0; o < num_scales; ++o)
+        for (auto o = 0; o < frame_pyramid.octave_count(); ++o)
         {
           const auto scale_factor = frame_pyramid.octave_scaling_factor(o);
           std::transform(corners_per_scale[o].begin(),
