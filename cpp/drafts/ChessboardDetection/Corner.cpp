@@ -15,7 +15,7 @@
 namespace DO::Sara {
 
   auto select(const DO::Sara::ImageView<float>& cornerness,
-              const float image_scale, const float sigma_I,
+              const float image_scale, const float sigma_I, const int octave,
               const float cornerness_adaptive_thres, const int border)
       -> std::vector<Corner<int>>
   {
@@ -37,7 +37,8 @@ namespace DO::Sara {
           border <= p.x() && p.x() < cornerness.width() - border &&  //
           border <= p.y() && p.y() < cornerness.height() - border;
       if (in_image_domain && cornerness(p) > cornerness_thres)
-        extrema_filtered.push_back({p, cornerness(p), image_scale * sigma_I});
+        extrema_filtered.push_back(
+            {p, cornerness(p), image_scale * sigma_I, octave});
     }
     toc("corner population");
 

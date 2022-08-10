@@ -22,6 +22,7 @@ namespace DO::Sara {
     Eigen::Vector2<T> coords;
     float score;
     float scale;
+    int octave;
 
     inline auto position() const -> const Eigen::Vector2<T>&
     {
@@ -35,8 +36,8 @@ namespace DO::Sara {
   };
 
   // Select the local maxima of the cornerness functions.
-  auto select(const ImageView<float>& cornerness,
-              const float sigma_D, const float sigma_I,
+  auto select(const ImageView<float>& cornerness,  //
+              const float image_scale, const float sigma_I, int octave,
               const float cornerness_adaptive_thres, const int border)
       -> std::vector<Corner<int>>;
 

@@ -39,11 +39,11 @@ static const auto scale_initial = std::sqrt(sara::square(scale_image) +  //
 static const auto scale_inter = std::sqrt(2.f) * scale_initial;
 
 static constexpr auto sigma_D = scale_delta;
-static constexpr auto sigma_I = 0.8f;
+static constexpr auto sigma_I = 3 * sigma_D;
 static constexpr auto kappa = 0.04f;
 
 // Circular profile extractor parameters.
-static constexpr auto radius_factor = 3.f;
+static constexpr auto radius_factor = 2.f;
 
 
 auto draw_corner(sara::ImageView<sara::Rgb8>& display,
@@ -82,15 +82,16 @@ auto detect_corners(const sara::ImageView<float>& cornerness,
                     const sara::ImageView<float>& grad_x,
                     const sara::ImageView<float>& grad_y,  //
                     const float image_scale,               //
-                    const float sigma_I)
+                    const float sigma_I, const int octave)
 {
-  static constexpr auto cornerness_adaptive_thres = 1e-5f;
-  static constexpr auto corner_filtering_radius = 7;
+  static constexpr auto cornerness_adaptive_thres = 0.f;
+  static const auto corner_filtering_radius =
+      static_cast<int>(std::round(M_SQRT2 * image_scale * sigma_I));
 
   sara::tic();
   const auto corners_quantized = select(  //
       cornerness,                         //
-      image_scale, sigma_I,               //
+      image_scale, sigma_I, octave,       //
       cornerness_adaptive_thres,          //
       corner_filtering_radius);
   sara::toc("Corner selection");
@@ -105,7 +106,7 @@ auto detect_corners(const sara::ImageView<float>& cornerness,
     const auto p = sara::refine_junction_location_unsafe(
         grad_x, grad_y, cq.coords, corner_filtering_radius);
     // TODO: interpolate the cornerness.
-    corners[c] = {p, cq.score, image_scale * sigma_I};
+    corners[c] = {p, cq.score, image_scale * sigma_I, octave};
   }
   sara::toc("Corner refinement");
 
@@ -244,10 +245,13 @@ auto __main(int argc, char** argv) -> int
         sara::toc("Cornerness pyramid");
 
         for (auto o = 0u; o < corners_per_scale.size(); ++o)
+        {
           corners_per_scale[o] = detect_corners(     //
               cornerness_pyramid[o],                 //
               grad_x_pyramid[o], grad_y_pyramid[o],  //
-              scale_initial, sigma_I);
+              scale_initial, sigma_I,                //
+              static_cast<int>(o));
+        }
 
 
         sara::tic();
@@ -336,6 +340,12 @@ auto __main(int argc, char** argv) -> int
         {
           corners_adjacent_to_endpoints.clear();
           corners_adjacent_to_endpoints.resize(2 * edges.size());
+
+          const auto w = endpoint_map.width();
+          const auto h = endpoint_map.height();
+          const auto r = static_cast<int>(std::round(
+              radius_factor * M_SQRT2 * scale_initial * sigma_I / scale_inter));
+
           const auto num_corners = static_cast<int>(fused_corners.size());
           for (auto c = 0; c < num_corners; ++c)
           {
@@ -346,12 +356,11 @@ auto __main(int argc, char** argv) -> int
                                           .round()
                                           .matrix()
                                           .cast<int>();
-            const auto r = 8;
 
-            const auto umin = std::clamp(p.x() - r, 0, edge_map.width());
-            const auto umax = std::clamp(p.x() + r, 0, edge_map.width());
-            const auto vmin = std::clamp(p.y() - r, 0, edge_map.height());
-            const auto vmax = std::clamp(p.y() + r, 0, edge_map.height());
+            const auto umin = std::clamp(p.x() - r, 0, w);
+            const auto umax = std::clamp(p.x() + r, 0, w);
+            const auto vmin = std::clamp(p.y() - r, 0, h);
+            const auto vmax = std::clamp(p.y() + r, 0, h);
             for (auto v = vmin; v < vmax; ++v)
             {
               for (auto u = umin; u < umax; ++u)
@@ -397,22 +406,27 @@ auto __main(int argc, char** argv) -> int
         for (auto c = 0; c < num_corners; ++c)
         {
           const auto& corner = fused_corners[c];
-          const auto& p = corner.coords;
-          const auto& r = profile_extractor.circle_radius;
-          // TODO: check this... this was guessed without verification.
-          const auto offset = static_cast<int>(
-              std::pow(2, num_scales - static_cast<int>(upscale)));
-          const auto w = frame_gray.width();
-          const auto h = frame_gray.height();
-          if (!(r + offset <= p.x() && p.x() < w - r - offset &&  //
-                r + offset <= p.y() && p.y() < h - r - offset))
+
+          // Retrieve the image where the corner was detected.
+          const auto& frame = frame_pyramid(0, corner.octave);
+          const auto w = frame.width();
+          const auto h = frame.height();
+
+          // Rescale the coordinates.
+          const Eigen::Vector2d p =
+              (corner.coords /
+               frame_pyramid.octave_scaling_factor(corner.octave))
+                  .cast<double>();
+
+          // Readapt the radius of the circular profile to the image scale.
+          const auto r = M_SQRT2 * scale_initial * sigma_I * radius_factor;
+
+          // Boundary check.
+          if (!(r + 1 <= p.x() && p.x() < w - r - 1 &&  //
+                r + 1 <= p.y() && p.y() < h - r - 1))
             continue;
 
-          const auto radius = M_SQRT2 * corner.scale * radius_factor;
-          const auto& frame =
-              upscale ? frame_pyramid(0, 1) : frame_pyramid(0, 0);
-          profiles[c] = profile_extractor(
-              frame, fused_corners[c].coords.cast<double>(), radius);
+          profiles[c] = profile_extractor(frame, p, r);
 
           zero_crossings[c] = sara::localize_zero_crossings(
               profiles[c], profile_extractor.num_circle_sample_points);

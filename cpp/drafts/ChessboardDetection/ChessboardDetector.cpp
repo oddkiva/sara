@@ -216,7 +216,7 @@ namespace DO::Sara {
 
     tic();
     _corners_int = select(_cornerness,                        //
-                          image_scale, _params.sigma_I,       //
+                          image_scale, _params.sigma_I, 0,    //
                           _params.cornerness_adaptive_thres,  //
                           _params.corner_filtering_radius);
     toc("Corner selection");
@@ -228,7 +228,7 @@ namespace DO::Sara {
         [this, image_scale](const Corner<int>& c) -> Corner<float> {
           const auto p = refine_junction_location_unsafe(
               _grad_x, _grad_y, c.coords, _params.corner_filtering_radius);
-          return {p, c.score, image_scale * _params.sigma_I};
+          return {p, c.score, image_scale * _params.sigma_I, 0};
         });
     nms(_corners, _cornerness.sizes(), _params.corner_filtering_radius);
     toc("Corner refinement");
