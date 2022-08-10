@@ -331,7 +331,6 @@ auto __main(int argc, char** argv) -> int
 
         sara::tic();
         {
-          SARA_CHECK(corners_adjacent_to_endpoints.size());
           corners_adjacent_to_endpoints.clear();
           corners_adjacent_to_endpoints.resize(2 * edges.size());
           const auto num_corners = static_cast<int>(fused_corners.size());
