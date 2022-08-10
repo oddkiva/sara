@@ -13,8 +13,10 @@
 
 #include <omp.h>
 
-#include <DO/Sara/FeatureDetectors/Harris.hpp>
 #include <DO/Sara/Graphics.hpp>
+
+#include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
+#include <DO/Sara/FeatureDetectors/Harris.hpp>
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
@@ -182,6 +184,17 @@ auto __main(int argc, char** argv) -> int
     auto profiles = std::vector<Eigen::ArrayXf>{};
     auto zero_crossings = std::vector<std::vector<float>>{};
 
+    struct CornerRef
+    {
+      std::int32_t id;
+      float score;
+      inline auto operator<(const CornerRef& other) const -> bool
+      {
+        return score < other.score;
+      }
+    };
+    auto corners_adjacent_to_endpoints = std::vector<std::set<CornerRef>>{};
+
     auto profile_extractor = sara::CircularProfileExtractor{};
 
     auto ed = sara::EdgeDetector{};
@@ -191,6 +204,7 @@ auto __main(int argc, char** argv) -> int
     ed.parameters.low_threshold_ratio = 0.02f;
 
     auto edge_map = sara::Image<float>{};
+    auto endpoint_map = sara::Image<std::int32_t>{};
     auto is_strong_edge = std::vector<std::uint8_t>{};
 
     while (video_stream.read())
@@ -274,10 +288,11 @@ auto __main(int argc, char** argv) -> int
                                           strong_edge_thres);
             });
 
-        edge_map = sara::Image<float>{
-            ed.pipeline.gradient_magnitude.sizes()  //
-        };
+        edge_map.resize(ed.pipeline.gradient_magnitude.sizes());
         edge_map.flat_array().fill(0);
+
+        endpoint_map.resize(ed.pipeline.gradient_magnitude.sizes());
+        endpoint_map.flat_array().fill(-1);
 
         const auto num_edges = static_cast<int>(edges.size());
 #pragma omp parallel for
@@ -287,8 +302,24 @@ auto __main(int argc, char** argv) -> int
             continue;
 
           const auto& edge = edges[e];
+          const auto& edge_ordered = sara::reorder_and_extract_longest_curve(edge);
+          auto curve = std::vector<Eigen::Vector2d>(edge_ordered.size());
+          std::transform(
+              edge_ordered.begin(), edge_ordered.end(), curve.begin(),
+              [](const auto& p) { return p.template cast<double>(); });
+          if (curve.size() < 2)
+            continue;
+
+          const Eigen::Vector2i a =
+              curve.front().array().round().matrix().cast<int>();
+          const Eigen::Vector2i b =
+              curve.back().array().round().matrix().cast<int>();
+
           for (const auto& p : edge)
             edge_map(p) = 1.;
+
+          endpoint_map(a) = 2 * e;
+          endpoint_map(b) = 2 * e + 1;
         }
         sara::toc("Edge filtering");
 
@@ -312,6 +343,7 @@ auto __main(int argc, char** argv) -> int
                               radius_factor);
         sara::toc("Corner grouping and NMS");
 
+#if 0
         sara::tic();
         {
           auto fused_corners_filtered = std::vector<sara::Corner<float>>{};
@@ -340,7 +372,64 @@ auto __main(int argc, char** argv) -> int
               });
           fused_corners_filtered.swap(fused_corners);
         }
-        sara::toc("Corner filtering on edge-vicinity-criterion");
+        sara::toc("Corner filtering (edge-vicinity)");
+#endif
+
+        sara::tic();
+        {
+          corners_adjacent_to_endpoints.clear();
+          corners_adjacent_to_endpoints.resize(2 * edges.size());
+          const auto num_corners = static_cast<int>(fused_corners.size());
+          for (auto c = 0; c < num_corners; ++c)
+          {
+            const auto& corner = fused_corners[c];
+
+            const Eigen::Vector2i p = (corner.coords / scale_inter)
+                                          .array()
+                                          .round()
+                                          .matrix()
+                                          .cast<int>();
+            const auto r = static_cast<int>(std::round(
+                M_SQRT2 * radius_factor * corner.scale / scale_inter));
+
+            const auto umin = std::clamp(p.x() - r, 0, edge_map.width());
+            const auto umax = std::clamp(p.x() + r, 0, edge_map.width());
+            const auto vmin = std::clamp(p.y() - r, 0, edge_map.height());
+            const auto vmax = std::clamp(p.y() + r, 0, edge_map.height());
+            for (auto v = vmin; v <= vmax; ++v)
+            {
+              for (auto u = umin; u <= umax; ++u)
+              {
+                const auto endpoint_id = endpoint_map(u, v);
+                if (endpoint_id != -1)
+                  corners_adjacent_to_endpoints[endpoint_id].insert(
+                      CornerRef{c, corner.score});
+              }
+            }
+          }
+        }
+        sara::toc("Topological linking");
+
+        sara::tic();
+        {
+          auto best_corner_ids = std::unordered_set<int>{};
+          for (const auto& corners_adj_to_endpoint: corners_adjacent_to_endpoints)
+          {
+            if (corners_adj_to_endpoint.empty())
+              continue;
+            const auto best_corner = corners_adj_to_endpoint.rbegin();
+            best_corner_ids.insert(best_corner->id);
+          }
+          auto fused_corners_filtered = std::vector<sara::Corner<float>>{};
+          std::transform(best_corner_ids.begin(), best_corner_ids.end(),
+                         std::back_inserter(fused_corners_filtered),
+                         [&fused_corners](const auto& id) {
+                           return fused_corners[id];
+                         });
+          fused_corners_filtered.swap(fused_corners);
+        }
+        sara::toc("Corner filtering (end-point)");
+
 
         sara::tic();
         profiles.clear();
@@ -354,10 +443,13 @@ auto __main(int argc, char** argv) -> int
           const auto& corner = fused_corners[c];
           const auto& p = corner.coords;
           const auto& r = profile_extractor.circle_radius;
+          // TODO: check this... this was guessed without verification.
+          const auto offset = static_cast<int>(
+              std::pow(2, num_scales - static_cast<int>(upscale)));
           const auto w = frame_gray.width();
           const auto h = frame_gray.height();
-          if (!(r + 1 <= p.x() && p.x() < w - r - 1 &&  //
-                r + 1 <= p.y() && p.y() < h - r - 1))
+          if (!(r + offset <= p.x() && p.x() < w - r - offset &&  //
+                r + offset <= p.y() && p.y() < h - r - offset))
             continue;
 
           const auto radius = M_SQRT2 * corner.scale * radius_factor;
@@ -392,18 +484,24 @@ auto __main(int argc, char** argv) -> int
           zero_crossings_filtered.swap(zero_crossings);
         }
         sara::toc("Corner filtering from intensity profile");
+
       }
       const auto pipeline_time = timer.elapsed_ms();
       SARA_DEBUG << "Processing time = " << pipeline_time << "ms" << std::endl;
 
 
-// #define VIEW_EDGE_MAP
+#define VIEW_EDGE_MAP
 #ifdef VIEW_EDGE_MAP
 
       auto edge_map_us = sara::Image<float>{video_frame.sizes()};
       sara::resize_v2(edge_map, edge_map_us);
 
       auto display = edge_map_us.convert<sara::Rgb8>();
+      for (auto y = 0; y < endpoint_map.height(); ++y)
+        for (auto x = 0; x < endpoint_map.width(); ++x)
+          if (endpoint_map(x, y) != -1)
+            sara::fill_circle(display, x * scale_inter, y * scale_inter, 2,
+                              sara::Green8);
 #else
       auto display = frame_gray.convert<sara::Rgb8>();
 #endif
@@ -419,7 +517,6 @@ auto __main(int argc, char** argv) -> int
   }
   catch (std::exception& e)
   {
-    // Harris corner parameters.
     std::cout << e.what() << std::endl;
   }
 
