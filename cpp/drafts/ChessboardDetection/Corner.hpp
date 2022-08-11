@@ -58,10 +58,7 @@ namespace DO::Sara {
 
   auto is_good_x_corner(const std::vector<float>& zero_crossings) -> bool;
 
-  auto is_seed_corner(  //
-      const std::unordered_set<int>& adjacent_edges,
-      const std::vector<float>& gradient_peaks,  //
-      const std::vector<float>& zero_crossings,  //
-      int N) -> bool;
+  auto is_seed_corner(const std::unordered_set<int>& adjacent_edges,
+                      const std::vector<float>& zero_crossings) -> bool;
 
 }  // namespace DO::Sara

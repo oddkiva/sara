@@ -94,34 +94,13 @@ namespace DO::Sara {
   auto is_good_x_corner(const std::vector<float>& zero_crossings) -> bool
   {
     const auto four_zero_crossings = zero_crossings.size() == 4;
-#if 0
-    if (!four_zero_crossings)
-      return false;
-
-    auto dirs = Eigen::Matrix<float, 2, 4>{};
-    for (auto i = 0; i < 4; ++i)
-      dirs.col(i) = dir(zero_crossings[i]);
-
-    // The 4 peaks are due to 2 lines crossing each other.
-    using operator""_deg;
-    static constexpr auto angle_thres = static_cast<float>((160._deg).value);
-
-    const auto two_crossing_lines =
-        dirs.col(0).dot(dirs.col(2)) < std::cos(angle_thres) &&
-        dirs.col(1).dot(dirs.col(3)) < std::cos(angle_thres);
-
-    return two_crossing_lines;
-#else
     return four_zero_crossings;
-#endif
   }
 
   // Seed corner selection.
   auto is_seed_corner(  //
       const std::unordered_set<int>& adjacent_edges,
-      const std::vector<float>& gradient_peaks,  //
-      const std::vector<float>& zero_crossings,  //
-      int N) -> bool
+      const std::vector<float>& zero_crossings) -> bool
   {
     // Topological constraints from the image.
     const auto four_adjacent_edges = adjacent_edges.size() == 4;
@@ -129,37 +108,7 @@ namespace DO::Sara {
       return false;
 
     const auto four_zero_crossings = zero_crossings.size() == 4;
-    if (four_zero_crossings)
-      return true;
-
-#if 0
-    auto dirs = Eigen::Matrix<float, 2, 4>{};
-    for (auto i = 0; i < 4; ++i)
-      dirs.col(i) = dir(zero_crossings[i]);
-
-    // The 4 peaks are due to 2 lines crossing each other.
-    static constexpr auto angle_thres = static_cast<float>((160._deg).value);
-
-    const auto two_crossing_lines =
-        dirs.col(0).dot(dirs.col(2)) < std::cos(angle_thres) &&
-        dirs.col(1).dot(dirs.col(3)) < std::cos(angle_thres);
-
-    return two_crossing_lines;
-#else
-    // A chessboard corner should have 4 gradient orientation peaks.
-    const auto four_contrast_changes = gradient_peaks.size() == 4;
-    if (!four_contrast_changes)
-      return false;
-
-    // The 4 peaks are due to 2 lines crossing each other.
-    static constexpr auto angle_degree_thres = 20.f;
-    const auto two_crossing_lines =
-        std::abs((gradient_peaks[2] - gradient_peaks[0]) * 360.f / N - 180.f) <
-            angle_degree_thres &&
-        std::abs((gradient_peaks[3] - gradient_peaks[1]) * 360.f / N - 180.f) <
-            angle_degree_thres;
-    return two_crossing_lines;
-#endif
+    return four_zero_crossings;
   }
 
 

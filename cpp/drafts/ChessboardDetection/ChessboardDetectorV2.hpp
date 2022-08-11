@@ -18,10 +18,10 @@
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 
-#include "CircularProfileExtractor.hpp"
-#include "Corner.hpp"
-#include "EdgeStatistics.hpp"
-#include "SquareGraph.hpp"
+#include <drafts/ChessboardDetection/CircularProfileExtractor.hpp>
+#include <drafts/ChessboardDetection/Corner.hpp>
+#include <drafts/ChessboardDetection/EdgeStatistics.hpp>
+#include <drafts/ChessboardDetection/SquareGraph.hpp>
 
 #include <set>
 #include <unordered_set>
@@ -103,11 +103,11 @@ namespace DO::Sara {
     inline ChessboardDetectorV2() = default;
 
     inline auto initialize_multiscale_harris_corner_detection_params(
-        const float sigma_D = 0.8f,      //
-        const float sigma_I = 3 * 0.8f,  //
-        const float kappa = 0.04f,       //
-        const int num_scales = 2,        //
-        bool upscale_image = false) -> void
+        const bool upscale_image = false,  //
+        const int num_scales = 2,          //
+        const float sigma_D = 0.8f,        //
+        const float sigma_I = 3 * 0.8f,    //
+        const float kappa = 0.04f) -> void
     {
       // First set up the Gaussian pyramid parameters.
       upscale = upscale_image;
@@ -124,6 +124,9 @@ namespace DO::Sara {
                           // octave
           num_scales      // The maximum number of octaves
       };
+      SARA_CHECK(gaussian_pyramid_params.scale_camera());
+      SARA_CHECK(gaussian_pyramid_params.scale_initial());
+      SARA_CHECK(gaussian_pyramid_params.num_octaves_max());
 
       // Now set the Harris corner detection parameters that will be applied at
       // each scale of the pyramid.
@@ -145,7 +148,8 @@ namespace DO::Sara {
       _ed = EdgeDetector{edge_detection_params};
     }
 
-    DO_SARA_EXPORT auto operator()(const ImageView<float>& image)
+    DO_SARA_EXPORT
+    auto operator()(const ImageView<float>& image)
         -> const std::vector<OrderedChessboardCorners>&;
 
     auto calculate_feature_pyramids(const ImageView<float>& image) -> void;
@@ -153,7 +157,15 @@ namespace DO::Sara {
     auto detect_edges() -> void;
     auto filter_edges() -> void;
     auto group_and_filter_corners() -> void;
+    auto link_corners_to_edge_endpoints_topologically() -> void;
     auto filter_corners_topologically() -> void;
+    auto calculate_circular_intensity_profiles() -> void;
+    auto filter_corners_with_intensity_profiles() -> void;
+
+    auto calculate_orientation_histograms() -> void;
+    auto calculate_edge_adjacent_to_corners() -> void;
+
+    auto select_seed_corners() -> void;
 
     //! @brief The edge detector.
     EdgeDetector _ed;
@@ -173,7 +185,7 @@ namespace DO::Sara {
     //! @brief The list of corners filtered and merged together.
     std::vector<Corner<float>> _corners;
 
-    //! @brief Corner local region descriptors.
+    //! @brief Circular intensity descriptors.
     std::vector<Eigen::ArrayXf> _profiles;
     std::vector<std::vector<float>> _zero_crossings;
 
@@ -182,6 +194,8 @@ namespace DO::Sara {
     Image<std::int32_t> _endpoint_map;
     std::vector<std::uint8_t> _is_strong_edge;
 
+    //! @brief These are used for the topological filtering of corners.
+    //! @{
     struct CornerRef
     {
       std::int32_t id;
@@ -192,9 +206,22 @@ namespace DO::Sara {
       }
     };
     std::vector<std::set<CornerRef>> _corners_adjacent_to_endpoints;
+    //! @}
+
+    //! @brief Gradient histograms.
+    static constexpr auto N = 72;
+    std::vector<Eigen::Array<float, N, 1>> _hists;
+    std::vector<std::vector<int>> _gradient_peaks;
+    std::vector<std::vector<float>> _gradient_peaks_refined;
+
+    //! @brief The best corners.
+    std::unordered_set<int> _best_corners;
+
 
     //! @brief For the square reconstruction.
     std::vector<std::unordered_set<int>> _edges_adjacent_to_corner;
+
+    std::vector<OrderedChessboardCorners> _cb_corners;
   };
 
 

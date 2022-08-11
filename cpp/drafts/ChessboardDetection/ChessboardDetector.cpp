@@ -351,8 +351,7 @@ namespace DO::Sara {
     tic();
     _best_corners.clear();
     for (auto c = 0u; c < _corners.size(); ++c)
-      if (is_seed_corner(_edges_adjacent_to_corner[c],
-                         _gradient_peaks_refined[c], _zero_crossings[c], N))
+      if (is_seed_corner(_edges_adjacent_to_corner[c], _zero_crossings[c]))
         _best_corners.insert(c);
     toc("Best corner selection");
   }

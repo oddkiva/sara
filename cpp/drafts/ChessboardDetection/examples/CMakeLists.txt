@@ -37,9 +37,9 @@ target_link_libraries(
           ImageOrVideoReader #
           DO_Sara_ChessboardDetection)
 
-sara_add_example(harris_corner_detector)
+sara_add_example(find_chessboard_corners_4)
 target_link_libraries(
-  harris_corner_detector
+  find_chessboard_corners_4
   PRIVATE DO::Sara::Graphics #
           ImageOrVideoReader #
           DO_Sara_ChessboardDetection)
