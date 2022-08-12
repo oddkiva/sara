@@ -635,7 +635,7 @@ namespace DO::Sara {
     toc("Chessboard ordered corners");
   }
 
-  auto ChessboardDetector::extract_chessboard_vertices_from_chessboard_squares()
+  auto ChessboardDetectorV2::extract_chessboard_vertices_from_chessboard_squares()
       -> void
   {
     tic();
