@@ -24,7 +24,7 @@
 
 namespace DO::Sara {
 
-  auto ChessboardDetectorV2::operator()(const ImageView<float>& image)
+  auto ChessboardDetector::operator()(const ImageView<float>& image)
       -> const std::vector<OrderedChessboardCorners>&
   {
     calculate_feature_pyramids(image);
@@ -53,7 +53,7 @@ namespace DO::Sara {
     return _cb_corners;
   }
 
-  auto ChessboardDetectorV2::calculate_feature_pyramids(
+  auto ChessboardDetector::calculate_feature_pyramids(
       const ImageView<float>& image) -> void
   {
     tic();
@@ -90,7 +90,7 @@ namespace DO::Sara {
     toc("Cornerness pyramid");
   }
 
-  auto ChessboardDetectorV2::extract_corners() -> void
+  auto ChessboardDetector::extract_corners() -> void
   {
     if (static_cast<int>(_corners_per_scale.size()) !=
         _gauss_pyr.octave_count())
@@ -107,7 +107,7 @@ namespace DO::Sara {
     }
   }
 
-  auto ChessboardDetectorV2::detect_edges() -> void
+  auto ChessboardDetector::detect_edges() -> void
   {
     tic();
 
@@ -137,7 +137,7 @@ namespace DO::Sara {
     toc("Edge detection");
   }
 
-  auto ChessboardDetectorV2::filter_edges() -> void
+  auto ChessboardDetector::filter_edges() -> void
   {
     tic();
     _is_strong_edge.clear();
@@ -186,7 +186,7 @@ namespace DO::Sara {
     toc("Edge filtering");
   }
 
-  auto ChessboardDetectorV2::group_and_filter_corners() -> void
+  auto ChessboardDetector::group_and_filter_corners() -> void
   {
     tic();
     _corners.clear();
@@ -210,7 +210,7 @@ namespace DO::Sara {
     toc("Corner grouping and NMS");
   }
 
-  auto ChessboardDetectorV2::link_corners_to_edge_endpoints_topologically()
+  auto ChessboardDetector::link_corners_to_edge_endpoints_topologically()
       -> void
   {
     tic();
@@ -251,7 +251,7 @@ namespace DO::Sara {
     toc("Corner-edge endpoint topological linking");
   }
 
-  auto ChessboardDetectorV2::filter_corners_topologically() -> void
+  auto ChessboardDetector::filter_corners_topologically() -> void
   {
     tic();
     auto best_corner_ids = std::unordered_set<int>{};
@@ -270,7 +270,7 @@ namespace DO::Sara {
     toc("Corner topological filtering");
   }
 
-  auto ChessboardDetectorV2::calculate_circular_intensity_profiles() -> void
+  auto ChessboardDetector::calculate_circular_intensity_profiles() -> void
   {
     tic();
     _profiles.clear();
@@ -309,7 +309,7 @@ namespace DO::Sara {
     toc("Circular intensity profile");
   }
 
-  auto ChessboardDetectorV2::filter_corners_with_intensity_profiles() -> void
+  auto ChessboardDetector::filter_corners_with_intensity_profiles() -> void
   {
     tic();
     auto corners_filtered = std::vector<Corner<float>>{};
@@ -332,7 +332,7 @@ namespace DO::Sara {
     toc("Corner filtering from intensity profile");
   }
 
-  auto ChessboardDetectorV2::link_corners_to_edges() -> void
+  auto ChessboardDetector::link_corners_to_edges() -> void
   {
     tic();
 
@@ -376,7 +376,7 @@ namespace DO::Sara {
     toc("Corners-to-edge topological linking");
   }
 
-  auto ChessboardDetectorV2::calculate_orientation_histograms() -> void
+  auto ChessboardDetector::calculate_orientation_histograms() -> void
   {
     tic();
     const auto& _grad_norm = _ed.pipeline.gradient_magnitude;
@@ -410,7 +410,7 @@ namespace DO::Sara {
     toc("Gradient histograms");
   }
 
-  auto ChessboardDetectorV2::calculate_edge_adjacent_to_corners() -> void
+  auto ChessboardDetector::calculate_edge_adjacent_to_corners() -> void
   {
     _edges_adjacent_to_corner.clear();
     _edges_adjacent_to_corner.resize(_corners.size());
@@ -445,7 +445,7 @@ namespace DO::Sara {
         });
   }
 
-  auto ChessboardDetectorV2::calculate_edge_shape_statistics() -> void
+  auto ChessboardDetector::calculate_edge_shape_statistics() -> void
   {
     tic();
     _edge_stats = get_curve_shape_statistics(_ed.pipeline.edges_as_list);
@@ -456,7 +456,7 @@ namespace DO::Sara {
     toc("Edge shape statistics");
   }
 
-  auto ChessboardDetectorV2::select_seed_corners() -> void
+  auto ChessboardDetector::select_seed_corners() -> void
   {
     tic();
     _best_corners.clear();
@@ -466,7 +466,7 @@ namespace DO::Sara {
     toc("Best corner selection");
   }
 
-  auto ChessboardDetectorV2::parse_squares() -> void
+  auto ChessboardDetector::parse_squares() -> void
   {
     tic();
     _black_squares.clear();
@@ -496,7 +496,7 @@ namespace DO::Sara {
     toc("White square reconstruction");
   }
 
-  auto ChessboardDetectorV2::parse_lines() -> void
+  auto ChessboardDetector::parse_lines() -> void
   {
     tic();
 
@@ -523,7 +523,7 @@ namespace DO::Sara {
     toc("Line reconstruction");
   }
 
-  auto ChessboardDetectorV2::grow_chessboards() -> void
+  auto ChessboardDetector::grow_chessboards() -> void
   {
     tic();
 
@@ -575,7 +575,7 @@ namespace DO::Sara {
     toc("Chessboard growing");
   }
 
-  auto ChessboardDetectorV2::extract_chessboard_corners_from_chessboard_squares()
+  auto ChessboardDetector::extract_chessboard_corners_from_chessboard_squares()
       -> void
   {
     tic();
@@ -635,7 +635,7 @@ namespace DO::Sara {
     toc("Chessboard ordered corners");
   }
 
-  auto ChessboardDetectorV2::extract_chessboard_vertices_from_chessboard_squares()
+  auto ChessboardDetector::extract_chessboard_vertices_from_chessboard_squares()
       -> void
   {
     tic();

@@ -115,7 +115,7 @@ auto __main(int argc, char** argv) -> int
     auto frame_gray = sara::Image<float>{video_frame.sizes()};
 
 
-    auto detect = sara::ChessboardDetectorV2{};
+    auto detect = sara::ChessboardDetector{};
     detect.initialize_multiscale_harris_corner_detection_params(upscale,
                                                                 num_scales);
     detect.initialize_filter_radius_according_to_scale();

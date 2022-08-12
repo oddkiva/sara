@@ -26,7 +26,7 @@
 
 namespace DO::Sara {
 
-  class ChessboardDetectorV2
+  class ChessboardDetector
   {
   public:
     using OrderedChessboardCorners = std::vector<std::vector<Eigen::Vector2f>>;
@@ -97,7 +97,7 @@ namespace DO::Sara {
     int corner_endpoint_linking_radius;
     static constexpr auto radius_factor = 2.f;
 
-    inline ChessboardDetectorV2() = default;
+    inline ChessboardDetector() = default;
 
     inline auto initialize_multiscale_harris_corner_detection_params(
         const bool upscale_image = false,  //
@@ -263,13 +263,13 @@ namespace DO::Sara {
 
 
   inline auto
-  transpose(const ChessboardDetectorV2::OrderedChessboardCorners& in)
-      -> ChessboardDetectorV2::OrderedChessboardCorners
+  transpose(const ChessboardDetector::OrderedChessboardCorners& in)
+      -> ChessboardDetector::OrderedChessboardCorners
   {
     const auto m = in.size();
     const auto n = in.front().size();
 
-    auto out = ChessboardDetectorV2::OrderedChessboardCorners{};
+    auto out = ChessboardDetector::OrderedChessboardCorners{};
     out.resize(n);
     for (auto i = 0u; i < n; ++i)
       out[i].resize(m);
