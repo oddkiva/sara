@@ -193,9 +193,9 @@ auto __main(int argc, char** argv) -> int
             detect._best_corners.find(c) != detect._best_corners.end()
                 ? sara::Magenta8
                 : sara::Cyan8;
-        draw_corner(display,     //
-                    corners[c],  //
-                    std::nullopt, // detect._gradient_peaks_refined[c],
+        draw_corner(display,               //
+                    corners[c],            //
+                    std::nullopt,          // detect._gradient_peaks_refined[c],
                     scale_image,           //
                     detect.radius_factor,  //
                     color, 2);
@@ -205,7 +205,7 @@ auto __main(int argc, char** argv) -> int
       const auto num_chessboards = static_cast<int>(chessboards.size());
 
       const auto& squares = detect._squares;
-#  pragma omp parallel for
+#pragma omp parallel for
       for (auto c = 0; c < num_chessboards; ++c)
       {
         const auto color =
