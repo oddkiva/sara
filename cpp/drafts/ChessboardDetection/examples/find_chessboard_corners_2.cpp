@@ -10,6 +10,8 @@
 // ========================================================================== //
 
 //! @example
+//! This partially implements OpenCV ideas used to detect the chessboard to draw
+//! some intuitions.
 
 #include <omp.h>
 

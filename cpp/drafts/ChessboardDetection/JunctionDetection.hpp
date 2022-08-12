@@ -17,6 +17,9 @@
 
 namespace DO::Sara {
 
+  //! @brief Kept for historical reasons although Harris's corner detection
+  //! handles the computational efficiency better.
+  //! @{
   template <typename T>
   struct Junction
   {
@@ -40,5 +43,6 @@ namespace DO::Sara {
 
   auto extract_junctions(const ImageView<float>& junction_map, const int radius)
       -> std::vector<Junction<int>>;
+  //! @}
 
 }  // namespace DO::Sara
