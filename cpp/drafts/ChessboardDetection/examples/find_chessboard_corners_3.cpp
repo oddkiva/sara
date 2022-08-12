@@ -14,11 +14,10 @@
 #include <omp.h>
 
 #include <DO/Sara/Graphics.hpp>
+
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 
 #include <drafts/ChessboardDetection/ChessboardDetector.hpp>
-#include <drafts/ChessboardDetection/LineUtilities.hpp>
-#include <drafts/ChessboardDetection/ParabolaFitting.hpp>
 
 #include "Utilities/ImageOrVideoReader.hpp"
 
@@ -27,16 +26,31 @@ namespace sara = DO::Sara;
 
 
 auto draw_corner(sara::ImageView<sara::Rgb8>& display,
-                 const sara::Corner<float>& c, const int radius,
-                 const float scale, const sara::Rgb8& color, int thickness)
-    -> void
+                 const sara::Corner<float>& c,
+                 const std::optional<std::vector<float>>& dominant_orientations,
+                 const float downscale_factor, const float radius_factor,
+                 const sara::Rgb8& color, int thickness) -> void
 {
-  const Eigen::Vector2i p1 = (scale * c.coords).array().round().cast<int>();
-  sara::fill_circle(display, p1.x(), p1.y(), 1, sara::Yellow8);
+  const Eigen::Vector2i p1 =
+      (downscale_factor * c.coords).array().round().cast<int>();
+  const auto radius =
+      static_cast<float>(M_SQRT2) * c.scale * downscale_factor * radius_factor;
   sara::draw_circle(display, p1.x(), p1.y(),
-                    static_cast<int>(std::round(radius * scale)), color,
-                    thickness);
-};
+                    static_cast<int>(std::round(radius)), color, thickness);
+  sara::fill_circle(display, p1.x(), p1.y(), 1, sara::Yellow8);
+
+  if (!dominant_orientations.has_value())
+    return;
+  for (const auto& val : *dominant_orientations)
+  {
+    const Eigen::Vector2i p2 =
+        (downscale_factor * c.coords + (radius * 2) * sara::dir(val))
+            .array()
+            .round()
+            .cast<int>();
+    sara::draw_arrow(display, p1.x(), p1.y(), p2.x(), p2.y(), color, thickness);
+  }
+}
 
 auto draw_chessboard(sara::ImageView<sara::Rgb8>& display,  //
                      const sara::Chessboard& cb,
@@ -57,49 +71,7 @@ auto draw_chessboard(sara::ImageView<sara::Rgb8>& display,  //
       draw_square(display, vertices, corners, scale, color, thickness);
     }
   }
-};
-
-auto draw_chessboard_corners(
-    sara::ImageView<sara::Rgb8>& display,
-    const sara::ChessboardDetector::OrderedChessboardCorners& cb_corners,
-    const int thickness) -> void
-{
-  // Draw the arrows along one axis.
-  for (auto i = 0u; i < cb_corners.size(); ++i)
-  {
-    auto color = sara::Red8;
-    color[0] = std::clamp(255 / int(cb_corners.size()) * int(i),  //
-                          0, 255);
-    for (auto j = 0u; j < cb_corners[i].size() - 1; ++j)
-    {
-      const auto& a = cb_corners[i][j];
-      const auto& b = cb_corners[i][j + 1];
-      if (std::isnan(a.x()) || std::isnan(b.x()))
-        continue;
-      sara::draw_arrow(display, a, b, color, thickness + 2);
-      sara::draw_arrow(display, a, b, sara::White8, 1);
-    }
-  }
-
-  // Draw the arrows along the other orthogonal axis.
-  for (auto j = 0u; j < cb_corners[0].size(); ++j)
-  {
-    auto color = sara::Green8;
-    color[1] = std::clamp(255 / int(cb_corners[0].size()) * int(j),  //
-                          0, 255);
-
-    for (auto i = 0u; i < cb_corners.size() - 1; ++i)
-    {
-      const auto& a = cb_corners[i][j];
-      const auto& b = cb_corners[i + 1][j];
-      if (std::isnan(a.x()) || std::isnan(b.x()))
-        continue;
-      sara::draw_arrow(display, a, b, color, thickness + 2);
-      sara::draw_arrow(display, a, b, sara::White8, 1);
-    }
-  }
 }
-
 
 auto __main(int argc, char** argv) -> int
 {
@@ -117,50 +89,45 @@ auto __main(int argc, char** argv) -> int
     const auto video_file = std::string{argv[1]};
 #endif
 
+    const auto upscale =
+        argc < 3 ? false : static_cast<bool>(std::stoi(argv[2]));
+    const auto num_scales = argc < 4 ? 2 : std::stoi(argv[3]);
+    const auto scale_aa = argc < 5 ? 1.5f : std::stof(argv[4]);
+
     // Visual inspection option
-    const auto pause = argc < 3 ? false : static_cast<bool>(std::stoi(argv[2]));
-    const auto check_edge_map = argc < 4
-                                    ? false  //
-                                    : static_cast<bool>(std::stoi(argv[3]));
+    const auto show_edge_map = argc < 6  //
+                                   ? false
+                                   : static_cast<bool>(std::stoi(argv[5]));
+    const auto pause = argc < 7  //
+                           ? false
+                           : static_cast<bool>(std::stoi(argv[6]));
 
-    // Setup the detection parameters.
-    auto params = sara::ChessboardDetector::Parameters{};
-    if (argc >= 5)
-      params.downscale_factor = std::stof(argv[4]);
-    if (argc >= 6)
-      params.cornerness_adaptive_thres = std::stof(argv[5]);
-    if (argc >= 7)
-    {
-      const auto value = std::stoi(argv[6]);
-      if (value != -1)
-        params.corner_filtering_radius = value;
-      else
-        params.set_corner_nms_radius();
-    }
-    else
-      params.set_corner_nms_radius();
-    if (argc >= 8)
-    {
-      const auto value = std::stoi(argv[7]);
-      if (value != -1)
-        params.corner_edge_linking_radius = value;
-      else
-        params.set_corner_edge_linking_radius_to_corner_filtering_radius();
-    }
-    else
-      params.set_corner_edge_linking_radius_to_corner_filtering_radius();
-
-    const auto chessboard_edge_thickness = argc < 9 ? 2 : std::stoi(argv[8]);
+    const auto line_thickness = argc < 8 ? 2 : std::stoi(argv[7]);
 
 
     auto timer = sara::Timer{};
     auto video_stream = sara::ImageOrVideoReader{video_file};
     auto video_frame = video_stream.frame();
-    auto frame_gray = sara::Image<float>{video_frame.sizes()};
     auto display = sara::Image<sara::Rgb8>{video_frame.sizes()};
     auto frame_number = -1;
 
-    auto detect = sara::ChessboardDetector{params};
+    // Preprocessed image.
+    auto frame_gray = sara::Image<float>{video_frame.sizes()};
+
+
+    auto detect = sara::ChessboardDetectorV2{};
+    detect.initialize_multiscale_harris_corner_detection_params(upscale,
+                                                                num_scales);
+    detect.initialize_filter_radius_according_to_scale();
+    if (scale_aa < detect.gaussian_pyramid_params.scale_initial())
+    {
+      std::cerr << "Choose scale_aa > "
+                << detect.gaussian_pyramid_params.scale_initial() << std::endl;
+      return 1;
+    }
+    detect.scale_aa = scale_aa;
+    detect.initialize_edge_detector();
+
 
     while (video_stream.read())
     {
@@ -180,55 +147,63 @@ auto __main(int argc, char** argv) -> int
         sara::tic();
         sara::from_rgb8_to_gray32f(video_frame, frame_gray);
         sara::toc("Grayscale conversion");
+
         detect(frame_gray);
       }
+      const auto elapsed_ms = timer.elapsed_ms();
+      SARA_DEBUG << "Pipeline processing time = " << elapsed_ms << "ms"
+                 << std::endl;
 
-      const auto pipeline_time = timer.elapsed_ms();
-      SARA_DEBUG << "Processing time = " << pipeline_time << "ms" << std::endl;
-
-      sara::tic();
-      if (check_edge_map)
+      auto display = sara::Image<sara::Rgb8>{};
+      if (show_edge_map)
       {
-        // Resize
-        auto display_32f_ds = detect._ed.pipeline.edge_map.convert<float>();
-        auto display_32f = sara::Image<float>{video_frame.sizes()};
-        sara::scale(display_32f_ds, display_32f);
+        const auto edge_map = detect._edge_map.convert<float>();
+        auto edge_map_us = sara::Image<float>{video_frame.sizes()};
+        sara::resize_v2(edge_map, edge_map_us);
 
-        display = display_32f.convert<sara::Rgb8>();
+        display = edge_map_us.convert<sara::Rgb8>();
+
+        const auto& endpoint_map = detect._endpoint_map;
+        const auto& scale_aa = detect.scale_aa;
+
+        const auto w = endpoint_map.width();
+        const auto h = endpoint_map.height();
+        const auto wh = w * h;
+#pragma omp parallel for
+        for (auto xy = 0; xy < wh; ++xy)
+        {
+          const auto y = xy / w;
+          const auto x = xy - y * w;
+          if (endpoint_map(x, y) != -1)
+            sara::fill_circle(display, x * scale_aa, y * scale_aa, 2,
+                              sara::Green8);
+        }
       }
       else
         display = frame_gray.convert<sara::Rgb8>();
 
-// #define SHOW_ALL_CORNERS
-#ifdef SHOW_ALL_CORNERS
-      const auto& scale = detect._params.downscale_factor;
-      const auto& radius = detect._params.corner_filtering_radius;
-      const auto num_corners = static_cast<int>(detect._corners.size());
-#  pragma omp parallel for
+      static constexpr auto scale_image = 1.f;
+      const auto& corners = detect._corners;
+      const auto num_corners = static_cast<int>(corners.size());
+
+#pragma omp parallel for
       for (auto c = 0; c < num_corners; ++c)
       {
-        const auto good = sara::is_seed_corner(   //
-            detect._edges_adjacent_to_corner[c],  //
-            detect._gradient_peaks_refined[c],    //
-            detect._zero_crossings[c],            //
-            detect.N);
-
-        // Remove noisy corners to understand better the behaviour of the
-        // algorithm.
-        if (detect._edges_adjacent_to_corner[c].empty())
-          continue;
-
-        const auto& corner = detect._corners[c];
-        draw_corner(display, corner, radius, scale,
-                    good ? sara::Red8 : sara::Cyan8, 2);
+        const auto color =
+            detect._best_corners.find(c) != detect._best_corners.end()
+                ? sara::Magenta8
+                : sara::Cyan8;
+        draw_corner(display,     //
+                    corners[c],  //
+                    std::nullopt, // detect._gradient_peaks_refined[c],
+                    scale_image,           //
+                    detect.radius_factor,  //
+                    color, 2);
       }
-#endif
 
       const auto& chessboards = detect._chessboards;
       const auto num_chessboards = static_cast<int>(chessboards.size());
 
-#ifdef SHOW_CHESSBOARD_SQUARES
-      const auto& corners = detect._corners;
       const auto& squares = detect._squares;
 #  pragma omp parallel for
       for (auto c = 0; c < num_chessboards; ++c)
@@ -237,17 +212,8 @@ auto __main(int argc, char** argv) -> int
             c == 0 ? sara::Red8
                    : sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
         const auto& cb = chessboards[c];
-        draw_chessboard(display, cb, corners, squares, scale, color,
-                        chessboard_edge_thickness);
-      }
-#endif
-
-      // Check the enumeration of corners.
-      for (const auto& cb_corners_untransposed : detect._cb_corners)
-      {
-        // Transpose the chessboard.
-        const auto cb_corners = sara::transpose(cb_corners_untransposed);
-        draw_chessboard_corners(display, cb_corners, chessboard_edge_thickness);
+        draw_chessboard(display, cb, corners, squares, 1.f, color,
+                        line_thickness);
       }
 
       sara::draw_text(display, 80, 80, "Frame: " + std::to_string(frame_number),
@@ -255,9 +221,6 @@ auto __main(int argc, char** argv) -> int
       sara::draw_text(display, 80, 120,
                       "Chessboards: " + std::to_string(chessboards.size()),
                       sara::White8, 30, 0, false, true);
-
-      sara::display(display);
-      sara::toc("Display");
 
 #ifdef WIP
       sara::tic();
@@ -323,6 +286,8 @@ auto __main(int argc, char** argv) -> int
         std::cout << sara::to_matrix(cb) << std::endl << std::endl;
       }
 
+
+      sara::display(display);
       if (pause)
         sara::get_key();
     }

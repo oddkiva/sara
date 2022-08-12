@@ -36,10 +36,3 @@ target_link_libraries(
   PRIVATE DO::Sara::Graphics #
           ImageOrVideoReader #
           DO_Sara_ChessboardDetection)
-
-sara_add_example(find_chessboard_corners_4)
-target_link_libraries(
-  find_chessboard_corners_4
-  PRIVATE DO::Sara::Graphics #
-          ImageOrVideoReader #
-          DO_Sara_ChessboardDetection)

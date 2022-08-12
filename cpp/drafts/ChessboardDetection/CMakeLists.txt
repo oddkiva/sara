@@ -26,9 +26,7 @@ add_library(
   EllipseFitting.cpp
   # The class that wraps everything.
   ChessboardDetector.hpp
-  ChessboardDetector.cpp
-  ChessboardDetectorV2.hpp
-  ChessboardDetectorV2.cpp)
+  ChessboardDetector.cpp)
 set_target_properties(DO_Sara_ChessboardDetection PROPERTIES FOLDER
                                                              "Libraries/Sara")
 target_link_libraries(

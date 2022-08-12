@@ -9,38 +9,40 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "ChessboardDetector.hpp"
-#include "EdgeStatistics.hpp"
-#include "LineReconstruction.hpp"
-#include "NonMaximumSuppression.hpp"
-#include "OrientationHistogram.hpp"
-#include "SquareReconstruction.hpp"
+#include <drafts/ChessboardDetection/ChessboardDetector.hpp>
+#include <drafts/ChessboardDetection/LineReconstruction.hpp>
+#include <drafts/ChessboardDetection/NonMaximumSuppression.hpp>
+#include <drafts/ChessboardDetection/OrientationHistogram.hpp>
+#include <drafts/ChessboardDetection/SquareReconstruction.hpp>
 
-#include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/FeatureDescriptors/Orientation.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/Harris.hpp>
-#include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
+
+#include <boost/log/trivial.hpp>
 
 
 namespace DO::Sara {
 
-  auto ChessboardDetector::operator()(const ImageView<float>& image)
+  auto ChessboardDetectorV2::operator()(const ImageView<float>& image)
       -> const std::vector<OrderedChessboardCorners>&
   {
-    preprocess_image(image);
+    calculate_feature_pyramids(image);
+    extract_corners();
+    detect_edges();
     filter_edges();
-
-    detect_corners();
+    group_and_filter_corners();
+    link_corners_to_edge_endpoints_topologically();
+    filter_corners_topologically();
     calculate_circular_intensity_profiles();
     filter_corners_with_intensity_profiles();
 
-    calculate_orientation_histograms();
+    link_corners_to_edges();
+    calculate_edge_adjacent_to_corners();
     calculate_edge_shape_statistics();
-
-    link_edges_and_corners();
-
+    calculate_orientation_histograms();
     select_seed_corners();
+
     parse_squares();
     grow_chessboards();
     extract_chessboard_corners_from_chessboard_squares();
@@ -51,100 +53,224 @@ namespace DO::Sara {
     return _cb_corners;
   }
 
-  auto ChessboardDetector::preprocess_image(const ImageView<float>& image)
+  auto ChessboardDetectorV2::calculate_feature_pyramids(
+      const ImageView<float>& image) -> void
+  {
+    tic();
+    _gauss_pyr = gaussian_pyramid(image, gaussian_pyramid_params);
+    toc("gaussian_pyramid pyramid");
+
+    tic();
+    if (static_cast<int>(_grad_x_pyr.size()) != _gauss_pyr.octave_count())
+      _grad_x_pyr.resize(_gauss_pyr.octave_count());
+    if (static_cast<int>(_grad_y_pyr.size()) != _gauss_pyr.octave_count())
+      _grad_y_pyr.resize(_gauss_pyr.octave_count());
+    for (auto o = 0; o < _gauss_pyr.octave_count(); ++o)
+    {
+      const auto& g = _gauss_pyr(0, o);
+      if (_grad_x_pyr[o].sizes() != g.sizes())
+        _grad_x_pyr[o].resize(g.sizes());
+      if (_grad_y_pyr[o].sizes() != g.sizes())
+        _grad_y_pyr[o].resize(g.sizes());
+
+      gradient(_gauss_pyr(0, o), _grad_x_pyr[o], _grad_y_pyr[o]);
+    }
+    toc("Gradient pyramid");
+
+    tic();
+    if (static_cast<int>(_cornerness_pyr.size()) != _gauss_pyr.octave_count())
+      _cornerness_pyr.resize(_gauss_pyr.octave_count());
+    for (auto o = 0; o < _gauss_pyr.octave_count(); ++o)
+    {
+      _cornerness_pyr[o] = harris_cornerness(  //
+          _grad_x_pyr[o], _grad_y_pyr[o],      //
+          corner_detection_params.sigma_I,     //
+          corner_detection_params.kappa);
+    }
+    toc("Cornerness pyramid");
+  }
+
+  auto ChessboardDetectorV2::extract_corners() -> void
+  {
+    if (static_cast<int>(_corners_per_scale.size()) !=
+        _gauss_pyr.octave_count())
+      _corners_per_scale.resize(_gauss_pyr.octave_count());
+
+    for (auto o = 0u; o < _corners_per_scale.size(); ++o)
+    {
+      _corners_per_scale[o] = detect_corners(       //
+          _cornerness_pyr[o],                       //
+          _grad_x_pyr[o], _grad_y_pyr[o],           //
+          gaussian_pyramid_params.scale_initial(),  //
+          corner_detection_params.sigma_I,          //
+          static_cast<int>(o), radius_factor);
+    }
+  }
+
+  auto ChessboardDetectorV2::detect_edges() -> void
+  {
+    tic();
+
+    const auto octave = upscale ? 1 : 0;
+    const auto& g = _gauss_pyr(0, octave);
+
+    // Downscale the image to combat against aliasing.
+    const auto scale_inter_delta = std::sqrt(
+        square(scale_aa) - square(gaussian_pyramid_params.scale_initial()));
+    const auto frame_blurred = g.compute<Gaussian>(scale_inter_delta);
+
+    const Eigen::Vector2i sizes_inter =
+        (g.sizes().cast<float>() / scale_aa).array().round().cast<int>();
+    auto frame_aa = Image<float>{sizes_inter};
+    resize_v2(frame_blurred, frame_aa);
+
+    // VERY IMPORTANT DETAIL: BLUR AGAIN.
+    frame_aa = frame_aa.compute<Gaussian>(corner_detection_params.sigma_D);
+
+    // Calculate the gradient at the antialias scale.
+    _grad_x_scale_aa.resize(sizes_inter);
+    _grad_y_scale_aa.resize(sizes_inter);
+    gradient(frame_aa, _grad_x_scale_aa, _grad_y_scale_aa);
+
+    // Filter the gradient map.
+    _ed.operator()(_grad_x_scale_aa, _grad_y_scale_aa);
+    toc("Edge detection");
+  }
+
+  auto ChessboardDetectorV2::filter_edges() -> void
+  {
+    tic();
+    _is_strong_edge.clear();
+    const auto& edges = _ed.pipeline.edges_as_list;
+    std::transform(edges.begin(), edges.end(),
+                   std::back_inserter(_is_strong_edge),
+                   [this](const auto& edge) -> std::uint8_t {
+                     static constexpr auto strong_edge_thres = 4.f / 255.f;
+                     return is_strong_edge(_ed.pipeline.gradient_magnitude,
+                                           edge, strong_edge_thres);
+                   });
+
+    _edge_map.resize(_ed.pipeline.gradient_magnitude.sizes());
+    _edge_map.flat_array().fill(0);
+
+    _endpoint_map.resize(_ed.pipeline.gradient_magnitude.sizes());
+    _endpoint_map.flat_array().fill(-1);
+
+    const auto num_edges = static_cast<int>(edges.size());
+#pragma omp parallel for
+    for (auto e = 0; e < num_edges; ++e)
+    {
+      if (!_is_strong_edge[e])
+        continue;
+
+      const auto& edge = edges[e];
+      const auto& edge_ordered = reorder_and_extract_longest_curve(edge);
+
+      auto curve = std::vector<Eigen::Vector2d>(edge_ordered.size());
+      std::transform(edge_ordered.begin(), edge_ordered.end(), curve.begin(),
+                     [](const auto& p) { return p.template cast<double>(); });
+      if (curve.size() < 2)
+        continue;
+
+      const Eigen::Vector2i a =
+          curve.front().array().round().matrix().cast<int>();
+      const Eigen::Vector2i b =
+          curve.back().array().round().matrix().cast<int>();
+
+      for (const auto& p : edge)
+        _edge_map(p) = 255;
+
+      _endpoint_map(a) = 2 * e;
+      _endpoint_map(b) = 2 * e + 1;
+    }
+    toc("Edge filtering");
+  }
+
+  auto ChessboardDetectorV2::group_and_filter_corners() -> void
+  {
+    tic();
+    _corners.clear();
+    for (auto o = 0u; o < _corners_per_scale.size(); ++o)
+    {
+      const auto scale_factor = _gauss_pyr.octave_scaling_factor(o);
+      std::transform(_corners_per_scale[o].begin(), _corners_per_scale[o].end(),
+                     std::back_inserter(_corners),
+                     [scale_factor](const Corner<float>& corner) {
+                       auto c = corner;
+                       c.coords *= scale_factor;
+                       c.score /= scale_factor;
+                       c.scale *= scale_factor;
+                       return c;
+                     });
+    }
+
+    const auto octave = upscale ? 1 : 0;
+    const auto& g = _gauss_pyr(0, octave);
+    scale_aware_nms(_corners, g.sizes(), radius_factor);
+    toc("Corner grouping and NMS");
+  }
+
+  auto ChessboardDetectorV2::link_corners_to_edge_endpoints_topologically()
       -> void
   {
     tic();
+    const auto& edges = _ed.pipeline.edges_as_list;
+    _corners_adjacent_to_endpoints.clear();
+    _corners_adjacent_to_endpoints.resize(2 * edges.size());
 
-    // First blur the original image to reduce anti-aliasing.
-    if (_f_blurred.sizes() != image.sizes())
-      _f_blurred.resize(image.sizes());
-    // Reduce the anti aliasing
-    static constexpr auto image_scale = 1.f;
-    const auto sigma_antialias = std::sqrt(square(_params.scale_initial) -  //
-                                           square(image_scale));
-    apply_gaussian_filter(image, _f_blurred, sigma_antialias);
+    const auto w = _endpoint_map.width();
+    const auto h = _endpoint_map.height();
 
-    if (_params.downscale_factor > _params.scale_initial)
+    const auto num_corners = static_cast<int>(_corners.size());
+    const auto& r = corner_endpoint_linking_radius;
+    for (auto c = 0; c < num_corners; ++c)
     {
-      const auto delta_sigma = std::sqrt(square(_params.downscale_factor) -
-                                         square(_params.scale_initial));
-      if (delta_sigma > 0.25f)
-        _f_blurred = _f_blurred.compute<Gaussian>(delta_sigma);
+      const auto& corner = _corners[c];
+
+      const Eigen::Vector2i p = (corner.coords / scale_aa)  //
+                                    .array()
+                                    .round()
+                                    .matrix()
+                                    .cast<int>();
+
+      const auto umin = std::clamp(p.x() - r, 0, w);
+      const auto umax = std::clamp(p.x() + r, 0, w);
+      const auto vmin = std::clamp(p.y() - r, 0, h);
+      const auto vmax = std::clamp(p.y() + r, 0, h);
+      for (auto v = vmin; v < vmax; ++v)
+      {
+        for (auto u = umin; u < umax; ++u)
+        {
+          const auto endpoint_id = _endpoint_map(u, v);
+          if (endpoint_id != -1)
+            _corners_adjacent_to_endpoints[endpoint_id].insert(
+                CornerRef{c, corner.score});
+        }
+      }
     }
-
-    // Now we can downscale the image.
-    const Eigen::Vector2i image_ds_sizes =
-        (image.sizes().cast<float>() / _params.downscale_factor)
-            .array()
-            .round()
-            .matrix()
-            .cast<int>();
-    if (_f_ds.sizes() != image_ds_sizes)
-      _f_ds.resize(image_ds_sizes);
-    resize_v2(_f_blurred, _f_ds);
-
-    toc("Rescale");
+    toc("Corner-edge endpoint topological linking");
   }
 
-  auto ChessboardDetector::filter_edges() -> void
+  auto ChessboardDetectorV2::filter_corners_topologically() -> void
   {
-    const auto& image_ds_sizes = _f_ds.sizes();
-
-    // Blur the image again before calculating the gradient.
     tic();
-    if (_f_ds_blurred.sizes() != image_ds_sizes)
-      _f_ds_blurred.resize(image_ds_sizes);
-    apply_gaussian_filter(_f_ds, _f_ds_blurred, _params.sigma_D);
-    toc("Blur");
-
-    tic();
-    if (_grad_x.sizes() != image_ds_sizes)
-      _grad_x.resize(image_ds_sizes);
-    if (_grad_y.sizes() != image_ds_sizes)
-      _grad_y.resize(image_ds_sizes);
-    gradient(_f_ds_blurred, _grad_x, _grad_y);
-    toc("Gradient Cartesian Coordinate");
-
-    // No need to profile this, it is done internally...
-    _ed.operator()(_grad_x, _grad_y);
+    auto best_corner_ids = std::unordered_set<int>{};
+    for (const auto& corners_adj_to_endpoint : _corners_adjacent_to_endpoints)
+    {
+      if (corners_adj_to_endpoint.empty())
+        continue;
+      const auto best_corner = corners_adj_to_endpoint.rbegin();
+      best_corner_ids.insert(best_corner->id);
+    }
+    auto corners_filtered = std::vector<Corner<float>>{};
+    std::transform(best_corner_ids.begin(), best_corner_ids.end(),
+                   std::back_inserter(corners_filtered),
+                   [this](const auto& id) { return _corners[id]; });
+    corners_filtered.swap(_corners);
+    toc("Corner topological filtering");
   }
 
-  auto ChessboardDetector::detect_corners() -> void
-  {
-    const auto& image_ds_sizes = _f_ds.sizes();
-    const auto& scale_initial = _params.downscale_factor;
-    const auto image_scale =
-        scale_initial * std::sqrt(1 + square(_params.sigma_D));
-
-    tic();
-    if (_cornerness.sizes() != image_ds_sizes)
-      _cornerness.resize(image_ds_sizes);
-    _cornerness = harris_cornerness(_grad_x, _grad_y,  //
-                                    _params.sigma_I, _params.kappa);
-    toc("Cornerness map");
-
-    tic();
-    _corners_int = select(_cornerness,                        //
-                          image_scale, _params.sigma_I, 0,    //
-                          _params.cornerness_adaptive_thres,  //
-                          _params.corner_filtering_radius);
-    toc("Corner selection");
-
-    tic();
-    _corners.clear();
-    std::transform(
-        _corners_int.begin(), _corners_int.end(), std::back_inserter(_corners),
-        [this, image_scale](const Corner<int>& c) -> Corner<float> {
-          const auto p = refine_junction_location_unsafe(
-              _grad_x, _grad_y, c.coords, _params.corner_filtering_radius);
-          return {p, c.score, image_scale * _params.sigma_I, 0};
-        });
-    nms(_corners, _cornerness.sizes(), _params.corner_filtering_radius);
-    toc("Corner refinement");
-  }
-
-  auto ChessboardDetector::calculate_circular_intensity_profiles() -> void
+  auto ChessboardDetectorV2::calculate_circular_intensity_profiles() -> void
   {
     tic();
     _profiles.clear();
@@ -155,135 +281,137 @@ namespace DO::Sara {
 #pragma omp parallel for
     for (auto c = 0; c < num_corners; ++c)
     {
-      const auto& p = _corners[c].coords;
-      const auto& r = _profile_extractor.circle_radius;
-      const auto w = _f_ds_blurred.width();
-      const auto h = _f_ds_blurred.height();
+      const auto& corner = _corners[c];
+
+      // Retrieve the image where the corner was detected.
+      const auto& frame = _gauss_pyr(0, corner.octave);
+      const auto w = frame.width();
+      const auto h = frame.height();
+
+      // Rescale the coordinates.
+      const Eigen::Vector2d p =
+          (corner.coords / _gauss_pyr.octave_scaling_factor(corner.octave))
+              .cast<double>();
+
+      // Readapt the radius of the circular profile to the image scale.
+      const auto r = M_SQRT2 * gaussian_pyramid_params.scale_initial() *
+                     corner_detection_params.sigma_I * radius_factor;
+
+      // Boundary check.
       if (!(r + 1 <= p.x() && p.x() < w - r - 1 &&  //
             r + 1 <= p.y() && p.y() < h - r - 1))
         continue;
-      _profiles[c] = _profile_extractor(_f_ds_blurred,  //
-                                        _corners[c].coords.cast<double>());
+
+      _profiles[c] = _profile_extractor(frame, p, r);
       _zero_crossings[c] = localize_zero_crossings(
           _profiles[c], _profile_extractor.num_circle_sample_points);
     }
     toc("Circular intensity profile");
   }
 
-  auto ChessboardDetector::filter_corners_with_intensity_profiles() -> void
+  auto ChessboardDetectorV2::filter_corners_with_intensity_profiles() -> void
   {
     tic();
+    auto corners_filtered = std::vector<Corner<float>>{};
+    auto profiles_filtered = std::vector<Eigen::ArrayXf>{};
+    auto zero_crossings_filtered = std::vector<std::vector<float>>{};
+
+    for (auto c = 0u; c < _corners.size(); ++c)
     {
-      auto corners_filtered = std::vector<Corner<float>>{};
-      auto profiles_filtered = std::vector<Eigen::ArrayXf>{};
-      auto zero_crossings_filtered = std::vector<std::vector<float>>{};
-
-      for (auto c = 0u; c < _corners.size(); ++c)
+      if (is_good_x_corner(_zero_crossings[c]))
       {
-        if (is_good_x_corner(_zero_crossings[c]))
-        {
-          corners_filtered.emplace_back(_corners[c]);
-          profiles_filtered.emplace_back(_profiles[c]);
-          zero_crossings_filtered.emplace_back(_zero_crossings[c]);
-        }
+        corners_filtered.emplace_back(_corners[c]);
+        profiles_filtered.emplace_back(_profiles[c]);
+        zero_crossings_filtered.emplace_back(_zero_crossings[c]);
       }
-
-      corners_filtered.swap(_corners);
-      profiles_filtered.swap(_profiles);
-      zero_crossings_filtered.swap(_zero_crossings);
     }
+
+    corners_filtered.swap(_corners);
+    profiles_filtered.swap(_profiles);
+    zero_crossings_filtered.swap(_zero_crossings);
     toc("Corner filtering from intensity profile");
   }
 
-  auto ChessboardDetector::calculate_orientation_histograms() -> void
+  auto ChessboardDetectorV2::link_corners_to_edges() -> void
+  {
+    tic();
+
+    const auto& edges = _ed.pipeline.edges_as_list;
+    _corners_adjacent_to_edge.clear();
+    _corners_adjacent_to_edge.resize(edges.size());
+
+    const auto w = _endpoint_map.width();
+    const auto h = _endpoint_map.height();
+
+    const auto num_corners = static_cast<int>(_corners.size());
+    const auto& r = corner_endpoint_linking_radius;
+    for (auto c = 0; c < num_corners; ++c)
+    {
+      const auto& corner = _corners[c];
+
+      const Eigen::Vector2i p = (corner.coords / scale_aa)  //
+                                    .array()
+                                    .round()
+                                    .matrix()
+                                    .cast<int>();
+
+      const auto umin = std::clamp(p.x() - r, 0, w);
+      const auto umax = std::clamp(p.x() + r, 0, w);
+      const auto vmin = std::clamp(p.y() - r, 0, h);
+      const auto vmax = std::clamp(p.y() + r, 0, h);
+      for (auto v = vmin; v < vmax; ++v)
+      {
+        for (auto u = umin; u < umax; ++u)
+        {
+          const auto endpoint_id = _endpoint_map(u, v);
+          if (endpoint_id == -1)
+            continue;
+
+          const auto edge_id = endpoint_id / 2;
+          _corners_adjacent_to_edge[edge_id].insert(c);
+        }
+      }
+    }
+
+    toc("Corners-to-edge topological linking");
+  }
+
+  auto ChessboardDetectorV2::calculate_orientation_histograms() -> void
   {
     tic();
     const auto& _grad_norm = _ed.pipeline.gradient_magnitude;
     const auto& _grad_ori = _ed.pipeline.gradient_orientation;
 
     _hists.resize(_corners.size());
+    _gradient_peaks.resize(_corners.size());
+    _gradient_peaks_refined.resize(_corners.size());
 
     const auto num_corners = static_cast<int>(_corners.size());
 #pragma omp parallel for
     for (auto i = 0; i < num_corners; ++i)
     {
-      compute_orientation_histogram<N>(_hists[i], _grad_norm, _grad_ori,
-                                       _corners[i].coords.x(),
-                                       _corners[i].coords.y(),  //
-                                       _params.sigma_D, 4, 5.0f);
+      const Eigen::Vector2f p = _corners[i].coords / scale_aa;
+      const auto radius = _corners[i].radius() / scale_aa;
+      compute_orientation_histogram<N>(_hists[i], _grad_norm, _grad_ori, p.x(),
+                                       p.y(), radius, radius_factor);
       lowe_smooth_histogram(_hists[i]);
       _hists[i].matrix().normalize();
-    };
+
+      _gradient_peaks[i] = find_peaks(_hists[i], 0.5f);
+      _gradient_peaks_refined[i] = refine_peaks(_hists[i], _gradient_peaks[i]);
+      std::for_each(_gradient_peaks_refined[i].begin(),
+                    _gradient_peaks_refined[i].end(), [](auto& v) {
+                      v *= static_cast<float>(2 * M_PI / N);
+                      v -= static_cast<float>(M_PI * 0.5);
+                      if (v < 0)
+                        v += static_cast<float>(2 * M_PI);
+                    });
+    }
     toc("Gradient histograms");
   }
 
-  auto ChessboardDetector::calculate_edge_shape_statistics() -> void
+  auto ChessboardDetectorV2::calculate_edge_adjacent_to_corners() -> void
   {
-    tic();
-    _edge_stats = get_curve_shape_statistics(_ed.pipeline.edges_as_list);
-    _edge_grad_means = gradient_mean(_ed.pipeline.edges_as_list,  //
-                                     _grad_x, _grad_y);
-    _edge_grad_covs = gradient_covariance(_ed.pipeline.edges_as_list,  //
-                                          _grad_x, _grad_y);
-    toc("Edge shape statistics");
-  }
-
-  auto ChessboardDetector::link_edges_and_corners() -> void
-  {
-    tic();
-
-    _edge_label_map.resize(_ed.pipeline.edge_map.sizes());
-    _edge_label_map.flat_array().fill(-1);
-
-#ifdef DEBUG_FILTERED_EDGES
-    auto edge_map_filtered =
-        sara::Image<std::uint8_t>{ed.pipeline.edge_map.sizes()};
-    edge_map_filtered.flat_array().fill(0);
-#endif
-
-    const auto& edges = _ed.pipeline.edges_as_list;
-    for (auto edge_id = 0u; edge_id < edges.size(); ++edge_id)
-    {
-      const auto& curvei = edges[edge_id];
-      const auto& edgei = reorder_and_extract_longest_curve(curvei);
-      auto curve = std::vector<Eigen::Vector2d>(edgei.size());
-      std::transform(edgei.begin(), edgei.end(), curve.begin(),
-                     [](const auto& p) { return p.template cast<double>(); });
-      if (curve.size() < 2)
-        continue;
-
-      const Eigen::Vector2i s =
-          curve.front().array().round().matrix().cast<int>();
-      const Eigen::Vector2i e =
-          curve.back().array().round().matrix().cast<int>();
-
-      static constexpr auto strong_edge_thres = 2.f / 255.f;
-      if (!is_strong_edge(_ed.pipeline.gradient_magnitude, curvei,
-                          strong_edge_thres))
-        continue;
-
-#ifdef DEBUG_FILTERED_EDGES
-      for (const auto& p : curvei)
-        edge_map_filtered(p) = 255;
-#endif
-
-      // Edge gradient distribution similar to cornerness measure.
-      const auto& grad_cov = _edge_grad_covs[edge_id];
-      const auto grad_dist_param = 0.2f;
-      const auto cornerness = grad_cov.determinant() -  //
-                              grad_dist_param * square(grad_cov.trace());
-      if (cornerness > 0)
-        continue;
-
-      _edge_label_map(s) = edge_id;
-      _edge_label_map(e) = edge_id;
-    }
-
-#ifdef DEBUG_FILTERED_EDGES
-    sara::display(edge_map_filtered);
-    sara::get_key();
-#endif
-
     _edges_adjacent_to_corner.clear();
     _edges_adjacent_to_corner.resize(_corners.size());
     std::transform(                         //
@@ -292,61 +420,43 @@ namespace DO::Sara {
         [this](const Corner<float>& c) {
           auto edges = std::unordered_set<int>{};
 
-          const auto& r = _params.corner_edge_linking_radius + 1;
+          const auto& r = corner_endpoint_linking_radius;
           for (auto v = -r; v <= r; ++v)
           {
             for (auto u = -r; u <= r; ++u)
             {
               const Eigen::Vector2i p =
-                  c.coords.cast<int>() + Eigen::Vector2i{u, v};
+                  (c.coords / scale_aa).cast<int>() + Eigen::Vector2i{u, v};
 
               const auto in_image_domain =
-                  0 <= p.x() && p.x() < _edge_label_map.width() &&  //
-                  0 <= p.y() && p.y() < _edge_label_map.height();
+                  0 <= p.x() && p.x() < _endpoint_map.width() &&  //
+                  0 <= p.y() && p.y() < _endpoint_map.height();
               if (!in_image_domain)
                 continue;
 
-              const auto edge_id = _edge_label_map(p);
-              if (edge_id != -1)
-                edges.insert(edge_id);
+              const auto endpoint_id = _endpoint_map(p);
+              if (endpoint_id == -1)
+                continue;
+              const auto edge_id = endpoint_id / 2;
+              edges.insert(edge_id);
             }
           }
           return edges;
         });
-
-    const auto num_corners = static_cast<int>(_corners.size());
-
-    const auto& _edges = _ed.pipeline.edges_as_list;
-    _corners_adjacent_to_edge.clear();
-    _corners_adjacent_to_edge.resize(_edges.size());
-    for (auto c = 0; c < num_corners; ++c)
-    {
-      const auto& corner = _corners[c];
-
-      const auto& r = _params.corner_edge_linking_radius;
-      for (auto v = -r; v <= r; ++v)
-      {
-        for (auto u = -r; u <= r; ++u)
-        {
-          const Eigen::Vector2i p =
-              corner.coords.cast<int>() + Eigen::Vector2i{u, v};
-
-          const auto in_image_domain =
-              0 <= p.x() && p.x() < _edge_label_map.width() &&  //
-              0 <= p.y() && p.y() < _edge_label_map.height();
-          if (!in_image_domain)
-            continue;
-
-          const auto edge_id = _edge_label_map(p);
-          if (edge_id != -1)
-            _corners_adjacent_to_edge[edge_id].insert(c);
-        }
-      }
-    }
-    toc("Topological linking");
   }
 
-  auto ChessboardDetector::select_seed_corners() -> void
+  auto ChessboardDetectorV2::calculate_edge_shape_statistics() -> void
+  {
+    tic();
+    _edge_stats = get_curve_shape_statistics(_ed.pipeline.edges_as_list);
+    _edge_grad_means = gradient_mean(_ed.pipeline.edges_as_list,  //
+                                     _grad_x_scale_aa, _grad_y_scale_aa);
+    _edge_grad_covs = gradient_covariance(_ed.pipeline.edges_as_list,  //
+                                          _grad_x_scale_aa, _grad_y_scale_aa);
+    toc("Edge shape statistics");
+  }
+
+  auto ChessboardDetectorV2::select_seed_corners() -> void
   {
     tic();
     _best_corners.clear();
@@ -356,7 +466,7 @@ namespace DO::Sara {
     toc("Best corner selection");
   }
 
-  auto ChessboardDetector::parse_squares() -> void
+  auto ChessboardDetectorV2::parse_squares() -> void
   {
     tic();
     _black_squares.clear();
@@ -386,7 +496,7 @@ namespace DO::Sara {
     toc("White square reconstruction");
   }
 
-  auto ChessboardDetector::parse_lines() -> void
+  auto ChessboardDetectorV2::parse_lines() -> void
   {
     tic();
 
@@ -413,7 +523,7 @@ namespace DO::Sara {
     toc("Line reconstruction");
   }
 
-  auto ChessboardDetector::grow_chessboards() -> void
+  auto ChessboardDetectorV2::grow_chessboards() -> void
   {
     tic();
 
@@ -457,7 +567,7 @@ namespace DO::Sara {
           _corners,                                 // Corner locations
           _squares, edge_ids, squares_adj_to_edge,  // Square graph
           is_square_visited,                        // Region growing state
-          _params.downscale_factor, display);
+          1.f, display);
 
       _chessboards.emplace_back(std::move(cb));
     }
@@ -465,7 +575,7 @@ namespace DO::Sara {
     toc("Chessboard growing");
   }
 
-  auto ChessboardDetector::extract_chessboard_corners_from_chessboard_squares()
+  auto ChessboardDetectorV2::extract_chessboard_corners_from_chessboard_squares()
       -> void
   {
     tic();
@@ -518,11 +628,6 @@ namespace DO::Sara {
           corners[i + 1][j] = _corners[d].coords;
         }
       }
-
-      // Important rescale the coordinates back to the original image sizes.
-      for (auto i = 0; i < m; ++i)
-        for (auto j = 0; j < n; ++j)
-          corners[i][j] *= _params.downscale_factor;
 
       _cb_corners.emplace_back(std::move(corners));
     }
@@ -587,4 +692,5 @@ namespace DO::Sara {
 
     toc("Chessboard ordered corners");
   }
+
 }  // namespace DO::Sara
