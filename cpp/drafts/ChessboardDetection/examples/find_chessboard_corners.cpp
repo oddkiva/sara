@@ -104,14 +104,22 @@ auto __main(int argc, char** argv) -> int
 
     const auto line_thickness = argc < 8 ? 2 : std::stoi(argv[7]);
 
+
+    // ====================================================================== //
+    // Special parameters for low resolution images.
     const auto low_resolution = argc < 9  //
                                     ? false
                                     : static_cast<bool>(std::stoi(argv[8]));
-
+    // In my experience, 2.f still works well but sometimes lowering it to 1.5f
+    // may become necessary
     const auto radius_factor = argc < 10 ? 2.f : std::stof(argv[9]);
+    // In my experience, we have to experiment between 4 and 6 pixels.
     const auto corner_endpoint_linking_radius = argc < 11  //
                                                     ? 4.f
                                                     : std::stof(argv[10]);
+    // End of special parameters for low resolution images.
+    // ====================================================================== //
+
 
     auto timer = sara::Timer{};
     auto video_stream = sara::ImageOrVideoReader{video_file};
