@@ -102,6 +102,8 @@ auto __main(int argc, char** argv) -> int
                            ? false
                            : static_cast<bool>(std::stoi(argv[6]));
 
+    const auto line_thickness = argc < 8 ? 2 : std::stoi(argv[7]);
+
 
     auto timer = sara::Timer{};
     auto video_stream = sara::ImageOrVideoReader{video_file};
@@ -210,7 +212,8 @@ auto __main(int argc, char** argv) -> int
             c == 0 ? sara::Red8
                    : sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
         const auto& cb = chessboards[c];
-        draw_chessboard(display, cb, corners, squares, 1.f, color, 5);
+        draw_chessboard(display, cb, corners, squares, 1.f, color,
+                        line_thickness);
       }
 
       sara::draw_text(display, 80, 80, "Frame: " + std::to_string(frame_number),
@@ -218,6 +221,71 @@ auto __main(int argc, char** argv) -> int
       sara::draw_text(display, 80, 120,
                       "Chessboards: " + std::to_string(chessboards.size()),
                       sara::White8, 30, 0, false, true);
+
+#ifdef WIP
+      sara::tic();
+      detect.extract_chessboard_vertices_from_chessboard_squares();
+      sara::toc("Vertices");
+
+      for (auto cb_id = 0u; cb_id < detect._chessboards.size(); ++cb_id)
+      {
+        const auto line_supports =
+            sara::collect_lines(detect._cb_corners[cb_id]);
+        const auto lines =
+            sara::collect_lines(detect._cb_vertices[cb_id], detect);
+
+        for (auto l = 0u; l < lines.size(); ++l)
+        {
+          const auto& line = lines[l];
+          const auto& line_support = line_supports[l];
+          if (line.size() < 3 || line_support.size() < 2)
+            continue;
+
+          const auto color = sara::Yellow8;
+          //  sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
+
+          // Normalization transform, it has to be done carefully.
+          const auto T = normalization_transform(line);
+          const Eigen::Matrix3f Tinv = T.inverse();
+          // Normalize the line.
+          const auto line_normalized = apply(T, line);
+
+          const auto fy = y_parabola(line_normalized);
+          const auto fx = x_parabola(line_normalized);
+
+          if (T(0, 0) < T(1, 1))
+          {
+            for (auto x = 0; x < frame_gray.width(); ++x)
+            {
+              const auto xn = T(0, 0) * x + T(0, 2);
+              const auto yn = fy(0) * xn * xn + fy(1) * xn + fy(2);
+              const Eigen::Vector2f pn{xn, yn};
+              const Eigen::Vector2f p = (Tinv * pn.homogeneous()).hnormalized();
+              sara::fill_circle(p.x(), p.y(), 2, color);
+            }
+          }
+          else
+          {
+            for (auto y = 0; y < frame_gray.height(); ++y)
+            {
+              const auto yn = T(1, 1) * y + T(1, 2);
+              const auto xn = fx(0) * yn * yn + fx(1) * yn + fx(2);
+              const Eigen::Vector2f pn{xn, yn};
+              const Eigen::Vector2f p = (Tinv * pn.homogeneous()).hnormalized();
+              sara::fill_circle(p.x(), p.y(), 2, color);
+            }
+          }
+        }
+      }
+#endif
+
+      for (auto c = 0; c < num_chessboards; ++c)
+      {
+        const auto& cb = chessboards[c];
+        SARA_DEBUG << "Chessboard " << c << std::endl;
+        std::cout << sara::to_matrix(cb) << std::endl << std::endl;
+      }
+
 
       sara::display(display);
       if (pause)

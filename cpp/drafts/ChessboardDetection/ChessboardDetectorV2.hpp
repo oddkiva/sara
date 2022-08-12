@@ -175,6 +175,12 @@ namespace DO::Sara {
     //! @brief Grid structure recovery.
     auto parse_squares() -> void;
     auto grow_chessboards() -> void;
+    auto extract_chessboard_corners_from_chessboard_squares() -> void;
+    auto extract_chessboard_vertices_from_chessboard_squares() -> void;
+
+    // TODO: redo this but this time with a smarter geometric modelling of
+    // the distorted lines.
+    auto parse_lines() -> void;
 
     //! @brief The edge detector.
     EdgeDetector _ed;
@@ -242,6 +248,9 @@ namespace DO::Sara {
     SquareSet _white_squares;
     //! @}
 
+    //! @brief TODO: Recover missed corners.
+    std::vector<std::vector<int>> _lines;
+
     //! @brief Chessboards grown from the list of squares.
     //! @{
     std::vector<Square> _squares;
@@ -249,7 +258,28 @@ namespace DO::Sara {
     //! @}
 
     std::vector<OrderedChessboardCorners> _cb_corners;
+    std::vector<OrderedChessboardVertices> _cb_vertices;
   };
+
+
+  inline auto
+  transpose(const ChessboardDetectorV2::OrderedChessboardCorners& in)
+      -> ChessboardDetectorV2::OrderedChessboardCorners
+  {
+    const auto m = in.size();
+    const auto n = in.front().size();
+
+    auto out = ChessboardDetectorV2::OrderedChessboardCorners{};
+    out.resize(n);
+    for (auto i = 0u; i < n; ++i)
+      out[i].resize(m);
+
+    for (auto i = 0u; i < m; ++i)
+      for (auto j = 0u; j < n; ++j)
+        out[j][i] = in[i][j];
+
+    return out;
+  }
 
 
 }  // namespace DO::Sara

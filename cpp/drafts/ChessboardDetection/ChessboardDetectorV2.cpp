@@ -10,6 +10,7 @@
 // ========================================================================== //
 
 #include <drafts/ChessboardDetection/ChessboardDetectorV2.hpp>
+#include <drafts/ChessboardDetection/LineReconstruction.hpp>
 #include <drafts/ChessboardDetection/NonMaximumSuppression.hpp>
 #include <drafts/ChessboardDetection/OrientationHistogram.hpp>
 #include <drafts/ChessboardDetection/SquareReconstruction.hpp>
@@ -44,6 +45,10 @@ namespace DO::Sara {
 
     parse_squares();
     grow_chessboards();
+    extract_chessboard_corners_from_chessboard_squares();
+
+    // TODO:
+    // parse_lines();
 
     return _cb_corners;
   }
@@ -491,6 +496,33 @@ namespace DO::Sara {
     toc("White square reconstruction");
   }
 
+  auto ChessboardDetectorV2::parse_lines() -> void
+  {
+    tic();
+
+    _lines.clear();
+
+    for (const auto& square : _black_squares)
+    {
+      const auto new_lines = grow_lines_from_square(
+          square.v, _corners, _edge_stats, _edge_grad_means, _edge_grad_covs,
+          _edges_adjacent_to_corner, _corners_adjacent_to_edge);
+
+      _lines.insert(_lines.end(), new_lines.begin(), new_lines.end());
+    }
+
+    for (const auto& square : _white_squares)
+    {
+      const auto new_lines = grow_lines_from_square(
+          square.v, _corners, _edge_stats, _edge_grad_means, _edge_grad_covs,
+          _edges_adjacent_to_corner, _corners_adjacent_to_edge);
+
+      _lines.insert(_lines.end(), new_lines.begin(), new_lines.end());
+    }
+
+    toc("Line reconstruction");
+  }
+
   auto ChessboardDetectorV2::grow_chessboards() -> void
   {
     tic();
@@ -541,6 +573,124 @@ namespace DO::Sara {
     }
 
     toc("Chessboard growing");
+  }
+
+  auto ChessboardDetectorV2::extract_chessboard_corners_from_chessboard_squares()
+      -> void
+  {
+    tic();
+    // Each grown chessboard consists of an ordered list of squares.
+    // We want to retrieve the ordered list of corners.
+    _cb_corners.clear();
+    _cb_corners.reserve(_chessboards.size());
+    for (const auto& chessboard : _chessboards)
+    {
+      const auto m = rows(chessboard) + 1;
+      const auto n = cols(chessboard) + 1;
+
+      auto corners = OrderedChessboardCorners{};
+      // Preallocate and initialize the list of ordered corners.
+      corners.resize(m);
+      std::for_each(corners.begin(), corners.end(), [n](auto& row) {
+        row.resize(n);
+        static const Eigen::Vector2f nan2d = Eigen::Vector2f::Constant(  //
+            std::numeric_limits<float>::quiet_NaN());
+        std::fill(row.begin(), row.end(), nan2d);
+      });
+
+      // Get the chessboard x-corners.
+      for (auto i = 0; i < m - 1; ++i)
+      {
+        for (auto j = 0; j < n - 1; ++j)
+        {
+          const auto is_square_undefined = chessboard[i][j].id == -1;
+          if (is_square_undefined)
+            continue;
+
+          const auto& square = _squares[chessboard[i][j].id];
+
+          // top-left
+          const auto& a = square.v[0];
+          // top-right
+          const auto& b = square.v[1];
+          // bottom-right
+          const auto& c = square.v[2];
+          // bottom-left
+          const auto& d = square.v[3];
+
+          // Update the list of coordinates.
+          //
+          // N.B.: it does not matter if we rewrite the coordinates, they are
+          // guaranteed to be the same.
+          corners[i][j] = _corners[a].coords;
+          corners[i][j + 1] = _corners[b].coords;
+          corners[i + 1][j + 1] = _corners[c].coords;
+          corners[i + 1][j] = _corners[d].coords;
+        }
+      }
+
+      _cb_corners.emplace_back(std::move(corners));
+    }
+
+    toc("Chessboard ordered corners");
+  }
+
+  auto ChessboardDetector::extract_chessboard_vertices_from_chessboard_squares()
+      -> void
+  {
+    tic();
+    // Each grown chessboard consists of an ordered list of squares.
+    // We want to retrieve the ordered list of corners.
+    _cb_vertices.clear();
+    _cb_vertices.reserve(_chessboards.size());
+    for (const auto& chessboard : _chessboards)
+    {
+      const auto m = rows(chessboard) + 1;
+      const auto n = cols(chessboard) + 1;
+
+      auto vertices = OrderedChessboardVertices{};
+      // Preallocate and initialize the list of ordered corners.
+      vertices.resize(m);
+      std::for_each(vertices.begin(), vertices.end(), [n](auto& row) {
+        row.resize(n);
+        std::fill(row.begin(), row.end(), -1);
+      });
+
+      // Get the chessboard x-corners.
+      for (auto i = 0; i < m - 1; ++i)
+      {
+        for (auto j = 0; j < n - 1; ++j)
+        {
+          const auto is_square_undefined = chessboard[i][j].id == -1;
+          if (is_square_undefined)
+            continue;
+
+          const auto& square = _squares[chessboard[i][j].id];
+
+          // top-left
+          const auto& a = square.v[0];
+          // top-right
+          const auto& b = square.v[1];
+          // bottom-right
+          const auto& c = square.v[2];
+          // bottom-left
+          const auto& d = square.v[3];
+
+          // Update the list of coordinates.
+          //
+          // N.B.: it does not matter if we rewrite the coordinates, they are
+          // guaranteed to be the same.
+          vertices[i][j] = a;
+          vertices[i][j + 1] = b;
+          vertices[i + 1][j + 1] = c;
+          vertices[i + 1][j] = d;
+        }
+      }
+
+      _cb_vertices.emplace_back(std::move(vertices));
+    }
+
+    toc("Chessboard ordered corners");
   }
 
 }  // namespace DO::Sara
