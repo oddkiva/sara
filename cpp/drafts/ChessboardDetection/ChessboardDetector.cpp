@@ -53,8 +53,9 @@ namespace DO::Sara {
     return _cb_corners;
   }
 
-  auto ChessboardDetector::calculate_feature_pyramids(
-      const ImageView<float>& image) -> void
+  auto
+  ChessboardDetector::calculate_feature_pyramids(const ImageView<float>& image)
+      -> void
   {
     tic();
     _gauss_pyr = gaussian_pyramid(image, gaussian_pyramid_params);
@@ -115,8 +116,11 @@ namespace DO::Sara {
     const auto& g = _gauss_pyr(0, octave);
 
     // Downscale the image to combat against aliasing.
-    const auto scale_inter_delta = std::sqrt(
-        square(scale_aa) - square(gaussian_pyramid_params.scale_initial()));
+    static constexpr auto extra_scale_factor =
+        1 / 0.6f;  // set empirically to combat the antialiasing better
+    const auto scale_inter_delta =
+        std::sqrt(square(extra_scale_factor * scale_aa) -
+                  square(gaussian_pyramid_params.scale_initial()));
     const auto frame_blurred = g.compute<Gaussian>(scale_inter_delta);
 
     const Eigen::Vector2i sizes_inter =
@@ -133,7 +137,7 @@ namespace DO::Sara {
     gradient(frame_aa, _grad_x_scale_aa, _grad_y_scale_aa);
 
     // Filter the gradient map.
-    _ed.operator()(_grad_x_scale_aa, _grad_y_scale_aa);
+    _ed(_grad_x_scale_aa, _grad_y_scale_aa);
     toc("Edge detection");
   }
 
@@ -145,7 +149,11 @@ namespace DO::Sara {
     std::transform(edges.begin(), edges.end(),
                    std::back_inserter(_is_strong_edge),
                    [this](const auto& edge) -> std::uint8_t {
-                     static constexpr auto strong_edge_thres = 4.f / 255.f;
+                     // In my experience this threshold needs this low to find
+                     // between noise suppression and robutstness against
+                     // illumination changes.
+                     // Noisy edges will still be discarded.
+                     static constexpr auto strong_edge_thres = 2.f / 255.f;
                      return is_strong_edge(_ed.pipeline.gradient_magnitude,
                                            edge, strong_edge_thres);
                    });
