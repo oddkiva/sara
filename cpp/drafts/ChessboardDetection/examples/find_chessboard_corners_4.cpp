@@ -27,7 +27,7 @@ namespace sara = DO::Sara;
 
 auto draw_corner(sara::ImageView<sara::Rgb8>& display,
                  const sara::Corner<float>& c,
-                 const std::vector<float>& zero_crossings,
+                 const std::optional<std::vector<float>>& dominant_orientations,
                  const float downscale_factor, const float radius_factor,
                  const sara::Rgb8& color, int thickness) -> void
 {
@@ -39,18 +39,17 @@ auto draw_corner(sara::ImageView<sara::Rgb8>& display,
                     static_cast<int>(std::round(radius)), color, thickness);
   sara::fill_circle(display, p1.x(), p1.y(), 1, sara::Yellow8);
 
-#if 0
-  for (const auto& val : zero_crossings)
+  if (!dominant_orientations.has_value())
+    return;
+  for (const auto& val : *dominant_orientations)
   {
     const Eigen::Vector2i p2 =
-        (downscale_factor * c.coords + (radius * 3) * sara::dir(val))
+        (downscale_factor * c.coords + (radius * 2) * sara::dir(val))
             .array()
             .round()
             .cast<int>();
-    sara::draw_arrow(display, p1.x(), p1.y(), p2.x(), p2.y(), color,
-                     thickness);
+    sara::draw_arrow(display, p1.x(), p1.y(), p2.x(), p2.y(), color, thickness);
   }
-#endif
 };
 
 auto __main(int argc, char** argv) -> int
@@ -97,7 +96,13 @@ auto __main(int argc, char** argv) -> int
     detect.initialize_multiscale_harris_corner_detection_params(upscale,
                                                                 num_scales);
     detect.initialize_filter_radius_according_to_scale();
-    detect.edge_detection_downscale_factor = scale_aa;
+    if (scale_aa < detect.gaussian_pyramid_params.scale_initial())
+    {
+      std::cerr << "Choose scale_aa > "
+                << detect.gaussian_pyramid_params.scale_initial() << std::endl;
+      return 1;
+    }
+    detect.scale_aa = scale_aa;
     detect.initialize_edge_detector();
 
 
@@ -136,7 +141,7 @@ auto __main(int argc, char** argv) -> int
         display = edge_map_us.convert<sara::Rgb8>();
 
         const auto& endpoint_map = detect._endpoint_map;
-        const auto& scale_aa = detect.edge_detection_downscale_factor;
+        const auto& scale_aa = detect.scale_aa;
 
         const auto w = endpoint_map.width();
         const auto h = endpoint_map.height();
@@ -157,6 +162,7 @@ auto __main(int argc, char** argv) -> int
       static constexpr auto scale_image = 1.f;
       const auto& corners = detect._corners;
       const auto num_corners = static_cast<int>(corners.size());
+
 #pragma omp parallel for
       for (auto c = 0; c < num_corners; ++c)
       {
@@ -164,12 +170,19 @@ auto __main(int argc, char** argv) -> int
             detect._best_corners.find(c) != detect._best_corners.end()
                 ? sara::Magenta8
                 : sara::Cyan8;
-        draw_corner(display, corners[c],                //
-                    // detect._zero_crossings[c],          //
-                    detect._gradient_peaks_refined[c],          //
-                    scale_image, detect.radius_factor,  //
+        draw_corner(display,     //
+                    corners[c],  //
+                    std::nullopt, // detect._gradient_peaks_refined[c],
+                    scale_image,           //
+                    detect.radius_factor,  //
                     color, 2);
       }
+
+      for (const auto& square : detect._white_squares)
+        sara::draw_square(display, square.v, corners, 1.f, sara::Green8, 5);
+      for (const auto& square : detect._black_squares)
+        sara::draw_square(display, square.v, corners, 1.f, sara::Red8, 5);
+
       sara::display(display);
       if (pause)
         sara::get_key();

@@ -23,9 +23,6 @@
 #include <drafts/ChessboardDetection/EdgeStatistics.hpp>
 #include <drafts/ChessboardDetection/SquareGraph.hpp>
 
-#include <set>
-#include <unordered_set>
-
 
 namespace DO::Sara {
 
@@ -80,7 +77,7 @@ namespace DO::Sara {
     //!
     //! For small images, we may need to upscale image, so the downscale factor
     //! should be 0.5f.
-    float edge_detection_downscale_factor = std::sqrt(2.f);
+    float scale_aa = std::sqrt(2.f);
 
     //! @brief Edge filtering parameters.
     //!
@@ -97,7 +94,7 @@ namespace DO::Sara {
 
     //! The default value seems to be a very good value for the analysis
     //! of the patch centered in each corner in my experience.
-    float corner_edge_linking_radius;
+    int corner_endpoint_linking_radius;
     static constexpr auto radius_factor = 2.f;
 
     inline ChessboardDetectorV2() = default;
@@ -136,11 +133,12 @@ namespace DO::Sara {
 
     inline auto initialize_filter_radius_according_to_scale() -> void
     {
-      corner_edge_linking_radius = static_cast<int>(  //
-          std::round(radius_factor * gaussian_pyramid_params.scale_initial() *
-                     corner_detection_params.sigma_I /
-                     edge_detection_downscale_factor));
-      SARA_CHECK(corner_edge_linking_radius);
+      const auto& scale_initial = gaussian_pyramid_params.scale_initial();
+      const auto& sigma_I = gaussian_pyramid_params.scale_initial();
+      corner_endpoint_linking_radius = static_cast<int>(std::round(
+          radius_factor * M_SQRT2 * scale_initial * sigma_I / scale_aa));
+
+      SARA_CHECK(corner_endpoint_linking_radius);
     }
 
     inline auto initialize_edge_detector() -> void
@@ -152,6 +150,8 @@ namespace DO::Sara {
     auto operator()(const ImageView<float>& image)
         -> const std::vector<OrderedChessboardCorners>&;
 
+    //! @brief Corner detection and filtering.
+    //! @{
     auto calculate_feature_pyramids(const ImageView<float>& image) -> void;
     auto extract_corners() -> void;
     auto detect_edges() -> void;
@@ -161,11 +161,19 @@ namespace DO::Sara {
     auto filter_corners_topologically() -> void;
     auto calculate_circular_intensity_profiles() -> void;
     auto filter_corners_with_intensity_profiles() -> void;
+    //! @}
 
+    //! @brief The features for the grid structure recovery.
+    //! @{
+    auto link_corners_to_edges() -> void;
     auto calculate_orientation_histograms() -> void;
     auto calculate_edge_adjacent_to_corners() -> void;
-
+    auto calculate_edge_shape_statistics() -> void;
     auto select_seed_corners() -> void;
+    //! @}
+
+    //! @brief Grid structure recovery.
+    auto parse_squares() -> void;
 
     //! @brief The edge detector.
     EdgeDetector _ed;
@@ -190,6 +198,8 @@ namespace DO::Sara {
     std::vector<std::vector<float>> _zero_crossings;
 
     //! @brief Data structures to analyze the topological structures
+    Image<float> _grad_x_scale_aa;
+    Image<float> _grad_y_scale_aa;
     Image<std::uint8_t> _edge_map;
     Image<std::int32_t> _endpoint_map;
     std::vector<std::uint8_t> _is_strong_edge;
@@ -217,9 +227,19 @@ namespace DO::Sara {
     //! @brief The best corners.
     std::unordered_set<int> _best_corners;
 
+    //! @brief Features for the square reconstruction and the recovery of the
+    //! grid structure.
+    std::vector<std::unordered_set<int>> _edges_adjacent_to_corner;
+    std::vector<std::unordered_set<int>> _corners_adjacent_to_edge;
+    CurveStatistics _edge_stats;
+    std::vector<Eigen::Vector2f> _edge_grad_means;
+    std::vector<Eigen::Matrix2f> _edge_grad_covs;
 
     //! @brief For the square reconstruction.
-    std::vector<std::unordered_set<int>> _edges_adjacent_to_corner;
+    //! @{
+    SquareSet _black_squares;
+    SquareSet _white_squares;
+    //! @}
 
     std::vector<OrderedChessboardCorners> _cb_corners;
   };

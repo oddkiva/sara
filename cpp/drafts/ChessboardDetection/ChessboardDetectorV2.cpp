@@ -12,6 +12,7 @@
 #include <drafts/ChessboardDetection/ChessboardDetectorV2.hpp>
 #include <drafts/ChessboardDetection/NonMaximumSuppression.hpp>
 #include <drafts/ChessboardDetection/OrientationHistogram.hpp>
+#include <drafts/ChessboardDetection/SquareReconstruction.hpp>
 
 #include <DO/Sara/FeatureDescriptors/Orientation.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
@@ -35,9 +36,13 @@ namespace DO::Sara {
     calculate_circular_intensity_profiles();
     filter_corners_with_intensity_profiles();
 
+    link_corners_to_edges();
     calculate_edge_adjacent_to_corners();
+    calculate_edge_shape_statistics();
     calculate_orientation_histograms();
     select_seed_corners();
+
+    parse_squares();
 
     return _cb_corners;
   }
@@ -99,24 +104,31 @@ namespace DO::Sara {
   auto ChessboardDetectorV2::detect_edges() -> void
   {
     tic();
-    // To combat against aliasing.
-    const auto& scale_aa = edge_detection_downscale_factor;
 
     const auto octave = upscale ? 1 : 0;
     const auto& g = _gauss_pyr(0, octave);
 
+    // Downscale the image to combat against aliasing.
     const auto scale_inter_delta = std::sqrt(
         square(scale_aa) - square(gaussian_pyramid_params.scale_initial()));
     const auto frame_blurred = g.compute<Gaussian>(scale_inter_delta);
 
     const Eigen::Vector2i sizes_inter =
         (g.sizes().cast<float>() / scale_aa).array().round().cast<int>();
-    auto frame_inter = Image<float>{sizes_inter};
-    resize_v2(frame_blurred, frame_inter);
+    auto frame_aa = Image<float>{sizes_inter};
+    resize_v2(frame_blurred, frame_aa);
 
-    _ed(frame_inter);
+    // VERY IMPORTANT DETAIL: BLUR AGAIN.
+    frame_aa = frame_aa.compute<Gaussian>(corner_detection_params.sigma_D);
+
+    // Calculate the gradient at the antialias scale.
+    _grad_x_scale_aa.resize(sizes_inter);
+    _grad_y_scale_aa.resize(sizes_inter);
+    gradient(frame_aa, _grad_x_scale_aa, _grad_y_scale_aa);
+
+    // Filter the gradient map.
+    _ed.operator()(_grad_x_scale_aa, _grad_y_scale_aa);
     toc("Edge detection");
-    BOOST_LOG_TRIVIAL(debug) << "Edge detection\n";
   }
 
   auto ChessboardDetectorV2::filter_edges() -> void
@@ -202,20 +214,19 @@ namespace DO::Sara {
 
     const auto w = _endpoint_map.width();
     const auto h = _endpoint_map.height();
-    const auto& scale_aa = edge_detection_downscale_factor;
-    const auto corner_endpoint_linking_radius = static_cast<int>(std::round(
-        radius_factor * M_SQRT2 * gaussian_pyramid_params.scale_initial() *
-        corner_detection_params.sigma_I / edge_detection_downscale_factor));
 
     const auto num_corners = static_cast<int>(_corners.size());
+    const auto& r = corner_endpoint_linking_radius;
     for (auto c = 0; c < num_corners; ++c)
     {
       const auto& corner = _corners[c];
 
-      const Eigen::Vector2i p =
-          (corner.coords / scale_aa).array().round().matrix().cast<int>();
+      const Eigen::Vector2i p = (corner.coords / scale_aa)  //
+                                    .array()
+                                    .round()
+                                    .matrix()
+                                    .cast<int>();
 
-      const auto& r = corner_endpoint_linking_radius;
       const auto umin = std::clamp(p.x() - r, 0, w);
       const auto umax = std::clamp(p.x() + r, 0, w);
       const auto vmin = std::clamp(p.y() - r, 0, h);
@@ -315,18 +326,95 @@ namespace DO::Sara {
     toc("Corner filtering from intensity profile");
   }
 
+  auto ChessboardDetectorV2::link_corners_to_edges() -> void
+  {
+    tic();
+
+    const auto& edges = _ed.pipeline.edges_as_list;
+    _corners_adjacent_to_edge.clear();
+    _corners_adjacent_to_edge.resize(edges.size());
+
+    const auto w = _endpoint_map.width();
+    const auto h = _endpoint_map.height();
+
+    const auto num_corners = static_cast<int>(_corners.size());
+    const auto& r = corner_endpoint_linking_radius;
+    for (auto c = 0; c < num_corners; ++c)
+    {
+      const auto& corner = _corners[c];
+
+      const Eigen::Vector2i p = (corner.coords / scale_aa)  //
+                                    .array()
+                                    .round()
+                                    .matrix()
+                                    .cast<int>();
+
+      const auto umin = std::clamp(p.x() - r, 0, w);
+      const auto umax = std::clamp(p.x() + r, 0, w);
+      const auto vmin = std::clamp(p.y() - r, 0, h);
+      const auto vmax = std::clamp(p.y() + r, 0, h);
+      for (auto v = vmin; v < vmax; ++v)
+      {
+        for (auto u = umin; u < umax; ++u)
+        {
+          const auto endpoint_id = _endpoint_map(u, v);
+          if (endpoint_id == -1)
+            continue;
+
+          const auto edge_id = endpoint_id / 2;
+          _corners_adjacent_to_edge[edge_id].insert(c);
+        }
+      }
+    }
+
+    toc("Corners-to-edge topological linking");
+  }
+
+  auto ChessboardDetectorV2::calculate_orientation_histograms() -> void
+  {
+    tic();
+    const auto& _grad_norm = _ed.pipeline.gradient_magnitude;
+    const auto& _grad_ori = _ed.pipeline.gradient_orientation;
+
+    _hists.resize(_corners.size());
+    _gradient_peaks.resize(_corners.size());
+    _gradient_peaks_refined.resize(_corners.size());
+
+    const auto num_corners = static_cast<int>(_corners.size());
+#pragma omp parallel for
+    for (auto i = 0; i < num_corners; ++i)
+    {
+      const Eigen::Vector2f p = _corners[i].coords / scale_aa;
+      const auto radius = _corners[i].radius() / scale_aa;
+      compute_orientation_histogram<N>(_hists[i], _grad_norm, _grad_ori, p.x(),
+                                       p.y(), radius, radius_factor);
+      lowe_smooth_histogram(_hists[i]);
+      _hists[i].matrix().normalize();
+
+      _gradient_peaks[i] = find_peaks(_hists[i], 0.5f);
+      _gradient_peaks_refined[i] = refine_peaks(_hists[i], _gradient_peaks[i]);
+      std::for_each(_gradient_peaks_refined[i].begin(),
+                    _gradient_peaks_refined[i].end(), [](auto& v) {
+                      v *= static_cast<float>(2 * M_PI / N);
+                      v -= static_cast<float>(M_PI * 0.5);
+                      if (v < 0)
+                        v += static_cast<float>(2 * M_PI);
+                    });
+    }
+    toc("Gradient histograms");
+  }
+
   auto ChessboardDetectorV2::calculate_edge_adjacent_to_corners() -> void
   {
     _edges_adjacent_to_corner.clear();
     _edges_adjacent_to_corner.resize(_corners.size());
-    const auto& scale_aa = edge_detection_downscale_factor;
     std::transform(                         //
         _corners.begin(), _corners.end(),   //
         _edges_adjacent_to_corner.begin(),  //
-        [this, scale_aa](const Corner<float>& c) {
+        [this](const Corner<float>& c) {
           auto edges = std::unordered_set<int>{};
 
-          const auto& r = corner_edge_linking_radius;
+          const auto& r = corner_endpoint_linking_radius;
           for (auto v = -r; v <= r; ++v)
           {
             for (auto u = -r; u <= r; ++u)
@@ -351,39 +439,15 @@ namespace DO::Sara {
         });
   }
 
-  auto ChessboardDetectorV2::calculate_orientation_histograms() -> void
+  auto ChessboardDetectorV2::calculate_edge_shape_statistics() -> void
   {
     tic();
-    const auto& _grad_norm = _ed.pipeline.gradient_magnitude;
-    const auto& _grad_ori = _ed.pipeline.gradient_orientation;
-
-    _hists.resize(_corners.size());
-    _gradient_peaks.resize(_corners.size());
-    _gradient_peaks_refined.resize(_corners.size());
-
-    const auto num_corners = static_cast<int>(_corners.size());
-#pragma omp parallel for
-    for (auto i = 0; i < num_corners; ++i)
-    {
-      const auto& scale_aa = edge_detection_downscale_factor;
-      const Eigen::Vector2f p = _corners[i].coords / scale_aa;
-      const auto radius = radius_factor * _corners[i].radius() / scale_aa;
-      compute_orientation_histogram<N>(_hists[i], _grad_norm, _grad_ori, p.x(),
-                                       p.y(), radius);
-      lowe_smooth_histogram(_hists[i]);
-      _hists[i].matrix().normalize();
-
-      _gradient_peaks[i] = find_peaks(_hists[i], 0.5f);
-      _gradient_peaks_refined[i] = refine_peaks(_hists[i], _gradient_peaks[i]);
-      std::for_each(_gradient_peaks_refined[i].begin(),
-                    _gradient_peaks_refined[i].end(), [](auto& v) {
-                      v *= static_cast<float>(2 * M_PI / N);
-                      v -= static_cast<float>(M_PI * 0.5);
-                      if (v < 0)
-                        v += static_cast<float>(2 * M_PI);
-                    });
-    };
-    toc("Gradient histograms");
+    _edge_stats = get_curve_shape_statistics(_ed.pipeline.edges_as_list);
+    _edge_grad_means = gradient_mean(_ed.pipeline.edges_as_list,  //
+                                     _grad_x_scale_aa, _grad_y_scale_aa);
+    _edge_grad_covs = gradient_covariance(_ed.pipeline.edges_as_list,  //
+                                          _grad_x_scale_aa, _grad_y_scale_aa);
+    toc("Edge shape statistics");
   }
 
   auto ChessboardDetectorV2::select_seed_corners() -> void
@@ -394,6 +458,36 @@ namespace DO::Sara {
       if (is_seed_corner(_edges_adjacent_to_corner[c], _zero_crossings[c]))
         _best_corners.insert(c);
     toc("Best corner selection");
+  }
+
+  auto ChessboardDetectorV2::parse_squares() -> void
+  {
+    tic();
+    _black_squares.clear();
+    for (const auto& c : _best_corners)
+    {
+      const auto square = reconstruct_black_square_from_corner(
+          c, _corners, _edge_grad_means, _edge_grad_covs,
+          _edges_adjacent_to_corner, _corners_adjacent_to_edge);
+      if (square == std::nullopt)
+        continue;
+      _black_squares.insert({*square, Square::Type::Black});
+    }
+    toc("Black square reconstruction");
+
+    tic();
+    _white_squares.clear();
+    for (const auto& c : _best_corners)
+    {
+      const auto square = reconstruct_white_square_from_corner(
+          c, _corners, _edge_grad_means, _edge_grad_covs,
+          _edges_adjacent_to_corner, _corners_adjacent_to_edge);
+      if (square == std::nullopt)
+        continue;
+
+      _white_squares.insert({*square, Square::Type::White});
+    }
+    toc("White square reconstruction");
   }
 
 }  // namespace DO::Sara

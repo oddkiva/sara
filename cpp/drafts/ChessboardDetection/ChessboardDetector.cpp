@@ -292,7 +292,7 @@ namespace DO::Sara {
         [this](const Corner<float>& c) {
           auto edges = std::unordered_set<int>{};
 
-          const auto& r = _params.corner_edge_linking_radius;
+          const auto& r = _params.corner_edge_linking_radius + 1;
           for (auto v = -r; v <= r; ++v)
           {
             for (auto u = -r; u <= r; ++u)
