@@ -31,7 +31,7 @@ namespace DO::Sara {
                     const double radius) const -> Eigen::ArrayXf;
 
     int num_circle_sample_points = 36;
-    double circle_radius = 10.f;
+    double circle_radius = 10.;
     std::vector<Eigen::Vector2d> circle_sample_points;
   };
 
