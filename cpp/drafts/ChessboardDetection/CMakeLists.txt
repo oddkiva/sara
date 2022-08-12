@@ -1,8 +1,3 @@
-find_package(
-  Boost
-  COMPONENTS log
-  REQUIRED)
-
 add_library(
   DO_Sara_ChessboardDetection STATIC
   # Feature detection.
@@ -32,7 +27,6 @@ set_target_properties(DO_Sara_ChessboardDetection PROPERTIES FOLDER
 target_link_libraries(
   DO_Sara_ChessboardDetection
   PUBLIC DO::Sara::ImageProcessing #
-         DO::Sara::FeatureDetectors
-  PRIVATE Boost::log)
+         DO::Sara::FeatureDetectors)
 
 add_subdirectory(examples)
