@@ -120,15 +120,24 @@ auto __main(int argc, char** argv) -> int
                                                                 num_scales);
     // Tuning the following parameter is useful to tune for very small images
     // but we work with HD images nowadays...
-    // detect.radius_factor = 1.1f;
-    detect.initialize_filter_radius_according_to_scale();
-    if (scale_aa < detect.gaussian_pyramid_params.scale_initial())
+    if (upscale)
     {
-      std::cerr << "Choose scale_aa > "
-                << detect.gaussian_pyramid_params.scale_initial() << std::endl;
-      return 1;
+      detect.radius_factor = 1.3f;
+      detect.corner_endpoint_linking_radius = 5;
+      detect.scale_aa = 1.0f;
     }
-    detect.scale_aa = scale_aa;
+    else
+    {
+      detect.initialize_filter_radius_according_to_scale();
+      if (scale_aa < detect.gaussian_pyramid_params.scale_initial())
+      {
+        std::cerr << "Choose scale_aa > "
+                  << detect.gaussian_pyramid_params.scale_initial()
+                  << std::endl;
+        return 1;
+      }
+      detect.scale_aa = scale_aa;
+    }
     detect.initialize_edge_detector();
 
 
