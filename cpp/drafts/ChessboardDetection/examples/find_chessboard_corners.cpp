@@ -118,6 +118,9 @@ auto __main(int argc, char** argv) -> int
     auto detect = sara::ChessboardDetector{};
     detect.initialize_multiscale_harris_corner_detection_params(upscale,
                                                                 num_scales);
+    // Tuning the following parameter is useful to tune for very small images
+    // but we work with HD images nowadays...
+    // detect.radius_factor = 1.1f;
     detect.initialize_filter_radius_according_to_scale();
     if (scale_aa < detect.gaussian_pyramid_params.scale_initial())
     {

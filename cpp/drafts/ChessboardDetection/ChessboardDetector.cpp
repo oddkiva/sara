@@ -112,7 +112,8 @@ namespace DO::Sara {
   {
     tic();
 
-    const auto octave = upscale ? 1 : 0;
+    const auto octave =
+        upscale && gaussian_pyramid_params.num_octaves_max() > 1 ? 1 : 0;
     const auto& g = _gauss_pyr(0, octave);
 
     // Downscale the image to combat against aliasing.
@@ -212,7 +213,8 @@ namespace DO::Sara {
                      });
     }
 
-    const auto octave = upscale ? 1 : 0;
+    const auto octave =
+        upscale && gaussian_pyramid_params.num_octaves_max() > 1 ? 1 : 0;
     const auto& g = _gauss_pyr(0, octave);
     scale_aware_nms(_corners, g.sizes(), radius_factor);
     toc("Corner grouping and NMS");
