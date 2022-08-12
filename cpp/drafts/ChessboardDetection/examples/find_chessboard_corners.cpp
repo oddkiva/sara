@@ -104,6 +104,14 @@ auto __main(int argc, char** argv) -> int
 
     const auto line_thickness = argc < 8 ? 2 : std::stoi(argv[7]);
 
+    const auto low_resolution = argc < 9  //
+                                    ? false
+                                    : static_cast<bool>(std::stoi(argv[8]));
+
+    const auto radius_factor = argc < 10 ? 2.f : std::stof(argv[9]);
+    const auto corner_endpoint_linking_radius = argc < 11  //
+                                                    ? 4.f
+                                                    : std::stof(argv[10]);
 
     auto timer = sara::Timer{};
     auto video_stream = sara::ImageOrVideoReader{video_file};
@@ -120,11 +128,11 @@ auto __main(int argc, char** argv) -> int
                                                                 num_scales);
     // Tuning the following parameter is useful to tune for very small images
     // but we work with HD images nowadays...
-    if (upscale)
+    if (low_resolution)
     {
-      detect.radius_factor = 1.2f;                // Should be tunable.
-      detect.corner_endpoint_linking_radius = 5;  // Should be tunable.
-      detect.scale_aa = 1.0f;                     // Should be tunable
+      detect.radius_factor = radius_factor;
+      detect.corner_endpoint_linking_radius = corner_endpoint_linking_radius;
+      detect.scale_aa = scale_aa;
     }
     else
     {

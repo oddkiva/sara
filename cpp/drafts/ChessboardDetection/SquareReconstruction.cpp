@@ -152,42 +152,32 @@ namespace DO::Sara {
     if (distinct_vertices.size() != 4)
       return std::nullopt;
 
-#define OLD
-#ifdef OLD
-    // Validation with the side lengths.
-    auto side_lengths = std::array<float, 4>{};
-    for (auto i = 0; i < 4; ++i)
     {
-      const auto& a = corners[square[i]].coords;
-      const auto& b = corners[square[(i + 1) % 4]].coords;
-      side_lengths[i] = (b - a).norm();
-    }
-    const auto [lmin, lmax] =
-        std::minmax_element(side_lengths.begin(), side_lengths.end());
-    const auto ratio = *lmin / *lmax;
-    if (ratio < 0.1f)
-      return std::nullopt;
-#else
-    {
-      // Even if very strongly distorted, the putative square should look like a
-      // parallelogram.
+      // If it is a square, at least the two parallel sides even under
+      // distortion should have the same length.
+      //
+      // Otherwise we really need to reject the square.
       const auto& a = corners[square[0]].coords;
       const auto& b = corners[square[1]].coords;
       const auto& c = corners[square[2]].coords;
       const auto& d = corners[square[3]].coords;
-      const Eigen::Vector2f ac = c - a;
-      const Eigen::Vector2f bd = d - b;
+      // First pair of parallel sides.
+      const auto ab = (b - a).norm();
+      const auto dc = (c - d).norm();
+      // Second pair of parallel sides.
+      const auto bc = (c - b).norm();
+      const auto ad = (d - a).norm();
 
-      // calculate the mid-point.
-      const Eigen::Vector2f m1 = (a + c) * 0.5f;
-      const Eigen::Vector2f m2 = (b + d) * 0.5f;
+      const auto diff1 = std::min(ab, dc) / std::max(ab, dc);
+      const auto diff2 = std::min(bc, ad) / std::max(bc, ad);
+      const auto diff = std::max(diff1, diff2);
 
-      const float rel_diff = (m1 - m2).norm() / std::min(ac.norm(), bd.norm());
-      if (rel_diff > 0.1f)
+      if (std::isinf(diff))
+        return std::nullopt;
+
+      if (diff < 0.8)
         return std::nullopt;
     }
-
-#endif
 
     return square;
   }
@@ -301,6 +291,40 @@ namespace DO::Sara {
     const auto vmin = std::min_element(square.begin(), square.end());
     if (vmin != square.begin())
       std::rotate(square.begin(), vmin, square.end());
+
+    // Validate the square.
+    auto distinct_vertices = std::unordered_set<int>{};
+    for (const auto& v : square)
+      distinct_vertices.insert(v);
+    if (distinct_vertices.size() != 4)
+      return std::nullopt;
+
+    {
+      // If it is a square, at least the two parallel sides even under
+      // distortion should have the same length.
+      //
+      // Otherwise we really need to reject the square.
+      const auto& a = corners[square[0]].coords;
+      const auto& b = corners[square[1]].coords;
+      const auto& c = corners[square[2]].coords;
+      const auto& d = corners[square[3]].coords;
+      // First pair of parallel sides.
+      const auto ab = (b - a).norm();
+      const auto dc = (c - d).norm();
+      // Second pair of parallel sides.
+      const auto bc = (c - b).norm();
+      const auto ad = (d - a).norm();
+
+      const auto diff1 = std::min(ab, dc) / std::max(ab, dc);
+      const auto diff2 = std::min(bc, ad) / std::max(bc, ad);
+      const auto diff = std::max(diff1, diff2);
+
+      if (std::isinf(diff))
+        return std::nullopt;
+
+      if (diff < 0.8)
+        return std::nullopt;
+    }
 
     return square;
   }
