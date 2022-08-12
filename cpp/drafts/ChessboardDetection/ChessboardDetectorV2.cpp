@@ -43,6 +43,7 @@ namespace DO::Sara {
     select_seed_corners();
 
     parse_squares();
+    grow_chessboards();
 
     return _cb_corners;
   }
@@ -109,8 +110,12 @@ namespace DO::Sara {
     const auto& g = _gauss_pyr(0, octave);
 
     // Downscale the image to combat against aliasing.
+#if 0
     const auto scale_inter_delta = std::sqrt(
         square(scale_aa) - square(gaussian_pyramid_params.scale_initial()));
+#else
+    const auto scale_inter_delta = scale_aa;
+#endif
     const auto frame_blurred = g.compute<Gaussian>(scale_inter_delta);
 
     const Eigen::Vector2i sizes_inter =
@@ -488,6 +493,58 @@ namespace DO::Sara {
       _white_squares.insert({*square, Square::Type::White});
     }
     toc("White square reconstruction");
+  }
+
+  auto ChessboardDetectorV2::grow_chessboards() -> void
+  {
+    tic();
+
+    _squares = to_list(_black_squares, _white_squares);
+
+    // Create IDs for each square edge.
+    const auto edge_ids = populate_edge_ids(_squares);
+    // Populate the list of squares adjacent to each edge.
+    const auto squares_adj_to_edge =
+        populate_squares_adj_to_edge(edge_ids, _squares);
+
+    // The state of the region growing procedure..
+    auto is_square_visited = std::vector<std::uint8_t>(_squares.size(), 0);
+
+    // Initialize the list of squares from which we will grow chessboards.
+    auto square_ids = std::queue<int>{};
+    for (auto s = 0u; s < _squares.size(); ++s)
+      square_ids.push(s);
+
+#ifdef DEBUG_REGION_GROWING
+    // For debugging purposes only, otherwise this will slow down the
+    // algorithm...
+    auto display = _f_blurred.convert<Rgb8>();
+#else
+    auto display = Image<Rgb8>{};
+#endif
+
+    // Recover the chessboards.
+    _chessboards.clear();
+    while (!square_ids.empty())
+    {
+      // The seed square.
+      const auto square_id = square_ids.front();
+      square_ids.pop();
+      if (is_square_visited[square_id])
+        continue;
+
+      // Grow the chessboard from the seed square.
+      auto cb = grow_chessboard(                    //
+          square_id,                                // Seed square
+          _corners,                                 // Corner locations
+          _squares, edge_ids, squares_adj_to_edge,  // Square graph
+          is_square_visited,                        // Region growing state
+          1.f, display);
+
+      _chessboards.emplace_back(std::move(cb));
+    }
+
+    toc("Chessboard growing");
   }
 
 }  // namespace DO::Sara

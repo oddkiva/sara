@@ -174,6 +174,7 @@ namespace DO::Sara {
 
     //! @brief Grid structure recovery.
     auto parse_squares() -> void;
+    auto grow_chessboards() -> void;
 
     //! @brief The edge detector.
     EdgeDetector _ed;
@@ -239,6 +240,12 @@ namespace DO::Sara {
     //! @{
     SquareSet _black_squares;
     SquareSet _white_squares;
+    //! @}
+
+    //! @brief Chessboards grown from the list of squares.
+    //! @{
+    std::vector<Square> _squares;
+    std::vector<Chessboard> _chessboards;
     //! @}
 
     std::vector<OrderedChessboardCorners> _cb_corners;

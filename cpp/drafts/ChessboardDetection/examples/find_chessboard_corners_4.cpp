@@ -50,7 +50,28 @@ auto draw_corner(sara::ImageView<sara::Rgb8>& display,
             .cast<int>();
     sara::draw_arrow(display, p1.x(), p1.y(), p2.x(), p2.y(), color, thickness);
   }
-};
+}
+
+auto draw_chessboard(sara::ImageView<sara::Rgb8>& display,  //
+                     const sara::Chessboard& cb,
+                     const std::vector<sara::Corner<float>>& corners,
+                     const std::vector<sara::Square>& squares,
+                     const float scale, const sara::Rgb8& color,
+                     const int thickness) -> void
+{
+  for (const auto& row : cb)
+  {
+    for (const auto& sq : row)
+    {
+      if (sq.id == -1)
+        continue;
+      const auto& vertices = squares[sq.id].v;
+      draw_square(display, vertices, corners, scale, sara::White8,
+                  thickness + 1);
+      draw_square(display, vertices, corners, scale, color, thickness);
+    }
+  }
+}
 
 auto __main(int argc, char** argv) -> int
 {
@@ -178,10 +199,25 @@ auto __main(int argc, char** argv) -> int
                     color, 2);
       }
 
-      for (const auto& square : detect._white_squares)
-        sara::draw_square(display, square.v, corners, 1.f, sara::Green8, 5);
-      for (const auto& square : detect._black_squares)
-        sara::draw_square(display, square.v, corners, 1.f, sara::Red8, 5);
+      const auto& chessboards = detect._chessboards;
+      const auto num_chessboards = static_cast<int>(chessboards.size());
+
+      const auto& squares = detect._squares;
+#  pragma omp parallel for
+      for (auto c = 0; c < num_chessboards; ++c)
+      {
+        const auto color =
+            c == 0 ? sara::Red8
+                   : sara::Rgb8(rand() % 255, rand() % 255, rand() % 255);
+        const auto& cb = chessboards[c];
+        draw_chessboard(display, cb, corners, squares, 1.f, color, 5);
+      }
+
+      sara::draw_text(display, 80, 80, "Frame: " + std::to_string(frame_number),
+                      sara::White8, 30, 0, false, true);
+      sara::draw_text(display, 80, 120,
+                      "Chessboards: " + std::to_string(chessboards.size()),
+                      sara::White8, 30, 0, false, true);
 
       sara::display(display);
       if (pause)
