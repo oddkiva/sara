@@ -122,9 +122,9 @@ auto __main(int argc, char** argv) -> int
     // but we work with HD images nowadays...
     if (upscale)
     {
-      detect.radius_factor = 1.3f;
-      detect.corner_endpoint_linking_radius = 5;
-      detect.scale_aa = 1.0f;
+      detect.radius_factor = 1.2f;                // Should be tunable.
+      detect.corner_endpoint_linking_radius = 5;  // Should be tunable.
+      detect.scale_aa = 1.0f;                     // Should be tunable
     }
     else
     {
