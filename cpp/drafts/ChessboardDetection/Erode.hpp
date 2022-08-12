@@ -23,6 +23,8 @@
 
 namespace DO::Sara {
 
+  //! @brief Quick-and-dirty implementation to mimic OpenCV ideas for the
+  //! detection of the chessboard.
   inline auto binary_erode_3x3(const ImageView<std::uint8_t>& src,
                                ImageView<std::uint8_t>& dst) -> void
   {

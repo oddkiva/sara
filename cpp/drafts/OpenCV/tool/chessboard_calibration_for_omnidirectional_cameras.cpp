@@ -428,14 +428,26 @@ int __main(int argc, char** argv)
   auto frame = video_stream.frame();
 
 #if defined(SAMSUNG_GALAXY_J6) || defined(GOPRO4) || defined(IPHONE12)
-  static const auto pattern_size = Eigen::Vector2i{7, 5};
-  static constexpr auto square_size = 3._cm;
+  const auto pattern_size = Eigen::Vector2i{7, 5};
+  const auto square_size = 3._cm;
 #elif defined(GOPRO7_SUPERVIEW)
-  static const auto pattern_size = Eigen::Vector2i{7, 9};
-  static constexpr auto square_size = 2._cm;
+  const auto pattern_size = Eigen::Vector2i{7, 9};
+  const auto square_size = 2._cm;
+#elif defined(LUXVISION_FISHEYE)
+  const auto pattern_size = Eigen::Vector2i{7, 12};
+  const auto square_size = 7._cm;
 #else
-  static const auto pattern_size = Eigen::Vector2i{7, 12};
-  static constexpr auto square_size = 7._cm;
+  if (argc < 5)
+  {
+    std::cerr << "Please specify the number of chessboard corners in each "
+                 "dimension and the square size!"
+              << std::endl;
+    return 1;
+  }
+  const auto rows = std::stoi(argv[2]);
+  const auto cols = std::stoi(argv[3]);
+  const auto pattern_size = Eigen::Vector2i{rows, cols};
+  const auto square_size = sara::Length{static_cast<double>(std::stof(argv[4]))};
 #endif
   auto chessboards = std::vector<sara::OpenCV::Chessboard>{};
 
@@ -470,8 +482,11 @@ int __main(int argc, char** argv)
     if (i % 3 != 0)
       continue;
 
-    // if (selected_frames.size() > 200)
-    //   break;
+    if (i < 200)
+      continue;
+
+    if (selected_frames.size() > 100)
+      break;
 
     sara::tic();
     auto chessboard = sara::OpenCV::Chessboard(pattern_size, square_size.value);

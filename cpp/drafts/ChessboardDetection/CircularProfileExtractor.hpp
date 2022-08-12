@@ -26,6 +26,10 @@ namespace DO::Sara {
     auto operator()(const ImageView<float>& image,
                     const Eigen::Vector2d& center) const -> Eigen::ArrayXf;
 
+    auto operator()(const ImageView<float>& image,
+                    const Eigen::Vector2d& center,  //
+                    const double radius) const -> Eigen::ArrayXf;
+
     int num_circle_sample_points = 36;
     double circle_radius = 10.;
     std::vector<Eigen::Vector2d> circle_sample_points;

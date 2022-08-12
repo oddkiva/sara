@@ -69,6 +69,40 @@ namespace DO::Sara {
     return intensity_profile;
   }
 
+  auto CircularProfileExtractor::operator()(const ImageView<float>& image,
+                                            const Eigen::Vector2d& center,
+                                            const double radius) const
+      -> Eigen::ArrayXf
+  {
+    auto intensity_profile = Eigen::ArrayXf(num_circle_sample_points);
+
+    for (auto n = 0; n < num_circle_sample_points; ++n)
+    {
+      // Use Abeles' spoke pattern, which really helps to filter out non
+      // chessboard x-corners.
+      auto mean_intensity = 0.f;
+      for (auto r = 0; r < static_cast<int>(radius); ++r)
+      {
+        const Eigen::Vector2d pn = center +  //
+                                   radius * circle_sample_points[n];
+        mean_intensity += static_cast<float>(interpolate(image, pn));
+      }
+      mean_intensity /= static_cast<int>(radius);
+      // Get the interpolated intensity value.
+      intensity_profile(n) = mean_intensity;
+    }
+
+    // Normalize the intensities.
+    const auto min_intensity = intensity_profile.minCoeff();
+    const auto max_intensity = intensity_profile.maxCoeff();
+
+    // The intensity treshold is the mid-point value.
+    const auto intensity_threshold = (max_intensity + min_intensity) * 0.5f;
+    intensity_profile -= intensity_threshold;
+
+    return intensity_profile;
+  }
+
   auto localize_zero_crossings(const Eigen::ArrayXf& profile, int num_bins)
       -> std::vector<float>
   {
