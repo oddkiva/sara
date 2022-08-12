@@ -580,6 +580,10 @@ namespace DO::Sara {
       _chessboards.emplace_back(std::move(cb));
     }
 
+    // Sort the chessboards by size.
+    std::sort(_chessboards.rbegin(), _chessboards.rend(),
+              [](const auto& a, const auto& b) { return a.size() < b.size(); });
+
     toc("Chessboard growing");
   }
 
