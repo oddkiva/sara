@@ -110,12 +110,8 @@ namespace DO::Sara {
     const auto& g = _gauss_pyr(0, octave);
 
     // Downscale the image to combat against aliasing.
-#if 0
     const auto scale_inter_delta = std::sqrt(
         square(scale_aa) - square(gaussian_pyramid_params.scale_initial()));
-#else
-    const auto scale_inter_delta = scale_aa;
-#endif
     const auto frame_blurred = g.compute<Gaussian>(scale_inter_delta);
 
     const Eigen::Vector2i sizes_inter =
