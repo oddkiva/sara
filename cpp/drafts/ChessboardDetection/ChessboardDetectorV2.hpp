@@ -134,7 +134,7 @@ namespace DO::Sara {
     inline auto initialize_filter_radius_according_to_scale() -> void
     {
       const auto& scale_initial = gaussian_pyramid_params.scale_initial();
-      const auto& sigma_I = gaussian_pyramid_params.scale_initial();
+      const auto& sigma_I = corner_detection_params.sigma_I;
       corner_endpoint_linking_radius = static_cast<int>(std::round(
           radius_factor * M_SQRT2 * scale_initial * sigma_I / scale_aa));
 
