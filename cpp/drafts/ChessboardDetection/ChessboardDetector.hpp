@@ -84,12 +84,13 @@ namespace DO::Sara {
     //! These are good default parameters and there is little reason to
     //! change them in my experience.
     EdgeDetector::Parameters edge_detection_params = EdgeDetector::Parameters{
-        .high_threshold_ratio = static_cast<float>(4._percent),
-        .low_threshold_ratio = static_cast<float>(2._percent),
-        .angular_threshold = static_cast<float>((10._deg).value),
-        .eps = 0.5,
-        .collapse_threshold = 0.5,
-        .collapse_adaptive = false,
+        static_cast<float>(4._percent),       // high threshold ratio
+        static_cast<float>(2._percent),       // low threshold ratio
+        static_cast<float>((10._deg).value),  // angle tolerance
+        true,                                 // simplify edges?
+        1.,                                   // simplification epsilon
+        2._percent,  // dominant point collapsing threshold
+        false,       // collapse dominant points
     };
 
     //! The default value seems to be a very good value for the analysis
@@ -262,8 +263,7 @@ namespace DO::Sara {
   };
 
 
-  inline auto
-  transpose(const ChessboardDetector::OrderedChessboardCorners& in)
+  inline auto transpose(const ChessboardDetector::OrderedChessboardCorners& in)
       -> ChessboardDetector::OrderedChessboardCorners
   {
     const auto m = in.size();
