@@ -1,0 +1,47 @@
+This approach assumes that we know the camera model, and aims at optimizing the parameters associated to the camera model by exploiting correspondences between the 2D image points and its corresponding 3D scene points of the x-corners of the chessboard.
+
+One task is to detect the chessboard x-corners. As deceptively simple as the chessboard may be, this computer vision task can turn unexpectedly challenging when we are faced with unexpected imaging conditions.
+
+Let us mention a few challenges that really makes the detection of the chessboard hard:
+
+    motion blur
+    dirty camera lens
+    changing lighting conditions as we film the chessboard,
+    dirty or damaged chessboard pattern
+
+All these complicates the design of a reliable chessboard detector.
+
+In this book, I will present my chessboard detection algorithm and my personal recipes that I have employed to detect chessboards reliably.
+
+Alternative chessboard detection algorithms available online: - OpenCV provides one and designed by Vezhnevets et al, and later improved by Scaramuzza, Rufli et al. It can work very well on easy conditions. However, it is not always possible the conditions under which the video data is acquired.This becomes a major issue when business ship software to clients who know very little about computer vision and expect the algorithms to just work.
+
+In challenging lighting conditions, OpenCV’s method will tend to break. Most annoyingly, it requires the chessboard to be visible in full and will not even output a partially detected chessboard. With the default parameters, the chessboard detector becomes slow to the point of being unusable especially when the chessboard is not visible in the images. While we can speed up OpenCV’s algorithm with a faster check option, it will tend to miss the chessboard.
+
+    libcbdetect is designed by Geiger et al. and turns out to be a strong and robust alternative. It it can still fail very badly under challenging conditions.
+    BoofCV also provides a chessboard detection algorithm and outperforms libcbdetect according to Abeles et al.
+
+The motivation to design a new chessboard detector was initially not to depend on OpenCV and I still wanted to investigate myself whether I could come out with a good enough alternative anyways. libcbdetect could have been an excellent choice, unfortunately its GPL-licensing made it a no-go for me. I decided to not use BoofCV since I don’t code in Java.
+
+While OpenCV’s method depends on the adaptive Gaussian thresholding and then localizes the chessboard black squares by morpohological erosion, the other approaches are based on the robust detection of x-corners and then performs a structure recovery via a region growing approach. This is very attractive as they can detect multiple chessboards in the images.
+
+I pursue the latter kind of ideas to localize the corners. This has the advantage of avoiding to perform binary erosion iteratively to localize squares, which can be a tricky process. However it is very convenient to retrieve the black squares and white squares and I have managed to design a greedy method to recover them by filtering the edges and parsing the edges. This will ease the recovery of the grid structure. Instead of relying on the geometric constraints as in Geiger et al. approach, will fail badly to recover the grid structure on tricky cases.
+3.1.1 Chessboard Calibration Method
+
+I have devised a chessboard detection algorithm that is designed to work well on HD resolution and above 4K resolutions, which seems to be the new standard in consumer cameras, without any parameter tuning. For resolution lower than 960x540, we may need to tune only two parameters for better results.
+
+Detecting x-corner can be done via several mathematical operators:
+
+    The traditional approach is to localize local maxima of Harris’s cornerness function.
+    Likewise Forstner cornerness approach will give the strongest response in points that are most orthogonal to local gradients, and is in this regards related to Harris’s cornerness function.
+    Another approach is to view x-corner as a saddle point which the Hessian operator responds as a local minima
+    Geiger et al. suggest to construct template filter which x-corners would respond maximally.
+    Abeles designed a faster corner detector than Harris.
+
+I have decided to stick with Harris’s classical cornerness operator. It is very versatile and also works for deltille based pattern, aka monkey saddle-point. I have found it to be robust and sufficiently accurate if we set the parameters with care.
+3.1.1.1 Recovery of the Grid Structure
+3.1.2 Mathematical Optimization Method
+
+Similar to the bundle adjustment, the mathematical optimization consists in minimizing the reprojection of the 3D points of the chessboard x-corners to the camera image plane.
+
+One first difficulty is to first initialize the pose of the chessboard plane with respect to the camera frame. The initialization of the rotation and position of the chessboard is necessary to avoid the optimizer being stuck in a bad local minimum.
+ 
