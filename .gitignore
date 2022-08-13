@@ -18,12 +18,12 @@ sara_book.log
 _book/
 _bookdown_files/
 
-# Mac crap
-.DS_Store
-
-
-# Project-specific files
+# CMake
 cmake/sara_version.cmake
 compile_commands.json
 
+# GDB
 .gdb_history
+
+# Mac crap
+.DS_Store
