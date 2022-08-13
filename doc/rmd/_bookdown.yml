@@ -12,6 +12,8 @@ rmd_files:
     "features.Rmd",
     "descriptors.Rmd",
     "sfm.Rmd",
+    "calibration.Rmd",
+    "calibration/chessboard_detection.Rmd",
     "imu.Rmd",
     "datasets.Rmd",
     "learning_journeys.Rmd",
