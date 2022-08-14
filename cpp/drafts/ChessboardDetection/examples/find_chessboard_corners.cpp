@@ -223,7 +223,7 @@ auto __main(int argc, char** argv) -> int
                 : sara::Cyan8;
         draw_corner(display,               //
                     corners[c],            //
-                    std::nullopt,          // detect._gradient_peaks_refined[c],
+                    detect._gradient_peaks_refined[c],
                     scale_image,           //
                     detect.radius_factor,  //
                     color, 2);
