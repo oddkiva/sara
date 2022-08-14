@@ -18,7 +18,9 @@ a second moment matrix.
 
 ### Structure Tensor
 
-Formally we define the structure tensor as
+**TODO: fix the formula, since it must be a convolution...**
+
+Formally we define the field of structure tensors as
 
 \begin{equation}
   \mathbf{M} = \begin{bmatrix}
@@ -47,7 +49,18 @@ This form is convenient from an implementation point of view.
 By extracting the eigenvalues and eigenvectors, we can calculate the two
 principal directions of the gradients, that is, those that appears most
 frequently, and then compare the "frequency" ratio between the two principal
-directions
+directions.
+
+If the local patch center on the point is a uniform region. The gradients are
+very small, the covariance matrix should be close to zero.
+
+If the local patch center on the point is on an edge. The covariance matrix
+should correspond to a very elongated ellipse geometrically. The ratio between
+the lowest and highest eigenvalues should be very small.
+
+If the local patch center on the point is on a corner. Then covariance matrix
+should correspond to a large circle. The ratio between the lowest and highest
+eigenvalues should be close to 1.
 
 ### Spiral Model
 
