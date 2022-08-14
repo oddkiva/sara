@@ -432,7 +432,9 @@ namespace DO::Sara {
         {
           // TODO: choose the biggest square that contains everything,
           // there must be no overlap area.
-          std::cerr << "TODO: address ambiguity later..." << std::endl;
+          std::cerr << "TODO: there must be only one adjacent square, please "
+                       "address the ambiguity..."
+                    << std::endl;
           continue;
         }
 
