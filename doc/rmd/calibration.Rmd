@@ -1,4 +1,4 @@
-### Camera Calibration
+# Camera Calibration
 
 The calibration of cameras is an essential task in computer vision. I cannot
 stress enough how important it is in any business involving distance estimation,

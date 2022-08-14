@@ -1,4 +1,4 @@
-# Chessboard Based Calibration
+## Chessboard Based Calibration
 
 This approach assumes that we know the camera model, and aims at optimizing the
 parameters associated to the camera model by exploiting correspondences between
@@ -26,24 +26,27 @@ recipes to robustify the chessboard detection.
 
 Alternative chessboard detection algorithms available online:
 
-- OpenCV provides one and is designed by Vezhnevets et al, and later improved by
-  Scaramuzza, Rufli et al. It can work very well on easy conditions. However, it
-  is not always possible the conditions under which the video data is being
-  acquired. This becomes a major problem when businesses ship software to
-  clients who know very little about computer vision and who then expect the
-  algorithms to just work.
+- `OpenCV` [@opencv] provides a chessboard detection method. Originally designed
+  by [@Vezhnevets] , and later improved by [@RufliSS:2008:iros], it can work
+  very well on easy conditions. However, it is not always possible the
+  conditions under which the video data is being acquired. This becomes a major
+  problem when businesses ship software to clients who know very little about
+  computer vision and who then expect the algorithms to just work.
 
   In challenging lighting conditions, OpenCV’s method will tend to break. Most
   annoyingly, it requires the chessboard to be visible in full and will not even
   output a partially detected chessboard. With the default parameters, the
   chessboard detector becomes slow to the point of being unusable when the
   chessboard is not visible in the images. While we can speed up OpenCV’s
-  algorithm with a faster check option, it will tend to miss the chessboard.
-- libcbdetect is designed by Geiger et al. and turns out to be a strong and
+  algorithm with a faster check option, I have found that the detection rate
+  degrades dramatically.
+
+- `libcbdetect` is designed by [@Geiger:2012:icra] and turns out to be a strong and
   robust alternative. Still the recovery of the grid structure can still fail
   badly under challenging conditions.
-- BoofCV also provides a chessboard detection algorithm and outperforms
-  libcbdetect according to the author of the library Abeles.
+
+- `BoofCV` [@BoofCV] also provides a chessboard detection algorithm
+  [@Abeles:2021:corr] and outperforms `libcbdetect`.
 
 Initially I wanted to design a new chessboard detector in order not to depend on
 `OpenCV` and I still wanted to investigate myself whether I could come out with
@@ -77,7 +80,7 @@ method, they may still fail at correctly recover the grid structure of the
 chessboard.
 
 
-In my approach, I still rely on a good corner detector. By filtering the edges
+My personal approach still relies on corner detection. By filtering the edges
 and parsing them, it is possible to recover both black and white squares of the
 chessboard. This will greatly ease the recovery of the grid structure, which is
 proceeded by region growing as well. Instead of relying on the geometric
@@ -139,17 +142,19 @@ Experimentally I have found three filtering strategies that worked very well at
 weeding out those spurious corners.
 
 In the following order, the three filtering strategies are successively applied.
+
 - A scale-aware non maximum suppression
-- A topological edge filtering
+- A topological edge analysis where:
   1. we employ Canny's edge detector and group edgels into into smooth edge
      curves;
   2. edges with a mean gradient magnitude lower than 0.02 are discarded. This
      has the benefit of keeping relevant edge curves, most of which being
-     edges of a chessboard square.
+     edges of a chessboard square;
   3. corners that are not close to the endpoints of the curves are discarded
-- A circular intensity profile extractor that combines both [Abeles] and [Geiger
-  et al.]'s ideas. The spoke pattern presented by Abeles turns out to be the key
-  idea in order to get a fairly robust corner filtering.
+- A circular intensity profile extractor that combines both [@Abeles:2021:corr]
+  and [@Geiger:2012:icra]'s ideas. The spoke pattern described in
+  [@Abeles:2021:corr] turns out to be the key idea in order to get a fairly
+  robust corner filtering.
 
 #### Square Parsing
 TODO.
