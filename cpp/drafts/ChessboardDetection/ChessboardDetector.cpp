@@ -19,8 +19,6 @@
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/Harris.hpp>
 
-#include <boost/log/trivial.hpp>
-
 
 namespace DO::Sara {
 
