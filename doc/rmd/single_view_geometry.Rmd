@@ -25,6 +25,3 @@ my main concern is that this will become worse.
 In this section I will try to illustrate the main ideas in projective geometry
 and you can then get started on your own by reading more comprehensive reference
 texts.
-
-```{r, child="singleviewgeometry/gaussian_sphere.Rmd"}
-```

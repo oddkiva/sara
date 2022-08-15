@@ -6,8 +6,8 @@ structure tensor.
 In each point of the image, we want to describe its shape locally on a
 small region.
 
-With the structure tensor, we can to classify each of these small regions
-into three categories:
+The structure tensor summarizes the principal gradient directions and enables us
+to classify each of these small regions into three categories:
 
 1. Is it a uniform region?
 2. Is the small region more like an edge? Can we calculate its orientation?
@@ -18,30 +18,51 @@ a second moment matrix.
 
 ### Structure Tensor
 
-**TODO: fix the formula, since it must be a convolution...**
-
 Formally we define the field of structure tensors as
 
 \begin{equation}
-  \mathbf{M} = \begin{bmatrix}
-    \int_\mathbf{x} w(\mathbf{x}) \frac{\partial I(\mathbf{x})}{\partial x}^2 d\mathbf{x}&&
+  \mathbf{M}(\mathbf{x}) = \begin{bmatrix}
+    \displaystyle \int w(\mathbf{x}') \frac{\partial I (\mathbf{x} -
+    \mathbf{x}')}{\partial x}^2 d\mathbf{x'}&&
     %
-    \int_\mathbf{x} w(\mathbf{x})
-    \frac{\partial I(\mathbf{x})}{\partial x} \frac{\partial I(\mathbf{x})}{\partial y} d\mathbf{x}\\
+    \displaystyle \int w(\mathbf{x})
+    \frac{\partial I(\mathbf{x} - \mathbf{x}')}
+         {\partial x}
+    \frac{\partial I(\mathbf{x} - \mathbf{x}')}
+         {\partial y} d\mathbf{x}'\\
     %
-    \int_\mathbf{x} w(\mathbf{x})
-    \frac{\partial I(\mathbf{x})}{\partial x} \frac{\partial I(\mathbf{x})}{\partial y} d\mathbf{x} &&
+    \displaystyle \int w(\mathbf{x}')
+    \frac{\partial I(\mathbf{x} - \mathbf{x}')}
+         {\partial x}
+    \frac{\partial I(\mathbf{x} - \mathbf{x}')}
+         {\partial y} d\mathbf{x}' &&
     %
-    \int_\mathbf{x} w(\mathbf{x}) \frac{\partial I(\mathbf{x})}{\partial y}^2 d\mathbf{x}\\
+    \displaystyle \int w(\mathbf{x}')  \frac{\partial I (\mathbf{x} -
+    \mathbf{x}')}{\partial y}^2 d\mathbf{x'}&&
   \end{bmatrix}
 \end{equation}
 
-We can rewrite this with a bit of linear algebra
+More tersely, in functional notations with the $*$ symbol to denote a
+convolution operation
+\begin{equation}
+  \mathbf{M} = \begin{bmatrix}
+    w * \left( \frac{\partial I}{\partial x} \right)^2 &&
+    %
+    w *
+    \left( \frac{\partial I}{\partial x} \frac{\partial I} {\partial y} \right) \\
+    %
+    w *
+    \left( \frac{\partial I}{\partial x} \frac{\partial I} {\partial y} \right) &&
+    %
+    w *
+    \left( \frac{\partial I}{\partial y} \right)^2
+  \end{bmatrix}
+\end{equation}
+
+With a bit of linear algebra, we can rewrite this as
 
 \begin{equation}
-  \mathbf{M} = \displaystyle \int_\mathbf{x} w(\mathbf{x})
-    \nabla I(\mathbf{x}) \nabla I(\mathbf{x})^T
-    d\mathbf{x}
+  \mathbf{M} = w * \left( \nabla I\ \nabla I^T \right)
 \end{equation}
 
 This form is convenient from an implementation point of view.
@@ -62,6 +83,20 @@ If the local patch center on the point is on a corner. Then covariance matrix
 should correspond to a large circle. The ratio between the lowest and highest
 eigenvalues should be close to 1.
 
+
+We should note that in practice the image is first convolved with a Gaussian
+kernel of standard deviation $\sigma_D$. This is to reduce the aliasing and
+image noise.
+
+\begin{equation}
+  \mathbf{M} = g_{\sigma_I} * \left( \nabla I_{\sigma_D} * \ \nabla I_{\sigma_D}^T \right)
+\end{equation}
+where the convolved image with a gaussian kernel is denoted as
+\begin{equation}
+  I_{\sigma_D} = g_{\sigma_D} * I
+\end{equation}
+
+
 ### Spiral Model
 
 I learnt from [@ForstnerDS:2009:iccv] that the spiral model is an extension of
@@ -69,10 +104,7 @@ the structure tensor. This time, the structure is also parameterized with a 2D
 rotation matrix parameterized by an angle $\alpha$ in the structure tensor.
 
 \begin{equation}
-  \mathbf{M}(\alpha) = \displaystyle \int_\mathbf{x} w(\mathbf{x})
-  \mathbf{R}_\alpha \nabla I(\mathbf{x})
-  \nabla I(\mathbf{x})^T
-  \mathbf{R}_\alpha^T
-  d\mathbf{x}
+  \mathbf{M}(\alpha) = w *
+  \mathbf{R}_\alpha \nabla I \nabla I^T \mathbf{R}_\alpha^T
 \end{equation}
 

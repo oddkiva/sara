@@ -87,7 +87,7 @@ $\bQ$ encode a rotation. This geometric interpretation is illustrated in
 Figure \@ref(fig:qrd).
 
 ```{r qrd, echo=FALSE, fig.align='center', fig.cap="Geometric interpretation of the QR factorization of linear transform matrix $\\bL_x$."}
-knitr::include_graphics(paste0(getwd(), "/../figures/normalizingTransform.png"))
+knitr::include_graphics(paste0(getwd(), "/figures/normalizingTransform.png"))
 ```
 
 Unless $L_x$ involves no rotation, $\bL_x$ is an upper triangular
