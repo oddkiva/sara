@@ -21,12 +21,12 @@ namespace DO::Sara {
   template <typename T>
   struct Corner
   {
-    Eigen::Vector2<T> coords;
+    Eigen::Matrix<T, 2, 1> coords;
     float score;
     float scale;
     int octave;
 
-    inline auto position() const -> const Eigen::Vector2<T>&
+    inline auto position() const -> const Eigen::Matrix<T, 2, 1>&
     {
       return coords;
     }

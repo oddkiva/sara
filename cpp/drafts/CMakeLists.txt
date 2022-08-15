@@ -6,6 +6,7 @@ if (SARA_BUILD_TESTS)
 endif ()
 
 add_subdirectory(ChessboardDetection)
+add_subdirectory(Calibration)
 
 if (NOT WIN32)
   add_subdirectory(Compute)

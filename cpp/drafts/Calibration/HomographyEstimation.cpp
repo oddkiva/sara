@@ -11,10 +11,7 @@
 
 //! @file
 
-#include "OpenCVInterop.hpp"
-
-
-namespace sara = DO::Sara;
+#include <drafts/Calibration/HomographyEstimation.hpp>
 
 
 auto estimate_H(const Eigen::MatrixXd& p1, const Eigen::MatrixXd& p2) -> Eigen::Matrix3d
@@ -38,8 +35,6 @@ auto estimate_H(const Eigen::MatrixXd& p1, const Eigen::MatrixXd& p2) -> Eigen::
     A.row(2 * i + 1) << zero, -yiT, vi * yiT;
   }
 
-  SARA_CHECK(A);
-
   // SVD.
   const auto svd = A.jacobiSvd(Eigen::ComputeFullV);
   const auto V = svd.matrixV();
@@ -55,11 +50,15 @@ auto estimate_H(const Eigen::MatrixXd& p1, const Eigen::MatrixXd& p2) -> Eigen::
   return H;
 }
 
-auto estimate_H(const sara::OpenCV::Chessboard& chessboard) -> Eigen::Matrix3d
+auto estimate_H(const DO::Sara::ChessboardCorners& chessboard) -> Eigen::Matrix3d
 {
   const auto w = chessboard.width();
   const auto h = chessboard.height();
-  const auto N = chessboard.corner_count();
+  const auto N = w * h;
+
+  SARA_CHECK(w);
+  SARA_CHECK(h);
+  SARA_CHECK(N);
 
   auto A = Eigen::MatrixXd{N * 2, 9};
 
@@ -87,7 +86,7 @@ auto estimate_H(const sara::OpenCV::Chessboard& chessboard) -> Eigen::Matrix3d
   // Collect the 3D coordinates on the chessboard plane.
   for (auto y = 0; y < h; ++y)
     for (auto x = 0; x < w; ++x)
-      p2.col(y * w + x) = chessboard.scene_point(x, y).homogeneous().cast<double>();
+      p2.col(y * w + x) = chessboard.scene_point(x, y);
 
   // Form the data matrix used to determine H.
   for (auto i = 0; i < N; ++i)

@@ -22,23 +22,23 @@ Formally we define the field of structure tensors as
 
 \begin{equation}
   \mathbf{M}(\mathbf{x}) = \begin{bmatrix}
-    \displaystyle \int w(\mathbf{x}') \frac{\partial I (\mathbf{x} -
-    \mathbf{x}')}{\partial x}^2 d\mathbf{x'}&&
+    \displaystyle \int w(\mathbf{u}) \left( \frac{\partial I (\mathbf{x} -
+    \mathbf{u})}{\partial x} \right)^2 d\mathbf{u}&&
     %
-    \displaystyle \int w(\mathbf{x})
-    \frac{\partial I(\mathbf{x} - \mathbf{x}')}
+    \displaystyle \int w(\mathbf{u})
+    \frac{\partial I(\mathbf{x} - \mathbf{u})}
          {\partial x}
-    \frac{\partial I(\mathbf{x} - \mathbf{x}')}
+    \frac{\partial I(\mathbf{x} - \mathbf{u})}
          {\partial y} d\mathbf{x}'\\
     %
-    \displaystyle \int w(\mathbf{x}')
-    \frac{\partial I(\mathbf{x} - \mathbf{x}')}
+    \displaystyle \int w(\mathbf{u})
+    \frac{\partial I(\mathbf{x} - \mathbf{u})}
          {\partial x}
-    \frac{\partial I(\mathbf{x} - \mathbf{x}')}
-         {\partial y} d\mathbf{x}' &&
+    \frac{\partial I(\mathbf{x} - \mathbf{u})}
+         {\partial y} d\mathbf{u} &&
     %
-    \displaystyle \int w(\mathbf{x}')  \frac{\partial I (\mathbf{x} -
-    \mathbf{x}')}{\partial y}^2 d\mathbf{x'}&&
+    \displaystyle \int w(\mathbf{u}) \left( \frac{\partial I (\mathbf{x} -
+    \mathbf{u})}{\partial y} \right)^2 d\mathbf{u}&&
   \end{bmatrix}
 \end{equation}
 

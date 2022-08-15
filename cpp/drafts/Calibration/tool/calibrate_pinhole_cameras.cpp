@@ -1,3 +1,18 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2022-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+//! @file
+
+#include <Eigen/Eigen>
+
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -5,11 +20,8 @@
 #include <DO/Sara/MultiViewGeometry/Resectioning/HartleyZisserman.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <drafts/OpenCV/HomographyDecomposition.hpp>
-#include <drafts/OpenCV/HomographyEstimation.hpp>
-
-#include <opencv2/core/eigen.hpp>
-#include <opencv2/opencv.hpp>
+#include <drafts/Calibration/HomographyDecomposition.hpp>
+#include <drafts/Calibration/HomographyEstimation.hpp>
 
 
 namespace sara = DO::Sara;
@@ -66,7 +78,7 @@ public:
     }
   }
 
-  inline auto add(const sara::OpenCV::Chessboard& chessboard,
+  inline auto add(const sara::ChessboardCorners& chessboard,
                   const Eigen::Matrix3d& R, const Eigen::Vector3d& t)
   {
     ++_num_images;
@@ -183,44 +195,45 @@ private:
 };
 
 
-GRAPHICS_MAIN()
+int main(int argc, char** argv)
 {
-  // #define SAMSUNG_GALAXY_J6
-  // #define GOPRO4
-#define IPHONE12
-  // #define GOPRO7_WIDE
-  // #define GOPRO7_SUPERVIEW
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
+}
 
-  const auto video_filepath =
-#if defined(SAMSUNG_GALAXY_J6)
-      "/home/david/Desktop/calibration/samsung-galaxy-j6/chessboard.mp4"
-#elif defined(GOPRO4)
-      "/home/david/Desktop/calibration/gopro-hero4/chessboard.mp4"
-#elif defined(IPHONE12)
-      // "/home/david/Desktop/calibration/iphone12/chessboard.mov"
-      "/home/david/Desktop/calibration/iphone12/IMG_2368.MOV"
-#elif defined(GOPRO7_WIDE)
-      "/home/david/Desktop/calibration/gopro-hero-black-7/wide/GH010052.MP4"
-#elif defined(GOPRO7_SUPERVIEW)
-      "/home/david/Desktop/calibration/gopro-hero-black-7/superview/"
-      "GH010053.MP4"
-#  pragma error "INVALID!"
-#endif
-      ;
+int __main(int argc, char** argv)
+{
+  if (argc < 5)
+  {
+    std::cerr << "Usage: " << argv[0]
+              << " VIDEO_PATH CHESSBOARD_SIZES CHESSBOARD_SQUARE_SIZE_IN_METERS"
+              << std::endl;
+    return 1;
+  }
+  const auto video_filepath = argv[1];
+  const auto pattern_size = Eigen::Vector2i{
+      std::stoi(argv[2]), std::stoi(argv[3])  //
+  };
+  const auto square_size = sara::Length{std::stod(argv[4])};
 
   auto video_stream = sara::VideoStream{video_filepath};
   auto frame = video_stream.frame();
+  auto frame_gray32f = sara::Image<float>{frame.sizes()};
 
-#if defined(SAMSUNG_GALAXY_J6) || defined(GOPRO4) || defined(IPHONE12)
-  // static const auto pattern_size = Eigen::Vector2i{7, 5};
-  // static constexpr auto square_size = 3._cm;
-  static const auto pattern_size = Eigen::Vector2i{19, 13};
-  static constexpr auto square_size = 1.9_cm;
-#elif defined(GOPRO7_WIDE) || defined(GOPRO7_SUPERVIEW)
-  static const auto pattern_size = Eigen::Vector2i{7, 9};
-  static constexpr auto square_size = 2._cm;
-#endif
-  auto chessboards = std::vector<sara::OpenCV::Chessboard>{};
+  auto chessboard_detector = sara::ChessboardDetector{};
+  const auto detect =
+      [&chessboard_detector, square_size](
+          const sara::ImageView<float>& frame) -> sara::ChessboardCorners {
+    const auto& chessboards = chessboard_detector(frame);
+    if (chessboards.empty())
+      return {};
+    const auto& chessboard = *std::max_element(
+        chessboards.rbegin(), chessboards.rend(),
+        [](const auto& a, const auto& b) { return a.size(), b.size(); });
+    return sara::ChessboardCorners{chessboard, square_size};
+  };
+  auto chessboards = std::vector<sara::ChessboardCorners>{};
 
   // Initialize the calibration matrix.
   auto K = init_K(frame.width(), frame.height());
@@ -241,44 +254,43 @@ GRAPHICS_MAIN()
     if (!video_stream.read())
       break;
 
-    if (i % 5 != 0)
+    if (i % 3 != 0)
       continue;
-
-    if (selected_frames.size() > 50)
-      break;
 
     SARA_CHECK(i);
 
     sara::tic();
-    auto chessboard = sara::OpenCV::Chessboard(pattern_size, square_size.value);
-    const auto corners_found = chessboard.detect(frame);
+    auto chessboard = sara::ChessboardCorners{};
+    const auto corners = detect(frame_gray32f);
     sara::toc("Chessboard corner detection");
 
-    if (corners_found)
-    {
-      auto frame_copy = sara::Image<sara::Rgb8>{frame};
-      draw_chessboard(frame_copy, chessboard);
+    if (corners.empty())
+      continue;
 
-      const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
-      auto Rs = std::vector<Eigen::Matrix3d>{};
-      auto ts = std::vector<Eigen::Vector3d>{};
-      auto ns = std::vector<Eigen::Vector3d>{};
+    auto frame_copy = sara::Image<sara::Rgb8>{frame};
+    draw_chessboard(frame_copy, chessboard);
+    sara::display(frame_copy);
+    sara::get_key();
 
-      // This simple approach gives the best results.
-      decompose_H_RQ_factorization(H, K, Rs, ts, ns);
+    const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
+    auto Rs = std::vector<Eigen::Matrix3d>{};
+    auto ts = std::vector<Eigen::Vector3d>{};
+    auto ns = std::vector<Eigen::Vector3d>{};
 
-      calibration_problem.add(chessboard, Rs[0], ts[0]);
+    // This simple approach gives the best results.
+    decompose_H_RQ_factorization(H, K, Rs, ts, ns);
 
-      SARA_DEBUG << "\nRi =\n" << Rs[0] << std::endl;
-      SARA_DEBUG << "\nti =\n" << ts[0] << std::endl;
-      SARA_DEBUG << "\nni =\n" << ns[0] << std::endl;
+    calibration_problem.add(chessboard, Rs[0], ts[0]);
 
-      inspect(frame_copy, chessboard, K, Rs[0], ts[0]);
-      sara::display(frame_copy);
+    SARA_DEBUG << "\nRi =\n" << Rs[0] << std::endl;
+    SARA_DEBUG << "\nti =\n" << ts[0] << std::endl;
+    SARA_DEBUG << "\nni =\n" << ns[0] << std::endl;
 
-      selected_frames.emplace_back(video_stream.frame());
-      chessboards.emplace_back(std::move(chessboard));
-    }
+    inspect(frame_copy, chessboard, K, Rs[0], ts[0]);
+    sara::display(frame_copy);
+
+    selected_frames.emplace_back(video_stream.frame());
+    chessboards.emplace_back(std::move(chessboard));
   }
 
   SARA_DEBUG << "Instantiating Ceres Problem..." << std::endl;
