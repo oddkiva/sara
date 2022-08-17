@@ -480,7 +480,7 @@ namespace DO::Sara {
                    << std::endl;
 #endif
 
-        const auto curr_dirs = curr_sq.dirs;
+        const auto& curr_dirs = curr_sq.dirs;
         auto neighbor_dirs = std::array<Eigen::Vector2f, 4>{};
         for (auto i = 0; i < 4; ++i)
         {
