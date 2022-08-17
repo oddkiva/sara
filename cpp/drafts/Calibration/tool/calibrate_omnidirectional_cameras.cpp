@@ -175,7 +175,6 @@ public:
       for (auto x = 0; x < chessboard.width(); ++x)
       {
         const Eigen::Vector2f image_point = chessboard.image_point(x, y);
-        SARA_CHECK(image_point.transpose());
         _observations_2d.push_back(image_point.x());
         _observations_2d.push_back(image_point.y());
       }
@@ -484,9 +483,6 @@ int __main(int argc, char** argv)
     if (i % 3 != 0)
       continue;
 
-    if (chessboards.size() > 10)
-      break;
-
     sara::tic();
     sara::from_rgb8_to_gray32f(frame, frame_gray32f);
     const auto chessboard = detect(frame_gray32f);
@@ -512,14 +508,11 @@ int __main(int argc, char** argv)
 
       auto frame_copy = sara::Image<sara::Rgb8>{frame};
       draw_chessboard(frame_copy, chessboard);
-      sara::display(frame_copy);
-      sara::get_key();
 
       const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
       auto Rs = std::vector<Eigen::Matrix3d>{};
       auto ts = std::vector<Eigen::Vector3d>{};
       auto ns = std::vector<Eigen::Vector3d>{};
-      SARA_CHECK(H);
 
       // This simple approach gives the best results.
       decompose_H_RQ_factorization(H, camera.K, Rs, ts, ns);

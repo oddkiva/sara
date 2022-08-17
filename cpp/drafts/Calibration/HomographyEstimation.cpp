@@ -86,7 +86,7 @@ auto estimate_H(const DO::Sara::ChessboardCorners& chessboard) -> Eigen::Matrix3
   // Collect the 3D coordinates on the chessboard plane.
   for (auto y = 0; y < h; ++y)
     for (auto x = 0; x < w; ++x)
-      p2.col(y * w + x) = chessboard.scene_point(x, y);
+      p2.col(y * w + x) = chessboard.scene_point(x, y).head(2).homogeneous();
 
   // Form the data matrix used to determine H.
   for (auto i = 0; i < N; ++i)
