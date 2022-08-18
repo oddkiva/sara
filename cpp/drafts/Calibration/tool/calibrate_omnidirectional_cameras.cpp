@@ -465,7 +465,7 @@ int __main(int argc, char** argv)
     if (i % 3 != 0)
       continue;
 
-    if (selected_frames.size() > 40)
+    if (selected_frames.size() > 100)
       break;
 
     sara::tic();
@@ -486,7 +486,7 @@ int __main(int argc, char** argv)
       auto ts = std::vector<Eigen::Vector3d>{};
       auto ns = std::vector<Eigen::Vector3d>{};
 
-#define USE_QR_FACTORIZATION
+// #define USE_QR_FACTORIZATION
 #ifdef USE_QR_FACTORIZATION
       // This simple approach gives the best results.
       const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
