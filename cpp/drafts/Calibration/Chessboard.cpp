@@ -69,6 +69,8 @@ namespace DO::Sara {
       {
         c0 = c1;
         c1 = corners.image_point(x, y);
+        if (is_nan(c0) || is_nan(c1))
+          continue;
         draw_circle(image, c1, 3.f, color, 2);
 
         if (x == 0 && y == 0)

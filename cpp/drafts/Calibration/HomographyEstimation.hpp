@@ -16,6 +16,7 @@
 #include <drafts/Calibration/Chessboard.hpp>
 
 
+//! @brief Estimate the homography using the Direct Linear Transform method.
 auto estimate_H(const Eigen::MatrixXd& p1, const Eigen::MatrixXd& p2)
     -> Eigen::Matrix3d;
 

@@ -19,10 +19,11 @@
 namespace DO::Sara {
 
 
-  inline auto is_nan(const Eigen::Vector2f& x) -> bool
+  template <typename T, int M, int N>
+  inline auto is_nan(const Eigen::Matrix<T, M, N>& x) -> bool
   {
-    return std::any_of(x.data(), x.data() + 2,
-                       [](const float x) { return std::isnan(x); });
+    return std::any_of(x.data(), x.data() + x.size(),
+                       [](const T& x) { return std::isnan(x); });
   }
 
   class ChessboardCorners

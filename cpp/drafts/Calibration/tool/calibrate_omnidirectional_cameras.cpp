@@ -26,8 +26,6 @@
 
 namespace sara = DO::Sara;
 
-using sara::operator""_cm;
-
 
 // This seems to work well...
 static inline auto init_K(int w, int h) -> Eigen::Matrix3d
@@ -137,22 +135,6 @@ public:
     _intrinsics[9] = xi;
   }
 
-  inline auto initialize_obs_3d(int w, int h, double square_size) -> void
-  {
-    _w = w;
-    _h = h;
-    _num_corners = w * h;
-
-    for (auto y = 0; y < h; ++y)
-    {
-      for (auto x = 0; x < w; ++x)
-      {
-        _observations_3d.push_back(x * square_size);
-        _observations_3d.push_back(y * square_size);
-      }
-    }
-  }
-
   inline auto add(const sara::ChessboardCorners& chessboard,
                   const Eigen::Matrix3d& R, const Eigen::Vector3d& t)
   {
@@ -170,15 +152,26 @@ public:
       _extrinsics.push_back(t(i));
 
     // Store the image points.
+    auto num_points = 0;
+    const auto& square_size = chessboard.square_size().value;
     for (auto y = 0; y < chessboard.height(); ++y)
     {
       for (auto x = 0; x < chessboard.width(); ++x)
       {
         const Eigen::Vector2f image_point = chessboard.image_point(x, y);
+        if (sara::is_nan(image_point))
+          continue;
         _observations_2d.push_back(image_point.x());
         _observations_2d.push_back(image_point.y());
+
+        _observations_3d.push_back(x * square_size);
+        _observations_3d.push_back(y * square_size);
+
+        ++num_points;
       }
     }
+
+    _num_points_at_image.push_back(num_points);
   }
 
   inline auto obs_2d() const -> const double*
@@ -225,32 +218,25 @@ public:
   inline auto transform_into_ceres_problem(ceres::Problem& problem) -> void
   {
     auto loss_fn = nullptr;  // new ceres::HuberLoss{1.0};
+    auto data_pos = std::size_t{};
     for (auto n = 0; n < _num_images; ++n)
     {
-      for (auto y = 0; y < _h; ++y)
+      const auto& num_points = _num_points_at_image[n];
+      for (auto p = 0; p < num_points; ++p)
       {
-        for (auto x = 0; x < _w; ++x)
-        {
-          const auto corner_index = y * _w + x;
-          const auto index = n * _num_corners + corner_index;
+        const Eigen::Vector2d image_point = Eigen::Map<const Eigen::Vector2d>(
+            _observations_2d.data() + data_pos);
+        const Eigen::Vector2d scene_point = Eigen::Map<const Eigen::Vector2d>(
+            _observations_3d.data() + data_pos);
 
-          const auto image_x =
-              static_cast<double>(_observations_2d[2 * index + 0]);
-          const auto image_y =
-              static_cast<double>(_observations_2d[2 * index + 1]);
-          const auto scene_x =
-              static_cast<double>(_observations_3d[2 * corner_index + 0]);
-          const auto scene_y =
-              static_cast<double>(_observations_3d[2 * corner_index + 1]);
+        auto cost_function =
+            sara::OmnidirectionalCameraReprojectionError::create(image_point,
+                                                                 scene_point);
 
-          auto cost_function =
-              sara::OmnidirectionalCameraReprojectionError::create(  //
-                  Eigen::Vector2d{image_x, image_y},                 //
-                  Eigen::Vector2d{scene_x, scene_y});
+        problem.AddResidualBlock(cost_function, loss_fn,  //
+                                 mutable_intrinsics(), mutable_extrinsics(n));
 
-          problem.AddResidualBlock(cost_function, loss_fn,  //
-                                   mutable_intrinsics(), mutable_extrinsics(n));
-        }
+        data_pos += 2;
       }
     }
 
@@ -341,72 +327,71 @@ public:
     camera.xi = xi;
   }
 
-  inline auto reinitialize_extrinsic_parameters(
-      const sara::OmnidirectionalCamera<double>& camera,
-      const std::vector<sara::Image<sara::Rgb8>>& selected_frames,
-      const std::vector<sara::ChessboardCorners>& chessboards) -> void
+  inline auto reinitialize_extrinsic_parameters() -> void
   {
-    if (chessboards.size() != static_cast<std::size_t>(_num_images) ||
-        chessboards.front().corner_count() != _w * _h)
-      throw std::runtime_error{
-          "Chessboard and calibration data sizes are not equal!"};
+    throw std::runtime_error{"Implementation incomplete!"};
+
+    const auto to_camera =
+        [](const double*) -> sara::OmnidirectionalCamera<double> { return {}; };
+    const auto camera = to_camera(_intrinsics.data());
+
+    auto data_pos = std::size_t{};
 
     for (auto image_index = 0; image_index < _num_images; ++image_index)
     {
-      auto frame_copy = selected_frames[image_index];
-      const auto& chessboard = chessboards[image_index];
-
-      auto p2ns = Eigen::MatrixXd{3, chessboard.corner_count()};
-      auto p3s = Eigen::MatrixXd{3, chessboard.corner_count()};
+      const auto& num_points = _num_points_at_image[image_index];
+      auto p2ns = Eigen::MatrixXd{3, num_points};
+      auto p3s = Eigen::MatrixXd{3, num_points};
 
       auto c = 0;
       for (auto y = 0; y < _h; ++y)
       {
         for (auto x = 0; x < _w; ++x)
         {
-          const Eigen::Vector2d p2 =
-              chessboard.image_point(x, y).cast<double>();
+          const Eigen::Vector2d p2 = Eigen::Map<const Eigen::Vector2d>(
+              _observations_2d.data() + data_pos);
+
+          const Eigen::Vector3d p3 = Eigen::Map<const Eigen::Vector2d>(
+                                         _observations_2d.data() + data_pos)
+                                         .homogeneous();
+
           const Eigen::Vector3d ray = camera.backproject(p2);
           const Eigen::Vector2d p2n = ray.hnormalized();
 
-          const Eigen::Vector2d p3 = chessboard.scene_point(x, y).head(2);
-
           p2ns.col(c) << p2n, 1;
-          p3s.col(c) << p3, 1;
+          p3s.col(c) = p3;
 
           ++c;
+          data_pos += 2;
         }
       }
 
-      // const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
-      // auto Rs = std::vector<Eigen::Matrix3d>{};
-      // auto ts = std::vector<Eigen::Vector3d>{};
-      // auto ns = std::vector<Eigen::Vector3d>{};
-
-      // // This simple approach gives the best results.
-      // decompose_H_RQ_factorization(H, camera.K, Rs, ts, ns);
+      // TODO: reestimate the extrinsics with the PnP algorithm.
 
       auto extrinsics = mutable_extrinsics(image_index);
       auto angle_axis_ptr = extrinsics;
       auto translation_ptr = extrinsics + 3;
 
-      // const auto angle_axis = Eigen::AngleAxisd{Rs.front()};
-      // const auto& angle = angle_axis.angle();
-      // const auto& axis = angle_axis.axis();
+#if 0
+      const auto angle_axis = Eigen::AngleAxisd{Rs.front()};
+      const auto& angle = angle_axis.angle();
+      const auto& axis = angle_axis.axis();
+#else
       for (auto k = 0; k < 3; ++k)
         angle_axis_ptr[k] = 0;  // angle * axis(k);
 
       for (auto k = 0; k < 3; ++k)
         translation_ptr[k] = 0;  // ts.front()(k);
+#endif
     }
   }
 
 private:
   int _w = 0;
   int _h = 0;
-  int _num_corners = 0;
   int _num_images = 0;
 
+  std::vector<int> _num_points_at_image;
   std::vector<double> _observations_2d;
   std::vector<double> _observations_3d;
   std::array<double, intrinsic_parameter_count> _intrinsics;
@@ -468,9 +453,6 @@ int __main(int argc, char** argv)
   calibration_problem.initialize_intrinsics(
       camera.K, camera.radial_distortion_coefficients,
       camera.tangential_distortion_coefficients, camera.xi);
-  calibration_problem.initialize_obs_3d(pattern_size.x(), pattern_size.y(),
-                                        square_size.value);
-
 
   auto selected_frames = std::vector<sara::Image<sara::Rgb8>>{};
   sara::create_window(frame.sizes());
@@ -483,45 +465,43 @@ int __main(int argc, char** argv)
     if (i % 3 != 0)
       continue;
 
+    if (selected_frames.size() > 40)
+      break;
+
     sara::tic();
     sara::from_rgb8_to_gray32f(frame, frame_gray32f);
     const auto chessboard = detect(frame_gray32f);
     sara::toc("Chessboard corner detection");
 
-    const auto is_clean_and_complete =
-        [&pattern_size](const sara::ChessboardCorners& corners) {
-          if (corners.sizes() != pattern_size)
-            return false;
-          for (auto y = 0; y < corners.height(); ++y)
-            for (auto x = 0; x < corners.width(); ++x)
-              if (sara::is_nan(corners.image_point(x, y)))
-                return false;
-          return true;
-        };
-
-    if (is_clean_and_complete(chessboard))
+    const auto total_count = pattern_size.x() * pattern_size.y();
+    const auto minimum_count = total_count / 3;
+    if (chessboard.corner_count() > minimum_count)
     {
-      SARA_DEBUG << "Chessboard CLEAN AND COMPLETE!\n";
-      SARA_CHECK(chessboard.sizes().transpose());
-      if (chessboard.actual_sizes().has_value())
-        SARA_CHECK(chessboard.actual_sizes()->transpose());
+      SARA_DEBUG << "Chessboard found!\n";
 
       auto frame_copy = sara::Image<sara::Rgb8>{frame};
       draw_chessboard(frame_copy, chessboard);
 
-      const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
       auto Rs = std::vector<Eigen::Matrix3d>{};
       auto ts = std::vector<Eigen::Vector3d>{};
       auto ns = std::vector<Eigen::Vector3d>{};
 
+#define USE_QR_FACTORIZATION
+#ifdef USE_QR_FACTORIZATION
       // This simple approach gives the best results.
+      const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
       decompose_H_RQ_factorization(H, camera.K, Rs, ts, ns);
-
-      calibration_problem.add(chessboard, Rs[0], ts[0]);
+#else
+      Rs = {Eigen::Matrix3d::Identity()};
+      ts = {Eigen::Vector3d::Zero()};
+      ns = {Eigen::Vector3d::Zero()};
+#endif
 
       SARA_DEBUG << "\nR =\n" << Rs[0] << std::endl;
       SARA_DEBUG << "\nt =\n" << ts[0] << std::endl;
       SARA_DEBUG << "\nn =\n" << ns[0] << std::endl;
+
+      calibration_problem.add(chessboard, Rs[0], ts[0]);
 
       inspect(frame_copy, chessboard, camera.K, Rs[0], ts[0]);
       sara::draw_text(frame_copy, 80, 80, "Chessboard: FOUND!", sara::White8,
