@@ -31,6 +31,15 @@ namespace DO::Sara {
     return x_shuffled;
   }
 
+  template <typename T>
+  inline auto shuffle(const TensorView_<T, 1>& x) -> Tensor_<T, 1>
+  {
+    auto rd = std::random_device{};
+    auto g = std::mt19937{rd()};
+    return shuffle(x, g);
+  }
+
+
   template <typename T, typename RandomGenerator>
   inline auto sample(const TensorView_<T, 1>& x, const int sample_size,
                      RandomGenerator& g) -> Tensor_<T, 1>
