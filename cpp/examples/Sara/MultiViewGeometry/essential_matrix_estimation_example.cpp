@@ -10,6 +10,7 @@
 // ========================================================================== //
 
 //! @example
+//! This program parses Strecha's datasets.
 
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -68,16 +69,11 @@ int __main(int argc, char** argv)
 
   // Load images.
   print_stage("Loading images...");
-  const auto data_dir =
-#ifdef __APPLE__
-      // "/Users/david/Desktop/Datasets/sfm/fountain_int"s;
-      "/Users/david/Desktop/Datasets/sfm/castle_int"s;
-#else
-      // "/home/david/Desktop/Datasets/sfm/fountain_int"s;
-      "/home/david/Desktop/Datasets/sfm/castle_int"s;
-#endif
-  const auto image_id1 = std::string{argv[1]};  // "0005"s;
-  const auto image_id2 = std::string{argv[2]};  // "0004"s;
+  const auto data_dir = argc < 2
+                            ? "/Users/david/Desktop/Datasets/sfm/castle_int"s
+                            : std::string{argv[1]};
+  const auto image_id1 = std::string{argv[2]};
+  const auto image_id2 = std::string{argv[3]};
   views.image_paths = {
       data_dir + "/" + image_id1 + ".png",
       data_dir + "/" + image_id2 + ".png",
@@ -114,7 +110,7 @@ int __main(int argc, char** argv)
 
 
   print_stage("Matching keypoints...");
-  const auto sift_nn_ratio = argc < 6 ? 0.6f : std::stof(argv[5]);
+  const auto sift_nn_ratio = argc < 7 ? 0.6f : std::stof(argv[6]);
   epipolar_edges.matches = {
       match(views.keypoints[0], views.keypoints[1], sift_nn_ratio)};
   const auto& matches = epipolar_edges.matches[0];
@@ -147,8 +143,8 @@ int __main(int argc, char** argv)
   auto estimator = NisterFivePointAlgorithm{};
   auto distance = EpipolarDistance{};
   {
-    num_samples = argc < 4 ? 200 : std::stoi(argv[3]);
-    err_thres = argc < 5 ? 1e-3 : std::stod(argv[4]);
+    num_samples = argc < 5 ? 200 : std::stoi(argv[4]);
+    err_thres = argc < 6 ? 1e-3 : std::stod(argv[5]);
     std::tie(E, inliers, sample_best) =
         ransac(M, un[0], un[1], estimator, distance, num_samples, err_thres);
     E.matrix() = E.matrix().normalized();
@@ -229,6 +225,8 @@ int __main(int argc, char** argv)
 
     auto color = Rgb8{};
     color << 0, 0, int(linear(depth) * 255);
+    if (depth < 0)
+      color = Red8; // Highlight where the problem is...
     fill_circle(ui.x(), ui.y(), 5, color);
     millisleep(1);
   }

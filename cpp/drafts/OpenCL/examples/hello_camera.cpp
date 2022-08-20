@@ -601,7 +601,6 @@ int main()
                    static_cast<GLsizei>(checkerboard.triangles.size()),
                    GL_UNSIGNED_INT, 0);
 
-
     // Rotate the point cloud.
     transform.rotate(AngleAxisf(
         static_cast<float>(std::pow(1.5, 5) * time.last_frame / 10000),
