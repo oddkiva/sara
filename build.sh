@@ -66,7 +66,7 @@ function build_library()
   if [[ "${platform_name}" == "Darwin" ]]; then
     cmake_options+="-DCMAKE_Swift_COMPILER=$(which swiftc) "
   elif [[ "${platform_name}" == "Linux" ]]; then
-    SWIFTC_PATH="${HOME}/opt/swift-5.5.1-RELEASE-ubuntu20.04/usr/bin/swiftc"
+    SWIFTC_PATH="${HOME}/opt/swift-5.6.2-RELEASE-ubuntu20.04/usr/bin/swiftc"
     if [ -f "${SWIFTC_PATH}" ]; then
       cmake_options+="-DCMAKE_Swift_COMPILER=${SWIFTC_PATH} "
     fi

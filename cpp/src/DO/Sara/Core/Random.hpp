@@ -22,17 +22,6 @@
 
 namespace DO::Sara {
 
-  template <typename T>
-  inline auto shuffle(const TensorView_<T, 1>& x) -> Tensor_<T, 1>
-  {
-    auto rd = std::random_device{};
-    auto g = std::mt19937{rd()};
-
-    auto x_shuffled = x;
-    std::shuffle(x_shuffled.begin(), x_shuffled.end(), g);
-    return x_shuffled;
-  }
-
   template <typename T, typename RandomGenerator>
   inline auto shuffle(const TensorView_<T, 1>& x, RandomGenerator& g)
       -> Tensor_<T, 1>
@@ -40,6 +29,15 @@ namespace DO::Sara {
     auto x_shuffled = x;
     std::shuffle(x_shuffled.begin(), x_shuffled.end(), g);
     return x_shuffled;
+  }
+
+  template <typename T, typename RandomGenerator>
+  inline auto sample(const TensorView_<T, 1>& x, const int sample_size,
+                     RandomGenerator& g) -> Tensor_<T, 1>
+  {
+    auto x_sampled = Tensor_<T, 1>{sample_size};
+    std::sample(x.begin(), x.end(), sample_size, g);
+    return x_sampled;
   }
 
   DO_SARA_EXPORT

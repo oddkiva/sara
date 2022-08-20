@@ -38,9 +38,10 @@ namespace DO::Sara {
     using DataPoints = TensorView_<Real, 2>;
     using Model = typename MinimalSolver::Model;
 
+    InlierPredicate inlier_predicate;
+
     auto operator()(const DataPoints& p1,  //
                     const DataPoints& p2,  //
-                    Real threshold,        //
                     int num_samples)       //
         -> std::tuple<Model, Tensor_<bool, 1>, Tensor_<int, 1>>
     {
@@ -56,7 +57,7 @@ namespace DO::Sara {
       // M = list of matches.
       const auto card_M = p1.cols();
 
-      if (card_M < Estimator::num_points)
+      if (card_M < MinimalSolver::num_points)
         throw std::runtime_error{"Not enough matches!"};
 
       // S is the list of N groups of L matches drawn randomly.
