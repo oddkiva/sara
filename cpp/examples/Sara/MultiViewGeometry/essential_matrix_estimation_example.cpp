@@ -60,7 +60,7 @@ int main(int argc, char** argv)
   return app.exec();
 }
 
-int __main(int, char** argv)
+int __main(int argc, char** argv)
 {
   // Use the following data structure to load images, keypoints, camera
   // parameters.
@@ -100,7 +100,7 @@ int __main(int, char** argv)
 
 
   print_stage("Computing keypoints...");
-  const auto image_pyr_params = ImagePyramidParams(0);
+  const auto image_pyr_params = ImagePyramidParams(-1);
   views.keypoints = {compute_sift_keypoints(views.images[0].convert<float>(),
                                             image_pyr_params),
                      compute_sift_keypoints(views.images[1].convert<float>(),
@@ -114,7 +114,9 @@ int __main(int, char** argv)
 
 
   print_stage("Matching keypoints...");
-  epipolar_edges.matches = {match(views.keypoints[0], views.keypoints[1])};
+  const auto sift_nn_ratio = argc < 6 ? 0.6f : std::stof(argv[5]);
+  epipolar_edges.matches = {
+      match(views.keypoints[0], views.keypoints[1], sift_nn_ratio)};
   const auto& matches = epipolar_edges.matches[0];
 
 
@@ -145,8 +147,8 @@ int __main(int, char** argv)
   auto estimator = NisterFivePointAlgorithm{};
   auto distance = EpipolarDistance{};
   {
-    num_samples = 200;
-    err_thres = 1e-3;
+    num_samples = argc < 4 ? 200 : std::stoi(argv[3]);
+    err_thres = argc < 5 ? 1e-3 : std::stod(argv[4]);
     std::tie(E, inliers, sample_best) =
         ransac(M, un[0], un[1], estimator, distance, num_samples, err_thres);
     E.matrix() = E.matrix().normalized();
