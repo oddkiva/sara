@@ -98,11 +98,6 @@ function build_library()
   cmake_options+="-DSARA_BUILD_TESTS:BOOL=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES:BOOL=ON "
 
-  # Compile OpenCV code.
-  if [ "${platform_name}" == "Linux" ]; then
-    cmake_options+="-DSARA_USE_OPENCV:BOOL=ON "
-  fi
-
   # Compile Halide code.
   cmake_options+="-DSARA_USE_HALIDE:BOOL=ON "
   if [ "${platform_name}" == "Linux" ]; then
@@ -117,9 +112,6 @@ function build_library()
   fi
 
   cmake_options+="-DCMAKE_PREFIX_PATH=${my_cmake_prefix_paths} "
-
-  # Use OpenCV tools
-  cmake_options+="-DSARA_USE_OPENCV:BOOL=ON"
 
   echo $(which cmake)
   echo $(cmake --version)

@@ -1,3 +1,7 @@
+if (NOT SARA_BUILD_VIDEOIO)
+  return ()
+endif ()
+
 macro(sara_add_example example)
   add_executable(${example} ${example}.cpp)
   set_target_properties(${example} PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS})

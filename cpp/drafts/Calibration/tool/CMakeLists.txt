@@ -1,3 +1,7 @@
+if (NOT SARA_BUILD_VIDEOIO)
+  return ()
+endif ()
+
 file(GLOB SOURCE_FILES FILES *.cpp)
 
 foreach(file ${SOURCE_FILES})
