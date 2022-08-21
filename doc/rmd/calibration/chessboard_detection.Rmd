@@ -104,7 +104,7 @@ Detecting x-corner can be done via several mathematical operators:
   points that are most orthogonal to local gradients, and is in this regards
   related to Harris’s cornerness function.
 - Another approach is to view x-corner as a saddle point which the Hessian
-  operator responds as a local minima Geiger et al. suggest to construct
+  operator responds as a local minima [@Geiger:2012:icra] suggest to construct
   template filter which x-corners would respond maximally.
 - Abeles designed a faster corner detector than Harris.
 
@@ -117,11 +117,19 @@ set the detection parameters with care. As the localization of corners are
 quantized, we polish their location using Forstner junction refinement method,
 similarly to all available chessboard detection methods.
 
-As [Abeles] advocated it, a multiscale corner detector is the best way to detect
-chessboard corners robustly agains blur. As illustrated in his report [Abeles],
-BoofCV detects chessboard corners across 4 different scales. Geiger et al. also
-do the same but limited themselves to only 2 scales, which is one of the
-reasons why Abeles's method was able to outperform [Geiger et al.].
+As [@Abeles:2021:corr] advocated it, a multiscale corner detector is the best
+way to detect chessboard corners robustly agains blur. As illustrated in his
+report [@Abeles:2021:corr], BoofCV detects chessboard corners across 4 different
+scales. Geiger et al. also do the same but limited themselves to only 2 scales,
+which is one of the reasons why [@Abeles:2021:corr]'s method was able to outperform
+[@Geiger:2012:icra]. In terms of speed, the method [@Abeles:2021:corr] is implemented in
+Java is faster than the original MATLAB implementation libcbdetect. However,
+there exists an unofficial OpenCV C++ implementation available on GitHub:
+[https://github.com/ftdlyc/libcbdetect], so it may be worth comparing it
+again.^[No, no, no, don't count on me on doing it, I don't care and don't have
+time. Anyways all comparative tests are designed to be misleading and at some
+point I would try to claim that my algorithmic approach is better and bla bla
+bla... :P.]
 
 In my approach, I do the same and detect corners at 3 different scales by
 default. This gives good results in my experience and is sufficient
@@ -167,4 +175,12 @@ TODO.
 
 Similar to the bundle adjustment, the mathematical optimization consists in minimizing the reprojection of the 3D points of the chessboard x-corners to the camera image plane.
 
-One first difficulty is to first initialize the pose of the chessboard plane with respect to the camera frame. The initialization of the rotation and position of the chessboard is necessary to avoid the optimizer being stuck in a bad local minimum.
+One first difficulty is to first initialize the pose of the chessboard plane
+with respect to the camera frame. The initialization of the rotation and
+position of the chessboard turn out to be critical to avoid the optimizer being
+stuck in a bad local minimum.
+
+We can employ a couple heuristics to identify images where the chessboard pose
+is close to the identity, to ensure a good guess of the intrinsic parameters.
+Once we have more confidence about the intrisic parameters, we can employ one
+proven PnP algorithm to better initialize the pose of the chessboard.

@@ -151,8 +151,9 @@ To calculate $\mathbf{R}$, let us consider three direction vectors
 \end{equation}
 
 As a gentle reminder, these direction vectors are the left part of Equation
-\@ref(eq:pnp-distance-equality). Since we know the scale quantities $\lambda_i$
-are known, they are also fully determined. Furthermore because we know that
+\@ref(eq:pnp-distance-equality). Since the scale quantities $\lambda_i$ are
+known, the vector quantities $\mathbf{z}_{ij}$ are also fully determined.
+Furthermore because we know that
 
 \begin{equation}
   \lambda_i \mathbf{y}_i = \mathbf{R} \mathbf{x}_i + \mathbf{t},
