@@ -200,8 +200,8 @@ composed in the following order:
 2. Pitch about the **current** $y'$-axis of the airplane by an angle $\theta$,
 3. Roll about the **current** $x''$-axis of the airplane by an angle $\phi$
 
-Once again let us stress the order to which we apply each elementary rotation is
-very important.
+Once again let us stress that the order to which we apply each elementary
+rotation is very important.
 
 ### Formula of Elementary Rotations
 
