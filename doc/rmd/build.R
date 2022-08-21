@@ -1,3 +1,3 @@
 #!/usr/bin/env Rscript
-bookdown::render("index.Rmd")
+bookdown::render_book("index.Rmd")
 bookdown::serve_book()

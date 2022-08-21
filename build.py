@@ -106,6 +106,13 @@ def test(build_dir: str):
                            cwd=build_dir).wait()
     return ret
 
+def build_rmd_book():
+    ret = subprocess.Popen(['Rscript', 'build.R'],
+                           cwd=SARA_SOURCE_DIR / "doc" / "rmd").wait()
+    return ret
+
 # generate_project(SARA_SOURCE_DIR, SARA_BUILD_DIR, True)
 # build(SARA_BUILD_DIR)
-test(SARA_BUILD_DIR)
+# test(SARA_BUILD_DIR)
+
+build_rmd_book()
