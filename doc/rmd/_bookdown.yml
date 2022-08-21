@@ -14,7 +14,7 @@ rmd_files:
     "features/structure_tensor.Rmd",
     "features/locally_invariant_regions.Rmd",
     "features/normalizing_feature_transform.Rmd",
-    # "descriptors.Rmd",
+    "descriptors.Rmd",
     # "sfm.Rmd",
     # "calibration.Rmd",
     # "calibration/chessboard_detection.Rmd",
