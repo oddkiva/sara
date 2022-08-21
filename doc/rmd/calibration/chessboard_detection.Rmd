@@ -118,7 +118,7 @@ quantized, we polish their location using Forstner junction refinement method,
 similarly to all available chessboard detection methods.
 
 As [@Abeles:2021:corr] advocated it, a multiscale corner detector is the best
-way to detect chessboard corners robustly agains blur. As illustrated in his
+way to detect chessboard corners robustly against blur. As illustrated in his
 report [@Abeles:2021:corr], BoofCV detects chessboard corners across 4 different
 scales. Geiger et al. also do the same but limited themselves to only 2 scales,
 which is one of the reasons why [@Abeles:2021:corr]'s method was able to outperform

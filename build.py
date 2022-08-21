@@ -32,6 +32,13 @@ except:
     PYBIND11_DIR = None
 
 
+def infer_project_type(system: str):
+    if system == "Linux":
+        return "Ninja"
+    elif system == "Darwin":
+        return "Xcode"
+
+
 def generate_project(source_dir: str,
                      build_dir: str,
                      build_type: str,
@@ -44,7 +51,8 @@ def generate_project(source_dir: str,
 
     cmake_options = []
     cmake_options.append('-D CMAKE_BUILD_TYPE={}'.format(build_type))
-    cmake_options.append('-G Ninja')
+    cmake_options.append('-G {}'.format(infer_project_type(SYSTEM))
+
     if SYSTEM == "Linux":
         cmake_options.append("-D CMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold")
 
