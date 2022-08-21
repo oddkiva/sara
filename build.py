@@ -4,6 +4,7 @@ import pathlib
 import platform
 import shutil
 import subprocess
+import sys
 
 
 # Build tasks
@@ -23,6 +24,7 @@ if SYSTEM == "Linux":
     NVIDIA_CODEC_SDK_ROOT_PATH = pathlib.Path.home() / "opt/Video_Codec_SDK_11.0.10"
     SWIFTC_PATH= pathlib.Path.home() / "opt/swift-5.6.2-RELEASE-ubuntu20.04/usr/bin/swiftc"
 elif SYSTEM == "Darwin":
+    NVIDIA_CODEC_SDK_ROOT_PATH = None
     SWIFT_PATH = subprocess.check_output(["which", "swift"])
 
 try:
@@ -54,8 +56,10 @@ def generate_project(source_dir: str,
         pathlib.Path.mkdir(build_dir)
 
     cmake_options = []
-    cmake_options.append('-D CMAKE_BUILD_TYPE={}'.format(build_type))
-    cmake_options.append('-G {}'.format(infer_project_type(SYSTEM))
+    project_type = infer_project_type(SYSTEM)
+    cmake_options.append('-G {}'.format(project_type))
+    if project_type != "Xcode":
+        cmake_options.append('-D CMAKE_BUILD_TYPE={}'.format(build_type))
 
     if SYSTEM == "Linux":
         cmake_options.append("-D CMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold")
@@ -65,10 +69,12 @@ def generate_project(source_dir: str,
 
     # Use latest Qt version instead of the system Qt.
     cmake_options.append("-D SARA_USE_QT6:BOOL=ON")
+    my_cmake_prefix_paths = []
     if SYSTEM == "Linux":
-        my_cmake_prefix_paths = ["/usr/local/Qt-6.3.1"]
+        my_cmake_prefix_paths.append("/usr/local/Qt-6.3.1")
     elif SYSTEM == "Darwin":
         qt6_root_dir = subprocess.check_output(["brew", "--prefix", "qt"])
+        qt6_root_dir = qt6_root_dir.decode(sys.stdout.encoding).strip()
         qt6_cmake_dir = pathlib.Path(qt6_root_dir) / "lib" / "cmake" / "Qt6"
         cmake_options.append("-D Qt6_DIR={}".format(qt6_cmake_dir))
 
@@ -85,16 +91,23 @@ def generate_project(source_dir: str,
     if SYSTEM == "Linux" and HALIDE_ROOT_PATH.exists():
         my_cmake_prefix_paths.append(HALIDE_ROOT_PATH)
     elif SYSTEM == "Darwin":
-        cmake_options.append("-D LLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm ")
+        llvm_dir = subprocess.check_output(["brew", "--prefix", "llvm"])
+        llvm_dir = llvm_dir.decode(sys.stdout.encoding).strip()
+        llvm_cmake_dir = pathlib.Path(llvm_dir) / "lib" / "cmake" / "llvm"
+        cmake_options.append("-D LLVM_DIR={}".format(llvm_cmake_dir))
 
     # Compile nVidia platform's accelerated VideoIO.
-    if pathlib.Path(NVIDIA_CODEC_SDK_ROOT_PATH).exists():
-        cmake_options.append("-D NvidiaVideoCodec_ROOT={}".format(NVIDIA_CODEC_SDK_ROOT_PATH))
+    if (NVIDIA_CODEC_SDK_ROOT_PATH is not None and
+            pathlib.Path(NVIDIA_CODEC_SDK_ROOT_PATH).exists()):
+        cmake_options.append(
+            "-D NvidiaVideoCodec_ROOT={}".format(NVIDIA_CODEC_SDK_ROOT_PATH))
 
     # Specify the paths for Qt and Halide.
-    my_cmake_prefix_paths = [str(path) for path in my_cmake_prefix_paths]
-    my_cmake_prefix_paths = ";".join(my_cmake_prefix_paths)
-    cmake_options.append("-D CMAKE_PREFIX_PATH={}".format(my_cmake_prefix_paths))
+    if my_cmake_prefix_paths:
+        my_cmake_prefix_paths = [str(path) for path in my_cmake_prefix_paths]
+        my_cmake_prefix_paths = ";".join(my_cmake_prefix_paths)
+        cmake_options.append(
+            "-D CMAKE_PREFIX_PATH={}".format(my_cmake_prefix_paths))
 
     # Setup Swift bindings.
     if SYSTEM == "Darwin":
@@ -115,14 +128,22 @@ def generate_project(source_dir: str,
     ).wait()
 
 
-def build_project(build_dir: str):
-    ret = subprocess.Popen(['cmake', '--build', '.', '-j12', '-v'],
-                           cwd=build_dir).wait()
+def build_project(build_dir: str, build_type: str):
+    project_type = infer_project_type(SYSTEM)
+    command_line = ['cmake', '--build', '.', '-j12', '-v']
+    if project_type == "Xcode":
+        command_line += ["--config", build_type]
+
+    ret = subprocess.Popen(command_line, cwd=build_dir).wait()
     return ret
 
-def run_project_tests(build_dir: str):
-    ret = subprocess.Popen(['ctest', '--output-on-failure'],
-                           cwd=build_dir).wait()
+def run_project_tests(build_dir: str, build_type: str):
+    project_type = infer_project_type(SYSTEM)
+    command_line = ['ctest', '--output-on-failure']
+    if project_type == "Xcode":
+        command_line += ["--config", build_type]
+
+    ret = subprocess.Popen(command_line, cwd=build_dir).wait()
     return ret
 
 def build_rmd_book():
@@ -144,13 +165,18 @@ if __name__ == '__main__':
 
     for task in args.tasks:
         if task == "library":
-            build_dir = (SARA_SOURCE_DIR.parent /
-                         "{}-build-{}".format(SARA_SOURCE_DIR.name,
-                                              args.build_type))
+            project_type = infer_project_type(SYSTEM)
+            if project_type == 'Xcode':
+                build_dir = (SARA_SOURCE_DIR.parent /
+                             "{}-build-Xcode".format(SARA_SOURCE_DIR.name))
+            else:
+                build_dir = (SARA_SOURCE_DIR.parent /
+                             "{}-build-{}".format(SARA_SOURCE_DIR.name,
+                                                  args.build_type))
             generate_project(SARA_SOURCE_DIR, build_dir, args.build_type,
                              args.from_scratch)
-            build_project(build_dir)
-            run_project_tests(build_dir)
+            build_project(build_dir, args.build_type)
+            run_project_tests(build_dir, args.build_type)
 
         if task == "book":
             build_rmd_book()
