@@ -5,16 +5,18 @@ import platform
 import shutil
 import subprocess
 
-BUILD_TYPE="Release"
 
-RUN_FROM_DOCKER = True
+# Build tasks
+BUILD_TASKS = ["library", "book"]
 
+# Build types.
+BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
+
+# Some constants
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
-SARA_BUILD_DIR = (SARA_SOURCE_DIR.parent /
-                  "{}-build-{}".format(SARA_SOURCE_DIR.name, BUILD_TYPE))
-
 SYSTEM = platform.system()
 
+# Third-party libraries that makes Sara faster, stronger, cooler...
 HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-14.0.0-x86-64-linux"
 NVIDIA_CODEC_SDK_ROOT_PATH = pathlib.Path.home() / "opt/Video_Codec_SDK_11.0.10"
 SWIFTC_PATH= pathlib.Path.home() / "opt/swift-5.6.2-RELEASE-ubuntu20.04/usr/bin/swiftc"
@@ -30,7 +32,10 @@ except:
     PYBIND11_DIR = None
 
 
-def generate_project(source_dir: str, build_dir: str, from_scratch: bool = False):
+def generate_project(source_dir: str,
+                     build_dir: str,
+                     build_type: str,
+                     from_scratch: bool = False):
     if from_scratch and build_dir.exists():
         shutil.rmtree(build_dir)
 
@@ -38,7 +43,7 @@ def generate_project(source_dir: str, build_dir: str, from_scratch: bool = False
         pathlib.Path.mkdir(build_dir)
 
     cmake_options = []
-    cmake_options.append('-D CMAKE_BUILD_TYPE={}'.format(BUILD_TYPE))
+    cmake_options.append('-D CMAKE_BUILD_TYPE={}'.format(build_type))
     cmake_options.append('-G Ninja')
     if SYSTEM == "Linux":
         cmake_options.append("-D CMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold")
@@ -96,12 +101,12 @@ def generate_project(source_dir: str, build_dir: str, from_scratch: bool = False
     ).wait()
 
 
-def build(build_dir: str):
-    ret = subprocess.Popen(['cmake', '--build', '.', '-j12'],
+def build_project(build_dir: str):
+    ret = subprocess.Popen(['cmake', '--build', '.', '-j12', '-v'],
                            cwd=build_dir).wait()
     return ret
 
-def test(build_dir: str):
+def run_project_tests(build_dir: str):
     ret = subprocess.Popen(['ctest', '--output-on-failure'],
                            cwd=build_dir).wait()
     return ret
@@ -111,8 +116,27 @@ def build_rmd_book():
                            cwd=SARA_SOURCE_DIR / "doc" / "rmd").wait()
     return ret
 
-# generate_project(SARA_SOURCE_DIR, SARA_BUILD_DIR, True)
-# build(SARA_BUILD_DIR)
-# test(SARA_BUILD_DIR)
 
-build_rmd_book()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Sara Build Program Options")
+
+    parser.add_argument("--tasks", choices=BUILD_TASKS, default="library",
+                        nargs='+', help="Specify the list of build tasks")
+    parser.add_argument("--build_type", choices=BUILD_TYPES, default="Release",
+                        help="CMake build type")
+    parser.add_argument("--from_scratch", type=bool, default=False,
+                        help="Rebuild the project from scratch")
+    args = parser.parse_args()
+
+    for task in args.tasks:
+        if task == "library":
+            build_dir = (SARA_SOURCE_DIR.parent /
+                         "{}-build-{}".format(SARA_SOURCE_DIR.name,
+                                              args.build_type))
+            generate_project(SARA_SOURCE_DIR, build_dir, args.build_type,
+                             args.from_scratch)
+            build_project(build_dir)
+            run_project_tests(build_dir)
+
+        if task == "book":
+            build_rmd_book()
