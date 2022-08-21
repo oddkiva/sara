@@ -35,7 +35,7 @@ There are two situations in Structure-from-Motion:
    small distortion;
 2. we are dealing with calibrated cameras, that is, we do know which
    mathematical camera model explains best the formation of image $I$ and we
-   know its associated parameter values of this model.
+   know the parameter values associated to this model.
 
 ### First Situation: Camera Resectioning
 
