@@ -14,7 +14,8 @@ frame.
 
 Our goal is to retrieve the camera parameters that formed this very image $I$,
 namely the camera pose, that is its gaze orientation $\mathbf{R}$ and position
-$\mathbf{t}$ with respect to some world reference frame $\mathcal{W}$.
+$\mathbf{t}$ with respect to some reference frame, say the world frame
+$\mathcal{W}$ to plant ideas in our mind.
 
 :::fyi
 In case we are still being confused about which frame or coordinates, let us
