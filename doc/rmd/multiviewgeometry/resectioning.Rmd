@@ -2,7 +2,7 @@
 
 The pose recovery is another important problem that is solved in
 Structure-from-Motion. The pose recovery can be tackled differently depending on
-the situations we are in. They are two situations that I have found in my
+the situation we are in. There are two situations that I have found in my
 current understanding.
 
 ### Problem Statement
