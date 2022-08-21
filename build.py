@@ -16,10 +16,14 @@ BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
 SYSTEM = platform.system()
 
+
 # Third-party libraries that makes Sara faster, stronger, cooler...
-HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-14.0.0-x86-64-linux"
-NVIDIA_CODEC_SDK_ROOT_PATH = pathlib.Path.home() / "opt/Video_Codec_SDK_11.0.10"
-SWIFTC_PATH= pathlib.Path.home() / "opt/swift-5.6.2-RELEASE-ubuntu20.04/usr/bin/swiftc"
+if SYSTEM == "Linux":
+    HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-14.0.0-x86-64-linux"
+    NVIDIA_CODEC_SDK_ROOT_PATH = pathlib.Path.home() / "opt/Video_Codec_SDK_11.0.10"
+    SWIFTC_PATH= pathlib.Path.home() / "opt/swift-5.6.2-RELEASE-ubuntu20.04/usr/bin/swiftc"
+elif SYSTEM == "Darwin":
+    SWIFT_PATH = subprocess.check_output(["which", "swift"])
 
 try:
     import pybind11
@@ -64,7 +68,9 @@ def generate_project(source_dir: str,
     if SYSTEM == "Linux":
         my_cmake_prefix_paths = ["/usr/local/Qt-6.3.1"]
     elif SYSTEM == "Darwin":
-        cmake_options.append("-D Qt6_DIR=$(brew --prefix qt)/lib/cmake/Qt6")
+        qt6_root_dir = subprocess.check_output(["brew", "--prefix", "qt"])
+        qt6_cmake_dir = pathlib.Path(qt6_root_dir) / "lib" / "cmake" / "Qt6"
+        cmake_options.append("-D Qt6_DIR={}".format(qt6_cmake_dir))
 
     # Compile shared or static libraries.
     cmake_options.append("-D SARA_BUILD_SHARED_LIBS:BOOL=ON")
