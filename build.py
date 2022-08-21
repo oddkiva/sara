@@ -2,10 +2,10 @@
 import argparse
 import pathlib
 import platform
-import subprocess
 import shutil
+import subprocess
 
-BUILD_TYPE="RelWithDebInfo"
+BUILD_TYPE="Release"
 
 RUN_FROM_DOCKER = True
 
