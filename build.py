@@ -101,6 +101,11 @@ def build(build_dir: str):
                            cwd=build_dir).wait()
     return ret
 
+def test(build_dir: str):
+    ret = subprocess.Popen(['ctest', '--output-on-failure'],
+                           cwd=build_dir).wait()
+    return ret
 
-generate_project(SARA_SOURCE_DIR, SARA_BUILD_DIR, True)
-build(SARA_BUILD_DIR)
+# generate_project(SARA_SOURCE_DIR, SARA_BUILD_DIR, True)
+# build(SARA_BUILD_DIR)
+test(SARA_BUILD_DIR)
