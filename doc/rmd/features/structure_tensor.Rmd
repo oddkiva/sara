@@ -186,7 +186,8 @@ where the convolved image with a gaussian kernel is denoted as
 We need to mention another important consideration related to the **scale-space
 theory**.
 Assuming that the scale of the original image $I$ is exactly $1\ \textrm{pixel}$
-($\textrm{px}$),then the scale of the convolved image $I_{\sigma_D} =
+($\textrm{px}$)^[Since the camera cannot capture details less than 1 pixel on
+images in principle.], then the scale of the convolved image $I_{\sigma_D} =
 g_{\sigma_D} * I$ is
 
 \begin{equation}
@@ -199,7 +200,8 @@ This has an important consequence in practice.
 pixels are lost because of the Gaussian blur -- in principle.
 
 2. The integration scale $\sigma_I$ in the structure tensor means that we are
-considering local patches with radius $t \sigma_I$ to decide whether we see a
+considering local patches with radius $t \sigma_I = \sqrt{1 + \sigma_D^2}
+\ \sigma_I$ to decide whether we see a
 corner or not. This means that the best corners are separated by at least
 $t \sigma_I$ pixels.
 
