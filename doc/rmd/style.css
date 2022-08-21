@@ -1,10 +1,12 @@
 @import url('http://fonts.cdnfonts.com/css/tex-gyre-heros');
 @import url('http://fonts.cdnfonts.com/css/latin-modern-roman');
 @import url('http://fonts.cdnfonts.com/css/linux-libertine');
+@import url('http://fonts.cdnfonts.com/css/kings-caslon-trial');
+@import url('http://fonts.cdnfonts.com/css/palatino-linotype');
 /* @import url('https://fonts.googleapis.com/css?family=Crimson+Text:400,600,700'); */
 
 .book.font-family-0 {
-  font-family: "LMRoman10", times, Georgia, serif;
+  font-family: "Kings Caslon Trial", "Linux Libertine", "LMRoman10", times, Georgia, serif;
 }
 
 .book.font-family-1 {
