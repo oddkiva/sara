@@ -11,8 +11,8 @@ these such details are useful.
 
 ### Underdetermined System of Linear Equations
 
-Let $(\mathbf{p}_i, \mathbf{q}_i)$, $0 \leq i < 5$ be $5$ point
-correspondences, with $\mathbf{p}_i$ and $\mathbf{q}_i$ being points
+Let $\left\{\mathbf{p}_i, \mathbf{q}_i \right\}_{0 \leq i < 5}$ denote a set of
+$5$ point correspondences, with $\mathbf{p}_i$ and $\mathbf{q}_i$ being points
 on the left image and the right image respectively (in homogeneous coordinates).
 
 They satisfy the epipolar constraints:

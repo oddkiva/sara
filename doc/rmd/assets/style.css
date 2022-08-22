@@ -1,0 +1,158 @@
+@import url('http://fonts.cdnfonts.com/css/tex-gyre-heros');
+@import url('http://fonts.cdnfonts.com/css/latin-modern-roman');
+@import url('http://fonts.cdnfonts.com/css/linux-libertine');
+@import url('http://fonts.cdnfonts.com/css/kings-caslon-trial');
+@import url('http://fonts.cdnfonts.com/css/palatino-linotype');
+/* @import url('https://fonts.googleapis.com/css?family=Crimson+Text:400,600,700'); */
+
+.book.font-family-0 {
+  font-family: "Kings Caslon Trial", "LMRoman10", times, Georgia, serif;
+}
+
+.book.font-family-1 {
+  font-family: "TexGyreHeros", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: "Kings Caslon Trial", serif;
+  color: #2f5275;
+}
+
+.title {
+  font-size: 3em !important;
+  color: #5699cc;
+ }
+
+.subtitle {
+  color: #2c6793;
+}
+
+.summary{
+  font-family: "TexGyreHeros", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.summary > li:first-child {
+  height: 50px;
+  padding-top: 10px;
+  border-bottom: 1px solid rgba(0,0,0,.07);
+}
+
+.book .book-summary ul.summary li.divider {
+  height: 0px;
+}
+
+.book .book-summary {
+  background: white;
+  border-right: none;
+}
+
+.book .book-summary ul.summary li a,
+.book .book-summary ul.summary li span {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 15px;
+  padding-right: 15px;
+  color: #2f5175;
+}
+
+.summary a:hover {
+  color: #778ca5 !important;
+}
+
+.book .book-summary ul.summary li.active>a { /*active TOC links*/
+  color: #778ca5 !important;
+  border-left: solid 4px;
+  border-color: #5699cc;
+  padding-left: 11px !important;
+}
+
+.sourceCode pre {
+  margin: 0 !important; /* makes space above and below symmetrical*/
+}
+
+.sourceCode {
+  margin-bottom: 0.85em; /* adds same amount of margin as a <p> would */
+}
+
+.book .book-body .page-wrapper .page-inner section.normal a {
+  color: #3f88ca;
+}
+
+.book .book-body .page-wrapper .page-inner section.normal a:hover {
+  color: #1f5386; /* darker color when hovering */
+  text-decoration: none;
+}
+
+.book .book-body .page-wrapper .page-inner section.normal {
+  overflow: visible !important; /*so anchor link doesnt get cut off */
+}
+
+li.appendix span, li.part span { /* for TOC part names */
+  margin-top: 1em;
+  color: color: #1c3046 !important;
+  opacity: 1 !important;
+  text-transform: uppercase;
+}
+
+a.anchor {
+  margin-left: -30px;
+  padding-right: 3px;
+  display:inline-block;
+  width: 30px;
+  height: 30px;
+  background-image: url(https://image.flaticon.com/icons/svg/34/34735.svg) !important;
+  background-repeat: no-repeat !important;
+  background-size: 20px 20px !important;
+  background-position: center bottom !important;
+  opacity: 0;
+}
+
+
+.hasAnchor:hover a.anchor, a.anchor:hover {
+  opacity: 0.6;
+}
+
+.copy {
+  width: inherit;
+  background-color: #e2e2e2 ;
+  border: none;
+  border-radius: 2px;
+  float: right;
+  font-size: 60%;
+  padding: 4px 4px 4px 4px
+}
+
+@media (max-width: 1144px) { /* dont show anchor link on small screens */
+  .hasAnchor:hover a.anchor {
+    visibility: hidden;
+  }
+}
+
+div.puzzle, div.fyi, div.demo, div.note {
+  padding: 1em;
+  margin: 1em 0;
+  padding-left: 100px;
+  background-size: 70px;
+  background-repeat: no-repeat;
+  background-position: 15px center;
+  min-height: 120px;
+  color: #1f5386;
+  background-color: #bed3ec;
+  border: solid 5px #dfedff;
+}
+
+div.puzzle {
+  background-image: url("div-icons/Your-turn.png");
+}
+
+div.fyi {
+ background-image: url("div-icons/fyi.png");
+}
+
+div.demo {
+  background-image: url("div-icons/Live-code.png");
+}
+
+div.note {
+  background-image: url("div-icons/Lightbulb.png");
+}

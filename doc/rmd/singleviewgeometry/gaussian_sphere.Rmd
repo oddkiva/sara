@@ -34,10 +34,10 @@ Now let us take it further.
 The backprojected 3D rays are the crux that will articulate our ideas about the
 vanishing point.
 
-Now it is more convenient this half-plane by the normal
-$\mathbf{\Pi}(\mathbf{a}, \mathbf{b})$.
-
-This can be calculated analytically as:
+This half-plane can be parameterized by its normal vector
+$\mathbf{\Pi}(\mathbf{a}, \mathbf{b})$^[Let's omit the side of the half-plane
+for now, which can be retrieved a cheirality criterion], which we calculate it
+analytically as:
 
 \begin{equation}
 \mathbf{\Pi}(\mathbf{a}, \mathbf{b}) =
@@ -45,4 +45,39 @@ This can be calculated analytically as:
 \end{equation}
 
 Said differently, a vanishing point can be traced from two 2D line segments
-which backprojects to 3D parallel planes.
+which backproject to two 3D planes that intersect at the camera center.
+The intersection of the two 3D planes is a line, whose direction vector is the
+3D ray obtained by backprojecting the vanishing point.
+
+Two vanishing points in the images are orthogonal if they backproject to two
+orthogonal vectors its plane normal $\Pi(l_i)$.
+We can retrieve the 3rd orthogonal plane by calculating the cross-product
+
+\begin{equation}
+  \mathbf{\Pi}(l_3) = \mathbf{\Pi}(l_1) \times \mathbf{\Pi}(l_2).
+\end{equation}
+
+### Orthogonal Vanishing Point Detection
+
+Detecting orthogonal vanishing point assumes that cameras are calibrated, that
+is we know the camera parameters that explain the image formation.
+
+We are now able to derive a natural algorithm that can compute the reference
+frame of a Manhattan world. If we use RANSAC where we draw minimal samples of 3
+line segments, we can infer the orientation of the camera with respect to the
+Manhattan world frame. (**TODO:** Cite Bazin et al.)
+
+This idea is as follows. A good sample of 3 line segments is a sample such that 
+
+- The first two image line segments are parallel and are used to construct a
+  first vanishing point.
+- The third line segment vanishes to a second vanishing point, which should be
+  orthogonal to the first vanishing point.
+- The third orthogonal vanishing point is obtained by cross-product.
+In that case, the three orthogonal vanishing points are well supported by the
+other line segments.
+
+## Image of the Absolute Conic
+
+**TODO:** this one important concept for self-calibration but mostly applicable to
+the pinhole camera model.

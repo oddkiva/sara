@@ -126,10 +126,10 @@ which is one of the reasons why [@Abeles:2021:corr]'s method was able to outperf
 Java is faster than the original MATLAB implementation libcbdetect. However,
 there exists an unofficial OpenCV C++ implementation available on GitHub:
 [https://github.com/ftdlyc/libcbdetect], so it may be worth comparing it
-again.^[No, no, no, don't count on me on doing it, I don't care and don't have
+again.^[No, no, no, don't count on me to do it, I don't care and don't have
 time. Anyways all comparative tests are designed to be misleading and at some
 point I would try to claim that my algorithmic approach is better and bla bla
-bla... :P.]
+bla... 😛]
 
 In my approach, I do the same and detect corners at 3 different scales by
 default. This gives good results in my experience and is sufficient

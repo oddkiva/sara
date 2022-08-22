@@ -40,7 +40,7 @@ image data, instead of calibration patterns, they rely instead on 2D point
 correspondences of the background across images. They rely on a mathematical
 object called the absolute quadric which remain invariant to rigid body
 transformations [@Triggs:1997:cvpr]. They turn out to be rather tricky and has
-many drawbacks: they will be less accurate than fiducial calibration approaches
-and is well studied only for the pinhole camera model.
+many drawbacks: they will be less accurate than fiducial-based approaches and is
+well studied only for the pinhole camera model.
 
 I will focus only on the camera calibration relying on the chessboard pattern.

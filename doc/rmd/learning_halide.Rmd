@@ -47,7 +47,7 @@ better. In a sense, it
   For example, the optimal scheduling of linearly separable convolution is far
   from being obvious for CPUs and eventually I tried one shedule published in
   Halide's first publication. This schedule is eventually the one that could
-  compete with OpenCV's gaussian blur implementation.
+  compete with OpenCV's Gaussian blur implementation.
 
 
 ## Open Questions (for Halide Developers?)
