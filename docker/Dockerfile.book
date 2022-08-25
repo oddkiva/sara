@@ -14,4 +14,4 @@ RUN pip3 install --no-binary="numpy" numpy --ignore-installed
 RUN pip3 install matplotlib sympy
 
 RUN Rscript -e 'devtools::install_cran(c("berryFunctions", "gifski", "reticulate", "Rcpp", "RcppEigen", "tinytex"))'
-# RUN Rscript -e 'tinytex::install_tinytex()'
+RUN Rscript -e 'tinytex::install_tinytex()'
