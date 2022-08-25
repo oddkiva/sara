@@ -60,13 +60,17 @@ needs addressing the following points to become more complete for
 traditional computer vision algorithms.
 
 We can write fairly elegantly the following key ingredients for SIFT in Halide:
-- local histograms of gradients (HoG, SIFT, Dalal and Triggs, CVPR 2005)
-- brute-force descriptor matching
-- stream compaction
 
-However from the documentation, it is not clear to me how we can optimally schedule.
-Does Halide even offer such possibilities.
+1. local histograms of gradients [@DalalTriggs:2005:cvpr];
+2. SIFT descriptors [@Lowe:2004:ijcv]
+3. brute-force descriptor matching;
+4. stream compaction
+
+While we are able to get reasonably fast processing time for the point (1).
+Points (2), (3) and (4) are not easy to optimize, far from it... Does Halide
+even empower us to do so?
 
 My GPU implementation in GPU is much better than my optimized CPU implementation
-but it is still very far away from what CUDA can do (see CudaSift and PopSift
-implementation). 10x to 20x slower because of that.
+but it is still very far away from what CUDA can do. Please see `CudaSift` and
+`PopSift` both  available on `GitHub`. My implementations seem to be 10x to 20x
+slower compared to what these alternative implementation do.
