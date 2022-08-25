@@ -8,7 +8,7 @@ import sys
 
 
 # Build tasks
-BUILD_TASKS = ["library", "book"]
+BUILD_TASKS = ["library", "book", "book_docker_container"]
 
 # Build types.
 BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
@@ -151,6 +151,29 @@ def build_rmd_book():
                            cwd=SARA_SOURCE_DIR / "doc" / "rmd").wait()
     return ret
 
+def build_book_docker():
+    # Build the docker image.
+    sara_book_build_image = 'sara-book-build'
+    ret = subprocess.Popen(
+        [
+            'docker', 'build',
+            '-f', './docker/Dockerfile.book',
+            '-t', '{}:latest'.format(sara_book_build_image),
+            '.'
+         ],
+        cwd=SARA_SOURCE_DIR
+    ).wait()
+
+    # Run the docker image.
+    ret = subprocess.Popen(
+        [
+            'docker', 'run', '-it',
+            '-v', "{}:/workspace/rmd".format(SARA_SOURCE_DIR / "doc" / "rmd"),
+            sara_book_build_image, '/bin/bash'
+         ],
+        cwd=(SARA_SOURCE_DIR / "doc" / "rmd")
+    ).wait()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Sara Build Program Options")
@@ -180,3 +203,6 @@ if __name__ == '__main__':
 
         if task == "book":
             build_rmd_book()
+
+        if task == "book_docker_container":
+            build_book_docker()

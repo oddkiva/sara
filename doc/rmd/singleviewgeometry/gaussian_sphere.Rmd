@@ -36,8 +36,8 @@ vanishing point.
 
 This half-plane can be parameterized by its normal vector
 $\mathbf{\Pi}(\mathbf{a}, \mathbf{b})$^[Let's omit the side of the half-plane
-for now, which can be retrieved a cheirality criterion], which we calculate it
-analytically as:
+for now, which can be retrieved via a cheirality criterion], which we calculate
+it analytically as:
 
 \begin{equation}
 \mathbf{\Pi}(\mathbf{a}, \mathbf{b}) =
@@ -67,7 +67,7 @@ frame of a Manhattan world. If we use RANSAC where we draw minimal samples of 3
 line segments, we can infer the orientation of the camera with respect to the
 Manhattan world frame. (**TODO:** Cite Bazin et al.)
 
-This idea is as follows. A good sample of 3 line segments is a sample such that 
+This idea is as follows. A good sample of 3 line segments is a sample such that
 
 - The first two image line segments are parallel and are used to construct a
   first vanishing point.
