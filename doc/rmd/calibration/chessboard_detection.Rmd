@@ -184,3 +184,5 @@ We can employ a couple heuristics to identify images where the chessboard pose
 is close to the identity, to ensure a good guess of the intrinsic parameters.
 Once we have more confidence about the intrisic parameters, we can employ one
 proven PnP algorithm to better initialize the pose of the chessboard.
+
+**TODO**: complete me.
