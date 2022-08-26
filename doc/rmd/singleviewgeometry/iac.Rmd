@@ -8,8 +8,8 @@ Basically, these are nothing more than **3D rays** or **3D vectors**.
 
 ## Absolute conic
 
-Then the absolute conic is by definition the set of imaginary 3D rays, that 3D
-rays $(x, y, z, 0) \in \mathbb{C}^4$ such that
+The absolute conic is by definition the set of imaginary 3D rays $(x, y, z,
+0) \in \mathbb{C}^4$ such that
 
 \begin{equation}
   \begin{bmatrix} x & y & z \end{bmatrix}
@@ -25,8 +25,8 @@ rays $(x, y, z, 0) \in \mathbb{C}^4$ such that
 
 In a nutshell, suppose we know the calibration matrix $\mathbf{K}$ of some pinhole camera.
 
-Suppose we have two orthogonal 3D unit rays $\mathbf{x}$ and $\mathbf{y}$. The form a
-right angle, and thus their dot product is zero:
+Suppose we have two orthogonal 3D unit rays $\mathbf{x}$ and $\mathbf{y}$. They
+form a right angle, and thus their dot product is zero:
 
 \begin{equation}
   \mathbf{x}^T \mathbf{y} = 0
