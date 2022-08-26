@@ -135,7 +135,8 @@ form a right angle, and thus their dot product is zero:
 \end{equation}
 
 They project onto the image plane at two orthogonal vanishing points
-$\mathbf{u} = \mathbf{K} \mathbf{x}$, $\mathbf{v} = \mathbf{K} \mathbf{y}$.
+$\mathbf{u} = \mathbf{K} \mathbf{x}$ and
+$\mathbf{v} = \mathbf{K} \mathbf{y}$ respectively.
 
 In other words,
 \begin{equation}
