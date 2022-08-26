@@ -188,9 +188,9 @@ TODO: when I take the time to understand more.
 - Absolute Quadric
 - Stratified Approaches:
   1. Projective reconstruction: from the fundamental matrix, we can reconstruct the 3D
-     geometry up to a 3D homography. Line parallelism are lost.
+     geometry up to a 3D homography. Line parallelisms are lost.
   2. Affine reconstruction -> find the 3D affine transform that recover the line
-     parallelism in the 3D reconstruction
+     parallelism in the 3D reconstruction.
   3. Metric reconstruction -> find the transform that preserves the angles and
      the original scale in the 3D reconstruction.
 
