@@ -91,8 +91,10 @@ cross-product of the two orthogonal vectors.
 
 ### Orthogonal Vanishing Point Detection
 
-Detecting orthogonal vanishing point assumes that cameras are calibrated, that
-is we know the camera parameters that explain the image formation.
+The detection of orthogonal vanishing point assumes that cameras are calibrated,
+that is we understand how the images are formed and know the camera parameters.
+We know not just the calibration matrix, but also its distortion model and its
+distortion coefficients.
 
 We are now able to derive an algorithm that can compute the reference frame of a
 Manhattan world. If we use RANSAC where we draw minimal samples of 3 line
