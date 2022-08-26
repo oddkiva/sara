@@ -1,4 +1,4 @@
-## Geometric Characteristics of a Locally Invariant Region
+## Geometric Characteristics
 
 In general any locally invariant regions, *a.k.a.* features, present a common
 set of geometric characteristics, be it SIFT, SURF, MSER, or Harris-Affine etc.

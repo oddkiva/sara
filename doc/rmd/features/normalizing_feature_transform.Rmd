@@ -1,6 +1,6 @@
 \renewcommand{\eqdef}{\overset{\textrm{def}}{=}}
 
-## Normalizing Transform of a Feature
+## Normalizing Transform
 
 :::fyi
 **TODO: Proof-read this again.**

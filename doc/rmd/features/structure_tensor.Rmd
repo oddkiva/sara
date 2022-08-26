@@ -1,4 +1,4 @@
-## Corner and Junction Detection
+## Corners and Junctions
 
 Detecting corners can be done in many different ways. One robust way to do so is
 to analyze of the local distribution of image gradients at each pixel of the
@@ -206,7 +206,7 @@ corner or not. This means that the best corners are separated by at least
 $t \sigma_I$ pixels.
 
 
-### Cornerness Score Function
+### Cornerness Function
 
 **TODO**
 
