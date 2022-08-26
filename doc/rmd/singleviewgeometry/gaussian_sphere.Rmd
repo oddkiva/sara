@@ -35,7 +35,7 @@ Now let us take it further.
 - The half-plane $(\mathbf{O}, \mathbf{r}_\mathbf{a}, \mathbf{r}_\mathbf{b})$
   can be parameterized by its normal vector $\mathbf{\Pi}(\mathbf{a},
   \mathbf{b})$^[Let's omit the side of the half-plane for now, which can be
-  retrieved a cheirality criterion], which we calculate as
+  retrieved via a cheirality criterion], which we calculate as
 
   \begin{equation}
   \mathbf{\Pi}(\mathbf{a}, \mathbf{b}) =
@@ -96,10 +96,14 @@ that is we understand how the images are formed and know the camera parameters.
 We know not just the calibration matrix, but also its distortion model and its
 distortion coefficients.
 
-We are now able to derive an algorithm that can compute the reference frame of a
-Manhattan world. If we use RANSAC where we draw minimal samples of 3 line
-segments, we can infer the orientation of the camera with respect to the
-Manhattan world frame.
+In the following, let's simplify the ideas. We assume the camera follows the
+pinhole model and that we know its calibration matrix $\mathbf{K}$.
+
+We can then derive an algorithm to compute the reference frame of a Manhattan
+world with respect to the camera frame. To do so, we employ RANSAC to draw
+minimal samples of 3 line segments. From there, we are able to infer the
+orientation of the camera with respect to the Manhattan world frame and
+vice-versa.
 
 This approach is described more in details in the paper [@BazinP:2012:iros].
 Basically, the main idea is as follows. A good sample of 3 line segments is a sample

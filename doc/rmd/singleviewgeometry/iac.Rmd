@@ -1,15 +1,21 @@
 ## Plane at Infinity
 
-[@HartleyZ:2003:mvg] use the term plane at infinity $\mathbf{\Pi}_\infty$ in
+[@HartleyZ:2003:mvg] use the term **Plane at Infinity** $\mathbf{\Pi}_\infty$ in
 projective geometry. This plane $\mathbf{\Pi}_\infty$ is the set of points $[x,
 y, z, 0]^T$ in the $3$-space.
 
-Basically, these are nothing more than **3D rays** or **3D vectors**.
+Basically, to plant ideas in our mind, this abstract definition contains the set
+of than **3D rays** or **3D vectors** (as opposed to 3D points). But because the
+coordinates $(x, y, z)$ are allowed to be in $\mathbb{C}$, it also contains 3D
+imaginary rays.
 
 ## Absolute Conic
 
-The Absolute Conic (AC) is by definition the set of imaginary 3D rays $(x, y, z,
-0) \in \mathbb{C}^4$ such that
+Now that we understand the definition of the plane at infinity in the previous
+subsection, we are ready to define the absolute conic.
+
+The **Absolute Conic (AC)** is by definition the set of 3D imaginary rays $(x,
+y, z, 0) \in \mathbb{C}^4$ such that
 
 \begin{equation}
   \begin{bmatrix} x & y & z \end{bmatrix}
@@ -21,9 +27,14 @@ The Absolute Conic (AC) is by definition the set of imaginary 3D rays $(x, y, z,
   = 0
 \end{equation}
 
+As we can see, the AC is characterized by the identity matrix $\mathbf{I}_3$.
+
 ## Absolute Quadric
 
-The Absolute Quadric (AQ) is nothing more than the same formulation of the
+We have defined the absolute conic (AC) as the identity matrix in the previous
+section. Let's complicate a bit more with the absolute quadric.
+
+The **Absolute Quadric (AQ)** is nothing more than the same formulation of the
 absolute conic in homogeneous coordinates.
 
 In the general form, 3D points $(x, y, z, w) \in \mathbb{C}^4$ lies in the
