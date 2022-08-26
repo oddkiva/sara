@@ -194,8 +194,7 @@ More reliable approaches involves fiducial objects like a chessboard pattern
 printed on a rigid planar surface. The detection of the chessboard x-corners are
 much more reliable data points to estimate the calibration matrix.
 
-
-### Multi-View Approach
+#### Multi-View Approach
 
 TODO: when I take the time to understand more.
 
