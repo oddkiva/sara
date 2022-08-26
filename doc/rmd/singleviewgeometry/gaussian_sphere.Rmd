@@ -99,9 +99,11 @@ distortion coefficients.
 We are now able to derive an algorithm that can compute the reference frame of a
 Manhattan world. If we use RANSAC where we draw minimal samples of 3 line
 segments, we can infer the orientation of the camera with respect to the
-Manhattan world frame. (**TODO:** Cite Bazin et al.)
+Manhattan world frame.
 
-The idea is as follows. A good sample of 3 line segments is a sample such that
+This approach is described more in details in the paper [@BazinP:2012:iros].
+Basically, the main idea is as follows. A good sample of 3 line segments is a sample
+such that
 
 - The first two image line segments are parallel and are used to construct a
   first vanishing point.

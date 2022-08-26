@@ -6,7 +6,7 @@ y, z, 0]^T$ in the $3$-space.
 
 Basically, these are nothing more than **3D rays** or **3D vectors**.
 
-## Absolute conic
+## Absolute Conic
 
 The absolute conic is by definition the set of imaginary 3D rays $(x, y, z,
 0) \in \mathbb{C}^4$ such that
@@ -20,6 +20,95 @@ The absolute conic is by definition the set of imaginary 3D rays $(x, y, z,
   \begin{bmatrix} x \\ y \\ z \end{bmatrix}
   = 0
 \end{equation}
+
+## Absolute Quadric
+
+The Absolute Quadric (AQ) is nothing more than the same formulation of the
+absolute conic in homogeneous coordinates.
+
+In the general form, 3D points $(x, y, z, w) \in \mathbb{C}^4$ lies in the
+absolute quadric iff
+
+\begin{equation}
+  \begin{bmatrix} x & y & z & w\end{bmatrix}
+  %
+  \begin{bmatrix} 1 & 0 & 0 & 0 \\
+                  0 & 1 & 0 & 0 \\
+                  0 & 0 & 1 & 0 \\
+                  0 & 0 & 0 & 0 \\
+  \end{bmatrix}
+  %
+  \begin{bmatrix} x \\ y \\ z \\ w \end{bmatrix}
+  %
+  = 0
+\end{equation}
+
+Let's observe that $w^2 = 0$ necessarily mean $w = 0$ and therefore the equality
+is equivalent to the absolute conic formulation.
+
+The AQ is therefore characterized by the matrix
+\begin{equation}
+  \mathbf{Q}_\infty =
+  \begin{bmatrix}
+    \mathbf{I}_3 & \mathbf{0}_3 \\
+    \mathbf{0}_3^T & 0
+  \end{bmatrix}
+\end{equation}
+
+And reformulating it again, the AQ is the set of 3D (imaginary) points
+$\tilde{\mathbf{x}} \in \mathbb{C}^4$ such that
+
+\begin{equation}
+  \tilde{\mathbf{x}}^T \mathbf{Q}_\infty \tilde{\mathbf{x}} = 0
+\end{equation}
+
+One central property of the AQ is that it is invariant to any rigid body
+transformation $(\mathbf{R}, \mathbf{t})$.
+
+```{proof}
+Indeed let's consider a point $\tilde{\mathbf{x}} \in \mathbf{Q}_\infty$ and
+rewrite it as
+$\tilde{\mathbf{x}} = \begin{bmatrix} \mathbf{x} \\ w \end{bmatrix}$
+
+Then transform it with the rigid body transform. The transformed point has
+the following coordinates
+
+\begin{equation}
+  \begin{bmatrix} \mathbf{R} \mathbf{x} + w \mathbf{t} \\ w \end{bmatrix}
+\end{equation}
+
+Because $\tilde{\mathbf{x}}$ lies in the AQ, $w = 0$ and the following
+coordinates of the transformed point simplifies as
+
+\begin{equation}
+  \begin{bmatrix} \mathbf{R} \mathbf{x} \\ 0 \end{bmatrix}
+\end{equation}
+
+This transformed point also lies in the AQ, which we will now show.
+
+\begin{equation}
+  \begin{bmatrix} (\mathbf{R} \mathbf{x})^T && 0 \end{bmatrix}
+  %
+  \begin{bmatrix}
+    \mathbf{I}_3 & \mathbf{0}_3 \\
+    \mathbf{0}_3^T & 0
+  \end{bmatrix}
+  %
+  \begin{bmatrix} \mathbf{R} \mathbf{x} \\ 0 \end{bmatrix}
+\end{equation}
+
+This simplifies further as
+\begin{equation}
+  (\mathbf{R} \mathbf{x})^T  (\mathbf{R} \mathbf{x}) = \mathbf{x}^T \mathbf{R}^T
+  \mathbf{R} \mathbf{x} = \mathbf{x}^T \mathbf{x} = 0
+\end{equation}
+
+since $\mathbf{R}^T \mathbf{R} = \mathbf{I}_3$ and $\mathbf{x}$ lies in the
+absolute conic.
+```
+
+[@Triggs:1997:cvpr] relies on the AQ to derive his self-calibration method.
+
 
 ## Image of the Absolute Conic
 
@@ -42,7 +131,7 @@ In other words,
 
 [@HartleyZ:2003:mvg] defines this $3\times3$ matrix as the **Image of the Absolute Conic** (IAC)
 \begin{equation}
-  \mathbf{\Omega}_\infty = \mathbf{K}^{-T} \mathbf{K}^T$
+  \mathbf{\Omega}_\infty = \mathbf{K}^{-T} \mathbf{K}^T
 \end{equation}
 
 The IAC is an interesting matrix because it can tell us if two image
@@ -63,11 +152,45 @@ measure the angle between the backprojected rays as
 That is why [@HartleyZ:2003:mvg] says that the IAC acts like a 3D protractor
 between 2 image points.
 
+### Self-Calibration
+
+The self-calibration relies mostly either on the absolute quadric or the image of the
+absolute conic.
+
+#### Single-View Approach
+
+Already with a single image, we can determine the calibration matrix.
+
 - If we know 3 orthogonal vanishing points, then we know the IAC and then we can
   determine the calibration matrix.
 - If we know 1 vanishing point and its orthogonal vanishing line, then we also
   know the IAC and then we can determine the calibration matrix.
 
-### Self-Calibration
+Then using Cholesky's factorization, we would retrieve the calibration
+matrix.
 
-TODO: when I understand more.
+This method is very simple to implement and is very dependent on the image data.
+
+In practice, this is an approach that is difficult to make it work. It is
+neither always possible to find 3 orthogonal vanishing points, nor one vanishing
+point and 1 orthogonal vanishing line, and get a reliable estimation of the
+calibration matrix.
+
+More reliable approaches involves fiducial objects like a chessboard pattern
+printed on a rigid planar surface. The detection of the chessboard x-corners are
+much more reliable data points to estimate the calibration matrix.
+
+
+### Multi-View Approach
+
+TODO: when I take the time to understand more.
+
+- Absolute Quadric
+- Stratified Approaches:
+  1. Projective reconstruction: from the fundamental matrix, we can reconstruct the 3D
+     geometry up to a 3D homography. Line parallelism are lost.
+  2. Affine reconstruction -> find the 3D affine transform that recover the line
+     parallelism in the 3D reconstruction
+  3. Metric reconstruction -> find the transform that preserves the angles and
+     the original scale in the 3D reconstruction.
+
