@@ -4,7 +4,7 @@ In projective geometry, the projection of 3D lines in the camera film plane are
 still line segments. However, the perspective projection does not preserve the
 parallelism.
 
-To make things clear in our mind, images are thus formed with a camera pinhole
+To make things clear in our mind, images are thus formed by some pinhole camera
 model with calibration matrix $\mathbf{K}$.
 
 One remarkable property in projective geometry is that the projection of 3D

@@ -8,7 +8,7 @@ Basically, these are nothing more than **3D rays** or **3D vectors**.
 
 ## Absolute Conic
 
-The absolute conic is by definition the set of imaginary 3D rays $(x, y, z,
+The Absolute Conic (AC) is by definition the set of imaginary 3D rays $(x, y, z,
 0) \in \mathbb{C}^4$ such that
 
 \begin{equation}
