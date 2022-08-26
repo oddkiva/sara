@@ -108,8 +108,3 @@ The idea is as follows. A good sample of 3 line segments is a sample such that
 - The third orthogonal vanishing point is obtained by cross-product.
 In that case, the three orthogonal vanishing points are well supported by the
 other line segments.
-
-## Image of the Absolute Conic
-
-**TODO:** this one important concept for self-calibration but mostly applicable to
-the pinhole camera model.
