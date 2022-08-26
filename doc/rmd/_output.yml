@@ -1,10 +1,12 @@
-# bookdown::bs4_book:
-#   theme:
-#     primary: "#637238"
-#   repo:
-#     base: https://gitlab.com/DO-CV/sara
-#     branch: master
-#     subdir: "doc/rmd"
+bookdown::bs4_book:
+  # theme:
+  #   primary: "#637238"
+  repo:
+    base: https://gitlab.com/DO-CV/sara
+    branch: master
+    subdir: "doc/rmd"
+  includes:
+    in_header: [assets/bs4_style.html]
 bookdown::gitbook:
   highlight: tango
   includes:
@@ -29,7 +31,7 @@ bookdown::pdf_book:
   keep_tex: yes
   extra_dependencies: [
     # Change fonts.
-    # "mathpazo",
+    "mathpazo",
     # Font optimization.
     "microtype",
     # Minimal math packages.
@@ -46,3 +48,6 @@ bookdown::pdf_book:
     "animate",
     "siunitx"
   ]
+  includes:
+    in_header:
+      - font-config.tex
