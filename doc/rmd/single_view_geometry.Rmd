@@ -1,7 +1,5 @@
 # Projective Geometry
 
-## A Few Words
-
 In my opinion, if you are serious about learning Computer Vision, I cannot
 stress enough that you *must* know about projective geometry and multi-view
 geometry. This should be considered as fundamental as linear algebra in
@@ -13,18 +11,15 @@ part of artificial intelligence.
 When I started my journey in computer vision, I felt very aware and very
 constricted by my poor knowledge in geometry. Luckily, thanks to my intellectual
 curiosity I studied projective geometry on my own with the reference book
-[@HartleyZ:2003:mvg]. This was a not easy and slow process but it turned out to
+[@HartleyZ:2003:mvg]. This was an uneasy and slow process but it turned out to
 be very rewarding to fully appreciate the ideas and quickly reason about the 3D
 geometry.
 
 I have also found that academics or professionals tend to neglect such an
-important topic. In my humble opinion, this is bad and will harm the advances in
+important topic. In my humble opinion, this tends to harm the advances in
 computer vision research. With the popularization of deep-learning approaches,
-my main concern is that this will become worse.
+my main concern is that this might become worse.
 
 In this section I will try to illustrate the main ideas in projective geometry
 and you can then get started on your own by reading more comprehensive reference
 texts.
-
-```{r, child="singleviewgeometry/gaussian_sphere.Rmd"}
-```

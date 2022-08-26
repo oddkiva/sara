@@ -19,8 +19,6 @@
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 #include <DO/Sara/FeatureDetectors/Harris.hpp>
 
-#include <boost/log/trivial.hpp>
-
 
 namespace DO::Sara {
 
@@ -41,6 +39,7 @@ namespace DO::Sara {
     calculate_edge_adjacent_to_corners();
     calculate_edge_shape_statistics();
     calculate_orientation_histograms();
+    // TODO: we should filter corners with less than 2 gradient peaks...
     select_seed_corners();
 
     parse_squares();
@@ -122,7 +121,9 @@ namespace DO::Sara {
     const auto scale_inter_delta =
         std::sqrt(square(extra_scale_factor * scale_aa) -
                   square(gaussian_pyramid_params.scale_initial()));
-    const auto frame_blurred = g.compute<Gaussian>(scale_inter_delta);
+    const auto frame_blurred = std::isnan(scale_inter_delta)
+                                   ? g
+                                   : g.compute<Gaussian>(scale_inter_delta);
 
     const Eigen::Vector2i sizes_inter =
         (g.sizes().cast<float>() / scale_aa).array().round().cast<int>();
@@ -407,7 +408,7 @@ namespace DO::Sara {
       lowe_smooth_histogram(_hists[i]);
       _hists[i].matrix().normalize();
 
-      _gradient_peaks[i] = find_peaks(_hists[i], 0.5f);
+      _gradient_peaks[i] = find_peaks(_hists[i], 0.3f);
       _gradient_peaks_refined[i] = refine_peaks(_hists[i], _gradient_peaks[i]);
       std::for_each(_gradient_peaks_refined[i].begin(),
                     _gradient_peaks_refined[i].end(), [](auto& v) {
@@ -471,7 +472,12 @@ namespace DO::Sara {
     tic();
     _best_corners.clear();
     for (auto c = 0u; c < _corners.size(); ++c)
+#define INTENSITY_PROFILE
+#ifdef INTENSITY_PROFILE
       if (is_seed_corner(_edges_adjacent_to_corner[c], _zero_crossings[c]))
+#else
+      if (is_seed_corner(_edges_adjacent_to_corner[c], _gradient_peaks_refined[c]))
+#endif
         _best_corners.insert(c);
     toc("Best corner selection");
   }

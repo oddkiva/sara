@@ -1,3 +1,7 @@
+if (NOT SARA_BUILD_VIDEOIO)
+  return ()
+endif ()
+
 find_package(DO_Sara COMPONENTS Core Graphics ImageProcessing ImageIO VideoIO REQUIRED)
 
 file(GLOB taskflow_SOURCE_FILES FILES *.cpp)

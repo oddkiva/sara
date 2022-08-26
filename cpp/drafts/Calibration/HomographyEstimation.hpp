@@ -13,11 +13,12 @@
 
 #pragma once
 
-#include "OpenCVInterop.hpp"
+#include <drafts/Calibration/Chessboard.hpp>
 
 
+//! @brief Estimate the homography using the Direct Linear Transform method.
 auto estimate_H(const Eigen::MatrixXd& p1, const Eigen::MatrixXd& p2)
     -> Eigen::Matrix3d;
 
-auto estimate_H(const DO::Sara::OpenCV::Chessboard& chessboard)
+auto estimate_H(const DO::Sara::ChessboardCorners& chessboard)
     -> Eigen::Matrix3d;

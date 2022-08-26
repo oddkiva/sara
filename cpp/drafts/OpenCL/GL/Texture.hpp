@@ -32,6 +32,7 @@ namespace DO::Sara { namespace GL {
     enum
     {
       ChannelType = GL_FLOAT,
+      InternalPixelFormat = GL_DEPTH_COMPONENT,
       PixelFormat = GL_DEPTH_COMPONENT
     };
   };
@@ -42,7 +43,19 @@ namespace DO::Sara { namespace GL {
     enum
     {
       ChannelType = GL_UNSIGNED_BYTE,
+      InternalPixelFormat = GL_RGB,
       PixelFormat = GL_RGB
+    };
+  };
+
+  template <>
+  struct PixelTraits<Bgr8>
+  {
+    enum
+    {
+      ChannelType = GL_UNSIGNED_BYTE,
+      InternalPixelFormat = GL_RGB,
+      PixelFormat = GL_BGR
     };
   };
 

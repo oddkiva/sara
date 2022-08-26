@@ -53,7 +53,7 @@ By applying the cross-product with vector $\mathbf{t}$ on the left side:
 \end{equation}
 
 Since the cross-product $\mathbf{n} = \mathbf{t} \wedge \mathbf{X}^1$ is a
-vector normal to the plane induced by the span $\mathrm{span}(\mathbf{t}$,
+vector normal to the plane induced by the $\mathrm{span}(\mathbf{t}$,
 $\mathbf{X}^1)$, applying the dot product yields the following equation
 
 \begin{equation}

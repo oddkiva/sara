@@ -190,6 +190,27 @@ namespace DO::Sara {
 
       if (diff < 0.8f)
         return std::nullopt;
+
+#if 0
+      auto angles = std::array<float, 4>{};
+      for (auto i = 0; i < 4; ++i)
+      {
+        const auto& pm = corners[square[i == 0 ? 3 : i - 1]].coords;
+        const auto& p0 = corners[square[i]].coords;
+        const auto& pp = corners[square[i == 3 ? 0 : i + 1]].coords;
+        const Eigen::Vector2f p0pm = (pm - p0).normalized();
+        const Eigen::Vector2f p0pp = (pp - p0).normalized();
+        angles[i] = std::abs(std::acos(p0pm.dot(p0pp)) - M_PI_2);
+      }
+
+      // Compare the angles using the diamond angle property.
+      const auto angle_diffs = std::array{std::abs(angles[0] - angles[2]),
+                                          std::abs(angles[1] - angles[3])};
+      const auto angle_diff_max =
+          *std::max_element(angle_diffs.begin(), angle_diffs.end());
+      if (angle_diff_max > M_PI / 8)
+        return std::nullopt;
+#endif
     }
 
     return square;
@@ -209,8 +230,7 @@ namespace DO::Sara {
       square = reconstruct_square_from_corner(
           c, d, corners,  //
           edge_grad_mean, edge_grad_cov, edges_adjacent_to_corner,
-          corners_adjacent_to_edge,
-          SquareColor::Black);
+          corners_adjacent_to_edge, SquareColor::Black);
       if (square != std::nullopt)
         return square;
     }
@@ -228,11 +248,11 @@ namespace DO::Sara {
     auto square = std::optional<std::array<int, 4>>{};
     for (auto d = 0; d < 4; ++d)
     {
-      square = reconstruct_square_from_corner(
-          c, d, corners,                  //
-          edge_grad_mean, edge_grad_cov,  //
-          edges_adjacent_to_corner, corners_adjacent_to_edge,
-          SquareColor::White);
+      square = reconstruct_square_from_corner(c, d, corners,                  //
+                                              edge_grad_mean, edge_grad_cov,  //
+                                              edges_adjacent_to_corner,
+                                              corners_adjacent_to_edge,
+                                              SquareColor::White);
       if (square != std::nullopt)
         return square;
     }

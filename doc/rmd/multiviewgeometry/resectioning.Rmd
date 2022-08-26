@@ -2,7 +2,7 @@
 
 The pose recovery is another important problem that is solved in
 Structure-from-Motion. The pose recovery can be tackled differently depending on
-the situations we are in. They are two situations that I have found in my
+the situation we are in. There are two situations that I have found in my
 current understanding.
 
 ### Problem Statement
@@ -14,7 +14,8 @@ frame.
 
 Our goal is to retrieve the camera parameters that formed this very image $I$,
 namely the camera pose, that is its gaze orientation $\mathbf{R}$ and position
-$\mathbf{t}$ with respect to some world reference frame $\mathcal{W}$.
+$\mathbf{t}$ with respect to some reference frame, say the world frame
+$\mathcal{W}$ to plant ideas in our mind.
 
 :::fyi
 In case we are still being confused about which frame or coordinates, let us
@@ -34,7 +35,7 @@ There are two situations in Structure-from-Motion:
    small distortion;
 2. we are dealing with calibrated cameras, that is, we do know which
    mathematical camera model explains best the formation of image $I$ and we
-   know its associated parameter values of this model.
+   know the parameter values associated to this model.
 
 ### First Situation: Camera Resectioning
 
@@ -151,8 +152,9 @@ To calculate $\mathbf{R}$, let us consider three direction vectors
 \end{equation}
 
 As a gentle reminder, these direction vectors are the left part of Equation
-\@ref(eq:pnp-distance-equality). Since we know the scale quantities $\lambda_i$
-are known, they are also fully determined. Furthermore because we know that
+\@ref(eq:pnp-distance-equality). Since the scale quantities $\lambda_i$ are
+known, the vector quantities $\mathbf{z}_{ij}$ are also fully determined.
+Furthermore because we know that
 
 \begin{equation}
   \lambda_i \mathbf{y}_i = \mathbf{R} \mathbf{x}_i + \mathbf{t},

@@ -227,7 +227,7 @@ public:
   void main()
   {
     gl_Position = projection * view * transform * vec4(in_coords, 1.0);
-    gl_PointSize = 20.0;
+    gl_PointSize = 10.0;
     out_color = in_color;
   }
   )shader";

@@ -1,0 +1,73 @@
+## Plane at Infinity
+
+[@HartleyZ:2003:mvg] use the term plane at infinity $\mathbf{\Pi}_\infty$ in
+projective geometry. This plane $\mathbf{\Pi}_\infty$ is the set of points $[x,
+y, z, 0]^T$ in the $3$-space.
+
+Basically, these are nothing more than **3D rays** or **3D vectors**.
+
+## Absolute conic
+
+The absolute conic is by definition the set of imaginary 3D rays $(x, y, z,
+0) \in \mathbb{C}^4$ such that
+
+\begin{equation}
+  \begin{bmatrix} x & y & z \end{bmatrix}
+  \begin{bmatrix} 1 & 0 & 0 \\
+                  0 & 1 & 0 \\
+                  0 & 0 & 1 \\
+  \end{bmatrix}
+  \begin{bmatrix} x \\ y \\ z \end{bmatrix}
+  = 0
+\end{equation}
+
+## Image of the Absolute Conic
+
+In a nutshell, suppose we know the calibration matrix $\mathbf{K}$ of some pinhole camera.
+
+Suppose we have two orthogonal 3D unit rays $\mathbf{x}$ and $\mathbf{y}$. They
+form a right angle, and thus their dot product is zero:
+
+\begin{equation}
+  \mathbf{x}^T \mathbf{y} = 0
+\end{equation}
+
+They project onto the image plane at two orthogonal vanishing points
+$\mathbf{u} = \mathbf{K} \mathbf{x}$, $\mathbf{v} = \mathbf{K} \mathbf{y}$.
+
+In other words,
+\begin{equation}
+  \mathbf{u}^T (\mathbf{K}^{-T} \mathbf{K}^T) \mathbf{y} = 0
+\end{equation}
+
+[@HartleyZ:2003:mvg] defines this $3\times3$ matrix as the **Image of the Absolute Conic** (IAC)
+\begin{equation}
+  \mathbf{\Omega}_\infty = \mathbf{K}^{-T} \mathbf{K}^T$
+\end{equation}
+
+The IAC is an interesting matrix because it can tell us if two image
+points $\mathbf{u}$, $\mathbf{v}$ backproject to 3D orthogonal rays
+$\mathbf{K}^{-1} \mathbf{u}$ and $\mathbf{K}^{-1} \mathbf{v}$.
+
+More than that, whether or not they backproject to two orthogonal rays, we can
+measure the angle between the backprojected rays as
+
+\begin{equation}
+\mathrm{arccos}
+  \left(
+    \frac{\mathbf{u}^T \mathbf{K}^{-T} \mathbf{K}^{-1} \mathbf{v}}
+    {\| \mathbf{K}^{-1} \mathbf{u} \| \| \mathbf{K}^{-1} \mathbf{v} \|}
+  \right)
+\end{equation}
+
+That is why [@HartleyZ:2003:mvg] says that the IAC acts like a 3D protractor
+between 2 image points.
+
+- If we know 3 orthogonal vanishing points, then we know the IAC and then we can
+  determine the calibration matrix.
+- If we know 1 vanishing point and its orthogonal vanishing line, then we also
+  know the IAC and then we can determine the calibration matrix.
+
+### Self-Calibration
+
+TODO: when I understand more.

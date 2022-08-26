@@ -6,7 +6,10 @@
 #     branch: master
 #     subdir: "doc/rmd"
 bookdown::gitbook:
-  css: style.css
+  highlight: tango
+  includes:
+    in_header: assets/header.html
+  css: assets/style.css
   split_by: section
   config:
     toc:

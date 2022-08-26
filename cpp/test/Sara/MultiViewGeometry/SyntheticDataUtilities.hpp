@@ -34,6 +34,16 @@ inline auto make_cube_vertices()
   return cube;
 }
 
+inline auto make_planar_chessboard_corners(int rows, int cols, double square_size)
+{
+  auto corners = Eigen::MatrixXd{4, rows * cols};
+  for (auto y = 0; y < rows; ++y)
+    for (auto x = 0; x < cols; ++x)
+      corners.col(y * cols + x) << cols * square_size, rows * square_size, 0, 1;
+
+  return corners;
+}
+
 inline auto make_relative_motion(double x = 0.1, double y = 0.3, double z = 0.2)
     -> DO::Sara::Motion
 {

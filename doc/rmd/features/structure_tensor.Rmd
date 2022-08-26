@@ -1,53 +1,215 @@
-## Corner and Junction Detection
+## Corners and Junctions
 
-The corner detection relies on the analysis of one statistical object called the
-structure tensor.
+Detecting corners can be done in many different ways. One robust way to do so is
+to analyze of the local distribution of image gradients at each pixel of the
+image. From there, we can identify the dominant orientations of the gradients.
 
-In each point of the image, we want to describe its shape locally on a
-small region.
+### Histogram of Gradients as Insight
 
-With the structure tensor, we can to classify each of these small regions
-into three categories:
+We can calculate one histogram of gradients per pixel and then localize the
+dominant gradient orientations which are localized at the histogram peaks.
 
-1. Is it a uniform region?
-2. Is the small region more like an edge? Can we calculate its orientation?
-3. Is the small region more like a corner? Can we calculate its orientation?
+Intuitively we expect to identify interpretable local image features:
 
-Thus we build the structure tensor by accumulating all the image gradients into
-a second moment matrix.
+- an edge if we count only $1$ dominant gradient orientation.
+- a square-like corner if we count $2$ dominant peaks.
+- a T-junction if we count $3$ dominant peaks.
+- a chessboard X-corner if we count $4$ dominant peaks.
+- and so on.
+
+While, by design, the histogram cannot localize very precisely the corners, I
+think it is important to be reminded that the histogram of gradients is still a
+powerful tool in practice. And [@Lowe:2004:ijcv] describes a robust way to
+identify the dominant gradient orientations.
+
+[@HarrisS:1988:alvey] have devised and popularized another way to do so by
+considering instead the covariance matrix of local gradients. This is the
+so-called *structure tensor*. One of their main innovations is actually to
+derive a **cornerness** score function from it. This function will score highest
+to corners and even more so at their precise location. The cornerness function
+solves the problem of corner localization, which the histogram of gradients
+cannot do.
+
+Let us talk more about the structure tensor first and we will expand a bit more
+on the cornerness later on.
 
 ### Structure Tensor
 
-Formally we define the structure tensor as
+As we said it in the introduction, the structure tensor is a covariance matrix
+of local gradients.
+
+Let us define the structure tensor in the discrete domain first. Then we
+redefine it in the continuous domain. The continuous definition is useful to
+provide insights for a better and more efficient implementation in the discrete
+domain.
+
+#### Discrete Domain
+
+Formally we consider all the image gradients $\nabla I(\mathbf{x} + \mathbf{h})$
+within the image patch centered in $\mathbf{x}$ with radius $r$, that is, the
+set of pixels $\mathbf{x} + \mathbf{h}$ such that $|| \mathbf{h} || < r$.
+The gradients are reweighted by a weight function $w(\mathbf{h})$ which gives
+them more importance if they are closer to $\mathbf{x}$. Classically, the
+Gaussian kernel is used.
+
+In the discrete domain, the structure tensor is written as
 
 \begin{equation}
-  \mathbf{M} = \begin{bmatrix}
-    \int_\mathbf{x} w(\mathbf{x}) \frac{\partial I(\mathbf{x})}{\partial x}^2 d\mathbf{x}&&
+  \mathbf{M}(\mathbf{x}) = \begin{bmatrix}
+    \displaystyle \sum_\mathbf{h} w(\mathbf{h}) \left( \frac{\partial I
+    (\mathbf{x} + \mathbf{h})}{\partial x} \right)^2 &&
     %
-    \int_\mathbf{x} w(\mathbf{x})
-    \frac{\partial I(\mathbf{x})}{\partial x} \frac{\partial I(\mathbf{x})}{\partial y} d\mathbf{x}\\
+    \displaystyle \sum_\mathbf{h} w(\mathbf{h})
+    \frac{\partial I(\mathbf{x} + \mathbf{h})}
+         {\partial x}
+    \frac{\partial I(\mathbf{x} + \mathbf{h})}
+         {\partial y} \\
     %
-    \int_\mathbf{x} w(\mathbf{x})
-    \frac{\partial I(\mathbf{x})}{\partial x} \frac{\partial I(\mathbf{x})}{\partial y} d\mathbf{x} &&
+    \displaystyle \sum_\mathbf{h} w(\mathbf{h})
+    \frac{\partial I(\mathbf{x} + \mathbf{h})}
+         {\partial x}
+    \frac{\partial I(\mathbf{x} + \mathbf{h})}
+         {\partial y} &&
     %
-    \int_\mathbf{x} w(\mathbf{x}) \frac{\partial I(\mathbf{x})}{\partial y}^2 d\mathbf{x}\\
+    \displaystyle \sum_\mathbf{h} w(\mathbf{h}) \left( \frac{\partial I
+    (\mathbf{x} + \mathbf{u})}{\partial y} \right)^2
   \end{bmatrix}
 \end{equation}
 
-We can rewrite this with a bit of linear algebra
+#### Continuous Domain
+
+Since we mentioned the Gaussian kernel, which is **symmetric**, we can
+generalize the definition in the continous domain as a convolution with any
+distribution $w$.
 
 \begin{equation}
-  \mathbf{M} = \displaystyle \int_\mathbf{x} w(\mathbf{x})
-    \nabla I(\mathbf{x}) \nabla I(\mathbf{x})^T
-    d\mathbf{x}
+  \mathbf{M}(\mathbf{x}) = \begin{bmatrix}
+    \displaystyle \int w(\mathbf{h}) \left( \frac{\partial I (\mathbf{x} -
+    \mathbf{h})}{\partial x} \right)^2 d\mathbf{h}&&
+    %
+    \displaystyle \int w(\mathbf{h})
+    \frac{\partial I(\mathbf{x} - \mathbf{h})}
+         {\partial x}
+    \frac{\partial I(\mathbf{x} - \mathbf{h})}
+         {\partial y} d\mathbf{h}\\
+    %
+    \displaystyle \int w(\mathbf{h})
+    \frac{\partial I(\mathbf{x} - \mathbf{h})}
+         {\partial x}
+    \frac{\partial I(\mathbf{x} - \mathbf{h})}
+         {\partial y} d\mathbf{h} &&
+    %
+    \displaystyle \int w(\mathbf{h}) \left( \frac{\partial I (\mathbf{x} -
+    \mathbf{h})}{\partial y} \right)^2 d\mathbf{h}&&
+  \end{bmatrix}
+\end{equation}
+
+Now as a side note, in the sense of Lebesgue's integration, this definition
+coincides with the discrete definition using a discrete measure.
+
+We can re-express this more tersely, in functional notation with the $*$ symbol
+to denote a convolution operation
+\begin{equation}
+  \mathbf{M} = \begin{bmatrix}
+    w * \left( \frac{\partial I}{\partial x} \right)^2 &&
+    %
+    w *
+    \left( \frac{\partial I}{\partial x} \frac{\partial I} {\partial y} \right) \\
+    %
+    w *
+    \left( \frac{\partial I}{\partial x} \frac{\partial I} {\partial y} \right) &&
+    %
+    w *
+    \left( \frac{\partial I}{\partial y} \right)^2
+  \end{bmatrix}
+\end{equation}
+
+Again with a bit of linear algebra, we can rewrite this as
+
+\begin{equation}
+  \mathbf{M} = w * \left( \nabla I\ \nabla I^T \right)
+\end{equation}
+
+since
+\begin{equation}
+  \nabla I(\mathbf{x}) = \begin{bmatrix}
+    \frac{\partial I(\mathbf{x})}{\partial x} \\
+    \frac{\partial I(\mathbf{x})}{\partial y}
+  \end{bmatrix}
 \end{equation}
 
 This form is convenient from an implementation point of view.
 
-By extracting the eigenvalues and eigenvectors, we can calculate the two
-principal directions of the gradients, that is, those that appears most
-frequently, and then compare the "frequency" ratio between the two principal
-directions
+#### Interpretation
+
+Because the structure tensor is a covariance matrix, the structure
+tensor should capture in principle only two principal directions of the image
+gradients. The gradient directions are expected to be quasi-orthogonal.
+
+This is perfect for a square-like corner where only two gradient orientations
+should dominate. The structure tensor can also localize a edgel, only one
+gradient orientation should dominate.
+
+Indeed, the extraction of the eigenvectors will give us the two principal
+directions of the gradients, and its associated eigenvalues $\lambda_1,
+\lambda_2$ with $\lambda_1 > \lambda_2$  quantifies the "frequency" of these two
+principal directions.
+
+- If the local patch is **a uniform region**, the gradients are very small, the
+  covariance matrix should be close to zero, i.e., $\lambda_i \approx 0$.
+- If the local patch is on **an edge**, the covariance matrix should correspond
+  to a very elongated ellipse geometrically. The ratio between the lowest and
+  highest eigenvalues should be very small, i.e., each $\lambda_2 \ll \lambda_1$
+- If the local patch is on **a corner**, then covariance matrix should
+  correspond to a large circle. The ratio between the lowest and highest
+  eigenvalues should be close should be close to $1$, i.e.,
+  $\frac{\lambda_1}{\lambda_2} \approx 1$
+
+In principle, the structure tensor should detect only these types of features,
+corners or edgels. In practise however, it will respond strongly to junctions as
+well. This is one problem of the structure tensor because this relies on the
+assumption that edges are orthogonal...
+
+#### Other Practical Considerations
+
+In practice the image $I$ is first convolved with a Gaussian kernel $g$ of
+standard deviation $\sigma_D$. This is to reduce the aliasing and image noise.
+
+\begin{equation}
+  \mathbf{M} = g_{\sigma_I} * \left( \nabla I_{\sigma_D} * \ \nabla I_{\sigma_D}^T \right)
+\end{equation}
+where the convolved image with a gaussian kernel is denoted as
+\begin{equation}
+  I_{\sigma_D} = g_{\sigma_D} * I
+\end{equation}
+
+We need to mention another important consideration related to the **scale-space
+theory**.
+Assuming that the scale of the original image $I$ is exactly $1\ \textrm{pixel}$
+($\textrm{px}$)^[Since the camera cannot capture details less than 1 pixel on
+images in principle.], then the scale of the convolved image $I_{\sigma_D} =
+g_{\sigma_D} * I$ is
+
+\begin{equation}
+  t = \sqrt{1 + \sigma_D^2}\ \textrm{px}
+\end{equation}
+
+This has an important consequence in practice.
+
+1. Image details within a window of $t$
+pixels are lost because of the Gaussian blur -- in principle.
+
+2. The integration scale $\sigma_I$ in the structure tensor means that we are
+considering local patches with radius $t \sigma_I = \sqrt{1 + \sigma_D^2}
+\ \sigma_I$ to decide whether we see a
+corner or not. This means that the best corners are separated by at least
+$t \sigma_I$ pixels.
+
+
+### Cornerness Function
+
+**TODO**
+
 
 ### Spiral Model
 
@@ -56,10 +218,7 @@ the structure tensor. This time, the structure is also parameterized with a 2D
 rotation matrix parameterized by an angle $\alpha$ in the structure tensor.
 
 \begin{equation}
-  \mathbf{M}(\alpha) = \displaystyle \int_\mathbf{x} w(\mathbf{x})
-  \mathbf{R}_\alpha \nabla I(\mathbf{x})
-  \nabla I(\mathbf{x})^T
-  \mathbf{R}_\alpha^T
-  d\mathbf{x}
+  \mathbf{M}(\alpha) = w *
+  \mathbf{R}_\alpha \nabla I \nabla I^T \mathbf{R}_\alpha^T
 \end{equation}
 
