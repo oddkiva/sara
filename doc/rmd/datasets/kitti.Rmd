@@ -1,4 +1,4 @@
-## KITTI
+# KITTI
 
 KITTI [@geiger:2013:ijrr] is a very comprehensive benchmark suite that touches
 upon many relevant computer vision tasks. This benchmark is clearly geared
@@ -13,7 +13,7 @@ In the object detection challenge -- be it whether 2D or 3D, it does not matter
 since the provided data provided is pretty much the same for both tasks -- it is
 worth focusing our attention on deciphering the calibration data.
 
-### Camera Sensors
+## Camera Sensors
 
 In the Figure \@ref(fig:kitti-sensors) borrowed from the setup page
 http://www.cvlibs.net/datasets/kitti/setup.php, the car is equipped with:
@@ -61,7 +61,7 @@ if (knitr::is_latex_output()) {
 knitr::include_graphics(sensors_file)
 ```
 
-### 3D Geometry of Annotations
+## 3D Geometry of Annotations
 
 For a given image, we are provided a label file that lists object annotations
 where each object annotation contains the following geometry:
@@ -189,7 +189,7 @@ We can double-check these by examining the MATLAB code provided in the
 development kit.
 
 
-### Projection of 3D World Points to the Camera #2's Film
+## Projection of 3D World Points to the Camera #2's Film
 
 One important thing to note is that the camera coordinate system refers to the
 coordinate system associated to Camera #0. Thus the vertices $\mathbf{X}$

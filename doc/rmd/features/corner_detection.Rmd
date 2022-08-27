@@ -1,10 +1,10 @@
-## Corners and Junctions
+# Corners and Junctions
 
 Detecting corners can be done in many different ways. One robust way to do so is
 to analyze of the local distribution of image gradients at each pixel of the
 image. From there, we can identify the dominant orientations of the gradients.
 
-### Histogram of Gradients as Insight
+## Histogram of Gradients as Insight
 
 We can calculate one histogram of gradients per pixel and then localize the
 dominant gradient orientations which are localized at the histogram peaks.
@@ -33,7 +33,7 @@ cannot do.
 Let us talk more about the structure tensor first and we will expand a bit more
 on the cornerness later on.
 
-### Structure Tensor
+## Structure Tensor
 
 As we said it in the introduction, the structure tensor is a covariance matrix
 of local gradients.
@@ -43,7 +43,7 @@ redefine it in the continuous domain. The continuous definition is useful to
 provide insights for a better and more efficient implementation in the discrete
 domain.
 
-#### Discrete Domain
+### Discrete Domain
 
 Formally we consider all the image gradients $\nabla I(\mathbf{x} + \mathbf{h})$
 within the image patch centered in $\mathbf{x}$ with radius $r$, that is, the
@@ -76,7 +76,7 @@ In the discrete domain, the structure tensor is written as
   \end{bmatrix}
 \end{equation}
 
-#### Continuous Domain
+### Continuous Domain
 
 Since we mentioned the Gaussian kernel, which is **symmetric**, we can
 generalize the definition in the continous domain as a convolution with any
@@ -140,7 +140,7 @@ since
 
 This form is convenient from an implementation point of view.
 
-#### Interpretation
+### Interpretation
 
 Because the structure tensor is a covariance matrix, the structure
 tensor should capture in principle only two principal directions of the image
@@ -170,7 +170,7 @@ corners or edgels. In practise however, it will respond strongly to junctions as
 well. This is one problem of the structure tensor because this relies on the
 assumption that edges are orthogonal...
 
-#### Other Practical Considerations
+### Other Practical Considerations
 
 In practice the image $I$ is first convolved with a Gaussian kernel $g$ of
 standard deviation $\sigma_D$. This is to reduce the aliasing and image noise.
@@ -206,12 +206,12 @@ corner or not. This means that the best corners are separated by at least
 $t \sigma_I$ pixels.
 
 
-### Cornerness Function
+## Cornerness Function
 
 **TODO**
 
 
-### Spiral Model
+## Spiral Model
 
 I learnt from [@ForstnerDS:2009:iccv] that the spiral model is an extension of
 the structure tensor. This time, the structure is also parameterized with a 2D

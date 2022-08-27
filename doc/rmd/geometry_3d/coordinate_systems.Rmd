@@ -14,9 +14,9 @@ Cartesian one. And of course, non-Cartesian coordinate systems such as the
 cylindric one can also be used for any reference frame.
 :::
 
-Let us detail how we go from the world coordinates $(O_W, \mathbf{i}_W,
-\mathbf{j}_W,\mathbf{k}_W)$ to the camera coordinates $(O_C, \mathbf{i}_C,
-\mathbf{j}_C,\mathbf{k}_C)$. We assume the basis vectors are *orthonormal* and
+Let us detail how we go from the camera coordinates $(O_C, \mathbf{i}_C,
+\mathbf{j}_C,\mathbf{k}_C)$ to the world coordinates $(O_W, \mathbf{i}_W,
+\mathbf{j}_W,\mathbf{k}_W)$. We assume the basis vectors are *orthonormal* and
 *right-handed*, that is each vector has a magnitude equal to $1$ and forms
 mutually a right angle between each of them.
 

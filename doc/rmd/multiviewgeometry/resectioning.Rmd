@@ -1,4 +1,4 @@
-## Pose Recovery
+# Pose Recovery
 
 The pose recovery is another important problem that is solved in
 Structure-from-Motion. The pose recovery can be tackled differently depending on
@@ -37,7 +37,7 @@ There are two situations in Structure-from-Motion:
    mathematical camera model explains best the formation of image $I$ and we
    know the parameter values associated to this model.
 
-### First Situation: Camera Resectioning
+## First Situation: Camera Resectioning
 
 The first situation can be solved by means of standard linear algebra.
 Specifically the calibration software Bundler [@SnavelySS:2008:ijcv] uses
@@ -128,7 +128,7 @@ the distances.
   (\#eq:pnp-distance-equality)
 \end{equation}
 
-#### Determining the Rigid Body Transform from Known Scales.
+### Determining the Rigid Body Transform from Known Scales.
 
 In this paragraph, let us assume for a moment that we know each scale
 $\lambda_i$. Then we are able to determine completely the rigid body transform
@@ -256,7 +256,7 @@ remarkable identity:
   = || \mathbf{x}_i - \mathbf{x}_j ||_2^2
 \end{equation}
 
-#### Three Inhomogeneous Quadrics
+### Three Inhomogeneous Quadrics
 
 [@PerssonN:2018:eccv] recognize three degenerate inhomogeneous quadratic forms
 in the 3D vector $\mathbf{\Lambda} = \begin{bmatrix} \lambda_0 \\ \lambda_1 \\
@@ -322,7 +322,7 @@ characterize these three quadratic form geometrically as follows.
 - the axis of each of these cylinders are mutually orthogonal as the zero column vector
   appears at different column index upon examination of the matrices.
 
-#### Two Homogeneous Quadrics
+### Two Homogeneous Quadrics
 
 The $\mathbf{\Lambda}$ that lie in the three inhomogeneous quadrics necessarily
 lie in two homogeneous quadrics.
@@ -354,7 +354,7 @@ proof-reading the paper [@PerssonN:2018:eccv] to point out the errors in the
 paper.
 :::
 
-#### Cubic Equation
+### Cubic Equation
 
 This is the main idea of [@PerssonN:2018:eccv], we go one step further by
 linearly combining the two homogeneous quadrics $\mathbf{D}_1$ and
@@ -422,7 +422,7 @@ where $\mathbf{D}_{ij}$ denotes the $j$-th column vector of matrix
 $\mathbf{D}_i$.
 
 
-##### Proof-Reading
+#### Proof-Reading
 
 Let us proof-read the formula of the cubic polynomial with Python and the
 wonderful SymPy package [@SymPy:2017:peerj] via literate programming
@@ -486,7 +486,7 @@ for i in range(0, 4):
         sp.simplify(c[i] - our_coeff[i])))
 ```
 
-#### The Diagonalization Method
+### The Diagonalization Method
 
 First let us explain the Eigen decomposition proposed by the paper.
 
@@ -552,7 +552,7 @@ Because $\lambda_1$ is a positive scalar, this equation amounts to finding the
 roots on the quadratic polynomial in the variable $\tau$.
 
 
-#### The $\tau$ Polynomial.
+### The $\tau$ Polynomial.
 
 Again the coefficients of the $\tau$ polynomial are riddled with errors. By
 manually recalculating the coefficients or double-checking with SymPy, instead
@@ -580,7 +580,7 @@ That might make the Gauss-Newton unnecessary as advised in the paper, or at
 least require less iterations.
 
 
-##### Proof-reading
+#### Proof-reading
 
 ```{python, echo=TRUE, cache=TRUE}
 import sympy as sp
@@ -631,7 +631,7 @@ for i in range(3):
 ```
 
 
-##### Determinining the Scales $\lambda_i$ from Auxiliary variables
+#### Determinining the Scales $\lambda_i$ from Auxiliary variables
 
 Let us just mention another error in the paper which is the solution of Equation
 (16), it should be instead^[This is the one blatant error that the review

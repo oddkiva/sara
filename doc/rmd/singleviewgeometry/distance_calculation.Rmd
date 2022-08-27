@@ -1,10 +1,9 @@
-# Distance Estimation for Animal Conservation
+# Visual Metrology for Animal Conservation
 
-Visual metrology and distance calculation are important problems that must be
-treated carefully in autonomous driving systems to guarantee the safety of
-pedestrians.
+Visual metrology is an important problem that must be treated carefully in
+autonomous driving systems to guarantee the safety of pedestrians.
 
-But this can be useful too for animal conservation. So instead of talking about
+But this can be useful for animal conservation too. So instead of talking about
 road safety which is already widely treated in the computer vision industry, let
 us to see how these problems could be used to protect animals and monitor their
 demographics as an attempt to bring more awareness and justice to environmental
