@@ -1,4 +1,4 @@
-## A Possible Use Case for Animal Conservation
+# Distance Estimation for Animal Conservation
 
 Visual metrology and distance calculation are important problems that must be
 treated carefully in autonomous driving systems to guarantee the safety of
@@ -43,7 +43,7 @@ pixel coordinates.
 Throughout this section, the main assumption we make is that *the ice floe is
 planar*.
 
-### Ideal Case
+## Ideal Case
 
 The drone is flying and it is staying still in the air at an altitude of $h$
 meters. It is equipped with a front camera in an upright position. The camera is
@@ -85,7 +85,7 @@ Thus the metric coordinates of a penguin are:
   \right.
 \end{equation}
 
-### A Motivating Example: Nonzero Pitch Angle
+## A Motivating Example: Nonzero Pitch Angle
 
 In real life, the drone does not necessarily have a perfect a zero pitch angle
 and this peculiar camera orientation may not be optimal to observe penguins. We
@@ -174,7 +174,7 @@ In the end:
 By reinjecting $z$ in the equations, we determine the $x$ metric coordinate
 of the penguin.
 
-### Generalization to Any Global Rigid Transform
+## Generalization to Any Global Rigid Transform
 
 The previous subsection has described how we could calculate the metric
 coordinates of each penguin using elementary algebraic manipulations for a very
@@ -295,7 +295,7 @@ invertible linear system:
 This will determine the missing coordinates $x$ and $y$, which is
 what we want.
 
-### Generalization to Any Camera Model
+## Generalization to Any Camera Model
 
 So far our mathematical formulation assumes that the image formation is done via
 perspective projection because we have assumed a pinhole camera model. In words,
@@ -339,7 +339,7 @@ vision because it assumes the camera model is the ideal pinhole camera. This is
 not the case when we are dealing with more complicated cameras that have lens
 distortions.
 
-#### An Example of Non-Perspective Image Formation: The Fisheye Camera Model
+### An Example of Non-Perspective Image Formation: The Fisheye Camera Model
 
 Also what happens if the image is instead formed from a fisheye camera with
 field of view much larger than $180^{\circ}$? The fisheye camera is apparently
@@ -434,7 +434,7 @@ image plane at pixel coordinates $\mathbf{u}$ is calculated as
 :::
 
 
-#### Mathematical Derivation
+### Mathematical Derivation
 
 A subtle yet important difference is that the light ray vector $\mathbf{v}$ for
 the fisheye camera model and other camera models is that the similar triangle
@@ -494,7 +494,7 @@ Notice that the cheirality condition $\lambda > 0$ also reappears in this
 generalized approach just like in the perspective projection induced by the
 ideal pinhole camera.
 
-### Visual Metrology for Animal Measurements
+## Visual Metrology for Animal Measurements
 
 Biologists need to measure animals to get an understanding of a animal
 population's current health and diet and its demographic dynamics. Most of the

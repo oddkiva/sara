@@ -1,4 +1,5 @@
-# Structure-from-Motion
+# (PART\*) Structure-from-Motion {-}
+
 
 This chapter details some classical algorithms that *Sara* implements in
 Multiple View Geometry.

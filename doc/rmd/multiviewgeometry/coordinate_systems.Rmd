@@ -1,4 +1,4 @@
-## Changing Reference Frames
+# Reference Frames
 
 :::fyi
 In this section, I use *reference frame* and *coordinate system*
@@ -167,7 +167,7 @@ inverse rotation matrix is calculated by transposition
 ```
 :::
 
-## Euler Angles
+# Euler Angles
 
 In engineering, we like to decompose any 3D rotation into Euler angles as they
 are quite intuitive to understand. The usual convention that is followed is
@@ -203,7 +203,7 @@ composed in the following order:
 Once again let us stress that the order to which we apply each elementary
 rotation is very important.
 
-### Formula of Elementary Rotations
+## Formula of Elementary Rotations
 
 Every now and then we may forget the formula of each elementary rotation and in
 particular we do not remember their signs and orientations.
@@ -252,7 +252,7 @@ each coefficient.
   \end{equation}
   :::
 
-### Composite Euler Rotation
+## Composite Euler Rotation
 
 The rotation matrix expressed with respect to the *extrinsic* axes (i.e., the
 axes of the original local coordinates before rotating the airplane) is
