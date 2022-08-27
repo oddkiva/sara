@@ -1,12 +1,12 @@
 \newcommand{\ji}{\begin{bmatrix} j \\ i \end{bmatrix}}
 \newcommand{\oneone}{\begin{bmatrix} 1 \\ 1 \end{bmatrix}}
 
-# SIFT Descriptors
+# SIFT Descriptor
 
 At this time, this chapter contains only one section in which I write about the
 SIFT descriptor.
 
-## SIFT is still State-of-the-Art
+## SIFT still State-of-the-Art
 
 This section breaks down the SIFT descriptor that *Sara* implements.
 

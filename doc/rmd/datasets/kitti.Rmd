@@ -26,14 +26,21 @@ http://www.cvlibs.net/datasets/kitti/setup.php, the car is equipped with:
 setup_top_view_file = "http://www.cvlibs.net/datasets/kitti/images/setup_top_view.png"
 if (knitr::is_latex_output()) {
   setup_top_view_local_file = paste0(getwd(),
-                                     "/../figures/kitti_setup_top_view.png")
+                                     "/figures/kitti_setup_top_view.png")
   if (!file.exists(setup_top_view_local_file))
     download.file(setup_top_view_file, setup_top_view_local_file, mode = 'wb')
   setup_top_view_file = setup_top_view_local_file
 }
 ```
 
-```{r kitti-sensors, echo=FALSE, fig.align="center", fig.cap="Sensors mounted on the car. Credits: www.cvlibs.net."}
+```{r}
+#| echo: false
+#| warning: false
+#| label: kitti-sensors
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   Sensors mounted on the car. Credits: www.cvlibs.net.
 knitr::include_graphics(setup_top_view_file)
 ```
 
@@ -50,14 +57,21 @@ axis convention where:
 sensors_file = "http://www.cvlibs.net/datasets/kitti/images/passat_sensors_920.png"
 if (knitr::is_latex_output()) {
   sensors_local_file = paste0(getwd(),
-                              "/../figures/kitti_passat_sensors_920.png")
+                              "/figures/kitti_passat_sensors_920.png")
   if (!file.exists(sensors_local_file))
     download.file(sensors_file, sensors_local_file, mode = 'wb')
   sensors_file = sensors_local_file
 }
 ```
 
-```{r kitti-sensors-2, echo=FALSE, fig.align="center", fig.cap="This image shows the coordinate system used for each sensor. Credits: www.cvlibs.net."}
+```{r}
+#| echo: false
+#| warning: false
+#| label: kitti-sensors-2
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   This image shows the coordinate system used for each sensor. Credits: www.cvlibs.net.
 knitr::include_graphics(sensors_file)
 ```
 

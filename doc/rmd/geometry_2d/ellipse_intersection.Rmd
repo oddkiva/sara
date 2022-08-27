@@ -45,8 +45,14 @@ calculate the ellipse area as a warm-up.
 
 Observe the ellipse below:
 
-```{r riemannsum, echo = FALSE, fig.align = 'center', fig.cap = "Riemann sum approximating the upper quadrant area of the ellipse."}
-
+```{r}
+#| echo: false
+#| warning: false
+#| label: riemannsum
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   "Riemann sum approximating the upper quadrant area of the ellipse.
 knitr::include_graphics("figures/ellipsearea.png")
 ```
 
@@ -92,8 +98,14 @@ The differential is $\mathop{\mathrm{d}x} = a \cos(\theta)
 In this part, we review the computation of the area of an ellipse sector. We
 complement [@Eberly] with a bit more details.
 
-```{r ellsector, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector bounded by the polar angles $(\\theta_1, \\theta_2)$ is colored in blue"}
-
+```{r}
+#| echo: false
+#| warning: false
+#| label: ellsector
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|  The ellipse sector bounded by the polar angles $(\theta_1, \theta_2)$ is colored in blue
 knitr::include_graphics("figures/ellipticalsector.png")
 ```
 
@@ -212,8 +224,15 @@ quantity
 
 ### Area Bounded by a Line Segment and an Elliptical Arc
 
-```{r ellsector2, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector bounded by a line segment and the elliptical arc $(\\theta_1, \\theta_2)$ is colored in blue."}
-
+```{r}
+#| echo: false
+#| warning: false
+#| label: ellsector2
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   The ellipse sector bounded by a line segment and the elliptical arc
+#|   $(\theta_1, \theta_2)$ is colored in blue.
 knitr::include_graphics("figures/ellipticalsector2.png")
 ```
 
@@ -633,21 +652,13 @@ have
 Either one ellipse is contained in the other or there are separated as
 illustrated in the figures below.
 
-```{r inter01, fig.show='hide', echo=FALSE}
-library(knitr)
-inter_0a <- "figures/test0a.png"
-inter_0b <- "figures/test0b.png"
-inter_1a <- "figures/test1a.png"
-inter_1b <- "figures/test1b.png"
-```
-
-0 Intersection Point           |
--------------------------------|-------------------------------:
-With Area Intersection         | Without Area Intersection
-`r include_graphics(inter_0a)` | `r include_graphics(inter_0b)`
-1 Intersection Point           |
-With Area Intersection         | Without Area Intersection
-`r include_graphics(inter_1a)` |`r include_graphics(inter_1b)`
+0 Intersection Point               |
+-----------------------------------|-------------------------------:
+With Area Intersection             | Without Area Intersection
+![](figures/test0a.png){width=90%} | ![](figures/test0b.png){width=90%}
+1 Intersection Point               |
+With Area Intersection             | Without Area Intersection
+![](figures/test1a.png){width=90%} | ![](figures/test1b.png){width=90%}
 
 An ellipse, say $\mathcal{E}_1$, is contained in the other $\mathcal{E}_2$ if
 and only if its center satisfies $E_2(\mathbf{x}_1) < 0$. In that case, the area
@@ -680,15 +691,9 @@ intersection area.
 
 Otherwise we have to consider cases as illustrated in the figures below.
 
-```{r inter2, fig.show='hide', echo=FALSE}
-library(knitr)
-inter_2a <- "figures/inter2a.png"
-inter_2b <- "figures/inter2b.png"
-```
-
-2 Intersection Points (Case 1)  | 2 Intersection Points (Case 2)
---------------------------------|-------------------------------:
-`r include_graphics(inter_2a)`  |`r include_graphics(inter_2b)`
+2 Intersection Points (Case 1)      | 2 Intersection Points (Case 2)
+------------------------------------|-------------------------------:
+![](figures/inter2a.png){width=90%} | ![](figures/inter2b.png){width=90%}
 
 Geometrically speaking, we easily see that the intersection area is the sum of
 the smallest elliptic portions on both sides of the line formed by joining
@@ -723,15 +728,9 @@ a special case since the polygonal area is zero for $2$ intersection points.
 
 ### 3 and 4 intersection points
 
-```{r inter34, fig.show = 'hide', echo = FALSE}
-library(knitr)
-inter_3 <- "figures/inter3.png"
-inter_4 <- "figures/inter4.png"
-```
-
-3 Intersection Points        | 4 Intersection Points
------------------------------|-----------------------------:
-`r include_graphics(inter_3)`|`r include_graphics(inter_4)`
+3 Intersection Points              | 4 Intersection Points
+-----------------------------------|-----------------------------:
+![](figures/inter3.png){width=90%} | ![](figures/inter4.png){width=90%}
 
 These cases are rather easy to handle. Indeed we deduce geometrically
 from the figures above the following formula.
