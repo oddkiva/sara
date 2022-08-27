@@ -5,7 +5,7 @@ Structure-from-Motion. The pose recovery can be tackled differently depending on
 the situation we are in. There are two situations that I have found in my
 current understanding.
 
-### Problem Statement
+## Problem Statement
 
 The problem of pose recovery starts with the following assumption. We know that
 a set of 2D image points $\{ \mathbf{u}_i \}_i$ in an image $I$ respectively
@@ -46,7 +46,7 @@ of the camera pose. After which, a bundle adjustment procedure refines the pose
 $(\mathbf{R}, \mathbf{t})$ of the camera and its intrinsic parameters, which
 include the calibration matrix $\mathbf{K}$ and the distortion coefficients.
 
-### Second Situation: Perspective-n-Point
+## Second Situation: Perspective-n-Point
 
 In the second situation, we know the camera model and its associated parameter
 values. As a result, we can calculate the incident light ray vector
