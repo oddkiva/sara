@@ -1,4 +1,4 @@
-# Pose Recovery
+# Pose Recovery aka PnP
 
 The pose recovery is another important problem that is solved in
 Structure-from-Motion. The pose recovery can be tackled differently depending on

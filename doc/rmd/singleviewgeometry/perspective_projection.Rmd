@@ -158,29 +158,3 @@ and we have the equivalence
 
 Thus we have introduced by construction a perspective projection matrix
 $\mathbf{C}$, in which homogeneous coordinates appear naturally.
-
-### Perspective Projection Matrix
-
-**TODO: proof-read this and it is being embryonary.**
-
-In computer vision, the projection matrix is presented as a $4 \times 3$ matrix.
-A such matrix emphasizes the fact that the image formation necessarily implies
-the loss of one dimension as we go from 3D to 2D.
-
-In computer graphics, in particular in educational resources related to OpenGL,
-the projection matrix is presented as a $4 \times 4$ matrix, which may be a
-source of confusion. In linear algebra, being square, this matrix satisfying the
-definition of a projection matrix in linear algebra because in the general case
-a projection matrix $\mathbf{P}$ is by definition square and satisfies
-$\mathbf{P}^2 = \mathbf{P}$.
-
-The equivalent projection matrix is
-
-\begin{equation}
-  \begin{bmatrix}
-    1 & 0 & 0 & 0 \\
-    0 & 1 & 0 & 0 \\
-    0 & 0 & 1 & 0 \\
-    0 & 0 & 1 & 0
-  \end{bmatrix}
-\end{equation}
