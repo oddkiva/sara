@@ -100,8 +100,28 @@ acquisition, *illumination* changes, *etc*.
 
 By design, SIFT can encode the photometric information of the region around the
 keypoint $k$ in a similarity-invariant manner if we make use of the scale
-$\sigma$ and the dominant gradient orientation $\theta$. To plant the ideas in
-our mind, the center of the keypoint $k$ is some blob.
+$\sigma$ and the dominant gradient orientation $\theta$.
+
+To plant the ideas in our mind, let us imagine that the keypoint $k$ describes the
+large dark head of the sunflower surrounded by yellow leaves, that forms a
+bright background as depicted in Figure \@ref(fig:sunflower-heads).
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: sunflower-heads
+#| out.width: 50%
+#| fig.align: center
+#| fig.cap: >
+#|   On an image depicting a field of of sunflowers, the SIFT blob detector
+#|   produces dark blobs $k_i$, many of which are typically sunflower heads.
+#|   Dark blobs $k_i$ are illustrated as red oriented circles with radius
+#|   $\sqrt{2} \sigma_i$ and with dominant gradient orientation $\theta_i$
+#|   represented by a line.
+#|   Bright blobs are on the other hand typically sunflower leaves.
+knitr::include_graphics(paste0(getwd(), "/features/sunflower-heads.png"))
+```
+
 
 By similarity invariance, we mean that the descriptor is able to estimate the
 characteristic size of the blob and its orientation, so that we can transform
