@@ -1,6 +1,15 @@
 bookdown::bs4_book:
-  # theme:
-  #   primary: "#637238"
+  theme:
+    base_font:
+      google: Sen
+    heading_font:
+      google:
+        family: Bitter
+        wght: 300
+    code_font:
+      google:
+        family: DM Mono
+        local: false
   repo:
     base: https://gitlab.com/DO-CV/sara
     branch: master
@@ -30,8 +39,6 @@ bookdown::pdf_book:
   citation_package: natbib
   keep_tex: yes
   extra_dependencies: [
-    # Change fonts.
-    "mathpazo",
     # Font optimization.
     "microtype",
     # Minimal math packages.
