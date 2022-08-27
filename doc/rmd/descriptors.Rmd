@@ -92,7 +92,7 @@ A peculiarity with SIFT is that each image sub-patch $(i, j)$ that form the grid
 trilinear interpolation trick as we will see later.
 :::
 
-### Design Details
+### Canonical Image Patch
 
 The design of SIFT is geared towards robustness w.r.t. *noisy* estimation of
 keypoint position, scale and orientation, *lossy and noisy* image
