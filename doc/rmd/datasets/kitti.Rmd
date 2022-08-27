@@ -26,7 +26,7 @@ http://www.cvlibs.net/datasets/kitti/setup.php, the car is equipped with:
 setup_top_view_file = "http://www.cvlibs.net/datasets/kitti/images/setup_top_view.png"
 if (knitr::is_latex_output()) {
   setup_top_view_local_file = paste0(getwd(),
-                                     "/../figures/kitti_setup_top_view.png")
+                                     "/figures/kitti_setup_top_view.png")
   if (!file.exists(setup_top_view_local_file))
     download.file(setup_top_view_file, setup_top_view_local_file, mode = 'wb')
   setup_top_view_file = setup_top_view_local_file
@@ -50,7 +50,7 @@ axis convention where:
 sensors_file = "http://www.cvlibs.net/datasets/kitti/images/passat_sensors_920.png"
 if (knitr::is_latex_output()) {
   sensors_local_file = paste0(getwd(),
-                              "/../figures/kitti_passat_sensors_920.png")
+                              "/figures/kitti_passat_sensors_920.png")
   if (!file.exists(sensors_local_file))
     download.file(sensors_file, sensors_local_file, mode = 'wb')
   sensors_file = sensors_local_file
