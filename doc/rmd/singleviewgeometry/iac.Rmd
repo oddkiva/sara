@@ -56,8 +56,9 @@ absolute quadric iff
   = 0
 \end{equation}
 
-Let's observe that $w^2 = 0$ necessarily mean $w = 0$ and therefore the equality
-is equivalent to the absolute conic formulation.
+Note that because points on the absolute conic are on the plane at infinity,
+we also need to impose a second constraint $w = 0$ to ensure the equivalence
+with the absolute conic formulation.
 
 The AQ is therefore characterized by the matrix
 \begin{equation}
