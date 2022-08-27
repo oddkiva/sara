@@ -33,7 +33,14 @@ if (knitr::is_latex_output()) {
 }
 ```
 
-```{r kitti-sensors, echo=FALSE, fig.align="center", fig.cap="Sensors mounted on the car. Credits: www.cvlibs.net."}
+```{r}
+#| echo: false
+#| warning: false
+#| label: kitti-sensors
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   Sensors mounted on the car. Credits: www.cvlibs.net.
 knitr::include_graphics(setup_top_view_file)
 ```
 
@@ -57,7 +64,14 @@ if (knitr::is_latex_output()) {
 }
 ```
 
-```{r kitti-sensors-2, echo=FALSE, fig.align="center", fig.cap="This image shows the coordinate system used for each sensor. Credits: www.cvlibs.net."}
+```{r}
+#| echo: false
+#| warning: false
+#| label: kitti-sensors-2
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   This image shows the coordinate system used for each sensor. Credits: www.cvlibs.net.
 knitr::include_graphics(sensors_file)
 ```
 
