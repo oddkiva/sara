@@ -652,14 +652,6 @@ have
 Either one ellipse is contained in the other or there are separated as
 illustrated in the figures below.
 
-```{r inter01, fig.show='hide', echo=FALSE}
-library(knitr)
-inter_0a <- "figures/test0a.png"
-inter_0b <- "figures/test0b.png"
-inter_1a <- "figures/test1a.png"
-inter_1b <- "figures/test1b.png"
-```
-
 0 Intersection Point               |
 -----------------------------------|-------------------------------:
 With Area Intersection             | Without Area Intersection
