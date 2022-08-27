@@ -70,8 +70,15 @@ circular and only guarantees invariance to similarity transforms
 (scale+rotation) in contrast to other affine invariant features presented in
 [@MikolajczykTSZMSKVG:2005:ijcv].
 
-```{r sift-feature, echo=FALSE, fig.align='center', fig.cap="Geometric characteristics of a SIFT feature. Credits: http://www.vlfeat.org/overview/sift.html."}
-
+```{r}
+#| echo: false
+#| warning: false
+#| label: sift-feature
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   Geometry of a SIFT feature.
+#|   Credits: http://www.vlfeat.org/overview/sift.html.
 knitr::include_graphics(paste0(getwd(), "/features/feature.png"))
 ```
 
@@ -90,8 +97,15 @@ initial feature detection. We will not go into details about this method and
 will be content with illustrating such features with Figure
 \@ref(fig:affine-covariant-regions).
 
-```{r affine-covariant-regions, echo=FALSE, fig.align='center', fig.cap="Locally Affine-Invariant Features. Credits: [@MikolajczykTSZMSKVG:2005:ijcv]"}
-
+```{r}
+#| echo: false
+#| warning: false
+#| label: affine-covariant-regions
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   Locally Affine-Invariant Features.
+#|   Credits: [@MikolajczykTSZMSKVG:2005:ijcv]
 knitr::include_graphics(paste0(getwd(), "/features/AffineCovariantRegions.png"))
 ```
 

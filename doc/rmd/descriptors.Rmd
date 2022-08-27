@@ -6,7 +6,7 @@
 At this time, this chapter contains only one section in which I write about the
 SIFT descriptor.
 
-## SIFT is still State-of-the-Art
+## SIFT still State-of-the-Art
 
 This section breaks down the SIFT descriptor that *Sara* implements.
 

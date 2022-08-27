@@ -153,7 +153,7 @@ cross-product $\mathbf{n} = \mathbf{a} \times \mathbf{b}$.
 The equation of the backprojected sea surface in 3D is therefore
 
 \begin{equation}
-  \mathbf{Pi}_\textrm{sea} = \mathbf{K}^T (\mathbf{a} \times \mathbf{b}).
+  \mathbf{\Pi}_\textrm{sea} = \mathbf{K}^T (\mathbf{a} \times \mathbf{b}).
 \end{equation}
 
 The normal of the sea surface is expressed in the camera frame, which we indeed
