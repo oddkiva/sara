@@ -1,4 +1,4 @@
-## Essential Matrix and Relative Motion
+# Essential Matrix and Relative Motion
 
 Consider two cameras $C_0$ and $C_1$. To fix ideas in our mind, let us imagine
 that:
@@ -127,9 +127,9 @@ The following remarks are useful to debug code dealing with structure-from-motio
 :::
 
 
-## Bundle Adjustment
+# Bundle Adjustment
 
-### My Personal Intellectual Journey about the Incremental Bundle Adjustment
+## Some (False) Understanding about Incremental Bundle Adjustment
 
 In this paragraph I document my first intellectual journey in order to
 understand how the incremental bundle adjustment is done. My reasoning started
@@ -201,7 +201,7 @@ In the end the epipolar geometry serves mostly to:
 In the next section we describe the DLT method to initialize the pose.
 
 
-### Camera Resectioning for Incremental Bundle Adjustment
+## Camera Resectioning for Incremental Bundle Adjustment
 
 The relative pose estimation allows to recover the position of two cameras. How
 do we choose the third camera and initialize its pose?

@@ -1,4 +1,4 @@
-## Nister's Method for the Relative Pose Estimation
+# Nister's Method for the Relative Pose Estimation
 
 This method is originally published in CVPR [@nister:2003:cvpr] and republished
 at length in PAMI [@nister:2004:pami]. It solves the essential matrix from $5$
@@ -47,7 +47,7 @@ $\be$ lives in the nullspace of $\mathbf{Q}$ which is of
 dimension $4$. And the nullspace depends on the $5$ point
 correspondences.
 
-### Nullspace Decomposition
+## Nullspace Decomposition
 
 Using a singular value decomposition allows us to express the nullspace
 $\mathrm{Null}(\mathbf{Q})$ as a span of 4 basis vectors $(\mathbf{x},
@@ -66,7 +66,7 @@ combination of these $4$ basis vectors
 
 The goal is to determine the value of the real scalars $x, y, z$.
 
-### Essential Matrix Constraints
+## Essential Matrix Constraints
 
 :::fyi
 Before proceeding onwards, let us mention a notational peculiarity used to
@@ -177,7 +177,7 @@ algebraic operations. This is very neat as we do not need to learn a new
 mathematical theory to solve this specific geometric problem. We detail how he
 does it.
 
-### Gauss-Jordan Elimination
+## Gauss-Jordan Elimination
 
 :::note
 This subsection is the trickiest part to understand in the method. Let us detail

@@ -1,12 +1,10 @@
-# Geometry
+# Ellipse Intersections {#ellipse-intersection}
 
-Presently I only write about the ellipse intersections. If I have to solve some more
+Presently I only write about ellipse intersections. If I have to solve some more
 interesting topics during my learning journey, I will share a few words about what I
 have learnt here.
 
-## Ellipse Intersections {#ellipse-intersection}
-
-### Context
+## Context
 
 I had to calculate ellipse intersections in the feature matching method I
 published in [@ok:hal-00743044] and which I also made available in *Sara*.
@@ -22,7 +20,7 @@ I revisited again [@Eberly]'s study in the appendix of my thesis
 and provided some corrections. The modest contribution of this text is to break
 down a bit more the implementation details when you read the code in *Sara*.
 
-### Origin-Centered Axis-Aligned Ellipses
+## Origin-Centered Axis-Aligned Ellipses
 
 Let us start by considering an ellipse $\mathcal{E}$ with semi-major axis $a$
 and semi-minor axis $b$, *i.e.*, $a \geq b > 0$. We suppose that $\mathcal{E}$
@@ -40,7 +38,7 @@ The equation of the ellipse $\mathcal{E}$ is
 ```
 :::
 
-#### Ellipse Area
+### Ellipse Area
 
 In case our math skills feel rusty, it is worth reminding ourselves how to
 calculate the ellipse area as a warm-up.
@@ -89,7 +87,7 @@ The differential is $\mathop{\mathrm{d}x} = a \cos(\theta)
 \end{align}
 ```
 
-#### Area of an Elliptical Sector
+### Area of an Elliptical Sector
 
 In this part, we review the computation of the area of an ellipse sector. We
 complement [@Eberly] with a bit more details.
@@ -212,7 +210,7 @@ quantity
 ```
 :::
 
-#### Area Bounded by a Line Segment and an Elliptical Arc
+### Area Bounded by a Line Segment and an Elliptical Arc
 
 ```{r ellsector2, echo = FALSE, fig.align = 'center', fig.cap = "The ellipse sector bounded by a line segment and the elliptical arc $(\\theta_1, \\theta_2)$ is colored in blue."}
 
@@ -303,7 +301,7 @@ With this definition:
 
   since $A(\theta_1, \theta_2) = -A(\theta_2, \theta_1)$
 
-### General Ellipse Parameterization
+## General Ellipse Parameterization
 
 The previous section has provided the basis for the calculation of intersecting
 ellipses. However, ellipses are neither centered at the origin nor aligned with
@@ -398,7 +396,7 @@ where:
 In practice, this algebraic form is the one we will use in order to compute the
 intersection points of two intersecting ellipses.
 
-### Intersection Points of Two Ellipses
+## Intersection Points of Two Ellipses
 
 We explain how we can retrieve the intersection points of two ellipses.
 
@@ -545,7 +543,7 @@ Using any polynomial solver, we get the $4$ roots $(y_i)_{1\leq i\leq 4}$ of the
 quartic polynomial $R$ and only keep those that are real. Finally $(x_i)_{1\leq
 i \leq 4}$ are deduced from Equation \@ref(eq:xinter).
 
-#### Implementation Notes
+### Implementation Notes
 
 In *Sara*, we can use several solvers to retrieve the roots of polynomial $R$.
 
@@ -559,7 +557,7 @@ The implementation in *Sara* uses Ferrari's method. While more tedious to
 implement, the method has the advantage of being direct. Also, we experimentally
 observe Ferrari’s method can sometimes be numerically inaccurate in particular situations where for example one of the ellipse is quasi-degenerate.  In the future, depending on the use case, we can polish the roots to refine the root values.
 
-### Intersection Area of Two Ellipses
+## Intersection Area of Two Ellipses
 
 Our presentation complements [@Eberly] with more technical details. In the rest
 of the section, we consider two ellipses $(\mathcal{E}_i)_{1 \leq i \leq 2}$ and
@@ -609,7 +607,7 @@ we respectively denote
     \end{gathered}
   \end{equation}
 
-#### Retrieving the polar angles
+### Retrieving the polar angles
 
 To retrieve the polar angles, we need to place ourselves in the coordinate
 system $(\mathbf{x}_i, \mathbf{u}_i, \mathbf{v}_i)$. Using the convenient
@@ -630,7 +628,7 @@ have
   \right)
 \end{align}
 
-#### 0 or 1 intersection point
+### 0 or 1 intersection point
 
 Either one ellipse is contained in the other or there are separated as
 illustrated in the figures below.
@@ -672,7 +670,7 @@ For 0 or 1 intersection point, the intersection area is equal to
 ```
 :::
 
-#### 2 Intersection Points
+### 2 Intersection Points
 
 We will not detail the case when Polynomial \@ref(eq:detBy) have $2$ roots with
 multiplicity $2$. This still corresponds to the case where there are two
@@ -723,7 +721,7 @@ Equation \@ref(eq:inter2) is consistent with the Equation \@ref(eq:inter34)
 obtained for the case of 3 or 4 intersection points because it can be viewed as
 a special case since the polygonal area is zero for $2$ intersection points.
 
-#### 3 and 4 intersection points
+### 3 and 4 intersection points
 
 ```{r inter34, fig.show = 'hide', echo = FALSE}
 library(knitr)

@@ -1,4 +1,4 @@
-## Changing Reference Frames
+# Reference Frames
 
 :::fyi
 In this section, I use *reference frame* and *coordinate system*
@@ -14,9 +14,9 @@ Cartesian one. And of course, non-Cartesian coordinate systems such as the
 cylindric one can also be used for any reference frame.
 :::
 
-Let us detail how we go from the world coordinates $(O_W, \mathbf{i}_W,
-\mathbf{j}_W,\mathbf{k}_W)$ to the camera coordinates $(O_C, \mathbf{i}_C,
-\mathbf{j}_C,\mathbf{k}_C)$. We assume the basis vectors are *orthonormal* and
+Let us detail how we go from the camera coordinates $(O_C, \mathbf{i}_C,
+\mathbf{j}_C,\mathbf{k}_C)$ to the world coordinates $(O_W, \mathbf{i}_W,
+\mathbf{j}_W,\mathbf{k}_W)$. We assume the basis vectors are *orthonormal* and
 *right-handed*, that is each vector has a magnitude equal to $1$ and forms
 mutually a right angle between each of them.
 
@@ -167,7 +167,7 @@ inverse rotation matrix is calculated by transposition
 ```
 :::
 
-## Euler Angles
+# Euler Angles
 
 In engineering, we like to decompose any 3D rotation into Euler angles as they
 are quite intuitive to understand. The usual convention that is followed is
@@ -203,7 +203,7 @@ composed in the following order:
 Once again let us stress that the order to which we apply each elementary
 rotation is very important.
 
-### Formula of Elementary Rotations
+## Formula of Elementary Rotations
 
 Every now and then we may forget the formula of each elementary rotation and in
 particular we do not remember their signs and orientations.
@@ -252,7 +252,7 @@ each coefficient.
   \end{equation}
   :::
 
-### Composite Euler Rotation
+## Composite Euler Rotation
 
 The rotation matrix expressed with respect to the *extrinsic* axes (i.e., the
 axes of the original local coordinates before rotating the airplane) is

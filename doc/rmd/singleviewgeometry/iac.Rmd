@@ -1,13 +1,15 @@
+# Fundamental Objects in Projective Geometry
+
 ## Plane at Infinity
 
 [@HartleyZ:2003:mvg] use the term **Plane at Infinity** $\mathbf{\Pi}_\infty$ in
-projective geometry. This plane $\mathbf{\Pi}_\infty$ is the set of points $[x,
-y, z, 0]^T$ in the $3$-space.
+projective geometry. This plane $\mathbf{\Pi}_\infty$ is the set of "points"
+$\begin{bmatrix} x \\ y \\ z \\ 0 \end{bmatrix}$ in the 3D space.
 
-Basically, to plant ideas in our mind, this abstract definition contains the set
-of than **3D rays** or **3D vectors** (as opposed to 3D points). But because the
-coordinates $(x, y, z)$ are allowed to be in $\mathbb{C}$, it also contains 3D
-imaginary rays.
+This definition is fairly abstract. Basically, to plant ideas in our mind,
+contains the set of than **3D rays** or **3D vectors** (as opposed to 3D
+points). But because the coordinates $(x, y, z)$ are allowed to be in
+$\mathbb{C}$, it also contains 3D imaginary rays.
 
 ## Absolute Conic
 
@@ -166,12 +168,15 @@ measure the angle between the backprojected rays as
 That is why [@HartleyZ:2003:mvg] says that the IAC acts like a 3D protractor
 between 2 image points.
 
-### Self-Calibration
+# Self-Calibration
 
-The self-calibration relies mostly either on the absolute quadric or the image of the
-absolute conic.
+The self-calibration problem is about the following question: can we calculate
+the calibration matrix $\mathbf{K}$ from the images and how?
 
-#### Single-View Approach
+The self-calibration relies mostly either on the **Absolute Quadric** or the **Image
+of the Absolute Conic**, which we introduced in the previous section.
+
+## Single-View Approach
 
 Already with a single image, we can determine the calibration matrix.
 
@@ -195,7 +200,7 @@ More reliable approaches involves fiducial objects like a chessboard pattern
 printed on a rigid planar surface. The detection of the chessboard x-corners are
 much more reliable data points to estimate the calibration matrix.
 
-#### Multi-View Approach
+## Multi-View Approach
 
 TODO: when I take the time to understand more.
 

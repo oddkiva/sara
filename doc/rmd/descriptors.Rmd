@@ -1,12 +1,12 @@
 \newcommand{\ji}{\begin{bmatrix} j \\ i \end{bmatrix}}
 \newcommand{\oneone}{\begin{bmatrix} 1 \\ 1 \end{bmatrix}}
 
-# Descriptors
+# SIFT Descriptors
 
 At this time, this chapter contains only one section in which I write about the
 SIFT descriptor.
 
-## SIFT
+## SIFT is still State-of-the-Art
 
 This section breaks down the SIFT descriptor that *Sara* implements.
 
@@ -58,7 +58,8 @@ In the sequel, let us denote an oriented scale-invariant local keypoint by $k =
 (x, y, \sigma, \theta)$ where:
 
 - $\mathbf{x} = (x, y)$ is the vector of 2D pixel coordinates of the keypoint,
-- $\sigma$ is the scale at which the keypoint is detected,
+- $\sigma$ is the scale at which the keypoint is detected, i.e., the
+  characteristic size in pixels of the local region
 - $\theta$ is the orientation of the dominant image gradient.
 
 
@@ -67,10 +68,11 @@ In the sequel, let us denote an oriented scale-invariant local keypoint by $k =
 SIFT is a feature vector that encodes the photometric information of an image
 patch into histograms of gradients.
 
-The image patch is divided into a 2D grid of $N \times N$ square image patches,
-from which we calculate their histogram of gradients.  Each histogram bins gradient
-orientations into $O$ principal orientations.  A single SIFT descriptor about
-can be viewed as a 3D tensor $\mathbf{h} \in \mathbb{R}^{N \times N \times O}$.
+The image patch is divided into a 2D grid of $N \times N$ square image
+sub-patches, from which we calculate their histogram of gradients.  Each
+histogram bins gradient orientations into $O$ principal orientations.  A single
+SIFT descriptor about can be viewed as a 3D tensor $\mathbf{h} \in \mathbb{R}^{N
+\times N \times O}$.
 
 In other words, the component $\mathbf{h}[i, j, o]$ quantifies the frequency of
 orientation $\frac{2 \pi o}{O}\ \mathrm{rad}$ in the $(i, j)$-th histogram,
@@ -85,36 +87,62 @@ further brings marginal performance improvements only.
 **TODO: ILLUSTRATE.**
 
 :::note
-A peculiarity with SIFT is that each image patch $(i, j)$ that form the grid
+A peculiarity with SIFT is that each image sub-patch $(i, j)$ that form the grid
 *overlaps* and that the orientation bins *overlap* as well because of the
 trilinear interpolation trick as we will see later.
 :::
 
-### Design Details
+### Canonical Image Patch
 
 The design of SIFT is geared towards robustness w.r.t. *noisy* estimation of
 keypoint position, scale and orientation, *lossy and noisy* image
 acquisition, *illumination* changes, *etc*.
 
-The SIFT descriptor can encode the photometric information of the region around
-the keypoint $k$ in a similarity-invariant manner if we make use of the scale
+By design, SIFT can encode the photometric information of the region around the
+keypoint $k$ in a similarity-invariant manner if we make use of the scale
 $\sigma$ and the dominant gradient orientation $\theta$.
 
-By similarity invariance, we mean that
+To plant the ideas in our mind, let us imagine that the keypoint $k$ describes the
+large dark head of the sunflower surrounded by yellow leaves, that forms a
+bright background as depicted in Figure \@ref(fig:sunflower-heads).
 
-- if we were in an ideal world where we have a perfectly accurate feature
-detector and orientation estimator and
-- if we were to take multiple photographs $I_i$ of the same visual salient
-region, *e.g.*, a corner or blob at different scales and positions,
+```{r}
+#| echo: false
+#| warning: false
+#| label: sunflower-heads
+#| out.width: 50%
+#| fig.align: center
+#| fig.cap: >
+#|   On an image depicting a field of of sunflowers, the SIFT blob detector
+#|   produces dark blobs $k_i$, many of which are typically sunflower heads.
+#|   Dark blobs $k_i$ are illustrated as red oriented circles with radius
+#|   $\sqrt{2} \sigma_i$ and with dominant gradient orientation $\theta_i$
+#|   represented by a line.
+#|   Bright blobs are on the other hand typically sunflower leaves.
+knitr::include_graphics(paste0(getwd(), "/features/sunflower-heads.png"))
+```
 
-then, in such an ideal world, that salient region would be re-detected in each
-image as a keypoint $k_i$ with perfect pixel localisation, scale and
-orientation.
 
-Normalizing the image patch around this salient region with scale $\sigma_i$ and
-orientation with $\theta_i$ would yield the same image. And we would expect that
-the SIFT descriptors $\mathbf{h}_i$ extracted in each normalized patch around
-$k_i$ to be identical.
+By similarity invariance, we mean that the descriptor is able to estimate the
+characteristic size of the blob and its orientation, so that we can transform
+the image patch into some upright canonical image patch of fixed size.
+
+Why is it important to be able to transform this image patch into some canonical
+patch? Let us assume for a moment that:
+
+- we are in an ideal world where we have a perfectly accurate feature detector
+and orientation estimator and
+- we were to take multiple photographs $I_i$ where we keep seeing that same
+  region centered at the keypoint location.
+
+then, in such an ideal world, that detector would keep re-detecting strongly at
+that salient region in each image $I_i$ as a keypoint $k_i$ with perfect pixel
+localisation, scale and orientation.
+
+It becomes now evident that transforming the image patch around each salient
+region with scale $\sigma_i$ and orientation with $\theta_i$ would yield the
+same canonical image patch. That way, all the SIFT descriptors $\mathbf{h}_i$
+computed for each normalized patch around $k_i$ are expected to be identical.
 
 This leads us to define specifically the local coordinate system and its
 associated normalizing transform.

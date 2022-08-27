@@ -1,4 +1,4 @@
-## nuScenes
+# nuScenes
 
 Similar to the KITTI dataset, the nuScenes dataset has been made available in
 2019. The novelty here is that the data is much larger and is acquired from a
@@ -10,7 +10,7 @@ So with nuScenes, in addition to the usual 2D and 3D bounding boxes and point
 clouds, we also have at our disposal ground-truth velocity data for each
 detected objects and a richer set of information regarding the car egomotion.
 
-### Concepts and Data Organization
+## Concepts and Data Organization
 
 Given that the richer and more complex nature of nuScenes data, we
 describe what the data are and how they are structured on a higher
@@ -29,7 +29,7 @@ follows:
 - a *calibration* data used to relate the 3D geometry with respect to each
   sensor.
 
-### The Sample Concept
+## The Sample Concept
 
 On a first approach, a complete sample is fully characterized by:
 
@@ -41,7 +41,7 @@ On a first approach, a complete sample is fully characterized by:
 - an ego-pose, that is, the car position and orientation $(\mathbf{R}_\tau,
   \mathbf{t}_\tau)$ w.r.t. to a fixed global coordinate system.
 
-### The Annotation Concept
+## The Annotation Concept
 
 Similarly to *KITTI*, one *annotation* is typically a road user, e.g., a
 pedestrian, a vehicle, for which we know its 3D geometry. nuScenes categorises
@@ -53,7 +53,7 @@ global coordinate system. And annotations are grouped into tracks which nuScenes
 terms as *Instances* which is used for the purpose of object tracking
 evaluation.
 
-### Ego-Pose and Coordinate Systems
+## Ego-Pose and Coordinate Systems
 
 From a careful examination of (1) the documentation, (2) the Python API and (3)
 the different coordinate systems in the picture **TODO: reference me**, (4) the
@@ -111,7 +111,7 @@ system, the table of calibrated sensors lists:
    \end{equation}
 
 
-### Data Structures and API Replication for C++
+## Data Structures and API Replication for C++
 
 Being a hardcore C++ user myself, my goal is to replicate the Python API data in
 my own way, which is available online. Based on my experience with KITTI, it can
