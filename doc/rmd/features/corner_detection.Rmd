@@ -7,12 +7,14 @@ image. From there, we can identify the dominant orientations of the gradients.
 ## Histogram of Gradients as Insight
 
 :::fyi
-OK, I agree this is not the real intuition that lecture or publications start
+OK, I agree this is not the real intuition that lectures or publications start
 with but keep reading what I have to say.
+
+I don't see why it can't be be a valid intuition.
 :::
 
-We can calculate one histogram of gradients per pixel and then localize the
-dominant gradient orientations which are localized at the histogram peaks.
+We can calculate one histogram of local gradients per pixel and then localize
+the dominant gradient orientations which are localized at the histogram peaks.
 
 Intuitively we expect to identify interpretable local image features:
 
@@ -27,26 +29,60 @@ think it is important to be reminded that the histogram of gradients is still a
 powerful tool in practice. And [@Lowe:2004:ijcv] describes a robust way to
 identify the dominant gradient orientations.
 
-:::note
-I will add a few more paragraphs about Moravec's corner detector, which Harris
-improves.
+## Small Shifts Inducing Large Intensity Changes
 
-- Moravec's main idea is to localize pixels where a small shift in any
-  direction induces a large change of intensity.
-- Harris improves Moravec's idea by using a Taylor expansion, which will make
-  the structure tensor appear.
-:::
+The histogram of gradients does not tell us precisely whether a pixel is located
+a corner or a junction. It can only tell whether or not this pixel is close to a
+corner and that depends on the size of the local window we choose when we build
+the histogram of local gradients.
 
-[@HarrisS:1988:alvey] have devised and popularized another way to do so by
-considering instead the covariance matrix of local gradients. This is the
-so-called *structure tensor*. One of their main innovations is actually to
+To localize corners accurately, [@Moravec:1980:phd] and [@HarrisS:1988:alvey]
+look for pixels $\mathbf{x}$ where there exists a large intensity difference
+$(I(\mathbf{x} + \mathbf{h}) - I(\mathbf{x}))^2$ for a **small and specific**
+set of **nonzero** shifts $\mathbf{\Delta}$. I won't go into much details and I
+will let you find out more by looking into [@Moravec:1980:phd]'s thesis.
+[@HarrisS:1988:alvey]'s formulation is simple enough to get the whole picture
+about corner detection.
+
+Instead of considering an *ad-hoc* small set of nonzero shifts,
+[@HarrisS:1988:alvey] does better by considering the sum of weighted squares of
+intensity changes for any small shifts.
+
+\begin{equation}
+  \sum_\mathbf{h} w(\mathbf{h})
+  \left( I(\mathbf{x} + \mathbf{h}) - I(\mathbf{x}) \right)^2
+\end{equation}
+
+Then surely this quantity must respond maximally at a corner location? Yes it is
+the case in practise.
+
+Let's observe the first-order Taylor expansion
+
+\begin{equation}
+  I(\mathbf{x} + \mathbf{h}) =
+  I(\mathbf{x}) + \mathbf{h}^T \nabla I(\mathbf{x}) + o(\|\mathbf{h}\|)
+\end{equation}
+
+then it follows that the reweighted sum of squares is approximated as
+
+\begin{equation}
+  \sum_\mathbf{h} w(\mathbf{h})
+  \ \mathbf{h}^T
+  \left(
+    \nabla I(\mathbf{x}) \nabla I(\mathbf{x})^T
+  \right)
+  \mathbf{h}
+\end{equation}
+
+As pointed by [@HarrisS:1988:alvey], we recognize the covariance matrix of local
+gradients, which the corner detection will be based on. This is the so-called
+*structure tensor*. Another innovation by [@HarrisS:1988:alvey] is to also
 derive a **cornerness** score function from it. This function will score highest
 to corners and even more so at their precise location. The cornerness function
-solves the problem of corner localization, which the histogram of gradients
-cannot do.
+solves the problem of corner localization.
 
-Let us talk more about the structure tensor first and we will expand a bit more
-on the cornerness later on.
+Let us talk more in details about the structure tensor first and we will expand
+a bit more on the cornerness later on.
 
 ## Structure Tensor
 
@@ -60,7 +96,7 @@ domain.
 
 ### Discrete Domain
 
-Formally we consider all the image gradients $\nabla I(\mathbf{x} + \mathbf{h})$
+Formally we consider all image gradients $\nabla I(\mathbf{x} + \mathbf{h})$
 within the image patch centered in $\mathbf{x}$ with radius $r$, that is, the
 set of pixels $\mathbf{x} + \mathbf{h}$ such that $|| \mathbf{h} || < r$.
 The gradients are reweighted by a weight function $w(\mathbf{h})$ which gives
@@ -219,6 +255,14 @@ considering local patches with radius $t \sigma_I = \sqrt{1 + \sigma_D^2}
 \ \sigma_I$ to decide whether we see a
 corner or not. This means that the best corners are separated by at least
 $t \sigma_I$ pixels.
+
+
+## Förstner Corner Operator
+
+Harris's corner operator localizes corners with an accuracy within 1pixel. To
+get a sub-pixel accuracy, we can use Förstner criterion.
+
+**TODO**
 
 
 ## Cornerness Function
