@@ -106,24 +106,24 @@ Gaussian kernel is used.
 In the discrete domain, the structure tensor is written as
 
 \begin{equation}
-  \mathbf{M}(\mathbf{x}) = \begin{bmatrix}
-    \displaystyle \sum_\mathbf{h} w(\mathbf{h}) \left( \frac{\partial I
+  \mathbf{M}(\mathbf{x}) =
+  \displaystyle \sum_\mathbf{h} w(\mathbf{h})
+  \begin{bmatrix}
+    \left( \frac{\partial I
     (\mathbf{x} + \mathbf{h})}{\partial x} \right)^2 &&
     %
-    \displaystyle \sum_\mathbf{h} w(\mathbf{h})
     \frac{\partial I(\mathbf{x} + \mathbf{h})}
          {\partial x}
     \frac{\partial I(\mathbf{x} + \mathbf{h})}
          {\partial y} \\
     %
-    \displaystyle \sum_\mathbf{h} w(\mathbf{h})
     \frac{\partial I(\mathbf{x} + \mathbf{h})}
          {\partial x}
     \frac{\partial I(\mathbf{x} + \mathbf{h})}
          {\partial y} &&
     %
-    \displaystyle \sum_\mathbf{h} w(\mathbf{h}) \left( \frac{\partial I
-    (\mathbf{x} + \mathbf{u})}{\partial y} \right)^2
+    \left( \frac{\partial I
+    (\mathbf{x} + \mathbf{h})}{\partial y} \right)^2
   \end{bmatrix}
 \end{equation}
 
@@ -134,25 +134,26 @@ generalize the definition in the continous domain as a convolution with any
 distribution $w$.
 
 \begin{equation}
-  \mathbf{M}(\mathbf{x}) = \begin{bmatrix}
-    \displaystyle \int w(\mathbf{h}) \left( \frac{\partial I (\mathbf{x} -
-    \mathbf{h})}{\partial x} \right)^2 d\mathbf{h}&&
+  \mathbf{M}(\mathbf{x}) =
+  \displaystyle \int w(\mathbf{h})
+  \begin{bmatrix}
+    \left( \frac{\partial I (\mathbf{x} -
+    \mathbf{h})}{\partial x} \right)^2 &&
     %
-    \displaystyle \int w(\mathbf{h})
     \frac{\partial I(\mathbf{x} - \mathbf{h})}
          {\partial x}
     \frac{\partial I(\mathbf{x} - \mathbf{h})}
-         {\partial y} d\mathbf{h}\\
+         {\partial y} \\
     %
-    \displaystyle \int w(\mathbf{h})
     \frac{\partial I(\mathbf{x} - \mathbf{h})}
          {\partial x}
     \frac{\partial I(\mathbf{x} - \mathbf{h})}
-         {\partial y} d\mathbf{h} &&
+         {\partial y} &&
     %
-    \displaystyle \int w(\mathbf{h}) \left( \frac{\partial I (\mathbf{x} -
-    \mathbf{h})}{\partial y} \right)^2 d\mathbf{h}&&
+    \left( \frac{\partial I (\mathbf{x} -
+    \mathbf{h})}{\partial y} \right)^2 &&
   \end{bmatrix}
+  d\mathbf{h}
 \end{equation}
 
 Now as a side note, in the sense of Lebesgue's integration, this definition
