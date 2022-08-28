@@ -83,7 +83,7 @@ Now let us take it further.
 
   $\mathbf{K}^T \mathbf{l}$ is the plane backprojected from the 2D image line $\mathbf{l}$.
 
-  :::{proof}
+  ```{proof}
   $\mathbf{K}^T \mathbf{l}$ is indeed the normal of the backprojected plane
   because it is orthogonal to both backprojected rays $\mathbf{K}^{-1}
   \mathbf{a}$ and $\mathbf{K}^{-1} \mathbf{b}$.
