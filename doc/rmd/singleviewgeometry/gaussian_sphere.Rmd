@@ -22,7 +22,7 @@ dividing the forest in two parts. The wild scenery is pleasant and you can't
 resist taking a picture of the straight train rails at the center. They vanish
 at a point far away in the horizon.*
 
-## Terminology
+## Backprojection
 
 In projective geometry, the projection of 3D lines in the camera film plane are
 still line segments. However, the perspective projection does not preserve the
@@ -72,25 +72,35 @@ Now let us take it further.
     \mathbf{r}_\mathbf{b} &= \mathbf{K}^{-1} \mathbf{b}.
   \end{align*}
 
-- Another way to calculate the plane normals is to use the normal vector
-  $\mathbf{n} = \mathbf{a} \times \mathbf{b}$ of the image line segment
-  $(\mathbf{a}, \mathbf{b})$, and then:
+- Another way to calculate the plane normal is to calculate the line
+  $\mathbf{l} = \mathbf{a} \times \mathbf{b}$ from the image line segment
+  $(\mathbf{a}, \mathbf{b})$ (expressed in homogeneous coordinates), and then:
 
   \begin{equation}
   \mathbf{\Pi}(\mathbf{a}, \mathbf{b}) =
-    \mathbf{K}^T \mathbf{n}.
+    \mathbf{K}^T \mathbf{l}.
   \end{equation}
 
-  $\mathbf{K}^T \mathbf{n}$ can be viewed as the backprojection of the 2D image line
-  normal $\mathbf{n}$.
+  $\mathbf{K}^T \mathbf{l}$ is the plane backprojected from the 2D image line $\mathbf{l}$.
 
-  $\mathbf{K}^T \mathbf{n}$ is indeed the normal of the backprojected plane
+  :::{proof}
+  $\mathbf{K}^T \mathbf{l}$ is indeed the normal of the backprojected plane
   because it is orthogonal to both backprojected rays $\mathbf{K}^{-1}
   \mathbf{a}$ and $\mathbf{K}^{-1} \mathbf{b}$.
+
+  Indeed, let us write the dot product for $\mathbf{K}^{-1} \mathbf{a}$
+
+  \begin{equation}
+    (\mathbf{K}^T \mathbf{l})^T \mathbf{K}^{-1} \mathbf{a} =
+    \mathbf{l}^T \mathbf{K} \mathbf{K}^{-1} \mathbf{a} = 0
+  \end{equation}
+
+  and likewise for $\mathbf{K}^{-1} \mathbf{b}$, the dot product is $0$.
 
   Since the backprojected rays form a linear span of the backprojected plane,
   any point on the backprojected plane is a linear combination of the
   backprojected rays is therefore orthogonal to $\mathbf{K}^T \mathbf{n}$.
+  ```
 
 ## Vanishing Point
 
@@ -158,8 +168,6 @@ The equation of the backprojected sea surface in 3D is therefore
 
 The normal of the sea surface is expressed in the camera frame, which we indeed
 expect it to be equal approximately $y = \mathbf{constant}$.
-
-
 
 
 ## Orthogonal Vanishing Point Detection
