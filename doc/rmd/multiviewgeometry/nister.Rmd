@@ -1,15 +1,16 @@
-# Nister's Method for the Relative Pose Estimation
+# Relative Pose Estimation
 
-This method is originally published in CVPR [@nister:2003:cvpr] and republished
-at length in PAMI [@nister:2004:pami]. It solves the essential matrix from $5$
-point correspondences. Here I revisit the PAMI article [@nister:2004:pami] which
+In this chapter, I will decribe Nister's method which was originally published
+in CVPR [@nister:2003:cvpr] and republished at length in PAMI 
+[@nister:2004:pami]. It solves the essential matrix from $5$ point 
+correspondences. Here I revisit the PAMI article [@nister:2004:pami] which
 I found clearer.
 
 The method is very technical as it is purely based on simple algebraic
 manipulations. As such, the paper may seem boring but I believe understanding
 these such details are useful.
 
-### Underdetermined System of Linear Equations
+## Underdetermined System of Linear Equations
 
 Let $\left\{\mathbf{p}_i, \mathbf{q}_i \right\}_{0 \leq i < 5}$ denote a set of
 $5$ point correspondences, with $\mathbf{p}_i$ and $\mathbf{q}_i$ being points
