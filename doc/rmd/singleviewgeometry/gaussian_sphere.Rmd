@@ -1,5 +1,7 @@
 # Vanishing Points and Lines
 
+## Vanishing Point
+
 ```{r}
 #| echo: false
 #| warning: false
@@ -22,89 +24,7 @@ dividing the forest in two parts. The wild scenery is pleasant and you can't
 resist taking a picture of the straight train rails at the center. They vanish
 at a point far away in the horizon.*
 
-## Backprojection
-
-In projective geometry, the projection of 3D lines in the camera film plane are
-still line segments. However, the perspective projection does not preserve the
-parallelism.
-
-To make things clear in our mind, images are thus formed by some pinhole camera
-model with calibration matrix $\mathbf{K}$.
-
-One remarkable property in projective geometry is that the projection of 3D
-parallel lines onto an image plane is a set of 2D lines that intersect
-altogether into a unique point: the so-called *vanishing point*.
-
-Let us recall a bit of terminology.
-
-- Any 3D scene point $X$ that lies in a 3D semi-line originating from the camera
-  center $O$ **projects** exactly on a unique point $\mathbf{u}$ in the image
-  plane.
-
-We also like to say the other way around, in 3D reconstruction:
-
-- A point $\mathbf{u}$ in the image plane **backprojects** to a 3D semi-line or
-  equivalently to the 3D ray vector $\mathbf{r}_\mathbf{u}$ that parameterizes
-  this semi-line.
-
-Now let us take it further.
-
-- A 2D line segment $(\mathbf{a}, \mathbf{b})$ in the image plane backprojects to
-  a 3D half-plane $(\mathbf{O}, \mathbf{r}_\mathbf{a}, \mathbf{r}_\mathbf{b})$
-  where $\mathbf{r}_\mathbf{a}$ and $\mathbf{r}_\mathbf{b}$ are respectively the
-  backprojected rays of the 2D image points $\mathbf{a}$ and $\mathbf{b}$.
-
-- The half-plane $(\mathbf{O}, \mathbf{r}_\mathbf{a}, \mathbf{r}_\mathbf{b})$
-  can be parameterized by its normal vector $\mathbf{\Pi}(\mathbf{a},
-  \mathbf{b})$^[Let's omit the side of the half-plane for now, which can be
-  retrieved via a cheirality criterion], which we calculate as
-
-  \begin{equation}
-  \mathbf{\Pi}(\mathbf{a}, \mathbf{b}) =
-    \mathbf{r}_\mathbf{a} \times \mathbf{r}_\mathbf{b}.
-  \end{equation}
-
-- Note that the backprojected rays are thus calculated as
-
-  \begin{align*}
-    \mathbf{r}_\mathbf{a} &= \mathbf{K}^{-1} \mathbf{a} \\
-    %
-    \mathbf{r}_\mathbf{b} &= \mathbf{K}^{-1} \mathbf{b}.
-  \end{align*}
-
-- Another way to calculate the plane normal is to calculate the line
-  $\mathbf{l} = \mathbf{a} \times \mathbf{b}$ from the image line segment
-  $(\mathbf{a}, \mathbf{b})$ (expressed in homogeneous coordinates), and then:
-
-  \begin{equation}
-  \mathbf{\Pi}(\mathbf{a}, \mathbf{b}) =
-    \mathbf{K}^T \mathbf{l}.
-  \end{equation}
-
-  $\mathbf{K}^T \mathbf{l}$ is the plane backprojected from the 2D image line $\mathbf{l}$.
-
-  ```{proof}
-  $\mathbf{K}^T \mathbf{l}$ is indeed the normal of the backprojected plane
-  because it is orthogonal to both backprojected rays $\mathbf{K}^{-1}
-  \mathbf{a}$ and $\mathbf{K}^{-1} \mathbf{b}$.
-
-  Indeed, let us write the dot product for $\mathbf{K}^{-1} \mathbf{a}$
-
-  \begin{equation}
-    (\mathbf{K}^T \mathbf{l})^T \mathbf{K}^{-1} \mathbf{a} =
-    \mathbf{l}^T \mathbf{K} \mathbf{K}^{-1} \mathbf{a} = 0
-  \end{equation}
-
-  and likewise for $\mathbf{K}^{-1} \mathbf{b}$, the dot product is $0$.
-
-  Since the backprojected rays form a linear span of the backprojected plane,
-  any point on the backprojected plane is a linear combination of the
-  backprojected rays is therefore orthogonal to $\mathbf{K}^T \mathbf{n}$.
-  ```
-
-## Vanishing Point
-
-This concept is illustrated in Figure \@ref(fig:train-rails).
+This concept of vanishing point is illustrated in Figure \@ref(fig:train-rails).
 
 A vanishing point can be traced from two "parallel" 2D line segments $l_1$ and
 $l_2$. These 2D line segments backproject to two 3D planes $\mathbf{\Pi}(l_1)$

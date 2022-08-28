@@ -6,6 +6,11 @@ image. From there, we can identify the dominant orientations of the gradients.
 
 ## Histogram of Gradients as Insight
 
+:::fyi
+OK, I agree this is not the real intuition that lecture or publications start
+with but keep reading what I have to say.
+:::
+
 We can calculate one histogram of gradients per pixel and then localize the
 dominant gradient orientations which are localized at the histogram peaks.
 
@@ -21,6 +26,16 @@ While, by design, the histogram cannot localize very precisely the corners, I
 think it is important to be reminded that the histogram of gradients is still a
 powerful tool in practice. And [@Lowe:2004:ijcv] describes a robust way to
 identify the dominant gradient orientations.
+
+:::note
+I will add a few more paragraphs about Moravec's corner detector, which Harris
+improves.
+
+- Moravec's main idea is to localize pixels where a small shift in any
+  direction induces a large change of intensity.
+- Harris improves Moravec's idea by using a Taylor expansion, which will make
+  the structure tensor appear.
+:::
 
 [@HarrisS:1988:alvey] have devised and popularized another way to do so by
 considering instead the covariance matrix of local gradients. This is the
