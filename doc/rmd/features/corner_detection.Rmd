@@ -38,15 +38,19 @@ the histogram of local gradients.
 
 To localize corners accurately, [@Moravec:1980:phd] and [@HarrisS:1988:alvey]
 look for pixels $\mathbf{x}$ where there exists a large intensity difference
-$(I(\mathbf{x} + \mathbf{h}) - I(\mathbf{x}))^2$ for a **small and specific**
-set of **nonzero** shifts $\mathbf{\Delta}$. I won't go into much details and I
-will let you find out more by looking into [@Moravec:1980:phd]'s thesis.
-[@HarrisS:1988:alvey]'s formulation is simple enough to get the whole picture
-about corner detection.
 
-Instead of considering an *ad-hoc* small set of nonzero shifts,
-[@HarrisS:1988:alvey] does better by considering the sum of weighted squares of
-intensity changes for any small shifts.
+\begin{equation}
+  \left( I(\mathbf{x} + \mathbf{h}) - I(\mathbf{x}) \right)^2
+\end{equation}
+
+for a **small and specific** set of **nonzero** shifts $\mathbf{h}$.^[I won't go
+into much details and I will let you find out more by looking into
+[@Moravec:1980:phd]'s thesis. [@HarrisS:1988:alvey]'s formulation is simple
+enough to get the whole picture about corner detection.]
+
+Now, instead of considering an *ad-hoc* small set of nonzero shifts,
+[@HarrisS:1988:alvey] do better by considering the sum of **weighted** squares of
+intensity differences for any small shift $\mathbf{h}$.
 
 \begin{equation}
   \sum_\mathbf{h} w(\mathbf{h})
@@ -71,7 +75,15 @@ then it follows that the reweighted sum of squares is approximated as
   \left(
     \nabla I(\mathbf{x}) \nabla I(\mathbf{x})^T
   \right)
-  \mathbf{h}
+  \mathbf{h},
+\end{equation}
+
+where the nabla operator $\nabla$ expresses the gradient as a column-vector
+\begin{equation}
+  \nabla I = \begin{bmatrix}
+    \frac{\partial I}{\partial x} \\
+    \frac{\partial I}{\partial y}
+  \end{bmatrix}.
 \end{equation}
 
 As pointed by [@HarrisS:1988:alvey], we recognize the covariance matrix of local
@@ -86,8 +98,8 @@ a bit more on the cornerness later on.
 
 ## Structure Tensor
 
-As we said it in the introduction, the structure tensor is a covariance matrix
-of local gradients.
+As we said it in the previous section, the structure tensor is a covariance
+matrix of local gradients.
 
 Let us define the structure tensor in the discrete domain first. Then we
 redefine it in the continuous domain. The continuous definition is useful to
@@ -161,36 +173,10 @@ coincides with the discrete definition using a discrete measure.
 
 We can re-express this more tersely, in functional notation with the $*$ symbol
 to denote a convolution operation
-\begin{equation}
-  \mathbf{M} = \begin{bmatrix}
-    w * \left( \frac{\partial I}{\partial x} \right)^2 &&
-    %
-    w *
-    \left( \frac{\partial I}{\partial x} \frac{\partial I} {\partial y} \right) \\
-    %
-    w *
-    \left( \frac{\partial I}{\partial x} \frac{\partial I} {\partial y} \right) &&
-    %
-    w *
-    \left( \frac{\partial I}{\partial y} \right)^2
-  \end{bmatrix}
-\end{equation}
-
-Again with a bit of linear algebra, we can rewrite this as
 
 \begin{equation}
   \mathbf{M} = w * \left( \nabla I\ \nabla I^T \right)
 \end{equation}
-
-since
-\begin{equation}
-  \nabla I(\mathbf{x}) = \begin{bmatrix}
-    \frac{\partial I(\mathbf{x})}{\partial x} \\
-    \frac{\partial I(\mathbf{x})}{\partial y}
-  \end{bmatrix}
-\end{equation}
-
-This form is convenient from an implementation point of view.
 
 ### Interpretation
 
@@ -256,6 +242,45 @@ considering local patches with radius $t \sigma_I = \sqrt{1 + \sigma_D^2}
 \ \sigma_I$ to decide whether we see a
 corner or not. This means that the best corners are separated by at least
 $t \sigma_I$ pixels.
+
+### Remarks About Efficient Implementations
+
+In practise, the convenient form that really allows for an optimized
+implementation is the following one
+
+\begin{equation}
+  \mathbf{M} = \begin{bmatrix}
+    w * \left( \frac{\partial I}{\partial x} \right)^2 &&
+    %
+    w *
+    \left( \frac{\partial I}{\partial x} \frac{\partial I} {\partial y} \right) \\
+    %
+    w *
+    \left( \frac{\partial I}{\partial x} \frac{\partial I} {\partial y} \right) &&
+    %
+    w *
+    \left( \frac{\partial I}{\partial y} \right)^2
+  \end{bmatrix}
+\end{equation}
+
+Because the structure tensor matrix is symmetric, efficient implementations
+calculate only the upper-triangular terms. They perform the following operations
+in the following order:
+
+1. The derivative maps $\frac{\partial I}{\partial x}$ and
+   $\frac{\partial I}{\partial y}$.
+2. The product maps
+   $\left(\frac{\partial I}{\partial x}\right)^2$,
+   $\left(\frac{\partial I}{\partial y}\right)^2$ and
+   $\frac{\partial I}{\partial x} \frac{\partial I}{\partial y}$
+3. The convolved maps
+   $w * \left( \frac{\partial I}{\partial x} \right)^2$,
+   $w * \left( \frac{\partial I}{\partial y} \right)^2$ and
+   $w * \frac{\partial I}{\partial x} \frac{\partial I}{\partial y}$
+
+On any platforms, the trickiest operation to optimize is the convolution. This
+is especially true on CPU architectures, where it is notoriously hard to find
+the optimal scheduling as pointed out in [@RaganKelleyBAPDA:2013:pldi].
 
 
 ## Förstner Corner Operator

@@ -1,21 +1,54 @@
-# My Learning Journey of the Halide language
+# Modern Image Processing
+
+The vast majority of computer vision lectures in academia don't talk about the
+optimization of image processing algorithms.
+
+Let alone designing robust computer vision algorithms, the optimization of image
+processing algorithms is a highly specialized knowledge domain and more than
+often falls outside the field of expertis of university professors.
+
+Optimizing image processing algorithms is very hard as pointed out by
+[@RaganKelleyBAPDA:2013:pldi]. It is absolutely dependent on the hardware
+platform where the algorithm will be running in as each hardware platform
+provide different parallelism capabilities.
+
+The most emblematic image processing algorithm being the convolution operation,
+its optimal CPU implementation will be drastically different from its GPU
+counterpart.
+
+Nowadays, CPU architectures posess two types of parallelism:
+
+1. special instructions termed as SIMD intrinsics
+2. multicore processing which enables to run several operations in parallel.
+
+Finding the optimal scheduling that makes good use of SIMD intrinsics and
+multicore processing is not easy at all.
+
+Besides CPU intrinsics differ from one CPU vendor to another (Intel, ARM, AMD).
+
+## Halide
+
+Halide [@RaganKelleyBAPDA:2013:pldi] is a high-level language aiming at writing
+efficient image processing algorithms a lot easier on any mainstream
+architectures. It is a lot more readable.
+
+It aims at decoupling (1) the implementation details of the algorithm and (2)
+the optimal scheduling that is intrinsically bound to the hardware device. In a
+nutshell, Halide would allow us to implement the algorithm details only once and
+then promises us that we would just need to focus on the scheduling.
+
+### My Personal Learning Journey
 
 I started learning the Halide language in 2020 out of curiosity since this has
 been touted as a very programming language that makes it easy to optimize image
 processing algorithms.
 
-It aims at decoupling (1) the implementation details of the algorithm and (2)
-the optimal scheduling that  intrinsically bound to the hardware device.
-In a nutshell, Halide would allow us to implement the algorithm details only
-once and then promises us that we would just need to focus on the
+For a major part of my journey in computer vision, I never really bothered about
+low-level optimization since this was not the core of my expertise. Computer
+vision algorithms are my expertise but not their optimizations. For a long time,
+optimization simply meant rewriting algorithms in CUDA to me.
 
-For a major part of my journey in computer vision, I was not very aware of
-hardware-related optimization (CPU intrinsics and so on) and never really
-bothered about low-level optimization since this is not the core of my
-expertise: computer vision algorithms are but not optimization. To me,
-optimization simply meant rewriting algorithms in CUDA.
-
-Indeed there is a lot to like about Halide, a single programming language that
+There is a lot to like about Halide, a single programming language that
 generates optimized code in C, CUDA, OpenCL, Metal for most mainstream GPU and
 CPU architectures.
 
@@ -31,13 +64,12 @@ of gradients).
 I will report the different building blocks that and ends with some open
 questions.
 
-
 One major hurdle in learning Halide is that the language forces us to rethink
 the implementation of each algorithmic step in a SIMD fashion.
-better. In a sense, it
+better.
 
 
-## Development experience
+### Development experience
 
 - The development of AOT functions is **very very** painful, but fortunately it
   was worth it.
@@ -49,8 +81,7 @@ better. In a sense, it
   Halide's first publication. This schedule is eventually the one that could
   compete with OpenCV's Gaussian blur implementation.
 
-
-## Open Questions (for Halide Developers?)
+### Open Questions (for Halide Developers?)
 
 Based on my learning journey and my current knowledge of Halide as a mere
 library user.
