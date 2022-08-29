@@ -1,7 +1,7 @@
 \newcommand{\ji}{\begin{bmatrix} j \\ i \end{bmatrix}}
 \newcommand{\oneone}{\begin{bmatrix} 1 \\ 1 \end{bmatrix}}
 
-# SIFT Descriptor
+# Descriptors
 
 At this time, this chapter contains only one section in which I write about the
 SIFT descriptor.
@@ -149,7 +149,7 @@ associated normalizing transform.
 
 **TODO: illustrate.**
 
-### Local Coordinate System and Normalizing Transform
+### Normalizing Transform
 
 The orientations are calculated and accumulated with respect to the *local
 coordinate system* $\mathcal{C}_k$ associated to keypoint $k$, where *$\sigma$
