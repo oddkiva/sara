@@ -8,7 +8,7 @@ import sys
 
 
 # Build tasks
-BUILD_TASKS = ["library", "book", "book_docker_container", "serve_book"]
+BUILD_TASKS = ["library", "book", "book_docker", "serve_book"]
 
 # Build types.
 BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
@@ -146,14 +146,14 @@ def run_project_tests(build_dir: str, build_type: str):
     ret = subprocess.Popen(command_line, cwd=build_dir).wait()
     return ret
 
-def build_rmd_book():
+def build_book():
     ret = subprocess.Popen(['Rscript', 'build.R'],
-                           cwd=SARA_SOURCE_DIR / "doc" / "rmd").wait()
+                           cwd=SARA_SOURCE_DIR / "doc" / "book").wait()
     return ret
 
-def serve_rmd_book():
+def serve_book():
     ret = subprocess.Popen(['Rscript', '-e', 'bookdown::serve_book()'],
-                           cwd=SARA_SOURCE_DIR / "doc" / "rmd").wait()
+                           cwd=SARA_SOURCE_DIR / "doc" / "book").wait()
     return ret
 
 def build_book_docker():
@@ -173,10 +173,10 @@ def build_book_docker():
     ret = subprocess.Popen(
         [
             'docker', 'run', '-it',
-            '-v', "{}:/workspace/rmd".format(SARA_SOURCE_DIR / "doc" / "rmd"),
+            '-v', "{}:/workspace/book".format(SARA_SOURCE_DIR / "doc" / "book"),
             sara_book_build_image, '/bin/bash'
          ],
-        cwd=(SARA_SOURCE_DIR / "doc" / "rmd")
+        cwd=(SARA_SOURCE_DIR / "doc" / "book")
     ).wait()
 
 
@@ -207,11 +207,10 @@ if __name__ == '__main__':
             run_project_tests(build_dir, args.build_type)
 
         if task == "book":
-            build_rmd_book()
+            build_book()
 
-        if task == "book_docker_container":
+        if task == "book_docker":
             build_book_docker()
 
         if task == "serve_book":
-            serve_rmd_book()
-
+            serve_book()
