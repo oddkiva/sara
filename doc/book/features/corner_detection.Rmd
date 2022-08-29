@@ -1,7 +1,8 @@
 # Corners and Junctions
 
-Traditional corner detectors are also junction detector as illustrated in
-Figures \@ref(fig:man-made-corners) and \@ref(fig:natural-corners).
+Traditional corner detectors are (accidentally by design) also junction
+detectors as illustrated in Figures \@ref(fig:man-made-corners) and
+\@ref(fig:natural-corners).
 
 ```{r}
 #| echo: false
