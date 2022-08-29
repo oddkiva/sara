@@ -13,9 +13,8 @@ bookdown::bs4_book:
   repo:
     base: https://gitlab.com/DO-CV/sara
     branch: master
-    subdir: "doc/rmd"
-  includes:
-    in_header: [assets/bs4_style.html]
+    subdir: "doc/book"
+  css: assets/bs4_style.css
 bookdown::gitbook:
   highlight: tango
   includes:

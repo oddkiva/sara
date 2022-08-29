@@ -8,7 +8,7 @@ image. From there, we can identify the dominant orientations of the gradients.
 
 :::fyi
 OK, I agree this is not the real intuition that lectures or publications start
-with but keep reading what I have to say.
+with but keep on reading what I have to say.
 
 I don't see why it can't be be a valid intuition.
 :::
@@ -26,8 +26,9 @@ Intuitively we expect to identify interpretable local image features:
 
 While, by design, the histogram cannot localize very precisely the corners, I
 think it is important to be reminded that the histogram of gradients is still a
-powerful tool in practice. And [@Lowe:2004:ijcv] describes a robust way to
-identify the dominant gradient orientations.
+powerful tool in practice. I have found it to be mostly useful in filtering
+unwanted corners. [@Lowe:2004:ijcv] describes a robust way to identify the
+dominant gradient orientations.
 
 ## Small Shifts Inducing Large Intensity Changes
 
@@ -36,8 +37,8 @@ a corner or a junction. It can only tell whether or not this pixel is close to a
 corner and that depends on the size of the local window we choose when we build
 the histogram of local gradients.
 
-To localize corners accurately, [@Moravec:1980:phd] and [@HarrisS:1988:alvey]
-look for pixels $\mathbf{x}$ where there exists a large intensity difference
+To localize corners accurately, [@Moravec:1980:phd]'s starting point is to look
+for pixels $\mathbf{x}$ where there exists a large intensity difference
 
 \begin{equation}
   \left( I(\mathbf{x} + \mathbf{h}) - I(\mathbf{x}) \right)^2
@@ -185,7 +186,7 @@ tensor should capture in principle only two principal directions of the image
 gradients. The gradient directions are expected to be quasi-orthogonal.
 
 This is perfect for a square-like corner where only two gradient orientations
-should dominate. The structure tensor can also localize a edgel, only one
+should dominate. The structure tensor can also localize an edgel, only one
 gradient orientation should dominate.
 
 Indeed, the extraction of the eigenvectors will give us the two principal
@@ -283,17 +284,71 @@ is especially true on CPU architectures, where it is notoriously hard to find
 the optimal scheduling as pointed out in [@RaganKelleyBAPDA:2013:pldi].
 
 
-## Förstner Corner Operator
-
-Harris's corner operator localizes corners with an accuracy within 1pixel. To
-get a sub-pixel accuracy, we can use Förstner criterion.
-
-**TODO**
-
-
 ## Cornerness Function
 
-**TODO**
+**TODO: write more explanations.**
+
+In a nutshell, the cornerness function is the scalar function (in functional
+notation)
+
+\begin{equation}
+  C = \det(\mathbf{M}) - \kappa \mathrm{trace}(\mathbf{M})
+\end{equation}
+
+In practice, I have found that $\kappa = 0.04$ works very well in my experiments
+and found little reason to change it. [@HarrisS:1988:alvey] suggests a range
+with this value being the this lower bound.
+
+## Förstner's Junction Operator
+
+Harris's detector localizes corners with an accuracy of $1$ pixel at best. To
+get a sub-pixel accuracy, we can refine the corner location using Förstner
+criterion.
+
+Förstner's idea comes from the observation that a good corner should be lying on
+the two dominant edges, if we look at a small patch centered at the corner
+location $\mathbf{x}$.
+
+So we just said that $\mathbf{x}$ must be an edgel. Let's discuss two cases.
+- If a neighboring pixel $\mathbf{x}'$ is also an edgel, we expect
+  that the direction vector $\mathbf{h}$ is a good approximation of the
+  (quasi-straight) edge curve and should be normal to the image gradient $\nabla
+  I(\mathbf{x}')$.
+
+  That means that the dot product between that the edge direction and the image
+  gradient should be very small.
+- If a neighboring pixel is not an edgel, its image gradients should be close to
+  zero and it will not bring any information.
+
+Now, since the corner location $\mathbf{x}$ is quantized, we can refine its
+location by minimizing the sum of square dot products over all points in the
+patches. The sum of squares can be reweighted by say a Gaussian kernel $w(.)$ to
+give more importance to pixels $\mathbf{x}'$ closer to the approximate corner
+location $\mathbf{x}$.
+
+And Förstner's criterion becomes
+
+\begin{equation}
+  \displaystyle \min_\mathbf{x}
+  \sum_\mathbf{x'} w\left(\mathbf{x} - \mathbf{x}'\right)
+  \left\{
+    \left(\mathbf{x} - \mathbf{x}' \right)^T \nabla I(\mathbf{x}')
+  \right\}^2
+\end{equation}
+
+where the neighboring pixels $\mathbf{x}'$ are in a small image patch
+$\|\mathbf{x} - \mathbf{x}'\| < r$.
+
+In fact, we can calculate the sum of square dot-products at every single pixel
+of the image as every corner would correspond to a local minimum of this such
+criterion, But Harris's corner detection method is computationally more
+efficient.
+
+:::note
+Until now, I have talked about corners but we can easily convince ourselves that
+that Förstner's criterion works for any complex junctions, say an x-corner,
+a T-junction.
+:::
 
 
 ## Spiral Model
