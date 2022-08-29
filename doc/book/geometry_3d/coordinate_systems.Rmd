@@ -1,3 +1,8 @@
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\cW}{\mathcal{W}}
+
 # Reference Frames
 
 :::fyi
@@ -14,11 +19,11 @@ Cartesian one. And of course, non-Cartesian coordinate systems such as the
 cylindric one can also be used for any reference frame.
 :::
 
-Let us detail how we go from the camera coordinates $(O_C, \mathbf{i}_C,
-\mathbf{j}_C,\mathbf{k}_C)$ to the world coordinates $(O_W, \mathbf{i}_W,
-\mathbf{j}_W,\mathbf{k}_W)$. We assume the basis vectors are *orthonormal* and
-*right-handed*, that is each vector has a magnitude equal to $1$ and forms
-mutually a right angle between each of them.
+Let us detail how we go from the camera coordinates $(O_\cC, \mathbf{i}_\cC,
+\mathbf{j}_\cC,\mathbf{k}_\cC)$ to the world coordinates $(O_\cW,
+\mathbf{i}_\cW, \mathbf{j}_\cW,\mathbf{k}_\cW)$. We assume the basis vectors are
+*orthonormal* and *right-handed*, that is each vector has a magnitude equal to
+$1$ and forms mutually a right angle between each of them.
 
 \begin{align*}
   \mathbf{i} \times \mathbf{j} &= \mathbf{k} \\
@@ -27,33 +32,33 @@ mutually a right angle between each of them.
 \end{align*}
 
 Denote a 3D point by $M$ and suppose that we know its coordinates in the
-camera coordinate system $(x_C, y_C, z_C)$. We can retrieve its
-coordinates in the world coordinate system $(x_W, y_W, z_W)$ as
+camera coordinate system $(x_\cC, y_\cC, z_\cC)$. We can retrieve its
+coordinates in the world coordinate system $(x_\cW, y_\cW, z_\cW)$ as
 follows.
 
 Let us start with Chasles' relation so that the world coordinates are expressed
 as
 
 \begin{equation}
-  \overrightarrow{O_W M} = \overrightarrow{O_W O_C} +
-                           \overrightarrow{O_C M}.
+  \overrightarrow{O_\cW M} = \overrightarrow{O_\cW O_\cC} +
+                           \overrightarrow{O_\cC M}.
 \end{equation}
 
 The second term can be expressed with the camera coordinates
 
 \begin{equation}
-  \overrightarrow{O_W M} = \overrightarrow{O_W O_C} +
-    x_C \mathbf{i}_C + y_C \mathbf{j}_C + z_C \mathbf{k}_C .
+  \overrightarrow{O_\cW M} = \overrightarrow{O_\cW O_\cC} +
+    x_\cC \mathbf{i}_\cC + y_\cC \mathbf{j}_\cC + z_\cC \mathbf{k}_\cC .
 \end{equation}
 
 Let us denote the camera axes w.r.t. the world coordinate system as
 \begin{equation}
   \begin{array}{ccc}
-  \mathbf{i}_C = \begin{bmatrix} i_{C1} \\ i_{C2} \\ i_{C3} \end{bmatrix},
+  \mathbf{i}_\cC = \begin{bmatrix} i_{\cC1} \\ i_{\cC2} \\ i_{\cC3} \end{bmatrix},
   &
-  \mathbf{j}_C = \begin{bmatrix} j_{C1} \\ j_{C2} \\ j_{C3} \end{bmatrix},
+  \mathbf{j}_\cC = \begin{bmatrix} j_{\cC1} \\ j_{\cC2} \\ j_{\cC3} \end{bmatrix},
   &
-  \mathbf{k}_C = \begin{bmatrix} k_{C1} \\ k_{C2} \\ k_{C3} \end{bmatrix}
+  \mathbf{k}_\cC = \begin{bmatrix} k_{\cC1} \\ k_{\cC2} \\ k_{\cC3} \end{bmatrix}
   \end{array}
   .
 \end{equation}
@@ -61,41 +66,41 @@ Let us denote the camera axes w.r.t. the world coordinate system as
 Reorganizing in matrix notation, the matrix-vector product becomes apparent:
 \begin{equation}
   \begin{aligned}
-  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
-  x_C
+  \overrightarrow{O_\cW M} &= \overrightarrow{O_\cW O_\cC} +
+  x_\cC
   \begin{bmatrix}
-    i_{C1} \\
-    i_{C2} \\
-    i_{C3}
+    i_{\cC1} \\
+    i_{\cC2} \\
+    i_{\cC3}
   \end{bmatrix} +
-  y_C
+  y_\cC
   \begin{bmatrix}
-    j_{C1} \\
-    j_{C2} \\
-    j_{C3}
+    j_{\cC1} \\
+    j_{\cC2} \\
+    j_{\cC3}
   \end{bmatrix} +
-  z_C
+  z_\cC
   \begin{bmatrix}
-    k_{C1} \\
-    k_{C2} \\
-    k_{C3}
+    k_{\cC1} \\
+    k_{\cC2} \\
+    k_{\cC3}
   \end{bmatrix} \\
   %
-  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+  \overrightarrow{O_\cW M} &= \overrightarrow{O_\cW O_\cC} +
   \begin{bmatrix}
-  i_{C1} & j_{C1} & k_{C1} \\
-  i_{C2} & j_{C2} & k_{C2} \\
-  i_{C3} & j_{C3} & k_{C3}
+  i_{\cC1} & j_{\cC1} & k_{\cC1} \\
+  i_{\cC2} & j_{\cC2} & k_{\cC2} \\
+  i_{\cC3} & j_{\cC3} & k_{\cC3}
   \end{bmatrix}
   %
-  \begin{bmatrix} x_C \\ y_C \\ z_C \end{bmatrix} \\
+  \begin{bmatrix} x_\cC \\ y_\cC \\ z_\cC \end{bmatrix} \\
   %
-  \overrightarrow{O_W M} &= \overrightarrow{O_W O_C} +
+  \overrightarrow{O_\cW M} &= \overrightarrow{O_\cW O_\cC} +
   \left[ \begin{array}{c|c|c}
-  \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
+  \mathbf{i}_\cC & \mathbf{j}_\cC & \mathbf{k}_\cC
   \end{array} \right]
   %
-  \begin{bmatrix} x_C \\ y_C \\ z_C \end{bmatrix}
+  \begin{bmatrix} x_\cC \\ y_\cC \\ z_\cC \end{bmatrix}
   %
   \end{aligned}
 \end{equation}
@@ -104,16 +109,16 @@ In the end we arrive at the following formula.
 
 :::puzzle
 \begin{equation}
-  \left[ \begin{array}{c} x_W \\ y_W \\ z_W \end{array} \right] =
-    \underbrace{\overrightarrow{O_W O_C}}_{\mathbf{t}} +
+  \left[ \begin{array}{c} x_\cW \\ y_\cW \\ z_\cW \end{array} \right] =
+    \underbrace{\overrightarrow{O_\cW O_\cC}}_{\mathbf{t}} +
   %
   \underbrace{
     \left[ \begin{array}{c|c|c}
-    \mathbf{i}_C & \mathbf{j}_C & \mathbf{k}_C
+    \mathbf{i}_\cC & \mathbf{j}_\cC & \mathbf{k}_\cC
     \end{array} \right]
   }_{\mathbf{R}}
   %
-  \begin{bmatrix} x_C \\ y_C \\ z_C \end{bmatrix}
+  \begin{bmatrix} x_\cC \\ y_\cC \\ z_\cC \end{bmatrix}
 \end{equation}
 
 We recognize the global rigid body motion $(\mathbf{R}, \mathbf{t})$
@@ -126,28 +131,28 @@ where:
 :::
 
 In general, if this time we are to change from one coordinate
-system $A$ ("camera") to another coordinate system $B$ ("world"), we can calculate
+system $\cA$ ("camera") to another coordinate system $\cB$ ("world"), we can calculate
 the rigid body motion as follows:
 
 \begin{align}
-  \mathbf{R}_{A \rightarrow B} &= \begin{bmatrix}
-    \mathbf{i}_A \cdot \mathbf{i}_B &
-    \mathbf{j}_A \cdot \mathbf{i}_B &
-    \mathbf{k}_A \cdot \mathbf{i}_B \\
+  \mathbf{R}_{\cA \rightarrow \cB} &= \begin{bmatrix}
+    \mathbf{i}_\cA \cdot \mathbf{i}_\cB &
+    \mathbf{j}_\cA \cdot \mathbf{i}_\cB &
+    \mathbf{k}_\cA \cdot \mathbf{i}_\cB \\
     %
-    \mathbf{i}_A \cdot \mathbf{j}_B &
-    \mathbf{j}_A \cdot \mathbf{j}_B &
-    \mathbf{k}_A \cdot \mathbf{j}_B \\
+    \mathbf{i}_\cA \cdot \mathbf{j}_\cB &
+    \mathbf{j}_\cA \cdot \mathbf{j}_\cB &
+    \mathbf{k}_\cA \cdot \mathbf{j}_\cB \\
     %
-    \mathbf{i}_A \cdot \mathbf{k}_B &
-    \mathbf{j}_A \cdot \mathbf{k}_B &
-    \mathbf{k}_A \cdot \mathbf{k}_B \\
+    \mathbf{i}_\cA \cdot \mathbf{k}_\cB &
+    \mathbf{j}_\cA \cdot \mathbf{k}_\cB &
+    \mathbf{k}_\cA \cdot \mathbf{k}_\cB \\
   \end{bmatrix} \\
   %
-  \mathbf{t}_{A \rightarrow B} &= \begin{bmatrix}
-    \overrightarrow{O_A O_B} \cdot \mathbf{i}_B \\
-    \overrightarrow{O_A O_B} \cdot \mathbf{j}_B \\
-    \overrightarrow{O_A O_B} \cdot \mathbf{k}_B
+  \mathbf{t}_{\cA \rightarrow \cB} &= \begin{bmatrix}
+    \overrightarrow{O_\cA O_\cB} \cdot \mathbf{i}_\cB \\
+    \overrightarrow{O_\cA O_\cB} \cdot \mathbf{j}_\cB \\
+    \overrightarrow{O_\cA O_\cB} \cdot \mathbf{k}_\cB
   \end{bmatrix}
 \end{align}
 
