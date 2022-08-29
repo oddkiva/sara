@@ -310,6 +310,7 @@ the two dominant edges, if we look at a small patch centered at the corner
 location $\mathbf{x}$.
 
 So we just said that $\mathbf{x}$ must be an edgel. Let's discuss two cases.
+
 - If a neighboring pixel $\mathbf{x}'$ is also an edgel, we expect
   that the direction vector $\mathbf{h}$ is a good approximation of the
   (quasi-straight) edge curve and should be normal to the image gradient $\nabla
