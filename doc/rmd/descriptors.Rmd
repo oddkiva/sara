@@ -149,7 +149,7 @@ associated normalizing transform.
 
 **TODO: illustrate.**
 
-#### Local Coordinate System and Normalizing Transform
+### Local Coordinate System and Normalizing Transform
 
 The orientations are calculated and accumulated with respect to the *local
 coordinate system* $\mathcal{C}_k$ associated to keypoint $k$, where *$\sigma$
@@ -209,7 +209,7 @@ The magnification factor $\lambda_{\text{zoom}}$ has been introduced in
 $\lambda_\mathrm{zoom} = 3$ scale units to avoid dealing with too small image
 patches and has to be thought as a parameter that is learnt empirically.
 
-#### Grid of Overlapping Patches and Overlapping Histogram Bins
+### Grid of Overlapping Patches and Overlapping Histogram Bins
 
 To compute a SIFT descriptor we consider an oriented square image patch
 $\mathcal{P}$:
@@ -580,7 +580,7 @@ The trilinear interpolation reweighs appropriately the contribution of each
 pixel depending on their distance to each sub-patch center. We will detail this
 in a later section.
 
-#### Geometry of Overlapping Patches
+### Geometry of Overlapping Patches
 
 With the visual interpretation that we provided previously, we can now easily
 relate the geometry analytically with respect to the local coordinate system
@@ -757,7 +757,7 @@ The pixel $(u, v)$ belongs to $4$ patches at most:
 We say "at most to $4$" because for example a gradient at the boundary
 $(-1,-1)$ contributes only to $\mathcal{P}_{00}$.
 
-#### Histogram of Gradients
+### Histogram of Gradients
 
 Consider a pixel $\mathbf{u} \in \mathcal{P}_{ij}$. Its contribution in
 histogram $\mathbf{h}_{ij}$ is
