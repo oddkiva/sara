@@ -119,7 +119,7 @@ bright background as depicted in Figure \@ref(fig:sunflower-heads).
 #|   $\sqrt{2} \sigma_i$ and with dominant gradient orientation $\theta_i$
 #|   represented by a line.
 #|   Bright blobs are on the other hand typically sunflower leaves.
-knitr::include_graphics(paste0(getwd(), "/features/sunflower-heads.png"))
+knitr::include_graphics(paste0(getwd(), "/features/sunflower-heads.jpg"))
 ```
 
 

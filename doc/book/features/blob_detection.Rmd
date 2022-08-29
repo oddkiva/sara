@@ -79,7 +79,7 @@ circular and only guarantees invariance to similarity transforms
 #| fig.cap: >
 #|   Geometry of a SIFT feature.
 #|   Credits: http://www.vlfeat.org/overview/sift.html.
-knitr::include_graphics(paste0(getwd(), "/features/feature.png"))
+knitr::include_graphics(paste0(getwd(), "/features/feature.jpg"))
 ```
 
 Other similarity-invariant detectors enjoy the same similarity invariance as
@@ -106,7 +106,7 @@ will be content with illustrating such features with Figure
 #| fig.cap: >
 #|   Locally Affine-Invariant Features.
 #|   Credits: [@MikolajczykTSZMSKVG:2005:ijcv]
-knitr::include_graphics(paste0(getwd(), "/features/AffineCovariantRegions.png"))
+knitr::include_graphics(paste0(getwd(), "/features/affine-covariant-regions.jpg"))
 ```
 
 As shown in Figure \@ref(fig:affine-covariant-regions), it is quite compelling

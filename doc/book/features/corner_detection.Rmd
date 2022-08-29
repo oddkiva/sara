@@ -1,5 +1,40 @@
 # Corners and Junctions
 
+Traditional corner detectors are also junction detector as illustrated in
+Figures \@ref(fig:man-made-corners) and \@ref(fig:natural-corners).
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: man-made-corners
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   Corners found on man-made structures by Harris's corner detector
+#|   implemented in Sara.
+#|   Harris's detector responds well on a variety of corners:
+#|   (1) sharp features on the roman digits printed on the clock,
+#|   (2) T-junctions on tiles,
+#|   (3) x-corners on metallic grids and so on.
+knitr::include_graphics(paste0(getwd(), "/features/clock.jpg"))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: natural-corners
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   Corners found on natural structures by Harris's corner detector implemented
+#|   in Sara.
+#|   Harris's detector responds well on a variety of corners:
+#|   (1) sharp features of the leaves,
+#|   (2) false corners due to occlusion between leaves,
+#|   (3) T-junctions on the leaf skeleton and so on.
+knitr::include_graphics(paste0(getwd(), "/features/leaves.jpg"))
+```
+
 Detecting corners can be done in many different ways. One robust way to do so is
 to analyze of the local distribution of image gradients at each pixel of the
 image. From there, we can identify the dominant orientations of the gradients.
