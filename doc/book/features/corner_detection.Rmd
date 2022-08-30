@@ -179,7 +179,7 @@ In the discrete domain, the structure tensor is written as
 ### Continuous Domain
 
 Since we mentioned the Gaussian kernel, which is **symmetric**, we can
-generalize the definition in the continous domain as a convolution with any
+generalize the definition to the continous domain as a convolution with any
 distribution $w$.
 
 \begin{equation}
