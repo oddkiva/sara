@@ -11,4 +11,13 @@
 
 #pragma once
 
-#include <DO/Kalpana/Math/Projection.hpp>
+#include <DO/Kalpana/EasyGL/OpenGL.hpp>
+
+#include <DO/Kalpana/EasyGL/Buffer.hpp>
+#include <DO/Kalpana/EasyGL/PixelBuffer.hpp>
+#include <DO/Kalpana/EasyGL/Shader.hpp>
+#include <DO/Kalpana/EasyGL/Texture.hpp>
+#include <DO/Kalpana/EasyGL/VertexArray.hpp>
+
+//! @ingroup Kalpana
+//! @defgroup EasyGL OpenGL Wrappers

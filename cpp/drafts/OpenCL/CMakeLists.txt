@@ -5,7 +5,6 @@ endif ()
 find_package(DO_Sara COMPONENTS Core ImageProcessing ImageIO REQUIRED)
 
 add_subdirectory(Core)
-add_subdirectory(GL)
 
 if (SARA_BUILD_TESTS)
   add_subdirectory(test)

@@ -17,7 +17,7 @@
 
 #include "MyGLFW.hpp"
 
-#include <drafts/OpenCL/GL.hpp>
+#include <DO/Kalpana/EasyGL.hpp>
 
 #include <DO/Sara/Core/Math/Rotation.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>

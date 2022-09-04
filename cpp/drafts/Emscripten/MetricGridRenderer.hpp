@@ -17,7 +17,7 @@
 
 #include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
 
-#include <drafts/OpenCL/GL.hpp>
+#include <DO/Kalpana/EasyGL.hpp>
 
 #include <memory>
 
@@ -49,9 +49,9 @@ struct MetricGridRenderer
     DO::Sara::OmnidirectionalCamera<float> _intrinsics;
 
     //! @brief OpenGL buffer objects.
-    DO::Sara::GL::VertexArray _vao;
-    DO::Sara::GL::Buffer _vbo;
-    DO::Sara::GL::Buffer _ebo;
+    DO::Kalpana::GL::VertexArray _vao;
+    DO::Kalpana::GL::Buffer _vbo;
+    DO::Kalpana::GL::Buffer _ebo;
 
     Eigen::Vector4f _color;
     std::size_t _triangle_index_count;
@@ -61,9 +61,9 @@ struct MetricGridRenderer
   };
 
   // OpenGL Shader program.
-  DO::Sara::GL::Shader _vertex_shader;
-  DO::Sara::GL::Shader _fragment_shader;
-  DO::Sara::GL::ShaderProgram _shader_program;
+  DO::Kalpana::GL::Shader _vertex_shader;
+  DO::Kalpana::GL::Shader _fragment_shader;
+  DO::Kalpana::GL::ShaderProgram _shader_program;
   // Uniform locations.
   GLint _image_loc;
   GLint _image_sizes_loc;

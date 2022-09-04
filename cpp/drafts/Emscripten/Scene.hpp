@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Core.hpp>
 
-#include <drafts/OpenCL/GL.hpp>
+#include <DO/Kalpana/EasyGL.hpp>
 
 #include <memory>
 
@@ -27,15 +27,15 @@ struct Scene
   DO::Sara::Tensor_<std::uint32_t, 2> _triangles;
 
   // OpenGL/Device geometry data.
-  DO::Sara::GL::VertexArray _vao;
-  DO::Sara::GL::Buffer _vbo;
-  DO::Sara::GL::Buffer _ebo;
+  DO::Kalpana::GL::VertexArray _vao;
+  DO::Kalpana::GL::Buffer _vbo;
+  DO::Kalpana::GL::Buffer _ebo;
 
   // OpenGL shaders.
-  DO::Sara::GL::Shader _vertex_shader;
-  DO::Sara::GL::Shader _fragment_shader;
-  DO::Sara::GL::ShaderProgram _shader_program;
-  DO::Sara::GL::Texture2D _texture;
+  DO::Kalpana::GL::Shader _vertex_shader;
+  DO::Kalpana::GL::Shader _fragment_shader;
+  DO::Kalpana::GL::ShaderProgram _shader_program;
+  DO::Kalpana::GL::Texture2D _texture;
 
   // Initialize the projection matrix once for all.
   Eigen::Matrix4f _projection;

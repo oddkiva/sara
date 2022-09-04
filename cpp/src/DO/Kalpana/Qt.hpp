@@ -11,4 +11,6 @@
 
 #pragma once
 
-#include <DO/Kalpana/Math/Projection.hpp>
+#include <DO/Kalpana/Qt/2D.hpp>
+#include <DO/Kalpana/Qt/3D.hpp>
+#include <DO/Kalpana/Qt/Plot.hpp>

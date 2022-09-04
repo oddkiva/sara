@@ -124,7 +124,9 @@ def generate_project(source_dir: str,
 
     subprocess.Popen(
         ['cmake', source_dir] + cmake_options,
-        cwd=build_dir
+        cwd=build_dir,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
     ).wait()
 
 
@@ -187,7 +189,7 @@ if __name__ == '__main__':
                         nargs='+', help="Specify the list of build tasks")
     parser.add_argument("--build_type", choices=BUILD_TYPES, default="Release",
                         help="CMake build type")
-    parser.add_argument("--from_scratch", type=bool, default=False,
+    parser.add_argument("--from_scratch", action='store_true',
                         help="Rebuild the project from scratch")
     args = parser.parse_args()
 
