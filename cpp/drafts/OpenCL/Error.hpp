@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <drafts/OpenCL/Core/OpenCL.hpp>
+#include <drafts/OpenCL/OpenCL.hpp>
 
 
 namespace DO::Sara {

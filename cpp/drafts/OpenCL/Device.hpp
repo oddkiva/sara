@@ -15,10 +15,9 @@
 #include <string>
 #include <vector>
 
-#include <drafts/OpenCL/Core/OpenCL.hpp>
-
-#include <drafts/OpenCL/Core/Error.hpp>
-#include <drafts/OpenCL/Core/Platform.hpp>
+#include <drafts/OpenCL/Error.hpp>
+#include <drafts/OpenCL/OpenCL.hpp>
+#include <drafts/OpenCL/Platform.hpp>
 
 
 namespace DO::Sara {
@@ -47,7 +46,8 @@ namespace DO::Sara {
 
   std::ostream& operator<<(std::ostream& os, const Device& p)
   {
-    const auto length = static_cast<int>(std::string("Compiler available  ").size());
+    const auto length =
+        static_cast<int>(std::string("Compiler available  ").size());
     using std::left;
     using std::setw;
     os << left << setw(length) << "ID"
@@ -69,7 +69,7 @@ namespace DO::Sara {
     return os;
   }
 
-  template<int _InfoType>
+  template <int _InfoType>
   std::string get_device_string_info(cl_device_id device_id)
   {
     cl_int err;
@@ -100,7 +100,7 @@ namespace DO::Sara {
   }
 
 
-  template<typename T, int InfoType>
+  template <typename T, int InfoType>
   T get_device_info(cl_device_id device_id)
   {
     auto info = T{};

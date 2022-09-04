@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <drafts/OpenCL/Core/Error.hpp>
+#include <drafts/OpenCL/Error.hpp>
 
 #include <DO/Sara/Core/StringFormat.hpp>
 

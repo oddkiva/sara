@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include <drafts/OpenCL/Core/Context.hpp>
-#include <drafts/OpenCL/Core/Device.hpp>
-#include <drafts/OpenCL/Core/DeviceBuffer.hpp>
-#include <drafts/OpenCL/Core/DeviceImage.hpp>
-#include <drafts/OpenCL/Core/Error.hpp>
-#include <drafts/OpenCL/Core/Kernel.hpp>
-#include <drafts/OpenCL/Core/OpenCL.hpp>
+#include <drafts/OpenCL/Context.hpp>
+#include <drafts/OpenCL/Device.hpp>
+#include <drafts/OpenCL/DeviceBuffer.hpp>
+#include <drafts/OpenCL/DeviceImage.hpp>
+#include <drafts/OpenCL/Error.hpp>
+#include <drafts/OpenCL/Kernel.hpp>
+#include <drafts/OpenCL/OpenCL.hpp>
 
 
 namespace DO::Sara {

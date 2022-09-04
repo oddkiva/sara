@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include <drafts/OpenCL/Core/Context.hpp>
-#include <drafts/OpenCL/Core/Device.hpp>
-#include <drafts/OpenCL/Core/OpenCL.hpp>
+#include <drafts/OpenCL/OpenCL.hpp>
+#include <drafts/OpenCL/Context.hpp>
+#include <drafts/OpenCL/Device.hpp>
 
 #include <fstream>
 #include <streambuf>

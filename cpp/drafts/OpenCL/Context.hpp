@@ -13,8 +13,8 @@
 
 #include <DO/Sara/Core/StringFormat.hpp>
 
-#include <drafts/OpenCL/Core/Device.hpp>
-#include <drafts/OpenCL/Core/OpenCL.hpp>
+#include <drafts/OpenCL/Device.hpp>
+#include <drafts/OpenCL/OpenCL.hpp>
 
 #include <vector>
 

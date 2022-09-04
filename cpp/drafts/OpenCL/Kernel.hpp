@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include <drafts/OpenCL/Core/Device.hpp>
-#include <drafts/OpenCL/Core/DeviceBuffer.hpp>
-#include <drafts/OpenCL/Core/DeviceImage.hpp>
-#include <drafts/OpenCL/Core/Error.hpp>
-#include <drafts/OpenCL/Core/Program.hpp>
+#include <drafts/OpenCL/Device.hpp>
+#include <drafts/OpenCL/DeviceBuffer.hpp>
+#include <drafts/OpenCL/DeviceImage.hpp>
+#include <drafts/OpenCL/Error.hpp>
+#include <drafts/OpenCL/Program.hpp>
 
 #include <memory>
 #include <vector>

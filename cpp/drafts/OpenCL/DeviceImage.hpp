@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <drafts/OpenCL/Core/Program.hpp>
+#include <drafts/OpenCL/Program.hpp>
 
 #include <array>
 

@@ -13,7 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <drafts/OpenCL/Core/Device.hpp>
+#include <drafts/OpenCL/Device.hpp>
 
 
 using namespace DO::Sara;
