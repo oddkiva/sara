@@ -44,7 +44,7 @@ before_script:
   - wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add -
   - wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
   # Intel TBB
-  - echo "deb http://cz.archive.ubuntu.com/ubuntu eoan main universe" | tee -a  /etc/apt/sources.list
+  # - echo "deb http://cz.archive.ubuntu.com/ubuntu eoan main universe" | tee -a  /etc/apt/sources.list
   # Update the packages list again.
   - apt-get update -y -qq
 
