@@ -1,8 +1,10 @@
 #include <DO/Sara/ImageIO/Details/Heif.hpp>
 
+#ifdef USE_C_API
 extern "C" {
-#include <libheif/heif.h>
+#  include <libheif/heif.h>
 }
+#endif
 
 
 namespace DO::Sara {
@@ -46,6 +48,7 @@ namespace DO::Sara {
     const auto w = image.width();
     const auto h = image.height();
 
+#ifdef USE_C_API
     auto error = heif::Error{};
 
     heif_image* himage = nullptr;
@@ -71,7 +74,7 @@ namespace DO::Sara {
 
     // Use the HEVC codec, which performs best.
     heif_encoder* encoder = nullptr;
-    error = heif_context_get_encoder_for_format(ctx, heif_compression_HEVC,
+    error = heif_context_get_encoder_for_format(nullptr, heif_compression_HEVC,
                                                 &encoder);
     if (error)
       throw std::runtime_error{error.get_message()};
@@ -95,6 +98,28 @@ namespace DO::Sara {
     heif_context_write_to_file(ctx, filepath.c_str());
     heif_context_free(ctx);
     heif_image_release(himage);
+#else
+    auto himage = heif::Image{};
+    himage.create(w, h, heif_colorspace_RGB, heif_chroma_interleaved_RGB);
+    himage.add_plane(heif_channel_interleaved, w, h, 8);
+
+    // Get the raw data pointer of the heif_image and copy the content of the
+    // image view to it.
+    auto stride = int{};
+    auto data = reinterpret_cast<Rgb8*>(
+        himage.get_plane(heif_channel_interleaved, &stride));
+    std::copy(image.begin(), image.end(), data);
+
+    auto encoder = heif::Encoder{heif_compression_HEVC};
+    encoder.set_lossy_quality(quality);
+
+    if (quality == 100)
+      encoder.set_lossless(true);
+
+    auto ctx = heif::Context{};
+    ctx.encode_image(himage, encoder);
+    ctx.write_to_file(filepath);
+#endif
   }
 
 }  // namespace DO::Sara
