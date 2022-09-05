@@ -13,9 +13,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <drafts/OpenCL/Core/Platform.hpp>
-#include <drafts/OpenCL/Core/Device.hpp>
-#include <drafts/OpenCL/Core/DeviceBuffer.hpp>
+#include <drafts/OpenCL/Platform.hpp>
+#include <drafts/OpenCL/Device.hpp>
+#include <drafts/OpenCL/DeviceBuffer.hpp>
 
 
 using namespace DO::Sara;

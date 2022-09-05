@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Core.hpp>
 
-#include <drafts/OpenCL/GL.hpp>
+#include <DO/Kalpana/EasyGL.hpp>
 
 #include <memory>
 
@@ -29,7 +29,7 @@ struct ImagePlaneRenderer
     Eigen::Matrix4f _model_view;
     Eigen::Vector2f _image_sizes;
 
-    DO::Sara::GL::Texture2D _texture;
+    DO::Kalpana::GL::Texture2D _texture;
     GLuint _texture_unit;
 
     auto set_texture(const DO::Sara::ImageView<DO::Sara::Rgb8>& image,
@@ -39,16 +39,16 @@ struct ImagePlaneRenderer
   };
 
   // OpenGL/Device geometry data.
-  DO::Sara::GL::VertexArray _vao;
-  DO::Sara::GL::Buffer _vbo;
-  DO::Sara::GL::Buffer _ebo;
+  DO::Kalpana::GL::VertexArray _vao;
+  DO::Kalpana::GL::Buffer _vbo;
+  DO::Kalpana::GL::Buffer _ebo;
   // The list of image textures.
   std::vector<ImageTexture> _textures;
 
   // OpenGL shaders.
-  DO::Sara::GL::Shader _vertex_shader;
-  DO::Sara::GL::Shader _fragment_shader;
-  DO::Sara::GL::ShaderProgram _shader_program;
+  DO::Kalpana::GL::Shader _vertex_shader;
+  DO::Kalpana::GL::Shader _fragment_shader;
+  DO::Kalpana::GL::ShaderProgram _shader_program;
   // Uniform locations.
   GLint _model_view_loc;
   GLint _projection_loc;

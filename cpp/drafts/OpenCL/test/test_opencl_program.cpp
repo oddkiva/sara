@@ -13,11 +13,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <drafts/OpenCL/Core/CommandQueue.hpp>
-#include <drafts/OpenCL/Core/Context.hpp>
-#include <drafts/OpenCL/Core/Kernel.hpp>
-#include <drafts/OpenCL/Core/Platform.hpp>
-#include <drafts/OpenCL/Core/Program.hpp>
+#include <drafts/OpenCL/CommandQueue.hpp>
+#include <drafts/OpenCL/Context.hpp>
+#include <drafts/OpenCL/Kernel.hpp>
+#include <drafts/OpenCL/Platform.hpp>
+#include <drafts/OpenCL/Program.hpp>
 
 
 using namespace DO::Sara;
