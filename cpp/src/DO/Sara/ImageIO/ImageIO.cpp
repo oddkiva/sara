@@ -13,42 +13,44 @@
 #include <vector>
 
 #if defined(_WIN32) || defined(_WIN32_WCE)
-# define NOMINMAX
-# include <windows.h>
+#  define NOMINMAX
+#  include <windows.h>
 #endif
 
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 
-#include <DO/Sara/ImageIO/ImageIO.hpp>
 #include <DO/Sara/ImageIO/Details/Exif.hpp>
+#include <DO/Sara/ImageIO/Details/Heif.hpp>
 #include <DO/Sara/ImageIO/Details/ImageIOObjects.hpp>
+#include <DO/Sara/ImageIO/ImageIO.hpp>
 
 
 using namespace std;
 
 
 // Utilities.
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   static inline string file_ext(const string& filepath)
   {
     if (filepath.empty())
       return string{};
 
-    string ext{ filepath.substr(filepath.find_last_of(".")) };
+    string ext{filepath.substr(filepath.find_last_of("."))};
     transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     return ext;
   }
 
   static inline bool is_jpeg_file_ext(const string& ext)
- {
-    return
-      ext == ".jpg"  ||
-      ext == ".jpeg" ||
-      ext == ".jpe"  ||
-      ext == ".jfif" ||
-      ext == ".jfi";
+  {
+    // clang-format off
+    return ext == ".jpg"  ||
+           ext == ".jpeg" ||
+           ext == ".jpe"  ||
+           ext == ".jfif" ||
+           ext == ".jfi";
+    // clang-format on
   }
 
   static inline bool is_png_file_ext(const string& ext)
@@ -59,18 +61,20 @@ namespace DO { namespace Sara {
 #ifndef __EMSCRIPTEN__
   static inline bool is_tiff_file_ext(const string& ext)
   {
-    return
-      ext == ".tif" ||
-      ext == ".tiff";
+    return ext == ".tif" || ext == ".tiff";
+  }
+
+  static inline bool is_heif_file_ext(const string& ext)
+  {
+    return ext == ".heic";
   }
 #endif
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara
 
 
 // Image read/write.
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   namespace Detail {
 
@@ -169,6 +173,12 @@ namespace DO { namespace Sara {
 #ifndef __EMSCRIPTEN__
       else if (is_tiff_file_ext(ext))
         read_image_with<TiffFileReader>(image, filepath.c_str());
+      else if (is_heif_file_ext(ext))
+      {
+        auto heif_image = read_heif_file_as_interleaved_rgb_image(filepath);
+        auto imview = to_image_view(heif_image);
+        image = imview;
+      }
 #endif
       else
         throw std::runtime_error{
@@ -184,7 +194,7 @@ namespace DO { namespace Sara {
   } /* namespace Detail */
 
   void imwrite(const Image<Rgb8>& image, const std::string& filepath,
-               int quality)
+               const int quality)
   {
     const auto ext = file_ext(filepath);
 
@@ -209,10 +219,14 @@ namespace DO { namespace Sara {
                      image.width(), image.height(), 3}
           .write(filepath.c_str());
     }
+
+    else if (is_heif_file_ext(ext))
+    {
+      write_heif_file(image, filepath, quality);
+    }
 #endif
     else
       throw std::runtime_error{"Not a supported or valid image format!"};
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara

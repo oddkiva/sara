@@ -61,6 +61,7 @@ before_script:
       lcov
       libboost-all-dev
       libhdf5-dev
+      libheif-dev
       libjpeg-dev
       libpng-dev
       libtiff5-dev

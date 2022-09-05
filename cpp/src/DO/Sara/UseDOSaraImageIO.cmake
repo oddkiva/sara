@@ -24,6 +24,7 @@ if(SARA_USE_FROM_SOURCE)
               ${PNG_LIBRARIES} #
               ${TIFF_LIBRARIES} #
               ${ZLIB_LIBRARIES} #
+              HEIF::HEIF #
       PUBLIC DO::Sara::Core #
              easyexif)
 
