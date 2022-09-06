@@ -175,9 +175,7 @@ namespace DO::Sara {
         read_image_with<TiffFileReader>(image, filepath.c_str());
       else if (is_heif_file_ext(ext))
       {
-        auto heif_image = read_heif_file_as_interleaved_rgb_image(filepath);
-        auto imview = to_image_view(heif_image);
-        image = imview;
+        image = read_heif_file_as_interleaved_rgb_image(filepath);
       }
 #endif
       else

@@ -22,7 +22,7 @@ SYSTEM = platform.system()
 if SYSTEM == "Linux":
     HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-14.0.0-x86-64-linux"
     NVIDIA_CODEC_SDK_ROOT_PATH = pathlib.Path.home() / "opt/Video_Codec_SDK_11.0.10"
-    SWIFTC_PATH= pathlib.Path.home() / "opt/swift-5.6.2-RELEASE-ubuntu20.04/usr/bin/swiftc"
+    SWIFTC_PATH= pathlib.Path.home() / "opt/swift-5.6.3-RELEASE-ubuntu20.04/usr/bin/swiftc"
 elif SYSTEM == "Darwin":
     NVIDIA_CODEC_SDK_ROOT_PATH = None
     SWIFT_PATH = subprocess.check_output(["which", "swift"])

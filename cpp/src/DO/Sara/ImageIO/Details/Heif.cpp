@@ -1,29 +1,66 @@
 #include <DO/Sara/ImageIO/Details/Heif.hpp>
 
+#define USE_C_API
 #ifdef USE_C_API
 extern "C" {
 #  include <libheif/heif.h>
 }
+#else
+#  include <libheif/heif_cxx.h>
 #endif
 
 
 namespace DO::Sara {
 
   auto read_heif_file_as_interleaved_rgb_image(const std::string& filepath)
-      -> heif::Image
+      -> Image<Rgb8>
   {
+#ifdef USE_C_API
+    auto error = heif_error{};
+
+    heif_context* ctx = heif_context_alloc();
+    error = heif_context_read_from_file(ctx, filepath.c_str(), nullptr);
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
+
+    heif_image_handle* handle = nullptr;
+    error = heif_context_get_primary_image_handle(ctx, &handle);
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
+
+    heif_image* image = nullptr;
+    error = heif_decode_image(handle, &image, heif_colorspace_RGB,
+                              heif_chroma_interleaved_RGB, nullptr);
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
+
+    const auto w = heif_image_get_width(image, heif_channel_interleaved);
+    const auto h = heif_image_get_height(image, heif_channel_interleaved);
+
+    auto stride = int{};
+    const auto data = reinterpret_cast<Rgb8*>(const_cast<std::uint8_t*>(
+        heif_image_get_plane(image, heif_channel_interleaved, &stride)));
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
+    const auto im_view = ImageView<Rgb8>{data, {w, h}};
+
+    auto im = Image<Rgb8>{w, h};
+    im = im_view;
+
+    heif_image_handle_release(handle);
+    heif_image_release(image);
+    heif_context_free(ctx);
+
+    return im;
+#else
     auto ctx = heif::Context{};
     ctx.read_from_file(filepath);
 
     auto image_handle = ctx.get_primary_image_handle();
 
-    const auto image = image_handle.decode_image(heif_colorspace_RGB,
-                                                 heif_chroma_interleaved_RGB);
-    return image;
-  }
+    auto image = image_handle.decode_image(heif_colorspace_RGB,
+                                           heif_chroma_interleaved_RGB);
 
-  auto to_image_view(heif::Image& image) -> ImageView<Rgb8>
-  {
     const auto colorspace = image.get_colorspace();
     if (!(colorspace == heif_colorspace_RGB &&
           image.get_chroma_format() == heif_chroma_interleaved_RGB))
@@ -38,8 +75,11 @@ namespace DO::Sara {
 
     const auto w = image.get_width(heif_channel_interleaved);
     const auto h = image.get_height(heif_channel_interleaved);
-    auto imview = ImageView<Rgb8>{data, {w, h}};
-    return imview;
+    const auto imview = ImageView<Rgb8>{data, {w, h}};
+
+    auto imcopy = Image<Rgb8>(imview);
+    return imcopy;
+#endif
   }
 
   auto write_heif_file(const ImageView<Rgb8>& image,
@@ -49,19 +89,19 @@ namespace DO::Sara {
     const auto h = image.height();
 
 #ifdef USE_C_API
-    auto error = heif::Error{};
+    auto error = heif_error{};
 
     heif_image* himage = nullptr;
     error = heif_image_create(w, h,                         //
                               heif_colorspace_RGB,          //
                               heif_chroma_interleaved_RGB,  //
                               &himage);
-    if (error)
-      throw std::runtime_error{error.get_message()};
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
 
     error = heif_image_add_plane(himage, heif_channel_interleaved, w, h, 8);
-    if (error)
-      throw std::runtime_error{error.get_message()};
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
 
     // Get the raw data pointer of the heif_image and copy the content of the
     // image view to it.
@@ -76,26 +116,28 @@ namespace DO::Sara {
     heif_encoder* encoder = nullptr;
     error = heif_context_get_encoder_for_format(nullptr, heif_compression_HEVC,
                                                 &encoder);
-    if (error)
-      throw std::runtime_error{error.get_message()};
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
 
     // set the encoder parameters
     error = heif_encoder_set_lossy_quality(encoder, quality);
-    if (error)
-      throw std::runtime_error{error.get_message()};
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
 
     if (quality == 100)
       error = heif_encoder_set_lossless(encoder, true);
-    if (error)
-      throw std::runtime_error{error.get_message()};
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
 
     error = heif_context_encode_image(ctx, himage, encoder, nullptr, nullptr);
-    if (error)
-      throw std::runtime_error{error.get_message()};
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
 
     // Free the allocated resources.
     heif_encoder_release(encoder);
-    heif_context_write_to_file(ctx, filepath.c_str());
+    error = heif_context_write_to_file(ctx, filepath.c_str());
+    if (error.code != heif_error_Ok)
+      throw std::runtime_error{error.message};
     heif_context_free(ctx);
     heif_image_release(himage);
 #else

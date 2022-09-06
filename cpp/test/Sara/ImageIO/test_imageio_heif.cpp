@@ -36,6 +36,10 @@ BOOST_AUTO_TEST_CASE(test_rgb_image_read_write)
     // Write dummy image.
     //
     // CAVEAT: libheif/libx265 is leaking when writing (!!!)
+    // Even if I try to mitigate the amount of leaks by using a singleton
+    // object, it will still leak as much.
+    //
+    // But also is it a true memory leak?
     {
       auto image = sara::Image<sara::Rgb8>{w, h};
       image.flat_array().fill(sara::Red8);

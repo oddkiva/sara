@@ -13,15 +13,11 @@
 
 #include <DO/Sara/Core/Image.hpp>
 
-#include <libheif/heif_cxx.h>
-
 
 namespace DO::Sara {
 
-  auto read_heif_file_as_interleaved_rgb_image(const std::string&)
-      -> heif::Image;
-
-  auto to_image_view(heif::Image&) -> ImageView<Rgb8>;
+  auto read_heif_file_as_interleaved_rgb_image(const std::string& filepath)
+      -> Image<Rgb8>;
 
   auto write_heif_file(const ImageView<Rgb8>&, const std::string&,
                        const int quality) -> void;
