@@ -58,6 +58,11 @@ BOOST_AUTO_TEST_CASE(test_rgb_image_read_write)
       // fs::remove(filepath);
     }
   }
+
+  const auto image_path = "/home/david/Desktop/Datasets/oddkiva/regents-park/IMG_2708.HEIC";
+
+  const auto image = sara::imread<sara::Rgb8>(image_path);
+  sara::imwrite(image, "/home/david/Desktop/test.heic");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -217,7 +217,7 @@ function install_package()
 
 if [[ ${build_type} == "docker" ]]; then
   # Build the docker image.
-  docker build -f Dockerfile -t ${SARA_DOCKER_IMAGE}:latest .
+  docker build -f docker/Dockerfile.bionic -t ${SARA_DOCKER_IMAGE}:latest .
   # Run the docker image.
   docker run --gpus all -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \

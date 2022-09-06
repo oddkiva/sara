@@ -20,11 +20,9 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
-#include <DO/Kalpana/Math/Projection.hpp>
-
 #include <GLFW/glfw3.h>
 
-#include <Eigen/Geometry>
+#include "GlfwUtilities.hpp"
 
 #include <map>
 
@@ -69,151 +67,6 @@ inline auto init_glew_boilerplate()
               << std::endl;
   }
 #endif
-}
-
-
-// Default camera values
-static const float YAW = -90.0f;
-static const float PITCH = 0.0f;
-static const float SPEED = 1e-1f;
-static const float SENSITIVITY = 1e-1f;
-static const float ZOOM = 45.0f;
-
-// The explorer's eye.
-struct Camera
-{
-  Vector3f position{10.f * Vector3f::UnitY()};
-  Vector3f front{-Vector3f::UnitZ()};
-  Vector3f up{Vector3f::UnitY()};
-  Vector3f right;
-  Vector3f world_up{Vector3f::UnitY()};
-
-  float yaw{YAW};
-  float pitch{PITCH};
-  float roll{0.f};
-
-  float movement_speed{SPEED};
-  float movement_sensitivity{SENSITIVITY};
-  float zoom{ZOOM};
-
-  auto move_left(float delta)
-  {
-    position -= movement_speed * delta * right;
-  }
-
-  auto move_right(float delta)
-  {
-    position += movement_speed * delta * right;
-  }
-
-  auto move_forward(float delta)
-  {
-    position += movement_speed * delta * front;
-  }
-
-  auto move_backward(float delta)
-  {
-    position -= movement_speed * delta * front;
-  }
-
-  auto move_up(float delta)
-  {
-    position += movement_speed * delta * up;
-  }
-
-  auto move_down(float delta)
-  {
-    position -= movement_speed * delta * up;
-  }
-
-  // pitch
-  auto yes_head_movement(float delta)
-  {
-    pitch += movement_sensitivity * delta;
-  }
-
-  // yaw
-  auto no_head_movement(float delta)
-  {
-    yaw += movement_sensitivity * delta;
-  }
-
-  auto maybe_head_movement(float delta)
-  {
-    roll += movement_sensitivity * delta;
-  }
-
-  auto update()
-  {
-    Vector3f front1;
-
-    static constexpr auto pi = static_cast<float>(M_PI);
-    front1 << cos(yaw * pi / 180) * cos(pitch * pi / 180.f),
-        sin(pitch * pi / 180.f),
-        sin(yaw * pi / 180.f) * cos(pitch * pi / 180.f);
-    front = front1.normalized();
-
-    right = front.cross(world_up).normalized();
-    right = AngleAxisf(roll * pi / 180, front).toRotationMatrix() * right;
-    right.normalize();
-
-    up = right.cross(front).normalized();
-  }
-
-  auto view_matrix() -> Matrix4f
-  {
-    return k::look_at(position, (position + front).eval(), up);
-  }
-};
-
-
-struct Time
-{
-  void update()
-  {
-    last_frame = current_frame;
-    current_frame = static_cast<float>(timer.elapsed_ms());
-    delta_time = current_frame - last_frame;
-  }
-
-  Timer timer;
-  float delta_time = 0.f;
-  float last_frame = 0.f;
-  float current_frame = 0.f;
-};
-
-auto move_camera_from_keyboard(GLFWwindow* window, Camera& camera, Time& time)
-{
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    camera.move_forward(time.delta_time);
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    camera.move_backward(time.delta_time);
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    camera.move_left(time.delta_time);
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    camera.move_right(time.delta_time);
-
-  if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS)
-    camera.no_head_movement(-time.delta_time);  // CCW
-  if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
-    camera.no_head_movement(+time.delta_time);  // CW
-
-  if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS)
-    camera.yes_head_movement(+time.delta_time);
-  if (glfwGetKey(window, GLFW_KEY_END) == GLFW_PRESS)
-    camera.yes_head_movement(-time.delta_time);
-
-  if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-    camera.move_up(time.delta_time);
-  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-    camera.move_down(time.delta_time);
-
-  if (glfwGetKey(window, GLFW_KEY_INSERT) == GLFW_PRESS)
-    camera.maybe_head_movement(-time.delta_time);
-  if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
-    camera.maybe_head_movement(+time.delta_time);
-
-  camera.update();
 }
 
 
