@@ -8,13 +8,14 @@ import sys
 
 
 # Build tasks
-BUILD_TASKS = ["library", "book", "book_docker", "serve_book"]
+BUILD_TASKS = ["library", "library_docker", "book", "book_docker", "serve_book"]
 
 # Build types.
 BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 
 # Some constants
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
+SARA_DOCKER_IMAGE="registry.gitlab.com/do-cv/sara"
 SYSTEM = platform.system()
 
 
@@ -36,6 +37,16 @@ try:
     PYTHON_LIBRARY=sysconfig.get_config_var('LIBDIR')
 except:
     PYBIND11_DIR = None
+
+
+def execute(cmd, cwd):
+    with subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1,
+                          universal_newlines=True, cwd=cwd) as p:
+        for line in p.stdout:
+            print(line, end='') # process line here
+
+    if p.returncode != 0:
+        raise subprocess.CalledProcessError(p.returncode, p.args)
 
 
 def infer_project_type(system: str):
@@ -67,12 +78,13 @@ def generate_project(source_dir: str,
     # Support for YouCompleteMe auto-completions
     cmake_options.append("-D CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON")
 
-    # Use latest Qt version instead of the system Qt.
+    # Use latest Qt version instead of the system Qt if possible.
     my_cmake_prefix_paths = []
     if SYSTEM == "Linux" and pathlib.Path("/usr/local/Qt-6.3.1").exists():
         cmake_options.append("-D SARA_USE_QT6:BOOL=ON")
         my_cmake_prefix_paths.append("/usr/local/Qt-6.3.1")
     elif SYSTEM == "Darwin":
+        cmake_options.append("-D SARA_USE_QT6:BOOL=ON")
         qt6_root_dir = subprocess.check_output(["brew", "--prefix", "qt"])
         qt6_root_dir = qt6_root_dir.decode(sys.stdout.encoding).strip()
         qt6_cmake_dir = pathlib.Path(qt6_root_dir) / "lib" / "cmake" / "Qt6"
@@ -87,10 +99,11 @@ def generate_project(source_dir: str,
     cmake_options.append("-D SARA_BUILD_VIDEOIO:BOOL=ON")
 
     # Compile Halide code.
-    cmake_options.append("-D SARA_USE_HALIDE:BOOL=ON")
     if SYSTEM == "Linux" and HALIDE_ROOT_PATH.exists():
+        cmake_options.append("-D SARA_USE_HALIDE:BOOL=ON")
         my_cmake_prefix_paths.append(HALIDE_ROOT_PATH)
     elif SYSTEM == "Darwin":
+        cmake_options.append("-D SARA_USE_HALIDE:BOOL=ON")
         llvm_dir = subprocess.check_output(["brew", "--prefix", "llvm"])
         llvm_dir = llvm_dir.decode(sys.stdout.encoding).strip()
         llvm_cmake_dir = pathlib.Path(llvm_dir) / "lib" / "cmake" / "llvm"
@@ -122,13 +135,8 @@ def generate_project(source_dir: str,
         cmake_options.append("-D PYTHON_INCLUDE_DIR={}".format(PYTHON_INCLUDE_DIR))
         cmake_options.append("-D PYTHON_LIBRARY={}".format(PYTHON_LIBRARY))
 
-    subprocess.Popen(
-        ['cmake', source_dir] + cmake_options,
-        cwd=build_dir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    ).wait()
-
+    cmd = ['cmake', source_dir] + cmake_options
+    execute(cmd, build_dir)
 
 def build_project(build_dir: str, build_type: str):
     project_type = infer_project_type(SYSTEM)
@@ -136,8 +144,7 @@ def build_project(build_dir: str, build_type: str):
     if project_type == "Xcode":
         command_line += ["--config", build_type]
 
-    ret = subprocess.Popen(command_line, cwd=build_dir).wait()
-    return ret
+    execute(command_line, build_dir)
 
 def run_project_tests(build_dir: str, build_type: str):
     project_type = infer_project_type(SYSTEM)
@@ -145,8 +152,22 @@ def run_project_tests(build_dir: str, build_type: str):
     if project_type == "Xcode":
         command_line += ["--config", build_type]
 
-    ret = subprocess.Popen(command_line, cwd=build_dir).wait()
-    return ret
+    execute(command_line, build_dir)
+
+def build_library_docker(source_dir: str) -> None:
+    # Build the docker image.
+    execute(
+        [
+            "docker",
+            "build",
+            "-f",
+            "docker/Dockerfile",
+            "-t",
+            f"{SARA_DOCKER_IMAGE}:latest",
+            "."
+        ],
+        source_dir)
+
 
 def build_book():
     ret = subprocess.Popen(['Rscript', 'build.R'],
@@ -207,6 +228,9 @@ if __name__ == '__main__':
                              args.from_scratch)
             build_project(build_dir, args.build_type)
             run_project_tests(build_dir, args.build_type)
+
+        if task == "library_docker":
+            build_library_docker(SARA_SOURCE_DIR)
 
         if task == "book":
             build_book()

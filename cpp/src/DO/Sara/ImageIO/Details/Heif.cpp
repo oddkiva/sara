@@ -1,6 +1,8 @@
 #include <DO/Sara/ImageIO/Details/Heif.hpp>
 
+#define ENSURE_HEIF_BACKWARD_COMPATIBILITY
 #define USE_C_API
+
 #ifdef USE_C_API
 extern "C" {
 #  include <libheif/heif.h>
@@ -98,23 +100,36 @@ namespace DO::Sara {
     if (error.code != heif_error_Ok)
       throw std::runtime_error{error.message};
 
+#  ifdef ENSURE_HEIF_BACKWARD_COMPATIBILITY
+    error = heif_image_add_plane(himage, heif_channel_interleaved, w, h, 24);
+#  else
     error = heif_image_add_plane(himage, heif_channel_interleaved, w, h, 8);
+#  endif
     if (error.code != heif_error_Ok)
       throw std::runtime_error{error.message};
 
     // Get the raw data pointer of the heif_image and copy the content of the
     // image view to it.
-    auto stride = int{};
-    auto data = reinterpret_cast<Rgb8*>(
-        heif_image_get_plane(himage, heif_channel_interleaved, &stride));
-    std::copy(image.begin(), image.end(), data);
+    auto row_byte_size = int{};
+    auto dst_ptr = reinterpret_cast<void*>(
+        heif_image_get_plane(himage, heif_channel_interleaved, &row_byte_size));
+    const auto src_ptr = reinterpret_cast<const void*>(image.data());
+    if (row_byte_size != static_cast<int>(sizeof(Rgb8) * image.width()))
+      throw std::runtime_error{
+          "The row byte size in the HEIF image buffer is incorrect!"};
+    std::memcpy(dst_ptr, src_ptr, sizeof(Rgb8) * image.size());
 
     heif_context* ctx = heif_context_alloc();
 
     // Use the HEVC codec, which performs best.
     heif_encoder* encoder = nullptr;
+#  ifdef ENSURE_HEIF_BACKWARD_COMPATIBILITY
+    error = heif_context_get_encoder_for_format(ctx, heif_compression_HEVC,
+                                                &encoder);
+#  else
     error = heif_context_get_encoder_for_format(nullptr, heif_compression_HEVC,
                                                 &encoder);
+#  endif
     if (error.code != heif_error_Ok)
       throw std::runtime_error{error.message};
 

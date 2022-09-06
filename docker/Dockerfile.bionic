@@ -75,7 +75,7 @@ RUN mv Halide-13.0.0-x86-64-linux ${HOME}/opt
 
 # Please make my life easier
 # TODO: install neovim, etc.
-RUN apt-get install -y zsh
+RUN apt-get install -y zsh vim
 
 # Set up my development workspace.
 WORKDIR /workspace/sara
