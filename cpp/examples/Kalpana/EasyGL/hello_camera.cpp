@@ -236,13 +236,14 @@ struct CheckerBoardObject
         const auto ij = cols * i + j;
 
         // Coordinates.
-        v_mat.block(4 * ij, 0, 4, 3) <<  //
-                                         // coords
-            i + 0.5f,
-            0.0f, j + 0.5f,              // top-right
+        //
+        // clang-format off
+        v_mat.block(4 * ij, 0, 4, 3) <<  // coords
+            i + 0.5f, 0.0f, j + 0.5f,    // top-right
             i + 0.5f, 0.0f, j + -0.5f,   // bottom-right
             i + -0.5f, 0.0f, j + -0.5f,  // bottom-left
             i + -0.5f, 0.0f, j + 0.5f;   // top-left
+        // clang-format on
 
         // Set colors.
         if (i % 2 == 0 and j % 2 == 0)
@@ -254,8 +255,13 @@ struct CheckerBoardObject
         else  // (i % 2 == 1 and j % 2 == 0)
           v_mat.block(4 * ij, 3, 4, 3).setZero();
 
-        t_mat.block(2 * ij, 0, 2, 3) << 4 * ij + 0, 4 * ij + 1, 4 * ij + 2,
-            4 * ij + 2, 4 * ij + 3, 4 * ij + 0;
+        // vertex indices for each triangle that forms the quad
+        //
+        // clang-format off
+        t_mat.block(2 * ij, 0, 2, 3) <<
+          4 * ij + 0, 4 * ij + 1, 4 * ij + 2,
+          4 * ij + 2, 4 * ij + 3, 4 * ij + 0;
+        // clang-format on
       }
     }
     // Translate.
