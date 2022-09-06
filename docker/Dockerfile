@@ -57,6 +57,7 @@ RUN apt-get update -y && apt-get install -y \
   libpocl-dev               \
   libcurl4                  \
   libz3-4                   \
+  libtbb-dev                \
   ocl-icd-opencl-dev        \
   opencl-headers            \
   python3-dev               \
