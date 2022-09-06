@@ -89,7 +89,7 @@ inline auto move_camera_from_keyboard(GLFWwindow* window,  //
   if (key == GLFW_KEY_MINUS)
     scale /= 1.01f;
   if (key == GLFW_KEY_EQUAL)
-    scale *= 1.11f;
+    scale *= 1.01f;
 
   camera.update();
 }
