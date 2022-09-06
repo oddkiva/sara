@@ -386,7 +386,9 @@ int main()
       glfwCreateWindow(width, height, "Hello Point Cloud", nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
-  // glfwSetCursorPosCallback(window, move_camera_from_mouse);
+  glfwSetKeyCallback(window, move_camera_from_keyboard);
+  glfwSetCursorPosCallback(window, move_trackball);
+  glfwSetMouseButtonCallback(window, use_trackball);
 
   init_glew_boilerplate();
 
@@ -396,7 +398,6 @@ int main()
   //
   auto point_cloud_object = PointCloudObject{make_point_cloud()};
   auto checkerboard = CheckerBoardObject{};
-  auto camera = Camera{};
 
 
   // ==========================================================================
@@ -408,10 +409,12 @@ int main()
   // You absolutely need this for 3D objects!
   glEnable(GL_DEPTH_TEST);
 
-  auto time = Time{};
-
   // Initialize the projection matrix once for all.
   const Matrix4f projection = k::perspective(45.f, 800.f / 600.f, .1f, 1000.f);
+
+  // Transform matrix.
+  const Transform<float, 3, Eigen::Projective> transform =
+      Transform<float, 3, Eigen::Projective>::Identity();
 
 
   // Display image.
@@ -419,45 +422,47 @@ int main()
   while (!glfwWindowShouldClose(window))
   {
     // Calculate the elapsed time.
-    time.update();
+    gtime.update();
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
       glfwSetWindowShouldClose(window, true);
 
-    // Camera interaction with keyboard.
-    move_camera_from_keyboard(window, camera, time);
-    auto view_matrix = camera.view_matrix();
+    // Camera interaction with the trackball.
+    // auto view_matrix = camera.view_matrix();
+    Eigen::Matrix3f view_matrix_33 =
+        trackball.rotation().toRotationMatrix().cast<float>();
+    Eigen::Matrix4f view_matrix = Eigen::Matrix4f::Identity();
+    view_matrix.topLeftCorner(3, 3) = view_matrix_33;
+    view_matrix.col(3).head(3) = camera.position;
+
+    Transform<float, 3, Eigen::Projective> scale_point_cloud =
+        Transform<float, 3, Eigen::Projective>::Identity();
+    scale_point_cloud.scale(scale);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Important.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Transform matrix.
-    auto transform = Transform<float, 3, Eigen::Projective>{};
-    transform.setIdentity();
-
     // Draw the checkerboard.
-    checkerboard.shader_program.use();
-    checkerboard.shader_program.set_uniform_matrix4f("transform",
-                                                     transform.matrix().data());
-    checkerboard.shader_program.set_uniform_matrix4f("view",
-                                                     view_matrix.data());
-    checkerboard.shader_program.set_uniform_matrix4f("projection",
-                                                     projection.data());
-    glBindVertexArray(checkerboard.vao);
-    glDrawElements(GL_TRIANGLES,
-                   static_cast<GLsizei>(checkerboard.triangles.size()),
-                   GL_UNSIGNED_INT, 0);
-
-    // Rotate the point cloud.
-    transform.rotate(AngleAxisf(
-        static_cast<float>(std::pow(1.5, 5) * time.last_frame / 10000),
-        Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
+    if (show_checkerboard)
+    {
+      checkerboard.shader_program.use();
+      checkerboard.shader_program.set_uniform_matrix4f(
+          "transform", transform.matrix().data());
+      checkerboard.shader_program.set_uniform_matrix4f("view",
+                                                       view_matrix.data());
+      checkerboard.shader_program.set_uniform_matrix4f("projection",
+                                                       projection.data());
+      glBindVertexArray(checkerboard.vao);
+      glDrawElements(GL_TRIANGLES,
+                     static_cast<GLsizei>(checkerboard.triangles.size()),
+                     GL_UNSIGNED_INT, 0);
+    }
 
     // Draw point cloud.
     point_cloud_object.shader_program.use();
     point_cloud_object.shader_program.set_uniform_matrix4f(
-        "transform", transform.matrix().data());
+        "transform", scale_point_cloud.matrix().data());
     point_cloud_object.shader_program.set_uniform_matrix4f("view",
                                                            view_matrix.data());
     point_cloud_object.shader_program.set_uniform_matrix4f("projection",

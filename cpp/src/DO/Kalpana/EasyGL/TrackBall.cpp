@@ -1,4 +1,5 @@
 #include <DO/Kalpana/EasyGL/TrackBall.hpp>
+#include <iostream>
 
 
 namespace DO::Kalpana::GL {
@@ -40,11 +41,8 @@ namespace DO::Kalpana::GL {
 
     // Compose the old rotation with the new rotation.
     // Remember that quaternions do not commute.
-#ifdef __linux__
-    _rotation = Eigen::AngleAxisf{1.f, _axis} * _rotation;
-#else
-    _rotation = Eigen::AngleAxisf{2.f, _axis} * _rotation;
-#endif
+    static const auto angle_delta = static_cast<float>(0.2 * M_PI / 180);
+    _rotation = Eigen::AngleAxisf{angle_delta, _axis} * _rotation;
 
     // Remember the current position as the last position when move is called
     // again.
@@ -59,9 +57,7 @@ namespace DO::Kalpana::GL {
 
   auto TrackBall::rotation() const -> Eigen::Quaternionf
   {
-    if (_pressed)
-      return _rotation;
-    return Eigen::AngleAxisf{2.f, _axis} * _rotation;
+    return _rotation;
   }
 
 }  // namespace DO::Kalpana::GL
