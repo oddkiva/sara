@@ -16,7 +16,7 @@ namespace DO::Sara {
       -> Image<Rgb8>
   {
 #ifdef USE_C_API
-    auto error = heif_error{};
+    heif_error error;
 
     heif_context* ctx = heif_context_alloc();
     error = heif_context_read_from_file(ctx, filepath.c_str(), nullptr);
@@ -44,8 +44,7 @@ namespace DO::Sara {
       throw std::runtime_error{error.message};
     const auto im_view = ImageView<Rgb8>{data, {w, h}};
 
-    auto im = Image<Rgb8>{w, h};
-    im = im_view;
+    auto im = Image<Rgb8>{im_view};
 
     heif_image_handle_release(handle);
     heif_image_release(image);
