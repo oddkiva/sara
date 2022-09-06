@@ -8,13 +8,14 @@ import sys
 
 
 # Build tasks
-BUILD_TASKS = ["library", "book", "book_docker", "serve_book"]
+BUILD_TASKS = ["library", "library_docker", "book", "book_docker", "serve_book"]
 
 # Build types.
 BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 
 # Some constants
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
+SARA_DOCKER_IMAGE="registry.gitlab.com/do-cv/sara"
 SYSTEM = platform.system()
 
 
@@ -22,7 +23,7 @@ SYSTEM = platform.system()
 if SYSTEM == "Linux":
     HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-14.0.0-x86-64-linux"
     NVIDIA_CODEC_SDK_ROOT_PATH = pathlib.Path.home() / "opt/Video_Codec_SDK_11.0.10"
-    SWIFTC_PATH= pathlib.Path.home() / "opt/swift-5.6.2-RELEASE-ubuntu20.04/usr/bin/swiftc"
+    SWIFTC_PATH= pathlib.Path.home() / "opt/swift-5.6.3-RELEASE-ubuntu20.04/usr/bin/swiftc"
 elif SYSTEM == "Darwin":
     NVIDIA_CODEC_SDK_ROOT_PATH = None
     SWIFT_PATH = subprocess.check_output(["which", "swift"])
@@ -36,6 +37,16 @@ try:
     PYTHON_LIBRARY=sysconfig.get_config_var('LIBDIR')
 except:
     PYBIND11_DIR = None
+
+
+def execute(cmd, cwd):
+    with subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1,
+                          universal_newlines=True, cwd=cwd) as p:
+        for line in p.stdout:
+            print(line, end='') # process line here
+
+    if p.returncode != 0:
+        raise subprocess.CalledProcessError(p.returncode, p.args)
 
 
 def infer_project_type(system: str):
@@ -122,13 +133,8 @@ def generate_project(source_dir: str,
         cmake_options.append("-D PYTHON_INCLUDE_DIR={}".format(PYTHON_INCLUDE_DIR))
         cmake_options.append("-D PYTHON_LIBRARY={}".format(PYTHON_LIBRARY))
 
-    subprocess.Popen(
-        ['cmake', source_dir] + cmake_options,
-        cwd=build_dir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    ).wait()
-
+    cmd = ['cmake', source_dir] + cmake_options
+    execute(cmd, source_dir)
 
 def build_project(build_dir: str, build_type: str):
     project_type = infer_project_type(SYSTEM)
@@ -136,8 +142,7 @@ def build_project(build_dir: str, build_type: str):
     if project_type == "Xcode":
         command_line += ["--config", build_type]
 
-    ret = subprocess.Popen(command_line, cwd=build_dir).wait()
-    return ret
+    execute(command_line, build_dir)
 
 def run_project_tests(build_dir: str, build_type: str):
     project_type = infer_project_type(SYSTEM)
@@ -145,8 +150,22 @@ def run_project_tests(build_dir: str, build_type: str):
     if project_type == "Xcode":
         command_line += ["--config", build_type]
 
-    ret = subprocess.Popen(command_line, cwd=build_dir).wait()
-    return ret
+    execute(command_line, build_dir)
+
+def build_library_docker(source_dir: str) -> None:
+    # Build the docker image.
+    execute(
+        [
+            "docker",
+            "build",
+            "-f",
+            "docker/Dockerfile",
+            "-t",
+            f"{SARA_DOCKER_IMAGE}:latest",
+            "."
+        ],
+        source_dir)
+
 
 def build_book():
     ret = subprocess.Popen(['Rscript', 'build.R'],
@@ -207,6 +226,9 @@ if __name__ == '__main__':
                              args.from_scratch)
             build_project(build_dir, args.build_type)
             run_project_tests(build_dir, args.build_type)
+
+        if task == "library_docker":
+            build_library_docker(SARA_SOURCE_DIR)
 
         if task == "book":
             build_book()
