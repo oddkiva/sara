@@ -23,10 +23,10 @@ auto camera = Camera{};
 auto gtime = Time{};
 
 auto trackball = DO::Kalpana::GL::TrackBall{};
-Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
 
 auto show_checkerboard = true;
 auto scale = 1.f;
+static constexpr auto scale_factor = 1.05f;
 
 
 static inline auto normalize_cursor_pos(GLFWwindow* window,
@@ -87,9 +87,9 @@ inline auto move_camera_from_keyboard(GLFWwindow* window,  //
     show_checkerboard = !show_checkerboard;
 
   if (key == GLFW_KEY_MINUS)
-    scale /= 1.01f;
+    scale /= scale_factor;
   if (key == GLFW_KEY_EQUAL)
-    scale *= 1.01f;
+    scale *= scale_factor;
 
   camera.update();
 }
