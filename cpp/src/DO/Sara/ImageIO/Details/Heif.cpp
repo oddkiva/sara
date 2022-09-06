@@ -66,7 +66,7 @@ namespace DO::Sara {
     if (!(colorspace == heif_colorspace_RGB &&
           image.get_chroma_format() == heif_chroma_interleaved_RGB))
       throw std::runtime_error{
-          "Decoded image must in interleaved 24-bit RGB format!"};
+          "Decoded image must be in interleaved 24-bit RGB format!"};
 
     auto stride = int{};
     auto data = reinterpret_cast<Rgb8*>(
