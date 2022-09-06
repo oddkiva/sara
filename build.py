@@ -78,12 +78,13 @@ def generate_project(source_dir: str,
     # Support for YouCompleteMe auto-completions
     cmake_options.append("-D CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON")
 
-    # Use latest Qt version instead of the system Qt.
-    cmake_options.append("-D SARA_USE_QT6:BOOL=ON")
+    # Use latest Qt version instead of the system Qt if possible.
     my_cmake_prefix_paths = []
-    if SYSTEM == "Linux":
+    if SYSTEM == "Linux" and pathlib.Path("/usr/local/Qt-6.3.1").exists():
+        cmake_options.append("-D SARA_USE_QT6:BOOL=ON")
         my_cmake_prefix_paths.append("/usr/local/Qt-6.3.1")
     elif SYSTEM == "Darwin":
+        cmake_options.append("-D SARA_USE_QT6:BOOL=ON")
         qt6_root_dir = subprocess.check_output(["brew", "--prefix", "qt"])
         qt6_root_dir = qt6_root_dir.decode(sys.stdout.encoding).strip()
         qt6_cmake_dir = pathlib.Path(qt6_root_dir) / "lib" / "cmake" / "Qt6"
@@ -134,7 +135,7 @@ def generate_project(source_dir: str,
         cmake_options.append("-D PYTHON_LIBRARY={}".format(PYTHON_LIBRARY))
 
     cmd = ['cmake', source_dir] + cmake_options
-    execute(cmd, source_dir)
+    execute(cmd, build_dir)
 
 def build_project(build_dir: str, build_type: str):
     project_type = infer_project_type(SYSTEM)
