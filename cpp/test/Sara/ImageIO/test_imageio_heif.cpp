@@ -17,8 +17,6 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/ImageIO.hpp>
 
-#include <libheif/heif_cxx.h>
-
 
 namespace sara = DO::Sara;
 namespace fs = boost::filesystem;

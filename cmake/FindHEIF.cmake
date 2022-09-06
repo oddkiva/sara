@@ -1,6 +1,6 @@
 find_path(
   HEIF_INCLUDE_DIR
-  NAMES heif.h heif_cxx.h heif_version.h
+  NAMES heif.h heif_version.h
   PATHS /usr /usr/local
   PATH_SUFFIXES include/libheif)
 
