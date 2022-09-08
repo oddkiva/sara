@@ -11,8 +11,8 @@
 
 //! @example
 
-#include <drafts/OpenCL/Core/CommandQueue.hpp>
-#include <drafts/OpenCL/Core/DeviceBuffer.hpp>
+#include <drafts/OpenCL/CommandQueue.hpp>
+#include <drafts/OpenCL/DeviceBuffer.hpp>
 
 
 int main()

@@ -123,7 +123,7 @@ where the nabla operator $\nabla$ expresses the gradient as a column-vector
   \end{bmatrix}.
 \end{equation}
 
-As pointed by [@HarrisS:1988:alvey], we recognize the covariance matrix of local
+As pointed out by [@HarrisS:1988:alvey], we recognize the covariance matrix of local
 gradients, which the corner detection will be based on. This is the so-called
 *structure tensor*. Another innovation by [@HarrisS:1988:alvey] is to also
 derive a **cornerness** score function from it. This function will score highest
@@ -179,7 +179,7 @@ In the discrete domain, the structure tensor is written as
 ### Continuous Domain
 
 Since we mentioned the Gaussian kernel, which is **symmetric**, we can
-generalize the definition in the continous domain as a convolution with any
+generalize the definition to the continous domain as a convolution with any
 distribution $w$.
 
 \begin{equation}
@@ -251,7 +251,7 @@ In practice the image $I$ is first convolved with a Gaussian kernel $g$ of
 standard deviation $\sigma_D$. This is to reduce the aliasing and image noise.
 
 \begin{equation}
-  \mathbf{M} = g_{\sigma_I} * \left( \nabla I_{\sigma_D} * \ \nabla I_{\sigma_D}^T \right)
+  \mathbf{M} = g_{\sigma_I} * \left( \nabla I_{\sigma_D} \ \nabla I_{\sigma_D}^T \right)
 \end{equation}
 where the convolved image with a gaussian kernel is denoted as
 \begin{equation}

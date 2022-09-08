@@ -5,6 +5,7 @@ add_subdirectory(FeatureDetectors)
 add_subdirectory(FeatureMatching)
 add_subdirectory(Geometry)
 add_subdirectory(Graphics)
+add_subdirectory(ImageIO)
 add_subdirectory(ImageProcessing)
 add_subdirectory(MultiViewGeometry)
 

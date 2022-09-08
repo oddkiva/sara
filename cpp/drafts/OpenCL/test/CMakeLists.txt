@@ -8,7 +8,7 @@ foreach (file ${test_OpenCL_SOURCE_FILES})
 
     DEPENDENCIES
     ${DO_Sara_LIBRARIES}
-    DO_Sara_OpenCL_Core
+    DO::Sara::OpenCL
 
     FOLDER OpenCL)
 endforeach ()

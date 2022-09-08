@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_bbox_ostream)
 
 BOOST_AUTO_TEST_CASE(test_bbox_degenerate)
 {
-  const auto bbox = BBox{};
+  const auto bbox = BBox::zero();
   BOOST_CHECK(degenerate(bbox));
 }
 

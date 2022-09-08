@@ -95,6 +95,7 @@ elseif (NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
 
   find_package(HDF5 COMPONENTS CXX REQUIRED)
 
+  find_package(HEIF REQUIRED)
   find_package(JPEG REQUIRED)
   find_package(PNG  REQUIRED)
   find_package(TIFF REQUIRED)

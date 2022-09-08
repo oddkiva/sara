@@ -29,9 +29,10 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
-#include <drafts/OpenCL/Core/CommandQueue.hpp>
-#include <drafts/OpenCL/Core/DeviceImage.hpp>
-#include <drafts/OpenCL/GL/PixelBuffer.hpp>
+#include <DO/Kalpana/EasyGL/PixelBuffer.hpp>
+
+#include <drafts/OpenCL/CommandQueue.hpp>
+#include <drafts/OpenCL/DeviceImage.hpp>
 
 
 #ifdef _WIN32
@@ -49,6 +50,8 @@ void setup_cl_gl_interoperability(DO::Sara::Context& context,
 
 int main()
 {
+  namespace kgl = DO::Kalpana::GL;
+
   using namespace DO::Sara;
   using namespace std;
 
@@ -118,8 +121,8 @@ int main()
 #endif
 
   // Create a pixel buffer from the host image.
-  GL::PixelBuffer<float> pixel_buffer(cpu_image.width(), cpu_image.height(),
-                                      cpu_image.data());
+  kgl::PixelBuffer<float> pixel_buffer(cpu_image.width(), cpu_image.height(),
+                                       cpu_image.data());
   SARA_DEBUG << "Pixel buffer OK" << std::endl;
 
   // Flush OpenGL operations before using OpenCL.

@@ -33,3 +33,10 @@ target_link_libraries(
   PRIVATE DO::Sara::Graphics #
           ImageOrVideoReader #
           DO_Sara_ChessboardDetection)
+
+sara_add_example(detect_corners)
+target_link_libraries(
+  detect_corners
+  PRIVATE DO::Sara::Graphics #
+          ImageOrVideoReader #
+          DO_Sara_ChessboardDetection)

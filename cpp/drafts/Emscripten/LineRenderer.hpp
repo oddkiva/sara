@@ -15,7 +15,7 @@
 
 #include "ImagePlaneRenderer.hpp"
 
-#include <drafts/OpenCL/GL.hpp>
+#include <DO/Kalpana/EasyGL.hpp>
 
 #include <memory>
 
@@ -53,9 +53,9 @@ struct LineRenderer
   struct LineShaderData
   {
     //! We choose one VAO per object.
-    DO::Sara::GL::VertexArray _vao;
-    DO::Sara::GL::Buffer _vbo;
-    DO::Sara::GL::Buffer _ebo;
+    DO::Kalpana::GL::VertexArray _vao;
+    DO::Kalpana::GL::Buffer _vbo;
+    DO::Kalpana::GL::Buffer _ebo;
     Eigen::Vector4f _color;
     std::size_t _triangle_index_count;
 
@@ -64,9 +64,9 @@ struct LineRenderer
   };
 
   // OpenGL Shader program.
-  DO::Sara::GL::Shader _vertex_shader;
-  DO::Sara::GL::Shader _fragment_shader;
-  DO::Sara::GL::ShaderProgram _shader_program;
+  DO::Kalpana::GL::Shader _vertex_shader;
+  DO::Kalpana::GL::Shader _fragment_shader;
+  DO::Kalpana::GL::ShaderProgram _shader_program;
   // Uniform variables.
   GLint _image_sizes_loc;
   GLint _color_loc;
@@ -84,5 +84,6 @@ struct LineRenderer
 
   auto destroy_gl_objects() -> void;
 
-  auto render(const ImagePlaneRenderer::ImageTexture&, const LineShaderData&) -> void;
+  auto render(const ImagePlaneRenderer::ImageTexture&, const LineShaderData&)
+      -> void;
 };

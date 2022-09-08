@@ -4,6 +4,12 @@
 # - https://github.com/ddemidov/vexcl/issues/204
 # In particular, it complains `clGetPlatformIDs`.
 
+# libheif is leaking...
+# cf.:
+# - https://github.com/strukturag/libheif/pull/654
+# - https://github.com/strukturag/libheif/issues/535
+# BUT I DON'T WANT ASAN TO IGNORE IT.
+
 # Turn off complaints related to Swift bindings.
 leak:Foundation
 
@@ -16,3 +22,4 @@ leak:Foundation
 # Luckily the memory leak does not show up on the GitLab CI.
 leak:dbus
 leak:nvidia-glcore
+leak:nvidia-opencl
