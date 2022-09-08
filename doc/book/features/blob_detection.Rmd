@@ -1,10 +1,44 @@
 # Blobs
 
+```{r}
+#| echo: false
+#| warning: false
+#| label: sift-on-cheetah
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   Black dots on the cheetah's fur are one beautiful pattern among
+#|   infinitely many in Nature.
+#|   Sara's SIFT implementation retrieves these particularly well as most of
+#|   them can be detected as dark circular blobs in this photograph.
+#|   Credits: https://www.britannica.com/animal/cheetah-mammal.
+knitr::include_graphics(paste0(getwd(), "/features/cheetah-2.jpg"))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: sift-on-sunflower-field
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   The SIFT detector implemented in Sara responds particularly well on the
+#|   sunflower heads in this image depicting a sunflower field. They are
+#|   detected as dark circular blobs surrounded by a brighter background. Notice
+#|   how with the scale-space representation of the image, we are able to
+#|   estimate well the size of the circular flower head.
+knitr::include_graphics(paste0(getwd(), "/features/sunflower-field.jpg"))
+```
+
 In this chapter, we will review the geometry of local features that *SIFT*
 [@Lowe:2004:ijcv], *SURF* [@BayETVG:2008:cviu], MSER [@MatasCUP:2002:bmvc] and
-affine-covariant regions [@MikolajczykTSZMSKVG:2005:ijcv] share in common. These
-features were very utilized for high-level object recognition tasks before the
-widespread adoption of deep learning and are still playing a key part in
+affine-covariant regions [@MikolajczykTSZMSKVG:2005:ijcv] share in common.
+
+Figures \@ref(fig:sift-on-cheetah) and \@ref(fig:sift-on-sunflower-field) are
+iconic illustrations of SIFT blobs.
+
+These features were very utilized for high-level object recognition tasks before
+the widespread adoption of deep learning and are still playing a key part in
 structure-from-motion pipelines that I feel compelled to say a few words about
 them.
 
