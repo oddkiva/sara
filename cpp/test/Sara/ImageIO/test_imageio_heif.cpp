@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_rgb_image_read_write)
         return (v.template cast<float>() - sara::Red8.cast<float>()).norm() < 2;
       }));
 
-      // fs::remove(filepath);
+      fs::remove(filepath);
     }
   }
 }
