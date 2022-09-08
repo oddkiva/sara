@@ -12,7 +12,7 @@
 #|   Sara's SIFT implementation retrieves these particularly well as most of
 #|   them can be detected as dark circular blobs in this photograph.
 #|   Credits: https://www.britannica.com/animal/cheetah-mammal.
-knitr::include_graphics(paste0(getwd(), "/features/cheetah-2.jpg"))
+knitr::include_graphics(paste0(getwd(), "/features/cheetah.jpg"))
 ```
 
 ```{r}
