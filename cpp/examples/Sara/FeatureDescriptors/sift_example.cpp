@@ -15,11 +15,11 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 
 using namespace DO::Sara;
-using namespace std;
+
 
 static const auto RedBerry8 = Rgb8{0xe3, 0x57, 0x60};
 static const auto BlueBerry8 = Rgb8{0x6f, 0x84, 0x9c};
@@ -35,7 +35,8 @@ int main(int argc, char** argv)
 
 int sara_graphics_main(int argc, char** argv)
 {
-  namespace fs = std::filesystem;
+  namespace fs = boost::filesystem;
+
   const auto image_path = fs::path{
     argc < 2  //
       ? src_path("../../../../data/sunflowerField.jpg")
