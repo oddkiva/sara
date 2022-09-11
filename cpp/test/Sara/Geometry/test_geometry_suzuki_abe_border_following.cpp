@@ -242,4 +242,36 @@ BOOST_AUTO_TEST_CASE(test_on_shape_4)
   }
 }
 
+BOOST_AUTO_TEST_CASE(test_on_edge)
+{
+  auto pic = Image<std::uint8_t>{10, 10};
+  // clang-format off
+  pic.matrix() <<
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0, 1, 1, 1, 1, 0,
+    0, 0, 1, 0, 0, 1, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 1, 0, 0, 0, 0,
+    0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+  // clang-format on
+
+  auto border = Image<int>{pic.sizes()};
+  border.matrix() = pic.matrix().cast<int>();
+
+  const auto p = Eigen::Vector2i{2, 1};
+  const auto p2 = Eigen::Vector2i{1, 1};
+
+  auto curve = std::vector<Eigen::Vector2i>{};
+  auto nbd = 2;
+
+  border(p) = 2;
+  follow_border(border, curve, p, p2, nbd);
+
+  std::cout << border.matrix() << std::endl;
+}
+
 BOOST_AUTO_TEST_SUITE_END()

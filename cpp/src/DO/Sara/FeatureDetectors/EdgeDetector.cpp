@@ -13,7 +13,9 @@
 
 #include <DO/Sara/Core/TicToc.hpp>
 
+#include <DO/Sara/ImageProcessing/CartesianToPolarCoordinates.hpp>
 #include <DO/Sara/ImageProcessing/EdgeDetection.hpp>
+
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
 
@@ -23,17 +25,8 @@
 
 namespace DO::Sara {
 
-  auto EdgeDetector::operator()(const ImageView<float>& image) -> void
+  auto EdgeDetector::reconstruct_edges_from_map() -> void
   {
-    tic();
-    if (pipeline.gradient_magnitude.sizes() != image.sizes())
-      pipeline.gradient_magnitude.resize(image.sizes());
-    if (pipeline.gradient_orientation.sizes() != image.sizes())
-      pipeline.gradient_orientation.resize(image.sizes());
-    gradient_in_polar_coordinates(image, pipeline.gradient_magnitude,
-                                  pipeline.gradient_orientation);
-    toc("Gradient Polar Coordinates");
-
     tic();
     const auto& grad_mag = pipeline.gradient_magnitude;
     const auto& grad_mag_max = grad_mag.flat_array().maxCoeff();
@@ -46,9 +39,8 @@ namespace DO::Sara {
     toc("Thresholding");
 
     pipeline.edges = perform_hysteresis_and_grouping(  //
-    // pipeline.edges = perform_parallel_grouping(  //
-        pipeline.edge_map,                       //
-        pipeline.gradient_orientation,           //
+        pipeline.edge_map,                             //
+        pipeline.gradient_orientation,                 //
         parameters.angular_threshold);
 
     tic();
@@ -78,23 +70,52 @@ namespace DO::Sara {
       }
       toc("Longest Curve Extraction & Simplification");
 
-//       tic();
-// #pragma omp parallel for
-//       for (auto i = 0u; i < edges_simplified.size(); ++i)
-//         if (edges_simplified[i].size() > 2)
-//           edges_simplified[i] = collapse(edges_simplified[i], grad_mag,
-//                                          parameters.collapse_threshold,
-//                                          parameters.collapse_adaptive);
-//       toc("Vertex Collapse");
-//
-//       tic();
-//       auto& edges_refined = edges_simplified;
-// #pragma omp parallel for
-//       for (auto i = 0u; i < edges_refined.size(); ++i)
-//         for (auto& p : edges_refined[i])
-//           p = refine(grad_mag, p.cast<int>()).cast<double>();
-//       toc("Refine Edge Localisation");
-     }
+      //    tic();
+      // #pragma omp parallel for
+      //    for (auto i = 0u; i < edges_simplified.size(); ++i)
+      //      if (edges_simplified[i].size() > 2)
+      //        edges_simplified[i] = collapse(edges_simplified[i], grad_mag,
+      //                                       parameters.collapse_threshold,
+      //                                       parameters.collapse_adaptive);
+      //    toc("Vertex Collapse");
+      //
+      //    tic();
+      //    auto& edges_refined = edges_simplified;
+      // #pragma omp parallel for
+      //    for (auto i = 0u; i < edges_refined.size(); ++i)
+      //      for (auto& p : edges_refined[i])
+      //        p = refine(grad_mag, p.cast<int>()).cast<double>();
+      //    toc("Refine Edge Localisation");
+    }
+  }
+
+  auto EdgeDetector::operator()(const ImageView<float>& image) -> void
+  {
+    tic();
+    if (pipeline.gradient_magnitude.sizes() != image.sizes())
+      pipeline.gradient_magnitude.resize(image.sizes());
+    if (pipeline.gradient_orientation.sizes() != image.sizes())
+      pipeline.gradient_orientation.resize(image.sizes());
+    gradient_in_polar_coordinates(image, pipeline.gradient_magnitude,
+                                  pipeline.gradient_orientation);
+    toc("Gradient Polar Coordinates");
+
+    reconstruct_edges_from_map();
+  }
+
+  auto EdgeDetector::operator()(const ImageView<float>& grad_x,
+                                const ImageView<float>& grad_y) -> void
+  {
+    tic();
+    if (pipeline.gradient_magnitude.sizes() != grad_x.sizes())
+      pipeline.gradient_magnitude.resize(grad_x.sizes());
+    if (pipeline.gradient_orientation.sizes() != grad_x.sizes())
+      pipeline.gradient_orientation.resize(grad_x.sizes());
+    cartesian_to_polar_coordinates(grad_x, grad_y, pipeline.gradient_magnitude,
+                                   pipeline.gradient_orientation);
+    toc("Gradient Polar Coordinates");
+
+    reconstruct_edges_from_map();
   }
 
 }  // namespace DO::Sara

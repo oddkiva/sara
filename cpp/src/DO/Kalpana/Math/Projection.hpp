@@ -1,32 +1,85 @@
-#pragma once
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2019 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
 
-#include <DO/Kalpana/Defines.hpp>
+#pragma once
 
 #include <Eigen/Core>
 
 
-namespace DO { namespace Kalpana {
+namespace DO::Kalpana {
 
-  using namespace Eigen;
-
-  DO_KALPANA_EXPORT
-  Matrix4d frustum(double l, double r, double b, double t, double n, double f);
-
-  DO_KALPANA_EXPORT
-  Matrix4d perspective(double fov, double aspect, double z_near, double z_far);
-
-  DO_KALPANA_EXPORT
-  Matrix4d orthographic(double l, double r, double b, double t, double n,
-                        double f);
-
-  inline Matrix4d orthographic(double w, double h, double n, double f)
+  template <typename T>
+  inline auto frustum(const T l, const T r, const T b, const T t, const T n,
+                      const T f) -> Eigen::Matrix4<T>
   {
-    return orthographic(-w / 2, w / 2, -h / 2, h / 2, n, f);
+    auto proj = Eigen::Matrix4<T>{};
+
+    // clang-format off
+    proj <<
+      2*n/(r-l),         0,  (r+l)/(r-l),            0,
+              0, 2*n/(t-b),  (t+b)/(t-b),            0,
+              0,         0, -(f+n)/(f-n), -2*f*n/(f-n),
+              0,         0,           -1,            0;
+    // clang-format on
+
+    return proj;
   }
 
-  DO_KALPANA_EXPORT
-  auto look_at(const Vector3f& eye, const Vector3f& center, const Vector3f& up)
-      -> Matrix4f;
+  template <typename T>
+  inline auto perspective(const T fov_degrees, const T aspect, const T z_near,
+                          const T z_far) -> Eigen::Matrix4<T>
+  {
+    static constexpr auto to_radians = static_cast<T>(M_PI / 360.);
+    const auto t = z_near * std::tan(fov_degrees * to_radians);
+    const auto b = -t;
+    const auto l = aspect * b;
+    const auto r = aspect * t;
+    return frustum(l, r, b, t, z_near, z_far);
+  }
 
-} /* namespace Kalpana */
-} /* namespace DO */
+  template <typename T>
+  inline auto orthographic(const T l, const T r, const T b, const T t,
+                           const T n, const T f) -> Eigen::Matrix4<T>
+  {
+    auto proj = Eigen::Matrix4<T>{};
+    // clang-format off
+    proj <<
+      2/(r-l),       0,       0, -(r+l)/(r-l),
+            0, 2/(t-b),       0, -(t+b)/(t-b),
+            0,       0,-2/(f-n), -(f+n)/(f-n),
+            0,       0,       0,            1;
+    // clang-format on
+    return proj;
+  }
+
+  template <typename T>
+  inline auto look_at(const Eigen::Vector3<T>& eye,
+                      const Eigen::Vector3<T>& center,
+                      const Eigen::Vector3<T>& up) -> Eigen::Matrix4<T>
+  {
+    const Eigen::Vector3<T> f = (center - eye).normalized();
+    Eigen::Vector3<T> u = up.normalized();
+    const Eigen::Vector3<T> s = f.cross(u).normalized();
+    u = s.cross(f);
+
+    auto res = Eigen::Matrix4<T>{};
+    // clang-format off
+    res <<
+       s.x(),  s.y(),  s.z(), -s.dot(eye),
+       u.x(),  u.y(),  u.z(), -u.dot(eye),
+      -f.x(), -f.y(), -f.z(),  f.dot(eye),
+           0,      0,      0,           1;
+    // clang-format on
+
+    return res;
+  }
+
+}  // namespace DO::Kalpana

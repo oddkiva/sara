@@ -19,6 +19,8 @@
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/Visualization.hpp>
 
+#include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
+
 
 using namespace std;
 using namespace std::string_literals;
@@ -29,8 +31,7 @@ using namespace DO::Sara;
 // Feature detection and matching.
 //
 // Detect or read SIFT keypoints.
-auto get_keypoints(const Image<Rgb8>& image1,
-                   const Image<Rgb8>& image2,
+auto get_keypoints(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
                    const std::string& keys1_filepath,
                    const std::string& keys2_filepath,
                    KeypointList<OERegion, float>& keys1,
@@ -58,26 +59,6 @@ auto get_keypoints(const Image<Rgb8>& image1,
   read_keypoints(f1, d1, keys1_filepath);
   read_keypoints(f2, d2, keys2_filepath);
 #endif
-}
-
-// Descriptor-based matching.
-//
-// TODO: by default a feature matcher should return a tensor containing pair of
-// indices instead. While becoming trickier to use, it is more powerful for data
-// manipulation.
-//
-// Convert a set of matches to a tensor.
-auto compute_matches(const KeypointList<OERegion, float>& keys1,
-                     const KeypointList<OERegion, float>& keys2,
-                     float lowe_ratio = 0.6f)
-{
-  print_stage("Computing Matches");
-  AnnMatcher matcher{keys1, keys2, lowe_ratio};
-
-  const auto matches = matcher.compute_matches();
-  cout << matches.size() << " matches" << endl;
-
-  return matches;
 }
 
 
@@ -195,44 +176,48 @@ void inspect_fundamental_matrix_estimation(const Image<Rgb8>& image1,
 }
 
 
-GRAPHICS_MAIN()
+int main(int argc, char** argv)
 {
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(sara_graphics_main);
+  return app.exec();
+}
+
+int sara_graphics_main(int argc, char** argv)
+{
+  if (argc < 3)
+  {
+    std::cerr << "Usage: " << argv[0] << " image1 image2" << std::endl;
+    return 1;
+  }
+
   // Load images.
   print_stage("Loading images...");
-#ifdef __APPLE__
-  const auto data_dir =
-      "/Users/david/Desktop/Datasets/sfm/castle_int"s;
-#else
-  const auto data_dir =
-      "/home/david/Desktop/Datasets/sfm/castle_int"s;
-#endif
-  const auto file1 = "0000.png";
-  const auto file2 = "0001.png";
+  const auto images = std::array{imread<Rgb8>(argv[1]), imread<Rgb8>(argv[2])};
 
-  const auto image1 = imread<Rgb8>(data_dir + "/" + file1);
-  const auto image2 = imread<Rgb8>(data_dir + "/" + file2);
-
-  print_stage("Getting keypoints...");
-  auto keys1 = KeypointList<OERegion, float>{};
-  auto keys2 = KeypointList<OERegion, float>{};
-  get_keypoints(image1, image2,               //
-                data_dir + "/" + "0000.key",  //
-                data_dir + "/" + "0001.key",  //
-                keys1, keys2);
+  // Use the following data structure to load images, keypoints, camera
+  // parameters.
+  print_stage("Computing keypoints...");
+  const auto image_pyr_params = ImagePyramidParams(-1);
+  auto keypoints = std::array{
+      compute_sift_keypoints(images[0].convert<float>(), image_pyr_params),
+      compute_sift_keypoints(images[1].convert<float>(), image_pyr_params)};
 
   print_stage("Matching keypoints...");
-  const auto matches = compute_matches(keys1, keys2);
+  const auto sift_nn_ratio = argc < 6 ? 0.6f : std::stof(argv[5]);
+  const auto matches = match(keypoints[0], keypoints[1], sift_nn_ratio);
+
 
   print_stage("Estimating the fundamental matrix...");
-  const auto num_samples = 1000;
-  const double f_err_thres = 1e-2;
+  const auto num_samples = argc < 4 ? 200 : std::stoi(argv[3]);
+  const auto f_err_thres = argc < 5 ? 1e-2 : std::stod(argv[4]);
   const auto [F, inliers, sample_best] = estimate_fundamental_matrix(
-      keys1, keys2, matches, num_samples, f_err_thres);
+      keypoints[0], keypoints[1], matches, num_samples, f_err_thres);
 
 
   print_stage("Inspecting the fundamental matrix estimation...");
-  inspect_fundamental_matrix_estimation(image1, image2, matches, F, inliers,
-                                        sample_best);
+  inspect_fundamental_matrix_estimation(images[0], images[1], matches, F,
+                                        inliers, sample_best);
 
   return 0;
 }

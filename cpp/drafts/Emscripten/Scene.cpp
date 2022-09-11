@@ -183,7 +183,7 @@ auto Scene::render() -> void
   _shader_program.set_uniform_matrix4f("model_view", _model_view.data());
   _shader_program.set_uniform_matrix4f("projection", _projection.data());
   // Texture.
-  _shader_program.set_uniform_texture("image", 0); // 0 as in GL_TEXTURE0
+  _shader_program.set_uniform_texture("image", 0);  // 0 as in GL_TEXTURE0
 
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_triangles.size()),

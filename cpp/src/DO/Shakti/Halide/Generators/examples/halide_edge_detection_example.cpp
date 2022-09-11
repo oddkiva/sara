@@ -120,8 +120,7 @@ namespace v2 {
           high_thres, low_thres);
       toc("Thresholding");
 
-      //pipeline.edges = perform_hysteresis_and_grouping(  //
-      pipeline.edges = perform_parallel_grouping(  //
+      pipeline.edges = perform_hysteresis_and_grouping(  //
           pipeline.edge_map,                             //
           pipeline.gradient_orientation,                 //
           parameters.angular_threshold);
@@ -188,12 +187,12 @@ inline constexpr long double operator"" _percent(long double x)
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   using namespace std::string_literals;
 

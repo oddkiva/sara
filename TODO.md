@@ -1,16 +1,7 @@
-OPENGL
-======
-- Learn how to use framebuffer for texture streaming.
-
 VULKAN
 ======
 - Hello Triangle tutorial.
 
-
-Autocalibration with radial distortion
-======================================
-Reimplement Fitzgibbon's approach (fundamental matrix with one radial distortion
-coefficients).
 
 Bundle Adjustment Tests
 =======================

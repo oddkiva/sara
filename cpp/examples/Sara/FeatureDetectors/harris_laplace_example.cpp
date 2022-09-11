@@ -96,11 +96,11 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   const auto image_filepath =
       argc < 2 ? src_path("../../../../data/sunflowerField.jpg") : argv[1];

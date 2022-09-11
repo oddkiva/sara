@@ -1,0 +1,46 @@
+# Camera Calibration
+
+The calibration of cameras is an essential task in computer vision. I cannot
+stress enough how important it is in any business involving distance estimation,
+in particular in this era where we are striving for autonomous vehicles.
+
+Nowadays, modern vehicles are equipped with cameras and embed software dedicated
+to the safety of road users, that is us humans and other animals. Let us leave
+out the topic of LIDAR devices, which is out-of-scope of this book.
+
+At some point, the computer vision systems embedded in such vehicles will try to
+estimate the distance between the vehicle and any pedestrian in the camera
+field-of-view, which is a critical data to assess the safety of pedestrians.
+
+In order to estimate the distance of pedestrians from the vehicle, we need to
+understand qualitatively and quantitatively how the images are formed in the
+camera. This constitutes the very first requirement for such computer vision
+systems.
+
+- Qualitatively, this entails finding a mathematical camera model that explains very
+the projection of 3D scene points in the image. Is the simple camera pinhole
+model sufficient to model the image formation? Or is there any lens distortion:
+can we find good continuous mathematical function that describes it? The camera
+model depends on how the camera lens is manufactured.
+
+- Quantitatively, the parameters of such camera model must be estimated. These
+include the focal length, the lens distortion parameters and so on.
+
+There exists two classes of camera calibration to estimate the camera
+parameters.
+
+- The first class involves fiducial markers, the most prevalent one being the
+planar chessboard pattern. As annoying as building a solid chessboard pattern
+may be, it is however the most reliable approach for industrial applications and
+even more so for the safety of people and animals. The mathematical modeling
+will rely on the 2D-3D point correspondences of the chessboard x-corners.
+
+- The second class is the so-called autocalibration approaches. In terms of
+image data, instead of calibration patterns, they rely instead on 2D point
+correspondences of the background across images. They rely on a mathematical
+object called the absolute quadric which remain invariant to rigid body
+transformations [@Triggs:1997:cvpr]. They turn out to be rather tricky and has
+many drawbacks: they will be less accurate than fiducial-based approaches and is
+well studied only for the pinhole camera model.
+
+I will focus only on the camera calibration relying on the chessboard pattern.

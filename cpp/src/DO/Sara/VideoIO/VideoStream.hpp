@@ -62,8 +62,8 @@ namespace DO { namespace Sara {
       return Vector2i{width(), height()};
     }
 
-    friend inline VideoStream& operator>>(VideoStream& video_stream,
-                                          ImageView<Rgb8>& video_frame)
+    friend inline auto operator>>(VideoStream& video_stream,
+                                  ImageView<Rgb8>& video_frame) -> VideoStream&
     {
       if (!video_stream.read())
         video_frame = {};

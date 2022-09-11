@@ -1,0 +1,1042 @@
+\newcommand{\ji}{\begin{bmatrix} j \\ i \end{bmatrix}}
+\newcommand{\oneone}{\begin{bmatrix} 1 \\ 1 \end{bmatrix}}
+
+# Descriptors
+
+At this time, this chapter contains only one section in which I write about the
+SIFT descriptor.
+
+## SIFT still State-of-the-Art
+
+This section breaks down the SIFT descriptor that *Sara* implements.
+
+Personally I love SIFT. Despite the popularisation and widespread use of deep
+learning approaches where they do shine in high-level image recognition tasks,
+this hand-engineered descriptor is still state-of-the-art on low-level vision
+tasks. As shown in the comparative study of [@schoenberger2017comparative] on
+the more specific task of structure-from-motion, SIFT is a brilliant
+demonstration that traditional approaches^[Crafted through human intelligence.
+:)] can still be outcompete machine-learned features in some instances.
+
+*Going slightly off-topic, this evaluation fundamentally dispels once more the
+ongoing trend that (1) ever more data and (2) ever bigger models is the way to
+go. Even cognitively, It is hard to believe that humans and animals in general,
+that these such extraordinarily complex biological systems, would go that
+far to learn. As of this writing, once more, this study highlights the need for
+new ideas in order to create smarter learning algorithms. It would be really
+great to create algorithms that can represent or organize the data into
+meaningful concepts instead of behaving like "stochastic parrots"
+[@bender:2021:parrots]^[Let us forget for a moment the outrage sparked by Timnit
+Gebru's firing and which has been happening in the social media. Clearly this
+was an *unjustified* and *summary* firing and illustrates once more the abusive
+power that Big Tech can exert over its own employees. Now I am of the opinion that
+this paper is well worth a read and does make interesting valid points to
+advance science. And if scientists are arguing with each other in this current
+context, which is very politically charged, something good can happen out of
+this.]. Doing so would enable us to learn not only better from the data but also
+from far less data.*
+
+:::fyi
+In this section, I clarify the big confusion that I had when comparing the
+original implementation of [@Lowe:2004:ijcv] and the explanations provided in
+the paper. When I started studying computer vision, many people found the paper
+fairly clear for them but that was not the case for me... far from it!
+
+For example, the drawing that illustrates the local image descriptor in
+[@Lowe:2004:ijcv] did not match the mental representation I had and I lacked the
+intellectual maturity to actually understand the text at that time. So this text
+would represent how I wished the paper would actually explain the algorithmic
+details to my younger self.
+:::
+
+In [@Lowe:2004:ijcv], SIFT is originally presented as a full-fledged method that
+jointly (1) localizes scale-space invariant keypoints in the image and (2)
+encodes its local texture information into a smaller feature vector, also termed
+as *descriptor*. We only focus on the *descriptor* part.
+
+In the sequel, let us denote an oriented scale-invariant local keypoint by $k =
+(x, y, \sigma, \theta)$ where:
+
+- $\mathbf{x} = (x, y)$ is the vector of 2D pixel coordinates of the keypoint,
+- $\sigma$ is the scale at which the keypoint is detected, i.e., the
+  characteristic size in pixels of the local region
+- $\theta$ is the orientation of the dominant image gradient.
+
+
+### Interpretation
+
+SIFT is a feature vector that encodes the photometric information of an image
+patch into histograms of gradients.
+
+The image patch is divided into a 2D grid of $N \times N$ square image
+sub-patches, from which we calculate their histogram of gradients.  Each
+histogram bins gradient orientations into $O$ principal orientations.  A single
+SIFT descriptor about can be viewed as a 3D tensor $\mathbf{h} \in \mathbb{R}^{N
+\times N \times O}$.
+
+In other words, the component $\mathbf{h}[i, j, o]$ quantifies the frequency of
+orientation $\frac{2 \pi o}{O}\ \mathrm{rad}$ in the $(i, j)$-th histogram,
+where ${0 \leq i,j < N}$ and $0 \leq o < O$.
+
+In the original implementation [@Lowe:2004:ijcv] the parameters are set as $N =
+4$ and $O = 8$ which are validated empirically as being fairly optimal. Thus a
+SIFT descriptor is a feature vector $\mathbf{h} \in \mathbb{R}^{128}$. The
+resulting dimension is neither too big nor too small as increasing  $N$ and $O$
+further brings marginal performance improvements only.
+
+**TODO: ILLUSTRATE.**
+
+:::note
+A peculiarity with SIFT is that each image sub-patch $(i, j)$ that form the grid
+*overlaps* and that the orientation bins *overlap* as well because of the
+trilinear interpolation trick as we will see later.
+:::
+
+### Canonical Image Patch
+
+The design of SIFT is geared towards robustness w.r.t. *noisy* estimation of
+keypoint position, scale and orientation, *lossy and noisy* image
+acquisition, *illumination* changes, *etc*.
+
+By design, SIFT can encode the photometric information of the region around the
+keypoint $k$ in a similarity-invariant manner if we make use of the scale
+$\sigma$ and the dominant gradient orientation $\theta$.
+
+To plant the ideas in our mind, let us imagine that the keypoint $k$ describes the
+large dark head of the sunflower surrounded by yellow leaves, that forms a
+bright background as depicted in Figure \@ref(fig:sunflower-heads).
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: sunflower-heads
+#| out.width: 50%
+#| fig.align: center
+#| fig.cap: >
+#|   On an image depicting a field of of sunflowers, the SIFT blob detector
+#|   produces dark blobs $k_i$, many of which are typically sunflower heads.
+#|   Dark blobs $k_i$ are illustrated as red oriented circles with radius
+#|   $\sqrt{2} \sigma_i$ and with dominant gradient orientation $\theta_i$
+#|   represented by a line.
+#|   Bright blobs are on the other hand typically sunflower leaves.
+knitr::include_graphics(paste0(getwd(), "/features/sunflower-heads.jpg"))
+```
+
+
+By similarity invariance, we mean that the descriptor is able to estimate the
+characteristic size of the blob and its orientation, so that we can transform
+the image patch into some upright canonical image patch of fixed size.
+
+Why is it important to be able to transform this image patch into some canonical
+patch? Let us assume for a moment that:
+
+- we are in an ideal world where we have a perfectly accurate feature detector
+and orientation estimator and
+- we were to take multiple photographs $I_i$ where we keep seeing that same
+  region centered at the keypoint location.
+
+then, in such an ideal world, that detector would keep re-detecting strongly at
+that salient region in each image $I_i$ as a keypoint $k_i$ with perfect pixel
+localisation, scale and orientation.
+
+It becomes now evident that transforming the image patch around each salient
+region with scale $\sigma_i$ and orientation with $\theta_i$ would yield the
+same canonical image patch. That way, all the SIFT descriptors $\mathbf{h}_i$
+computed for each normalized patch around $k_i$ are expected to be identical.
+
+This leads us to define specifically the local coordinate system and its
+associated normalizing transform.
+
+**TODO: illustrate.**
+
+### Normalizing Transform
+
+The orientations are calculated and accumulated with respect to the *local
+coordinate system* $\mathcal{C}_k$ associated to keypoint $k$, where *$\sigma$
+is used as the reference scale unit* instead of the pixel.
+
+We characterize this local coordinate system by the following similarity
+transform $\mathbf{T}$.
+
+:::puzzle
+```{definition, name="Normalizing Transform"}
+Let $\lambda_\text{zoom}$ be a magnification factor. The scale of the
+normalizing transform is $s = \lambda_\text{zoom} \sigma$.
+
+Thus in matrix notation and using homogeneous coordinates, the normalizing
+transform $\mathbf{T}$ transforms *image coordinates* $\mathbf{u} = (u, v)$ to
+*normalized coordinates* $\tilde{\mathbf{u}} = (\tilde{u}, \tilde{v})$ as
+follows
+
+\begin{equation}
+  \begin{bmatrix} \tilde{\mathbf{u}} \\ 1 \end{bmatrix}
+  = \mathbf{T} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
+  = \displaystyle \frac{1}{s}
+    %
+    \left[
+      \begin{array}{c|c}
+      \mathbf{I}_2   & \mathbf{0}_2 \\
+      \hline
+      \mathbf{0}_2^T & s
+      \end{array}
+    \right]
+    %
+    \left[
+      \begin{array}{c|c}
+        \mathbf{R}_{\theta}^T & -\mathbf{R}_{\theta}^T \mathbf{x} \\
+        \hline
+        \mathbf{0}_2^T & 1
+      \end{array}
+    \right]
+    %
+    \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
+\end{equation}
+
+with
+
+\begin{equation}
+  \mathbf{R}_\theta =
+  \begin{bmatrix}
+    \cos \theta & -\sin \theta \\
+    \sin \theta & \cos \theta
+  \end{bmatrix}.
+\end{equation}
+```
+:::
+
+The magnification factor $\lambda_{\text{zoom}}$ has been introduced in
+[@Lowe:2004:ijcv]'s original implementation.  In practice it is set as
+$\lambda_\mathrm{zoom} = 3$ scale units to avoid dealing with too small image
+patches and has to be thought as a parameter that is learnt empirically.
+
+### Grid of Overlapping Patches and Overlapping Histogram Bins
+
+To compute a SIFT descriptor we consider an oriented square image patch
+$\mathcal{P}$:
+
+- centered in $\mathbf{x} = (x, y)$ and,
+- oriented with an angle $\theta$ w.r.t. the image axes to enforce invariance to
+  rotation,
+
+:::note
+We divide the square patch $\mathcal{P}$ into a grid of $N \times
+N$ *overlapping* square patches $\mathcal{P}_{ij}$ for ${0 \leq
+i,j < N}$, each of them having a *radius* $s = \lambda_{\text{zoom}}
+\sigma$ pixels. This means that the whole square patch $\mathcal{P}$
+has a side length equal to $(N + 1) s$.
+:::
+
+Now let us explain why the *overlapping* is due to the trilinear interpolation
+before we detail the geometry of the patches $\mathcal{P}_{ij}$ in the
+next section.
+
+Quoting [@Lowe:2004:ijcv], the trilinear interpolation is key to ensure smooth
+changes in the histogram as the keypoint shifts from its true location in the
+scale-space: *"It is important to avoid all boundary affects in which the
+descriptor abruptly changes as a sample shifts smoothly from being within one
+histogram to another or from one orientation to another."*
+
+In other words, this is so that we can mitigate the *noisy* estimation of
+keypoint $k$. If we did not apply the trilinear interpolation, that actually
+means that the patches in the grid are mutually disjoint as illustrated in
+Figure \@ref(fig:patches-nonoverlapping). Because of the noisy estimation, a
+pixel at the boundary of a subpatch patch could then fall suddenly in another
+adjacent image patch. In turn this would have a catastrophic effect in the
+performance of the SIFT descriptor if we cumulate the contributions of all such
+pixels.
+
+In fact Figure \@ref(fig:patches-nonoverlapping) tells a much longer story,
+which goes as follows. Suppose that there is an identifiable keypoint with
+ground-truth localization $k = (x = 0, y = 0, \theta = 0, \sigma = 1)$. We will
+forget about $\lambda_\text{zoom}$ and set it to 1 for the purpose of
+illustration.
+
+Translating in R language yields:
+
+```{r}
+patch_center <- c(0, 0)
+patch_orientation <- 0
+patch_scale <- 1
+subpatch_radius <- 0.5
+```
+
+```{r, echo=FALSE}
+N <- 4
+j <- 0:(N - 1)
+i <- 0:(N - 1)
+
+xi <- i - (N - 1) / 2
+yj <- j - (N - 1) / 2
+```
+
+
+The ground-truth image patch corresponds to the immobile upright patch centered
+in $(0, 0)$, where each sub-patch has its centers illustrated in blue dots and
+has a square side length equal to $1$, thus a radius equal to $0.5$.
+
+Let us also consider a point in this image patch highlighted by the blue cross
+in Figure \@ref(fig:patches-nonoverlapping) with the following coordinates:
+
+```{r}
+point_in_patch <- c(-0.8, 1.1)
+```
+
+```{r, echo=FALSE}
+region_min_max_x <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
+region_min_max_y <- c(-(N-1)/2 - 1, (N-1)/2 + 1)
+```
+
+```{r, echo=FALSE}
+x_view_min_max <- c(region_min_max_x[1] - 1, region_min_max_x[2] + 1)
+y_view_min_max <- c(region_min_max_y[1] - 1, region_min_max_y[2] + 1)
+```
+
+```{r, cache=TRUE, echo=FALSE}
+draw_patch <- function(center, theta, scale, subpatch_radius,
+                       color = "red") {
+  # Alias the variable.
+  r <- subpatch_radius
+
+  # Cosmetics.
+  rect_color <- rgb(0.8, 0.8, 0.8, alpha = 0.5)
+  rect_line_width <- 0.5
+
+  # Transformation matrix
+  T <- scale * matrix(c(cos(theta), -sin(theta), center[1],
+                        sin(theta),  cos(theta), center[2],
+                                 0,           0,         1),
+                      nrow = 3,
+                      byrow = TRUE)
+
+  # Render the grid of patches.
+  for (x in xi) {
+    for (y in yj) {
+      # Enumerate the quad vertices.
+      X <- matrix(c(x - r, x + r, x + r, x - r,
+                    y - r, y - r, y + r, y + r,
+                        1,     1,     1,     1),
+                  nrow = 3,
+                  byrow = TRUE)
+
+      # Transform the vertices.
+      TX <- T %*% X
+
+      # Separate the coordinates.
+      u <- TX[1,]
+      v <- TX[2,]
+      polygon(u, v, col = rect_color, lwd = rect_line_width)
+    }
+  }
+
+  # Draw the center of the image patch.
+  points(center[1], center[2], col = color)
+
+  # Draw the center of each subpatch (i, j).
+  for (x in xi) {
+    for (y in yj) {
+      Txy <- T %*% matrix(c(x, y, 1), nrow=3)
+      u <- Txy[1]
+      v <- Txy[2]
+      points(u, v, col = color)
+    }
+  }
+
+  # Draw the closest subpatches (i, j) to the point in the patch.
+  for (k in 1:2) {
+    for (l in 3:4) {
+      # Enumerate the quad vertices.
+      X <- matrix(c(xi[k] - r, xi[k] + r, xi[k] + r, xi[k] - r,
+                    yj[l] - r, yj[l] - r, yj[l] + r, yj[l] + r,
+                            1,         1,         1,         1),
+                  nrow = 3,
+                  byrow = TRUE)
+
+      # Transform the vertices.
+      TX <- T %*% X
+      u <- TX[1,]
+      v <- TX[2,]
+
+      # Draw the polygon.
+      if (k == 1 & l == 3)
+        color <- rgb(1, 0, 0, alpha = 0.2)
+      if (k == 2 & l == 3)
+        color <- rgb(0, 1, 0, alpha = 0.2)
+      if (k == 1 & l == 4)
+        color <- rgb(0, 0, 1, alpha = 0.2)
+      if (k == 2 & l == 4)
+        color <- rgb(0, 1, 1, alpha = 0.2)
+      polygon(u, v, col = color, lwd = 1)
+    }
+  }
+
+  # Draw the point in the patch.
+  points(point_in_patch[1], point_in_patch[2],
+         col = "darkblue",  # In another color please
+         pch = "+",              # I want a "+" shape
+         cex = 2)                # Thicker size please
+}
+```
+
+In real life, the feature detector, as imperfect as it is, will not detect
+this feature at the exact location $(x, y, \sigma)$ in the scale-space and with
+the exact orientation $\theta$. Let us imagine that the noisy localization
+of this keypoint by the detector can vary wildly from the ground truth. We will
+deviate the estimated localization $(x, y, \theta, \sigma)$ smoothly in the
+following range:
+
+
+```{r}
+steps <- 30
+
+theta <- seq(0, 0.2, length.out = steps)
+scale_inc <- seq(1, 1.3, length.out = steps)
+scale_dec <- seq(1, 0.8, length.out = steps)
+shift_x <- seq(0, 0.5, length.out = steps)
+shift_y <- seq(0, 0.3, length.out = steps)
+```
+
+As animated in Figure \@ref(fig:patches-nonoverlapping), by smoothly varying these
+parameters, the image patch corresponding to the noisy keypoint localization,
+will drift further and further away from the ground-truth immobile image patch.
+Very early, the blue cross will not fall in the cyan sub-patch anymore and
+instead fall in either the green, red, or lavender subpatch. As a result each
+histogram of gradients computed in each subpatch will sharply diverge from the
+ground truth histogram for small deviations.
+
+```{r patches-nonoverlapping, animation.hook="gifski", interval=0.1, cache=TRUE, echo=FALSE, fig.align='center', fig.cap="SIFT Grid Geometry: Non-Overlapping Sub-Patches"}
+op <- par(bg = "#f7f7f7", pty="s")
+
+for (ii in 1:steps) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] + shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, 0.5,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, theta[ii], scale_inc[ii], 0.5,
+             color = "orangered")
+
+  mtext("Without Overlapping")
+}
+
+for (ii in 1:steps) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] - 0.5 * shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, 0.5,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, -theta[ii], scale_dec[ii], 0.5,
+             color = "orangered")
+
+  mtext("Without Overlapping")
+}
+```
+
+To mitigate such boundary effect, [@Lowe:2004:ijcv] resorts to the trilinear
+interpolation. That means that we have to increase the radius of each subpatch
+(i, j) in the grid. In turn this causes them to overlap each other as shown in
+Figure \@ref(fig:patches-radius-increase). Each subpatch has their radius
+increased from $0.5$ to $1$. Also notice that we don't change the position of the
+centers.
+
+As highlighted with the *color blending* in Figure
+\@ref(fig:patches-radius-increase), the blue cross will this time belong to not
+just 1 subpatch but to $4$ subpatches: the lavender, cyan, red and green
+subpatches.
+
+```{r patches-radius-increase, animation.hook="gifski", interval=0.1, cache=TRUE, echo=FALSE, fig.align='center', fig.cap="Increase of the Sub-Patch Radius"}
+op <- par(bg = "#f7f7f7", pty="s")
+
+patch_radius <- c(seq(0.5, 0.9, length.out = 5),
+                  seq(0.9, 0.99, length.out = 5),
+                  seq(0.99, 1, length.out = 20))
+
+for (ii in 1:steps) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1, patch_radius[ii],
+             color = "slateblue")
+
+  mtext("Increase of the Patch Radius for the Patch Overlapping")
+}
+```
+
+Now this time, Figure \@ref(fig:patches-overlapping) illustrates the following
+behavior with the overlapping of subpatches:
+
+1. If we deviate from the ground-truth keypoint localization again, the blue
+cross will keep belonging to all 4 patches provided that the deviation from the
+ground-truth is moderate. By design, we can hope and expect the histogram of
+gradients to be close to the gound-truth histograms.
+
+2. At some point the noisy patch becomes so different from the ground-truth
+patch and the blue cross will not belong to all the 4 subpatches. When we arrive
+to this point, the histogram of gradients should differ as sharply as possible
+from the ground-truth histogram of gradients.
+
+That is the balance that SIFT strives to achieve and its widespread adoption in
+3D reconstruction is a good testimony of how well the descriptor performs.
+
+:::fyi
+We can make *many many many* more useful comments but hopefully my aim is to
+bring enough insights in helping you to understand SIFT and come up with your
+own descriptor. If you don't like or disagree with some of my explanation, let
+me know and suggest what I can improve.
+:::
+
+```{r patches-overlapping, animation.hook="gifski", interval=0.1, cache=TRUE, echo=FALSE, fig.align='center', fig.cap="SIFT Grid Geometry: Overlapping Sub-Patches."}
+op <- par(bg = "#f7f7f7", pty="s")
+
+subpatch_radius <- 1
+theta <- seq(0, 0.2, length.out = steps)
+scale <- seq(1, 1.3, length.out = steps)
+shift_x <- seq(0, 0.5, length.out = steps)
+shift_y <- seq(0, 0.3, length.out = steps)
+
+for (ii in 1:steps) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] + shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1,
+             subpatch_radius,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, theta[ii], scale_inc[ii],
+             subpatch_radius,
+             color = "orangered")
+
+  mtext("With Overlapping")
+}
+
+for (ii in 1:steps) {
+  # Reset the canvas
+  plot(x_view_min_max, y_view_min_max,
+       type = "n",                      # Reset the canvas
+       xlab = "x", ylab = "y",          # Legend
+       main = "SIFT Grid Geometry")           # Title.
+
+  patch_center_shifted <- c(patch_center[1] + shift_x[ii],
+                            patch_center[2] - 0.5 * shift_y[ii])
+
+  # The ground truth image patch.
+  draw_patch(patch_center, 0, 1,
+             subpatch_radius,
+             color = "slateblue")
+
+  # The noisy image patch.
+  draw_patch(patch_center_shifted, -theta[ii], scale_dec[ii],
+             subpatch_radius,
+             color = "orangered")
+
+  mtext("With Overlapping")
+}
+```
+
+We talked mostly about the benefit brought by the patch overlap but for the same
+reason, [@Lowe:2004:ijcv] also extends the idea to orientation bins.
+Orientations are binned into $O$ principal orientations and again with the
+trilinear interpolation, we mitigate for the noisy orientation $\theta$. This
+leads us to the following note.
+
+:::note
+By design the histogram bins $\mathbf{h}[i, j, o]$ overlap as each of them covers the
+interval of orientations $[\frac{2 \pi}{O} (o - 1), \frac{2 \pi}{O} (o + 1)]$.
+
+In the end, every image gradient contributes to at most $8$ SIFT bins
+$\mathbf{h}[i, j, o]$.
+:::
+
+The trilinear interpolation reweighs appropriately the contribution of each
+pixel depending on their distance to each sub-patch center. We will detail this
+in a later section.
+
+### Geometry of Overlapping Patches
+
+With the visual interpretation that we provided previously, we can now easily
+relate the geometry analytically with respect to the local coordinate system
+$\mathcal{C}_k$:
+
+- the keypoint center is at the origin $(0, 0)$,
+- each patch $\mathcal{P}_{ij}$ can be viewed as a patch with side length
+  $2$,
+- each patch has:
+
+  - its top-left corner at
+
+    \begin{equation}
+      \mathbf{c}_{ij}^{\text{tl}} = \ji - \frac{N + 1}{2} \oneone
+    \end{equation}
+
+  - its bottom-right corner at
+
+    \begin{equation}
+      \mathbf{c}_{ij}^{\text{br}} = \ji - \frac{N - 3}{2} \oneone
+    \end{equation}
+
+  - its center at
+
+    \begin{equation}
+      \mathbf{c}_{ij} = \ji - \frac{N - 1}{2} \oneone
+    \end{equation}
+
+Clearly a patch $\mathcal{P}_{ij}$ is a closed ball centered in
+$\mathbf{c}_{ij}$ and with radius $1$ for the $\ell_1$ norm in this coordinate
+system. The patches overlap by construction because their diameter is $2$ and
+their centers are laid on a 2D grid with step size $1$.
+
+Notice that the patch centers $\mathbf{c}_{ij}$ coincide with the histogram
+indices $(i, j)$ if we shift each coordinate by the quantity $\frac{N - 1}{2}$.
+
+This observation will be useful to determine which histogram bins needs to be
+accumulated for each given pixel.
+
+As also illustrated in the figures above, the centers are numerically
+
+\begin{equation}
+  \left[
+  \begin{array}{c|c|c|c}
+    (-1.5,-1.5) & (-0.5,-1.5) & (+0.5,-1.5) & (+1.5,-1.5) \\
+    \hline
+    (-1.5,-0.5) & (-0.5,-0.5) & (+0.5,-0.5) & (+1.5,-0.5) \\
+    \hline
+    (-1.5,+0.5) & (-0.5,+0.5) & (+0.5,+0.5) & (+1.5,+0.5) \\
+    \hline
+    (-1.5,+1.5) & (-0.5,+1.5) & (+0.5,+1.5) & (+1.5,+1.5) \\
+  \end{array}
+  \right]
+\end{equation}
+
+Equivalently using array broadcasting (as in a *NumPy* concept), integral
+coordinates appear smoothly as follows:
+
+\begin{equation}
+  \left[
+  \begin{array}{c|c|c|c}
+    [0, 0] & [1, 0] & [2, 0] & [3, 0] \\
+    \hline
+    [0, 1] & [1, 1] & [2, 1] & [3, 1] \\
+    \hline
+    [0, 2] & [1, 2] & [2, 2] & [3, 2] \\
+    \hline
+    [0, 3] & [1, 3] & [2, 3] & [3, 3]
+  \end{array}
+  \right]
+  - [1.5, 1.5]
+\end{equation}
+
+This leads us to define a new coordinate system in the sequel.
+
+#### SIFT Coordinate System
+
+Let us consider a pixel $(u, v)$ in the patch $\mathcal{P}$:
+
+\begin{equation}
+  \left\{
+  \begin{aligned}
+  & \displaystyle x - r \leq u \leq x + r \\
+  & \displaystyle y - r \leq v \leq y + r \\
+  \end{aligned}
+  \right.
+  %
+  \Longleftrightarrow
+  %
+  \left\{
+  \begin{aligned}
+  & \displaystyle -\frac{N + 1}{2} \leq \tilde{u} \leq \frac{N + 1}{2} \\
+  & \displaystyle -\frac{N + 1}{2} \leq \tilde{v} \leq \frac{N + 1}{2}
+  \end{aligned}
+  \right.
+\end{equation}
+
+:::puzzle
+```{definition, name="SIFT Coordinates"}
+Introducing shifted coordinates which I choose to call these *SIFT
+coordinates* $\hat{\mathbf{u}} = (\hat{u}, \hat{v})$
+
+\begin{equation}
+  \left\{
+  \begin{aligned}
+  \hat{u} &= \tilde{u} + \frac{N - 1}{2} \\
+  \hat{v} &= \tilde{v} + \frac{N - 1}{2}
+  \end{aligned}
+  \right.
+\end{equation}
+```
+
+We then see equivalently that
+
+\begin{equation}
+  \left\{
+  \begin{aligned}
+  -1 \leq \hat{u} \leq N \\
+  -1 \leq \hat{v} \leq N
+  \end{aligned}
+  \right.
+  (\#eq:sift-coords-domain)
+\end{equation}
+
+In matrix notation and using homogeneous coordinates, the normalizing
+transform $\mathbf{T}_\text{SIFT}$ transforms *image coordinates*
+$\mathbf{u}$ to *SIFT coordinates* $\hat{\mathbf{u}}$ as follows
+
+\begin{equation}
+  \begin{bmatrix} \hat{\mathbf{u}} \\ 1 \end{bmatrix}
+  = \mathbf{T}_{\text{SIFT}} \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
+= \displaystyle
+  \underbrace
+  {\left[
+  \begin{array}{ccc}
+  1 & 0 & \frac{N - 1}{2} \\
+  0 & 1 & \frac{N - 1}{2} \\
+  0 & 0 &              1  \\
+  \end{array}
+  \right]}_{\text{shift}}
+  %
+  \mathbf{T}
+  \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
+\end{equation}
+:::
+
+The floored coordinates satisfies:
+
+\begin{equation}
+  \left\{
+  \begin{aligned}
+  -1 \leq \lfloor \hat{u} \rfloor \leq N \\
+  -1 \leq \lfloor \hat{v} \rfloor \leq N
+  \end{aligned}
+  \right.
+\end{equation}
+
+\begin{equation}
+  \left\{
+  \begin{aligned}
+  \lfloor \hat{u} \rfloor \leq \hat{u} < \lfloor \hat{u} \rfloor + 1 \\
+  \lfloor \hat{v} \rfloor \leq \hat{v} < \lfloor \hat{v} \rfloor + 1
+  \end{aligned}
+  \right.
+\end{equation}
+
+The pixel $(u, v)$ belongs to $4$ patches at most:
+
+- $\mathcal{P}_{ \lfloor \hat{v} \rfloor    , \lfloor \hat{u} \rfloor     }$
+- $\mathcal{P}_{ \lfloor \hat{v} \rfloor    , \lfloor \hat{u} \rfloor  + 1}$
+- $\mathcal{P}_{ \lfloor \hat{v} \rfloor + 1, \lfloor \hat{u} \rfloor     }$
+- $\mathcal{P}_{ \lfloor \hat{v} \rfloor + 1, \lfloor \hat{u} \rfloor  + 1}$
+
+We say "at most to $4$" because for example a gradient at the boundary
+$(-1,-1)$ contributes only to $\mathcal{P}_{00}$.
+
+### Histogram of Gradients
+
+Consider a pixel $\mathbf{u} \in \mathcal{P}_{ij}$. Its contribution in
+histogram $\mathbf{h}_{ij}$ is
+
+\begin{equation}
+  \boxed{
+    w(\mathbf{u}) =
+    \underbrace{
+    \exp \left( - \frac{\| \tilde{\mathbf{u}} \|^2}{2 (N/2)^2} \right)
+    }_{\text{distance to center}}
+    %
+    \underbrace{
+    \| \nabla g_\sigma * I(\mathbf{u}) \|_2
+    }_{\text{gradient magnitude}}
+  }
+\end{equation}
+
+[@Lowe:2004:ijcv] chooses to give more emphasis to gradients close to the
+keypoint center $\mathbf{x}$ to mitigate for the noisy estimation of
+keypoint.
+
+With the trilinear interpolation, its contribution to $\mathbf{h}_{ij}$
+becomes:
+
+\begin{equation}
+  \displaystyle
+  w_{\text{final}}(\mathbf{u}) =
+  w(\mathbf{u})
+  \left( 1 - |\hat{u} - j| \right)
+  \left( 1 - |\hat{v} - i| \right)
+\end{equation}
+
+In the local coordinate system, the orientation of the gradient $\nabla
+I_\sigma(\mathbf{u})$ is calculated as:
+
+\begin{equation}
+  \phi = \text{atan2}(\nabla I_\sigma(\mathbf{u})) - \theta \\
+\end{equation}
+
+The normalized orientation is:
+
+\begin{equation}
+  \hat{\phi} = \phi \frac{O}{2 \pi}
+\end{equation}
+
+It falls within two orientation bins:
+
+- $\mathbf{h}[i, j, o]$
+- $\mathbf{h}[i, j, o+1]$
+
+where $o = \lfloor \hat{\phi} \rfloor$.
+
+The contribution will be distributed to the two bins as follows
+
+\begin{align}
+  \displaystyle
+  \mathbf{h}[i, j, o] &\leftarrow \mathbf{h}[i, j, o] +
+  w_\text{final}(\mathbf{u}) \left(1 - (\hat{\phi} - o) \right) \\
+  %
+  \displaystyle
+  \mathbf{h}[i, j, o + 1] &\leftarrow \mathbf{h}[i, j, o + 1] +
+  w_\text{final}(\mathbf{u}) \left( \hat{\phi} - o \right)
+\end{align}
+
+:::note
+The histogram bins have an explicit formula but it is not efficient to calculate
+it as is:
+
+\begin{equation}
+  \displaystyle
+  \mathbf{h}[i, j, o] = \sum_{\mathbf{u} \in \mathcal{P}_{ij}}
+  w(\mathbf{u})
+  \left( 1 - | \hat{u} - j | \right)
+  \left( 1 - | \hat{v} - i | \right)
+  \left( 1 - | \hat{\phi} - o | \right)
+  \mathbf{1}_{\left|\ \hat{\phi} - o \right| < 1}
+\end{equation}
+:::
+
+### Sketch of Implementation
+
+The last paragraph gives enough insights as for how to compute the SIFT
+descriptor. It is easy to show that we need to scan all the pixels on a large
+enough image patch, e.g., radius
+
+\begin{equation}
+  \boxed{r = \sqrt{2} \frac{N + 1}{2} \lambda_{\text{zoom}} \sigma}
+\end{equation}
+
+In the formula above, we notice the following.
+
+- The factor $\frac{N + 1}{2}$ is used instead of $\frac{N}{2}$: as shown in
+  Equation \@ref(eq:sift-coords-domain), this factor accounts for gradients for
+  patches "at the border" of the image patch $\mathcal{P}$. These are gradients
+  "at the border" who belong to either only one histogram ("at the corners") or
+  two histograms ("at the edges").
+- There is the factor $\sqrt{2}$: because the square patches are oriented with
+  an angle $\theta \neq 0$, we need to make sure we are not missing any pixels
+  at the corners of the patches. This is at the cost of considering pixels that
+  are outside the patch domain and possibly there could be many of them.
+- If the orientation $\theta$ was zero, we could check that a radius $r =
+  \frac{N + 1}{2} \lambda_{\text{zoom}} \sigma$ would have been sufficient.
+
+The SIFT descriptor for keypoint $k$ is calculated as follows:
+
+:::note
+For each pixel $\mathbf{u} = (u, v) \in [x-r,x+r] \times [y-r, y+r]$:
+
+1. calculate the gradient
+   $\nabla g_\sigma * I (\mathbf{u})$
+
+2. express its orientation w.r.t. the local coordinate system
+   $\mathcal{C}_k$
+
+3. calculate the contribution $w(\mathbf{u})$ of the gradient.
+
+4. accumulate histograms using trilinear interpolation (*to be cont'd*)
+
+In practice the gradients are precomputed all at once in polar coordinates for
+efficiency and at every scale of the Gaussian pyramid.
+:::
+
+The computation of SIFT in *C++* can be sketched as follows:
+
+```cpp
+using descriptor_type = Eigen::Matrix<float, 128, 1>;
+
+auto compute_sift_descriptor(
+    float x, float y, float sigma, float theta,
+    const Image<Vector2f, 2>& grad_polar_coords)
+    -> descriptor_type
+{
+  constexpr auto lambda_zoom = 3.f;
+
+  // The SIFT descriptor.
+  descriptor_type h = descriptor_type::Zero();
+
+  // The radius of each overlapping patches.
+  const auto s = lambda_zoom * sigma;
+
+  // The radius of the total patch.
+  const auto r = sqrt(2.f) * s * (N + 1) / 2.f;
+
+  // Linear part of the normalization transform.
+  const Eigen::Matrix2f T =
+      Eigen::Rotation2D<float>{-theta}::toRotationMatrix() / s;
+
+  // Loop to perform interpolation
+  const auto rounded_r = static_cast<int>(std::round(r));
+  const auto rounded_x = static_cast<int>(std::round(x));
+  const auto rounded_y = static_cast<int>(std::round(y));
+  for (auto v = -rounded_r; v <= rounded_r; ++v)
+  {
+    for (auto u = -rounded_r; u <= rounded_r; ++u)
+    {
+      // Retrieve the normalized coordinates.
+      const Vector2f pos = T * Vector2f(u, v);
+
+      const auto u1 = rounded_x + u;
+      const auto v1 = rounded_y + v;
+
+      // Boundary check.
+      if (u1 < 0 || u1 >= grad_polar_coords.width() ||
+          v1 < 0 || v1 >= grad_polar_coords.height())
+        continue;
+
+      // Gaussian weight contribution.
+      const auto weight = exp(-pos.squaredNorm()
+                        / (2.f * pow(N / 2.f, 2)));
+
+      // Read the precomputed gradient (in polar coordinates).
+      const auto mag = grad_polar_coords(u1, v1)(0);
+      auto ori = grad_polar_coords(u1, v1)(1) - theta;
+
+      // Normalize the orientation.
+      ori = ori < 0.f ? ori + 2.f * pi : ori;
+      ori *= float(O) / (2.f * pi);
+
+      // Shift the coordinates to retrieve the "SIFT" coordinates.
+      pos.array() += N / 2.f - 0.5f;
+
+      // Discard pixels that are not in the oriented patch.
+      if (pos.minCoeff() <= -1.f ||
+          pos.maxCoeff() >= static_cast<float>(N))
+        continue;
+
+      // Accumulate the 4 gradient histograms using trilinear
+      // interpolation.
+      trilinear_interpolation(h, pos, ori, weight, mag);
+    }
+  }
+
+  return h;
+}
+```
+
+#### Trilinear Interpolation
+
+We can sketch the trilinear interpolation in C++ as follows:
+
+```cpp
+void trilinear_interpolation(descriptor_type& h,
+                             const Vector2f& pos,
+                             float ori,
+                             float weight,
+                             float mag)
+{
+  const auto xfrac = pos.x() - floor(pos.x());
+  const auto yfrac = pos.y() - floor(pos.y());
+  const auto orifrac = ori - floor(ori);
+  const auto xi = static_cast<int>(pos.x());
+  const auto yi = static_cast<int>(pos.y());
+  const auto orii = static_cast<int>(ori);
+
+  auto at = [](int y, int x, int o) {
+    return y * N * O + x * O + o;
+  };
+
+  for (auto dy = 0; dy < 2; ++dy)
+  {
+    const auto y = yi + dy;
+    if (y < 0 || y >= N)
+      continue;
+
+    const auto wy = (dy == 0) ? 1.f - yfrac : yfrac;
+    for (auto dx = 0; dx < 2; ++dx)
+    {
+      const auto x = xi + dx;
+      if (x < 0 || x >= N)
+        continue;
+
+      const auto wx = (dx == 0) ? 1.f - xfrac : xfrac;
+      for (auto dori = 0; dori < 2; ++dori)
+      {
+        const auto o = (orii + dori) % O;
+        const auto wo = (dori == 0) ? 1.f - orifrac : orifrac;
+        // Trilinear interpolation:
+        h[at(y, x, o)] += wy * wx * wo * weight * mag;
+      }
+    }
+  }
+}
+```
+
+#### Robustness to illumination changes
+
+[@Lowe:2004:ijcv] explains that:
+
+- a brightness change consists in adding a constant factor to image intensities.
+  And image gradients cancels this constant factor so SIFT is invariant to
+  brightness change by construction.
+- a contrast change in image amounts to multiplying image intensities by a
+  constant factor. Normalizing the descriptor cancels the multiplication factor.
+  So we must normalize the descriptor once the histogram of gradients are
+  accumulated.
+- There are still other nonlinear illumination changes. They arise for example
+  from camera saturation and surface reflective properties.
+  [@Lowe:2004:ijcv] have found experimentally that (1) clamping histogram
+  bins to $0.2$ and then (2) renormalizing the descriptor again worked
+  well to account for these on a dataset consisting of 3D objects photographed
+  under different lighting conditions.
+
+Using *Eigen*, we can express these in *C++*:
+
+```cpp
+auto enforce_invariance_to_illumination_changes(
+  descriptor_type& h) -> void
+{
+  // SIFT is by construction invariant to brightness change since
+  // it is based on gradients.
+
+  // Make the descriptor robust to contrast change.
+  h.normalize();
+
+  // Apply the following recipe for nonlinear illumination change.
+  //
+  // 1) Clamp the histogram bin values to 0.2
+  h = h.cwiseMin(descriptor_type::Ones() * _max_bin_value);
+  // 2) Renormalize again.
+  h.normalize();
+}
+```

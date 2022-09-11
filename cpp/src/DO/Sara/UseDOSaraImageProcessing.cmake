@@ -6,20 +6,22 @@ if(SARA_USE_FROM_SOURCE)
     sara_create_common_variables("ImageProcessing")
     sara_generate_library("ImageProcessing")
 
+    target_link_libraries(DO_Sara_ImageProcessing PRIVATE DO::Sara::Core)
+
     if(SARA_USE_HALIDE)
       target_compile_definitions(DO_Sara_ImageProcessing
                                  PRIVATE DO_SARA_USE_HALIDE)
       target_link_libraries(
         DO_Sara_ImageProcessing
         PUBLIC ${CMAKE_DL_LIBS}
-        PRIVATE DO::Sara::Core
-                Halide::Halide
-                Halide::Runtime
+        PRIVATE Halide::Halide
                 # Fast color conversion
                 shakti_rgb8u_to_gray32f_cpu
                 shakti_bgra8u_to_gray32f_cpu
                 # Binary operations.
                 shakti_subtract_32f_cpu
+                # Cartesian to polar coordinates.
+                shakti_cartesian_to_polar_32f_cpu
                 # Resize operations.
                 shakti_scale_32f_cpu
                 shakti_reduce_32f_cpu
@@ -31,6 +33,10 @@ if(SARA_USE_FROM_SOURCE)
                 shakti_separable_convolution_2d_cpu
                 # Gaussian convolutions.
                 shakti_gaussian_convolution_cpu
+                # Moment matrix
+                shakti_moment_matrix_32f_cpu
+                # Cornerness
+                shakti_cornerness_32f_cpu
                 # Local extremum map
                 shakti_scale_space_dog_extremum_32f_cpu
                 $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)

@@ -1,0 +1,649 @@
+# Pose Recovery aka PnP
+
+The pose recovery is another important problem that is solved in
+Structure-from-Motion. The pose recovery can be tackled differently depending on
+the situation we are in. There are two situations that I have found in my
+current understanding.
+
+## Problem Statement
+
+The problem of pose recovery starts with the following assumption. We know that
+a set of 2D image points $\{ \mathbf{u}_i \}_i$ in an image $I$ respectively
+correspond to a set of 3D scene points $\{ \mathbf{x}_i\}$ in some reference
+frame.
+
+Our goal is to retrieve the camera parameters that formed this very image $I$,
+namely the camera pose, that is its gaze orientation $\mathbf{R}$ and position
+$\mathbf{t}$ with respect to some reference frame, say the world frame
+$\mathcal{W}$ to plant ideas in our mind.
+
+:::fyi
+In case we are still being confused about which frame or coordinates, let us
+remind again that
+
+- the 2D image points $\mathbf{u}_i$ are the pixel coordinates in the image $I$,
+- the 3D scene points $\mathbf{x}_i$ have their coordinates expressed in the
+  world frame $\mathcal{W}$.
+:::
+
+
+There are two situations in Structure-from-Motion:
+
+1. we do not know the camera intrinsic parameters but we do know that the
+   mathematical camera model that can explain the formation of image $I$ is
+   either the pinhole camera model, or a camera model that can account for
+   small distortion;
+2. we are dealing with calibrated cameras, that is, we do know which
+   mathematical camera model explains best the formation of image $I$ and we
+   know the parameter values associated to this model.
+
+## First Situation: Camera Resectioning
+
+The first situation can be solved by means of standard linear algebra.
+Specifically the calibration software Bundler [@SnavelySS:2008:ijcv] uses
+[@HartleyZ:2003:mvg]'s Direct Linear Transform (DLT) method to find a good guess
+of the camera pose. After which, a bundle adjustment procedure refines the pose
+$(\mathbf{R}, \mathbf{t})$ of the camera and its intrinsic parameters, which
+include the calibration matrix $\mathbf{K}$ and the distortion coefficients.
+
+## Second Situation: Perspective-n-Point
+
+In the second situation, we know the camera model and its associated parameter
+values. As a result, we can calculate the incident light ray vector
+$\mathrm{ray}(\mathbf{u}_i) = \mathbf{y}_i \in \mathbb{R}^3$ that has hit the
+image plane for any pixel coordinates $\mathbf{u}_i$. The backprojected ray
+$\mathbf{y}_i$ has its coordinates expressed in the camera frame $\mathcal{C}$.
+
+For example, if we are dealing with the simple pinhole camera model with known
+calibration matrix $\mathbf{K}$, the film (homogeneous) coordinates
+
+\begin{equation}
+  \begin{bmatrix} \tilde{\mathbf{u}}_i \\ 1 \end{bmatrix} =
+  \mathbf{K}^{-1} \begin{bmatrix} \mathbf{u}_i \\ 1 \end{bmatrix}
+\end{equation}
+
+is also the backprojected light ray vector $\mathbf{y}_i$ from a physics point
+of view.
+
+Now the goal is to calculate the camera pose $(\mathbf{R}, \mathbf{t})$ knowing
+that each backprojected light ray $\mathbf{y}_i$ respectively corresponds to the
+scene point $\mathbf{x}_i$. This is how the Perspective-n-Point (PnP) problem is
+formulated.
+
+The PnP problem starts by observing that any rigid body motion $(\mathbf{R},
+\mathbf{t})$ preserves the Euclidean distance $||\mathbf{x}_i -
+\mathbf{x}_j||_2$ for any pair of 3D scene points $\mathbf{x}_i$ and
+$\mathbf{x}_j$ for any $i \neq j$. In words, denoting the transformed point by
+any such rigid body motion by
+
+\begin{equation}
+  \mathbf{x}'_i = \mathbf{R} \mathbf{x}_i + \mathbf{t}
+\end{equation}
+
+the following equality holds
+
+\begin{equation}
+  ||\mathbf{x}'_i - \mathbf{x}'_j||_2= ||\mathbf{x}_i - \mathbf{x}_j||_2
+\end{equation}
+
+In particular the distance invariance still holds for the camera pose we aim at
+calculating.
+
+:::fyi
+Let us ponder for a moment about the meaning of the global rigid motion equation
+above. Here notice that in the PnP problem formulation:
+
+- $\mathbf{R}$ actually expresses the axes of the world frame $\mathcal{W}$ with
+  respect to the camera frame $\mathcal{C}$.
+- $\mathbf{t}$ actually expresses the position of the world origin in the camera
+  frame $\mathcal{C}$.
+
+Not the other way around.
+:::
+
+In our context, $\mathbf{x}'_i$ is the same 3D scene point $\mathbf{x}_i$ but
+this time it is expressed in the camera frame $\mathcal{C}$.  And because of the
+basic laws of geometrical optics, the 3D coordinates $\mathbf{x}'_i$ is
+collinear to the backprojected light ray vector $\mathbf{y}_i$
+
+\begin{equation}
+  \mathbf{x}'_i = \lambda_i \mathbf{y}_i,
+\end{equation}
+
+with the additional physics constraint that each scale must be positive
+\begin{equation}
+  \lambda_i > 0,
+\end{equation}
+which ensures that the 3D scene point $\mathbf{x}'_i$ does appear in front of the
+camera.
+
+The camera resectioning then consists in determining the appropriate scale
+$\lambda_i$ for each backprojected ray $\mathbf{y}_i$ so that the change of
+coordinate via the rigid body motion $(\mathbf{R}, \mathbf{t})$ still preserves
+the distances.
+
+\begin{equation}
+  ||\lambda_i \mathbf{y}_i - \lambda_j \mathbf{y}_j||_2 =
+  ||\mathbf{x}_i - \mathbf{x}_j||_2
+  (\#eq:pnp-distance-equality)
+\end{equation}
+
+### Determining the Rigid Body Transform from Known Scales.
+
+In this paragraph, let us assume for a moment that we know each scale
+$\lambda_i$. Then we are able to determine completely the rigid body transform
+$(\mathbf{R}, \mathbf{t})$.
+
+The first step is to calculate the rotational part $\mathbf{R}$ of the rigid
+body transform. Then the second step which determines the translational part
+$\mathbf{t}$ will follow naturally from the first step.
+
+To calculate $\mathbf{R}$, let us consider three direction vectors
+
+\begin{equation}
+  \left\{
+  \begin{array}{c}
+    \mathbf{z}_{01} = \lambda_0 \mathbf{y}_0 - \lambda_1 \mathbf{y}_1 \\
+    \mathbf{z}_{02} = \lambda_0 \mathbf{y}_0 - \lambda_2 \mathbf{y}_2 \\
+    \mathbf{z}_{12} = \lambda_1 \mathbf{y}_1 - \lambda_2 \mathbf{y}_2
+  \end{array}
+  \right.,
+  (\#eq:pnp-dir-vectors)
+\end{equation}
+
+As a gentle reminder, these direction vectors are the left part of Equation
+\@ref(eq:pnp-distance-equality). Since the scale quantities $\lambda_i$ are
+known, the vector quantities $\mathbf{z}_{ij}$ are also fully determined.
+Furthermore because we know that
+
+\begin{equation}
+  \lambda_i \mathbf{y}_i = \mathbf{R} \mathbf{x}_i + \mathbf{t},
+  (\#eq:pnp-rigid-body)
+\end{equation}
+
+By plugging the right-hand side of Equation \@ref(eq:pnp-rigid-body) in the
+right-hand side of Equation \@ref(eq:pnp-dir-vectors), these three direction
+vectors $\mathbf{z}_{ij}$ also satisfy the matrix-vector product
+
+\begin{equation}
+  \mathbf{z}_{ij} = \mathbf{R} (\mathbf{x}_i - \mathbf{x}_j)
+  (\#eq:pnp-dir-vector-invariant)
+\end{equation}
+
+Stacking the column vectors together yields the following matrix system:
+\begin{equation}
+  \underbrace{
+    \left[
+      \begin{array}{c|c|c}
+        \mathbf{z}_{01} & \mathbf{z}_{02} & \mathbf{z}_{12}
+      \end{array}
+    \right]
+  }_{\mathbf{Z}}
+  =
+  \mathbf{R}
+  \underbrace{
+    \left[
+      \begin{array}{c|c|c}
+        \mathbf{x}_0 - \mathbf{x}_1 &
+        \mathbf{x}_0 - \mathbf{x}_2 &
+        \mathbf{x}_1 - \mathbf{x}_2
+      \end{array}
+    \right]
+  }_{\mathbf{X}}
+  (\#eq:pnp-matrix-system)
+\end{equation}
+
+:::fyi
+I prefer enumerating indices from $0$ instead of enumerating them from $1$. This
+will minimize the cognitive overhead if you decide to reimplement for example
+Lambda-Twist [@PerssonN:2018:eccv] yourself in a mainstream computer language
+such as Python or C++. The publication [@PerssonN:2018:eccv] is a nice paper but
+one criticism I can make is that it mixes $0$-based indices and $1$-based
+indices. This made the implementation quite troublesome if you try to do it from
+scratch without looking at the reference implementation.
+:::
+
+The matrices $\mathbf{Z}$ and $\mathbf{X}$ are fully determined. Thus under the
+assumption that the three scene points $\mathbf{x}_i$ are not aligned, the
+matrix $\mathbf{X}$ is then invertible and we can calculate the rotation as
+
+\begin{equation}
+  \mathbf{R} = \mathbf{Z} \mathbf{X}^{-1},
+\end{equation}
+
+And we can finally deduce $\mathbf{t}$ a posteriori since
+
+\begin{equation}
+  \mathbf{t} = \lambda_i \mathbf{y}_i - \mathbf{R} \mathbf{x}_i
+\end{equation}
+
+In my readings, I have learnt that the first method ever devised was discovered
+by Grunert in 1841 who solved it for the case $N = 3$ [@Grunert:1841:grunert].
+
+I will not try to review the literature exhaustively but let us quickly mention
+that more recent methods have been proposed in the computer vision literature
+for the general case such as [@LepetitMNF:2009:ijcv] or [@KneipLS:2014:eccv] or
+for other particular case $N = 4$ [@QuanL:1999:pami].
+
+Over the years, newer P3P methods have been proposed and are becoming more
+efficient to compute. We will focus on reviewing Lambda-Twist
+[@PerssonN:2018:eccv], which is one of the fastest P3P method if not the fastest
+as of 2021.
+
+### Revisiting Lambda-Twist: a Fast P3P solver
+
+:::fyi
+You may be tempted to read the paper [@PerssonN:2018:eccv] instead of my
+paragraph and I understand it. However! Be prepared to painfully discover that
+the paper does contain troublesome errors: the ECCV reviewers did a sloppy
+review, for one thing they did not even notice one blatant math error...
+
+And yes I am quite upset, because in the end I spent a lot of time proof-reading
+the paper myself.
+
+I will mention the corrections that the paper needs throughout this subsection.
+:::
+
+Without loss of generality, Lambda-Twist assumes that each backprojected ray
+$\mathbf{y}_i$ have unit norm, *i.e.*, $||\mathbf{y}_i||_2 = 1$, which we
+renormalize as a preprocessing step if necessary.
+
+Lambda-Twist starts by squaring the distance invariants, yielding the following
+remarkable identity:
+
+\begin{equation}
+  \lambda_i^2 + \lambda_j^2 - 2 \mathbf{y}_i^T \mathbf{y}_j \lambda_i \lambda_j
+  = || \mathbf{x}_i - \mathbf{x}_j ||_2^2
+\end{equation}
+
+### Three Inhomogeneous Quadrics
+
+[@PerssonN:2018:eccv] recognize three degenerate inhomogeneous quadratic forms
+in the 3D vector $\mathbf{\Lambda} = \begin{bmatrix} \lambda_0 \\ \lambda_1 \\
+\lambda_2 \end{bmatrix}$
+
+By denoting the Euclidean squared distance by
+\begin{equation}
+  a_{ij} = || \mathbf{x}_i - \mathbf{x}_j ||_2^2,
+\end{equation}
+and the cosine of the angle between each backprojected light rays by
+\begin{equation}
+  b_{ij} = \mathbf{y}_i^T \mathbf{y}_j
+\end{equation}
+
+We can rewrite these into quadratic matrix form as
+\begin{equation}
+  \mathbf{\Lambda}^T \mathbf{M}_{ij} \mathbf{\Lambda} = a_{ij}
+\end{equation}
+
+where
+\begin{equation}
+  \mathbf{M}_{01} = \begin{bmatrix}
+    1 & -b_{01} & 0 \\
+    -b_{01} & 1 & 0 \\
+    0 & 0 & 0 \\
+  \end{bmatrix}
+\end{equation}
+
+\begin{equation}
+  \mathbf{M}_{02} = \begin{bmatrix}
+    1 & 0 & -b_{02} \\
+    0 & 0 & 0 \\
+    -b_{02} & 0 & 1 \\
+  \end{bmatrix}
+\end{equation}
+
+\begin{equation}
+  \mathbf{M}_{12} = \begin{bmatrix}
+    0 & 0 & 0 \\
+    0 & 1 & -b_{12} \\
+    0 & -b_{12} & 1 \\
+  \end{bmatrix}
+\end{equation}
+
+Let us take a closer look at these three matrices. Specifically we can
+characterize these three quadratic form geometrically as follows.
+
+- Each of them represents parabolic, elliptic or hyperbolic cylinders since in
+  the $\Lambda$ 3-space, since the matrices are rank 2.
+  In fact they are elliptic cylinders (parabolic in the worst case), since the
+  discriminant of the conic is nonpositive
+  \begin{equation}
+    B^2 - 4AC = 4 b_{ij}^2 - 4 \leq 0
+  \end{equation}
+  since the cosine of unit vectors $b_{ij}$ verifies $-1 \leq b_{ij} =
+  \mathbf{y}_i^T \mathbf{y}_j \leq 1$
+
+  Unless we are dealing with 360 cameras (and even then), two backprojected
+  light rays are unlikely to be collinear for two different image points. So we
+  can safely assume that the discriminant is negative and that we are dealing
+  are elliptic cylinders in the general case.
+
+- the axis of each of these cylinders are mutually orthogonal as the zero column vector
+  appears at different column index upon examination of the matrices.
+
+### Two Homogeneous Quadrics
+
+The $\mathbf{\Lambda}$ that lie in the three inhomogeneous quadrics necessarily
+lie in two homogeneous quadrics.
+
+They are obtained by linearly combining the three inhomogeneous quadrics.
+
+Specifically let us define two following matrices
+
+\begin{equation}
+  \mathbf{D}_1 = \mathbf{M}_{01} a_{12} - \mathbf{M}_{12} a_{01}
+\end{equation}
+
+and
+
+\begin{equation}
+  \mathbf{D}_2 = \mathbf{M}_{02} a_{12} - \mathbf{M}_{12} a_{02}.
+\end{equation}
+
+We can easily see that algebraically that
+\begin{equation}
+  \mathbf{\Lambda}^T \mathbf{D}_i \mathbf{\Lambda} = 0
+\end{equation}
+
+These are the equations that characterizes the two homogeneous quadrics.
+
+:::fyi
+Here I keep the $1$-based enumeration of the matrices $D_i$ as I will start
+proof-reading the paper [@PerssonN:2018:eccv] to point out the errors in the
+paper.
+:::
+
+### Cubic Equation
+
+This is the main idea of [@PerssonN:2018:eccv], we go one step further by
+linearly combining the two homogeneous quadrics $\mathbf{D}_1$ and
+$\mathbf{D}_2$ into the new inhomogeneous quadric $\mathbf{D}_0$ defined as
+
+\begin{equation}
+  \mathbf{D}_0 = \mathbf{D}_1 + \gamma \mathbf{D}_2
+\end{equation}
+
+Necessarily a physically feasible solution $\mathbf{\Lambda}$ has to satisfy the
+inhomogeneous quadric defined as
+
+\begin{equation}
+  \mathbf{\Lambda}^T \mathbf{D}_0 \mathbf{\Lambda} = 0.
+\end{equation}
+
+By using a geometric argument, [@PerssonN:2018:eccv] claims that the quadric
+$\mathbf{D}_0$ is of rank 2. This means that necessarily
+
+\begin{equation}
+  \det \mathbf{D}_0 = 0
+\end{equation}
+
+:::fyi
+Visualizing the intersection of the two homogeneous quadrics is not obvious to
+me. So I am still not clear to me as for why the linear combination has rank 2.
+Care to explain to me if you know why? Much appreciated.
+:::
+
+This leads us to finding the roots of a cubic equation $c$ in the variable
+$\gamma$ denoted as
+
+\begin{equation}
+  c(\gamma) = c_3 \gamma^3 + c_2 \gamma^2 + c_1 \gamma + c_0
+  (\#eq:cubic-polynomial)
+\end{equation}
+
+[@PerssonN:2018:eccv] say it is sufficient to extract one real root and we know
+a cubic polynomial has always one real root at least.
+
+:::fyi
+So far so good until here. Now let us point out the first error appearing in
+the paper: it erroneously swaps the formula of coefficients $c_1$ and $c_2$.
+
+So trust me... don't follow the paper as it is and use my coefficients instead.
+:::
+
+Using $0$-based indexing, the correct coefficients of polynomial $c$ are as
+follows.
+
+\begin{equation}
+\begin{aligned}
+  c_3 &=& \det \mathbf{D}_2 \\
+  c_2 &=& \mathbf{D}_{10}^T (\mathbf{D}_{21} \times \mathbf{D}_{22}) \\
+      &+& \mathbf{D}_{11}^T (\mathbf{D}_{22} \times \mathbf{D}_{20}) \\
+      &+& \mathbf{D}_{12}^T (\mathbf{D}_{20} \times \mathbf{D}_{21}) \\
+  c_1 &=& \mathbf{D}_{20}^T (\mathbf{D}_{11} \times \mathbf{D}_{12}) \\
+      &+& \mathbf{D}_{21}^T (\mathbf{D}_{12} \times \mathbf{D}_{10}) \\
+      &+& \mathbf{D}_{22}^T (\mathbf{D}_{10} \times \mathbf{D}_{11}) \\
+  c_0 &=& \det \mathbf{D}_1 \\
+\end{aligned},
+\end{equation}
+
+where $\mathbf{D}_{ij}$ denotes the $j$-th column vector of matrix
+$\mathbf{D}_i$.
+
+
+#### Proof-Reading
+
+Let us proof-read the formula of the cubic polynomial with Python and the
+wonderful SymPy package [@SymPy:2017:peerj] via literate programming
+[@knuth:1984:lp].
+
+```{python, echo=TRUE}
+import sympy as sp
+
+# Let us populate the matrices used for the cubic equation.
+D1 = sp.MatrixSymbol('D1', 3, 3)
+D2 = sp.MatrixSymbol('D2', 3, 3)
+gamma = sp.symbols('gamma')
+
+# The quadric that result from the linear combination.
+D0 = sp.Matrix(D1 + gamma * D2)
+
+# Form the cubic polynomial in the variable gamma.
+det_D0, _ = sp.polys.poly_from_expr(D0.det(), gamma)
+# Collect the coefficients c[i] of the polynomial as denoted in
+# the paper.
+c = det_D0.all_coeffs()
+
+# The cubic polynomial does not have a very enticing form if we
+# print it:
+# print(det_D0)
+```
+
+Now if we write our nicer form for each coefficients of the polynomial $c$:
+
+```{python, echo=TRUE}
+D1 = sp.Matrix(D1)
+D2 = sp.Matrix(D2)
+
+# CAVEAT: SymPy enumerates coefficients in DECREASING degree
+# order.
+our_coeff = [
+    # Our c[3]
+    D2.det(),
+
+    # Our c[2]
+    (D1[:,0].T * (D2[:,1].cross(D2[:,2])) + \
+     D1[:,1].T * (D2[:,2].cross(D2[:,0])) + \
+     D1[:,2].T * (D2[:,0].cross(D2[:,1])))[0, 0],
+
+    # Our c[1]
+    (D2[:,0].T * (D1[:,1].cross(D1[:,2])) + \
+     D2[:,1].T * (D1[:,2].cross(D1[:,0])) + \
+     D2[:,2].T * (D1[:,0].cross(D1[:,1])))[0, 0],
+
+    # Our c[0]
+    D1.det()
+]
+```
+
+We can see that they are indeed equal:
+```{python, echo=TRUE}
+for i in range(0, 4):
+    print("c[{}] - our_coeff[{}] = {}".format(
+        3 - i,
+        3 - i,
+        sp.simplify(c[i] - our_coeff[i])))
+```
+
+### The Diagonalization Method
+
+First let us explain the Eigen decomposition proposed by the paper.
+
+- It first determines the eigenvalues by determining the roots of the
+  characteristic polynomial.
+- Then the method calculates the associated eigenvectors.
+
+Now again a few more words are necessary, the proposed eigen decomposition is
+not entirely robust and a better approach has been proposed by
+[@Eberly:2014:eigen3x3]. I prefer to follow [@Eberly:2014:eigen3x3]'s method
+since the robustness outweighs the slight loss of speed.
+
+**TODO:** I will provide an example where the eigen decomposition indeed fails.
+
+#### The Linear Relationships Between Each Scale $\lambda_i$
+
+Another technical trick that [@PerssonN:2018:eccv] use is that they introduce
+nonzero auxiliary variables by exploiting two linear dependences.
+
+0. TODO: detail the parameterization of eigenvectors.
+
+1. The first linear dependence between each $\lambda_i$ results from the Eigen
+   decomposition of the matrix $\mathbf{D}_0$ which encodes the homogeneous
+   quadrics.
+
+   \begin{equation}
+     \lambda_0 = w_0 \lambda_1 + w_1 \lambda_2
+   \end{equation}
+
+   where the $w_i$ are fully determined from the Eigen decomposition.
+
+2. The second linear dependence relates $\lambda_1$ and $\lambda_2$ by a simple
+   scaling factor $\tau$ since the assumption is that each scale are positive,
+   i.e., $\lambda_i > 0$
+
+   \begin{equation}
+     \lambda_1 = \tau \lambda_2
+   \end{equation}
+
+Now because the physically feasible solution $\mathbf{\Lambda}$ lies in the
+first homogeneous quadric, necessarily it has to satisfy
+
+\begin{equation}
+  \mathbf{\Lambda}^T \mathbf{D}_1 \mathbf{\Lambda} = 0
+\end{equation}
+
+By expanding the quadric equation, we arrive to an equation that only depends
+on $\lambda_1$ and $\tau$
+
+\begin{equation}
+  \lambda_1^2
+  \begin{bmatrix} w_0 + \tau w_1 & 1 & \tau \end{bmatrix}
+  \mathbf{D}_1
+  \begin{bmatrix}
+    w_0 + \tau w_1 \\
+    1 \\
+    \tau
+  \end{bmatrix}
+  = 0
+\end{equation}
+
+Because $\lambda_1$ is a positive scalar, this equation amounts to finding the
+roots on the quadratic polynomial in the variable $\tau$.
+
+
+### The $\tau$ Polynomial.
+
+Again the coefficients of the $\tau$ polynomial are riddled with errors. By
+manually recalculating the coefficients or double-checking with SymPy, instead
+the coefficients are
+
+\begin{equation}
+\begin{aligned}
+  \tau_2 &=& -a_{01} + a_{12} w_1^2 \\
+  \tau_1 &=& 2 a_{01} b_{12} - 2 a_{12} b_{01} w_1 + 2 a_{12} w_0 w_1 \\
+  \tau_0 &=& -a_{01} - 2 a_{12} b_{01} w_0 + a_{12} w_0^2 + a_{12}
+\end{aligned}
+\end{equation}
+
+:::fyi
+Well it turns out that [@PerssonN:2018:eccv] actually forms the
+$\tau$-polynomial from the second homogeneous quadric $\mathbf{D}_2$ instead of
+the first homogeneous quadric $\mathbf{D}_1$. Still the coefficients of the
+$\tau$-polynomial are still wrong because of the mixing between $0$-based
+indexing and $1$-based indexing...
+
+You can check for yourself with SymPy.
+:::
+
+That might make the Gauss-Newton unnecessary as advised in the paper, or at
+least require less iterations.
+
+
+#### Proof-reading
+
+```{python, echo=TRUE, cache=TRUE}
+import sympy as sp
+
+# The squared distances between the scene points x[i].
+a01, a02, a12 = sp.symbols('a01 a02 a12')
+
+# The cosines between each backprojected rays y[i].
+b01, b02, b12 = sp.symbols('b01 b02 b12')
+
+# The three inhomogeneous quadrics.
+M01 = sp.Matrix([[   1, -b01, 0],
+                 [-b01,    1, 0],
+                 [   0,    0, 0]])
+M02 = sp.Matrix([[   1, 0, -b02],
+                 [   0, 0,    0],
+                 [-b02, 0,    1]])
+M12 = sp.Matrix([[0,    0,    0],
+                 [0,    1, -b12],
+                 [0, -b12,    1]])
+
+# The two homogeneous quadrics.
+D1 = M01 * a12 - M12 * a01
+D2 = M02 * a12 - M12 * a02
+
+# Declare the variables introduced for the tau polynomial.
+w0, w1, tau, l = sp.symbols('w0 w1 tau l')
+
+# The feasible solution.
+lambda_valid = sp.Matrix([[w0 + tau * w1],
+                          [1],
+                          [tau]])
+
+# The feasible solution must be in the first homogeneous quadric,
+# which gives rise to the tau-polynomial.
+tau_polynomial = lambda_valid.transpose() * D1 * lambda_valid
+tau_polynomial = sp.expand(tau_polynomial)[0, 0]
+tau_polynomial, _ = sp.polys.poly_from_expr(tau_polynomial, tau)
+print('tau-polynomial = ', tau_polynomial)
+```
+
+The coefficients are evaluated as
+
+```{python, echo=TRUE, cache=TRUE}
+tau_coeff = tau_polynomial.all_coeffs()
+for i in range(3):
+    print('tau[{}] = {}'.format(2 - i, tau_coeff[i]))
+```
+
+
+#### Determinining the Scales $\lambda_i$ from Auxiliary variables
+
+Let us just mention another error in the paper which is the solution of Equation
+(16), it should be instead^[This is the one blatant error that the review
+missed in the paper (sigh...)]
+
+Using $1$-based indexing to
+\begin{equation}
+  \lambda_{2k} = \sqrt{\frac{a_{23}}{\tau_k^2 - 2 b_{23} \tau_k + 1}}
+\end{equation}
+
+So in our case, since we use $0$-based indexing
+\begin{equation}
+  \lambda_{1k} = \sqrt{\frac{a_{12}}{\tau_k^2 - 2 b_{12} \tau_k + 1}}
+\end{equation}
+

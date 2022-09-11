@@ -13,9 +13,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <drafts/OpenCL/Core/Platform.hpp>
-#include <drafts/OpenCL/Core/Device.hpp>
-#include <drafts/OpenCL/Core/DeviceBuffer.hpp>
+#include <drafts/OpenCL/Platform.hpp>
+#include <drafts/OpenCL/Device.hpp>
+#include <drafts/OpenCL/DeviceBuffer.hpp>
 
 
 using namespace DO::Sara;
@@ -28,7 +28,9 @@ BOOST_AUTO_TEST_CASE(test_buffer)
   Device device = get_devices(platform, CL_DEVICE_TYPE_ALL).front();
   Context context(device);
 
-  float in_array[10];
-  DeviceBuffer<float> in_array_buffer(context, in_array, 10,
-                                      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR);
+  {
+    float in_array[10];
+    DeviceBuffer<float> in_array_buffer(context, in_array, 10,
+                                        CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR);
+  }
 }

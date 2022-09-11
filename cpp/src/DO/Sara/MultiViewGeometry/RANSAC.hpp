@@ -165,6 +165,16 @@ namespace DO::Sara {
     return ransac(matches, p1, p2, estimator, inlier_predicate, num_samples);
   }
 
+  //! @brief From vanilla RANSAC
+  inline auto ransac_num_samples(double inlier_ratio,
+                                 int minimal_sample_cardinality,
+                                 double confidence = 0.99) -> std::size_t
+  {
+    return std::log(1 - confidence) /
+           std::log(1 - std::pow(inlier_ratio, minimal_sample_cardinality));
+  }
+
+
   //! @}
 
 } /* namespace DO::Sara */

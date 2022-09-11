@@ -43,24 +43,26 @@ namespace DO::Sara {
 
 #ifdef PROFILE_VIDEOSTREAM
   static Timer video_stream_profiler;
-#define VIDEO_STREAM_TIC video_stream_profiler.restart();
-#define VIDEO_STREAM_TOC(what)                                            \
-  {                                                                       \
-    const auto elapsed = video_stream_profiler.elapsed_ms();              \
-    std::cout << "[" << (what) << "] " << elapsed << " ms" << std::endl;  \
-  }
+#  define VIDEO_STREAM_TIC video_stream_profiler.restart();
+#  define VIDEO_STREAM_TOC(what)                                               \
+    {                                                                          \
+      const auto elapsed = video_stream_profiler.elapsed_ms();                 \
+      std::cout << "[" << (what) << "] " << elapsed << " ms" << std::endl;     \
+    }
 #else
-#define VIDEO_STREAM_TIC
-#define VIDEO_STREAM_TOC(what) {}
+#  define VIDEO_STREAM_TIC
+#  define VIDEO_STREAM_TOC(what)                                               \
+    {                                                                          \
+    }
 #endif
 
   bool VideoStream::_registered_all_codecs = false;
 #ifdef HWACCEL
-#ifdef __APPLE__
+#  ifdef __APPLE__
   int VideoStream::_hw_device_type = AV_HWDEVICE_TYPE_VIDEOTOOLBOX;
-#else
+#  else
   int VideoStream::_hw_device_type = AV_HWDEVICE_TYPE_CUDA;
-#endif
+#  endif
 
   static AVBufferRef* hw_device_ctx = NULL;
   static enum AVPixelFormat hw_pix_fmt;
@@ -102,7 +104,7 @@ namespace DO::Sara {
     {
       // av_register_all() got deprecated in lavf 58.9.100.
       // We don't need to use it anymore since FFmpeg 4.0.
-#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58,9,100))
+#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
       av_register_all();
 #endif
       _registered_all_codecs = true;
@@ -178,7 +180,8 @@ namespace DO::Sara {
 
 #ifdef HWACCEL
     auto video_stream = _video_format_context->streams[_video_stream_index];
-    if (avcodec_parameters_to_context(_video_codec_context, video_stream->codecpar) < 0)
+    if (avcodec_parameters_to_context(_video_codec_context,
+                                      video_stream->codecpar) < 0)
       throw std::runtime_error{"Could not initialize the video codec context!"};
 
     _video_codec_context->get_format = get_hw_format;
@@ -225,15 +228,14 @@ namespace DO::Sara {
         << std::endl;
 
     // Get video format converter to RGB24.
-    _sws_context = sws_getContext(
-        width(), height(),
+    _sws_context = sws_getContext(width(), height(),
 #ifdef HWACCEL
-        AV_PIX_FMT_NV12,
+                                  AV_PIX_FMT_NV12,
 #else
-        _video_codec_context->pix_fmt,
+                                  _video_codec_context->pix_fmt,
 #endif
-        width(), height(),
-        AV_PIX_FMT_RGB24, SWS_POINT, nullptr, nullptr, nullptr);
+                                  width(), height(), AV_PIX_FMT_RGB24,
+                                  SWS_POINT, nullptr, nullptr, nullptr);
     if (_sws_context == nullptr)
       throw std::runtime_error{"Could not allocate SWS context!"};
 
@@ -289,7 +291,7 @@ namespace DO::Sara {
     do
     {
       if (!_end_of_stream && av_read_frame(_video_format_context, _pkt) < 0)
-          _end_of_stream = true;
+        _end_of_stream = true;
 
       if (_end_of_stream)
       {
@@ -307,15 +309,19 @@ namespace DO::Sara {
 
         // Decompress the video frame.
         _got_frame = decode(_pkt);
+        // N.B.: always unreference the packet after decoding even if the frame
+        // is not complete.
+        av_packet_unref(_pkt);
 
         if (_got_frame)
         {
           VIDEO_STREAM_TIC
-          av_packet_unref(_pkt);
 
           // Convert to RGB24 pixel format.
           sws_scale(_sws_context, _picture->data, _picture->linesize, 0,
                     height(), _picture_rgb->data, _picture_rgb->linesize);
+
+          // av_frame_unref(_picture);
           VIDEO_STREAM_TOC("To RGB24")
 
           return true;
@@ -348,7 +354,6 @@ namespace DO::Sara {
     if (ret < 0)
       throw std::runtime_error{"Error sending a packet for decoding!"};
     VIDEO_STREAM_TOC("Send packet")
-
 
     // Decode the compressed video data into an uncompressed video frame.
     VIDEO_STREAM_TIC

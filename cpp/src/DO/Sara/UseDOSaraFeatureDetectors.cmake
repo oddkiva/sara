@@ -6,7 +6,7 @@ if (SARA_USE_FROM_SOURCE)
     sara_generate_library("FeatureDetectors")
 
     if(SARA_USE_HALIDE)
-      target_compile_definitions(DO_Sara_ImageProcessing
+      target_compile_definitions(DO_Sara_FeatureDetectors
                                  PRIVATE DO_SARA_USE_HALIDE)
     endif ()
 

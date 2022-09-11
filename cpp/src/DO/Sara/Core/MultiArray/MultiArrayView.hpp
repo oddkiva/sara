@@ -511,7 +511,7 @@ namespace DO { namespace Sara {
       std::copy(other._begin, other._end, _begin);
     }
 
-    self_type& operator=(self_type other)
+    self_type& operator=(const self_type& other)
     {
       copy(other);
       return *this;

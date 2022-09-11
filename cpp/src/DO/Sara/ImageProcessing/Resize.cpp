@@ -164,4 +164,45 @@ namespace DO::Sara {
 #endif
   }
 
+  auto resize_v2(const ImageView<float>& src, ImageView<float>& dst) -> void
+  {
+    if (dst.sizes().minCoeff() <= 0)
+      throw std::range_error{
+          "The sizes of the destination image must be positive!"};
+
+#ifdef DO_SARA_USE_HALIDE
+    auto src_tensor_view = tensor_view(src).reshape(
+        Eigen::Vector4i{1, 1, src.height(), src.width()});
+    auto dst_tensor_view = tensor_view(dst).reshape(
+        Eigen::Vector4i{1, 1, dst.height(), dst.width()});
+
+    auto src_buffer = Shakti::Halide::as_runtime_buffer(src_tensor_view);
+    auto dst_buffer = Shakti::Halide::as_runtime_buffer(dst_tensor_view);
+
+    // The name is misleading: this can work still work for smaller sizes.
+    shakti_enlarge_cpu(src_buffer,                               //
+                       src_buffer.width(), src_buffer.height(),  //
+                       dst_buffer.width(), dst_buffer.height(),  //
+                       dst_buffer);
+#else
+    const auto wh = dst.width() * dst.height();
+    const auto scale = src.sizes().template cast<double>().array() /
+                       dst.sizes().template cast<double>().array();
+
+    // Just a plain simple parallelization without vectorization.
+#  pragma omp parallel for
+    for (auto xy = 0; xy < wh; ++xy)
+    {
+      const auto& w = dst.width();
+      const auto y = xy / w;
+      const auto x = xy - y * w;
+
+      const Eigen::Vector2d p = Eigen::Array2d(x, y) * scale;
+
+      const auto pixel = interpolate(src, p);
+      dst(x, y) = static_cast<float>(pixel);
+    }
+#endif
+  }
+
 }  // namespace DO::Sara

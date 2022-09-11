@@ -39,14 +39,13 @@ target_include_directories(emscripten_gl_utilities
                            PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
 target_link_libraries(
   emscripten_gl_utilities
-  PRIVATE DO_Sara_OpenCL_GL #
-          DO::Sara::Core #
-          DO::Sara::ImageIO
+  PRIVATE DO::Sara::Core #
+          DO::Sara::ImageIO #
+          DO::Kalpana::EasyGL #
   INTERFACE $<$<NOT:$<PLATFORM_ID:Emscripten>>:Boost::filesystem>
             $<$<NOT:$<PLATFORM_ID:Emscripten>>:glfw>)
 set_property(TARGET emscripten_gl_utilities
-  PROPERTY
-  FOLDER "Libraries/Sara/Emscripten")
+             PROPERTY FOLDER "Libraries/Sara/Emscripten")
 
 if(MSVC)
   target_link_libraries(emscripten_gl_utilities INTERFACE GLEW::GLEW)
@@ -80,23 +79,20 @@ macro(sara_add_wasm_executable file)
   target_include_directories(${filename} PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
   target_link_libraries(
     ${filename}
-    PRIVATE DO_Sara_OpenCL_GL #
-            DO::Sara::Core #
+    PRIVATE DO::Sara::Core #
             DO::Sara::ImageIO #
+            DO::Kalpana::EasyGL #
             $<$<NOT:$<PLATFORM_ID:Emscripten>>:glfw>)
   if(MSVC)
     target_link_libraries(${filename} PRIVATE GLEW::GLEW)
   endif()
 
-  set_property(TARGET ${filename}
-    PROPERTY
-    FOLDER "Libraries/Sara/Emscripten")
+  set_property(TARGET ${filename} PROPERTY FOLDER "Libraries/Sara/Emscripten")
 
   if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     add_dependencies(emscripten_copy_assets ${filename})
     set_property(TARGET emscripten_copy_assets
-      PROPERTY
-      FOLDER "Libraries/Sara/Emscripten")
+                 PROPERTY FOLDER "Libraries/Sara/Emscripten")
   endif()
 endmacro()
 

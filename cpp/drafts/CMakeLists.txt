@@ -5,13 +5,15 @@ if (SARA_BUILD_TESTS)
   add_definitions(-DBOOST_ALL_NO_LIB)
 endif ()
 
+add_subdirectory(ChessboardDetection)
+add_subdirectory(Calibration)
+
 if (NOT WIN32)
   add_subdirectory(Compute)
 endif ()
 
 add_subdirectory(OpenCL)
 
-# add_subdirectory(Expression)
 add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
 
@@ -22,7 +24,5 @@ endif ()
 add_subdirectory(NuScenes)
 
 add_subdirectory(Taskflow)
-
-add_subdirectory(OpenCV)
 
 add_subdirectory(Emscripten)

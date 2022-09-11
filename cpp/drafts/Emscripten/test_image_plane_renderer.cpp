@@ -11,7 +11,7 @@
 
 //! @file
 
-#include <drafts/OpenCL/GL.hpp>
+#include <DO/Kalpana/EasyGL.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/ImageIO.hpp>

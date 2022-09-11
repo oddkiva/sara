@@ -13,9 +13,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <drafts/OpenCL/Core/CommandQueue.hpp>
-#include <drafts/OpenCL/Core/Context.hpp>
-#include <drafts/OpenCL/Core/Device.hpp>
+#include <drafts/OpenCL/CommandQueue.hpp>
+#include <drafts/OpenCL/Context.hpp>
+#include <drafts/OpenCL/Device.hpp>
 
 
 using namespace DO::Sara;

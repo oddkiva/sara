@@ -6,9 +6,11 @@ add_executable(image_processing ${SRC_FILES})
 
 target_link_libraries(image_processing
   PRIVATE
-  ${DO_Sara_LIBRARIES}
-  DO_Sara_OpenCL_Core
-  DO_Sara_OpenCL_GL
+  DO::Sara::Core
+  DO::Sara::ImageIO
+  DO::Sara::ImageProcessing
+  DO::Sara::OpenCL
+  DO::Kalpana::EasyGL
   glfw)
 
 target_compile_definitions(image_processing

@@ -1,0 +1,119 @@
+# Vanishing Points and Lines
+
+## Vanishing Point
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: train-rails
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   The straight train rails converge to a vanishing point far away in the
+#|   horizon.
+#|   Credits: Stephanie Bower.
+#|   https://drawingperspectives.com/2020/03/25/1-perspective-rule-1-converging-lines/.
+knitr::include_graphics(paste0(getwd(), "/singleviewgeometry/train-rails.jpg"))
+```
+
+*On a quiet Sunday, you are walking in the park while sipping your coffee all
+along. Your mind is being distracted by the birds chirping on the branches. You
+notice a trail reserved for train workers. Out of curiosity, you walk that way
+leading to deeper woods. At the end of the trail, you discover train rails
+dividing the forest in two parts. The wild scenery is pleasant and you can't
+resist taking a picture of the straight train rails at the center. They vanish
+at a point far away in the horizon.*
+
+This concept of vanishing point is illustrated in Figure \@ref(fig:train-rails).
+
+A vanishing point can be traced from two "parallel" 2D line segments $l_1$ and
+$l_2$. These 2D line segments backproject to two 3D planes $\mathbf{\Pi}(l_1)$
+and $\mathbf{\Pi}(l_2)$ that intersect at the camera center.
+
+But also, because the intersection of two non parallel 3D planes must be a 3D
+line in general, their intersection is calculated as the cross-product
+
+  \begin{equation}
+    \mathbf{\Pi}(l_1) \times \mathbf{\Pi}(l_2).
+  \end{equation}
+
+This cross-product is exactly the backprojected ray of the vanishing point.
+Let's call it the vanishing ray.
+
+As a side note:
+
+- the dual representation of a 3D vector is the plane orthogonal to the
+  vector itself;
+- thus in particular, the dual representation of a vanishing ray is the plane
+  orthogonal to the vanishing ray itself.
+
+Finally, two vanishing points in the images are orthogonal if they backproject to two
+orthogonal vectors. We can retrieve the third orthogonal ray by calculating the
+cross-product of the two orthogonal vectors.
+
+\begin{equation}
+  \mathbf{\Pi}(l_3) = \mathbf{\Pi}(l_1) \times \mathbf{\Pi}(l_2).
+\end{equation}
+
+## Vanishing Line
+
+*The nature lover in you escaped the stress of the big city and found temporary
+refuge at the beach. Standing at the shore, your mind is being rejuvenated by
+the appeasing sound of ocean waves. A few birds are floating peacefully on the
+sea. Not a single boat is there to disturb the quiet infiniteness of the sea.
+Only the horizon, this imaginary line, seems to separate the water and the air.
+You can't help but wonder how on earth the sea looks so strangely flat?*
+
+<p align="center">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/LdsTydS4eww" frameborder="0" allowfullscreen></iframe>
+</p>
+
+The horizon which we depicted in the text above and which can be seen in the YouTube
+video is a vanishing line. As explained in the terminology section, the
+vanishing line backprojects to a 3D plane which we can calculate.
+
+Assuming we know the calibration matrix $\mathbf{K}$ of the camera that shot
+this YouTube video, we can calculate the equation of the backprojected plane
+video.
+
+Indeed let us pick two image points in homogeneous coordinates $\mathbf{a}$ and
+$\mathbf{b}$, the normal of the associated line segments calculated by the
+cross-product $\mathbf{n} = \mathbf{a} \times \mathbf{b}$.
+
+The equation of the backprojected sea surface in 3D is therefore
+
+\begin{equation}
+  \mathbf{\Pi}_\textrm{sea} = \mathbf{K}^T (\mathbf{a} \times \mathbf{b}).
+\end{equation}
+
+The normal of the sea surface is expressed in the camera frame, which we indeed
+expect it to be equal approximately $y = \mathbf{constant}$.
+
+
+## Orthogonal Vanishing Point Detection
+
+The detection of orthogonal vanishing point assumes that cameras are calibrated,
+that is we understand how the images are formed and know the camera parameters.
+We know not just the calibration matrix, but also its distortion model and its
+distortion coefficients.
+
+In the following, let's simplify the ideas. We assume the camera follows the
+pinhole model and that we know its calibration matrix $\mathbf{K}$.
+
+We can then derive an algorithm to compute the reference frame of a Manhattan
+world with respect to the camera frame. To do so, we employ RANSAC to draw
+minimal samples of 3 line segments. From there, we are able to infer the
+orientation of the camera with respect to the Manhattan world frame and
+vice-versa.
+
+This approach is described more in details in the paper [@BazinP:2012:iros].
+Basically, the main idea is as follows. A good sample of 3 line segments is a sample
+such that
+
+- The first two image line segments are parallel and are used to construct a
+  first vanishing point.
+- The third line segment vanishes to a second vanishing point, which should be
+  orthogonal to the first vanishing point.
+- The third orthogonal vanishing point is obtained by cross-product.
+In that case, the three orthogonal vanishing points are well supported by the
+other line segments.

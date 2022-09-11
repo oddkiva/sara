@@ -42,6 +42,8 @@ set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 # Add Sara to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+include(sara_create_asan_build_type)
+
 # Import macros and configure Sara library version.
 include(sara_macros)
 sara_dissect_version()
@@ -97,6 +99,8 @@ elseif (NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   find_package(PNG  REQUIRED)
   find_package(TIFF REQUIRED)
   find_package(ZLIB REQUIRED)
+  find_package(HEIF REQUIRED)
+  find_package(WebP REQUIRED)
 
   if (SARA_USE_QT6)
     set (QT_VERSION 6)

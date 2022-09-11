@@ -17,7 +17,7 @@
 
 #include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
 
-#include <drafts/OpenCL/GL.hpp>
+#include <DO/Kalpana/EasyGL.hpp>
 
 #include <memory>
 
@@ -36,9 +36,9 @@ struct ImageDewarpRenderer
   };
 
   // OpenGL Shader program.
-  DO::Sara::GL::Shader _vertex_shader;
-  DO::Sara::GL::Shader _fragment_shader;
-  DO::Sara::GL::ShaderProgram _shader_program;
+  DO::Kalpana::GL::Shader _vertex_shader;
+  DO::Kalpana::GL::Shader _fragment_shader;
+  DO::Kalpana::GL::ShaderProgram _shader_program;
   // MVP uniform locations.
   GLint _image_loc;
   GLint _image_sizes_loc;
@@ -55,9 +55,9 @@ struct ImageDewarpRenderer
   GLint _xi_loc;
 
   // OpenGL geometry data.
-  DO::Sara::GL::VertexArray _vao;
-  DO::Sara::GL::Buffer _vbo;
-  DO::Sara::GL::Buffer _ebo;
+  DO::Kalpana::GL::VertexArray _vao;
+  DO::Kalpana::GL::Buffer _vbo;
+  DO::Kalpana::GL::Buffer _ebo;
 
   static std::unique_ptr<ImageDewarpRenderer> _instance;
 

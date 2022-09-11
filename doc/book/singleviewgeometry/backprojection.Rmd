@@ -1,0 +1,84 @@
+# Projection and Backprojection
+
+In projective geometry, the projection of 3D lines in the camera film plane are
+still lines but the line parallelism is lost after the perspective projection.
+
+This makes the perspective projection more difficult to understand, however
+there are some remarkable properties in the perspective projection we can
+observe. More particularly, in this section, we will talk about the concept of
+backprojection and the things we can calculate by backprojection.
+
+We suppose that images are formed by a pinhole camera model with calibration
+matrix $\mathbf{K}$.
+
+One remarkable property in projective geometry is that the projection of 3D
+parallel lines onto an image plane is a set of 2D lines that intersect
+altogether into a unique point: the so-called *vanishing point*.
+
+Let us recall a bit of terminology.
+
+- Any 3D scene point $X$ that lies in a 3D semi-line originating from the camera
+  center $O$ **projects** exactly on a unique point $\mathbf{u}$ in the image
+  plane.
+
+We also like to say the other way around, in 3D reconstruction:
+
+- A point $\mathbf{u}$ in the image plane **backprojects** to a 3D semi-line or
+  equivalently to the 3D ray vector $\mathbf{r}_\mathbf{u}$ that parameterizes
+  this semi-line.
+
+Now let us take it further.
+
+- A 2D line segment $(\mathbf{a}, \mathbf{b})$ in the image plane backprojects to
+  a 3D half-plane $(\mathbf{O}, \mathbf{r}_\mathbf{a}, \mathbf{r}_\mathbf{b})$
+  where $\mathbf{r}_\mathbf{a}$ and $\mathbf{r}_\mathbf{b}$ are respectively the
+  backprojected rays of the 2D image points $\mathbf{a}$ and $\mathbf{b}$.
+
+- The half-plane $(\mathbf{O}, \mathbf{r}_\mathbf{a}, \mathbf{r}_\mathbf{b})$
+  can be parameterized by its normal vector $\mathbf{\Pi}(\mathbf{a},
+  \mathbf{b})$^[Let's omit the side of the half-plane for now, which can be
+  retrieved via a cheirality criterion], which we calculate as
+
+  \begin{equation}
+  \mathbf{\Pi}(\mathbf{a}, \mathbf{b}) =
+    \mathbf{r}_\mathbf{a} \times \mathbf{r}_\mathbf{b}.
+  \end{equation}
+
+- Note that the backprojected rays are thus calculated as
+
+  \begin{align*}
+    \mathbf{r}_\mathbf{a} &= \mathbf{K}^{-1} \mathbf{a} \\
+    %
+    \mathbf{r}_\mathbf{b} &= \mathbf{K}^{-1} \mathbf{b}.
+  \end{align*}
+
+- Another way to calculate the plane normal is to calculate the line
+  $\mathbf{l} = \mathbf{a} \times \mathbf{b}$ from the image line segment
+  $(\mathbf{a}, \mathbf{b})$ (expressed in homogeneous coordinates), and then:
+
+  \begin{equation}
+  \mathbf{\Pi}(\mathbf{a}, \mathbf{b}) =
+    \mathbf{K}^T \mathbf{l}.
+  \end{equation}
+
+  $\mathbf{K}^T \mathbf{l}$ is the plane backprojected from the 2D image line $\mathbf{l}$.
+
+  ```{proof}
+  $\mathbf{K}^T \mathbf{l}$ is indeed the normal of the backprojected plane
+  because it is orthogonal to both backprojected rays $\mathbf{K}^{-1}
+  \mathbf{a}$ and $\mathbf{K}^{-1} \mathbf{b}$.
+
+  Indeed, let us write the dot product for $\mathbf{K}^{-1} \mathbf{a}$
+
+  \begin{equation}
+    (\mathbf{K}^T \mathbf{l})^T \mathbf{K}^{-1} \mathbf{a} =
+    \mathbf{l}^T \mathbf{K} \mathbf{K}^{-1} \mathbf{a} = 0
+  \end{equation}
+
+  and likewise for $\mathbf{K}^{-1} \mathbf{b}$, the dot product is $0$.
+
+  Since the backprojected rays form a linear span of the backprojected plane,
+  any point on the backprojected plane is a linear combination of the
+  backprojected rays is therefore orthogonal to $\mathbf{K}^T \mathbf{n}$.
+  ```
+
