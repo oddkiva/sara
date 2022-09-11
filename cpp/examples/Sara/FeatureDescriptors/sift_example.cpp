@@ -37,11 +37,10 @@ int sara_graphics_main(int argc, char** argv)
 {
   namespace fs = boost::filesystem;
 
-  const auto image_path = fs::path{
-    argc < 2  //
-      ? src_path("../../../../data/sunflowerField.jpg")
-      : argv[1]
-  };
+  const auto image_path =
+      fs::path{argc < 2  //
+                   ? src_path("../../../../data/sunflowerField.jpg")
+                   : argv[1]};
   const auto image = imread<Rgb8>(image_path.string());
 
   const auto first_octave = argc < 3 ? 0 : std::stoi(argv[2]);
@@ -76,9 +75,8 @@ int sara_graphics_main(int argc, char** argv)
   auto image_annotated = image;
   for (const auto& f : features)
   {
-    const auto& color = f.extremum_type == OERegion::ExtremumType::Max
-      ? RedBerry8
-      : BlueBerry8;
+    const auto& color =
+        f.extremum_type == OERegion::ExtremumType::Max ? RedBerry8 : BlueBerry8;
     draw(image_annotated, f, color);
   }
   display(image_annotated);
