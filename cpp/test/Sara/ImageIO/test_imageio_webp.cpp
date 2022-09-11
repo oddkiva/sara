@@ -24,7 +24,7 @@ namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(TestImageIO)
 
-BOOST_AUTO_TEST_CASE(test_heif_image_format_read_and_write)
+BOOST_AUTO_TEST_CASE(test_webp_image_format_read_and_write)
 {
   const auto w = 64;
   const auto h = 64;
@@ -41,12 +41,12 @@ BOOST_AUTO_TEST_CASE(test_heif_image_format_read_and_write)
     {
       auto image = sara::Image<sara::Rgb8>{w, h};
       image.flat_array().fill(sara::Red8);
-      imwrite(image, "output.heic", 50);
+      imwrite(image, "output.webp", 50);
     }
 
     // Read the image we just wrote.
     {
-      const auto filepath = "output.heic";
+      const auto filepath = "output.webp";
 
       const auto image = sara::imread<sara::Rgb8>(filepath);
       BOOST_CHECK_EQUAL(image.width(), w);
@@ -58,11 +58,6 @@ BOOST_AUTO_TEST_CASE(test_heif_image_format_read_and_write)
       fs::remove(filepath);
     }
   }
-
-  // const auto image_path = "/home/david/Desktop/Datasets/oddkiva/regents-park/IMG_2708.HEIC";
-
-  // const auto image = sara::imread<sara::Rgb8>(image_path);
-  // sara::imwrite(image, "/home/david/Desktop/test.heic");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
