@@ -24,7 +24,7 @@ namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(TestImageIO)
 
-BOOST_AUTO_TEST_CASE(test_heif_image_format_read_and_write)
+BOOST_AUTO_TEST_CASE(test_webp_image_format_read_and_write)
 {
   const auto w = 64;
   const auto h = 64;
@@ -32,37 +32,27 @@ BOOST_AUTO_TEST_CASE(test_heif_image_format_read_and_write)
   for (auto i = 0; i < 10; ++i)
   {
     // Write dummy image.
-    //
-    // CAVEAT: libheif/libx265 is leaking when writing (!!!)
-    // Even if I try to mitigate the amount of leaks by using a singleton
-    // object, it will still leak as much.
-    //
-    // But also is it a true memory leak?
     {
       auto image = sara::Image<sara::Rgb8>{w, h};
       image.flat_array().fill(sara::Red8);
-      imwrite(image, "output.heic", 50);
+      imwrite(image, "output.webp", 100);
     }
 
     // Read the image we just wrote.
     {
-      const auto filepath = "output.heic";
+      const auto filepath = "output.webp";
 
       const auto image = sara::imread<sara::Rgb8>(filepath);
       BOOST_CHECK_EQUAL(image.width(), w);
       BOOST_CHECK_EQUAL(image.height(), h);
       BOOST_CHECK(std::all_of(image.begin(), image.end(), [](const auto& v) {
-        return (v.template cast<float>() - sara::Red8.cast<float>()).norm() < 2;
+        // Very liberal check... The webp compression is a bit peculiar.
+        return std::abs(static_cast<float>(v[0]) - 255.f) < 10.f;
       }));
 
       fs::remove(filepath);
     }
   }
-
-  // const auto image_path = "/home/david/Desktop/Datasets/oddkiva/regents-park/IMG_2708.HEIC";
-
-  // const auto image = sara::imread<sara::Rgb8>(image_path);
-  // sara::imwrite(image, "/home/david/Desktop/test.heic");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
