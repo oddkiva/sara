@@ -178,11 +178,11 @@ void inspect_fundamental_matrix_estimation(const Image<Rgb8>& image1,
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   if (argc < 3)
   {
