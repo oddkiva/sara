@@ -166,13 +166,11 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
   SARA_DEBUG << termcolor::green
              << "Setting the inference engine with the right configuration!"
              << termcolor::reset << std::endl;
-  // Setup the engine.
-  builder->setMaxBatchSize(1);
 
   // Create a inference configuration object.
   auto config = ConfigUniquePtr{builder->createBuilderConfig(),  //
                                 &config_deleter};
-  config->setMaxWorkspaceSize(32);
+  config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 32u);
   config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
   // If the GPU supports FP16 operations.
   // config->setFlag(nvinfer1::BuilderFlag::kFP16);
@@ -230,7 +228,7 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
   };
 
   // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
-  if (!context->enqueue(1, device_buffers.data(), *cuda_stream, nullptr))
+  if (!context->enqueueV2(device_buffers.data(), *cuda_stream, nullptr))
   {
     SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
                << std::endl;
@@ -259,13 +257,13 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
   auto builder = sara::TensorRT::make_builder();
 
   // Create a simple convolution operation.
-  constexpr auto n = 1;
-  constexpr auto h = 8;
-  constexpr auto w = 8;
-  constexpr auto kh = 3;
-  constexpr auto kw = 3;
-  constexpr auto ci = 1;
-  constexpr auto co = 20;
+  static constexpr auto n = 1;
+  static constexpr auto h = 8;
+  static constexpr auto w = 8;
+  static constexpr auto kh = 3;
+  static constexpr auto kw = 3;
+  static constexpr auto ci = 1;
+  static constexpr auto co = 20;
 
   // Create artificial weights.
   const auto conv1_kernel_weights_vector =
@@ -281,7 +279,7 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
 
     // Instantiate an input data.
     auto image_tensor = network->addInput("image", nvinfer1::DataType::kFLOAT,
-                                          nvinfer1::Dims3{n, h, w});
+                                          nvinfer1::Dims4{n, ci, h, w});
 
     // Encapsulate the weights using TensorRT data structures.
     const auto conv1_kernel_weights = nvinfer1::Weights{
@@ -309,13 +307,11 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
   SARA_DEBUG << termcolor::green
              << "Setting the inference engine with the right configuration!"
              << termcolor::reset << std::endl;
-  // Setup the engine.
-  builder->setMaxBatchSize(1);
 
   // Create a inference configuration object.
   auto config =
       ConfigUniquePtr{builder->createBuilderConfig(), &config_deleter};
-  config->setMaxWorkspaceSize(32);
+  config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 32u);
   config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
   // If the GPU supports FP16 operations.
   // config->setFlag(nvinfer1::BuilderFlag::kFP16);
@@ -374,7 +370,7 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
   };
 
   // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
-  if (!context->enqueue(1, device_buffers.data(), *cuda_stream, nullptr))
+  if (!context->enqueueV2(device_buffers.data(), *cuda_stream, nullptr))
   {
     SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
                << std::endl;
