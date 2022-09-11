@@ -9,7 +9,7 @@ namespace DO::Sara::Darknet {
 
   struct NetworkParser
   {
-    inline auto read_line(std::ifstream& file, std::string& line) const
+    auto read_line(std::ifstream& file, std::string& line) const -> bool
     {
       if (!std::getline(file, line))
         return false;
@@ -17,17 +17,17 @@ namespace DO::Sara::Darknet {
       return true;
     }
 
-    inline auto is_section(const std::string& line) const
+    auto is_section(const std::string& line) const -> bool
     {
       return line.front() == '[';
     }
 
-    inline auto is_comment(const std::string& line) const
+    auto is_comment(const std::string& line) const -> bool
     {
       return line.front() == '#';
     }
 
-    inline auto section_name(const std::string& line) const
+    auto section_name(const std::string& line) const -> std::string
     {
       auto line_trimmed = line;
       boost::algorithm::trim_if(
@@ -35,8 +35,9 @@ namespace DO::Sara::Darknet {
       return line_trimmed;
     }
 
-    inline auto make_new_layer(const std::string& layer_type,
-                               std::vector<std::unique_ptr<Layer>>& nodes) const
+    auto make_new_layer(const std::string& layer_type,
+                        std::vector<std::unique_ptr<Layer>>& nodes) const
+        -> void
     {
       std::cout << "MAKING NEW LAYER: " << layer_type << std::endl;
 
@@ -56,8 +57,7 @@ namespace DO::Sara::Darknet {
       nodes.back()->type = layer_type;
     }
 
-    inline auto
-    finish_layer_init(std::vector<std::unique_ptr<Layer>>& nodes) const
+    auto finish_layer_init(std::vector<std::unique_ptr<Layer>>& nodes) const
     {
       const auto& layer_type = nodes.back()->type;
       if (layer_type != "net")
@@ -85,7 +85,7 @@ namespace DO::Sara::Darknet {
       std::cout << *nodes.back() << std::endl;
     }
 
-    inline auto parse_config_file(const std::string& cfg_filepath) const
+    auto parse_config_file(const std::string& cfg_filepath) const
     {
       namespace fs = boost::filesystem;
 
@@ -155,9 +155,9 @@ namespace DO::Sara::Darknet {
 
     bool debug = false;
 
-    inline NetworkWeightLoader() = default;
+    NetworkWeightLoader() = default;
 
-    inline NetworkWeightLoader(const std::string& filepath)
+    NetworkWeightLoader(const std::string& filepath)
     {
       fp = fopen(filepath.c_str(), "rb");
       if (fp == nullptr)
@@ -192,7 +192,7 @@ namespace DO::Sara::Darknet {
       // std::cout << "Num bytes read = " << num_bytes_read << std::endl;
     }
 
-    inline ~NetworkWeightLoader()
+    ~NetworkWeightLoader()
     {
       if (fp)
       {
@@ -201,7 +201,7 @@ namespace DO::Sara::Darknet {
       }
     }
 
-    inline auto load(std::vector<std::unique_ptr<Layer>>& net)
+    auto load(std::vector<std::unique_ptr<Layer>>& net) -> void
     {
       for (auto& layer : net)
       {

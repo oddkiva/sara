@@ -63,8 +63,8 @@ namespace DO::Sara::TensorRT {
   int Network::_current_var_index = 0;
 
 
-  inline auto make_placeholder(const std::array<int, 3>& chw_sizes,
-                               const std::string& name = "image")
+  auto make_placeholder(const std::array<int, 3>& chw_sizes,
+                        const std::string& name = "image")
   {
     auto net = Network::current().model();
 
@@ -75,8 +75,7 @@ namespace DO::Sara::TensorRT {
     return data;
   }
 
-  inline auto operator*(nvinfer1::ITensor& x,
-                        const std::pair<float, std::string>& y)
+  auto operator*(nvinfer1::ITensor& x, const std::pair<float, std::string>& y)
       -> nvinfer1::ITensor&
   {
     auto model = Network::current().model();
@@ -97,14 +96,13 @@ namespace DO::Sara::TensorRT {
     return *x_div_y;
   }
 
-  inline auto operator/(nvinfer1::ITensor& x,
-                        const std::pair<float, std::string>& y)
+  auto operator/(nvinfer1::ITensor& x, const std::pair<float, std::string>& y)
       -> nvinfer1::ITensor&
   {
     return x * make_pair(1 / y.first, y.second);
   }
 
-  inline auto operator*(nvinfer1::ITensor& x, float y) -> nvinfer1::ITensor&
+  auto operator*(nvinfer1::ITensor& x, float y) -> nvinfer1::ITensor&
   {
     const auto y_name =
         "weights/" + std::to_string(Network::current_var_index());
@@ -112,17 +110,17 @@ namespace DO::Sara::TensorRT {
     return x * std::make_pair(y, y_name);
   }
 
-  inline auto operator/(nvinfer1::ITensor& x, float y) -> nvinfer1::ITensor&
+  auto operator/(nvinfer1::ITensor& x, float y) -> nvinfer1::ITensor&
   {
     return x * (1 / y);
   }
 
-  inline auto conv_2d(nvinfer1::ITensor& x,              //
-                      int num_filters,                   //
-                      nvinfer1::DimsHW kernel_sizes,     //
-                      const std::vector<float>& w = {},  //
-                      const std::vector<float>& b = {},
-                      const std::string& name = {})  //
+  auto conv_2d(nvinfer1::ITensor& x,              //
+               int num_filters,                   //
+               nvinfer1::DimsHW kernel_sizes,     //
+               const std::vector<float>& w = {},  //
+               const std::vector<float>& b = {},
+               const std::string& name = {})  //
       -> nvinfer1::ITensor&
   {
     auto model = Network::current().model();
