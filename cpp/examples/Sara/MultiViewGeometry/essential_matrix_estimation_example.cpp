@@ -57,11 +57,11 @@ auto calculate_yaw_pitch_roll(const Eigen::Matrix3d& R) -> Eigen::Vector3d
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   // Use the following data structure to load images, keypoints, camera
   // parameters.

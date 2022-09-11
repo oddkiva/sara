@@ -6,3 +6,4 @@ macro(sara_add_example example)
 endmacro()
 
 sara_add_example(read_write_heif_images)
+sara_add_example(read_write_webp_images)

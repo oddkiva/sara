@@ -44,11 +44,11 @@ auto initialize_crop_region(const Eigen::Vector2i& sizes)
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
@@ -69,7 +69,8 @@ int __main(int argc, char** argv)
       ("downscale-factor,d",
        po::value<int>(&downscale_factor)->default_value(2),
        "downscale factor")  //
-      ("num_scales_per_octave,s", po::value<int>(&num_scales_per_octave)->default_value(1),
+      ("num_scales_per_octave,s",
+       po::value<int>(&num_scales_per_octave)->default_value(1),
        "number of scales per octave")  //
       ("skip", po::value<int>(&skip)->default_value(0),
        "number of frames to skip")  //
@@ -226,7 +227,7 @@ int __main(int argc, char** argv)
     draw_text(frame_annotated, 100, 100,
               format("Matching: %0.3f ms", matching_time),  //
               White8, 40, 0, false, true, false);
-    draw_text(frame_annotated, 100, 150,              //
+    draw_text(frame_annotated, 100, 150,             //
               format("Tracks: %u", matches.size()),  //
               White8, 40, 0, false, true, false);
     set_active_window(w);

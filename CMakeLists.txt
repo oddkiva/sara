@@ -95,11 +95,12 @@ elseif (NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
 
   find_package(HDF5 COMPONENTS CXX REQUIRED)
 
-  find_package(HEIF REQUIRED)
   find_package(JPEG REQUIRED)
   find_package(PNG  REQUIRED)
   find_package(TIFF REQUIRED)
   find_package(ZLIB REQUIRED)
+  find_package(HEIF REQUIRED)
+  find_package(WebP REQUIRED)
 
   if (SARA_USE_QT6)
     set (QT_VERSION 6)
