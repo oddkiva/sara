@@ -9,6 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <drafts/NeuralNetworks/Darknet/Network.hpp>
+#include <drafts/NeuralNetworks/Darknet/Parser.hpp>
+
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -16,8 +19,7 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <drafts/NeuralNetworks/Darknet/Network.hpp>
-#include <drafts/NeuralNetworks/Darknet/Parser.hpp>
+#include <boost/filesystem.hpp>
 
 #include <iomanip>
 

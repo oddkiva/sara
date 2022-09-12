@@ -99,4 +99,41 @@ namespace DO::Sara::TensorRT {
 
   //! @}
 
+
+  inline auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
+  {
+    delete_nvinfer_object(engine);
+  }
+
+  inline auto runtime_deleter(nvinfer1::IRuntime* runtime) -> void
+  {
+    delete_nvinfer_object(runtime);
+  }
+
+  inline auto config_deleter(nvinfer1::IBuilderConfig* config) -> void
+  {
+    delete_nvinfer_object(config);
+  }
+
+  inline auto context_deleter(nvinfer1::IExecutionContext* context) -> void
+  {
+    delete_nvinfer_object(context);
+  };
+
+  inline auto host_memory_deleter(nvinfer1::IHostMemory* memory) -> void
+  {
+    delete_nvinfer_object(memory);
+  }
+
+  using HostMemoryUniquePtr =
+      std::unique_ptr<nvinfer1::IHostMemory, decltype(&host_memory_deleter)>;
+  using CudaEngineUniquePtr =
+      std::unique_ptr<nvinfer1::ICudaEngine, decltype(&engine_deleter)>;
+  using RuntimeUniquePtr =
+      std::unique_ptr<nvinfer1::IRuntime, decltype(&runtime_deleter)>;
+  using ConfigUniquePtr =
+      std::unique_ptr<nvinfer1::IBuilderConfig, decltype(&config_deleter)>;
+  using ContextUniquePtr =
+      std::unique_ptr<nvinfer1::IExecutionContext, decltype(&context_deleter)>;
+
 }  // namespace DO::Sara::TensorRT

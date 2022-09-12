@@ -2,7 +2,7 @@
 
 #include <drafts/NeuralNetworks/Darknet/Layer.hpp>
 
-#include <boost/filesystem.hpp>
+#include <fstream>
 
 
 namespace DO::Sara::Darknet {
@@ -87,11 +87,6 @@ namespace DO::Sara::Darknet {
 
     auto parse_config_file(const std::string& cfg_filepath) const
     {
-      namespace fs = boost::filesystem;
-
-      const auto data_dir_path =
-          fs::canonical(fs::path{src_path("../../../../data")});
-
       auto file = std::ifstream{cfg_filepath};
 
       auto line = std::string{};

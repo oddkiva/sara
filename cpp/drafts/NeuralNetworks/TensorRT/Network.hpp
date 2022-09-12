@@ -8,31 +8,26 @@ namespace DO::Sara::TensorRT {
   class Network
   {
   public:
-    using unique_net_ptr_type =
-        decltype(make_network(std::declval<nvinfer1::IBuilder*>()));
     using model_weights_dict_type = std::map<std::string, std::vector<float>>;
 
-    inline Network(nvinfer1::IBuilder* builder)
-      : _model{make_network(builder)}
+    explicit Network() = default;
+
+    auto model()
     {
+      return _model;
     }
 
-    inline auto model()
-    {
-      return _model.get();
-    }
-
-    inline auto weights() -> model_weights_dict_type&
+    auto weights() -> model_weights_dict_type&
     {
       return _model_weights;
     }
 
-    static inline auto set_current(Network& net)
+    static auto set_current(Network& net)
     {
       _current_network = &net;
     }
 
-    static inline auto current() -> Network&
+    static auto current() -> Network&
     {
       if (_current_network == nullptr)
         throw std::runtime_error{"Error: the current network is invalid!"};
@@ -40,12 +35,12 @@ namespace DO::Sara::TensorRT {
       return *_current_network;
     }
 
-    static inline auto current_var_index() -> int
+    static auto current_var_index() -> int
     {
       return _current_var_index;
     }
 
-    static inline auto increment_current_var_index() -> int
+    static auto increment_current_var_index() -> int
     {
       return ++_current_var_index;
     }
@@ -55,7 +50,7 @@ namespace DO::Sara::TensorRT {
     static int _current_var_index;
 
   private:
-    unique_net_ptr_type _model;
+    nvinfer1::INetworkDefinition* _model = nullptr;
     model_weights_dict_type _model_weights;
   };
 
@@ -63,19 +58,36 @@ namespace DO::Sara::TensorRT {
   int Network::_current_var_index = 0;
 
 
-  auto make_placeholder(const std::array<int, 3>& chw_sizes,
-                        const std::string& name = "image")
+  inline auto make_placeholder(const std::array<int, 3>& chw_sizes,
+                               const std::string& name = "image")
+      -> const nvinfer1::ITensor&
   {
     auto net = Network::current().model();
 
-    auto data = net->addInput(
+    const auto data = net->addInput(
         name.c_str(), nvinfer1::DataType::kFLOAT,
         nvinfer1::Dims3{chw_sizes[0], chw_sizes[1], chw_sizes[2]});
 
-    return data;
+    return *data;
   }
 
-  auto operator*(nvinfer1::ITensor& x, const std::pair<float, std::string>& y)
+  inline auto make_placeholder(const std::array<int, 4>& nchw_sizes,
+                               const std::string& name = "image")
+      -> nvinfer1::ITensor&
+  {
+    auto net = Network::current().model();
+
+    const auto data =
+        net->addInput(name.c_str(), nvinfer1::DataType::kFLOAT,
+                      nvinfer1::Dims4{nchw_sizes[0], nchw_sizes[1],
+                                      nchw_sizes[2], nchw_sizes[3]});
+
+    return *data;
+  }
+
+
+  inline auto operator*(nvinfer1::ITensor& x,
+                        const std::pair<float, std::string>& y)
       -> nvinfer1::ITensor&
   {
     auto model = Network::current().model();
@@ -96,13 +108,14 @@ namespace DO::Sara::TensorRT {
     return *x_div_y;
   }
 
-  auto operator/(nvinfer1::ITensor& x, const std::pair<float, std::string>& y)
+  inline auto operator/(nvinfer1::ITensor& x,
+                        const std::pair<float, std::string>& y)
       -> nvinfer1::ITensor&
   {
     return x * make_pair(1 / y.first, y.second);
   }
 
-  auto operator*(nvinfer1::ITensor& x, float y) -> nvinfer1::ITensor&
+  inline auto operator*(nvinfer1::ITensor& x, float y) -> nvinfer1::ITensor&
   {
     const auto y_name =
         "weights/" + std::to_string(Network::current_var_index());
@@ -110,17 +123,17 @@ namespace DO::Sara::TensorRT {
     return x * std::make_pair(y, y_name);
   }
 
-  auto operator/(nvinfer1::ITensor& x, float y) -> nvinfer1::ITensor&
+  inline auto operator/(nvinfer1::ITensor& x, float y) -> nvinfer1::ITensor&
   {
     return x * (1 / y);
   }
 
-  auto conv_2d(nvinfer1::ITensor& x,              //
-               int num_filters,                   //
-               nvinfer1::DimsHW kernel_sizes,     //
-               const std::vector<float>& w = {},  //
-               const std::vector<float>& b = {},
-               const std::string& name = {})  //
+  inline auto conv_2d(nvinfer1::ITensor& x,              //
+                      int num_filters,                   //
+                      nvinfer1::DimsHW kernel_sizes,     //
+                      const std::vector<float>& w = {},  //
+                      const std::vector<float>& b = {},
+                      const std::string& name = {})  //
       -> nvinfer1::ITensor&
   {
     auto model = Network::current().model();

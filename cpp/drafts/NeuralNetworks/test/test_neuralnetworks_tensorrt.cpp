@@ -10,6 +10,7 @@
 #include <DO/Shakti/Cuda/Utilities.hpp>
 
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
+#include <drafts/NeuralNetworks/TensorRT/IO.hpp>
 
 #include <termcolor/termcolor.hpp>
 
@@ -19,101 +20,11 @@
 
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
+namespace trt = sara::TensorRT;
 
 
 template <typename T, int N>
 using PinnedTensor = sara::Tensor_<float, N, shakti::PinnedMemoryAllocator>;
-
-
-auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
-{
-  sara::TensorRT::delete_nvinfer_object(engine);
-}
-
-auto runtime_deleter(nvinfer1::IRuntime* runtime) -> void
-{
-  sara::TensorRT::delete_nvinfer_object(runtime);
-}
-
-auto config_deleter(nvinfer1::IBuilderConfig* config) -> void
-{
-  sara::TensorRT::delete_nvinfer_object(config);
-}
-
-auto context_deleter(nvinfer1::IExecutionContext* context) -> void
-{
-  sara::TensorRT::delete_nvinfer_object(context);
-};
-
-auto host_memory_deleter(nvinfer1::IHostMemory* memory) -> void
-{
-  sara::TensorRT::delete_nvinfer_object(memory);
-}
-
-
-using HostMemoryUniquePtr =
-    std::unique_ptr<nvinfer1::IHostMemory, decltype(&host_memory_deleter)>;
-using CudaEngineUniquePtr =
-    std::unique_ptr<nvinfer1::ICudaEngine, decltype(&engine_deleter)>;
-using RuntimeUniquePtr =
-    std::unique_ptr<nvinfer1::IRuntime, decltype(&runtime_deleter)>;
-using ConfigUniquePtr =
-    std::unique_ptr<nvinfer1::IBuilderConfig, decltype(&config_deleter)>;
-using ContextUniquePtr =
-    std::unique_ptr<nvinfer1::IExecutionContext, decltype(&context_deleter)>;
-
-
-auto load_from_model_weights(nvinfer1::IRuntime& runtime,
-                             const std::string& trt_model_weights_filepath)
-{
-  auto model_weights_file = std::ifstream{trt_model_weights_filepath};
-  if (!model_weights_file)
-    throw std::runtime_error{"Failed to open model weights file!"};
-
-  auto model_weights_stream = std::stringstream{};
-  model_weights_stream << model_weights_file.rdbuf();
-
-  // Count the number of bytes.
-  model_weights_stream.seekg(0, std::ios::end);
-  const auto model_weights_byte_size = model_weights_stream.tellg();
-
-  // Rewind to the beginning of the file.
-  model_weights_stream.seekg(0, std::ios::beg);
-
-  // Read the file and transfer the data to the array of the bytes.
-  auto model_weights = std::vector<char>(model_weights_byte_size);
-  model_weights_stream.read(model_weights.data(), model_weights.size());
-
-  // Deserialize the model weights data to initialize the CUDA inference engine.
-  return CudaEngineUniquePtr{
-      runtime.deserializeCudaEngine(model_weights.data(), model_weights.size()),
-      &engine_deleter};
-}
-
-auto save_model_weights(nvinfer1::ICudaEngine* engine,
-                        const std::string& model_weights_filepath) -> void
-{
-  // Memory management.
-  auto model_weights_deleter = [](nvinfer1::IHostMemory* model_stream) {
-    sara::TensorRT::delete_nvinfer_object(model_stream);
-  };
-
-  // Serialize the model weights into the following data buffer.
-  auto model_weights =
-      std::unique_ptr<nvinfer1::IHostMemory, decltype(model_weights_deleter)>{
-          engine->serialize(), model_weights_deleter};
-
-  // Save in the disk.
-  auto model_weights_stream = std::stringstream{};
-  model_weights_stream.seekg(0, model_weights_stream.beg);
-  model_weights_stream.write(static_cast<const char*>(model_weights->data()),
-                             model_weights->size());
-
-  auto model_weights_file = std::ofstream{model_weights_filepath};
-  if (!model_weights_file)
-    throw std::runtime_error{"Failed to create model weights file!"};
-  model_weights_file << model_weights_stream.rdbuf();
-}
 
 
 BOOST_AUTO_TEST_SUITE(TestTensorRT)
@@ -125,9 +36,9 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
   for (const auto& device : devices)
     std::cout << device << std::endl;
 
-  auto cuda_stream = sara::TensorRT::make_cuda_stream();
+  auto cuda_stream = trt::make_cuda_stream();
 
-  auto builder = sara::TensorRT::make_builder();
+  auto builder = trt::make_builder();
 
   // Create a simple scale operation.
   constexpr auto n = 1;
@@ -137,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
   const float scale = 3.f;
 
   // Instantiate a network and automatically manager its memory.
-  auto network = sara::TensorRT::make_network(builder.get());
+  auto network = trt::make_network(builder.get());
   {
     SARA_DEBUG << termcolor::green << "Creating the network from scratch!"
                << std::endl;
@@ -168,35 +79,35 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
              << termcolor::reset << std::endl;
 
   // Create a inference configuration object.
-  auto config = ConfigUniquePtr{builder->createBuilderConfig(),  //
-                                &config_deleter};
+  auto config = trt::ConfigUniquePtr{builder->createBuilderConfig(),  //
+                                     &trt::config_deleter};
   config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 32u);
   config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
   // If the GPU supports FP16 operations.
   // config->setFlag(nvinfer1::BuilderFlag::kFP16);
 
-  auto plan = HostMemoryUniquePtr{
+  auto plan = trt::HostMemoryUniquePtr{
       builder->buildSerializedNetwork(*network, *config),  //
-      host_memory_deleter};
+      trt::host_memory_deleter};
   if (plan.get() == nullptr)
     throw std::runtime_error{"Failed to build TensorRT plan!"};
 
-  auto runtime = RuntimeUniquePtr{
+  auto runtime = trt::RuntimeUniquePtr{
       nvinfer1::createInferRuntime(DO::Sara::TensorRT::Logger::instance()),
-      &runtime_deleter};
+      &trt::runtime_deleter};
 
   // Create or load an engine.
-  auto engine = CudaEngineUniquePtr{nullptr, &engine_deleter};
+  auto engine = trt::CudaEngineUniquePtr{nullptr, &trt::engine_deleter};
   {
     // Load inference engine from a model weights.
     constexpr auto load_engine_from_disk = false;
     if constexpr (load_engine_from_disk)
-      engine = load_from_model_weights(*runtime, "");
+      engine = trt::load_from_model_weights(*runtime, "");
     else
     {
-      engine = CudaEngineUniquePtr{
+      engine = trt::CudaEngineUniquePtr{
           runtime->deserializeCudaEngine(plan->data(), plan->size()),
-          &engine_deleter};
+          &trt::engine_deleter};
       // save_model_weights("");
     }
   }
@@ -204,8 +115,8 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
   // Perform a context to enqueue inference operations in C++.
   SARA_DEBUG << termcolor::green << "Setting the inference context!"
              << termcolor::reset << std::endl;
-  auto context = ContextUniquePtr{engine->createExecutionContext(),  //
-                                  &context_deleter};
+  auto context = trt::ContextUniquePtr{engine->createExecutionContext(),  //
+                                       &trt::context_deleter};
 
   // Create som data and create two GPU device buffers.
   SARA_DEBUG << termcolor::red << "Creating input data and two device buffers!"
@@ -309,35 +220,35 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
              << termcolor::reset << std::endl;
 
   // Create a inference configuration object.
-  auto config =
-      ConfigUniquePtr{builder->createBuilderConfig(), &config_deleter};
+  auto config = trt::ConfigUniquePtr{builder->createBuilderConfig(),
+                                     &trt::config_deleter};
   config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 32u);
   config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
   // If the GPU supports FP16 operations.
   // config->setFlag(nvinfer1::BuilderFlag::kFP16);
 
-  auto plan = HostMemoryUniquePtr{
+  auto plan = trt::HostMemoryUniquePtr{
       builder->buildSerializedNetwork(*network, *config),  //
-      host_memory_deleter};
+      trt::host_memory_deleter};
   if (plan.get() == nullptr)
     throw std::runtime_error{"Failed to build TensorRT plan!"};
 
-  auto runtime = RuntimeUniquePtr{
+  auto runtime = trt::RuntimeUniquePtr{
       nvinfer1::createInferRuntime(DO::Sara::TensorRT::Logger::instance()),
-      &runtime_deleter};
+      &trt::runtime_deleter};
 
   // Create or load an engine.
-  auto engine = CudaEngineUniquePtr{nullptr, &engine_deleter};
+  auto engine = trt::CudaEngineUniquePtr{nullptr, &trt::engine_deleter};
   {
     // Load inference engine from a model weights.
     constexpr auto load_engine_from_disk = false;
     if constexpr (load_engine_from_disk)
-      engine = load_from_model_weights(*runtime, "");
+      engine = trt::load_from_model_weights(*runtime, "");
     else
     {
-      engine = CudaEngineUniquePtr{
+      engine = trt::CudaEngineUniquePtr{
           runtime->deserializeCudaEngine(plan->data(), plan->size()),
-          &engine_deleter};
+          &trt::engine_deleter};
       // save_model_weights("");
     }
   }
@@ -345,8 +256,8 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
   // Perform a context to enqueue inference operations in C++.
   SARA_DEBUG << termcolor::green << "Setting the inference context!"
              << termcolor::reset << std::endl;
-  auto context = ContextUniquePtr{engine->createExecutionContext(),  //
-                                  &context_deleter};
+  auto context = trt::ContextUniquePtr{engine->createExecutionContext(),  //
+                                       &trt::context_deleter};
 
   // Create some data and create two GPU device buffers.
   SARA_DEBUG << termcolor::red << "Creating input data and two device buffers!"

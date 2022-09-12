@@ -1,59 +1,53 @@
-find_package(DO_Sara COMPONENTS Core ImageIO REQUIRED)
-
 find_package(TensorRT)
 
 file(GLOB test_neuralnetworks_SOURCE_FILES FILES test_*.cpp)
 
 file(GLOB test_tensorrt_SOURCE_FILES FILES test_*tensorrt*.cpp)
-foreach (file ${test_tensorrt_SOURCE_FILES})
+foreach(file ${test_tensorrt_SOURCE_FILES})
   list(REMOVE_ITEM test_neuralnetworks_SOURCE_FILES ${file})
 endforeach()
 
-foreach (file ${test_neuralnetworks_SOURCE_FILES})
+foreach(file ${test_neuralnetworks_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES ${DO_Sara_LIBRARIES}
+    DEPENDENCIES DO::Sara::Core DO::Sara::ImageIO
     FOLDER "NeuralNetworks")
-endforeach ()
+endforeach()
 
-if (CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
+if(CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
   foreach(file ${test_tensorrt_SOURCE_FILES})
     get_filename_component(filename ${file} NAME_WE)
 
     add_executable(${filename} ${file})
 
-    target_include_directories(${filename}
-      PRIVATE
-      ${CUDA_TOOLKIT_INCLUDE}
-      ${TensorRT_INCLUDE_DIRS})
+    target_include_directories(${filename} PRIVATE ${CUDA_TOOLKIT_INCLUDE}
+                                                   ${TensorRT_INCLUDE_DIRS})
 
-    target_compile_definitions(${filename}
-      PRIVATE -DBOOST_TEST_DYN_LINK)
+    target_compile_definitions(${filename} PRIVATE -DBOOST_TEST_DYN_LINK)
 
-    target_compile_features(${filename}
-      PRIVATE cxx_std_17)
+    target_compile_features(${filename} PRIVATE cxx_std_17)
 
-    target_link_libraries(${filename}
-      ${Boost_LIBRARIES}
-      $<$<PLATFORM_ID:Linux>:CUDA::cudart>
-      ${TensorRT_LIBRARIES}
-      ${DO_Sara_LIBRARIES}
-      DO::Shakti::Cuda::MultiArray
-      DO::Shakti::Cuda::Utilities)
-    if (NOT WIN32)
-      target_link_libraries(${filename} CUDA::cudart)
-    endif ()
+    target_link_libraries(
+      ${filename}
+      PRIVATE ${Boost_LIBRARIES} #
+              $<$<PLATFORM_ID:Linux>:CUDA::cudart> #
+              ${TensorRT_LIBRARIES}
+              DO::Sara::Core
+              DO::Sara::ImageIO
+              DO::Shakti::Cuda::MultiArray
+              DO::Shakti::Cuda::Utilities)
+    # if(NOT WIN32) target_link_libraries(${filename} PRIVATE CUDA::cudart)
+    # endif()
 
-    set_target_properties(${filename}
-      PROPERTIES
-      COMPILE_FLAGS ${SARA_DEFINITIONS}
-      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+    set_target_properties(
+      ${filename} PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS}
+                             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-    set_property(TARGET ${filename} PROPERTY
-      FOLDER "Tests/Shakti/NeuralNetworks")
+    set_property(TARGET ${filename} PROPERTY FOLDER
+                                             "Tests/Shakti/NeuralNetworks")
 
     add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
   endforeach()
-endif ()
+endif()
