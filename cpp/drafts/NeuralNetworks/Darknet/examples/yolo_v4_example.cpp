@@ -37,19 +37,6 @@ struct Detection
   Eigen::VectorXf class_probs;
 };
 
-auto load_yolov4_tiny_model(const fs::path& model_dir_path)
-{
-  const auto cfg_filepath = model_dir_path / "yolov4-tiny.cfg";
-  const auto weights_filepath = model_dir_path / "yolov4-tiny.weights";
-
-  auto model = sara::Darknet::Network{};
-  auto& net = model.net;
-  net = sara::Darknet::NetworkParser{}.parse_config_file(cfg_filepath.string());
-  sara::Darknet::NetworkWeightLoader{weights_filepath.string()}.load(net);
-
-  return model;
-}
-
 //! @brief Post-processing functions.
 //! @{
 auto get_yolo_boxes(const sara::TensorView_<float, 3>& output,
@@ -223,8 +210,7 @@ auto test_on_image(int argc, char** argv) -> void
   Eigen::setNbThreads(num_threads);
 #endif
 
-  const auto data_dir_path =
-      fs::canonical(fs::path{src_path("../../../../data")});
+  const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
   const auto image =
       argc < 2
@@ -233,7 +219,7 @@ auto test_on_image(int argc, char** argv) -> void
   sara::create_window(image.sizes());
   sara::display(image);
 
-  auto model = load_yolov4_tiny_model(yolov4_tiny_dirpath);
+  auto model = sara::Darknet::load_yolov4_tiny_model(yolov4_tiny_dirpath);
 
   sara::display(image);
   const auto dets = detect_objects(image, model);
@@ -275,7 +261,7 @@ auto test_on_video(int argc, char** argv) -> void
   const auto data_dir_path =
       fs::canonical(fs::path{src_path("../../../../data")});
   const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
-  auto model = load_yolov4_tiny_model(yolov4_tiny_dirpath);
+  auto model = sara::Darknet::load_yolov4_tiny_model(yolov4_tiny_dirpath);
   model.profile = false;
 
   sara::create_window(frame.sizes());

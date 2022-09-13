@@ -2,23 +2,23 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <DO/Shakti/Cuda/MultiArray.hpp>
 #include <DO/Shakti/Cuda/Utilities.hpp>
 
+#include <drafts/NeuralNetworks/Darknet/Parser.hpp>
+#include <drafts/NeuralNetworks/TensorRT/DarknetParser.hpp>
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 
 #include <termcolor/termcolor.hpp>
 
-#include <fstream>
-#include <sstream>
 
+namespace fs = boost::filesystem;
 
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
+namespace d = sara::Darknet;
 namespace trt = sara::TensorRT;
 
 
@@ -30,14 +30,19 @@ BOOST_AUTO_TEST_SUITE(TestTensorRT)
 
 BOOST_AUTO_TEST_CASE(test_network_build_process)
 {
-  auto builder = sara::TensorRT::make_builder();
-
   // Instantiate a network and automatically manager its memory.
-  auto network = sara::TensorRT::make_network(builder.get());
-  {
-    SARA_DEBUG << termcolor::green << "Creating the network from scratch!"
-               << std::endl;
+  auto builder = trt::make_builder();
+  auto network = trt::make_network(builder.get());
 
+  const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
+  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
+  auto hnet = d::load_yolov4_tiny_model(yolov4_tiny_dirpath);
+
+  auto converter = trt::YoloV4TinyConverter{network.get(), hnet.net};
+  converter();
+
+#if 0
+  {
     // Instantiate an input data.
     auto image_tensor = network->addInput("image", nvinfer1::DataType::kFLOAT,
                                           nvinfer1::Dims4{n, ci, h, w});
@@ -64,6 +69,7 @@ BOOST_AUTO_TEST_CASE(test_network_build_process)
     auto conv1 = conv1_fn->getOutput(0);
     network->markOutput(*conv1);
   }
+#endif
 }
 
 BOOST_AUTO_TEST_SUITE_END()

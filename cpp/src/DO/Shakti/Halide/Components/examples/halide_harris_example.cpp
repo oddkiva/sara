@@ -79,7 +79,7 @@ auto rescale_to_rgb(const Halide::Func& f, int32_t w, int32_t h)
 }
 
 
-int __main(int argc, char** argv)
+int sara_graphics_main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
   using namespace std::string_literals;
 
@@ -240,6 +240,6 @@ int __main(int argc, char** argv)
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }

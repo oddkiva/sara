@@ -1,20 +1,6 @@
 find_package(TensorRT)
 
-file(GLOB test_neuralnetworks_SOURCE_FILES FILES test_*.cpp)
-
 file(GLOB test_tensorrt_SOURCE_FILES FILES test_*tensorrt*.cpp)
-foreach(file ${test_tensorrt_SOURCE_FILES})
-  list(REMOVE_ITEM test_neuralnetworks_SOURCE_FILES ${file})
-endforeach()
-
-foreach(file ${test_neuralnetworks_SOURCE_FILES})
-  get_filename_component(filename "${file}" NAME_WE)
-  sara_add_test(
-    NAME ${filename}
-    SOURCES ${file}
-    DEPENDENCIES DO::Sara::Core DO::Sara::ImageIO
-    FOLDER "NeuralNetworks")
-endforeach()
 
 if(CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
   foreach(file ${test_tensorrt_SOURCE_FILES})
@@ -34,12 +20,10 @@ if(CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
       PRIVATE ${Boost_LIBRARIES} #
               $<$<PLATFORM_ID:Linux>:CUDA::cudart> #
               ${TensorRT_LIBRARIES}
-              DO::Sara::Core
               DO::Sara::ImageIO
+              DO::Sara::Darknet
               DO::Shakti::Cuda::MultiArray
               DO::Shakti::Cuda::Utilities)
-    # if(NOT WIN32) target_link_libraries(${filename} PRIVATE CUDA::cudart)
-    # endif()
 
     set_target_properties(
       ${filename} PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS}
