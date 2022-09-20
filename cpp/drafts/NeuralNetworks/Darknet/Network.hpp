@@ -51,7 +51,6 @@ namespace DO::Sara::Darknet {
 
         const auto& end = x.sizes();
 
-
         const auto x_slice = slice(x, {
                                           {start(0), end(0), 1},
                                           {start(1), end(1), 1},

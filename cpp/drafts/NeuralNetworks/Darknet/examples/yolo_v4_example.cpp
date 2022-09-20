@@ -46,11 +46,13 @@ auto get_yolo_boxes(const sara::TensorView_<float, 3>& output,
                     const Eigen::Vector2i& original_sizes,
                     float objectness_threshold)
 {
+  SARA_CHECK(output.sizes().transpose());
   const Eigen::Vector2f scale = original_sizes.cast<float>().array() /
                                 network_input_sizes.cast<float>().array();
 
   auto boxes = std::vector<Detection>{};
-  for (auto box = 0; box < 3; ++box)
+  const auto num_boxes = static_cast<int>(masks.size());
+  for (auto box = 0; box < num_boxes; ++box)
   {
     // Box center
     const auto rel_x = output[box * 85 + 0];
@@ -258,8 +260,7 @@ auto test_on_video(int argc, char** argv) -> void
   auto video_stream = sara::VideoStream{video_filepath};
   auto frame = video_stream.frame();
 
-  const auto data_dir_path =
-      fs::canonical(fs::path{src_path("../../../../data")});
+  const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
   auto model = sara::Darknet::load_yolov4_tiny_model(yolov4_tiny_dirpath);
   model.profile = false;
