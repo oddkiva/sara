@@ -18,11 +18,11 @@ if(CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
     target_link_libraries(
       ${filename}
       PRIVATE ${Boost_LIBRARIES} #
-              $<$<PLATFORM_ID:Linux>:CUDA::cudart> #
-              ${TensorRT_LIBRARIES}
+              ${TensorRT_LIBRARIES} #
               DO::Sara::ImageIO
               DO::Sara::ImageProcessing
               DO::Sara::Darknet
+              DO::Sara::TensorRT
               DO::Shakti::Cuda::MultiArray
               DO::Shakti::Cuda::Utilities)
 

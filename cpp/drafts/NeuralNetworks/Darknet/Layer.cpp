@@ -496,13 +496,14 @@ auto Yolo::forward(const TensorView_<float, 4>& x)
 
   const auto& alpha = scale_x_y;
   const auto beta = -0.5f * (alpha - 1);
+  const auto num_boxes = static_cast<int>(mask.size());
 
   for (auto n = 0; n < x.size(0); ++n)
   {
     const auto xn = x[n];
     auto yn = y[n];
 
-    for (auto box = 0; box < 3; ++box)
+    for (auto box = 0; box < num_boxes; ++box)
     {
       const auto x_channel = box * num_box_features + 0;
       const auto y_channel = box * num_box_features + 1;
@@ -528,7 +529,7 @@ auto Yolo::forward(const TensorView_<float, 4>& x)
     }
 
     // Shift and rescale the position.
-    for (auto box = 0; box < 3; ++box)
+    for (auto box = 0; box < num_boxes; ++box)
     {
       const auto x_channel = box * num_box_features + 0;
       const auto y_channel = box * num_box_features + 1;

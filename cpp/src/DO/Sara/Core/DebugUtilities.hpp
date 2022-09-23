@@ -19,6 +19,7 @@
 
 #include <termcolor/termcolor.hpp>
 
+#include <cstring>
 #include <iostream>
 #include <string>
 
