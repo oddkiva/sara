@@ -58,5 +58,28 @@ namespace DO::Sara::TensorRT {
     model_weights_file << model_weights_stream.rdbuf();
   }
 
+  //! @brief Helper function for serializing TensorRT plugins.
+  //!
+  //! N.B.: this implementation taken from GitHub implies that TensorRT will
+  //! not guarantee portability w.r.t. endianness.
+  template <typename T>
+  void write_to_buffer(char*& buffer, const T& val)
+  {
+    *reinterpret_cast<T*>(buffer) = val;
+    buffer += sizeof(T);
+  }
+
+  //! @brief Helper function for deserializing TensorRT plugins.
+  //!
+  //! N.B.: this implementation taken from GitHub implies that TensorRT will
+  //! not guarantee portability w.r.t. endianness.
+  template <typename T>
+  T read_from_buffer(const char*& buffer)
+  {
+    T val = *reinterpret_cast<const T*>(buffer);
+    buffer += sizeof(T);
+    return val;
+  }
+
 
 }  // namespace DO::Sara::TensorRT

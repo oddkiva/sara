@@ -21,6 +21,7 @@ if(CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
               $<$<PLATFORM_ID:Linux>:CUDA::cudart> #
               ${TensorRT_LIBRARIES}
               DO::Sara::ImageIO
+              DO::Sara::ImageProcessing
               DO::Sara::Darknet
               DO::Shakti::Cuda::MultiArray
               DO::Shakti::Cuda::Utilities)

@@ -6,6 +6,8 @@
 
 #include <NvInfer.h>
 
+#include <stdexcept>
+
 
 namespace DO::Sara::TensorRT {
 
@@ -31,10 +33,20 @@ namespace DO::Sara::TensorRT {
     {
     }
 
+    auto make_input_rgb_tensor(const int w, const int h) const
+        -> nvinfer1::ITensor*
+    {
+      return tnet->addInput("input",  //
+                            nvinfer1::DataType::kFLOAT,
+                            nvinfer1::Dims4{1, 3, h, w});
+    }
+
     //! @brief zero-padding convolution.
     auto conv2d(nvinfer1::ITensor* x,  //
                 const TensorView_<float, 4>& w, const Eigen::VectorXf& b,
-                int stride) const -> nvinfer1::ITensor*
+                const int stride, const std::string& activation_layer,
+                const std::optional<std::string>& name = std::nullopt) const
+        -> nvinfer1::ITensor*
     {
       // Encapsulate the weights using TensorRT data structures.
       const auto conv_weights = nvinfer1::Weights{
@@ -58,7 +70,48 @@ namespace DO::Sara::TensorRT {
           conv_bias);    // bias weights
       conv_fn->setStrideNd(nvinfer1::DimsHW{stride, stride});
       conv_fn->setPaddingNd(nvinfer1::DimsHW{kh / 2, kw / 2});
-      const auto y = conv_fn->getOutput(0);
+
+      // Set a default for debugging.
+      using namespace std::string_literals;
+      auto conv_layer_name = "fused_conv_bn"s;
+      if (name.has_value())
+        conv_layer_name = *name + "/" + conv_layer_name;
+      conv_fn->setName(conv_layer_name.c_str());
+
+      // Get the convolution output.
+      auto y = conv_fn->getOutput(0);
+
+      // Apply the activation.
+      if (activation_layer == "leaky")
+      {
+        const auto leaky_fn =
+            tnet->addActivation(*y, nvinfer1::ActivationType::kLEAKY_RELU);
+
+        auto leaky_layer_name = "leaky"s;
+        if (name.has_value())
+          leaky_layer_name = *name + "/" + leaky_layer_name;
+
+        leaky_fn->setName(leaky_layer_name.c_str());
+        y = leaky_fn->getOutput(0);
+      }
+      else if (activation_layer == "linear")
+      {
+        const auto linear_fn =
+            tnet->addActivation(*y, nvinfer1::ActivationType::kLEAKY_RELU);
+
+        auto linear_layer_name = "linear"s;
+        if (name.has_value())
+          linear_layer_name = *name + "/" + linear_layer_name;
+
+        linear_fn->setName(linear_layer_name.c_str());
+        y = linear_fn->getOutput(0);
+      }
+      else
+        throw std::invalid_argument{"activation layer: " + activation_layer +
+                                    " is not implemented!"};
+
+
+      // The output.
       return y;
     }
 
@@ -69,19 +122,16 @@ namespace DO::Sara::TensorRT {
       if (hnet.empty())
         throw std::runtime_error{"Network is empty!"};
 
-      SARA_DEBUG << termcolor::green << "Creating the network from scratch!"
-                 << std::endl;
+      SARA_DEBUG << "Creating the network from scratch!" << std::endl;
 
+      // Define the input tensor.
       const auto& input_layer = dynamic_cast<const Darknet::Input&>(*hnet[0]);
-      auto input_tensor = tnet->addInput(
-          "input",  //
-          nvinfer1::DataType::kFLOAT,
-          nvinfer1::Dims4{1, 3, input_layer.height(), input_layer.width()});
+      auto input_tensor = make_input_rgb_tensor(input_layer.width(),  //
+                                                input_layer.height());
 
       // The list of intermediate feature maps.
       auto fmaps = std::vector<nvinfer1::ITensor*>{};
       fmaps.push_back(input_tensor);
-
       SARA_DEBUG << "Shape 0 : " << shape(*fmaps.back()).transpose()
                  << std::endl;
 
@@ -100,7 +150,9 @@ namespace DO::Sara::TensorRT {
           // It's always the last one in Darknet cfg file.
           auto& x = fmaps.back();
           auto y = conv2d(x, conv_layer.weights.w, conv_layer.weights.b,
-                          conv_layer.stride);
+                          conv_layer.stride, conv_layer.activation,
+                          "conv_bn_" + conv_layer.activation + "_" +
+                              std::to_string(layer_idx));
           fmaps.push_back(y);
 
           SARA_DEBUG << "TRT Shape " << layer_idx << " : "
@@ -126,19 +178,21 @@ namespace DO::Sara::TensorRT {
             // Only keep the last half channels in the feature maps.
             auto& x = fmaps[glob_idx];
             const auto x_dims = x->getDimensions();
-            const auto n = x_dims.d[0];
             const auto c_start =
                 x_dims.d[1] * route_layer.group_id / route_layer.groups;
             const auto c_size = x_dims.d[1] / route_layer.groups;
             const auto h = x_dims.d[2];
             const auto w = x_dims.d[3];
-            const auto start = nvinfer1::Dims4{n, c_start, h, w};
-            const auto size = nvinfer1::Dims4{n, c_size, h, w};
+            const auto start = nvinfer1::Dims4{0, c_start, 0, 0};
+            const auto size = nvinfer1::Dims4{1, c_size, h, w};
             const auto stride = nvinfer1::Dims4{1, 1, 1, 1};
 
-            const auto slice_layer = tnet->addSlice(*x, start, size, stride);
+            const auto trt_slice_layer =
+                tnet->addSlice(*x, start, size, stride);
+            trt_slice_layer->setName(
+                ("slice_" + std::to_string(layer_idx)).c_str());
 
-            const auto y = slice_layer->getOutput(0);
+            const auto y = trt_slice_layer->getOutput(0);
             fmaps.push_back(y);
 
             SARA_DEBUG << "TRT Shape " << layer_idx << " : "
@@ -169,9 +223,12 @@ namespace DO::Sara::TensorRT {
               xs.push_back(fmaps[glob_idx]);
             }
 
-            const auto concat_layer =
+            const auto trt_concat_layer =
                 tnet->addConcatenation(xs.data(), xs.size());
-            const auto y = concat_layer->getOutput(0);
+            trt_concat_layer->setName(
+                ("concat_" + std::to_string(layer_idx)).c_str());
+
+            const auto y = trt_concat_layer->getOutput(0);
             fmaps.push_back(y);
             SARA_DEBUG << "TRT Shape " << layer_idx << " : "
                        << shape(*fmaps.back()).transpose() << std::endl;
@@ -192,6 +249,9 @@ namespace DO::Sara::TensorRT {
           auto trt_maxpool_layer = tnet->addPoolingNd(
               *x, nvinfer1::PoolingType::kMAX, nvinfer1::DimsHW{size, size});
           trt_maxpool_layer->setStrideNd(nvinfer1::DimsHW{stride, stride});
+
+          trt_maxpool_layer->setName(
+              ("maxpool_" + std::to_string(layer_idx)).c_str());
 
           auto y = trt_maxpool_layer->getOutput(0);
           fmaps.push_back(y);

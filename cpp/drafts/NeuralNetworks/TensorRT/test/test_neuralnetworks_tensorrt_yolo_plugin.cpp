@@ -4,8 +4,6 @@
 
 #include <drafts/NeuralNetworks/TensorRT/Yolo.hpp>
 
-#include <termcolor/termcolor.hpp>
-
 
 namespace sara = DO::Sara;
 namespace trt = sara::TensorRT;

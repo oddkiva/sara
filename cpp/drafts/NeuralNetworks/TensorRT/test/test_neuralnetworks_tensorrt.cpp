@@ -12,8 +12,6 @@
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 #include <drafts/NeuralNetworks/TensorRT/IO.hpp>
 
-#include <termcolor/termcolor.hpp>
-
 #include <fstream>
 #include <sstream>
 
@@ -93,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
     throw std::runtime_error{"Failed to build TensorRT plan!"};
 
   auto runtime = trt::RuntimeUniquePtr{
-      nvinfer1::createInferRuntime(DO::Sara::TensorRT::Logger::instance()),
+      nvinfer1::createInferRuntime(trt::Logger::instance()),
       &trt::runtime_deleter};
 
   // Create or load an engine.
@@ -112,13 +110,14 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
     }
   }
 
-  // Perform a context to enqueue inference operations in C++.
+  // Create a GPU inference context, this is to run the machine learning model
+  // on the GPU.
   SARA_DEBUG << termcolor::green << "Setting the inference context!"
              << termcolor::reset << std::endl;
   auto context = trt::ContextUniquePtr{engine->createExecutionContext(),  //
                                        &trt::context_deleter};
 
-  // Create som data and create two GPU device buffers.
+  // Create some data and create two GPU device buffers.
   SARA_DEBUG << termcolor::red << "Creating input data and two device buffers!"
              << termcolor::reset << std::endl;
   auto image = PinnedTensor<float, 2>{h, w};
@@ -234,7 +233,7 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
     throw std::runtime_error{"Failed to build TensorRT plan!"};
 
   auto runtime = trt::RuntimeUniquePtr{
-      nvinfer1::createInferRuntime(DO::Sara::TensorRT::Logger::instance()),
+      nvinfer1::createInferRuntime(trt::Logger::instance()),
       &trt::runtime_deleter};
 
   // Create or load an engine.
