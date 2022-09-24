@@ -203,4 +203,26 @@ namespace DO::Sara::TensorRT {
     return nullptr;
   }
 
+  auto YoloPluginCreator::getPluginNamespace() const noexcept
+      -> const nvinfer1::AsciiChar*
+  {
+    return nullptr;
+  }
+
+  auto YoloPluginCreator::setPluginNamespace(
+      [[maybe_unused]] const nvinfer1::AsciiChar* plugin_namespace) noexcept
+      -> void
+  {
+  }
+
+  auto YoloPluginCreator::deserializePlugin(
+      [[maybe_unused]] const nvinfer1::AsciiChar* name,
+      [[maybe_unused]] const void* serial_data,
+      [[maybe_unused]] const size_t serial_length) noexcept
+      -> nvinfer1::IPluginV2*
+
+  {
+    return nullptr;
+  }
+
 }  // namespace DO::Sara::TensorRT

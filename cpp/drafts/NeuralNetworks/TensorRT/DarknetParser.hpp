@@ -11,8 +11,7 @@
 
 namespace DO::Sara::TensorRT {
 
-  inline auto shape(const nvinfer1::ITensor& t)
-      -> Eigen::Map<const Eigen::Vector4i>
+  inline auto shape(const nvinfer1::ITensor& t) -> Eigen::Vector4i
   {
     const auto dims = t.getDimensions();
     return Eigen::Map<const Eigen::Vector4i>{dims.d, 4};
@@ -86,6 +85,7 @@ namespace DO::Sara::TensorRT {
       {
         const auto leaky_fn =
             tnet->addActivation(*y, nvinfer1::ActivationType::kLEAKY_RELU);
+        leaky_fn->setAlpha(0.1f);
 
         auto leaky_layer_name = "leaky"s;
         if (name.has_value())
@@ -115,7 +115,8 @@ namespace DO::Sara::TensorRT {
       return y;
     }
 
-    auto operator()() -> void
+    auto operator()(const std::size_t max_layers =
+                        std::numeric_limits<std::size_t>::max()) -> void
     {
       if (tnet == nullptr)
         throw std::runtime_error{"TensorRT network definition is NULL!"};
@@ -137,6 +138,9 @@ namespace DO::Sara::TensorRT {
 
       for (auto layer_idx = 1u; layer_idx < hnet.size(); ++layer_idx)
       {
+        if (layer_idx > max_layers)
+          break;
+
         // Update the input.
         const auto& layer_type = hnet[layer_idx]->type;
         if (layer_type == "convolutional")

@@ -61,7 +61,7 @@ namespace DO::Sara::Darknet {
                        [](const auto& v) { return v; });
 
         if (profile)
-          toc("Route-Group");
+          toc("Route-Slice");
       }
       else
       {

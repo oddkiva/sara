@@ -96,6 +96,16 @@ namespace DO::Sara::TensorRT {
                       const nvinfer1::PluginFieldCollection*) noexcept
         -> nvinfer1::IPluginV2* override;
 
+    auto getPluginNamespace() const noexcept -> const nvinfer1::AsciiChar* override;
+
+    auto setPluginNamespace(const nvinfer1::AsciiChar* plugin_namespace) noexcept
+        -> void override;
+
+    auto deserializePlugin(const nvinfer1::AsciiChar* name,
+                           const void* serial_data,
+                           const size_t serial_length) noexcept
+        -> nvinfer1::IPluginV2* override;
+
   private:
     static nvinfer1::PluginFieldCollection _fc;
   };
