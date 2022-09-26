@@ -1,6 +1,7 @@
 #pragma once
 
 #include <drafts/NeuralNetworks/Darknet/Network.hpp>
+#include <drafts/NeuralNetworks/TensorRT/Yolo.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
@@ -56,7 +57,6 @@ namespace DO::Sara::TensorRT {
           static_cast<std::int64_t>(b.size())};
 
       const auto co = w.size(0);
-      // const auto ci = w.size(1);
       const auto kh = w.size(2);
       const auto kw = w.size(3);
 
@@ -263,11 +263,40 @@ namespace DO::Sara::TensorRT {
           SARA_DEBUG << "TRT Shape " << layer_idx << " : "
                      << shape(*fmaps.back()).transpose() << std::endl;
         }
+        else if (layer_type == "yolo")
+        {
+          const auto& yolo_layer =
+              dynamic_cast<const Darknet::Layer&>(*hnet[layer_idx]);
+          SARA_DEBUG << "convert yolo layer " << layer_idx << "("
+                     << hnet[layer_idx]->type << ")" << std::endl;
+          std::cout << yolo_layer << std::endl;
+
+          const auto plugin_registry = getPluginRegistry();
+          assert(plugin_registry != nullptr);
+          const auto yolo_plugin_creator = plugin_registry->getPluginCreator(
+              YoloPlugin::name, YoloPlugin::version);
+          assert(yolo_plugin_creator != nullptr);
+
+          static constexpr auto delete_plugin = [](nvinfer1::IPluginV2* const plugin) {
+            plugin->destroy();
+          };
+          const auto yolo_plugin =
+              std::unique_ptr<nvinfer1::IPluginV2, decltype(delete_plugin)>{
+                  yolo_plugin_creator->createPlugin("yolo", nullptr),
+                  delete_plugin};
+          assert(yolo_plugin.get() != nullptr);
+
+          auto x = fmaps.back();
+          auto trt_yolo_layer = tnet->addPluginV2(&x, 1, *yolo_plugin);
+          auto y = trt_yolo_layer->getOutput(0);
+          fmaps.push_back(y);
+        }
         else
         {
           SARA_DEBUG << "TODO: convert layer " << layer_idx << "("
                      << hnet[layer_idx]->type << ")" << std::endl;
           std::cout << *hnet[layer_idx] << std::endl;
+          throw std::runtime_error{"TENSORRT LAYER CONVERSION MISSING!"};
           break;
         }
       }

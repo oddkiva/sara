@@ -8,9 +8,6 @@
 
 namespace DO::Sara::TensorRT {
 
-  static constexpr const char* yolo_plugin_name = "TensorRT-Yolo";
-  static constexpr const char* yolo_plugin_version = "0.1";
-
   nvinfer1::PluginFieldCollection YoloPluginCreator::_fc;
 
 
@@ -41,8 +38,8 @@ namespace DO::Sara::TensorRT {
   {
     try
     {
-      auto* plugin = new YoloPlugin{};
-      // plugin->setPluginNamespace(mNamespace.c_str());
+      auto plugin = new YoloPlugin{};
+      plugin->setPluginNamespace(_namespace.c_str());
       return plugin;
     }
     catch (const std::exception& e)
@@ -55,13 +52,13 @@ namespace DO::Sara::TensorRT {
 
   auto YoloPlugin::getPluginType() const noexcept -> const nvinfer1::AsciiChar*
   {
-    return yolo_plugin_name;
+    return name;
   }
 
   auto YoloPlugin::getPluginVersion() const noexcept
       -> const nvinfer1::AsciiChar*
   {
-    return yolo_plugin_version;
+    return version;
   }
 
   auto YoloPlugin::getNbOutputs() const noexcept -> std::int32_t
@@ -78,22 +75,25 @@ namespace DO::Sara::TensorRT {
     return inputs[0];
   }
 
+  //! TODO
   auto YoloPlugin::initialize() noexcept -> std::int32_t
   {
     return 1;
   }
 
+  //! TODO
   auto YoloPlugin::terminate() noexcept -> void
   {
   }
 
-
+  //! TODO
   auto YoloPlugin::getWorkspaceSize(
       const std::int32_t /* maxBatchSize */) const noexcept -> std::size_t
   {
     return 1;
   }
 
+  //! TODO
   auto YoloPlugin::enqueue([[maybe_unused]] const std::int32_t batchSize,
                            [[maybe_unused]] void const* const* inputs,
                            [[maybe_unused]] void* const* outputs,
@@ -125,39 +125,36 @@ namespace DO::Sara::TensorRT {
     return -1;
   }
 
+  //! TODO
   auto YoloPlugin::getSerializationSize() const noexcept -> size_t
   {
-    // Find the size of the serialization buffer required. More...
     return 0;
   }
 
+  //! TODO
   auto YoloPlugin::serialize(void* /* buffer */) const noexcept -> void
   {
-    // Serialize the layer. More...
   }
 
+  //! TODO
   auto YoloPlugin::destroy() noexcept -> void
   {
-    // Destroy the plugin object. This will be called when the network,
-    // builder or engine is destroyed. More...
     delete this;
   }
 
   auto YoloPlugin::setPluginNamespace(
-      const nvinfer1::AsciiChar* /* pluginNamespace */) noexcept -> void
+      const nvinfer1::AsciiChar* plugin_namespace) noexcept -> void
   {
-    // Set the namespace that this plugin object belongs to. Ideally, all plugin
-    // objects from the same plugin library should have the same namespace.
-    // More...
+    _namespace = plugin_namespace;
   }
 
   auto YoloPlugin::getPluginNamespace() const noexcept
       -> const nvinfer1::AsciiChar*
   {
-    // Return the namespace of the plugin object. More...
-    return nullptr;
+    return _namespace.c_str();
   }
 
+  //! TODO
   auto YoloPlugin::configurePlugin(
       [[maybe_unused]] const nvinfer1::PluginTensorDesc* inputs,
       [[maybe_unused]] const std::int32_t num_inputs,
@@ -166,6 +163,7 @@ namespace DO::Sara::TensorRT {
   {
   }
 
+  //! TODO
   auto YoloPlugin::supportsFormatCombination(
       [[maybe_unused]] const std::int32_t pos,  //
       const nvinfer1::PluginTensorDesc* in_out,
@@ -181,13 +179,13 @@ namespace DO::Sara::TensorRT {
   auto YoloPluginCreator::getPluginName() const noexcept
       -> const nvinfer1::AsciiChar*
   {
-    return yolo_plugin_name;
+    return YoloPlugin::name;
   }
 
   auto YoloPluginCreator::getPluginVersion() const noexcept
       -> const nvinfer1::AsciiChar*
   {
-    return yolo_plugin_version;
+    return YoloPlugin::version;
   }
 
   auto YoloPluginCreator::getFieldNames() noexcept
@@ -197,24 +195,28 @@ namespace DO::Sara::TensorRT {
   }
 
   auto YoloPluginCreator::createPlugin(
-      const nvinfer1::AsciiChar*,
+      const nvinfer1::AsciiChar* trt_namespace,
       const nvinfer1::PluginFieldCollection*) noexcept -> nvinfer1::IPluginV2*
   {
-    return nullptr;
+    auto plugin = new YoloPlugin;
+    plugin->setPluginNamespace(trt_namespace);
+    return plugin;
   }
 
   auto YoloPluginCreator::getPluginNamespace() const noexcept
       -> const nvinfer1::AsciiChar*
   {
-    return nullptr;
+    return _namespace.c_str();
   }
 
   auto YoloPluginCreator::setPluginNamespace(
       [[maybe_unused]] const nvinfer1::AsciiChar* plugin_namespace) noexcept
       -> void
   {
+    _namespace = plugin_namespace;
   }
 
+  //! TODO
   auto YoloPluginCreator::deserializePlugin(
       [[maybe_unused]] const nvinfer1::AsciiChar* name,
       [[maybe_unused]] const void* serial_data,

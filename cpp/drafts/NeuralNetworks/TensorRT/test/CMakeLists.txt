@@ -1,5 +1,3 @@
-find_package(TensorRT)
-
 file(GLOB test_tensorrt_SOURCE_FILES FILES test_*tensorrt*.cpp)
 
 if(CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
@@ -18,7 +16,6 @@ if(CMAKE_CUDA_COMPILER AND TensorRT_FOUND)
     target_link_libraries(
       ${filename}
       PRIVATE ${Boost_LIBRARIES} #
-              ${TensorRT_LIBRARIES} #
               DO::Sara::ImageIO
               DO::Sara::ImageProcessing
               DO::Sara::Darknet

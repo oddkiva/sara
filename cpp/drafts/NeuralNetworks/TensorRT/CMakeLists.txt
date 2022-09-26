@@ -10,7 +10,8 @@ add_library(DO::Sara::TensorRT ALIAS DO_Sara_TensorRT)
 target_link_libraries(
   DO_Sara_TensorRT
   PUBLIC $<$<PLATFORM_ID:Linux>:CUDA::cudart> #
-         ${TensorRT_LIBRARIES} #
+         TensorRT::TensorRT
+         TensorRT::Plugins
          DO::Sara::Core)
 
 if(SARA_BUILD_TESTS)

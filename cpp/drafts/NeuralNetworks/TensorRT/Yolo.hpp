@@ -3,6 +3,7 @@
 #include <NvInfer.h>
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 
@@ -10,6 +11,12 @@ namespace DO::Sara::TensorRT {
 
   class YoloPlugin : public nvinfer1::IPluginV2IOExt
   {
+  public:
+    static constexpr const nvinfer1::AsciiChar* name = "TensorRT-Yolo";
+    static constexpr const nvinfer1::AsciiChar* version = "0.1";
+
+    YoloPlugin() = default;
+
     auto getOutputDataType(const std::int32_t output_index,
                            const nvinfer1::DataType* input_types,
                            const std::int32_t num_inputs) const noexcept
@@ -56,8 +63,7 @@ namespace DO::Sara::TensorRT {
 
     auto destroy() noexcept -> void override;
 
-    auto
-    setPluginNamespace(const nvinfer1::AsciiChar* plugin_namespace) noexcept
+    auto setPluginNamespace(const nvinfer1::AsciiChar*) noexcept
         -> void override;
 
     auto getPluginNamespace() const noexcept
@@ -76,6 +82,7 @@ namespace DO::Sara::TensorRT {
         -> bool override;
 
   private:
+    std::string _namespace;
     std::int32_t _classes;
     std::vector<std::int32_t> _anchors;
     std::vector<std::int32_t> _mask;
@@ -84,6 +91,11 @@ namespace DO::Sara::TensorRT {
 
   class YoloPluginCreator : public nvinfer1::IPluginCreator
   {
+  public:
+    YoloPluginCreator() = default;
+
+    ~YoloPluginCreator() override = default;
+
     auto getPluginName() const noexcept -> const nvinfer1::AsciiChar* override;
 
     auto getPluginVersion() const noexcept
@@ -96,9 +108,10 @@ namespace DO::Sara::TensorRT {
                       const nvinfer1::PluginFieldCollection*) noexcept
         -> nvinfer1::IPluginV2* override;
 
-    auto getPluginNamespace() const noexcept -> const nvinfer1::AsciiChar* override;
+    auto getPluginNamespace() const noexcept
+        -> const nvinfer1::AsciiChar* override;
 
-    auto setPluginNamespace(const nvinfer1::AsciiChar* plugin_namespace) noexcept
+    auto setPluginNamespace(const nvinfer1::AsciiChar*) noexcept
         -> void override;
 
     auto deserializePlugin(const nvinfer1::AsciiChar* name,
@@ -108,6 +121,10 @@ namespace DO::Sara::TensorRT {
 
   private:
     static nvinfer1::PluginFieldCollection _fc;
+    std::string _namespace;
   };
+
+
+  REGISTER_TENSORRT_PLUGIN(YoloPluginCreator);
 
 }  // namespace DO::Sara::TensorRT
