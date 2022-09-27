@@ -115,6 +115,188 @@ namespace DO::Sara::TensorRT {
       return y;
     }
 
+    auto add_conv2d_layer(const int layer_idx,
+                          std::vector<nvinfer1::ITensor*>& fmaps) const -> void
+    {
+      SARA_DEBUG << "Converting convolutional layer " << layer_idx << " to TRT"
+                 << std::endl;
+      const auto& conv_layer =
+          dynamic_cast<const Darknet::Convolution&>(*hnet[layer_idx]);
+      std::cout << conv_layer << std::endl;
+
+      // It's always the last one in Darknet cfg file.
+      auto& x = fmaps.back();
+      auto y = conv2d(x, conv_layer.weights.w, conv_layer.weights.b,
+                      conv_layer.stride, conv_layer.activation,
+                      "conv_bn_" + conv_layer.activation + "_" +
+                          std::to_string(layer_idx));
+      fmaps.push_back(y);
+
+      SARA_DEBUG << "TRT Shape " << layer_idx << " : "
+                 << shape(*fmaps.back()).transpose() << std::endl;
+    }
+
+    auto add_slice_layer(const int layer_idx,
+                         std::vector<nvinfer1::ITensor*>& fmaps) const -> void
+    {
+      const auto& route_layer =
+          dynamic_cast<const Darknet::Route&>(*hnet[layer_idx]);
+      SARA_DEBUG << "convert route-slice layer " << layer_idx << "("
+                 << route_layer.type << ")" << std::endl;
+      std::cout << route_layer << std::endl;
+
+      // Retrieve the index of the input tensor.
+      const auto& rel_idx = route_layer.layers.front();
+      const auto glob_idx = rel_idx < 0
+                                ? layer_idx + rel_idx
+                                : rel_idx + 1 /* because of the input layer. */;
+
+      // Only keep the last half channels in the feature maps.
+      auto& x = fmaps[glob_idx];
+      const auto x_dims = x->getDimensions();
+      const auto c_start =
+          route_layer.group_id != -1
+              ? x_dims.d[1] * route_layer.group_id / route_layer.groups
+              : 0;
+      const auto c_size = x_dims.d[1] / route_layer.groups;
+      const auto h = x_dims.d[2];
+      const auto w = x_dims.d[3];
+      const auto start = nvinfer1::Dims4{0, c_start, 0, 0};
+      const auto size = nvinfer1::Dims4{1, c_size, h, w};
+      const auto stride = nvinfer1::Dims4{1, 1, 1, 1};
+
+      const auto trt_slice_layer = tnet->addSlice(*x, start, size, stride);
+      trt_slice_layer->setName(("slice_" + std::to_string(layer_idx)).c_str());
+
+      const auto y = trt_slice_layer->getOutput(0);
+      fmaps.push_back(y);
+
+      SARA_DEBUG << "TRT Shape " << layer_idx << " : "
+                 << shape(*fmaps.back()).transpose() << std::endl;
+      SARA_DEBUG << "TRT start : "
+                 << Eigen::Map<const Eigen::RowVector4i>(start.d) << std::endl;
+      SARA_DEBUG << "TRT size : "
+                 << Eigen::Map<const Eigen::RowVector4i>(size.d) << std::endl;
+      SARA_DEBUG << "TRT stride : "
+                 << Eigen::Map<const Eigen::RowVector4i>(stride.d) << std::endl;
+    }
+
+    auto add_concat_layer(const int layer_idx,
+                          std::vector<nvinfer1::ITensor*>& fmaps) const -> void
+    {
+      const auto& route_layer =
+          dynamic_cast<const Darknet::Route&>(*hnet[layer_idx]);
+      SARA_DEBUG << "convert route-concat layer " << layer_idx << "("
+                 << route_layer.type << ")" << std::endl;
+      std::cout << route_layer << std::endl;
+
+      auto xs = std::vector<nvinfer1::ITensor*>{};
+      for (const auto& rel_idx : route_layer.layers)
+      {
+        // Retrieve the index of the input tensor.
+        const auto glob_idx =
+            rel_idx < 0 ? layer_idx + rel_idx
+                        : rel_idx + 1 /* because of the input layer. */;
+        xs.push_back(fmaps[glob_idx]);
+      }
+
+      const auto trt_concat_layer =
+          tnet->addConcatenation(xs.data(), xs.size());
+      trt_concat_layer->setName(
+          ("concat_" + std::to_string(layer_idx)).c_str());
+
+      const auto y = trt_concat_layer->getOutput(0);
+      fmaps.push_back(y);
+      SARA_DEBUG << "TRT Shape " << layer_idx << " : "
+                 << shape(*fmaps.back()).transpose() << std::endl;
+    }
+
+    auto add_maxpool_layer(const int layer_idx,
+                           std::vector<nvinfer1::ITensor*>& fmaps) const -> void
+    {
+      const auto& maxpool_layer =
+          dynamic_cast<const Darknet::MaxPool&>(*hnet[layer_idx]);
+      SARA_DEBUG << "convert maxpool layer " << layer_idx << "("
+                 << hnet[layer_idx]->type << ")" << std::endl;
+      std::cout << maxpool_layer << std::endl;
+
+      const auto size = maxpool_layer.size;
+      const auto stride = maxpool_layer.stride;
+
+      const auto x = fmaps.back();
+      auto trt_maxpool_layer = tnet->addPoolingNd(
+          *x, nvinfer1::PoolingType::kMAX, nvinfer1::DimsHW{size, size});
+      trt_maxpool_layer->setStrideNd(nvinfer1::DimsHW{stride, stride});
+
+      trt_maxpool_layer->setName(
+          ("maxpool_" + std::to_string(layer_idx)).c_str());
+
+      auto y = trt_maxpool_layer->getOutput(0);
+      fmaps.push_back(y);
+
+      SARA_DEBUG << "TRT Shape " << layer_idx << " : "
+                 << shape(*fmaps.back()).transpose() << std::endl;
+    }
+
+    auto add_upsample_layer(const int layer_idx,
+                            std::vector<nvinfer1::ITensor*>& fmaps) const
+        -> void
+    {
+      const auto& upsample_layer =
+          dynamic_cast<const Darknet::Upsample&>(*hnet[layer_idx]);
+      SARA_DEBUG << "convert layer " << layer_idx << "(" << upsample_layer.type
+                 << ")" << std::endl;
+      std::cout << upsample_layer << std::endl;
+
+      const auto x = fmaps.back();
+
+      // Define the TensorRT upsample layer.
+      const auto trt_upsample_layer = tnet->addResize(*x);
+      trt_upsample_layer->setResizeMode(nvinfer1::ResizeMode::kLINEAR);
+      const auto out_dims = nvinfer1::Dims4{
+          upsample_layer.output_sizes(0),
+          upsample_layer.output_sizes(1),
+          upsample_layer.output_sizes(2),
+          upsample_layer.output_sizes(3),
+      };
+      trt_upsample_layer->setOutputDimensions(out_dims);
+
+      const auto y = trt_upsample_layer->getOutput(0);
+      fmaps.push_back(y);
+
+      SARA_DEBUG << "TRT Shape " << layer_idx << " : "
+                 << shape(*fmaps.back()).transpose() << std::endl;
+    }
+
+    auto add_yolo_layer(const int layer_idx,
+                        std::vector<nvinfer1::ITensor*>& fmaps) const -> void
+    {
+      const auto& yolo_layer =
+          dynamic_cast<const Darknet::Layer&>(*hnet[layer_idx]);
+      SARA_DEBUG << "convert yolo layer " << layer_idx << "("
+                 << hnet[layer_idx]->type << ")" << std::endl;
+      std::cout << yolo_layer << std::endl;
+
+      const auto plugin_registry = getPluginRegistry();
+      assert(plugin_registry != nullptr);
+      const auto yolo_plugin_creator = plugin_registry->getPluginCreator(
+          YoloPlugin::name, YoloPlugin::version);
+      assert(yolo_plugin_creator != nullptr);
+
+      static constexpr auto delete_plugin =
+          [](nvinfer1::IPluginV2* const plugin) { plugin->destroy(); };
+      const auto yolo_plugin =
+          std::unique_ptr<nvinfer1::IPluginV2, decltype(delete_plugin)>{
+              yolo_plugin_creator->createPlugin("yolo", nullptr),
+              delete_plugin};
+      assert(yolo_plugin.get() != nullptr);
+
+      auto x = fmaps.back();
+      auto trt_yolo_layer = tnet->addPluginV2(&x, 1, *yolo_plugin);
+      auto y = trt_yolo_layer->getOutput(0);
+      fmaps.push_back(y);
+    }
+
     auto operator()(const std::size_t max_layers =
                         std::numeric_limits<std::size_t>::max()) -> void
     {
@@ -144,159 +326,30 @@ namespace DO::Sara::TensorRT {
         // Update the input.
         const auto& layer_type = hnet[layer_idx]->type;
         if (layer_type == "convolutional")
-        {
-          SARA_DEBUG << "Converting convolutional layer " << layer_idx
-                     << " to TRT" << std::endl;
-          const auto& conv_layer =
-              dynamic_cast<const Darknet::Convolution&>(*hnet[layer_idx]);
-          std::cout << conv_layer << std::endl;
-
-          // It's always the last one in Darknet cfg file.
-          auto& x = fmaps.back();
-          auto y = conv2d(x, conv_layer.weights.w, conv_layer.weights.b,
-                          conv_layer.stride, conv_layer.activation,
-                          "conv_bn_" + conv_layer.activation + "_" +
-                              std::to_string(layer_idx));
-          fmaps.push_back(y);
-
-          SARA_DEBUG << "TRT Shape " << layer_idx << " : "
-                     << shape(*fmaps.back()).transpose() << std::endl;
-        }
+          add_conv2d_layer(layer_idx, fmaps);
         else if (layer_type == "route")
         {
           const auto& route_layer =
               dynamic_cast<const Darknet::Route&>(*hnet[layer_idx]);
 
           if (route_layer.layers.size() == 1)
-          {
-            SARA_DEBUG << "convert route-slice layer " << layer_idx << "("
-                       << hnet[layer_idx]->type << ")" << std::endl;
-            std::cout << route_layer << std::endl;
-
-            // Retrieve the index of the input tensor.
-            const auto& rel_idx = route_layer.layers.front();
-            const auto glob_idx =
-                rel_idx < 0 ? layer_idx + rel_idx
-                            : rel_idx + 1 /* because of the input layer. */;
-
-            // Only keep the last half channels in the feature maps.
-            auto& x = fmaps[glob_idx];
-            const auto x_dims = x->getDimensions();
-            const auto c_start =
-                x_dims.d[1] * route_layer.group_id / route_layer.groups;
-            const auto c_size = x_dims.d[1] / route_layer.groups;
-            const auto h = x_dims.d[2];
-            const auto w = x_dims.d[3];
-            const auto start = nvinfer1::Dims4{0, c_start, 0, 0};
-            const auto size = nvinfer1::Dims4{1, c_size, h, w};
-            const auto stride = nvinfer1::Dims4{1, 1, 1, 1};
-
-            const auto trt_slice_layer =
-                tnet->addSlice(*x, start, size, stride);
-            trt_slice_layer->setName(
-                ("slice_" + std::to_string(layer_idx)).c_str());
-
-            const auto y = trt_slice_layer->getOutput(0);
-            fmaps.push_back(y);
-
-            SARA_DEBUG << "TRT Shape " << layer_idx << " : "
-                       << shape(*fmaps.back()).transpose() << std::endl;
-            SARA_DEBUG << "TRT start : "
-                       << Eigen::Map<const Eigen::RowVector4i>(start.d)
-                       << std::endl;
-            SARA_DEBUG << "TRT size : "
-                       << Eigen::Map<const Eigen::RowVector4i>(size.d)
-                       << std::endl;
-            SARA_DEBUG << "TRT stride : "
-                       << Eigen::Map<const Eigen::RowVector4i>(stride.d)
-                       << std::endl;
-          }
+            add_slice_layer(layer_idx, fmaps);
           else
-          {
-            SARA_DEBUG << "convert route-concat layer " << layer_idx << "("
-                       << hnet[layer_idx]->type << ")" << std::endl;
-            std::cout << route_layer << std::endl;
-
-            auto xs = std::vector<nvinfer1::ITensor*>{};
-            for (const auto& rel_idx : route_layer.layers)
-            {
-              // Retrieve the index of the input tensor.
-              const auto glob_idx =
-                  rel_idx < 0 ? layer_idx + rel_idx
-                              : rel_idx + 1 /* because of the input layer. */;
-              xs.push_back(fmaps[glob_idx]);
-            }
-
-            const auto trt_concat_layer =
-                tnet->addConcatenation(xs.data(), xs.size());
-            trt_concat_layer->setName(
-                ("concat_" + std::to_string(layer_idx)).c_str());
-
-            const auto y = trt_concat_layer->getOutput(0);
-            fmaps.push_back(y);
-            SARA_DEBUG << "TRT Shape " << layer_idx << " : "
-                       << shape(*fmaps.back()).transpose() << std::endl;
-          }
+            add_concat_layer(layer_idx, fmaps);
         }
         else if (layer_type == "maxpool")
-        {
-          const auto& maxpool_layer =
-              dynamic_cast<const Darknet::MaxPool&>(*hnet[layer_idx]);
-          SARA_DEBUG << "convert maxpool layer " << layer_idx << "("
-                     << hnet[layer_idx]->type << ")" << std::endl;
-          std::cout << maxpool_layer << std::endl;
-
-          const auto size = maxpool_layer.size;
-          const auto stride = maxpool_layer.stride;
-
-          const auto x = fmaps.back();
-          auto trt_maxpool_layer = tnet->addPoolingNd(
-              *x, nvinfer1::PoolingType::kMAX, nvinfer1::DimsHW{size, size});
-          trt_maxpool_layer->setStrideNd(nvinfer1::DimsHW{stride, stride});
-
-          trt_maxpool_layer->setName(
-              ("maxpool_" + std::to_string(layer_idx)).c_str());
-
-          auto y = trt_maxpool_layer->getOutput(0);
-          fmaps.push_back(y);
-
-          SARA_DEBUG << "TRT Shape " << layer_idx << " : "
-                     << shape(*fmaps.back()).transpose() << std::endl;
-        }
+          add_maxpool_layer(layer_idx, fmaps);
+        else if (layer_type == "upsample")
+          add_upsample_layer(layer_idx, fmaps);
         else if (layer_type == "yolo")
-        {
-          const auto& yolo_layer =
-              dynamic_cast<const Darknet::Layer&>(*hnet[layer_idx]);
-          SARA_DEBUG << "convert yolo layer " << layer_idx << "("
-                     << hnet[layer_idx]->type << ")" << std::endl;
-          std::cout << yolo_layer << std::endl;
-
-          const auto plugin_registry = getPluginRegistry();
-          assert(plugin_registry != nullptr);
-          const auto yolo_plugin_creator = plugin_registry->getPluginCreator(
-              YoloPlugin::name, YoloPlugin::version);
-          assert(yolo_plugin_creator != nullptr);
-
-          static constexpr auto delete_plugin = [](nvinfer1::IPluginV2* const plugin) {
-            plugin->destroy();
-          };
-          const auto yolo_plugin =
-              std::unique_ptr<nvinfer1::IPluginV2, decltype(delete_plugin)>{
-                  yolo_plugin_creator->createPlugin("yolo", nullptr),
-                  delete_plugin};
-          assert(yolo_plugin.get() != nullptr);
-
-          auto x = fmaps.back();
-          auto trt_yolo_layer = tnet->addPluginV2(&x, 1, *yolo_plugin);
-          auto y = trt_yolo_layer->getOutput(0);
-          fmaps.push_back(y);
-        }
+          add_yolo_layer(layer_idx, fmaps);
         else
         {
           SARA_DEBUG << "TODO: convert layer " << layer_idx << "("
                      << hnet[layer_idx]->type << ")" << std::endl;
           std::cout << *hnet[layer_idx] << std::endl;
-          throw std::runtime_error{"TENSORRT LAYER CONVERSION MISSING!"};
+          throw std::runtime_error{"TENSORRT LAYER CONVERSION " + layer_type +
+                                   " NOT IMPLEMENTED!"};
           break;
         }
       }

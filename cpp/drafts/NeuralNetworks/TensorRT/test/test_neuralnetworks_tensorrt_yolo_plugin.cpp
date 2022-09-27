@@ -70,8 +70,6 @@ BOOST_AUTO_TEST_CASE(test_that_the_yolo_plugin_is_automatically_registered)
       reinterpret_cast<void*>(u_out_tensor.data())  //
   };
 
-  u_in_tensor = PinnedTensor<float, 3>{};
-
   auto cuda_stream = trt::make_cuda_stream();
   BOOST_CHECK_EQUAL(
       yolo_plugin->enqueue(0, nullptr, nullptr, nullptr, *cuda_stream), 0);

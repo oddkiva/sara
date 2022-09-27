@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
 
   // Up until now, I have checked manually that the output of each intermediat
   // layers until max_layers are pretty much equal.
-  const auto max_layers = std::numeric_limits<std::size_t>::max();
+  const auto max_layers = 34; // std::numeric_limits<std::size_t>::max();
   converter(max_layers);
 
 
