@@ -65,14 +65,16 @@ BOOST_AUTO_TEST_CASE(test_that_the_yolo_plugin_is_automatically_registered)
   auto u_out_tensor = PinnedTensor<float, 3>{};
   // u_out_tensor.resize{out_sizes(1), out_sizes(2), out_sizes(3)};
 
-  auto device_tensors = std::vector{
-      reinterpret_cast<void*>(u_in_tensor.data()),  //
-      reinterpret_cast<void*>(u_out_tensor.data())  //
-  };
+  const auto batch_size = 0;
+  auto inputs = std::vector<const void *>{};
+  auto outputs = std::vector<void *>{};
+  const auto workspace = nullptr;
 
   auto cuda_stream = trt::make_cuda_stream();
-  BOOST_CHECK_EQUAL(
-      yolo_plugin->enqueue(0, nullptr, nullptr, nullptr, *cuda_stream), 0);
+  BOOST_CHECK_EQUAL(yolo_plugin->enqueue(batch_size, inputs.data(),
+                                         outputs.data(), workspace,
+                                         *cuda_stream),
+                    0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

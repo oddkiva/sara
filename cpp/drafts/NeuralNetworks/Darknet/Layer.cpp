@@ -503,6 +503,25 @@ auto Yolo::forward(const TensorView_<float, 4>& x)
     const auto xn = x[n];
     auto yn = y[n];
 
+    // We predict 3 boxes (0, 1, 2) per grid element
+    // (i, j) in [0, H - 1[ x[0, W - 1[.
+    //
+    // Each `box` is a group of 85 channels.
+    // - channel 0 is the predicted coord `x` of box 0
+    // - channel 1 is the predicted coord `y` of box 0
+    // - channel 2 is the predicted dim   `w` of box 0
+    // - channel 3 is the predicted dim   `h` of box 0
+    // - channel 4  is the prob that box 0 contains an object
+    // - channel 5  is the prob that box 0 contains an object of class  0 if box 0 does contains an object
+    // - channel 6  is the prob that box 0 contains an object of class  1 if box 0 does contains an object
+    // - ...
+    // - channel 84 is the prob that box 0 contains an object of class 80 if box 0 does contains an object
+    //
+    // - channel 85 + 0 is the predicted coord `x` of box 1
+    // - channel 85 + 1 is the predicted coord `y` of box 1
+    // - channel 85 + 2 is the predicted dim   `w` of box 1
+    // - channel 85 + 3 is the predicted dim   `h` of box 1
+    // - Repeat the reasoning again.
     for (auto box = 0; box < num_boxes; ++box)
     {
       const auto x_channel = box * num_box_features + 0;

@@ -96,15 +96,6 @@ namespace DO::Sara::TensorRT {
       }
       else if (activation_layer == "linear")
       {
-        const auto linear_fn =
-            tnet->addActivation(*y, nvinfer1::ActivationType::kLEAKY_RELU);
-
-        auto linear_layer_name = "linear"s;
-        if (name.has_value())
-          linear_layer_name = *name + "/" + linear_layer_name;
-
-        linear_fn->setName(linear_layer_name.c_str());
-        y = linear_fn->getOutput(0);
       }
       else
         throw std::invalid_argument{"activation layer: " + activation_layer +
@@ -252,7 +243,8 @@ namespace DO::Sara::TensorRT {
 
       // Define the TensorRT upsample layer.
       const auto trt_upsample_layer = tnet->addResize(*x);
-      trt_upsample_layer->setResizeMode(nvinfer1::ResizeMode::kLINEAR);
+      // N.B.: it really is the nearest interpolation mode.
+      trt_upsample_layer->setResizeMode(nvinfer1::ResizeMode::kNEAREST);
       const auto out_dims = nvinfer1::Dims4{
           upsample_layer.output_sizes(0),
           upsample_layer.output_sizes(1),

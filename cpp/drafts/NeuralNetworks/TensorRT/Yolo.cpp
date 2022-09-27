@@ -1,4 +1,5 @@
 #include <drafts/NeuralNetworks/TensorRT/Yolo.hpp>
+#include <drafts/NeuralNetworks/TensorRT/YoloImpl.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
@@ -94,28 +95,35 @@ namespace DO::Sara::TensorRT {
   }
 
   //! TODO
-  auto YoloPlugin::enqueue([[maybe_unused]] const std::int32_t batchSize,
-                           [[maybe_unused]] void const* const* inputs,
-                           [[maybe_unused]] void* const* outputs,
+  auto YoloPlugin::enqueue([[maybe_unused]] const std::int32_t batch_size,
+                           void const* const* inputs, void* const* outputs,
                            [[maybe_unused]] void* workspace,
-                           [[maybe_unused]] cudaStream_t stream) noexcept
-      -> std::int32_t
+                           cudaStream_t stream) noexcept -> std::int32_t
   {
     try
     {
-#ifdef DO_SOMETHING_WITH_CUDA
-      char* output = reinterpret_cast<char*>(outputs[0]);
-      // expand to batch size
-      for (int i = 0; i < batchSize; i++)
-      {
-        auto ret = cudaMemcpyAsync(output + i * mCopySize, inputs[1], mCopySize,
-                                   cudaMemcpyDeviceToDevice, stream);
-        if (ret != cudaSuccess)
-          return ret;
-      }
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      const auto in = reinterpret_cast<const float*>(inputs[0]);
+      const auto out = reinterpret_cast<float*>(outputs[0]);
+      static constexpr auto num_boxes = 3;
+      static constexpr auto num_classes = 80;
+      static constexpr auto c = 85 * 3;
+      static constexpr auto h = 26;
+      static constexpr auto w = 26;
+      static constexpr auto size = c * h * w;
+      static constexpr auto scale_x_y = 0.1f;
+      yolo(in, out, size, c, h, w, num_boxes, num_classes, scale_x_y, stream);
       return 0;
-#else
-#endif
     }
     catch (const std::exception& e)
     {

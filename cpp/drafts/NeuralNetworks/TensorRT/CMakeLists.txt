@@ -5,7 +5,8 @@ add_library(
   IO.hpp #
   Yolo.cpp
   Yolo.hpp
-  Yolo.cu)
+  YoloImpl.hpp
+  YoloImpl.cu)
 add_library(DO::Sara::TensorRT ALIAS DO_Sara_TensorRT)
 target_link_libraries(
   DO_Sara_TensorRT
