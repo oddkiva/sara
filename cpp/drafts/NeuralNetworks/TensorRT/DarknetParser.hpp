@@ -264,7 +264,7 @@ namespace DO::Sara::TensorRT {
                         std::vector<nvinfer1::ITensor*>& fmaps) const -> void
     {
       const auto& yolo_layer =
-          dynamic_cast<const Darknet::Layer&>(*hnet[layer_idx]);
+          dynamic_cast<const Darknet::Yolo&>(*hnet[layer_idx]);
       SARA_DEBUG << "convert yolo layer " << layer_idx << "("
                  << hnet[layer_idx]->type << ")" << std::endl;
       std::cout << yolo_layer << std::endl;
@@ -277,9 +277,30 @@ namespace DO::Sara::TensorRT {
 
       static constexpr auto delete_plugin =
           [](nvinfer1::IPluginV2* const plugin) { plugin->destroy(); };
+      SARA_DEBUG << "Creating TensorRT-YOLO plugin...\n";
+
+      // Create the plugin field collection.
+      auto fields = std::vector<nvinfer1::PluginField>{};
+      const auto num_boxes_per_grid_cell= static_cast<std::int32_t>(yolo_layer.mask.size());
+      fields.emplace_back("num_boxes_per_grid_cell", &num_boxes_per_grid_cell,
+                          nvinfer1::PluginFieldType::kINT32, 1);
+      fields.emplace_back("num_classes", &yolo_layer.classes,
+                          nvinfer1::PluginFieldType::kINT32, 1);
+      fields.emplace_back("height", &yolo_layer.output_sizes(2),
+                          nvinfer1::PluginFieldType::kINT32, 1);
+      fields.emplace_back("width", &yolo_layer.output_sizes(3),
+                          nvinfer1::PluginFieldType::kINT32, 1);
+      fields.emplace_back("scale_x_y", &yolo_layer.scale_x_y,
+                          nvinfer1::PluginFieldType::kFLOAT32, 1);
+
+      auto fc = nvinfer1::PluginFieldCollection{};
+      fc.fields= fields.data();
+      fc.nbFields = static_cast<std::int32_t>(fields.size());
+
+      // Create the YOLO plugin.
       const auto yolo_plugin =
           std::unique_ptr<nvinfer1::IPluginV2, decltype(delete_plugin)>{
-              yolo_plugin_creator->createPlugin("yolo", nullptr),
+              yolo_plugin_creator->createPlugin("", &fc),
               delete_plugin};
       assert(yolo_plugin.get() != nullptr);
 

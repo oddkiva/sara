@@ -1,3 +1,4 @@
+#include <drafts/NeuralNetworks/TensorRT/IO.hpp>
 #include <drafts/NeuralNetworks/TensorRT/Yolo.hpp>
 #include <drafts/NeuralNetworks/TensorRT/YoloImpl.hpp>
 
@@ -10,6 +11,7 @@
 namespace DO::Sara::TensorRT {
 
   nvinfer1::PluginFieldCollection YoloPluginCreator::_fc;
+  std::vector<nvinfer1::PluginField> YoloPluginCreator::_plugin_attributes;
 
 
   auto YoloPlugin::getOutputDataType(
@@ -41,11 +43,12 @@ namespace DO::Sara::TensorRT {
     {
       auto plugin = new YoloPlugin{};
       plugin->setPluginNamespace(_namespace.c_str());
+      SARA_DEBUG << "PLUGIN CREATED OK!" << std::endl;
       return plugin;
     }
     catch (const std::exception& e)
     {
-      SARA_DEBUG << e.what() << std::endl;
+      SARA_DEBUG << "EXCEPTION" << e.what() << std::endl;
     }
 
     return nullptr;
@@ -76,22 +79,19 @@ namespace DO::Sara::TensorRT {
     return inputs[0];
   }
 
-  //! TODO
   auto YoloPlugin::initialize() noexcept -> std::int32_t
   {
-    return 1;
+    return 0;
   }
 
-  //! TODO
   auto YoloPlugin::terminate() noexcept -> void
   {
   }
 
-  //! TODO
   auto YoloPlugin::getWorkspaceSize(
-      const std::int32_t /* maxBatchSize */) const noexcept -> std::size_t
+      const std::int32_t /* max_batch_size */) const noexcept -> std::size_t
   {
-    return 1;
+    return 0;
   }
 
   //! TODO
@@ -102,27 +102,36 @@ namespace DO::Sara::TensorRT {
   {
     try
     {
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
-      SARA_DEBUG << "CALLING MY YOLO IMPLEMENTATION\n";
+      SARA_DEBUG << "CALLING YOLO IMPLEMENTATION\n";
       const auto in = reinterpret_cast<const float*>(inputs[0]);
       const auto out = reinterpret_cast<float*>(outputs[0]);
-      static constexpr auto num_boxes = 3;
-      static constexpr auto num_classes = 80;
-      static constexpr auto c = 85 * 3;
-      static constexpr auto h = 26;
-      static constexpr auto w = 26;
-      static constexpr auto size = c * h * w;
-      static constexpr auto scale_x_y = 0.1f;
-      yolo(in, out, size, c, h, w, num_boxes, num_classes, scale_x_y, stream);
+
+      // The image is divided in a grid of size 13x13 or 26x26.
+      // For each cell (i, j) of the grid, the YOLO layer predicts a fixed
+      // number of boxes: typically 3.
+
+      // The YOLO layer predicts a number of features for each of these box:
+      // - four box coordinates: (x, y, w, h)
+      static constexpr auto num_box_coordinates = 4;
+
+      // Using the Bayes rule: Prob[class = i] = Prob[object] x Prob[class = i |
+      // object],
+      //
+      // the YOLO layer estimates the following probabilities:
+      //
+      // - The probability that the box contains an object: 1
+      // - The probability that the box contains an object of class i, if it
+      //   does contain an object.
+      //
+      // There are 80 classes if YOLO is trained on COCO.
+      const auto box_probabilities = 1 + _num_classes;
+      const auto box_features = num_box_coordinates + box_probabilities;
+
+      const auto c = _num_boxes_per_grid_cell * box_features;
+      const auto size = c * _h * _w;
+
+      yolo(in, out, size, c, _h, _w, _num_classes, _scale_x_y, stream);
+
       return 0;
     }
     catch (const std::exception& e)
@@ -133,18 +142,27 @@ namespace DO::Sara::TensorRT {
     return -1;
   }
 
-  //! TODO
   auto YoloPlugin::getSerializationSize() const noexcept -> size_t
   {
-    return 0;
+    const auto yolo_parameter_byte_size =   //
+        sizeof(_num_boxes_per_grid_cell) +  //
+        sizeof(_num_classes) +              //
+        sizeof(_h) +                        //
+        sizeof(_w) +                        //
+        sizeof(_scale_x_y);
+    return yolo_parameter_byte_size;
   }
 
-  //! TODO
-  auto YoloPlugin::serialize(void* /* buffer */) const noexcept -> void
+  auto YoloPlugin::serialize(void* buffer) const noexcept -> void
   {
+    auto cbuf = reinterpret_cast<char*>(buffer);
+    write_to_buffer(cbuf, _num_boxes_per_grid_cell);
+    write_to_buffer(cbuf, _num_classes);
+    write_to_buffer(cbuf, _h);
+    write_to_buffer(cbuf, _w);
+    write_to_buffer(cbuf, _scale_x_y);
   }
 
-  //! TODO
   auto YoloPlugin::destroy() noexcept -> void
   {
     delete this;
@@ -171,7 +189,6 @@ namespace DO::Sara::TensorRT {
   {
   }
 
-  //! TODO
   auto YoloPlugin::supportsFormatCombination(
       [[maybe_unused]] const std::int32_t pos,  //
       const nvinfer1::PluginTensorDesc* in_out,
@@ -180,8 +197,27 @@ namespace DO::Sara::TensorRT {
   {
     assert(nb_inputs == 1 || nb_outputs == 1 || pos == 0);
 
-    return in_out[0].type == nvinfer1::DataType::kHALF ||
-           in_out[0].type == nvinfer1::DataType::kFLOAT;
+    return (in_out[0].type == nvinfer1::DataType::kHALF ||
+            in_out[0].type == nvinfer1::DataType::kFLOAT) &&
+           in_out[0].format == nvinfer1::PluginFormat::kLINEAR;
+  }
+
+  YoloPluginCreator::YoloPluginCreator()
+  {
+    _plugin_attributes.clear();
+    _plugin_attributes.emplace_back("num_boxes_per_grid_cell", nullptr,
+                                    nvinfer1::PluginFieldType::kINT32, 1);
+    _plugin_attributes.emplace_back("num_classes", nullptr,
+                                    nvinfer1::PluginFieldType::kINT32, 1);
+    _plugin_attributes.emplace_back("height", nullptr,
+                                    nvinfer1::PluginFieldType::kINT32, 1);
+    _plugin_attributes.emplace_back("width", nullptr,
+                                    nvinfer1::PluginFieldType::kINT32, 1);
+    _plugin_attributes.emplace_back("scale_x_y", nullptr,
+                                    nvinfer1::PluginFieldType::kFLOAT32, 1);
+
+    _fc.fields = _plugin_attributes.data();
+    _fc.nbFields = static_cast<std::int32_t>(_plugin_attributes.size());
   }
 
   auto YoloPluginCreator::getPluginName() const noexcept
@@ -204,9 +240,40 @@ namespace DO::Sara::TensorRT {
 
   auto YoloPluginCreator::createPlugin(
       const nvinfer1::AsciiChar* trt_namespace,
-      const nvinfer1::PluginFieldCollection*) noexcept -> nvinfer1::IPluginV2*
+      const nvinfer1::PluginFieldCollection* fc) noexcept
+      -> nvinfer1::IPluginV2*
   {
-    auto plugin = new YoloPlugin;
+    // All the necessary parameters for the YOLO layer.
+    auto num_boxes_per_grid_cell = std::int32_t{};
+    auto num_classes = std::int32_t{};
+    auto h = std::int32_t{};
+    auto w = std::int32_t{};
+    auto scale_x_y = float{};
+
+    // Parse the plugin field collection.
+    const auto fields = fc->fields;
+    const auto num_fields = fc->nbFields;
+    for (auto i = 0; i < num_fields; ++i)
+    {
+      if (!std::strcmp(fields[i].name, "num_boxes_per_grid_cell"))
+        num_boxes_per_grid_cell =
+            *reinterpret_cast<const std::int32_t*>(fields[i].data);
+      if (!std::strcmp(fields[i].name, "num_classes"))
+        num_classes = *reinterpret_cast<const std::int32_t*>(fields[i].data);
+      if (!std::strcmp(fields[i].name, "height"))
+        h = *reinterpret_cast<const std::int32_t*>(fields[i].data);
+      if (!std::strcmp(fields[i].name, "width"))
+        w = *reinterpret_cast<const std::int32_t*>(fields[i].data);
+      if (!std::strcmp(fields[i].name, "scale_x_y"))
+        scale_x_y = *reinterpret_cast<const float*>(fields[i].data);
+    }
+
+    auto plugin = new YoloPlugin{
+        num_boxes_per_grid_cell,  //
+        num_classes,              //
+        h, w,                     //
+        scale_x_y                 //
+    };
     plugin->setPluginNamespace(trt_namespace);
     return plugin;
   }
@@ -224,14 +291,33 @@ namespace DO::Sara::TensorRT {
     _namespace = plugin_namespace;
   }
 
-  //! TODO
   auto YoloPluginCreator::deserializePlugin(
-      [[maybe_unused]] const nvinfer1::AsciiChar* name,
-      [[maybe_unused]] const void* serial_data,
+      const nvinfer1::AsciiChar* plugin_namespace,  //
+      const void* serial_data,
       [[maybe_unused]] const size_t serial_length) noexcept
       -> nvinfer1::IPluginV2*
-
   {
+    try
+    {
+      auto buffer_ptr = reinterpret_cast<const char*>(serial_data);
+      const auto num_boxes_per_grid_cell =
+          read_from_buffer<std::int32_t>(buffer_ptr);
+      const auto num_classes = read_from_buffer<std::int32_t>(buffer_ptr);
+      const auto h = read_from_buffer<std::int32_t>(buffer_ptr);
+      const auto w = read_from_buffer<std::int32_t>(buffer_ptr);
+      const auto scale_x_y = read_from_buffer<float>(buffer_ptr);
+
+      auto plugin = new YoloPlugin{num_boxes_per_grid_cell,  //
+                                   num_classes,              //
+                                   h, w,                     //
+                                   scale_x_y};
+      plugin->setPluginNamespace(plugin_namespace);
+      return plugin;
+    }
+    catch (std::exception const& e)
+    {
+      SARA_DEBUG << "EXCEPTION: " << e.what() << std::endl;
+    }
     return nullptr;
   }
 

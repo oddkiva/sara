@@ -17,6 +17,18 @@ namespace DO::Sara::TensorRT {
 
     YoloPlugin() = default;
 
+    YoloPlugin(const std::int32_t num_boxes_per_grid_cell,  //
+               const std::int32_t num_classes,              //
+               const std::int32_t h, const std::int32_t w,  //
+               const float scale_x_y)
+      : _num_boxes_per_grid_cell{num_boxes_per_grid_cell}
+      , _num_classes{num_classes}
+      , _h{h}
+      , _w{w}
+      , _scale_x_y{scale_x_y}
+    {
+    }
+
     auto getOutputDataType(const std::int32_t output_index,
                            const nvinfer1::DataType* input_types,
                            const std::int32_t num_inputs) const noexcept
@@ -82,17 +94,27 @@ namespace DO::Sara::TensorRT {
         -> bool override;
 
   private:
+    //! @brief Number of boxes predicted per grid cell.
+    std::int32_t _num_boxes_per_grid_cell;
+    //! @brief Number of object classes.
+    std::int32_t _num_classes;
+    //! @brief Grid dimensions
+    //! @{
+    std::int32_t _h;
+    std::int32_t _w;
+    //! @}
+    //! @brief Extra parameter for YOLO V4 Tiny.
+    float _scale_x_y;
+
+    //! @brief Plugin namespace.
     std::string _namespace;
-    std::int32_t _classes;
-    std::vector<std::int32_t> _anchors;
-    std::vector<std::int32_t> _mask;
   };
 
 
   class YoloPluginCreator : public nvinfer1::IPluginCreator
   {
   public:
-    YoloPluginCreator() = default;
+    YoloPluginCreator();
 
     ~YoloPluginCreator() override = default;
 
@@ -104,8 +126,8 @@ namespace DO::Sara::TensorRT {
     auto getFieldNames() noexcept
         -> const nvinfer1::PluginFieldCollection* override;
 
-    auto createPlugin(const nvinfer1::AsciiChar*,
-                      const nvinfer1::PluginFieldCollection*) noexcept
+    auto createPlugin(const nvinfer1::AsciiChar* plugin_namespace,
+                      const nvinfer1::PluginFieldCollection* fc) noexcept
         -> nvinfer1::IPluginV2* override;
 
     auto getPluginNamespace() const noexcept
@@ -114,13 +136,14 @@ namespace DO::Sara::TensorRT {
     auto setPluginNamespace(const nvinfer1::AsciiChar*) noexcept
         -> void override;
 
-    auto deserializePlugin(const nvinfer1::AsciiChar* name,
+    auto deserializePlugin(const nvinfer1::AsciiChar* plugin_namespace,
                            const void* serial_data,
                            const size_t serial_length) noexcept
         -> nvinfer1::IPluginV2* override;
 
   private:
     static nvinfer1::PluginFieldCollection _fc;
+    static std::vector<nvinfer1::PluginField> _plugin_attributes;
     std::string _namespace;
   };
 
