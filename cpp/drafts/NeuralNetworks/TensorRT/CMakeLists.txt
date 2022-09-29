@@ -1,3 +1,7 @@
+if(NOT CMAKE_CUDA_COMPILER OR NOT TensorRT_FOUND)
+  return()
+endif ()
+
 add_library(
   DO_Sara_TensorRT #
   Helpers.hpp #
