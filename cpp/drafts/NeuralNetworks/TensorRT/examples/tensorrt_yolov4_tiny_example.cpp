@@ -77,8 +77,10 @@ auto detect_objects(
   sara::toc("Postprocess boxes");
 
   sara::tic();
-  d::nms(detections, iou_thres);
+  detections = d::nms(detections, iou_thres);
   sara::toc("NMS");
+
+  SARA_CHECK(iou_thres);
 
   return detections;
 }
@@ -97,8 +99,12 @@ auto test_on_video(int argc, char** argv) -> void
     return;
   }
   const auto video_filepath = argv[1];
-  const auto iou_thres = argc < 3 ? 0.4f : std::stof(argv[2]);
 #endif
+
+  const auto skip = argc < 3 ? 0 : std::stoi(argv[2]);
+  const auto iou_thres = argc < 4 ? 0.4f : std::stof(argv[3]);
+  SARA_CHECK(skip);
+  SARA_CHECK(iou_thres);
 
   auto video_stream = sara::VideoStream{video_filepath};
   auto frame = video_stream.frame();
@@ -133,8 +139,6 @@ auto test_on_video(int argc, char** argv) -> void
   };
 
   sara::create_window(frame.sizes());
-
-  const auto skip = argc < 3 ? 0 : std::stoi(argv[2]);
   auto frames_read = 0;
   while (true)
   {
@@ -160,18 +164,22 @@ auto test_on_video(int argc, char** argv) -> void
         inference_executor,                //
         cuda_in_tensor, cuda_out_tensors,  //
         iou_thres, yolo_masks, yolo_anchors);
-    sara::toc("Yolo");
+    sara::toc("Object detection");
 
-    sara::display(frame);
+    sara::tic();
     for (const auto& det : dets)
     {
       static constexpr auto int_round = [](const float v) {
         return static_cast<int>(std::round(v));
       };
-      sara::draw_rect(int_round(det.box(0)), int_round(det.box(1)),
+      sara::draw_rect(frame,  //
+                      int_round(det.box(0)), int_round(det.box(1)),
                       int_round(det.box(2)), int_round(det.box(3)),  //
                       sara::Green8, 2);
     }
+    sara::toc("Draw detections");
+
+    sara::display(frame);
   }
 }
 
