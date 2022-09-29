@@ -11,6 +11,7 @@
 
 #include <drafts/NeuralNetworks/Darknet/Parser.hpp>
 #include <drafts/NeuralNetworks/TensorRT/DarknetParser.hpp>
+#include <drafts/NeuralNetworks/TensorRT/IO.hpp>
 
 
 namespace DO::Sara::TensorRT {
@@ -359,21 +360,24 @@ namespace DO::Sara::TensorRT {
     }
   }
 
-  auto make_yolo_v4_tiny_network(const BuilderUniquePtr& builder,
-                                 const std::string& trained_model_dir)
-      -> NetworkUniquePtr
+
+  auto convert_yolo_v4_tiny_network_from_darknet(
+      const std::string& trained_model_dir) -> HostMemoryUniquePtr
   {
     // Load the CPU implementation.
     auto hnet = Darknet::load_yolov4_tiny_model(trained_model_dir);
 
     // Create a TensorRT network.
-    auto network = make_network(builder.get());
+    auto net_builder = make_builder();
+    auto net = make_network(net_builder.get());
 
     // Convert the network to TensorRT (GPU).
-    auto converter = YoloV4TinyConverter{network.get(), hnet.net};
+    auto converter = YoloV4TinyConverter{net.get(), hnet.net};
     converter();
 
-    return network;
+    auto serialized_net = serialize_network_into_plan(net_builder, net,  //
+                                                      /* use_fp16 */ false);
+    return serialized_net;
   }
 
 }  // namespace DO::Sara::TensorRT

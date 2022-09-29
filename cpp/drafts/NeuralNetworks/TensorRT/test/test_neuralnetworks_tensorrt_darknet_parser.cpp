@@ -118,50 +118,93 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
   u_in_tensor.resize(3, input_layer.height(), input_layer.width());
   std::copy(image_tensor.begin(), image_tensor.end(), u_in_tensor.begin());
 
-  // Inspect the TensorRT log output: there is no padding!
-  const auto& h_layer = max_layers < hnet.net.size()  //
-                            ? *hnet.net[max_layers]
-                            : *hnet.net.back();
-  const auto& out_sizes = h_layer.output_sizes;
-  auto u_out_tensor = PinnedTensor<float, 3>{
-      out_sizes(1), out_sizes(2), out_sizes(3)  //
-  };
-
-  auto device_tensors = std::vector{
-      reinterpret_cast<void*>(u_in_tensor.data()),  //
-      reinterpret_cast<void*>(u_out_tensor.data())  //
-  };
-
-  // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
-  if (!context->enqueueV2(device_tensors.data(), *cuda_stream, nullptr))
+  // This is debug mode.
+  if (max_layers != std::numeric_limits<std::size_t>::max())
   {
-    SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
-               << std::endl;
+    // Inspect the TensorRT log output: there is no padding!
+    const auto& h_layer = max_layers < hnet.net.size()  //
+                              ? *hnet.net[max_layers]
+                              : *hnet.net.back();
+    const auto& out_sizes = h_layer.output_sizes;
+    auto u_out_tensor = PinnedTensor<float, 3>{
+        out_sizes(1), out_sizes(2), out_sizes(3)  //
+    };
+
+    const auto device_tensors = std::array{
+        reinterpret_cast<void*>(u_in_tensor.data()),  //
+        reinterpret_cast<void*>(u_out_tensor.data())  //
+    };
+
+    // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
+    if (!context->enqueueV2(device_tensors.data(), *cuda_stream, nullptr))
+    {
+      SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
+                 << std::endl;
+    }
+
+    // Wait for the completion of GPU operations.
+    cudaStreamSynchronize(*cuda_stream);
+
+    const auto& h_out_tensor = h_layer.output;
+    SARA_DEBUG << "Checking layer = " << h_layer.type << "\n"
+               << h_layer << std::endl;
+
+    // Check the equality between the CPU implementation and the TensorRT-based
+    // network.
+    BOOST_CHECK_EQUAL(out_sizes, h_out_tensor.sizes());
+    BOOST_CHECK(std::equal(h_out_tensor.begin(), h_out_tensor.end(),
+                           u_out_tensor.begin(),
+                           [](const float& a, const float& b) {
+                             return std::abs(a - b) < 1e-4f;
+                           }));
+
+    for (auto i = 0u; i < 2 * 13 * 13; ++i)
+    {
+      const auto& a = h_out_tensor.data()[i];
+      const auto& b = u_out_tensor.data()[i];
+      if (std::abs(a - b) > 1e-4f)
+        std::cout << sara::format("[OUCH] i=%d me=%f trt=%f\n",  //
+                                  i,                             //
+                                  h_out_tensor.data()[i],        //
+                                  u_out_tensor.data()[i]);
+    }
   }
-
-  // Wait for the completion of GPU operations.
-  cudaStreamSynchronize(*cuda_stream);
-
-  const auto& h_out_tensor = h_layer.output;
-  SARA_DEBUG << "Checking layer = " << h_layer.type << "\n"
-             << h_layer << std::endl;
-
-  // Check the equality between the CPU implementation and the TensorRT-based
-  // network.
-  BOOST_CHECK_EQUAL(out_sizes, h_out_tensor.sizes());
-  BOOST_CHECK(std::equal(
-      h_out_tensor.begin(), h_out_tensor.end(), u_out_tensor.begin(),
-      [](const float& a, const float& b) { return std::abs(a - b) < 1e-4f; }));
-
-  for (auto i = 0u; i < 2 * 13 * 13; ++i)
+  else
   {
-    const auto& a = h_out_tensor.data()[i];
-    const auto& b = u_out_tensor.data()[i];
-    if (std::abs(a - b) > 1e-4f)
-      std::cout << sara::format("[OUCH] i=%d me=%f trt=%f\n",  //
-                                i,                             //
-                                h_out_tensor.data()[i],        //
-                                u_out_tensor.data()[i]);
+    const auto h_out_tensor =
+        std::array{hnet.net[31]->output, hnet.net[38]->output};
+
+    // There are 2 YOLO layers in YOLO v4 Tiny
+    auto u_out_tensor = std::array{PinnedTensor<float, 3>{85 * 3, 13, 13},
+                                   PinnedTensor<float, 3>{85 * 3, 26, 26}};
+
+    const auto device_tensors = std::array{
+        reinterpret_cast<void*>(u_in_tensor.data()),      //
+        reinterpret_cast<void*>(u_out_tensor[0].data()),  //
+        reinterpret_cast<void*>(u_out_tensor[1].data())   //
+    };
+
+    // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
+    if (!context->enqueueV2(device_tensors.data(), *cuda_stream, nullptr))
+    {
+      SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
+                 << std::endl;
+    }
+
+    // Wait for the completion of GPU operations.
+    cudaStreamSynchronize(*cuda_stream);
+
+    // Check the equality between the CPU implementation and the TensorRT-based
+    // network.
+    for (auto i = 0u; i < h_out_tensor.size(); ++i)
+      BOOST_CHECK(std::equal(h_out_tensor[i].begin(), h_out_tensor[i].end(),
+                             u_out_tensor[i].begin(),
+                             [](const float& a, const float& b) {
+                               return std::abs(a - b) < 1e-4f;
+                             }));
+
+    std::cout << "out 0 =\n" << u_out_tensor[0][0].matrix() << std::endl;
+    std::cout << "out 1 =\n" << u_out_tensor[1][0].matrix() << std::endl;
   }
 }
 

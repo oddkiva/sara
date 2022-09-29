@@ -28,12 +28,17 @@ namespace DO::Sara::TensorRT {
 
     InferenceExecutor() = default;
 
-    InferenceExecutor(const HostMemoryUniquePtr& serialized_network);
+    explicit InferenceExecutor(const HostMemoryUniquePtr& serialized_network);
 
     auto operator()(const PinnedTensor<float, 3>& in,
                     PinnedTensor<float, 3>& out,  //
-                    const bool synchronize = false) -> void;
+                    const bool synchronize = true) const -> void;
 
+    auto operator()(const PinnedTensor<float, 3>& in,
+                    std::array<PinnedTensor<float, 3>, 2>& out,  //
+                    const bool synchronize = true) const -> void;
+
+  // private:
     CudaStreamUniquePtr _cuda_stream = make_cuda_stream();
     RuntimeUniquePtr _runtime = {nullptr, &runtime_deleter};
     CudaEngineUniquePtr _engine = {nullptr, &engine_deleter};

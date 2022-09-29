@@ -72,8 +72,7 @@ namespace DO::Sara::TensorRT {
   };
 
 
-  auto make_yolo_v4_tiny_network(const BuilderUniquePtr& builder,
-                                 const std::string& trained_model_dir)
-      -> NetworkUniquePtr;
+  auto convert_yolo_v4_tiny_network_from_darknet(
+      const std::string& trained_model_dir) -> HostMemoryUniquePtr;
 
 }  // namespace DO::Sara::TensorRT

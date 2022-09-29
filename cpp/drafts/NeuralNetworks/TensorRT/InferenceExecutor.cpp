@@ -32,11 +32,34 @@ namespace DO::Sara::TensorRT {
 
   auto InferenceExecutor::operator()(const PinnedTensor<float, 3>& in,
                                      PinnedTensor<float, 3>& out,
-                                     const bool synchronize) -> void
+                                     const bool synchronize) const -> void
   {
     const auto device_tensors = std::array{
         const_cast<void*>(reinterpret_cast<const void*>(in.data())),  //
         reinterpret_cast<void*>(out.data())                           //
+    };
+
+    // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
+    if (!_context->enqueueV2(device_tensors.data(), *_cuda_stream, nullptr))
+    {
+      SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
+                 << std::endl;
+    }
+
+    // Wait for the completion of GPU operations.
+    if (synchronize)
+      cudaStreamSynchronize(*_cuda_stream);
+  }
+
+  auto InferenceExecutor::operator()(  //
+      const PinnedTensor<float, 3>& in,
+      std::array<PinnedTensor<float, 3>, 2>& out,  //
+      const bool synchronize) const -> void
+  {
+    const auto device_tensors = std::array{
+        const_cast<void*>(reinterpret_cast<const void*>(in.data())),  //
+        reinterpret_cast<void*>(out[0].data()),                       //
+        reinterpret_cast<void*>(out[1].data())                        //
     };
 
     // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
