@@ -126,6 +126,8 @@ namespace DO::Sara::TensorRT {
     auto getFieldNames() noexcept
         -> const nvinfer1::PluginFieldCollection* override;
 
+    // N.B.: the plugin namespace should be blank if it is registered
+    // statically with the macro REGISTER_TENSORRT_PLUGIN.
     auto createPlugin(const nvinfer1::AsciiChar* plugin_namespace,
                       const nvinfer1::PluginFieldCollection* fc) noexcept
         -> nvinfer1::IPluginV2* override;
@@ -142,8 +144,17 @@ namespace DO::Sara::TensorRT {
         -> nvinfer1::IPluginV2* override;
 
   private:
-    static nvinfer1::PluginFieldCollection _fc;
-    static std::vector<nvinfer1::PluginField> _plugin_attributes;
+    //! @brief Plugin parameters.
+    //! N.B.: don't follow example codes where plugin field collection are
+    //! declared as static variables. The address sanitizer says it leads to
+    //! memory leak otherwise.
+    //!
+    //! @{
+    nvinfer1::PluginFieldCollection _fc;
+    std::vector<nvinfer1::PluginField> _plugin_attributes;
+    //! @}
+
+    //! @brief Plugin namespace.
     std::string _namespace;
   };
 

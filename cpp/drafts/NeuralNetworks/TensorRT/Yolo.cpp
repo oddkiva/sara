@@ -10,10 +10,6 @@
 
 namespace DO::Sara::TensorRT {
 
-  nvinfer1::PluginFieldCollection YoloPluginCreator::_fc;
-  std::vector<nvinfer1::PluginField> YoloPluginCreator::_plugin_attributes;
-
-
   auto YoloPlugin::getOutputDataType(
       [[maybe_unused]] const std::int32_t output_index,
       const nvinfer1::DataType* input_types,
@@ -177,9 +173,10 @@ namespace DO::Sara::TensorRT {
            in_out[0].format == nvinfer1::PluginFormat::kLINEAR;
   }
 
+
   YoloPluginCreator::YoloPluginCreator()
   {
-    _plugin_attributes.clear();
+    _plugin_attributes.reserve(5u);
     _plugin_attributes.emplace_back("num_boxes_per_grid_cell", nullptr,
                                     nvinfer1::PluginFieldType::kINT32, 1);
     _plugin_attributes.emplace_back("num_classes", nullptr,

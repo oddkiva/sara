@@ -96,6 +96,8 @@ namespace DO::Sara::TensorRT {
       }
       else if (activation_layer == "linear")
       {
+        // Do nothing, the linear activation layer is the identity function:
+        // x |-> x.
       }
       else
         throw std::invalid_argument{"activation layer: " + activation_layer +
