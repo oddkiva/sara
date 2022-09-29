@@ -17,7 +17,7 @@ namespace trt = sara::TensorRT;
 
 
 template <typename T, int N>
-using PinnedTensor = sara::Tensor_<float, N, shakti::PinnedMemoryAllocator>;
+using PinnedTensor = sara::Tensor_<T, N, shakti::PinnedMemoryAllocator>;
 
 
 BOOST_AUTO_TEST_SUITE(TestTensorRT)

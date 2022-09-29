@@ -1,8 +1,12 @@
 add_library(
   DO_Sara_TensorRT #
-  DarknetParser.hpp #
   Helpers.hpp #
   IO.hpp #
+  IO.cpp #
+  InferenceExecutor.hpp #
+  InferenceExecutor.cpp #
+  DarknetParser.hpp #
+  DarknetParser.cpp #
   Yolo.cpp
   Yolo.hpp
   YoloImpl.hpp
@@ -11,9 +15,8 @@ add_library(DO::Sara::TensorRT ALIAS DO_Sara_TensorRT)
 target_link_libraries(
   DO_Sara_TensorRT
   PUBLIC $<$<PLATFORM_ID:Linux>:CUDA::cudart> #
-         TensorRT::TensorRT
-         TensorRT::Plugins
-         DO::Sara::Core)
+         TensorRT::TensorRT #
+         DO::Sara::Darknet)
 
 if(SARA_BUILD_TESTS)
   add_subdirectory(test)

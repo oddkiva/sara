@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "NeuralNetworks/TensorRT"
+#define BOOST_TEST_MODULE "NeuralNetworks/TensorRT/Yolo-V4-Tiny"
 
 #include <boost/test/unit_test.hpp>
 
@@ -15,8 +15,6 @@
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 #include <drafts/NeuralNetworks/TensorRT/IO.hpp>
 
-#include <thread>
-
 
 namespace fs = boost::filesystem;
 
@@ -27,14 +25,14 @@ namespace trt = sara::TensorRT;
 
 
 template <typename T, int N>
-using PinnedTensor = sara::Tensor_<float, N, shakti::PinnedMemoryAllocator>;
+using PinnedTensor = sara::Tensor_<T, N, shakti::PinnedMemoryAllocator>;
 
 
 BOOST_AUTO_TEST_SUITE(TestTensorRT)
 
 BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
 {
-  // Instantiate a network and automatically manager its memory.
+  // Instantiate a network and automatically manage its memory.
   auto builder = trt::make_builder();
   auto network = trt::make_network(builder.get());
 

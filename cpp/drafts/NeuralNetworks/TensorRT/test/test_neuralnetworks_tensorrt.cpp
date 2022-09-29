@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "NeuralNetworks/TensorRT"
+#define BOOST_TEST_MODULE "NeuralNetworks/TensorRT/Basic Operations"
 
 #include <boost/test/unit_test.hpp>
 
@@ -94,21 +94,10 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
       nvinfer1::createInferRuntime(trt::Logger::instance()),
       &trt::runtime_deleter};
 
-  // Create or load an engine.
-  auto engine = trt::CudaEngineUniquePtr{nullptr, &trt::engine_deleter};
-  {
-    // Load inference engine from a model weights.
-    constexpr auto load_engine_from_disk = false;
-    if constexpr (load_engine_from_disk)
-      engine = trt::load_from_model_weights(*runtime, "");
-    else
-    {
-      engine = trt::CudaEngineUniquePtr{
-          runtime->deserializeCudaEngine(plan->data(), plan->size()),
-          &trt::engine_deleter};
-      // save_model_weights("");
-    }
-  }
+  // Create a CUDA inference engine.
+  auto engine = trt::CudaEngineUniquePtr{
+      runtime->deserializeCudaEngine(plan->data(), plan->size()),
+      &trt::engine_deleter};
 
   // Create a GPU inference context, this is to run the machine learning model
   // on the GPU.
@@ -236,21 +225,10 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
       nvinfer1::createInferRuntime(trt::Logger::instance()),
       &trt::runtime_deleter};
 
-  // Create or load an engine.
-  auto engine = trt::CudaEngineUniquePtr{nullptr, &trt::engine_deleter};
-  {
-    // Load inference engine from a model weights.
-    constexpr auto load_engine_from_disk = false;
-    if constexpr (load_engine_from_disk)
-      engine = trt::load_from_model_weights(*runtime, "");
-    else
-    {
-      engine = trt::CudaEngineUniquePtr{
-          runtime->deserializeCudaEngine(plan->data(), plan->size()),
-          &trt::engine_deleter};
-      // save_model_weights("");
-    }
-  }
+  // Create a CUDA inference engine.
+  auto engine = trt::CudaEngineUniquePtr{
+      runtime->deserializeCudaEngine(plan->data(), plan->size()),
+      &trt::engine_deleter};
 
   // Perform a context to enqueue inference operations in C++.
   SARA_DEBUG << termcolor::green << "Setting the inference context!"

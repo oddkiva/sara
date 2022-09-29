@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2022 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <NvInfer.h>
@@ -39,7 +50,6 @@ namespace DO::Sara::TensorRT {
 
   inline auto delete_cuda_stream(cudaStream_t* cuda_stream)
   {
-    SHAKTI_STDOUT << "DELETING CUDA STREAM" << std::endl;
     if (cuda_stream == nullptr)
       return;
     SHAKTI_SAFE_CUDA_CALL(cudaStreamDestroy(*cuda_stream));
@@ -51,25 +61,17 @@ namespace DO::Sara::TensorRT {
   inline auto delete_nvinfer_object(NVInferObject* object) -> void
   {
     if (object != nullptr)
-    {
-#ifdef DEBUG
-      std::cout << "Deleting " << typeid(object).name() << " " << object
-                << std::endl;
-#endif
       delete object;
-    }
     object = nullptr;
   }
 
   inline auto delete_network_def(nvinfer1::INetworkDefinition* network_def)
   {
-    SHAKTI_STDOUT << "DELETING NETWORK DEFINITION" << std::endl;
     delete_nvinfer_object(network_def);
   }
 
   inline auto delete_builder(nvinfer1::IBuilder* builder)
   {
-    SHAKTI_STDOUT << "DELETING BUILDER" << std::endl;
     delete_nvinfer_object(builder);
   };
 
@@ -125,8 +127,14 @@ namespace DO::Sara::TensorRT {
     delete_nvinfer_object(memory);
   }
 
+  using BuilderUniquePtr =
+      std::unique_ptr<nvinfer1::IBuilder, decltype(&delete_builder)>;
+  using NetworkUniquePtr = std::unique_ptr<nvinfer1::INetworkDefinition,
+                                           decltype(&delete_network_def)>;
   using HostMemoryUniquePtr =
       std::unique_ptr<nvinfer1::IHostMemory, decltype(&host_memory_deleter)>;
+  using CudaStreamUniquePtr =
+      std::unique_ptr<cudaStream_t, decltype(&delete_cuda_stream)>;
   using CudaEngineUniquePtr =
       std::unique_ptr<nvinfer1::ICudaEngine, decltype(&engine_deleter)>;
   using RuntimeUniquePtr =
