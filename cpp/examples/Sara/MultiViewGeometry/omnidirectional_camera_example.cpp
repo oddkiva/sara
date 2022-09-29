@@ -47,7 +47,7 @@ auto make_omnidirectional_camera()
   camera_parameters.radial_distortion_coefficients <<
       0.50776095f,
       -0.16478652f,
-      0.0;
+      0.0f;
   camera_parameters.tangential_distortion_coefficients <<
       0.00023093f,
       0.00078712f;
@@ -66,9 +66,9 @@ auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& omni_camera)
   K(1, 1) /= downscale_factor;
   K(1, 2) -= 450;
 
-  auto t = static_cast<float>(M_PI / 12);
-  auto c = std::cos(t);
-  auto s = std::sin(t);
+  const auto t = static_cast<float>(M_PI / 12);
+  const auto c = std::cos(t);
+  const auto s = std::sin(t);
   // clang-format off
   const auto R = (Eigen::Matrix3f{} <<
                   1,  0,  0,

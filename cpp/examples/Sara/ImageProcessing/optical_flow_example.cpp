@@ -118,9 +118,9 @@ int __main(int argc, char** argv)
   // Harris cornerness parameters.
   //
   // Blur parameter before gradient calculation.
-  static constexpr auto sigma_D = 0.8f;
+  static const auto sigma_D = std::sqrt(sara::square(1.6f) - 1);
   // Integration domain of the second moment.
-  static constexpr auto sigma_I = 2 * sigma_D;
+  static const auto sigma_I = 2 * sigma_D;
   // Harris cornerness free parameter.
   static constexpr auto kappa = 0.04f;
 

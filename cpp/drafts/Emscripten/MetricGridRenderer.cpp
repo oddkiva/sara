@@ -31,7 +31,7 @@ auto MetricGridRenderer::LineHostData::add_line_segment(
   const Eigen::Vector2f b0 = b + (w * 0.5f + r) * (t + o);
   const Eigen::Vector2f b1 = b + (w * 0.5f + r) * (t - o);
 
-  const auto n = _vertices.size() / 2;
+  const auto n = static_cast<std::uint32_t>(_vertices.size() / 2);
 
   // Store the quad vertices.
   _vertices.push_back(a0.x());

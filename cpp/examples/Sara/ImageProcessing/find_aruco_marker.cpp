@@ -207,7 +207,7 @@ auto __main(int argc, char** argv) -> int
           std::execution::par_unseq,
 #  endif
           M.begin(), M.end(), cornerness.begin(), [kappa](const auto& m) {
-            return m.determinant() - kappa * pow(m.trace(), 2);
+            return m.determinant() - kappa * sara::square(m.trace());
           });
       sara::gradient_in_polar_coordinates(f_blurred, grad_f_norm, grad_f_ori);
 #else

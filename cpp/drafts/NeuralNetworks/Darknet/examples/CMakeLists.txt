@@ -2,8 +2,6 @@ if (NOT SARA_BUILD_VIDEOIO)
   return ()
 endif ()
 
-find_package(DO_Sara COMPONENTS Core Graphics ImageProcessing ImageIO VideoIO REQUIRED)
-
 file(GLOB neuralnetworks_SOURCE_FILES FILES *.cpp)
 
 foreach (file ${neuralnetworks_SOURCE_FILES})
@@ -11,8 +9,11 @@ foreach (file ${neuralnetworks_SOURCE_FILES})
   add_executable(${filename} ${filename}.cpp)
   target_link_libraries(${filename}
     PRIVATE
-    ${DO_Sara_LIBRARIES}
-    ${Boost_LIBRARIES}
+    DO::Sara::Graphics
+    DO::Sara::ImageIO
+    DO::Sara::VideoIO
+    DO::Sara::Darknet
+    Boost::filesystem
     $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
   set_target_properties(${filename}
       PROPERTIES

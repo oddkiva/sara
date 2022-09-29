@@ -446,8 +446,10 @@ namespace DO::Sara {
   inline auto gaussian(const ImageView<T>& src, S sigma,
                        S gauss_truncate = S(4)) -> Image<T>
   {
+    using Channel = typename PixelTraits<T>::channel_type;
     auto dst = Image<T>{src.sizes()};
-    apply_gaussian_filter(src, dst, sigma, gauss_truncate);
+    apply_gaussian_filter(src, dst, static_cast<Channel>(sigma),
+                          static_cast<Channel>(gauss_truncate));
     return dst;
   }
 

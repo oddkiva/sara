@@ -67,7 +67,8 @@ auto test_on_image()
 
     // Blur.
     const auto delta = std::pow(2.f, 1 / 100.f);
-    const auto sigma = 1.6f * sqrt(pow(delta, 2 * s + 2) - pow(delta, 2 * s));
+    const auto sigma = 1.6f * sqrt(pow(delta, static_cast<float>(2 * s + 2)) -
+                                   pow(delta, static_cast<float>(2 * s)));
     image_curr = deriche_blur(image_curr, sigma);
   }
 

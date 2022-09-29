@@ -176,8 +176,8 @@ namespace DO { namespace Sara {
       for (auto s = 0; s < cornerness.scale_count_per_octave(); ++s)
       {
         static const auto scale_factor = 1 / std::sqrt(2.f);
-        const auto& sigma_I = G.scale_relative_to_octave(s);
-        const auto& sigma_D = sigma_I * scale_factor;
+        const auto sigma_I = static_cast<float>(G.scale_relative_to_octave(s));
+        const auto sigma_D = sigma_I * scale_factor;
 
         auto M = G(s, o)
                      .compute<Gradient>()

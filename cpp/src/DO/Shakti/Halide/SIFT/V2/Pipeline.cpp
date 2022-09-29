@@ -23,16 +23,15 @@ namespace DO::Shakti::HalideBackend::v2 {
   {
     scales = std::vector<float>(scale_count + 3);
     for (auto i = 0; i < scale_count + 3; ++i)
-      scales[i] = scale_initial * std::pow(scale_factor, i);
+      scales[i] = scale_initial * std::pow(scale_factor, static_cast<float>(i));
 
     sigmas = std::vector<float>(scale_count + 3);
     for (auto i = 0u; i < sigmas.size(); ++i)
     {
-      sigmas[i] =
-          i == 0
-              ? std::sqrt(std::pow(scale_initial, 2) -
-                          std::pow(scale_camera, 2))
-              : std::sqrt(std::pow(scales[i], 2) - std::pow(scales[i - 1], 2));
+      using DO::Sara::square;
+      sigmas[i] = i == 0
+                      ? std::sqrt(square(scale_initial) - square(scale_camera))
+                      : std::sqrt(square(scales[i]) - square(scales[i - 1]));
     }
 
     kernels = std::vector<::Halide::Runtime::Buffer<float>>{};
