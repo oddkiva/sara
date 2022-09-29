@@ -49,13 +49,17 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
   // Up until now, I have checked manually that the output of each intermediate
   // layers until max_layers are pretty much equal.
   //
-  // Until I implement YOLO correctly, this will fail
-  // - Everything is fine until layer 30
-  // - Layers 31, 32,... 37 are correctly implemented.
-  // - Layer 31 and 38 are the yolo layers, which still fails
-  const auto max_layers = 31;  // std::numeric_limits<std::size_t>::max();
+  // TensorRT offers by default convolution, slice, concatenation
+  //
+  // Upon manual inspection, TensorRT calculates similar results to my CPU
+  // implementation:
+  // - All layers until layer 31 are correct.
+  // - Layers 32,... 37 are correctly implemented.
+  //
+  // The custom YOLO layer are used for layers 31 and 38 and reports correct
+  // results upon manual inspection.
+  const auto max_layers = std::numeric_limits<std::size_t>::max();
   converter(max_layers);
-
 
   // Create an inference configuration object.
   auto config = trt::ConfigUniquePtr{builder->createBuilderConfig(),  //
@@ -117,7 +121,10 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
   std::copy(image_tensor.begin(), image_tensor.end(), u_in_tensor.begin());
 
   // Inspect the TensorRT log output: there is no padding!
-  const auto& out_sizes = hnet.net[max_layers]->output_sizes;
+  const auto& h_layer = max_layers < hnet.net.size()  //
+                            ? *hnet.net[max_layers]
+                            : *hnet.net.back();
+  const auto& out_sizes = h_layer.output_sizes;
   auto u_out_tensor = PinnedTensor<float, 3>{
       out_sizes(1), out_sizes(2), out_sizes(3)  //
   };
@@ -137,9 +144,7 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
   // Wait for the completion of GPU operations.
   cudaStreamSynchronize(*cuda_stream);
 
-  const auto& h_layer = *hnet.net[max_layers];
   const auto& h_out_tensor = h_layer.output;
-
   SARA_DEBUG << "Checking layer = " << h_layer.type << "\n"
              << h_layer << std::endl;
 
@@ -149,6 +154,17 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
   BOOST_CHECK(std::equal(
       h_out_tensor.begin(), h_out_tensor.end(), u_out_tensor.begin(),
       [](const float& a, const float& b) { return std::abs(a - b) < 1e-4f; }));
+
+  for (auto i = 0u; i < 2 * 13 * 13; ++i)
+  {
+    const auto& a = h_out_tensor.data()[i];
+    const auto& b = u_out_tensor.data()[i];
+    if (std::abs(a - b) > 1e-4f)
+      std::cout << sara::format("[OUCH] i=%d me=%f trt=%f\n",  //
+                                i,                             //
+                                h_out_tensor.data()[i],        //
+                                u_out_tensor.data()[i]);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

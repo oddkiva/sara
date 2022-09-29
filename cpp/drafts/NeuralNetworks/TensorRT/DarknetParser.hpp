@@ -281,7 +281,8 @@ namespace DO::Sara::TensorRT {
 
       // Create the plugin field collection.
       auto fields = std::vector<nvinfer1::PluginField>{};
-      const auto num_boxes_per_grid_cell= static_cast<std::int32_t>(yolo_layer.mask.size());
+      const auto num_boxes_per_grid_cell =
+          static_cast<std::int32_t>(yolo_layer.mask.size());
       fields.emplace_back("num_boxes_per_grid_cell", &num_boxes_per_grid_cell,
                           nvinfer1::PluginFieldType::kINT32, 1);
       fields.emplace_back("num_classes", &yolo_layer.classes,
@@ -292,16 +293,17 @@ namespace DO::Sara::TensorRT {
                           nvinfer1::PluginFieldType::kINT32, 1);
       fields.emplace_back("scale_x_y", &yolo_layer.scale_x_y,
                           nvinfer1::PluginFieldType::kFLOAT32, 1);
+      SARA_CHECK(num_boxes_per_grid_cell);
+      SARA_CHECK(yolo_layer.classes);
 
       auto fc = nvinfer1::PluginFieldCollection{};
-      fc.fields= fields.data();
+      fc.fields = fields.data();
       fc.nbFields = static_cast<std::int32_t>(fields.size());
 
       // Create the YOLO plugin.
       const auto yolo_plugin =
           std::unique_ptr<nvinfer1::IPluginV2, decltype(delete_plugin)>{
-              yolo_plugin_creator->createPlugin("", &fc),
-              delete_plugin};
+              yolo_plugin_creator->createPlugin("", &fc), delete_plugin};
       assert(yolo_plugin.get() != nullptr);
 
       auto x = fmaps.back();
@@ -363,7 +365,6 @@ namespace DO::Sara::TensorRT {
           std::cout << *hnet[layer_idx] << std::endl;
           throw std::runtime_error{"TENSORRT LAYER CONVERSION " + layer_type +
                                    " NOT IMPLEMENTED!"};
-          break;
         }
       }
 

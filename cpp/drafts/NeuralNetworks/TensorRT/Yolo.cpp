@@ -41,9 +41,10 @@ namespace DO::Sara::TensorRT {
   {
     try
     {
-      auto plugin = new YoloPlugin{};
+      auto plugin = new YoloPlugin{_num_boxes_per_grid_cell, _num_classes,  //
+                                   _h, _w,                                  //
+                                   _scale_x_y};
       plugin->setPluginNamespace(_namespace.c_str());
-      SARA_DEBUG << "PLUGIN CREATED OK!" << std::endl;
       return plugin;
     }
     catch (const std::exception& e)
@@ -94,7 +95,6 @@ namespace DO::Sara::TensorRT {
     return 0;
   }
 
-  //! TODO
   auto YoloPlugin::enqueue([[maybe_unused]] const std::int32_t batch_size,
                            void const* const* inputs, void* const* outputs,
                            [[maybe_unused]] void* workspace,
@@ -102,35 +102,10 @@ namespace DO::Sara::TensorRT {
   {
     try
     {
-      SARA_DEBUG << "CALLING YOLO IMPLEMENTATION\n";
       const auto in = reinterpret_cast<const float*>(inputs[0]);
       const auto out = reinterpret_cast<float*>(outputs[0]);
-
-      // The image is divided in a grid of size 13x13 or 26x26.
-      // For each cell (i, j) of the grid, the YOLO layer predicts a fixed
-      // number of boxes: typically 3.
-
-      // The YOLO layer predicts a number of features for each of these box:
-      // - four box coordinates: (x, y, w, h)
-      static constexpr auto num_box_coordinates = 4;
-
-      // Using the Bayes rule: Prob[class = i] = Prob[object] x Prob[class = i |
-      // object],
-      //
-      // the YOLO layer estimates the following probabilities:
-      //
-      // - The probability that the box contains an object: 1
-      // - The probability that the box contains an object of class i, if it
-      //   does contain an object.
-      //
-      // There are 80 classes if YOLO is trained on COCO.
-      const auto box_probabilities = 1 + _num_classes;
-      const auto box_features = num_box_coordinates + box_probabilities;
-
-      const auto c = _num_boxes_per_grid_cell * box_features;
-      const auto size = c * _h * _w;
-
-      yolo(in, out, size, c, _h, _w, _num_classes, _scale_x_y, stream);
+      yolo(in, out, _num_boxes_per_grid_cell, _h, _w, _num_classes, _scale_x_y,
+           stream);
 
       return 0;
     }
