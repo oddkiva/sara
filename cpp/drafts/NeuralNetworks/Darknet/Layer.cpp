@@ -157,7 +157,10 @@ auto Convolution::load_weights(FILE* fp, bool inference) -> void
   const auto kernel_weight_count =
       fread(weights.w.data(), sizeof(float), weights.w.size(), fp);
   if (kernel_weight_count != weights.w.size())
+  {
+    std::cout << "Could not read weights for this layer\n" << *this << std::endl;
     throw std::runtime_error{"Failed to read kernel weights!"};
+  }
   if (debug)
   {
     std::cout << "Loading Conv W: " << weights.w.size() << std::endl;

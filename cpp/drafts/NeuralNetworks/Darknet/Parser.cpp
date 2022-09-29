@@ -193,29 +193,36 @@ namespace DO::Sara::Darknet {
   auto NetworkWeightLoader::load(std::vector<std::unique_ptr<Layer>>& net)
       -> void
   {
+    auto i = 0;
     for (auto& layer : net)
     {
       if (auto d = dynamic_cast<Convolution*>(layer.get()))
       {
         if (debug)
           std::cout << "LOADING WEIGHTS FOR CONVOLUTIONAL LAYER:\n"
+                    << "[" << i << "]\n"
                     << *layer << std::endl;
         d->load_weights(fp);
+        ++i;
       }
     }
   }
 
 
-  auto load_yolov4_tiny_model(const boost::filesystem::path& model_dir_path)
-      -> Network
+  auto load_yolov4_tiny_model(const boost::filesystem::path& model_dir_path,
+                              const int version) -> Network
   {
-    const auto cfg_filepath = model_dir_path / "yolov4-tiny.cfg";
-    const auto weights_filepath = model_dir_path / "yolov4-tiny.weights";
+    const auto yolo_name = "yolov" + std::to_string(version) + "-tiny";
+    const auto cfg_filepath = model_dir_path / (yolo_name + ".cfg");
+    const auto weights_filepath = model_dir_path / (yolo_name + ".weights");
 
     auto model = Network{};
     auto& net = model.net;
     net = NetworkParser{}.parse_config_file(cfg_filepath.string());
-    NetworkWeightLoader{weights_filepath.string()}.load(net);
+
+    auto network_weight_loader = NetworkWeightLoader{weights_filepath.string()};
+    network_weight_loader.debug = true;
+    network_weight_loader.load(net);
 
     return model;
   }

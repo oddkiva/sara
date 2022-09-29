@@ -83,7 +83,7 @@ auto test_on_image(int argc, char** argv) -> void
 #endif
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
-  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
+  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models" / "yolov7-tiny";
   const auto image =
       argc < 2
           ? sara::imread<sara::Rgb32f>((data_dir_path / "dog.jpg").string())
@@ -91,7 +91,7 @@ auto test_on_image(int argc, char** argv) -> void
   sara::create_window(image.sizes());
   sara::display(image);
 
-  auto model = sara::Darknet::load_yolov4_tiny_model(yolov4_tiny_dirpath);
+  auto model = sara::Darknet::load_yolov4_tiny_model(yolov4_tiny_dirpath, 7);
 
   sara::display(image);
   const auto dets = detect_objects(image, model);
@@ -131,9 +131,12 @@ auto test_on_video(int argc, char** argv) -> void
   auto frame = video_stream.frame();
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
-  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
-  auto model = sara::Darknet::load_yolov4_tiny_model(yolov4_tiny_dirpath);
-  model.profile = false;
+  const auto yolo_version = 7;
+  const auto yolo_name = "yolov" + std::to_string(yolo_version) + "-tiny";
+  const auto yolo_tiny_dirpath =
+      data_dir_path / "trained_models" / yolo_name;
+  auto model = sara::Darknet::load_yolov4_tiny_model(yolo_tiny_dirpath, yolo_version);
+  model.profile = true;
 
   sara::create_window(frame.sizes());
 
