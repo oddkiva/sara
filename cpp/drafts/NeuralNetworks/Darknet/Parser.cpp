@@ -55,12 +55,17 @@ namespace DO::Sara::Darknet {
       nodes.emplace_back(new Convolution);
     else if (layer_type == "route")
       nodes.emplace_back(new Route);
+    else if (layer_type == "shortcut")
+      nodes.emplace_back(new Shortcut);
     else if (layer_type == "maxpool")
       nodes.emplace_back(new MaxPool);
     else if (layer_type == "upsample")
       nodes.emplace_back(new Upsample);
     else if (layer_type == "yolo")
       nodes.emplace_back(new Yolo);
+    else
+      throw std::runtime_error{"The \"" + layer_type +
+                               "\" layer is not implemented!"};
 
     nodes.back()->type = layer_type;
   }
@@ -89,6 +94,8 @@ namespace DO::Sara::Darknet {
       dynamic_cast<Upsample&>(*nodes.back()).update_output_sizes();
     else if (layer_type == "yolo")
       dynamic_cast<Yolo&>(*nodes.back()).update_output_sizes(nodes);
+    else if (layer_type == "shortcut")
+      dynamic_cast<Shortcut&>(*nodes.back()).update_output_sizes(nodes);
 
     std::cout << "CHECKING CURRENT LAYER: " << std::endl;
     std::cout << *nodes.back() << std::endl;

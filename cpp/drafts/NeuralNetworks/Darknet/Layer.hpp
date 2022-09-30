@@ -174,6 +174,23 @@ namespace DO::Sara::Darknet {
     auto to_output_stream(std::ostream& os) const -> void override;
   };
 
+
+  struct Shortcut : Layer
+  {
+    int from;
+    std::string activation;
+
+    auto update_output_sizes(const std::vector<std::unique_ptr<Layer>>& nodes)
+        -> void;
+
+    auto parse_line(const std::string&) -> void override;
+
+    auto to_output_stream(std::ostream&) const -> void override;
+
+    auto forward(const TensorView_<float, 4>& x)
+        -> const TensorView_<float, 4>& override;
+  };
+
   struct MaxPool : Layer
   {
     int size = 2;

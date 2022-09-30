@@ -143,10 +143,15 @@ auto test_on_video(int argc, char** argv) -> void
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   const auto yolo_version = 4;
-  const auto yolo_name = "yolov" + std::to_string(yolo_version) + "-tiny";
-  const auto yolo_tiny_dirpath = data_dir_path / "trained_models" / yolo_name;
-  auto model = sara::Darknet::load_yolov4_tiny_model(yolo_tiny_dirpath,  //
-                                                     yolo_version);
+  const auto is_tiny = false;
+  auto yolo_name = "yolov" + std::to_string(yolo_version);
+  if (is_tiny)
+    yolo_name += "-tiny";
+  const auto yolo_dirpath = data_dir_path / "trained_models" / yolo_name;
+  auto model = is_tiny ? d::load_yolov4_tiny_model(yolo_dirpath,  //
+                                                   yolo_version)
+                       : d::load_yolo_model(yolo_dirpath, yolo_version);
+
   model.profile = true;
 
   sara::create_window(frame.sizes());

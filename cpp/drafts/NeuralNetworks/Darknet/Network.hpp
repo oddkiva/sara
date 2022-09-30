@@ -164,7 +164,10 @@ namespace DO::Sara::Darknet {
         else if (auto yolo = dynamic_cast<Yolo*>(net[i].get()))
           forward_to_yolo(*yolo, i);
         else
-          break;
+        {
+          throw std::runtime_error{"Layer[" + std::to_string(i) + "] = " +
+                                   net[i]->type + "is not implemented!"};
+        }
 
         if (debug)
           std::cout << std::endl;

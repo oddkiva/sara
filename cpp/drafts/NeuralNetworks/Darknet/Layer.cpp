@@ -158,7 +158,8 @@ auto Convolution::load_weights(FILE* fp, bool inference) -> void
       fread(weights.w.data(), sizeof(float), weights.w.size(), fp);
   if (kernel_weight_count != weights.w.size())
   {
-    std::cout << "Could not read weights for this layer\n" << *this << std::endl;
+    std::cout << "Could not read weights for this layer\n"
+              << *this << std::endl;
     throw std::runtime_error{"Failed to read kernel weights!"};
   }
   if (debug)
@@ -227,7 +228,7 @@ auto Convolution::forward(const TensorView_<float, 4>& x)
   {
   }
   else
-    throw std::runtime_error{"Unsupported activation!"};
+    throw std::runtime_error{"activation: " + activation + " is unsupported!"};
 
   return y;
 }
@@ -291,6 +292,53 @@ auto Route::to_output_stream(std::ostream& os) const -> void
   os << "- group_id       = " << group_id << "\n";
   os << "- input          = " << input_sizes.transpose() << "\n";
   os << "- output         = " << output_sizes.transpose();
+}
+
+
+auto Shortcut::update_output_sizes(
+    const std::vector<std::unique_ptr<Layer>>& nodes) -> void
+{
+  // All layers must have the same width, height, and batch size.
+  // Only the input channels vary.
+  const auto id = from < 0
+                      ? nodes.size() - 1 + from
+                      : from + 1 /* because of the input layer */;
+  input_sizes = nodes[id]->output_sizes;
+  output_sizes = nodes[id]->output_sizes;
+
+  output_sizes = input_sizes;
+  output.resize(output_sizes);
+}
+
+auto Shortcut::parse_line(const std::string& line) -> void
+{
+  auto line_split = std::vector<std::string>{};
+  boost::split(line_split, line, boost::is_any_of("="),
+               boost::token_compress_on);
+  for (auto& str : line_split)
+    boost::trim(str);
+
+  const auto& key = line_split[0];
+  if (key == "from")
+    from = std::stoi(line_split[1]);
+  else if (key == "activation")
+    activation = line_split[1];
+  else
+    throw std::runtime_error{line_split[0] +
+                             "is not a valid field for the shortcut layer!"};
+}
+
+auto Shortcut::to_output_stream(std::ostream& os) const -> void
+{
+  os << "- from           = " << from << "\n";
+  os << "- activation     = " << activation;
+}
+
+auto Shortcut::forward(const TensorView_<float, 4>& x)
+    -> const TensorView_<float, 4>&
+{
+  throw std::runtime_error{"Shortcut::forward not implemented!"};
+  return x;
 }
 
 
@@ -526,10 +574,13 @@ auto Yolo::forward(const TensorView_<float, 4>& x)
     // - channel 2 is the predicted dim   `w` of box 0
     // - channel 3 is the predicted dim   `h` of box 0
     // - channel 4  is the prob that box 0 contains an object
-    // - channel 5  is the prob that box 0 contains an object of class  0 if box 0 does contains an object
-    // - channel 6  is the prob that box 0 contains an object of class  1 if box 0 does contains an object
+    // - channel 5  is the prob that box 0 contains an object of class  0 if box
+    // 0 does contains an object
+    // - channel 6  is the prob that box 0 contains an object of class  1 if box
+    // 0 does contains an object
     // - ...
-    // - channel 84 is the prob that box 0 contains an object of class 80 if box 0 does contains an object
+    // - channel 84 is the prob that box 0 contains an object of class 80 if box
+    // 0 does contains an object
     //
     // - channel 85 + 0 is the predicted coord `x` of box 1
     // - channel 85 + 1 is the predicted coord `y` of box 1
