@@ -108,6 +108,7 @@ auto detect_objects(
 auto test_on_video(int argc, char** argv) -> void
 {
   omp_set_num_threads(omp_get_max_threads());
+  SARA_CHECK(omp_get_max_threads());
 
 #ifdef _WIN32
   const auto video_filepath = sara::select_video_file_from_dialog_box();
