@@ -43,6 +43,9 @@ auto detect_objects(
     const std::array<std::vector<int>, 2>& anchor_masks,
     const std::vector<int>& anchors) -> std::vector<d::YoloBox>
 {
+  // N.B.: this would still be unacceptably slow and a GPU implementation is
+  // still preferrable.
+  // The CPU implementation takes between 5 and 7 ms on a powerful CPU...
   sara::tic();
   auto rgb_tensor = sara::Tensor_<float, 3>{3, image.height(), image.width()};
   const auto rgb = image.data();
