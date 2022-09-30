@@ -31,8 +31,8 @@ BOOST_AUTO_TEST_CASE(test_inference_engine)
   const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
 
   // Convert it into a TensorRT network object.
-  auto serialized_net = trt::convert_yolo_v4_tiny_network_from_darknet(
-      yolov4_tiny_dirpath.string());
+  auto serialized_net = trt::convert_yolo_v4_network_from_darknet(
+      yolov4_tiny_dirpath.string(), true);
   auto inference_engine = trt::InferenceEngine{serialized_net};
 
   // Prepare the input tensor

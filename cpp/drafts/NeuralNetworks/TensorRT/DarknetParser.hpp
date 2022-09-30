@@ -58,7 +58,8 @@ namespace DO::Sara::TensorRT {
                           std::vector<nvinfer1::ITensor*>& fmaps) const -> void;
 
     auto add_maxpool_layer(const int layer_idx,
-                           std::vector<nvinfer1::ITensor*>& fmaps) const -> void;
+                           std::vector<nvinfer1::ITensor*>& fmaps) const
+        -> void;
 
     auto add_upsample_layer(const int layer_idx,
                             std::vector<nvinfer1::ITensor*>& fmaps) const
@@ -72,7 +73,9 @@ namespace DO::Sara::TensorRT {
   };
 
 
-  auto convert_yolo_v4_tiny_network_from_darknet(
-      const std::string& trained_model_dir) -> HostMemoryUniquePtr;
+  auto
+  convert_yolo_v4_network_from_darknet(const std::string& trained_model_dir,
+                                       const bool is_tiny = true)
+      -> HostMemoryUniquePtr;
 
 }  // namespace DO::Sara::TensorRT

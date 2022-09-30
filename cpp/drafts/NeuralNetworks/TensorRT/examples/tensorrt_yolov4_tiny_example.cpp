@@ -132,9 +132,12 @@ auto test_on_video(int argc, char** argv) -> void
   auto frame = video_stream.frame();
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
-  const auto yolo_version = 4;
-  const auto yolo_model = "yolov" + std::to_string(yolo_version) + "-tiny";
-  const auto yolo_dirpath = data_dir_path / "trained_models" / "yolov4-tiny";
+  static constexpr auto yolo_version = 4;
+  static constexpr auto is_tiny = true;
+  auto yolo_model = "yolov" + std::to_string(yolo_version);
+  if (is_tiny)
+    yolo_model += "-tiny";
+  const auto yolo_dirpath = data_dir_path / "trained_models" / yolo_model;
 
   const auto yolo_plan_filepath = yolo_dirpath / (yolo_model + ".plan");
 
@@ -144,8 +147,8 @@ auto test_on_video(int argc, char** argv) -> void
     inference_engine.load_from_plan_file(yolo_plan_filepath.string());
   else
   {
-    const auto serialized_net =
-        trt::convert_yolo_v4_tiny_network_from_darknet(yolo_dirpath.string());
+    const auto serialized_net = trt::convert_yolo_v4_network_from_darknet(
+        yolo_dirpath.string(), is_tiny);
     inference_engine = trt::InferenceEngine{serialized_net};
     trt::write_plan(serialized_net, yolo_plan_filepath.string());
   }

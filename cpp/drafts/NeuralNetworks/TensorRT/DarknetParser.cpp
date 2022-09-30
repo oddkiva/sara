@@ -361,13 +361,16 @@ namespace DO::Sara::TensorRT {
   }
 
 
-  auto convert_yolo_v4_tiny_network_from_darknet(
-      const std::string& trained_model_dir) -> HostMemoryUniquePtr
+  auto convert_yolo_v4_network_from_darknet(
+      const std::string& trained_model_dir, const bool is_tiny)
+      -> HostMemoryUniquePtr
   {
     // Load the CPU implementation.
     static constexpr auto yolo_version = 4;
     auto hnet =
-        Darknet::load_yolov4_tiny_model(trained_model_dir, yolo_version);
+        is_tiny
+            ? Darknet::load_yolov4_tiny_model(trained_model_dir, yolo_version)
+            : Darknet::load_yolo_model(trained_model_dir, yolo_version);
 
     // Create a TensorRT network.
     auto net_builder = make_builder();

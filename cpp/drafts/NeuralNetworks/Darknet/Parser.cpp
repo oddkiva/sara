@@ -227,4 +227,22 @@ namespace DO::Sara::Darknet {
     return model;
   }
 
+  auto load_yolo_model(const boost::filesystem::path& model_dir_path,
+                       const int version) -> Network
+  {
+    const auto yolo_name = "yolov" + std::to_string(version);
+    const auto cfg_filepath = model_dir_path / (yolo_name + ".cfg");
+    const auto weights_filepath = model_dir_path / (yolo_name + ".weights");
+
+    auto model = Network{};
+    auto& net = model.net;
+    net = NetworkParser{}.parse_config_file(cfg_filepath.string());
+
+    auto network_weight_loader = NetworkWeightLoader{weights_filepath.string()};
+    network_weight_loader.debug = true;
+    network_weight_loader.load(net);
+
+    return model;
+  }
+
 }  // namespace DO::Sara::Darknet
