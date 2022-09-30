@@ -15,7 +15,6 @@ foreach(file ${TRT_SOURCE_FILES})
             DO::Sara::ImageIO
             DO::Sara::VideoIO
             DO::Sara::ImageProcessing
-            DO::Sara::Darknet
             DO::Sara::TensorRT
             DO::Shakti::Cuda::MultiArray
             DO::Shakti::Cuda::Utilities)

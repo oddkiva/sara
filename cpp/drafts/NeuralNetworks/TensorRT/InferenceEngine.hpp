@@ -20,15 +20,20 @@
 
 namespace DO::Sara::TensorRT {
 
-  class InferenceExecutor
+  class InferenceEngine
   {
   public:
     template <typename T, int N>
     using PinnedTensor = Tensor_<T, N, Shakti::PinnedMemoryAllocator>;
 
-    InferenceExecutor() = default;
+    InferenceEngine() = default;
 
-    explicit InferenceExecutor(const HostMemoryUniquePtr& serialized_network);
+    explicit InferenceEngine(const std::string& plan_filepath)
+    {
+      load_from_plan_file(plan_filepath);
+    }
+
+    explicit InferenceEngine(const HostMemoryUniquePtr& serialized_network);
 
     auto operator()(const PinnedTensor<float, 3>& in,
                     PinnedTensor<float, 3>& out,  //
@@ -38,7 +43,9 @@ namespace DO::Sara::TensorRT {
                     std::array<PinnedTensor<float, 3>, 2>& out,  //
                     const bool synchronize = true) const -> void;
 
-  // private:
+    auto load_from_plan_file(const std::string& plan_filepath) -> void;
+
+  private:
     CudaStreamUniquePtr _cuda_stream = make_cuda_stream();
     RuntimeUniquePtr _runtime = {nullptr, &runtime_deleter};
     CudaEngineUniquePtr _engine = {nullptr, &engine_deleter};

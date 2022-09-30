@@ -11,7 +11,9 @@
 
 #include <drafts/NeuralNetworks/Darknet/YoloUtilities.hpp>
 #include <drafts/NeuralNetworks/TensorRT/DarknetParser.hpp>
-#include <drafts/NeuralNetworks/TensorRT/InferenceExecutor.hpp>
+#include <drafts/NeuralNetworks/TensorRT/IO.hpp>
+#include <drafts/NeuralNetworks/TensorRT/InferenceEngine.hpp>
+#include <drafts/NeuralNetworks/TensorRT/Yolo.hpp>
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
@@ -20,8 +22,11 @@
 
 #include <boost/filesystem.hpp>
 
+#include <omp.h>
+
 
 namespace sara = DO::Sara;
+namespace s = sara;
 namespace fs = boost::filesystem;
 namespace trt = sara::TensorRT;
 namespace d = sara::Darknet;
@@ -29,32 +34,43 @@ namespace d = sara::Darknet;
 
 // The API.
 auto detect_objects(
-    const sara::ImageView<sara::Rgb32f>& image,
-    const trt::InferenceExecutor& inference_engine,
-    trt::InferenceExecutor::PinnedTensor<float, 3>& cuda_in_tensor,
-    std::array<trt::InferenceExecutor::PinnedTensor<float, 3>, 2>&
+    const sara::ImageView<sara::Rgb8>& image,
+    const trt::InferenceEngine& inference_engine,
+    trt::InferenceEngine::PinnedTensor<float, 3>& cuda_in_tensor,
+    std::array<trt::InferenceEngine::PinnedTensor<float, 3>, 2>&
         cuda_out_tensors,
     const float iou_thres,  //
     const std::array<std::vector<int>, 2>& anchor_masks,
     const std::vector<int>& anchors) -> std::vector<d::YoloBox>
 {
-  // This is the bottleneck.
   sara::tic();
-  const auto image_resized = sara::resize(image, {416, 416});
+  auto rgb_tensor = sara::Tensor_<float, 3>{3, image.height(), image.width()};
+  const auto rgb = image.data();
+  auto r = rgb_tensor[0].data();
+  auto g = rgb_tensor[1].data();
+  auto b = rgb_tensor[2].data();
+  const auto size = static_cast<int>(image.size());
+  if (image.size() != rgb_tensor[0].size())
+    throw 0;
+#pragma omp parallel for
+  for (auto i = 0; i < size; ++i)
+  {
+    r[i] = rgb[i].channel<s::R>() / 255.f;
+    g[i] = rgb[i].channel<s::G>() / 255.f;
+    b[i] = rgb[i].channel<s::B>() / 255.f;
+  }
+  sara::toc("Uint8 Interleaved to Float Planar");
+
+  sara::tic();
+  auto rgb_tensor_resized = sara::TensorView_<float, 3>{cuda_in_tensor.data(),
+                                                        cuda_in_tensor.sizes()};
+  for (auto i = 0; i < 3; ++i)
+  {
+    const auto src = sara::image_view(rgb_tensor[i]);
+    auto dst = sara::image_view(rgb_tensor_resized[i]);
+    sara::resize_v2(src, dst);
+  }
   sara::toc("Image resize");
-
-  sara::tic();
-  const auto image_tensor =
-      sara::tensor_view(image_resized)
-          .reshape(Eigen::Vector4i{1, image_resized.height(),
-                                   image_resized.width(), 3})
-          .transpose({0, 3, 1, 2});
-  sara::toc("Tensor transpose");
-
-  // Copy to the CUDA tensor.
-  sara::tic();
-  std::copy(image_tensor.begin(), image_tensor.end(), cuda_in_tensor.begin());
-  sara::toc("Copy to CUDA tensor");
 
   // Feed the input and outputs to the YOLO v4 tiny network.
   sara::tic();
@@ -68,10 +84,12 @@ auto detect_objects(
   {
     const auto& yolo_out = cuda_out_tensors[i];
     const auto& anchor_mask = anchor_masks[i];
-    const auto dets =
-        d::get_yolo_boxes(yolo_out,              //
-                          anchors, anchor_mask,  //
-                          image_resized.sizes(), image.sizes(), 0.25f);
+    const auto dets = d::get_yolo_boxes(                   //
+        yolo_out,                                          //
+        anchors, anchor_mask,                              //
+        {cuda_in_tensor.size(2), cuda_in_tensor.size(1)},  //
+        image.sizes(),                                     //
+        0.25f);
     detections.insert(detections.end(), dets.begin(), dets.end());
   }
   sara::toc("Postprocess boxes");
@@ -80,14 +98,14 @@ auto detect_objects(
   detections = d::nms(detections, iou_thres);
   sara::toc("NMS");
 
-  SARA_CHECK(iou_thres);
-
   return detections;
 }
 
 
 auto test_on_video(int argc, char** argv) -> void
 {
+  omp_set_num_threads(omp_get_max_threads());
+
 #ifdef _WIN32
   const auto video_filepath = sara::select_video_file_from_dialog_box();
   if (video_filepath.empty())
@@ -110,19 +128,30 @@ auto test_on_video(int argc, char** argv) -> void
   auto frame = video_stream.frame();
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
-  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
-  auto serialized_net = trt::convert_yolo_v4_tiny_network_from_darknet(
-      yolov4_tiny_dirpath.string());
+  const auto yolo_version = 4;
+  const auto yolo_model = "yolov" + std::to_string(yolo_version) + "-tiny";
+  const auto yolo_dirpath = data_dir_path / "trained_models" / "yolov4-tiny";
+
+  const auto yolo_plan_filepath = yolo_dirpath / (yolo_model + ".plan");
 
   // Load the network and get the CUDA inference engine ready.
-  auto inference_executor = trt::InferenceExecutor{serialized_net};
+  auto inference_engine = trt::InferenceEngine{};
+  if (fs::exists(yolo_plan_filepath))
+    inference_engine.load_from_plan_file(yolo_plan_filepath.string());
+  else
+  {
+    const auto serialized_net =
+        trt::convert_yolo_v4_tiny_network_from_darknet(yolo_dirpath.string());
+    inference_engine = trt::InferenceEngine{serialized_net};
+    trt::write_plan(serialized_net, yolo_plan_filepath.string());
+  }
 
   // The CUDA tensors.
   auto cuda_in_tensor =
-      trt::InferenceExecutor::PinnedTensor<float, 3>{3, 416, 416};
+      trt::InferenceEngine::PinnedTensor<float, 3>{3, 416, 416};
   auto cuda_out_tensors = std::array{
-      trt::InferenceExecutor::PinnedTensor<float, 3>{255, 13, 13},
-      trt::InferenceExecutor::PinnedTensor<float, 3>{255, 26, 26}  //
+      trt::InferenceEngine::PinnedTensor<float, 3>{255, 13, 13},
+      trt::InferenceEngine::PinnedTensor<float, 3>{255, 26, 26}  //
   };
 
   const auto yolo_masks = std::array{
@@ -155,13 +184,9 @@ auto test_on_video(int argc, char** argv) -> void
       continue;
 
     sara::tic();
-    const auto frame32f = video_stream.frame().convert<sara::Rgb32f>();
-    sara::toc("Color conversion");
-
-    sara::tic();
     auto dets = detect_objects(            //
-        frame32f,                          //
-        inference_executor,                //
+        video_stream.frame(),              //
+        inference_engine,                  //
         cuda_in_tensor, cuda_out_tensors,  //
         iou_thres, yolo_masks, yolo_anchors);
     sara::toc("Object detection");

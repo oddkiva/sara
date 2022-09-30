@@ -38,8 +38,10 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
 
   // Load the network on the host device (CPU).
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
-  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
-  auto hnet = d::load_yolov4_tiny_model(yolov4_tiny_dirpath);
+  static const auto yolo_version = 4;
+  const auto yolo_model = "yolov" + std::to_string(yolo_version) + "-tiny";
+  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models" / yolo_model;
+  auto hnet = d::load_yolov4_tiny_model(yolov4_tiny_dirpath, yolo_version);
 
   // Convert the network to TensorRT (GPU).
   auto converter = trt::YoloV4TinyConverter{network.get(), hnet.net};

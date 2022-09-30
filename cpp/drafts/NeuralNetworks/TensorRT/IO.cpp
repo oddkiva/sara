@@ -11,6 +11,9 @@
 
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 
+#include <fstream>
+#include <sstream>
+
 
 namespace DO::Sara::TensorRT {
 
@@ -34,6 +37,23 @@ namespace DO::Sara::TensorRT {
       throw std::runtime_error{"Failed to build TensorRT plan!"};
 
     return plan;
+  }
+
+  auto write_plan(const HostMemoryUniquePtr& model_weights,
+                  const std::string& model_weights_filepath) -> void
+  {
+    // Save in the disk.
+    auto model_weights_stream = std::stringstream{};
+    model_weights_stream.seekg(0, model_weights_stream.beg);
+    model_weights_stream.write(
+        reinterpret_cast<const char*>(model_weights->data()),
+        model_weights->size());
+
+    auto model_weights_file = std::ofstream{
+        model_weights_filepath, std::ofstream::out | std::ofstream::binary};
+    if (!model_weights_file)
+      throw std::runtime_error{"Failed to create model weights file!"};
+    model_weights_file << model_weights_stream.rdbuf();
   }
 
 }  // namespace DO::Sara::TensorRT

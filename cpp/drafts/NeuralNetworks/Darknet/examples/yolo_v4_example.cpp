@@ -33,27 +33,37 @@ namespace fs = boost::filesystem;
 
 
 // The API.
-auto detect_objects(const sara::ImageView<sara::Rgb32f>& image,
+auto detect_objects(const sara::ImageView<sara::Rgb8>& image,
                     sara::Darknet::Network& model)
 {
   auto& net = model.net;
   const auto& input_layer =
       dynamic_cast<const sara::Darknet::Input&>(*net.front());
 
-  // Resize the image to the network input sizes.
-  // TODO: optimize later.
-  const auto image_resized =
-      sara::resize(image, {input_layer.width(), input_layer.height()});
-  const auto image_tensor =
-      sara::tensor_view(image_resized)
-          .reshape(Eigen::Vector4i{1, image_resized.height(),
-                                   image_resized.width(), 3})
-          .transpose({0, 3, 1, 2});
+  sara::tic();
+  const auto image_transposed = sara::tensor_view(image).transpose({2, 0, 1});
+  static_assert(std::is_same_v<decltype(image_transposed),
+                               const sara::Tensor_<std::uint8_t, 3>>);
+  sara::toc("Image transpose");
+
+  sara::tic();
+  auto rgb_tensor = image_transposed.cwise_transform(
+      [](const std::uint8_t& v) { return v / 255.f; });
+  sara::toc("Image channel conversion");
+
+  sara::tic();
+  auto rgb_tensor_resized = sara::Tensor_<float, 4>{
+      {1, 3, input_layer.height(), input_layer.width()}};
+  for (auto i = 0; i < 3; ++i)
+  {
+    const auto src = sara::image_view(rgb_tensor[i]);
+    auto dst = sara::image_view(rgb_tensor_resized[0][i]);
+    sara::resize_v2(src, dst);
+  }
+  sara::toc("Image resize");
 
   // Feed the input to the network.
-  // TODO: optimize this method to avoid recopying again or better, eliminate
-  // the input layer.
-  model.forward(image_tensor);
+  model.forward(rgb_tensor_resized);
 
   // Accumulate all the detection from each YOLO layer.
   auto detections = std::vector<d::YoloBox>{};
@@ -61,10 +71,11 @@ auto detect_objects(const sara::ImageView<sara::Rgb32f>& image,
   {
     if (const auto yolo = dynamic_cast<const sara::Darknet::Yolo*>(layer.get()))
     {
-      const auto dets = d::get_yolo_boxes(       //
-          yolo->output[0],                       //
-          yolo->anchors, yolo->mask,             //
-          image_resized.sizes(), image.sizes(),  //
+      const auto dets = d::get_yolo_boxes(                           //
+          yolo->output[0],                                           //
+          yolo->anchors, yolo->mask,                                 //
+          {rgb_tensor_resized.size(3), rgb_tensor_resized.size(2)},  //
+          image.sizes(),                                             //
           0.25f);
       detections.insert(detections.end(), dets.begin(), dets.end());
     }
@@ -83,11 +94,11 @@ auto test_on_image(int argc, char** argv) -> void
 #endif
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
-  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models" / "yolov7-tiny";
+  const auto yolov4_tiny_dirpath =
+      data_dir_path / "trained_models" / "yolov7-tiny";
   const auto image =
-      argc < 2
-          ? sara::imread<sara::Rgb32f>((data_dir_path / "dog.jpg").string())
-          : sara::imread<sara::Rgb32f>(argv[1]);
+      argc < 2 ? sara::imread<sara::Rgb8>((data_dir_path / "dog.jpg").string())
+               : sara::imread<sara::Rgb8>(argv[1]);
   sara::create_window(image.sizes());
   sara::display(image);
 
@@ -131,11 +142,11 @@ auto test_on_video(int argc, char** argv) -> void
   auto frame = video_stream.frame();
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
-  const auto yolo_version = 7;
+  const auto yolo_version = 4;
   const auto yolo_name = "yolov" + std::to_string(yolo_version) + "-tiny";
-  const auto yolo_tiny_dirpath =
-      data_dir_path / "trained_models" / yolo_name;
-  auto model = sara::Darknet::load_yolov4_tiny_model(yolo_tiny_dirpath, yolo_version);
+  const auto yolo_tiny_dirpath = data_dir_path / "trained_models" / yolo_name;
+  auto model = sara::Darknet::load_yolov4_tiny_model(yolo_tiny_dirpath,  //
+                                                     yolo_version);
   model.profile = true;
 
   sara::create_window(frame.sizes());
@@ -157,11 +168,7 @@ auto test_on_video(int argc, char** argv) -> void
       continue;
 
     sara::tic();
-    const auto frame32f = video_stream.frame().convert<sara::Rgb32f>();
-    sara::toc("Color conversion");
-
-    sara::tic();
-    auto dets = detect_objects(frame32f, model);
+    auto dets = detect_objects(video_stream.frame(), model);
     sara::toc("Yolo");
 
     sara::display(frame);

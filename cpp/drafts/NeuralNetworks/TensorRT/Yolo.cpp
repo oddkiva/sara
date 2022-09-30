@@ -23,11 +23,11 @@ namespace DO::Sara::TensorRT {
 
   auto YoloPlugin::getOutputDataType(
       [[maybe_unused]] const std::int32_t output_index,
-      const nvinfer1::DataType* input_types,
+      [[maybe_unused]] const nvinfer1::DataType* input_types,
       [[maybe_unused]] const std::int32_t num_inputs) const noexcept
       -> nvinfer1::DataType
   {
-    return input_types[0];
+    return nvinfer1::DataType::kFLOAT;  // input_types[0];
   }
 
   auto YoloPlugin::isOutputBroadcastAcrossBatch(
@@ -126,11 +126,11 @@ namespace DO::Sara::TensorRT {
 
   auto YoloPlugin::getSerializationSize() const noexcept -> size_t
   {
-    const auto yolo_parameter_byte_size =   //
-        sizeof(_num_boxes_per_grid_cell) +  //
-        sizeof(_num_classes) +              //
-        sizeof(_h) +                        //
-        sizeof(_w) +                        //
+    static constexpr auto yolo_parameter_byte_size =  //
+        sizeof(_num_boxes_per_grid_cell) +            //
+        sizeof(_num_classes) +                        //
+        sizeof(_h) +                                  //
+        sizeof(_w) +                                  //
         sizeof(_scale_x_y);
     return yolo_parameter_byte_size;
   }

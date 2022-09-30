@@ -365,7 +365,9 @@ namespace DO::Sara::TensorRT {
       const std::string& trained_model_dir) -> HostMemoryUniquePtr
   {
     // Load the CPU implementation.
-    auto hnet = Darknet::load_yolov4_tiny_model(trained_model_dir);
+    static constexpr auto yolo_version = 4;
+    auto hnet =
+        Darknet::load_yolov4_tiny_model(trained_model_dir, yolo_version);
 
     // Create a TensorRT network.
     auto net_builder = make_builder();
@@ -375,9 +377,8 @@ namespace DO::Sara::TensorRT {
     auto converter = YoloV4TinyConverter{net.get(), hnet.net};
     converter();
 
-    auto serialized_net = serialize_network_into_plan(net_builder, net,  //
-                                                      /* use_fp16 */ false);
-    return serialized_net;
+    return serialize_network_into_plan(net_builder, net,  //
+                                       /* use_fp16 */ false);
   }
 
 }  // namespace DO::Sara::TensorRT

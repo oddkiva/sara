@@ -7,8 +7,8 @@ add_library(
   Helpers.hpp #
   IO.hpp #
   IO.cpp #
-  InferenceExecutor.hpp #
-  InferenceExecutor.cpp #
+  InferenceEngine.hpp #
+  InferenceEngine.cpp #
   DarknetParser.hpp #
   DarknetParser.cpp #
   Yolo.cpp

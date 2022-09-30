@@ -48,4 +48,7 @@ namespace DO::Sara::TensorRT {
                                    const bool use_fp16 = false)
       -> HostMemoryUniquePtr;
 
+  auto write_plan(const HostMemoryUniquePtr& model_weights,
+                  const std::string& model_weights_filepath) -> void;
+
 }  // namespace DO::Sara::TensorRT
