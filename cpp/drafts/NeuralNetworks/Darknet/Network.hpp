@@ -144,6 +144,24 @@ namespace DO::Sara::Darknet {
         toc("Upsample");
     }
 
+    inline auto forward_to_shortcut(Darknet::Shortcut& shortcut, int i) -> void
+    {
+      if (profile)
+        tic();
+
+      const auto i1 = i - 1;
+      const auto i2 = shortcut.from < 0  //
+                          ? i + shortcut.from
+                          : shortcut.from;
+      const auto& fx = net[i1]->output;
+      const auto& x = net[i2]->output;
+      shortcut.forward(fx, x);
+
+      if (profile)
+        toc("Shortcut");
+    }
+
+
     inline auto forward(const TensorView_<float, 4>& x) -> void
     {
       net[0]->output = x;
@@ -163,10 +181,12 @@ namespace DO::Sara::Darknet {
           forward_to_upsample(*upsample, i);
         else if (auto yolo = dynamic_cast<Yolo*>(net[i].get()))
           forward_to_yolo(*yolo, i);
+        else if (auto shortcut = dynamic_cast<Shortcut*>(net[i].get()))
+          forward_to_shortcut(*shortcut, i);
         else
         {
           throw std::runtime_error{"Layer[" + std::to_string(i) + "] = " +
-                                   net[i]->type + "is not implemented!"};
+                                   net[i]->type + " is not implemented!"};
         }
 
         if (debug)

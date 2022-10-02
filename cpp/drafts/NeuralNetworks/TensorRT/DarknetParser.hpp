@@ -13,7 +13,6 @@
 
 #include <drafts/NeuralNetworks/Darknet/Network.hpp>
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
-#include <drafts/NeuralNetworks/TensorRT/Yolo.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
@@ -56,6 +55,9 @@ namespace DO::Sara::TensorRT {
 
     auto add_concat_layer(const int layer_idx,
                           std::vector<nvinfer1::ITensor*>& fmaps) const -> void;
+
+    auto add_shortcut_layer(const int layer_idx,
+                            std::vector<nvinfer1::ITensor*>& fmaps) const -> void;
 
     auto add_maxpool_layer(const int layer_idx,
                            std::vector<nvinfer1::ITensor*>& fmaps) const

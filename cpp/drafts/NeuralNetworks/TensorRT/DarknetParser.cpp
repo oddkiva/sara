@@ -12,6 +12,8 @@
 #include <drafts/NeuralNetworks/Darknet/Parser.hpp>
 #include <drafts/NeuralNetworks/TensorRT/DarknetParser.hpp>
 #include <drafts/NeuralNetworks/TensorRT/IO.hpp>
+#include <drafts/NeuralNetworks/TensorRT/Mish.hpp>
+#include <drafts/NeuralNetworks/TensorRT/Yolo.hpp>
 
 
 namespace DO::Sara::TensorRT {
@@ -90,10 +92,51 @@ namespace DO::Sara::TensorRT {
       // Do nothing, the linear activation layer is the identity function:
       // x |-> x.
     }
+    else if (activation_layer == "mish")
+    {
+      const auto plugin_registry = getPluginRegistry();
+      assert(plugin_registry != nullptr);
+      const auto mish_plugin_creator = plugin_registry->getPluginCreator(
+          MishPlugin::name, MishPlugin::version);
+      assert(mish_plugin_creator != nullptr);
+
+      static constexpr auto delete_plugin =
+          [](nvinfer1::IPluginV2* const plugin) { plugin->destroy(); };
+      SARA_DEBUG << "Creating TensorRT-Mish plugin...\n";
+
+      // Create the plugin field collection.
+      auto fields = std::vector<nvinfer1::PluginField>{};
+
+
+      const auto d = y->getDimensions();
+      auto inout_size =
+          std::accumulate(d.d, d.d + d.nbDims, 1, std::multiplies<int>{});
+      fields.emplace_back("inout_size", &inout_size,
+                          nvinfer1::PluginFieldType::kINT32, 1);
+
+      auto fc = nvinfer1::PluginFieldCollection{};
+      fc.fields = fields.data();
+      fc.nbFields = static_cast<std::int32_t>(fields.size());
+
+      // Create the Mish activation plugin.
+      const auto mish_plugin =
+          std::unique_ptr<nvinfer1::IPluginV2, decltype(delete_plugin)>{
+              mish_plugin_creator->createPlugin("", &fc), delete_plugin};
+      assert(mish_plugin.get() != nullptr);
+      SARA_CHECK(mish_plugin->getPluginType());
+
+      auto trt_mish_layer = tnet->addPluginV2(&y, 1, *mish_plugin);
+
+      auto mish_layer_name = "mish"s;
+      if (name.has_value())
+        mish_layer_name = *name + "/" + mish_layer_name;
+
+      trt_mish_layer->setName(mish_layer_name.c_str());
+      y = trt_mish_layer->getOutput(0);
+    }
     else
       throw std::invalid_argument{"activation layer: " + activation_layer +
                                   " is not implemented!"};
-
 
     // The output.
     return y;
@@ -187,8 +230,41 @@ namespace DO::Sara::TensorRT {
     const auto trt_concat_layer = tnet->addConcatenation(xs.data(), xs.size());
     trt_concat_layer->setName(("concat_" + std::to_string(layer_idx)).c_str());
 
+    for (const auto& x: xs)
+    {
+      SARA_DEBUG << "TRT X Shape: " << shape(*x).transpose() << std::endl;
+    }
+
     const auto y = trt_concat_layer->getOutput(0);
     fmaps.push_back(y);
+    SARA_DEBUG << "TRT Shape " << layer_idx << " : "
+               << shape(*fmaps.back()).transpose() << std::endl;
+  }
+
+  auto YoloV4TinyConverter::add_shortcut_layer(
+      const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
+  {
+    const auto& shortcut_layer =
+        dynamic_cast<const Darknet::Shortcut&>(*hnet[layer_idx]);
+    SARA_DEBUG << "convert route-concat layer " << layer_idx << "("
+               << shortcut_layer.type << ")" << std::endl;
+    std::cout << shortcut_layer << std::endl;
+
+    auto xs = std::vector<nvinfer1::ITensor*>{};
+
+    const auto i1 = layer_idx - 1;
+    const auto i2 = shortcut_layer.from < 0  //
+                        ? layer_idx + shortcut_layer.from
+                        : shortcut_layer.from;
+
+    auto fx = fmaps[i1];
+    auto x = fmaps[i2];
+
+    const auto trt_sum_layer =
+        tnet->addElementWise(*fx, *x, nvinfer1::ElementWiseOperation::kSUM);
+    const auto y = trt_sum_layer->getOutput(0);
+    fmaps.push_back(y);
+
     SARA_DEBUG << "TRT Shape " << layer_idx << " : "
                << shape(*fmaps.back()).transpose() << std::endl;
   }
@@ -204,11 +280,14 @@ namespace DO::Sara::TensorRT {
 
     const auto size = maxpool_layer.size;
     const auto stride = maxpool_layer.stride;
+    SARA_CHECK(stride);
+    const auto padding_size = size % 2 == 0 ? (size - 1) / 2 : size / 2;
 
     const auto x = fmaps.back();
     auto trt_maxpool_layer = tnet->addPoolingNd(*x, nvinfer1::PoolingType::kMAX,
                                                 nvinfer1::DimsHW{size, size});
     trt_maxpool_layer->setStrideNd(nvinfer1::DimsHW{stride, stride});
+    trt_maxpool_layer->setPaddingNd(nvinfer1::DimsHW{padding_size, padding_size});
 
     trt_maxpool_layer->setName(
         ("maxpool_" + std::to_string(layer_idx)).c_str());
@@ -340,6 +419,10 @@ namespace DO::Sara::TensorRT {
         else
           add_concat_layer(layer_idx, fmaps);
       }
+      else if (layer_type == "shortcut")
+      {
+        add_shortcut_layer(layer_idx, fmaps);
+      }
       else if (layer_type == "maxpool")
         add_maxpool_layer(layer_idx, fmaps);
       else if (layer_type == "upsample")
@@ -358,11 +441,15 @@ namespace DO::Sara::TensorRT {
                                  " NOT IMPLEMENTED!"};
       }
     }
+
+    if (max_layers != std::numeric_limits<std::size_t>::max())
+      tnet->markOutput(*fmaps.back());
   }
 
 
-  auto convert_yolo_v4_network_from_darknet(
-      const std::string& trained_model_dir, const bool is_tiny)
+  auto
+  convert_yolo_v4_network_from_darknet(const std::string& trained_model_dir,
+                                       const bool is_tiny)
       -> HostMemoryUniquePtr
   {
     // Load the CPU implementation.

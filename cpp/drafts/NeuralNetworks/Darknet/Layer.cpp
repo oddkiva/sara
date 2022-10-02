@@ -227,6 +227,13 @@ auto Convolution::forward(const TensorView_<float, 4>& x)
   else if (activation == "linear")
   {
   }
+  else if (activation == "mish")
+  {
+    y.cwise_transform_inplace([](float& v) {
+      const auto softplus = std::log(1 + std::exp(v));
+      v = v * std::tanh(softplus);
+    });
+  }
   else
     throw std::runtime_error{"activation: " + activation + " is unsupported!"};
 
@@ -334,11 +341,11 @@ auto Shortcut::to_output_stream(std::ostream& os) const -> void
   os << "- activation     = " << activation;
 }
 
-auto Shortcut::forward(const TensorView_<float, 4>& x)
+auto Shortcut::forward(const TensorView_<float, 4>& fx, const TensorView_<float, 4>& x)
     -> const TensorView_<float, 4>&
 {
-  throw std::runtime_error{"Shortcut::forward not implemented!"};
-  return x;
+  output.flat_array() = fx.flat_array() + x.flat_array();
+  return output;
 }
 
 
@@ -377,25 +384,37 @@ auto MaxPool::forward(const TensorView_<float, 4>& x)
     -> const TensorView_<float, 4>&
 {
   auto& y = output;
-  if (size != 2)
-    throw std::runtime_error{
-        "MaxPool implementation incomplete! size must be 2"};
 
   const auto start = Eigen::Vector4i::Zero().eval();
   const auto& end = x.sizes();
   const auto steps = (Eigen::Vector4i{} << 1, 1, stride, stride).finished();
 
-  const auto infx = make_infinite(x, make_constant_padding(0.f));
+  // Yes this is how Darknet implements it.
+  const auto infx = make_infinite(
+      x, make_constant_padding(-std::numeric_limits<float>::max()));
 
   auto xi = infx.begin_stepped_subarray(start, end, steps);
   auto yi = y.begin();
   for (; yi != y.end(); ++yi, ++xi)
   {
     const auto& p = xi.position();
-    const Matrix<int, 4, 1> s = p;
-    const Matrix<int, 4, 1> e = p + Eigen::Vector4i{1, 1, size, size};
+    Matrix<int, 4, 1> s = p;
+    const auto half_size = size % 2 == 0 ? (size - 1) / 2 : size / 2;
+    s(2) -= half_size;
+    s(3) -= half_size;
+    const Matrix<int, 4, 1> e = s + Eigen::Vector4i{1, 1, size, size};
 
-    auto x_arr = std::array<float, 4>{};
+    static constexpr auto max_size = 20 * 20;
+    auto x_arr = std::array<float, max_size>{};
+
+    const Matrix<int, 4, 1> size_4d = e - s;
+    const std::size_t size = std::accumulate(size_4d.data(), size_4d.data() + 4,
+                                             1, std::multiplies<int>{});
+
+    if (x_arr.size() < size)
+      throw std::runtime_error{
+          "MAXPOOL INTERNAL SIZE LIMIT REACHED: please increase "
+          "the stack size"};
     auto samples = TensorView_<float, 4>{x_arr.data(), e - s};
     crop(samples, infx, s, e);
 

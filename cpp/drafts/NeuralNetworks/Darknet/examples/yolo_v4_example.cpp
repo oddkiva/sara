@@ -71,6 +71,7 @@ auto detect_objects(const sara::ImageView<sara::Rgb8>& image,
   {
     if (const auto yolo = dynamic_cast<const sara::Darknet::Yolo*>(layer.get()))
     {
+      std::cout << *yolo << std::endl;
       const auto dets = d::get_yolo_boxes(                           //
           yolo->output[0],                                           //
           yolo->anchors, yolo->mask,                                 //
@@ -152,7 +153,7 @@ auto test_on_video(int argc, char** argv) -> void
                                                    yolo_version)
                        : d::load_yolo_model(yolo_dirpath, yolo_version);
 
-  model.profile = true;
+  model.profile = false;
 
   sara::create_window(frame.sizes());
 

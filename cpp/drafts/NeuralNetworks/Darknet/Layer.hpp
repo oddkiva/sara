@@ -187,8 +187,8 @@ namespace DO::Sara::Darknet {
 
     auto to_output_stream(std::ostream&) const -> void override;
 
-    auto forward(const TensorView_<float, 4>& x)
-        -> const TensorView_<float, 4>& override;
+    auto forward(const TensorView_<float, 4>& fx, const TensorView_<float, 4>& x)
+        -> const TensorView_<float, 4>&;
   };
 
   struct MaxPool : Layer

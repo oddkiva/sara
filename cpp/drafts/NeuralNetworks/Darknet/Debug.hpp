@@ -53,10 +53,12 @@ namespace DO::Sara::Darknet {
       return ss.str();
     };
 
-    auto outputs = std::vector<Tensor_<float, 4>>(38);
+    auto outputs = std::vector<Tensor_<float, 4>>(200);
     for (auto i = 0u; i < outputs.size(); ++i)
     {
       const auto filepath = fs::path{dir_path} / (stringify(i) + ".bin");
+      if (!fs::exists(filepath))
+        break;
       std::cout << "Parsing " << filepath << std::endl;
       outputs[i] = Darknet::read_tensor(filepath.string());
     }
@@ -82,7 +84,9 @@ namespace DO::Sara::Darknet {
   inline auto check_against_ground_truth(
       const TensorView_<float, 4>& gt,  // ground-truth
       const TensorView_<float, 4>& me,  // my implementation
-      const Eigen::Vector2i& sizes)
+      const Eigen::Vector2i& sizes,
+      const float max_diff_thres = 7e-5f,
+      const bool show_error_stats = false)
   {
     auto reformat = [&sizes](const auto& y) {
       const auto y_i = y;
@@ -90,6 +94,11 @@ namespace DO::Sara::Darknet {
       const auto im_i_rescaled = resize(color_rescale(im_i), sizes);
       return im_i_rescaled;
     };
+
+    const auto num_channels = gt.size(1);
+    SARA_CHECK(num_channels);
+    SARA_CHECK(gt.sizes().transpose());
+    SARA_CHECK(me.sizes().transpose());
 
     for (auto i = 0; i < gt.size(1); ++i)
     {
@@ -101,19 +110,7 @@ namespace DO::Sara::Darknet {
       const auto min_diff = diff.matrix().cwiseAbs().minCoeff();
       const auto max_diff = diff.matrix().cwiseAbs().maxCoeff();
 
-      if (false)
-      {
-        std::cout << "residual " << i << " = " << residual << std::endl;
-        std::cout << "min residual value " << i << " = " << min_diff
-                  << std::endl;
-        std::cout << "max residual value " << i << " = " << max_diff
-                  << std::endl;
-
-        std::cout << "GT\n" << gt[0][i].matrix().block(0, 0, 5, 5) << std::endl;
-        std::cout << "ME\n" << me[0][i].matrix().block(0, 0, 5, 5) << std::endl;
-      }
-
-      if (max_diff > 6e-5f)
+      if (max_diff > max_diff_thres)
       {
         // Resize and color rescale the data to show it nicely.
         const auto im1 = reformat(gt[0][i]);
@@ -125,6 +122,22 @@ namespace DO::Sara::Darknet {
         display(imdiff, {2 * im1.width(), 0});
 
         get_key();
+
+        if (show_error_stats)
+        {
+          std::cout << "ERROR STAT SUMMARY (channel " << i << ")" << std::endl;
+          std::cout << "residual " << i << " = " << residual << std::endl;
+          std::cout << "min residual value " << i << " = " << min_diff
+                    << std::endl;
+          std::cout << "max residual value " << i << " = " << max_diff
+                    << std::endl;
+
+          std::cout << "GT\n"
+                    << gt[0][i].matrix().block(0, 0, 5, 5) << std::endl;
+          std::cout << "ME\n"
+                    << me[0][i].matrix().block(0, 0, 5, 5) << std::endl;
+        }
+
         throw std::runtime_error{"FISHY COMPUTATION ERROR!"};
       }
     }
@@ -145,6 +158,8 @@ namespace DO::Sara::Darknet {
     {
       if (auto conv = dynamic_cast<const Convolution*>(net[i].get()))
       {
+        SARA_DEBUG << "Checking convolution weights " << i << std::endl;
+
         const auto weights_fp =
             data_dirpath + "/kernel-" + stringify(i - 1) + ".bin";
         const auto biases_fp =
@@ -156,56 +171,13 @@ namespace DO::Sara::Darknet {
         const auto diffb = (conv->weights.b - b.vector()).norm();
         const auto diffw = (conv->weights.w.vector() - w.vector()).norm();
 
-        if (diffb > 5e-6f || diffw > 5e-6f)
+        if (diffb > 5e-6f || diffw > 1e-5f)
         {
           std::cout << i << " diffb = " << diffb << std::endl;
           std::cout << i << " diffw = " << diffw << std::endl;
           throw std::runtime_error{"Error: convolutional weights are wrong!"};
         }
       }
-    }
-  }
-
-  inline auto check_yolov4_tiny_implementation(Network& model,
-                                               const std::string& output_dir)
-  {
-    namespace fs = boost::filesystem;
-
-    if (!fs::exists(output_dir))
-      throw std::runtime_error{"Ouput directory " + output_dir +
-                               "does not exist!"};
-
-    // Check the weights.
-    check_convolutional_weights(model, output_dir);
-
-    const auto x = Darknet::read_tensor(               //
-        (fs::path{output_dir} / "input.bin").string()  //
-    );
-    const auto xt = x.transpose({0, 2, 3, 1});
-
-    const auto image = ImageView<Rgb32f>{
-        reinterpret_cast<Rgb32f*>(const_cast<float*>(xt.data())),
-        {xt.size(2), xt.size(1)}};
-    const auto& image_resized = image;
-
-    create_window(3 * image.width(), image.height());
-    display(image);
-    get_key();
-
-    model.debug = true;
-    model.forward(x);
-
-    // Compare my layer outputs with Darknet's.
-    const auto gt = read_all_intermediate_outputs(output_dir);
-
-    const auto& net = model.net;
-    for (auto layer = 1u; layer < net.size(); ++layer)
-    {
-      std::cout << "CHECKING LAYER " << layer << ": " << net[layer]->type
-                << std::endl
-                << *net[layer] << std::endl;
-      check_against_ground_truth(gt[layer - 1], net[layer]->output,
-                                 image_resized.sizes());
     }
   }
 

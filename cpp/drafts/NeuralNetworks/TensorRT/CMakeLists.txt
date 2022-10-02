@@ -11,6 +11,8 @@ add_library(
   InferenceEngine.cpp #
   DarknetParser.hpp #
   DarknetParser.cpp #
+  Mish.hpp
+  Mish.cu
   Yolo.cpp
   Yolo.hpp
   YoloImpl.hpp

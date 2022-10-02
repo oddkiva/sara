@@ -40,7 +40,7 @@ namespace DO::Sara::TensorRT {
                     const bool synchronize = true) const -> void;
 
     auto operator()(const PinnedTensor<float, 3>& in,
-                    std::array<PinnedTensor<float, 3>, 2>& out,  //
+                    std::vector<PinnedTensor<float, 3>>& out,  //
                     const bool synchronize = true) const -> void;
 
     auto load_from_plan_file(const std::string& plan_filepath) -> void;

@@ -37,10 +37,9 @@ auto detect_objects(
     const sara::ImageView<sara::Rgb8>& image,
     const trt::InferenceEngine& inference_engine,
     trt::InferenceEngine::PinnedTensor<float, 3>& cuda_in_tensor,
-    std::array<trt::InferenceEngine::PinnedTensor<float, 3>, 2>&
-        cuda_out_tensors,
+    std::vector<trt::InferenceEngine::PinnedTensor<float, 3>>& cuda_out_tensors,
     const float iou_thres,  //
-    const std::array<std::vector<int>, 2>& anchor_masks,
+    const std::vector<std::vector<int>>& anchor_masks,
     const std::vector<int>& anchors) -> std::vector<d::YoloBox>
 {
   // N.B.: this would still be unacceptably slow and a GPU implementation is
@@ -133,7 +132,7 @@ auto test_on_video(int argc, char** argv) -> void
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   static constexpr auto yolo_version = 4;
-  static constexpr auto is_tiny = true;
+  static constexpr auto is_tiny = false;
   auto yolo_model = "yolov" + std::to_string(yolo_version);
   if (is_tiny)
     yolo_model += "-tiny";
@@ -143,9 +142,9 @@ auto test_on_video(int argc, char** argv) -> void
 
   // Load the network and get the CUDA inference engine ready.
   auto inference_engine = trt::InferenceEngine{};
-  if (fs::exists(yolo_plan_filepath))
-    inference_engine.load_from_plan_file(yolo_plan_filepath.string());
-  else
+  // if (fs::exists(yolo_plan_filepath))
+  //   inference_engine.load_from_plan_file(yolo_plan_filepath.string());
+  // else
   {
     const auto serialized_net = trt::convert_yolo_v4_network_from_darknet(
         yolo_dirpath.string(), is_tiny);
@@ -153,26 +152,61 @@ auto test_on_video(int argc, char** argv) -> void
     trt::write_plan(serialized_net, yolo_plan_filepath.string());
   }
 
-  // The CUDA tensors.
-  auto cuda_in_tensor =
-      trt::InferenceEngine::PinnedTensor<float, 3>{3, 416, 416};
-  auto cuda_out_tensors = std::array{
-      trt::InferenceEngine::PinnedTensor<float, 3>{255, 13, 13},
-      trt::InferenceEngine::PinnedTensor<float, 3>{255, 26, 26}  //
-  };
+  auto cuda_in_tensor = trt::InferenceEngine::PinnedTensor<float, 3>{};
+  auto cuda_out_tensors =
+      std::vector<trt::InferenceEngine::PinnedTensor<float, 3>>{};
+  auto yolo_masks = std::vector<std::vector<int>>{};
+  auto yolo_anchors = std::vector<int>{};
 
-  const auto yolo_masks = std::array{
-      std::vector{3, 4, 5},  //
-      std::vector{1, 2, 3}   //
-  };
-  const auto yolo_anchors = std::vector{
-      10,  14,   //
-      23,  27,   //
-      37,  58,   //
-      81,  82,   //
-      135, 169,  //
-      344, 319   //
-  };
+  if constexpr (is_tiny)
+  {
+    // The CUDA tensors.
+    cuda_in_tensor = trt::InferenceEngine::PinnedTensor<float, 3>{3, 416, 416};
+    cuda_out_tensors = std::vector{
+        trt::InferenceEngine::PinnedTensor<float, 3>{255, 13, 13},
+        trt::InferenceEngine::PinnedTensor<float, 3>{255, 26, 26}  //
+    };
+
+    yolo_masks = std::vector{
+        std::vector{3, 4, 5},  //
+        std::vector{1, 2, 3}   //
+    };
+    yolo_anchors = std::vector{
+        10,  14,   //
+        23,  27,   //
+        37,  58,   //
+        81,  82,   //
+        135, 169,  //
+        344, 319   //
+    };
+  }
+  else
+  {
+    // The CUDA tensors.
+    cuda_in_tensor = trt::InferenceEngine::PinnedTensor<float, 3>{3, 608, 608};
+    cuda_out_tensors = std::vector{
+        trt::InferenceEngine::PinnedTensor<float, 3>{255, 76, 76},
+        trt::InferenceEngine::PinnedTensor<float, 3>{255, 38, 38},  //
+        trt::InferenceEngine::PinnedTensor<float, 3>{255, 19, 19}   //
+    };
+
+    const auto yolo_masks = std::vector{
+        std::vector{0, 1, 2},  //
+        std::vector{3, 4, 5},  //
+        std::vector{6, 7, 8},  //
+    };
+    const auto yolo_anchors = std::vector{
+        12,  16,   //
+        19,  36,   //
+        40,  28,   //
+        36,  75,   //
+        76,  55,   //
+        72,  146,  //
+        142, 110,  //
+        192, 243,  //
+        459, 401   //
+    };
+  }
 
   sara::create_window(frame.sizes());
   auto frames_read = 0;

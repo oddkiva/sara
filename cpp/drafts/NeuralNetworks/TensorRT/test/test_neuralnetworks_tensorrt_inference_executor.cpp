@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_inference_engine)
       3, image_resized.height(), image_resized.width()};
   std::copy(image_tensor.begin(), image_tensor.end(), cuda_in_tensor.begin());
 
-  auto cuda_out_tensor = std::array{
+  auto cuda_out_tensor = std::vector{
       trt::InferenceEngine::PinnedTensor<float, 3>{255, 13, 13},
       trt::InferenceEngine::PinnedTensor<float, 3>{255, 26, 26}  //
   };
