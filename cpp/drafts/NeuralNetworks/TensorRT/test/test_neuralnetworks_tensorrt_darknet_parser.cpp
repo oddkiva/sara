@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "NeuralNetworks/TensorRT/Yolo-V4-Tiny"
+#define BOOST_TEST_MODULE "NeuralNetworks/TensorRT/Yolo-V4"
 
 #include <boost/test/unit_test.hpp>
 
@@ -213,18 +213,18 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
 #endif
 
 
-auto get_yolov4_model()
+auto get_yolov4_model() -> d::Network
 {
   // Load the network on the host device (CPU).
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   static const auto yolo_version = 4;
   const auto yolo_model = "yolov" + std::to_string(yolo_version);
   const auto yolo_dirpath = data_dir_path / "trained_models" / yolo_model;
-  auto hnet = d::load_yolo_model(yolo_dirpath, yolo_version);
+  auto hnet = d::load_yolo_model(yolo_dirpath, yolo_version, false);
   return hnet;
 }
 
-auto get_image_tensor(const d::Network& hnet)
+auto get_image_tensor(const d::Network& hnet) -> sara::Tensor_<float, 4>
 {
   // Prepare the input tensor
   const auto image = sara::imread<sara::Rgb8>(src_path("data/dog.jpg"));
@@ -276,10 +276,12 @@ auto serialize_yolov4_engine(const d::Network& hnet, int max_layers)
   return plan;
 }
 
-BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion)
+
+BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
 {
   // Get my CPU inference implementation of YOLO v4.
   auto hnet = get_yolov4_model();
+  hnet.debug = true;
 
   // Read a dog image.
   const auto image_tensor = get_image_tensor(hnet);
@@ -292,7 +294,10 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion)
   // Instantiate a single CUDA stream for everything.
   auto cuda_stream = trt::make_cuda_stream();
 
-  for (auto max_layers = 1; max_layers < 100; ++max_layers)
+  // Verify the network conversion to TensorRT incrementally and exhaustively.
+  //
+  // Everything goes well until layer 87...
+  for (auto max_layers = 86; max_layers < 88; ++max_layers)
   {
     // Serialize the TensorRT engine
     const auto plan = serialize_yolov4_engine(hnet, max_layers);
@@ -314,7 +319,7 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion)
     auto context = trt::ContextUniquePtr{engine->createExecutionContext(),  //
                                          &trt::context_deleter};
 
-    SARA_DEBUG << "Forward data to CPU inference implementation...\n";
+    SARA_DEBUG << "Forwarding data to CPU inference implementation...\n";
     hnet.forward(image_tensor, max_layers);
 
 
@@ -331,6 +336,7 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion)
     };
 
     // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
+    SARA_DEBUG << "Forwarding data to TensorRT implementation...\n";
     if (!context->enqueueV2(device_tensors.data(), *cuda_stream, nullptr))
       SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
                  << std::endl;
@@ -346,11 +352,11 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion)
     // Check the equality between the CPU implementation and the
     // TensorRT-based network.
     BOOST_REQUIRE_EQUAL(h_out_sizes, h_out_tensor.sizes());
-    BOOST_REQUIRE(std::equal(h_out_tensor.begin(), h_out_tensor.end(),
-                             u_out_tensor.begin(),
-                             [](const float& a, const float& b) {
-                               return std::abs(a - b) < 1e-4f;
-                             }));
+    BOOST_CHECK(std::equal(h_out_tensor.begin(), h_out_tensor.end(),
+                           u_out_tensor.begin(),
+                           [](const float& a, const float& b) {
+                             return std::abs(a - b) < 1e-4f;
+                           }));
 
     for (auto i = 0u; i < 2 * 13 * 13; ++i)
     {

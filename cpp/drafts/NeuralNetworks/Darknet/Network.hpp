@@ -162,18 +162,20 @@ namespace DO::Sara::Darknet {
     }
 
 
-    inline auto forward(const TensorView_<float, 4>& x,
-                        std::optional<std::size_t> up_to_layer_idx = std::nullopt)
-        -> void
+    inline auto
+    forward(const TensorView_<float, 4>& x,
+            std::optional<std::size_t> up_to_layer_idx = std::nullopt) -> void
     {
-      const auto n =
-          up_to_layer_idx.has_value() ? (*up_to_layer_idx + 1): net.size();
+      const auto n = up_to_layer_idx.has_value()  //
+                         ? (*up_to_layer_idx + 1)
+                         : net.size();
 
       net[0]->output = x;
       for (auto i = 1u; i < n; ++i)
       {
         if (debug)
-          std::cout << "Forwarding to layer " << i << "\n"
+          std::cout << "Forwarding to layer " << i << " (" << net[i]->type
+                    << ")\n"
                     << *net[i] << std::endl;
 
         if (auto conv = dynamic_cast<Convolution*>(net[i].get()))
@@ -189,10 +191,8 @@ namespace DO::Sara::Darknet {
         else if (auto shortcut = dynamic_cast<Shortcut*>(net[i].get()))
           forward_to_shortcut(*shortcut, i);
         else
-        {
           throw std::runtime_error{"Layer[" + std::to_string(i) + "] = " +
                                    net[i]->type + " is not implemented!"};
-        }
 
         if (debug)
           std::cout << std::endl;

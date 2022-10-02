@@ -403,7 +403,7 @@ namespace DO::Sara::TensorRT {
 
     for (auto layer_idx = 1u; layer_idx < hnet.size(); ++layer_idx)
     {
-      if (layer_idx > max_layers)
+      if (max_layers.has_value() && layer_idx > *max_layers)
         break;
 
       // Update the input.
@@ -431,7 +431,7 @@ namespace DO::Sara::TensorRT {
       else if (layer_type == "yolo")
       {
         add_yolo_layer(layer_idx, fmaps);
-        if (!max_layers.has_value())
+        if (max_layers == std::nullopt)
           tnet->markOutput(*fmaps.back());
       }
       else
@@ -456,10 +456,9 @@ namespace DO::Sara::TensorRT {
   {
     // Load the CPU implementation.
     static constexpr auto yolo_version = 4;
-    auto hnet =
-        is_tiny
-            ? Darknet::load_yolov4_tiny_model(trained_model_dir, yolo_version)
-            : Darknet::load_yolo_model(trained_model_dir, yolo_version);
+    auto hnet = Darknet::load_yolo_model(trained_model_dir,  //
+                                         yolo_version,       //
+                                         is_tiny);
 
     // Create a TensorRT network.
     auto net_builder = make_builder();

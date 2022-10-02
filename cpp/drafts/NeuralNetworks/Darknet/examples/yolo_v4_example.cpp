@@ -103,7 +103,7 @@ auto test_on_image(int argc, char** argv) -> void
   sara::create_window(image.sizes());
   sara::display(image);
 
-  auto model = sara::Darknet::load_yolov4_tiny_model(yolov4_tiny_dirpath, 7);
+  auto model = sara::Darknet::load_yolo_model(yolov4_tiny_dirpath, 7, true);
 
   sara::display(image);
   const auto dets = detect_objects(image, model);
@@ -149,9 +149,7 @@ auto test_on_video(int argc, char** argv) -> void
   if (is_tiny)
     yolo_name += "-tiny";
   const auto yolo_dirpath = data_dir_path / "trained_models" / yolo_name;
-  auto model = is_tiny ? d::load_yolov4_tiny_model(yolo_dirpath,  //
-                                                   yolo_version)
-                       : d::load_yolo_model(yolo_dirpath, yolo_version);
+  auto model = d::load_yolo_model(yolo_dirpath, yolo_version, is_tiny);
 
   model.profile = false;
 

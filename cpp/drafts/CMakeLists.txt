@@ -27,4 +27,4 @@ add_subdirectory(Taskflow)
 
 add_subdirectory(Emscripten)
 
-add_subdirectory(Codility)
+# add_subdirectory(Codility)
