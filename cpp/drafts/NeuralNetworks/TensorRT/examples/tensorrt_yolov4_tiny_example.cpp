@@ -142,9 +142,9 @@ auto test_on_video(int argc, char** argv) -> void
 
   // Load the network and get the CUDA inference engine ready.
   auto inference_engine = trt::InferenceEngine{};
-  // if (fs::exists(yolo_plan_filepath))
-  //   inference_engine.load_from_plan_file(yolo_plan_filepath.string());
-  // else
+  if (fs::exists(yolo_plan_filepath))
+    inference_engine.load_from_plan_file(yolo_plan_filepath.string());
+  else
   {
     const auto serialized_net = trt::convert_yolo_v4_network_from_darknet(
         yolo_dirpath.string(), is_tiny);
