@@ -31,9 +31,11 @@ namespace DO::Sara::TensorRT {
     const auto v = in[i];
 #ifdef USE_FAST_MATH_VERSION
     static constexpr auto thres = 20.f;
-    const auto softplus = v > thres    ? v
-                          : v < -thres ? __expf(v)
-                                       : __logf(1 + __expf(v));
+    const auto softplus =
+        v > thres  //
+            ? v
+            : v < -thres ? __expf(v)  // 1st-order Taylor Appoximation
+                         : __logf(1 + __expf(v));
 #else
     const auto softplus = logf(1 + expf(v));
 #endif
