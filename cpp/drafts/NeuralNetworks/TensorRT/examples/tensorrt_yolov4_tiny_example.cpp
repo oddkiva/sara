@@ -66,10 +66,10 @@ auto detect_objects(
   sara::tic();
   auto rgb_tensor_resized = sara::TensorView_<float, 3>{cuda_in_tensor.data(),
                                                         cuda_in_tensor.sizes()};
-  for (auto i = 0; i < 3; ++i)
+  for (auto channel = 0; channel < 3; ++channel)
   {
-    const auto src = sara::image_view(rgb_tensor[i]);
-    auto dst = sara::image_view(rgb_tensor_resized[i]);
+    const auto src = sara::image_view(rgb_tensor[channel]);
+    auto dst = sara::image_view(rgb_tensor_resized[channel]);
     sara::resize_v2(src, dst);
   }
   sara::toc("Image resize");
@@ -82,7 +82,7 @@ auto detect_objects(
   // Accumulate all the detection from each YOLO layer.
   sara::tic();
   auto detections = std::vector<d::YoloBox>{};
-  for (auto i = 0; i < 2; ++i)
+  for (auto i = 0u; i < anchor_masks.size(); ++i)
   {
     const auto& yolo_out = cuda_out_tensors[i];
     const auto& anchor_mask = anchor_masks[i];
@@ -185,15 +185,15 @@ auto test_on_video(int argc, char** argv) -> void
     // The CUDA tensors.
     cuda_in_tensor = trt::InferenceEngine::PinnedTensor<float, 3>{3, 608, 608};
     cuda_out_tensors = std::vector{
-        trt::InferenceEngine::PinnedTensor<float, 3>{255, 76, 76},
+        trt::InferenceEngine::PinnedTensor<float, 3>{255, 19, 19},  //
         trt::InferenceEngine::PinnedTensor<float, 3>{255, 38, 38},  //
-        trt::InferenceEngine::PinnedTensor<float, 3>{255, 19, 19}   //
+        trt::InferenceEngine::PinnedTensor<float, 3>{255, 76, 76}
     };
 
     const auto yolo_masks = std::vector{
-        std::vector{0, 1, 2},  //
-        std::vector{3, 4, 5},  //
         std::vector{6, 7, 8},  //
+        std::vector{3, 4, 5},  //
+        std::vector{0, 1, 2}  //
     };
     const auto yolo_anchors = std::vector{
         12,  16,   //

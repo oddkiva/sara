@@ -25,8 +25,7 @@ namespace DO::Sara::TensorRT {
   }
 
 
-  auto YoloV4TinyConverter::make_input_rgb_tensor(const int w,
-                                                  const int h) const
+  auto YoloV4Converter::make_input_rgb_tensor(const int w, const int h) const
       -> nvinfer1::ITensor*
   {
     return tnet->addInput("input",  //
@@ -34,11 +33,11 @@ namespace DO::Sara::TensorRT {
                           nvinfer1::Dims4{1, 3, h, w});
   }
 
-  auto YoloV4TinyConverter::conv2d(nvinfer1::ITensor* x,  //
-                                   const TensorView_<float, 4>& w,
-                                   const Eigen::VectorXf& b, const int stride,
-                                   const std::string& activation_layer,
-                                   const std::optional<std::string>& name) const
+  auto YoloV4Converter::conv2d(nvinfer1::ITensor* x,  //
+                               const TensorView_<float, 4>& w,
+                               const Eigen::VectorXf& b, const int stride,
+                               const std::string& activation_layer,
+                               const std::optional<std::string>& name) const
       -> nvinfer1::ITensor*
   {
     // Encapsulate the weights using TensorRT data structures.
@@ -142,7 +141,7 @@ namespace DO::Sara::TensorRT {
     return y;
   }
 
-  auto YoloV4TinyConverter::add_conv2d_layer(
+  auto YoloV4Converter::add_conv2d_layer(
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     SARA_DEBUG << "Converting convolutional layer " << layer_idx << " to TRT"
@@ -163,7 +162,7 @@ namespace DO::Sara::TensorRT {
                << shape(*fmaps.back()).transpose() << std::endl;
   }
 
-  auto YoloV4TinyConverter::add_slice_layer(
+  auto YoloV4Converter::add_slice_layer(
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& route_layer =
@@ -208,7 +207,7 @@ namespace DO::Sara::TensorRT {
                << Eigen::Map<const Eigen::RowVector4i>(stride.d) << std::endl;
   }
 
-  auto YoloV4TinyConverter::add_concat_layer(
+  auto YoloV4Converter::add_concat_layer(
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& route_layer =
@@ -230,7 +229,7 @@ namespace DO::Sara::TensorRT {
     const auto trt_concat_layer = tnet->addConcatenation(xs.data(), xs.size());
     trt_concat_layer->setName(("concat_" + std::to_string(layer_idx)).c_str());
 
-    for (const auto& x: xs)
+    for (const auto& x : xs)
     {
       SARA_DEBUG << "TRT X Shape: " << shape(*x).transpose() << std::endl;
     }
@@ -241,7 +240,7 @@ namespace DO::Sara::TensorRT {
                << shape(*fmaps.back()).transpose() << std::endl;
   }
 
-  auto YoloV4TinyConverter::add_shortcut_layer(
+  auto YoloV4Converter::add_shortcut_layer(
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& shortcut_layer =
@@ -269,7 +268,7 @@ namespace DO::Sara::TensorRT {
                << shape(*fmaps.back()).transpose() << std::endl;
   }
 
-  auto YoloV4TinyConverter::add_maxpool_layer(
+  auto YoloV4Converter::add_maxpool_layer(
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& maxpool_layer =
@@ -287,7 +286,8 @@ namespace DO::Sara::TensorRT {
     auto trt_maxpool_layer = tnet->addPoolingNd(*x, nvinfer1::PoolingType::kMAX,
                                                 nvinfer1::DimsHW{size, size});
     trt_maxpool_layer->setStrideNd(nvinfer1::DimsHW{stride, stride});
-    trt_maxpool_layer->setPaddingNd(nvinfer1::DimsHW{padding_size, padding_size});
+    trt_maxpool_layer->setPaddingNd(
+        nvinfer1::DimsHW{padding_size, padding_size});
 
     trt_maxpool_layer->setName(
         ("maxpool_" + std::to_string(layer_idx)).c_str());
@@ -299,7 +299,7 @@ namespace DO::Sara::TensorRT {
                << shape(*fmaps.back()).transpose() << std::endl;
   }
 
-  auto YoloV4TinyConverter::add_upsample_layer(
+  auto YoloV4Converter::add_upsample_layer(
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& upsample_layer =
@@ -329,7 +329,7 @@ namespace DO::Sara::TensorRT {
                << shape(*fmaps.back()).transpose() << std::endl;
   }
 
-  auto YoloV4TinyConverter::add_yolo_layer(
+  auto YoloV4Converter::add_yolo_layer(
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& yolo_layer =
@@ -381,7 +381,8 @@ namespace DO::Sara::TensorRT {
     fmaps.push_back(y);
   }
 
-  auto YoloV4TinyConverter::operator()(const std::size_t max_layers) -> void
+  auto YoloV4Converter::operator()(const std::optional<std::size_t> max_layers)
+      -> void
   {
     if (tnet == nullptr)
       throw std::runtime_error{"TensorRT network definition is NULL!"};
@@ -430,7 +431,8 @@ namespace DO::Sara::TensorRT {
       else if (layer_type == "yolo")
       {
         add_yolo_layer(layer_idx, fmaps);
-        tnet->markOutput(*fmaps.back());
+        if (!max_layers.has_value())
+          tnet->markOutput(*fmaps.back());
       }
       else
       {
@@ -442,7 +444,7 @@ namespace DO::Sara::TensorRT {
       }
     }
 
-    if (max_layers != std::numeric_limits<std::size_t>::max())
+    if (max_layers != std::nullopt)
       tnet->markOutput(*fmaps.back());
   }
 
@@ -464,7 +466,7 @@ namespace DO::Sara::TensorRT {
     auto net = make_network(net_builder.get());
 
     // Convert the network to TensorRT (GPU).
-    auto converter = YoloV4TinyConverter{net.get(), hnet.net};
+    auto converter = YoloV4Converter{net.get(), hnet.net};
     converter();
 
     return serialize_network_into_plan(net_builder, net,  //

@@ -23,7 +23,7 @@
 
 namespace DO::Sara::TensorRT {
 
-  struct YoloV4TinyConverter
+  struct YoloV4Converter
   {
     using TrtNet = nvinfer1::INetworkDefinition;
     using HostNet = std::vector<std::unique_ptr<Darknet::Layer>>;
@@ -31,7 +31,7 @@ namespace DO::Sara::TensorRT {
     TrtNet* tnet;
     const HostNet& hnet;
 
-    YoloV4TinyConverter(TrtNet* tnet, const HostNet& hnet)
+    YoloV4Converter(TrtNet* tnet, const HostNet& hnet)
       : tnet{tnet}
       , hnet{hnet}
     {
@@ -57,7 +57,8 @@ namespace DO::Sara::TensorRT {
                           std::vector<nvinfer1::ITensor*>& fmaps) const -> void;
 
     auto add_shortcut_layer(const int layer_idx,
-                            std::vector<nvinfer1::ITensor*>& fmaps) const -> void;
+                            std::vector<nvinfer1::ITensor*>& fmaps) const
+        -> void;
 
     auto add_maxpool_layer(const int layer_idx,
                            std::vector<nvinfer1::ITensor*>& fmaps) const
@@ -70,8 +71,8 @@ namespace DO::Sara::TensorRT {
     auto add_yolo_layer(const int layer_idx,
                         std::vector<nvinfer1::ITensor*>& fmaps) const -> void;
 
-    auto operator()(const std::size_t max_layers =
-                        std::numeric_limits<std::size_t>::max()) -> void;
+    auto operator()(const std::optional<std::size_t> max_layers = std::nullopt)
+        -> void;
   };
 
 

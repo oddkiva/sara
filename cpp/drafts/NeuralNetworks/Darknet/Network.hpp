@@ -162,10 +162,15 @@ namespace DO::Sara::Darknet {
     }
 
 
-    inline auto forward(const TensorView_<float, 4>& x) -> void
+    inline auto forward(const TensorView_<float, 4>& x,
+                        std::optional<std::size_t> up_to_layer_idx = std::nullopt)
+        -> void
     {
+      const auto n =
+          up_to_layer_idx.has_value() ? (*up_to_layer_idx + 1): net.size();
+
       net[0]->output = x;
-      for (auto i = 1u; i < net.size(); ++i)
+      for (auto i = 1u; i < n; ++i)
       {
         if (debug)
           std::cout << "Forwarding to layer " << i << "\n"
