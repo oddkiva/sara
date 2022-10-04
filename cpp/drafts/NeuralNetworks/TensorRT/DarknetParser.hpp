@@ -37,6 +37,9 @@ namespace DO::Sara::TensorRT {
     {
     }
 
+    auto make_input_tensor(const int c, const int h, const int w) const
+        -> nvinfer1::ITensor*;
+
     auto make_input_rgb_tensor(const int w, const int h) const
         -> nvinfer1::ITensor*;
 
@@ -73,6 +76,13 @@ namespace DO::Sara::TensorRT {
 
     auto operator()(const std::optional<std::size_t> max_layers = std::nullopt)
         -> void;
+
+    auto operator()(const std::size_t begin, const std::size_t end) -> void;
+
+    auto operator()(const std::size_t at) -> void
+    {
+      (*this)(at, at + 1);
+    }
   };
 
 

@@ -27,7 +27,23 @@ namespace DO::Sara::Darknet {
   {
     using TensorView = TensorView_<float, 4>;
 
-    inline auto forward_to_conv(Darknet::Convolution& conv, int i) -> void
+    auto get_input(int i) -> TensorView
+    {
+      if (i <= 0)
+        throw std::runtime_error{"Input index must be positive!"};
+
+      return net[i - 1]->output;
+    }
+
+    auto get_output(int i) -> TensorView
+    {
+      if (i < 0)
+        throw std::runtime_error{"Input index must be positive!"};
+
+      return net[i]->output;
+    }
+
+    auto forward_to_conv(Darknet::Convolution& conv, int i) -> void
     {
       if (profile)
         tic();
@@ -39,7 +55,7 @@ namespace DO::Sara::Darknet {
         toc("Conv");
     }
 
-    inline auto forward_to_route(Darknet::Route& route, int i) -> void
+    auto forward_to_route(Darknet::Route& route, int i) -> void
     {
       auto& y = route.output;
 
@@ -108,7 +124,7 @@ namespace DO::Sara::Darknet {
       }
     }
 
-    inline auto forward_to_maxpool(Darknet::MaxPool& maxpool, int i) -> void
+    auto forward_to_maxpool(Darknet::MaxPool& maxpool, int i) -> void
     {
       if (profile)
         tic();
@@ -120,7 +136,7 @@ namespace DO::Sara::Darknet {
         toc("MaxPool");
     }
 
-    inline auto forward_to_yolo(Darknet::Yolo& yolo, int i) -> void
+    auto forward_to_yolo(Darknet::Yolo& yolo, int i) -> void
     {
       if (profile)
         tic();
@@ -132,7 +148,7 @@ namespace DO::Sara::Darknet {
         toc("YOLO forward pass");
     }
 
-    inline auto forward_to_upsample(Darknet::Upsample& upsample, int i) -> void
+    auto forward_to_upsample(Darknet::Upsample& upsample, int i) -> void
     {
       if (profile)
         tic();
@@ -144,7 +160,7 @@ namespace DO::Sara::Darknet {
         toc("Upsample");
     }
 
-    inline auto forward_to_shortcut(Darknet::Shortcut& shortcut, int i) -> void
+    auto forward_to_shortcut(Darknet::Shortcut& shortcut, int i) -> void
     {
       if (profile)
         tic();
@@ -161,10 +177,9 @@ namespace DO::Sara::Darknet {
         toc("Shortcut");
     }
 
-
-    inline auto
-    forward(const TensorView_<float, 4>& x,
-            std::optional<std::size_t> up_to_layer_idx = std::nullopt) -> void
+    auto forward(const TensorView_<float, 4>& x,
+                 std::optional<std::size_t> up_to_layer_idx = std::nullopt)
+        -> void
     {
       const auto n = up_to_layer_idx.has_value()  //
                          ? (*up_to_layer_idx + 1)

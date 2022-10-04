@@ -10,6 +10,7 @@
 #include <DO/Shakti/Cuda/MultiArray.hpp>
 #include <DO/Shakti/Cuda/Utilities.hpp>
 
+#include <drafts/NeuralNetworks/Darknet/Debug.hpp>
 #include <drafts/NeuralNetworks/Darknet/Parser.hpp>
 #include <drafts/NeuralNetworks/TensorRT/DarknetParser.hpp>
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
@@ -277,6 +278,124 @@ auto serialize_yolov4_engine(const d::Network& hnet, int max_layers)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_convolution_layer)
+{
+  // Get my CPU inference implementation of YOLO v4.
+  auto hnet = get_yolov4_model();
+  hnet.debug = true;
+
+  // The test data.
+  const auto yolov4_intermediate_output_dir =
+      "/home/david/GitHub/darknet/yolov4";
+  const auto gt =
+      d::read_all_intermediate_outputs(yolov4_intermediate_output_dir);
+
+  // Instantiate a single CUDA stream for everything.
+  auto cuda_stream = trt::make_cuda_stream();
+
+  for (auto layer_idx = 87u; layer_idx < hnet.net.size(); ++layer_idx)
+  {
+    const auto& test_in_data = gt[layer_idx - 2];
+    const auto& test_out_data = gt[layer_idx - 1];
+
+    auto layer = dynamic_cast<d::Convolution*>(hnet.net[layer_idx].get());
+    if (layer == nullptr)
+      continue;
+
+    auto h_in_tensor = hnet.get_input(layer_idx);
+    auto h_out_tensor = hnet.get_output(layer_idx);
+
+    // Create and initialize the CUDA tensors.
+    auto u_in_tensor = PinnedTensor<float, 3>{h_in_tensor.sizes().tail(3)};
+    auto u_out_tensor = PinnedTensor<float, 3>{h_out_tensor.sizes().tail(3)};
+    h_in_tensor = test_in_data;
+    u_in_tensor = test_in_data[0];
+
+
+    // Build the mini-network consisting of only the convolution layer.
+    auto net_builder = trt::make_builder();
+    auto net = trt::make_network(net_builder.get());
+    auto converter = trt::YoloV4Converter{net.get(), hnet.net};
+    converter(layer_idx);
+
+    // Serialize the TensorRT engine
+    const auto plan = trt::serialize_network_into_plan(net_builder, net,  //
+                                                       false /* use_fp16*/);
+
+    // Create a TensorRT runtime.
+    auto runtime = trt::RuntimeUniquePtr{
+        nvinfer1::createInferRuntime(trt::Logger::instance()),
+        &trt::runtime_deleter};
+
+    // Create or load an TensorRT engine.
+    auto engine = trt::CudaEngineUniquePtr{nullptr, &trt::engine_deleter};
+    engine = trt::CudaEngineUniquePtr{
+        runtime->deserializeCudaEngine(plan->data(), plan->size()),
+        &trt::engine_deleter};
+
+    // Create a TensorRT inference context.
+    auto context = trt::ContextUniquePtr{engine->createExecutionContext(),  //
+                                         &trt::context_deleter};
+
+    SARA_DEBUG << "Forwarding data to CPU inference implementation...\n";
+    h_in_tensor = test_in_data;
+    conv_layer->forward(h_in_tensor);
+    BOOST_CHECK(std::equal(h_out_tensor.begin(), h_out_tensor.end(),
+                           test_out_data.begin(),
+                           [](const float& a, const float& b) {
+                             return std::abs(a - b) < 1e-4f;
+                           }));
+
+    // TensorRT implementation.
+    SARA_DEBUG << "Forwarding data to TensorRT implementation...\n";
+    const auto device_tensors = std::array{
+        reinterpret_cast<void*>(u_in_tensor.data()),  //
+        reinterpret_cast<void*>(u_out_tensor.data())  //
+    };
+    if (!context->enqueueV2(device_tensors.data(), *cuda_stream, nullptr))
+      SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
+                 << std::endl;
+
+    // Wait for the completion of GPU operations.
+    cudaStreamSynchronize(*cuda_stream);
+
+    SARA_DEBUG << "Checking output of layer [" << layer_idx
+               << "] = " << conv_layer->type << "\n"
+               << *conv_layer << std::endl;
+
+    // Check the equality between the CPU implementation and the
+    // TensorRT-based network.
+    BOOST_REQUIRE_EQUAL(h_out_tensor.sizes().tail(3), u_out_tensor.sizes());
+
+    // Check a little bit of the output tensors.
+    auto num_errors = 0;
+    for (auto i = 0u; i < u_out_tensor.size(); ++i)
+    {
+      const auto& a = h_out_tensor.data()[i];
+      const auto& b = u_out_tensor.data()[i];
+      if (std::abs(a - b) > 1e-4f)
+      {
+        std::cout << sara::format("[OUCH] i=%d me=%f trt=%f\n",  //
+                                  i,                             //
+                                  h_out_tensor.data()[i],        //
+                                  u_out_tensor.data()[i]);
+        ++num_errors;
+      }
+      if (num_errors > 20)
+        break;
+    }
+
+    // The full check.
+    BOOST_REQUIRE(std::equal(h_out_tensor.begin(), h_out_tensor.end(),
+                             u_out_tensor.begin(),
+                             [](const float& a, const float& b) {
+                               return std::abs(a - b) < 1e-4f;
+                             }));
+  }
+}
+
+
+#if 0
 BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
 {
   // Get my CPU inference implementation of YOLO v4.
@@ -370,6 +489,7 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
     }
   }
 }
+#endif
 
 #if defined(END_TO_END_YOLOV4)
 {

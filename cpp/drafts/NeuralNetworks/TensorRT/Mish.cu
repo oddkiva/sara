@@ -32,8 +32,8 @@ namespace DO::Sara::TensorRT {
 #ifdef USE_FAST_MATH_VERSION
     static constexpr auto thres = 20.f;
     const auto softplus =
-        v > thres  //
-            ? v
+        v > thres                     //
+            ? v                       // because when v tends to +infinity...
             : v < -thres ? __expf(v)  // 1st-order Taylor Appoximation
                          : __logf(1 + __expf(v));
 #else
@@ -137,7 +137,7 @@ namespace DO::Sara::TensorRT {
       static constexpr auto max_threads_per_block = 1024;
       const auto num_blocks = _inout_size % 1024 == 0
                                   ? _inout_size / max_threads_per_block
-                                  : (_inout_size + 1) / max_threads_per_block;
+                                  : _inout_size / max_threads_per_block + 1;
 
       mish_kernel<<<num_blocks, max_threads_per_block, 0, stream>>>(
           in, out, _inout_size);
