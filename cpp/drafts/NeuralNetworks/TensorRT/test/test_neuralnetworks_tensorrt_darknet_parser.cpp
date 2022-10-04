@@ -1,4 +1,5 @@
 #define BOOST_TEST_MODULE "NeuralNetworks/TensorRT/Yolo-V4"
+// #define CHECK_EACH_YOLOV4_LAYER_IN_ISOLATION
 
 #include <boost/test/unit_test.hpp>
 
@@ -225,6 +226,15 @@ auto get_yolov4_model() -> d::Network
   return hnet;
 }
 
+auto get_yolov4_intermediate_outputs() -> std::vector<sara::Tensor_<float, 4>>
+{
+  const auto yolov4_intermediate_output_dir =
+      "/home/david/GitHub/darknet/yolov4";
+  const auto gt =
+      d::read_all_intermediate_outputs(yolov4_intermediate_output_dir);
+  return gt;
+}
+
 auto get_image_tensor(const d::Network& hnet) -> sara::Tensor_<float, 4>
 {
   // Prepare the input tensor
@@ -278,30 +288,28 @@ auto serialize_yolov4_engine(const d::Network& hnet, int max_layers)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_convolution_layer)
+// Sweet this works...
+#if defined(CHECK_EACH_YOLOV4_LAYER_IN_ISOLATION)
+BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_unary_layer_individually)
 {
   // Get my CPU inference implementation of YOLO v4.
   auto hnet = get_yolov4_model();
   hnet.debug = true;
 
-  // The test data.
-  const auto yolov4_intermediate_output_dir =
-      "/home/david/GitHub/darknet/yolov4";
-  const auto gt =
-      d::read_all_intermediate_outputs(yolov4_intermediate_output_dir);
+  // The ground-truth test data.
+  const auto gt = get_yolov4_intermediate_outputs();
 
   // Instantiate a single CUDA stream for everything.
   auto cuda_stream = trt::make_cuda_stream();
 
-  for (auto layer_idx = 87u; layer_idx < hnet.net.size(); ++layer_idx)
+  for (auto layer_idx = 2u; /* not from 1u because I haven't fetched the input
+                              image tensor yet */
+       layer_idx < hnet.net.size(); ++layer_idx)
   {
     const auto& test_in_data = gt[layer_idx - 2];
     const auto& test_out_data = gt[layer_idx - 1];
 
-    auto layer = dynamic_cast<d::Convolution*>(hnet.net[layer_idx].get());
-    if (layer == nullptr)
-      continue;
-
+    // Get the host tensors.
     auto h_in_tensor = hnet.get_input(layer_idx);
     auto h_out_tensor = hnet.get_output(layer_idx);
 
@@ -311,6 +319,22 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_convolution_layer)
     h_in_tensor = test_in_data;
     u_in_tensor = test_in_data[0];
 
+    // For now, we only check layers that accepts only one input tensor.
+    SARA_DEBUG << "Forwarding data to CPU inference implementation...\n";
+    if (auto layer = dynamic_cast<d::Convolution*>(hnet.net[layer_idx].get()))
+      layer->forward(h_in_tensor);
+    else if (auto layer = dynamic_cast<d::MaxPool*>(hnet.net[layer_idx].get()))
+      layer->forward(h_in_tensor);
+    else if (auto layer = dynamic_cast<d::Upsample*>(hnet.net[layer_idx].get()))
+      layer->forward(h_in_tensor);
+    else if (auto layer = dynamic_cast<d::Yolo*>(hnet.net[layer_idx].get()))
+      layer->forward(h_in_tensor);
+    else
+    {
+      SARA_DEBUG << "SKIPPING THIS POSSIBLY NON-UNARY LAYER... (BUILD FROM END "
+                    "TO END INSTEAD...)\n";
+      continue;
+    }
 
     // Build the mini-network consisting of only the convolution layer.
     auto net_builder = trt::make_builder();
@@ -337,9 +361,8 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_convolution_layer)
     auto context = trt::ContextUniquePtr{engine->createExecutionContext(),  //
                                          &trt::context_deleter};
 
-    SARA_DEBUG << "Forwarding data to CPU inference implementation...\n";
     h_in_tensor = test_in_data;
-    conv_layer->forward(h_in_tensor);
+
     BOOST_CHECK(std::equal(h_out_tensor.begin(), h_out_tensor.end(),
                            test_out_data.begin(),
                            [](const float& a, const float& b) {
@@ -360,8 +383,8 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_convolution_layer)
     cudaStreamSynchronize(*cuda_stream);
 
     SARA_DEBUG << "Checking output of layer [" << layer_idx
-               << "] = " << conv_layer->type << "\n"
-               << *conv_layer << std::endl;
+               << "] = " << hnet.net[layer_idx]->type << "\n"
+               << *hnet.net[layer_idx] << std::endl;
 
     // Check the equality between the CPU implementation and the
     // TensorRT-based network.
@@ -393,9 +416,9 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_convolution_layer)
                              }));
   }
 }
+#endif
 
 
-#if 0
 BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
 {
   // Get my CPU inference implementation of YOLO v4.
@@ -405,18 +428,20 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
   // Read a dog image.
   const auto image_tensor = get_image_tensor(hnet);
 
-  // Resize the host tensor.
-  auto u_in_tensor = PinnedTensor<float, 3>{};
-  u_in_tensor.resize(3, image_tensor.size(2), image_tensor.size(3));
-  std::copy(image_tensor.begin(), image_tensor.end(), u_in_tensor.begin());
 
-  // Instantiate a single CUDA stream for everything.
+  // Make a unique CUDA stream.
   auto cuda_stream = trt::make_cuda_stream();
+
+  // Copy the host tensor to the CUDA tensor.
+  auto u_in_tensor = PinnedTensor<float, 3>{3, image_tensor.size(2), image_tensor.size(3)};
+  u_in_tensor = image_tensor[0];
+  BOOST_REQUIRE(std::equal(u_in_tensor.begin(), u_in_tensor.end(), image_tensor.begin()));
 
   // Verify the network conversion to TensorRT incrementally and exhaustively.
   //
   // Everything goes well until layer 87...
-  for (auto max_layers = 86; max_layers < 88; ++max_layers)
+  // for (auto max_layers = 1u; max_layers < hnet.net.size(); ++max_layers)
+  auto max_layers = 5u;
   {
     // Serialize the TensorRT engine
     const auto plan = serialize_yolov4_engine(hnet, max_layers);
@@ -456,11 +481,11 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
 
     // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
     SARA_DEBUG << "Forwarding data to TensorRT implementation...\n";
+
+    // Instantiate a single CUDA stream for everything.
     if (!context->enqueueV2(device_tensors.data(), *cuda_stream, nullptr))
       SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
                  << std::endl;
-
-    // Wait for the completion of GPU operations.
     cudaStreamSynchronize(*cuda_stream);
 
     const auto& h_out_tensor = h_layer.output;
@@ -470,26 +495,34 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
 
     // Check the equality between the CPU implementation and the
     // TensorRT-based network.
-    BOOST_REQUIRE_EQUAL(h_out_sizes, h_out_tensor.sizes());
-    BOOST_CHECK(std::equal(h_out_tensor.begin(), h_out_tensor.end(),
-                           u_out_tensor.begin(),
-                           [](const float& a, const float& b) {
-                             return std::abs(a - b) < 1e-4f;
-                           }));
+    BOOST_REQUIRE_EQUAL(u_out_tensor.sizes(), h_out_tensor.sizes().tail(3));
 
-    for (auto i = 0u; i < 2 * 13 * 13; ++i)
+    // Check a little bit of the output tensors.
+    auto num_errors = 0;
+    for (auto i = 0u; i < u_out_tensor.size(); ++i)
     {
       const auto& a = h_out_tensor.data()[i];
       const auto& b = u_out_tensor.data()[i];
       if (std::abs(a - b) > 1e-4f)
+      {
         std::cout << sara::format("[OUCH] i=%d me=%f trt=%f\n",  //
                                   i,                             //
                                   h_out_tensor.data()[i],        //
                                   u_out_tensor.data()[i]);
+        ++num_errors;
+      }
+      if (num_errors > 20)
+        break;
     }
+
+    BOOST_REQUIRE(std::equal(h_out_tensor.begin(), h_out_tensor.end(),
+                             u_out_tensor.begin(),
+                             [](const float& a, const float& b) {
+                               return std::abs(a - b) < 1e-4f;
+                             }));
   }
 }
-#endif
+
 
 #if defined(END_TO_END_YOLOV4)
 {
