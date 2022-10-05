@@ -24,8 +24,8 @@ namespace DO::Sara::TensorRT {
     // Create an inference configuration object.
     auto config = ConfigUniquePtr{network_builder->createBuilderConfig(),  //
                                   &config_deleter};
-    config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 32u);
-    config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
+    // config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 32u);
+    // config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
     if (use_fp16)
       config->setFlag(nvinfer1::BuilderFlag::kFP16);
 

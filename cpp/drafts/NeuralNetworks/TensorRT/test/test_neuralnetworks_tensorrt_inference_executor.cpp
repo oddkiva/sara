@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(test_inference_engine)
 {
   // Load the network on the host device (CPU).
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
-  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models";
+  const auto yolov4_tiny_dirpath = data_dir_path / "trained_models" / "yolov4-tiny";
 
   // Convert it into a TensorRT network object.
   auto serialized_net = trt::convert_yolo_v4_network_from_darknet(

@@ -132,7 +132,7 @@ auto test_on_video(int argc, char** argv) -> void
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   static constexpr auto yolo_version = 4;
-  static constexpr auto is_tiny = true;
+  static constexpr auto is_tiny = false;
   auto yolo_model = "yolov" + std::to_string(yolo_version);
   if (is_tiny)
     yolo_model += "-tiny";
@@ -185,15 +185,15 @@ auto test_on_video(int argc, char** argv) -> void
     // The CUDA tensors.
     cuda_in_tensor = trt::InferenceEngine::PinnedTensor<float, 3>{3, 608, 608};
     cuda_out_tensors = std::vector{
-        trt::InferenceEngine::PinnedTensor<float, 3>{255, 19, 19},  //
+        trt::InferenceEngine::PinnedTensor<float, 3>{255, 76, 76},
         trt::InferenceEngine::PinnedTensor<float, 3>{255, 38, 38},  //
-        trt::InferenceEngine::PinnedTensor<float, 3>{255, 76, 76}
+        trt::InferenceEngine::PinnedTensor<float, 3>{255, 19, 19},  //
     };
 
     const auto yolo_masks = std::vector{
-        std::vector{6, 7, 8},  //
+        std::vector{0, 1, 2}, //
         std::vector{3, 4, 5},  //
-        std::vector{0, 1, 2}  //
+        std::vector{6, 7, 8},  //
     };
     const auto yolo_anchors = std::vector{
         12,  16,   //

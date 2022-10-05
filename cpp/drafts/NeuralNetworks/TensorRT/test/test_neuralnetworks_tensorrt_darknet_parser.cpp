@@ -1,5 +1,4 @@
 #define BOOST_TEST_MODULE "NeuralNetworks/TensorRT/Yolo-V4"
-// #define CHECK_EACH_YOLOV4_LAYER_IN_ISOLATION
 
 #include <boost/test/unit_test.hpp>
 
@@ -256,40 +255,7 @@ auto get_image_tensor(const d::Network& hnet) -> sara::Tensor_<float, 4>
   return image_tensor;
 }
 
-auto serialize_yolov4_engine(const d::Network& hnet, int max_layers)
-    -> trt::HostMemoryUniquePtr
-{
-  // Instantiate a network and automatically manage its memory.
-  auto builder = trt::make_builder();
-  auto network = trt::make_network(builder.get());
-
-  // Convert the network to TensorRT (GPU).
-  auto converter = trt::YoloV4Converter{network.get(), hnet.net};
-  converter(max_layers);
-
-  // Create an inference configuration object.
-  auto config = trt::ConfigUniquePtr{builder->createBuilderConfig(),  //
-                                     &trt::config_deleter};
-  config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 32u);
-  config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
-#ifdef GPU_SUPPORTS_FP16
-  // If the GPU supports FP16 operations.
-  config->setFlag(nvinfer1::BuilderFlag::kFP16);
-#endif
-
-  // Serialize the network definition and weights for TensorRT.
-  auto plan = trt::HostMemoryUniquePtr{
-      builder->buildSerializedNetwork(*network, *config),  //
-      trt::host_memory_deleter};
-  if (plan.get() == nullptr)
-    throw std::runtime_error{"Failed to build TensorRT plan!"};
-
-  return plan;
-}
-
-
 // Sweet this works...
-#if defined(CHECK_EACH_YOLOV4_LAYER_IN_ISOLATION)
 BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_unary_layer_individually)
 {
   // Get my CPU inference implementation of YOLO v4.
@@ -302,9 +268,13 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_unary_layer_individually)
   // Instantiate a single CUDA stream for everything.
   auto cuda_stream = trt::make_cuda_stream();
 
+#if defined(TEST_ALL_LAYERS)
   for (auto layer_idx = 2u; /* not from 1u because I haven't fetched the input
                               image tensor yet */
        layer_idx < hnet.net.size(); ++layer_idx)
+#else
+  const auto layer_idx = 87u;
+#endif
   {
     const auto& test_in_data = gt[layer_idx - 2];
     const auto& test_out_data = gt[layer_idx - 1];
@@ -333,7 +303,11 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_unary_layer_individually)
     {
       SARA_DEBUG << "SKIPPING THIS POSSIBLY NON-UNARY LAYER... (BUILD FROM END "
                     "TO END INSTEAD...)\n";
+#if defined(TEST_ALL_LAYERS)
       continue;
+#else
+      return;
+#endif
     }
 
     // Build the mini-network consisting of only the convolution layer.
@@ -390,13 +364,14 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_unary_layer_individually)
     // TensorRT-based network.
     BOOST_REQUIRE_EQUAL(h_out_tensor.sizes().tail(3), u_out_tensor.sizes());
 
+    static constexpr auto thresh = 1e-4f;
     // Check a little bit of the output tensors.
     auto num_errors = 0;
     for (auto i = 0u; i < u_out_tensor.size(); ++i)
     {
       const auto& a = h_out_tensor.data()[i];
       const auto& b = u_out_tensor.data()[i];
-      if (std::abs(a - b) > 1e-4f)
+      if (std::abs(a - b) > thresh)
       {
         std::cout << sara::format("[OUCH] i=%d me=%f trt=%f\n",  //
                                   i,                             //
@@ -408,15 +383,17 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_unary_layer_individually)
         break;
     }
 
+    SARA_CHECK(u_in_tensor.data());
+    SARA_CHECK(u_out_tensor.data());
+
     // The full check.
     BOOST_REQUIRE(std::equal(h_out_tensor.begin(), h_out_tensor.end(),
                              u_out_tensor.begin(),
                              [](const float& a, const float& b) {
-                               return std::abs(a - b) < 1e-4f;
+                               return std::abs(a - b) < thresh;
                              }));
   }
 }
-#endif
 
 
 BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
@@ -432,19 +409,28 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
   // Make a unique CUDA stream.
   auto cuda_stream = trt::make_cuda_stream();
 
-  // Copy the host tensor to the CUDA tensor.
-  auto u_in_tensor = PinnedTensor<float, 3>{3, image_tensor.size(2), image_tensor.size(3)};
+  // Copy the host tensor to the input CUDA tensor.
+  auto u_in_tensor =
+      PinnedTensor<float, 3>{3, image_tensor.size(2), image_tensor.size(3)};
   u_in_tensor = image_tensor[0];
-  BOOST_REQUIRE(std::equal(u_in_tensor.begin(), u_in_tensor.end(), image_tensor.begin()));
+  BOOST_REQUIRE(std::equal(u_in_tensor.begin(), u_in_tensor.end(),  //
+                           image_tensor.begin()));
 
   // Verify the network conversion to TensorRT incrementally and exhaustively.
   //
   // Everything goes well until layer 87...
-  // for (auto max_layers = 1u; max_layers < hnet.net.size(); ++max_layers)
-  auto max_layers = 5u;
+  // for (auto max_layers = 88u; max_layers < hnet.net.size(); ++max_layers)
+  auto max_layers = 87u;
   {
+    // Build the mini-network consisting of only the convolution layer.
+    auto net_builder = trt::make_builder();
+    auto net = trt::make_network(net_builder.get());
+    auto converter = trt::YoloV4Converter{net.get(), hnet.net};
+    converter(1, max_layers + 1);
+
     // Serialize the TensorRT engine
-    const auto plan = serialize_yolov4_engine(hnet, max_layers);
+    const auto plan = trt::serialize_network_into_plan(net_builder, net,  //
+                                                       false /* use_fp16*/);
 
     // Create a TensorRT runtime.
     auto runtime = trt::RuntimeUniquePtr{
@@ -465,7 +451,6 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
 
     SARA_DEBUG << "Forwarding data to CPU inference implementation...\n";
     hnet.forward(image_tensor, max_layers);
-
 
     // Inspect the TensorRT log output: there is no padding!
     const auto& h_layer = *hnet.net[max_layers];
@@ -498,12 +483,13 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
     BOOST_REQUIRE_EQUAL(u_out_tensor.sizes(), h_out_tensor.sizes().tail(3));
 
     // Check a little bit of the output tensors.
+    static constexpr auto thresh = 1e-4f;
     auto num_errors = 0;
     for (auto i = 0u; i < u_out_tensor.size(); ++i)
     {
       const auto& a = h_out_tensor.data()[i];
       const auto& b = u_out_tensor.data()[i];
-      if (std::abs(a - b) > 1e-4f)
+      if (std::abs(a - b) > thresh)
       {
         std::cout << sara::format("[OUCH] i=%d me=%f trt=%f\n",  //
                                   i,                             //
@@ -515,10 +501,20 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
         break;
     }
 
+    if (num_errors > 0)
+    {
+      std::cout << "h_out_tensor\n"
+                << h_out_tensor[0][0].matrix().topLeftCorner(8, 8) << std::endl;
+      std::cout << "u_out_tensor\n"
+                << u_out_tensor[0].matrix().topLeftCorner(8, 8) << std::endl;
+
+      SARA_CHECK(u_out_tensor.data());
+    }
+
     BOOST_REQUIRE(std::equal(h_out_tensor.begin(), h_out_tensor.end(),
                              u_out_tensor.begin(),
                              [](const float& a, const float& b) {
-                               return std::abs(a - b) < 1e-4f;
+                               return std::abs(a - b) < thresh;
                              }));
   }
 }

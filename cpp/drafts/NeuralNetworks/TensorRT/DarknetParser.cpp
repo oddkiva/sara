@@ -36,7 +36,9 @@ namespace DO::Sara::TensorRT {
   auto YoloV4Converter::make_input_rgb_tensor(const int w, const int h) const
       -> nvinfer1::ITensor*
   {
-    return tnet->addInput("input",  //
+    const auto input_tensor_name =
+        "input_rgb_tensor_" + std::to_string(w) + "x" + std::to_string(h);
+    return tnet->addInput(input_tensor_name.c_str(),  //
                           nvinfer1::DataType::kFLOAT,
                           nvinfer1::Dims4{1, 3, h, w});
   }
@@ -145,6 +147,9 @@ namespace DO::Sara::TensorRT {
       throw std::invalid_argument{"activation layer: " + activation_layer +
                                   " is not implemented!"};
 
+    if (name.has_value())
+      y->setName(name->c_str());
+
     // The output.
     return y;
   }
@@ -167,8 +172,10 @@ namespace DO::Sara::TensorRT {
                         std::to_string(layer_idx));
     trt_fmaps.push_back(y);
 
-    SARA_DEBUG << "TRT Shape " << layer_idx << " : "
+    SARA_DEBUG << "TRT output shape " << layer_idx << " : "
                << shape(*trt_fmaps.back()).transpose() << std::endl;
+    SARA_DEBUG << "TRT output name " << layer_idx << " : "
+               << trt_fmaps.back()->getName() << std::endl;
   }
 
   auto YoloV4Converter::add_slice_layer(
@@ -396,8 +403,7 @@ namespace DO::Sara::TensorRT {
     trt_fmaps.push_back(y);
   }
 
-  auto YoloV4Converter::operator()(const std::optional<std::size_t> max_layers)
-      -> void
+  auto YoloV4Converter::operator()() -> void
   {
     if (tnet == nullptr)
       throw std::runtime_error{"TensorRT network definition is NULL!"};
@@ -419,9 +425,6 @@ namespace DO::Sara::TensorRT {
 
     for (auto layer_idx = 1u; layer_idx < hnet.size(); ++layer_idx)
     {
-      if (max_layers.has_value() && layer_idx > *max_layers)
-        break;
-
       // Update the input.
       const auto& layer_type = hnet[layer_idx]->type;
       if (layer_type == "convolutional")
@@ -447,8 +450,7 @@ namespace DO::Sara::TensorRT {
       else if (layer_type == "yolo")
       {
         add_yolo_layer(layer_idx, trt_fmaps);
-        if (max_layers == std::nullopt)
-          tnet->markOutput(*trt_fmaps.back());
+        tnet->markOutput(*trt_fmaps.back());
       }
       else
       {
@@ -459,9 +461,6 @@ namespace DO::Sara::TensorRT {
                                  " NOT IMPLEMENTED!"};
       }
     }
-
-    if (max_layers != std::nullopt)
-      tnet->markOutput(*trt_fmaps.back());
   }
 
   auto YoloV4Converter::operator()(const std::size_t begin,
@@ -530,6 +529,8 @@ namespace DO::Sara::TensorRT {
     }
 
     tnet->markOutput(*trt_fmaps.back());
+    SARA_DEBUG << "OUTPUT TENSOR=\n"
+               << shape(*trt_fmaps.back()).transpose() << std::endl;
   }
 
   auto

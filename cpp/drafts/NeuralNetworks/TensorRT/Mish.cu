@@ -29,7 +29,8 @@ namespace DO::Sara::TensorRT {
       return;
 
     const auto v = in[i];
-#ifdef USE_FAST_MATH_VERSION
+#define MISH_USE_FAST_MATH_VERSION
+#if defined(MISH_USE_FAST_MATH_VERSION)
     static constexpr auto thres = 20.f;
     const auto softplus =
         v > thres                     //
@@ -138,6 +139,16 @@ namespace DO::Sara::TensorRT {
       const auto num_blocks = _inout_size % 1024 == 0
                                   ? _inout_size / max_threads_per_block
                                   : _inout_size / max_threads_per_block + 1;
+
+#define DEBUG_MISH_BLOCK_CALCULATION
+#if defined(DEBUG_MISH_BLOCK_CALCULATION)
+      SARA_CHECK(batch_size);
+      SARA_CHECK(_inout_size);
+      SARA_CHECK(max_threads_per_block);
+      SARA_CHECK(num_blocks);
+      SARA_CHECK(in);
+      SARA_CHECK(out);
+#endif
 
       mish_kernel<<<num_blocks, max_threads_per_block, 0, stream>>>(
           in, out, _inout_size);

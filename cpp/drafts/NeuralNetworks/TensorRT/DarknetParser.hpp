@@ -74,8 +74,7 @@ namespace DO::Sara::TensorRT {
     auto add_yolo_layer(const int layer_idx,
                         std::vector<nvinfer1::ITensor*>& fmaps) const -> void;
 
-    auto operator()(const std::optional<std::size_t> max_layers = std::nullopt)
-        -> void;
+    auto operator()() -> void;
 
     auto operator()(const std::size_t begin, const std::size_t end) -> void;
 
