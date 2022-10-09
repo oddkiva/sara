@@ -11,6 +11,10 @@
 
 #pragma once
 
+#if (defined(_WIN32) || defined(_WIN32_WCE)) && !defined(NOMINMAX)
+#  define NOMINMAX
+#endif
+
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 
 #include <DO/Sara/Core/Tensor.hpp>

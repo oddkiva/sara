@@ -19,6 +19,7 @@
 
 #include <NvInfer.h>
 
+#include <optional>
 #include <stdexcept>
 
 
