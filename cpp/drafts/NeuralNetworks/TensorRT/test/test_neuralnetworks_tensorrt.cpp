@@ -79,8 +79,6 @@ BOOST_AUTO_TEST_CASE(test_scale_operation)
   // Create a inference configuration object.
   auto config = trt::ConfigUniquePtr{builder->createBuilderConfig(),  //
                                      &trt::config_deleter};
-  config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 32u);
-  config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
   // If the GPU supports FP16 operations.
   // config->setFlag(nvinfer1::BuilderFlag::kFP16);
 
@@ -210,8 +208,7 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
   // Create a inference configuration object.
   auto config = trt::ConfigUniquePtr{builder->createBuilderConfig(),
                                      &trt::config_deleter};
-  config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 32u);
-  config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
+
   // If the GPU supports FP16 operations.
   // config->setFlag(nvinfer1::BuilderFlag::kFP16);
 
