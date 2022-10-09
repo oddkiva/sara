@@ -1,5 +1,9 @@
 #define BOOST_TEST_MODULE "NeuralNetworks/TensorRT"
 
+#if (defined(_WIN32) || defined(_WIN32_WCE)) && !defined(NOMINMAX)
+#  define NOMINMAX
+#endif
+
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 #include <drafts/NeuralNetworks/TensorRT/Yolo.hpp>
 

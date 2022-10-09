@@ -34,7 +34,7 @@ list(
   MetricGridRenderer.hpp
   MetricGridRenderer.cpp #
 )
-add_library(emscripten_gl_utilities ${GL_UTILS})
+add_library(emscripten_gl_utilities STATIC ${GL_UTILS})
 target_include_directories(emscripten_gl_utilities
                            PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
 target_link_libraries(

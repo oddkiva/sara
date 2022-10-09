@@ -16,10 +16,17 @@ add_library(
   YoloImpl.hpp
   YoloImpl.cu)
 add_library(DO::Sara::TensorRT ALIAS DO_Sara_TensorRT)
+if (SARA_BUILD_SHARED_LIBS)
+  target_compile_definitions(DO_Sara_TensorRT PRIVATE DO_SARA_EXPORTS)
+else ()
+  target_compile_definitions(DO_Sara_TensorRT PUBLIC DO_SARA_STATIC)
+endif ()
+
 target_link_libraries(
   DO_Sara_TensorRT
   PUBLIC $<$<PLATFORM_ID:Linux>:CUDA::cudart> #
          TensorRT::TensorRT #
+         DO::Shakti::Cuda::Utilities
          DO::Sara::Darknet)
 
 add_subdirectory(examples)
