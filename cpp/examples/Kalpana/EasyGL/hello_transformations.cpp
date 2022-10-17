@@ -210,7 +210,7 @@ int main()
   auto texture0 = kgl::Texture2D{};
   {
     // Read the image from the disk.
-    auto image = imread<Rgb8>(src_path("../../../../data/ksmall.jpg"));
+    auto image = imread<Rgb8>(src_path("data/ksmall.jpg"));
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);
@@ -223,7 +223,7 @@ int main()
   auto texture1 = kgl::Texture2D{};
   {
     // Read the image from the disk.
-    auto image = imread<Rgb8>(src_path("../../../../data/sunflowerField.jpg"));
+    auto image = imread<Rgb8>(src_path("data/sunflowerField.jpg"));
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);

@@ -124,12 +124,13 @@ int main()
   fragment_shader.destroy();
 
   auto vertices = Tensor_<float, 2>{{3, 6}};
-  vertices.flat_array() <<  //
-                            // coords            color
-      -0.5f,
-      -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,        // left
-      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // right
-      0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f;   // top
+  // clang-format off
+  vertices.flat_array() <<
+    // coords            color
+    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // left
+     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // right
+     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f;  // top
+  // clang-format on
 
   const auto row_bytes = [](const TensorView_<float, 2>& data) {
     return static_cast<GLsizei>(data.size(1) * sizeof(float));

@@ -31,7 +31,7 @@ using namespace DO::Sara;
 using namespace std;
 
 
-inline auto init_glfw_boilerplate()
+auto init_glfw_boilerplate()
 {
   // Initialize the windows manager.
   if (!glfwInit())
@@ -45,7 +45,7 @@ inline auto init_glfw_boilerplate()
 #endif
 }
 
-inline auto init_glew_boilerplate()
+auto init_glew_boilerplate()
 {
 #ifndef __APPLE__
   // Initialize GLEW.

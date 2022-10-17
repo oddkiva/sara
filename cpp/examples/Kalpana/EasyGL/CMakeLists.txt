@@ -14,7 +14,7 @@ foreach(file ${example_FILES})
             glfw)
   target_compile_definitions(
     ${filename}
-    PRIVATE SRCDIR=${CMAKE_CURRENT_SOURCE_DIR} #
+    PRIVATE SRCDIR=${CMAKE_SOURCE_DIR} #
             $<$<PLATFORM_ID:Darwin>:
             GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED>)
 

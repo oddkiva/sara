@@ -251,7 +251,7 @@ public:
     SARA_DEBUG << "Initialize texture data on GPU" << std::endl;
 
     // Texture 0.
-    const auto image0_path = src_path("../../../data/ksmall.jpg");
+    const auto image0_path = src_path("../../../../data/ksmall.jpg");
     const auto image0 = QImage{image0_path}.mirrored();
     m_texture0 = new QOpenGLTexture{image0};
     m_texture0->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
@@ -261,7 +261,7 @@ public:
     m_program->setUniformValue("texture0", 0);
 
     // Texture 1.
-    const auto image1_path = src_path("../../../data/sunflowerField.jpg");
+    const auto image1_path = src_path("../../../../data/sunflowerField.jpg");
     const auto image1 = QImage{image1_path}.mirrored();
     m_texture1 = new QOpenGLTexture{image1};
     m_texture1->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
