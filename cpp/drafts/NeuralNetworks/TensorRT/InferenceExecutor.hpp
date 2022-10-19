@@ -11,6 +11,12 @@
 
 #pragma once
 
+#if (defined(_WIN32) || defined(_WIN32_WCE)) && !defined(NOMINMAX)
+#  define NOMINMAX
+#endif
+
+#include <DO/Sara/Defines.hpp>
+
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 
 #include <DO/Sara/Core/Tensor.hpp>
@@ -20,7 +26,7 @@
 
 namespace DO::Sara::TensorRT {
 
-  class InferenceExecutor
+  class DO_SARA_EXPORT InferenceExecutor
   {
   public:
     template <typename T, int N>

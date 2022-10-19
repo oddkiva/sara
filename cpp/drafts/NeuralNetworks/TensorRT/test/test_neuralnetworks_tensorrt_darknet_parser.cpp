@@ -62,8 +62,6 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
   // Create an inference configuration object.
   auto config = trt::ConfigUniquePtr{builder->createBuilderConfig(),  //
                                      &trt::config_deleter};
-  config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 32u);
-  config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
 #ifdef GPU_SUPPORTS_FP16
   // If the GPU supports FP16 operations.
   config->setFlag(nvinfer1::BuilderFlag::kFP16);

@@ -17,7 +17,7 @@ $halide_dir = "C:\local\Halide-13.0.3-x86-64-windows"
 $nvidia_codec_sdk_dir = "C:\local\Video_Codec_SDK_11.1.5"
 $tensorrt_dir = "C:\local\TensorRT-8.0.1.6.Windows10.x86_64.cuda-11.3.cudnn8.2"
 
-$update_vcpkg = $false
+$update_vcpkg = $true
 $build_from_scratch = $true
 $run_cmake_build = $false
 
@@ -39,6 +39,8 @@ if ($update_vcpkg) {
   iex ".\vcpkg.exe install libjpeg-turbo:x64-windows"
   iex ".\vcpkg.exe install libpng:x64-windows"
   iex ".\vcpkg.exe install tiff:x64-windows"
+  iex ".\vcpkg.exe install libheif:x64-windows"
+  iex ".\vcpkg.exe install libwebp:x64-windows"
 
   # Install Video I/O libraries.
   iex ".\vcpkg.exe install ffmpeg:x64-windows"
@@ -49,8 +51,12 @@ if ($update_vcpkg) {
   # Install Ceres libraries.
   iex ".\vcpkg.exe install ceres[cxsparse,suitesparse]:x64-windows"
 
-    # Install Halide libraries.
-  iex ".\vcpkg.exe install halide:x64-windows"
+  # Install Halide libraries.
+  #
+  # Please don't... It builds too many things and takes too much space:
+  # - LLVM
+  # - etc.
+  # iex ".\vcpkg.exe install halide:x64-windows"
 
   # Install GLEW libraries.
   iex ".\vcpkg.exe install glew:x64-windows"

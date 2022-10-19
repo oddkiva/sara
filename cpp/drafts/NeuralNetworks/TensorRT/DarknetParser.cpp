@@ -184,7 +184,8 @@ namespace DO::Sara::TensorRT {
       xs.push_back(fmaps[glob_idx]);
     }
 
-    const auto trt_concat_layer = tnet->addConcatenation(xs.data(), xs.size());
+    const auto trt_concat_layer =
+        tnet->addConcatenation(xs.data(), static_cast<std::int32_t>(xs.size()));
     trt_concat_layer->setName(("concat_" + std::to_string(layer_idx)).c_str());
 
     const auto y = trt_concat_layer->getOutput(0);
