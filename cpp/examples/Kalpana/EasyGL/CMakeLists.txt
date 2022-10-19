@@ -9,8 +9,9 @@ foreach(file ${example_FILES})
     ${filename}
     PRIVATE DO::Sara::Core #
             DO::Sara::ImageIO #
+            # FIXME: OK... this is the problematic library on Windows...
             DO::Kalpana::EasyGL #
-            # ${HDF5_LIBRARIES} #
+            ${HDF5_LIBRARIES} #
             glfw)
   target_compile_definitions(
     ${filename}
