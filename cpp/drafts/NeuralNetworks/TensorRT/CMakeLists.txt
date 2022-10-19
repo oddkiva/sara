@@ -28,6 +28,7 @@ target_link_libraries(
          TensorRT::TensorRT #
          DO::Shakti::Cuda::Utilities
          DO::Sara::Darknet)
+set_property(TARGET DO_Sara_TensorRT PROPERTY FOLDER "Libraries/Sara")
 
 add_subdirectory(examples)
 

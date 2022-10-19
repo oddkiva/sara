@@ -10,13 +10,12 @@ foreach(file ${example_FILES})
     PRIVATE DO::Sara::Core #
             DO::Sara::ImageIO #
             DO::Kalpana::EasyGL #
-            ${HDF5_LIBRARIES} #
+            # ${HDF5_LIBRARIES} #
             glfw)
   target_compile_definitions(
     ${filename}
     PRIVATE SRCDIR=${CMAKE_CURRENT_SOURCE_DIR} #
-            $<$<PLATFORM_ID:Darwin>:
-            GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED>)
+            $<$<PLATFORM_ID:Darwin>:GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED>)
 
   if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(${filename} PRIVATE DO_SARA_STATIC)

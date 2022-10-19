@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Kalpana/EasyGL/OpenGL.hpp>
 
 #include <stdexcept>
@@ -22,7 +24,7 @@ namespace DO::Kalpana::GL {
   //! @addtogroup EasyGL
   //! @{
 
-  struct Shader
+  struct DO_SARA_EXPORT Shader
   {
     operator GLuint() const
     {
@@ -40,7 +42,7 @@ namespace DO::Kalpana::GL {
   };
 
 
-  struct ShaderProgram
+  struct DO_SARA_EXPORT ShaderProgram
   {
     inline ShaderProgram() = default;
 
@@ -61,7 +63,7 @@ namespace DO::Kalpana::GL {
 
     void clear();
 
-    inline auto get_uniform_location(const char* param_name) const -> GLint
+    auto get_uniform_location(const char* param_name) const -> GLint
     {
       const auto param_location =
           glGetUniformLocation(program_object, param_name);
@@ -72,8 +74,8 @@ namespace DO::Kalpana::GL {
     }
 
     template <typename T>
-    inline auto set_uniform_param(GLint param_location,
-                                  const T& param_value) const -> void
+    auto set_uniform_param(GLint param_location, const T& param_value) const
+        -> void
     {
       if constexpr (std::is_same_v<T, int>)
         glUniform1i(param_location, param_value);
@@ -85,39 +87,39 @@ namespace DO::Kalpana::GL {
 
 
     template <typename T>
-    inline auto set_uniform_param(const char* param_name,
-                                  const T& param_value) const -> void
+    auto set_uniform_param(const char* param_name, const T& param_value) const
+        -> void
     {
       const auto param_location = get_uniform_location(param_name);
       set_uniform_param(param_location, param_value);
     }
 
-    inline auto set_uniform_vector2f(GLint mat_location,
-                                     const float* mat_coeffs) const -> void
+    auto set_uniform_vector2f(GLint mat_location, const float* mat_coeffs) const
+        -> void
     {
       glUniform2fv(mat_location, 1, mat_coeffs);
     }
 
-    inline auto set_uniform_vector4f(GLint mat_location,
-                                     const float* mat_coeffs) const -> void
+    auto set_uniform_vector4f(GLint mat_location, const float* mat_coeffs) const
+        -> void
     {
       glUniform4fv(mat_location, 1, mat_coeffs);
     }
 
-    inline auto set_uniform_matrix3f(GLint mat_location,
-                                     const float* mat_coeffs) const -> void
+    auto set_uniform_matrix3f(GLint mat_location, const float* mat_coeffs) const
+        -> void
     {
       glUniformMatrix3fv(mat_location, 1, GL_FALSE, mat_coeffs);
     }
 
-    inline auto set_uniform_matrix4f(GLint mat_location,
-                                     const float* mat_coeffs) const -> void
+    auto set_uniform_matrix4f(GLint mat_location, const float* mat_coeffs) const
+        -> void
     {
       glUniformMatrix4fv(mat_location, 1, GL_FALSE, mat_coeffs);
     }
 
-    inline auto set_uniform_texture(GLint tex_location,
-                                    GLuint texture_unit) const -> void
+    auto set_uniform_texture(GLint tex_location, GLuint texture_unit) const
+        -> void
     {
       glUniform1i(tex_location, texture_unit);
     }
