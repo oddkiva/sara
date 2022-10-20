@@ -22,3 +22,7 @@ leak:Foundation
 # Luckily the memory leak does not show up on the GitLab CI.
 leak:dbus
 leak:nvidia-glcore
+leak:nvidia-opencl
+
+# HEIF/x265 leaking memory when calling x265_malloc apparently.
+leak:x265

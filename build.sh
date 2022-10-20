@@ -80,10 +80,10 @@ function install_package()
 
 if [[ ${build_type} == "docker" ]]; then
   # Build the docker image.
-  docker build -f docker/Dockerfile -t ${SARA_DOCKER_IMAGE}:latest .
+  docker build -f docker/Dockerfile.bionic -t ${SARA_DOCKER_IMAGE}:latest .
   # Run the docker image.
   docker run --gpus all -it \
-    -v ~/.gitconfig:/etc/gitconfig \
+    -v $HOME/.gitconfig:/etc/gitconfig \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v "$HOME/.Xauthority:/root/.Xauthority:rw" \
     -v /media/Linux\ Data:/media/Linux\ Data \

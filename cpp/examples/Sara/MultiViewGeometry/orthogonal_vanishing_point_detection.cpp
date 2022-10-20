@@ -178,12 +178,12 @@ auto calculate_yaw_and_pitch(const Eigen::Vector3f& v)
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
@@ -419,13 +419,18 @@ int __main(int argc, char** argv)
           const auto ibest =
               std::min_element(rn.begin(), rn.end()) - rn.begin();
 
-
+          static constexpr auto int_round = [](const double x) {
+            return static_cast<int>(std::round(x));
+          };
           if (ibest == 0)
-            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Red8, 4);
+            draw_line(detection, int_round(a.x()), int_round(a.y()),
+                      int_round(b.x()), int_round(b.y()), Red8, 4);
           else if (ibest == 1)
-            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Green8, 4);
+            draw_line(detection, int_round(a.x()), int_round(a.y()),
+                      int_round(b.x()), int_round(b.y()), Green8, 4);
           else
-            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Blue8, 4);
+            draw_line(detection, int_round(a.x()), int_round(a.y()),
+                      int_round(b.x()), int_round(b.y()), Blue8, 4);
         }
       }
 

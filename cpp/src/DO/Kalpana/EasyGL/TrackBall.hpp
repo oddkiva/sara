@@ -20,6 +20,11 @@ namespace DO::Kalpana::GL {
 
     auto rotation() const -> Eigen::Quaternionf;
 
+    inline auto pressed() const -> bool
+    {
+      return _pressed;
+    }
+
   private:
     Eigen::Quaternionf _rotation = Eigen::Quaternionf::Identity();
     Eigen::Vector3f _axis = Eigen::Vector3f::UnitY();

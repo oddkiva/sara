@@ -23,6 +23,7 @@
 #include <DO/Sara/ImageIO/Details/Exif.hpp>
 #include <DO/Sara/ImageIO/Details/Heif.hpp>
 #include <DO/Sara/ImageIO/Details/ImageIOObjects.hpp>
+#include <DO/Sara/ImageIO/Details/WebP.hpp>
 #include <DO/Sara/ImageIO/ImageIO.hpp>
 
 
@@ -67,6 +68,11 @@ namespace DO::Sara {
   static inline bool is_heif_file_ext(const string& ext)
   {
     return ext == ".heic";
+  }
+
+  static inline bool is_webp_file_ext(const string& ext)
+  {
+    return ext == ".webp";
   }
 #endif
 
@@ -174,11 +180,9 @@ namespace DO::Sara {
       else if (is_tiff_file_ext(ext))
         read_image_with<TiffFileReader>(image, filepath.c_str());
       else if (is_heif_file_ext(ext))
-      {
-        auto heif_image = read_heif_file_as_interleaved_rgb_image(filepath);
-        auto imview = to_image_view(heif_image);
-        image = imview;
-      }
+        image = read_heif_file_as_interleaved_rgb_image(filepath);
+      else if (is_webp_file_ext(ext))
+        image = read_webp_file_as_interleaved_rgb_image(filepath);
 #endif
       else
         throw std::runtime_error{
@@ -199,31 +203,26 @@ namespace DO::Sara {
     const auto ext = file_ext(filepath);
 
     if (is_jpeg_file_ext(ext))
-    {
       JpegFileWriter{reinterpret_cast<const unsigned char*>(image.data()),
                      image.width(), image.height(), 3}
           .write(filepath.c_str(), quality);
-    }
 
     else if (is_png_file_ext(ext))
-    {
       PngFileWriter{reinterpret_cast<const unsigned char*>(image.data()),
                     image.width(), image.height(), 3}
           .write(filepath.c_str());
-    }
 
 #ifndef __EMSCRIPTEN__
     else if (is_tiff_file_ext(ext))
-    {
       TiffFileWriter{reinterpret_cast<const unsigned char*>(image.data()),
                      image.width(), image.height(), 3}
           .write(filepath.c_str());
-    }
 
     else if (is_heif_file_ext(ext))
-    {
       write_heif_file(image, filepath, quality);
-    }
+
+    else if (is_webp_file_ext(ext))
+      write_webp_file(image, filepath, quality);
 #endif
     else
       throw std::runtime_error{"Not a supported or valid image format!"};

@@ -43,7 +43,7 @@ namespace DO { namespace Sara {
     void register_user_main(int (*userMain)(int, char**));
 
     DO_SARA_EXPORT
-    void register_user_main(std::function<int(int, char **)>);
+    void register_user_main(std::function<int(int, char**)>);
 
     DO_SARA_EXPORT
     int exec();
@@ -62,17 +62,17 @@ namespace DO { namespace Sara {
 
 // ====================================================================== //
 //! @brief Some convenient hacks.
-int __main(int, char**);
+int sara_graphics_main(int, char**);
 
 #define GRAPHICS_MAIN()                                                        \
   int main(int argc, char** argv)                                              \
   {                                                                            \
     DO::Sara::GraphicsApplication app(argc, argv);                             \
-    app.register_user_main(__main);                                            \
+    app.register_user_main(sara_graphics_main);                                \
     return app.exec();                                                         \
   }                                                                            \
                                                                                \
-  int __main(int, char**)
+  int sara_graphics_main(int, char**)
 
 
 //! @}

@@ -99,10 +99,11 @@ def generate_project(source_dir: str,
     cmake_options.append("-D SARA_BUILD_VIDEOIO:BOOL=ON")
 
     # Compile Halide code.
-    cmake_options.append("-D SARA_USE_HALIDE:BOOL=ON")
     if SYSTEM == "Linux" and HALIDE_ROOT_PATH.exists():
+        cmake_options.append("-D SARA_USE_HALIDE:BOOL=ON")
         my_cmake_prefix_paths.append(HALIDE_ROOT_PATH)
     elif SYSTEM == "Darwin":
+        cmake_options.append("-D SARA_USE_HALIDE:BOOL=ON")
         llvm_dir = subprocess.check_output(["brew", "--prefix", "llvm"])
         llvm_dir = llvm_dir.decode(sys.stdout.encoding).strip()
         llvm_cmake_dir = pathlib.Path(llvm_dir) / "lib" / "cmake" / "llvm"

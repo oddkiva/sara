@@ -67,6 +67,7 @@ before_script:
       libjpeg-dev
       libpng-dev
       libtiff5-dev
+      libwebp-dev
       libavcodec-dev
       libavformat-dev
       libavutil-dev

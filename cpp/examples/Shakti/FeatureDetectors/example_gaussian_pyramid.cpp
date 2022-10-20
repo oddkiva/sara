@@ -48,12 +48,12 @@ void my_handler(int s)
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
 #ifdef _WIN32
   const auto video_filepath = sara::select_video_file_from_dialog_box();

@@ -34,7 +34,7 @@ list(
   MetricGridRenderer.hpp
   MetricGridRenderer.cpp #
 )
-add_library(emscripten_gl_utilities ${GL_UTILS})
+add_library(emscripten_gl_utilities STATIC ${GL_UTILS})
 target_include_directories(emscripten_gl_utilities
                            PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
 target_link_libraries(
@@ -87,12 +87,12 @@ macro(sara_add_wasm_executable file)
     target_link_libraries(${filename} PRIVATE GLEW::GLEW)
   endif()
 
-  set_property(TARGET ${filename} PROPERTY FOLDER "Libraries/Sara/Emscripten")
+  set_property(TARGET ${filename} PROPERTY FOLDER "Examples/Sara/Emscripten")
 
   if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     add_dependencies(emscripten_copy_assets ${filename})
     set_property(TARGET emscripten_copy_assets
-                 PROPERTY FOLDER "Libraries/Sara/Emscripten")
+                 PROPERTY FOLDER "Examples/Sara/Emscripten")
   endif()
 endmacro()
 

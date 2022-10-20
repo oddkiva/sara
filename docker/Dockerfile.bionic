@@ -1,0 +1,81 @@
+FROM nvidia/cudagl:10.1-runtime-ubuntu18.04
+
+MAINTAINER "Odd Kiva"
+
+# To avoid console interaction with apt.
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
+
+# Install necessary packages to add APT repositories.
+RUN apt-get update -y && apt-get install -y \
+  apt-transport-https        \
+  ca-certificates            \
+  gnupg                      \
+  software-properties-common \
+  wget
+
+# CMake APT repository.
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | \
+  gpg --dearmor - | \
+  tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+RUN apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+
+# Vulkan SDK APT repository.
+RUN wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add -
+RUN wget -qO \
+      /etc/apt/sources.list.d/lunarg-vulkan-bionic.list \
+      http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+
+# CLBlast APT repository.
+RUN add-apt-repository ppa:cnugteren/clblast
+
+# C++ toolchain, libraries and tools.
+RUN apt-get update -y && apt-get install -y \
+  build-essential           \
+  ccache                    \
+  cmake                     \
+  cppcheck                  \
+  git                       \
+  lcov                      \
+  ninja-build               \
+  python3-pip               \
+  rubygems                  \
+  doxygen                   \
+  graphviz                  \
+  libboost-all-dev          \
+  libclblast-dev            \
+  libhdf5-dev               \
+  libheif-dev               \
+  libjpeg-dev               \
+  libpng-dev                \
+  libtiff5-dev              \
+  libavcodec-dev            \
+  libavformat-dev           \
+  libavutil-dev             \
+  libswscale-dev            \
+  libglew-dev               \
+  libglfw3-dev              \
+  libceres-dev              \
+  libpocl-dev               \
+  libcurl4                  \
+  libz3-4                   \
+  ocl-icd-opencl-dev        \
+  opencl-headers            \
+  python3-dev               \
+  qtbase5-dev               \
+  vulkan-sdk
+
+# Install Halide.
+RUN mkdir ${HOME}/opt
+RUN wget https://github.com/halide/Halide/releases/download/v13.0.0/Halide-13.0.0-x86-64-linux-c3641b6850d156aff6bb01a9c01ef475bd069a31.tar.gz
+RUN tar xvzf Halide-13.0.0-x86-64-linux-c3641b6850d156aff6bb01a9c01ef475bd069a31.tar.gz
+RUN mv Halide-13.0.0-x86-64-linux ${HOME}/opt
+
+
+# Please make my life easier
+# TODO: install neovim, etc.
+RUN apt-get install -y zsh vim
+
+# Set up my development workspace.
+WORKDIR /workspace/sara

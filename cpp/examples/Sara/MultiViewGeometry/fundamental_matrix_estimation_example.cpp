@@ -120,7 +120,8 @@ void inspect_fundamental_matrix_estimation(const Image<Rgb8>& image1,
   drawer.display_images();
 
   // Show the inliers.
-  for (size_t i = 0; i < matches.size(); ++i)
+  const auto num_matches = static_cast<int>(matches.size());
+  for (auto i = 0; i < num_matches; ++i)
   {
     if (!inliers(i))
       continue;
@@ -160,7 +161,7 @@ void inspect_fundamental_matrix_estimation(const Image<Rgb8>& image1,
   Matrix<double, 3, 8> proj_Y = F.matrix().transpose() * Y;
   proj_Y.array().rowwise() /= proj_Y.row(2).array();
 
-  for (size_t i = 0; i < L; ++i)
+  for (auto i = 0; i < L; ++i)
   {
     // Draw the best elemental subset drawn by RANSAC.
     drawer.draw_match(matches[sample_best(i)], Red8, true);
@@ -178,11 +179,11 @@ void inspect_fundamental_matrix_estimation(const Image<Rgb8>& image1,
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   if (argc < 3)
   {

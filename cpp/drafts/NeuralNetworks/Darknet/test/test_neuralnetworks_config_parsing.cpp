@@ -11,16 +11,16 @@
 
 #define BOOST_TEST_MODULE "NeuralNetworks/Yolo Configuration Parsing"
 
-#include <DO/Sara/Core.hpp>
-#include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/Defines.hpp>
 
 #include <drafts/NeuralNetworks/Darknet/Layer.hpp>
 #include <drafts/NeuralNetworks/Darknet/Parser.hpp>
 
+#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
 
+namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
 
 
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
   namespace fs = boost::filesystem;
 
   const auto data_dir_path =
-      fs::canonical(fs::path{src_path("../../../../data")});
+      fs::canonical(fs::path{src_path("data")});
   const auto cfg_filepath =
       data_dir_path / "trained_models" / "yolov4-tiny.cfg";
   const auto weights_filepath =

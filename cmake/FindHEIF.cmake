@@ -1,6 +1,6 @@
 find_path(
   HEIF_INCLUDE_DIR
-  NAMES heif.h heif_cxx.h heif_version.h
+  NAMES heif.h heif_version.h
   PATHS /usr /usr/local
   PATH_SUFFIXES include/libheif)
 
@@ -12,7 +12,17 @@ find_library(
 
 if(HEIF_INCLUDE_DIR AND EXISTS "${HEIF_INCLUDE_DIR}/heif_version.h")
   file(STRINGS "${HEIF_INCLUDE_DIR}/heif_version.h" HEIF_VERSION_STRING
-       REGEX "^#define LIBHEIF_VERSION [0-9]+.*$")
+       REGEX "^#define LIBHEIF_VERSION[ ]+\"([0-9]+).([0-9]+).([0-9]+)\"$")
+
+  string(REGEX MATCH
+               "^#define LIBHEIF_VERSION[ ]+\"([0-9]+).([0-9]+).([0-9]+)\"$" _
+               ${HEIF_VERSION_STRING})
+  set(HEIF_VERSION_MAJOR ${CMAKE_MATCH_1})
+  set(HEIF_VERSION_MINOR ${CMAKE_MATCH_2})
+  set(HEIF_VERSION_PATCH ${CMAKE_MATCH_3})
+
+  set(HEIF_VERSION_MAJOR
+      ${HEIF_VERSION_MAJOR}.${HEIF_VERSION_MINOR}.${HEIF_VERSION_PATCH})
 endif()
 
 mark_as_advanced(HEIF_INCLUDE_DIR)
