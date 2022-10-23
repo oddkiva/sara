@@ -110,7 +110,7 @@ build:
         -DSARA_BUILD_VIDEOIO:BOOL=ON
         -DSARA_BUILD_SAMPLES:BOOL=ON
         -DSARA_BUILD_TESTS:BOOL=ON
-    - make VERBOSE=1
+    - make -j$(nproc) VERBOSE=1
     # Create deb package.
     # - make package  # Lack of space in the build machine ?
     # Run tests.
