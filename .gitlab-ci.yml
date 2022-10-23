@@ -20,18 +20,17 @@ before_script:
   - export CCACHE_BASEDIR=${PWD}
   - export CCACHE_DIR=${PWD}/ccache
 
-  - apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
-
   # Do this first.
   - apt-get update -y -qq
-
-  # Install the latest CMake please.
+  # Install the prerequisite software to add APT packages.
   - apt-get install -y -qq
       apt-transport-https
       ca-certificates
-      gnupg
+      gnupg2
       software-properties-common
       wget
+
+  - apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
 
   # Now add the additional APT repositories:
   #
