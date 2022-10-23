@@ -13,11 +13,6 @@ fi
 
 platform_name=$(uname -s)
 
-function install_python_packages_via_pip()
-{
-  pip3 install -r ../sara/requirements.txt
-}
-
 function build_library_for_ios()
 {
   # Generate an Xcode project.

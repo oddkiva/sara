@@ -1,4 +1,4 @@
-FROM nvidia/cudagl:11.4.2-devel
+FROM nvidia/cudagl:11.4.2-runtime-ubuntu20.04
 
 MAINTAINER "Odd Kiva"
 
@@ -32,6 +32,7 @@ RUN apt-get update -y && apt-get install -y \
   ccache                    \
   cmake                     \
   cppcheck                  \
+  cuda-toolkit-11-7         \
   git                       \
   lcov                      \
   ninja-build               \
@@ -42,6 +43,7 @@ RUN apt-get update -y && apt-get install -y \
   libboost-all-dev          \
   libclblast-dev            \
   libhdf5-dev               \
+  libheif-dev               \
   libjpeg-dev               \
   libpng-dev                \
   libtiff5-dev              \
@@ -55,6 +57,7 @@ RUN apt-get update -y && apt-get install -y \
   libpocl-dev               \
   libcurl4                  \
   libz3-4                   \
+  libtbb-dev                \
   ocl-icd-opencl-dev        \
   opencl-headers            \
   python3-dev               \
@@ -63,26 +66,26 @@ RUN apt-get update -y && apt-get install -y \
 
 # Install Halide.
 RUN mkdir ${HOME}/opt
-RUN wget https://github.com/halide/Halide/releases/download/v13.0.0/Halide-13.0.0-x86-64-linux-c3641b6850d156aff6bb01a9c01ef475bd069a31.tar.gz
-RUN tar xvzf Halide-13.0.0-x86-64-linux-c3641b6850d156aff6bb01a9c01ef475bd069a31.tar.gz
-RUN mv Halide-13.0.0-x86-64-linux ${HOME}/opt
+RUN wget https://github.com/halide/Halide/releases/download/v14.0.0/Halide-14.0.0-x86-64-linux-6b9ed2afd1d6d0badf04986602c943e287d44e46.tar.gz
+RUN tar xvzf Halide-14.0.0-x86-64-linux-6b9ed2afd1d6d0badf04986602c943e287d44e46.tar.gz
+RUN mv Halide-14.0.0-x86-64-linux ${HOME}/opt
 
 # Install Swift toolchain.
-RUN wget https://download.swift.org/swift-5.5.1-release/ubuntu2004/swift-5.5.1-RELEASE/swift-5.5.1-RELEASE-ubuntu20.04.tar.gz \
-      && tar xvzf swift-5.5.1-RELEASE-ubuntu20.04.tar.gz \
-      && mv swift-5.5.1-RELEASE-ubuntu20.04 ${HOME}/opt
+RUN wget https://download.swift.org/swift-5.6.3-release/ubuntu2004/swift-5.6.3-RELEASE/swift-5.6.3-RELEASE-ubuntu20.04.tar.gz \
+      && tar xvzf swift-5.6.3-RELEASE-ubuntu20.04.tar.gz \
+      && mv swift-5.6.3-RELEASE-ubuntu20.04 ${HOME}/opt
 
 
 # Install Python dependencies.
 RUN pip3 install \
-      coverage==4.5.4 \
-      ipdb            \
-      ipdbplugin      \
-      nose            \
-      numpy           \
-      scipy           \
-      PySide2         \
-      ipython         \
+      coverage    \
+      ipdb        \
+      ipdbplugin  \
+      nose        \
+      numpy       \
+      scipy       \
+      PySide2     \
+      ipython     \
       pybind11
 
 # Please make my life easier
