@@ -1,4 +1,4 @@
-image: nvidia/cudagl:11.4.2-runtime-ubuntu20.04
+image: ubuntu:20.04
 
 cache:
   paths:
