@@ -39,7 +39,7 @@ if(SARA_USE_FROM_SOURCE)
                 shakti_cornerness_32f_cpu
                 # Local extremum map
                 shakti_scale_space_dog_extremum_32f_cpu
-                $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+                $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
     endif()
   endif()
 endif()

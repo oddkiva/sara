@@ -25,6 +25,6 @@ if (SARA_USE_FROM_SOURCE)
       DO::Sara::FeatureMatching
       DO::Sara::MultiViewGeometry
       DO::Sara::Visualization
-      $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+      $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   endif ()
 endif ()

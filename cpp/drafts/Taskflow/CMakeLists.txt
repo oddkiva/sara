@@ -15,7 +15,7 @@ foreach (file ${taskflow_SOURCE_FILES})
   target_link_libraries(${filename}
     PRIVATE
     ${DO_Sara_LIBRARIES}
-    $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+    $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   set_target_properties(${filename}
       PROPERTIES
       COMPILE_FLAGS ${SARA_DEFINITIONS}

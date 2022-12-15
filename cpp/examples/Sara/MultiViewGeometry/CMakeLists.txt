@@ -30,7 +30,7 @@ target_link_libraries(orthogonal_vanishing_point_detection
   PRIVATE
   Boost::filesystem
   Boost::program_options
-  $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+  $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
 
 # Two-view geometry.
 sara_add_example(homography_estimation_example)
