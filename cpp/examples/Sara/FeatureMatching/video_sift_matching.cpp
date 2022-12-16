@@ -24,7 +24,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 namespace fs = boost::filesystem;
