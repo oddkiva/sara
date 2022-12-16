@@ -29,7 +29,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 namespace fs = boost::filesystem;
@@ -219,9 +221,10 @@ int sara_graphics_main(int argc, char** argv)
     return 1;
   }
 
-
   // OpenMP.
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);

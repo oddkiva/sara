@@ -11,7 +11,9 @@
 
 //! @example
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -177,7 +179,9 @@ auto test_on_video()
 GRAPHICS_MAIN()
 {
   // Optimization.
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
   std::ios_base::sync_with_stdio(false);
 
   // test_on_image();

@@ -28,7 +28,9 @@
 
 #include <boost/filesystem.hpp>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 using namespace std;
@@ -209,7 +211,9 @@ int sara_graphics_main(int argc, char** argv)
   const auto downscale_factor = argc >= 3 ? std::atoi(argv[2]) : 2;
 
   // OpenMP.
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);

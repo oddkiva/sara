@@ -21,7 +21,9 @@
 #include <DO/Sara/FeatureDetectors/LineSegmentDetector.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 using namespace std;
@@ -164,7 +166,9 @@ auto test_on_video()
 
 GRAPHICS_MAIN()
 {
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   // test_on_image();
   test_on_video();

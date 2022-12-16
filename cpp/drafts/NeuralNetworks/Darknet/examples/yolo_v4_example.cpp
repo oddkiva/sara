@@ -24,7 +24,9 @@
 
 #include <iomanip>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 namespace sara = DO::Sara;
@@ -76,10 +78,11 @@ auto detect_objects(const sara::ImageView<sara::Rgb32f>& image,
 
 auto test_on_image(int argc, char** argv) -> void
 {
-#ifndef __APPLE__
+#if !defined(__APPLE__) && defined(_OPENMP)
   const auto num_threads = omp_get_max_threads();
   omp_set_num_threads(num_threads);
   Eigen::setNbThreads(num_threads);
+
 #endif
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
