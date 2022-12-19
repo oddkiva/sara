@@ -35,7 +35,9 @@
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#  if !defined(__has_warning) || __has_warning("-Wmaybe-uninitialized")
+#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#  endif
 #endif
 #include <Eigen/Eigen>
 #ifdef __GNUC__
