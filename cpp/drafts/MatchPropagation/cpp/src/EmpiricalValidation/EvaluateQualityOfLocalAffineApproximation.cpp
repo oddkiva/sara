@@ -69,12 +69,13 @@ namespace DO::Sara {
         // Extract the subset of matches of interest.
         vector<IndexDist> M_sorted(sort_matches_by_reprojection_error(M, H));
 
-        for (size_t lb = 0; lb != thres.size() - 1; ++lb)
+        const auto num_thres = static_cast<int>(thres.size());
+        for (auto lb = 0; lb != num_thres - 1; ++lb)
         {
-          int ub = lb + 1;
-          bool success;
-          success = run(M, M_sorted, H, j, squared_ell, thres[lb], thres[ub],
-                        num_region_growths, K, rho_min, drawer);
+          const auto ub = lb + 1;
+          const auto success = run(M, M_sorted, H, j, squared_ell,
+                                   thres[lb], thres[ub],
+                                   num_region_growths, K, rho_min, drawer);
           if (!success)
           {
             if (_display)

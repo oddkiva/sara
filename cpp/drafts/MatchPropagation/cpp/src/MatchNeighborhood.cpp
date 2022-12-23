@@ -58,12 +58,13 @@ namespace DO::Sara {
     N_K_i.reserve(_neighborhood_max_size);
 
     // Match $m_i = (x_i, y_i)$
-    Vector2d xi(_M[i].x_pos().cast<double>());
-    Vector2d yi(_M[i].y_pos().cast<double>());
+    const Vector2d xi = _M[i].x_pos().cast<double>();
+    const Vector2d yi = _M[i].y_pos().cast<double>();
+    const auto Ki = static_cast<int>(K);
     // Collect the K nearest matches $\mathb{x}_j$ to $\mathb{x}_i$.
-    _x_index_ptr->knn_search(xi, K, _x_indices, _sq_dists);
+    _x_index_ptr->knn_search(xi, Ki, _x_indices, _sq_dists);
     // Collect the K nearest matches $\mathb{y}_j$ to $\mathb{y}_i$
-    _y_index_ptr->knn_search(yi, K, _y_indices, _sq_dists);
+    _y_index_ptr->knn_search(yi, Ki, _y_indices, _sq_dists);
 
 
     // Reset list of neighboring matches.
@@ -131,11 +132,12 @@ namespace DO::Sara {
 #else
     for (size_t i = 0; i != indices.size(); ++i)
     {
-      Vector2d xi(_M[indices[i]].x_pos().cast<double>());
-      Vector2d yi(_M[indices[i]].y_pos().cast<double>());
-      _x_index_ptr->knn_search(xi, K, x_indices[i], squared_distances[0]);
+      const Vector2d xi = _M[indices[i]].x_pos().cast<double>();
+      const Vector2d yi = _M[indices[i]].y_pos().cast<double>();
+      const auto Ki = static_cast<int>(K);
+      _x_index_ptr->knn_search(xi, Ki, x_indices[i], squared_distances[0]);
       // Collect the K nearest matches $\mathb{y}_j$ to $\mathb{y}_i$
-      _y_index_ptr->knn_search(yi, K, y_indices[i], squared_distances[0]);
+      _y_index_ptr->knn_search(yi, Ki, y_indices[i], squared_distances[0]);
     }
 #endif
 
@@ -526,14 +528,15 @@ namespace DO::Sara {
     for (size_t i = 0; i != _M.size(); ++i)
     {
       // Match $m_i = (x_i, y_i)$
-      Vector2d xi(_M[i].x_pos().cast<double>());
-      Vector2d yi(_M[i].y_pos().cast<double>());
+      const Vector2d xi = _M[i].x_pos().cast<double>();
+      const Vector2d yi = _M[i].y_pos().cast<double>();
+      const auto Ki = static_cast<int>(K);
       // Collect the indices of $\mathb{x}_j$ such that
       // $|| \mathbf{x}_j - \mathbf{x}_i ||_2 < thres$.
-      _x_index_ptr->knn_search(xi, K, _x_indices, _sq_dists);
+      _x_index_ptr->knn_search(xi, Ki, _x_indices, _sq_dists);
       // Collect the indices of $\mathb{y}_j$ such that
       // $|| \mathbf{y}_j - \mathbf{x}_i ||_2 < thres$.
-      _y_index_ptr->knn_search(yi, K, _y_indices, _sq_dists);
+      _y_index_ptr->knn_search(yi, Ki, _y_indices, _sq_dists);
       // Reset list of neighboring matches.
       _index_scores.clear();
 //#define DEBUG

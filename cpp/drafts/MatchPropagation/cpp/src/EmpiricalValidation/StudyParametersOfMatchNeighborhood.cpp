@@ -152,8 +152,8 @@ namespace DO::Sara {
     vector<int> size_hatN_K(N_K.size());
     for (size_t i = 0; i != N_K.size(); ++i)
     {
-      size_N_K[i] = N_K[i].size();
-      size_hatN_K[i] = hatN_K[i].size();
+      size_N_K[i] = static_cast<int>(N_K[i].size());
+      size_hatN_K[i] = static_cast<int>(hatN_K[i].size());
       diff_size[i] = size_hatN_K[i] - size_N_K[i];
     }
 
