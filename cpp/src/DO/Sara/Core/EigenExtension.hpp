@@ -31,7 +31,10 @@
 #    if __has_warning("-Wmaybe-uninitialized")
 #      pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #    endif
-#  else // GCC
+#    if __has_warning("-Wimplicit-int-conversion")
+#      pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+#    endif
+#  else  // GCC
 #    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #  endif
 #endif
