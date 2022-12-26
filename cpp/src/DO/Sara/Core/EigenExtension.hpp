@@ -25,17 +25,11 @@
 #  define NOMINMAX
 #endif
 
-// This is a specific compiling issue with MSVC 2008
-#if (_MSC_VER >= 1500 && _MSC_VER < 1600)
-#  define EIGEN_DONT_ALIGN
-#  pragma warning(                                                             \
-      disable : 4181)  // "../Core/Locator.hpp(444) : warning C4181: qualifier
-                       // applied to reference type; ignored"
-#endif
-
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
-#  if !defined(__has_warning) || __has_warning("-Wmaybe-uninitialized")
+#  if (defined(__has_warning) &&                                               \
+       __has_warning("-Wmaybe-uninitialized")) /* clang */                     \
+      || !defined(__had_warning)               /* GCC */
 #    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #  endif
 #endif
