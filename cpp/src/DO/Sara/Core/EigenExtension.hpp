@@ -15,7 +15,7 @@
   @brief Eigen matrices and vector typedefs.
 
   VERY IMPORTANT:
-  By default Eigen uses the *COLUMN-MAJOR* storage.
+  By default Eigen stores matrix data in a *COLUMN-MAJOR* order.
  */
 
 #pragma once
@@ -27,9 +27,9 @@
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
-#  if (defined(__has_warning) &&                                               \
-       __has_warning("-Wmaybe-uninitialized")) /* clang */                     \
-      || !defined(__had_warning)               /* GCC */
+#  if defined(__has_warning) && __has_warning("-Wmaybe-uninitialized")  // clang
+#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#  elif !defined(__has_warning)  // GCC
 #    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #  endif
 #endif

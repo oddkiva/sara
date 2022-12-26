@@ -12,12 +12,12 @@
 
 #include <DO/Sara/Defines.hpp>
 
-#include <DO/Sara/MultiViewGeometry/Estimators/RelativePoseEstimator.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
 
 
 namespace DO::Sara {
 
-template struct DO_SARA_EXPORT RelativePoseEstimator<NisterFivePointAlgorithm>;
-template struct DO_SARA_EXPORT RelativePoseEstimator<SteweniusFivePointAlgorithm>;
+template struct DO_SARA_EXPORT RelativePoseSolver<NisterFivePointAlgorithm>;
+template struct DO_SARA_EXPORT RelativePoseSolver<SteweniusFivePointAlgorithm>;
 
 } /* namespace DO::Sara */

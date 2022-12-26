@@ -15,8 +15,8 @@
 #include <Eigen/StdVector>
 
 #include <DO/Sara/Core/Numpy.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
 
 #include <iterator>
 
@@ -37,13 +37,13 @@ namespace DO::Sara {
 
   //! @brief Relative pose estimator.
   template <typename Method>
-  struct RelativePoseEstimator : Method
+  struct RelativePoseSolver : Method
   {
     static constexpr auto N = Method::num_points;
 
     CheiralityCriterion cheiral_criterion{CheiralityCriterion::NONE};
 
-    RelativePoseEstimator(CheiralityCriterion c = CheiralityCriterion::NONE)
+    RelativePoseSolver(CheiralityCriterion c = CheiralityCriterion::NONE)
       : cheiral_criterion{c}
     {
     }
@@ -95,8 +95,8 @@ namespace DO::Sara {
     }
   };
 
-  extern template struct RelativePoseEstimator<NisterFivePointAlgorithm>;
-  extern template struct RelativePoseEstimator<SteweniusFivePointAlgorithm>;
+  extern template struct RelativePoseSolver<NisterFivePointAlgorithm>;
+  extern template struct RelativePoseSolver<SteweniusFivePointAlgorithm>;
 
   //! @}
 
