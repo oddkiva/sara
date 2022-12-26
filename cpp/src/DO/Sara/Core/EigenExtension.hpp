@@ -27,9 +27,11 @@
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
-#  if defined(__has_warning) && __has_warning("-Wmaybe-uninitialized")  // clang
-#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#  elif !defined(__has_warning)  // GCC
+#  if defined(__has_warning)  // clang
+#    if __has_warning("-Wmaybe-uninitialized")
+#      pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#    endif
+#  else // GCC
 #    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #  endif
 #endif
