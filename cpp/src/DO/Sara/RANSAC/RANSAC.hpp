@@ -46,7 +46,7 @@ namespace DO::Sara {
   auto ransac(const TensorView_<T, 2>& points,         //
               ModelSolver solver,                      //
               InlierPredicateType inlier_predicate,    //
-              const std::size_t num_samples)                 //
+              const std::size_t num_samples)           //
       -> std::tuple<typename ModelSolver::model_type,  //
                     Tensor_<bool, 1>,                  //
                     Tensor_<int, 1>>                   //

@@ -20,63 +20,60 @@
 // #include <vector>
 //
 // namespace fs = boost::filesystem;
-//
 // const uint32_t WIDTH = 800;
 // const uint32_t HEIGHT = 600;
 //
 // const int MAX_FRAMES_IN_FLIGHT = 2;
 //
 // const std::vector<const char*> validation_layers = {
-//   "VK_LAYER_KHRONOS_validation"};
+//     "VK_LAYER_KHRONOS_validation"};
 //
 // const std::vector<const char*> deviceExtensions = {
-//   VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+//     VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 //
-// #ifdef NDEBUG
-// const bool enableValidationLayers = false;
-// #else
-// const bool enable_validation_layers = true;
-// #endif
+// static constexpr auto enable_validation_layers = true;
+//
 //
 // namespace vk {
-// VkResult CreateDebugUtilsMessengerEXT(
-//     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-//     const VkAllocationCallbacks* pAllocator,
-//     VkDebugUtilsMessengerEXT* pDebugMessenger)
-// {
-//   auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
-//       instance, "vkCreateDebugUtilsMessengerEXT");
-//   if (func != nullptr)
+//   VkResult CreateDebugUtilsMessengerEXT(
+//       VkInstance instance,
+//       const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+//       const VkAllocationCallbacks* pAllocator,
+//       VkDebugUtilsMessengerEXT* pDebugMessenger)
 //   {
-//     return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+//     auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
+//         instance, "vkCreateDebugUtilsMessengerEXT");
+//     if (func != nullptr)
+//     {
+//       return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+//     }
+//     else
+//     {
+//       return VK_ERROR_EXTENSION_NOT_PRESENT;
+//     }
 //   }
-//   else
-//   {
-//     return VK_ERROR_EXTENSION_NOT_PRESENT;
-//   }
-// }
 //
-// void DestroyDebugUtilsMessengerEXT(VkInstance instance,
-//                                    VkDebugUtilsMessengerEXT debugMessenger,
-//                                    const VkAllocationCallbacks* pAllocator)
-// {
-//   auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
-//       instance, "vkDestroyDebugUtilsMessengerEXT");
-//   if (func != nullptr)
+//   void DestroyDebugUtilsMessengerEXT(VkInstance instance,
+//                                      VkDebugUtilsMessengerEXT debugMessenger,
+//                                      const VkAllocationCallbacks* pAllocator)
 //   {
-//     func(instance, debugMessenger, pAllocator);
+//     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
+//         instance, "vkDestroyDebugUtilsMessengerEXT");
+//     if (func != nullptr)
+//     {
+//       func(instance, debugMessenger, pAllocator);
+//     }
 //   }
-// }
-// }
+// }  // namespace vk
 //
 // struct QueueFamilyIndices
 // {
-//   std::optional<uint32_t> graphicsFamily;
-//   std::optional<uint32_t> presentFamily;
+//   std::optional<uint32_t> graphics_family;
+//   std::optional<uint32_t> present_family;
 //
-//   bool isComplete()
+//   auto is_complete() const -> bool
 //   {
-//     return graphicsFamily.has_value() && presentFamily.has_value();
+//     return graphics_family.has_value() && present_family.has_value();
 //   }
 // };
 //
@@ -84,7 +81,7 @@
 // {
 //   VkSurfaceCapabilitiesKHR capabilities;
 //   std::vector<VkSurfaceFormatKHR> formats;
-//   std::vector<VkPresentModeKHR> presentModes;
+//   std::vector<VkPresentModeKHR> present_modes;
 // };
 //
 // struct Vertex
@@ -92,38 +89,39 @@
 //   Eigen::Vector2f pos;
 //   Eigen::Vector3f color;
 //
-//   static VkVertexInputBindingDescription getBindingDescription()
+//   static auto get_binding_description() -> VkVertexInputBindingDescription
 //   {
-//     VkVertexInputBindingDescription bindingDescription{};
-//     bindingDescription.binding = 0;
-//     bindingDescription.stride = sizeof(Vertex);
-//     bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+//     VkVertexInputBindingDescription binding_description{};
+//     binding_description.binding = 0;
+//     binding_description.stride = sizeof(Vertex);
+//     binding_description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 //
-//     return bindingDescription;
+//     return binding_description;
 //   }
 //
-//   static std::array<VkVertexInputAttributeDescription, 2>
-//     getAttributeDescriptions()
-//     {
-//       std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+//   static auto get_attribute_descriptions()
+//       -> std::array<VkVertexInputAttributeDescription, 2>
+//   {
+//     std::array<VkVertexInputAttributeDescription, 2>
+//     attribute_descriptions{};
 //
-//       attributeDescriptions[0].binding = 0;
-//       attributeDescriptions[0].location = 0;
-//       attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-//       attributeDescriptions[0].offset = offsetof(Vertex, pos);
+//     attribute_descriptions[0].binding = 0;
+//     attribute_descriptions[0].location = 0;
+//     attribute_descriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+//     attribute_descriptions[0].offset = offsetof(Vertex, pos);
 //
-//       attributeDescriptions[1].binding = 0;
-//       attributeDescriptions[1].location = 1;
-//       attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-//       attributeDescriptions[1].offset = offsetof(Vertex, color);
+//     attribute_descriptions[1].binding = 0;
+//     attribute_descriptions[1].location = 1;
+//     attribute_descriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+//     attribute_descriptions[1].offset = offsetof(Vertex, color);
 //
-//       return attributeDescriptions;
-//     }
+//     return attribute_descriptions;
+//   }
 // };
 //
 // const std::vector<Vertex> vertices = {{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-//   {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-//   {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+//                                       {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+//                                       {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 //
 // class HelloTriangleApplication
 // {
@@ -156,33 +154,33 @@
 //   VkQueue graphicsQueue;
 //   VkQueue presentQueue;
 //
-//   VkSwapchainKHR swapChain;
-//   std::vector<VkImage> swapChainImages;
-//   VkFormat swapChainImageFormat;
-//   VkExtent2D swapChainExtent;
-//   std::vector<VkImageView> swapChainImageViews;
-//   std::vector<VkFramebuffer> swapChainFramebuffers;
+//   VkSwapchainKHR swap_chain;
+//   std::vector<VkImage> swap_chain_images;
+//   VkFormat swap_chain_image_format;
+//   VkExtent2D swap_chain_extent;
+//   std::vector<VkImageView> swap_chain_image_views;
+//   std::vector<VkFramebuffer> swap_chain_framebuffers;
 //
 //   VkRenderPass _render_pass;
 //   VkPipelineLayout _pipeline_layout;
 //   VkPipeline _graphics_pipeline;
 //
-//   VkCommandPool commandPool;
+//   VkCommandPool command_pool;
 //
-//   VkBuffer vertexBuffer;
-//   VkDeviceMemory vertexBufferMemory;
+//   VkBuffer vertex_buffer;
+//   VkDeviceMemory vertex_buffer_memory;
 //
-//   std::vector<VkCommandBuffer> commandBuffers;
+//   std::vector<VkCommandBuffer> command_buffers;
 //
-//   std::vector<VkSemaphore> imageAvailableSemaphores;
-//   std::vector<VkSemaphore> renderFinishedSemaphores;
-//   std::vector<VkFence> inFlightFences;
-//   std::vector<VkFence> imagesInFlight;
-//   size_t currentFrame = 0;
+//   std::vector<VkSemaphore> image_available_semaphores;
+//   std::vector<VkSemaphore> render_finished_semaphores;
+//   std::vector<VkFence> in_flight_fences;
+//   std::vector<VkFence> images_in_flight;
+//   size_t current_frame = 0;
 //
-//   bool framebufferResized = false;
+//   bool framebuffer_resized = false;
 //
-//   void initWindow()
+//   void init_window()
 //   {
 //     glfwInit();
 //
@@ -193,31 +191,31 @@
 //     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 //   }
 //
-//   static void framebufferResizeCallback(GLFWwindow* window,
-//                                         [[maybe_unused]] int width,
-//                                         [[maybe_unused]] int height)
+//   static void framebuffer_resize_callback(GLFWwindow* window,
+//                                           [[maybe_unused]] int width,
+//                                           [[maybe_unused]] int height)
 //   {
 //     auto app = reinterpret_cast<HelloTriangleApplication*>(
 //         glfwGetWindowUserPointer(window));
-//     app->framebufferResized = true;
+//     app->framebuffer_resized = true;
 //   }
 //
 //   void initVulkan()
 //   {
 //     create_instance();
 //     setup_debug_messenger();
-//     createSurface();
+//     create_surface();
 //     pickPhysicalDevice();
-//     createLogicalDevice();
-//     createSwapChain();
-//     createImageViews();
-//     createRenderPass();
-//     createGraphicsPipeline();
-//     createFramebuffers();
-//     createCommandPool();
-//     createVertexBuffer();
-//     createCommandBuffers();
-//     createSyncObjects();
+//     create_logical_device();
+//     create_swapchain();
+//     create_image_views();
+//     create_render_pass();
+//     create_graphics_pipeline();
+//     create_framebuffers();
+//     create_command_pool();
+//     create_vertex_buffer();
+//     create_command_buffers();
+//     create_sync_objects();
 //   }
 //
 //   void mainLoop()
@@ -225,7 +223,7 @@
 //     while (!glfwWindowShouldClose(window))
 //     {
 //       glfwPollEvents();
-//       drawFrame();
+//       draw_frame();
 //     }
 //
 //     vkDeviceWaitIdle(_device);
@@ -330,18 +328,20 @@
 //     createInfo.pApplicationInfo = &appInfo;
 //
 //     auto extensions = ();
-//     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+//     createInfo.enabledExtensionCount =
+//     static_cast<uint32_t>(extensions.size());
 //     createInfo.ppEnabledExtensionNames = extensions.data();
 //
 //     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 //     if (enable_validation_layers)
 //     {
 //       createInfo.enabledLayerCount =
-//         static_cast<uint32_t>(validation_layers.size());
+//           static_cast<uint32_t>(validation_layers.size());
 //       createInfo.ppEnabledLayerNames = validation_layers.data();
 //
 //       populateDebugMessengerCreateInfo(debugCreateInfo);
-//       createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
+//       createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)
+//       &debugCreateInfo;
 //     }
 //     else
 //     {
@@ -360,14 +360,15 @@
 //       VkDebugUtilsMessengerCreateInfoEXT& createInfo)
 //   {
 //     createInfo = {};
-//     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+//     createInfo.sType =
+//     VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 //     createInfo.messageSeverity =
-//       VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-//       VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-//       VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+//         VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+//         VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+//         VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 //     createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-//       VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-//       VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+//                              VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+//                              VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 //     createInfo.pfnUserCallback = debugCallback;
 //   }
 //
@@ -386,15 +387,6 @@
 //     }
 //   }
 //
-//   void createSurface()
-//   {
-//     if (glfwCreateWindowSurface(_instance, window, nullptr, &_surface) !=
-//         VK_SUCCESS)
-//     {
-//       throw std::runtime_error("failed to create window surface!");
-//     }
-//   }
-//
 //   void pickPhysicalDevice()
 //   {
 //     uint32_t deviceCount = 0;
@@ -410,7 +402,7 @@
 //
 //     for (const auto& device : devices)
 //     {
-//       if (isDeviceSuitable(device))
+//       if (is_device_suitable(device))
 //       {
 //         _physical_device = device;
 //         break;
@@ -435,7 +427,8 @@
 //                            !swapchain_support.presentModes.empty();
 //     }
 //
-//     return indices.isComplete() && extensions_supported && swapchain_adequate;
+//     return indices.isComplete() && extensions_supported &&
+//     swapchain_adequate;
 //   }
 //
 //   auto check_device_extension_support(VkPhysicalDevice device) const -> bool
@@ -449,7 +442,8 @@
 //     vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count,
 //                                          available_extensions.data());
 //
-//     auto requiredExtensions = std::set<std::string>(device_extensions.begin(),
+//     auto requiredExtensions =
+//     std::set<std::string>(device_extensions.begin(),
 //                                                     device_extensions.end());
 //
 //     for (const auto& extension : available_extensions)
@@ -458,19 +452,18 @@
 //     return requiredExtensions.empty();
 //   }
 //
-//   // We need a GPU that supports Vulkan Graphics operations at the bare minimum.
-//   auto find_queue_families(VkPhysicalDevice device) const
-//       -> vk::QueueFamilyIndices
+//   // We need a GPU that supports Vulkan Graphics operations at the bare
+//   minimum. auto find_queue_families(VkPhysicalDevice device) const ->
+//   QueueFamilyIndices
 //   {
-//     auto indices = vk::QueueFamilyIndices{};
+//     auto indices = QueueFamilyIndices{};
 //
 //     auto queue_family_count = std::uint32_t{};
 //     vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count,
 //                                              nullptr);
 //
-//     auto queue_families = std::vector<VkQueueFamilyProperties>(  //
-//         queue_family_count                                       //
-//     );
+//     auto queue_families =
+//         std::vector<VkQueueFamilyProperties>(queue_family_count);
 //     vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count,
 //                                              queue_families.data());
 //
@@ -488,7 +481,7 @@
 //       if (present_support)
 //         indices.presentFamily = i;
 //
-//       if (indices.isComplete())
+//       if (indices.is_complete())
 //         break;
 //
 //       ++i;
@@ -565,7 +558,8 @@
 //
 //     // Find a valid pixel format for the swap chain images and if possible
 //     // choose RGBA 32 bits.
-//     auto surface_format = choose_swap_surface_format(swapchain_support.formats);
+//     auto surface_format =
+//     choose_swap_surface_format(swapchain_support.formats);
 //     // FIFO/Mailbox presentation mode.
 //     auto present_mode = choose_swap_present_mode(  //
 //         swapchain_support.presentModes             //
@@ -591,13 +585,13 @@
 //       create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 //     }
 //
-//     auto indices = find_queue_families(_physical_device);
-//     auto queue_family_indices = std::array{
-//         indices.graphicsFamily.value(),  //
-//         indices.presentFamily.value()    //
+//     const auto indices = find_queue_families(_physical_device);
+//     const auto queue_family_indices = std::array{
+//         indices.graphics_family.value(),  //
+//         indices.present_family.value()    //
 //     };
 //
-//     if (indices.graphicsFamily != indices.presentFamily)
+//     if (indices.graphics_family != indices.present_family)
 //     {
 //       create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 //       create_info.queueFamilyIndexCount = 2;
@@ -606,7 +600,8 @@
 //     else
 //       create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 //
-//     create_info.preTransform = swapchain_support.capabilities.currentTransform;
+//     create_info.preTransform =
+//     swapchain_support.capabilities.currentTransform;
 //     create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 //     create_info.presentMode = present_mode;
 //     create_info.clipped = VK_TRUE;
@@ -628,7 +623,7 @@
 //   }
 //
 //   auto query_swapchain_support(VkPhysicalDevice device) const
-//       -> vk::SwapChainSupportDetails
+//       -> SwapChainSupportDetails
 //   {
 //     auto details = vk::SwapChainSupportDetails{};
 //
@@ -652,7 +647,8 @@
 //     {
 //       details.presentModes.resize(present_mode_count);
 //       vkGetPhysicalDeviceSurfacePresentModesKHR(
-//           device, _surface, &present_mode_count, details.presentModes.data());
+//           device, _surface, &present_mode_count,
+//           details.presentModes.data());
 //     }
 //
 //     return details;
@@ -765,16 +761,18 @@
 //     {
 //       dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 //       dependency.dstSubpass = 0;
-//       dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-//       dependency.srcAccessMask = 0;
-//       dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-//       dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+//       dependency.srcStageMask =
+//       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; dependency.srcAccessMask
+//       = 0; dependency.dstStageMask =
+//       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; dependency.dstAccessMask
+//       = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 //     }
 //
 //
 //     auto render_pass_create_info = VkRenderPassCreateInfo{};
 //     {
-//       render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+//       render_pass_create_info.sType =
+//       VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 //       render_pass_create_info.attachmentCount = 1;
 //       render_pass_create_info.pAttachments = &color_attachment;
 //       render_pass_create_info.subpassCount = 1;
@@ -954,14 +952,16 @@
 //     };
 //
 //     if (vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipeline_info,
-//                                   nullptr, &_graphics_pipeline) != VK_SUCCESS)
+//                                   nullptr, &_graphics_pipeline) !=
+//                                   VK_SUCCESS)
 //       throw std::runtime_error{"Failed to create graphics pipeline!"};
 //
 //     vkDestroyShaderModule(_device, vertex_shader_module, nullptr);
 //     vkDestroyShaderModule(_device, fragment_shader_module, nullptr);
 //   }
 //
-//   static auto read_shader_file(const std::string& filename) -> std::vector<char>
+//   static auto read_shader_file(const std::string& filename) ->
+//   std::vector<char>
 //   {
 //     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 //     if (!file)
@@ -977,17 +977,20 @@
 //     return buffer;
 //   }
 //
-//   auto create_shader_module(const std::vector<char>& buffer) -> VkShaderModule
+//   auto create_shader_module(const std::vector<char>& buffer) ->
+//   VkShaderModule
 //   {
 //     auto create_info = VkShaderModuleCreateInfo{};
 //     {
 //       create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 //       create_info.codeSize = static_cast<std::uint32_t>(buffer.size());
-//       create_info.pCode = reinterpret_cast<const std::uint32_t*>(buffer.data());
+//       create_info.pCode = reinterpret_cast<const
+//       std::uint32_t*>(buffer.data());
 //     }
 //
 //     auto shader_module = VkShaderModule{};
-//     if (vkCreateShaderModule(_device, &create_info, nullptr, &shader_module) !=
+//     if (vkCreateShaderModule(_device, &create_info, nullptr, &shader_module)
+//     !=
 //         VK_SUCCESS)
 //       throw std::runtime_error{"Failed to create shader module!"};
 //
@@ -1028,8 +1031,8 @@
 //     auto pool_info = VkCommandPoolCreateInfo{};
 //     {
 //       pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-//       pool_info.queueFamilyIndex = queue_family_indices.graphicsFamily.value();
-//       pool_info.flags = 0;
+//       pool_info.queueFamilyIndex =
+//       queue_family_indices.graphicsFamily.value(); pool_info.flags = 0;
 //     }
 //
 //     if (vkCreateCommandPool(_device, &pool_info, nullptr, &_command_pool) !=
@@ -1061,12 +1064,15 @@
 //       begin_info.flags = 0;
 //       begin_info.pInheritanceInfo = nullptr;
 //
-//       if (vkBeginCommandBuffer(_command_buffers[i], &begin_info) != VK_SUCCESS)
-//         throw std::runtime_error{"Failed to begin recording command buffer!"};
+//       if (vkBeginCommandBuffer(_command_buffers[i], &begin_info) !=
+//       VK_SUCCESS)
+//         throw std::runtime_error{"Failed to begin recording command
+//         buffer!"};
 //
 //       auto render_pass_begin_info = VkRenderPassBeginInfo{};
 //       {
-//         render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+//         render_pass_begin_info.sType =
+//         VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 //         render_pass_begin_info.renderPass = _render_pass;
 //         render_pass_begin_info.framebuffer = _swapchain_framebuffers[i];
 //         render_pass_begin_info.renderArea.offset = {0, 0};
@@ -1080,7 +1086,8 @@
 //       vkCmdBeginRenderPass(_command_buffers[i], &render_pass_begin_info,
 //                            VK_SUBPASS_CONTENTS_INLINE);
 //       {
-//         vkCmdBindPipeline(_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+//         vkCmdBindPipeline(_command_buffers[i],
+//         VK_PIPELINE_BIND_POINT_GRAPHICS,
 //                           _graphics_pipeline);
 //         vkCmdDraw(_command_buffers[i], 3, 1, 0, 0);
 //       }
@@ -1112,7 +1119,8 @@
 //                             &_image_available_semaphores[i]) != VK_SUCCESS ||
 //           vkCreateSemaphore(_device, &semaphore_info, nullptr,
 //                             &_render_finished_semaphores[i]) != VK_SUCCESS ||
-//           vkCreateFence(_device, &fence_info, nullptr, &_in_flight_fences[i]) !=
+//           vkCreateFence(_device, &fence_info, nullptr, &_in_flight_fences[i])
+//           !=
 //               VK_SUCCESS)
 //       {
 //         throw std::runtime_error{
@@ -1133,7 +1141,7 @@
 //     // - The first fence has opened just now.
 //
 //     // The CPU pursues its journey:
-//     // - it acquires the next image for rendering.
+//     // - it acquires the next image ready for presentation.
 //     auto image_index = std::uint32_t{};
 //     auto result =
 //         vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX,
@@ -1151,10 +1159,12 @@
 //       throw std::runtime_error("failed to acquire swap chain image!");
 //
 //     // The CPU encounters another fence controlled by the GPU:
-//     // - The CPU is waiting from the GPU until the image becomes available for
+//     // - The CPU is waiting from the GPU until the image becomes available
+//     for
 //     //   rendering.
 //     // - The second fence displays a red light
-//     // - When rendering for the first time, the second fence is already opened,
+//     // - When rendering for the first time, the second fence is already
+//     opened,
 //     //   so the CPU can pursue its journey.
 //     if (_images_in_flight[image_index] != VK_NULL_HANDLE)
 //       vkWaitForFences(_device, 1, &_images_in_flight[current_frame], VK_TRUE,
@@ -1173,13 +1183,15 @@
 //     // - The CPU tells the GPU to ensure that it starts drawing only when the
 //     // image becomes available.
 //     submit_info.waitSemaphoreCount = 1;
-//     submit_info.pWaitSemaphores = &_image_available_semaphores[current_frame];
+//     submit_info.pWaitSemaphores =
+//     &_image_available_semaphores[current_frame];
 //     submit_info.pWaitDstStageMask = &wait_stages;
 //
 //     // - The CPU tells the GPU to ensure that it notifies when the drawing is
 //     //   finished and thus ready to present onto the screen.
 //     submit_info.signalSemaphoreCount = 1;
-//     submit_info.pSignalSemaphores = &_render_finished_semaphores[current_frame];
+//     submit_info.pSignalSemaphores =
+//     &_render_finished_semaphores[current_frame];
 //
 //     submit_info.commandBufferCount = 1;
 //     submit_info.pCommandBuffers = &_command_buffers[image_index];
@@ -1187,8 +1199,8 @@
 //     // - The CPU now tells the GPU to make the first fence close the road.
 //     vkResetFences(_device, 1, &_in_flight_fences[current_frame]);
 //
-//     // - The CPU submits a drawing command to the GPU (on the graphics queue).
-//     if (vkQueueSubmit(_graphics_queue, 1, &submit_info,
+//     // - The CPU submits a drawing command to the GPU (on the graphics
+//     queue). if (vkQueueSubmit(_graphics_queue, 1, &submit_info,
 //                       _in_flight_fences[current_frame]) != VK_SUCCESS)
 //       throw std::runtime_error{"Failed to submit draw command buffer!"};
 //
@@ -1291,23 +1303,28 @@
 //
 //   std::int32_t current_frame = 0;
 // };
-
-
-int main(int, char**)
-{
-//   const auto program_path =
-//       fs::canonical(fs::system_complete(argv[0]).parent_path());
-//   HelloTriangleApplication app{program_path.string()};
 //
-//   try
-//   {
-//     app.run();
-//   }
-//   catch (const std::exception& e)
-//   {
-//     std::cerr << e.what() << std::endl;
-//     return EXIT_FAILURE;
-//   }
+//
+// int main(int, char**)
+// {
+//   //   const auto program_path =
+//   //       fs::canonical(fs::system_complete(argv[0]).parent_path());
+//   //   HelloTriangleApplication app{program_path.string()};
+//   //
+//   //   try
+//   //   {
+//   //     app.run();
+//   //   }
+//   //   catch (const std::exception& e)
+//   //   {
+//   //     std::cerr << e.what() << std::endl;
+//   //     return EXIT_FAILURE;
+//   //   }
+//
+//   return 0;
+// }
 
+int main()
+{
   return 0;
 }

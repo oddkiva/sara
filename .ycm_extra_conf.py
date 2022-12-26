@@ -90,6 +90,7 @@ flags = [
 # versions.
 if platform.system() != 'Windows':
   flags.append('-std=c++17')
+  flags.append('-std=c++20')
 
 
 # Set this to the absolute path to the folder (NOT the file!) containing the

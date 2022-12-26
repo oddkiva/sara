@@ -11,7 +11,7 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Math/JenkinsTraub.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 //#define SHOW_DEBUG_LOG
