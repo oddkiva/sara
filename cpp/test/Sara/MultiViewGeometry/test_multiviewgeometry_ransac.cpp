@@ -1,8 +1,8 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/RANSAC Algorithm"
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/ErrorMeasures.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FundamentalMatrixSolvers.hpp>
 #include <DO/Sara/MultiViewGeometry/RANSAC.hpp>
 
 #include <boost/test/unit_test.hpp>

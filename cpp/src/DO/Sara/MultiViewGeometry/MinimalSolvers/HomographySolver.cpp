@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/MultiViewGeometry/Estimators/HomographyEstimator.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/HomographySolver.hpp>
 
 
 namespace DO { namespace Sara {

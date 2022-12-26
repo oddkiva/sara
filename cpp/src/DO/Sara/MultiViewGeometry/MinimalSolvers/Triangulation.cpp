@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/Triangulation.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
 
 
 namespace DO::Sara {

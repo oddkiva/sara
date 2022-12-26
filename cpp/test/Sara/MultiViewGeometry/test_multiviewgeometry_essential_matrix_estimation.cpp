@@ -16,8 +16,8 @@
 #include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/TensorDebug.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/Triangulation.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 

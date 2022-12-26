@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <DO/Sara/MultiViewGeometry/Estimators/Triangulation.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 
