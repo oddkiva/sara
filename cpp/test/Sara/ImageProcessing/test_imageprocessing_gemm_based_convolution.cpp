@@ -414,10 +414,10 @@ BOOST_AUTO_TEST_CASE(test_transpose_convolution_naive)
   //   0.00, 0.00, 0.00,   0.00, 0.25, 0.25,   0.00, 0.25, 0.25;
 
   // Better way of constructing the upsampling kernel.
-  auto K = Tensor_<float, 4>{Vector4i(kh * x.rows(),  //
-                                      kw * x.cols(),  //
-                                      px.rows(),      //
-                                      px.cols())};
+  auto K = Tensor_<float, 4>{Vector4i(kh * static_cast<int>(x.rows()),  //
+                                      kw * static_cast<int>(x.cols()),  //
+                                      static_cast<int>(px.rows()),      //
+                                      static_cast<int>(px.cols()))};
   K.flat_array().fill(0);
   // Whole kernel.
   for (int i = 0; i < kh * x.rows(); ++i)
