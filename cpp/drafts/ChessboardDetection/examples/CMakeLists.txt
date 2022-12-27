@@ -15,9 +15,10 @@ add_library(ImageOrVideoReader STATIC Utilities/ImageOrVideoReader.hpp
 target_link_libraries(ImageOrVideoReader PUBLIC DO::Sara::ImageIO
                                                 DO::Sara::VideoIO
                                                 Boost::filesystem)
-
 target_compile_definitions(ImageOrVideoReader PRIVATE -DBOOST_ALL_DYN_LINK #
                                                       -DBOOST_ALL_NO_LIB)
+set_property(TARGET ImageOrVideoReader PROPERTY FOLDER
+             "Examples/Sara/ChessboardDetection")
 
 sara_add_example(find_chessboard_corners_2)
 target_link_libraries(

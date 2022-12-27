@@ -25,21 +25,21 @@
 #  define NOMINMAX
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__)
 #  pragma GCC diagnostic push
 #  if defined(__has_warning)  // clang
 #    if __has_warning("-Wmaybe-uninitialized")
 #      pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #    endif
-#    if __has_warning("-Wimplicit-int-conversion")
-#      pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+#    if __has_warning("-Wconversion")
+#      pragma GCC diagnostic ignored "-Wconversion"
 #    endif
 #  else  // GCC
 #    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #  endif
 #endif
 #include <Eigen/Eigen>
-#ifdef __GNUC__
+#if defined(__GNUC__)
 #  pragma GCC diagnostic pop
 #endif
 

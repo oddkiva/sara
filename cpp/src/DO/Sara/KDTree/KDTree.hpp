@@ -11,15 +11,24 @@
 
 #pragma once
 
-#ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable : 4267)
-#pragma warning(disable : 4334)
-#pragma warning(disable : 4996)
+#if defined(_WIN32)
+#  pragma warning(push)
+#  pragma warning(disable : 4267)
+#  pragma warning(disable : 4334)
+#  pragma warning(disable : 4996)
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  if defined(__has_warning)  // clang
+#    if __has_warning("-Wimplicit-int-conversion")
+#      pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+#    endif
+#  endif
 #endif
 #include <flann/flann.hpp>
-#ifdef _WIN32
-#pragma warning(pop)
+#if defined(_WIN32)
+#  pragma warning(pop)
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic pop
 #endif
 
 #include <DO/Sara/Defines.hpp>
@@ -27,7 +36,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   //! @addtogroup KDTree
   //! @{
@@ -141,5 +150,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara
