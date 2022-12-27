@@ -15,7 +15,6 @@ namespace DO { namespace Sara {
   {
   public:
     using matrix_type = Matrix3d;
-    using line_type = Matrix3d;
     using point_type = Vector3d;
 
     Homography() = default;
