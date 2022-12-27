@@ -19,9 +19,10 @@
 #elif defined(__GNUC__)
 #  pragma GCC diagnostic push
 #  if defined(__has_warning)  // clang
-#    if __has_warning("-Wimplicit-int-conversion")
-#      pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
+#    if __has_warning("-Wconversion")
+#      pragma GCC diagnostic ignored "-Wconversion"
 #    endif
+#  pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #  endif
 #endif
 #include <flann/flann.hpp>

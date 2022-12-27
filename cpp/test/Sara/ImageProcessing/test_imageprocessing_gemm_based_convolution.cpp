@@ -370,8 +370,9 @@ BOOST_AUTO_TEST_CASE(test_transpose_convolution_naive)
     0.25, 0.25,
     0.25, 0.25;
 
-
-  auto k_base_padded_shape = Vector4i(kh, kw, px.rows(), px.cols());
+  const auto px_rows = static_cast<int>(px.rows());
+  const auto px_cols = static_cast<int>(px.cols());
+  auto k_base_padded_shape = Vector4i(kh, kw, px_rows, px_cols);
   auto k_base_padded = Tensor_<float, 4>{k_base_padded_shape};
   for (auto i = 0; i < kh; ++i)
     for (auto j = 0; j < kw; ++j)

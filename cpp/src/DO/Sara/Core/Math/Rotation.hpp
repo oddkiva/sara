@@ -11,8 +11,18 @@
 
 #pragma once
 
+#if defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  if defined(__has_warning)  // clang
+#    if __has_warning("-Wconversion")
+#      pragma GCC diagnostic ignored "-Wconversion"
+#    endif
+#  endif
+#endif
 #include <Eigen/Geometry>
-
+#if defined(__GNUC__)
+#  pragma GCC diagnostic pop
+#endif
 
 namespace DO::Sara {
 
