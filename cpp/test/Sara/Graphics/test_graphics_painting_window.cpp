@@ -585,7 +585,8 @@ BOOST_AUTO_TEST_CASE(test_mouse_move_event)
   QSignalSpy spy(_test_window, SIGNAL(movedMouse(int, int, Qt::MouseButtons)));
   BOOST_CHECK(spy.isValid());
 
-  QMouseEvent event(QEvent::MouseMove, _mouse_pos, Qt::NoButton, Qt::NoButton,
+  QMouseEvent event(QEvent::MouseMove, _mouse_pos, _mouse_pos,
+                    Qt::NoButton, Qt::NoButton,
                     Qt::NoModifier);
   _event_scheduler.schedule_event(&event, _event_time_ms);
 
@@ -598,8 +599,9 @@ BOOST_AUTO_TEST_CASE(test_mouse_press_event)
                  SIGNAL(pressedMouseButtons(int, int, Qt::MouseButtons)));
   BOOST_CHECK(spy.isValid());
 
-  QMouseEvent event(QEvent::MouseButtonPress, _mouse_pos, Qt::LeftButton,
-                    Qt::LeftButton, Qt::NoModifier);
+  QMouseEvent event(QEvent::MouseButtonPress, _mouse_pos, _mouse_pos,
+                    Qt::LeftButton, Qt::LeftButton,
+                    Qt::NoModifier);
   _event_scheduler.schedule_event(&event, _event_time_ms);
 
   compare_mouse_event(spy, event);
@@ -611,8 +613,8 @@ BOOST_AUTO_TEST_CASE(test_mouse_release_event)
                  SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)));
   BOOST_CHECK(spy.isValid());
 
-  QMouseEvent event(QEvent::MouseButtonRelease, _mouse_pos, Qt::LeftButton,
-                    Qt::LeftButton, Qt::NoModifier);
+  QMouseEvent event(QEvent::MouseButtonRelease, _mouse_pos, _mouse_pos,
+                    Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
   _event_scheduler.schedule_event(&event, _event_time_ms);
 
   compare_mouse_event(spy, event);
