@@ -12,7 +12,6 @@ namespace DO::Sara {
   {
     static constexpr auto num_points = 7;
     static constexpr auto num_models = 3;
-    static constexpr auto num_candidate_models = 3;
 
     using data_point_type = Eigen::Matrix<T, 4, 7>;
 
@@ -53,65 +52,53 @@ namespace DO::Sara {
     {
       auto P = UnivariatePolynomial<T, 3>{};
 
-      // The coefficients are calculated with SymPy in Python where we solve
-      // det(F) = det(F1 + α * F2) = 0.
+      // Lambda-Twist has a nice formula for the determinant formula. Let's
+      // reuse it instead of using SymPy.
       //
-      // Here is the Python code.
-      // import sympy as sp
-      //
-      // # Solve the cubic polynomial.
-      // F1 = sp.MatrixSymbol('F1', 3, 3)
-      // F2 = sp.MatrixSymbol('F2', 3, 3)
-      // α = sp.symbols('α')
-      //
-      // # Form the symbolic matrix expression as reported in the paper.
-      // F = sp.Matrix(F1 + α * F2)
-      //
-      // # Form the polynomial in the variable α.
-      // det_F, _ = sp.polys.poly_from_expr(F.det(), α)
-      //
-      // # Collect the coefficients "c[i]" as denoted in the paper.
-      // c = det_F.all_coeffs()
+      // clang-format off
+      P[3] = F2.determinant();
 
+      P[2] = F1.col(0).dot(F2.col(1).cross(F2.col(2))) +
+             F1.col(1).dot(F2.col(2).cross(F2.col(0))) +
+             F1.col(2).dot(F2.col(0).cross(F2.col(1)));
 
-      P[3] = F2(0, 0) * F2(1, 1) * F2(2, 2) - F2(0, 0) * F2(1, 2) * F2(2, 1) -
-             F2(0, 1) * F2(1, 0) * F2(2, 2) + F2(0, 1) * F2(1, 2) * F2(2, 0) +
-             F2(0, 2) * F2(1, 0) * F2(2, 1) - F2(0, 2) * F2(1, 1) * F2(2, 0);
+      P[1] = F2.col(0).dot(F1.col(1).cross(F1.col(2))) +
+             F2.col(1).dot(F1.col(2).cross(F1.col(0))) +
+             F2.col(2).dot(F1.col(0).cross(F1.col(1)));
 
-      P[2] = F1(0, 0) * F2(1, 1) * F2(2, 2) - F1(0, 0) * F2(1, 2) * F2(2, 1) -
-             F1(0, 1) * F2(1, 0) * F2(2, 2) + F1(0, 1) * F2(1, 2) * F2(2, 0) +
-             F1(0, 2) * F2(1, 0) * F2(2, 1) - F1(0, 2) * F2(1, 1) * F2(2, 0) -
-             F1(1, 0) * F2(0, 1) * F2(2, 2) + F1(1, 0) * F2(0, 2) * F2(2, 1) +
-             F1(1, 1) * F2(0, 0) * F2(2, 2) - F1(1, 1) * F2(0, 2) * F2(2, 0) -
-             F1(1, 2) * F2(0, 0) * F2(2, 1) + F1(1, 2) * F2(0, 1) * F2(2, 0) +
-             F1(2, 0) * F2(0, 1) * F2(1, 2) - F1(2, 0) * F2(0, 2) * F2(1, 1) -
-             F1(2, 1) * F2(0, 0) * F2(1, 2) + F1(2, 1) * F2(0, 2) * F2(1, 0) +
-             F1(2, 2) * F2(0, 0) * F2(1, 1) - F1(2, 2) * F2(0, 1) * F2(1, 0);
+      P[0] = F1.determinant();
+      // clang-format on
 
-      P[1] = F1(0, 0) * F1(1, 1) * F2(2, 2) - F1(0, 0) * F1(1, 2) * F2(2, 1) -
-             F1(0, 0) * F1(2, 1) * F2(1, 2) + F1(0, 0) * F1(2, 2) * F2(1, 1) -
-             F1(0, 1) * F1(1, 0) * F2(2, 2) + F1(0, 1) * F1(1, 2) * F2(2, 0) +
-             F1(0, 1) * F1(2, 0) * F2(1, 2) - F1(0, 1) * F1(2, 2) * F2(1, 0) +
-             F1(0, 2) * F1(1, 0) * F2(2, 1) - F1(0, 2) * F1(1, 1) * F2(2, 0) -
-             F1(0, 2) * F1(2, 0) * F2(1, 1) + F1(0, 2) * F1(2, 1) * F2(1, 0) +
-             F1(1, 0) * F1(2, 1) * F2(0, 2) - F1(1, 0) * F1(2, 2) * F2(0, 1) -
-             F1(1, 1) * F1(2, 0) * F2(0, 2) + F1(1, 1) * F1(2, 2) * F2(0, 0) +
-             F1(1, 2) * F1(2, 0) * F2(0, 1) - F1(1, 2) * F1(2, 1) * F2(0, 0);
-
-      P[0] = F1(0, 0) * F1(1, 1) * F1(2, 2) - F1(0, 0) * F1(1, 2) * F1(2, 1) -
-             F1(0, 1) * F1(1, 0) * F1(2, 2) + F1(0, 1) * F1(1, 2) * F1(2, 0) +
-             F1(0, 2) * F1(1, 0) * F1(2, 1) - F1(0, 2) * F1(1, 1) * F1(2, 0);
+      return P;
     }
 
     auto operator()(const data_point_type& X) const
+        -> std::array<std::optional<Eigen::Matrix3<T>>, num_models>
     {
+      // The fundamental matrix lives in the nullspace of data matrix X, which
+      // has rank 2.
+      //
+      // Null(A) = Span(F[0], F[1])
+      // The fundamental matrix is a linear combination F[0] + α F[1].
       const auto F = extract_nullspace(X);
+
+      // Because the fundamental matrix is rank 2, the determinant must be 0,
+      // i.e.: det(F[0] + α F[1]) = 0
+      // This is a cubic polynomial in α.
       const auto det_F = form_determinant_constraint(F[0], F[1]);
-      const auto α = std::array<T, 3>{};
+
+      // We determine 3 real roots α_i at most.
+      const auto α = std::array<T, num_models>{};
       const auto found = compute_cubic_real_roots(det_F, α[0], α[1], α[2]);
-      const auto F0 = std::array<Eigen::Matrix3<T>, 3>{};
+
+      // Form the candidate fundamental matrices.
+      const auto F0 =
+          std::array<std::optional<Eigen::Matrix3<T>>, num_models>{};
       std::transform(α.begin(), α.end(), F0.begin(),
-                     [&F](const auto& α_i) { return F[0] + α_i * F[1]; });
+                     [&F](const auto& α_i) -> Eigen::Matrix3<T> {
+                       return F[0] + α_i * F[1];
+                     });
+
       return F0;
     }
   };
