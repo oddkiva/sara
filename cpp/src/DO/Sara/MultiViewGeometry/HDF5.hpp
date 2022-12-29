@@ -47,14 +47,14 @@ namespace DO::Sara {
 
   //! @brief Specialized helper structure to serialize a PinholeCamera object.
   template <>
-  struct CalculateH5Type<PinholeCamera>
+  struct CalculateH5Type<BasicPinholeCamera>
   {
     static inline auto value() -> H5::CompType
     {
-      auto h5_comp_type = H5::CompType{sizeof(PinholeCamera)};
-      INSERT_MEMBER(h5_comp_type, PinholeCamera, K);
-      INSERT_MEMBER(h5_comp_type, PinholeCamera, R);
-      INSERT_MEMBER(h5_comp_type, PinholeCamera, t);
+      auto h5_comp_type = H5::CompType{sizeof(BasicPinholeCamera)};
+      INSERT_MEMBER(h5_comp_type, BasicPinholeCamera, K);
+      INSERT_MEMBER(h5_comp_type, BasicPinholeCamera, R);
+      INSERT_MEMBER(h5_comp_type, BasicPinholeCamera, t);
       return h5_comp_type;
     }
   };

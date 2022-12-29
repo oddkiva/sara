@@ -52,7 +52,7 @@ namespace DO::Sara {
   {
   public:
     //! Constructor.
-    KDTree(const MatrixXd& data_matrix,
+    KDTree(const Eigen::MatrixXd& data_matrix,
            const flann::KDTreeIndexParams& index_params =
                flann::KDTreeIndexParams(1),
            const flann::SearchParams& search_params = flann::SearchParams(-1));
@@ -60,7 +60,7 @@ namespace DO::Sara {
     //! k-NN search for a single query column vector.
     template <int N, int Options, int MaxRows, int MaxCols>
     void
-    knn_search(const Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
+    knn_search(const Eigen::Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
                int num_nearest_neighbors, std::vector<int>& nn_indices,
                std::vector<double>& nn_squared_distances)
     {
@@ -72,7 +72,7 @@ namespace DO::Sara {
     }
 
     //! Batch k-NN search for a set of query column vectors.
-    void knn_search(const MatrixXd& query_column_vectors,
+    void knn_search(const Eigen::MatrixXd& query_column_vectors,
                     int num_nearest_neighbors,
                     std::vector<std::vector<int>>& nn_indices,
                     std::vector<std::vector<double>>& nn_squared_distances);
@@ -94,7 +94,7 @@ namespace DO::Sara {
     //! Radius search for a single query column vector.
     template <int N, int Options, int MaxRows, int MaxCols>
     int
-    radius_search(const Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
+    radius_search(const Eigen::Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
                   double squared_search_radius, std::vector<int>& nn_indices,
                   std::vector<double>& nn_squared_distances,
                   int max_num_nearest_neighbors = -1)
@@ -110,7 +110,7 @@ namespace DO::Sara {
     }
 
     //! Radius search for a set of of query column vectors.
-    void radius_search(const MatrixXd& queries, double squared_search_radius,
+    void radius_search(const Eigen::MatrixXd& queries, double squared_search_radius,
                        std::vector<std::vector<int>>& nn_indices,
                        std::vector<std::vector<double>>& nn_squared_distances,
                        int max_num_nearest_neighbors = -1);

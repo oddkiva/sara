@@ -43,7 +43,7 @@ namespace DO::Sara {
     //!
     //! TODO: use more sophisticated camera to estimate distortion parameters
     //! later on.
-    std::vector<PinholeCamera> cameras;
+    std::vector<BasicPinholeCamera> cameras;
 
     DO_SARA_EXPORT
     auto list_images(const std::string& dirpath) -> void;

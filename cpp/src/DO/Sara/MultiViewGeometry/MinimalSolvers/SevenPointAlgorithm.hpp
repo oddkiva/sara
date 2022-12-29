@@ -18,10 +18,10 @@ namespace DO::Sara {
     auto extract_nullspace(const data_point_type& X) const
         -> std::array<Eigen::Matrix3<T>, 2>
     {
-      auto F = Matrix3d{};
+      auto F = Eigen::Matrix3<T>{};
 
       // 1. solve the linear system from the 8-point correspondences.
-      Matrix<double, 7, 9> A;
+      auto A = Eigen::Matrix<T, 7, 9>{};
       for (int i = 0; i < 8; ++i)
       {
         const Eigen::Vector3<T> p_left = X.col(i).head(2).homogeneous();
@@ -32,9 +32,9 @@ namespace DO::Sara {
             p_right(2, i) * p_left.col(i).transpose();
       }
 
-      auto svd = Eigen::BDCSVD<Matrix<double, 8, 9>>{A, Eigen::ComputeFullV};
-      const Eigen::Matrix<double, 9, 1> f1 = svd.matrixV().col(7).normalized();
-      const Eigen::Matrix<double, 9, 1> f2 = svd.matrixV().col(8).normalized();
+      auto svd = Eigen::BDCSVD<Matrix<T, 8, 9>>{A, Eigen::ComputeFullV};
+      const Eigen::Matrix<T, 9, 1> f1 = svd.matrixV().col(7);
+      const Eigen::Matrix<T, 9, 1> f2 = svd.matrixV().col(8);
 
       const auto to_matrix = [](const auto& f) {
         auto F = Eigen::Matrix3<T>{};
@@ -76,9 +76,8 @@ namespace DO::Sara {
         -> std::array<std::optional<Eigen::Matrix3<T>>, num_models>
     {
       // The fundamental matrix lives in the nullspace of data matrix X, which
-      // has rank 2.
+      // has rank 2, i.e., Null(X) = Span(F[0], F[1])
       //
-      // Null(A) = Span(F[0], F[1])
       // The fundamental matrix is a linear combination F[0] + α F[1].
       const auto F = extract_nullspace(X);
 
@@ -89,7 +88,8 @@ namespace DO::Sara {
 
       // We determine 3 real roots α_i at most.
       const auto α = std::array<T, num_models>{};
-      const auto found = compute_cubic_real_roots(det_F, α[0], α[1], α[2]);
+      const auto all_real_roots = compute_cubic_real_roots(det_F, α[0], α[1], α[2]);
+      const auto num_real_roots = all_real_roots ? 3 : 1;
 
       // Form the candidate fundamental matrices.
       const auto F0 =
