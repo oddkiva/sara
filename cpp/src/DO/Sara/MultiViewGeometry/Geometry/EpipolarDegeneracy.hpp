@@ -27,9 +27,9 @@ namespace DO::Sara::degensac {
   // We implement the Equation (4) of the paper.
   //
   // Points x1[i] and x2[i] satisfy the relation x2[i].T F * x1[i] = 0
-  auto compute_homography(const FundamentalMatrix& F,             //
-                          const Eigen::Matrix<double, 2, 3>& x1,  //
-                          const Eigen::Matrix<double, 2, 3>& x2)  //
+  inline auto compute_homography(const FundamentalMatrix& F,             //
+                                 const Eigen::Matrix<double, 2, 3>& x1,  //
+                                 const Eigen::Matrix<double, 2, 3>& x2)  //
       -> Homography
   {
     const auto [e1, e2] = F.extract_epipoles();
@@ -58,20 +58,28 @@ namespace DO::Sara::degensac {
     return H;
   }
 
-  constexpr auto list_homographies_from_7_eg_matches()
+  inline static constexpr auto list_homographies_from_7_matches()
       -> std::array<std::array<int, 3>, 5>
   {
     // 1-based enumeration from the paper.
-    return {// {1, 2, 3}
-            std::array{0, 1, 2},
-            // {4, 5, 6}
-            std::array{3, 4, 5},
-            // {1, 2, 7}
-            std::array{0, 1, 6},
-            // {4, 5, 7}
-            std::array{3, 4, 6},
-            // {3, 6, 7}
-            std::array{2, 5, 6}};
+    return {
+        // {1, 2, 3}
+        std::array{0, 1, 2},
+        // {4, 5, 6}
+        std::array{3, 4, 5},
+        // {1, 2, 7}
+        std::array{0, 1, 6},
+        // {4, 5, 7}
+        std::array{3, 4, 6},
+        // {3, 6, 7}
+        std::array{2, 5, 6}  //
+    };
   }
+
+  /*
+   *
+   * C(6, 5)
+   *
+   */
 
 }  // namespace DO::Sara::degensac

@@ -1,3 +1,7 @@
+#ifdef __APPLE__
+# define GL_SILENCE_DEPRECATION
+#endif
+
 #include <iostream>
 
 #include <DO/Kalpana/Qt/3D.hpp>

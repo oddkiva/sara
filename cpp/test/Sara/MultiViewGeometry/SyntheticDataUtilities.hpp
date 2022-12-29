@@ -63,20 +63,20 @@ inline auto make_relative_motion(double x = 0.1, double y = 0.3, double z = 0.2)
   return {R, t};
 }
 
-inline auto make_camera(double x, double y, double z) -> DO::Sara::PinholeCamera
+inline auto make_camera(double x, double y, double z)
 {
   const auto& [R, t] = make_relative_motion(x, y, z);
   return DO::Sara::normalized_camera(R, t);
 }
 
-inline auto to_camera_coordinates(const DO::Sara::PinholeCamera& C,
+inline auto to_camera_coordinates(const DO::Sara::BasicPinholeCamera& C,
                                   const Eigen::MatrixXd& X) -> Eigen::MatrixXd
 {
   Eigen::MatrixXd X1 = (C.R * X.topRows(3)).colwise() + C.t;
   return X1.colwise().homogeneous();
 }
 
-inline auto project_to_film(const DO::Sara::PinholeCamera& C,
+inline auto project_to_film(const DO::Sara::BasicPinholeCamera& C,
                             const Eigen::MatrixXd& X) -> Eigen::MatrixXd
 {
   auto xh = Eigen::MatrixXd{3, X.cols()};
