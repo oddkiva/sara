@@ -420,7 +420,28 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
   //
   // Everything goes well until layer 87...
   // for (auto max_layers = 88u; max_layers < hnet.net.size(); ++max_layers)
-  auto max_layers = 87u;
+  auto max_layers = 35u;
+
+// layers = 35
+//
+// h_out_tensor
+//  -0.239912  -0.276882  -0.112395  -0.306818  -0.248383  -0.154634  -0.184812  -0.122076
+//  -0.306911   0.204397  -0.221075     1.5993   0.781725  -0.191988  -0.164775  -0.303083
+//  -0.278409   0.774572  -0.216393 -0.0724351   0.490605  -0.308843  -0.295758  -0.252452
+//  0.0324171 -0.0383892  -0.279219  -0.279822    0.33445  -0.229523  -0.233142  -0.186258
+//  -0.289081  -0.298239  -0.307617  -0.305277    1.39844   -0.22397  -0.129098  -0.255643
+//   -0.30245  -0.196463  -0.302754  -0.249703    1.64081  -0.243826   0.118683  -0.306845
+//  -0.231999   0.768396  -0.301371  0.0713109   0.402886  -0.308842  -0.236937  -0.241136
+//   -0.30534    1.60836  -0.308838   -0.30884   0.549651  -0.205581  -0.194776  -0.308751
+// u_out_tensor
+//  -0.289367  -0.264936  -0.101996   -0.30311   -0.25898  -0.118093  -0.163118 -0.0736392
+//   -0.26204  -0.126781  -0.286619    1.04209    1.06169  -0.284401  -0.295792  -0.159279
+//  -0.302032  0.0600801  -0.290587  0.0266602    1.20102  -0.289216  -0.299499  -0.175496
+//  -0.198176  -0.258859  -0.243346  -0.307519   0.597543  -0.304013  -0.290579  -0.257453
+//  -0.228253  -0.238514   -0.29665  -0.298039    2.14789  -0.131796  -0.163164  -0.232221
+//  -0.278594  -0.268113   0.549058   -0.26297    2.43282  -0.195115  -0.180264  -0.291472
+// -0.0675805    1.79673   0.876684    2.31913    2.55072   0.498026  -0.308815  -0.307724
+//  -0.291981    2.37784   0.766488  -0.165548    1.24549    1.00571  -0.281311  -0.305154
   {
     // Build the mini-network consisting of only the convolution layer.
     auto net_builder = trt::make_builder();
@@ -458,6 +479,8 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
     auto u_out_tensor = PinnedTensor<float, 3>{
         h_out_sizes(1), h_out_sizes(2), h_out_sizes(3)  //
     };
+    u_out_tensor.flat_array().fill(0);
+    SHAKTI_SYNCHRONIZED_CHECK();
 
     const auto device_tensors = std::array{
         reinterpret_cast<void*>(u_in_tensor.data()),  //
@@ -472,6 +495,7 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
       SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
                  << std::endl;
     cudaStreamSynchronize(*cuda_stream);
+    SHAKTI_SYNCHRONIZED_CHECK();
 
     const auto& h_out_tensor = h_layer.output;
     SARA_DEBUG << "Checking layer [" << max_layers << "] = " << h_layer.type
