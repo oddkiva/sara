@@ -5,18 +5,15 @@
 
 namespace DO::Sara {
 
-  template <typename T>
-  constexpr auto combinatorial(const T& n, const int& k) -> T
+  inline constexpr auto log_combinatorial(const int n, const int k) -> double
   {
-    static_assert(std::is_integral_v<T>);
-    auto num = T{1};
-    auto denum = T{1};
+    auto log_num = double{};
+    auto log_denum = double{};
     for (auto i = 0; i < k; ++i)
-      num *= n - i;
+      log_num += std::log(n - i);
     for (auto i = 1; i <= k; ++i)
-      denum *= i;
-
-    return num / denum;
+      log_denum += std::log(i);
+    return log_num - log_denum;
   }
 
 
@@ -55,7 +52,9 @@ namespace DO::Sara {
     auto r = std::vector<IndexedResidual>{};
     r.resize(X.size());
     std::transform(S.begin(), S.end(), r.begin(),
-                   [&d, &θ, &X](const auto& i) { return d(θ, X[i]); });
+                   [&d, &θ, &X](const auto& i) -> IndexedResidual {
+                     return {i, d(θ, X[i])};
+                   });
 
     // Sort the residuals to ease the calculus of the NFA.
     std::sort(r.begin(), r.end());
@@ -72,9 +71,9 @@ namespace DO::Sara {
                const double normalized_residual) -> double
   {
     return std::log(MinimalSolver::num_candidate_models) +
-           std::log(combinatorial(num_data_points, subset_size)) +
-           std::log(combinatorial(subset_size, MinimalSolver::num_points)) +
-           subset_size * std::log(normalized_residual);
+           log_combinatorial(num_data_points, subset_size) +
+           log_combinatorial(subset_size, MinimalSolver::num_points) +
+           std::log(normalized_residual) * subset_size;
   }
 
   template <typename MinimalSolver, typename Model, typename DataPoint,
@@ -91,6 +90,7 @@ namespace DO::Sara {
     return log_nfa(X.size(), S.size(), α);
   }
 
+#if 0
   // Optimal Random SAmpling (ORSA) acts like vanilla RANSAC at the beginning
   // of the sampling.
   // - Start sampling normally like RANSAC
@@ -219,5 +219,6 @@ namespace DO::Sara {
       // optimize it globally...
     }
   };
+#endif
 
 }  // namespace DO::Sara

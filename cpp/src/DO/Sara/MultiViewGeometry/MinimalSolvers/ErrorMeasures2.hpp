@@ -45,7 +45,7 @@ namespace DO::Sara {
 
     static auto normalization_factor(const Eigen::Vector2i& sizes) -> double
     {
-      const auto image_diagonal = sizes.cast<double>().array().square().sum();
+      const auto image_diagonal = sizes.cast<double>().norm();
       const auto image_area = static_cast<double>(sizes.x() * sizes.y());
       return 2 * image_diagonal / image_area;
     };

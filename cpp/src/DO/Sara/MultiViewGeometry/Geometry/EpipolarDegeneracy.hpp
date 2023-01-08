@@ -58,7 +58,8 @@ namespace DO::Sara::degensac {
     return H;
   }
 
-  inline static constexpr auto list_homographies_from_7_matches()
+  // I have verified by counting manually.
+  inline constexpr auto homography_index_triples()
       -> std::array<std::array<int, 3>, 5>
   {
     // 1-based enumeration from the paper.
@@ -75,11 +76,5 @@ namespace DO::Sara::degensac {
         std::array{2, 5, 6}  //
     };
   }
-
-  /*
-   *
-   * C(6, 5)
-   *
-   */
 
 }  // namespace DO::Sara::degensac

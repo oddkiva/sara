@@ -42,8 +42,9 @@ namespace DO::Sara {
 
   //! @brief Random Sample Consensus algorithm from Fischler and Bolles 1981.
   //! batched computations and more generic API.
-  template <typename T, typename ModelSolver, typename InlierPredicateType>
-  auto ransac(const TensorView_<T, 2>& points,         //
+  template <typename T, int D, typename ModelSolver,
+            typename InlierPredicateType>
+  auto ransac(const TensorView_<T, D>& points,         //
               ModelSolver solver,                      //
               InlierPredicateType inlier_predicate,    //
               const std::size_t num_samples)           //
@@ -91,12 +92,6 @@ namespace DO::Sara {
         model_best = model;
         inliers_best.flat_array() = inliers;
         subset_best = S[n];
-
-#ifdef DEBUG
-        SARA_CHECK(model_best);
-        SARA_CHECK(num_inliers);
-        SARA_CHECK(subset_best.row_vector());
-#endif
       }
     }
 
