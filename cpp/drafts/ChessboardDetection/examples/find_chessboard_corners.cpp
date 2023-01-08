@@ -21,6 +21,8 @@
 
 #include "Utilities/ImageOrVideoReader.hpp"
 
+#include <optional>
+
 
 namespace sara = DO::Sara;
 

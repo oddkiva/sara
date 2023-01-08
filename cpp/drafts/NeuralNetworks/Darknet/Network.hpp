@@ -19,6 +19,7 @@
 #include <drafts/NeuralNetworks/Darknet/Layer.hpp>
 
 #include <iomanip>
+#include <optional>
 
 
 namespace DO::Sara::Darknet {

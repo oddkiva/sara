@@ -15,6 +15,8 @@
 
 #include <drafts/ChessboardDetection/ChessboardDetector.hpp>
 
+#include <optional>
+
 
 namespace DO::Sara {
 
