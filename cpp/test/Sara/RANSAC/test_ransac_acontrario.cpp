@@ -188,9 +188,9 @@ BOOST_AUTO_TEST_CASE(test_log_nfa_calculus_in_line_fitting_problems)
     log_nfa[i] =
         sara::log_nfa<LineSolver>(n, candidate_subset_size, ε[i].value);
 
-    // Normalized distances are not "physically interpretable" and in practice,
-    // setting some pixel threshold on point-to-line distance makes sense in
-    // computer vision problems.
+    // Normalized distances are not easily "physically interpretable" and in
+    // practice, setting a hard pixel threshold on point-to-line distance makes
+    // sense in computer vision problems.
     if (ε[i].value > 10. * d.norm_factor)
       break;
 

@@ -22,7 +22,8 @@ REPOSITORY_URLS=(
   "https://git.ffmpeg.org/ffmpeg.git"
 )
 
-FFMPEG_VERSION="5.1.2"
+# FFMPEG_VERSION="5.1.2"
+FFMPEG_VERSION="4.4.3"  # because of OpenCV on my local machine...
 
 
 function url_basename()
@@ -66,6 +67,7 @@ popd
 nv_codec_dirpath=$(repo_dirpath ${REPOSITORY_URLS[0]})
 pushd ${nv_codec_dirpath}
 {
+  git pull origin master
   sudo make install
 }
 popd
@@ -86,7 +88,7 @@ pushd ${ffmpeg_dirpath}
   ffmpeg_options+="--enable-gpl "
 
   # From FFmpeg versions shipped in Ubuntu.
-  # ffmpeg_options+="--enable-avresample "
+  ffmpeg_options+="--enable-avresample "
 
   # Add the options only if we need them.
   #
@@ -154,7 +156,13 @@ pushd ${ffmpeg_dirpath}
   ffmpeg_options+="--extra-cflags=-I/usr/local/cuda/include "
   ffmpeg_options+="--extra-ldflags=-L/usr/local/cuda/lib64 "
 
-  ./configure ${ffmpeg_options}
+  # If configure fails, that's because we now need to add the following nvccflags.
+  # nvidia-smi --query-gpu=compute_cap --format=csv
+  #
+  # Reference links:
+  # https://docs.nvidia.com/video-technologies/video-codec-sdk/ffmpeg-with-nvidia-gpu/
+  # https://www.mail-archive.com/ffmpeg-devel@ffmpeg.org/msg120213.html
+  ./configure ${ffmpeg_options} --nvccflags="-gencode arch=compute_61,code=sm_61 -O2"
   make -j$(nproc)
   sudo make install
 }
