@@ -22,7 +22,7 @@ REPOSITORY_URLS=(
   "https://git.ffmpeg.org/ffmpeg.git"
 )
 
-FFMPEG_VERSION="4.4"
+FFMPEG_VERSION="5.1.2"
 
 
 function url_basename()
@@ -85,8 +85,8 @@ pushd ${ffmpeg_dirpath}
   ffmpeg_options+="--enable-nonfree  "
   ffmpeg_options+="--enable-gpl "
 
-  # From FFmpeg verions shipped in Ubuntu.
-  ffmpeg_options+="--enable-avresample "
+  # From FFmpeg versions shipped in Ubuntu.
+  # ffmpeg_options+="--enable-avresample "
 
   # Add the options only if we need them.
   #

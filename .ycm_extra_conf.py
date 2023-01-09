@@ -60,6 +60,17 @@ flags = [
 "-I", "/usr/include/x86_64-linux-gnu/qt5/QtXml",
 "-I", "/usr/include/x86_64-linux-gnu/qt5/QtSql",
 "-I", "/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64",
+# Qt6 header directories.
+"-I", "/usr/include/x86_64-linux-gnu/qt6",
+"-I", "/usr/include/x86_64-linux-gnu/qt6/QtQuick",
+"-I", "/usr/include/x86_64-linux-gnu/qt6/QtQml",
+"-I", "/usr/include/x86_64-linux-gnu/qt6/QtNetwork",
+"-I", "/usr/include/x86_64-linux-gnu/qt6/QtCore",
+"-I", "/usr/include/x86_64-linux-gnu/qt6/QtGui",
+"-I", "/usr/include/x86_64-linux-gnu/qt6/QtConcurrent",
+"-I", "/usr/include/x86_64-linux-gnu/qt6/QtWidgets",
+"-I", "/usr/include/x86_64-linux-gnu/qt6/QtXml",
+"-I", "/usr/include/x86_64-linux-gnu/qt6/QtSql",
 # Boost, Halide and HPX headers in /usr/local.
 "-I", "/usr/local/include",
 "-I", "/usr/local/include/opencv4",

@@ -1,4 +1,4 @@
-image: ubuntu:20.04
+image: ubuntu:22.04
 
 cache:
   paths:
@@ -33,13 +33,11 @@ before_script:
   # Now add the additional APT repositories:
   #
   # CMake.
-  - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-  - apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
-  # CLBlast.
-  - add-apt-repository ppa:cnugteren/clblast
+  - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+  - echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy-rc main' | tee -a /etc/apt/sources.list.d/kitware.list >/dev/null
   # Vulkan SDK.
-  - wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add -
-  - wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
+  - wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | tee /etc/apt/trusted.gpg.d/lunarg.asc
+  - wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
   # Intel TBB
   # - echo "deb http://cz.archive.ubuntu.com/ubuntu eoan main universe" | tee -a  /etc/apt/sources.list
   # Update the packages list again.

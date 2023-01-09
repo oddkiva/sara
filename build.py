@@ -80,11 +80,8 @@ def generate_project(source_dir: str,
 
     # Use latest Qt version instead of the system Qt if possible.
     my_cmake_prefix_paths = []
-    if SYSTEM == "Linux" and pathlib.Path("/usr/local/Qt-6.3.1").exists():
-        cmake_options.append("-D SARA_USE_QT6:BOOL=ON")
-        my_cmake_prefix_paths.append("/usr/local/Qt-6.3.1")
-    elif SYSTEM == "Darwin":
-        cmake_options.append("-D SARA_USE_QT6:BOOL=ON")
+    cmake_options.append("-D SARA_USE_QT6:BOOL=ON")
+    if SYSTEM == "Darwin":
         qt6_root_dir = subprocess.check_output(["brew", "--prefix", "qt"])
         qt6_root_dir = qt6_root_dir.decode(sys.stdout.encoding).strip()
         qt6_cmake_dir = pathlib.Path(qt6_root_dir) / "lib" / "cmake" / "Qt6"
