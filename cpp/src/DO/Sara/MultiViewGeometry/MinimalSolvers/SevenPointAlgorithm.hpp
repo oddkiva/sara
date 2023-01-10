@@ -1,13 +1,17 @@
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Math/PolynomialRoots.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures2.hpp>
 
+#include <optional>
+
 
 namespace DO::Sara {
 
-  template <typename T = double>
+  template <typename T>
   struct SevenPointAlgorithm
   {
     static constexpr auto num_points = 7;
@@ -114,5 +118,9 @@ namespace DO::Sara {
   {
     return normalized_residual(subset, F, matches, distance);
   }
+
+  DO_SARA_EXPORT
+  auto solve_fundamental_matrix(const Eigen::Matrix<double, 4, 7>& X)
+      -> std::array<std::optional<Eigen::Matrix3d>, 3>;
 
 }  // namespace DO::Sara
