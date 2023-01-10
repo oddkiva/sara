@@ -90,7 +90,6 @@ namespace DO::Sara {
     return log_nfa(X.size(), S.size(), α);
   }
 
-#if 0
   // Optimal Random SAmpling (ORSA) acts like vanilla RANSAC at the beginning
   // of the sampling.
   // - Start sampling normally like RANSAC
@@ -219,6 +218,5 @@ namespace DO::Sara {
       // optimize it globally...
     }
   };
-#endif
 
 }  // namespace DO::Sara
