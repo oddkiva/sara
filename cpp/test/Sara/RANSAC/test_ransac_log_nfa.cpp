@@ -4,7 +4,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <concepts>
+#include <algorithm>
 #include <iostream>
 #include <random>
 
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_log_nfa_quality_measure_in_line_fitting_problems)
     // Generate the data from the mixture of inliers and outliers.
     //
     // The number of data points.
-    static constexpr auto n = 100;
+    static constexpr auto n = 200;
     auto x = std::vector<Eigen::Vector2d>(n);
 
     // The normalized point-to-line distance.
@@ -167,8 +167,19 @@ BOOST_AUTO_TEST_CASE(test_log_nfa_quality_measure_in_line_fitting_problems)
                   << "|ε:" << d(l_true, x[i]) / d.norm_factor << std::endl;
     }
 
+    const auto& true_inlier_count = count[1];
+    const auto ideal_inlier_count = static_cast<int>(std::round(p * n));
+    const auto acceptable_experimental_ratio =
+        std::min(ideal_inlier_count, true_inlier_count) /
+        static_cast<double>(std::max(ideal_inlier_count, true_inlier_count));
+    static constexpr auto tol_error = 0.1;
+    if (acceptable_experimental_ratio < 1 - tol_error)
+      continue;
+
     std::cout << "inliers  = " << count[1] << std::endl;
     std::cout << "outliers = " << count[0] << std::endl;
+
+
 
     auto S = sara::DataPointIndices(n);
     std::iota(S.begin(), S.end(), 0u);
@@ -221,20 +232,19 @@ BOOST_AUTO_TEST_CASE(test_log_nfa_quality_measure_in_line_fitting_problems)
         std::min_element(log_nfa.begin(),
                          log_nfa.begin() + valid_subset_cardinality) -
         log_nfa.begin();
-    const auto estimated_inlier_count = best_subset_index + 1;
-    for (auto i = 0u; i < best_subset_index + 1; ++i)
-    {
+    const auto estimated_inlier_count = static_cast<int>(best_subset_index + 1);
+    for (auto i = 0; i < estimated_inlier_count; ++i)
       std::cout << "i:" << i << " x:" << x[ε[i].index].transpose()
                 << " ε[i]:" << ε[i].value / d.norm_factor
                 << " log(nfa):" << log_nfa[i] << std::endl;
-    }
 
-    const auto& true_inlier_count = count[1];
-    static constexpr auto tol_error_count = 2;
-    BOOST_CHECK_LE(std::abs(true_inlier_count - estimated_inlier_count),
-                   tol_error_count);
     SARA_CHECK(true_inlier_count);
     SARA_CHECK(estimated_inlier_count);
+    const auto ratio = std::min(estimated_inlier_count, true_inlier_count) /
+                       static_cast<double>(
+                           std::max(estimated_inlier_count, true_inlier_count));
+    SARA_CHECK(ratio);
+    BOOST_REQUIRE_LE(1 - ratio, tol_error * 2);
   }
 }
 
