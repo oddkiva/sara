@@ -144,10 +144,9 @@ int sara_graphics_main(int argc, char** argv)
   auto distance = EpipolarDistance{};
   {
     num_samples = argc < 5 ? 200 : std::stoi(argv[4]);
-    err_thres = argc < 6 ? 1e-3 : std::stod(argv[5]);
+    err_thres = argc < 6 ? 1e-2 : std::stod(argv[5]);
     std::tie(E, inliers, sample_best) =
         ransac(M, un[0], un[1], estimator, distance, num_samples, err_thres);
-    E.matrix() = E.matrix().normalized();
 
     epipolar_edges.E_inliers[0] = inliers;
     epipolar_edges.E_best_samples[0] = sample_best;
