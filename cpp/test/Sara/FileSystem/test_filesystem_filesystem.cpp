@@ -11,14 +11,21 @@
 
 #define BOOST_TEST_MODULE "Filesytem Utilities"
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/FileSystem.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
+#if __has_include(<filesystem>)
+#  include <filesystem>
+namespace fs = std::filesystem;
+#else
+#  include <boost/filesystem.hpp>
+namespace fs = ::filesystem;
+#endif
 
-namespace fs = boost::filesystem;
+
 namespace sara = DO::Sara;
 
 
@@ -43,7 +50,10 @@ BOOST_AUTO_TEST_CASE(test_mkdir)
 BOOST_AUTO_TEST_CASE(test_cp)
 {
   const auto src = sara::ls(src_path("../../../../data/"), ".jpg")[0];
-  const auto dst = (fs::temp_directory_path() / fs::path{src}.filename()).string();
+  const auto dst =
+      (fs::temp_directory_path() / fs::path{src}.filename()).string();
+  SARA_CHECK(src);
+  SARA_CHECK(dst);
   sara::cp(src, dst);
   BOOST_CHECK(fs::exists(dst));
 

@@ -4,8 +4,7 @@
 namespace DO::Sara {
 
   auto SevenPointAlgorithmDoublePrecision::extract_nullspace(
-      const Eigen::Matrix<double, 4, 7>& X)
-      -> std::array<Eigen::Matrix3d, 2>
+      const Eigen::Matrix<double, 4, 7>& X) -> std::array<Eigen::Matrix3d, 2>
   {
     return Impl::extract_nullspace(X);
   }
@@ -19,7 +18,7 @@ namespace DO::Sara {
 
   auto SevenPointAlgorithmDoublePrecision::operator()(
       const Eigen::Matrix<double, 4, 7>& X) const
-      -> std::array<std::optional<Eigen::Matrix3d>, 3>
+      -> std::vector<Eigen::Matrix3d>
   {
     return Impl::solve(X);
   }

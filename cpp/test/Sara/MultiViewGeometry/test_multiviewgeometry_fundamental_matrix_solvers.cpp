@@ -124,10 +124,7 @@ BOOST_AUTO_TEST_CASE(test_seven_point_algorithm)
 
   const auto Fs = SevenPointAlgorithmDoublePrecision{}(X);
   for (const auto& F : Fs)
-  {
-    if (F.has_value())
-      SARA_CHECK(*F);
-  }
+    SARA_CHECK(F);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

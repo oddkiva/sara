@@ -12,20 +12,34 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/FileSystem/FileSystem.hpp>
 
-#include <boost/filesystem.hpp>
+#if __has_include(<filesystem>)
+#  include <filesystem>
+#else
+// N.B.: Boost 1.74 `copy_file` function is buggy...
+#  include <boost/filesystem.hpp>
+#endif
 
 #include <algorithm>
 #include <iostream>
+#include <stdexcept>
 
 
+#if __has_include(<filesystem>)
+namespace fs = std::filesystem;
+#else
 namespace fs = boost::filesystem;
+#endif
 
 
 namespace DO::Sara {
 
   auto basename(const std::string& filepath) -> std::string
   {
+#if __has_include(<filesystem>)
+    return fs::path{filepath}.stem();
+#else
     return fs::basename(filepath);
+#endif
   }
 
   auto mkdir(const std::string& dirpath) -> void
@@ -37,13 +51,21 @@ namespace DO::Sara {
 
   auto cp(const std::string& from, const std::string& to) -> void
   {
+#if __has_include(<filesystem>)
+    fs::copy_file(from, to, fs::copy_options::overwrite_existing);
+#else
     fs::copy_file(from, to, fs::copy_option::overwrite_if_exists);
+#endif
   }
 
   auto ls(const std::string& dirpath, const std::string& ext_filter)
       -> std::vector<std::string>
   {
+#if __has_include(<filesystem>)
+    auto in_path = fs::absolute(dirpath);
+#else
     auto in_path = fs::system_complete(fs::path{dirpath});
+#endif
 
     if (!fs::exists(in_path))
       throw std::runtime_error{"Error: directory does not exist"};
@@ -65,7 +87,11 @@ namespace DO::Sara {
       if (!fs::is_regular_file(dir_i->status()))
         continue;
 
+#if __has_include(<filesystem>)
+      auto ext = dir_i->path().extension().string();
+#else
       auto ext = fs::extension(dir_i->path());
+#endif
       std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
       if (ext == ext_filter)

@@ -22,8 +22,6 @@ namespace DO::Sara {
     static auto extract_nullspace(const data_point_type& X)
         -> std::array<Eigen::Matrix3<T>, 2>
     {
-      auto F = Eigen::Matrix3<T>{};
-
       // 1. solve the linear system from the 8-point correspondences.
       auto A = Eigen::Matrix<T, 7, 9>{};
       for (int i = 0; i < 8; ++i)
@@ -77,7 +75,7 @@ namespace DO::Sara {
     }
 
     static auto solve(const data_point_type& X)
-        -> std::array<std::optional<Eigen::Matrix3<T>>, num_models>
+        -> std::vector<Eigen::Matrix3<T>>
     {
       // The fundamental matrix lives in the nullspace of data matrix X, which
       // has rank 2, i.e., Null(X) = Span(F[0], F[1])
@@ -97,8 +95,7 @@ namespace DO::Sara {
       const auto num_real_roots = all_real_roots ? 3 : 1;
 
       // Form the candidate fundamental matrices.
-      const auto F0 =
-          std::array<std::optional<Eigen::Matrix3<T>>, num_models>{};
+      auto F0 = std::vector<Eigen::Matrix3<T>>(num_real_roots);
       std::transform(α.begin(), α.end(), F0.begin(),
                      [&F](const auto& α_i) -> Eigen::Matrix3<T> {
                        return F[0] + α_i * F[1];
@@ -125,7 +122,7 @@ namespace DO::Sara {
         -> UnivariatePolynomial<double, 3>;
 
     auto operator()(const data_point_type& X) const
-        -> std::array<std::optional<Eigen::Matrix3d>, num_models>;
+        -> std::vector<Eigen::Matrix3d>;
 
     Impl _impl;
   };
