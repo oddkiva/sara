@@ -34,9 +34,10 @@ target_link_libraries(orthogonal_vanishing_point_detection
 
 # Two-view geometry.
 sara_add_example(homography_estimation_example)
-sara_add_example(fundamental_matrix_estimation_example)
-sara_add_example(essential_matrix_estimation_example)
-target_link_libraries(essential_matrix_estimation_example PRIVATE tinyply)
+sara_add_example(fundamental_7_point_example)
+sara_add_example(fundamental_8_point_example)
+sara_add_example(essential_5_point_example)
+target_link_libraries(essential_5_point_example PRIVATE tinyply)
 
 # Camera resectioning.
 sara_add_example(camera_resectioning_example)
