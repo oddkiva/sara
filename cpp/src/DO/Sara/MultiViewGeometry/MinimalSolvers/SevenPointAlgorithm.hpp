@@ -75,19 +75,14 @@ namespace DO::Sara {
       return P;
     }
 
-    static auto solve(const data_point_type& X)
+    static auto solve_determinant_constraint(const std::array<Eigen::Matrix3<T>, 2>& F)
         -> std::vector<Eigen::Matrix3<T>>
     {
-      // The fundamental matrix lives in the nullspace of data matrix X, which
-      // has rank 2, i.e., Null(X) = Span(F[0], F[1])
-      //
-      // The fundamental matrix is a linear combination F[0] + α F[1].
-      const auto F = extract_nullspace(X);
-
       // Because the fundamental matrix is rank 2, the determinant must be 0,
       // i.e.: det(F[0] + α F[1]) = 0
       // This is a cubic polynomial in α.
       const auto det_F = form_determinant_constraint(F[0], F[1]);
+      std::cout << "det_F = " << det_F << std::endl;
 
       // We determine 3 real roots α_i at most.
       auto α = std::array<T, num_models>{};
@@ -121,6 +116,9 @@ namespace DO::Sara {
     static auto form_determinant_constraint(const Eigen::Matrix3d& F1,
                                             const Eigen::Matrix3d& F2)
         -> UnivariatePolynomial<double, 3>;
+
+    static auto solve_determinant_constraint(const std::array<Eigen::Matrix3d, 2>& F)
+        -> std::vector<Eigen::Matrix3d>;
 
     auto operator()(const data_point_type& X) const
         -> std::vector<Eigen::Matrix3d>;

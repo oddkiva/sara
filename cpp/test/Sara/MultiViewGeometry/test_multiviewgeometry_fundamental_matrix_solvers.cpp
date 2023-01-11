@@ -129,14 +129,13 @@ BOOST_AUTO_TEST_CASE(test_seven_point_algorithm)
   // Check the nullspace extraction.
   const auto nullspace =
       SevenPointAlgorithmDoublePrecision::extract_nullspace(X);
-
   // Check the dimensions of the nullspace.
   BOOST_REQUIRE_EQUAL(nullspace.size(), 2u);
-
+  // Check the residual.
   for (auto i = 0u; i < nullspace.size(); ++i)
   {
     const auto& F = nullspace[i];
-    std::cout << fmt::format("F[{}] =\n {}\n", i, F);
+    std::cout << fmt::format("Eigen F[{}] =\n {}\n", i, F);
 
     // Apply in batch.
     const auto dots_batched = (right.colwise().homogeneous().array() *
@@ -144,9 +143,38 @@ BOOST_AUTO_TEST_CASE(test_seven_point_algorithm)
                                   .colwise()
                                   .sum()
                                   .matrix();
+
+    // Maximum residual value.
     const auto residual_max = dots_batched.lpNorm<Eigen::Infinity>();
     std::cout << fmt::format("residual max = {}\n", residual_max);
     BOOST_CHECK_SMALL(residual_max, 1e-12);
+  }
+
+  // Solve the determinant constraint.
+  const auto Fs =
+      SevenPointAlgorithmDoublePrecision::solve_determinant_constraint(
+          nullspace);
+  for (const auto& F : Fs)
+  {
+    std::cout << fmt::format("Candidate F =\n {}\n", F);
+
+    // Apply in batch.
+    const auto dots_batched = (right.colwise().homogeneous().array() *
+                               (F * left.colwise().homogeneous()).array())
+                                  .colwise()
+                                  .sum()
+                                  .matrix();
+
+    // Maximum residual value.
+    const auto residual_max = dots_batched.lpNorm<Eigen::Infinity>();
+    std::cout << fmt::format("residual max = {}\n", residual_max);
+    BOOST_CHECK_SMALL(residual_max, 1e-12);
+
+    // Try the eighth data point.
+    const auto u = Eigen::Vector3d{0.253816, 0.675353, 1.};
+    const auto v = Eigen::Vector3d{0.530029, 0.604387, 1.};
+
+    SARA_CHECK(v.transpose() * F * u);
   }
 }
 
