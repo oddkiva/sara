@@ -167,7 +167,6 @@ BOOST_AUTO_TEST_CASE(test_seven_point_algorithm)
 
     // Maximum residual value.
     const auto residual_max = dots_batched.lpNorm<Eigen::Infinity>();
-    std::cout << fmt::format("residual max = {}\n", residual_max);
     BOOST_CHECK_SMALL(residual_max, 1e-12);
 
     // Try the eighth data point.
