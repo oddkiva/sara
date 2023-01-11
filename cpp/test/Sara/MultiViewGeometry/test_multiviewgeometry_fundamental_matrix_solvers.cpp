@@ -12,12 +12,16 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/Eight Point Algorithm"
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/EigenFormatInterop.hpp>
+
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/FundamentalMatrixSolvers.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/SevenPointAlgorithm.hpp>
 
 #include <boost/test/unit_test.hpp>
+
+#include <Eigen/Eigen>
 
 #include <iostream>
 
@@ -122,9 +126,28 @@ BOOST_AUTO_TEST_CASE(test_seven_point_algorithm)
   for (auto i = 0; i < 7; ++i)
     X.col(i) << left.col(i), right.col(i);
 
-  const auto Fs = SevenPointAlgorithmDoublePrecision{}(X);
-  for (const auto& F : Fs)
-    SARA_CHECK(F);
+  // Check the nullspace extraction.
+  const auto nullspace =
+      SevenPointAlgorithmDoublePrecision::extract_nullspace(X);
+
+  // Check the dimensions of the nullspace.
+  BOOST_REQUIRE_EQUAL(nullspace.size(), 2u);
+
+  for (auto i = 0u; i < nullspace.size(); ++i)
+  {
+    const auto& F = nullspace[i];
+    std::cout << fmt::format("F[{}] =\n {}\n", i, F);
+
+    // Apply in batch.
+    const auto dots_batched = (right.colwise().homogeneous().array() *
+                               (F * left.colwise().homogeneous()).array())
+                                  .colwise()
+                                  .sum()
+                                  .matrix();
+    const auto residual_max = dots_batched.lpNorm<Eigen::Infinity>();
+    std::cout << fmt::format("residual max = {}\n", residual_max);
+    BOOST_CHECK_SMALL(residual_max, 1e-12);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -24,19 +24,20 @@ namespace DO::Sara {
     {
       // 1. solve the linear system from the 8-point correspondences.
       auto A = Eigen::Matrix<T, 7, 9>{};
-      for (int i = 0; i < 8; ++i)
+      for (int i = 0; i < X.cols(); ++i)
       {
-        const Eigen::Vector3<T> p_left = X.col(i).head(2).homogeneous();
-        const Eigen::Vector3<T> p_right = X.col(i).head(2).homogeneous();
-        A.row(i) <<                                     //
-            p_right(0, i) * p_left.col(i).transpose(),  //
-            p_right(1, i) * p_left.col(i).transpose(),  //
-            p_right(2, i) * p_left.col(i).transpose();
+        const auto p_left = X.col(i).head(2).homogeneous();
+        const auto p_right = X.col(i).tail(2);
+        // clang-format off
+        A.row(i) << p_right(0) * p_left.transpose(),
+                    p_right(1) * p_left.transpose(),
+                    p_left.transpose();
+        // clang-format on
       }
 
       auto svd = Eigen::BDCSVD<Matrix<T, 7, 9>>{A, Eigen::ComputeFullV};
-      const Eigen::Matrix<T, 9, 1> f1 = svd.matrixV().col(7);
-      const Eigen::Matrix<T, 9, 1> f2 = svd.matrixV().col(8);
+      const Eigen::Vector<T, 9> f1 = svd.matrixV().col(7);
+      const Eigen::Vector<T, 9> f2 = svd.matrixV().col(8);
 
       const auto to_matrix = [](const auto& f) {
         auto F = Eigen::Matrix3<T>{};

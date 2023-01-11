@@ -35,6 +35,7 @@ flags = [
 # Third-party header directories.
 "-isystem", "cpp/third-party",
 "-isystem", "cpp/third-party/eigen",
+"-isystem", "cpp/third-party/fmt/include",
 "-isystem", "cpp/third-party/flann/src/cpp",
 # Qt5 defines.
 "-DQT_CORE_LIB",
