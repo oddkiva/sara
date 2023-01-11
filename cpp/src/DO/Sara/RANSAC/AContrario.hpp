@@ -2,6 +2,8 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
+#include <optional>
+
 
 namespace DO::Sara {
 
