@@ -66,9 +66,6 @@ namespace DO::Sara {
 
   //! @brief Calculate the real roots of the cubic polynomial.
   //!
-  //! Implemented as described in:
-  //! http://people.csail.mit.edu/bkph/articles/Quadratics.pdf
-  //!
   //! Return true if the roots are all real, false otherwise.
   //! At least one root is real.
   template <typename T, int N>

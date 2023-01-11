@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_seven_point_algorithm)
   for (auto i = 0; i < 7; ++i)
     X.col(i) << left.col(i), right.col(i);
 
-  const auto Fs = solve_fundamental_matrix(X);
+  const auto Fs = SevenPointAlgorithmDoublePrecision{}(X);
   for (const auto& F : Fs)
   {
     if (F.has_value())

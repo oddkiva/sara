@@ -12,14 +12,14 @@
 namespace DO::Sara {
 
   template <typename T>
-  struct SevenPointAlgorithm
+  struct SevenPointAlgorithmImpl
   {
     static constexpr auto num_points = 7;
     static constexpr auto num_models = 3;
 
     using data_point_type = Eigen::Matrix<T, 4, 7>;
 
-    auto extract_nullspace(const data_point_type& X) const
+    static auto extract_nullspace(const data_point_type& X)
         -> std::array<Eigen::Matrix3<T>, 2>
     {
       auto F = Eigen::Matrix3<T>{};
@@ -36,7 +36,7 @@ namespace DO::Sara {
             p_right(2, i) * p_left.col(i).transpose();
       }
 
-      auto svd = Eigen::BDCSVD<Matrix<T, 8, 9>>{A, Eigen::ComputeFullV};
+      auto svd = Eigen::BDCSVD<Matrix<T, 7, 9>>{A, Eigen::ComputeFullV};
       const Eigen::Matrix<T, 9, 1> f1 = svd.matrixV().col(7);
       const Eigen::Matrix<T, 9, 1> f2 = svd.matrixV().col(8);
 
@@ -51,13 +51,13 @@ namespace DO::Sara {
       return {to_matrix(f1), to_matrix(f2)};
     }
 
-    auto form_determinant_constraint(const Eigen::Matrix3<T>& F1,
-                                     const Eigen::Matrix3<T>& F2) const
+    static auto form_determinant_constraint(const Eigen::Matrix3<T>& F1,
+                                            const Eigen::Matrix3<T>& F2)
     {
       auto P = UnivariatePolynomial<T, 3>{};
 
-      // Lambda-Twist has a nice formula for the determinant formula. Let's
-      // reuse it instead of using SymPy.
+      // Lambda-Twist has a nice formula for the determinant. Let's reuse it
+      // instead of using SymPy.
       //
       // clang-format off
       P[3] = F2.determinant();
@@ -76,7 +76,7 @@ namespace DO::Sara {
       return P;
     }
 
-    auto operator()(const data_point_type& X) const
+    static auto solve(const data_point_type& X)
         -> std::array<std::optional<Eigen::Matrix3<T>>, num_models>
     {
       // The fundamental matrix lives in the nullspace of data matrix X, which
@@ -91,8 +91,9 @@ namespace DO::Sara {
       const auto det_F = form_determinant_constraint(F[0], F[1]);
 
       // We determine 3 real roots α_i at most.
-      const auto α = std::array<T, num_models>{};
-      const auto all_real_roots = compute_cubic_real_roots(det_F, α[0], α[1], α[2]);
+      auto α = std::array<T, num_models>{};
+      const auto all_real_roots = compute_cubic_real_roots(det_F,  //
+                                                           α[0], α[1], α[2]);
       const auto num_real_roots = all_real_roots ? 3 : 1;
 
       // Form the candidate fundamental matrices.
@@ -107,6 +108,28 @@ namespace DO::Sara {
     }
   };
 
+  struct DO_SARA_EXPORT SevenPointAlgorithmDoublePrecision
+  {
+    using Impl = SevenPointAlgorithmImpl<double>;
+
+    static constexpr auto num_points = Impl::num_points;
+    static constexpr auto num_models = Impl::num_models;
+
+    using data_point_type = Impl::data_point_type;
+
+    static auto extract_nullspace(const data_point_type& X)
+        -> std::array<Eigen::Matrix3d, 2>;
+
+    static auto form_determinant_constraint(const Eigen::Matrix3d& F1,
+                                            const Eigen::Matrix3d& F2)
+        -> UnivariatePolynomial<double, 3>;
+
+    auto operator()(const data_point_type& X) const
+        -> std::array<std::optional<Eigen::Matrix3d>, num_models>;
+
+    Impl _impl;
+  };
+
 
   template <typename EpipolarDistance>
   inline auto
@@ -118,9 +141,5 @@ namespace DO::Sara {
   {
     return normalized_residual(subset, F, matches, distance);
   }
-
-  DO_SARA_EXPORT
-  auto solve_fundamental_matrix(const Eigen::Matrix<double, 4, 7>& X)
-      -> std::array<std::optional<Eigen::Matrix3d>, 3>;
 
 }  // namespace DO::Sara
