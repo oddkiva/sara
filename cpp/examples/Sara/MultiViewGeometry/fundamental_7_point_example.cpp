@@ -17,6 +17,7 @@
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/SevenPointAlgorithm.hpp>
 #include <DO/Sara/Visualization.hpp>
 
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
@@ -65,7 +66,7 @@ auto get_keypoints(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
 // =============================================================================
 // Robust estimation using RANSAC.
 //
-using FEstimator = EightPointAlgorithm;
+using FEstimator = SevenPointAlgorithmDoublePrecision;
 
 auto estimate_fundamental_matrix(const KeypointList<OERegion, float>& keys1,
                                  const KeypointList<OERegion, float>& keys2,

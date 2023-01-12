@@ -75,14 +75,14 @@ namespace DO::Sara {
       return P;
     }
 
-    static auto solve_determinant_constraint(const std::array<Eigen::Matrix3<T>, 2>& F)
+    static auto
+    solve_determinant_constraint(const std::array<Eigen::Matrix3<T>, 2>& F)
         -> std::vector<Eigen::Matrix3<T>>
     {
       // Because the fundamental matrix is rank 2, the determinant must be 0,
       // i.e.: det(F[0] + α F[1]) = 0
       // This is a cubic polynomial in α.
       const auto det_F = form_determinant_constraint(F[0], F[1]);
-      std::cout << "det_F = " << det_F << std::endl;
 
       // We determine 3 real roots α_i at most.
       auto α = std::array<T, num_models>{};
@@ -92,7 +92,7 @@ namespace DO::Sara {
 
       // Form the candidate fundamental matrices.
       auto F0 = std::vector<Eigen::Matrix3<T>>(num_real_roots);
-      std::transform(α.begin(), α.end(), F0.begin(),
+      std::transform(α.begin(), α.begin() + num_real_roots, F0.begin(),
                      [&F](const auto& α_i) -> Eigen::Matrix3<T> {
                        return F[0] + α_i * F[1];
                      });
@@ -117,11 +117,22 @@ namespace DO::Sara {
                                             const Eigen::Matrix3d& F2)
         -> UnivariatePolynomial<double, 3>;
 
-    static auto solve_determinant_constraint(const std::array<Eigen::Matrix3d, 2>& F)
+    static auto
+    solve_determinant_constraint(const std::array<Eigen::Matrix3d, 2>& F)
         -> std::vector<Eigen::Matrix3d>;
 
     auto operator()(const data_point_type& X) const
         -> std::vector<Eigen::Matrix3d>;
+
+
+    //! @{
+    //! @brief Legacy API.
+    using model_type = FundamentalMatrix;
+    using matrix_type = Eigen::Matrix<double, 3, 7>;
+    auto operator()(const matrix_type& x, const matrix_type& y) const
+        -> std::vector<model_type>;
+    //! @}
+
 
     Impl _impl;
   };
