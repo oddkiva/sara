@@ -38,7 +38,6 @@ namespace DO::Sara {
       -> Tensor_<int, 3>;
 
   template <typename T>
-  requires std::is_arithmetic_v<T>
   auto from_matches_to_data_points(const TensorView_<int, 2>& matches,
                                    const TensorView_<T, 2>& p1,
                                    const TensorView_<T, 2>& p2) -> Tensor_<T, 3>
@@ -76,7 +75,7 @@ namespace DO::Sara {
     auto points_sampled = Tensor_<T, D>{sample_sizes};
 
     for (auto s = 0; s < num_samples; ++s)
-      points_sampled[s].flat_array() = points[point_indices[s]].flat_array();
+      points_sampled[s].flat_array() = points[point_indices(s)].flat_array();
 
     return points_sampled;
   }
