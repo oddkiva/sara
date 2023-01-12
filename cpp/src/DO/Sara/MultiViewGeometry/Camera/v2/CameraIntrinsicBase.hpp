@@ -8,16 +8,17 @@
 namespace DO::Sara::v2 {
 
   template <typename T>
-  concept Array = requires
+  concept ArrayConcept = requires
   {
     std::is_array_v<T>;
     typename T::value_type;
   };
 
-  template <Array Array_>
+  template <ArrayConcept Array>
   struct CameraIntrinsicBase
   {
-    Array_ data;
+    using array_type = Array;
+    Array data;
   };
 
 

@@ -12,6 +12,7 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/Pinhole Camera Model"
 
 #include <DO/Sara/MultiViewGeometry/Camera/PinholeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -53,4 +54,43 @@ BOOST_AUTO_TEST_CASE(test_pinhole_camera_model)
   const auto& K = camera.K;
   const auto& K_inv = camera.K_inverse;
   BOOST_CHECK_LE((K * K_inv - Eigen::Matrix3f::Identity()).norm(), 1e-4f);
+}
+
+BOOST_AUTO_TEST_CASE(test_pinhole_camera_model_v2)
+{
+  auto camera = v2::PinholeCamera<double>{};
+  // Focal lengths in each dimension.
+  camera.fx() = 1063.30738864;
+  camera.fy() = 1064.20554291;
+  // Shear component.
+  camera.shear() = -1.00853432;
+  // Principal point.
+  camera.principal_point() << 969.55702157, 541.26230733;
+
+  // Check the calibration matrix.
+  const auto K = camera.calibration_matrix();
+  // clang-format off
+  const auto K_true = (Eigen::Matrix3d{} <<
+    camera.fx(), camera.shear(), camera.u0(),
+              0,    camera.fy(), camera.v0(),
+              0,              0,           1
+  ).finished();
+  // clang-format on
+  BOOST_CHECK(K == K_true);
+
+  // 2D point on the image plane.
+  const auto x = Eigen::Vector2d{100.12, 1230.123f};
+
+  // Backproject the 3D ray by backprojectin.
+  const auto ray = camera.backproject(x);
+  // A property of the 3D ray by design.
+  BOOST_CHECK_EQUAL(ray.z(), 1);
+
+  // Check the projection of the 3D ray onto the image plane.
+  BOOST_CHECK_SMALL((camera.project(ray) - x).norm(), 1e-12);
+
+  // Projection using the calibration matrix.
+  BOOST_CHECK_SMALL(((K * ray).hnormalized() - x).norm(), 1e-12);
+  // Backprojection using the calibration matrix.
+  BOOST_CHECK_SMALL((K.inverse() * x.homogeneous() - ray).norm(), 1e-12);
 }

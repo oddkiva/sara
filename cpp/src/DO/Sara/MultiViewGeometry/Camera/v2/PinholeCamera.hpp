@@ -1,20 +1,30 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2023-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <DO/Sara/MultiViewGeometry/Camera/v2/CameraIntrinsicBase.hpp>
 
 #include <Eigen/Geometry>
 
-#include <iostream>
-
 
 namespace DO::Sara::v2 {
 
-  template <Array Array_>
-  struct PinholeCameraBase : CameraIntrinsicBase<Array_>
+  template <ArrayConcept Array>
+  struct PinholeCameraBase : CameraIntrinsicBase<Array>
   {
-    using base_type = CameraIntrinsicBase<Array_>;
+    using base_type = CameraIntrinsicBase<Array>;
+    using base_type::array_type;
     using base_type::data;
-    using T = typename Array_::value_type;
+    using T = typename Array::value_type;
 
     // clang-format off
     enum Index
@@ -52,6 +62,16 @@ namespace DO::Sara::v2 {
       return data[V0];
     }
 
+    auto focal_lengths() -> VectorView<T, 2>
+    {
+      return VectorView<T, 2>{data.data() + FX};
+    }
+
+    auto principal_point() -> VectorView<T, 2>
+    {
+      return VectorView<T, 2>{data.data() + U0};
+    }
+
     auto fx() const -> T
     {
       return data[FX];
@@ -77,13 +97,24 @@ namespace DO::Sara::v2 {
       return data[V0];
     }
 
-    auto matrix() const -> Eigen::Matrix3<T>
+    auto focal_lengths() const -> ConstVectorView<T, 2>
+    {
+      return ConstVectorView<T, 2>{data.data() + FX};
+    }
+
+
+    auto principal_point() const -> ConstVectorView<T, 2>
+    {
+      return ConstVectorView<T, 2>{data.data() + U0};
+    }
+
+    auto calibration_matrix() const -> Eigen::Matrix3<T>
     {
       // clang-format off
       const auto K = (Eigen::Matrix3<T>{} <<
-        fx(),    0, u0(),
-           0, fy(), v0(),
-           0,    0,    1
+        fx(), shear(), u0(),
+           0,    fy(), v0(),
+           0,       0,    1
       ).finished();
       // clang-format on
       return K;
@@ -93,10 +124,11 @@ namespace DO::Sara::v2 {
     //! distorted image coordinates.
     auto project(const Eigen::Vector3<T>& Xc) const -> Eigen::Vector2<T>
     {
-      auto x = Eigen::Vector2<T>{};
-      x.x() = fx() * md.x() + shear() * md.y() + u0();
-      x.y() = fy() * md.y() + v0();
-      return x;
+      const Eigen::Vector2<T> Xn = Xc.hnormalized();
+      return {
+          fx() * Xn.x() + shear() * Xn.y() + u0(),  //
+          /*              */ fy() * Xn.y() + v0()   //
+      };
     }
 
     //! @brief Backproject a 2D pixel coordinates back to the corresponding 3D
@@ -110,7 +142,7 @@ namespace DO::Sara::v2 {
       const auto y = (v - v0()) / fy();
       const auto x = (u - u0() - shear() * y) / fx();
       static constexpr auto one = static_cast<T>(1);
-      return Eigen::Vector2<T>{x, y, one};
+      return Eigen::Vector3<T>{x, y, one};
     }
   };
 
