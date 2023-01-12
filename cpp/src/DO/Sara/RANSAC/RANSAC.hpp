@@ -13,85 +13,111 @@
 
 #include <DO/Sara/Core/Random.hpp>
 
+#include <concepts>
+#include <vector>
+
 
 namespace DO::Sara {
 
-  //! @ingroup Geometry
-  //! @defgroup RANSAC RANSAC
-  //! @{
   template <typename T>
-  auto to_coordinates(const TensorView_<int, 2>& samples,
-                      const TensorView_<T, 2>& points)
+  concept TensorConcept = requires
   {
-    const auto num_samples = samples.size(0);
-    const auto sample_size = samples.size(1);
-    const auto point_dimension = points.size(1);
-    const auto point_matrix = points.matrix();
+    T::Dimension;
+    typename T::value_type;
+  };
 
-    auto p = Tensor_<T, 3>{{num_samples, sample_size, point_dimension}};
+  template <typename T>
+  concept MinimalSolverConcept = requires(T solver)
+  {
+    T::num_points;
+    T::num_models;
+    typename T::data_point_type;
+    typename T::model_type;
 
-    for (auto s = 0; s < num_samples; ++s)
-    {
-      auto subset_matrix = p[s].matrix();
-      for (auto k = 0; k < sample_size; ++k)
-        subset_matrix.row(k) = point_matrix.row(samples(s, k));
-    }
+    // clang-format off
+    { solver(std::declval<T::data_point_type>()) }
+      -> std::same_as<std::vector<typename T::model_type>>;
+    // clang-format on
+  };
 
-    return p;
-  }
 
   //! @brief Random Sample Consensus algorithm from Fischler and Bolles 1981.
   //! batched computations and more generic API.
-  template <typename T, int D, typename ModelSolver,
-            typename InlierPredicateType>
-  auto ransac(const TensorView_<T, D>& points,         //
-              ModelSolver solver,                      //
-              InlierPredicateType inlier_predicate,    //
-              const std::size_t num_samples)           //
-      -> std::tuple<typename ModelSolver::model_type,  //
-                    Tensor_<bool, 1>,                  //
-                    Tensor_<int, 1>>                   //
+  template <TensorConcept Tensor,              //
+            MinimalSolverConcept ModelSolver,  //
+            typename InlierPredicateType,
+            typename DataNormalizer>
+  auto ransac(
+      const Tensor& data_points,                                            //
+      ModelSolver solver,                                                   //
+      InlierPredicateType inlier_predicate,                                 //
+      const std::size_t num_samples,                                        //
+      const std::optional<DataNormalizer>& data_normalizer = std::nullopt)  //
+      -> std::tuple<typename ModelSolver::model_type,                       //
+                    Tensor_<bool, 1>,                                       //
+                    Tensor_<int, 1>>                                        //
   {
-    // Generate random samples for RANSAC.
-    const auto& N = num_samples;
-    constexpr auto L = ModelSolver::num_points;
+    // X = data points.
+    const auto& X = data_points;
 
-    // P = list of points.
-    const auto& P = points;
-    const auto card_P = P.size(0);
-    if (card_P < ModelSolver::num_points)
+    // Normalize the data points.
+    const auto& Xn = data_normalizer.has_value()  //
+                         ? data_normalizer->normalize(X)
+                         : X;
+
+    // Define cardinality variables.
+    const auto N = static_cast<int>(num_samples);
+    static constexpr auto L = ModelSolver::num_points;
+    const auto& card_X = X.size(0);
+    if (card_X < ModelSolver::num_points)
       throw std::runtime_error{"Not enough data points!"};
 
-    // S is the list of N random elemental subsets, each of them having
-    // cardinality L.
-    const auto S = random_samples(static_cast<int>(N), L, card_P);
-
-    // Remap every (sampled) point indices to point coordinates.
-    const auto p = to_coordinates(S, points);
+    const auto minimal_subsets = random_samples(N, L, card_X);
 
     // For the inliers count.
     auto model_best = typename ModelSolver::model_type{};
 
     auto num_inliers_best = 0;
     auto subset_best = Tensor_<int, 1>{L};
-    auto inliers_best = Tensor_<bool, 1>{card_P};
+    auto inliers_best = Tensor_<bool, 1>{card_X};
 
-    for (auto n = 0u; n < N; ++n)
+    for (auto n = 0; n < N; ++n)
     {
-      // Estimate the normalized models.
-      auto model = solver(p[n].matrix());
+      // Get the L point indices (the minimal subsets).
+      const auto indices = minimal_subsets[n];
+
+      // Remap the point indices to point coordinates.
+      const auto Xn_sampled = to_coordinates(indices, Xn);
+
+      // Estimate the candidate models with the normalized data.
+      auto candidate_models = solver(Xn_sampled);
+
+      // Denormalize the candiate models from the data.
+      if (data_normalizer.has_value())
+        std::for_each(candidate_models.begin(), candidate_models.end(),
+                      [&data_normalizer](auto& model) {
+                        data_normalizer->denormalize(model);
+                      });
 
       // Count the inliers.
-      inlier_predicate.set_model(model);
-      const auto inliers = inlier_predicate(points.matrix());
-      const auto num_inliers = static_cast<int>(inliers.count());
-
-      if (num_inliers > num_inliers_best)
+      for (const auto& model : candidate_models)
       {
-        num_inliers_best = num_inliers;
-        model_best = model;
-        inliers_best.flat_array() = inliers;
-        subset_best = S[n];
+        // Count the inliers.
+        inlier_predicate.set_model(model);
+        const auto inliers = inlier_predicate(X);
+        const auto num_inliers = static_cast<int>(inliers.count());
+
+        if (num_inliers > num_inliers_best)
+        {
+          num_inliers_best = num_inliers;
+          model_best = model;
+          inliers_best.flat_array() = inliers;
+          subset_best = minimal_subsets[n];
+
+          SARA_CHECK(model_best);
+          SARA_CHECK(num_inliers);
+          SARA_CHECK(subset_best.row_vector());
+        }
       }
     }
 
