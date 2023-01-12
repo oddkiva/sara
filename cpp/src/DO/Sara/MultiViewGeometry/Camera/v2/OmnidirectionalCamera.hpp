@@ -9,12 +9,12 @@
 
 namespace DO::Sara::v2 {
 
-  template <Array Array_>
-  struct OmnidirectionalCameraBase : CameraIntrinsicBase<Array_>
+  template <ArrayConcept Array>
+  struct OmnidirectionalCameraBase : CameraIntrinsicBase<Array>
   {
-    using base_type = CameraIntrinsicBase<Array_>;
+    using base_type = CameraIntrinsicBase<Array>;
     using base_type::data;
-    using T = typename Array_::value_type;
+    using T = typename Array::value_type;
 
     // clang-format off
     enum Index
