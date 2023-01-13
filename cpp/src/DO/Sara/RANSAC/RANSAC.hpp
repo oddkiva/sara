@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2020-present David Ok <david.ok8@gmail.com>
+// Copyright (C) 2023-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -12,6 +12,7 @@
 #pragma once
 
 #include <DO/Sara/Core/Random.hpp>
+#include <DO/Sara/RANSAC/Utility.hpp>
 
 #include <concepts>
 #include <vector>
@@ -60,7 +61,7 @@ namespace DO::Sara {
     // X = data points.
     const auto& X = data_points;
 
-    // Normalize the data points.
+    // Xn = normalized data points.
     const auto& Xn = data_normalizer.has_value()  //
                          ? data_normalizer->normalize(X)
                          : X;
@@ -72,7 +73,8 @@ namespace DO::Sara {
     if (card_X < ModelSolver::num_points)
       throw std::runtime_error{"Not enough data points!"};
 
-    const auto minimal_subsets = random_samples(N, L, card_X);
+    const auto minimal_index_subsets = random_samples(N, L, card_X);
+    const auto Xn_sampled = from_index_to_point(minimal_index_subsets, Xn);
 
     // For the inliers count.
     auto model_best = typename ModelSolver::model_type{};
@@ -83,14 +85,8 @@ namespace DO::Sara {
 
     for (auto n = 0; n < N; ++n)
     {
-      // Get the L point indices (the minimal subsets).
-      const auto indices = minimal_subsets[n];
-
-      // Remap the point indices to point coordinates.
-      const auto Xn_sampled = to_coordinates(indices, Xn);
-
       // Estimate the candidate models with the normalized data.
-      auto candidate_models = solver(Xn_sampled);
+      auto candidate_models = solver(Xn_sampled[n]);
 
       // Denormalize the candiate models from the data.
       if (data_normalizer.has_value())
@@ -112,7 +108,7 @@ namespace DO::Sara {
           num_inliers_best = num_inliers;
           model_best = model;
           inliers_best.flat_array() = inliers;
-          subset_best = minimal_subsets[n];
+          subset_best = minimal_index_subsets[n];
 
           SARA_CHECK(model_best);
           SARA_CHECK(num_inliers);

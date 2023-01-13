@@ -38,49 +38,6 @@ namespace DO::Sara {
       -> Tensor_<int, 3>;
 
   template <typename T>
-  auto from_matches_to_data_points(const TensorView_<int, 2>& matches,
-                                   const TensorView_<T, 2>& p1,
-                                   const TensorView_<T, 2>& p2) -> Tensor_<T, 3>
-  {
-    if (matches.size(1) != 2)
-      throw std::runtime_error{
-          "The match tensor must be 2D with exactly 2 index columns!"};
-
-    const auto num_samples = matches.size(0);
-    const auto coords_dim = p1.size(1);
-
-    auto X = Tensor_<T, 3>{{num_samples, 2, coords_dim}};
-
-    for (auto s = 0; s < num_samples; ++s)
-    {
-      const auto& i1 = matches(s, 0);
-      const auto& i2 = matches(s, 1);
-
-      X[s][0].flat_array() = p1[i1].flat_array();
-      X[s][1].flat_array() = p2[i2].flat_array();
-    }
-
-    return X;
-  }
-
-  template <typename T, int D>
-  auto to_coordinates(const TensorView_<int, 1>& point_indices,
-                      const TensorView_<T, D>& points) -> Tensor_<T, D>
-  {
-    const auto num_samples = point_indices.size(0);
-
-    auto sample_sizes = points.sizes();
-    sample_sizes(0) = num_samples;
-
-    auto points_sampled = Tensor_<T, D>{sample_sizes};
-
-    for (auto s = 0; s < num_samples; ++s)
-      points_sampled[s].flat_array() = points[point_indices(s)].flat_array();
-
-    return points_sampled;
-  }
-
-  template <typename T>
   auto to_coordinates(const TensorView_<int, 3>& point_indices,
                       const TensorView_<T, 2>& p1,
                       const TensorView_<T, 2>& p2)  //
