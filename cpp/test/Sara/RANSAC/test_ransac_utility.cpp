@@ -71,12 +71,12 @@ BOOST_AUTO_TEST_CASE(test_index_to_point_pairs_from_epipolar_geometry)
 
   const auto S = sara::from_index_to_point(I, X);
   BOOST_CHECK_EQUAL(S.size(0), num_subsets);
-  BOOST_CHECK_EQUAL(S.size(1), num_points_per_subset);
-  BOOST_CHECK_EQUAL(S.size(2), 2);
+  BOOST_CHECK_EQUAL(S.size(1), 2);
+  BOOST_CHECK_EQUAL(S.size(2), num_points_per_subset);
   BOOST_CHECK_EQUAL(S.size(3), data_dimension);
 
-  static const auto first = 0;
-  static const auto second = 1;
+  static constexpr auto first = 0;
+  static constexpr auto second = 1;
   // Unwrap the code to check manually the first row.
   BOOST_CHECK_EQUAL(S[0][0][first].vector(), left[0].vector());
   BOOST_CHECK_EQUAL(S[0][0][second].vector(), right[0].vector());
