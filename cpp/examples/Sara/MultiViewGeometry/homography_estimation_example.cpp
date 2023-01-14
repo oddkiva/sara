@@ -20,6 +20,7 @@
 #include <DO/Sara/Visualization.hpp>
 
 #include <filesystem>
+#include <optional>
 
 
 using namespace std;
@@ -126,52 +127,82 @@ auto estimate_homography_v2(const KeypointList<OERegion, float>& keys1,
                             const vector<Match>& matches, int num_samples,
                             double h_err_thres)
 {
+  using ModelSolver = FourPointAlgorithm;
+  auto solver = ModelSolver{};
+  auto inlier_predicate = InlierPredicate<SymmetricTransferError>{};
+  inlier_predicate.err_threshold = h_err_thres;
+
   // ==========================================================================
   // Normalize the points.
   const auto& f1 = features(keys1);
   const auto& f2 = features(keys2);
-  const auto p1 = extract_centers(f1).cast<double>();
-  const auto p2 = extract_centers(f2).cast<double>();
-
   const auto M = to_tensor(matches);
-  const auto to_data = [](const TensorView_<int, 2>& M,
-                          const TensorView_<double, 2>& p1,
-                          const TensorView_<double, 2>& p2) {
-    auto X = Tensor_<double, 3>{2, M.size(0), p1.size(1)};
-    auto p1_mat = p1.matrix();
-    auto p2_mat = p2.matrix();
-    auto p1_matched = X[0].matrix();
-    auto p2_matched = X[1].matrix();
-    for (auto m = 0; m < M.size(0); ++m)
-    {
-      const auto& i1 = M(m, 0);
-      const auto& i2 = M(m, 1);
 
-      p1_matched.row(m) = p1_mat.row(i1);
-      p2_matched.row(m) = p2_mat.row(i2);
-    }
-    return X;
-  };
+  // It is important to convert point in homogeneous coordinates here.
+  const auto p1 = homogeneous(extract_centers(f1)).cast<double>();
+  const auto p2 = homogeneous(extract_centers(f2)).cast<double>();
 
-  const auto X = to_data(M, p1, p2);
-  std::cout << "to_data: OK\n";
+  const auto X = PointCorrespondenceList{M, p1, p2};
 
-  const auto data_normalizer = Normalizer<Homography>{X[0], X[1]};
-  std::cout << "data_normalizer: OK\n";
+  const auto data_normalizer =
+      std::make_optional(Normalizer<Homography>{X._p1, X._p2});
 
-  auto Xn = Tensor_<double, 3>{X.sizes()};
-  Xn[0] = apply_transform(data_normalizer.T1, X[0]);
-  Xn[1] = apply_transform(data_normalizer.T2, X[1]);
-  std::cout << "data normalization applied: OK\n";
+  const auto Xn = data_normalizer->normalize(X);
 
-  const auto num_data_points = X.size(1);
-  const auto minimal_index_subsets = random_samples(1000, 4, X.size(1));
-  std::cout << "random minimal subsets: OK\n";
+  const auto card_X = X.size();
+  static constexpr auto L = ModelSolver::num_points;
+  if (card_X < ModelSolver::num_points)
+    throw std::runtime_error{"Not enough data points!"};
+
+  const auto minimal_index_subsets = random_samples(num_samples, L, card_X);
 
   // The simplest and most natural implementation.
-  auto p1_sampled = from_index_to_point(minimal_index_subsets, Xn[0]);
-  auto p2_sampled = from_index_to_point(minimal_index_subsets, Xn[1]);
-  std::cout << "match coordinates: OK\n";
+  auto Xn_sampled = from_index_to_point(minimal_index_subsets, Xn);
+
+  // For the inliers count.
+  auto model_best = typename ModelSolver::model_type{};
+
+  auto num_inliers_best = 0;
+  auto subset_best = Tensor_<int, 1>{L};
+  auto inliers_best = Tensor_<bool, 1>{card_X};
+
+  for (auto n = 0; n < num_samples; ++n)
+  {
+    // Estimate the candidate models with the normalized data.
+    auto candidate_models = solver(Xn_sampled[n]);
+
+    // Denormalize the candiate models from the data.
+    if (data_normalizer.has_value())
+      std::for_each(candidate_models.begin(), candidate_models.end(),
+                    [&data_normalizer](auto& model) {
+                      model.matrix() = data_normalizer->denormalize(model);
+                    });
+
+    // Count the inliers.
+    for (const auto& model : candidate_models)
+    {
+      // Count the inliers.
+      inlier_predicate.set_model(model);
+
+      const auto inliers = inlier_predicate(X);
+      const auto num_inliers = static_cast<int>(inliers.count());
+
+      if (num_inliers > num_inliers_best)
+      {
+        num_inliers_best = num_inliers;
+        model_best = model;
+        inliers_best.flat_array() = inliers;
+        subset_best = minimal_index_subsets[n];
+
+        SARA_DEBUG << "n = " << n << "\n";
+        SARA_DEBUG << "model_best = \n" << model_best << "\n";
+        SARA_DEBUG << "num inliers = " << num_inliers << "\n";
+        SARA_CHECK(subset_best.row_vector());
+      }
+    }
+  }
+
+  return std::make_tuple(model_best, inliers_best, subset_best);
 }
 
 // =============================================================================
@@ -267,26 +298,20 @@ GRAPHICS_MAIN()
   print_stage("Match keypoints...");
   const auto matches = compute_matches(keys1, keys2);
 
-#ifdef OLD
   print_stage("Estimate the principal homography...");
   const auto num_samples = 1000;
   const auto h_err_thres = 1.;
+#ifdef OLD
   const auto [H, inliers, sample_best] =
       estimate_homography(keys1, keys2, matches, num_samples, h_err_thres);
+#else
+  const auto [H, inliers, sample_best] =
+      estimate_homography_v2(keys1, keys2, matches, num_samples, h_err_thres);
+#endif
 
   print_stage("Inspect the homography estimation...");
   inspect_homography_estimation(image1, image2, matches, H, inliers,
                                 sample_best);
-#else
-  print_stage("Estimate the principal homography...");
-  const auto num_samples = 1000;
-  const auto h_err_thres = 1.;
-  estimate_homography_v2(keys1, keys2, matches, num_samples, h_err_thres);
-
-  // print_stage("Inspect the homography estimation...");
-  // inspect_homography_estimation(image1, image2, matches, H, inliers,
-  //                               sample_best);
-#endif
 
   return 0;
 }

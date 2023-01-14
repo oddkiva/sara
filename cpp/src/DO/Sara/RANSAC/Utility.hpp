@@ -12,36 +12,10 @@
 #pragma once
 
 #include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/MultiViewGeometry/PointCorrespondenceList.hpp>
 
 
 namespace DO::Sara {
-
-  template <typename T, int N>
-  auto from_index_pairs_to_point_pairs(const TensorView_<int, 2>& index_pairs,
-                                       const TensorView_<T, N>& first,
-                                       const TensorView_<T, N>& second)
-      -> Tensor_<T, N + 1>
-  {
-    if (index_pairs.size(1) != 2)
-      throw std::runtime_error{
-          "The tensor of index pairs must contain 2 columns!"};
-
-    const auto num_samples = index_pairs.size(0);
-    const auto coords_dim = first.size(1);
-
-    auto point_pairs = Tensor_<T, N + 1>{{num_samples, 2, coords_dim}};
-
-    for (auto s = 0; s < num_samples; ++s)
-    {
-      const auto& i1 = index_pairs(s, 0);
-      const auto& i2 = index_pairs(s, 1);
-
-      point_pairs[s][0].flat_array() = first[i1].flat_array();
-      point_pairs[s][1].flat_array() = second[i2].flat_array();
-    }
-
-    return point_pairs;
-  }
 
   template <typename T, int D>
   auto from_index_to_point(const TensorView_<int, 1>& point_indices,
@@ -82,5 +56,16 @@ namespace DO::Sara {
 
     return points_sampled;
   }
+
+  template <typename T>
+  auto from_index_to_point(const TensorView_<int, 2>& point_indices,
+                           const PointCorrespondenceList<T>& correspondences)
+      -> PointCorrespondenceSubsetList<T>
+  {
+    auto res = PointCorrespondenceSubsetList<T>{};
+    res._p1 = from_index_to_point(point_indices, correspondences._p1);
+    res._p2 = from_index_to_point(point_indices, correspondences._p2);
+    return res;
+  };
 
 }  // namespace DO::Sara

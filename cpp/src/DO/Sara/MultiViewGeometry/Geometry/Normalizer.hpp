@@ -15,6 +15,7 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/Homography.hpp>
+#include <DO/Sara/MultiViewGeometry/PointCorrespondenceList.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 
@@ -46,6 +47,14 @@ namespace DO::Sara {
                           const TensorView_<double, 2>& p2) const
     {
       return std::make_tuple(apply_transform(T1, p1), apply_transform(T2, p2));
+    }
+
+    inline auto normalize(const PointCorrespondenceList<double>& X) const
+        -> PointCorrespondenceList<double>
+    {
+      auto Xn = PointCorrespondenceList<double>{};
+      std::tie(Xn._p1, Xn._p2) = this->normalize(X._p1, X._p2);
+      return Xn;
     }
 
     inline auto denormalize(const Eigen::Matrix3d& H) const

@@ -12,9 +12,11 @@
 #pragma once
 
 #include <DO/Sara/Core/Random.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/Normalizer.hpp>
 #include <DO/Sara/RANSAC/Utility.hpp>
 
 #include <concepts>
+#include <optional>
 #include <vector>
 
 
@@ -25,10 +27,8 @@ namespace DO::Sara {
   {
     typename T::value_type;
 
-    // clang-format off
-    { data_points[std::declval<int>()] }
-      -> std::convertible_to<typename T::value_type>>;
-    // clang-format on
+    {data_points[std::declval<int>()]};
+    {data_points.size()};
   };
 
   template <typename T>
@@ -40,8 +40,7 @@ namespace DO::Sara {
     typename T::model_type;
 
     // clang-format off
-    { solver(std::declval<T::data_point_type>()) }
-      -> std::same_as<std::vector<typename T::model_type>>;
+    { solver(std::declval<const typename T::data_point_type&>()) };
     // clang-format on
   };
 
@@ -50,17 +49,17 @@ namespace DO::Sara {
   //! batched computations and more generic API.
   template <DataPointListConcept DataPointList,  //
             MinimalSolverConcept ModelSolver,    //
-            typename InlierPredicateType,
-            typename DataNormalizer>
-  auto ransac(
-      const DataPointList& data_points,                                     //
-      ModelSolver solver,                                                   //
-      InlierPredicateType inlier_predicate,                                 //
-      const std::size_t num_samples,                                        //
-      const std::optional<DataNormalizer>& data_normalizer = std::nullopt)  //
-      -> std::tuple<typename ModelSolver::model_type,                       //
-                    Tensor_<bool, 1>,                                       //
-                    Tensor_<int, 1>>                                        //
+            typename InlierPredicateType>
+  auto
+  ransac_v2(const DataPointList& data_points,      //
+            ModelSolver solver,                    //
+            InlierPredicateType inlier_predicate,  //
+            const std::size_t num_samples,         //
+            const std::optional<Normalizer<typename ModelSolver::model_type>>&
+                data_normalizer = std::nullopt)        //
+      -> std::tuple<typename ModelSolver::model_type,  //
+                    Tensor_<bool, 1>,                  //
+                    Tensor_<int, 1>>                   //
   {
     // X = data points.
     const auto& X = data_points;
@@ -123,30 +122,6 @@ namespace DO::Sara {
 
     return std::make_tuple(model_best, inliers_best, subset_best);
   }
-
-
-  //! @brief Set the distance relative to the model parameters.
-  template <typename Distance>
-  struct InlierPredicate
-  {
-    using distance_type = Distance;
-    using scalar_type = typename Distance::scalar_type;
-
-    distance_type distance;
-    scalar_type error_threshold;
-
-    inline void set_model(const typename Distance::model_type& model)
-    {
-      distance = Distance{model};
-    }
-
-    //! @brief Calculate inlier predicate on a batch of correspondences.
-    template <typename Mat>
-    inline auto operator()(const Mat& x) const -> Eigen::Array<bool, 1, Dynamic>
-    {
-      return distance(x).array() < error_threshold;
-    }
-  };
 
   //! @}
 

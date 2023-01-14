@@ -94,7 +94,6 @@ namespace DO::Sara {
       throw std::runtime_error{"To apply the transform the input data "
                                "dimension must be 2 or 3!"};
 
-
     return TX;
   }
   //! @}

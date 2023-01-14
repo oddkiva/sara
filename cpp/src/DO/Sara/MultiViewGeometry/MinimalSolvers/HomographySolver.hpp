@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/Homography.hpp>
 
 #include <array>
@@ -29,18 +30,31 @@ namespace DO::Sara {
     using model_type = Homography;
     using matrix_type = Eigen::Matrix<double, 3, 4>;
     using matrix_view_type = Eigen::Map<const matrix_type>;
+    using data_point_type = std::array<TensorView_<double, 2>, 2>;
 
     static constexpr auto num_points = 4;
+    static constexpr auto num_models = 1;
 
+    //! N.B.: the 2D data points are required in homogeneous coordinates (thus
+    //! 3D).
     auto operator()(const matrix_view_type& x, const matrix_view_type& y) const
-        -> std::array<model_type, 1>;
+        -> std::array<model_type, num_models>;
 
+    //! N.B.: the 2D data points are required in homogeneous coordinates (thus
+    //! 3D).
     auto operator()(const matrix_type& x, const matrix_type& y) const
-        -> std::array<model_type, 1>
+        -> std::array<model_type, num_models>
     {
       const auto x_view = matrix_view_type{x.data()};
       const auto y_view = matrix_view_type{y.data()};
       return this->operator()(x_view, y_view);
+    }
+
+    auto operator()(const data_point_type& X) const
+        -> std::array<model_type, num_models>
+    {
+      return this->operator()(X[0].colmajor_view().matrix(),
+                              X[1].colmajor_view().matrix());
     }
   };
 

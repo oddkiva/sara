@@ -148,6 +148,15 @@ namespace DO::Sara {
     {
       return distance(x, y).array() < err_threshold;
     }
+
+    template <typename T>
+    inline auto operator()(const PointCorrespondenceList<T>& m) const
+        -> Array<bool, 1, Dynamic>
+    {
+      return distance(m._p1.colmajor_view().matrix(),
+                      m._p2.colmajor_view().matrix())
+                 .array() < err_threshold;
+    }
   };
 
   //! @brief Random Sample Consensus algorithm from Fischler and Bolles 1981.

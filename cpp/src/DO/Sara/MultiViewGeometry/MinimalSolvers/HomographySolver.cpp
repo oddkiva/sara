@@ -11,6 +11,8 @@
 
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/HomographySolver.hpp>
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
+
 
 namespace DO { namespace Sara {
 
