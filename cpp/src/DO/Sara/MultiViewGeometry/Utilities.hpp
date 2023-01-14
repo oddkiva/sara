@@ -41,16 +41,35 @@ namespace DO::Sara {
   template <typename S>
   inline auto compute_normalizer(const TensorView_<S, 2>& X) -> Matrix<S, 3, 3>
   {
-    const Matrix<S, 1, 3> min = X.matrix().colwise().minCoeff();
-    const Matrix<S, 1, 3> max = X.matrix().colwise().maxCoeff();
+    auto slope = Eigen::RowVector2<S>{};
+    auto offset = Eigen::RowVector2<S>{};
 
-    const Matrix<S, 2, 2> scale =
-        (max - min).cwiseInverse().head(2).asDiagonal();
+    if (X.size(1) == 2)
+    {
+      const Eigen::RowVector2<S> min = X.matrix().colwise().minCoeff();
+      const Eigen::RowVector2<S> max = X.matrix().colwise().maxCoeff();
 
-    auto T = Matrix<S, 3, 3>{};
+      slope = (max - min).cwiseInverse();
+      offset = -min.cwiseQuotient(max - min);
+    }
+    else if (X.size(1) == 3)
+    {
+      const Eigen::RowVector3<S> min = X.matrix().colwise().minCoeff();
+      const Eigen::RowVector3<S> max = X.matrix().colwise().maxCoeff();
+
+      slope = (max - min).cwiseInverse().head(2);
+      offset = -min.cwiseQuotient(max - min).head(2);
+    }
+    else
+      throw std::runtime_error{
+          "To compute the normalization matrix the input data "
+          "dimension must be 2 or 3!"};
+
+
+    auto T = Eigen::Matrix<S, 3, 3>{};
     T.setZero();
-    T.template topLeftCorner<2, 2>() = scale;
-    T.col(2) << -min.cwiseQuotient(max - min).transpose().head(2), S(1);
+    T.template topLeftCorner<2, 2>() = slope.asDiagonal();
+    T.col(2) << offset.transpose(), S(1);
 
     return T;
   }
@@ -62,8 +81,19 @@ namespace DO::Sara {
     auto TX = Tensor_<S, 2>{X.sizes()};
     auto TX_ = TX.colmajor_view().matrix();
 
-    TX_ = T * X.colmajor_view().matrix();
-    TX_.array().rowwise() /= TX_.array().row(2);
+    const auto X_matrix = X.colmajor_view().matrix();
+
+    if (X.size(1) == 2)
+      TX_ = (T * X_matrix.colwise().homogeneous()).colwise().hnormalized();
+    else if (X.size(1) == 3)
+    {
+      TX_ = T * X_matrix;
+      TX_.array().rowwise() /= TX_.array().row(2);
+    }
+    else
+      throw std::runtime_error{"To apply the transform the input data "
+                               "dimension must be 2 or 3!"};
+
 
     return TX;
   }
@@ -85,10 +115,11 @@ namespace DO::Sara {
   inline auto skew_symmetric_matrix(const Matrix<T, 3, 1>& a) -> Matrix<T, 3, 3>
   {
     auto A = Matrix<T, 3, 3>{};
-    A <<
-       T(0), -a(2),  a(1), //
-       a(2),  T(0), -a(0), //
-      -a(1),  a(0),  T(0);
+    // clang-format off
+    A << T(0), -a(2), a(1),
+         a(2), T(0), -a(0),
+        -a(1), a(0), T(0);
+    // clang-format on
 
     return A;
   }

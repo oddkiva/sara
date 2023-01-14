@@ -32,8 +32,8 @@ using namespace DO::Sara;
 //
 // Detect or read SIFT keypoints.
 auto get_keypoints(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
-                   const std::string& keys1_filepath,
-                   const std::string& keys2_filepath,
+                   [[maybe_unused]] const std::string& keys1_filepath,
+                   [[maybe_unused]] const std::string& keys2_filepath,
                    KeypointList<OERegion, float>& keys1,
                    KeypointList<OERegion, float>& keys2)
 {
@@ -154,22 +154,24 @@ auto estimate_homography_v2(const KeypointList<OERegion, float>& keys1,
   };
 
   const auto X = to_data(M, p1, p2);
+  std::cout << "to_data: OK\n";
 
   const auto data_normalizer = Normalizer<Homography>{X[0], X[1]};
+  std::cout << "data_normalizer: OK\n";
 
-  std::cout << "OK\n";
   auto Xn = Tensor_<double, 3>{X.sizes()};
-  // data_normalizer.normalize(X)
-  {
-    Xn[0] = apply_transform(data_normalizer.T1, X[0]);
-    Xn[1] = apply_transform(data_normalizer.T2, X[1]);
-  }
+  Xn[0] = apply_transform(data_normalizer.T1, X[0]);
+  Xn[1] = apply_transform(data_normalizer.T2, X[1]);
+  std::cout << "data normalization applied: OK\n";
 
-  const auto minimal_index_subsets = random_samples(1000, 4, X.size(0));
+  const auto num_data_points = X.size(1);
+  const auto minimal_index_subsets = random_samples(1000, 4, X.size(1));
+  std::cout << "random minimal subsets: OK\n";
 
   // The simplest and most natural implementation.
   auto p1_sampled = from_index_to_point(minimal_index_subsets, Xn[0]);
   auto p2_sampled = from_index_to_point(minimal_index_subsets, Xn[1]);
+  std::cout << "match coordinates: OK\n";
 }
 
 // =============================================================================
