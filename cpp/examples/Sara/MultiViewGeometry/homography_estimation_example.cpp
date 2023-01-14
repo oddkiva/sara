@@ -142,7 +142,6 @@ auto estimate_homography_v2(const KeypointList<OERegion, float>& keys1,
 
   const auto data_normalizer = std::make_optional(Normalizer<Homography>{X});
 
-  using ModelSolver = FourPointAlgorithm;
   auto inlier_predicate = InlierPredicate<SymmetricTransferError>{};
   inlier_predicate.err_threshold = h_err_thres;
 
