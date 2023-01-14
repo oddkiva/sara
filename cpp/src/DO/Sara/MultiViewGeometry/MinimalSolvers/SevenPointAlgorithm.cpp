@@ -46,6 +46,7 @@ namespace DO::Sara {
     auto X = Eigen::Matrix<double, 4, 7>{};
     for (auto i = 0; i < 7; ++i)
       X.col(i) << x.col(i).head(2), y.col(i).head(2);
+    // X << x.colwise().hnormalized(), y.colwise().hnormalized();
 
     const auto matrices = (*this)(X);
 

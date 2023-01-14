@@ -108,9 +108,10 @@ namespace DO::Sara {
     static constexpr auto num_points = Impl::num_points;
     static constexpr auto num_models = Impl::num_models;
 
-    using data_point_type = Impl::data_point_type;
+    using internal_data_point_type = Impl::data_point_type;
+    using data_point_type = std::array<TensorView_<double, 2>, 2>;
 
-    static auto extract_nullspace(const data_point_type& X)
+    static auto extract_nullspace(const internal_data_point_type& X)
         -> std::array<Eigen::Matrix3d, 2>;
 
     static auto form_determinant_constraint(const Eigen::Matrix3d& F1,
@@ -121,9 +122,20 @@ namespace DO::Sara {
     solve_determinant_constraint(const std::array<Eigen::Matrix3d, 2>& F)
         -> std::vector<Eigen::Matrix3d>;
 
-    auto operator()(const data_point_type& X) const
+    auto operator()(const internal_data_point_type& X) const
         -> std::vector<Eigen::Matrix3d>;
 
+    auto operator()(const data_point_type& X) const
+        -> std::vector<Eigen::Matrix3d>
+    {
+      auto Xi = internal_data_point_type{};
+      const Eigen::Matrix<double, 2, 7> X0 =
+          X[0].colmajor_view().matrix().colwise().hnormalized();
+      const Eigen::Matrix<double, 2, 7> X1 =
+          X[1].colmajor_view().matrix().colwise().hnormalized();
+      Xi << X0, X1;
+      return this->operator()(Xi);
+    }
 
     //! @{
     //! @brief Legacy API.
