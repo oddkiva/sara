@@ -55,7 +55,7 @@ namespace DO::Sara {
     auto points_sampled = Tensor_<T, D>{sample_sizes};
 
     for (auto s = 0; s < num_samples; ++s)
-      points_sampled[s].flat_array() = points[point_indices(s)].flat_array();
+      points_sampled[s] = points[point_indices(s)];
 
     return points_sampled;
   }
@@ -67,8 +67,6 @@ namespace DO::Sara {
     const auto num_subsets = point_indices.size(0);
     const auto num_samples_per_subset = point_indices.size(1);
 
-    const auto point_matrix = points.matrix();
-
     auto sample_sizes = typename Tensor_<T, D + 1>::vector_type{};
     sample_sizes << num_subsets, num_samples_per_subset,
         points.sizes().template tail<D - 1>();
@@ -77,9 +75,9 @@ namespace DO::Sara {
     for (auto n = 0; n < num_subsets; ++n)
     {
       const auto indices = point_indices[n];
-      auto subset = points_sampled[n].matrix();
+      auto subset = points_sampled[n];
       for (auto s = 0; s < num_samples_per_subset; ++s)
-        subset.row(s) = point_matrix.row(indices(s));
+        subset[s] = points[indices(s)];
     }
 
     return points_sampled;

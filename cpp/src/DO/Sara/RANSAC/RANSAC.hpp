@@ -21,10 +21,14 @@
 namespace DO::Sara {
 
   template <typename T>
-  concept TensorConcept = requires
+  concept DataPointListConcept = requires(T data_points)
   {
-    T::Dimension;
     typename T::value_type;
+
+    // clang-format off
+    { data_points[std::declval<int>()] }
+      -> std::convertible_to<typename T::value_type>>;
+    // clang-format on
   };
 
   template <typename T>
@@ -44,12 +48,12 @@ namespace DO::Sara {
 
   //! @brief Random Sample Consensus algorithm from Fischler and Bolles 1981.
   //! batched computations and more generic API.
-  template <TensorConcept Tensor,              //
-            MinimalSolverConcept ModelSolver,  //
+  template <DataPointListConcept DataPointList,  //
+            MinimalSolverConcept ModelSolver,    //
             typename InlierPredicateType,
             typename DataNormalizer>
   auto ransac(
-      const Tensor& data_points,                                            //
+      const DataPointList& data_points,                                     //
       ModelSolver solver,                                                   //
       InlierPredicateType inlier_predicate,                                 //
       const std::size_t num_samples,                                        //
