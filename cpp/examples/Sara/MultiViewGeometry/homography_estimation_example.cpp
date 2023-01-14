@@ -16,6 +16,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
+#include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/RANSAC/Utility.hpp>
 #include <DO/Sara/Visualization.hpp>
 
@@ -127,82 +128,27 @@ auto estimate_homography_v2(const KeypointList<OERegion, float>& keys1,
                             const vector<Match>& matches, int num_samples,
                             double h_err_thres)
 {
-  using ModelSolver = FourPointAlgorithm;
-  auto solver = ModelSolver{};
-  auto inlier_predicate = InlierPredicate<SymmetricTransferError>{};
-  inlier_predicate.err_threshold = h_err_thres;
-
-  // ==========================================================================
-  // Normalize the points.
-  const auto& f1 = features(keys1);
-  const auto& f2 = features(keys2);
   const auto M = to_tensor(matches);
 
+  // Extract the coordinates of the feature centers.
+  const auto& f1 = features(keys1);
+  const auto& f2 = features(keys2);
   // It is important to convert point in homogeneous coordinates here.
   const auto p1 = homogeneous(extract_centers(f1)).cast<double>();
   const auto p2 = homogeneous(extract_centers(f2)).cast<double>();
 
+  // Get the list of point correspondences.
   const auto X = PointCorrespondenceList{M, p1, p2};
 
-  const auto data_normalizer =
-      std::make_optional(Normalizer<Homography>{X._p1, X._p2});
+  const auto data_normalizer = std::make_optional(Normalizer<Homography>{X});
 
-  const auto Xn = data_normalizer->normalize(X);
+  using ModelSolver = FourPointAlgorithm;
+  auto inlier_predicate = InlierPredicate<SymmetricTransferError>{};
+  inlier_predicate.err_threshold = h_err_thres;
 
-  const auto card_X = X.size();
-  static constexpr auto L = ModelSolver::num_points;
-  if (card_X < ModelSolver::num_points)
-    throw std::runtime_error{"Not enough data points!"};
-
-  const auto minimal_index_subsets = random_samples(num_samples, L, card_X);
-
-  // The simplest and most natural implementation.
-  auto Xn_sampled = from_index_to_point(minimal_index_subsets, Xn);
-
-  // For the inliers count.
-  auto model_best = typename ModelSolver::model_type{};
-
-  auto num_inliers_best = 0;
-  auto subset_best = Tensor_<int, 1>{L};
-  auto inliers_best = Tensor_<bool, 1>{card_X};
-
-  for (auto n = 0; n < num_samples; ++n)
-  {
-    // Estimate the candidate models with the normalized data.
-    auto candidate_models = solver(Xn_sampled[n]);
-
-    // Denormalize the candiate models from the data.
-    if (data_normalizer.has_value())
-      std::for_each(candidate_models.begin(), candidate_models.end(),
-                    [&data_normalizer](auto& model) {
-                      model.matrix() = data_normalizer->denormalize(model);
-                    });
-
-    // Count the inliers.
-    for (const auto& model : candidate_models)
-    {
-      // Count the inliers.
-      inlier_predicate.set_model(model);
-
-      const auto inliers = inlier_predicate(X);
-      const auto num_inliers = static_cast<int>(inliers.count());
-
-      if (num_inliers > num_inliers_best)
-      {
-        num_inliers_best = num_inliers;
-        model_best = model;
-        inliers_best.flat_array() = inliers;
-        subset_best = minimal_index_subsets[n];
-
-        SARA_DEBUG << "n = " << n << "\n";
-        SARA_DEBUG << "model_best = \n" << model_best << "\n";
-        SARA_DEBUG << "num inliers = " << num_inliers << "\n";
-        SARA_CHECK(subset_best.row_vector());
-      }
-    }
-  }
-
-  return std::make_tuple(model_best, inliers_best, subset_best);
+  const auto [H, inliers, sample_best] = ransac_v2(
+      X, FourPointAlgorithm{}, inlier_predicate, num_samples, data_normalizer);
+  return std::make_tuple(H, inliers, sample_best);
 }
 
 // =============================================================================

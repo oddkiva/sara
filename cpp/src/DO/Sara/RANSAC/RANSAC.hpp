@@ -54,7 +54,7 @@ namespace DO::Sara {
   ransac_v2(const DataPointList& data_points,      //
             ModelSolver solver,                    //
             InlierPredicateType inlier_predicate,  //
-            const std::size_t num_samples,         //
+            const int num_samples,                 //
             const std::optional<Normalizer<typename ModelSolver::model_type>>&
                 data_normalizer = std::nullopt)        //
       -> std::tuple<typename ModelSolver::model_type,  //
@@ -70,23 +70,20 @@ namespace DO::Sara {
                          : X;
 
     // Define cardinality variables.
-    const auto N = static_cast<int>(num_samples);
-    static constexpr auto L = ModelSolver::num_points;
-    const auto& card_X = X.size(0);
+    const auto& card_X = X.size();
     if (card_X < ModelSolver::num_points)
       throw std::runtime_error{"Not enough data points!"};
 
-    const auto minimal_index_subsets = random_samples(N, L, card_X);
+    const auto minimal_index_subsets =
+        random_samples(num_samples, ModelSolver::num_points, card_X);
     const auto Xn_sampled = from_index_to_point(minimal_index_subsets, Xn);
 
-    // For the inliers count.
     auto model_best = typename ModelSolver::model_type{};
-
     auto num_inliers_best = 0;
-    auto subset_best = Tensor_<int, 1>{L};
+    auto subset_best = Tensor_<int, 1>{ModelSolver::num_points};
     auto inliers_best = Tensor_<bool, 1>{card_X};
 
-    for (auto n = 0; n < N; ++n)
+    for (auto n = 0; n < num_samples; ++n)
     {
       // Estimate the candidate models with the normalized data.
       auto candidate_models = solver(Xn_sampled[n]);
@@ -95,7 +92,7 @@ namespace DO::Sara {
       if (data_normalizer.has_value())
         std::for_each(candidate_models.begin(), candidate_models.end(),
                       [&data_normalizer](auto& model) {
-                        data_normalizer->denormalize(model);
+                        model = data_normalizer->denormalize(model);
                       });
 
       // Count the inliers.
@@ -113,8 +110,9 @@ namespace DO::Sara {
           inliers_best.flat_array() = inliers;
           subset_best = minimal_index_subsets[n];
 
-          SARA_CHECK(model_best);
-          SARA_CHECK(num_inliers);
+          SARA_DEBUG << "n = " << n << "\n";
+          SARA_DEBUG << "model_best = \n" << model_best << "\n";
+          SARA_DEBUG << "num inliers = " << num_inliers << "\n";
           SARA_CHECK(subset_best.row_vector());
         }
       }

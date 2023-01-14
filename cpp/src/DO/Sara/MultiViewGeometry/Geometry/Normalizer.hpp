@@ -43,6 +43,15 @@ namespace DO::Sara {
       T2_inv = T2.inverse();
     }
 
+    inline Normalizer(const PointCorrespondenceList<double>& matches)
+      : T1{compute_normalizer(matches._p1)}
+      , T2{compute_normalizer(matches._p2)}
+    {
+      T1_inv = T1.inverse();
+      T2_inv = T2.inverse();
+    }
+
+
     inline auto normalize(const TensorView_<double, 2>& p1,
                           const TensorView_<double, 2>& p2) const
     {
@@ -57,7 +66,7 @@ namespace DO::Sara {
       return Xn;
     }
 
-    inline auto denormalize(const Eigen::Matrix3d& H) const
+    inline auto denormalize(const Eigen::Matrix3d& H) const -> Eigen::Matrix3d
     {
       return T2_inv * H * T1;
     }
@@ -85,7 +94,7 @@ namespace DO::Sara {
       return std::make_tuple(apply_transform(T1, p1), apply_transform(T2, p2));
     }
 
-    inline auto denormalize(const Eigen::Matrix3d& F) const -> Matrix3d
+    inline auto denormalize(const Eigen::Matrix3d& F) const -> Eigen::Matrix3d
     {
       return (T2.transpose() * F * T1).normalized();
     }
