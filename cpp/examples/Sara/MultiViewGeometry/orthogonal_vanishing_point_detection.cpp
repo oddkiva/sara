@@ -195,11 +195,18 @@ int sara_graphics_main(int argc, char** argv)
   auto skip = int{};
 
   po::options_description desc("Orthogonal Vanishing Point Detector");
-  desc.add_options()("help", "Usage")(
-      "video,v", po::value<std::string>(&video_filepath), "input video file")(
-      "downscale-factor,d", po::value<int>(&downscale_factor)->default_value(2),
-      "downscale factor")("skip,s", po::value<int>(&skip)->default_value(0),
-                          "number of frames to skip");
+  // clang-format off
+  desc.add_options()
+    ("help", "Usage")
+    ("video,v", po::value<std::string>(&video_filepath),
+     "input video file")
+    ("downscale-factor,d",
+     po::value<int>(&downscale_factor)->default_value(2),
+     "downscale factor")
+    ("skip,s", po::value<int>(&skip)->default_value(0),
+     "number of frames to skip")
+  ;
+  // clang-format on
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -253,8 +260,11 @@ int sara_graphics_main(int argc, char** argv)
   // const auto [p1, p2] = initialize_no_crop_region(frame.sizes());
   const auto [p1, p2] = initialize_crop_region_2(frame.sizes());
 
-  auto ed = EdgeDetector{
-      {high_threshold_ratio, low_threshold_ratio, angular_threshold}};
+  auto ed = EdgeDetector{{
+      high_threshold_ratio,  //
+      low_threshold_ratio,   //
+      angular_threshold      //
+  }};
 
 
   // Initialize the camera matrix.
