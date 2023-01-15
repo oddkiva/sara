@@ -22,6 +22,8 @@
 
 namespace DO::Sara {
 
+  //! @defgroup RANSAC RANSAC
+
   template <typename T>
   concept DataPointListConcept = requires(T data_points)
   {
@@ -121,6 +123,59 @@ namespace DO::Sara {
     return std::make_tuple(model_best, inliers_best, subset_best);
   }
 
-  //! @}
+  template <typename Distance>
+  struct InlierPredicate
+  {
+    Distance distance;
+    double err_threshold;
 
+    //! @brief Set the distance relative to the model parameters.
+    template <typename Model>
+    inline void set_model(const Model& model)
+    {
+      distance = Distance{model};
+    }
+
+    //! @brief Calculate inlier predicate on a batch of correspondences.
+    template <typename Mat>
+    inline auto operator()(const Mat& x, const Mat& y) const
+        -> Array<bool, 1, Dynamic>
+    {
+      return distance(x, y).array() < err_threshold;
+    }
+
+    template <typename T>
+    inline auto operator()(const PointCorrespondenceList<T>& m) const
+        -> Array<bool, 1, Dynamic>
+    {
+      return distance(m._p1.colmajor_view().matrix(),
+                      m._p2.colmajor_view().matrix())
+                 .array() < err_threshold;
+    }
+  };
+
+  template <DataPointListConcept DataPointList,  //
+            MinimalSolverConcept ModelSolver,    //
+            typename Distance>
+  auto ransac(const DataPointList& data_points,       //
+              ModelSolver solver, Distance distance,  //
+              const int num_samples, const double err_threshold)
+  {
+    auto inlier_predicate = InlierPredicate<Distance>{};
+    inlier_predicate.distance = distance;
+    inlier_predicate.err_threshold = err_threshold;
+
+    return ransac_v2(data_points, solver, inlier_predicate, num_samples);
+  }
+
+  //! @brief From vanilla RANSAC
+  inline auto ransac_num_samples(double inlier_ratio,
+                                 int minimal_sample_cardinality,
+                                 double confidence = 0.99) -> std::size_t
+  {
+    return std::log(1 - confidence) /
+           std::log(1 - std::pow(inlier_ratio, minimal_sample_cardinality));
+  }
+
+  //! @}
 }  // namespace DO::Sara

@@ -99,35 +99,6 @@ auto estimate_homography(const KeypointList<OERegion, float>& keys1,
                          const vector<Match>& matches, int num_samples,
                          double h_err_thres)
 {
-  // ==========================================================================
-  // Normalize the points.
-  const auto& f1 = features(keys1);
-  const auto& f2 = features(keys2);
-  const auto p1 = extract_centers(f1).cast<double>();
-  const auto p2 = extract_centers(f2).cast<double>();
-
-  // Work in homogeneous coordinates please.
-  const auto P1 = homogeneous(p1);
-  const auto P2 = homogeneous(p2);
-
-  const auto M = to_tensor(matches);
-
-  // Generate random samples for RANSAC.
-  auto distance = SymmetricTransferError{};
-
-  // const auto [H, num_inliers, sample_best] = ransac(
-  //     M, P1, P2, FourPointAlgorithm{}, distance, num_samples, h_err_thres);
-  const auto [H, inliers, sample_best] = ransac(
-      M, P1, P2, FourPointAlgorithm{}, distance, num_samples, h_err_thres);
-
-  return std::make_tuple(H, inliers, sample_best);
-}
-
-auto estimate_homography_v2(const KeypointList<OERegion, float>& keys1,
-                            const KeypointList<OERegion, float>& keys2,
-                            const vector<Match>& matches, int num_samples,
-                            double h_err_thres)
-{
   const auto M = to_tensor(matches);
 
   // Extract the coordinates of the feature centers.
@@ -246,13 +217,8 @@ GRAPHICS_MAIN()
   print_stage("Estimate the principal homography...");
   const auto num_samples = 1000;
   const auto h_err_thres = 1.;
-#ifdef OLD
   const auto [H, inliers, sample_best] =
       estimate_homography(keys1, keys2, matches, num_samples, h_err_thres);
-#else
-  const auto [H, inliers, sample_best] =
-      estimate_homography_v2(keys1, keys2, matches, num_samples, h_err_thres);
-#endif
 
   print_stage("Inspect the homography estimation...");
   inspect_homography_estimation(image1, image2, matches, H, inliers,
