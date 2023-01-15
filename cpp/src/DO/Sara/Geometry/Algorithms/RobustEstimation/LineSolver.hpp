@@ -12,6 +12,7 @@
 #pragma once
 
 #include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/Geometry/Algorithms/RobustEstimation/PointList.hpp>
 #include <DO/Sara/Geometry/Tools/Projective.hpp>
 
 
@@ -24,8 +25,8 @@ namespace DO::Sara {
 
     static constexpr auto num_points = 2;
 
-    template <typename Mat>
-    inline auto operator()(const Mat& ab) const
+    template <typename Derived>
+    inline auto operator()(const Eigen::MatrixBase<Derived>& ab) const
     {
       const Eigen::Matrix<T, 3, 2> abT = ab.transpose();
       const auto& a = abT.col(0);
@@ -33,6 +34,29 @@ namespace DO::Sara {
       return Projective::line(a.eval(), b.eval());
     }
   };
+
+  namespace v2 {
+
+    template <typename T>
+    struct LineSolver2D
+    {
+      using model_type = Projective::Line2<T>;
+      using data_point_type = TensorView_<T, 2>;
+
+      static constexpr auto num_points = 2;
+      static constexpr auto num_models = 1;
+
+      inline auto operator()(const data_point_type& ab) const
+          -> std::array<model_type, num_models>
+      {
+        const auto abT = ab.colmajor_view().matrix();
+        const Eigen::Vector3<T> a = abT.col(0);
+        const Eigen::Vector3<T> b = abT.col(1);
+        return {Projective::line(a, b)};
+      }
+    };
+
+  }  // namespace v2
 
   template <typename T>
   struct LinePointDistance2D
@@ -47,11 +71,20 @@ namespace DO::Sara {
     {
     }
 
-    template <typename Mat>
-    inline auto operator()(const Mat& points) const
-        -> Eigen::Matrix<T, Eigen::Dynamic, 1>
+    template <typename Derived>
+    inline auto operator()(const Eigen::MatrixBase<Derived>& points) const
+        -> Eigen::Vector<T, Eigen::Dynamic>
     {
-      return (points * line / line.head(2).norm()).cwiseAbs();
+      if (points.rows() == 2)
+        return ((line.transpose() * points.colwise().homogeneous()) /
+                line.head(2).norm())
+            .cwiseAbs();
+
+      if (points.rows() == 3)
+        return ((line.transpose() * points) / line.head(2).norm()).cwiseAbs();
+
+      throw std::runtime_error{"The point dimension must be 2 or 3"};
+      return {};
     }
 
     Projective::Line2<T> line;

@@ -72,7 +72,7 @@ namespace DO::Sara {
                          : X;
 
     // Define cardinality variables.
-    const auto& card_X = X.size();
+    const auto& card_X = static_cast<int>(X.size());
     if (card_X < ModelSolver::num_points)
       throw std::runtime_error{"Not enough data points!"};
 
@@ -136,14 +136,15 @@ namespace DO::Sara {
       distance = Distance{model};
     }
 
-    //! @brief Calculate inlier predicate on a batch of correspondences.
-    template <typename Mat>
-    inline auto operator()(const Mat& x, const Mat& y) const
+    //! @brief Check the inlier predicate on a batch of data points.
+    template <typename T, int D>
+    inline auto operator()(const PointList<T, D>& X) const
         -> Array<bool, 1, Dynamic>
     {
-      return distance(x, y).array() < err_threshold;
+      return distance(X._data.colmajor_view().matrix()).array() < err_threshold;
     }
 
+    //! @brief Check the inlier predicate on a list of correspondences.
     template <typename T>
     inline auto operator()(const PointCorrespondenceList<T>& m) const
         -> Array<bool, 1, Dynamic>

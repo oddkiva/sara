@@ -52,8 +52,8 @@ namespace DO::Sara {
     {
     }
 
-    template <typename Mat>
-    inline auto operator()(const Mat& lines) const
+    template <typename Derived>
+    inline auto operator()(const Eigen::MatrixBase<Derived>& lines) const
         -> Eigen::Matrix<T, Eigen::Dynamic, 1>
     {
       return (lines * vp).cwiseAbs();

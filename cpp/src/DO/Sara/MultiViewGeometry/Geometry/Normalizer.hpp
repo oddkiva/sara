@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/Geometry/Tools/Normalizer.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/Homography.hpp>
@@ -21,16 +21,9 @@
 
 namespace DO::Sara {
 
-  //! @ingroup MultiViewGeometry
-  //! @defgroup MultiviewNormalizer Normalizers
+  //! @ingroup GeometryDataNormalizer
+
   //! @{
-
-  template <typename Model>
-  struct Normalizer
-  {
-  };
-
-
   template <>
   struct Normalizer<Homography>
   {

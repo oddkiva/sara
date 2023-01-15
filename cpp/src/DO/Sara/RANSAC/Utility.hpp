@@ -12,6 +12,7 @@
 #pragma once
 
 #include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/Geometry/Algorithms/RobustEstimation/PointList.hpp>
 #include <DO/Sara/MultiViewGeometry/PointCorrespondenceList.hpp>
 
 
@@ -56,6 +57,13 @@ namespace DO::Sara {
 
     return points_sampled;
   }
+
+  template <typename T, int D>
+  auto from_index_to_point(const TensorView_<int, 2>& point_indices,
+                           const PointList<T, D>& points) -> Tensor_<T, D + 1>
+  {
+    return from_index_to_point(point_indices, points._data);
+  };
 
   template <typename T>
   auto from_index_to_point(const TensorView_<int, 2>& point_indices,
