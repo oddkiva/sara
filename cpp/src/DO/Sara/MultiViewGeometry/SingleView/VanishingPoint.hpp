@@ -194,9 +194,8 @@ namespace DO::Sara {
                                            std::size_t num_random_samples = 100)
   {
     auto vp_solver = DominantOrthogonalDirectionTripletSolver3D<T>{};
-    auto inlier_predicate = InlierPredicate{
-        AngularDistance3D<T>{},  //
-        threshold                //
+    auto inlier_predicate = InlierPredicate<AngularDistance3D<T>>{
+        {}, threshold  //
     };
     return ransac(planes,            //
                   vp_solver,         //

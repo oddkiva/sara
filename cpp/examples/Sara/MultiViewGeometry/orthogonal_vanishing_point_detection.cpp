@@ -361,7 +361,7 @@ int sara_graphics_main(int argc, char** argv)
     const Eigen::MatrixXf lines_as_matrix = lines.matrix().transpose();
     auto plane_list = PointList<float, 2>{};
     auto& plane_tensor = plane_list._data;
-    plane_tensor.resize(line_segments.size(), 4);
+    plane_tensor.resize(static_cast<int>(line_segments.size()), 4);
     plane_tensor.colmajor_view().matrix() = (Pt * lines_as_matrix)  //
                                                 .colwise()          //
                                                 .normalized();
