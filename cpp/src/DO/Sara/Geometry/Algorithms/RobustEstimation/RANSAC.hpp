@@ -103,30 +103,6 @@ namespace DO::Sara {
     return std::make_tuple(model_best, inliers_best, subset_best);
   }
 
-
-  //! @brief Set the distance relative to the model parameters.
-  template <typename Distance>
-  struct InlierPredicate
-  {
-    using distance_type = Distance;
-    using scalar_type = typename Distance::scalar_type;
-
-    distance_type distance;
-    scalar_type error_threshold;
-
-    inline void set_model(const typename Distance::model_type& model)
-    {
-      distance = Distance{model};
-    }
-
-    //! @brief Calculate inlier predicate on a batch of correspondences.
-    template <typename Mat>
-    inline auto operator()(const Mat& x) const -> Eigen::Array<bool, 1, Dynamic>
-    {
-      return distance(x).array() < error_threshold;
-    }
-  };
-
   //! @}
 
 }  // namespace DO::Sara

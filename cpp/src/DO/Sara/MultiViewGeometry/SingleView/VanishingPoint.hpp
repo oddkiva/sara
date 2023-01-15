@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <DO/Sara/Geometry/Algorithms/RobustEstimation/RANSAC.hpp>
+#include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/Geometry/Tools/Projective.hpp>
 
 

@@ -112,10 +112,12 @@ namespace DO::Sara {
           inliers_best.flat_array() = inliers;
           subset_best = minimal_index_subsets[n];
 
+#ifdef TODO_ADD_VISITOR
           SARA_DEBUG << "n = " << n << "\n";
           SARA_DEBUG << "model_best = \n" << model_best << "\n";
           SARA_DEBUG << "num inliers = " << num_inliers << "\n";
           SARA_CHECK(subset_best.row_vector());
+#endif
         }
       }
     }
@@ -134,6 +136,14 @@ namespace DO::Sara {
     inline void set_model(const Model& model)
     {
       distance = Distance{model};
+    }
+
+    //! @brief Calculate inlier predicate on a batch of correspondences.
+    template <typename Derived>
+    inline auto operator()(const Eigen::MatrixBase<Derived>& x) const
+        -> Eigen::Array<bool, 1, Dynamic>
+    {
+      return distance(x).array() < err_threshold;
     }
 
     //! @brief Check the inlier predicate on a batch of data points.

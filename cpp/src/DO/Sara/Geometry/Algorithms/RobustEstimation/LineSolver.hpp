@@ -22,41 +22,20 @@ namespace DO::Sara {
   struct LineSolver2D
   {
     using model_type = Projective::Line2<T>;
+    using data_point_type = TensorView_<T, 2>;
 
     static constexpr auto num_points = 2;
+    static constexpr auto num_models = 1;
 
-    template <typename Derived>
-    inline auto operator()(const Eigen::MatrixBase<Derived>& ab) const
+    inline auto operator()(const data_point_type& ab) const
+        -> std::array<model_type, num_models>
     {
-      const Eigen::Matrix<T, 3, 2> abT = ab.transpose();
-      const auto& a = abT.col(0);
-      const auto& b = abT.col(1);
-      return Projective::line(a.eval(), b.eval());
+      const auto abT = ab.colmajor_view().matrix();
+      const Eigen::Vector3<T> a = abT.col(0);
+      const Eigen::Vector3<T> b = abT.col(1);
+      return {Projective::line(a, b)};
     }
   };
-
-  namespace v2 {
-
-    template <typename T>
-    struct LineSolver2D
-    {
-      using model_type = Projective::Line2<T>;
-      using data_point_type = TensorView_<T, 2>;
-
-      static constexpr auto num_points = 2;
-      static constexpr auto num_models = 1;
-
-      inline auto operator()(const data_point_type& ab) const
-          -> std::array<model_type, num_models>
-      {
-        const auto abT = ab.colmajor_view().matrix();
-        const Eigen::Vector3<T> a = abT.col(0);
-        const Eigen::Vector3<T> b = abT.col(1);
-        return {Projective::line(a, b)};
-      }
-    };
-
-  }  // namespace v2
 
   template <typename T>
   struct LinePointDistance2D
