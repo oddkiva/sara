@@ -204,9 +204,9 @@ namespace DO::Sara {
                                 .cast<float>();  //
 
     auto line_solver = LineSolver2D<float>{};
-    auto inlier_predicate = InlierPredicate<LinePointDistance2D<float>>{
-        {},              //
-        error_threshold  //
+    auto inlier_predicate = InlierPredicate{
+        LinePointDistance2D<float>{},  //
+        error_threshold                //
     };
     const auto ransac_result = ransac_v2(point_list,        //
                                          line_solver,       //
