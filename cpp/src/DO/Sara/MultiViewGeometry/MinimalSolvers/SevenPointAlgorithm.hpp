@@ -137,15 +137,6 @@ namespace DO::Sara {
       return this->operator()(Xi);
     }
 
-    //! @{
-    //! @brief Legacy API.
-    using model_type = FundamentalMatrix;
-    using matrix_type = Eigen::Matrix<double, 3, 7>;
-    auto operator()(const matrix_type& x, const matrix_type& y) const
-        -> std::vector<model_type>;
-    //! @}
-
-
     Impl _impl;
   };
 

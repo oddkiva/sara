@@ -82,30 +82,6 @@ auto estimate_fundamental_matrix(const KeypointList<OERegion, float>& keys1,
   // Image coordinates.
   const auto& f1 = features(keys1);
   const auto& f2 = features(keys2);
-  const auto p1 = extract_centers(f1).cast<double>();
-  const auto p2 = extract_centers(f2).cast<double>();
-
-  const auto P1 = homogeneous(p1);
-  const auto P2 = homogeneous(p2);
-
-  const auto [F, inliers, sample_best] = ransac(
-      M, P1, P2, FEstimator{}, EpipolarDistance{}, num_samples, f_err_thres);
-
-  return std::make_tuple(F, inliers, sample_best);
-}
-
-auto estimate_fundamental_matrix_v2(const KeypointList<OERegion, float>& keys1,
-                                    const KeypointList<OERegion, float>& keys2,
-                                    const vector<Match>& matches,  //
-                                    int num_samples, double f_err_thres)
-{
-  // Transform matches to an array of indices.
-  const auto M = to_tensor(matches);
-
-  // ==========================================================================
-  // Image coordinates.
-  const auto& f1 = features(keys1);
-  const auto& f2 = features(keys2);
   const auto p1 = homogeneous(extract_centers(f1)).cast<double>();
   const auto p2 = homogeneous(extract_centers(f2)).cast<double>();
 
@@ -243,7 +219,7 @@ int sara_graphics_main(int argc, char** argv)
   print_stage("Estimating the fundamental matrix...");
   const auto num_samples = argc < 4 ? 200 : std::stoi(argv[3]);
   const auto f_err_thres = argc < 5 ? 1e-2 : std::stod(argv[4]);
-  const auto [F, inliers, sample_best] = estimate_fundamental_matrix_v2(
+  const auto [F, inliers, sample_best] = estimate_fundamental_matrix(
       keypoints[0], keypoints[1], matches, num_samples, f_err_thres);
 
 

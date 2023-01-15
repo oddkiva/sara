@@ -70,8 +70,10 @@ namespace DO::Sara {
     using model_type = EssentialMatrix;
     using matrix_type = Eigen::Matrix<double, 3, 5>;
     using matrix_view_type = Eigen::Map<const matrix_type>;
+    using data_point_type = std::array<TensorView_<double, 2>, 2>;
 
     static constexpr auto num_points = 5;
+    static constexpr auto num_models = 10;
 
     const std::array<Monomial, 20> monomials{
         x.pow(3), y.pow(3), x.pow(2) * y, x* y.pow(2), x.pow(2) * z, x.pow(2),
@@ -114,6 +116,14 @@ namespace DO::Sara {
     {
       return find_essential_matrices(left, right);
     }
+
+    auto operator()(const data_point_type& X) const
+        -> std::vector<EssentialMatrix>
+    {
+      const matrix_type left = X[0].colmajor_view().matrix();
+      const matrix_type right = X[1].colmajor_view().matrix();
+      return this->operator()(left, right);
+    }
   };
 
 
@@ -122,8 +132,10 @@ namespace DO::Sara {
     using model_type = EssentialMatrix;
     using matrix_type = Eigen::Matrix<double, 3, 5>;
     using matrix_view_type = Eigen::Map<const matrix_type>;
+    using data_point_type = std::array<TensorView_<double, 2>, 2>;
 
     static constexpr auto num_points = 5;
+    static constexpr auto num_models = 10;
 
     const std::array<Monomial, 20> monomials{
         x * x * x, x* x* y, x* y* y, y* y* y, x* x* z, x* y* z, y* y* z,
@@ -152,6 +164,14 @@ namespace DO::Sara {
                     const Matrix<double, 3, 5>& right) const
     {
       return find_essential_matrices(left, right);
+    }
+
+    auto operator()(const data_point_type& X) const
+        -> std::vector<EssentialMatrix>
+    {
+      const matrix_type left = X[0].colmajor_view().matrix();
+      const matrix_type right = X[1].colmajor_view().matrix();
+      return this->operator()(left, right);
     }
   };
   //! @}

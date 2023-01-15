@@ -133,6 +133,7 @@ int sara_graphics_main(int argc, char** argv)
   // pair of point indices (i, j).
   const auto M = to_tensor(matches);
 
+  const auto X = PointCorrespondenceList{M, un[0], un[1]};
 
   print_stage("Estimating the essential matrix...");
   auto& E = epipolar_edges.E[0];
@@ -146,7 +147,7 @@ int sara_graphics_main(int argc, char** argv)
     num_samples = argc < 5 ? 200 : std::stoi(argv[4]);
     err_thres = argc < 6 ? 1e-2 : std::stod(argv[5]);
     std::tie(E, inliers, sample_best) =
-        ransac(M, un[0], un[1], estimator, distance, num_samples, err_thres);
+        ransac(X, estimator, distance, num_samples);
 
     epipolar_edges.E_inliers[0] = inliers;
     epipolar_edges.E_best_samples[0] = sample_best;
@@ -225,7 +226,7 @@ int sara_graphics_main(int argc, char** argv)
     auto color = Rgb8{};
     color << 0, 0, int(linear(depth) * 255);
     if (depth < 0)
-      color = Red8; // Highlight where the problem is...
+      color = Red8;  // Highlight where the problem is...
     fill_circle(ui.x(), ui.y(), 5, color);
     millisleep(1);
   }
