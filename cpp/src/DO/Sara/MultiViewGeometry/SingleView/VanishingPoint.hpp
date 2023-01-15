@@ -141,7 +141,7 @@ namespace DO::Sara {
   template <typename T>
   struct AngularDistance3D
   {
-    using model_type = Eigen::Matrix<T, 3, 3>;
+    using model_type = Eigen::Matrix3<T>;
     using scalar_type = T;
 
     AngularDistance3D() = default;
@@ -157,13 +157,13 @@ namespace DO::Sara {
         -> Eigen::Vector<T, Eigen::Dynamic>
     {
       auto distances = Eigen::Vector<T, Eigen::Dynamic>(  //
-          planes_backprojected.rows()                     //
+          planes_backprojected.cols()                     //
       );
 
       // Check whether a plane contains a vanishing point/direction.
-      distances = (planes_backprojected.leftCols(3) * rotation)
+      distances = (rotation * planes_backprojected.topRows(3))
                       .cwiseAbs()
-                      .rowwise()
+                      .colwise()
                       .minCoeff();
 
       return distances;

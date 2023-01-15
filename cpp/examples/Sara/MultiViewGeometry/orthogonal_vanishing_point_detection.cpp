@@ -360,8 +360,8 @@ int sara_graphics_main(int argc, char** argv)
 
     tic();
     const auto angle_threshold = std::sin(float((3._deg).value));
-    SARA_DEBUG << "plane_tensor.rows = " << plane_tensor.rows() << std::endl;
-#if 0
+    SARA_DEBUG << "plane_tensor.sizes = " << plane_tensor.sizes().transpose()
+               << std::endl;
     const auto ransac_result = find_dominant_orthogonal_directions(  //
         plane_list,                                                  //
         angle_threshold,                                             //
@@ -371,9 +371,7 @@ int sara_graphics_main(int argc, char** argv)
     toc("Vanishing Point");
 
     const auto inliers_count = inliers.flat_array().count();
-#endif
 
-#if 0
     tic();
     if (inliers_count > 0)
     {
@@ -387,7 +385,6 @@ int sara_graphics_main(int argc, char** argv)
       }
     }
     toc("Axis Matching");
-#endif
 
     auto& detection = frame_undistorted;
 #ifdef CLEAR_IMAGE
@@ -396,7 +393,6 @@ int sara_graphics_main(int argc, char** argv)
 
     tic();
     {
-#if 0
       if (inliers_count > 0)
       {
         SARA_DEBUG << "inliers = " << inliers.flat_array().count() << std::endl;
@@ -433,10 +429,8 @@ int sara_graphics_main(int argc, char** argv)
                       int_round(b.x()), int_round(b.y()), Blue8, 4);
         }
       }
-#endif
 
       display(detection);
-#if 0
       if (inliers_count > 0 && std::abs(R0.determinant()) > 0.9f)
       {
         const auto angular_diff_degree =
@@ -445,7 +439,6 @@ int sara_graphics_main(int argc, char** argv)
                   format("Angle diff = %0.2f degree", angular_diff_degree),
                   White8, 20, 0, false, true);
       }
-#endif
     }
     toc("Display");
 
