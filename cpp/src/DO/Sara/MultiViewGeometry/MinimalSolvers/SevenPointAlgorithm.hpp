@@ -110,6 +110,7 @@ namespace DO::Sara {
 
     using internal_data_point_type = Impl::data_point_type;
     using data_point_type = std::array<TensorView_<double, 2>, 2>;
+    using model_type = FundamentalMatrix;
 
     static auto extract_nullspace(const internal_data_point_type& X)
         -> std::array<Eigen::Matrix3d, 2>;

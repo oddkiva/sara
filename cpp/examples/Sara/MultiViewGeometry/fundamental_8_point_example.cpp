@@ -18,7 +18,6 @@
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
-#include <DO/Sara/RANSAC/Utility.hpp>
 #include <DO/Sara/Visualization.hpp>
 
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>

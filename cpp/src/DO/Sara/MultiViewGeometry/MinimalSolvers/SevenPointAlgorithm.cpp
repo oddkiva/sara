@@ -38,23 +38,4 @@ namespace DO::Sara {
     return solve_determinant_constraint(F);
   }
 
-  auto SevenPointAlgorithmDoublePrecision::operator()(
-      const SevenPointAlgorithmDoublePrecision::matrix_type& x,
-      const SevenPointAlgorithmDoublePrecision::matrix_type& y) const
-      -> std::vector<FundamentalMatrix>
-  {
-    auto X = Eigen::Matrix<double, 4, 7>{};
-    for (auto i = 0; i < 7; ++i)
-      X.col(i) << x.col(i).head(2), y.col(i).head(2);
-    // X << x.colwise().hnormalized(), y.colwise().hnormalized();
-
-    const auto matrices = (*this)(X);
-
-    auto Fs = std::vector<FundamentalMatrix>(matrices.size());
-    std::transform(matrices.begin(), matrices.end(), Fs.begin(),
-                   [](const auto& F) -> FundamentalMatrix { return F; });
-
-    return Fs;
-  }
-
 }  // namespace DO::Sara

@@ -54,7 +54,8 @@ include(sara_use_ccache)
 
 # We are post-2020 now: let's all look to the future please.
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   set (CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)

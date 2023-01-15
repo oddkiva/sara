@@ -119,28 +119,20 @@ namespace DO::Sara {
 
 
   template <>
-  struct Normalizer<EssentialMatrix>
+  struct Normalizer<EssentialMatrix> : public Normalizer<FundamentalMatrix>
   {
+    using Base = Normalizer<FundamentalMatrix>;
+
     inline Normalizer(const TensorView_<double, 2>& p1,
                       const TensorView_<double, 2>& p2)
-      : T1{compute_normalizer(p1)}
-      , T2{compute_normalizer(p2)}
+      : Base{p1, p2}
     {
     }
 
-    inline auto normalize(const TensorView_<double, 2>& p1,
-                          const TensorView_<double, 2>& p2) const
+    inline Normalizer(const PointCorrespondenceList<double>& matches)
+      : Base{matches}
     {
-      return std::make_tuple(apply_transform(T1, p1), apply_transform(T2, p2));
     }
-
-    inline auto denormalize(const Eigen::Matrix3d& E) const -> Eigen::Matrix3d
-    {
-      return (T2.transpose() * E * T1).normalized();
-    }
-
-    Eigen::Matrix3d T1;
-    Eigen::Matrix3d T2;
   };
 
   //! @}

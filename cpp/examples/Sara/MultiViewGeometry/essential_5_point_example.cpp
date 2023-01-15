@@ -18,6 +18,7 @@
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
+#include <DO/Sara/RANSAC/RANSAC.hpp>
 
 #include <DO/Sara/SfM/BuildingBlocks/EssentialMatrixEstimation.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
@@ -132,7 +133,6 @@ int sara_graphics_main(int argc, char** argv)
   // List the matches as a 2D-tensor where each row encodes a match 'm' as a
   // pair of point indices (i, j).
   const auto M = to_tensor(matches);
-
   const auto X = PointCorrespondenceList{M, un[0], un[1]};
 
   print_stage("Estimating the essential matrix...");
@@ -141,13 +141,15 @@ int sara_graphics_main(int argc, char** argv)
   auto& err_thres = epipolar_edges.E_noise[0];
   auto& inliers = epipolar_edges.E_inliers[0];
   auto sample_best = Tensor_<int, 1>{};
-  auto estimator = NisterFivePointAlgorithm{};
-  auto distance = EpipolarDistance{};
   {
     num_samples = argc < 5 ? 200 : std::stoi(argv[4]);
     err_thres = argc < 6 ? 1e-2 : std::stod(argv[5]);
+
+    auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
+    inlier_predicate.err_threshold = err_thres;
+
     std::tie(E, inliers, sample_best) =
-        ransac(X, estimator, distance, num_samples);
+        ransac_v2(X, NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
 
     epipolar_edges.E_inliers[0] = inliers;
     epipolar_edges.E_best_samples[0] = sample_best;
