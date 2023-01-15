@@ -9,18 +9,29 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-// Disable FLANN warnings
-#ifdef _MSC_VER
-#pragma warning(disable : 4244 4267 4800 4305 4291 4996)
-#endif
-
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 
 #include <DO/Sara/FeatureMatching.hpp>
 
+#if defined(_MSC_VER)
+#  pragma warning(push)
+#  pragma warning(disable : 4244 4267 4800 4305 4291 4996)
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  if defined(__has_warning)  // clang
+#    if __has_warning("-Wconversion")
+#      pragma GCC diagnostic ignored "-Wconversion"
+#    endif
+#  pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#  endif
+#endif
 #include <flann/flann.hpp>
-
+#if defined(_WIN32)
+#  pragma warning(pop)
+#elif defined(__GNUC__)
+#  pragma GCC diagnostic pop
+#endif
 
 
 using namespace std;

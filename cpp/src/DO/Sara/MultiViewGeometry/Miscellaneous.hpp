@@ -27,7 +27,7 @@ namespace DO::Sara {
                            const TensorView_<double, 2>& colors)
   {
     // Get the left and right cameras.
-    auto cameras = Tensor_<PinholeCamera, 1>{2};
+    auto cameras = Tensor_<BasicPinholeCamera, 1>{2};
     cameras(0) = complete_geom.C1;
     cameras(1) = complete_geom.C2;
 

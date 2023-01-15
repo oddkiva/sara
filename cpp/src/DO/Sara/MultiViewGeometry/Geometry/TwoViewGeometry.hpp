@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <DO/Sara/MultiViewGeometry/Estimators/Triangulation.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 
@@ -22,8 +22,8 @@ namespace DO::Sara {
 
   struct TwoViewGeometry
   {
-    PinholeCamera C1;
-    PinholeCamera C2;
+    BasicPinholeCamera C1;
+    BasicPinholeCamera C2;
     Eigen::MatrixXd X;
     Eigen::VectorXd scales1;
     Eigen::VectorXd scales2;

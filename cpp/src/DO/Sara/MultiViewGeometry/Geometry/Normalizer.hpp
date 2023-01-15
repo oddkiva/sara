@@ -15,6 +15,7 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/Homography.hpp>
+#include <DO/Sara/MultiViewGeometry/PointCorrespondenceList.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 
@@ -42,13 +43,29 @@ namespace DO::Sara {
       T2_inv = T2.inverse();
     }
 
+    inline Normalizer(const PointCorrespondenceList<double>& matches)
+      : T1{compute_normalizer(matches._p1)}
+      , T2{compute_normalizer(matches._p2)}
+    {
+      T1_inv = T1.inverse();
+      T2_inv = T2.inverse();
+    }
+
     inline auto normalize(const TensorView_<double, 2>& p1,
                           const TensorView_<double, 2>& p2) const
     {
       return std::make_tuple(apply_transform(T1, p1), apply_transform(T2, p2));
     }
 
-    inline auto denormalize(const Eigen::Matrix3d& H) const
+    inline auto normalize(const PointCorrespondenceList<double>& X) const
+        -> PointCorrespondenceList<double>
+    {
+      auto Xn = PointCorrespondenceList<double>{};
+      std::tie(Xn._p1, Xn._p2) = this->normalize(X._p1, X._p2);
+      return Xn;
+    }
+
+    inline auto denormalize(const Eigen::Matrix3d& H) const -> Eigen::Matrix3d
     {
       return T2_inv * H * T1;
     }
@@ -70,13 +87,28 @@ namespace DO::Sara {
     {
     }
 
+    inline Normalizer(const PointCorrespondenceList<double>& matches)
+      : T1{compute_normalizer(matches._p1)}
+      , T2{compute_normalizer(matches._p2)}
+    {
+    }
+
     inline auto normalize(const TensorView_<double, 2>& p1,
                           const TensorView_<double, 2>& p2) const
     {
       return std::make_tuple(apply_transform(T1, p1), apply_transform(T2, p2));
     }
 
-    inline auto denormalize(const Eigen::Matrix3d& F) const -> Matrix3d
+    inline auto normalize(const PointCorrespondenceList<double>& X) const
+        -> PointCorrespondenceList<double>
+    {
+      auto Xn = PointCorrespondenceList<double>{};
+      std::tie(Xn._p1, Xn._p2) = this->normalize(X._p1, X._p2);
+      return Xn;
+    }
+
+
+    inline auto denormalize(const Eigen::Matrix3d& F) const -> Eigen::Matrix3d
     {
       return (T2.transpose() * F * T1).normalized();
     }
@@ -87,28 +119,20 @@ namespace DO::Sara {
 
 
   template <>
-  struct Normalizer<EssentialMatrix>
+  struct Normalizer<EssentialMatrix> : public Normalizer<FundamentalMatrix>
   {
+    using Base = Normalizer<FundamentalMatrix>;
+
     inline Normalizer(const TensorView_<double, 2>& p1,
                       const TensorView_<double, 2>& p2)
-      : T1{compute_normalizer(p1)}
-      , T2{compute_normalizer(p2)}
+      : Base{p1, p2}
     {
     }
 
-    inline auto normalize(const TensorView_<double, 2>& p1,
-                          const TensorView_<double, 2>& p2) const
+    inline Normalizer(const PointCorrespondenceList<double>& matches)
+      : Base{matches}
     {
-      return std::make_tuple(apply_transform(T1, p1), apply_transform(T2, p2));
     }
-
-    inline auto denormalize(const Eigen::Matrix3d& E) const -> Eigen::Matrix3d
-    {
-      return (T2.transpose() * E * T1).normalized();
-    }
-
-    Eigen::Matrix3d T1;
-    Eigen::Matrix3d T2;
   };
 
   //! @}

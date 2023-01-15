@@ -18,7 +18,7 @@ foreach (file ${test_multiviewgeometry_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES ${DO_Sara_LIBRARIES}
+    DEPENDENCIES ${DO_Sara_LIBRARIES} fmt::fmt
     FOLDER MultiViewGeometry)
 endforeach ()
 

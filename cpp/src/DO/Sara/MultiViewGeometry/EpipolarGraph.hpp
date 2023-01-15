@@ -17,8 +17,8 @@
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/Features/KeypointList.hpp>
 #include <DO/Sara/Match.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FundamentalMatrixSolvers.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
 
@@ -43,7 +43,7 @@ namespace DO::Sara {
     //!
     //! TODO: use more sophisticated camera to estimate distortion parameters
     //! later on.
-    std::vector<PinholeCamera> cameras;
+    std::vector<BasicPinholeCamera> cameras;
 
     DO_SARA_EXPORT
     auto list_images(const std::string& dirpath) -> void;

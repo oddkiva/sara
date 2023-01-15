@@ -13,15 +13,17 @@
 //! This partially implements OpenCV ideas used to detect the chessboard to draw
 //! some intuitions.
 
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 #include <map>
 #include <unordered_map>
 
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
+#include <DO/Sara/FeatureDetectors/EdgeUtilities.hpp>
 #include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Geometry/Algorithms/BorderFollowing.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -38,7 +40,9 @@ namespace sara = DO::Sara;
 
 auto __main(int argc, char** argv) -> int
 {
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
 #ifdef _WIN32
   const auto video_file = sara::select_video_file_from_dialog_box();

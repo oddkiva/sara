@@ -14,7 +14,9 @@
 #include <algorithm>
 #include <cmath>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #include <boost/program_options.hpp>
 
@@ -43,7 +45,9 @@ namespace halide = DO::Shakti::HalideBackend;
 int __main(int argc, char** argv)
 {
   // Optimization.
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
   std::ios_base::sync_with_stdio(false);
 
   namespace po = boost::program_options;

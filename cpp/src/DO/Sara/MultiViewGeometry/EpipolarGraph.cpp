@@ -223,7 +223,7 @@ auto EpipolarEdgeAttributes::read_two_view_geometries(
 
         SARA_DEBUG << "Reading two-view geometries..." << std::endl;
         // Read the cameras.
-        auto cameras = Tensor_<PinholeCamera, 1>{2};
+        auto cameras = Tensor_<BasicPinholeCamera, 1>{2};
         h5_file.read_dataset(format("two_view_geometries/cameras/%d_%d", i, j),
                              cameras);
         two_view_geometries[ij].C1 = cameras(0);

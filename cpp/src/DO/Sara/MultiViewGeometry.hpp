@@ -15,7 +15,6 @@
 
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
-#include <DO/Sara/MultiViewGeometry/RANSAC.hpp>
 
 #include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
 
@@ -25,10 +24,11 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/Normalizer.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
 
-#include <DO/Sara/MultiViewGeometry/Estimators/ErrorMeasures.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/HomographyEstimator.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FundamentalMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/HomographySolver.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/SevenPointAlgorithm.hpp>
 
 #include <DO/Sara/MultiViewGeometry/HDF5.hpp>
 

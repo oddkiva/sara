@@ -731,7 +731,7 @@ public:
     m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
   }
 
-  auto set_camera(const PinholeCamera& camera)
+  auto set_camera(const BasicPinholeCamera& camera)
   {
     m_camera = camera;
     initialize_geometry();
@@ -774,7 +774,7 @@ private:
   //! @{
   //! @brief CPU data.
   Vector2i m_image_sizes;
-  PinholeCamera m_camera{normalized_camera()};
+  BasicPinholeCamera m_camera{normalized_camera()};
   Tensor_<float, 2> m_vertices;
   Tensor_<unsigned int, 2> m_triangles;
   //! @}
@@ -847,7 +847,7 @@ public:
     m_imagePlane->set_image(data_dir + "/" + image);
 
     const auto K = "0001.png.K";
-    auto camera = PinholeCamera{
+    auto camera = BasicPinholeCamera{
       read_internal_camera_parameters(data_dir + "/" + K),
       Matrix3d::Identity(),
       Vector3d::Zero()

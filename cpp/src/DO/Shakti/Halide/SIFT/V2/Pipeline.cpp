@@ -38,7 +38,8 @@ namespace DO::Shakti::HalideBackend::v2 {
     std::transform(sigmas.begin(), sigmas.end(), std::back_inserter(kernels),
                    [](const auto& sigma) {
                      const auto k = Sara::make_gaussian_kernel(sigma);
-                     auto k_buffer = ::Halide::Runtime::Buffer<float>(k.size());
+                     const auto k_size = static_cast<int>(k.size());
+                     auto k_buffer = ::Halide::Runtime::Buffer<float>(k_size);
                      std::copy_n(k.data(), k.size(), k_buffer.data());
                      k_buffer.set_host_dirty();
                      return k_buffer;
@@ -232,10 +233,10 @@ namespace DO::Shakti::HalideBackend::v2 {
     for (auto s = 0; s < static_cast<int>(extrema_maps.size()); ++s)
     {
       const auto& dog_ext_map = extrema_maps[s];
-      const auto num_extrema = std::count_if(      //
+      const auto num_extrema = static_cast<int>(std::count_if(      //
           dog_ext_map.begin(), dog_ext_map.end(),  //
           [](const auto& v) { return v != 0; }     //
-      );
+      ));
 
       if (num_extrema == 0)
         continue;
@@ -363,7 +364,7 @@ namespace DO::Shakti::HalideBackend::v2 {
       e.value.copy_to_host();
       // No need to copy e.type because it is already in the host memory.
 
-      e_oriented.resize(d.orientation_map.size());
+      e_oriented.resize(static_cast<int>(d.orientation_map.size()));
 
       auto k = 0;
       for (auto i = 0; i < e.size(); ++i)

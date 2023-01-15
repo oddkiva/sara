@@ -11,7 +11,9 @@
 
 //! @example
 
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -83,7 +85,9 @@ int sara_graphics_main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
   using namespace std::string_literals;
 
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
 #ifdef _WIN32
   const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;

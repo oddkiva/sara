@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #include "JunctionDetection.hpp"
 

@@ -18,9 +18,9 @@
  *  ACCV 2012, Daejeon, South Korea.
  */
 
-#include "StudyOnMikolajczykDataset.hpp"
 #include "Region.hpp"
 #include "RegionBoundary.hpp"
+#include "StudyOnMikolajczykDataset.hpp"
 
 
 using namespace std;
@@ -30,11 +30,11 @@ using namespace DO::Sara;
 class TestRegion : public StudyOnMikolajczykDataset
 {
 public:
-  TestRegion(const string& abs_parent_folder_path,
-             const string& name,
+  TestRegion(const string& abs_parent_folder_path, const string& name,
              const string& feature_type)
     : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
-  {}
+  {
+  }
 
   void operator()()
   {
@@ -69,9 +69,9 @@ public:
         Region R;
         for (size_t i = 0; i != inliers.size(); ++i)
         {
-          //cout << "Inserting M["<<inliers[i]<<"]" << endl;
+          // cout << "Inserting M["<<inliers[i]<<"]" << endl;
           R.insert(M[inliers[i]], M);
-          //cout << "Is M["<<inliers[i]<<"] correctly inserted?" << endl;
+          // cout << "Is M["<<inliers[i]<<"] correctly inserted?" << endl;
           if (!R.find(M[inliers[i]], M))
           {
             cerr << "Cannot find match:\n" << M[inliers[i]] << endl;
@@ -83,7 +83,6 @@ public:
         }
         cout << "R.size() = " << R.size() << endl;
         get_key();
-
       }
       close_window_for_image_pair();
     }
@@ -93,11 +92,11 @@ public:
 class TestRegionBoundary : public StudyOnMikolajczykDataset
 {
 public:
-  TestRegionBoundary(const string& abs_parent_folder_path,
-                     const string& name,
+  TestRegionBoundary(const string& abs_parent_folder_path, const string& name,
                      const string& feature_type)
     : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
-  {}
+  {
+  }
 
   void operator()()
   {
@@ -116,7 +115,7 @@ public:
         const auto& Y = dataset().keys(j);
 
         // Compute initial matches.
-        vector<Match> M(compute_matches(X, Y, 1.2f*1.2f));
+        vector<Match> M(compute_matches(X, Y, 1.2f * 1.2f));
 
         // Get inliers and outliers.
         vector<size_t> inliers, outliers;
@@ -127,16 +126,16 @@ public:
         // View inliers.
         for (size_t i = 0; i != inliers.size(); ++i)
           drawer.draw_match(M[inliers[i]]);
-        
+
         // ================================================================== //
         // Region boundary.
         // Testing insertion and query.
         RegionBoundary dR(M);
         for (size_t i = 0; i != inliers.size(); ++i)
         {
-          //cout << "Inserting M["<<inliers[i]<<"]" << endl;
+          // cout << "Inserting M["<<inliers[i]<<"]" << endl;
           dR.insert(M[inliers[i]]);
-          //cout << "Is M["<<inliers[i]<<"] correctly inserted?" << endl;
+          // cout << "Is M["<<inliers[i]<<"] correctly inserted?" << endl;
           if (!dR.find(M[inliers[i]]))
           {
             cerr << "Cannot find match:\n" << M[inliers[i]] << endl;
@@ -144,14 +143,14 @@ public:
             break;
           }
           if (dR.find(M[inliers[i]]))
-            cout << "M["<<inliers[i]<<"] correctly inserted" << endl;
+            cout << "M[" << inliers[i] << "] correctly inserted" << endl;
           cout << "dR.size() = " << dR.size() << endl;
         }
         cout << "dR.size() = " << dR.size() << endl;
         get_key();
 
         // Testing iterators.
-        for (RegionBoundary::const_iterator m = dR.begin(); m != dR.end(); ++m)
+        for (auto m = dR.begin(); m != dR.end(); ++m)
         {
           cout << "M[" << m.index() << "] = \n" << *m << endl;
           drawer.draw_match(*m, Red8);
@@ -162,7 +161,7 @@ public:
         RegionBoundary dR2(M);
         dR2.insert(inliers[0]);
         // Testing iterators.
-        for (RegionBoundary::const_iterator m = dR2.begin(); m != dR2.end(); ++m)
+        for (auto m = dR2.begin(); m != dR2.end(); ++m)
         {
           cout << "M[" << m.index() << "] = \n" << *m << endl;
           drawer.draw_match(*m, Red8);
@@ -182,14 +181,14 @@ GRAPHICS_MAIN()
 {
   // Dataset paths.
   const string mikolajczyk_dataset_folder = "mikolajczyk";
-  const string folders[8] = { 
-    "bark", "bikes", "boat", "graf", "leuven", "trees", "ubc", "wall" 
-  };
-  const string ext[4] = { ".dog", ".haraff", ".hesaff", ".mser" };
+  const string folders[8] = {"bark",   "bikes", "boat", "graf",
+                             "leuven", "trees", "ubc",  "wall"};
+  const string ext[4] = {".dog", ".haraff", ".hesaff", ".mser"};
   TestRegion testRegion(mikolajczyk_dataset_folder, folders[0], ext[0]);
   testRegion();
 
-  TestRegionBoundary testRegionBoundary(mikolajczyk_dataset_folder, folders[0], ext[0]);
+  TestRegionBoundary testRegionBoundary(mikolajczyk_dataset_folder, folders[0],
+                                        ext[0]);
   testRegionBoundary();
   return 0;
 }

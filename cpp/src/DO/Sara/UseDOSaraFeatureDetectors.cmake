@@ -17,6 +17,6 @@ if (SARA_USE_FROM_SOURCE)
       DO::Sara::ImageProcessing
       PUBLIC
       DO::Sara::Core
-      $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+      $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   endif ()
 endif ()

@@ -11,6 +11,7 @@
 
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/FileSystem.hpp>
+#include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/EssentialMatrixEstimation.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
 
@@ -42,12 +43,13 @@ namespace DO::Sara {
     const auto unj = apply_transform(Kj_inv, homogeneous(uj));
 
     const auto Mij_tensor = to_tensor(Mij);
+    const auto Xij = PointCorrespondenceList{Mij_tensor, uni, unj};
 
-    auto estimator = ESolver{};
-    auto distance = EpipolarDistance{};
+    auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
+    inlier_predicate.err_threshold = err_thres;
 
-    const auto [E, inliers, sample_best] = ransac(
-        Mij_tensor, uni, unj, estimator, distance, num_samples, err_thres);
+    const auto [E, inliers, sample_best] =
+        ransac_v2(Xij, ESolver{}, inlier_predicate, num_samples);
 
     SARA_CHECK(E);
     SARA_CHECK(inliers.row_vector());

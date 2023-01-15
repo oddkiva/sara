@@ -1,14 +1,8 @@
 #pragma once
 
-#ifndef _USE_MATH_DEFINES
-#  define _USE_MATH_DEFINES
-#endif
+#include <DO/Sara/Core/EigenExtension.hpp>
 
-#include <Eigen/Core>
-
-#include <cmath>
 #include <ratio>
-#include <utility>
 
 
 namespace DO::Sara {

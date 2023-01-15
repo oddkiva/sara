@@ -16,7 +16,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   //! @ingroup MultiViewGeometry
   //! @defgroup FundamentalMatrix Fundamental Matrix
@@ -32,9 +32,7 @@ namespace DO { namespace Sara {
     using point_type = vector_type;
     using line_type = vector_type;
 
-    FundamentalMatrix()
-    {
-    }
+    FundamentalMatrix() = default;
 
     FundamentalMatrix(const matrix_type& m)
       : _m{m}
@@ -85,5 +83,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara

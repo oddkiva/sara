@@ -11,7 +11,9 @@
 
 //! @example
 
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -469,7 +471,9 @@ struct KnnGraph
 
 auto __main(int argc, char** argv) -> int
 {
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
 #ifdef _WIN32
   const auto video_file = sara::select_video_file_from_dialog_box();

@@ -40,9 +40,11 @@ auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
   return colors;
 }
 
-auto __main(int argc, char** argv) -> int
+auto __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) -> int
 {
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   using namespace std::string_literals;
 

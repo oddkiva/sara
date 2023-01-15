@@ -13,10 +13,10 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Math/Rotation.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -28,20 +28,23 @@ using namespace DO::Sara;
 auto generate_test_data()
 {
   // 3D points.
-  MatrixXd X(4, 5);  // coefficients are in [-1, 1].
-  X.topRows<3>() << -1.49998, -0.5827, -1.40591, 0.369386, 0.161931,  //
-      -1.23692, -0.434466, -0.142271, -0.732996, -1.43086,            //
-      1.51121, 0.437918, 1.35859, 1.03883, 0.106923;                  //
+  auto X = Eigen::MatrixXd(4, 5);  // coefficients are in [-1, 1].
+  // clang-format off
+  X.topRows<3>() <<
+    -1.49998, -0.5827,   -1.40591,   0.369386,  0.161931,
+    -1.23692, -0.434466, -0.142271, -0.732996, -1.43086,
+     1.51121,  0.437918,  1.35859,   1.03883,   0.106923;
+  // clang-format on
   X.bottomRows<1>().fill(1.);
 
-  const Matrix3d R = rotation(0.3, 0.2, 0.1);
-  const Vector3d t{0.1, 0.2, 0.3};
+  const auto R = rotation(0.3, 0.2, 0.1);
+  const auto t = Eigen::Vector3d{0.1, 0.2, 0.3};
 
   const auto E = essential_matrix(R, t);
 
-  const Matrix34d C1 = PinholeCamera{Matrix3d::Identity(), Matrix3d::Identity(),
-                                     Vector3d::Zero()};
-  const Matrix34d C2 = PinholeCamera{Matrix3d::Identity(), R, t};
+  const Matrix34d C1 = BasicPinholeCamera{
+      Matrix3d::Identity(), Matrix3d::Identity(), Vector3d::Zero()};
+  const Matrix34d C2 = BasicPinholeCamera{Matrix3d::Identity(), R, t};
   MatrixXd x1 = C1 * X;
   x1.array().rowwise() /= x1.row(2).array();
   MatrixXd x2 = C2 * X;

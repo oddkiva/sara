@@ -15,7 +15,7 @@
   @brief Eigen matrices and vector typedefs.
 
   VERY IMPORTANT:
-  By default Eigen uses the *COLUMN-MAJOR* storage.
+  By default Eigen stores matrix data in a *COLUMN-MAJOR* order.
  */
 
 #pragma once
@@ -25,20 +25,21 @@
 #  define NOMINMAX
 #endif
 
-// This is a specific compiling issue with MSVC 2008
-#if (_MSC_VER >= 1500 && _MSC_VER < 1600)
-#  define EIGEN_DONT_ALIGN
-#  pragma warning(                                                             \
-      disable : 4181)  // "../Core/Locator.hpp(444) : warning C4181: qualifier
-                       // applied to reference type; ignored"
-#endif
-
-#ifdef __GNUC__
+#if defined(__GNUC__)
 #  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#  if defined(__has_warning)  // clang
+#    if __has_warning("-Wmaybe-uninitialized")
+#      pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#    endif
+#    if __has_warning("-Wconversion")
+#      pragma GCC diagnostic ignored "-Wconversion"
+#    endif
+#  else  // GCC
+#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#  endif
 #endif
 #include <Eigen/Eigen>
-#ifdef __GNUC__
+#if defined(__GNUC__)
 #  pragma GCC diagnostic pop
 #endif
 

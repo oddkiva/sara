@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_pinhole_camera)
   {
     auto h5file = H5File{filepath, H5F_ACC_TRUNC};
 
-    auto cameras = std::vector<PinholeCamera>{
+    auto cameras = std::vector<BasicPinholeCamera>{
         // K, R, t.
         {Matrix3d::Identity(), roll(0.), Vector3d::Zero()},
         {Matrix3d::Identity() * 2., pitch(1.), Vector3d::Ones()},
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_pinhole_camera)
   // Read data from from HDF5.
   {
     auto h5file = H5File{filepath, H5F_ACC_RDONLY};
-    auto cameras = std::vector<PinholeCamera>{};
+    auto cameras = std::vector<BasicPinholeCamera>{};
     h5file.read_dataset("cameras", cameras);
 
     const auto& C0 = cameras[0];

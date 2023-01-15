@@ -16,7 +16,12 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
+#include <DO/Sara/RANSAC/RANSAC.hpp>
+#include <DO/Sara/RANSAC/Utility.hpp>
 #include <DO/Sara/Visualization.hpp>
+
+#include <filesystem>
+#include <optional>
 
 
 using namespace std;
@@ -28,42 +33,48 @@ using namespace DO::Sara;
 // Feature detection and matching.
 //
 // Detect or read SIFT keypoints.
-auto get_keypoints(const Image<Rgb8>& image1,
-                   const Image<Rgb8>& image2,
-                   const std::string& keys1_filepath,
-                   const std::string& keys2_filepath,
+auto get_keypoints(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
+                   [[maybe_unused]] const std::string& keys1_filepath,
+                   [[maybe_unused]] const std::string& keys2_filepath,
                    KeypointList<OERegion, float>& keys1,
                    KeypointList<OERegion, float>& keys2)
 {
   print_stage("Computing/Reading keypoints");
 
-#ifdef COMPUTE_KEYPOINTS
-  keys1 = compute_sift_keypoints(image1.convert<float>());
-  keys2 = compute_sift_keypoints(image2.convert<float>());
-  cout << "Image 1: " << keys1.size() << " keypoints" << endl;
-  cout << "Image 2: " << keys2.size() << " keypoints" << endl;
+  namespace fs = std::filesystem;
 
-  const auto& [f1, d1] = keys1;
-  const auto& [f2, d2] = keys2;
+#ifdef FIXME
+  const auto load_or_compute_keys = [](auto& keys, const auto& keys_filepath,
+                                       const auto& image) {
+    if (!fs::exists(keys_filepath))
+    {
+      keys = compute_sift_keypoints(image.template convert<float>());
+      const auto& [f, d] = keys;
+      write_keypoints(f, d, keys_filepath);
+    }
+    else
+    {
+      auto& [f, d] = keys;
+      read_keypoints(f, d, keys_filepath);
+    }
+  };
 
-  write_keypoints(f1, d1, keys1_filepath);
-  write_keypoints(f2, d2, keys2_filepath);
+  load_or_compute_keys(keys1, keys1_filepath, image1);
+  load_or_compute_keys(keys2, keys2_filepath, image2);
 #else
-  (void) image1;
-  (void) image2;
-  auto& [f1, d1] = keys1;
-  auto& [f2, d2] = keys2;
-
-  read_keypoints(f1, d1, keys1_filepath);
-  read_keypoints(f2, d2, keys2_filepath);
+  keys1 = compute_sift_keypoints(image1.template convert<float>());
+  keys2 = compute_sift_keypoints(image2.template convert<float>());
 #endif
+
+  cout << "Image 1: " << features(keys1).size() << " keypoints" << endl;
+  cout << "Image 2: " << features(keys2).size() << " keypoints" << endl;
 }
 
 // Descriptor-based matching.
 //
-// TODO: by default a feature matcher should return a tensor containing pair of
-// indices instead. While becoming trickier to use, it is more powerful for data
-// manipulation.
+// TODO: by default a feature matcher should return a tensor containing pair
+// of indices instead. While becoming trickier to use, it is more powerful for
+// data manipulation.
 //
 // Convert a set of matches to a tensor.
 auto compute_matches(const KeypointList<OERegion, float>& keys1,
@@ -88,30 +99,27 @@ auto estimate_homography(const KeypointList<OERegion, float>& keys1,
                          const vector<Match>& matches, int num_samples,
                          double h_err_thres)
 {
-  // ==========================================================================
-  // Normalize the points.
-  const auto& f1 = features(keys1);
-  const auto& f2 = features(keys2);
-  const auto p1 = extract_centers(f1).cast<double>();
-  const auto p2 = extract_centers(f2).cast<double>();
-
-  // Work in homogeneous coordinates please.
-  const auto P1 = homogeneous(p1);
-  const auto P2 = homogeneous(p2);
-
   const auto M = to_tensor(matches);
 
-  // Generate random samples for RANSAC.
-  auto distance = SymmetricTransferError{};
+  // Extract the coordinates of the feature centers.
+  const auto& f1 = features(keys1);
+  const auto& f2 = features(keys2);
+  // It is important to convert point in homogeneous coordinates here.
+  const auto p1 = homogeneous(extract_centers(f1)).cast<double>();
+  const auto p2 = homogeneous(extract_centers(f2)).cast<double>();
 
-  // const auto [H, num_inliers, sample_best] = ransac(
-  //     M, P1, P2, FourPointAlgorithm{}, distance, num_samples, h_err_thres);
-  const auto [H, inliers, sample_best] = ransac(
-      M, P1, P2, FourPointAlgorithm{}, distance, num_samples, h_err_thres);
+  // Get the list of point correspondences.
+  const auto X = PointCorrespondenceList{M, p1, p2};
 
+  const auto data_normalizer = std::make_optional(Normalizer<Homography>{X});
+
+  auto inlier_predicate = InlierPredicate<SymmetricTransferError>{};
+  inlier_predicate.err_threshold = h_err_thres;
+
+  const auto [H, inliers, sample_best] = ransac_v2(
+      X, FourPointAlgorithm{}, inlier_predicate, num_samples, data_normalizer);
   return std::make_tuple(H, inliers, sample_best);
 }
-
 
 // =============================================================================
 // Visual inspection.
@@ -173,7 +181,6 @@ void inspect_homography_estimation(const Image<Rgb8>& image1,
     drawer.draw_point(0, proj_Y.col(i).head(2).cast<float>(), Magenta8, 7);
     // Draw the best elemental subset drawn by RANSAC.
     drawer.draw_match(matches[sample_best(i)], Red8, true);
-
   }
 
   get_key();
@@ -186,11 +193,9 @@ GRAPHICS_MAIN()
   // Load images.
   print_stage("Loading images...");
 #ifdef __APPLE__
-  const auto data_dir =
-      "/Users/david/Desktop/Datasets/sfm/castle_int"s;
+  const auto data_dir = "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
-  const auto data_dir =
-      "/home/david/Desktop/Datasets/sfm/castle_int"s;
+  const auto data_dir = "/home/david/Desktop/Datasets/sfm/castle_int"s;
 #endif
   const auto file1 = "0000.png";
   const auto file2 = "0001.png";

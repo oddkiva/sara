@@ -14,6 +14,6 @@ if(SARA_USE_FROM_SOURCE)
       DO_Sara_FeatureDescriptors
       PUBLIC DO::Sara::Features #
              DO::Sara::ImageProcessing
-             $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+             $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   endif()
 endif()

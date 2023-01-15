@@ -152,7 +152,7 @@ namespace DO::Sara::Darknet {
     if (fp == nullptr)
       throw std::runtime_error{"Failed to open file: " + filepath};
 
-    auto num_bytes_read = size_t{};
+    [[maybe_unused]] auto num_bytes_read = size_t{};
 
     num_bytes_read += fread(&major, sizeof(int), 1, fp);
     num_bytes_read += fread(&minor, sizeof(int), 1, fp);

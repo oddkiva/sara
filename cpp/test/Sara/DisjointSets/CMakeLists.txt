@@ -13,4 +13,4 @@ endforeach ()
 
 target_link_libraries(test_disjointsets_algorithm_v2
   PRIVATE
-  $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+  $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
