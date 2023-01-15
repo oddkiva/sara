@@ -208,10 +208,10 @@ namespace DO::Sara {
         LinePointDistance2D<float>{},  //
         error_threshold                //
     };
-    const auto ransac_result = ransac_v2(point_list,        //
-                                         line_solver,       //
-                                         inlier_predicate,  //
-                                         num_iterations);
+    const auto ransac_result = ransac(point_list,        //
+                                      line_solver,       //
+                                      inlier_predicate,  //
+                                      num_iterations);
 
     const auto& line = std::get<0>(ransac_result);
     const auto& inliers = std::get<1>(ransac_result);

@@ -149,7 +149,7 @@ int sara_graphics_main(int argc, char** argv)
     inlier_predicate.err_threshold = err_thres;
 
     std::tie(E, inliers, sample_best) =
-        ransac_v2(X, NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
+        ransac(X, NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
 
     epipolar_edges.E_inliers[0] = inliers;
     epipolar_edges.E_best_samples[0] = sample_best;

@@ -183,10 +183,10 @@ namespace DO::Sara {
         LineToVanishingPointDistance<T>{},  //
         threshold                           //
     };
-    return ransac_v2(lines,             //
-                     vp_solver,         //
-                     inlier_predicate,  //
-                     num_random_samples);
+    return ransac(lines,             //
+                  vp_solver,         //
+                  inlier_predicate,  //
+                  num_random_samples);
   }
 
   template <typename T>
@@ -199,10 +199,10 @@ namespace DO::Sara {
         AngularDistance3D<T>{},  //
         threshold                //
     };
-    return ransac_v2(planes,            //
-                     vp_solver,         //
-                     inlier_predicate,  //
-                     num_random_samples);
+    return ransac(planes,            //
+                  vp_solver,         //
+                  inlier_predicate,  //
+                  num_random_samples);
   }
 
 }  // namespace DO::Sara

@@ -52,13 +52,12 @@ namespace DO::Sara {
   template <DataPointListConcept DataPointList,  //
             MinimalSolverConcept ModelSolver,    //
             typename InlierPredicateType>
-  auto
-  ransac_v2(const DataPointList& data_points,      //
-            ModelSolver solver,                    //
-            InlierPredicateType inlier_predicate,  //
-            const int num_samples,                 //
-            const std::optional<Normalizer<typename ModelSolver::model_type>>&
-                data_normalizer = std::nullopt)        //
+  auto ransac(const DataPointList& data_points,      //
+              ModelSolver solver,                    //
+              InlierPredicateType inlier_predicate,  //
+              const int num_samples,                 //
+              const std::optional<Normalizer<typename ModelSolver::model_type>>&
+                  data_normalizer = std::nullopt)      //
       -> std::tuple<typename ModelSolver::model_type,  //
                     Tensor_<bool, 1>,                  //
                     Tensor_<int, 1>>                   //
@@ -176,7 +175,7 @@ namespace DO::Sara {
     inlier_predicate.distance = distance;
     inlier_predicate.err_threshold = err_threshold;
 
-    return ransac_v2(data_points, solver, inlier_predicate, num_samples);
+    return ransac(data_points, solver, inlier_predicate, num_samples);
   }
 
   //! @brief From vanilla RANSAC

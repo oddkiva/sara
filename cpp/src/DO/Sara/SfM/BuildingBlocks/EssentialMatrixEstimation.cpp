@@ -49,7 +49,7 @@ namespace DO::Sara {
     inlier_predicate.err_threshold = err_thres;
 
     const auto [E, inliers, sample_best] =
-        ransac_v2(Xij, ESolver{}, inlier_predicate, num_samples);
+        ransac(Xij, ESolver{}, inlier_predicate, num_samples);
 
     SARA_CHECK(E);
     SARA_CHECK(inliers.row_vector());

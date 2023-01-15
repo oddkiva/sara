@@ -116,7 +116,7 @@ auto estimate_homography(const KeypointList<OERegion, float>& keys1,
   auto inlier_predicate = InlierPredicate<SymmetricTransferError>{};
   inlier_predicate.err_threshold = h_err_thres;
 
-  const auto [H, inliers, sample_best] = ransac_v2(
+  const auto [H, inliers, sample_best] = ransac(
       X, FourPointAlgorithm{}, inlier_predicate, num_samples, data_normalizer);
   return std::make_tuple(H, inliers, sample_best);
 }
