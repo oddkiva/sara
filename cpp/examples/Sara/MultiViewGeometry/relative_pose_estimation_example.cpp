@@ -175,10 +175,12 @@ int sara_graphics_main(int argc, char** argv)
     s1(j) = s1j;
     s2(j) = s2j;
     ++j;
-
   }
   if (!(s1.array() > 0 && s2.array() > 0).all())
     throw std::runtime_error{"Uh Oh.... Cheirality is wrong!"};
+
+  // N.B.: if this is too restrictive we may just testing the cheirality
+  // partially at least (s1.array() > 0)
 
 
   return 0;
