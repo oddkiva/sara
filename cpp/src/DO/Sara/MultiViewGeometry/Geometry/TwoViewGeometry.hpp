@@ -11,8 +11,10 @@
 
 #pragma once
 
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
+
+#include <iostream>
 
 
 namespace DO::Sara {
@@ -28,6 +30,27 @@ namespace DO::Sara {
     Eigen::VectorXd scales1;
     Eigen::VectorXd scales2;
     Eigen::Array<bool, 1, Eigen::Dynamic> cheirality;
+
+    friend auto operator<<(std::ostream& os, const TwoViewGeometry& g) -> std::ostream&
+    {
+      os << "Camera matrices\n";
+      os << "C[1] =\n" << g.C1.matrix() << "\n";
+      os << "C[2] =\n" << g.C2.matrix() << "\n";
+
+      os << "Triangulated points\n";
+      const Eigen::MatrixXd C1X = g.C1.matrix() * g.X;
+      const Eigen::MatrixXd C2X = g.C2.matrix() * g.X;
+      os << "X[1] =\n" << C1X << "\n";
+      os << "X[2] =\n" << C2X << "\n";
+
+      os << "Triangulated points\n";
+      os << "scales[1] =\n" << g.scales1.transpose() << "\n";
+      os << "scales[2] =\n" << g.scales2.transpose() << "\n";
+
+      os << "Cheirality " << g.cheirality << "\n";
+
+      return os;
+    }
   };
 
   inline auto two_view_geometry(const Motion& m, const MatrixXd& u1,
@@ -38,7 +61,8 @@ namespace DO::Sara {
     const Matrix34d P1 = C1;
     const Matrix34d P2 = C2;
     const auto [X, s1, s2] = triangulate_linear_eigen(P1, P2, u1, u2);
-    const auto cheirality = relative_motion_cheirality_predicate(X, P2);
+    const Eigen::Array<bool, 1, Eigen::Dynamic> cheirality =
+        relative_motion_cheirality_predicate(X, P2);
     return {C1, C2, X, s1, s2, cheirality};
   }
 

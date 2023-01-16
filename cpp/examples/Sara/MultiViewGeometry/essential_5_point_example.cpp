@@ -127,9 +127,11 @@ int sara_graphics_main(int argc, char** argv)
   const auto u = std::array{homogeneous(extract_centers(f0)).cast<double>(),
                             homogeneous(extract_centers(f1)).cast<double>()};
   // Tensors of camera coordinates.
-  const auto un = std::array{apply_transform(K_inv[0], u[0]),
+  auto un = std::array{apply_transform(K_inv[0], u[0]),
                              apply_transform(K_inv[1], u[1])};
-  static_assert(std::is_same_v<decltype(un[0]), const Tensor_<double, 2>&>);
+  // Normalize backprojected rays to unit norm.
+  for (auto i = 0u; i < un.size(); ++i)
+    un[i].colmajor_view().matrix().colwise().normalize();
   // List the matches as a 2D-tensor where each row encodes a match 'm' as a
   // pair of point indices (i, j).
   const auto M = to_tensor(matches);

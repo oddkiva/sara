@@ -15,6 +15,7 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/Homography.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
 #include <DO/Sara/MultiViewGeometry/PointCorrespondenceList.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
@@ -112,7 +113,7 @@ namespace DO::Sara {
 
 
   template <>
-  struct Normalizer<EssentialMatrix> : public Normalizer<FundamentalMatrix>
+  struct Normalizer<EssentialMatrix> final : public Normalizer<FundamentalMatrix>
   {
     using Base = Normalizer<FundamentalMatrix>;
 
@@ -125,6 +126,32 @@ namespace DO::Sara {
     inline Normalizer(const PointCorrespondenceList<double>& matches)
       : Base{matches}
     {
+    }
+  };
+
+  template <>
+  struct Normalizer<TwoViewGeometry>
+  {
+    using Base = Normalizer<EssentialMatrix>;
+
+    inline Normalizer(const TensorView_<double, 2>&,
+                      const TensorView_<double, 2>&)
+    {
+    }
+
+    inline Normalizer(const PointCorrespondenceList<double>&)
+    {
+    }
+
+    inline auto normalize(const PointCorrespondenceList<double>& X) const
+        -> PointCorrespondenceList<double>
+    {
+      return X;
+    }
+
+    inline auto denormalize(const TwoViewGeometry& g) const -> TwoViewGeometry
+    {
+      return g;
     }
   };
 

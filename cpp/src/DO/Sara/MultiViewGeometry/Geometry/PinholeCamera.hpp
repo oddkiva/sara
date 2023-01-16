@@ -62,6 +62,7 @@ namespace DO::Sara {
                                             const Matrix34d& P)
       -> Eigen::Array<bool, 1, Eigen::Dynamic>;
 
+
   //! @}
 
 } /* namespace DO::Sara */

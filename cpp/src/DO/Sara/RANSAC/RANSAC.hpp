@@ -57,7 +57,8 @@ namespace DO::Sara {
               InlierPredicateType inlier_predicate,  //
               const int num_samples,                 //
               const std::optional<Normalizer<typename ModelSolver::model_type>>&
-                  data_normalizer = std::nullopt)      //
+                  data_normalizer = std::nullopt,
+              bool verbose = false)                    //
       -> std::tuple<typename ModelSolver::model_type,  //
                     Tensor_<bool, 1>,                  //
                     Tensor_<int, 1>>                   //
@@ -111,12 +112,13 @@ namespace DO::Sara {
           inliers_best.flat_array() = inliers;
           subset_best = minimal_index_subsets[n];
 
-#ifdef TODO_ADD_VISITOR
-          SARA_DEBUG << "n = " << n << "\n";
-          SARA_DEBUG << "model_best = \n" << model_best << "\n";
-          SARA_DEBUG << "num inliers = " << num_inliers << "\n";
-          SARA_CHECK(subset_best.row_vector());
-#endif
+          if (verbose)
+          {
+            SARA_DEBUG << "n = " << n << "\n";
+            SARA_DEBUG << "model_best = \n" << model_best << "\n";
+            SARA_DEBUG << "num inliers = " << num_inliers << "\n";
+            SARA_CHECK(subset_best.row_vector());
+          }
         }
       }
     }

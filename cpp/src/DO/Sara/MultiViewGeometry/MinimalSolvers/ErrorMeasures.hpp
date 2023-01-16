@@ -13,7 +13,6 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
 
 
 namespace DO::Sara {
@@ -79,42 +78,6 @@ namespace DO::Sara {
 
     Eigen::Matrix3d H_;
     Eigen::Matrix3d H_inv_;
-  };
-
-
-  //! @brief Joint cheirality and epipolar consistency for RANSAC.
-  struct CheiralAndEpipolarConsistency
-  {
-    using Model = TwoViewGeometry;
-
-    Model geometry;
-    EpipolarDistance distance;
-    double err_threshold;
-
-    auto set_model(const Model& g)
-    {
-      geometry = g;
-    }
-
-    // N.B.: this is not a const method. This triangulates the points from the
-    // point correspondences and updates the cheirality.
-    template <typename Mat>
-    auto operator()(const Mat& u1, const Mat& u2)
-        -> Eigen::Array<bool, 1, Eigen::Dynamic>
-    {
-      const auto epipolar_consistent = distance(u1, u2).array() < err_threshold;
-
-      const Matrix34d P1 = geometry.C1;
-      const Matrix34d P2 = geometry.C2;
-
-      auto& X = geometry.X;
-      auto& cheirality = geometry.cheirality;
-
-      X = triangulate_linear_eigen(P1, P2, u1, u2);
-      cheirality = relative_motion_cheirality_predicate(X, P2);
-
-      return epipolar_consistent && cheirality;
-    }
   };
 
   //! @}
