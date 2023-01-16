@@ -11,6 +11,7 @@
 
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/LevelSets/FastMarching.hpp>
 
@@ -40,12 +41,12 @@ auto fast_marching_2d() -> void
 {
 #define REAL_IMAGE
 #ifdef REAL_IMAGE
-  const auto image = sara::imread<float>(                       //
-#ifdef __APPLE__
-      "/Users/david/GitLab/DO-CV/sara/data/stinkbug.png"        //
-#else
-      "/home/david/GitLab/DO-CV/sara/data/stinkbug.png"        //
-#endif
+  const auto image = sara::imread<float>(  //
+#  ifdef __APPLE__
+      "/Users/david/GitLab/DO-CV/sara/data/stinkbug.png"  //
+#  else
+      "/home/david/GitLab/DO-CV/sara/data/stinkbug.png"  //
+#  endif
   );
 
   constexpr auto sigma = 3.f;
@@ -59,9 +60,9 @@ auto fast_marching_2d() -> void
   static_assert(std::is_same_v<decltype(image_blurred), decltype(grad_mag)>);
 
   // Create the speed function from the gradient magnitude.
-  auto speed_times_dt = grad_mag.cwise_transform(
-      [](const auto& v) { return std::exp(-v); }  //
-  );
+  auto speed_times_dt =
+      grad_mag.cwise_transform([](const auto& v) { return std::exp(-v); }  //
+      );
 
   // Extract the zero level set.
   const auto zeros = sara::extract_zero_level_set(laplacian);
@@ -74,7 +75,7 @@ auto fast_marching_2d() -> void
   auto speed_times_dt = sara::Image<float, 2>{w, h};
   speed_times_dt.flat_array().fill(1);
 
-  const auto zeros = std::vector{Eigen::Vector2i(w/2, h/2)};
+  const auto zeros = std::vector{Eigen::Vector2i(w / 2, h / 2)};
 
   sara::create_window(image.sizes());
 #endif
@@ -113,7 +114,7 @@ auto fast_marching_3d() -> void
   auto speed_times_dt = sara::Image<float, 3>{w, h, d};
   speed_times_dt.flat_array().fill(1);
 
-  const auto zeros = std::vector{Eigen::Vector3i(w/2, h/2, d/2)};
+  const auto zeros = std::vector{Eigen::Vector3i(w / 2, h / 2, d / 2)};
 
   // Fast marching.
   sara::tic();
