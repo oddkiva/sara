@@ -53,6 +53,10 @@ namespace DO::Sara {
     return BasicPinholeCamera{Eigen::Matrix3d::Identity(), m.R, m.t};
   }
 
+  //! We should stop using these functions and it won't work on 360 cameras or
+  //! ultra-wide fisheye cameras!
+  //!
+  //! @{
   DO_SARA_EXPORT
   auto cheirality_predicate(const Eigen::MatrixXd& X)
       -> Eigen::Array<bool, 1, Eigen::Dynamic>;
@@ -61,6 +65,7 @@ namespace DO::Sara {
   auto relative_motion_cheirality_predicate(const Eigen::MatrixXd& X,
                                             const Matrix34d& P)
       -> Eigen::Array<bool, 1, Eigen::Dynamic>;
+  //! @}
 
 
   //! @}

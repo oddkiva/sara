@@ -33,7 +33,7 @@ namespace DO::Sara {
     // point correspondences and updates the cheirality.
     template <typename Derived>
     auto operator()(const Eigen::MatrixBase<Derived>& u1,
-                    const Eigen::MatrixBase<Derived>& u2)
+                    const Eigen::MatrixBase<Derived>& u2) const
         -> Eigen::Array<bool, 1, Eigen::Dynamic>
     {
       const auto epipolar_consistent = distance(u1, u2).array() < err_threshold;
@@ -41,9 +41,8 @@ namespace DO::Sara {
       const Matrix34d P1 = geometry.C1;
       const Matrix34d P2 = geometry.C2;
 
-      const auto X = triangulate_linear_eigen(P1, P2, u1, u2);
-      const auto cheirality = cheirality_predicate(X) &&
-                              relative_motion_cheirality_predicate(X, P2);
+      const auto [X, s1, s2] = triangulate_linear_eigen(P1, P2, u1, u2);
+      const auto cheirality = (s1.transpose().array()) > 0 && (s2.transpose().array() > 0);
 
       return epipolar_consistent && cheirality;
     }
@@ -53,9 +52,8 @@ namespace DO::Sara {
     inline auto operator()(const PointCorrespondenceList<T>& m) const
         -> Array<bool, 1, Dynamic>
     {
-      return distance(m._p1.colmajor_view().matrix(),
-                      m._p2.colmajor_view().matrix())
-                 .array() < err_threshold;
+      return this->operator()(m._p1.colmajor_view().matrix(),
+                              m._p2.colmajor_view().matrix());
     }
   };
 

@@ -132,7 +132,6 @@ int sara_graphics_main(int argc, char** argv)
 
   SARA_DEBUG << "Geometry =\n" << geometry << std::endl;
   SARA_DEBUG << "inliers count = " << inliers.flat_array().count() << std::endl;
-  SARA_DEBUG << "Num 3D points = " << geometry.X.cols() << std::endl;
 
   // Retrieve the essential matrix.
   print_stage("Saving the data from the essential matrix estimation...");
@@ -156,10 +155,10 @@ int sara_graphics_main(int argc, char** argv)
 
   // Retrieve all the 3D points by triangulation.
   print_stage("Retriangulating the inliers...");
-  auto& X3d = geometry.X;
+  auto& points = geometry.X;
   auto& s1 = geometry.scales1;
   auto& s2 = geometry.scales2;
-  X3d.resize(4, inliers.flat_array().count());
+  points.resize(4, inliers.flat_array().count());
   s1.resize(inliers.flat_array().count());
   s2.resize(inliers.flat_array().count());
   for (auto i = 0, j = 0; i < inliers.size(0); ++i)
@@ -172,16 +171,13 @@ int sara_graphics_main(int argc, char** argv)
     const auto [Xj, s1j, s2j] = triangulate_single_point_linear_eigen(
         geometry.C1.matrix(), geometry.C2.matrix(), u1, u2);
 
-    X3d.col(j) = Xj;
+    points.col(j) = Xj;
     s1(j) = s1j;
     s2(j) = s2j;
-    if (X3d.col(j)(2) <= 0)
-      std::cout << j << " -> " << X3d.col(j).transpose() << std::endl;
     ++j;
 
   }
-
-  if (!(X3d.row(2).array() > 0).all())
+  if (!(s1.array() > 0 && s2.array() > 0).all())
     throw std::runtime_error{"Uh Oh.... Cheirality is wrong!"};
 
 
