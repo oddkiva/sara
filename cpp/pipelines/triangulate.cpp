@@ -190,7 +190,7 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath,
     h5_file.get_group("two_view_geometries/colors");
     {
       // Get the left and right cameras.
-      auto cameras = Tensor_<BasicPinholeCamera, 1>{2};
+      auto cameras = Tensor_<PinholeCameraDecomposition, 1>{2};
       cameras(0) = geometry.C1;
       cameras(1) = geometry.C2;
 

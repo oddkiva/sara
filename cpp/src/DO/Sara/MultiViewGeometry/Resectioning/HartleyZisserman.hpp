@@ -22,7 +22,7 @@ namespace DO::Sara {
   template <typename T>
   auto resectioning_hartley_zisserman(const TensorView_<T, 2>& X,
                                       const TensorView_<T, 2>& x)
-      -> BasicPinholeCamera
+      -> PinholeCameraDecomposition
   {
     if (X.rows() != x.rows())
       throw std::runtime_error{"X and x must have the same number of points!"};

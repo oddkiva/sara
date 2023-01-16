@@ -22,7 +22,7 @@ namespace DO::Sara {
   //! @addtogroup MultiViewGeometry
   //! @{
 
-  struct BasicPinholeCamera
+  struct PinholeCameraDecomposition
   {
     operator Matrix34d() const
     {
@@ -45,28 +45,13 @@ namespace DO::Sara {
   inline auto normalized_camera(const Eigen::Matrix3d& R,
                                 const Eigen::Vector3d& t)
   {
-    return BasicPinholeCamera{Eigen::Matrix3d::Identity(), R, t};
+    return PinholeCameraDecomposition{Eigen::Matrix3d::Identity(), R, t};
   }
 
   inline auto normalized_camera(const Motion& m = Motion{})
   {
-    return BasicPinholeCamera{Eigen::Matrix3d::Identity(), m.R, m.t};
+    return PinholeCameraDecomposition{Eigen::Matrix3d::Identity(), m.R, m.t};
   }
-
-  //! We should stop using these functions and it won't work on 360 cameras or
-  //! ultra-wide fisheye cameras!
-  //!
-  //! @{
-  DO_SARA_EXPORT
-  auto cheirality_predicate(const Eigen::MatrixXd& X)
-      -> Eigen::Array<bool, 1, Eigen::Dynamic>;
-
-  DO_SARA_EXPORT
-  auto relative_motion_cheirality_predicate(const Eigen::MatrixXd& X,
-                                            const Matrix34d& P)
-      -> Eigen::Array<bool, 1, Eigen::Dynamic>;
-  //! @}
-
 
   //! @}
 

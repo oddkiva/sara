@@ -42,9 +42,9 @@ auto generate_test_data()
 
   const auto E = essential_matrix(R, t);
 
-  const Matrix34d C1 = BasicPinholeCamera{
+  const Matrix34d C1 = PinholeCameraDecomposition{
       Matrix3d::Identity(), Matrix3d::Identity(), Vector3d::Zero()};
-  const Matrix34d C2 = BasicPinholeCamera{Matrix3d::Identity(), R, t};
+  const Matrix34d C2 = PinholeCameraDecomposition{Matrix3d::Identity(), R, t};
   MatrixXd x1 = C1 * X;
   x1.array().rowwise() /= x1.row(2).array();
   MatrixXd x2 = C2 * X;
@@ -125,13 +125,19 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
   // correspondences.
   {
     // Cheirality with respect to P1 = [I|0].
-    BOOST_CHECK_EQUAL(cheirality_predicate(X.colwise().hnormalized()).count(),
-                      5);
-    BOOST_CHECK_EQUAL(cheirality_predicate(X).count(), 5);
+    const auto z1 = X.colwise().hnormalized().row(2);
+    BOOST_CHECK((z1.array() > 0).all());
     // Cheirality with respect to P2 = [R|t].
+    SARA_CHECK("OK");
     const Matrix34d P2 = normalized_camera(*motion_found);
-    BOOST_CHECK_EQUAL(cheirality_predicate(P2 * X).count(), 5);
-    BOOST_CHECK_EQUAL(relative_motion_cheirality_predicate(X, P2).count(), 5);
+    const Eigen::MatrixXd X2 = P2 * X;
+    const auto z2 = X2.colwise().hnormalized().row(2);
+    BOOST_CHECK((z2.array() > 0).all());
+
+    auto [X_est, s1, s2] = triangulate_linear_eigen(P1, P2, x1, x2);
+    BOOST_CHECK((X_est.row(2).array() > 0).all());
+    BOOST_CHECK((s1.array() > 0).all());
+    BOOST_CHECK((s2.array() > 0).all());
   }
 
   for (auto motion = candidate_motions.begin();
@@ -141,9 +147,9 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
       continue;
 
     const Matrix34d P2_est = normalized_camera(motion->R, motion->t);
-    BOOST_CHECK(relative_motion_cheirality_predicate(X, P2_est).count() < 5);
 
     auto [X_est, s1, s2] = triangulate_linear_eigen(P1, P2_est, x1, x2);
+    BOOST_CHECK_LT((s1.array() > 0 && s2.array() > 0).count(), 5);
 
     SARA_DEBUG << "candidate camera =" << std::endl;
     std::cout << P2_est << std::endl;
@@ -169,8 +175,6 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
                << (X_est.row(2).array() > 0).all() << std::endl;
     SARA_DEBUG << "Count in front of camera P1 = "
                << (X_est.row(2).array() > 0).count() << std::endl;
-    SARA_DEBUG << "cheirality_check = " << cheirality_predicate(X_est)
-               << std::endl;
     std::cout << std::endl;
 
     SARA_DEBUG << "In front of camera P2 = "
@@ -179,8 +183,6 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
                << ((P2_est * X_est).row(2).array() > 0).all() << std::endl;
     SARA_DEBUG << "Count in front of camera P2 = "
                << ((P2_est * X_est).row(2).array() > 0).count() << std::endl;
-    SARA_DEBUG << "cheirality_check = " << cheirality_predicate(P2_est * X_est)
-               << std::endl;
 
     std::cout << std::endl;
     std::cout << std::endl;

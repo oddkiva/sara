@@ -167,8 +167,7 @@ namespace DO::Sara {
     SARA_CHECK(inliers.flat_array().count());
 
     SARA_DEBUG << "Calculating cheirality..." << std::endl;
-    best_geom->cheirality =
-        relative_motion_cheirality_predicate(best_geom->X, P2);
+    best_geom->cheirality = scales1.array() > 0 && scales2.array() > 0;
     SARA_CHECK(best_geom->cheirality.count());
 
     SARA_DEBUG
@@ -197,8 +196,8 @@ namespace DO::Sara {
     for (int i = 0; i < X_cheiral.size(0); ++i)
       complete_geom.X.col(i) = X_cheiral(i);
 
-    complete_geom.cheirality =
-        relative_motion_cheirality_predicate(complete_geom.X, P2);
+    // FIXME...
+    complete_geom.cheirality = X.row(2).array() > 0;
 
     SARA_DEBUG << "complete_geom.X =\n"
                << complete_geom.X.leftCols(10) << std::endl;

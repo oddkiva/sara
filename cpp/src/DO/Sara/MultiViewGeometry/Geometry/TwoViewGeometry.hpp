@@ -24,8 +24,8 @@ namespace DO::Sara {
 
   struct TwoViewGeometry
   {
-    BasicPinholeCamera C1;
-    BasicPinholeCamera C2;
+    PinholeCameraDecomposition C1;
+    PinholeCameraDecomposition C2;
     Eigen::MatrixXd X;
     Eigen::VectorXd scales1;
     Eigen::VectorXd scales2;
@@ -62,7 +62,7 @@ namespace DO::Sara {
     const Matrix34d P2 = C2;
     const auto [X, s1, s2] = triangulate_linear_eigen(P1, P2, u1, u2);
     const Eigen::Array<bool, 1, Eigen::Dynamic> cheirality =
-        relative_motion_cheirality_predicate(X, P2);
+        (s1.array() > 0 && s2.array() > 0);
     return {C1, C2, X, s1, s2, cheirality};
   }
 

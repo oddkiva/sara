@@ -85,8 +85,8 @@ auto generate_test_data() -> TestData
   F /= F.norm();
 
   const Matrix34d C1 =
-      BasicPinholeCamera{K1, Matrix3d::Identity(), Vector3d::Zero()};
-  const Matrix34d C2 = BasicPinholeCamera{K2, R, t};
+      PinholeCameraDecomposition{K1, Matrix3d::Identity(), Vector3d::Zero()};
+  const Matrix34d C2 = PinholeCameraDecomposition{K2, R, t};
 
   Eigen::MatrixXd x1 = (C1 * X).colwise().hnormalized();
   Eigen::MatrixXd x2 = (C2 * X).colwise().hnormalized();
