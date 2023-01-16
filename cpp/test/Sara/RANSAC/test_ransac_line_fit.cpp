@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_random_samples)
 
 BOOST_AUTO_TEST_CASE(test_robust_line_fit)
 {
-  auto points = PointList{Tensor_<double, 2>{6, 3}};
+  auto points = PointList<double, 2>{Tensor_<double, 2>{6, 3}};
   // clang-format off
   points._data.matrix() <<              0.00,                      0.00, 1,
                                         1.00,                      1.10, 1,
@@ -54,9 +54,8 @@ BOOST_AUTO_TEST_CASE(test_robust_line_fit)
   // clang-format on
 
   auto line_solver = LineSolver2D<double>{};
-  auto inlier_predicate = InlierPredicate{
-      LinePointDistance2D<double>{},  //
-      0.1                             //
+  auto inlier_predicate = InlierPredicate<LinePointDistance2D<double>>{
+      {}, 0.1  //
   };
   const auto& estimation = ransac(points,            //
                                   line_solver,       //
