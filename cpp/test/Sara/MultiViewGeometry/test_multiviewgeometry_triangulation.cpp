@@ -127,11 +127,11 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
     // Cheirality with respect to P1 = [I|0].
     const auto z1 = X.colwise().hnormalized().row(2);
     BOOST_CHECK((z1.array() > 0).all());
+
     // Cheirality with respect to P2 = [R|t].
-    SARA_CHECK("OK");
     const Matrix34d P2 = normalized_camera(*motion_found);
-    const Eigen::MatrixXd X2 = P2 * X;
-    const auto z2 = X2.colwise().hnormalized().row(2);
+    const Eigen::MatrixXd X2 = (P2 * X);
+    const auto z2 = X2.row(2);
     BOOST_CHECK((z2.array() > 0).all());
 
     auto [X_est, s1, s2] = triangulate_linear_eigen(P1, P2, x1, x2);
