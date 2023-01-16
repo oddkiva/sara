@@ -15,9 +15,6 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <algorithm>
-#include <random>
-
 
 namespace DO::Sara {
 
@@ -27,8 +24,9 @@ namespace DO::Sara {
    *  @{
    */
 
-  //! @brief Geometry.
+  //! @brief Elementary transformations.
   //! @{
+
   template <typename T>
   inline auto homogeneous(const TensorView_<T, 2>& x) -> Tensor_<T, 2>
   {
@@ -38,69 +36,6 @@ namespace DO::Sara {
     return X;
   }
 
-  template <typename S>
-  inline auto compute_normalizer(const TensorView_<S, 2>& X) -> Matrix<S, 3, 3>
-  {
-    auto slope = Eigen::RowVector2<S>{};
-    auto offset = Eigen::RowVector2<S>{};
-
-    if (X.size(1) == 2)
-    {
-      const Eigen::RowVector2<S> min = X.matrix().colwise().minCoeff();
-      const Eigen::RowVector2<S> max = X.matrix().colwise().maxCoeff();
-
-      slope = (max - min).cwiseInverse();
-      offset = -min.cwiseQuotient(max - min);
-    }
-    else if (X.size(1) == 3)
-    {
-      const Eigen::RowVector3<S> min = X.matrix().colwise().minCoeff();
-      const Eigen::RowVector3<S> max = X.matrix().colwise().maxCoeff();
-
-      slope = (max - min).cwiseInverse().head(2);
-      offset = -min.cwiseQuotient(max - min).head(2);
-    }
-    else
-      throw std::runtime_error{
-          "To compute the normalization matrix the input data "
-          "dimension must be 2 or 3!"};
-
-
-    auto T = Eigen::Matrix<S, 3, 3>{};
-    T.setZero();
-    T.template topLeftCorner<2, 2>() = slope.asDiagonal();
-    T.col(2) << offset.transpose(), S(1);
-
-    return T;
-  }
-
-  template <typename S>
-  inline auto apply_transform(const Matrix<S, 3, 3>& T,
-                              const TensorView_<S, 2>& X) -> Tensor_<S, 2>
-  {
-    auto TX = Tensor_<S, 2>{X.sizes()};
-    auto TX_ = TX.colmajor_view().matrix();
-
-    const auto X_matrix = X.colmajor_view().matrix();
-
-    if (X.size(1) == 2)
-      TX_ = (T * X_matrix.colwise().homogeneous()).colwise().hnormalized();
-    else if (X.size(1) == 3)
-    {
-      TX_ = T * X_matrix;
-      TX_.array().rowwise() /= TX_.array().row(2);
-    }
-    else
-      throw std::runtime_error{"To apply the transform the input data "
-                               "dimension must be 2 or 3!"};
-
-    return TX;
-  }
-  //! @}
-
-
-  //! @brief Elementary transformations.
-  //! @{
   inline auto cofactors_transposed(const Matrix3d& E)
   {
     Matrix3d cofE;

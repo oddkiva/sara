@@ -164,3 +164,16 @@ BOOST_AUTO_TEST_CASE(test_indexing)
   for (int i = 0; i < N * C * H * W; ++i)
     BOOST_CHECK_EQUAL(x.flat_array()(i), float(i));
 };
+
+BOOST_AUTO_TEST_CASE(test_array_and_operator)
+{
+  auto p1 = Eigen::Array<bool, 1, Eigen::Dynamic>{1, 5};
+  auto p2 = Eigen::Array<bool, 1, Eigen::Dynamic>{1, 5};
+  p1 << true,  false, false, true, true;
+  p2 << false, true,  false, true, true;
+  const Eigen::Array<bool, 1, Eigen::Dynamic> p3 = p1 && p2;
+  auto p3_true = Eigen::Array<bool, 1, Eigen::Dynamic>{1, 5};
+  p3_true << false, false, false, true, true;
+  BOOST_CHECK((p3 == p3_true).all());
+  std::cout << p3 << std::endl;
+}

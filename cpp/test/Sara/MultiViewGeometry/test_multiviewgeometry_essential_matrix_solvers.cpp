@@ -16,9 +16,9 @@
 #include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/TensorDebug.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -162,46 +162,6 @@ BOOST_AUTO_TEST_CASE(test_to_coordinates)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_compute_normalizer)
-{
-  auto X = Tensor_<float, 2>{3, 3};
-  X.matrix() <<
-    1, 1, 1,
-    2, 2, 1,
-    3, 3, 1;
-
-  auto T = compute_normalizer(X);
-
-  Matrix3f expected_T;
-  expected_T <<
-    0.5, 0.0, -0.5,
-    0.0, 0.5, -0.5,
-    0.0, 0.0,  1.0;
-
-  BOOST_CHECK((T - expected_T).norm() < 1e-12);
-}
-
-BOOST_AUTO_TEST_CASE(test_apply_transform)
-{
-  auto X = Tensor_<double, 2>{3, 3};
-  X.matrix() <<
-    1, 1, 1,
-    2, 2, 1,
-    3, 3, 1;
-
-  // From Oxford affine covariant features dataset, graf, H1to5P homography.
-  auto H = Matrix3d{};
-  H <<
-    6.2544644e-01,  5.7759174e-02,  2.2201217e+02,
-    2.2240536e-01,  1.1652147e+00, -2.5605611e+01,
-    4.9212545e-04, -3.6542424e-05,  1.0000000e+00;
-
-  auto HX = apply_transform(H, X);
-
-  BOOST_CHECK(HX.matrix().col(2) == Vector3d::Ones());
-}
-
-
 BOOST_AUTO_TEST_CASE(test_skew_symmetric_matrix)
 {
   Vector3f t{1, 2, 3};
@@ -244,10 +204,10 @@ auto generate_test_data() -> TestData
 
   const auto E = essential_matrix(R, t);
 
-  const Matrix34d C1 = BasicPinholeCamera{Matrix3d::Identity(),
+  const Matrix34d C1 = PinholeCameraDecomposition{Matrix3d::Identity(),
                                           Matrix3d::Identity(),
                                           Vector3d::Zero()};
-  const Matrix34d C2 = BasicPinholeCamera{Matrix3d::Identity(), R, t};
+  const Matrix34d C2 = PinholeCameraDecomposition{Matrix3d::Identity(), R, t};
   MatrixXd x1 = C1 * X; x1.array().rowwise() /= x1.row(2).array();
   MatrixXd x2 = C2 * X; x2.array().rowwise() /= x2.row(2).array();
 

@@ -69,14 +69,14 @@ inline auto make_camera(double x, double y, double z)
   return DO::Sara::normalized_camera(R, t);
 }
 
-inline auto to_camera_coordinates(const DO::Sara::BasicPinholeCamera& C,
+inline auto to_camera_coordinates(const DO::Sara::PinholeCameraDecomposition& C,
                                   const Eigen::MatrixXd& X) -> Eigen::MatrixXd
 {
   Eigen::MatrixXd X1 = (C.R * X.topRows(3)).colwise() + C.t;
   return X1.colwise().homogeneous();
 }
 
-inline auto project_to_film(const DO::Sara::BasicPinholeCamera& C,
+inline auto project_to_film(const DO::Sara::PinholeCameraDecomposition& C,
                             const Eigen::MatrixXd& X) -> Eigen::MatrixXd
 {
   auto xh = Eigen::MatrixXd{3, X.cols()};

@@ -22,9 +22,10 @@ namespace DO::Sara::v2 {
   struct PinholeCameraBase : CameraIntrinsicBase<Array>
   {
     using base_type = CameraIntrinsicBase<Array>;
-    using base_type::array_type;
-    using base_type::data;
+    using array_type = typename base_type::array_type;
     using T = typename Array::value_type;
+
+    using base_type::data;
 
     // clang-format off
     enum Index

@@ -57,9 +57,9 @@ auto generate_test_data() -> TestData
 
   const auto E = essential_matrix(R, t);
 
-  const Matrix34d C1 = BasicPinholeCamera{
+  const Matrix34d C1 = PinholeCameraDecomposition{
       Matrix3d::Identity(), Matrix3d::Identity(), Vector3d::Zero()};
-  const Matrix34d C2 = BasicPinholeCamera{Matrix3d::Identity(), R, t};
+  const Matrix34d C2 = PinholeCameraDecomposition{Matrix3d::Identity(), R, t};
   MatrixXd x1 = C1 * X;
   x1.array().rowwise() /= x1.row(2).array();
   MatrixXd x2 = C2 * X;

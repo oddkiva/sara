@@ -93,8 +93,8 @@ auto estimate_fundamental_matrix(const KeypointList<OERegion, float>& keys1,
   auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
   inlier_predicate.err_threshold = f_err_thres;
 
-  const auto [F, inliers, sample_best] = ransac_v2(
-      X, FEstimator{}, inlier_predicate, num_samples, data_normalizer);
+  const auto [F, inliers, sample_best] =
+      ransac(X, FEstimator{}, inlier_predicate, num_samples, data_normalizer);
 
   return std::make_tuple(F, inliers, sample_best);
 }

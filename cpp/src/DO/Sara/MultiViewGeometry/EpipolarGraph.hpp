@@ -17,10 +17,10 @@
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/Features/KeypointList.hpp>
 #include <DO/Sara/Match.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FundamentalMatrixSolvers.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FundamentalMatrixSolvers.hpp>
 
 
 namespace DO::Sara {
@@ -43,7 +43,7 @@ namespace DO::Sara {
     //!
     //! TODO: use more sophisticated camera to estimate distortion parameters
     //! later on.
-    std::vector<BasicPinholeCamera> cameras;
+    std::vector<PinholeCameraDecomposition> cameras;
 
     DO_SARA_EXPORT
     auto list_images(const std::string& dirpath) -> void;
@@ -100,10 +100,10 @@ namespace DO::Sara {
 
     DO_SARA_EXPORT
     auto initialize_edges(int num_vertices) -> void;
-    
+
     DO_SARA_EXPORT
     auto resize_fundamental_edge_list() -> void;
-    
+
     DO_SARA_EXPORT
     auto resize_essential_edge_list() -> void;
 

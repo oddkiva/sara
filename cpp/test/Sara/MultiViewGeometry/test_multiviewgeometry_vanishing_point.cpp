@@ -13,7 +13,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/Geometry/Algorithms/RobustEstimation/RANSAC.hpp>
 #include <DO/Sara/Geometry/Tools/Projective.hpp>
 
 #include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
@@ -28,7 +27,11 @@ using namespace DO::Sara;
 BOOST_AUTO_TEST_CASE(test_vp_detection)
 {
   const auto vp = Eigen::Vector3f(500, 500, 1);
-  auto lines = Tensor_<float, 2>{6, 3};
+
+  auto line_list = PointList<float, 2>{};
+  auto& lines = line_list._data;
+
+  lines = Tensor_<float, 2>{6, 3};
   auto lines_as_matrix = lines.matrix();
 
   constexpr auto radius = 100.f;
@@ -49,6 +52,6 @@ BOOST_AUTO_TEST_CASE(test_vp_detection)
   SARA_DEBUG << "lines_as_matrix =\n" << lines_as_matrix << std::endl;
 
   const auto& [vp_estimated, inliers, best_line_pair] =
-      find_dominant_vanishing_point(lines, 5.f, 100u);
+      find_dominant_vanishing_point(line_list, 5.f, 100u);
   BOOST_CHECK_LE((vp.hnormalized() - vp_estimated.hnormalized()).norm(), 5e-3f);
 }

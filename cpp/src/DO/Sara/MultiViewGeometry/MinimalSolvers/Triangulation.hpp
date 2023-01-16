@@ -32,7 +32,7 @@ namespace DO::Sara {
 
   DO_SARA_EXPORT
   auto triangulate_linear_eigen(const Matrix34d& P1, const Matrix34d& P2,
-                                   const MatrixXd& u1, const MatrixXd& u2)
+                                const MatrixXd& u1, const MatrixXd& u2)
       -> std::tuple<MatrixXd, VectorXd, VectorXd>;
   //! @}
 

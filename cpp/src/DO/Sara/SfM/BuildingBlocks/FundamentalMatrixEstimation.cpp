@@ -47,8 +47,8 @@ namespace DO::Sara {
     auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
     inlier_predicate.err_threshold = err_thres;
 
-    const auto [F, inliers, sample_best] = ransac_v2(
-        Xij, FSolver{}, inlier_predicate, num_samples, data_normalizer);
+    const auto [F, inliers, sample_best] =
+        ransac(Xij, FSolver{}, inlier_predicate, num_samples, data_normalizer);
 
 #ifdef DEBUG
     SARA_CHECK(F);

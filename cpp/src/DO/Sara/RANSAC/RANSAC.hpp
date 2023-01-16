@@ -52,13 +52,13 @@ namespace DO::Sara {
   template <DataPointListConcept DataPointList,  //
             MinimalSolverConcept ModelSolver,    //
             typename InlierPredicateType>
-  auto
-  ransac_v2(const DataPointList& data_points,      //
-            ModelSolver solver,                    //
-            InlierPredicateType inlier_predicate,  //
-            const int num_samples,                 //
-            const std::optional<Normalizer<typename ModelSolver::model_type>>&
-                data_normalizer = std::nullopt)        //
+  auto ransac(const DataPointList& data_points,      //
+              ModelSolver solver,                    //
+              InlierPredicateType inlier_predicate,  //
+              const int num_samples,                 //
+              const std::optional<Normalizer<typename ModelSolver::model_type>>&
+                  data_normalizer = std::nullopt,
+              bool verbose = false)                    //
       -> std::tuple<typename ModelSolver::model_type,  //
                     Tensor_<bool, 1>,                  //
                     Tensor_<int, 1>>                   //
@@ -72,7 +72,7 @@ namespace DO::Sara {
                          : X;
 
     // Define cardinality variables.
-    const auto& card_X = X.size();
+    const auto& card_X = static_cast<int>(X.size());
     if (card_X < ModelSolver::num_points)
       throw std::runtime_error{"Not enough data points!"};
 
@@ -112,10 +112,13 @@ namespace DO::Sara {
           inliers_best.flat_array() = inliers;
           subset_best = minimal_index_subsets[n];
 
-          SARA_DEBUG << "n = " << n << "\n";
-          SARA_DEBUG << "model_best = \n" << model_best << "\n";
-          SARA_DEBUG << "num inliers = " << num_inliers << "\n";
-          SARA_CHECK(subset_best.row_vector());
+          if (verbose)
+          {
+            SARA_DEBUG << "n = " << n << "\n";
+            SARA_DEBUG << "model_best = \n" << model_best << "\n";
+            SARA_DEBUG << "num inliers = " << num_inliers << "\n";
+            SARA_CHECK(subset_best.row_vector());
+          }
         }
       }
     }
@@ -137,13 +140,22 @@ namespace DO::Sara {
     }
 
     //! @brief Calculate inlier predicate on a batch of correspondences.
-    template <typename Mat>
-    inline auto operator()(const Mat& x, const Mat& y) const
-        -> Array<bool, 1, Dynamic>
+    template <typename Derived>
+    inline auto operator()(const Eigen::MatrixBase<Derived>& x) const
+        -> Eigen::Array<bool, 1, Dynamic>
     {
-      return distance(x, y).array() < err_threshold;
+      return distance(x).array() < err_threshold;
     }
 
+    //! @brief Check the inlier predicate on a batch of data points.
+    template <typename T, int D>
+    inline auto operator()(const PointList<T, D>& X) const
+        -> Array<bool, 1, Dynamic>
+    {
+      return distance(X._data.colmajor_view().matrix()).array() < err_threshold;
+    }
+
+    //! @brief Check the inlier predicate on a list of correspondences.
     template <typename T>
     inline auto operator()(const PointCorrespondenceList<T>& m) const
         -> Array<bool, 1, Dynamic>
@@ -165,7 +177,7 @@ namespace DO::Sara {
     inlier_predicate.distance = distance;
     inlier_predicate.err_threshold = err_threshold;
 
-    return ransac_v2(data_points, solver, inlier_predicate, num_samples);
+    return ransac(data_points, solver, inlier_predicate, num_samples);
   }
 
   //! @brief From vanilla RANSAC
