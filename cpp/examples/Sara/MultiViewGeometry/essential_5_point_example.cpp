@@ -128,7 +128,7 @@ int sara_graphics_main(int argc, char** argv)
                             homogeneous(extract_centers(f1)).cast<double>()};
   // Tensors of camera coordinates.
   auto un = std::array{apply_transform(K_inv[0], u[0]),
-                             apply_transform(K_inv[1], u[1])};
+                       apply_transform(K_inv[1], u[1])};
   // Normalize backprojected rays to unit norm.
   for (auto i = 0u; i < un.size(); ++i)
     un[i].colmajor_view().matrix().colwise().normalize();
