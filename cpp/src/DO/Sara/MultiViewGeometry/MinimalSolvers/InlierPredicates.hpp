@@ -41,12 +41,9 @@ namespace DO::Sara {
       const Matrix34d P1 = geometry.C1;
       const Matrix34d P2 = geometry.C2;
 
-      auto& X = geometry.X;
-      auto& cheirality = geometry.cheirality;
-
-      X = triangulate_linear_eigen(P1, P2, u1, u2);
-      cheirality = cheirality_predicate(X) &&
-                   relative_motion_cheirality_predicate(X, P2);
+      const auto X = triangulate_linear_eigen(P1, P2, u1, u2);
+      const auto cheirality = cheirality_predicate(X) &&
+                              relative_motion_cheirality_predicate(X, P2);
 
       return epipolar_consistent && cheirality;
     }
