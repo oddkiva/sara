@@ -1,3 +1,6 @@
+# You still need this cumbersome thing to make the tests pass.
+find_package(DO_Sara REQUIRED)
+
 project(DO_Sara_Core_Tests)
 
 file(GLOB test_core_SOURCE_FILES FILES *.cpp)
