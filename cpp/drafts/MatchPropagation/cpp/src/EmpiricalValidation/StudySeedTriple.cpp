@@ -20,8 +20,8 @@
 
 #include "StudySeedTriple.hpp"
 
-#include <DO/Sara/Visualization.hpp>
 #include "GrowRegion.hpp"
+#include <DO/Sara/Visualization.hpp>
 
 
 using namespace std;
@@ -31,7 +31,7 @@ namespace DO::Sara {
 
   bool StudySeedTriple::operator()(float inlier_thres, float squared_ell)
   {
-    vector<double> successRates;
+    vector<double> success_rates;
     for (int j = 1; j < 6; ++j)
     {
       // View the image pair.
@@ -52,7 +52,7 @@ namespace DO::Sara {
         // Find inliers and outliers using ground truth homography.
         vector<size_t> inliers, outliers;
         get_inliers_and_outliers(inliers, outliers, M, dataset().H(j),
-                              inlier_thres);
+                                 inlier_thres);
         cout << "inliers.size() = " << inliers.size() << endl;
         cout << "outliers.size() = " << outliers.size() << endl;
 
@@ -65,18 +65,19 @@ namespace DO::Sara {
         const size_t max_region_size = 50;
         const size_t critical_size = 7;
 
-        DynamicMatchGraph G(M, growth_params.K(), growth_params.rho_min());
+        DynamicMatchGraph G(M, growth_params.K(),
+                            static_cast<float>(growth_params.rho_min()));
         int num_successes = 0;
         for (const auto& seed : inliers)
         {
           // Grow region from inliers seeds.
           GrowRegion grow_region(seed, G, growth_params);
-          const auto R =  grow_region(max_region_size, &drawer);
+          const auto R = grow_region(max_region_size, &drawer);
           if (R.size() > critical_size)
             ++num_successes;
         }
         double successRate = double(num_successes) / inliers.size();
-        successRates.push_back(successRate);
+        success_rates.push_back(successRate);
       }
       close_window_for_image_pair();
     }

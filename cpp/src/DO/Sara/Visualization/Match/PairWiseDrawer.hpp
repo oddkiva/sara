@@ -119,7 +119,7 @@ namespace DO { namespace Sara {
       return (i == 0) ? Point2i::Zero() : _off2;
     }
 
-    Point2f offF(int i) const
+    Point2f offset(int i) const
     {
       return off(i).cast<float>();
     }
@@ -136,7 +136,8 @@ namespace DO { namespace Sara {
 
     CatType _cat_type;
     Point2i _off2;
-    float _z1, _z2;
+    float _z1 = 1.f;
+    float _z2 = 1.f;
   };
 
   //! @}
