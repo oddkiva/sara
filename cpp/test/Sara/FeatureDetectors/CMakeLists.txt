@@ -5,6 +5,6 @@ foreach (file ${test_feature_detectors_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES DO::Sara::FeatureDetectors
+    DEPENDENCIES DO::Sara::ImageProcessing DO::Sara::FeatureDetectors
     FOLDER FeatureDetectors)
 endforeach ()
