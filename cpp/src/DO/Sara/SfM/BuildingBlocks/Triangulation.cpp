@@ -173,9 +173,6 @@ namespace DO::Sara {
     for (int i = 0; i < X_cheiral.size(0); ++i)
       complete_geom.X.col(i) = X_cheiral(i);
 
-    // FIXME...
-    complete_geom.cheirality = X.row(2).array() > 0;
-
     SARA_DEBUG << "complete_geom.X =\n"
                << complete_geom.X.leftCols(10) << std::endl;
     SARA_DEBUG << "complete_geom.cheirality = "
