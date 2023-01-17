@@ -180,20 +180,19 @@ BOOST_AUTO_TEST_CASE(test_reduce_single_channel)
 
 BOOST_AUTO_TEST_CASE(test_reduce_rgb)
 {
-  auto lambda = [](double lambda) { return Rgb64f{lambda, lambda, lambda}; };
-  auto src = Image<Rgb64f>{4, 4};
+  auto lambda = [](double lambda) { return sara::Rgb64f{lambda, lambda, lambda}; };
+  auto src = sara::Image<sara::Rgb64f>{4, 4};
   src(0, 0) = lambda(0); src(1, 0) = lambda(0.5); src(2, 0) = lambda(1); src(3, 0) = lambda(1);
   src(0, 1) = lambda(1); src(1, 1) = lambda(1.5); src(2, 1) = lambda(2); src(3, 1) = lambda(2);
   src(0, 2) = lambda(2); src(1, 2) = lambda(2.5); src(2, 2) = lambda(3); src(3, 2) = lambda(3);
   src(0, 3) = lambda(2); src(1, 3) = lambda(2.5); src(2, 3) = lambda(3); src(3, 3) = lambda(3);
 
-  auto true_dst = Image<Rgb64f>{2, 2};
+  auto true_dst = sara::Image<sara::Rgb64f>{2, 2};
   true_dst.matrix();
   true_dst(0, 0) = lambda(0); true_dst(1, 0) = lambda(1);
   true_dst(0, 1) = lambda(2); true_dst(1, 1) = lambda(3);
 
-  sara::Image<sara::Rgb64f> dst;
-  dst = sara::reduce(src, 2);
+  const auto dst = sara::reduce(src, 2);
 
   auto dst_pixel = dst.begin();
   auto true_dst_pixel = true_dst.begin();
