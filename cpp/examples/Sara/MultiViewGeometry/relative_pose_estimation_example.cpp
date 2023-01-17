@@ -11,6 +11,14 @@
 
 //! @example
 //! This program parses Strecha's datasets.
+//!
+//! Recovering the pose immediately after the estimated essential matrix and
+//! then counting the cheiral triangulated points does not work well.
+//! - This is slow because of the triangulation.
+//!
+//! Estimating the essential matrix first works and counting the inliers
+//! without worrying whether the triangulated points are cheiral just works
+//! better. Then after the pose recovery at the end just gives better results.
 
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -120,8 +128,8 @@ int sara_graphics_main(int argc, char** argv)
   const auto num_samples = argc < 6 ? 1000 : std::stoi(argv[5]);
   const auto err_thres = argc < 7 ? 5e-3 : std::stod(argv[6]);
 
-  auto solver = RelativePoseSolver<NisterFivePointAlgorithm>{
-      CheiralityCriterion::CHEIRAL_MOST};
+  auto solver =
+      RelativePoseSolver<NisterFivePointAlgorithm>{CheiralityCriterion::NONE};
 
   auto inlier_predicate = CheiralAndEpipolarConsistency{};
   inlier_predicate.err_threshold = err_thres;
