@@ -65,6 +65,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
 endif ()
 
 
+
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
 # Generate position independent code for static libraries.
 # (cf. EasyExif third-party library)
 if (SARA_BUILD_SHARED_LIBS)
