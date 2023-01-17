@@ -262,19 +262,11 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
   // instead of the two steps involving:
   //  (1) the SVD of the companion matrix
   //  (2) the root polishing using Sturm sequences.
-  auto roots = decltype(rpoly(n)){};
-  try
-  {
 #ifdef SHOW_DEBUG_LOG
-    SARA_DEBUG << "Root extraction of " << n << endl;
+  SARA_DEBUG << "Root extraction of " << n << endl;
 #endif
-    roots = rpoly(n);
-  }
-  catch (exception& e)
-  {
-    // And it's OK because some the 5 correspondences may be really wrong.
-    SARA_DEBUG << "Polynomial solver failed: " << e.what() << endl;
-  }
+  const auto rpoly_results = rpoly(n);
+  const auto& roots = rpoly_results.second;
 
 #ifdef SHOW_DEBUG_LOG
   SARA_DEBUG << "Extraction of xyz" << endl;

@@ -214,7 +214,8 @@ namespace DO::Sara {
     {
       NoConvergence = 0,
       LinearFactor_ = 1,
-      QuadraticFactor_ = 2
+      QuadraticFactor_ = 2,
+      AlgorithmFailure = 3
     };
     ConvergenceType cvg_type{NoConvergence};
 
@@ -259,7 +260,7 @@ namespace DO::Sara {
 
     //! @brief Find all the roots.
     DO_SARA_EXPORT
-    auto find_roots() -> std::vector<std::complex<double>>;
+    auto find_roots() -> std::pair<bool, std::vector<std::complex<double>>>;
   };
 
 
@@ -267,7 +268,8 @@ namespace DO::Sara {
   DO_SARA_EXPORT
   auto rpoly(const UnivariatePolynomial<double>& P,
              const int stage3_max_iter = 20, const double root_abs_tol = 1e-12,
-             const bool verbose = true) -> std::vector<std::complex<double>>;
+             const bool verbose = false)
+      -> std::pair<bool, std::vector<std::complex<double>>>;
 
   //! @}
 
