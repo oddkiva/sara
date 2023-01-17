@@ -18,24 +18,23 @@
 #include "AssertHelpers.hpp"
 
 
-using namespace std;
-using namespace DO::Sara;
+namespace sara = DO::Sara;
 
 BOOST_AUTO_TEST_SUITE(TestImageResize)
 
 BOOST_AUTO_TEST_CASE(test_upscale)
 {
-  auto src = Image<float>{2, 2};
+  auto src = sara::Image<float>{2, 2};
   // clang-format off
   src.matrix() <<
     0, 1,
     2, 3;
   // clang-format on
 
-  auto dst = Image<float>{};
-  dst = upscale(src, 2);
+  auto dst = sara::Image<float>{};
+  dst = sara::upscale(src, 2);
 
-  auto true_dst = Image<float>{4, 4};
+  auto true_dst = sara::Image<float>{4, 4};
   // clang-format off
   true_dst.matrix() <<
     0, 0, 1, 1,
@@ -48,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test_upscale)
 
 BOOST_AUTO_TEST_CASE(test_downscale)
 {
-  auto src = Image<float>{4, 4};
+  auto src = sara::Image<float>{4, 4};
   // clang-format off
   src.matrix() <<
     0, 0, 1, 1,
@@ -57,10 +56,10 @@ BOOST_AUTO_TEST_CASE(test_downscale)
     2, 2, 3, 3;
   // clang-format on
 
-  auto dst = Image<float>{};
-  dst = downscale(src, 2);
+  auto dst = sara::Image<float>{};
+  dst = sara::downscale(src, 2);
 
-  auto true_dst = Image<float>{2, 2};
+  auto true_dst = sara::Image<float>{2, 2};
   // clang-format off
   true_dst.matrix() <<
     0, 1,
@@ -71,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_downscale)
 
 BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
 {
-  auto src = Image<float>{5, 5};
+  auto src = sara::Image<float>{5, 5};
   for (int y = 0; y < src.height(); ++y)
     src.matrix().row(y).fill(static_cast<float>(y));
   // clang-format off
@@ -83,10 +82,10 @@ BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
     4, 4, 4, 4, 4;
   // clang-format on
 
-  auto dst = Image<float>{5, 10};
-  enlarge(src, dst);
+  auto dst = sara::Image<float>{5, 10};
+  sara::enlarge(src, dst);
 
-  auto true_dst = Image<float>{5, 10};
+  auto true_dst = sara::Image<float>{5, 10};
   // clang-format off
   true_dst.matrix() <<
     0.0, 0.0, 0.0, 0.0, 0.0,
@@ -106,14 +105,14 @@ BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
 
 BOOST_AUTO_TEST_CASE(test_enlarge)
 {
-  auto src = Image<float>{2, 2};
+  auto src = sara::Image<float>{2, 2};
   // clang-format off
   src.matrix() <<
     0, 1,
     2, 3;
   // clang-format on
 
-  auto true_dst = Image<float>{4, 4};
+  auto true_dst = sara::Image<float>{4, 4};
   // clang-format off
   true_dst.matrix() <<
     0, 0.5, 1, 1,
@@ -122,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_enlarge)
     2, 2.5, 3, 3;
   // clang-format on
 
-  auto dst = Image<float>{};
+  auto dst = sara::Image<float>{};
 
   dst = enlarge(src, {4, 4});
   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
@@ -133,18 +132,18 @@ BOOST_AUTO_TEST_CASE(test_enlarge)
 
 BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
 {
-  auto src = Image<float>{10, 10};
+  auto src = sara::Image<float>{10, 10};
   for (int y = 0; y < 10; ++y)
     src.matrix().row(y).fill(static_cast<float>(y));
 
-  auto dst = Image<float>{10, 5};
-  reduce(src, dst);
+  auto dst = sara::Image<float>{10, 5};
+  sara::reduce(src, dst);
 
   // Make the following check except for y = 0, which should be sorted out
   // later.
   for (int y = 1; y < dst.height(); ++y)
   {
-    auto true_value = RowVectorXf{10};
+    auto true_value = Eigen::RowVectorXf{10};
     true_value.fill(y * 2.f);
     BOOST_CHECK_LE(std::abs(true_value[0] - dst.matrix().row(y)[0]), 0.05);
   }
@@ -152,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
 
 BOOST_AUTO_TEST_CASE(test_reduce_single_channel)
 {
-  auto src = Image<float>{4, 4};
+  auto src = sara::Image<float>{4, 4};
   // clang-format off
   src.matrix() <<
     0, 0.5, 1, 1,
@@ -161,20 +160,22 @@ BOOST_AUTO_TEST_CASE(test_reduce_single_channel)
     2, 2.5, 3, 3;
   // clang-format on
 
-  auto true_dst = Image<float>{2, 2};
+  auto true_dst = sara::Image<float>{2, 2};
   // clang-format off
   true_dst.matrix() <<
     0, 1,
     2, 3;
   // clang-format on
 
-  auto dst = Image<float>{};
+  auto dst = sara::Image<float>{};
 
-  dst = reduce(src, {2, 2});
-  BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).lpNorm<Infinity>(), 0.4);
+  dst = sara::reduce(src, Eigen::Vector2i{2, 2});
+  BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).lpNorm<Eigen::Infinity>(),
+                 0.4);
 
-  dst = reduce(src, 2);
-  BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).lpNorm<Infinity>(), 0.4);
+  dst = sara::reduce(src, 2);
+  BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).lpNorm<Eigen::Infinity>(),
+                 0.4);
 }
 
 BOOST_AUTO_TEST_CASE(test_reduce_rgb)
@@ -191,29 +192,30 @@ BOOST_AUTO_TEST_CASE(test_reduce_rgb)
   true_dst(0, 0) = lambda(0); true_dst(1, 0) = lambda(1);
   true_dst(0, 1) = lambda(2); true_dst(1, 1) = lambda(3);
 
-  Image<Rgb64f> dst;
-  dst = reduce(src, 2);
+  sara::Image<sara::Rgb64f> dst;
+  dst = sara::reduce(src, 2);
 
   auto dst_pixel = dst.begin();
   auto true_dst_pixel = true_dst.begin();
   for (; dst_pixel != dst.end(); ++dst_pixel, ++true_dst_pixel)
-    BOOST_CHECK_LE((*true_dst_pixel - *dst_pixel).lpNorm<Infinity>(), 0.4);
+    BOOST_CHECK_LE((*true_dst_pixel - *dst_pixel).lpNorm<Eigen::Infinity>(),
+                   0.4);
 }
 
 BOOST_AUTO_TEST_CASE(test_resize)
 {
-  auto src = Image<float>{4, 4};
+  auto src = sara::Image<float>{4, 4};
   for (int y = 0; y < src.height(); ++y)
     src.matrix().row(y).fill(static_cast<float>(y));
 
   // Check case 1: inplace downscaling.
   {
-    auto dst = Image<float>{2, 2};
-    resize(src, dst);
+    auto dst = sara::Image<float>{2, 2};
+    sara::resize(src, dst);
 
     for (int y = 1; y < dst.height(); ++y)
     {
-      auto true_value = RowVectorXf{dst.width()};
+      auto true_value = Eigen::RowVectorXf{dst.width()};
       true_value.fill(y * 2.f);
       BOOST_CHECK_LE(std::abs(true_value[0] - dst.matrix().row(y)[0]), 0.05);
     }
@@ -221,19 +223,19 @@ BOOST_AUTO_TEST_CASE(test_resize)
 
   // Check case 2: inplace upscaling.
   {
-    auto dst = Image<float>{8, 8};
-    resize(src, dst);
+    auto dst = sara::Image<float>{8, 8};
+    sara::resize(src, dst);
 
     // Check the height.
     for (int y = 0; y < dst.height() - 1; ++y)
     {
-      auto true_value = RowVectorXf{dst.width()};
+      auto true_value = Eigen::RowVectorXf{dst.width()};
       true_value.fill(y / 2.f);
       BOOST_CHECK_LE((true_value - dst.matrix().row(y)).norm(), 1e-6);
     }
 
     // Check the last row.
-    BOOST_CHECK_LE((RowVectorXf::Ones(dst.width()) * 3 -
+    BOOST_CHECK_LE((Eigen::RowVectorXf::Ones(dst.width()) * 3 -
                     dst.matrix().row(dst.height() - 1))
                        .norm(),
                    1e-6);
@@ -241,25 +243,27 @@ BOOST_AUTO_TEST_CASE(test_resize)
 
   // Check case 3: inplace mixed between downscaling and upscaling.
   {
-    auto dst = Image<float>{8, 2};
-    resize(src, dst);
+    auto dst = sara::Image<float>{8, 2};
+    sara::resize(src, dst);
     BOOST_CHECK_LE(
-        (dst.matrix().row(1) - RowVectorXf::Ones(dst.width()) * 2).norm(),
+        (dst.matrix().row(1) - Eigen::RowVectorXf::Ones(dst.width()) * 2)
+            .norm(),
         1e-1f);
   }
 
   // Check case 3: same thing but instead this creates a new resized image.
   {
-    auto dst = resize(src, {8, 2});
+    auto dst = sara::resize(src, {8, 2});
     BOOST_CHECK_LE(
-        (dst.matrix().row(1) - RowVectorXf::Ones(dst.width()) * 2).norm(),
+        (dst.matrix().row(1) - Eigen::RowVectorXf::Ones(dst.width()) * 2)
+            .norm(),
         1e-1f);
   }
 }
 
 BOOST_AUTO_TEST_CASE(test_resize_while_preserving_ratio)
 {
-  auto src = Image<float>{4, 3};
+  auto src = sara::Image<float>{4, 3};
   // clang-format off
   src.matrix() <<
     0, 1, 2, 3,
@@ -267,7 +271,7 @@ BOOST_AUTO_TEST_CASE(test_resize_while_preserving_ratio)
     8, 9, 10, 11;
   // clang-format on
 
-  auto true_dst = Image<float>{8, 8};
+  auto true_dst = sara::Image<float>{8, 8};
   // clang-format off
   true_dst.matrix() <<
     0,   0, 0,   0,  0,    0,  0,  0,
@@ -281,8 +285,8 @@ BOOST_AUTO_TEST_CASE(test_resize_while_preserving_ratio)
   // clang-format on
 
   {
-    auto dst = Image<float>{8, 8};
-    const auto resize_image = SizeRatioPreservingImageResizer{};
+    auto dst = sara::Image<float>{8, 8};
+    const auto resize_image = sara::SizeRatioPreservingImageResizer{};
     const auto resize_info = resize_image(src, dst);
     BOOST_CHECK_LE((dst.matrix() - true_dst.matrix()).norm(), 1e-9);
 
@@ -309,7 +313,7 @@ BOOST_AUTO_TEST_CASE(test_resize_while_preserving_ratio)
   }
 
   {
-    const auto resize_image = SizeRatioPreservingImageResizer{};
+    const auto resize_image = sara::SizeRatioPreservingImageResizer{};
     const auto out = resize_image(src, {8, 8});
     const auto& dst = std::get<0>(out);
     BOOST_CHECK_LE((dst.matrix() - true_dst.matrix()).norm(), 1e-9);
