@@ -734,9 +734,10 @@ namespace DO::Sara {
 
       if (stage3_linear_factor() != ConvergenceType::LinearFactor_)
       {
-        SARA_DEBUG << "Uh oh: still no convergence...\n"
-                   << "Jenkins-Traub: stage3 fallback linear shift iterations "
-                      "failed!\n";
+        if (_verbose)
+          SARA_DEBUG << "Uh oh: still no convergence...\n"
+                     << "Jenkins-Traub: stage3 fallback linear shift "
+                        "iterations failed!\n";
         return ConvergenceType::AlgorithmFailure;
       }
 
