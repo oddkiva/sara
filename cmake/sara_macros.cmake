@@ -289,13 +289,6 @@ macro (sara_append_library _library_name
       ${DO_Sara_SOURCE_DIR}/UseDOSara${_library_name}.cmake
       ${_hdr_files} ${_src_files})
 
-    if(MSVC)
-      add_custom_target(DO_Sara_${_library_name}
-        SOURCES
-        ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
-        ${_hdr_files})
-    endif()
-
     target_include_directories(DO_Sara_${_library_name}
       INTERFACE
       $<BUILD_INTERFACE:${DO_Sara_SOURCE_DIR}>
@@ -303,9 +296,16 @@ macro (sara_append_library _library_name
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
   endif ()
 
+  # We have to force C++20 on MSVC for some reason...
   set_target_properties(DO_Sara_${_library_name}
     PROPERTIES
+    CXX_STANDARD 20
+    CXX_STANDARD_REQUIRED YES
     FOLDER "Libraries/Sara")
+
+  # Propagate C++20 to any project using the library.
+  target_compile_features(DO_Sara_${_library_name}
+    INTERFACE cxx_std_20)
 
   # Figure out the rest later.
   # 6. Specify where to install the library.
