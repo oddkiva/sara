@@ -34,10 +34,11 @@
 
 
 using namespace DO::Sara;
-using namespace std;
+
 
 namespace k = DO::Kalpana;
 namespace kgl = k::GL;
+namespace sara = DO::Sara;
 
 
 auto resize_framebuffer(GLFWwindow*, int width, int height)
@@ -68,8 +69,8 @@ inline auto init_glew_boilerplate()
   auto err = glewInit();
   if (err != GLEW_OK)
   {
-    std::cerr << format("Error: failed to initialize GLEW: %s",
-                        glewGetErrorString(err))
+    std::cerr << sara::format("Error: failed to initialize GLEW: %s",
+                              glewGetErrorString(err))
               << std::endl;
   }
 #endif

@@ -32,9 +32,9 @@
 
 
 namespace kgl = DO::Kalpana::GL;
+namespace sara = DO::Sara;
 
 using namespace DO::Sara;
-using namespace std;
 
 
 inline auto init_glfw_boilerplate()
@@ -59,7 +59,7 @@ inline auto init_glew_boilerplate()
   auto err = glewInit();
   if (err != GLEW_OK)
   {
-    std::cerr << format("Error: failed to initialize GLEW: %s",
+    std::cerr << sara::format("Error: failed to initialize GLEW: %s",
                         glewGetErrorString(err))
               << std::endl;
   }

@@ -11,12 +11,19 @@
 
 //! @example
 //! This program parses Strecha's datasets.
+//!
+//! Recovering the pose immediately after the estimated essential matrix and
+//! then counting the cheiral triangulated points does not work well.
+//! - This is slow because of the triangulation.
+//!
+//! Estimating the essential matrix first works and counting the inliers
+//! without worrying whether the triangulated points are cheiral just works
+//! better. Then after the pose recovery at the end just gives better results.
 
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
-#include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/InlierPredicates.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
@@ -121,8 +128,8 @@ int sara_graphics_main(int argc, char** argv)
   const auto num_samples = argc < 6 ? 1000 : std::stoi(argv[5]);
   const auto err_thres = argc < 7 ? 5e-3 : std::stod(argv[6]);
 
-  auto solver = RelativePoseSolver<NisterFivePointAlgorithm>{
-      CheiralityCriterion::CHEIRAL_COMPLETE};
+  auto solver =
+      RelativePoseSolver<NisterFivePointAlgorithm>{CheiralityCriterion::NONE};
 
   auto inlier_predicate = CheiralAndEpipolarConsistency{};
   inlier_predicate.err_threshold = err_thres;
@@ -182,6 +189,62 @@ int sara_graphics_main(int argc, char** argv)
   // N.B.: if this is too restrictive we may just testing the cheirality
   // partially at least (s1.array() > 0)
 
+  // Add the internal camera matrices to the camera.
+  geometry.C1.K = views.cameras[0].K;
+  geometry.C2.K = views.cameras[1].K;
+  auto colors = extract_colors(views.images[0],  //
+                               views.images[1],  //
+                               geometry);
+  save_to_hdf5(geometry, colors);
+
+  // Inspect the fundamental matrix.
+  print_stage("Inspecting the fundamental matrix estimation...");
+  check_epipolar_constraints(views.images[0], views.images[1], F, matches,
+                             sample_best, inliers,
+                             /* display_step */ 20, /* wait_key */ true);
+
+  print_stage("Sort the points by depth...");
+  const auto num_points = static_cast<int>(geometry.X.cols());
+  const auto indices = range(num_points);
+
+  // Retrieve the camera matrices.
+  const auto P1 = geometry.C1.matrix();
+  const auto P2 = geometry.C2.matrix();
+
+  // Calculate the image coordinates from the normalized camera coordinates.
+  const MatrixXd u1 = (P1 * geometry.X).colwise().hnormalized();
+  const MatrixXd u2 = (P2 * geometry.X).colwise().hnormalized();
+
+  using depth_t = float;
+  auto depths = std::vector<std::pair<int, depth_t>>{};
+  for (auto i = 0; i < num_points; ++i)
+    depths.emplace_back(i, geometry.X.col(i).z());
+
+  std::sort(depths.begin(), depths.end(),
+            [](const auto& a, const auto& b) { return a.second < b.second; });
+
+  display(views.images[0], Point2i::Zero(), 0.25);
+
+  // The brighter the color, the further the point is.
+  const auto depth_min = depths.front().second;
+  const auto depth_max = depths.back().second;
+  const auto linear = [depth_min, depth_max](auto d) {
+    return (d - depth_min) / (depth_max - depth_min);
+  };
+
+  for (const auto& [index, depth] : depths)
+  {
+    const Eigen::Vector2d ui = u1.col(index) * 0.25;
+
+    auto color = Rgb8{};
+    color << 0, 0, int(linear(depth) * 255);
+    if (depth < 0)
+      color = Red8;  // Highlight where the problem is...
+    fill_circle(ui.x(), ui.y(), 5, color);
+    millisleep(1);
+  }
+
+  get_key();
 
   return 0;
 }

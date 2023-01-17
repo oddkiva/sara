@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Sara LANGUAGES C CXX)
 
+# We are post-2020 now: let's all look to the future please.
+# Activate C++20 globally
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 
 # Set the version major and minor manually.
 set(DO_Sara_VERSION_MAJOR 1)
@@ -50,12 +56,6 @@ sara_dissect_version()
 
 # Use CCache if available to speed up builds.
 include(sara_use_ccache)
-
-
-# We are post-2020 now: let's all look to the future please.
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   set (CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)

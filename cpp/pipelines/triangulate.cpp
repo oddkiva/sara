@@ -199,15 +199,19 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath,
       SARA_DEBUG << "cheirality =\n"
                  << geometry.cheirality.leftCols(20) << std::endl;
 
-      h5_file.write_dataset(format("two_view_geometries/cameras/%d_%d", i, j),
-                            cameras, overwrite);
-      h5_file.write_dataset(format("two_view_geometries/points/%d_%d", i, j),
-                            X_euclidean, overwrite);
+      namespace sara = DO::Sara;
       h5_file.write_dataset(
-          format("two_view_geometries/cheirality/%d_%d", i, j),
+          sara::format("two_view_geometries/cameras/%d_%d", i, j), cameras,
+          overwrite);
+      h5_file.write_dataset(
+          sara::format("two_view_geometries/points/%d_%d", i, j), X_euclidean,
+          overwrite);
+      h5_file.write_dataset(
+          sara::format("two_view_geometries/cheirality/%d_%d", i, j),
           geometry.cheirality, overwrite);
-      h5_file.write_dataset(format("two_view_geometries/colors/%d_%d", i, j),
-                            colors, overwrite);
+      h5_file.write_dataset(
+          sara::format("two_view_geometries/colors/%d_%d", i, j), colors,
+          overwrite);
     }
   });
 }

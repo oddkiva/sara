@@ -1,5 +1,3 @@
-find_package(DO_Sara COMPONENTS MultiViewGeometry REQUIRED)
-
 file(GLOB test_multiviewgeometry_SOURCE_FILES FILES test_*.cpp)
 file(GLOB test_ceres_SOURCE_FILES FILES test_*ceres*.cpp)
 
@@ -18,7 +16,7 @@ foreach (file ${test_multiviewgeometry_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES ${DO_Sara_LIBRARIES} fmt::fmt
+    DEPENDENCIES DO::Sara::MultiViewGeometry fmt::fmt
     FOLDER MultiViewGeometry)
 endforeach ()
 

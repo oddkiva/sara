@@ -36,7 +36,7 @@ namespace DO::Sara {
   auto basename(const std::string& filepath) -> std::string
   {
 #if __has_include(<filesystem>)
-    return fs::path{filepath}.stem();
+    return fs::path{filepath}.stem().string();
 #else
     return fs::basename(filepath);
 #endif

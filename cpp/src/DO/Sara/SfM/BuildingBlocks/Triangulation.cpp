@@ -29,34 +29,22 @@ namespace DO::Sara {
     const Matrix34d C1 = g.C1;
     const Matrix34d C2 = g.C2;
 
-    SARA_DEBUG << "Camera matrices" << std::endl;
+    SARA_DEBUG << "Camera matrices:" << std::endl;
     SARA_DEBUG << "C1 =\n" << C1 << std::endl;
     SARA_DEBUG << "C2 =\n" << C2 << std::endl;
 
-    SARA_DEBUG << "Triangulated points" << std::endl;
+    SARA_DEBUG << "Triangulated points:" << std::endl;
     const MatrixXd C1X = C1 * g.X;
     const MatrixXd C2X = C2 * g.X;
-
-    SARA_DEBUG << "Check cheirality" << std::endl;
-    const auto R = C2.topLeftCorner<3, 3>();
-    const auto t = C2.col(3);
-    const auto X_euclidean = g.X.topRows(3);
-    const Eigen::Vector3d C = -R.transpose() * t;
-    const Eigen::RowVector3d e3 = R.row(2);
-    const Eigen::VectorXd dots = e3 * (X_euclidean.colwise() - C);
-    const Eigen::Array<bool, 1, Eigen::Dynamic> cheirality = dots.array() > 0;
-    SARA_DEBUG << "cheirality dots =\n" << dots << std::endl;
-    SARA_DEBUG << "cheirality =\n" << cheirality << std::endl;
-
     SARA_DEBUG << "C1 * X =\n" << C1X << std::endl;
     SARA_DEBUG << "C2 * X =\n" << C2X << std::endl;
 
-    SARA_DEBUG << "Scales " << std::endl;
+    SARA_DEBUG << "Cheirality:" << std::endl;
     SARA_DEBUG << "scales[1] =\n" << g.scales1.transpose() << std::endl;
     SARA_DEBUG << "scales[2] =\n" << g.scales2.transpose() << std::endl;
+    SARA_DEBUG << "Cheirality =\n" << g.cheirality << std::endl << std::endl;
 
-
-    SARA_DEBUG << "Comparison with normalized coordinates" << std::endl;
+    SARA_DEBUG << "Projection to normalized coordinates:" << std::endl;
     SARA_DEBUG << "(C1 * X).hnormalized() =\n"
                << C1X.colwise().hnormalized() << std::endl;
     SARA_DEBUG << "u1n_s =\n" << un1_s.colwise().hnormalized() << std::endl;
@@ -67,6 +55,7 @@ namespace DO::Sara {
                << un2_s.colwise().hnormalized() << std::endl;
     std::cout << std::endl;
 
+    SARA_DEBUG << "Projection residuals:" << std::endl;
     const double residual1 =
         (C1X.colwise().hnormalized() - un1_s.colwise().hnormalized()).norm() /
         (un1_s.colwise().hnormalized()).norm();
@@ -75,8 +64,7 @@ namespace DO::Sara {
         (un1_s.colwise().hnormalized()).norm();
     SARA_DEBUG << "Residual 1 = " << residual1 << std::endl;
     SARA_DEBUG << "Residual 2 = " << residual2 << std::endl;
-
-    SARA_DEBUG << "Cheirality =\n" << g.cheirality << std::endl << std::endl;
+    std::cout << std::endl;
   }
 
 
@@ -88,14 +76,15 @@ namespace DO::Sara {
                                   const TensorView_<int, 1>& sample_best)
       -> TwoViewGeometry
   {
-    // Visualize the best sample drawn by RANSAC.
-    constexpr auto L = EEstimator::num_points;
+    // Collect the point correspondences from the best sample found by RANSAC.
+    static constexpr auto L = EEstimator::num_points;
     const auto sample_best_reshaped = sample_best.reshape(Vector2i{1, L});
     const auto I = to_point_indices(sample_best_reshaped, M);
     const auto un_s = to_coordinates(I, un1, un2).transpose({0, 2, 1, 3});
     const Matrix<double, 3, L> un1_s = un_s[0][0].colmajor_view().matrix();
     const Matrix<double, 3, L> un2_s = un_s[0][1].colmajor_view().matrix();
 
+    // Extract the 4 possible relative motions.
     const auto candidate_motions = extract_relative_motion_horn(E);
 
     // Triangulate the points from the best samples and calculate their
@@ -105,8 +94,7 @@ namespace DO::Sara {
                    std::back_inserter(geometries), [&](const Motion& m) {
                      return two_view_geometry(m, un1_s, un2_s);
                    });
-#define DEBUG_CHEIRALITY
-#ifdef DEBUG_CHEIRALITY
+
     // Check the cheirality.
     for (auto i = 0u; i != geometries.size(); ++i)
     {
@@ -114,7 +102,6 @@ namespace DO::Sara {
       const auto& g = geometries[i];
       inspect_geometry(g, un1_s, un2_s);
     }
-#endif
 
     // Find the best geometry, i.e., the one with the high cheirality degree.
     const auto best_geom =
@@ -122,13 +109,13 @@ namespace DO::Sara {
                          [](const auto& g1, const auto& g2) {
                            return g1.cheirality.count() < g2.cheirality.count();
                          });
-
-
     const auto cheiral_degree = best_geom->cheirality.count();
     if (cheiral_degree == 0)
       throw std::runtime_error{"The cheirality degree can't be zero!"};
+    else if (cheiral_degree != L)
+      throw std::runtime_error{
+          "The cheirality degree is not right, it is not 5..."};
 
-    inspect_geometry(*best_geom, un1_s, un2_s);
     // Data transformations.
     const Matrix34d P1 = best_geom->C1;
     const Matrix34d P2 = best_geom->C2;
@@ -137,7 +124,6 @@ namespace DO::Sara {
     const auto card_M = M.size(0);
     const auto mindices = range(card_M);
     const auto card_M_filtered = mindices.size(0);
-    SARA_CHECK(card_M_filtered);
 
     auto coords_matched = Tensor_<double, 3>{{2, card_M_filtered, 3}};
     auto un1_matched_mat = coords_matched[0].colmajor_view().matrix();
@@ -150,25 +136,18 @@ namespace DO::Sara {
         un2_matched_mat.col(m) = un2_mat.col(M(m, 1));
       });
     }
-#ifdef DEBUG
-    SARA_DEBUG << "un1_matched_mat =\n"
-               << un1_matched_mat.leftCols(10) << std::endl;
-    SARA_DEBUG << "un2_matched_mat =\n"
-               << un2_matched_mat.leftCols(10) << std::endl;
-#endif
 
-    SARA_DEBUG << "Triangulating all matches..." << std::endl;
-    Eigen::VectorXd scales1, scales2;
-    std::tie(best_geom->X, scales1, scales2) =
+    SARA_DEBUG << "Triangulating all matches and store it in the geometry data "
+                  "structure..."
+               << std::endl;
+    std::tie(best_geom->X, best_geom->scales1, best_geom->scales2) =
         triangulate_linear_eigen(P1, P2, un1_matched_mat, un2_matched_mat);
     SARA_CHECK(best_geom->X.cols());
-    SARA_CHECK(scales1.transpose());
-    SARA_CHECK(scales2.transpose());
     SARA_CHECK(inliers.flat_array().count());
 
     SARA_DEBUG << "Calculating cheirality..." << std::endl;
-    best_geom->cheirality = scales1.array() > 0 && scales2.array() > 0;
-    SARA_CHECK(best_geom->cheirality.count());
+    best_geom->cheirality =
+        best_geom->scales1.array() > 0 && best_geom->scales2.array() > 0;
 
     SARA_DEBUG
         << "Cheiral inliers count = "
@@ -190,14 +169,9 @@ namespace DO::Sara {
         | transformed([&](int i) -> Vector4d { return X.col(i); });
     SARA_CHECK(X_cheiral.size());
 
-    const auto P2 = complete_geom.C2.matrix();
-
     complete_geom.X.resize(4, X_cheiral.size(0));
     for (int i = 0; i < X_cheiral.size(0); ++i)
       complete_geom.X.col(i) = X_cheiral(i);
-
-    // FIXME...
-    complete_geom.cheirality = X.row(2).array() > 0;
 
     SARA_DEBUG << "complete_geom.X =\n"
                << complete_geom.X.leftCols(10) << std::endl;

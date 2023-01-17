@@ -16,7 +16,6 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
-#include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 

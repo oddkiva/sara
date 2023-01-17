@@ -1,8 +1,8 @@
-$cmake_vsver = @{2015="v140"; 2017="v141"; 2019="v1421"};
-$cmake_vsver2 = @{2015="14"; 2017="15"; 2019="16"};
+$cmake_vsver = @{2015="v140"; 2017="v141"; 2019="v1421"; 2022="v143"};
+$cmake_vsver2 = @{2015="14"; 2017="15"; 2019="16"; 2022="17"};
 $build_shared_libs = @{"static"="OFF"; "shared"="ON"};
 
-$vsver = 2019
+$vsver = 2022
 $vsver2 = $cmake_vsver2[$vsver]
 
 $build_type = "static"
@@ -12,12 +12,12 @@ $build_dir = "sara-build-vs$vsver-$build_type"
 $cmake_toolset = $cmake_vsver[$vsver]
 
 $qt_dir = "C:\local\qt-everywhere-src-6.1.2\qtbase"
-$cudnn_dir = "C:\local\cudnn-11.4-windows-x64-v8.2.2.26"
+$cudnn_dir = "C:\local\cudnn-windows-x86_64-8.6.0.163_cuda11-archive"
 $halide_dir = "C:\local\Halide-13.0.3-x86-64-windows"
 $nvidia_codec_sdk_dir = "C:\local\Video_Codec_SDK_11.1.5"
-$tensorrt_dir = "C:\local\TensorRT-8.0.1.6.Windows10.x86_64.cuda-11.3.cudnn8.2"
+$tensorrt_dir = "C:\local\TensorRT-8.4.3.1"
 
-$update_vcpkg = $true
+$update_vcpkg = $false
 $build_from_scratch = $true
 $run_cmake_build = $false
 

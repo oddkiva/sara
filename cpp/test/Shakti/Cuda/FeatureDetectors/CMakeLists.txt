@@ -1,5 +1,3 @@
-find_package(DO_Sara COMPONENTS Core REQUIRED)
-
 function(shakti_add_test)
   set(_options OPTIONAL)
   set(_file SOURCES)

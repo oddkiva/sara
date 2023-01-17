@@ -114,8 +114,10 @@ auto map_feature_gid_to_match_gid(const EpipolarEdgeAttributes& epipolar_edges)
     {
       if (E_inliers_ij(m) && two_view_geometry_ij.cheirality(m))
       {
-        mapping.insert({{view_i, M_ij[m].x_index()}, {ij, m}});
-        mapping.insert({{view_j, M_ij[m].y_index()}, {ij, m}});
+        mapping.insert(
+            {FeatureGID{view_i, M_ij[m].x_index()}, MatchGID{ij, m}});
+        mapping.insert(
+            {FeatureGID{view_j, M_ij[m].y_index()}, MatchGID{ij, m}});
       }
     }
   }
