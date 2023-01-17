@@ -4,6 +4,7 @@ set(THIRDPARTY_FOLDER_NAME "Third-Party")
 
 message(STATUS "  - fmt")
 add_subdirectory(fmt)
+set_property(TARGET fmt PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 
 message(STATUS "  - easyexif")
 add_subdirectory(easyexif)
