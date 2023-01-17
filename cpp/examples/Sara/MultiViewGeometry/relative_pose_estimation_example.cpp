@@ -16,7 +16,6 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
-#include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/InlierPredicates.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
@@ -182,6 +181,19 @@ int sara_graphics_main(int argc, char** argv)
   // N.B.: if this is too restrictive we may just testing the cheirality
   // partially at least (s1.array() > 0)
 
+  // Add the internal camera matrices to the camera.
+  geometry.C1.K = views.cameras[0].K;
+  geometry.C2.K = views.cameras[1].K;
+  auto colors = extract_colors(views.images[0],  //
+                               views.images[1],  //
+                               geometry);
+  save_to_hdf5(geometry, colors);
+
+  // Inspect the fundamental matrix.
+  print_stage("Inspecting the fundamental matrix estimation...");
+  check_epipolar_constraints(views.images[0], views.images[1], F, matches,
+                             sample_best, inliers,
+                             /* display_step */ 20, /* wait_key */ true);
 
   return 0;
 }

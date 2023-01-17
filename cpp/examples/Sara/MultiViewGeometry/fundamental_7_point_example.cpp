@@ -66,7 +66,6 @@ auto get_keypoints(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
 
 // =============================================================================
 // Robust estimation using RANSAC.
-//
 using FEstimator = SevenPointAlgorithmDoublePrecision;
 
 auto estimate_fundamental_matrix(const KeypointList<OERegion, float>& keys1,

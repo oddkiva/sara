@@ -35,7 +35,6 @@ target_link_libraries(orthogonal_vanishing_point_detection
 # Two-view geometry.
 sara_add_example(homography_estimation_example)
 sara_add_example(fundamental_7_point_example)
-sara_add_example(fundamental_8_point_example)
 sara_add_example(essential_5_point_example)
 sara_add_example(relative_pose_estimation_example)
 target_link_libraries(essential_5_point_example PRIVATE tinyply)
