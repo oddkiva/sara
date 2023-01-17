@@ -37,8 +37,7 @@ namespace DO::Sara {
     SARA_DEBUG << "colors =\n" << colors.matrix().topRows(20) << std::endl;
     SARA_DEBUG << "Number of 3D valid points = " << X_euclidean.cols()
                << std::endl;
-    SARA_DEBUG << "X.min_coeff = " << X_euclidean.minCoeff() << std::endl;
-    SARA_DEBUG << "X.max_coeff = " << X_euclidean.maxCoeff() << std::endl;
+
     SARA_DEBUG << "X.x_coord.min_coeff = " << X_euclidean.col(0).minCoeff()
                << std::endl;
     SARA_DEBUG << "X.x_coord.max_coeff = " << X_euclidean.col(0).maxCoeff()
@@ -51,6 +50,7 @@ namespace DO::Sara {
                << std::endl;
     SARA_DEBUG << "X.z_coord.max_coeff = " << X_euclidean.col(2).maxCoeff()
                << std::endl;
+
     SARA_DEBUG << "colors.min_coeff = " << colors.matrix().minCoeff()
                << std::endl;
     SARA_DEBUG << "colors.max_coeff = " << colors.matrix().maxCoeff()
