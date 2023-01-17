@@ -214,7 +214,8 @@ namespace DO::Sara {
     {
       NoConvergence = 0,
       LinearFactor_ = 1,
-      QuadraticFactor_ = 2
+      QuadraticFactor_ = 2,
+      AlgorithmFailure = 3
     };
     ConvergenceType cvg_type{NoConvergence};
 
@@ -225,15 +226,16 @@ namespace DO::Sara {
 
     LinearFactor linear_factor;
 
-    int phase_try{0};
     QuadraticFactor sigma0, sigma1;
 
-    int M{5};
-    int L{20};
+    int M = 5;
+    int L = 20;
     //! In practice, Jenkins-Traub algorithm converges very fast. So after that,
     //! the convergence is considered to be stalling.
-    int stage3_max_iter{20};
-    double root_abs_tol{1e-12};
+    int stage3_max_iter = 20;
+    double root_abs_tol = 1e-12;
+
+    bool _verbose = false;
 
     //! @brief Apply zero shift polynomial.
     DO_SARA_EXPORT
@@ -258,14 +260,16 @@ namespace DO::Sara {
 
     //! @brief Find all the roots.
     DO_SARA_EXPORT
-    auto find_roots() -> std::vector<std::complex<double>>;
+    auto find_roots() -> std::pair<bool, std::vector<std::complex<double>>>;
   };
 
 
   //! @brief Find all the roots using Jenkins-Traub algorithm.
   DO_SARA_EXPORT
-  auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter = 20,
-             double root_abs_tol = 1e-12) -> std::vector<std::complex<double>>;
+  auto rpoly(const UnivariatePolynomial<double>& P,
+             const int stage3_max_iter = 20, const double root_abs_tol = 1e-12,
+             const bool verbose = false)
+      -> std::pair<bool, std::vector<std::complex<double>>>;
 
   //! @}
 

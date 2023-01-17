@@ -700,9 +700,11 @@ namespace DO::Sara {
         sigma1.polynomial = (Z - linear_factor.root()) * (Z - linear_factor.root());
         if (stage3_quadratic_factor() != ConvergenceType::QuadraticFactor_)
         {
-          SARA_DEBUG << "Uh oh: still no convergence..." << endl;
-          throw std::runtime_error{"Jenkins-Traub: stage3 fallback quadratic "
-                                   "shift iterations failed!"};
+          if (_verbose)
+            SARA_DEBUG << "Uh oh: still no convergence...\n"
+                       << "Jenkins-Traub: stage3 fallback quadratic "
+                          "shift iterations failed!\n";
+          return ConvergenceType::AlgorithmFailure;
         }
       }
     }
@@ -732,9 +734,11 @@ namespace DO::Sara {
 
       if (stage3_linear_factor() != ConvergenceType::LinearFactor_)
       {
-        SARA_DEBUG << "Uh oh: still no convergence..." << endl;
-        throw std::runtime_error{
-            "Jenkins-Traub: stage3 fallback linear shift iterations failed!"};
+        if (_verbose)
+          SARA_DEBUG << "Uh oh: still no convergence...\n"
+                     << "Jenkins-Traub: stage3 fallback linear shift "
+                        "iterations failed!\n";
+        return ConvergenceType::AlgorithmFailure;
       }
 
       const auto root = -linear_factor.polynomial[0];
@@ -743,7 +747,7 @@ namespace DO::Sara {
     }
   }
 
-  auto JenkinsTraub::find_roots() -> std::vector<std::complex<double>>
+  auto JenkinsTraub::find_roots() -> std::pair<bool, std::vector<std::complex<double>>>
   {
     // Pre-process the polynomial.
     P.remove_leading_zeros();
@@ -773,37 +777,56 @@ namespace DO::Sara {
        stage2();
        if (cvg_type == ConvergenceType::NoConvergence)
        {
-         SARA_DEBUG << "P = " << P << endl;
-         throw std::runtime_error{"Jenkins-Traub stage 2: weak convergence failed!"};
+         if (_verbose)
+           SARA_DEBUG << "P = " << P << "\n"
+                      << "Jenkins-Traub stage 2: weak convergence failed!\n";
+
+         // Notify the algorithm failure and return the roots found until now.
+         return std::make_pair(false, roots);
        }
 
-       if (stage3(roots) == ConvergenceType::LinearFactor_)
+
+       // Determine whether we converge to a linear factor or a quadratic
+       // factor.
+       //
+       // The list of roots.
+       const auto stage3_cvg_type = stage3(roots);
+       // If stage 3 failed, notify the algorithm failure and return the roots
+       // found until now.
+       if (stage3_cvg_type == ConvergenceType::AlgorithmFailure)
+         return std::make_pair(false, roots);
+       // Reduce the polynomial by the linear factor we found.
+       if (stage3_cvg_type == ConvergenceType::LinearFactor_)
          P = (P / linear_factor.polynomial).first;
-       else
+       // Reduce the polynomial by the quadratic factor we found.
+       else if (stage3_cvg_type == ConvergenceType::QuadraticFactor_)
          P = (P / sigma1.polynomial).first;
 
-       // Restart.
+       // Restart the algorithm.
        cvg_type = ConvergenceType::NoConvergence;
     }
 
     if (P.degree() == 2)
     {
+      // Extract the last two roots.
       const auto qroots = quadratic_roots(P);
       roots.insert(roots.end(), qroots.begin(), qroots.end());
     }
     else if (P.degree() == 1)
     {
+      // Extract the last root.
       auto root = linear_root(P);
       roots.push_back(root);
     }
 
-    return roots;
+    // The algorithm terminated successfully and we have all the real roots.
+    return std::make_pair(true, roots);
   }
 
 
-  auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter,
-             double root_abs_tol)
-    -> std::vector<std::complex<double>>
+  auto rpoly(const UnivariatePolynomial<double>& P, const int stage3_max_iter,
+             const double root_abs_tol, const bool verbose)
+      -> std::pair<bool, std::vector<std::complex<double>>>
   {
     for (const auto& c: P)
       if (std::isnan(c) || std::isinf(c))
@@ -812,6 +835,7 @@ namespace DO::Sara {
     auto solver = JenkinsTraub{P};
     solver.stage3_max_iter = stage3_max_iter;
     solver.root_abs_tol = root_abs_tol;
+    solver._verbose = verbose;
     return solver.find_roots();
   }
 
