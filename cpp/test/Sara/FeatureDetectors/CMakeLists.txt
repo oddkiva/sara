@@ -1,5 +1,3 @@
-find_package(DO_Sara COMPONENTS ImageProcessing FeatureDetectors REQUIRED)
-
 set(TEST_GROUP_NAME "FeatureDetectors")
 file(GLOB test_feature_detectors_SOURCE_FILES FILES test_*.cpp)
 foreach (file ${test_feature_detectors_SOURCE_FILES})
@@ -7,6 +5,6 @@ foreach (file ${test_feature_detectors_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES ${DO_Sara_LIBRARIES}
+    DEPENDENCIES DO::Sara::FeatureDetectors
     FOLDER FeatureDetectors)
 endforeach ()

@@ -16,15 +16,5 @@ if(SARA_USE_FROM_SOURCE)
       PRIVATE DO::Sara::Geometry DO::Sara::FeatureDescriptors
               DO::Sara::ImageProcessing
       PUBLIC DO::Sara::Core $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
-
-    # N.B.: this is a workaround.
-    #
-    # For some reason, I have to force to compile explicitly with C++20, I don't
-    # know why...
-    set_target_properties(
-      DO_Sara_FeatureDetectors
-      PROPERTIES CXX_STANDARD 20
-                 CXX_STANDARD_REQUIRED YES
-                 CXX_EXTENSIONS NO)
   endif()
 endif()

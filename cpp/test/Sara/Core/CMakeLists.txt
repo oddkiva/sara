@@ -1,7 +1,5 @@
 project(DO_Sara_Core_Tests)
 
-find_package(DO_Sara COMPONENTS Core REQUIRED)
-
 file(GLOB test_core_SOURCE_FILES FILES *.cpp)
 if (NOT HDF5_FOUND)
   list(REMOVE_ITEM ${CMAKE_CURRENT_SOURCE_DIR}/test_core_hdf5.cpp)
@@ -17,7 +15,7 @@ foreach (file ${test_core_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES ${DO_Sara_LIBRARIES}
+    DEPENDENCIES DO::Sara::Core
     FOLDER Core)
 endforeach ()
 

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(Sara LANGUAGES C CXX)
 
 # We are post-2020 now: let's all look to the future please.
+# Activate C++20 globally
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

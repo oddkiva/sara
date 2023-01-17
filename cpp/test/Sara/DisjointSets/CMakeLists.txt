@@ -1,5 +1,3 @@
-find_package(DO_Sara COMPONENTS DisjointSets REQUIRED)
-
 file(GLOB test_disjoint_sets_SOURCE_FILES FILES *.cpp)
 
 foreach (file ${test_disjoint_sets_SOURCE_FILES})
@@ -7,7 +5,7 @@ foreach (file ${test_disjoint_sets_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES ${DO_Sara_LIBRARIES}
+    DEPENDENCIES DO::Sara::DisjointSets
     FOLDER DisjointSets)
 endforeach ()
 
