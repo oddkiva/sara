@@ -801,8 +801,8 @@ namespace DO::Sara {
   }
 
 
-  auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter,
-             double root_abs_tol)
+  auto rpoly(const UnivariatePolynomial<double>& P, const int stage3_max_iter,
+             const double root_abs_tol, const bool verbose)
     -> std::vector<std::complex<double>>
   {
     for (const auto& c: P)
@@ -812,6 +812,7 @@ namespace DO::Sara {
     auto solver = JenkinsTraub{P};
     solver.stage3_max_iter = stage3_max_iter;
     solver.root_abs_tol = root_abs_tol;
+    solver._verbose = verbose;
     return solver.find_roots();
   }
 
