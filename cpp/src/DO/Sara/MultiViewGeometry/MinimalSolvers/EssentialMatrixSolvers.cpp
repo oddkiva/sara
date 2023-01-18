@@ -312,6 +312,8 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
     auto E = EssentialMatrix{};
     E.matrix() = xyz[0] * E_bases[0] + xyz[1] * E_bases[1] +
                  xyz[2] * E_bases[2] + E_bases[3];
+    // We should normalize the matrix.
+    E.matrix().normalize();
     Es.push_back(E);
   }
 
@@ -380,6 +382,7 @@ auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
     auto E = Matrix3d{};
     auto vec_E = Map<Matrix<double, 9, 1>>(E.data());
     vec_E = E_bases * U.col(s).tail<4>().real();
+    E.normalize();
 
     Es.emplace_back(E.transpose());
   }

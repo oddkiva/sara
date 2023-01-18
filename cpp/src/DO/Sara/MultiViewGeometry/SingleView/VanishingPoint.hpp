@@ -48,9 +48,9 @@ namespace DO::Sara {
 
     LineToVanishingPointDistance() = default;
 
-    LineToVanishingPointDistance(const Projective::Point2<T>& p) noexcept
-      : vp{p}
+    auto set_model(const Projective::Point2<T>& p) noexcept
     {
+      vp = p;
     }
 
     template <typename Derived>
@@ -146,9 +146,9 @@ namespace DO::Sara {
 
     AngularDistance3D() = default;
 
-    AngularDistance3D(const model_type& r) noexcept
-      : rotation{r}
+    auto set_model(const model_type& r) noexcept
     {
+      rotation = r;
     }
 
     template <typename Derived>

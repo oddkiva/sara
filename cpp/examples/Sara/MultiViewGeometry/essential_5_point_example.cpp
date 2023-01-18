@@ -125,16 +125,31 @@ int sara_graphics_main(int argc, char** argv)
   const auto& f1 = features(views.keypoints[1]);
   const auto u = std::array{homogeneous(extract_centers(f0)).cast<double>(),
                             homogeneous(extract_centers(f1)).cast<double>()};
+// #define OLD
+#ifdef OLD
   // Tensors of camera coordinates.
   auto un = std::array{apply_transform(K_inv[0], u[0]),
                        apply_transform(K_inv[1], u[1])};
   // Normalize backprojected rays to unit norm.
   for (auto i = 0u; i < un.size(); ++i)
     un[i].colmajor_view().matrix().colwise().normalize();
+#endif
   // List the matches as a 2D-tensor where each row encodes a match 'm' as a
   // pair of point indices (i, j).
   const auto M = to_tensor(matches);
+
+#ifdef OLD
   const auto X = PointCorrespondenceList{M, un[0], un[1]};
+#else
+  const auto X = PointCorrespondenceList{M, u[0], u[1]};
+#endif
+
+#ifdef OLD
+  auto data_normalizer = std::nullopt;
+#else
+  auto data_normalizer = std::make_optional(
+      Normalizer<EssentialMatrix>{views.cameras[0].K, views.cameras[1].K});
+#endif
 
   print_stage("Estimating the essential matrix...");
   auto& E = epipolar_edges.E[0];
@@ -148,9 +163,16 @@ int sara_graphics_main(int argc, char** argv)
 
     // N.B.: in my experience, the Sampson distance works less well than the
     // normal epipolar distance for the estimation of the essential matrix.
+#ifdef OLD
     auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
+#else
+    auto inlier_predicate = InlierPredicate<EssentialEpipolarDistance>{};
+    inlier_predicate.distance.K1_inv = K_inv[0];
+    inlier_predicate.distance.K2_inv = K_inv[1];
+#endif
     inlier_predicate.err_threshold = err_thres;
 
+#define NISTER_METHOD
 #if defined(NISTER_METHOD)
     std::cout << "WITH NISTER'S POLYNOMIAL ROOTS\n";
 #else
@@ -163,7 +185,7 @@ int sara_graphics_main(int argc, char** argv)
 #else
         SteweniusFivePointAlgorithm{},
 #endif
-        inlier_predicate, num_samples);
+        inlier_predicate, num_samples, data_normalizer, true);
 
     epipolar_edges.E_inliers[0] = inliers;
     epipolar_edges.E_best_samples[0] = sample_best;
@@ -184,6 +206,10 @@ int sara_graphics_main(int argc, char** argv)
 
   // Extract the two-view geometry.
   print_stage("Estimating the two-view geometry...");
+#ifndef OLD
+  auto un = u;
+  std::tie(un[0], un[1]) = data_normalizer->normalize(u[0], u[1]);
+#endif
   epipolar_edges.two_view_geometries = {
       estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best)};
 
@@ -197,7 +223,7 @@ int sara_graphics_main(int argc, char** argv)
   auto colors = extract_colors(views.images[0],  //
                                views.images[1],  //
                                two_view_geometry);
-  save_to_hdf5(two_view_geometry, colors);
+  save_to_hdf5(two_view_geometry, colors, data_dir);
 
   // Inspect the fundamental matrix.
   print_stage("Inspecting the fundamental matrix estimation...");

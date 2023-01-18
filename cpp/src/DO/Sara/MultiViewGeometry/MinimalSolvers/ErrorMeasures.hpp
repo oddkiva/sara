@@ -24,6 +24,11 @@ namespace DO::Sara {
   //! @brief Functor evaluating distance of a point to its epipolar line.
   struct EpipolarDistance
   {
+    auto set_model(const Eigen::Matrix3d& model) -> void
+    {
+      F = model;
+    }
+
     auto operator()(const Eigen::Vector3d& X, const Eigen::Vector3d& Y) const
     {
       return std::abs(Y.transpose() * F * X);
@@ -40,10 +45,42 @@ namespace DO::Sara {
     Eigen::Matrix3d F;
   };
 
+  struct EssentialEpipolarDistance
+  {
+    auto set_model(const Eigen::Matrix3d& E_) -> void
+    {
+      E = E_;
+      F = K2_inv.transpose() * E * K1_inv;
+    }
+
+    auto operator()(const Eigen::Vector3d& X, const Eigen::Vector3d& Y) const
+    {
+      return std::abs(Y.transpose() * F * X);
+    }
+
+    template <typename Derived>
+    auto operator()(const Eigen::MatrixBase<Derived>& X,
+                    const Eigen::MatrixBase<Derived>& Y) const
+        -> Eigen::RowVectorXd
+    {
+      return (Y.array() * (F * X).array()).colwise().sum().abs();
+    }
+
+    Eigen::Matrix3d K1_inv;
+    Eigen::Matrix3d K2_inv;
+    Eigen::Matrix3d E;
+    Eigen::Matrix3d F;
+  };
+
   //! See for example the following reference:
   //! https://cseweb.ucsd.edu/classes/sp04/cse252b/notes/lec11/lec11.pdf
   struct SampsonEpipolarDistance
   {
+    auto set_model(const Eigen::Matrix3d& model) -> void
+    {
+      F = model;
+    }
+
     auto operator()(const Eigen::Vector3d& X, const Eigen::Vector3d& Y) const
     {
       const Eigen::Vector3d Xn = X / X.z();
@@ -65,10 +102,8 @@ namespace DO::Sara {
     {
       const auto Xn = X.colwise().hnormalized().colwise().homogeneous();
       const auto Yn = Y.colwise().hnormalized().colwise().homogeneous();
-      const auto dots = (Yn.array() * (F * Xn).array())
-                           .matrix()
-                           .colwise()
-                           .sum();
+      const auto dots =
+          (Yn.array() * (F * Xn).array()).matrix().colwise().sum();
       const auto nums = dots.array().square();
       // SARA_CHECK(nums);
 
@@ -94,9 +129,14 @@ namespace DO::Sara {
     SymmetricTransferError() = default;
 
     SymmetricTransferError(const Eigen::Matrix3d& H)
-      : H_{H}
-      , H_inv_{H.inverse()}
     {
+      set_model(H);
+    }
+
+    auto set_model(const Eigen::Matrix3d& H) -> void
+    {
+      H_ = H;
+      H_inv_ = H.inverse();
     }
 
     auto operator()(const Eigen::Vector3d& x, const Eigen::Vector3d& y) const

@@ -41,11 +41,13 @@ using namespace std::string_literals;
 
 
 // Default camera values
+// clang-format off
 static const float YAW         = -90.0f;
 static const float PITCH       =  0.0f;
 static const float SPEED       =  1e-2f;
 static const float SENSITIVITY =  1e-2f;
 static const float ZOOM        =  45.0f;
+// clang-format on
 
 
 // The explorer's eye.
@@ -172,14 +174,10 @@ auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
   return vertex_data.cast<float>();
 }
 
-auto make_point_cloud()
+auto make_point_cloud(const std::string& h5_filepath)
 {
   // Encode the vertex data in a tensor.
-#ifdef __APPLE__
-  const auto vertex_data = read_point_cloud("/Users/david/Desktop/geometry.h5");
-#else
-  const auto vertex_data = read_point_cloud("/home/david/Desktop/geometry.h5");
-#endif
+  const auto vertex_data = read_point_cloud(h5_filepath);
   SARA_DEBUG << "vertices =\n" << vertex_data.matrix().topRows(20) << std::endl;
   SARA_DEBUG << "min =\n" << vertex_data.matrix().colwise().minCoeff() << std::endl;
   SARA_DEBUG << "max =\n" << vertex_data.matrix().colwise().maxCoeff() << std::endl;
@@ -796,6 +794,7 @@ private:
 class Window : public QOpenGLWindow
 {
 private:
+  QString m_h5_file;
   QMatrix4x4 m_projection;
   QMatrix4x4 m_view;
   QMatrix4x4 m_transform;
@@ -807,7 +806,10 @@ private:
   ImagePlane *m_imagePlane{nullptr};
 
 public:
-  Window() = default;
+  Window(const QString& h5_file)
+    : m_h5_file{h5_file}
+  {
+  }
 
   ~Window()
   {
@@ -833,16 +835,13 @@ public:
 
     // Instantiate the objects.
     m_checkerboard = new CheckerBoardObject{20, 20, 10, context()};
-    m_pointCloud = new PointCloudObject{make_point_cloud(), context()};
+    m_pointCloud = new PointCloudObject{make_point_cloud(m_h5_file.toStdString()), context()};
     m_imagePlane = new ImagePlane{context()};
 
-#ifdef __APPLE__
-    const auto data_dir =
-        "/Users/david/Desktop/Datasets/sfm/castle_int"s;
-#else
-    const auto data_dir =
-        "/home/david/Desktop/Datasets/sfm/castle_int"s;
-#endif
+    auto h5_file = H5File{m_h5_file.toStdString(), H5F_ACC_RDONLY};
+    auto data_dir = std::string{};
+    h5_file.read_dataset("dataset_folder", data_dir);
+
     const auto image = "0001.png";
     m_imagePlane->set_image(data_dir + "/" + image);
 
@@ -972,6 +971,13 @@ protected:
 
 int main(int argc, char **argv)
 {
+  using namespace std::string_literals;
+#ifdef __APPLE__
+  const auto geometry_h5_file = "/Users/david/Desktop/geometry.h5"s;
+#else
+  const auto geometry_h5_file = "/home/david/Desktop/geometry.h5"s;
+#endif
+
   QGuiApplication app(argc, argv);
   QSurfaceFormat format;
   format.setOption(QSurfaceFormat::DebugContext);
@@ -980,7 +986,7 @@ int main(int argc, char **argv)
   format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
   format.setSwapInterval(1);
 
-  Window window;
+  Window window{QString::fromStdString(geometry_h5_file)};
   window.setFormat(format);
   window.resize(800, 600);
   window.show();

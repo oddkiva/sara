@@ -23,8 +23,10 @@ namespace DO::Sara {
   //! @defgroup MultiviewMisc Miscellaneous I/O
   //! @{
 
-  inline auto save_to_hdf5(const TwoViewGeometry& complete_geom,
-                           const TensorView_<double, 2>& colors)
+  inline auto
+  save_to_hdf5(const TwoViewGeometry& complete_geom,
+               const TensorView_<double, 2>& colors,
+               const std::optional<std::string>& dataset_folder = std::nullopt)
   {
     // Get the left and right cameras.
     auto cameras = Tensor_<PinholeCameraDecomposition, 1>{2};
@@ -66,6 +68,8 @@ namespace DO::Sara {
     geom_h5_file.write_dataset("cameras", cameras, true);
     geom_h5_file.write_dataset("points", X_euclidean, true);
     geom_h5_file.write_dataset("colors", colors, true);
+    if (dataset_folder.has_value())
+      geom_h5_file.write_dataset("dataset_folder", *dataset_folder, true);
   }
 
   inline auto save_to_ply(const TwoViewGeometry& complete_geom,

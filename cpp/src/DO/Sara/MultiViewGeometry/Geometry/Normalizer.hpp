@@ -28,8 +28,8 @@ namespace DO::Sara {
   template <>
   struct Normalizer<Homography>
   {
-    inline Normalizer(const TensorView_<double, 2>& p1,
-                      const TensorView_<double, 2>& p2)
+    Normalizer(const TensorView_<double, 2>& p1,
+               const TensorView_<double, 2>& p2)
       : T1{compute_normalizer(p1)}
       , T2{compute_normalizer(p2)}
     {
@@ -37,7 +37,7 @@ namespace DO::Sara {
       T2_inv = T2.inverse();
     }
 
-    inline Normalizer(const PointCorrespondenceList<double>& matches)
+    Normalizer(const PointCorrespondenceList<double>& matches)
       : T1{compute_normalizer(matches._p1)}
       , T2{compute_normalizer(matches._p2)}
     {
@@ -45,13 +45,13 @@ namespace DO::Sara {
       T2_inv = T2.inverse();
     }
 
-    inline auto normalize(const TensorView_<double, 2>& p1,
-                          const TensorView_<double, 2>& p2) const
+    auto normalize(const TensorView_<double, 2>& p1,
+                   const TensorView_<double, 2>& p2) const
     {
       return std::make_tuple(apply_transform(T1, p1), apply_transform(T2, p2));
     }
 
-    inline auto normalize(const PointCorrespondenceList<double>& X) const
+    auto normalize(const PointCorrespondenceList<double>& X) const
         -> PointCorrespondenceList<double>
     {
       auto Xn = PointCorrespondenceList<double>{};
@@ -74,26 +74,26 @@ namespace DO::Sara {
   template <>
   struct Normalizer<FundamentalMatrix>
   {
-    inline Normalizer(const TensorView_<double, 2>& p1,
-                      const TensorView_<double, 2>& p2)
+    Normalizer(const TensorView_<double, 2>& p1,
+               const TensorView_<double, 2>& p2)
       : T1{compute_normalizer(p1)}
       , T2{compute_normalizer(p2)}
     {
     }
 
-    inline Normalizer(const PointCorrespondenceList<double>& matches)
+    Normalizer(const PointCorrespondenceList<double>& matches)
       : T1{compute_normalizer(matches._p1)}
       , T2{compute_normalizer(matches._p2)}
     {
     }
 
-    inline auto normalize(const TensorView_<double, 2>& p1,
-                          const TensorView_<double, 2>& p2) const
+    auto normalize(const TensorView_<double, 2>& p1,
+                   const TensorView_<double, 2>& p2) const
     {
       return std::make_tuple(apply_transform(T1, p1), apply_transform(T2, p2));
     }
 
-    inline auto normalize(const PointCorrespondenceList<double>& X) const
+    auto normalize(const PointCorrespondenceList<double>& X) const
         -> PointCorrespondenceList<double>
     {
       auto Xn = PointCorrespondenceList<double>{};
@@ -102,7 +102,7 @@ namespace DO::Sara {
     }
 
 
-    inline auto denormalize(const Eigen::Matrix3d& F) const -> Eigen::Matrix3d
+    auto denormalize(const Eigen::Matrix3d& F) const -> Eigen::Matrix3d
     {
       return (T2.transpose() * F * T1).normalized();
     }
@@ -111,22 +111,45 @@ namespace DO::Sara {
     Eigen::Matrix3d T2;
   };
 
-
+  //! @brief Only valid for ideal pinhole cameras.
   template <>
-  struct Normalizer<EssentialMatrix> final : public Normalizer<FundamentalMatrix>
+  struct Normalizer<EssentialMatrix>
   {
-    using Base = Normalizer<FundamentalMatrix>;
-
-    inline Normalizer(const TensorView_<double, 2>& p1,
-                      const TensorView_<double, 2>& p2)
-      : Base{p1, p2}
+    Normalizer(const Eigen::Matrix3d& K1, const Eigen::Matrix3d& K2)
+      : K1_inv{K1.inverse()}
+      , K2_inv{K2.inverse()}
     {
     }
 
-    inline Normalizer(const PointCorrespondenceList<double>& matches)
-      : Base{matches}
+    auto normalize(const TensorView_<double, 2>& p1,
+                   const TensorView_<double, 2>& p2) const
     {
+      auto p1n = apply_transform(K1_inv, p1);
+      auto p2n = apply_transform(K2_inv, p2);
+      std::cout << p1n.colmajor_view().matrix().leftCols(5) << std::endl;
+
+      // Normalize backprojected rays to unit norm.
+      p1n.colmajor_view().matrix().colwise().normalize();
+      p2n.colmajor_view().matrix().colwise().normalize();
+
+      return std::make_tuple(p1n, p2n);
     }
+
+    auto normalize(const PointCorrespondenceList<double>& X) const
+        -> PointCorrespondenceList<double>
+    {
+      auto Xn = PointCorrespondenceList<double>{};
+      std::tie(Xn._p1, Xn._p2) = this->normalize(X._p1, X._p2);
+      return Xn;
+    }
+
+    auto denormalize(const Eigen::Matrix3d& E) const -> Eigen::Matrix3d
+    {
+      return E;
+    }
+
+    Eigen::Matrix3d K1_inv;
+    Eigen::Matrix3d K2_inv;
   };
 
   template <>
@@ -134,22 +157,21 @@ namespace DO::Sara {
   {
     using Base = Normalizer<EssentialMatrix>;
 
-    inline Normalizer(const TensorView_<double, 2>&,
-                      const TensorView_<double, 2>&)
+    Normalizer(const TensorView_<double, 2>&, const TensorView_<double, 2>&)
     {
     }
 
-    inline Normalizer(const PointCorrespondenceList<double>&)
+    Normalizer(const PointCorrespondenceList<double>&)
     {
     }
 
-    inline auto normalize(const PointCorrespondenceList<double>& X) const
+    auto normalize(const PointCorrespondenceList<double>& X) const
         -> PointCorrespondenceList<double>
     {
       return X;
     }
 
-    inline auto denormalize(const TwoViewGeometry& g) const -> TwoViewGeometry
+    auto denormalize(const TwoViewGeometry& g) const -> TwoViewGeometry
     {
       return g;
     }

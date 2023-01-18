@@ -136,7 +136,7 @@ namespace DO::Sara {
     template <typename Model>
     inline void set_model(const Model& model)
     {
-      distance = Distance{model};
+      distance.set_model(model);
     }
 
     //! @brief Calculate inlier predicate on a batch of correspondences.
