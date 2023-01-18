@@ -26,15 +26,6 @@ namespace DO::Sara {
   //! @addtogroup MinimalSolvers
   //! @{
 
-  //! @brief Cheirality criterion type.
-  enum class CheiralityCriterion : std::uint8_t
-  {
-    CHEIRAL_COMPLETE,
-    CHEIRAL_MOST,
-    NONE
-  };
-
-
   //! @brief Relative pose estimator.
   template <typename Method>
   struct RelativePoseSolver : Method
@@ -46,12 +37,7 @@ namespace DO::Sara {
     static constexpr auto num_points = Method::num_points;
     static constexpr auto num_models = Method::num_models * 4;
 
-    CheiralityCriterion cheiral_criterion{CheiralityCriterion::NONE};
-
-    RelativePoseSolver(CheiralityCriterion c = CheiralityCriterion::NONE)
-      : cheiral_criterion{c}
-    {
-    }
+    RelativePoseSolver() = default;
 
     auto operator()(const Matrix<double, 3, N>& left,
                     const Matrix<double, 3, N>& right) const
@@ -78,34 +64,15 @@ namespace DO::Sara {
           std::begin(motions), std::end(motions), std::begin(geometries),
           [&left, &right](const auto& m) { return two_view_geometry(m, left, right); });
 
-      if (cheiral_criterion == CheiralityCriterion::NONE)
-        return geometries;
-
-      // Check the cheirality of the 5 point-correspondences.
-      const auto best_geom = std::max_element(
-          std::begin(geometries), std::end(geometries),
-          [](const auto& g1, const auto& g2) {
-            return g1.cheirality.count() < g2.cheirality.count();
-          });
-
-      const auto cheiral_degree = best_geom->cheirality.count();
       // Remove geometries where all the points violates the cheirality.
-      geometries.erase(
-          std::remove_if(std::begin(geometries), std::end(geometries),
-                         [&](const auto& g) {
-                           return g.cheirality.count() != cheiral_degree;
-                         }),
-          geometries.end());
-
-      // Filter the estimated camera poses.
-      if (cheiral_criterion == CheiralityCriterion::CHEIRAL_MOST)
-        return geometries;
-
-      // We should really use this only...
-      if (cheiral_criterion == CheiralityCriterion::CHEIRAL_COMPLETE)
-        return cheiral_degree < N ? std::vector<TwoViewGeometry>{} : geometries;
-
-      throw std::runtime_error{"Not implemented for this cheirality criterion"};
+      static_assert(N == 5, "The implementation is valid for 5-point solver only!");
+      const auto last = std::remove_if(std::begin(geometries),
+                                      std::end(geometries),
+                                      [&](const auto& g) {
+                                        return g.cheirality.count() < N - 1;
+                                      });
+      geometries.erase(last, geometries.end());
+      return geometries;
     }
 
     auto operator()(const data_point_type& X) const

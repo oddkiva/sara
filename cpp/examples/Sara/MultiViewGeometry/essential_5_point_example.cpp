@@ -151,8 +151,19 @@ int sara_graphics_main(int argc, char** argv)
     auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
     inlier_predicate.err_threshold = err_thres;
 
-    std::tie(E, inliers, sample_best) =
-        ransac(X, NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
+#if defined(NISTER_METHOD)
+    std::cout << "WITH NISTER'S POLYNOMIAL ROOTS\n";
+#else
+    std::cout << "WITH STEWENIUS' GROEBNER BASIS\n";
+#endif
+    std::tie(E, inliers, sample_best) = ransac(  //
+        X,
+#if defined(NISTER_METHOD)
+        NisterFivePointAlgorithm{},  //
+#else
+        SteweniusFivePointAlgorithm{},
+#endif
+        inlier_predicate, num_samples);
 
     epipolar_edges.E_inliers[0] = inliers;
     epipolar_edges.E_best_samples[0] = sample_best;

@@ -127,12 +127,16 @@ void inspect_fundamental_matrix_estimation(const Image<Rgb8>& image1,
 
   // Show the inliers.
   const auto num_matches = static_cast<int>(matches.size());
+  static constexpr auto num_matches_max = 100;
+  const auto step = num_matches < num_matches_max  //
+                        ? 1
+                        : num_matches / num_matches_max;
   for (auto i = 0; i < num_matches; ++i)
   {
     if (!inliers(i))
       continue;
 
-    if (i % 100 == 0)
+    if (i % step == 0)
     {
       drawer.draw_match(matches[i], Blue8, false);
 

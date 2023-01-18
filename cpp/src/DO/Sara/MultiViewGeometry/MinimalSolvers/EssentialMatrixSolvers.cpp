@@ -265,8 +265,15 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
 #ifdef SHOW_DEBUG_LOG
   SARA_DEBUG << "Root extraction of " << n << endl;
 #endif
-  const auto rpoly_results = rpoly(n);
-  const auto& roots = rpoly_results.second;
+
+  const auto [roots_extracted_successfully, roots] = rpoly(n);
+
+#if DECIDE_WHETHER_WE_SHOULD_BE_CONSERVATIVE
+  // If rpoly fails, then let's take a conservative behaviour, minimize the risk
+  // of providing false essential matrices...
+  if (!roots_extracted_successfully)
+    return {};
+#endif
 
 #ifdef SHOW_DEBUG_LOG
   SARA_DEBUG << "Extraction of xyz" << endl;

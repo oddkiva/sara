@@ -80,16 +80,13 @@ BOOST_AUTO_TEST_CASE(test_relative_pose_estimator)
 
   const auto motions1 = RelativePoseSolver<NisterFivePointAlgorithm>{}(u1, u2);
 
-  const auto motions2 = RelativePoseSolver<NisterFivePointAlgorithm>{
-      CheiralityCriterion::NONE}(u1, u2);
+  const auto motions2 = RelativePoseSolver<NisterFivePointAlgorithm>{}(u1, u2);
   BOOST_CHECK_EQUAL(motions1.size(), motions2.size());
 
-  const auto motions3 = RelativePoseSolver<NisterFivePointAlgorithm>{
-      CheiralityCriterion::CHEIRAL_COMPLETE}(u1, u2);
+  const auto motions3 = RelativePoseSolver<NisterFivePointAlgorithm>{}(u1, u2);
   BOOST_CHECK_LE(motions3.size(), motions2.size());
 
-  const auto motions4 = RelativePoseSolver<NisterFivePointAlgorithm>{
-      CheiralityCriterion::CHEIRAL_MOST}(u1, u2);
+  const auto motions4 = RelativePoseSolver<NisterFivePointAlgorithm>{}(u1, u2);
   BOOST_CHECK_GE(motions4.size(), motions3.size());
 }
 

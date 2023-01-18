@@ -112,9 +112,9 @@ namespace DO::Sara {
     const auto cheiral_degree = best_geom->cheirality.count();
     if (cheiral_degree == 0)
       throw std::runtime_error{"The cheirality degree can't be zero!"};
-    else if (cheiral_degree != L)
+    else if (cheiral_degree < L - 1)
       throw std::runtime_error{
-          "The cheirality degree is not right, it is not 5..."};
+          "The cheirality degree is not right, it is less than 4..."};
 
     // Data transformations.
     const Matrix34d P1 = best_geom->C1;
