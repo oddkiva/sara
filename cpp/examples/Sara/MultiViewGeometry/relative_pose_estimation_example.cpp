@@ -128,8 +128,7 @@ int sara_graphics_main(int argc, char** argv)
   const auto num_samples = argc < 6 ? 1000 : std::stoi(argv[5]);
   const auto err_thres = argc < 7 ? 5e-3 : std::stod(argv[6]);
 
-  auto solver =
-      RelativePoseSolver<NisterFivePointAlgorithm>{CheiralityCriterion::NONE};
+  auto solver = RelativePoseSolver<NisterFivePointAlgorithm>{};
 
   auto inlier_predicate = CheiralAndEpipolarConsistency{};
   inlier_predicate.err_threshold = err_thres;
