@@ -24,20 +24,15 @@ namespace DO::Sara {
   //! @brief Functor evaluating distance of a point to its epipolar line.
   struct EpipolarDistance
   {
-    EpipolarDistance() = default;
-
-    EpipolarDistance(const Eigen::Matrix3d& F_)
-      : F{F_}
-    {
-    }
-
     auto operator()(const Eigen::Vector3d& X, const Eigen::Vector3d& Y) const
     {
       return std::abs(Y.transpose() * F * X);
     }
 
-    template <typename Mat>
-    auto operator()(const Mat& X, const Mat& Y) const -> RowVectorXd
+    template <typename Derived>
+    auto operator()(const Eigen::MatrixBase<Derived>& X,
+                    const Eigen::MatrixBase<Derived>& Y) const
+        -> Eigen::RowVectorXd
     {
       return (Y.array() * (F * X).array()).colwise().sum().abs();
     }
@@ -45,6 +40,54 @@ namespace DO::Sara {
     Eigen::Matrix3d F;
   };
 
+  //! See for example the following reference:
+  //! https://cseweb.ucsd.edu/classes/sp04/cse252b/notes/lec11/lec11.pdf
+  struct SampsonEpipolarDistance
+  {
+    auto operator()(const Eigen::Vector3d& X, const Eigen::Vector3d& Y) const
+    {
+      const Eigen::Vector3d Xn = X / X.z();
+      const Eigen::Vector3d Yn = Y / Y.z();
+      const double sqrt_num = Yn.transpose() * F * Xn;
+
+      const auto right_line = F * Xn;
+      const auto left_line = F.transpose() * Yn;
+      const double den = right_line.head(2).squaredNorm() +  //
+                         left_line.head(2).squaredNorm();
+
+      return (sqrt_num * sqrt_num) / den;
+    }
+
+    template <typename Derived>
+    auto operator()(const Eigen::MatrixBase<Derived>& X,
+                    const Eigen::MatrixBase<Derived>& Y) const
+        -> Eigen::RowVectorXd
+    {
+      const auto Xn = X.colwise().hnormalized().colwise().homogeneous();
+      const auto Yn = Y.colwise().hnormalized().colwise().homogeneous();
+      const auto dots = (Yn.array() * (F * Xn).array())
+                           .matrix()
+                           .colwise()
+                           .sum();
+      const auto nums = dots.array().square();
+      // SARA_CHECK(nums);
+
+      const auto right_lines = F * Xn;
+      const auto left_lines = F.transpose() * Yn;
+      const auto dens =
+          (right_lines.template topRows<2>().colwise().squaredNorm() +  //
+           left_lines.template topRows<2>().colwise().squaredNorm())
+              .array();
+      // SARA_CHECK(dens);
+
+      const auto residuals = (nums / dens).matrix();
+      // SARA_CHECK(residuals);
+
+      return residuals;
+    }
+
+    Eigen::Matrix3d F;
+  };
 
   struct SymmetricTransferError
   {
@@ -63,8 +106,10 @@ namespace DO::Sara {
              ((H_inv_ * y).hnormalized() - x.hnormalized()).norm();
     }
 
-    template <typename Mat>
-    auto operator()(const Mat& u1, const Mat& u2) const -> RowVectorXd
+    template <typename Derived>
+    auto operator()(const Eigen::MatrixBase<Derived>& u1,
+                    const Eigen::MatrixBase<Derived>& u2) const
+        -> Eigen::RowVectorXd
     {
       auto hu1_u2 =
           (H_ * u1).colwise().hnormalized() - u2.colwise().hnormalized();

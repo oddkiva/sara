@@ -91,8 +91,8 @@ int sara_graphics_main(int argc, char** argv)
   views.cameras[1].K =
       read_internal_camera_parameters(data_dir + "/" + image_id2 + ".png.K")
           .cast<double>();
-  SARA_CHECK(views.cameras[0].K);
-  SARA_CHECK(views.cameras[1].K);
+  SARA_DEBUG << "K[0] =\n" << views.cameras[0].K << "\n";
+  SARA_DEBUG << "K[1] =\n" << views.cameras[1].K << "\n";
 
 
   print_stage("Computing keypoints...");
@@ -146,6 +146,8 @@ int sara_graphics_main(int argc, char** argv)
     num_samples = argc < 5 ? 200 : std::stoi(argv[4]);
     err_thres = argc < 6 ? 1e-2 : std::stod(argv[5]);
 
+    // N.B.: in my experience, the Sampson distance works less well than the
+    // normal epipolar distance for the estimation of the essential matrix.
     auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
     inlier_predicate.err_threshold = err_thres;
 
@@ -163,7 +165,7 @@ int sara_graphics_main(int argc, char** argv)
   {
     F.matrix() = K_inv[1].transpose() * E.matrix() * K_inv[0];
 
-    epipolar_edges.F_num_samples[0] = 1000;
+    epipolar_edges.F_num_samples[0] = num_samples;
     epipolar_edges.F_noise = epipolar_edges.E_noise;
     epipolar_edges.F_inliers = epipolar_edges.E_inliers;
     epipolar_edges.F_best_samples = epipolar_edges.E_best_samples;
