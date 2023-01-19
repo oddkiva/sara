@@ -126,7 +126,6 @@ namespace DO::Sara {
     {
       auto p1n = apply_transform(K1_inv, p1);
       auto p2n = apply_transform(K2_inv, p2);
-      std::cout << p1n.colmajor_view().matrix().leftCols(5) << std::endl;
 
       // Normalize backprojected rays to unit norm.
       p1n.colmajor_view().matrix().colwise().normalize();
