@@ -124,6 +124,19 @@ namespace DO::Sara {
     Eigen::Matrix3d F;
   };
 
+  struct SampsonEssentialEpipolarDistance : SampsonEpipolarDistance
+  {
+    auto set_model(const Eigen::Matrix3d& E_) -> void
+    {
+      E = E_;
+      F = K2_inv.transpose() * E * K1_inv;
+    }
+
+    Eigen::Matrix3d K1_inv;
+    Eigen::Matrix3d K2_inv;
+    Eigen::Matrix3d E;
+  };
+
   struct SymmetricTransferError
   {
     SymmetricTransferError() = default;
