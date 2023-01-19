@@ -55,16 +55,28 @@ BOOST_AUTO_TEST_CASE(test_eight_point_algorithm)
   // Fundamental matrix computation.
   const auto [F] = EightPointAlgorithm{}(left, right);
 
+  const auto d = SymmetricEpipolarSquaredLinePointDistance{F};
+
   // Check the residual errors.
-  RowVectorXd errors(8);
+  auto errors = RowVectorXd(8);
   for (int i = 0; i < 8; ++i)
   {
-    errors[i] = std::abs(right.col(i).transpose() * F.matrix() * left.col(i));
-    BOOST_CHECK_SMALL(errors[i], 1e-3);
+    const double di = right.col(i).transpose() * F.matrix() * left.col(i);
+    const double di2 = di * di;
+    const auto dleft_2 =
+        di2 / (F.matrix().transpose() * right.col(i)).head(2).squaredNorm();
+    const auto dright_2 =
+        di2 / (F.matrix() * left.col(i)).head(2).squaredNorm();
+    errors[i] = dleft_2 + dright_2;
+
+    const auto distance_i = d(Eigen::Vector3d{left.col(i)},  //
+                              Eigen::Vector3d{right.col(i)});
+    BOOST_CHECK_CLOSE(errors[i], distance_i, 1e-12);
+    BOOST_CHECK_SMALL(errors[i], 1e-5);
   }
 
   // Also check the batched residual computation as well.
-  const auto batched_errors = EpipolarDistance{F}(left, right);
+  const auto batched_errors = d(left, right);
   BOOST_CHECK_LE(batched_errors.norm(), 1e-3);
 
   // Check that the batched distance computation is consistent for the unbatched

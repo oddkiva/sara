@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_ransac_with_eight_point_algorithm)
 
   const auto iterations = 10;
 
-  auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
+  auto inlier_predicate = InlierPredicate<SampsonEpipolarDistance>{};
   inlier_predicate.err_threshold = 1e-3;
 
   ransac(X, EightPointAlgorithm{}, inlier_predicate, iterations);

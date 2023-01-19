@@ -89,7 +89,7 @@ auto estimate_fundamental_matrix(const KeypointList<OERegion, float>& keys1,
   const auto data_normalizer =
       std::make_optional(Normalizer<FundamentalMatrix>{X});
 
-  auto inlier_predicate = InlierPredicate<SampsonEpipolarDistance>{};
+  auto inlier_predicate = InlierPredicate<SymmetricEpipolarSquaredLinePointDistance>{};
   inlier_predicate.err_threshold = f_err_thres;
 
   const auto [F, inliers, sample_best] =

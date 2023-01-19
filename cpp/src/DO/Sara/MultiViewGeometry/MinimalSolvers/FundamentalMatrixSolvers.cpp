@@ -50,6 +50,9 @@ namespace DO::Sara {
       Vector3d D = svd.singularValues();
       D(2) = 0;
       F = svd.matrixU() * D.asDiagonal() * svd.matrixV().transpose();
+
+      // Yes do normalize the fundamental matrix to avoid dealing with numerical
+      // issues and headaches later...
       F = F.matrix().normalized();
     }
 
