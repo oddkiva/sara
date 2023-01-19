@@ -125,7 +125,7 @@ int sara_graphics_main(int argc, char** argv)
   const auto& f1 = features(views.keypoints[1]);
   const auto u = std::array{homogeneous(extract_centers(f0)).cast<double>(),
                             homogeneous(extract_centers(f1)).cast<double>()};
-#define USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+// #define USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
 #ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
   // Tensors of camera coordinates.
   auto un = std::array{apply_transform(K_inv[0], u[0]),
