@@ -35,7 +35,6 @@
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 
 
-using namespace std;
 using namespace std::string_literals;
 using namespace DO::Sara;
 
@@ -194,7 +193,19 @@ int sara_graphics_main(int argc, char** argv)
   auto colors = extract_colors(views.images[0],  //
                                views.images[1],  //
                                geometry);
-  save_to_hdf5(geometry, colors);
+
+#ifdef __APPLE__
+  const auto geometry_h5_filepath = "/Users/david/Desktop/geometry.h5"s;
+#else
+  const auto geometry_h5_filepath = "/home/david/Desktop/geometry.h5"s;
+#endif
+  auto geometry_h5_file = H5File{geometry_h5_filepath, H5F_ACC_TRUNC};
+  save_to_hdf5(geometry_h5_file, geometry, colors);
+  geometry_h5_file.write_dataset("dataset_folder", data_dir, true);
+  geometry_h5_file.write_dataset("image_1", views.image_paths[0], true);
+  geometry_h5_file.write_dataset("image_2", views.image_paths[1], true);
+  geometry_h5_file.write_dataset("K", data_dir + "/" + image_id1 + ".png.K",
+                                 true);
 
   // Inspect the fundamental matrix.
   print_stage("Inspecting the fundamental matrix estimation...");

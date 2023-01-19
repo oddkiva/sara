@@ -169,7 +169,8 @@ namespace DO::Sara {
       return distances;
     }
 
-    Eigen::Matrix3<T> rotation;
+    Eigen::Matrix3<T> rotation =
+        Eigen::Matrix3<T>::Constant(std::numeric_limits<T>::quiet_NaN());
   };
 
 

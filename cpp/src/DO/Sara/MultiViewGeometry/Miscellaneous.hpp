@@ -23,10 +23,9 @@ namespace DO::Sara {
   //! @defgroup MultiviewMisc Miscellaneous I/O
   //! @{
 
-  inline auto
-  save_to_hdf5(const TwoViewGeometry& complete_geom,
-               const TensorView_<double, 2>& colors,
-               const std::optional<std::string>& dataset_folder = std::nullopt)
+  inline auto save_to_hdf5(H5File& out_h5_file,
+                           const TwoViewGeometry& complete_geom,
+                           const TensorView_<double, 2>& colors) -> void
   {
     // Get the left and right cameras.
     auto cameras = Tensor_<PinholeCameraDecomposition, 1>{2};
@@ -58,22 +57,13 @@ namespace DO::Sara {
     SARA_DEBUG << "colors.max_coeff = " << colors.matrix().maxCoeff()
                << std::endl;
 
-#ifdef __APPLE__
-    auto geom_h5_file =
-        H5File{"/Users/david/Desktop/geometry.h5", H5F_ACC_TRUNC};
-#else
-    auto geom_h5_file =
-        H5File{"/home/david/Desktop/geometry.h5", H5F_ACC_TRUNC};
-#endif
-    geom_h5_file.write_dataset("cameras", cameras, true);
-    geom_h5_file.write_dataset("points", X_euclidean, true);
-    geom_h5_file.write_dataset("colors", colors, true);
-    if (dataset_folder.has_value())
-      geom_h5_file.write_dataset("dataset_folder", *dataset_folder, true);
+    out_h5_file.write_dataset("cameras", cameras, true);
+    out_h5_file.write_dataset("points", X_euclidean, true);
+    out_h5_file.write_dataset("colors", colors, true);
   }
 
   inline auto save_to_ply(const TwoViewGeometry& complete_geom,
-                          const TensorView_<double, 2>& colors)
+                          const TensorView_<double, 2>& colors) -> void
   {
     const auto& X = complete_geom.X;
     auto X_data =
