@@ -13,7 +13,7 @@ namespace DO::Sara {
     using Model = TwoViewGeometry;
 
     Model geometry;
-    EpipolarDistance distance;
+    SampsonEpipolarDistance distance;
     double err_threshold;
 
     CheiralAndEpipolarConsistency() = default;
@@ -26,7 +26,7 @@ namespace DO::Sara {
     auto set_model(const Model& g) -> void
     {
       geometry = g;
-      distance = EpipolarDistance{essential_matrix(g.C2.R, g.C2.t).matrix()};
+      distance = SampsonEpipolarDistance{essential_matrix(g.C2.R, g.C2.t).matrix()};
     }
 
     // N.B.: this is not a const method. This triangulates the points from the

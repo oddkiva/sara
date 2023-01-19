@@ -76,8 +76,12 @@ namespace DO::Sara {
                     const Eigen::MatrixBase<Derived>& Y) const
         -> Eigen::RowVectorXd
     {
-      const auto du2 =
-          (Y.array() * (F * X).array()).matrix().colwise().squaredNorm().array();
+      const auto du2 = (Y.array() * (F * X).array())
+                           .matrix()
+                           .colwise()
+                           .sum()
+                           .array()
+                           .square();
       const auto dleft_2_den = (F.transpose() * Y)
                                    .template topRows<2>()
                                    .colwise()

@@ -201,7 +201,7 @@ GRAPHICS_MAIN()
     num_samples = 1000;
     err_thres = 1e-3;
 
-    auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
+    auto inlier_predicate = InlierPredicate<SampsonEpipolarDistance>{};
     inlier_predicate.err_threshold = err_thres;
 
     std::tie(E, inliers, sample_best) =
