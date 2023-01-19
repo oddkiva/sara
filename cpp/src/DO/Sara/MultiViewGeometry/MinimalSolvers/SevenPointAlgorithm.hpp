@@ -94,7 +94,9 @@ namespace DO::Sara {
       auto F0 = std::vector<Eigen::Matrix3<T>>(num_real_roots);
       std::transform(α.begin(), α.begin() + num_real_roots, F0.begin(),
                      [&F](const auto& α_i) -> Eigen::Matrix3<T> {
-                       return F[0] + α_i * F[1];
+                       // Normalize the fundamental matrix to avoid numerical
+                       // issues and later headaches.
+                       return (F[0] + α_i * F[1]).normalized();
                      });
 
       return F0;

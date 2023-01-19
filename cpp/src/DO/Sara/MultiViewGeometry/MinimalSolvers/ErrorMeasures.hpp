@@ -22,7 +22,13 @@ namespace DO::Sara {
   //! @{
 
   //! @brief Functor evaluating distance of a point to its epipolar line.
-  struct EpipolarDistance
+  //!
+  //! CAVEAT: I strongly discourage using this distance measure unless you have
+  //! a specific reason.
+  //!
+  //! This calculates an algebraic value and does not have a geometric meaning
+  //! because the line equations (F x) and (F.T y) are not normalized.
+  struct AlgebraicEpipolarDistance
   {
     auto set_model(const Eigen::Matrix3d& model) -> void
     {
@@ -40,6 +46,50 @@ namespace DO::Sara {
         -> Eigen::RowVectorXd
     {
       return (Y.array() * (F * X).array()).colwise().sum().abs();
+    }
+
+    Eigen::Matrix3d F;
+  };
+
+  //! @brief Functor evaluating distance of a point to its epipolar line.
+  struct SymmetricEpipolarSquaredLinePointDistance
+  {
+    auto set_model(const Eigen::Matrix3d& F_) -> void
+    {
+      F = F_;
+    }
+
+    auto operator()(const Eigen::Vector3d& X, const Eigen::Vector3d& Y) const
+    {
+      // Unnormalized distance
+      const double du = Y.transpose() * F * X;
+      // Squared unnormalized distance
+      const auto du2 = du * du;
+
+      const auto dleft_2 = du2 / (F.transpose() * Y).head(2).squaredNorm();
+      const auto dright_2 = du2 / (F * X).head(2).squaredNorm();
+      return dleft_2 + dright_2;
+    }
+
+    template <typename Derived>
+    auto operator()(const Eigen::MatrixBase<Derived>& X,
+                    const Eigen::MatrixBase<Derived>& Y) const
+        -> Eigen::RowVectorXd
+    {
+      const auto du2 =
+          (Y.array() * (F * X).array()).matrix().colwise().squaredNorm().array();
+      const auto dleft_2_den = (F.transpose() * Y)
+                                   .template topRows<2>()
+                                   .colwise()
+                                   .squaredNorm()
+                                   .array();
+      const auto dright_2_den =
+          (F * X).template topRows<2>().colwise().squaredNorm().array();
+
+      const auto dleft_2 = du2 / dleft_2_den;
+      const auto dright_2 = du2 / dright_2_den;
+
+      return dleft_2 + dright_2;
     }
 
     Eigen::Matrix3d F;

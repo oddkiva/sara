@@ -44,7 +44,7 @@ namespace DO::Sara {
     const auto data_normalizer =
         std::make_optional(Normalizer<FundamentalMatrix>{Xij});
 
-    auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
+    auto inlier_predicate = InlierPredicate<SampsonEssentialEpipolarDistance>{};
     inlier_predicate.err_threshold = err_thres;
 
     const auto [F, inliers, sample_best] =

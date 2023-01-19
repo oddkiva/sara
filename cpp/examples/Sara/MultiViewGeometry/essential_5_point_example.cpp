@@ -130,6 +130,9 @@ int sara_graphics_main(int argc, char** argv)
   // Tensors of camera coordinates.
   auto un = std::array{apply_transform(K_inv[0], u[0]),
                        apply_transform(K_inv[1], u[1])};
+  // Only OK for the algebraid epipolar distance.
+  for (auto i = 0; i < 2; ++i)
+    un[i].colmajor_view().matrix().colwise().normalize();
 #endif
   // List the matches as a 2D-tensor where each row encodes a match 'm' as a
   // pair of point indices (i, j).
@@ -161,10 +164,15 @@ int sara_graphics_main(int argc, char** argv)
     // N.B.: in my experience, the Sampson distance works less well than the
     // normal epipolar distance for the estimation of the essential matrix.
 #ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
-    // To apply the Sampson distance error:
+    // To apply the Sampson distance or the symmetric line-point distance error:
     // - don't normalize the backprojected rays to unit norm.
     // - instead divide the vector by its z-components.
-    auto inlier_predicate = InlierPredicate<SampsonEpipolarDistance>{};
+    // auto inlier_predicate =
+    //     InlierPredicate<SymmetricEpipolarSquaredLinePointDistance>{};
+    // auto inlier_predicate = InlierPredicate<SampsonEpipolarDistance>{};
+
+    // Only OK for backprojected rays with unit norm.
+    auto inlier_predicate = InlierPredicate<AlgebraicEpipolarDistance>{};
 #else
     auto inlier_predicate = InlierPredicate<SampsonEssentialEpipolarDistance>{};
     inlier_predicate.distance.K1_inv = K_inv[0];
