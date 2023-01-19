@@ -37,6 +37,7 @@ option(SARA_BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
 option(SARA_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
 option(SARA_BUILD_SAMPLES "Build sample programs using DO-Sara libraries" OFF)
 option(SARA_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries" OFF)
+option(SARA_BUILD_DRAFTS "Build draft code" OFF)
 option(SARA_SELF_CONTAINED_INSTALLATION
   "Install C++ and Python libraries in a single self contained directory" OFF)
 

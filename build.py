@@ -91,6 +91,7 @@ def generate_project(source_dir: str,
     cmake_options.append("-D SARA_BUILD_SHARED_LIBS:BOOL=ON")
     cmake_options.append("-D SARA_BUILD_TESTS:BOOL=ON")
     cmake_options.append("-D SARA_BUILD_SAMPLES:BOOL=ON")
+    cmake_options.append("-D SARA_BUILD_DRAFTS:BOOL=ON")
 
     # Compile the Video I/O module.
     cmake_options.append("-D SARA_BUILD_VIDEOIO:BOOL=ON")
