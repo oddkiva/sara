@@ -56,12 +56,12 @@ BOOST_AUTO_TEST_CASE(test_fill)
   octave.init_surface();
 
   // Initialize the octave in CUDA.
-  const dim3 threadsperBlock(16, 16, 2);
-  const dim3 numBlocks(
-      (octave.width() + threadsperBlock.x - 1) / threadsperBlock.x,
-      (octave.height() + threadsperBlock.y - 1) / threadsperBlock.y,
-      (octave.scale_count() + threadsperBlock.z - 1) / threadsperBlock.z);
-  fill<<<numBlocks, threadsperBlock>>>(octave.surface_object(),  //
+  const dim3 threads_per_block(16, 16, 2);
+  const dim3 num_blocks(
+      (octave.width() + threads_per_block.x - 1) / threads_per_block.x,
+      (octave.height() + threads_per_block.y - 1) / threads_per_block.y,
+      (octave.scale_count() + threads_per_block.z - 1) / threads_per_block.z);
+  fill<<<num_blocks, threads_per_block>>>(octave.surface_object(),  //
                                        octave.width(), octave.height(),
                                        octave.scale_count());
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_fill)
 
   auto gt = sara::Image<float, 3>{w, h, octave.scale_count()};
   for (auto i = 0u; i < gt.size(); ++i)
-    gt.data()[i] = static_cast<T>(i);
+    gt.data()[i] = static_cast<float>(i);
 
   // for (auto s = 0; s < result.depth(); ++s)
   //   SARA_DEBUG << s << "\n"
