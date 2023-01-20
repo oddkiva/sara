@@ -71,7 +71,7 @@ namespace DO::Sara {
         c1 = corners.image_point(x, y);
         if (is_nan(c0) || is_nan(c1))
           continue;
-        draw_circle(image, c1, 3.f, color, 2);
+        draw_circle(image, c1, 3, color, 2);
 
         if (x == 0 && y == 0)
           continue;
@@ -123,8 +123,8 @@ namespace DO::Sara {
         const Eigen::Vector2f p1 = corners.image_point(x, y);
         const Eigen::Vector2f p2 = (Hr * P).hnormalized().cast<float>();
 
-        draw_circle(image, p1, 3.f, Cyan8, 3);
-        draw_circle(image, p2, 3.f, Magenta8, 3);
+        draw_circle(image, p1, 3, Cyan8, 3);
+        draw_circle(image, p2, 3, Magenta8, 3);
         if (pause)
         {
           display(image);
