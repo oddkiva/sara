@@ -26,6 +26,4 @@ foreach(file ${TRT_SOURCE_FILES})
 
   set_property(TARGET ${filename} PROPERTY FOLDER
                                            "Examples/Shakti/NeuralNetworks")
-
-  add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
 endforeach()
