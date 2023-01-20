@@ -45,9 +45,9 @@ namespace DO::Sara {
 
     LinePointDistance2D() = default;
 
-    LinePointDistance2D(const Projective::Line2<T>& l) noexcept
-      : line{l}
+    inline auto set_model(const Projective::Line2<T>& l) noexcept
     {
+      line = l;
     }
 
     template <typename Derived>

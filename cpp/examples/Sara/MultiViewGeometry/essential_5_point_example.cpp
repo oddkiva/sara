@@ -91,8 +91,8 @@ int sara_graphics_main(int argc, char** argv)
   views.cameras[1].K =
       read_internal_camera_parameters(data_dir + "/" + image_id2 + ".png.K")
           .cast<double>();
-  SARA_CHECK(views.cameras[0].K);
-  SARA_CHECK(views.cameras[1].K);
+  SARA_DEBUG << "K[0] =\n" << views.cameras[0].K << "\n";
+  SARA_DEBUG << "K[1] =\n" << views.cameras[1].K << "\n";
 
 
   print_stage("Computing keypoints...");
@@ -125,16 +125,31 @@ int sara_graphics_main(int argc, char** argv)
   const auto& f1 = features(views.keypoints[1]);
   const auto u = std::array{homogeneous(extract_centers(f0)).cast<double>(),
                             homogeneous(extract_centers(f1)).cast<double>()};
+// #define USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
   // Tensors of camera coordinates.
   auto un = std::array{apply_transform(K_inv[0], u[0]),
                        apply_transform(K_inv[1], u[1])};
-  // Normalize backprojected rays to unit norm.
-  for (auto i = 0u; i < un.size(); ++i)
+  // Only OK for the algebraid epipolar distance.
+  for (auto i = 0; i < 2; ++i)
     un[i].colmajor_view().matrix().colwise().normalize();
+#endif
   // List the matches as a 2D-tensor where each row encodes a match 'm' as a
   // pair of point indices (i, j).
   const auto M = to_tensor(matches);
+
+#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
   const auto X = PointCorrespondenceList{M, un[0], un[1]};
+#else
+  const auto X = PointCorrespondenceList{M, u[0], u[1]};
+#endif
+
+#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+  auto data_normalizer = std::nullopt;
+#else
+  auto data_normalizer = std::make_optional(
+      Normalizer<EssentialMatrix>{views.cameras[0].K, views.cameras[1].K});
+#endif
 
   print_stage("Estimating the essential matrix...");
   auto& E = epipolar_edges.E[0];
@@ -146,11 +161,39 @@ int sara_graphics_main(int argc, char** argv)
     num_samples = argc < 5 ? 200 : std::stoi(argv[4]);
     err_thres = argc < 6 ? 1e-2 : std::stod(argv[5]);
 
-    auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
+    // N.B.: in my experience, the Sampson distance works less well than the
+    // normal epipolar distance for the estimation of the essential matrix.
+#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+    // To apply the Sampson distance or the symmetric line-point distance error:
+    // - don't normalize the backprojected rays to unit norm.
+    // - instead divide the vector by its z-components.
+    // auto inlier_predicate =
+    //     InlierPredicate<SymmetricEpipolarSquaredLinePointDistance>{};
+    // auto inlier_predicate = InlierPredicate<SampsonEpipolarDistance>{};
+
+    // Only OK for backprojected rays with unit norm.
+    auto inlier_predicate = InlierPredicate<AlgebraicEpipolarDistance>{};
+#else
+    auto inlier_predicate = InlierPredicate<SampsonEssentialEpipolarDistance>{};
+    inlier_predicate.distance.K1_inv = K_inv[0];
+    inlier_predicate.distance.K2_inv = K_inv[1];
+#endif
     inlier_predicate.err_threshold = err_thres;
 
-    std::tie(E, inliers, sample_best) =
-        ransac(X, NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
+#define NISTER_METHOD
+#if defined(NISTER_METHOD)
+    std::cout << "WITH NISTER'S POLYNOMIAL ROOTS\n";
+#else
+    std::cout << "WITH STEWENIUS' GROEBNER BASIS\n";
+#endif
+    std::tie(E, inliers, sample_best) = ransac(  //
+        X,
+#if defined(NISTER_METHOD)
+        NisterFivePointAlgorithm{},  //
+#else
+        SteweniusFivePointAlgorithm{},
+#endif
+        inlier_predicate, num_samples, data_normalizer, true);
 
     epipolar_edges.E_inliers[0] = inliers;
     epipolar_edges.E_best_samples[0] = sample_best;
@@ -163,7 +206,7 @@ int sara_graphics_main(int argc, char** argv)
   {
     F.matrix() = K_inv[1].transpose() * E.matrix() * K_inv[0];
 
-    epipolar_edges.F_num_samples[0] = 1000;
+    epipolar_edges.F_num_samples[0] = num_samples;
     epipolar_edges.F_noise = epipolar_edges.E_noise;
     epipolar_edges.F_inliers = epipolar_edges.E_inliers;
     epipolar_edges.F_best_samples = epipolar_edges.E_best_samples;
@@ -171,6 +214,10 @@ int sara_graphics_main(int argc, char** argv)
 
   // Extract the two-view geometry.
   print_stage("Estimating the two-view geometry...");
+#ifndef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+  auto un = u;
+  std::tie(un[0], un[1]) = data_normalizer->normalize(u[0], u[1]);
+#endif
   epipolar_edges.two_view_geometries = {
       estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best)};
 
@@ -184,7 +231,19 @@ int sara_graphics_main(int argc, char** argv)
   auto colors = extract_colors(views.images[0],  //
                                views.images[1],  //
                                two_view_geometry);
-  save_to_hdf5(two_view_geometry, colors);
+
+#ifdef __APPLE__
+  const auto geometry_h5_filepath = "/Users/david/Desktop/geometry.h5"s;
+#else
+  const auto geometry_h5_filepath = "/home/david/Desktop/geometry.h5"s;
+#endif
+  auto geometry_h5_file = H5File{geometry_h5_filepath, H5F_ACC_TRUNC};
+  save_to_hdf5(geometry_h5_file, two_view_geometry, colors);
+  geometry_h5_file.write_dataset("dataset_folder", data_dir, true);
+  geometry_h5_file.write_dataset("image_1", views.image_paths[0], true);
+  geometry_h5_file.write_dataset("image_2", views.image_paths[1], true);
+  geometry_h5_file.write_dataset("K", data_dir + "/" + image_id1 + ".png.K",
+                                 true);
 
   // Inspect the fundamental matrix.
   print_stage("Inspecting the fundamental matrix estimation...");

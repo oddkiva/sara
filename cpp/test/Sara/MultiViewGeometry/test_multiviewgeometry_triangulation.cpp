@@ -42,9 +42,9 @@ auto generate_test_data()
 
   const auto E = essential_matrix(R, t);
 
-  const Matrix34d C1 = PinholeCameraDecomposition{
-      Matrix3d::Identity(), Matrix3d::Identity(), Vector3d::Zero()};
-  const Matrix34d C2 = PinholeCameraDecomposition{Matrix3d::Identity(), R, t};
+  const Matrix34d C1 =
+      normalized_camera(Matrix3d::Identity(), Vector3d::Zero()).matrix();
+  const Matrix34d C2 = normalized_camera(R, t).matrix();
   MatrixXd x1 = C1 * X;
   x1.array().rowwise() /= x1.row(2).array();
   MatrixXd x2 = C2 * X;
@@ -53,6 +53,24 @@ auto generate_test_data()
   return std::make_tuple(X, R, t, E, C1, C2, x1, x2);
 }
 
+template <typename T>
+auto triangulate_nister(const Eigen::Matrix3<T>& E,
+                        const Eigen::Matrix<T, 3, 4>& P,
+                        const Eigen::Vector3<T>& ray1,
+                        const Eigen::Vector3<T>& ray2) -> Eigen::Vector4<T>
+{
+  const Eigen::Vector3<T> a = E.transpose() * ray2;
+  const Eigen::Vector3<T> b =
+      ray1.cross(Eigen::Vector3<T>(1, 1, 0).asDiagonal() * a);
+  const Eigen::Vector3<T> c =
+      ray2.cross(Eigen::Vector3<T>(1, 1, 0).asDiagonal() * E * ray1);
+  const Eigen::Vector3<T> d = a.cross(b);
+  const Eigen::Vector4<T> C = P.transpose() * c;
+
+  auto X = Eigen::Vector4<T>{};
+  X << d * C(3), -d.dot(C.head(3));
+  return X;
+}
 
 BOOST_AUTO_TEST_CASE(test_triangulate_linear_eigen_v2)
 {
@@ -84,7 +102,6 @@ BOOST_AUTO_TEST_CASE(test_triangulate_linear_eigen_v2)
   BOOST_CHECK_SMALL((C1 * X_est - s1_x1.matrix()).norm(), 1e-6);
   BOOST_CHECK_SMALL((C2 * X_est - s2_x2).norm(), 1e-6);
 }
-
 
 BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
 {
@@ -246,4 +263,24 @@ BOOST_AUTO_TEST_CASE(test_calculate_two_view_geometries)
   BOOST_CHECK_EQUAL(g.C1.matrix(), normalized_camera().matrix());
   BOOST_CHECK_EQUAL(g.C2.matrix(),
                     normalized_camera(R, t.normalized()).matrix());
+}
+
+BOOST_AUTO_TEST_CASE(test_triangulate_nister)
+{
+  const auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
+  (void) R;
+  (void) t;
+  (void) E;
+
+  const auto P = normalized_camera(R, t).matrix();
+  SARA_DEBUG << "P =\n" << P << std::endl;
+  for (auto i = 0; i < x1.cols(); ++i)
+  {
+    const Eigen::Vector3d x1i = x1.col(i);
+    const Eigen::Vector3d x2i = x1.col(i);
+    const auto Xi = triangulate_nister(E.matrix(), P, x1i, x2i);
+    SARA_CHECK(i);
+    SARA_CHECK(X.col(i).transpose());
+    SARA_CHECK(Xi.hnormalized().homogeneous().transpose());
+  }
 }

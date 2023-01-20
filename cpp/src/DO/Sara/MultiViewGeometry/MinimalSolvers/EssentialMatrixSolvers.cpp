@@ -265,8 +265,16 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
 #ifdef SHOW_DEBUG_LOG
   SARA_DEBUG << "Root extraction of " << n << endl;
 #endif
-  const auto rpoly_results = rpoly(n);
-  const auto& roots = rpoly_results.second;
+
+  const auto [roots_extracted_successfully, roots] = rpoly(n);
+
+  // If rpoly fails, then let's take a conservative behaviour, minimize the risk
+  // of providing false essential matrices...
+  //
+  // It probably means the polynomial have ill-conditioned coefficients, and
+  // that probably generated from wrong correspondences.
+  if (!roots_extracted_successfully)
+    return {};
 
 #ifdef SHOW_DEBUG_LOG
   SARA_DEBUG << "Extraction of xyz" << endl;
@@ -305,6 +313,12 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
     auto E = EssentialMatrix{};
     E.matrix() = xyz[0] * E_bases[0] + xyz[1] * E_bases[1] +
                  xyz[2] * E_bases[2] + E_bases[3];
+
+    // Normalizing the essential matrix will make sure the epipolar line-point
+    // distances have nice value and it's useful to do it before counting the
+    // inliers in RANSAC.
+    E.matrix().normalize();
+
     Es.push_back(E);
   }
 
@@ -373,6 +387,11 @@ auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
     auto E = Matrix3d{};
     auto vec_E = Map<Matrix<double, 9, 1>>(E.data());
     vec_E = E_bases * U.col(s).tail<4>().real();
+
+    // Normalizing the essential matrix will make sure the epipolar line-point
+    // distances have nice value and it's useful to do it before counting the
+    // inliers in RANSAC.
+    E.normalize();
 
     Es.emplace_back(E.transpose());
   }

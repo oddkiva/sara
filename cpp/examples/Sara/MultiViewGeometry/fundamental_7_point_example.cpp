@@ -89,7 +89,7 @@ auto estimate_fundamental_matrix(const KeypointList<OERegion, float>& keys1,
   const auto data_normalizer =
       std::make_optional(Normalizer<FundamentalMatrix>{X});
 
-  auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
+  auto inlier_predicate = InlierPredicate<SymmetricEpipolarSquaredLinePointDistance>{};
   inlier_predicate.err_threshold = f_err_thres;
 
   const auto [F, inliers, sample_best] =
@@ -127,12 +127,16 @@ void inspect_fundamental_matrix_estimation(const Image<Rgb8>& image1,
 
   // Show the inliers.
   const auto num_matches = static_cast<int>(matches.size());
+  static constexpr auto num_matches_max = 100;
+  const auto step = num_matches < num_matches_max  //
+                        ? 1
+                        : num_matches / num_matches_max;
   for (auto i = 0; i < num_matches; ++i)
   {
     if (!inliers(i))
       continue;
 
-    if (i % 100 == 0)
+    if (i % step == 0)
     {
       drawer.draw_match(matches[i], Blue8, false);
 
@@ -216,7 +220,7 @@ int sara_graphics_main(int argc, char** argv)
 
   print_stage("Estimating the fundamental matrix...");
   const auto num_samples = argc < 4 ? 200 : std::stoi(argv[3]);
-  const auto f_err_thres = argc < 5 ? 1e-2 : std::stod(argv[4]);
+  const auto f_err_thres = argc < 5 ? 1. : std::stod(argv[4]);
   const auto [F, inliers, sample_best] = estimate_fundamental_matrix(
       keypoints[0], keypoints[1], matches, num_samples, f_err_thres);
 

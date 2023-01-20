@@ -45,7 +45,7 @@ namespace DO::Sara {
     const auto Mij_tensor = to_tensor(Mij);
     const auto Xij = PointCorrespondenceList{Mij_tensor, uni, unj};
 
-    auto inlier_predicate = InlierPredicate<EpipolarDistance>{};
+    auto inlier_predicate = InlierPredicate<AlgebraicEpipolarDistance>{};
     inlier_predicate.err_threshold = err_thres;
 
     const auto [E, inliers, sample_best] =
