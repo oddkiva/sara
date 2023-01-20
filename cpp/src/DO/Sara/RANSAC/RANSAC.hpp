@@ -152,7 +152,8 @@ namespace DO::Sara {
     inline auto operator()(const PointList<T, D>& X) const
         -> Array<bool, 1, Dynamic>
     {
-      return distance(X._data.colmajor_view().matrix()).array() < err_threshold;
+      return distance(X._data.colmajor_view().matrix()).array() <
+             static_cast<float>(err_threshold);
     }
 
     //! @brief Check the inlier predicate on a list of correspondences.
@@ -185,8 +186,9 @@ namespace DO::Sara {
                                  int minimal_sample_cardinality,
                                  double confidence = 0.99) -> std::size_t
   {
-    return std::log(1 - confidence) /
-           std::log(1 - std::pow(inlier_ratio, minimal_sample_cardinality));
+    return static_cast<std::size_t>(
+        std::log(1 - confidence) /
+        std::log(1 - std::pow(inlier_ratio, minimal_sample_cardinality)));
   }
 
   //! @}

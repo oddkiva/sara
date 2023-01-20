@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_fill)
 
   auto gt = sara::Image<float, 3>{w, h, octave.scale_count()};
   for (auto i = 0u; i < gt.size(); ++i)
-    gt.data()[i] = i;
+    gt.data()[i] = static_cast<T>(i);
 
   // for (auto s = 0; s < result.depth(); ++s)
   //   SARA_DEBUG << s << "\n"

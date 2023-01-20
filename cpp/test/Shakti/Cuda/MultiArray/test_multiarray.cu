@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(test_copy_between_host_and_device_3d)
   const int d = 5;
   float in_host_data[w * h * d];
   for (int i = 0; i < w * h * d; ++i)
-    in_host_data[i] = i;
+    in_host_data[i] = static_cast<float>(i);
 
   // Copy to device.
   shakti::MultiArray<float, 3> out_device_image{in_host_data, {w, h, d}};
