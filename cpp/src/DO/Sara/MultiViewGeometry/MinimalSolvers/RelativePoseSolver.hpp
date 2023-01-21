@@ -69,7 +69,11 @@ namespace DO::Sara {
       const auto last = std::remove_if(std::begin(geometries),
                                       std::end(geometries),
                                       [&](const auto& g) {
+#if defined(I_AM_SURE_THERE_IS_NO_POINT_AT_INFINITY)
+                                        return g.cheirality.count() != N;
+#else
                                         return g.cheirality.count() < N - 1;
+#endif
                                       });
       geometries.erase(last, geometries.end());
       return geometries;

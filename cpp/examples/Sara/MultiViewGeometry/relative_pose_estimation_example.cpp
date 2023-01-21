@@ -76,8 +76,8 @@ int sara_graphics_main(int argc, char** argv)
   views.cameras[1].K =
       read_internal_camera_parameters(data_dir + "/" + image_id2 + ".png.K")
           .cast<double>();
-  SARA_CHECK(views.cameras[0].K);
-  SARA_CHECK(views.cameras[1].K);
+  SARA_DEBUG << "K[0] =\n" << views.cameras[0].K << "\n";
+  SARA_DEBUG << "K[1] =\n" << views.cameras[1].K << "\n";
 
 
   print_stage("Computing keypoints...");
@@ -110,30 +110,27 @@ int sara_graphics_main(int argc, char** argv)
   const auto& f1 = features(views.keypoints[1]);
   const auto u = std::array{homogeneous(extract_centers(f0)).cast<double>(),
                             homogeneous(extract_centers(f1)).cast<double>()};
-  // Tensors of camera coordinates.
-  auto un = std::array{apply_transform(K_inv[0], u[0]),
-                       apply_transform(K_inv[1], u[1])};
-  // Normalize backprojected rays to unit norm.
-  for (auto i = 0u; i < un.size(); ++i)
-    un[i].colmajor_view().matrix().colwise().normalize();
-
 
   // List the matches as a 2D-tensor where each row encodes a match 'm' as a
   // pair of point indices (i, j).
   print_stage("Estimating the two view geometry...");
   const auto M = to_tensor(matches);
-  const auto X = PointCorrespondenceList{M, un[0], un[1]};
-
+  const auto X = PointCorrespondenceList{M, u[0], u[1]};
   const auto num_samples = argc < 6 ? 1000 : std::stoi(argv[5]);
-  const auto err_thres = argc < 7 ? 5e-3 : std::stod(argv[6]);
+  const auto err_thres = argc < 7 ? 2. : std::stod(argv[6]);
 
   auto solver = RelativePoseSolver<NisterFivePointAlgorithm>{};
 
+  auto data_normalizer = std::make_optional(
+      Normalizer<TwoViewGeometry>{views.cameras[0].K, views.cameras[1].K});
+
   auto inlier_predicate = CheiralAndEpipolarConsistency{};
+  inlier_predicate.distance.K1_inv = K_inv[0];
+  inlier_predicate.distance.K2_inv = K_inv[0];
   inlier_predicate.err_threshold = err_thres;
 
   auto [geometry, inliers, sample_best] =
-      ransac(X, solver, inlier_predicate, num_samples, std::nullopt, true);
+      ransac(X, solver, inlier_predicate, num_samples, data_normalizer, true);
 
   SARA_DEBUG << "Geometry =\n" << geometry << std::endl;
   SARA_DEBUG << "inliers count = " << inliers.flat_array().count() << std::endl;
@@ -171,10 +168,13 @@ int sara_graphics_main(int argc, char** argv)
     if (!inliers(i))
       continue;
 
-    const Eigen::Vector3d u1 = X[i][0].vector();
-    const Eigen::Vector3d u2 = X[i][1].vector();
+    const Eigen::Vector3d u1 = K_inv[0] * X[i][0].vector();
+    const Eigen::Vector3d u2 = K_inv[1] * X[i][1].vector();
     const auto [Xj, s1j, s2j] = triangulate_single_point_linear_eigen(
         geometry.C1.matrix(), geometry.C2.matrix(), u1, u2);
+    const auto cheiral = s1j > 0 && s2j > 0;
+    if (!cheiral)
+      continue;
 
     points.col(j) = Xj;
     s1(j) = s1j;
@@ -183,9 +183,6 @@ int sara_graphics_main(int argc, char** argv)
   }
   if (!(s1.array() > 0 && s2.array() > 0).all())
     throw std::runtime_error{"Uh Oh.... Cheirality is wrong!"};
-
-  // N.B.: if this is too restrictive we may just testing the cheirality
-  // partially at least (s1.array() > 0)
 
   // Add the internal camera matrices to the camera.
   geometry.C1.K = views.cameras[0].K;

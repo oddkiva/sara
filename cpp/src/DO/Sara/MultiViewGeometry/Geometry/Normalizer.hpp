@@ -154,26 +154,40 @@ namespace DO::Sara {
   template <>
   struct Normalizer<TwoViewGeometry>
   {
-    using Base = Normalizer<EssentialMatrix>;
-
-    Normalizer(const TensorView_<double, 2>&, const TensorView_<double, 2>&)
+    Normalizer(const Eigen::Matrix3d& K1, const Eigen::Matrix3d& K2)
+      : K1_inv{K1.inverse()}
+      , K2_inv{K2.inverse()}
     {
     }
 
-    Normalizer(const PointCorrespondenceList<double>&)
+    auto normalize(const TensorView_<double, 2>& p1,
+                   const TensorView_<double, 2>& p2) const
     {
+      auto p1n = apply_transform(K1_inv, p1);
+      auto p2n = apply_transform(K2_inv, p2);
+
+      // Normalize backprojected rays to unit norm.
+      p1n.colmajor_view().matrix().colwise().normalize();
+      p2n.colmajor_view().matrix().colwise().normalize();
+
+      return std::make_tuple(p1n, p2n);
     }
 
     auto normalize(const PointCorrespondenceList<double>& X) const
         -> PointCorrespondenceList<double>
     {
-      return X;
+      auto Xn = PointCorrespondenceList<double>{};
+      std::tie(Xn._p1, Xn._p2) = this->normalize(X._p1, X._p2);
+      return Xn;
     }
 
     auto denormalize(const TwoViewGeometry& g) const -> TwoViewGeometry
     {
       return g;
     }
+
+    Eigen::Matrix3d K1_inv;
+    Eigen::Matrix3d K2_inv;
   };
 
   //! @}

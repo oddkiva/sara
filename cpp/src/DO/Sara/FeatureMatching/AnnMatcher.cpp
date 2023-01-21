@@ -235,7 +235,7 @@ namespace DO { namespace Sara {
     SARA_DEBUG << "Built trees in " << t.elapsed() << " seconds." << endl;
 
     auto matches = vector<Match>{};
-    matches.reserve(1e5);
+    matches.reserve(100'000);
 
     t.restart();
     for (auto i1 = 0; i1 < dmat1.rows(); ++i1)
