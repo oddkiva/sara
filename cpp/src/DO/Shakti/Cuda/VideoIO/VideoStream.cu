@@ -11,10 +11,10 @@
 
 #include <DO/Shakti/Cuda/VideoIO/VideoStream.hpp>
 
-#include "nvidia-video-codec-sdk-9.1.23/NvCodec/NvDecoder/NvDecoder.h"
-#include "nvidia-video-codec-sdk-9.1.23/Utils/ColorSpace.h"
-#include "nvidia-video-codec-sdk-9.1.23/Utils/FFmpegDemuxer.h"
-#include "nvidia-video-codec-sdk-9.1.23/Utils/NvCodecUtils.h"
+#include "nvidia-video-codec-sdk/NvCodec/NvDecoder/NvDecoder.h"
+#include "nvidia-video-codec-sdk/Utils/ColorSpace.h"
+#include "nvidia-video-codec-sdk/Utils/FFmpegDemuxer.h"
+#include "nvidia-video-codec-sdk/Utils/NvCodecUtils.h"
 
 #include <array>
 

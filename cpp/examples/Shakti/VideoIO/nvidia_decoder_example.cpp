@@ -11,7 +11,7 @@
 
 #include <DO/Shakti/Cuda/VideoIO.hpp>
 
-#include "nvidia-video-codec-sdk-9.1.23/Utils/NvCodecUtils.h"
+#include "nvidia-video-codec-sdk/Utils/NvCodecUtils.h"
 
 
 namespace sara = DO::Sara;
