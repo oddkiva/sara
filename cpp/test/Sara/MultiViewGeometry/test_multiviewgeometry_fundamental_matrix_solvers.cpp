@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_eight_point_algorithm)
   // Fundamental matrix computation.
   const auto [F] = EightPointAlgorithm{}(left, right);
 
-  const auto d = SymmetricEpipolarSquaredLinePointDistance{F};
+  const auto d = SymmetricEpipolarGeometricSquaredDistance{F};
 
   // Check the residual errors.
   auto errors = RowVectorXd(8);
