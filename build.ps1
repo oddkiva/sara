@@ -12,10 +12,10 @@ $build_dir = "sara-build-vs$vsver-$build_type"
 $cmake_toolset = $cmake_vsver[$vsver]
 
 $qt_dir = "C:\local\qt-everywhere-src-6.1.2\qtbase"
-$cudnn_dir = "C:\local\cudnn-windows-x86_64-8.6.0.163_cuda11-archive"
-$halide_dir = "C:\local\Halide-13.0.3-x86-64-windows"
-$nvidia_codec_sdk_dir = "C:\local\Video_Codec_SDK_11.1.5"
-$tensorrt_dir = "C:\local\TensorRT-8.4.3.1"
+$cudnn_dir = "C:\local\cudnn-windows-x86_64-8.7.0.84_cuda11-archive"
+$halide_dir = "C:\local\Halide-14.0.0-x86-64-windows"
+$nvidia_codec_sdk_dir = "C:\local\Video_Codec_SDK_9.1.23"
+$tensorrt_dir = "TensorRT-8.5.2.2"
 
 $update_vcpkg = $false
 $build_from_scratch = $true

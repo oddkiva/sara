@@ -28,13 +28,13 @@ auto make_pinhole_camera()
   const auto h = 1080;
 
   // Focal lengths in each dimension.
-  const auto fx = 1063.30738864;
-  const auto fy = 1064.20554291;
+  const auto fx = 1063.30738864f;
+  const auto fy = 1064.20554291f;
   // Shear component.
-  const auto s = -1.00853432;
+  const auto s = -1.00853432f;
   // Principal point.
-  const auto u0 = 969.55702157;
-  const auto v0 = 541.26230733;
+  const auto u0 = 969.55702157f;
+  const auto v0 = 541.26230733f;
 
   camera_parameters.image_sizes << w, h;
   // clang-format off

@@ -64,6 +64,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   add_link_options(${CMAKE_EXE_LINKER_FLAGS})
 endif ()
 
+if (MSVC AND CCACHE_PROGRAM)
+  string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_ASAN "${CMAKE_C_FLAGS_ASAN}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_ASAN "${CMAKE_CXX_FLAGS_ASAN}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+endif ()
+
 
 # Generate position independent code for static libraries.
 # (cf. EasyExif third-party library)
