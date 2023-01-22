@@ -15,7 +15,7 @@
 #include <cmath>
 
 #ifdef _OPENMP
-#include <omp.h>
+#  include <omp.h>
 #endif
 
 #include <boost/program_options.hpp>
@@ -26,6 +26,7 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
 #include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
@@ -168,6 +169,10 @@ int __main(int argc, char** argv)
   static constexpr auto match_count_max_estimate = 20000;
   matches.reserve(match_count_max_estimate);
 
+  auto F = sara::FundamentalMatrix{};
+  auto inliers = sara::Tensor_<bool, 1>{};
+  auto sample_best = sara::Tensor_<int, 1>{};
+
   while (true)
   {
     sara::tic();
@@ -220,7 +225,7 @@ int __main(int argc, char** argv)
       sara::tic();
       matching_timer.restart();
       matches.clear();
-      const auto& fprev = std::get<0>(keys_prev);
+      const auto& fprev = sara::features(keys_prev);
       if (!fprev.empty())
       {
         sara::AnnMatcher matcher{keys_prev, keys_curr, nearest_neighbor_ratio};
@@ -228,14 +233,26 @@ int __main(int argc, char** argv)
       }
       matching_time = matching_timer.elapsed_ms();
       sara::toc("Matching");
+
+
+      sara::tic();
+      if (!fprev.empty())
+      {
+        static constexpr auto num_samples = 200.;
+        static constexpr auto f_err_thres = 4.;
+        std::tie(F, inliers, sample_best) = sara::estimate_fundamental_matrix(
+            matches, keys_prev, keys_curr, num_samples, f_err_thres);
+      }
+      sara::toc("Estimating the fundamental matrix");
     }
+
 
     sara::tic();
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
     auto frame_rgb = frame.cwise_transform(  //
         [](const sara::Bgra8& color) -> sara::Rgb8 {
           using namespace sara;
-      return {color.channel<R>(), color.channel<G>(), color.channel<B>()};
+          return {color.channel<R>(), color.channel<G>(), color.channel<B>()};
         });
 #else
     auto& frame_rgb = frame;
@@ -258,6 +275,8 @@ int __main(int argc, char** argv)
 #pragma omp parallel for
       for (auto i = 0; i < num_matches; ++i)
       {
+        if (!inliers(i))
+          continue;
         if (show_features)
         {
           draw(frame_rgb, matches[i].x(), sara::Blue8);
@@ -275,8 +294,8 @@ int __main(int argc, char** argv)
     draw_text(frame_rgb, 100, 100,
               sara::format("Matching: %0.3f ms", matching_time),  //
               sara::White8, 40, 0, false, true, false);
-    draw_text(frame_rgb, 100, 150,                         //
-              sara::format("Tracks: %u", matches.size()),  //
+    draw_text(frame_rgb, 100, 200,                                          //
+              sara::format("F-Inliers: %d", inliers.flat_array().count()),  //
               sara::White8, 40, 0, false, true, false);
 
     sara::display(frame_rgb);
