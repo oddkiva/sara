@@ -21,9 +21,9 @@ namespace DO::Sara {
   //! @addtogroup MultiviewErrorMeasures Error Measures
   //! @{
 
-  struct NormalizedEpipolarDistance
+  struct SymmetricNormalizedEpipolarDistance
   {
-    NormalizedEpipolarDistance(const Eigen::Vector2i& image_sizes_1,
+    SymmetricNormalizedEpipolarDistance(const Eigen::Vector2i& image_sizes_1,
                                const Eigen::Vector2i& image_sizes_2)
       : image_sizes_1{image_sizes_1}
       , image_sizes_2{image_sizes_2}
@@ -34,13 +34,18 @@ namespace DO::Sara {
 
     auto operator()(const Eigen::Matrix3d& F, const Eigen::Vector4d& pq) const
     {
-      const auto p = pq.head(2);
-      const auto q = pq.tail(2);
-      const double epipolar_distance =
-          q.homogeneous().transpose() * F * p.homogeneous();
-      const auto norm_dist_in_image_1 = norm_factor_1 * epipolar_distance;
-      const auto norm_dist_in_image_2 = norm_factor_2 * epipolar_distance;
-      return std::max(norm_dist_in_image_1, norm_dist_in_image_2);
+      const auto p = pq.head(2).homogeneous();
+      const auto q = pq.tail(2).homogeneous();
+      // Algebraic square epipolar distance
+      const double alg_epi_dist = q.transpose() * F * p;
+      // Left line-point square distance
+      const double right_dist = alg_epi_dist / (F * p).head(2).norm();
+      // Right line-point square distance
+      const double left_dist =
+          alg_epi_dist / (F.transpose() * q).head(2).norm();
+      const auto left_dist_normalized = norm_factor_1 * left_dist;
+      const auto right_dist_normalized = norm_factor_2 * right_dist;
+      return std::max(left_dist_normalized, right_dist_normalized);
     }
 
     static auto normalization_factor(const Eigen::Vector2i& sizes) -> double
