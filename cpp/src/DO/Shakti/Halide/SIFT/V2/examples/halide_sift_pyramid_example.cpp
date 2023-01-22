@@ -294,7 +294,7 @@ int __main(int argc, char** argv)
     draw_text(frame_rgb, 100, 100,
               sara::format("Matching: %0.3f ms", matching_time),  //
               sara::White8, 40, 0, false, true, false);
-    draw_text(frame_rgb, 100, 200,                                          //
+    draw_text(frame_rgb, 100, 150,                                          //
               sara::format("F-Inliers: %d", inliers.flat_array().count()),  //
               sara::White8, 40, 0, false, true, false);
 
