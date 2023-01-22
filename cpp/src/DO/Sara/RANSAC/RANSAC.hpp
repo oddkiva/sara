@@ -94,7 +94,7 @@ namespace DO::Sara {
       if (data_normalizer.has_value())
         std::for_each(candidate_models.begin(), candidate_models.end(),
                       [&data_normalizer](auto& model) {
-                        model = data_normalizer->denormalize(model);
+                        data_normalizer->denormalize(model);
                       });
 
       // Count the inliers.

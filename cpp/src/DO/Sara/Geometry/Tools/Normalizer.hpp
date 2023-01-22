@@ -100,10 +100,9 @@ namespace DO::Sara {
       return Xn;
     }
 
-    inline auto denormalize(const Projective::Line2<S>& l) const
-        -> Projective::Line2<S>
+    inline auto denormalize(Projective::Line2<S>& l) const -> void
     {
-      return T.transpose() * l;
+      l = T.transpose() * l;
     }
 
     Eigen::Matrix3<S> T;
@@ -118,10 +117,9 @@ namespace DO::Sara {
       return X;
     }
 
-    inline auto denormalize(const Eigen::Matrix3<T>& R) const
-        -> Eigen::Matrix3<T>
+    //! @brief Dummy implementation.
+    inline auto denormalize(const Eigen::Matrix3<T>&) const -> void
     {
-      return R;
     }
   };
 
