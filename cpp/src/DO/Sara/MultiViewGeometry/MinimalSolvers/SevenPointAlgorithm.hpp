@@ -2,9 +2,9 @@
 
 #include <DO/Sara/Defines.hpp>
 
-#include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Math/PolynomialRoots.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures2.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 
 #include <optional>
 
