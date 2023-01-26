@@ -286,7 +286,7 @@ int sara_graphics_main(int argc, char** argv)
     const Eigen::Vector2d ui = u1.col(index) * 0.25;
 
     auto color = Rgb8{};
-    color << 0, 0, int(linear(depth) * 255);
+    color << 0, 0, static_cast<int>(linear(depth) * 255);
     if (depth < 0)
       color = Red8;  // Highlight where the problem is...
     fill_circle(ui.x(), ui.y(), 5, color);

@@ -42,6 +42,9 @@ target_link_libraries(essential_5_point_example PRIVATE tinyply)
 # Camera resectioning.
 sara_add_example(camera_resectioning_example)
 
+# Visual odometry.
+sara_add_example(visual_odometry_example)
+
 # Bundle adjustment.
 sara_add_example(two_view_bundle_adjustment_example)
 target_include_directories(two_view_bundle_adjustment_example
