@@ -228,6 +228,9 @@ auto sara_graphics_main(int, char**) -> int
     {
       sara::print_stage("Matching keypoints...");
       matches = match(keys[0], keys[1], sift_nn_ratio);
+      // Put a hard limit of 1000 matches to scale.
+      if (matches.size() > 1000)
+        matches.resize(1000);
 
       sara::print_stage("Estimating the relative pose...");
       const auto u = std::array{
