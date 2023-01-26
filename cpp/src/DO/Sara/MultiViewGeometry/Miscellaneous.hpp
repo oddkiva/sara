@@ -32,24 +32,22 @@ namespace DO::Sara {
     cameras(0) = complete_geom.C1;
     cameras(1) = complete_geom.C2;
 
-    const MatrixXd X_euclidean = complete_geom.X.colwise().hnormalized();
-    SARA_DEBUG << "3D points =\n" << X_euclidean.leftCols(20) << std::endl;
+    const Eigen::MatrixXd X_euclidean = complete_geom.X.colwise().hnormalized();
 
-    SARA_DEBUG << "colors =\n" << colors.matrix().topRows(20) << std::endl;
     SARA_DEBUG << "Number of 3D valid points = " << X_euclidean.cols()
                << std::endl;
 
-    SARA_DEBUG << "X.x_coord.min_coeff = " << X_euclidean.col(0).minCoeff()
+    SARA_DEBUG << "X.x_coord.min_coeff = " << X_euclidean.row(0).minCoeff()
                << std::endl;
-    SARA_DEBUG << "X.x_coord.max_coeff = " << X_euclidean.col(0).maxCoeff()
+    SARA_DEBUG << "X.x_coord.max_coeff = " << X_euclidean.row(0).maxCoeff()
                << std::endl;
-    SARA_DEBUG << "X.y_coord.min_coeff = " << X_euclidean.col(1).minCoeff()
+    SARA_DEBUG << "X.y_coord.min_coeff = " << X_euclidean.row(1).minCoeff()
                << std::endl;
-    SARA_DEBUG << "X.y_coord.max_coeff = " << X_euclidean.col(1).maxCoeff()
+    SARA_DEBUG << "X.y_coord.max_coeff = " << X_euclidean.row(1).maxCoeff()
                << std::endl;
-    SARA_DEBUG << "X.z_coord.min_coeff = " << X_euclidean.col(2).minCoeff()
+    SARA_DEBUG << "X.z_coord.min_coeff = " << X_euclidean.row(2).minCoeff()
                << std::endl;
-    SARA_DEBUG << "X.z_coord.max_coeff = " << X_euclidean.col(2).maxCoeff()
+    SARA_DEBUG << "X.z_coord.max_coeff = " << X_euclidean.row(2).maxCoeff()
                << std::endl;
 
     SARA_DEBUG << "colors.min_coeff = " << colors.matrix().minCoeff()
@@ -63,7 +61,8 @@ namespace DO::Sara {
   }
 
   inline auto save_to_ply(const TwoViewGeometry& complete_geom,
-                          const TensorView_<double, 2>& colors) -> void
+                          const TensorView_<double, 2>& colors,
+                          const std::string& out_ply_filepath) -> void
   {
     const auto& X = complete_geom.X;
     auto X_data =
@@ -72,7 +71,7 @@ namespace DO::Sara {
         TensorView_<double, 2>{X_data, {int(complete_geom.X.size()), 3}};
 
     std::filebuf fb;
-    fb.open("/home/david/Desktop/geometry.ply", std::ios::out);
+    fb.open(out_ply_filepath, std::ios::out);
     std::ostream ostr(&fb);
     if (ostr.fail())
       throw std::runtime_error{"Error: failed to create PLY!"};

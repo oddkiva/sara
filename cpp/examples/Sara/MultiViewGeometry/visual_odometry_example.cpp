@@ -26,10 +26,12 @@
 #include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization/Features/Draw.hpp>
 
-#define BROWN_CONRADY
+#include <filesystem>
 
 
+namespace fs = std::filesystem;
 namespace sara = DO::Sara;
+
 
 template <typename CameraModel>
 auto undistortion_map(const CameraModel& camera, const Eigen::Vector2i& sizes)
@@ -138,30 +140,25 @@ auto main(int argc, char** argv) -> int
 auto sara_graphics_main(int, char**) -> int
 {
   using namespace std::string_literals;
+#if defined(__APPLE__)
   const auto video_path = "/Users/david/Desktop/Datasets/sample-1.mp4"s;
-
-#if defined(BROWN_CONRADY)
-  auto camera = sara::v2::BrownConradyDistortionModel<double>{};
 #else
-  auto camera = sara::v2::OmnidirectionalCamera<double>{};
+  const auto video_path = "/home/david/Desktop/Datasets/sample-1.mp4"s;
 #endif
+
+  auto camera = sara::v2::BrownConradyDistortionModel<double>{};
   camera.fx() = 917.2878392016245;
   camera.fy() = 917.2878392016245;
   camera.shear() = 0.;
   camera.u0() = 960.;
   camera.v0() = 540.;
-#if defined(BROWN_CONRADY)
   camera.k() << -0.2338367557617234, 0.05952465745165465, -0.007947847982157091;
-#else
-  camera.k() << -0.2338367557617234, 0.05952465745165465;
-#endif
   camera.p() << -0.0003137658969742134, 0.00021943576376532096;
-#if !defined(BROWN_CONRADY)
-  camera.xi() = 0.;
-#endif
 
   const auto K = camera.calibration_matrix();
   const Eigen::Matrix3d K_inv = K.inverse();
+  SARA_DEBUG << "K =\n" << K << std::endl;
+  SARA_DEBUG << "K^{-1} =\n" << K_inv << std::endl;
 
   auto video_stream = sara::VideoStream{video_path};
 
@@ -205,6 +202,7 @@ auto sara_graphics_main(int, char**) -> int
     ++frame_index;
     if (frame_index % 3 != 0)
       continue;
+    SARA_CHECK(frame_index);
 
     frames_rgb_undist[0].swap(frames_rgb_undist[1]);
     frames_work[0].swap(frames_work[1]);
@@ -216,7 +214,7 @@ auto sara_graphics_main(int, char**) -> int
     sara::from_rgb8_to_gray32f(frame_rgb8, frame_gray32f);
     warp(umap, vmap, frame_rgb8, frames_rgb_undist[1]);
     warp(umap, vmap, frame_gray32f, frame_undistorted);
-    auto& display = frames_rgb_undist[1];
+    auto display = frames_rgb_undist[1];
 
     sara::print_stage("Computing keypoints...");
     std::swap(keys[0], keys[1]);
@@ -256,38 +254,56 @@ auto sara_graphics_main(int, char**) -> int
       points.resize(4, inliers.flat_array().count());
       s1.resize(inliers.flat_array().count());
       s2.resize(inliers.flat_array().count());
-      for (auto i = 0, j = 0; i < inliers.size(0); ++i)
+      auto cheiral_inlier_count = 0;
       {
-        if (!inliers(i))
-          continue;
+        auto& j = cheiral_inlier_count;
+        for (auto i = 0; i < inliers.size(0); ++i)
+        {
+          if (!inliers(i))
+            continue;
 
-        const Eigen::Vector3d u1 = K_inv * X[i][0].vector();
-        const Eigen::Vector3d u2 = K_inv * X[i][1].vector();
-        const auto [Xj, s1j, s2j] = sara::triangulate_single_point_linear_eigen(
-            geometry.C1.matrix(), geometry.C2.matrix(), u1, u2);
-        const auto cheiral = s1j > 0 && s2j > 0;
-        if (!cheiral)
-          continue;
+          const Eigen::Vector3d u1 = K_inv * X[i][0].vector();
+          const Eigen::Vector3d u2 = K_inv * X[i][1].vector();
+          const auto [Xj, s1j, s2j] =
+              sara::triangulate_single_point_linear_eigen(
+                  geometry.C1.matrix(), geometry.C2.matrix(), u1, u2);
+          const auto cheiral = s1j > 0 && s2j > 0;
+          if (!cheiral)
+            continue;
 
-        points.col(j) = Xj;
-        s1(j) = s1j;
-        s2(j) = s2j;
-        ++j;
+          // Also we want z in [0, 200] meters max...
+          // We want to avoid 3D point corresponding to the sky...
+          Eigen::Vector4d Xjh = Xj.hnormalized().homogeneous();
+          const auto reasonable = 0 < Xjh.z() && Xjh.z() < 200;
+          if (!reasonable)
+            continue;
+
+          points.col(j) = Xjh;
+          s1(j) = s1j;
+          s2(j) = s2j;
+          ++j;
+        }
+        SARA_CHECK(cheiral_inlier_count);
+        points = points.leftCols(cheiral_inlier_count);
+        s1 = s1.head(cheiral_inlier_count);
+        s2 = s2.head(cheiral_inlier_count);
       }
 
-      // Add the internal camera matrices to the camera.
+      sara::print_stage("Extracting the colors...");
       geometry.C1.K = K;
       geometry.C2.K = K;
       auto colors = sara::extract_colors(frames_rgb_undist[0],
                                          frames_rgb_undist[1],  //
                                          geometry);
 
+      sara::print_stage("Saving to HDF5");
       {
-#ifdef __APPLE__
-        const auto geometry_h5_filepath = "/Users/david/Desktop/geometry.h5"s;
+#if defined(__APPLE__)
+        const auto geometry_h5_filepath = "/Users/david/Desktop/geometry" +
 #else
-        const auto geometry_h5_filepath = "/home/david/Desktop/geometry.h5"s;
+        const auto geometry_h5_filepath = "/home/david/Desktop/geometry" +
 #endif
+                                          std::to_string(frame_index) + ".h5"s;
         auto geometry_h5_file =
             sara::H5File{geometry_h5_filepath, H5F_ACC_TRUNC};
         sara::save_to_hdf5(geometry_h5_file, geometry, colors);
@@ -307,8 +323,8 @@ auto sara_graphics_main(int, char**) -> int
       }
 
       sara::display(display);
-      if (sara::get_key() == sara::KEY_ESCAPE)
-        break;
+      // if (sara::get_key() == sara::KEY_ESCAPE)
+      //   break;
     }
   }
 

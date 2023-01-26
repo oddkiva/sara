@@ -27,8 +27,8 @@ namespace DO::Sara {
   //! @{
   struct Motion
   {
-    Eigen::Matrix3d R{Eigen::Matrix3d::Identity()};
-    Eigen::Vector3d t{Eigen::Vector3d::Zero()};
+    Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
+    Eigen::Vector3d t = Eigen::Vector3d::Zero();
   };
 
   class EssentialMatrix : public FundamentalMatrix
