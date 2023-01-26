@@ -17,9 +17,10 @@
 #include <DO/Sara/MultiViewGeometry/Camera/v2/OmnidirectionalCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/InlierPredicates.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
+#include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/EssentialMatrixEstimation.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 #include <DO/Sara/VideoIO.hpp>
@@ -90,6 +91,43 @@ auto warp(const sara::ImageView<float>& u_map,  //
   }
 }
 
+auto warp(const sara::ImageView<float>& u_map,  //
+          const sara::ImageView<float>& v_map,
+          const sara::ImageView<sara::Rgb8>& frame,
+          sara::ImageView<sara::Rgb8>& frame_warped)
+{
+  const auto w = frame.width();
+  const auto h = frame.height();
+  const auto wh = w * h;
+
+#pragma omp parallel for
+  for (auto p = 0; p < wh; ++p)
+  {
+    // Destination pixel.
+    const auto y = p / w;
+    const auto x = p - w * y;
+
+    auto xyd = Eigen::Vector2d{};
+    xyd << u_map(x, y), v_map(x, y);
+
+    const auto in_image_domain = 0 <= xyd.x() && xyd.x() < w - 1 &&  //
+                                 0 <= xyd.y() && xyd.y() < h - 1;
+    if (!in_image_domain)
+    {
+      frame_warped(x, y) = sara::Black8;
+      continue;
+    }
+
+    auto color = sara::interpolate(frame, xyd);
+    color /= 255;
+
+    auto color_converted = sara::Rgb8{};
+    sara::smart_convert_color(color, color_converted);
+
+    frame_warped(x, y) = color_converted;
+  }
+}
+
 auto main(int argc, char** argv) -> int
 {
   DO::Sara::GraphicsApplication app(argc, argv);
@@ -130,100 +168,132 @@ auto sara_graphics_main(int, char**) -> int
   auto frame_rgb8 = video_stream.frame();
   auto frame_gray32f = sara::Image<float>{video_stream.sizes()};
 
+  auto frames_rgb_undist = std::array<sara::Image<sara::Rgb8>, 2>{};
   auto frames_work = std::array<sara::Image<float>, 2>{};
   auto& frame_undistorted = frames_work[1];
 
   const auto coords_map = undistortion_map(camera, video_stream.sizes());
   const auto& [umap, vmap] = coords_map;
 
-  // Use the following data structure to load images, keypoints, camera
-  // parameters.
-  auto views = sara::ViewAttributes{};
-  views.keypoints.resize(2);
+  constexpr auto sift_nn_ratio = 0.6f;
+  constexpr auto ransac_iterations = 200;
+  constexpr auto err_thres = 2.;
+  const auto image_pyr_params = sara::ImagePyramidParams(0);
+  auto solver = sara::RelativePoseSolver<sara::NisterFivePointAlgorithm>{};
+  auto inlier_predicate = sara::CheiralAndEpipolarConsistency{};
+  {
+    inlier_predicate.distance.K1_inv = K_inv;
+    inlier_predicate.distance.K2_inv = K_inv;
+    inlier_predicate.err_threshold = err_thres;
+  }
 
-  auto epipolar_edges = sara::EpipolarEdgeAttributes{};
-  epipolar_edges.initialize_edges(2 /* views */);
-  epipolar_edges.resize_fundamental_edge_list();
-  epipolar_edges.resize_essential_edge_list();
+  auto keys = std::array<sara::KeypointList<sara::OERegion, float>, 2>{};
+  auto E = sara::EssentialMatrix{};
+  auto F = sara::FundamentalMatrix{};
+  auto matches = std::vector<sara::Match>{};
+  auto inliers = sara::Tensor_<bool, 1>{};
+  auto sample_best = sara::Tensor_<int, 1>{};
+  auto geometry = sara::TwoViewGeometry{};
+
 
   sara::create_window(video_stream.sizes());
   sara::set_antialiasing();
+
+  auto frame_index = -1;
   while (video_stream.read())
   {
+    ++frame_index;
+    if (frame_index % 3 != 0)
+      continue;
+
+    frames_rgb_undist[0].swap(frames_rgb_undist[1]);
     frames_work[0].swap(frames_work[1]);
 
     if (frame_undistorted.sizes() != frame_rgb8.sizes())
       frame_undistorted.resize(frame_rgb8.sizes());
+    if (frames_rgb_undist[1].sizes() != frame_rgb8.sizes())
+      frames_rgb_undist[1].resize(frame_rgb8.sizes());
     sara::from_rgb8_to_gray32f(frame_rgb8, frame_gray32f);
+    warp(umap, vmap, frame_rgb8, frames_rgb_undist[1]);
     warp(umap, vmap, frame_gray32f, frame_undistorted);
-    sara::display(frame_undistorted);
+    auto& display = frames_rgb_undist[1];
 
     sara::print_stage("Computing keypoints...");
-    const auto image_pyr_params = sara::ImagePyramidParams(0);
-    std::swap(sara::features(views.keypoints[0]),
-              sara::features(views.keypoints[1]));
-    std::swap(sara::descriptors(views.keypoints[0]),
-              sara::descriptors(views.keypoints[1]));
-    views.keypoints[1] =
-        sara::compute_sift_keypoints(frame_undistorted, image_pyr_params);
+    std::swap(keys[0], keys[1]);
+    keys[1] = sara::compute_sift_keypoints(frame_undistorted, image_pyr_params);
 
-    const auto& f0 = sara::features(views.keypoints[0]);
-    const auto& f1 = sara::features(views.keypoints[1]);
+    const auto& f0 = sara::features(keys[0]);
+    const auto& f1 = sara::features(keys[1]);
     const auto do_relative_pose_estimation = !f0.empty() && !f1.empty();
-    auto& matches = epipolar_edges.matches[0];
-    auto& inliers = epipolar_edges.E_inliers[0];
 
     if (do_relative_pose_estimation)
     {
       sara::print_stage("Matching keypoints...");
-      static constexpr auto sift_nn_ratio = 0.6f;
-      matches = match(views.keypoints[0], views.keypoints[1], sift_nn_ratio);
+      matches = match(keys[0], keys[1], sift_nn_ratio);
 
-      sara::print_stage("Converting the keypoints to homogeneous coordinates...");
+      sara::print_stage("Estimating the relative pose...");
       const auto u = std::array{
           sara::homogeneous(sara::extract_centers(f0)).cast<double>(),
           sara::homogeneous(sara::extract_centers(f1)).cast<double>()};
-      sara::print_stage("Preparing matches for epipolar geometry...");
       // List the matches as a 2D-tensor where each row encodes a match 'm' as a
       // pair of point indices (i, j).
       const auto M = sara::to_tensor(matches);
-
       const auto X = sara::PointCorrespondenceList{M, u[0], u[1]};
       auto data_normalizer =
-          std::make_optional(sara::Normalizer<sara::EssentialMatrix>{K, K});
-
-      sara::print_stage("Estimating the essential matrix...");
-      auto& E = epipolar_edges.E[0];
-      auto& num_samples = epipolar_edges.E_num_samples[0];
-      auto& err_thres = epipolar_edges.E_noise[0];
+          std::make_optional(sara::Normalizer<sara::TwoViewGeometry>{K, K});
       auto sample_best = sara::Tensor_<int, 1>{};
+      std::tie(geometry, inliers, sample_best) = sara::ransac(
+          X, solver, inlier_predicate, ransac_iterations, data_normalizer);
+      SARA_DEBUG << "Geometry =\n" << geometry << std::endl;
+      SARA_DEBUG << "inliers count = " << inliers.flat_array().count()
+                 << std::endl;
+
+      // Retrieve all the 3D points by triangulation.
+      sara::print_stage("Retriangulating the inliers...");
+      auto& points = geometry.X;
+      auto& s1 = geometry.scales1;
+      auto& s2 = geometry.scales2;
+      points.resize(4, inliers.flat_array().count());
+      s1.resize(inliers.flat_array().count());
+      s2.resize(inliers.flat_array().count());
+      for (auto i = 0, j = 0; i < inliers.size(0); ++i)
       {
-        num_samples = 200;
-        err_thres = 2.;
+        if (!inliers(i))
+          continue;
 
-        auto inlier_predicate =
-            sara::InlierPredicate<sara::SampsonEssentialEpipolarDistance>{};
-        inlier_predicate.distance.K1_inv = K_inv;
-        inlier_predicate.distance.K2_inv = K_inv;
-        inlier_predicate.err_threshold = err_thres;
+        const Eigen::Vector3d u1 = K_inv * X[i][0].vector();
+        const Eigen::Vector3d u2 = K_inv * X[i][1].vector();
+        const auto [Xj, s1j, s2j] = sara::triangulate_single_point_linear_eigen(
+            geometry.C1.matrix(), geometry.C2.matrix(), u1, u2);
+        const auto cheiral = s1j > 0 && s2j > 0;
+        if (!cheiral)
+          continue;
 
-        std::tie(E, inliers, sample_best) = ransac(  //
-            X, sara::NisterFivePointAlgorithm{},     //
-            inlier_predicate, num_samples, data_normalizer, true);
-
-        epipolar_edges.E_inliers[0] = inliers;
-        epipolar_edges.E_best_samples[0] = sample_best;
+        points.col(j) = Xj;
+        s1(j) = s1j;
+        s2(j) = s2j;
+        ++j;
       }
 
-      auto& F = epipolar_edges.F[0];
-      {
-        F.matrix() = K_inv.transpose() * E.matrix() * K_inv;
+      // Add the internal camera matrices to the camera.
+      geometry.C1.K = K;
+      geometry.C2.K = K;
+      auto colors = sara::extract_colors(frames_rgb_undist[0],
+                                         frames_rgb_undist[1],  //
+                                         geometry);
 
-        epipolar_edges.F_num_samples[0] = num_samples;
-        epipolar_edges.F_noise = epipolar_edges.E_noise;
-        epipolar_edges.F_inliers = epipolar_edges.E_inliers;
-        epipolar_edges.F_best_samples = epipolar_edges.E_best_samples;
+      {
+#ifdef __APPLE__
+        const auto geometry_h5_filepath = "/Users/david/Desktop/geometry.h5"s;
+#else
+        const auto geometry_h5_filepath = "/home/david/Desktop/geometry.h5"s;
+#endif
+        auto geometry_h5_file =
+            sara::H5File{geometry_h5_filepath, H5F_ACC_TRUNC};
+        sara::save_to_hdf5(geometry_h5_file, geometry, colors);
       }
+
+      F.matrix() = K_inv.transpose() * E.matrix() * K_inv;
 
       sara::print_stage("Draw...");
       for (auto m = 0u; m < matches.size(); ++m)
@@ -231,15 +301,15 @@ auto sara_graphics_main(int, char**) -> int
         if (!inliers(m))
           continue;
         const auto& match = matches[m];
-        sara::draw(match.x(), sara::Blue8);
-        sara::draw(match.y(), sara::Cyan8);
-        sara::draw_arrow(match.x_pos(), match.y_pos(), sara::Yellow8);
-        sara::get_key();
+        sara::draw(display, match.x(), sara::Blue8);
+        sara::draw(display, match.y(), sara::Cyan8);
+        sara::draw_arrow(display, match.x_pos(), match.y_pos(), sara::Yellow8);
       }
-    }
 
-    if (sara::get_key() == sara::KEY_ESCAPE)
-      break;
+      sara::display(display);
+      if (sara::get_key() == sara::KEY_ESCAPE)
+        break;
+    }
   }
 
   return 0;

@@ -23,7 +23,7 @@
 #    if __has_warning("-Wconversion")
 #      pragma GCC diagnostic ignored "-Wconversion"
 #    endif
-#  pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#    pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #  endif
 #endif
 #include <flann/flann.hpp>
@@ -43,18 +43,14 @@ namespace DO { namespace Sara {
   auto create_flann_matrix(const Tensor_<float, 2>& descriptors)
   {
     if (descriptors.size() == 0)
-      throw runtime_error{ "Error: the list of key-points is empty!"};
+      throw runtime_error{"Error: the list of key-points is empty!"};
 
-    SARA_DEBUG
-        << "Gentle Warning: make sure every key has distinct descriptors..."
-        << endl;
+    auto matrix = flann::Matrix<float>{
+        const_cast<float*>(descriptors.data()),
+        static_cast<std::size_t>(descriptors.rows()),
+        static_cast<std::size_t>(descriptors.cols())  //
+    };
 
-    SARA_DEBUG << "Number of descriptors = " << descriptors.rows() << endl;
-    SARA_DEBUG << "Descriptor dimension = " << descriptors.cols() << endl;
-
-    auto matrix = flann::Matrix<float>{const_cast<float*>(descriptors.data()),
-                                       size_t(descriptors.rows()),
-                                       size_t(descriptors.cols())};
     return matrix;
   }
 
@@ -83,8 +79,8 @@ namespace DO { namespace Sara {
     // Create search parameters.
     flann::SearchParams search_params;
 
-    // N.B.: We should not be in the boundary case in practice, in which case the
-    // ambiguity score does not really make sense.
+    // N.B.: We should not be in the boundary case in practice, in which case
+    // the ambiguity score does not really make sense.
     //
     // Boundary case 1.
     if (features2.size() == 0)
@@ -112,11 +108,13 @@ namespace DO { namespace Sara {
     {
       tree2.knnSearch(query, indices, dists, 2, search_params);
 
-      const auto i2 = indices[0][1]; // The first index can't be indices[0][0], which is i1.
+      const auto i2 =
+          indices[0]
+                 [1];  // The first index can't be indices[0][0], which is i1.
       auto m = Match{&features1[i1], &features2[i2], 1.f, dir, i1, i2};
       m.rank() = 1;
 
-      if(dir == Match::Direction::TargetToSource)
+      if (dir == Match::Direction::TargetToSource)
       {
         swap(m.x_pointer(), m.y_pointer());
         swap(m.x_index(), m.y_index());
@@ -136,8 +134,9 @@ namespace DO { namespace Sara {
     // This is to avoid the source key matches with himself in case of intra
     // image matching.
     const auto top1_index = self_matching ? 1 : 0;
-    auto top1_score = dists[0][top1_index + 1] > 0.f ?
-      dists[0][top1_index] / dists[0][top1_index + 1] : 0.f;
+    auto top1_score = dists[0][top1_index + 1] > 0.f
+                          ? dists[0][top1_index] / dists[0][top1_index + 1]
+                          : 0.f;
     auto K = 1;
 
     // Determine the number of nearest neighbors.
@@ -203,7 +202,7 @@ namespace DO { namespace Sara {
                          float pixel_dist_thres)
     : _keys1(keys)
     , _keys2(keys)
-    , _squared_ratio_thres(sift_ratio_thres*sift_ratio_thres)
+    , _squared_ratio_thres(sift_ratio_thres * sift_ratio_thres)
     , _is_too_close(min_max_metric_dist_thres, pixel_dist_thres)
     , _max_neighbors(size(keys))
     , _self_matching(true)
@@ -251,8 +250,7 @@ namespace DO { namespace Sara {
           _vec_indices, _vec_dists, _max_neighbors);
 
     // Lexicographical comparison between matches.
-    auto compare_match = [](const Match& m1, const Match& m2)
-    {
+    auto compare_match = [](const Match& m1, const Match& m2) {
       if (m1.x_index() < m2.x_index())
         return true;
       if (m1.x_index() == m2.x_index() && m1.y_index() < m2.y_index())
@@ -279,5 +277,4 @@ namespace DO { namespace Sara {
     return matches;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara
