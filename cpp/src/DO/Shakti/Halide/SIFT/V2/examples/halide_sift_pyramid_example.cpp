@@ -309,7 +309,6 @@ int __main(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-  SARA_CHECK(argv[1]);
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(__main);
   return app.exec();
