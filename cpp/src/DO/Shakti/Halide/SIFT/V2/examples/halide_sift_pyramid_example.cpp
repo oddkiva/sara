@@ -41,6 +41,9 @@
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
 namespace halide = DO::Shakti::HalideBackend;
+namespace po = boost::program_options;
+
+using namespace std::string_literals;
 
 
 int __main(int argc, char** argv)
@@ -50,10 +53,6 @@ int __main(int argc, char** argv)
   omp_set_num_threads(omp_get_max_threads());
 #endif
   std::ios_base::sync_with_stdio(false);
-
-  namespace po = boost::program_options;
-
-  using namespace std::string_literals;
 
   // Video.
   auto video_filepath = std::string{};
@@ -125,10 +124,11 @@ int __main(int argc, char** argv)
 
   // nVidia's hardware accelerated video decoder.
   shakti::VideoStream video_stream{video_filepath, cuda_context};
-  auto frame =
-      sara::Image<sara::Bgra8>{video_stream.width(), video_stream.height()};
-  auto device_bgra_buffer =
-      DriverApi::DeviceBgraBuffer{video_stream.width(), video_stream.height()};
+  auto frame = sara::Image<sara::Bgra8>{video_stream.sizes()};
+  auto device_bgra_buffer = DriverApi::DeviceBgraBuffer{
+      video_stream.width(),  //
+      video_stream.height()  //
+  };
 #else
   sara::VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
@@ -309,6 +309,7 @@ int __main(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+  SARA_CHECK(argv[1]);
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(__main);
   return app.exec();

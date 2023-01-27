@@ -77,6 +77,11 @@ namespace DO { namespace Shakti {
 
     auto height() const -> int;
 
+    auto sizes() const -> Eigen::Vector2i
+    {
+      return {width(), height()};
+    }
+
     auto decode() -> bool;
 
     auto read(DriverApi::DeviceBgraBuffer&) -> bool;
