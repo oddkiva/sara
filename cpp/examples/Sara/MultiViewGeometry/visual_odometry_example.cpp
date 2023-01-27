@@ -20,7 +20,7 @@
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/InlierPredicates.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
-#include <DO/Sara/RANSAC/RANSAC.hpp>
+#include <DO/Sara/RANSAC/RANSACv2.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 #include <DO/Sara/VideoIO.hpp>
@@ -173,7 +173,8 @@ auto sara_graphics_main(int, char**) -> int
   const auto& [umap, vmap] = coords_map;
 
   constexpr auto sift_nn_ratio = 0.6f;
-  constexpr auto ransac_iterations = 200;
+  constexpr auto ransac_iterations_max = 200;
+  constexpr auto ransac_confidence = 0.999;
   constexpr auto err_thres = 2.;
   const auto image_pyr_params = sara::ImagePyramidParams(0);
   auto solver = sara::RelativePoseSolver<sara::NisterFivePointAlgorithm>{};
@@ -200,7 +201,7 @@ auto sara_graphics_main(int, char**) -> int
   while (video_stream.read())
   {
     ++frame_index;
-    if (frame_index % 3 != 0)
+    if (frame_index % 5 != 0)
       continue;
     SARA_CHECK(frame_index);
 
@@ -243,8 +244,9 @@ auto sara_graphics_main(int, char**) -> int
       auto data_normalizer =
           std::make_optional(sara::Normalizer<sara::TwoViewGeometry>{K, K});
       auto sample_best = sara::Tensor_<int, 1>{};
-      std::tie(geometry, inliers, sample_best) = sara::ransac(
-          X, solver, inlier_predicate, ransac_iterations, data_normalizer);
+      std::tie(geometry, inliers, sample_best) =
+          sara::v2::ransac(X, solver, inlier_predicate, ransac_iterations_max,
+                           ransac_confidence, data_normalizer, true);
       SARA_DEBUG << "Geometry =\n" << geometry << std::endl;
       SARA_DEBUG << "inliers count = " << inliers.flat_array().count()
                  << std::endl;

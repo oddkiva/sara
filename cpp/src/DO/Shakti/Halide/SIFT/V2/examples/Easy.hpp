@@ -22,6 +22,7 @@ namespace easy {
 
   struct VideoStream
   {
+#if defined(USE_SHAKTI_CUDA_VIDEOIO)
     VideoStream(const std::filesystem::path& video_filepath,
                 DriverApi::CudaContext& cuda_context)
       : _video_stream{
@@ -36,11 +37,27 @@ namespace easy {
       _device_frame = DriverApi::DeviceBgraBuffer{_video_stream->width(),
                                                   _video_stream->height()};
     }
+#else
+    VideoStream(const std::filesystem::path& video_filepath)
+      : _video_stream{new sara::VideoStream{video_filepath.string()}}
+    {
+      if (_video_stream.get() == nullptr)
+        throw std::runtime_error{
+            "Failed to initialize GPU video stream object"};
+    }
+#endif
 
-    auto host_frame() -> const sara::Image<sara::Bgra8>&
+#if defined(USE_SHAKTI_CUDA_VIDEOIO)
+    auto host_frame() const -> const sara::Image<sara::Bgra8>&
     {
       return _host_frame;
     }
+#else
+    auto host_frame() const -> const sara::ImageView<sara::Rgb8>
+    {
+      return _video_stream->frame();
+    }
+#endif
 
     auto width() const noexcept -> int
     {
@@ -59,7 +76,7 @@ namespace easy {
 
     auto read() -> bool
     {
-#ifdef USE_SHAKTI_CUDA_VIDEOIO
+#if defined(USE_SHAKTI_CUDA_VIDEOIO)
       // const auto has_frame = _video_stream->read(*_device_frame);
       const auto has_frame = _video_stream->read(_device_frame);
       sara::tic();
@@ -67,17 +84,17 @@ namespace easy {
       _device_frame.to_host(_host_frame);
       sara::toc("Copy to host");
 #else
-      const auto has_frame = video_stream.read();
+      const auto has_frame = _video_stream->read();
 #endif
 
       return has_frame;
     }
 
-#ifdef USE_SHAKTI_CUDA_VIDEOIO
+#if defined(USE_SHAKTI_CUDA_VIDEOIO)
+    std::unique_ptr<shakti::VideoStream> _video_stream;
     sara::Image<sara::Bgra8> _host_frame;
     // std::unique_ptr<DriverApi::DeviceBgraBuffer> _device_frame;
     DriverApi::DeviceBgraBuffer _device_frame;
-    std::unique_ptr<shakti::VideoStream> _video_stream;
 #else
     std::unique_ptr<sara::VideoStream> _video_stream;
 #endif

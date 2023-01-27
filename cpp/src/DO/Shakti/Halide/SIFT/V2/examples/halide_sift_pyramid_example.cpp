@@ -32,10 +32,10 @@
 #include <boost/program_options.hpp>
 
 
+namespace fs = std::filesystem;
 namespace po = boost::program_options;
 
 using namespace std::string_literals;
-
 
 
 int __main(int argc, char** argv)
@@ -115,9 +115,9 @@ int __main(int argc, char** argv)
   cuda_context.make_current();
 
   // nVidia's hardware accelerated video decoder.
-  auto video_stream = easy::VideoStream{video_filepath, cuda_context};
+  auto video_stream = easy::VideoStream{fs::path{video_filepath}, cuda_context};
 #else
-  auto video_stream = easy::VideoStream{video_filepath};
+  auto video_stream = easy::VideoStream{fs::path{video_filepath}};
 #endif
   auto grayscale_converter =
       easy::ToGrayscaleColorConverter{video_stream.sizes()};
@@ -217,7 +217,7 @@ int __main(int argc, char** argv)
           return {color.channel<R>(), color.channel<G>(), color.channel<B>()};
         });
 #else
-    auto& frame_rgb = frame;
+    sara::Image<sara::Rgb8> frame_rgb = video_stream.host_frame();
 #endif
 
     if (!match_keypoints)
