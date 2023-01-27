@@ -55,9 +55,32 @@ namespace DriverApi {
     int height{};
     CUdeviceptr data{0};
 
+    DeviceBgraBuffer() = default;
+
+    DeviceBgraBuffer(DeviceBgraBuffer&& other) noexcept
+      : width{std::move(other.width)}
+      , height{std::move(other.height)}
+      , data{other.data}
+    {
+      other.data = 0;
+    }
+
+    DeviceBgraBuffer(const DeviceBgraBuffer&) = delete;
+
     DeviceBgraBuffer(int width_, int height_);
 
     ~DeviceBgraBuffer();
+
+    auto operator=(const DeviceBgraBuffer&) = delete;
+
+    auto operator=(DeviceBgraBuffer&& other) noexcept -> DeviceBgraBuffer&
+    {
+      width = std::move(other.width);
+      height = std::move(other.height);
+      data = other.data;
+      other.data = 0;
+      return *this;
+    }
 
     auto to_host(DO::Sara::ImageView<DO::Sara::Bgra8>&) const -> void;
   };
