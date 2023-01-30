@@ -15,7 +15,6 @@
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/BrownConradyCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/OmnidirectionalCamera.hpp>
-#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/InlierPredicates.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
@@ -27,6 +26,8 @@
 #include <DO/Sara/Visualization/Features/Draw.hpp>
 
 #include <filesystem>
+
+#include <omp.h>
 
 
 namespace fs = std::filesystem;
@@ -139,6 +140,10 @@ auto main(int argc, char** argv) -> int
 
 auto sara_graphics_main(int, char**) -> int
 {
+  const auto num_threads = omp_get_max_threads();
+  omp_set_num_threads(num_threads);
+  Eigen::setNbThreads(num_threads);
+
   using namespace std::string_literals;
 #if defined(__APPLE__)
   const auto video_path = "/Users/david/Desktop/Datasets/sample-1.mp4"s;
