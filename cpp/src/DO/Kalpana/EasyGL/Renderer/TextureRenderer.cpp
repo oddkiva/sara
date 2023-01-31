@@ -89,9 +89,6 @@ auto TextureRenderer::render(TexturedImage2D& what,
 {
   _shader_program.use(true);
 
-  SARA_CHECK(model_view);
-  SARA_CHECK(projection);
-
   // Set the uniforms.
   //
   // Projection-Model-View matrices.
@@ -100,10 +97,6 @@ auto TextureRenderer::render(TexturedImage2D& what,
   _shader_program.set_uniform_matrix4f(_projection_loc,
                                        const_cast<float*>(projection.data()));
   _shader_program.set_uniform_texture(_image_loc, what.texture_unit());
-
-  SARA_CHECK(where.host_vertices().matrix());
-  SARA_CHECK(where.host_triangles().matrix());
-  SARA_CHECK(where.host_triangles().size());
 
   // We want to draw the number of triangle indices:
   // 3 vertex indices per triangles x 2 triangles  = 6 vertex indices

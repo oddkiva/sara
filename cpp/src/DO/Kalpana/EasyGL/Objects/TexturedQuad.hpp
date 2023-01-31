@@ -36,6 +36,8 @@ namespace DO::Kalpana::GL {
     //! @{
     static constexpr auto loc_coords_dim = 3;
     static constexpr auto tex_coords_dim = 2;
+    static constexpr auto loc_attr_index = 0;
+    static constexpr auto tex_attr_index = 1;
     static constexpr auto vertex_dim = loc_coords_dim + tex_coords_dim;
     //! @}
 

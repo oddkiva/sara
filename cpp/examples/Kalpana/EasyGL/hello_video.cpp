@@ -15,6 +15,7 @@
 #include <DO/Kalpana/EasyGL/Objects/TexturedImage.hpp>
 #include <DO/Kalpana/EasyGL/Objects/TexturedQuad.hpp>
 #include <DO/Kalpana/EasyGL/Renderer/TextureRenderer.hpp>
+#include <DO/Kalpana/Math/Projection.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
@@ -30,49 +31,17 @@
 #include <filesystem>
 
 
+namespace k = DO::Kalpana;
 namespace kgl = DO::Kalpana::GL;
 namespace sara = DO::Sara;
 namespace fs = std::filesystem;
 
 
-inline auto init_glfw_boilerplate() -> void
-{
-  // Initialize the windows manager.
-  if (!glfwInit())
-    throw std::runtime_error{"Error: failed to initialize GLFW!"};
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-}
-
-inline auto init_glew_boilerplate() -> void
-{
-#ifndef __APPLE__
-  // Initialize GLEW.
-  const auto err = glewInit();
-  if (err != GLEW_OK)
-    throw std::runtime_error{sara::format(
-        "Error: failed to initialize GLEW: %s", glewGetErrorString(err))};
-#endif
-}
-
-inline auto create_glfw_window(const Eigen::Vector2i& sizes,
-                               const std::string& title) -> GLFWwindow*
-{
-  auto window = glfwCreateWindow(sizes.x(), sizes.y(),  //
-                                 title.c_str(),         //
-                                 nullptr, nullptr);
-  return window;
-}
-
-
 struct SingleWindowApp
 {
+public:
   SingleWindowApp(const Eigen::Vector2i& sizes, const std::string& title)
+    : _window_sizes{sizes}
   {
     // Init GLFW.
     init_glfw_boilerplate();
@@ -107,7 +76,14 @@ struct SingleWindowApp
   auto init_gl_resources() -> void
   {
     _texture.initialize(_video_stream.frame(), 0);
+
+    const auto& w = _video_stream.width();
+    const auto& h = _video_stream.height();
+    const auto aspect_ratio = static_cast<float>(w) / h;
+    auto vertices = _quad.host_vertices().matrix();
+    vertices.col(0) *= aspect_ratio;
     _quad.initialize();
+
     _texture_renderer.initialize();
   }
 
@@ -123,16 +99,22 @@ struct SingleWindowApp
     // Projection-model-view matrices.
     auto model_view = Eigen::Transform<float, 3, Eigen::Projective>{};
     model_view.setIdentity();
-    model_view.translate(Eigen::Vector3f::Ones() * -0.5f);
-    auto projection = Eigen::Transform<float, 3, Eigen::Projective>{};
-    projection.setIdentity();
 
+    const auto win_aspect_ratio =
+        static_cast<float>(_window_sizes.x()) / _window_sizes.y();
+    const auto projection = k::orthographic(  //
+        -win_aspect_ratio, win_aspect_ratio,  //
+        -1.f, 1.f,                            //
+        -1.f, 1.f);
+
+
+    // Video state.
     auto frame_index = -1;
 
-    // Specific rendering options.
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_DEPTH_TEST);
+    // Render on the whole window surface.
+    glViewport(0, 0, _window_sizes.x(), _window_sizes.y());
+    // Background color.
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     // Display image.
     glfwSwapInterval(1);
@@ -142,15 +124,14 @@ struct SingleWindowApp
         break;
       ++frame_index;
 
-      glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+      // Clear the color buffer and the buffer testing.
       glClear(GL_COLOR_BUFFER_BIT);
 
       // Transfer the CPU image frame data to the OpenGL texture.
       _texture.reset(_video_stream.frame());
       // Render the texture on the quad.
       _texture_renderer.render(_texture, _quad, model_view.matrix(),
-                               projection.matrix());
-      SARA_CHECK(frame_index);
+                               projection);
 
       glfwSwapBuffers(_window);
       glfwPollEvents();
@@ -168,7 +149,45 @@ struct SingleWindowApp
     glfwTerminate();
   }
 
+private:
+  static auto init_glfw_boilerplate() -> void
+  {
+    // Initialize the windows manager.
+    if (!glfwInit())
+      throw std::runtime_error{"Error: failed to initialize GLFW!"};
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+  }
+
+  static auto init_glew_boilerplate() -> void
+  {
+#ifndef __APPLE__
+    // Initialize GLEW.
+    const auto err = glewInit();
+    if (err != GLEW_OK)
+      throw std::runtime_error{sara::format(
+          "Error: failed to initialize GLEW: %s", glewGetErrorString(err))};
+#endif
+  }
+
+  static auto create_glfw_window(const Eigen::Vector2i& sizes,
+                                 const std::string& title) -> GLFWwindow*
+  {
+    auto window = glfwCreateWindow(sizes.x(), sizes.y(),  //
+                                   title.c_str(),         //
+                                   nullptr, nullptr);
+    return window;
+  }
+
+
+private:
   GLFWwindow* _window = nullptr;
+  Eigen::Vector2i _window_sizes = -Eigen::Vector2i::Ones();
 
   // Our video stream.
   sara::VideoStream _video_stream;
@@ -191,6 +210,7 @@ auto main(int const argc, char** const argv) -> int
 
   auto app = SingleWindowApp({800, 600}, "Hello Video");
 
+  // The order matters.
   app.open_video(fs::path{argv[1]});
   app.init_gl_resources();
   app.run();

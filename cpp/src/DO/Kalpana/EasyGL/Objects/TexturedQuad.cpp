@@ -43,7 +43,6 @@ TexturedQuad::TexturedQuad()
   // clang-format on
 }
 
-
 auto TexturedQuad::initialize() -> void
 {
   if (!_vao)
@@ -60,6 +59,24 @@ auto TexturedQuad::initialize() -> void
 
   // Copy geometry data.
   _ebo.bind_triangles_data(host_triangles());
+
+  // Map the parameters to the argument position for the vertex shader.
+  //
+  // Vertex coordinates.
+  static constexpr auto float_pointer = [](int offset = 0) {
+    return reinterpret_cast<void*>(offset * sizeof(float));
+  };
+
+  glVertexAttribPointer(loc_attr_index, loc_coords_dim,  //
+                        GL_FLOAT, GL_FALSE, vertex_row_byte_size(),
+                        float_pointer());
+  glEnableVertexAttribArray(0);
+
+  // Texture coordinates.
+  glVertexAttribPointer(1, tex_coords_dim,  //
+                        GL_FLOAT, GL_FALSE, vertex_row_byte_size(),
+                        float_pointer(loc_coords_dim));
+  glEnableVertexAttribArray(1);
 }
 
 auto TexturedQuad::destroy() -> void
