@@ -9,9 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#pragma once
-
-#include <DO/Kalpana/EasyGL/Texture.hpp>
+#include <DO/Kalpana/EasyGL/Objects/TexturedImage.hpp>
+#include <DO/Kalpana/EasyGL/Objects/TexturedQuad.hpp>
+#include <DO/Kalpana/EasyGL/Shader.hpp>
 
 
 namespace DO::Kalpana::GL {
@@ -19,19 +19,31 @@ namespace DO::Kalpana::GL {
   //! @addtogroup EasyGL
   //! @{
 
-  struct ImageTexture
+  struct TextureRenderer
   {
-    Texture2D _texture;
-    GLuint _texture_unit;
+    //! @brief OpenGL shaders.
+    //! @{
+    Shader _vertex_shader;
+    Shader _fragment_shader;
+    ShaderProgram _shader_program;
+    //! @}
 
-    auto set_texture(const Sara::ImageView<DO::Sara::Rgb8>& image,
-                     GLuint texture_unit) -> void;
+    //! brief Uniform locations.
+    //! @{
+    GLint _model_view_loc;
+    GLint _projection_loc;
+    GLint _image_loc;
+    //! @}
+
+    auto initialize() -> void;
 
     auto destroy() -> void;
+
+    auto render(TexturedImage2D& what, TexturedQuad& where,
+                const Eigen::Matrix4f& model_view,
+                const Eigen::Matrix4f& projection) -> void;
   };
 
   //! @}
 
 }  // namespace DO::Kalpana::GL
-
-

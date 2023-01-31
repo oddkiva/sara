@@ -53,10 +53,14 @@ namespace DO::Kalpana::GL {
     ~TexturedQuad() = default;
 
     //! @brief Initialize OpenGL resources (VAO, VBO and EBO).
-    auto initialize_gl_objects() -> void;
+    //!
+    //! N.B.: GLEW must be initialized before!
+    auto initialize() -> void;
 
     //! @brief Destroy OpenGL resources.
-    auto destroy_gl_objects() -> void;
+    //!
+    //! N.B.: GLEW must be initialized before!
+    auto destroy() -> void;
 
     //! @brief Bind the vertex array object.
     //!
@@ -76,19 +80,30 @@ namespace DO::Kalpana::GL {
     auto host_vertices() -> Sara::TensorView_<float, 2>
     {
       return Sara::TensorView_<float, 2>{_host_vertex_data.data(),
-                                         {num_vertices, vertex_dimension}};
+                                         {num_vertices, vertex_dim}};
     }
 
     auto host_triangles() -> Sara::TensorView_<std::uint32_t, 2>
     {
-      return Sara::TensorView_<std::uint32_t, 2>{_host_vertex_data.data(),
+      return Sara::TensorView_<std::uint32_t, 2>{_host_triangle_data.data(),
                                                  {num_triangles, 3}};
+    }
+
+    auto host_triangles() const -> Sara::TensorView_<const std::uint32_t, 2>
+    {
+      return Sara::TensorView_<const std::uint32_t, 2>{
+          _host_triangle_data.data(), {num_triangles, 3}};
     }
 
     auto vertex_row_byte_size() const -> GLsizei
     {
       return static_cast<GLsizei>(vertex_dim * sizeof(float));
     };
+
+    auto vao() const -> const VertexArray&
+    {
+      return _vao;
+    }
 
   private:
     //! @brief Host vertex data.

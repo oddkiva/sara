@@ -1,4 +1,4 @@
-file(GLOB DO_Kalpana_EasyGL_FILES FILES *.hpp *.cpp)
+file(GLOB_RECURSE DO_Kalpana_EasyGL_FILES FILES *.hpp *.cpp)
 
 add_library(DO_Kalpana_EasyGL ${DO_Kalpana_EasyGL_FILES})
 

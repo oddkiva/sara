@@ -13,6 +13,8 @@
 
 #include <DO/Kalpana/EasyGL/Objects/TexturedQuad.hpp>
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
+
 
 namespace sara = DO::Sara;
 
@@ -39,15 +41,13 @@ TexturedQuad::TexturedQuad()
     0, 1, 2,
     2, 3, 0;
   // clang-format on
-
-  initialize_gl_objects();
 }
 
 
-auto TexturedQuad::initialize_gl_objects() -> void
+auto TexturedQuad::initialize() -> void
 {
   if (!_vao)
-    _vao.generate();
+    glGenVertexArrays(1, &_vao.object);
   if (!_vbo)
     _vbo.generate();
   if (!_ebo)
@@ -62,13 +62,7 @@ auto TexturedQuad::initialize_gl_objects() -> void
   _ebo.bind_triangles_data(host_triangles());
 }
 
-auto TexturedQuad::upload_vertex_data_from_host_to_gl() -> void
-{
-  _vbo.bind_vertex_data(host_vertices());
-}
-
-
-auto TexturedQuad::destroy_gl_objects() -> void
+auto TexturedQuad::destroy() -> void
 {
   _vao.destroy();
   _vbo.destroy();

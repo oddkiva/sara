@@ -12,9 +12,9 @@
 //! @example
 
 #include <DO/Kalpana/EasyGL.hpp>
-#include <DO/Kalpana/EasyGL/Objects/ImageTexture.hpp>
-#include <DO/Kalpana/EasyGL/Objects/Quad.hpp>
-#include <DO/Kalpana/EasyGL/Renderer/ImageTextureRenderer.hpp>
+#include <DO/Kalpana/EasyGL/Objects/TexturedImage.hpp>
+#include <DO/Kalpana/EasyGL/Objects/TexturedQuad.hpp>
+#include <DO/Kalpana/EasyGL/Renderer/TextureRenderer.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
@@ -69,6 +69,7 @@ inline auto create_glfw_window(const Eigen::Vector2i& sizes,
   return window;
 }
 
+
 struct SingleWindowApp
 {
   SingleWindowApp(const Eigen::Vector2i& sizes, const std::string& title)
@@ -78,10 +79,9 @@ struct SingleWindowApp
 
     // Create a GLFW window.
     _window = create_glfw_window(sizes, title);
-    glfwMakeContextCurrent(_window);
 
-    // Init OpenGL extensions.
-    init_glew_boilerplate();
+    // Prepare OpenGL first before any OpenGL calls.
+    init_opengl();
   }
 
   //! @brief Note: RAII does not work on OpenGL applications.
@@ -95,14 +95,62 @@ struct SingleWindowApp
     _video_stream.open(video_path.string());
   }
 
+  auto init_opengl() -> void
+  {
+    // GLFW context...
+    glfwMakeContextCurrent(_window);
+
+    // Init OpenGL extensions.
+    init_glew_boilerplate();
+  }
+
+  auto init_gl_resources() -> void
+  {
+    _texture.initialize(_video_stream.frame(), 0);
+    _quad.initialize();
+    _texture_renderer.initialize();
+  }
+
+  auto deinit_gl_resources() -> void
+  {
+    _texture.destroy();
+    _quad.destroy();
+    _texture_renderer.destroy();
+  }
+
   auto run() -> void
   {
+    // Projection-model-view matrices.
+    auto model_view = Eigen::Transform<float, 3, Eigen::Projective>{};
+    model_view.setIdentity();
+    model_view.translate(Eigen::Vector3f::Ones() * -0.5f);
+    auto projection = Eigen::Transform<float, 3, Eigen::Projective>{};
+    projection.setIdentity();
+
+    auto frame_index = -1;
+
+    // Specific rendering options.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEPTH_TEST);
+
     // Display image.
     glfwSwapInterval(1);
     while (!glfwWindowShouldClose(_window))
     {
+      if (!_video_stream.read())
+        break;
+      ++frame_index;
+
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
+
+      // Transfer the CPU image frame data to the OpenGL texture.
+      _texture.reset(_video_stream.frame());
+      // Render the texture on the quad.
+      _texture_renderer.render(_texture, _quad, model_view.matrix(),
+                               projection.matrix());
+      SARA_CHECK(frame_index);
 
       glfwSwapBuffers(_window);
       glfwPollEvents();
@@ -111,6 +159,10 @@ struct SingleWindowApp
 
   auto terminate() -> void
   {
+    // Destroy GL objects.
+    deinit_gl_resources();
+
+    // Destroy GLFW.
     if (_window != nullptr)
       glfwDestroyWindow(_window);
     glfwTerminate();
@@ -121,9 +173,11 @@ struct SingleWindowApp
   // Our video stream.
   sara::VideoStream _video_stream;
   // What: our image texture.
-  kgl::ImageTexture _image_texture;
+  kgl::TexturedImage2D _texture;
   // Where: where to show our image texture.
-  kgl::Quad _quad;
+  kgl::TexturedQuad _quad;
+  // Texture renderer.
+  kgl::TextureRenderer _texture_renderer;
 };
 
 
@@ -136,10 +190,10 @@ auto main(int const argc, char** const argv) -> int
   }
 
   auto app = SingleWindowApp({800, 600}, "Hello Video");
-  app.open_video(fs::path{argv[1]});
-  app.run();
 
-  // Explicitly terminate the OpenGL app because RAII does not work with OpenGL.
+  app.open_video(fs::path{argv[1]});
+  app.init_gl_resources();
+  app.run();
   app.terminate();
 
   return EXIT_SUCCESS;

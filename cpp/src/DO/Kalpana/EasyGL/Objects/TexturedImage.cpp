@@ -9,15 +9,16 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Kalpana/EasyGL/Objects/ImageTexture.hpp>
+#include <DO/Kalpana/EasyGL/Objects/TexturedImage.hpp>
 
 
 using namespace DO::Kalpana::GL;
 
 namespace sara = DO::Sara;
 
-auto ImageTexture::set_texture(const sara::ImageView<sara::Rgb8>& image_view,
-                               GLuint texture_unit) -> void
+
+auto TexturedImage2D::initialize(const sara::ImageView<sara::Rgb8>& image_view,
+                                 const GLuint texture_unit) -> void
 {
   // Bind the texture unit: GL_TEXTURE0 + i.
   _texture_unit = texture_unit;
@@ -38,7 +39,7 @@ auto ImageTexture::set_texture(const sara::ImageView<sara::Rgb8>& image_view,
   _texture.set_interpolation_type(GL_LINEAR);
 }
 
-auto ImageTexture::destroy() -> void
+auto TexturedImage2D::destroy() -> void
 {
   _texture.destroy();
 }
