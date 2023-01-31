@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#pragma once
+
 #include <DO/Kalpana/EasyGL.hpp>
 
 #include <DO/Sara/Core/Tensor.hpp>
