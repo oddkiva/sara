@@ -22,7 +22,7 @@ auto TextureRenderer::initialize() -> void
   static const std::map<std::string, int> arg_pos = {{"in_coords", 0},       //
                                                      {"in_tex_coords", 1}};  //
 
-  static const auto vertex_shader_source = R"shader(#version 300 es
+  static const auto vertex_shader_source = R"shader(#version 330 core
     layout (location = 0) in vec3 in_coords;
     layout (location = 1) in vec2 in_tex_coords;
 
@@ -41,7 +41,7 @@ auto TextureRenderer::initialize() -> void
   _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
 
   // Create a fragment shader.
-  static const auto fragment_shader_source = R"shader(#version 300 es
+  static const auto fragment_shader_source = R"shader(#version 330 core
     #ifdef GL_ES
     precision highp float;
     #endif

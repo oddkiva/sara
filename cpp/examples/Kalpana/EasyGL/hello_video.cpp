@@ -51,6 +51,11 @@ public:
 
     // Prepare OpenGL first before any OpenGL calls.
     init_opengl();
+
+    // The magic function.
+    glfwSetWindowUserPointer(_window, this);
+    // Register callbacks.
+    glfwSetWindowSizeCallback(_window, window_size_callback);
   }
 
   //! @brief Note: RAII does not work on OpenGL applications.
@@ -102,11 +107,10 @@ public:
 
     const auto win_aspect_ratio =
         static_cast<float>(_window_sizes.x()) / _window_sizes.y();
-    const auto projection = k::orthographic(  //
+    _projection = k::orthographic(            //
         -win_aspect_ratio, win_aspect_ratio,  //
         -1.f, 1.f,                            //
         -1.f, 1.f);
-
 
     // Video state.
     auto frame_index = -1;
@@ -131,7 +135,7 @@ public:
       _texture.reset(_video_stream.frame());
       // Render the texture on the quad.
       _texture_renderer.render(_texture, _quad, model_view.matrix(),
-                               projection);
+                               _projection);
 
       glfwSwapBuffers(_window);
       glfwPollEvents();
@@ -147,6 +151,27 @@ public:
     if (_window != nullptr)
       glfwDestroyWindow(_window);
     glfwTerminate();
+  }
+
+private:
+  static auto get_self(GLFWwindow* const window) -> SingleWindowApp&
+  {
+    const auto app_void_ptr = glfwGetWindowUserPointer(window);
+    if (app_void_ptr == nullptr)
+      throw std::runtime_error{
+          "Please call glfwSetWindowUserPointer to register this window!"};
+    const auto app_ptr = reinterpret_cast<SingleWindowApp*>(app_void_ptr);
+    return *app_ptr;
+  }
+
+  static auto window_size_callback(GLFWwindow* window, const int width,
+                                   const int height) -> void
+  {
+    auto& app = get_self(window);
+    app._window_sizes << width, height;
+    const auto aspect_ratio = static_cast<float>(width) / height;
+    app._projection = k::orthographic(-0.5f * aspect_ratio, 0.5f * aspect_ratio,
+                                      -0.5f, 0.5f, -0.5f, 0.5f);
   }
 
 private:
@@ -184,10 +209,11 @@ private:
     return window;
   }
 
-
 private:
   GLFWwindow* _window = nullptr;
   Eigen::Vector2i _window_sizes = -Eigen::Vector2i::Ones();
+
+  Eigen::Matrix4f _projection;
 
   // Our video stream.
   sara::VideoStream _video_stream;
