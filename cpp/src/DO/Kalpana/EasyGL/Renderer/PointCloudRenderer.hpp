@@ -9,9 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/Tensor.hpp>
-
 #include <DO/Kalpana/EasyGL.hpp>
+#include <DO/Kalpana/EasyGL/Objects/PointCloud.hpp>
 
 #include <string>
 
@@ -32,29 +31,16 @@ namespace DO::Kalpana::GL {
     //! The shader program is understood as an optional value.
     ShaderProgram _shader_program;
 
+    auto initialize() -> void;
+
     auto initialize(const std::string& vertex_shader_source,
-                    const std::string& fragment_shader_source) -> void
-    {
-      _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
-      _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
-                                          fragment_shader_source);
+                    const std::string& fragment_shader_source) -> void;
 
-      _shader_program.create();
-      _shader_program.attach(_vertex_shader, _fragment_shader);
+    auto destroy() -> void;
 
-#ifndef __EMSCRIPTEN__
-      _shader_program.use();
-      _shader_program.detach();
-      _vertex_shader.destroy();
-      _fragment_shader.destroy();
-#endif
-    }
-
-    auto destroy_gl_objects()
-    {
-      _shader_program.detach();
-      _shader_program.clear();
-    }
+    auto render(const ColoredPointCloud& point_cloud, const float point_size,
+                const Eigen::Matrix4f& model_view,
+                const Eigen::Matrix4f& projection) -> void;
   };
 
   //! @}
