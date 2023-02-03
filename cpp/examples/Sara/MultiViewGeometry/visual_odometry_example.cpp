@@ -9,6 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Kalpana/EasyGL.hpp>
+#include <DO/Kalpana/EasyGL/Objects/TexturedImage.hpp>
+#include <DO/Kalpana/EasyGL/Objects/TexturedQuad.hpp>
+#include <DO/Kalpana/EasyGL/Renderer/TextureRenderer.hpp>
+#include <DO/Kalpana/Math/Projection.hpp>
+
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
@@ -25,113 +31,238 @@
 #include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization/Features/Draw.hpp>
 
+#include "ImageWarpUtilities.hpp"
+
+#ifdef _WIN32
+#  include <windows.h>
+#endif
+
+#include <GLFW/glfw3.h>
+
+#include <fmt/format.h>
+
 #include <filesystem>
 
-#include <omp.h>
+#if defined(_OPENMP)
+#  include <omp.h>
+#endif
 
 
 namespace fs = std::filesystem;
 namespace sara = DO::Sara;
+namespace k = DO::Kalpana;
+namespace kgl = DO::Kalpana::GL;
 
 
-template <typename CameraModel>
-auto undistortion_map(const CameraModel& camera, const Eigen::Vector2i& sizes)
-    -> std::array<sara::Image<float>, 2>
+class SingleWindowApp
 {
-  auto coords_map = std::array<sara::Image<float>, 2>{};
-  for (auto& coord_map : coords_map)
-    coord_map.resize(sizes);
-  auto& [umap, vmap] = coords_map;
-
-  const auto& w = sizes.x();
-  const auto& h = sizes.y();
-
-  for (int v = 0; v < h; ++v)
+public:
+  SingleWindowApp(const Eigen::Vector2i& sizes, const std::string& title)
+    : _window_sizes{sizes}
   {
-    for (int u = 0; u < w; ++u)
-    {
-      // Backproject the pixel from the destination camera plane.
-      const auto uv = Eigen::Vector2d(u, v);
-      const Eigen::Vector2f uvd = camera.distort(uv).template cast<float>();
+    // Init GLFW.
+    init_glfw();
 
-      umap(u, v) = uvd.x();
-      vmap(u, v) = uvd.y();
+    // Create a GLFW window.
+    _window = create_glfw_window(sizes, title);
+
+    // Prepare OpenGL first before any OpenGL calls.
+    init_opengl();
+
+    // The magic function.
+    glfwSetWindowUserPointer(_window, this);
+    // Register callbacks.
+    glfwSetWindowSizeCallback(_window, window_size_callback);
+  }
+
+  //! @brief Note: RAII does not work on OpenGL applications.
+  //!
+  //! So the destructor gets a default implementation and we neeed to explicitly
+  //! call the terminate method.
+  ~SingleWindowApp() = default;
+
+  auto open_video(const fs::path& video_path) -> void
+  {
+    _video_stream.open(video_path.string());
+  }
+
+  auto run() -> void
+  {
+    // Projection-model-view matrices.
+    auto model_view = Eigen::Transform<float, 3, Eigen::Projective>{};
+    model_view.setIdentity();
+
+    const auto win_aspect_ratio =
+        static_cast<float>(_window_sizes.x()) / _window_sizes.y();
+    _projection = k::orthographic(            //
+        -win_aspect_ratio, win_aspect_ratio,  //
+        -1.f, 1.f,                            //
+        -1.f, 1.f);
+
+    // Video state.
+    auto frame_index = -1;
+
+    // Render on the whole window surface.
+    glViewport(0, 0, _window_sizes.x(), _window_sizes.y());
+    // Background color.
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+    // Display image.
+    glfwSwapInterval(1);
+    while (!glfwWindowShouldClose(_window))
+    {
+      if (!_video_stream.read())
+        break;
+      ++frame_index;
+
+      // Clear the color buffer and the buffer testing.
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      // Transfer the CPU image frame data to the OpenGL texture.
+      _texture.reset(_video_stream.frame());
+      // Render the texture on the quad.
+      _texture_renderer.render(_texture, _quad, model_view.matrix(),
+                               _projection);
+
+      glfwSwapBuffers(_window);
+      glfwPollEvents();
     }
   }
 
-  return coords_map;
-}
-
-auto warp(const sara::ImageView<float>& u_map,  //
-          const sara::ImageView<float>& v_map,
-          const sara::ImageView<float>& frame,
-          sara::ImageView<float>& frame_warped)
-{
-  const auto w = frame.width();
-  const auto h = frame.height();
-  const auto wh = w * h;
-
-#pragma omp parallel for
-  for (auto p = 0; p < wh; ++p)
+  auto terminate() -> void
   {
-    // Destination pixel.
-    const auto y = p / w;
-    const auto x = p - w * y;
+    // Destroy GL objects.
+    deinit_gl_resources();
 
-    auto xyd = Eigen::Vector2d{};
-    xyd << u_map(x, y), v_map(x, y);
-
-    const auto in_image_domain = 0 <= xyd.x() && xyd.x() < w - 1 &&  //
-                                 0 <= xyd.y() && xyd.y() < h - 1;
-    if (!in_image_domain)
-    {
-      frame_warped(x, y) = 0.f;
-      continue;
-    }
-
-    const auto color = sara::interpolate(frame, xyd);
-    frame_warped(x, y) = color;
+    // Destroy GLFW.
+    if (_window != nullptr)
+      glfwDestroyWindow(_window);
+    glfwTerminate();
   }
-}
-
-auto warp(const sara::ImageView<float>& u_map,  //
-          const sara::ImageView<float>& v_map,
-          const sara::ImageView<sara::Rgb8>& frame,
-          sara::ImageView<sara::Rgb8>& frame_warped)
-{
-  const auto w = frame.width();
-  const auto h = frame.height();
-  const auto wh = w * h;
-
-#pragma omp parallel for
-  for (auto p = 0; p < wh; ++p)
+private:
+  auto init_opengl() -> void
   {
-    // Destination pixel.
-    const auto y = p / w;
-    const auto x = p - w * y;
+    // GLFW context...
+    glfwMakeContextCurrent(_window);
 
-    auto xyd = Eigen::Vector2d{};
-    xyd << u_map(x, y), v_map(x, y);
-
-    const auto in_image_domain = 0 <= xyd.x() && xyd.x() < w - 1 &&  //
-                                 0 <= xyd.y() && xyd.y() < h - 1;
-    if (!in_image_domain)
-    {
-      frame_warped(x, y) = sara::Black8;
-      continue;
-    }
-
-    auto color = sara::interpolate(frame, xyd);
-    color /= 255;
-
-    auto color_converted = sara::Rgb8{};
-    sara::smart_convert_color(color, color_converted);
-
-    frame_warped(x, y) = color_converted;
+    // Init OpenGL extensions.
+    init_glew();
   }
+
+  auto init_gl_resources() -> void
+  {
+    _texture.initialize(_video_stream.frame(), 0);
+
+    const auto& w = _video_stream.width();
+    const auto& h = _video_stream.height();
+    const auto aspect_ratio = static_cast<float>(w) / h;
+    auto vertices = _quad.host_vertices().matrix();
+    vertices.col(0) *= aspect_ratio;
+    _quad.initialize();
+
+    _texture_renderer.initialize();
+  }
+
+  auto deinit_gl_resources() -> void
+  {
+    _texture.destroy();
+    _quad.destroy();
+    _texture_renderer.destroy();
+  }
+
+private:
+  static auto get_self(GLFWwindow* const window) -> SingleWindowApp&
+  {
+    const auto app_void_ptr = glfwGetWindowUserPointer(window);
+    if (app_void_ptr == nullptr)
+      throw std::runtime_error{
+          "Please call glfwSetWindowUserPointer to register this window!"};
+    const auto app_ptr = reinterpret_cast<SingleWindowApp*>(app_void_ptr);
+    return *app_ptr;
+  }
+
+  static auto window_size_callback(GLFWwindow* window, const int width,
+                                   const int height) -> void
+  {
+    auto& app = get_self(window);
+    app._window_sizes << width, height;
+    const auto aspect_ratio = static_cast<float>(width) / height;
+    app._projection = k::orthographic(-0.5f * aspect_ratio, 0.5f * aspect_ratio,
+                                      -0.5f, 0.5f, -0.5f, 0.5f);
+  }
+
+private:
+  static auto init_glfw() -> void
+  {
+    // Initialize the windows manager.
+    if (!glfwInit())
+      throw std::runtime_error{"Error: failed to initialize GLFW!"};
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+  }
+
+  static auto init_glew() -> void
+  {
+#ifndef __APPLE__
+    // Initialize GLEW.
+    const auto err = glewInit();
+    if (err != GLEW_OK)
+      throw std::runtime_error{sara::format(
+          "Error: failed to initialize GLEW: %s", glewGetErrorString(err))};
+#endif
+  }
+
+  static auto create_glfw_window(const Eigen::Vector2i& sizes,
+                                 const std::string& title) -> GLFWwindow*
+  {
+    auto window = glfwCreateWindow(sizes.x(), sizes.y(),  //
+                                   title.c_str(),         //
+                                   nullptr, nullptr);
+    return window;
+  }
+
+private:
+  GLFWwindow* _window = nullptr;
+  Eigen::Vector2i _window_sizes = -Eigen::Vector2i::Ones();
+
+  Eigen::Matrix4f _projection;
+
+  // Our video stream.
+  sara::VideoStream _video_stream;
+  // What: our image texture.
+  kgl::TexturedImage2D _texture;
+  // Where: where to show our image texture.
+  kgl::TexturedQuad _quad;
+  // Texture renderer.
+  kgl::TextureRenderer _texture_renderer;
+};
+
+
+auto main(int const argc, char** const argv) -> int
+{
+  if (argc < 2)
+  {
+    std::cout << fmt::format("Usage: {} VIDEO_PATH\n",
+                             std::string_view{argv[0]});
+    return 1;
+  }
+
+  const auto video_path = fs::path{argv[1]};
+  auto app = SingleWindowApp{{800, 600}, "Odometry: " + video_path.string()};
+
+  app.terminate();
+
+  return 0;
 }
 
-auto main(int argc, char** argv) -> int
+
+#if 0
+auto main(int const argc, char** const argv) -> int
 {
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(sara_graphics_main);
@@ -140,16 +271,18 @@ auto main(int argc, char** argv) -> int
 
 auto sara_graphics_main(int, char**) -> int
 {
+#  if defined(_OPENMP)
   const auto num_threads = omp_get_max_threads();
   omp_set_num_threads(num_threads);
   Eigen::setNbThreads(num_threads);
+#  endif
 
   using namespace std::string_literals;
-#if defined(__APPLE__)
+#  if defined(__APPLE__)
   const auto video_path = "/Users/david/Desktop/Datasets/sample-1.mp4"s;
-#else
+#  else
   const auto video_path = "/home/david/Desktop/Datasets/sample-1.mp4"s;
-#endif
+#  endif
 
   auto camera = sara::v2::BrownConradyDistortionModel<double>{};
   camera.fx() = 917.2878392016245;
@@ -174,7 +307,7 @@ auto sara_graphics_main(int, char**) -> int
   auto frames_work = std::array<sara::Image<float>, 2>{};
   auto& frame_undistorted = frames_work[1];
 
-  const auto coords_map = undistortion_map(camera, video_stream.sizes());
+  const auto coords_map = sara::undistortion_map(camera, video_stream.sizes());
   const auto& [umap, vmap] = coords_map;
 
   constexpr auto sift_nn_ratio = 0.6f;
@@ -308,11 +441,11 @@ auto sara_graphics_main(int, char**) -> int
 
       sara::print_stage("Saving to HDF5");
       {
-#if defined(__APPLE__)
+#  if defined(__APPLE__)
         const auto geometry_h5_filepath = "/Users/david/Desktop/geometry" +
-#else
+#  else
         const auto geometry_h5_filepath = "/home/david/Desktop/geometry" +
-#endif
+#  endif
                                           std::to_string(frame_index) + ".h5"s;
         auto geometry_h5_file =
             sara::H5File{geometry_h5_filepath, H5F_ACC_TRUNC};
@@ -340,3 +473,4 @@ auto sara_graphics_main(int, char**) -> int
 
   return 0;
 }
+#endif

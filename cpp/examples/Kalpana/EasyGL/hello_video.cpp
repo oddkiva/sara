@@ -44,13 +44,18 @@ public:
     : _window_sizes{sizes}
   {
     // Init GLFW.
-    init_glfw_boilerplate();
+    init_glfw();
 
     // Create a GLFW window.
     _window = create_glfw_window(sizes, title);
 
     // Prepare OpenGL first before any OpenGL calls.
     init_opengl();
+
+    // The magic function.
+    glfwSetWindowUserPointer(_window, this);
+    // Register callbacks.
+    glfwSetWindowSizeCallback(_window, window_size_callback);
   }
 
   //! @brief Note: RAII does not work on OpenGL applications.
@@ -70,7 +75,7 @@ public:
     glfwMakeContextCurrent(_window);
 
     // Init OpenGL extensions.
-    init_glew_boilerplate();
+    init_glew();
   }
 
   auto init_gl_resources() -> void
@@ -102,11 +107,10 @@ public:
 
     const auto win_aspect_ratio =
         static_cast<float>(_window_sizes.x()) / _window_sizes.y();
-    const auto projection = k::orthographic(  //
+    _projection = k::orthographic(            //
         -win_aspect_ratio, win_aspect_ratio,  //
         -1.f, 1.f,                            //
         -1.f, 1.f);
-
 
     // Video state.
     auto frame_index = -1;
@@ -131,7 +135,7 @@ public:
       _texture.reset(_video_stream.frame());
       // Render the texture on the quad.
       _texture_renderer.render(_texture, _quad, model_view.matrix(),
-                               projection);
+                               _projection);
 
       glfwSwapBuffers(_window);
       glfwPollEvents();
@@ -150,7 +154,7 @@ public:
   }
 
 private: /* convenience free functions*/
-  static auto init_glfw_boilerplate() -> void
+  static auto init_glfw() -> void
   {
     // Initialize the windows manager.
     if (!glfwInit())
@@ -164,7 +168,7 @@ private: /* convenience free functions*/
 #endif
   }
 
-  static auto init_glew_boilerplate() -> void
+  static auto init_glew() -> void
   {
 #ifndef __APPLE__
     // Initialize GLEW.
@@ -187,6 +191,8 @@ private: /* convenience free functions*/
 private: /* data members */
   GLFWwindow* _window = nullptr;
   Eigen::Vector2i _window_sizes = -Eigen::Vector2i::Ones();
+
+  Eigen::Matrix4f _projection;
 
   // Our video stream.
   sara::VideoStream _video_stream;
