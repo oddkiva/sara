@@ -149,7 +149,7 @@ public:
     glfwTerminate();
   }
 
-private:
+private: /* convenience free functions*/
   static auto init_glfw_boilerplate() -> void
   {
     // Initialize the windows manager.
@@ -184,8 +184,7 @@ private:
     return window;
   }
 
-
-private:
+private: /* data members */
   GLFWwindow* _window = nullptr;
   Eigen::Vector2i _window_sizes = -Eigen::Vector2i::Ones();
 
