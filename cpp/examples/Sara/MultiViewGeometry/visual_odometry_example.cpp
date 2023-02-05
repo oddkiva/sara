@@ -136,35 +136,40 @@ public:
       const Eigen::Vector2i& image_sizes)
   {
     std::tie(_umap, _vmap) = sara::undistortion_map(camera, image_sizes);
-    _rgb8_undistorted.resize(image_sizes);
-    _gray32f_undistorted.resize(image_sizes);
+    for (auto i = 0; i < 2; ++i)
+    {
+      _rgb8_undistorted[i].resize(image_sizes);
+      _gray32f_undistorted[i].resize(image_sizes);
+    }
   }
 
   auto undistort(const sara::ImageView<float>& gray32f) -> void
   {
-    warp(_umap, _vmap, gray32f, _gray32f_undistorted);
+    _gray32f_undistorted.front().swap(_gray32f_undistorted.back());
+    warp(_umap, _vmap, gray32f, _gray32f_undistorted.back());
   }
 
   auto undistort(const sara::ImageView<sara::Rgb8>& rgb8) -> void
   {
-    warp(_umap, _vmap, rgb8, _rgb8_undistorted);
+    _rgb8_undistorted.front().swap(_rgb8_undistorted.back());
+    warp(_umap, _vmap, rgb8, _rgb8_undistorted.back());
   }
 
-  auto frame_gray32f() const -> const sara::ImageView<float>&
+  auto frame_gray32f(int i = 1) const -> const sara::ImageView<float>&
   {
-    return _gray32f_undistorted;
+    return _gray32f_undistorted[i];
   }
 
-  auto frame_rgb8() const -> const sara::ImageView<sara::Rgb8>&
+  auto frame_rgb8(int i = 1) const -> const sara::ImageView<sara::Rgb8>&
   {
-    return _rgb8_undistorted;
+    return _rgb8_undistorted[i];
   }
 
 private:
   sara::Image<float> _umap;
   sara::Image<float> _vmap;
-  sara::Image<sara::Rgb8> _rgb8_undistorted;
-  sara::Image<float> _gray32f_undistorted;
+  std::array<sara::Image<sara::Rgb8>, 2> _rgb8_undistorted;
+  std::array<sara::Image<float>, 2> _gray32f_undistorted;
 };
 
 
@@ -257,9 +262,9 @@ struct RelativePoseBlock
 
 struct TriangulationBlock
 {
-  sara::TwoViewGeometry geometry;
-  sara::Tensor_<double, 2> colors;
-  sara::Tensor_<double, 2> _colored_point_cloud;
+  sara::TwoViewGeometry _geometry;
+  sara::Tensor_<double, 2> _colors;
+  sara::Tensor_<float, 2> _colored_point_cloud;
 
   auto triangulate(const sara::PinholeCameraDecomposition& C1,
                    const sara::PinholeCameraDecomposition& C2,
@@ -268,9 +273,9 @@ struct TriangulationBlock
                    const sara::TensorView_<bool, 1>& inliers) -> void
   {
     sara::print_stage("Retriangulating the inliers...");
-    auto& points = geometry.X;
-    auto& s1 = geometry.scales1;
-    auto& s2 = geometry.scales2;
+    auto& points = _geometry.X;
+    auto& s1 = _geometry.scales1;
+    auto& s2 = _geometry.scales2;
     points.resize(4, inliers.flat_array().count());
     s1.resize(inliers.flat_array().count());
     s2.resize(inliers.flat_array().count());
@@ -308,14 +313,31 @@ struct TriangulationBlock
       s2 = s2.head(cheiral_inlier_count);
     }
 
+    // CAVEAT: setting the calibration matrix is necessary (bad design...)
+    _geometry.C1.K = K;
+    _geometry.C2.K = K;
+  }
+
+  auto extract_colors(const sara::ImageView<sara::Rgb8>& frame_prev,
+                      const sara::ImageView<sara::Rgb8>& frame_curr) -> void
+  {
     sara::print_stage("Extracting the colors...");
-    geometry.C1.K = K;
-    geometry.C2.K = K;
-#if 0
-    colors = sara::extract_colors(frames_rgb_undist[0],
-                                  frames_rgb_undist[1],  //
-                                  geometry);
-#endif
+    _colors = sara::extract_colors(frame_prev,
+                                   frame_curr,  //
+                                   _geometry);
+  }
+
+  auto update_colored_point_cloud() -> void
+  {
+    sara::print_stage("Updating the colored point cloud...");
+    _colored_point_cloud.resize(_colors.size(0), 6);
+    SARA_CHECK(_colored_point_cloud.sizes().transpose());
+    SARA_CHECK(_colors.sizes().transpose());
+    SARA_CHECK(_geometry.X.rows());
+    SARA_CHECK(_geometry.X.cols());
+    const auto& X = _geometry.X.colwise().hnormalized().transpose();
+    _colored_point_cloud.matrix().leftCols(3) = X.cast<float>();
+    _colored_point_cloud.matrix().rightCols(3) = _colors.matrix().cast<float>();
   }
 };
 
@@ -356,11 +378,17 @@ struct Pipeline
     _relative_pose_estimator.estimate_relative_pose(_feature_tracker.keys,
                                                     _feature_tracker.matches);
 
+    if (_relative_pose_estimator._inliers.empty())
+      return;
     _triangulator.triangulate(
         _relative_pose_estimator._geometry.C1,
         _relative_pose_estimator._geometry.C2,  //
         _relative_pose_estimator._K, _relative_pose_estimator._K_inv,
         _relative_pose_estimator._X, _relative_pose_estimator._inliers);
+
+    _triangulator.extract_colors(_image_corrector.frame_rgb8(0),
+                                 _image_corrector.frame_rgb8(1));
+    _triangulator.update_colored_point_cloud();
   }
 
   auto make_display_frame() const -> sara::Image<sara::Rgb8>
@@ -445,6 +473,13 @@ public:
     // Background color.
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
+    // You absolutely need this for 3D objects!
+    glEnable(GL_DEPTH_TEST);
+
     // Display image.
     glfwSwapInterval(1);
     while (!glfwWindowShouldClose(_window))
@@ -453,11 +488,14 @@ public:
         break;
 
       _pipeline.process();
+      // Load data to OpenGL.
+      upload_point_cloud_data_to_opengl();
 
       // Clear the color buffer and the buffer testing.
-      glClear(GL_COLOR_BUFFER_BIT);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       render_video();
+      render_point_cloud();
 
       glfwSwapBuffers(_window);
       glfwPollEvents();
@@ -511,8 +549,7 @@ private:
     _point_cloud_renderer.destroy();
   }
 
-  auto upload_point_cloud_data_to_opengl(
-      const sara::TensorView_<float, 2>& point_cloud) -> void
+  auto upload_point_cloud_data_to_opengl() -> void
   {
     _point_cloud.upload_host_data_to_gl(
         _pipeline._triangulator._colored_point_cloud);
@@ -581,15 +618,28 @@ private:
     auto& self = get_self(window);
     self._window_sizes << width, height;
 
-    // Reset the viewport sizes
+    // Point cloud viewport rectangle geometry.
+    self._point_cloud_viewport.top_left << 0, 0;
+    self._point_cloud_viewport.sizes << width / 2, height;
+
+    // Video viewport rectangle geometry.
     self._video_viewport.top_left << width / 2, 0;
     self._video_viewport.sizes << width / 2, height;
-    // Update the current projection matrix.
+
+    // Update the current projection matrices.
     auto scale = 0.5f;
     if (self._video_viewport.width() < self._pipeline._video_streamer.width())
       scale *= static_cast<float>(self._pipeline._video_streamer.width()) /
                self._video_viewport.width();
     self._projection = self._video_viewport.orthographic_projection(scale);
+
+    // Point cloud projection matrix.
+    const auto aspect_ratio = self._point_cloud_viewport.aspect_ratio();
+    const Eigen::Matrix4f projection = self._point_cloud_projection =
+        k::perspective(60.f,          //
+                       aspect_ratio,  //
+                       .5f,           //
+                       200.f);
   }
 
 private:
@@ -650,8 +700,9 @@ private:
   //! @brief Point cloud GPU renderer.
   kgl::ColoredPointCloudRenderer _point_cloud_renderer;
   //! @brief Point cloud rendering options.
+  Eigen::Matrix4f _point_cloud_projection;
   // kgl::Camera _point_cloud_camera;
-  float _point_size = 3.f;
+  float _point_size = 5.f;
 };
 
 

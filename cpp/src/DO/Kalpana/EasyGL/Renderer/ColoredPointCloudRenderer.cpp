@@ -19,6 +19,7 @@ auto ColoredPointCloudRenderer::initialize() -> void
 {
   const auto vertex_shader_source = R"shader(#version 300 es
     layout (location = 0) in vec3 in_coords;
+    layout (location = 1) in vec3 in_color;
 
     uniform float point_size;
     uniform mat4 transform;
@@ -31,7 +32,7 @@ auto ColoredPointCloudRenderer::initialize() -> void
     {
       gl_Position = projection * view * transform * vec4(in_coords, 1.0);
       gl_PointSize = point_size;
-      out_color = vec3(1.0, 0.5, 0.5);
+      out_color = in_color;
     }
   )shader";
 
@@ -105,6 +106,6 @@ auto ColoredPointCloudRenderer::render(const ColoredPointCloud& point_cloud,
 
   // Draw triangles.
   glBindVertexArray(point_cloud._vao);
-  const auto& num_points = static_cast<GLsizei>(point_cloud._sizes.x());
-  glDrawArrays(GL_POINTS, 0, num_points);
+  SARA_CHECK(point_cloud._num_vertices);
+  glDrawArrays(GL_POINTS, 0, point_cloud._num_vertices);
 }

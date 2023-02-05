@@ -34,7 +34,7 @@ namespace DO::Kalpana::GL {
     // 3D points and other attributes (colors, normals, etc).
     Buffer _vbo;
     // Point cloud data sizes
-    Eigen::Vector2i _sizes;
+    GLsizei _num_vertices;
 
     // Initialize the VAO and VBO.
     auto initialize() -> void;

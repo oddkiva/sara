@@ -40,6 +40,8 @@ auto ColoredPointCloud::upload_host_data_to_gl(
     return reinterpret_cast<void*>(offset * sizeof(float));
   };
 
+  _num_vertices = static_cast<GLsizei>(point_cloud.size(0));
+
   // Important: specify the vertex attribute object that defines the point
   // cloud data.
   glBindVertexArray(_vao);
