@@ -107,16 +107,14 @@ public:
 
     const auto win_aspect_ratio =
         static_cast<float>(_window_sizes.x()) / _window_sizes.y();
-    _projection = k::orthographic(            //
-        -win_aspect_ratio, win_aspect_ratio,  //
-        -1.f, 1.f,                            //
-        -1.f, 1.f);
+    _projection = k::orthographic(                          //
+        -0.5f * win_aspect_ratio, 0.5f * win_aspect_ratio,  //
+        -0.5f, 0.5f,                                        //
+        -0.5f, 0.5f);
 
     // Video state.
     auto frame_index = -1;
 
-    // Render on the whole window surface.
-    glViewport(0, 0, _window_sizes.x(), _window_sizes.y());
     // Background color.
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -130,6 +128,9 @@ public:
 
       // Clear the color buffer and the buffer testing.
       glClear(GL_COLOR_BUFFER_BIT);
+
+      // Render on the whole window surface.
+      glViewport(0, 0, _window_sizes.x(), _window_sizes.y());
 
       // Transfer the CPU image frame data to the OpenGL texture.
       _texture.reset(_video_stream.frame());
@@ -151,6 +152,18 @@ public:
     if (_window != nullptr)
       glfwDestroyWindow(_window);
     glfwTerminate();
+  }
+
+private: /* callback functions */
+  static auto window_size_callback(GLFWwindow* window, const int width,
+                                   const int height) -> void
+  {
+    auto& app = get_self(window);
+    app._window_sizes << width, height;
+    const auto aspect_ratio = static_cast<float>(width) / height;
+    app._projection = k::orthographic(-0.5f * aspect_ratio, 0.5f * aspect_ratio,
+                                      -0.5f, 0.5f,  //
+                                      -0.5f, 0.5f);
   }
 
 private: /* convenience free functions*/
@@ -186,6 +199,16 @@ private: /* convenience free functions*/
                                    title.c_str(),         //
                                    nullptr, nullptr);
     return window;
+  }
+
+  static auto get_self(GLFWwindow* const window) -> SingleWindowApp&
+  {
+    const auto app_void_ptr = glfwGetWindowUserPointer(window);
+    if (app_void_ptr == nullptr)
+      throw std::runtime_error{
+          "Please call glfwSetWindowUserPointer to register this window!"};
+    const auto app_ptr = reinterpret_cast<SingleWindowApp*>(app_void_ptr);
+    return *app_ptr;
   }
 
 private: /* data members */
