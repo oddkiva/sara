@@ -31,7 +31,7 @@ auto ColoredPointCloudRenderer::initialize() -> void
     void main()
     {
       gl_Position = projection * view * transform * vec4(in_coords, 1.0);
-      gl_PointSize = point_size;
+      gl_PointSize = clamp(10.0 * point_size / (0.1 * in_coords.z), 3., 10.);
       out_color = in_color;
     }
   )shader";
