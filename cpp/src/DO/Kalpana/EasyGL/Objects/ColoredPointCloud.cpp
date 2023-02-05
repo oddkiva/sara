@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Kalpana/EasyGL/Objects/PointCloud.hpp>
+#include <DO/Kalpana/EasyGL/Objects/ColoredPointCloud.hpp>
 
 
 using namespace DO::Kalpana::GL;
@@ -34,7 +34,7 @@ auto ColoredPointCloud::upload_host_data_to_gl(
     const Sara::TensorView_<float, 2>& point_cloud) -> void
 {
   static const auto vertex_data_byte_size = [&point_cloud]() {
-    return static_cast<GLsizei>(point_cloud.size(0) * sizeof(float));
+    return static_cast<GLsizei>(point_cloud.size(1) * sizeof(float));
   };
   static const auto float_pointer = [](int offset = 0) {
     return reinterpret_cast<void*>(offset * sizeof(float));

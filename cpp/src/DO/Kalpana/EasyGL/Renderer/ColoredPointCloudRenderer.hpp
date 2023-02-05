@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 #include <DO/Kalpana/EasyGL.hpp>
-#include <DO/Kalpana/EasyGL/Objects/PointCloud.hpp>
+#include <DO/Kalpana/EasyGL/Objects/ColoredPointCloud.hpp>
 
 #include <string>
 
@@ -20,7 +20,7 @@ namespace DO::Kalpana::GL {
   //! @addtogroup EasyGL
   //! @{
 
-  struct PointCloudRenderer
+  struct ColoredPointCloudRenderer
   {
     //! @brief Shader data structure are understood as optional values.
     //! @{
@@ -39,6 +39,7 @@ namespace DO::Kalpana::GL {
     auto destroy() -> void;
 
     auto render(const ColoredPointCloud& point_cloud, const float point_size,
+                const Eigen::Matrix4f& transform,
                 const Eigen::Matrix4f& model_view,
                 const Eigen::Matrix4f& projection) -> void;
   };

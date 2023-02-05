@@ -9,12 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Kalpana/EasyGL/Renderer/PointCloudRenderer.hpp>
+#include <DO/Kalpana/EasyGL/Renderer/ColoredPointCloudRenderer.hpp>
 
 
 using namespace DO::Kalpana::GL;
 
-auto PointCloudRenderer::initialize() -> void
+
+auto ColoredPointCloudRenderer::initialize() -> void
 {
   const auto vertex_shader_source = R"shader(#version 300 es
     layout (location = 0) in vec3 in_coords;
@@ -58,9 +59,9 @@ auto PointCloudRenderer::initialize() -> void
   this->initialize(vertex_shader_source, fragment_shader_source);
 }
 
-auto PointCloudRenderer::initialize(const std::string& vertex_shader_source,
-                                    const std::string& fragment_shader_source)
-    -> void
+auto ColoredPointCloudRenderer::initialize(
+    const std::string& vertex_shader_source,
+    const std::string& fragment_shader_source) -> void
 {
   _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
   _fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
@@ -77,19 +78,24 @@ auto PointCloudRenderer::initialize(const std::string& vertex_shader_source,
 #endif
 }
 
-auto PointCloudRenderer::destroy() -> void
+auto ColoredPointCloudRenderer::destroy() -> void
 {
   _shader_program.detach();
   _shader_program.clear();
 }
 
-auto PointCloudRenderer::render(const ColoredPointCloud& point_cloud,
-                                const float point_size,
-                                const Eigen::Matrix4f& model_view,
-                                const Eigen::Matrix4f& projection) -> void
+auto ColoredPointCloudRenderer::render(const ColoredPointCloud& point_cloud,
+                                       const float point_size,
+                                       const Eigen::Matrix4f& transformation,
+                                       const Eigen::Matrix4f& model_view,
+                                       const Eigen::Matrix4f& projection)
+    -> void
 {
   _shader_program.use();
   _shader_program.set_uniform_param("point_size", point_size);
+
+  // Transformation matrix.
+  _shader_program.set_uniform_matrix4f("transform", transformation.data());
 
   // View matrix.
   _shader_program.set_uniform_matrix4f("view", model_view.data());

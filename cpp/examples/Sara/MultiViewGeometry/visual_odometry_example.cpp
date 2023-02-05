@@ -10,8 +10,10 @@
 // ========================================================================== //
 
 #include <DO/Kalpana/EasyGL.hpp>
+#include <DO/Kalpana/EasyGL/Objects/ColoredPointCloud.hpp>
 #include <DO/Kalpana/EasyGL/Objects/TexturedImage.hpp>
 #include <DO/Kalpana/EasyGL/Objects/TexturedQuad.hpp>
+#include <DO/Kalpana/EasyGL/Renderer/ColoredPointCloudRenderer.hpp>
 #include <DO/Kalpana/EasyGL/Renderer/TextureRenderer.hpp>
 #include <DO/Kalpana/Math/Projection.hpp>
 #include <DO/Kalpana/Math/Viewport.hpp>
@@ -171,6 +173,7 @@ struct FeatureTrackingBlock
   float sift_nn_ratio = 0.6f;
   sara::ImagePyramidParams image_pyr_params = sara::ImagePyramidParams(0);
 
+  std::array<sara::Image<sara::Rgb8>, 2> _rgb8_images;
   std::array<sara::KeypointList<sara::OERegion, float>, 2> keys;
   std::vector<sara::Match> matches;
 
@@ -199,26 +202,27 @@ struct RelativePoseBlock
   int ransac_iterations_max = 500;
   double ransac_confidence = 0.999;
   double err_thres = 2.;
-  const sara::RelativePoseSolver<sara::NisterFivePointAlgorithm> solver;
-  sara::CheiralAndEpipolarConsistency inlier_predicate;
 
-  sara::EssentialMatrix E;
-  Eigen::Matrix3d K;
-  Eigen::Matrix3d K_inv;
-  sara::FundamentalMatrix F;
-  sara::Tensor_<bool, 1> inliers;
-  sara::Tensor_<int, 1> sample_best;
-  sara::TwoViewGeometry geometry;
+  const sara::RelativePoseSolver<sara::NisterFivePointAlgorithm> _solver;
+  sara::CheiralAndEpipolarConsistency _inlier_predicate;
+
+  sara::PointCorrespondenceList<double> _X;
+
+  Eigen::Matrix3d _K;
+  Eigen::Matrix3d _K_inv;
+  sara::Tensor_<bool, 1> _inliers;
+  sara::Tensor_<int, 1> _sample_best;
+  sara::TwoViewGeometry _geometry;
 
   auto configure(const sara::v2::BrownConradyDistortionModel<double>& camera)
       -> void
   {
-    K = camera.calibration_matrix();
-    K_inv = K.inverse();
+    _K = camera.calibration_matrix();
+    _K_inv = _K.inverse();
 
-    inlier_predicate.distance.K1_inv = K_inv;
-    inlier_predicate.distance.K2_inv = K_inv;
-    inlier_predicate.err_threshold = err_thres;
+    _inlier_predicate.distance.K1_inv = _K_inv;
+    _inlier_predicate.distance.K2_inv = _K_inv;
+    _inlier_predicate.err_threshold = err_thres;
   }
 
   auto estimate_relative_pose(
@@ -237,29 +241,31 @@ struct RelativePoseBlock
     // List the matches as a 2D-tensor where each row encodes a match 'm' as a
     // pair of point indices (i, j).
     const auto M = sara::to_tensor(matches);
-    const auto X = sara::PointCorrespondenceList{M, u[0], u[1]};
+
+    _X = sara::PointCorrespondenceList{M, u[0], u[1]};
     auto data_normalizer =
-        std::make_optional(sara::Normalizer<sara::TwoViewGeometry>{K, K});
-    auto sample_best = sara::Tensor_<int, 1>{};
-    std::tie(geometry, inliers, sample_best) =
-        sara::v2::ransac(X, solver, inlier_predicate, ransac_iterations_max,
+        std::make_optional(sara::Normalizer<sara::TwoViewGeometry>{_K, _K});
+
+    std::tie(_geometry, _inliers, _sample_best) =
+        sara::v2::ransac(_X, _solver, _inlier_predicate, ransac_iterations_max,
                          ransac_confidence, data_normalizer, true);
-    SARA_DEBUG << "Geometry =\n" << geometry << std::endl;
-    SARA_DEBUG << "inliers count = " << inliers.flat_array().count()
+    SARA_DEBUG << "Geometry =\n" << _geometry << std::endl;
+    SARA_DEBUG << "inliers count = " << _inliers.flat_array().count()
                << std::endl;
   }
 };
 
-#if 0
 struct TriangulationBlock
 {
   sara::TwoViewGeometry geometry;
   sara::Tensor_<double, 2> colors;
 
-  auto triangulate(const Eigen::Matrix3f K_inv,
-                   const sara::PointCorrespondenceList<double>& X) -> void
+  auto triangulate(const sara::PinholeCameraDecomposition& C1,
+                   const sara::PinholeCameraDecomposition& C2,
+                   const Eigen::Matrix3d& K, const Eigen::Matrix3d& K_inv,
+                   const sara::PointCorrespondenceList<double>& X,
+                   const sara::TensorView_<bool, 1>& inliers) -> void
   {
-    // Retrieve all the 3D points by triangulation.
     sara::print_stage("Retriangulating the inliers...");
     auto& points = geometry.X;
     auto& s1 = geometry.scales1;
@@ -278,7 +284,7 @@ struct TriangulationBlock
         const Eigen::Vector3d u1 = K_inv * X[i][0].vector();
         const Eigen::Vector3d u2 = K_inv * X[i][1].vector();
         const auto [Xj, s1j, s2j] = sara::triangulate_single_point_linear_eigen(
-            geometry.C1.matrix(), geometry.C2.matrix(), u1, u2);
+            C1.matrix(), C2.matrix(), u1, u2);
         const auto cheiral = s1j > 0 && s2j > 0;
         if (!cheiral)
           continue;
@@ -304,12 +310,13 @@ struct TriangulationBlock
     sara::print_stage("Extracting the colors...");
     geometry.C1.K = K;
     geometry.C2.K = K;
+#if 0
     colors = sara::extract_colors(frames_rgb_undist[0],
                                   frames_rgb_undist[1],  //
                                   geometry);
+#endif
   }
 };
-#endif
 
 
 struct Pipeline
@@ -347,15 +354,20 @@ struct Pipeline
 
     _relative_pose_estimator.estimate_relative_pose(_feature_tracker.keys,
                                                     _feature_tracker.matches);
+
+    _triangulator.triangulate(
+        _relative_pose_estimator._geometry.C1,
+        _relative_pose_estimator._geometry.C2,  //
+        _relative_pose_estimator._K, _relative_pose_estimator._K_inv,
+        _relative_pose_estimator._X, _relative_pose_estimator._inliers);
   }
 
   auto make_display_frame() const -> sara::Image<sara::Rgb8>
   {
-    sara::print_stage("Draw...");
-
     sara::Image<sara::Rgb8> display = _image_corrector.frame_rgb8();
     const auto& matches = _feature_tracker.matches;
-    const auto& inliers = _relative_pose_estimator.inliers;
+    const auto& inliers = _relative_pose_estimator._inliers;
+#pragma omp parallel for
     for (auto m = 0u; m < matches.size(); ++m)
     {
       if (!inliers(m))
@@ -375,6 +387,7 @@ struct Pipeline
   ImageCorrectionBlock _image_corrector;
   FeatureTrackingBlock _feature_tracker;
   RelativePoseBlock _relative_pose_estimator;
+  TriangulationBlock _triangulator;
 };
 
 
@@ -392,7 +405,11 @@ public:
                                title.c_str(),         //
                                nullptr, nullptr);
 
-    // Initialize the video viewport
+    // Initialize the point cloud viewport.
+    _point_cloud_viewport.top_left.setZero();
+    _point_cloud_viewport.sizes << sizes.x() / 2, sizes.y();
+
+    // Initialize the video viewport.
     _video_viewport.top_left << sizes.x() / 2, 0;
     _video_viewport.sizes << sizes.x() / 2, sizes.y();
 
@@ -478,6 +495,7 @@ private:
 
   auto init_gl_resources() -> void
   {
+    // Video texture rendering
     _texture.initialize(_pipeline._video_streamer.frame_rgb8(), 0);
 
     const auto& w = _pipeline._video_streamer.width();
@@ -488,6 +506,10 @@ private:
     _quad.initialize();
 
     _texture_renderer.initialize();
+
+    // Point cloud rendering
+    _point_cloud.initialize();
+    _point_cloud_renderer.initialize();
   }
 
   auto deinit_gl_resources() -> void
@@ -495,6 +517,41 @@ private:
     _texture.destroy();
     _quad.destroy();
     _texture_renderer.destroy();
+
+    _point_cloud.destroy();
+    _point_cloud_renderer.destroy();
+  }
+
+  auto render_point_cloud() -> void
+  {
+    glViewport(
+        _point_cloud_viewport.top_left.x(), _point_cloud_viewport.top_left.y(),
+        _point_cloud_viewport.sizes.x(), _point_cloud_viewport.sizes.y());
+
+    // CAVEAT: re-express the point cloud in OpenGL axis convention.
+    auto from_cam_to_gl = Eigen::Transform<float, 3, Eigen::Projective>{};
+    from_cam_to_gl.setIdentity();
+    // clang-format off
+    from_cam_to_gl.matrix().topLeftCorner<3, 3>() <<
+      1,  0,  0,
+      0, -1,  0,
+      0,  0, -1;
+    // clang-format on
+
+    // Recalculate the projection matrix for the point cloud.
+    const auto aspect_ratio = _point_cloud_viewport.aspect_ratio();
+    const Eigen::Matrix4f projection = k::perspective(60.f,          //
+                                                      aspect_ratio,  //
+                                                      .5f,           //
+                                                      200.f);
+
+    // Update the model view matrix.
+    const Eigen::Matrix4f model_view = Eigen::Matrix4f::Identity();
+
+    // Render the point cloud.
+    _point_cloud_renderer.render(_point_cloud, _point_size,
+                                 from_cam_to_gl.matrix(),  //
+                                 model_view, projection);
   }
 
 private:
@@ -560,16 +617,30 @@ private:
 
   Pipeline _pipeline;
 
-  // The viewport
+  //! Video rendering
+  //!
+  //! The viewport
   k::Viewport _video_viewport;
-  // What: our image texture.
+  //! @brief the video texture.
   kgl::TexturedImage2D _texture;
-  // Where: where to show our image texture.
+  //! @brief the video quad.
   kgl::TexturedQuad _quad;
-  // Texture renderer.
+  //! @brief Texture renderer.
   kgl::TextureRenderer _texture_renderer;
-  // Model-view-projection matrices.
+  //! @brief Model-view-projection matrices.
   Eigen::Matrix4f _projection;
+
+  //! Point cloud rendering
+  //!
+  //! @brief The viewport.
+  k::Viewport _point_cloud_viewport;
+  //! @brief Point cloud GPU data.
+  kgl::ColoredPointCloud _point_cloud;
+  //! @brief Point cloud GPU renderer.
+  kgl::ColoredPointCloudRenderer _point_cloud_renderer;
+  //! @brief Point cloud rendering options.
+  // kgl::Camera _point_cloud_camera;
+  float _point_size = 3.f;
 };
 
 
