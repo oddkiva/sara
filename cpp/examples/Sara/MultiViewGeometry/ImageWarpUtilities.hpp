@@ -1,6 +1,5 @@
 #pragma once
 
-#include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 
 
@@ -8,12 +7,10 @@ namespace DO::Sara {
 
   template <typename CameraModel>
   auto undistortion_map(const CameraModel& camera, const Eigen::Vector2i& sizes)
-      -> std::array<Image<float>, 2>
+      -> std::pair<Image<float>, Image<float>>
   {
-    auto coords_map = std::array<Image<float>, 2>{};
-    for (auto& coord_map : coords_map)
-      coord_map.resize(sizes);
-    auto& [umap, vmap] = coords_map;
+    auto umap = Image<float>{sizes};
+    auto vmap = Image<float>{sizes};
 
     const auto& w = sizes.x();
     const auto& h = sizes.y();
@@ -31,7 +28,7 @@ namespace DO::Sara {
       }
     }
 
-    return coords_map;
+    return std::make_pair(umap, vmap);
   }
 
   inline auto warp(const ImageView<float>& u_map,  //

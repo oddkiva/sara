@@ -56,255 +56,117 @@ namespace k = DO::Kalpana;
 namespace kgl = DO::Kalpana::GL;
 
 
-class SingleWindowApp
+class VideoStreamBlock
 {
 public:
-  SingleWindowApp(const Eigen::Vector2i& sizes, const std::string& title)
-    : _window_sizes{sizes}
+  VideoStreamBlock() = default;
+
+  VideoStreamBlock(const fs::path& video_path)
   {
-    // Init GLFW.
-    init_glfw();
-
-    // Create a window.
-    _window = glfwCreateWindow(sizes.x(), sizes.y(),  //
-                               title.c_str(),         //
-                               nullptr, nullptr);
-
-    // Initialize the video viewport
-    _video_viewport.top_left << sizes.x() / 2, 0;
-    _video_viewport.sizes << sizes.x() / 2, sizes.y();
-
-    // Prepare OpenGL first before any OpenGL calls.
-    init_opengl();
-
-    // The magic function.
-    glfwSetWindowUserPointer(_window, this);
-    // Register callbacks.
-    glfwSetWindowSizeCallback(_window, window_size_callback);
+    open(video_path);
   }
 
-  //! @brief Note: RAII does not work on OpenGL applications.
-  //!
-  //! So the destructor gets a default implementation and we neeed to explicitly
-  //! call the terminate method.
-  ~SingleWindowApp() = default;
-
-  auto open_video(const fs::path& video_path) -> void
+  auto open(const fs::path& video_path) -> void
   {
-    _video_stream.open(video_path.string());
-    init_gl_resources();
+    _frame_index = -1;
+    _video_stream.close();
+    _video_stream.open(video_path);
+    _rgb8.swap(_video_stream.frame());
+    _gray32f.resize(_video_stream.sizes());
   }
 
-  auto run() -> void
+  auto read() -> bool
   {
-    // Current model-view matrix.
-    auto model_view = Eigen::Transform<float, 3, Eigen::Projective>{};
-    model_view.setIdentity();
-
-    // Current projection matrix
-    _projection = _video_viewport.orthographic_projection();
-
-    // Video state.
-    auto frame_index = -1;
-
-    // Background color.
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
-    // Display image.
-    glfwSwapInterval(1);
-    while (!glfwWindowShouldClose(_window))
-    {
-      if (!_video_stream.read())
-        break;
-      ++frame_index;
-
-      // Clear the color buffer and the buffer testing.
-      glClear(GL_COLOR_BUFFER_BIT);
-
-      // Render on the right half of the window surface.
-      glViewport(_window_sizes.x() / 2, 0,  //
-                 _window_sizes.x() / 2, _window_sizes.y());
-      // Transfer the CPU image frame data to the OpenGL texture.
-      _texture.reset(_video_stream.frame());
-      // Render the texture on the quad.
-      _texture_renderer.render(_texture, _quad, model_view.matrix(),
-                               _projection);
-
-      glfwSwapBuffers(_window);
-      glfwPollEvents();
-    }
+    const auto read_new_frame = _video_stream.read();
+    sara::from_rgb8_to_gray32f(_rgb8, _gray32f);
+    if (read_new_frame)
+      ++_frame_index;
+    return read_new_frame;
   }
 
-  auto terminate() -> void
+  auto frame_rgb8() const -> const sara::ImageView<sara::Rgb8>&
   {
-    // Destroy GL objects.
-    deinit_gl_resources();
+    return _rgb8;
+  }
 
-    // Destroy GLFW.
-    if (_window != nullptr)
-      glfwDestroyWindow(_window);
-    glfwTerminate();
+  auto frame_gray32f() const -> const sara::ImageView<float>&
+  {
+    return _gray32f;
+  }
+
+  auto sizes() const -> Eigen::Vector2i
+  {
+    return _video_stream.sizes();
+  }
+
+  auto width() const -> int
+  {
+    return _video_stream.width();
+  }
+
+  auto height() const -> int
+  {
+    return _video_stream.height();
+  }
+
+  auto skip() const -> bool
+  {
+    return _frame_index % (_frame_skip + 1) == 0;
   }
 
 private:
-  auto init_opengl() -> void
-  {
-    glfwMakeContextCurrent(_window);
-    init_glew();
-  }
-
-  auto init_gl_resources() -> void
-  {
-    _texture.initialize(_video_stream.frame(), 0);
-
-    const auto& w = _video_stream.width();
-    const auto& h = _video_stream.height();
-    const auto aspect_ratio = static_cast<float>(w) / h;
-    auto vertices = _quad.host_vertices().matrix();
-    vertices.col(0) *= aspect_ratio;
-    _quad.initialize();
-
-    _texture_renderer.initialize();
-  }
-
-  auto deinit_gl_resources() -> void
-  {
-    _texture.destroy();
-    _quad.destroy();
-    _texture_renderer.destroy();
-  }
-
-private:
-  static auto get_self(GLFWwindow* const window) -> SingleWindowApp&
-  {
-    const auto app_void_ptr = glfwGetWindowUserPointer(window);
-    if (app_void_ptr == nullptr)
-      throw std::runtime_error{
-          "Please call glfwSetWindowUserPointer to register this window!"};
-    const auto app_ptr = reinterpret_cast<SingleWindowApp*>(app_void_ptr);
-    return *app_ptr;
-  }
-
-  static auto window_size_callback(GLFWwindow* window, const int width,
-                                   const int height) -> void
-  {
-    auto& self = get_self(window);
-    self._window_sizes << width, height;
-
-    // Reset the viewport sizes
-    self._video_viewport.sizes << width / 2, height;
-    // Update the current projection matrix.
-    auto scale = 0.5f;
-    if (self._video_viewport.width() < self._video_stream.width())
-      scale *= static_cast<float>(self._video_stream.width()) /
-               self._video_viewport.width();
-    self._projection = self._video_viewport.orthographic_projection(scale);
-  }
-
-private:
-  static auto init_glfw() -> void
-  {
-    // Initialize the windows manager.
-    if (!glfwInit())
-      throw std::runtime_error{"Error: failed to initialize GLFW!"};
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-  }
-
-  static auto init_glew() -> void
-  {
-#ifndef __APPLE__
-    // Initialize GLEW.
-    const auto err = glewInit();
-    if (err != GLEW_OK)
-    {
-      const auto err_str =
-          reinterpret_cast<const char*>(glewGetErrorString(err));
-      throw std::runtime_error{fmt::format(
-          "Error: failed to initialize GLEW: {}", std::string_view{err_str})};
-    }
-#endif
-  }
-
-private:
-  GLFWwindow* _window = nullptr;
-  Eigen::Vector2i _window_sizes = -Eigen::Vector2i::Ones();
-
-  Eigen::Matrix4f _projection;
-
-  // Our video stream.
   sara::VideoStream _video_stream;
-  // The viewport
-  k::Viewport _video_viewport;
-  // What: our image texture.
-  kgl::TexturedImage2D _texture;
-  // Where: where to show our image texture.
-  kgl::TexturedQuad _quad;
-  // Texture renderer.
-  kgl::TextureRenderer _texture_renderer;
+  sara::ImageView<sara::Rgb8> _rgb8;
+  sara::Image<float> _gray32f;
+
+  int _frame_skip = 2;
+  int _frame_index = -1;
 };
 
 
-auto main(int const argc, char** const argv) -> int
+class ImageCorrectionBlock
 {
-#if defined(_OPENMP)
-  const auto num_threads = omp_get_max_threads();
-  omp_set_num_threads(num_threads);
-  Eigen::setNbThreads(num_threads);
-#endif
+public:
+  ImageCorrectionBlock() = default;
 
-  if (argc < 2)
+  ImageCorrectionBlock(
+      const sara::v2::BrownConradyDistortionModel<double>& camera,
+      const Eigen::Vector2i& image_sizes)
   {
-    std::cout << fmt::format("Usage: {} VIDEO_PATH\n",
-                             std::string_view{argv[0]});
-    return 1;
+    std::tie(_umap, _vmap) = sara::undistortion_map(camera, image_sizes);
+    _rgb8_undistorted.resize(image_sizes);
+    _gray32f_undistorted.resize(image_sizes);
   }
 
-  // Create a camera.
-  auto camera = sara::v2::BrownConradyDistortionModel<double>{};
-  camera.fx() = 917.2878392016245;
-  camera.fy() = 917.2878392016245;
-  camera.shear() = 0.;
-  camera.u0() = 960.;
-  camera.v0() = 540.;
-  camera.k() << -0.2338367557617234, 0.05952465745165465, -0.007947847982157091;
-  camera.p() << -0.0003137658969742134, 0.00021943576376532096;
-
-  const auto K = camera.calibration_matrix();
-  const Eigen::Matrix3d K_inv = K.inverse();
-  SARA_DEBUG << "K =\n" << K << std::endl;
-  SARA_DEBUG << "K^{-1} =\n" << K_inv << std::endl;
-
-  const auto video_path = fs::path{argv[1]};
-
-  auto app = SingleWindowApp{{800, 600}, "Odometry: " + video_path.string()};
-
-  app.open_video(video_path);
-  app.run();
-  app.terminate();
-
-  return 0;
-}
-
-
-struct ImageDistortionCorrector
-{
-  ImageDistortionCorrector(
-      const sara::v2::BrownConradyDistortionModel<double>& camera)
+  auto undistort(const sara::ImageView<float>& gray32f) -> void
   {
-    std::tie(umap, vmap) = sara::undistortion_map(camera, video_stream.sizes());
+    warp(_umap, _vmap, gray32f, _gray32f_undistorted);
   }
 
-  sara::Image<float> umap;
-  sara::Image<float> vmap;
+  auto undistort(const sara::ImageView<sara::Rgb8>& rgb8) -> void
+  {
+    warp(_umap, _vmap, rgb8, _rgb8_undistorted);
+  }
+
+  auto frame_gray32f() const -> const sara::ImageView<float>&
+  {
+    return _gray32f_undistorted;
+  }
+
+  auto frame_rgb8() const -> const sara::ImageView<sara::Rgb8>&
+  {
+    return _rgb8_undistorted;
+  }
+
+private:
+  sara::Image<float> _umap;
+  sara::Image<float> _vmap;
+  sara::Image<sara::Rgb8> _rgb8_undistorted;
+  sara::Image<float> _gray32f_undistorted;
 };
 
-struct ImageFeatureTracker
+
+struct FeatureTrackingBlock
 {
   float sift_nn_ratio = 0.6f;
   sara::ImagePyramidParams image_pyr_params = sara::ImagePyramidParams(0);
@@ -312,39 +174,63 @@ struct ImageFeatureTracker
   std::array<sara::KeypointList<sara::OERegion, float>, 2> keys;
   std::vector<sara::Match> matches;
 
-  auto detect() -> void
+  auto detect_features(const sara::ImageView<float>& frame) -> void
   {
     sara::print_stage("Computing keypoints...");
     std::swap(keys[0], keys[1]);
-    keys[1] = sara::compute_sift_keypoints(frame_undistorted, image_pyr_params);
+    keys[1] = sara::compute_sift_keypoints(frame, image_pyr_params);
   }
 
-  auto match() -> void
+  auto match_features() -> void
   {
     sara::print_stage("Matching keypoints...");
-    matches = match(keys[0], keys[1], sift_nn_ratio);
+    if (sara::features(keys[0]).empty() || sara::features(keys[1]).empty())
+      return;
+
+    matches = sara::match(keys[0], keys[1], sift_nn_ratio);
     // Put a hard limit of 1000 matches to scale.
     if (matches.size() > 1000)
       matches.resize(1000);
   }
 };
 
-struct RelativePoseEstimator
+struct RelativePoseBlock
 {
-  int ransac_iterations_max = 200;
+  int ransac_iterations_max = 500;
   double ransac_confidence = 0.999;
   double err_thres = 2.;
   const sara::RelativePoseSolver<sara::NisterFivePointAlgorithm> solver;
   sara::CheiralAndEpipolarConsistency inlier_predicate;
 
   sara::EssentialMatrix E;
+  Eigen::Matrix3d K;
+  Eigen::Matrix3d K_inv;
   sara::FundamentalMatrix F;
   sara::Tensor_<bool, 1> inliers;
   sara::Tensor_<int, 1> sample_best;
+  sara::TwoViewGeometry geometry;
 
-  auto estimate_relative_pose() -> void
+  auto configure(const sara::v2::BrownConradyDistortionModel<double>& camera)
+      -> void
+  {
+    K = camera.calibration_matrix();
+    K_inv = K.inverse();
+
+    inlier_predicate.distance.K1_inv = K_inv;
+    inlier_predicate.distance.K2_inv = K_inv;
+    inlier_predicate.err_threshold = err_thres;
+  }
+
+  auto estimate_relative_pose(
+      const std::array<sara::KeypointList<sara::OERegion, float>, 2> keys,
+      const std::vector<sara::Match>& matches) -> void
   {
     sara::print_stage("Estimating the relative pose...");
+    if (matches.empty())
+      return;
+
+    const auto& f0 = sara::features(keys[0]);
+    const auto& f1 = sara::features(keys[1]);
     const auto u =
         std::array{sara::homogeneous(sara::extract_centers(f0)).cast<double>(),
                    sara::homogeneous(sara::extract_centers(f1)).cast<double>()};
@@ -364,11 +250,14 @@ struct RelativePoseEstimator
   }
 };
 
-struct Triangulator
+#if 0
+struct TriangulationBlock
 {
   sara::TwoViewGeometry geometry;
+  sara::Tensor_<double, 2> colors;
 
-  auto triangulate() -> void
+  auto triangulate(const Eigen::Matrix3f K_inv,
+                   const sara::PointCorrespondenceList<double>& X) -> void
   {
     // Retrieve all the 3D points by triangulation.
     sara::print_stage("Retriangulating the inliers...");
@@ -415,92 +304,311 @@ struct Triangulator
     sara::print_stage("Extracting the colors...");
     geometry.C1.K = K;
     geometry.C2.K = K;
-    auto colors = sara::extract_colors(frames_rgb_undist[0],
-                                       frames_rgb_undist[1],  //
-                                       geometry);
+    colors = sara::extract_colors(frames_rgb_undist[0],
+                                  frames_rgb_undist[1],  //
+                                  geometry);
   }
+};
+#endif
+
+
+struct Pipeline
+{
+  Pipeline() = default;
+
+  auto set_config(const fs::path& video_path,
+                  const sara::v2::BrownConradyDistortionModel<double> camera)
+      -> void
+  {
+    _video_streamer.open(video_path);
+    _camera = camera;
+
+    _image_corrector = ImageCorrectionBlock{_camera, _video_streamer.sizes()};
+
+    _relative_pose_estimator.configure(_camera);
+  }
+
+  auto read() -> bool
+  {
+    return _video_streamer.read();
+  }
+
+  auto process() -> void
+  {
+    _image_corrector.undistort(_video_streamer.frame_rgb8());
+    _image_corrector.undistort(_video_streamer.frame_gray32f());
+
+    if (_video_streamer.skip())
+      return;
+
+    // N.B.: detect the features on the **undistorted** image.
+    _feature_tracker.detect_features(_image_corrector.frame_gray32f());
+    _feature_tracker.match_features();
+
+    _relative_pose_estimator.estimate_relative_pose(_feature_tracker.keys,
+                                                    _feature_tracker.matches);
+  }
+
+  auto make_display_frame() const -> sara::Image<sara::Rgb8>
+  {
+    sara::print_stage("Draw...");
+
+    sara::Image<sara::Rgb8> display = _image_corrector.frame_rgb8();
+    const auto& matches = _feature_tracker.matches;
+    const auto& inliers = _relative_pose_estimator.inliers;
+    for (auto m = 0u; m < matches.size(); ++m)
+    {
+      if (!inliers(m))
+        continue;
+      const auto& match = matches[m];
+      sara::draw(display, match.x(), sara::Blue8);
+      sara::draw(display, match.y(), sara::Cyan8);
+      sara::draw_arrow(display, match.x_pos(), match.y_pos(), sara::Yellow8);
+    }
+
+    return display;
+  }
+
+  VideoStreamBlock _video_streamer;
+  sara::v2::BrownConradyDistortionModel<double> _camera;
+
+  ImageCorrectionBlock _image_corrector;
+  FeatureTrackingBlock _feature_tracker;
+  RelativePoseBlock _relative_pose_estimator;
 };
 
 
-#if 0
-auto sara_graphics_main(int, char**) -> int
+class SingleWindowApp
 {
-  auto frame_rgb8 = video_stream.frame();
-  auto frame_gray32f = sara::Image<float>{video_stream.sizes()};
-
-  auto frames_rgb_undist = std::array<sara::Image<sara::Rgb8>, 2>{};
-  auto frames_work = std::array<sara::Image<float>, 2>{};
-  auto& frame_undistorted = frames_work[1];
-
-  auto inlier_predicate = sara::CheiralAndEpipolarConsistency{};
+public:
+  SingleWindowApp(const Eigen::Vector2i& sizes, const std::string& title)
+    : _window_sizes{sizes}
   {
-    inlier_predicate.distance.K1_inv = K_inv;
-    inlier_predicate.distance.K2_inv = K_inv;
-    inlier_predicate.err_threshold = err_thres;
+    // Init GLFW.
+    init_glfw();
+
+    // Create a window.
+    _window = glfwCreateWindow(sizes.x(), sizes.y(),  //
+                               title.c_str(),         //
+                               nullptr, nullptr);
+
+    // Initialize the video viewport
+    _video_viewport.top_left << sizes.x() / 2, 0;
+    _video_viewport.sizes << sizes.x() / 2, sizes.y();
+
+    // Prepare OpenGL first before any OpenGL calls.
+    init_opengl();
+
+    // The magic function.
+    glfwSetWindowUserPointer(_window, this);
+    // Register callbacks.
+    glfwSetWindowSizeCallback(_window, window_size_callback);
   }
 
+  //! @brief Note: RAII does not work on OpenGL applications.
+  //!
+  //! So the destructor gets a default implementation and we neeed to explicitly
+  //! call the terminate method.
+  ~SingleWindowApp() = default;
 
-  sara::create_window(video_stream.sizes());
-  sara::set_antialiasing();
-
-  auto frame_index = -1;
-  while (video_stream.read())
+  auto set_config(const fs::path& video_path,
+                  const sara::v2::BrownConradyDistortionModel<double>& camera)
+      -> void
   {
-    ++frame_index;
-    if (frame_index % 5 != 0)
-      continue;
-    SARA_CHECK(frame_index);
+    _pipeline.set_config(video_path, camera);
+    init_gl_resources();
+  }
 
-    frames_rgb_undist[0].swap(frames_rgb_undist[1]);
-    frames_work[0].swap(frames_work[1]);
+  auto run() -> void
+  {
+    // Current model-view matrix.
+    auto model_view = Eigen::Transform<float, 3, Eigen::Projective>{};
+    model_view.setIdentity();
 
-    if (frame_undistorted.sizes() != frame_rgb8.sizes())
-      frame_undistorted.resize(frame_rgb8.sizes());
-    if (frames_rgb_undist[1].sizes() != frame_rgb8.sizes())
-      frames_rgb_undist[1].resize(frame_rgb8.sizes());
-    sara::from_rgb8_to_gray32f(frame_rgb8, frame_gray32f);
-    warp(umap, vmap, frame_rgb8, frames_rgb_undist[1]);
-    warp(umap, vmap, frame_gray32f, frame_undistorted);
-    auto display = frames_rgb_undist[1];
+    // Current projection matrix
+    _projection = _video_viewport.orthographic_projection();
 
-    const auto& f0 = sara::features(keys[0]);
-    const auto& f1 = sara::features(keys[1]);
-    const auto do_relative_pose_estimation = !f0.empty() && !f1.empty();
+    // Background color.
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    if (do_relative_pose_estimation)
+    // Display image.
+    glfwSwapInterval(1);
+    while (!glfwWindowShouldClose(_window))
     {
-      sara::print_stage("Saving to HDF5");
-      {
-#  if defined(__APPLE__)
-        const auto geometry_h5_filepath = "/Users/david/Desktop/geometry" +
-#  else
-        const auto geometry_h5_filepath = "/home/david/Desktop/geometry" +
-#  endif
-                                          std::to_string(frame_index) + ".h5"s;
-        auto geometry_h5_file =
-            sara::H5File{geometry_h5_filepath, H5F_ACC_TRUNC};
-        sara::save_to_hdf5(geometry_h5_file, geometry, colors);
-      }
+      if (!_pipeline.read())
+        break;
 
-      F.matrix() = K_inv.transpose() * E.matrix() * K_inv;
+      _pipeline.process();
 
-      sara::print_stage("Draw...");
-      for (auto m = 0u; m < matches.size(); ++m)
-      {
-        if (!inliers(m))
-          continue;
-        const auto& match = matches[m];
-        sara::draw(display, match.x(), sara::Blue8);
-        sara::draw(display, match.y(), sara::Cyan8);
-        sara::draw_arrow(display, match.x_pos(), match.y_pos(), sara::Yellow8);
-      }
+      // Clear the color buffer and the buffer testing.
+      glClear(GL_COLOR_BUFFER_BIT);
 
-      sara::display(display);
-      // if (sara::get_key() == sara::KEY_ESCAPE)
-      //   break;
+      // Render on the right half of the window surface.
+      glViewport(_window_sizes.x() / 2, 0,  //
+                 _window_sizes.x() / 2, _window_sizes.y());
+      // Transfer the CPU image frame data to the OpenGL texture.
+      // _texture.reset(_pipeline._video_stream.frame_rgb8());
+      _texture.reset(_pipeline.make_display_frame());
+      // Render the texture on the quad.
+      _texture_renderer.render(_texture, _quad, model_view.matrix(),
+                               _projection);
+
+      glfwSwapBuffers(_window);
+      glfwPollEvents();
     }
   }
 
+  auto terminate() -> void
+  {
+    // Destroy GL objects.
+    deinit_gl_resources();
+
+    // Destroy GLFW.
+    if (_window != nullptr)
+      glfwDestroyWindow(_window);
+    glfwTerminate();
+  }
+
+private:
+  auto init_opengl() -> void
+  {
+    glfwMakeContextCurrent(_window);
+    init_glew();
+  }
+
+  auto init_gl_resources() -> void
+  {
+    _texture.initialize(_pipeline._video_streamer.frame_rgb8(), 0);
+
+    const auto& w = _pipeline._video_streamer.width();
+    const auto& h = _pipeline._video_streamer.height();
+    const auto aspect_ratio = static_cast<float>(w) / h;
+    auto vertices = _quad.host_vertices().matrix();
+    vertices.col(0) *= aspect_ratio;
+    _quad.initialize();
+
+    _texture_renderer.initialize();
+  }
+
+  auto deinit_gl_resources() -> void
+  {
+    _texture.destroy();
+    _quad.destroy();
+    _texture_renderer.destroy();
+  }
+
+private:
+  static auto get_self(GLFWwindow* const window) -> SingleWindowApp&
+  {
+    const auto app_void_ptr = glfwGetWindowUserPointer(window);
+    if (app_void_ptr == nullptr)
+      throw std::runtime_error{
+          "Please call glfwSetWindowUserPointer to register this window!"};
+    const auto app_ptr = reinterpret_cast<SingleWindowApp*>(app_void_ptr);
+    return *app_ptr;
+  }
+
+  static auto window_size_callback(GLFWwindow* window, const int width,
+                                   const int height) -> void
+  {
+    auto& self = get_self(window);
+    self._window_sizes << width, height;
+
+    // Reset the viewport sizes
+    self._video_viewport.sizes << width / 2, height;
+    // Update the current projection matrix.
+    auto scale = 0.5f;
+    if (self._video_viewport.width() < self._pipeline._video_streamer.width())
+      scale *= static_cast<float>(self._pipeline._video_streamer.width()) /
+               self._video_viewport.width();
+    self._projection = self._video_viewport.orthographic_projection(scale);
+  }
+
+private:
+  static auto init_glfw() -> void
+  {
+    // Initialize the windows manager.
+    if (!glfwInit())
+      throw std::runtime_error{"Error: failed to initialize GLFW!"};
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+  }
+
+  static auto init_glew() -> void
+  {
+#ifndef __APPLE__
+    // Initialize GLEW.
+    const auto err = glewInit();
+    if (err != GLEW_OK)
+    {
+      const auto err_str =
+          reinterpret_cast<const char*>(glewGetErrorString(err));
+      throw std::runtime_error{fmt::format(
+          "Error: failed to initialize GLEW: {}", std::string_view{err_str})};
+    }
+#endif
+  }
+
+private:
+  GLFWwindow* _window = nullptr;
+  Eigen::Vector2i _window_sizes = -Eigen::Vector2i::Ones();
+
+  Pipeline _pipeline;
+
+  // The viewport
+  k::Viewport _video_viewport;
+  // What: our image texture.
+  kgl::TexturedImage2D _texture;
+  // Where: where to show our image texture.
+  kgl::TexturedQuad _quad;
+  // Texture renderer.
+  kgl::TextureRenderer _texture_renderer;
+  // Model-view-projection matrices.
+  Eigen::Matrix4f _projection;
+};
+
+
+auto main(int const argc, char** const argv) -> int
+{
+#if defined(_OPENMP)
+  const auto num_threads = omp_get_max_threads();
+  omp_set_num_threads(num_threads);
+  Eigen::setNbThreads(num_threads);
+#endif
+
+  if (argc < 2)
+  {
+    std::cout << fmt::format("Usage: {} VIDEO_PATH\n",
+                             std::string_view{argv[0]});
+    return 1;
+  }
+
+  const auto video_path = fs::path{argv[1]};
+  auto camera = sara::v2::BrownConradyDistortionModel<double>{};
+  {
+    camera.fx() = 917.2878392016245;
+    camera.fy() = 917.2878392016245;
+    camera.shear() = 0.;
+    camera.u0() = 960.;
+    camera.v0() = 540.;
+    // clang-format off
+    camera.k() <<
+      -0.2338367557617234,
+      0.05952465745165465,
+      -0.007947847982157091;
+    // clang-format on
+    camera.p() << -0.0003137658969742134, 0.00021943576376532096;
+  }
+
+  auto app = SingleWindowApp{{800, 600}, "Odometry: " + video_path.string()};
+  app.set_config(video_path, camera);
+  app.run();
+  app.terminate();
+
   return 0;
 }
-#endif
