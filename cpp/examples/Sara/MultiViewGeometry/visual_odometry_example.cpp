@@ -438,10 +438,6 @@ public:
 
   auto run() -> void
   {
-    // Current model-view matrix.
-    auto model_view = Eigen::Transform<float, 3, Eigen::Projective>{};
-    model_view.setIdentity();
-
     // Current projection matrix
     _projection = _video_viewport.orthographic_projection();
 
@@ -460,15 +456,7 @@ public:
       // Clear the color buffer and the buffer testing.
       glClear(GL_COLOR_BUFFER_BIT);
 
-      // Render on the right half of the window surface.
-      glViewport(_window_sizes.x() / 2, 0,  //
-                 _window_sizes.x() / 2, _window_sizes.y());
-      // Transfer the CPU image frame data to the OpenGL texture.
-      // _texture.reset(_pipeline._video_stream.frame_rgb8());
-      _texture.reset(_pipeline.make_display_frame());
-      // Render the texture on the quad.
-      _texture_renderer.render(_texture, _quad, model_view.matrix(),
-                               _projection);
+      render_video();
 
       glfwSwapBuffers(_window);
       glfwPollEvents();
@@ -522,6 +510,20 @@ private:
     _point_cloud_renderer.destroy();
   }
 
+  auto render_video() -> void
+  {
+    // Render on the right half of the window surface.
+    glViewport(_video_viewport.top_left.x(), _video_viewport.top_left.y(),  //
+               _video_viewport.sizes.x(), _video_viewport.sizes.y());
+    // Transfer the CPU image frame data to the OpenGL texture.
+    // _texture.reset(_pipeline._video_stream.frame_rgb8());
+    _texture.reset(_pipeline.make_display_frame());
+    // Render the texture on the quad.
+    auto model_view = Eigen::Transform<float, 3, Eigen::Projective>{};
+    model_view.setIdentity();
+    _texture_renderer.render(_texture, _quad, model_view.matrix(), _projection);
+  }
+
   auto render_point_cloud() -> void
   {
     glViewport(
@@ -572,6 +574,7 @@ private:
     self._window_sizes << width, height;
 
     // Reset the viewport sizes
+    self._video_viewport.top_left << width / 2, 0;
     self._video_viewport.sizes << width / 2, height;
     // Update the current projection matrix.
     auto scale = 0.5f;
