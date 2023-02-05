@@ -111,7 +111,7 @@ public:
 
   auto skip() const -> bool
   {
-    return _frame_index % (_frame_skip + 1) == 0;
+    return _frame_index % (_frame_skip + 1) != 0;
   }
 
 private:
@@ -335,11 +335,11 @@ struct Pipeline
 
   auto process() -> void
   {
-    _image_corrector.undistort(_video_streamer.frame_rgb8());
-    _image_corrector.undistort(_video_streamer.frame_gray32f());
-
     if (_video_streamer.skip())
       return;
+
+    _image_corrector.undistort(_video_streamer.frame_rgb8());
+    _image_corrector.undistort(_video_streamer.frame_gray32f());
 
     // N.B.: detect the features on the **undistorted** image.
     _feature_tracker.detect_features(_image_corrector.frame_gray32f());
