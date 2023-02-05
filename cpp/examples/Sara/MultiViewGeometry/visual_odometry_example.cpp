@@ -259,6 +259,7 @@ struct TriangulationBlock
 {
   sara::TwoViewGeometry geometry;
   sara::Tensor_<double, 2> colors;
+  sara::Tensor_<double, 2> _colored_point_cloud;
 
   auto triangulate(const sara::PinholeCameraDecomposition& C1,
                    const sara::PinholeCameraDecomposition& C2,
@@ -508,6 +509,13 @@ private:
 
     _point_cloud.destroy();
     _point_cloud_renderer.destroy();
+  }
+
+  auto upload_point_cloud_data_to_opengl(
+      const sara::TensorView_<float, 2>& point_cloud) -> void
+  {
+    _point_cloud.upload_host_data_to_gl(
+        _pipeline._triangulator._colored_point_cloud);
   }
 
   auto render_video() -> void
