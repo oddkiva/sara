@@ -30,8 +30,11 @@ auto ColoredPointCloudRenderer::initialize() -> void
 
     void main()
     {
-      gl_Position = projection * view * transform * vec4(in_coords, 1.0);
-      gl_PointSize = clamp(10.0 * point_size / (0.1 * in_coords.z), 3., 10.);
+      vec4  cam_coords = view * transform * vec4(in_coords, 1.0);
+      gl_Position = projection * cam_coords;
+      float z2 = cam_coords.z * cam_coords.z;
+      float sigma2 = pow(150., 2.);  // sigma = 150 meters
+      gl_PointSize = clamp(5. * point_size * exp(-z2 / sigma2), 2., 15.);
       out_color = in_color;
     }
   )shader";

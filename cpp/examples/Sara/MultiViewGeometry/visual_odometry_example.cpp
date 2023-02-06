@@ -298,9 +298,11 @@ struct TriangulationBlock
         // Also we want z in [0, 200] meters max...
         // We want to avoid 3D point corresponding to the sky...
         Eigen::Vector4d Xjh = Xj.hnormalized().homogeneous();
+#if 0
         const auto reasonable = 0 < Xjh.z() && Xjh.z() < 200;
         if (!reasonable)
           continue;
+#endif
 
         points.col(j) = Xjh;
         s1(j) = s1j;
@@ -587,10 +589,10 @@ private:
 
     // Recalculate the projection matrix for the point cloud.
     const auto aspect_ratio = _point_cloud_viewport.aspect_ratio();
-    const Eigen::Matrix4f projection = k::perspective(60.f,          //
+    const Eigen::Matrix4f projection = k::perspective(80.f,          //
                                                       aspect_ratio,  //
                                                       .5f,           //
-                                                      200.f);
+                                                      500.f);
 
     // Update the model view matrix.
     const Eigen::Matrix4f model_view = Eigen::Matrix4f::Identity();
