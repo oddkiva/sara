@@ -28,15 +28,18 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include <thread>
-
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
+#define PROFILE_VIDEOSTREAM
 #ifdef PROFILE_VIDEOSTREAM
 #  include <DO/Sara/Core/Timer.hpp>
 #endif
 
+#include <DO/Sara/ImageProcessing/Rotate.hpp>
 #include <DO/Sara/VideoIO/VideoStream.hpp>
+
+#include <optional>
+#include <thread>
 
 
 namespace DO::Sara {
@@ -98,6 +101,7 @@ namespace DO::Sara {
   }
 #endif
 
+
   VideoStream::VideoStream()
   {
     if (!_registered_all_codecs)
@@ -137,8 +141,8 @@ namespace DO::Sara {
     _video_stream_index = av_find_best_stream(
         _video_format_context, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
 
-    _video_codec_params =
-        _video_format_context->streams[_video_stream_index]->codecpar;
+    auto& video_stream = _video_format_context->streams[_video_stream_index];
+    _video_codec_params = video_stream->codecpar;
 
     _video_codec = avcodec_find_decoder(_video_codec_params->codec_id);
     if (_video_codec == nullptr)
@@ -216,7 +220,11 @@ namespace DO::Sara {
     if (_pkt == nullptr)
       throw std::runtime_error("Could not allocate video packet!");
 
-    SARA_DEBUG << "#[VideoStream] sizes = " << sizes().transpose() << std::endl;
+    const auto sizes_original = Eigen::Vector2i{
+        _video_codec_context->width,  //
+        _video_codec_context->height  //
+    };
+    SARA_DEBUG << "#[VideoStream] sizes = " << sizes_original.transpose() << std::endl;
     SARA_DEBUG << "#[VideoStream] pixel format = "
                << av_get_pix_fmt_name(_video_codec_context->pix_fmt)
                << std::endl;
@@ -228,14 +236,15 @@ namespace DO::Sara {
         << std::endl;
 
     // Get video format converter to RGB24.
-    _sws_context = sws_getContext(width(), height(),
+    _sws_context =
+        sws_getContext(sizes_original.x(), sizes_original.y(),
 #ifdef HWACCEL
-                                  AV_PIX_FMT_NV12,
+                       AV_PIX_FMT_NV12,
 #else
-                                  _video_codec_context->pix_fmt,
+                       _video_codec_context->pix_fmt,
 #endif
-                                  width(), height(), AV_PIX_FMT_RGB24,
-                                  SWS_POINT, nullptr, nullptr, nullptr);
+                       sizes_original.x(), sizes_original.y(), AV_PIX_FMT_RGB24,
+                       SWS_POINT, nullptr, nullptr, nullptr);
     if (_sws_context == nullptr)
       throw std::runtime_error{"Could not allocate SWS context!"};
 
@@ -247,14 +256,26 @@ namespace DO::Sara {
 
     // TODO: make it RGBA 32 bit to optimize for SSE/AVX2?
     constexpr auto alignment_size = 1;
-    const auto byte_size =
-        av_image_alloc(_picture_rgb->data, _picture_rgb->linesize, width(),
-                       height(), AV_PIX_FMT_RGB24, alignment_size);
-    if (byte_size != width() * height() * 3)
+    const auto byte_size = av_image_alloc(
+        _picture_rgb->data, _picture_rgb->linesize, sizes_original.x(),
+        sizes_original.y(), AV_PIX_FMT_RGB24, alignment_size);
+    if (byte_size != sizes_original.x() * sizes_original.y() * 3)
       throw std::runtime_error{
           "Allocated memory size for the converted video frame is wrong!"};
 
     _end_of_stream = false;
+
+
+    // Initialize the image unrotater.
+    const auto rotate_tag = av_dict_get(video_stream->metadata, "rotate",  //
+                                        nullptr, 0);
+    const auto rotation_angle =
+        rotate_tag == nullptr ? 0 : std::stoi(rotate_tag->value);
+    const auto frame_original = ImageView<Rgb8>{
+        reinterpret_cast<Rgb8*>(_picture_rgb->data[0]),
+        sizes_original  //
+    };
+    _frame_rotater = FrameRotater{frame_original, rotation_angle};
   }
 
   auto VideoStream::close() -> void
@@ -319,10 +340,15 @@ namespace DO::Sara {
 
           // Convert to RGB24 pixel format.
           sws_scale(_sws_context, _picture->data, _picture->linesize, 0,
-                    height(), _picture_rgb->data, _picture_rgb->linesize);
+                    _frame_rotater._src.height(), _picture_rgb->data,
+                    _picture_rgb->linesize);
 
           // av_frame_unref(_picture);
           VIDEO_STREAM_TOC("To RGB24")
+
+          VIDEO_STREAM_TIC
+          _frame_rotater.update();
+          VIDEO_STREAM_TOC("Unrotate");
 
           return true;
         }
@@ -335,7 +361,9 @@ namespace DO::Sara {
 
   auto VideoStream::frame() const -> ImageView<Rgb8>
   {
-    return {reinterpret_cast<Rgb8*>(_picture_rgb->data[0]), sizes()};
+    const auto& frame = _frame_rotater._dst;
+    const auto frame_ptr = const_cast<Rgb8*>(frame.data());
+    return {frame_ptr, frame.sizes()};
   }
 
   auto VideoStream::seek(std::size_t frame_pos) -> void
@@ -393,12 +421,44 @@ namespace DO::Sara {
 
   auto VideoStream::width() const -> int
   {
-    return _video_codec_context->width;
+    return _frame_rotater._dst.width();
   }
 
   auto VideoStream::height() const -> int
   {
-    return _video_codec_context->height;
+    return _frame_rotater._dst.height();
+  }
+
+
+  VideoStream::FrameRotater::FrameRotater(const ImageView<Rgb8>& src,
+                                          const int rotation_angle)
+    : _rotation_angle{rotation_angle}
+  {
+    _src.swap(ImageView<Rgb8>{const_cast<Rgb8*>(src.data()), src.sizes()});
+    if (_rotation_angle == 0)
+      _dst.swap(ImageView<Rgb8>{
+          const_cast<Rgb8*>(_src.data()),  //
+          _src.sizes()                     //
+      });
+    else if (_rotation_angle == 90)
+    {
+      _src_rotated.resize(_src.sizes().reverse());
+      _dst.swap(ImageView<Rgb8>{_src_rotated.data(), _src_rotated.sizes()});
+    }
+    else
+      throw std::runtime_error{"Unsupported rotation angle!"};
+    SARA_CHECK(_src.sizes().transpose());
+    SARA_CHECK(_src_rotated.sizes().transpose());
+    SARA_CHECK(_dst.sizes().transpose());
+  }
+
+  auto VideoStream::FrameRotater::update() -> void
+  {
+    SARA_CHECK("UPDATE");
+    if (_rotation_angle == 90)
+      rotate_cw_90(_src, _dst);
+    else if (_rotation_angle != 0)
+      throw std::runtime_error{"Unsupported rotation angle!"};
   }
 
 }  // namespace DO::Sara

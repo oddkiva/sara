@@ -32,6 +32,33 @@ namespace DO { namespace Sara {
 
   class DO_SARA_EXPORT VideoStream
   {
+    struct FrameRotater
+    {
+    public:
+      FrameRotater() = default;
+
+      FrameRotater(const ImageView<Rgb8>& src, const int rotation_angle);
+
+      auto operator=(FrameRotater&& other) -> FrameRotater&
+      {
+        _src.swap(other._src);
+        _rotation_angle = other._rotation_angle;
+        _src_rotated.swap(other._src_rotated);
+        _dst.swap(other._dst);
+        return *this;
+      }
+
+      auto update() -> void;
+
+      // Input data.
+      ImageView<Rgb8> _src;
+      int _rotation_angle;
+
+      // Additional buffer for non-zero rotation angles.
+      Image<Rgb8> _src_rotated;
+      ImageView<Rgb8> _dst;
+    };
+
   public:
     VideoStream();
 
@@ -62,6 +89,11 @@ namespace DO { namespace Sara {
       return Vector2i{width(), height()};
     }
 
+    auto rotation_angle() const -> int
+    {
+      return _frame_rotater._rotation_angle;
+    }
+
     friend inline auto operator>>(VideoStream& video_stream,
                                   ImageView<Rgb8>& video_frame) -> VideoStream&
     {
@@ -81,8 +113,6 @@ namespace DO { namespace Sara {
     // Hardware acceleration type.
     static int _hw_device_type;
 
-    std::vector<std::uint8_t> _buffer;
-
     // FFmpeg internals.
     int _video_stream_index = -1;
     const AVCodecParameters* _video_codec_params = nullptr;
@@ -93,12 +123,14 @@ namespace DO { namespace Sara {
     AVFrame* _picture = nullptr;
     AVPacket* _pkt = nullptr;
 
-    SwsContext *_sws_context = nullptr;
+    SwsContext* _sws_context = nullptr;
     AVFrame* _picture_rgb = nullptr;
 
     bool _end_of_stream{true};
     int _got_frame{};
     int _i{};
+
+    FrameRotater _frame_rotater;
   };
 
   //! @}

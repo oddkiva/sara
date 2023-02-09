@@ -637,11 +637,10 @@ private:
 
     // Point cloud projection matrix.
     const auto aspect_ratio = self._point_cloud_viewport.aspect_ratio();
-    const Eigen::Matrix4f projection = self._point_cloud_projection =
-        k::perspective(60.f,          //
-                       aspect_ratio,  //
-                       .5f,           //
-                       200.f);
+    self._point_cloud_projection = k::perspective(60.f,          //
+                                                  aspect_ratio,  //
+                                                  .5f,           //
+                                                  200.f);
   }
 
 private:
