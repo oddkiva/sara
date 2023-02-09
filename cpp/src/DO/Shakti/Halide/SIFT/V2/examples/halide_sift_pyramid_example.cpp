@@ -23,8 +23,6 @@
 #include <DO/Shakti/Halide/SIFT/Draw.hpp>
 #include <DO/Shakti/Halide/SIFT/V2/Pipeline.hpp>
 
-#include <algorithm>
-
 #ifdef _OPENMP
 #  include <omp.h>
 #endif
@@ -32,17 +30,19 @@
 #include <boost/program_options.hpp>
 
 
+namespace fs = std::filesystem;
 namespace po = boost::program_options;
 
 using namespace std::string_literals;
-
 
 
 int __main(int argc, char** argv)
 {
   // Optimization.
 #ifdef _OPENMP
-  omp_set_num_threads(omp_get_max_threads());
+  const auto num_threads = omp_get_max_threads();
+  omp_set_num_threads(num_threads);
+  Eigen::setNbThreads(num_threads);
 #endif
   std::ios_base::sync_with_stdio(false);
 
@@ -101,10 +101,6 @@ int __main(int argc, char** argv)
   }
 
 
-  // ===========================================================================
-  // SARA PIPELINE
-  //
-  // Input and output from Sara.
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
   // Initialize CUDA driver.
   DriverApi::init();
@@ -115,15 +111,15 @@ int __main(int argc, char** argv)
   cuda_context.make_current();
 
   // nVidia's hardware accelerated video decoder.
-  auto video_stream = easy::VideoStream{video_filepath, cuda_context};
+  auto video_stream = easy::VideoStream{fs::path{video_filepath}, cuda_context};
 #else
-  auto video_stream = easy::VideoStream{video_filepath};
+  auto video_stream = easy::VideoStream{fs::path{video_filepath}};
 #endif
   auto grayscale_converter =
       easy::ToGrayscaleColorConverter{video_stream.sizes()};
 
   // ===========================================================================
-  // HALIDE PIPELINE.
+  // SIFT.
   auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
   sift_pipeline.profile = profile;
   sift_pipeline.initialize(start_octave_index, num_scales_per_octave,
@@ -201,7 +197,7 @@ int __main(int argc, char** argv)
       if (!fprev.empty())
       {
         static constexpr auto num_samples = 200;
-        static constexpr auto f_err_thres = 4.;
+        static constexpr auto f_err_thres = 1.;
         std::tie(F, inliers, sample_best) = sara::estimate_fundamental_matrix(
             matches, keys_prev, keys_curr, num_samples, f_err_thres);
       }
@@ -217,7 +213,7 @@ int __main(int argc, char** argv)
           return {color.channel<R>(), color.channel<G>(), color.channel<B>()};
         });
 #else
-    auto& frame_rgb = frame;
+    sara::Image<sara::Rgb8> frame_rgb = video_stream.host_frame();
 #endif
 
     if (!match_keypoints)

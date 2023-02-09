@@ -13,7 +13,7 @@
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
-#include <DO/Sara/RANSAC/RANSAC.hpp>
+#include <DO/Sara/RANSAC/RANSACv2.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
 #include <DO/Sara/Visualization.hpp>
 
@@ -47,15 +47,14 @@ namespace DO::Sara {
     auto inlier_predicate = InlierPredicate<SampsonEpipolarDistance>{};
     inlier_predicate.err_threshold = err_thres;
 
-    const auto [F, inliers, sample_best] =
-        ransac(Xij, FSolver{}, inlier_predicate, num_samples, data_normalizer);
-
-#ifdef DEBUG
-    SARA_CHECK(F);
-    SARA_CHECK(inliers.row_vector());
-    SARA_CHECK(inliers.row_vector());
-    SARA_CHECK(Mij.size());
-#endif
+    static constexpr auto confidence = 0.99;
+    const auto [F, inliers, sample_best] = v2::ransac(  //
+        Xij,                                            //
+        FSolver{},                                      //
+        inlier_predicate,                               //
+        num_samples, confidence,                        //
+        data_normalizer,                                //
+        true);
 
     return std::make_tuple(F, inliers, sample_best);
   }
