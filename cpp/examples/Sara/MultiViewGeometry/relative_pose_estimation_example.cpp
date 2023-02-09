@@ -241,7 +241,7 @@ int sara_graphics_main(int argc, char** argv)
 
   for (const auto& [index, depth] : depths)
   {
-    const Eigen::Vector2d ui = u1.col(index) * 0.25;
+    const Eigen::Vector2i ui = (u1.col(index) * 0.25).array().round().matrix();
 
     auto color = Rgb8{};
     color << 0, 0, int(linear(depth) * 255);
