@@ -64,11 +64,12 @@ namespace DO { namespace Sara {
 
     VideoStream(const VideoStream&) = delete;
 
-    VideoStream(const std::string& file_path);
+    VideoStream(const std::string& file_path, const bool autorotate = true);
 
     ~VideoStream();
 
-    auto open(const std::string& file_path) -> void;
+    auto open(const std::string& file_path, const bool autorotate = true)
+        -> void;
 
     auto close() -> void;
 

@@ -10,13 +10,13 @@
 // ========================================================================== //
 
 // #define PROFILE_VIDEOSTREAM
-#ifdef __APPLE__
+#if defined(__APPLE__)
 // #define HWACCEL
 #endif
 
 // Deactivate hardware acceleration for now. The CPU multi-threaded decoding is
 // quite good in the meantime.
-#ifdef HWACCEL
+#if defined(HWACCEL)
 #  undef HWACCEL
 #endif
 
@@ -30,8 +30,7 @@ extern "C" {
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
-#define PROFILE_VIDEOSTREAM
-#ifdef PROFILE_VIDEOSTREAM
+#if defined(PROFILE_VIDEOSTREAM)
 #  include <DO/Sara/Core/Timer.hpp>
 #endif
 
@@ -44,7 +43,7 @@ extern "C" {
 
 namespace DO::Sara {
 
-#ifdef PROFILE_VIDEOSTREAM
+#if defined(PROFILE_VIDEOSTREAM)
   static Timer video_stream_profiler;
 #  define VIDEO_STREAM_TIC video_stream_profiler.restart();
 #  define VIDEO_STREAM_TOC(what)                                               \
@@ -60,8 +59,8 @@ namespace DO::Sara {
 #endif
 
   bool VideoStream::_registered_all_codecs = false;
-#ifdef HWACCEL
-#  ifdef __APPLE__
+#if defined(HWACCEL)
+#  if defined(__APPLE__)
   int VideoStream::_hw_device_type = AV_HWDEVICE_TYPE_VIDEOTOOLBOX;
 #  else
   int VideoStream::_hw_device_type = AV_HWDEVICE_TYPE_CUDA;
@@ -115,10 +114,10 @@ namespace DO::Sara {
     }
   }
 
-  VideoStream::VideoStream(const std::string& file_path)
+  VideoStream::VideoStream(const std::string& file_path, const bool autorotate)
     : VideoStream()
   {
-    open(file_path);
+    open(file_path, autorotate);
   }
 
   VideoStream::~VideoStream()
@@ -126,7 +125,8 @@ namespace DO::Sara {
     close();
   }
 
-  auto VideoStream::open(const std::string& file_path) -> void
+  auto VideoStream::open(const std::string& file_path, const bool autorotate)
+      -> void
   {
     // Read the video file.
     if (avformat_open_input(&_video_format_context, file_path.c_str(), nullptr,
@@ -148,7 +148,7 @@ namespace DO::Sara {
     if (_video_codec == nullptr)
       throw std::runtime_error{"Could not find video decoder!"};
 
-#ifdef HWACCEL
+#if defined(HWACCEL)
     // Initialize the audio-video codec hardware config.
     for (auto i = 0;; i++)
     {
@@ -182,7 +182,7 @@ namespace DO::Sara {
                                       _video_codec_params))
       throw std::runtime_error{"Could not copy video decoder context!"};
 
-#ifdef HWACCEL
+#if defined(HWACCEL)
     auto video_stream = _video_format_context->streams[_video_stream_index];
     if (avcodec_parameters_to_context(_video_codec_context,
                                       video_stream->codecpar) < 0)
@@ -200,7 +200,7 @@ namespace DO::Sara {
       throw std::runtime_error{"Could not open video decoder!"};
 
 
-#ifdef HWACCEL
+#if defined(HWACCEL)
     // Allocate the device picture buffer.
     if (_device_picture == nullptr)
       _device_picture = av_frame_alloc();
@@ -224,7 +224,8 @@ namespace DO::Sara {
         _video_codec_context->width,  //
         _video_codec_context->height  //
     };
-    SARA_DEBUG << "#[VideoStream] sizes = " << sizes_original.transpose() << std::endl;
+    SARA_DEBUG << "#[VideoStream] sizes = " << sizes_original.transpose()
+               << std::endl;
     SARA_DEBUG << "#[VideoStream] pixel format = "
                << av_get_pix_fmt_name(_video_codec_context->pix_fmt)
                << std::endl;
@@ -238,7 +239,7 @@ namespace DO::Sara {
     // Get video format converter to RGB24.
     _sws_context =
         sws_getContext(sizes_original.x(), sizes_original.y(),
-#ifdef HWACCEL
+#if defined(HWACCEL)
                        AV_PIX_FMT_NV12,
 #else
                        _video_codec_context->pix_fmt,
@@ -270,7 +271,7 @@ namespace DO::Sara {
     const auto rotate_tag = av_dict_get(video_stream->metadata, "rotate",  //
                                         nullptr, 0);
     const auto rotation_angle =
-        rotate_tag == nullptr ? 0 : std::stoi(rotate_tag->value);
+        rotate_tag == nullptr || !autorotate ? 0 : std::stoi(rotate_tag->value);
     const auto frame_original = ImageView<Rgb8>{
         reinterpret_cast<Rgb8*>(_picture_rgb->data[0]),
         sizes_original  //
@@ -385,7 +386,7 @@ namespace DO::Sara {
 
     // Decode the compressed video data into an uncompressed video frame.
     VIDEO_STREAM_TIC
-#ifdef HWACCEL
+#if defined(HWACCEL)
     ret = avcodec_receive_frame(_video_codec_context, _device_picture);
 #else
     ret = avcodec_receive_frame(_video_codec_context, _picture);
@@ -398,7 +399,7 @@ namespace DO::Sara {
     if (ret < 0)
       throw std::runtime_error{"Error during decoding!"};
 
-#ifdef HWACCEL
+#if defined(HWACCEL)
     // Copy the data from the device buffer to the host buffer.
     if (_device_picture->format == hw_pix_fmt)
     {
@@ -454,7 +455,6 @@ namespace DO::Sara {
 
   auto VideoStream::FrameRotater::update() -> void
   {
-    SARA_CHECK("UPDATE");
     if (_rotation_angle == 90)
       rotate_cw_90(_src, _dst);
     else if (_rotation_angle != 0)
