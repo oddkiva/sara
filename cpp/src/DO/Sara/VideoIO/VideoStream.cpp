@@ -448,9 +448,6 @@ namespace DO::Sara {
     }
     else
       throw std::runtime_error{"Unsupported rotation angle!"};
-    SARA_CHECK(_src.sizes().transpose());
-    SARA_CHECK(_src_rotated.sizes().transpose());
-    SARA_CHECK(_dst.sizes().transpose());
   }
 
   auto VideoStream::FrameRotater::update() -> void
