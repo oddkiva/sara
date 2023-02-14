@@ -23,6 +23,7 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavutil/display.h>
 #include <libavutil/hwcontext.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
@@ -100,6 +101,25 @@ namespace DO::Sara {
   }
 #endif
 
+  // Since FFmpeg 5.x, copied from "cmdutils.c".
+  static double get_rotation_degrees(const int32_t* displaymatrix)
+  {
+    double theta = 0;
+    if (displaymatrix)
+      theta = -std::round(av_display_rotation_get(displaymatrix));
+
+    theta -= 360 * std::floor(theta / 360 + 0.9 / 360);
+
+    if (std::fabs(theta - 90 * std::round(theta / 90)) > 2)
+      av_log(NULL, AV_LOG_WARNING,
+             "Odd rotation angle.\n"
+             "If you want to help, upload a sample "
+             "of this file to https://streams.videolan.org/upload/ "
+             "and contact the ffmpeg-devel mailing list. "
+             "(ffmpeg-devel@ffmpeg.org)");
+
+    return theta;
+  }
 
   VideoStream::VideoStream()
   {
@@ -267,11 +287,28 @@ namespace DO::Sara {
     _end_of_stream = false;
 
 
-    // Initialize the image unrotater.
+    // Initialize the frame rotater.
+    //
+    // This worked until FFmpeg 5.x.
     const auto rotate_tag = av_dict_get(video_stream->metadata, "rotate",  //
                                         nullptr, 0);
-    const auto rotation_angle =
-        rotate_tag == nullptr || !autorotate ? 0 : std::stoi(rotate_tag->value);
+    const auto rotation_angle_from_tag =
+        rotate_tag == nullptr ? 0 : std::stoi(rotate_tag->value);
+    // Since FFmpeg 5.x, we need to do this.
+    const auto display_mat_ptr =
+        reinterpret_cast<int32_t*>(av_stream_get_side_data(
+            video_stream, AV_PKT_DATA_DISPLAYMATRIX, nullptr));
+    const auto rotation_angle_from_display_matrix =
+        static_cast<int>(get_rotation_degrees(display_mat_ptr));
+
+    // Before FFmpeg 5.x
+    auto rotation_angle = rotation_angle_from_tag;
+    // After FFmpeg 5.x
+    if (rotation_angle == 0 && rotation_angle_from_display_matrix != 0)
+      rotation_angle = rotation_angle_from_display_matrix;
+    if (!autorotate)
+      rotation_angle = 0;
+
     const auto frame_original = ImageView<Rgb8>{
         reinterpret_cast<Rgb8*>(_picture_rgb->data[0]),
         sizes_original  //
