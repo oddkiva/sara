@@ -219,6 +219,10 @@ struct RelativePoseBlock
   sara::Tensor_<int, 1> _sample_best;
   sara::TwoViewGeometry _geometry;
 
+  RelativePoseBlock()
+  {
+  }
+
   auto configure(const sara::v2::BrownConradyDistortionModel<double>& camera)
       -> void
   {

@@ -125,7 +125,7 @@ int sara_graphics_main(int argc, char** argv)
   auto frame_gray32f_downscaled = Image<float>{downscaled_sizes};
 
   // Output save.
-  const auto basename = fs::basename(video_filepath);
+  const auto basename = fs::path{video_filepath}.stem().string();
   auto video_writer = std::unique_ptr<VideoWriter>{};
 
   if (save_video)
