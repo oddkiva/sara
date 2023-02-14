@@ -17,7 +17,7 @@ using namespace DO::Kalpana::GL;
 
 auto ColoredPointCloudRenderer::initialize() -> void
 {
-  const auto vertex_shader_source = R"shader(#version 300 es
+  const auto vertex_shader_source = R"shader(#version 330 core
     layout (location = 0) in vec3 in_coords;
     layout (location = 1) in vec3 in_color;
 
@@ -39,7 +39,7 @@ auto ColoredPointCloudRenderer::initialize() -> void
     }
   )shader";
 
-  const auto fragment_shader_source = R"shader(#version 300 es
+  const auto fragment_shader_source = R"shader(#version 330 core
     #ifdef GL_ES
     precision highp float;
     #endif
