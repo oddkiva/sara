@@ -70,7 +70,7 @@ int sara_graphics_main(int argc, char** argv)
   // Load images.
   print_stage("Loading images...");
   const auto data_dir = argc < 2
-                            ? "/Users/david/Desktop/Datasets/sfm/castle_int"s
+                            ? "/Users/oddkiva/Desktop/datasets/sfm/castle_int"s
                             : std::string{argv[1]};
   const auto image_id1 = std::string{argv[2]};
   const auto image_id2 = std::string{argv[3]};
@@ -126,7 +126,7 @@ int sara_graphics_main(int argc, char** argv)
   const auto u = std::array{homogeneous(extract_centers(f0)).cast<double>(),
                             homogeneous(extract_centers(f1)).cast<double>()};
 // #define USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
-#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+#if defined(USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS)
   // Tensors of camera coordinates.
   auto un = std::array{apply_transform(K_inv[0], u[0]),
                        apply_transform(K_inv[1], u[1])};
@@ -138,13 +138,13 @@ int sara_graphics_main(int argc, char** argv)
   // pair of point indices (i, j).
   const auto M = to_tensor(matches);
 
-#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+#if defined(USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS)
   const auto X = PointCorrespondenceList{M, un[0], un[1]};
 #else
   const auto X = PointCorrespondenceList{M, u[0], u[1]};
 #endif
 
-#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+#if defined(USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS)
   auto data_normalizer = std::nullopt;
 #else
   auto data_normalizer = std::make_optional(
@@ -163,7 +163,7 @@ int sara_graphics_main(int argc, char** argv)
 
     // N.B.: in my experience, the Sampson distance works less well than the
     // normal epipolar distance for the estimation of the essential matrix.
-#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+#if defined(USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS)
     // To apply the Sampson distance or the symmetric line-point distance error:
     // - don't normalize the backprojected rays to unit norm.
     // - instead divide the vector by its z-components.
@@ -232,8 +232,8 @@ int sara_graphics_main(int argc, char** argv)
                                views.images[1],  //
                                two_view_geometry);
 
-#ifdef __APPLE__
-  const auto geometry_h5_filepath = "/Users/david/Desktop/geometry.h5"s;
+#if defined(__APPLE__)
+  const auto geometry_h5_filepath = "/Users/oddkiva/Desktop/geometry.h5"s;
 #else
   const auto geometry_h5_filepath = "/home/david/Desktop/geometry.h5"s;
 #endif

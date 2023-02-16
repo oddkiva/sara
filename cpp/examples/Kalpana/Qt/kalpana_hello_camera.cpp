@@ -853,9 +853,7 @@ public:
     m_checkerboard = new CheckerBoardObject{20, 20, 10, context()};
     m_pointCloud = new PointCloudObject{
         make_point_cloud(m_h5_file.toStdString()), context()};
-#if 0
     m_imagePlane = new ImagePlane{context()};
-#endif
 
     if (m_imagePlane != nullptr)
     {
@@ -895,10 +893,7 @@ public:
     // Checkerboard.
     m_transform.setToIdentity();
 
-    // m_transform.rotate(std::pow(1.5, 5) * m_timer.elapsed_ms() / 500,
-    //                    QVector3D{0.5f, 1.0f, 0.0f}.normalized());
-
-    // m_checkerboard->render(m_projection, m_view, m_transform);
+    m_checkerboard->render(m_projection, m_view, m_transform);
     m_pointCloud->render(m_projection, m_view, m_transform);
     if (m_imagePlane != nullptr)
       m_imagePlane->render(m_projection, m_view, m_transform);
@@ -996,8 +991,8 @@ protected:
 int main(int argc, char** argv)
 {
   using namespace std::string_literals;
-#ifdef __APPLE__
-  auto geometry_h5_file = "/Users/david/Desktop/geometry.h5"s;
+#if defined(__APPLE__)
+  auto geometry_h5_file = "/Users/oddkiva/Desktop/geometry.h5"s;
 #else
   auto geometry_h5_file = "/home/david/Desktop/geometry.h5"s;
 #endif

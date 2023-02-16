@@ -197,7 +197,7 @@ int __main(int argc, char** argv)
       if (!fprev.empty())
       {
         static constexpr auto num_samples = 200;
-        static constexpr auto f_err_thres = 1.;
+        static constexpr auto f_err_thres = 2.;
         std::tie(F, inliers, sample_best) = sara::estimate_fundamental_matrix(
             matches, keys_prev, keys_curr, num_samples, f_err_thres);
       }
