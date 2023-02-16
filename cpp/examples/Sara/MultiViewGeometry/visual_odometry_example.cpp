@@ -193,7 +193,10 @@ struct FeatureTrackingBlock
   {
     sara::print_stage("Matching keypoints...");
     if (sara::features(keys[0]).empty() || sara::features(keys[1]).empty())
+    {
+      SARA_DEBUG << "Skipping...\n";
       return;
+    }
 
     matches = sara::match(keys[0], keys[1], sift_nn_ratio);
     // Put a hard limit of 1000 matches to scale.
@@ -240,7 +243,10 @@ struct RelativePoseBlock
   {
     sara::print_stage("Estimating the relative pose...");
     if (matches.empty())
+    {
+      SARA_DEBUG << "Skipping relative pose estimation\n";
       return;
+    }
 
     const auto& f0 = sara::features(keys[0]);
     const auto& f1 = sara::features(keys[1]);
@@ -250,6 +256,7 @@ struct RelativePoseBlock
     // List the matches as a 2D-tensor where each row encodes a match 'm' as a
     // pair of point indices (i, j).
     const auto M = sara::to_tensor(matches);
+    SARA_CHECK(M.size(0));
 
     _X = sara::PointCorrespondenceList{M, u[0], u[1]};
     auto data_normalizer =

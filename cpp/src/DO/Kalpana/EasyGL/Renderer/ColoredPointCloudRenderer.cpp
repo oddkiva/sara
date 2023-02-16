@@ -109,6 +109,5 @@ auto ColoredPointCloudRenderer::render(const ColoredPointCloud& point_cloud,
 
   // Draw triangles.
   glBindVertexArray(point_cloud._vao);
-  SARA_CHECK(point_cloud._num_vertices);
   glDrawArrays(GL_POINTS, 0, point_cloud._num_vertices);
 }

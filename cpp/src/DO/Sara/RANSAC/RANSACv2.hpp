@@ -55,7 +55,7 @@ namespace DO::Sara::v2 {
     auto subset_best = Tensor_<int, 1>{ModelSolver::num_points};
     auto inliers_best = Tensor_<bool, 1>{card_X};
 
-    auto inlier_ratio_current = 0.;
+    auto inlier_ratio_current = 1. / card_X;
     auto num_iterations = std::numeric_limits<int>::max();
 
     const auto update_num_iterations = [&num_iterations, &inlier_ratio_current,
