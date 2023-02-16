@@ -41,13 +41,13 @@ struct SingleWindowApp
 {
 public:
   SingleWindowApp(const Eigen::Vector2i& sizes, const std::string& title)
-    : _window_sizes{sizes}
   {
     // Init GLFW.
     init_glfw();
 
     // Create a GLFW window.
     _window = create_glfw_window(sizes, title);
+    _fb_sizes = get_framebuffer_sizes();
 
     // Prepare OpenGL first before any OpenGL calls.
     init_opengl();
@@ -105,10 +105,10 @@ public:
     auto model_view = Eigen::Transform<float, 3, Eigen::Projective>{};
     model_view.setIdentity();
 
-    const auto win_aspect_ratio =
-        static_cast<float>(_window_sizes.x()) / _window_sizes.y();
+    const auto fb_aspect_ratio =
+        static_cast<float>(_fb_sizes.x()) / _fb_sizes.y();
     _projection = k::orthographic(                          //
-        -0.5f * win_aspect_ratio, 0.5f * win_aspect_ratio,  //
+        -0.5f * fb_aspect_ratio, 0.5f * fb_aspect_ratio,  //
         -0.5f, 0.5f,                                        //
         -0.5f, 0.5f);
 
@@ -130,7 +130,7 @@ public:
       glClear(GL_COLOR_BUFFER_BIT);
 
       // Render on the whole window surface.
-      glViewport(0, 0, _window_sizes.x(), _window_sizes.y());
+      glViewport(0, 0, _fb_sizes.x(), _fb_sizes.y());
 
       // Transfer the CPU image frame data to the OpenGL texture.
       _texture.reset(_video_stream.frame());
@@ -155,12 +155,13 @@ public:
   }
 
 private: /* callback functions */
-  static auto window_size_callback(GLFWwindow* window, const int width,
-                                   const int height) -> void
+  static auto window_size_callback(GLFWwindow* window, const int, const int)
+      -> void
   {
     auto& app = get_self(window);
-    app._window_sizes << width, height;
-    const auto aspect_ratio = static_cast<float>(width) / height;
+    auto& sizes = app._fb_sizes;
+    sizes = app.get_framebuffer_sizes();
+    const auto aspect_ratio = static_cast<float>(sizes.x()) / sizes.y();
     app._projection = k::orthographic(-0.5f * aspect_ratio, 0.5f * aspect_ratio,
                                       -0.5f, 0.5f,  //
                                       -0.5f, 0.5f);
@@ -211,9 +212,17 @@ private: /* convenience free functions*/
     return *app_ptr;
   }
 
+  auto get_framebuffer_sizes() const -> Eigen::Vector2i
+  {
+    auto sizes = Eigen::Vector2i{};
+    glfwGetFramebufferSize(_window, &sizes.x(), &sizes.y());
+    return sizes;
+  }
+
+
 private: /* data members */
   GLFWwindow* _window = nullptr;
-  Eigen::Vector2i _window_sizes = -Eigen::Vector2i::Ones();
+  Eigen::Vector2i _fb_sizes = -Eigen::Vector2i::Ones();
 
   Eigen::Matrix4f _projection;
 

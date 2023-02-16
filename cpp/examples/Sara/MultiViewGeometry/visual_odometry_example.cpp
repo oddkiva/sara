@@ -207,9 +207,9 @@ struct FeatureTrackingBlock
 
 struct RelativePoseBlock
 {
-  int ransac_iterations_max = 500;
+  int ransac_iterations_max = 1000;
   double ransac_confidence = 0.999;
-  double err_thres = 2.;
+  double err_thres = 4.;
 
   const sara::RelativePoseSolver<sara::NisterFivePointAlgorithm> _solver;
   sara::CheiralAndEpipolarConsistency _inlier_predicate;
@@ -256,7 +256,6 @@ struct RelativePoseBlock
     // List the matches as a 2D-tensor where each row encodes a match 'm' as a
     // pair of point indices (i, j).
     const auto M = sara::to_tensor(matches);
-    SARA_CHECK(M.size(0));
 
     _X = sara::PointCorrespondenceList{M, u[0], u[1]};
     auto data_normalizer =
@@ -432,12 +431,10 @@ struct Pipeline
   TriangulationBlock _triangulator;
 };
 
-
 class SingleWindowApp
 {
 public:
   SingleWindowApp(const Eigen::Vector2i& sizes, const std::string& title)
-    : _window_sizes{sizes}
   {
     // Init GLFW.
     init_glfw();
@@ -447,13 +444,15 @@ public:
                                title.c_str(),         //
                                nullptr, nullptr);
 
+    _fb_sizes = get_framebuffer_sizes();
+
     // Initialize the point cloud viewport.
     _point_cloud_viewport.top_left.setZero();
-    _point_cloud_viewport.sizes << sizes.x() / 2, sizes.y();
+    _point_cloud_viewport.sizes << _fb_sizes.x() / 2, _fb_sizes.y();
 
     // Initialize the video viewport.
-    _video_viewport.top_left << sizes.x() / 2, 0;
-    _video_viewport.sizes << sizes.x() / 2, sizes.y();
+    _video_viewport.top_left << _fb_sizes.x() / 2, 0;
+    _video_viewport.sizes << _fb_sizes.x() / 2, _fb_sizes.y();
 
     // Prepare OpenGL first before any OpenGL calls.
     init_opengl();
@@ -598,20 +597,20 @@ private:
       0,  0, -1;
     // clang-format on
 
-    // Recalculate the projection matrix for the point cloud.
-    const auto aspect_ratio = _point_cloud_viewport.aspect_ratio();
-    const Eigen::Matrix4f projection = k::perspective(80.f,          //
-                                                      aspect_ratio,  //
-                                                      .5f,           //
-                                                      500.f);
-
     // Update the model view matrix.
     const Eigen::Matrix4f model_view = Eigen::Matrix4f::Identity();
 
     // Render the point cloud.
     _point_cloud_renderer.render(_point_cloud, _point_size,
                                  from_cam_to_gl.matrix(),  //
-                                 model_view, projection);
+                                 model_view, _point_cloud_projection);
+  }
+
+  auto get_framebuffer_sizes() const -> Eigen::Vector2i
+  {
+    auto sizes = Eigen::Vector2i{};
+    glfwGetFramebufferSize(_window, &sizes.x(), &sizes.y());
+    return sizes;
   }
 
 private:
@@ -625,19 +624,21 @@ private:
     return *app_ptr;
   }
 
-  static auto window_size_callback(GLFWwindow* window, const int width,
-                                   const int height) -> void
+  static auto window_size_callback(GLFWwindow* window, const int, const int)
+      -> void
   {
     auto& self = get_self(window);
-    self._window_sizes << width, height;
+
+    auto& fb_sizes = self._fb_sizes;
+    fb_sizes = self.get_framebuffer_sizes();
 
     // Point cloud viewport rectangle geometry.
     self._point_cloud_viewport.top_left << 0, 0;
-    self._point_cloud_viewport.sizes << width / 2, height;
+    self._point_cloud_viewport.sizes << fb_sizes.x() / 2, fb_sizes.y();
 
     // Video viewport rectangle geometry.
-    self._video_viewport.top_left << width / 2, 0;
-    self._video_viewport.sizes << width / 2, height;
+    self._video_viewport.top_left << fb_sizes.x() / 2, 0;
+    self._video_viewport.sizes << fb_sizes.x() / 2, fb_sizes.y();
 
     // Update the current projection matrices.
     auto scale = 0.5f;
@@ -686,7 +687,10 @@ private:
 
 private:
   GLFWwindow* _window = nullptr;
-  Eigen::Vector2i _window_sizes = -Eigen::Vector2i::Ones();
+  //! @brief Framebuffer sizes
+  //! We want to use this and not the window sizes because of MacOS retina
+  //! display.
+  Eigen::Vector2i _fb_sizes = -Eigen::Vector2i::Ones();
 
   Pipeline _pipeline;
 
