@@ -447,12 +447,12 @@ public:
     _fb_sizes = get_framebuffer_sizes();
 
     // Initialize the point cloud viewport.
-    _point_cloud_viewport.top_left.setZero();
-    _point_cloud_viewport.sizes << _fb_sizes.x() / 2, _fb_sizes.y();
+    _point_cloud_viewport.top_left().setZero();
+    _point_cloud_viewport.sizes() << _fb_sizes.x() / 2, _fb_sizes.y();
 
     // Initialize the video viewport.
-    _video_viewport.top_left << _fb_sizes.x() / 2, 0;
-    _video_viewport.sizes << _fb_sizes.x() / 2, _fb_sizes.y();
+    _video_viewport.top_left() << _fb_sizes.x() / 2, 0;
+    _video_viewport.sizes() << _fb_sizes.x() / 2, _fb_sizes.y();
 
     // Prepare OpenGL first before any OpenGL calls.
     init_opengl();
@@ -481,6 +481,7 @@ public:
   {
     // Current projection matrix
     _projection = _video_viewport.orthographic_projection();
+    _point_cloud_projection = _point_cloud_viewport.orthographic_projection();
 
     // Background color.
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -570,8 +571,8 @@ private:
   auto render_video() -> void
   {
     // Render on the right half of the window surface.
-    glViewport(_video_viewport.top_left.x(), _video_viewport.top_left.y(),  //
-               _video_viewport.sizes.x(), _video_viewport.sizes.y());
+    glViewport(_video_viewport.x(), _video_viewport.y(),  //
+               _video_viewport.width(), _video_viewport.height());
     // Transfer the CPU image frame data to the OpenGL texture.
     // _texture.reset(_pipeline._video_stream.frame_rgb8());
     _texture.reset(_pipeline.make_display_frame());
@@ -583,9 +584,8 @@ private:
 
   auto render_point_cloud() -> void
   {
-    glViewport(
-        _point_cloud_viewport.top_left.x(), _point_cloud_viewport.top_left.y(),
-        _point_cloud_viewport.sizes.x(), _point_cloud_viewport.sizes.y());
+    glViewport(_point_cloud_viewport.x(), _point_cloud_viewport.y(),
+               _point_cloud_viewport.width(), _point_cloud_viewport.height());
 
     // CAVEAT: re-express the point cloud in OpenGL axis convention.
     auto from_cam_to_gl = Eigen::Transform<float, 3, Eigen::Projective>{};
@@ -633,12 +633,12 @@ private:
     fb_sizes = self.get_framebuffer_sizes();
 
     // Point cloud viewport rectangle geometry.
-    self._point_cloud_viewport.top_left << 0, 0;
-    self._point_cloud_viewport.sizes << fb_sizes.x() / 2, fb_sizes.y();
+    self._point_cloud_viewport.top_left().setZero();
+    self._point_cloud_viewport.sizes() << fb_sizes.x() / 2, fb_sizes.y();
 
     // Video viewport rectangle geometry.
-    self._video_viewport.top_left << fb_sizes.x() / 2, 0;
-    self._video_viewport.sizes << fb_sizes.x() / 2, fb_sizes.y();
+    self._video_viewport.top_left() << fb_sizes.x() / 2, 0;
+    self._video_viewport.sizes() << fb_sizes.x() / 2, fb_sizes.y();
 
     // Update the current projection matrices.
     auto scale = 0.5f;
@@ -648,11 +648,7 @@ private:
     self._projection = self._video_viewport.orthographic_projection(scale);
 
     // Point cloud projection matrix.
-    const auto aspect_ratio = self._point_cloud_viewport.aspect_ratio();
-    self._point_cloud_projection = k::perspective(60.f,          //
-                                                  aspect_ratio,  //
-                                                  .5f,           //
-                                                  200.f);
+    self._point_cloud_projection = self._point_cloud_viewport.perspective();
   }
 
 private:

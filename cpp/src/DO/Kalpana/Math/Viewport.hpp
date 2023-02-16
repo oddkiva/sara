@@ -1,28 +1,16 @@
 #pragma once
 
 #include <DO/Kalpana/Math/Projection.hpp>
+#include <DO/Sara/Geometry/Objects/AxisAlignedBoundingBox.hpp>
 
 
 namespace DO::Kalpana {
 
-  struct Viewport
+  struct Viewport : Sara::AxisAlignedBoundingBox<int, 2>
   {
-    Eigen::Vector2i top_left = Eigen::Vector2i::Zero();
-    Eigen::Vector2i sizes = Eigen::Vector2i::Zero();
-
     auto aspect_ratio() const -> float
     {
-      return static_cast<float>(sizes.x()) / sizes.y();
-    }
-
-    auto width() const -> int
-    {
-      return sizes.x();
-    }
-
-    auto height() const -> int
-    {
-      return sizes.y();
+      return static_cast<float>(width()) / height();
     }
 
     auto orthographic_projection(const float scale = 0.5f) const
@@ -33,6 +21,13 @@ namespace DO::Kalpana {
           -scale * ratio, scale * ratio,  //
           -scale, scale,                  //
           -scale, scale);
+    }
+
+    auto perspective(const float fov_degrees = 60.f, const float z_min = 0.5f,
+                     const float z_max = 200.f) const -> Eigen::Matrix4f
+    {
+      const auto ratio = aspect_ratio();
+      return Kalpana::perspective(fov_degrees, ratio, z_min, z_max);
     }
   };
 
