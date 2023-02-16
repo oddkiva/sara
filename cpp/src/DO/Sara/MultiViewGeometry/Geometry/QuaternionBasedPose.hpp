@@ -7,7 +7,7 @@
 namespace DO::Sara {
 
   template <typename T>
-  struct CameraPose
+  struct QuaternionBasedPose
   {
     Eigen::Quaternion<T> q;
     Eigen::Vector3<T> t;

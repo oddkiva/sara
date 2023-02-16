@@ -15,7 +15,6 @@
 
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/Core/Pixel.hpp>
-#include <DO/Sara/SfM/Graph/CameraPose.hpp>
 #include <DO/Sara/SfM/Graph/ImageFeatures.hpp>
 
 #include <boost/graph/adjacency_list.hpp>

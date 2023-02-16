@@ -30,11 +30,6 @@ namespace DO::Sara {
                              const CameraPoseGraph::Edge&,
                              const ImageView<Rgb8>&) -> void;
 
-    auto point_cloud() const -> const PointCloud&
-    {
-      return _point_cloud;
-    }
-
   private:
     const CameraPoseGraph& _camera_pose_graph;
     const FeatureGraph& _feature_graph;
