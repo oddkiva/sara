@@ -82,8 +82,7 @@ auto TextureRenderer::destroy() -> void
   _fragment_shader.destroy();
 }
 
-auto TextureRenderer::render(TexturedImage2D& what,
-                             TexturedQuad& where,
+auto TextureRenderer::render(TexturedImage2D& what, TexturedQuad& where,
                              const Eigen::Matrix4f& model_view,
                              const Eigen::Matrix4f& projection) -> void
 {
@@ -101,6 +100,7 @@ auto TextureRenderer::render(TexturedImage2D& what,
   // We want to draw the number of triangle indices:
   // 3 vertex indices per triangles x 2 triangles  = 6 vertex indices
   glBindVertexArray(where.vao());
-  glDrawElements(GL_TRIANGLES, where.host_triangles().size(), GL_UNSIGNED_INT,
-                 0);
+  glDrawElements(GL_TRIANGLES,
+                 static_cast<GLsizei>(where.host_triangles().size()),
+                 GL_UNSIGNED_INT, 0);
 }

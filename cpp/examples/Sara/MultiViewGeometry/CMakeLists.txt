@@ -46,9 +46,6 @@ sara_add_example(essential_5_point_example)
 sara_add_example(relative_pose_estimation_example)
 target_link_libraries(essential_5_point_example PRIVATE tinyply)
 
-# Camera resectioning.
-sara_add_example(camera_resectioning_example)
-
 # Visual odometry.
 sara_add_example(visual_odometry_example)
 target_link_libraries(visual_odometry_example PRIVATE DO::Kalpana::EasyGL #
