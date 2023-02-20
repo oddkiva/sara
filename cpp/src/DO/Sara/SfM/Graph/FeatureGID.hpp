@@ -11,27 +11,28 @@
 
 #pragma once
 
+#include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
 #include <utility>
 
 
 namespace DO::Sara {
 
-  //! @brief Feature global ID (GID).
+  //! @brief Feature Global ID (GID).
   struct FeatureGID
   {
-    int camera_view_id{-1};
-    int feature_index{-1};
+    CameraPoseGraph::Vertex pose_vertex;
+    std::size_t feature_index;
 
     auto operator==(const FeatureGID& other) const -> bool
     {
-      return camera_view_id == other.camera_view_id &&
+      return pose_vertex == other.pose_vertex &&
              feature_index == other.feature_index;
     }
 
     auto operator<(const FeatureGID& other) const -> bool
     {
-      return std::make_pair(camera_view_id, feature_index) <
-             std::make_pair(other.camera_view_id, other.feature_index);
+      return std::make_pair(pose_vertex, feature_index) <
+             std::make_pair(other.pose_vertex, other.feature_index);
     }
   };
 
