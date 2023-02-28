@@ -44,17 +44,22 @@ BOOST_AUTO_TEST_CASE(test_yolox_tiny_onnx_conversion_to_trt_serialized_engine)
   auto builder = trt::make_builder();
   auto network = trt::make_network(builder.get());
 
-  // Load the network on the host device (CPU).
+  // Make sure we downloaded the YOLO-X Tiny ONNX model provided by Megvii:
+  //
+  // It is available here:
+  // https://yolox.readthedocs.io/en/latest/demo/onnx_readme.html#download-onnx-models
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   const auto yolox_tiny_onnx_filepath =
       data_dir_path / "trained_models" / "yolox_tiny.onnx";
   BOOST_CHECK(fs::exists(yolox_tiny_onnx_filepath));
 
+  // Instantiate an ONNX parser and read the ONNX model file.
   auto onnx_parser = trt::OnnxParserUniquePtr{
       nvonnxparser::createParser(*network, trt::Logger::instance()),
       &trt::onnx_parser_deleter  //
   };
 
+  // The file parsing should be successful.
   const auto parsed_successfully = onnx_parser->parseFromFile(
       yolox_tiny_onnx_filepath.string().c_str(),
       static_cast<std::int32_t>(nvinfer1::ILogger::Severity::kWARNING));
@@ -63,24 +68,31 @@ BOOST_AUTO_TEST_CASE(test_yolox_tiny_onnx_conversion_to_trt_serialized_engine)
     std::cout << onnx_parser->getError(i)->desc() << std::endl;
   BOOST_CHECK_EQUAL(onnx_parser->getNbErrors(), 0);
 
+  // There is only one input tensor.
   BOOST_CHECK_EQUAL(network->getNbInputs(), 1);
   SARA_CHECK(network->getInput(0)->getName());
   SARA_CHECK(shape(*network->getInput(0)).transpose());
 
+  // There is only one output tensor.
   BOOST_CHECK_EQUAL(network->getNbOutputs(), 1);
   SARA_CHECK(network->getOutput(0)->getName());
   SARA_CHECK(shape(*network->getOutput(0)).transpose());
 
+  // Prepare the model optimization with a GPU memory budget
   static constexpr std::size_t Gb = 1ul << 30;
+  const auto gpu_memory_budget = 6ul * Gb;
   auto config = trt::ConfigUniquePtr{builder->createBuilderConfig(),  //
                                      &trt::config_deleter};
-  config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, 6ul * Gb);
+  config->setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE,
+                             gpu_memory_budget);
 
-  // Serialize the network definition and weights for TensorRT.
+  // Optimize and serialize the network definition and weights for TensorRT.
   auto plan = trt::HostMemoryUniquePtr{
       builder->buildSerializedNetwork(*network, *config),  //
       trt::host_memory_deleter};
   BOOST_CHECK_NE(plan.get(), nullptr);
+
+  // We can save the model.
 }
 
 BOOST_AUTO_TEST_SUITE_END()
