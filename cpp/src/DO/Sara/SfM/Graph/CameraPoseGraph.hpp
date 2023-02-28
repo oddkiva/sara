@@ -26,8 +26,8 @@ namespace DO::Sara {
 
   struct RelativePoseEdge
   {
-    int src_camera_view_id = -1;
-    int dst_camera_view_id = -1;
+    int src_camera = -1;
+    int dst_camera = -1;
 
     std::vector<std::pair<int, int>> _matches;
     std::vector<std::uint8_t> _inliers;

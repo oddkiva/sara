@@ -25,6 +25,10 @@
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 
+#include <filesystem>
+
+
+namespace fs = std::filesystem;
 
 using namespace std::string_literals;
 using namespace DO::Sara;
@@ -45,15 +49,13 @@ int sara_graphics_main(int argc, char** argv)
 
   // Load images.
   print_stage("Loading images...");
-  const auto data_dir = argc < 2
-                            ? "/Users/oddkiva/Desktop/datasets/sfm/castle_int"s
-                            : std::string{argv[1]};
+  const auto data_dir =
+      argc < 2 ? fs::path{"/Users/oddkiva/Desktop/datasets/sfm/castle_int"}
+               : fs::path{argv[1]};
   const auto image_id1 = std::string{argv[2]};
   const auto image_id2 = std::string{argv[3]};
-  views.image_paths = {
-      data_dir + "/" + image_id1 + ".png",
-      data_dir + "/" + image_id2 + ".png",
-  };
+  views.image_paths = {(data_dir / (image_id1 + ".png")).string(),
+                       (data_dir / (image_id2 + ".png")).string()};
   views.read_images();
   SARA_CHECK(views.images[0].sizes().transpose());
   SARA_CHECK(views.images[1].sizes().transpose());
@@ -61,12 +63,12 @@ int sara_graphics_main(int argc, char** argv)
 
   print_stage("Loading the internal camera matrices...");
   views.cameras.resize(2 /* views */);
-  views.cameras[0].K =
-      read_internal_camera_parameters(data_dir + "/" + image_id1 + ".png.K")
-          .cast<double>();
-  views.cameras[1].K =
-      read_internal_camera_parameters(data_dir + "/" + image_id2 + ".png.K")
-          .cast<double>();
+  views.cameras[0].K = read_internal_camera_parameters(
+                           (data_dir / (image_id1 + ".png.K")).string())
+                           .cast<double>();
+  views.cameras[1].K = read_internal_camera_parameters(
+                           (data_dir / (image_id2 + ".png.K")).string())
+                           .cast<double>();
   SARA_DEBUG << "K[0] =\n" << views.cameras[0].K << "\n";
   SARA_DEBUG << "K[1] =\n" << views.cameras[1].K << "\n";
 
@@ -218,8 +220,8 @@ int sara_graphics_main(int argc, char** argv)
   geometry_h5_file.write_dataset("dataset_folder", data_dir, true);
   geometry_h5_file.write_dataset("image_1", views.image_paths[0], true);
   geometry_h5_file.write_dataset("image_2", views.image_paths[1], true);
-  geometry_h5_file.write_dataset("K", data_dir + "/" + image_id1 + ".png.K",
-                                 true);
+  geometry_h5_file.write_dataset(
+      "K", (data_dir / (image_id1 + ".png.K")).string(), true);
 
   // Inspect the fundamental matrix.
   print_stage("Inspecting the fundamental matrix estimation...");
