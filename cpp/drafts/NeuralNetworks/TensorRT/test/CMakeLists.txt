@@ -26,3 +26,6 @@ foreach(file ${test_tensorrt_SOURCE_FILES})
 
   add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
 endforeach()
+
+target_link_libraries(test_neuralnetworks_tensorrt_onnx_parser
+                      PRIVATE TensorRT::OnnxParser)
