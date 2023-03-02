@@ -25,7 +25,7 @@ namespace DO::Sara {
 
     inline auto matrix4() const -> Eigen::Matrix4<T>
     {
-      return (Eigen::Matrix<T, 4, 4>{};
+      return (Eigen::Matrix<T, 4, 4>{} <<
               matrix34(), Eigen::RowVector3<T>::Zero().homogeneous())
           .finished();
     }
