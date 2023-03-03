@@ -9,7 +9,7 @@ __device__ auto lanczos(const float* f, const int x, const int a) -> float
   if (x == 0)
     return 1;
 
-  if (a <= x && x < a)
+  if (-a <= x && x < a)
   {
     static constexpr auto pi = CUDART_PI_F;
     const auto af = static_cast<float>(a);
