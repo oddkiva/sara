@@ -36,9 +36,9 @@ __global__ auto from_hwc_uint8_to_chw_float(float* out, const uint8_t* in,
   const int gi_out = y * w + x;
   const int gi_in = 3 * (y * w + x);
   // clang-format off
-  out[/* 0 *  wh */ + gi_out] = float(in[gi_in + 0]) / 255.f;
-  out[/* 1 */ wh    + gi_out] = float(in[gi_in + 1]) / 255.f;
-  out[   2 *  wh    + gi_out] = float(in[gi_in + 2]) / 255.f;
+  out[/* 0 *  wh */ + gi_out] = float(in[gi_in + 0]);
+  out[/* 1 */ wh    + gi_out] = float(in[gi_in + 1]);
+  out[   2 *  wh    + gi_out] = float(in[gi_in + 2]);
   // clang-format on
 }
 

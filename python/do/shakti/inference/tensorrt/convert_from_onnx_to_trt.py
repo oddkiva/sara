@@ -2,9 +2,11 @@ from pathlib import Path
 import tensorrt as trt
 
 
-ONNX_MODEL_DIR_PATH = Path("/home/david/Downloads/ha-onnx/")
-ONNX_MODEL_PATH = ONNX_MODEL_DIR_PATH / "output/export_results/yolox-tiny.onnx"
+ONNX_MODEL_DIR_PATH = Path("/home/david/Downloads/models/")
+ONNX_MODEL_PATH = ONNX_MODEL_DIR_PATH / "yolox-tiny.onnx"
 assert ONNX_MODEL_PATH.exists()
+
+THIS_DIR = Path(__file__).parent
 
 logger = trt.Logger(trt.Logger.WARNING)
 
@@ -24,14 +26,16 @@ trt_config = network_builder.create_builder_config()
 
 trt_profile = network_builder.create_optimization_profile()
 trt_profile.set_shape("input",
-                      (1, 3, 416, 416),
                       (1, 3, 512, 960),
-                      (1, 3, 1024, 1920))
+                      (1, 3, 512, 960),
+                      (1, 3, 512, 960))
 trt_config.add_optimization_profile(trt_profile)
 
 
 serialized_engine = network_builder.build_serialized_network(network,
                                                              trt_config)
 serialized_engine_filepath = "{}.bin".format(ONNX_MODEL_PATH.stem)
-with open(serialized_engine_filepath, "wb") as f:
+with open(str(THIS_DIR / serialized_engine_filepath), "wb") as f:
     f.write(serialized_engine)
+
+import IPython; IPython.embed()
