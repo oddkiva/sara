@@ -1,5 +1,6 @@
 #pragma once
 
+#include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Features/Feature.hpp>
 #include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
 
@@ -20,10 +21,10 @@ namespace DO::Sara {
       return _descriptor_dimension;
     }
 
-    auto features(const CameraPoseGraph::Vertex camera_vertex) const
+    auto features(const std::size_t camera_vertex) const
         -> std::span<const OERegion>;
 
-    auto descriptors(const CameraPoseGraph::Vertex camera_vertex) const
+    auto descriptors(const std::size_t camera_vertex) const
         -> TensorView_<const float, 2>;
 
     //! @brief Feature data.

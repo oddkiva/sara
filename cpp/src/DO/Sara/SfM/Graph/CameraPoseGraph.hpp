@@ -15,6 +15,7 @@
 
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/Core/Pixel.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/QuaternionBasedPose.hpp>
 #include <DO/Sara/SfM/Graph/ImageFeatures.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
@@ -39,13 +40,13 @@ namespace DO::Sara {
   {
     using GraphImpl =
         boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
-                              CameraPose<double>, RelativePoseEdge>;
-    using Vertex = boost::graph_traits<Graph>::vertex_descriptor;
-    using Edge = boost::graph_traits<Graph>::edge_descriptor;
+                              QuaternionBasedPose<double>, RelativePoseEdge>;
+    using Vertex = boost::graph_traits<GraphImpl>::vertex_descriptor;
+    using Edge = boost::graph_traits<GraphImpl>::edge_descriptor;
 
     GraphImpl _pose_graph;
     std::vector<std::optional<Image<Rgb8>>> _images;
-    ImageFeatures _image_features;
+    ImageKeypoints _image_keypoints;
   };
 
 } /* namespace DO::Sara */
