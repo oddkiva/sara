@@ -34,7 +34,6 @@ namespace DO::Sara::TensorRT {
                                    num_classes /* P[class|object] */;
     const auto num_box_features = num_coordinates + num_probabilities;
 
-    const auto& w = grid_width;
     const auto hw = grid_height * grid_width;
     const auto fhw = num_box_features * hw;
 
