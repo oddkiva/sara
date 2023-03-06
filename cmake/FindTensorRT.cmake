@@ -4,33 +4,29 @@ endif()
 
 list(APPEND TensorRT_SEARCH_PATHS "/usr")
 
-foreach(search ${TensorRT_SEARCH_PATHS})
-  find_path(
-    TensorRT_INCLUDE_DIR
-    NAMES NvInfer.h
-    PATHS ${TensorRT_SEARCH_PATHS}
-    PATH_SUFFIXES include)
-endforeach()
+find_path(
+  TensorRT_INCLUDE_DIR
+  NAMES NvInfer.h
+  PATHS ${TensorRT_SEARCH_PATHS}
+  PATH_SUFFIXES include)
 
-if(NOT TensorRT_LIBRARY)
-  foreach(search ${TensorRT_SEARCH_PATHS})
-    find_library(
-      TensorRT_LIBRARY
-      NAMES nvinfer
-      PATHS ${search}
-      PATH_SUFFIXES lib)
-  endforeach()
-endif()
+find_library(
+  TensorRT_LIBRARY
+  NAMES nvinfer
+  PATHS ${search}
+  PATH_SUFFIXES lib)
 
-if(NOT TensorRT_Plugins_LIBRARY)
-  foreach(search ${TensorRT_SEARCH_PATHS})
-    find_library(
-      TensorRT_Plugins_LIBRARY
-      NAMES nvinfer_plugin
-      PATHS ${search}
-      PATH_SUFFIXES lib)
-  endforeach()
-endif()
+find_library(
+  TensorRT_Plugins_LIBRARY
+  NAMES nvinfer_plugin
+  PATHS ${TensorRT_SEARCH_PATHS}
+  PATH_SUFFIXES lib)
+
+find_library(
+  TensorRT_OnnxParser_LIBRARY
+  NAMES nvonnxparser
+  PATHS ${TensorRT_SEARCH_PATHS}
+  PATH_SUFFIXES lib)
 
 mark_as_advanced(TensorRT_INCLUDE_DIR)
 
@@ -56,7 +52,11 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   TensorRT
-  REQUIRED_VARS TensorRT_LIBRARY TensorRT_Plugins_LIBRARY TensorRT_INCLUDE_DIR
+  REQUIRED_VARS
+    TensorRT_LIBRARY #
+    TensorRT_Plugins_LIBRARY #
+    TensorRT_OnnxParser_LIBRARY #
+    TensorRT_INCLUDE_DIR
   VERSION_VAR TensorRT_VERSION_STRING)
 
 if(TensorRT_FOUND)
@@ -83,4 +83,13 @@ if(TensorRT_FOUND)
     TARGET TensorRT::Plugins
     APPEND
     PROPERTY IMPORTED_LOCATION ${TensorRT_Plugins_LIBRARY})
+
+  add_library(TensorRT::OnnxParser UNKNOWN IMPORTED)
+  set_target_properties(
+    TensorRT::OnnxParser PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                 ${TensorRT_INCLUDE_DIRS})
+  set_property(
+    TARGET TensorRT::OnnxParser
+    APPEND
+    PROPERTY IMPORTED_LOCATION ${TensorRT_OnnxParser_LIBRARY})
 endif()

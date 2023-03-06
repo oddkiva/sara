@@ -19,13 +19,13 @@ namespace DO::Sara {
 
   class FeatureGraph
   {
-  public:
     using GraphImpl = boost::adjacency_list<           //
         boost::vecS, boost::vecS, boost::undirectedS,  //
         FeatureGID>;
 
-    using Vertex = boost::graph_traits<Graph>::vertex_descriptor;
-    using Edge = boost::graph_traits<Graph>::edge_descriptor;
+  public:
+    using Vertex = boost::graph_traits<GraphImpl>::vertex_descriptor;
+    using Edge = boost::graph_traits<GraphImpl>::edge_descriptor;
     using Track = std::vector<Vertex>;
 
     auto operator[](Vertex v) -> FeatureGID&

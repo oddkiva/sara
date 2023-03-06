@@ -1,0 +1,43 @@
+FROM nvidia/cuda:11.7.0-cudnn8-devel-ubuntu22.04
+
+MAINTAINER "Odd Kiva"
+
+# To avoid console interaction with APT.
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update -y && apt-get install -y wget
+
+# Use CUDA network repository.
+ARG CUDA_REPO_ROOT_URL=https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64
+ARG CUDA_DEB_FILENAME=cuda-keyring_1.0-1_all.deb
+RUN wget $CUDA_REPO_ROOT_URL/$CUDA_DEB_FILENAME && \
+      dpkg -i $CUDA_DEB_FILENAME && \
+      apt-get update -y
+
+# Install cuDNN 8.
+#
+# N.B.: the version minor value is 8 as in CUDA 11.8 does not matter: it will
+# also work on CUDA 11.7
+ARG CUDNN_VERSION=8.6.0.163-1+cuda11.8
+RUN apt-mark unhold libcudnn8 libcudnn8-dev && \
+      apt-get install -y libcudnn8=${CUDNN_VERSION} libcudnn8-dev=${CUDNN_VERSION} && \
+      apt-mark hold libcudnn8 libcudnn8-dev
+
+# Install TensorRT
+#
+# N.B.: the version minor value is 8 as in CUDA 11.8 does not matter: it will
+# also work on CUDA 11.7
+ARG TENSORRT_VERSION=8.5.3.1-1+cuda11.8
+RUN apt-get install -y tensorrt-dev=${TENSORRT_VERSION} && \
+      apt-get install -y python3-libnvinfer-dev && \
+      apt-mark hold tensorrt-dev python3-libnvinfer-dev
+
+# Install pip and the system OpenCV's Python bindings.
+RUN apt-get install -y python3-pip python3-opencv
+
+# Install pytorch
+RUN pip3 install torch torchvision torchaudio
+RUN pip3 install 'pycuda<2021.1'
+
+# Comfortable work environment
+RUN pip3 install ipython
