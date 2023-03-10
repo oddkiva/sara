@@ -17,8 +17,6 @@
 
 find_package(Halide REQUIRED)
 
-include(SaraHalideGeneratorHelpers)
-
 
 if (NOT SHAKTI_HALIDE_GPU_TARGETS)
   if (APPLE)
@@ -42,7 +40,7 @@ function (shakti_halide_library _source_filepath)
     ${DO_Sara_ThirdParty_DIR}/eigen)
   target_link_libraries(${_source_filename}.generator PRIVATE Halide::Generator)
 
-  sara_add_halide_library(${_source_filename}
+  add_halide_library(${_source_filename}
     FROM ${_source_filename}.generator)
 
   foreach (suffix IN ITEMS ""
@@ -109,12 +107,12 @@ function (shakti_halide_library_v2)
   target_link_libraries(${generator_NAME}.generator PRIVATE Halide::Generator)
 
   if (generator_HALIDE_TARGET_FEATURES)
-    sara_add_halide_library(${generator_NAME}
+    add_halide_library(${generator_NAME}
       FROM ${generator_NAME}.generator
       TARGETS host
       FEATURES ${generator_HALIDE_TARGET_FEATURES})
   else ()
-    sara_add_halide_library(${generator_NAME}
+    add_halide_library(${generator_NAME}
       FROM ${generator_NAME}.generator
       TARGETS host)
   endif()
