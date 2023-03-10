@@ -1,20 +1,3 @@
-# If the link fails, run `install_name_tool` to update the install name in
-# `libHalide.dylib` file.
-#
-# I have installed halide in `/opt/halide`:
-#
-# $ cd /opt/halide/bin
-# $ install_name_tool -id "/opt/halide/bin/libHalide.dylib" libHalide.dylib
-#
-# References:
-# - https://github.com/halide/Halide/issues/2821
-# - https://stackoverflow.com/questions/33991581/install-name-tool-to-update-a-executable-to-search-for-dylib-in-mac-os-x
-#
-# Then:
-# - MacOSX will complain about the unverified dylib file. Click on the help
-# button from the dialog box that popped up.
-# - Follow the instructions in the user guide to allow the use of this file.
-
 find_package(Halide REQUIRED)
 
 
