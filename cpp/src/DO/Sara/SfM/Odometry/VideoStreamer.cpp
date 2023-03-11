@@ -14,7 +14,7 @@ auto VideoStreamer::open(const std::filesystem::path& video_path) -> void
 {
   _frame_index = -1;
   _video_stream.close();
-  _video_stream.open(video_path);
+  _video_stream.open(video_path.string());
   _rgb8.swap(_video_stream.frame());
   _gray32f.resize(_video_stream.sizes());
 }

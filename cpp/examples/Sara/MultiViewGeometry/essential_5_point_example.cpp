@@ -217,7 +217,7 @@ int sara_graphics_main(int argc, char** argv)
 #endif
   auto geometry_h5_file = H5File{geometry_h5_filepath, H5F_ACC_TRUNC};
   save_to_hdf5(geometry_h5_file, two_view_geometry, colors);
-  geometry_h5_file.write_dataset("dataset_folder", data_dir, true);
+  geometry_h5_file.write_dataset("dataset_folder", data_dir.string(), true);
   geometry_h5_file.write_dataset("image_1", views.image_paths[0], true);
   geometry_h5_file.write_dataset("image_2", views.image_paths[1], true);
   geometry_h5_file.write_dataset(
@@ -261,7 +261,8 @@ int sara_graphics_main(int argc, char** argv)
 
   for (const auto& [index, depth] : points)
   {
-    const Eigen::Vector2d ui = u1.col(index) * 0.25;
+    const Eigen::Vector2i ui =
+        (u1.col(index) * 0.25).array().round().cast<int>();
 
     auto color = Rgb8{};
     color << 0, 0, static_cast<int>(linear(depth) * 255);

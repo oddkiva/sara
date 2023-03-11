@@ -16,8 +16,8 @@ namespace DO::Sara {
                  const PointCorrespondenceList<double>& X,
                  const TensorView_<bool, 1>& inliers)
 
-      : _C1{C1}
-      , _C2{C2}
+      : _camera_1{C1}
+      , _camera_2{C2}
       , _K{K}
       , _K_inv{K_inv}
       , _X{X}
@@ -26,8 +26,8 @@ namespace DO::Sara {
     }
 
     //! @brief Input data.
-    const PinholeCameraDecomposition& _C1;
-    const PinholeCameraDecomposition& _C2;
+    const PinholeCameraDecomposition& _camera_1;
+    const PinholeCameraDecomposition& _camera_2;
     const Eigen::Matrix3d& _K;
     const Eigen::Matrix3d& _K_inv;
     const PointCorrespondenceList<double>& _X;
@@ -58,7 +58,7 @@ namespace DO::Sara {
         const Eigen::Vector3d u1 = _K_inv * _X[i][0].vector();
         const Eigen::Vector3d u2 = _K_inv * _X[i][1].vector();
         const auto [Xj, s1j, s2j] = triangulate_single_point_linear_eigen(
-            _C1.matrix(), _C2.matrix(), u1, u2);
+            _camera_1.matrix(), _camera_2.matrix(), u1, u2);
         const auto cheiral = s1j > 0 && s2j > 0;
         if (!cheiral)
           continue;

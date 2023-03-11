@@ -71,8 +71,9 @@ namespace DO::Sara {
       Image<Rgb8> display = _distortion_corrector->frame_rgb8();
       const auto& matches = _feature_tracker->matches;
       const auto& inliers = _relative_pose_estimator->_inliers;
+      const auto num_matches = static_cast<int>(matches.size());
 #pragma omp parallel for
-      for (auto m = 0u; m < matches.size(); ++m)
+      for (auto m = 0; m < num_matches; ++m)
       {
         if (!inliers(m))
           continue;

@@ -54,7 +54,7 @@ auto serialize_onnx_model_as_tensort_engine(
   };
 
   const auto parsed_successfully = onnx_parser->parseFromFile(
-      yolox_tiny_onnx_filepath.string().c_str(),
+      onnx_filepath.string().c_str(),
       static_cast<std::int32_t>(nvinfer1::ILogger::Severity::kWARNING));
   for (auto i = 0; i < onnx_parser->getNbErrors(); ++i)
     std::cerr << "[ONNX parse error] " << onnx_parser->getError(i)->desc()
