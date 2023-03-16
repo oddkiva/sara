@@ -45,7 +45,6 @@ class ImagePreprocessor:
             cuda_source = f.read()
         mod = SourceModule(cuda_source)
 
-
         self._to_chw_float_kernel = mod.get_function("from_hwc_uint8_to_chw_float")
         self._grid = (round(w / 32), round(h / 32), 1)
 
