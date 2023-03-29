@@ -20,6 +20,7 @@ if(SARA_USE_FROM_SOURCE)
              DO::Sara::FeatureMatching
              DO::Sara::MultiViewGeometry
              DO::Sara::Visualization
+             $<$<BOOL:${SARA_BUILD_VIDEOIO}>:DO::Sara::VideoIO>
              $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   endif()
 endif()

@@ -21,7 +21,7 @@ SYSTEM = platform.system()
 
 # Third-party libraries that makes Sara faster, stronger, cooler...
 if SYSTEM == "Linux":
-    HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-14.0.0-x86-64-linux"
+    HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-15.0.0-x86-64-linux"
     ONNXRUNTIME_ROOT_PATH = pathlib.Path.home() / "opt/onnxruntime-linux-x64-gpu-1.14.0"
     NVIDIA_CODEC_SDK_ROOT_PATH = pathlib.Path.home() / "opt/Video_Codec_SDK_11.0.10"
     SWIFTC_PATH= pathlib.Path.home() / "opt/swift-5.6.3-RELEASE-ubuntu20.04/usr/bin/swiftc"
