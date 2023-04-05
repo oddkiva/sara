@@ -21,6 +21,7 @@
 #include <boost/graph/adjacency_list.hpp>
 
 #include <optional>
+#include <vector>
 
 
 namespace DO::Sara {
