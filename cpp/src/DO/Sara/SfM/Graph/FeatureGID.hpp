@@ -31,8 +31,9 @@ namespace DO::Sara {
 
     auto operator<(const FeatureGID& other) const -> bool
     {
-      return std::make_pair(pose_vertex, feature_index) <
-             std::make_pair(other.pose_vertex, other.feature_index);
+      return (pose_vertex < other.pose_vertex) ||
+             (pose_vertex == other.pose_vertex &&
+              feature_index < other.feature_index);
     }
   };
 

@@ -127,7 +127,7 @@ def generate_project(source_dir: str,
 
     # Setup Swift bindings.
     if SYSTEM == "Darwin":
-        cmake_options.append("-D CMAKE_Swift_COMPILER=$(which swiftc)")
+        cmake_options.append("-D CMAKE_Swift_COMPILER=/usr/bin/swiftc")
     elif SYSTEM == "Linux" and pathlib.Path(SWIFTC_PATH).exists():
         cmake_options.append("-D CMAKE_Swift_COMPILER={}".format(SWIFTC_PATH))
 
