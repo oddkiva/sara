@@ -22,7 +22,7 @@ namespace DO::Sara {
   //! @{
 
   //! @{
-  //! @brief Invariant up to affine-transformations.
+  //! @brief Reconstruct a 3D point from two backprojected rays.
   DO_SARA_EXPORT
   auto triangulate_single_point_linear_eigen(const Matrix34d& P1,
                                              const Matrix34d& P2,

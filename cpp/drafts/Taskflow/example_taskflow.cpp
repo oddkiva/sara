@@ -6,11 +6,13 @@
 #include <drafts/Taskflow/SafeQueue.hpp>
 
 #ifdef _WIN32
-#pragma warning(push, 0)
+// Quick workaround until the next release of taskflow (cf. https://github.com/taskflow/taskflow/pull/459)
+#  undef MAX_PRIORITY
+#  pragma warning(push, 0)
 #endif
 #include <taskflow/taskflow.hpp>
 #ifdef _WIN32
-#pragma warning(pop)
+#  pragma warning(pop)
 #endif
 
 

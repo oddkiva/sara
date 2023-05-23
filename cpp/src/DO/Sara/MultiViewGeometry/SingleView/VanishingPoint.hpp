@@ -186,7 +186,7 @@ namespace DO::Sara {
     return ransac(lines,             //
                   vp_solver,         //
                   inlier_predicate,  //
-                  num_random_samples);
+                  static_cast<int>(num_random_samples));
   }
 
   template <typename T>
@@ -201,7 +201,7 @@ namespace DO::Sara {
     return ransac(planes,            //
                   vp_solver,         //
                   inlier_predicate,  //
-                  num_random_samples);
+                  static_cast<int>(num_random_samples));
   }
 
 }  // namespace DO::Sara

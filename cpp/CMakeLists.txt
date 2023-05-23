@@ -20,7 +20,6 @@ else ()
     add_subdirectory(examples)
   endif ()
 
-  add_subdirectory(pipelines)
   add_subdirectory(tools)
 
   if (SARA_BUILD_DRAFTS)

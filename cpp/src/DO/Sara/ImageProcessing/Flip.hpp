@@ -15,8 +15,12 @@
 
 #include <DO/Sara/Core/Image.hpp>
 
+#if defined(_OPENMP)
+#  include <omp.h>
+#endif
 
-namespace DO { namespace Sara {
+
+namespace DO::Sara {
 
   //! @{
   //! \brief Flip image.
@@ -124,5 +128,100 @@ namespace DO { namespace Sara {
   }
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+  namespace v2 {
+
+    template <typename T>
+    inline auto flip_horizontally(const ImageView<T>& src, ImageView<T>& dst)
+        -> void
+    {
+      const auto w = dst.width();
+      const auto h = dst.height();
+      const auto wh = w * h;
+
+#pragma omp parallel for
+      for (auto xy = 0; xy < wh; ++xy)
+      {
+        const auto y = xy / w;
+        const auto x = xy - y * w;
+        dst(x, y) = src(w - 1 - x, y);
+      }
+    }
+
+    template <typename T>
+    inline auto flip_vertically(const ImageView<T>& src, ImageView<T>& dst)
+        -> void
+    {
+      const auto w = dst.width();
+      const auto h = dst.height();
+      const auto wh = w * h;
+
+#pragma omp parallel for
+      for (auto xy = 0; xy < wh; ++xy)
+      {
+        const auto y = xy / w;
+        const auto x = xy - y * w;
+        dst(x, y) = src(x, h - 1 - y);
+      }
+    }
+
+    template <typename T>
+    inline auto transpose(const ImageView<T>& src, ImageView<T>& dst) -> void
+    {
+      const auto w = dst.width();
+      const auto h = dst.height();
+      const auto wh = w * h;
+
+#pragma omp parallel for
+      for (auto xy = 0; xy < wh; ++xy)
+      {
+        const auto y = xy / w;
+        const auto x = xy - y * w;
+        dst(x, y) = src(y, x);
+      }
+    }
+
+    template <typename T>
+    inline auto rotate_cw_90(const ImageView<T>& src, ImageView<T>& dst)
+        -> void
+    {
+      const auto w = dst.width();
+      const auto h = dst.height();
+      const auto wh = w * h;
+
+#pragma omp parallel for
+      for (auto xy = 0; xy < wh; ++xy)
+      {
+        const auto y = xy / w;
+        const auto x = xy - y * w;
+        dst(x, y) = src(y, x);
+      }
+    }
+
+    template <typename T>
+    inline auto rotate_ccw_180(const ImageView<T>& src, ImageView<T>& dst)
+        -> void
+    {
+      const auto w = src.width();
+      const auto h = src.height();
+
+      const auto wh = w * h;
+
+#pragma omp parallel for
+      for (auto xy = 0; xy < wh; ++xy)
+      {
+        const auto y = xy / w;
+        const auto x = xy - y * w;
+        dst(x, y) = src(w - 1 - x, h - 1 - y);
+      }
+    }
+
+    template <typename T>
+    inline auto rotate_cw_180(const ImageView<T>& src, ImageView<T>& dst)
+        -> void
+    {
+      rotate_ccw_189(src, dst);
+    }
+
+  }  // namespace v2
+
+}  // namespace DO::Sara

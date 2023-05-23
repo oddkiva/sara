@@ -105,7 +105,7 @@ int sara_graphics_main(int argc, char** argv)
 
   // Output save.
   namespace fs = boost::filesystem;
-  const auto basename = fs::basename(video_filepath);
+  const auto basename = fs::path{video_filepath}.stem().string();
   VideoWriter video_writer{
 #ifdef _WIN32
       "C:/Users/David/Desktop/" + basename + ".edge-detection.mp4",

@@ -64,4 +64,29 @@ namespace DO::Sara {
     const auto cosine = T(0.5) * (delta.trace() - T(1));
     return std::acos(cosine);
   }
-}
+
+  template <typename T>
+  inline auto calculate_yaw_pitch_roll(const Eigen::Quaternion<T>& q)
+      -> Eigen::Vector3<T>
+  {
+    // roll (x-axis rotation)
+    const auto sinr_cosp = 2 * (q.w() * q.x() + q.y() * q.z());
+    const auto cosr_cosp = 1 - 2 * (q.x() * q.x() + q.y() * q.y());
+    const auto roll = std::atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    const auto sinp = 2 * (q.w() * q.y() - q.z() * q.x());
+    const auto pitch =
+        std::abs(sinp) >= 1
+            ? std::copysign(M_PI / 2, sinp)  // use 90 degrees if out of range
+            : std::asin(sinp);
+
+    // yaw (z-axis rotation)
+    const auto siny_cosp = 2 * (q.w() * q.z() + q.x() * q.y());
+    const auto cosy_cosp = 1 - 2 * (q.y() * q.y() + q.z() * q.z());
+    const auto yaw = std::atan2(siny_cosp, cosy_cosp);
+
+    return {yaw, pitch, roll};
+  }
+
+}  // namespace DO::Sara

@@ -24,13 +24,13 @@ namespace DO::Sara {
 
   //! @defgroup RANSAC RANSAC
 
+  // clang-format off
   template <typename T>
   concept DataPointListConcept = requires(T data_points)
   {
     typename T::value_type;
-
-    {data_points[std::declval<int>()]};
-    {data_points.size()};
+    { data_points[std::declval<int>()] };
+    { data_points.size() };
   };
 
   template <typename T>
@@ -41,10 +41,9 @@ namespace DO::Sara {
     typename T::data_point_type;
     typename T::model_type;
 
-    // clang-format off
     { solver(std::declval<const typename T::data_point_type&>()) };
-    // clang-format on
   };
+  // clang-format on
 
 
   //! @brief Random Sample Consensus algorithm from Fischler and Bolles 1981.
@@ -184,11 +183,30 @@ namespace DO::Sara {
   //! @brief From vanilla RANSAC
   inline auto ransac_num_samples(double inlier_ratio,
                                  int minimal_sample_cardinality,
-                                 double confidence = 0.99) -> std::size_t
+                                 double confidence = 0.99) -> std::uint64_t
   {
-    return static_cast<std::size_t>(
-        std::log(1 - confidence) /
-        std::log(1 - std::pow(inlier_ratio, minimal_sample_cardinality)));
+    // Check the range of values...
+    if (!(0 <= inlier_ratio && inlier_ratio < 1))
+      throw std::runtime_error{
+          "Error: the inlier ratio must be in the open interval [0, 1["};
+    if (!(0 <= confidence && confidence < 1))
+      throw std::runtime_error{
+          "Error: the confidence value must be in the open interval [0, 1["};
+
+    const auto inlier_sample_probability =
+        std::max(std::numeric_limits<double>::epsilon(),
+                 std::pow(inlier_ratio, minimal_sample_cardinality));
+
+    // Numerical edge case.
+    // Because otherwise 'std::log(1 - inlier_sample_probability)' is 0 because
+    // of the floating point rounding error.
+    if (inlier_sample_probability <= std::numeric_limits<double>::epsilon())
+      return std::numeric_limits<std::uint64_t>::max();
+
+    const auto num_iter =
+        std::log(1 - confidence) / std::log(1 - inlier_sample_probability);
+
+    return static_cast<std::uint64_t>(num_iter);
   }
 
   //! @}

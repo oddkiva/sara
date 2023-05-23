@@ -11,8 +11,17 @@
 
 //! @example
 
-#include <algorithm>
-#include <cmath>
+#include "Easy.hpp"
+
+#include <DO/Sara/FeatureMatching.hpp>
+#include <DO/Sara/Features.hpp>
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
+#include <DO/Sara/Visualization.hpp>
+
+#include <DO/Shakti/Halide/SIFT/Draw.hpp>
+#include <DO/Shakti/Halide/SIFT/V2/Pipeline.hpp>
 
 #ifdef _OPENMP
 #  include <omp.h>
@@ -20,40 +29,22 @@
 
 #include <boost/program_options.hpp>
 
-#include <DO/Sara/Core.hpp>
-#include <DO/Sara/FeatureMatching.hpp>
-#include <DO/Sara/Features.hpp>
-#include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
-#include <DO/Sara/VideoIO.hpp>
-#include <DO/Sara/Visualization.hpp>
 
-#include <DO/Shakti/Halide/SIFT/Draw.hpp>
-#include <DO/Shakti/Halide/SIFT/V2/Pipeline.hpp>
+namespace fs = std::filesystem;
+namespace po = boost::program_options;
 
-#ifdef USE_SHAKTI_CUDA_VIDEOIO
-#  include <DO/Shakti/Cuda/VideoIO.hpp>
-#endif
-
-
-namespace sara = DO::Sara;
-namespace shakti = DO::Shakti;
-namespace halide = DO::Shakti::HalideBackend;
+using namespace std::string_literals;
 
 
 int __main(int argc, char** argv)
 {
   // Optimization.
 #ifdef _OPENMP
-  omp_set_num_threads(omp_get_max_threads());
+  const auto num_threads = omp_get_max_threads();
+  omp_set_num_threads(num_threads);
+  Eigen::setNbThreads(num_threads);
 #endif
   std::ios_base::sync_with_stdio(false);
-
-  namespace po = boost::program_options;
-
-  using namespace std::string_literals;
 
   // Video.
   auto video_filepath = std::string{};
@@ -110,10 +101,6 @@ int __main(int argc, char** argv)
   }
 
 
-  // ===========================================================================
-  // SARA PIPELINE
-  //
-  // Input and output from Sara.
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
   // Initialize CUDA driver.
   DriverApi::init();
@@ -124,36 +111,22 @@ int __main(int argc, char** argv)
   cuda_context.make_current();
 
   // nVidia's hardware accelerated video decoder.
-  shakti::VideoStream video_stream{video_filepath, cuda_context};
-  auto frame =
-      sara::Image<sara::Bgra8>{video_stream.width(), video_stream.height()};
-  auto device_bgra_buffer =
-      DriverApi::DeviceBgraBuffer{video_stream.width(), video_stream.height()};
+  auto video_stream = easy::VideoStream{fs::path{video_filepath}, cuda_context};
 #else
-  sara::VideoStream video_stream(video_filepath);
-  auto frame = video_stream.frame();
+  auto video_stream = easy::VideoStream{fs::path{video_filepath}};
 #endif
-
-  auto frame_gray = sara::Image<float>{frame.sizes()};
-  auto frame_gray_tensor =
-      tensor_view(frame_gray)
-          .reshape(
-              Eigen::Vector4i{1, 1, frame_gray.height(), frame_gray.width()});
+  auto grayscale_converter =
+      easy::ToGrayscaleColorConverter{video_stream.sizes()};
 
   // ===========================================================================
-  // HALIDE PIPELINE.
-  //
-  // RGB-grayscale conversion.
-  auto buffer_gray_4d = halide::as_runtime_buffer(frame_gray_tensor);
-
+  // SIFT.
   auto sift_pipeline = halide::v2::SiftPyramidPipeline{};
-
   sift_pipeline.profile = profile;
   sift_pipeline.initialize(start_octave_index, num_scales_per_octave,
-                           frame.width(), frame.height());
+                           video_stream.width(), video_stream.height());
 
   // Show the local extrema.
-  sara::create_window(frame.sizes());
+  sara::create_window(video_stream.sizes());
   sara::set_antialiasing();
 
   auto frames_read = 0;
@@ -176,23 +149,13 @@ int __main(int argc, char** argv)
   while (true)
   {
     sara::tic();
-#ifdef USE_SHAKTI_CUDA_VIDEOIO
-    const auto has_frame = video_stream.read(device_bgra_buffer);
-#else
     const auto has_frame = video_stream.read();
-#endif
     sara::toc("Read frame");
     if (!has_frame)
     {
       std::cout << "Reached the end of the video!" << std::endl;
       break;
     }
-
-#ifdef USE_SHAKTI_CUDA_VIDEOIO
-    sara::tic();
-    device_bgra_buffer.to_host(frame);
-    sara::toc("Copy to host");
-#endif
 
     ++frames_read;
     if (frames_read % (skip + 1) != 0)
@@ -201,16 +164,11 @@ int __main(int argc, char** argv)
     feature_timer.restart();
     {
       sara::tic();
-#ifdef USE_SHAKTI_CUDA_VIDEOIO
-      from_bgra8_to_gray32f(frame, frame_gray);
-#else
-      from_rgb8_to_gray32f(frame, frame_gray);
-#endif
+      grayscale_converter(video_stream.host_frame());
       sara::toc("CPU RGB to grayscale");
 
       sara::tic();
-      buffer_gray_4d.set_host_dirty();
-      sift_pipeline.feed(buffer_gray_4d);
+      sift_pipeline.feed(grayscale_converter.device_buffer());
       sara::toc("SIFT");
 
       sara::tic();
@@ -238,8 +196,8 @@ int __main(int argc, char** argv)
       sara::tic();
       if (!fprev.empty())
       {
-        static constexpr auto num_samples = 200.;
-        static constexpr auto f_err_thres = 4.;
+        static constexpr auto num_samples = 200;
+        static constexpr auto f_err_thres = 2.;
         std::tie(F, inliers, sample_best) = sara::estimate_fundamental_matrix(
             matches, keys_prev, keys_curr, num_samples, f_err_thres);
       }
@@ -249,13 +207,13 @@ int __main(int argc, char** argv)
 
     sara::tic();
 #ifdef USE_SHAKTI_CUDA_VIDEOIO
-    auto frame_rgb = frame.cwise_transform(  //
+    auto frame_rgb = video_stream.host_frame().cwise_transform(  //
         [](const sara::Bgra8& color) -> sara::Rgb8 {
           using namespace sara;
           return {color.channel<R>(), color.channel<G>(), color.channel<B>()};
         });
 #else
-    auto& frame_rgb = frame;
+    sara::Image<sara::Rgb8> frame_rgb = video_stream.host_frame();
 #endif
 
     if (!match_keypoints)

@@ -12,6 +12,7 @@
 //! @example
 //! This program parses Strecha's datasets.
 
+#include <DO/Sara/Core/Math/Rotation.hpp>
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
@@ -24,34 +25,13 @@
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 
+#include <filesystem>
 
-using namespace std;
+
+namespace fs = std::filesystem;
+
 using namespace std::string_literals;
 using namespace DO::Sara;
-
-
-auto calculate_yaw_pitch_roll(const Eigen::Matrix3d& R) -> Eigen::Vector3d
-{
-  const auto q = Eigen::Quaterniond{R};
-  // roll (x-axis rotation)
-  const auto sinr_cosp = 2 * (q.w() * q.x() + q.y() * q.z());
-  const auto cosr_cosp = 1 - 2 * (q.x() * q.x() + q.y() * q.y());
-  const auto roll = std::atan2(sinr_cosp, cosr_cosp);
-
-  // pitch (y-axis rotation)
-  const auto sinp = 2 * (q.w() * q.y() - q.z() * q.x());
-  const auto pitch =
-      std::abs(sinp) >= 1
-          ? std::copysign(M_PI / 2, sinp)  // use 90 degrees if out of range
-          : std::asin(sinp);
-
-  // yaw (z-axis rotation)
-  const auto siny_cosp = 2 * (q.w() * q.z() + q.x() * q.y());
-  const auto cosy_cosp = 1 - 2 * (q.y() * q.y() + q.z() * q.z());
-  const auto yaw = std::atan2(siny_cosp, cosy_cosp);
-
-  return {yaw, pitch, roll};
-}
 
 
 int main(int argc, char** argv)
@@ -69,15 +49,13 @@ int sara_graphics_main(int argc, char** argv)
 
   // Load images.
   print_stage("Loading images...");
-  const auto data_dir = argc < 2
-                            ? "/Users/david/Desktop/Datasets/sfm/castle_int"s
-                            : std::string{argv[1]};
+  const auto data_dir =
+      argc < 2 ? fs::path{"/Users/oddkiva/Desktop/datasets/sfm/castle_int"}
+               : fs::path{argv[1]};
   const auto image_id1 = std::string{argv[2]};
   const auto image_id2 = std::string{argv[3]};
-  views.image_paths = {
-      data_dir + "/" + image_id1 + ".png",
-      data_dir + "/" + image_id2 + ".png",
-  };
+  views.image_paths = {(data_dir / (image_id1 + ".png")).string(),
+                       (data_dir / (image_id2 + ".png")).string()};
   views.read_images();
   SARA_CHECK(views.images[0].sizes().transpose());
   SARA_CHECK(views.images[1].sizes().transpose());
@@ -85,12 +63,12 @@ int sara_graphics_main(int argc, char** argv)
 
   print_stage("Loading the internal camera matrices...");
   views.cameras.resize(2 /* views */);
-  views.cameras[0].K =
-      read_internal_camera_parameters(data_dir + "/" + image_id1 + ".png.K")
-          .cast<double>();
-  views.cameras[1].K =
-      read_internal_camera_parameters(data_dir + "/" + image_id2 + ".png.K")
-          .cast<double>();
+  views.cameras[0].K = read_internal_camera_parameters(
+                           (data_dir / (image_id1 + ".png.K")).string())
+                           .cast<double>();
+  views.cameras[1].K = read_internal_camera_parameters(
+                           (data_dir / (image_id2 + ".png.K")).string())
+                           .cast<double>();
   SARA_DEBUG << "K[0] =\n" << views.cameras[0].K << "\n";
   SARA_DEBUG << "K[1] =\n" << views.cameras[1].K << "\n";
 
@@ -126,7 +104,7 @@ int sara_graphics_main(int argc, char** argv)
   const auto u = std::array{homogeneous(extract_centers(f0)).cast<double>(),
                             homogeneous(extract_centers(f1)).cast<double>()};
 // #define USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
-#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+#if defined(USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS)
   // Tensors of camera coordinates.
   auto un = std::array{apply_transform(K_inv[0], u[0]),
                        apply_transform(K_inv[1], u[1])};
@@ -138,13 +116,13 @@ int sara_graphics_main(int argc, char** argv)
   // pair of point indices (i, j).
   const auto M = to_tensor(matches);
 
-#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+#if defined(USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS)
   const auto X = PointCorrespondenceList{M, un[0], un[1]};
 #else
   const auto X = PointCorrespondenceList{M, u[0], u[1]};
 #endif
 
-#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+#if defined(USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS)
   auto data_normalizer = std::nullopt;
 #else
   auto data_normalizer = std::make_optional(
@@ -163,7 +141,7 @@ int sara_graphics_main(int argc, char** argv)
 
     // N.B.: in my experience, the Sampson distance works less well than the
     // normal epipolar distance for the estimation of the essential matrix.
-#ifdef USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS
+#if defined(USE_BACKPROJECTED_RAYS_INSTEAD_OF_IMAGE_PIXELS)
     // To apply the Sampson distance or the symmetric line-point distance error:
     // - don't normalize the backprojected rays to unit norm.
     // - instead divide the vector by its z-components.
@@ -232,18 +210,18 @@ int sara_graphics_main(int argc, char** argv)
                                views.images[1],  //
                                two_view_geometry);
 
-#ifdef __APPLE__
-  const auto geometry_h5_filepath = "/Users/david/Desktop/geometry.h5"s;
+#if defined(__APPLE__)
+  const auto geometry_h5_filepath = "/Users/oddkiva/Desktop/geometry.h5"s;
 #else
   const auto geometry_h5_filepath = "/home/david/Desktop/geometry.h5"s;
 #endif
   auto geometry_h5_file = H5File{geometry_h5_filepath, H5F_ACC_TRUNC};
   save_to_hdf5(geometry_h5_file, two_view_geometry, colors);
-  geometry_h5_file.write_dataset("dataset_folder", data_dir, true);
+  geometry_h5_file.write_dataset("dataset_folder", data_dir.string(), true);
   geometry_h5_file.write_dataset("image_1", views.image_paths[0], true);
   geometry_h5_file.write_dataset("image_2", views.image_paths[1], true);
-  geometry_h5_file.write_dataset("K", data_dir + "/" + image_id1 + ".png.K",
-                                 true);
+  geometry_h5_file.write_dataset(
+      "K", (data_dir / (image_id1 + ".png.K")).string(), true);
 
   // Inspect the fundamental matrix.
   print_stage("Inspecting the fundamental matrix estimation...");
@@ -283,10 +261,11 @@ int sara_graphics_main(int argc, char** argv)
 
   for (const auto& [index, depth] : points)
   {
-    const Eigen::Vector2d ui = u1.col(index) * 0.25;
+    const Eigen::Vector2i ui =
+        (u1.col(index) * 0.25).array().round().cast<int>();
 
     auto color = Rgb8{};
-    color << 0, 0, int(linear(depth) * 255);
+    color << 0, 0, static_cast<int>(linear(depth) * 255);
     if (depth < 0)
       color = Red8;  // Highlight where the problem is...
     fill_circle(ui.x(), ui.y(), 5, color);
@@ -314,7 +293,7 @@ int sara_graphics_main(int argc, char** argv)
   const Eigen::Vector3d tw = P * (-R.transpose() * t);
 
   // The implementation.
-  const auto angles = calculate_yaw_pitch_roll(Rw);
+  const auto angles = calculate_yaw_pitch_roll(Eigen::Quaterniond{Rw});
   SARA_DEBUG << "Rw =\n" << Rw << std::endl;
   SARA_DEBUG << "tw =\n" << tw << std::endl;
 

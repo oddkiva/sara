@@ -149,7 +149,7 @@ namespace DO::Sara::v2 {
      *  wide enough.
      *
      */
-    inline auto lifting(const Eigen::Vector2<T>& m) const -> Eigen::Vector3<T>
+    auto lifting(const Eigen::Vector2<T>& m) const -> Eigen::Vector3<T>
     {
       // Calculate auxiliary terms.
       const auto xi_squared = xi() * xi();
@@ -238,8 +238,7 @@ namespace DO::Sara::v2 {
 
     //! @brief Backproject a 2D pixel coordinates back to the corresponding 3D
     //! light ray.
-    inline auto backproject(const Eigen::Vector2<T>& uv) const
-        -> Eigen::Vector3<T>
+    auto backproject(const Eigen::Vector2<T>& uv) const -> Eigen::Vector3<T>
     {
       // Back to normalized camera coordinates.
       const auto& u = uv.x();
@@ -258,7 +257,7 @@ namespace DO::Sara::v2 {
       return Xs;
     }
 
-    inline auto distort(const Eigen::Vector2<T>& xu) const -> Eigen::Vector2<T>
+    auto distort(const Eigen::Vector2<T>& xu) const -> Eigen::Vector2<T>
     {
       // Backproject the undistorted coordinates to a 3D ray.
       const auto& u = xu.x();
@@ -273,7 +272,7 @@ namespace DO::Sara::v2 {
       return xd;
     }
 
-    inline auto undistort(const Eigen::Vector2<T>& x) const -> Eigen::Vector2<T>
+    auto undistort(const Eigen::Vector2<T>& x) const -> Eigen::Vector2<T>
     {
       const Eigen::Vector2<T> Xs = backproject(x).hnormalized();
 
@@ -281,6 +280,17 @@ namespace DO::Sara::v2 {
       const auto v = fy() * Xs.y() + v0();
 
       return {u, v};
+    }
+
+    auto calibration_matrix() const -> Eigen::Matrix3<T>
+    {
+      // clang-format off
+      return (Eigen::Matrix3<T>{} <<
+          fx(), shear(), u0(),
+          T(0),    fy(), v0(),
+          T(0),    T(0), T(1)
+      ).finished();
+      // clang-format on
     }
   };
 

@@ -830,7 +830,7 @@ namespace DO::Sara {
   {
     for (const auto& c: P)
       if (std::isnan(c) || std::isinf(c))
-        throw std::runtime_error{"Polynomial contains nan or inf coefficients!"};
+        return {false, {}};
 
     auto solver = JenkinsTraub{P};
     solver.stage3_max_iter = stage3_max_iter;
