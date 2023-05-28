@@ -103,7 +103,7 @@ def generate_project(source_dir: str,
         my_cmake_prefix_paths.append(HALIDE_ROOT_PATH)
     elif SYSTEM == "Darwin":
         cmake_options.append("-D SARA_USE_HALIDE:BOOL=ON")
-        llvm_dir = subprocess.check_output(["brew", "--prefix", "llvm"])
+        llvm_dir = subprocess.check_output(["brew", "--prefix", "llvm@15"])
         llvm_dir = llvm_dir.decode(sys.stdout.encoding).strip()
         llvm_cmake_dir = pathlib.Path(llvm_dir) / "lib" / "cmake" / "llvm"
         cmake_options.append("-D LLVM_DIR={}".format(llvm_cmake_dir))
