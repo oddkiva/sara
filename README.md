@@ -2,8 +2,6 @@ Sara: C++ Computer Vision Library
 =================================
 
 [![GitLab CI Build Status](https://gitlab.com/DO-CV/sara/badges/master/pipeline.svg)](https://gitlab.com/DO-CV/sara/-/pipelines)
-[![GitHub Actions Build Status](https://github.com/DO-CV/sara/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/DO-CV/sara/actions)
-<a href="https://ci.appveyor.com/project/davidok8/do-cv"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
 [![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
 [![License](https://img.shields.io/badge/license-MPL2-blue.svg)](LICENSE)
 [![Codedocs Reference API Documentation](https://codedocs.xyz/DO-CV/sara.svg)](https://codedocs.xyz/DO-CV/sara/)
