@@ -1,4 +1,5 @@
 module SaraGraphics {
   header "CGraphics.hpp"
+  header "Graphics.hpp"
   export *
 }

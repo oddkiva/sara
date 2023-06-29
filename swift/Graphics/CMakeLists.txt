@@ -1,6 +1,8 @@
 find_package(DO_Sara COMPONENTS Graphics ImageIO VideoIO REQUIRED)
 
-add_library(SaraSwiftGraphics CGraphics.hpp CGraphics.cpp)
+add_library(SaraSwiftGraphics
+  CGraphics.hpp CGraphics.cpp
+  Graphics.hpp Graphics.cpp)
 target_include_directories(SaraSwiftGraphics
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}  # DO NOT REMOVE!
