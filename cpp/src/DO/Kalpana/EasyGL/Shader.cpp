@@ -99,9 +99,20 @@ namespace DO::Kalpana::GL {
   {
     create();
 
+#if 0
+    std::cout << "Attaching vertex shader " << vertex_shader
+              << " to program object " << program_object << std::endl;
+#endif
     glAttachShader(program_object, vertex_shader);
+#if 0
+    std::cout << "Attaching vertex shader " << fragment_shader
+              << " to program object " << program_object << std::endl;
+#endif
     glAttachShader(program_object, fragment_shader);
 
+#if 0
+    std::cout << "Link shader program " << program_object << std::endl;
+#endif
     glLinkProgram(program_object);
 
     // Linking sanity check.
@@ -173,6 +184,11 @@ namespace DO::Kalpana::GL {
       program_object = glCreateProgram();
     if (!program_object)
       throw std::runtime_error{"Failed to create shader program!"};
+
+#if 0
+    std::cout << "Created shader program with ID: " << program_object
+              << std::endl;
+#endif
   }
 
   void ShaderProgram::clear()

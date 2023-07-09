@@ -392,8 +392,8 @@ int main(int, [[maybe_unused]] char** argv)
   {
     auto app = GLFWApp{{800, 600}};
     // app.initialize(fs::path{argv[0]}.parent_path());
-    app.initialize(
-        fs::path{"/home/david/GitLab/DO-CV/sara/cpp/drafts/Emscripten"});
+    app.initialize(fs::path{"/home/david/GitLab/DO-CV"} / "sara" / "cpp" /
+                   "drafts" / "Emscripten");
     app.run();
     app.terminate();
   }
