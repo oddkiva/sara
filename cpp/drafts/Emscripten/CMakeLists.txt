@@ -19,12 +19,6 @@ list(
   APPEND
   GL_UTILS
   Geometry.hpp
-  # Implementation V1
-  MyGLFW.hpp
-  MyGLFW.cpp
-  Scene.hpp
-  Scene.cpp
-  # Implementation V2
   ImagePlaneRenderer.hpp
   ImagePlaneRenderer.cpp
   ImageDewarpRenderer.hpp

@@ -22,9 +22,9 @@
 #ifdef __EMSCRIPTEN__
 #  include <emscripten/emscripten.h>
 #  define GLFW_INCLUDE_ES3
-#else
-#  include <filesystem>
 #endif
+
+#include <filesystem>
 
 #include "Geometry.hpp"
 #include "ImageDewarpRenderer.hpp"
