@@ -230,7 +230,7 @@ int main(int, [[maybe_unused]] char** argv)
     auto app = GLFWApp{{800, 600}, "Image Plane Renderer"};
     // app.initialize(fs::path{argv[0]}.parent_path());
     app.initialize(fs::path{"/home/david/GitLab/DO-CV"} / "sara" / "cpp" /
-                   "drafts" / "Emscripten");
+                   "examples" / "Kalpana" / "Emscripten");
     app.run();
     app.terminate();
   }

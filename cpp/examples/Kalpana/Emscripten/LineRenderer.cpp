@@ -36,19 +36,27 @@ auto LineRenderer::LineHostData::add_line_segment(const Eigen::Vector2f& a,
   // Store the quad vertices.
   _vertices.push_back(a0.x());
   _vertices.push_back(a0.y());
+#if 0
   std::cout << a0.transpose() << std::endl;
+#endif
 
   _vertices.push_back(a1.x());
   _vertices.push_back(a1.y());
+#if 0
   std::cout << a1.transpose() << std::endl;
+#endif
 
   _vertices.push_back(b0.x());
   _vertices.push_back(b0.y());
+#if 0
   std::cout << b0.transpose() << std::endl;
+#endif
 
   _vertices.push_back(b1.x());
   _vertices.push_back(b1.y());
+#if 0
   std::cout << b1.transpose() << std::endl;
+#endif
 
   // Tesselate the quad into two right triangles.
   _triangles.push_back(n + 0);  // a0
@@ -59,9 +67,11 @@ auto LineRenderer::LineHostData::add_line_segment(const Eigen::Vector2f& a,
   _triangles.push_back(n + 3);  // b1
   _triangles.push_back(n + 1);  // a1
 
+#if 0
   for (const auto& i : _triangles)
     std::cout << i << " ";
   std::cout << std::endl;
+#endif
 }
 
 auto LineRenderer::LineHostData::add_line_segment_in_pixel_coordinates(
@@ -92,14 +102,18 @@ auto LineRenderer::LineShaderData::set_data(const LineHostData& host_data)
   // Allocate the GL buffers.
   if (_vbo == 0)
   {
+#if 0
     std::cout << "Generating VBO" << std::endl;
+#endif
     _vbo.generate();
   }
   if (_ebo == 0)
     _ebo.generate();
 
   _triangle_index_count = host_data._triangles.size();
+#if 0
   std::cout << _triangle_index_count << std::endl;
+#endif
 
   glBindVertexArray(_vao);
   glEnableVertexAttribArray(0);
