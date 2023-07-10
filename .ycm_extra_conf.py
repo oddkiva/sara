@@ -79,6 +79,8 @@ flags = [
 "-I", "/usr/local/cuda/include",
 # nVidia Video Codec SDK.
 "-I", "/opt/Video_Codec_SDK_9.1.23/include",
+# ONNX Runtime.
+"-I", "/home/david/opt/onnxruntime-linux-x64-gpu-1.14.0/include",
 # Current header directories.
 "-I", "cpp",
 "-I", "cpp/src",

@@ -26,6 +26,8 @@ if(SARA_USE_FROM_SOURCE)
                 shakti_scale_32f_cpu
                 shakti_reduce_32f_cpu
                 shakti_enlarge_cpu
+                # Rotate functions.
+                shakti_rotate_cw_90_rgb8_cpu
                 # Differential operations.
                 shakti_gradient_2d_32f_cpu
                 shakti_polar_gradient_2d_32f_cpu

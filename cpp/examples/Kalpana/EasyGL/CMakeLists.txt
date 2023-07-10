@@ -24,3 +24,5 @@ foreach(file ${example_FILES})
 
   set_property(TARGET ${filename} PROPERTY FOLDER "Examples/Kalpana/EasyGL")
 endforeach()
+
+target_link_libraries(hello_video PRIVATE DO::Sara::VideoIO)

@@ -12,6 +12,7 @@
 #pragma once
 
 #include <NvInfer.h>
+#include <NvOnnxParser.h>
 
 #include <DO/Shakti/Cuda/Utilities/ErrorCheck.hpp>
 
@@ -54,7 +55,6 @@ namespace DO::Sara::TensorRT {
       return;
     SHAKTI_SAFE_CUDA_CALL(cudaStreamDestroy(*cuda_stream));
     delete cuda_stream;
-    cuda_stream = nullptr;
   }
 
   template <typename NVInferObject>
@@ -62,7 +62,6 @@ namespace DO::Sara::TensorRT {
   {
     if (object != nullptr)
       delete object;
-    object = nullptr;
   }
 
   inline auto delete_network_def(nvinfer1::INetworkDefinition* network_def)
@@ -127,6 +126,12 @@ namespace DO::Sara::TensorRT {
     delete_nvinfer_object(memory);
   }
 
+  inline auto onnx_parser_deleter(nvonnxparser::IParser* parser) -> void
+  {
+    delete parser;
+  }
+
+
   using BuilderUniquePtr =
       std::unique_ptr<nvinfer1::IBuilder, decltype(&delete_builder)>;
   using NetworkUniquePtr = std::unique_ptr<nvinfer1::INetworkDefinition,
@@ -143,5 +148,7 @@ namespace DO::Sara::TensorRT {
       std::unique_ptr<nvinfer1::IBuilderConfig, decltype(&config_deleter)>;
   using ContextUniquePtr =
       std::unique_ptr<nvinfer1::IExecutionContext, decltype(&context_deleter)>;
+  using OnnxParserUniquePtr =
+      std::unique_ptr<nvonnxparser::IParser, decltype(&onnx_parser_deleter)>;
 
 }  // namespace DO::Sara::TensorRT

@@ -59,9 +59,9 @@ namespace DO::Sara {
       return Xn;
     }
 
-    inline auto denormalize(const Eigen::Matrix3d& H) const -> Eigen::Matrix3d
+    inline auto denormalize(Eigen::Matrix3d& H) const -> void
     {
-      return T2_inv * H * T1;
+      H = T2_inv * H * T1;
     }
 
     Eigen::Matrix3d T1;
@@ -101,10 +101,9 @@ namespace DO::Sara {
       return Xn;
     }
 
-
-    auto denormalize(const Eigen::Matrix3d& F) const -> Eigen::Matrix3d
+    auto denormalize(Eigen::Matrix3d& F) const -> void
     {
-      return (T2.transpose() * F * T1).normalized();
+      F = (T2.transpose() * F * T1).normalized();
     }
 
     Eigen::Matrix3d T1;
@@ -142,9 +141,9 @@ namespace DO::Sara {
       return Xn;
     }
 
-    auto denormalize(const Eigen::Matrix3d& E) const -> Eigen::Matrix3d
+    //! @brief Dummy implementation.
+    auto denormalize(const Eigen::Matrix3d&) const -> void
     {
-      return E;
     }
 
     Eigen::Matrix3d K1_inv;
@@ -181,9 +180,9 @@ namespace DO::Sara {
       return Xn;
     }
 
-    auto denormalize(const TwoViewGeometry& g) const -> TwoViewGeometry
+    //! @brief Dummy implementation.
+    auto denormalize(const TwoViewGeometry&) const -> void
     {
-      return g;
     }
 
     Eigen::Matrix3d K1_inv;

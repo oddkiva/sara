@@ -52,7 +52,7 @@ namespace DO::Sara {
   };
 
   //! @brief Functor evaluating distance of a point to its epipolar line.
-  struct SymmetricEpipolarSquaredLinePointDistance
+  struct SymmetricEpipolarGeometricSquaredDistance
   {
     auto set_model(const Eigen::Matrix3d& F_) -> void
     {

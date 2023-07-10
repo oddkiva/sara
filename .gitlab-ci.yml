@@ -138,5 +138,5 @@ pages:
 staging:
   stage: deploy
   trigger:
-    project: DO-CV/sara-book
+    project: oddkiva/sara-book
     branch: master

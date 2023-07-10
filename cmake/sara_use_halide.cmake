@@ -1,23 +1,4 @@
-# If the link fails, run `install_name_tool` to update the install name in
-# `libHalide.dylib` file.
-#
-# I have installed halide in `/opt/halide`:
-#
-# $ cd /opt/halide/bin
-# $ install_name_tool -id "/opt/halide/bin/libHalide.dylib" libHalide.dylib
-#
-# References:
-# - https://github.com/halide/Halide/issues/2821
-# - https://stackoverflow.com/questions/33991581/install-name-tool-to-update-a-executable-to-search-for-dylib-in-mac-os-x
-#
-# Then:
-# - MacOSX will complain about the unverified dylib file. Click on the help
-# button from the dialog box that popped up.
-# - Follow the instructions in the user guide to allow the use of this file.
-
 find_package(Halide REQUIRED)
-
-include(SaraHalideGeneratorHelpers)
 
 
 if (NOT SHAKTI_HALIDE_GPU_TARGETS)
@@ -42,7 +23,7 @@ function (shakti_halide_library _source_filepath)
     ${DO_Sara_ThirdParty_DIR}/eigen)
   target_link_libraries(${_source_filename}.generator PRIVATE Halide::Generator)
 
-  sara_add_halide_library(${_source_filename}
+  add_halide_library(${_source_filename}
     FROM ${_source_filename}.generator)
 
   foreach (suffix IN ITEMS ""
@@ -109,12 +90,12 @@ function (shakti_halide_library_v2)
   target_link_libraries(${generator_NAME}.generator PRIVATE Halide::Generator)
 
   if (generator_HALIDE_TARGET_FEATURES)
-    sara_add_halide_library(${generator_NAME}
+    add_halide_library(${generator_NAME}
       FROM ${generator_NAME}.generator
       TARGETS host
       FEATURES ${generator_HALIDE_TARGET_FEATURES})
   else ()
-    sara_add_halide_library(${generator_NAME}
+    add_halide_library(${generator_NAME}
       FROM ${generator_NAME}.generator
       TARGETS host)
   endif()

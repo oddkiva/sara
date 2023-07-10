@@ -181,8 +181,10 @@ auto make_point_cloud(const std::string& h5_filepath)
   // Encode the vertex data in a tensor.
   const auto vertex_data = read_point_cloud(h5_filepath);
   SARA_DEBUG << "vertices =\n" << vertex_data.matrix().topRows(20) << std::endl;
-  SARA_DEBUG << "min =\n" << vertex_data.matrix().colwise().minCoeff() << std::endl;
-  SARA_DEBUG << "max =\n" << vertex_data.matrix().colwise().maxCoeff() << std::endl;
+  SARA_DEBUG << "min =\n"
+             << vertex_data.matrix().colwise().minCoeff() << std::endl;
+  SARA_DEBUG << "max =\n"
+             << vertex_data.matrix().colwise().maxCoeff() << std::endl;
   return vertex_data;
 }
 
@@ -328,8 +330,8 @@ private:
   Tensor_<float, 2> m_vertices;
 
   //! @brief GPU data.
-  QOpenGLShaderProgram *m_program{nullptr};
-  QOpenGLVertexArrayObject *m_vao{nullptr};
+  QOpenGLShaderProgram* m_program{nullptr};
+  QOpenGLVertexArrayObject* m_vao{nullptr};
   QOpenGLBuffer m_vbo{QOpenGLBuffer::VertexBuffer};
   std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
                                         {"in_color", 1}};
@@ -460,7 +462,8 @@ public:
 
   auto initialize_geometry_on_gpu() -> void
   {
-    SARA_DEBUG << "Initialize checkerboard geometry data on GPU..." << std::endl;
+    SARA_DEBUG << "Initialize checkerboard geometry data on GPU..."
+               << std::endl;
     m_vao = new QOpenGLVertexArrayObject{this};
     if (!m_vao->create())
       throw QException{};
@@ -544,8 +547,8 @@ private:
 
   //! @{
   //! @brief GPU data.
-  QOpenGLShaderProgram *m_program{nullptr};
-  QOpenGLVertexArrayObject *m_vao{nullptr};
+  QOpenGLShaderProgram* m_program{nullptr};
+  QOpenGLVertexArrayObject* m_vao{nullptr};
   QOpenGLBuffer m_vbo{QOpenGLBuffer::VertexBuffer};
   QOpenGLBuffer m_ebo{QOpenGLBuffer::IndexBuffer};
   std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
@@ -604,7 +607,8 @@ public:
 
     // Because the z is negative in OpenGL.
     corners.row(2) *= -1;
-    //SARA_DEBUG << "Z-negative normalized corners =\n" << corners << std::endl;
+    // SARA_DEBUG << "Z-negative normalized corners =\n" << corners <<
+    // std::endl;
     SARA_DEBUG << "Z-negative corners =\n" << corners << std::endl;
 
     // Vertex coordinates.
@@ -791,13 +795,13 @@ private:
 
   //! @{
   //! @brief GPU data.
-  QOpenGLShaderProgram *m_program{nullptr};
-  QOpenGLVertexArrayObject *m_vao{nullptr};
+  QOpenGLShaderProgram* m_program{nullptr};
+  QOpenGLVertexArrayObject* m_vao{nullptr};
   QOpenGLBuffer m_vbo{QOpenGLBuffer::VertexBuffer};
   QOpenGLBuffer m_ebo{QOpenGLBuffer::IndexBuffer};
-  QOpenGLTexture *m_texture{nullptr};
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                        {"in_tex_coords", 1},   //
+  QOpenGLTexture* m_texture{nullptr};
+  std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
+                                        {"in_tex_coords", 1},  //
                                         {"out_color", 0}};
   //! @}
 };
@@ -813,9 +817,9 @@ private:
 
   Camera m_camera;
   Timer m_timer;
-  CheckerBoardObject *m_checkerboard{nullptr};
-  PointCloudObject *m_pointCloud{nullptr};
-  ImagePlane *m_imagePlane{nullptr};
+  CheckerBoardObject* m_checkerboard{nullptr};
+  PointCloudObject* m_pointCloud{nullptr};
+  ImagePlane* m_imagePlane{nullptr};
 
 public:
   Window(const QString& h5_file)
@@ -847,26 +851,28 @@ public:
 
     // Instantiate the objects.
     m_checkerboard = new CheckerBoardObject{20, 20, 10, context()};
-    m_pointCloud = new PointCloudObject{make_point_cloud(m_h5_file.toStdString()), context()};
+    m_pointCloud = new PointCloudObject{
+        make_point_cloud(m_h5_file.toStdString()), context()};
     m_imagePlane = new ImagePlane{context()};
 
-    // Read HDF5 file.
-    auto h5_file = H5File{m_h5_file.toStdString(), H5F_ACC_RDONLY};
-    auto data_dir = std::string{};
-    h5_file.read_dataset("dataset_folder", data_dir);
+    if (m_imagePlane != nullptr)
+    {
+      // Read HDF5 file.
+      auto h5_file = H5File{m_h5_file.toStdString(), H5F_ACC_RDONLY};
+      auto data_dir = std::string{};
+      h5_file.read_dataset("dataset_folder", data_dir);
 
-    auto image_filepath = std::string{};
-    h5_file.read_dataset("image_1", image_filepath);
-    m_imagePlane->set_image(image_filepath);
+      auto image_filepath = std::string{};
+      h5_file.read_dataset("image_1", image_filepath);
+      m_imagePlane->set_image(image_filepath);
 
-    auto K_filepath = std::string{};
-    h5_file.read_dataset("K", K_filepath);
-    auto camera = PinholeCameraDecomposition{
-      read_internal_camera_parameters(K_filepath),
-      Matrix3d::Identity(),
-      Vector3d::Zero()
-    };
-    m_imagePlane->set_camera(camera);
+      auto K_filepath = std::string{};
+      h5_file.read_dataset("K", K_filepath);
+      auto camera = PinholeCameraDecomposition{
+          read_internal_camera_parameters(K_filepath), Matrix3d::Identity(),
+          Vector3d::Zero()};
+      m_imagePlane->set_camera(camera);
+    }
   }
 
   void paintGL() override
@@ -887,18 +893,16 @@ public:
     // Checkerboard.
     m_transform.setToIdentity();
 
-    //m_transform.rotate(std::pow(1.5, 5) * m_timer.elapsed_ms() / 500,
-    //                   QVector3D{0.5f, 1.0f, 0.0f}.normalized());
-
     m_checkerboard->render(m_projection, m_view, m_transform);
     m_pointCloud->render(m_projection, m_view, m_transform);
-    m_imagePlane->render(m_projection, m_view, m_transform);
+    if (m_imagePlane != nullptr)
+      m_imagePlane->render(m_projection, m_view, m_transform);
   }
 
 protected:
-  void keyPressEvent(QKeyEvent *ev) override
+  void keyPressEvent(QKeyEvent* ev) override
   {
-     move_camera_from_keyboard(ev->key());
+    move_camera_from_keyboard(ev->key());
   }
 
   auto move_camera_from_keyboard(int key) -> void
@@ -984,14 +988,16 @@ protected:
 };
 
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   using namespace std::string_literals;
-#ifdef __APPLE__
-  const auto geometry_h5_file = "/Users/david/Desktop/geometry.h5"s;
+#if defined(__APPLE__)
+  auto geometry_h5_file = "/Users/oddkiva/Desktop/geometry.h5"s;
 #else
-  const auto geometry_h5_file = "/home/david/Desktop/geometry.h5"s;
+  auto geometry_h5_file = "/home/david/Desktop/geometry.h5"s;
 #endif
+  if (argc >= 2)
+    geometry_h5_file = argv[1];
 
   QGuiApplication app(argc, argv);
   QSurfaceFormat format;

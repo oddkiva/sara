@@ -217,6 +217,17 @@ namespace DO::Sara::v2 {
       const Eigen::Vector2<T> xun = correct_lens_distortion(xdn);
       return to_pixel_coordinates(xun);
     }
+
+    auto calibration_matrix() const -> Eigen::Matrix3<T>
+    {
+      // clang-format off
+      return (Eigen::Matrix3<T>{} <<
+          fx(), shear(), u0(),
+          T(0),    fy(), v0(),
+          T(0),    T(0), T(1)
+      ).finished();
+      // clang-format on
+    }
   };
 
   template <typename T>
