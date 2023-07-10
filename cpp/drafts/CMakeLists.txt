@@ -25,6 +25,4 @@ add_subdirectory(NuScenes)
 
 add_subdirectory(Taskflow)
 
-add_subdirectory(Emscripten)
-
 add_subdirectory(OnnxRuntime)
