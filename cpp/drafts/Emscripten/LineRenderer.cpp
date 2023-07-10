@@ -120,16 +120,6 @@ auto LineRenderer::LineShaderData::destroy() -> void
 }
 
 
-std::unique_ptr<LineRenderer> LineRenderer::_instance = nullptr;
-
-
-auto LineRenderer::instance() -> LineRenderer&
-{
-  if (_instance == nullptr)
-    _instance.reset(new LineRenderer{});
-  return *_instance;
-}
-
 auto LineRenderer::initialize() -> void
 {
   // Create a vertex shader.

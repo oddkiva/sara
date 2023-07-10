@@ -55,16 +55,6 @@ auto ImagePlaneRenderer::ImageTexture::destroy() -> void
 }
 
 
-std::unique_ptr<ImagePlaneRenderer> ImagePlaneRenderer::_instance = nullptr;
-
-
-auto ImagePlaneRenderer::instance() -> ImagePlaneRenderer&
-{
-  if (_instance.get() == nullptr)
-    _instance.reset(new ImagePlaneRenderer{});
-  return *_instance;
-}
-
 auto ImagePlaneRenderer::initialize() -> void
 {
   // Create a vertex shader.

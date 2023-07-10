@@ -125,12 +125,7 @@ public:
     _program_dir_path = program_dir_path;
 #endif
 
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    image_plane_renderer.initialize();
     initialize_image_textures();
-
-    auto& image_dewarp_renderer = ImageDewarpRenderer::instance();
-    image_dewarp_renderer.initialize();
     initialize_camera_parameters();
 
     // Specific rendering options.
@@ -158,6 +153,8 @@ public:
 private:
   auto initialize_image_textures() -> void
   {
+    _image_plane_renderer.initialize();
+
 #ifdef __EMSCRIPTEN__
     // const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
     auto image = sara::Image<sara::Rgb8>{1920, 1080};
@@ -172,8 +169,7 @@ private:
         (_program_dir_path / "assets/image-omni.png").string());
 #endif
 
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    auto& image_textures = image_plane_renderer._textures;
+    auto& image_textures = _image_plane_renderer._textures;
     image_textures.resize(1);
 
     auto& image_texture = image_textures.front();
@@ -193,6 +189,8 @@ private:
 
   auto initialize_camera_parameters() -> void
   {
+    _image_dewarp_renderer.initialize();
+
     // clang-format off
     const auto K = (Eigen::Matrix3f{} <<
       1041.55762f, -2.31719828f, 942.885742f,
@@ -223,11 +221,8 @@ private:
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    const auto& image_texture = image_plane_renderer._textures.front();
-
-    auto& image_dewarp_renderer = ImageDewarpRenderer::instance();
-    image_dewarp_renderer.render(image_texture, _camera_params, _dewarp_mode);
+    const auto& image_texture = _image_plane_renderer._textures.front();
+    _image_dewarp_renderer.render(image_texture, _camera_params, _dewarp_mode);
 
     glfwSwapBuffers(_window);
     glfwPollEvents();
@@ -236,17 +231,15 @@ private:
   auto cleanup_gl_objects() -> void
   {
     // Destroy the shaders and quad geometry data.
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    image_plane_renderer.destroy_gl_objects();
+    _image_plane_renderer.destroy_gl_objects();
 
     // Destroy the image textures.
-    auto& image_textures = image_plane_renderer._textures;
+    auto& image_textures = _image_plane_renderer._textures;
     for (auto i = 0u; i < image_textures.size(); ++i)
       image_textures[i].destroy();
     image_textures.clear();
 
-    auto& image_dewarp_renderer = ImageDewarpRenderer::instance();
-    image_dewarp_renderer.destroy_gl_objects();
+    _image_dewarp_renderer.destroy_gl_objects();
   }
 
 private: /* callbacks */
@@ -257,7 +250,7 @@ private: /* callbacks */
     app._window_sizes << width, height;
     const auto aspect_ratio = static_cast<float>(width) / height;
 
-    auto& image = ImagePlaneRenderer::instance()._textures.front();
+    auto& image = app._image_plane_renderer._textures.front();
     image._projection = orthographic(-0.5f * aspect_ratio, 0.5f * aspect_ratio,
                                      -0.5f, 0.5f, -0.5f, 0.5f);
   }
@@ -377,6 +370,9 @@ private: /* convenience free functions. */
 private:
   GLFWwindow* _window = nullptr;
   Eigen::Vector2i _window_sizes = Eigen::Vector2i::Zero();
+
+  ImagePlaneRenderer _image_plane_renderer;
+  ImageDewarpRenderer _image_dewarp_renderer;
 
 #ifndef __EMSCRIPTEN__
   fs::path _program_dir_path;

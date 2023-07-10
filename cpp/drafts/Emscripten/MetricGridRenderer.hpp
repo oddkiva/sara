@@ -80,10 +80,6 @@ struct MetricGridRenderer
 
   std::vector<LineShaderData> _lines;
 
-  static std::unique_ptr<MetricGridRenderer> _instance;
-
-  static auto instance() -> MetricGridRenderer&;
-
   auto initialize() -> void;
 
   auto destroy_gl_objects() -> void;

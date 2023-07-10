@@ -119,8 +119,6 @@ public:
     _program_dir_path = program_dir_path;
 #endif
 
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    image_plane_renderer.initialize();
     initialize_image_textures();
 
     // Specific rendering options.
@@ -153,10 +151,9 @@ private:
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    const auto& image_textures = image_plane_renderer._textures;
+    const auto& image_textures = _image_plane_renderer._textures;
     for (const auto& image_texture : image_textures)
-      image_plane_renderer.render(image_texture);
+      _image_plane_renderer.render(image_texture);
 
     glfwSwapBuffers(_window);
     glfwPollEvents();
@@ -164,6 +161,8 @@ private:
 
   auto initialize_image_textures() -> void
   {
+    _image_plane_renderer.initialize();
+
 #ifdef __EMSCRIPTEN__
     const auto images = std::array<sara::Image<sara::Rgb8>, 2>{
         sara::imread<sara::Rgb8>("assets/image-omni.png"),
@@ -185,8 +184,7 @@ private:
     };
 #endif
 
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    auto& image_textures = image_plane_renderer._textures;
+    auto& image_textures = _image_plane_renderer._textures;
     image_textures.resize(2);
     for (auto i = 0; i < 2; ++i)
     {
@@ -206,11 +204,10 @@ private:
   auto cleanup_gl_objects() -> void
   {
     // Destroy the shaders and quad geometry data.
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    image_plane_renderer.destroy_gl_objects();
+    _image_plane_renderer.destroy_gl_objects();
 
     // Destroy the image textures.
-    auto& image_textures = image_plane_renderer._textures;
+    auto& image_textures = _image_plane_renderer._textures;
     for (auto i = 0u; i < image_textures.size(); ++i)
       image_textures[i].destroy();
 
@@ -222,6 +219,8 @@ private:
   GLFWwindow* _window = nullptr;
   Eigen::Vector2i _window_sizes = Eigen::Vector2i::Zero();
   fs::path _program_dir_path;
+
+  ImagePlaneRenderer _image_plane_renderer;
 };
 
 int main(int, [[maybe_unused]] char** argv)
