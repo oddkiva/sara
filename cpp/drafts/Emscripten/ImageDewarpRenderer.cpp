@@ -17,16 +17,6 @@
 namespace sara = DO::Sara;
 
 
-std::unique_ptr<ImageDewarpRenderer> ImageDewarpRenderer::_instance = nullptr;
-
-
-auto ImageDewarpRenderer::instance() -> ImageDewarpRenderer&
-{
-  if (_instance == nullptr)
-    _instance.reset(new ImageDewarpRenderer{});
-  return *_instance;
-}
-
 auto ImageDewarpRenderer::initialize() -> void
 {
   // Create a vertex shader.

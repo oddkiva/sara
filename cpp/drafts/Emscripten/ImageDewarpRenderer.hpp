@@ -59,10 +59,6 @@ struct ImageDewarpRenderer
   DO::Kalpana::GL::Buffer _vbo;
   DO::Kalpana::GL::Buffer _ebo;
 
-  static std::unique_ptr<ImageDewarpRenderer> _instance;
-
-  static auto instance() -> ImageDewarpRenderer&;
-
   auto initialize() -> void;
 
   auto destroy_gl_objects() -> void;

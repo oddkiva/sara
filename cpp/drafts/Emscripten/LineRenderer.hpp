@@ -76,10 +76,6 @@ struct LineRenderer
   // Line data.
   std::vector<LineShaderData> _lines;
 
-  static std::unique_ptr<LineRenderer> _instance;
-
-  static auto instance() -> LineRenderer&;
-
   auto initialize() -> void;
 
   auto destroy_gl_objects() -> void;

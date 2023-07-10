@@ -55,12 +55,6 @@ struct ImagePlaneRenderer
   GLint _image_sizes_loc;
   GLint _image_loc;
 
-
-  // The singleton.
-  static std::unique_ptr<ImagePlaneRenderer> _instance;
-
-  static auto instance() -> ImagePlaneRenderer&;
-
   auto initialize() -> void;
 
   auto destroy_gl_objects() -> void;

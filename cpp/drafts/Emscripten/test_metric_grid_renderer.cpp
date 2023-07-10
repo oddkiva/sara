@@ -135,12 +135,10 @@ public:
     ImGui_ImplOpenGL3_Init("#version 300 es");
     ImGui::StyleColorsDark();
 
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    image_plane_renderer.initialize();
+    _image_plane_renderer.initialize();
     initialize_image_texture();
 
-    auto& metric_grid_renderer = MetricGridRenderer::instance();
-    metric_grid_renderer.initialize();
+    _metric_grid_renderer.initialize();
     initialize_metric_grid({-50, 50}, {-50, 50});
 
     // Specific rendering options.
@@ -190,8 +188,7 @@ public:
         P;
     const auto t = Eigen::Vector3f(0, 0, 1.51f);
 
-    auto& grid_renderer = MetricGridRenderer::instance();
-    auto& line_batches = grid_renderer._lines;
+    auto& line_batches = _metric_grid_renderer._lines;
     for (auto& lines : line_batches)
     {
       lines._extrinsics.topLeftCorner(3, 3) = R.transpose();
@@ -246,14 +243,12 @@ private:
 
     // Render the scene.
     {
-      auto& image_plane_renderer = ImagePlaneRenderer::instance();
-      const auto& image_texture = image_plane_renderer._textures.front();
-      image_plane_renderer.render(image_texture);
+      const auto& image_texture = _image_plane_renderer._textures.front();
+      _image_plane_renderer.render(image_texture);
 
-      auto& grid_renderer = MetricGridRenderer::instance();
-      const auto& lines = grid_renderer._lines;
+      const auto& lines = _metric_grid_renderer._lines;
       for (auto i = 0u; i < lines.size(); ++i)
-        grid_renderer.render(image_texture, lines[i]);
+        _metric_grid_renderer.render(image_texture, lines[i]);
     }
 
     // Render ImGUI.
@@ -276,13 +271,12 @@ private:
         (_program_dir_path / "assets/image-omni.png").string());
 #endif
 
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    auto& image_textures = image_plane_renderer._textures;
+    auto& image_textures = _image_plane_renderer._textures;
     image_textures.resize(1);
 
     // Transfer the CPU image data to the GPU texture.
     static constexpr auto texture_unit = 0;
-    auto& image_texture = image_plane_renderer._textures.front();
+    auto& image_texture = _image_plane_renderer._textures.front();
     image_texture.set_texture(image, texture_unit);
 
     // Geometry
@@ -340,8 +334,7 @@ private:
     const auto& sq_size = square_size_in_meters;
     const auto& s = line_discretization_step;
 
-    auto& grid_renderer = MetricGridRenderer::instance();
-    auto& gl_lines = grid_renderer._lines;
+    auto& gl_lines = _metric_grid_renderer._lines;
     gl_lines.resize(2);
 
     auto line_data = MetricGridRenderer::LineHostData{};
@@ -382,21 +375,18 @@ private:
   auto cleanup_gl_objects() -> void
   {
     // Destroy the shaders and quad geometry data.
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    image_plane_renderer.destroy_gl_objects();
-
-    auto& grid_renderer = MetricGridRenderer::instance();
-    grid_renderer.destroy_gl_objects();
+    _image_plane_renderer.destroy_gl_objects();
+    _metric_grid_renderer.destroy_gl_objects();
 
     // Destroy the image textures.
-    auto& image_textures = image_plane_renderer._textures;
+    auto& image_textures = _image_plane_renderer._textures;
     for (auto i = 0u; i < image_textures.size(); ++i)
       image_textures[i].destroy();
     image_textures.clear();
     image_textures.clear();
 
     // Destroy the line buffers.
-    auto& lines = grid_renderer._lines;
+    auto& lines = _metric_grid_renderer._lines;
     for (auto i = 0u; i < image_textures.size(); ++i)
       lines[i].destroy();
     lines.clear();
@@ -410,7 +400,7 @@ public: /* callbacks */
     app._window_sizes << width, height;
     const auto aspect_ratio = static_cast<float>(width) / height;
 
-    auto& image = ImagePlaneRenderer::instance()._textures.front();
+    auto& image = app._image_plane_renderer._textures.front();
     image._projection = orthographic(-0.5f * aspect_ratio, 0.5f * aspect_ratio,
                                      -0.5f, 0.5f, -0.5f, 0.5f);
   }
@@ -425,7 +415,7 @@ public: /* callbacks */
       return;
 
     auto& app = get_app(window);
-    auto& image = ImagePlaneRenderer::instance()._textures.front();
+    auto& image = app._image_plane_renderer._textures.front();
 
     static constexpr auto angle_step = 0.5f;
 
@@ -474,10 +464,11 @@ public: /* callbacks */
     app.update_rotation();
   }
 
-  static auto scroll_callback(GLFWwindow* /*window*/, double /*xoffset */,
+  static auto scroll_callback(GLFWwindow* window, double /*xoffset */,
                               double yoffset) -> void
   {
-    auto& image = ImagePlaneRenderer::instance()._textures.front();
+    auto& app = get_app(window);
+    auto& image = app._image_plane_renderer._textures.front();
 
     if (yoffset > 0)
     {
@@ -513,6 +504,9 @@ private:
   // Extrinsic camera parameter state.
   std::array<float, 3> _ypr_deg = {0, 0, 0};
   bool _rotation_changed = false;
+
+  ImagePlaneRenderer _image_plane_renderer;
+  MetricGridRenderer _metric_grid_renderer;
 };
 
 int main(int, [[maybe_unused]] char** argv)

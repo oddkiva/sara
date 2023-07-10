@@ -89,16 +89,6 @@ auto MetricGridRenderer::LineShaderData::destroy() -> void
   _ebo.destroy();
 }
 
-std::unique_ptr<MetricGridRenderer> MetricGridRenderer::_instance = nullptr;
-
-
-auto MetricGridRenderer::instance() -> MetricGridRenderer&
-{
-  if (_instance == nullptr)
-    _instance.reset(new MetricGridRenderer{});
-  return *_instance;
-}
-
 auto MetricGridRenderer::initialize() -> void
 {
   // Create a vertex shader.

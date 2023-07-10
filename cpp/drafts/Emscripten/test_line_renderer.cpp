@@ -116,12 +116,9 @@ public:
     _program_dir_path = program_dir_path;
 #endif
 
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    image_plane_renderer.initialize();
     initialize_image_textures();
 
-    auto& line_renderer = LineRenderer::instance();
-    line_renderer.initialize();
+    _line_renderer.initialize();
     initialize_lines();
 
     // Specific rendering options.
@@ -149,6 +146,8 @@ public:
 private:
   auto initialize_image_textures() -> void
   {
+    _image_plane_renderer.initialize();
+
 #ifdef __EMSCRIPTEN__
     const auto images = std::array<sara::Image<sara::Rgb8>, 2>{
         sara::imread<sara::Rgb8>("assets/image-omni.png"),
@@ -170,8 +169,7 @@ private:
     };
 #endif
 
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    auto& image_textures = image_plane_renderer._textures;
+    auto& image_textures = _image_plane_renderer._textures;
     image_textures.resize(2);
     for (auto i = 0; i < 2; ++i)
     {
@@ -190,8 +188,7 @@ private:
 
   auto initialize_lines() -> void
   {
-    auto& line_renderer = LineRenderer::instance();
-    auto& gl_lines = line_renderer._lines;
+    auto& gl_lines = _line_renderer._lines;
     gl_lines.resize(2);
 
     const auto image_sizes = Eigen::Vector2f{1920.f, 1080.f};
@@ -230,17 +227,14 @@ private:
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    auto& line_renderer = LineRenderer::instance();
-
-    const auto& image_textures = image_plane_renderer._textures;
-    const auto& lines = line_renderer._lines;
+    const auto& image_textures = _image_plane_renderer._textures;
+    const auto& lines = _line_renderer._lines;
 
     for (auto i = 0u; i < image_textures.size(); ++i)
-      image_plane_renderer.render(image_textures[i]);
+      _image_plane_renderer.render(image_textures[i]);
 
     for (auto i = 0u; i < image_textures.size(); ++i)
-      line_renderer.render(image_textures[i], lines[i]);
+      _line_renderer.render(image_textures[i], lines[i]);
 
     glfwSwapBuffers(_window);
     glfwPollEvents();
@@ -249,14 +243,11 @@ private:
   auto cleanup_gl_objects() -> void
   {
     // Destroy the shaders and quad geometry data.
-    auto& image_plane_renderer = ImagePlaneRenderer::instance();
-    image_plane_renderer.destroy_gl_objects();
-
-    auto& line_renderer = LineRenderer::instance();
-    line_renderer.destroy_gl_objects();
+    _image_plane_renderer.destroy_gl_objects();
+    _line_renderer.destroy_gl_objects();
 
     // Destroy the image textures.
-    auto& image_textures = image_plane_renderer._textures;
+    auto& image_textures = _image_plane_renderer._textures;
     for (auto i = 0u; i < image_textures.size(); ++i)
       image_textures[i].destroy();
     image_textures.clear();
@@ -265,7 +256,7 @@ private:
     image_textures.clear();
 
     // Destroy the lines.
-    auto& gl_lines = line_renderer._lines;
+    auto& gl_lines = _line_renderer._lines;
     for (auto i = 0u; i < gl_lines.size(); ++i)
       gl_lines[i].destroy();
     gl_lines.clear();
@@ -278,6 +269,9 @@ private:
 #ifndef __EMSCRIPTEN__
   fs::path _program_dir_path;
 #endif
+
+  ImagePlaneRenderer _image_plane_renderer;
+  LineRenderer _line_renderer;
 };
 
 int main(int, [[maybe_unused]] char** argv)
