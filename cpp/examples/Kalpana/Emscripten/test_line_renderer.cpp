@@ -13,14 +13,8 @@
 
 #include <DO/Kalpana/EasyGL.hpp>
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
-
-#include <filesystem>
-#include <iostream>
-#include <map>
-#include <memory>
 
 #include <GLFW/glfw3.h>
 
@@ -29,7 +23,10 @@
 #  define GLFW_INCLUDE_ES3
 #endif
 
+#include <filesystem>
+
 #include "ImagePlaneRenderer.hpp"
+#include "LineRenderer.hpp"
 
 
 namespace fs = std::filesystem;
@@ -121,10 +118,13 @@ public:
 
     initialize_image_textures();
 
+    _line_renderer.initialize();
+    initialize_lines();
+
     // Specific rendering options.
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_DEPTH_TEST);
   }
 
   auto run() -> void
@@ -144,21 +144,6 @@ public:
   }
 
 private:
-  auto render_frame() -> void
-  {
-    glViewport(0, 0, _window_sizes.x(), _window_sizes.y());
-
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    const auto& image_textures = _image_plane_renderer._textures;
-    for (const auto& image_texture : image_textures)
-      _image_plane_renderer.render(image_texture);
-
-    glfwSwapBuffers(_window);
-    glfwPollEvents();
-  }
-
   auto initialize_image_textures() -> void
   {
     _image_plane_renderer.initialize();
@@ -180,7 +165,7 @@ private:
         sara::imread<sara::Rgb8>(
             (_program_dir_path / "assets/image-omni.png").string()),
         sara::imread<sara::Rgb8>(
-            (_program_dir_path / "assets/image-pinhole.png").string())  //
+            (_program_dir_path / "assets/image-pinhole.png").string()),
     };
 #endif
 
@@ -201,36 +186,102 @@ private:
     }
   }
 
+  auto initialize_lines() -> void
+  {
+    auto& gl_lines = _line_renderer._lines;
+    gl_lines.resize(2);
+
+    const auto image_sizes = Eigen::Vector2f{1920.f, 1080.f};
+
+    auto line_data = LineRenderer::LineHostData{};
+
+    // Draw a quad.
+    line_data.add_line_segment_in_pixel_coordinates(  //
+        {0.f, 0.f}, {1920.f, 0.f}, image_sizes, 3.f, 1.f);
+    line_data.add_line_segment_in_pixel_coordinates(
+        {1920.f, 0.f}, {1920.f, 1080.f}, image_sizes, 3.f, 1.f);
+    line_data.add_line_segment_in_pixel_coordinates(
+        {1920.f, 1080.f}, {0.f, 1080.f}, image_sizes, 3.f, 1.f);
+    line_data.add_line_segment_in_pixel_coordinates(  //
+        {0.f, 1080.f}, {0.f, 0.f}, image_sizes, 3.f, 1.f);
+    gl_lines[0].set_data(line_data);
+    gl_lines[0]._color << .8f, .0f, .0f, .5f;
+
+    line_data.clear();
+
+    // Draw a triangle.
+    line_data.add_line_segment_in_pixel_coordinates(  //
+        {0.f, 0.f}, {1920.f, 0.f}, image_sizes, 3.f, 1.f);
+    line_data.add_line_segment_in_pixel_coordinates(
+        {1920.f, 0.f}, {1920.f, 1080.f}, image_sizes, 3.f, 1.f);
+    line_data.add_line_segment_in_pixel_coordinates(  //
+        {1920.f, 1080.f}, {0.f, 0.f}, image_sizes, 3.f, 1.f);
+    gl_lines[1].set_data(line_data);
+    gl_lines[1]._color << .0f, .8f, .0f, .5f;
+  }
+
+  auto render_frame() -> void
+  {
+    glViewport(0, 0, _window_sizes.x(), _window_sizes.y());
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    const auto& image_textures = _image_plane_renderer._textures;
+    const auto& lines = _line_renderer._lines;
+
+    for (auto i = 0u; i < image_textures.size(); ++i)
+      _image_plane_renderer.render(image_textures[i]);
+
+    for (auto i = 0u; i < image_textures.size(); ++i)
+      _line_renderer.render(image_textures[i], lines[i]);
+
+    glfwSwapBuffers(_window);
+    glfwPollEvents();
+  }
+
   auto cleanup_gl_objects() -> void
   {
     // Destroy the shaders and quad geometry data.
     _image_plane_renderer.destroy_gl_objects();
+    _line_renderer.destroy_gl_objects();
 
     // Destroy the image textures.
     auto& image_textures = _image_plane_renderer._textures;
     for (auto i = 0u; i < image_textures.size(); ++i)
       image_textures[i].destroy();
+    image_textures.clear();
 
     // Clear the list of image textures.
     image_textures.clear();
+
+    // Destroy the lines.
+    auto& gl_lines = _line_renderer._lines;
+    for (auto i = 0u; i < gl_lines.size(); ++i)
+      gl_lines[i].destroy();
+    gl_lines.clear();
   }
 
 private:
   GLFWwindow* _window = nullptr;
   Eigen::Vector2i _window_sizes = Eigen::Vector2i::Zero();
+
+#ifndef __EMSCRIPTEN__
   fs::path _program_dir_path;
+#endif
 
   ImagePlaneRenderer _image_plane_renderer;
+  LineRenderer _line_renderer;
 };
 
 int main(int, [[maybe_unused]] char** argv)
 {
   try
   {
-    auto app = GLFWApp{{800, 600}, "Image Plane Renderer"};
+    auto app = GLFWApp{{800, 600}, "Line Renderer"};
     // app.initialize(fs::path{argv[0]}.parent_path());
     app.initialize(fs::path{"/home/david/GitLab/DO-CV"} / "sara" / "cpp" /
-                   "drafts" / "Emscripten");
+                   "examples" / "Kalpana" / "Emscripten");
     app.run();
     app.terminate();
   }
