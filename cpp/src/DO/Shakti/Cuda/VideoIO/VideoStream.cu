@@ -98,7 +98,7 @@ simplelogger::Logger* logger =
     simplelogger::LoggerFactory::CreateConsoleLogger();
 
 
-namespace DO { namespace Shakti {
+namespace DO::Shakti {
 
   struct VideoStream::Impl
   {
@@ -114,33 +114,46 @@ namespace DO { namespace Shakti {
     read_decoded_frame_packet(DriverApi::DeviceBgraBuffer& bgra_frame_buffer)
         -> void
     {
+      const auto raw_frame_packet = decoder.GetFrame();
+      const auto iMatrix = decoder.GetVideoFormatInfo()
+                               .video_signal_description.matrix_coefficients;
+
       // Launch CUDA kernels for colorspace conversion from raw video to raw
       // image formats which OpenGL textures can work with
       if (decoder.GetBitDepth() == 8)
       {
         if (decoder.GetOutputFormat() == cudaVideoSurfaceFormat_YUV444)
           YUV444ToColor32<BGRA32>(
-              (uint8_t*) raw_frame_packet[frame_index], decoder.GetWidth(),
-              (uint8_t*) bgra_frame_buffer.data, bgra_frame_buffer.width * 4,
-              decoder.GetWidth(), decoder.GetHeight());
+              raw_frame_packet,
+              decoder.GetWidth(),
+              reinterpret_cast<uint8_t*>(bgra_frame_buffer.data),
+              bgra_frame_buffer.width * 4, decoder.GetWidth(),
+              decoder.GetHeight(), iMatrix);
+
         else  // default assumed NV12
           Nv12ToColor32<BGRA32>(
-              (uint8_t*) raw_frame_packet[frame_index], decoder.GetWidth(),
-              (uint8_t*) bgra_frame_buffer.data, bgra_frame_buffer.width * 4,
-              decoder.GetWidth(), decoder.GetHeight());
+              raw_frame_packet,
+              decoder.GetWidth(),
+              reinterpret_cast<uint8_t*>(bgra_frame_buffer.data),
+              bgra_frame_buffer.width * 4, decoder.GetWidth(),
+              decoder.GetHeight(), iMatrix);
       }
       else
       {
         if (decoder.GetOutputFormat() == cudaVideoSurfaceFormat_YUV444)
           YUV444P16ToColor32<BGRA32>(
-              (uint8_t*) raw_frame_packet[frame_index], 2 * decoder.GetWidth(),
-              (uint8_t*) bgra_frame_buffer.data, bgra_frame_buffer.width * 4,
-              decoder.GetWidth(), decoder.GetHeight());
+              raw_frame_packet,
+              2 * decoder.GetWidth(),
+              reinterpret_cast<uint8_t*>(bgra_frame_buffer.data),
+              bgra_frame_buffer.width * 4, decoder.GetWidth(),
+              decoder.GetHeight(), iMatrix);
         else  // default assumed P016
           P016ToColor32<BGRA32>(
-              (uint8_t*) raw_frame_packet[frame_index], 2 * decoder.GetWidth(),
-              (uint8_t*) bgra_frame_buffer.data, bgra_frame_buffer.width * 4,
-              decoder.GetWidth(), decoder.GetHeight());
+              reinterpret_cast<uint8_t*>(raw_frame_packet[frame_index]),
+              2 * decoder.GetWidth(),
+              reinterpret_cast<uint8_t*>(bgra_frame_buffer.data),
+              bgra_frame_buffer.width * 4, decoder.GetWidth(),
+              decoder.GetHeight(), iMatrix);
       }
 
       ++frame_index;
@@ -158,8 +171,8 @@ namespace DO { namespace Shakti {
                            &frame_data_compressed.size))
           return false;
 
-        decoder.Decode(frame_data_compressed.data, frame_data_compressed.size,
-                       &raw_frame_packet, &num_frames_decoded);
+        num_frames_decoded = decoder.Decode(frame_data_compressed.data,
+                                            frame_data_compressed.size);
       } while (num_frames_decoded <= 0);
       return true;
     }
@@ -182,14 +195,13 @@ namespace DO { namespace Shakti {
     mutable FFmpegDemuxer demuxer;
     NvDecoder decoder;
 
-    std::uint8_t** raw_frame_packet{nullptr};
-    std::int32_t num_frames_decoded{};
-    std::int32_t frame_index{};
+    std::int32_t num_frames_decoded = 0;
+    std::int32_t frame_index = 0;
 
     struct EncodedVideoBuffer
     {
-      std::uint8_t* data{nullptr};
-      std::int32_t size{};
+      std::uint8_t* data = nullptr;
+      std::int32_t size = 0;
     } frame_data_compressed;
   };
 
@@ -227,7 +239,7 @@ namespace DO { namespace Shakti {
     return _impl->read(bgra_frame_buffer);
   }
 
-}}  // namespace DO::Shakti
+}  // namespace DO::Shakti
 
 
 static auto get_output_format_names(unsigned short output_format_mask,
