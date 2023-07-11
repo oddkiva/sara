@@ -11,7 +11,7 @@
 
 #include <DO/Shakti/Cuda/VideoIO.hpp>
 
-#include "nvidia-video-codec-sdk-9.1.23/Utils/NvCodecUtils.h"
+#include "nvidia-video-codec-sdk/Utils/NvCodecUtils.h"
 
 
 namespace sara = DO::Sara;
@@ -81,14 +81,16 @@ struct Texture
   auto display() -> void
   {
     glBegin(GL_QUADS);
-    glTexCoord2f(0, static_cast<GLfloat>(height));
-    glVertex2f(0, 0);
-    glTexCoord2f(static_cast<GLfloat>(width), static_cast<GLfloat>(height));
-    glVertex2f(1, 0);
-    glTexCoord2f(static_cast<GLfloat>(width), 0);
-    glVertex2f(1, 1);
-    glTexCoord2f(0, 0);
-    glVertex2f(0, 1);
+    {
+      glTexCoord2f(0, static_cast<GLfloat>(height));
+      glVertex2f(0, 0);
+      glTexCoord2f(static_cast<GLfloat>(width), static_cast<GLfloat>(height));
+      glVertex2f(1, 0);
+      glTexCoord2f(static_cast<GLfloat>(width), 0);
+      glVertex2f(1, 1);
+      glTexCoord2f(0, 0);
+      glVertex2f(0, 1);
+    }
     glEnd();
     glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
   }
@@ -244,8 +246,11 @@ int test_with_glfw(int argc, char** argv)
   {
     // Read the decoded frame and store it in a CUDA device buffer.
     sara::tic();
-    video_stream.read(device_bgra_buffer);
+    const auto has_frame = video_stream.read(device_bgra_buffer);
     sara::toc("Read frame");
+
+    if (!has_frame)
+      break;
 
     // Copy the device buffer data to the pixel buffer object.
     sara::tic();
@@ -343,7 +348,7 @@ int test_with_sara_graphics(int argc, char** argv)
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(test_with_sara_graphics);
-  // app.register_user_main(test_with_glfw);
+  // app.register_user_main(test_with_sara_graphics);
+  app.register_user_main(test_with_glfw);
   return app.exec();
 }
