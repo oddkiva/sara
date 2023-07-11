@@ -115,8 +115,8 @@ namespace DO::Shakti {
         -> void
     {
       const auto raw_frame_packet = decoder.GetFrame();
-      const auto iMatrix = decoder.GetVideoFormatInfo()
-                               .video_signal_description.matrix_coefficients;
+      const auto matrix = decoder.GetVideoFormatInfo()
+                              .video_signal_description.matrix_coefficients;
 
       // Launch CUDA kernels for colorspace conversion from raw video to raw
       // image formats which OpenGL textures can work with
@@ -124,36 +124,32 @@ namespace DO::Shakti {
       {
         if (decoder.GetOutputFormat() == cudaVideoSurfaceFormat_YUV444)
           YUV444ToColor32<BGRA32>(
-              raw_frame_packet,
-              decoder.GetWidth(),
+              raw_frame_packet, decoder.GetWidth(),
               reinterpret_cast<uint8_t*>(bgra_frame_buffer.data),
               bgra_frame_buffer.width * 4, decoder.GetWidth(),
-              decoder.GetHeight(), iMatrix);
+              decoder.GetHeight(), matrix);
 
         else  // default assumed NV12
           Nv12ToColor32<BGRA32>(
-              raw_frame_packet,
-              decoder.GetWidth(),
+              raw_frame_packet, decoder.GetWidth(),
               reinterpret_cast<uint8_t*>(bgra_frame_buffer.data),
               bgra_frame_buffer.width * 4, decoder.GetWidth(),
-              decoder.GetHeight(), iMatrix);
+              decoder.GetHeight(), matrix);
       }
       else
       {
         if (decoder.GetOutputFormat() == cudaVideoSurfaceFormat_YUV444)
           YUV444P16ToColor32<BGRA32>(
-              raw_frame_packet,
-              2 * decoder.GetWidth(),
+              raw_frame_packet, 2 * decoder.GetWidth(),
               reinterpret_cast<uint8_t*>(bgra_frame_buffer.data),
               bgra_frame_buffer.width * 4, decoder.GetWidth(),
-              decoder.GetHeight(), iMatrix);
+              decoder.GetHeight(), matrix);
         else  // default assumed P016
           P016ToColor32<BGRA32>(
-              reinterpret_cast<uint8_t*>(raw_frame_packet[frame_index]),
-              2 * decoder.GetWidth(),
+              raw_frame_packet, 2 * decoder.GetWidth(),
               reinterpret_cast<uint8_t*>(bgra_frame_buffer.data),
               bgra_frame_buffer.width * 4, decoder.GetWidth(),
-              decoder.GetHeight(), iMatrix);
+              decoder.GetHeight(), matrix);
       }
 
       ++frame_index;
