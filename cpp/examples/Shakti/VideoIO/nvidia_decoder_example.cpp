@@ -246,8 +246,11 @@ int test_with_glfw(int argc, char** argv)
   {
     // Read the decoded frame and store it in a CUDA device buffer.
     sara::tic();
-    video_stream.read(device_bgra_buffer);
+    const auto has_frame = video_stream.read(device_bgra_buffer);
     sara::toc("Read frame");
+
+    if (!has_frame)
+      break;
 
     // Copy the device buffer data to the pixel buffer object.
     sara::tic();
