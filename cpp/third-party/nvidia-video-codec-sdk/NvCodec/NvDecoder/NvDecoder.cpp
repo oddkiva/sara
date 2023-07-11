@@ -25,13 +25,12 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "NvDecoder/NvDecoder.h"
+
 #include <iostream>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-
-#include "../../../Interface/nvcuvid.h"
-#include "NvDecoder/NvDecoder.h"
 
 #define START_TIMER auto start = std::chrono::high_resolution_clock::now();
 

@@ -27,6 +27,9 @@
 
 #pragma once
 
+#include "nvcuvid.h"
+#include "NvCodecUtils.h"
+
 #include <assert.h>
 #include <stdint.h>
 #include <mutex>
@@ -35,8 +38,6 @@
 #include <iostream>
 #include <sstream>
 #include <string.h>
-#include "../../../Interface/nvcuvid.h"
-#include "../Utils/NvCodecUtils.h"
 #include <map>
 
 #define MAX_FRM_CNT 32
