@@ -92,7 +92,7 @@ public:
     glfwGetMonitorContentScale(monitor, &xscale, &yscale);
     if (xscale > 1 || yscale > 1)
     {
-      high_dpi_scale_factor = static_cast<int>(xscale);
+      _high_dpi_scale_factor = static_cast<int>(xscale);
       glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
     }
 #elif __APPLE__
@@ -370,6 +370,7 @@ private: /* convenience free functions. */
 private:
   GLFWwindow* _window = nullptr;
   Eigen::Vector2i _window_sizes = Eigen::Vector2i::Zero();
+  int _high_dpi_scale_factor;
 
   ImagePlaneRenderer _image_plane_renderer;
   ImageDewarpRenderer _image_dewarp_renderer;
