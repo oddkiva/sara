@@ -8,43 +8,63 @@ import sys
 
 
 # Build tasks
-BUILD_TASKS = ["library", "library_docker", "book", "book_docker", "serve_book"]
+BUILD_TASKS = [
+    "library",
+    "library_docker",
+    "book",
+    "book_docker",
+    "serve_book",
+]
 
 # Build types.
 BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 
 # Some constants
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
-SARA_DOCKER_IMAGE="registry.gitlab.com/do-cv/sara"
+SARA_DOCKER_IMAGE = "registry.gitlab.com/do-cv/sara"
 SYSTEM = platform.system()
 
 
 # Third-party libraries that makes Sara faster, stronger, cooler...
 if SYSTEM == "Linux":
     HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-15.0.0-x86-64-linux"
-    ONNXRUNTIME_ROOT_PATH = pathlib.Path.home() / "opt/onnxruntime-linux-x64-gpu-1.14.0"
-    NVIDIA_CODEC_SDK_ROOT_PATH = pathlib.Path.home() / "opt/Video_Codec_SDK_11.0.10"
-    SWIFTC_PATH= pathlib.Path.home() / "opt/swift-5.6.3-RELEASE-ubuntu20.04/usr/bin/swiftc"
+    ONNXRUNTIME_ROOT_PATH = (
+        pathlib.Path.home() / "opt/onnxruntime-linux-x64-gpu-1.14.0"
+    )
+    NVIDIA_CODEC_SDK_ROOT_PATH = (
+        pathlib.Path.home() / "opt/Video_Codec_SDK_12.1.14"
+    )
+    SWIFTC_PATH = (
+        pathlib.Path.home()
+        / "opt/swift-5.6.3-RELEASE-ubuntu20.04/usr/bin/swiftc"
+    )
 elif SYSTEM == "Darwin":
     NVIDIA_CODEC_SDK_ROOT_PATH = None
     SWIFT_PATH = subprocess.check_output(["which", "swift"])
 
 try:
     import pybind11
+
     PYBIND11_DIR = pybind11.get_cmake_dir()
 
     import distutils.sysconfig as sysconfig
-    PYTHON_INCLUDE_DIR=sysconfig.get_python_inc()
-    PYTHON_LIBRARY=sysconfig.get_config_var('LIBDIR')
+
+    PYTHON_INCLUDE_DIR = sysconfig.get_python_inc()
+    PYTHON_LIBRARY = sysconfig.get_config_var("LIBDIR")
 except:
     PYBIND11_DIR = None
 
 
 def execute(cmd, cwd):
-    with subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=1,
-                          universal_newlines=True, cwd=cwd) as p:
+    with subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        bufsize=1,
+        universal_newlines=True,
+        cwd=cwd,
+    ) as p:
         for line in p.stdout:
-            print(line, end='') # process line here
+            print(line, end="")  # process line here
 
     if p.returncode != 0:
         raise subprocess.CalledProcessError(p.returncode, p.args)
@@ -57,10 +77,12 @@ def infer_project_type(system: str):
         return "Xcode"
 
 
-def generate_project(source_dir: str,
-                     build_dir: str,
-                     build_type: str,
-                     from_scratch: bool = False):
+def generate_project(
+    source_dir: str,
+    build_dir: str,
+    build_type: str,
+    from_scratch: bool = False,
+):
     if from_scratch and build_dir.exists():
         shutil.rmtree(build_dir)
 
@@ -69,9 +91,9 @@ def generate_project(source_dir: str,
 
     cmake_options = []
     project_type = infer_project_type(SYSTEM)
-    cmake_options.append('-G {}'.format(project_type))
+    cmake_options.append("-G {}".format(project_type))
     if project_type != "Xcode":
-        cmake_options.append('-D CMAKE_BUILD_TYPE={}'.format(build_type))
+        cmake_options.append("-D CMAKE_BUILD_TYPE={}".format(build_type))
 
     if SYSTEM == "Linux":
         cmake_options.append("-D CMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold")
@@ -113,17 +135,21 @@ def generate_project(source_dir: str,
         my_cmake_prefix_paths.append(ONNXRUNTIME_ROOT_PATH)
 
     # Compile nVidia platform's accelerated VideoIO.
-    if (NVIDIA_CODEC_SDK_ROOT_PATH is not None and
-            pathlib.Path(NVIDIA_CODEC_SDK_ROOT_PATH).exists()):
+    if (
+        NVIDIA_CODEC_SDK_ROOT_PATH is not None
+        and pathlib.Path(NVIDIA_CODEC_SDK_ROOT_PATH).exists()
+    ):
         cmake_options.append(
-            "-D NvidiaVideoCodec_ROOT={}".format(NVIDIA_CODEC_SDK_ROOT_PATH))
+            "-D NvidiaVideoCodec_ROOT={}".format(NVIDIA_CODEC_SDK_ROOT_PATH)
+        )
 
     # Specify the paths for Qt and Halide.
     if my_cmake_prefix_paths:
         my_cmake_prefix_paths = [str(path) for path in my_cmake_prefix_paths]
         my_cmake_prefix_paths = ";".join(my_cmake_prefix_paths)
         cmake_options.append(
-            "-D CMAKE_PREFIX_PATH={}".format(my_cmake_prefix_paths))
+            "-D CMAKE_PREFIX_PATH={}".format(my_cmake_prefix_paths)
+        )
 
     # Setup Swift bindings.
     if SYSTEM == "Darwin":
@@ -135,27 +161,32 @@ def generate_project(source_dir: str,
     if PYBIND11_DIR is not None:
         cmake_options.append("-D SARA_BUILD_PYTHON_BINDINGS:BOOL=ON")
         cmake_options.append("-D pybind11_DIR={}".format(PYBIND11_DIR))
-        cmake_options.append("-D PYTHON_INCLUDE_DIR={}".format(PYTHON_INCLUDE_DIR))
+        cmake_options.append(
+            "-D PYTHON_INCLUDE_DIR={}".format(PYTHON_INCLUDE_DIR)
+        )
         cmake_options.append("-D PYTHON_LIBRARY={}".format(PYTHON_LIBRARY))
 
-    cmd = ['cmake', source_dir] + cmake_options
+    cmd = ["cmake", source_dir] + cmake_options
     execute(cmd, build_dir)
+
 
 def build_project(build_dir: str, build_type: str):
     project_type = infer_project_type(SYSTEM)
-    command_line = ['cmake', '--build', '.', '-j12', '-v']
+    command_line = ["cmake", "--build", ".", "-j12", "-v"]
     if project_type == "Xcode":
         command_line += ["--config", build_type]
 
     execute(command_line, build_dir)
+
 
 def run_project_tests(build_dir: str, build_type: str):
     project_type = infer_project_type(SYSTEM)
-    command_line = ['ctest', '--output-on-failure']
+    command_line = ["ctest", "--output-on-failure"]
     if project_type == "Xcode":
         command_line += ["--config", build_type]
 
     execute(command_line, build_dir)
+
 
 def build_library_docker(source_dir: str) -> None:
     # Build the docker image.
@@ -167,68 +198,95 @@ def build_library_docker(source_dir: str) -> None:
             "docker/Dockerfile",
             "-t",
             f"{SARA_DOCKER_IMAGE}:latest",
-            "."
+            ".",
         ],
-        source_dir)
+        source_dir,
+    )
 
 
 def build_book():
-    ret = subprocess.Popen(['Rscript', 'build.R'],
-                           cwd=SARA_SOURCE_DIR / "doc" / "book").wait()
+    ret = subprocess.Popen(
+        ["Rscript", "build.R"], cwd=SARA_SOURCE_DIR / "doc" / "book"
+    ).wait()
     return ret
 
+
 def serve_book():
-    ret = subprocess.Popen(['Rscript', '-e', 'bookdown::serve_book()'],
-                           cwd=SARA_SOURCE_DIR / "doc" / "book").wait()
+    ret = subprocess.Popen(
+        ["Rscript", "-e", "bookdown::serve_book()"],
+        cwd=SARA_SOURCE_DIR / "doc" / "book",
+    ).wait()
     return ret
+
 
 def build_book_docker():
     # Build the docker image.
-    sara_book_build_image = 'sara-book-build'
+    sara_book_build_image = "sara-book-build"
     ret = subprocess.Popen(
         [
-            'docker', 'build',
-            '-f', './docker/Dockerfile.book',
-            '-t', '{}:latest'.format(sara_book_build_image),
-            '.'
-         ],
-        cwd=SARA_SOURCE_DIR
+            "docker",
+            "build",
+            "-f",
+            "./docker/Dockerfile.book",
+            "-t",
+            "{}:latest".format(sara_book_build_image),
+            ".",
+        ],
+        cwd=SARA_SOURCE_DIR,
     ).wait()
 
     # Run the docker image.
     ret = subprocess.Popen(
         [
-            'docker', 'run', '-it',
-            '-v', "{}:/workspace/book".format(SARA_SOURCE_DIR / "doc" / "book"),
-            sara_book_build_image, '/bin/bash'
-         ],
-        cwd=(SARA_SOURCE_DIR / "doc" / "book")
+            "docker",
+            "run",
+            "-it",
+            "-v",
+            "{}:/workspace/book".format(SARA_SOURCE_DIR / "doc" / "book"),
+            sara_book_build_image,
+            "/bin/bash",
+        ],
+        cwd=(SARA_SOURCE_DIR / "doc" / "book"),
     ).wait()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sara Build Program Options")
 
-    parser.add_argument("--tasks", choices=BUILD_TASKS, default="library",
-                        nargs='+', help="Specify the list of build tasks")
-    parser.add_argument("--build_type", choices=BUILD_TYPES, default="Release",
-                        help="CMake build type")
-    parser.add_argument("--from_scratch", action='store_true',
-                        help="Rebuild the project from scratch")
+    parser.add_argument(
+        "--tasks",
+        choices=BUILD_TASKS,
+        default="library",
+        nargs="+",
+        help="Specify the list of build tasks",
+    )
+    parser.add_argument(
+        "--build_type",
+        choices=BUILD_TYPES,
+        default="Release",
+        help="CMake build type",
+    )
+    parser.add_argument(
+        "--from_scratch",
+        action="store_true",
+        help="Rebuild the project from scratch",
+    )
     args = parser.parse_args()
 
     for task in args.tasks:
         if task == "library":
             project_type = infer_project_type(SYSTEM)
-            if project_type == 'Xcode':
-                build_dir = (SARA_SOURCE_DIR.parent /
-                             "{}-build-Xcode".format(SARA_SOURCE_DIR.name))
+            if project_type == "Xcode":
+                build_dir = SARA_SOURCE_DIR.parent / "{}-build-Xcode".format(
+                    SARA_SOURCE_DIR.name
+                )
             else:
-                build_dir = (SARA_SOURCE_DIR.parent /
-                             "{}-build-{}".format(SARA_SOURCE_DIR.name,
-                                                  args.build_type))
-            generate_project(SARA_SOURCE_DIR, build_dir, args.build_type,
-                             args.from_scratch)
+                build_dir = SARA_SOURCE_DIR.parent / "{}-build-{}".format(
+                    SARA_SOURCE_DIR.name, args.build_type
+                )
+            generate_project(
+                SARA_SOURCE_DIR, build_dir, args.build_type, args.from_scratch
+            )
             build_project(build_dir, args.build_type)
             run_project_tests(build_dir, args.build_type)
 
