@@ -33,6 +33,9 @@ if ($update_vcpkg) {
   iex ".\vcpkg.exe upgrade"
 
   # Install Boost libraries.
+  # If there is a problem with updating boost, uninstall everything with:
+  # .\vcpkg.exe remove boost-uninstall:x64-windows --recurse
+  # Then try again.
   iex ".\vcpkg.exe install boost:x64-windows"
 
   # Install Image I/O libraries.
