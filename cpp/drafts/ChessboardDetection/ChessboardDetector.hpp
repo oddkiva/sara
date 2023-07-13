@@ -95,7 +95,7 @@ namespace DO::Sara {
 
     //! The default value seems to be a very good value for the analysis
     //! of the patch centered in each corner in my experience.
-    float corner_endpoint_linking_radius;
+    int corner_endpoint_linking_radius;
     float radius_factor = 2.f;
 
     inline ChessboardDetector() = default;
