@@ -25,7 +25,9 @@ if(SARA_USE_FROM_SOURCE)
               ${TIFF_LIBRARIES} #
               ${ZLIB_LIBRARIES} #
               HEIF::HEIF #
-              WebP::webp WebP::webpdecoder WebP::webpdemux #
+              $<IF:$<COMPILE_LANG_AND_ID:CXX,MSVC>,WebP::webp,WebP::WebP>
+              $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:WebP::webpdecoder>
+              $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:WebP::webpdemux>
       PUBLIC DO::Sara::Core #
              easyexif)
 
