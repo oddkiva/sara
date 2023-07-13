@@ -436,7 +436,7 @@ int __main(int argc, char** argv)
       return sara::ChessboardCorners{{}, square_size, pattern_size};
     const auto& chessboard = *std::max_element(
         chessboards.rbegin(), chessboards.rend(),
-        [](const auto& a, const auto& b) { return a.size(), b.size(); });
+        [](const auto& a, const auto& b) { return a.size() < b.size(); });
     return sara::ChessboardCorners{chessboard, square_size, pattern_size};
   };
   auto chessboards = std::vector<sara::ChessboardCorners>{};

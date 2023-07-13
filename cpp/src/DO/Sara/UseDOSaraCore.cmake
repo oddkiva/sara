@@ -18,5 +18,5 @@ if(NOT DO_Sara_Core_ADDED)
   )
   target_compile_options(DO_Sara_Core
     PUBLIC
-    $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<PLATFORM_ID:Linux>>:-Xcudafe "--diag_suppress=20236 --diag_suppress=20012">)
+    $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<PLATFORM_ID:Linux>>:"-Xcudafe --diag_suppress=20236 --diag_suppress=20012">)
 endif()
