@@ -27,7 +27,7 @@ auto FeatureGraph::calculate_feature_tracks() const
   using Rank = VertexIndex*;
   using Parent = Vertex*;
 
-  using DisjointSets = boost::disjoint_sets<Rank, Parent>;
+  // using DisjointSets = boost::disjoint_sets<Rank, Parent>;
 
   using Components = boost::component_index<VertexIndex>;
 
