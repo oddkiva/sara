@@ -18,6 +18,8 @@ sara_book.log
 _book/
 _bookdown_files/
 
+**/node_modules/
+
 # CMake
 cmake/sara_version.cmake
 compile_commands.json
