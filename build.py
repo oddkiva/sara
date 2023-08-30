@@ -24,7 +24,6 @@ SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
 SARA_DOCKER_IMAGE = "registry.gitlab.com/do-cv/sara"
 SYSTEM = platform.system()
 
-
 # Third-party libraries that makes Sara faster, stronger, cooler...
 if SYSTEM == "Linux":
     HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-15.0.0-x86-64-linux"
@@ -77,6 +76,10 @@ def infer_project_type(system: str):
         return "Xcode"
 
 
+# PROJECT_TYPE = infer_project_type(SYSTEM)
+PROJECT_TYPE = "Ninja"
+
+
 def generate_project(
     source_dir: str,
     build_dir: str,
@@ -90,9 +93,8 @@ def generate_project(
         pathlib.Path.mkdir(build_dir)
 
     cmake_options = []
-    project_type = infer_project_type(SYSTEM)
-    cmake_options.append("-G {}".format(project_type))
-    if project_type != "Xcode":
+    cmake_options.append("-G {}".format(PROJECT_TYPE))
+    if PROJECT_TYPE != "Xcode":
         cmake_options.append("-D CMAKE_BUILD_TYPE={}".format(build_type))
 
     if SYSTEM == "Linux":
@@ -171,18 +173,16 @@ def generate_project(
 
 
 def build_project(build_dir: str, build_type: str):
-    project_type = infer_project_type(SYSTEM)
     command_line = ["cmake", "--build", ".", "-j12", "-v"]
-    if project_type == "Xcode":
+    if PROJECT_TYPE == "Xcode":
         command_line += ["--config", build_type]
 
     execute(command_line, build_dir)
 
 
 def run_project_tests(build_dir: str, build_type: str):
-    project_type = infer_project_type(SYSTEM)
     command_line = ["ctest", "--output-on-failure"]
-    if project_type == "Xcode":
+    if PROJECT_TYPE == "Xcode":
         command_line += ["--config", build_type]
 
     execute(command_line, build_dir)
@@ -275,8 +275,7 @@ if __name__ == "__main__":
 
     for task in args.tasks:
         if task == "library":
-            project_type = infer_project_type(SYSTEM)
-            if project_type == "Xcode":
+            if PROJECT_TYPE == "Xcode":
                 build_dir = SARA_SOURCE_DIR.parent / "{}-build-Xcode".format(
                     SARA_SOURCE_DIR.name
                 )
