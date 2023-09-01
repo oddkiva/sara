@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
   int x = 200;
   int y = 300;
 
-  OpenGLWindow *window = new OpenGLWindow(width, height, windowName, x, y);
+  OpenGLWindow* window = new OpenGLWindow(width, height, windowName, x, y);
 
   BOOST_CHECK_EQUAL(window->width(), width);
   BOOST_CHECK_EQUAL(window->height(), height);
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_SUITE_END()
 class TestFixtureForOpenGLWindowEvents
 {
 protected:  // data members.
-  OpenGLWindow *_test_window;
+  OpenGLWindow* _test_window;
   EventScheduler _event_scheduler;
   QPoint _mouse_pos;
   Qt::Key _key;
