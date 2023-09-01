@@ -18,6 +18,10 @@ sara_book.log
 _book/
 _bookdown_files/
 
+# cache folder
+.cache
+
+# NPM
 **/node_modules/
 
 # CMake
