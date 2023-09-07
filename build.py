@@ -76,8 +76,8 @@ def infer_project_type(system: str):
         return "Xcode"
 
 
-# PROJECT_TYPE = infer_project_type(SYSTEM)
-PROJECT_TYPE = "Ninja"
+PROJECT_TYPE = infer_project_type(SYSTEM)
+# PROJECT_TYPE = "Ninja"
 
 
 def generate_project(
