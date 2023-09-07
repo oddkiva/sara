@@ -97,7 +97,7 @@ public:
   auto init(const SingleGLFWWindowApplication& app) -> void
   {
     init_instance("Hello Vulkan");
-    // init_debug_messenger();
+    init_debug_messengers();
     // if (enable_validation_layers)
     //   init_surface_from_glfw(app);
   }
@@ -106,15 +106,15 @@ public:
       const std::string& application_name,
       const std::uint32_t application_version = VK_MAKE_VERSION(1, 0, 0),
       const std::string& engine_name = {},
-      const std::uint32_t engine_version = VK_MAKE_VERSION(1, 0, 0)) -> void
+      const std::uint32_t engine_version = VK_MAKE_VERSION(1, 0, 0)) -> bool
   {
     SARA_DEBUG << "[VK] Initializing a Vulkan instance...\n";
     if (enable_validation_layers &&
         !vk::check_validation_layer_support(requested_validation_layers))
     {
-      std::cerr << "[VK] Error: requested Vulkan validation layers but they "
-                   "are not available!\n";
-      return;
+      SARA_DEBUG << "[VK] Error: requested Vulkan validation layers but they "
+                    "are not available!\n";
+      return false;
     }
 
     auto create_info = VkInstanceCreateInfo{};
@@ -144,7 +144,7 @@ public:
     // 3. Specify the debug callback so that the Vulkan API produce debugging
     //    feedback.
     auto debug_create_info = VkDebugUtilsMessengerCreateInfoEXT{};
-    vk::populate_debug_messenger_create_info(debug_create_info);
+    vk::init_debug_messenger_create_info(debug_create_info);
     // Bind the debug create info to the create info object.
     if (enable_validation_layers)
     {
@@ -163,25 +163,40 @@ public:
 
     // Finally instantiate the Vulkan instance.
     if (vkCreateInstance(&create_info, nullptr, &_instance) != VK_SUCCESS)
-      throw std::runtime_error("failed to create instance!");
+    {
+      SARA_DEBUG << "failed to create instance!\n";
+      return false;
+    }
+
+    return true;
   }
 
-  auto init_surface_from_glfw(const SingleGLFWWindowApplication& app) -> void
+  auto init_surface_from_glfw(const SingleGLFWWindowApplication& app) -> bool
   {
     if (glfwCreateWindowSurface(_instance,             //
                                 app._window, nullptr,  //
                                 &_surface) != VK_SUCCESS)
-      throw std::runtime_error{"Error: failed to initilialize Vulkan surface!"};
+    {
+      SARA_DEBUG << "[VK] Error: failed to initilialize Vulkan surface!\n";
+      return false;
+    }
+
+    return true;
   }
 
-  auto init_debug_messenger() -> void
+  auto init_debug_messengers() -> bool
   {
     VkDebugUtilsMessengerCreateInfoEXT create_info;
-    vk::populate_debug_messenger_create_info(create_info);
+    vk::init_debug_messenger_create_info(create_info);
 
     if (vk::create_debug_utils_messenger_ext(_instance, &create_info, nullptr,
                                              &_debug_messenger) != VK_SUCCESS)
-      throw std::runtime_error("failed to set up debug messenger!");
+    {
+      SARA_DEBUG << "[VK] failed to set up debug messengers!\n";
+      return false;
+    }
+
+    return true;
   }
 
   // Create a logical device with:
@@ -244,7 +259,7 @@ public:
   {
     if (enable_validation_layers)
     {
-      SARA_DEBUG << "[VK] Cleaning debug utilitu messengers...\n";
+      SARA_DEBUG << "[VK] Cleaning debug utility messengers...\n";
       vk::destroy_debug_utils_messenger_ext(_instance, _debug_messenger,
                                             nullptr);
     }

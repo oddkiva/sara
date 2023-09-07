@@ -71,6 +71,8 @@ namespace vk {
   {
     auto layer_count = std::uint32_t{};
     vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
+    if (layer_count == 0 && !requested_validation_layers.empty())
+      return false;
 
     auto available_layers = std::vector<VkLayerProperties>(layer_count);
     vkEnumerateInstanceLayerProperties(&layer_count, available_layers.data());
@@ -128,7 +130,7 @@ namespace vk {
     return VK_FALSE;
   }
 
-  inline auto populate_debug_messenger_create_info(
+  inline auto init_debug_messenger_create_info(
       VkDebugUtilsMessengerCreateInfoEXT& create_info) -> void
   {
     create_info = VkDebugUtilsMessengerCreateInfoEXT{};
