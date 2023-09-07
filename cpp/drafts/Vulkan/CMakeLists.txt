@@ -13,6 +13,7 @@ target_include_directories(hello_vulkan
 target_link_libraries(
   hello_vulkan
   PRIVATE glfw #
+          DO_Sara_Core #
           Boost::filesystem #
           Boost::system #
           Vulkan::Vulkan)

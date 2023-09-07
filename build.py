@@ -9,6 +9,7 @@ import sys
 
 # Build tasks
 BUILD_TASKS = [
+    "compilation_database",
     "library",
     "library_docker",
     "book",
@@ -77,7 +78,6 @@ def infer_project_type(system: str):
 
 
 PROJECT_TYPE = infer_project_type(SYSTEM)
-# PROJECT_TYPE = "Ninja"
 
 
 def generate_project(
@@ -139,7 +139,7 @@ def generate_project(
     # Compile nVidia platform's accelerated VideoIO.
     if (
         NVIDIA_CODEC_SDK_ROOT_PATH is not None
-        and pathlib.Path(NVIDIA_CODEC_SDK_ROOT_PATH).exists()
+            and pathlib.Path(NVIDIA_CODEC_SDK_ROOT_PATH).exists()
     ):
         cmake_options.append(
             "-D NvidiaVideoCodec_ROOT={}".format(NVIDIA_CODEC_SDK_ROOT_PATH)
@@ -274,6 +274,20 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     for task in args.tasks:
+        if task == "compilation_database":
+            # Override the following options.
+            PROJECT_TYPE = "Ninja"
+            args.build_type = "Debug"
+
+            build_dir = SARA_SOURCE_DIR.parent / "{}-build-{}".format(
+                SARA_SOURCE_DIR.name, args.build_type
+            )
+            # Only regenerate the project
+            generate_project(
+                SARA_SOURCE_DIR, build_dir, args.build_type, args.from_scratch
+            )
+            # ... but don't build it.
+
         if task == "library":
             if PROJECT_TYPE == "Xcode":
                 build_dir = SARA_SOURCE_DIR.parent / "{}-build-Xcode".format(

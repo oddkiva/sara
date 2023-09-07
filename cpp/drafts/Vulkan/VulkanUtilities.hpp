@@ -1,14 +1,41 @@
 #pragma once
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
+
 #include <GLFW/glfw3.h>
 
 #include <vulkan/vulkan.h>
 
 #include <iostream>
+#include <optional>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 
 namespace vk {
+
+  struct QueueFamilyIndices
+  {
+    std::optional<uint32_t> graphics_family;
+    std::optional<uint32_t> present_family;
+
+    // Check if the GPU driver supports Vulkan. By that we mean we should be
+    // able to:
+    // - display stuff on the screen (present queue)
+    // - perform typical computer graphics operations (graphics queue).
+    auto is_complete() const -> bool
+    {
+      return graphics_family.has_value() && present_family.has_value();
+    }
+  };
+
+  struct SwapChainSupportDetails
+  {
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> present_modes;
+  };
+
 
   inline auto create_debug_utils_messenger_ext(
       const VkInstance instance,
@@ -42,7 +69,7 @@ namespace vk {
   auto check_validation_layer_support(
       const STLArrayOfStrings& requested_validation_layers) -> bool
   {
-    auto layer_count = uint32_t{};
+    auto layer_count = std::uint32_t{};
     vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
 
     auto available_layers = std::vector<VkLayerProperties>(layer_count);
@@ -54,6 +81,8 @@ namespace vk {
 
       for (const auto& layer_properties : available_layers)
       {
+        SARA_CHECK(layer_name);
+        SARA_CHECK(layer_properties.layerName);
         if (strcmp(layer_name, layer_properties.layerName) == 0)
         {
           layer_found = true;
