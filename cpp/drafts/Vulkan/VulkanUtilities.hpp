@@ -6,6 +6,9 @@
 
 #include <vulkan/vulkan.h>
 
+#include <fmt/format.h>
+
+#include <algorithm>
 #include <iostream>
 #include <optional>
 #include <vector>
@@ -36,6 +39,25 @@ namespace vk {
     std::vector<VkPresentModeKHR> present_modes;
   };
 
+
+  //! Debug messenger hooks to the Vulkan instance
+  //! @{
+  inline auto
+  get_required_extensions_from_glfw(const bool enable_validation_layers)
+      -> std::vector<const char*>
+  {
+    auto glfw_extension_count = std::uint32_t{};
+    const char** glfw_extensions = nullptr;
+    glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
+
+    std::vector<const char*> extensions(glfw_extensions,
+                                        glfw_extensions + glfw_extension_count);
+
+    if (enable_validation_layers)
+      extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+    return extensions;
+  }
 
   inline auto create_debug_utils_messenger_ext(
       const VkInstance instance,
@@ -79,41 +101,21 @@ namespace vk {
 
     for (const char* layer_name : requested_validation_layers)
     {
-      auto layer_found = false;
+      const auto available_layer_it = std::find_if(
+          available_layers.begin(), available_layers.end(),
+          [&layer_name](const auto& layer_properties) {
+            return strcmp(layer_name, layer_properties.layerName) == 0;
+          });
+      const auto layer_found = available_layer_it != available_layers.end();
 
-      for (const auto& layer_properties : available_layers)
-      {
-        SARA_CHECK(layer_name);
-        SARA_CHECK(layer_properties.layerName);
-        if (strcmp(layer_name, layer_properties.layerName) == 0)
-        {
-          layer_found = true;
-          break;
-        }
-      }
+      std::cout << fmt::format("  [VK][Validation] {}: {}\n",  //
+                               layer_name, layer_found ? "FOUND" : "NOT FOUND");
 
       if (!layer_found)
         return false;
     }
 
     return true;
-  }
-
-  inline auto
-  get_required_extensions_from_glfw(const bool enable_validation_layers)
-      -> std::vector<const char*>
-  {
-    auto glfw_extension_count = std::uint32_t{};
-    const char** glfw_extensions = nullptr;
-    glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
-
-    std::vector<const char*> extensions(glfw_extensions,
-                                        glfw_extensions + glfw_extension_count);
-
-    if (enable_validation_layers)
-      extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-
-    return extensions;
   }
 
   inline VKAPI_ATTR auto VKAPI_CALL
@@ -123,10 +125,10 @@ namespace vk {
                  void* /* user_data */) -> VkBool32
   {
 
-    std::cerr << "[DEBUG]"
-              << "[" << message_severity << "]"
-              << "[" << message_type << "]"  //
-              << "Validation layer: " << callback_data->pMessage << std::endl;
+    std::cerr << fmt::format("  [VK-Debug][SEV {:03d}][TYPE {:02d}] {}\n",  //
+                             static_cast<std::uint32_t>(message_severity),
+                             static_cast<std::uint32_t>(message_type),
+                             callback_data->pMessage);
     return VK_FALSE;
   }
 
@@ -144,5 +146,89 @@ namespace vk {
                               VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     create_info.pfnUserCallback = debug_callback;
   }
+  //! @}
+
+
+  inline auto list_physical_devices(const VkInstance instance)
+      -> std::vector<VkPhysicalDevice>
+  {
+    SARA_DEBUG << "  [VK] Counting the number of physical devices...\n";
+    auto device_count = std::uint32_t{};
+    vkEnumeratePhysicalDevices(instance, &device_count, nullptr);
+    SARA_DEBUG << fmt::format("  [VK] Device count: {}\n", device_count);
+
+    SARA_DEBUG << "  [VK] Populating the list of physical devices...\n";
+    if (device_count == 0)
+      return {};
+
+    auto devices = std::vector<VkPhysicalDevice>(device_count);
+    vkEnumeratePhysicalDevices(instance, &device_count, devices.data());
+    return devices;
+  }
+
+  inline auto list_device_extensions(const VkPhysicalDevice device)
+      -> std::vector<VkExtensionProperties>
+  {
+    auto extension_count = std::uint32_t{};
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count,
+                                         nullptr);
+
+    if (extension_count == 0)
+      return {};
+
+    auto extensions = std::vector<VkExtensionProperties>(extension_count);
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count,
+                                         extensions.data());
+    return extensions;
+  }
+
+  inline auto query_swapchain_support(const VkPhysicalDevice physical_device,
+                                      const VkSurfaceKHR surface)
+      -> vk::SwapChainSupportDetails
+  {
+    auto details = vk::SwapChainSupportDetails{};
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface,
+                                              &details.capabilities);
+
+    auto format_count = std::uint32_t{};
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface,
+                                         &format_count, nullptr);
+    if (format_count != 0)
+    {
+      details.formats.resize(format_count);
+      vkGetPhysicalDeviceSurfaceFormatsKHR(
+          physical_device, surface, &format_count, details.formats.data());
+    }
+
+    auto present_mode_count = std::uint32_t{};
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface,
+                                              &present_mode_count, nullptr);
+    if (present_mode_count != 0)
+    {
+      details.present_modes.resize(present_mode_count);
+      vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface,
+                                                &present_mode_count,
+                                                details.present_modes.data());
+    }
+
+    return details;
+  }
+
+  inline auto list_swapchain_images(const VkDevice device,
+                                    VkSwapchainKHR swapchain)
+      -> std::vector<VkImage>
+  {
+    // Get the count of swapchain images.
+    auto image_count = std::uint32_t{};
+    vkGetSwapchainImagesKHR(device, swapchain, &image_count, nullptr);
+
+    // Populate the array of swapchain images.
+    auto swapchain_images = std::vector<VkImage>(image_count);
+    vkGetSwapchainImagesKHR(device, swapchain, &image_count,
+                            swapchain_images.data());
+
+    return swapchain_images;
+  }
+
 
 }  // namespace vk

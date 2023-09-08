@@ -14,6 +14,7 @@ target_link_libraries(
   hello_vulkan
   PRIVATE glfw #
           DO_Sara_Core #
+          fmt::fmt #
           Boost::filesystem #
           Boost::system #
           Vulkan::Vulkan)
