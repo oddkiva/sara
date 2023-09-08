@@ -155,7 +155,8 @@ namespace vk {
     SARA_DEBUG << "  [VK] Counting the number of physical devices...\n";
     auto device_count = std::uint32_t{};
     vkEnumeratePhysicalDevices(instance, &device_count, nullptr);
-    SARA_DEBUG << fmt::format("  [VK] Device count: {}\n", device_count);
+    SARA_DEBUG << fmt::format("  [VK] Physical device count: {}\n",
+                              device_count);
 
     SARA_DEBUG << "  [VK] Populating the list of physical devices...\n";
     if (device_count == 0)
@@ -219,12 +220,12 @@ namespace vk {
       -> std::vector<VkImage>
   {
     // Get the count of swapchain images.
-    auto image_count = std::uint32_t{};
-    vkGetSwapchainImagesKHR(device, swapchain, &image_count, nullptr);
+    auto swapchain_image_count = std::uint32_t{};
+    vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count, nullptr);
 
     // Populate the array of swapchain images.
-    auto swapchain_images = std::vector<VkImage>(image_count);
-    vkGetSwapchainImagesKHR(device, swapchain, &image_count,
+    auto swapchain_images = std::vector<VkImage>(swapchain_image_count);
+    vkGetSwapchainImagesKHR(device, swapchain, &swapchain_image_count,
                             swapchain_images.data());
 
     return swapchain_images;

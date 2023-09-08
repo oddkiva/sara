@@ -348,6 +348,7 @@ private: /* initialization methods */
 
   auto init_swapchain(const SingleGLFWWindowApplication& app) -> bool
   {
+    SARA_DEBUG << "[VK] Check the physical device support swapchains...\n";
     const auto swapchain_support = vk::query_swapchain_support(  //
         _physical_device,                                        //
         _surface                                                 //
@@ -355,20 +356,25 @@ private: /* initialization methods */
 
     // Find a valid pixel format for the swap chain images and if possible
     // choose RGBA 32 bits.
+    SARA_DEBUG << "[VK] Setting the swap surface format (RGBA 32-bit)...\n";
     auto surface_format = choose_swap_surface_format(swapchain_support.formats);
     // FIFO/Mailbox presentation mode.
+    SARA_DEBUG << "[VK] Setting the swap present mode...\n";
     auto present_mode = choose_swap_present_mode(  //
         swapchain_support.present_modes            //
     );
     // Set the swap chain image sizes to be equal to the window surface
     // sizes.
-    const auto extent = choose_swap_extent(app, swapchain_support.capabilities);
+    SARA_DEBUG << "[VK] Setting the swap extent...\n";
+    _swapchain_extent = choose_swap_extent(app, swapchain_support.capabilities);
 
+    SARA_DEBUG << "[VK] Setting the swap image count...\n";
     auto image_count = swapchain_support.capabilities.maxImageCount + 1;
     if (swapchain_support.capabilities.maxImageCount > 0 &&
         image_count > swapchain_support.capabilities.maxImageCount)
       image_count = swapchain_support.capabilities.maxImageCount;
 
+    SARA_DEBUG << "[VK] Initializing the swapchain...\n";
     auto create_info = VkSwapchainCreateInfoKHR{};
     {
       create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -376,7 +382,7 @@ private: /* initialization methods */
       create_info.minImageCount = image_count;
       create_info.imageFormat = surface_format.format;
       create_info.imageColorSpace = surface_format.colorSpace;
-      create_info.imageExtent = extent;
+      create_info.imageExtent = _swapchain_extent;
       create_info.imageArrayLayers = 1;
       create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     }
@@ -409,9 +415,11 @@ private: /* initialization methods */
       return false;
     }
 
+    SARA_DEBUG << "[VK] Initializing the swapchain images...\n";
     _swapchain_images = vk::list_swapchain_images(_device, _swapchain);
+
+    SARA_DEBUG << "[VK] Initializing the swapchain image format...\n";
     _swapchain_image_format = surface_format.format;
-    _swapchain_extent = extent;
 
     return true;
   }
@@ -491,7 +499,7 @@ private: /* cleanup methods related to the render pipeline. */
 private: /* cleanup methods related to the present operations */
   auto cleanup_swapchain_framebuffers() -> void
   {
-    for (const auto framebuffer : swapchain_framebuffers)
+    for (const auto framebuffer : _swapchain_framebuffers)
       vkDestroyFramebuffer(_device, framebuffer, nullptr);
   }
 
@@ -507,8 +515,7 @@ private: /* cleanup methods related to the present operations */
   }
 
 private: /* utility methods */
-  // We need a GPU that supports Vulkan Graphics operations at the bare
-  // minimum.
+  // We need a GPU that supports Vulkan graphics and present operations.
   auto find_queue_families(VkPhysicalDevice device) const
       -> vk::QueueFamilyIndices
   {
