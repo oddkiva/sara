@@ -107,7 +107,7 @@ public:
 
     init_surface_from_glfw(app);
 
-    find_first_suitable_vulkan_device();
+    find_first_vulkan_device_suitable_for_computer_graphics();
     init_logical_device();
 
     init_swapchain(app);
@@ -238,9 +238,9 @@ private: /* initialization methods */
     return true;
   }
 
-  auto find_first_suitable_vulkan_device() -> bool
+  auto find_first_vulkan_device_suitable_for_computer_graphics() -> bool
   {
-    SARA_DEBUG << "[VK] Finding first suitable Vulkan physical device...\n";
+    SARA_DEBUG << "[VK] Listing Vulkan physical devices (GPUs)...\n";
     const auto physical_devices = vk::list_physical_devices(_instance);
 
     const auto physical_device_it = std::find_if(          //
