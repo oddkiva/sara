@@ -14,31 +14,35 @@
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/VulkanGLFWInterop.hpp>
 
+#include <GLFW/glfw3.h>
+
 #include <boost/test/unit_test.hpp>
 
 
-BOOST_AUTO_TEST_CASE(test_instance_constructor)
+BOOST_AUTO_TEST_CASE(test_graphics_instance)
 {
   namespace svk = DO::Shakti::EasyVulkan;
   namespace k = DO::Kalpana;
 
-  // const auto extensions_required_by_glfw =
-  //     k::list_required_vulkan_extensions_from_glfw(true);
-  // const auto validation_layers_required = std::vector{
-  //     "VK_LAYER_KHRONOS_validation"  //
-  // };
-  const auto extensions_required_by_glfw =
-      k::list_required_vulkan_extensions_from_glfw(false);
-  const auto validation_layers_required = std::vector<const char*>{};
 
-  auto instance = svk::Instance{};
+  static constexpr auto debug_vulkan_instance = true;
 
-  VkInstance& vk_instance = instance;
+  glfwInit();
 
-  svk::InstanceCreator{}
-      // .application_name("GLFW-Vulkan Application")
-      // .engine_name("No Engine")
-      // .required_instance_extensions(extensions_required_by_glfw)
-      // .required_validation_layers(validation_layers_required)
-      .init(vk_instance);
+  auto instance_extensions = k::list_required_vulkan_extensions_from_glfw();
+  if constexpr (debug_vulkan_instance)
+    instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+  const auto validation_layers_required =
+      debug_vulkan_instance ? std::vector{"VK_LAYER_KHRONOS_validation"}
+                            : std::vector<const char*>{};
+
+  auto instance = svk::InstanceCreator{}
+                      .application_name("GLFW-Vulkan Application")
+                      .engine_name("No Engine")
+                      .required_instance_extensions(instance_extensions)
+                      .required_validation_layers(validation_layers_required)
+                      .create();
+
+  glfwTerminate();
 }

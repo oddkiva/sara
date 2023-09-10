@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 
 namespace DO::Shakti::EasyVulkan {
@@ -121,7 +122,7 @@ namespace DO::Shakti::EasyVulkan {
       _app_info.engineVersion = _engine_version;
       _app_info.apiVersion = VK_API_VERSION_1_0;
 
-      // Pre-fill.
+      // Pre-fill the list of Vulkan extensions.
       _create_info.enabledExtensionCount = 0;
       _create_info.ppEnabledExtensionNames = nullptr;
 
