@@ -11,6 +11,7 @@
 
 #pragma once
 
+#define GLFW_INCLUDE_VULKAN
 #include <drafts/Vulkan/Instance.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
@@ -47,7 +48,7 @@ namespace DO::Kalpana {
       {
         SARA_DEBUG << fmt::format("[VK] Error: failed to initilialize Vulkan "
                                   "surface! Error code: {}\n",
-                                  status);
+                                  static_cast<int>(status));
         return false;
       }
 
@@ -74,7 +75,7 @@ namespace DO::Kalpana {
     }
 
   private:
-    VkSurfaceKHR _surface = nullptr;
+    VkSurfaceKHR _surface = VK_NULL_HANDLE;
   };
 
 }  // namespace DO::Kalpana

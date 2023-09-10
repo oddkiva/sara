@@ -9,14 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <vulkan/vulkan_core.h>
 #define BOOST_TEST_MODULE "EasyVulkan/Vulkan Physical Device"
 
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
 #include <drafts/Vulkan/VulkanGLFWInterop.hpp>
-
-#include <GLFW/glfw3.h>
 
 #include <boost/test/unit_test.hpp>
 
@@ -35,6 +32,11 @@ BOOST_AUTO_TEST_CASE(test_list_physical_devices)
   namespace k = DO::Kalpana;
 
   glfwInit();
+
+  // The following call is important and allows to create a Vulkan surface from
+  // a GLFWwindow object.
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+  // Create a window.
   const auto window = glfwCreateWindow(100, 100,  //
                                        "Vulkan",  //
                                        nullptr, nullptr);

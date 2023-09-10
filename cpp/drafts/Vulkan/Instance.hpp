@@ -95,7 +95,7 @@ namespace DO::Shakti::EasyVulkan {
       return _instance;
     }
 
-    operator const VkInstance&() const
+    operator VkInstance() const
     {
       return _instance;
     }
