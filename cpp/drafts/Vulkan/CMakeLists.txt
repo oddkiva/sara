@@ -16,6 +16,7 @@ add_library(
 target_link_libraries(
   EasyVulkan
   PUBLIC Vulkan::Vulkan #
+         glfw #
          DO::Sara::Core #
          fmt::fmt)
 

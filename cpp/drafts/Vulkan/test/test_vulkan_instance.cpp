@@ -19,14 +19,29 @@
 #include <boost/test/unit_test.hpp>
 
 
+static constexpr auto debug_vulkan_instance = true;
+static constexpr auto compiling_for_apple = __APPLE__ == 1;
+
+
 BOOST_AUTO_TEST_CASE(test_barebone_instance)
 {
   namespace svk = DO::Shakti::EasyVulkan;
 
-  const auto instance = svk::InstanceCreator{}
-                            .application_name("Barebone Vulkan Application")
-                            .engine_name("No Engine")
-                            .create();
+  auto instance_extensions = std::vector{
+      VK_EXT_DEBUG_UTILS_EXTENSION_NAME  //
+  };
+  if constexpr (compiling_for_apple)
+    instance_extensions.emplace_back("VK_KHR_portability_enumeration");
+  auto validation_layers_required =
+      debug_vulkan_instance ? std::vector{"VK_LAYER_KHRONOS_validation"}
+                            : std::vector<const char*>{};
+  const auto instance =
+      svk::InstanceCreator{}
+          .application_name("Barebone Vulkan Application")
+          .engine_name("No Engine")
+          .required_instance_extensions(instance_extensions)
+          .required_validation_layers(validation_layers_required)
+          .create();
 }
 
 BOOST_AUTO_TEST_CASE(test_glfw_vulkan_instance)
@@ -35,13 +50,13 @@ BOOST_AUTO_TEST_CASE(test_glfw_vulkan_instance)
   namespace k = DO::Kalpana;
 
 
-  static constexpr auto debug_vulkan_instance = true;
-
   glfwInit();
 
   auto instance_extensions = k::list_required_vulkan_extensions_from_glfw();
   if constexpr (debug_vulkan_instance)
     instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+  if constexpr (compiling_for_apple)
+    instance_extensions.emplace_back("VK_KHR_portability_enumeration");
 
   SARA_DEBUG << "Inspecting all required Vulkan extensions:\n";
   for (const auto extension : instance_extensions)
