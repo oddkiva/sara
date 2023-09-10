@@ -22,7 +22,11 @@
 
 
 static constexpr auto debug_vulkan_instance = true;
-static constexpr auto compiling_for_apple = __APPLE__ == 1;
+#if defined(__APPLE__)
+static constexpr auto compiling_for_apple = true;
+#else
+static constexpr auto compiling_for_apple = false;
+#endif
 
 
 BOOST_AUTO_TEST_CASE(test_list_physical_devices)
