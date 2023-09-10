@@ -140,6 +140,11 @@ namespace DO::Shakti::EasyVulkan {
       _debug_create_info.pfnUserCallback = debug_callback;
       _create_info.enabledLayerCount = 0;
       _create_info.pNext = nullptr;
+
+#if defined(__APPLE__)
+      // You need this flags in Apple platforms.
+      _create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
     }
 
     auto application_name(const std::string_view& app_name) -> InstanceCreator&
@@ -207,9 +212,13 @@ namespace DO::Shakti::EasyVulkan {
 
       // Finally instantiate the Vulkan instance.
       SARA_DEBUG << "[VK] Initializing a Vulkan instance...\n";
-      if (vkCreateInstance(&_create_info, nullptr, &instance._instance) !=
-          VK_SUCCESS)
-        throw std::runtime_error{"failed to create instance!"};
+      const auto status =
+          vkCreateInstance(&_create_info, nullptr, &instance._instance);
+      if (status != VK_SUCCESS)
+        throw std::runtime_error{
+            fmt::format("Error: failed to create instance! Error code: {}",
+                        static_cast<int>(status))  //
+        };
 
       if (!_required_validation_layers.empty())
       {
@@ -219,14 +228,6 @@ namespace DO::Shakti::EasyVulkan {
       }
 
       return instance;
-    }
-
-    auto init(VkInstance& instance) -> void
-    {
-      // Finally instantiate the Vulkan instance.
-      SARA_DEBUG << "[VK] Initializing a Vulkan instance...\n";
-      if (vkCreateInstance(&_create_info, nullptr, &instance) != VK_SUCCESS)
-        throw std::runtime_error{"failed to create instance!"};
     }
 
   private:

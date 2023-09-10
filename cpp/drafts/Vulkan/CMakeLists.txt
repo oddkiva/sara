@@ -1,8 +1,4 @@
-# N.B.: the application crashes on MacOS for some reason. Investigate because it
-# should...
-find_package(glfw3 REQUIRED)
 find_package(Vulkan REQUIRED)
-
 find_program(
   GLSLC_EXECUTABLE
   NAMES glslc
@@ -16,6 +12,7 @@ add_library(
 target_link_libraries(
   EasyVulkan
   PUBLIC Vulkan::Vulkan #
+         glfw #
          DO::Sara::Core #
          fmt::fmt)
 

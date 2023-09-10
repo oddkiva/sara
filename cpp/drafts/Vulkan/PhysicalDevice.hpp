@@ -109,46 +109,23 @@ namespace DO::Shakti::EasyVulkan {
           [this](const auto& ext) { return supports_extension(ext); });
     }
 
-    auto supports_queue_family(const VkFlags queue_family_bit_value) const
+    auto supports_queue_family_type(const std::uint32_t queue_family_index,
+                                    const VkFlags queue_family_bit_value) const
         -> bool
     {
-      return std::find_if(  //
-                 _queue_families.begin(), _queue_families.end(),
-                 [queue_family_bit_value](
-                     const VkQueueFamilyProperties& queue_family) {
-                   return (queue_family.queueFlags & queue_family_bit_value) !=
-                          VkFlags{0};
-                 }) != _queue_families.end();
+      const auto& queue_family = _queue_families[queue_family_index];
+      return (queue_family.queueFlags & queue_family_bit_value) != VkFlags{0};
     }
 
-    auto find_graphics_queue_family_index() -> std::optional<std::uint32_t>
+    auto supports_surface_presentation(const std::uint32_t queue_family_index,
+                                       const VkSurfaceKHR surface) const -> bool
     {
-      const auto it = std::find_if(  //
-          _queue_families.begin(), _queue_families.end(),
-          [](const VkQueueFamilyProperties& queue_family) {
-            return (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) !=
-                   VkFlags{0};
-          });
-      if (it == _queue_families.end())
-        return std::nullopt;
-
-      return static_cast<std::uint32_t>(it - _queue_families.begin());
-    }
-
-    auto find_present_queue_family_index(VkSurface surface)
-        -> std::optional<std::uint32_t>
-    {
-      for (auto i = std::uint32_t{}; i != _queue_families.size(); ++i)
-      {
-        // Does the physical device have a present queue?
-        auto present_support = VkBool32{false};
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface,
-                                             &present_support);
-        if (present_support)
-          return i;
-      }
-
-      return std::nullopt;
+      auto present_support = VkBool32{false};
+      vkGetPhysicalDeviceSurfaceSupportKHR(_physical_device,    //
+                                           queue_family_index,  //
+                                           surface,             //
+                                           &present_support);
+      return static_cast<bool>(present_support);
     }
 
     operator VkPhysicalDevice&()

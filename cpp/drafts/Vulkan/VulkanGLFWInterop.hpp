@@ -16,6 +16,7 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Kalpana {
@@ -40,10 +41,13 @@ namespace DO::Kalpana {
     {
       SARA_DEBUG
           << "[VK] Initializing Vulkan surface with the GLFW application...\n";
-      if (glfwCreateWindowSurface(instance, window, nullptr, &_surface) !=
-          VK_SUCCESS)
+      const auto status =
+          glfwCreateWindowSurface(instance, window, nullptr, &_surface);
+      if (status != VK_SUCCESS)
       {
-        SARA_DEBUG << "[VK] Error: failed to initilialize Vulkan surface!\n";
+        SARA_DEBUG << fmt::format("[VK] Error: failed to initilialize Vulkan "
+                                  "surface! Error code: {}\n",
+                                  status);
         return false;
       }
 
@@ -57,6 +61,16 @@ namespace DO::Kalpana {
 
       SARA_DEBUG << "[VK] Destroying Vulkan surface...\n";
       vkDestroySurfaceKHR(instance, _surface, nullptr);
+    }
+
+    operator VkSurfaceKHR&()
+    {
+      return _surface;
+    }
+
+    operator const VkSurfaceKHR&() const
+    {
+      return _surface;
     }
 
   private:
