@@ -1,17 +1,31 @@
-#include <vulkan/vulkan.h>
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2023 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+#include <vulkan/vulkan_core.h>
 
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
 
 
-namespace vk {
+namespace DO::Shakti::EasyVulkan {
 
   struct PhysicalDevice
   {
+    PhysicalDevice() = default;
+
     PhysicalDevice(const VkPhysicalDevice physical_device)
       : _physical_device{physical_device}
       , _queue_families{list_supported_queue_families(physical_device)}
@@ -107,19 +121,49 @@ namespace vk {
                  }) != _queue_families.end();
     }
 
-    operator VkPhysicalDevice()
+    auto find_graphics_queue_family_index() -> std::optional<std::uint32_t>
+    {
+      const auto it = std::find_if(  //
+          _queue_families.begin(), _queue_families.end(),
+          [](const VkQueueFamilyProperties& queue_family) {
+            return (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT) !=
+                   VkFlags{0};
+          });
+      if (it == _queue_families.end())
+        return std::nullopt;
+
+      return static_cast<std::uint32_t>(it - _queue_families.begin());
+    }
+
+    auto find_present_queue_family_index(VkSurface surface)
+        -> std::optional<std::uint32_t>
+    {
+      for (auto i = std::uint32_t{}; i != _queue_families.size(); ++i)
+      {
+        // Does the physical device have a present queue?
+        auto present_support = VkBool32{false};
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface,
+                                             &present_support);
+        if (present_support)
+          return i;
+      }
+
+      return std::nullopt;
+    }
+
+    operator VkPhysicalDevice&()
     {
       return _physical_device;
     }
 
-    operator const VkPhysicalDevice() const
+    operator VkPhysicalDevice() const
     {
       return _physical_device;
     }
 
-    VkPhysicalDevice _physical_device;
+    VkPhysicalDevice _physical_device = nullptr;
     std::vector<VkQueueFamilyProperties> _queue_families;
     std::vector<VkExtensionProperties> _extensions_supported;
   };
 
-}  // namespace vk
+}  // namespace DO::Shakti::EasyVulkan
