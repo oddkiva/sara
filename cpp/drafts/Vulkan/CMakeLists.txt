@@ -1,6 +1,4 @@
-find_package(glfw3 REQUIRED)
 find_package(Vulkan REQUIRED)
-
 find_program(
   GLSLC_EXECUTABLE
   NAMES glslc

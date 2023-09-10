@@ -9,6 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <vulkan/vulkan_core.h>
 #define BOOST_TEST_MODULE "EasyVulkan/Vulkan Physical Device"
 
 #include <drafts/Vulkan/Instance.hpp>
@@ -20,19 +21,26 @@
 #include <boost/test/unit_test.hpp>
 
 
+static constexpr auto debug_vulkan_instance = true;
+static constexpr auto compiling_for_apple = __APPLE__ == 1;
+
+
 BOOST_AUTO_TEST_CASE(test_list_physical_devices)
 {
   namespace svk = DO::Shakti::EasyVulkan;
   namespace k = DO::Kalpana;
 
-  static constexpr auto debug_vulkan_instance = true;
-
   glfwInit();
+  const auto window = glfwCreateWindow(100, 100,  //
+                                       "Vulkan",  //
+                                       nullptr, nullptr);
 
   // Vulkan instance.
   auto instance_extensions = k::list_required_vulkan_extensions_from_glfw();
   if constexpr (debug_vulkan_instance)
     instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+  if constexpr (compiling_for_apple)
+    instance_extensions.push_back("VK_KHR_portability_enumeration");
 
   const auto validation_layers_required =
       debug_vulkan_instance ? std::vector{"VK_LAYER_KHRONOS_validation"}
@@ -46,13 +54,30 @@ BOOST_AUTO_TEST_CASE(test_list_physical_devices)
           .required_validation_layers(validation_layers_required)
           .create();
 
+  // Vulkan surface.
+  auto surface = k::Surface{};
+  surface.init(instance, window);
+
   // Vulkan physical device.
   const auto physical_devices =
       svk::PhysicalDevice::list_physical_devices(instance);
 
   // All my devices should support graphics operations.
   for (const auto& physical_device : physical_devices)
-    BOOST_CHECK(physical_device.supports_queue_family(VK_QUEUE_GRAPHICS_BIT));
+  {
+    const auto& queue_families = physical_device._queue_families;
+    SARA_CHECK(queue_families.size());
+    for (auto i = std::uint32_t{}; i != queue_families.size(); ++i)
+    {
+      BOOST_CHECK(
+          physical_device.supports_queue_family_type(i, VK_QUEUE_GRAPHICS_BIT));
+      BOOST_CHECK(physical_device.supports_surface_presentation(i, surface));
+    }
+  }
 
+  surface.destroy(instance);
+
+  if (window != nullptr)
+    glfwDestroyWindow(window);
   glfwTerminate();
 }
