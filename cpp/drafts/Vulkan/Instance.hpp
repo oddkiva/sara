@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2023 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
@@ -11,7 +22,7 @@
 #include <vector>
 
 
-namespace DO::Shakti::EasyVulkan {
+namespace DO::Shakti::Vulkan {
 
   auto list_available_instance_layers() -> std::vector<VkLayerProperties>;
 
@@ -27,7 +38,7 @@ namespace DO::Shakti::EasyVulkan {
                  void* /* user_data */) -> VkBool32
   {
 
-    std::cerr << fmt::format("  [VK-Debug][SEV {:03d}][TYPE {:02d}] {}\n",  //
+    std::cerr << fmt::format("[VK-Debug][SEV {:03d}][TYPE {:02d}] {}\n",  //
                              static_cast<std::uint32_t>(message_severity),
                              static_cast<std::uint32_t>(message_type),
                              callback_data->pMessage);
@@ -63,10 +74,10 @@ namespace DO::Shakti::EasyVulkan {
   }
   //! @}
 
-}  // namespace DO::Shakti::EasyVulkan
+}  // namespace DO::Shakti::Vulkan
 
 
-namespace DO::Shakti::EasyVulkan {
+namespace DO::Shakti::Vulkan {
 
   class Instance
   {
@@ -250,4 +261,4 @@ namespace DO::Shakti::EasyVulkan {
     std::vector<const char*> _required_validation_layers;
   };
 
-}  // namespace DO::Shakti::EasyVulkan
+}  // namespace DO::Shakti::Vulkan

@@ -12,27 +12,26 @@
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include <drafts/Vulkan/Instance.hpp>
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
 
-#include <GLFW/glfw3.h>
-#include <vulkan/vulkan_core.h>
-
-
-namespace DO::Kalpana {
+namespace DO::Kalpana::Vulkan {
 
   //! Pre-condition: call glfwInit() first.
   auto list_required_vulkan_extensions_from_glfw() -> std::vector<const char*>;
 
-}  // namespace DO::Kalpana
+}  // namespace DO::Kalpana::Vulkan
 
 
-namespace DO::Kalpana {
+namespace DO::Kalpana::Vulkan {
 
   //! Pre-condition: call glfwInit() first.
   //!
   //! N.B.: this does not use C++ RAII.
+  //! Using RAII is not a good idea anyways because the order in which the
+  //! surface object is destroyed matters.
   class Surface
   {
   public:
@@ -43,7 +42,7 @@ namespace DO::Kalpana {
       SARA_DEBUG
           << "[VK] Initializing Vulkan surface with the GLFW application...\n";
       const auto status =
-          glfwCreateWindowSurface(instance, window, nullptr, &_surface);
+          glfwCreateWindowSurface(instance, window, nullptr, &handle);
       if (status != VK_SUCCESS)
       {
         SARA_DEBUG << fmt::format("[VK] Error: failed to initilialize Vulkan "
@@ -57,25 +56,25 @@ namespace DO::Kalpana {
 
     auto destroy(const VkInstance instance) -> void
     {
-      if (_surface == nullptr)
+      if (handle == nullptr)
         return;
 
       SARA_DEBUG << "[VK] Destroying Vulkan surface...\n";
-      vkDestroySurfaceKHR(instance, _surface, nullptr);
+      vkDestroySurfaceKHR(instance, handle, nullptr);
     }
 
     operator VkSurfaceKHR&()
     {
-      return _surface;
+      return handle;
     }
 
     operator const VkSurfaceKHR&() const
     {
-      return _surface;
+      return handle;
     }
 
   private:
-    VkSurfaceKHR _surface = VK_NULL_HANDLE;
+    VkSurfaceKHR handle = nullptr;
   };
 
-}  // namespace DO::Kalpana
+}  // namespace DO::Kalpana::Vulkan

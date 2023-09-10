@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#pragma once
+
 #include <vulkan/vulkan_core.h>
 
 #include <algorithm>
@@ -20,16 +22,16 @@
 #include <vector>
 
 
-namespace DO::Shakti::EasyVulkan {
+namespace DO::Shakti::Vulkan {
 
   struct PhysicalDevice
   {
     PhysicalDevice() = default;
 
     PhysicalDevice(const VkPhysicalDevice physical_device)
-      : _physical_device{physical_device}
-      , _queue_families{list_supported_queue_families(physical_device)}
-      , _extensions_supported{list_supported_extensions(physical_device)}
+      : handle{physical_device}
+      , queue_families{list_supported_queue_families(physical_device)}
+      , extensions_supported{list_supported_extensions(physical_device)}
     {
     }
 
@@ -94,11 +96,11 @@ namespace DO::Shakti::EasyVulkan {
         -> bool
     {
       return std::find_if(
-                 _extensions_supported.begin(), _extensions_supported.end(),
+                 extensions_supported.begin(), extensions_supported.end(),
                  [&extension_name](const VkExtensionProperties& extension) {
                    return std::strcmp(extension.extensionName,
                                       extension_name.data()) == 0;
-                 }) != _extensions_supported.end();
+                 }) != extensions_supported.end();
     }
 
     auto supports_extensions(
@@ -113,7 +115,7 @@ namespace DO::Shakti::EasyVulkan {
                                     const VkFlags queue_family_bit_value) const
         -> bool
     {
-      const auto& queue_family = _queue_families[queue_family_index];
+      const auto& queue_family = queue_families[queue_family_index];
       return (queue_family.queueFlags & queue_family_bit_value) != VkFlags{0};
     }
 
@@ -121,7 +123,7 @@ namespace DO::Shakti::EasyVulkan {
                                        const VkSurfaceKHR surface) const -> bool
     {
       auto present_support = VkBool32{false};
-      vkGetPhysicalDeviceSurfaceSupportKHR(_physical_device,    //
+      vkGetPhysicalDeviceSurfaceSupportKHR(handle,              //
                                            queue_family_index,  //
                                            surface,             //
                                            &present_support);
@@ -130,17 +132,17 @@ namespace DO::Shakti::EasyVulkan {
 
     operator VkPhysicalDevice&()
     {
-      return _physical_device;
+      return handle;
     }
 
     operator VkPhysicalDevice() const
     {
-      return _physical_device;
+      return handle;
     }
 
-    VkPhysicalDevice _physical_device = nullptr;
-    std::vector<VkQueueFamilyProperties> _queue_families;
-    std::vector<VkExtensionProperties> _extensions_supported;
+    VkPhysicalDevice handle = nullptr;
+    std::vector<VkQueueFamilyProperties> queue_families;
+    std::vector<VkExtensionProperties> extensions_supported;
   };
 
-}  // namespace DO::Shakti::EasyVulkan
+}  // namespace DO::Shakti::Vulkan

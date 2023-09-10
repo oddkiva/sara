@@ -1,7 +1,7 @@
 #include <drafts/Vulkan/Instance.hpp>
 
 
-namespace svk = DO::Shakti::EasyVulkan;
+namespace svk = DO::Shakti::Vulkan;
 
 auto svk::list_available_instance_layers() -> std::vector<VkLayerProperties>
 {

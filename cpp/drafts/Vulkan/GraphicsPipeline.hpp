@@ -7,7 +7,7 @@
 #include <vulkan/vulkan_core.h>
 
 
-namespace vk {
+namespace DO::Kalpana::Vulkan {
 
   //! The graphics pipeline, which is called the render pipeline in Metal.
   //!
@@ -234,4 +234,4 @@ namespace vk {
   };
 
 
-}  // namespace vk
+}  // namespace DO::Kalpana::Vulkan

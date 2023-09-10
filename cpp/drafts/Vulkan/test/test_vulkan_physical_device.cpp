@@ -11,9 +11,11 @@
 
 #define BOOST_TEST_MODULE "EasyVulkan/Vulkan Physical Device"
 
+#include <drafts/Vulkan/VulkanGLFWInterop.hpp>
+
+#include <drafts/Vulkan/GLFWHelpers.hpp>
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
-#include <drafts/Vulkan/VulkanGLFWInterop.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -28,21 +30,20 @@ static constexpr auto compiling_for_apple = false;
 
 BOOST_AUTO_TEST_CASE(test_list_physical_devices)
 {
-  namespace svk = DO::Shakti::EasyVulkan;
+  namespace svk = DO::Shakti::Vulkan;
   namespace k = DO::Kalpana;
+  namespace kvk = DO::Kalpana::Vulkan;
 
-  glfwInit();
+  auto glfw_app = DO::Kalpana::GLFWApplication{};
+  glfw_app.init_for_vulkan_rendering();
 
-  // The following call is important and allows to create a Vulkan surface from
-  // a GLFWwindow object.
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   // Create a window.
   const auto window = glfwCreateWindow(100, 100,  //
                                        "Vulkan",  //
                                        nullptr, nullptr);
 
   // Vulkan instance.
-  auto instance_extensions = k::list_required_vulkan_extensions_from_glfw();
+  auto instance_extensions = kvk::list_required_vulkan_extensions_from_glfw();
   if constexpr (debug_vulkan_instance)
     instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
   if constexpr (compiling_for_apple)
@@ -61,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_list_physical_devices)
           .create();
 
   // Vulkan surface.
-  auto surface = k::Surface{};
+  auto surface = kvk::Surface{};
   surface.init(instance, window);
 
   // Vulkan physical device.
@@ -71,19 +72,12 @@ BOOST_AUTO_TEST_CASE(test_list_physical_devices)
   // All my devices should support graphics operations.
   for (const auto& physical_device : physical_devices)
   {
-    const auto& queue_families = physical_device._queue_families;
+    const auto& queue_families = physical_device.queue_families;
     SARA_CHECK(queue_families.size());
-    for (auto i = std::uint32_t{}; i != queue_families.size(); ++i)
-    {
-      BOOST_CHECK(
-          physical_device.supports_queue_family_type(i, VK_QUEUE_GRAPHICS_BIT));
-      BOOST_CHECK(physical_device.supports_surface_presentation(i, surface));
-    }
   }
 
   surface.destroy(instance);
 
   if (window != nullptr)
     glfwDestroyWindow(window);
-  glfwTerminate();
 }

@@ -9,22 +9,29 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "EasyVulkan/Vulkan Instance"
+#define BOOST_TEST_MODULE "Vulkan/Vulkan Instance"
 
-#include <drafts/Vulkan/Instance.hpp>
+// Include this first
 #include <drafts/Vulkan/VulkanGLFWInterop.hpp>
+// Then the rest.
+#include <drafts/Vulkan/GLFWHelpers.hpp>
+#include <drafts/Vulkan/Instance.hpp>
 
 #include <GLFW/glfw3.h>
 
 #include <boost/test/unit_test.hpp>
 
 
-static constexpr auto compiling_for_apple = __APPLE__ == 1;
+#if defined(__APPLE__)
+static constexpr auto compiling_for_apple = true;
+#else
+static constexpr auto compiling_for_apple = false;
+#endif
 
 
 BOOST_AUTO_TEST_CASE(test_barebone_instance)
 {
-  namespace svk = DO::Shakti::EasyVulkan;
+  namespace svk = DO::Shakti::Vulkan;
 
   const auto instance_extensions =
       compiling_for_apple ? std::vector{"VK_KHR_portability_enumeration"}
@@ -39,14 +46,14 @@ BOOST_AUTO_TEST_CASE(test_barebone_instance)
 
 BOOST_AUTO_TEST_CASE(test_glfw_vulkan_instance)
 {
-  namespace svk = DO::Shakti::EasyVulkan;
-  namespace k = DO::Kalpana;
+  namespace svk = DO::Shakti::Vulkan;
+  namespace kvk = DO::Kalpana::Vulkan;
 
   static constexpr auto debug_vulkan_instance = true;
 
   glfwInit();
 
-  auto instance_extensions = k::list_required_vulkan_extensions_from_glfw();
+  auto instance_extensions = kvk::list_required_vulkan_extensions_from_glfw();
   if constexpr (debug_vulkan_instance)
     instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
   if constexpr (compiling_for_apple)

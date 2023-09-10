@@ -16,9 +16,10 @@
 #include <cstdint>
 
 
-namespace k = DO::Kalpana;
+namespace kvk = DO::Kalpana::Vulkan;
 
-auto k::list_required_vulkan_extensions_from_glfw() -> std::vector<const char*>
+auto kvk::list_required_vulkan_extensions_from_glfw()
+    -> std::vector<const char*>
 {
   auto glfw_extension_count = std::uint32_t{};
   const char** glfw_extensions = nullptr;
