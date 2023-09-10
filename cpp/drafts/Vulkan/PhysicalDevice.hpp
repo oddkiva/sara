@@ -1,12 +1,11 @@
-#include <algorithm>
 #include <vulkan/vulkan.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <set>
 #include <string>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 
 namespace vk {
