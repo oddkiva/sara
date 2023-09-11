@@ -9,6 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include "drafts/Vulkan/Device.hpp"
 #define BOOST_TEST_MODULE "EasyVulkan/Vulkan Physical Device"
 
 #include <drafts/Vulkan/VulkanGLFWInterop.hpp>
@@ -28,7 +29,7 @@ static constexpr auto compiling_for_apple = false;
 #endif
 
 
-BOOST_AUTO_TEST_CASE(test_list_physical_devices)
+BOOST_AUTO_TEST_CASE(test_device)
 {
   namespace svk = DO::Shakti::Vulkan;
   namespace k = DO::Kalpana;
@@ -69,15 +70,19 @@ BOOST_AUTO_TEST_CASE(test_list_physical_devices)
   const auto physical_devices =
       svk::PhysicalDevice::list_physical_devices(instance);
 
-  // All my devices should support graphics operations.
-  for (const auto& physical_device : physical_devices)
-  {
-    const auto& queue_families = physical_device.queue_families;
-    SARA_CHECK(queue_families.size());
-  }
+  // TODO: List all devices that supports the graphics queue family
+  // TODO: List all devices that supports the present queue family
+  // TODO: Bind the queue families to the Vulkan device.
+  // TODO: Bind the device extensions to the Vulkan device.
+  auto device = svk::DeviceCreator{physical_devices.front()}
+                    .device_extensions(instance_extensions)
+                    .queue_families({})
+                    .device_features({})
+                    .validation_layers(validation_layers_required)
+                    .create();
 
+  // Destroy in this order.
   surface.destroy(instance);
-
   if (window != nullptr)
     glfwDestroyWindow(window);
 }
