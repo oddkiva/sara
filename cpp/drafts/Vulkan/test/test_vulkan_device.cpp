@@ -22,11 +22,9 @@
 #include <boost/test/unit_test.hpp>
 
 
-using std::find_if;
-
 static constexpr auto debug_vulkan_instance = true;
 #if defined(__APPLE__)
-static constexpr auto compiling_for_apple = true;
+static constexpr auto compile_for_apple = true;
 #else
 static constexpr auto compiling_for_apple = false;
 #endif
@@ -50,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_device)
   auto instance_extensions = kvk::list_required_vulkan_extensions_from_glfw();
   if constexpr (debug_vulkan_instance)
     instance_extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-  if constexpr (compiling_for_apple)
+  if constexpr (compile_for_apple)
   {
     instance_extensions.emplace_back(
         VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
@@ -66,8 +64,8 @@ BOOST_AUTO_TEST_CASE(test_device)
       svk::InstanceCreator{}
           .application_name("GLFW-Vulkan Application")
           .engine_name("No Engine")
-          .required_instance_extensions(instance_extensions)
-          .required_validation_layers(validation_layers_required)
+          .enable_instance_extensions(instance_extensions)
+          .enable_validation_layers(validation_layers_required)
           .create();
 
   // Initialize a Vulkan surface to which the GLFW Window surface is bound.
@@ -80,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_device)
 
   // Find a suitable physical (GPU) device that can be used for 3D graphics
   // application.
-  const auto di = find_if(
+  const auto di = std::find_if(
       physical_devices.begin(), physical_devices.end(),
       [&surface](const auto& d) {
         return d.supports_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME) &&
@@ -105,15 +103,16 @@ BOOST_AUTO_TEST_CASE(test_device)
       kvk::find_present_queue_family_indices(physical_device, surface).front();
 
   // Create a logical device.
-  const auto device =
-      svk::DeviceCreator{*di}
-          .enable_device_extensions(
-              {VK_KHR_SWAPCHAIN_EXTENSION_NAME, "VK_KHR_portability_subset"})
-          .enable_queue_families(
-              {graphics_queue_family_index, present_queue_family_index})
-          .enable_device_features({})
-          .enable_validation_layers(validation_layers_required)
-          .create();
+  auto device_extensions = std::vector{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  if constexpr (compile_for_apple)
+    device_extensions.emplace_back("VK_KHR_portability_subset");
+  const auto device = svk::DeviceCreator{*di}
+                          .enable_device_extensions(device_extensions)
+                          .enable_queue_families({graphics_queue_family_index,
+                                                  present_queue_family_index})
+                          .enable_device_features({})
+                          .enable_validation_layers(validation_layers_required)
+                          .create();
   BOOST_CHECK(device.handle != nullptr);
 
   // Destroy in this order.

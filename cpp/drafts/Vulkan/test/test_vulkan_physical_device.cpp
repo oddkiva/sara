@@ -49,17 +49,16 @@ BOOST_AUTO_TEST_CASE(test_find_physical_devices_for_3d_graphics_application)
   if constexpr (compiling_for_apple)
     instance_extensions.push_back("VK_KHR_portability_enumeration");
 
-  const auto validation_layers_required =
+  const auto validation_layers =
       debug_vulkan_instance ? std::vector{"VK_LAYER_KHRONOS_validation"}
                             : std::vector<const char*>{};
 
-  const auto instance =
-      svk::InstanceCreator{}
-          .application_name("GLFW-Vulkan Application")
-          .engine_name("No Engine")
-          .required_instance_extensions(instance_extensions)
-          .required_validation_layers(validation_layers_required)
-          .create();
+  const auto instance = svk::InstanceCreator{}
+                            .application_name("GLFW-Vulkan Application")
+                            .engine_name("No Engine")
+                            .enable_instance_extensions(instance_extensions)
+                            .enable_validation_layers(validation_layers)
+                            .create();
 
   // Vulkan surface.
   auto surface = kvk::Surface{};

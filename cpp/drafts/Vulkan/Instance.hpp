@@ -175,7 +175,7 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
-    auto required_instance_extensions(
+    auto enable_instance_extensions(
         const std::vector<const char*> required_instance_extensions)
         -> InstanceCreator&
     {
@@ -191,7 +191,7 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
-    auto required_validation_layers(
+    auto enable_validation_layers(
         const std::vector<const char*>& required_validation_layers)
         -> InstanceCreator&
     {

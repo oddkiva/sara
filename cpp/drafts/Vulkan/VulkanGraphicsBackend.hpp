@@ -27,7 +27,7 @@ namespace DO::Kalpana::Vulkan {
   {
   public:
 #if defined(__APPLE__)
-    static constexpr auto compiling_for_apple = true;
+    static constexpr auto compile_for_apple = true;
 #else
     static constexpr auto compiling_for_apple = false;
 #endif
@@ -38,7 +38,7 @@ namespace DO::Kalpana::Vulkan {
   public:
     VulkanGraphicsBackend(const std::string& app_name, const bool debug_vulkan)
     {
-      init_vulkan_instance(app_name, debug_vulkan);
+      init_instance(app_name, debug_vulkan);
     }
 
     auto init_instance(const std::string& app_name, const bool debug_vulkan)
@@ -46,8 +46,13 @@ namespace DO::Kalpana::Vulkan {
     {
       // Vulkan instance.
       _instance_extensions = list_required_vulkan_extensions_from_glfw();
-      if constexpr (compiling_for_apple)
-        _instance_extensions.push_back("VK_KHR_portability_enumeration");
+      if constexpr (compile_for_apple)
+      {
+        _instance_extensions.emplace_back(
+            VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+        _instance_extensions.emplace_back(
+            VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+      }
       if (debug_vulkan)
         _instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
@@ -59,8 +64,8 @@ namespace DO::Kalpana::Vulkan {
       _instance = Shakti::Vulkan::InstanceCreator{}
                       .application_name(app_name.c_str())
                       .engine_name("No Engine")
-                      .required_instance_extensions(_instance_extensions)
-                      .required_validation_layers(_validation_layers)
+                      .enable_instance_extensions(_instance_extensions)
+                      .enable_validation_layers(_validation_layers)
                       .create();
     }
 
@@ -79,7 +84,7 @@ namespace DO::Kalpana::Vulkan {
 
       // Find a suitable physical (GPU) device that can be used for 3D graphics
       // application.
-      const auto di = find_if(
+      const auto di = std::find_if(
           physical_devices.begin(), physical_devices.end(),
           [this](const auto& d) {
             return d.supports_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME) &&
@@ -97,7 +102,7 @@ namespace DO::Kalpana::Vulkan {
       _physical_device = *di;
     }
 
-    auto init_device() -> void
+    auto init_device_and_queues() -> void
     {
       namespace svk = Shakti::Vulkan;
 
@@ -110,14 +115,17 @@ namespace DO::Kalpana::Vulkan {
       //
       // This is because the hardware does not expose present-only queue
       // families...
-      const auto graphics_queue_family_index =
+      _graphics_queue_family_index =
           find_graphics_queue_family_indices(_physical_device).front();
-      const auto present_queue_family_index =
+      _present_queue_family_index =
           find_present_queue_family_indices(_physical_device, _surface).front();
 
       // Create a logical device.
+      auto device_extensions = std::vector{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+      if constexpr (compile_for_apple)
+        device_extensions.emplace_back("VK_KHR_portability_subset");
       _device = svk::DeviceCreator{_physical_device}
-                    .enable_device_extensions({VK_KHR_SWAPCHAIN_EXTENSION_NAME})
+                    .enable_device_extensions(device_extensions)
                     .enable_queue_families({graphics_queue_family_index,
                                             present_queue_family_index})
                     .enable_device_features({})

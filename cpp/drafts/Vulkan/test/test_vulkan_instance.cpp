@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_barebone_instance)
   const auto instance = svk::InstanceCreator{}
                             .application_name("Barebone Vulkan Application")
                             .engine_name("No Engine")
-                            .required_instance_extensions(instance_extensions)
+                            .enable_instance_extensions(instance_extensions)
                             .create();
 }
 
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_glfw_vulkan_instance)
   for (const auto extension : instance_extensions)
     SARA_DEBUG << fmt::format("- {}\n", extension);
 
-  const auto validation_layers_required =
+  const auto validation_layers =
       debug_vulkan_instance ? std::vector{"VK_LAYER_KHRONOS_validation"}
                             : std::vector<const char*>{};
 
@@ -71,8 +71,8 @@ BOOST_AUTO_TEST_CASE(test_glfw_vulkan_instance)
       svk::InstanceCreator{}
           .application_name("GLFW-Vulkan Application")
           .engine_name("No Engine")
-          .required_instance_extensions(instance_extensions)
-          .required_validation_layers(validation_layers_required)
+          .enable_instance_extensions(instance_extensions)
+          .enable_validation_layers(validation_layers)
           .create();
 
   glfwTerminate();
