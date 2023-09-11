@@ -49,9 +49,14 @@ BOOST_AUTO_TEST_CASE(test_device)
   // Vulkan instance.
   auto instance_extensions = kvk::list_required_vulkan_extensions_from_glfw();
   if constexpr (debug_vulkan_instance)
-    instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    instance_extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
   if constexpr (compiling_for_apple)
-    instance_extensions.push_back("VK_KHR_portability_enumeration");
+  {
+    instance_extensions.emplace_back(
+        VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+    instance_extensions.emplace_back(
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+  }
 
   const auto validation_layers_required =
       debug_vulkan_instance ? std::vector{"VK_LAYER_KHRONOS_validation"}
@@ -102,7 +107,8 @@ BOOST_AUTO_TEST_CASE(test_device)
   // Create a logical device.
   const auto device =
       svk::DeviceCreator{*di}
-          .enable_device_extensions({VK_KHR_SWAPCHAIN_EXTENSION_NAME})
+          .enable_device_extensions(
+              {VK_KHR_SWAPCHAIN_EXTENSION_NAME, "VK_KHR_portability_subset"})
           .enable_queue_families(
               {graphics_queue_family_index, present_queue_family_index})
           .enable_device_features({})
