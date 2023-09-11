@@ -15,6 +15,7 @@
 #include <GLFW/glfw3.h>
 
 #include <drafts/Vulkan/Instance.hpp>
+#include <drafts/Vulkan/PhysicalDevice.hpp>
 
 
 namespace DO::Kalpana::Vulkan {
@@ -76,5 +77,29 @@ namespace DO::Kalpana::Vulkan {
   private:
     VkSurfaceKHR handle = nullptr;
   };
+
+
+  inline auto
+  find_graphics_queue_family_indices(const Shakti::Vulkan::PhysicalDevice& d)
+      -> std::vector<std::uint32_t>
+  {
+    auto indices = std::vector<std::uint32_t>{};
+    for (auto i = std::uint32_t{}; i != d.queue_families.size(); ++i)
+      if (d.supports_queue_family_type(i, VK_QUEUE_GRAPHICS_BIT))
+        indices.emplace_back(i);
+    return indices;
+  }
+
+  inline auto
+  find_present_queue_family_indices(const Shakti::Vulkan::PhysicalDevice& d,
+                                    const Surface& s)
+      -> std::vector<std::uint32_t>
+  {
+    auto indices = std::vector<std::uint32_t>{};
+    for (auto i = std::uint32_t{}; i != d.queue_families.size(); ++i)
+      if (d.supports_surface_presentation(i, s))
+        indices.emplace_back(i);
+    return indices;
+  }
 
 }  // namespace DO::Kalpana::Vulkan

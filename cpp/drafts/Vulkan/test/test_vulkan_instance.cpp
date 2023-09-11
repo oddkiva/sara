@@ -14,7 +14,7 @@
 // Include this first
 #include <drafts/Vulkan/VulkanGLFWInterop.hpp>
 // Then the rest.
-#include <drafts/Vulkan/GLFWHelpers.hpp>
+#include <drafts/Vulkan/GLFWApplication.hpp>
 #include <drafts/Vulkan/Instance.hpp>
 
 #include <GLFW/glfw3.h>

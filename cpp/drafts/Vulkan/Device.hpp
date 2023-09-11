@@ -16,13 +16,19 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
 #include <fmt/format.h>
+#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Shakti::Vulkan {
 
   struct Device
   {
-    VkDevice handle = nullptr;
+    Device() = default;
+
+    ~Device()
+    {
+      vkDestroyDevice(handle, nullptr);
+    }
 
     auto get_device_queue(const std::uint32_t queue_family_index) const
         -> VkQueue
@@ -33,6 +39,8 @@ namespace DO::Shakti::Vulkan {
       vkGetDeviceQueue(handle, queue_family_index, 0, &queue);
       return queue;
     }
+
+    VkDevice handle = nullptr;
   };
 
   //! @brief Specify the logical device that we want to create.
@@ -52,12 +60,11 @@ namespace DO::Shakti::Vulkan {
     //!
     //! So We need to bind these family of operations from the physical
     //! device to the logical device.
-    auto queue_families(const std::set<std::uint32_t>& queue_family_indices)
+    auto
+    enable_queue_families(const std::set<std::uint32_t>& queue_family_indices)
         -> DeviceCreator&
     {
-      SARA_DEBUG
-          << "[VK] - (Basically but not necessarily) checking that the "
-             "physical device supports graphics and present operations...\n";
+      SARA_DEBUG << "[VK] - Enabling queue families...\n";
 
       // Re-populate the list of create infos for each queue family.
       _queue_create_infos.clear();
@@ -84,28 +91,29 @@ namespace DO::Shakti::Vulkan {
     }
 
     //! Bind the validation layers for debugging purposes.
-    auto validation_layers(
-        const std::vector<const char*>& requested_validation_layers)
+    auto
+    enable_validation_layers(const std::vector<const char*>& validation_layers)
         -> DeviceCreator&
     {
-      _requested_validation_layers = requested_validation_layers;
-      _create_info.enabledLayerCount = _requested_validation_layers.size();
-      _create_info.ppEnabledLayerNames = _requested_validation_layers.data();
+      _validation_layers = validation_layers;
+      _create_info.enabledLayerCount = _validation_layers.size();
+      _create_info.ppEnabledLayerNames = _validation_layers.data();
       return *this;
     }
 
     //! Bind the Vulkan device extensions we require.
-    auto device_extensions(const std::vector<const char*> device_extensions)
+    auto
+    enable_device_extensions(const std::vector<const char*> device_extensions)
         -> DeviceCreator&
     {
-      _requested_device_extensions = device_extensions;
-      _create_info.enabledExtensionCount = _required_device_extensions.size();
-      _create_info.ppEnabledExtensionNames = _required_device_extensions.data();
+      _device_extensions = device_extensions;
+      _create_info.enabledExtensionCount = _device_extensions.size();
+      _create_info.ppEnabledExtensionNames = _device_extensions.data();
       return *this;
     }
 
     //! Bind the Vulkan device features we require.
-    auto device_features(const VkPhysicalDeviceFeatures& features = {})
+    auto enable_device_features(const VkPhysicalDeviceFeatures& features = {})
         -> DeviceCreator&
     {
       _physical_device_features = features;
@@ -135,8 +143,8 @@ namespace DO::Shakti::Vulkan {
 
     VkDeviceCreateInfo _create_info = {};
     std::vector<VkDeviceQueueCreateInfo> _queue_create_infos;
-    std::vector<const char*> _requested_validation_layers;
-    std::vector<const char*> _requested_device_extensions;
+    std::vector<const char*> _validation_layers;
+    std::vector<const char*> _device_extensions;
     VkPhysicalDeviceFeatures _physical_device_features = {};
   };
 
