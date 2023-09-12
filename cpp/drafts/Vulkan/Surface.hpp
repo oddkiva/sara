@@ -20,62 +20,53 @@
 
 namespace DO::Kalpana::Vulkan {
 
-  //! Pre-condition: call glfwInit() first.
-  auto list_required_vulkan_extensions_from_glfw() -> std::vector<const char*>;
-
-}  // namespace DO::Kalpana::Vulkan
-
-
-namespace DO::Kalpana::Vulkan {
-
-  //! Pre-condition: call glfwInit() first.
-  //!
-  //! N.B.: this does not use C++ RAII.
-  //! Using RAII is not a good idea anyways because the order in which the
-  //! surface object is destroyed matters.
+  //! Pre-condition: call glfwInit() first or instantiate a
+  //! `DO::Kalpana::GLFW::Application` object.
   class Surface
   {
   public:
     Surface() = default;
 
-    auto init(const VkInstance instance, GLFWwindow* window) -> bool
+    Surface(const VkInstance instance, GLFWwindow* window)
+      : _instance{instance}
     {
-      SARA_DEBUG
-          << "[VK] Initializing Vulkan surface with the GLFW application...\n";
       const auto status =
-          glfwCreateWindowSurface(instance, window, nullptr, &handle);
+          glfwCreateWindowSurface(_instance, window, nullptr, &_handle);
       if (status != VK_SUCCESS)
-      {
-        SARA_DEBUG << fmt::format("[VK] Error: failed to initilialize Vulkan "
-                                  "surface! Error code: {}\n",
-                                  static_cast<int>(status));
-        return false;
-      }
-
-      return true;
+        throw std::runtime_error{
+            fmt::format("[VK] Error: failed to initilialize Vulkan "
+                        "surface! Error code: {}\n",
+                        static_cast<int>(status))};
+      SARA_DEBUG << fmt::format("[VK] Initialized Vulkan surface: {}\n",
+                                fmt::ptr(_handle));
     }
 
-    auto destroy(const VkInstance instance) -> void
+    ~Surface()
     {
-      if (handle == nullptr)
+      if (_handle == nullptr || _instance == nullptr)
         return;
 
-      SARA_DEBUG << "[VK] Destroying Vulkan surface...\n";
-      vkDestroySurfaceKHR(instance, handle, nullptr);
+      SARA_DEBUG << fmt::format("[VK] Destroying Vulkan surface: {}\n",
+                                fmt::ptr(_handle));
+      vkDestroySurfaceKHR(_instance, _handle, nullptr);
     }
 
     operator VkSurfaceKHR&()
     {
-      return handle;
+      return _handle;
     }
 
     operator const VkSurfaceKHR&() const
     {
-      return handle;
+      return _handle;
     }
 
+    static auto list_required_instance_extensions_from_glfw()
+        -> std::vector<const char*>;
+
   private:
-    VkSurfaceKHR handle = nullptr;
+    VkSurfaceKHR _handle = nullptr;
+    VkInstance _instance = nullptr;
   };
 
 

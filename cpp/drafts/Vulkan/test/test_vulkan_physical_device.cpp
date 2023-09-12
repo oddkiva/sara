@@ -9,13 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "EasyVulkan/Vulkan Physical Device"
+#define BOOST_TEST_MODULE "Vulkan/Physical Device"
+#define GLFW_INCLUDE_VULKAN
 
-#include <drafts/Vulkan/VulkanGLFWInterop.hpp>
-
-#include <drafts/Vulkan/GLFWApplication.hpp>
+#include <drafts/Vulkan/EasyGLFW.hpp>
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
+#include <drafts/Vulkan/Surface.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -32,18 +32,18 @@ BOOST_AUTO_TEST_CASE(test_find_physical_devices_for_3d_graphics_application)
 {
   namespace svk = DO::Shakti::Vulkan;
   namespace k = DO::Kalpana;
+  namespace glfw = DO::Kalpana::GLFW;
   namespace kvk = DO::Kalpana::Vulkan;
 
-  auto glfw_app = k::GLFWApplication{};
+  auto glfw_app = glfw::Application{};
   glfw_app.init_for_vulkan_rendering();
 
   // Create a window.
-  const auto window = glfwCreateWindow(100, 100,  //
-                                       "Vulkan",  //
-                                       nullptr, nullptr);
+  const auto window = glfw::Window(100, 100, "Vulkan");
 
   // Vulkan instance.
-  auto instance_extensions = kvk::list_required_vulkan_extensions_from_glfw();
+  auto instance_extensions =
+      kvk::Surface::list_required_instance_extensions_from_glfw();
   if constexpr (debug_vulkan_instance)
     instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
   if constexpr (compiling_for_apple)
@@ -61,8 +61,7 @@ BOOST_AUTO_TEST_CASE(test_find_physical_devices_for_3d_graphics_application)
                             .create();
 
   // Vulkan surface.
-  auto surface = kvk::Surface{};
-  surface.init(instance, window);
+  auto surface = kvk::Surface{instance, window};
 
   // Vulkan physical device.
   const auto physical_devices =
@@ -117,10 +116,4 @@ BOOST_AUTO_TEST_CASE(test_find_physical_devices_for_3d_graphics_application)
     ++gpu_id;
   }
   BOOST_CHECK(one_gpu_can_present_on_the_vulkan_surface);
-
-
-  surface.destroy(instance);
-
-  if (window != nullptr)
-    glfwDestroyWindow(window);
 }

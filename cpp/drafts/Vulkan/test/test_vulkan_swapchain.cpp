@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "Vulkan/Device"
+#define BOOST_TEST_MODULE "Vulkan/Swapchain"
 #define GLFW_INCLUDE_VULKAN
 
 #include <drafts/Vulkan/Device.hpp>
@@ -17,6 +17,7 @@
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
 #include <drafts/Vulkan/Surface.hpp>
+#include <drafts/Vulkan/Swapchain.hpp>
 
 
 #include <boost/test/unit_test.hpp>
@@ -113,4 +114,8 @@ BOOST_AUTO_TEST_CASE(test_device)
                           .enable_validation_layers(validation_layers_required)
                           .create();
   BOOST_CHECK(device.handle != nullptr);
+
+  const auto swapchain =
+      kvk::Swapchain{physical_device, device, surface, window};
+  BOOST_CHECK(swapchain.handle != nullptr);
 }

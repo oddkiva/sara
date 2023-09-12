@@ -29,11 +29,13 @@ namespace DO::Kalpana::Vulkan {
 #if defined(__APPLE__)
     static constexpr auto compile_for_apple = true;
 #else
-    static constexpr auto compiling_for_apple = false;
+    static constexpr auto compile_for_apple = false;
 #endif
 
     static constexpr auto default_width = 800;
     static constexpr auto default_height = 600;
+
+    class Configurator;
 
   public:
     VulkanGraphicsBackend(const std::string& app_name, const bool debug_vulkan)
@@ -115,9 +117,9 @@ namespace DO::Kalpana::Vulkan {
       //
       // This is because the hardware does not expose present-only queue
       // families...
-      _graphics_queue_family_index =
+      const auto graphics_queue_family_index =
           find_graphics_queue_family_indices(_physical_device).front();
-      _present_queue_family_index =
+      const auto present_queue_family_index =
           find_present_queue_family_indices(_physical_device, _surface).front();
 
       // Create a logical device.
@@ -134,17 +136,12 @@ namespace DO::Kalpana::Vulkan {
 
       SARA_DEBUG
           << "[VK] - Fetching the graphics queue from the logical device...\n";
-      vkGetDeviceQueue(_device, graphics_queue_family_index, 0,
+      vkGetDeviceQueue(_device.handle, graphics_queue_family_index, 0,
                        &_graphics_queue);
       SARA_DEBUG
           << "[VK] - Fetching the present queue from the logical device...\n";
-      vkGetDeviceQueue(_device, present_queue_family_index, 0, &_present_queue);
-    }
-
-    auto cleanup() -> void
-    {
-      // Destroy in this order.
-      _surface.destroy(_instance);
+      vkGetDeviceQueue(_device.handle, present_queue_family_index, 0,
+                       &_present_queue);
     }
 
   private:
@@ -170,6 +167,5 @@ namespace DO::Kalpana::Vulkan {
     VkQueue _graphics_queue;
     VkQueue _present_queue;
   };
-
 
 }  // namespace DO::Kalpana::Vulkan

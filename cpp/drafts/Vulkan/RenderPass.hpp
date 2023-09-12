@@ -86,4 +86,4 @@ namespace DO::Kalpana::Vulkan {
     std::vector<VkSubpassDependency> _dependencies;
   };
 
-}  // namespace vk
+}  // namespace DO::Kalpana::Vulkan

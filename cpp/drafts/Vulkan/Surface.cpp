@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <drafts/Vulkan/VulkanGLFWInterop.hpp>
+#include <drafts/Vulkan/Surface.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -18,7 +18,7 @@
 
 namespace kvk = DO::Kalpana::Vulkan;
 
-auto kvk::list_required_vulkan_extensions_from_glfw()
+auto kvk::Surface::list_required_instance_extensions_from_glfw()
     -> std::vector<const char*>
 {
   auto glfw_extension_count = std::uint32_t{};

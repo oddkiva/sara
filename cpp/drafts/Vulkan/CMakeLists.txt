@@ -8,7 +8,7 @@ find_program(
 add_library(
   EasyVulkan #
   Instance.cpp Instance.hpp #
-  VulkanGLFWInterop.cpp VulkanGLFWInterop.hpp)
+  Surface.cpp Surface.hpp)
 target_link_libraries(
   EasyVulkan
   PUBLIC Vulkan::Vulkan #

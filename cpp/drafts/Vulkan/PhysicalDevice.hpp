@@ -11,7 +11,11 @@
 
 #pragma once
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
+
 #include <vulkan/vulkan_core.h>
+
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -38,13 +42,12 @@ namespace DO::Shakti::Vulkan {
     static auto list_physical_devices(const VkInstance instance)
         -> std::vector<PhysicalDevice>
     {
-      SARA_DEBUG << "  [VK] Counting the number of physical devices...\n";
       auto device_count = std::uint32_t{};
       vkEnumeratePhysicalDevices(instance, &device_count, nullptr);
-      SARA_DEBUG << fmt::format("  [VK] Physical device count: {}\n",
+      SARA_DEBUG << fmt::format("[VK] Found {} physical devices:\n",
                                 device_count);
 
-      SARA_DEBUG << "  [VK] Populating the list of physical devices...\n";
+      SARA_DEBUG << "[VK] Populating the list of physical devices...\n";
       if (device_count == 0)
         return {};
 
