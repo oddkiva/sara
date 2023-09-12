@@ -9,9 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <vulkan/vulkan.h>
+#pragma once
 
-#include <vector>
+#include <drafts/Vulkan/Swapchain.hpp>
 
 
 namespace DO::Kalpana::Vulkan {
@@ -20,12 +20,12 @@ namespace DO::Kalpana::Vulkan {
   // result.
   struct RenderPass
   {
-    auto create_basic_render_pass(VkDevice device,
+    auto create_basic_render_pass(const Shakti::Vulkan::Device& device,
                                   const VkFormat swapchain_image_format) -> void
     {
       // 1. Specify the color buffer.
-      _color_attachments.resize(1);
-      auto& color_attachment = _color_attachments.front();
+      color_attachments.resize(1);
+      auto& color_attachment = color_attachments.front();
       color_attachment.format = swapchain_image_format;
       color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
       color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -35,8 +35,8 @@ namespace DO::Kalpana::Vulkan {
 
       // 2. The color buffer is referenced by its index. We take the first one,
       //    i.e. the zero-th one.
-      _color_attachment_refs.resize(1);
-      auto& color_attachment_ref = _color_attachment_refs.front();
+      color_attachment_refs.resize(1);
+      auto& color_attachment_ref = color_attachment_refs.front();
       color_attachment_ref = VkAttachmentReference{
           .attachment = 0,                                    //
           .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL  //
@@ -47,16 +47,16 @@ namespace DO::Kalpana::Vulkan {
       //
       //    In our case, we just want to fill the color buffer with our fragment
       //    shader of a graphics pipeline that we will specify later.
-      _subpasses.resize(1);
-      auto& subpass = _subpasses.front();
+      subpasses.resize(1);
+      auto& subpass = subpasses.front();
       subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-      subpass.colorAttachmentCount = _color_attachment_refs.size();
-      subpass.pColorAttachments = _color_attachment_refs.data();
+      subpass.colorAttachmentCount = color_attachment_refs.size();
+      subpass.pColorAttachments = color_attachment_refs.data();
 
       // 4. Link one subpass to one another. Here, if I understood correctly, we
       //    just want the fragment shader to write to the color buffer.
-      _dependencies.resize(1);
-      auto& dependency = _dependencies.front();
+      dependencies.resize(1);
+      auto& dependency = dependencies.front();
       dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
       dependency.dstSubpass = 0;
       dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -69,21 +69,24 @@ namespace DO::Kalpana::Vulkan {
       render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
       render_pass_create_info.attachmentCount = 1;
       render_pass_create_info.pAttachments = &color_attachment;
-      render_pass_create_info.subpassCount = _subpasses.size();
-      render_pass_create_info.pSubpasses = _subpasses.data();
-      render_pass_create_info.dependencyCount = _dependencies.size();
-      render_pass_create_info.pDependencies = _dependencies.data();
+      render_pass_create_info.subpassCount = subpasses.size();
+      render_pass_create_info.pSubpasses = subpasses.data();
+      render_pass_create_info.dependencyCount = dependencies.size();
+      render_pass_create_info.pDependencies = dependencies.data();
 
-      if (vkCreateRenderPass(device, &render_pass_create_info, nullptr,
-                             &_render_pass) != VK_SUCCESS)
-        throw std::runtime_error{"Failed to create render pass!"};
+      const auto status = vkCreateRenderPass(
+          device.handle, &render_pass_create_info, nullptr, &handle);
+      if (status != VK_SUCCESS)
+        throw std::runtime_error{
+            fmt::format("[VK] Failed to create render pass! Error code: {}",
+                        static_cast<int>(status))};
     }
 
-    VkRenderPass _render_pass;
-    std::vector<VkAttachmentDescription> _color_attachments;
-    std::vector<VkAttachmentReference> _color_attachment_refs;
-    std::vector<VkSubpassDescription> _subpasses;
-    std::vector<VkSubpassDependency> _dependencies;
+    VkRenderPass handle;
+    std::vector<VkAttachmentDescription> color_attachments;
+    std::vector<VkAttachmentReference> color_attachment_refs;
+    std::vector<VkSubpassDescription> subpasses;
+    std::vector<VkSubpassDependency> dependencies;
   };
 
 }  // namespace DO::Kalpana::Vulkan

@@ -76,8 +76,8 @@ namespace DO::Kalpana::Vulkan {
               GLFWwindow* window)
       : device{device}
     {
-      init_swapchain();
-      init_swapchain_image_views();
+      init_swapchain(physical_device, surface, window);
+      init_image_views();
     }
 
     ~Swapchain()
@@ -85,19 +85,20 @@ namespace DO::Kalpana::Vulkan {
       if (handle == nullptr)
         return;
 
-      for (const auto framebuffer : swapchain_framebuffers)
-        vkDestroyFramebuffer(device, framebuffer, nullptr);
+      for (const auto framebuffer : framebuffers)
+        vkDestroyFramebuffer(device.handle, framebuffer, nullptr);
 
       SARA_DEBUG << "[VK] Destroying swapchain image views...\n";
-      for (const auto image_view : swapchain_image_views)
-        vkDestroyImageView(device, image_view, nullptr);
+      for (const auto image_view : image_views)
+        vkDestroyImageView(device.handle, image_view, nullptr);
 
       SARA_DEBUG << "[VK] Destroying swapchain...\n";
       vkDestroySwapchainKHR(device.handle, handle, nullptr);
     }
 
   public: /* initialization methods */
-    auto init_swapchain() -> void
+    auto init_swapchain(const Shakti::Vulkan::PhysicalDevice& physical_device,
+                        const Surface& surface, GLFWwindow* window) -> void
     {
       SARA_DEBUG
           << "[VK] Check the physical device supports the swapchain...\n";
@@ -119,8 +120,7 @@ namespace DO::Kalpana::Vulkan {
       // Set the swap chain image sizes to be equal to the window surface
       // sizes.
       SARA_DEBUG << "[VK] Setting the swap extent...\n";
-      swapchain_extent =
-          choose_swap_extent(window, swapchain_support.capabilities);
+      extent = choose_swap_extent(window, swapchain_support.capabilities);
 
       SARA_DEBUG << "[VK] Setting the swap image count...\n";
       auto image_count = swapchain_support.capabilities.maxImageCount + 1;
@@ -136,7 +136,7 @@ namespace DO::Kalpana::Vulkan {
         create_info.minImageCount = image_count;
         create_info.imageFormat = surface_format.format;
         create_info.imageColorSpace = surface_format.colorSpace;
-        create_info.imageExtent = swapchain_extent;
+        create_info.imageExtent = extent;
         create_info.imageArrayLayers = 1;
         create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
       }
@@ -176,24 +176,24 @@ namespace DO::Kalpana::Vulkan {
             static_cast<int>(status))};
 
       SARA_DEBUG << "[VK] Initializing the swapchain images...\n";
-      swapchain_images = list_swapchain_images(device.handle, handle);
+      images = list_swapchain_images(device.handle, handle);
 
       SARA_DEBUG << "[VK] Initializing the swapchain image format...\n";
-      swapchain_image_format = surface_format.format;
+      image_format = surface_format.format;
     }
 
-    auto init_swapchain_image_views() -> void
+    auto init_image_views() -> void
     {
       SARA_DEBUG << "[VK] Create swapchain image views...\n";
-      swapchain_image_views.resize(swapchain_images.size());
+      image_views.resize(images.size());
 
-      for (auto i = 0u; i < swapchain_images.size(); ++i)
+      for (auto i = 0u; i < images.size(); ++i)
       {
         auto create_info = VkImageViewCreateInfo{};
         create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        create_info.image = swapchain_images[i];
+        create_info.image = images[i];
         create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        create_info.format = swapchain_image_format;
+        create_info.format = image_format;
         create_info.components = {VK_COMPONENT_SWIZZLE_IDENTITY,  //
                                   VK_COMPONENT_SWIZZLE_IDENTITY,
                                   VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -204,8 +204,8 @@ namespace DO::Kalpana::Vulkan {
         create_info.subresourceRange.baseArrayLayer = 0;
         create_info.subresourceRange.layerCount = 1;
 
-        const auto status = vkCreateImageView(
-            device.handle, &create_info, nullptr, &swapchain_image_views[i]);
+        const auto status = vkCreateImageView(device.handle, &create_info,
+                                              nullptr, &image_views[i]);
         if (status != VK_SUCCESS)
           throw std::runtime_error{
               fmt::format("[VK] Failed to create image views! Error code {}",
@@ -213,35 +213,31 @@ namespace DO::Kalpana::Vulkan {
       }
     }
 
-#if 0
-    auto init_swapchain_framebuffers() -> void
+    auto init_framebuffers(VkRenderPass render_pass) -> void
     {
-      swapchain_framebuffers.resize(swapchain_image_views.size());
+      framebuffers.resize(image_views.size());
 
-      for (auto i = 0u; i < swapchain_image_views.size(); ++i)
+      for (auto i = 0u; i < image_views.size(); ++i)
       {
         auto framebuffer_info = VkFramebufferCreateInfo{};
         {
           framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-          framebuffer_info.renderPass = _render_pass;
+          framebuffer_info.renderPass = render_pass;
           framebuffer_info.attachmentCount = 1;
-          framebuffer_info.pAttachments = &_swapchain_image_views[i];
-          framebuffer_info.width = _swapchain_extent.width;
-          framebuffer_info.height = _swapchain_extent.height;
+          framebuffer_info.pAttachments = &image_views[i];
+          framebuffer_info.width = extent.width;
+          framebuffer_info.height = extent.height;
           framebuffer_info.layers = 1;
         }
 
-        if (vkCreateFramebuffer(_device, &framebuffer_info, nullptr,
-                                &_swapchain_framebuffers[i]) != VK_SUCCESS)
-        {
-          std::cerr << "  [VK] Failed to create framebuffer!\n";
-          return false;
-        }
+        const auto status = vkCreateFramebuffer(
+            device.handle, &framebuffer_info, nullptr, &framebuffers[i]);
+        if (status != VK_SUCCESS)
+          throw std::runtime_error{
+              fmt::format("[VK] Failed to create framebuffer! Error code: {}",
+                          static_cast<int>(status))};
       }
-
-      return true;
     }
-#endif
 
 
   public: /* opiniated configuration methods */
@@ -303,12 +299,12 @@ namespace DO::Kalpana::Vulkan {
     const Shakti::Vulkan::Device& device;
 
     VkSwapchainKHR handle = nullptr;
-    std::vector<VkImage> swapchain_images;
-    VkFormat swapchain_image_format;
-    VkExtent2D swapchain_extent;
+    std::vector<VkImage> images;
+    VkFormat image_format;
+    VkExtent2D extent;
 
-    std::vector<VkImageView> swapchain_image_views;
-    std::vector<VkFramebuffer> swapchain_framebuffers;
+    std::vector<VkImageView> image_views;
+    std::vector<VkFramebuffer> framebuffers;
   };
 
 }  // namespace DO::Kalpana::Vulkan
