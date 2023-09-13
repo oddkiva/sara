@@ -13,13 +13,15 @@
 
 namespace DO::Kalpana::Vulkan {
 
-  struct SwapChainSupportDetails
+  struct SwapchainFeatures
   {
     VkSurfaceCapabilitiesKHR capabilities;
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> present_modes;
   };
 
+  //! @brief Return the sequence of swapchain images exposed by the Vulkan
+  //! device.
   inline auto list_swapchain_images(const VkDevice device,
                                     VkSwapchainKHR swapchain)
       -> std::vector<VkImage>
@@ -36,11 +38,11 @@ namespace DO::Kalpana::Vulkan {
     return swapchain_images;
   }
 
-  inline auto query_swapchain_support(const VkPhysicalDevice physical_device,
-                                      const VkSurfaceKHR surface)
-      -> SwapChainSupportDetails
+  inline auto query_swapchain_features(const VkPhysicalDevice physical_device,
+                                       const VkSurfaceKHR surface)
+      -> SwapchainFeatures
   {
-    auto details = SwapChainSupportDetails{};
+    auto details = SwapchainFeatures{};
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface,
                                               &details.capabilities);
 
@@ -99,9 +101,9 @@ namespace DO::Kalpana::Vulkan {
     {
       SARA_DEBUG
           << "[VK] Check the physical device supports the swapchain...\n";
-      const auto swapchain_support = query_swapchain_support(  //
-          physical_device,                                     //
-          surface                                              //
+      const auto swapchain_support = query_swapchain_features(  //
+          physical_device,                                      //
+          surface                                               //
       );
 
       // Find a valid pixel format for the swap chain images and if possible
@@ -268,13 +270,15 @@ namespace DO::Kalpana::Vulkan {
   public: /* data members */
     const Shakti::Vulkan::Device& device;
 
+    //! @brief Swapchain object handle.
     VkSwapchainKHR handle = nullptr;
+
+    //! @brief
     std::vector<VkImage> images;
     VkFormat image_format;
     VkExtent2D extent;
 
     std::vector<VkImageView> image_views;
-    std::vector<VkFramebuffer> framebuffers;
   };
 
 }  // namespace DO::Kalpana::Vulkan
