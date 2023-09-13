@@ -85,9 +85,6 @@ namespace DO::Kalpana::Vulkan {
       if (handle == nullptr)
         return;
 
-      for (const auto framebuffer : framebuffers)
-        vkDestroyFramebuffer(device.handle, framebuffer, nullptr);
-
       SARA_DEBUG << "[VK] Destroying swapchain image views...\n";
       for (const auto image_view : image_views)
         vkDestroyImageView(device.handle, image_view, nullptr);
@@ -212,33 +209,6 @@ namespace DO::Kalpana::Vulkan {
                           static_cast<int>(status))};
       }
     }
-
-    auto init_framebuffers(VkRenderPass render_pass) -> void
-    {
-      framebuffers.resize(image_views.size());
-
-      for (auto i = 0u; i < image_views.size(); ++i)
-      {
-        auto framebuffer_info = VkFramebufferCreateInfo{};
-        {
-          framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-          framebuffer_info.renderPass = render_pass;
-          framebuffer_info.attachmentCount = 1;
-          framebuffer_info.pAttachments = &image_views[i];
-          framebuffer_info.width = extent.width;
-          framebuffer_info.height = extent.height;
-          framebuffer_info.layers = 1;
-        }
-
-        const auto status = vkCreateFramebuffer(
-            device.handle, &framebuffer_info, nullptr, &framebuffers[i]);
-        if (status != VK_SUCCESS)
-          throw std::runtime_error{
-              fmt::format("[VK] Failed to create framebuffer! Error code: {}",
-                          static_cast<int>(status))};
-      }
-    }
-
 
   public: /* opiniated configuration methods */
     //! We want a surface with the BGRA 32bit pixel format preferably, otherwise

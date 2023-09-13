@@ -17,8 +17,8 @@
 #include <drafts/Vulkan/Device.hpp>
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
-
-#include <drafts/Vulkan/VulkanGLFWInterop.hpp>
+#include <drafts/Vulkan/Queue.hpp>
+#include <drafts/Vulkan/Surface.hpp>
 
 
 namespace DO::Kalpana::Vulkan {
@@ -47,7 +47,8 @@ namespace DO::Kalpana::Vulkan {
         -> void
     {
       // Vulkan instance.
-      _instance_extensions = list_required_vulkan_extensions_from_glfw();
+      _instance_extensions =
+          Surface::list_required_instance_extensions_from_glfw();
       if constexpr (compile_for_apple)
       {
         _instance_extensions.emplace_back(
@@ -73,7 +74,7 @@ namespace DO::Kalpana::Vulkan {
 
     auto init_surface(GLFWwindow* window) -> void
     {
-      _surface.init(_instance, window);
+      _surface = Surface{_instance, window};
     }
 
     auto init_physical_device() -> void
@@ -136,12 +137,10 @@ namespace DO::Kalpana::Vulkan {
 
       SARA_DEBUG
           << "[VK] - Fetching the graphics queue from the logical device...\n";
-      vkGetDeviceQueue(_device.handle, graphics_queue_family_index, 0,
-                       &_graphics_queue);
+      _graphics_queue = svk::Queue{_device, graphics_queue_family_index};
       SARA_DEBUG
           << "[VK] - Fetching the present queue from the logical device...\n";
-      vkGetDeviceQueue(_device.handle, present_queue_family_index, 0,
-                       &_present_queue);
+      _present_queue = svk::Queue{_device, present_queue_family_index};
     }
 
   private:
@@ -164,8 +163,8 @@ namespace DO::Kalpana::Vulkan {
     // - Display operations
     //
     // N.B.: no need to destroy these objects.
-    VkQueue _graphics_queue;
-    VkQueue _present_queue;
+    Shakti::Vulkan::Queue _graphics_queue;
+    Shakti::Vulkan::Queue _present_queue;
   };
 
 }  // namespace DO::Kalpana::Vulkan
