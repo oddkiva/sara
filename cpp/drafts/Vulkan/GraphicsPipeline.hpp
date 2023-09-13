@@ -11,7 +11,9 @@
 
 #pragma once
 
-#include "Shader.hpp"
+#include <drafts/Vulkan/Device.hpp>
+#include <drafts/Vulkan/RenderPass.hpp>
+#include <drafts/Vulkan/Shader.hpp>
 
 #include <array>
 #include <filesystem>
@@ -28,59 +30,59 @@ namespace DO::Kalpana::Vulkan {
   //! we want to use.
   struct GraphicsPipeline
   {
-    auto create_render_pipeline(const VkDevice device,
-                                const VkRenderPass render_pass,
-                                const std::string& program_path,
-                                const VkExtent2D& image_extent) -> void
+    struct Builder;
+
+    VkPipelineLayout _pipeline_layout;
+    VkPipeline _graphics_pipeline;
+  };
+
+  struct GraphicsPipeline::Builder
+  {
+    Builder(const Shakti::Vulkan::Device& device,
+            const Kalpana::Vulkan::RenderPass& render_pass)
+      : device{device}
+      , render_pass{render_pass}
     {
-      // 1. Where do the vertex and fragment shader code lives?
-      namespace fs = std::filesystem;
-      const auto p = fs::path{program_path};
+    }
 
-      // 2. Retrieve the vertex shader code.
-      const auto vertex_shader_code =
-          read_shader_file((p / "vert.spv").string());
-      const auto [vertex_shader_module, vshader_compiled] =
-          create_shader_module(vertex_shader_code);
-      auto vertex_shader_stage_info = VkPipelineShaderStageCreateInfo{};
-      {
-        vertex_shader_stage_info.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        vertex_shader_stage_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        vertex_shader_stage_info.module = vertex_shader_module;
-        vertex_shader_stage_info.pName = "main";
-      }
+    auto vertex_shader(const std::filesystem::path& source_filepath) -> Builder&
+    {
+      vertex_shader_filepath = source_filepath;
+      return *this;
+    }
 
-      // 3. Retrieve the fragment shader code.
-      const auto fragment_shader_code =
-          read_shader_file((p / "frag.spv").string());
-      const auto [fragment_shader_module, fshader_compiled] =
-          create_shader_module(fragment_shader_code);
-      auto fragment_shader_stage_info = VkPipelineShaderStageCreateInfo{};
-      {
-        fragment_shader_stage_info.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        fragment_shader_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragment_shader_stage_info.module = fragment_shader_module;
-        fragment_shader_stage_info.pName = "main";
-      }
+    auto fragment_shader(const std::filesystem::path& source_filepath)
+        -> Builder&
+    {
+      fragment_shader_filepath = source_filepath;
+      return *this;
+    }
 
-      // 4. The render pipeline typically transforms the 3D geometry.
-      auto shader_stages = std::array{
-          // Vertex shader which typically does the following:
-          // 1. 3D vertex coords -> modelview coordinates
-          // 2. modelview coordinates -> projection coordinates
-          // 3. projection coordinates -> clip coordinates
-          vertex_shader_stage_info,
-          // 4. Rasterization by fragment shader
-          fragment_shader_stage_info  //
-      };
+    auto compile_shader() -> void
+    {
+      auto& vertex_shader_stage_info = shader_stage_infos[0];
+      vertex_shader_stage_info.sType =
+          VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+      vertex_shader_stage_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
+      vertex_shader_stage_info.module = vertex_shader_module.handle;
+      vertex_shader_stage_info.pName = "main";
+
+      auto& fragment_shader_stage_info = shader_stage_infos[1];
+      fragment_shader_stage_info.sType =
+          VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+      fragment_shader_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+      fragment_shader_stage_info.module = fragment_shader_module.handle;
+      fragment_shader_stage_info.pName = "main";
+    }
+
+    auto create() -> GraphicsPipeline
+    {
+      compile_shader();
 
       // 5. Data format of the vertex buffer.
       const auto binding_description = Vertex::get_binding_description();
       const auto attribute_description = Vertex::get_attributes_description();
-
-      auto vertex_input_info = VkPipelineVertexInputStateCreateInfo{};
+      vertex_input_info = VkPipelineVertexInputStateCreateInfo{};
       {
         vertex_input_info.sType =
             VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -94,7 +96,7 @@ namespace DO::Kalpana::Vulkan {
 
       // 6. Data type of the 3D geometry.
       //    Here a list of triangles.
-      auto input_assembly = VkPipelineInputAssemblyStateCreateInfo{};
+      input_assembly = VkPipelineInputAssemblyStateCreateInfo{};
       {
         input_assembly.sType =
             VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -105,7 +107,7 @@ namespace DO::Kalpana::Vulkan {
       // Viewport: which portion of the window?
       //
       // Here we want to render on the whole window.
-      const auto viewport = VkViewport{
+      viewport = VkViewport{
           .x = 0.f,
           .y = 0.f,
           .width = static_cast<float>(image_extent.width),
@@ -114,13 +116,13 @@ namespace DO::Kalpana::Vulkan {
           .maxDepth = 1.f  //
       };
 
-      const auto scissor = VkRect2D{
+      scissor = VkRect2D{
           .offset = {0, 0},
           .extent = image_extent  //
       };
 
       //
-      auto viewport_state = VkPipelineViewportStateCreateInfo{};
+      viewport_state = VkPipelineViewportStateCreateInfo{};
       {
         viewport_state.sType =
             VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -131,7 +133,7 @@ namespace DO::Kalpana::Vulkan {
         viewport_state.pScissors = &scissor;
       };
 
-      auto rasterizer = VkPipelineRasterizationStateCreateInfo{};
+      rasterizer = VkPipelineRasterizationStateCreateInfo{};
       {
         rasterizer.sType =
             VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -148,7 +150,7 @@ namespace DO::Kalpana::Vulkan {
 
       // Multisampling processing policy.
       // Let's worry about this later.
-      auto multisampling = VkPipelineMultisampleStateCreateInfo{};
+      multisampling = VkPipelineMultisampleStateCreateInfo{};
       {
         multisampling.sType =
             VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -163,7 +165,7 @@ namespace DO::Kalpana::Vulkan {
       // Color blending policy.
       //
       // 1. Let's worry about this later.
-      auto color_blend_attachment = VkPipelineColorBlendAttachmentState{};
+      color_blend_attachment = VkPipelineColorBlendAttachmentState{};
       {
         color_blend_attachment.blendEnable = VK_FALSE;
         color_blend_attachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
@@ -178,7 +180,7 @@ namespace DO::Kalpana::Vulkan {
       }
 
       // Let's worry about this later.
-      auto color_blending = VkPipelineColorBlendStateCreateInfo{};
+      color_blending = VkPipelineColorBlendStateCreateInfo{};
       {
         color_blending.sType =
             VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -191,7 +193,7 @@ namespace DO::Kalpana::Vulkan {
       };
 
       // Let's worry about this later.
-      auto pipeline_layout_info = VkPipelineLayoutCreateInfo{};
+      pipeline_layout_info = VkPipelineLayoutCreateInfo{};
       {
         pipeline_layout_info.sType =
             VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -199,17 +201,23 @@ namespace DO::Kalpana::Vulkan {
         pipeline_layout_info.pushConstantRangeCount = 0;
       };
 
-      if (vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr,
-                                 &_pipeline_layout) != VK_SUCCESS)
-        throw std::runtime_error{"Failed to create pipeline layout!"};
+      auto graphics_pipeline = GraphicsPipeline{};
 
-      auto pipeline_info = VkGraphicsPipelineCreateInfo{};
+      const auto status =
+          vkCreatePipelineLayout(device.handle, &pipeline_layout_info, nullptr,
+                                 &graphics_pipeline._pipeline_layout);
+      if (status != VK_SUCCESS)
+        throw std::runtime_error{
+            fmt::format("Failed to create pipeline layout! Error code: {}",
+                        static_cast<int>(status))};
+
+      pipeline_info = VkGraphicsPipelineCreateInfo{};
       {
         pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 
         // - Vertex and fragment shaders.
-        pipeline_info.stageCount = shader_stages.size();
-        pipeline_info.pStages = shader_stages.data();
+        pipeline_info.stageCount = shader_stage_infos.size();
+        pipeline_info.pStages = shader_stage_infos.data();
 
         // - Vertex buffer data format.
         pipeline_info.pVertexInputState = &vertex_input_info;
@@ -224,25 +232,61 @@ namespace DO::Kalpana::Vulkan {
         pipeline_info.pMultisampleState = &multisampling;
         pipeline_info.pColorBlendState = &color_blending;
 
-        pipeline_info.layout = _pipeline_layout;
-        pipeline_info.renderPass = render_pass;
+        pipeline_info.layout = graphics_pipeline._pipeline_layout;
+        pipeline_info.renderPass = render_pass.handle;
         pipeline_info.subpass = 0;
         pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
         pipeline_info.basePipelineIndex = -1;
       };
 
-      if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipeline_info,
-                                    nullptr, &_graphics_pipeline) != VK_SUCCESS)
+      if (vkCreateGraphicsPipelines(
+              device.handle, VK_NULL_HANDLE, 1, &pipeline_info, nullptr,
+              &graphics_pipeline._graphics_pipeline) != VK_SUCCESS)
         throw std::runtime_error{"Failed to create graphics pipeline!"};
 
-      // Clean up the shaders.
-      vkDestroyShaderModule(device, vertex_shader_module, nullptr);
-      vkDestroyShaderModule(device, fragment_shader_module, nullptr);
+      return graphics_pipeline;
     }
 
-    VkPipelineLayout _pipeline_layout;
-    VkPipeline _graphics_pipeline;
-  };
+    const Shakti::Vulkan::Device& device;
+    const Kalpana::Vulkan::RenderPass& render_pass;
 
+    //! @brief Paths to shader source.
+    std::filesystem::path vertex_shader_filepath;
+    std::filesystem::path fragment_shader_filepath;
+
+    //! @brief Compiled shaders.
+    Shakti::Vulkan::ShaderModule vertex_shader_module;
+    Shakti::Vulkan::ShaderModule fragment_shader_module;
+
+    //! @brief The shader create infos that bind the shader modules.
+    std::array<VkPipelineShaderStageCreateInfo, 2> shader_stage_infos;
+
+    //! @brief Data format of the vertex in the vertex buffer.
+    VkPipelineVertexInputStateCreateInfo vertex_input_info;
+
+    //! @brief Data type of the 3D geometry (typically triangles).
+    VkPipelineInputAssemblyStateCreateInfo input_assembly = {};
+
+    //! @brief Viewport as in computer graphics pipeline.
+    VkViewport viewport;
+    VkRect2D scissor;
+    VkPipelineViewportStateCreateInfo viewport_state;
+
+    //! @brief Rasterization create info.
+    VkPipelineRasterizationStateCreateInfo rasterizer{};
+
+    //! @brief Multisampling create info.
+    VkPipelineMultisampleStateCreateInfo multisampling;
+
+    //! @brief Let's worry about these later.
+    VkPipelineColorBlendAttachmentState color_blend_attachment;
+    VkPipelineColorBlendStateCreateInfo color_blending;
+
+    //! @brief Not sure what it is.
+    VkPipelineLayoutCreateInfo pipeline_layout_info;
+
+    //! @brief THE BIG FAT CREATE INFO that ties everything together.
+    VkGraphicsPipelineCreateInfo pipeline_info;
+  };
 
 }  // namespace DO::Kalpana::Vulkan

@@ -11,15 +11,16 @@
 
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <drafts/Vulkan/Device.hpp>
 
 #include <cstdint>
 #include <fstream>
 #include <utility>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 
-namespace DO::Kalpana::Vulkan {
+namespace DO::Shakti::Vulkan {
 
   inline auto read_shader_file(const std::string& filename) -> std::vector<char>
   {
@@ -40,23 +41,42 @@ namespace DO::Kalpana::Vulkan {
     return buffer;
   }
 
-  inline auto create_shader_module(const std::vector<char>& buffer)
-      -> std::pair<VkShaderModule, bool>
-  {
-    auto create_info = VkShaderModuleCreateInfo{};
-    create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    create_info.codeSize = static_cast<std::uint32_t>(buffer.size());
-    create_info.pCode = reinterpret_cast<const std::uint32_t*>(buffer.data());
+}  // namespace DO::Shakti::Vulkan
 
-    auto shader_module = VkShaderModule{};
-    if (vkCreateShaderModule(_device, &create_info, nullptr, &shader_module) !=
-        VK_SUCCESS)
+
+namespace DO::Shakti::Vulkan {
+
+  struct ShaderModule
+  {
+    ShaderModule() = default;
+
+    ShaderModule(const Device& device, const std::vector<char>& shader_source)
+      : device_handle{device.handle}
     {
-      return {shader_module, false};
+      auto create_info = VkShaderModuleCreateInfo{};
+      create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+      create_info.codeSize = static_cast<std::uint32_t>(shader_source.size());
+      create_info.pCode =
+          reinterpret_cast<const std::uint32_t*>(shader_source.data());
+
+      auto shader_module = VkShaderModule{};
+      const auto status =
+          vkCreateShaderModule(device.handle, &create_info, nullptr, &handle);
+      if (status != VK_SUCCESS)
+        throw std::runtime_error fmt::format(
+            "Failed to create shader module! Error code: {}",
+            static_cast<int>(status));
     }
 
-    return {shader_module, true};
-  }
+    ~ShaderModule()
+    {
+      if (handle == nullptr)
+        return;
+      vkDestroyShaderModule(device_handle, handle, nullptr);
+    }
 
+    VkDevice device_handle = nullptr;
+    VkShaderModule handle = nullptr;
+  };
 
-}  // namespace vk
+}  // namespace DO::Shakti::Vulkan
