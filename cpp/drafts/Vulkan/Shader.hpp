@@ -50,8 +50,8 @@ namespace DO::Shakti::Vulkan {
   {
     ShaderModule() = default;
 
-    ShaderModule(const Device& device, const std::vector<char>& shader_source)
-      : device_handle{device.handle}
+    ShaderModule(const VkDevice device, const std::vector<char>& shader_source)
+      : device_handle{device}
     {
       auto create_info = VkShaderModuleCreateInfo{};
       create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -61,11 +61,18 @@ namespace DO::Shakti::Vulkan {
 
       auto shader_module = VkShaderModule{};
       const auto status =
-          vkCreateShaderModule(device.handle, &create_info, nullptr, &handle);
+          vkCreateShaderModule(device_handle, &create_info, nullptr, &handle);
       if (status != VK_SUCCESS)
-        throw std::runtime_error fmt::format(
-            "Failed to create shader module! Error code: {}",
-            static_cast<int>(status));
+        throw std::runtime_error{
+            fmt::format("Failed to create shader module! Error code: {}",
+                        static_cast<int>(status))};
+    }
+
+    ShaderModule(const ShaderModule&) = delete;
+
+    ShaderModule(ShaderModule&& other)
+    {
+      swap(std::move(other));
     }
 
     ~ShaderModule()
@@ -75,6 +82,21 @@ namespace DO::Shakti::Vulkan {
       vkDestroyShaderModule(device_handle, handle, nullptr);
     }
 
+    auto swap(ShaderModule&& other) -> void
+    {
+      std::swap(device_handle, other.device_handle);
+      std::swap(handle, other.handle);
+    }
+
+    auto operator=(const ShaderModule&) -> ShaderModule& = delete;
+
+    auto operator=(ShaderModule&& other) -> ShaderModule&
+    {
+      swap(std::move(other));
+      return *this;
+    }
+
+  public:
     VkDevice device_handle = nullptr;
     VkShaderModule handle = nullptr;
   };
