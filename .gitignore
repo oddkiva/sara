@@ -1,7 +1,15 @@
-# Temporarily generated library folders
+# Data
+**/assets/
+**/yolov*/
 doc/source/xml/
 html/
 latex/
+
+# Model weights.
+*.weights
+*.onnx
+# TensorRT optimized model.
+*.bin
 
 # QtCreator
 CMakeLists.txt.user
