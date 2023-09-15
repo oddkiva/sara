@@ -23,14 +23,6 @@ if (WIN32 AND NOT CMAKE_TOOLCHAIN_FILE)
     "please specify it to build Sara on Windows!")
 endif ()
 
-if (CMAKE_GENERATOR STREQUAL "Xcode" AND CMAKE_EXPORT_COMPILE_COMMANDS)
-  set(CMAKE_XCODE_ATTRIBUTE_OTHER_CFLAGS
-    "$(inherited) -gen-cdb-fragment-path ${CMAKE_SOURCE_DIR}/CompilationDatabase"
-  )
-endif ()
-
-
-
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
   "Build type options are: Debug, Release")

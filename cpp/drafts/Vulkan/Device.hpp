@@ -23,6 +23,8 @@ namespace DO::Shakti::Vulkan {
 
   struct Device
   {
+    struct Builder;
+
     Device() = default;
 
     ~Device()
@@ -47,9 +49,9 @@ namespace DO::Shakti::Vulkan {
   //!
   //! Basically we must bind the capabilities of the physical device to this
   //! logical device.
-  struct DeviceCreator
+  struct Device::Builder
   {
-    DeviceCreator(const PhysicalDevice& physical_device)
+    Builder(const PhysicalDevice& physical_device)
       : _physical_device{physical_device}
     {
       _create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -62,7 +64,7 @@ namespace DO::Shakti::Vulkan {
     //! device to the logical device.
     auto
     enable_queue_families(const std::set<std::uint32_t>& queue_family_indices)
-        -> DeviceCreator&
+        -> Builder&
     {
       SARA_DEBUG << "[VK] - Enabling queue families...\n";
 
@@ -93,7 +95,7 @@ namespace DO::Shakti::Vulkan {
     //! Bind the validation layers for debugging purposes.
     auto
     enable_validation_layers(const std::vector<const char*>& validation_layers)
-        -> DeviceCreator&
+        -> Builder&
     {
       _validation_layers = validation_layers;
       _create_info.enabledLayerCount = _validation_layers.size();
@@ -104,7 +106,7 @@ namespace DO::Shakti::Vulkan {
     //! Bind the Vulkan device extensions we require.
     auto
     enable_device_extensions(const std::vector<const char*> device_extensions)
-        -> DeviceCreator&
+        -> Builder&
     {
       _device_extensions = device_extensions;
       _create_info.enabledExtensionCount = _device_extensions.size();
@@ -114,7 +116,7 @@ namespace DO::Shakti::Vulkan {
 
     //! Bind the Vulkan device features we require.
     auto enable_device_features(const VkPhysicalDeviceFeatures& features = {})
-        -> DeviceCreator&
+        -> Builder&
     {
       _physical_device_features = features;
       _create_info.pEnabledFeatures = &_physical_device_features;

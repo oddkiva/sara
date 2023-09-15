@@ -81,7 +81,9 @@ namespace DO::Shakti::Vulkan {
 
   class Instance
   {
-    friend class InstanceCreator;
+  public:
+    class Builder;
+    friend class Builder;
 
   public:
     Instance() = default;
@@ -118,10 +120,10 @@ namespace DO::Shakti::Vulkan {
 
 
   //! N.B.: Vulkan follows the factory pattern.
-  class InstanceCreator
+  class Instance::Builder
   {
   public:
-    InstanceCreator()
+    Builder()
     {
       _create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
       _create_info.pApplicationInfo = &_app_info;
@@ -158,7 +160,7 @@ namespace DO::Shakti::Vulkan {
 #endif
     }
 
-    auto application_name(const std::string_view& app_name) -> InstanceCreator&
+    auto application_name(const std::string_view& app_name) -> Builder&
     {
       SARA_DEBUG << fmt::format("[VK] Setting app name as: {}\n", app_name);
       _app_name = app_name;
@@ -166,7 +168,7 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
-    auto engine_name(const std::string_view& engine_name) -> InstanceCreator&
+    auto engine_name(const std::string_view& engine_name) -> Builder&
     {
       SARA_DEBUG << fmt::format("[VK] Setting engine name as: {}\n",
                                 engine_name);
@@ -176,8 +178,7 @@ namespace DO::Shakti::Vulkan {
     }
 
     auto enable_instance_extensions(
-        const std::vector<const char*> required_instance_extensions)
-        -> InstanceCreator&
+        const std::vector<const char*> required_instance_extensions) -> Builder&
     {
       SARA_DEBUG << "[VK] Setting required extensions...\n";
       _required_instance_extensions = required_instance_extensions;
@@ -192,8 +193,7 @@ namespace DO::Shakti::Vulkan {
     }
 
     auto enable_validation_layers(
-        const std::vector<const char*>& required_validation_layers)
-        -> InstanceCreator&
+        const std::vector<const char*>& required_validation_layers) -> Builder&
     {
       SARA_DEBUG << "[VK] Setting required validation layers...\n";
       _required_validation_layers = required_validation_layers;

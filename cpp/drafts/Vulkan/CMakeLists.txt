@@ -5,10 +5,8 @@ find_program(
   HINTS ENV VULKAN_SDK
   PATH_SUFFIXES bin)
 
-add_library(
-  EasyVulkan #
-  Instance.cpp Instance.hpp #
-  Surface.cpp Surface.hpp)
+file(GLOB EasyVulkan_SOURCE_FILES FILES *.cpp *.hpp)
+add_library(EasyVulkan ${EasyVulkan_SOURCE_FILES})
 target_link_libraries(
   EasyVulkan
   PUBLIC Vulkan::Vulkan #

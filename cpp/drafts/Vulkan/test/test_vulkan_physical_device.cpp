@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_find_physical_devices_for_3d_graphics_application)
       debug_vulkan_instance ? std::vector{"VK_LAYER_KHRONOS_validation"}
                             : std::vector<const char*>{};
 
-  const auto instance = svk::InstanceCreator{}
+  const auto instance = svk::Instance::Builder{}
                             .application_name("GLFW-Vulkan Application")
                             .engine_name("No Engine")
                             .enable_instance_extensions(instance_extensions)
