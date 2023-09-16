@@ -28,12 +28,43 @@ namespace DO::Kalpana::Vulkan {
   //! - what vertex shader
   //! - what fragment shader
   //! we want to use.
-  struct GraphicsPipeline
+  class GraphicsPipeline
   {
+  public:
     struct Builder;
+    friend struct Builder;
 
-    VkPipelineLayout _pipeline_layout;
-    VkPipeline _graphics_pipeline;
+  public:
+    GraphicsPipeline() = default;
+
+    GraphicsPipeline(const GraphicsPipeline&) = delete;
+    GraphicsPipeline(GraphicsPipeline&&) = default;
+
+    auto operator=(const GraphicsPipeline&) -> GraphicsPipeline& = delete;
+    auto operator=(GraphicsPipeline&&) -> GraphicsPipeline& = default;
+
+    ~GraphicsPipeline()
+    {
+      if (_device == nullptr)
+        return;
+
+      if (_pipeline_layout != nullptr)
+      {
+        SARA_DEBUG << "Destroying graphics pipeline layout...\n";
+        vkDestroyPipelineLayout(_device, _pipeline_layout, nullptr);
+      }
+
+      if (_pipeline != nullptr)
+      {
+        SARA_DEBUG << "Destroying graphics pipeline...\n";
+        vkDestroyPipeline(_device, _pipeline, nullptr);
+      }
+    }
+
+  private:
+    VkDevice _device = nullptr;
+    VkPipelineLayout _pipeline_layout = nullptr;
+    VkPipeline _pipeline = nullptr;
   };
 
   struct GraphicsPipeline::Builder
@@ -45,13 +76,14 @@ namespace DO::Kalpana::Vulkan {
     {
     }
 
-    auto vertex_shader(const std::filesystem::path& source_filepath) -> Builder&
+    auto vertex_shader_path(const std::filesystem::path& source_filepath)
+        -> Builder&
     {
       vertex_shader_filepath = source_filepath;
       return *this;
     }
 
-    auto fragment_shader(const std::filesystem::path& source_filepath)
+    auto fragment_shader_path(const std::filesystem::path& source_filepath)
         -> Builder&
     {
       fragment_shader_filepath = source_filepath;
@@ -60,21 +92,21 @@ namespace DO::Kalpana::Vulkan {
 
     // 5. Data format of the vertex buffer.
     template <typename VertexDescription>
-    auto vbo_data_format() -> void
+    auto vbo_data_format() -> Builder&
     {
-      const auto binding_description =
-          VertexDescription::get_binding_description();
-      const auto attribute_description =
-          VertexDescription::get_attributes_description();
+      binding_description = VertexDescription::get_binding_description();
+      attribute_descriptions = VertexDescription::get_attribute_descriptions();
       vertex_input_info = VkPipelineVertexInputStateCreateInfo{};
       vertex_input_info.sType =
           VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
       vertex_input_info.vertexBindingDescriptionCount = 1;
       vertex_input_info.pVertexBindingDescriptions = &binding_description;
       vertex_input_info.vertexAttributeDescriptionCount =
-          static_cast<std::uint32_t>(attribute_description.size());
+          static_cast<std::uint32_t>(attribute_descriptions.size());
       vertex_input_info.pVertexAttributeDescriptions =
-          attribute_description.data();
+          attribute_descriptions.data();
+
+      return *this;
     }
 
     // 6. Data type of the 3D geometry.
@@ -122,13 +154,14 @@ namespace DO::Kalpana::Vulkan {
 
     auto create() -> GraphicsPipeline
     {
-      compile_shaders();
+      load_shaders();
 
       initialize_other_things_which_we_will_worry_about_later();
 
       auto graphics_pipeline = GraphicsPipeline{};
 
       // Initialize the graphics pipeline layout.
+      SARA_DEBUG << "Initializing the graphics pipeline layout...\n";
       pipeline_layout_info = VkPipelineLayoutCreateInfo{};
       {
         pipeline_layout_info.sType =
@@ -145,6 +178,7 @@ namespace DO::Kalpana::Vulkan {
             static_cast<int>(status))};
 
       // Initialize the graphics pipeline.
+      SARA_DEBUG << "Initializing the graphics pipeline...\n";
       pipeline_info = VkGraphicsPipelineCreateInfo{};
       {
         pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -173,9 +207,9 @@ namespace DO::Kalpana::Vulkan {
         pipeline_info.basePipelineIndex = -1;
       };
 
-      if (vkCreateGraphicsPipelines(
-              device.handle, VK_NULL_HANDLE, 1, &pipeline_info, nullptr,
-              &graphics_pipeline._graphics_pipeline) != VK_SUCCESS)
+      if (vkCreateGraphicsPipelines(device.handle, VK_NULL_HANDLE, 1,
+                                    &pipeline_info, nullptr,
+                                    &graphics_pipeline._pipeline) != VK_SUCCESS)
         throw std::runtime_error{"Failed to create graphics pipeline!"};
 
       return graphics_pipeline;
@@ -192,25 +226,35 @@ namespace DO::Kalpana::Vulkan {
     }
 
   private:
-    auto compile_shaders() -> void
+    auto load_shaders() -> void
     {
-      // Recompile the shaders
-      vertex_shader_module = Shakti::Vulkan::ShaderModule{
-          device.handle,
-          Shakti::Vulkan::read_shader_file(vertex_shader_filepath.string())};
+      // Load the compiled shaders.
+      SARA_DEBUG << "Load compiled vertex shader...\n";
+      vertex_shader =
+          Shakti::Vulkan::read_shader_file(vertex_shader_filepath.string());
+      SARA_DEBUG << "Creating vertex shader module...\n";
+      vertex_shader_module =
+          Shakti::Vulkan::ShaderModule{device.handle, vertex_shader};
 
-      fragment_shader_module = Shakti::Vulkan::ShaderModule{
-          device.handle,
-          Shakti::Vulkan::read_shader_file(vertex_shader_filepath.string())};
+      SARA_DEBUG << "Load compiled fragment shader...\n";
+      fragment_shader =
+          Shakti::Vulkan::read_shader_file(vertex_shader_filepath.string());
+      SARA_DEBUG << "Creating fragment shader module...\n";
+      fragment_shader_module =
+          Shakti::Vulkan::ShaderModule{device.handle, fragment_shader};
 
       // Rebind the shader module references to their respective shader stage
       // infos.
+      SARA_DEBUG << "Rebind vertex shader module to vertex shader stage create "
+                    "info...\n";
       auto& vssi = vertex_shader_stage_info();
       vssi.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
       vssi.stage = VK_SHADER_STAGE_VERTEX_BIT;
       vssi.module = vertex_shader_module.handle;
       vssi.pName = "main";
 
+      SARA_DEBUG << "Rebind fragment shader module to fragment shader stage "
+                    "create info...\n";
       auto& fssi = fragment_shader_stage_info();
       fssi.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
       fssi.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -220,6 +264,7 @@ namespace DO::Kalpana::Vulkan {
 
     auto initialize_other_things_which_we_will_worry_about_later() -> void
     {
+      SARA_DEBUG << "Initialize other things to worry about later...\n";
       //
       viewport_state = VkPipelineViewportStateCreateInfo{};
       {
@@ -299,6 +344,8 @@ namespace DO::Kalpana::Vulkan {
     //! @brief Paths to shader source.
     std::filesystem::path vertex_shader_filepath;
     std::filesystem::path fragment_shader_filepath;
+    std::vector<char> vertex_shader;
+    std::vector<char> fragment_shader;
 
     //! @brief Compiled shaders.
     Shakti::Vulkan::ShaderModule vertex_shader_module;
@@ -308,6 +355,8 @@ namespace DO::Kalpana::Vulkan {
     std::array<VkPipelineShaderStageCreateInfo, 2> shader_stage_infos;
 
     //! @brief Data format of the vertex in the vertex buffer.
+    VkVertexInputBindingDescription binding_description;
+    std::array<VkVertexInputAttributeDescription, 2> attribute_descriptions;
     VkPipelineVertexInputStateCreateInfo vertex_input_info;
 
     //! @brief Data type of the 3D geometry (typically triangles).

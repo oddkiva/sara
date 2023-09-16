@@ -17,7 +17,6 @@
 #include <fstream>
 #include <utility>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Shakti::Vulkan {
@@ -26,10 +25,8 @@ namespace DO::Shakti::Vulkan {
   {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file)
-    {
-      std::cerr << "  [VK] Failed to open file!\n";
-      return {};
-    }
+      throw std::runtime_error{fmt::format(
+          "Error: failed to open compiled shader file: {}", filename)};
 
     const auto file_size = static_cast<std::size_t>(file.tellg());
     auto buffer = std::vector<char>(file_size);
@@ -59,7 +56,6 @@ namespace DO::Shakti::Vulkan {
       create_info.pCode =
           reinterpret_cast<const std::uint32_t*>(shader_source.data());
 
-      auto shader_module = VkShaderModule{};
       const auto status =
           vkCreateShaderModule(device_handle, &create_info, nullptr, &handle);
       if (status != VK_SUCCESS)
@@ -70,10 +66,7 @@ namespace DO::Shakti::Vulkan {
 
     ShaderModule(const ShaderModule&) = delete;
 
-    ShaderModule(ShaderModule&& other)
-    {
-      swap(std::move(other));
-    }
+    ShaderModule(ShaderModule&& other) = default;
 
     ~ShaderModule()
     {
@@ -82,19 +75,9 @@ namespace DO::Shakti::Vulkan {
       vkDestroyShaderModule(device_handle, handle, nullptr);
     }
 
-    auto swap(ShaderModule&& other) -> void
-    {
-      std::swap(device_handle, other.device_handle);
-      std::swap(handle, other.handle);
-    }
-
     auto operator=(const ShaderModule&) -> ShaderModule& = delete;
 
-    auto operator=(ShaderModule&& other) -> ShaderModule&
-    {
-      swap(std::move(other));
-      return *this;
-    }
+    auto operator=(ShaderModule&& other) -> ShaderModule& = default;
 
   public:
     VkDevice device_handle = nullptr;
