@@ -13,6 +13,8 @@
 
 #include <drafts/Vulkan/Swapchain.hpp>
 
+#include <fmt/format.h>
+
 
 namespace DO::Kalpana::Vulkan {
 
@@ -94,7 +96,11 @@ namespace DO::Kalpana::Vulkan {
         return;
 
       if (handle != nullptr)
+      {
+        SARA_DEBUG << fmt::format("[VK] Destroying render pass {}\n",
+                                  fmt::ptr(handle));
         vkDestroyRenderPass(device_handle, handle, nullptr);
+      }
     }
 
     VkDevice device_handle;
