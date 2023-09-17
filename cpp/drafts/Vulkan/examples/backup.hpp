@@ -203,17 +203,15 @@ auto draw_frame() -> void
 
     VkPipelineStageFlags wait_stages =
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    // - The CPU tells the GPU to ensure that it starts drawing only when
-    the
-        // image becomes available.
-        submit_info.waitSemaphoreCount = 1;
+    // - The CPU tells the GPU to ensure that it starts drawing only when the
+    // image becomes available.
+    submit_info.waitSemaphoreCount = 1;
     submit_info.pWaitSemaphores = &_image_available_semaphores[current_frame];
     submit_info.pWaitDstStageMask = &wait_stages;
 
-    // - The CPU tells the GPU to ensure that it notifies when the drawing
-    is
-        //   finished and thus ready to present onto the screen.
-        submit_info.signalSemaphoreCount = 1;
+    // - The CPU tells the GPU to ensure that it notifies when the drawing is
+    //   finished and thus ready to present onto the screen.
+    submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores = &_render_finished_semaphores[current_frame];
 
     submit_info.commandBufferCount = 1;
@@ -223,7 +221,8 @@ auto draw_frame() -> void
     vkResetFences(_device, 1, &_in_flight_fences[current_frame]);
 
     // - The CPU submits a drawing command to the GPU (on the graphics
-    queue). if (vkQueueSubmit(_graphics_queue, 1, &submit_info,
+    // queue).
+    if (vkQueueSubmit(_graphics_queue, 1, &submit_info,
                       _in_flight_fences[current_frame]) != VK_SUCCESS)
       throw std::runtime_error{"Failed to submit draw command buffer!"};
 
