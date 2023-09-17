@@ -140,8 +140,13 @@ BOOST_AUTO_TEST_CASE(test_device)
   BOOST_CHECK_EQUAL(render_pass.dependencies.size(), 1u);
 
   // Now build the graphics pipeline.
+#if defined(__APPLE__)
   static const auto vs_path = "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
   static const auto fs_path = "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/frag.spv";
+#else
+  static const auto vs_path = "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
+  static const auto fs_path = "/home/david/GitLab/oddkiva/sara-build-Asan/frag.spv";
+#endif
   std::cout << vs_path << std::endl;
   std::cout << fs_path << std::endl;
 

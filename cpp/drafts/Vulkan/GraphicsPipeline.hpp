@@ -199,9 +199,8 @@ namespace DO::Kalpana::Vulkan {
         pipeline_info.pInputAssemblyState = &input_assembly;
         pipeline_info.pViewportState = &viewport_state;
 
-        // The rasterization by the fragment shader.
-        pipeline_info.pRasterizationState = &rasterizer;
-
+        // The rasterization state.
+        pipeline_info.pRasterizationState = &rasterization_state;
         // Rendering policy.
         pipeline_info.pMultisampleState = &multisampling;
         pipeline_info.pColorBlendState = &color_blend;
@@ -291,19 +290,19 @@ namespace DO::Kalpana::Vulkan {
       };
 
       SARA_DEBUG << "Initialize the rasterization state create info...\n";
-      rasterizer = VkPipelineRasterizationStateCreateInfo{};
+      rasterization_state = VkPipelineRasterizationStateCreateInfo{};
       {
-        rasterizer.sType =
+        rasterization_state.sType =
             VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-        rasterizer.depthClampEnable = VK_FALSE;
-        rasterizer.rasterizerDiscardEnable = VK_FALSE;  //
-        rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-        rasterizer.depthBiasEnable = VK_FALSE;
-        rasterizer.depthBiasConstantFactor = 0.f;
-        rasterizer.depthBiasSlopeFactor = 0.f;
-        rasterizer.lineWidth = 1.f;
+        rasterization_state.depthClampEnable = VK_FALSE;
+        rasterization_state.rasterizerDiscardEnable = VK_FALSE;  //
+        rasterization_state.polygonMode = VK_POLYGON_MODE_FILL;
+        rasterization_state.cullMode = VK_CULL_MODE_BACK_BIT;
+        rasterization_state.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterization_state.depthBiasEnable = VK_FALSE;
+        rasterization_state.depthBiasConstantFactor = 0.f;
+        rasterization_state.depthBiasSlopeFactor = 0.f;
+        rasterization_state.lineWidth = 1.f;
       }
 
       // Multisampling processing policy.
@@ -383,7 +382,7 @@ namespace DO::Kalpana::Vulkan {
     VkPipelineViewportStateCreateInfo viewport_state;
 
     //! @brief Rasterization create info.
-    VkPipelineRasterizationStateCreateInfo rasterizer{};
+    VkPipelineRasterizationStateCreateInfo rasterization_state{};
 
     //! @brief Multisampling create info.
     VkPipelineMultisampleStateCreateInfo multisampling;
