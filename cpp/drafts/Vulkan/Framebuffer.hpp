@@ -21,7 +21,7 @@ namespace DO::Kalpana::Vulkan {
                         const RenderPass& render_pass)
       : device{swapchain.device}
     {
-      handles.resize(swapchain.image_views.size());
+      fbs.resize(swapchain.image_views.size());
 
       for (auto i = 0u; i < swapchain.image_views.size(); ++i)
       {
@@ -37,7 +37,7 @@ namespace DO::Kalpana::Vulkan {
         }
 
         const auto status = vkCreateFramebuffer(
-            swapchain.device.handle, &framebuffer_info, nullptr, &handles[i]);
+            swapchain.device.handle, &framebuffer_info, nullptr, &fbs[i]);
         if (status != VK_SUCCESS)
           throw std::runtime_error{
               fmt::format("[VK] Failed to create framebuffer! Error code: {}",
@@ -47,12 +47,24 @@ namespace DO::Kalpana::Vulkan {
 
     ~FramebufferSequence()
     {
-      for (const auto fb_handle : handles)
-        vkDestroyFramebuffer(device.handle, fb_handle, nullptr);
+      for (const auto fb : fbs)
+        vkDestroyFramebuffer(device.handle, fb, nullptr);
+    }
+
+    auto operator[](const int i) -> VkFramebuffer&
+    {
+      return fbs[i];
+    }
+
+    auto operator[](const int i) const -> VkFramebuffer
+    {
+      return fbs[i];
     }
 
     const Shakti::Vulkan::Device& device;
-    std::vector<VkFramebuffer> handles;
+
+  private:
+    std::vector<VkFramebuffer> fbs;
   };
 
 }  // namespace DO::Kalpana::Vulkan
