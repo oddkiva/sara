@@ -102,7 +102,8 @@ namespace DO::Kalpana::Vulkan {
       for (const auto image_view : image_views)
         vkDestroyImageView(device.handle, image_view, nullptr);
 
-      SARA_DEBUG << "[VK] Destroying swapchain...\n";
+      SARA_DEBUG << fmt::format("[VK] Destroying swapchain: {}...\n",
+                                fmt::ptr(handle));
       vkDestroySwapchainKHR(device.handle, handle, nullptr);
     }
 

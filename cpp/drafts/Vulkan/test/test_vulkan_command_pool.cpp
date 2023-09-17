@@ -9,9 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "Vulkan/Graphics Pipeline"
+#define BOOST_TEST_MODULE "Vulkan/Command Pool"
 #define GLFW_INCLUDE_VULKAN
 
+#include <drafts/Vulkan/CommandPool.hpp>
 #include <drafts/Vulkan/Device.hpp>
 #include <drafts/Vulkan/EasyGLFW.hpp>
 #include <drafts/Vulkan/GraphicsPipeline.hpp>
@@ -21,7 +22,6 @@
 #include <drafts/Vulkan/Surface.hpp>
 #include <drafts/Vulkan/Swapchain.hpp>
 
-#include <drafts/Vulkan/Geometry.hpp>
 
 #include <DO/Sara/Defines.hpp>
 
@@ -36,21 +36,7 @@ static constexpr auto compile_for_apple = false;
 #endif
 
 
-auto get_program_path() -> std::filesystem::path
-{
-#ifdef _WIN32
-  static auto path = std::array<wchar_t, MAX_PATH>{};
-  GetModuleFileNameW(nullptr, path.data(), MAX_PATH);
-  return path.data();
-#else
-  static auto result = std::array<char, PATH_MAX>{};
-  ssize_t count = readlink("/proc/self/exe", result.data(), PATH_MAX);
-  return std::string(result.data(), (count > 0) ? count : 0);
-#endif
-}
-
-
-BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
+BOOST_AUTO_TEST_CASE(initialize_graphics_command_pool)
 {
   namespace svk = DO::Shakti::Vulkan;
   namespace k = DO::Kalpana;
@@ -134,50 +120,7 @@ BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
                           .create();
   BOOST_CHECK(device.handle != nullptr);
 
-  // Now initialize the swapchain to present the rendering on screen.
-  const auto swapchain =
-      kvk::Swapchain{physical_device, device, surface, window};
-  BOOST_CHECK(swapchain.handle != nullptr);
+  const auto graphics_command_pool =
+      svk::CommandPool{device, graphics_queue_family_index};
 
-  // Now build the render pass.
-  auto render_pass = kvk::RenderPass{};
-  render_pass.create_basic_render_pass(device, swapchain.image_format);
-  BOOST_CHECK(render_pass.handle != nullptr);
-  BOOST_CHECK_EQUAL(render_pass.color_attachments.size(), 1u);
-  BOOST_CHECK_EQUAL(render_pass.color_attachment_refs.size(),
-                    render_pass.color_attachments.size());
-  BOOST_CHECK_EQUAL(render_pass.subpasses.size(), 1u);
-  BOOST_CHECK_EQUAL(render_pass.dependencies.size(), 1u);
-
-  // Now build the graphics pipeline.
-#if defined(__APPLE__)
-  static const auto vs_path =
-      "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
-  static const auto fs_path =
-      "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/frag.spv";
-#else
-  static const auto vs_path =
-      "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
-  static const auto fs_path =
-      "/home/david/GitLab/oddkiva/sara-build-Asan/frag.spv";
-#endif
-  std::cout << vs_path << std::endl;
-  std::cout << fs_path << std::endl;
-
-  const auto [w, h] = window.sizes();
-  SARA_CHECK(w);
-  SARA_CHECK(h);
-
-  const auto graphics_pipeline =
-      kvk::GraphicsPipeline::Builder{device, render_pass}
-          .vertex_shader_path(vs_path)
-          .fragment_shader_path(fs_path)
-          .vbo_data_format<Vertex>()
-          .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
-          .viewport_sizes(w, h)
-          .scissor_sizes(w, h)
-          .create();
-  BOOST_CHECK(graphics_pipeline.device() != nullptr);
-  BOOST_CHECK(graphics_pipeline.pipeline_layout() != nullptr);
-  BOOST_CHECK(static_cast<VkPipeline>(graphics_pipeline) != nullptr);
 }

@@ -92,13 +92,16 @@ namespace DO::Shakti::Vulkan {
     {
       if (_debug_messenger != nullptr)
       {
-        SARA_DEBUG << "[VK] Destroying Vulkan debug messenger...\n";
+        SARA_DEBUG << fmt::format(
+            "[VK] Destroying Vulkan debug messenger: {}...\n",
+            fmt::ptr(_debug_messenger));
         destroy_debug_utils_messenger_ext(_instance, _debug_messenger, nullptr);
       }
 
       if (_instance != nullptr)
       {
-        SARA_DEBUG << "[VK] Destroying Vulkan instance...\n";
+        SARA_DEBUG << fmt::format("[VK] Destroying Vulkan instance: {}...\n",
+                                  fmt::ptr(_instance));
         vkDestroyInstance(_instance, nullptr);
       }
     }

@@ -19,7 +19,7 @@ namespace DO::Shakti::Vulkan {
   struct CommandPool
   {
     CommandPool(const Device& device, const std::uint32_t queue_index)
-      : device_hande{device.handle}
+      : device_handle{device.handle}
     {
       auto create_info = VkCommandPoolCreateInfo{};
       {
@@ -29,22 +29,32 @@ namespace DO::Shakti::Vulkan {
       }
 
       const auto status =
-          vkCreateCommandPool(_device, &create_info, nullptr, &_command_pool);
+          vkCreateCommandPool(device_handle, &create_info, nullptr, &handle);
       if (status != VK_SUCCESS)
         throw std::runtime_error{
             fmt::format("Error: failed to create command pool! Error code: {}",
                         static_cast<int>(status))};
     }
 
+    CommandPool(const CommandPool& other) = delete;
+
+    CommandPool(CommandPool&& other)
+    {
+      std::swap(device_handle, other.device_handle);
+      std::swap(handle, other.handle);
+    }
+
     ~CommandPool()
     {
       if (handle != nullptr)
       {
-        SARA_DEBUG << fmt::format("[VK] Destroying command pool {}...\n",
+        SARA_DEBUG << fmt::format("[VK] Destroying command pool: {}...\n",
                                   fmt::ptr(handle));
         vkDestroyCommandPool(device_handle, handle, nullptr);
       }
     }
+
+    auto operator=(const CommandPool& other) -> CommandPool& = delete;
 
     VkDevice device_handle = nullptr;
     VkCommandPool handle = nullptr;

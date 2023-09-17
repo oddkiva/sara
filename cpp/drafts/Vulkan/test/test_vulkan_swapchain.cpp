@@ -31,7 +31,7 @@ static constexpr auto compile_for_apple = false;
 #endif
 
 
-BOOST_AUTO_TEST_CASE(test_device)
+BOOST_AUTO_TEST_CASE(test_swapchain_build)
 {
   namespace svk = DO::Shakti::Vulkan;
   namespace k = DO::Kalpana;
