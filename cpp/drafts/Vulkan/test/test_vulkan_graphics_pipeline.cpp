@@ -1,4 +1,3 @@
-#include <vulkan/vulkan_core.h>
 #define BOOST_TEST_MODULE "Vulkan/Graphics Pipeline"
 #define GLFW_INCLUDE_VULKAN
 
@@ -40,7 +39,7 @@ auto get_program_path() -> std::filesystem::path
 }
 
 
-BOOST_AUTO_TEST_CASE(test_device)
+BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
 {
   namespace svk = DO::Shakti::Vulkan;
   namespace k = DO::Kalpana;
@@ -141,11 +140,15 @@ BOOST_AUTO_TEST_CASE(test_device)
 
   // Now build the graphics pipeline.
 #if defined(__APPLE__)
-  static const auto vs_path = "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
-  static const auto fs_path = "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/frag.spv";
+  static const auto vs_path =
+      "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
+  static const auto fs_path =
+      "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/frag.spv";
 #else
-  static const auto vs_path = "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
-  static const auto fs_path = "/home/david/GitLab/oddkiva/sara-build-Asan/frag.spv";
+  static const auto vs_path =
+      "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
+  static const auto fs_path =
+      "/home/david/GitLab/oddkiva/sara-build-Asan/frag.spv";
 #endif
   std::cout << vs_path << std::endl;
   std::cout << fs_path << std::endl;
@@ -163,4 +166,7 @@ BOOST_AUTO_TEST_CASE(test_device)
           .viewport_sizes(w, h)
           .scissor_sizes(w, h)
           .create();
+  BOOST_CHECK(graphics_pipeline._device != nullptr);
+  BOOST_CHECK(graphics_pipeline._pipeline_layout != nullptr);
+  BOOST_CHECK(graphics_pipeline._pipeline != nullptr);
 }

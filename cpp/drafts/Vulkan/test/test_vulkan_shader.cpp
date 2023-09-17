@@ -9,17 +9,16 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "Vulkan/Render Pass"
+#define BOOST_TEST_MODULE "Vulkan/Shader Module"
 #define GLFW_INCLUDE_VULKAN
 
 #include <drafts/Vulkan/Device.hpp>
 #include <drafts/Vulkan/EasyGLFW.hpp>
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
-#include <drafts/Vulkan/Surface.hpp>
-#include <drafts/Vulkan/Swapchain.hpp>
-#include <drafts/Vulkan/RenderPass.hpp>
+#include <drafts/Vulkan/Shader.hpp>
 
+#include <DO/Sara/Defines.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -32,7 +31,21 @@ static constexpr auto compile_for_apple = false;
 #endif
 
 
-BOOST_AUTO_TEST_CASE(test_render_pass_build)
+auto get_program_path() -> std::filesystem::path
+{
+#ifdef _WIN32
+  static auto path = std::array<wchar_t, MAX_PATH>{};
+  GetModuleFileNameW(nullptr, path.data(), MAX_PATH);
+  return path.data();
+#else
+  static auto result = std::array<char, PATH_MAX>{};
+  ssize_t count = readlink("/proc/self/exe", result.data(), PATH_MAX);
+  return std::string(result.data(), (count > 0) ? count : 0);
+#endif
+}
+
+
+BOOST_AUTO_TEST_CASE(test_vulkan_shader_module)
 {
   namespace svk = DO::Shakti::Vulkan;
   namespace k = DO::Kalpana;
@@ -116,15 +129,20 @@ BOOST_AUTO_TEST_CASE(test_render_pass_build)
                           .create();
   BOOST_CHECK(device.handle != nullptr);
 
-  const auto swapchain =
-      kvk::Swapchain{physical_device, device, surface, window};
-  BOOST_CHECK(swapchain.handle != nullptr);
+  // Now build the graphics pipeline.
+#if defined(__APPLE__)
+  static const auto vs_path =
+      "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
+#else
+  static const auto vs_path =
+      "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
+#endif
+  std::cout << vs_path << std::endl;
 
-  auto render_pass = kvk::RenderPass{};
-  render_pass.create_basic_render_pass(device, swapchain.image_format);
-  BOOST_CHECK(render_pass.handle != nullptr);
-  BOOST_CHECK_EQUAL(render_pass.color_attachments.size(), 1u);
-  BOOST_CHECK_EQUAL(render_pass.color_attachment_refs.size(), render_pass.color_attachments.size());
-  BOOST_CHECK_EQUAL(render_pass.subpasses.size(), 1u);
-  BOOST_CHECK_EQUAL(render_pass.dependencies.size(), 1u);
+  const auto vs = svk::read_spirv_compiled_shader(vs_path);
+  BOOST_CHECK(!vs.empty());
+
+  const auto vs_module = svk::ShaderModule{device.handle, vs};
+  BOOST_CHECK(vs_module.device_handle != nullptr);
+  BOOST_CHECK(vs_module.handle != nullptr);
 }
