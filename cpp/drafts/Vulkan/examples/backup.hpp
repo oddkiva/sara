@@ -11,30 +11,6 @@ std::vector<VkFence> in_flight_fences;
 std::vector<VkFence> images_in_flight;
 size_t current_frame = 0;
 
-void init_vulkan()
-{
-  create_swapchain();
-  create_image_views();
-  create_render_pass();
-  create_graphics_pipeline();
-  create_framebuffers();
-  create_command_pool();
-  create_vertex_buffer();
-  create_command_buffers();
-  create_sync_objects();
-}
-
-void mainLoop()
-{
-  while (!glfwWindowShouldClose(window))
-  {
-    glfwPollEvents();
-    draw_frame();
-  }
-
-  vkDeviceWaitIdle(_device);
-}
-
 void cleanup()
 {
   cleanup_swap_chain();
@@ -88,24 +64,6 @@ void recreate_swapchain()
   createCommandBuffers();
 
   imagesInFlight.resize(swapChainImages.size(), VK_NULL_HANDLE);
-}
-
-
-// Command pool for graphics family queue.
-auto create_command_pool() -> void
-{
-  const auto queue_family_indices = find_queue_families(_physical_device);
-
-  auto pool_info = VkCommandPoolCreateInfo{};
-  {
-    pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    pool_info.queueFamilyIndex = queue_family_indices.graphicsFamily.value();
-    pool_info.flags = 0;
-  }
-
-  if (vkCreateCommandPool(_device, &pool_info, nullptr, &_command_pool) !=
-      VK_SUCCESS)
-    throw std::runtime_error{"Failed to create command pool!"};
 }
 
 auto create_command_buffers() -> void
@@ -318,39 +276,3 @@ auto recreate_swapchain() -> void
   create_framebuffers();
   create_command_buffers();
 }
-
-auto cleanup_swapchain() -> void
-{
-  for (auto& framebuffer : _swapchain_framebuffers)
-    vkDestroyFramebuffer(_device, framebuffer, nullptr);
-
-  vkFreeCommandBuffers(_device, _command_pool,
-                       static_cast<std::uint32_t>(_command_buffers.size()),
-                       _command_buffers.data());
-
-  vkDestroyPipeline(_device, _graphics_pipeline, nullptr);
-  vkDestroyPipelineLayout(_device, _pipeline_layout, nullptr);
-  vkDestroyRenderPass(_device, _render_pass, nullptr);
-
-  for (auto& image_view : _swapchain_image_views)
-    vkDestroyImageView(_device, image_view, nullptr);
-
-  vkDestroySwapchainKHR(_device, _swapchain, nullptr);
-}
-
-VkRenderPass _render_pass;
-VkPipelineLayout _pipeline_layout;
-VkPipeline _graphics_pipeline;
-
-VkCommandPool _command_pool;
-std::vector<VkCommandBuffer> _command_buffers;
-
-//! @brief "Traffic lights".
-//! @{
-std::vector<VkSemaphore> _image_available_semaphores;
-std::vector<VkSemaphore> _render_finished_semaphores;
-std::vector<VkFence> _in_flight_fences;
-std::vector<VkFence> _images_in_flight;
-//! @}
-
-std::int32_t current_frame = 0;
