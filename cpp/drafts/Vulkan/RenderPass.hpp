@@ -50,7 +50,8 @@ namespace DO::Kalpana::Vulkan {
       subpasses.resize(1);
       auto& subpass = subpasses.front();
       subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-      subpass.colorAttachmentCount = color_attachment_refs.size();
+      subpass.colorAttachmentCount =
+          static_cast<std::uint32_t>(color_attachment_refs.size());
       subpass.pColorAttachments = color_attachment_refs.data();
 
       // 4. Link one subpass to one another. Here, if I understood correctly, we
@@ -69,9 +70,11 @@ namespace DO::Kalpana::Vulkan {
       render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
       render_pass_create_info.attachmentCount = 1;
       render_pass_create_info.pAttachments = &color_attachment;
-      render_pass_create_info.subpassCount = subpasses.size();
+      render_pass_create_info.subpassCount =
+          static_cast<std::uint32_t>(subpasses.size());
       render_pass_create_info.pSubpasses = subpasses.data();
-      render_pass_create_info.dependencyCount = dependencies.size();
+      render_pass_create_info.dependencyCount =
+          static_cast<std::uint32_t>(dependencies.size());
       render_pass_create_info.pDependencies = dependencies.data();
 
       const auto status = vkCreateRenderPass(

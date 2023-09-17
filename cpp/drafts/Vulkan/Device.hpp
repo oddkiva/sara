@@ -98,7 +98,8 @@ namespace DO::Shakti::Vulkan {
         -> Builder&
     {
       _validation_layers = validation_layers;
-      _create_info.enabledLayerCount = _validation_layers.size();
+      _create_info.enabledLayerCount =
+          static_cast<std::uint32_t>(_validation_layers.size());
       _create_info.ppEnabledLayerNames = _validation_layers.data();
       return *this;
     }
@@ -109,7 +110,8 @@ namespace DO::Shakti::Vulkan {
         -> Builder&
     {
       _device_extensions = device_extensions;
-      _create_info.enabledExtensionCount = _device_extensions.size();
+      _create_info.enabledExtensionCount =
+          static_cast<std::uint32_t>(_device_extensions.size());
       _create_info.ppEnabledExtensionNames = _device_extensions.data();
       return *this;
     }

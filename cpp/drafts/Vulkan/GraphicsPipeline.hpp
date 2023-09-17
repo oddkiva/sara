@@ -156,9 +156,11 @@ namespace DO::Kalpana::Vulkan {
     {
       load_shaders();
 
-      initialize_other_things_which_we_will_worry_about_later();
+      initialize_fixed_functions();
 
       auto graphics_pipeline = GraphicsPipeline{};
+
+      graphics_pipeline._device = device.handle;
 
       // Initialize the graphics pipeline layout.
       SARA_DEBUG << "Initializing the graphics pipeline layout...\n";
@@ -169,9 +171,12 @@ namespace DO::Kalpana::Vulkan {
         pipeline_layout_info.setLayoutCount = 0;
         pipeline_layout_info.pushConstantRangeCount = 0;
       };
-      const auto status =
-          vkCreatePipelineLayout(device.handle, &pipeline_layout_info, nullptr,
-                                 &graphics_pipeline._pipeline_layout);
+      auto status = vkCreatePipelineLayout(    //
+          device.handle,                       //
+          &pipeline_layout_info,               //
+          nullptr,                             //
+          &graphics_pipeline._pipeline_layout  //
+      );
       if (status != VK_SUCCESS)
         throw std::runtime_error{fmt::format(
             "Failed to create the graphics pipeline layout! Error code: {}",
@@ -184,7 +189,8 @@ namespace DO::Kalpana::Vulkan {
         pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 
         // - Vertex and fragment shaders.
-        pipeline_info.stageCount = shader_stage_infos.size();
+        pipeline_info.stageCount =
+            static_cast<std::uint32_t>(shader_stage_infos.size());
         pipeline_info.pStages = shader_stage_infos.data();
 
         // - Vertex buffer data format.
@@ -198,7 +204,7 @@ namespace DO::Kalpana::Vulkan {
 
         // Rendering policy.
         pipeline_info.pMultisampleState = &multisampling;
-        pipeline_info.pColorBlendState = &color_blending;
+        pipeline_info.pColorBlendState = &color_blend;
 
         pipeline_info.layout = graphics_pipeline._pipeline_layout;
         pipeline_info.renderPass = render_pass.handle;
@@ -207,10 +213,18 @@ namespace DO::Kalpana::Vulkan {
         pipeline_info.basePipelineIndex = -1;
       };
 
-      if (vkCreateGraphicsPipelines(device.handle, VK_NULL_HANDLE, 1,
-                                    &pipeline_info, nullptr,
-                                    &graphics_pipeline._pipeline) != VK_SUCCESS)
-        throw std::runtime_error{"Failed to create graphics pipeline!"};
+      status = vkCreateGraphicsPipelines(  //
+          device.handle,                   //
+          VK_NULL_HANDLE,                  //
+          1,                               //
+          &pipeline_info,                  //
+          nullptr,                         //
+          &graphics_pipeline._pipeline     //
+      );
+      if (status != VK_SUCCESS)
+        throw std::runtime_error{
+            fmt::format("Failed to create graphics pipeline! Error code: {}",
+                        static_cast<int>(status))};
 
       return graphics_pipeline;
     }
@@ -262,10 +276,9 @@ namespace DO::Kalpana::Vulkan {
       fssi.pName = "main";
     }
 
-    auto initialize_other_things_which_we_will_worry_about_later() -> void
+    auto initialize_fixed_functions() -> void
     {
-      SARA_DEBUG << "Initialize other things to worry about later...\n";
-      //
+      SARA_DEBUG << "Initialize the viewport state create info...\n";
       viewport_state = VkPipelineViewportStateCreateInfo{};
       {
         viewport_state.sType =
@@ -277,6 +290,7 @@ namespace DO::Kalpana::Vulkan {
         viewport_state.pScissors = &scissor;
       };
 
+      SARA_DEBUG << "Initialize the rasterization state create info...\n";
       rasterizer = VkPipelineRasterizationStateCreateInfo{};
       {
         rasterizer.sType =
@@ -293,7 +307,7 @@ namespace DO::Kalpana::Vulkan {
       }
 
       // Multisampling processing policy.
-      // Let's worry about this later.
+      SARA_DEBUG << "Initialize the multisampling state create info...\n";
       multisampling = VkPipelineMultisampleStateCreateInfo{};
       {
         multisampling.sType =
@@ -307,9 +321,9 @@ namespace DO::Kalpana::Vulkan {
       }
 
       // Color blending policy.
-      //
-      // 1. Let's worry about this later.
-      color_blend_attachment = VkPipelineColorBlendAttachmentState{};
+      SARA_DEBUG << "Initialize the color blend attachment state...\n";
+      color_blend_attachments.resize(1);
+      auto& color_blend_attachment = color_blend_attachments.front();
       {
         color_blend_attachment.blendEnable = VK_FALSE;
         color_blend_attachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
@@ -323,17 +337,18 @@ namespace DO::Kalpana::Vulkan {
                                                 VK_COLOR_COMPONENT_A_BIT;   //
       }
 
-      // Let's worry about this later.
-      color_blending = VkPipelineColorBlendStateCreateInfo{};
+      SARA_DEBUG << "Initialize the color blend state create info...\n";
+      color_blend = VkPipelineColorBlendStateCreateInfo{};
       {
-        color_blending.sType =
+        color_blend.sType =
             VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-        color_blending.logicOpEnable = VK_FALSE;
-        color_blending.logicOp = VK_LOGIC_OP_COPY;
-        color_blending.attachmentCount = 1;
-        color_blending.pAttachments = &color_blend_attachment;
+        color_blend.logicOpEnable = VK_FALSE;
+        color_blend.logicOp = VK_LOGIC_OP_COPY;
+        color_blend.attachmentCount =
+            static_cast<std::uint32_t>(color_blend_attachments.size());
+        color_blend.pAttachments = color_blend_attachments.data();
         for (auto i = 0; i < 4; ++i)
-          color_blending.blendConstants[i] = 0.f;
+          color_blend.blendConstants[i] = 0.f;
       };
     }
 
@@ -373,9 +388,9 @@ namespace DO::Kalpana::Vulkan {
     //! @brief Multisampling create info.
     VkPipelineMultisampleStateCreateInfo multisampling;
 
-    //! @brief Let's worry about these later.
-    VkPipelineColorBlendAttachmentState color_blend_attachment;
-    VkPipelineColorBlendStateCreateInfo color_blending;
+    //! @brief Color blend create info.
+    std::vector<VkPipelineColorBlendAttachmentState> color_blend_attachments;
+    VkPipelineColorBlendStateCreateInfo color_blend;
 
     //! @brief Not sure what it is.
     VkPipelineLayoutCreateInfo pipeline_layout_info;
