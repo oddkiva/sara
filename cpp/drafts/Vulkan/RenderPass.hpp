@@ -23,6 +23,9 @@ namespace DO::Kalpana::Vulkan {
     auto create_basic_render_pass(const Shakti::Vulkan::Device& device,
                                   const VkFormat swapchain_image_format) -> void
     {
+      // First bind the device handle to the render pass object.
+      device_handle = device.handle;
+
       // 1. Specify the color buffer.
       color_attachments.resize(1);
       auto& color_attachment = color_attachments.front();
@@ -85,6 +88,16 @@ namespace DO::Kalpana::Vulkan {
                         static_cast<int>(status))};
     }
 
+    ~RenderPass()
+    {
+      if (device_handle == nullptr)
+        return;
+
+      if (handle != nullptr)
+        vkDestroyRenderPass(device_handle, handle, nullptr);
+    }
+
+    VkDevice device_handle;
     VkRenderPass handle;
     std::vector<VkAttachmentDescription> color_attachments;
     std::vector<VkAttachmentReference> color_attachment_refs;

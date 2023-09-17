@@ -39,14 +39,15 @@ struct Vertex
     auto attribute_descriptions =
         std::array<VkVertexInputAttributeDescription, 2>{};
 
-    for (auto i = 0u; i != attribute_descriptions.size(); ++i)
-    {
-      attribute_descriptions[0].binding = 0;
-      attribute_descriptions[0].location = i;
-      attribute_descriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-      attribute_descriptions[0].offset = offsetof(Vertex, pos);
-    }
+    attribute_descriptions[0].binding = 0;
+    attribute_descriptions[0].location = 0;
+    attribute_descriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+    attribute_descriptions[0].offset = offsetof(Vertex, pos);
 
+    attribute_descriptions[1].binding = 0;
+    attribute_descriptions[1].location = 1;
+    attribute_descriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+    attribute_descriptions[1].offset = offsetof(Vertex, color);
 
     return attribute_descriptions;
   }

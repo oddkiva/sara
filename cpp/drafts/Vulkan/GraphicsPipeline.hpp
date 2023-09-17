@@ -155,7 +155,6 @@ namespace DO::Kalpana::Vulkan {
     auto create() -> GraphicsPipeline
     {
       load_shaders();
-
       initialize_fixed_functions();
 
       auto graphics_pipeline = GraphicsPipeline{};
@@ -184,7 +183,7 @@ namespace DO::Kalpana::Vulkan {
 
       // Initialize the graphics pipeline.
       SARA_DEBUG << "Initializing the graphics pipeline...\n";
-      pipeline_info = VkGraphicsPipelineCreateInfo{};
+      pipeline_info = {};
       {
         pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 
@@ -201,6 +200,7 @@ namespace DO::Kalpana::Vulkan {
 
         // The rasterization state.
         pipeline_info.pRasterizationState = &rasterization_state;
+
         // Rendering policy.
         pipeline_info.pMultisampleState = &multisampling;
         pipeline_info.pColorBlendState = &color_blend;
@@ -261,6 +261,7 @@ namespace DO::Kalpana::Vulkan {
       SARA_DEBUG << "Rebind vertex shader module to vertex shader stage create "
                     "info...\n";
       auto& vssi = vertex_shader_stage_info();
+      vssi = {}; // Very important.
       vssi.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
       vssi.stage = VK_SHADER_STAGE_VERTEX_BIT;
       vssi.module = vertex_shader_module.handle;
@@ -269,6 +270,7 @@ namespace DO::Kalpana::Vulkan {
       SARA_DEBUG << "Rebind fragment shader module to fragment shader stage "
                     "create info...\n";
       auto& fssi = fragment_shader_stage_info();
+      fssi = {}; // Very important.
       fssi.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
       fssi.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
       fssi.module = fragment_shader_module.handle;

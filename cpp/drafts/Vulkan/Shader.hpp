@@ -66,7 +66,10 @@ namespace DO::Shakti::Vulkan {
 
     ShaderModule(const ShaderModule&) = delete;
 
-    ShaderModule(ShaderModule&& other) = default;
+    ShaderModule(ShaderModule&& other)
+    {
+      swap(other);
+    }
 
     ~ShaderModule()
     {
@@ -77,7 +80,17 @@ namespace DO::Shakti::Vulkan {
 
     auto operator=(const ShaderModule&) -> ShaderModule& = delete;
 
-    auto operator=(ShaderModule&& other) -> ShaderModule& = default;
+    auto operator=(ShaderModule&& other) -> ShaderModule&
+    {
+      swap(other);
+      return *this;
+    }
+
+    auto swap(ShaderModule& other) -> void
+    {
+      std::swap(device_handle, other.device_handle);
+      std::swap(handle, other.handle);
+    }
 
   public:
     VkDevice device_handle = nullptr;
