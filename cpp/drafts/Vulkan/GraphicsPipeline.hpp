@@ -61,6 +61,21 @@ namespace DO::Kalpana::Vulkan {
       }
     }
 
+    auto device() const -> VkDevice
+    {
+      return _device;
+    }
+
+    auto pipeline_layout() const -> VkPipelineLayout
+    {
+      return _pipeline_layout;
+    }
+
+    operator VkPipeline() const
+    {
+      return _pipeline;
+    }
+
   private:
     VkDevice _device = nullptr;
     VkPipelineLayout _pipeline_layout = nullptr;

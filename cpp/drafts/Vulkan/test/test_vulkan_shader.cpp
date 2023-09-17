@@ -17,10 +17,13 @@
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
 #include <drafts/Vulkan/Shader.hpp>
+#include <drafts/Vulkan/Surface.hpp>
 
 #include <DO/Sara/Defines.hpp>
 
 #include <boost/test/unit_test.hpp>
+
+#include <filesystem>
 
 
 static constexpr auto debug_vulkan_instance = true;

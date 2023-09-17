@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
           .viewport_sizes(w, h)
           .scissor_sizes(w, h)
           .create();
-  BOOST_CHECK(graphics_pipeline._device != nullptr);
-  BOOST_CHECK(graphics_pipeline._pipeline_layout != nullptr);
-  BOOST_CHECK(graphics_pipeline._pipeline != nullptr);
+  BOOST_CHECK(graphics_pipeline.device() != nullptr);
+  BOOST_CHECK(graphics_pipeline.pipeline_layout() != nullptr);
+  BOOST_CHECK(static_cast<VkPipeline>(graphics_pipeline) != nullptr);
 }
