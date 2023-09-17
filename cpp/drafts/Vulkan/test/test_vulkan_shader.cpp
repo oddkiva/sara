@@ -136,6 +136,9 @@ BOOST_AUTO_TEST_CASE(test_vulkan_shader_module)
 #if defined(__APPLE__)
   static const auto vs_path =
       "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
+#elif defined(_WIN32)
+  static const auto vs_path =
+      "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/vert.spv";
 #else
   static const auto vs_path =
       "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
