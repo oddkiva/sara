@@ -1,5 +1,3 @@
-VkCommandPool command_pool;
-
 VkBuffer vertex_buffer;
 VkDeviceMemory vertex_buffer_memory;
 
@@ -92,40 +90,35 @@ auto create_command_buffers() -> void
 
     if (vkBeginCommandBuffer(_command_buffers[i], &begin_info) != VK_SUCCESS)
     {
-      throw std::runtime_error
+      throw std::runtime_error{"Failed to begin recording command buffer !"};
+
+      auto render_pass_begin_info = VkRenderPassBeginInfo{};
       {
-        "Failed to begin recording command
-            buffer !"};
+        render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        render_pass_begin_info.renderPass = _render_pass;
+        render_pass_begin_info.framebuffer = _swapchain_framebuffers[i];
+        render_pass_begin_info.renderArea.offset = {0, 0};
+        render_pass_begin_info.renderArea.extent = _swapchain_extent;
 
-            auto render_pass_begin_info = VkRenderPassBeginInfo{};
-        {
-          render_pass_begin_info.sType =
-              VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-          render_pass_begin_info.renderPass = _render_pass;
-          render_pass_begin_info.framebuffer = _swapchain_framebuffers[i];
-          render_pass_begin_info.renderArea.offset = {0, 0};
-          render_pass_begin_info.renderArea.extent = _swapchain_extent;
-
-          auto clear_color = VkClearValue{{{0.f, 0.f, 0.f, 1.f}}};
-          render_pass_begin_info.clearValueCount = 1;
-          render_pass_begin_info.pClearValues = &clear_color;
-        }
-
-        vkCmdBeginRenderPass(_command_buffers[i], &render_pass_begin_info,
-                             VK_SUBPASS_CONTENTS_INLINE);
-        {
-          vkCmdBindPipeline(_command_buffers[i],
-                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            _graphics_pipeline);
-          vkCmdDraw(_command_buffers[i], 3, 1, 0, 0);
-        }
-        vkCmdEndRenderPass(_command_buffers[i]);
-
-        if (vkEndCommandBuffer(_command_buffers[i]) != VK_SUCCESS)
-          throw std::runtime_error{"Failed to record command buffer!"};
+        auto clear_color = VkClearValue{{{0.f, 0.f, 0.f, 1.f}}};
+        render_pass_begin_info.clearValueCount = 1;
+        render_pass_begin_info.pClearValues = &clear_color;
       }
+
+      vkCmdBeginRenderPass(_command_buffers[i], &render_pass_begin_info,
+                           VK_SUBPASS_CONTENTS_INLINE);
+      {
+        vkCmdBindPipeline(_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+                          _graphics_pipeline);
+        vkCmdDraw(_command_buffers[i], 3, 1, 0, 0);
+      }
+      vkCmdEndRenderPass(_command_buffers[i]);
+
+      if (vkEndCommandBuffer(_command_buffers[i]) != VK_SUCCESS)
+        throw std::runtime_error{"Failed to record command buffer!"};
     }
   }
+}
 }
 
 // Semaphores
@@ -265,14 +258,14 @@ auto draw_frame() -> void
 //
 auto recreate_swapchain() -> void
 {
-  vkDeviceWaitIdle(_device);
+    vkDeviceWaitIdle(_device);
 
-  cleanup_swapchain();
+    cleanup_swapchain();
 
-  create_swapchain();
-  create_image_views();
-  create_render_pass();
-  create_graphics_pipeline();
-  create_framebuffers();
-  create_command_buffers();
+    create_swapchain();
+    create_image_views();
+    create_render_pass();
+    create_graphics_pipeline();
+    create_framebuffers();
+    create_command_buffers();
 }

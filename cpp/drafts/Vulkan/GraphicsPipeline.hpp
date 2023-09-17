@@ -243,15 +243,15 @@ namespace DO::Kalpana::Vulkan {
     {
       // Load the compiled shaders.
       SARA_DEBUG << "Load compiled vertex shader...\n";
-      vertex_shader =
-          Shakti::Vulkan::read_shader_file(vertex_shader_filepath.string());
+      vertex_shader = Shakti::Vulkan::read_spirv_compiled_shader(
+          vertex_shader_filepath.string());
       SARA_DEBUG << "Creating vertex shader module...\n";
       vertex_shader_module =
           Shakti::Vulkan::ShaderModule{device.handle, vertex_shader};
 
       SARA_DEBUG << "Load compiled fragment shader...\n";
-      fragment_shader =
-          Shakti::Vulkan::read_shader_file(fragment_shader_filepath.string());
+      fragment_shader = Shakti::Vulkan::read_spirv_compiled_shader(
+          fragment_shader_filepath.string());
       SARA_DEBUG << "Creating fragment shader module...\n";
       fragment_shader_module =
           Shakti::Vulkan::ShaderModule{device.handle, fragment_shader};

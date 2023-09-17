@@ -21,7 +21,8 @@
 
 namespace DO::Shakti::Vulkan {
 
-  inline auto read_shader_file(const std::string& filename) -> std::vector<char>
+  inline auto read_spirv_compiled_shader(const std::string& filename)
+      -> std::vector<char>
   {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file)
