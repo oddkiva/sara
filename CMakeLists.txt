@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-
 # Set the version major and minor manually.
 set(DO_Sara_VERSION_MAJOR 1)
 set(DO_Sara_VERSION_MINOR 7)
@@ -23,6 +22,14 @@ if (WIN32 AND NOT CMAKE_TOOLCHAIN_FILE)
     "[Sara] Could not find vpkg toolchain file: "
     "please specify it to build Sara on Windows!")
 endif ()
+
+if (CMAKE_GENERATOR STREQUAL "Xcode" AND CMAKE_EXPORT_COMPILE_COMMANDS)
+  set(CMAKE_XCODE_ATTRIBUTE_OTHER_CFLAGS
+    "$(inherited) -gen-cdb-fragment-path ${CMAKE_SOURCE_DIR}/CompilationDatabase"
+  )
+endif ()
+
+
 
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
