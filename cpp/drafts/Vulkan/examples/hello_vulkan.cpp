@@ -43,27 +43,24 @@ public:
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
       // For example when the window is resized, we need to recreate the
-      swap
-          // chain, the images of the swap chains must reinitialized with the
-          new
-          // window extent.
-          recreate_swapchain();
+      // swapchain, the images of the swap chains must reinitialized with the
+      // new window extent.
+      recreate_swapchain();
       return;
     }
     else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-      throw std::runtime_error("failed to acquire swap chain image!");
+      throw std::runtime_error("failed to acquire swapchain image!");
 
     // The CPU encounters another fence controlled by the GPU:
     // - The CPU is waiting from the GPU until the image becomes available
-    for
-      //   rendering.
-      // - The second fence displays a red light
-      // - When rendering for the first time, the second fence is already
-      opened,
-          //   so the CPU can pursue its journey.
-          if (_images_in_flight[image_index] != VK_NULL_HANDLE)
-              vkWaitForFences(_device, 1, &_images_in_flight[current_frame],
-                              VK_TRUE, UINT64_MAX);
+    //   for rendering.
+    // - The second fence displays a red light
+    // - When rendering for the first time, the second fence is already
+    // opened,
+    //   so the CPU can pursue its journey.
+    if (_images_in_flight[image_index] != VK_NULL_HANDLE)
+      vkWaitForFences(_device, 1, &_images_in_flight[current_frame], VK_TRUE,
+                      UINT64_MAX);
     _images_in_flight[image_index] = _in_flight_fences[current_frame];
     // - The second fence has opened just now.
 
