@@ -34,15 +34,15 @@ function (shakti_add_test)
     PRIVATE -DBOOST_TEST_DYN_LINK)
 
   # Disable compile warnings with boost.test.
-  list(APPEND NVCC_DIAG_SUPPRESS_WARNING_IDS
-    "--diag_suppress=611"
-    "--diag_suppress=1388"
-    "--diag_suppress=1394")
-  target_compile_options(
-    ${_test_name}
-    PRIVATE
-      $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<PLATFORM_ID:Windows>>:-Xcudafe ${NVCC_DIAG_SUPPRESS_WARNING_IDS}>
-  )
+  # list(APPEND NVCC_DIAG_SUPPRESS_WARNING_IDS
+  #   "--diag_suppress=611"
+  #   "--diag_suppress=1388"
+  #   "--diag_suppress=1394")
+  # target_compile_options(
+  #   ${_test_name}
+  #   PRIVATE
+  #     $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<PLATFORM_ID:Windows>>:"-Xcudafe ${NVCC_DIAG_SUPPRESS_WARNING_IDS}">
+  # )
 
   set_target_properties(${_test_name}
     PROPERTIES
