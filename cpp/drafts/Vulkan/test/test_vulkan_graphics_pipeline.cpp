@@ -155,6 +155,11 @@ BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
       "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
   static const auto fs_path =
       "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/frag.spv";
+#elif defined(_WIN32)
+  static const auto vs_path =
+      "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/vert.spv";
+  static const auto fs_path =
+      "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/frag.spv";
 #else
   static const auto vs_path =
       "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
@@ -174,7 +179,7 @@ BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
           .fragment_shader_path(fs_path)
           .vbo_data_format<Vertex>()
           .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
-          .viewport_sizes(w, h)
+          .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
           .scissor_sizes(w, h)
           .create();
   BOOST_CHECK(graphics_pipeline.device() != nullptr);

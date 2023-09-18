@@ -64,7 +64,7 @@ namespace DO::Kalpana::Vulkan {
             "VK_LAYER_KHRONOS_validation"  //
         };
 
-      _instance = Shakti::Vulkan::InstanceCreator{}
+      _instance = Shakti::Vulkan::Instance::Builder{}
                       .application_name(app_name.c_str())
                       .engine_name("No Engine")
                       .enable_instance_extensions(_instance_extensions)
@@ -127,7 +127,7 @@ namespace DO::Kalpana::Vulkan {
       auto device_extensions = std::vector{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
       if constexpr (compile_for_apple)
         device_extensions.emplace_back("VK_KHR_portability_subset");
-      _device = svk::DeviceCreator{_physical_device}
+      _device = svk::Device::Builder{_physical_device}
                     .enable_device_extensions(device_extensions)
                     .enable_queue_families({graphics_queue_family_index,
                                             present_queue_family_index})

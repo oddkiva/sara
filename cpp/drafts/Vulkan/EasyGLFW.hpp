@@ -17,6 +17,7 @@
 
 #include <fmt/format.h>
 
+#include <array>
 #include <stdexcept>
 #include <string>
 
