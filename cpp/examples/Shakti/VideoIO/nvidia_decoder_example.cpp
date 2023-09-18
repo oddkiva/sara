@@ -183,8 +183,18 @@ auto cuda_async_copy(const DriverApi::DeviceBgraBuffer& src, PixelBuffer& dst)
 
 int test_with_glfw(int argc, char** argv)
 {
-  if (argc < 2)
-    return 1;
+  const auto video_filepath = argc < 2
+                                  ?
+#ifdef _WIN32
+                                  "C:/Users/David/Desktop/sfm-data/GOPR0542.MP4"
+#elif __APPLE__
+                                  "/Users/david/Desktop/Datasets/"
+                                  "humanising-autonomy/turn_bikes.mp4"
+#else
+                                  "/home/david/Desktop/Datasets/sfm/"
+                                  "Family.mp4"
+#endif
+                                  : argv[1];
 
   // Initialize CUDA driver.
   DriverApi::init();
@@ -193,8 +203,6 @@ int test_with_glfw(int argc, char** argv)
   const auto gpu_id = 0;
   auto cuda_context = DriverApi::CudaContext{gpu_id};
   cuda_context.make_current();
-
-  const auto video_filepath = argv[1];
 
   // Initialize a CUDA-powered video streamer object.
   auto video_stream = shakti::VideoStream{video_filepath, cuda_context};
@@ -294,17 +302,18 @@ int test_with_sara_graphics(int argc, char** argv)
   auto cuda_context = DriverApi::CudaContext{gpu_id};
   cuda_context.make_current();
 
-  const auto video_filepath = argc < 2 ?
+  const auto video_filepath = argc < 2
+                                  ?
 #ifdef _WIN32
-                                       "C:/Users/David/Desktop/GOPR0542.MP4"
+                                  "C:/Users/David/Desktop/sfm-data/GOPR0542.MP4"
 #elif __APPLE__
-                                       "/Users/david/Desktop/Datasets/"
-                                       "humanising-autonomy/turn_bikes.mp4"
+                                  "/Users/david/Desktop/Datasets/"
+                                  "humanising-autonomy/turn_bikes.mp4"
 #else
-                                       "/home/david/Desktop/Datasets/sfm/"
-                                       "Family.mp4"
+                                  "/home/david/Desktop/Datasets/sfm/"
+                                  "Family.mp4"
 #endif
-                                       : argv[1];
+                                  : argv[1];
 
   // Initialize a CUDA-powered video streamer object.
   auto video_stream = shakti::VideoStream{video_filepath, cuda_context};
@@ -347,8 +356,11 @@ int test_with_sara_graphics(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+#if 0
   DO::Sara::GraphicsApplication app(argc, argv);
-  // app.register_user_main(test_with_sara_graphics);
-  app.register_user_main(test_with_glfw);
+  app.register_user_main(test_with_sara_graphics);
   return app.exec();
+#else
+  test_with_glfw(argc, argv);
+#endif
 }
