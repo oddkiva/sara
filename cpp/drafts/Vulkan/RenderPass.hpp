@@ -22,6 +22,44 @@ namespace DO::Kalpana::Vulkan {
   // result.
   struct RenderPass
   {
+    RenderPass() = default;
+    RenderPass(const RenderPass&) = delete;
+    RenderPass(RenderPass&& other)
+    {
+      swap(other);
+    }
+
+    ~RenderPass()
+    {
+      if (device_handle == nullptr)
+        return;
+
+      if (handle != nullptr)
+      {
+        SARA_DEBUG << fmt::format("[VK] Destroying render pass {}\n",
+                                  fmt::ptr(handle));
+        vkDestroyRenderPass(device_handle, handle, nullptr);
+      }
+    }
+
+    auto operator=(const RenderPass&) -> RenderPass& = delete;
+
+    auto operator=(RenderPass&& other) -> RenderPass&
+    {
+      swap(other);
+      return *this;
+    }
+
+    auto swap(RenderPass& other) -> void
+    {
+      std::swap(device_handle, other.device_handle);
+      std::swap(handle, other.handle);
+      color_attachments.swap(other.color_attachments);
+      color_attachment_refs.swap(other.color_attachment_refs);
+      subpasses.swap(other.subpasses);
+      dependencies.swap(other.dependencies);
+    }
+
     auto create_basic_render_pass(const Shakti::Vulkan::Device& device,
                                   const VkFormat swapchain_image_format) -> void
     {
@@ -33,9 +71,11 @@ namespace DO::Kalpana::Vulkan {
       auto& color_attachment = color_attachments.front();
       color_attachment.format = swapchain_image_format;
       color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+      // Before rendering, clear the previous color values.
       color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
       color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
       color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+      // To be presented to the swapchain.
       color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
       // 2. The color buffer is referenced by its index. We take the first one,
@@ -88,19 +128,6 @@ namespace DO::Kalpana::Vulkan {
         throw std::runtime_error{
             fmt::format("[VK] Failed to create render pass! Error code: {}",
                         static_cast<int>(status))};
-    }
-
-    ~RenderPass()
-    {
-      if (device_handle == nullptr)
-        return;
-
-      if (handle != nullptr)
-      {
-        SARA_DEBUG << fmt::format("[VK] Destroying render pass {}\n",
-                                  fmt::ptr(handle));
-        vkDestroyRenderPass(device_handle, handle, nullptr);
-      }
     }
 
     VkDevice device_handle;

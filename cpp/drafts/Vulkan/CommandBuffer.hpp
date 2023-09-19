@@ -19,7 +19,7 @@ namespace DO::Shakti::Vulkan {
 
     CommandBufferSequence(const std::uint32_t num_buffers,
                           const VkDevice device,
-                          const VkCommandPool& command_pool)
+                          const VkCommandPool command_pool)
       : _device{device}
       , _command_pool{command_pool}
     {

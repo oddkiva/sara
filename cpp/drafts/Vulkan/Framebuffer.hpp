@@ -49,6 +49,7 @@ namespace DO::Kalpana::Vulkan {
     {
       for (const auto fb : fbs)
         vkDestroyFramebuffer(device.handle, fb, nullptr);
+      fbs.clear();
     }
 
     auto operator[](const int i) -> VkFramebuffer&

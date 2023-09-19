@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "drafts/Vulkan/Framebuffer.hpp"
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -30,7 +31,7 @@
 
 namespace DO::Kalpana::Vulkan {
 
-  class VulkanGraphicsBackend
+  class GraphicsBackend
   {
   public:
 #if defined(__APPLE__)
@@ -43,7 +44,7 @@ namespace DO::Kalpana::Vulkan {
     static constexpr auto default_height = 600;
 
   public:
-    VulkanGraphicsBackend(const std::string& app_name, const bool debug_vulkan)
+    GraphicsBackend(const std::string& app_name, const bool debug_vulkan)
     {
       init_instance(app_name, debug_vulkan);
     }
@@ -153,6 +154,11 @@ namespace DO::Kalpana::Vulkan {
       _swapchain = Swapchain{_physical_device, _device, _surface, window};
     }
 
+    auto init_framebuffers() -> void
+    {
+      _framebuffers = FramebufferSequence{_swapchain, _render_pass};
+    }
+
     auto init_render_pass() -> void
     {
       _render_pass.create_basic_render_pass(_device, _swapchain.image_format);
@@ -213,7 +219,11 @@ namespace DO::Kalpana::Vulkan {
 
     // The abstraction of the present operations in the hardware
     Swapchain _swapchain;
+    // Color buffers, render subpasses...
     RenderPass _render_pass;
+    // Framebuffers are wrapped swapchain image views... (somehow)
+    // and associated to a render pass.
+    FramebufferSequence _framebuffers;
 
     GraphicsPipeline _graphics_pipeline;
 
