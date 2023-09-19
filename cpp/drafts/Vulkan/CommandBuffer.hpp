@@ -53,6 +53,12 @@ namespace DO::Shakti::Vulkan {
     auto operator=(const CommandBufferSequence&)
         -> CommandBufferSequence& = delete;
 
+    auto operator=(CommandBufferSequence&& other) -> CommandBufferSequence&
+    {
+      swap(other);
+      return *this;
+    }
+
     auto swap(CommandBufferSequence& other) -> void
     {
       std::swap(_device, other._device);
@@ -62,6 +68,12 @@ namespace DO::Shakti::Vulkan {
 
     auto clear() -> void
     {
+      if (_device == nullptr || _command_pool == nullptr)
+        return;
+
+      SARA_DEBUG << fmt::format(
+          "[VK] Freeing command buffers: [ptr:{}] [size:{}]\n",
+          fmt::ptr(_command_buffers.data()), _command_buffers.size());
       vkFreeCommandBuffers(_device, _command_pool,
                            static_cast<std::uint32_t>(_command_buffers.size()),
                            _command_buffers.data());

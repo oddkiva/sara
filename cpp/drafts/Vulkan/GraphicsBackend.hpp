@@ -65,6 +65,10 @@ namespace DO::Kalpana::Vulkan {
 
     auto init_graphics_pipeline(GLFWwindow* window) -> void;
 
+    auto init_command_pool_and_buffers() -> void;
+
+    auto init_synchronization_objects() -> void;
+
   private:
     // The Vulkan instance.
     std::vector<const char*> _instance_extensions;
@@ -98,15 +102,14 @@ namespace DO::Kalpana::Vulkan {
 
     GraphicsPipeline _graphics_pipeline;
 
-#if 0
     // The draw command machinery
-    Shakti::Vulkan::CommandPool _command_pool;
-    Shakti::Vulkan::CommandBufferSequence _command_buffers;
+    Shakti::Vulkan::CommandPool _graphics_cmd_pool;
+    Shakti::Vulkan::CommandBufferSequence _graphics_cmd_bufs;
 
     // Synchronization objects.
-    std::vector<Shakti::Vulkan::Fence> _fences;
-    std::vector<Shakti::Vulkan::Semaphore> _semaphores;
-#endif
+    std::vector<Shakti::Vulkan::Fence> _render_fences;
+    std::vector<Shakti::Vulkan::Semaphore> _image_available_semaphores;
+    std::vector<Shakti::Vulkan::Semaphore> _render_finished_semaphores;
   };
 
 }  // namespace DO::Kalpana::Vulkan

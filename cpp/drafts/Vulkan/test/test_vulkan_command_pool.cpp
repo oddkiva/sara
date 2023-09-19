@@ -121,6 +121,6 @@ BOOST_AUTO_TEST_CASE(initialize_graphics_command_pool)
   BOOST_CHECK(device.handle != nullptr);
 
   const auto graphics_command_pool =
-      svk::CommandPool{device, graphics_queue_family_index};
+      svk::CommandPool{device.handle, graphics_queue_family_index};
   BOOST_CHECK(graphics_command_pool.handle != nullptr);
 }

@@ -9,6 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include "drafts/Vulkan/Semaphore.hpp"
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -30,6 +31,8 @@ GraphicsBackend::GraphicsBackend(GLFWwindow* window,
   init_swapchain(window);
   init_render_pass();
   init_graphics_pipeline(window);
+  init_command_pool_and_buffers();
+  init_synchronization_objects();
 }
 
 auto GraphicsBackend::init_instance(const std::string& app_name,
@@ -176,4 +179,43 @@ auto GraphicsBackend::init_graphics_pipeline(GLFWwindow* window) -> void
           .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
           .scissor_sizes(w, h)
           .create();
+}
+
+auto GraphicsBackend::init_command_pool_and_buffers() -> void
+{
+  namespace svk = Shakti::Vulkan;
+
+  const auto graphics_queue_family_index =
+      find_graphics_queue_family_indices(_physical_device).front();
+
+  _graphics_cmd_pool =
+      svk::CommandPool{_device.handle, graphics_queue_family_index};
+
+  _graphics_cmd_bufs = svk::CommandBufferSequence{
+      static_cast<std::uint32_t>(_swapchain.images.size()),  //
+      _device.handle,                                        //
+      _graphics_cmd_pool.handle                              //
+  };
+}
+
+auto GraphicsBackend::init_synchronization_objects() -> void
+{
+  namespace svk = Shakti::Vulkan;
+
+  // Create as many synchronization objects as swapchain images.
+  _render_fences.resize(_swapchain.images.size());
+  // Initialize them with an unsignaled state.
+  for (auto& fence : _render_fences)
+  {
+    fence = svk::Fence{_device.handle};
+    fence.reset();
+  }
+
+  _image_available_semaphores.resize(_swapchain.images.size());
+  for (auto& s : _image_available_semaphores)
+    s = svk::Semaphore{_device.handle};
+
+  _render_finished_semaphores.resize(_swapchain.images.size());
+  for (auto& s : _render_finished_semaphores)
+    s = svk::Semaphore{_device.handle};
 }

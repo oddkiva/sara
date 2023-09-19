@@ -9,9 +9,12 @@
 
 namespace DO::Shakti::Vulkan {
 
-  struct Semaphore
+  class Semaphore
   {
-    Semaphore(VkDevice device)
+  public:
+    Semaphore() = default;
+
+    explicit Semaphore(VkDevice device)
       : _device{device}
     {
       auto create_info = VkSemaphoreCreateInfo{};
@@ -29,16 +32,29 @@ namespace DO::Shakti::Vulkan {
 
     Semaphore(Semaphore&& other)
     {
-      std::swap(_device, other._device);
-      std::swap(_handle, other._handle);
+      swap(other);
     }
 
     ~Semaphore()
     {
+      if (_device == nullptr || _handle == nullptr)
+        return;
       vkDestroySemaphore(_device, _handle, nullptr);
     }
 
     auto operator=(const Semaphore&) -> Semaphore& = delete;
+
+    auto operator=(Semaphore&& other) -> Semaphore&
+    {
+      swap(other);
+      return *this;
+    }
+
+    auto swap(Semaphore& other) -> void
+    {
+      std::swap(_device, other._device);
+      std::swap(_handle, other._handle);
+    }
 
     VkDevice _device = nullptr;
     VkSemaphore _handle = nullptr;

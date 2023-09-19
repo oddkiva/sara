@@ -18,8 +18,10 @@ namespace DO::Shakti::Vulkan {
 
   struct CommandPool
   {
-    CommandPool(const Device& device, const std::uint32_t queue_index)
-      : device_handle{device.handle}
+    CommandPool() = default;
+
+    CommandPool(const VkDevice device, const std::uint32_t queue_index)
+      : device_handle{device}
     {
       auto create_info = VkCommandPoolCreateInfo{};
       {
@@ -40,8 +42,7 @@ namespace DO::Shakti::Vulkan {
 
     CommandPool(CommandPool&& other)
     {
-      std::swap(device_handle, other.device_handle);
-      std::swap(handle, other.handle);
+      swap(other);
     }
 
     ~CommandPool()
@@ -54,7 +55,19 @@ namespace DO::Shakti::Vulkan {
       }
     }
 
-    auto operator=(const CommandPool& other) -> CommandPool& = delete;
+    auto operator=(const CommandPool&) -> CommandPool& = delete;
+
+    auto operator=(CommandPool&& other) -> CommandPool&
+    {
+      swap(other);
+      return *this;
+    }
+
+    auto swap(CommandPool& other) -> void
+    {
+      std::swap(device_handle, other.device_handle);
+      std::swap(handle, other.handle);
+    }
 
     VkDevice device_handle = nullptr;
     VkCommandPool handle = nullptr;

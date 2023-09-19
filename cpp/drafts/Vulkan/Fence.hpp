@@ -12,7 +12,9 @@ namespace DO::Shakti::Vulkan {
 
   struct Fence
   {
-    Fence(VkDevice device)
+    Fence() = default;
+
+    explicit Fence(VkDevice device)
       : _device{device}
     {
       auto create_info = VkFenceCreateInfo{};
@@ -23,24 +25,37 @@ namespace DO::Shakti::Vulkan {
                                         &_handle);
       if (status != VK_SUCCESS)
         throw std::runtime_error{
-          fmt::format("[VK] Failed to create fence! Error code: {}",
-                      static_cast<int>(status))};
+            fmt::format("[VK] Failed to create fence! Error code: {}",
+                        static_cast<int>(status))};
     }
 
     Fence(const Fence&) = delete;
 
     Fence(Fence&& other)
     {
-      std::swap(_device, other._device);
-      std::swap(_handle, other._handle);
+      swap(other);
     }
 
     ~Fence()
     {
+      if (_device == nullptr || _handle == nullptr)
+        return;
       vkDestroyFence(_device, _handle, nullptr);
     }
 
     auto operator=(const Fence&) -> Fence& = delete;
+
+    auto operator=(Fence&& other) -> Fence&
+    {
+      swap(other);
+      return *this;
+    }
+
+    auto swap(Fence& other) -> void
+    {
+      std::swap(_device, other._device);
+      std::swap(_handle, other._handle);
+    }
 
     auto reset()
     {
@@ -48,7 +63,7 @@ namespace DO::Shakti::Vulkan {
     }
 
     auto wait(const std::uint64_t timeout_ns =
-              std::numeric_limits<std::uint64_t>::max()) -> void
+                  std::numeric_limits<std::uint64_t>::max()) -> void
     {
       vkWaitForFences(_device, 1, &_handle, VK_TRUE, timeout_ns);
     }
