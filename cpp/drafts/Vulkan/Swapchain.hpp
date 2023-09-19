@@ -83,6 +83,7 @@ namespace DO::Kalpana::Vulkan {
 
   struct Swapchain
   {
+    Swapchain() = default;
     Swapchain(const Shakti::Vulkan::PhysicalDevice& physical_device,
               const Shakti::Vulkan::Device& device,  //
               const Surface& surface,                //
@@ -207,14 +208,14 @@ namespace DO::Kalpana::Vulkan {
       create_info.oldSwapchain = VK_NULL_HANDLE;
 
       const auto status =
-          vkCreateSwapchainKHR(device.handle, &create_info, nullptr, &handle);
+          vkCreateSwapchainKHR(device_handle, &create_info, nullptr, &handle);
       if (status != VK_SUCCESS)
         throw std::runtime_error{fmt::format(
             "Error: failed to create Vulkan swapchain! Error code: {}",
             static_cast<int>(status))};
 
       SARA_DEBUG << "[VK] Initializing the swapchain images...\n";
-      images = list_swapchain_images(device.handle, handle);
+      images = list_swapchain_images(device_handle, handle);
 
       SARA_DEBUG << "[VK] Initializing the swapchain image format...\n";
       image_format = surface_format.format;
@@ -242,7 +243,7 @@ namespace DO::Kalpana::Vulkan {
         create_info.subresourceRange.baseArrayLayer = 0;
         create_info.subresourceRange.layerCount = 1;
 
-        const auto status = vkCreateImageView(device.handle, &create_info,
+        const auto status = vkCreateImageView(device_handle, &create_info,
                                               nullptr, &image_views[i]);
         if (status != VK_SUCCESS)
           throw std::runtime_error{
