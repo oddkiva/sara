@@ -15,8 +15,18 @@
 
 namespace DO::Kalpana::Vulkan {
 
-  struct FramebufferSequence
+  class FramebufferSequence
   {
+  public:
+    FramebufferSequence() = default;
+
+    FramebufferSequence(const FramebufferSequence&) = delete;
+
+    FramebufferSequence(FramebufferSequence&& other)
+    {
+      swap(other);
+    }
+
     FramebufferSequence(const Swapchain& swapchain,
                         const RenderPass& render_pass)
       : device{swapchain.device_handle}
@@ -49,7 +59,14 @@ namespace DO::Kalpana::Vulkan {
     {
       for (const auto fb : fbs)
         vkDestroyFramebuffer(device, fb, nullptr);
-      fbs.clear();
+    }
+
+    auto operator=(const FramebufferSequence&) -> FramebufferSequence& = delete;
+
+    auto operator=(FramebufferSequence&& other) -> FramebufferSequence&
+    {
+      swap(other);
+      return *this;
     }
 
     auto operator[](const int i) -> VkFramebuffer&
@@ -62,8 +79,14 @@ namespace DO::Kalpana::Vulkan {
       return fbs[i];
     }
 
+    auto swap(FramebufferSequence& other) -> void
+    {
+      std::swap(device, other.device);
+      fbs.swap(other.fbs);
+    }
+
   private:
-    VkDevice device;
+    VkDevice device = nullptr;
     std::vector<VkFramebuffer> fbs;
   };
 
