@@ -14,11 +14,18 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <drafts/Vulkan/CommandBuffer.hpp>
+#include <drafts/Vulkan/CommandPool.hpp>
 #include <drafts/Vulkan/Device.hpp>
+#include <drafts/Vulkan/Fence.hpp>
+#include <drafts/Vulkan/GraphicsPipeline.hpp>
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
 #include <drafts/Vulkan/Queue.hpp>
+#include <drafts/Vulkan/RenderPass.hpp>
+#include <drafts/Vulkan/Semaphore.hpp>
 #include <drafts/Vulkan/Surface.hpp>
+#include <drafts/Vulkan/Swapchain.hpp>
 
 
 namespace DO::Kalpana::Vulkan {
@@ -34,8 +41,6 @@ namespace DO::Kalpana::Vulkan {
 
     static constexpr auto default_width = 800;
     static constexpr auto default_height = 600;
-
-    class Configurator;
 
   public:
     VulkanGraphicsBackend(const std::string& app_name, const bool debug_vulkan)
@@ -143,6 +148,46 @@ namespace DO::Kalpana::Vulkan {
       _present_queue = svk::Queue{_device, present_queue_family_index};
     }
 
+    auto init_swapchain(GLFWwindow* window) -> void
+    {
+      _swapchain = Swapchain{_physical_device, _device, _surface, window};
+    }
+
+    auto init_render_pass() -> void
+    {
+      _render_pass.create_basic_render_pass(_device, _swapchain.image_format);
+    }
+
+    auto init_graphics_pipeline() -> void
+    {
+#if defined(__APPLE__)
+      static const auto vs_path =
+          "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
+      static const auto fs_path =
+          "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/frag.spv";
+#elif defined(_WIN32)
+      static const auto vs_path =
+          "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/vert.spv";
+      static const auto fs_path =
+          "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/frag.spv";
+#else
+      static const auto vs_path =
+          "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
+      static const auto fs_path =
+          "/home/david/GitLab/oddkiva/sara-build-Asan/frag.spv";
+#endif
+
+      _graphics_pipeline =
+          GraphicsPipeline::Builder{_device, _render_pass}
+              .vertex_shader_path(vs_path)
+              .fragment_shader_path(fs_path)
+              .vbo_data_format<Vertex>()
+              .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+              .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
+              .scissor_sizes(w, h)
+              .create();
+    }
+
   private:
     // The Vulkan instance.
     std::vector<const char*> _instance_extensions;
@@ -165,6 +210,20 @@ namespace DO::Kalpana::Vulkan {
     // N.B.: no need to destroy these objects.
     Shakti::Vulkan::Queue _graphics_queue;
     Shakti::Vulkan::Queue _present_queue;
+
+    // The abstraction of the present operations in the hardware
+    Swapchain _swapchain;
+    RenderPass _render_pass;
+
+    GraphicsPipeline _graphics_pipeline;
+
+    // The draw command machinery
+    Shakti::Vulkan::CommandPool _command_pool;
+    Shakti::Vulkan::CommandBufferSequence _command_buffers;
+
+    // Synchronization objects.
+    std::vector<Shakti::Vulkan::Fence> _fences;
+    std::vector<Shakti::Vulkan::Semaphore> _semaphores;
   };
 
 }  // namespace DO::Kalpana::Vulkan
