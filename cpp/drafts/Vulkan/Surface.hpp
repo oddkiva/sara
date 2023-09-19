@@ -41,6 +41,13 @@ namespace DO::Kalpana::Vulkan {
                                 fmt::ptr(_handle));
     }
 
+    Surface(const Surface&) = delete;
+
+    Surface(Surface&& other)
+    {
+      swap(other);
+    }
+
     ~Surface()
     {
       if (_handle == nullptr || _instance == nullptr)
@@ -51,6 +58,14 @@ namespace DO::Kalpana::Vulkan {
       vkDestroySurfaceKHR(_instance, _handle, nullptr);
     }
 
+    auto operator=(const Surface&) -> Surface& = delete;
+
+    auto operator=(Surface&& other) -> Surface&
+    {
+      swap(other);
+      return *this;
+    }
+
     operator VkSurfaceKHR&()
     {
       return _handle;
@@ -59,6 +74,12 @@ namespace DO::Kalpana::Vulkan {
     operator const VkSurfaceKHR&() const
     {
       return _handle;
+    }
+
+    auto swap(Surface& other) -> void
+    {
+      std::swap(_handle, other._handle);
+      std::swap(_instance, other._instance);
     }
 
     static auto list_required_instance_extensions_from_glfw()

@@ -27,9 +27,29 @@ namespace DO::Shakti::Vulkan {
 
     Device() = default;
 
+    Device(const Device&) = delete;
+
+    Device(Device&& other)
+    {
+      swap(other);
+    }
+
     ~Device()
     {
       vkDestroyDevice(handle, nullptr);
+    }
+
+    auto operator=(const Device&) -> Device& = delete;
+
+    auto operator=(Device&& other) -> Device&
+    {
+      swap(other);
+      return *this;
+    }
+
+    auto swap(Device& other) -> void
+    {
+      std::swap(handle, other.handle);
     }
 
     auto get_device_queue(const std::uint32_t queue_family_index) const

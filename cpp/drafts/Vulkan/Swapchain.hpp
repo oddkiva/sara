@@ -87,10 +87,17 @@ namespace DO::Kalpana::Vulkan {
               const Shakti::Vulkan::Device& device,  //
               const Surface& surface,                //
               GLFWwindow* window)
-      : device{device}
+      : device_handle{device.handle}
     {
       init_swapchain(physical_device, surface, window);
       init_image_views();
+    }
+
+    Swapchain(const Swapchain&) = delete;
+
+    Swapchain(Swapchain&& other)
+    {
+      swap(other);
     }
 
     ~Swapchain()
@@ -100,11 +107,31 @@ namespace DO::Kalpana::Vulkan {
 
       SARA_DEBUG << "[VK] Destroying swapchain image views...\n";
       for (const auto image_view : image_views)
-        vkDestroyImageView(device.handle, image_view, nullptr);
+        vkDestroyImageView(device_handle, image_view, nullptr);
 
       SARA_DEBUG << fmt::format("[VK] Destroying swapchain: {}...\n",
                                 fmt::ptr(handle));
-      vkDestroySwapchainKHR(device.handle, handle, nullptr);
+      vkDestroySwapchainKHR(device_handle, handle, nullptr);
+    }
+
+    auto operator=(const Swapchain&) -> Swapchain& = delete;
+
+    auto operator=(Swapchain&& other) -> Swapchain&
+    {
+      swap(other);
+      return *this;
+    }
+
+    auto swap(Swapchain& other) -> void
+    {
+      std::swap(device_handle, other.device_handle);
+      std::swap(handle, other.handle);
+
+      images.swap(other.images);
+      std::swap(image_format, other.image_format);
+      std::swap(extent, other.extent);
+
+      image_views.swap(other.image_views);
     }
 
   public: /* initialization methods */
@@ -280,7 +307,7 @@ namespace DO::Kalpana::Vulkan {
     }
 
   public: /* data members */
-    const Shakti::Vulkan::Device& device;
+    VkDevice device_handle = nullptr;
 
     //! @brief Swapchain object handle.
     VkSwapchainKHR handle = nullptr;
