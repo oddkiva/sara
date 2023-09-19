@@ -88,6 +88,13 @@ namespace DO::Shakti::Vulkan {
   public:
     Instance() = default;
 
+    Instance(const Instance&) = delete;
+
+    Instance(Instance&& other)
+    {
+      swap(other);
+    }
+
     ~Instance()
     {
       if (_debug_messenger != nullptr)
@@ -106,6 +113,14 @@ namespace DO::Shakti::Vulkan {
       }
     }
 
+    auto operator=(const Instance&) -> Instance& = delete;
+
+    auto operator=(Instance&& other) -> Instance&
+    {
+      swap(other);
+      return *this;
+    }
+
     operator VkInstance&()
     {
       return _instance;
@@ -114,6 +129,12 @@ namespace DO::Shakti::Vulkan {
     operator VkInstance() const
     {
       return _instance;
+    }
+
+    auto swap(Instance& other) -> void
+    {
+      std::swap(_instance, other._instance);
+      std::swap(_debug_messenger, other._debug_messenger);
     }
 
   private:

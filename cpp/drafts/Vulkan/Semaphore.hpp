@@ -15,7 +15,7 @@ namespace DO::Shakti::Vulkan {
       : _device{device}
     {
       auto create_info = VkSemaphoreCreateInfo{};
-      create_info = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+      create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
       const auto status =
           vkCreateSemaphore(device, &create_info, nullptr, &_handle);
 
