@@ -2,8 +2,10 @@
 
 #include <drafts/Vulkan/CommandPool.hpp>
 #include <drafts/Vulkan/Device.hpp>
+#include <drafts/Vulkan/Fence.hpp>
 #include <drafts/Vulkan/Framebuffer.hpp>
 #include <drafts/Vulkan/GraphicsPipeline.hpp>
+#include <drafts/Vulkan/Queue.hpp>
 #include <drafts/Vulkan/RenderPass.hpp>
 #include <drafts/Vulkan/Swapchain.hpp>
 
@@ -79,6 +81,11 @@ namespace DO::Shakti::Vulkan {
     auto operator[](const int i) const -> VkCommandBuffer
     {
       return _command_buffers[i];
+    }
+
+    auto reset(int i, VkCommandBufferResetFlags flags = 0) const -> void
+    {
+      vkResetCommandBuffer(_command_buffers[i], flags);
     }
 
   private:

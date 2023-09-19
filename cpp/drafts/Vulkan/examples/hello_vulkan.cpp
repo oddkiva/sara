@@ -1,18 +1,7 @@
-class VulkanBackend
-{
-private: /* initialization methods */
-private: /* cleanup methods related to the render pipeline. */
-  // auto cleanup_render_pipeline() -> void {
-  //   vkFreeCommandBuffers(_device, commandPool,
-  //                        static_cast<uint32_t>(commandBuffers.size()),
-  //                        commandBuffers.data());
-  //   vkDestroyPipeline(_device, _graphics_pipeline, nullptr);
-  //   vkDestroyPipelineLayout(_device, _pipeline_layout, nullptr);
-  //   vkDestroyRenderPass(_device, _render_pass, nullptr);
-  // }
+#include <vulkan/vulkan.h>
 
-private: /* cleanup methods related to the present operations */
-};
+#include <drafts/Vulkan/Fence.hpp>
+#include <drafts/Vulkan/Semaphore.hpp>
 
 
 class HelloTriangleApplication
@@ -26,100 +15,132 @@ public:
 
   auto draw_frame() -> void
   {
-    // The GPU is blocking the CPU at this point of the road:
-    // - The CPU is stopped at a fence
-    // - The first fence is closed
-    vkWaitForFences(_device, 1, &_in_flight_fences[current_frame], VK_TRUE,
-                    UINT64_MAX);
-    // - The first fence has opened just now.
+    // The number of images in-flight is the number of swapchain images.
+    // And there are as many fences as swapchain images.
+    //
+    // The pre-condition to start the render loop is to initialize our Vulkan
+    // application as follows:
+    // - every fence is reset to an unsignalled state. This is necessary to for
+    //   the synchronization machinery to start correctly.
+    // - the current frame index is 0;
 
-    // The CPU pursues its journey:
-    // - it acquires the next image ready for presentation.
-    auto image_index = std::uint32_t{};
-    auto result =
-        vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX,
-                              _image_available_semaphores[current_frame],
-                              VK_NULL_HANDLE, &image_index);
+    // Wait for the GPU signal that the current frame becomes available.
+    //
+    // The function call `vkQueueSubmit(...)` at the end of this `draw_frame`
+    // method uses this `_in_flight_fences[_current_frame]` fence.
+    vkWaitForFences(_device, 1, &_in_flight_fences[_current_frame], VK_TRUE,
+                    UINT64_MAX);
+    // This function call blocks.
+    //
+    // After that, the function unblocks and the program resumes its execution
+    // flow on the CPU side.
+
+    // Acquire the next image ready to be rendered.
+    auto index_of_next_image_to_render = std::uint32_t{};
+    const auto result = vkAcquireNextImageKHR(
+        _device, _swapchain,
+        UINT64_MAX,                                   // timeout in nanoseconds
+        _image_available_semaphores[_current_frame],  // semaphore to signal
+        VK_NULL_HANDLE,                               // fence to signal
+        &index_of_next_image_to_render);
+    // Sanity check.
+    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+      throw std::runtime_error("failed to acquire the next swapchain image!");
+    // Recreate the swapchain if the size of the window surface has changed.
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
-      // For example when the window is resized, we need to recreate the
-      // swapchain, the images of the swap chains must reinitialized with the
-      // new window extent.
       recreate_swapchain();
       return;
     }
-    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-      throw std::runtime_error("failed to acquire swapchain image!");
 
-    // The CPU encounters another fence controlled by the GPU:
-    // - The CPU is waiting from the GPU until the image becomes available
-    //   for rendering.
-    // - The second fence displays a red light
-    // - When rendering for the first time, the second fence is already
-    // opened,
-    //   so the CPU can pursue its journey.
-    if (_images_in_flight[image_index] != VK_NULL_HANDLE)
-      vkWaitForFences(_device, 1, &_images_in_flight[current_frame], VK_TRUE,
-                      UINT64_MAX);
-    _images_in_flight[image_index] = _in_flight_fences[current_frame];
-    // - The second fence has opened just now.
+    // Reset the signaled fence associated to the current frame to an unsignaled
+    // state. So that the GPU can reuse it to signal.
+    vkResetFences(_device, 1, &_in_flight_fences[_current_frame]);
 
-    // The CPU pursues its journey:
-    //
-    // - The CPU will now detail what to do at the drawing stage.
+    // Reset the command buffer associated to the current frame.
+    vkResetCommandBuffer(_command_buffers[_current_frame],
+                         /*VkCommandBufferResetFlagBits*/ 0);
+    // Record the draw command to be performed on this swapchain image.
+    recordCommandBuffer(_command_buffers[_current_frame],
+                        index_of_next_image_to_render);
+
+    // Submit the draw command to the graphics queue.
     auto submit_info = VkSubmitInfo{};
-    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    VkPipelineStageFlags wait_stages =
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    // - The CPU tells the GPU to ensure that it starts drawing only when the
-    // image becomes available.
-    submit_info.waitSemaphoreCount = 1;
-    submit_info.pWaitSemaphores = &_image_available_semaphores[current_frame];
-    submit_info.pWaitDstStageMask = &wait_stages;
-
-    // - The CPU tells the GPU to ensure that it notifies when the drawing is
-    //   finished and thus ready to present onto the screen.
-    submit_info.signalSemaphoreCount = 1;
-    submit_info.pSignalSemaphores = &_render_finished_semaphores[current_frame];
-
+    // Specify the draw command buffer to submit and the dependency order in
+    // which the draw command happens.
+    //
+    // A. The easy bit: reference the draw command buffer we want to submit.
     submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = &_command_buffers[image_index];
+    submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
 
-    // - The CPU now tells the GPU to make the first fence close the road.
-    vkResetFences(_device, 1, &_in_flight_fences[current_frame]);
+    // B. Synchronization details on the GPU side.
+    //
+    // 1. Wait to acquire the next image ready to be rendered.
+    //
+    //    When vkAcquireNextImageKHR completes, the semaphore
+    //    `_image_available_semaphores[current_frame]` is in a signaled state.
+    //
+    //    The draw command starts only after this semaphore is in a signaled
+    //    state and cannot start before.
+    const auto wait_semaphores = std::array{
+        _image_available_semaphores[currentFrame]  //
+    };
+    submitInfo.waitSemaphoreCount = wait_semaphores.size();
+    submitInfo.pWaitSemaphores = wait_semaphores.data();
 
-    // - The CPU submits a drawing command to the GPU (on the graphics
-    // queue).
-    if (vkQueueSubmit(_graphics_queue, 1, &submit_info,
-                      _in_flight_fences[current_frame]) != VK_SUCCESS)
-      throw std::runtime_error{"Failed to submit draw command buffer!"};
+    // 2. Ensure that drawing starts until the GPU has finished processing this
+    //    image. (Worry about this later).
+    VkPipelineStageFlags wait_stages[] = {
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    submitInfo.pWaitDstStageMask = waitStages;
 
-    // - The CPU details the screen presentation command.
+    // 3. Set the render finished semaphore in a signaled state, when the draw
+    //    command completes.
+    //    This is for the present command buffer.
+    const auto render_finished_semaphores = std::array{
+        _render_finished_semaphores[_current_frame]  //
+    };
+    submitInfo.signalSemaphoreCount = render_finished_semaphores.size();
+    submitInfo.pSignalSemaphores = render_finished_semaphores.data();
+
+    // 4. Submit the draw command.
+    //    - Notice the fence parameter passed to vkQueueSubmit.
+    //    - It has been reset by vkResetFences above so that it can be in
+    //      signaled state when the draw command completes.
+    //    - The first command vkWaitForFences at the beginning of the draw
+    //      command stalls the CPU execution flow, we need to re-render on this
+    //      swapchain image.
+    if (vkQueueSubmit(graphics_queue, 1, &submit_info,
+                      _in_flight_fences[_current_frame]) != VK_SUCCESS)
+      throw std::runtime_error("failed to submit draw command buffer!");
+
+    // Submit the present command to the present queue.
     auto present_info = VkPresentInfoKHR{};
+    present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    // Wait until the draw command finishes. It is signaled by its signal
+    // semaphore.
+    present_info.waitSemaphoreCount = render_finished_semaphores.size();
+    present_info.pWaitSemaphores = render_finished_semaphores.data();
+    // Specify which swapchain we are using.
+    VkSwapchainKHR swapchains[] = {_swapchain};
+    present_info.swapchainCount = 1;
+    present_info.pSwapchains = swapchains;
+    present_info.pImageIndices = &index_of_next_image_to_render;
+
+    result = vkQueuePresentKHR(present_queue, &present_info);
+    if (result != VK_SUCCESS)
+      throw std::runtime_error("failed to present swap chain image!");
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
+        framebufferResized)
     {
-      present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-      // - The CPU tells the GPU to trigger the frame display only when the
-      //   rendering is finished.
-      //
-      //   This completely specifies the dependency between the rendering
-      //   command and the screen display command.
-      present_info.waitSemaphoreCount = 1;
-      present_info.pWaitSemaphores =
-          &_render_finished_semaphores[current_frame];
-
-      present_info.swapchainCount = 1;
-      present_info.pSwapchains = &_swapchain;
-
-      present_info.pImageIndices = &image_index;
+      framebuffer_resized = false;
+      recreate_swapchain();
     }
 
-    // - The CPU submits another command to the GPU (on the present queue).
-    vkQueuePresentKHR(_present_queue, &present_info);
-
-    // Move to the next framebuffer.
-    current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
+    // Update the current frame to the next one for the next `draw_frame` call.
+    _current_frame = (_current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
   }
 
 private:

@@ -5,6 +5,7 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <limits>
 
 
 namespace DO::Shakti::Vulkan {
@@ -22,8 +23,8 @@ namespace DO::Shakti::Vulkan {
                                         &_handle);
       if (status != VK_SUCCESS)
         throw std::runtime_error{
-            fmt::format("[VK] Failed to create fence! Error code: {}",
-                        static_cast<int>(status))};
+          fmt::format("[VK] Failed to create fence! Error code: {}",
+                      static_cast<int>(status))};
     }
 
     Fence(const Fence&) = delete;
@@ -41,7 +42,13 @@ namespace DO::Shakti::Vulkan {
 
     auto operator=(const Fence&) -> Fence& = delete;
 
-    auto wait(const std::uint64_t timeout_ns) -> void
+    auto reset()
+    {
+      vkResetFences(_device, 1, &_handle);
+    }
+
+    auto wait(const std::uint64_t timeout_ns =
+              std::numeric_limits<std::uint64_t>::max()) -> void
     {
       vkWaitForFences(_device, 1, &_handle, VK_TRUE, timeout_ns);
     }

@@ -134,7 +134,7 @@ namespace DO::Kalpana::Vulkan {
       extent = choose_swap_extent(window, swapchain_support.capabilities);
 
       SARA_DEBUG << "[VK] Setting the swap image count...\n";
-      auto image_count = swapchain_support.capabilities.maxImageCount + 1;
+      auto image_count = swapchain_support.capabilities.minImageCount + 1;
       if (swapchain_support.capabilities.maxImageCount > 0 &&
           image_count > swapchain_support.capabilities.maxImageCount)
         image_count = swapchain_support.capabilities.maxImageCount;
