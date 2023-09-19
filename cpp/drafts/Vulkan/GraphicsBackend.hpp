@@ -19,7 +19,6 @@
 #include <drafts/Vulkan/Device.hpp>
 #include <drafts/Vulkan/Fence.hpp>
 #include <drafts/Vulkan/Framebuffer.hpp>
-#include <drafts/Vulkan/Geometry.hpp>
 #include <drafts/Vulkan/GraphicsPipeline.hpp>
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
