@@ -23,7 +23,9 @@ namespace DO::Kalpana::Vulkan {
   struct RenderPass
   {
     RenderPass() = default;
+
     RenderPass(const RenderPass&) = delete;
+
     RenderPass(RenderPass&& other)
     {
       swap(other);

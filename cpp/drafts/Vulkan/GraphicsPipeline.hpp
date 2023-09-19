@@ -38,10 +38,19 @@ namespace DO::Kalpana::Vulkan {
     GraphicsPipeline() = default;
 
     GraphicsPipeline(const GraphicsPipeline&) = delete;
-    GraphicsPipeline(GraphicsPipeline&&) = default;
+
+    GraphicsPipeline(GraphicsPipeline&& other)
+    {
+      swap(other);
+    }
 
     auto operator=(const GraphicsPipeline&) -> GraphicsPipeline& = delete;
-    auto operator=(GraphicsPipeline&&) -> GraphicsPipeline& = default;
+
+    auto operator=(GraphicsPipeline&& other) -> GraphicsPipeline&
+    {
+      swap(other);
+      return *this;
+    }
 
     ~GraphicsPipeline()
     {
@@ -74,6 +83,13 @@ namespace DO::Kalpana::Vulkan {
     operator VkPipeline() const
     {
       return _pipeline;
+    }
+
+    auto swap(GraphicsPipeline& other) -> void
+    {
+      std::swap(_device, other._device);
+      std::swap(_pipeline_layout, other._pipeline_layout);
+      std::swap(_pipeline, other._pipeline);
     }
 
   private:
