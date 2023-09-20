@@ -162,9 +162,9 @@ auto GraphicsBackend::init_graphics_pipeline(GLFWwindow* window) -> void
       "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/frag.spv";
 #else
   static const auto vs_path =
-      "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
+      "/home/david/GitLab/oddkiva/sara-build-Debug/vert.spv";
   static const auto fs_path =
-      "/home/david/GitLab/oddkiva/sara-build-Asan/frag.spv";
+      "/home/david/GitLab/oddkiva/sara-build-Debug/frag.spv";
 #endif
 
   auto w = int{};
