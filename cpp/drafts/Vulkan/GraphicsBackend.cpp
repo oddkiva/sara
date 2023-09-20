@@ -187,9 +187,12 @@ auto GraphicsBackend::init_command_pool_and_buffers() -> void
 
   const auto graphics_queue_family_index =
       find_graphics_queue_family_indices(_physical_device).front();
+  SARA_CHECK(graphics_queue_family_index);
 
   _graphics_cmd_pool =
       svk::CommandPool{_device.handle, graphics_queue_family_index};
+  SARA_DEBUG << fmt::format("[VK] Initialized command pool {}\n",
+                            fmt::ptr(_graphics_cmd_pool.handle));
 
   _graphics_cmd_bufs = svk::CommandBufferSequence{
       static_cast<std::uint32_t>(_swapchain.images.size()),  //

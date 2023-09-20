@@ -1,4 +1,3 @@
-#include "DO/Sara/Core/DebugUtilities.hpp"
 #define GLFW_INCLUDE_VULKAN
 
 #include <drafts/Vulkan/EasyGLFW.hpp>
@@ -27,10 +26,6 @@ struct SigintHandler
 
   static auto init() -> void
   {
-    // TODO: investigate the following:
-    // - This seems to happen on Apple platforms only.
-    // - Understand why after CTRL+C, when the program reruns a second time,
-    //   it cannot reconnect to IB Gateway again.
     sigint_handler.sa_handler = SigintHandler::stop_render_loop;
     sigemptyset(&sigint_handler.sa_mask);
     sigint_handler.sa_flags = 0;
