@@ -17,9 +17,7 @@ add_subdirectory(OpenCL)
 add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
 
-if (NOT WIN32)
-  add_subdirectory(Vulkan)
-endif ()
+add_subdirectory(Vulkan)
 
 add_subdirectory(NuScenes)
 

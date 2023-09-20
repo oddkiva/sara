@@ -26,3 +26,6 @@ leak:nvidia-opencl
 
 # HEIF/x265 leaking memory when calling x265_malloc apparently.
 leak:x265
+
+# Vulkan
+leak:vulkan
