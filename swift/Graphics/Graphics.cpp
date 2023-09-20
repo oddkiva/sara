@@ -9,56 +9,35 @@
 
 namespace sara = DO::Sara;
 
-auto GraphicsContext::initQApp() -> void*
+GraphicsContext::GraphicsContext()
 {
   qDebug() << "Instantiating QApplication...";
-  auto app = new QApplication{argc, argv};
-  return reinterpret_cast<void*>(app);
-}
+  _qApp = new QApplication{argc, argv};
 
-auto GraphicsContext::deinitQApp(void* app) -> void
-{
-  qDebug() << "Destroying QApplication...";
-  delete reinterpret_cast<QApplication*>(app);
-}
-
-auto GraphicsContext::initContext() -> void*
-{
   qDebug() << "Instantiating graphics context...";
-  auto context = new sara::GraphicsContext{};
-  context->makeCurrent();
-  return reinterpret_cast<void*>(context);
-}
+  _context = new sara::GraphicsContext{};
+  if (_context == nullptr)
+    throw std::runtime_error{"Failed to initialize graphics context!"};
+  _context->makeCurrent();
 
-auto GraphicsContext::deinitContext(void* context) -> void
-{
-  qDebug() << "Destroying graphics context...";
-  delete reinterpret_cast<sara::GraphicsContext*>(context);
-}
-
-auto GraphicsContext::initWidgetList() -> void*
-{
   qDebug() << "Instantiating widget list...";
-  auto widgetList = new sara::WidgetList{};
-
-  auto ctx = sara::GraphicsContext::current();
-  if (ctx != nullptr)
-    ctx->setWidgetList(widgetList);
-
-  return reinterpret_cast<void*>(widgetList);
+  _widgetList = new sara::WidgetList{};
+  _context->setWidgetList(_widgetList);
 }
 
-auto GraphicsContext::deinitWidgetList(void* widgetListObj) -> void
+GraphicsContext::~GraphicsContext()
 {
   qDebug() << "Destroying widget list...";
-  auto widgetList = reinterpret_cast<sara::WidgetList*>(widgetListObj);
-  delete widgetList;
+  delete _widgetList;
 
-  auto ctx = sara::GraphicsContext::current();
-  if (ctx)
-    ctx->setWidgetList(nullptr);
+  if (_context)
+    _context->setWidgetList(nullptr);
+  qDebug() << "Destroying graphics context...";
+  delete _context;
+
+  qDebug() << "Destroying QApplication...";
+  delete _qApp;
 }
-
 
 auto GraphicsContext::registerUserMainFunc(auto(*user_main)(void)->void) -> void
 {
@@ -73,14 +52,9 @@ auto GraphicsContext::registerUserMainFunc(auto(*user_main)(void)->void) -> void
   ctx->registerUserMain(user_main_func);
 }
 
-auto GraphicsContext::exec(void* appObj) -> void
+auto GraphicsContext::exec() -> void
 {
-  auto ctx = sara::GraphicsContext::current();
-  if (ctx != nullptr)
-    ctx->userThread().start();
-
-  if (appObj == nullptr)
-    return;
-  auto app = reinterpret_cast<QApplication*>(appObj);
-  app->exec();
+  if (_context != nullptr)
+    _context->userThread().start();
+  _qApp->exec();
 }
