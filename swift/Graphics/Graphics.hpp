@@ -1,10 +1,13 @@
 #pragma once
 
+
 class QApplication;
 
 namespace DO::Sara {
-class GraphicsContext;
-class WidgetList;
+
+  class GraphicsContext;
+  class WidgetList;
+
 }
 
 class GraphicsContext
