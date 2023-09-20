@@ -206,10 +206,7 @@ auto GraphicsBackend::init_synchronization_objects() -> void
   _render_fences.resize(_swapchain.images.size());
   // Initialize them with an unsignaled state.
   for (auto& fence : _render_fences)
-  {
     fence = svk::Fence{_device.handle};
-    fence.reset();
-  }
 
   _image_available_semaphores.resize(_swapchain.images.size());
   for (auto& s : _image_available_semaphores)

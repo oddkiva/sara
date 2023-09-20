@@ -14,4 +14,5 @@ target_link_libraries(
          DO::Sara::Core #
          fmt::fmt)
 
+add_subdirectory(examples)
 add_subdirectory(test)

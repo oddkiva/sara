@@ -68,7 +68,7 @@ namespace DO::Kalpana::Vulkan {
 
     auto init_synchronization_objects() -> void;
 
-  private:
+  protected:
     // The Vulkan instance.
     std::vector<const char*> _instance_extensions;
     std::vector<const char*> _validation_layers;
