@@ -85,7 +85,6 @@ namespace DO::Kalpana::Vulkan {
       fbs.swap(other.fbs);
     }
 
-  private:
     VkDevice device = nullptr;
     std::vector<VkFramebuffer> fbs;
   };

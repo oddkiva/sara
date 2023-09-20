@@ -30,6 +30,7 @@ GraphicsBackend::GraphicsBackend(GLFWwindow* window,
   init_device_and_queues();
   init_swapchain(window);
   init_render_pass();
+  init_framebuffers();
   init_graphics_pipeline(window);
   init_command_pool_and_buffers();
   init_synchronization_objects();

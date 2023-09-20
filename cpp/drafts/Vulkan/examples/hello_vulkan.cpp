@@ -1,3 +1,4 @@
+#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 
 #include <drafts/Vulkan/EasyGLFW.hpp>
@@ -66,7 +67,7 @@ public:
     //
     // The function call `vkQueueSubmit(...)` at the end of this `draw_frame`
     // method uses this `_in_flight_fences[_current_frame]` fence.
-    SARA_DEBUG << "Waiting for the render fence to signal...\n";
+    SARA_DEBUG << "[VK] Waiting for the render fence to signal...\n";
     _render_fences[_current_frame].wait(forever);
     // This function call blocks.
     //
@@ -74,7 +75,7 @@ public:
     // flow on the CPU side.
 
     // Acquire the next image ready to be rendered.
-    SARA_DEBUG << "Acquire the next image ready to be rendered...\n";
+    SARA_DEBUG << "[VK] Acquiring the next image ready to be rendered...\n";
     auto index_of_next_image_to_render = std::uint32_t{};
     result = vkAcquireNextImageKHR(  //
         _device.handle,              //
@@ -99,21 +100,22 @@ public:
 
     // Reset the signaled fence associated to the current frame to an unsignaled
     // state. So that the GPU can reuse it to signal.
-    SARA_DEBUG << "Resetting for the render fence...\n";
+    SARA_DEBUG << "[VK] Resetting for the render fence...\n";
     _render_fences[_current_frame].reset();
 
     // Reset the command buffer associated to the current frame.
-    SARA_DEBUG << "Resetting for the command buffer...\n";
+    SARA_DEBUG << "[VK] Resetting for the command buffer...\n";
     vkResetCommandBuffer(_graphics_cmd_bufs[_current_frame],
                          /*VkCommandBufferResetFlagBits*/ 0);
 
     // Record the draw command to be performed on this swapchain image.
+    SARA_CHECK(_framebuffers.fbs.size());
     record_graphics_command_buffer(
         _graphics_cmd_bufs[_current_frame],
         _framebuffers[index_of_next_image_to_render]);
 
     // Submit the draw command to the graphics queue.
-    SARA_DEBUG << "Specifying the graphics command submission...\n";
+    SARA_DEBUG << "[VK] Specifying the graphics command submission...\n";
     auto submit_info = VkSubmitInfo{};
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -212,6 +214,7 @@ public:
   auto record_graphics_command_buffer(VkCommandBuffer command_buffer,
                                       VkFramebuffer framebuffer) -> void
   {
+    SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
     auto begin_info = VkCommandBufferBeginInfo{};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     begin_info.flags = 0;
@@ -240,13 +243,32 @@ public:
       render_pass_begin_info.pClearValues = &clear_white_color;
     }
 
+    SARA_DEBUG << "[VK] Begin render pass...\n";
     vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info,
                          VK_SUBPASS_CONTENTS_INLINE);
     {
       vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                         _graphics_pipeline);
+
+      VkViewport viewport{};
+      viewport.x = 0.0f;
+      viewport.y = 0.0f;
+      viewport.width = static_cast<float>(_swapchain.extent.width);
+      viewport.height = static_cast<float>(_swapchain.extent.height);
+      viewport.minDepth = 0.0f;
+      viewport.maxDepth = 1.0f;
+      vkCmdSetViewport(command_buffer, 0, 1, &viewport);
+
+      VkRect2D scissor{};
+      scissor.offset = {0, 0};
+      scissor.extent = _swapchain.extent;
+      vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+
+
       vkCmdDraw(command_buffer, 3, 1, 0, 0);
     }
+
+    SARA_DEBUG << "[VK] End render pass...\n";
     vkCmdEndRenderPass(command_buffer);
 
     status = vkEndCommandBuffer(command_buffer);
