@@ -1,7 +1,7 @@
 import SaraGraphics
 
 
-public class GraphicsContext {
+public class GraphicsContextOld {
     private var _qApp: UnsafeMutableRawPointer
     private var _context: UnsafeMutableRawPointer
     private var _widgetList: UnsafeMutableRawPointer
@@ -29,9 +29,8 @@ public class GraphicsContext {
     }
 }
 
-
 func runGraphics(userMainFn: @escaping (@convention(c) () -> Void)) {
-    let ctx = GraphicsContext()
+    let ctx = GraphicsContextOld()
     ctx.registerUserMainFunc(userMainFn: userMainFn)
     ctx.exec()
 }

@@ -22,7 +22,7 @@ auto GraphicsContext::deinitQApp(void* app) -> void
   delete reinterpret_cast<QApplication*>(app);
 }
 
-auto GraphicsContext::initContext()-> void *
+auto GraphicsContext::initContext() -> void*
 {
   qDebug() << "Instantiating graphics context...";
   auto context = new sara::GraphicsContext{};
@@ -33,7 +33,7 @@ auto GraphicsContext::initContext()-> void *
 auto GraphicsContext::deinitContext(void* context) -> void
 {
   qDebug() << "Destroying graphics context...";
-  delete reinterpret_cast<sara::GraphicsContext *>(context);
+  delete reinterpret_cast<sara::GraphicsContext*>(context);
 }
 
 auto GraphicsContext::initWidgetList() -> void*
@@ -60,7 +60,7 @@ auto GraphicsContext::deinitWidgetList(void* widgetListObj) -> void
 }
 
 
-auto GraphicsContext_registerUserMainFunc(auto (*user_main)(void) -> void) -> void
+auto GraphicsContext::registerUserMainFunc(auto(*user_main)(void)->void) -> void
 {
   auto ctx = sara::GraphicsContext::current();
   if (ctx == nullptr)
@@ -73,7 +73,7 @@ auto GraphicsContext_registerUserMainFunc(auto (*user_main)(void) -> void) -> vo
   ctx->registerUserMain(user_main_func);
 }
 
-auto GraphicsContext_exec(void* appObj) -> void
+auto GraphicsContext::exec(void* appObj) -> void
 {
   auto ctx = sara::GraphicsContext::current();
   if (ctx != nullptr)

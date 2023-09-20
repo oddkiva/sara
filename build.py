@@ -36,7 +36,7 @@ if SYSTEM == "Linux":
     )
     SWIFTC_PATH = (
         pathlib.Path.home()
-        / "opt/swift-5.6.3-RELEASE-ubuntu20.04/usr/bin/swiftc"
+        / "opt/swift-5.9-RELEASE-ubuntu22.04/usr/bin/swiftc"
     )
 elif SYSTEM == "Darwin":
     NVIDIA_CODEC_SDK_ROOT_PATH = None
