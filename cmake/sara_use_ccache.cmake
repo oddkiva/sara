@@ -24,12 +24,12 @@ if (RULE_LAUNCH_COMPILE AND CMAKE_GENERATOR STREQUAL "Xcode")
   set(CMAKE_XCODE_ATTRIBUTE_LD         "${CMAKE_BINARY_DIR}/launch-c")
   set(CMAKE_XCODE_ATTRIBUTE_LDPLUSPLUS "${CMAKE_BINARY_DIR}/launch-cxx")
 elseif (${CMAKE_GENERATOR} MATCHES "Visual Studio" AND CCACHE_PROGRAM)
-  file(COPY_FILE ${CCACHE_PROGRAM} ${CMAKE_BINARY_DIR}/cl.exe ONLY_IF_DIFFERENT)
-
-  set(CMAKE_VS_GLOBALS
-      "CLToolExe=cl.exe"
-      "CLToolPath=${CMAKE_BINARY_DIR}"
-      "TrackFileAccess=false"
-      "UseMultiToolTask=true"
-      "DebugInformationFormat=OldStyle")
+  # file(COPY_FILE ${CCACHE_PROGRAM} ${CMAKE_BINARY_DIR}/cl.exe ONLY_IF_DIFFERENT)
+# 
+  # set(CMAKE_VS_GLOBALS
+  #     "CLToolExe=cl.exe"
+  #     "CLToolPath=${CMAKE_BINARY_DIR}"
+  #     "TrackFileAccess=false"
+  #     "UseMultiToolTask=true"
+  #     "DebugInformationFormat=OldStyle")
 endif ()

@@ -39,12 +39,12 @@ namespace DO::Sara {
     switch (region)
     {
       // clang-format off
-    case 0: r = 255; g = 0;   b = 0;   g += x; break;
-    case 1: r = 255; g = 255; b = 0;   r -= x; break;
-    case 2: r = 0;   g = 255; b = 0;   b += x; break;
-    case 3: r = 0;   g = 255; b = 255; g -= x; break;
-    case 4: r = 0;   g = 0;   b = 255; r += x; break;
-    case 5: r = 255; g = 0;   b = 255; b -= x; break;
+      case 0: r = 255; g = 0;   b = 0;   g += x; break;
+      case 1: r = 255; g = 255; b = 0;   r -= x; break;
+      case 2: r = 0;   g = 255; b = 0;   b += x; break;
+      case 3: r = 0;   g = 255; b = 255; g -= x; break;
+      case 4: r = 0;   g = 0;   b = 255; r += x; break;
+      case 5: r = 255; g = 0;   b = 255; b -= x; break;
       // clang-format on
     }
 
