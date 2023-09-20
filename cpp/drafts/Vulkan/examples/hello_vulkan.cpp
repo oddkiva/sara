@@ -250,6 +250,7 @@ public:
       vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                         _graphics_pipeline);
 
+#ifdef ALLOW_DYNAMIC_VIEWPORT_AND_SCISSOR_STATE
       VkViewport viewport{};
       viewport.x = 0.0f;
       viewport.y = 0.0f;
@@ -263,7 +264,7 @@ public:
       scissor.offset = {0, 0};
       scissor.extent = _swapchain.extent;
       vkCmdSetScissor(command_buffer, 0, 1, &scissor);
-
+#endif
 
       vkCmdDraw(command_buffer, 3, 1, 0, 0);
     }

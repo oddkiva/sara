@@ -175,7 +175,7 @@ auto GraphicsBackend::init_graphics_pipeline(GLFWwindow* window) -> void
       GraphicsPipeline::Builder{_device, _render_pass}
           .vertex_shader_path(vs_path)
           .fragment_shader_path(fs_path)
-          .vbo_data_format<Vertex>()
+          .vbo_data_built_in_vertex_shader()
           .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
           .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
           .scissor_sizes(w, h)
