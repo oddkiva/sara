@@ -8,6 +8,7 @@
 
 #include <atomic>
 #include <limits>
+#include <stdexcept>
 
 
 namespace glfw = DO::Kalpana::GLFW;
@@ -294,8 +295,15 @@ int main(int, char**)
   const auto app_name = "Vulkan Triangle";
   auto window = glfw::Window{300, 300, app_name};
 
-  auto triangle_renderer = VulkanTriangleRenderer{window, app_name};
-  triangle_renderer.loop(window);
+  try
+  {
+    auto triangle_renderer = VulkanTriangleRenderer{window, app_name};
+    triangle_renderer.loop(window);
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
 
   return 0;
 }
