@@ -336,8 +336,8 @@ int main(int, char**)
     namespace fs = std::filesystem;
 
     const auto program_dir_path = get_program_path().parent_path();
-    auto triangle_renderer =
-        VulkanTriangleRenderer{window, app_name, program_dir_path / "hello_vulkan"};
+    auto triangle_renderer = VulkanTriangleRenderer{
+        window, app_name, program_dir_path / "hello_vulkan_shaders", true};
     triangle_renderer.loop(window);
   }
   catch (std::exception& e)

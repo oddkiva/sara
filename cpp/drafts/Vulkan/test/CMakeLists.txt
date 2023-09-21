@@ -25,6 +25,5 @@ add_custom_command(
   COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/shader.frag -o
           $<TARGET_FILE_DIR:test_vulkan_shader>/test_shaders/frag.spv)
 
-add_dependencies(test_vulkan_shader compile_vulkan_test_shaders)
 add_dependencies(test_vulkan_graphics_pipeline test_vulkan_shader) 
 add_dependencies(test_vulkan_graphics_backend test_vulkan_shader)
