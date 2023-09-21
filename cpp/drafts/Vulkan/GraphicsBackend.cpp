@@ -20,9 +20,11 @@
 using namespace DO::Kalpana::Vulkan;
 
 
-GraphicsBackend::GraphicsBackend(GLFWwindow* window,
-                                 const std::string& app_name,
-                                 const bool debug_vulkan)
+GraphicsBackend::GraphicsBackend(
+    GLFWwindow* window, const std::string& app_name,
+    const std::filesystem::path& vertex_shader_path,
+    const std::filesystem::path& fragment_shader_path,  //
+    const bool debug_vulkan)
 {
   init_instance(app_name, debug_vulkan);
   init_surface(window);
@@ -31,7 +33,7 @@ GraphicsBackend::GraphicsBackend(GLFWwindow* window,
   init_swapchain(window);
   init_render_pass();
   init_framebuffers();
-  init_graphics_pipeline(window);
+  init_graphics_pipeline(window, vertex_shader_path, fragment_shader_path);
   init_command_pool_and_buffers();
   init_synchronization_objects();
 }
@@ -148,33 +150,19 @@ auto GraphicsBackend::init_render_pass() -> void
   _render_pass.create_basic_render_pass(_device, _swapchain.image_format);
 }
 
-auto GraphicsBackend::init_graphics_pipeline(GLFWwindow* window) -> void
+auto GraphicsBackend::init_graphics_pipeline(
+    GLFWwindow* window,  //
+    const std::filesystem::path& vertex_shader_path,
+    const std::filesystem::path& fragment_shader_path) -> void
 {
-#if defined(__APPLE__)
-  static const auto vs_path =
-      "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
-  static const auto fs_path =
-      "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/frag.spv";
-#elif defined(_WIN32)
-  static const auto vs_path =
-      "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/vert.spv";
-  static const auto fs_path =
-      "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/frag.spv";
-#else
-  static const auto vs_path =
-      "/home/david/GitLab/oddkiva/sara-build-Debug/vert.spv";
-  static const auto fs_path =
-      "/home/david/GitLab/oddkiva/sara-build-Debug/frag.spv";
-#endif
-
   auto w = int{};
   auto h = int{};
   glfwGetWindowSize(window, &w, &h);
 
   _graphics_pipeline =
       GraphicsPipeline::Builder{_device, _render_pass}
-          .vertex_shader_path(vs_path)
-          .fragment_shader_path(fs_path)
+          .vertex_shader_path(vertex_shader_path)
+          .fragment_shader_path(fragment_shader_path)
           .vbo_data_built_in_vertex_shader()
           .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
           .viewport_sizes(static_cast<float>(w), static_cast<float>(h))

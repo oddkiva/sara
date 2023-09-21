@@ -15,8 +15,9 @@ namespace glfw = DO::Kalpana::GLFW;
 namespace kvk = DO::Kalpana::Vulkan;
 
 
-struct SigintHandler
+struct SignalHandler
 {
+  static bool initialized;
   static std::atomic_bool ctrl_c_hit;
   static struct sigaction sigint_handler;
 
@@ -28,23 +29,55 @@ struct SigintHandler
 
   static auto init() -> void
   {
-    sigint_handler.sa_handler = SigintHandler::stop_render_loop;
+    if (initialized)
+      return;
+
+#if defined(_WIN32)
+    signal(SIGINT, stop_render_loop);
+    signal(SIGTERM, stop_render_loop);
+    signal(SIGABRT, stop_render_loop);
+#else
+    sigint_handler.sa_handler = SignalHandler::stop_render_loop;
     sigemptyset(&sigint_handler.sa_mask);
     sigint_handler.sa_flags = 0;
-    sigaction(SIGINT, &sigint_handler, NULL);
+    sigaction(SIGINT, &sigint_handler, nullptr);
+#endif
+
+    initialized = true;
   }
 };
 
-std::atomic_bool SigintHandler::ctrl_c_hit = false;
-struct sigaction SigintHandler::sigint_handler = {};
+bool SignalHandler::initialized = false;
+std::atomic_bool SignalHandler::ctrl_c_hit = false;
+#if !defined(_WIN32)
+struct sigaction SignalHandler::sigint_handler = {};
+#endif
+
+
+static auto get_program_path() -> std::filesystem::path
+{
+#ifdef _WIN32
+  static auto path = std::array<wchar_t, MAX_PATH>{};
+  GetModuleFileNameW(nullptr, path.data(), MAX_PATH);
+  return path.data();
+#else
+  static auto result = std::array<char, PATH_MAX>{};
+  ssize_t count = readlink("/proc/self/exe", result.data(), PATH_MAX);
+  return std::string(result.data(), (count > 0) ? count : 0);
+#endif
+}
 
 
 class VulkanTriangleRenderer : public kvk::GraphicsBackend
 {
 public:
   VulkanTriangleRenderer(GLFWwindow* window, const std::string& app_name,
+                         const std::filesystem::path& shader_dirpath,
                          const bool debug_vulkan = true)
-    : kvk::GraphicsBackend{window, app_name, debug_vulkan}
+    : kvk::GraphicsBackend{window, app_name,             //
+                           shader_dirpath / "vert.spv",  //
+                           shader_dirpath / "frag.spv",  //
+                           debug_vulkan}
   {
   }
 
@@ -139,14 +172,15 @@ public:
     const auto wait_semaphores = std::array{
         _image_available_semaphores[_current_frame]._handle  //
     };
-    submit_info.waitSemaphoreCount = wait_semaphores.size();
+    submit_info.waitSemaphoreCount =
+        static_cast<std::uint32_t>(wait_semaphores.size());
     submit_info.pWaitSemaphores = wait_semaphores.data();
 
     // 2. Ensure that drawing starts until the GPU has finished processing this
     //    image. (Worry about this later).
-    VkPipelineStageFlags wait_stages[] = {
+    static constexpr auto wait_stages = std::array<VkPipelineStageFlags, 1>{
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    submit_info.pWaitDstStageMask = wait_stages;
+    submit_info.pWaitDstStageMask = wait_stages.data();
 
     // 3. Set the render finished semaphore in a signaled state, when the draw
     //    command completes.
@@ -154,7 +188,8 @@ public:
     const auto render_finished_semaphores = std::array{
         _render_finished_semaphores[_current_frame]._handle  //
     };
-    submit_info.signalSemaphoreCount = render_finished_semaphores.size();
+    submit_info.signalSemaphoreCount =
+        static_cast<std::uint32_t>(render_finished_semaphores.size());
     submit_info.pSignalSemaphores = render_finished_semaphores.data();
 
     // 4. Submit the draw command.
@@ -173,7 +208,8 @@ public:
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     // Wait until the draw command finishes. It is signaled by its signal
     // semaphore.
-    present_info.waitSemaphoreCount = render_finished_semaphores.size();
+    present_info.waitSemaphoreCount =
+        static_cast<std::uint32_t>(render_finished_semaphores.size());
     present_info.pWaitSemaphores = render_finished_semaphores.data();
     // Specify which swapchain we are using.
     VkSwapchainKHR swapchains[] = {_swapchain.handle};
@@ -205,7 +241,7 @@ public:
       glfwPollEvents();
       draw_frame();
 
-      if (SigintHandler::ctrl_c_hit)
+      if (SignalHandler::ctrl_c_hit)
         break;
     }
 
@@ -287,7 +323,7 @@ private:
 
 int main(int, char**)
 {
-  SigintHandler::init();
+  SignalHandler::init();
 
   auto app = glfw::Application{};
   app.init_for_vulkan_rendering();
@@ -297,7 +333,11 @@ int main(int, char**)
 
   try
   {
-    auto triangle_renderer = VulkanTriangleRenderer{window, app_name};
+    namespace fs = std::filesystem;
+
+    const auto program_dir_path = get_program_path().parent_path();
+    auto triangle_renderer =
+        VulkanTriangleRenderer{window, app_name, program_dir_path / "hello_vulkan"};
     triangle_renderer.loop(window);
   }
   catch (std::exception& e)

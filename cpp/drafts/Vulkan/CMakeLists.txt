@@ -13,6 +13,7 @@ target_link_libraries(
          glfw #
          DO::Sara::Core #
          fmt::fmt)
+set_target_properties(EasyVulkan PROPERTIES FOLDER "DRAFTS")
 
 add_subdirectory(examples)
 add_subdirectory(test)
