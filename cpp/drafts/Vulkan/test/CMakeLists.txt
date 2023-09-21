@@ -16,15 +16,14 @@ foreach(file ${test_EasyVulkan_SOURCE_FILES})
 endforeach()
 
 # Compile the shader code first.
-add_custom_target(compile_test_vulkan_shaders)
 add_custom_command(
-  TARGET compile_test_vulkan_shaders
+  TARGET test_vulkan_shader 
+  PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:test_vulkan_shader>/test_shaders
   COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/shader.vert -o
-          ${CMAKE_BINARY_DIR}/vert.spv
+          $<TARGET_FILE_DIR:test_vulkan_shader>/test_shaders/vert.spv
   COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/shader.frag -o
-          ${CMAKE_BINARY_DIR}/frag.spv
-  COMMENT "Compiling test Vulkan/GLSL shaders")
-set_target_properties(compile_test_vulkan_shaders
-                      PROPERTIES FOLDER "Tests/Sara/Vulkan")
+          $<TARGET_FILE_DIR:test_vulkan_shader>/test_shaders/frag.spv)
 
-add_dependencies(test_vulkan_graphics_pipeline compile_test_vulkan_shaders)
+add_dependencies(test_vulkan_graphics_pipeline test_vulkan_shader) 
+add_dependencies(test_vulkan_graphics_backend test_vulkan_shader)

@@ -36,7 +36,7 @@ static constexpr auto compile_for_apple = false;
 #endif
 
 
-auto get_program_path() -> std::filesystem::path
+static auto get_program_path() -> std::filesystem::path
 {
 #ifdef _WIN32
   static auto path = std::array<wchar_t, MAX_PATH>{};
@@ -150,24 +150,10 @@ BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
   BOOST_CHECK_EQUAL(render_pass.dependencies.size(), 1u);
 
   // Now build the graphics pipeline.
-#if defined(__APPLE__)
-  static const auto vs_path =
-      "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
-  static const auto fs_path =
-      "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/frag.spv";
-#elif defined(_WIN32)
-  static const auto vs_path =
-      "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/vert.spv";
-  static const auto fs_path =
-      "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/frag.spv";
-#else
-  static const auto vs_path =
-      "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
-  static const auto fs_path =
-      "/home/david/GitLab/oddkiva/sara-build-Asan/frag.spv";
-#endif
-  std::cout << vs_path << std::endl;
-  std::cout << fs_path << std::endl;
+  const auto shader_dir_path =
+      get_program_path().parent_path() / "test_shaders";
+  const auto vshader_path = shader_dir_path / "vert.spv";
+  const auto fshader_path = shader_dir_path / "frag.spv";
 
   const auto [w, h] = window.sizes();
   SARA_CHECK(w);
@@ -175,8 +161,8 @@ BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
 
   const auto graphics_pipeline =
       kvk::GraphicsPipeline::Builder{device, render_pass}
-          .vertex_shader_path(vs_path)
-          .fragment_shader_path(fs_path)
+          .vertex_shader_path(vshader_path)
+          .fragment_shader_path(fshader_path)
           .vbo_data_format<Vertex>()
           .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
           .viewport_sizes(static_cast<float>(w), static_cast<float>(h))

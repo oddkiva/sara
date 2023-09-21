@@ -45,6 +45,8 @@ namespace DO::Kalpana::Vulkan {
 
   public:
     GraphicsBackend(GLFWwindow* window, const std::string& app_name,
+                    const std::filesystem::path& vertex_shader_path,
+                    const std::filesystem::path& fragment_shader_path,
                     const bool debug_vulkan);
 
     auto init_instance(const std::string& app_name, const bool debug_vulkan)
@@ -62,7 +64,11 @@ namespace DO::Kalpana::Vulkan {
 
     auto init_render_pass() -> void;
 
-    auto init_graphics_pipeline(GLFWwindow* window) -> void;
+    auto
+    init_graphics_pipeline(GLFWwindow* window,  //
+                           const std::filesystem::path& vertex_shader_path,
+                           const std::filesystem::path& fragment_shader_path)
+        -> void;
 
     auto init_command_pool_and_buffers() -> void;
 
