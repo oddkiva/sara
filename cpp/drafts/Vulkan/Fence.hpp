@@ -19,6 +19,8 @@ namespace DO::Shakti::Vulkan {
     {
       auto create_info = VkFenceCreateInfo{};
       create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+      // This is an important default.
+      // When we call `wait` method for the first time, this will not block,
       create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
       const auto status = vkCreateFence(_device, &create_info, nullptr,  //

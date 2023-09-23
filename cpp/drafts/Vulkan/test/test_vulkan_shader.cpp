@@ -133,19 +133,9 @@ BOOST_AUTO_TEST_CASE(test_vulkan_shader_module)
   BOOST_CHECK(device.handle != nullptr);
 
   // Now build the graphics pipeline.
-#if defined(__APPLE__)
   static const auto vs_path =
-      "/Users/oddkiva/GitLab/oddkiva/sara-build-Debug/vert.spv";
-#elif defined(_WIN32)
-  static const auto vs_path =
-      "C:/Users/David/Desktop/GitLab/sara-build-vs2022-static/vert.spv";
-#else
-  static const auto vs_path =
-      "/home/david/GitLab/oddkiva/sara-build-Asan/vert.spv";
-#endif
-  std::cout << vs_path << std::endl;
-
-  const auto vs = svk::read_spirv_compiled_shader(vs_path);
+      get_program_path().parent_path() / "test_shaders" / "vert.spv";
+  const auto vs = svk::read_spirv_compiled_shader(vs_path.string());
   BOOST_CHECK(!vs.empty());
 
   const auto vs_module = svk::ShaderModule{device.handle, vs};

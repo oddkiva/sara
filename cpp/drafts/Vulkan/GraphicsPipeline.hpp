@@ -140,6 +140,15 @@ namespace DO::Kalpana::Vulkan {
       return *this;
     }
 
+    auto vbo_data_built_in_vertex_shader() -> Builder&
+    {
+      vertex_input_info = VkPipelineVertexInputStateCreateInfo{};
+      vertex_input_info.sType =
+          VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
+      return *this;
+    }
+
     // 6. Data type of the 3D geometry.
     //    Here a list of triangles.
     auto input_assembly_topology(

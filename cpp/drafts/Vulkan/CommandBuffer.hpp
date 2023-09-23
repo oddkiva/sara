@@ -8,6 +8,7 @@
 #include <drafts/Vulkan/Queue.hpp>
 #include <drafts/Vulkan/RenderPass.hpp>
 #include <drafts/Vulkan/Swapchain.hpp>
+#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Shakti::Vulkan {
@@ -107,63 +108,3 @@ namespace DO::Shakti::Vulkan {
   };
 
 }  // namespace DO::Shakti::Vulkan
-
-
-namespace DO::Kalpana::Vulkan {
-
-  inline auto record_draw_graphics_command_buffers(
-      Shakti::Vulkan::CommandBufferSequence& command_buffers,
-      const RenderPass& render_pass,  //
-      const Swapchain& swapchain,     //
-      const FramebufferSequence& framebuffers,
-      const GraphicsPipeline& graphics_pipeline) -> void
-  {
-    for (auto i = 0u; i < command_buffers.size(); ++i)
-    {
-      auto begin_info = VkCommandBufferBeginInfo{};
-      begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-      begin_info.flags = 0;
-      begin_info.pInheritanceInfo = nullptr;
-
-      auto status = VkResult{};
-      status = vkBeginCommandBuffer(command_buffers[i], &begin_info);
-      if (status != VK_SUCCESS)
-        throw std::runtime_error{
-            fmt::format("[VK] Error: failed to begin recording command buffer! "
-                        "Error code: {}",
-                        static_cast<int>(status))};
-
-      auto render_pass_begin_info = VkRenderPassBeginInfo{};
-      {
-        render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        render_pass_begin_info.renderPass = render_pass.handle;
-        render_pass_begin_info.framebuffer = framebuffers[i];
-        render_pass_begin_info.renderArea.offset = {0, 0};
-        render_pass_begin_info.renderArea.extent = swapchain.extent;
-
-        render_pass_begin_info.clearValueCount = 1;
-
-        static constexpr auto clear_white_color =
-            VkClearValue{{{0.f, 0.f, 0.f, 1.f}}};
-        render_pass_begin_info.pClearValues = &clear_white_color;
-      }
-
-      vkCmdBeginRenderPass(command_buffers[i], &render_pass_begin_info,
-                           VK_SUBPASS_CONTENTS_INLINE);
-      {
-        vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
-                          graphics_pipeline);
-        vkCmdDraw(command_buffers[i], 3, 1, 0, 0);
-      }
-      vkCmdEndRenderPass(command_buffers[i]);
-
-      status = vkEndCommandBuffer(command_buffers[i]);
-      if (status != VK_SUCCESS)
-        throw std::runtime_error{fmt::format(
-            "[VK] Error: failed to end record command buffer {}! Error "
-            "code: {}",  //
-            i, static_cast<int>(status))};
-    }
-  }
-
-}  // namespace DO::Kalpana::Vulkan

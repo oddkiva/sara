@@ -9,21 +9,16 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "Vulkan/Graphics Pipeline"
+#define BOOST_TEST_MODULE "Vulkan/Fence"
 #define GLFW_INCLUDE_VULKAN
 
 #include <drafts/Vulkan/Device.hpp>
 #include <drafts/Vulkan/EasyGLFW.hpp>
-#include <drafts/Vulkan/GraphicsPipeline.hpp>
+#include <drafts/Vulkan/Fence.hpp>
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
-#include <drafts/Vulkan/RenderPass.hpp>
 #include <drafts/Vulkan/Surface.hpp>
-#include <drafts/Vulkan/Swapchain.hpp>
 
-#include <drafts/Vulkan/Geometry.hpp>
-
-#include <DO/Sara/Defines.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -36,21 +31,7 @@ static constexpr auto compile_for_apple = false;
 #endif
 
 
-static auto get_program_path() -> std::filesystem::path
-{
-#ifdef _WIN32
-  static auto path = std::array<wchar_t, MAX_PATH>{};
-  GetModuleFileNameW(nullptr, path.data(), MAX_PATH);
-  return path.data();
-#else
-  static auto result = std::array<char, PATH_MAX>{};
-  ssize_t count = readlink("/proc/self/exe", result.data(), PATH_MAX);
-  return std::string(result.data(), (count > 0) ? count : 0);
-#endif
-}
-
-
-BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
+BOOST_AUTO_TEST_CASE(test_fence)
 {
   namespace svk = DO::Shakti::Vulkan;
   namespace k = DO::Kalpana;
@@ -134,41 +115,12 @@ BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
                           .create();
   BOOST_CHECK(device.handle != nullptr);
 
-  // Now initialize the swapchain to present the rendering on screen.
-  const auto swapchain =
-      kvk::Swapchain{physical_device, device, surface, window};
-  BOOST_CHECK(swapchain.handle != nullptr);
 
-  // Now build the render pass.
-  auto render_pass = kvk::RenderPass{};
-  render_pass.create_basic_render_pass(device, swapchain.image_format);
-  BOOST_CHECK(render_pass.handle != nullptr);
-  BOOST_CHECK_EQUAL(render_pass.color_attachments.size(), 1u);
-  BOOST_CHECK_EQUAL(render_pass.color_attachment_refs.size(),
-                    render_pass.color_attachments.size());
-  BOOST_CHECK_EQUAL(render_pass.subpasses.size(), 1u);
-  BOOST_CHECK_EQUAL(render_pass.dependencies.size(), 1u);
-
-  // Now build the graphics pipeline.
-  const auto shader_dir_path =
-      get_program_path().parent_path() / "test_shaders";
-  const auto vshader_path = shader_dir_path / "vert.spv";
-  const auto fshader_path = shader_dir_path / "frag.spv";
-
-  const auto [w, h] = window.sizes();
-  SARA_CHECK(w);
-  SARA_CHECK(h);
-
-  const auto graphics_pipeline =
-      kvk::GraphicsPipeline::Builder{device, render_pass}
-          .vertex_shader_path(vshader_path)
-          .fragment_shader_path(fshader_path)
-          .vbo_data_format<Vertex>()
-          .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
-          .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
-          .scissor_sizes(w, h)
-          .create();
-  BOOST_CHECK(graphics_pipeline.device() != nullptr);
-  BOOST_CHECK(graphics_pipeline.pipeline_layout() != nullptr);
-  BOOST_CHECK(static_cast<VkPipeline>(graphics_pipeline) != nullptr);
+  // A created fence should be created in a signaled state.
+  auto fences = std::vector<svk::Fence>(10);
+  for (auto i = 0u; i < fences.size(); ++i)
+    fences[i] = svk::Fence{device.handle};
+  // The following call should be unblocked immediately.
+  for (auto& fence : fences)
+    fence.wait();
 }
