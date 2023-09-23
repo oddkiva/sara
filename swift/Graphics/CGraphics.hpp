@@ -1,23 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// Graphics context API.
-void* GraphicsContext_initQApp();
-void GraphicsContext_deinitQApp(void *qapp);
-
-void* GraphicsContext_initContext();
-void GraphicsContext_deinitContext(void* context);
-
-void* GraphicsContext_initWidgetList();
-void GraphicsContext_deinitWidgetList(void* widgetList);
-
-void GraphicsContext_registerUserMainFunc(void (*user_main)(void));
-void GraphicsContext_exec(void* appObj);
-
-
 // Window management API.
 void* createWindow(int w, int h);
 void closeWindow(void* window);
@@ -71,8 +53,3 @@ unsigned char* VideoStream_getFramePtr(void* stream);
 int VideoStream_getFrameWidth(void* stream);
 int VideoStream_getFrameHeight(void* stream);
 int VideoStream_readFrame(void* stream);
-
-
-#ifdef __cplusplus
-}
-#endif

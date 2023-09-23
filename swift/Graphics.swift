@@ -1,37 +1,9 @@
 import SaraGraphics
 
 
-public class GraphicsContextOld {
-    private var _qApp: UnsafeMutableRawPointer
-    private var _context: UnsafeMutableRawPointer
-    private var _widgetList: UnsafeMutableRawPointer
-
-    init() {
-        print("Init Graphics Context...")
-        self._qApp = GraphicsContext_initQApp()
-        self._context = GraphicsContext_initContext()
-        self._widgetList = GraphicsContext_initWidgetList()
-    }
-
-    func registerUserMainFunc(userMainFn: @escaping (@convention(c) () -> Void)) {
-        GraphicsContext_registerUserMainFunc(userMainFn)
-    }
-
-    func exec() {
-        GraphicsContext_exec(self._qApp)
-    }
-
-    deinit {
-        print("Deinit Graphics Context...")
-        GraphicsContext_deinitWidgetList(self._widgetList)
-        GraphicsContext_deinitContext(self._context)
-        GraphicsContext_deinitQApp(self._qApp)
-    }
-}
-
 func runGraphics(userMainFn: @escaping (@convention(c) () -> Void)) {
-    let ctx = GraphicsContextOld()
-    ctx.registerUserMainFunc(userMainFn: userMainFn)
+    var ctx = GraphicsContext()
+    ctx.registerUserMainFunc(userMainFn)
     ctx.exec()
 }
 

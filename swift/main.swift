@@ -38,9 +38,9 @@ func testDrawFunctions() {
 
 func testImageRead() {
 #if os(macOS)
-    let imageFilepath = "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+    let imageFilepath = "/Users/oddkiva/GitLab/oddkiva/sara/data/sunflowerField.jpg"
 #else
-    let imageFilepath = "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
+    let imageFilepath = "/home/david/GitLab/oddkiva/sara/data/sunflowerField.jpg"
 #endif
     let image = imread(filePath: imageFilepath)
 
@@ -65,7 +65,7 @@ func testImageRead() {
 
 func testVideoRead() {
 #if os(macOS)
-    let videoFilePath = "/Users/david/Desktop/Datasets/videos/sample10.mp4"
+    let videoFilePath = "/Users/oddkiva/Desktop/datasets/oddkiva/brockwell-park/brockwell-park-varying-focal-length.mov"
 #else
     let videoFilePath = "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.mp4"
 #endif
