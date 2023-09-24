@@ -36,20 +36,6 @@ static constexpr auto compile_for_apple = false;
 #endif
 
 
-static auto get_program_path() -> std::filesystem::path
-{
-#ifdef _WIN32
-  static auto path = std::array<wchar_t, MAX_PATH>{};
-  GetModuleFileNameW(nullptr, path.data(), MAX_PATH);
-  return path.data();
-#else
-  static auto result = std::array<char, PATH_MAX>{};
-  ssize_t count = readlink("/proc/self/exe", result.data(), PATH_MAX);
-  return std::string(result.data(), (count > 0) ? count : 0);
-#endif
-}
-
-
 BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
 {
   namespace svk = DO::Shakti::Vulkan;
@@ -150,8 +136,11 @@ BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
   BOOST_CHECK_EQUAL(render_pass.dependencies.size(), 1u);
 
   // Now build the graphics pipeline.
+  namespace fs = std::filesystem;
   const auto shader_dir_path =
-      get_program_path().parent_path() / "test_shaders";
+      fs::path(boost::unit_test::framework::master_test_suite().argv[0])
+          .parent_path() /
+      "test_shaders";
   const auto vshader_path = shader_dir_path / "vert.spv";
   const auto fshader_path = shader_dir_path / "frag.spv";
 
