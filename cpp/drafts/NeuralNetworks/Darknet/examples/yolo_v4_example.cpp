@@ -112,7 +112,7 @@ auto test_on_image(int argc, char** argv) -> void
 
 auto test_on_video(int argc, char** argv) -> void
 {
-#ifndef __APPLE__
+#if defined(_OPENMP)
   const auto num_threads = omp_get_max_threads();
   omp_set_num_threads(num_threads);
   Eigen::setNbThreads(num_threads);

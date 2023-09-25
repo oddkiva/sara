@@ -24,7 +24,9 @@
 #include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/GaussianOctaveComputer.hpp>
 #include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
 
-#include <omp.h>
+#if defined(_OPENMP)
+#  include <omp.h>
+#endif
 
 #include <atomic>
 #include <cstdio>
@@ -77,7 +79,9 @@ int sara_graphics_main(int argc, char** argv)
   //   return 1;
   // }
 
+#if defined(_OPENMP)
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
 #ifndef _WIN32
   struct sigaction sig_int_handler;
