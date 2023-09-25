@@ -27,7 +27,7 @@ SYSTEM = platform.system()
 
 # Third-party libraries that makes Sara faster, stronger, cooler...
 if SYSTEM == "Linux":
-    HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-15.0.0-x86-64-linux"
+    HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-16.0.0-x86-64-linux"
     ONNXRUNTIME_ROOT_PATH = (
         pathlib.Path.home() / "opt/onnxruntime-linux-x64-gpu-1.14.0"
     )
