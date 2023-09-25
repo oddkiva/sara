@@ -17,9 +17,17 @@ namespace DO::Shakti::Vulkan {
   public:
     DeviceMemory() = default;
 
+    DeviceMemory(const DeviceMemory&) = delete;
+
+    DeviceMemory(DeviceMemory&& other)
+    {
+      swap(other);
+    }
+
     DeviceMemory(VkDevice device, const VkDeviceSize size,
                  const std::uint32_t memory_type_index)
       : _device{device}
+      , _size{size}
     {
       auto allocate_info = VkMemoryAllocateInfo{};
       allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -39,6 +47,19 @@ namespace DO::Shakti::Vulkan {
         return;
 
       vkFreeMemory(_device, _handle, nullptr);
+    }
+
+    auto operator=(const DeviceMemory&) -> DeviceMemory& = delete;
+
+    auto operator=(DeviceMemory&& other) -> DeviceMemory&
+    {
+      swap(other);
+      return *this;
+    }
+
+    auto size() const -> VkDeviceSize
+    {
+      return _size;
     }
 
     template <typename T>
@@ -67,9 +88,17 @@ namespace DO::Shakti::Vulkan {
       return _handle;
     }
 
+    auto swap(DeviceMemory& other) -> void
+    {
+      std::swap(_device, other._device);
+      std::swap(_handle, other._handle);
+      std::swap(_size, other._size);
+    }
+
   private:
     VkDevice _device = nullptr;
     VkDeviceMemory _handle = nullptr;
+    VkDeviceSize _size = 0;
   };
 
 }  // namespace DO::Shakti::Vulkan
