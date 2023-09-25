@@ -13,12 +13,6 @@ struct JpegImageReader::Impl
   DO::Sara::JpegFileReader _internal;
 };
 
-JpegImageReader::JpegImageReader(const JpegImageReader& other)
-  : _fp{other._fp}
-  , _impl{new Impl{other._fp}}
-{
-}
-
 JpegImageReader::JpegImageReader(const std::string& filepath)
   : _fp{filepath}
   , _impl{new Impl{filepath}}

@@ -7,9 +7,7 @@ public class VideoStream {
   var frame: ImageView<UInt8>
 
   init(filePath: String) {
-    print("Initing...")
     self.impl = VideoStreamImpl(std.string(filePath))
-    print("Initing done...")
     self.frame = ImageView<UInt8>()
 
     let w = Int(impl.frameWidth())

@@ -34,11 +34,12 @@ if SYSTEM == "Linux":
     NVIDIA_CODEC_SDK_ROOT_PATH = (
         pathlib.Path.home() / "opt/Video_Codec_SDK_12.1.14"
     )
-    SWIFT_TOOLCHAIN_DIR_PATH = (
+    SWIFT_TOOLCHAIN_DIR = (
         pathlib.Path.home()
-        / "opt/swift-5.9-RELEASE-ubuntu22.04/usr/bin"
+        / "opt/swift-5.9-RELEASE-ubuntu22.04"
     )
-    SWIFTC_PATH = SWIFT_TOOLCHAIN_DIR_PATH / "swiftc"
+    SWIFT_TOOLCHAIN_BIN_DIR = SWIFT_TOOLCHAIN_DIR / "usr/bin"
+    SWIFTC_PATH = SWIFT_TOOLCHAIN_BIN_DIR / "swiftc"
 elif SYSTEM == "Darwin":
     NVIDIA_CODEC_SDK_ROOT_PATH = None
     SWIFT_PATH = subprocess.check_output(["which", "swift"])
@@ -99,11 +100,14 @@ def generate_project(
         cmake_options.append("-D CMAKE_BUILD_TYPE={}".format(build_type))
 
     if SYSTEM == "Linux":
-        cxx_compiler = SWIFT_TOOLCHAIN_DIR_PATH / "clang++"
-        c_compiler = SWIFT_TOOLCHAIN_DIR_PATH / "clang"
+        cxx_compiler = SWIFT_TOOLCHAIN_BIN_DIR / "clang++"
+        c_compiler = SWIFT_TOOLCHAIN_BIN_DIR / "clang"
+        swift_bridging_include_dirs = SWIFT_TOOLCHAIN_DIR / "usr/include"
         cmake_options.append("-D CMAKE_CXX_COMPILER={}".format(cxx_compiler))
         cmake_options.append("-D CMAKE_C_COMPILER={}".format(c_compiler))
         cmake_options.append("-D CMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld")
+        cmake_options.append("-D SWIFT_BRIDGING_INCLUDE_DIR={}".format(
+            swift_bridging_include_dirs))
 
     # Support for YouCompleteMe auto-completions
     cmake_options.append("-D CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON")

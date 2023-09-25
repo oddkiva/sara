@@ -12,10 +12,6 @@ class JpegImageReader
 public:
   JpegImageReader() = default;
 
-  JpegImageReader(const JpegImageReader&);
-
-  ~JpegImageReader() = default;
-
   explicit JpegImageReader(const std::string& filepath);
 
   auto imageSizes() const -> std::array<int, 3>;
