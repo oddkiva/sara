@@ -286,7 +286,7 @@ namespace DO::Sara {
     auto D = std::complex<T>{};
     auto E = std::complex<T>{};
 
-    if (abs(R) > 0)
+    if (std::abs(R) > 0)
     {
       D = std::sqrt(3 * a3 * a3 / 4 - R * R - 2 * a2 +
                     (4 * a3 * a2 - 8 * a1 - a3 * a3 * a3) / (4 * R));

@@ -1,4 +1,8 @@
 module SaraGraphics {
-  header "CGraphics.hpp"
+  header "Graphics.hpp"
+  header "ImageIO.hpp"
+  header "VideoIO.hpp"
+  requires cplusplus
+
   export *
 }

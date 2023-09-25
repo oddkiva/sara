@@ -20,14 +20,6 @@
 #include <boost/test/unit_test.hpp>
 
 
-static constexpr auto debug_vulkan_instance = true;
-#if defined(__APPLE__)
-static constexpr auto compile_for_apple = true;
-#else
-static constexpr auto compile_for_apple = false;
-#endif
-
-
 BOOST_AUTO_TEST_CASE(test_graphics_backend)
 {
   namespace glfw = DO::Kalpana::GLFW;
@@ -40,12 +32,16 @@ BOOST_AUTO_TEST_CASE(test_graphics_backend)
   const auto window = glfw::Window(100, 100, "Vulkan");
 
   namespace fs = std::filesystem;
-  const auto shader_dir_path =
-      fs::path(boost::unit_test::framework::master_test_suite().argv[0])
-          .parent_path() /
-      "test_shaders";
-  const auto vshader_path = shader_dir_path / "vert.spv";
-  const auto fshader_path = shader_dir_path / "frag.spv";
-  auto vk_backend = kvk::GraphicsBackend{window, "GLFW-Vulkan App",
-                                         vshader_path, fshader_path, true};
+  static const auto program_path =
+      fs::path(boost::unit_test::framework::master_test_suite().argv[0]);
+  static const auto shader_dir_path =
+      program_path.parent_path() / "test_shaders";
+  static const auto vshader_path = shader_dir_path / "vert.spv";
+  static const auto fshader_path = shader_dir_path / "frag.spv";
+
+  static constexpr auto with_vulkan_logging = true;
+
+  const auto vk_backend =
+      kvk::GraphicsBackend{window, "GLFW-Vulkan App", vshader_path,
+                           fshader_path, with_vulkan_logging};
 }
