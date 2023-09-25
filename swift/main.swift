@@ -27,12 +27,12 @@ func testDrawFunctions() {
     typealias Point = (x: Int32, y: Int32)
     let p1: Point = (10, 10)
     let p2: Point = (200, 200)
-    var color = rgb(UInt8.random(in: 0...UInt8.max),
+    let color = rgb(UInt8.random(in: 0...UInt8.max),
                     UInt8.random(in: 0...UInt8.max),
                     UInt8.random(in: 0...UInt8.max))
     let penWidth: Int32 = 10
 
-    drawLine(p1.x, p1.y, p2.x, p2.y, &color, penWidth)
+    drawLine(p1.x, p1.y, p2.x, p2.y, color, penWidth)
     getKey()
 }
 
@@ -52,8 +52,8 @@ func testImageRead() {
     for y in 0..<h / 8 {
         for x in 0..<w / 8 {
             let (r, g, b) = image.rgb(Int(x), Int(y))
-            var color = rgb(r, g, b)
-            drawPoint(x, y, &color)
+            let color = rgb(r, g, b)
+            drawPoint(x, y, color)
         }
     }
     getKey()

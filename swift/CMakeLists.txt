@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.16)
-
 project(Sara-Swift LANGUAGES CXX Swift)
 
 if("${CMAKE_Swift_COMPILER_VERSION}" VERSION_LESS 5.9)
@@ -14,6 +12,8 @@ include(sara_initialize_swift)
 # The following provides the function for creating the Swift to C++ bridging
 # header
 include(sara_add_swift)
+
+set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(Core)
 add_subdirectory(Graphics)

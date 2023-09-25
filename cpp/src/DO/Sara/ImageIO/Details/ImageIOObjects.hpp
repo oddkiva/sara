@@ -82,7 +82,7 @@ namespace DO { namespace Sara {
 
 
 // Jpeg I/O.
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   //! @addtogroup ImageIO
   //! @{
@@ -111,7 +111,7 @@ namespace DO { namespace Sara {
 
     JpegFileReader(const JpegFileReader&) = delete;
 
-    JpegFileReader(const char* filepath);
+    explicit JpegFileReader(const char* filepath);
 
     JpegFileReader& operator=(const JpegFileReader&) = delete;
 
@@ -152,7 +152,7 @@ namespace DO { namespace Sara {
 
   //! @}
 
-}}  // namespace DO::Sara
+}  // namespace DO::Sara
 
 
 // PNG I/O.
