@@ -1,4 +1,4 @@
-#include "CGraphics.hpp"
+#include "Graphics.hpp"
 
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsContext.hpp>
 #include <DO/Sara/ImageIO/Details/ImageIOObjects.hpp>
@@ -9,62 +9,38 @@
 
 namespace sara = DO::Sara;
 
-int argc = 0;
-char** argv = nullptr;
 
-
-auto GraphicsContext_initQApp() -> void*
+GraphicsContext::GraphicsContext()
 {
   qDebug() << "Instantiating QApplication...";
-  auto app = new QApplication{argc, argv};
-  return reinterpret_cast<void*>(app);
-}
+  _qApp = new QApplication{argc, argv};
 
-auto GraphicsContext_deinitQApp(void * app) -> void
-{
-  qDebug() << "Destroying QApplication...";
-  delete reinterpret_cast<QApplication*>(app);
-}
-
-void* GraphicsContext_initContext()
-{
   qDebug() << "Instantiating graphics context...";
-  auto context = new sara::GraphicsContext;
-  context->makeCurrent();
-  return reinterpret_cast<void*>(context);
-}
+  _context = new sara::GraphicsContext{};
+  if (_context == nullptr)
+    throw std::runtime_error{"Failed to initialize graphics context!"};
+  _context->makeCurrent();
 
-void GraphicsContext_deinitContext(void* context)
-{
-  qDebug() << "Destroying graphics context...";
-  delete reinterpret_cast<sara::GraphicsContext *>(context);
-}
-
-auto GraphicsContext_initWidgetList() -> void*
-{
   qDebug() << "Instantiating widget list...";
-  auto widgetList = new sara::WidgetList;
-
-  auto ctx = sara::GraphicsContext::current();
-  if (ctx != nullptr)
-    ctx->setWidgetList(widgetList);
-
-  return reinterpret_cast<void*>(widgetList);
+  _widgetList = new sara::WidgetList{};
+  _context->setWidgetList(_widgetList);
 }
 
-auto GraphicsContext_deinitWidgetList(void* widgetListObj) -> void
+GraphicsContext::~GraphicsContext()
 {
   qDebug() << "Destroying widget list...";
-  auto widgetList = reinterpret_cast<sara::WidgetList*>(widgetListObj);
-  delete widgetList;
+  delete _widgetList;
 
-  auto ctx = sara::GraphicsContext::current();
-  if (ctx)
-    ctx->setWidgetList(nullptr);
+  if (_context)
+    _context->setWidgetList(nullptr);
+  qDebug() << "Destroying graphics context...";
+  delete _context;
+
+  qDebug() << "Destroying QApplication...";
+  delete _qApp;
 }
 
-
-auto GraphicsContext_registerUserMainFunc(void (*user_main)(void)) -> void
+auto GraphicsContext::registerUserMainFunc(auto(*user_main)(void)->void) -> void
 {
   auto ctx = sara::GraphicsContext::current();
   if (ctx == nullptr)
@@ -77,16 +53,11 @@ auto GraphicsContext_registerUserMainFunc(void (*user_main)(void)) -> void
   ctx->registerUserMain(user_main_func);
 }
 
-auto GraphicsContext_exec(void* appObj) -> void
+auto GraphicsContext::exec() -> void
 {
-  auto ctx = sara::GraphicsContext::current();
-  if (ctx != nullptr)
-    ctx->userThread().start();
-
-  if (appObj == nullptr)
-    return;
-  auto app = reinterpret_cast<QApplication*>(appObj);
-  app->exec();
+  if (_context != nullptr)
+    _context->userThread().start();
+  _qApp->exec();
 }
 
 
@@ -119,25 +90,24 @@ auto closeWindow(void* w) -> void
 void resizeWindow(int width, int height)
 {
   QMetaObject::invokeMethod(activeWindow(), "resizeScreen",
-                            Qt::BlockingQueuedConnection,
-                            Q_ARG(int, width), Q_ARG(int, height));
+                            Qt::BlockingQueuedConnection, Q_ARG(int, width),
+                            Q_ARG(int, height));
 }
 
 
-auto drawPoint(int x, int y, const Color* c) -> void
+auto drawPoint(int x, int y, const Color& c) -> void
 {
-  QMetaObject::invokeMethod(
-      activeWindow(), "drawPoint", Qt::QueuedConnection, Q_ARG(int, x),
-      Q_ARG(int, y), Q_ARG(const QColor&, QColor(c->r, c->g, c->b, c->a)));
+  QMetaObject::invokeMethod(activeWindow(), "drawPoint", Qt::QueuedConnection,
+                            Q_ARG(int, x), Q_ARG(int, y),
+                            Q_ARG(const QColor&, QColor(c.r, c.g, c.b, c.a)));
 }
 
-void drawLine(int x1, int y1, int x2, int y2, const Color* c, int penWidth)
+void drawLine(int x1, int y1, int x2, int y2, const Color& c, int penWidth)
 {
   QMetaObject::invokeMethod(
       activeWindow(), "drawLine", Qt::QueuedConnection, Q_ARG(int, x1),
       Q_ARG(int, y1), Q_ARG(int, x2), Q_ARG(int, y2),
-      Q_ARG(const QColor&, QColor(c->r, c->g, c->b, c->a)),
-      Q_ARG(int, penWidth));
+      Q_ARG(const QColor&, QColor(c.r, c.g, c.b, c.a)), Q_ARG(int, penWidth));
 }
 
 void drawRect(int x, int y, int w, int h, int r, int g, int b, int penWidth)
@@ -184,12 +154,13 @@ void drawArrow(int x1, int y1, int x2, int y2, int r, int g, int b,
       Q_ARG(int, arrowHeight), Q_ARG(int, style), Q_ARG(int, width));
 }
 
-void drawText(int x, int y, const char* s, int r, int g, int b, int fontSize,
-              double alpha, char italic, char bold, char underlined)
+void drawText(int x, int y, const std::string& s, int r, int g, int b,
+              int fontSize, double alpha, char italic, char bold,
+              char underlined)
 {
   QMetaObject::invokeMethod(
       activeWindow(), "drawText", Qt::QueuedConnection, Q_ARG(int, x),
-      Q_ARG(int, y), Q_ARG(const QString&, QString{s}),
+      Q_ARG(int, y), Q_ARG(const QString&, QString::fromStdString(s)),
       Q_ARG(const QColor&, QColor(r, g, b)), Q_ARG(int, fontSize),
       Q_ARG(qreal, qreal(alpha)), Q_ARG(bool, italic), Q_ARG(bool, bold),
       Q_ARG(bool, underlined));
@@ -244,66 +215,4 @@ void setAntialiasing(bool on)
   auto ctx = sara::GraphicsContext::current();
   QMetaObject::invokeMethod(ctx->activeWindow(), "setAntialiasing",
                             Qt::QueuedConnection, Q_ARG(bool, on));
-}
-
-
-auto JpegImageReader_init(const char* filepath) -> void*
-{
-  auto reader = new sara::JpegFileReader(filepath);
-  return reinterpret_cast<void*>(reader);
-}
-
-auto JpegImageReader_deinit(void* reader) -> void
-{
-  delete reinterpret_cast<sara::JpegFileReader*>(reader);
-}
-
-auto JpegImageReader_imageSizes(void* reader, int* w, int* h, int* c) -> void
-{
-  auto r = reinterpret_cast<sara::JpegFileReader*>(reader);
-  std::tie(*w, *h, *c) = r->image_sizes();
-}
-
-auto JpegImageReader_readImageData(void* reader, unsigned char* dataPtr) -> void
-{
-  auto r = reinterpret_cast<sara::JpegFileReader*>(reader);
-  r->read(dataPtr);
-}
-
-
-auto VideoStream_init(const char* filepath) -> void*
-{
-  auto reader = new sara::VideoStream{filepath};
-  return reinterpret_cast<void*>(reader);
-}
-
-auto VideoStream_deinit(void* stream) -> void
-{
-  delete reinterpret_cast<sara::VideoStream*>(stream);
-}
-
-auto VideoStream_getFramePtr(void* stream) -> unsigned char *
-{
-  auto vstream = reinterpret_cast<sara::VideoStream *>(stream);
-  auto frame = vstream->frame();
-  auto framePtr = reinterpret_cast<unsigned char*>(frame.data());
-  return framePtr;
-}
-
-auto VideoStream_getFrameWidth(void* stream) -> int
-{
-  auto vstream = reinterpret_cast<sara::VideoStream *>(stream);
-  return vstream->width();
-}
-
-auto VideoStream_getFrameHeight(void* stream) -> int
-{
-  auto vstream = reinterpret_cast<sara::VideoStream *>(stream);
-  return vstream->height();
-}
-
-auto VideoStream_readFrame(void *stream) -> int
-{
-  auto vstream = reinterpret_cast<sara::VideoStream *>(stream);
-  return static_cast<int>(vstream->read());
 }

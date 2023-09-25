@@ -25,9 +25,7 @@ namespace DO::Shakti {
   class Matrix
   {
   public:
-    __host__ __device__ inline Matrix()
-    {
-    }
+    inline Matrix() = default;
 
     __host__ __device__ inline Matrix(const Matrix& other)
     {
