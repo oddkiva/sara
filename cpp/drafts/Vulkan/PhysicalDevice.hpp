@@ -133,6 +133,26 @@ namespace DO::Shakti::Vulkan {
       return static_cast<bool>(present_support);
     }
 
+    auto find_memory_type(const std::uint32_t type_filter,
+                          VkMemoryPropertyFlags properties) const
+        -> std::uint32_t
+    {
+      auto mem_properties = VkPhysicalDeviceMemoryProperties{};
+      vkGetPhysicalDeviceMemoryProperties(handle, &mem_properties);
+
+      for (auto i = 0u; i < mem_properties.memoryTypeCount; ++i)
+      {
+        if ((type_filter & (1 << i)) &&
+            (mem_properties.memoryTypes[i].propertyFlags & properties) ==
+                properties)
+          return i;
+      }
+
+      throw std::runtime_error{
+          "[VK] Error: failed to find suitable memory type!"};
+    }
+
+
     operator VkPhysicalDevice&()
     {
       return handle;

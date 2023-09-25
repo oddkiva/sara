@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "fmt/core.h"
+#include <drafts/Vulkan/CommandBuffer.hpp>
 #include <drafts/Vulkan/Device.hpp>
 
 
@@ -24,6 +26,17 @@ namespace DO::Shakti::Vulkan {
     {
       vkGetDeviceQueue(device.handle, queue_index, 0, &handle);
     }
+
+    auto submit(const VkSubmitInfo& submit_info, const VkFence fence) const
+        -> void
+    {
+      const auto status = vkQueueSubmit(handle, 1, &submit_info, fence);
+      if (status != VK_SUCCESS)
+        throw std::runtime_error{
+            fmt::format("[VK] Error: failed to submit command buffer sequence "
+                        "to the queue! Error code: {}",
+                        static_cast<int>(status))};
+    };
 
     VkQueue handle = nullptr;
   };

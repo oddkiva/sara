@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstring>
 #include <vulkan/vulkan_core.h>
+
+#include <DO/Sara/Core/DebugUtilities.hpp>
 
 #include <fmt/format.h>
 
@@ -14,7 +17,7 @@ namespace DO::Shakti::Vulkan {
   public:
     DeviceMemory() = default;
 
-    DeviceMemory(VkDevice device, const std::uint32_t size,
+    DeviceMemory(VkDevice device, const VkDeviceSize size,
                  const std::uint32_t memory_type_index)
       : _device{device}
     {
@@ -36,6 +39,22 @@ namespace DO::Shakti::Vulkan {
         return;
 
       vkFreeMemory(_device, _handle, nullptr);
+    }
+
+    template <typename T>
+    auto copy_from(T* src_ptr, const VkDeviceSize src_size,
+                   const VkDeviceSize dst_offset = 0) -> void
+    {
+      const auto src_byte_size = sizeof(T) * src_size;
+
+      // Get the virtual host destination pointer.
+      auto dst_ptr = static_cast<void*>(nullptr);
+      vkMapMemory(_device, _handle, dst_offset, src_byte_size, 0 /* flags */,
+                  &dst_ptr);
+      // Copy the host data to the virtual host destination.
+      std::memcpy(dst_ptr, src_ptr, src_byte_size);
+      // Invalidate the virtual host destination pointer.
+      vkUnmapMemory(_device, _handle);
     }
 
     operator VkDeviceMemory&()

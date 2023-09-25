@@ -199,9 +199,7 @@ public:
     //    - The first command vkWaitForFences at the beginning of the draw
     //      command stalls the CPU execution flow, we need to re-render on this
     //      swapchain image.
-    if (vkQueueSubmit(_graphics_queue.handle, 1, &submit_info,
-                      _render_fences[_current_frame]._handle) != VK_SUCCESS)
-      throw std::runtime_error("failed to submit draw command buffer!");
+    _graphics_queue.submit(submit_info, _render_fences[_current_frame]);
 
     // Submit the present command to the present queue.
     auto present_info = VkPresentInfoKHR{};
@@ -219,7 +217,8 @@ public:
 
     result = vkQueuePresentKHR(_present_queue.handle, &present_info);
     if (result != VK_SUCCESS)
-      throw std::runtime_error("failed to present swap chain image!");
+      throw std::runtime_error{fmt::format(
+          "failed to present the swapchain image {}!", _current_frame)};
 #if 0
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
         framebufferResized)

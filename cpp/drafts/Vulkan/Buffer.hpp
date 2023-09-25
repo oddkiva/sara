@@ -1,9 +1,10 @@
 #pragma once
 
-
-#include <vulkan/vulkan_core.h>
+#include <drafts/Vulkan/CommandBuffer.hpp>
+#include <drafts/Vulkan/CommandPool.hpp>
 
 #include <fmt/format.h>
+#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Shakti::Vulkan {
@@ -66,7 +67,8 @@ namespace DO::Shakti::Vulkan {
       return mem_requirements;
     }
 
-    auto bind(VkDeviceMemory device_memory, const std::uint32_t offset) -> void
+    auto bind(VkDeviceMemory device_memory, const std::uint32_t offset) const
+        -> void
     {
       const auto status =
           vkBindBufferMemory(_device, _handle, device_memory, offset);
@@ -87,9 +89,37 @@ namespace DO::Shakti::Vulkan {
       return _handle;
     }
 
+    //! Quick-and-dirty and does not look optimal.
+    auto record_copy_buffer_command(const Buffer& dst, const VkDeviceSize size,
+                                    const VkCommandBuffer cmd_buffer) -> void
+    {
+      // Specify the copy operation for this command buffer.
+      auto cmd_buf_begin_info = VkCommandBufferBeginInfo{};
+      cmd_buf_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+      cmd_buf_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+      vkBeginCommandBuffer(cmd_buffer, &cmd_buf_begin_info);
+      {
+        auto region = VkBufferCopy{};
+        region.size = size;
+        vkCmdCopyBuffer(cmd_buffer, _handle, dst._handle, 1, &region);
+      }
+      vkEndCommandBuffer(cmd_buffer);
+    }
+
   private:
     VkDevice _device = nullptr;
     VkBuffer _handle = nullptr;
+  };
+
+  struct BufferFactory
+  {
+    template <typename T>
+    inline auto make_staging_buffer(const std::size_t num_elements) -> Buffer
+    {
+      return Buffer(device, sizeof(T) * size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+    }
+
+    const VkDevice device = nullptr;
   };
 
 }  // namespace DO::Shakti::Vulkan

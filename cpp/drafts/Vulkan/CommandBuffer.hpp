@@ -8,7 +8,6 @@
 #include <drafts/Vulkan/Queue.hpp>
 #include <drafts/Vulkan/RenderPass.hpp>
 #include <drafts/Vulkan/Swapchain.hpp>
-#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Shakti::Vulkan {
@@ -16,6 +15,8 @@ namespace DO::Shakti::Vulkan {
   class CommandBufferSequence
   {
   public:
+    friend struct Queue;
+
     CommandBufferSequence() = default;
 
     CommandBufferSequence(const std::uint32_t num_buffers,
