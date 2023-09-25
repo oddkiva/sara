@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstring>
 #include <vulkan/vulkan_core.h>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
