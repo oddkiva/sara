@@ -84,6 +84,7 @@ namespace DO::Kalpana::Vulkan {
   struct Swapchain
   {
     Swapchain() = default;
+
     Swapchain(const Shakti::Vulkan::PhysicalDevice& physical_device,
               const Shakti::Vulkan::Device& device,  //
               const Surface& surface,                //

@@ -38,6 +38,16 @@ namespace DO::Shakti::Vulkan {
       vkFreeMemory(_device, _handle, nullptr);
     }
 
+    operator VkDeviceMemory&()
+    {
+      return _handle;
+    }
+
+    operator VkDeviceMemory() const
+    {
+      return _handle;
+    }
+
   private:
     VkDevice _device = nullptr;
     VkDeviceMemory _handle = nullptr;

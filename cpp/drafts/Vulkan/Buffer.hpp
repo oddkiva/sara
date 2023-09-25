@@ -66,7 +66,7 @@ namespace DO::Shakti::Vulkan {
       return mem_requirements;
     }
 
-    auto bind(DeviceMemory& device_memory, const std::uint32_t offset) -> void
+    auto bind(VkDeviceMemory device_memory, const std::uint32_t offset) -> void
     {
       const auto status =
           vkBindBufferMemory(_device, _handle, device_memory, offset);
@@ -75,6 +75,16 @@ namespace DO::Shakti::Vulkan {
             fmt::format("[VK] Failed to bind buffer to device memory region! "
                         "Error code: {}",
                         static_cast<int>(status))};
+    }
+
+    operator VkBuffer&()
+    {
+      return _handle;
+    }
+
+    operator VkBuffer() const
+    {
+      return _handle;
     }
 
   private:
