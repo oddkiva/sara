@@ -1,5 +1,8 @@
-add_library(SaraSwiftGraphics CGraphics.hpp CGraphics.cpp Graphics.hpp
-                              Graphics.cpp)
+add_library(
+  SaraSwiftGraphics
+  Graphics.hpp Graphics.cpp #
+  ImageIO.hpp ImageIO.cpp #
+  VideoIO.hpp VideoIO.cpp)
 target_include_directories(
   SaraSwiftGraphics
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} # DO NOT REMOVE!
