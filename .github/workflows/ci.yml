@@ -158,11 +158,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:  [macos-latest, ubuntu-22.04]
+        os:  [macos-latest, ubuntu-latest]
         include:
           - os: macos-latest
           - os: ubuntu-22.04
-            cc: slackware
             container: 'nvidia/cuda:12.1.0-devel-ubuntu22.04'
 
     runs-on: ${{ matrix.os }}
@@ -172,7 +171,7 @@ jobs:
 
     - name: Install dependencies on Ubuntu
       run: |
-        sudo apt update -y && sudo apt upgrade -y
+        apt update -y && apt upgrade -y
 
         # For the documentation.
-        sudo apt-get install -y -qq doxygen graphviz
+        apt-get install -y -qq doxygen graphviz
