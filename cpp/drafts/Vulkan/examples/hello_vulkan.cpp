@@ -73,20 +73,6 @@ struct sigaction SignalHandler::sigint_handler = {};
 #endif
 
 
-static auto get_program_path() -> std::filesystem::path
-{
-#ifdef _WIN32
-  static auto path = std::array<wchar_t, MAX_PATH>{};
-  GetModuleFileNameW(nullptr, path.data(), MAX_PATH);
-  return path.data();
-#else
-  static auto result = std::array<char, PATH_MAX>{};
-  ssize_t count = readlink("/proc/self/exe", result.data(), PATH_MAX);
-  return std::string(result.data(), (count > 0) ? count : 0);
-#endif
-}
-
-
 static const auto vertices = std::vector<Vertex>{
     {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},  //
     {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},   //
