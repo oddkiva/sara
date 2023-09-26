@@ -91,7 +91,7 @@ namespace DO::Kalpana::Vulkan {
               const Shakti::Vulkan::Device& device,  //
               const Surface& surface,                //
               GLFWwindow* window)
-      : device_handle{device.handle}
+      : device_handle{device}
     {
       init_swapchain(physical_device, surface, window);
       init_image_views();

@@ -199,7 +199,7 @@ namespace DO::Kalpana::Vulkan {
 
       auto graphics_pipeline = GraphicsPipeline{};
 
-      graphics_pipeline._device = device.handle;
+      graphics_pipeline._device = device;
 
       // Initialize the graphics pipeline layout.
       SARA_DEBUG << "Initializing the graphics pipeline layout...\n";
@@ -211,7 +211,7 @@ namespace DO::Kalpana::Vulkan {
         pipeline_layout_info.pushConstantRangeCount = 0;
       };
       auto status = vkCreatePipelineLayout(    //
-          device.handle,                       //
+          device,                              //
           &pipeline_layout_info,               //
           nullptr,                             //
           &graphics_pipeline._pipeline_layout  //
@@ -253,7 +253,7 @@ namespace DO::Kalpana::Vulkan {
       };
 
       status = vkCreateGraphicsPipelines(  //
-          device.handle,                   //
+          device,                          //
           VK_NULL_HANDLE,                  //
           1,                               //
           &pipeline_info,                  //
@@ -287,14 +287,14 @@ namespace DO::Kalpana::Vulkan {
           vertex_shader_filepath.string());
       SARA_DEBUG << "Creating vertex shader module...\n";
       vertex_shader_module =
-          Shakti::Vulkan::ShaderModule{device.handle, vertex_shader};
+          Shakti::Vulkan::ShaderModule{device, vertex_shader};
 
       SARA_DEBUG << "Load compiled fragment shader...\n";
       fragment_shader = Shakti::Vulkan::read_spirv_compiled_shader(
           fragment_shader_filepath.string());
       SARA_DEBUG << "Creating fragment shader module...\n";
       fragment_shader_module =
-          Shakti::Vulkan::ShaderModule{device.handle, fragment_shader};
+          Shakti::Vulkan::ShaderModule{device, fragment_shader};
 
       // Rebind the shader module references to their respective shader stage
       // infos.

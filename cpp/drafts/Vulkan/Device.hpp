@@ -36,7 +36,7 @@ namespace DO::Shakti::Vulkan {
 
     ~Device()
     {
-      vkDestroyDevice(handle, nullptr);
+      vkDestroyDevice(_handle, nullptr);
     }
 
     auto operator=(const Device&) -> Device& = delete;
@@ -47,9 +47,19 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
+    operator VkDevice&()
+    {
+      return _handle;
+    }
+
+    operator VkDevice() const
+    {
+      return _handle;
+    }
+
     auto swap(Device& other) -> void
     {
-      std::swap(handle, other.handle);
+      std::swap(_handle, other._handle);
     }
 
     auto get_device_queue(const std::uint32_t queue_family_index) const
@@ -58,11 +68,12 @@ namespace DO::Shakti::Vulkan {
       SARA_DEBUG << fmt::format("[VK] - Fetching the queue from index {}...\n",
                                 queue_family_index);
       auto queue = VkQueue{};
-      vkGetDeviceQueue(handle, queue_family_index, 0, &queue);
+      vkGetDeviceQueue(_handle, queue_family_index, 0, &queue);
       return queue;
     }
 
-    VkDevice handle = nullptr;
+  private:
+    VkDevice _handle = nullptr;
   };
 
   //! @brief Specify the logical device that we want to create.
@@ -151,7 +162,7 @@ namespace DO::Shakti::Vulkan {
 
       auto device = Device{};
       const auto status = vkCreateDevice(_physical_device, &_create_info,
-                                         nullptr, &device.handle);
+                                         nullptr, &device._handle);
       if (status != VK_SUCCESS)
       {
         throw std::runtime_error{fmt::format(

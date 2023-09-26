@@ -9,7 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <vulkan/vulkan_core.h>
 #define BOOST_TEST_MODULE "Vulkan/Buffer"
 
 #define GLFW_INCLUDE_VULKAN
@@ -93,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_staging_buffer)
                           .enable_queue_families({compute_queue_family_index})
                           .enable_validation_layers(validation_layers_required)
                           .create();
-  BOOST_CHECK(device.handle != nullptr);
+  BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
   // Let's say we want to store vertex data on a device buffer.
   static constexpr auto num_vertices = 10;
@@ -105,8 +104,7 @@ BOOST_AUTO_TEST_CASE(test_staging_buffer)
   // Our such intent is substantified by a staging buffer, which we create as
   // follows.
   const auto usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-  const auto staging_buffer =
-      svk::Buffer{device.handle, batch_byte_size, usage};
+  const auto staging_buffer = svk::Buffer{device, batch_byte_size, usage};
   BOOST_CHECK(static_cast<VkBuffer>(staging_buffer) != nullptr);
 
   // Our hardware requirements is substantified by the memory type needed to
@@ -129,8 +127,7 @@ BOOST_AUTO_TEST_CASE(test_staging_buffer)
 
   // Finally, allocate some device memory that fulfills these such memory
   // properties.
-  auto device_memory =
-      svk::DeviceMemory{device.handle, mem_reqs.size, mem_type};
+  auto device_memory = svk::DeviceMemory{device, mem_reqs.size, mem_type};
   BOOST_CHECK(static_cast<VkDeviceMemory>(device_memory) != nullptr);
 
   // Bind the staging buffer to this device memory.
@@ -213,7 +210,7 @@ BOOST_AUTO_TEST_CASE(test_device_buffer)
                           .enable_queue_families({compute_queue_family_index})
                           .enable_validation_layers(validation_layers_required)
                           .create();
-  BOOST_CHECK(device.handle != nullptr);
+  BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
   // Let's say we want to store vertex data on a device buffer.
   static constexpr auto num_vertices = 10;
@@ -225,7 +222,7 @@ BOOST_AUTO_TEST_CASE(test_device_buffer)
   // Our such intent is substantified by a device-only buffer, which we create
   // as follows.
   const auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-  const auto device_buffer = svk::Buffer{device.handle, batch_byte_size, usage};
+  const auto device_buffer = svk::Buffer{device, batch_byte_size, usage};
   BOOST_CHECK(static_cast<VkBuffer>(device_buffer) != nullptr);
 
   // Our hardware requirements is substantified by the memory type needed to
@@ -246,8 +243,7 @@ BOOST_AUTO_TEST_CASE(test_device_buffer)
 
   // Finally, allocate some device memory that fulfills these such memory
   // properties.
-  auto device_memory =
-      svk::DeviceMemory{device.handle, mem_reqs.size, mem_type};
+  auto device_memory = svk::DeviceMemory{device, mem_reqs.size, mem_type};
   BOOST_CHECK(static_cast<VkDeviceMemory>(device_memory) != nullptr);
 
   // Bind the device buffer to this device memory.

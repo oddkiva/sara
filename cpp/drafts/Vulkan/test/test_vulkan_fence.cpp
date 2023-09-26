@@ -113,13 +113,13 @@ BOOST_AUTO_TEST_CASE(test_fence)
                           .enable_device_features({})
                           .enable_validation_layers(validation_layers_required)
                           .create();
-  BOOST_CHECK(device.handle != nullptr);
+  BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
 
   // A created fence should be created in a signaled state.
   auto fences = std::vector<svk::Fence>(10);
   for (auto i = 0u; i < fences.size(); ++i)
-    fences[i] = svk::Fence{device.handle};
+    fences[i] = svk::Fence{device};
   // The following call should be unblocked immediately.
   for (auto& fence : fences)
     fence.wait();

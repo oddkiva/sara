@@ -11,26 +11,28 @@
 
 #pragma once
 
-#include "fmt/core.h"
 #include <drafts/Vulkan/CommandBuffer.hpp>
 #include <drafts/Vulkan/Device.hpp>
+
+#include <fmt/core.h>
 
 
 namespace DO::Shakti::Vulkan {
 
-  struct Queue
+  class Queue
   {
+  public:
     Queue() = default;
 
     Queue(const Device& device, const std::uint32_t queue_index)
     {
-      vkGetDeviceQueue(device.handle, queue_index, 0, &handle);
+      vkGetDeviceQueue(device, queue_index, 0, &_handle);
     }
 
     auto submit(const VkSubmitInfo& submit_info, const VkFence fence) const
         -> void
     {
-      const auto status = vkQueueSubmit(handle, 1, &submit_info, fence);
+      const auto status = vkQueueSubmit(_handle, 1, &submit_info, fence);
       if (status != VK_SUCCESS)
         throw std::runtime_error{
             fmt::format("[VK] Error: failed to submit command buffer sequence "
@@ -38,7 +40,34 @@ namespace DO::Shakti::Vulkan {
                         static_cast<int>(status))};
     };
 
-    VkQueue handle = nullptr;
+    auto submit_copy_commands(const CommandBufferSequence& copy_cmd_bufs) const
+        -> void
+    {
+      auto submit_info = VkSubmitInfo{};
+      submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+      submit_info.commandBufferCount =
+          static_cast<std::uint32_t>(copy_cmd_bufs.size());
+      submit_info.pCommandBuffers = copy_cmd_bufs.data();
+      submit(submit_info, VK_NULL_HANDLE);
+    }
+
+    auto wait() const -> void
+    {
+      vkQueueWaitIdle(_handle);
+    }
+
+    operator VkQueue&()
+    {
+      return _handle;
+    }
+
+    operator VkQueue() const
+    {
+      return _handle;
+    }
+
+  private:
+    VkQueue _handle = nullptr;
   };
 
 }  // namespace DO::Shakti::Vulkan

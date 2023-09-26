@@ -1,4 +1,4 @@
-FROM nvidia/cudagl:11.4.2-runtime-ubuntu20.04
+FROM nvidia/cuda:12.1.0-devel-ubuntu22.04
 
 MAINTAINER "Odd Kiva"
 
@@ -15,16 +15,14 @@ RUN apt-get update -y && apt-get install -y \
 
 # CMake APT repository.
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | \
-  gpg --dearmor - | \
-  tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-RUN apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'
+      gpg --dearmor - | \
+      tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+RUN echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy-rc main' | \
+      tee -a /etc/apt/sources.list.d/kitware.list >/dev/null
 
 # Vulkan SDK APT repository.
-RUN wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add -
-RUN wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
-
-# CLBlast APT repository.
-RUN add-apt-repository ppa:cnugteren/clblast
+RUN wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | tee /etc/apt/trusted.gpg.d/lunarg.asc
+RUN wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
 
 # C++ toolchain, libraries and tools.
 RUN apt-get update -y && apt-get install -y \
@@ -32,7 +30,6 @@ RUN apt-get update -y && apt-get install -y \
   ccache                    \
   cmake                     \
   cppcheck                  \
-  cuda-toolkit-11-7         \
   git                       \
   lcov                      \
   ninja-build               \
@@ -66,14 +63,14 @@ RUN apt-get update -y && apt-get install -y \
 
 # Install Halide.
 RUN mkdir ${HOME}/opt
-RUN wget https://github.com/halide/Halide/releases/download/v14.0.0/Halide-14.0.0-x86-64-linux-6b9ed2afd1d6d0badf04986602c943e287d44e46.tar.gz
-RUN tar xvzf Halide-14.0.0-x86-64-linux-6b9ed2afd1d6d0badf04986602c943e287d44e46.tar.gz
-RUN mv Halide-14.0.0-x86-64-linux ${HOME}/opt
+RUN wget https://github.com/halide/Halide/releases/download/v16.0.0/Halide-16.0.0-x86-64-linux-1e963ff817ef0968cc25d811a25a7350c8953ee6.tar.gz
+RUN tar xvzf Halide-16.0.0-x86-64-linux-1e963ff817ef0968cc25d811a25a7350c8953ee6.tar.gz && \
+      mv Halide-16.0.0-x86-64-linux ${HOME}/opt
 
 # Install Swift toolchain.
-RUN wget https://download.swift.org/swift-5.6.3-release/ubuntu2004/swift-5.6.3-RELEASE/swift-5.6.3-RELEASE-ubuntu20.04.tar.gz \
-      && tar xvzf swift-5.6.3-RELEASE-ubuntu20.04.tar.gz \
-      && mv swift-5.6.3-RELEASE-ubuntu20.04 ${HOME}/opt
+RUN wget https://download.swift.org/swift-5.9-release/ubuntu2204/swift-5.9-RELEASE/swift-5.9-RELEASE-ubuntu22.04.tar.gz
+RUN tar xvzf swift-5.9-RELEASE-ubuntu22.04.tar.gz  \
+      && mv swift-5.9-RELEASE-ubuntu22.04 ${HOME}/opt
 
 
 # Install Python dependencies.

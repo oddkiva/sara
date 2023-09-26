@@ -50,12 +50,23 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
+    operator VkSemaphore&()
+    {
+      return _handle;
+    }
+
+    operator VkSemaphore() const
+    {
+      return _handle;
+    }
+
     auto swap(Semaphore& other) -> void
     {
       std::swap(_device, other._device);
       std::swap(_handle, other._handle);
     }
 
+  private:
     VkDevice _device = nullptr;
     VkSemaphore _handle = nullptr;
   };

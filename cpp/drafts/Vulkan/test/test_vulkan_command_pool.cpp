@@ -118,9 +118,9 @@ BOOST_AUTO_TEST_CASE(initialize_graphics_command_pool)
                           .enable_device_features({})
                           .enable_validation_layers(validation_layers_required)
                           .create();
-  BOOST_CHECK(device.handle != nullptr);
+  BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
   const auto graphics_command_pool =
-      svk::CommandPool{device.handle, graphics_queue_family_index};
-  BOOST_CHECK(graphics_command_pool.handle != nullptr);
+      svk::CommandPool{device, graphics_queue_family_index};
+  BOOST_CHECK(static_cast<VkCommandPool>(graphics_command_pool) != nullptr);
 }

@@ -9,12 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "drafts/Vulkan/Semaphore.hpp"
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <drafts/Vulkan/Geometry.hpp>
 #include <drafts/Vulkan/GraphicsBackend.hpp>
+#include <drafts/Vulkan/Semaphore.hpp>
 
 
 using namespace DO::Kalpana::Vulkan;
@@ -163,7 +163,8 @@ auto GraphicsBackend::init_graphics_pipeline(
       GraphicsPipeline::Builder{_device, _render_pass}
           .vertex_shader_path(vertex_shader_path)
           .fragment_shader_path(fragment_shader_path)
-          .vbo_data_built_in_vertex_shader()
+          // .vbo_data_built_in_vertex_shader()
+          .vbo_data_format<Vertex>()
           .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
           .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
           .scissor_sizes(w, h)
@@ -178,15 +179,15 @@ auto GraphicsBackend::init_command_pool_and_buffers() -> void
       find_graphics_queue_family_indices(_physical_device).front();
   SARA_CHECK(graphics_queue_family_index);
 
-  _graphics_cmd_pool =
-      svk::CommandPool{_device.handle, graphics_queue_family_index};
-  SARA_DEBUG << fmt::format("[VK] Initialized command pool {}\n",
-                            fmt::ptr(_graphics_cmd_pool.handle));
+  _graphics_cmd_pool = svk::CommandPool{_device, graphics_queue_family_index};
+  SARA_DEBUG << fmt::format(
+      "[VK] Initialized command pool {}\n",
+      fmt::ptr(static_cast<VkCommandPool>(_graphics_cmd_pool)));
 
   _graphics_cmd_bufs = svk::CommandBufferSequence{
       static_cast<std::uint32_t>(_swapchain.images.size()),  //
-      _device.handle,                                        //
-      _graphics_cmd_pool.handle                              //
+      _device,                                               //
+      _graphics_cmd_pool                                     //
   };
 }
 
@@ -198,13 +199,13 @@ auto GraphicsBackend::init_synchronization_objects() -> void
   _render_fences.resize(_swapchain.images.size());
   // Initialize them with an unsignaled state.
   for (auto& fence : _render_fences)
-    fence = svk::Fence{_device.handle};
+    fence = svk::Fence{_device};
 
   _image_available_semaphores.resize(_swapchain.images.size());
   for (auto& s : _image_available_semaphores)
-    s = svk::Semaphore{_device.handle};
+    s = svk::Semaphore{_device};
 
   _render_finished_semaphores.resize(_swapchain.images.size());
   for (auto& s : _render_finished_semaphores)
-    s = svk::Semaphore{_device.handle};
+    s = svk::Semaphore{_device};
 }

@@ -1,8 +1,24 @@
-#include <vulkan/vulkan_core.h>
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2023 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #define GLFW_INCLUDE_VULKAN
 
+#include <drafts/Vulkan/Buffer.hpp>
+#include <drafts/Vulkan/CommandBuffer.hpp>
+#include <drafts/Vulkan/DeviceMemory.hpp>
 #include <drafts/Vulkan/EasyGLFW.hpp>
+#include <drafts/Vulkan/Geometry.hpp>
 #include <drafts/Vulkan/GraphicsBackend.hpp>
+
+#include <DO/Sara/Core/DebugUtilities.hpp>
 
 #include <signal.h>
 
@@ -13,6 +29,7 @@
 
 namespace glfw = DO::Kalpana::GLFW;
 namespace kvk = DO::Kalpana::Vulkan;
+namespace svk = DO::Shakti::Vulkan;
 
 
 struct SignalHandler
@@ -68,6 +85,19 @@ static auto get_program_path() -> std::filesystem::path
 }
 
 
+static const auto vertices = std::vector<Vertex>{
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},  //
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},   //
+    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},    //
+    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}    //
+};
+
+static const auto indices = std::vector<uint16_t>{
+    0, 1, 2,  //
+    2, 3, 0   //
+};
+
+
 class VulkanTriangleRenderer : public kvk::GraphicsBackend
 {
 public:
@@ -79,6 +109,86 @@ public:
                            shader_dirpath / "frag.spv",  //
                            debug_vulkan}
   {
+    transfer_vertex_data_to_vulkan(vertices);
+    transfer_element_data_to_vulkan(indices);
+  }
+
+  auto transfer_vertex_data_to_vulkan(const std::vector<Vertex>& vertices)
+      -> void
+  {
+    const auto buffer_factory = svk::BufferFactory{_device};
+    const auto dmem_factory =
+        svk::DeviceMemoryFactory{_physical_device, _device};
+
+    // Staging buffer
+    SARA_DEBUG << "Vertex staging buffer...\n";
+    const auto vbo_staging =
+        buffer_factory.make_staging_buffer<Vertex>(vertices.size());
+    const auto vdm_staging =
+        dmem_factory.allocate_for_staging_buffer(vbo_staging);
+    vbo_staging.bind(vdm_staging, 0);
+
+    // Copy the data.
+    SARA_DEBUG << "Copying from host data to vertex staging buffer...\n";
+    vdm_staging.copy_from(vertices.data(), vertices.size(), 0);
+
+    // Device buffer
+    SARA_DEBUG << "Vertex device buffer...\n";
+    _vbo = buffer_factory.make_device_vertex_buffer<Vertex>(vertices.size());
+    _vdm = dmem_factory.allocate_for_device_buffer(_vbo);
+    _vbo.bind(_vdm, 0);
+
+    SARA_DEBUG << "Recording data transfer from vertex staging buffer to "
+                  "device buffer...\n";
+    const auto copy_cmd_bufs =
+        svk::CommandBufferSequence{1, _device, _graphics_cmd_pool};
+    const auto& copy_cmd_buf = copy_cmd_bufs[0];
+    // Copy from the staging buffer to the device buffer
+    svk::record_copy_buffer(vbo_staging, _vbo, copy_cmd_buf);
+
+    SARA_DEBUG << "Submitting data transfer command...\n";
+    _graphics_queue.submit_copy_commands(copy_cmd_bufs);
+    _graphics_queue.wait();
+  }
+
+  auto
+  transfer_element_data_to_vulkan(const std::vector<std::uint16_t>& indices)
+      -> void
+  {
+    const auto buffer_factory = svk::BufferFactory{_device};
+    const auto dmem_factory =
+        svk::DeviceMemoryFactory{_physical_device, _device};
+
+    // Staging buffer
+    SARA_DEBUG << "Element staging buffer...\n";
+    const auto ebo_staging =
+        buffer_factory.make_staging_buffer<std::uint16_t>(indices.size());
+    const auto edm_staging =
+        dmem_factory.allocate_for_staging_buffer(ebo_staging);
+    ebo_staging.bind(edm_staging, 0);
+
+    // Copy the data.
+    SARA_DEBUG << "Copying from host data to index staging buffer...\n";
+    edm_staging.copy_from(indices.data(), indices.size(), 0);
+
+    // Device buffer
+    SARA_DEBUG << "Element device buffer...\n";
+    _ebo =
+        buffer_factory.make_device_index_buffer<std::uint16_t>(indices.size());
+    _edm = dmem_factory.allocate_for_device_buffer(_ebo);
+    _ebo.bind(_edm, 0);
+
+    SARA_DEBUG << "Recording data transfer from index staging buffer to "
+                  "device buffer...\n";
+    const auto copy_cmd_bufs =
+        svk::CommandBufferSequence{1, _device, _graphics_cmd_pool};
+    const auto& copy_cmd_buf = copy_cmd_bufs[0];
+    // Copy from the staging buffer to the device buffer
+    svk::record_copy_buffer(ebo_staging, _ebo, copy_cmd_buf);
+
+    SARA_DEBUG << "Submitting data transfer command...\n";
+    _graphics_queue.submit_copy_commands(copy_cmd_bufs);
+    _graphics_queue.wait();
   }
 
   auto draw_frame() -> void
@@ -112,12 +222,11 @@ public:
     SARA_DEBUG << "[VK] Acquiring the next image ready to be rendered...\n";
     auto index_of_next_image_to_render = std::uint32_t{};
     result = vkAcquireNextImageKHR(  //
-        _device.handle,              //
+        _device,                     //
         _swapchain.handle,
-        forever,  // timeout in nanoseconds
-        _image_available_semaphores[_current_frame]
-            ._handle,    // semaphore to signal
-        VK_NULL_HANDLE,  // fence to signal
+        forever,                                      // timeout in nanoseconds
+        _image_available_semaphores[_current_frame],  // semaphore to signal
+        VK_NULL_HANDLE,                               // fence to signal
         &index_of_next_image_to_render);
     // Sanity check.
     if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
@@ -169,8 +278,8 @@ public:
     //
     //    The draw command starts only after this semaphore is in a signaled
     //    state and cannot start before.
-    const auto wait_semaphores = std::array{
-        _image_available_semaphores[_current_frame]._handle  //
+    const auto wait_semaphores = std::array<VkSemaphore, 1>{
+        _image_available_semaphores[_current_frame]  //
     };
     submit_info.waitSemaphoreCount =
         static_cast<std::uint32_t>(wait_semaphores.size());
@@ -185,8 +294,8 @@ public:
     // 3. Set the render finished semaphore in a signaled state, when the draw
     //    command completes.
     //    This is for the present command buffer.
-    const auto render_finished_semaphores = std::array{
-        _render_finished_semaphores[_current_frame]._handle  //
+    const auto render_finished_semaphores = std::array<VkSemaphore, 1>{
+        _render_finished_semaphores[_current_frame]  //
     };
     submit_info.signalSemaphoreCount =
         static_cast<std::uint32_t>(render_finished_semaphores.size());
@@ -224,7 +333,7 @@ public:
     present_info.pSwapchains = swapchains;
     present_info.pImageIndices = &index_of_next_image_to_render;
 
-    result = vkQueuePresentKHR(_present_queue.handle, &present_info);
+    result = vkQueuePresentKHR(_present_queue, &present_info);
     if (result != VK_SUCCESS)
       throw std::runtime_error{fmt::format(
           "failed to present the swapchain image {}!", _current_frame)};
@@ -242,7 +351,7 @@ public:
     _current_frame = (_current_frame + 1) % max_frames_in_flight;
   }
 
-  auto loop(GLFWwindow* window)
+  auto loop(GLFWwindow* window) -> void
   {
     while (!glfwWindowShouldClose(window))
     {
@@ -253,11 +362,11 @@ public:
         break;
     }
 
-    vkDeviceWaitIdle(_device.handle);
+    vkDeviceWaitIdle(_device);
   }
 
   auto record_graphics_command_buffer(VkCommandBuffer command_buffer,
-                                      VkFramebuffer framebuffer) -> void
+                                        VkFramebuffer framebuffer) -> void
   {
     SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
     auto begin_info = VkCommandBufferBeginInfo{};
@@ -311,7 +420,16 @@ public:
       vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 #endif
 
-      vkCmdDraw(command_buffer, 3, 1, 0, 0);
+      static const auto vbos = std::array<VkBuffer, 1>{_vbo};
+      static constexpr auto offsets = std::array<VkDeviceSize, 1>{0};
+      vkCmdBindVertexBuffers(command_buffer, 0,
+                             static_cast<std::uint32_t>(vbos.size()),
+                             vbos.data(), offsets.data());
+
+      vkCmdBindIndexBuffer(command_buffer, _ebo, 0, VK_INDEX_TYPE_UINT16);
+
+      vkCmdDrawIndexed(command_buffer,
+                       static_cast<std::uint32_t>(indices.size()), 1, 0, 0, 0);
     }
 
     SARA_DEBUG << "[VK] End render pass...\n";
@@ -326,11 +444,23 @@ public:
 
 private:
   int _current_frame = 0;
+
+  svk::Buffer _vbo;
+  svk::Buffer _ebo;
+
+  svk::DeviceMemory _vdm;
+  svk::DeviceMemory _edm;
 };
 
 
 int main(int, char**)
 {
+  SARA_CHECK(vertices.size());
+  SARA_CHECK(sizeof(Vertex));
+  SARA_CHECK(vertices.size() * sizeof(Vertex));
+
+  // return 0;
+
   SignalHandler::init();
 
   auto app = glfw::Application{};
@@ -341,8 +471,6 @@ int main(int, char**)
 
   try
   {
-    namespace fs = std::filesystem;
-
     const auto program_dir_path = get_program_path().parent_path();
     auto triangle_renderer = VulkanTriangleRenderer{
         window, app_name, program_dir_path / "hello_vulkan_shaders", true};

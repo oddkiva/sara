@@ -44,6 +44,8 @@ namespace DO::Shakti::Vulkan {
 
     ~Buffer()
     {
+      if (_device == nullptr || _handle == nullptr)
+        return;
       vkDestroyBuffer(_device, _handle, nullptr);
     }
 
@@ -74,6 +76,7 @@ namespace DO::Shakti::Vulkan {
     {
       std::swap(_device, other._device);
       std::swap(_handle, other._handle);
+      std::swap(_size, other._size);
     }
 
     auto get_memory_requirements() const -> VkMemoryRequirements
@@ -95,39 +98,24 @@ namespace DO::Shakti::Vulkan {
                         static_cast<int>(status))};
     }
 
-    friend auto record_copy_buffer(const Buffer& src, const Buffer& dst,
-                                   const VkCommandBuffer cmd_buffer) -> void
-    {
-      // Specify the copy operation for this command buffer.
-      auto cmd_buf_begin_info = VkCommandBufferBeginInfo{};
-      cmd_buf_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-      cmd_buf_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-      vkBeginCommandBuffer(cmd_buffer, &cmd_buf_begin_info);
-      {
-        auto region = VkBufferCopy{};
-        region.size = src._size;
-        vkCmdCopyBuffer(cmd_buffer, src._handle, dst._handle, 1, &region);
-      }
-      vkEndCommandBuffer(cmd_buffer);
-    }
-
   private:
     VkDevice _device = nullptr;
     VkBuffer _handle = nullptr;
     VkDeviceSize _size = 0;
   };
 
+
   struct BufferFactory
   {
     template <typename T>
-    inline auto make_staging_buffer(const std::size_t n) -> Buffer
+    inline auto make_staging_buffer(const std::size_t n) const -> Buffer
     {
       const auto byte_size = sizeof(T) * n;
       return Buffer(device, byte_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
     }
 
     template <typename T>
-    inline auto make_device_vertex_buffer(const std::size_t n) -> Buffer
+    inline auto make_device_vertex_buffer(const std::size_t n) const -> Buffer
     {
       const auto byte_size = sizeof(T) * n;
       return Buffer(device, byte_size,
@@ -136,7 +124,7 @@ namespace DO::Shakti::Vulkan {
     }
 
     template <typename T>
-    inline auto make_device_index_buffer(const std::size_t n) -> Buffer
+    inline auto make_device_index_buffer(const std::size_t n) const -> Buffer
     {
       const auto byte_size = sizeof(T) * n;
       return Buffer(device, byte_size,
@@ -146,5 +134,22 @@ namespace DO::Shakti::Vulkan {
 
     const VkDevice device = nullptr;
   };
+
+
+  inline auto record_copy_buffer(const Buffer& src, const Buffer& dst,
+                                 const VkCommandBuffer cmd_buffer) -> void
+  {
+    // Specify the copy operation for this command buffer.
+    auto cmd_buf_begin_info = VkCommandBufferBeginInfo{};
+    cmd_buf_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    cmd_buf_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    vkBeginCommandBuffer(cmd_buffer, &cmd_buf_begin_info);
+    {
+      auto region = VkBufferCopy{};
+      region.size = src.size();
+      vkCmdCopyBuffer(cmd_buffer, src, dst, 1, &region);
+    }
+    vkEndCommandBuffer(cmd_buffer);
+  }
 
 }  // namespace DO::Shakti::Vulkan

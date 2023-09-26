@@ -21,7 +21,7 @@ namespace DO::Shakti::Vulkan {
     CommandPool() = default;
 
     CommandPool(const VkDevice device, const std::uint32_t queue_index)
-      : device_handle{device}
+      : _device{device}
     {
       auto create_info = VkCommandPoolCreateInfo{};
       {
@@ -31,7 +31,7 @@ namespace DO::Shakti::Vulkan {
       }
 
       const auto status =
-          vkCreateCommandPool(device_handle, &create_info, nullptr, &handle);
+          vkCreateCommandPool(_device, &create_info, nullptr, &_handle);
       if (status != VK_SUCCESS)
         throw std::runtime_error{
             fmt::format("Error: failed to create command pool! Error code: {}",
@@ -47,11 +47,11 @@ namespace DO::Shakti::Vulkan {
 
     ~CommandPool()
     {
-      if (handle != nullptr)
+      if (_handle != nullptr)
       {
         SARA_DEBUG << fmt::format("[VK] Destroying command pool: {}...\n",
-                                  fmt::ptr(handle));
-        vkDestroyCommandPool(device_handle, handle, nullptr);
+                                  fmt::ptr(_handle));
+        vkDestroyCommandPool(_device, _handle, nullptr);
       }
     }
 
@@ -63,14 +63,25 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
-    auto swap(CommandPool& other) -> void
+    operator VkCommandPool&()
     {
-      std::swap(device_handle, other.device_handle);
-      std::swap(handle, other.handle);
+      return _handle;
     }
 
-    VkDevice device_handle = nullptr;
-    VkCommandPool handle = nullptr;
+    operator VkCommandPool() const
+    {
+      return _handle;
+    }
+
+    auto swap(CommandPool& other) -> void
+    {
+      std::swap(_device, other._device);
+      std::swap(_handle, other._handle);
+    }
+
+  private:
+    VkDevice _device = nullptr;
+    VkCommandPool _handle = nullptr;
   };
 
 }  // namespace DO::Shakti::Vulkan
