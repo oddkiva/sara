@@ -194,11 +194,20 @@ public:
 
     // 4. Submit the draw command.
     //    - Notice the fence parameter passed to vkQueueSubmit.
+    //
     //    - It has been reset by vkResetFences above so that it can be in
     //      signaled state when the draw command completes.
-    //    - The first command vkWaitForFences at the beginning of the draw
-    //      command stalls the CPU execution flow, we need to re-render on this
-    //      swapchain image.
+    //
+    //    - When we re-invoke the `draw_frame` command, and this draw_frame
+    //      needs to reuse the same swapchain image, i.e., the one with the same
+    //      index `_current_frame`,
+    //
+    //      the first command `vkWaitForFences(...)` at the beginning of the
+    //      draw command stalls the CPU execution flow, until the current draw
+    //      command submission, here, completes.
+    //
+    //      After which, the fence `_render_fences[_current_frame]` enters in a
+    //      signaled state and un-stalls the function `vkWaitForFences(...)`.
     _graphics_queue.submit(submit_info, _render_fences[_current_frame]);
 
     // Submit the present command to the present queue.
