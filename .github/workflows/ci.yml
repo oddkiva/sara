@@ -90,8 +90,8 @@ jobs:
               opencl-headers \
               libpocl-dev \
               libceres-dev \
-              qtbase5-dev \
-              vulkan-sdk
+              qtbase5-dev # \
+              # vulkan-sdk
 
           # Install the GStreamer SDK.
           sudo apt-get install -y -qq \
