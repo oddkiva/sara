@@ -23,6 +23,7 @@
 #include <signal.h>
 
 #include <atomic>
+#include <filesystem>
 #include <limits>
 #include <stdexcept>
 
@@ -30,6 +31,7 @@
 namespace glfw = DO::Kalpana::GLFW;
 namespace kvk = DO::Kalpana::Vulkan;
 namespace svk = DO::Shakti::Vulkan;
+namespace fs = std::filesystem;
 
 
 struct SignalHandler
@@ -366,7 +368,7 @@ public:
   }
 
   auto record_graphics_command_buffer(VkCommandBuffer command_buffer,
-                                        VkFramebuffer framebuffer) -> void
+                                      VkFramebuffer framebuffer) -> void
   {
     SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
     auto begin_info = VkCommandBufferBeginInfo{};
@@ -453,14 +455,8 @@ private:
 };
 
 
-int main(int, char**)
+int main(int, char** argv)
 {
-  SARA_CHECK(vertices.size());
-  SARA_CHECK(sizeof(Vertex));
-  SARA_CHECK(vertices.size() * sizeof(Vertex));
-
-  // return 0;
-
   SignalHandler::init();
 
   auto app = glfw::Application{};
@@ -471,7 +467,7 @@ int main(int, char**)
 
   try
   {
-    const auto program_dir_path = get_program_path().parent_path();
+    const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     auto triangle_renderer = VulkanTriangleRenderer{
         window, app_name, program_dir_path / "hello_vulkan_shaders", true};
     triangle_renderer.loop(window);
