@@ -37,7 +37,6 @@ namespace DO::Shakti::Vulkan {
                  const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
                  void* /* user_data */) -> VkBool32
   {
-
     std::cerr << fmt::format("[VK-Debug][SEV {:03d}][TYPE {:02d}] {}\n",  //
                              static_cast<std::uint32_t>(message_severity),
                              static_cast<std::uint32_t>(message_type),

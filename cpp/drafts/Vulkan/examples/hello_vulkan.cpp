@@ -194,14 +194,21 @@ public:
 
     // 4. Submit the draw command.
     //    - Notice the fence parameter passed to vkQueueSubmit.
+    //
     //    - It has been reset by vkResetFences above so that it can be in
     //      signaled state when the draw command completes.
-    //    - The first command vkWaitForFences at the beginning of the draw
-    //      command stalls the CPU execution flow, we need to re-render on this
-    //      swapchain image.
-    if (vkQueueSubmit(_graphics_queue.handle, 1, &submit_info,
-                      _render_fences[_current_frame]._handle) != VK_SUCCESS)
-      throw std::runtime_error("failed to submit draw command buffer!");
+    //
+    //    - When we re-invoke the `draw_frame` command, and this draw_frame
+    //      needs to reuse the same swapchain image, i.e., the one with the same
+    //      index `_current_frame`,
+    //
+    //      the first command `vkWaitForFences(...)` at the beginning of the
+    //      draw command stalls the CPU execution flow, until the current draw
+    //      command submission, here, completes.
+    //
+    //      After which, the fence `_render_fences[_current_frame]` enters in a
+    //      signaled state and un-stalls the function `vkWaitForFences(...)`.
+    _graphics_queue.submit(submit_info, _render_fences[_current_frame]);
 
     // Submit the present command to the present queue.
     auto present_info = VkPresentInfoKHR{};
@@ -219,7 +226,8 @@ public:
 
     result = vkQueuePresentKHR(_present_queue.handle, &present_info);
     if (result != VK_SUCCESS)
-      throw std::runtime_error("failed to present swap chain image!");
+      throw std::runtime_error{fmt::format(
+          "failed to present the swapchain image {}!", _current_frame)};
 #if 0
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
         framebufferResized)

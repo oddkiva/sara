@@ -70,6 +70,17 @@ namespace DO::Shakti::Vulkan {
       vkWaitForFences(_device, 1, &_handle, VK_TRUE, timeout_ns);
     }
 
+    operator VkFence&()
+    {
+      return _handle;
+    }
+
+    operator VkFence() const
+    {
+      return _handle;
+    }
+
+  private:
     VkDevice _device = nullptr;
     VkFence _handle = nullptr;
   };
