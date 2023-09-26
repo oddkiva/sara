@@ -61,7 +61,7 @@ jobs:
           # sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
           
           # Update the packages list again.
-          sudo apt-get update -y -qq
+          # sudo apt-get update -y -qq
 
           # For the documentation.
           sudo apt-get install -y -qq doxygen graphviz
