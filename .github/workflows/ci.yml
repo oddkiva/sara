@@ -1,4 +1,5 @@
 name: Sara Build + Test
+
 on:
   push:
   pull_request:
@@ -13,9 +14,9 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest MSVC",
+            name: "Windows latest MSVC",
             os: windows-latest,
-            artifact: "windows_msvc.7z",
+            artifact: "windows-msvc.7z",
             build_type: "Release",
             cc: "cl",
             cxx: "cl",
@@ -24,19 +25,19 @@ jobs:
             generators: "Visual Studio 16 2019"
           }
         - {
-            name: "Ubuntu Latest GCC",
-            os: ubuntu-latest,
-            artifact: "ubuntu_gcc.7z",
-            build_type: "Release",
+            name: "Ubuntu 22.04",
+            os: ubuntu-22.04,
+            artifact: "ubuntu-22.04-gcc.7z",
+            build_type: "Debug",
             cc: "gcc",
             cxx: "g++",
             archiver: "7z a",
             generators: "Ninja"
           }
         - {
-            name: "macOS Latest Clang",
+            name: "macOS latest",
             os: macos-latest,
-            artifact: "macos_clang.7z",
+            artifact: "macos-clang.7z",
             build_type: "Release",
             cc: "clang",
             cxx: "clang++",
@@ -45,34 +46,19 @@ jobs:
           }
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Prepare ccache timestamp
-        id: ccache_cache_timestamp
-        shell: cmake -P {0}
-        run: |
-          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-          message("::set-output name=timestamp::${current_date}")
-
-      - name: Save ccache cache files
-        uses: actions/cache@v1.1.0
-        with:
-          path: .ccache
-          key: ${ { matrix.config.name } }-ccache-${ { steps.ccache_cache_timestamp.outputs.timestamp } }
-          restore-keys: |
-            ${ { matrix.config.name } }-ccache-
+      - uses: actions/checkout@v4
 
       - name: Install dependencies on Ubuntu
-        if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
+        if: startsWith(matrix.config.name, 'Ubuntu 22.04')
         run: |
-          # Now add the additional APT repositories:
-          #
-          # CMake
-          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
-          sudo echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy-rc main' | sudo tee -a /etc/apt/sources.list.d/kitware.list >/dev/null
-          # Vulkan
-          sudo wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
+          # # Now add the additional APT repositories:
+          # #
+          # # CMake
+          # wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+          # sudo echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy-rc main' | sudo tee -a /etc/apt/sources.list.d/kitware.list >/dev/null
+          # # Vulkan
+          # sudo wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
+          # sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
           
           # Update the packages list again.
           sudo apt-get update -y -qq
@@ -138,7 +124,7 @@ jobs:
           bundle install
 
       - name: Build and test on Ubuntu
-        if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
+        if: startsWith(matrix.config.name, 'Ubuntu 22.04')
         run: |
           # Build Sara.
           mkdir build
@@ -161,7 +147,7 @@ jobs:
           #- make -j$(nproc) coverage
 
       - name: Send code coverage to Coveralls
-        if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
+        if: startsWith(matrix.config.name, 'Ubuntu 22.04')
         run: |
           cd /home/runner/work/sara/sara
           lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
