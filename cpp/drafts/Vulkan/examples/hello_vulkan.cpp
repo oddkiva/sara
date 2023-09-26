@@ -253,7 +253,7 @@ public:
 
     // Record the draw command to be performed on this swapchain image.
     SARA_CHECK(_framebuffers.fbs.size());
-    record_graphics_command_buffer_2(
+    record_graphics_command_buffer(
         _graphics_cmd_bufs[_current_frame],
         _framebuffers[index_of_next_image_to_render]);
 
@@ -351,7 +351,7 @@ public:
     _current_frame = (_current_frame + 1) % max_frames_in_flight;
   }
 
-  auto loop(GLFWwindow* window)
+  auto loop(GLFWwindow* window) -> void
   {
     while (!glfwWindowShouldClose(window))
     {
@@ -366,74 +366,6 @@ public:
   }
 
   auto record_graphics_command_buffer(VkCommandBuffer command_buffer,
-                                      VkFramebuffer framebuffer) -> void
-  {
-    SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
-    auto begin_info = VkCommandBufferBeginInfo{};
-    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    begin_info.flags = 0;
-    begin_info.pInheritanceInfo = nullptr;
-
-    auto status = VkResult{};
-    status = vkBeginCommandBuffer(command_buffer, &begin_info);
-    if (status != VK_SUCCESS)
-      throw std::runtime_error{
-          fmt::format("[VK] Error: failed to begin recording command buffer! "
-                      "Error code: {}",
-                      static_cast<int>(status))};
-
-    auto render_pass_begin_info = VkRenderPassBeginInfo{};
-    {
-      render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-      render_pass_begin_info.renderPass = _render_pass.handle;
-      render_pass_begin_info.framebuffer = framebuffer;
-      render_pass_begin_info.renderArea.offset = {0, 0};
-      render_pass_begin_info.renderArea.extent = _swapchain.extent;
-
-      render_pass_begin_info.clearValueCount = 1;
-
-      static constexpr auto clear_white_color =
-          VkClearValue{{{0.f, 0.f, 0.f, 1.f}}};
-      render_pass_begin_info.pClearValues = &clear_white_color;
-    }
-
-    SARA_DEBUG << "[VK] Begin render pass...\n";
-    vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info,
-                         VK_SUBPASS_CONTENTS_INLINE);
-    {
-      vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        _graphics_pipeline);
-
-#ifdef ALLOW_DYNAMIC_VIEWPORT_AND_SCISSOR_STATE
-      VkViewport viewport{};
-      viewport.x = 0.0f;
-      viewport.y = 0.0f;
-      viewport.width = static_cast<float>(_swapchain.extent.width);
-      viewport.height = static_cast<float>(_swapchain.extent.height);
-      viewport.minDepth = 0.0f;
-      viewport.maxDepth = 1.0f;
-      vkCmdSetViewport(command_buffer, 0, 1, &viewport);
-
-      VkRect2D scissor{};
-      scissor.offset = {0, 0};
-      scissor.extent = _swapchain.extent;
-      vkCmdSetScissor(command_buffer, 0, 1, &scissor);
-#endif
-
-      vkCmdDraw(command_buffer, 3, 1, 0, 0);
-    }
-
-    SARA_DEBUG << "[VK] End render pass...\n";
-    vkCmdEndRenderPass(command_buffer);
-
-    status = vkEndCommandBuffer(command_buffer);
-    if (status != VK_SUCCESS)
-      throw std::runtime_error{fmt::format(
-          "[VK] Error: failed to end record command buffer! Error code: {}",
-          static_cast<int>(status))};
-  }
-
-  auto record_graphics_command_buffer_2(VkCommandBuffer command_buffer,
                                         VkFramebuffer framebuffer) -> void
   {
     SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
