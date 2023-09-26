@@ -5,150 +5,174 @@ on:
   pull_request:
   release:
 
+# jobs:
+#   build:
+#     name: ${{ matrix.config.name }}
+#     runs-on: ${{ matrix.config.os }}
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         config:
+#         - {
+#             name: "Windows latest MSVC",
+#             os: windows-latest,
+#             artifact: "windows-msvc.7z",
+#             build_type: "Release",
+#             cc: "cl",
+#             cxx: "cl",
+#             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
+#             archiver: "7z a",
+#             generators: "Visual Studio 16 2019"
+#           }
+#         - {
+#             name: "Ubuntu 22.04",
+#             os: ubuntu-22.04,
+#             artifact: "ubuntu-22.04-gcc.7z",
+#             build_type: "Debug",
+#             container: 'nvidia/cuda:12.1.0-devel-ubuntu22.04'
+#           }
+#         - {
+#             name: "macOS latest",
+#             os: macos-latest,
+#             artifact: "macos-clang.7z",
+#             build_type: "Release",
+#             cc: "clang",
+#             cxx: "clang++",
+#             archiver: "7za a",
+#             generators: "Ninja"
+#           }
+# 
+#     steps:
+#       - uses: actions/checkout@v4
+# 
+#       - name: Install dependencies on Ubuntu
+#         if: startsWith(matrix.config.name, 'Ubuntu 22.04')
+#         run: |
+#           # # Now add the additional APT repositories:
+#           # #
+#           # # CMake
+#           # wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+#           # sudo echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy-rc main' | sudo tee -a /etc/apt/sources.list.d/kitware.list >/dev/null
+#           # # Vulkan
+#           # sudo wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
+#           # sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
+#           
+#           sudo apt update -y && sudo apt upgrade -y
+#           
+#           # For the documentation.
+#           sudo apt-get install -y -qq doxygen graphviz
+# 
+#           # All the packages to compile the C++ codebase.
+#           sudo apt-get install -y -qq \
+#               build-essential \
+#               ccache \
+#               cmake \
+#               cppcheck \
+#               git \
+#               lcov \
+#               libboost-all-dev \
+#               libclblast-dev \
+#               libhdf5-dev \
+#               libjpeg-dev \
+#               libpng-dev \
+#               libtiff5-dev \
+#               libavcodec-dev \
+#               libavformat-dev \
+#               libavutil-dev \
+#               libswscale-dev \
+#               libglew-dev \
+#               libglfw3-dev \
+#               ocl-icd-opencl-dev \
+#               opencl-headers \
+#               libpocl-dev \
+#               libceres-dev \
+#               qtbase5-dev # \
+#               # vulkan-sdk
+# 
+#           # Install the GStreamer SDK.
+#           sudo apt-get install -y -qq \
+#             libgstreamer1.0-0         \
+#             gstreamer1.0-plugins-base \
+#             gstreamer1.0-plugins-good \
+#             gstreamer1.0-plugins-bad  \
+#             gstreamer1.0-plugins-ugly \
+#             gstreamer1.0-libav        \
+#             gstreamer1.0-doc          \
+#             gstreamer1.0-tools        \
+#             gstreamer1.0-x            \
+#             gstreamer1.0-alsa         \
+#             gstreamer1.0-gl           \
+#             gstreamer1.0-gtk3         \
+#             gstreamer1.0-qt5          \
+#             gstreamer1.0-pulseaudio
+# 
+#           # Python dependencies
+#           sudo apt-get install -y -qq python3-dev
+# 
+#           # Setup for GUI testing.
+#           sudo apt-get install -y xvfb
+#           Xvfb :1 -noreset 1>/dev/null 2>&1 &
+#           export DISPLAY=:1
+# 
+#           # Coveralls for code coverage
+#           sudo apt install rubygems
+#           sudo gem install bundler
+#           bundle install
+# 
+#       - name: Build and test on Ubuntu
+#         if: startsWith(matrix.config.name, 'Ubuntu 22.04')
+#         run: |
+#           # Build Sara.
+#           mkdir build
+#           cd build
+#           cmake .. \
+#             -DCMAKE_BUILD_TYPE:STRING=Debug \
+#             -DSARA_BUILD_SHARED_LIBS:BOOL=ON \
+#             -DSARA_BUILD_VIDEOIO:BOOL=ON \
+#             -DSARA_BUILD_SAMPLES:BOOL=ON \
+#             -DSARA_BUILD_TESTS:BOOL=ON
+#           cmake --build . -j$(nproc)
+#           # Create deb package.
+#           cmake --build . --target package -j$(nproc)
+#           # Run tests.
+#           DISPLAY=:1 ctest \
+#             -j$(nproc) \
+#             --output-on-failure \
+#             --exclude-regex "test_core_ipc_cond1|shakti_test_*"
+#           # Run coverage (disabled for now).
+#           #- make -j$(nproc) coverage
+# 
+#       - name: Send code coverage to Coveralls
+#         if: startsWith(matrix.config.name, 'Ubuntu 22.04')
+#         run: |
+#           cd /home/runner/work/sara/sara
+#           lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
+#           lcov --remove coverage.info '/usr/*' --output-file coverage.info
+#           lcov --remove coverage.info '/home/runner/work/sara/sara/cpp/third-party/*' --output-file coverage.info
+#           lcov --remove coverage.info '/home/runner/work/sara/sara/cpp/test/*' --output-file coverage.info
+#           lcov --remove coverage.info '/home/runner/work/sara/sara/build/*' --output-file coverage.info
+#           coveralls-lcov coverage.info
+
 jobs:
   build:
-    name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
-        config:
-        - {
-            name: "Windows latest MSVC",
-            os: windows-latest,
-            artifact: "windows-msvc.7z",
-            build_type: "Release",
-            cc: "cl",
-            cxx: "cl",
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
-            archiver: "7z a",
-            generators: "Visual Studio 16 2019"
-          }
-        - {
-            name: "Ubuntu 22.04",
-            os: ubuntu-22.04,
-            artifact: "ubuntu-22.04-gcc.7z",
-            build_type: "Debug",
+        os:  [macos-latest, ubuntu-22.04]
+        include:
+          - os: macos-latest
+          - os: ubuntu-22.04
+            cc: slackware
             container: 'nvidia/cuda:12.1.0-devel-ubuntu22.04'
-          }
-        - {
-            name: "macOS latest",
-            os: macos-latest,
-            artifact: "macos-clang.7z",
-            build_type: "Release",
-            cc: "clang",
-            cxx: "clang++",
-            archiver: "7za a",
-            generators: "Ninja"
-          }
 
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Install dependencies on Ubuntu
-        if: startsWith(matrix.config.name, 'Ubuntu 22.04')
-        run: |
-          # # Now add the additional APT repositories:
-          # #
-          # # CMake
-          # wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
-          # sudo echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy-rc main' | sudo tee -a /etc/apt/sources.list.d/kitware.list >/dev/null
-          # # Vulkan
-          # sudo wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
-          # sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
-          
-          sudo apt update -y && sudo apt upgrade -y
-          
-          # For the documentation.
-          sudo apt-get install -y -qq doxygen graphviz
+    - name: Install dependencies on Ubuntu
+      run: |
+        sudo apt update -y && sudo apt upgrade -y
 
-          # All the packages to compile the C++ codebase.
-          sudo apt-get install -y -qq \
-              build-essential \
-              ccache \
-              cmake \
-              cppcheck \
-              git \
-              lcov \
-              libboost-all-dev \
-              libclblast-dev \
-              libhdf5-dev \
-              libjpeg-dev \
-              libpng-dev \
-              libtiff5-dev \
-              libavcodec-dev \
-              libavformat-dev \
-              libavutil-dev \
-              libswscale-dev \
-              libglew-dev \
-              libglfw3-dev \
-              ocl-icd-opencl-dev \
-              opencl-headers \
-              libpocl-dev \
-              libceres-dev \
-              qtbase5-dev # \
-              # vulkan-sdk
-
-          # Install the GStreamer SDK.
-          sudo apt-get install -y -qq \
-            libgstreamer1.0-0         \
-            gstreamer1.0-plugins-base \
-            gstreamer1.0-plugins-good \
-            gstreamer1.0-plugins-bad  \
-            gstreamer1.0-plugins-ugly \
-            gstreamer1.0-libav        \
-            gstreamer1.0-doc          \
-            gstreamer1.0-tools        \
-            gstreamer1.0-x            \
-            gstreamer1.0-alsa         \
-            gstreamer1.0-gl           \
-            gstreamer1.0-gtk3         \
-            gstreamer1.0-qt5          \
-            gstreamer1.0-pulseaudio
-
-          # Python dependencies
-          sudo apt-get install -y -qq python3-dev
-
-          # Setup for GUI testing.
-          sudo apt-get install -y xvfb
-          Xvfb :1 -noreset 1>/dev/null 2>&1 &
-          export DISPLAY=:1
-
-          # Coveralls for code coverage
-          sudo apt install rubygems
-          sudo gem install bundler
-          bundle install
-
-      - name: Build and test on Ubuntu
-        if: startsWith(matrix.config.name, 'Ubuntu 22.04')
-        run: |
-          # Build Sara.
-          mkdir build
-          cd build
-          cmake .. \
-            -DCMAKE_BUILD_TYPE:STRING=Debug \
-            -DSARA_BUILD_SHARED_LIBS:BOOL=ON \
-            -DSARA_BUILD_VIDEOIO:BOOL=ON \
-            -DSARA_BUILD_SAMPLES:BOOL=ON \
-            -DSARA_BUILD_TESTS:BOOL=ON
-          cmake --build . -j$(nproc)
-          # Create deb package.
-          cmake --build . --target package -j$(nproc)
-          # Run tests.
-          DISPLAY=:1 ctest \
-            -j$(nproc) \
-            --output-on-failure \
-            --exclude-regex "test_core_ipc_cond1|shakti_test_*"
-          # Run coverage (disabled for now).
-          #- make -j$(nproc) coverage
-
-      - name: Send code coverage to Coveralls
-        if: startsWith(matrix.config.name, 'Ubuntu 22.04')
-        run: |
-          cd /home/runner/work/sara/sara
-          lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
-          lcov --remove coverage.info '/usr/*' --output-file coverage.info
-          lcov --remove coverage.info '/home/runner/work/sara/sara/cpp/third-party/*' --output-file coverage.info
-          lcov --remove coverage.info '/home/runner/work/sara/sara/cpp/test/*' --output-file coverage.info
-          lcov --remove coverage.info '/home/runner/work/sara/sara/build/*' --output-file coverage.info
-          coveralls-lcov coverage.info
+        # For the documentation.
+        sudo apt-get install -y -qq doxygen graphviz
