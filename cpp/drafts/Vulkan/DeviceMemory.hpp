@@ -6,7 +6,6 @@
 #include <fmt/format.h>
 
 #include <stdexcept>
-#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Shakti::Vulkan {
