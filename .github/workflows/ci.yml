@@ -29,10 +29,7 @@ jobs:
             os: ubuntu-22.04,
             artifact: "ubuntu-22.04-gcc.7z",
             build_type: "Debug",
-            cc: "gcc",
-            cxx: "g++",
-            archiver: "7z a",
-            generators: "Ninja"
+            container: 'nvidia/cuda:12.1.0-devel-ubuntu22.04'
           }
         - {
             name: "macOS latest",
@@ -51,9 +48,6 @@ jobs:
       - name: Install dependencies on Ubuntu
         if: startsWith(matrix.config.name, 'Ubuntu 22.04')
         run: |
-          # Update the packages list.
-          apt-get update -y && apt install -y sudo
-
           # # Now add the additional APT repositories:
           # #
           # # CMake
@@ -62,6 +56,8 @@ jobs:
           # # Vulkan
           # sudo wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
           # sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
+          
+          sudo apt update -y && sudo apt upgrade -y
           
           # For the documentation.
           sudo apt-get install -y -qq doxygen graphviz
