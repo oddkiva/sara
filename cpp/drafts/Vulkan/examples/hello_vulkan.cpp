@@ -488,8 +488,6 @@ public:
       vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 #endif
 
-      vkCmdDraw(command_buffer, 3, 1, 0, 0);
-
       static const auto vbos = std::array<VkBuffer, 1>{_vbo};
       static constexpr auto offsets = std::array<VkDeviceSize, 1>{0};
       vkCmdBindVertexBuffers(command_buffer, 0,
