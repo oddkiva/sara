@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_swapchain_build)
                           .enable_device_features({})
                           .enable_validation_layers(validation_layers_required)
                           .create();
-  BOOST_CHECK(device.handle != nullptr);
+  BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
   const auto swapchain =
       kvk::Swapchain{physical_device, device, surface, window};

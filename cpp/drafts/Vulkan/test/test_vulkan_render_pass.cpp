@@ -16,9 +16,9 @@
 #include <drafts/Vulkan/EasyGLFW.hpp>
 #include <drafts/Vulkan/Instance.hpp>
 #include <drafts/Vulkan/PhysicalDevice.hpp>
+#include <drafts/Vulkan/RenderPass.hpp>
 #include <drafts/Vulkan/Surface.hpp>
 #include <drafts/Vulkan/Swapchain.hpp>
-#include <drafts/Vulkan/RenderPass.hpp>
 
 
 #include <boost/test/unit_test.hpp>
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_render_pass_build)
                           .enable_device_features({})
                           .enable_validation_layers(validation_layers_required)
                           .create();
-  BOOST_CHECK(device.handle != nullptr);
+  BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
   const auto swapchain =
       kvk::Swapchain{physical_device, device, surface, window};
@@ -124,7 +124,8 @@ BOOST_AUTO_TEST_CASE(test_render_pass_build)
   render_pass.create_basic_render_pass(device, swapchain.image_format);
   BOOST_CHECK(render_pass.handle != nullptr);
   BOOST_CHECK_EQUAL(render_pass.color_attachments.size(), 1u);
-  BOOST_CHECK_EQUAL(render_pass.color_attachment_refs.size(), render_pass.color_attachments.size());
+  BOOST_CHECK_EQUAL(render_pass.color_attachment_refs.size(),
+                    render_pass.color_attachments.size());
   BOOST_CHECK_EQUAL(render_pass.subpasses.size(), 1u);
   BOOST_CHECK_EQUAL(render_pass.dependencies.size(), 1u);
 }

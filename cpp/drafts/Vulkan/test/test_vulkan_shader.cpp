@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_vulkan_shader_module)
                           .enable_device_features({})
                           .enable_validation_layers(validation_layers_required)
                           .create();
-  BOOST_CHECK(device.handle != nullptr);
+  BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
   // Now build the graphics pipeline.
   namespace fs = std::filesystem;
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(test_vulkan_shader_module)
   const auto vs = svk::read_spirv_compiled_shader(vs_path.string());
   BOOST_CHECK(!vs.empty());
 
-  const auto vs_module = svk::ShaderModule{device.handle, vs};
+  const auto vs_module = svk::ShaderModule{device, vs};
   BOOST_CHECK(vs_module.device_handle != nullptr);
   BOOST_CHECK(vs_module.handle != nullptr);
 }

@@ -5,7 +5,6 @@
 #include <drafts/Vulkan/Fence.hpp>
 #include <drafts/Vulkan/Framebuffer.hpp>
 #include <drafts/Vulkan/GraphicsPipeline.hpp>
-#include <drafts/Vulkan/Queue.hpp>
 #include <drafts/Vulkan/RenderPass.hpp>
 #include <drafts/Vulkan/Swapchain.hpp>
 
@@ -15,8 +14,6 @@ namespace DO::Shakti::Vulkan {
   class CommandBufferSequence
   {
   public:
-    friend struct Queue;
-
     CommandBufferSequence() = default;
 
     CommandBufferSequence(const std::uint32_t num_buffers,
@@ -100,6 +97,11 @@ namespace DO::Shakti::Vulkan {
     auto reset(int i, VkCommandBufferResetFlags flags = 0) const -> void
     {
       vkResetCommandBuffer(_command_buffers[i], flags);
+    }
+
+    auto data() const -> const VkCommandBuffer*
+    {
+      return _command_buffers.data();
     }
 
   private:

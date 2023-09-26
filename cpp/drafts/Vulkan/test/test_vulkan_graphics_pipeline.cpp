@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)
                           .enable_device_features({})
                           .enable_validation_layers(validation_layers_required)
                           .create();
-  BOOST_CHECK(device.handle != nullptr);
+  BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
   // Now initialize the swapchain to present the rendering on screen.
   const auto swapchain =

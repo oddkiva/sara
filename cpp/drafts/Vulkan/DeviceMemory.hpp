@@ -1,12 +1,12 @@
 #pragma once
 
-#include <vulkan/vulkan_core.h>
-
-#include <DO/Sara/Core/DebugUtilities.hpp>
+#include <drafts/Vulkan/Buffer.hpp>
+#include <drafts/Vulkan/PhysicalDevice.hpp>
 
 #include <fmt/format.h>
 
 #include <stdexcept>
+#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Shakti::Vulkan {
@@ -62,15 +62,15 @@ namespace DO::Shakti::Vulkan {
     }
 
     template <typename T>
-    auto copy_from(T* src_ptr, const VkDeviceSize src_size,
-                   const VkDeviceSize dst_offset = 0) -> void
+    auto copy_from(T* src_ptr, const VkDeviceSize src_num_elements,
+                   const VkDeviceSize dst_start = 0) const -> void
     {
-      const auto src_byte_size = sizeof(T) * src_size;
+      const auto src_byte_size = sizeof(T) * src_num_elements;
 
       // Get the virtual host destination pointer.
       auto dst_ptr = static_cast<void*>(nullptr);
-      vkMapMemory(_device, _handle, dst_offset, src_byte_size, 0 /* flags */,
-                  &dst_ptr);
+      vkMapMemory(_device, _handle, sizeof(T) * dst_start, src_byte_size,
+                  0 /* flags */, &dst_ptr);
       // Copy the host data to the virtual host destination.
       std::memcpy(dst_ptr, src_ptr, src_byte_size);
       // Invalidate the virtual host destination pointer.
@@ -98,6 +98,40 @@ namespace DO::Shakti::Vulkan {
     VkDevice _device = nullptr;
     VkDeviceMemory _handle = nullptr;
     VkDeviceSize _size = 0;
+  };
+
+  struct DeviceMemoryFactory
+  {
+    auto allocate_for_staging_buffer(const Buffer& buffer) const -> DeviceMemory
+    {
+      static constexpr auto mem_props = VkMemoryPropertyFlags{
+          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT  //
+      };
+
+      const auto mem_reqs = buffer.get_memory_requirements();
+      const auto mem_type =
+          _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
+
+      return {_device, buffer.size(), mem_type};
+    }
+
+    auto allocate_for_device_buffer(const Buffer& buffer) const -> DeviceMemory
+    {
+      static constexpr auto mem_props =
+          VkMemoryPropertyFlags{VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT};
+
+      const auto mem_reqs = buffer.get_memory_requirements();
+      const auto mem_type =
+          _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
+
+      SARA_CHECK(buffer.size());
+
+      return {_device, buffer.size(), mem_type};
+    }
+
+    const PhysicalDevice& _physical_device = nullptr;
+    const VkDevice _device = nullptr;
   };
 
 }  // namespace DO::Shakti::Vulkan

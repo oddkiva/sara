@@ -66,7 +66,7 @@ namespace DO::Kalpana::Vulkan {
                                   const VkFormat swapchain_image_format) -> void
     {
       // First bind the device handle to the render pass object.
-      device_handle = device.handle;
+      device_handle = device;
 
       // 1. Specify the color buffer.
       color_attachments.resize(1);
@@ -124,8 +124,8 @@ namespace DO::Kalpana::Vulkan {
           static_cast<std::uint32_t>(dependencies.size());
       render_pass_create_info.pDependencies = dependencies.data();
 
-      const auto status = vkCreateRenderPass(
-          device.handle, &render_pass_create_info, nullptr, &handle);
+      const auto status = vkCreateRenderPass(device, &render_pass_create_info,
+                                             nullptr, &handle);
       if (status != VK_SUCCESS)
         throw std::runtime_error{
             fmt::format("[VK] Failed to create render pass! Error code: {}",
