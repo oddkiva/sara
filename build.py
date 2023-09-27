@@ -105,7 +105,7 @@ def generate_project(
         swift_bridging_include_dirs = SWIFT_TOOLCHAIN_DIR / "usr/include"
         cmake_options.append("-D CMAKE_CXX_COMPILER={}".format(cxx_compiler))
         cmake_options.append("-D CMAKE_C_COMPILER={}".format(c_compiler))
-        cmake_options.append("-D CMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld")
+        # cmake_options.append("-D CMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld")
         cmake_options.append("-D SWIFT_BRIDGING_INCLUDE_DIR={}".format(
             swift_bridging_include_dirs))
 

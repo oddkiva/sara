@@ -44,6 +44,7 @@ RUN apt-get update -y && apt-get install -y \
   libjpeg-dev               \
   libpng-dev                \
   libtiff5-dev              \
+  libwebp-dev               \
   libavcodec-dev            \
   libavformat-dev           \
   libavutil-dev             \
@@ -58,7 +59,7 @@ RUN apt-get update -y && apt-get install -y \
   ocl-icd-opencl-dev        \
   opencl-headers            \
   python3-dev               \
-  qtbase5-dev               \
+  qt6-base-dev              \
   vulkan-sdk
 
 # Install Halide.
