@@ -98,6 +98,13 @@ elseif (NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
 
   find_package(HDF5 COMPONENTS CXX REQUIRED)
 
+  if (WIN32 AND SARA_USE_VLD)
+    find_package(VisualLeakDetector)
+    include_directories(${VLD_INCLUDE_DIR})
+    link_directories(${VLD_LINK_DIRECTORIES})
+  endif ()
+
+  # Image I/O libraries.
   find_package(JPEG REQUIRED)
   find_package(PNG  REQUIRED)
   find_package(TIFF REQUIRED)
@@ -109,6 +116,7 @@ elseif (NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
     find_package(WebP REQUIRED)
   endif ()
 
+  # Qt 5 or 6.
   if (SARA_USE_QT6)
     set (QT_VERSION 6)
     find_package(Qt${QT_VERSION} COMPONENTS Core Widgets OpenGL OpenGLWidgets REQUIRED)
@@ -125,7 +133,14 @@ elseif (NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   find_package(glfw3 REQUIRED)
   find_package(Freetype)
 
+  # High-performance compute.
   find_package(OpenCL)
+  find_package(Vulkan)
+  find_program(
+    GLSLC_EXECUTABLE
+    NAMES glslc
+    HINTS ENV VULKAN_SDK
+    PATH_SUFFIXES bin)
 
   find_package(Ceres REQUIRED)
 

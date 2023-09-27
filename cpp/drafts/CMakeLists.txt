@@ -7,20 +7,9 @@ endif ()
 
 add_subdirectory(ChessboardDetection)
 add_subdirectory(Calibration)
-
-if (NOT WIN32)
-  add_subdirectory(Compute)
-endif ()
-
-add_subdirectory(OpenCL)
-
+add_subdirectory(Compute)
 add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
-
-add_subdirectory(Vulkan)
-
 add_subdirectory(NuScenes)
-
 add_subdirectory(Taskflow)
-
 add_subdirectory(OnnxRuntime)

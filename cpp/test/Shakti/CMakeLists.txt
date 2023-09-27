@@ -1,10 +1,3 @@
-if (WIN32 AND DO_USE_VLD)
-  find_package(VisualLeakDetector)
-  include_directories(${VLD_INCLUDE_DIR})
-  link_directories(${VLD_LINK_DIRECTORIES})
-endif ()
-
-
 function (shakti_add_test)
   set(_options OPTIONAL)
   set(_file SOURCES)
@@ -58,3 +51,5 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/../)
 
 add_subdirectory(Cuda)
+add_subdirectory(OpenCL)
+add_subdirectory(Vulkan)
