@@ -62,18 +62,6 @@ RUN apt-get update -y && apt-get install -y \
   qt6-base-dev              \
   vulkan-sdk
 
-# Install Halide.
-RUN mkdir ${HOME}/opt
-RUN wget https://github.com/halide/Halide/releases/download/v16.0.0/Halide-16.0.0-x86-64-linux-1e963ff817ef0968cc25d811a25a7350c8953ee6.tar.gz
-RUN tar xvzf Halide-16.0.0-x86-64-linux-1e963ff817ef0968cc25d811a25a7350c8953ee6.tar.gz && \
-      mv Halide-16.0.0-x86-64-linux ${HOME}/opt
-
-# Install Swift toolchain.
-RUN wget https://download.swift.org/swift-5.9-release/ubuntu2204/swift-5.9-RELEASE/swift-5.9-RELEASE-ubuntu22.04.tar.gz
-RUN tar xvzf swift-5.9-RELEASE-ubuntu22.04.tar.gz  \
-      && mv swift-5.9-RELEASE-ubuntu22.04 ${HOME}/opt
-
-
 # Install Python dependencies.
 RUN pip3 install \
       coverage    \
@@ -85,6 +73,16 @@ RUN pip3 install \
       PySide2     \
       ipython     \
       pybind11
+
+# Install Swift toolchain.
+RUN wget https://download.swift.org/swift-5.9-release/ubuntu2204/swift-5.9-RELEASE/swift-5.9-RELEASE-ubuntu22.04.tar.gz
+RUN tar xvzf swift-5.9-RELEASE-ubuntu22.04.tar.gz  \
+      && mv swift-5.9-RELEASE-ubuntu22.04 /opt
+
+# Install Halide.
+RUN wget https://github.com/halide/Halide/releases/download/v16.0.0/Halide-16.0.0-x86-64-linux-1e963ff817ef0968cc25d811a25a7350c8953ee6.tar.gz
+RUN tar xvzf Halide-16.0.0-x86-64-linux-1e963ff817ef0968cc25d811a25a7350c8953ee6.tar.gz && \
+      mv Halide-16.0.0-x86-64-linux /opt
 
 # Please make my life easier
 # TODO: install neovim, etc.

@@ -41,17 +41,11 @@ SYSTEM = platform.system()
 
 # Third-party libraries that makes Sara faster, stronger, cooler...
 if SYSTEM == "Linux":
-    HALIDE_ROOT_PATH = pathlib.Path.home() / f"opt/Halide-{HALIDE_VERSION}-x86-64-linux"
-    ONNXRUNTIME_ROOT_PATH = (
-        pathlib.Path.home() / "opt/onnxruntime-linux-x64-gpu-1.14.0"
-    )
-    NVIDIA_CODEC_SDK_ROOT_PATH = (
-        pathlib.Path.home() / "opt/Video_Codec_SDK_12.1.14"
-    )
-    SWIFT_TOOLCHAIN_DIR = (
-        pathlib.Path.home()
-        / f"opt/swift-{SWIFT_VERSION}-RELEASE-ubuntu{UBUNTU_VERSION}"
-    )
+    OPT_PATH = pathlib.Path("/opt")
+    HALIDE_ROOT_PATH = OPT_PATH / (f"Halide-{HALIDE_VERSION}-x86-64-linux")
+    ONNXRUNTIME_ROOT_PATH = OPT_PATH / "onnxruntime-linux-x64-gpu-1.14.0"
+    NVIDIA_CODEC_SDK_ROOT_PATH = OPT_PATH / "Video_Codec_SDK_12.1.14"
+    SWIFT_TOOLCHAIN_DIR = OPT_PATH / f"swift-{SWIFT_VERSION}-RELEASE-ubuntu{UBUNTU_VERSION}"
     SWIFT_TOOLCHAIN_BIN_DIR = SWIFT_TOOLCHAIN_DIR / "usr/bin"
     SWIFTC_PATH = SWIFT_TOOLCHAIN_BIN_DIR / "swiftc"
 elif SYSTEM == "Darwin":
