@@ -17,7 +17,8 @@ target_compile_options(DO_Shakti_MultiArray
 add_library(DO::Shakti::MultiArray ALIAS DO_Shakti_MultiArray)
 
 # Create the reamining libraries.
-set(DO_Shakti_LIBRARIES ImageProcessing Segmentation Utilities)
+# set(DO_Shakti_LIBRARIES ImageProcessing Segmentation Utilities)
+set(DO_Shakti_LIBRARIES Segmentation Utilities)
 if (NvidiaVideoCodec_ROOT)
   list(APPEND DO_Shakti_LIBRARIES VideoIO)
 endif ()
@@ -27,10 +28,10 @@ foreach (library ${DO_Shakti_LIBRARIES})
   shakti_generate_library("${library}")
 endforeach ()
 
-target_link_libraries(DO_Shakti_ImageProcessing
-  PUBLIC
-  DO_Shakti_MultiArray
-  DO_Shakti_Utilities)
+# target_link_libraries(DO_Shakti_ImageProcessing
+#   PUBLIC
+#   DO_Shakti_MultiArray
+#   DO_Shakti_Utilities)
 target_link_libraries(DO_Shakti_Segmentation
   PUBLIC
   DO_Shakti_MultiArray
