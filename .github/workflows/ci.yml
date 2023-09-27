@@ -175,7 +175,7 @@ jobs:
         cd build
         cmake .. \
           -G Ninja \
-          -D CMAKE_BUILD_TYPE:STRING=Debug \
+          -D CMAKE_BUILD_TYPE:STRING=Release \
           -D SARA_BUILD_SHARED_LIBS:BOOL=ON \
           -D SARA_BUILD_VIDEOIO:BOOL=ON \
           -D SARA_BUILD_SAMPLES:BOOL=ON \
