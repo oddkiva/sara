@@ -49,5 +49,5 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/cpp/third-party)
 
 add_subdirectory(MultiArray)
-add_subdirectory(ImageProcessing)
+# add_subdirectory(ImageProcessing)
 add_subdirectory(Segmentation)
