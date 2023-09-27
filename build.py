@@ -20,14 +20,28 @@ BUILD_TASKS = [
 # Build types.
 BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 
-# Some constants
+# Platform and third-party version constants
+UBUNTU_VERSION = "22.04"
+CUDA_VERSION = "12.1.0"
+TRT_VERSION = "8.6"
+SWIFT_VERSION = "5.9"
+HALIDE_VERSION = "16.0.0"
+
+# Docker
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
-SARA_DOCKER_IMAGE = "registry.gitlab.com/do-cv/sara"
+SARA_DOCKER_IMAGE_BASENAME = "oddkiva/sara-devel"
+SARA_DOCKER_IMAGE_VERSION = "-".join([f'cuda{CUDA_VERSION}',
+                                      f'ubuntu{UBUNTU_VERSION}',
+                                      f'trt{TRT_VERSION}',
+                                      f'swift{SWIFT_VERSION}',
+                                      f'halide{HALIDE_VERSION}'])
+SARA_DOCKER_IMAGE = f'{SARA_DOCKER_IMAGE_BASENAME}:{SARA_DOCKER_IMAGE_VERSION}'
+
 SYSTEM = platform.system()
 
 # Third-party libraries that makes Sara faster, stronger, cooler...
 if SYSTEM == "Linux":
-    HALIDE_ROOT_PATH = pathlib.Path.home() / "opt/Halide-16.0.0-x86-64-linux"
+    HALIDE_ROOT_PATH = pathlib.Path.home() / f"opt/Halide-{HALIDE_VERSION}-x86-64-linux"
     ONNXRUNTIME_ROOT_PATH = (
         pathlib.Path.home() / "opt/onnxruntime-linux-x64-gpu-1.14.0"
     )
@@ -36,7 +50,7 @@ if SYSTEM == "Linux":
     )
     SWIFT_TOOLCHAIN_DIR = (
         pathlib.Path.home()
-        / "opt/swift-5.9-RELEASE-ubuntu22.04"
+        / f"opt/swift-{SWIFT_VERSION}-RELEASE-ubuntu{UBUNTU_VERSION}"
     )
     SWIFT_TOOLCHAIN_BIN_DIR = SWIFT_TOOLCHAIN_DIR / "usr/bin"
     SWIFTC_PATH = SWIFT_TOOLCHAIN_BIN_DIR / "swiftc"
@@ -206,7 +220,7 @@ def build_library_docker(source_dir: str) -> None:
             "-f",
             "docker/Dockerfile",
             "-t",
-            f"{SARA_DOCKER_IMAGE}:latest",
+            f"{SARA_DOCKER_IMAGE}",
             ".",
         ],
         source_dir,
@@ -238,7 +252,7 @@ def build_book_docker():
             "-f",
             "./docker/Dockerfile.book",
             "-t",
-            "{}:latest".format(sara_book_build_image),
+            f"{sara_book_build_image}:latest",
             ".",
         ],
         cwd=SARA_SOURCE_DIR,
