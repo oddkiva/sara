@@ -41,10 +41,10 @@ on:
 #             archiver: "7za a",
 #             generators: "Ninja"
 #           }
-# 
+#
 #     steps:
 #       - uses: actions/checkout@v4
-# 
+#
 #       - name: Install dependencies on Ubuntu
 #         if: startsWith(matrix.config.name, 'Ubuntu 22.04')
 #         run: |
@@ -56,12 +56,12 @@ on:
 #           # # Vulkan
 #           # sudo wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
 #           # sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
-#           
+#
 #           sudo apt update -y && sudo apt upgrade -y
-#           
+#
 #           # For the documentation.
 #           sudo apt-get install -y -qq doxygen graphviz
-# 
+#
 #           # All the packages to compile the C++ codebase.
 #           sudo apt-get install -y -qq \
 #               build-essential \
@@ -88,7 +88,7 @@ on:
 #               libceres-dev \
 #               qtbase5-dev # \
 #               # vulkan-sdk
-# 
+#
 #           # Install the GStreamer SDK.
 #           sudo apt-get install -y -qq \
 #             libgstreamer1.0-0         \
@@ -105,20 +105,20 @@ on:
 #             gstreamer1.0-gtk3         \
 #             gstreamer1.0-qt5          \
 #             gstreamer1.0-pulseaudio
-# 
+#
 #           # Python dependencies
 #           sudo apt-get install -y -qq python3-dev
-# 
+#
 #           # Setup for GUI testing.
 #           sudo apt-get install -y xvfb
 #           Xvfb :1 -noreset 1>/dev/null 2>&1 &
 #           export DISPLAY=:1
-# 
+#
 #           # Coveralls for code coverage
 #           sudo apt install rubygems
 #           sudo gem install bundler
 #           bundle install
-# 
+#
 #       - name: Build and test on Ubuntu
 #         if: startsWith(matrix.config.name, 'Ubuntu 22.04')
 #         run: |
@@ -141,7 +141,7 @@ on:
 #             --exclude-regex "test_core_ipc_cond1|shakti_test_*"
 #           # Run coverage (disabled for now).
 #           #- make -j$(nproc) coverage
-# 
+#
 #       - name: Send code coverage to Coveralls
 #         if: startsWith(matrix.config.name, 'Ubuntu 22.04')
 #         run: |
