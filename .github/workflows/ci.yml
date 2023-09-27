@@ -161,17 +161,26 @@ jobs:
         os:  [macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            container: 'nvidia/cuda:12.1.0-devel-ubuntu22.04'
+            container: 'oddkiva/sara-devel:cuda12.1.0-ubuntu22.04-trt8.6-swift5.9-halide16.0.0'
 
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install dependencies on Ubuntu
-      if: matrix.include.container
+    - name: Build and test on Ubuntu
+      if: startsWith(matrix.include.container, 'oddkiva/sara-devel')
       run: |
-        apt update -y && apt upgrade -y
-
-        # For the documentation.
-        apt-get install -y -qq doxygen graphviz
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE:STRING=Debug \
+          -DSARA_BUILD_SHARED_LIBS:BOOL=ON \
+          -DSARA_BUILD_VIDEOIO:BOOL=ON \
+          -DSARA_BUILD_SAMPLES:BOOL=ON \
+          -DSARA_BUILD_TESTS:BOOL=ON
+        cmake --build . -j$(nproc)
+        DISPLAY=:1 ctest \
+          -j$(nproc) \
+          --output-on-failure \
+          --exclude-regex "test_core_ipc_cond1|shakti_test_*"
