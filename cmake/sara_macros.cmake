@@ -32,7 +32,7 @@ macro (sara_dissect_version)
 
   # Build the version.
   set(DO_Sara_VERSION
-    "${DO_Sara_VERSION_MAJOR}.${DO_Sara_VERSION_MINOR}.${DO_Sara_BUILD_NUMBER}")
+    "${DO_Sara_VERSION_MAJOR}.${DO_Sara_VERSION_MINOR}.0") #.${DO_Sara_BUILD_NUMBER}")
   set(DO_Sara_SOVERSION "${DO_Sara_VERSION_MAJOR}.${DO_Sara_VERSION_MINOR}")
 
   configure_file(
