@@ -1,9 +1,9 @@
 function (shakti_add_test)
   set(_options OPTIONAL)
-  set(_file SOURCES)
-  set(_dependencies DEPENDENCIES)
+  set(_single_value_args SOURCES FOLDER)
+  set(_multi_value_args DEPENDENCIES)
   cmake_parse_arguments(shakti_add_test
-    "${_options}" "${_file}" "${_dependencies}" ${ARGN})
+    "${_options}" "${_single_value_args}" "${_multi_value_args}" ${ARGN})
 
   get_filename_component(_filename "${shakti_add_test_SOURCES}" NAME_WE)
   set (_test_name shakti_${_filename})
@@ -21,7 +21,7 @@ function (shakti_add_test)
   set_target_properties(${_test_name}
     PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
-    FOLDER "Tests/Shakti")
+    FOLDER "Tests/Shakti/${shakti_add_test_FOLDER}")
 
   target_compile_definitions(${_test_name}
     PRIVATE -DBOOST_TEST_DYN_LINK)

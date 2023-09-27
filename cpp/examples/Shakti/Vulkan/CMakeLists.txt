@@ -3,7 +3,7 @@ target_link_libraries(
   hello_vulkan #
   PRIVATE DO::Sara::Core #
           DO::Shakti::Vulkan)
-set_target_properties(hello_vulkan PROPERTIES FOLDER "Tutorials/Vulkan")
+set_target_properties(hello_vulkan PROPERTIES FOLDER "Examples/Shakti/Vulkan")
 
 # file(GLOB SHADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.vert *.frag)
 add_custom_command(
