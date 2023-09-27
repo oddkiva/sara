@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_read_write_feature_graph_to_hdf5)
   boost::add_edge(v0, v5, graph);
   boost::add_edge(v1, v3, graph);
 
-  const auto filepath = (fs::temp_directory_path() / "feature_graph.h5").string();
+  const auto filepath = (fs::current_path() / "feature_graph.h5").string();
 
   // Write data to HDF5.
   SARA_DEBUG << "WRITE PHASE" << std::endl;

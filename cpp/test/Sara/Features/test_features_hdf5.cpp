@@ -25,8 +25,7 @@ using namespace DO::Sara;
 
 BOOST_AUTO_TEST_CASE(test_hdf5_read_write_array)
 {
-  const auto filepath =
-      (fs::temp_directory_path() / "sfm_dummy_data.h5").string();
+  const auto filepath = (fs::current_path() / "sfm_dummy_data.h5").string();
 
   // Write.
   {
