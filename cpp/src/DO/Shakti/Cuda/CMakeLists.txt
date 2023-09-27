@@ -1,3 +1,9 @@
+if (NOT CMAKE_CUDA_COMPILER)
+  return ()
+endif ()
+
+sara_message("Building DO::Shakti CUDA Libraries")
+
 add_subdirectory(Utilities)
 add_subdirectory(MultiArray)
 # FIXME: update the code for CUDA 12.
