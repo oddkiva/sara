@@ -223,8 +223,28 @@ def build_project(build_dir: str, build_type: str):
     execute(command_line, build_dir)
 
 
-def run_project_tests(build_dir: str, build_type: str):
+def run_project_tests(build_dir: str, build_type: str,
+                      build_for_ci: bool = False):
     command_line = ["ctest", "--output-on-failure"]
+    if build_for_ci:
+        # N.B.: actually this is specific to GitHub Actions:
+        # See: https://github.com/oddkiva/sara/actions/runs/6333376713/job/17201395646
+        #
+        # - build machines don't support CUDA, Vulkan at runtime
+        # - it is not clear how to run GUI tests.
+        #
+        # We will rely on the testing on local machines instead and not rely
+        # too much on GHA.
+        tests_excluded = [
+            "test_core_ipc_cond1",
+            "test_graphics_*",
+            "test_halide_*",
+            "test_vulkan_*",
+            "shakti_test_*",
+        ]
+        command_line.append("--exclude-regex")
+        command_line.append("|".join(tests_excluded))
+
     if PROJECT_TYPE == "Xcode":
         command_line += ["--config", build_type]
 
@@ -356,7 +376,7 @@ if __name__ == "__main__":
                 args.ci
             )
             build_project(build_dir, args.build_type)
-            run_project_tests(build_dir, args.build_type)
+            run_project_tests(build_dir, args.build_type, args.ci)
 
         if task == "web":
             # Make sure that you have done the following:
