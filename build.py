@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import multiprocessing as mp
 import pathlib
 import platform
 import shutil
@@ -190,7 +191,7 @@ def generate_project(
 
 
 def build_project(build_dir: str, build_type: str):
-    command_line = ["cmake", "--build", ".", "-j12", "-v"]
+    command_line = ["cmake", "--build", ".", "-j{}".format(mp.cpu_count()), "-v"]
     if PROJECT_TYPE == "Xcode":
         command_line += ["--config", build_type]
 
