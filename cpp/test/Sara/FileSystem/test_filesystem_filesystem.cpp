@@ -50,10 +50,10 @@ BOOST_AUTO_TEST_CASE(test_mkdir)
 BOOST_AUTO_TEST_CASE(test_cp)
 {
   const auto src = sara::ls(src_path("../../../../data/"), ".jpg")[0];
-  const auto dst =
-      (fs::temp_directory_path() / fs::path{src}.filename()).string();
+  const auto dst = (fs::current_path() / fs::path{src}.filename()).string();
   SARA_CHECK(src);
   SARA_CHECK(dst);
+
   sara::cp(src, dst);
   BOOST_CHECK(fs::exists(dst));
 
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_cp)
 BOOST_AUTO_TEST_CASE(test_ls)
 {
   {
-    const auto images = sara::ls(fs::temp_directory_path().string(), ".jpg");
+    const auto images = sara::ls(fs::current_path().string(), ".jpg");
     BOOST_CHECK(images.empty());
   }
 
