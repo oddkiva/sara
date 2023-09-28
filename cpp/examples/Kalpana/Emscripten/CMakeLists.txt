@@ -2,6 +2,7 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten AND NOT GLEW_FOUND)
   return()
 endif()
 
+# N.B.: set this value back to NO to create a JavaScript module.
 set(SARA_EMSCRIPTEN_BUILD_HTML YES)
 
 # In case something goes wrong.

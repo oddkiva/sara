@@ -186,4 +186,4 @@ jobs:
     - name: Build and test on Ubuntu
       if: startsWith(matrix.container, 'oddkiva/sara-devel')
       run: |
-        ./build.py --tasks library --build_type Release --from_scratch
+        ./build.py --tasks library --build_type Release --from_scratch --ci

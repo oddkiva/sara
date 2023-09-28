@@ -315,6 +315,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Rebuild the project from scratch",
     )
+    parser.add_argument(
+        "--ci",
+        action="store_true",
+        help="Build only essential parts of the project for Continous Integration",
+    )
     args = parser.parse_args()
 
     for task in args.tasks:
@@ -345,7 +350,10 @@ if __name__ == "__main__":
                     f"{SARA_SOURCE_DIR.name}-build-{args.build_type}"
                 )
             generate_project(
-                SARA_SOURCE_DIR, build_dir, args.build_type, args.from_scratch
+                SARA_SOURCE_DIR, build_dir,
+                args.build_type,
+                args.from_scratch,
+                args.ci
             )
             build_project(build_dir, args.build_type)
             run_project_tests(build_dir, args.build_type)
