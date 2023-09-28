@@ -19,7 +19,7 @@ BUILD_TASKS = [
 ]
 
 # Build types.
-BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
+BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan", "Emscripten"]
 
 # Platform and third-party version constants
 UBUNTU_VERSION = "22.04"
@@ -96,6 +96,7 @@ def generate_project(
     build_dir: str,
     build_type: str,
     from_scratch: bool = False,
+    build_for_ci: bool = False
 ):
     if from_scratch and build_dir.exists():
         shutil.rmtree(build_dir)
@@ -104,19 +105,21 @@ def generate_project(
         pathlib.Path.mkdir(build_dir)
 
     cmake_options = []
-    cmake_options.append("-G {}".format(PROJECT_TYPE))
+    cmake_options.append(f"-G {PROJECT_TYPE}")
     if PROJECT_TYPE != "Xcode":
-        cmake_options.append("-D CMAKE_BUILD_TYPE={}".format(build_type))
+        cmake_options.append(f"-D CMAKE_BUILD_TYPE={build_type}")
 
     if SYSTEM == "Linux":
         cxx_compiler = SWIFT_TOOLCHAIN_BIN_DIR / "clang++"
         c_compiler = SWIFT_TOOLCHAIN_BIN_DIR / "clang"
         swift_bridging_include_dirs = SWIFT_TOOLCHAIN_DIR / "usr/include"
-        cmake_options.append("-D CMAKE_CXX_COMPILER={}".format(cxx_compiler))
-        cmake_options.append("-D CMAKE_C_COMPILER={}".format(c_compiler))
+        cmake_options.append(f"-D CMAKE_CXX_COMPILER={cxx_compiler}")
+        cmake_options.append(f"-D CMAKE_C_COMPILER={c_compiler}")
         # cmake_options.append("-D CMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld")
-        cmake_options.append("-D SWIFT_BRIDGING_INCLUDE_DIR={}".format(
-            swift_bridging_include_dirs))
+        cmake_options.append(
+            f"-D SWIFT_BRIDGING_INCLUDE_DIR={swift_bridging_include_dirs}"
+        )
+
 
     # Support for YouCompleteMe auto-completions
     cmake_options.append("-D CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON")
@@ -128,13 +131,14 @@ def generate_project(
         qt6_root_dir = subprocess.check_output(["brew", "--prefix", "qt"])
         qt6_root_dir = qt6_root_dir.decode(sys.stdout.encoding).strip()
         qt6_cmake_dir = pathlib.Path(qt6_root_dir) / "lib" / "cmake" / "Qt6"
-        cmake_options.append("-D Qt6_DIR={}".format(qt6_cmake_dir))
+        cmake_options.append(f"-D Qt6_DIR={qt6_cmake_dir}")
 
     # Compile shared or static libraries.
     cmake_options.append("-D SARA_BUILD_SHARED_LIBS:BOOL=ON")
     cmake_options.append("-D SARA_BUILD_TESTS:BOOL=ON")
-    cmake_options.append("-D SARA_BUILD_SAMPLES:BOOL=ON")
-    cmake_options.append("-D SARA_BUILD_DRAFTS:BOOL=ON")
+    if not build_for_ci:
+        cmake_options.append("-D SARA_BUILD_SAMPLES:BOOL=ON")
+        cmake_options.append("-D SARA_BUILD_DRAFTS:BOOL=ON")
 
     # Compile the Video I/O module.
     cmake_options.append("-D SARA_BUILD_VIDEOIO:BOOL=ON")
@@ -148,7 +152,7 @@ def generate_project(
         llvm_dir = subprocess.check_output(["brew", "--prefix", "llvm"])
         llvm_dir = llvm_dir.decode(sys.stdout.encoding).strip()
         llvm_cmake_dir = pathlib.Path(llvm_dir) / "lib" / "cmake" / "llvm"
-        cmake_options.append("-D LLVM_DIR={}".format(llvm_cmake_dir))
+        cmake_options.append(f"-D LLVM_DIR={llvm_cmake_dir}")
 
     # Compile ONNX runtime code.
     if SYSTEM == "Linux" and ONNXRUNTIME_ROOT_PATH.exists():
@@ -160,7 +164,7 @@ def generate_project(
             and pathlib.Path(NVIDIA_CODEC_SDK_ROOT_PATH).exists()
     ):
         cmake_options.append(
-            "-D NvidiaVideoCodec_ROOT={}".format(NVIDIA_CODEC_SDK_ROOT_PATH)
+            f"-D NvidiaVideoCodec_ROOT={NVIDIA_CODEC_SDK_ROOT_PATH}"
         )
 
     # Specify the paths for Qt and Halide.
@@ -168,30 +172,29 @@ def generate_project(
         my_cmake_prefix_paths = [str(path) for path in my_cmake_prefix_paths]
         my_cmake_prefix_paths = ";".join(my_cmake_prefix_paths)
         cmake_options.append(
-            "-D CMAKE_PREFIX_PATH={}".format(my_cmake_prefix_paths)
+            f"-D CMAKE_PREFIX_PATH={my_cmake_prefix_paths}"
         )
 
     # Setup Swift bindings.
     if SYSTEM == "Darwin":
         cmake_options.append("-D CMAKE_Swift_COMPILER=/usr/bin/swiftc")
     elif SYSTEM == "Linux" and pathlib.Path(SWIFTC_PATH).exists():
-        cmake_options.append("-D CMAKE_Swift_COMPILER={}".format(SWIFTC_PATH))
+        cmake_options.append(f"-D CMAKE_Swift_COMPILER={SWIFTC_PATH}")
 
     # Setup Python bindings.
     if PYBIND11_DIR is not None:
         cmake_options.append("-D SARA_BUILD_PYTHON_BINDINGS:BOOL=ON")
-        cmake_options.append("-D pybind11_DIR={}".format(PYBIND11_DIR))
-        cmake_options.append(
-            "-D PYTHON_INCLUDE_DIR={}".format(PYTHON_INCLUDE_DIR)
-        )
-        cmake_options.append("-D PYTHON_LIBRARY={}".format(PYTHON_LIBRARY))
+        cmake_options.append(f"-D pybind11_DIR={PYBIND11_DIR}")
+        cmake_options.append(f"-D PYTHON_INCLUDE_DIR={PYTHON_INCLUDE_DIR}")
+        cmake_options.append(f"-D PYTHON_LIBRARY={PYTHON_LIBRARY}")
 
     cmd = ["cmake", source_dir] + cmake_options
     execute(cmd, build_dir)
 
 
 def build_project(build_dir: str, build_type: str):
-    command_line = ["cmake", "--build", ".", "-j{}".format(mp.cpu_count()), "-v"]
+    cpu_count = mp.cpu_count()
+    command_line = ["cmake", "--build", ".", f"-j{cpu_count}", "-v"]
     if PROJECT_TYPE == "Xcode":
         command_line += ["--config", build_type]
 
@@ -254,13 +257,14 @@ def build_book_docker():
     ).wait()
 
     # Run the docker image.
+    book_dir_path = SARA_SOURCE_DIR / "doc" / "book"
     ret = subprocess.Popen(
         [
             "docker",
             "run",
             "-it",
             "-v",
-            "{}:/workspace/book".format(SARA_SOURCE_DIR / "doc" / "book"),
+            f"{book_dir_path}:/workspace/book",
             sara_book_build_image,
             "/bin/bash",
         ],
@@ -297,8 +301,9 @@ if __name__ == "__main__":
             PROJECT_TYPE = "Ninja"
             args.build_type = "Debug"
 
-            build_dir = SARA_SOURCE_DIR.parent / "{}-build-{}".format(
-                SARA_SOURCE_DIR.name, args.build_type
+            build_dir = (
+                SARA_SOURCE_DIR.parent /
+                f"{SARA_SOURCE_DIR.name}-build-{args.build_type}"
             )
             # Only regenerate the project
             generate_project(
@@ -308,12 +313,14 @@ if __name__ == "__main__":
 
         if task == "library":
             if PROJECT_TYPE == "Xcode":
-                build_dir = SARA_SOURCE_DIR.parent / "{}-build-Xcode".format(
-                    SARA_SOURCE_DIR.name
+                build_dir = (
+                    SARA_SOURCE_DIR.parent /
+                    f"{SARA_SOURCE_DIR.name}-build-Xcode"
                 )
             else:
-                build_dir = SARA_SOURCE_DIR.parent / "{}-build-{}".format(
-                    SARA_SOURCE_DIR.name, args.build_type
+                build_dir = (
+                    SARA_SOURCE_DIR.parent /
+                    f"{SARA_SOURCE_DIR.name}-build-{args.build_type}"
                 )
             generate_project(
                 SARA_SOURCE_DIR, build_dir, args.build_type, args.from_scratch

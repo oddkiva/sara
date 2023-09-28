@@ -12,7 +12,7 @@
 //! @example
 
 #ifdef _OPENMP
-#include <omp.h>
+#  include <omp.h>
 #endif
 
 #include <DO/Sara/Core.hpp>
@@ -39,9 +39,9 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   {
     sara::display(sift_octave.gaussian(s, 0));
     sara::draw_text(20, 20,
-                      sara::format("Gaussian: scale[%d] = %f", s,
-                                   sift_octave.params.scales[s]),
-                      sara::Blue8);
+                    sara::format("Gaussian: scale[%d] = %f", s,
+                                 sift_octave.params.scales[s]),
+                    sara::Blue8);
     sara::get_key();
   }
 
@@ -54,16 +54,16 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   {
     sara::display(sara::color_rescale(sift_octave.gradient_magnitude(s, 0)));
     sara::draw_text(20, 20,
-                      sara::format("Gradient magnitude: scale[%d] = %f", s,
-                                   sift_octave.params.scales[s]),
-                      sara::Blue8);
+                    sara::format("Gradient magnitude: scale[%d] = %f", s,
+                                 sift_octave.params.scales[s]),
+                    sara::Blue8);
     sara::get_key();
 
     sara::display(sara::color_rescale(sift_octave.gradient_orientation(s, 0)));
     sara::draw_text(20, 20,
-                      sara::format("Gradient orientation: scale[%d] = %f", s,
-                                   sift_octave.params.scales[s]),
-                      sara::Blue8);
+                    sara::format("Gradient orientation: scale[%d] = %f", s,
+                                 sift_octave.params.scales[s]),
+                    sara::Blue8);
     sara::get_key();
   }
 
@@ -93,8 +93,7 @@ auto test_on_video()
   using namespace std::string_literals;
 
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/sfm-data/GOPR0542.MP4"s;
+  const auto video_filepath = "C:/Users/David/Desktop/sfm-data/GOPR0542.MP4"s;
 #elif __APPLE__
   const auto
       video_filepath =  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
