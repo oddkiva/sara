@@ -7,12 +7,9 @@ file(GLOB_RECURSE SRC_FILES
 add_library(DO_Shakti_Cuda_Segmentation ${SRC_FILES})
 set_target_properties(DO_Shakti_Cuda_Segmentation
   PROPERTIES
-  CXX_STANDARD 17
   CXX_STANDARD_REQUIRED YES
   POSITION_INDEPENDENT_CODE ON
   FOLDER "Libraries/Shakti/Cuda")
-
-target_compile_features(DO_Shakti_Cuda_Segmentation INTERFACE cxx_std_17)
 
 # Set correct compile definitions when building the libraries.
  if (SARA_BUILD_SHARED_LIBS)

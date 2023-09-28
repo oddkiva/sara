@@ -10,8 +10,6 @@ foreach(file ${test_tensorrt_SOURCE_FILES})
 
   target_compile_definitions(${filename} PRIVATE -DBOOST_TEST_DYN_LINK)
 
-  target_compile_features(${filename} PRIVATE cxx_std_17)
-
   target_link_libraries(
     ${filename}
     PRIVATE ${Boost_LIBRARIES} #

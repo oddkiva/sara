@@ -1,39 +1,29 @@
-add_library(NuScenes STATIC
-  NuImages.hpp NuImages.cpp
-  NuScenes.hpp NuScenes.cpp)
-target_compile_features(NuScenes
-  PUBLIC
-  cxx_std_17)
-target_include_directories(NuScenes
-  PUBLIC
-  ${cpp_INCLUDE_DIR}/third-party
-  ${cpp_INCLUDE_DIR}/third-party/eigen)
-target_link_libraries(NuScenes
-  PRIVATE
-  Boost::filesystem)
-set_property(TARGET NuScenes
-  PROPERTY
-  FOLDER "Datasets/NuScenes")
+add_library(NuScenes STATIC NuImages.hpp NuImages.cpp NuScenes.hpp NuScenes.cpp)
+target_include_directories(
+  NuScenes #
+  PUBLIC ${CMAKE_SOURCE_DIR}/cpp/third-party
+         ${CMAKE_SOURCE_DIR}/cpp/third-party/eigen)
+target_link_libraries(NuScenes PRIVATE Boost::filesystem)
+set_property(TARGET NuScenes PROPERTY FOLDER "Datasets/NuScenes")
 
 add_executable(nuimages_cpp_devkit_usage_example
-  nuimages_cpp_devkit_usage_example.cpp)
-target_link_libraries(nuimages_cpp_devkit_usage_example
-  PRIVATE
-  NuScenes
-  DO::Sara::Core
-  DO::Sara::Graphics
-  DO::Sara::ImageIO
+               nuimages_cpp_devkit_usage_example.cpp)
+target_link_libraries(
+  nuimages_cpp_devkit_usage_example
+  PRIVATE NuScenes #
+          DO::Sara::Core #
+          DO::Sara::Graphics #
+          DO::Sara::ImageIO)
 set_property(TARGET nuimages_cpp_devkit_usage_example
-  PROPERTY
-  FOLDER "Datasets/NuScenes")
+             PROPERTY FOLDER "Datasets/NuScenes")
 
-add_executable(nuscenes_cpp_devkit_usage_example nuscenes_cpp_devkit_usage_example.cpp)
-target_link_libraries(nuscenes_cpp_devkit_usage_example
-  PRIVATE
-  NuScenes
-  DO::Sara::Core
-  DO::Sara::Graphics
-  DO::Sara::ImageIO)
+add_executable(nuscenes_cpp_devkit_usage_example
+               nuscenes_cpp_devkit_usage_example.cpp)
+target_link_libraries(
+  nuscenes_cpp_devkit_usage_example
+  PRIVATE NuScenes #
+          DO::Sara::Core #
+          DO::Sara::Graphics #
+          DO::Sara::ImageIO)
 set_property(TARGET nuscenes_cpp_devkit_usage_example
-  PROPERTY
-  FOLDER "Datasets/NuScenes")
+             PROPERTY FOLDER "Datasets/NuScenes")

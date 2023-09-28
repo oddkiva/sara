@@ -26,5 +26,3 @@ if(CMAKE_CUDA_COMPILER)
   target_compile_definitions(DO_Sara_OpenCL
                              INTERFACE CL_TARGET_OPENCL_VERSION=300)
 endif()
-
-target_compile_features(DO_Sara_OpenCL INTERFACE cxx_std_17)
