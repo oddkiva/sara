@@ -8,8 +8,8 @@ set(SARA_EMSCRIPTEN_BUILD_HTML YES)
 add_custom_target(emscripten_copy_assets)
 add_custom_command(
   TARGET emscripten_copy_assets
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data
-          ${CMAKE_BINARY_DIR}/bin)
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data/
+          ${CMAKE_BINARY_DIR}/bin/data)
 
 list(
   APPEND

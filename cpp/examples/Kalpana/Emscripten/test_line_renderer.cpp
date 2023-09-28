@@ -103,7 +103,7 @@ class GLFWApp
     // 4. Tell that the OpenGL rendering will be done on this window surface.
     glfwMakeContextCurrent(_window);
 
-#if defined(__EMSCRIPTEN__)
+#if !defined(__EMSCRIPTEN__)
     // 5. Load GLEW.
     //    This is important as any attempt at calling OpenGL functions will
     //    result in a runtime crash.

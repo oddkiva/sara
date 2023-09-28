@@ -106,7 +106,7 @@ class GLFWApp
     // 4. Tell that the OpenGL rendering will be done on this window surface.
     glfwMakeContextCurrent(_window);
 
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__)
     // 5. Load GLEW.
     //    This is important as any attempt at calling OpenGL functions will
     //    result in a runtime crash.
@@ -139,7 +139,7 @@ public:
 
   auto initialize([[maybe_unused]] const fs::path& program_dir_path) -> void
   {
-#if defined(__EMSCRIPTEN__)
+#if !defined(__EMSCRIPTEN__)
     _program_dir_path = program_dir_path;
 #endif
 
