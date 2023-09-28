@@ -58,7 +58,8 @@ namespace DO { namespace Sara {
                       const QString& windowTitle, int x, int y);
     void setActiveWindow(QWidget *w);
     void closeWindow(QWidget *w);
-    void getFileFromDialogBox();
+    void getImageFileFromDialogBox();
+    void getVideoFileFromDialogBox();
 
   public: /* connection methods for the keyboard and mouse handling. */
     bool activeWindowIsVisible();

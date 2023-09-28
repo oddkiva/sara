@@ -11,20 +11,27 @@
 
 //! @example
 
+#include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/MultiViewGeometry/BundleAdjustmentProblem.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
+#include <DO/Sara/RANSAC/RANSAC.hpp>
 
 #include <DO/Sara/SfM/BuildingBlocks/EssentialMatrixEstimation.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 
+#ifdef _WIN32
+#  pragma warning(push, 0)
+#endif
 #include <ceres/ceres.h>
+#ifdef _WIN32
+#  pragma warning(pop)
+#endif
 #include <ceres/rotation.h>
 
 
@@ -79,10 +86,10 @@ struct ReprojectionError
     return true;
   }
 
-  static ceres::CostFunction* Create(const double observed_x,
+  static ceres::CostFunction* create(const double observed_x,
                                      const double observed_y)
   {
-    constexpr auto NumParams = 6 /* camera paramters */ + 3 /* points */;
+    constexpr auto NumParams = 6 /* camera parameters */ + 3 /* points */;
     return new ceres::AutoDiffCostFunction<ReprojectionError, 2, NumParams, 3>{
         new ReprojectionError{observed_x, observed_y}};
   }
@@ -107,8 +114,10 @@ auto map_feature_gid_to_match_gid(const EpipolarEdgeAttributes& epipolar_edges)
     {
       if (E_inliers_ij(m) && two_view_geometry_ij.cheirality(m))
       {
-        mapping.insert({{view_i, M_ij[m].x_index()}, {ij, m}});
-        mapping.insert({{view_j, M_ij[m].y_index()}, {ij, m}});
+        mapping.insert(
+            {FeatureGID{view_i, M_ij[m].x_index()}, MatchGID{ij, m}});
+        mapping.insert(
+            {FeatureGID{view_j, M_ij[m].y_index()}, MatchGID{ij, m}});
       }
     }
   }
@@ -180,7 +189,7 @@ GRAPHICS_MAIN()
   // List the matches as a 2D-tensor where each row encodes a match 'm' as a
   // pair of point indices (i, j).
   const auto M = to_tensor(matches);
-
+  const auto X = PointCorrespondenceList{M, un[0], un[1]};
 
   print_stage("Estimating the essential matrix...");
   auto& E = epipolar_edges.E[0];
@@ -188,14 +197,15 @@ GRAPHICS_MAIN()
   auto& err_thres = epipolar_edges.E_noise[0];
   auto& inliers = epipolar_edges.E_inliers[0];
   auto sample_best = Tensor_<int, 1>{};
-  auto estimator = NisterFivePointAlgorithm{};
-  auto distance = EpipolarDistance{};
   {
     num_samples = 1000;
     err_thres = 1e-3;
+
+    auto inlier_predicate = InlierPredicate<SampsonEpipolarDistance>{};
+    inlier_predicate.err_threshold = err_thres;
+
     std::tie(E, inliers, sample_best) =
-        ransac(M, un[0], un[1], estimator, distance, num_samples, err_thres);
-    E.matrix() = E.matrix().normalized();
+        ransac(X, NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
 
     epipolar_edges.E_inliers[0] = inliers;
     epipolar_edges.E_best_samples[0] = sample_best;
@@ -269,7 +279,7 @@ GRAPHICS_MAIN()
   ceres::Problem problem;
   for (int i = 0; i < ba_problem.observations.size(0); ++i)
   {
-    auto cost_fn = ReprojectionError::Create(ba_problem.observations(i, 0),
+    auto cost_fn = ReprojectionError::create(ba_problem.observations(i, 0),
                                              ba_problem.observations(i, 1));
 
     problem.AddResidualBlock(cost_fn, nullptr /* squared loss */,

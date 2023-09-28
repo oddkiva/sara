@@ -2,90 +2,44 @@
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <drafts/Taskflow/DisplayTask.hpp>
+#include <drafts/Taskflow/SafeQueue.hpp>
+
+#ifdef _WIN32
+// Quick workaround until the next release of taskflow (cf. https://github.com/taskflow/taskflow/pull/459)
+#  undef MAX_PRIORITY
+#  pragma warning(push, 0)
+#endif
 #include <taskflow/taskflow.hpp>
+#ifdef _WIN32
+#  pragma warning(pop)
+#endif
 
 
 namespace sara = DO::Sara;
 
 
-template <class T>
-class SafeQueue
+int main(int argc, char** argv)
 {
-public:
-  SafeQueue(void)
-    : q()
-    , m()
-    , c()
-  {
-  }
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(sara_graphics_main);
+  return app.exec();
+}
 
-  ~SafeQueue(void)
-  {
-  }
-
-  void enqueue(T t)
-  {
-    std::lock_guard<std::mutex> lock(m);
-    q.push(t);
-    c.notify_one();
-  }
-
-  T dequeue(void)
-  {
-    std::unique_lock<std::mutex> lock(m);
-    if (q.empty())
-      return {};
-    T val = q.front();
-    q.pop();
-    return val;
-  }
-
-private:
-  std::queue<T> q;
-  mutable std::mutex m;
-  std::condition_variable c;
-};
-
-template<typename T = float>
-struct DisplayTask
+int sara_graphics_main(int argc, char** argv)
 {
-  sara::Image<T> image;
-  int index = -1;
-
-  inline DisplayTask() = default;
-
-  inline DisplayTask(sara::Image<T> im, int id)
-    : image{std::move(im)}
-    , index{id}
+#ifdef _WIN32
+  const auto video_path = sara::select_video_file_from_dialog_box();
+  if (video_path.empty())
+    return 1;
+#else
+  if (argc < 2)
   {
+    std::cerr << "Usage: " << argv[0] << "  VIDEO_FILEPATH" << std::endl;
+    return 1;
   }
-
-  inline DisplayTask(const DisplayTask& task) = default;
-
-  inline DisplayTask(DisplayTask&& task)
-    : image{std::move(task.image)}
-    , index{task.index}
-  {
-  }
-
-  inline ~DisplayTask() = default;
-
-  inline auto run() -> void
-  {
-    if (index == -1 || image.data() == nullptr)
-      return;
-    auto image_rgb = image.template convert<sara::Rgb8>();
-    sara::draw_text(image_rgb, 100, 50, std::to_string(index), sara::White8, 30);
-    sara::display(image_rgb);
-    std::cout << "Showing frame " << index << std::endl;
-  }
-};
-
-
-GRAPHICS_MAIN()
-{
-  const auto video_path =
-      "/Users/david/Desktop/Datasets/brockwell-park-varying-focal-length.mov";
+  const auto video_path = std::string{argv[1]};
+#endif
   auto video_stream = sara::VideoStream{video_path};
   auto video_frame = video_stream.frame();
   auto video_frame_gray = sara::Image<float>{video_stream.sizes()};
@@ -93,19 +47,18 @@ GRAPHICS_MAIN()
   auto last_frame_shown = std::atomic_int32_t{-1};
   auto video_stream_end = false;
 
-  auto display_queue = SafeQueue<DisplayTask<float>>{};
+  auto display_queue = sara::SafeQueue<sara::DisplayTask<float>>{};
   auto display_async_task = std::thread{
-    [&display_queue, &last_frame_shown, &current_frame, &video_stream_end] {
-      while (!video_stream_end)
-      {
-        auto task = display_queue.dequeue();
-        if (task.index < last_frame_shown || task.index + 3 < current_frame)
-           continue;
-        last_frame_shown = task.index;
-        task.run();
-      }
-    }
-  };
+      [&display_queue, &last_frame_shown, &current_frame, &video_stream_end] {
+        while (!video_stream_end)
+        {
+          auto task = display_queue.dequeue();
+          if (task.index < last_frame_shown || task.index + 3 < current_frame)
+            continue;
+          last_frame_shown = task.index;
+          task.run();
+        }
+      }};
 
   sara::create_window(video_stream.sizes());
 
@@ -133,17 +86,19 @@ GRAPHICS_MAIN()
           })
           .name("To grayscale");
 
-  auto display = taskflow
-                     .emplace([&display_queue, &video_frame_gray, &current_frame] {
-                       display_queue.enqueue({video_frame_gray, current_frame});
-                     })
-                     .name("display");
+  auto display =  //
+      taskflow
+          .emplace([&display_queue, &video_frame_gray, &current_frame] {
+            display_queue.enqueue({video_frame_gray, current_frame});
+          })
+          .name("display");
 
   read_video_frame.precede(color_convert);
   color_convert.precede(display);
 
-  executor.run_until(taskflow,
-                     [&video_stream_end]() { return video_stream_end; }).wait();
+  executor
+      .run_until(taskflow, [&video_stream_end]() { return video_stream_end; })
+      .wait();
   display_async_task.join();
 
   return 0;

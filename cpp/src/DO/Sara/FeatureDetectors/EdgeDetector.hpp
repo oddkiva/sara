@@ -64,6 +64,13 @@ namespace DO::Sara {
 
     DO_SARA_EXPORT
     auto operator()(const ImageView<float>& image) -> void;
+
+    DO_SARA_EXPORT
+    auto operator()(const ImageView<float>& grad_x,
+                    const ImageView<float>& grad_y) -> void;
+
+  private:
+    auto reconstruct_edges_from_map() -> void;
   };
 
 }  // namespace DO::Sara

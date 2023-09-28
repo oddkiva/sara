@@ -3,9 +3,9 @@
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 #include <DO/Shakti/Halide/BinaryOperators.hpp>
-#include <DO/Shakti/Halide/SIFT/V3/ExtremumDataStructures.hpp>
 #include <DO/Shakti/Halide/GaussianConvolution.hpp>
 #include <DO/Shakti/Halide/Resize.hpp>
+#include <DO/Shakti/Halide/SIFT/V3/ExtremumDataStructures.hpp>
 
 #include "shakti_gray32f_to_rgb8u_cpu.h"
 
@@ -34,7 +34,7 @@ namespace DO::Shakti::HalideBackend::v3 {
     float scale_camera = 1.f;
     float scale_initial = 1.6f;
     float scale_factor = std::pow(2.f, 1 / 3.f);
-    int num_scales = 3;
+    int scale_count = 3;
     int gaussian_truncation_factor = 4;
     //! @}
 
@@ -78,21 +78,21 @@ namespace DO::Shakti::HalideBackend::v3 {
     auto initialize_kernels() -> void
     {
       // Set up the list of scales in the discrete octave.
-      scales = std::vector<float>(num_scales + 3);
-      for (auto i = 0; i < num_scales + 3; ++i)
-        scales[i] = scale_initial * std::pow(scale_factor, i);
+      scales = std::vector<float>(scale_count + 3);
+      for (auto i = 0; i < scale_count + 3; ++i)
+        scales[i] = scale_initial * std::pow(scale_factor, static_cast<float>(i));
 
       // Calculate the Gaussian smoothing values.
-      sigmas = std::vector<float>(num_scales + 3);
+      sigmas = std::vector<float>(scale_count + 3);
+      using DO::Sara::square;
       for (auto i = 0u; i < sigmas.size(); ++i)
-        sigmas[i] =
-            std::sqrt(std::pow(scales[i], 2) - std::pow(scale_camera, 2));
+        sigmas[i] = std::sqrt(square(scales[i]) - square(scale_camera));
 
       // Fill the Gaussian kernels.
       const auto kernel_size_max = kernel_size(sigmas.back());
       const auto kernel_mid = kernel_size_max / 2;
 
-      kernels.resize(num_scales + 3, kernel_size_max);
+      kernels.resize(scale_count + 3, kernel_size_max);
       kernels.flat_array().fill(0);
 
       for (auto n = 0; n < kernels.size(0); ++n)
@@ -104,7 +104,7 @@ namespace DO::Shakti::HalideBackend::v3 {
 
         for (auto k = 0; k < ksize; ++k)
           kernels(n, k + kernel_mid - kradius) =
-              exp(-std::pow(k - kradius, 2) / two_sigma_squared);
+              exp(-square(k - kradius) / two_sigma_squared);
 
         const auto kernel_sum =
             std::accumulate(&kernels(n, kernel_mid - kradius),
@@ -116,11 +116,11 @@ namespace DO::Shakti::HalideBackend::v3 {
 
       // Wrap the gaussian kernels as Halide buffers.
       kernel_x_buffer = Halide::Runtime::Buffer<float>(
-          kernels.data(), kernel_size_max, 1, 1, num_scales + 3);
+          kernels.data(), kernel_size_max, 1, 1, scale_count + 3);
       kernel_x_buffer.set_min(-kernel_mid, 0, 0, 0);
 
       kernel_y_buffer = Halide::Runtime::Buffer<float>(
-          kernels.data(), 1, kernel_size_max, 1, num_scales + 3);
+          kernels.data(), 1, kernel_size_max, 1, scale_count + 3);
       kernel_y_buffer.set_min(0, -kernel_mid, 0, 0);
 
       // Transfer the host data to the GPU device.
@@ -159,17 +159,17 @@ namespace DO::Shakti::HalideBackend::v3 {
 
     auto initialize(int w, int h) -> void
     {
-      const auto& num_scales = params.num_scales;
+      const auto& scale_count = params.scale_count;
 
-      x_convolved = Halide::Runtime::Buffer<float>(w, h, num_scales + 3, 1);
-      y_convolved = Halide::Runtime::Buffer<float>(w, h, num_scales + 3, 1);
+      x_convolved = Halide::Runtime::Buffer<float>(w, h, scale_count + 3, 1);
+      y_convolved = Halide::Runtime::Buffer<float>(w, h, scale_count + 3, 1);
 
-      gradient_mag = Halide::Runtime::Buffer<float>(w, h, num_scales + 3, 1);
-      gradient_ori = Halide::Runtime::Buffer<float>(w, h, num_scales + 3, 1);
+      gradient_mag = Halide::Runtime::Buffer<float>(w, h, scale_count + 3, 1);
+      gradient_ori = Halide::Runtime::Buffer<float>(w, h, scale_count + 3, 1);
 
-      dog = Halide::Runtime::Buffer<float>(w, h, num_scales + 2, 1);
+      dog = Halide::Runtime::Buffer<float>(w, h, scale_count + 2, 1);
 
-      extrema_map = Halide::Runtime::Buffer<std::int8_t>(w, h, num_scales, 1);
+      extrema_map = Halide::Runtime::Buffer<std::int8_t>(w, h, scale_count, 1);
     }
 
     auto feed(Halide::Runtime::Buffer<float>& gray_image)
@@ -231,7 +231,7 @@ namespace DO::Shakti::HalideBackend::v3 {
       extrema_quantized.resize(num_extrema);
 
       auto i = 0;
-#pragma omp parallel for schedule(dynamic) reduction(+:i)
+#pragma omp parallel for schedule(dynamic) reduction(+ : i)
       for (auto n = 0; n < extrema_map.dim(3).extent(); ++n)
       {
         for (auto s = 0; s < extrema_map.dim(2).extent(); ++s)
@@ -403,7 +403,7 @@ namespace DO::Shakti::HalideBackend::v3 {
       e.value.copy_to_host();
       // No need to copy e.type because it is already in the host memory.
 
-      e_oriented.resize(d.orientation_map.size());
+      e_oriented.resize(static_cast<std::int32_t>(d.orientation_map.size()));
 
       auto k = 0;
       for (auto i = 0; i < e.size(); ++i)

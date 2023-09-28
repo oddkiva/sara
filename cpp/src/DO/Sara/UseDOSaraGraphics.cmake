@@ -24,7 +24,10 @@ if (SARA_USE_FROM_SOURCE)
 
     target_compile_definitions(DO_Sara_Graphics
       PUBLIC
-      $<$<PLATFORM_ID:Darwin>:GL_SILENCE_DEPRECATION>)
+      $<$<PLATFORM_ID:Darwin>:GL_SILENCE_DEPRECATION>
+      PRIVATE
+      $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/wd26812>
+    )
 
     set(CMAKE_AUTOMOC OFF)
     set(CMAKE_INCLUDE_CURRENT_DIR OFF)

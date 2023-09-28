@@ -15,7 +15,7 @@
 
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

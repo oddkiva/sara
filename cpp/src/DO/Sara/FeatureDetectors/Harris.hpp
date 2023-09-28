@@ -27,6 +27,11 @@ namespace DO { namespace Sara {
   //! @addtogroup InterestPoint
   //! @{
 
+  //! @brief Simple harris cornerness function.
+  DO_SARA_EXPORT
+  auto harris_cornerness(const ImageView<float>& gx, const ImageView<float>& gy,
+                         float sigma_I, float kappa) -> Image<float>;
+
   // ======================================================================== //
   // Multiscale Harris Corner function.
   /*!
@@ -45,16 +50,17 @@ namespace DO { namespace Sara {
    *  \f].
    */
   DO_SARA_EXPORT
-  Image<float> scale_adapted_harris_cornerness(const ImageView<float>& I,
-                                               float sigma_I, float sigma_D,
-                                               float kappa);
+  auto scale_adapted_harris_cornerness(const ImageView<float>& I, float sigma_I,
+                                       float sigma_D, float kappa)
+      -> Image<float>;
 
   //! Pyramid of Harris cornerness functions.
   DO_SARA_EXPORT
-  ImagePyramid<float> harris_cornerness_pyramid(
-    const ImageView<float>& image,
-    float kappa = 0.04f,
-    const ImagePyramidParams& params = ImagePyramidParams(-1, 2+1, sqrt(2.f), 1));
+  auto harris_cornerness_pyramid(
+      const ImageView<float>& image, float kappa = 0.04f,
+      const ImagePyramidParams& params = ImagePyramidParams(-1, 2 + 1,
+                                                            sqrt(2.f), 1))
+      -> ImagePyramid<float>;
 
   // ======================================================================== //
   /*!
@@ -62,7 +68,8 @@ namespace DO { namespace Sara {
    *  threshold.
    */
   DO_SARA_EXPORT
-  std::vector<OERegion> local_maxima(const ImageView<float>& I, float thres);
+  auto local_maxima(const ImageView<float>& I, float thres)
+      -> std::vector<OERegion>;
 
   /*!
     @brief Utility functions to locate edgels from the Harris-Stephens corner
@@ -136,8 +143,8 @@ namespace DO { namespace Sara {
      *  This function does the following:
      *  1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from
      *  the image \f$I\f$, where \f$(s,o)\f$ are integers. Here:
-     *  \f$\sigma(s,o) = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per
-     *  octaves.
+     *  \f$\sigma(s,o) = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales
+     * per octaves.
      *
      *  2. Localize extrema in Harris corner functions in each scale
      *     \f$\sigma(s,o)\f$.
@@ -154,8 +161,9 @@ namespace DO { namespace Sara {
      *  \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$.
      */
     DO_SARA_EXPORT
-    std::vector<OERegion> operator()(const ImageView<float>& I,
-                                     std::vector<Point2i> *scale_octave_pairs = 0);
+    std::vector<OERegion>
+    operator()(const ImageView<float>& I,
+               std::vector<Point2i>* scale_octave_pairs = 0);
     /*!
      *  @brief Returns the Gaussian pyramid used to select characteristic scales
      *  for Harris-Laplace corners.
@@ -203,5 +211,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

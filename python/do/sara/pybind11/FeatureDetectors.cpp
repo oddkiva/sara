@@ -104,7 +104,13 @@ auto expose_feature_detectors(pybind11::module& m) -> void
             angular_threshold      //
         }};
       }))
-      .def("detect", &sara::EdgeDetector::operator(), "detect edges")
+      //.def("detect", &sara::EdgeDetector::operator(), "detect edges")
+      .def(
+          "detect",
+          [](sara::EdgeDetector& ed, const sara::ImageView<float>& image) {
+            ed(image);
+          },
+          "detect edges")
       .def_readonly("pipeline", &sara::EdgeDetector::pipeline, "pipeline data");
 
   m.def("compute_sift_keypoints", &sara::compute_sift_keypoints,

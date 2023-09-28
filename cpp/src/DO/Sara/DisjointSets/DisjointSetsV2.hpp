@@ -231,7 +231,7 @@ namespace DO::Sara::v2 {
 
     friend std::ostream& operator<<(std::ostream& os, const DisjointSets& f)
     {
-      for (size_t i = 0; i < f._data.size(); ++i)
+      for (auto i = 0u; i < f._data.size(); ++i)
         os << i << ": parent=" << f.parent(i) << ", rank=" << f.rank(i)
            << std::endl;
       return os;

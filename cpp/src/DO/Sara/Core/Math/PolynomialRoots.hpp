@@ -66,9 +66,6 @@ namespace DO::Sara {
 
   //! @brief Calculate the real roots of the cubic polynomial.
   //!
-  //! Implemented as described in:
-  //! http://people.csail.mit.edu/bkph/articles/Quadratics.pdf
-  //!
   //! Return true if the roots are all real, false otherwise.
   //! At least one root is real.
   template <typename T, int N>
@@ -82,7 +79,7 @@ namespace DO::Sara {
         throw std::runtime_error{"Error: the polynomial must be of degree 2!"};
     }
 
-    const auto a = static_cast<T>(1);
+    static constexpr auto a = static_cast<T>(1);
     const auto b = P[2] / P[3];
     const auto c = P[1] / P[3];
     const auto d = P[0] / P[3];
@@ -184,7 +181,7 @@ namespace DO::Sara {
         throw std::runtime_error{"Error: the polynomial must be of degree 3!"};
     }
 
-    const auto a = static_cast<T>(1);
+    static constexpr auto a = static_cast<T>(1);
     const auto b = P[2] / P[3];
     const auto c = P[1] / P[3];
     const auto d = P[0] / P[3];
@@ -251,7 +248,6 @@ namespace DO::Sara {
         throw std::runtime_error{"Error: the polynomial must be of degree 4!"};
     }
 
-    const auto a4 = static_cast<T>(1);
     const auto a3 = P[3] / P[4];
     const auto a2 = P[2] / P[4];
     const auto a1 = P[1] / P[4];
@@ -260,7 +256,6 @@ namespace DO::Sara {
     static_assert(std::is_same_v<decltype(a1), const T>);
     static_assert(std::is_same_v<decltype(a2), const T>);
     static_assert(std::is_same_v<decltype(a3), const T>);
-    static_assert(std::is_same_v<decltype(a4), const T>);
 
     auto Q = UnivariatePolynomial<T, 3>{};
     Q[3] = 1;
@@ -291,7 +286,7 @@ namespace DO::Sara {
     auto D = std::complex<T>{};
     auto E = std::complex<T>{};
 
-    if (abs(R) > 0)
+    if (std::abs(R) > 0)
     {
       D = std::sqrt(3 * a3 * a3 / 4 - R * R - 2 * a2 +
                     (4 * a3 * a2 - 8 * a1 - a3 * a3 * a3) / (4 * R));

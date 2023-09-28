@@ -1,8 +1,3 @@
-find_package(
-  DO_Sara
-  COMPONENTS Core
-  REQUIRED)
-
 set(HALIDE_SIFT_BLOCK_LIBRARIES_V2
     # Resize operations.
     shakti_enlarge_gpu
@@ -22,8 +17,7 @@ set(HALIDE_SIFT_BLOCK_LIBRARIES_V2
     shakti_polar_gradient_2d_32f_gpu_v2
     shakti_dominant_gradient_orientations_gpu_v2
     # SIFT descriptor.
-    shakti_sift_descriptor_gpu_v5
-)
+    shakti_sift_descriptor_gpu_v5)
 
 add_library(DO_Shakti_Halide_Sift_gpu_v2 Pipeline.hpp Pipeline.cpp)
 target_link_libraries(
@@ -32,9 +26,9 @@ target_link_libraries(
          Halide::Runtime #
   PRIVATE DO::Sara::Core #
           ${HALIDE_SIFT_BLOCK_LIBRARIES_V2})
-set_property(
-  TARGET DO_Shakti_Halide_Sift_gpu_v2
-  PROPERTY
-  FOLDER "Libraries/Shakti/Halide")
+set_property(TARGET DO_Shakti_Halide_Sift_gpu_v2
+             PROPERTY FOLDER "Libraries/Shakti/Halide")
 
-add_subdirectory(examples)
+if(SARA_BUILD_SAMPLES)
+  add_subdirectory(examples)
+endif()

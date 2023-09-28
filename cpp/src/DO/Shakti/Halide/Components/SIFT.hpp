@@ -9,7 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Shakti/Halide/MyHalide.hpp>
 #include <DO/Shakti/Halide/Components/TinyLinearAlgebra.hpp>
 
 
@@ -46,7 +45,7 @@ namespace DO::Shakti::HalideBackend {
     Halide::Func hist_illumination_invariant{"hist_illumination_invariant"};
 
     //! @brief Radius of the whole image patch.
-    auto patch_radius(const Halide::Expr& scale) const
+    auto patch_radius(const Halide::Expr& scale) const -> Halide::Expr
     {
       return bin_length_in_scale_unit * scale *  //
              (N + 1) / 2.f * std::sqrt(2.f);
@@ -54,7 +53,7 @@ namespace DO::Shakti::HalideBackend {
 
     //! @brief Reduction domain associated to the whole image patch.
     auto reduction_domain(const Halide::Expr& scale,
-                          const Halide::Expr& scale_max) const
+                          const Halide::Expr& scale_max) const -> Halide::RDom
     {
       // Calculate the radius upper-bound.
       const auto r_max =
@@ -73,7 +72,7 @@ namespace DO::Shakti::HalideBackend {
     }
 
     //! @brief Radius of each image sub-patch (i, j).
-    auto subpatch_radius(const Halide::Expr& scale) const
+    auto subpatch_radius(const Halide::Expr& scale) const -> Halide::Expr
     {
       return bin_length_in_scale_unit * scale * std::sqrt(2.f);
     }
@@ -81,6 +80,7 @@ namespace DO::Shakti::HalideBackend {
     //! @brief Radius for each image sub-patch (i, j).
     auto subpatch_reduction_domain(const Halide::Expr& scale,
                                    const Halide::Expr& scale_max) const
+        -> Halide::RDom
     {
       // Calculate the radius upper-bound.
       const auto r_max =
@@ -101,6 +101,7 @@ namespace DO::Shakti::HalideBackend {
     //! @brief Weight associated to each sampled image gradient of the whole
     //! image patch.
     auto gradient_weight(const Halide::Var& u, const Halide::Var& v) const
+        -> Halide::Expr
     {
       // Calculate the standard deviation of the gaussian weight:
       constexpr auto sigma = N / 2 * bin_length_in_scale_unit;
@@ -125,8 +126,10 @@ namespace DO::Shakti::HalideBackend {
       const auto s = Halide::sin(theta);
 
       auto T = Matrix2{};
+      // clang-format off
       T(0, 0) = c; T(0, 1) = -s;
       T(1, 0) = s; T(1, 1) = c;
+      // clang-format on
       T *= scale;
 
       // For each point of the normalized patch, i.e.:
@@ -151,7 +154,7 @@ namespace DO::Shakti::HalideBackend {
       // The canonical patch of normalized image gradients.
       return Halide::Tuple{
           grad_weight_fn(u, v) * grad_mag_fn(Tu, Tv),  //
-          ori_normalized,                            //
+          ori_normalized,                              //
       };
     }
 
@@ -174,8 +177,10 @@ namespace DO::Shakti::HalideBackend {
       const auto s = Halide::sin(theta);
 
       auto T = Matrix2{};
+      // clang-format off
       T(0, 0) = c; T(0, 1) = -s;
       T(1, 0) = s; T(1, 1) = c;
+      // clang-format on
       T *= scale;
 
       // For each point of the normalized patch, i.e.:
@@ -205,12 +210,14 @@ namespace DO::Shakti::HalideBackend {
     }
 
     //! Precompute the spatial weights used in the trilinear interpolation.
-    auto spatial_weight(const Halide::Var& x, //
+    auto spatial_weight(const Halide::Var& x,  //
                         const Halide::Var& y) const
     {
       // Spatial weights.
-      const auto dx = Halide::cast<float>(Halide::abs(x)) / bin_length_in_scale_unit;
-      const auto dy = Halide::cast<float>(Halide::abs(y)) / bin_length_in_scale_unit;
+      const auto dx =
+          Halide::cast<float>(Halide::abs(x)) / bin_length_in_scale_unit;
+      const auto dy =
+          Halide::cast<float>(Halide::abs(y)) / bin_length_in_scale_unit;
       // Thus:
       const auto wx = Halide::max(1.f - dx, 0.f);
       const auto wy = Halide::max(1.f - dy, 0.f);
@@ -255,7 +262,8 @@ namespace DO::Shakti::HalideBackend {
       const auto ori_index = ori_normalized * O;
 
       // Linear part of the patch normalization transform.
-      const Halide::Expr bin_length_in_pixels = bin_length_in_scale_unit * scale;
+      const Halide::Expr bin_length_in_pixels =
+          bin_length_in_scale_unit * scale;
       auto T = Matrix2{};
       T(0, 0) = Halide::cos(theta);  T(0, 1) = Halide::sin(theta);
       T(1, 0) = -Halide::sin(theta); T(1, 1) = Halide::cos(theta);
@@ -274,7 +282,7 @@ namespace DO::Shakti::HalideBackend {
       const auto weight = Halide::exp(-squared_norm(Tp) /  //
                                       (2 * Halide::pow(N / 2.f, 2)));
 
-      auto Tp2 = Vector2{};   // 2. Find out which bin (i, j) it belongs to.
+      auto Tp2 = Vector2{};  // 2. Find out which bin (i, j) it belongs to.
       Tp2(0) = Tp(0) + N / 2.f - 0.5f;
       Tp2(1) = Tp(1) + N / 2.f - 0.5f;
 
@@ -360,7 +368,7 @@ namespace DO::Shakti::HalideBackend {
       const auto weight = Halide::exp(-squared_norm(Tp) /  //
                                       (2 * Halide::pow(N / 2.f, 2)));
 
-      auto Tp2 = Vector2{};   // 2. Find out which bin (i, j) it belongs to.
+      auto Tp2 = Vector2{};  // 2. Find out which bin (i, j) it belongs to.
       Tp2(0) = Tp(0) + N / 2.f - 0.5f;
       Tp2(1) = Tp(1) + N / 2.f - 0.5f;
 
@@ -407,8 +415,10 @@ namespace DO::Shakti::HalideBackend {
       const auto dori = Halide::abs(ori - o);
       // OUCH: becomes incorrect when: when o == 0 or o == 7.
 
-      const auto wx = 1.f - Halide::abs(Halide::cast<float>(r.x)) / bin_length_in_scale_unit;
-      const auto wy = 1.f - Halide::abs(Halide::cast<float>(r.y)) / bin_length_in_scale_unit;
+      const auto wx = 1.f - Halide::abs(Halide::cast<float>(r.x)) /
+                                bin_length_in_scale_unit;
+      const auto wy = 1.f - Halide::abs(Halide::cast<float>(r.y)) /
+                                bin_length_in_scale_unit;
       const auto wo = Halide::select(dori < 1, 1 - dori, 0);
 
       return Halide::sum(wo * wy * wx * mag);
@@ -450,7 +460,8 @@ namespace DO::Shakti::HalideBackend {
       const auto ori_index = ori_normalized * O;
 
       // Linear part of the patch normalization transform.
-      const Halide::Expr bin_length_in_pixels = bin_length_in_scale_unit * scale;
+      const Halide::Expr bin_length_in_pixels =
+          bin_length_in_scale_unit * scale;
       auto T = Matrix2{};
       T(0, 0) = Halide::cos(theta);  T(0, 1) = Halide::sin(theta);
       T(1, 0) = -Halide::sin(theta); T(1, 1) = Halide::cos(theta);
@@ -469,7 +480,7 @@ namespace DO::Shakti::HalideBackend {
       const auto weight = Halide::exp(-squared_norm(Tp) /  //
                                       (2 * Halide::pow(N / 2.f, 2)));
 
-      auto Tp2 = Vector2{};   // 2. Find out which bin (i, j) it belongs to.
+      auto Tp2 = Vector2{};  // 2. Find out which bin (i, j) it belongs to.
       Tp2(0) = Tp(0) + N / 2.f - 0.5f;
       Tp2(1) = Tp(1) + N / 2.f - 0.5f;
 
@@ -477,8 +488,8 @@ namespace DO::Shakti::HalideBackend {
       const auto j_int = Halide::cast<int>(Tp2(0));
       const auto o_int = Halide::cast<int>(ori_index);
 
-      const auto i0 = Halide::clamp(i_int, 0, N -1);
-      const auto j0 = Halide::clamp(j_int, 0, N -1);
+      const auto i0 = Halide::clamp(i_int, 0, N - 1);
+      const auto j0 = Halide::clamp(j_int, 0, N - 1);
       const auto& o0 = o_int;
 
       const auto i1 = Halide::clamp(i_int + 1, 0, N - 1);
@@ -592,7 +603,7 @@ namespace DO::Shakti::HalideBackend {
       const auto weight = Halide::exp(-squared_norm(Tp) /  //
                                       (2 * Halide::pow(N / 2.f, 2)));
 
-      auto Tp2 = Vector2{};   // 2. Find out which bin (i, j) it belongs to.
+      auto Tp2 = Vector2{};  // 2. Find out which bin (i, j) it belongs to.
       Tp2(0) = Tp(0) + N / 2.f - 0.5f;
       Tp2(1) = Tp(1) + N / 2.f - 0.5f;
 
@@ -693,7 +704,7 @@ namespace DO::Shakti::HalideBackend {
       const auto weight = Halide::exp(-squared_norm(Tp) /  //
                                       (2 * Halide::pow(N / 2.f, 2)));
 
-      auto Tp2 = Vector2{};   // 2. Find out which bin (i, j) it belongs to.
+      auto Tp2 = Vector2{};  // 2. Find out which bin (i, j) it belongs to.
       Tp2(0) = Tp(0) + N / 2.f - 0.5f;
       Tp2(1) = Tp(1) + N / 2.f - 0.5f;
 
@@ -740,9 +751,13 @@ namespace DO::Shakti::HalideBackend {
       const auto i = ji / N;
       const auto j = ji - i * N;
 
-      const auto r = Halide::RDom(                                      //
-          -bin_length_in_scale_unit, 2 * bin_length_in_scale_unit + 1,  //
-          -bin_length_in_scale_unit, 2 * bin_length_in_scale_unit + 1   //
+      const auto radius = Halide::cast<int>(bin_length_in_scale_unit);
+
+      // 49 = 7 x 7 gradient samples. That's already a lot and should be
+      // sufficient.
+      const auto r = Halide::RDom(  //
+          -radius, 2 * radius + 1,  //
+          -radius, 2 * radius + 1   //
       );
 
       const auto x = Halide::round(                      //
@@ -808,7 +823,7 @@ namespace DO::Shakti::HalideBackend {
             hist_contrast_invariant(o, ji, k),  //
             max_bin_value                       //
         );
-        //hist_clamped.compute_at(hist_contrast_invariant, k);
+        // hist_clamped.compute_at(hist_contrast_invariant, k);
         hist_clamped.compute_root();
       }
 

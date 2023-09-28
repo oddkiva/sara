@@ -2,14 +2,8 @@
 
 #include <Halide.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "shakti_rgb8u_to_gray32f_cpu.h"
 #include "shakti_gray32f_to_rgb8u_cpu.h"
-#ifdef __cplusplus
-}
-#endif
 
 
 void shakti_rgb8_to_gray32f_cpu(unsigned char* src, float* dst, int w, int h)

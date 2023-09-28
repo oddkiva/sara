@@ -28,7 +28,9 @@
 
 #include <boost/filesystem.hpp>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 using namespace std;
@@ -120,12 +122,10 @@ namespace v2 {
           high_thres, low_thres);
       toc("Thresholding");
 
-      tic();
       pipeline.edges = perform_hysteresis_and_grouping(  //
           pipeline.edge_map,                             //
           pipeline.gradient_orientation,                 //
           parameters.angular_threshold);
-      toc("Hysteresis & Edgel Grouping");
 
       tic();
       const auto& edges = pipeline.edges;
@@ -189,12 +189,12 @@ inline constexpr long double operator"" _percent(long double x)
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
@@ -211,7 +211,9 @@ int __main(int argc, char** argv)
   const auto downscale_factor = argc >= 3 ? std::atoi(argv[2]) : 2;
 
   // OpenMP.
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
@@ -250,7 +252,7 @@ int __main(int argc, char** argv)
 
   // Output save.
   namespace fs = boost::filesystem;
-  const auto basename = fs::basename(video_filepath);
+  const auto basename = fs::path(video_filepath).stem().string();
   VideoWriter video_writer{
 #ifdef __APPLE__
       "/Users/david/Desktop/" + basename + ".edge-detection.mp4",
@@ -274,7 +276,7 @@ int __main(int argc, char** argv)
   constexpr float angular_threshold = static_cast<float>((20._deg).value);
   const auto sigma = std::sqrt(std::pow(1.2f, 2) - 1);
 
-  auto ed = v2::EdgeDetector{{
+  auto ed = ::v2::EdgeDetector{{
       high_threshold_ratio,  //
       low_threshold_ratio,   //
       angular_threshold      //

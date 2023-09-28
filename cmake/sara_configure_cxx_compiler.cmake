@@ -1,21 +1,9 @@
 sara_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 
-
 # By default, use the math constants defined in <cmath> header.
 add_definitions(-D_USE_MATH_DEFINES)
 
-# Visual C++ compiler
-if (MSVC)
-  add_definitions(
-    /D_SCL_SECURE_NO_WARNINGS
-    /D_CRT_SECURE_NO_DEPRECATE
-    /D_SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING  # Eigen
-    /bigobj
-    /wd4251)
-  message(STATUS "  - Disabled annoying warnings in MSVC.")
-
-# GNU compiler
-elseif (CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_COMPILER_IS_GNUCXX)
   sara_substep_message(
     "${CMAKE_CXX_COMPILER_ID} compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
 
@@ -42,17 +30,47 @@ if (UNIX)
   if (APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-copy")
   endif()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+  # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
   # Additional flags for Release builds.
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
   # Additional flags for Debug builds to code coverage.
-  set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -D_DEBUG -fno-inline")
+  set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -DDEBUG -D_DEBUG")
   if (NOT APPLE)
     set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   endif ()
+endif ()
+
+if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  # Support exceptions.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
+  set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -fexceptions)
+
+  # Additional flags for Release builds.
+  set(CMAKE_CXX_FLAGS_RELEASE -O3)
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO -O2)
+  # Additional flags for Debug builds to code coverage.
+  set(CMAKE_CXX_FLAGS_DEBUG -O0 -DDEBUG -D_DEBUG -fno-inline)
+
+  if (CMAKE_BUILD_TYPE STREQUAL "" OR CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options(${CMAKE_CXX_FLAGS_RELEASE})
+  elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    add_compile_options(${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
+  elseif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(${CMAKE_CXX_FLAGS_DEBUG})
+  endif ()
+  add_link_options(${CMAKE_EXE_LINKER_FLAGS})
+endif ()
+
+if (MSVC AND CCACHE_PROGRAM)
+  string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_ASAN "${CMAKE_C_FLAGS_ASAN}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_ASAN "${CMAKE_CXX_FLAGS_ASAN}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+  string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 endif ()
 
 

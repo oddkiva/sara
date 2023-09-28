@@ -39,12 +39,20 @@ namespace DO { namespace Sara {
   bool load_from_dialog_box(Image<Rgb8>& image)
   {
     QMetaObject::invokeMethod(
-      gui_app(), "getFileFromDialogBox",
+      gui_app(), "getImageFileFromDialogBox",
       Qt::BlockingQueuedConnection);
 
     return load(
       image,
       gui_app()->m_dialogBoxInfo.filename.toLocal8Bit().constData());
+  }
+
+  std::string select_video_file_from_dialog_box()
+  {
+    QMetaObject::invokeMethod(gui_app(), "getVideoFileFromDialogBox",
+                              Qt::BlockingQueuedConnection);
+
+    return gui_app()->m_dialogBoxInfo.filename.toLocal8Bit().constData();
   }
 
   bool save(const ImageView<unsigned char>& image, const std::string& name,

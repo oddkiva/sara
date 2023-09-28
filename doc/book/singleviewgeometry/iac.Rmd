@@ -1,0 +1,216 @@
+# Fundamental Objects in Projective Geometry
+
+## Plane at Infinity
+
+[@HartleyZ:2003:mvg] use the term **Plane at Infinity** $\mathbf{\Pi}_\infty$ in
+projective geometry. This plane $\mathbf{\Pi}_\infty$ is the set of "points"
+$\begin{bmatrix} x \\ y \\ z \\ 0 \end{bmatrix}$ in the 3D space.
+
+This definition is fairly abstract. Basically, to plant ideas in our mind,
+contains the set of than **3D rays** or **3D vectors** (as opposed to 3D
+points). But because the coordinates $(x, y, z)$ are allowed to be in
+$\mathbb{C}$, it also contains 3D imaginary rays.
+
+## Absolute Conic
+
+Now that we understand the definition of the plane at infinity in the previous
+subsection, we are ready to define the absolute conic.
+
+The **Absolute Conic (AC)** is by definition the set of 3D imaginary rays $(x,
+y, z, 0) \in \mathbb{C}^4$ such that
+
+\begin{equation}
+  \begin{bmatrix} x & y & z \end{bmatrix}
+  \begin{bmatrix} 1 & 0 & 0 \\
+                  0 & 1 & 0 \\
+                  0 & 0 & 1 \\
+  \end{bmatrix}
+  \begin{bmatrix} x \\ y \\ z \end{bmatrix}
+  = 0
+\end{equation}
+
+As we can see, the AC is characterized by the identity matrix $\mathbf{I}_3$.
+
+## Absolute Quadric
+
+We have defined the absolute conic (AC) as the identity matrix in the previous
+section. Let's complicate a bit more with the absolute quadric.
+
+The **Absolute Quadric (AQ)** is nothing more than the same formulation of the
+absolute conic in homogeneous coordinates.
+
+In the general form, 3D points $(x, y, z, w) \in \mathbb{C}^4$ lies in the
+absolute quadric iff
+
+\begin{equation}
+  \begin{bmatrix} x & y & z & w\end{bmatrix}
+  %
+  \begin{bmatrix} 1 & 0 & 0 & 0 \\
+                  0 & 1 & 0 & 0 \\
+                  0 & 0 & 1 & 0 \\
+                  0 & 0 & 0 & 0 \\
+  \end{bmatrix}
+  %
+  \begin{bmatrix} x \\ y \\ z \\ w \end{bmatrix}
+  %
+  = 0
+\end{equation}
+
+Note that because points on the absolute conic are on the plane at infinity,
+we also need to impose a second constraint $w = 0$ to ensure the equivalence
+with the absolute conic formulation.
+
+The AQ is therefore characterized by the matrix
+\begin{equation}
+  \mathbf{Q}_\infty =
+  \begin{bmatrix}
+    \mathbf{I}_3 & \mathbf{0}_3 \\
+    \mathbf{0}_3^T & 0
+  \end{bmatrix}
+\end{equation}
+
+And reformulating it again, the AQ is the set of 3D (imaginary) points
+$\tilde{\mathbf{x}} \in \mathbb{C}^4$ such that
+
+\begin{equation}
+  \tilde{\mathbf{x}}^T \mathbf{Q}_\infty \tilde{\mathbf{x}} = 0
+\end{equation}
+
+:::note
+One central property of the AQ is that it is invariant to any rigid body
+transformation $(\mathbf{R}, \mathbf{t})$.
+:::
+
+```{proof}
+Indeed let's consider a point $\tilde{\mathbf{x}} \in \mathbf{Q}_\infty$ and
+rewrite it as
+$\tilde{\mathbf{x}} = \begin{bmatrix} \mathbf{x} \\ w \end{bmatrix}$
+
+Then transform it with the rigid body transform. The transformed point has
+the following coordinates
+
+\begin{equation}
+  \begin{bmatrix} \mathbf{R} \mathbf{x} + w \mathbf{t} \\ w \end{bmatrix}
+\end{equation}
+
+Because $\tilde{\mathbf{x}}$ lies in the AQ, $w = 0$ and the following
+coordinates of the transformed point simplifies as
+
+\begin{equation}
+  \begin{bmatrix} \mathbf{R} \mathbf{x} \\ 0 \end{bmatrix}
+\end{equation}
+
+This transformed point also lies in the AQ, which we will now show.
+
+\begin{equation}
+  \begin{bmatrix} (\mathbf{R} \mathbf{x})^T && 0 \end{bmatrix}
+  %
+  \begin{bmatrix}
+    \mathbf{I}_3 & \mathbf{0}_3 \\
+    \mathbf{0}_3^T & 0
+  \end{bmatrix}
+  %
+  \begin{bmatrix} \mathbf{R} \mathbf{x} \\ 0 \end{bmatrix}
+\end{equation}
+
+This simplifies further as
+\begin{equation}
+  (\mathbf{R} \mathbf{x})^T  (\mathbf{R} \mathbf{x}) = \mathbf{x}^T \mathbf{R}^T
+  \mathbf{R} \mathbf{x} = \mathbf{x}^T \mathbf{x} = 0
+\end{equation}
+
+since $\mathbf{R}^T \mathbf{R} = \mathbf{I}_3$ and $\mathbf{x}$ lies in the
+absolute conic.
+```
+
+[@Triggs:1997:cvpr] relies on the AQ to derive his self-calibration method.
+
+
+## Image of the Absolute Conic
+
+In a nutshell, suppose we know the calibration matrix $\mathbf{K}$ of some pinhole camera.
+
+Suppose we have two orthogonal 3D unit rays $\mathbf{x}$ and $\mathbf{y}$. They
+form a right angle, and thus their dot product is zero:
+
+\begin{equation}
+  \mathbf{x}^T \mathbf{y} = 0
+\end{equation}
+
+They project onto the image plane at two orthogonal vanishing points
+$\mathbf{u} = \mathbf{K} \mathbf{x}$ and
+$\mathbf{v} = \mathbf{K} \mathbf{y}$ respectively.
+
+In other words,
+\begin{equation}
+  \mathbf{u}^T (\mathbf{K}^{-T} \mathbf{K}^T) \mathbf{y} = 0
+\end{equation}
+
+[@HartleyZ:2003:mvg] defines this $3\times3$ matrix as the **Image of the Absolute Conic** (IAC)
+\begin{equation}
+  \mathbf{\Omega}_\infty = \mathbf{K}^{-T} \mathbf{K}^T
+\end{equation}
+
+The IAC is an interesting matrix because it can tell us if two image
+points $\mathbf{u}$, $\mathbf{v}$ backproject to 3D orthogonal rays
+$\mathbf{K}^{-1} \mathbf{u}$ and $\mathbf{K}^{-1} \mathbf{v}$.
+
+More than that, whether or not they backproject to two orthogonal rays, we can
+measure the angle between the backprojected rays as
+
+\begin{equation}
+\mathrm{arccos}
+  \left(
+    \frac{\mathbf{u}^T \mathbf{K}^{-T} \mathbf{K}^{-1} \mathbf{v}}
+    {\| \mathbf{K}^{-1} \mathbf{u} \| \| \mathbf{K}^{-1} \mathbf{v} \|}
+  \right)
+\end{equation}
+
+That is why [@HartleyZ:2003:mvg] says that the IAC acts like a 3D protractor
+between 2 image points.
+
+# Self-Calibration
+
+The self-calibration problem is about the following question: can we calculate
+the calibration matrix $\mathbf{K}$ from the images and how?
+
+The self-calibration relies mostly either on the **Absolute Quadric** or the **Image
+of the Absolute Conic**, which we introduced in the previous section.
+
+## Single-View Approach
+
+Already with a single image, we can determine the calibration matrix.
+
+- If we know 3 orthogonal vanishing points, then we know the IAC and then we can
+  determine the calibration matrix.
+- If we know 1 vanishing point and its orthogonal vanishing line, then we also
+  know the IAC and then we can determine the calibration matrix.
+
+Then using Cholesky's factorization, we would retrieve the calibration
+matrix.
+
+This method is very simple to implement.
+
+In practice, this is an approach that is difficult to make it work and it is
+very dependent on the image data. It is neither always possible to find 3
+orthogonal vanishing points, nor possible to find one vanishing point and 1
+orthogonal vanishing line, and get a reliable estimation of the calibration
+matrix.
+
+More reliable approaches involves fiducial objects like a chessboard pattern
+printed on a rigid planar surface. The detection of the chessboard x-corners are
+much more reliable data points to estimate the calibration matrix.
+
+## Multi-View Approach
+
+TODO: when I take the time to understand more.
+
+- Absolute Quadric
+- Stratified Approaches:
+  1. Projective reconstruction: from the fundamental matrix, we can reconstruct the 3D
+     geometry up to a 3D homography. Line parallelisms are lost.
+  2. Affine reconstruction -> find the 3D affine transform that recover the line
+     parallelism in the 3D reconstruction.
+  3. Metric reconstruction -> find the transform that preserves the angles and
+     the original scale in the 3D reconstruction.
+

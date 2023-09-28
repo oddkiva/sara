@@ -1,10 +1,3 @@
-if (WIN32 AND DO_USE_VLD)
-  find_package(VisualLeakDetector)
-  include_directories(${VLD_INCLUDE_DIR})
-  link_directories(${VLD_LINK_DIRECTORIES})
-endif ()
-
-
 function (shakti_add_test)
   set(_options OPTIONAL)
   set(_file SOURCES)
@@ -15,7 +8,7 @@ function (shakti_add_test)
   get_filename_component(_filename "${shakti_add_test_SOURCES}" NAME_WE)
   set (_test_name shakti_${_filename})
 
-  cuda_add_executable(${_test_name} ${shakti_add_test_SOURCES})
+  add_executable(${_test_name} ${shakti_add_test_SOURCES})
   target_include_directories(${_test_name}
     PRIVATE
     ${CUDA_TOOLKIT_INCLUDE}
@@ -25,16 +18,24 @@ function (shakti_add_test)
     ${Boost_LIBRARIES}
     ${shakti_add_test_DEPENDENCIES})
 
-  target_compile_features(${_test_name} PRIVATE cxx_std_14)
-
   set_target_properties(${_test_name}
     PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
-    CUDA_STANDARD 14
     FOLDER "Tests/Shakti")
 
   target_compile_definitions(${_test_name}
     PRIVATE -DBOOST_TEST_DYN_LINK)
+
+  # Disable compile warnings with boost.test.
+  # list(APPEND NVCC_DIAG_SUPPRESS_WARNING_IDS
+  #   "--diag_suppress=611"
+  #   "--diag_suppress=1388"
+  #   "--diag_suppress=1394")
+  # target_compile_options(
+  #   ${_test_name}
+  #   PRIVATE
+  #     $<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<PLATFORM_ID:Windows>>:"-Xcudafe ${NVCC_DIAG_SUPPRESS_WARNING_IDS}">
+  # )
 
   set_target_properties(${_test_name}
     PROPERTIES
@@ -46,8 +47,9 @@ endfunction ()
 # Because we use the old CMake way to use CUDA.
 include_directories(
   ${CMAKE_SOURCE_DIR}/cpp/src
-  ${CMAKE_SOURCE_DIR}/cpp/third-party)
+  ${CMAKE_SOURCE_DIR}/cpp/third-party
+  ${CMAKE_CURRENT_SOURCE_DIR}/../)
 
-add_subdirectory(MultiArray)
-# add_subdirectory(ImageProcessing)
-add_subdirectory(Segmentation)
+add_subdirectory(Cuda)
+add_subdirectory(OpenCL)
+add_subdirectory(Vulkan)

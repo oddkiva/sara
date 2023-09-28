@@ -1,6 +1,5 @@
 project(Shakti CXX)
 
-
 # Set the version major and minor manually.
 set(DO_Shakti_VERSION_MAJOR 0)
 set(DO_Shakti_VERSION_MINOR 1)
@@ -33,10 +32,7 @@ shakti_dissect_version()
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-if (CMAKE_CUDA_COMPILER)
-  sara_message("Building DO::Shakti CUDA Libraries")
-  add_subdirectory(Cuda)
-endif ()
-if (SARA_USE_HALIDE)
-  add_subdirectory(Halide)
-endif ()
+add_subdirectory(Cuda)
+add_subdirectory(Halide)
+add_subdirectory(OpenCL)
+add_subdirectory(Vulkan)

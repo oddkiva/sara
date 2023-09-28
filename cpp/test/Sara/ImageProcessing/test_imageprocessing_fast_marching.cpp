@@ -14,7 +14,7 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/LevelSets/FastMarching.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 #include <boost/test/unit_test.hpp>
 

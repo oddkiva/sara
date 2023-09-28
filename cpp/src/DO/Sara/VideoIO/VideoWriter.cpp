@@ -7,6 +7,7 @@
 #include <cstring>
 
 extern "C" {
+#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
@@ -50,11 +51,8 @@ av_always_inline char* av_err2str(int errnum)
 }
 #endif
 
-
-constexpr auto STREAM_DURATION = 10.0;
-constexpr auto STREAM_FRAME_RATE = 25;              /* 25 images/s */
-constexpr auto STREAM_PIX_FMT = AV_PIX_FMT_YUV420P; /* default pix_fmt */
-constexpr auto SCALE_FLAGS = SWS_BICUBIC;
+static constexpr auto STREAM_FRAME_RATE = 25;              /* 25 images/s */
+static constexpr auto STREAM_PIX_FMT = AV_PIX_FMT_YUV420P; /* default pix_fmt */
 
 
 namespace DO::Sara {
@@ -115,7 +113,7 @@ namespace DO::Sara {
   // ======================================================================== //
   // Add an output stream.
   static void add_stream(OutputStream* out_stream, AVFormatContext* out_context,
-                         AVCodec** codec, enum AVCodecID codec_id)
+                         const AVCodec** codec, enum AVCodecID codec_id)
   {
     AVCodecContext* c;
     /* find the encoder */
@@ -199,7 +197,8 @@ namespace DO::Sara {
   }
 
   static void add_video_stream(OutputStream* ostream,
-                               AVFormatContext* format_context, AVCodec** codec,
+                               AVFormatContext* format_context,
+                               const AVCodec** codec,
                                enum AVCodecID codec_id, int width, int height,
                                int frame_rate)
   {
@@ -277,7 +276,9 @@ namespace DO::Sara {
     return frame;
   }
 
-  static void open_audio(AVFormatContext*, AVCodec* codec, OutputStream* ost,
+  static void open_audio(AVFormatContext*,
+                         const AVCodec* codec,
+                         OutputStream* ost,
                          AVDictionary* opt_arg)
   {
     AVCodecContext* c;
@@ -330,6 +331,7 @@ namespace DO::Sara {
   }
 
 
+#if 0
   /* Prepare a 16 bit dummy audio frame of 'frame_size' samples and
    * 'nb_channels' channels. */
   static AVFrame* get_audio_frame(OutputStream* ost)
@@ -396,6 +398,7 @@ namespace DO::Sara {
     }
     return write_frame(oc, c, ost->stream, frame);
   }
+#endif
 
 
   // ======================================================================== //
@@ -419,7 +422,7 @@ namespace DO::Sara {
     return picture;
   }
 
-  static void open_video(AVFormatContext*, AVCodec* codec,
+  static void open_video(AVFormatContext*, const AVCodec* codec,
                          OutputStream* ostream, AVDictionary* opt_arg)
   {
     int ret;
@@ -455,6 +458,7 @@ namespace DO::Sara {
       throw std::runtime_error{"Could not copy the stream parameters!"};
   }
 
+#if 0
   /* Prepare a dummy image. */
   static void fill_yuv_image(AVFrame* pict, int frame_index, int width,
                              int height)
@@ -527,6 +531,7 @@ namespace DO::Sara {
     return write_frame(format_context, ostream->encoding_context,
                        ostream->stream, get_video_frame(ostream));
   }
+#endif
 
   static void close_stream(AVFormatContext*, OutputStream* os)
   {
@@ -659,6 +664,9 @@ namespace DO::Sara {
 
   auto VideoWriter::finish() -> void
   {
+    if (_options)
+      av_dict_free(&_options);
+
     // Write the trailer, if any. The trailer must be written before you close
     // the CodecContexts open when you wrote the header; otherwise
     // av_write_trailer() may try to use memory that was freed on
@@ -694,23 +702,6 @@ namespace DO::Sara {
     {
       avformat_free_context(_format_context);
       _format_context = nullptr;
-    }
-  }
-
-  auto VideoWriter::generate_dummy() -> void
-  {
-    while (_encode_video || _encode_audio)
-    {
-      /* select the stream to encode */
-      if (_encode_video &&
-          (!_encode_audio ||
-           av_compare_ts(_video_stream.next_pts,
-                         _video_stream.encoding_context->time_base,
-                         _audio_stream.next_pts,
-                         _audio_stream.encoding_context->time_base) <= 0))
-        _encode_video = !write_video_frame(_format_context, &_video_stream);
-      else
-        _encode_audio = !write_audio_frame(_format_context, &_audio_stream);
     }
   }
 

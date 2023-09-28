@@ -47,6 +47,7 @@ namespace DO { namespace Sara {
   using colorspace##64f = Pixel<double, colorspace>;
 
   DEFINE_COLOR_TYPES(Rgb)
+  DEFINE_COLOR_TYPES(Bgr)
   DEFINE_COLOR_TYPES(Rgba)
   DEFINE_COLOR_TYPES(Bgra)
   DEFINE_COLOR_TYPES(Yuv)

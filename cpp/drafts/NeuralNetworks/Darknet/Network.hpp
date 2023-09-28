@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2022 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <DO/Sara/Core/MultiArray/Slice.hpp>
@@ -51,7 +62,6 @@ namespace DO::Sara::Darknet {
 
         const auto& end = x.sizes();
 
-
         const auto x_slice = slice(x, {
                                           {start(0), end(0), 1},
                                           {start(1), end(1), 1},
@@ -62,7 +72,7 @@ namespace DO::Sara::Darknet {
                        [](const auto& v) { return v; });
 
         if (profile)
-          toc("Route-Group");
+          toc("Route-Slice");
       }
       else
       {

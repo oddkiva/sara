@@ -117,11 +117,16 @@ namespace DO { namespace Sara {
   void UserThread::run()
   {
     const auto& args = qApp->arguments();
+
     auto argc = static_cast<int>(args.size());
     auto argStrings = std::vector<std::string>(args.size());
     std::transform(args.begin(), args.end(), argStrings.begin(),
-                   [](const auto& arg) {
-                     return arg.toUtf8().constData();
+                   [](const auto& arg) -> std::string {
+#ifdef _WIN32
+                     return arg.toLocal8Bit().constData();
+#else
+                     return arg.toStdString();
+#endif
                    });
     auto argVector = std::vector<char*>(args.size());
     std::transform(argStrings.begin(), argStrings.end(), argVector.begin(),

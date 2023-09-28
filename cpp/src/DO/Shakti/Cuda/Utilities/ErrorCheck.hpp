@@ -34,6 +34,7 @@
   SHAKTI_CHECK_LAST_ERROR();                                                   \
   SHAKTI_SYNCHRONIZE()
 
+
 #define SHAKTI_STDOUT                                                          \
   std::cout << termcolor::bold << termcolor::green << "[" << __FUNCTION__      \
             << ":" << __LINE__ << "] " << termcolor::reset
@@ -51,7 +52,7 @@ namespace DO { namespace Shakti {
     if (err != cudaSuccess)
     {
       throw std::runtime_error{
-          Shakti::format("[SYNCHRONIZATION] CUDA Runtime API error = %02d from "
+          Shakti::format("CUDA Runtime API error = %02d from "
                          "file <%s>, line %i: %s\n",
                          err, file, line, cudaGetErrorString(err))};
 

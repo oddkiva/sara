@@ -210,6 +210,15 @@ namespace DO { namespace Shakti {
     }
     //! @}
 
+    //! @brief Copy the ND-array host array to device array.
+    __host__ inline void copy_from_host(T* host_data, int w, int h)
+    {
+      static_assert(N == 2, "Array must be 2D!");
+      SHAKTI_SAFE_CUDA_CALL(cudaMemcpy2D(_data, _pitch, host_data,
+                                         w * sizeof(T), w * sizeof(T), h,
+                                         cudaMemcpyHostToDevice));
+    }
+
     //! @brief Copy the ND-array device array to host array.
     //! You must allocate the array with the appropriate size.
     __host__ inline void copy_to_host(T* host_data) const

@@ -15,7 +15,7 @@
 
 #include <DO/Sara/ImageProcessing/Norm.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Geometry/Objects/Cone.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 #include "TestPolygon.hpp"
 

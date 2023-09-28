@@ -13,75 +13,79 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FileSystem.hpp>
+#include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
 
 namespace DO::Sara {
 
-auto detect_keypoints(const std::string& dirpath,
-                      const std::string& h5_filepath,  //
-                      bool overwrite) -> void
-{
-  auto h5_file = H5File{h5_filepath, H5F_ACC_TRUNC};
+  auto detect_keypoints(const std::string& dirpath,
+                        const std::string& h5_filepath,  //
+                        bool overwrite) -> void
+  {
+    auto h5_file = H5File{h5_filepath, H5F_ACC_TRUNC};
 
-  auto image_paths = std::vector<std::string>{};
-  append(image_paths, ls(dirpath, ".png"));
-  append(image_paths, ls(dirpath, ".jpg"));
+    auto image_paths = std::vector<std::string>{};
+    append(image_paths, ls(dirpath, ".png"));
+    append(image_paths, ls(dirpath, ".jpg"));
 
-  std::for_each(
-      std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
-        SARA_DEBUG << "Reading image " << path << "..." << std::endl;
-        const auto image = imread<float>(path);
+    std::for_each(
+        std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
+          SARA_DEBUG << "Reading image " << path << "..." << std::endl;
+          const auto image = imread<float>(path);
 
-        SARA_DEBUG << "Computing SIFT keypoints " << path << "..." << std::endl;
-        const auto keys = compute_sift_keypoints(image);
+          SARA_DEBUG << "Computing SIFT keypoints " << path << "..."
+                     << std::endl;
+          const auto keys = compute_sift_keypoints(image);
 
-        const auto group_name = basename(path);
-        h5_file.get_group(group_name);
+          const auto group_name = basename(path);
+          h5_file.get_group(group_name);
 
-        SARA_DEBUG << "Saving SIFT keypoints of " << path << "..." << std::endl;
-        write_keypoints(h5_file, group_name, keys, overwrite);
-      });
-}
+          SARA_DEBUG << "Saving SIFT keypoints of " << path << "..."
+                     << std::endl;
+          write_keypoints(h5_file, group_name, keys, overwrite);
+        });
+  }
 
 
-auto read_keypoints(const std::string& dirpath, const std::string& h5_filepath)
-    -> void
-{
-  auto h5_file = H5File{h5_filepath, H5F_ACC_RDONLY};
-  auto image_paths = std::vector<std::string>{};
-  append(image_paths, ls(dirpath, ".png"));
-  append(image_paths, ls(dirpath, ".jpg"));
+  auto read_keypoints(const std::string& dirpath,
+                      const std::string& h5_filepath) -> void
+  {
+    auto h5_file = H5File{h5_filepath, H5F_ACC_RDONLY};
+    auto image_paths = std::vector<std::string>{};
+    append(image_paths, ls(dirpath, ".png"));
+    append(image_paths, ls(dirpath, ".jpg"));
 
-  std::for_each(
-      std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
-        SARA_DEBUG << "Reading image " << path << "..." << std::endl;
-        const auto image = imread<float>(path);
+    std::for_each(
+        std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
+          SARA_DEBUG << "Reading image " << path << "..." << std::endl;
+          const auto image = imread<float>(path);
 
-        const auto group_name = basename(path);
+          const auto group_name = basename(path);
 
-        SARA_DEBUG << "Read keypoints for " << group_name << "..." << std::endl;
-        const auto keys = read_keypoints(h5_file, group_name);
+          SARA_DEBUG << "Read keypoints for " << group_name << "..."
+                     << std::endl;
+          const auto keys = read_keypoints(h5_file, group_name);
 
-        const auto& features = std::get<0>(keys);
+          const auto& features = std::get<0>(keys);
 
-        // Visual inspection.
-        if (!active_window())
-        {
-          create_window(image.sizes() / 2, group_name);
-          set_antialiasing();
-        }
+          // Visual inspection.
+          if (!active_window())
+          {
+            create_window(image.sizes() / 2, group_name);
+            set_antialiasing();
+          }
 
-        if (get_sizes(active_window()) != image.sizes() / 2)
-          resize_window(image.sizes() / 2);
+          if (get_sizes(active_window()) != image.sizes() / 2)
+            resize_window(image.sizes() / 2);
 
-        display(image, Point2i::Zero(), 0.5);
-        draw_oe_regions(features, Red8, 0.5f);
-        get_key();
-      });
+          display(image, Point2i::Zero(), 0.5);
+          draw_oe_regions(features, Red8, 0.5f);
+          get_key();
+        });
 
-  if (active_window())
-    close_window();
-}
+    if (active_window())
+      close_window();
+  }
 
 } /* namespace DO::Sara */

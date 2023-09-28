@@ -17,7 +17,7 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

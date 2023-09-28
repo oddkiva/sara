@@ -92,7 +92,7 @@ namespace DO { namespace Sara {
                       int x, int y);
     void setActiveWindow(QWidget* w);
     void closeWindow(QWidget* w);
-    void getFileFromDialogBox();
+    void getImageFileFromDialogBox();
 
   public: /* connection methods for the keyboard and mouse handling. */
     bool activeWindowIsVisible();

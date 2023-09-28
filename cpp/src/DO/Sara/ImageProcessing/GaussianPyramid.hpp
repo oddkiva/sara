@@ -34,7 +34,7 @@ namespace DO::Sara {
   inline auto
   gaussian_pyramid(const ImageView<T>& image,
                    const ImagePyramidParams& params = ImagePyramidParams(),
-                   typename PixelTraits<T>::channel_type gauss_truncate =
+                   const typename PixelTraits<T>::channel_type gauss_truncate =
                        typename PixelTraits<T>::channel_type(4))
       -> ImagePyramid<T>
   {
@@ -90,7 +90,8 @@ namespace DO::Sara {
      *   k < log(l / (2b)) / log(2)
      *
      */
-    const auto num_octaves = static_cast<int>(log(l / (2.f * b)) / log(2.f));
+    const auto num_octaves = std::min(static_cast<int>(log(l / (2.f * b)) / log(2.f)),
+                                      params.num_octaves_max());
 
     // Shorten names.
     const auto k = static_cast<Scalar>(params.scale_geometric_factor());

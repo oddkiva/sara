@@ -1,6 +1,7 @@
-project(DO_Sara_FileSystem_Tests)
+# You still need this cumbersome thing to make the tests pass.
+find_package(DO_Sara REQUIRED)
 
-find_package(DO_Sara COMPONENTS Core FileSystem REQUIRED)
+project(DO_Sara_FileSystem_Tests)
 
 file(GLOB test_filesystem_SOURCE_FILES FILES test_*.cpp)
 
@@ -9,6 +10,6 @@ foreach (file ${test_filesystem_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES ${DO_Sara_LIBRARIES}
+    DEPENDENCIES DO::Sara::FileSystem
     FOLDER FileSystem)
 endforeach ()

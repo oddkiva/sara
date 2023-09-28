@@ -1,14 +1,8 @@
 #pragma once
 
-#ifndef _USE_MATH_DEFINES
-#  define _USE_MATH_DEFINES
-#endif
+#include <DO/Sara/Core/EigenExtension.hpp>
 
-#include <Eigen/Core>
-
-#include <cmath>
 #include <ratio>
-#include <utility>
 
 
 namespace DO::Sara {
@@ -84,6 +78,12 @@ namespace DO::Sara {
     {
       value /= scale;
       return *this;
+    }
+
+    template <typename U>
+    inline constexpr auto as() const -> U
+    {
+      return static_cast<U>(value);
     }
 
     T value{};

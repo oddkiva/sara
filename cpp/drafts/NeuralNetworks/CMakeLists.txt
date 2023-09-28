@@ -1,5 +1,2 @@
-add_subdirectory(examples)
-
-if (SARA_BUILD_TESTS)
-  add_subdirectory(test)
-endif ()
+add_subdirectory(Darknet)
+add_subdirectory(TensorRT)

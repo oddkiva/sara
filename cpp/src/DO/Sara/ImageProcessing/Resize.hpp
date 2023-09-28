@@ -56,7 +56,7 @@ namespace DO { namespace Sara {
 
   //! @brief Find min and max coefficient of a vector.
   template <typename T, int N>
-  inline std::pair<T, T> range(const Matrix<T, N, 1>& v)
+  inline auto range(const Matrix<T, N, 1>& v) -> std::pair<T, T>
   {
     return {*std::min_element(v.data(), v.data() + N),
             *std::max_element(v.data(), v.data() + N)};
@@ -65,6 +65,7 @@ namespace DO { namespace Sara {
 
   //! @{
   //! @brief Reduce image.
+  //! CAVEAT: these functions are slow!
   template <typename T, int N>
   void reduce(const ImageView<T, N>& src, ImageView<T, N>& dst)
   {
@@ -247,6 +248,8 @@ namespace DO { namespace Sara {
     resize(src, dst);
     return dst;
   }
+
+  auto resize_v2(const ImageView<float>& src, ImageView<float>& dst) -> void;
   //! @}
 
 

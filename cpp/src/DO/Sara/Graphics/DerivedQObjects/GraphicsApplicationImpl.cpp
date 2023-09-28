@@ -120,10 +120,16 @@ namespace DO { namespace Sara {
     m_createdWindows.erase(wi);
   }
 
-  void GraphicsApplication::Impl::getFileFromDialogBox()
+  void GraphicsApplication::Impl::getImageFileFromDialogBox()
   {
     m_dialogBoxInfo.filename = QFileDialog::getOpenFileName(
         0, "Open File", "/home", "Images (*.png *.xpm *.jpg)");
+  }
+
+  void GraphicsApplication::Impl::getVideoFileFromDialogBox()
+  {
+    m_dialogBoxInfo.filename = QFileDialog::getOpenFileName(
+        0, "Open File", "/home", "Videos (*.mp4 *.mov *.mkv)");
   }
 
   bool GraphicsApplication::Impl::activeWindowIsVisible()

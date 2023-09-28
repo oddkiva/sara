@@ -23,23 +23,23 @@ namespace DO::Shakti::HalideBackend::v2 {
   {
     scales = std::vector<float>(scale_count + 3);
     for (auto i = 0; i < scale_count + 3; ++i)
-      scales[i] = scale_initial * std::pow(scale_factor, i);
+      scales[i] = scale_initial * std::pow(scale_factor, static_cast<float>(i));
 
     sigmas = std::vector<float>(scale_count + 3);
     for (auto i = 0u; i < sigmas.size(); ++i)
     {
-      sigmas[i] =
-          i == 0
-              ? std::sqrt(std::pow(scale_initial, 2) -
-                          std::pow(scale_camera, 2))
-              : std::sqrt(std::pow(scales[i], 2) - std::pow(scales[i - 1], 2));
+      using DO::Sara::square;
+      sigmas[i] = i == 0
+                      ? std::sqrt(square(scale_initial) - square(scale_camera))
+                      : std::sqrt(square(scales[i]) - square(scales[i - 1]));
     }
 
     kernels = std::vector<::Halide::Runtime::Buffer<float>>{};
     std::transform(sigmas.begin(), sigmas.end(), std::back_inserter(kernels),
                    [](const auto& sigma) {
                      const auto k = Sara::make_gaussian_kernel(sigma);
-                     auto k_buffer = ::Halide::Runtime::Buffer<float>(k.size());
+                     const auto k_size = static_cast<int>(k.size());
+                     auto k_buffer = ::Halide::Runtime::Buffer<float>(k_size);
                      std::copy_n(k.data(), k.size(), k_buffer.data());
                      k_buffer.set_host_dirty();
                      return k_buffer;
@@ -233,10 +233,10 @@ namespace DO::Shakti::HalideBackend::v2 {
     for (auto s = 0; s < static_cast<int>(extrema_maps.size()); ++s)
     {
       const auto& dog_ext_map = extrema_maps[s];
-      const auto num_extrema = std::count_if(      //
+      const auto num_extrema = static_cast<int>(std::count_if(      //
           dog_ext_map.begin(), dog_ext_map.end(),  //
           [](const auto& v) { return v != 0; }     //
-      );
+      ));
 
       if (num_extrema == 0)
         continue;
@@ -364,7 +364,7 @@ namespace DO::Shakti::HalideBackend::v2 {
       e.value.copy_to_host();
       // No need to copy e.type because it is already in the host memory.
 
-      e_oriented.resize(d.orientation_map.size());
+      e_oriented.resize(static_cast<int>(d.orientation_map.size()));
 
       auto k = 0;
       for (auto i = 0; i < e.size(); ++i)
@@ -414,9 +414,6 @@ namespace DO::Shakti::HalideBackend::v2 {
                                        int width, int height) -> void
   {
     start_octave_index = start_octave;
-
-    // Adjust the scale of the photograph acquired by the camera.
-    scale_camera = 1.f / std::pow(2, start_octave_index);
 
     // Deduce the maximum number of octaves.
     const auto l = std::min(width, height);  // l = min image image sizes.
@@ -575,7 +572,7 @@ namespace DO::Shakti::HalideBackend::v2 {
     auto& descriptors = Sara::descriptors(keys);
     descriptors.resize(num_features, 128);
     auto dmat = descriptors.matrix();
-    auto current_row = 0;
+    auto current_row = Eigen::Index{};
     for (auto o = 0u; o < octaves.size(); ++o)
     {
       const auto& octave = octaves[o];
@@ -595,7 +592,7 @@ namespace DO::Shakti::HalideBackend::v2 {
 
   auto SiftPyramidPipeline::octave_scaling_factor(int o) const -> float
   {
-    return std::pow(2, o);
+    return std::pow(2.f, static_cast<float>(o));
   }
 
   auto SiftPyramidPipeline::input_rescaled_view() -> Sara::ImageView<float>

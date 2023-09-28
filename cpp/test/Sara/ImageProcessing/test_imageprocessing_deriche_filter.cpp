@@ -15,7 +15,7 @@
 
 #include <DO/Sara/ImageProcessing/Deriche.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

@@ -14,5 +14,6 @@ if (SARA_USE_FROM_SOURCE)
       DO::Sara::Features
       DO::Sara::FileSystem
       DO::Sara::ImageIO)
+    target_compile_options(DO_Sara_MultiViewGeometry PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/utf-8>)
   endif ()
 endif ()

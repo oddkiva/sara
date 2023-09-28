@@ -16,7 +16,9 @@
 #include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 namespace sara = DO::Sara;
@@ -30,13 +32,13 @@ auto make_omnidirectional_camera()
   const auto h = 1080;
 
   // Focal lengths in each dimension.
-  const auto fx = 1063.30738864;
-  const auto fy = 1064.20554291;
+  const auto fx = 1063.30738864f;
+  const auto fy = 1064.20554291f;
   // Shear component.
-  const auto s = -1.00853432;
+  const auto s = -1.00853432f;
   // Principal point.
-  const auto u0 = 969.55702157;
-  const auto v0 = 541.26230733;
+  const auto u0 = 969.55702157f;
+  const auto v0 = 541.26230733f;
 
   camera_parameters.image_sizes << w, h;
   // clang-format off
@@ -45,13 +47,14 @@ auto make_omnidirectional_camera()
        0, fy, v0,
        0,  0,  1).finished());
   camera_parameters.radial_distortion_coefficients <<
-      0.50776095,
-      -0.16478652;
+      0.50776095f,
+      -0.16478652f,
+      0.0f;
   camera_parameters.tangential_distortion_coefficients <<
-      0.00023093,
-      0.00078712;
+      0.00023093f,
+      0.00078712f;
   // clang-format on
-  camera_parameters.xi = 1.50651524;
+  camera_parameters.xi = 1.50651524f;
 
   return camera_parameters;
 }
@@ -65,9 +68,9 @@ auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& omni_camera)
   K(1, 1) /= downscale_factor;
   K(1, 2) -= 450;
 
-  auto t = M_PI / 12;
-  auto c = std::cos(t);
-  auto s = std::sin(t);
+  const auto t = static_cast<float>(M_PI / 12);
+  const auto c = std::cos(t);
+  const auto s = std::sin(t);
   // clang-format off
   const auto R = (Eigen::Matrix3f{} <<
                   1,  0,  0,
@@ -265,7 +268,9 @@ int __main(int argc, char** argv)
     return -1;
   const auto video_filepath = argv[1];
 
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   auto video_stream = sara::VideoStream{video_filepath};
 

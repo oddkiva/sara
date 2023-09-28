@@ -106,10 +106,12 @@ namespace DO::Shakti::HalideBackend {
         conv_x.compute_root();
         conv_x.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1,
                         Halide::TailStrategy::GuardWithIf);
+        conv_x.vectorize(xi, 4, Halide::TailStrategy::GuardWithIf);
 
         // 2nd pass: transpose and convolve the rows.
         conv_y.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1,
                         Halide::TailStrategy::GuardWithIf);
+        conv_y.vectorize(yi, 4, Halide::TailStrategy::GuardWithIf);
       }
 
       // Hexagon schedule.

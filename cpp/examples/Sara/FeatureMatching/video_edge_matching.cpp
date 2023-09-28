@@ -28,7 +28,9 @@
 
 #include <boost/filesystem.hpp>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 using namespace std;
@@ -404,11 +406,11 @@ struct EdgeMatcher
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
@@ -423,7 +425,9 @@ int __main(int argc, char** argv)
 #endif
 
   // OpenMP.
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
@@ -434,7 +438,7 @@ int __main(int argc, char** argv)
 
   // Output save.
   namespace fs = boost::filesystem;
-  const auto basename = fs::basename(video_filepath);
+  const auto basename = fs::path(video_filepath).stem().string();
   VideoWriter video_writer{
 #ifdef __APPLE__
       "/Users/david/Desktop/" + basename + ".curve-analysis.mp4",

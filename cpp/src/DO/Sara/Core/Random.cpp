@@ -21,13 +21,17 @@ namespace DO::Sara {
                       int num_data_points)  //
       -> Tensor_<int, 2>
   {
+    auto rd = std::random_device{};
+    auto g = std::mt19937{rd()};
+
     auto indices = range(num_data_points);
 
     auto samples = Tensor_<int, 2>{{num_samples, sample_size}};
     for (int i = 0; i < num_samples; ++i)
     {
-      auto indices_shuffled = shuffle(indices);
-      samples[i].flat_array() = indices_shuffled.flat_array().head(sample_size);
+      auto samples_i = samples[i];
+      std::sample(indices.begin(), indices.end(), samples_i.begin(),
+                  sample_size, g);
     }
 
     return samples;

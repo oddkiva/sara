@@ -25,7 +25,8 @@ namespace DO::Sara {
   auto estimate_fundamental_matrix(const std::vector<Match>& Mij,
                                    const KeypointList<OERegion, float>& ki,
                                    const KeypointList<OERegion, float>& kj,
-                                   int num_samples, double err_thres)
+                                   const int num_samples,
+                                   const double err_thres)
       -> std::tuple<FundamentalMatrix, Tensor_<bool, 1>, Tensor_<int, 1>>;
 
   auto estimate_fundamental_matrices(const std::string& dirpath,

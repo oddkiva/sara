@@ -1,0 +1,228 @@
+# Blobs
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: sift-on-cheetah
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   Black dots on the cheetah's fur are one beautiful pattern among
+#|   infinitely many in Nature.
+#|   Sara's SIFT implementation retrieves these particularly well as most of
+#|   them can be detected as dark circular blobs in this photograph.
+#|   Credits: https://www.britannica.com/animal/cheetah-mammal.
+knitr::include_graphics(paste0(getwd(), "/features/cheetah.jpg"))
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: sift-on-sunflower-field
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   The SIFT detector implemented in Sara responds particularly well on the
+#|   sunflower heads in this image depicting a sunflower field. They are
+#|   detected as dark circular blobs surrounded by a brighter background. Notice
+#|   how with the scale-space representation of the image, we are able to
+#|   estimate well the size of the circular flower head.
+knitr::include_graphics(paste0(getwd(), "/features/sunflower-field.jpg"))
+```
+
+In this chapter, we will review the geometry of local features that *SIFT*
+[@Lowe:2004:ijcv], *SURF* [@BayETVG:2008:cviu], MSER [@MatasCUP:2002:bmvc] and
+affine-covariant regions [@MikolajczykTSZMSKVG:2005:ijcv] share in common.
+
+Figures \@ref(fig:sift-on-cheetah) and \@ref(fig:sift-on-sunflower-field) are
+iconic illustrations of SIFT blobs.
+
+These features were very utilized for high-level object recognition tasks before
+the widespread adoption of deep learning and are still playing a key part in
+structure-from-motion pipelines that I feel compelled to say a few words about
+them.
+
+N.B.: this chapter contains bits of my thesis [@Ok:2013:phdthesis], which I have
+simplified.
+
+## Geometry
+
+In general any locally invariant regions, *a.k.a.* features, present a common
+set of geometric characteristics, be it SIFT, SURF, MSER, or Harris-Affine etc.
+We will detail these in the sequel. Now in multiple view geometry and
+structure-from-motion, they tend to be viewed as mere points in the images but
+they are actually much more than that.
+
+Before moving forward in this chapter, let us denote a feature by the italic
+text letter $x$ for convenience.
+
+More than just being a point indeed, a feature $x$ is fully characterized by:
+
+- a center with pixel coordinates $\x \in \mathbb{R}^2$,
+  which in practice is the only information that structure-from-motion pipelines
+  use,
+
+- a shape $\Shape_x$, which represents the (possibly anisotropic) scale of
+  feature $x$ and can be summarized^[MSER is a special case as I'll explain
+  further below] as an ellipse as follows:
+
+  \begin{equation}
+    \Shape_x \eqdef \left\{ \x' \in \mathbb{R}^2\ \left|\ (\x'-\x)^T \bSigma_x
+  (\x'-\x) \leq 1 \right. \right\},
+  \end{equation}
+
+  where $\bSigma_x \in \mathbb{R}^{2\times 2}$ is a scale matrix.
+
+- a dominant gradient orientation $\theta_x$ if it is calculated.
+
+While this may seem redundant with the shape definition, we can also derive the
+following definition^[I doubt you will see this definition anywhere else, so
+this is my small innovation.].
+
+:::puzzle
+```{definition, name="Scale-Normalized Signed Distance Function"}
+The scale matrix $\bSigma_x$ also allows to define a *scale-normalized signed
+distance function* to $x$:
+
+\begin{equation}
+  d_x(\x') \eqdef (\x' - \x)^T \bSigma (\x' - \x) - 1,
+\end{equation}
+
+where the zero level set is the *elliptic* shape of the feature.
+```
+:::
+
+Let us illustrate some kinds of feature that have been used in previous research
+to set things clear in our mind.
+
+### Locally Similar-Invariant Features
+
+An example of a SIFT feature is illustrated in Figure \@ref(fig:sift-feature).
+To be more accurate, what SIFT detects are *local extrema of Difference of
+Gaussians*, which we term simply as DoG for brevity. By design, a DoG feature is
+circular and only guarantees invariance to similarity transforms
+(scale+rotation) in contrast to other affine invariant features presented in
+[@MikolajczykTSZMSKVG:2005:ijcv].
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: sift-feature
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   Geometry of a SIFT feature.
+#|   Credits: http://www.vlfeat.org/overview/sift.html.
+knitr::include_graphics(paste0(getwd(), "/features/feature.jpg"))
+```
+
+Other similarity-invariant detectors enjoy the same similarity invariance as
+SIFT. Let us cite for example SURF [@BayETVG:2008:cviu], Edge Foci
+[@ZitnickR:2011:iccv], SFOP [@ForstnerDS:2009:iccv]. I don't know much about
+them but I really like the elegant geometric properties that SFOP and Edge Foci
+enjoy.^[And I should study them someday.]
+
+### Locally Affine-Invariant Features
+
+In contrast to DoG-SIFT keypoints, the shape of affine-covariant features is
+elliptic. Such an elliptic shape is obtained by an algorithmic process called
+affine shape adaptation, which iteratively refines the localization of the
+initial feature detection. We will not go into details about this method and
+will be content with illustrating such features with Figure
+\@ref(fig:affine-covariant-regions).
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: affine-covariant-regions
+#| out.width: 80%
+#| fig.align: center
+#| fig.cap: >
+#|   Locally Affine-Invariant Features.
+#|   Credits: [@MikolajczykTSZMSKVG:2005:ijcv]
+knitr::include_graphics(paste0(getwd(), "/features/affine-covariant-regions.jpg"))
+```
+
+As shown in Figure \@ref(fig:affine-covariant-regions), it is quite compelling
+that most of the time the affine shape is well estimated across different change
+of viewpoints and would bring a superior advantage in the feature matching.
+
+In my experience however, I found that SIFT still performs very well without the
+affine shape adaptation [@MikolajczykTSZMSKVG:2005:ijcv] and actually better
+than affine-invariant features in structure-from-motion. In fact, we can even
+tell that by closely inspecting the features in Figure
+\@ref(fig:affine-covariant-regions): some Harris-Affine or Hessian-Affine
+features seem to have their center and shape really off by a few noticeable
+pixels between the two viewpoints in this figure.^[Optical illusion? I don't
+think so... my fear is that these are far from being uncommon to the point of
+harming the 3D reconstruction, but this claim needs proper investigation.].
+
+One thing to note about MSER elliptic shapes: they are not obtained from affine
+shape adaptation but from the computation of the second-moment matrix.
+Regardless of their elliptic shape, MSERs are not very popular in
+structure-from-motion pipelines mostly because they tend to be too few at the
+detection.
+
+Besides the affine shape adaptation has a significant computational burden and
+is tricky to implement, which leads us to think this might not be worth going
+through the pain.
+
+
+### MSER: A Special Case.
+
+In fact, MSER features [@MatasCUP:2002:bmvc] are more than just an elliptic
+shape: they are a set of connected pixels. That allows us to represent a much
+richer set of shapes, and we can use them for letter recognition. See for
+example [@GomezK:2014:icpr].
+
+As I carefully said it above, a MSER feature is *summarized* more compactly as
+an elliptic region by calculating a second-order moment matrix. To do so, we
+cumulate the locations of all the pixels $\mathbf{x}'$ in the MSER as follows:
+
+\begin{equation}
+  \bSigma_x^{-1} = \frac{1}{\mathrm{area}(x)}
+  \displaystyle \int (\x' - \x)(\x' - \x)^T \mathop{d}\x'
+\end{equation}
+
+The reason for which I use the integral $\int$ was to avoid the confusion with
+the discrete sum symbol $\sum$ with the scale symbol $\bSigma$.
+
+Implementation-wise, denoting the $x$- and $y$-coordinates of each 2D vector by
+$\x_u$ and $\x_v$, this is simply the following discrete sums:
+
+\begin{equation}
+  \bSigma_x^{-1} = \frac{1}{\mathrm{area}(x)}
+  \begin{bmatrix}
+    \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_u - \mathbf{x}_u)^2 &
+    %
+    \displaystyle \sum_{\mathbf{x}'}
+      (\mathbf{x}'_u - \mathbf{x}_u)(\mathbf{x}'_v - \mathbf{x}_v) \\
+    %
+    \displaystyle \sum_{\mathbf{x}'}
+      (\mathbf{x}'_u - \mathbf{x}_u)(\mathbf{x}'_v - \mathbf{x}_v) &
+    %
+    \displaystyle \sum_{\mathbf{x}'} (\mathbf{x}'_v - \mathbf{x}_v)^2
+  \end{bmatrix},
+\end{equation}
+
+the second-order moment matrix being also the inverse of the scale matrix.
+
+### Personal Conclusion
+
+I conclude this section with a personal (biased) note since I am a SIFT fan.
+
+Despite the advances in feature detection, SIFT remains a very good option.
+Besides the SIFT patent has expired, which now makes it viable for commercial
+applications. The default parameters that comes with it are so good and well
+validated over the widespread adoption in research. If parameter tuning becomes
+necessary, it is very easy to do so as I found them quite straightforward to
+interpret.
+
+Although only similarity-invariant, SIFT still performs very well compared to
+affine-covariant regions in my experience. My main complaint with
+affine-covariant features is the messiness I have to deal after the detection.
+Usually, I have to filter them with non-maxima suppression to remove clusters of
+features.^[Sorry for being too critical... but yes I was a long-time user of
+affine-covariant features.]
+
+That is not the case with SIFT, MSER where the keypoints are very distinctive.

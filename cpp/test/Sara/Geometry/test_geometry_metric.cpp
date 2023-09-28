@@ -16,7 +16,7 @@
 
 #include <DO/Sara/Geometry/Tools/Metric.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace DO::Sara;

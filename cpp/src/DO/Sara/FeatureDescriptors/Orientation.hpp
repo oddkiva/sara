@@ -172,8 +172,8 @@ namespace DO { namespace Sara {
       Only histogram peaks \f$i\f$ such that \f$h_i \geq 0.8 \max_j h_j\f$
    */
   template <typename T, int N>
-  std::vector<int> find_peaks(const Array<T, N, 1>& orientation_histogram,
-                              T peak_ratio_thres = T(0.8))
+  auto find_peaks(const Array<T, N, 1>& orientation_histogram,
+                  T peak_ratio_thres = T(0.8)) -> std::vector<int>
   {
     T max = orientation_histogram.maxCoeff();
     std::vector<int> orientation_peaks;
@@ -189,7 +189,7 @@ namespace DO { namespace Sara {
   //! @brief Refine peaks as in [Lowe, IJCV 2004] by interpolation based on a
   //! second-order Taylor approximation.
   template <typename T, int N>
-  T refine_peak(const Array<T, N, 1>& orientation_histogram, int i)
+  auto refine_peak(const Array<T, N, 1>& orientation_histogram, int i) -> T
   {
     const auto y0 = orientation_histogram((i - 1 + N) % N);
     const auto y1 = orientation_histogram(i);
@@ -214,8 +214,8 @@ namespace DO { namespace Sara {
 
   //! @brief Helper functions.
   template <typename T, int N>
-  std::vector<T> refine_peaks(const Array<T, N, 1>& orientation_histogram,
-                              const std::vector<int>& ori)
+  auto refine_peaks(const Array<T, N, 1>& orientation_histogram,
+                    const std::vector<int>& ori) -> std::vector<T>
   {
     std::vector<T> oriT(ori.size());
     for (size_t i = 0; i < ori.size(); ++i)

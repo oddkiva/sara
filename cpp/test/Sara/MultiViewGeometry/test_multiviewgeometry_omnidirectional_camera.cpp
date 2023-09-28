@@ -12,6 +12,7 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/Omnidirectional Camera Model"
 
 #include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/OmnidirectionalCamera.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -146,5 +147,79 @@ BOOST_AUTO_TEST_CASE(test_omnidirectional_camera_lat_lon_extraction)
     std::cout << "lon = " << theta / M_PI * 180 << " deg" << std::endl;
     std::cout << std::endl;
 
+  }
+}
+
+
+BOOST_AUTO_TEST_CASE(test_omnidirectional_camera_model_v2)
+{
+  auto camera = v2::OmnidirectionalCamera<float>{};
+
+  // Focal lengths in each dimension.
+  camera.fx() = 1063.30738864f;
+  camera.fy() = 1064.20554291f;
+  // Shear component.
+  camera.shear() = -1.00853432f;
+  // Principal point.
+  camera.u0() = 969.55702157f;
+  camera.v0() = 541.26230733f;
+
+  // Distortion coefficients.
+  camera.k() << 0.50776095f, -0.16478652f;
+  camera.p() << 0.00023093f, 0.00078712f;
+  camera.xi() = 1.50651524f;
+
+  // Check the projection and backprojection.
+  {
+    const auto center = Eigen::Vector2f(960, 540);
+
+    // The backprojected ray must have positive depth, i.e., z > 0?
+    //
+    // The light ray that hits the center of the film plane must be in front
+    // of the camera.
+    const auto ray = camera.backproject(center);
+    BOOST_CHECK(ray.z() > 0);
+
+    // The reprojected ray must hit the center of the image.
+    const auto projected_ray = camera.project(ray);
+    BOOST_CHECK_LE((projected_ray - center).norm(), 1e-3f);
+
+    // Another property is that the center should be not too distorted.
+    //
+    // This is not very rigorous but this test is there to serve as a geometric
+    // insight.
+    const auto center_distorted = camera.distort(center);
+    BOOST_CHECK_LE((center_distorted - center).norm(), 10.f);
+    const auto center_undistorted = camera.undistort(center);
+    BOOST_CHECK_LE((center_undistorted - center).norm(), 15.f);
+
+    // Check the bijectivity between distortion and undistortion.
+    const auto cu = camera.undistort(center);
+    const auto cd = camera.distort(cu);
+
+    BOOST_CHECK_LE((center - cd).norm(), 1e-3f);
+  }
+
+  // Check the corners.
+  static constexpr auto w = 1920.f;
+  static constexpr auto h = 1080.f;
+  const auto corners = std::array<Eigen::Vector2f, 4>{
+      Eigen::Vector2f{0, 0},
+      Eigen::Vector2f{w, 0},
+      Eigen::Vector2f{w, h},
+      Eigen::Vector2f{0, h},
+  };
+  for (const auto& c : corners)
+  {
+    // Check that the corners are behind the cameras
+    const auto ray = camera.backproject(c);
+    // This is a non-negotiable check.
+    BOOST_CHECK(ray.z() < 0);
+
+    // The reprojected ray must hit the center of the image.
+    const auto projected_ray = camera.project(ray);
+    // We allow ourselves to set generous thresholds for the reprojection of
+    // rays because the corners are extreme cases.
+    BOOST_CHECK_LE((projected_ray - c).norm(), 6.f);
   }
 }

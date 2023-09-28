@@ -253,6 +253,11 @@ namespace DO { namespace Sara {
     };
   };
 
+  //! @brief Computes gradients.
+  //! This is optimized with Halide.
+  auto gradient(const ImageView<float>& f,    //
+                ImageView<float>& nabla_f_x,  //
+                ImageView<float>& nabla_f_y) -> void;
 
   //! @brief Computes gradients in polar coordinates.
   //! This is optimized with Halide.

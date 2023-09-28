@@ -24,13 +24,15 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
+namespace sara = DO::Sara;
 
-using namespace std;
 using namespace DO::Sara;
 
 
@@ -44,11 +46,11 @@ auto initialize_crop_region(const Eigen::Vector2i& sizes)
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
@@ -69,7 +71,8 @@ int __main(int argc, char** argv)
       ("downscale-factor,d",
        po::value<int>(&downscale_factor)->default_value(2),
        "downscale factor")  //
-      ("num_scales_per_octave,s", po::value<int>(&num_scales_per_octave)->default_value(1),
+      ("num_scales_per_octave,s",
+       po::value<int>(&num_scales_per_octave)->default_value(1),
        "number of scales per octave")  //
       ("skip", po::value<int>(&skip)->default_value(0),
        "number of frames to skip")  //
@@ -110,7 +113,9 @@ int __main(int argc, char** argv)
       /* scale_initial */ 1.2f);
 
   // OpenMP.
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
@@ -120,7 +125,7 @@ int __main(int argc, char** argv)
   auto frame_gray32f_downscaled = Image<float>{downscaled_sizes};
 
   // Output save.
-  const auto basename = fs::basename(video_filepath);
+  const auto basename = fs::path{video_filepath}.stem().string();
   auto video_writer = std::unique_ptr<VideoWriter>{};
 
   if (save_video)
@@ -220,14 +225,14 @@ int __main(int argc, char** argv)
         draw_arrow(frame_annotated, a, b, Yellow8, 4);
       }
     }
-    draw_text(frame_annotated, 100, 50,               //
-              format("SIFT: %0.f ms", feature_time),  //
+    draw_text(frame_annotated, 100, 50,                     //
+              sara::format("SIFT: %0.f ms", feature_time),  //
               White8, 40, 0, false, true, false);
     draw_text(frame_annotated, 100, 100,
-              format("Matching: %0.3f ms", matching_time),  //
+              sara::format("Matching: %0.3f ms", matching_time),  //
               White8, 40, 0, false, true, false);
-    draw_text(frame_annotated, 100, 150,              //
-              format("Tracks: %u", matches.size()),  //
+    draw_text(frame_annotated, 100, 150,                   //
+              sara::format("Tracks: %u", matches.size()),  //
               White8, 40, 0, false, true, false);
     set_active_window(w);
     display(frame_annotated);

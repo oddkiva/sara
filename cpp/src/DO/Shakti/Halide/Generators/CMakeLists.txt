@@ -21,6 +21,17 @@ shakti_halide_library_v2(
   NAME shakti_cast_uint8_to_float_cpu
   SRCS CastUint8ToFloat.cpp)
 
+# ------------------------------------------------------------------------------
+# Image rotation CW 90
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_rotate_cw_90_rgb8_cpu
+  SRCS Rotate.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_rotate_cw_90_rgb8_gpu
+  SRCS Rotate.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 # ------------------------------------------------------------------------------
 # Separable convolution 2D
@@ -195,6 +206,45 @@ shakti_halide_library_v2(
 
 
 # ------------------------------------------------------------------------------
+# Moment matrix
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_moment_matrix_32f_cpu
+  SRCS MomentMatrixGenerator.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_moment_matrix_32f_gpu
+  SRCS MomentMatrixGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# ------------------------------------------------------------------------------
+# Cornerness
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_cornerness_32f_cpu
+  SRCS MomentMatrixGenerator.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_cornerness_32f_gpu
+  SRCS MomentMatrixGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# ------------------------------------------------------------------------------
+# Cartesian to polar coordinates
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_cartesian_to_polar_32f_cpu
+  SRCS CartesianToPolarCoordinateGenerator.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_cartesian_to_polar_32f_gpu
+  SRCS CartesianToPolarCoordinateGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# ------------------------------------------------------------------------------
 # Dominant gradient orientations
 # ------------------------------------------------------------------------------
 shakti_halide_library_v2(
@@ -248,7 +298,6 @@ shakti_halide_library_v2(
   NAME shakti_stream_compaction_gpu
   SRCS StreamCompactionGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
 
 # ------------------------------------------------------------------------------
 # Examples

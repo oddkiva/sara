@@ -65,11 +65,12 @@ BOOST_AUTO_TEST_CASE(test_get_mouse)
 
   for (int i = 0; i < 3; ++i)
   {
-    Qt::MouseButton input_qt_mouse_button = expected_qt_mouse_buttons[i];
-    int expected_button_code = expected_button_codes[i];
+    const auto input_qt_mouse_button = expected_qt_mouse_buttons[i];
+    const auto expected_button_code = expected_button_codes[i];
+    const auto mouse_pos = QPointF(expected_x, expected_y);
 
-    QMouseEvent event(QEvent::MouseButtonRelease,
-                      QPointF(expected_x, expected_y), input_qt_mouse_button,
+    QMouseEvent event(QEvent::MouseButtonRelease, mouse_pos, mouse_pos,
+                      input_qt_mouse_button,
                       Qt::MouseButtons(input_qt_mouse_button), Qt::NoModifier);
     emit get_user_thread().sendEvent(&event, 10);
 
@@ -84,9 +85,11 @@ BOOST_AUTO_TEST_CASE(test_get_mouse)
 
 BOOST_AUTO_TEST_CASE(test_click)
 {
-  Qt::MouseButton expected_button = Qt::LeftButton;
-  int expected_x = 150, expected_y = 150;
-  QMouseEvent event(QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
+  const auto expected_button = Qt::LeftButton;
+  const auto expected_x = 150;
+  const auto expected_y = 150;
+  const auto mouse_pos = QPointF(expected_x, expected_y);
+  QMouseEvent event(QEvent::MouseButtonRelease, mouse_pos, mouse_pos,
                     expected_button, expected_button, Qt::NoModifier);
   emit get_user_thread().sendEvent(&event, 10);
 
@@ -95,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_click)
 
 BOOST_AUTO_TEST_CASE(test_get_key)
 {
-  int expected_key = Qt::Key_A;
+  const auto expected_key = Qt::Key_A;
   QKeyEvent event(QEvent::KeyPress, expected_key, Qt::NoModifier);
   emit get_user_thread().sendEvent(&event, 10);
 
@@ -127,11 +130,12 @@ BOOST_AUTO_TEST_CASE(test_get_event_with_input_key_event)
 
 BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_pressed_event)
 {
-  Qt::MouseButton expected_button = Qt::LeftButton;
-  int expected_x = 150, expected_y = 150;
-  QMouseEvent qt_event(QEvent::MouseButtonPress,
-                       QPointF(expected_x, expected_y), expected_button,
-                       expected_button, Qt::NoModifier);
+  const auto expected_button = Qt::LeftButton;
+  const auto expected_x = 150;
+  const auto expected_y = 150;
+  const auto mouse_pos = QPointF(expected_x, expected_y);
+  QMouseEvent qt_event(QEvent::MouseButtonPress, mouse_pos, mouse_pos,
+                       expected_button, expected_button, Qt::NoModifier);
   emit get_user_thread().sendEvent(&qt_event, 5);
 
   Event event;
@@ -144,11 +148,14 @@ BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_pressed_event)
 
 BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_released_event)
 {
-  Qt::MouseButton expected_button = Qt::LeftButton;
-  int expected_x = 150, expected_y = 150;
+  const auto expected_button = Qt::LeftButton;
+  const auto expected_x = 150;
+  const auto expected_y = 150;
+  const auto mouse_pos = QPointF(expected_x, expected_y);
   QMouseEvent qt_event(QEvent::MouseButtonRelease,
-                       QPointF(expected_x, expected_y), expected_button,
-                       expected_button, Qt::NoModifier);
+                       mouse_pos, mouse_pos,
+                       expected_button, expected_button,
+                       Qt::NoModifier);
   emit get_user_thread().sendEvent(&qt_event, 5);
 
   Event event;
@@ -161,9 +168,11 @@ BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_released_event)
 
 BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_moved_event)
 {
-  Qt::MouseButton expected_button = Qt::LeftButton;
-  int expected_x = 150, expected_y = 150;
-  QMouseEvent qt_event(QEvent::MouseMove, QPointF(expected_x, expected_y),
+  const auto expected_button = Qt::LeftButton;
+  const auto expected_x = 150;
+  const auto expected_y = 150;
+  const auto mouse_pos = QPointF(expected_x, expected_y);
+  QMouseEvent qt_event(QEvent::MouseMove, mouse_pos, mouse_pos,
                        expected_button, expected_button, Qt::NoModifier);
   emit get_user_thread().sendEvent(&qt_event, 5);
 
@@ -203,8 +212,10 @@ BOOST_FIXTURE_TEST_SUITE(TestKeyboardMouseInputOnAnyWindow,
 
 BOOST_AUTO_TEST_CASE(test_any_get_mouse)
 {
-  Qt::MouseButton expected_button = Qt::LeftButton;
-  int expected_x = 150, expected_y = 150;
+  const auto expected_button = Qt::LeftButton;
+  const auto expected_x = 150;
+  const auto expected_y = 150;
+  const auto mouse_pos = QPointF(expected_x, expected_y);
 
   for (auto wi : test_windows_)
   {
@@ -214,7 +225,8 @@ BOOST_AUTO_TEST_CASE(test_any_get_mouse)
     {
       global_scheduler->set_receiver(wj);
       QMouseEvent event(QEvent::MouseButtonRelease,
-                        QPointF(expected_x, expected_y), expected_button,
+                        mouse_pos, mouse_pos,
+                        expected_button,
                         expected_button, Qt::NoModifier);
       emit get_user_thread().sendEvent(&event, 10);
 
@@ -230,8 +242,10 @@ BOOST_AUTO_TEST_CASE(test_any_get_mouse)
 
 BOOST_AUTO_TEST_CASE(test_any_click)
 {
-  Qt::MouseButton expected_button = Qt::LeftButton;
-  int expected_x = 150, expected_y = 150;
+  const auto expected_button = Qt::LeftButton;
+  const auto expected_x = 150;
+  const auto expected_y = 150;
+  const auto mouse_pos = QPointF(expected_x, expected_y);
 
   for (auto wi : test_windows_)
   {
@@ -241,7 +255,8 @@ BOOST_AUTO_TEST_CASE(test_any_click)
     {
       global_scheduler->set_receiver(wj);
       QMouseEvent event(QEvent::MouseButtonRelease,
-                        QPointF(expected_x, expected_y), expected_button,
+                        mouse_pos, mouse_pos,
+                        expected_button,
                         expected_button, Qt::NoModifier);
       emit get_user_thread().sendEvent(&event, 10);
 

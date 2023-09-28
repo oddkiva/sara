@@ -1,4 +1,4 @@
-name: Sara Build + Test
+name: Continuous Integration
 
 on:
   push:
@@ -43,6 +43,21 @@ on:
 #           }
 #
 #     steps:
+#       - name: Prepare ccache timestamp
+#         id: ccache_cache_timestamp
+#         shell: cmake -P {0}
+#         run: |
+#           string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
+#           message("::set-output name=timestamp::${current_date}")
+#
+#       - name: Save ccache cache files
+#         uses: actions/cache@v1.1.0
+#         with:
+#           path: .ccache
+#           key: ${ { matrix.config.name } }-ccache-${ { steps.ccache_cache_timestamp.outputs.timestamp } }
+#           restore-keys: |
+#             ${ { matrix.config.name } }-ccache-
+#
 #       - uses: actions/checkout@v4
 #
 #       - name: Install dependencies on Ubuntu
@@ -171,17 +186,4 @@ jobs:
     - name: Build and test on Ubuntu
       if: startsWith(matrix.container, 'oddkiva/sara-devel')
       run: |
-        mkdir build
-        cd build
-        cmake .. \
-          -G Ninja \
-          -D CMAKE_BUILD_TYPE:STRING=Release \
-          -D SARA_BUILD_SHARED_LIBS:BOOL=ON \
-          -D SARA_BUILD_VIDEOIO:BOOL=ON \
-          -D SARA_BUILD_SAMPLES:BOOL=ON \
-          -D SARA_BUILD_TESTS:BOOL=ON
-        cmake --build . -j$(nproc)
-        DISPLAY=:1 ctest \
-          -j$(nproc) \
-          --output-on-failure \
-          --exclude-regex "test_core_ipc_cond1|test_graphics_*|test_visualization_feature_draw|shakti_test_*"
+        ./build.py --tasks library --build_type Release --from_scratch --ci

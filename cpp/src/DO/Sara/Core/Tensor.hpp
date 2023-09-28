@@ -13,9 +13,9 @@
 
 #pragma once
 
-#include <array>
-
 #include <DO/Sara/Core/Image.hpp>
+
+#include <array>
 
 
 namespace DO { namespace Sara {

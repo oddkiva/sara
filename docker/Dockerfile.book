@@ -1,0 +1,17 @@
+FROM rocker/verse:4.2.1
+
+MAINTAINER "Odd Kiva"
+
+# To avoid console interaction with apt.
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install necessary packages to add APT repositories.
+RUN apt-get update -y -qq && \
+  apt-get install -y -qq python3 python3-pip librsvg2-bin
+
+# cf. this crazy issue: https://github.com/rstudio/reticulate/issues/1133#issuecomment-1021783041
+RUN pip3 install --no-binary="numpy" numpy --ignore-installed
+RUN pip3 install matplotlib sympy
+
+RUN Rscript -e 'devtools::install_cran(c("berryFunctions", "gifski", "reticulate", "Rcpp", "RcppEigen", "tinytex"))'
+RUN Rscript -e 'tinytex::install_tinytex()'

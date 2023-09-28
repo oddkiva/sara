@@ -143,7 +143,8 @@ public:
     assign_orientations(gradients, DoGs, scale_octave_pairs);
     orientation_assignment_time = timer.elapsed_ms();
     elapsed += orientation_assignment_time;
-    cout << "orientation assignment time = " << orientation_assignment_time << " ms" << endl;
+    cout << "orientation assignment time = " << orientation_assignment_time
+         << " ms" << endl;
     cout << "DoGs.size() = " << DoGs.size() << endl;
 
 
@@ -200,21 +201,30 @@ private:
   // Max ratio of Hessian eigenvalues.
   float edgeThresh{10.f};
   // Min contrast.
-  float peakThresh{0.04};
+  float peakThresh{0.04f};
 };
 
 
 // ========================================================================== //
 // Matching demo.
-GRAPHICS_MAIN()
+int main(int argc, char** argv)
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(sara_graphics_main);
+  return app.exec();
+}
+
+int sara_graphics_main(int argc, char** argv)
 {
   auto timer = Timer{};
   auto elapsed = double{};
 
   // Where are the images?
   const string query_image_path =
-      src_path("products/garnier-shampoing.jpg");
-  const string target_image_path = src_path("shelves/shelf-1.jpg");
+      argc < 2 ? src_path("products/garnier-shampoing.jpg")
+               : std::string{argv[1]};
+  const string target_image_path =
+      argc < 3 ? src_path("shelves/shelf-1.jpg") : std::string{argv[2]};
 
   // Load the query and target images.
   Image<Rgb8> query, target;
@@ -228,7 +238,8 @@ GRAPHICS_MAIN()
     cerr << "Cannot load target image: " << query_image_path << endl;
     return 1;
   }
-  query = rotate_ccw(query);
+  if (argc < 2)
+    query = rotate_ccw(query);
 
   // Open a window.
   float scale = 0.5;
@@ -253,8 +264,7 @@ GRAPHICS_MAIN()
   // Compute initial matches.
   print_stage("Compute initial matches");
   const auto nearest_neighbor_ratio = 1.f;
-  AnnMatcher matcher(target_keypoints, query_keypoints,
-                     nearest_neighbor_ratio);
+  AnnMatcher matcher(target_keypoints, query_keypoints, nearest_neighbor_ratio);
   const auto initial_matches = matcher.compute_matches();
 
   // Match keypoints.
@@ -265,7 +275,8 @@ GRAPHICS_MAIN()
   const auto num_region_growing = 2000;
   const auto growth_params = GrowthParams{};
   const auto verbose_level = 0;
-  GrowMultipleRegions grow_regions(initial_matches, growth_params, verbose_level);
+  GrowMultipleRegions grow_regions(initial_matches, growth_params,
+                                   verbose_level);
   regions = grow_regions(num_region_growing, 0, &drawer);
   elapsed = timer.elapsed_ms();
   cout << "Matching time = " << elapsed << " ms" << endl << endl;

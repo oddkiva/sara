@@ -34,6 +34,16 @@ inline auto make_cube_vertices()
   return cube;
 }
 
+inline auto make_planar_chessboard_corners(int rows, int cols, double square_size)
+{
+  auto corners = Eigen::MatrixXd{4, rows * cols};
+  for (auto y = 0; y < rows; ++y)
+    for (auto x = 0; x < cols; ++x)
+      corners.col(y * cols + x) << cols * square_size, rows * square_size, 0, 1;
+
+  return corners;
+}
+
 inline auto make_relative_motion(double x = 0.1, double y = 0.3, double z = 0.2)
     -> DO::Sara::Motion
 {
@@ -53,20 +63,20 @@ inline auto make_relative_motion(double x = 0.1, double y = 0.3, double z = 0.2)
   return {R, t};
 }
 
-inline auto make_camera(double x, double y, double z) -> DO::Sara::PinholeCamera
+inline auto make_camera(double x, double y, double z)
 {
   const auto& [R, t] = make_relative_motion(x, y, z);
   return DO::Sara::normalized_camera(R, t);
 }
 
-inline auto to_camera_coordinates(const DO::Sara::PinholeCamera& C,
+inline auto to_camera_coordinates(const DO::Sara::PinholeCameraDecomposition& C,
                                   const Eigen::MatrixXd& X) -> Eigen::MatrixXd
 {
   Eigen::MatrixXd X1 = (C.R * X.topRows(3)).colwise() + C.t;
   return X1.colwise().homogeneous();
 }
 
-inline auto project_to_film(const DO::Sara::PinholeCamera& C,
+inline auto project_to_film(const DO::Sara::PinholeCameraDecomposition& C,
                             const Eigen::MatrixXd& X) -> Eigen::MatrixXd
 {
   auto xh = Eigen::MatrixXd{3, X.cols()};

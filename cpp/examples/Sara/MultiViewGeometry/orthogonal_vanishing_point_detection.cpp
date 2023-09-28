@@ -21,15 +21,18 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/CameraModel.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/CameraModel.hpp>
 #include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
+#include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 
 namespace fs = boost::filesystem;
@@ -178,12 +181,12 @@ auto calculate_yaw_and_pitch(const Eigen::Vector3f& v)
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
 
-int __main(int argc, char** argv)
+int sara_graphics_main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
@@ -192,16 +195,18 @@ int __main(int argc, char** argv)
   auto skip = int{};
 
   po::options_description desc("Orthogonal Vanishing Point Detector");
+  // clang-format off
   desc.add_options()
-      ("help", "Usage")
-      ("video,v", po::value<std::string>(&video_filepath),
-       "input video file")
-      ("downscale-factor,d",
-       po::value<int>(&downscale_factor)->default_value(2),
-       "downscale factor")
-      ("skip,s", po::value<int>(&skip)->default_value(0),
-       "number of frames to skip")
-      ;
+    ("help", "Usage")
+    ("video,v", po::value<std::string>(&video_filepath),
+     "input video file")
+    ("downscale-factor,d",
+     po::value<int>(&downscale_factor)->default_value(2),
+     "downscale factor")
+    ("skip,s", po::value<int>(&skip)->default_value(0),
+     "number of frames to skip")
+  ;
+  // clang-format on
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -219,9 +224,10 @@ int __main(int argc, char** argv)
     return 1;
   }
 
-
   // OpenMP.
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
@@ -232,15 +238,14 @@ int __main(int argc, char** argv)
 
 
   // Output save.
-  const auto basename = fs::basename(video_filepath);
+  const auto basename = fs::path(video_filepath).stem().string();
   VideoWriter video_writer{
 #ifdef __APPLE__
       "/Users/david/Desktop/" + basename + ".ortho-vp.mp4",
 #else
       "/home/david/Desktop/" + basename + ".ortho-vp.mp4",
 #endif
-      frame.sizes()
-  };
+      frame.sizes()};
 
 
   // Show the local extrema.
@@ -256,9 +261,9 @@ int __main(int argc, char** argv)
   const auto [p1, p2] = initialize_crop_region_2(frame.sizes());
 
   auto ed = EdgeDetector{{
-      high_threshold_ratio,
-      low_threshold_ratio,
-      angular_threshold
+      high_threshold_ratio,  //
+      low_threshold_ratio,   //
+      angular_threshold      //
   }};
 
 
@@ -354,20 +359,21 @@ int __main(int argc, char** argv)
 
     tic();
     const Eigen::MatrixXf lines_as_matrix = lines.matrix().transpose();
-    const Eigen::MatrixXf planes_backprojected = (Pt * lines_as_matrix)  //
-                                                     .colwise()          //
-                                                     .normalized();
+    auto plane_list = PointList<float, 2>{};
+    auto& plane_tensor = plane_list._data;
+    plane_tensor.resize(static_cast<int>(line_segments.size()), 4);
+    plane_tensor.colmajor_view().matrix() = (Pt * lines_as_matrix)  //
+                                                .colwise()          //
+                                                .normalized();
+    const auto& planes_backprojected = plane_tensor.colmajor_view().matrix();
     toc("Planes Backprojected");
 
     tic();
-    const auto planes_tensor = TensorView_<float, 2>{
-        const_cast<float*>(planes_backprojected.data()),
-        {planes_backprojected.cols(), planes_backprojected.rows()}};
-
     const auto angle_threshold = std::sin(float((3._deg).value));
-    SARA_DEBUG << "planes_tensor.rows = " << planes_tensor.rows() << std::endl;
+    SARA_DEBUG << "plane_tensor.sizes = " << plane_tensor.sizes().transpose()
+               << std::endl;
     const auto ransac_result = find_dominant_orthogonal_directions(  //
-        planes_tensor,                                               //
+        plane_list,                                                  //
         angle_threshold,                                             //
         100);
     const auto dirs = std::get<0>(ransac_result);
@@ -419,13 +425,18 @@ int __main(int argc, char** argv)
           const auto ibest =
               std::min_element(rn.begin(), rn.end()) - rn.begin();
 
-
+          static constexpr auto int_round = [](const double x) {
+            return static_cast<int>(std::round(x));
+          };
           if (ibest == 0)
-            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Red8, 4);
+            draw_line(detection, int_round(a.x()), int_round(a.y()),
+                      int_round(b.x()), int_round(b.y()), Red8, 4);
           else if (ibest == 1)
-            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Green8, 4);
+            draw_line(detection, int_round(a.x()), int_round(a.y()),
+                      int_round(b.x()), int_round(b.y()), Green8, 4);
           else
-            draw_line(detection, a.x(), a.y(), b.x(), b.y(), Blue8, 4);
+            draw_line(detection, int_round(a.x()), int_round(a.y()),
+                      int_round(b.x()), int_round(b.y()), Blue8, 4);
         }
       }
 

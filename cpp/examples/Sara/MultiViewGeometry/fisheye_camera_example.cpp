@@ -16,7 +16,9 @@
 #include <DO/Sara/MultiViewGeometry/Camera/KannalaBrandtFisheyeDistortionModel.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 namespace sara = DO::Sara;
@@ -78,7 +80,9 @@ int __main(int argc, char** argv)
     return -1;
   const auto video_filepath = argv[1];
 
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   auto video_stream = sara::VideoStream{video_filepath};
 

@@ -47,9 +47,9 @@ namespace DO::Sara {
 #  else
     const auto kernel = make_gaussian_kernel(sigma, gauss_truncate);
     auto kernel_buffer = Shakti::Halide::as_runtime_buffer(kernel);
-    shakti_separable_convolution_2d_cpu(src_buffer, kernel_buffer,
-                                        kernel.size(), -kernel.size() / 2,
-                                        dst_buffer);
+    const auto kernel_size = static_cast<std::int32_t>(kernel.size());
+    shakti_separable_convolution_2d_cpu(src_buffer, kernel_buffer, kernel_size,
+                                        -kernel_size / 2, dst_buffer);
 #  endif
 
 #  ifdef PROFILE_ME

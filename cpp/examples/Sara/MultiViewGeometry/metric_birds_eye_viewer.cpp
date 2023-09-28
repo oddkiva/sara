@@ -20,7 +20,9 @@
 
 #include <array>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 using namespace std;
@@ -159,7 +161,9 @@ int __main(int argc, char**argv)
     return -1;
   const auto video_filepath = argv[1];
 
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   auto video_stream = sara::VideoStream{video_filepath};
   auto video_writer = sara::VideoWriter{

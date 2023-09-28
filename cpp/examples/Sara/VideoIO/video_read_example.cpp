@@ -15,37 +15,49 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <filesystem>
 
+
+namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 
 
-GRAPHICS_MAIN()
+auto main(int argc, char** argv) -> int
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(sara_graphics_main);
+  return app.exec();
+}
+
+auto sara_graphics_main(int const argc, char** const argv) -> int
 {
   using namespace std::string_literals;
 
-  // const std::string video_filepath = src_path("orion_1.mpg");
-  // const auto video_filepath =
-  //     "/home/david/Downloads/big-buck-bunny_trailer.webm"s;
-  using namespace std::string_literals;
+  auto video_filepath = fs::path{
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/GOPR0542.MP4"s;
+      "C:/Users/David/Desktop/GOPR0542.MP4"
 #elif __APPLE__
-  const auto video_filepath = "/Users/david/Desktop/Datasets/videos/sample10.mp4";
+      "/Users/david/Desktop/Datasets/videos/sample10.mp4"
 #else
-  // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  //const auto video_filepath = "/home/david/Desktop/GOPR0542.MP4"s;
+      "/home/david/Desktop/Datasets/sfm/Family.mp4"
 #endif
+  };
 
-  sara::VideoStream video_stream{video_filepath};
+  if (argc >= 2)
+    video_filepath = argv[1];
+
+  auto video_stream = sara::VideoStream{video_filepath.string()};
+  const auto video_frame = video_stream.frame();
 
   SARA_DEBUG << "Frame rate = " << video_stream.frame_rate() << std::endl;
-  SARA_DEBUG << "Frame sizes = " << video_stream.sizes().transpose() << std::endl;
+  SARA_DEBUG << "Frame sizes = " << video_stream.sizes().transpose()
+             << std::endl;
+  SARA_DEBUG << "Frame rotation angle = " << video_stream.rotation_angle()
+             << std::endl;
 
+  sara::create_window(video_stream.sizes());
   while (true)
   {
-
     sara::tic();
     auto has_frame = video_stream.read();
     sara::toc("Read frame");
@@ -53,11 +65,8 @@ GRAPHICS_MAIN()
     if (!has_frame)
       break;
 
-    if (sara::active_window() == nullptr)
-      sara::set_active_window(sara::create_window(video_stream.sizes()));
-
     sara::tic();
-    sara::display(video_stream.frame());
+    sara::display(video_frame);
     sara::toc("Display");
   }
 

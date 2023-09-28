@@ -59,6 +59,8 @@ namespace DO { namespace Sara {
   struct Gray {};
   //! RGB color space and layout.
   using Rgb = Meta::Vector3<R, G, B>;
+  //! BGR color space and layout.
+  using Bgr = Meta::Vector3<B, G, R>;
   //! RGBA color space and layout.
   using Rgba = Meta::Vector4<R, G, B, A>;
   //! BGRA color space and layout.

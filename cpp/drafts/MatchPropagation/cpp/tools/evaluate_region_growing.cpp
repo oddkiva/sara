@@ -39,14 +39,14 @@ public:
   void operator()()
   {
     float ell = 1.0f;
-    float inlierThres = 5.f;
+    float inlier_thres = 5.f;
     size_t K = 200;
     double rho_min = 0.5;
     //
-    double angleDeg1 = 15;
-    double angleDeg2 = 25;
+    double angle_deg_1 = 15;
+    double angle_deg_2 = 25;
     //
-    bool displayInliers = false;
+    bool display_inliers = false;
 
     for (int j = 5; j < 6; ++j)
     {
@@ -66,11 +66,11 @@ public:
         vector<Match> M(compute_matches(X, Y, ell*ell));
         // Get inliers and outliers.
         vector<size_t> inliers, outliers;
-        get_inliers_and_outliers(inliers, outliers, M, H, inlierThres);
+        get_inliers_and_outliers(inliers, outliers, M, H, inlier_thres);
         cout << "inliers.size() = " << inliers.size() << endl;
         cout << "outliers.size() = " << outliers.size() << endl;
         // View inliers.
-        if (displayInliers)
+        if (display_inliers)
         {
           for (size_t i = 0; i != inliers.size(); ++i)
             drawer.draw_match(M[inliers[i]], Cyan8);
@@ -83,9 +83,9 @@ public:
 
         // Grow region from the first seed
         size_t seed = inliers[0];
-        GrowthParams growthParams(K, rho_min, angleDeg1, angleDeg2);
-        DynamicMatchGraph G(M, growthParams.K(), growthParams.rho_min());
-        GrowRegion growRegion(seed, G, growthParams);
+        GrowthParams growth_params(K, rho_min, angle_deg_1, angle_deg_2);
+        DynamicMatchGraph G(M, growth_params.K(), static_cast<float>(growth_params.rho_min()));
+        GrowRegion growRegion(seed, G, growth_params);
         Region R(growRegion(numeric_limits<size_t>::max(), &drawer, &analyzer));
 
         analyzer.compute_local_affine_consistency_statistics();

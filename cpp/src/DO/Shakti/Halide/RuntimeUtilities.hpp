@@ -23,7 +23,7 @@ namespace DO::Shakti::Halide {
   inline auto as_runtime_buffer(const Eigen::Matrix<T, N, 1>& v)
   {
     auto& v_mutable = const_cast<Eigen::Matrix<T, N, 1>&>(v);
-    return ::Halide::Runtime::Buffer<T>(v_mutable.data(), v.size());
+    return ::Halide::Runtime::Buffer<T>(v_mutable.data(), static_cast<int>(v.size()));
   }
 
   template <typename T, int N>

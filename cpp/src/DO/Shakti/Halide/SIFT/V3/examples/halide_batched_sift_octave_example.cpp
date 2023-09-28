@@ -11,7 +11,9 @@
 
 //! @example
 
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -33,13 +35,13 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   sift_octave.y_convolved.copy_to_host();
   sara::toc("Copy gaussians to host");
 
-  for (auto s = 0; s < sift_octave.params.num_scales + 3; ++s)
+  for (auto s = 0; s < sift_octave.params.scale_count + 3; ++s)
   {
     sara::display(sift_octave.gaussian(s, 0));
     sara::draw_text(20, 20,
-                      sara::format("Gaussian: scale[%d] = %f", s,
-                                   sift_octave.params.scales[s]),
-                      sara::Blue8);
+                    sara::format("Gaussian: scale[%d] = %f", s,
+                                 sift_octave.params.scales[s]),
+                    sara::Blue8);
     sara::get_key();
   }
 
@@ -48,20 +50,20 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   sift_octave.gradient_ori.copy_to_host();
   sara::toc("Copy gradients to host");
 
-  for (auto s = 0; s < sift_octave.params.num_scales + 3; ++s)
+  for (auto s = 0; s < sift_octave.params.scale_count + 3; ++s)
   {
     sara::display(sara::color_rescale(sift_octave.gradient_magnitude(s, 0)));
     sara::draw_text(20, 20,
-                      sara::format("Gradient magnitude: scale[%d] = %f", s,
-                                   sift_octave.params.scales[s]),
-                      sara::Blue8);
+                    sara::format("Gradient magnitude: scale[%d] = %f", s,
+                                 sift_octave.params.scales[s]),
+                    sara::Blue8);
     sara::get_key();
 
     sara::display(sara::color_rescale(sift_octave.gradient_orientation(s, 0)));
     sara::draw_text(20, 20,
-                      sara::format("Gradient orientation: scale[%d] = %f", s,
-                                   sift_octave.params.scales[s]),
-                      sara::Blue8);
+                    sara::format("Gradient orientation: scale[%d] = %f", s,
+                                 sift_octave.params.scales[s]),
+                    sara::Blue8);
     sara::get_key();
   }
 
@@ -69,7 +71,7 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   sift_octave.dog.copy_to_host();
   sara::toc("Copy dog to host");
 
-  for (auto s = 0; s < sift_octave.params.num_scales + 2; ++s)
+  for (auto s = 0; s < sift_octave.params.scale_count + 2; ++s)
   {
     sara::display(
         sara::color_rescale(sift_octave.difference_of_gaussians(s, 0)));
@@ -91,8 +93,7 @@ auto test_on_video()
   using namespace std::string_literals;
 
 #ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/GOPR0542.MP4"s;
+  const auto video_filepath = "C:/Users/David/Desktop/sfm-data/GOPR0542.MP4"s;
 #elif __APPLE__
   const auto
       video_filepath =  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
@@ -177,7 +178,9 @@ auto test_on_video()
 GRAPHICS_MAIN()
 {
   // Optimization.
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
   std::ios_base::sync_with_stdio(false);
 
   // test_on_image();

@@ -1,0 +1,258 @@
+# Essential Matrix and Relative Motion
+
+Consider two cameras $C_0$ and $C_1$. To fix ideas in our mind, let us imagine
+that:
+
+- the first camera frame $C_0$ is viewed as the world reference frame.
+- the second camera frame $C_1$ is a convenient local frame.
+
+Consider a 3D point "X" with world coordinates $\mathbf{X}^0$ and suppose we can
+calculate its local coordinates $\mathbf{X}^1$ with the following rigid body
+motion
+
+\begin{equation}
+  \mathbf{X}^1 = \mathbf{R} \mathbf{X}^0 + \mathbf{t} .
+\end{equation}
+
+As a reminder, we can interpret the formula as follows:
+
+- The column vectors of the rotation matrix $\mathbf{R}$ are the
+  coordinates of the world axes expressed in the local camera frame.
+- $\mathbf{t}$ are the coordinates of the world origin expressed in the
+  local camera frame.
+
+Basically this rigid body describes the relative position of camera $C_0$
+w.r.t. camera $C_1$ and in the local frame. Specifically:
+
+- the local camera axes are rotated to the world camera axes by the rotation
+  $\mathbf{R}$;
+- the translation $\mathbf{t}$ whose coordinates are expressed in the local
+  frame displaces the origin of the local frame to the world origin;
+  Said differently, the translation $\mathbf{t}$ are the coordinates of the
+  world origin in the **local** frame.
+
+The essential matrix we implement in *Sara* uses *this* rotation matrix and
+*this* translation vector.
+
+\begin{equation}
+  \mathbf{E} = [\mathbf{t}]_\times \mathbf{R}\ .
+\end{equation}
+
+:::puzzle
+Let us recall how the essential matrix is derived by construction.
+
+By definition any 3D scene point "X" satisfies
+\begin{equation}
+  \mathbf{X}^1 = \mathbf{R} \mathbf{X}^0 + \mathbf{t}
+\end{equation}
+
+By applying the cross-product with vector $\mathbf{t}$ on the left side:
+\begin{equation}
+  \mathbf{t} \wedge \mathbf{X}^1 = \mathbf{t} \wedge ( \mathbf{R} \mathbf{X}^0 +
+  \mathbf{t} )
+\end{equation}
+
+Since the cross-product $\mathbf{n} = \mathbf{t} \wedge \mathbf{X}^1$ is a
+vector normal to the plane induced by the $\mathrm{span}(\mathbf{t}$,
+$\mathbf{X}^1)$, applying the dot product yields the following equation
+
+\begin{equation}
+  \langle \mathbf{X}^1, \mathbf{n} \rangle = 0
+\end{equation}
+
+Then injecting the right-hand side of the rigid body equation, we have:
+\begin{equation}
+  \langle \mathbf{X}^1, \mathbf{t} \wedge ( \mathbf{R} \mathbf{X}^0 +
+  \mathbf{t}) \rangle = 0
+\end{equation}
+
+In matrix notation, where in particular the cross-product is written as a
+matrix-vector multiplication, this equation is equivalent to:
+\begin{equation}
+  \mathbf{X}^{1T} [\mathbf{t}]_\times \mathbf{R} \mathbf{X}^0 = 0
+\end{equation}
+
+And we recognize the essential matrix.
+:::
+
+
+The relative *motion* extracted from the essential matrix of camera
+$C_1$ w.r.t. $C_0$ will mean this rotation and translation pair
+$(\mathbf{R}, \mathbf{t})$. And be careful, this is not the same
+convention described in the wikipedia page.
+
+
+Now when I talk about the relative **pose** of camera $C_1$ w.r.t. to camera
+$C_0$, I will mean the inverse rigid body motion
+$(\mathbf{R}_{0 \rightarrow 1}, \mathbf{t}_{0 \rightarrow 1})$.
+
+The reverse rigid body motion is obtained from:
+
+\begin{equation}
+  \begin{aligned}
+  %
+  \mathbf{R} \mathbf{X}^0 + \mathbf{t} &= \mathbf{X}^1 \\
+  %
+  \mathbf{X}^0 + \mathbf{R^T} \mathbf{t} &= \mathbf{R}^T \mathbf{X}^1 \\
+  %
+  \mathbf{X}^0 &= \mathbf{R}^T \mathbf{X}^1 - \mathbf{R^T} \mathbf{t} \\
+  %
+  \end{aligned}
+\end{equation}
+
+By interpreting the inverse rigid body motion, we see that:
+
+- the position of camera $C_1$ w.r.t. camera coordinate system $C_0$,
+  is calculated as $\mathbf{t}_{0 \rightarrow 1} = -\mathbf{R}^T \mathbf{t}$.
+- the "gaze orientation", i.e. the rotation matrix, of camera $C_1$ w.r.t. camera
+  coordinate system $C_0$ is calculated as $\mathbf{R}_{0
+  \rightarrow 1} = \mathbf{R}^T$
+
+The following remarks are useful to debug code dealing with structure-from-motion:
+
+:::puzzle
+**Quick Summary**
+
+- The coordinates of the first camera center in the first camera coordinate
+  system is $(0, 0, 0)$.
+- The coordinates of the first camera center in the second camera coordinate
+  system is $\mathbf{t}$.
+- The coordinates of the second camera center in the second camera coordinate
+  system is $(0, 0, 0)$.
+- The coordinates of the second camera center in the first camera coordinate
+  system is $-\mathbf{R}^T \mathbf{t}$.
+
+- $\mathbf{t}$ goes from camera $C_1$ to camera $C_0$ and not
+  the other way around.
+:::
+
+
+# Bundle Adjustment
+
+## Some (False) Understanding about Incremental Bundle Adjustment
+
+In this paragraph I document my first intellectual journey in order to
+understand how the incremental bundle adjustment is done. My reasoning started
+from a wrong premise and how after digging the literature I was able to piece
+things together.
+
+In the bundle adjustment problem we need to initialize the position and the gaze
+direction of each camera $C_i = (\mathbf{R}_i, \mathbf{t}_i)$ in a global
+coordinate system. The position and the gaze direction of the camera is called
+the camera pose.
+
+To start, we choose one camera, say $C_0$, and its associated camera
+coordinate system will be set as the world coordinate system.
+
+The relative pose of camera $C_j$ w.r.t. camera $C_i$ is the
+rotation and translation pair $(\mathbf{R}_{i \rightarrow j},
+\mathbf{t}_{i \rightarrow j})$. Let us now shorten the notations by writing them
+as $(\mathbf{R}_{ij}, \mathbf{t}_{ij})$ The relative motion is recovered
+from the estimation of the essential matrix $\mathbf{E}_{ij}$.
+
+Let us assume the camera network is fully connected from now on. To retrieve
+the absolute pose of each camera $C_i$, we can retrieve the shortest path
+of connected cameras $C_0, C_{i_1}, C_{i_2},\dots, C_{i}$. Composing
+successively the relative motions, we would retrieve the absolute pose by
+applying recursively:
+
+\begin{equation}
+  \mathbf{R}_{j} = \mathbf{R}_{i} \mathbf{R}_{ij} \mathbf{R}_{i}^T \\
+  %
+  \mathbf{t}_j = \mathbf{t}_{ij} + \mathbf{t}_i
+\end{equation}
+
+Because the relative pose estimations are noisy, the successive composition of
+rotation and translation will induce an accumulation of errors. And as a
+consequence the estimated global camera pose can drift very far from the ground
+truth pose.
+
+Unfortunately, we cannot add translations together like this because the
+relative pose from the essential matrix allows us to recover the translation
+only up to a scale. In other words, we can only know the direction vector of the
+translation but not the magnitude of the translation. Thus it is not a good
+approach.
+
+Fortunately, as described in Snavely's paper, we can do like Bundler. Bundler
+starts from two cameras. From these two cameras, we can initialize the 3D
+geometry up to a scale by estimating the essential matrix and then by
+triangulation. A bundle adjustment is then applied to refine the 3D geometry and
+the camera parameters.
+
+Then a third new camera is added if its view overlaps with at least one of the
+two cameras. Because the 3D geometry is initialized, we know the correspondences
+between the 3D world points and the 2D image points in each views. Since the 3D
+image points are also imaged in the third view, we can initialize the third
+camera pose by camera resectioning.
+
+The internal camera parameters are initialized from the extraction of EXIF
+metadata. Again a bundle adjustment is then performed done on all the three
+views to refine the camera parameters and 3D geometry.
+
+By proceeding incrementally in this manner, where each time a new camera is
+added, its pose is initialized by camera resectioning and a bundle adjustment is
+performed.
+
+In the end the epipolar geometry serves mostly to:
+
+- initialize the 3D geometry from the seed two-view geometry.
+- track the correspondence between the 3D world points and the 2D image points.
+
+In the next section we describe the DLT method to initialize the pose.
+
+
+## Camera Resectioning for Incremental Bundle Adjustment
+
+The relative pose estimation allows to recover the position of two cameras. How
+do we choose the third camera and initialize its pose?
+
+To start, we can look for the third image where the 3D points estimated from the
+two-view geometry reappears the most.
+
+The DLT initializes the camera pose and the internal parameters are initialized
+from EXIF metadata. What the DLT solves is also called *camera resectioning*.
+
+In summary the data we know are:
+
+- the internal camera matrix $\mathbf{K}$
+- the image coordinates in the third image $\mathbf{x}_i$
+- the normalized camera coordinates $\tilde{\mathbf{x}}_i = \mathbf{K}^{-1} \mathbf{x}_i$
+- the 3D points are calculated from the relative pose $\mathbf{X}_i$
+
+We want to determine the pose of the third camera, i.e.:
+
+- the global rotation $\mathbf{R}$
+- the global translation $\mathbf{t}$
+
+Projecting the 3D points to the image:
+
+\begin{equation}
+  \mathbf{x}_i = \mathbf{K} [\mathbf{R} | \mathbf{t}] \mathbf{X}_i \\
+  %
+  \tilde{\mathbf{x}}_i = \mathbf{R} \mathbf{X}_i + \mathbf{t} \\
+\end{equation}
+
+The third image needs to have at least $n \geq 6$ point correspondences
+between 3D points $\mathbf{X}_i$ and 2D image points $\mathbf{x}_i$
+to fully retrieve the third camera pose.
+
+We are then able to form a new bundle adjustment problem involving the three
+cameras to refine again the 3D points and camera parameters (both external and
+internal).
+
+It turns out in fact that we may not even need to know the camera internal
+parameters. [Hartley and Zisserman] calculate the whole projection matrix
+
+\begin{equation}
+  \mathbf{P} = \mathbf{K} [\mathbf{R} | \mathbf{t}]
+\end{equation}
+
+and then decompose the matrix $\mathbf{P}$ to fully recover the internal
+and external parameters. More accurate details in:
+https://users.cecs.anu.edu.au/~hartley/Papers/CVPR99-tutorial/tutorial.pdf
+
+Proceeding incrementally like this, we can also retrieve the next camera poses.
+
+The DLT approach is in theory only applicable to the pinhole camera model. It
+can be a good initialization for the bundle adjustment which will estimate the
+distortion coefficients of the camera.

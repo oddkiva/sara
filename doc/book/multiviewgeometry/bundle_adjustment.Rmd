@@ -1,0 +1,66 @@
+# Incremental Bundle Adjustment
+
+:::puzzle
+Warning: this is just an embryonary set of notes for now and might just look
+cryptic because of the lack of context and notations.
+:::
+
+## Operations on the feature graph
+
+1. Propagate the scene point indices to the features on the new image after
+   calculating a relative pose.
+   We can argue that this could be done before re-calculating the feature tracks
+   for computational efficiency.
+   However, on second thought, it seems wiser and simpler to me to propagate the
+   scene point indices after we recalculate the feature tracks.
+2. One advantage of propagating the scene point indices to the new features
+   after calculating the relative pose is that the new feature vertices are
+   already labeled with a scene point.
+   We will come back to this point later.
+3. N.B.: only feature tracks that are still alive and with visibility count
+   greater than 2 will be considered for the PnP problem that we will be forming
+   next. Alive feature tracks with visibility count equal to 2 are discarded
+   because we don't know yet the absolute camera pose associated to the new
+   image.
+4. Everytime, we grow the point cloud, we need to ensure that all vertices in a
+   feature track has the same scene point index. This is related to point 2.
+   We don't have any hint that this would be guaranteed over time.
+   So what do we do if this condition is not satisfied? We will address this
+   point later.
+5. Collect the backprojected rays of each feature track still alive (and with
+   visibility count greater than 2)
+6. Collect the scene point indices associated to each of those feature tracks.
+7. Solve the PnP problem.
+
+## Multiple scene point indices for a given feature track (Point 2 and 4)
+
+When we recalculate feature tracks everytime a new relative pose is found,
+supposedly distinct feature tracks can be merged in a single feature track. In
+this case, more than one scene point indices are assigned to this merged feature
+track.
+
+The simplest and probably the best thing to address this problem is to
+regenerate the point cloud. In this scenario:
+
+- scene point indices are being regenerated.
+- Merged feature tracks are assigned with a single scene point index.
+- The corresponding scene point coordinates can be initialized as a barycenter
+  of all the scene point coordinates.
+- In this case, performing a bundle adjustment becomes justified and necessary
+  to improve the accuracy of (1) the absolute camera poses and (2) the coordinates
+  of each scene point index. This way, we would (1) avoid geometric drifts of the camera
+  pose estimation w.r.t. the actual camera poses and (2) ensure a proper metric
+  reconstruction of the point cloud.
+
+
+## Addressing point 1
+
+- Let us denote an inlier match by $m = (u, v)$
+- The feature vertex $v$ is the new camera view
+- The feature vertex $u$ has a scene point index $i$
+- If during the process, $v$ already has a scene point index, it does not
+  matter. Keep track of all scene point indices assigned to the feature track.
+  This will be needed to calculate the barycenter of all these scene point
+  coordinates.
+- Flag the need to regenerate the point cloud (the bundle
+  adjustment will always be performed anyways).

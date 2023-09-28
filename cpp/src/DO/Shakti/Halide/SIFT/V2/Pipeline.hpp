@@ -144,13 +144,11 @@ namespace DO::Shakti::HalideBackend::v2 {
     float scale_camera = 1;
     int start_octave_index = 0;
 
-    // Overkill but possible.
-    // float scale_camera = 0.25;
-    // int start_octave_index = -2;
-
-    // Ultra options.
-    // float scale_camera = 0.5;
+    // Ultra options: upscale x2 the image.
     // int start_octave_index = -1;
+
+    // Overkill but possible: upscale x4 the image.
+    // int start_octave_index = -2;
 
     Halide::Runtime::Buffer<float> input_rescaled;
     std::vector<SiftOctavePipeline> octaves;

@@ -12,13 +12,14 @@
 #ifndef DO_SHAKTI_MULTIARRAY_TEXTUREARRAY_HPP
 #define DO_SHAKTI_MULTIARRAY_TEXTUREARRAY_HPP
 
+#include <cuda_fp16.h>
 #include <cuda_runtime.h>
 
 #include <DO/Shakti/Cuda/MultiArray/Matrix.hpp>
 #include <DO/Shakti/Cuda/MultiArray/MultiArray.hpp>
 
 
-namespace DO { namespace Shakti {
+namespace DO::Shakti {
 
   template <typename T>
   struct ChannelFormatDescriptor
@@ -26,6 +27,15 @@ namespace DO { namespace Shakti {
     static inline cudaChannelFormatDesc type()
     {
       return cudaCreateChannelDesc<T>();
+    }
+  };
+
+  template <>
+  struct ChannelFormatDescriptor<half>
+  {
+    static inline cudaChannelFormatDesc type()
+    {
+      return cudaCreateChannelDescHalf();
     }
   };
 
@@ -94,7 +104,9 @@ namespace DO { namespace Shakti {
 
     inline ~TextureArray()
     {
-      SHAKTI_SAFE_CUDA_CALL(cudaFreeArray(_array));
+      const auto ret = cudaFreeArray(_array);
+      if (ret != cudaSuccess)
+        SHAKTI_STDERR << cudaGetErrorString(cudaDeviceSynchronize()) << std::endl;
     }
 
     inline void copy_from(const T* data, const Vector2i& sizes, size_t pitch,
@@ -138,11 +150,11 @@ namespace DO { namespace Shakti {
     }
 
   protected:
-    cudaArray* _array{nullptr};
-    Vector2i _sizes{Vector2i::Zero()};
+    cudaArray* _array = nullptr;
+    Vector2i _sizes = Vector2i::Zero();
   };
 
-}}  // namespace DO::Shakti
+}  // namespace DO::Shakti
 
 
 #endif /* DO_SHAKTI_MULTIARRAY_TEXTUREARRAY_HPP */

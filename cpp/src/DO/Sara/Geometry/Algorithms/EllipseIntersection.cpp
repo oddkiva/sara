@@ -178,11 +178,11 @@ namespace DO { namespace Sara {
     }
 
     // Remove redundant roots.
-    constexpr auto eps = 1e-4;
-    constexpr auto squared_eps = eps * eps;
+    static constexpr auto eps = 1e-4;
+    static constexpr auto squared_eps = eps * eps;
     std::sort(ys.begin(), ys.end());
     const auto y_last = std::unique(ys.begin(), ys.end(),
-                                    [&eps](const double& a, const auto& b) {
+                                    [](const double& a, const auto& b) {
                                       return std::abs(a - b) < eps;
                                     });
     ys.resize(y_last - ys.begin());

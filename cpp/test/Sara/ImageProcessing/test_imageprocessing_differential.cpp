@@ -15,7 +15,7 @@
 
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 
 using namespace std;

@@ -89,8 +89,10 @@ BOOST_AUTO_TEST_CASE(test_hartley_zisserman)
     // Now check the resectioning method.
     const auto Xw1 = tensor_view(Xw);
     const auto x1 = tensor_view(x);
+    SARA_CHECK(Xw1.sizes().transpose());
+    SARA_CHECK(x1.sizes().transpose());
     const auto [K, R, t] = sara::resectioning_hartley_zisserman(Xw1, x1);
-    const auto C1 = sara::PinholeCamera{K, R, t};
+    const auto C1 = sara::PinholeCameraDecomposition{K, R, t};
 
     std::cout << "Calibration matrix:" << std::endl;
     std::cout << "K1 =\n" << K << std::endl;

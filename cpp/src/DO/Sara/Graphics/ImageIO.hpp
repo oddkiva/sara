@@ -61,6 +61,13 @@ namespace DO { namespace Sara {
    */
   DO_SARA_EXPORT
   bool load_from_dialog_box(Image<Rgb8>& I);
+  
+  /*!
+    @brief Choose video file from a dialog box.
+    \return video file as a string object.
+   */
+  DO_SARA_EXPORT
+  std::string select_video_file_from_dialog_box();
 
   /*!
     @brief Save grayscale image.

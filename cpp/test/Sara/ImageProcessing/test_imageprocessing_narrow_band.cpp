@@ -16,7 +16,7 @@
 #include <DO/Sara/ImageProcessing/LevelSets/NarrowBand.hpp>
 #include <DO/Sara/ImageProcessing/LevelSets/TimeIntegrators.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 #include <boost/test/unit_test.hpp>
 

@@ -30,13 +30,14 @@ namespace DO { namespace Sara {
   {
   public:
     //! @brief Constructor.
-    ImagePyramidParams(                                           //
-        int first_octave_index = -1,                              //
-        int scale_count_per_octave = 3 + 3,                       //
-        float scale_geometric_factor = std::pow(2.f, 1.f / 3.f),  //
-        int image_padding_size = 1,                               //
-        float scale_camera = 0.5f,                                //
-        float scale_initial = 1.6f)
+    ImagePyramidParams(                                                 //
+        const int first_octave_index = -1,                              //
+        const int scale_count_per_octave = 3 + 3,                       //
+        const float scale_geometric_factor = std::pow(2.f, 1.f / 3.f),  //
+        const int image_padding_size = 1,                               //
+        const float scale_camera = 0.5f,                                //
+        const float scale_initial = 1.6f,                               //
+        const int num_octaves_max = std::numeric_limits<int>::max())
     {
       _scale_camera = scale_camera;
       _scale_initial = scale_initial;
@@ -44,30 +45,36 @@ namespace DO { namespace Sara {
       _scale_geometric_factor = scale_geometric_factor;
       _image_padding_size = image_padding_size;
       _first_octave_index = first_octave_index;
+      _num_octaves_max = num_octaves_max;
     }
 
     /*!
-     *  Let @f$I@f$ be an image function that maps a position @f$(x, y) \in
+     *  Let @f$I@f$ denote an image function that maps a position @f$(x, y) \in
      *  \mathbb{R}^2@f$ to an intensity value in @f$\mathbb{R}@f$.
      *
-     *  In theory, this corresponds to the ideal image function where we would
-     *  know the intensity value with perfect precision at any position @f$(x,
+     *  In theory, this corresponds to an ideal image function where we know the
+     *  intensity value with perfect precision at any position @f$(x,
      *  y)@f$ at any fine resolution @f$\sigma@f$ in meters (millimeters,
-     *  microns, and so on...). The resolution is termed as scale.
+     *  microns, and so on...).
+     *
+     *  The resolution is termed as scale.
      *
      *  There is this nice stackexchange answer:
      *  https://biology.stackexchange.com/questions/26189/whats-the-smallest-size-a-human-eye-can-see.
      *
-     *  Just like the human eye can perceive small objects whose size is of the
-     *  order of a tens of microns, the camera will capture photographs with
-     *  details at a fixed resolution @f$\sigma@f$ defined by the size of
-     *  photoreceptors. At this resolution and at coarser resolutions, the
-     *  average pixel value can be known with good certainty.
+     *  The human eye can perceive and distinguish small objects up to the order
+     *  of tens of microns, so the human eye photoreceptor has a predefined
+     *  size of a few microns. This is the scale of the image.
      *
-     *  Each pixel of a photograph can be viewed as a local averaging of all
-     *  color values @f$I(x, y)@f$ on a patch of size @f$\sigma@f$ meters. And
-     *  these pixel values would be known with infinitesimally small resolution
-     *  @f$\sigma \rightarrow 0@f$.
+     *  Likewise the camera will capture photographs with details at a fixed
+     *  resolution @f$\sigma@f$ also defined by the size of its photoreceptors.
+     *  The photoreceptor can be thought as a tiny square of size 1x1 pixel. At
+     *  this resolution and at coarser resolutions, the average pixel value can
+     *  be known with good certainty.
+     *
+     *  Each pixel value of a photograph can be viewed as a local averaging of
+     *  all color values @f$I(x, y)@f$ on this photoreceptor square, which is
+     *  less than a millimeter.
      *
      *  In the scale-space framework, the local averaging is modeled by a
      *  Gaussian convolution and the image function is augmented with
@@ -92,9 +99,13 @@ namespace DO { namespace Sara {
      *  @f$I_{\sigma_\textrm{camera}}@f$ and not @f$I@f$.
      *
      *  Now the caveat here is that @f$\sigma_\textrm{camera}@f$ is not known in
-     *  meters and we work with pixels. The default parameter we use is
-     *  @f$0.5@f$, which means that we assume we can estimate the pixel values
-     *  with good confidence up to half a pixel resolution.
+     *  meters and we work with pixels. If we know the camera parameters, we can
+     *  relate the size of a pixel in millimeters.
+     *
+     *  The default parameter we use is @f$0.5@f$, which means that we assume we
+     *  can estimate the pixel values with good confidence up to half a pixel
+     *  resolution.
+     *
      *  We can retrieve such color values every half pixels by using bilinear
      *  interpolation.
      */
@@ -170,6 +181,12 @@ namespace DO { namespace Sara {
       return _first_octave_index;
     }
 
+    //! @brief The maximum number of octaves to generate.
+    int num_octaves_max() const
+    {
+      return _num_octaves_max;
+    }
+
   private:
     float _scale_camera;
     float _scale_initial;
@@ -177,6 +194,7 @@ namespace DO { namespace Sara {
     float _scale_geometric_factor;
     int _image_padding_size;
     int _first_octave_index;
+    int _num_octaves_max;
   };
 
 

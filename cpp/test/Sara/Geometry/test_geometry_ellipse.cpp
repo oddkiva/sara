@@ -21,7 +21,7 @@
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 #include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
 
-#include "../AssertHelpers.hpp"
+#include "AssertHelpers.hpp"
 
 #include "TestPolygon.hpp"
 
