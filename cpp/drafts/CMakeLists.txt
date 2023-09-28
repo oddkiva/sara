@@ -12,4 +12,7 @@ add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
 add_subdirectory(NuScenes)
 add_subdirectory(Taskflow)
-add_subdirectory(OnnxRuntime)
+
+# Disable for now because the ONNX runtime library was compiled with CUDA 11 and
+# we use CUDA 12.
+# add_subdirectory(OnnxRuntime)
