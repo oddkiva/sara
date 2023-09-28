@@ -1,4 +1,5 @@
-name: Sara Build + Test
+name: Continuous Integration
+
 on:
   push:
   pull_request:
@@ -6,151 +7,42 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
-        config:
-        - {
-            name: "Windows Latest MSVC",
-            os: windows-latest,
-            artifact: "windows_msvc.7z",
-            build_type: "Release",
-            cc: "cl",
-            cxx: "cl",
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
-            archiver: "7z a",
-            generators: "Visual Studio 16 2019"
-          }
-        - {
-            name: "Ubuntu Latest GCC",
-            os: ubuntu-latest,
-            artifact: "ubuntu_gcc.7z",
-            build_type: "Release",
-            cc: "gcc",
-            cxx: "g++",
-            archiver: "7z a",
-            generators: "Ninja"
-          }
-        - {
-            name: "macOS Latest Clang",
-            os: macos-latest,
-            artifact: "macos_clang.7z",
-            build_type: "Release",
-            cc: "clang",
-            cxx: "clang++",
-            archiver: "7za a",
-            generators: "Ninja"
-          }
+        # The build machine is very slow and dealing with the CI is
+        # time-consuming.
+        #
+        # It may not be worth sticking rigorously to build and test on these
+        # platforms.
+        # os:  [macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            container: 'oddkiva/sara-devel:cuda12.1.0-ubuntu22.04-trt8.6-swift5.9-halide16.0.0'
 
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-      - name: Prepare ccache timestamp
-        id: ccache_cache_timestamp
-        shell: cmake -P {0}
-        run: |
-          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-          message("::set-output name=timestamp::${current_date}")
+    # TODO: figure out howto save and reuse the ccache folder.
 
-      - name: Save ccache cache files
-        uses: actions/cache@v1.1.0
-        with:
-          path: .ccache
-          key: ${ { matrix.config.name } }-ccache-${ { steps.ccache_cache_timestamp.outputs.timestamp } }
-          restore-keys: |
-            ${ { matrix.config.name } }-ccache-
+    - name: Build and test on Ubuntu
+      if: startsWith(matrix.container, 'oddkiva/sara-devel')
+      run: |
+        ./build.py --tasks library --build_type Release --from_scratch --ci
 
-      - name: Install dependencies on Ubuntu
-        if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
-        run: |
-          # Now add the additional APT repositories:
-          #
-          # CMake.
-          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-          sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'
-          # Vulkan SDK.
-          sudo wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
-          # CLBlast.
-          sudo add-apt-repository ppa:cnugteren/clblast
-          # Update the packages list again.
-          sudo apt-get update -y -qq
-
-          # For the documentation.
-          sudo apt-get install -y -qq doxygen graphviz
-
-          # All the packages to compile the C++ codebase.
-          sudo apt-get install -y -qq \
-              build-essential \
-              ccache \
-              cmake \
-              cppcheck \
-              git \
-              lcov \
-              libboost-all-dev \
-              libclblast-dev \
-              libhdf5-dev \
-              libjpeg-dev \
-              libpng-dev \
-              libtiff5-dev \
-              libavcodec-dev \
-              libavformat-dev \
-              libavutil-dev \
-              libswscale-dev \
-              libglew-dev \
-              libglfw3-dev \
-              ocl-icd-opencl-dev \
-              opencl-headers \
-              libpocl-dev \
-              libceres-dev \
-              qtbase5-dev \
-              vulkan-sdk
-
-          # Python dependencies
-          sudo apt-get install -y -qq python3-dev
-
-          # Setup for GUI testing.
-          sudo apt-get install -y xvfb
-          Xvfb :1 -noreset 1>/dev/null 2>&1 &
-          export DISPLAY=:1
-
-          # Coveralls for code coverage
-          sudo apt install rubygems
-          sudo gem install bundler
-          bundle install
-
-      - name: Build and test on Ubuntu
-        if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
-        run: |
-          # Build Sara.
-          mkdir build
-          cd build
-          cmake .. \
-            -DCMAKE_BUILD_TYPE:STRING=Debug \
-            -DSARA_BUILD_SHARED_LIBS:BOOL=ON \
-            -DSARA_BUILD_VIDEOIO:BOOL=ON \
-            -DSARA_BUILD_SAMPLES:BOOL=ON \
-            -DSARA_BUILD_TESTS:BOOL=ON
-          cmake --build . -j$(nproc)
-          # Create deb package.
-          cmake --build . --target package -j$(nproc)
-          # Run tests.
-          DISPLAY=:1 ctest \
-            -j$(nproc) \
-            --output-on-failure \
-            --exclude-regex "test_core_ipc_cond1|shakti_test_*"
-          # Run coverage (disabled for now).
-          #- make -j$(nproc) coverage
-
-      - name: Send code coverage to Coveralls
-        if: startsWith(matrix.config.name, 'Ubuntu Latest GCC')
-        run: |
-          cd /home/runner/work/sara/sara
-          lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
-          lcov --remove coverage.info '/usr/*' --output-file coverage.info
-          lcov --remove coverage.info '/home/runner/work/sara/sara/cpp/third-party/*' --output-file coverage.info
-          lcov --remove coverage.info '/home/runner/work/sara/sara/cpp/test/*' --output-file coverage.info
-          lcov --remove coverage.info '/home/runner/work/sara/sara/build/*' --output-file coverage.info
-          coveralls-lcov coverage.info
+    # - name: Run code coverage
+    #   run:|
+    #     make -j$(nproc) coverage
+    #
+    # - name: Send code coverage to Coveralls
+    #   if: startsWith(matrix.config.name, 'Ubuntu 22.04')
+    #   run: |
+    #     cd /home/runner/work/sara/sara
+    #     lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
+    #     lcov --remove coverage.info '/usr/*' --output-file coverage.info
+    #     lcov --remove coverage.info '/home/runner/work/sara/sara/cpp/third-party/*' --output-file coverage.info
+    #     lcov --remove coverage.info '/home/runner/work/sara/sara/cpp/test/*' --output-file coverage.info
+    #     lcov --remove coverage.info '/home/runner/work/sara/sara/build/*' --output-file coverage.info
+    #     coveralls-lcov coverage.info

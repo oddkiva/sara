@@ -1,15 +1,17 @@
-#include <DO/Sara/ImageIO/Details/Heif.hpp>
+#if !defined(__EMSCRIPTEN__)
 
-#define ENSURE_HEIF_BACKWARD_COMPATIBILITY
-#define USE_C_API
+#  include <DO/Sara/ImageIO/Details/Heif.hpp>
 
-#ifdef USE_C_API
+#  define ENSURE_HEIF_BACKWARD_COMPATIBILITY
+#  define USE_C_API
+
+#  ifdef USE_C_API
 extern "C" {
-#  include <libheif/heif.h>
+#    include <libheif/heif.h>
 }
-#else
-#  include <libheif/heif_cxx.h>
-#endif
+#  else
+#    include <libheif/heif_cxx.h>
+#  endif
 
 
 namespace DO::Sara {
@@ -17,7 +19,7 @@ namespace DO::Sara {
   auto read_heif_file_as_interleaved_rgb_image(const std::string& filepath)
       -> Image<Rgb8>
   {
-#ifdef USE_C_API
+#  ifdef USE_C_API
     heif_error error;
 
     heif_context* ctx = heif_context_alloc();
@@ -53,7 +55,7 @@ namespace DO::Sara {
     heif_context_free(ctx);
 
     return im;
-#else
+#  else
     auto ctx = heif::Context{};
     ctx.read_from_file(filepath);
 
@@ -80,7 +82,7 @@ namespace DO::Sara {
 
     auto imcopy = Image<Rgb8>(imview);
     return imcopy;
-#endif
+#  endif
   }
 
   auto write_heif_file(const ImageView<Rgb8>& image,
@@ -89,7 +91,7 @@ namespace DO::Sara {
     const auto w = image.width();
     const auto h = image.height();
 
-#ifdef USE_C_API
+#  ifdef USE_C_API
     auto error = heif_error{};
 
     heif_image* himage = nullptr;
@@ -100,11 +102,11 @@ namespace DO::Sara {
     if (error.code != heif_error_Ok)
       throw std::runtime_error{error.message};
 
-#  ifdef ENSURE_HEIF_BACKWARD_COMPATIBILITY
+#    ifdef ENSURE_HEIF_BACKWARD_COMPATIBILITY
     error = heif_image_add_plane(himage, heif_channel_interleaved, w, h, 24);
-#  else
+#    else
     error = heif_image_add_plane(himage, heif_channel_interleaved, w, h, 8);
-#  endif
+#    endif
     if (error.code != heif_error_Ok)
       throw std::runtime_error{error.message};
 
@@ -123,13 +125,13 @@ namespace DO::Sara {
 
     // Use the HEVC codec, which performs best.
     heif_encoder* encoder = nullptr;
-#  ifdef ENSURE_HEIF_BACKWARD_COMPATIBILITY
+#    ifdef ENSURE_HEIF_BACKWARD_COMPATIBILITY
     error = heif_context_get_encoder_for_format(ctx, heif_compression_HEVC,
                                                 &encoder);
-#  else
+#    else
     error = heif_context_get_encoder_for_format(nullptr, heif_compression_HEVC,
                                                 &encoder);
-#  endif
+#    endif
     if (error.code != heif_error_Ok)
       throw std::runtime_error{error.message};
 
@@ -154,7 +156,7 @@ namespace DO::Sara {
       throw std::runtime_error{error.message};
     heif_context_free(ctx);
     heif_image_release(himage);
-#else
+#  else
     auto himage = heif::Image{};
     himage.create(w, h, heif_colorspace_RGB, heif_chroma_interleaved_RGB);
     himage.add_plane(heif_channel_interleaved, w, h, 8);
@@ -175,7 +177,9 @@ namespace DO::Sara {
     auto ctx = heif::Context{};
     ctx.encode_image(himage, encoder);
     ctx.write_to_file(filepath);
-#endif
+#  endif
   }
 
 }  // namespace DO::Sara
+
+#endif

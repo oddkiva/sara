@@ -66,7 +66,7 @@ inline auto init_glew_boilerplate()
 {
 #ifndef __APPLE__
   // Initialize GLEW.
-  auto err = glewInit();
+  const auto err = glewInit();
   if (err != GLEW_OK)
   {
     std::cerr << sara::format("Error: failed to initialize GLEW: %s",

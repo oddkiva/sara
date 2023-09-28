@@ -27,3 +27,5 @@ include(UseDOSaraMatch)
 include(UseDOSaraFeatureMatching)
 include(UseDOSaraMultiViewGeometry)
 include(UseDOSaraRANSAC)
+
+include(UseDOSaraVisualization)

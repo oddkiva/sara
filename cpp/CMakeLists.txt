@@ -1,29 +1,22 @@
 add_subdirectory(third-party)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  # Build only a small subset of libraries.
   include(${CMAKE_SOURCE_DIR}/cpp/src/DO/Sara/UseDOSaraCore.cmake)
   include(${CMAKE_SOURCE_DIR}/cpp/src/DO/Sara/UseDOSaraImageIO.cmake)
-  add_subdirectory(drafts/OpenCL/GL)
-  add_subdirectory(drafts/Emscripten)
+  add_subdirectory(src/DO/Kalpana/EasyGL)
+
+  # Build the specific Emscripten examples.
+  add_subdirectory(examples/Kalpana/Emscripten)
 else ()
   add_subdirectory(src/DO)
-
-  if (SARA_BUILD_TESTS)
-    add_subdirectory(test)
-  endif ()
+  add_subdirectory(test)
 
   if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
     return()
   endif ()
 
-  if (SARA_BUILD_SAMPLES)
-    add_subdirectory(examples)
-  endif ()
-
+  add_subdirectory(examples)
   add_subdirectory(tools)
-
-  if (SARA_BUILD_DRAFTS)
-    set(cpp_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-    add_subdirectory(drafts)
-  endif ()
+  add_subdirectory(drafts)
 endif ()

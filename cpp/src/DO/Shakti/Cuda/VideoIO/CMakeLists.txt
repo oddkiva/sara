@@ -11,13 +11,9 @@ target_link_libraries(DO_Shakti_Cuda_VideoIO
 
  set_target_properties(DO_Shakti_Cuda_VideoIO
   PROPERTIES
-  CXX_STANDARD 17
   CXX_STANDARD_REQUIRED YES
   POSITION_INDEPENDENT_CODE ON
   FOLDER "Libraries/Shakti/Cuda")
-
-# Propagate C++17 to any project linking against the library.
-target_compile_features(DO_Shakti_Cuda_VideoIO INTERFACE cxx_std_17)
 
 # Set correct compile definitions when building the libraries.
  if (SARA_BUILD_SHARED_LIBS)

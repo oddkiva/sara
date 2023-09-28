@@ -24,5 +24,4 @@ target_compile_definitions(
     # https://developer.nvidia.com/blog/nvidia-is-now-opencl-3-0-conformant/
     $<$<BOOL:CMAKE_CUDA_COMPILER>:CL_TARGET_OPENCL_VERSION=300>)
 
-target_compile_features(DO_Sara_OpenCL INTERFACE cxx_std_17)
 set_target_properties(DO_Sara_OpenCL PROPERTIES FOLDER "Libraries/Shakti")

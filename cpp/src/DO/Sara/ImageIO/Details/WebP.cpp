@@ -1,6 +1,7 @@
+#if !defined(__EMSCRIPTEN__)
+
 #include <DO/Sara/ImageIO/Details/ImageIOObjects.hpp>
 #include <DO/Sara/ImageIO/Details/WebP.hpp>
-
 
 extern "C" {
 #include <webp/decode.h>
@@ -162,3 +163,5 @@ namespace DO::Sara {
   }
 
 }  // namespace DO::Sara
+
+#endif

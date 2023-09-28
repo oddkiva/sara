@@ -12,8 +12,6 @@ set_target_properties(DO_Shakti_Cuda_ImageProcessing
   POSITION_INDEPENDENT_CODE ON
   FOLDER "Libraries/Shakti/Cuda")
 
-target_compile_features(DO_Shakti_Cuda_ImageProcessing INTERFACE cxx_std_17)
-
 # Set correct compile definitions when building the libraries.
  if (SARA_BUILD_SHARED_LIBS)
    target_compile_definitions(DO_Shakti_Cuda_ImageProcessing
