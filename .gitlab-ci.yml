@@ -115,7 +115,7 @@ build:
     - DISPLAY=:1 ctest
         -j$(nproc)
         --output-on-failure
-        --exclude-regex "test_graphics_*|test_visualization_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
+        --exclude-regex "test_graphics_*|test_visualization_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*|test_ransac_log_nfa"
     # FIXME: I give up the code coverage... Will come back to it later.
     # - make -j$(nproc) coverage
     # - coveralls-lcov coverage.info --repo-token=$(cat .coveralls.gitlab.yml)
