@@ -4,7 +4,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   # Build only a small subset of libraries.
   include(${CMAKE_SOURCE_DIR}/cpp/src/DO/Sara/UseDOSaraCore.cmake)
   include(${CMAKE_SOURCE_DIR}/cpp/src/DO/Sara/UseDOSaraImageIO.cmake)
-  add_subdirectory(src/Kalpana/EasyGL)
+  add_subdirectory(src/DO/Kalpana/EasyGL)
 
   # Build the specific Emscripten examples.
   add_subdirectory(examples/Kalpana/Emscripten)

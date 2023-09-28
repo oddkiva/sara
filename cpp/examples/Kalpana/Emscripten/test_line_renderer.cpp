@@ -18,7 +18,7 @@
 
 #include <GLFW/glfw3.h>
 
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__)
 #  include <emscripten/emscripten.h>
 #  define GLFW_INCLUDE_ES3
 #endif
@@ -33,9 +33,15 @@ namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 
 
+class GLFWApp;
+
+#if defined(__EMSCRIPTEN__)
+auto render_frame_for_emscripten() -> void;
+#endif
+
+
 class GLFWApp
 {
-public:
   GLFWApp(const Eigen::Vector2i& sizes, const std::string& title)
     : _window_sizes{sizes}
   {
@@ -56,13 +62,10 @@ public:
                                title.c_str(),         //
                                nullptr, nullptr);
     if (!_window)
-    {
-      glfwTerminate();
       throw std::runtime_error{"Failed to create window!"};
-    }
 
-    // clang-format off
-// #ifdef __APPLE__
+      // clang-format off
+// #if defined(__APPLE__)
 //   // GL 3.2 + GLSL 150
 //   MyGLFW::glsl_version = "#version 150";
 //   glfwWindowHint(  // required on Mac OS
@@ -80,7 +83,7 @@ public:
 //   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 //   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 // #endif
-    // clang-format on
+      // clang-format on
 
 #ifdef _WIN32
     // if it's a HighDPI monitor, try to scale everything
@@ -100,7 +103,7 @@ public:
     // 4. Tell that the OpenGL rendering will be done on this window surface.
     glfwMakeContextCurrent(_window);
 
-#ifndef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__)
     // 5. Load GLEW.
     //    This is important as any attempt at calling OpenGL functions will
     //    result in a runtime crash.
@@ -110,9 +113,30 @@ public:
 #endif
   }
 
-  auto initialize(const fs::path& program_dir_path) -> void
+public:
+  ~GLFWApp()
   {
-#ifndef __EMSCRIPTEN__
+    terminate();
+  }
+
+  static auto instantiate(const Eigen::Vector2i& sizes,
+                          const std::string& title) -> GLFWApp&
+  {
+    _instance.reset(new GLFWApp{sizes, title});
+    return *_instance;
+  }
+
+  static auto instance() -> GLFWApp&
+  {
+    if (_instance.get() == nullptr)
+      throw std::runtime_error{
+          "Error: you must instantiate the app exlicitly!"};
+    return *_instance;
+  }
+
+  auto initialize([[maybe_unused]] const fs::path& program_dir_path) -> void
+  {
+#if !defined(__EMSCRIPTEN__)
     _program_dir_path = program_dir_path;
 #endif
 
@@ -129,18 +153,32 @@ public:
 
   auto run() -> void
   {
-#ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(render_frame, 0, 1);
+#if defined(__EMSCRIPTEN__)
+    emscripten_set_main_loop(render_frame_for_emscripten, 0, 1);
 #else
     while (!glfwWindowShouldClose(_window))
       render_frame();
 #endif
   }
 
-  auto terminate() -> void
+  auto render_frame() -> void
   {
-    cleanup_gl_objects();
-    glfwTerminate();
+    glViewport(0, 0, _window_sizes.x(), _window_sizes.y());
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    const auto& image_textures = _image_plane_renderer._textures;
+    const auto& lines = _line_renderer._lines;
+
+    for (auto i = 0u; i < image_textures.size(); ++i)
+      _image_plane_renderer.render(image_textures[i]);
+
+    for (auto i = 0u; i < image_textures.size(); ++i)
+      _line_renderer.render(image_textures[i], lines[i]);
+
+    glfwSwapBuffers(_window);
+    glfwPollEvents();
   }
 
 private:
@@ -148,26 +186,12 @@ private:
   {
     _image_plane_renderer.initialize();
 
-#ifdef __EMSCRIPTEN__
-    const auto images = std::array<sara::Image<sara::Rgb8>, 2>{
-        sara::imread<sara::Rgb8>("assets/image-omni.png"),
-        sara::imread<sara::Rgb8>("assets/image-pinhole.png"),
-    };
-#elif defined _WIN32
-    auto images = std::array<sara::Image<sara::Rgb8>, 2>{};
-    for (auto i = 0; i < 2; ++i)
-      images[i] = sara::resize(
-          sara::imread<sara::Rgb8>(
-              "C:/Users/David/Desktop/GitLab/sara/data/stinkbug.png"),
-          {1920, 1080});
-#else
     const auto images = std::array<sara::Image<sara::Rgb8>, 2>{
         sara::imread<sara::Rgb8>(
-            (_program_dir_path / "assets/image-omni.png").string()),
+            (_program_dir_path / "data/image-omni.png").string()),
         sara::imread<sara::Rgb8>(
-            (_program_dir_path / "assets/image-pinhole.png").string()),
+            (_program_dir_path / "data/image-pinhole.png").string()),
     };
-#endif
 
     auto& image_textures = _image_plane_renderer._textures;
     image_textures.resize(2);
@@ -220,26 +244,6 @@ private:
     gl_lines[1]._color << .0f, .8f, .0f, .5f;
   }
 
-  auto render_frame() -> void
-  {
-    glViewport(0, 0, _window_sizes.x(), _window_sizes.y());
-
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    const auto& image_textures = _image_plane_renderer._textures;
-    const auto& lines = _line_renderer._lines;
-
-    for (auto i = 0u; i < image_textures.size(); ++i)
-      _image_plane_renderer.render(image_textures[i]);
-
-    for (auto i = 0u; i < image_textures.size(); ++i)
-      _line_renderer.render(image_textures[i], lines[i]);
-
-    glfwSwapBuffers(_window);
-    glfwPollEvents();
-  }
-
   auto cleanup_gl_objects() -> void
   {
     // Destroy the shaders and quad geometry data.
@@ -262,29 +266,44 @@ private:
     gl_lines.clear();
   }
 
+  auto terminate() -> void
+  {
+    cleanup_gl_objects();
+    glfwTerminate();
+  }
+
 private:
   GLFWwindow* _window = nullptr;
   Eigen::Vector2i _window_sizes = Eigen::Vector2i::Zero();
+#if defined(_WN32)
   int _high_dpi_scale_factor;
-
-#ifndef __EMSCRIPTEN__
-  fs::path _program_dir_path;
 #endif
+
+  fs::path _program_dir_path = ".";
 
   ImagePlaneRenderer _image_plane_renderer;
   LineRenderer _line_renderer;
+
+  static std::unique_ptr<GLFWApp> _instance;
 };
+
+std::unique_ptr<GLFWApp> GLFWApp::_instance = nullptr;
+
+#if defined(__EMSCRIPTEN__)
+auto render_frame_for_emscripten() -> void
+{
+  GLFWApp::instance().render_frame();
+}
+#endif
+
 
 int main(int, [[maybe_unused]] char** argv)
 {
   try
   {
-    auto app = GLFWApp{{800, 600}, "Line Renderer"};
-    // app.initialize(fs::path{argv[0]}.parent_path());
-    app.initialize(fs::path{"/home/david/GitLab/DO-CV"} / "sara" / "cpp" /
-                   "examples" / "Kalpana" / "Emscripten");
+    auto& app = GLFWApp::instantiate({800, 600}, "Line Renderer");
+    app.initialize(fs::path{argv[0]}.parent_path());
     app.run();
-    app.terminate();
   }
   catch (std::exception& e)
   {

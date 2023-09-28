@@ -2,18 +2,14 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten AND NOT GLEW_FOUND)
   return()
 endif()
 
-set(SARA_EMSCRIPTEN_BUILD_HTML NO)
+set(SARA_EMSCRIPTEN_BUILD_HTML YES)
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-  add_custom_target(emscripten_copy_assets)
-  add_custom_command(
-    TARGET emscripten_copy_assets
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_BINARY_DIR}/bin/assets)
-else()
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets
-       DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endif()
+# In case something goes wrong.
+add_custom_target(emscripten_copy_assets)
+add_custom_command(
+  TARGET emscripten_copy_assets
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data
+          ${CMAKE_BINARY_DIR}/bin)
 
 list(
   APPEND
@@ -91,14 +87,10 @@ macro(sara_add_wasm_executable file)
 endmacro()
 
 set(ALL_FLAGS "$<$<PLATFORM_ID:Emscripten>:SHELL:-s ALLOW_MEMORY_GROWTH=1>")
-set(ALL_FLAGS
-    ${ALL_FLAGS}
-    "$<$<PLATFORM_ID:Emscripten>:SHELL:--preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image-pinhole.png>"
-)
-set(ALL_FLAGS
-    ${ALL_FLAGS}
-    "$<$<PLATFORM_ID:Emscripten>:SHELL:--preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets/image-omni.png>"
-)
+set(ALL_FLAGS ${ALL_FLAGS} "$<$<PLATFORM_ID:Emscripten>:SHELL:--preload-file
+    ${CMAKE_SOURCE_DIR}/data/image-pinhole.png@data/image-pinhole.png>")
+set(ALL_FLAGS ${ALL_FLAGS} "$<$<PLATFORM_ID:Emscripten>:SHELL:--preload-file
+    ${CMAKE_SOURCE_DIR}/data/image-omni.png@data/image-omni.png>")
 
 # -----------------------------------------------------------------------------
 # TESTS
@@ -121,9 +113,10 @@ target_link_options(test_metric_grid_renderer PRIVATE ${ALL_FLAGS})
 sara_add_wasm_executable(test_image_dewarp_renderer.cpp)
 target_link_libraries(test_image_dewarp_renderer #
                       PRIVATE emscripten_gl_utilities)
-target_link_options(
-  test_image_dewarp_renderer PRIVATE
-  "$<$<PLATFORM_ID:Emscripten>:SHELL:-s ALLOW_MEMORY_GROWTH=1>")
+# target_link_options(
+#   test_image_dewarp_renderer PRIVATE
+#   "$<$<PLATFORM_ID:Emscripten>:SHELL:-s ALLOW_MEMORY_GROWTH=1>")
+target_link_options(test_image_dewarp_renderer PRIVATE ${ALL_FLAGS})
 
 target_link_options(
   test_metric_grid_renderer

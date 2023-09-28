@@ -19,7 +19,7 @@
 
 #include <GLFW/glfw3.h>
 
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__)
 #  include <emscripten/emscripten.h>
 #  define GLFW_INCLUDE_ES3
 #endif
@@ -38,11 +38,16 @@ namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 
 
+class GLFWApp;
+
+#if defined(__EMSCRIPTEN__)
+auto render_frame_for_emscripten() -> void;
+#endif
+
+
 class GLFWApp
 {
-public:
-  GLFWApp(const Eigen::Vector2i& sizes,
-          const std::string& title = "Image Dewarper")
+  GLFWApp(const Eigen::Vector2i& sizes, const std::string& title)
     : _window_sizes{sizes}
   {
     // In the constructor, the order in which functions are called matters.
@@ -62,12 +67,9 @@ public:
                                title.c_str(),         //
                                nullptr, nullptr);
     if (!_window)
-    {
-      glfwTerminate();
       throw std::runtime_error{"Failed to create window!"};
-    }
 
-    // clang-format off
+      // clang-format off
 // #ifdef __APPLE__
 //   // GL 3.2 + GLSL 150
 //   MyGLFW::glsl_version = "#version 150";
@@ -86,7 +88,7 @@ public:
 //   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 //   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 // #endif
-    // clang-format on
+      // clang-format on
 
 #ifdef _WIN32
     // if it's a HighDPI monitor, try to scale everything
@@ -122,9 +124,31 @@ public:
     glfwSetScrollCallback(_window, scroll_callback);
   }
 
-  auto initialize(const fs::path& program_dir_path) -> void
+public:
+  ~GLFWApp()
   {
-#ifndef __EMSCRIPTEN__
+    terminate();
+  }
+
+  static auto instantiate(const Eigen::Vector2i& sizes,
+                          const std::string& title = "Metric Grid Renderer")
+      -> GLFWApp&
+  {
+    _instance.reset(new GLFWApp{sizes, title});
+    return *_instance;
+  }
+
+  static auto instance() -> GLFWApp&
+  {
+    if (_instance.get() == nullptr)
+      throw std::runtime_error{
+          "Error: you must instantiate the app exlicitly!"};
+    return *_instance;
+  }
+
+  auto initialize([[maybe_unused]] const fs::path& program_dir_path) -> void
+  {
+#if !defined(__EMSCRIPTEN__)
     _program_dir_path = program_dir_path;
 #endif
 
@@ -149,8 +173,8 @@ public:
 
   auto run() -> void
   {
-#ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(render_frame, 0, 1);
+#if defined(__EMSCRIPTEN__)
+    emscripten_set_main_loop(render_frame_for_emscripten, 0, 1);
 #else
     while (!glfwWindowShouldClose(_window))
       render_frame();
@@ -211,7 +235,6 @@ public:
     _rotation_changed = false;
   }
 
-private:
   auto render_frame() -> void
   {
     glfwPollEvents();
@@ -257,19 +280,11 @@ private:
     glfwSwapBuffers(_window);
   }
 
+private:
   auto initialize_image_texture() -> void
   {
-#ifdef __EMSCRIPTEN__
-    const auto image = sara::imread<sara::Rgb8>("assets/image-omni.png");
-#elif defined _WIN32
-    const auto image = sara::resize(
-        sara::imread<sara::Rgb8>(
-            "C:/Users/David/Desktop/GitLab/sara/data/stinkbug.png"),
-        {1920, 1080});
-#else
     const auto image = sara::imread<sara::Rgb8>(
-        (_program_dir_path / "assets/image-omni.png").string());
-#endif
+        (_program_dir_path / "data/image-omni.png").string());
 
     auto& image_textures = _image_plane_renderer._textures;
     image_textures.resize(1);
@@ -496,11 +511,11 @@ private: /* convenience free functions. */
 private:
   GLFWwindow* _window = nullptr;
   Eigen::Vector2i _window_sizes = Eigen::Vector2i::Zero();
+#if defined(_WIN32)
   int _high_dpi_scale_factor;
-
-#ifndef __EMSCRIPTEN__
-  fs::path _program_dir_path;
 #endif
+
+  fs::path _program_dir_path;
 
   // Extrinsic camera parameter state.
   std::array<float, 3> _ypr_deg = {0, 0, 0};
@@ -508,18 +523,27 @@ private:
 
   ImagePlaneRenderer _image_plane_renderer;
   MetricGridRenderer _metric_grid_renderer;
+
+  static std::unique_ptr<GLFWApp> _instance;
 };
+
+std::unique_ptr<GLFWApp> GLFWApp::_instance = nullptr;
+
+#if defined(__EMSCRIPTEN__)
+auto render_frame_for_emscripten() -> void
+{
+  GLFWApp::instance().render_frame();
+}
+#endif
+
 
 int main(int, [[maybe_unused]] char** argv)
 {
   try
   {
-    auto app = GLFWApp{{800, 600}};
-    // app.initialize(fs::path{argv[0]}.parent_path());
-    app.initialize(fs::path{"/home/david/GitLab/DO-CV"} / "sara" / "cpp" /
-                   "examples" / "Kalpana" / "Emscripten");
+    auto& app = GLFWApp::instantiate({800, 600});
+    app.initialize(fs::path{argv[0]}.parent_path());
     app.run();
-    app.terminate();
   }
   catch (std::exception& e)
   {

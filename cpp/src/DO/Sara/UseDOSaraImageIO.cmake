@@ -18,18 +18,20 @@ if(SARA_USE_FROM_SOURCE)
              ${DO_Sara_ThirdParty_DIR} #
              ${DO_Sara_ThirdParty_DIR}/eigen)
 
-    target_link_libraries(
-      DO_Sara_ImageIO
-      PRIVATE ${JPEG_LIBRARIES} #
-              ${PNG_LIBRARIES} #
-              ${TIFF_LIBRARIES} #
-              ${ZLIB_LIBRARIES} #
-              HEIF::HEIF #
-              $<IF:$<CXX_COMPILER_ID:MSVC>,WebP::webp,WebP::WebP>
-              $<$<CXX_COMPILER_ID:MSVC>:WebP::webpdecoder>
-              $<$<CXX_COMPILER_ID:MSVC>:WebP::webpdemux>
-      PUBLIC DO::Sara::Core #
-             easyexif)
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+      target_link_libraries(
+        DO_Sara_ImageIO
+        PRIVATE ${JPEG_LIBRARIES} #
+                ${PNG_LIBRARIES} #
+                ${TIFF_LIBRARIES} #
+                ${ZLIB_LIBRARIES} #
+                HEIF::HEIF #
+                $<IF:$<CXX_COMPILER_ID:MSVC>,WebP::webp,WebP::WebP>
+                $<$<CXX_COMPILER_ID:MSVC>:WebP::webpdecoder>
+                $<$<CXX_COMPILER_ID:MSVC>:WebP::webpdemux>)
+    endif()
+    target_link_libraries(DO_Sara_ImageIO PUBLIC DO::Sara::Core #
+                                                 easyexif)
 
     target_compile_definitions(
       DO_Sara_ImageIO

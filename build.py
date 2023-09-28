@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import multiprocessing as mp
+import os
 import pathlib
 import platform
 import shutil
@@ -13,13 +14,14 @@ BUILD_TASKS = [
     "compilation_database",
     "library",
     "library_docker",
+    "web",
     "book",
     "book_docker",
     "serve_book",
 ]
 
 # Build types.
-BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan", "Emscripten"]
+BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 
 # Platform and third-party version constants
 UBUNTU_VERSION = "22.04"
@@ -192,6 +194,26 @@ def generate_project(
     execute(cmd, build_dir)
 
 
+def generate_project_for_web(
+    build_dir: str,
+    build_type: str,
+    from_scratch: bool = False
+):
+    if from_scratch and build_dir.exists():
+        shutil.rmtree(build_dir)
+
+    if not build_dir.exists():
+        pathlib.Path.mkdir(build_dir)
+
+    cmake_options = []
+    cmake_options.append(f"-G Ninja")
+    cmake_options.append(f"-D CMAKE_BUILD_TYPE={build_type}")
+    cmake_options.append("-D CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON")
+
+    cmd = ["emcmake", "cmake", SARA_SOURCE_DIR] + cmake_options
+    execute(cmd, build_dir)
+
+
 def build_project(build_dir: str, build_type: str):
     cpu_count = mp.cpu_count()
     command_line = ["cmake", "--build", ".", f"-j{cpu_count}", "-v"]
@@ -327,6 +349,25 @@ if __name__ == "__main__":
             )
             build_project(build_dir, args.build_type)
             run_project_tests(build_dir, args.build_type)
+
+        if task == "web":
+            # Make sure that you have done the following:
+            # $ cd $PATH_TO_EMSDK
+            # $ git pull
+            # $ ./emsdk install latest
+            # $ ./emsdk activate latest
+            # $ source ./emsdk_env.sh
+
+            build_dir = (
+                SARA_SOURCE_DIR.parent /
+                f"{SARA_SOURCE_DIR.name}-build-Emscripten-{args.build_type}"
+            )
+            generate_project_for_web(
+                build_dir,
+                args.build_type,
+                args.from_scratch
+            )
+            build_project(build_dir, args.build_type)
 
         if task == "library_docker":
             build_library_docker(SARA_SOURCE_DIR)
