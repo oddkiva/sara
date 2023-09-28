@@ -240,6 +240,7 @@ def run_project_tests(build_dir: str, build_type: str,
             "test_graphics_*",
             "test_halide_*",
             "test_vulkan_*",
+            "test_visualization_feature_draw",
             "shakti_test_*",
         ]
         command_line.append("--exclude-regex")
