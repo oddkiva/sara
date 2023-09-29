@@ -318,7 +318,7 @@ def build_book_docker():
 
 def build_emsdk_docker():
     # Build the docker image.
-    sara_emsdk_build_image = "sara-emsdk-build"
+    sara_emsdk_build_image = "oddkiva/sara-emsdk-devel"
     ret = subprocess.Popen(
         [
             "docker",
@@ -333,18 +333,17 @@ def build_emsdk_docker():
     ).wait()
 
     # Run the docker image.
-    book_dir_path = SARA_SOURCE_DIR / "doc" / "book"
     ret = subprocess.Popen(
         [
             "docker",
             "run",
             "-it",
             "-v",
-            f"{book_dir_path}:/workspace/book",
-            sara_book_build_image,
+            f"{SARA_SOURCE_DIR}:/workspace/sara",
+            sara_emsdk_build_image,
             "/bin/bash",
         ],
-        cwd=(SARA_SOURCE_DIR / "doc" / "book"),
+        cwd=SARA_SOURCE_DIR,
     ).wait()
 
 

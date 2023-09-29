@@ -19,6 +19,8 @@ jobs:
         include:
           - os: ubuntu-latest
             container: 'oddkiva/sara-devel:cuda12.1.0-ubuntu22.04-trt8.6-swift5.9-halide16.0.0'
+          - os: ubuntu-latest
+            container: 'oddkiva/sara-emsdk-devel:latest'
 
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
@@ -31,6 +33,11 @@ jobs:
       if: startsWith(matrix.container, 'oddkiva/sara-devel')
       run: |
         ./build.py --tasks library --build_type Release --from_scratch --ci
+
+    - name: Build and test WASM on Ubuntu
+      if: startsWith(matrix.container, 'oddkiva/sara-emsdk-devel')
+      run: |
+        ./build.py --tasks web --build_type Release --from_scratch
 
     # - name: Run code coverage
     #   run:|
