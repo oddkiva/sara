@@ -39,7 +39,7 @@ necessity but I don't really like it.
 Of course, you will not want to use my library and use *OpenCV* instead, and
 that's fine.
 
-The two aspects below are always in my mind when I write anything in this
+The two aspects below are always in my mind when I write anything for this
 library:
 1. as a computer vision scientist, understanding as many algorithms as possible
    and as deeply as possible is one of my responsibilities .
@@ -53,6 +53,6 @@ Build the libraries
 -------------------
 
 Please have a look at the CI scripts like `.gitlab-ci.yml` or
-`.github/workflows/ci.yml`**.
+`.github/workflows/ci.yml`.
 
 If something does not work, help me and try fixing it? =P
