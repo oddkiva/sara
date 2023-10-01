@@ -87,6 +87,22 @@ namespace DO::Shakti::Vulkan {
       vkUnmapMemory(_device, _handle);
     }
 
+    template <typename T>
+    auto map_memory(const std::size_t num_elements,
+                    const std::size_t offset = 0) const -> T*
+    {
+      auto virtual_host_ptr = static_cast<void*>(nullptr);
+      vkMapMemory(_device, _handle, sizeof(T) * offset,
+                  sizeof(T) * num_elements, 0 /* flags */,  //
+                  &virtual_host_ptr);
+      return reinterpret_cast<T*>(virtual_host_ptr);
+    }
+
+    auto unmap_memory() const -> void
+    {
+      vkUnmapMemory(_device, _handle);
+    }
+
     operator VkDeviceMemory&()
     {
       return _handle;
