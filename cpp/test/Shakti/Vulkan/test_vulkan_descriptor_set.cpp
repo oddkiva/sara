@@ -90,5 +90,6 @@ BOOST_AUTO_TEST_CASE(test_device)
   const auto desc_pool = svk::DescriptorPool{device};
   BOOST_CHECK(static_cast<VkDescriptorPool>(desc_pool) != nullptr);
 
-  const auto desc_set = svk::DescriptorSet
+  const auto desc_set = svk::DescriptorSet{1, desc_pool};
+  BOOST_CHECK(static_cast<VkDescriptorSet>(desc_set) != nullptr);
 }

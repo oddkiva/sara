@@ -122,7 +122,7 @@ namespace DO::Shakti::Vulkan {
       allocate_info.pSetLayouts = nullptr;
 
       const auto status =
-          vkAllocateDescriptorSets(_device, &allocate_info, nullptr, &_handle);
+          vkAllocateDescriptorSets(_device, &allocate_info, &_handle);
       if (status != VK_SUCCESS)
         throw std::runtime_error{fmt::format(
             "[VK] Error: failed to create descriptor pool! Error code: {}",
