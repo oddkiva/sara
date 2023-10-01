@@ -84,18 +84,30 @@ namespace DO::Shakti::Vulkan {
   public:
     Builder() = delete;
 
+    Builder(const Builder&) = default;
+
+    Builder(Builder&& other)
+    {
+      swap(other);
+    }
+
     Builder(const VkDevice device)
       : _device{device}
     {
       _create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     }
 
+    auto operator=(const Builder& other) -> Builder& = default;
+
+    auto operator=(Builder&& other) -> Builder&
+    {
+      swap(other);
+      return *this;
+    }
+
     auto pool_count(const std::uint32_t n) -> Builder&
     {
       _pool_sizes.resize(n);
-      _create_info.poolSizeCount =
-          static_cast<std::uint32_t>(_pool_sizes.size());
-      _create_info.pPoolSizes = _pool_sizes.data();
       return *this;
     }
 
@@ -122,7 +134,6 @@ namespace DO::Shakti::Vulkan {
 
       _create_info.poolSizeCount = _pool_sizes.size();
       _create_info.pPoolSizes = _pool_sizes.data();
-      _create_info.maxSets = static_cast<uint32_t>(1);
 
       const auto status = vkCreateDescriptorPool(_device, &_create_info,
                                                  nullptr, &pool._handle);
@@ -132,6 +143,13 @@ namespace DO::Shakti::Vulkan {
             static_cast<int>(status))};
 
       return pool;
+    }
+
+    auto swap(Builder& other) -> void
+    {
+      std::swap(_device, other._device);
+      _pool_sizes.swap(other._pool_sizes);
+      std::swap(_create_info, other._create_info);
     }
 
   private:
