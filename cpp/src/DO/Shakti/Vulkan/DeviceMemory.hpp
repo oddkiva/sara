@@ -123,7 +123,21 @@ namespace DO::Shakti::Vulkan {
       const auto mem_type =
           _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
 
-      return {_device, buffer.size(), mem_type};
+      return {_device, mem_reqs.size, mem_type};
+    }
+
+    auto allocate_for_uniform_buffer(const Buffer& buffer) const -> DeviceMemory
+    {
+      static constexpr auto mem_props = VkMemoryPropertyFlags{
+          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT  //
+      };
+
+      const auto mem_reqs = buffer.get_memory_requirements();
+      const auto mem_type =
+          _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
+
+      return {_device, mem_reqs.size, mem_type};
     }
 
     auto allocate_for_device_buffer(const Buffer& buffer) const -> DeviceMemory
@@ -135,9 +149,7 @@ namespace DO::Shakti::Vulkan {
       const auto mem_type =
           _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
 
-      SARA_CHECK(buffer.size());
-
-      return {_device, buffer.size(), mem_type};
+      return {_device, mem_reqs.size, mem_type};
     }
 
     const PhysicalDevice& _physical_device = nullptr;

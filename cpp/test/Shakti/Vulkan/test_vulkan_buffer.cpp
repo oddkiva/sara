@@ -138,8 +138,9 @@ BOOST_AUTO_TEST_CASE(test_staging_buffer)
   // Copy to the device memory.
   device_memory.copy_from(host_vertices.data(), host_vertices.size());
 
-  // This will fail and Vulkan detects that we are trying to write more data
-  // than what is allocated for the device memory.
+  // The following will fail and Vulkan detects that we are trying to write more
+  // data than what is allocated for the device memory.
+  //
   // auto host_vertices = std::vector<float>(num_vertices * 3 + 1, 0);
   // device_memory.copy_from(host_vertices.data(), host_vertices.size() + 1);
 }
@@ -245,6 +246,188 @@ BOOST_AUTO_TEST_CASE(test_device_buffer)
   // properties.
   auto device_memory = svk::DeviceMemory{device, mem_reqs.size, mem_type};
   BOOST_CHECK(static_cast<VkDeviceMemory>(device_memory) != nullptr);
+
+  // Bind the device buffer to this device memory.
+  device_buffer.bind(device_memory, 0);
+}
+
+BOOST_AUTO_TEST_CASE(test_staging_buffer_with_factory)
+{
+  namespace svk = DO::Shakti::Vulkan;
+
+  static constexpr auto debug_vulkan_instance = true;
+#if defined(__APPLE__)
+  static constexpr auto compile_for_apple = true;
+#else
+  static constexpr auto compile_for_apple = false;
+#endif
+
+  // Vulkan instance.
+  auto instance_extensions = std::vector<const char*>{};
+  if constexpr (debug_vulkan_instance)
+    instance_extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+  if constexpr (compile_for_apple)
+  {
+    instance_extensions.emplace_back(
+        VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+    instance_extensions.emplace_back(
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+  }
+
+  const auto validation_layers_required =
+      debug_vulkan_instance ? std::vector{"VK_LAYER_KHRONOS_validation"}
+                            : std::vector<const char*>{};
+
+  const auto instance =
+      svk::Instance::Builder{}
+          .application_name("Vulkan Application")
+          .engine_name("No Engine")
+          .enable_instance_extensions(instance_extensions)
+          .enable_validation_layers(validation_layers_required)
+          .create();
+
+  // List all Vulkan physical devices.
+  const auto physical_devices =
+      svk::PhysicalDevice::list_physical_devices(instance);
+
+  // There must be at least one GPU device...
+  BOOST_CHECK(!physical_devices.empty());
+  const auto& physical_device = physical_devices.front();
+
+  // The physical device should at least support a compute queue family.
+  auto compute_queue_family_index = std::uint32_t{};
+  for (auto i = 0u; i != physical_device.queue_families.size(); ++i)
+  {
+    if (physical_device.supports_queue_family_type(i, VK_QUEUE_COMPUTE_BIT))
+    {
+      compute_queue_family_index = i;
+      break;
+    }
+  }
+  BOOST_CHECK(compute_queue_family_index !=
+              physical_device.queue_families.size());
+
+  // Create a logical device.
+  auto device_extensions = std::vector<const char*>{};
+  if constexpr (compile_for_apple)
+    device_extensions.emplace_back("VK_KHR_portability_subset");
+  const auto device = svk::Device::Builder{physical_device}
+                          .enable_device_extensions(device_extensions)
+                          .enable_device_features({})
+                          .enable_queue_families({compute_queue_family_index})
+                          .enable_validation_layers(validation_layers_required)
+                          .create();
+  BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
+
+  // Let's say we want to store vertex data on a device buffer.
+  static constexpr auto num_vertices = 10;
+  const auto staging_buffer =
+      svk::BufferFactory{device}.make_staging_buffer<Eigen::Vector3f>(
+          num_vertices);
+
+  auto device_memory = svk::DeviceMemoryFactory{physical_device, device}
+                           .allocate_for_staging_buffer(staging_buffer);
+
+  // Bind the staging buffer to this device memory.
+  staging_buffer.bind(device_memory, 0);
+
+  // Some source vertex data.
+  auto host_vertices = std::vector<float>(num_vertices * 3, 0);
+  // Copy to the device memory.
+  device_memory.copy_from(host_vertices.data(), host_vertices.size());
+
+  // The following will fail and Vulkan detects that we are trying to write more
+  // data than what is allocated for the device memory.
+  //
+  // auto host_vertices = std::vector<float>(num_vertices * 3 + 1, 0);
+  // device_memory.copy_from(host_vertices.data(), host_vertices.size() + 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_device_buffer_with_factory)
+{
+  namespace svk = DO::Shakti::Vulkan;
+
+  static constexpr auto debug_vulkan_instance = true;
+#if defined(__APPLE__)
+  static constexpr auto compile_for_apple = true;
+#else
+  static constexpr auto compile_for_apple = false;
+#endif
+
+  // Vulkan instance.
+  auto instance_extensions = std::vector<const char*>{};
+  if constexpr (debug_vulkan_instance)
+    instance_extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+  if constexpr (compile_for_apple)
+  {
+    instance_extensions.emplace_back(
+        VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+    instance_extensions.emplace_back(
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+  }
+
+  const auto validation_layers_required =
+      debug_vulkan_instance ? std::vector{"VK_LAYER_KHRONOS_validation"}
+                            : std::vector<const char*>{};
+
+  const auto instance =
+      svk::Instance::Builder{}
+          .application_name("Vulkan Application")
+          .engine_name("No Engine")
+          .enable_instance_extensions(instance_extensions)
+          .enable_validation_layers(validation_layers_required)
+          .create();
+
+  // List all Vulkan physical devices.
+  const auto physical_devices =
+      svk::PhysicalDevice::list_physical_devices(instance);
+
+  // There must be at least one GPU device...
+  BOOST_CHECK(!physical_devices.empty());
+  const auto& physical_device = physical_devices.front();
+
+  // The physical device should at least support a compute queue family.
+  auto compute_queue_family_index = std::uint32_t{};
+  for (auto i = 0u; i != physical_device.queue_families.size(); ++i)
+  {
+    if (physical_device.supports_queue_family_type(i, VK_QUEUE_COMPUTE_BIT))
+    {
+      compute_queue_family_index = i;
+      break;
+    }
+  }
+  BOOST_CHECK(compute_queue_family_index !=
+              physical_device.queue_families.size());
+
+  // Create a logical device.
+  auto device_extensions = std::vector<const char*>{};
+  if constexpr (compile_for_apple)
+    device_extensions.emplace_back("VK_KHR_portability_subset");
+  const auto device = svk::Device::Builder{physical_device}
+                          .enable_device_extensions(device_extensions)
+                          .enable_device_features({})
+                          .enable_queue_families({compute_queue_family_index})
+                          .enable_validation_layers(validation_layers_required)
+                          .create();
+  BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
+
+  // Let's say we want to store vertex data on a device buffer.
+  static constexpr auto num_vertices = 10;
+
+  // Our such intent is substantified by a device-only buffer, which we create
+  // as follows.
+  const auto device_buffer =
+      svk::BufferFactory{device}.make_device_vertex_buffer<Eigen::Vector3f>(
+          num_vertices);
+  BOOST_CHECK(static_cast<VkBuffer>(device_buffer) != nullptr);
+  SARA_CHECK(device_buffer.size());
+
+  // Finally, allocate some device memory that fulfills these such memory
+  // properties.
+  auto device_memory = svk::DeviceMemoryFactory{physical_device, device}
+                           .allocate_for_device_buffer(device_buffer);
+  BOOST_CHECK(static_cast<VkDeviceMemory>(device_memory) != nullptr);
+  SARA_CHECK(device_memory.size());
 
   // Bind the device buffer to this device memory.
   device_buffer.bind(device_memory, 0);

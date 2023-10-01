@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_device)
               physical_device.queue_families.size());
 
   // Create a logical device.
-  auto device_extensions = std::vector{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  auto device_extensions = std::vector<const char*>{};
   if constexpr (compile_for_apple)
     device_extensions.emplace_back("VK_KHR_portability_subset");
   const auto device = svk::Device::Builder{physical_device}

@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Shakti::Vulkan {
@@ -123,6 +124,13 @@ namespace DO::Shakti::Vulkan {
     {
       const auto byte_size = sizeof(T) * n;
       return Buffer(device, byte_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+    }
+
+    template <typename T>
+    inline auto make_uniform_buffer(const std::size_t n) const -> Buffer
+    {
+      const auto byte_size = sizeof(T) * n;
+      return Buffer(device, byte_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     }
 
     template <typename T>
