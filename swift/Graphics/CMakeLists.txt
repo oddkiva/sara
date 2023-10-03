@@ -1,6 +1,8 @@
-if (UNIX AND NOT APPLE AND NOT SWIFT_BRIDGING_INCLUDE_DIR)
+if(UNIX
+   AND NOT APPLE
+   AND NOT SWIFT_BRIDGING_INCLUDE_DIR)
   message(FATAL_ERROR "SWIFT_BRIDGING_INCLUDE_DIR must be defined!")
-endif ()
+endif()
 
 add_library(
   SaraSwiftGraphics
@@ -18,9 +20,10 @@ target_link_libraries(
   PRIVATE DO::Sara::Graphics #
           DO::Sara::ImageIO #
           DO::Sara::VideoIO)
-set_target_properties(SaraSwiftGraphics PROPERTIES FOLDER "Swift")
-set_target_properties(SaraSwiftGraphics PROPERTIES Swift_MODULE_NAME
-                                                   "SaraGraphics")
+set_target_properties(
+  SaraSwiftGraphics #
+  PROPERTIES FOLDER "Swift" #
+             Swift_MODULE_NAME "SaraGraphics")
 target_compile_options(
   SaraSwiftGraphics
   PUBLIC "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>")

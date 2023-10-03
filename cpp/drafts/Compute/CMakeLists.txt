@@ -43,9 +43,6 @@ if(APPLE)
       MPS/SGEMM.hpp
       MPS/SGEMM.cpp)
 
-  set_source_files_properties(${DO_Sara_Compute_SOURCE_FILES}
-                              PROPERTIES LANGUAGE CXX)
-
   add_library(DO_Sara_Compute ${DO_Sara_Compute_SOURCE_FILES})
   target_compile_options(
     DO_Sara_Compute

@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2023 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <DO/Shakti/Vulkan/Buffer.hpp>
@@ -76,6 +87,22 @@ namespace DO::Shakti::Vulkan {
       vkUnmapMemory(_device, _handle);
     }
 
+    template <typename T>
+    auto map_memory(const std::size_t num_elements,
+                    const std::size_t offset = 0) const -> T*
+    {
+      auto virtual_host_ptr = static_cast<void*>(nullptr);
+      vkMapMemory(_device, _handle, sizeof(T) * offset,
+                  sizeof(T) * num_elements, 0 /* flags */,  //
+                  &virtual_host_ptr);
+      return reinterpret_cast<T*>(virtual_host_ptr);
+    }
+
+    auto unmap_memory() const -> void
+    {
+      vkUnmapMemory(_device, _handle);
+    }
+
     operator VkDeviceMemory&()
     {
       return _handle;
@@ -112,7 +139,21 @@ namespace DO::Shakti::Vulkan {
       const auto mem_type =
           _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
 
-      return {_device, buffer.size(), mem_type};
+      return {_device, mem_reqs.size, mem_type};
+    }
+
+    auto allocate_for_uniform_buffer(const Buffer& buffer) const -> DeviceMemory
+    {
+      static constexpr auto mem_props = VkMemoryPropertyFlags{
+          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT  //
+      };
+
+      const auto mem_reqs = buffer.get_memory_requirements();
+      const auto mem_type =
+          _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
+
+      return {_device, mem_reqs.size, mem_type};
     }
 
     auto allocate_for_device_buffer(const Buffer& buffer) const -> DeviceMemory
@@ -124,9 +165,7 @@ namespace DO::Shakti::Vulkan {
       const auto mem_type =
           _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
 
-      SARA_CHECK(buffer.size());
-
-      return {_device, buffer.size(), mem_type};
+      return {_device, mem_reqs.size, mem_type};
     }
 
     const PhysicalDevice& _physical_device = nullptr;

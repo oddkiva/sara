@@ -78,41 +78,30 @@ BOOST_AUTO_TEST_CASE(test_vulkan_shader_module)
   // List all Vulkan physical devices.
   const auto physical_devices =
       svk::PhysicalDevice::list_physical_devices(instance);
+  BOOST_CHECK(!physical_devices.empty());
+  const auto& physical_device = physical_devices.front();
 
-  // Find a suitable physical (GPU) device that can be used for 3D graphics
-  // application.
-  const auto di = std::find_if(
-      physical_devices.begin(), physical_devices.end(),
-      [&surface](const auto& d) {
-        return d.supports_extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME) &&
-               !kvk::find_graphics_queue_family_indices(d).empty() &&
-               !kvk::find_present_queue_family_indices(d, surface).empty();
-      });
+  // The physical device should at least support a compute queue family.
+  auto compute_queue_family_index = std::uint32_t{};
+  for (auto i = 0u; i != physical_device.queue_families.size(); ++i)
+  {
+    if (physical_device.supports_queue_family_type(i, VK_QUEUE_COMPUTE_BIT))
+    {
+      compute_queue_family_index = i;
+      break;
+    }
+  }
+  BOOST_CHECK(compute_queue_family_index !=
+              physical_device.queue_families.size());
 
-  // There must be a suitable GPU device...
-  BOOST_CHECK(di != physical_devices.end());
-  const auto& physical_device = *di;
-
-  // According to:
-  // https://stackoverflow.com/questions/61434615/in-vulkan-is-it-beneficial-for-the-graphics-queue-family-to-be-separate-from-th
-  //
-  // Using distinct queue families, namely one for the graphics operations and
-  // another for the present operations, does not result in better performance.
-  //
-  // This is because the hardware does not expose present-only queue families...
-  const auto graphics_queue_family_index =
-      kvk::find_graphics_queue_family_indices(physical_device).front();
-  const auto present_queue_family_index =
-      kvk::find_present_queue_family_indices(physical_device, surface).front();
 
   // Create a logical device.
-  auto device_extensions = std::vector{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  auto device_extensions = std::vector<const char *>{};
   if constexpr (compile_for_apple)
     device_extensions.emplace_back("VK_KHR_portability_subset");
-  const auto device = svk::Device::Builder{*di}
+  const auto device = svk::Device::Builder{physical_device}
                           .enable_device_extensions(device_extensions)
-                          .enable_queue_families({graphics_queue_family_index,
-                                                  present_queue_family_index})
+                          .enable_queue_families({compute_queue_family_index})
                           .enable_device_features({})
                           .enable_validation_layers(validation_layers_required)
                           .create();

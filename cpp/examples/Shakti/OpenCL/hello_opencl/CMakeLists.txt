@@ -5,4 +5,4 @@ add_executable(hello_opencl main.cpp ${KERNEL_SRC_FILES})
 target_link_libraries(hello_opencl PRIVATE DO::Sara::OpenCL)
 set_target_properties(
   hello_opencl PROPERTIES COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
-set_property(TARGET hello_opencl PROPERTY FOLDER "Tutorials/OpenCL")
+set_property(TARGET hello_opencl PROPERTY FOLDER "Examples/Shakti/OpenCL")

@@ -20,4 +20,4 @@ target_compile_definitions(image_processing
 
 set_target_properties(image_processing
   PROPERTIES
-  FOLDER "Tutorials/OpenCL")
+  FOLDER "Examples/Shakti/OpenCL")

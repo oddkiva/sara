@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2023 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <DO/Shakti/Vulkan/CommandBuffer.hpp>
@@ -7,6 +18,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Shakti::Vulkan {
@@ -112,6 +124,13 @@ namespace DO::Shakti::Vulkan {
     {
       const auto byte_size = sizeof(T) * n;
       return Buffer(device, byte_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+    }
+
+    template <typename T>
+    inline auto make_uniform_buffer(const std::size_t n) const -> Buffer
+    {
+      const auto byte_size = sizeof(T) * n;
+      return Buffer(device, byte_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     }
 
     template <typename T>

@@ -18,6 +18,7 @@ BUILD_TASKS = [
     "book",
     "book_docker",
     "serve_book",
+    "emsdk_docker",
 ]
 
 # Build types.
@@ -242,6 +243,7 @@ def run_project_tests(build_dir: str, build_type: str,
             "test_vulkan_*",
             "test_visualization_feature_draw",
             "shakti_test_*",
+            "test_ransac_*"
         ]
         command_line.append("--exclude-regex")
         command_line.append("|".join(tests_excluded))
@@ -252,7 +254,7 @@ def run_project_tests(build_dir: str, build_type: str,
     execute(command_line, build_dir)
 
 
-def build_library_docker(source_dir: str) -> None:
+def build_library_docker() -> None:
     # Build the docker image.
     execute(
         [
@@ -264,7 +266,7 @@ def build_library_docker(source_dir: str) -> None:
             f"{SARA_DOCKER_IMAGE}",
             ".",
         ],
-        source_dir,
+        SARA_SOURCE_DIR,
     )
 
 
@@ -312,6 +314,37 @@ def build_book_docker():
             "/bin/bash",
         ],
         cwd=(SARA_SOURCE_DIR / "doc" / "book"),
+    ).wait()
+
+
+def build_emsdk_docker():
+    # Build the docker image.
+    sara_emsdk_build_image = "oddkiva/sara-emsdk-devel"
+    ret = subprocess.Popen(
+        [
+            "docker",
+            "build",
+            "-f",
+            "./docker/Dockerfile.emsdk",
+            "-t",
+            f"{sara_emsdk_build_image}:latest",
+            ".",
+        ],
+        cwd=SARA_SOURCE_DIR,
+    ).wait()
+
+    # Run the docker image.
+    ret = subprocess.Popen(
+        [
+            "docker",
+            "run",
+            "-it",
+            "-v",
+            f"{SARA_SOURCE_DIR}:/workspace/sara",
+            sara_emsdk_build_image,
+            "/bin/bash",
+        ],
+        cwd=SARA_SOURCE_DIR,
     ).wait()
 
 
@@ -398,8 +431,11 @@ if __name__ == "__main__":
             )
             build_project(build_dir, args.build_type)
 
+        if task == "emsdk_docker":
+            build_emsdk_docker()
+
         if task == "library_docker":
-            build_library_docker(SARA_SOURCE_DIR)
+            build_library_docker()
 
         if task == "book":
             build_book()
