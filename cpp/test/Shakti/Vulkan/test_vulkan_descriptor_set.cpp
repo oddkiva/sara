@@ -9,7 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <algorithm>
 #define BOOST_TEST_MODULE "Vulkan/Descriptor Pool and Set"
 
 #include <DO/Sara/Core/EigenExtension.hpp>
@@ -103,18 +102,16 @@ BOOST_AUTO_TEST_CASE(test_device)
   static constexpr auto num_pools = 1;
   // We need as many **sets** of descriptors as frames in flight.
   static constexpr auto num_frames_in_flight = 3;
-  static constexpr auto& max_num_desc_sets = num_frames_in_flight;
-  // Each descriptor set is composed of only one descriptor (the UBO).
-  static constexpr auto num_descriptors = 1;
+  static constexpr auto& num_desc_sets = num_frames_in_flight;
+  static constexpr auto& max_descriptor_count = num_frames_in_flight;
 
-  // 1. Create UBOs.
+  // 1. Create UBOs and allocate a device memory for each one of them.
   struct ModelViewProjectionStack
   {
     Eigen::Matrix4f model;
     Eigen::Matrix4f view;
     Eigen::Matrix4f projection;
   };
-
   auto ubos = std::array<svk::Buffer, 3>{};
   auto device_mems = std::array<svk::DeviceMemory, 3>{};
   for (auto i = 0; i < 3; ++i)
@@ -128,51 +125,65 @@ BOOST_AUTO_TEST_CASE(test_device)
     ubos[i].bind(device_mems[i], 0);
 
     BOOST_CHECK(static_cast<VkDeviceMemory&>(device_mems[i]) != nullptr);
-    SARA_CHECK(device_mems[i].size());
   }
 
   // 2. Create a single descriptor pool of uniform buffer objects.
   auto desc_pool_builder = svk::DescriptorPool::Builder{device}  //
                                .pool_count(num_pools)
-                               .pool_max_sets(max_num_desc_sets);
+                               .pool_max_sets(num_desc_sets);
+  // The descriptor pool can only allocate UBO descriptors.
   desc_pool_builder.pool_type(0) = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  desc_pool_builder.descriptor_count(0) = num_descriptors;
+  // The cumulated number of UBO descriptors across all every descriptor sets
+  // cannot exceed the following number of descriptors (3).
+  desc_pool_builder.descriptor_count(0) = max_descriptor_count;
 
   auto desc_pool = desc_pool_builder.create();
   BOOST_CHECK(static_cast<VkDescriptorPool>(desc_pool) != nullptr);
 
-  // 4. Bind each descriptor in the set.
-  auto ubo_layout_binding =
+  // 3. Create 3 descriptor sets from this pool, each one having only 1
+  //    descriptor.
+  //    Each descriptor set must have a layout associated to it.
+  //
+  // 3.a) Create one descriptor set layout for each each descriptor.
+  const auto ubo_layout_binding =
       svk::DescriptorSetLayout::create_for_single_ubo(device);
-
-  // 3. Create a set of `max_num_desc_sets` descriptors in this pool.
-  //    That is we create 3 descriptor sets, each one of them consisting of only
-  //    1 descriptor.
-  auto desc_sets = svk::DescriptorSets{
-      max_num_desc_sets,            //
-      &ubo_layout_binding._handle,  //
-      desc_pool                     //
+  const auto desc_set_layouts =
+      std::array<VkDescriptorSetLayout, num_desc_sets>{
+          ubo_layout_binding,  //
+          ubo_layout_binding,  //
+          ubo_layout_binding   //
+      };
+  // 3.b) Create the 3 descriptor sets, each one of them bound with a set
+  // layout, in one go.
+  const auto desc_sets = svk::DescriptorSets{
+      desc_set_layouts.data(),                              //
+      static_cast<std::uint32_t>(desc_set_layouts.size()),  //
+      desc_pool                                             //
   };
-
-  for (auto i = 0; i < max_num_desc_sets; ++i)
+  for (auto i = 0; i < num_desc_sets; ++i)
     BOOST_CHECK(static_cast<VkDescriptorSet>(desc_sets[i]) != nullptr);
 
-  for (auto i = 0; i < max_num_desc_sets; ++i)
+  for (auto i = 0; i < num_desc_sets; ++i)
   {
-    auto buffer_info = VkDescriptorBufferInfo{};
-    buffer_info.buffer = ubos[i];
-    buffer_info.offset = 0;
-    buffer_info.range = sizeof(ModelViewProjectionStack);
-
+    // 4.a) Register the byte size, the type of buffer which the descriptor
+    //      references to.
     auto desc_set_write = VkWriteDescriptorSet{};
+
     desc_set_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     desc_set_write.dstSet = desc_sets[i];
     desc_set_write.dstBinding = 0;
     desc_set_write.dstArrayElement = 0;
-    desc_set_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    desc_set_write.descriptorCount = 1;
+    desc_set_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;  // Here
+    desc_set_write.descriptorCount = 1;  // Only 1 descriptor per set.
+
+    // 4.b) Each descriptor set being a singleton, must reference to a UBO.
+    auto buffer_info = VkDescriptorBufferInfo{};
+    buffer_info.buffer = ubos[i];
+    buffer_info.offset = 0;
+    buffer_info.range = sizeof(ModelViewProjectionStack);
     desc_set_write.pBufferInfo = &buffer_info;
 
+    // 4.c) Send this metadata to Vulkan.
     vkUpdateDescriptorSets(device, 1, &desc_set_write, 0, nullptr);
   }
 }

@@ -94,11 +94,15 @@ namespace DO::Shakti::Vulkan {
 
   private:
     VkDevice _device = nullptr;
-  public:
     VkDescriptorSetLayout _handle = nullptr;
   };
 
 
+  // According to:
+  // https://arm-software.github.io/vulkan_best_practice_for_mobile_developers/samples/performance/descriptor_management/descriptor_management_tutorial.html
+  // We don't need to free descriptor sets manually, so `vkFreeDescriptorSets`
+  // is not needed, VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT is not
+  // needed.
   class DescriptorSets
   {
   public:
@@ -111,8 +115,8 @@ namespace DO::Shakti::Vulkan {
       swap(other);
     }
 
-    DescriptorSets(const std::uint32_t count,
-                   const VkDescriptorSetLayout* descriptor_set_layouts,
+    DescriptorSets(const VkDescriptorSetLayout* descriptor_set_layouts,
+                   const std::uint32_t count,
                    const DescriptorPool& descriptor_pool)
       : _device{descriptor_pool._device}
       , _pool{descriptor_pool._handle}
@@ -133,16 +137,17 @@ namespace DO::Shakti::Vulkan {
             static_cast<int>(status))};
     }
 
+#if 0
     ~DescriptorSets()
     {
       if (_device == nullptr || _pool == nullptr || _handles.empty())
         return;
-
       vkFreeDescriptorSets(_device, _pool,
                            static_cast<std::uint32_t>(_handles.size()),
                            _handles.data());
       _handles.clear();
     }
+#endif
 
     auto operator=(const DescriptorSets&) -> DescriptorSets& = delete;
 
