@@ -502,7 +502,6 @@ BOOST_AUTO_TEST_CASE(test_uniform_buffer_with_factory)
   BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
   // Let's create a uniform buffer as we do in OpenGL.
-  static constexpr auto num_vertices = 10;
   struct ModelViewProjectionStack
   {
     Eigen::Matrix4f model;

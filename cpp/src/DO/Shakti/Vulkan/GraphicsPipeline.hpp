@@ -11,13 +11,13 @@
 
 #pragma once
 
+#include <DO/Shakti/Vulkan/DescriptorSet.hpp>
 #include <DO/Shakti/Vulkan/Device.hpp>
 #include <DO/Shakti/Vulkan/RenderPass.hpp>
 #include <DO/Shakti/Vulkan/Shader.hpp>
 
 #include <array>
 #include <filesystem>
-#include <vulkan/vulkan_core.h>
 
 
 namespace DO::Kalpana::Vulkan {
@@ -75,6 +75,11 @@ namespace DO::Kalpana::Vulkan {
       return _device;
     }
 
+    auto model_view_projection_layout() const -> const Shakti::Vulkan::DescriptorSetLayout&
+    {
+      return _mvp_layout;
+    }
+
     auto pipeline_layout() const -> VkPipelineLayout
     {
       return _pipeline_layout;
@@ -88,12 +93,15 @@ namespace DO::Kalpana::Vulkan {
     auto swap(GraphicsPipeline& other) -> void
     {
       std::swap(_device, other._device);
+      _mvp_layout.swap(other._mvp_layout);
       std::swap(_pipeline_layout, other._pipeline_layout);
       std::swap(_pipeline, other._pipeline);
     }
 
   private:
     VkDevice _device = nullptr;
+    // Model View Projection matrix stack etc.
+    Shakti::Vulkan::DescriptorSetLayout _mvp_layout;
     VkPipelineLayout _pipeline_layout = nullptr;
     VkPipeline _pipeline = nullptr;
   };
@@ -201,13 +209,18 @@ namespace DO::Kalpana::Vulkan {
 
       graphics_pipeline._device = device;
 
+      graphics_pipeline._mvp_layout =
+          Shakti::Vulkan::DescriptorSetLayout::create_for_single_ubo(device);
+
       // Initialize the graphics pipeline layout.
       SARA_DEBUG << "Initializing the graphics pipeline layout...\n";
       pipeline_layout_info = VkPipelineLayoutCreateInfo{};
       {
         pipeline_layout_info.sType =
             VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipeline_layout_info.setLayoutCount = 0;
+        pipeline_layout_info.setLayoutCount = 1;
+        pipeline_layout_info.pSetLayouts =
+            &static_cast<VkDescriptorSetLayout&>(graphics_pipeline._mvp_layout);
         pipeline_layout_info.pushConstantRangeCount = 0;
       };
       auto status = vkCreatePipelineLayout(    //
