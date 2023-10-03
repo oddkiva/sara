@@ -9,11 +9,16 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <algorithm>
 #define BOOST_TEST_MODULE "Vulkan/Descriptor Pool and Set"
 
+#include <DO/Sara/Core/EigenExtension.hpp>
+
+#include <DO/Shakti/Vulkan/Buffer.hpp>
 #include <DO/Shakti/Vulkan/DescriptorPool.hpp>
 #include <DO/Shakti/Vulkan/DescriptorSet.hpp>
 #include <DO/Shakti/Vulkan/Device.hpp>
+#include <DO/Shakti/Vulkan/DeviceMemory.hpp>
 #include <DO/Shakti/Vulkan/Instance.hpp>
 #include <DO/Shakti/Vulkan/PhysicalDevice.hpp>
 
@@ -87,15 +92,87 @@ BOOST_AUTO_TEST_CASE(test_device)
                           .create();
   BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
+  // Now let's exhibit a usage code example:
+  //
+  // The model-view-projection matrix data needs to be sent to the vertex shader
+  // in the form of a UBO.
+  //
+  // The UBO can be accessed by the vertex shader via a descriptor.
+  //
+  // We only need 1 descriptor pool.
+  static constexpr auto num_pools = 1;
+  // We need as many **sets** of descriptors as frames in flight.
+  static constexpr auto num_frames_in_flight = 3;
+  static constexpr auto& max_num_desc_sets = num_frames_in_flight;
+  // Each descriptor set is composed of only one descriptor (the UBO).
+  static constexpr auto num_descriptors = 1;
+
+  // 1. Create UBOs.
+  struct ModelViewProjectionStack
+  {
+    Eigen::Matrix4f model;
+    Eigen::Matrix4f view;
+    Eigen::Matrix4f projection;
+  };
+
+  auto ubos = std::array<svk::Buffer, 3>{};
+  auto device_mems = std::array<svk::DeviceMemory, 3>{};
+  for (auto i = 0; i < 3; ++i)
+  {
+    ubos[i] = svk::BufferFactory{device}
+                  .make_uniform_buffer<ModelViewProjectionStack>(1);
+    BOOST_CHECK(static_cast<VkBuffer>(ubos[i]) != nullptr);
+
+    device_mems[i] = svk::DeviceMemoryFactory{physical_device, device}
+                         .allocate_for_uniform_buffer(ubos[i]);
+    ubos[i].bind(device_mems[i], 0);
+
+    BOOST_CHECK(static_cast<VkDeviceMemory&>(device_mems[i]) != nullptr);
+    SARA_CHECK(device_mems[i].size());
+  }
+
+  // 2. Create a single descriptor pool of uniform buffer objects.
   auto desc_pool_builder = svk::DescriptorPool::Builder{device}  //
-                               .pool_count(1)
-                               .pool_max_sets(1);
+                               .pool_count(num_pools)
+                               .pool_max_sets(max_num_desc_sets);
   desc_pool_builder.pool_type(0) = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  desc_pool_builder.descriptor_count(0) = 1;
+  desc_pool_builder.descriptor_count(0) = num_descriptors;
 
   auto desc_pool = desc_pool_builder.create();
   BOOST_CHECK(static_cast<VkDescriptorPool>(desc_pool) != nullptr);
 
-  // const auto desc_set = svk::DescriptorSet{1, desc_pool};
-  // BOOST_CHECK(static_cast<VkDescriptorSet>(desc_set) != nullptr);
+  // 4. Bind each descriptor in the set.
+  auto ubo_layout_binding =
+      svk::DescriptorSetLayout::create_for_single_ubo(device);
+
+  // 3. Create a set of `max_num_desc_sets` descriptors in this pool.
+  //    That is we create 3 descriptor sets, each one of them consisting of only
+  //    1 descriptor.
+  auto desc_sets = svk::DescriptorSets{
+      max_num_desc_sets,            //
+      &ubo_layout_binding._handle,  //
+      desc_pool                     //
+  };
+
+  for (auto i = 0; i < max_num_desc_sets; ++i)
+    BOOST_CHECK(static_cast<VkDescriptorSet>(desc_sets[i]) != nullptr);
+
+  for (auto i = 0; i < max_num_desc_sets; ++i)
+  {
+    auto buffer_info = VkDescriptorBufferInfo{};
+    buffer_info.buffer = ubos[i];
+    buffer_info.offset = 0;
+    buffer_info.range = sizeof(ModelViewProjectionStack);
+
+    auto desc_set_write = VkWriteDescriptorSet{};
+    desc_set_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    desc_set_write.dstSet = desc_sets[i];
+    desc_set_write.dstBinding = 0;
+    desc_set_write.dstArrayElement = 0;
+    desc_set_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    desc_set_write.descriptorCount = 1;
+    desc_set_write.pBufferInfo = &buffer_info;
+
+    vkUpdateDescriptorSets(device, 1, &desc_set_write, 0, nullptr);
+  }
 }

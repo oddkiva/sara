@@ -22,14 +22,15 @@
 namespace DO::Shakti::Vulkan {
 
   class DescriptorPool;
-  class DescriptorSet;
+  class DescriptorSets;
 
   class DescriptorPool
   {
-    friend class DescriptorSet;
-
   public:
     class Builder;
+
+  private:
+    friend class DescriptorSets;
     friend class Builder;
 
   public:
@@ -94,7 +95,6 @@ namespace DO::Shakti::Vulkan {
     Builder(const VkDevice device)
       : _device{device}
     {
-      _create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     }
 
     auto operator=(const Builder& other) -> Builder& = default;
@@ -132,6 +132,7 @@ namespace DO::Shakti::Vulkan {
       auto pool = DescriptorPool{};
       pool._device = _device;
 
+      _create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
       _create_info.poolSizeCount = _pool_sizes.size();
       _create_info.pPoolSizes = _pool_sizes.data();
 

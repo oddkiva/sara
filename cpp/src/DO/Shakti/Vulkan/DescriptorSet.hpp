@@ -14,7 +14,8 @@
 #include <DO/Shakti/Vulkan/DescriptorPool.hpp>
 
 #include <fmt/core.h>
-#include <vulkan/vulkan_core.h>
+
+#include <vector>
 
 
 namespace DO::Shakti::Vulkan {
@@ -62,9 +63,9 @@ namespace DO::Shakti::Vulkan {
       std::swap(_handle, other._handle);
     }
 
-    static auto make_for_uniform_buffer(VkDevice device) -> DescriptorSetLayout
+    static auto create_for_single_ubo(VkDevice device) -> DescriptorSetLayout
     {
-      // UBO object: matrix-view-projection matrices
+      // UBO object: matrix-view-projection matrix stack
       auto ubo_layout_binding = VkDescriptorSetLayoutBinding{};
       ubo_layout_binding.binding = 0;
       ubo_layout_binding.descriptorCount = 1;
@@ -72,11 +73,13 @@ namespace DO::Shakti::Vulkan {
       ubo_layout_binding.pImmutableSamplers = nullptr;
       ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
+      // We only need 1 set of descriptors for the MVP UBO.
       auto create_info = VkDescriptorSetLayoutCreateInfo{};
       create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
       create_info.bindingCount = 1;
       create_info.pBindings = &ubo_layout_binding;
 
+      // Finally really create the descriptor set layout.
       auto ubo_set_layout = DescriptorSetLayout{};
       ubo_set_layout._device = device;
       const auto status = vkCreateDescriptorSetLayout(
@@ -91,80 +94,80 @@ namespace DO::Shakti::Vulkan {
 
   private:
     VkDevice _device = nullptr;
+  public:
     VkDescriptorSetLayout _handle = nullptr;
   };
 
 
-  class DescriptorSet
+  class DescriptorSets
   {
   public:
-    DescriptorSet() = default;
+    DescriptorSets() = default;
 
-    DescriptorSet(const DescriptorSet&) = delete;
+    DescriptorSets(const DescriptorSets&) = delete;
 
-    DescriptorSet(DescriptorSet&& other)
+    DescriptorSets(DescriptorSets&& other)
     {
       swap(other);
     }
 
-    DescriptorSet(const std::uint32_t count,
-                  const DescriptorPool& descriptor_pool)
+    DescriptorSets(const std::uint32_t count,
+                   const VkDescriptorSetLayout* descriptor_set_layouts,
+                   const DescriptorPool& descriptor_pool)
       : _device{descriptor_pool._device}
       , _pool{descriptor_pool._handle}
-      , _count{count}
     {
+      _handles.resize(count);
 
       auto allocate_info = VkDescriptorSetAllocateInfo{};
       allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
       allocate_info.descriptorPool = _pool;
       allocate_info.descriptorSetCount = count;
-      // TODO.
-      allocate_info.pSetLayouts = nullptr;
+      allocate_info.pSetLayouts = descriptor_set_layouts;
 
       const auto status =
-          vkAllocateDescriptorSets(_device, &allocate_info, &_handle);
+          vkAllocateDescriptorSets(_device, &allocate_info, _handles.data());
       if (status != VK_SUCCESS)
         throw std::runtime_error{fmt::format(
             "[VK] Error: failed to create descriptor pool! Error code: {}",
             static_cast<int>(status))};
     }
 
-    ~DescriptorSet()
+    ~DescriptorSets()
     {
-      if (_device == nullptr || _pool == nullptr || _handle == nullptr)
+      if (_device == nullptr || _pool == nullptr || _handles.empty())
         return;
-      vkFreeDescriptorSets(_device, _pool, _count, &_handle);
+
+      vkFreeDescriptorSets(_device, _pool,
+                           static_cast<std::uint32_t>(_handles.size()),
+                           _handles.data());
+      _handles.clear();
     }
 
-    auto operator=(const DescriptorSet&) -> DescriptorSet& = delete;
+    auto operator=(const DescriptorSets&) -> DescriptorSets& = delete;
 
-    auto operator=(DescriptorSet&& other) -> DescriptorSet&
+    auto operator=(DescriptorSets&& other) -> DescriptorSets&
     {
       swap(other);
       return *this;
     }
 
-    operator VkDescriptorSet&()
+    auto operator[](const std::uint32_t i) const -> VkDescriptorSet
     {
-      return _handle;
+      return _handles[i];
     }
 
-    operator VkDescriptorSet() const
-    {
-      return _handle;
-    }
-
-    auto swap(DescriptorSet& other) -> void
+    auto swap(DescriptorSets& other) -> void
     {
       std::swap(_device, other._device);
-      std::swap(_handle, other._handle);
+      std::swap(_pool, other._pool);
+      _handles.swap(other._handles);
     }
 
   private:
     VkDevice _device = nullptr;
     VkDescriptorPool _pool = nullptr;
-    VkDescriptorSet _handle = nullptr;
-    std::uint32_t _count = 0;
+    std::vector<VkDescriptorSet> _handles;
   };
 
 }  // namespace DO::Shakti::Vulkan
