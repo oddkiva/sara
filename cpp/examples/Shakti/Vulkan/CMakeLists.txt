@@ -5,6 +5,16 @@ target_link_libraries(
           DO::Shakti::Vulkan)
 set_target_properties(hello_vulkan PROPERTIES FOLDER "Examples/Shakti/Vulkan")
 
+add_custom_target(compile_hello_vulkan_shaders)
+add_custom_command(
+  TARGET compile_hello_vulkan_shaders
+  COMMAND ${CMAKE_COMMAND} -E make_directory
+          $<TARGET_FILE_DIR:hello_vulkan>/hello_vulkan_shaders
+  COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/shader.vert -o
+          $<TARGET_FILE_DIR:hello_vulkan>/hello_vulkan_shaders/vert.spv
+  COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/shader.frag -o
+          $<TARGET_FILE_DIR:hello_vulkan>/hello_vulkan_shaders/frag.spv)
+
 # file(GLOB SHADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.vert *.frag)
 add_custom_command(
   TARGET hello_vulkan

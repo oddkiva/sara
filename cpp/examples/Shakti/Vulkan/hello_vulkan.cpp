@@ -13,12 +13,15 @@
 
 #include <DO/Shakti/Vulkan/Buffer.hpp>
 #include <DO/Shakti/Vulkan/CommandBuffer.hpp>
+#include <DO/Shakti/Vulkan/DescriptorSet.hpp>
 #include <DO/Shakti/Vulkan/DeviceMemory.hpp>
 #include <DO/Shakti/Vulkan/EasyGLFW.hpp>
 #include <DO/Shakti/Vulkan/Geometry.hpp>
 #include <DO/Shakti/Vulkan/GraphicsBackend.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
+
+#include <Eigen/Geometry>
 
 #include <signal.h>
 
@@ -73,6 +76,20 @@ struct sigaction SignalHandler::sigint_handler = {};
 #endif
 
 
+struct ModelViewProjectionStack
+{
+  ModelViewProjectionStack()
+  {
+    model.setIdentity();
+    view.setIdentity();
+    projection.setIdentity();
+  }
+
+  Eigen::Transform<float, 3, Eigen::Projective> model;
+  Eigen::Transform<float, 3, Eigen::Projective> view;
+  Eigen::Transform<float, 3, Eigen::Projective> projection;
+};
+
 static const auto vertices = std::vector<Vertex>{
     {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},  //
     {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},   //
@@ -99,6 +116,10 @@ public:
   {
     transfer_vertex_data_to_vulkan(vertices);
     transfer_element_data_to_vulkan(indices);
+
+    make_ubo_descriptor_pool();
+    make_ubo_descriptor_sets();
+    initialize_model_view_projection_ubos();
   }
 
   auto transfer_vertex_data_to_vulkan(const std::vector<Vertex>& vertices)
@@ -179,6 +200,117 @@ public:
     _graphics_queue.wait();
   }
 
+  auto make_ubo_descriptor_pool() -> void
+  {
+    const auto num_frames_in_flight =
+        static_cast<std::uint32_t>(_swapchain.images.size());  // 3 typically.
+
+    // We just need a single descriptor pool.
+    auto ubo_pool_builder = svk::DescriptorPool::Builder{_device}  //
+                                .pool_count(1)
+                                .pool_max_sets(num_frames_in_flight);
+    // This descriptor pool can only allocate UBO descriptors.
+    ubo_pool_builder.pool_type(0) = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    // The cumulated number of UBO descriptors across all every descriptor sets
+    // cannot exceed the following number of descriptors (3).
+    ubo_pool_builder.descriptor_count(0) = num_frames_in_flight;
+
+    _ubo_pool = ubo_pool_builder.create();
+  }
+
+  auto make_ubo_descriptor_sets() -> void
+  {
+    const auto num_frames_in_flight =
+        static_cast<std::uint32_t>(_swapchain.images.size());  // 3 typically.
+
+    const auto desc_set_layouts = std::vector<VkDescriptorSetLayout>(
+        num_frames_in_flight,
+        _graphics_pipeline.model_view_projection_layout());
+
+    _ubo_desc_sets = svk::DescriptorSets{
+        desc_set_layouts.data(),
+        static_cast<std::uint32_t>(desc_set_layouts.size()),
+        _ubo_pool  //
+    };
+  }
+
+  auto initialize_model_view_projection_ubos() -> void
+  {
+    const auto num_frames_in_flight = _swapchain.images.size();
+    _mvp_ubos = std::vector<svk::Buffer>(num_frames_in_flight);
+    _mvp_dmems = std::vector<svk::DeviceMemory>(num_frames_in_flight);
+
+    for (auto i = std::size_t{}; i != num_frames_in_flight; ++i)
+    {
+      // 1. Create UBOs.
+      _mvp_ubos[i] = svk::BufferFactory{_device}
+                         .make_uniform_buffer<ModelViewProjectionStack>(1);
+      // 2. Allocate device memory objects for each UBO.
+      _mvp_dmems[i] = svk::DeviceMemoryFactory{_physical_device, _device}
+                          .allocate_for_uniform_buffer(_mvp_ubos[i]);
+      // 3. Bind the buffer to the corresponding device memory objects.
+      _mvp_ubos[i].bind(_mvp_dmems[i], 0);
+
+      // 4. Get the virtual host pointer to transfer the UBO data from CPU to
+      //    GPU device.
+      _mvp_ubo_ptrs.emplace_back(
+          _mvp_dmems[i].map_memory<ModelViewProjectionStack>(1));
+    }
+
+    for (auto i = std::size_t{}; i != num_frames_in_flight; ++i)
+    {
+      // 4.a) Register the byte size, the type of buffer which the descriptor
+      //      references to.
+      auto write_dset = VkWriteDescriptorSet{};
+      write_dset.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      write_dset.dstSet = _ubo_desc_sets[i];
+      write_dset.dstBinding = 0;       // layout(binding = 0) uniform ...
+      write_dset.dstArrayElement = 0;  // Worry about this later.
+      write_dset.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+      write_dset.descriptorCount = 1;  // Only 1 UBO descriptor per set.
+
+      // 4.b) Each descriptor set being a singleton, must reference to a UBO.
+      auto buffer_info = VkDescriptorBufferInfo{};
+      buffer_info.buffer = _mvp_ubos[i];
+      buffer_info.offset = 0;
+      buffer_info.range = sizeof(ModelViewProjectionStack);
+      write_dset.pBufferInfo = &buffer_info;
+
+      // 4.c) Send this metadata to Vulkan.
+      vkUpdateDescriptorSets(_device, 1, &write_dset, 0, nullptr);
+    }
+  }
+
+  auto
+  update_model_view_projection_ubo(const std::uint32_t swapchain_image_index)
+      -> void
+  {
+    static auto start_time = std::chrono::high_resolution_clock::now();
+
+    const auto current_time = std::chrono::high_resolution_clock::now();
+    const auto time =
+        std::chrono::duration<float, std::chrono::seconds::period>(
+            current_time - start_time)
+            .count();
+
+    auto mvp = ModelViewProjectionStack{};
+
+    mvp.model.rotate(Eigen::AngleAxisf{time, Eigen::Vector3f::UnitZ()});
+    /*
+    mvp.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f),
+                            glm::vec3(0.0f, 0.0f, 1.0f));
+    mvp.view =
+        glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(0.0f, 0.0f, 1.0f));
+    mvp.projection = glm::perspective(
+        glm::radians(45.0f),
+        swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
+    ubo.proj[1][1] *= -1;
+    */
+
+    memcpy(_mvp_ubo_ptrs[swapchain_image_index], &mvp, sizeof(mvp));
+  }
+
   auto draw_frame() -> void
   {
     static constexpr auto forever = std::numeric_limits<std::uint64_t>::max();
@@ -191,8 +323,8 @@ public:
     //
     // The pre-condition to start the render loop is to initialize our Vulkan
     // application as follows:
-    // - every fence is reset to an unsignalled state. This is necessary to for
-    //   the synchronization machinery to start correctly.
+    // - every fence is reset to an unsignalled state. This is necessary to
+    //   get synchronization machinery to work correctly.
     // - the current frame index is 0;
 
     // Wait for the GPU signal that the current frame becomes available.
@@ -229,8 +361,10 @@ public:
 #endif
     SARA_CHECK(index_of_next_image_to_render);
 
-    // Reset the signaled fence associated to the current frame to an unsignaled
-    // state. So that the GPU can reuse it to signal.
+    update_model_view_projection_ubo(index_of_next_image_to_render);
+
+    // Reset the signaled fence associated to the current frame to an
+    // unsignaled state. So that the GPU can reuse it to signal.
     SARA_DEBUG << "[VK] Resetting for the render fence...\n";
     _render_fences[_current_frame].reset();
 
@@ -241,9 +375,11 @@ public:
 
     // Record the draw command to be performed on this swapchain image.
     SARA_CHECK(_framebuffers.fbs.size());
-    record_graphics_command_buffer(
-        _graphics_cmd_bufs[_current_frame],
-        _framebuffers[index_of_next_image_to_render]);
+    const auto& descriptor_set = static_cast<VkDescriptorSet&>(
+        _ubo_desc_sets[index_of_next_image_to_render]);
+    record_graphics_command_buffer(_graphics_cmd_bufs[_current_frame],
+                                   _framebuffers[index_of_next_image_to_render],
+                                   descriptor_set);
 
     // Submit the draw command to the graphics queue.
     SARA_DEBUG << "[VK] Specifying the graphics command submission...\n";
@@ -273,7 +409,8 @@ public:
         static_cast<std::uint32_t>(wait_semaphores.size());
     submit_info.pWaitSemaphores = wait_semaphores.data();
 
-    // 2. Ensure that drawing starts until the GPU has finished processing this
+    // 2. Ensure that drawing starts until the GPU has finished processing
+    // this
     //    image. (Worry about this later).
     static constexpr auto wait_stages = std::array<VkPipelineStageFlags, 1>{
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
@@ -296,15 +433,16 @@ public:
     //      signaled state when the draw command completes.
     //
     //    - When we re-invoke the `draw_frame` command, and this draw_frame
-    //      needs to reuse the same swapchain image, i.e., the one with the same
-    //      index `_current_frame`,
+    //      needs to reuse the same swapchain image, i.e., the one with the
+    //      same index `_current_frame`,
     //
     //      the first command `vkWaitForFences(...)` at the beginning of the
     //      draw command stalls the CPU execution flow, until the current draw
     //      command submission, here, completes.
     //
-    //      After which, the fence `_render_fences[_current_frame]` enters in a
-    //      signaled state and un-stalls the function `vkWaitForFences(...)`.
+    //      After which, the fence `_render_fences[_current_frame]` enters in
+    //      a signaled state and un-stalls the function
+    //      `vkWaitForFences(...)`.
     _graphics_queue.submit(submit_info, _render_fences[_current_frame]);
 
     // Submit the present command to the present queue.
@@ -334,7 +472,8 @@ public:
     }
 #endif
 
-    // Update the current frame to the next one for the next `draw_frame` call.
+    // Update the current frame to the next one for the next `draw_frame`
+    // call.
     const auto max_frames_in_flight = _swapchain.images.size();
     _current_frame = (_current_frame + 1) % max_frames_in_flight;
   }
@@ -354,7 +493,9 @@ public:
   }
 
   auto record_graphics_command_buffer(VkCommandBuffer command_buffer,
-                                      VkFramebuffer framebuffer) -> void
+                                      VkFramebuffer framebuffer,
+                                      const VkDescriptorSet& descriptor_set)
+      -> void
   {
     SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
     auto begin_info = VkCommandBufferBeginInfo{};
@@ -416,6 +557,12 @@ public:
 
       vkCmdBindIndexBuffer(command_buffer, _ebo, 0, VK_INDEX_TYPE_UINT16);
 
+      vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              _graphics_pipeline.pipeline_layout(),  //
+                              0, 1,             // Find out later about this.
+                              &descriptor_set,  //
+                              0, nullptr);      // Find out later about this.
+
       vkCmdDrawIndexed(command_buffer,
                        static_cast<std::uint32_t>(indices.size()), 1, 0, 0, 0);
     }
@@ -433,11 +580,22 @@ public:
 private:
   int _current_frame = 0;
 
+  // Geometry data (quad)
   svk::Buffer _vbo;
   svk::Buffer _ebo;
 
   svk::DeviceMemory _vdm;
   svk::DeviceMemory _edm;
+
+  // Model-view-projection matrix
+  //
+  // 1. UBO and device memory objects.
+  std::vector<svk::Buffer> _mvp_ubos;
+  std::vector<svk::DeviceMemory> _mvp_dmems;
+  std::vector<void*> _mvp_ubo_ptrs;
+  // 2. Layout binding referenced for the shader.
+  svk::DescriptorPool _ubo_pool;
+  svk::DescriptorSets _ubo_desc_sets;
 };
 
 

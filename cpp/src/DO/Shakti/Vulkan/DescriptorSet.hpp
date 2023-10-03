@@ -67,10 +67,15 @@ namespace DO::Shakti::Vulkan {
     {
       // UBO object: matrix-view-projection matrix stack
       auto ubo_layout_binding = VkDescriptorSetLayoutBinding{};
+
+      // In the vertex shader code, we have something like:
+      // layout(binding = 0) uniform UBO { ... } ubo;
       ubo_layout_binding.binding = 0;
       ubo_layout_binding.descriptorCount = 1;
       ubo_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
       ubo_layout_binding.pImmutableSamplers = nullptr;
+
+      // Accessible from the vertex shader only.
       ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
       // We only need 1 set of descriptors for the MVP UBO.
@@ -158,6 +163,11 @@ namespace DO::Shakti::Vulkan {
     }
 
     auto operator[](const std::uint32_t i) const -> VkDescriptorSet
+    {
+      return _handles[i];
+    }
+
+    auto operator[](const std::uint32_t i) -> VkDescriptorSet&
     {
       return _handles[i];
     }
