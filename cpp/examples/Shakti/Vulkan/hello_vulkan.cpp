@@ -223,14 +223,17 @@ public:
     const auto num_frames_in_flight =
         static_cast<std::uint32_t>(_swapchain.images.size());  // 3 typically.
 
+    const auto& ubo_layout = _graphics_pipeline.model_view_projection_layout();
+    const auto ubo_layout_handle =
+        static_cast<VkDescriptorSetLayout>(ubo_layout);
+
     const auto desc_set_layouts = std::vector<VkDescriptorSetLayout>(
-        num_frames_in_flight,
-        _graphics_pipeline.model_view_projection_layout());
+        num_frames_in_flight, ubo_layout_handle);
 
     _ubo_desc_sets = svk::DescriptorSets{
-        desc_set_layouts.data(),
-        static_cast<std::uint32_t>(desc_set_layouts.size()),
-        _ubo_pool  //
+        desc_set_layouts.data(),  //
+        num_frames_in_flight,     //
+        _ubo_pool                 //
     };
   }
 
