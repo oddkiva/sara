@@ -324,8 +324,7 @@ public:
     // The pre-condition to start the render loop is to initialize our Vulkan
     // application as follows:
     // - every fence is reset to an unsignalled state. This is necessary to
-    // for
-    //   the synchronization machinery to start correctly.
+    //   get synchronization machinery to work correctly.
     // - the current frame index is 0;
 
     // Wait for the GPU signal that the current frame becomes available.
