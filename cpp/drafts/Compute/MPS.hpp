@@ -9,11 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_COMPUTE_MPS
-#define DO_SARA_COMPUTE_MPS
+#pragma once
 
-#ifdef __APPLE__
-#include "MPS/SGEMM.hpp"
+#if defined(__APPLE__)
+#  include "MPS/SGEMM.hpp"
 #endif
-
-#endif /* DO_SARA_COMPUTE_MPS */

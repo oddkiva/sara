@@ -73,9 +73,9 @@ int sara_graphics_main(int argc, char** argv)
   // Parse command line.
   const auto video_filepath = argc >= 2
                                   ? argv[1]
-#ifdef _WIN32
+#if defined(_WIN32)
                                   : "C:/Users/David/Desktop/IMG_1895.MOV"s;
-#elif __APPLE__
+#elif defined(__APPLE__)
                                   : "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
                                   : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
@@ -107,9 +107,9 @@ int sara_graphics_main(int argc, char** argv)
   namespace fs = boost::filesystem;
   const auto basename = fs::path{video_filepath}.stem().string();
   VideoWriter video_writer{
-#ifdef _WIN32
+#if defined(_WIN32)
       "C:/Users/David/Desktop/" + basename + ".edge-detection.mp4",
-#elif __APPLE__
+#elif defined(__APPLE__)
       "/Users/david/Desktop/" + basename + ".edge-detection.mp4",
 #else
       "/home/david/Desktop/" + basename + ".edge-detection.mp4",

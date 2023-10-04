@@ -22,7 +22,7 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #  include <windows.h>
 #endif
 
@@ -177,14 +177,14 @@ private: /* convenience free functions*/
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
+#if defined(__APPLE__)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
   }
 
   static auto init_glew() -> void
   {
-#ifndef __APPLE__
+#if !defined(__APPLE__)
     // Initialize GLEW.
     const auto err = glewInit();
     if (err != GLEW_OK)

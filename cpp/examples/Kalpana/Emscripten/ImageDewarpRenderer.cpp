@@ -23,7 +23,13 @@ auto ImageDewarpRenderer::initialize() -> void
   static const std::map<std::string, int> arg_pos = {{"in_coords", 0},       //
                                                      {"in_tex_coords", 1}};  //
 
-  static const auto vertex_shader_source = R"shader(#version 300 es
+  auto vertex_shader_source = std::string{};
+#if defined(__APPLE__)
+  vertex_shader_source += R"shader(#version 330 core)shader";
+#else
+  vertex_shader_source += R"shader(#version 300 es)shader";
+#endif
+  vertex_shader_source += R"shader(
     layout (location = 0) in vec3 in_coords;
     layout (location = 1) in vec2 in_tex_coords;
 
@@ -47,7 +53,13 @@ auto ImageDewarpRenderer::initialize() -> void
   _vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
 
   // Create a fragment shader.
-  static const auto fragment_shader_source = R"shader(#version 300 es
+  auto fragment_shader_source = std::string{};
+#if defined(__APPLE__)
+  fragment_shader_source += R"shader(#version 330 core)shader";
+#else
+  fragment_shader_source += R"shader(#version 300 es)shader";
+#endif
+  fragment_shader_source += R"shader(
     #ifdef GL_ES
     precision highp float;
     #endif

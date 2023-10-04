@@ -23,10 +23,10 @@ GRAPHICS_MAIN()
 {
   try
   {
-#ifdef _WIN32
+#if defined(_WIN32)
     const auto in_video_filepath = "C:/Users/David/Desktop/GOPR0542.mp4";
     const auto out_video_filepath = "C:/Users/David/Desktop/test.mkv";
-#elif __APPLE__
+#elif defined(__APPLE__)
     const auto in_video_filepath =
         "/Users/david/Desktop/Datasets/videos/sample10.mp4";
     const auto out_video_filepath = "/Users/david/Desktop/test.mkv";

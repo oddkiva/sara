@@ -191,7 +191,7 @@ int sara_graphics_main(int argc, char** argv)
                                views.images[1],  //
                                geometry);
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
   const auto geometry_h5_filepath = "/Users/david/Desktop/geometry.h5"s;
 #else
   const auto geometry_h5_filepath = "/home/david/Desktop/geometry.h5"s;

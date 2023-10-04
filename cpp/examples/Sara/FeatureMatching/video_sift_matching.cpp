@@ -24,7 +24,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-#ifdef _OPENMP
+#if defined(OPENMP)
 #  include <omp.h>
 #endif
 
@@ -113,7 +113,7 @@ int sara_graphics_main(int argc, char** argv)
       /* scale_initial */ 1.2f);
 
   // OpenMP.
-#ifdef _OPENMP
+#if defined(OPENMP)
   omp_set_num_threads(omp_get_max_threads());
 #endif
 
@@ -130,7 +130,7 @@ int sara_graphics_main(int argc, char** argv)
 
   if (save_video)
     video_writer = std::make_unique<VideoWriter>(
-#ifdef __APPLE__
+#if defined(__APPLE__)
         "/Users/david/Desktop/" + basename + ".sift-matching.mp4",
 #else
         "/home/david/Desktop/" + basename + ".sift-matching.mp4",

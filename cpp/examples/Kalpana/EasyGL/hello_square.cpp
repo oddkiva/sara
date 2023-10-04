@@ -16,7 +16,7 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #  include <windows.h>
 #endif
 
@@ -40,14 +40,14 @@ inline auto init_glfw_boilerplate()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
+#if defined(__APPLE__)
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 }
 
 inline auto init_glew_boilerplate()
 {
-#ifndef __APPLE__
+#if !defined(__APPLE__)
   // Initialize GLEW.
   auto err = glewInit();
   if (err != GLEW_OK)

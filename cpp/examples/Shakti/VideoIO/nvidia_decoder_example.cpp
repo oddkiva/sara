@@ -185,11 +185,11 @@ int test_with_glfw(int argc, char** argv)
 {
   const auto video_filepath = argc < 2
                                   ?
-#ifdef _WIN32
+#if defined(_WIN32)
                                   "C:/Users/David/Desktop/sfm-data/GOPR0542.MP4"
-#elif __APPLE__
-                                  "/Users/david/Desktop/Datasets/"
-                                  "humanising-autonomy/turn_bikes.mp4"
+#elif defined(__APPLE__)
+                                  "/Users/oddkiva/Desktop/datasets/odometry/"
+                                  "turn_bikes.mp4"
 #else
                                   "/home/david/Desktop/Datasets/sfm/"
                                   "Family.mp4"
@@ -304,11 +304,11 @@ int test_with_sara_graphics(int argc, char** argv)
 
   const auto video_filepath = argc < 2
                                   ?
-#ifdef _WIN32
+#if defined(_WIN32)
                                   "C:/Users/David/Desktop/sfm-data/GOPR0542.MP4"
-#elif __APPLE__
-                                  "/Users/david/Desktop/Datasets/"
-                                  "humanising-autonomy/turn_bikes.mp4"
+#elif defined(__APPLE__)
+                                  "/Users/oddkiva/Desktop/datasets/odometry/"
+                                  "turn_bikes.mp4"
 #else
                                   "/home/david/Desktop/Datasets/sfm/"
                                   "Family.mp4"

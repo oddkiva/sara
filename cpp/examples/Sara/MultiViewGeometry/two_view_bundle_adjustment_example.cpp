@@ -25,11 +25,11 @@
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #  pragma warning(push, 0)
 #endif
 #include <ceres/ceres.h>
-#ifdef _WIN32
+#if defined(_WIN32)
 #  pragma warning(pop)
 #endif
 #include <ceres/rotation.h>
@@ -135,7 +135,7 @@ GRAPHICS_MAIN()
   // Load images.
   print_stage("Loading images...");
   const auto data_dir =
-#ifdef __APPLE__
+#if defined(__APPLE__)
       "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
       "/home/david/Desktop/Datasets/sfm/castle_int"s;

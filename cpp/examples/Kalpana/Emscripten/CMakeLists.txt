@@ -1,7 +1,3 @@
-if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten AND NOT GLEW_FOUND)
-  return()
-endif()
-
 # N.B.: set this value back to NO to create a JavaScript module.
 set(SARA_EMSCRIPTEN_BUILD_HTML YES)
 
@@ -81,7 +77,7 @@ macro(sara_add_wasm_executable file)
   set_property(TARGET ${filename} PROPERTY FOLDER "Examples/Sara/Emscripten")
 
   if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-    add_dependencies(emscripten_copy_assets ${filename})
+    add_dependencies(${filename} emscripten_copy_assets)
     set_property(TARGET emscripten_copy_assets
                  PROPERTY FOLDER "Examples/Sara/Emscripten")
   endif()

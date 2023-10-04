@@ -56,13 +56,11 @@ class GLFWApp
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    // 3. Create a GLFW window.
-    _window = glfwCreateWindow(sizes.x(), sizes.y(),  //
-                               title.c_str(),         //
-                               nullptr, nullptr);
-    if (!_window)
-      throw std::runtime_error{"Failed to create window!"};
+#if defined(__APPLE__)
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    // Retina display.
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+#endif
 
       // clang-format off
 // #if defined(__APPLE__)
@@ -85,7 +83,7 @@ class GLFWApp
 // #endif
       // clang-format on
 
-#ifdef _WIN32
+#if defined(_WIN32)
     // if it's a HighDPI monitor, try to scale everything
     const auto monitor = glfwGetPrimaryMonitor();
     float xscale, yscale;
@@ -95,15 +93,22 @@ class GLFWApp
       _high_dpi_scale_factor = static_cast<int>(xscale);
       glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
     }
-#elif __APPLE__
+#elif defined(__APPLE__)
     // to prevent 1200x800 from becoming 2400x1600
     glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif
 
+    // 3. Create a GLFW window.
+    _window = glfwCreateWindow(sizes.x(), sizes.y(),  //
+                               title.c_str(),         //
+                               nullptr, nullptr);
+    if (!_window)
+      throw std::runtime_error{"Failed to create window!"};
+
     // 4. Tell that the OpenGL rendering will be done on this window surface.
     glfwMakeContextCurrent(_window);
 
-#if !defined(__EMSCRIPTEN__)
+#if !defined(__EMSCRIPTEN__) && !defined(__APPLE__)
     // 5. Load GLEW.
     //    This is important as any attempt at calling OpenGL functions will
     //    result in a runtime crash.

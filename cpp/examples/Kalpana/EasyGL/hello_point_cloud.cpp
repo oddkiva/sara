@@ -22,7 +22,7 @@
 
 #include <DO/Kalpana/Math/Projection.hpp>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #  include <windows.h>
 #endif
 
@@ -57,7 +57,7 @@ inline auto init_glfw_boilerplate()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
+#if defined(__APPLE__)
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 }
@@ -104,7 +104,7 @@ auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 auto make_point_cloud()
 {
   // Encode the vertex data in a tensor.
-#ifdef __APPLE__
+#if defined(__APPLE__)
   const auto vertex_data = read_point_cloud("/Users/david/Desktop/geometry.h5");
 #else
   const auto vertex_data = read_point_cloud("/home/david/Desktop/geometry.h5");
