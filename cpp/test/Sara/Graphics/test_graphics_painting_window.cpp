@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(test_construction_of_PaintingWindow_with_small_size)
   BOOST_CHECK_EQUAL(window->width(), width);
   BOOST_CHECK_EQUAL(window->height(), height);
   BOOST_CHECK(window->windowTitle() == windowName);
-#ifndef __APPLE__
+#if !defined(__APPLE__)
   // Strangely, when we have 2 monitor screens, this fails on Mac OS X...
   BOOST_CHECK_EQUAL(window->x(), x);
   BOOST_CHECK_EQUAL(window->y(), y);

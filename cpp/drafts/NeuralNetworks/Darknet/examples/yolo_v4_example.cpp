@@ -187,7 +187,7 @@ int __main(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-#ifndef __APPLE__
+#if defined(__APPLE__)
   Eigen::initParallel();
 #endif
 

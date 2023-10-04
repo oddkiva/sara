@@ -58,7 +58,7 @@ inline auto init_glfw_boilerplate()
 
 inline auto init_glew_boilerplate()
 {
-#ifndef __APPLE__
+#if !defined(__APPLE__)
   // Initialize GLEW.
   auto err = glewInit();
   if (err != GLEW_OK)

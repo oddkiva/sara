@@ -85,7 +85,7 @@ class GLFWApp
 // #endif
       // clang-format on
 
-#ifdef _WIN32
+#if defined(_WIN32)
     // if it's a HighDPI monitor, try to scale everything
     const auto monitor = glfwGetPrimaryMonitor();
     float xscale, yscale;
@@ -95,7 +95,7 @@ class GLFWApp
       _high_dpi_scale_factor = static_cast<int>(xscale);
       glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
     }
-#elif __APPLE__
+#elif defined(__APPLE__)
     // to prevent 1200x800 from becoming 2400x1600
     glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif

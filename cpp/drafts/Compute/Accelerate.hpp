@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
 #  include <Accelerate/Accelerate.h>
 #else
 #  include <cblas.h>

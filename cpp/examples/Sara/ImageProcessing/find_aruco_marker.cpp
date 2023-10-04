@@ -11,8 +11,8 @@
 
 //! @example
 
-#ifdef _OPENMP
-#include <omp.h>
+#if defined(_OPENMP)
+#  include <omp.h>
 #endif
 
 #if __has_include(<execution>) && !defined(__APPLE__)
@@ -59,7 +59,7 @@ struct Corner
 };
 
 // #define INSPECT_PATCH
-#ifdef INSPECT_PATCH
+#if defined(INSPECT_PATCH)
 static constexpr auto square_size = 20;
 static constexpr auto square_padding = 4;
 #else
@@ -112,12 +112,12 @@ auto __main(int argc, char** argv) -> int
 {
   try
   {
-#ifdef _OPENMP
+#if defined(_OPENMP)
     omp_set_num_threads(omp_get_max_threads());
 #endif
 
 
-#ifdef _WIN32
+#if defined(_WIN32)
     const auto video_file = sara::select_video_file_from_dialog_box();
     if (video_file.empty())
       return 1;
@@ -150,14 +150,15 @@ auto __main(int argc, char** argv) -> int
     const auto video_path = fs::path{video_file};
     const auto video_filename = video_path.filename().string();
 
-    auto video_writer = sara::VideoWriter{
-#ifdef __APPLE__
-        (fs::path{"/Users/david/Desktop"} / video_filename).string(),  //
+    auto video_writer = sara::VideoWriter
+    {
+#if defined(__APPLE__)
+      (fs::path{"/Users/oddkiva/Desktop"} / video_filename).string(),  //
 #else
-        (fs::path{"/home/david/Desktop"} / video_filename).string(),  //
+      (fs::path{"/home/david/Desktop"} / video_filename).string(),  //
 #endif
-        video_stream.sizes(),  //
-        30                     //
+          video_stream.sizes(),  //
+          30                     //
     };
 
     auto f = sara::Image<float>{video_frame.sizes()};
@@ -201,7 +202,7 @@ auto __main(int argc, char** argv) -> int
       sara::tic();
       sara::apply_gaussian_filter(f_ds, f_blurred, sigma_D);
 
-#ifdef SLOW_IMPL
+#if defined(SLOW_IMPL)
       grad_f = f_blurred.compute<sara::Gradient>();
       const auto M =
           grad_f.compute<sara::SecondMomentMatrix>().compute<sara::Gaussian>(
@@ -279,7 +280,7 @@ auto __main(int argc, char** argv) -> int
           if (score > cornerness_thres)
             dominant_points.push_back({ch[i], score});
         }
-#ifdef DEBUG_ME
+#if defined(DEBUG_ME)
         SARA_CHECK(dominant_points.size());
 #endif
         // No point continuing at this point.
@@ -339,7 +340,7 @@ auto __main(int argc, char** argv) -> int
               if (!in_domain)
                 return ci.cast<double>();
 
-#ifdef SLOW_IMPL
+#if defined(SLOW_IMPL)
               const auto p = sara::refine_junction_location_unsafe(  //
                   grad_f, ci, radius);
 #else
@@ -452,7 +453,7 @@ auto __main(int argc, char** argv) -> int
       }
       sara::display(disp);
 
-#ifdef INSPECT_PATCH
+#if defined(INSPECT_PATCH)
       for (auto k = 0u; k < codes.size(); ++k)
       {
         if (!plausible_codes[k])
@@ -472,7 +473,7 @@ auto __main(int argc, char** argv) -> int
 #endif
       sara::toc("Display");
 
-#ifdef DEBUG_ME
+#if defined(DEBUG_ME)
       sara::get_key();
 #endif
 

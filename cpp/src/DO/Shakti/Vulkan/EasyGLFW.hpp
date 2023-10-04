@@ -39,6 +39,10 @@ namespace DO::Kalpana::GLFW {
     auto init_for_vulkan_rendering() -> void
     {
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#if defined(__APPLE__)
+      // to prevent 1200x800 from becoming 2400x1600
+      glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+#endif
     }
 
     ~Application()

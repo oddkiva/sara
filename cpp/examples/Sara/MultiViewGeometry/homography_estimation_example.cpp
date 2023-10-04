@@ -43,7 +43,7 @@ auto get_keypoints(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
 
   namespace fs = std::filesystem;
 
-#ifdef FIXME
+#if defined(FIXME)
   const auto load_or_compute_keys = [](auto& keys, const auto& keys_filepath,
                                        const auto& image) {
     if (!fs::exists(keys_filepath))
@@ -192,7 +192,7 @@ GRAPHICS_MAIN()
 {
   // Load images.
   print_stage("Loading images...");
-#ifdef __APPLE__
+#if defined(__APPLE__)
   const auto data_dir = "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
   const auto data_dir = "/home/david/Desktop/Datasets/sfm/castle_int"s;

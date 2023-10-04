@@ -30,7 +30,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-#ifdef _OPENMP
+#if defined(OPENMP)
 #  include <omp.h>
 #endif
 
@@ -225,7 +225,7 @@ int sara_graphics_main(int argc, char** argv)
   }
 
   // OpenMP.
-#ifdef _OPENMP
+#if defined(OPENMP)
   omp_set_num_threads(omp_get_max_threads());
 #endif
 
@@ -240,7 +240,7 @@ int sara_graphics_main(int argc, char** argv)
   // Output save.
   const auto basename = fs::path(video_filepath).stem().string();
   VideoWriter video_writer{
-#ifdef __APPLE__
+#if defined(__APPLE__)
       "/Users/david/Desktop/" + basename + ".ortho-vp.mp4",
 #else
       "/home/david/Desktop/" + basename + ".ortho-vp.mp4",

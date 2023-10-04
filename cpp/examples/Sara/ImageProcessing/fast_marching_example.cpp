@@ -40,9 +40,9 @@ auto radial_distance(sara::Image<float>& phi, const Eigen::Vector2f& center)
 auto fast_marching_2d() -> void
 {
 #define REAL_IMAGE
-#ifdef REAL_IMAGE
+#if defined(REAL_IMAGE)
   const auto image = sara::imread<float>(  //
-#  ifdef __APPLE__
+#  if defined(__APPLE__)
       "/Users/david/GitLab/DO-CV/sara/data/stinkbug.png"  //
 #  else
       "/home/david/GitLab/DO-CV/sara/data/stinkbug.png"  //
