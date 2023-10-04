@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DO/Sara/Defines.hpp>
+#include <DO/Sara/Core/PhysicalQuantities.hpp>
 
 #include <Eigen/Geometry>
 
@@ -25,11 +26,22 @@ namespace DO::Kalpana::GL {
       return _pressed;
     }
 
+    auto angle_delta() const noexcept -> float
+    {
+      return _angle_delta;
+    }
+
+    auto angle_delta() noexcept -> float&
+    {
+      return _angle_delta;
+    }
+
   private:
     Eigen::Quaternionf _rotation = Eigen::Quaternionf::Identity();
     Eigen::Vector3f _axis = Eigen::Vector3f::UnitY();
     Eigen::Vector2f _last_pos = Eigen::Vector2f::Zero();
     bool _pressed = false;
+    float _angle_delta = 1._deg;
   };
 
 }  // namespace DO::Kalpana::GL
