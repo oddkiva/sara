@@ -62,13 +62,6 @@ class GLFWApp
     glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif
 
-    // 3. Create a GLFW window.
-    _window = glfwCreateWindow(sizes.x(), sizes.y(),  //
-                               title.c_str(),         //
-                               nullptr, nullptr);
-    if (!_window)
-      throw std::runtime_error{"Failed to create window!"};
-
       // clang-format off
 // #if defined(__APPLE__)
 //   // GL 3.2 + GLSL 150
@@ -104,6 +97,13 @@ class GLFWApp
     // to prevent 1200x800 from becoming 2400x1600
     glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif
+
+    // 3. Create a GLFW window.
+    _window = glfwCreateWindow(sizes.x(), sizes.y(),  //
+                               title.c_str(),         //
+                               nullptr, nullptr);
+    if (!_window)
+      throw std::runtime_error{"Failed to create window!"};
 
     // 4. Tell that the OpenGL rendering will be done on this window surface.
     glfwMakeContextCurrent(_window);
