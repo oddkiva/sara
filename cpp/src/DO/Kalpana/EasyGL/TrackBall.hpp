@@ -41,7 +41,7 @@ namespace DO::Kalpana::GL {
     Eigen::Vector3f _axis = Eigen::Vector3f::UnitY();
     Eigen::Vector2f _last_pos = Eigen::Vector2f::Zero();
     bool _pressed = false;
-    float _angle_delta = 1._deg;
+    float _angle_delta = static_cast<float>(Sara::degree.value);
   };
 
 }  // namespace DO::Kalpana::GL

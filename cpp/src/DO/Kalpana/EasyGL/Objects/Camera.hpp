@@ -16,7 +16,7 @@
 #include <Eigen/Geometry>
 
 
-namespace DO::Kalpana::EasyGL {
+namespace DO::Kalpana {
 
   // The explorer's eye.
   struct Camera
@@ -114,4 +114,4 @@ namespace DO::Kalpana::EasyGL {
     }
   };
 
-}  // namespace DO::Kalpana::EasyGL
+}  // namespace DO::Kalpana

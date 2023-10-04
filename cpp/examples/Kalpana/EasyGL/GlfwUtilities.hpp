@@ -11,15 +11,15 @@
 
 #include <GLFW/glfw3.h>
 
+#include <DO/Kalpana/EasyGL/Objects/Camera.hpp>
 #include <DO/Kalpana/EasyGL/TrackBall.hpp>
 
-#include "Camera.hpp"
 #include "Time.hpp"
 
 #include <iostream>
 
 
-auto camera = Camera{};
+auto camera = DO::Kalpana::Camera{};
 auto gtime = Time{};
 
 auto trackball = DO::Kalpana::GL::TrackBall{};

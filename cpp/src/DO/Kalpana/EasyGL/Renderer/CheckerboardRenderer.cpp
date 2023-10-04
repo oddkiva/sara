@@ -21,8 +21,8 @@ CheckerboardRenderer::CheckerboardRenderer(const int rows, const int cols,
   : _rows{rows}
   , _cols{cols}
 {
-  _vertices = Tensor_<float, 2>{{4 * rows * cols, 6}};
-  _triangles = Tensor_<unsigned int, 2>{{2 * rows * cols, 3}};
+  _vertices = Sara::Tensor_<float, 2>{{4 * rows * cols, 6}};
+  _triangles = Sara::Tensor_<unsigned int, 2>{{2 * rows * cols, 3}};
 
   auto v_mat = _vertices.matrix();
   auto t_mat = _triangles.matrix();
@@ -70,7 +70,7 @@ CheckerboardRenderer::CheckerboardRenderer(const int rows, const int cols,
 
 auto CheckerboardRenderer::initialize_geometry() -> void
 {
-  const auto row_bytes = [](const TensorView_<float, 2>& data) {
+  const auto row_bytes = [](const Sara::TensorView_<float, 2>& data) {
     return static_cast<GLsizei>(data.size(1) * sizeof(float));
   };
   const auto float_pointer = [](int offset) {
@@ -183,7 +183,6 @@ auto CheckerboardRenderer::render(const Eigen::Matrix4f& transform,
 {
   _shader_program.use();
   // Pass the parameters to the shader program.
-  _shader_program.set_uniform_param(_point_size_loc, point_size);
   _shader_program.set_uniform_matrix4f(_transform_loc, transform.data());
   _shader_program.set_uniform_matrix4f(_view_loc, model_view.data());
   _shader_program.set_uniform_matrix4f(_projection_loc, projection.data());
