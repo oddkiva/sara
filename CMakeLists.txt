@@ -209,3 +209,10 @@ endif()
 
 # Make documentation
 add_subdirectory(doc)
+
+if(SARA_USE_HALIDE)
+  set_property(TARGET acc_gen PROPERTY FOLDER "Libraries/Shakti/Halide")
+  set_property(TARGET intrinsics_gen PROPERTY FOLDER "Libraries/Shakti/Halide")
+  set_property(TARGET omp_gen PROPERTY FOLDER "Libraries/Shakti/Halide")
+  set_property(TARGET RISCVTargetParserTableGen PROPERTY FOLDER "Libraries/Shakti/Halide")
+endif()
