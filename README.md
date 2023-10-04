@@ -1,7 +1,7 @@
 Sara: C++ Computer Vision Library
 =================================
 
-[![GitLab CI Build Status](https://gitlab.com/DO-CV/sara/badges/master/pipeline.svg)](https://gitlab.com/DO-CV/sara/-/pipelines)
+[![GitLab CI Build Status](https://gitlab.com/oddkiva/sara/badges/master/pipeline.svg)](https://gitlab.com/oddkiva/sara/-/pipelines)
 [![GitHub Actions Status](https://github.com/oddkiva/sara/actions/workflows/ci.yml/badge.svg)](https://github.com/oddkiva/sara/actions)
 
 *Sara* (सार) is a Sanskrit word meaning *essence*.
