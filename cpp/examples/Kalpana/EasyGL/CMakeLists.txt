@@ -9,18 +9,20 @@ foreach(file ${example_FILES})
     ${filename}
     PRIVATE DO::Sara::Core #
             DO::Sara::ImageIO #
-            # FIXME: OK... this is the problematic library on Windows...
             DO::Kalpana::EasyGL #
             ${HDF5_LIBRARIES} #
             glfw)
   target_compile_definitions(
     ${filename}
-    PRIVATE SRCDIR=${CMAKE_CURRENT_SOURCE_DIR} #
-            $<$<PLATFORM_ID:Darwin>:GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED>)
+    PRIVATE
+      $<$<PLATFORM_ID:Darwin>:GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED>
+  )
+  target_compile_definitions(
+    ${filename} #
+    PRIVATE $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:DO_SARA_STATIC> #
+  )
 
-  if(NOT BUILD_SHARED_LIBS)
-    target_compile_definitions(${filename} PRIVATE DO_SARA_STATIC)
-  endif()
+  add_dependencies(${filename} copy_data_folder_to_binary_dir)
 
   set_property(TARGET ${filename} PROPERTY FOLDER "Examples/Kalpana/EasyGL")
 endforeach()

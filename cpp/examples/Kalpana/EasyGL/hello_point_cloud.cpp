@@ -231,6 +231,9 @@ int main()
   }
 
   shader_program.use(true);
+  const auto view_uniform = shader_program.get_uniform_location("view");
+  const auto proj_uniform = shader_program.get_uniform_location("projection");
+  const auto tsfm_uniform = shader_program.get_uniform_location("transform");
 
 
   // ==========================================================================
@@ -242,13 +245,15 @@ int main()
   // You absolutely need this for 3D objects!
   glEnable(GL_DEPTH_TEST);
 
+  // Background color.
+  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
   auto timer = Timer{};
 
   // Display image.
   glfwSwapInterval(1);
   while (!glfwWindowShouldClose(window))
   {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Important.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -258,18 +263,19 @@ int main()
     transform.rotate(AngleAxisf(
         static_cast<float>(std::pow(1.5, 5) * timer.elapsed_ms() / 10000),
         Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
-    shader_program.set_uniform_matrix4f("transform", transform.matrix().data());
+    shader_program.set_uniform_matrix4f(tsfm_uniform,
+                                        transform.matrix().data());
 
     // View matrix.
     auto view = Transform<float, 3, Eigen::Projective>{};
     view.setIdentity();
     view.translate(Vector3f{0.f, 0.f, -100.f});
-    shader_program.set_uniform_matrix4f("view", view.matrix().data());
+    shader_program.set_uniform_matrix4f(view_uniform, view.matrix().data());
 
     // Projection matrix.
     const Matrix4f projection =
         k::perspective(45.f, 800.f / 600.f, .1f, 1000.f);
-    shader_program.set_uniform_matrix4f("projection", projection.data());
+    shader_program.set_uniform_matrix4f(proj_uniform, projection.data());
 
     // Draw triangles.
     glBindVertexArray(vao);

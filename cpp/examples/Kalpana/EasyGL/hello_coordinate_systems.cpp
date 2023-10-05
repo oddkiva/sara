@@ -21,6 +21,7 @@
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
 #include <DO/Kalpana/Math/Projection.hpp>
+#include <array>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -30,12 +31,14 @@
 
 #include <Eigen/Geometry>
 
+#include <filesystem>
 #include <map>
 
 
 using namespace DO::Sara;
 
 
+namespace fs = std::filesystem;
 namespace k = DO::Kalpana;
 namespace kgl = k::GL;
 namespace sara = DO::Sara;
@@ -128,25 +131,30 @@ auto make_cube()
 }
 
 
-int main()
+int main(int, char** argv)
 {
+  // Iniialize the GLFW application.
   init_glfw_boilerplate();
 
   // Create a window.
   const auto width = 800;
   const auto height = 600;
-  auto window =
-      glfwCreateWindow(width, height, "Hello Triangle", nullptr, nullptr);
+  auto window = glfwCreateWindow(width, height,               //
+                                 "Hello Coordinate Systems",  //
+                                 nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
 
+  // Import OpenGL API dynamically.
   init_glew_boilerplate();
 
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
-                                        {"in_tex_coords", 1},  //
-                                        {"out_color", 0}};
+  static const auto arg_pos = std::map<std::string, int>{
+      {"in_coords", 0},      //
+      {"in_tex_coords", 1},  //
+      {"out_color", 0}       //
+  };
 
-  const auto vertex_shader_source = R"shader(
+  static constexpr auto vertex_shader_source = R"shader(
 #version 330 core
   layout (location = 0) in vec3 in_coords;
   layout (location = 1) in vec2 in_tex_coords;
@@ -169,7 +177,7 @@ int main()
   vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
 
 
-  const auto fragment_shader_source = R"shader(
+  static constexpr auto fragment_shader_source = R"shader(
 #version 330 core
   in vec2 out_tex_coords;
   out vec4 frag_color;
@@ -199,17 +207,20 @@ int main()
   // Encode the vertex data in a tensor.
   auto vertices = make_cube();
 
-  Vector3f cubePositions[] = {
-      Vector3f(0.0f, 0.0f, 0.0f),    Vector3f(2.0f, 5.0f, -15.0f),
+  // clang-format off
+  static const auto cube_positions = std::array<Vector3f, 10>{
+      Vector3f( 0.0f,  0.0f,  0.0f), Vector3f( 2.0f,  5.0f, -15.0f),
       Vector3f(-1.5f, -2.2f, -2.5f), Vector3f(-3.8f, -2.0f, -12.3f),
-      Vector3f(2.4f, -0.4f, -3.5f),  Vector3f(-1.7f, 3.0f, -7.5f),
-      Vector3f(1.3f, -2.0f, -2.5f),  Vector3f(1.5f, 2.0f, -2.5f),
-      Vector3f(1.5f, 0.2f, -1.5f),   Vector3f(-1.3f, 1.0f, -1.5f)};
+      Vector3f( 2.4f, -0.4f, -3.5f), Vector3f(-1.7f,  3.0f, -7.5f),
+      Vector3f( 1.3f, -2.0f, -2.5f), Vector3f( 1.5f,  2.0f, -2.5f),
+      Vector3f( 1.5f,  0.2f, -1.5f), Vector3f(-1.3f,  1.0f, -1.5f)
+  };
+  // clang-format on
 
-  const auto row_bytes = [](const TensorView_<float, 2>& data) {
+  static const auto row_bytes = [](const TensorView_<float, 2>& data) {
     return static_cast<GLsizei>(data.size(1) * sizeof(float));
   };
-  const auto float_pointer = [](int offset) {
+  static const auto float_pointer = [](const int offset) {
     return reinterpret_cast<void*>(offset * sizeof(float));
   };
 
@@ -228,27 +239,24 @@ int main()
     // Map the parameters to the argument position for the vertex shader.
     //
     // Vertex coordinates.
-    glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
+    glVertexAttribPointer(arg_pos.at("in_coords"), 3 /* 3D points */, GL_FLOAT,
                           GL_FALSE, row_bytes(vertices), float_pointer(0));
-    glEnableVertexAttribArray(arg_pos["in_coords"]);
+    glEnableVertexAttribArray(arg_pos.at("in_coords"));
 
     // Texture coordinates.
-    glVertexAttribPointer(arg_pos["in_tex_coords"], 2 /* texture coords */,
+    glVertexAttribPointer(arg_pos.at("in_tex_coords"), 2 /* texture coords */,
                           GL_FLOAT, GL_FALSE, row_bytes(vertices),
                           float_pointer(3));
-    glEnableVertexAttribArray(arg_pos["in_tex_coords"]);
+    glEnableVertexAttribArray(arg_pos.at("in_tex_coords"));
   }
 
   // Texture data.
+  const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
   auto texture0 = kgl::Texture2D{};
   {
     // Read the image from the disk.
-    auto image = imread<Rgb8>(
-#ifdef __APPLE__
-        "/Users/david/GitLab/DO-CV/sara/data/ksmall.jpg"
-#else
-        "/home/david/GitLab/DO-CV/sara/data/ksmall.jpg"
-#endif
+    auto image = imread<Rgb8>(                               //
+        (program_dir_path / "data" / "ksmall.jpg").string()  //
     );
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
@@ -262,12 +270,8 @@ int main()
   auto texture1 = kgl::Texture2D{};
   {
     // Read the image from the disk.
-    auto image = imread<Rgb8>(
-#ifdef __APPLE__
-        "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
-#else
-        "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg"
-#endif
+    auto image = imread<Rgb8>(                                       //
+        (program_dir_path / "data" / "sunflowerField.jpg").string()  //
     );
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
@@ -284,37 +288,38 @@ int main()
   // Specify that GL_TEXTURE1 is mapped to texture1 in the fragment shader code.
   shader_program.set_uniform_param("texture1", 1);
 
+  const auto view_uniform = shader_program.get_uniform_location("view");
+  const auto proj_uniform = shader_program.get_uniform_location("projection");
+  const auto tsfm_uniform = shader_program.get_uniform_location("transform");
+
   auto timer = Timer{};
 
-  // For point cloud rendering.
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_PROGRAM_POINT_SIZE);
 
   // You need this for 3D objects!
   glEnable(GL_DEPTH_TEST);
+  // Backgoun color
+  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
   // Display image.
   glfwSwapInterval(1);
   while (!glfwWindowShouldClose(window))
   {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Important.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture0);
-
-    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
     auto view = Transform<float, 3, Eigen::Projective>{};
     view.setIdentity();
     view.translate(Vector3f{0.f, 0.f, -10.f});
-    shader_program.set_uniform_matrix4f("view", view.matrix().data());
+    shader_program.set_uniform_matrix4f(view_uniform, view.matrix().data());
 
     const Matrix4f projection = k::perspective(45.f, 800.f / 600.f, .1f, 100.f);
-    shader_program.set_uniform_matrix4f("projection", projection.data());
+    shader_program.set_uniform_matrix4f(proj_uniform, projection.data());
 
     // Draw triangles.
     glBindVertexArray(vao);
@@ -322,12 +327,12 @@ int main()
     {
       auto transform = Transform<float, 3, Eigen::Projective>{};
       transform.setIdentity();
-      transform.translate(cubePositions[i]);
+      transform.translate(cube_positions[i]);
       transform.rotate(
           AngleAxisf(static_cast<float>(std::pow(1.2, (i + 1) * 5) *
                                         timer.elapsed_ms() / 10000),
                      Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
-      shader_program.set_uniform_matrix4f("transform",
+      shader_program.set_uniform_matrix4f(tsfm_uniform,
                                           transform.matrix().data());
 
       glDrawArrays(GL_TRIANGLES, 0, vertices.size(0));
@@ -338,10 +343,11 @@ int main()
     glfwPollEvents();
   }
 
+  // Destroy OpenGL resources.
   vao.destroy();
   vbo.destroy();
 
-  // Clean up resources.
+  // Clean up GLFW.
   glfwDestroyWindow(window);
   glfwTerminate();
 

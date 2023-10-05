@@ -1,13 +1,6 @@
 # N.B.: set this value back to NO to create a JavaScript module.
 set(SARA_EMSCRIPTEN_BUILD_HTML YES)
 
-# In case something goes wrong.
-add_custom_target(emscripten_copy_assets)
-add_custom_command(
-  TARGET emscripten_copy_assets
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data/
-          ${CMAKE_BINARY_DIR}/bin/data)
-
 list(
   APPEND
   GL_UTILS
@@ -77,9 +70,7 @@ macro(sara_add_wasm_executable file)
   set_property(TARGET ${filename} PROPERTY FOLDER "Examples/Sara/Emscripten")
 
   if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-    add_dependencies(${filename} emscripten_copy_assets)
-    set_property(TARGET emscripten_copy_assets
-                 PROPERTY FOLDER "Examples/Sara/Emscripten")
+    add_dependencies(${filename} copy_data_folder_to_binary_dir)
   endif()
 endmacro()
 

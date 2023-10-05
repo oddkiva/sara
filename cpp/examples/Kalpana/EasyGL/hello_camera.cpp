@@ -12,6 +12,9 @@
 //! @example
 
 #include <DO/Kalpana/EasyGL.hpp>
+#include <DO/Kalpana/EasyGL/Objects/ColoredPointCloud.hpp>
+#include <DO/Kalpana/EasyGL/Renderer/CheckerboardRenderer.hpp>
+#include <DO/Kalpana/EasyGL/Renderer/ColoredPointCloudRenderer.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/HDF5.hpp>
@@ -103,281 +106,6 @@ auto make_point_cloud()
   return vertex_data;
 }
 
-struct PointCloudObject
-{
-  PointCloudObject(const Tensor_<float, 2>& vertices_)
-    : vertices{vertices_}
-  {
-    shader_program = make_shader();
-
-    // =========================================================================
-    // Encode the vertex data in a tensor.
-    //
-    const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return static_cast<GLsizei>(data.size(1) * sizeof(float));
-    };
-    const auto float_pointer = [](int offset) {
-      return reinterpret_cast<void*>(offset * sizeof(float));
-    };
-
-    vao.generate();
-
-
-    // =========================================================================
-    // Setup Vertex attributes on the GPU side.
-    //
-    vbo.generate();
-    {
-      glBindVertexArray(vao);
-
-      // Copy vertex data.
-      vbo.bind_vertex_data(vertices);
-
-      // Map the parameters to the argument position for the vertex shader.
-      //
-      // Vertex coordinates.
-      glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
-                            GL_FALSE, row_bytes(vertices), float_pointer(0));
-      glEnableVertexAttribArray(arg_pos["in_coords"]);
-
-      // Texture coordinates.
-      glVertexAttribPointer(arg_pos["in_color"], 3 /* RGB_COLOR */, GL_FLOAT,
-                            GL_FALSE, row_bytes(vertices), float_pointer(3));
-      glEnableVertexAttribArray(arg_pos["in_color"]);
-    }
-  }
-
-  auto make_shader() -> kgl::ShaderProgram
-  {
-    const auto vertex_shader_source = R"shader(
-#version 330 core
-  layout (location = 0) in vec3 in_coords;
-  layout (location = 1) in vec3 in_color;
-
-  uniform mat4 transform;
-  uniform mat4 view;
-  uniform mat4 projection;
-
-  out vec3 out_color;
-
-  void main()
-  {
-    gl_Position = projection * view * transform * vec4(in_coords, 1.0);
-    gl_PointSize = 5.0;
-    out_color = in_color;
-  }
-  )shader";
-    auto vertex_shader = kgl::Shader{};
-    vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
-
-
-    const auto fragment_shader_source = R"shader(
-#version 330 core
-  in vec3 out_color;
-  out vec4 frag_color;
-
-  void main()
-  {
-    vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-    if (dot(circCoord, circCoord) > 1.0)
-        discard;
-
-    float dist = length(gl_PointCoord - vec2(0.5));
-    float alpha = 1.0 - smoothstep(0.2, 0.5, dist);
-
-    frag_color = vec4(out_color, alpha);
-  }
-  )shader";
-    auto fragment_shader = kgl::Shader{};
-    fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
-                                       fragment_shader_source);
-
-    auto shader_program = kgl::ShaderProgram{};
-    shader_program.create();
-    shader_program.attach(vertex_shader, fragment_shader);
-
-    vertex_shader.destroy();
-    fragment_shader.destroy();
-
-    return shader_program;
-  }
-
-  void destroy()
-  {
-    vao.destroy();
-    vbo.destroy();
-  }
-
-  Tensor_<float, 2> vertices;
-  kgl::Buffer vbo;
-  kgl::VertexArray vao;
-  kgl::ShaderProgram shader_program;
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                        {"in_color", 1}};
-};
-
-
-struct CheckerBoardObject
-{
-  CheckerBoardObject(int rows_ = 20, int cols_ = 20, float scale = 10.f)
-    : rows{rows_}
-    , cols{cols_}
-  {
-    shader_program = make_shader();
-
-    vertices = Tensor_<float, 2>{{4 * rows * cols, 6}};
-    triangles = Tensor_<unsigned int, 2>{{2 * rows * cols, 3}};
-
-    auto v_mat = vertices.matrix();
-    auto t_mat = triangles.matrix();
-    for (int i = 0; i < rows; ++i)
-    {
-      for (int j = 0; j < cols; ++j)
-      {
-        const auto ij = cols * i + j;
-
-        // Coordinates.
-        //
-        // clang-format off
-        v_mat.block(4 * ij, 0, 4, 3) <<  // coords
-            i + 0.5f, 0.0f, j + 0.5f,    // top-right
-            i + 0.5f, 0.0f, j + -0.5f,   // bottom-right
-            i + -0.5f, 0.0f, j + -0.5f,  // bottom-left
-            i + -0.5f, 0.0f, j + 0.5f;   // top-left
-        // clang-format on
-
-        // Set colors.
-        if (i % 2 == 0 && j % 2 == 0)
-          v_mat.block(4 * ij, 3, 4, 3).setZero();
-        else if (i % 2 == 0 && j % 2 == 1)
-          v_mat.block(4 * ij, 3, 4, 3).setOnes();
-        else if (i % 2 == 1 && j % 2 == 0)
-          v_mat.block(4 * ij, 3, 4, 3).setOnes();
-        else  // (i % 2 == 1 and j % 2 == 0)
-          v_mat.block(4 * ij, 3, 4, 3).setZero();
-
-        // vertex indices for each triangle that forms the quad
-        //
-        // clang-format off
-        t_mat.block(2 * ij, 0, 2, 3) <<
-          4 * ij + 0, 4 * ij + 1, 4 * ij + 2,
-          4 * ij + 2, 4 * ij + 3, 4 * ij + 0;
-        // clang-format on
-      }
-    }
-    // Translate.
-    v_mat.col(0).array() -= rows / 2.f;
-    v_mat.col(2).array() -= cols / 2.f;
-    // Rescale.
-    v_mat.leftCols(3) *= scale;
-
-    const auto row_bytes = [](const TensorView_<float, 2>& data) {
-      return static_cast<GLsizei>(data.size(1) * sizeof(float));
-    };
-    const auto float_pointer = [](int offset) {
-      return reinterpret_cast<void*>(offset * sizeof(float));
-    };
-
-    vao.generate();
-    vbo.generate();
-    ebo.generate();
-
-    // Specify the vertex attributes here.
-    {
-      glBindVertexArray(vao);
-
-      // Copy the vertex data into the GPU buffer object.
-      vbo.bind_vertex_data(vertices);
-
-      // Copy the triangles data into the GPU buffer object.
-      ebo.bind_triangles_data(triangles);
-
-      // Specify that the vertex shader param 0 corresponds to the first 3 float
-      // data of the buffer object.
-      glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
-                            GL_FALSE, row_bytes(vertices), float_pointer(0));
-      glEnableVertexAttribArray(arg_pos["in_coords"]);
-
-      // Specify that the vertex shader param 1 corresponds to the first 3 float
-      // data of the buffer object.
-      glVertexAttribPointer(arg_pos["in_color"], 3 /* 3D colors */, GL_FLOAT,
-                            GL_FALSE, row_bytes(vertices), float_pointer(3));
-      glEnableVertexAttribArray(arg_pos["in_color"]);
-
-      // Unbind the vbo to protect its data.
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
-    }
-  }
-
-  auto make_shader() -> kgl::ShaderProgram
-  {
-    const auto vertex_shader_source = R"shader(
-#version 330 core
-  layout (location = 0) in vec3 in_coords;
-  layout (location = 1) in vec3 in_color;
-
-  uniform mat4 transform;
-  uniform mat4 view;
-  uniform mat4 projection;
-
-  out vec3 out_color;
-
-  void main()
-  {
-    gl_Position = projection * view * transform * vec4(in_coords, 1.0);
-    gl_PointSize = 200.0;
-    out_color = in_color;
-  }
-  )shader";
-    auto vertex_shader = kgl::Shader{};
-    vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
-
-
-    const auto fragment_shader_source = R"shader(
-#version 330 core
-  in vec3 out_color;
-  out vec4 frag_color;
-
-  void main()
-  {
-    frag_color = vec4(out_color, 0.1);
-  }
-  )shader";
-    auto fragment_shader = kgl::Shader{};
-    fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
-                                       fragment_shader_source);
-
-    auto shader_program = kgl::ShaderProgram{};
-    shader_program.create();
-    shader_program.attach(vertex_shader, fragment_shader);
-
-    vertex_shader.destroy();
-    fragment_shader.destroy();
-
-    return shader_program;
-  }
-
-  void destroy()
-  {
-    vao.destroy();
-    vbo.destroy();
-    ebo.destroy();
-  }
-
-  int rows{100};
-  int cols{100};
-  Tensor_<float, 2> vertices;
-  Tensor_<unsigned int, 2> triangles;
-  kgl::Buffer vbo;
-  kgl::Buffer ebo;
-  kgl::VertexArray vao;
-  kgl::ShaderProgram shader_program;
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                        {"in_color", 1},   //
-                                        {"out_color", 0}};
-};
-
 
 int main()
 {
@@ -401,31 +129,37 @@ int main()
 
 
   // ==========================================================================
-  // Create objects to display.
-  //
-  auto point_cloud_object = PointCloudObject{make_point_cloud()};
-  auto checkerboard = CheckerBoardObject{};
+  // Initialize data on OpenGL side.
+  auto point_cloud = kgl::ColoredPointCloud{};
+  point_cloud.initialize();
+  point_cloud.upload_host_data_to_gl(make_point_cloud());
 
+  // Object renderers on OpenGL side.
+  auto point_cloud_renderer = kgl::ColoredPointCloudRenderer{};
+  point_cloud_renderer.initialize();
+  auto checkerboard_renderer = kgl::CheckerboardRenderer(100, 100);
 
   // ==========================================================================
   // Setup options for point cloud rendering.
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_PROGRAM_POINT_SIZE);
-
+  // Default background color.
+  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   // You absolutely need this for 3D objects!
   glEnable(GL_DEPTH_TEST);
+  glfwSwapInterval(1);
 
+  // ==========================================================================
+  // Model-view-projection matrix stack.
+  //
   // Initialize the projection matrix once for all.
   const Matrix4f projection = k::perspective(45.f, 800.f / 600.f, .1f, 1000.f);
-
   // Transform matrix.
   const Transform<float, 3, Eigen::Projective> transform =
       Transform<float, 3, Eigen::Projective>::Identity();
 
-
   // Display image.
-  glfwSwapInterval(1);
   while (!glfwWindowShouldClose(window))
   {
     // Calculate the elapsed time.
@@ -446,44 +180,32 @@ int main()
         Transform<float, 3, Eigen::Projective>::Identity();
     scale_point_cloud.scale(scale);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Important.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw the checkerboard.
     if (show_checkerboard)
-    {
-      checkerboard.shader_program.use();
-      checkerboard.shader_program.set_uniform_matrix4f(
-          "transform", transform.matrix().data());
-      checkerboard.shader_program.set_uniform_matrix4f("view",
-                                                       view_matrix.data());
-      checkerboard.shader_program.set_uniform_matrix4f("projection",
-                                                       projection.data());
-      glBindVertexArray(checkerboard.vao);
-      glDrawElements(GL_TRIANGLES,
-                     static_cast<GLsizei>(checkerboard.triangles.size()),
-                     GL_UNSIGNED_INT, 0);
-    }
+      checkerboard_renderer.render(transform.matrix(),    //
+                                   view_matrix.matrix(),  //
+                                   projection.matrix());
 
     // Draw point cloud.
-    point_cloud_object.shader_program.use();
-    point_cloud_object.shader_program.set_uniform_matrix4f(
-        "transform", scale_point_cloud.matrix().data());
-    point_cloud_object.shader_program.set_uniform_matrix4f("view",
-                                                           view_matrix.data());
-    point_cloud_object.shader_program.set_uniform_matrix4f("projection",
-                                                           projection.data());
-
-    glBindVertexArray(point_cloud_object.vao);
-    glDrawArrays(GL_POINTS, 0, point_cloud_object.vertices.size(0));
+    static constexpr auto point_size = 3.f;
+    point_cloud_renderer.render(point_cloud, point_size,  //
+                                transform.matrix(),       //
+                                view_matrix.matrix(),     //
+                                projection.matrix());
 
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
-  point_cloud_object.destroy();
-  checkerboard.destroy();
+  // Destroy object renderers.
+  checkerboard_renderer.destroy();
+  point_cloud_renderer.destroy();
+
+  // Destroy geometry data.
+  point_cloud.destroy();
 
   // Clean up resources.
   glfwDestroyWindow(window);

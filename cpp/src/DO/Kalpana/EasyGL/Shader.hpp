@@ -124,21 +124,6 @@ namespace DO::Kalpana::GL {
       glUniform1i(tex_location, texture_unit);
     }
 
-    auto set_uniform_vector2f(const char* mat_name,
-                              const float* mat_coeffs) const -> void;
-
-    auto set_uniform_vector4f(const char* mat_name,
-                              const float* mat_coeffs) const -> void;
-
-    auto set_uniform_matrix3f(const char* mat_name,
-                              const float* mat_coeffs) const -> void;
-
-    auto set_uniform_matrix4f(const char* mat_name,
-                              const float* mat_coeffs) const -> void;
-
-    auto set_uniform_texture(const char* texture_name,
-                             GLuint texture_unit) const -> void;
-
     GLuint program_object{0};
     GLuint vertex_shader{0};
     GLuint fragment_shader{0};

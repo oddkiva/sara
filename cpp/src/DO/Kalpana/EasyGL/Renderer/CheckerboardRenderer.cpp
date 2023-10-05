@@ -182,11 +182,11 @@ auto CheckerboardRenderer::render(const Eigen::Matrix4f& transform,
                                   const Eigen::Matrix4f& projection) -> void
 {
   _shader_program.use();
+
   // Pass the parameters to the shader program.
   _shader_program.set_uniform_matrix4f(_transform_loc, transform.data());
   _shader_program.set_uniform_matrix4f(_view_loc, model_view.data());
   _shader_program.set_uniform_matrix4f(_projection_loc, projection.data());
-
 
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_triangles.size()),
