@@ -251,7 +251,8 @@ int main(int, char** argv)
   }
 
   // Texture data.
-  const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
+  static const auto program_dir_path =
+      fs::absolute(fs::path(argv[0])).parent_path();
   auto texture0 = kgl::Texture2D{};
   {
     // Read the image from the disk.
@@ -302,6 +303,8 @@ int main(int, char** argv)
   glEnable(GL_DEPTH_TEST);
   // Backgoun color
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+  glBindTexture(GL_TEXTURE_2D, texture0);
+  glBindTexture(GL_TEXTURE_2D, texture1);
 
   // Display image.
   glfwSwapInterval(1);
@@ -309,9 +312,6 @@ int main(int, char** argv)
   {
     // Important.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glBindTexture(GL_TEXTURE_2D, texture0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
 
     auto view = Transform<float, 3, Eigen::Projective>{};
     view.setIdentity();

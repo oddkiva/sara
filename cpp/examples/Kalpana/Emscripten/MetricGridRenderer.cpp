@@ -219,6 +219,7 @@ auto MetricGridRenderer::initialize() -> void
   _k_loc = _shader_program.get_uniform_location("k");
   _p_loc = _shader_program.get_uniform_location("p");
   _xi_loc = _shader_program.get_uniform_location("xi");
+  _color_loc = _shader_program.get_uniform_location("color");
 }
 
 auto MetricGridRenderer::destroy_gl_objects() -> void
@@ -258,7 +259,7 @@ auto MetricGridRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   _shader_program.set_uniform_param(_xi_loc, lines._intrinsics.xi);
 
   // Color.
-  _shader_program.set_uniform_vector4f("color", lines._color.data());
+  _shader_program.set_uniform_vector4f(_color_loc, lines._color.data());
 
   glBindVertexArray(lines._vao);
   glDrawElements(GL_TRIANGLES,
