@@ -115,10 +115,11 @@ int main()
   init_glfw_boilerplate();
 
   // Create a window.
-  const auto width = 800;
-  const auto height = 600;
-  auto window =
-      glfwCreateWindow(width, height, "Hello Point Cloud", nullptr, nullptr);
+  static constexpr auto width = 800;
+  static constexpr auto height = 600;
+  const auto window = glfwCreateWindow(width, height,   //
+                                 "Hello Camera",  //
+                                 nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
   glfwSetKeyCallback(window, move_camera_from_keyboard);
@@ -190,7 +191,7 @@ int main()
                                    projection.matrix());
 
     // Draw point cloud.
-    static constexpr auto point_size = 3.f;
+    static constexpr auto point_size = 5.f;
     point_cloud_renderer.render(point_cloud, point_size,  //
                                 transform.matrix(),       //
                                 view_matrix.matrix(),     //
