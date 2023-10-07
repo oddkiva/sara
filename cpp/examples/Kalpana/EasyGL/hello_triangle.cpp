@@ -60,24 +60,25 @@ inline auto init_glew_boilerplate()
 }
 
 
-int main()
+struct ShaderProgramBuilder
 {
-  init_glfw_boilerplate();
+  const std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
+                                              {"in_color", 1},   //
+                                              {"out_color", 0}};
 
-  // Create a window.
-  const auto width = 800;
-  const auto height = 600;
-  auto window =
-      glfwCreateWindow(width, height, "Hello Triangle", nullptr, nullptr);
-  glfwMakeContextCurrent(window);
+  auto row_bytes(const TensorView_<float, 2>& data) const -> GLsizei
+  {
+    return static_cast<GLsizei>(data.size(1) * sizeof(float));
+  }
 
-  init_glew_boilerplate();
+  auto float_pointer(const int offset) const -> void*
+  {
+    return reinterpret_cast<void*>(offset * sizeof(float));
+  };
 
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                        {"in_color", 1},   //
-                                        {"out_color", 0}};
-
-  const auto vertex_shader_source = R"shader(
+  auto build_shader_program() const -> kgl::ShaderProgram
+  {
+    static constexpr auto vertex_shader_source = R"shader(
 #version 330 core
   layout (location = 0) in vec3 in_coords;
   layout (location = 1) in vec3 in_color;
@@ -91,11 +92,10 @@ int main()
     out_color = in_color;
   }
   )shader";
-  auto vertex_shader = kgl::Shader{};
-  vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
+    auto vertex_shader = kgl::Shader{};
+    vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
 
-
-  const auto fragment_shader_source = R"shader(
+    static constexpr auto fragment_shader_source = R"shader(
 #version 330 core
   in vec3 out_color;
   out vec4 frag_color;
@@ -112,31 +112,47 @@ int main()
     frag_color = vec4(out_color, alpha);
   }
   )shader";
-  auto fragment_shader = kgl::Shader{};
-  fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
-                                     fragment_shader_source);
+    auto fragment_shader = kgl::Shader{};
+    fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
+                                       fragment_shader_source);
 
-  auto shader_program = kgl::ShaderProgram{};
-  shader_program.create();
-  shader_program.attach(vertex_shader, fragment_shader);
+    auto shader_program = kgl::ShaderProgram{};
+    shader_program.create();
+    shader_program.attach(vertex_shader, fragment_shader);
 
-  vertex_shader.destroy();
-  fragment_shader.destroy();
+    vertex_shader.destroy();
+    fragment_shader.destroy();
+
+    return shader_program;
+  }
+};
+
+
+int main()
+{
+  init_glfw_boilerplate();
+
+  // Create a window.
+  static constexpr auto width = 800;
+  static constexpr auto height = 600;
+  const auto window = glfwCreateWindow(width, height,     //
+                                       "Hello Triangle",  //
+                                       nullptr, nullptr);
+  glfwMakeContextCurrent(window);
+  init_glew_boilerplate();
+
+  const auto shader_program_builder = ShaderProgramBuilder{};
+  const auto& shader_arg_pos = shader_program_builder.arg_pos;
+  auto shader_program = shader_program_builder.build_shader_program();
 
   auto vertices = Tensor_<float, 2>{{3, 6}};
-  vertices.flat_array() <<  //
-                            // coords            color
-      -0.5f,
-      -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,        // left
-      0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // right
-      0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f;   // top
-
-  const auto row_bytes = [](const TensorView_<float, 2>& data) {
-    return static_cast<GLsizei>(data.size(1) * sizeof(float));
-  };
-  const auto float_pointer = [](int offset) {
-    return reinterpret_cast<void*>(offset * sizeof(float));
-  };
+  // clang-format off
+  vertices.flat_array() <<
+    // coords            color
+    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // left
+     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // right
+     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f;  // top
+  // clang-format on
 
   auto vao = kgl::VertexArray{};
   vao.generate();
@@ -153,15 +169,19 @@ int main()
 
     // Specify that the vertex shader param 0 corresponds to the first 3 float
     // data of the buffer object.
-    glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
-                          GL_FALSE, row_bytes(vertices), float_pointer(0));
-    glEnableVertexAttribArray(arg_pos["in_coords"]);
+    glVertexAttribPointer(shader_arg_pos.at("in_coords"), 3 /* 3D points */,
+                          GL_FLOAT, GL_FALSE,
+                          shader_program_builder.row_bytes(vertices),
+                          shader_program_builder.float_pointer(0));
+    glEnableVertexAttribArray(shader_arg_pos.at("in_coords"));
 
     // Specify that the vertex shader param 1 corresponds to the first 3 float
     // data of the buffer object.
-    glVertexAttribPointer(arg_pos["in_color"], 3 /* 3D colors */, GL_FLOAT,
-                          GL_FALSE, row_bytes(vertices), float_pointer(3));
-    glEnableVertexAttribArray(arg_pos["in_color"]);
+    glVertexAttribPointer(shader_arg_pos.at("in_color"), 3 /* 3D colors */,
+                          GL_FLOAT, GL_FALSE,
+                          shader_program_builder.row_bytes(vertices),
+                          shader_program_builder.float_pointer(3));
+    glEnableVertexAttribArray(shader_arg_pos.at("in_color"));
 
     // Unbind the vbo to protect its data.
     glBindBuffer(GL_ARRAY_BUFFER, 0);

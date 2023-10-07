@@ -58,12 +58,6 @@ public:
     glfwSetWindowSizeCallback(_window, window_size_callback);
   }
 
-  //! @brief Note: RAII does not work on OpenGL applications.
-  //!
-  //! So the destructor gets a default implementation and we neeed to explicitly
-  //! call the terminate method.
-  ~SingleWindowApp() = default;
-
   auto open_video(const fs::path& video_path) -> void
   {
     _video_stream.open(video_path.string());
@@ -107,13 +101,10 @@ public:
 
     const auto fb_aspect_ratio =
         static_cast<float>(_fb_sizes.x()) / _fb_sizes.y();
-    _projection = k::orthographic(                          //
+    _projection = k::orthographic(                        //
         -0.5f * fb_aspect_ratio, 0.5f * fb_aspect_ratio,  //
-        -0.5f, 0.5f,                                        //
+        -0.5f, 0.5f,                                      //
         -0.5f, 0.5f);
-
-    // Video state.
-    auto frame_index = -1;
 
     // Background color.
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -124,7 +115,6 @@ public:
     {
       if (!_video_stream.read())
         break;
-      ++frame_index;
 
       // Clear the color buffer and the buffer testing.
       glClear(GL_COLOR_BUFFER_BIT);
@@ -143,7 +133,7 @@ public:
     }
   }
 
-  auto terminate() -> void
+  ~SingleWindowApp()
   {
     // Destroy GL objects.
     deinit_gl_resources();
@@ -237,7 +227,7 @@ private: /* data members */
 };
 
 
-auto main(int const argc, char** const argv) -> int
+int main(int const argc, char** const argv)
 {
   if (argc < 2)
   {
@@ -245,13 +235,18 @@ auto main(int const argc, char** const argv) -> int
     return EXIT_FAILURE;
   }
 
-  auto app = SingleWindowApp({800, 600}, "Hello Video");
-
-  // The order matters.
-  app.open_video(fs::path{argv[1]});
-  app.init_gl_resources();
-  app.run();
-  app.terminate();
+  try
+  {
+    auto app = SingleWindowApp({800, 600}, "Hello Video");
+    app.open_video(fs::path{argv[1]});
+    app.init_gl_resources();
+    app.run();
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }
