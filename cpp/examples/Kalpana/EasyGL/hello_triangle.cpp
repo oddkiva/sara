@@ -15,6 +15,7 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
+#include <GL/gl.h>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -29,35 +30,6 @@ namespace kgl = DO::Kalpana::GL;
 
 using namespace DO::Sara;
 using namespace std;
-
-
-inline auto init_glfw_boilerplate()
-{
-  // Initialize the windows manager.
-  if (!glfwInit())
-    throw std::runtime_error{"Error: failed to initialize GLFW!"};
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-}
-
-inline auto init_glew_boilerplate()
-{
-#ifndef __APPLE__
-  // Initialize GLEW.
-  auto err = glewInit();
-  if (err != GLEW_OK)
-  {
-    std::cerr << format("Error: failed to initialize GLEW: %s",
-                        glewGetErrorString(err))
-              << std::endl;
-  }
-#endif
-}
 
 
 struct ShaderProgramBuilder
@@ -128,44 +100,100 @@ struct ShaderProgramBuilder
 };
 
 
-int main()
+class App
 {
-  init_glfw_boilerplate();
-
-  // Create a window.
-  static constexpr auto width = 800;
-  static constexpr auto height = 600;
-  const auto window = glfwCreateWindow(width, height,     //
-                                       "Hello Triangle",  //
-                                       nullptr, nullptr);
-  glfwMakeContextCurrent(window);
-  init_glew_boilerplate();
-
-  const auto shader_program_builder = ShaderProgramBuilder{};
-  const auto& shader_arg_pos = shader_program_builder.arg_pos;
-  auto shader_program = shader_program_builder.build_shader_program();
-
-  auto vertices = Tensor_<float, 2>{{3, 6}};
-  // clang-format off
-  vertices.flat_array() <<
-    // coords            color
-    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // left
-     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // right
-     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f;  // top
-  // clang-format on
-
-  auto vao = kgl::VertexArray{};
-  vao.generate();
-
-  auto vbo = kgl::Buffer{};
-  vbo.generate();
-
-  // Specify the vertex attributes here.
+public:
+  App(const Eigen::Vector2i& sizes, const std::string& title)
   {
-    glBindVertexArray(vao);
+    // Init GLFW.
+    init_glfw();
+
+    // Create a GLFW window.
+    _window = glfwCreateWindow(sizes.x(), sizes.y(),  //
+                               title.c_str(),         //
+                               nullptr, nullptr);
+
+    // Prepare OpenGL first before any OpenGL calls.
+    init_opengl();
+
+    init_shader_program();
+    init_data_on_opengl();
+    init_render_settings();
+  }
+
+  ~App()
+  {
+    _vbo.destroy();
+    _vao.destroy();
+    _shader_program.clear();
+
+    // Clean up resources.
+    if (_window)
+      glfwDestroyWindow(_window);
+
+    // Kill the GLFW app.
+    if (_glfw_initialized)
+      glfwTerminate();
+  }
+
+  auto run() -> void
+  {
+    _shader_program.use();
+    while (!glfwWindowShouldClose(_window))
+    {
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      // Draw triangles
+      glBindVertexArray(_vao);
+      glDrawArrays(GL_POINTS, 0, _num_vertices);
+
+      glfwSwapBuffers(_window);
+      glfwPollEvents();
+    }
+  }
+
+private:
+  auto init_opengl() -> void
+  {
+    // GLFW context...
+    glfwMakeContextCurrent(_window);
+
+    // Init OpenGL extensions.
+    init_glew();
+  }
+
+  auto init_shader_program() -> void
+  {
+    const auto shader_program_builder = ShaderProgramBuilder{};
+    _shader_program = shader_program_builder.build_shader_program();
+  }
+
+  auto init_data_on_opengl() -> void
+  {
+    auto vertices = Tensor_<float, 2>{{3, 6}};
+    // clang-format off
+    vertices.flat_array() <<
+      // coords            color
+      -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // left
+       0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // right
+       0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f;  // top
+    // clang-format on
+    _num_vertices = vertices.size(0);
+
+    _vao = kgl::VertexArray{};
+    _vao.generate();
+
+    _vbo = kgl::Buffer{};
+    _vbo.generate();
+
+    const auto shader_program_builder = ShaderProgramBuilder{};
+    const auto& shader_arg_pos = shader_program_builder.arg_pos;
+
+    // Specify the vertex attributes here.
+    glBindVertexArray(_vao);
 
     // Copy the vertex data into the GPU buffer object.
-    vbo.bind_vertex_data(vertices);
+    _vbo.bind_vertex_data(vertices);
 
     // Specify that the vertex shader param 0 corresponds to the first 3 float
     // data of the buffer object.
@@ -188,35 +216,80 @@ int main()
     glBindVertexArray(0);
   }
 
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_PROGRAM_POINT_SIZE);
-  glEnable(GL_DEPTH_TEST);
-
-  // Activate the shader program once and for all.
-  shader_program.use(true);
-
-  // Display image.
-  glfwSwapInterval(1);
-  while (!glfwWindowShouldClose(window))
+  auto init_render_settings() -> void
   {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // Draw triangles
-    glBindVertexArray(vao);  // geometry specified by the VAO.
-    glDrawArrays(GL_POINTS, 0, vertices.size(0));  //
-
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+    glfwSwapInterval(1);
   }
 
-  vao.destroy();
-  vbo.destroy();
+private: /* convenience free functions*/
+  static auto init_glfw() -> void
+  {
+    if (_glfw_initialized)
+      throw std::runtime_error{
+          "Error: cannot instantiate more than one GLFW Application!"};
 
-  // Clean up resources.
-  glfwDestroyWindow(window);
-  glfwTerminate();
+    // Initialize the windows manager.
+    _glfw_initialized = glfwInit();
+    if (!_glfw_initialized)
+      throw std::runtime_error{"Error: failed to initialize GLFW!"};
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#if defined(__APPLE__)
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+  }
+
+  static auto init_glew() -> void
+  {
+#if !defined(__APPLE__)
+    // Initialize GLEW.
+    const auto err = glewInit();
+    if (err != GLEW_OK)
+      throw std::runtime_error{format("Error: failed to initialize GLEW: %s",
+                                      glewGetErrorString(err))};
+#endif
+  }
+
+private:
+  static bool _glfw_initialized;
+
+  GLFWwindow* _window = nullptr;
+
+  // The graphics pipeline.
+  kgl::ShaderProgram _shader_program;
+
+  // Geometry data on OpenGL side.
+  GLsizei _num_vertices;
+  kgl::VertexArray _vao;
+  kgl::Buffer _vbo;
+};
+
+auto App::_glfw_initialized = false;
+
+
+auto main() -> int
+{
+  try
+  {
+    static constexpr auto width = 800;
+    static constexpr auto height = 600;
+    static constexpr auto title = "Hello Triangle";
+
+    auto app = App{{width, height}, title};
+    app.run();
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }

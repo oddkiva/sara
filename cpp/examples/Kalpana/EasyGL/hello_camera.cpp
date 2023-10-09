@@ -38,41 +38,55 @@ namespace kgl = k::GL;
 namespace sara = DO::Sara;
 
 
+class GLFWApp
+{
+public:
+  GLFWApp()
+  {
+    // Initialize the windows manager.
+    _glfw_initialized = glfwInit();
+    if (!_glfw_initialized)
+      throw std::runtime_error{"Error: failed to initialize GLFW!"};
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#if defined(__APPLE__)
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+  }
+
+  ~GLFWApp()
+  {
+    if (_glfw_initialized)
+      glfwTerminate();
+  }
+
+  auto init_opengl() const -> void
+  {
+#if !defined(__APPLE__)
+    // Initialize GLEW.
+    const auto err = glewInit();
+    if (err != GLEW_OK)
+    {
+      std::cerr << sara::format("Error: failed to initialize GLEW: %s",
+                                glewGetErrorString(err))
+                << std::endl;
+    }
+#endif
+  }
+
+private:
+  bool _glfw_initialized = false;
+};
+
+
 auto resize_framebuffer(GLFWwindow*, int width, int height)
 {
   // make sure the viewport matches the new window dimensions; note that width
   // and height will be significantly larger than specified on retina displays.
   glViewport(0, 0, width, height);
 }
-
-inline auto init_glfw_boilerplate()
-{
-  // Initialize the windows manager.
-  if (!glfwInit())
-    throw std::runtime_error{"Error: failed to initialize GLFW!"};
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#if defined(__APPLE__)
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-}
-
-inline auto init_glew_boilerplate()
-{
-#if !defined(__APPLE__)
-  // Initialize GLEW.
-  auto err = glewInit();
-  if (err != GLEW_OK)
-  {
-    std::cerr << sara::format("Error: failed to initialize GLEW: %s",
-                              glewGetErrorString(err))
-              << std::endl;
-  }
-#endif
-}
-
 
 auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 {
@@ -107,27 +121,23 @@ auto make_point_cloud()
 }
 
 
-int main()
+auto main() -> int
 {
-  // ==========================================================================
-  // Boilerplate code for display initialization.
-  //
-  init_glfw_boilerplate();
+  const auto glfw_app = GLFWApp{};
 
   // Create a window.
   static constexpr auto width = 800;
   static constexpr auto height = 600;
   const auto window = glfwCreateWindow(width, height,   //
-                                 "Hello Camera",  //
-                                 nullptr, nullptr);
+                                       "Hello Camera",  //
+                                       nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
   glfwSetKeyCallback(window, move_camera_from_keyboard);
   glfwSetCursorPosCallback(window, move_trackball);
   glfwSetMouseButtonCallback(window, use_trackball);
 
-  init_glew_boilerplate();
-
+  glfw_app.init_opengl();
 
   // ==========================================================================
   // Initialize data on OpenGL side.
@@ -210,7 +220,6 @@ int main()
 
   // Clean up resources.
   glfwDestroyWindow(window);
-  glfwTerminate();
 
   return EXIT_SUCCESS;
 }

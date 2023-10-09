@@ -26,62 +26,35 @@
 
 #include <GLFW/glfw3.h>
 
+#include <filesystem>
 #include <map>
 
 
+namespace sara = DO::Sara;
 namespace kgl = DO::Kalpana::GL;
-using namespace DO::Sara;
-using namespace std;
+namespace fs = std::filesystem;
 
 
-inline auto init_glfw_boilerplate()
+struct ShaderProgramBuilder
 {
-  // Initialize the windows manager.
-  if (!glfwInit())
-    throw std::runtime_error{"Error: failed to initialize GLFW!"};
+  const std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
+                                              {"in_color", 1},       //
+                                              {"in_tex_coords", 2},  //
+                                              {"out_color", 0}};
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#if defined(__APPLE__)
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-}
-
-inline auto init_glew_boilerplate()
-{
-#ifndef __APPLE__
-  // Initialize GLEW.
-  auto err = glewInit();
-  if (err != GLEW_OK)
+  auto row_bytes(const sara::TensorView_<float, 2>& data) const -> GLsizei
   {
-    std::cerr << format("Error: failed to initialize GLEW: %s",
-                        glewGetErrorString(err))
-              << std::endl;
+    return static_cast<GLsizei>(data.size(1) * sizeof(float));
   }
-#endif
-}
 
+  auto float_pointer(const int offset) const -> void*
+  {
+    return reinterpret_cast<void*>(offset * sizeof(float));
+  };
 
-int main()
-{
-  init_glfw_boilerplate();
-
-  // Create a window.
-  const auto width = 800;
-  const auto height = 600;
-  auto window =
-      glfwCreateWindow(width, height, "Hello Triangle", nullptr, nullptr);
-  glfwMakeContextCurrent(window);
-
-  init_glew_boilerplate();
-
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
-                                        {"in_color", 1},       //
-                                        {"in_tex_coords", 2},  //
-                                        {"out_color", 0}};
-
-  const auto vertex_shader_source = R"shader(
+  auto build_shader_program() const -> kgl::ShaderProgram
+  {
+    static constexpr auto vertex_shader_source = R"shader(
 #version 330 core
   layout (location = 0) in vec3 in_coords;
   layout (location = 1) in vec3 in_color;
@@ -97,12 +70,12 @@ int main()
     out_color = in_color;
     out_tex_coords = vec2(in_tex_coords.x, in_tex_coords.y);
   }
-  )shader";
-  auto vertex_shader = kgl::Shader{};
-  vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
+    )shader";
+    auto vertex_shader = kgl::Shader{};
+    vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
 
 
-  const auto fragment_shader_source = R"shader(
+    static constexpr auto fragment_shader_source = R"shader(
 #version 330 core
   in vec3 out_color;
   in vec2 out_tex_coords;
@@ -114,124 +87,255 @@ int main()
   {
     frag_color = texture(texture1, out_tex_coords) * vec4(out_color, 1.0);
   }
-  )shader";
-  auto fragment_shader = kgl::Shader{};
-  fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
-                                     fragment_shader_source);
+    )shader";
+    auto fragment_shader = kgl::Shader{};
+    fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
+                                       fragment_shader_source);
 
-  auto shader_program = kgl::ShaderProgram{};
-  shader_program.create();
-  shader_program.attach(vertex_shader, fragment_shader);
+    auto shader_program = kgl::ShaderProgram{};
+    shader_program.create();
+    shader_program.attach(vertex_shader, fragment_shader);
 
-  shader_program.detach();
-  vertex_shader.destroy();
-  fragment_shader.destroy();
+    shader_program.detach();
+    vertex_shader.destroy();
+    fragment_shader.destroy();
 
-  // Encode the vertex data in a tensor.
-  auto vertices = Tensor_<float, 2>{{4, 8}};
-  // clang-format off
-  vertices.flat_array() <<
-  // coords              color              texture coords
-     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // bottom-right
-     0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // top-right
-    -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,  // top-left
-    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f;  // bottom-left
-  // clang-format on
+    return shader_program;
+  }
+};
 
-  auto triangles = Tensor_<unsigned int, 2>{{2, 3}};
-  triangles.flat_array() << 0, 1, 2, 2, 3, 0;
 
-  const auto row_bytes = [](const TensorView_<float, 2>& data) {
-    return static_cast<GLsizei>(data.size(1) * sizeof(float));
-  };
-  const auto float_pointer = [](int offset) {
-    return reinterpret_cast<void*>(offset * sizeof(float));
-  };
-
-  auto vao = kgl::VertexArray{};
-  vao.generate();
-
-  // Vertex attributes.
-  auto vbo = kgl::Buffer{};
-  vbo.generate();
-
-  // Triangles data.
-  auto ebo = kgl::Buffer{};
-  ebo.generate();
-
+class App
+{
+public:
+  App(const fs::path& program_dirpath, const Eigen::Vector2i& sizes,
+      const std::string& title)
+    : _program_dirpath{program_dirpath}
   {
-    glBindVertexArray(vao);
+    // Init GLFW.
+    init_glfw();
+
+    // Create a GLFW window.
+    _window = glfwCreateWindow(sizes.x(), sizes.y(),  //
+                               title.c_str(),         //
+                               nullptr, nullptr);
+
+    // Prepare OpenGL first before any OpenGL calls.
+    init_opengl();
+
+    init_shader_program();
+    init_data_on_opengl();
+    init_render_settings();
+  }
+
+  ~App()
+  {
+    _vao.destroy();
+    _vbo.destroy();
+    _ebo.destroy();
+    _texture.destroy();
+
+    _shader_program.clear();
+
+    // Clean up resources.
+    if (_window)
+      glfwDestroyWindow(_window);
+
+    // Kill the GLFW app.
+    if (_glfw_initialized)
+      glfwTerminate();
+  }
+
+  auto run() -> void
+  {
+    _shader_program.use();
+    while (!glfwWindowShouldClose(_window))
+    {
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      // Draw triangles.
+      glBindVertexArray(_vao);
+      glDrawElements(GL_TRIANGLES, _num_triangle_indices, GL_UNSIGNED_INT, 0);
+
+      glfwSwapBuffers(_window);
+      glfwPollEvents();
+    }
+  }
+
+private:
+  auto init_opengl() -> void
+  {
+    // GLFW context...
+    glfwMakeContextCurrent(_window);
+
+    // Init OpenGL extensions.
+    init_glew();
+  }
+
+  auto init_shader_program() -> void
+  {
+    const auto shader_program_builder = ShaderProgramBuilder{};
+    _shader_program = shader_program_builder.build_shader_program();
+  }
+
+  auto init_data_on_opengl() -> void
+  {
+    // Encode the vertex data in a tensor.
+    auto vertices = sara::Tensor_<float, 2>{{4, 8}};
+    // clang-format off
+    vertices.flat_array() <<
+    // coords              color              texture coords
+       0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // bottom-right
+       0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // top-right
+      -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,  // top-left
+      -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f;  // bottom-left
+    // clang-format on
+
+    auto triangles = sara::Tensor_<unsigned int, 2>{{2, 3}};
+    // clang-format off
+    triangles.flat_array() <<
+      0, 1, 2,
+      2, 3, 0;
+    // clang-format on
+    _num_triangle_indices = triangles.size();
+
+    _vao.generate();
+
+    // Vertex attributes.
+    _vbo.generate();
+    // Triangles data.
+    _ebo.generate();
+
+    glBindVertexArray(_vao);
 
     // Copy vertex data.
-    vbo.bind_vertex_data(vertices);
+    _vbo.bind_vertex_data(vertices);
 
     // Copy geometry data.
-    ebo.bind_triangles_data(triangles);
+    _ebo.bind_triangles_data(triangles);
+
+    const auto shader_program_builder = ShaderProgramBuilder{};
+    const auto& shader_arg_pos = shader_program_builder.arg_pos;
 
     // Map the parameters to the argument position for the vertex shader.
     //
     // Vertex coordinates.
-    glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
-                          GL_FALSE, row_bytes(vertices), float_pointer(0));
-    glEnableVertexAttribArray(arg_pos["in_coords"]);
+    glVertexAttribPointer(shader_arg_pos.at("in_coords"), 3 /* 3D points */,
+                          GL_FLOAT, GL_FALSE,
+                          shader_program_builder.row_bytes(vertices),
+                          shader_program_builder.float_pointer(0));
+    glEnableVertexAttribArray(shader_arg_pos.at("in_coords"));
 
     // Colors.
-    glVertexAttribPointer(arg_pos["in_color"], 3 /* 3D colors */, GL_FLOAT,
-                          GL_FALSE, row_bytes(vertices), float_pointer(3));
-    glEnableVertexAttribArray(arg_pos["in_color"]);
+    glVertexAttribPointer(shader_arg_pos.at("in_color"), 3 /* 3D colors */,
+                          GL_FLOAT, GL_FALSE,
+                          shader_program_builder.row_bytes(vertices),
+                          shader_program_builder.float_pointer(3));
+    glEnableVertexAttribArray(shader_arg_pos.at("in_color"));
 
     // Texture coordinates.
-    glVertexAttribPointer(arg_pos["in_tex_coords"], 2 /* 2D texture coords */,
-                          GL_FLOAT, GL_FALSE, row_bytes(vertices),
-                          float_pointer(6));
-    glEnableVertexAttribArray(arg_pos["in_tex_coords"]);
-  }
+    glVertexAttribPointer(shader_arg_pos.at("in_tex_coords"),
+                          2 /* 2D texture coords */, GL_FLOAT, GL_FALSE,
+                          shader_program_builder.row_bytes(vertices),
+                          shader_program_builder.float_pointer(6));
+    glEnableVertexAttribArray(shader_arg_pos.at("in_tex_coords"));
 
-  // Texture data.
-  auto texture = kgl::Texture2D{};
-  {
     // Read the image from the disk.
-    auto image = imread<Rgb8>(src_path("../../../../data/ksmall.jpg"));
+    auto image = sara::imread<sara::Rgb8>(
+        (_program_dirpath / "data" / "ksmall.jpg").string());
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);
 
     // Copy the image to the GPU texture.
-    texture.setup_with_pretty_defaults(image, 0);
+    _texture.setup_with_pretty_defaults(image, 0);
   }
 
-  // Activate the shader program once and for all.
-  shader_program.use(true);
-
-  // Activate the texture 0 once for all.
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture);
-
-  // Display image.
-  glfwSwapInterval(1);
-  while (!glfwWindowShouldClose(window))
+  auto init_render_settings() -> void
   {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
 
-    // Draw triangles.
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(triangles.size()),
-                   GL_UNSIGNED_INT, 0);
+    // Activate the texture 0 once for all.
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _texture);
 
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+    glfwSwapInterval(1);
   }
 
-  shader_program.clear();
-  vao.destroy();
-  vbo.destroy();
-  ebo.destroy();
-  texture.destroy();
+private: /* convenience free functions*/
+  static auto init_glfw() -> void
+  {
+    if (_glfw_initialized)
+      throw std::runtime_error{
+          "Error: cannot instantiate more than one GLFW Application!"};
 
-  // Clean up resources.
-  glfwDestroyWindow(window);
-  glfwTerminate();
+    // Initialize the windows manager.
+    _glfw_initialized = glfwInit();
+    if (!_glfw_initialized)
+      throw std::runtime_error{"Error: failed to initialize GLFW!"};
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#if defined(__APPLE__)
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+  }
+
+  static auto init_glew() -> void
+  {
+#if !defined(__APPLE__)
+    // Initialize GLEW.
+    const auto err = glewInit();
+    if (err != GLEW_OK)
+      throw std::runtime_error{sara::format(
+          "Error: failed to initialize GLEW: %s", glewGetErrorString(err))};
+#endif
+  }
+
+private:
+  static bool _glfw_initialized;
+  const fs::path _program_dirpath;
+
+  GLFWwindow* _window = nullptr;
+
+  //! @brief The graphics pipeline.
+  kgl::ShaderProgram _shader_program;
+
+  //! @brief Geometry data on OpenGL side.
+  //! @{
+  GLsizei _num_triangle_indices;
+  kgl::VertexArray _vao;
+  kgl::Buffer _vbo;
+  kgl::Buffer _ebo;
+  //! @}
+
+  //! @brief Image texture.
+  kgl::Texture2D _texture;
+};
+
+auto App::_glfw_initialized = false;
+
+
+auto main(const int, char** const argv) -> int
+{
+  try
+  {
+    static constexpr auto width = 800;
+    static constexpr auto height = 600;
+    static constexpr auto title = "Hello Texture";
+
+    const auto program_dirpath = fs::absolute(fs::path(argv[0]).parent_path());
+    auto app = App{program_dirpath, {width, height}, title};
+    app.run();
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }
