@@ -54,7 +54,7 @@ struct ShaderProgramBuilder
   auto float_pointer(const int offset) const -> void*
   {
     return reinterpret_cast<void*>(offset * sizeof(float));
-  };
+  }
 
   auto build_shader_program() const -> kgl::ShaderProgram
   {
@@ -372,7 +372,6 @@ auto App::_glfw_initialized = false;
 
 auto main(int, char** argv) -> int
 {
-  // Texture data.
   try
   {
     static constexpr auto width = 800;
