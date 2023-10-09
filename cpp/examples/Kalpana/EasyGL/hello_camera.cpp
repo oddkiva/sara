@@ -24,10 +24,9 @@
 
 #include <GLFW/glfw3.h>
 
+#include <map>
 
 #include "Time.hpp"
-
-#include <map>
 
 
 namespace k = DO::Kalpana;
@@ -544,7 +543,6 @@ public:
   Time gtime = Time{};
 
   DO::Kalpana::GL::TrackBall trackball = {};
-
   bool show_checkerboard = true;
   float scale = 1.f;
   static constexpr auto scale_factor = 1.05f;
