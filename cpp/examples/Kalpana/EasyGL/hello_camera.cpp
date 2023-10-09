@@ -420,7 +420,6 @@ private: /* convenience free functions*/
 #endif
   }
 
-private:
   static auto get_self(GLFWwindow* const window) -> App&
   {
     const auto app_void_ptr = glfwGetWindowUserPointer(window);
@@ -431,6 +430,23 @@ private:
     return *app_ptr;
   }
 
+  static inline auto normalize_cursor_pos(GLFWwindow* window,
+                                          const Eigen::Vector2d& pos)
+      -> Eigen::Vector2d
+  {
+    auto w = int{};
+    auto h = int{};
+    glfwGetWindowSize(window, &w, &h);
+
+    const Eigen::Vector2d c = Eigen::Vector2i(w, h).cast<double>() * 0.5;
+
+    Eigen::Vector2d normalized_pos = ((pos - c).array() / c.array()).matrix();
+    normalized_pos.y() *= -1;
+    return normalized_pos;
+  };
+
+
+private: /* callbacks */
   static auto resize_framebuffer(GLFWwindow*, int width, int height) -> void
   {
     // make sure the viewport matches the new window dimensions; note that width
@@ -520,32 +536,24 @@ private:
       app.trackball.move(p);
   }
 
-  static inline auto normalize_cursor_pos(GLFWwindow* window,
-                                          const Eigen::Vector2d& pos)
-      -> Eigen::Vector2d
-  {
-    auto w = int{};
-    auto h = int{};
-    glfwGetWindowSize(window, &w, &h);
-
-    const Eigen::Vector2d c = Eigen::Vector2i(w, h).cast<double>() * 0.5;
-
-    Eigen::Vector2d normalized_pos = ((pos - c).array() / c.array()).matrix();
-    normalized_pos.y() *= -1;
-    return normalized_pos;
-  };
-
 public:
   static bool _glfw_initialized;
   GLFWwindow* _window = nullptr;
 
-  k::Camera camera = {};
   Time gtime = Time{};
 
-  DO::Kalpana::GL::TrackBall trackball = {};
+  //! @brief View objects.
+  //! @{
+  k::Camera camera = {};
+  kgl::TrackBall trackball = {};
+  //! @}
+
+  //! @brief View parameters.
+  //! @{
   bool show_checkerboard = true;
   float scale = 1.f;
   static constexpr auto scale_factor = 1.05f;
+  //! @}
 };
 
 auto App::_glfw_initialized = false;
