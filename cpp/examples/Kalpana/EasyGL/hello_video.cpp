@@ -37,16 +37,19 @@ namespace sara = DO::Sara;
 namespace fs = std::filesystem;
 
 
-struct SingleWindowApp
+class App
 {
 public:
-  SingleWindowApp(const Eigen::Vector2i& sizes, const std::string& title)
+  App(const Eigen::Vector2i& sizes, const std::string& title)
   {
     // Init GLFW.
     init_glfw();
 
     // Create a GLFW window.
-    _window = create_glfw_window(sizes, title);
+    _window = glfwCreateWindow(sizes.x(), sizes.y(),  //
+                               title.c_str(),         //
+                               nullptr, nullptr);
+
     _fb_sizes = get_framebuffer_sizes();
 
     // Prepare OpenGL first before any OpenGL calls.
@@ -58,24 +61,9 @@ public:
     glfwSetWindowSizeCallback(_window, window_size_callback);
   }
 
-  //! @brief Note: RAII does not work on OpenGL applications.
-  //!
-  //! So the destructor gets a default implementation and we neeed to explicitly
-  //! call the terminate method.
-  ~SingleWindowApp() = default;
-
   auto open_video(const fs::path& video_path) -> void
   {
     _video_stream.open(video_path.string());
-  }
-
-  auto init_opengl() -> void
-  {
-    // GLFW context...
-    glfwMakeContextCurrent(_window);
-
-    // Init OpenGL extensions.
-    init_glew();
   }
 
   auto init_gl_resources() -> void
@@ -92,13 +80,6 @@ public:
     _texture_renderer.initialize();
   }
 
-  auto deinit_gl_resources() -> void
-  {
-    _texture.destroy();
-    _quad.destroy();
-    _texture_renderer.destroy();
-  }
-
   auto run() -> void
   {
     // Projection-model-view matrices.
@@ -107,13 +88,10 @@ public:
 
     const auto fb_aspect_ratio =
         static_cast<float>(_fb_sizes.x()) / _fb_sizes.y();
-    _projection = k::orthographic(                          //
+    _projection = k::orthographic(                        //
         -0.5f * fb_aspect_ratio, 0.5f * fb_aspect_ratio,  //
-        -0.5f, 0.5f,                                        //
+        -0.5f, 0.5f,                                      //
         -0.5f, 0.5f);
-
-    // Video state.
-    auto frame_index = -1;
 
     // Background color.
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -124,7 +102,6 @@ public:
     {
       if (!_video_stream.read())
         break;
-      ++frame_index;
 
       // Clear the color buffer and the buffer testing.
       glClear(GL_COLOR_BUFFER_BIT);
@@ -143,7 +120,7 @@ public:
     }
   }
 
-  auto terminate() -> void
+  ~App()
   {
     // Destroy GL objects.
     deinit_gl_resources();
@@ -151,7 +128,9 @@ public:
     // Destroy GLFW.
     if (_window != nullptr)
       glfwDestroyWindow(_window);
-    glfwTerminate();
+
+    if (_glfw_initialized)
+      glfwTerminate();
   }
 
 private: /* callback functions */
@@ -170,8 +149,14 @@ private: /* callback functions */
 private: /* convenience free functions*/
   static auto init_glfw() -> void
   {
+    _glfw_initialized = false;
+    if (_glfw_initialized)
+      throw std::runtime_error{
+          "Error: cannot instantiate more than one GLFW Application!"};
+
     // Initialize the windows manager.
-    if (!glfwInit())
+    _glfw_initialized = glfwInit();
+    if (!_glfw_initialized)
       throw std::runtime_error{"Error: failed to initialize GLFW!"};
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -193,25 +178,17 @@ private: /* convenience free functions*/
 #endif
   }
 
-  static auto create_glfw_window(const Eigen::Vector2i& sizes,
-                                 const std::string& title) -> GLFWwindow*
-  {
-    auto window = glfwCreateWindow(sizes.x(), sizes.y(),  //
-                                   title.c_str(),         //
-                                   nullptr, nullptr);
-    return window;
-  }
-
-  static auto get_self(GLFWwindow* const window) -> SingleWindowApp&
+  static auto get_self(GLFWwindow* const window) -> App&
   {
     const auto app_void_ptr = glfwGetWindowUserPointer(window);
     if (app_void_ptr == nullptr)
       throw std::runtime_error{
           "Please call glfwSetWindowUserPointer to register this window!"};
-    const auto app_ptr = reinterpret_cast<SingleWindowApp*>(app_void_ptr);
+    const auto app_ptr = reinterpret_cast<App*>(app_void_ptr);
     return *app_ptr;
   }
 
+private:
   auto get_framebuffer_sizes() const -> Eigen::Vector2i
   {
     auto sizes = Eigen::Vector2i{};
@@ -219,25 +196,47 @@ private: /* convenience free functions*/
     return sizes;
   }
 
+  auto init_opengl() -> void
+  {
+    // GLFW context...
+    glfwMakeContextCurrent(_window);
+
+    // Init OpenGL extensions.
+    init_glew();
+  }
+
+  auto deinit_gl_resources() -> void
+  {
+    _texture.destroy();
+    _quad.destroy();
+    _texture_renderer.destroy();
+  }
 
 private: /* data members */
+  static bool _glfw_initialized;
+
   GLFWwindow* _window = nullptr;
-  Eigen::Vector2i _fb_sizes = -Eigen::Vector2i::Ones();
+  Eigen::Vector2i _fb_sizes = Eigen::Vector2i::Zero();
 
   Eigen::Matrix4f _projection;
 
-  // Our video stream.
+  // Our video stream (CPU side).
   sara::VideoStream _video_stream;
-  // What: our image texture.
+
+  //! @brief OpenGL side
+  //!
+  //! @brief What: our image texture.
   kgl::TexturedImage2D _texture;
-  // Where: where to show our image texture.
+  //! @brief  Where: where to show our image texture.
   kgl::TexturedQuad _quad;
-  // Texture renderer.
+  //! @brief Texture renderer.
   kgl::TextureRenderer _texture_renderer;
 };
 
+auto App::_glfw_initialized = false;
 
-auto main(int const argc, char** const argv) -> int
+
+int main(int const argc, char** const argv)
 {
   if (argc < 2)
   {
@@ -245,13 +244,18 @@ auto main(int const argc, char** const argv) -> int
     return EXIT_FAILURE;
   }
 
-  auto app = SingleWindowApp({800, 600}, "Hello Video");
-
-  // The order matters.
-  app.open_video(fs::path{argv[1]});
-  app.init_gl_resources();
-  app.run();
-  app.terminate();
+  try
+  {
+    auto app = App({800, 600}, "Hello Video");
+    app.open_video(fs::path{argv[1]});
+    app.init_gl_resources();
+    app.run();
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }

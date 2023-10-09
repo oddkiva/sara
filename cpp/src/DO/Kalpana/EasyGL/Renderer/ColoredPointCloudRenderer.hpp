@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#pragma once
+
 #include <DO/Kalpana/EasyGL.hpp>
 #include <DO/Kalpana/EasyGL/Objects/ColoredPointCloud.hpp>
 
@@ -30,6 +32,11 @@ namespace DO::Kalpana::GL {
 
     //! The shader program is understood as an optional value.
     ShaderProgram _shader_program;
+    //! @brief Shader parameters.
+    GLint _point_size_loc;
+    GLint _transform_loc;
+    GLint _view_loc;
+    GLint _projection_loc;
 
     auto initialize() -> void;
 

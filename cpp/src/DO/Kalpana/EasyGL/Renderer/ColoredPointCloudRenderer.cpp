@@ -61,6 +61,11 @@ auto ColoredPointCloudRenderer::initialize() -> void
   )shader";
 
   this->initialize(vertex_shader_source, fragment_shader_source);
+
+  _point_size_loc = _shader_program.get_uniform_location("point_size");
+  _transform_loc = _shader_program.get_uniform_location("transform");
+  _view_loc = _shader_program.get_uniform_location("view");
+  _projection_loc = _shader_program.get_uniform_location("projection");
 }
 
 auto ColoredPointCloudRenderer::initialize(
@@ -90,24 +95,20 @@ auto ColoredPointCloudRenderer::destroy() -> void
 
 auto ColoredPointCloudRenderer::render(const ColoredPointCloud& point_cloud,
                                        const float point_size,
-                                       const Eigen::Matrix4f& transformation,
+                                       const Eigen::Matrix4f& transform,
                                        const Eigen::Matrix4f& model_view,
                                        const Eigen::Matrix4f& projection)
     -> void
 {
   _shader_program.use();
-  _shader_program.set_uniform_param("point_size", point_size);
 
-  // Transformation matrix.
-  _shader_program.set_uniform_matrix4f("transform", transformation.data());
-
-  // View matrix.
-  _shader_program.set_uniform_matrix4f("view", model_view.data());
-
-  // Projection matrix.
-  _shader_program.set_uniform_matrix4f("projection", projection.data());
+  // Pass the parameters to the shader program.
+  _shader_program.set_uniform_param(_point_size_loc, point_size);
+  _shader_program.set_uniform_matrix4f(_transform_loc, transform.data());
+  _shader_program.set_uniform_matrix4f(_view_loc, model_view.data());
+  _shader_program.set_uniform_matrix4f(_projection_loc, projection.data());
 
   // Draw triangles.
-  glBindVertexArray(point_cloud._vao);
-  glDrawArrays(GL_POINTS, 0, point_cloud._num_vertices);
+  glBindVertexArray(point_cloud.vao());
+  glDrawArrays(GL_POINTS, 0, point_cloud.num_vertices());
 }

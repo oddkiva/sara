@@ -29,13 +29,6 @@ namespace DO::Kalpana::GL {
     static constexpr auto color_attr_index = 1;
     static constexpr auto vertex_dim = coords_dim + color_dim;
 
-    // Point cloud data layout specified for OpenGL.
-    VertexArray _vao;
-    // 3D points and other attributes (colors, normals, etc).
-    Buffer _vbo;
-    // Point cloud data sizes
-    GLsizei _num_vertices;
-
     // Initialize the VAO and VBO.
     auto initialize() -> void;
 
@@ -43,6 +36,23 @@ namespace DO::Kalpana::GL {
 
     auto upload_host_data_to_gl(const Sara::TensorView_<float, 2>& point_cloud)
         -> void;
+
+    auto vao() const -> VertexArray {
+      return _vao;
+    }
+
+    auto num_vertices() const -> GLsizei {
+      return _num_vertices;
+    }
+
+  private:
+    // Point cloud data layout specified for OpenGL.
+    VertexArray _vao;
+    // 3D points and other attributes (colors, normals, etc).
+    Buffer _vbo;
+    // Point cloud data sizes
+    GLsizei _num_vertices;
+
   };
 
   //! @}

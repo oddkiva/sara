@@ -6,6 +6,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
   return()
 endif ()
 
+add_subdirectory(Logging)
+
 include(UseDOSaraFileSystem)
 include(UseDOSaraGraphics)
 include(UseDOSaraImageIO)

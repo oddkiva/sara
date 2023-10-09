@@ -222,43 +222,4 @@ namespace DO::Kalpana::GL {
                                           success, log.data())};
   }
 
-  auto ShaderProgram::set_uniform_vector2f(const char* mat_name,
-                                           const float* mat_coeffs) const
-      -> void
-  {
-    const auto mat_location = get_uniform_location(mat_name);
-    set_uniform_vector2f(mat_location, mat_coeffs);
-  }
-
-  auto ShaderProgram::set_uniform_vector4f(const char* mat_name,
-                                           const float* mat_coeffs) const
-      -> void
-  {
-    const auto mat_location = get_uniform_location(mat_name);
-    set_uniform_vector4f(mat_location, mat_coeffs);
-  }
-
-  auto ShaderProgram::set_uniform_matrix3f(const char* mat_name,
-                                           const float* mat_coeffs) const
-      -> void
-  {
-    const auto mat_location = get_uniform_location(mat_name);
-    set_uniform_matrix3f(mat_location, mat_coeffs);
-  }
-
-  auto ShaderProgram::set_uniform_matrix4f(const char* mat_name,
-                                           const float* mat_coeffs) const
-      -> void
-  {
-    const auto mat_location = get_uniform_location(mat_name);
-    set_uniform_matrix4f(mat_location, mat_coeffs);
-  }
-
-  auto ShaderProgram::set_uniform_texture(const char* texture_name,
-                                          GLuint texture_unit) const -> void
-  {
-    const auto tex_location = get_uniform_location(texture_name);
-    set_uniform_texture(tex_location, texture_unit);
-  }
-
 }  // namespace DO::Kalpana::GL

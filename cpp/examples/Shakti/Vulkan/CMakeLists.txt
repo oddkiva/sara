@@ -6,6 +6,7 @@ target_link_libraries(
 set_target_properties(hello_vulkan PROPERTIES FOLDER "Examples/Shakti/Vulkan")
 
 add_custom_target(compile_hello_vulkan_shaders)
+set_target_properties(compile_hello_vulkan_shaders PROPERTIES FOLDER "Examples/Shakti/Vulkan")
 add_custom_command(
   TARGET compile_hello_vulkan_shaders
   COMMAND ${CMAKE_COMMAND} -E make_directory
