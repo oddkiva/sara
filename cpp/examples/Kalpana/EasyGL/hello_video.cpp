@@ -233,7 +233,7 @@ private: /* data members */
   kgl::TextureRenderer _texture_renderer;
 };
 
-auto App::_glfw_initialized = false;
+bool App::_glfw_initialized = false;
 
 
 int main(int const argc, char** const argv)

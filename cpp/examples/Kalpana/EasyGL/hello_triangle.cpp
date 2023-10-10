@@ -15,7 +15,6 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
-#include <GL/gl.h>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -271,7 +270,7 @@ private:
   kgl::Buffer _vbo;
 };
 
-auto App::_glfw_initialized = false;
+bool App::_glfw_initialized = false;
 
 
 auto main() -> int
