@@ -36,7 +36,7 @@ namespace DO::Kalpana::GLFW {
       SARA_DEBUG << "[GLFW] Initialized GLFW application!\n";
     }
 
-    auto init_for_vulkan_rendering() -> void
+    auto init_for_vulkan_rendering() const -> void
     {
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #if defined(__APPLE__)
