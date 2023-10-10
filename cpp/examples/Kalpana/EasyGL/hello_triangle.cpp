@@ -271,7 +271,7 @@ private:
   kgl::Buffer _vbo;
 };
 
-auto App::_glfw_initialized = false;
+bool App::_glfw_initialized = false;
 
 
 auto main() -> int

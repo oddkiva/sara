@@ -349,7 +349,7 @@ private:
   //! @}
 };
 
-auto App::_glfw_initialized = false;
+bool App::_glfw_initialized = false;
 
 
 int main()

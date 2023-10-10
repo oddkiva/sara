@@ -198,10 +198,6 @@ public:
     const Eigen::Transform<float, 3, Eigen::Projective> transform =
         Eigen::Transform<float, 3, Eigen::Projective>::Identity();
 
-    const auto view_uniform = _checkerboard._view_loc;
-    const auto proj_uniform = _checkerboard._projection_loc;
-    const auto tsfm_uniform = _checkerboard._transform_loc;
-
     while (!glfwWindowShouldClose(window))
     {
       // Calculate the elapsed time.
@@ -418,7 +414,7 @@ public:
   Scene _scene;
 };
 
-auto App::_glfw_initialized = false;
+bool App::_glfw_initialized = false;
 
 
 auto main() -> int

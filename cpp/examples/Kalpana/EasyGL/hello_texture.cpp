@@ -316,7 +316,7 @@ private:
   kgl::Texture2D _texture;
 };
 
-auto App::_glfw_initialized = false;
+bool App::_glfw_initialized = false;
 
 
 auto main(const int, char** const argv) -> int
