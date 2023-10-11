@@ -43,15 +43,20 @@ SARA_DOCKER_IMAGE = f'{SARA_DOCKER_IMAGE_BASENAME}:{SARA_DOCKER_IMAGE_VERSION}'
 
 SYSTEM = platform.system()
 
+FORCE_COMPILE_WITH_GCC = False
+
 # Third-party libraries that makes Sara faster, stronger, cooler...
 if SYSTEM == "Linux":
     OPT_PATH = pathlib.Path("/opt")
     HALIDE_ROOT_PATH = OPT_PATH / (f"Halide-{HALIDE_VERSION}-x86-64-linux")
     ONNXRUNTIME_ROOT_PATH = OPT_PATH / "onnxruntime-linux-x64-gpu-1.14.0"
     NVIDIA_CODEC_SDK_ROOT_PATH = OPT_PATH / "Video_Codec_SDK_12.1.14"
-    SWIFT_TOOLCHAIN_DIR = OPT_PATH / f"swift-{SWIFT_VERSION}-RELEASE-ubuntu{UBUNTU_VERSION}"
-    SWIFT_TOOLCHAIN_BIN_DIR = SWIFT_TOOLCHAIN_DIR / "usr/bin"
-    SWIFTC_PATH = SWIFT_TOOLCHAIN_BIN_DIR / "swiftc"
+    if not FORCE_COMPILE_WITH_GCC:
+        SWIFT_TOOLCHAIN_DIR = OPT_PATH / f"swift-{SWIFT_VERSION}-RELEASE-ubuntu{UBUNTU_VERSION}"
+        SWIFT_TOOLCHAIN_BIN_DIR = SWIFT_TOOLCHAIN_DIR / "usr/bin"
+        SWIFTC_PATH = SWIFT_TOOLCHAIN_BIN_DIR / "swiftc"
+    else:
+        SWIFTC_PATH = ""
 elif SYSTEM == "Darwin":
     NVIDIA_CODEC_SDK_ROOT_PATH = None
     SWIFT_PATH = subprocess.check_output(["which", "swift"])
@@ -69,6 +74,47 @@ except:
     PYBIND11_DIR = None
 
 
+class BuildConfiguration:
+
+    def __init__(self, args):
+        self._os_name = "ubuntu"
+        self._os_version = UBUNTU_VERSION
+        self._cuda_version = CUDA_VERSION
+        self._trt_version = TRT_VERSION
+        self._halide_version = HALIDE_VERSION
+        self._source_dir = SARA_SOURCE_DIR
+
+        # Quick'n'dirty
+        if FORCE_COMPILE_WITH_GCC:
+            self._compiler = "gcc"
+        else:
+            self._compiler = "clang"
+        self._build_type = args.build_type
+
+        config_list = [self._build_type]
+        if FORCE_COMPILE_WITH_GCC:
+            config_list += [
+                f"{self._compiler}",
+                # f"{self._os_name}{self._os_version}",
+                # f"cuda-{self._cuda_version}",
+                # f"trt-{self._trt_version}",
+                # f"halide-{self._halide_version}",
+            ]
+
+        stringified_config = "-".join(config_list)
+        self._build_dir = f"{SARA_SOURCE_DIR.name}-build-{stringified_config}"
+
+    @staticmethod
+    def infer_project_type(system: str):
+        if system == "Linux":
+            return "Ninja"
+        elif system == "Darwin":
+            return "Xcode"
+
+
+PROJECT_TYPE = BuildConfiguration.infer_project_type(SYSTEM)
+
+
 def execute(cmd, cwd):
     with subprocess.Popen(
         cmd,
@@ -82,16 +128,6 @@ def execute(cmd, cwd):
 
     if p.returncode != 0:
         raise subprocess.CalledProcessError(p.returncode, p.args)
-
-
-def infer_project_type(system: str):
-    if system == "Linux":
-        return "Ninja"
-    elif system == "Darwin":
-        return "Xcode"
-
-
-PROJECT_TYPE = infer_project_type(SYSTEM)
 
 
 def generate_project(
@@ -112,7 +148,7 @@ def generate_project(
     if PROJECT_TYPE != "Xcode":
         cmake_options.append(f"-D CMAKE_BUILD_TYPE={build_type}")
 
-    if SYSTEM == "Linux":
+    if SYSTEM == "Linux" and not FORCE_COMPILE_WITH_GCC:
         cxx_compiler = SWIFT_TOOLCHAIN_BIN_DIR / "clang++"
         c_compiler = SWIFT_TOOLCHAIN_BIN_DIR / "clang"
         swift_bridging_include_dirs = SWIFT_TOOLCHAIN_DIR / "usr/include"
@@ -181,7 +217,7 @@ def generate_project(
     # Setup Swift bindings.
     if SYSTEM == "Darwin":
         cmake_options.append("-D CMAKE_Swift_COMPILER=/usr/bin/swiftc")
-    elif SYSTEM == "Linux" and pathlib.Path(SWIFTC_PATH).exists():
+    elif SYSTEM == "Linux" and pathlib.Path(SWIFTC_PATH).exists() and not FORCE_COMPILE_WITH_GCC:
         cmake_options.append(f"-D CMAKE_Swift_COMPILER={SWIFTC_PATH}")
 
     # Setup Python bindings.
@@ -399,10 +435,8 @@ if __name__ == "__main__":
                     f"{SARA_SOURCE_DIR.name}-build-Xcode"
                 )
             else:
-                build_dir = (
-                    SARA_SOURCE_DIR.parent /
-                    f"{SARA_SOURCE_DIR.name}-build-{args.build_type}"
-                )
+                build_config = BuildConfiguration(args)
+                build_dir = SARA_SOURCE_DIR.parent / build_config._build_dir
             generate_project(
                 SARA_SOURCE_DIR, build_dir,
                 args.build_type,

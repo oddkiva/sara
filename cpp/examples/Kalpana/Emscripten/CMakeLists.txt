@@ -4,7 +4,6 @@ set(SARA_EMSCRIPTEN_BUILD_HTML YES)
 list(
   APPEND
   GL_UTILS
-  Geometry.hpp
   ImagePlaneRenderer.hpp
   ImagePlaneRenderer.cpp
   ImageDewarpRenderer.hpp
