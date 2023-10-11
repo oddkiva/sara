@@ -280,7 +280,7 @@ private:
 private:
   GLFWwindow* _window = nullptr;
   Eigen::Vector2i _window_sizes = Eigen::Vector2i::Zero();
-#if defined(_WN32)
+#if defined(_WIN32)
   int _high_dpi_scale_factor;
 #endif
 
