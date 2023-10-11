@@ -316,11 +316,11 @@ private:
     // convention.
     //
     // clang-format off
-  const Eigen::Matrix3f P = (Eigen::Matrix3f{} <<
-     0,  0, 1,
-    -1,  0, 0,
-     0, -1, 0
-  ).finished();
+    const Eigen::Matrix3f P = (Eigen::Matrix3f{} <<
+       0,  0, 1,
+      -1,  0, 0,
+       0, -1, 0
+    ).finished();
     // clang-format on
 
     auto& C = lines._extrinsics;
@@ -331,19 +331,19 @@ private:
     auto& intrinsics = lines._intrinsics;
 
     // clang-format off
-  const auto K = (Eigen::Matrix3f{} <<
-    1041.55762f, -2.31719828f, 942.885742f,
-            0.f,  1041.53857f, 589.198425f,
-            0.f,          0.f,         1.f
-  ).finished();
-  intrinsics.set_calibration_matrix(K);
-  intrinsics.radial_distortion_coefficients <<
-     0.442631334f,
-    -0.156340882f,
-     0;
-  intrinsics.tangential_distortion_coefficients <<
-    -0.000787709199f,
-    -0.000381082471f;
+    const auto K = (Eigen::Matrix3f{} <<
+      1041.55762f, -2.31719828f, 942.885742f,
+              0.f,  1041.53857f, 589.198425f,
+              0.f,          0.f,         1.f
+    ).finished();
+    intrinsics.set_calibration_matrix(K);
+    intrinsics.radial_distortion_coefficients <<
+       0.442631334f,
+      -0.156340882f,
+       0;
+    intrinsics.tangential_distortion_coefficients <<
+      -0.000787709199f,
+      -0.000381082471f;
     // clang-format on
     intrinsics.xi = 1.43936455f;
   }
@@ -423,9 +423,10 @@ public: /* callbacks */
     const auto aspect_ratio = static_cast<float>(width) / height;
 
     auto& image = app._image_plane_renderer._textures.front();
-    image._projection = k::orthographic(                         //
-        -0.5f * aspect_ratio, 0.5f * aspect_ratio, -0.5f, 0.5f,  //
-        -0.5f, 0.5f                                              //
+    image._projection = k::orthographic(            //
+        -0.5f * aspect_ratio, 0.5f * aspect_ratio,  //
+        -0.5f, 0.5f,                                //
+        -0.5f, 0.5f                                 //
     );
   }
 
