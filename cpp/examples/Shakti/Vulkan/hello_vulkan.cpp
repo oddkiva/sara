@@ -90,12 +90,14 @@ struct ModelViewProjectionStack
   Eigen::Transform<float, 3, Eigen::Projective> projection;
 };
 
+// clang-format off
 static const auto vertices = std::vector<Vertex>{
-    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},  //
-    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},   //
-    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},    //
-    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}    //
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{ 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{ 0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}}
 };
+// clang-format on
 
 static const auto indices = std::vector<uint16_t>{
     0, 1, 2,  //
@@ -220,9 +222,15 @@ public:
 
   auto make_ubo_descriptor_sets() -> void
   {
+    // The number of frames in flight is the number of swapchain images.
+    // Let's say there are 3 frames in flight.
+    //
+    // We will construct 3 sets of descriptors, that is, we need one for each
+    // swapchain image.
     const auto num_frames_in_flight =
-        static_cast<std::uint32_t>(_swapchain.images.size());  // 3 typically.
+        static_cast<std::uint32_t>(_swapchain.images.size());
 
+    // Each descriptor set has the same uniform descriptor layout.
     const auto& ubo_layout = _graphics_pipeline.model_view_projection_layout();
     const auto ubo_layout_handle =
         static_cast<VkDescriptorSetLayout>(ubo_layout);
@@ -284,9 +292,7 @@ public:
     }
   }
 
-  auto
-  update_model_view_projection_ubo(const std::uint32_t swapchain_image_index)
-      -> void
+  auto update_mvp_uniform(const std::uint32_t swapchain_image_index) -> void
   {
     static auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -364,7 +370,7 @@ public:
 #endif
     SARA_CHECK(index_of_next_image_to_render);
 
-    update_model_view_projection_ubo(index_of_next_image_to_render);
+    update_mvp_uniform(index_of_next_image_to_render);
 
     // Reset the signaled fence associated to the current frame to an
     // unsignaled state. So that the GPU can reuse it to signal.
@@ -552,20 +558,24 @@ public:
       vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 #endif
 
+      // Pass the VBO to the graphics pipeline.
       static const auto vbos = std::array<VkBuffer, 1>{_vbo};
       static constexpr auto offsets = std::array<VkDeviceSize, 1>{0};
       vkCmdBindVertexBuffers(command_buffer, 0,
                              static_cast<std::uint32_t>(vbos.size()),
                              vbos.data(), offsets.data());
 
+      // Pass the EBO to the graphics pipeline.
       vkCmdBindIndexBuffer(command_buffer, _ebo, 0, VK_INDEX_TYPE_UINT16);
 
+      // Pass the UBO to the graphics pipeline.
       vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                               _graphics_pipeline.pipeline_layout(),  //
                               0, 1,             // Find out later about this.
                               &descriptor_set,  //
                               0, nullptr);      // Find out later about this.
 
+      // Tell the graphics pipeline to draw triangles.
       vkCmdDrawIndexed(command_buffer,
                        static_cast<std::uint32_t>(indices.size()), 1, 0, 0, 0);
     }
@@ -602,18 +612,18 @@ private:
 };
 
 
-int main(int, char** argv)
+auto main(int, char** argv) -> int
 {
   SignalHandler::init();
 
-  auto app = glfw::Application{};
-  app.init_for_vulkan_rendering();
-
-  const auto app_name = "Vulkan Triangle";
-  auto window = glfw::Window{300, 300, app_name};
-
   try
   {
+    const auto app = glfw::Application{};
+    app.init_for_vulkan_rendering();
+
+    const auto app_name = "Vulkan Triangle";
+    auto window = glfw::Window{300, 300, app_name};
+
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     auto triangle_renderer = VulkanTriangleRenderer{
         window, app_name, program_dir_path / "hello_vulkan_shaders", true};
