@@ -12,6 +12,7 @@
 //! @file
 
 #include <DO/Kalpana/EasyGL.hpp>
+#include <DO/Kalpana/Math/Projection.hpp>
 
 #include <DO/Sara/Core/Math/Rotation.hpp>
 #include <DO/Sara/ImageIO.hpp>
@@ -29,13 +30,13 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "Geometry.hpp"
 #include "ImagePlaneRenderer.hpp"
 #include "MetricGridRenderer.hpp"
 
 
 namespace fs = std::filesystem;
 namespace sara = DO::Sara;
+namespace k = DO::Kalpana;
 
 
 class GLFWApp;
@@ -65,7 +66,7 @@ class GLFWApp
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-      // clang-format off
+    // clang-format off
 // #if defined(__APPLE__)
 //   // GL 3.2 + GLSL 150
 //   MyGLFW::glsl_version = "#version 150";
@@ -84,7 +85,7 @@ class GLFWApp
 //   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 //   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 // #endif
-      // clang-format on
+    // clang-format on
 
 #if defined(_WIN32)
     // if it's a HighDPI monitor, try to scale everything
@@ -301,8 +302,11 @@ private:
     const auto aspect_ratio = static_cast<float>(_window_sizes.x()) /  //
                               _window_sizes.y();
     image_texture._model_view.setIdentity();
-    image_texture._projection = orthographic(
-        -0.5f * aspect_ratio, 0.5f * aspect_ratio, -0.5f, 0.5f, -0.5f, 0.5f);
+    image_texture._projection = k::orthographic(    //
+        -0.5f * aspect_ratio, 0.5f * aspect_ratio,  //
+        -0.5f, 0.5f,                                //
+        -0.5f, 0.5f                                 //
+    );
   }
 
   auto initialize_camera_parameters(MetricGridRenderer::LineShaderData& lines)
@@ -419,8 +423,10 @@ public: /* callbacks */
     const auto aspect_ratio = static_cast<float>(width) / height;
 
     auto& image = app._image_plane_renderer._textures.front();
-    image._projection = orthographic(-0.5f * aspect_ratio, 0.5f * aspect_ratio,
-                                     -0.5f, 0.5f, -0.5f, 0.5f);
+    image._projection = k::orthographic(                         //
+        -0.5f * aspect_ratio, 0.5f * aspect_ratio, -0.5f, 0.5f,  //
+        -0.5f, 0.5f                                              //
+    );
   }
 
   static auto key_callback(GLFWwindow* window, int key, int /* scancode */,
