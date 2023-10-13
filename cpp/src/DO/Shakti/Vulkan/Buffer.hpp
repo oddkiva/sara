@@ -91,7 +91,7 @@ namespace DO::Shakti::Vulkan {
       std::swap(_size, other._size);
     }
 
-    auto get_memory_requirements() const -> VkMemoryRequirements
+    auto memory_requirements() const -> VkMemoryRequirements
     {
       auto mem_requirements = VkMemoryRequirements{};
       vkGetBufferMemoryRequirements(_device, _handle, &mem_requirements);

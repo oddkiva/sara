@@ -12,6 +12,7 @@
 #pragma once
 
 #include <DO/Shakti/Vulkan/Buffer.hpp>
+#include <DO/Shakti/Vulkan/Image.hpp>
 #include <DO/Shakti/Vulkan/PhysicalDevice.hpp>
 
 #include <fmt/format.h>
@@ -135,7 +136,7 @@ namespace DO::Shakti::Vulkan {
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT  //
       };
 
-      const auto mem_reqs = buffer.get_memory_requirements();
+      const auto mem_reqs = buffer.memory_requirements();
       const auto mem_type =
           _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
 
@@ -149,7 +150,7 @@ namespace DO::Shakti::Vulkan {
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT  //
       };
 
-      const auto mem_reqs = buffer.get_memory_requirements();
+      const auto mem_reqs = buffer.memory_requirements();
       const auto mem_type =
           _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
 
@@ -161,7 +162,19 @@ namespace DO::Shakti::Vulkan {
       static constexpr auto mem_props =
           VkMemoryPropertyFlags{VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT};
 
-      const auto mem_reqs = buffer.get_memory_requirements();
+      const auto mem_reqs = buffer.memory_requirements();
+      const auto mem_type =
+          _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
+
+      return {_device, mem_reqs.size, mem_type};
+    }
+
+    auto allocate_for_device_image(const Image& image) const -> DeviceMemory
+    {
+      static constexpr auto mem_props =
+          VkMemoryPropertyFlags{VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT};
+
+      const auto mem_reqs = image.memory_requirements();
       const auto mem_type =
           _physical_device.find_memory_type(mem_reqs.memoryTypeBits, mem_props);
 
