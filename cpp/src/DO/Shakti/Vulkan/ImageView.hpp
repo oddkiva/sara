@@ -30,11 +30,25 @@ namespace DO::Shakti::Vulkan {
 
     ImageView(const ImageView&) = delete;
 
-    ImageView(ImageView&& other);
+    ImageView(ImageView&& other)
+    {
+      swap(other);
+    }
+
+    ~ImageView()
+    {
+      if (_device == nullptr || _handle == nullptr)
+        return;
+      vkDestroyImageView(_device, _handle, nullptr);
+    }
 
     auto operator=(const ImageView&) -> ImageView& = delete;
 
-    auto operator=(ImageView&& other) -> ImageView&;
+    auto operator=(ImageView&& other) -> ImageView&
+    {
+      swap(other);
+      return *this;
+    }
 
     operator VkImageView&()
     {
@@ -46,6 +60,12 @@ namespace DO::Shakti::Vulkan {
       return _handle;
     }
 
+    auto swap(ImageView& other) -> void
+    {
+      std::swap(_device, other._device);
+      std::swap(_handle, other._handle);
+    }
+
   private:
     VkDevice _device = VK_NULL_HANDLE;
     VkImageView _handle = VK_NULL_HANDLE;
@@ -55,7 +75,10 @@ namespace DO::Shakti::Vulkan {
   class ImageView::Builder
   {
   public:
-    Builder() = default;
+    explicit Builder(VkDevice device)
+      : _device{device}
+    {
+    }
 
     auto image(const VkImage value) -> Builder&
     {
@@ -75,7 +98,7 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
-    auto aspect_mask(const VkImageAspectFlagBits value) -> Builder&
+    auto aspect_mask(const VkImageAspectFlags value) -> Builder&
     {
       _aspect_mask = value;
       return *this;
@@ -114,7 +137,7 @@ namespace DO::Shakti::Vulkan {
     VkImage _image = VK_NULL_HANDLE;
     VkImageViewType _view_type = VK_IMAGE_VIEW_TYPE_2D;
     VkFormat _format;
-    VkImageAspectFlagBits _aspect_mask = VK_IMAGE_ASPECT_COLOR_BIT;
+    VkImageAspectFlags _aspect_mask = VK_IMAGE_ASPECT_COLOR_BIT;
   };
 
 }  // namespace DO::Shakti::Vulkan

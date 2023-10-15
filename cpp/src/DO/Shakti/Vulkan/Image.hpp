@@ -125,6 +125,12 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
+    auto usage(const VkImageUsageFlags value) -> Builder&
+    {
+      _usage = value;
+      return *this;
+    }
+
     auto create() const -> Image
     {
       auto create_info = VkImageCreateInfo{};
@@ -159,15 +165,15 @@ namespace DO::Shakti::Vulkan {
     //! @brief Image sizes: [width, height, depth]
     std::array<std::uint32_t, 3> _sizes = {0, 0, 1};
     VkImageType _image_type = VK_IMAGE_TYPE_2D;
-    VkFormat _format;
-    VkImageTiling _tiling;
+    VkFormat _format;       // VK_FORMAT_R8G8B8A8_SRGB
+    VkImageTiling _tiling;  // VK_IMAGE_TILING_OPTIMAL
     std::uint32_t _mip_levels = 1;
     std::uint32_t _array_layers = 1;
     VkImageLayout _initial_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-    std::uint32_t _usage;
+    VkImageUsageFlags _usage;  // VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                               // VK_IMAGE_USAGE_SAMPLED_BIT
     VkSampleCountFlagBits _samples = VK_SAMPLE_COUNT_1_BIT;
     VkSharingMode _sharing_mode = VK_SHARING_MODE_EXCLUSIVE;
-    VkImageUsageFlags _flags;
   };
 
 
