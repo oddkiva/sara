@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <vulkan/vulkan_core.h>
+#include <DO/Shakti/Vulkan/Buffer.hpp>
 
 #include <fmt/core.h>
 
@@ -30,7 +30,7 @@ namespace DO::Shakti::Vulkan {
 
     Image(const Image&) = delete;
 
-    Image(Image&& other);
+    Image(Image&&) = default;
 
     ~Image()
     {
@@ -41,7 +41,13 @@ namespace DO::Shakti::Vulkan {
 
     auto operator=(const Image&) -> Image& = delete;
 
-    auto operator=(Image&& other) -> Image&;
+    auto operator=(Image&& other) -> Image&
+    {
+      _device = std::move(other._device);
+      _handle = std::move(other._handle);
+      _sizes = std::move(other._sizes);
+      return *this;
+    }
 
     operator VkImage&()
     {
@@ -72,9 +78,15 @@ namespace DO::Shakti::Vulkan {
                         static_cast<int>(status))};
     }
 
+    auto sizes() const -> const VkExtent3D&
+    {
+      return _sizes;
+    }
+
   private:
     VkDevice _device = VK_NULL_HANDLE;
     VkImage _handle = VK_NULL_HANDLE;
+    VkExtent3D _sizes = {.width = 0, .height = 0, .depth = 0};
   };
 
 
@@ -94,14 +106,15 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
-    auto sizes(const std::array<std::uint32_t, 2>& value) -> Builder&
+    auto sizes(const VkExtent2D& value) -> Builder&
     {
-      _sizes[0] = value[0];
-      _sizes[1] = value[1];
+      _sizes.width = value.width;
+      _sizes.height = value.height;
+      _sizes.depth = 1;
       return *this;
     }
 
-    auto sizes(const std::array<std::uint32_t, 3>& value) -> Builder&
+    auto sizes(const VkExtent3D& value) -> Builder&
     {
       _sizes = value;
       return *this;
@@ -125,6 +138,12 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
+    auto initial_layout(const VkImageLayout value) -> Builder&
+    {
+      _initial_layout = value;
+      return *this;
+    }
+
     auto usage(const VkImageUsageFlags value) -> Builder&
     {
       _usage = value;
@@ -136,9 +155,7 @@ namespace DO::Shakti::Vulkan {
       auto create_info = VkImageCreateInfo{};
       create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
       create_info.imageType = _image_type;
-      create_info.extent.width = _sizes[0];
-      create_info.extent.height = _sizes[1];
-      create_info.extent.depth = _sizes[2];
+      create_info.extent = _sizes;
       create_info.mipLevels = _mip_levels;
       create_info.arrayLayers = _array_layers;
       create_info.format = _format;
@@ -150,6 +167,7 @@ namespace DO::Shakti::Vulkan {
 
       auto image = Image{};
       image._device = _device;
+      image._sizes = _sizes;
       const auto status = vkCreateImage(_device, &create_info, nullptr,  //
                                         &image._handle);
       if (status != VK_SUCCESS)
@@ -162,8 +180,7 @@ namespace DO::Shakti::Vulkan {
 
   private:
     VkDevice _device = VK_NULL_HANDLE;
-    //! @brief Image sizes: [width, height, depth]
-    std::array<std::uint32_t, 3> _sizes = {0, 0, 1};
+    VkExtent3D _sizes = {.width = 0, .height = 0, .depth = 1};
     VkImageType _image_type = VK_IMAGE_TYPE_2D;
     VkFormat _format;       // VK_FORMAT_R8G8B8A8_SRGB
     VkImageTiling _tiling;  // VK_IMAGE_TILING_OPTIMAL
@@ -175,6 +192,38 @@ namespace DO::Shakti::Vulkan {
     VkSampleCountFlagBits _samples = VK_SAMPLE_COUNT_1_BIT;
     VkSharingMode _sharing_mode = VK_SHARING_MODE_EXCLUSIVE;
   };
+
+
+  inline auto record_copy_buffer_to_image(const Buffer& src, const Image& dst,
+                                          const VkCommandBuffer cmd_buffer)
+      -> void
+  {
+    // Specify the copy operation for this command buffer.
+    auto cmd_buf_begin_info = VkCommandBufferBeginInfo{};
+    cmd_buf_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    cmd_buf_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(cmd_buffer, &cmd_buf_begin_info);
+    {
+      auto region = VkBufferImageCopy{};
+      // Source region.
+      region.bufferOffset = 0;
+      region.bufferRowLength = 0;
+      region.bufferImageHeight = 0;
+
+      // Destination region.
+      region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+      region.imageSubresource.mipLevel = 0;
+      region.imageSubresource.baseArrayLayer = 0;
+      region.imageSubresource.layerCount = 1;
+      region.imageOffset = {0, 0, 0};
+      region.imageExtent = dst.sizes();
+
+      vkCmdCopyBufferToImage(cmd_buffer, src, dst,
+                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+    }
+    vkEndCommandBuffer(cmd_buffer);
+  }
 
 
 }  // namespace DO::Shakti::Vulkan

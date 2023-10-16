@@ -9,6 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include "DO/Shakti/Vulkan/CommandBuffer.hpp"
+#include "DO/Shakti/Vulkan/CommandPool.hpp"
+#include "DO/Shakti/Vulkan/Queue.hpp"
+#include <vulkan/vulkan_core.h>
 #define BOOST_TEST_MODULE "Vulkan/Image"
 
 #include <DO/Shakti/Vulkan/Buffer.hpp>
@@ -89,9 +93,13 @@ BOOST_AUTO_TEST_CASE(test_image)
                           .create();
   BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
 
+  static constexpr auto width = 800u;
+  static constexpr auto height = 600u;
+
   // Create a staging buffer.
   const auto staging_image_buffer =
-      svk::BufferFactory{device}.make_staging_buffer<std::uint32_t>(800 * 600);
+      svk::BufferFactory{device}  //
+          .make_staging_buffer<std::uint32_t>(width * height);
   BOOST_CHECK(static_cast<VkBuffer>(staging_image_buffer) != nullptr);
   const auto staging_image_dmem =
       svk::DeviceMemoryFactory{physical_device, device}
@@ -102,9 +110,10 @@ BOOST_AUTO_TEST_CASE(test_image)
   // Create an image.
   const auto image =
       svk::Image::Builder{device}
-          .sizes(std::array{800u, 600u})
+          .sizes(VkExtent2D{width, height})
           .format(VK_FORMAT_R8G8B8A8_SRGB)
           .tiling(VK_IMAGE_TILING_OPTIMAL)
+          // .initial_layout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
           .usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
           .create();
   BOOST_CHECK(static_cast<VkImage>(image) != nullptr);
@@ -123,5 +132,19 @@ BOOST_AUTO_TEST_CASE(test_image)
                               .create();
   BOOST_CHECK(static_cast<VkImageView>(image_view) != nullptr);
 
-  // TODO copy from staging buffer object to image object.
+
+  // Copy from staging buffer object to image object.
+  auto compute_queue = svk::Queue{device, compute_queue_family_index};
+
+  // Command buffers.
+  const auto cmd_pool = svk::CommandPool{device, compute_queue_family_index};
+  auto cmd_bufs = svk::CommandBufferSequence{1, device, cmd_pool};
+  const auto& cmd_buf = cmd_bufs[0];
+
+  svk::record_copy_buffer_to_image(staging_image_buffer, image, cmd_buf);
+
+  compute_queue.submit_copy_commands(cmd_bufs);
+  compute_queue.wait();
+
+  cmd_bufs.clear();
 }
