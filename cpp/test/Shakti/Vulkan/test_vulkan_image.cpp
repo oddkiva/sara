@@ -103,55 +103,14 @@ BOOST_AUTO_TEST_CASE(test_image)
   BOOST_CHECK(static_cast<VkDevice>(device) != VK_NULL_HANDLE);
 
 
-
-
   // ======================================================================== //
   // TODO: SPECIFY THE GRAPHICS PIPELINE LAYOUT.
   //
-  // 1. First the description set layout.
+  // 1. Create the description set layout that the shaders need.
   const auto desc_set_layout = svk::DescriptorSetLayout::Builder{device}
                                    .push_sampler_layout_binding()
                                    .create();
-  const auto desc_set_layout_handle =
-      static_cast<VkDescriptorSetLayout>(desc_set_layout);
-
-  // 2. A set of descriptors allocated by a descriptor pool.
-  //
-  // We only need 1 pool of image sampler descriptors.
-  static constexpr auto num_pools = 1;
-  static constexpr auto num_frames_in_flight = 2;
-  auto desc_pool_builder = svk::DescriptorPool::Builder{device}
-                               .pool_count(num_pools)  //
-                               .pool_max_sets(num_frames_in_flight);
-  desc_pool_builder.descriptor_count(0) = num_frames_in_flight;
-  desc_pool_builder.pool_type(0) = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-
-  auto desc_pool = desc_pool_builder.create();
-  BOOST_CHECK(static_cast<VkDescriptorPool>(desc_pool) != VK_NULL_HANDLE);
-
-  // We create num_frames_in_flight sets of descriptors.
-  auto desc_sets = svk::DescriptorSets{&desc_set_layout_handle,
-                                       num_frames_in_flight, desc_pool};
-
-
-  // We describe each sets of descriptors.
-  auto image_info = VkDescriptorImageInfo{};
-  image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-  image_info.imageView = image_view;
-  image_info.sampler = image_sampler;
-
-  auto desc_write = VkWriteDescriptorSet{};
-  desc_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  desc_write.dstSet = desc_sets[0];
-  desc_write.dstBinding = 0;
-  desc_write.dstArrayElement = 0;
-  desc_write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  desc_write.descriptorCount = 1;
-  desc_write.pImageInfo = &image_info;
-  vkUpdateDescriptorSets(device, 1, &desc_write, 0, nullptr);
-
-
-
+  // 2. Hook this to the graphics pipeline layout data structure.
 
 
   // ======================================================================== //
@@ -262,4 +221,45 @@ BOOST_AUTO_TEST_CASE(test_image)
       svk::Sampler::Builder{physical_device, device}.create();
   BOOST_CHECK(static_cast<VkSampler>(image_sampler) != VK_NULL_HANDLE);
 
+
+  // ======================================================================== //
+  // ALLOCATE RENDER RESOURCES ON VULKAN (descriptor pool, sets and so on.)
+  //
+  const auto desc_set_layout_handle =
+      static_cast<VkDescriptorSetLayout>(desc_set_layout);
+
+  // 2. A set of descriptors allocated by a descriptor pool.
+  //
+  // We only need 1 pool of image sampler descriptors.
+  static constexpr auto num_pools = 1;
+  static constexpr auto num_frames_in_flight = 2;
+  auto desc_pool_builder = svk::DescriptorPool::Builder{device}
+                               .pool_count(num_pools)  //
+                               .pool_max_sets(num_frames_in_flight);
+  desc_pool_builder.descriptor_count(0) = num_frames_in_flight;
+  desc_pool_builder.pool_type(0) = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
+  auto desc_pool = desc_pool_builder.create();
+  BOOST_CHECK(static_cast<VkDescriptorPool>(desc_pool) != VK_NULL_HANDLE);
+
+  // We create num_frames_in_flight sets of descriptors.
+  auto desc_sets = svk::DescriptorSets{&desc_set_layout_handle,
+                                       num_frames_in_flight, desc_pool};
+
+
+  // We describe each sets of descriptors.
+  auto image_info = VkDescriptorImageInfo{};
+  image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  image_info.imageView = image_view;
+  image_info.sampler = image_sampler;
+
+  auto desc_write = VkWriteDescriptorSet{};
+  desc_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  desc_write.dstSet = desc_sets[0];
+  desc_write.dstBinding = 0;
+  desc_write.dstArrayElement = 0;
+  desc_write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  desc_write.descriptorCount = 1;
+  desc_write.pImageInfo = &image_info;
+  vkUpdateDescriptorSets(device, 1, &desc_write, 0, nullptr);
 }
