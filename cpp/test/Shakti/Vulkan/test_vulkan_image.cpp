@@ -9,7 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <vulkan/vulkan_core.h>
 #define BOOST_TEST_MODULE "Vulkan/Image"
 
 #include <DO/Sara/Core/Image.hpp>
@@ -225,9 +224,6 @@ BOOST_AUTO_TEST_CASE(test_image)
   // ======================================================================== //
   // ALLOCATE RENDER RESOURCES ON VULKAN (descriptor pool, sets and so on.)
   //
-  const auto desc_set_layout_handle =
-      static_cast<VkDescriptorSetLayout>(desc_set_layout);
-
   // 2. A set of descriptors allocated by a descriptor pool.
   //
   // We only need 1 pool of image sampler descriptors.
@@ -242,9 +238,16 @@ BOOST_AUTO_TEST_CASE(test_image)
   auto desc_pool = desc_pool_builder.create();
   BOOST_CHECK(static_cast<VkDescriptorPool>(desc_pool) != VK_NULL_HANDLE);
 
+  const auto desc_set_layouts = std::vector<VkDescriptorSetLayout>(
+      num_frames_in_flight,
+      static_cast<VkDescriptorSetLayout>(desc_set_layout));
+
   // We create num_frames_in_flight sets of descriptors.
-  auto desc_sets = svk::DescriptorSets{&desc_set_layout_handle,
-                                       num_frames_in_flight, desc_pool};
+  auto desc_sets = svk::DescriptorSets{
+      desc_set_layouts.data(),                              //
+      static_cast<std::uint32_t>(desc_set_layouts.size()),  //
+      desc_pool                                             //
+  };
 
 
   // We describe each sets of descriptors.
