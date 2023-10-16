@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2023 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <DO/Shakti/Vulkan/PhysicalDevice.hpp>
@@ -19,25 +30,36 @@ namespace DO::Shakti::Vulkan {
 
     Sampler(const Sampler&) = delete;
 
-    Sampler(Sampler&& other)
+    Sampler(Sampler&& other) = default;
+
+    ~Sampler()
     {
-      swap(other);
+      if (_device == VK_NULL_HANDLE || _handle == VK_NULL_HANDLE)
+        return;
+      vkDestroySampler(_device, _handle, nullptr);
     }
 
     auto operator=(const Sampler&) -> Sampler& = delete;
 
     auto operator=(Sampler&& other) -> Sampler&
     {
-      swap(other);
+      _device = std::move(other._device);
+      _handle = std::move(other._handle);
       return *this;
     }
 
-    auto swap(Sampler& other) -> void
+    operator VkSampler&()
     {
-      std::swap(_handle, other._handle);
+      return _handle;
+    }
+
+    operator VkSampler() const
+    {
+      return _handle;
     }
 
   private:
+    VkDevice _device = VK_NULL_HANDLE;
     VkSampler _handle = VK_NULL_HANDLE;
   };
 
@@ -75,6 +97,7 @@ namespace DO::Shakti::Vulkan {
       create_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
       auto sampler = Sampler{};
+      sampler._device = _device;
       const auto status = vkCreateSampler(_device, &create_info, nullptr,  //
                                           &sampler._handle);
       if (status != VK_SUCCESS)

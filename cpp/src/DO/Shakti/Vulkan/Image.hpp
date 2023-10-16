@@ -225,5 +225,64 @@ namespace DO::Shakti::Vulkan {
     vkEndCommandBuffer(cmd_buffer);
   }
 
+  inline auto record_image_layout_transition(const VkImage image,
+                                             const VkImageLayout old_layout,
+                                             const VkImageLayout new_layout,
+                                             const VkCommandBuffer cmd_buffer)
+      -> void
+  {
+    // Specify the copy operation for this command buffer.
+    auto cmd_buf_begin_info = VkCommandBufferBeginInfo{};
+    cmd_buf_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    cmd_buf_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(cmd_buffer, &cmd_buf_begin_info);
+    {
+      auto barrier = VkImageMemoryBarrier{};
+      barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+      //
+      barrier.oldLayout = old_layout;
+      barrier.newLayout = new_layout;
+      barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+      barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+      barrier.image = image;
+      barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+      barrier.subresourceRange.baseMipLevel = 0;
+      barrier.subresourceRange.levelCount = 1;
+      barrier.subresourceRange.baseArrayLayer = 0;
+      barrier.subresourceRange.layerCount = 1;
+
+      auto src_stage = VkPipelineStageFlags{};
+      auto dst_stage = VkPipelineStageFlags{};
+
+      if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED &&
+          new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+      {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+        src_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        dst_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+      }
+      else if (old_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+               new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+      {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        src_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        dst_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+      }
+      else
+        throw std::invalid_argument{
+            "[VK] Error: unimplemented/unsupported layout transition!"  //
+        };
+
+      vkCmdPipelineBarrier(cmd_buffer, src_stage, dst_stage, 0, 0, nullptr, 0,
+                           nullptr, 1, &barrier);
+    }
+    vkEndCommandBuffer(cmd_buffer);
+  }
+
 
 }  // namespace DO::Shakti::Vulkan

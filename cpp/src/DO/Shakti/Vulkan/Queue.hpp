@@ -40,7 +40,7 @@ namespace DO::Shakti::Vulkan {
                         static_cast<int>(status))};
     };
 
-    auto submit_copy_commands(const CommandBufferSequence& copy_cmd_bufs) const
+    auto submit_commands(const CommandBufferSequence& copy_cmd_bufs) const
         -> void
     {
       auto submit_info = VkSubmitInfo{};
