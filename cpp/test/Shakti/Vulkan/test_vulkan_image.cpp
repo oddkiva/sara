@@ -186,21 +186,21 @@ BOOST_AUTO_TEST_CASE(test_image)
                                       cmd_buf);
   compute_queue.submit_commands(cmd_bufs);
   compute_queue.wait();
-  cmd_bufs.reset(0);
 
   // Copy the data from the staging buffer to the device image.
+  cmd_bufs.reset(0);
   svk::record_copy_buffer_to_image(staging_image_buffer, image, cmd_buf);
   compute_queue.submit_commands(cmd_bufs);
   compute_queue.wait();
 
   // Finally tell Vulkan that the image can only be used a read-only resource
   // from a shader now on.
+  cmd_bufs.reset(0);
   svk::record_image_layout_transition(
       image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
       VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, cmd_buf);
   compute_queue.submit_commands(cmd_bufs);
   compute_queue.wait();
-  cmd_bufs.reset(0);
   // Optional since the destructor calls it: but this helped to fix a bug in the
   // implementation of the `clear` method.
   cmd_bufs.clear();
