@@ -23,6 +23,9 @@ namespace DO::Shakti::Vulkan {
   class DescriptorSetLayout
   {
   public:
+    class Builder;
+    friend class Builder;
+
     DescriptorSetLayout() = default;
 
     DescriptorSetLayout(const DescriptorSetLayout&) = delete;
@@ -63,43 +66,85 @@ namespace DO::Shakti::Vulkan {
       std::swap(_handle, other._handle);
     }
 
-    static auto create_for_single_ubo(VkDevice device) -> DescriptorSetLayout
+  private:
+    VkDevice _device = nullptr;
+    VkDescriptorSetLayout _handle = nullptr;
+  };
+
+  class DescriptorSetLayout::Builder
+  {
+  public:
+    explicit Builder(VkDevice device)
+      : _device{device}
+    {
+    }
+
+    auto push_uniform_buffer_layout_binding() -> DescriptorSetLayout::Builder&
     {
       // UBO object: matrix-view-projection matrix stack
       auto ubo_layout_binding = VkDescriptorSetLayoutBinding{};
 
       // In the vertex shader code, we have something like:
       // layout(binding = 0) uniform UBO { ... } ubo;
-      ubo_layout_binding.binding = 0;
-      ubo_layout_binding.descriptorCount = 1;
+      ubo_layout_binding.binding = static_cast<std::uint32_t>(_bindings.size());
+      ubo_layout_binding.descriptorCount = 1;  // TODO: see if this ever
+                                               // needs to change.
       ubo_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
       ubo_layout_binding.pImmutableSamplers = nullptr;
 
       // Accessible from the vertex shader only.
       ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-      // We only need 1 set of descriptors for the MVP UBO.
+      _bindings.emplace_back(ubo_layout_binding);
+
+      return *this;
+    }
+
+    auto push_sampler_layout_binding() -> DescriptorSetLayout::Builder&
+    {
+      auto sampler_layout_binding = VkDescriptorSetLayoutBinding{};
+
+      sampler_layout_binding.binding =
+          static_cast<std::uint32_t>(_bindings.size());
+      sampler_layout_binding.descriptorCount = 1;  // TODO: see if this ever
+                                                   // needs to change.
+      sampler_layout_binding.descriptorType =
+          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+      sampler_layout_binding.pImmutableSamplers = nullptr;
+
+      // Accessible from the fragment shader only.
+      sampler_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+      _bindings.emplace_back(sampler_layout_binding);
+
+      return *this;
+    }
+
+    auto create() const -> DescriptorSetLayout
+    {
       auto create_info = VkDescriptorSetLayoutCreateInfo{};
       create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-      create_info.bindingCount = 1;
-      create_info.pBindings = &ubo_layout_binding;
+      create_info.bindingCount = static_cast<std::uint32_t>(_bindings.size());
+      create_info.pBindings = _bindings.data();
 
-      // Finally really create the descriptor set layout.
-      auto ubo_set_layout = DescriptorSetLayout{};
-      ubo_set_layout._device = device;
-      const auto status = vkCreateDescriptorSetLayout(
-          device, &create_info, nullptr, &ubo_set_layout._handle);
+      auto desc_set_layout = DescriptorSetLayout{};
+      desc_set_layout._device = _device;
+      const auto status = vkCreateDescriptorSetLayout(  //
+          _device, &create_info, nullptr,               //
+          &desc_set_layout._handle                      //
+      );
       if (status != VK_SUCCESS)
-        throw std::runtime_error{fmt::format(
-            "[VK] Error: failed to create UBO set layout! Error code: {}",
-            static_cast<int>(status))};
+        throw std::runtime_error{
+            fmt::format("[VK] Error: failed to create descriptor set layout! "
+                        "Error code: {}",
+                        static_cast<int>(status))};
 
-      return ubo_set_layout;
+      return desc_set_layout;
     }
 
   private:
-    VkDevice _device = nullptr;
-    VkDescriptorSetLayout _handle = nullptr;
+    VkDevice _device = VK_NULL_HANDLE;
+    std::vector<VkDescriptorSetLayoutBinding> _bindings;
   };
 
 

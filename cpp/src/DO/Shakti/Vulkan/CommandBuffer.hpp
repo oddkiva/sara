@@ -78,7 +78,8 @@ namespace DO::Shakti::Vulkan {
 
     auto clear() -> void
     {
-      if (_device == nullptr || _command_pool == nullptr)
+      if (_device == nullptr || _command_pool == nullptr ||
+          _command_buffers.empty())
         return;
 
       SARA_DEBUG << fmt::format(
@@ -107,7 +108,11 @@ namespace DO::Shakti::Vulkan {
 
     auto reset(int i, VkCommandBufferResetFlags flags = 0) const -> void
     {
-      vkResetCommandBuffer(_command_buffers[i], flags);
+      const auto status = vkResetCommandBuffer(_command_buffers[i], flags);
+      if (status != VK_SUCCESS)
+        throw std::runtime_error{fmt::format(
+            "[VK] Failed to reset to reset command buffer {}! Error code: {}",
+            i, static_cast<int>(status))};
     }
 
     auto data() const -> const VkCommandBuffer*

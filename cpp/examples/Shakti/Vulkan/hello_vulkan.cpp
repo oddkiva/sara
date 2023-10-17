@@ -158,7 +158,7 @@ public:
     svk::record_copy_buffer(vbo_staging, _vbo, copy_cmd_buf);
 
     SARA_DEBUG << "Submitting data transfer command...\n";
-    _graphics_queue.submit_copy_commands(copy_cmd_bufs);
+    _graphics_queue.submit_commands(copy_cmd_bufs);
     _graphics_queue.wait();
   }
 
@@ -198,7 +198,7 @@ public:
     svk::record_copy_buffer(ebo_staging, _ebo, copy_cmd_buf);
 
     SARA_DEBUG << "Submitting data transfer command...\n";
-    _graphics_queue.submit_copy_commands(copy_cmd_bufs);
+    _graphics_queue.submit_commands(copy_cmd_bufs);
     _graphics_queue.wait();
   }
 
@@ -379,8 +379,8 @@ public:
 
     // Reset the command buffer associated to the current frame.
     SARA_DEBUG << "[VK] Resetting for the command buffer...\n";
-    vkResetCommandBuffer(_graphics_cmd_bufs[_current_frame],
-                         /*VkCommandBufferResetFlagBits*/ 0);
+    _graphics_cmd_bufs.reset(_current_frame,
+                             /*VkCommandBufferResetFlagBits*/ 0);
 
     // Record the draw command to be performed on this swapchain image.
     SARA_CHECK(_framebuffers.fbs.size());

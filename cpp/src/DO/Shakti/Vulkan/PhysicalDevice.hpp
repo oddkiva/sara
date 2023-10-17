@@ -152,6 +152,12 @@ namespace DO::Shakti::Vulkan {
           "[VK] Error: failed to find suitable memory type!"};
     }
 
+    auto properties() const -> VkPhysicalDeviceProperties
+    {
+      auto properties = VkPhysicalDeviceProperties{};
+      vkGetPhysicalDeviceProperties(handle, &properties);
+      return properties;
+    }
 
     operator VkPhysicalDevice&()
     {

@@ -75,7 +75,8 @@ namespace DO::Kalpana::Vulkan {
       return _device;
     }
 
-    auto model_view_projection_layout() const -> const Shakti::Vulkan::DescriptorSetLayout&
+    auto model_view_projection_layout() const
+        -> const Shakti::Vulkan::DescriptorSetLayout&
     {
       return _mvp_layout;
     }
@@ -210,7 +211,9 @@ namespace DO::Kalpana::Vulkan {
       graphics_pipeline._device = device;
 
       graphics_pipeline._mvp_layout =
-          Shakti::Vulkan::DescriptorSetLayout::create_for_single_ubo(device);
+          Shakti::Vulkan::DescriptorSetLayout::Builder{device}
+              .push_uniform_buffer_layout_binding()
+              .create();
 
       // Initialize the graphics pipeline layout.
       SARA_DEBUG << "Initializing the graphics pipeline layout...\n";

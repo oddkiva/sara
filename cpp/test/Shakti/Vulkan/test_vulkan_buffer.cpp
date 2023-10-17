@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_staging_buffer)
 
   // Our hardware requirements is substantified by the memory type needed to
   // created such a buffer.
-  const auto mem_reqs = staging_buffer.get_memory_requirements();
+  const auto mem_reqs = staging_buffer.memory_requirements();
   SARA_CHECK(mem_reqs.size);
   SARA_CHECK(mem_reqs.alignment);
   SARA_CHECK(mem_reqs.memoryTypeBits);
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(test_device_buffer)
 
   // Our hardware requirements is substantified by the memory type needed to
   // created such a buffer.
-  const auto mem_reqs = device_buffer.get_memory_requirements();
+  const auto mem_reqs = device_buffer.memory_requirements();
   SARA_CHECK(mem_reqs.size);
   SARA_CHECK(mem_reqs.alignment);
   SARA_CHECK(mem_reqs.memoryTypeBits);

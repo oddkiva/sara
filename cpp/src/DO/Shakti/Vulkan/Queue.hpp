@@ -40,14 +40,13 @@ namespace DO::Shakti::Vulkan {
                         static_cast<int>(status))};
     };
 
-    auto submit_copy_commands(const CommandBufferSequence& copy_cmd_bufs) const
-        -> void
+    auto submit_commands(const CommandBufferSequence& cmd_bufs) const -> void
     {
       auto submit_info = VkSubmitInfo{};
       submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
       submit_info.commandBufferCount =
-          static_cast<std::uint32_t>(copy_cmd_bufs.size());
-      submit_info.pCommandBuffers = copy_cmd_bufs.data();
+          static_cast<std::uint32_t>(cmd_bufs.size());
+      submit_info.pCommandBuffers = cmd_bufs.data();
       submit(submit_info, VK_NULL_HANDLE);
     }
 
