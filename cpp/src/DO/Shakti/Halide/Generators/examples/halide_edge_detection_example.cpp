@@ -180,12 +180,6 @@ namespace v2 {
 }  // namespace v2
 
 
-inline constexpr long double operator"" _percent(long double x)
-{
-  return x / 100;
-}
-
-
 int main(int argc, char** argv)
 {
   DO::Sara::GraphicsApplication app(argc, argv);

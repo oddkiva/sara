@@ -426,7 +426,19 @@ namespace DO::Sara {
       -> PixelUnits<2>
   {
     const auto ratio = sensor_sizes.cast<long double>() / focal_length.value;
-    return image_sizes.cast<long double>().cwiseProduct(ratio).cast<PixelUnit>();
+    return image_sizes.cast<long double>()
+        .cwiseProduct(ratio)
+        .cast<PixelUnit>();
+  }
+
+}  // namespace DO::Sara
+
+
+namespace DO::Sara {
+
+  inline constexpr auto operator"" _percent(long double x) -> long double
+  {
+    return x / 100;
   }
 
 }  // namespace DO::Sara

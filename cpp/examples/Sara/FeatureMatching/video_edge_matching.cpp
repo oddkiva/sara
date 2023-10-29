@@ -37,12 +37,6 @@ using namespace std;
 using namespace DO::Sara;
 
 
-inline constexpr long double operator"" _percent(long double x)
-{
-  return x / 100;
-}
-
-
 auto initialize_camera_intrinsics_1()
 {
   auto intrinsics = BrownConradyCamera32<float>{};
