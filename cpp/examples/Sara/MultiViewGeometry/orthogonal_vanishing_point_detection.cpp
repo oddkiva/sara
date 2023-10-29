@@ -41,12 +41,6 @@ namespace po = boost::program_options;
 using namespace DO::Sara;
 
 
-inline constexpr long double operator"" _percent(long double x)
-{
-  return x / 100;
-}
-
-
 auto initialize_camera_intrinsics_1()
 {
   auto intrinsics = BrownConradyCamera32<float>{};
@@ -239,13 +233,13 @@ int sara_graphics_main(int argc, char** argv)
 
   // Output save.
   const auto basename = fs::path(video_filepath).stem().string();
-  VideoWriter video_writer{
+  const auto output_file =
 #if defined(__APPLE__)
-      "/Users/david/Desktop/" + basename + ".ortho-vp.mp4",
+      "/Users/david/Desktop/" + basename + ".ortho-vp.mp4";
 #else
-      "/home/david/Desktop/" + basename + ".ortho-vp.mp4",
+      "/home/david/Desktop/" + basename + ".ortho-vp.mp4";
 #endif
-      frame.sizes()};
+  auto video_writer = VideoWriter{output_file, frame.sizes()};
 
 
   // Show the local extrema.

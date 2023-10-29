@@ -35,12 +35,6 @@ using namespace std;
 using namespace DO::Sara;
 
 
-inline constexpr long double operator"" _percent(long double x)
-{
-  return x / 100;
-}
-
-
 auto is_strong_edge(const ImageView<float>& grad_mag,
                     const std::vector<Eigen::Vector2i>& edge,
                     const float grad_thres) -> float

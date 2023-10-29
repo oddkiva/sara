@@ -14,11 +14,6 @@
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 
 
-inline constexpr auto operator"" _percent(long double x) -> long double
-{
-  return x / 100;
-}
-
 namespace DO::Sara {
 
   auto is_strong_edge(const ImageView<float>& grad_mag,
