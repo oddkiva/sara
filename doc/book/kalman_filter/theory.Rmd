@@ -78,7 +78,7 @@ and is based on two equations:
 
 ### State Transition Equation
 
-Now that we have introduced the notations, let us remind the equation used in
+Now that we have introduced the notations, let us remind the equations used in
 the Kalman filter.
 
 The pedestrian state, i.e., the pedestrian box follows a state transition
