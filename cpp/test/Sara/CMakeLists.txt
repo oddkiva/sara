@@ -29,4 +29,6 @@ add_subdirectory(FeatureMatching)
 add_subdirectory(RANSAC)
 add_subdirectory(MultiViewGeometry)
 
+add_subdirectory(MultipleObjectTracking)
+
 add_subdirectory(Visualization)

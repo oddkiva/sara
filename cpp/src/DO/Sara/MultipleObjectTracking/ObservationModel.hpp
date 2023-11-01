@@ -7,30 +7,27 @@
 namespace DO::Sara::MultipleObjectTracking {
 
   template <typename T>
-  using ObservationModelMatrix = Eigen::Matrix<T, 4, 12>;
-
-  template <typename T>
-  inline auto observation_model_matrix() -> ObservationModelMatrix<T>
-  {
-    auto H = ObservationModelMatrix<T>{};
-
-    static const auto I = Eigen::Matrix4<T>::Identity();
-    static const auto O = Eigen::Matrix<T, 4, 8>::Zero();
-    H << I, O;
-
-    return H;
-  }
-
-  template <typename T>
   struct ObservationEquation
   {
     using State = StateDistribution<T>;
-    using Observation = ObservationDistribution<T>;
-    using Innovation = Observation;
-    using ObservationMatrix = ObservationModelMatrix<T>;
-    using ObservationNoise = ObservationNoiseDistribution<T>;
 
+    using Observation = ObservationDistribution<T>;
+    using ObservationNoise = ObservationNoiseDistribution<T>;
+    using ObservationModelMatrix = Eigen::Matrix<T, 4, 12>;
+
+    using Innovation = Observation;
     using KalmanGain = typename ObservationDistribution<T>::CovarianceMatrix;
+
+    inline static auto observation_model_matrix() -> ObservationModelMatrix
+    {
+      auto H = ObservationModelMatrix{};
+
+      static const auto I = Eigen::Matrix4<T>::Identity();
+      static const auto O = Eigen::Matrix<T, 4, 8>::Zero();
+      H << I, O;
+
+      return H;
+    }
 
     inline auto innovation(const State& x_a_priori,
                            const Observation& z) const  //
@@ -62,13 +59,13 @@ namespace DO::Sara::MultipleObjectTracking {
     }
 
     inline auto residual(const Observation& z,
-                         const State& x_a_posteriori) const  //
+                         const State& x) const  //
         -> typename Observation::Mean
     {
-      return z.μ - H * x_a_posteriori.μ;
+      return z.μ - H * x.μ;
     }
 
-    ObservationMatrix H;
+    const ObservationModelMatrix H = observation_model_matrix();
     ObservationNoise v;
   };
 
