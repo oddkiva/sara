@@ -1,0 +1,9 @@
+# Kalman Filter
+
+The Kalman Filter is a mathematical method that is usually utilitzed to track a
+physical object of interest.
+
+For example, let us suppose we are tracking pedestrians to monitor their road
+safety.
+
+Let's start reminding ourselves the equations.
