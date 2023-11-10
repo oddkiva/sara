@@ -159,7 +159,6 @@ BOOST_AUTO_TEST_CASE(test_image)
           .sizes(VkExtent2D{width, height})
           .format(VK_FORMAT_R8G8B8A8_SRGB)
           .tiling(VK_IMAGE_TILING_OPTIMAL)
-          // .initial_layout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
           .usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
           .create();
   BOOST_CHECK(static_cast<VkImage>(image) != VK_NULL_HANDLE);
