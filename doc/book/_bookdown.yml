@@ -29,6 +29,8 @@ rmd_files:
     "calibration.Rmd",
     "calibration/chessboard_detection.Rmd",
     "imu.Rmd",
+    "kalman_filter.Rmd",
+    "kalman_filter/theory.Rmd",
     "datasets.Rmd",
     "datasets/kitti.Rmd",
     "datasets/nuscenes.Rmd",

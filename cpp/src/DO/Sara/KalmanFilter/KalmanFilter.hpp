@@ -3,51 +3,24 @@
 
 namespace DO::Sara::KalmanFilter {
 
-  //! @brief The step-by-step evolution of the 3D bounding box of the
-  //! pedestrian.
-  template <typename StateVector,            //
-            typename StateTransitionMatrix,  //
-            typename ProcessNoiseVector>
-  struct StateTransitionEquation
-  {
-    StateTransitionMatrix F;
-    ProcessNoiseVector w;
-
-    inline auto operator()(const StateVector& x) const -> StateVector
-    {
-      return F * x + w;
-    }
-  };
-
-  //! @brief The projection of the 3D bounding box into the image plane.
-  //! Sort of...
-  template <typename StateVector,        //
-            typename ObservationVector,  //
-            typename ObservationMatrix,  //
-            typename MeasurementNoiseVector>
-  struct ObservationEquation
-  {
-    ObservationMatrix H;
-    MeasurementNoiseVector v;
-
-    inline auto operator()(const StateVector& x) const -> ObservationVector
-    {
-      // z = observation vector.
-      const auto z = H * x + v;
-      return z;
-    }
-  };
-
-
   template <typename StateTransitionEquation, typename ObservationEquation>
   struct KalmanFilter
   {
-    template <typename StateVector>
-    auto predict(const StateVector& x)
-        -> std::pair<APrioriStateMeanVector, APrioriStateCovarianceMatrix>;
+    using State = typename StateTransitionEquation::State;
+    using Observation = typename StateTransitionEquation::Observation;
 
-    auto update() -> std::pair<APosterioriStateMeanVector,
-                               APosterioriStateCovarianceMatrix>;
+    auto predict(const State& x) -> State
+    {
+      return _state_transition_equation.predict(x);
+    }
+
+    auto update(const State& x_predicted, const Observation& z) -> State
+    {
+      return _observation_equation.update(x_predicted, z);
+    }
+
+    StateTransitionEquation _state_transition_equation;
+    ObservationEquation _observation_equation;
   };
 
 }  // namespace DO::Sara::KalmanFilter

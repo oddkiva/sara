@@ -1,9 +1,19 @@
+# (PART\*) Tracking {-}
+
 # Kalman Filter
 
 The Kalman Filter is a mathematical method that is usually utilized to track a
 physical object of interest.
 
-For example, let us suppose we are tracking pedestrians to monitor their road
+For example, let us suppose we are tracking pedestrians to ensure their road
 safety.
+
+One important aspect to note with the Kalman filter is that it not only gives
+predicts the next state of the object but it also provides how wrong we could be
+in our prediction. How wrong we could be is quantified in terms of covariance
+matrix?
+
+So when we predict the next state of the object, we actually predict a
+**Gaussian distribution** at each time step.
 
 Let's start reminding ourselves the equations.
