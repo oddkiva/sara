@@ -100,7 +100,7 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
-    auto push_sampler_layout_binding() -> DescriptorSetLayout::Builder&
+    auto push_image_sampler_layout_binding() -> DescriptorSetLayout::Builder&
     {
       auto sampler_layout_binding = VkDescriptorSetLayoutBinding{};
 

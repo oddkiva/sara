@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_image)
   //
   // 1. Create the description set layout that the shaders need.
   const auto desc_set_layout = svk::DescriptorSetLayout::Builder{device}
-                                   .push_sampler_layout_binding()
+                                   .push_image_sampler_layout_binding()
                                    .create();
   // 2. Hook this to the graphics pipeline layout data structure.
 
