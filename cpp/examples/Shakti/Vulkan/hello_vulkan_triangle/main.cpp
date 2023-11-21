@@ -626,7 +626,7 @@ auto main(int, char** argv) -> int
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     auto triangle_renderer = VulkanTriangleRenderer{
-        window, app_name, program_dir_path / "hello_vulkan_shaders", true};
+        window, app_name, program_dir_path / "hello_vulkan_triangle_shaders", true};
     triangle_renderer.loop(window);
   }
   catch (std::exception& e)

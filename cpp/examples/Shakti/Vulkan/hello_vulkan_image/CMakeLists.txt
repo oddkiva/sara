@@ -1,0 +1,28 @@
+add_executable(hello_vulkan_image main.cpp)
+target_link_libraries(
+  hello_vulkan_image #
+  PRIVATE DO::Sara::Core #
+          DO::Shakti::Vulkan)
+set_target_properties(hello_vulkan_image PROPERTIES FOLDER "Examples/Shakti/Vulkan")
+
+add_custom_target(compile_hello_vulkan_image_shaders)
+set_target_properties(compile_hello_vulkan_image_shaders PROPERTIES FOLDER "Examples/Shakti/Vulkan")
+add_custom_command(
+  TARGET compile_hello_vulkan_image_shaders
+  COMMAND ${CMAKE_COMMAND} -E make_directory
+          $<TARGET_FILE_DIR:hello_vulkan_image>/hello_vulkan_image_shaders
+  COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/shader.vert -o
+          $<TARGET_FILE_DIR:hello_vulkan_image>/hello_vulkan_image_shaders/vert.spv
+  COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/shader.frag -o
+          $<TARGET_FILE_DIR:hello_vulkan_image>/hello_vulkan_image_shaders/frag.spv)
+
+# file(GLOB SHADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.vert *.frag)
+add_custom_command(
+  TARGET hello_vulkan_image
+  PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory
+          $<TARGET_FILE_DIR:hello_vulkan_image>/hello_vulkan_image_shaders
+  COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/shader.vert -o
+          $<TARGET_FILE_DIR:hello_vulkan_image>/hello_vulkan_image_shaders/vert.spv
+  COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/shader.frag -o
+          $<TARGET_FILE_DIR:hello_vulkan_image>/hello_vulkan_image_shaders/frag.spv)
