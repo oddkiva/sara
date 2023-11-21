@@ -116,6 +116,8 @@ namespace DO::Kalpana::Vulkan {
     {
     }
 
+    virtual ~Builder() = default;
+
     auto vertex_shader_path(const std::filesystem::path& source_filepath)
         -> Builder&
     {
@@ -201,7 +203,7 @@ namespace DO::Kalpana::Vulkan {
       return *this;
     }
 
-    auto create() -> GraphicsPipeline
+    virtual auto create() -> GraphicsPipeline
     {
       load_shaders();
       initialize_fixed_functions();
@@ -213,6 +215,7 @@ namespace DO::Kalpana::Vulkan {
       graphics_pipeline._mvp_layout =
           Shakti::Vulkan::DescriptorSetLayout::Builder{device}
               .push_uniform_buffer_layout_binding()
+              .push_image_sampler_layout_binding()
               .create();
 
       // Initialize the graphics pipeline layout.

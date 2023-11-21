@@ -108,9 +108,9 @@ static const auto indices = std::vector<uint16_t>{
 class VulkanImageRenderer : public kvk::GraphicsBackend
 {
 public:
-  VulkanTriangleRenderer(GLFWwindow* window, const std::string& app_name,
-                         const std::filesystem::path& shader_dirpath,
-                         const bool debug_vulkan = true)
+  VulkanImageRenderer(GLFWwindow* window, const std::string& app_name,
+                      const std::filesystem::path& shader_dirpath,
+                      const bool debug_vulkan = true)
     : kvk::GraphicsBackend{window, app_name,             //
                            shader_dirpath / "vert.spv",  //
                            shader_dirpath / "frag.spv",  //
@@ -119,7 +119,7 @@ public:
     transfer_vertex_data_to_vulkan(vertices);
     transfer_element_data_to_vulkan(indices);
 
-    make_ubo_descriptor_pool();
+    make_descriptor_pool();
     make_ubo_descriptor_sets();
     initialize_model_view_projection_ubos();
   }
@@ -217,6 +217,8 @@ public:
     // cannot exceed the following number of descriptors (3).
     desc_pool_builder.descriptor_count(0) = num_frames_in_flight;
 
+    // The second descriptor pool is dedicated to the allocation of Vulkan
+    // image descriptors.
     desc_pool_builder.pool_type(1) = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     desc_pool_builder.descriptor_count(1) = num_frames_in_flight;
 
@@ -244,7 +246,32 @@ public:
     _desc_sets = svk::DescriptorSets{
         desc_set_layouts.data(),  //
         num_frames_in_flight,     //
-        _desc_pool                 //
+        _desc_pool                //
+    };
+  }
+
+  auto make_image_descriptor_sets() -> void
+  {
+    // The number of frames in flight is the number of swapchain images.
+    // Let's say there are 3 frames in flight.
+    //
+    // We will construct 3 sets of descriptors, that is, we need one for each
+    // swapchain image.
+    const auto num_frames_in_flight =
+        static_cast<std::uint32_t>(_swapchain.images.size());
+
+    // Each descriptor set has the same uniform descriptor layout.
+    const auto& ubo_layout = _graphics_pipeline.model_view_projection_layout();
+    const auto ubo_layout_handle =
+        static_cast<VkDescriptorSetLayout>(ubo_layout);
+
+    const auto desc_set_layouts = std::vector<VkDescriptorSetLayout>(
+        num_frames_in_flight, ubo_layout_handle);
+
+    _desc_sets = svk::DescriptorSets{
+        desc_set_layouts.data(),  //
+        num_frames_in_flight,     //
+        _desc_pool                //
     };
   }
 
@@ -612,6 +639,8 @@ private:
   // 2. Layout binding referenced for the shader.
   svk::DescriptorPool _desc_pool;
   svk::DescriptorSets _desc_sets;
+
+  svk::DescriptorSetLayout _image_desc_layout;
 };
 
 
@@ -628,7 +657,7 @@ auto main(int, char** argv) -> int
     auto window = glfw::Window{300, 300, app_name};
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
-    auto triangle_renderer = VulkanTriangleRenderer{
+    auto triangle_renderer = VulkanImageRenderer{
         window, app_name, program_dir_path / "hello_vulkan_image_shaders",
         true};
     triangle_renderer.loop(window);
