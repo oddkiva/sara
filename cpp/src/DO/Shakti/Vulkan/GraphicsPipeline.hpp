@@ -215,7 +215,6 @@ namespace DO::Kalpana::Vulkan {
       graphics_pipeline._mvp_layout =
           Shakti::Vulkan::DescriptorSetLayout::Builder{device}
               .push_uniform_buffer_layout_binding()
-              .push_image_sampler_layout_binding()
               .create();
 
       // Initialize the graphics pipeline layout.
@@ -431,7 +430,7 @@ namespace DO::Kalpana::Vulkan {
 
     //! @brief Data format of the vertex in the vertex buffer.
     VkVertexInputBindingDescription binding_description;
-    std::array<VkVertexInputAttributeDescription, 2> attribute_descriptions;
+    std::vector<VkVertexInputAttributeDescription> attribute_descriptions;
     VkPipelineVertexInputStateCreateInfo vertex_input_info;
 
     //! @brief Data type of the 3D geometry (typically triangles).

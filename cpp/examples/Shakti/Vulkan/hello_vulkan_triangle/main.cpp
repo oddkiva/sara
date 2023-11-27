@@ -16,7 +16,6 @@
 #include <DO/Shakti/Vulkan/DescriptorSet.hpp>
 #include <DO/Shakti/Vulkan/DeviceMemory.hpp>
 #include <DO/Shakti/Vulkan/EasyGLFW.hpp>
-#include <DO/Shakti/Vulkan/Geometry.hpp>
 #include <DO/Shakti/Vulkan/GraphicsBackend.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
@@ -29,6 +28,8 @@
 #include <filesystem>
 #include <limits>
 #include <stdexcept>
+
+#include "Geometry.hpp"
 
 
 namespace glfw = DO::Kalpana::GLFW;
@@ -111,17 +112,46 @@ public:
   VulkanTriangleRenderer(GLFWwindow* window, const std::string& app_name,
                          const std::filesystem::path& shader_dirpath,
                          const bool debug_vulkan = true)
-    : kvk::GraphicsBackend{window, app_name,             //
-                           shader_dirpath / "vert.spv",  //
-                           shader_dirpath / "frag.spv",  //
-                           debug_vulkan}
   {
+    init_instance(app_name, debug_vulkan);
+    init_surface(window);
+    init_physical_device();
+    init_device_and_queues();
+    init_swapchain(window);
+    init_render_pass();
+    init_framebuffers();
+    init_graphics_pipeline(window,  //
+                           shader_dirpath / "vert.spv",
+                           shader_dirpath / "frag.spv");
+    init_command_pool_and_buffers();
+    init_synchronization_objects();
+
     transfer_vertex_data_to_vulkan(vertices);
     transfer_element_data_to_vulkan(indices);
 
     make_ubo_descriptor_pool();
     make_ubo_descriptor_sets();
     initialize_model_view_projection_ubos();
+  }
+
+  auto init_graphics_pipeline(GLFWwindow* window,  //
+                              const std::filesystem::path& vertex_shader_path,
+                              const std::filesystem::path& fragment_shader_path)
+      -> void override
+  {
+    auto w = int{};
+    auto h = int{};
+    glfwGetWindowSize(window, &w, &h);
+
+    _graphics_pipeline =
+        kvk::GraphicsPipeline::Builder{_device, _render_pass}
+            .vertex_shader_path(vertex_shader_path)
+            .fragment_shader_path(fragment_shader_path)
+            .vbo_data_format<Vertex>()
+            .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+            .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
+            .scissor_sizes(w, h)
+            .create();
   }
 
   auto transfer_vertex_data_to_vulkan(const std::vector<Vertex>& vertices)
@@ -626,7 +656,8 @@ auto main(int, char** argv) -> int
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     auto triangle_renderer = VulkanTriangleRenderer{
-        window, app_name, program_dir_path / "hello_vulkan_triangle_shaders", true};
+        window, app_name, program_dir_path / "hello_vulkan_triangle_shaders",
+        true};
     triangle_renderer.loop(window);
   }
   catch (std::exception& e)

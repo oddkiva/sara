@@ -21,9 +21,7 @@
 #include <DO/Shakti/Vulkan/Surface.hpp>
 #include <DO/Shakti/Vulkan/Swapchain.hpp>
 
-#include <DO/Shakti/Vulkan/Geometry.hpp>
-
-#include <DO/Sara/Defines.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -34,6 +32,44 @@ static constexpr auto compile_for_apple = true;
 #else
 static constexpr auto compile_for_apple = false;
 #endif
+
+
+struct Vertex
+{
+  Eigen::Vector2f pos;
+  Eigen::Vector3f color;
+
+  static auto get_binding_description() -> VkVertexInputBindingDescription
+  {
+    VkVertexInputBindingDescription binding_description{};
+    binding_description.binding = 0;
+    binding_description.stride = sizeof(Vertex);
+    binding_description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    return binding_description;
+  }
+
+  static auto get_attribute_descriptions()
+      -> std::vector<VkVertexInputAttributeDescription>
+  {
+    auto attribute_descriptions =
+        std::vector<VkVertexInputAttributeDescription>(2);
+
+    // Position
+    attribute_descriptions[0].binding = 0;
+    attribute_descriptions[0].location = 0;
+    attribute_descriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+    attribute_descriptions[0].offset = offsetof(Vertex, pos);
+
+    // Color
+    attribute_descriptions[1].binding = 0;
+    attribute_descriptions[1].location = 1;
+    attribute_descriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+    attribute_descriptions[1].offset = offsetof(Vertex, color);
+
+    return attribute_descriptions;
+  }
+};
 
 
 BOOST_AUTO_TEST_CASE(test_graphics_pipeline_build)

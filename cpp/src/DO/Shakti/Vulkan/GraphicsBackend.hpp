@@ -44,10 +44,7 @@ namespace DO::Kalpana::Vulkan {
     static constexpr auto default_height = 600;
 
   public:
-    GraphicsBackend(GLFWwindow* window, const std::string& app_name,
-                    const std::filesystem::path& vertex_shader_path,
-                    const std::filesystem::path& fragment_shader_path,
-                    const bool debug_vulkan);
+    virtual ~GraphicsBackend() = default;
 
     auto init_instance(const std::string& app_name, const bool debug_vulkan)
         -> void;
@@ -64,11 +61,11 @@ namespace DO::Kalpana::Vulkan {
 
     auto init_render_pass() -> void;
 
-    auto
+    virtual auto
     init_graphics_pipeline(GLFWwindow* window,  //
                            const std::filesystem::path& vertex_shader_path,
                            const std::filesystem::path& fragment_shader_path)
-        -> void;
+        -> void = 0;
 
     auto init_command_pool_and_buffers() -> void;
 
