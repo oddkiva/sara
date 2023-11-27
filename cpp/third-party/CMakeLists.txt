@@ -16,6 +16,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   return ()
 endif ()
 
+message(STATUS "  - implot")
+add_subdirectory(implot)
+
 message(STATUS "  - FLANN")
 add_subdirectory(flann)
 set_property(TARGET flann_cpp_s PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
