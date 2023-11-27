@@ -267,7 +267,7 @@ public:
         static_cast<std::uint32_t>(_swapchain.images.size());
 
     // Each descriptor set has the same uniform descriptor layout.
-    const auto& ubo_layout = _graphics_pipeline.model_view_projection_layout();
+    const auto& ubo_layout = _graphics_pipeline.descriptor_set_layout();
     const auto ubo_layout_handle =
         static_cast<VkDescriptorSetLayout>(ubo_layout);
 
@@ -292,7 +292,7 @@ public:
         static_cast<std::uint32_t>(_swapchain.images.size());
 
     // Each descriptor set has the same uniform descriptor layout.
-    const auto& ubo_layout = _graphics_pipeline.model_view_projection_layout();
+    const auto& ubo_layout = _graphics_pipeline.descriptor_set_layout();
     const auto ubo_layout_handle =
         static_cast<VkDescriptorSetLayout>(ubo_layout);
 

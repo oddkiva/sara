@@ -75,10 +75,10 @@ namespace DO::Kalpana::Vulkan {
       return _device;
     }
 
-    auto model_view_projection_layout() const
+    auto descriptor_set_layout() const
         -> const Shakti::Vulkan::DescriptorSetLayout&
     {
-      return _mvp_layout;
+      return _desc_set_layout;
     }
 
     auto pipeline_layout() const -> VkPipelineLayout
@@ -94,7 +94,7 @@ namespace DO::Kalpana::Vulkan {
     auto swap(GraphicsPipeline& other) -> void
     {
       std::swap(_device, other._device);
-      _mvp_layout.swap(other._mvp_layout);
+      _desc_set_layout.swap(other._desc_set_layout);
       std::swap(_pipeline_layout, other._pipeline_layout);
       std::swap(_pipeline, other._pipeline);
     }
@@ -102,7 +102,7 @@ namespace DO::Kalpana::Vulkan {
   private:
     VkDevice _device = nullptr;
     // Model View Projection matrix stack etc.
-    Shakti::Vulkan::DescriptorSetLayout _mvp_layout;
+    Shakti::Vulkan::DescriptorSetLayout _desc_set_layout;
     VkPipelineLayout _pipeline_layout = nullptr;
     VkPipeline _pipeline = nullptr;
   };
@@ -212,7 +212,7 @@ namespace DO::Kalpana::Vulkan {
 
       graphics_pipeline._device = device;
 
-      graphics_pipeline._mvp_layout =
+      graphics_pipeline._desc_set_layout =
           Shakti::Vulkan::DescriptorSetLayout::Builder{device}
               .push_uniform_buffer_layout_binding()
               .create();
@@ -225,7 +225,7 @@ namespace DO::Kalpana::Vulkan {
             VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipeline_layout_info.setLayoutCount = 1;
         pipeline_layout_info.pSetLayouts =
-            &static_cast<VkDescriptorSetLayout&>(graphics_pipeline._mvp_layout);
+            &static_cast<VkDescriptorSetLayout&>(graphics_pipeline._desc_set_layout);
         pipeline_layout_info.pushConstantRangeCount = 0;
       };
       auto status = vkCreatePipelineLayout(    //
