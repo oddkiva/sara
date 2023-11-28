@@ -11,7 +11,6 @@
 
 //! @example
 
-#include "imgui.h"
 #include <DO/Kalpana/EasyGL.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
@@ -131,7 +130,7 @@ public:
 
     // ImGuiIO &io = ImGui::GetIO();
     ImGui_ImplGlfw_InitForOpenGL(_window, true);
-    ImGui_ImplOpenGL3_Init("#version 300 es");
+    ImGui_ImplOpenGL3_Init("#version 330 core");
     ImGui::StyleColorsDark();
   }
 
