@@ -382,6 +382,7 @@ public:
 
     // Image data on the host.
     auto image_host = sara::Image<sara::Rgba8>{w, h};
+    image_host.flat_array().fill(sara::Rgba8{255, 0, 0, 255});
 
     // Image data as a staging device buffer.
     _image_staging_buffer = svk::BufferFactory{_device}  //
