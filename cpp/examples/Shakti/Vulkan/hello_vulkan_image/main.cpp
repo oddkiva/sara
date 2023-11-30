@@ -390,6 +390,8 @@ public:
         svk::DeviceMemoryFactory{_physical_device, _device}  //
             .allocate_for_staging_buffer(_image_staging_buffer);
     _image_staging_buffer.bind(_image_staging_dmem, 0);
+
+    // Copy the image data from the host buffer to the staging device buffer.
     _image_staging_dmem.copy_from(image_host.data(), image_host.size());
 
     // Image data as device image associated with a device memory.
