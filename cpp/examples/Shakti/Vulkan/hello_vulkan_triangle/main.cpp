@@ -280,19 +280,7 @@ public:
             .count();
 
     auto mvp = ModelViewProjectionStack{};
-
     mvp.model.rotate(Eigen::AngleAxisf{time, Eigen::Vector3f::UnitZ()});
-    /*
-    mvp.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f),
-                            glm::vec3(0.0f, 0.0f, 1.0f));
-    mvp.view =
-        glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-                    glm::vec3(0.0f, 0.0f, 1.0f));
-    mvp.projection = glm::perspective(
-        glm::radians(45.0f),
-        swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
-    ubo.proj[1][1] *= -1;
-    */
 
     memcpy(_mvp_ubo_ptrs[swapchain_image_index], &mvp, sizeof(mvp));
   }

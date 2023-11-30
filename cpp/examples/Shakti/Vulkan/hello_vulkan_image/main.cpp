@@ -24,13 +24,10 @@
 #include <DO/Shakti/Vulkan/GraphicsBackend.hpp>
 #include <DO/Shakti/Vulkan/Image.hpp>
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
-
-#include <Eigen/Geometry>
+#include <DO/Sara/Core/Image.hpp>
 
 #include <filesystem>
 #include <limits>
-#include <stdexcept>
 
 
 namespace glfw = DO::Kalpana::GLFW;
@@ -377,6 +374,38 @@ public:
     }
   }
 
+  auto initialize_image() -> void
+  {
+    static constexpr auto w = 640;
+    static constexpr auto h = 480;
+
+    namespace sara = DO::Sara;
+
+    // Image data on the host.
+    auto image_host = sara::Image<sara::Rgba8>{w, h};
+
+    // Image data as a staging device buffer.
+    _image_staging_buffer = svk::BufferFactory{_device}  //
+                                .make_staging_buffer<std::uint32_t>(w * h);
+    _image_staging_dmem =
+        svk::DeviceMemoryFactory{_physical_device, _device}  //
+            .allocate_for_staging_buffer(_image_staging_buffer);
+    _image_staging_buffer.bind(_image_staging_dmem, 0);
+    _image_staging_dmem.copy_from(image_host.data(), image_host.size());
+
+    // Image data as device image associated with a device memory.
+    _image =
+        svk::Image::Builder{_device}
+            .sizes(VkExtent2D{w, h})
+            .format(VK_FORMAT_B8G8R8A8_SRGB)
+            .tiling(VK_IMAGE_TILING_OPTIMAL)
+            .usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
+            .create();
+    _image_dmem = svk::DeviceMemoryFactory{_physical_device, _device}  //
+                      .allocate_for_device_image(_image);
+    _image.bind(_image_dmem, 0);
+  }
+
   auto update_mvp_uniform(const std::uint32_t swapchain_image_index) -> void
   {
     static auto start_time = std::chrono::high_resolution_clock::now();
@@ -390,17 +419,6 @@ public:
     auto mvp = ModelViewProjectionStack{};
 
     mvp.model.rotate(Eigen::AngleAxisf{time, Eigen::Vector3f::UnitZ()});
-    /*
-    mvp.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f),
-                            glm::vec3(0.0f, 0.0f, 1.0f));
-    mvp.view =
-        glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-                    glm::vec3(0.0f, 0.0f, 1.0f));
-    mvp.projection = glm::perspective(
-        glm::radians(45.0f),
-        swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
-    ubo.proj[1][1] *= -1;
-    */
 
     memcpy(_mvp_ubo_ptrs[swapchain_image_index], &mvp, sizeof(mvp));
   }
@@ -692,7 +710,12 @@ private:
   std::vector<svk::DeviceMemory> _mvp_dmems;
   std::vector<void*> _mvp_ubo_ptrs;
 
+  // Image
+  svk::Buffer _image_staging_buffer;
+  svk::DeviceMemory _image_staging_dmem;
+
   svk::Image _image;
+  svk::DeviceMemory _image_dmem;
 
   // 2. Layout binding referenced for the shader.
   svk::DescriptorPool _desc_pool;
