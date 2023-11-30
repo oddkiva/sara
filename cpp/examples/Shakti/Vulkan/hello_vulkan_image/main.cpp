@@ -23,6 +23,11 @@
 #include <DO/Shakti/Vulkan/EasyGLFW.hpp>
 #include <DO/Shakti/Vulkan/GraphicsBackend.hpp>
 #include <DO/Shakti/Vulkan/Image.hpp>
+#include <DO/Shakti/Vulkan/ImageView.hpp>
+#include <DO/Shakti/Vulkan/Instance.hpp>
+#include <DO/Shakti/Vulkan/PhysicalDevice.hpp>
+#include <DO/Shakti/Vulkan/Queue.hpp>
+#include <DO/Shakti/Vulkan/Sampler.hpp>
 
 #include <DO/Sara/Core/Image.hpp>
 
@@ -38,7 +43,7 @@ namespace fs = std::filesystem;
 
 // clang-format off
 static const auto vertices = std::vector<Vertex>{
-    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.f, 0.f}},
+  {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.f, 0.f}},
     {{ 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.f, 0.f}},
     {{ 0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.f, 1.f}},
     {{-0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}, {0.f, 1.f}}
@@ -408,6 +413,21 @@ public:
     _image.bind(_image_dmem, 0);
   }
 
+  auto initialize_image_view_and_sampler() -> void
+  {
+    // To use the image resource from a shader:
+    // 1. Create an image view
+    // 2. Create an image sampler
+    // 3. Add a DescriptorSetLayout for the image sampler.
+    _image_view = svk::ImageView::Builder{_device}
+                      .image(_image)
+                      .format(VK_FORMAT_R8G8B8A8_SRGB)
+                      .aspect_mask(VK_IMAGE_ASPECT_COLOR_BIT)
+                      .create();
+
+    _image_sampler = svk::Sampler::Builder{_physical_device, _device}.create();
+  }
+
   auto update_mvp_uniform(const std::uint32_t swapchain_image_index) -> void
   {
     static auto start_time = std::chrono::high_resolution_clock::now();
@@ -423,6 +443,32 @@ public:
     mvp.model.rotate(Eigen::AngleAxisf{time, Eigen::Vector3f::UnitZ()});
 
     memcpy(_mvp_ubo_ptrs[swapchain_image_index], &mvp, sizeof(mvp));
+  }
+
+  auto update_image() -> void
+  {
+    for (auto i = std::size_t{}; i != num_frames_in_flight; ++i)
+    {
+      // 4.a) Register the byte size, the type of buffer which the descriptor
+      //      references to.
+      auto write_dset = VkWriteDescriptorSet{};
+      write_dset.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      write_dset.dstSet = _desc_sets[i];
+      write_dset.dstBinding = 0;       // layout(binding = 0) uniform ...
+      write_dset.dstArrayElement = 0;  // Worry about this later.
+      write_dset.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+      write_dset.descriptorCount = 1;  // Only 1 UBO descriptor per set.
+
+      // 4.b) Each descriptor set being a singleton, must reference to a UBO.
+      auto buffer_info = VkDescriptorBufferInfo{};
+      buffer_info.buffer = _mvp_ubos[i];
+      buffer_info.offset = 0;
+      buffer_info.range = sizeof(ModelViewProjectionStack);
+      write_dset.pBufferInfo = &buffer_info;
+
+      // 4.c) Send this metadata to Vulkan.
+      vkUpdateDescriptorSets(_device, 1, &write_dset, 0, nullptr);
+    }
   }
 
   auto draw_frame() -> void
@@ -722,6 +768,10 @@ private:
   // 2. Layout binding referenced for the shader.
   svk::DescriptorPool _desc_pool;
   svk::DescriptorSets _desc_sets;
+
+  // GLSL shader side.
+  svk::ImageView _image_view;
+  svk::Sampler _image_sampler;
 };
 
 
