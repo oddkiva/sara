@@ -11,6 +11,11 @@
 
 #define GLFW_INCLUDE_VULKAN
 
+#include "Geometry.hpp"
+
+#include "Common/HostUniforms.hpp"
+#include "Common/SignalHandler.hpp"
+
 #include <DO/Shakti/Vulkan/Buffer.hpp>
 #include <DO/Shakti/Vulkan/CommandBuffer.hpp>
 #include <DO/Shakti/Vulkan/DescriptorSet.hpp>
@@ -22,14 +27,9 @@
 
 #include <Eigen/Geometry>
 
-#include <signal.h>
-
-#include <atomic>
 #include <filesystem>
 #include <limits>
 #include <stdexcept>
-
-#include "Geometry.hpp"
 
 
 namespace glfw = DO::Kalpana::GLFW;
@@ -37,59 +37,6 @@ namespace kvk = DO::Kalpana::Vulkan;
 namespace svk = DO::Shakti::Vulkan;
 namespace fs = std::filesystem;
 
-
-struct SignalHandler
-{
-  static bool initialized;
-  static std::atomic_bool ctrl_c_hit;
-  static struct sigaction sigint_handler;
-
-  static auto stop_render_loop(int) -> void
-  {
-    std::cout << "[CTRL+C HIT] Preparing to close the program!" << std::endl;
-    ctrl_c_hit = true;
-  }
-
-  static auto init() -> void
-  {
-    if (initialized)
-      return;
-
-#if defined(_WIN32)
-    signal(SIGINT, stop_render_loop);
-    signal(SIGTERM, stop_render_loop);
-    signal(SIGABRT, stop_render_loop);
-#else
-    sigint_handler.sa_handler = SignalHandler::stop_render_loop;
-    sigemptyset(&sigint_handler.sa_mask);
-    sigint_handler.sa_flags = 0;
-    sigaction(SIGINT, &sigint_handler, nullptr);
-#endif
-
-    initialized = true;
-  }
-};
-
-bool SignalHandler::initialized = false;
-std::atomic_bool SignalHandler::ctrl_c_hit = false;
-#if !defined(_WIN32)
-struct sigaction SignalHandler::sigint_handler = {};
-#endif
-
-
-struct ModelViewProjectionStack
-{
-  ModelViewProjectionStack()
-  {
-    model.setIdentity();
-    view.setIdentity();
-    projection.setIdentity();
-  }
-
-  Eigen::Transform<float, 3, Eigen::Projective> model;
-  Eigen::Transform<float, 3, Eigen::Projective> view;
-  Eigen::Transform<float, 3, Eigen::Projective> projection;
-};
 
 // clang-format off
 static const auto vertices = std::vector<Vertex>{
@@ -261,7 +208,7 @@ public:
         static_cast<std::uint32_t>(_swapchain.images.size());
 
     // Each descriptor set has the same uniform descriptor layout.
-    const auto& ubo_layout = _graphics_pipeline.descriptor_set_layout();
+    const auto& ubo_layout = _graphics_pipeline.desc_set_layout;
     const auto ubo_layout_handle =
         static_cast<VkDescriptorSetLayout>(ubo_layout);
 
@@ -600,7 +547,7 @@ public:
 
       // Pass the UBO to the graphics pipeline.
       vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              _graphics_pipeline.pipeline_layout(),  //
+                              _graphics_pipeline.pipeline_layout,  //
                               0, 1,             // Find out later about this.
                               &descriptor_set,  //
                               0, nullptr);      // Find out later about this.

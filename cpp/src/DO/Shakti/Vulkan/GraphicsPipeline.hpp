@@ -28,13 +28,10 @@ namespace DO::Kalpana::Vulkan {
   //! - what vertex shader
   //! - what fragment shader
   //! we want to use.
-  class GraphicsPipeline
+  struct GraphicsPipeline
   {
-  public:
-    struct Builder;
-    friend struct Builder;
+    class Builder;
 
-  public:
     GraphicsPipeline() = default;
 
     GraphicsPipeline(const GraphicsPipeline&) = delete;
@@ -54,61 +51,45 @@ namespace DO::Kalpana::Vulkan {
 
     ~GraphicsPipeline()
     {
-      if (_device == nullptr)
+      if (device == nullptr)
         return;
 
-      if (_pipeline_layout != nullptr)
+      if (pipeline_layout != nullptr)
       {
         SARA_DEBUG << "Destroying graphics pipeline layout...\n";
-        vkDestroyPipelineLayout(_device, _pipeline_layout, nullptr);
+        vkDestroyPipelineLayout(device, pipeline_layout, nullptr);
       }
 
-      if (_pipeline != nullptr)
+      if (pipeline != nullptr)
       {
         SARA_DEBUG << "Destroying graphics pipeline...\n";
-        vkDestroyPipeline(_device, _pipeline, nullptr);
+        vkDestroyPipeline(device, pipeline, nullptr);
       }
-    }
-
-    auto device() const -> VkDevice
-    {
-      return _device;
-    }
-
-    auto descriptor_set_layout() const
-        -> const Shakti::Vulkan::DescriptorSetLayout&
-    {
-      return _desc_set_layout;
-    }
-
-    auto pipeline_layout() const -> VkPipelineLayout
-    {
-      return _pipeline_layout;
     }
 
     operator VkPipeline() const
     {
-      return _pipeline;
+      return pipeline;
     }
 
     auto swap(GraphicsPipeline& other) -> void
     {
-      std::swap(_device, other._device);
-      _desc_set_layout.swap(other._desc_set_layout);
-      std::swap(_pipeline_layout, other._pipeline_layout);
-      std::swap(_pipeline, other._pipeline);
+      std::swap(device, other.device);
+      desc_set_layout.swap(other.desc_set_layout);
+      std::swap(pipeline_layout, other.pipeline_layout);
+      std::swap(pipeline, other.pipeline);
     }
 
-  private:
-    VkDevice _device = nullptr;
+    VkDevice device = nullptr;
     // Model View Projection matrix stack etc.
-    Shakti::Vulkan::DescriptorSetLayout _desc_set_layout;
-    VkPipelineLayout _pipeline_layout = nullptr;
-    VkPipeline _pipeline = nullptr;
+    Shakti::Vulkan::DescriptorSetLayout desc_set_layout;
+    VkPipelineLayout pipeline_layout = nullptr;
+    VkPipeline pipeline = nullptr;
   };
 
-  struct GraphicsPipeline::Builder
+  class GraphicsPipeline::Builder
   {
+  public:
     Builder(const Shakti::Vulkan::Device& device,
             const Kalpana::Vulkan::RenderPass& render_pass)
       : device{device}
@@ -210,9 +191,9 @@ namespace DO::Kalpana::Vulkan {
 
       auto graphics_pipeline = GraphicsPipeline{};
 
-      graphics_pipeline._device = device;
+      graphics_pipeline.device = device;
 
-      graphics_pipeline._desc_set_layout =
+      graphics_pipeline.desc_set_layout =
           Shakti::Vulkan::DescriptorSetLayout::Builder{device}
               .push_uniform_buffer_layout_binding()
               .create();
@@ -224,15 +205,15 @@ namespace DO::Kalpana::Vulkan {
         pipeline_layout_info.sType =
             VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipeline_layout_info.setLayoutCount = 1;
-        pipeline_layout_info.pSetLayouts =
-            &static_cast<VkDescriptorSetLayout&>(graphics_pipeline._desc_set_layout);
+        pipeline_layout_info.pSetLayouts = &static_cast<VkDescriptorSetLayout&>(
+            graphics_pipeline.desc_set_layout);
         pipeline_layout_info.pushConstantRangeCount = 0;
       };
-      auto status = vkCreatePipelineLayout(    //
-          device,                              //
-          &pipeline_layout_info,               //
-          nullptr,                             //
-          &graphics_pipeline._pipeline_layout  //
+      auto status = vkCreatePipelineLayout(   //
+          device,                             //
+          &pipeline_layout_info,              //
+          nullptr,                            //
+          &graphics_pipeline.pipeline_layout  //
       );
       if (status != VK_SUCCESS)
         throw std::runtime_error{fmt::format(
@@ -263,7 +244,7 @@ namespace DO::Kalpana::Vulkan {
         pipeline_info.pMultisampleState = &multisampling;
         pipeline_info.pColorBlendState = &color_blend;
 
-        pipeline_info.layout = graphics_pipeline._pipeline_layout;
+        pipeline_info.layout = graphics_pipeline.pipeline_layout;
         pipeline_info.renderPass = render_pass.handle;
         pipeline_info.subpass = 0;
         pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
@@ -276,7 +257,7 @@ namespace DO::Kalpana::Vulkan {
           1,                               //
           &pipeline_info,                  //
           nullptr,                         //
-          &graphics_pipeline._pipeline     //
+          &graphics_pipeline.pipeline      //
       );
       if (status != VK_SUCCESS)
         throw std::runtime_error{
@@ -296,7 +277,7 @@ namespace DO::Kalpana::Vulkan {
       return shader_stage_infos[1];
     }
 
-  private:
+  protected:
     auto load_shaders() -> void
     {
       // Load the compiled shaders.

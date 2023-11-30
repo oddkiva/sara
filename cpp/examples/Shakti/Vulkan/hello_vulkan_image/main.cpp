@@ -11,6 +11,11 @@
 
 #define GLFW_INCLUDE_VULKAN
 
+#include "Geometry.hpp"
+
+#include "Common/HostUniforms.hpp"
+#include "Common/SignalHandler.hpp"
+
 #include <DO/Shakti/Vulkan/Buffer.hpp>
 #include <DO/Shakti/Vulkan/CommandBuffer.hpp>
 #include <DO/Shakti/Vulkan/DescriptorSet.hpp>
@@ -22,14 +27,9 @@
 
 #include <Eigen/Geometry>
 
-#include <signal.h>
-
-#include <atomic>
 #include <filesystem>
 #include <limits>
 #include <stdexcept>
-
-#include "Geometry.hpp"
 
 
 namespace glfw = DO::Kalpana::GLFW;
@@ -37,59 +37,6 @@ namespace kvk = DO::Kalpana::Vulkan;
 namespace svk = DO::Shakti::Vulkan;
 namespace fs = std::filesystem;
 
-
-struct SignalHandler
-{
-  static bool initialized;
-  static std::atomic_bool ctrl_c_hit;
-  static struct sigaction sigint_handler;
-
-  static auto stop_render_loop(int) -> void
-  {
-    std::cout << "[CTRL+C HIT] Preparing to close the program!" << std::endl;
-    ctrl_c_hit = true;
-  }
-
-  static auto init() -> void
-  {
-    if (initialized)
-      return;
-
-#if defined(_WIN32)
-    signal(SIGINT, stop_render_loop);
-    signal(SIGTERM, stop_render_loop);
-    signal(SIGABRT, stop_render_loop);
-#else
-    sigint_handler.sa_handler = SignalHandler::stop_render_loop;
-    sigemptyset(&sigint_handler.sa_mask);
-    sigint_handler.sa_flags = 0;
-    sigaction(SIGINT, &sigint_handler, nullptr);
-#endif
-
-    initialized = true;
-  }
-};
-
-bool SignalHandler::initialized = false;
-std::atomic_bool SignalHandler::ctrl_c_hit = false;
-#if !defined(_WIN32)
-struct sigaction SignalHandler::sigint_handler = {};
-#endif
-
-
-struct ModelViewProjectionStack
-{
-  ModelViewProjectionStack()
-  {
-    model.setIdentity();
-    view.setIdentity();
-    projection.setIdentity();
-  }
-
-  Eigen::Transform<float, 3, Eigen::Projective> model;
-  Eigen::Transform<float, 3, Eigen::Projective> view;
-  Eigen::Transform<float, 3, Eigen::Projective> projection;
-};
 
 // clang-format off
 static const auto vertices = std::vector<Vertex>{
@@ -103,6 +50,95 @@ static const auto vertices = std::vector<Vertex>{
 static const auto indices = std::vector<uint16_t>{
     0, 1, 2,  //
     2, 3, 0   //
+};
+
+
+class VulkanImagePipelineBuilder : public kvk::GraphicsPipeline::Builder
+{
+public:
+  auto create() -> kvk::GraphicsPipeline override
+  {
+    load_shaders();
+    initialize_fixed_functions();
+
+    auto graphics_pipeline = kvk::GraphicsPipeline{};
+
+    graphics_pipeline.device = device;
+
+    graphics_pipeline.desc_set_layout =
+        svk::DescriptorSetLayout::Builder{device}
+            .push_uniform_buffer_layout_binding()
+            .push_image_sampler_layout_binding()
+            .create();
+
+    // Initialize the graphics pipeline layout.
+    SARA_DEBUG << "Initializing the graphics pipeline layout...\n";
+    pipeline_layout_info = VkPipelineLayoutCreateInfo{};
+    {
+      pipeline_layout_info.sType =
+          VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+      pipeline_layout_info.setLayoutCount = 1;
+      pipeline_layout_info.pSetLayouts = &static_cast<VkDescriptorSetLayout&>(
+          graphics_pipeline.desc_set_layout);
+      pipeline_layout_info.pushConstantRangeCount = 0;
+    };
+    auto status = vkCreatePipelineLayout(   //
+        device,                             //
+        &pipeline_layout_info,              //
+        nullptr,                            //
+        &graphics_pipeline.pipeline_layout  //
+    );
+    if (status != VK_SUCCESS)
+      throw std::runtime_error{fmt::format(
+          "Failed to create the graphics pipeline layout! Error code: {}",
+          static_cast<int>(status))};
+
+    // Initialize the graphics pipeline.
+    SARA_DEBUG << "Initializing the graphics pipeline...\n";
+    pipeline_info = {};
+    {
+      pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+
+      // - Vertex and fragment shaders.
+      pipeline_info.stageCount =
+          static_cast<std::uint32_t>(shader_stage_infos.size());
+      pipeline_info.pStages = shader_stage_infos.data();
+
+      // - Vertex buffer data format.
+      pipeline_info.pVertexInputState = &vertex_input_info;
+      // - We enumerate triangle vertices.
+      pipeline_info.pInputAssemblyState = &input_assembly;
+      pipeline_info.pViewportState = &viewport_state;
+
+      // The rasterization state.
+      pipeline_info.pRasterizationState = &rasterization_state;
+
+      // Rendering policy.
+      pipeline_info.pMultisampleState = &multisampling;
+      pipeline_info.pColorBlendState = &color_blend;
+
+      pipeline_info.layout = graphics_pipeline.pipeline_layout;
+      pipeline_info.renderPass = render_pass.handle;
+      pipeline_info.subpass = 0;
+      pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
+      pipeline_info.basePipelineIndex = -1;
+    };
+
+    status = vkCreateGraphicsPipelines(  //
+        device,                          //
+        VK_NULL_HANDLE,                  //
+        1,                               //
+        &pipeline_info,                  //
+        nullptr,                         //
+        &graphics_pipeline.pipeline      //
+    );
+    if (status != VK_SUCCESS)
+      throw std::runtime_error{
+          fmt::format("Failed to create graphics pipeline! Error code: {}",
+                      static_cast<int>(status))};
+
+    return graphics_pipeline;
+  }
 };
 
 
@@ -130,7 +166,7 @@ public:
     transfer_element_data_to_vulkan(indices);
 
     make_descriptor_pool();
-    make_ubo_descriptor_sets();
+    make_descriptor_sets();
     initialize_model_view_projection_ubos();
   }
 
@@ -256,7 +292,7 @@ public:
     _desc_pool = desc_pool_builder.create();
   }
 
-  auto make_ubo_descriptor_sets() -> void
+  auto make_descriptor_sets() -> void
   {
     // The number of frames in flight is the number of swapchain images.
     // Let's say there are 3 frames in flight.
@@ -267,34 +303,9 @@ public:
         static_cast<std::uint32_t>(_swapchain.images.size());
 
     // Each descriptor set has the same uniform descriptor layout.
-    const auto& ubo_layout = _graphics_pipeline.descriptor_set_layout();
+    const auto& desc_set_layout = _graphics_pipeline.desc_set_layout;
     const auto ubo_layout_handle =
-        static_cast<VkDescriptorSetLayout>(ubo_layout);
-
-    const auto desc_set_layouts = std::vector<VkDescriptorSetLayout>(
-        num_frames_in_flight, ubo_layout_handle);
-
-    _desc_sets = svk::DescriptorSets{
-        desc_set_layouts.data(),  //
-        num_frames_in_flight,     //
-        _desc_pool                //
-    };
-  }
-
-  auto make_image_descriptor_sets() -> void
-  {
-    // The number of frames in flight is the number of swapchain images.
-    // Let's say there are 3 frames in flight.
-    //
-    // We will construct 3 sets of descriptors, that is, we need one for each
-    // swapchain image.
-    const auto num_frames_in_flight =
-        static_cast<std::uint32_t>(_swapchain.images.size());
-
-    // Each descriptor set has the same uniform descriptor layout.
-    const auto& ubo_layout = _graphics_pipeline.descriptor_set_layout();
-    const auto ubo_layout_handle =
-        static_cast<VkDescriptorSetLayout>(ubo_layout);
+        static_cast<VkDescriptorSetLayout>(desc_set_layout);
 
     const auto desc_set_layouts = std::vector<VkDescriptorSetLayout>(
         num_frames_in_flight, ubo_layout_handle);
@@ -631,7 +642,7 @@ public:
 
       // Pass the UBO to the graphics pipeline.
       vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              _graphics_pipeline.pipeline_layout(),  //
+                              _graphics_pipeline.pipeline_layout,  //
                               0, 1,             // Find out later about this.
                               &descriptor_set,  //
                               0, nullptr);      // Find out later about this.

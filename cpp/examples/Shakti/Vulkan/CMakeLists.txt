@@ -1,2 +1,3 @@
+add_subdirectory(Common)
 add_subdirectory(hello_vulkan_triangle)
 add_subdirectory(hello_vulkan_image)

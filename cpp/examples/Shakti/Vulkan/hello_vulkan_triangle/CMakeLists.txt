@@ -2,7 +2,8 @@ add_executable(hello_vulkan_triangle main.cpp)
 target_link_libraries(
   hello_vulkan_triangle #
   PRIVATE DO::Sara::Core #
-          DO::Shakti::Vulkan)
+          DO::Shakti::Vulkan #
+          SignalHandler)
 set_target_properties(hello_vulkan_triangle PROPERTIES FOLDER
                                                        "Examples/Shakti/Vulkan")
 
