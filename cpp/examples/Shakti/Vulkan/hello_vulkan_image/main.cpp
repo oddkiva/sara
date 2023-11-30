@@ -149,7 +149,6 @@ public:
     create_graphics_pipeline_layout(graphics_pipeline);
     create_graphics_pipeline(graphics_pipeline);
 
-
     return graphics_pipeline;
   }
 };
