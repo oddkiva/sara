@@ -22,6 +22,7 @@
 #include <DO/Shakti/Vulkan/DeviceMemory.hpp>
 #include <DO/Shakti/Vulkan/EasyGLFW.hpp>
 #include <DO/Shakti/Vulkan/GraphicsBackend.hpp>
+#include <DO/Shakti/Vulkan/Image.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
@@ -56,21 +57,9 @@ static const auto indices = std::vector<uint16_t>{
 class VulkanImagePipelineBuilder : public kvk::GraphicsPipeline::Builder
 {
 public:
-  auto create() -> kvk::GraphicsPipeline override
+  auto create_graphics_pipeline_layout(kvk::GraphicsPipeline& graphics_pipeline)
+      -> void
   {
-    load_shaders();
-    initialize_fixed_functions();
-
-    auto graphics_pipeline = kvk::GraphicsPipeline{};
-
-    graphics_pipeline.device = device;
-
-    graphics_pipeline.desc_set_layout =
-        svk::DescriptorSetLayout::Builder{device}
-            .push_uniform_buffer_layout_binding()
-            .push_image_sampler_layout_binding()
-            .create();
-
     // Initialize the graphics pipeline layout.
     SARA_DEBUG << "Initializing the graphics pipeline layout...\n";
     pipeline_layout_info = VkPipelineLayoutCreateInfo{};
@@ -82,17 +71,21 @@ public:
           graphics_pipeline.desc_set_layout);
       pipeline_layout_info.pushConstantRangeCount = 0;
     };
-    auto status = vkCreatePipelineLayout(   //
-        device,                             //
-        &pipeline_layout_info,              //
-        nullptr,                            //
-        &graphics_pipeline.pipeline_layout  //
+    const auto status = vkCreatePipelineLayout(  //
+        device,                                  //
+        &pipeline_layout_info,                   //
+        nullptr,                                 //
+        &graphics_pipeline.pipeline_layout       //
     );
     if (status != VK_SUCCESS)
       throw std::runtime_error{fmt::format(
           "Failed to create the graphics pipeline layout! Error code: {}",
           static_cast<int>(status))};
+  }
 
+  auto create_graphics_pipeline(kvk::GraphicsPipeline& graphics_pipeline)
+      -> void
+  {
     // Initialize the graphics pipeline.
     SARA_DEBUG << "Initializing the graphics pipeline...\n";
     pipeline_info = {};
@@ -124,18 +117,38 @@ public:
       pipeline_info.basePipelineIndex = -1;
     };
 
-    status = vkCreateGraphicsPipelines(  //
-        device,                          //
-        VK_NULL_HANDLE,                  //
-        1,                               //
-        &pipeline_info,                  //
-        nullptr,                         //
-        &graphics_pipeline.pipeline      //
+    const auto status = vkCreateGraphicsPipelines(  //
+        device,                                     //
+        VK_NULL_HANDLE,                             //
+        1,                                          //
+        &pipeline_info,                             //
+        nullptr,                                    //
+        &graphics_pipeline.pipeline                 //
     );
     if (status != VK_SUCCESS)
       throw std::runtime_error{
           fmt::format("Failed to create graphics pipeline! Error code: {}",
                       static_cast<int>(status))};
+  }
+
+  auto create() -> kvk::GraphicsPipeline override
+  {
+    load_shaders();
+    initialize_fixed_functions();
+
+    auto graphics_pipeline = kvk::GraphicsPipeline{};
+
+    graphics_pipeline.device = device;
+
+    graphics_pipeline.desc_set_layout =
+        svk::DescriptorSetLayout::Builder{device}
+            .push_uniform_buffer_layout_binding()
+            .push_image_sampler_layout_binding()
+            .create();
+
+    create_graphics_pipeline_layout(graphics_pipeline);
+    create_graphics_pipeline(graphics_pipeline);
+
 
     return graphics_pipeline;
   }
@@ -678,11 +691,12 @@ private:
   std::vector<svk::Buffer> _mvp_ubos;
   std::vector<svk::DeviceMemory> _mvp_dmems;
   std::vector<void*> _mvp_ubo_ptrs;
+
+  svk::Image _image;
+
   // 2. Layout binding referenced for the shader.
   svk::DescriptorPool _desc_pool;
   svk::DescriptorSets _desc_sets;
-
-  svk::DescriptorSetLayout _image_desc_layout;
 };
 
 
