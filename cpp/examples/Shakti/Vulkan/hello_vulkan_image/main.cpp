@@ -17,22 +17,14 @@
 #include "Common/SignalHandler.hpp"
 
 #include <DO/Shakti/Vulkan/Buffer.hpp>
-#include <DO/Shakti/Vulkan/CommandBuffer.hpp>
-#include <DO/Shakti/Vulkan/DescriptorSet.hpp>
 #include <DO/Shakti/Vulkan/DeviceMemory.hpp>
 #include <DO/Shakti/Vulkan/EasyGLFW.hpp>
 #include <DO/Shakti/Vulkan/GraphicsBackend.hpp>
 #include <DO/Shakti/Vulkan/Image.hpp>
 #include <DO/Shakti/Vulkan/ImageView.hpp>
-#include <DO/Shakti/Vulkan/Instance.hpp>
-#include <DO/Shakti/Vulkan/PhysicalDevice.hpp>
-#include <DO/Shakti/Vulkan/Queue.hpp>
 #include <DO/Shakti/Vulkan/Sampler.hpp>
 
 #include <DO/Sara/Core/Image.hpp>
-
-#include <filesystem>
-#include <limits>
 
 
 namespace glfw = DO::Kalpana::GLFW;
@@ -163,6 +155,7 @@ public:
                       const std::filesystem::path& shader_dirpath,
                       const bool debug_vulkan = true)
   {
+    // General vulkan context objects.
     init_instance(app_name, debug_vulkan);
     init_surface(window);
     init_physical_device();
@@ -170,20 +163,53 @@ public:
     init_swapchain(window);
     init_render_pass();
     init_framebuffers();
+
+    // Graphics pipeline.
     init_graphics_pipeline(window,  //
                            shader_dirpath / "vert.spv",
                            shader_dirpath / "frag.spv");
+
+    // Graphics command pool and command buffers.
     init_command_pool_and_buffers();
+    // Vulkan fence and semaphores for graphics rendering.
     init_synchronization_objects();
 
-    transfer_vertex_data_to_vulkan(vertices);
-    transfer_element_data_to_vulkan(indices);
+    // Geometry data.
+    init_vbos(vertices);
+    init_ebos(indices);
 
+    // Device memory for image data..
+    init_vulkan_image_objects();
+    init_image_copy_command_buffers();
+
+    // Graphics pipeline resource objects.
     make_descriptor_pool();
     make_descriptor_sets();
-    initialize_model_view_projection_ubos();
+
+    // Uniform data for the shaders.
+    //
+    // 1. Model-view-projection matrices
+    init_mvp_ubos();
+    // 2. Image sampler objects
+    init_image_sampler();
   }
 
+  auto loop(GLFWwindow* window) -> void
+  {
+    while (!glfwWindowShouldClose(window))
+    {
+      glfwPollEvents();
+      draw_frame();
+
+      if (SignalHandler::ctrl_c_hit)
+        break;
+    }
+
+    vkDeviceWaitIdle(_device);
+  }
+
+
+private: /* Methods to initialize objects for the graphics pipeline. */
   auto init_graphics_pipeline(GLFWwindow* window,  //
                               const std::filesystem::path& vertex_shader_path,
                               const std::filesystem::path& fragment_shader_path)
@@ -204,9 +230,58 @@ public:
             .create();
   }
 
+  auto make_descriptor_pool() -> void
+  {
+    const auto num_frames_in_flight =
+        static_cast<std::uint32_t>(_swapchain.images.size());  // 3 typically.
 
-  auto transfer_vertex_data_to_vulkan(const std::vector<Vertex>& vertices)
-      -> void
+    // We just need a single descriptor pool.
+    auto desc_pool_builder = svk::DescriptorPool::Builder{_device}  //
+                                 .pool_count(2)
+                                 .pool_max_sets(num_frames_in_flight);
+    // This descriptor pool can only allocate UBO descriptors.
+    desc_pool_builder.pool_type(0) = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    // The cumulated number of UBO descriptors across all every descriptor sets
+    // cannot exceed the following number of descriptors (3).
+    desc_pool_builder.descriptor_count(0) = num_frames_in_flight;
+
+    // The second descriptor pool is dedicated to the allocation of Vulkan
+    // image descriptors.
+    desc_pool_builder.pool_type(1) = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    // We only need to reserve 1 image descriptor since the image will stay
+    // unchanged throughout the application runtime
+    desc_pool_builder.descriptor_count(1) = 1;
+
+    _desc_pool = desc_pool_builder.create();
+  }
+
+  auto make_descriptor_sets() -> void
+  {
+    // The number of frames in flight is the number of swapchain images.
+    // Let's say there are 3 frames in flight.
+    //
+    // We will construct 3 sets of descriptors, that is, we need one for each
+    // swapchain image.
+    const auto num_frames_in_flight =
+        static_cast<std::uint32_t>(_swapchain.images.size());
+
+    // Each descriptor set has the same uniform descriptor layout.
+    const auto& desc_set_layout = _graphics_pipeline.desc_set_layout;
+    const auto ubo_layout_handle =
+        static_cast<VkDescriptorSetLayout>(desc_set_layout);
+
+    const auto desc_set_layouts = std::vector<VkDescriptorSetLayout>(
+        num_frames_in_flight, ubo_layout_handle);
+
+    _desc_sets = svk::DescriptorSets{
+        desc_set_layouts.data(),  //
+        num_frames_in_flight,     //
+        _desc_pool                //
+    };
+  }
+
+private: /* Methods to initialize geometry buffer data on the device side. */
+  auto init_vbos(const std::vector<Vertex>& vertices) -> void
   {
     const auto buffer_factory = svk::BufferFactory{_device};
     const auto dmem_factory =
@@ -243,9 +318,7 @@ public:
     _graphics_queue.wait();
   }
 
-  auto
-  transfer_element_data_to_vulkan(const std::vector<std::uint16_t>& indices)
-      -> void
+  auto init_ebos(const std::vector<std::uint16_t>& indices) -> void
   {
     const auto buffer_factory = svk::BufferFactory{_device};
     const auto dmem_factory =
@@ -283,55 +356,9 @@ public:
     _graphics_queue.wait();
   }
 
-  auto make_descriptor_pool() -> void
-  {
-    const auto num_frames_in_flight =
-        static_cast<std::uint32_t>(_swapchain.images.size());  // 3 typically.
 
-    // We just need a single descriptor pool.
-    auto desc_pool_builder = svk::DescriptorPool::Builder{_device}  //
-                                 .pool_count(2)
-                                 .pool_max_sets(num_frames_in_flight);
-    // This descriptor pool can only allocate UBO descriptors.
-    desc_pool_builder.pool_type(0) = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    // The cumulated number of UBO descriptors across all every descriptor sets
-    // cannot exceed the following number of descriptors (3).
-    desc_pool_builder.descriptor_count(0) = num_frames_in_flight;
-
-    // The second descriptor pool is dedicated to the allocation of Vulkan
-    // image descriptors.
-    desc_pool_builder.pool_type(1) = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    desc_pool_builder.descriptor_count(1) = num_frames_in_flight;
-
-    _desc_pool = desc_pool_builder.create();
-  }
-
-  auto make_descriptor_sets() -> void
-  {
-    // The number of frames in flight is the number of swapchain images.
-    // Let's say there are 3 frames in flight.
-    //
-    // We will construct 3 sets of descriptors, that is, we need one for each
-    // swapchain image.
-    const auto num_frames_in_flight =
-        static_cast<std::uint32_t>(_swapchain.images.size());
-
-    // Each descriptor set has the same uniform descriptor layout.
-    const auto& desc_set_layout = _graphics_pipeline.desc_set_layout;
-    const auto ubo_layout_handle =
-        static_cast<VkDescriptorSetLayout>(desc_set_layout);
-
-    const auto desc_set_layouts = std::vector<VkDescriptorSetLayout>(
-        num_frames_in_flight, ubo_layout_handle);
-
-    _desc_sets = svk::DescriptorSets{
-        desc_set_layouts.data(),  //
-        num_frames_in_flight,     //
-        _desc_pool                //
-    };
-  }
-
-  auto initialize_model_view_projection_ubos() -> void
+private: /* Methods to transfer model-view-projection uniform data. */
+  auto init_mvp_ubos() -> void
   {
     const auto num_frames_in_flight = _swapchain.images.size();
     _mvp_ubos = std::vector<svk::Buffer>(num_frames_in_flight);
@@ -378,56 +405,6 @@ public:
     }
   }
 
-  auto initialize_image() -> void
-  {
-    static constexpr auto w = 640;
-    static constexpr auto h = 480;
-
-    namespace sara = DO::Sara;
-
-    // Image data on the host.
-    auto image_host = sara::Image<sara::Rgba8>{w, h};
-    image_host.flat_array().fill(sara::Rgba8{255, 0, 0, 255});
-
-    // Image data as a staging device buffer.
-    _image_staging_buffer = svk::BufferFactory{_device}  //
-                                .make_staging_buffer<std::uint32_t>(w * h);
-    _image_staging_dmem =
-        svk::DeviceMemoryFactory{_physical_device, _device}  //
-            .allocate_for_staging_buffer(_image_staging_buffer);
-    _image_staging_buffer.bind(_image_staging_dmem, 0);
-
-    // Copy the image data from the host buffer to the staging device buffer.
-    _image_staging_dmem.copy_from(image_host.data(), image_host.size());
-
-    // Image data as device image associated with a device memory.
-    _image =
-        svk::Image::Builder{_device}
-            .sizes(VkExtent2D{w, h})
-            .format(VK_FORMAT_B8G8R8A8_SRGB)
-            .tiling(VK_IMAGE_TILING_OPTIMAL)
-            .usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
-            .create();
-    _image_dmem = svk::DeviceMemoryFactory{_physical_device, _device}  //
-                      .allocate_for_device_image(_image);
-    _image.bind(_image_dmem, 0);
-  }
-
-  auto initialize_image_view_and_sampler() -> void
-  {
-    // To use the image resource from a shader:
-    // 1. Create an image view
-    // 2. Create an image sampler
-    // 3. Add a DescriptorSetLayout for the image sampler.
-    _image_view = svk::ImageView::Builder{_device}
-                      .image(_image)
-                      .format(VK_FORMAT_R8G8B8A8_SRGB)
-                      .aspect_mask(VK_IMAGE_ASPECT_COLOR_BIT)
-                      .create();
-
-    _image_sampler = svk::Sampler::Builder{_physical_device, _device}.create();
-  }
-
   auto update_mvp_uniform(const std::uint32_t swapchain_image_index) -> void
   {
     static auto start_time = std::chrono::high_resolution_clock::now();
@@ -445,30 +422,201 @@ public:
     memcpy(_mvp_ubo_ptrs[swapchain_image_index], &mvp, sizeof(mvp));
   }
 
-  auto update_image() -> void
+
+private: /* Methods to initialize image data */
+  auto init_vulkan_image_objects() -> void
   {
-    for (auto i = std::size_t{}; i != num_frames_in_flight; ++i)
+    static constexpr auto w = 640;
+    static constexpr auto h = 480;
+
+    namespace sara = DO::Sara;
+
+    // Image data on the host side.
+    _image_host = sara::Image<sara::Rgba8>{w, h};
+    _image_host.flat_array().fill(sara::Rgba8{255, 0, 0, 255});
+
+    // Image data as a staging device buffer.
+    _image_staging_buffer = svk::BufferFactory{_device}  //
+                                .make_staging_buffer<std::uint32_t>(w * h);
+    _image_staging_dmem =
+        svk::DeviceMemoryFactory{_physical_device, _device}  //
+            .allocate_for_staging_buffer(_image_staging_buffer);
+    _image_staging_buffer.bind(_image_staging_dmem, 0);
+    fmt::print("Initializing staging buffer OK\n");
+
+    // Copy the image data from the host buffer to the staging device buffer.
+    _image_staging_dmem.copy_from(_image_host.data(), _image_host.size());
+    fmt::print("Copy from host to staging buffer OK\n");
+
+    // Image data as device image associated with a device memory.
+    _image =
+        svk::Image::Builder{_device}
+            .sizes(VkExtent2D{w, h})
+            .format(VK_FORMAT_B8G8R8A8_SRGB)
+            .tiling(VK_IMAGE_TILING_OPTIMAL)
+            .usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
+            .create();
+    fmt::print("Initializing device image OK\n");
+    _image_dmem = svk::DeviceMemoryFactory{_physical_device, _device}  //
+                      .allocate_for_device_image(_image);
+    fmt::print("Initializing device image mem OK\n");
+    _image.bind(_image_dmem, 0);
+    fmt::print("Binding device image to device mem OK\n");
+  }
+
+  auto init_image_sampler() -> void
+  {
+    // To use the image resource from a shader:
+    // 1. Create an image view
+    // 2. Create an image sampler
+    // 3. Add a DescriptorSetLayout for the image sampler.
+    _image_view = svk::ImageView::Builder{_device}
+                      .image(_image)
+                      .format(VK_FORMAT_R8G8B8A8_SRGB)
+                      .aspect_mask(VK_IMAGE_ASPECT_COLOR_BIT)
+                      .create();
+
+    _image_sampler = svk::Sampler::Builder{_physical_device, _device}.create();
+  }
+
+  auto init_image_copy_command_buffers() -> void
+  {
+    _image_copy_cmd_bufs = svk::CommandBufferSequence{
+        1,                  //
+        _device,            //
+        _graphics_cmd_pool  //
+    };
+  }
+
+  auto copy_image_data_from_host_to_staging_buffer() -> void
+  {
+    _image_staging_dmem.copy_from(_image_host.data(), _image_host.size(), 0);
+  }
+
+  auto copy_image_data_from_staging_to_device_buffer() -> void
+  {
+    _image_copy_cmd_bufs.reset(0);
     {
-      // 4.a) Register the byte size, the type of buffer which the descriptor
-      //      references to.
-      auto write_dset = VkWriteDescriptorSet{};
-      write_dset.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-      write_dset.dstSet = _desc_sets[i];
-      write_dset.dstBinding = 0;       // layout(binding = 0) uniform ...
-      write_dset.dstArrayElement = 0;  // Worry about this later.
-      write_dset.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-      write_dset.descriptorCount = 1;  // Only 1 UBO descriptor per set.
-
-      // 4.b) Each descriptor set being a singleton, must reference to a UBO.
-      auto buffer_info = VkDescriptorBufferInfo{};
-      buffer_info.buffer = _mvp_ubos[i];
-      buffer_info.offset = 0;
-      buffer_info.range = sizeof(ModelViewProjectionStack);
-      write_dset.pBufferInfo = &buffer_info;
-
-      // 4.c) Send this metadata to Vulkan.
-      vkUpdateDescriptorSets(_device, 1, &write_dset, 0, nullptr);
+      auto& image_layout_transition_cmd_buf = _image_copy_cmd_bufs[0];
+      svk::record_image_layout_transition(_image,  //
+                                          VK_IMAGE_LAYOUT_UNDEFINED,
+                                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                          image_layout_transition_cmd_buf);
+      _graphics_queue.submit_commands(_image_copy_cmd_bufs);
+      _graphics_queue.wait();
     }
+
+    _image_copy_cmd_bufs.reset(0);
+    {
+      auto& image_copy_cmd_buf = _image_copy_cmd_bufs[0];
+      svk::record_copy_buffer_to_image(_image_staging_buffer, _image,
+                                       image_copy_cmd_buf);
+      _graphics_queue.submit_commands(_image_copy_cmd_bufs);
+      _graphics_queue.wait();
+    }
+
+    _image_copy_cmd_bufs.reset(0);
+    {
+      auto& image_layout_transition_cmd_buf = _image_copy_cmd_bufs[0];
+      svk::record_image_layout_transition(
+          _image,  //
+          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+          VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  //
+          image_layout_transition_cmd_buf);
+      _graphics_queue.submit_commands(_image_copy_cmd_bufs);
+      _graphics_queue.wait();
+    }
+  }
+
+
+private: /* Methods for onscreen rendering */
+  auto record_graphics_command_buffer(VkCommandBuffer command_buffer,
+                                      VkFramebuffer framebuffer,
+                                      const VkDescriptorSet& descriptor_set)
+      -> void
+  {
+    SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
+    auto begin_info = VkCommandBufferBeginInfo{};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = 0;
+    begin_info.pInheritanceInfo = nullptr;
+
+    auto status = VkResult{};
+    status = vkBeginCommandBuffer(command_buffer, &begin_info);
+    if (status != VK_SUCCESS)
+      throw std::runtime_error{
+          fmt::format("[VK] Error: failed to begin recording command buffer! "
+                      "Error code: {}",
+                      static_cast<int>(status))};
+
+    auto render_pass_begin_info = VkRenderPassBeginInfo{};
+    {
+      render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+      render_pass_begin_info.renderPass = _render_pass.handle;
+      render_pass_begin_info.framebuffer = framebuffer;
+      render_pass_begin_info.renderArea.offset = {0, 0};
+      render_pass_begin_info.renderArea.extent = _swapchain.extent;
+
+      render_pass_begin_info.clearValueCount = 1;
+
+      static constexpr auto clear_white_color =
+          VkClearValue{{{0.f, 0.f, 0.f, 1.f}}};
+      render_pass_begin_info.pClearValues = &clear_white_color;
+    }
+
+    SARA_DEBUG << "[VK] Begin render pass...\n";
+    vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info,
+                         VK_SUBPASS_CONTENTS_INLINE);
+    {
+      vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        _graphics_pipeline);
+
+#ifdef ALLOW_DYNAMIC_VIEWPORT_AND_SCISSOR_STATE
+      VkViewport viewport{};
+      viewport.x = 0.0f;
+      viewport.y = 0.0f;
+      viewport.width = static_cast<float>(_swapchain.extent.width);
+      viewport.height = static_cast<float>(_swapchain.extent.height);
+      viewport.minDepth = 0.0f;
+      viewport.maxDepth = 1.0f;
+      vkCmdSetViewport(command_buffer, 0, 1, &viewport);
+
+      VkRect2D scissor{};
+      scissor.offset = {0, 0};
+      scissor.extent = _swapchain.extent;
+      vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+#endif
+
+      // Pass the VBO to the graphics pipeline.
+      static const auto vbos = std::array<VkBuffer, 1>{_vbo};
+      static constexpr auto offsets = std::array<VkDeviceSize, 1>{0};
+      vkCmdBindVertexBuffers(command_buffer, 0,
+                             static_cast<std::uint32_t>(vbos.size()),
+                             vbos.data(), offsets.data());
+
+      // Pass the EBO to the graphics pipeline.
+      vkCmdBindIndexBuffer(command_buffer, _ebo, 0, VK_INDEX_TYPE_UINT16);
+
+      // Pass the UBO to the graphics pipeline.
+      vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              _graphics_pipeline.pipeline_layout,  //
+                              0, 1,             // Find out later about this.
+                              &descriptor_set,  //
+                              0, nullptr);      // Find out later about this.
+
+      // Tell the graphics pipeline to draw triangles.
+      vkCmdDrawIndexed(command_buffer,
+                       static_cast<std::uint32_t>(indices.size()), 1, 0, 0, 0);
+    }
+
+    SARA_DEBUG << "[VK] End render pass...\n";
+    vkCmdEndRenderPass(command_buffer);
+
+    status = vkEndCommandBuffer(command_buffer);
+    if (status != VK_SUCCESS)
+      throw std::runtime_error{fmt::format(
+          "[VK] Error: failed to end record command buffer! Error code: {}",
+          static_cast<int>(status))};
   }
 
   auto draw_frame() -> void
@@ -638,108 +786,6 @@ public:
     _current_frame = (_current_frame + 1) % max_frames_in_flight;
   }
 
-  auto loop(GLFWwindow* window) -> void
-  {
-    while (!glfwWindowShouldClose(window))
-    {
-      glfwPollEvents();
-      draw_frame();
-
-      if (SignalHandler::ctrl_c_hit)
-        break;
-    }
-
-    vkDeviceWaitIdle(_device);
-  }
-
-  auto record_graphics_command_buffer(VkCommandBuffer command_buffer,
-                                      VkFramebuffer framebuffer,
-                                      const VkDescriptorSet& descriptor_set)
-      -> void
-  {
-    SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
-    auto begin_info = VkCommandBufferBeginInfo{};
-    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    begin_info.flags = 0;
-    begin_info.pInheritanceInfo = nullptr;
-
-    auto status = VkResult{};
-    status = vkBeginCommandBuffer(command_buffer, &begin_info);
-    if (status != VK_SUCCESS)
-      throw std::runtime_error{
-          fmt::format("[VK] Error: failed to begin recording command buffer! "
-                      "Error code: {}",
-                      static_cast<int>(status))};
-
-    auto render_pass_begin_info = VkRenderPassBeginInfo{};
-    {
-      render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-      render_pass_begin_info.renderPass = _render_pass.handle;
-      render_pass_begin_info.framebuffer = framebuffer;
-      render_pass_begin_info.renderArea.offset = {0, 0};
-      render_pass_begin_info.renderArea.extent = _swapchain.extent;
-
-      render_pass_begin_info.clearValueCount = 1;
-
-      static constexpr auto clear_white_color =
-          VkClearValue{{{0.f, 0.f, 0.f, 1.f}}};
-      render_pass_begin_info.pClearValues = &clear_white_color;
-    }
-
-    SARA_DEBUG << "[VK] Begin render pass...\n";
-    vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info,
-                         VK_SUBPASS_CONTENTS_INLINE);
-    {
-      vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        _graphics_pipeline);
-
-#ifdef ALLOW_DYNAMIC_VIEWPORT_AND_SCISSOR_STATE
-      VkViewport viewport{};
-      viewport.x = 0.0f;
-      viewport.y = 0.0f;
-      viewport.width = static_cast<float>(_swapchain.extent.width);
-      viewport.height = static_cast<float>(_swapchain.extent.height);
-      viewport.minDepth = 0.0f;
-      viewport.maxDepth = 1.0f;
-      vkCmdSetViewport(command_buffer, 0, 1, &viewport);
-
-      VkRect2D scissor{};
-      scissor.offset = {0, 0};
-      scissor.extent = _swapchain.extent;
-      vkCmdSetScissor(command_buffer, 0, 1, &scissor);
-#endif
-
-      // Pass the VBO to the graphics pipeline.
-      static const auto vbos = std::array<VkBuffer, 1>{_vbo};
-      static constexpr auto offsets = std::array<VkDeviceSize, 1>{0};
-      vkCmdBindVertexBuffers(command_buffer, 0,
-                             static_cast<std::uint32_t>(vbos.size()),
-                             vbos.data(), offsets.data());
-
-      // Pass the EBO to the graphics pipeline.
-      vkCmdBindIndexBuffer(command_buffer, _ebo, 0, VK_INDEX_TYPE_UINT16);
-
-      // Pass the UBO to the graphics pipeline.
-      vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              _graphics_pipeline.pipeline_layout,  //
-                              0, 1,             // Find out later about this.
-                              &descriptor_set,  //
-                              0, nullptr);      // Find out later about this.
-
-      // Tell the graphics pipeline to draw triangles.
-      vkCmdDrawIndexed(command_buffer,
-                       static_cast<std::uint32_t>(indices.size()), 1, 0, 0, 0);
-    }
-
-    SARA_DEBUG << "[VK] End render pass...\n";
-    vkCmdEndRenderPass(command_buffer);
-
-    status = vkEndCommandBuffer(command_buffer);
-    if (status != VK_SUCCESS)
-      throw std::runtime_error{fmt::format(
-          "[VK] Error: failed to end record command buffer! Error code: {}",
-          static_cast<int>(status))};
-  }
 
 private:
   int _current_frame = 0;
@@ -758,18 +804,25 @@ private:
   std::vector<svk::DeviceMemory> _mvp_dmems;
   std::vector<void*> _mvp_ubo_ptrs;
 
-  // Image
+  // 2.a) Host image buffer.
+  DO::Sara::Image<DO::Sara::Rgba8> _image_host;
+
+  // 2.b) Staging image buffer and its allocated memory.
   svk::Buffer _image_staging_buffer;
   svk::DeviceMemory _image_staging_dmem;
 
+  // 2.c) Device image and its allocated memory
   svk::Image _image;
   svk::DeviceMemory _image_dmem;
 
-  // 2. Layout binding referenced for the shader.
+  // 2.d) Copy command buffers.
+  svk::CommandBufferSequence _image_copy_cmd_bufs;
+
+  // 3. Layout binding referenced for the shader.
   svk::DescriptorPool _desc_pool;
   svk::DescriptorSets _desc_sets;
 
-  // GLSL shader side.
+  // 4. GLSL shader side.
   svk::ImageView _image_view;
   svk::Sampler _image_sampler;
 };
