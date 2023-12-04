@@ -9,3 +9,4 @@ set_property(TARGET copy_data_folder_to_binary_dir #
 add_subdirectory(EasyGL)
 add_subdirectory(Emscripten)
 add_subdirectory(Qt)
+add_subdirectory(ImPlot)

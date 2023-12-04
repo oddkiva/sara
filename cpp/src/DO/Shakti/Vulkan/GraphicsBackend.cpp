@@ -12,31 +12,12 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include <DO/Shakti/Vulkan/Geometry.hpp>
 #include <DO/Shakti/Vulkan/GraphicsBackend.hpp>
 #include <DO/Shakti/Vulkan/Semaphore.hpp>
 
 
 using namespace DO::Kalpana::Vulkan;
 
-
-GraphicsBackend::GraphicsBackend(
-    GLFWwindow* window, const std::string& app_name,
-    const std::filesystem::path& vertex_shader_path,
-    const std::filesystem::path& fragment_shader_path,  //
-    const bool debug_vulkan)
-{
-  init_instance(app_name, debug_vulkan);
-  init_surface(window);
-  init_physical_device();
-  init_device_and_queues();
-  init_swapchain(window);
-  init_render_pass();
-  init_framebuffers();
-  init_graphics_pipeline(window, vertex_shader_path, fragment_shader_path);
-  init_command_pool_and_buffers();
-  init_synchronization_objects();
-}
 
 auto GraphicsBackend::init_instance(const std::string& app_name,
                                     const bool debug_vulkan) -> void
@@ -123,7 +104,7 @@ auto GraphicsBackend::init_device_and_queues() -> void
                 .enable_device_extensions(device_extensions)
                 .enable_queue_families(
                     {graphics_queue_family_index, present_queue_family_index})
-                .enable_device_features({})
+                .enable_physical_device_features({})
                 .enable_validation_layers(_validation_layers)
                 .create();
 
@@ -148,27 +129,6 @@ auto GraphicsBackend::init_framebuffers() -> void
 auto GraphicsBackend::init_render_pass() -> void
 {
   _render_pass.create_basic_render_pass(_device, _swapchain.image_format);
-}
-
-auto GraphicsBackend::init_graphics_pipeline(
-    GLFWwindow* window,  //
-    const std::filesystem::path& vertex_shader_path,
-    const std::filesystem::path& fragment_shader_path) -> void
-{
-  auto w = int{};
-  auto h = int{};
-  glfwGetWindowSize(window, &w, &h);
-
-  _graphics_pipeline =
-      GraphicsPipeline::Builder{_device, _render_pass}
-          .vertex_shader_path(vertex_shader_path)
-          .fragment_shader_path(fragment_shader_path)
-          // .vbo_data_built_in_vertex_shader()
-          .vbo_data_format<Vertex>()
-          .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
-          .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
-          .scissor_sizes(w, h)
-          .create();
 }
 
 auto GraphicsBackend::init_command_pool_and_buffers() -> void

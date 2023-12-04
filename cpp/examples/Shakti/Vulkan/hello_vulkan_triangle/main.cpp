@@ -11,21 +11,22 @@
 
 #define GLFW_INCLUDE_VULKAN
 
+#include "Geometry.hpp"
+
+#include "Common/HostUniforms.hpp"
+#include "Common/SignalHandler.hpp"
+
 #include <DO/Shakti/Vulkan/Buffer.hpp>
 #include <DO/Shakti/Vulkan/CommandBuffer.hpp>
 #include <DO/Shakti/Vulkan/DescriptorSet.hpp>
 #include <DO/Shakti/Vulkan/DeviceMemory.hpp>
 #include <DO/Shakti/Vulkan/EasyGLFW.hpp>
-#include <DO/Shakti/Vulkan/Geometry.hpp>
 #include <DO/Shakti/Vulkan/GraphicsBackend.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
 #include <Eigen/Geometry>
 
-#include <signal.h>
-
-#include <atomic>
 #include <filesystem>
 #include <limits>
 #include <stdexcept>
@@ -36,59 +37,6 @@ namespace kvk = DO::Kalpana::Vulkan;
 namespace svk = DO::Shakti::Vulkan;
 namespace fs = std::filesystem;
 
-
-struct SignalHandler
-{
-  static bool initialized;
-  static std::atomic_bool ctrl_c_hit;
-  static struct sigaction sigint_handler;
-
-  static auto stop_render_loop(int) -> void
-  {
-    std::cout << "[CTRL+C HIT] Preparing to close the program!" << std::endl;
-    ctrl_c_hit = true;
-  }
-
-  static auto init() -> void
-  {
-    if (initialized)
-      return;
-
-#if defined(_WIN32)
-    signal(SIGINT, stop_render_loop);
-    signal(SIGTERM, stop_render_loop);
-    signal(SIGABRT, stop_render_loop);
-#else
-    sigint_handler.sa_handler = SignalHandler::stop_render_loop;
-    sigemptyset(&sigint_handler.sa_mask);
-    sigint_handler.sa_flags = 0;
-    sigaction(SIGINT, &sigint_handler, nullptr);
-#endif
-
-    initialized = true;
-  }
-};
-
-bool SignalHandler::initialized = false;
-std::atomic_bool SignalHandler::ctrl_c_hit = false;
-#if !defined(_WIN32)
-struct sigaction SignalHandler::sigint_handler = {};
-#endif
-
-
-struct ModelViewProjectionStack
-{
-  ModelViewProjectionStack()
-  {
-    model.setIdentity();
-    view.setIdentity();
-    projection.setIdentity();
-  }
-
-  Eigen::Transform<float, 3, Eigen::Projective> model;
-  Eigen::Transform<float, 3, Eigen::Projective> view;
-  Eigen::Transform<float, 3, Eigen::Projective> projection;
-};
 
 // clang-format off
 static const auto vertices = std::vector<Vertex>{
@@ -111,17 +59,46 @@ public:
   VulkanTriangleRenderer(GLFWwindow* window, const std::string& app_name,
                          const std::filesystem::path& shader_dirpath,
                          const bool debug_vulkan = true)
-    : kvk::GraphicsBackend{window, app_name,             //
-                           shader_dirpath / "vert.spv",  //
-                           shader_dirpath / "frag.spv",  //
-                           debug_vulkan}
   {
+    init_instance(app_name, debug_vulkan);
+    init_surface(window);
+    init_physical_device();
+    init_device_and_queues();
+    init_swapchain(window);
+    init_render_pass();
+    init_framebuffers();
+    init_graphics_pipeline(window,  //
+                           shader_dirpath / "vert.spv",
+                           shader_dirpath / "frag.spv");
+    init_command_pool_and_buffers();
+    init_synchronization_objects();
+
     transfer_vertex_data_to_vulkan(vertices);
     transfer_element_data_to_vulkan(indices);
 
     make_ubo_descriptor_pool();
     make_ubo_descriptor_sets();
     initialize_model_view_projection_ubos();
+  }
+
+  auto init_graphics_pipeline(GLFWwindow* window,  //
+                              const std::filesystem::path& vertex_shader_path,
+                              const std::filesystem::path& fragment_shader_path)
+      -> void override
+  {
+    auto w = int{};
+    auto h = int{};
+    glfwGetWindowSize(window, &w, &h);
+
+    _graphics_pipeline =
+        kvk::GraphicsPipeline::Builder{_device, _render_pass}
+            .vertex_shader_path(vertex_shader_path)
+            .fragment_shader_path(fragment_shader_path)
+            .vbo_data_format<Vertex>()
+            .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+            .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
+            .scissor_sizes(w, h)
+            .create();
   }
 
   auto transfer_vertex_data_to_vulkan(const std::vector<Vertex>& vertices)
@@ -231,7 +208,7 @@ public:
         static_cast<std::uint32_t>(_swapchain.images.size());
 
     // Each descriptor set has the same uniform descriptor layout.
-    const auto& ubo_layout = _graphics_pipeline.model_view_projection_layout();
+    const auto& ubo_layout = _graphics_pipeline.desc_set_layout;
     const auto ubo_layout_handle =
         static_cast<VkDescriptorSetLayout>(ubo_layout);
 
@@ -303,19 +280,7 @@ public:
             .count();
 
     auto mvp = ModelViewProjectionStack{};
-
     mvp.model.rotate(Eigen::AngleAxisf{time, Eigen::Vector3f::UnitZ()});
-    /*
-    mvp.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f),
-                            glm::vec3(0.0f, 0.0f, 1.0f));
-    mvp.view =
-        glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-                    glm::vec3(0.0f, 0.0f, 1.0f));
-    mvp.projection = glm::perspective(
-        glm::radians(45.0f),
-        swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f);
-    ubo.proj[1][1] *= -1;
-    */
 
     memcpy(_mvp_ubo_ptrs[swapchain_image_index], &mvp, sizeof(mvp));
   }
@@ -570,7 +535,7 @@ public:
 
       // Pass the UBO to the graphics pipeline.
       vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              _graphics_pipeline.pipeline_layout(),  //
+                              _graphics_pipeline.pipeline_layout,  //
                               0, 1,             // Find out later about this.
                               &descriptor_set,  //
                               0, nullptr);      // Find out later about this.
@@ -626,7 +591,8 @@ auto main(int, char** argv) -> int
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     auto triangle_renderer = VulkanTriangleRenderer{
-        window, app_name, program_dir_path / "hello_vulkan_shaders", true};
+        window, app_name, program_dir_path / "hello_vulkan_triangle_shaders",
+        true};
     triangle_renderer.loop(window);
   }
   catch (std::exception& e)

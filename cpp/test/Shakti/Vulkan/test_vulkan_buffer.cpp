@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_staging_buffer)
     device_extensions.emplace_back("VK_KHR_portability_subset");
   const auto device = svk::Device::Builder{physical_device}
                           .enable_device_extensions(device_extensions)
-                          .enable_device_features({})
+                          .enable_physical_device_features({})
                           .enable_queue_families({compute_queue_family_index})
                           .enable_validation_layers(validation_layers_required)
                           .create();
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(test_device_buffer)
     device_extensions.emplace_back("VK_KHR_portability_subset");
   const auto device = svk::Device::Builder{physical_device}
                           .enable_device_extensions(device_extensions)
-                          .enable_device_features({})
+                          .enable_physical_device_features({})
                           .enable_queue_families({compute_queue_family_index})
                           .enable_validation_layers(validation_layers_required)
                           .create();
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(test_staging_buffer_with_factory)
     device_extensions.emplace_back("VK_KHR_portability_subset");
   const auto device = svk::Device::Builder{physical_device}
                           .enable_device_extensions(device_extensions)
-                          .enable_device_features({})
+                          .enable_physical_device_features({})
                           .enable_queue_families({compute_queue_family_index})
                           .enable_validation_layers(validation_layers_required)
                           .create();
@@ -405,7 +405,7 @@ BOOST_AUTO_TEST_CASE(test_device_buffer_with_factory)
     device_extensions.emplace_back("VK_KHR_portability_subset");
   const auto device = svk::Device::Builder{physical_device}
                           .enable_device_extensions(device_extensions)
-                          .enable_device_features({})
+                          .enable_physical_device_features({})
                           .enable_queue_families({compute_queue_family_index})
                           .enable_validation_layers(validation_layers_required)
                           .create();
@@ -495,7 +495,7 @@ BOOST_AUTO_TEST_CASE(test_uniform_buffer_with_factory)
     device_extensions.emplace_back("VK_KHR_portability_subset");
   const auto device = svk::Device::Builder{physical_device}
                           .enable_device_extensions(device_extensions)
-                          .enable_device_features({})
+                          .enable_physical_device_features({})
                           .enable_queue_families({compute_queue_family_index})
                           .enable_validation_layers(validation_layers_required)
                           .create();

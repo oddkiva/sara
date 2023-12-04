@@ -30,7 +30,10 @@ namespace DO::Shakti::Vulkan {
 
     Image(const Image&) = delete;
 
-    Image(Image&&) = default;
+    Image(Image&& other)
+    {
+      swap(other);
+    }
 
     ~Image()
     {
@@ -43,9 +46,7 @@ namespace DO::Shakti::Vulkan {
 
     auto operator=(Image&& other) -> Image&
     {
-      _device = std::move(other._device);
-      _handle = std::move(other._handle);
-      _sizes = std::move(other._sizes);
+      swap(other);
       return *this;
     }
 
@@ -81,6 +82,18 @@ namespace DO::Shakti::Vulkan {
     auto sizes() const -> const VkExtent3D&
     {
       return _sizes;
+    }
+
+    auto device() const -> VkDevice
+    {
+      return _device;
+    }
+
+    auto swap(Image& other) -> void
+    {
+      std::swap(_device, other._device);
+      std::swap(_handle, other._handle);
+      std::swap(_sizes, other._sizes);
     }
 
   private:

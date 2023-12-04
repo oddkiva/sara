@@ -30,7 +30,10 @@ namespace DO::Shakti::Vulkan {
 
     Sampler(const Sampler&) = delete;
 
-    Sampler(Sampler&& other) = default;
+    Sampler(Sampler&& other)
+    {
+      swap(other);
+    }
 
     ~Sampler()
     {
@@ -43,8 +46,7 @@ namespace DO::Shakti::Vulkan {
 
     auto operator=(Sampler&& other) -> Sampler&
     {
-      _device = std::move(other._device);
-      _handle = std::move(other._handle);
+      swap(other);
       return *this;
     }
 
@@ -56,6 +58,12 @@ namespace DO::Shakti::Vulkan {
     operator VkSampler() const
     {
       return _handle;
+    }
+
+    auto swap(Sampler& other) -> void
+    {
+      std::swap(_device, other._device);
+      std::swap(_handle, other._handle);
     }
 
   private:

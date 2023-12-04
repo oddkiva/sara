@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_device)
   const auto device = svk::Device::Builder{physical_device}
                           .enable_device_extensions(device_extensions)
                           .enable_queue_families({compute_queue_family_index})
-                          .enable_device_features({})
+                          .enable_physical_device_features({})
                           .enable_validation_layers(validation_layers_required)
                           .create();
   BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(test_device)
   //
   // 3.a) Create one descriptor set layout for each each descriptor.
   const auto ubo_layout_binding = svk::DescriptorSetLayout::Builder{device}
-                                      .push_uniform_buffer_layout_binding()
+                                      .push_uniform_buffer_layout_binding(0)
                                       .create();
   const auto desc_set_layouts =
       std::array<VkDescriptorSetLayout, num_desc_sets>{
