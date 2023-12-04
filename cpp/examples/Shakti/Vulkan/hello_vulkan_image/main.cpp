@@ -121,7 +121,7 @@ public:
 
     // Device memory for image data..
     const auto image_fp = program_dir_path / "data" / "dog.jpg";
-    const auto image_host = sara::imread<sara::Rgba8>(image_fp);
+    const auto image_host = sara::imread<sara::Rgba8>(image_fp.string());
     init_vulkan_image_objects(image_host);
     init_image_copy_command_buffers();
     // Initialize the image data on the device side.

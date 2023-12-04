@@ -17,3 +17,4 @@ target_compile_definitions(
   implot_example
   PRIVATE $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:DO_SARA_STATIC> #
 )
+set_target_properties(implot_example PROPERTIES FOLDER "Examples/Shakti/ImPlot")
