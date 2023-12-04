@@ -28,6 +28,7 @@
 #include <DO/Sara/ImageIO.hpp>
 
 
+namespace sara = DO::Sara;
 namespace glfw = DO::Kalpana::GLFW;
 namespace kvk = DO::Kalpana::Vulkan;
 namespace svk = DO::Shakti::Vulkan;
@@ -119,10 +120,12 @@ public:
     init_ebos(indices);
 
     // Device memory for image data..
-    init_vulkan_image_objects(program_dir_path);
+    const auto image_fp = program_dir_path / "data" / "dog.jpg";
+    const auto image_host = sara::imread<sara::Rgba8>(image_fp);
+    init_vulkan_image_objects(image_host);
     init_image_copy_command_buffers();
     // Initialize the image data on the device side.
-    copy_image_data_from_host_to_staging_buffer();
+    copy_image_data_from_host_to_staging_buffer(image_host);
     copy_image_data_from_staging_to_device_buffer();
 
     // Graphics pipeline resource objects.
@@ -436,30 +439,26 @@ private: /* Methods to transfer model-view-projection uniform data. */
   }
 
 private: /* Methods to initialize image data */
-  auto init_vulkan_image_objects(const std::filesystem::path& program_dir_path)
+  auto init_vulkan_image_objects(const sara::Image<sara::Rgba8>& image_host)
       -> void
   {
-    namespace sara = DO::Sara;
+    // Temporary image object on the host side.
+    const auto w = static_cast<std::uint32_t>(image_host.width());
+    const auto h = static_cast<std::uint32_t>(image_host.height());
 
-    // Image data on the host side.
-    const auto image_fp = program_dir_path / "data" / "dog.jpg";
-    _image_host = sara::imread<sara::Rgba8>(image_fp);
-
-    // Image data as a staging device buffer.
+    // The image object as a staging device buffer.
     _image_staging_buffer =
         svk::BufferFactory{_device}  //
-            .make_staging_buffer<std::uint32_t>(_image_host.size());
+            .make_staging_buffer<std::uint32_t>(image_host.size());
     _image_staging_dmem =
         svk::DeviceMemoryFactory{_physical_device, _device}  //
             .allocate_for_staging_buffer(_image_staging_buffer);
     _image_staging_buffer.bind(_image_staging_dmem, 0);
 
     // Copy the image data from the host buffer to the staging device buffer.
-    _image_staging_dmem.copy_from(_image_host.data(), _image_host.size());
+    _image_staging_dmem.copy_from(image_host.data(), image_host.size());
 
     // Image data as device image associated with a device memory.
-    const auto w = static_cast<std::uint32_t>(_image_host.width());
-    const auto h = static_cast<std::uint32_t>(_image_host.height());
     _image =
         svk::Image::Builder{_device}
             .sizes(VkExtent2D{w, h})
@@ -469,7 +468,6 @@ private: /* Methods to initialize image data */
             .create();
     _image_dmem = svk::DeviceMemoryFactory{_physical_device, _device}  //
                       .allocate_for_device_image(_image);
-    fmt::print("Initializing device image mem OK\n");
     _image.bind(_image_dmem, 0);
   }
 
@@ -497,9 +495,11 @@ private: /* Methods to initialize image data */
     };
   }
 
-  auto copy_image_data_from_host_to_staging_buffer() -> void
+  auto copy_image_data_from_host_to_staging_buffer(
+      const sara::Image<sara::Rgba8>& image_host) -> void
   {
-    _image_staging_dmem.copy_from(_image_host.data(), _image_host.size(), 0);
+    // Temporary image object on the host side.
+    _image_staging_dmem.copy_from(image_host.data(), image_host.size(), 0);
   }
 
   auto copy_image_data_from_staging_to_device_buffer() -> void
@@ -811,16 +811,16 @@ private:
   std::vector<svk::DeviceMemory> _mvp_dmems;
   std::vector<void*> _mvp_ubo_ptrs;
 
-  // 2.a) Host image buffer.
-  DO::Sara::Image<DO::Sara::Rgba8> _image_host;
-
-  // 2.b) Staging image buffer and its allocated memory.
+  // 2.a) Staging image buffer and its allocated memory.
   svk::Buffer _image_staging_buffer;
   svk::DeviceMemory _image_staging_dmem;
 
-  // 2.c) Device image and its allocated memory
+  // 2.b) Device image and its allocated memory
   svk::Image _image;
   svk::DeviceMemory _image_dmem;
+  // 2.c) Device image bindings for the shader.
+  svk::ImageView _image_view;
+  svk::Sampler _image_sampler;
 
   // 2.d) Copy command buffers.
   svk::CommandBufferSequence _image_copy_cmd_bufs;
@@ -828,10 +828,6 @@ private:
   // 3. Layout binding referenced for the shader.
   svk::DescriptorPool _desc_pool;
   svk::DescriptorSets _desc_sets;
-
-  // 4. GLSL shader side.
-  svk::ImageView _image_view;
-  svk::Sampler _image_sampler;
 };
 
 
