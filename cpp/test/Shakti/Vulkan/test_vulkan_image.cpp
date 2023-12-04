@@ -93,12 +93,13 @@ BOOST_AUTO_TEST_CASE(test_image)
   // Allow anisotropic sampling.
   auto physical_device_features = VkPhysicalDeviceFeatures{};
   physical_device_features.samplerAnisotropy = VK_TRUE;
-  const auto device = svk::Device::Builder{physical_device}
-                          .enable_device_extensions(device_extensions)
-                          .enable_queue_families({compute_queue_family_index})
-                          .enable_device_features(physical_device_features)
-                          .enable_validation_layers(validation_layers_required)
-                          .create();
+  const auto device =
+      svk::Device::Builder{physical_device}
+          .enable_device_extensions(device_extensions)
+          .enable_queue_families({compute_queue_family_index})
+          .enable_physical_device_features(physical_device_features)
+          .enable_validation_layers(validation_layers_required)
+          .create();
   BOOST_CHECK(static_cast<VkDevice>(device) != VK_NULL_HANDLE);
 
 
@@ -107,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_image)
   //
   // 1. Create the description set layout that the shaders need.
   const auto desc_set_layout = svk::DescriptorSetLayout::Builder{device}
-                                   .push_sampler_layout_binding()
+                                   .push_image_sampler_layout_binding(0)
                                    .create();
   // 2. Hook this to the graphics pipeline layout data structure.
 
