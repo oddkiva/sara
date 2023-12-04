@@ -192,6 +192,8 @@ public:
     init_mvp_ubos();
     // 2. Image sampler objects
     init_image_sampler();
+
+    update_descriptor_sets();
   }
 
   auto loop(GLFWwindow* window) -> void
@@ -319,6 +321,53 @@ private: /* Methods to initialize objects for the graphics pipeline. */
     };
   }
 
+  auto update_descriptor_sets() -> void
+  {
+    const auto num_frames_in_flight = _swapchain.images.size();
+
+    for (auto i = std::size_t{}; i != num_frames_in_flight; ++i)
+    {
+      // 1. Descriptor set #1: the model-view-projection matrix stack uniform.
+      auto buffer_info = VkDescriptorBufferInfo{};
+      buffer_info.buffer = _mvp_ubos[i];
+      buffer_info.offset = 0;
+      buffer_info.range = sizeof(ModelViewProjectionStack);
+
+      // 2. Descriptor set #2: the image sampler uniform.
+      auto image_info = VkDescriptorImageInfo{};
+      image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+      image_info.imageView = _image_view;
+      image_info.sampler = _image_sampler;
+
+      auto write_dsets = std::array<VkWriteDescriptorSet, 2>{};
+
+      // 4.a) Register the byte size, the type of buffer which the descriptor
+      //      references to.
+      auto& mvp_wdset = write_dsets[0];
+      mvp_wdset.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      mvp_wdset.dstSet = _desc_sets[i];
+      mvp_wdset.dstBinding = 0;       // layout(binding = 0) uniform ...
+      mvp_wdset.dstArrayElement = 0;  // Worry about this later.
+      mvp_wdset.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+      mvp_wdset.descriptorCount = 1;  // Only 1 UBO descriptor per set.
+      mvp_wdset.pBufferInfo = &buffer_info;
+
+      auto& image_wdset = write_dsets[1];
+      image_wdset.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      image_wdset.dstSet = _desc_sets[i];
+      image_wdset.dstBinding = 1;
+      image_wdset.dstArrayElement = 0;
+      image_wdset.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+      image_wdset.descriptorCount = 1;
+      image_wdset.pImageInfo = &image_info;
+
+      // 4.c) Send this metadata to Vulkan.
+      vkUpdateDescriptorSets(_device,
+                             static_cast<std::uint32_t>(write_dsets.size()),
+                             write_dsets.data(), 0, nullptr);
+    }
+  }
+
 private: /* Methods to initialize geometry buffer data on the device side. */
   auto init_vbos(const std::vector<Vertex>& vertices) -> void
   {
@@ -419,29 +468,6 @@ private: /* Methods to transfer model-view-projection uniform data. */
       _mvp_ubo_ptrs.emplace_back(
           _mvp_dmems[i].map_memory<ModelViewProjectionStack>(1));
     }
-
-    for (auto i = std::size_t{}; i != num_frames_in_flight; ++i)
-    {
-      // 4.a) Register the byte size, the type of buffer which the descriptor
-      //      references to.
-      auto write_dset = VkWriteDescriptorSet{};
-      write_dset.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-      write_dset.dstSet = _desc_sets[i];
-      write_dset.dstBinding = 0;       // layout(binding = 0) uniform ...
-      write_dset.dstArrayElement = 0;  // Worry about this later.
-      write_dset.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-      write_dset.descriptorCount = 1;  // Only 1 UBO descriptor per set.
-
-      // 4.b) Each descriptor set being a singleton, must reference to a UBO.
-      auto buffer_info = VkDescriptorBufferInfo{};
-      buffer_info.buffer = _mvp_ubos[i];
-      buffer_info.offset = 0;
-      buffer_info.range = sizeof(ModelViewProjectionStack);
-      write_dset.pBufferInfo = &buffer_info;
-
-      // 4.c) Send this metadata to Vulkan.
-      vkUpdateDescriptorSets(_device, 1, &write_dset, 0, nullptr);
-    }
   }
 
   auto update_mvp_uniform(const std::uint32_t swapchain_image_index) -> void
@@ -460,7 +486,6 @@ private: /* Methods to transfer model-view-projection uniform data. */
 
     memcpy(_mvp_ubo_ptrs[swapchain_image_index], &mvp, sizeof(mvp));
   }
-
 
 private: /* Methods to initialize image data */
   auto init_vulkan_image_objects() -> void
