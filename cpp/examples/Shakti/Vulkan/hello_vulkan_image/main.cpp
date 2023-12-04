@@ -36,9 +36,9 @@ namespace fs = std::filesystem;
 // clang-format off
 static const auto vertices = std::vector<Vertex>{
   {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.f, 0.f}},
-    {{ 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.f, 0.f}},
-    {{ 0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.f, 1.f}},
-    {{-0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}, {0.f, 1.f}}
+  {{ 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.f, 0.f}},
+  {{ 0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.f, 1.f}},
+  {{-0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}, {0.f, 1.f}}
 };
 // clang-format on
 
@@ -50,89 +50,14 @@ static const auto indices = std::vector<uint16_t>{
 
 class VulkanImagePipelineBuilder : public kvk::GraphicsPipeline::Builder
 {
+  using BaseBuilder = kvk::GraphicsPipeline::Builder;
+
 public:
   VulkanImagePipelineBuilder(const svk::Device& device,
                              const kvk::RenderPass& render_pass)
-    : kvk::GraphicsPipeline::Builder{device, render_pass}
+    : BaseBuilder{device, render_pass}
   {
   }
-
-  //! @brief Boilerplate code.
-  //! @{
-  auto create_graphics_pipeline_layout(kvk::GraphicsPipeline& graphics_pipeline)
-      -> void
-  {
-    // Initialize the graphics pipeline layout.
-    SARA_DEBUG << "Initializing the graphics pipeline layout...\n";
-    pipeline_layout_info = VkPipelineLayoutCreateInfo{};
-    {
-      pipeline_layout_info.sType =
-          VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-      pipeline_layout_info.setLayoutCount = 1;
-      pipeline_layout_info.pSetLayouts = &static_cast<VkDescriptorSetLayout&>(
-          graphics_pipeline.desc_set_layout);
-      pipeline_layout_info.pushConstantRangeCount = 0;
-    };
-    const auto status = vkCreatePipelineLayout(  //
-        device,                                  //
-        &pipeline_layout_info,                   //
-        nullptr,                                 //
-        &graphics_pipeline.pipeline_layout       //
-    );
-    if (status != VK_SUCCESS)
-      throw std::runtime_error{fmt::format(
-          "Failed to create the graphics pipeline layout! Error code: {}",
-          static_cast<int>(status))};
-  }
-
-  auto create_graphics_pipeline(kvk::GraphicsPipeline& graphics_pipeline)
-      -> void
-  {
-    // Initialize the graphics pipeline.
-    SARA_DEBUG << "Initializing the graphics pipeline...\n";
-    pipeline_info = {};
-    {
-      pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-
-      // - Vertex and fragment shaders.
-      pipeline_info.stageCount =
-          static_cast<std::uint32_t>(shader_stage_infos.size());
-      pipeline_info.pStages = shader_stage_infos.data();
-
-      // - Vertex buffer data format.
-      pipeline_info.pVertexInputState = &vertex_input_info;
-      // - We enumerate triangle vertices.
-      pipeline_info.pInputAssemblyState = &input_assembly;
-      pipeline_info.pViewportState = &viewport_state;
-
-      // The rasterization state.
-      pipeline_info.pRasterizationState = &rasterization_state;
-
-      // Rendering policy.
-      pipeline_info.pMultisampleState = &multisampling;
-      pipeline_info.pColorBlendState = &color_blend;
-
-      pipeline_info.layout = graphics_pipeline.pipeline_layout;
-      pipeline_info.renderPass = render_pass.handle;
-      pipeline_info.subpass = 0;
-      pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
-      pipeline_info.basePipelineIndex = -1;
-    };
-
-    const auto status = vkCreateGraphicsPipelines(  //
-        device,                                     //
-        VK_NULL_HANDLE,                             //
-        1,                                          //
-        &pipeline_info,                             //
-        nullptr,                                    //
-        &graphics_pipeline.pipeline                 //
-    );
-    if (status != VK_SUCCESS)
-      throw std::runtime_error{
-          fmt::format("Failed to create graphics pipeline! Error code: {}",
-                      static_cast<int>(status))};
-  }
-  //! @}
 
   //! @brief Focus the attention here.
   auto create() -> kvk::GraphicsPipeline override
@@ -318,11 +243,11 @@ private: /* Methods to initialize objects for the graphics pipeline. */
 
     // Each descriptor set has the same uniform descriptor layout.
     const auto& desc_set_layout = _graphics_pipeline.desc_set_layout;
-    const auto ubo_layout_handle =
+    const auto desc_set_layout_handle =
         static_cast<VkDescriptorSetLayout>(desc_set_layout);
 
     const auto desc_set_layouts = std::vector<VkDescriptorSetLayout>(
-        num_frames_in_flight, ubo_layout_handle);
+        num_frames_in_flight, desc_set_layout_handle);
 
     _desc_sets = svk::DescriptorSets{
         desc_set_layouts.data(),  //
