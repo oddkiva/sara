@@ -7,3 +7,4 @@ add_library(
 )
 target_include_directories(ImPlot PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(ImPlot PUBLIC ImGui)
+set_target_properties(ImPlot PROPERTIES FOLDER "Third-Party")
