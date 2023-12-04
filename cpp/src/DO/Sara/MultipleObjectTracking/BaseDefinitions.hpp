@@ -27,7 +27,7 @@ namespace DO::Sara::MultipleObjectTracking {
   //! concatenates the 3 4D vectors:
   //!   (x, y, a, h)         the base state vector
   //!   (dx, dy, da, dh)     1st-order differential of the base state vector
-  //!   (d2x, d2y, d2a, d2h) 2nd-order differential of the base state vector
+  //!   (d²x, d²y, d²a, d²h) 2nd-order differential of the base state vector
   //!
   //! The differentials are used indeed in the transition matrix in the Kalman
   //! filter.
