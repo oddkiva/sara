@@ -79,14 +79,15 @@ namespace DO::Shakti::Vulkan {
     {
     }
 
-    auto push_uniform_buffer_layout_binding() -> DescriptorSetLayout::Builder&
+    auto push_uniform_buffer_layout_binding(const std::uint32_t binding)
+        -> DescriptorSetLayout::Builder&
     {
       // UBO object: matrix-view-projection matrix stack
       auto ubo_layout_binding = VkDescriptorSetLayoutBinding{};
 
       // In the vertex shader code, we have something like:
       // layout(binding = 0) uniform UBO { ... } ubo;
-      ubo_layout_binding.binding = static_cast<std::uint32_t>(_bindings.size());
+      ubo_layout_binding.binding = binding;
       ubo_layout_binding.descriptorCount = 1;  // TODO: see if this ever
                                                // needs to change.
       ubo_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -100,12 +101,12 @@ namespace DO::Shakti::Vulkan {
       return *this;
     }
 
-    auto push_image_sampler_layout_binding() -> DescriptorSetLayout::Builder&
+    auto push_image_sampler_layout_binding(const std::uint32_t binding)
+        -> DescriptorSetLayout::Builder&
     {
       auto sampler_layout_binding = VkDescriptorSetLayoutBinding{};
 
-      sampler_layout_binding.binding =
-          static_cast<std::uint32_t>(_bindings.size());
+      sampler_layout_binding.binding = binding;
       sampler_layout_binding.descriptorCount = 1;  // TODO: see if this ever
                                                    // needs to change.
       sampler_layout_binding.descriptorType =

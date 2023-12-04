@@ -195,7 +195,7 @@ namespace DO::Kalpana::Vulkan {
 
       graphics_pipeline.desc_set_layout =
           Shakti::Vulkan::DescriptorSetLayout::Builder{device}
-              .push_uniform_buffer_layout_binding()
+              .push_uniform_buffer_layout_binding(0)
               .create();
 
       // Initialize the graphics pipeline layout.

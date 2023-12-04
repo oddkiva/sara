@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(test_device)
   //
   // 3.a) Create one descriptor set layout for each each descriptor.
   const auto ubo_layout_binding = svk::DescriptorSetLayout::Builder{device}
-                                      .push_uniform_buffer_layout_binding()
+                                      .push_uniform_buffer_layout_binding(0)
                                       .create();
   const auto desc_set_layouts =
       std::array<VkDescriptorSetLayout, num_desc_sets>{

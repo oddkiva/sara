@@ -51,6 +51,14 @@ static const auto indices = std::vector<uint16_t>{
 class VulkanImagePipelineBuilder : public kvk::GraphicsPipeline::Builder
 {
 public:
+  VulkanImagePipelineBuilder(const svk::Device& device,
+                             const kvk::RenderPass& render_pass)
+    : kvk::GraphicsPipeline::Builder{device, render_pass}
+  {
+  }
+
+  //! @brief Boilerplate code.
+  //! @{
   auto create_graphics_pipeline_layout(kvk::GraphicsPipeline& graphics_pipeline)
       -> void
   {
@@ -124,7 +132,9 @@ public:
           fmt::format("Failed to create graphics pipeline! Error code: {}",
                       static_cast<int>(status))};
   }
+  //! @}
 
+  //! @brief Focus the attention here.
   auto create() -> kvk::GraphicsPipeline override
   {
     load_shaders();
@@ -136,8 +146,8 @@ public:
 
     graphics_pipeline.desc_set_layout =
         svk::DescriptorSetLayout::Builder{device}
-            .push_uniform_buffer_layout_binding()
-            .push_image_sampler_layout_binding()
+            .push_uniform_buffer_layout_binding(0)
+            .push_image_sampler_layout_binding(1)
             .create();
 
     create_graphics_pipeline_layout(graphics_pipeline);
@@ -261,7 +271,7 @@ private: /* Methods to initialize objects for the graphics pipeline. */
     glfwGetWindowSize(window, &w, &h);
 
     _graphics_pipeline =
-        kvk::GraphicsPipeline::Builder{_device, _render_pass}
+        VulkanImagePipelineBuilder{_device, _render_pass}
             .vertex_shader_path(vertex_shader_path)
             .fragment_shader_path(fragment_shader_path)
             .vbo_data_format<Vertex>()
@@ -291,7 +301,7 @@ private: /* Methods to initialize objects for the graphics pipeline. */
     desc_pool_builder.pool_type(1) = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     // We only need to reserve 1 image descriptor since the image will stay
     // unchanged throughout the application runtime
-    desc_pool_builder.descriptor_count(1) = 1;
+    desc_pool_builder.descriptor_count(1) = num_frames_in_flight;
 
     _desc_pool = desc_pool_builder.create();
   }
@@ -341,8 +351,8 @@ private: /* Methods to initialize objects for the graphics pipeline. */
 
       auto write_dsets = std::array<VkWriteDescriptorSet, 2>{};
 
-      // 4.a) Register the byte size, the type of buffer which the descriptor
-      //      references to.
+      // 3. Register the byte size, the type of buffer which the descriptor
+      //    references to.
       auto& mvp_wdset = write_dsets[0];
       mvp_wdset.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
       mvp_wdset.dstSet = _desc_sets[i];
@@ -361,7 +371,7 @@ private: /* Methods to initialize objects for the graphics pipeline. */
       image_wdset.descriptorCount = 1;
       image_wdset.pImageInfo = &image_info;
 
-      // 4.c) Send this metadata to Vulkan.
+      // 4. Send this metadata to Vulkan.
       vkUpdateDescriptorSets(_device,
                              static_cast<std::uint32_t>(write_dsets.size()),
                              write_dsets.data(), 0, nullptr);
@@ -852,9 +862,9 @@ private:
 
   // Geometry data (quad)
   svk::Buffer _vbo;
-  svk::Buffer _ebo;
-
   svk::DeviceMemory _vdm;
+
+  svk::Buffer _ebo;
   svk::DeviceMemory _edm;
 
   // Model-view-projection matrix
