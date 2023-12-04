@@ -3,6 +3,7 @@ target_link_libraries(
   hello_vulkan_image
   PRIVATE SignalHandler #
           DO::Sara::Core #
+          DO::Sara::ImageIO #
           DO::Shakti::Vulkan)
 set_target_properties(hello_vulkan_image PROPERTIES FOLDER
                                                     "Examples/Shakti/Vulkan")

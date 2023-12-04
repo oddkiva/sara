@@ -25,6 +25,7 @@
 #include <DO/Shakti/Vulkan/Sampler.hpp>
 
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/ImageIO.hpp>
 
 
 namespace glfw = DO::Kalpana::GLFW;
@@ -33,15 +34,17 @@ namespace svk = DO::Shakti::Vulkan;
 namespace fs = std::filesystem;
 
 
+//! @brief The 4 vertices of the square.
 // clang-format off
 static const auto vertices = std::vector<Vertex>{
-  {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.f, 0.f}},
-  {{ 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.f, 0.f}},
-  {{ 0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.f, 1.f}},
-  {{-0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}, {0.f, 1.f}}
+  {.pos = {-0.5f, -0.5f}, .color = {1.0f, 0.0f, 0.0f}, .uv = {0.f, 0.f}},
+  {.pos = { 0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}, .uv = {1.f, 0.f}},
+  {.pos = { 0.5f,  0.5f}, .color = {0.0f, 0.0f, 1.0f}, .uv = {1.f, 1.f}},
+  {.pos = {-0.5f,  0.5f}, .color = {1.0f, 1.0f, 1.0f}, .uv = {0.f, 1.f}}
 };
 // clang-format on
 
+//! @brief The 2 triangles to form the square.
 static const auto indices = std::vector<uint16_t>{
     0, 1, 2,  //
     2, 3, 0   //
@@ -87,7 +90,7 @@ class VulkanImageRenderer : public kvk::GraphicsBackend
 {
 public:
   VulkanImageRenderer(GLFWwindow* window, const std::string& app_name,
-                      const std::filesystem::path& shader_dirpath,
+                      const std::filesystem::path& program_dir_path,
                       const bool debug_vulkan = true)
   {
     // General vulkan context objects.
@@ -100,9 +103,11 @@ public:
     init_framebuffers();
 
     // Graphics pipeline.
+    const auto shader_dir_path =
+        program_dir_path / "hello_vulkan_image_shaders";
     init_graphics_pipeline(window,  //
-                           shader_dirpath / "vert.spv",
-                           shader_dirpath / "frag.spv");
+                           shader_dir_path / "vert.spv",
+                           shader_dir_path / "frag.spv");
 
     // Graphics command pool and command buffers.
     init_command_pool_and_buffers();
@@ -114,8 +119,11 @@ public:
     init_ebos(indices);
 
     // Device memory for image data..
-    init_vulkan_image_objects();
+    init_vulkan_image_objects(program_dir_path);
     init_image_copy_command_buffers();
+    // Initialize the image data on the device side.
+    copy_image_data_from_host_to_staging_buffer();
+    copy_image_data_from_staging_to_device_buffer();
 
     // Graphics pipeline resource objects.
     make_descriptor_pool();
@@ -128,7 +136,7 @@ public:
     // 2. Image sampler objects
     init_image_sampler();
 
-    update_descriptor_sets();
+    define_descriptor_set_types();
   }
 
   auto loop(GLFWwindow* window) -> void
@@ -144,7 +152,6 @@ public:
 
     vkDeviceWaitIdle(_device);
   }
-
 
 private: /* Methods to initialize objects for the graphics pipeline. */
   auto init_device_and_queues() -> void override
@@ -163,26 +170,31 @@ private: /* Methods to initialize objects for the graphics pipeline. */
     const auto present_queue_family_index =
         kvk::find_present_queue_family_indices(_physical_device, _surface)
             .front();
+    const auto queue_family_indices = std::set{
+        graphics_queue_family_index,  //
+        present_queue_family_index    //
+    };
 
-    // Create a logical device.
     auto device_extensions = std::vector{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
     if constexpr (compile_for_apple)
       device_extensions.emplace_back("VK_KHR_portability_subset");
-    auto physical_device_features = VkPhysicalDeviceFeatures{};
-    physical_device_features.samplerAnisotropy = VK_TRUE;
+
+    // Here we also require the anisotropic sampling capability from the
+    // hardware.
+    auto device_features = VkPhysicalDeviceFeatures{};
+    device_features.samplerAnisotropy = VK_TRUE;
+
+    // Create a logical device with our requirements.
     _device = svk::Device::Builder{_physical_device}
                   .enable_device_extensions(device_extensions)
-                  .enable_queue_families(
-                      {graphics_queue_family_index, present_queue_family_index})
-                  .enable_physical_device_features(physical_device_features)
+                  .enable_queue_families(queue_family_indices)
+                  .enable_physical_device_features(device_features)
                   .enable_validation_layers(_validation_layers)
                   .create();
 
-    SARA_DEBUG
-        << "[VK] - Fetching the graphics queue from the logical device...\n";
+    SARA_DEBUG << "[VK] - Initializing the graphics queue...\n";
     _graphics_queue = svk::Queue{_device, graphics_queue_family_index};
-    SARA_DEBUG
-        << "[VK] - Fetching the present queue from the logical device...\n";
+    SARA_DEBUG << "[VK] - Initializing the present queue...\n";
     _present_queue = svk::Queue{_device, present_queue_family_index};
   }
 
@@ -242,24 +254,23 @@ private: /* Methods to initialize objects for the graphics pipeline. */
         static_cast<std::uint32_t>(_swapchain.images.size());
 
     // Each descriptor set has the same uniform descriptor layout.
-    const auto& desc_set_layout = _graphics_pipeline.desc_set_layout;
-    const auto desc_set_layout_handle =
-        static_cast<VkDescriptorSetLayout>(desc_set_layout);
+    const auto& dset_layout = _graphics_pipeline.desc_set_layout;
+    const auto dset_layout_handle =
+        static_cast<VkDescriptorSetLayout>(dset_layout);
 
-    const auto desc_set_layouts = std::vector<VkDescriptorSetLayout>(
-        num_frames_in_flight, desc_set_layout_handle);
+    const auto dset_layouts = std::vector<VkDescriptorSetLayout>(
+        num_frames_in_flight, dset_layout_handle);
 
     _desc_sets = svk::DescriptorSets{
-        desc_set_layouts.data(),  //
-        num_frames_in_flight,     //
-        _desc_pool                //
+        dset_layouts.data(),   //
+        num_frames_in_flight,  //
+        _desc_pool             //
     };
   }
 
-  auto update_descriptor_sets() -> void
+  auto define_descriptor_set_types() -> void
   {
     const auto num_frames_in_flight = _swapchain.images.size();
-
     for (auto i = std::size_t{}; i != num_frames_in_flight; ++i)
     {
       // 1. Descriptor set #1: the model-view-projection matrix stack uniform.
@@ -379,7 +390,6 @@ private: /* Methods to initialize geometry buffer data on the device side. */
     _graphics_queue.wait();
   }
 
-
 private: /* Methods to transfer model-view-projection uniform data. */
   auto init_mvp_ubos() -> void
   {
@@ -405,6 +415,9 @@ private: /* Methods to transfer model-view-projection uniform data. */
     }
   }
 
+  //! @brief Every time we render the image frame through the method
+  //! `VulkanImageRenderer::draw_frame`, we update the model-view-projection
+  //! matrix stack by calling this method and therefore animate the square.
   auto update_mvp_uniform(const std::uint32_t swapchain_image_index) -> void
   {
     static auto start_time = std::chrono::high_resolution_clock::now();
@@ -423,20 +436,19 @@ private: /* Methods to transfer model-view-projection uniform data. */
   }
 
 private: /* Methods to initialize image data */
-  auto init_vulkan_image_objects() -> void
+  auto init_vulkan_image_objects(const std::filesystem::path& program_dir_path)
+      -> void
   {
-    static constexpr auto w = 640;
-    static constexpr auto h = 480;
-
     namespace sara = DO::Sara;
 
     // Image data on the host side.
-    _image_host = sara::Image<sara::Rgba8>{w, h};
-    _image_host.flat_array().fill(sara::Rgba8{255, 0, 0, 255});
+    const auto image_fp = program_dir_path / "data" / "dog.jpg";
+    _image_host = sara::imread<sara::Rgba8>(image_fp);
 
     // Image data as a staging device buffer.
-    _image_staging_buffer = svk::BufferFactory{_device}  //
-                                .make_staging_buffer<std::uint32_t>(w * h);
+    _image_staging_buffer =
+        svk::BufferFactory{_device}  //
+            .make_staging_buffer<std::uint32_t>(_image_host.size());
     _image_staging_dmem =
         svk::DeviceMemoryFactory{_physical_device, _device}  //
             .allocate_for_staging_buffer(_image_staging_buffer);
@@ -446,6 +458,8 @@ private: /* Methods to initialize image data */
     _image_staging_dmem.copy_from(_image_host.data(), _image_host.size());
 
     // Image data as device image associated with a device memory.
+    const auto w = static_cast<std::uint32_t>(_image_host.width());
+    const auto h = static_cast<std::uint32_t>(_image_host.height());
     _image =
         svk::Image::Builder{_device}
             .sizes(VkExtent2D{w, h})
@@ -522,7 +536,6 @@ private: /* Methods to initialize image data */
       _graphics_queue.wait();
     }
   }
-
 
 private: /* Methods for onscreen rendering */
   auto record_graphics_command_buffer(VkCommandBuffer command_buffer,
@@ -781,7 +794,6 @@ private: /* Methods for onscreen rendering */
     _current_frame = (_current_frame + 1) % max_frames_in_flight;
   }
 
-
 private:
   int _current_frame = 0;
 
@@ -837,8 +849,11 @@ auto main(int, char** argv) -> int
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     auto triangle_renderer = VulkanImageRenderer{
-        window, app_name, program_dir_path / "hello_vulkan_image_shaders",
-        true};
+        window,            //
+        app_name,          //
+        program_dir_path,  //
+        true               //
+    };
     triangle_renderer.loop(window);
   }
   catch (std::exception& e)
