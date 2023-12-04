@@ -53,7 +53,7 @@ namespace DO::Kalpana::Vulkan {
 
     auto init_physical_device() -> void;
 
-    auto init_device_and_queues() -> void;
+    virtual auto init_device_and_queues() -> void;
 
     auto init_swapchain(GLFWwindow* window) -> void;
 

@@ -148,8 +148,8 @@ namespace DO::Shakti::Vulkan {
     }
 
     //! Bind the Vulkan device features we require.
-    auto enable_device_features(const VkPhysicalDeviceFeatures& features = {})
-        -> Builder&
+    auto enable_physical_device_features(
+        const VkPhysicalDeviceFeatures& features = {}) -> Builder&
     {
       _physical_device_features = features;
       _create_info.pEnabledFeatures = &_physical_device_features;

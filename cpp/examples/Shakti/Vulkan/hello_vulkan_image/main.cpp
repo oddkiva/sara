@@ -210,6 +210,45 @@ public:
 
 
 private: /* Methods to initialize objects for the graphics pipeline. */
+  auto init_device_and_queues() -> void override
+  {
+    // According to:
+    // https://stackoverflow.com/questions/61434615/in-vulkan-is-it-beneficial-for-the-graphics-queue-family-to-be-separate-from-th
+    //
+    // Using distinct queue families, namely one for the graphics operations
+    // and another for the present operations, does not result in better
+    // performance.
+    //
+    // This is because the hardware does not expose present-only queue
+    // families...
+    const auto graphics_queue_family_index =
+        kvk::find_graphics_queue_family_indices(_physical_device).front();
+    const auto present_queue_family_index =
+        kvk::find_present_queue_family_indices(_physical_device, _surface)
+            .front();
+
+    // Create a logical device.
+    auto device_extensions = std::vector{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    if constexpr (compile_for_apple)
+      device_extensions.emplace_back("VK_KHR_portability_subset");
+    auto physical_device_features = VkPhysicalDeviceFeatures{};
+    physical_device_features.samplerAnisotropy = VK_TRUE;
+    _device = svk::Device::Builder{_physical_device}
+                  .enable_device_extensions(device_extensions)
+                  .enable_queue_families(
+                      {graphics_queue_family_index, present_queue_family_index})
+                  .enable_physical_device_features(physical_device_features)
+                  .enable_validation_layers(_validation_layers)
+                  .create();
+
+    SARA_DEBUG
+        << "[VK] - Fetching the graphics queue from the logical device...\n";
+    _graphics_queue = svk::Queue{_device, graphics_queue_family_index};
+    SARA_DEBUG
+        << "[VK] - Fetching the present queue from the logical device...\n";
+    _present_queue = svk::Queue{_device, present_queue_family_index};
+  }
+
   auto init_graphics_pipeline(GLFWwindow* window,  //
                               const std::filesystem::path& vertex_shader_path,
                               const std::filesystem::path& fragment_shader_path)
@@ -442,26 +481,22 @@ private: /* Methods to initialize image data */
         svk::DeviceMemoryFactory{_physical_device, _device}  //
             .allocate_for_staging_buffer(_image_staging_buffer);
     _image_staging_buffer.bind(_image_staging_dmem, 0);
-    fmt::print("Initializing staging buffer OK\n");
 
     // Copy the image data from the host buffer to the staging device buffer.
     _image_staging_dmem.copy_from(_image_host.data(), _image_host.size());
-    fmt::print("Copy from host to staging buffer OK\n");
 
     // Image data as device image associated with a device memory.
     _image =
         svk::Image::Builder{_device}
             .sizes(VkExtent2D{w, h})
-            .format(VK_FORMAT_B8G8R8A8_SRGB)
+            .format(VK_FORMAT_R8G8B8A8_SRGB)
             .tiling(VK_IMAGE_TILING_OPTIMAL)
             .usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
             .create();
-    fmt::print("Initializing device image OK\n");
     _image_dmem = svk::DeviceMemoryFactory{_physical_device, _device}  //
                       .allocate_for_device_image(_image);
     fmt::print("Initializing device image mem OK\n");
     _image.bind(_image_dmem, 0);
-    fmt::print("Binding device image to device mem OK\n");
   }
 
   auto init_image_sampler() -> void

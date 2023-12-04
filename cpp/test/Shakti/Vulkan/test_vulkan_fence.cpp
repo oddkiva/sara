@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_fence)
   const auto device = svk::Device::Builder{physical_device}
                           .enable_device_extensions(device_extensions)
                           .enable_queue_families({compute_queue_family_index})
-                          .enable_device_features({})
+                          .enable_physical_device_features({})
                           .enable_validation_layers(validation_layers_required)
                           .create();
   BOOST_CHECK(static_cast<VkDevice>(device) != nullptr);

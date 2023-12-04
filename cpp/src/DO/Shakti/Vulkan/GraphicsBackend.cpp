@@ -104,7 +104,7 @@ auto GraphicsBackend::init_device_and_queues() -> void
                 .enable_device_extensions(device_extensions)
                 .enable_queue_families(
                     {graphics_queue_family_index, present_queue_family_index})
-                .enable_device_features({})
+                .enable_physical_device_features({})
                 .enable_validation_layers(_validation_layers)
                 .create();
 
