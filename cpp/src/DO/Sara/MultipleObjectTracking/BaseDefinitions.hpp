@@ -38,8 +38,19 @@ namespace DO::Sara::MultipleObjectTracking {
   template <typename T>
   struct ObservationDistribution
   {
+    using Scalar = T;
     using Mean = CylindricBoxObservationVector<T>;
     using CovarianceMatrix = Eigen::Matrix4<T>;
+
+    auto mean() -> const Mean&
+    {
+      return μ;
+    }
+
+    auto covariance_matrix() -> const CovarianceMatrix&
+    {
+      return Σ;
+    }
 
     Mean μ;
     CovarianceMatrix Σ;
@@ -48,8 +59,22 @@ namespace DO::Sara::MultipleObjectTracking {
   template <typename T>
   struct StateDistribution
   {
+    static constexpr auto dimension =
+        CylindricBoxObservationVector<T>::RowsAtCompileTime;
+
+    using Scalar = T;
     using Mean = CylindricBoxStateVector<T>;
-    using CovarianceMatrix = Eigen::Matrix<T, 12, 12>;
+    using CovarianceMatrix = Eigen::Matrix<T, dimension, dimension>;
+
+    auto mean() -> const Mean&
+    {
+      return μ;
+    }
+
+    auto covariance_matrix() -> const CovarianceMatrix&
+    {
+      return Σ;
+    }
 
     Mean μ;
     CovarianceMatrix Σ;
