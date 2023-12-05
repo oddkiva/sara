@@ -75,9 +75,9 @@ RUN pip3 install \
       pybind11
 
 # Install Swift toolchain.
-RUN wget https://download.swift.org/swift-5.9-release/ubuntu2204/swift-5.9-RELEASE/swift-5.9-RELEASE-ubuntu22.04.tar.gz
-RUN tar xvzf swift-5.9-RELEASE-ubuntu22.04.tar.gz  \
-      && mv swift-5.9-RELEASE-ubuntu22.04 /opt
+RUN wget https://download.swift.org/swift-5.9.1-release/ubuntu2204/swift-5.9.1-RELEASE/swift-5.9.1-RELEASE-ubuntu22.04.tar.gz
+RUN tar xvzf swift-5.9.1-RELEASE-ubuntu22.04.tar.gz  \
+      && mv swift-5.9.1-RELEASE-ubuntu22.04 /opt
 
 # Install Halide.
 RUN wget https://github.com/halide/Halide/releases/download/v16.0.0/Halide-16.0.0-x86-64-linux-1e963ff817ef0968cc25d811a25a7350c8953ee6.tar.gz

@@ -28,7 +28,7 @@ BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 UBUNTU_VERSION = "22.04"
 CUDA_VERSION = "12.1.0"
 TRT_VERSION = "8.6"
-SWIFT_VERSION = "5.9"
+SWIFT_VERSION = "5.9.1"
 HALIDE_VERSION = "16.0.0"
 
 # Docker
@@ -303,6 +303,14 @@ def build_library_docker() -> None:
             ".",
         ],
         SARA_SOURCE_DIR,
+    )
+    execute(
+        [
+            "docker",
+            "push",
+            f"{SARA_DOCKER_IMAGE}",
+        ],
+        SARA_SOURCE_DIR
     )
 
 
