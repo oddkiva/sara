@@ -48,12 +48,12 @@ namespace DO::Sara::KalmanFilter {
 
     inline auto residual(const Observation& z,
                          const State& x) const  //
-        -> typename Observation::mean_type
+        -> typename Observation::Mean
     {
       return z.mean() - H * x.covariance_matrix();
     }
 
-    const ObservationModelMatrix H;
+    ObservationModelMatrix H;
     ObservationNoise v;
   };
 
