@@ -8,23 +8,12 @@ namespace DO::Sara::KalmanFilter {
   template <GaussianDistribution State,                     //
             GaussianDistribution Observation,               //
             ZeroMeanGaussianDistribution ObservationNoise,  //
-            EigenMatrix ObservationModelMatrix>
+            MatrixConcept ObservationModelMatrix>
   struct ObservationEquation
   {
     using T = typename ObservationModelMatrix::Scalar;
     using Innovation = Observation;
     using KalmanGain = typename Observation::covariance_matrix_type;
-
-    inline static auto observation_model_matrix() -> ObservationModelMatrix
-    {
-      auto H = ObservationModelMatrix{};
-
-      static const auto I = Eigen::Matrix4<T>::Identity();
-      static const auto O = Eigen::Matrix<T, 4, 8>::Zero();
-      H << I, O;
-
-      return H;
-    }
 
     inline auto innovation(const State& x_a_priori,
                            const Observation& z) const  //
