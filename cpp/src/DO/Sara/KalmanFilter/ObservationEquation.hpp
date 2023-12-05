@@ -13,7 +13,7 @@ namespace DO::Sara::KalmanFilter {
   {
     using T = typename ObservationModelMatrix::Scalar;
     using Innovation = Observation;
-    using KalmanGain = typename Observation::covariance_matrix_type;
+    using KalmanGain = typename Observation::CovarianceMatrix;
 
     inline auto innovation(const State& x_a_priori,
                            const Observation& z) const  //
