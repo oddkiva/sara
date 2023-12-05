@@ -5,7 +5,7 @@
 
 namespace DO::Sara::KalmanFilter {
 
-  template <EigenMatrix StateTransitionMatrix,
+  template <MatrixConcept StateTransitionMatrix,
             GaussianDistribution StateDistribution,
             ZeroMeanGaussianDistribution ProcessNoiseDistribution>
   struct StateTransitionEquation
