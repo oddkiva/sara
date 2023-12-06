@@ -4,6 +4,7 @@ target_link_libraries(
   PRIVATE SignalHandler #
           DO::Sara::Core #
           DO::Sara::ImageIO #
+          DO::Sara::VideoIO #
           DO::Shakti::Vulkan)
 set_target_properties(hello_vulkan_image PROPERTIES FOLDER
                                                     "Examples/Shakti/Vulkan")

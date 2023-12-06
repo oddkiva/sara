@@ -26,6 +26,7 @@
 
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/VideoIO.hpp>
 
 
 namespace sara = DO::Sara;
@@ -120,8 +121,14 @@ public:
     init_ebos(indices);
 
     // Device memory for image data..
-    const auto image_fp = program_dir_path / "data" / "dog.jpg";
-    const auto image_host = sara::imread<sara::Rgba8>(image_fp.string());
+    // const auto image_fp = program_dir_path / "data" / "dog.jpg";
+    // const auto image_host = sara::imread<sara::Rgba8>(image_fp.string());
+
+    const auto video_fp = std::filesystem::path{
+        "/home/david/Desktop/Capoeira/thursday/00372.MTS.mp4"  //
+    };
+    _vstream.open(video_fp.string());
+    const auto image_host = _vstream.frame().convert<sara::Rgba8>();
     init_vulkan_image_objects(image_host);
     init_image_copy_command_buffers();
     // Initialize the image data on the device side.
@@ -147,6 +154,14 @@ public:
     while (!glfwWindowShouldClose(window))
     {
       glfwPollEvents();
+
+      if (_vstream.read())
+      {
+        const auto image_host = _vstream.frame().convert<sara::Rgba8>();
+        copy_image_data_from_host_to_staging_buffer(image_host);
+        copy_image_data_from_staging_to_device_buffer();
+      }
+
       draw_frame();
 
       if (SignalHandler::ctrl_c_hit)
@@ -439,7 +454,7 @@ private: /* Methods to transfer model-view-projection uniform data. */
   }
 
 private: /* Methods to initialize image data */
-  auto init_vulkan_image_objects(const sara::Image<sara::Rgba8>& image_host)
+  auto init_vulkan_image_objects(const sara::ImageView<sara::Rgba8>& image_host)
       -> void
   {
     // Temporary image object on the host side.
@@ -496,7 +511,7 @@ private: /* Methods to initialize image data */
   }
 
   auto copy_image_data_from_host_to_staging_buffer(
-      const sara::Image<sara::Rgba8>& image_host) -> void
+      const sara::ImageView<sara::Rgba8>& image_host) -> void
   {
     // Temporary image object on the host side.
     _image_staging_dmem.copy_from(image_host.data(), image_host.size(), 0);
@@ -796,6 +811,8 @@ private: /* Methods for onscreen rendering */
 
 private:
   int _current_frame = 0;
+
+  sara::VideoStream _vstream;
 
   // Geometry data (quad)
   svk::Buffer _vbo;
