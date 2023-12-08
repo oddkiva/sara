@@ -74,7 +74,7 @@ public:
     init_device_and_queues();
     init_swapchain(window);
     init_render_pass();
-    init_framebuffers();
+    init_swapchain_fbos();
     init_graphics_pipeline(window, vertex_shader_path, fragment_shader_path);
     init_command_pool_and_buffers();
     init_synchronization_objects();

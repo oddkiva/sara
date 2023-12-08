@@ -57,7 +57,7 @@ namespace DO::Kalpana::Vulkan {
 
     auto init_swapchain(GLFWwindow* window) -> void;
 
-    auto init_framebuffers() -> void;
+    auto init_swapchain_fbos() -> void;
 
     auto init_render_pass() -> void;
 
@@ -100,7 +100,7 @@ namespace DO::Kalpana::Vulkan {
     RenderPass _render_pass;
     // Framebuffers are wrapped swapchain image views... (somehow)
     // and associated to a render pass.
-    FramebufferSequence _framebuffers;
+    FramebufferSequence _swapchain_fbos;
 
     GraphicsPipeline _graphics_pipeline;
 

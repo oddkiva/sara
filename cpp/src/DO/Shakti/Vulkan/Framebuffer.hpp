@@ -12,6 +12,7 @@
 #pragma once
 
 #include <DO/Shakti/Vulkan/RenderPass.hpp>
+#include <vulkan/vulkan_core.h>
 
 namespace DO::Kalpana::Vulkan {
 
@@ -57,8 +58,15 @@ namespace DO::Kalpana::Vulkan {
 
     ~FramebufferSequence()
     {
+      destroy();
+    }
+
+    auto destroy() -> void
+    {
       for (const auto fb : fbs)
         vkDestroyFramebuffer(device, fb, nullptr);
+      fbs.clear();
+      device = VK_NULL_HANDLE;
     }
 
     auto operator=(const FramebufferSequence&) -> FramebufferSequence& = delete;
@@ -85,7 +93,7 @@ namespace DO::Kalpana::Vulkan {
       fbs.swap(other.fbs);
     }
 
-    VkDevice device = nullptr;
+    VkDevice device = VK_NULL_HANDLE;
     std::vector<VkFramebuffer> fbs;
   };
 
