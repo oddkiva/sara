@@ -7,7 +7,6 @@
 
 namespace DO::Sara {
 
-
   template <typename T>
   concept MatrixConcept = requires(T)
   {
@@ -33,6 +32,8 @@ namespace DO::Sara {
   {
     std::same_as<T, Eigen::Matrix<typename T::Scalar, T::RowsAtCompileTime,
                                   T::ColsAtCompileTime>>;
+    T::RowsAtCompileTime != Eigen::Dynamic;
+    T::ColsAtCompileTime != Eigen::Dynamic;
     // clang-format off
     { T::RowsAtCompileTime };
     { T::ColsAtCompileTime };

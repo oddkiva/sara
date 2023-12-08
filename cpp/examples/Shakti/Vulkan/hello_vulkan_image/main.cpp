@@ -25,7 +25,6 @@
 #include <DO/Shakti/Vulkan/Sampler.hpp>
 
 #include <DO/Sara/Core/Image.hpp>
-#include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 
@@ -40,9 +39,9 @@ namespace fs = std::filesystem;
 // clang-format off
 static const auto vertices = std::vector<Vertex>{
   {.pos = {-0.5f, -0.5f}, .color = {1.0f, 0.0f, 0.0f}, .uv = {0.f, 0.f}},
-  {.pos = { 0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}, .uv = {1.f, 0.f}},
-  {.pos = { 0.5f,  0.5f}, .color = {0.0f, 0.0f, 1.0f}, .uv = {1.f, 1.f}},
-  {.pos = {-0.5f,  0.5f}, .color = {1.0f, 1.0f, 1.0f}, .uv = {0.f, 1.f}}
+    {.pos = { 0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}, .uv = {1.f, 0.f}},
+    {.pos = { 0.5f,  0.5f}, .color = {0.0f, 0.0f, 1.0f}, .uv = {1.f, 1.f}},
+    {.pos = {-0.5f,  0.5f}, .color = {1.0f, 1.0f, 1.0f}, .uv = {0.f, 1.f}}
 };
 // clang-format on
 
@@ -93,11 +92,14 @@ class VulkanImageRenderer : public kvk::GraphicsBackend
 public:
   VulkanImageRenderer(GLFWwindow* window, const std::string& app_name,
                       const std::filesystem::path& program_dir_path,
+                      const std::filesystem::path& video_path,
                       const bool debug_vulkan = true)
+    : _window{window}
+    , _verbose{debug_vulkan}
+    , _vpath{video_path}
   {
     // Set the GLFW callbacks.
     {
-      _window = window;
       glfwSetWindowUserPointer(window, this);
       glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
     }
@@ -128,13 +130,7 @@ public:
     init_ebos(indices);
 
     // Device memory for image data..
-    // const auto image_fp = program_dir_path / "data" / "dog.jpg";
-    // const auto image_host = sara::imread<sara::Rgba8>(image_fp.string());
-
-    const auto video_fp = std::filesystem::path{
-        "/home/david/Desktop/Capoeira/thursday/00372.MTS.mp4"  //
-    };
-    _vstream.open(video_fp.string());
+    _vstream.open(_vpath);
     const auto image_host = _vstream.frame().convert<sara::Rgba8>();
     init_vulkan_image_objects(image_host);
     init_image_copy_command_buffers();
@@ -201,7 +197,7 @@ private: /* Methods to initialize objects for the graphics pipeline. */
     };
 
     auto device_extensions = std::vector{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-    if constexpr (compile_for_apple)
+    if (compile_for_apple)
       device_extensions.emplace_back("VK_KHR_portability_subset");
 
     // Here we also require the anisotropic sampling capability from the
@@ -565,7 +561,7 @@ private: /* Methods for onscreen rendering */
                                       const VkDescriptorSet& descriptor_set)
       -> void
   {
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
     auto begin_info = VkCommandBufferBeginInfo{};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -595,7 +591,7 @@ private: /* Methods for onscreen rendering */
       render_pass_begin_info.pClearValues = &clear_white_color;
     }
 
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_DEBUG << "[VK] Begin render pass...\n";
     vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info,
                          VK_SUBPASS_CONTENTS_INLINE);
@@ -641,7 +637,7 @@ private: /* Methods for onscreen rendering */
                        static_cast<std::uint32_t>(indices.size()), 1, 0, 0, 0);
     }
 
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_DEBUG << "[VK] End render pass...\n";
     vkCmdEndRenderPass(command_buffer);
 
@@ -657,7 +653,7 @@ private: /* Methods for onscreen rendering */
     static constexpr auto forever = std::numeric_limits<std::uint64_t>::max();
     auto result = VkResult{};
 
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_CHECK(_current_frame);
 
     // The number of images in-flight is the number of swapchain images.
@@ -673,7 +669,7 @@ private: /* Methods for onscreen rendering */
     //
     // The function call `vkQueueSubmit(...)` at the end of this `draw_frame`
     // method uses this `_in_flight_fences[_current_frame]` fence.
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_DEBUG << "[VK] Waiting for the render fence to signal...\n";
     _render_fences[_current_frame].wait(forever);
     // This function call blocks.
@@ -682,7 +678,7 @@ private: /* Methods for onscreen rendering */
     // flow on the CPU side.
 
     // Acquire the next image ready to be rendered.
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_DEBUG << "[VK] Acquiring the next image ready to be rendered...\n";
     auto index_of_next_image_to_render = std::uint32_t{};
     result = vkAcquireNextImageKHR(  //
@@ -700,25 +696,25 @@ private: /* Methods for onscreen rendering */
     }
     else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
       throw std::runtime_error("Failed to acquire the next swapchain image!");
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_CHECK(index_of_next_image_to_render);
 
     update_mvp_uniform(index_of_next_image_to_render);
 
     // Reset the signaled fence associated to the current frame to an
     // unsignaled state. So that the GPU can reuse it to signal.
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_DEBUG << "[VK] Resetting for the render fence...\n";
     _render_fences[_current_frame].reset();
 
     // Reset the command buffer associated to the current frame.
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_DEBUG << "[VK] Resetting for the command buffer...\n";
     _graphics_cmd_bufs.reset(_current_frame,
                              /*VkCommandBufferResetFlagBits*/ 0);
 
     // Record the draw command to be performed on this swapchain image.
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_CHECK(_swapchain_fbos.fbs.size());
     const auto& descriptor_set = static_cast<VkDescriptorSet&>(
         _desc_sets[index_of_next_image_to_render]);
@@ -727,7 +723,7 @@ private: /* Methods for onscreen rendering */
         _swapchain_fbos[index_of_next_image_to_render], descriptor_set);
 
     // Submit the draw command to the graphics queue.
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_DEBUG << "[VK] Specifying the graphics command submission...\n";
     auto submit_info = VkSubmitInfo{};
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -848,12 +844,12 @@ private: /* Swapchain recreation */
 
     // It is not possible to create two swapchains apparently, so we have to
     // destroy the current swapchain.
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_DEBUG << "DESTROYING THE CURRENT SWAPCHAIN...\n";
     _swapchain_fbos.destroy();
     _swapchain.destroy();
 
-    if constexpr (_verbose)
+    if (_verbose)
       SARA_DEBUG << "RECREATING THE SWAPCHAIN (with the correct image "
                     "dimensions)...\n";
     init_swapchain(_window);
@@ -864,8 +860,9 @@ private:
   GLFWwindow* _window = nullptr;
   int _current_frame = 0;
   bool _framebuffer_resized = false;
-  static constexpr bool _verbose = false;
+  bool _verbose = false;
 
+  std::filesystem::path _vpath;
   sara::VideoStream _vstream;
 
   // Geometry data (quad)
@@ -902,9 +899,15 @@ private:
 };
 
 
-auto main(int, char** argv) -> int
+auto main(int argc, char** argv) -> int
 {
   SignalHandler::init();
+
+  if (argc < 2)
+  {
+    std::cerr << "PROGRAM USAGE: " << argv[0] << " VIDEO_PATH\n";
+    return 0;
+  }
 
   try
   {
@@ -915,11 +918,14 @@ auto main(int, char** argv) -> int
     auto window = glfw::Window{300, 300, app_name};
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
+    const auto video_path = fs::path(argv[1]);
+    static constexpr auto debug = true;
     auto triangle_renderer = VulkanImageRenderer{
         window,            //
         app_name,          //
         program_dir_path,  //
-        true               //
+        video_path,        //
+        debug              //
     };
     triangle_renderer.loop(window);
   }
