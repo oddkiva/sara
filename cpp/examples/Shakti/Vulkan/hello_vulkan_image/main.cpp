@@ -24,10 +24,14 @@
 #include <DO/Shakti/Vulkan/ImageView.hpp>
 #include <DO/Shakti/Vulkan/Sampler.hpp>
 
+#include <DO/Kalpana/Math/Projection.hpp>
+
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 
+namespace k = DO::Kalpana;
 namespace sara = DO::Sara;
 namespace glfw = DO::Kalpana::GLFW;
 namespace kvk = DO::Kalpana::Vulkan;
@@ -37,11 +41,11 @@ namespace fs = std::filesystem;
 
 //! @brief The 4 vertices of the square.
 // clang-format off
-static const auto vertices = std::vector<Vertex>{
+static auto vertices = std::vector<Vertex>{
   {.pos = {-0.5f, -0.5f}, .color = {1.0f, 0.0f, 0.0f}, .uv = {0.f, 0.f}},
-    {.pos = { 0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}, .uv = {1.f, 0.f}},
-    {.pos = { 0.5f,  0.5f}, .color = {0.0f, 0.0f, 1.0f}, .uv = {1.f, 1.f}},
-    {.pos = {-0.5f,  0.5f}, .color = {1.0f, 1.0f, 1.0f}, .uv = {0.f, 1.f}}
+  {.pos = { 0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}, .uv = {1.f, 0.f}},
+  {.pos = { 0.5f,  0.5f}, .color = {0.0f, 0.0f, 1.0f}, .uv = {1.f, 1.f}},
+  {.pos = {-0.5f,  0.5f}, .color = {1.0f, 1.0f, 1.0f}, .uv = {0.f, 1.f}}
 };
 // clang-format on
 
@@ -104,6 +108,13 @@ public:
       glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
     }
 
+    _vstream.open(_vpath);
+    const auto image_host = _vstream.frame().convert<sara::Rgba8>();
+
+    const auto aspect_ratio = static_cast<float>(image_host.width()) / image_host.height();
+    for (auto& vertex: vertices)
+      vertex.pos.x() *= aspect_ratio;
+
     // General vulkan context objects.
     init_instance(app_name, debug_vulkan);
     init_surface(window);
@@ -130,8 +141,6 @@ public:
     init_ebos(indices);
 
     // Device memory for image data..
-    _vstream.open(_vpath);
-    const auto image_host = _vstream.frame().convert<sara::Rgba8>();
     init_vulkan_image_objects(image_host);
     init_image_copy_command_buffers();
     // Initialize the image data on the device side.
@@ -147,7 +156,7 @@ public:
     // 1. Model-view-projection matrices
     init_mvp_ubos();
     // 2. Image sampler objects
-    init_image_sampler();
+    init_image_view_and_sampler();
 
     define_descriptor_set_types();
   }
@@ -160,9 +169,18 @@ public:
 
       if (_vstream.read())
       {
+        if (_verbose)
+          sara::tic();
         const auto image_host = _vstream.frame().convert<sara::Rgba8>();
+        if (_verbose)
+          sara::toc("RGB to RGBA");
+
+        if (_verbose)
+          sara::tic();
         copy_image_data_from_host_to_staging_buffer(image_host);
         copy_image_data_from_staging_to_device_buffer();
+        if (_verbose)
+          sara::toc("Transfer from host to device image");
       }
 
       draw_frame();
@@ -439,21 +457,19 @@ private: /* Methods to transfer model-view-projection uniform data. */
   //! @brief Every time we render the image frame through the method
   //! `VulkanImageRenderer::draw_frame`, we update the model-view-projection
   //! matrix stack by calling this method and therefore animate the square.
-  auto update_mvp_uniform(const std::uint32_t swapchain_image_index) -> void
+  auto update_mvp_ubo(const std::uint32_t swapchain_image_index) -> void
   {
-    static auto start_time = std::chrono::high_resolution_clock::now();
+    // static auto start_time = std::chrono::high_resolution_clock::now();
 
-    const auto current_time = std::chrono::high_resolution_clock::now();
-    const auto time =
-        std::chrono::duration<float, std::chrono::seconds::period>(
-            current_time - start_time)
-            .count();
+    // const auto current_time = std::chrono::high_resolution_clock::now();
+    // const auto time =
+    //     std::chrono::duration<float, std::chrono::seconds::period>(
+    //         current_time - start_time)
+    //         .count();
 
-    auto mvp = ModelViewProjectionStack{};
+    // _mvp.model.rotate(Eigen::AngleAxisf{time, Eigen::Vector3f::UnitZ()});
 
-    mvp.model.rotate(Eigen::AngleAxisf{time, Eigen::Vector3f::UnitZ()});
-
-    memcpy(_mvp_ubo_ptrs[swapchain_image_index], &mvp, sizeof(mvp));
+    memcpy(_mvp_ubo_ptrs[swapchain_image_index], &_mvp, sizeof(_mvp));
   }
 
 private: /* Methods to initialize image data */
@@ -489,7 +505,7 @@ private: /* Methods to initialize image data */
     _image.bind(_image_dmem, 0);
   }
 
-  auto init_image_sampler() -> void
+  auto init_image_view_and_sampler() -> void
   {
     // To use the image resource from a shader:
     // 1. Create an image view
@@ -699,7 +715,7 @@ private: /* Methods for onscreen rendering */
     if (_verbose)
       SARA_CHECK(index_of_next_image_to_render);
 
-    update_mvp_uniform(index_of_next_image_to_render);
+    update_mvp_ubo(index_of_next_image_to_render);
 
     // Reset the signaled fence associated to the current frame to an
     // unsignaled state. So that the GPU can reuse it to signal.
@@ -854,6 +870,16 @@ private: /* Swapchain recreation */
                     "dimensions)...\n";
     init_swapchain(_window);
     init_swapchain_fbos();
+
+    const auto fb_aspect_ratio = static_cast<float>(w) / h;
+    _mvp.projection = k::orthographic(                    //
+        -0.5f * fb_aspect_ratio, 0.5f * fb_aspect_ratio,  //
+        -0.5f, 0.5f,                                      //
+        -0.5f, 0.5f);
+
+    SARA_CHECK(_mvp.model.matrix());
+    SARA_CHECK(_mvp.view.matrix());
+    SARA_CHECK(_mvp.projection);
   }
 
 private:
@@ -875,6 +901,7 @@ private:
   // Model-view-projection matrix
   //
   // 1. UBO and device memory objects.
+  ModelViewProjectionStack _mvp;
   std::vector<svk::Buffer> _mvp_ubos;
   std::vector<svk::DeviceMemory> _mvp_dmems;
   std::vector<void*> _mvp_ubo_ptrs;
@@ -915,11 +942,11 @@ auto main(int argc, char** argv) -> int
     app.init_for_vulkan_rendering();
 
     const auto app_name = "Vulkan Image";
-    auto window = glfw::Window{300, 300, app_name};
+    auto window = glfw::Window{800, 600, app_name};
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     const auto video_path = fs::path(argv[1]);
-    static constexpr auto debug = true;
+    static constexpr auto debug = false;
     auto triangle_renderer = VulkanImageRenderer{
         window,            //
         app_name,          //

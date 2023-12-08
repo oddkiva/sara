@@ -9,10 +9,9 @@ struct ModelViewProjectionStack
   {
     model.setIdentity();
     view.setIdentity();
-    projection.setIdentity();
   }
 
   Eigen::Transform<float, 3, Eigen::Projective> model;
   Eigen::Transform<float, 3, Eigen::Projective> view;
-  Eigen::Transform<float, 3, Eigen::Projective> projection;
+  Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
 };
