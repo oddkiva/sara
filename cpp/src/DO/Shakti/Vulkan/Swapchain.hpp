@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include <vulkan/vulkan_core.h>
 #define GLFW_INCLUDE_VULKAN
 
 #include <DO/Shakti/Vulkan/Device.hpp>
