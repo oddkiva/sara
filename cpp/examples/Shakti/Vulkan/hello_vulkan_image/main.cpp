@@ -43,10 +43,10 @@ namespace fs = std::filesystem;
 //! @brief The 4 vertices of the square.
 // clang-format off
 static auto vertices = std::vector<Vertex>{
-  {.pos = {-0.5f, -0.5f}, .color = {1.0f, 0.0f, 0.0f}, .uv = {0.f, 0.f}},
-  {.pos = { 0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}, .uv = {1.f, 0.f}},
-  {.pos = { 0.5f,  0.5f}, .color = {0.0f, 0.0f, 1.0f}, .uv = {1.f, 1.f}},
-  {.pos = {-0.5f,  0.5f}, .color = {1.0f, 1.0f, 1.0f}, .uv = {0.f, 1.f}}
+  {.pos = {-0.5f, -0.5f}, .uv = {0.f, 0.f}},
+  {.pos = { 0.5f, -0.5f}, .uv = {1.f, 0.f}},
+  {.pos = { 0.5f,  0.5f}, .uv = {1.f, 1.f}},
+  {.pos = {-0.5f,  0.5f}, .uv = {0.f, 1.f}}
 };
 // clang-format on
 
@@ -934,7 +934,7 @@ auto main(int argc, char** argv) -> int
 
   if (argc < 2)
   {
-    std::cerr << "PROGRAM USAGE: " << argv[0] << " VIDEO_PATH\n";
+    std::cerr << "USAGE: " << argv[0] << " VIDEO_PATH\n";
     return 0;
   }
 
@@ -948,7 +948,7 @@ auto main(int argc, char** argv) -> int
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     const auto video_path = fs::path(argv[1]);
-    static constexpr auto debug = false;
+    static constexpr auto debug = true;
     auto triangle_renderer = VulkanImageRenderer{
         window,            //
         app_name,          //
