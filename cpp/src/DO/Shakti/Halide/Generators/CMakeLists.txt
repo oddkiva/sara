@@ -21,6 +21,10 @@ shakti_halide_library_v2(
   NAME shakti_cast_uint8_to_float_cpu
   SRCS CastUint8ToFloat.cpp)
 
+shakti_halide_library_v2(
+  NAME shakti_rgb8_to_rgba8_cpu
+  SRCS FromRgb8ToRgba8.cpp)
+
 # ------------------------------------------------------------------------------
 # Image rotation CW 90
 # ------------------------------------------------------------------------------

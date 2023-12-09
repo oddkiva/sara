@@ -28,6 +28,7 @@
 
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
+#include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 
@@ -109,10 +110,11 @@ public:
     }
 
     _vstream.open(_vpath);
-    const auto image_host = _vstream.frame().convert<sara::Rgba8>();
+    const auto image_host = sara::from_rgb8_to_rgba8(_vstream.frame());
 
-    const auto aspect_ratio = static_cast<float>(image_host.width()) / image_host.height();
-    for (auto& vertex: vertices)
+    const auto aspect_ratio =
+        static_cast<float>(image_host.width()) / image_host.height();
+    for (auto& vertex : vertices)
       vertex.pos.x() *= aspect_ratio;
 
     // General vulkan context objects.
@@ -169,11 +171,11 @@ public:
 
       if (_vstream.read())
       {
-        if (_verbose)
-          sara::tic();
-        const auto image_host = _vstream.frame().convert<sara::Rgba8>();
-        if (_verbose)
-          sara::toc("RGB to RGBA");
+        // if (_verbose)
+        sara::tic();
+        const auto image_host = sara::from_rgb8_to_rgba8(_vstream.frame());
+        // if (_verbose)
+        sara::toc("RGB to RGBA");
 
         if (_verbose)
           sara::tic();

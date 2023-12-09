@@ -20,6 +20,9 @@ namespace DO::Sara {
   auto from_bgra8_to_gray32f(const ImageView<Bgra8>& src, ImageView<float>& dst)
       -> void;
 
+  auto from_rgb8_to_rgba8(const ImageView<Rgb8>& src, ImageView<Rgba8>& dst)
+      -> void;
+
   inline auto from_rgb8_to_gray32f(const ImageView<Rgb8>& src)
   {
     auto dst = Image<float>{src.sizes()};
@@ -31,6 +34,13 @@ namespace DO::Sara {
   {
     auto dst = Image<float>{src.sizes()};
     from_bgra8_to_gray32f(src, dst);
+    return dst;
+  }
+
+  inline auto from_rgb8_to_rgba8(const ImageView<Rgb8>& src)
+  {
+    auto dst = Image<Rgba8>{src.sizes()};
+    from_rgb8_to_rgba8(src, dst);
     return dst;
   }
 

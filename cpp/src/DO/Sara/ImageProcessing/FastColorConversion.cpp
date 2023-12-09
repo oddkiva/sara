@@ -12,16 +12,35 @@
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 
 #ifdef DO_SARA_USE_HALIDE
-#include <DO/Shakti/Halide/RuntimeUtilities.hpp>
+#  include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
-#include "shakti_rgb8u_to_gray32f_cpu.h"
-#include "shakti_bgra8u_to_gray32f_cpu.h"
+#  include "shakti_bgra8u_to_gray32f_cpu.h"
+#  include "shakti_rgb8_to_rgba8_cpu.h"
+#  include "shakti_rgb8u_to_gray32f_cpu.h"
 #endif
 
 
 namespace DO::Sara {
 
-  auto from_rgb8_to_gray32f(const ImageView<Rgb8>& src, ImageView<float>& dst) -> void
+  auto from_rgb8_to_rgba8(const ImageView<Rgb8>& src, ImageView<Rgba8>& dst)
+      -> void
+  {
+    if (src.sizes() != dst.sizes())
+      throw std::domain_error{
+          "Color conversion error: image sizes are not equal!"};
+
+#ifdef DO_SARA_USE_HALIDE
+    auto src_buffer = Shakti::Halide::as_interleaved_runtime_buffer(src);
+    auto dst_buffer = Shakti::Halide::as_interleaved_runtime_buffer(dst);
+    shakti_rgb8_to_rgba8_cpu(src_buffer, dst_buffer);
+#else
+    // FALLBACK IMPLEMENTATION.
+    DO::Sara::convert(src, dst);
+#endif
+  }
+
+  auto from_rgb8_to_gray32f(const ImageView<Rgb8>& src, ImageView<float>& dst)
+      -> void
   {
     if (src.sizes() != dst.sizes())
       throw std::domain_error{
@@ -42,12 +61,14 @@ namespace DO::Sara {
     // - model name      : Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz
     //
     // [Grayscale] 8.8687 ms
-    // This is 15 times slower compared to the Halide optimized CPU implementation
+    // This is 15 times slower compared to the Halide optimized CPU
+    // implementation
     DO::Sara::convert(src, dst);
 #endif
   }
 
-  auto from_bgra8_to_gray32f(const ImageView<Bgra8>& src, ImageView<float>& dst) -> void
+  auto from_bgra8_to_gray32f(const ImageView<Bgra8>& src, ImageView<float>& dst)
+      -> void
   {
     if (src.sizes() != dst.sizes())
       throw std::domain_error{

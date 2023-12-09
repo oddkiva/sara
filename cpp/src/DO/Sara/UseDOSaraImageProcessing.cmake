@@ -18,6 +18,7 @@ if(SARA_USE_FROM_SOURCE)
                 # Fast color conversion
                 shakti_rgb8u_to_gray32f_cpu
                 shakti_bgra8u_to_gray32f_cpu
+                shakti_rgb8_to_rgba8_cpu
                 # Binary operations.
                 shakti_subtract_32f_cpu
                 # Cartesian to polar coordinates.
