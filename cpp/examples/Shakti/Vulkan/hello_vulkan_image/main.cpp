@@ -109,7 +109,7 @@ public:
       glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
     }
 
-    _vstream.open(_vpath);
+    _vstream.open(_vpath.string());
     const auto image_host = sara::from_rgb8_to_rgba8(_vstream.frame());
 
     // Rescale the x coordinates of the vertices so that it matches that video
