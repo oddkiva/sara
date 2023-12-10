@@ -6,5 +6,6 @@ foreach (file ${test_SOURCE_FILES})
     NAME ${filename}
     SOURCES ${file}
     DEPENDENCIES DO::Sara::Core
-    FOLDER RANSAC)
+    FOLDER MultipleObjectTracking)
+  target_compile_options(${filename} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/utf-8>)
 endforeach ()

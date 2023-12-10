@@ -7,4 +7,5 @@ foreach (file ${test_SOURCE_FILES})
     SOURCES ${file}
     DEPENDENCIES DO::Sara::Core
     FOLDER KalmanFilter)
+  target_compile_options(${filename} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/utf-8>)
 endforeach ()
