@@ -182,11 +182,11 @@ public:
 
       if (_vstream.read())
       {
-        // if (_verbose)
-        sara::tic();
+        if (_verbose)
+          sara::tic();
         const auto image_host = sara::from_rgb8_to_rgba8(_vstream.frame());
-        // if (_verbose)
-        sara::toc("RGB to RGBA");
+        if (_verbose)
+          sara::toc("RGB to RGBA");
 
         if (_verbose)
           sara::tic();
