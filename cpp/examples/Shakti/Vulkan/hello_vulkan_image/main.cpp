@@ -117,6 +117,17 @@ public:
     for (auto& vertex : vertices)
       vertex.pos.x() *= aspect_ratio;
 
+    {
+      auto w = int{};
+      auto h = int{};
+      glfwGetWindowSize(window, &w, &h);
+      const auto fb_aspect_ratio = static_cast<float>(w) / h;
+      _mvp.projection = k::orthographic(                    //
+          -0.5f * fb_aspect_ratio, 0.5f * fb_aspect_ratio,  //
+          -0.5f, 0.5f,                                      //
+          -0.5f, 0.5f);
+    }
+
     // General vulkan context objects.
     init_instance(app_name, debug_vulkan);
     init_surface(window);
@@ -873,11 +884,11 @@ private: /* Swapchain recreation */
     init_swapchain(_window);
     init_swapchain_fbos();
 
-    const auto fb_aspect_ratio = static_cast<float>(w) / h;
-    _mvp.projection = k::orthographic(                    //
-        -0.5f * fb_aspect_ratio, 0.5f * fb_aspect_ratio,  //
-        -0.5f, 0.5f,                                      //
-        -0.5f, 0.5f);
+    // const auto fb_aspect_ratio = static_cast<float>(w) / h;
+    // _mvp.projection = k::orthographic(                    //
+    //     -0.5f * fb_aspect_ratio, 0.5f * fb_aspect_ratio,  //
+    //     -0.5f, 0.5f,                                      //
+    //     -0.5f, 0.5f);
 
     SARA_CHECK(_mvp.model.matrix());
     SARA_CHECK(_mvp.view.matrix());
@@ -944,11 +955,11 @@ auto main(int argc, char** argv) -> int
     app.init_for_vulkan_rendering();
 
     const auto app_name = "Vulkan Image";
-    auto window = glfw::Window{800, 600, app_name};
+    auto window = glfw::Window{1920, 1080, app_name};
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     const auto video_path = fs::path(argv[1]);
-    static constexpr auto debug = true;
+    static constexpr auto debug = false;
     auto triangle_renderer = VulkanImageRenderer{
         window,            //
         app_name,          //
