@@ -43,10 +43,10 @@ namespace fs = std::filesystem;
 //! @brief The 4 vertices of the square.
 // clang-format off
 static auto vertices = std::vector<Vertex>{
-  {.pos = {-0.5f, -0.5f}, .uv = {0.f, 0.f}},
-  {.pos = { 0.5f, -0.5f}, .uv = {1.f, 0.f}},
-  {.pos = { 0.5f,  0.5f}, .uv = {1.f, 1.f}},
-  {.pos = {-0.5f,  0.5f}, .uv = {0.f, 1.f}}
+  {.pos = {-1.0f, -1.0f}, .uv = {0.f, 0.f}},
+  {.pos = { 1.0f, -1.0f}, .uv = {1.f, 0.f}},
+  {.pos = { 1.0f,  1.0f}, .uv = {1.f, 1.f}},
+  {.pos = {-1.0f,  1.0f}, .uv = {0.f, 1.f}}
 };
 // clang-format on
 
@@ -112,20 +112,23 @@ public:
     _vstream.open(_vpath);
     const auto image_host = sara::from_rgb8_to_rgba8(_vstream.frame());
 
+    // Rescale the x coordinates of the vertices so that it matches that video
+    // rectangle aspect ratio.
     const auto aspect_ratio =
         static_cast<float>(image_host.width()) / image_host.height();
     for (auto& vertex : vertices)
       vertex.pos.x() *= aspect_ratio;
 
+    // Initialize the projection matrix.
     {
       auto w = int{};
       auto h = int{};
       glfwGetWindowSize(window, &w, &h);
       const auto fb_aspect_ratio = static_cast<float>(w) / h;
-      _mvp.projection = k::orthographic(                    //
-          -0.5f * fb_aspect_ratio, 0.5f * fb_aspect_ratio,  //
-          -0.5f, 0.5f,                                      //
-          -0.5f, 0.5f);
+      _mvp.projection = k::orthographic(      //
+          -fb_aspect_ratio, fb_aspect_ratio,  //
+          -1.f, 1.f,                          //
+          -1.f, 1.f);
     }
 
     // General vulkan context objects.
@@ -864,6 +867,7 @@ private: /* Swapchain recreation */
   {
     auto w = int{};
     auto h = int{};
+    glfwGetFramebufferSize(_window, &w, &h);
     while (w == 0 || h == 0)
     {
       glfwGetFramebufferSize(_window, &w, &h);
@@ -884,11 +888,20 @@ private: /* Swapchain recreation */
     init_swapchain(_window);
     init_swapchain_fbos();
 
-    // const auto fb_aspect_ratio = static_cast<float>(w) / h;
-    // _mvp.projection = k::orthographic(                    //
-    //     -0.5f * fb_aspect_ratio, 0.5f * fb_aspect_ratio,  //
-    //     -0.5f, 0.5f,                                      //
-    //     -0.5f, 0.5f);
+    // // This time only modify the view matrix.
+    // {
+    //   _mvp.view.setIdentity();
+    //   _mvp.view.scale(static_cast<float>(w) / _vstream.width());
+    // }
+
+    // Recalculate the projection matrix.
+    {
+      const auto fb_aspect_ratio = static_cast<float>(w) / h;
+      _mvp.projection = k::orthographic(      //
+          -fb_aspect_ratio, fb_aspect_ratio,  //
+          -1.f, 1.f,                          //
+          -1.f, 1.f);
+    }
 
     SARA_CHECK(_mvp.model.matrix());
     SARA_CHECK(_mvp.view.matrix());
