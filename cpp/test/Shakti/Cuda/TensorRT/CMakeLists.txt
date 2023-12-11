@@ -1,3 +1,7 @@
+if(NOT CMAKE_CUDA_COMPILER OR NOT TensorRT_FOUND)
+  return()
+endif()
+
 file(GLOB test_tensorrt_SOURCE_FILES FILES test_*tensorrt*.cpp)
 
 foreach(file ${test_tensorrt_SOURCE_FILES})
