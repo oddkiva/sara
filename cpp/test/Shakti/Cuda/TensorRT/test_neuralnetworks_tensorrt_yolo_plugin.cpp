@@ -27,7 +27,7 @@
 
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
-namespace trt = sara::TensorRT;
+namespace trt = shakti::TensorRT;
 
 
 template <typename T, int N>

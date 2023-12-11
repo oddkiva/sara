@@ -17,7 +17,7 @@
 #include <sstream>
 
 
-namespace DO::Sara::TensorRT {
+namespace DO::Shakti::TensorRT {
 
   //! @brief Helper function for serializing TensorRT plugins.
   //!
@@ -48,4 +48,4 @@ namespace DO::Sara::TensorRT {
                                    const bool use_fp16 = false)
       -> HostMemoryUniquePtr;
 
-}  // namespace DO::Sara::TensorRT
+}  // namespace DO::Shakti::TensorRT

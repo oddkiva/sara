@@ -23,7 +23,7 @@
 
 namespace sara = DO::Sara;
 namespace fs = std::filesystem;
-namespace trt = sara::TensorRT;
+namespace trt = DO::Shakti::TensorRT;
 namespace d = sara::Darknet;
 
 

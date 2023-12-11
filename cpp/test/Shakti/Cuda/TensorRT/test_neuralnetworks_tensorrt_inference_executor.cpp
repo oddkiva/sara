@@ -28,8 +28,7 @@
 namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
-namespace d = sara::Darknet;
-namespace trt = sara::TensorRT;
+namespace trt = shakti::TensorRT;
 
 
 BOOST_AUTO_TEST_SUITE(TestTensorRT)

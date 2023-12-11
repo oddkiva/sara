@@ -23,13 +23,13 @@
 #include <DO/Shakti/Cuda/TensorRT/Helpers.hpp>
 
 
-namespace DO::Sara::TensorRT {
+namespace DO::Shakti::TensorRT {
 
   class DO_SARA_EXPORT InferenceExecutor
   {
   public:
     template <typename T, int N>
-    using PinnedTensor = Tensor_<T, N, Shakti::PinnedMemoryAllocator>;
+    using PinnedTensor = Sara::Tensor_<T, N, Shakti::PinnedMemoryAllocator>;
 
     InferenceExecutor() = default;
 

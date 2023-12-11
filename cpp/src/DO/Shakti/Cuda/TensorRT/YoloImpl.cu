@@ -14,7 +14,7 @@
 #include <DO/Shakti/Cuda/TensorRT/YoloImpl.hpp>
 
 
-namespace DO::Sara::TensorRT {
+namespace DO::Shakti::TensorRT {
 
   __global__ void yolo_kernel(const float* conv, float* yolo,     //
                               const int num_boxes_per_grid_cell,  //
@@ -112,8 +112,8 @@ namespace DO::Sara::TensorRT {
     SARA_CHECK(total_num_boxes);
 #endif
 
-    // By design CUDA can have at most 1024 threads per block, so let us use this
-    // limit.
+    // By design CUDA can have at most 1024 threads per block, so let us use
+    // this limit.
     static constexpr auto max_threads_per_block = 1024;
     const auto num_blocks = total_num_boxes % 1024 == 0
                                 ? total_num_boxes / max_threads_per_block
@@ -126,4 +126,5 @@ namespace DO::Sara::TensorRT {
         conv, yolo, num_boxes_per_grid_cell, grid_height, grid_width,
         num_classes, scale_x_y);
   }
-}  // namespace DO::Sara::TensorRT
+
+}  // namespace DO::Shakti::TensorRT

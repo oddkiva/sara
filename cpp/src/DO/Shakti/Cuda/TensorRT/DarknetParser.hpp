@@ -23,12 +23,12 @@
 #include <stdexcept>
 
 
-namespace DO::Sara::TensorRT {
+namespace DO::Shakti::TensorRT {
 
   struct YoloV4TinyConverter
   {
     using TrtNet = nvinfer1::INetworkDefinition;
-    using HostNet = std::vector<std::unique_ptr<Darknet::Layer>>;
+    using HostNet = std::vector<std::unique_ptr<DO::Sara::Darknet::Layer>>;
 
     TrtNet* tnet;
     const HostNet& hnet;
@@ -44,8 +44,9 @@ namespace DO::Sara::TensorRT {
 
     //! @brief zero-padding convolution.
     auto conv2d(nvinfer1::ITensor* x,  //
-                const TensorView_<float, 4>& w, const Eigen::VectorXf& b,
-                const int stride, const std::string& activation_layer,
+                const DO::Sara::TensorView_<float, 4>& w,
+                const Eigen::VectorXf& b, const int stride,
+                const std::string& activation_layer,
                 const std::optional<std::string>& name = std::nullopt) const
         -> nvinfer1::ITensor*;
 
@@ -77,4 +78,4 @@ namespace DO::Sara::TensorRT {
   auto convert_yolo_v4_tiny_network_from_darknet(
       const std::string& trained_model_dir) -> HostMemoryUniquePtr;
 
-}  // namespace DO::Sara::TensorRT
+}  // namespace DO::Shakti::TensorRT

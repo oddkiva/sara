@@ -14,9 +14,9 @@
 #include <driver_types.h>
 
 
-namespace DO::Sara::TensorRT {
+namespace DO::Shakti::TensorRT {
 
-  void yolo(const float* conv, float* yolo,  //
+  void yolo(const float* conv, float* yolo,     //
             const int num_boxes_per_grid_cell,  //
             const int grid_height,              //
             const int grid_width,               //
@@ -24,4 +24,4 @@ namespace DO::Sara::TensorRT {
             const float scale_x_y,              //
             cudaStream_t stream);
 
-}  // namespace DO::Sara::TensorRT
+}  // namespace DO::Shakti::TensorRT

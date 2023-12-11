@@ -12,7 +12,7 @@
 #include <DO/Shakti/Cuda/TensorRT/Helpers.hpp>
 
 
-namespace DO::Sara::TensorRT {
+namespace DO::Shakti::TensorRT {
 
   auto serialize_network_into_plan(const BuilderUniquePtr& network_builder,
                                    const NetworkUniquePtr& network,
@@ -36,4 +36,4 @@ namespace DO::Sara::TensorRT {
     return plan;
   }
 
-}  // namespace DO::Sara::TensorRT
+}  // namespace DO::Shakti::TensorRT

@@ -18,7 +18,7 @@
 #include <vector>
 
 
-namespace DO::Sara::TensorRT {
+namespace DO::Shakti::TensorRT {
 
   class YoloPlugin : public nvinfer1::IPluginV2IOExt
   {
@@ -172,4 +172,4 @@ namespace DO::Sara::TensorRT {
 
   REGISTER_TENSORRT_PLUGIN(YoloPluginCreator);
 
-}  // namespace DO::Sara::TensorRT
+}  // namespace DO::Shakti::TensorRT

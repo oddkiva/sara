@@ -28,7 +28,7 @@
 
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
-namespace trt = sara::TensorRT;
+namespace trt = shakti::TensorRT;
 
 
 template <typename T, int N>
@@ -159,9 +159,9 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
   for (const auto& device : devices)
     std::cout << device << std::endl;
 
-  auto cuda_stream = sara::TensorRT::make_cuda_stream();
+  auto cuda_stream = trt::make_cuda_stream();
 
-  auto builder = sara::TensorRT::make_builder();
+  auto builder = trt::make_builder();
 
   // Create a simple convolution operation.
   static constexpr auto n = 1;
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(test_convolution_2d_operation)
 
 
   // Instantiate a network and automatically manager its memory.
-  auto network = sara::TensorRT::make_network(builder.get());
+  auto network = trt::make_network(builder.get());
   {
     SARA_DEBUG << termcolor::green << "Creating the network from scratch!"
                << std::endl;

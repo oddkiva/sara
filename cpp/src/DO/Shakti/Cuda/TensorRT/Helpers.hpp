@@ -25,7 +25,7 @@
 #include <vector>
 
 
-namespace DO::Sara::TensorRT {
+namespace DO::Shakti::TensorRT {
 
   //! @ingroup NeuralNetworks
   //! @defgroup TensorRT TensorRT helper functions.

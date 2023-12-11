@@ -15,9 +15,11 @@
 #include <DO/Sara/NeuralNetworks/Darknet/Parser.hpp>
 
 
-namespace DO::Sara::TensorRT {
-  using nvinfer1::IPluginV2;
+namespace sara = DO::Sara;
+namespace darknet = DO::Sara::Darknet;
 
+
+namespace DO::Shakti::TensorRT {
 
   static inline auto shape(const nvinfer1::ITensor& t) -> Eigen::Vector4i
   {
@@ -36,7 +38,7 @@ namespace DO::Sara::TensorRT {
   }
 
   auto YoloV4TinyConverter::conv2d(nvinfer1::ITensor* x,  //
-                                   const TensorView_<float, 4>& w,
+                                   const sara::TensorView_<float, 4>& w,
                                    const Eigen::VectorXf& b, const int stride,
                                    const std::string& activation_layer,
                                    const std::optional<std::string>& name) const
@@ -108,7 +110,7 @@ namespace DO::Sara::TensorRT {
     SARA_DEBUG << "Converting convolutional layer " << layer_idx << " to TRT"
                << std::endl;
     const auto& conv_layer =
-        dynamic_cast<const Darknet::Convolution&>(*hnet[layer_idx]);
+        dynamic_cast<const darknet::Convolution&>(*hnet[layer_idx]);
     std::cout << conv_layer << std::endl;
 
     // It's always the last one in Darknet cfg file.
@@ -127,7 +129,7 @@ namespace DO::Sara::TensorRT {
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& route_layer =
-        dynamic_cast<const Darknet::Route&>(*hnet[layer_idx]);
+        dynamic_cast<const darknet::Route&>(*hnet[layer_idx]);
     SARA_DEBUG << "convert route-slice layer " << layer_idx << "("
                << route_layer.type << ")" << std::endl;
     std::cout << route_layer << std::endl;
@@ -172,7 +174,7 @@ namespace DO::Sara::TensorRT {
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& route_layer =
-        dynamic_cast<const Darknet::Route&>(*hnet[layer_idx]);
+        dynamic_cast<const darknet::Route&>(*hnet[layer_idx]);
     SARA_DEBUG << "convert route-concat layer " << layer_idx << "("
                << route_layer.type << ")" << std::endl;
     std::cout << route_layer << std::endl;
@@ -201,7 +203,7 @@ namespace DO::Sara::TensorRT {
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& maxpool_layer =
-        dynamic_cast<const Darknet::MaxPool&>(*hnet[layer_idx]);
+        dynamic_cast<const darknet::MaxPool&>(*hnet[layer_idx]);
     SARA_DEBUG << "convert maxpool layer " << layer_idx << "("
                << hnet[layer_idx]->type << ")" << std::endl;
     std::cout << maxpool_layer << std::endl;
@@ -228,7 +230,7 @@ namespace DO::Sara::TensorRT {
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& upsample_layer =
-        dynamic_cast<const Darknet::Upsample&>(*hnet[layer_idx]);
+        dynamic_cast<const darknet::Upsample&>(*hnet[layer_idx]);
     SARA_DEBUG << "convert layer " << layer_idx << "(" << upsample_layer.type
                << ")" << std::endl;
     std::cout << upsample_layer << std::endl;
@@ -258,7 +260,7 @@ namespace DO::Sara::TensorRT {
       const int layer_idx, std::vector<nvinfer1::ITensor*>& fmaps) const -> void
   {
     const auto& yolo_layer =
-        dynamic_cast<const Darknet::Yolo&>(*hnet[layer_idx]);
+        dynamic_cast<const darknet::Yolo&>(*hnet[layer_idx]);
     SARA_DEBUG << "convert yolo layer " << layer_idx << "("
                << hnet[layer_idx]->type << ")" << std::endl;
     std::cout << yolo_layer << std::endl;
@@ -296,7 +298,7 @@ namespace DO::Sara::TensorRT {
 
     // Create the YOLO plugin.
     const auto yolo_plugin =
-        std::unique_ptr<IPluginV2, decltype(delete_plugin)>{
+        std::unique_ptr<nvinfer1::IPluginV2, decltype(delete_plugin)>{
             yolo_plugin_creator->createPlugin("", &fc), delete_plugin};
     assert(yolo_plugin.get() != nullptr);
 
@@ -316,7 +318,7 @@ namespace DO::Sara::TensorRT {
     SARA_DEBUG << "Creating the network from scratch!" << std::endl;
 
     // Define the input tensor.
-    const auto& input_layer = dynamic_cast<const Darknet::Input&>(*hnet[0]);
+    const auto& input_layer = dynamic_cast<const darknet::Input&>(*hnet[0]);
     auto input_tensor = make_input_rgb_tensor(input_layer.width(),  //
                                               input_layer.height());
 
@@ -337,7 +339,7 @@ namespace DO::Sara::TensorRT {
       else if (layer_type == "route")
       {
         const auto& route_layer =
-            dynamic_cast<const Darknet::Route&>(*hnet[layer_idx]);
+            dynamic_cast<const darknet::Route&>(*hnet[layer_idx]);
 
         if (route_layer.layers.size() == 1)
           add_slice_layer(layer_idx, fmaps);
@@ -369,7 +371,7 @@ namespace DO::Sara::TensorRT {
       const std::string& trained_model_dir) -> HostMemoryUniquePtr
   {
     // Load the CPU implementation.
-    auto hnet = Darknet::load_yolov4_tiny_model(trained_model_dir);
+    auto hnet = darknet::load_yolov4_tiny_model(trained_model_dir);
 
     // Create a TensorRT network.
     auto net_builder = make_builder();
@@ -384,4 +386,4 @@ namespace DO::Sara::TensorRT {
     return serialized_net;
   }
 
-}  // namespace DO::Sara::TensorRT
+}  // namespace DO::Shakti::TensorRT
