@@ -33,3 +33,5 @@ add_subdirectory(KalmanFilter)
 add_subdirectory(MultipleObjectTracking)
 
 add_subdirectory(Visualization)
+
+add_subdirectory(NeuralNetworks)

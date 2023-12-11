@@ -15,3 +15,5 @@ if (NvidiaVideoCodec_ROOT)
 endif ()
 
 add_subdirectory(FeatureDetectors)
+
+add_subdirectory(TensorRT)

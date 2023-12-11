@@ -13,7 +13,6 @@ add_subdirectory(ChessboardDetection)
 add_subdirectory(Calibration)
 add_subdirectory(Compute)
 add_subdirectory(MatchPropagation)
-add_subdirectory(NeuralNetworks)
 add_subdirectory(NuScenes)
 add_subdirectory(Taskflow)
 
