@@ -304,6 +304,14 @@ def build_library_docker() -> None:
         ],
         SARA_SOURCE_DIR,
     )
+    execute(
+        [
+            "docker",
+            "push",
+            f"{SARA_DOCKER_IMAGE}",
+        ],
+        SARA_SOURCE_DIR
+    )
 
 
 def build_book():

@@ -15,3 +15,5 @@ endif()
 
 add_subdirectory(OpenCL)
 add_subdirectory(Vulkan)
+
+add_subdirectory(TensorRT)

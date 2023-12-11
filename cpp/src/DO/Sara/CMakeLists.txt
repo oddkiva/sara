@@ -31,3 +31,5 @@ include(UseDOSaraMultiViewGeometry)
 include(UseDOSaraRANSAC)
 
 include(UseDOSaraVisualization)
+
+add_subdirectory(NeuralNetworks)

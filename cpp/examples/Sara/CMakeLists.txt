@@ -12,3 +12,5 @@ add_subdirectory(MultiViewGeometry)
 if (SARA_BUILD_VIDEOIO)
   add_subdirectory(VideoIO)
 endif ()
+
+add_subdirectory(NeuralNetworks)
