@@ -113,7 +113,7 @@ namespace DO::Sara {
     comment += "\n\tsquaredEll = " + to_string(squared_ell);
     comment += "\n\tK = " + to_string(K);
     comment += "\n\trho_min = " + to_string(rho_min);
-    comment + "_inlierThres_" + to_string(inlier_thres);
+    comment += "\n\tinlierThres = " + to_string(inlier_thres);
     print_stage(comment);
 
     // Get subset of matches.

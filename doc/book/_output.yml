@@ -11,7 +11,7 @@ bookdown::bs4_book:
         family: DM Mono
         local: false
   repo:
-    base: https://gitlab.com/DO-CV/sara
+    base: https://gitlab.com/oddkiva/sara
     branch: master
     subdir: "doc/book"
   css: assets/bs4_style.css

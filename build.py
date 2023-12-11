@@ -285,7 +285,7 @@ def run_project_tests(build_dir: str, build_type: str,
         command_line.append("|".join(tests_excluded))
 
     if PROJECT_TYPE == "Xcode":
-        command_line += ["--config", build_type]
+        command_line += ["-C", build_type]
 
     execute(command_line, build_dir)
 

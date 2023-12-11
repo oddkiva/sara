@@ -21,7 +21,6 @@
 struct Vertex
 {
   Eigen::Vector2f pos;
-  Eigen::Vector3f color;
   Eigen::Vector2f uv;
 
   static auto get_binding_description() -> VkVertexInputBindingDescription
@@ -38,7 +37,7 @@ struct Vertex
       -> std::vector<VkVertexInputAttributeDescription>
   {
     auto attribute_descriptions =
-        std::vector<VkVertexInputAttributeDescription>(3);
+        std::vector<VkVertexInputAttributeDescription>(2);
 
     // Position
     attribute_descriptions[0].binding = 0;
@@ -46,17 +45,11 @@ struct Vertex
     attribute_descriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
     attribute_descriptions[0].offset = offsetof(Vertex, pos);
 
-    // Color
+    // UV texture coords
     attribute_descriptions[1].binding = 0;
     attribute_descriptions[1].location = 1;
-    attribute_descriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attribute_descriptions[1].offset = offsetof(Vertex, color);
-
-    // UV texture coords
-    attribute_descriptions[2].binding = 0;
-    attribute_descriptions[2].location = 2;
-    attribute_descriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-    attribute_descriptions[2].offset = offsetof(Vertex, uv);
+    attribute_descriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+    attribute_descriptions[1].offset = offsetof(Vertex, uv);
 
     return attribute_descriptions;
   }

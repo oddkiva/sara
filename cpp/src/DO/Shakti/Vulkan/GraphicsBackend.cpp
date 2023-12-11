@@ -121,9 +121,9 @@ auto GraphicsBackend::init_swapchain(GLFWwindow* window) -> void
   _swapchain = Swapchain{_physical_device, _device, _surface, window};
 }
 
-auto GraphicsBackend::init_framebuffers() -> void
+auto GraphicsBackend::init_swapchain_fbos() -> void
 {
-  _framebuffers = FramebufferSequence{_swapchain, _render_pass};
+  _swapchain_fbos = FramebufferSequence{_swapchain, _render_pass};
 }
 
 auto GraphicsBackend::init_render_pass() -> void
