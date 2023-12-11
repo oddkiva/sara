@@ -60,13 +60,20 @@ public:
                          const std::filesystem::path& shader_dirpath,
                          const bool debug_vulkan = true)
   {
+    // Set the GLFW callbacks.
+    {
+      _window = window;
+      glfwSetWindowUserPointer(window, this);
+      glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
+    }
+
     init_instance(app_name, debug_vulkan);
     init_surface(window);
     init_physical_device();
     init_device_and_queues();
     init_swapchain(window);
     init_render_pass();
-    init_framebuffers();
+    init_swapchain_fbos();
     init_graphics_pipeline(window,  //
                            shader_dirpath / "vert.spv",
                            shader_dirpath / "frag.spv");
@@ -290,7 +297,8 @@ public:
     static constexpr auto forever = std::numeric_limits<std::uint64_t>::max();
     auto result = VkResult{};
 
-    SARA_CHECK(_current_frame);
+    if constexpr (_verbose)
+      SARA_CHECK(_current_frame);
 
     // The number of images in-flight is the number of swapchain images.
     // And there are as many fences as swapchain images.
@@ -301,11 +309,13 @@ public:
     //   get synchronization machinery to work correctly.
     // - the current frame index is 0;
 
-    // Wait for the GPU signal that the current frame becomes available.
+    // Wait for the GPU signal notifying that the current frame becomes
+    // available.
     //
     // The function call `vkQueueSubmit(...)` at the end of this `draw_frame`
     // method uses this `_in_flight_fences[_current_frame]` fence.
-    SARA_DEBUG << "[VK] Waiting for the render fence to signal...\n";
+    if constexpr (_verbose)
+      SARA_DEBUG << "[VK] Waiting for the render fence to signal...\n";
     _render_fences[_current_frame].wait(forever);
     // This function call blocks.
     //
@@ -313,7 +323,8 @@ public:
     // flow on the CPU side.
 
     // Acquire the next image ready to be rendered.
-    SARA_DEBUG << "[VK] Acquiring the next image ready to be rendered...\n";
+    if constexpr (_verbose)
+      SARA_DEBUG << "[VK] Acquiring the next image ready to be rendered...\n";
     auto index_of_next_image_to_render = std::uint32_t{};
     result = vkAcquireNextImageKHR(  //
         _device,                     //
@@ -322,41 +333,43 @@ public:
         _image_available_semaphores[_current_frame],  // semaphore to signal
         VK_NULL_HANDLE,                               // fence to signal
         &index_of_next_image_to_render);
-    // Sanity check.
-    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-      throw std::runtime_error("failed to acquire the next swapchain image!");
-#if defined(RECREATE_SWAPCHAIN_IMPLEMENTED)
-    // Recreate the swapchain if the size of the window surface has changed.
+
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
       recreate_swapchain();
       return;
     }
-#endif
-    SARA_CHECK(index_of_next_image_to_render);
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+      throw std::runtime_error("Failed to acquire the next swapchain image!");
+    if constexpr (_verbose)
+      SARA_CHECK(index_of_next_image_to_render);
 
     update_mvp_uniform(index_of_next_image_to_render);
 
     // Reset the signaled fence associated to the current frame to an
     // unsignaled state. So that the GPU can reuse it to signal.
-    SARA_DEBUG << "[VK] Resetting for the render fence...\n";
+    if constexpr (_verbose)
+      SARA_DEBUG << "[VK] Resetting for the render fence...\n";
     _render_fences[_current_frame].reset();
 
     // Reset the command buffer associated to the current frame.
-    SARA_DEBUG << "[VK] Resetting for the command buffer...\n";
+    if constexpr (_verbose)
+      SARA_DEBUG << "[VK] Resetting for the command buffer...\n";
     _graphics_cmd_bufs.reset(_current_frame,
                              /*VkCommandBufferResetFlagBits*/ 0);
 
     // Record the draw command to be performed on this swapchain image.
-    SARA_CHECK(_framebuffers.fbs.size());
+    if constexpr (_verbose)
+      SARA_CHECK(_swapchain_fbos.fbs.size());
     const auto& descriptor_set = static_cast<VkDescriptorSet&>(
         _ubo_desc_sets[index_of_next_image_to_render]);
-    record_graphics_command_buffer(_graphics_cmd_bufs[_current_frame],
-                                   _framebuffers[index_of_next_image_to_render],
-                                   descriptor_set);
+    record_graphics_command_buffer(
+        _graphics_cmd_bufs[_current_frame],
+        _swapchain_fbos[index_of_next_image_to_render], descriptor_set);
 
     // Submit the draw command to the graphics queue.
-    SARA_DEBUG << "[VK] Specifying the graphics command submission...\n";
+    if constexpr (_verbose)
+      SARA_DEBUG << "[VK] Specifying the graphics command submission...\n";
     auto submit_info = VkSubmitInfo{};
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -434,17 +447,17 @@ public:
     present_info.pImageIndices = &index_of_next_image_to_render;
 
     result = vkQueuePresentKHR(_present_queue, &present_info);
-    if (result != VK_SUCCESS)
-      throw std::runtime_error{fmt::format(
-          "failed to present the swapchain image {}!", _current_frame)};
-#if 0
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
-        framebufferResized)
+        _framebuffer_resized)
     {
-      framebuffer_resized = false;
+      _framebuffer_resized = false;
       recreate_swapchain();
     }
-#endif
+    else if (result != VK_SUCCESS)
+    {
+      throw std::runtime_error{fmt::format(
+          "failed to present the swapchain image {}!", _current_frame)};
+    }
 
     // Update the current frame to the next one for the next `draw_frame`
     // call.
@@ -471,7 +484,8 @@ public:
                                       const VkDescriptorSet& descriptor_set)
       -> void
   {
-    SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
+    if constexpr (_verbose)
+      SARA_DEBUG << "[VK] Recording graphics command buffer...\n";
     auto begin_info = VkCommandBufferBeginInfo{};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     begin_info.flags = 0;
@@ -500,7 +514,8 @@ public:
       render_pass_begin_info.pClearValues = &clear_white_color;
     }
 
-    SARA_DEBUG << "[VK] Begin render pass...\n";
+    if constexpr (_verbose)
+      SARA_DEBUG << "[VK] Begin render pass...\n";
     vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info,
                          VK_SUBPASS_CONTENTS_INLINE);
     {
@@ -545,7 +560,8 @@ public:
                        static_cast<std::uint32_t>(indices.size()), 1, 0, 0, 0);
     }
 
-    SARA_DEBUG << "[VK] End render pass...\n";
+    if constexpr (_verbose)
+      SARA_DEBUG << "[VK] End render pass...\n";
     vkCmdEndRenderPass(command_buffer);
 
     status = vkEndCommandBuffer(command_buffer);
@@ -555,8 +571,47 @@ public:
           static_cast<int>(status))};
   }
 
+private: /* Swapchain recreation */
+  static auto framebuffer_resize_callback(GLFWwindow* window,
+                                          [[maybe_unused]] const int width,
+                                          [[maybe_unused]] const int height)
+      -> void
+  {
+    auto app = reinterpret_cast<VulkanTriangleRenderer*>(
+        glfwGetWindowUserPointer(window));
+    app->_framebuffer_resized = true;
+  }
+
+  auto recreate_swapchain() -> void
+  {
+    auto w = int{};
+    auto h = int{};
+    while (w == 0 || h == 0)
+    {
+      glfwGetFramebufferSize(_window, &w, &h);
+      glfwWaitEvents();
+    }
+    vkDeviceWaitIdle(_device);
+
+    // It is not possible to create two swapchains apparently, so we have to
+    // destroy the current swapchain.
+    if constexpr (_verbose)
+      SARA_DEBUG << "DESTROYING THE CURRENT SWAPCHAIN...\n";
+    _swapchain_fbos.destroy();
+    _swapchain.destroy();
+
+    if constexpr (_verbose)
+      SARA_DEBUG << "RECREATING THE SWAPCHAIN (with the correct image "
+                    "dimensions)...\n";
+    init_swapchain(_window);
+    init_swapchain_fbos();
+  }
+
 private:
+  GLFWwindow* _window = nullptr;
   int _current_frame = 0;
+  bool _framebuffer_resized = false;
+  static constexpr bool _verbose = false;
 
   // Geometry data (quad)
   svk::Buffer _vbo;

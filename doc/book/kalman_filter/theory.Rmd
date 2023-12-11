@@ -1,0 +1,142 @@
+## Use Case: Pedestrian Tracking
+
+Let us simplify the problem first by making some assumptions.
+
+We assume that pedestrians walk on a flat surface $z = 0$. This flat surface
+will be what we call the *ground plane*.
+
+A pedestrian is either standing up still or walking. He/she is neither sitting
+on a bench, nor bending down, nor lying down on the floor and so on. We can
+therefore represent that pedestrian with a 3D cylindric bounding box
+$\mathbf{b} = (x, y, a, h)$.
+
+The cylindric box $\mathbf{b}$ is described by:
+
+- its bottom base on the ground plane and is centered at $(x, y, 0)$
+- a constant height $h$
+- a radius $r = \frac{1}{2} a h$, where $a$ is an aspect ratio quantity usually
+  in the open interval $]0, 1]$.
+
+We can estimate this cylindric box if we possess two ingredients
+
+1. an object detector like YOLO
+2. the camera calibration parameters
+
+Then we can calculate the bounding box $\mathbf{b}$ via metrologic formulas we
+derived in previous chapter (**TODO: reference this**).
+
+Such a bounding box estimate corresponds to the observation vector which is
+commonly denoted as $\mathbf{z}$:
+
+- in the course notes: https://www.robots.ox.ac.uk/~ian/Teaching/Estimation/LectureNotes2.pdf
+- in the Wikipedia article: https://en.wikipedia.org/wiki/Kalman_filter.
+
+When monitoring busy streets, we want to track every pedestrian at all times in
+order to understand their behavior.
+
+Each pedestrian has a dynamic state encoded by a vector temporally indexed by
+$k$
+
+\begin{equation}
+\mathbf{x}_k = \begin{bmatrix}
+    \mathbf{b}_k \\
+    \dot{\mathbf{b}}_k \\
+    \ddot{\mathbf{b}}_k
+  \end{bmatrix},
+\end{equation}
+
+which concatenates the bounding box, and its first-order and second-order
+temporal derivatives.
+
+In other terms, ignoring the aspect ratio and the height, the state vector
+$\mathbf{x}$ concatenates the pedestrian position, velocity and acceleration.
+
+We see that the observation vector $\mathbf{z}_k = \mathbf{b}_k$ and the
+state vector are related by the linear relation
+
+\begin{equation}
+  \mathbf{z}_k = \mathbf{H}_k \mathbf{x}_k
+\end{equation}
+
+where
+
+\begin{equation}
+  \mathbf{H}_k = \begin{bmatrix}
+    \mathbf{I}_4 & \mathbf{0}_{4 \times 8}
+  \end{bmatrix}
+\end{equation}
+
+is called the observation model in the Kalman filter
+
+## Theory
+
+The Kalman filter assumes that the uncertainty follows a Gaussian distribution
+and is based on two equations:
+
+- the state transition equation
+- the observation equation
+
+### State Transition Equation
+
+Now that we have introduced the notations, let us remind the equations used in
+the Kalman filter.
+
+The pedestrian state, i.e., the pedestrian box follows a state transition
+equation
+
+\begin{equation}
+  \mathbf{x}_{k + 1} =
+    \mathbf{F}_k \mathbf{x}_k +
+    \mathbf{B}_k \mathbf{u}_k +
+    \mathbf{w}_k
+\end{equation}
+
+$\mathbf{F}_k$ is called the *transition matrix* and the simplest one we can
+obtain is from the temporal integration as in classical Newtonian mechanics:
+
+\begin{equation}
+  \mathbf{b}_{k+1} =
+    \mathbf{b}_k +
+    \dot{\mathbf{b}}_k (t_{k+1} - t_k) +
+    \frac{1}{2} \ddot{\mathbf{b}}_k (t_{k+1} - t_k)^2
+\end{equation}
+
+And so the matrix $\mathbf{F}_k$ is
+
+\begin{equation}
+\mathbf{F}_k = \begin{bmatrix}
+  \mathbf{I}_4 & \Delta_k \mathbf{I}_4 & \frac{\Delta_k^2}{2} \mathbf{I}_4 \\
+  \mathbf{0}_4 & \mathbf{I}_4 & \Delta_k \mathbf{I}_4 \\
+  \mathbf{0}_4 & \mathbf{0}_4 & \mathbf{I}_4
+  \end{bmatrix},
+\end{equation}
+where $\Delta_k = t_{k+1} - t_k$.
+
+
+Unless we are driving a car autonomously trying to keep a minimum distance with
+every pedestrian in a busy street, we can ignore $\mathbf{B}_k$ by setting it to
+$\mathbf{0}$.
+
+The state transition equation acts as a very basic yet reasonable predictor of
+the pedestrian and makes a prediction error. This prediction error is called the
+process noise vector denoted as $\mathbf{w}_k$. The process noise follows a
+zero-mean Gaussian distribution.
+
+
+### Observation Equation
+
+The Kalman filter relies on another equation
+
+\begin{equation}
+  \mathbf{z}_k = \mathbf{H}_k \mathbf{x}_k + \mathbf{v}_k
+\end{equation}
+
+This is the observation equation we introduced above with the observation model,
+except that the new one factors in:
+
+1. errors in the measurement and
+2. all other factors like for example, the pedestrian suddenly changes its
+   walking direction because he forgot something or any other reason.
+
+The sum of all other factors that are not measurement errors is called *the
+innovation vector* $\hat{\mathbf{y}}_k$.

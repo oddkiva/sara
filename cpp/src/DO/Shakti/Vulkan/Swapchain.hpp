@@ -106,16 +106,7 @@ namespace DO::Kalpana::Vulkan {
 
     ~Swapchain()
     {
-      if (handle == nullptr)
-        return;
-
-      SARA_DEBUG << "[VK] Destroying swapchain image views...\n";
-      for (const auto image_view : image_views)
-        vkDestroyImageView(device_handle, image_view, nullptr);
-
-      SARA_DEBUG << fmt::format("[VK] Destroying swapchain: {}...\n",
-                                fmt::ptr(handle));
-      vkDestroySwapchainKHR(device_handle, handle, nullptr);
+      destroy();
     }
 
     auto operator=(const Swapchain&) -> Swapchain& = delete;
@@ -136,6 +127,23 @@ namespace DO::Kalpana::Vulkan {
       std::swap(extent, other.extent);
 
       image_views.swap(other.image_views);
+    }
+
+    auto destroy() -> void
+    {
+      if (handle == nullptr)
+        return;
+
+      SARA_DEBUG << "[VK] Destroying swapchain image views...\n";
+      for (const auto image_view : image_views)
+        vkDestroyImageView(device_handle, image_view, nullptr);
+      image_views.clear();
+
+      SARA_DEBUG << fmt::format("[VK] Destroying swapchain: {}...\n",
+                                fmt::ptr(handle));
+      vkDestroySwapchainKHR(device_handle, handle, nullptr);
+      device_handle = VK_NULL_HANDLE;
+      handle = VK_NULL_HANDLE;
     }
 
   public: /* initialization methods */
@@ -259,13 +267,15 @@ namespace DO::Kalpana::Vulkan {
     //! We want a surface with the BGRA 32bit pixel format preferably, otherwise
     //! choose the first available surface format.
     auto choose_swap_surface_format(
-        const std::vector<VkSurfaceFormatKHR>& available_formats) const
-        -> VkSurfaceFormatKHR
+        const std::vector<VkSurfaceFormatKHR>& available_formats,
+        const VkFormat preferred_pixel_format = VK_FORMAT_B8G8R8A8_SRGB,
+        const VkColorSpaceKHR preferred_color_space =
+            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) const -> VkSurfaceFormatKHR
     {
       for (const auto& available_format : available_formats)
       {
-        if (available_format.format == VK_FORMAT_B8G8R8A8_SRGB &&
-            available_format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+        if (available_format.format == preferred_pixel_format &&
+            available_format.colorSpace == preferred_color_space)
           return available_format;
       }
 

@@ -16,9 +16,6 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
 
-namespace sara = DO::Sara;
-
-
 using namespace DO::Kalpana::GL;
 
 

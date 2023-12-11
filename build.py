@@ -28,7 +28,7 @@ BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 UBUNTU_VERSION = "22.04"
 CUDA_VERSION = "12.1.0"
 TRT_VERSION = "8.6"
-SWIFT_VERSION = "5.9"
+SWIFT_VERSION = "5.9.1"
 HALIDE_VERSION = "16.0.0"
 
 # Docker
@@ -285,7 +285,7 @@ def run_project_tests(build_dir: str, build_type: str,
         command_line.append("|".join(tests_excluded))
 
     if PROJECT_TYPE == "Xcode":
-        command_line += ["--config", build_type]
+        command_line += ["-C", build_type]
 
     execute(command_line, build_dir)
 
