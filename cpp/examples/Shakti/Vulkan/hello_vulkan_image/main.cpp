@@ -631,8 +631,8 @@ private: /* Methods for onscreen rendering */
       vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                         _graphics_pipeline);
 
-#ifdef ALLOW_DYNAMIC_VIEWPORT_AND_SCISSOR_STATE
-      VkViewport viewport{};
+      // Important: reset the viewport.
+      auto viewport = VkViewport{};
       viewport.x = 0.0f;
       viewport.y = 0.0f;
       viewport.width = static_cast<float>(_swapchain.extent.width);
@@ -641,11 +641,11 @@ private: /* Methods for onscreen rendering */
       viewport.maxDepth = 1.0f;
       vkCmdSetViewport(command_buffer, 0, 1, &viewport);
 
-      VkRect2D scissor{};
+      // Important: reset the scissor.
+      auto scissor = VkRect2D{};
       scissor.offset = {0, 0};
       scissor.extent = _swapchain.extent;
       vkCmdSetScissor(command_buffer, 0, 1, &scissor);
-#endif
 
       // Pass the VBO to the graphics pipeline.
       static const auto vbos = std::array<VkBuffer, 1>{_vbo};
@@ -837,8 +837,8 @@ private: /* Methods for onscreen rendering */
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
         _framebuffer_resized)
     {
-      _framebuffer_resized = false;
       recreate_swapchain();
+      _framebuffer_resized = false;
     }
     else if (result != VK_SUCCESS)
     {
@@ -888,10 +888,15 @@ private: /* Swapchain recreation */
     init_swapchain(_window);
     init_swapchain_fbos();
 
-    // // This time only modify the view matrix.
+    // Rescale the vertices.
     // {
     //   _mvp.view.setIdentity();
-    //   _mvp.view.scale(static_cast<float>(w) / _vstream.width());
+    //   if (w < h)
+    //   {
+    //     const auto s = 2 * std::max(static_cast<float>(w) / _vstream.width(),
+    //                                 static_cast<float>(h) / _vstream.height());
+    //     _mvp.view.scale(s);
+    //   }
     // }
 
     // Recalculate the projection matrix.
