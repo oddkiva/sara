@@ -156,6 +156,19 @@ namespace DO::Kalpana::Vulkan {
       return *this;
     }
 
+    auto dynamic_states(const std::vector<VkDynamicState>& states) -> Builder&
+    {
+      _dynamic_states = states;
+      dynamic_state_info = {};
+      dynamic_state_info.sType =
+          VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+      dynamic_state_info.dynamicStateCount =
+          static_cast<std::uint32_t>(_dynamic_states.size());
+      dynamic_state_info.pDynamicStates = _dynamic_states.data();
+
+      return *this;
+    }
+
     // Viewport: which portion of the window?
     //
     // Here we want to render on the whole window.
@@ -252,6 +265,9 @@ namespace DO::Kalpana::Vulkan {
     //! @brief Color blend create info.
     std::vector<VkPipelineColorBlendAttachmentState> color_blend_attachments;
     VkPipelineColorBlendStateCreateInfo color_blend;
+
+    std::vector<VkDynamicState> _dynamic_states;
+    VkPipelineDynamicStateCreateInfo dynamic_state_info;
 
     //! @brief Not sure what it is.
     VkPipelineLayoutCreateInfo pipeline_layout_info;

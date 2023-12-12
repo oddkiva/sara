@@ -262,6 +262,11 @@ private: /* Methods to initialize objects for the graphics pipeline. */
     auto h = int{};
     glfwGetWindowSize(window, &w, &h);
 
+    const auto dynamic_viewport_states = std::vector<VkDynamicState>{
+        VK_DYNAMIC_STATE_VIEWPORT,  //
+        VK_DYNAMIC_STATE_SCISSOR    //
+    };
+
     _graphics_pipeline =
         VulkanImagePipelineBuilder{_device, _render_pass}
             .vertex_shader_path(vertex_shader_path)
@@ -270,6 +275,7 @@ private: /* Methods to initialize objects for the graphics pipeline. */
             .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
             .scissor_sizes(w, h)
+            .dynamic_states(dynamic_viewport_states)
             .create();
   }
 
@@ -894,7 +900,8 @@ private: /* Swapchain recreation */
     //   if (w < h)
     //   {
     //     const auto s = 2 * std::max(static_cast<float>(w) / _vstream.width(),
-    //                                 static_cast<float>(h) / _vstream.height());
+    //                                 static_cast<float>(h) /
+    //                                 _vstream.height());
     //     _mvp.view.scale(s);
     //   }
     // }
@@ -977,7 +984,7 @@ auto main(int argc, char** argv) -> int
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     const auto video_path = fs::path(argv[1]);
-    static constexpr auto debug = false;
+    static constexpr auto debug = true;
     auto triangle_renderer = VulkanImageRenderer{
         window,            //
         app_name,          //

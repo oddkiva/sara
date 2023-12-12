@@ -181,6 +181,9 @@ auto GraphicsPipeline::Builder::create_graphics_pipeline(
     pipeline_info.pMultisampleState = &multisampling;
     pipeline_info.pColorBlendState = &color_blend;
 
+    if (!_dynamic_states.empty())
+      pipeline_info.pDynamicState = &dynamic_state_info;
+
     pipeline_info.layout = graphics_pipeline.pipeline_layout;
     pipeline_info.renderPass = render_pass.handle;
     pipeline_info.subpass = 0;
