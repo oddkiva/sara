@@ -894,30 +894,12 @@ private: /* Swapchain recreation */
     init_swapchain(_window);
     init_swapchain_fbos();
 
-    // Rescale the vertices.
-    // {
-    //   _mvp.view.setIdentity();
-    //   if (w < h)
-    //   {
-    //     const auto s = 2 * std::max(static_cast<float>(w) / _vstream.width(),
-    //                                 static_cast<float>(h) /
-    //                                 _vstream.height());
-    //     _mvp.view.scale(s);
-    //   }
-    // }
-
     // Recalculate the projection matrix.
-    {
-      const auto fb_aspect_ratio = static_cast<float>(w) / h;
-      _mvp.projection = k::orthographic(      //
-          -fb_aspect_ratio, fb_aspect_ratio,  //
-          -1.f, 1.f,                          //
-          -1.f, 1.f);
-    }
-
-    SARA_CHECK(_mvp.model.matrix());
-    SARA_CHECK(_mvp.view.matrix());
-    SARA_CHECK(_mvp.projection);
+    const auto fb_aspect_ratio = static_cast<float>(w) / h;
+    _mvp.projection = k::orthographic(      //
+        -fb_aspect_ratio, fb_aspect_ratio,  //
+        -1.f, 1.f,                          //
+        -1.f, 1.f);
   }
 
 private:
@@ -984,7 +966,7 @@ auto main(int argc, char** argv) -> int
 
     const auto program_dir_path = fs::absolute(fs::path(argv[0])).parent_path();
     const auto video_path = fs::path(argv[1]);
-    static constexpr auto debug = true;
+    static constexpr auto debug = false;
     auto triangle_renderer = VulkanImageRenderer{
         window,            //
         app_name,          //
