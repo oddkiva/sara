@@ -184,14 +184,14 @@ auto test_on_video(int argc, char** argv) -> void
 }
 
 
-int graphics_main(int argc, char** argv)
+auto graphics_main(int argc, char** argv) -> int
 {
   test_on_video(argc, argv);
   return 0;
 }
 
 
-int main(int argc, char** argv)
+auto main(int argc, char** argv) -> int
 {
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(graphics_main);
