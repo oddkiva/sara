@@ -19,14 +19,14 @@
 #include "shakti_reduce_32f_gpu.h"
 #include "shakti_scale_32f_gpu.h"
 
+#include "oddkiva/sara/pybind11/Utilities.hpp"
+
 #include <DO/Sara/Core.hpp>
 
 #ifdef USE_SHAKTI_CUDA_LIBRARIES
 #  include <DO/Shakti/Cuda/ImageProcessing.hpp>
 #endif
 #include <DO/Shakti/Halide/MyHalide.hpp>
-
-#include "do/sara/pybind11/Utilities.hpp"
 
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
