@@ -5,16 +5,14 @@ import torch.nn.functional as F
 
 from tool.region_loss import RegionLoss
 from tool.yolo_layer import YoloLayer
-from tool.config import *
-from tool.torch_utils import *
 
 
-class Mish(torch.nn.Module):
+class Mish(nn.Module):
     def __init__(self):
         super().__init__()
 
     def forward(self, x):
-        x = x * (torch.tanh(torch.nn.functional.softplus(x)))
+        x = x * (torch.tanh(F.softplus(x)))
         return x
 
 
