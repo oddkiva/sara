@@ -91,12 +91,107 @@ class DarknetConfigParser:
         layers = layers_str.split(',')
         layers = [int(v.strip()) for v in layers]
 
-        groups = int(route_params['groups'])
-        group_id = int(route_params['group_id'])
+        groups = int(route_params.get('groups', 1))
+        group_id = int(route_params.get('group_id', -1))
 
         self._model[layer_index] = {
             'route': {
                 'layers': layers,
+                'groups': groups,
+                'group_id': group_id
+            }
+        }
+
+    def typify_maxpool_parameters(self, layer_index):
+        section = self._model[layer_index]
+
+        section_name = list(section.keys())[0]
+        if section_name != 'maxpool':
+            raise RuntimeError('Not a maxpool layer!')
+
+        maxpool_params = section[section_name]
+        print(maxpool_params)
+
+        # The following parameters must be present in the config file.
+        size = int(maxpool_params['size'])
+        stride = int(maxpool_params['stride'])
+
+        self._model[layer_index] = {
+            'maxpool': {
+                'size': size,
+                'stride': stride,
+            }
+        }
+
+    def typify_upsample_parameters(self, layer_index):
+        section = self._model[layer_index]
+
+        section_name = list(section.keys())[0]
+        if section_name != 'upsample':
+            raise RuntimeError('Not an upsample layer!')
+
+        upsample_params = section[section_name]
+        print(upsample_params)
+
+        # The following parameters must be present in the config file.
+        stride = int(upsample_params['stride'])
+
+        self._model[layer_index] = {
+            'upsample': {
+                'stride': stride,
+            }
+        }
+
+    def typify_yolo_parameters(self, layer_index):
+        section = self._model[layer_index]
+
+        section_name = list(section.keys())[0]
+        if section_name != 'yolo':
+            raise RuntimeError('Not a YOLO layer!')
+
+        yolo_params = section[section_name]
+        print(yolo_params)
+
+        mask = [int(v.strip()) for v in yolo_params['mask'].split(',')]
+
+        anchors = [int(v.strip()) for v in yolo_params['anchors'].split(',')]
+        anchors_x = anchors[0::2]
+        anchors_y = anchors[1::2]
+        anchors = [(x, y) for (x, y) in zip(anchors_x, anchors_y)]
+
+        classes = int(yolo_params['classes'])
+
+        num = int(yolo_params['num'])
+        jitter = float(yolo_params['jitter'])
+        scale_x_y = float(yolo_params['scale_x_y'])
+        cls_normalizer = float(yolo_params['cls_normalizer'])
+        iou_normalizer = float(yolo_params['iou_normalizer'])
+        iou_loss = yolo_params['iou_loss']
+        ignore_thresh = yolo_params['ignore_thresh']
+        truth_thresh = yolo_params['truth_thresh']
+        random = yolo_params['random']
+        resize = float(yolo_params['resize'])
+        nms_kind = yolo_params['nms_kind']
+        beta_nms = float(yolo_params['beta_nms'])
+
+        # The following parameters must be present in the config file.
+        self._model[layer_index] = {
+            'upsample': {
+                'mask': mask,
+                'anchors': anchors,
+                'classes': classes,
+                'num': num,
+                'jitter': jitter,
+                'scale_x_y': scale_x_y,
+                'cls_normalizer': cls_normalizer,
+                'iou_normalizer': iou_normalizer,
+                'iou_loss': iou_loss,
+                'ignore_thresh': ignore_thresh,
+                'truth_thresh': truth_thresh,
+                'random': random,
+                'resize': resize,
+                'nms_kind': nms_kind,
+                'beta_nms': beta_nms,
             }
         }
 
@@ -108,3 +203,11 @@ class DarknetConfigParser:
             layer_name = list(self._model[layer_index].keys())[0]
             if layer_name == 'convolutional':
                 self.typify_convolutional_parameters(layer_index)
+            elif layer_name == 'route':
+                self.typify_route_parameters(layer_index)
+            elif layer_name == 'maxpool':
+                self.typify_maxpool_parameters(layer_index)
+            elif layer_name == 'upsample':
+                self.typify_upsample_parameters(layer_index)
+            elif layer_name == 'yolo':
+                self.typify_yolo_parameters(layer_index)

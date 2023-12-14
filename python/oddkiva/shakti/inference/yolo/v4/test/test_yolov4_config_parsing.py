@@ -23,4 +23,6 @@ def test_yolo_v4_tiny_conversion():
     parser.read(YOLO_V4_TINY_CFG_PATH)
 
     print(f'\nmetadata =\n{parser._metadata}')
-    print(f'\nmodel =\n{parser._model}')
+    print(f'\nmodel')
+    for layer in parser._model:
+        print(layer)
