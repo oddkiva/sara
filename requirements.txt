@@ -1,9 +1,11 @@
-coverage==4.5.4
+pybind11
+pytest
+coverage
+
+ipython
 ipdb
 ipdbplugin
-nose
+
 numpy
-PySide2
 scipy
-ipython
-pybind11
+PySide2

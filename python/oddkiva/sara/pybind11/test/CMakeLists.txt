@@ -5,9 +5,9 @@ add_custom_target(pytest
   COMMAND ${CMAKE_COMMAND}
       -E env PYTHONPATH=$<TARGET_FILE_DIR:pysara_pybind11>
       coverage run -m pytest -s
-  COMMAND ${CMAKE_COMMAND}
-      -E env PYTHONPATH=$<TARGET_FILE_DIR:pysara_pybind11>
-      coverage report
+  # COMMAND ${CMAKE_COMMAND}
+  #     -E env PYTHONPATH=$<TARGET_FILE_DIR:pysara_pybind11>
+  #     coverage report
   WORKING_DIRECTORY ${DO_Sara_DIR}/python
   COMMENT "Running Python tests.")
 set_target_properties(pytest PROPERTIES FOLDER "Python")

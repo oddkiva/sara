@@ -7,7 +7,8 @@ from oddkiva.shakti.inference.yolo.darknet_config_parser import (
 )
 
 
-SARA_SOURCE_DIR_PATH = Path('/Users/oddkiva/GitLab/oddkiva/sara')
+THIS_FILE = str(__file__)
+SARA_SOURCE_DIR_PATH = Path(THIS_FILE[:THIS_FILE.find('sara') + len('sara')])
 SARA_DATA_DIR_PATH = SARA_SOURCE_DIR_PATH / 'data'
 YOLO_V4_TINY_DIR_PATH = SARA_DATA_DIR_PATH / 'trained_models'
 
