@@ -1,12 +1,16 @@
 from pathlib import Path
+from typing import Any, Optional, TypeAlias
 
 
-class DarknetConfigParser:
+KeyValueStore: TypeAlias = dict[str, Any]
+
+
+class DarknetConfig:
 
     def __init__(self):
-        self._lines = None
-        self._metadata = None
-        self._model = None
+        self._lines: Optional[list[str]] = None
+        self._metadata: Optional[KeyValueStore] = None
+        self._model: Optional[list[KeyValueStore]] = None
 
     def _is_comment(self, line: str):
         return line[0] == '#'
@@ -31,6 +35,9 @@ class DarknetConfigParser:
             ]
 
     def parse_lines(self):
+        if self._lines is None:
+            raise ValueError('lines is None')
+
         sections = []
 
         section_name = None
@@ -49,6 +56,9 @@ class DarknetConfigParser:
         self._model = sections[1:]
 
     def typify_convolutional_parameters(self, layer_index):
+        if self._model is None:
+            raise ValueError('Model is None!')
+
         section = self._model[layer_index]
 
         section_name = list(section.keys())[0]
@@ -62,8 +72,8 @@ class DarknetConfigParser:
         filters = int(conv_params['filters'])
         size = int(conv_params['size'])
         stride = int(conv_params['stride'])
-        pad = bool(conv_params['pad'])
-        activation = bool(conv_params['activation'])
+        pad = int(conv_params['pad'])
+        activation = conv_params['activation']
         # The following parameter has default values.
         batch_normalize = int(conv_params.get('batch_normalize', '0'))
 
@@ -73,10 +83,14 @@ class DarknetConfigParser:
                 'filters': filters,
                 'size': size,
                 'pad': pad,
+                'activation': activation,
             }
         }
 
     def typify_route_parameters(self, layer_index):
+        if self._model is None:
+            raise ValueError('Model is None!')
+
         section = self._model[layer_index]
 
         section_name = list(section.keys())[0]
@@ -103,6 +117,9 @@ class DarknetConfigParser:
         }
 
     def typify_maxpool_parameters(self, layer_index):
+        if self._model is None:
+            raise ValueError('Model is None!')
+
         section = self._model[layer_index]
 
         section_name = list(section.keys())[0]
@@ -124,6 +141,9 @@ class DarknetConfigParser:
         }
 
     def typify_upsample_parameters(self, layer_index):
+        if self._model is None:
+            raise ValueError('Model is None!')
+
         section = self._model[layer_index]
 
         section_name = list(section.keys())[0]
@@ -143,6 +163,9 @@ class DarknetConfigParser:
         }
 
     def typify_yolo_parameters(self, layer_index):
+        if self._model is None:
+            raise ValueError('Model is None!')
+
         section = self._model[layer_index]
 
         section_name = list(section.keys())[0]
@@ -198,6 +221,9 @@ class DarknetConfigParser:
     def read(self, path: Path):
         self.read_lines(path)
         self.parse_lines()
+
+        if self._model is None:
+            raise ValueError('Model is None!')
 
         for layer_index in range(len(self._model)):
             layer_name = list(self._model[layer_index].keys())[0]

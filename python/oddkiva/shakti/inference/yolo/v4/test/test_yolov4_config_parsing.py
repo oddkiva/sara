@@ -2,8 +2,8 @@ from pathlib import Path
 
 from configparser import ConfigParser
 
-from oddkiva.shakti.inference.yolo.darknet_config_parser import (
-    DarknetConfigParser
+from oddkiva.shakti.inference.yolo.darknet_config import (
+    DarknetConfig
 )
 
 
@@ -19,7 +19,7 @@ assert YOLO_V4_TINY_CFG_PATH.exists()
 
 
 def test_yolo_v4_tiny_conversion():
-    parser = DarknetConfigParser()
+    parser = DarknetConfig()
     parser.read(YOLO_V4_TINY_CFG_PATH)
 
     print(f'\nmetadata =\n{parser._metadata}')
