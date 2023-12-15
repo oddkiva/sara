@@ -36,7 +36,7 @@ for i, label in enumerate(class_labels):
 classifier_config = ct.ClassifierConfig(class_labels)
 
 image = Image.open(
-    "/Users/oddkiva/GitLab/DO-CV/sara/data/dog.jpg")
+    "/Users/oddkiva/GitLab/oddkiva/sara/data/dog.jpg")
 image = image.resize((224, 224), Image.LANCZOS)
 to_tensor = transforms.ToTensor()
 input_tensor = to_tensor(image)

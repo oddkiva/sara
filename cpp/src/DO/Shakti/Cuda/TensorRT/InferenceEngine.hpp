@@ -17,6 +17,7 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
+#include <DO/Shakti/Cuda/MultiArray/ManagedMemoryAllocator.hpp>
 #include <DO/Shakti/Cuda/MultiArray/PinnedMemoryAllocator.hpp>
 #include <DO/Shakti/Cuda/TensorRT/Helpers.hpp>
 
@@ -27,7 +28,10 @@ namespace DO::Shakti::TensorRT {
   {
   public:
     template <typename T, int N>
-    using PinnedTensor = Sara::Tensor_<T, N, Shakti::PinnedMemoryAllocator>;
+    using PinnedTensor = Sara::Tensor_<T, N, PinnedMemoryAllocator>;
+
+    template <typename T, int N>
+    using ManagedTensor = Sara::Tensor_<T, N, ManagedMemoryAllocator>;
 
     InferenceEngine() = default;
 
@@ -38,6 +42,8 @@ namespace DO::Shakti::TensorRT {
 
     explicit InferenceEngine(const HostMemoryUniquePtr& serialized_network);
 
+    auto load_from_plan_file(const std::string& plan_filepath) -> void;
+
     auto operator()(const PinnedTensor<float, 3>& in,
                     PinnedTensor<float, 3>& out,  //
                     const bool synchronize = true) const -> void;
@@ -46,7 +52,9 @@ namespace DO::Shakti::TensorRT {
                     std::vector<PinnedTensor<float, 3>>& out,  //
                     const bool synchronize = true) const -> void;
 
-    auto load_from_plan_file(const std::string& plan_filepath) -> void;
+    auto operator()(const ManagedTensor<float, 3>& in,
+                    std::vector<PinnedTensor<float, 3>>& out,  //
+                    const bool synchronize = true) const -> void;
 
   private:
     CudaStreamUniquePtr _cuda_stream = make_cuda_stream();

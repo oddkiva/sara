@@ -74,6 +74,29 @@ namespace DO::Shakti::TensorRT {
       cudaStreamSynchronize(*_cuda_stream);
   }
 
+  auto InferenceEngine::operator()(  //
+      const ManagedTensor<float, 3>& in,
+      std::vector<PinnedTensor<float, 3>>& out,  //
+      const bool synchronize) const -> void
+  {
+    auto device_tensors = std::vector{
+        const_cast<void*>(reinterpret_cast<const void*>(in.data())),  //
+    };
+    for (auto& o : out)
+      device_tensors.push_back(reinterpret_cast<void*>(o.data()));
+
+    // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
+    if (!_context->enqueueV2(device_tensors.data(), *_cuda_stream, nullptr))
+    {
+      SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
+                 << std::endl;
+    }
+
+    // Wait for the completion of GPU operations.
+    if (synchronize)
+      cudaStreamSynchronize(*_cuda_stream);
+  }
+
   auto InferenceEngine::load_from_plan_file(const std::string& plan_filepath)
       -> void
   {
