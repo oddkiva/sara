@@ -19,6 +19,7 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
+#include <DO/Shakti/Cuda/MultiArray/ManagedMemoryAllocator.hpp>
 #include <DO/Shakti/Cuda/MultiArray/PinnedMemoryAllocator.hpp>
 #include <DO/Shakti/Cuda/TensorRT/Helpers.hpp>
 
@@ -29,7 +30,10 @@ namespace DO::Shakti::TensorRT {
   {
   public:
     template <typename T, int N>
-    using PinnedTensor = Sara::Tensor_<T, N, Shakti::PinnedMemoryAllocator>;
+    using PinnedTensor = Sara::Tensor_<T, N, PinnedMemoryAllocator>;
+
+    template <typename T, int N>
+    using ManagedTensor = Sara::Tensor_<T, N, ManagedMemoryAllocator>;
 
     InferenceExecutor() = default;
 
@@ -43,6 +47,10 @@ namespace DO::Shakti::TensorRT {
                     std::array<PinnedTensor<float, 3>, 2>& out,  //
                     const bool synchronize = true) const -> void;
 
+    auto operator()(const ManagedTensor<float, 3>& in,
+                    std::array<PinnedTensor<float, 3>, 2>& out,  //
+                    const bool synchronize = true) const -> void;
+
     // private:
     CudaStreamUniquePtr _cuda_stream = make_cuda_stream();
     RuntimeUniquePtr _runtime = {nullptr, &runtime_deleter};
@@ -50,4 +58,4 @@ namespace DO::Shakti::TensorRT {
     ContextUniquePtr _context = {nullptr, &context_deleter};
   };
 
-}  // namespace DO::Sara::TensorRT
+}  // namespace DO::Shakti::TensorRT

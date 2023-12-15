@@ -20,23 +20,29 @@
 #include <DO/Sara/NeuralNetworks/Darknet/YoloUtilities.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <algorithm>
 #include <filesystem>
 
 
 namespace sara = DO::Sara;
-namespace shakti = DO::Shakti;
 namespace fs = std::filesystem;
 namespace trt = DO::Shakti::TensorRT;
 namespace d = sara::Darknet;
 
+using CudaManagedTensor3ub =
+    trt::InferenceExecutor::ManagedTensor<std::uint8_t, 3>;
+using CudaManagedTensor3f = trt::InferenceExecutor::ManagedTensor<float, 3>;
 
-__global__ auto naive_downsample(float* out, const float* in, const int wout,
-                                 const int hout, const int win, const int hin)
+
+__global__ auto naive_downsample_and_transpose(float* out_chw,
+                                               const std::uint8_t* in_hwc,
+                                               const int wout, const int hout,
+                                               const int win, const int hin)
     -> void
 {
-  const int xout = blockIdx.x * blockDim.x + threadIdx.x;
+  const int c = blockIdx.x * blockDim.x + threadIdx.x;
   const int yout = blockIdx.y * blockDim.y + threadIdx.y;
-  const int c = blockIdx.z * blockDim.z + threadIdx.z;
+  const int xout = blockIdx.z * blockDim.z + threadIdx.z;
 
   if (xout >= wout || yout >= hout || c >= 3)
     return;
@@ -52,41 +58,25 @@ __global__ auto naive_downsample(float* out, const float* in, const int wout,
   if (yin >= hin)
     yin = hin - 1;
 
-  const int gi_out = c * wout * hout + yout * wout + xout;
-  const int gi_in = c * win * hin + yin * win + xin;
-  out[gi_out] = in[gi_in];
+  const int gi_out = c * hout * wout + yout * wout + xout;
+  const int gi_in = yin * win * 3 + xin * 3 + c;
+
+  static constexpr auto normalize_factor = 1 / 255.f;
+  out_chw[gi_out] = static_cast<float>(in_hwc[gi_in]) * normalize_factor;
 }
 
 
 // The API.
 auto detect_objects(
-    const sara::ImageView<sara::Rgb32f>& image,
     const trt::InferenceExecutor& inference_engine,
-    trt::InferenceExecutor::PinnedTensor<float, 3>& cuda_in_tensor,
+    const trt::InferenceExecutor::PinnedTensor<float, 3>& cuda_in_tensor,
     std::array<trt::InferenceExecutor::PinnedTensor<float, 3>, 2>&
         cuda_out_tensors,
     const float iou_thres,  //
     const std::array<std::vector<int>, 2>& anchor_masks,
-    const std::vector<int>& anchors) -> std::vector<d::YoloBox>
+    const std::vector<int>& anchors, const Eigen::Vector2i& image_sizes)
+    -> std::vector<d::YoloBox>
 {
-  // This is the bottleneck.
-  sara::tic();
-  const auto image_resized = sara::resize(image, {416, 416});
-  sara::toc("Image resize");
-
-  sara::tic();
-  const auto image_tensor =
-      sara::tensor_view(image_resized)
-          .reshape(Eigen::Vector4i{1, image_resized.height(),
-                                   image_resized.width(), 3})
-          .transpose({0, 3, 1, 2});
-  sara::toc("Tensor transpose");
-
-  // Copy to the CUDA tensor.
-  sara::tic();
-  std::copy(image_tensor.begin(), image_tensor.end(), cuda_in_tensor.begin());
-  sara::toc("Copy to CUDA tensor");
-
   // Feed the input and outputs to the YOLO v4 tiny network.
   sara::tic();
   inference_engine(cuda_in_tensor, cuda_out_tensors, true);
@@ -95,14 +85,15 @@ auto detect_objects(
   // Accumulate all the detection from each YOLO layer.
   sara::tic();
   auto detections = std::vector<d::YoloBox>{};
+  const auto wr = cuda_in_tensor.sizes()(2);
+  const auto hr = cuda_in_tensor.sizes()(1);
   for (auto i = 0; i < 2; ++i)
   {
     const auto& yolo_out = cuda_out_tensors[i];
     const auto& anchor_mask = anchor_masks[i];
-    const auto dets =
-        d::get_yolo_boxes(yolo_out,              //
-                          anchors, anchor_mask,  //
-                          image_resized.sizes(), image.sizes(), 0.25f);
+    const auto dets = d::get_yolo_boxes(yolo_out,              //
+                                        anchors, anchor_mask,  //
+                                        {wr, hr}, image_sizes, 0.25f);
     detections.insert(detections.end(), dets.begin(), dets.end());
   }
   sara::toc("Postprocess boxes");
@@ -148,15 +139,11 @@ auto test_on_video(int argc, char** argv) -> void
   // Load the network and get the CUDA inference engine ready.
   auto inference_executor = trt::InferenceExecutor{serialized_net};
 
-  using shakti::ManagedMemoryAllocator;
-  using CudaManagedTensor_ = sara::Tensor_<float, 3, ManagedMemoryAllocator>;
-  auto tensor_rgb32f = CudaManagedTensor_{frame.height(), frame.width(), 3};
-  auto frame32f = sara::ImageView<sara::Rgb32f>{
-      reinterpret_cast<sara::Rgb32f *>(tensor_rgb32f.data()), frame.sizes()};
+  auto tensor_hwc_8u = CudaManagedTensor3ub{frame.height(), frame.width(), 3};
+  auto tensor_hwc_32f = CudaManagedTensor3f{frame.height(), frame.width(), 3};
+  auto tensor_chw_resized_32f = CudaManagedTensor3f{{3, 416, 416}};
 
-  // The CUDA tensors.
-  auto cuda_in_tensor =
-      trt::InferenceExecutor::PinnedTensor<float, 3>{3, 416, 416};
+  auto& cuda_in_tensor = tensor_chw_resized_32f;
   auto cuda_out_tensors = std::array{
       trt::InferenceExecutor::PinnedTensor<float, 3>{255, 13, 13},
       trt::InferenceExecutor::PinnedTensor<float, 3>{255, 26, 26}  //
@@ -192,15 +179,46 @@ auto test_on_video(int argc, char** argv) -> void
       continue;
 
     sara::tic();
-    sara::convert(frame, frame32f);
-    sara::toc("Color conversion");
+    std::copy_n(reinterpret_cast<const std::uint8_t*>(frame.data()),
+                sizeof(sara::Rgb8) * frame.size(),  //
+                tensor_hwc_8u.begin());
+    sara::toc("Copy frame data from host to CUDA");
 
     sara::tic();
-    auto dets = detect_objects(            //
-        frame32f,                          //
-        inference_executor,                //
-        cuda_in_tensor, cuda_out_tensors,  //
-        iou_thres, yolo_masks, yolo_anchors);
+    {
+      // Data order: H W C
+      //             0 1 2
+      const auto in_hwc = tensor_hwc_8u.data();
+      const auto win = tensor_hwc_8u.sizes()(1);
+      const auto hin = tensor_hwc_8u.sizes()(0);
+
+      // Data order: C H W
+      //             0 1 2
+      auto out_chw = tensor_chw_resized_32f.data();
+      const auto hout = tensor_chw_resized_32f.sizes()(1);
+      const auto wout = tensor_chw_resized_32f.sizes()(2);
+
+      const auto threads_per_block = dim3(4, 16, 16);
+      const auto num_blocks = dim3(  //
+          1,                         //
+          (hout + threads_per_block.y - 1) / threads_per_block.y,
+          (wout + threads_per_block.z - 1) / threads_per_block.z  //
+      );
+
+      naive_downsample_and_transpose<<<num_blocks, threads_per_block>>>(
+          out_chw, in_hwc,  //
+          wout, hout,       //
+          win, hin          //
+      );
+    }
+    sara::toc("CUDA downsample+transpose");
+
+    sara::tic();
+    auto dets = detect_objects(               //
+        inference_executor,                   //
+        cuda_in_tensor, cuda_out_tensors,     //
+        iou_thres, yolo_masks, yolo_anchors,  //
+        frame.sizes());
     sara::toc("Object detection");
 
     sara::tic();
