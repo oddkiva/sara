@@ -33,7 +33,7 @@ namespace DO::Shakti::Cuda {
       // List the scales in the discrete octave.
       scales = std::vector<T>(scale_count + 3);
       for (auto i = 0; i < scale_count + 3; ++i)
-        scales[i] = scale_initial * std::pow(scale_factor, i);
+        scales[i] = scale_initial * std::pow(scale_factor, static_cast<T>(i));
       SARA_DEBUG << "scales =\n"
                  << Eigen::Map<const Eigen::RowVectorXf>(scales.data(),
                                                          scales.size())

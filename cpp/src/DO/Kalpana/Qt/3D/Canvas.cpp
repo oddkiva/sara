@@ -8,6 +8,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#ifdef __APPLE__
+# define GL_SILENCE_DEPRECATION
+#endif
+
 #include <iostream>
 #include <stdexcept>
 

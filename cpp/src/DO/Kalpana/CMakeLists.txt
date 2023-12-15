@@ -1,5 +1,6 @@
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  return ()
+endif ()
 
 add_subdirectory(EasyGL)
 add_subdirectory(Qt)

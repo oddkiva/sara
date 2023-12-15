@@ -91,6 +91,7 @@ macro (sara_populate_available_components)
 
     # Multiple view geometry.
     sara_append_components(DO_Sara_COMPONENTS MultiViewGeometry)
+    sara_append_components(DO_Sara_COMPONENTS RANSAC)
     sara_append_components(DO_Sara_COMPONENTS SfM)
 
     # Disjoint sets.
@@ -282,17 +283,11 @@ macro (sara_append_library _library_name
       "[Sara] No linking needed for header-only project "
       "'DO_Sara_${_library_name}'")
     add_library(DO_Sara_${_library_name} INTERFACE)
+    add_library(DO::Sara::${_library_name} ALIAS DO_Sara_${_library_name})
     target_sources(DO_Sara_${_library_name}
       INTERFACE
-      ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
+      ${DO_Sara_SOURCE_DIR}/UseDOSara${_library_name}.cmake
       ${_hdr_files} ${_src_files})
-
-    if(MSVC)
-      add_custom_target(DO_Sara_${_library_name}
-        SOURCES
-        ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
-        ${_hdr_files})
-    endif()
 
     target_include_directories(DO_Sara_${_library_name}
       INTERFACE
@@ -301,16 +296,16 @@ macro (sara_append_library _library_name
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
   endif ()
 
-  # Drop older compiler support in favor of C++17.
+  # We have to force C++20 on MSVC for some reason...
   set_target_properties(DO_Sara_${_library_name}
     PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     CXX_STANDARD_REQUIRED YES
     FOLDER "Libraries/Sara")
 
-  # Propagate C++17 to any project linking against the library.
+  # Propagate C++20 to any project using the library.
   target_compile_features(DO_Sara_${_library_name}
-    INTERFACE cxx_std_17)
+    INTERFACE cxx_std_20)
 
   # Figure out the rest later.
   # 6. Specify where to install the library.

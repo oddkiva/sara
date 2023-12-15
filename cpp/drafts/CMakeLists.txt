@@ -1,28 +1,20 @@
-include_directories(${cpp_INCLUDE_DIR})
+if(NOT SARA_BUILD_DRAFTS)
+  return()
+endif()
 
-if (SARA_BUILD_TESTS)
+include_directories(${CMAKE_SOURCE_DIR}/cpp)
+
+if(SARA_BUILD_TESTS)
   include_directories(${Boost_INCLUDE_DIR})
   add_definitions(-DBOOST_ALL_NO_LIB)
-endif ()
+endif()
 
 add_subdirectory(ChessboardDetection)
 add_subdirectory(Calibration)
-
-if (NOT WIN32)
-  add_subdirectory(Compute)
-endif ()
-
-add_subdirectory(OpenCL)
-
+add_subdirectory(Compute)
 add_subdirectory(MatchPropagation)
-add_subdirectory(NeuralNetworks)
-
-if (NOT WIN32)
-  add_subdirectory(Vulkan)
-endif ()
-
 add_subdirectory(NuScenes)
-
 add_subdirectory(Taskflow)
 
-add_subdirectory(Emscripten)
+# Disable for now because the ONNX runtime library was compiled with CUDA 11 and
+# we use CUDA 12. add_subdirectory(OnnxRuntime)

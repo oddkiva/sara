@@ -61,7 +61,7 @@ namespace DO::Sara {
         GrowMultipleRegions grow_regions{M, growthParams};
         const auto R = grow_regions(N, nullptr, &drawer);
 
-        num_regions.push_back(R.size());
+        num_regions.push_back(static_cast<int>(R.size()));
       }
       close_window_for_image_pair();
 

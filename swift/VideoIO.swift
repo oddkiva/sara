@@ -1,34 +1,30 @@
+import CxxStdlib
 import SaraGraphics
 
-
 public class VideoStream {
-    private var _stream: UnsafeMutableRawPointer
+  private var impl: VideoStreamImpl
 
-    var frame: ImageView<UInt8>
+  var frame: ImageView<UInt8>
 
-    init(filePath: String) {
-        self._stream = VideoStream_init(filePath.cString(using: .utf8))
-        self.frame = ImageView<UInt8>()
+  init(filePath: String) {
+    self.impl = VideoStreamImpl(std.string(filePath))
+    self.frame = ImageView<UInt8>()
 
-        let framePtr = VideoStream_getFramePtr(self._stream)
-        let frameWidth = VideoStream_getFrameWidth(self._stream)
-        let frameHeight = VideoStream_getFrameHeight(self._stream)
-        let frameByteSize = Int(frameWidth) * Int(frameHeight) * 3
+    let w = Int(impl.frameWidth())
+    let h = Int(impl.frameHeight())
+    let framePtr = impl.framePointer()
+    let frameByteSize = w * h * 3 /* RGB */
 
-        self.frame.dataPtr = UnsafeMutableBufferPointer<UInt8>(
-            start: framePtr,
-            count: frameByteSize
-        )
-        self.frame.width = Int(frameWidth)
-        self.frame.height = Int(frameHeight)
-        self.frame.numChannels = 3
-    }
+    self.frame.dataPtr = UnsafeMutableBufferPointer<UInt8>(
+      start: framePtr,
+      count: frameByteSize
+    )
+    self.frame.width = w
+    self.frame.height = h
+    self.frame.numChannels = 3
+  }
 
-    func read() -> Bool {
-        return Bool(VideoStream_readFrame(self._stream) == 1)
-    }
-
-    deinit {
-        VideoStream_deinit(self._stream)
-    }
+  func read() -> Bool {
+    return impl.read()
+  }
 }

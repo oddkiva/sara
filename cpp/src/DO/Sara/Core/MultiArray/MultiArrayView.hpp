@@ -340,8 +340,7 @@ namespace DO { namespace Sara {
     inline const_flat_array_view_type flat_array() const
     {
       return const_flat_array_view_type{
-          reinterpret_cast<typename ElementTraits<T>::const_pointer>(
-              data()),
+          reinterpret_cast<typename ElementTraits<T>::const_pointer>(data()),
           static_cast<Eigen::Index>(size())};
     }
     //! @}

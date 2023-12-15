@@ -26,6 +26,12 @@ add_subdirectory(FeatureDescriptors)
 
 add_subdirectory(Match)
 add_subdirectory(FeatureMatching)
+add_subdirectory(RANSAC)
 add_subdirectory(MultiViewGeometry)
 
+add_subdirectory(KalmanFilter)
+add_subdirectory(MultipleObjectTracking)
+
 add_subdirectory(Visualization)
+
+add_subdirectory(NeuralNetworks)

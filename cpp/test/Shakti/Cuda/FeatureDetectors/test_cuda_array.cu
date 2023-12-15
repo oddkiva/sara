@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(test_fill_on_3d_layered_surface)
 
   auto gt = sara::Image<float, 3>{w, h, d};
   for (auto i = 0u; i < gt.size(); ++i)
-    gt.data()[i] = i;
+    gt.data()[i] = static_cast<float>(i);
 
   for (auto s = 0; s < result.depth(); ++s)
     SARA_DEBUG << s << "\n"
@@ -209,22 +209,23 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   // Set up the list of scales in the discrete octave.
   auto scales = std::vector<float>(scale_count + 3);
   for (auto i = 0; i < scale_count + 3; ++i)
-    scales[i] = scale_initial * std::pow(scale_factor, i);
+    scales[i] = scale_initial * std::pow(scale_factor, static_cast<float>(i));
 
   // Calculate the Gaussian smoothing values.
   auto sigmas = std::vector<float>(scale_count + 3);
   for (auto i = 0u; i < sigmas.size(); ++i)
-    sigmas[i] = std::sqrt(std::pow(scales[i], 2) - std::pow(scale_camera, 2));
+    sigmas[i] = std::sqrt(sara::square(scales[i]) - sara::square(scale_camera));
 
-  auto sigmaDeltas = std::vector<float>(scale_count + 3);
+  auto sigma_deltas = std::vector<float>(scale_count + 3);
   for (auto i = 0u; i < sigmas.size(); ++i)
-    sigmaDeltas[i] =
-        i == 0 ? std::sqrt(std::pow(scales[0], 2) - std::pow(scale_camera, 2))
-               : std::sqrt(std::pow(scales[i], 2) - std::pow(scales[i - 1], 2));
+    sigma_deltas[i] =
+        i == 0
+            ? std::sqrt(sara::square(scales[0]) - sara::square(scale_camera))
+            : std::sqrt(sara::square(scales[i]) - sara::square(scales[i - 1]));
   SARA_CHECK(
       Eigen::Map<const Eigen::RowVectorXf>(sigmas.data(), sigmas.size()));
-  SARA_CHECK(Eigen::Map<const Eigen::RowVectorXf>(sigmaDeltas.data(),
-                                                  sigmaDeltas.size()));
+  SARA_CHECK(Eigen::Map<const Eigen::RowVectorXf>(sigma_deltas.data(),
+                                                  sigma_deltas.size()));
 
   // Calculater the kernel dimensions.
   auto kernel_sizes = std::vector<int>{};
@@ -255,7 +256,7 @@ BOOST_AUTO_TEST_CASE(test_convolve)
 
     for (auto k = 0; k < ksize; ++k)
       kernels(n, k + kernel_radius - kradius) =
-          exp(-std::pow(k - kradius, 2) / two_sigma_squared);
+          exp(-sara::square(k - kradius) / two_sigma_squared);
 
     const auto kernel_sum =
         std::accumulate(&kernels(n, kernel_radius - kradius),
@@ -324,8 +325,8 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   SARA_CHECK(kernel_radius_point_copied);
 #endif
 
-  const auto w = 5;// 4 * 1920;
-  const auto h = 5;// 4 * 1080;
+  const auto w = 5;  // 4 * 1920;
+  const auto h = 5;  // 4 * 1080;
 
   // Initialize the octave.
   auto dirac = sara::Image<float, 3>{w, h, scale_count + 3};

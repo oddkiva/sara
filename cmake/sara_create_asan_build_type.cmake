@@ -15,7 +15,7 @@ else()
   endif()
 endif()
 
-if (WIN32)
+if (MSVC)
   set(CMAKE_C_FLAGS_ASAN
       "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address"
       CACHE STRING
@@ -41,6 +41,9 @@ else ()
             FORCE)
 endif ()
 
+if (MSVC)
+  return()
+endif ()
 set(CMAKE_EXE_LINKER_FLAGS_ASAN
     "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=address"
     CACHE STRING

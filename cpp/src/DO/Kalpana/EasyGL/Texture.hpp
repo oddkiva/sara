@@ -105,7 +105,7 @@ namespace DO::Kalpana::GL {
 
     template <typename T>
     inline auto initialize_data(const Eigen::Vector2i& sizes,
-                                int mipmap_level = 0) -> void
+                                const int mipmap_level = 0) -> void
     {
       glTexImage2D(GL_TEXTURE_2D, mipmap_level, GL::PixelTraits<T>::PixelFormat,
                    sizes.x(), sizes.y(),
@@ -115,7 +115,7 @@ namespace DO::Kalpana::GL {
 
     template <typename T>
     inline void initialize_data(const Sara::ImageView<T>& image,
-                                int mipmap_level = 0)
+                                const int mipmap_level = 0)
     {
       glTexImage2D(GL_TEXTURE_2D, mipmap_level, GL::PixelTraits<T>::PixelFormat,
                    image.width(), image.height(),
@@ -127,7 +127,7 @@ namespace DO::Kalpana::GL {
 
     template <typename T>
     inline void setup_with_pretty_defaults(const Sara::ImageView<T>& image,
-                                           int mipmap_level = 0)
+                                           const int mipmap_level = 0)
     {
       generate();
       bind();

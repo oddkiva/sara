@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Now this is not necessary on recent Ubuntu distributions, just type:
+# $ sudo apt install libclblast-dev
 set -ex
 
 GITHUB_MASTER_REPOSITORY_PATH=${HOME}/GitHub

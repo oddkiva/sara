@@ -21,13 +21,13 @@ target_link_libraries(
           shakti_reduce_32f_gpu
           shakti_scale_32f_cpu
           shakti_scale_32f_gpu)
-if(CMAKE_CUDA_COMPILER)
-  target_compile_definitions(pyshakti_pybind11
-                             PRIVATE USE_SHAKTI_CUDA_LIBRARIES)
-  target_link_libraries(pyshakti_pybind11 PRIVATE
-    CUDA::cudart
-    DO::Shakti::Cuda::ImageProcessing)
-endif()
+# if(CMAKE_CUDA_COMPILER)
+#   target_compile_definitions(pyshakti_pybind11
+#                              PRIVATE USE_SHAKTI_CUDA_LIBRARIES)
+#   target_link_libraries(pyshakti_pybind11 PRIVATE
+#     CUDA::cudart
+#     DO::Shakti::Cuda::ImageProcessing)
+# endif()
 set_target_properties(
   pyshakti_pybind11
   PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"

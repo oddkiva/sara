@@ -16,9 +16,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/Core/Timer.hpp>
-#include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/TicToc.hpp>
+#include <DO/Sara/Core/Timer.hpp>
 
 
 using namespace DO::Sara;
@@ -37,11 +37,12 @@ BOOST_AUTO_TEST_CASE(test_timer)
   Timer timer{};
   auto elapsed_milliseconds = double{};
   auto elapsed_seconds = double{};
-  constexpr auto sleep_milliseconds = unsigned{ 580 };
+  constexpr auto sleep_milliseconds = unsigned{580};
+
 
   timer.restart();
   millisleep(sleep_milliseconds);
-  elapsed_milliseconds =  timer.elapsed_ms();
+  elapsed_milliseconds = timer.elapsed_ms();
   BOOST_CHECK_SMALL(elapsed_milliseconds - sleep_milliseconds, 100.);
 
   timer.restart();
@@ -52,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_timer)
 
 BOOST_AUTO_TEST_CASE(test_tictoc)
 {
-  constexpr auto sleep_milliseconds = unsigned{ 580 };
+  constexpr auto sleep_milliseconds = unsigned{580};
 
   tic();
   millisleep(sleep_milliseconds);

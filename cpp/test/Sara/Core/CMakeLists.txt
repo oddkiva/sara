@@ -1,6 +1,7 @@
-project(DO_Sara_Core_Tests)
+# You still need this cumbersome thing to make the tests pass.
+find_package(DO_Sara REQUIRED)
 
-find_package(DO_Sara COMPONENTS Core REQUIRED)
+project(DO_Sara_Core_Tests)
 
 file(GLOB test_core_SOURCE_FILES FILES *.cpp)
 if (NOT HDF5_FOUND)
@@ -17,7 +18,7 @@ foreach (file ${test_core_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES ${DO_Sara_LIBRARIES}
+    DEPENDENCIES DO::Sara::Core
     FOLDER Core)
 endforeach ()
 

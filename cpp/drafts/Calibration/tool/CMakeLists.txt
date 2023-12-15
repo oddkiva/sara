@@ -17,7 +17,7 @@ foreach(file ${SOURCE_FILES})
             DO_Sara_ChessboardDetection
             DO_Sara_Calibration
             ${CERES_LIBRARIES}
-            $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+            $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   set_target_properties(
     ${filename} PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS}
                            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

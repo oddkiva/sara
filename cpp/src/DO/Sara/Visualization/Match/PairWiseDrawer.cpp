@@ -16,23 +16,23 @@ namespace DO::Sara {
 
   void PairWiseDrawer::display_images() const
   {
-    display(image1, (offF(0) * scale(0)).cast<int>(), _z1);
-    display(image2, (offF(1) * scale(0)).cast<int>(), _z2);
+    display(image1, (offset(0) * scale(0)).cast<int>(), _z1);
+    display(image2, (offset(1) * scale(0)).cast<int>(), _z2);
   }
 
   void PairWiseDrawer::draw_point(int i, const Point2f& p, const Rgb8& c,
                                   int r) const
   {
     assert(i == 0 || i == 1);
-    fill_circle((p + offF(i)) * scale(i), float(r), c);
+    fill_circle((p + offset(i)) * scale(i), float(r), c);
   }
 
   void PairWiseDrawer::draw_line(int i, const Point2f& pa, const Point2f& pb,
                                  const Rgb8& c, int penWidth) const
   {
     assert(i == 0 || i == 1);
-    const Vector2f a = (pa + offF(i)) * scale(i);
-    const Vector2f b = (pb + offF(i)) * scale(i);
+    const Vector2f a = (pa + offset(i)) * scale(i);
+    const Vector2f b = (pb + offset(i)) * scale(i);
     Sara::draw_line(a, b, c, penWidth);
   }
 
@@ -40,8 +40,8 @@ namespace DO::Sara {
                                   const Rgb8& c, int penWidth) const
   {
     assert(i == 0 || i == 1);
-    const Vector2f a = (pa + offF(i)) * scale(i);
-    const Vector2f b = (pb + offF(i)) * scale(i);
+    const Vector2f a = (pa + offset(i)) * scale(i);
+    const Vector2f b = (pb + offset(i)) * scale(i);
     Sara::draw_arrow(a, b, c, penWidth);
   }
 
@@ -59,12 +59,12 @@ namespace DO::Sara {
                                  int r, const Rgb8& c) const
   {
     assert(i == 0 || i == 1);
-    const Point2i s = (scale(i) * p1 + offF(i) * scale(0))
+    const Point2i s = (scale(i) * p1 + offset(i) * scale(0))
                           .array()
                           .round()
                           .matrix()
                           .cast<int>();
-    const Point2i e = (scale(i) * p2 + offF(i) * scale(0))
+    const Point2i e = (scale(i) * p2 + offset(i) * scale(0))
                           .array()
                           .round()
                           .matrix()
@@ -92,7 +92,7 @@ namespace DO::Sara {
                                     const Rgb8& c) const
   {
     assert(i == 0 || i == 1);
-    draw(f, c, _z1, offF(i));
+    draw(f, c, _z1, offset(i));
   }
 
   void PairWiseDrawer::draw_match(const Match& m, const Rgb8& c,
@@ -105,7 +105,7 @@ namespace DO::Sara {
     {
       Vector2f a, b;
       a = scale(0) * m.x_pos();
-      b = scale(1) * (m.y_pos() + offF(1));
+      b = scale(1) * (m.y_pos() + offset(1));
       Sara::draw_line(a, b, c);
     }
   }

@@ -14,7 +14,23 @@
 #include <iostream>
 #include <memory>
 
+#if defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  if defined(__has_warning)  // clang
+#    if __has_warning("-Wmaybe-uninitialized")
+#      pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#    endif
+#    if __has_warning("-Wconversion")
+#      pragma GCC diagnostic ignored "-Wconversion"
+#    endif
+#  else  // GCC
+#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#  endif
+#endif
 #include <Eigen/Core>
+#if defined(__GNUC__)
+#  pragma GCC diagnostic pop
+#endif
 
 #include <DO/Sara/Core/Image.hpp>
 
@@ -68,8 +84,7 @@ namespace DO::Sara {
       return c._self->project(x);
     }
 
-    friend inline auto backproject(const CameraModel& c,
-                                   const Vector2& x)
+    friend inline auto backproject(const CameraModel& c, const Vector2& x)
         -> Vector3
     {
       return c._self->backproject(x);
@@ -178,8 +193,7 @@ namespace DO::Sara {
 
 
   template <typename CameraModelType, typename PixelType>
-  auto undistort(const CameraModelType& camera,
-                 const ImageView<PixelType>& src,
+  auto undistort(const CameraModelType& camera, const ImageView<PixelType>& src,
                  ImageView<PixelType>& dst)
   {
     using vector2_type = typename CameraModelType::vector2_type;
@@ -215,8 +229,7 @@ namespace DO::Sara {
   }
 
   template <typename CameraModelType, typename PixelType>
-  auto distort(const CameraModelType& camera,
-               const ImageView<PixelType>& src,
+  auto distort(const CameraModelType& camera, const ImageView<PixelType>& src,
                ImageView<PixelType>& dst)
   {
     using vector2_type = typename CameraModelType::vector2_type;
@@ -229,9 +242,8 @@ namespace DO::Sara {
     {
       const auto y = yx / w;
       const auto x = yx - y * w;
-      const Eigen::Vector2d p = camera
-                                    .undistort(vector2_type(x, y))
-                                    .template cast<double>();
+      const Eigen::Vector2d p =
+          camera.undistort(vector2_type(x, y)).template cast<double>();
       const auto in_image_domain = 0 <= p.x() && p.x() < src.width() - 1 &&
                                    0 <= p.y() && p.y() < src.height() - 1;
       if (!in_image_domain)

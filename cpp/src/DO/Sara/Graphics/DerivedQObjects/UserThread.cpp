@@ -121,7 +121,7 @@ namespace DO { namespace Sara {
     auto argc = static_cast<int>(args.size());
     auto argStrings = std::vector<std::string>(args.size());
     std::transform(args.begin(), args.end(), argStrings.begin(),
-                   [](const auto& arg) {
+                   [](const auto& arg) -> std::string {
 #ifdef _WIN32
                      return arg.toLocal8Bit().constData();
 #else

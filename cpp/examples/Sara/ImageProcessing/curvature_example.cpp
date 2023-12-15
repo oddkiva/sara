@@ -87,10 +87,10 @@ int sara_graphics_main(int argc, char** argv)
 
   const auto video_filepath = argc == 2
                                   ? argv[1]
-#ifdef _WIN32
+#if defined(_WIN32)
                                   : "C:/Users/David/Desktop/GOPR0542.MP4"s;
-#elif __APPLE__
-                                  : "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
+#elif defined(__APPLE__)
+                                  : "/Users/oddkiva/Desktop/datasets/odometry/turn_bikes.mp4"s;
 #else
                                   : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif

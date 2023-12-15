@@ -11,7 +11,9 @@
 
 //! @example
 
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 #include <DO/Sara/Graphics.hpp>
 
@@ -79,7 +81,9 @@ auto __main(int argc, char** argv) -> int
 {
   try
   {
+#ifdef _OPENMP
     omp_set_num_threads(omp_get_max_threads());
+#endif
 
 #ifdef _WIN32
     const auto video_file = sara::select_video_file_from_dialog_box();
@@ -223,8 +227,8 @@ auto __main(int argc, char** argv) -> int
             detect._best_corners.find(c) != detect._best_corners.end()
                 ? sara::Magenta8
                 : sara::Cyan8;
-        draw_corner(display,               //
-                    corners[c],            //
+        draw_corner(display,     //
+                    corners[c],  //
                     detect._gradient_peaks_refined[c],
                     scale_image,           //
                     detect.radius_factor,  //

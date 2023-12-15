@@ -99,9 +99,20 @@ namespace DO::Kalpana::GL {
   {
     create();
 
+#if 0
+    std::cout << "Attaching vertex shader " << vertex_shader
+              << " to program object " << program_object << std::endl;
+#endif
     glAttachShader(program_object, vertex_shader);
+#if 0
+    std::cout << "Attaching vertex shader " << fragment_shader
+              << " to program object " << program_object << std::endl;
+#endif
     glAttachShader(program_object, fragment_shader);
 
+#if 0
+    std::cout << "Link shader program " << program_object << std::endl;
+#endif
     glLinkProgram(program_object);
 
     // Linking sanity check.
@@ -173,6 +184,11 @@ namespace DO::Kalpana::GL {
       program_object = glCreateProgram();
     if (!program_object)
       throw std::runtime_error{"Failed to create shader program!"};
+
+#if 0
+    std::cout << "Created shader program with ID: " << program_object
+              << std::endl;
+#endif
   }
 
   void ShaderProgram::clear()
@@ -204,45 +220,6 @@ namespace DO::Kalpana::GL {
     throw std::runtime_error{Sara::format("Failed to delete shader program: %d."
                                           "Delete log:\n%s)log",
                                           success, log.data())};
-  }
-
-  auto ShaderProgram::set_uniform_vector2f(const char* mat_name,
-                                           const float* mat_coeffs) const
-      -> void
-  {
-    const auto mat_location = get_uniform_location(mat_name);
-    set_uniform_vector2f(mat_location, mat_coeffs);
-  }
-
-  auto ShaderProgram::set_uniform_vector4f(const char* mat_name,
-                                           const float* mat_coeffs) const
-      -> void
-  {
-    const auto mat_location = get_uniform_location(mat_name);
-    set_uniform_vector4f(mat_location, mat_coeffs);
-  }
-
-  auto ShaderProgram::set_uniform_matrix3f(const char* mat_name,
-                                           const float* mat_coeffs) const
-      -> void
-  {
-    const auto mat_location = get_uniform_location(mat_name);
-    set_uniform_matrix3f(mat_location, mat_coeffs);
-  }
-
-  auto ShaderProgram::set_uniform_matrix4f(const char* mat_name,
-                                           const float* mat_coeffs) const
-      -> void
-  {
-    const auto mat_location = get_uniform_location(mat_name);
-    set_uniform_matrix4f(mat_location, mat_coeffs);
-  }
-
-  auto ShaderProgram::set_uniform_texture(const char* texture_name,
-                                          GLuint texture_unit) const -> void
-  {
-    const auto tex_location = get_uniform_location(texture_name);
-    set_uniform_texture(tex_location, texture_unit);
   }
 
 }  // namespace DO::Kalpana::GL

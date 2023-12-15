@@ -21,6 +21,21 @@ shakti_halide_library_v2(
   NAME shakti_cast_uint8_to_float_cpu
   SRCS CastUint8ToFloat.cpp)
 
+shakti_halide_library_v2(
+  NAME shakti_rgb8_to_rgba8_cpu
+  SRCS FromRgb8ToRgba8.cpp)
+
+# ------------------------------------------------------------------------------
+# Image rotation CW 90
+# ------------------------------------------------------------------------------
+shakti_halide_library_v2(
+  NAME shakti_rotate_cw_90_rgb8_cpu
+  SRCS Rotate.cpp)
+
+shakti_halide_library_v2(
+  NAME shakti_rotate_cw_90_rgb8_gpu
+  SRCS Rotate.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 # ------------------------------------------------------------------------------
 # Separable convolution 2D

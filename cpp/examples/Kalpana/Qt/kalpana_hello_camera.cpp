@@ -41,11 +41,13 @@ using namespace std::string_literals;
 
 
 // Default camera values
+// clang-format off
 static const float YAW         = -90.0f;
 static const float PITCH       =  0.0f;
 static const float SPEED       =  1e-2f;
 static const float SENSITIVITY =  1e-2f;
 static const float ZOOM        =  45.0f;
+// clang-format on
 
 
 // The explorer's eye.
@@ -121,9 +123,11 @@ struct Camera
   {
     Vector3f front1;
 
+    // clang-format off
     front1 << cos(yaw * M_PI / 180) * cos(pitch * M_PI / 180.f),
               sin(pitch * M_PI / 180.f),
               sin(yaw * M_PI / 180.f) * cos(pitch * M_PI / 180.f);
+    // clang-format on
     front = front1.normalized();
 
     right = front.cross(world_up).normalized();
@@ -172,17 +176,15 @@ auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
   return vertex_data.cast<float>();
 }
 
-auto make_point_cloud()
+auto make_point_cloud(const std::string& h5_filepath)
 {
   // Encode the vertex data in a tensor.
-#ifdef __APPLE__
-  const auto vertex_data = read_point_cloud("/Users/david/Desktop/geometry.h5");
-#else
-  const auto vertex_data = read_point_cloud("/home/david/Desktop/geometry.h5");
-#endif
+  const auto vertex_data = read_point_cloud(h5_filepath);
   SARA_DEBUG << "vertices =\n" << vertex_data.matrix().topRows(20) << std::endl;
-  SARA_DEBUG << "min =\n" << vertex_data.matrix().colwise().minCoeff() << std::endl;
-  SARA_DEBUG << "max =\n" << vertex_data.matrix().colwise().maxCoeff() << std::endl;
+  SARA_DEBUG << "min =\n"
+             << vertex_data.matrix().colwise().minCoeff() << std::endl;
+  SARA_DEBUG << "max =\n"
+             << vertex_data.matrix().colwise().maxCoeff() << std::endl;
   return vertex_data;
 }
 
@@ -328,8 +330,8 @@ private:
   Tensor_<float, 2> m_vertices;
 
   //! @brief GPU data.
-  QOpenGLShaderProgram *m_program{nullptr};
-  QOpenGLVertexArrayObject *m_vao{nullptr};
+  QOpenGLShaderProgram* m_program{nullptr};
+  QOpenGLVertexArrayObject* m_vao{nullptr};
   QOpenGLBuffer m_vbo{QOpenGLBuffer::VertexBuffer};
   std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
                                         {"in_color", 1}};
@@ -381,6 +383,8 @@ public:
       {
         const auto ij = cols * i + j;
 
+        // clang-format off
+
         // Coordinates.
         v_mat.block(4 * ij, 0, 4, 3) << //
           // coords
@@ -402,6 +406,8 @@ public:
         t_mat.block(2 * ij, 0, 2, 3) <<
           4 * ij + 0, 4 * ij + 1, 4 * ij + 2,
           4 * ij + 2, 4 * ij + 3, 4 * ij + 0;
+
+        // clang-format on
       }
     }
 
@@ -456,7 +462,8 @@ public:
 
   auto initialize_geometry_on_gpu() -> void
   {
-    SARA_DEBUG << "Initialize checkerboard geometry data on GPU..." << std::endl;
+    SARA_DEBUG << "Initialize checkerboard geometry data on GPU..."
+               << std::endl;
     m_vao = new QOpenGLVertexArrayObject{this};
     if (!m_vao->create())
       throw QException{};
@@ -540,8 +547,8 @@ private:
 
   //! @{
   //! @brief GPU data.
-  QOpenGLShaderProgram *m_program{nullptr};
-  QOpenGLVertexArrayObject *m_vao{nullptr};
+  QOpenGLShaderProgram* m_program{nullptr};
+  QOpenGLVertexArrayObject* m_vao{nullptr};
   QOpenGLBuffer m_vbo{QOpenGLBuffer::VertexBuffer};
   QOpenGLBuffer m_ebo{QOpenGLBuffer::IndexBuffer};
   std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
@@ -583,10 +590,12 @@ public:
 
     // Encode the pixel coordinates of the image corners.
     auto corners = Matrix<double, 3, 4>{};
+    // clang-format off
     corners <<
       w, w, 0, 0,
       0, h, h, 0,
       1, 1, 1, 1;
+    // clang-format on
     SARA_DEBUG << "Pixel corners =\n" << corners << std::endl;
 
     SARA_DEBUG << "K =\n" << m_camera.K << std::endl;
@@ -598,7 +607,8 @@ public:
 
     // Because the z is negative in OpenGL.
     corners.row(2) *= -1;
-    //SARA_DEBUG << "Z-negative normalized corners =\n" << corners << std::endl;
+    // SARA_DEBUG << "Z-negative normalized corners =\n" << corners <<
+    // std::endl;
     SARA_DEBUG << "Z-negative corners =\n" << corners << std::endl;
 
     // Vertex coordinates.
@@ -606,18 +616,22 @@ public:
     m_vertices.matrix().block<4, 3>(0, 0) = corners.transpose().cast<float>();
 
     // Texture coordinates.
+    // clang-format off
     m_vertices.matrix().block<4, 2>(0, 3) <<
       1.0f, 0.0f,  // bottom-right
       1.0f, 1.0f,  // top-right
       0.0f, 1.0f,  // top-left
       0.0f, 0.0f;  // bottom-left
+    // clang-format on
 
     SARA_DEBUG << "m_vertices =\n" << m_vertices.matrix() << std::endl;
 
     m_triangles = Tensor_<unsigned int, 2>{{2, 3}};
+    // clang-format off
     m_triangles.flat_array() <<
       0, 1, 2,
       2, 3, 0;
+    // clang-format on
   }
 
   auto initialize_shader() -> void
@@ -731,7 +745,7 @@ public:
     m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
   }
 
-  auto set_camera(const PinholeCamera& camera)
+  auto set_camera(const PinholeCameraDecomposition& camera)
   {
     m_camera = camera;
     initialize_geometry();
@@ -774,20 +788,20 @@ private:
   //! @{
   //! @brief CPU data.
   Vector2i m_image_sizes;
-  PinholeCamera m_camera{normalized_camera()};
+  PinholeCameraDecomposition m_camera{normalized_camera()};
   Tensor_<float, 2> m_vertices;
   Tensor_<unsigned int, 2> m_triangles;
   //! @}
 
   //! @{
   //! @brief GPU data.
-  QOpenGLShaderProgram *m_program{nullptr};
-  QOpenGLVertexArrayObject *m_vao{nullptr};
+  QOpenGLShaderProgram* m_program{nullptr};
+  QOpenGLVertexArrayObject* m_vao{nullptr};
   QOpenGLBuffer m_vbo{QOpenGLBuffer::VertexBuffer};
   QOpenGLBuffer m_ebo{QOpenGLBuffer::IndexBuffer};
-  QOpenGLTexture *m_texture{nullptr};
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                        {"in_tex_coords", 1},   //
+  QOpenGLTexture* m_texture{nullptr};
+  std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
+                                        {"in_tex_coords", 1},  //
                                         {"out_color", 0}};
   //! @}
 };
@@ -796,18 +810,22 @@ private:
 class Window : public QOpenGLWindow
 {
 private:
+  QString m_h5_file;
   QMatrix4x4 m_projection;
   QMatrix4x4 m_view;
   QMatrix4x4 m_transform;
 
   Camera m_camera;
   Timer m_timer;
-  CheckerBoardObject *m_checkerboard{nullptr};
-  PointCloudObject *m_pointCloud{nullptr};
-  ImagePlane *m_imagePlane{nullptr};
+  CheckerBoardObject* m_checkerboard{nullptr};
+  PointCloudObject* m_pointCloud{nullptr};
+  ImagePlane* m_imagePlane{nullptr};
 
 public:
-  Window() = default;
+  Window(const QString& h5_file)
+    : m_h5_file{h5_file}
+  {
+  }
 
   ~Window()
   {
@@ -833,26 +851,28 @@ public:
 
     // Instantiate the objects.
     m_checkerboard = new CheckerBoardObject{20, 20, 10, context()};
-    m_pointCloud = new PointCloudObject{make_point_cloud(), context()};
+    m_pointCloud = new PointCloudObject{
+        make_point_cloud(m_h5_file.toStdString()), context()};
     m_imagePlane = new ImagePlane{context()};
 
-#ifdef __APPLE__
-    const auto data_dir =
-        "/Users/david/Desktop/Datasets/sfm/castle_int"s;
-#else
-    const auto data_dir =
-        "/home/david/Desktop/Datasets/sfm/castle_int"s;
-#endif
-    const auto image = "0001.png";
-    m_imagePlane->set_image(data_dir + "/" + image);
+    if (m_imagePlane != nullptr)
+    {
+      // Read HDF5 file.
+      auto h5_file = H5File{m_h5_file.toStdString(), H5F_ACC_RDONLY};
+      auto data_dir = std::string{};
+      h5_file.read_dataset("dataset_folder", data_dir);
 
-    const auto K = "0001.png.K";
-    auto camera = PinholeCamera{
-      read_internal_camera_parameters(data_dir + "/" + K),
-      Matrix3d::Identity(),
-      Vector3d::Zero()
-    };
-    m_imagePlane->set_camera(camera);
+      auto image_filepath = std::string{};
+      h5_file.read_dataset("image_1", image_filepath);
+      m_imagePlane->set_image(image_filepath);
+
+      auto K_filepath = std::string{};
+      h5_file.read_dataset("K", K_filepath);
+      auto camera = PinholeCameraDecomposition{
+          read_internal_camera_parameters(K_filepath), Matrix3d::Identity(),
+          Vector3d::Zero()};
+      m_imagePlane->set_camera(camera);
+    }
   }
 
   void paintGL() override
@@ -873,18 +893,16 @@ public:
     // Checkerboard.
     m_transform.setToIdentity();
 
-    //m_transform.rotate(std::pow(1.5, 5) * m_timer.elapsed_ms() / 500,
-    //                   QVector3D{0.5f, 1.0f, 0.0f}.normalized());
-
     m_checkerboard->render(m_projection, m_view, m_transform);
     m_pointCloud->render(m_projection, m_view, m_transform);
-    m_imagePlane->render(m_projection, m_view, m_transform);
+    if (m_imagePlane != nullptr)
+      m_imagePlane->render(m_projection, m_view, m_transform);
   }
 
 protected:
-  void keyPressEvent(QKeyEvent *ev) override
+  void keyPressEvent(QKeyEvent* ev) override
   {
-     move_camera_from_keyboard(ev->key());
+    move_camera_from_keyboard(ev->key());
   }
 
   auto move_camera_from_keyboard(int key) -> void
@@ -970,8 +988,17 @@ protected:
 };
 
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
+  using namespace std::string_literals;
+#if defined(__APPLE__)
+  auto geometry_h5_file = "/Users/oddkiva/Desktop/geometry.h5"s;
+#else
+  auto geometry_h5_file = "/home/david/Desktop/geometry.h5"s;
+#endif
+  if (argc >= 2)
+    geometry_h5_file = argv[1];
+
   QGuiApplication app(argc, argv);
   QSurfaceFormat format;
   format.setOption(QSurfaceFormat::DebugContext);
@@ -980,7 +1007,7 @@ int main(int argc, char **argv)
   format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
   format.setSwapInterval(1);
 
-  Window window;
+  Window window{QString::fromStdString(geometry_h5_file)};
   window.setFormat(format);
   window.resize(800, 600);
   window.show();

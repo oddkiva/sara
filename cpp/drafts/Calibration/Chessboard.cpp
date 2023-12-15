@@ -39,12 +39,12 @@ namespace DO::Sara {
     switch (region)
     {
       // clang-format off
-    case 0: r = 255; g = 0;   b = 0;   g += x; break;
-    case 1: r = 255; g = 255; b = 0;   r -= x; break;
-    case 2: r = 0;   g = 255; b = 0;   b += x; break;
-    case 3: r = 0;   g = 255; b = 255; g -= x; break;
-    case 4: r = 0;   g = 0;   b = 255; r += x; break;
-    case 5: r = 255; g = 0;   b = 255; b -= x; break;
+      case 0: r = 255; g = 0;   b = 0;   g += x; break;
+      case 1: r = 255; g = 255; b = 0;   r -= x; break;
+      case 2: r = 0;   g = 255; b = 0;   b += x; break;
+      case 3: r = 0;   g = 255; b = 255; g -= x; break;
+      case 4: r = 0;   g = 0;   b = 255; r += x; break;
+      case 5: r = 255; g = 0;   b = 255; b -= x; break;
       // clang-format on
     }
 
@@ -71,7 +71,7 @@ namespace DO::Sara {
         c1 = corners.image_point(x, y);
         if (is_nan(c0) || is_nan(c1))
           continue;
-        draw_circle(image, c1, 3.f, color, 2);
+        draw_circle(image, c1, 3, color, 2);
 
         if (x == 0 && y == 0)
           continue;
@@ -123,8 +123,8 @@ namespace DO::Sara {
         const Eigen::Vector2f p1 = corners.image_point(x, y);
         const Eigen::Vector2f p2 = (Hr * P).hnormalized().cast<float>();
 
-        draw_circle(image, p1, 3.f, Cyan8, 3);
-        draw_circle(image, p2, 3.f, Magenta8, 3);
+        draw_circle(image, p1, 3, Cyan8, 3);
+        draw_circle(image, p2, 3, Magenta8, 3);
         if (pause)
         {
           display(image);

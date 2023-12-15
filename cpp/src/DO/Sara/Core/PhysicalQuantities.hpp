@@ -1,14 +1,8 @@
 #pragma once
 
-#ifndef _USE_MATH_DEFINES
-#  define _USE_MATH_DEFINES
-#endif
+#include <DO/Sara/Core/EigenExtension.hpp>
 
-#include <Eigen/Core>
-
-#include <cmath>
 #include <ratio>
-#include <utility>
 
 
 namespace DO::Sara {
@@ -305,10 +299,12 @@ namespace DO::Sara {
   constexpr auto centimeter = meter / 100;
   constexpr auto millimeter = meter / 1000;
 
-  constexpr auto foot = Length{0.3048};
-  constexpr auto inch = Length{0.0254};
+  constexpr auto foot = 0.3048L * meter;
+  constexpr auto inch = 0.0254L * meter;
+  constexpr auto mile = 1609.34L * meter;
 
   constexpr auto second = Time{1};
+  constexpr auto hour = Time{3600};
 
   constexpr auto hertz = Frequency{1};
 
@@ -347,6 +343,11 @@ namespace DO::Sara {
   constexpr auto operator""_s(long double v)
   {
     return v * second;
+  }
+
+  constexpr auto operator""_hour(long double v)
+  {
+    return v * hour;
   }
 
   constexpr auto operator""_Hz(long double v)
@@ -432,7 +433,19 @@ namespace DO::Sara {
       -> PixelUnits<2>
   {
     const auto ratio = sensor_sizes.cast<long double>() / focal_length.value;
-    return image_sizes.cast<long double>().cwiseProduct(ratio).cast<PixelUnit>();
+    return image_sizes.cast<long double>()
+        .cwiseProduct(ratio)
+        .cast<PixelUnit>();
+  }
+
+}  // namespace DO::Sara
+
+
+namespace DO::Sara {
+
+  inline constexpr auto operator"" _percent(long double x) -> long double
+  {
+    return x / 100;
   }
 
 }  // namespace DO::Sara

@@ -18,8 +18,8 @@
 #include <DO/Sara/ImageProcessing.hpp>
 
 #include <DO/Sara/Geometry/Algorithms/RobustEstimation/LineSolver.hpp>
-#include <DO/Sara/Geometry/Algorithms/RobustEstimation/RANSAC.hpp>
 #include <DO/Sara/Geometry/Objects/LineSegment.hpp>
+#include <DO/Sara/RANSAC/RANSAC.hpp>
 
 
 namespace DO::Sara {
@@ -192,14 +192,10 @@ namespace DO::Sara {
     if (curve_points.size() < 2)
       return {false, {}};
 
-    auto line_solver = LineSolver2D<float>{};
-    auto inlier_predicate = InlierPredicate<LinePointDistance2D<float>>{
-        {},              //
-        error_threshold  //
-    };
-
     const auto num_curve_points = static_cast<int>(curve_points.size());
-    auto points = Tensor_<float, 2>(num_curve_points, 3);
+    auto point_list = PointList<float, 2>{};
+    point_list._data.resize(num_curve_points, 3);
+    auto& points = point_list._data;
     auto point_matrix = points.matrix();
     for (auto r = 0; r < num_curve_points; ++r)
       point_matrix.row(r) = curve_points[r]      //
@@ -207,10 +203,14 @@ namespace DO::Sara {
                                 .homogeneous()   //
                                 .cast<float>();  //
 
-    const auto ransac_result = ransac(points,            //
+    auto line_solver = LineSolver2D<float>{};
+    auto inlier_predicate =
+        InlierPredicate<LinePointDistance2D<float>>{{}, error_threshold};
+    const auto ransac_result = ransac(point_list,        //
                                       line_solver,       //
                                       inlier_predicate,  //
                                       num_iterations);
+
     const auto& line = std::get<0>(ransac_result);
     const auto& inliers = std::get<1>(ransac_result);
 

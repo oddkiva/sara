@@ -12,8 +12,8 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/Homography Estimator"
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/HomographyEstimator.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/ErrorMeasures.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/HomographySolver.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
 
 
 #include <boost/test/unit_test.hpp>

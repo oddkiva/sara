@@ -20,7 +20,9 @@
 
 #include <array>
 
+#if defined(OPENMP)
 #include <omp.h>
+#endif
 
 
 using namespace std;
@@ -159,11 +161,13 @@ int __main(int argc, char**argv)
     return -1;
   const auto video_filepath = argv[1];
 
+#if defined(OPENMP)
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   auto video_stream = sara::VideoStream{video_filepath};
   auto video_writer = sara::VideoWriter{
-#ifdef __APPLE__
+#if defined(__APPLE__)
       "/Users/david/Desktop/test.mp4",
 #else
       "/home/david/Desktop/test.mp4",

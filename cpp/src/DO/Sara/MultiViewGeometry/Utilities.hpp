@@ -15,9 +15,6 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <algorithm>
-#include <random>
-
 
 namespace DO::Sara {
 
@@ -27,8 +24,9 @@ namespace DO::Sara {
    *  @{
    */
 
-  //! @brief Geometry.
+  //! @brief Elementary transformations.
   //! @{
+
   template <typename T>
   inline auto homogeneous(const TensorView_<T, 2>& x) -> Tensor_<T, 2>
   {
@@ -38,40 +36,6 @@ namespace DO::Sara {
     return X;
   }
 
-  template <typename S>
-  inline auto compute_normalizer(const TensorView_<S, 2>& X) -> Matrix<S, 3, 3>
-  {
-    const Matrix<S, 1, 3> min = X.matrix().colwise().minCoeff();
-    const Matrix<S, 1, 3> max = X.matrix().colwise().maxCoeff();
-
-    const Matrix<S, 2, 2> scale =
-        (max - min).cwiseInverse().head(2).asDiagonal();
-
-    auto T = Matrix<S, 3, 3>{};
-    T.setZero();
-    T.template topLeftCorner<2, 2>() = scale;
-    T.col(2) << -min.cwiseQuotient(max - min).transpose().head(2), S(1);
-
-    return T;
-  }
-
-  template <typename S>
-  inline auto apply_transform(const Matrix<S, 3, 3>& T,
-                              const TensorView_<S, 2>& X) -> Tensor_<S, 2>
-  {
-    auto TX = Tensor_<S, 2>{X.sizes()};
-    auto TX_ = TX.colmajor_view().matrix();
-
-    TX_ = T * X.colmajor_view().matrix();
-    TX_.array().rowwise() /= TX_.array().row(2);
-
-    return TX;
-  }
-  //! @}
-
-
-  //! @brief Elementary transformations.
-  //! @{
   inline auto cofactors_transposed(const Matrix3d& E)
   {
     Matrix3d cofE;
@@ -85,10 +49,11 @@ namespace DO::Sara {
   inline auto skew_symmetric_matrix(const Matrix<T, 3, 1>& a) -> Matrix<T, 3, 3>
   {
     auto A = Matrix<T, 3, 3>{};
-    A <<
-       T(0), -a(2),  a(1), //
-       a(2),  T(0), -a(0), //
-      -a(1),  a(0),  T(0);
+    // clang-format off
+    A << T(0), -a(2), a(1),
+         a(2), T(0), -a(0),
+        -a(1), a(0), T(0);
+    // clang-format on
 
     return A;
   }

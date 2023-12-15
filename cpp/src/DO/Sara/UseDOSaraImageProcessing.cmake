@@ -18,6 +18,7 @@ if(SARA_USE_FROM_SOURCE)
                 # Fast color conversion
                 shakti_rgb8u_to_gray32f_cpu
                 shakti_bgra8u_to_gray32f_cpu
+                shakti_rgb8_to_rgba8_cpu
                 # Binary operations.
                 shakti_subtract_32f_cpu
                 # Cartesian to polar coordinates.
@@ -26,6 +27,8 @@ if(SARA_USE_FROM_SOURCE)
                 shakti_scale_32f_cpu
                 shakti_reduce_32f_cpu
                 shakti_enlarge_cpu
+                # Rotate functions.
+                shakti_rotate_cw_90_rgb8_cpu
                 # Differential operations.
                 shakti_gradient_2d_32f_cpu
                 shakti_polar_gradient_2d_32f_cpu
@@ -39,7 +42,7 @@ if(SARA_USE_FROM_SOURCE)
                 shakti_cornerness_32f_cpu
                 # Local extremum map
                 shakti_scale_space_dog_extremum_32f_cpu
-                $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+                $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
     endif()
   endif()
 endif()

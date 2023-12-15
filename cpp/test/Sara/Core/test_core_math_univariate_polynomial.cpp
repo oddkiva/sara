@@ -108,7 +108,8 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_1)
            (Z + 3.) *               //
            (Z - 10.);
 
-  const auto roots = rpoly(P);
+  const auto [all_roots_found, roots] = rpoly(P);
+  BOOST_CHECK(all_roots_found);
 
   for (const auto& root: roots)
     cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
@@ -128,7 +129,8 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_2)
            - 8.035 * Z                  //
            + 2.01;
 
-  const auto roots = rpoly(P, 40);
+  const auto [all_roots_found, roots] = rpoly(P, 40);
+  BOOST_CHECK(all_roots_found);
 
   for (const auto& root: roots)
     cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
@@ -144,7 +146,8 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_3)
            (Z - 1.23e+2) *  //
            (Z - 1.23e+5);
 
-  const auto roots = rpoly(P);
+  const auto [all_roots_found, roots] = rpoly(P);
+  BOOST_CHECK(all_roots_found);
 
   for (const auto& root: roots)
   {
@@ -174,7 +177,8 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_4)
       (-52412.8655144021);
   P = P * Z.pow<double>(3);
 
-  const auto roots = rpoly(P);
+  const auto [all_roots_found, roots] = rpoly(P);
+  BOOST_CHECK(all_roots_found);
 
   for (const auto& root: roots)
   {
@@ -200,7 +204,8 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_5)
            0.159393;
 
   auto solver = JenkinsTraub{P};
-  const auto roots = solver.find_roots();
+  const auto [all_roots_found, roots] = solver.find_roots();
+  BOOST_CHECK(all_roots_found);
 
   for (const auto& root: roots)
   {
@@ -226,7 +231,8 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_6)
            2.21693;
 
   auto solver = JenkinsTraub{P};
-  const auto roots = solver.find_roots();
+  const auto [all_roots_found, roots] = solver.find_roots();
+  BOOST_CHECK(all_roots_found);
 
   for (const auto& root: roots)
   {

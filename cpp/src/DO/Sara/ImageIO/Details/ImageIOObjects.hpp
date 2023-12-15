@@ -30,59 +30,59 @@ extern "C" {
 // Base classes for image reading and writing.
 namespace DO { namespace Sara {
 
-  //! @addtogroup ImageIO
-  //! @{
+    //! @addtogroup ImageIO
+    //! @{
 
-  //! @brief FileHandle class.
-  class FileHandle
-  {
-    FILE* _file{nullptr};
-
-  public:
-    FileHandle() = default;
-
-    FileHandle(const char* filepath, const char* mode)
+    //! @brief FileHandle class.
+    class FileHandle
     {
-      open(filepath, mode);
-    }
+      FILE* _file{nullptr};
 
-    ~FileHandle()
-    {
-      close();
-    }
+    public:
+      FileHandle() = default;
 
-    void open(const char* filepath, const char* mode)
-    {
+      FileHandle(const char* filepath, const char* mode)
+      {
+        open(filepath, mode);
+      }
+
+      ~FileHandle()
+      {
+        close();
+      }
+
+      void open(const char* filepath, const char* mode)
+      {
 #ifdef WIN32
-      if (fopen_s(&_file, filepath, mode) != 0)
+        if (fopen_s(&_file, filepath, mode) != 0)
 #else
-      _file = fopen(filepath, mode);
-      if (_file == nullptr)
+        _file = fopen(filepath, mode);
+        if (_file == nullptr)
 #endif
-        throw std::runtime_error{
-            format("Error opening file '%s' in mode %s!", filepath, mode)
-                .c_str()};
-    }
+          throw std::runtime_error{
+              format("Error opening file '%s' in mode %s!", filepath, mode)
+                  .c_str()};
+      }
 
-    void close()
-    {
-      if (_file)
-        fclose(_file);
-    }
+      void close()
+      {
+        if (_file)
+          fclose(_file);
+      }
 
-    operator FILE*()
-    {
-      return _file;
-    }
-  };
+      operator FILE*()
+      {
+        return _file;
+      }
+    };
 
-  //! @}
+    //! @}
 
 }}  // namespace DO::Sara
 
 
 // Jpeg I/O.
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   //! @addtogroup ImageIO
   //! @{
@@ -111,15 +111,15 @@ namespace DO { namespace Sara {
 
     JpegFileReader(const JpegFileReader&) = delete;
 
-    JpegFileReader(const char* filepath);
+    explicit JpegFileReader(const char* filepath);
 
-    JpegFileReader& operator=(const JpegFileReader&) = delete;
+    auto operator=(const JpegFileReader&) -> JpegFileReader& = delete;
 
     ~JpegFileReader();
 
     auto image_sizes() const -> std::tuple<int, int, int>;
 
-    void read(unsigned char* data);
+    auto read(unsigned char* data) -> void;
   };
 
   //! @brief JPEG image writer class.
@@ -143,83 +143,84 @@ namespace DO { namespace Sara {
 
     JpegFileWriter(const unsigned char* data, int width, int height, int depth);
 
-    JpegFileWriter& operator=(const JpegFileWriter&) = delete;
+    auto operator=(const JpegFileWriter&) -> JpegFileWriter& = delete;
 
     ~JpegFileWriter();
 
-    void write(const char* filepath, int quality);
+    auto write(const char* filepath, int quality) -> void;
   };
 
   //! @}
 
-}}  // namespace DO::Sara
+}  // namespace DO::Sara
 
 
 // PNG I/O.
 namespace DO { namespace Sara {
 
-  //! @addtogroup ImageIO
-  //! @{
+    //! @addtogroup ImageIO
+    //! @{
 
-  //! @brief PNG image reader class.
-  class PngFileReader
-  {
-    png_structp _png_ptr;
-    png_infop _info_ptr;
+    //! @brief PNG image reader class.
+    class PngFileReader
+    {
+      png_structp _png_ptr;
+      png_infop _info_ptr;
 
-    FileHandle _file_handle;
+      FileHandle _file_handle;
 
-    png_uint_32 _width, _height;
-    png_byte _channels;
-    int _bit_depth;
-    int _color_type;
+      png_uint_32 _width, _height;
+      png_byte _channels;
+      int _bit_depth;
+      int _color_type;
 
-  public:
-    PngFileReader() = delete;
+    public:
+      PngFileReader() = delete;
 
-    PngFileReader(const PngFileReader&) = delete;
+      PngFileReader(const PngFileReader&) = delete;
 
-    PngFileReader(const char* filepath);
+      PngFileReader(const char* filepath);
 
-    PngFileReader& operator=(const PngFileReader&) = delete;
+      PngFileReader& operator=(const PngFileReader&) = delete;
 
-    ~PngFileReader();
+      ~PngFileReader();
 
-    auto image_sizes() const -> std::tuple<int, int, int>;
+      auto image_sizes() const -> std::tuple<int, int, int>;
 
-    void read(unsigned char* data);
-  };
+      void read(unsigned char* data);
+    };
 
-  //! @brief PNG image writer class.
-  class PngFileWriter
-  {
-    png_structp _png_ptr;
-    png_infop _info_ptr;
+    //! @brief PNG image writer class.
+    class PngFileWriter
+    {
+      png_structp _png_ptr;
+      png_infop _info_ptr;
 
-    //! @brief File handle.
-    FileHandle _file_handle;
+      //! @brief File handle.
+      FileHandle _file_handle;
 
-    //! @brief Image data.
-    const unsigned char* _data;
-    int _width;
-    int _height;
-    int _depth;
+      //! @brief Image data.
+      const unsigned char* _data;
+      int _width;
+      int _height;
+      int _depth;
 
-  public:
-    PngFileWriter() = delete;
+    public:
+      PngFileWriter() = delete;
 
-    PngFileWriter(const PngFileWriter&) = delete;
+      PngFileWriter(const PngFileWriter&) = delete;
 
-    PngFileWriter(const unsigned char* data, int width, int height, int depth);
+      PngFileWriter(const unsigned char* data, int width, int height,
+                    int depth);
 
-    PngFileReader& operator=(const PngFileReader&) = delete;
+      PngFileReader& operator=(const PngFileReader&) = delete;
 
-    ~PngFileWriter();
+      ~PngFileWriter();
 
-    void write(const char* filepath);
-  };
+      void write(const char* filepath);
+    };
 
-  //! @}
+    //! @}
 
 }}  // namespace DO::Sara
 

@@ -40,18 +40,20 @@ auto mean_colors(const std::map<int, std::vector<Eigen::Vector2i>>& regions,
   return colors;
 }
 
-auto __main(int argc, char** argv) -> int
+auto __main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) -> int
 {
+#if defined(OPENMP)
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   using namespace std::string_literals;
 
-#ifdef _WIN32
+#if defined(_WIN32)
   // const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
   const auto video_filepath = select_video_file_from_dialog_box();
   if (video_filepath.empty())
     return 1;
-#elif __APPLE__
+#elif defined(__APPLE__)
   const auto video_filepath =
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
@@ -66,7 +68,7 @@ auto __main(int argc, char** argv) -> int
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
 #define DOWNSAMPLE
-#ifdef DOWNSAMPLE
+#if defined(DOWNSAMPLE)
   auto frame_downsampled = Image<Rgb8>{frame.sizes() / 2};
 #else
   auto& frame_downsampled = frame;

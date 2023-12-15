@@ -11,7 +11,9 @@
 
 //! @example
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #include <set>
 
@@ -103,7 +105,9 @@ int __main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   // Input video.
   const auto video_filepath =

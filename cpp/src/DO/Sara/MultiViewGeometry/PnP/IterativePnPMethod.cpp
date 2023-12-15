@@ -9,6 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+// To avoid compilation error with Eigen
+#if (defined(_WIN32) || defined(_WIN32_WCE)) && !defined(NOMINMAX)
+#  define NOMINMAX
+#endif
+#define GLOG_NO_ABBREVIATED_SEVERITIES
+
 #include <DO/Sara/MultiViewGeometry/Calibration/OmnidirectionalCameraReprojectionError.hpp>
 #include <DO/Sara/MultiViewGeometry/PnP/IterativePnPMethod.hpp>
 

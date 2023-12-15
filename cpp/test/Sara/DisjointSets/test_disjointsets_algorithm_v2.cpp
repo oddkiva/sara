@@ -11,7 +11,9 @@
 
 #define BOOST_TEST_MODULE "DisjointSets/Algorithms"
 
-#include <omp.h>
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 #include <unordered_map>
 
@@ -53,7 +55,9 @@ BOOST_AUTO_TEST_CASE(test_on_image)
     for (auto x = 0; x < 5; ++x)
       BOOST_CHECK_EQUAL(index(x, y), disjoint_sets.parent(index(x, y)));
 
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
 #pragma omp parallel for
   for (auto y = 0; y < 5; ++y)
@@ -61,8 +65,8 @@ BOOST_AUTO_TEST_CASE(test_on_image)
     for (auto x = 0; x < 5; ++x)
     {
       const auto me = index(x, y);
-      for (auto dy = -1; dy <=1; ++dy)
-        for(auto dx = -1; dx <=1; ++dx)
+      for (auto dy = -1; dy <= 1; ++dy)
+        for (auto dx = -1; dx <= 1; ++dx)
         {
           const auto x1 = x + dx;
           const auto y1 = y + dy;
@@ -90,10 +94,10 @@ BOOST_AUTO_TEST_CASE(test_on_image)
   for (auto& component : components)
     sort(component.second.begin(), component.second.end());
 
-  for (const auto& [id, set]: components)
+  for (const auto& [id, set] : components)
   {
     SARA_CHECK(id);
-    for (const auto& i: set)
+    for (const auto& i : set)
       std::cout << i << " ";
     std::cout << std::endl;
   }

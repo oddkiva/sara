@@ -28,17 +28,13 @@
 
 #include <boost/filesystem.hpp>
 
+#if defined(OPENMP)
 #include <omp.h>
+#endif
 
 
 using namespace std;
 using namespace DO::Sara;
-
-
-inline constexpr long double operator"" _percent(long double x)
-{
-  return x / 100;
-}
 
 
 auto initialize_camera_intrinsics_1()
@@ -414,16 +410,18 @@ int sara_graphics_main(int argc, char** argv)
 
   const auto video_filepath = argc == 2
                                   ? argv[1]
-#ifdef _WIN32
+#if defined(_WIN32)
                                   : "C:/Users/David/Desktop/GOPR0542.MP4"s;
-#elif __APPLE__
+#elif defined(__APPLE__)
                                   : "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
                                   : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
 
   // OpenMP.
+#if defined(OPENMP)
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
@@ -434,9 +432,9 @@ int sara_graphics_main(int argc, char** argv)
 
   // Output save.
   namespace fs = boost::filesystem;
-  const auto basename = fs::basename(video_filepath);
+  const auto basename = fs::path(video_filepath).stem().string();
   VideoWriter video_writer{
-#ifdef __APPLE__
+#if defined(__APPLE__)
       "/Users/david/Desktop/" + basename + ".curve-analysis.mp4",
 #else
       "/home/david/Desktop/" + basename + ".curve-analysis.mp4",

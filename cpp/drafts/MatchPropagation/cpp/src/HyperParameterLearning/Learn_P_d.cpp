@@ -106,7 +106,7 @@ namespace DO::Sara {
             // Draw orientation.
             Phi_ox *= 20.;
             Vector2d p1, p2;
-            Vector2d off(drawer.offF(1).cast<double>());
+            Vector2d off(drawer.offset(1).cast<double>());
             p1 = H_Sx.center() + off;
             p2 = p1 + Phi_ox;
             draw_arrow(p1.x(), p1.y(), p2.x(), p2.y(), Blue8);

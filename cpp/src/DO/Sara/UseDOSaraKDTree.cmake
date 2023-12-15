@@ -11,6 +11,6 @@ if (SARA_USE_FROM_SOURCE)
       $<BUILD_INTERFACE:${DO_Sara_ThirdParty_DIR}/flann/src/cpp>)
     target_link_libraries(DO_Sara_KDTree
       PRIVATE flann_cpp_s
-      PUBLIC $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
+      PUBLIC $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   endif ()
 endif ()

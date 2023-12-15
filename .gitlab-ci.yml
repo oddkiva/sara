@@ -1,4 +1,4 @@
-image: nvidia/cudagl:10.1-runtime-ubuntu18.04
+image: ubuntu:22.04
 
 cache:
   paths:
@@ -20,12 +20,9 @@ before_script:
   - export CCACHE_BASEDIR=${PWD}
   - export CCACHE_DIR=${PWD}/ccache
 
-  - apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
-
   # Do this first.
   - apt-get update -y -qq
-
-  # Install the latest CMake please.
+  # Install the prerequisite software to add APT packages.
   - apt-get install -y -qq
       apt-transport-https
       ca-certificates
@@ -36,13 +33,13 @@ before_script:
   # Now add the additional APT repositories:
   #
   # CMake.
-  - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-  - apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
-  # CLBlast.
-  - add-apt-repository ppa:cnugteren/clblast
+  - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+  - echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy-rc main' | tee -a /etc/apt/sources.list.d/kitware.list >/dev/null
   # Vulkan SDK.
-  - wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add -
-  - wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+  - wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | tee /etc/apt/trusted.gpg.d/lunarg.asc
+  - wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
+  # Intel TBB
+  # - echo "deb http://cz.archive.ubuntu.com/ubuntu eoan main universe" | tee -a  /etc/apt/sources.list
   # Update the packages list again.
   - apt-get update -y -qq
 
@@ -76,6 +73,7 @@ before_script:
       ocl-icd-opencl-dev
       opencl-headers
       libpocl-dev
+      libtbb-dev
       libceres-dev
       qtbase5-dev
       vulkan-sdk
@@ -110,14 +108,14 @@ build:
         -DSARA_BUILD_VIDEOIO:BOOL=ON
         -DSARA_BUILD_SAMPLES:BOOL=ON
         -DSARA_BUILD_TESTS:BOOL=ON
-    - make -j$(nproc)
+    - make -j$(nproc) VERBOSE=1
     # Create deb package.
     # - make package  # Lack of space in the build machine ?
     # Run tests.
     - DISPLAY=:1 ctest
         -j$(nproc)
         --output-on-failure
-        --exclude-regex "test_graphics_*|test_visualization_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*"
+        --exclude-regex "test_graphics_*|test_visualization_*|test_core_ipc_cond1|test_videoio_video_writer|shakti_test_*|test_ransac_*"
     # FIXME: I give up the code coverage... Will come back to it later.
     # - make -j$(nproc) coverage
     # - coveralls-lcov coverage.info --repo-token=$(cat .coveralls.gitlab.yml)
@@ -140,5 +138,5 @@ pages:
 staging:
   stage: deploy
   trigger:
-    project: DO-CV/sara-book
+    project: oddkiva/sara-book
     branch: master

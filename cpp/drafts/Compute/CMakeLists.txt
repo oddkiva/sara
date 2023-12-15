@@ -1,77 +1,77 @@
-find_package(DO_Sara COMPONENTS Core REQUIRED)
+if(WIN32)
+  return()
+endif()
 
 find_library(CLBlast_LIBRARY clblast)
-if (NOT CLBlast_LIBRARY)
+if(NOT CLBlast_LIBRARY)
   message(FATAL_ERROR "Could not find CLBlast library!")
-endif ()
+endif()
 message("Found CLBlast libraries: ${CLBlast_LIBRARY}")
 
-if (APPLE)
+if(APPLE)
   find_library(Accelerate_LIBRARY Accelerate)
-  if (NOT Accelerate_LIBRARY)
+  if(NOT Accelerate_LIBRARY)
     message(FATAL_ERROR "Could not find Accelerate library!")
-  endif ()
-  message("Found Accelerate framework:\n"
-    "\t${Accelerate_LIBRARY}")
+  endif()
+  message("Found Accelerate framework:\n" "\t${Accelerate_LIBRARY}")
 
   find_library(Foundation_LIBRARY Foundation)
-  if (NOT Foundation_LIBRARY)
+  if(NOT Foundation_LIBRARY)
     message(FATAL_ERROR "Could not find Foundation library!")
-  endif ()
-  message("Found Foundation framework:\n"
-    "\t${Foundation_LIBRARY}")
+  endif()
+  message("Found Foundation framework:\n" "\t${Foundation_LIBRARY}")
 
   find_library(MetalPerformanceShaders_LIBRARY MetalPerformanceShaders)
-  if (NOT MetalPerformanceShaders_LIBRARY)
+  if(NOT MetalPerformanceShaders_LIBRARY)
     message(FATAL_ERROR "Could not find MetalPerformanceShaders library!")
-  endif ()
+  endif()
   message("Found MetalPerformanceShaders framework:\n"
-    "\t${MetalPerformanceShaders_LIBRARY}")
+          "\t${MetalPerformanceShaders_LIBRARY}")
 
   # Create the library.
   set(DO_Sara_Compute_SOURCE_FILES
-    # Apple Accelerate backend.
-    Accelerate.hpp
-    # CLBlast backend.
-    CLBlast.hpp
-    # Metal backend.
-    MPS.hpp
-    MPS/Matrix.hpp MPS/Matrix.mm
-    MPS/SGEMMImpl.hpp MPS/SGEMMImpl.mm
-    MPS/SGEMM.hpp MPS/SGEMM.cpp)
-
-  set_source_files_properties(${DO_Sara_Compute_SOURCE_FILES}
-    PROPERTIES LANGUAGE CXX)
+      # Apple Accelerate backend.
+      Accelerate.hpp
+      # CLBlast backend.
+      CLBlast.hpp
+      # Metal backend.
+      MPS.hpp
+      MPS/Matrix.hpp
+      MPS/Matrix.mm
+      MPS/SGEMMImpl.hpp
+      MPS/SGEMMImpl.mm
+      MPS/SGEMM.hpp
+      MPS/SGEMM.cpp)
 
   add_library(DO_Sara_Compute ${DO_Sara_Compute_SOURCE_FILES})
-
-  target_compile_options(DO_Sara_Compute
+  target_compile_options(
+    DO_Sara_Compute
     PUBLIC -x objective-c++
     PRIVATE -fobjc-arc)
-
-  target_link_libraries(DO_Sara_Compute
-    PUBLIC
-    ${DO_Sara_LIBRARIES}
-    ${CLBlast_LIBRARY}
-    ${Accelerate_LIBRARY}
-    OpenCL::OpenCL
-    "-framework Foundation"
-    "-framework Metal"
-    "-framework MetalPerformanceShaders")
-
-  set_target_properties(DO_Sara_Compute
-    PROPERTIES FOLDER "Libraries/Sara")
-
+  target_link_libraries(
+    DO_Sara_Compute
+    PUBLIC DO::Sara::Core
+           ${CLBlast_LIBRARY}
+           ${Accelerate_LIBRARY}
+           OpenCL::OpenCL
+           "-framework Foundation"
+           "-framework Metal"
+           "-framework MetalPerformanceShaders")
+  set_target_properties(DO_Sara_Compute PROPERTIES FOLDER "Libraries/Sara")
 
   # Add unit tests.
   file(GLOB test_compute_SOURCE_FILES FILES test_*.cpp)
 
-  foreach (file ${test_compute_SOURCE_FILES})
+  foreach(file ${test_compute_SOURCE_FILES})
     get_filename_component(filename "${file}" NAME_WE)
     sara_add_test(
-      NAME ${filename}
-      SOURCES ${file}
-      DEPENDENCIES DO_Sara_Compute
-      FOLDER Compute)
-  endforeach ()
-endif ()
+      NAME
+      ${filename}
+      SOURCES
+      ${file}
+      DEPENDENCIES
+      DO_Sara_Compute
+      FOLDER
+      Compute)
+  endforeach()
+endif()

@@ -6,6 +6,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
   return()
 endif ()
 
+add_subdirectory(Logging)
+
 include(UseDOSaraFileSystem)
 include(UseDOSaraGraphics)
 include(UseDOSaraImageIO)
@@ -26,3 +28,8 @@ include(UseDOSaraFeatureDescriptors)
 include(UseDOSaraMatch)
 include(UseDOSaraFeatureMatching)
 include(UseDOSaraMultiViewGeometry)
+include(UseDOSaraRANSAC)
+
+include(UseDOSaraVisualization)
+
+add_subdirectory(NeuralNetworks)

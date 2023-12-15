@@ -21,7 +21,9 @@
 #include <DO/Sara/FeatureDetectors/LineSegmentDetector.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 
 using namespace std;
@@ -79,10 +81,10 @@ auto test_on_video()
 {
   using namespace std::string_literals;
 
-#ifdef _WIN32
+#if defined(_WIN32)
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
-#elif __APPLE__
+#elif defined(__APPLE__)
   // const auto video_filepath =
   // "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
   const auto video_filepath =
@@ -164,7 +166,9 @@ auto test_on_video()
 
 GRAPHICS_MAIN()
 {
+#ifdef _OPENMP
   omp_set_num_threads(omp_get_max_threads());
+#endif
 
   // test_on_image();
   test_on_video();

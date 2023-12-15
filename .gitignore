@@ -1,7 +1,15 @@
-# Temporarily generated library folders
+# Data
+**/assets/
+**/yolov*/
 doc/source/xml/
 html/
 latex/
+
+# Model weights.
+*.weights
+*.onnx
+# TensorRT optimized model.
+*.bin
 
 # QtCreator
 CMakeLists.txt.user
@@ -17,6 +25,12 @@ CMakeLists.txt.user
 sara_book.log
 _book/
 _bookdown_files/
+
+# cache folder
+.cache
+
+# NPM
+**/node_modules/
 
 # CMake
 cmake/sara_version.cmake

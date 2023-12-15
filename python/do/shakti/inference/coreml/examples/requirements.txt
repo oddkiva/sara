@@ -1,0 +1,4 @@
+coremltools
+torch
+torchvision
+torchaudio
