@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include "DO/Sara/Core/Image/Image.hpp"
+#include <DO/Shakti/Cuda/MultiArray/ManagedMemoryAllocator.hpp>
 #include <DO/Shakti/Cuda/TensorRT/DarknetParser.hpp>
 #include <DO/Shakti/Cuda/TensorRT/InferenceExecutor.hpp>
 
@@ -22,9 +24,38 @@
 
 
 namespace sara = DO::Sara;
+namespace shakti = DO::Shakti;
 namespace fs = std::filesystem;
 namespace trt = DO::Shakti::TensorRT;
 namespace d = sara::Darknet;
+
+
+__global__ auto naive_downsample(float* out, const float* in, const int wout,
+                                 const int hout, const int win, const int hin)
+    -> void
+{
+  const int xout = blockIdx.x * blockDim.x + threadIdx.x;
+  const int yout = blockIdx.y * blockDim.y + threadIdx.y;
+  const int c = blockIdx.z * blockDim.z + threadIdx.z;
+
+  if (xout >= wout || yout >= hout || c >= 3)
+    return;
+
+  const float sx = float(win) / float(wout);
+  const float sy = float(hin) / float(hout);
+
+  int xin = int(xout * sx + 0.5f);
+  int yin = int(yout * sy + 0.5f);
+
+  if (xin >= win)
+    xin = win - 1;
+  if (yin >= hin)
+    yin = hin - 1;
+
+  const int gi_out = c * wout * hout + yout * wout + xout;
+  const int gi_in = c * win * hin + yin * win + xin;
+  out[gi_out] = in[gi_in];
+}
 
 
 // The API.
@@ -117,6 +148,12 @@ auto test_on_video(int argc, char** argv) -> void
   // Load the network and get the CUDA inference engine ready.
   auto inference_executor = trt::InferenceExecutor{serialized_net};
 
+  using shakti::ManagedMemoryAllocator;
+  using CudaManagedTensor_ = sara::Tensor_<float, 3, ManagedMemoryAllocator>;
+  auto tensor_rgb32f = CudaManagedTensor_{frame.height(), frame.width(), 3};
+  auto frame32f = sara::ImageView<sara::Rgb32f>{
+      reinterpret_cast<sara::Rgb32f *>(tensor_rgb32f.data()), frame.sizes()};
+
   // The CUDA tensors.
   auto cuda_in_tensor =
       trt::InferenceExecutor::PinnedTensor<float, 3>{3, 416, 416};
@@ -155,7 +192,7 @@ auto test_on_video(int argc, char** argv) -> void
       continue;
 
     sara::tic();
-    const auto frame32f = video_stream.frame().convert<sara::Rgb32f>();
+    sara::convert(frame, frame32f);
     sara::toc("Color conversion");
 
     sara::tic();
