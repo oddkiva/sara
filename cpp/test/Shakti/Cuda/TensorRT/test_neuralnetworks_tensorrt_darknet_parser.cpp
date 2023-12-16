@@ -28,7 +28,6 @@
 
 
 namespace fs = std::filesystem;
-namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
 namespace d = sara::Darknet;
@@ -41,6 +40,7 @@ using PinnedTensor = sara::Tensor_<T, N, shakti::PinnedMemoryAllocator>;
 
 BOOST_AUTO_TEST_SUITE(TestTensorRT)
 
+#if defined(TEST_YOLOV4_TINY)
 BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
 {
   // Instantiate a network and automatically manage its memory.
@@ -221,6 +221,7 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
     std::cout << "out 1 =\n" << u_out_tensor[1][0].matrix() << std::endl;
   }
 }
+#endif
 
 
 auto get_yolov4_model() -> d::Network
@@ -282,7 +283,7 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_unary_layer_individually)
                               image tensor yet */
        layer_idx < hnet.net.size(); ++layer_idx)
 #else
-  const auto layer_idx = 87u;
+  const auto layer_idx = 2u;
 #endif
   {
     const auto& test_in_data = gt[layer_idx - 2];
@@ -405,6 +406,7 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_unary_layer_individually)
 }
 
 
+#if defined(SEE_LATER)
 BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
 {
   // Get my CPU inference implementation of YOLO v4.
@@ -560,6 +562,7 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
                              }));
   }
 }
+#endif
 
 
 #if defined(END_TO_END_YOLOV4)

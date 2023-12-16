@@ -29,7 +29,7 @@ namespace DO::Shakti::TensorRT {
       return;
 
     const auto v = in[i];
-#define MISH_USE_FAST_MATH_VERSION
+// #define MISH_USE_FAST_MATH_VERSION
 #if defined(MISH_USE_FAST_MATH_VERSION)
     static constexpr auto thres = 20.f;
     const auto softplus =
@@ -140,7 +140,7 @@ namespace DO::Shakti::TensorRT {
                                   ? _inout_size / max_threads_per_block
                                   : _inout_size / max_threads_per_block + 1;
 
-#define DEBUG_MISH_BLOCK_CALCULATION
+// #define DEBUG_MISH_BLOCK_CALCULATION
 #if defined(DEBUG_MISH_BLOCK_CALCULATION)
       SARA_CHECK(batch_size);
       SARA_CHECK(_inout_size);
