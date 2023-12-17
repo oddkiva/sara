@@ -40,7 +40,6 @@ using PinnedTensor = sara::Tensor_<T, N, shakti::PinnedMemoryAllocator>;
 
 BOOST_AUTO_TEST_SUITE(TestTensorRT)
 
-#if defined(TEST_YOLOV4_TINY)
 BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
 {
   // Instantiate a network and automatically manage its memory.
@@ -221,9 +220,9 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_tiny_conversion)
     std::cout << "out 1 =\n" << u_out_tensor[1][0].matrix() << std::endl;
   }
 }
-#endif
 
 
+#if defined(YOLO_V4_TRT_WORKS)
 auto get_yolov4_model() -> d::Network
 {
   // Load the network on the host device (CPU).
@@ -405,8 +404,6 @@ BOOST_AUTO_TEST_CASE(test_yolo_v4_check_each_unary_layer_individually)
   }
 }
 
-
-#if defined(SEE_LATER)
 BOOST_AUTO_TEST_CASE(test_yolo_v4_conversion_incrementally_and_exhaustively)
 {
   // Get my CPU inference implementation of YOLO v4.
