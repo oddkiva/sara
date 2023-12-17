@@ -14,6 +14,9 @@ RUN wget $CUDA_REPO_ROOT_URL/$CUDA_DEB_FILENAME && \
       dpkg -i $CUDA_DEB_FILENAME && \
       apt-get update -y
 
+# We keep the following commented code for historical reasons, in case we need
+# it again.
+#
 # # Install cuDNN 8.
 # ARG CUDNN_VERSION=8.6.0.163-1+cuda11.8
 # RUN apt-mark unhold libcudnn8 libcudnn8-dev && \
