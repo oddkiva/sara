@@ -17,6 +17,7 @@
 #include <DO/Sara/NeuralNetworks/Darknet/Layer.hpp>
 
 #include <iomanip>
+#include <optional>
 
 
 namespace DO::Sara::Darknet {
@@ -25,7 +26,23 @@ namespace DO::Sara::Darknet {
   {
     using TensorView = TensorView_<float, 4>;
 
-    inline auto forward_to_conv(Darknet::Convolution& conv, int i) -> void
+    auto get_input(int i) -> TensorView
+    {
+      if (i <= 0)
+        throw std::runtime_error{"Input index must be positive!"};
+
+      return net[i - 1]->output;
+    }
+
+    auto get_output(int i) -> TensorView
+    {
+      if (i < 0)
+        throw std::runtime_error{"Input index must be positive!"};
+
+      return net[i]->output;
+    }
+
+    auto forward_to_conv(Darknet::Convolution& conv, int i) -> void
     {
       if (profile)
         tic();
@@ -37,7 +54,7 @@ namespace DO::Sara::Darknet {
         toc("Conv");
     }
 
-    inline auto forward_to_route(Darknet::Route& route, int i) -> void
+    auto forward_to_route(Darknet::Route& route, int i) -> void
     {
       auto& y = route.output;
 
@@ -106,7 +123,7 @@ namespace DO::Sara::Darknet {
       }
     }
 
-    inline auto forward_to_maxpool(Darknet::MaxPool& maxpool, int i) -> void
+    auto forward_to_maxpool(Darknet::MaxPool& maxpool, int i) -> void
     {
       if (profile)
         tic();
@@ -118,7 +135,7 @@ namespace DO::Sara::Darknet {
         toc("MaxPool");
     }
 
-    inline auto forward_to_yolo(Darknet::Yolo& yolo, int i) -> void
+    auto forward_to_yolo(Darknet::Yolo& yolo, int i) -> void
     {
       if (profile)
         tic();
@@ -130,7 +147,7 @@ namespace DO::Sara::Darknet {
         toc("YOLO forward pass");
     }
 
-    inline auto forward_to_upsample(Darknet::Upsample& upsample, int i) -> void
+    auto forward_to_upsample(Darknet::Upsample& upsample, int i) -> void
     {
       if (profile)
         tic();
@@ -142,13 +159,37 @@ namespace DO::Sara::Darknet {
         toc("Upsample");
     }
 
-    inline auto forward(const TensorView_<float, 4>& x) -> void
+    auto forward_to_shortcut(Darknet::Shortcut& shortcut, int i) -> void
     {
+      if (profile)
+        tic();
+
+      const auto i1 = i - 1;
+      const auto i2 = shortcut.from < 0  //
+                          ? i + shortcut.from
+                          : shortcut.from;
+      const auto& fx = net[i1]->output;
+      const auto& x = net[i2]->output;
+      shortcut.forward(fx, x);
+
+      if (profile)
+        toc("Shortcut");
+    }
+
+    auto forward(const TensorView_<float, 4>& x,
+                 std::optional<std::size_t> up_to_layer_idx = std::nullopt)
+        -> void
+    {
+      const auto n = up_to_layer_idx.has_value()  //
+                         ? (*up_to_layer_idx + 1)
+                         : net.size();
+
       net[0]->output = x;
-      for (auto i = 1u; i < net.size(); ++i)
+      for (auto i = 1u; i < n; ++i)
       {
         if (debug)
-          std::cout << "Forwarding to layer " << i << "\n"
+          std::cout << "Forwarding to layer " << i << " (" << net[i]->type
+                    << ")\n"
                     << *net[i] << std::endl;
 
         if (auto conv = dynamic_cast<Convolution*>(net[i].get()))
@@ -161,8 +202,11 @@ namespace DO::Sara::Darknet {
           forward_to_upsample(*upsample, i);
         else if (auto yolo = dynamic_cast<Yolo*>(net[i].get()))
           forward_to_yolo(*yolo, i);
+        else if (auto shortcut = dynamic_cast<Shortcut*>(net[i].get()))
+          forward_to_shortcut(*shortcut, i);
         else
-          break;
+          throw std::runtime_error{"Layer[" + std::to_string(i) + "] = " +
+                                   net[i]->type + " is not implemented!"};
 
         if (debug)
           std::cout << std::endl;

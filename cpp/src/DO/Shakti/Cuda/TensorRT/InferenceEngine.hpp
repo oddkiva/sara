@@ -15,8 +15,6 @@
 #  define NOMINMAX
 #endif
 
-#include <DO/Sara/Defines.hpp>
-
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <DO/Shakti/Cuda/MultiArray/ManagedMemoryAllocator.hpp>
@@ -26,7 +24,7 @@
 
 namespace DO::Shakti::TensorRT {
 
-  class DO_SARA_EXPORT InferenceExecutor
+  class InferenceEngine
   {
   public:
     template <typename T, int N>
@@ -35,23 +33,30 @@ namespace DO::Shakti::TensorRT {
     template <typename T, int N>
     using ManagedTensor = Sara::Tensor_<T, N, ManagedMemoryAllocator>;
 
-    InferenceExecutor() = default;
+    InferenceEngine() = default;
 
-    explicit InferenceExecutor(const HostMemoryUniquePtr& serialized_network);
+    explicit InferenceEngine(const std::string& plan_filepath)
+    {
+      load_from_plan_file(plan_filepath);
+    }
+
+    explicit InferenceEngine(const HostMemoryUniquePtr& serialized_network);
+
+    auto load_from_plan_file(const std::string& plan_filepath) -> void;
 
     auto operator()(const PinnedTensor<float, 3>& in,
                     PinnedTensor<float, 3>& out,  //
                     const bool synchronize = true) const -> void;
 
     auto operator()(const PinnedTensor<float, 3>& in,
-                    std::array<PinnedTensor<float, 3>, 2>& out,  //
+                    std::vector<PinnedTensor<float, 3>>& out,  //
                     const bool synchronize = true) const -> void;
 
     auto operator()(const ManagedTensor<float, 3>& in,
-                    std::array<PinnedTensor<float, 3>, 2>& out,  //
+                    std::vector<PinnedTensor<float, 3>>& out,  //
                     const bool synchronize = true) const -> void;
 
-    // private:
+  private:
     CudaStreamUniquePtr _cuda_stream = make_cuda_stream();
     RuntimeUniquePtr _runtime = {nullptr, &runtime_deleter};
     CudaEngineUniquePtr _engine = {nullptr, &engine_deleter};

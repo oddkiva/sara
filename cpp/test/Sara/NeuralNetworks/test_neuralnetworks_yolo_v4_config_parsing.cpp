@@ -31,9 +31,9 @@ BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
 {
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   const auto cfg_filepath =
-      data_dir_path / "trained_models" / "yolov4-tiny.cfg";
+      data_dir_path / "trained_models" / "yolov4-tiny" / "yolov4-tiny.cfg";
   const auto weights_filepath =
-      data_dir_path / "trained_models" / "yolov4-tiny.weights";
+      data_dir_path / "trained_models" / "yolov4-tiny" / "yolov4-tiny.weights";
   BOOST_CHECK(fs::exists(cfg_filepath));
 
   auto net =
