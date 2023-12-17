@@ -169,7 +169,7 @@ auto test_on_video(int argc, char** argv) -> void
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   static constexpr auto yolo_version = 4;
-  static constexpr auto is_tiny = true;
+  static constexpr auto is_tiny = false;
   auto yolo_model = "yolov" + std::to_string(yolo_version);
   if (is_tiny)
     yolo_model += "-tiny";
