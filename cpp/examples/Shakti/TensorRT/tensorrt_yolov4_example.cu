@@ -30,7 +30,6 @@
 
 
 namespace sara = DO::Sara;
-namespace s = sara;
 namespace fs = std::filesystem;
 namespace trt = DO::Shakti::TensorRT;
 namespace d = sara::Darknet;

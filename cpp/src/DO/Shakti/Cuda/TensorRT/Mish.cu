@@ -29,7 +29,7 @@ namespace DO::Shakti::TensorRT {
       return;
 
     const auto v = in[i];
-// #define MISH_USE_FAST_MATH_VERSION
+#define MISH_USE_FAST_MATH_VERSION
 #if defined(MISH_USE_FAST_MATH_VERSION)
     static constexpr auto thres = 20.f;
     const auto softplus =
