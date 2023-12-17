@@ -15,39 +15,52 @@
 #  define NOMINMAX
 #endif
 
-#include <DO/Sara/Defines.hpp>
-
 #include <DO/Sara/Core/Tensor.hpp>
 
+#include <DO/Shakti/Cuda/MultiArray/ManagedMemoryAllocator.hpp>
 #include <DO/Shakti/Cuda/MultiArray/PinnedMemoryAllocator.hpp>
 #include <DO/Shakti/Cuda/TensorRT/Helpers.hpp>
 
 
 namespace DO::Shakti::TensorRT {
 
-  class DO_SARA_EXPORT InferenceExecutor
+  class InferenceEngine
   {
   public:
     template <typename T, int N>
-    using PinnedTensor = Sara::Tensor_<T, N, Shakti::PinnedMemoryAllocator>;
+    using PinnedTensor = Sara::Tensor_<T, N, PinnedMemoryAllocator>;
 
-    InferenceExecutor() = default;
+    template <typename T, int N>
+    using ManagedTensor = Sara::Tensor_<T, N, ManagedMemoryAllocator>;
 
-    explicit InferenceExecutor(const HostMemoryUniquePtr& serialized_network);
+    InferenceEngine() = default;
+
+    explicit InferenceEngine(const std::string& plan_filepath)
+    {
+      load_from_plan_file(plan_filepath);
+    }
+
+    explicit InferenceEngine(const HostMemoryUniquePtr& serialized_network);
+
+    auto load_from_plan_file(const std::string& plan_filepath) -> void;
 
     auto operator()(const PinnedTensor<float, 3>& in,
                     PinnedTensor<float, 3>& out,  //
                     const bool synchronize = true) const -> void;
 
     auto operator()(const PinnedTensor<float, 3>& in,
-                    std::array<PinnedTensor<float, 3>, 2>& out,  //
+                    std::vector<PinnedTensor<float, 3>>& out,  //
                     const bool synchronize = true) const -> void;
 
-    // private:
+    auto operator()(const ManagedTensor<float, 3>& in,
+                    std::vector<PinnedTensor<float, 3>>& out,  //
+                    const bool synchronize = true) const -> void;
+
+  private:
     CudaStreamUniquePtr _cuda_stream = make_cuda_stream();
     RuntimeUniquePtr _runtime = {nullptr, &runtime_deleter};
     CudaEngineUniquePtr _engine = {nullptr, &engine_deleter};
     ContextUniquePtr _context = {nullptr, &context_deleter};
   };
 
-}  // namespace DO::Sara::TensorRT
+}  // namespace DO::Shakti::TensorRT

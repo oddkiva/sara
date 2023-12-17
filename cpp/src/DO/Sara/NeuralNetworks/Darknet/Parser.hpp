@@ -66,7 +66,7 @@ namespace DO::Sara::Darknet {
   };
 
 
-  auto load_yolov4_tiny_model(const std::filesystem::path& model_dir_path)
-      -> Network;
+  auto load_yolo_model(const std::filesystem::path& model_dir_path,
+                       const int version, const bool is_tiny) -> Network;
 
 }  // namespace DO::Sara::Darknet

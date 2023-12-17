@@ -23,7 +23,6 @@ add_custom_command(
     ${GLSLC_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/shader.frag -o
     $<TARGET_FILE_DIR:hello_vulkan_image>/hello_vulkan_image_shaders/frag.spv)
 
-# file(GLOB SHADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.vert *.frag)
 add_custom_command(
   TARGET hello_vulkan_image
   PRE_BUILD

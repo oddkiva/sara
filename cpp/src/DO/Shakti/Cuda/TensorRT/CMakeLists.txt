@@ -7,10 +7,12 @@ add_library(
   Helpers.hpp #
   IO.hpp #
   IO.cpp #
-  InferenceExecutor.hpp #
-  InferenceExecutor.cpp #
+  InferenceEngine.hpp #
+  InferenceEngine.cpp #
   DarknetParser.hpp #
   DarknetParser.cpp #
+  Mish.cu
+  Mish.hpp
   Yolo.cpp
   Yolo.hpp
   YoloImpl.hpp

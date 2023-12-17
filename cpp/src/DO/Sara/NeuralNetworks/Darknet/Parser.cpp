@@ -57,12 +57,17 @@ namespace DO::Sara::Darknet {
       nodes.emplace_back(new Convolution);
     else if (layer_type == "route")
       nodes.emplace_back(new Route);
+    else if (layer_type == "shortcut")
+      nodes.emplace_back(new Shortcut);
     else if (layer_type == "maxpool")
       nodes.emplace_back(new MaxPool);
     else if (layer_type == "upsample")
       nodes.emplace_back(new Upsample);
     else if (layer_type == "yolo")
       nodes.emplace_back(new Yolo);
+    else
+      throw std::runtime_error{"The \"" + layer_type +
+                               "\" layer is not implemented!"};
 
     nodes.back()->type = layer_type;
   }
@@ -91,6 +96,8 @@ namespace DO::Sara::Darknet {
       dynamic_cast<Upsample&>(*nodes.back()).update_output_sizes();
     else if (layer_type == "yolo")
       dynamic_cast<Yolo&>(*nodes.back()).update_output_sizes(nodes);
+    else if (layer_type == "shortcut")
+      dynamic_cast<Shortcut&>(*nodes.back()).update_output_sizes(nodes);
 
     std::cout << "CHECKING CURRENT LAYER: " << std::endl;
     std::cout << *nodes.back() << std::endl;
@@ -195,29 +202,38 @@ namespace DO::Sara::Darknet {
   auto NetworkWeightLoader::load(std::vector<std::unique_ptr<Layer>>& net)
       -> void
   {
+    auto i = 0;
     for (auto& layer : net)
     {
       if (auto d = dynamic_cast<Convolution*>(layer.get()))
       {
         if (debug)
           std::cout << "LOADING WEIGHTS FOR CONVOLUTIONAL LAYER:\n"
+                    << "[" << i << "]\n"
                     << *layer << std::endl;
         d->load_weights(fp);
+        ++i;
       }
     }
   }
 
 
-  auto load_yolov4_tiny_model(const std::filesystem::path& model_dir_path)
-      -> Network
+  auto load_yolo_model(const std::filesystem::path& model_dir_path,
+                       const int version, const bool is_tiny) -> Network
   {
-    const auto cfg_filepath = model_dir_path / "yolov4-tiny.cfg";
-    const auto weights_filepath = model_dir_path / "yolov4-tiny.weights";
+    auto yolo_name = "yolov" + std::to_string(version);
+    if (is_tiny)
+      yolo_name += "-tiny";
+    const auto cfg_filepath = model_dir_path / (yolo_name + ".cfg");
+    const auto weights_filepath = model_dir_path / (yolo_name + ".weights");
 
     auto model = Network{};
     auto& net = model.net;
     net = NetworkParser{}.parse_config_file(cfg_filepath.string());
-    NetworkWeightLoader{weights_filepath.string()}.load(net);
+
+    auto network_weight_loader = NetworkWeightLoader{weights_filepath.string()};
+    network_weight_loader.debug = true;
+    network_weight_loader.load(net);
 
     return model;
   }

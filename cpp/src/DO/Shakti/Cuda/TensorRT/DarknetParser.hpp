@@ -25,7 +25,7 @@
 
 namespace DO::Shakti::TensorRT {
 
-  struct YoloV4TinyConverter
+  struct YoloV4Converter
   {
     using TrtNet = nvinfer1::INetworkDefinition;
     using HostNet = std::vector<std::unique_ptr<DO::Sara::Darknet::Layer>>;
@@ -33,11 +33,14 @@ namespace DO::Shakti::TensorRT {
     TrtNet* tnet;
     const HostNet& hnet;
 
-    YoloV4TinyConverter(TrtNet* tnet, const HostNet& hnet)
+    YoloV4Converter(TrtNet* tnet, const HostNet& hnet)
       : tnet{tnet}
       , hnet{hnet}
     {
     }
+
+    auto make_input_tensor(const int c, const int h, const int w) const
+        -> nvinfer1::ITensor*;
 
     auto make_input_rgb_tensor(const int w, const int h) const
         -> nvinfer1::ITensor*;
@@ -59,6 +62,10 @@ namespace DO::Shakti::TensorRT {
     auto add_concat_layer(const int layer_idx,
                           std::vector<nvinfer1::ITensor*>& fmaps) const -> void;
 
+    auto add_shortcut_layer(const int layer_idx,
+                            std::vector<nvinfer1::ITensor*>& fmaps) const
+        -> void;
+
     auto add_maxpool_layer(const int layer_idx,
                            std::vector<nvinfer1::ITensor*>& fmaps) const
         -> void;
@@ -70,12 +77,20 @@ namespace DO::Shakti::TensorRT {
     auto add_yolo_layer(const int layer_idx,
                         std::vector<nvinfer1::ITensor*>& fmaps) const -> void;
 
-    auto operator()(const std::size_t max_layers =
-                        std::numeric_limits<std::size_t>::max()) -> void;
+    auto operator()() -> void;
+
+    auto operator()(const std::size_t begin, const std::size_t end) -> void;
+
+    auto operator()(const std::size_t at) -> void
+    {
+      (*this)(at, at + 1);
+    }
   };
 
 
-  auto convert_yolo_v4_tiny_network_from_darknet(
-      const std::string& trained_model_dir) -> HostMemoryUniquePtr;
+  auto
+  convert_yolo_v4_network_from_darknet(const std::string& trained_model_dir,
+                                       const bool is_tiny = true)
+      -> HostMemoryUniquePtr;
 
 }  // namespace DO::Shakti::TensorRT

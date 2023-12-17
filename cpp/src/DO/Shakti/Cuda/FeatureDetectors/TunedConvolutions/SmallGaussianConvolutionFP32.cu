@@ -300,18 +300,18 @@ namespace DO::Shakti::Cuda::Gaussian {
     timer.restart();
 #endif
     {
-      const auto threadsperBlock = dim3(kernel_max_radius, tile_size);
-      const auto numBlocks = dim3(
-          (d_in.padded_width() + threadsperBlock.x - 1) / threadsperBlock.x,
-          (d_in.height() + threadsperBlock.y - 1) / threadsperBlock.y);
+      const auto threads_per_block = dim3(kernel_max_radius, tile_size);
+      const auto num_blocks = dim3(
+          (d_in.padded_width() + threads_per_block.x - 1) / threads_per_block.x,
+          (d_in.height() + threads_per_block.y - 1) / threads_per_block.y);
 
       // x-convolution.
-      convx<<<numBlocks, threadsperBlock>>>(d_in.data(),          //
-                                            d_convx.data(),       //
-                                            d_in.width(),         //
-                                            d_in.height(),        //
-                                            d_in.padded_width(),  //
-                                            kernel_index);
+      convx<<<num_blocks, threads_per_block>>>(d_in.data(),          //
+                                               d_convx.data(),       //
+                                               d_in.width(),         //
+                                               d_in.height(),        //
+                                               d_in.padded_width(),  //
+                                               kernel_index);
     }
 #ifdef PROFILE_GAUSSIAN_CONVOLUTION
     elapsed = timer.elapsed_ms();

@@ -262,6 +262,11 @@ private: /* Methods to initialize objects for the graphics pipeline. */
     auto h = int{};
     glfwGetWindowSize(window, &w, &h);
 
+    const auto dynamic_viewport_states = std::vector<VkDynamicState>{
+        VK_DYNAMIC_STATE_VIEWPORT,  //
+        VK_DYNAMIC_STATE_SCISSOR    //
+    };
+
     _graphics_pipeline =
         VulkanImagePipelineBuilder{_device, _render_pass}
             .vertex_shader_path(vertex_shader_path)
@@ -270,6 +275,7 @@ private: /* Methods to initialize objects for the graphics pipeline. */
             .input_assembly_topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
             .viewport_sizes(static_cast<float>(w), static_cast<float>(h))
             .scissor_sizes(w, h)
+            .dynamic_states(dynamic_viewport_states)
             .create();
   }
 
@@ -631,8 +637,8 @@ private: /* Methods for onscreen rendering */
       vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                         _graphics_pipeline);
 
-#ifdef ALLOW_DYNAMIC_VIEWPORT_AND_SCISSOR_STATE
-      VkViewport viewport{};
+      // Important: reset the viewport.
+      auto viewport = VkViewport{};
       viewport.x = 0.0f;
       viewport.y = 0.0f;
       viewport.width = static_cast<float>(_swapchain.extent.width);
@@ -641,11 +647,11 @@ private: /* Methods for onscreen rendering */
       viewport.maxDepth = 1.0f;
       vkCmdSetViewport(command_buffer, 0, 1, &viewport);
 
-      VkRect2D scissor{};
+      // Important: reset the scissor.
+      auto scissor = VkRect2D{};
       scissor.offset = {0, 0};
       scissor.extent = _swapchain.extent;
       vkCmdSetScissor(command_buffer, 0, 1, &scissor);
-#endif
 
       // Pass the VBO to the graphics pipeline.
       static const auto vbos = std::array<VkBuffer, 1>{_vbo};
@@ -837,8 +843,8 @@ private: /* Methods for onscreen rendering */
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
         _framebuffer_resized)
     {
-      _framebuffer_resized = false;
       recreate_swapchain();
+      _framebuffer_resized = false;
     }
     else if (result != VK_SUCCESS)
     {
@@ -888,24 +894,12 @@ private: /* Swapchain recreation */
     init_swapchain(_window);
     init_swapchain_fbos();
 
-    // // This time only modify the view matrix.
-    // {
-    //   _mvp.view.setIdentity();
-    //   _mvp.view.scale(static_cast<float>(w) / _vstream.width());
-    // }
-
     // Recalculate the projection matrix.
-    {
-      const auto fb_aspect_ratio = static_cast<float>(w) / h;
-      _mvp.projection = k::orthographic(      //
-          -fb_aspect_ratio, fb_aspect_ratio,  //
-          -1.f, 1.f,                          //
-          -1.f, 1.f);
-    }
-
-    SARA_CHECK(_mvp.model.matrix());
-    SARA_CHECK(_mvp.view.matrix());
-    SARA_CHECK(_mvp.projection);
+    const auto fb_aspect_ratio = static_cast<float>(w) / h;
+    _mvp.projection = k::orthographic(      //
+        -fb_aspect_ratio, fb_aspect_ratio,  //
+        -1.f, 1.f,                          //
+        -1.f, 1.f);
   }
 
 private:

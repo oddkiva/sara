@@ -16,7 +16,7 @@
 #include <DO/Shakti/Halide/SIFT/V2/Pipeline.hpp>
 
 
-namespace Shakti::Halide {
+namespace DO::Shakti::Halide {
 
   struct SIFT
   {
@@ -54,4 +54,4 @@ namespace Shakti::Halide {
     DO::Shakti::HalideBackend::v2::SiftPyramidPipeline pipeline;
   };
 
-}  // namespace Shakti::Halide
+}  // namespace DO::Shakti::Halide

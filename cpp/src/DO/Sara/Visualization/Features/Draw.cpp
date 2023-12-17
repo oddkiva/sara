@@ -16,7 +16,7 @@
 using namespace std;
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   auto draw(const OERegion& f, const Rgb8& color, float scale,
             const Point2f& offset) -> void
@@ -37,16 +37,18 @@ namespace DO { namespace Sara {
     // In slides:
     //   http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
     // the blob radius is the scale multiplied sqrt(2).
-    constexpr auto sqrt_two = static_cast<float>(M_SQRT2);
+    static constexpr auto sqrt_two = static_cast<float>(M_SQRT2);
     const auto a = radii(0) * sqrt_two;
     const auto b = radii(1) * sqrt_two;
 
     // Orientation.
-    const auto ori_degree = atan2(U(1, 0), U(0, 0)) *  //
-                            180 / static_cast<float>(M_PI);
+    const auto& ox = U(0, 0);
+    const auto& oy = U(1, 0);
+    static constexpr auto radian_32f = static_cast<float>(180 / M_PI);
+    const auto ori_degree = std::atan2(oy, ox) * radian_32f;
 
     // Start and end points of orientation line.
-    const Matrix2f& L = f.affinity().block(0, 0, 2, 2);
+    const Matrix2f& L = f.affinity().topLeftCorner<2, 2>();
     const Vector2f& p1 = z * (f.center() + offset);
     const Vector2f& p2 = p1 + z * sqrt_two * L * Vector2f::UnitX();
 
@@ -99,16 +101,18 @@ namespace DO { namespace Sara {
     // In slides:
     //   http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
     // the blob radius is the scale multiplied sqrt(2).
-    constexpr auto sqrt_two = static_cast<float>(M_SQRT2);
+    static constexpr auto sqrt_two = static_cast<float>(M_SQRT2);
     const auto a = radii(0) * sqrt_two;
     const auto b = radii(1) * sqrt_two;
 
     // Orientation.
-    const auto ori_degree = atan2(U(1, 0), U(0, 0)) *  //
-                            180 / static_cast<float>(M_PI);
+    const auto& ox = U(0, 0);
+    const auto& oy = U(1, 0);
+    static constexpr auto radian_32f = static_cast<float>(180 / M_PI);
+    const auto ori_degree = std::atan2(oy, ox) * radian_32f;
 
     // Start and end points of orientation line.
-    const Matrix2f& L = f.affinity().block(0, 0, 2, 2);
+    const Matrix2f& L = f.affinity().topLeftCorner<2, 2>();
     const Vector2f& p1 = z * (f.center() + offset);
     const Vector2f& p2 = p1 + z * sqrt_two * L * Vector2f::UnitX();
 
@@ -142,4 +146,4 @@ namespace DO { namespace Sara {
     }
   }
 
-}}  // namespace DO::Sara
+}  // namespace DO::Sara
