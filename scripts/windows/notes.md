@@ -9,6 +9,7 @@ Otherwise we can rebuild things ourselves as follows:
   - Download `jom` and put it in the source folder.
   - Run `./configure.bat`
   - I'd rather not use `vcpkg` for Qt5.
+- Halide: *DON'T* install from `vcpkg`. Grab the binaries instead from GitHub.
 - **Boost**: use and readapt the configuration `user-config.jam` to build
   Boost binaries with `bjam`.
   - `vcpkg` does not bring much value to build boost.
