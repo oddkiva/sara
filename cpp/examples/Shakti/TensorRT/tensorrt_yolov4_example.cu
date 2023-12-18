@@ -255,6 +255,7 @@ auto test_on_video(int argc, char** argv) -> void
 
   const auto skip = argc < 3 ? 0 : std::stoi(argv[2]);
   const auto iou_thres = argc < 4 ? 0.4f : std::stof(argv[3]);
+  const auto is_tiny = argc < 5 ? false : static_cast<bool>(std::stoi(argv[4]));
   SARA_CHECK(skip);
   SARA_CHECK(iou_thres);
 
@@ -264,7 +265,6 @@ auto test_on_video(int argc, char** argv) -> void
   // Instantiate the YOLO v4 object detector.
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   static constexpr auto yolo_version = 4;
-  static constexpr auto is_tiny = false;
   auto yolo_model = "yolov" + std::to_string(yolo_version);
   if (is_tiny)
     yolo_model += "-tiny";
@@ -346,11 +346,15 @@ auto test_on_video(int argc, char** argv) -> void
     sara::get_event(5, ev);
     if (ev.key == ' ')
       pause = !pause;
+    if (ev.key == sara::KEY_ESCAPE)
+      break;
     if (pause)
     {
       const auto k = sara::get_key();
       if (k == ' ')
         pause = false;
+      else if (k == sara::KEY_ESCAPE)
+        break;
     }
   }
 }
