@@ -327,9 +327,7 @@ auto test_on_video(int argc, char** argv) -> void
       const auto w = int_round(det.box(2));
       const auto h = int_round(det.box(3));
 
-      sara::draw_rect(frame,       //
-                      x, y, w, h,  //
-                      class_colors[label_index], 5);
+      sara::draw_rect(frame, x, y, w, h, class_colors[label_index], 5);
 
       const auto& class_name = yolo.classes()[label_index];
       const auto class_score = int_round(det.class_probs[label_index] * 100);
@@ -345,7 +343,7 @@ auto test_on_video(int argc, char** argv) -> void
     auto ev = sara::Event{};
     sara::get_event(5, ev);
     if (ev.key == ' ')
-      pause = !pause;
+      pause = true;
     if (ev.key == sara::KEY_ESCAPE)
       break;
     if (pause)
