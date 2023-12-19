@@ -15,4 +15,5 @@ torch
 torchvision
 torchaudio
 
+PyOpenGL
 PySide2
