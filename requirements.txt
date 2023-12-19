@@ -8,4 +8,10 @@ ipdbplugin
 
 numpy
 scipy
+
+coremltools
+torch
+torchvision
+torchaudio
+
 PySide2
