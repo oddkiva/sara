@@ -92,13 +92,16 @@ equation
 \end{equation}
 
 $\mathbf{F}_k$ is called the *transition matrix* and the simplest one we can
-obtain is from the temporal integration as in classical Newtonian mechanics:
+obtain is from the temporal integration as in kinematics or classical Newtonian
+mechanics and assuming that the state acceleration vector is constant:
 
 \begin{equation}
   \mathbf{b}_{k+1} =
     \mathbf{b}_k +
     \dot{\mathbf{b}}_k (t_{k+1} - t_k) +
-    \frac{1}{2} \ddot{\mathbf{b}}_k (t_{k+1} - t_k)^2
+    \frac{1}{2} \ddot{\mathbf{b}}_k (t_{k+1} - t_k)^2 \\
+  \dot{\mathbf{b}}_{k+1} =
+    \dot{\mathbf{b}}_k + \ddot{\mathbf{b}}_k (t_{k+1} - t_k)
 \end{equation}
 
 And so the matrix $\mathbf{F}_k$ is
