@@ -3,9 +3,6 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
-from tool.region_loss import RegionLoss
-from tool.yolo_layer import YoloLayer
-
 
 class Upsample_expand(nn.Module):
     def __init__(self, stride=2):
@@ -57,29 +54,6 @@ class Reorg(nn.Module):
         return x
 
 
-class GlobalAvgPool2d(nn.Module):
-    def __init__(self):
-        super(GlobalAvgPool2d, self).__init__()
-
-    def forward(self, x):
-        N = x.data.size(0)
-        C = x.data.size(1)
-        H = x.data.size(2)
-        W = x.data.size(3)
-        x = F.avg_pool2d(x, (H, W))
-        x = x.view(N, C)
-        return x
-
-
-# for route, shortcut and sam
-class EmptyModule(nn.Module):
-    def __init__(self):
-        super(EmptyModule, self).__init__()
-
-    def forward(self, x):
-        return x
-
-
 # support route shortcut and reorg
 class Darknet(nn.Module):
     def __init__(self, cfgfile, inference=False):
@@ -102,96 +76,6 @@ class Darknet(nn.Module):
 
         self.header = torch.IntTensor([0, 0, 0, 0])
         self.seen = 0
-
-    def forward(self, x):
-        ind = -2
-        self.loss = None
-        outputs = dict()
-        out_boxes = []
-        for block in self.blocks:
-            ind = ind + 1
-            # if ind > 0:
-            #    return x
-
-            if block['type'] == 'net':
-                continue
-            elif block['type'] in ['convolutional', 'maxpool', 'reorg', 'upsample', 'avgpool', 'softmax', 'connected']:
-                x = self.models[ind](x)
-                outputs[ind] = x
-            elif block['type'] == 'route':
-                layers = block['layers'].split(',')
-                layers = [int(i) if int(i) > 0 else int(i) + ind for i in layers]
-                if len(layers) == 1:
-                    if 'groups' not in block.keys() or int(block['groups']) == 1:
-                        x = outputs[layers[0]]
-                        outputs[ind] = x
-                    else:
-                        groups = int(block['groups'])
-                        group_id = int(block['group_id'])
-                        _, b, _, _ = outputs[layers[0]].shape
-                        x = outputs[layers[0]][:, b // groups * group_id:b // groups * (group_id + 1)]
-                        outputs[ind] = x
-                elif len(layers) == 2:
-                    x1 = outputs[layers[0]]
-                    x2 = outputs[layers[1]]
-                    x = torch.cat((x1, x2), 1)
-                    outputs[ind] = x
-                elif len(layers) == 4:
-                    x1 = outputs[layers[0]]
-                    x2 = outputs[layers[1]]
-                    x3 = outputs[layers[2]]
-                    x4 = outputs[layers[3]]
-                    x = torch.cat((x1, x2, x3, x4), 1)
-                    outputs[ind] = x
-                else:
-                    print("rounte number > 2 ,is {}".format(len(layers)))
-
-            elif block['type'] == 'shortcut':
-                from_layer = int(block['from'])
-                activation = block['activation']
-                from_layer = from_layer if from_layer > 0 else from_layer + ind
-                x1 = outputs[from_layer]
-                x2 = outputs[ind - 1]
-                x = x1 + x2
-                if activation == 'leaky':
-                    x = F.leaky_relu(x, 0.1, inplace=True)
-                elif activation == 'relu':
-                    x = F.relu(x, inplace=True)
-                outputs[ind] = x
-            elif block['type'] == 'sam':
-                from_layer = int(block['from'])
-                from_layer = from_layer if from_layer > 0 else from_layer + ind
-                x1 = outputs[from_layer]
-                x2 = outputs[ind - 1]
-                x = x1 * x2
-                outputs[ind] = x
-            elif block['type'] == 'region':
-                continue
-                if self.loss:
-                    self.loss = self.loss + self.models[ind](x)
-                else:
-                    self.loss = self.models[ind](x)
-                outputs[ind] = None
-            elif block['type'] == 'yolo':
-                # if self.training:
-                #     pass
-                # else:
-                #     boxes = self.models[ind](x)
-                #     out_boxes.append(boxes)
-                boxes = self.models[ind](x)
-                out_boxes.append(boxes)
-            elif block['type'] == 'cost':
-                continue
-            else:
-                print('unknown type %s' % (block['type']))
-
-        if self.training:
-            return out_boxes
-        else:
-            return get_region_boxes(out_boxes)
-
-    def print_network(self):
-        print_cfg(self.blocks)
 
     def create_network(self, blocks):
         models = nn.ModuleList()
@@ -257,10 +141,6 @@ class Darknet(nn.Module):
                 out_filters.append(prev_filters)
                 prev_stride = stride * prev_stride
                 out_strides.append(prev_stride)
-                models.append(model)
-            elif block['type'] == 'avgpool':
-                model = GlobalAvgPool2d()
-                out_filters.append(prev_filters)
                 models.append(model)
             elif block['type'] == 'softmax':
                 model = nn.Softmax()

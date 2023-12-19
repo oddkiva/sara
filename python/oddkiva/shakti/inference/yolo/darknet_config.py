@@ -82,6 +82,7 @@ class DarknetConfig:
                 'batch_normalize': bool(batch_normalize),
                 'filters': filters,
                 'size': size,
+                'stride': stride,
                 'pad': pad,
                 'activation': activation,
             }

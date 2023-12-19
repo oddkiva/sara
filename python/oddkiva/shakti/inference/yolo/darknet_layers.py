@@ -97,3 +97,70 @@ class ConvBNA(nn.Module):
 
     def forward(self, x):
         return self.block.forward(x)
+
+
+class Route(nn.Module):
+
+    def __init__(self):
+        super(Route, self).__init__()
+
+    def forward(self, x):
+        raise NotImplementedError()
+        # layers = block['layers'].split(',')
+        # layers = [int(i) if int(i) > 0 else int(i) + ind for i in layers]
+        # if len(layers) == 1:
+        #     if 'groups' not in block.keys() or int(block['groups']) == 1:
+        #         x = outputs[layers[0]]
+        #         outputs[ind] = x
+        #     else:
+        #         groups = int(block['groups'])
+        #         group_id = int(block['group_id'])
+        #         _, b, _, _ = outputs[layers[0]].shape
+        #         x = outputs[layers[0]][:, b // groups * group_id:b // groups * (group_id + 1)]
+        #         outputs[ind] = x
+        # elif len(layers) == 2:
+        #     x1 = outputs[layers[0]]
+        #     x2 = outputs[layers[1]]
+        #     x = torch.cat((x1, x2), 1)
+        #     outputs[ind] = x
+        # elif len(layers) == 4:
+        #     x1 = outputs[layers[0]]
+        #     x2 = outputs[layers[1]]
+        #     x3 = outputs[layers[2]]
+        #     x4 = outputs[layers[3]]
+        #     x = torch.cat((x1, x2, x3, x4), 1)
+        #     outputs[ind] = x
+        # else:
+        #     print("rounte number > 2 ,is {}".format(len(layers)))
+        return x
+
+
+class Shortcut(nn.Module):
+
+    def __init__(self):
+        super(Shortcut, self).__init__()
+
+    def forward(self, x):
+        raise NotImplementedError()
+        # from_layer = int(block['from'])
+        # activation = block['activation']
+        # from_layer = from_layer if from_layer > 0 else from_layer + ind
+        # x1 = outputs[from_layer]
+        # x2 = outputs[ind - 1]
+        # x = x1 + x2
+        # if activation == 'leaky':
+        #     x = F.leaky_relu(x, 0.1, inplace=True)
+        # elif activation == 'relu':
+        #     x = F.relu(x, inplace=True)
+        # outputs[ind] = x
+        return x
+
+
+class Yolo(nn.Module):
+
+    def __init__(self):
+        super(Yolo, self).__init__()
+
+    def forward(self, x):
+        raise NotImplementedError()
+        return x;
