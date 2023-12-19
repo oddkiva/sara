@@ -63,10 +63,9 @@ elif SYSTEM == "Darwin":
 
 try:
     import pybind11
+    import sysconfig
 
     PYBIND11_DIR = pybind11.get_cmake_dir()
-
-    import distutils.sysconfig as sysconfig
 
     PYTHON_INCLUDE_DIR = sysconfig.get_python_inc()
     PYTHON_LIBRARY = sysconfig.get_config_var("LIBDIR")
