@@ -1,6 +1,9 @@
+from typing import Any
+
+import torch
 import torch.nn as nn
 
-import oddkiva.shakti.inference.yolo.darknet_config import DarknetConfig
+from oddkiva.shakti.inference.yolo.darknet_config import DarknetConfig
 
 
 class Darknet(nn.Module):
@@ -8,23 +11,16 @@ class Darknet(nn.Module):
     def __init__(self, darknet_config: DarknetConfig, inference:bool=False):
         super(Darknet, self).__init__()
 
+        self.blocks = darknet_config
+
         self.inference = inference
         self.training = not self.inference
 
         self.models = self.create_network(self.blocks)  # merge conv, bn,leaky
         self.loss = self.models[len(self.models) - 1]
 
-        if self.blocks[(len(self.blocks) - 1)]['type'] == 'region':
-            self.anchors = self.loss.anchors
-            self.num_anchors = self.loss.num_anchors
-            self.anchor_step = self.loss.anchor_step
-            self.num_classes = self.loss.num_classes
-
         self.header = torch.IntTensor([0, 0, 0, 0])
         self.seen = 0
-
-    def print_network(self):
-        print_cfg(self.blocks)
 
     def create_network(self, blocks):
         models = nn.ModuleList()
@@ -39,41 +35,7 @@ class Darknet(nn.Module):
                 prev_filters = int(block['channels'])
                 continue
             elif block['type'] == 'convolutional':
-                conv_id = conv_id + 1
-                batch_normalize = int(block['batch_normalize'])
-                filters = int(block['filters'])
-                kernel_size = int(block['size'])
-                stride = int(block['stride'])
-                is_pad = int(block['pad'])
-                pad = (kernel_size - 1) // 2 if is_pad else 0
-                activation = block['activation']
-                model = nn.Sequential()
-                if batch_normalize:
-                    model.add_module('conv{0}'.format(conv_id),
-                                     nn.Conv2d(prev_filters, filters, kernel_size, stride, pad, bias=False))
-                    model.add_module('bn{0}'.format(conv_id), nn.BatchNorm2d(filters))
-                    # model.add_module('bn{0}'.format(conv_id), BN2d(filters))
-                else:
-                    model.add_module('conv{0}'.format(conv_id),
-                                     nn.Conv2d(prev_filters, filters, kernel_size, stride, pad))
-                if activation == 'leaky':
-                    model.add_module('leaky{0}'.format(conv_id), nn.LeakyReLU(0.1, inplace=True))
-                elif activation == 'relu':
-                    model.add_module('relu{0}'.format(conv_id), nn.ReLU(inplace=True))
-                elif activation == 'mish':
-                    model.add_module('mish{0}'.format(conv_id), Mish())
-                elif activation == 'linear':
-                    model.add_module('linear{0}'.format(conv_id), nn.Identity())
-                elif activation == 'logistic':
-                    model.add_module('sigmoid{0}'.format(conv_id), nn.Sigmoid())
-                else:
-                    print("No convolutional activation named {}".format(activation))
-
-                prev_filters = filters
-                out_filters.append(prev_filters)
-                prev_stride = stride * prev_stride
-                out_strides.append(prev_stride)
-                models.append(model)
+                # DONE
             elif block['type'] == 'maxpool':
                 pool_size = int(block['size'])
                 stride = int(block['stride'])
