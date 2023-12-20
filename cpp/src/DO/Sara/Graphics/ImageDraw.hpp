@@ -125,7 +125,7 @@ namespace DO { namespace Sara {
                  bool italic = false, bool bold = false, bool underline = false,
                  int pen_width = 1, bool antialiasing = true) -> void;
 
-  struct TextStyle
+  struct DO_SARA_EXPORT TextStyle
   {
     int size = 10;
     bool bold = false;
@@ -133,6 +133,8 @@ namespace DO { namespace Sara {
     bool underline = false;
     int outline_radius = 1;
     Rgb8 color = White8;
+
+    auto text_box(const std::string&) const -> Eigen::Vector4d;
   };
 
   struct BoxedTextStyle : TextStyle

@@ -176,6 +176,26 @@ namespace DO { namespace Sara {
     p.drawPath(textPath);
   }
 
+  auto TextStyle::text_box(const std::string& text) const -> Eigen::Vector4d
+  {
+    auto font = QFont{};
+    font.setPointSize(size);
+    font.setItalic(italic);
+    font.setBold(bold);
+    font.setUnderline(underline);
+
+    const auto fm = QFontMetrics{font};
+    const auto qstr = QString::QString::fromLocal8Bit(text.c_str());
+    const auto qstr_bbox = fm.boundingRect(qstr);
+
+    return {
+        qstr_bbox.x(),
+        qstr_bbox.y(),
+        qstr_bbox.width(),
+        qstr_bbox.height(),
+    };
+  }
+
   auto draw_boxed_text(ImageView<Rgb8>& image, const std::string& text,
                        const Eigen::Vector2i& xy, const BoxedTextStyle& style,
                        const float orientation, const bool antialiasing) -> void

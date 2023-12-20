@@ -88,12 +88,13 @@ auto naive_downsample_and_transpose(CudaManagedTensor3f& tensor_chw_resized_32f,
   const auto hout = tensor_chw_resized_32f.sizes()(1);
   const auto wout = tensor_chw_resized_32f.sizes()(2);
 
-  const auto threads_per_block = dim3(4, 16, 16);
-  const auto num_blocks = dim3(  //
-      1,                         //
+  static const auto threads_per_block = dim3{4, 16, 16};
+  static const auto num_blocks = dim3{
+      //
+      1,  //
       (hout + threads_per_block.y - 1) / threads_per_block.y,
       (wout + threads_per_block.z - 1) / threads_per_block.z  //
-  );
+  };
 
   naive_downsample_and_transpose<<<num_blocks, threads_per_block>>>(
       out_chw, in_hwc,  //
@@ -327,18 +328,21 @@ auto test_on_video(int argc, char** argv) -> void
       const auto w = int_round(det.box(2));
       const auto h = int_round(det.box(3));
 
-      sara::draw_rect(frame, x, y, w, h, class_colors[label_index], 5);
+      static constexpr auto pen_width = 3;
+      sara::draw_rect(frame, x, y, w, h, class_colors[label_index], pen_width);
 
       const auto& class_name = yolo.classes()[label_index];
       const auto class_score = int_round(det.class_probs[label_index] * 100);
 
       const auto& label = fmt::format("{} {}%", class_name, class_score);
       auto style = sara::BoxedTextStyle{};
-      style.size = 16;
+      style.size = 12;
       style.outline_radius = 1;
       style.bold = true;
       style.box_color << class_colors[label_index], 255;
-      sara::draw_boxed_text(frame, label, {x, y - 3}, style);
+      sara::draw_boxed_text(
+          frame, label,
+          {int(x - pen_width / 2 + 0.5f), int(y - pen_width + 0.5f)}, style);
     }
     sara::toc("Draw detections");
 
