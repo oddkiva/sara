@@ -23,15 +23,21 @@ def test_mish():
 
 
 def test_maxpool():
-    x_np = np.arange(9).reshape(1, 1, 3, 3).astype(np.float32)
-    x = torch.tensor(x_np)
+    for sz in range(1, 10):
+        # print(f'\nsz = {sz}')
+        w, h = sz, sz
+        x_np = np.arange(sz ** 2).reshape(1, 1, h, w).astype(np.float32)
+        x = torch.tensor(x_np)
+        # print(x)
 
-    max_pool = MaxPool(2, 2)
+        max_pool = MaxPool(2, 2)
 
-    y = max_pool(x)
+        y = max_pool(x)
+        # print(y)
 
-    hy, wy = y.shape[2:]
-    assert wy == 2 and hy == 2
+        # Just check the dimensions for now.
+        hy, wy = y.shape[2:]
+        assert wy == (sz + 1) // 2 and hy == (sz + 1) // 2
 
 
 

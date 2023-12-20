@@ -34,8 +34,8 @@ class MaxPool(nn.Module):
         #
         # The input signal is extended spatially so that it contains the
         # following sample points.
-        x_last = (w // s) * s + r
-        y_last = (h // s) * s + r
+        x_last = ((w - 1) // s) * s + r
+        y_last = ((h - 1) // s) * s + r
         # Therefore the last two padding are
         p_right = 0 if x_last == w - 1 else x_last - w + 1
         p_bottom = 0 if y_last == h - 1 else y_last - h + 1
