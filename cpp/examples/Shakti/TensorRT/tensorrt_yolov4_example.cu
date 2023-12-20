@@ -90,7 +90,6 @@ auto naive_downsample_and_transpose(CudaManagedTensor3f& tensor_chw_resized_32f,
 
   static const auto threads_per_block = dim3{4, 16, 16};
   static const auto num_blocks = dim3{
-      //
       1,  //
       (hout + threads_per_block.y - 1) / threads_per_block.y,
       (wout + threads_per_block.z - 1) / threads_per_block.z  //
