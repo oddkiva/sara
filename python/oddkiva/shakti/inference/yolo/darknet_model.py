@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import torch.nn as nn
 
 from oddkiva.shakti.inference.yolo.darknet_config import DarknetConfig
@@ -23,3 +25,9 @@ class Darknet(nn.Module):
             )
 
         return model
+
+    def load_weights(self, weights_file: Path):
+        pass
+
+    def save_weights(self, weights_file: Path)
+        pass

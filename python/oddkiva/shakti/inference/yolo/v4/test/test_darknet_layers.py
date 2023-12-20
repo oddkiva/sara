@@ -1,11 +1,11 @@
+import numpy as np
+
+import torch
+
 from oddkiva.shakti.inference.yolo.darknet_layers import (
     MaxPool,
     ConvBNA,
 )
-
-import numpy as np
-
-import torch
 
 
 def test_mish():
@@ -20,7 +20,6 @@ def test_mish():
     y_true = x_np * np.tanh(np.log(1 + np.exp(x_np)))
 
     assert np.linalg.norm(y - y_true) < 1e-6
-
 
 def test_maxpool():
     for sz in range(1, 10):
@@ -38,8 +37,6 @@ def test_maxpool():
         # Just check the dimensions for now.
         hy, wy = y.shape[2:]
         assert wy == (sz + 1) // 2 and hy == (sz + 1) // 2
-
-
 
 def test_convolution():
     in_channels = 3
