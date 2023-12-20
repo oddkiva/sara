@@ -47,9 +47,15 @@ class ConvBNA(nn.Module):
             raise ValueError(f'No convolutional activation named {activation}')
         self.block.add_module(f'{activation}{id}', activation_fn);
 
-
     def forward(self, x):
         return self.block.forward(x)
+
+    def load_weights(self, weights_file: Path):
+        with open(weights_file, 'rb') as fp:
+            w_data = fp.read(conv.weight.shape.numel() * 4)
+            conv.weight.data.copy_(torch.from_numpy
+            conv.bias.data = fp.read(conv.bias.shape.numel() * 4)
+
 
 
 class MaxPool(nn.Module):

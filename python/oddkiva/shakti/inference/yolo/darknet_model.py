@@ -13,6 +13,12 @@ class Darknet(nn.Module):
 
         self.model = self.create_network(darknet_config)
 
+        self.major = None
+        self.minor = None
+        self.revision = None
+        self.seen = None
+        self.transpose = None
+
     def create_network(self, darknet_config: DarknetConfig):
         model = nn.ModuleList()
 
@@ -26,8 +32,9 @@ class Darknet(nn.Module):
 
         return model
 
-    def load_weights(self, weights_file: Path):
-        pass
+    def load_convolutional_weights(self, conv, weights_file: Path):
+        with open(weights_file, 'rb') as fp:
+            fp.read(
 
     def save_weights(self, weights_file: Path)
         pass
