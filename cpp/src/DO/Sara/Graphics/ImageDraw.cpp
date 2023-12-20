@@ -176,6 +176,47 @@ namespace DO { namespace Sara {
     p.drawPath(textPath);
   }
 
+  auto draw_boxed_text(ImageView<Rgb8>& image, const std::string& text,
+                       const Eigen::Vector2i& xy, const BoxedTextStyle& style,
+                       const float orientation, const bool antialiasing) -> void
+  {
+    auto qimage = as_QImage(image);
+
+    QPainter p(&qimage);
+    p.setRenderHints(QPainter::Antialiasing, antialiasing);
+
+    auto font = QFont{};
+    font.setPointSize(style.size);
+    font.setItalic(style.italic);
+    font.setBold(style.bold);
+    font.setUnderline(style.underline);
+
+    const auto qstr = QString::QString::fromLocal8Bit(text.c_str());
+    const auto baseline = QPointF{0, 0};
+    auto textPath = QPainterPath{};
+    textPath.addText(baseline, font, qstr);
+
+    const auto fm = QFontMetrics{font};
+    const auto qstr_bbox = fm.boundingRect(qstr);
+
+    // Outline the text by default for more visibility.
+    const auto qcolor = to_QColor(style.color);
+    const auto qbox_color = to_QColor(style.box_color);
+
+    // Geometry transform.
+    p.translate(xy.x(), xy.y());
+    p.rotate(static_cast<qreal>(orientation));
+
+    // Render the box.
+    p.fillRect(qstr_bbox, qbox_color);
+
+    // Render the text.
+    p.setBrush(qcolor);
+    p.setPen(QPen(Qt::black, style.outline_radius));
+    p.setFont(font);
+    p.drawPath(textPath);
+  }
+
   auto fill_rect(ImageView<Rgb8>& image, int x, int y, int w, int h,
                  const Rgb8& c) -> void
   {

@@ -15,6 +15,8 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Core/Image.hpp>
+
 
 class QImage;
 
@@ -122,6 +124,28 @@ namespace DO { namespace Sara {
                  int font_size = 10, float orientation = 0.f,
                  bool italic = false, bool bold = false, bool underline = false,
                  int pen_width = 1, bool antialiasing = true) -> void;
+
+  struct TextStyle
+  {
+    int size = 10;
+    bool bold = false;
+    bool italic = false;
+    bool underline = false;
+    int outline_radius = 1;
+    Rgb8 color = White8;
+  };
+
+  struct BoxedTextStyle : TextStyle
+  {
+    Rgba8 box_color = Rgba8{127, 127, 127, 127};
+  };
+
+  DO_SARA_EXPORT
+  auto draw_boxed_text(ImageView<Rgb8>& image, const std::string& text,
+                       const Eigen::Vector2i& xy,
+                       const BoxedTextStyle& style = {},
+                       const float orientation = 0.f,
+                       const bool antialiasing = true) -> void;
 
   /*!
    *  @brief Draw color-filled rectangle on image.

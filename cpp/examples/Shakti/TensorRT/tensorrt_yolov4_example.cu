@@ -333,8 +333,12 @@ auto test_on_video(int argc, char** argv) -> void
       const auto class_score = int_round(det.class_probs[label_index] * 100);
 
       const auto& label = fmt::format("{} {}%", class_name, class_score);
-      sara::draw_text(frame, x, y - 3, label, sara::White8, 16, 0.f, false,
-                      true, false);
+      auto style = sara::BoxedTextStyle{};
+      style.size = 16;
+      style.outline_radius = 1;
+      style.bold = true;
+      style.box_color << class_colors[label_index], 255;
+      sara::draw_boxed_text(frame, label, {x, y - 3}, style);
     }
     sara::toc("Draw detections");
 
