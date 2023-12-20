@@ -1,8 +1,6 @@
 from pathlib import Path
 
-from oddkiva.shakti.inference.yolo.darknet_config import (
-    DarknetConfig
-)
+import oddkiva.shakti.inference.darknet as darknet
 
 
 THIS_FILE = str(__file__)
@@ -11,16 +9,16 @@ SARA_DATA_DIR_PATH = SARA_SOURCE_DIR_PATH / 'data'
 YOLO_V4_TINY_DIR_PATH = SARA_DATA_DIR_PATH / 'trained_models' / 'yolov4-tiny'
 
 YOLO_V4_TINY_CFG_PATH = YOLO_V4_TINY_DIR_PATH / 'yolov4-tiny.cfg'
+YOLO_V4_TINY_WEIGHT_PATH = YOLO_V4_TINY_DIR_PATH / 'yolov4-tiny.weights'
 
 assert SARA_DATA_DIR_PATH.exists()
 assert YOLO_V4_TINY_CFG_PATH.exists()
+assert YOLO_V4_TINY_WEIGHT_PATH.exists()
 
 
-def test_yolo_v4_tiny_conversion():
-    config = DarknetConfig()
-    config.read(YOLO_V4_TINY_CFG_PATH)
+def test_yolo_v4_tiny_cfg():
+    yolo_cfg = darknet.Config()
+    yolo_cfg.read(YOLO_V4_TINY_CFG_PATH)
+    assert yolo_cfg._model is not None
 
-    print(f'\nmetadata =\n{config._metadata}')
-    print(f'\nmodel')
-    for layer in config._model:
-        print(layer)
+    yolo_net = darknet.Network(yolo_cfg)

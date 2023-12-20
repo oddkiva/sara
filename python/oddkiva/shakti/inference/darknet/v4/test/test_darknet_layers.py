@@ -2,7 +2,7 @@ import numpy as np
 
 import torch
 
-from oddkiva.shakti.inference.yolo.darknet_layers import (
+from oddkiva.shakti.inference.darknet.torch_layers import (
     MaxPool,
     ConvBNA,
 )

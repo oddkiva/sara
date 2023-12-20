@@ -5,7 +5,7 @@ from typing import Any, Optional, TypeAlias
 KeyValueStore: TypeAlias = dict[str, Any]
 
 
-class DarknetConfig:
+class Config:
 
     def __init__(self):
         self._lines: Optional[list[str]] = None
@@ -52,8 +52,20 @@ class DarknetConfig:
                 key, value = [l.strip(' ') for l in line.split('=')]
                 sections[-1][section_name][key] = value
 
-        self._metadata = sections[0]
+        self._metadata = sections[0]['net']
         self._model = sections[1:]
+
+    def typify_metadata_parameters(self):
+        # Just do the bare minimum for now.
+        batch = int(self._metadata['batch'])
+        width = int(self._metadata['width'])
+        height = int(self._metadata['height'])
+        channels = int(self._metadata['channels'])
+
+        self._metadata['batch'] = batch
+        self._metadata['width'] = width 
+        self._metadata['height'] = height 
+        self._metadata['channels'] = channels
 
     def typify_convolutional_parameters(self, layer_index):
         if self._model is None:
@@ -66,7 +78,6 @@ class DarknetConfig:
             raise RuntimeError('Not a convolutional layer!')
 
         conv_params = section[section_name]
-        print(conv_params)
 
         # The following parameters must be present in the config file.
         filters = int(conv_params['filters'])
@@ -99,7 +110,6 @@ class DarknetConfig:
             raise RuntimeError('Not a route layer!')
 
         route_params = section[section_name]
-        print(route_params)
 
         # The following parameters must be present in the config file.
         layers_str = route_params['layers']
@@ -128,7 +138,6 @@ class DarknetConfig:
             raise RuntimeError('Not a maxpool layer!')
 
         maxpool_params = section[section_name]
-        print(maxpool_params)
 
         # The following parameters must be present in the config file.
         size = int(maxpool_params['size'])
@@ -152,7 +161,6 @@ class DarknetConfig:
             raise RuntimeError('Not an upsample layer!')
 
         upsample_params = section[section_name]
-        print(upsample_params)
 
         # The following parameters must be present in the config file.
         stride = int(upsample_params['stride'])
@@ -174,7 +182,6 @@ class DarknetConfig:
             raise RuntimeError('Not a YOLO layer!')
 
         yolo_params = section[section_name]
-        print(yolo_params)
 
         mask = [int(v.strip()) for v in yolo_params['mask'].split(',')]
 
@@ -222,6 +229,8 @@ class DarknetConfig:
     def read(self, path: Path):
         self.read_lines(path)
         self.parse_lines()
+
+        self.typify_metadata_parameters()
 
         if self._model is None:
             raise ValueError('Model is None!')

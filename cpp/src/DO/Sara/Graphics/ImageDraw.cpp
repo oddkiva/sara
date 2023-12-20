@@ -160,13 +160,14 @@ namespace DO { namespace Sara {
     font.setBold(bold);
     font.setUnderline(underline);
 
+    const auto qstr = QString::QString::fromLocal8Bit(text.c_str());
     auto textPath = QPainterPath{};
     const auto baseline = QPointF{0, 0};
-    textPath.addText(baseline, font,
-                     QString::QString::fromLocal8Bit(text.c_str()));
+    textPath.addText(baseline, font, qstr);
 
     // Outline the text by default for more visibility.
-    p.setBrush(to_QColor(color));
+    const auto qcolor = to_QColor(color);
+    p.setBrush(qcolor);
     p.setPen(QPen(Qt::black, pen_width));
     p.setFont(font);
 

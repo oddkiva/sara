@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any, Optional
 
 import torch.nn as nn
@@ -51,11 +52,11 @@ class ConvBNA(nn.Module):
         return self.block.forward(x)
 
     def load_weights(self, weights_file: Path):
-        with open(weights_file, 'rb') as fp:
-            w_data = fp.read(conv.weight.shape.numel() * 4)
-            conv.weight.data.copy_(torch.from_numpy
-            conv.bias.data = fp.read(conv.bias.shape.numel() * 4)
-
+        pass
+        # with open(weights_file, 'rb') as fp:
+        #     w_data = fp.read(conv.weight.shape.numel() * 4)
+        #     conv.weight.data.copy_(torch.from_numpy
+        #     conv.bias.data = fp.read(conv.bias.shape.numel() * 4)
 
 
 class MaxPool(nn.Module):
@@ -111,7 +112,7 @@ class RouteSlice(nn.Module):
                  groups: int = 1,
                  group_id: Optional[int] = None,
                  id: Optional[int] = None):
-        super(Route, self).__init__()
+        super(RouteSlice, self).__init__()
         self.layer = layer
         self.groups = groups
         self.group_id = group_id
@@ -131,11 +132,11 @@ class RouteSlice(nn.Module):
             return x[:, c1:c2, :, :]
 
 
-class RouteGroup(nn.Module):
+class RouteConcat(nn.Module):
 
     def __init__(self, layers: [int], id: Optional[int] = None):
-        super(Route, self).__init__()
-        self.layers = layer
+        super(RouteConcat, self).__init__()
+        self.layers = layers
         self.id = id
 
     def forward(self, x1, x2):
@@ -174,7 +175,7 @@ class Upsample(nn.Module):
         self.upsample = nn.Upsample(scale_factor=stride, mode='nearest')
 
     def forward(self, x):
-        retrn self.upsample(x)
+        return self.upsample(x)
 
 
 class Yolo(nn.Module):

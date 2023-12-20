@@ -155,7 +155,9 @@ namespace DO::Sara::Darknet {
     return nodes;
   }
 
-  NetworkWeightLoader::NetworkWeightLoader(const std::string& filepath)
+  NetworkWeightLoader::NetworkWeightLoader(const std::string& filepath,
+                                           const bool debug)
+    : debug{debug}
   {
     fp = fopen(filepath.c_str(), "rb");
     if (fp == nullptr)
@@ -166,10 +168,13 @@ namespace DO::Sara::Darknet {
     num_bytes_read += fread(&major, sizeof(int), 1, fp);
     num_bytes_read += fread(&minor, sizeof(int), 1, fp);
     num_bytes_read += fread(&revision, sizeof(int), 1, fp);
+    SARA_DEBUG << "version = " << major << "." << minor << "." << revision
+               << std::endl;
+
     if ((major * 10 + minor) >= 2)
     {
       if (debug)
-        printf("\n seen 64");
+        SARA_DEBUG << "seen = 64\n";
       uint64_t iseen = 0;
       num_bytes_read += fread(&iseen, sizeof(uint64_t), 1, fp);
       seen = iseen;
@@ -183,8 +188,9 @@ namespace DO::Sara::Darknet {
       seen = iseen;
     }
     if (debug)
-      printf(", trained: %.0f K-images (%.0f Kilo-batches_64) \n",
-             (float) (seen / 1000), (float) (seen / 64000));
+      SARA_DEBUG << format(
+          "Trained: %.0f K-images (%.0f K-batch of 64 images)\n",
+          static_cast<float>(seen) / 1000, static_cast<float>(seen) / 64000);
     transpose = (major > 1000) || (minor > 1000);
 
     // std::cout << "Num bytes read = " << num_bytes_read << std::endl;
@@ -231,8 +237,8 @@ namespace DO::Sara::Darknet {
     auto& net = model.net;
     net = NetworkParser{}.parse_config_file(cfg_filepath.string());
 
-    auto network_weight_loader = NetworkWeightLoader{weights_filepath.string()};
-    network_weight_loader.debug = true;
+    auto network_weight_loader =
+        NetworkWeightLoader{weights_filepath.string(), true};
     network_weight_loader.load(net);
 
     return model;
