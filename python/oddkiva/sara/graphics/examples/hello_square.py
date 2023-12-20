@@ -87,7 +87,7 @@ class SquareObject(QObject):
             raise ValueError('Could not create VBO')
         self.vbo.bind()
         self.vbo.setUsagePattern(QOpenGLBuffer.StaticDraw)
-        vertices_data = self.vertices.tostring()
+        vertices_data = self.vertices.tobytes()
         self.vbo.allocate(len(vertices_data))
         self.vbo.write(0, vertices_data, len(vertices_data))
 
@@ -96,7 +96,7 @@ class SquareObject(QObject):
             raise ValueError('Could not create EBO')
         self.ebo.bind()
         self.ebo.setUsagePattern(QOpenGLBuffer.StaticDraw)
-        triangles_data = self.triangles.tostring()
+        triangles_data = self.triangles.tobytes()
         self.ebo.allocate(len(triangles_data))
         self.ebo.write(0, triangles_data, len(triangles_data))
 
