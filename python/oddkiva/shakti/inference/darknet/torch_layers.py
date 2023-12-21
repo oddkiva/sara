@@ -53,10 +53,10 @@ class ConvBNA(nn.Module):
 
     def load_weights(self, weights_file: Path):
         pass
-        # with open(weights_file, 'rb') as fp:
-        #     w_data = fp.read(conv.weight.shape.numel() * 4)
-        #     conv.weight.data.copy_(torch.from_numpy
-        #     conv.bias.data = fp.read(conv.bias.shape.numel() * 4)
+    # with open(weights_file, 'rb') as fp:
+    #     w_data = fp.read(conv.weight.shape.numel() * 4)
+    #     conv.weight.data.copy_(torch.from_numpy
+    #     conv.bias.data = fp.read(conv.bias.shape.numel() * 4)
 
 
 class MaxPool(nn.Module):
@@ -209,7 +209,7 @@ class Yolo(nn.Module):
         # P[object] and P[class|object] probabilities.
         for box in range(0, 3):
             c_begin = box * num_box_features + 4
-            c_end = (box + 1) * num_box_features 
+            c_end = (box + 1) * num_box_features
             y[:, c_begin:c_end, :, :] = nn.Sigmoid(x[:, c_begin:c_end, :, :])
 
         return y
