@@ -5,4 +5,6 @@ install.packages(c("berryFunctions",
                    "Rcpp",
                    "RcppEigen",
                    "bookdown",
+                   "downlit",
+                   "xml2",
                    "servr"))
