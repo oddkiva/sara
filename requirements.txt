@@ -10,6 +10,8 @@ numpy
 scipy
 sympy
 
+Pillow
+
 coremltools
 torch
 torchvision

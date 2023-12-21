@@ -18,4 +18,4 @@ assert YOLO_V4_WEIGHT_PATH.exists()
 
 def test_yolov4_weight_loader():
     weight_loader = NetworkWeightLoader(YOLO_V4_WEIGHT_PATH)
-    print(weight_loader._weights.shape)
+    assert weight_loader._weights.size != 0

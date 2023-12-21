@@ -7,7 +7,8 @@ import torch.nn.functional as F
 
 class ConvBNA(nn.Module):
 
-    def __init__(self, in_channels, darknet_params: dict[str, Any], id: int):
+    def __init__(self, in_channels, darknet_params: dict[str, Any], id: int,
+                 inference=True):
         super(ConvBNA, self).__init__()
         self.block = nn.Sequential()
 
@@ -20,17 +21,21 @@ class ConvBNA(nn.Module):
         activation = darknet_params['activation']
         pad_size = (kernel_size - 1) // 2 if add_padding else 0
 
+        self.batch_normalize = batch_normalize
+
+        self.fuse_conv_bn_layer = False  # inference and batch_normalize
+
         # Add the convolutional layer
         conv = nn.Conv2d(
             in_channels, out_channels, kernel_size, stride,
             padding=pad_size,
-            bias=not batch_normalize,
+            bias=True,
             padding_mode='zeros' # Let's be explicit about the padding value
         )
         self.block.add_module(f'conv{id}', conv)
 
         # Add the batch-normalization layer
-        if batch_normalize:
+        if not self.fuse_conv_bn_layer:
             self.block.add_module(f'batch_norm{id}', nn.BatchNorm2d(out_channels))
 
         # Add the activation layer
@@ -50,13 +55,6 @@ class ConvBNA(nn.Module):
 
     def forward(self, x):
         return self.block.forward(x)
-
-    def load_weights(self, weights_file: Path):
-        pass
-    # with open(weights_file, 'rb') as fp:
-    #     w_data = fp.read(conv.weight.shape.numel() * 4)
-    #     conv.weight.data.copy_(torch.from_numpy
-    #     conv.bias.data = fp.read(conv.bias.shape.numel() * 4)
 
 
 class MaxPool(nn.Module):
