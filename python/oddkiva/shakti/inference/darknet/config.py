@@ -207,7 +207,7 @@ class Config:
 
         # The following parameters must be present in the config file.
         self._model[layer_index] = {
-            'upsample': {
+            'yolo': {
                 'mask': mask,
                 'anchors': anchors,
                 'classes': classes,

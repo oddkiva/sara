@@ -140,13 +140,13 @@ class RouteConcat(nn.Module):
         self.id = id
 
     def forward(self, x1, x2):
-        if self.layers != 2:
-            raise RuntimeError("Group only 2 inputs")
+        if len(self.layers) != 2:
+            raise RuntimeError("This route-concat layer requires 2 inputs")
         return torch.cat((x1, x2), 1)
 
     def forward(self, x1, x2, x3, x4):
-        if self.layers != 4:
-            raise RuntimeError("Group only 4 inputs")
+        if len(self.layers) != 4:
+            raise RuntimeError("This route-concat layer requires 4 inputs")
         return torch.cat((x1, x2, x3, x4), 1)
 
 
@@ -161,7 +161,9 @@ class Shortcut(nn.Module):
         elif activation == 'relu':
             self.activation_fn = ReLU(inplace=True)
         else:
-            raise NotImplementedError('Activation function not implemented!')
+            raise NotImplementedError(
+                f'The followig activation function "{activation}" not implemented!'
+            )
 
     def forward(self, x1, x2):
         x = self.activation_fn(x1 + x2)
@@ -180,9 +182,34 @@ class Upsample(nn.Module):
 
 class Yolo(nn.Module):
 
-    def __init__(self):
+    def __init__(self, darknet_params: dict[str, Any]):
         super(Yolo, self).__init__()
+        self.masks = darknet_params['mask']
+        self.anchors = darknet_params['anchors']
+        self.scale_x_y = darknet_params['scale_x_y']
+        self.classes = darknet_params['classes']
+
+        self.alpha = self.scale_x_y
+        self.beta = -0.5 * (self.scale_x_y - 1)
 
     def forward(self, x):
-        raise NotImplementedError()
-        return x;
+        num_box_features = 5 + self.num_classes
+        assert num_box_features == 85
+
+        y = x
+
+        # Box prediction
+        xs = [box * num_box_features + 0 for box in range(3)]
+        ys = [box * num_box_features + 1 for box in range(3)]
+        # ws = [box * num_box_features + 2 for box in range(3)]
+        # hs = [box * num_box_features + 3 for box in range(3)]
+        y[:, xs, :, :] = self.alpha * nn.Sigmoid(x[:, xs, :, :]) + self.beta
+        y[:, ys, :, :] = self.alpha * nn.Sigmoid(x[:, ys, :, :]) + self.beta
+
+        # Class probabilities.
+        for box in range(0, 3):
+            c_begin = box * num_box_features + 4
+            c_end = (box + 1) * num_box_features 
+            y[:, c_begin:c_end, :, :] = nn.Sigmoid(x[:, c_begin:c_end, :, :])
+
+        return y;
