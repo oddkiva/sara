@@ -206,10 +206,10 @@ class Yolo(nn.Module):
         y[:, xs, :, :] = self.alpha * nn.Sigmoid(x[:, xs, :, :]) + self.beta
         y[:, ys, :, :] = self.alpha * nn.Sigmoid(x[:, ys, :, :]) + self.beta
 
-        # Class probabilities.
+        # P[object] and P[class|object] probabilities.
         for box in range(0, 3):
             c_begin = box * num_box_features + 4
             c_end = (box + 1) * num_box_features 
             y[:, c_begin:c_end, :, :] = nn.Sigmoid(x[:, c_begin:c_end, :, :])
 
-        return y;
+        return y

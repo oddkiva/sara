@@ -77,7 +77,7 @@ class Network(nn.Module):
 
         # Append the convolutional block to the model.
         model.append(darknet.ConvBNA(c_in, layer_params, conv_id))
-        print(f'[Conv{conv_id}]: '
+        print(f'[Conv {conv_id}] '
               f'{self.in_shape_at_block[-1]} -> {self.out_shape_at_block[-1]}')
 
     def _append_route(self, model, layer_params, route_id):
@@ -100,7 +100,7 @@ class Network(nn.Module):
             # Append the route-slice block.
             model.append(darknet.RouteSlice(
                 layers[0], groups, group_id, route_id))
-            print(f'[Route{route_id}] (Slide): '
+            print(f'[Route {route_id}] (Slide): '
                   f'{self.in_shape_at_block[-1]} -> {self.out_shape_at_block[-1]}')
         else:
             # Fetch all the input shapes.
@@ -117,8 +117,9 @@ class Network(nn.Module):
 
             # Append the route-concat block.
             model.append(darknet.RouteConcat(layers, route_id))
-            print(f'[Route{route_id}] (Concat): '
+            print(f'[Route {route_id}] (Concat): '
                   f'{self.in_shape_at_block[-1]} -> {self.out_shape_at_block[-1]}')
+            print(f'                    layers = {layers}')
 
     def _append_max_pool(self, model, layer_params, max_pool_id):
         # Extract the input shape
@@ -135,7 +136,7 @@ class Network(nn.Module):
         self.out_shape_at_block.append(shape_out)
 
         model.append(darknet.MaxPool(size, stride))
-        print(f'[MaxPool{max_pool_id}] '
+        print(f'[MaxPool {max_pool_id}] '
               f'{self.in_shape_at_block[-1]} -> {self.out_shape_at_block[-1]}')
 
     def _append_upsample(self, model, layer_params, upsample_id):
@@ -152,7 +153,7 @@ class Network(nn.Module):
         self.out_shape_at_block.append(shape_out)
 
         model.append(darknet.Upsample(stride))
-        print(f'[Upsample{upsample_id}] '
+        print(f'[Upsample {upsample_id}] '
               f'{self.in_shape_at_block[-1]} -> {self.out_shape_at_block[-1]}')
 
     def _append_yolo(self, model, layer_params, yolo_id):
@@ -167,7 +168,7 @@ class Network(nn.Module):
         self.out_shape_at_block.append(shape_out)
 
         model.append(darknet.Yolo(layer_params))
-        print(f'[YOLO{yolo_id}] '
+        print(f'[YOLO {yolo_id}] '
               f'{self.in_shape_at_block[-1]} -> {self.out_shape_at_block[-1]}')
 
     def load_convolutional_weights(self, conv, weights_file: Path):
