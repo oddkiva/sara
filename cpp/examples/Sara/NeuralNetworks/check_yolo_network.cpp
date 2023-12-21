@@ -90,14 +90,15 @@ inline auto check_yolo_implementation(d::Network& model,
 
 auto graphics_main(int, char**) -> int
 {
-  const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
+  const auto model_dir_path =
+      fs::canonical(fs::path{src_path("trained_models")});
 
   static constexpr auto yolo_version = 4;
   static constexpr auto is_tiny = false;
-  const auto yolo_dirpath = data_dir_path / "trained_models" /
-                            ("yolov" + std::to_string(yolo_version));
-  auto model =
-      sara::Darknet::load_yolo_model(yolo_dirpath, yolo_version, is_tiny);
+  const auto yolo_model_name = "yolov" + std::to_string(yolo_version);
+  const auto yolo_dirpath = model_dir_path / yolo_model_name;
+  auto model = sara::Darknet::load_yolo_model(yolo_dirpath,  //
+                                              yolo_version, is_tiny);
 
   const auto yolo_intermediate_output_dir = "/home/david/GitHub/darknet/yolov4";
   check_yolo_implementation(model, yolo_intermediate_output_dir);

@@ -27,11 +27,11 @@ if(SARA_BUILD_TESTS AND SARA_BUILD_PYTHON_BINDINGS)
 
   # Dependency DAG:
   #
-  # pysara_pybind11 -> copy_pysara_module
-  # pyshakti_pybind11 -> copy_pyshakti_module
+  # - pysara_pybind11 -> copy_pysara_module
+  # - pyshakti_pybind11 -> copy_pyshakti_module
   add_dependencies(pytest copy_pysara_module)
   add_dependencies(pytest copy_pyshakti_module)
-  # pytest -> pycoverage
+  # - pytest -> pycoverage
   add_dependencies(pycoverage pytest)
 
 endif()

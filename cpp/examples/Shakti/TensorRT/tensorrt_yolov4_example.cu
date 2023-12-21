@@ -263,12 +263,13 @@ auto test_on_video(int argc, char** argv) -> void
   auto frame = video_stream.frame();
 
   // Instantiate the YOLO v4 object detector.
-  const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
+  const auto model_dir_path =
+      fs::canonical(fs::path{src_path("trained_models")});
   static constexpr auto yolo_version = 4;
   auto yolo_model = "yolov" + std::to_string(yolo_version);
   if (is_tiny)
     yolo_model += "-tiny";
-  const auto yolo_dir_path = data_dir_path / "trained_models" / yolo_model;
+  const auto yolo_dir_path = model_dir_path / yolo_model;
   auto yolo = Yolo{yolo_dir_path, yolo_version, is_tiny};
 
   auto tensor_hwc_8u = CudaManagedTensor3ub{frame.height(), frame.width(), 3};
