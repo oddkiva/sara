@@ -233,6 +233,7 @@ class Network(nn.Module):
         ys = [x]
         boxes = []
         for block in self.model:
+            logging.debug(f'{block}')
             if type(block) is darknet.ConvBNA:
                 conv = block
                 x = ys[-1]
@@ -248,11 +249,8 @@ class Network(nn.Module):
             elif type(block) is darknet.RouteConcat:
                 concat = block
                 if len(concat.layers) == 2:
-                    x1, x2 = [ys[l] for l in concat.layers]
-                    y = concat(x1, x2)
-                elif len(concat.layers) == 4:
-                    x1, x2, x3, x4 = [ys[l] for l in concat.layers]
-                    y = concat(x1, x2, x3, x4)
+                    xs = [ys[l] for l in concat.layers]
+                    y = concat(*xs)
                 else:
                     raise NotImplementedError(
                         'Unsupported number of inputs for concat'
@@ -265,8 +263,11 @@ class Network(nn.Module):
                 yolo = block
                 x = ys[-1]
                 y = yolo(x)
-                boxes.append(y)
             else:
                 raise NotImplementedError
 
-            return boxes
+            ys.append(y)
+            if type(block) is darknet.Yolo:
+                boxes.append(y)
+
+        return boxes

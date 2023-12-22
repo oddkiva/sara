@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any, Optional
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -117,7 +118,7 @@ class RouteSlice(nn.Module):
         self.id = id
 
     def forward(self, x):
-        if groups == 1:
+        if self.groups == 1:
             return x
         else:
             # Get the number of channels.
@@ -126,7 +127,7 @@ class RouteSlice(nn.Module):
             group_size = C // self.groups
             # Get the slice that we want.
             c1 = self.group_id * group_size
-            c2 = c1 + self.group_size
+            c2 = c1 + group_size
             return x[:, c1:c2, :, :]
 
 
@@ -137,15 +138,10 @@ class RouteConcat(nn.Module):
         self.layers = layers
         self.id = id
 
-    def forward(self, x1, x2):
-        if len(self.layers) != 2:
-            raise RuntimeError("This route-concat layer requires 2 inputs")
-        return torch.cat((x1, x2), 1)
-
-    def forward(self, x1, x2, x3, x4):
-        if len(self.layers) != 4:
-            raise RuntimeError("This route-concat layer requires 4 inputs")
-        return torch.cat((x1, x2, x3, x4), 1)
+    def forward(self, *xs):
+        if len(self.layers) != len(xs):
+            raise RuntimeError(f"This route-concat layer requires {self.layers} inputs")
+        return torch.cat(xs, 1)
 
 
 class Shortcut(nn.Module):
@@ -185,7 +181,7 @@ class Yolo(nn.Module):
         self.masks = darknet_params['mask']
         self.anchors = darknet_params['anchors']
         self.scale_x_y = darknet_params['scale_x_y']
-        self.classes = darknet_params['classes']
+        self.num_classes = darknet_params['classes']
 
         self.alpha = self.scale_x_y
         self.beta = -0.5 * (self.scale_x_y - 1)
@@ -201,13 +197,13 @@ class Yolo(nn.Module):
         ys = [box * num_box_features + 1 for box in range(3)]
         # ws = [box * num_box_features + 2 for box in range(3)]
         # hs = [box * num_box_features + 3 for box in range(3)]
-        y[:, xs, :, :] = self.alpha * nn.Sigmoid(x[:, xs, :, :]) + self.beta
-        y[:, ys, :, :] = self.alpha * nn.Sigmoid(x[:, ys, :, :]) + self.beta
+        y[:, xs, :, :] = self.alpha * torch.sigmoid(x[:, xs, :, :]) + self.beta
+        y[:, ys, :, :] = self.alpha * torch.sigmoid(x[:, ys, :, :]) + self.beta
 
         # P[object] and P[class|object] probabilities.
         for box in range(0, 3):
             c_begin = box * num_box_features + 4
             c_end = (box + 1) * num_box_features
-            y[:, c_begin:c_end, :, :] = nn.Sigmoid(x[:, c_begin:c_end, :, :])
+            y[:, c_begin:c_end, :, :] = torch.sigmoid(x[:, c_begin:c_end, :, :])
 
         return y
