@@ -78,7 +78,7 @@ auto wrap_tensor_class(pybind11::module& m, const std::string& name)
 }
 
 template <typename T>
-inline auto to_image_view(pybind11::array_t<T> image)
+inline auto to_image_view_2d(pybind11::array_t<T> image)
 {
   namespace sara = DO::Sara;
 
@@ -87,9 +87,41 @@ inline auto to_image_view(pybind11::array_t<T> image)
 
   const auto height = static_cast<int>(image.shape(0));
   const auto width = static_cast<int>(image.shape(1));
-  auto data = const_cast<T*>(image.data());
+  auto data = image.mutable_data();
   auto imview = sara::ImageView<T, 2>{data, {width, height}};
   return imview;
+}
+
+template <typename T>
+inline auto to_image_view_3d(pybind11::array_t<T> image)
+{
+  namespace sara = DO::Sara;
+
+  if (image.ndim() != 2)
+    throw std::runtime_error{"Invalid image shape!"};
+
+  const auto depth = static_cast<int>(image.shape(0));
+  const auto height = static_cast<int>(image.shape(1));
+  const auto width = static_cast<int>(image.shape(2));
+  auto data = image.mutable_data();
+  auto imview = sara::ImageView<T, 3>{data, {width, height, depth}};
+  return imview;
+}
+
+template <typename T, int ExtraFlags>
+inline auto to_tensor_view_3d(pybind11::array_t<T, ExtraFlags> image)
+{
+  namespace sara = DO::Sara;
+
+  if (image.ndim() != 3)
+    throw std::runtime_error{"Invalid image shape!"};
+
+  const auto sz0 = static_cast<int>(image.shape(0));
+  const auto sz1 = static_cast<int>(image.shape(1));
+  const auto sz2 = static_cast<int>(image.shape(2));
+  auto data = image.mutable_data();
+  auto tview = sara::TensorView_<T, 3>{data, {sz0, sz1, sz2}};
+  return tview;
 }
 
 template <typename T>
@@ -103,7 +135,7 @@ inline auto to_interleaved_rgb_image_view(pybind11::array_t<T> image)
   using Pixel = sara::Pixel<T, sara::Rgb>;
   const auto height = static_cast<int>(image.shape(0));
   const auto width = static_cast<int>(image.shape(1));
-  auto data = const_cast<T*>(image.data());
+  auto data = image.mutable_data();
   auto imview = sara::ImageView<Pixel, 2>{reinterpret_cast<Pixel*>(data),
                                           {width, height}};
   return imview;
@@ -133,7 +165,7 @@ namespace pybind11::detail {
         return false;
 
       value.swap(DO::Sara::TensorView_<T, 2>{
-          const_cast<T*>(buffer.data()),
+          buffer.mutable_data(),
           Eigen::Vector2i(buffer.shape()[0], buffer.shape()[1])});
 
       return true;
@@ -182,7 +214,7 @@ namespace pybind11::detail {
         return false;
 
       value.swap(DO::Sara::ImageView<T>{
-          const_cast<T*>(buffer.data()),
+          buffer.mutable_data(),
           Eigen::Vector2i(buffer.shape()[1], buffer.shape()[0])});
 
       return true;

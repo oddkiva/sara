@@ -6,6 +6,7 @@ import numpy as np
 
 import torch
 
+import oddkiva.sara as sara
 import oddkiva.shakti.inference.darknet as darknet
 
 
@@ -34,11 +35,22 @@ def test_yolo_v4_tiny_cfg():
     yolo_net = darknet.Network(yolo_cfg)
     yolo_net.load_convolutional_weights(YOLO_V4_TINY_WEIGHT_PATH);
 
-    image = np.asarray(Image.open(DOG_IMAGE_PATH)).astype(np.float32) / 255
+    image = Image.open(DOG_IMAGE_PATH)
+    image = np.asarray(image).astype(np.float32) / 255
     image = image.transpose((2, 0, 1))
-    image = image[np.newaxis, :]
 
-    print(image.shape)
+    _, c, h, w = yolo_net.input_shape()
+    image_resized = np.zeros((c, h, w), dtype=np.float32)
+    sara.resize(image, image_resized)
 
-    boxes = yolo_net.forward(torch.from_numpy(image))
-    import IPython; IPython.embed()
+    # image_hwc = image.transpose((1, 2, 0)) * 255
+    # image_hwc_im = Image.fromarray(image_hwc.astype(np.uint8), 'RGB')
+    # image_hwc_im.save('original.jpg')
+
+    # image_resized_hwc = image_resized.transpose((1, 2, 0)) * 255
+    # image_resized_hwc_im = Image.fromarray(image_resized_hwc.astype(np.uint8),
+    #                                        'RGB')
+    # image_resized_hwc_im.save('resized.jpg')
+
+    in_tensor = torch.from_numpy(image_resized[np.newaxis, :])
+    boxes = yolo_net.forward(in_tensor)

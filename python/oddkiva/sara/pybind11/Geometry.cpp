@@ -24,7 +24,7 @@ namespace sara = DO::Sara;
 
 auto compute_region_inner_boundaries(py::array_t<int> regions)
 {
-  auto im = to_image_view<int>(regions);
+  auto im = to_image_view_2d<int>(regions);
   return sara::compute_region_inner_boundaries(im);
 }
 

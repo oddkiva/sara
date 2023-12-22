@@ -26,6 +26,9 @@ class Network(nn.Module):
         self.out_shape_at_block = [input_shape]
         self.model = self.create_network(cfg)
 
+    def input_shape(self):
+        return self.in_shape_at_block[0]
+
     def create_network(self, cfg: darknet.Config):
         model = nn.ModuleList()
 
