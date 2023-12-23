@@ -42,13 +42,6 @@ set_target_properties(copy_pysara_module PROPERTIES FOLDER "Python")
 
 add_dependencies(copy_pysara_module pysara_pybind11)
 
-
-# ============================================================================ #
-# Install the library in the currently active python environment.
-if (SARA_BUILD_TESTS AND SARA_BUILD_PYTHON_BINDINGS)
-  add_subdirectory(test)
-endif ()
-
 install(TARGETS pysara_pybind11
   RUNTIME DESTINATION bin COMPONENT Libraries
   LIBRARY DESTINATION lib COMPONENT Libraries

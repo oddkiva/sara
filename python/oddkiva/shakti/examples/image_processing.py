@@ -44,7 +44,9 @@ def user_main():
     while True:
         with sara.Timer("Read"):
             if USE_OPENCV:
-                ret, _ = video_stream.read(video_frame)
+                read_success, _ = video_stream.read(video_frame)
+                if not read_success
+                    break
             elif not video_stream.read(video_frame):
                 break
 

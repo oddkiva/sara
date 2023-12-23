@@ -32,8 +32,6 @@ namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
 namespace trt = shakti::TensorRT;
 
-namespace nvonnx = nvonnxparser;
-
 
 template <typename T, int N>
 using PinnedTensor = sara::Tensor_<T, N, shakti::PinnedMemoryAllocator>;
@@ -101,9 +99,9 @@ BOOST_AUTO_TEST_CASE(test_yolox_tiny_onnx_conversion_to_trt_serialized_engine)
   //
   // It is available here:
   // https://yolox.readthedocs.io/en/latest/demo/onnx_readme.html#download-onnx-models
-  const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
-  const auto yolox_tiny_onnx_filepath =
-      data_dir_path / "trained_models" / "yolox_tiny.onnx";
+  const auto model_dir_path =
+      fs::canonical(fs::path{src_path("trained_models")});
+  const auto yolox_tiny_onnx_filepath = model_dir_path / "yolox_tiny.onnx";
   BOOST_CHECK(fs::exists(yolox_tiny_onnx_filepath));
 
   // Instantiate an ONNX parser and read the ONNX model file.

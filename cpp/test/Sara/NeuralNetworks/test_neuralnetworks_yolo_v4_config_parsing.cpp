@@ -29,11 +29,25 @@ BOOST_AUTO_TEST_SUITE(TestLayers)
 
 BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
 {
-  const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
-  const auto cfg_filepath =
-      data_dir_path / "trained_models" / "yolov4-tiny" / "yolov4-tiny.cfg";
+  const auto model_dir_path =
+      fs::canonical(fs::path{src_path("trained_models")});
+  const auto cfg_filepath = model_dir_path / "yolov4-tiny" / "yolov4-tiny.cfg";
   const auto weights_filepath =
-      data_dir_path / "trained_models" / "yolov4-tiny" / "yolov4-tiny.weights";
+      model_dir_path / "yolov4-tiny" / "yolov4-tiny.weights";
+  BOOST_CHECK(fs::exists(cfg_filepath));
+
+  auto net =
+      sara::Darknet::NetworkParser{}.parse_config_file(cfg_filepath.string());
+  if (fs::exists(weights_filepath))
+    sara::Darknet::NetworkWeightLoader{weights_filepath.string()}.load(net);
+}
+
+BOOST_AUTO_TEST_CASE(test_yolov4_config_parsing)
+{
+  const auto model_dir_path =
+      fs::canonical(fs::path{src_path("trained_models")});
+  const auto cfg_filepath = model_dir_path / "yolov4" / "yolov4.cfg";
+  const auto weights_filepath = model_dir_path / "yolov4" / "yolov4.weights";
   BOOST_CHECK(fs::exists(cfg_filepath));
 
   auto net =

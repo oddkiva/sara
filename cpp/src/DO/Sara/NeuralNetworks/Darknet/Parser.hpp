@@ -54,11 +54,11 @@ namespace DO::Sara::Darknet {
     uint64_t seen;
     int transpose;
 
-    bool debug = false;
+    bool debug;
 
     NetworkWeightLoader() = default;
 
-    NetworkWeightLoader(const std::string& filepath);
+    NetworkWeightLoader(const std::string& filepath, const bool debug = false);
 
     ~NetworkWeightLoader();
 

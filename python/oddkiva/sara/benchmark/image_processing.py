@@ -4,8 +4,8 @@ from PySide2.QtCore import Qt
 
 import numpy as np
 
-import do.sara as sara
-import do.shakti as shakti
+import oddkiva.sara as sara
+import oddkiva.shakti as shakti
 
 import cv2
 

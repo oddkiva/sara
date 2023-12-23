@@ -13,7 +13,8 @@ foreach (file ${neuralnetworks_SOURCE_FILES})
     DO::Sara::ImageIO
     DO::Sara::VideoIO
     DO::Sara::Darknet
-    $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
+    $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>
+    fmt::fmt)
   set_target_properties(${filename}
       PROPERTIES
       COMPILE_FLAGS ${SARA_DEFINITIONS}

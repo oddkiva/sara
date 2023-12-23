@@ -6,6 +6,9 @@ message(STATUS "  - fmt")
 add_subdirectory(fmt)
 set_property(TARGET fmt PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 
+message(STATUS "  - tinycolormap")
+add_subdirectory(tinycolormap)
+
 message(STATUS "  - easyexif")
 add_subdirectory(easyexif)
 

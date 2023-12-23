@@ -147,13 +147,13 @@ auto test_on_video(int argc, char** argv) -> void
   auto video_stream = sara::VideoStream{video_filepath};
   auto frame = video_stream.frame();
 
-  const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
+  const auto model_dir_path = fs::canonical(fs::path{src_path("trained_models")});
   const auto yolo_version = 4;
   const auto is_tiny = false;
   auto yolo_name = "yolov" + std::to_string(yolo_version);
   if (is_tiny)
     yolo_name += "-tiny";
-  const auto yolo_dirpath = data_dir_path / "trained_models" / yolo_name;
+  const auto yolo_dirpath = model_dir_path / yolo_name;
   auto model = d::load_yolo_model(yolo_dirpath, yolo_version, is_tiny);
 
   model.profile = false;

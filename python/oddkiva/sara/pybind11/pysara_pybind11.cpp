@@ -4,6 +4,7 @@
 #include "FeatureDetectors.hpp"
 #include "FeatureMatching.hpp"
 #include "Geometry.hpp"
+#include "ImageProcessing.hpp"
 #include "VideoIO.hpp"
 
 
@@ -11,6 +12,7 @@ PYBIND11_MODULE(pysara_pybind11, m)
 {
   m.doc() = "Sara Python API";  // optional module docstring
 
+  expose_image_processing(m);
   expose_disjoint_sets(m);
   expose_geometry(m);
 #ifdef PYSARA_BUILD_VIDEOIO

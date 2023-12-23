@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import multiprocessing as mp
-import os
 import pathlib
 import platform
 import shutil
@@ -63,12 +62,11 @@ elif SYSTEM == "Darwin":
 
 try:
     import pybind11
+    import sysconfig
 
     PYBIND11_DIR = pybind11.get_cmake_dir()
 
-    import distutils.sysconfig as sysconfig
-
-    PYTHON_INCLUDE_DIR = sysconfig.get_python_inc()
+    PYTHON_INCLUDE_DIR = sysconfig.get_config_var('INCLUDE_DIR')
     PYTHON_LIBRARY = sysconfig.get_config_var("LIBDIR")
 except:
     PYBIND11_DIR = None

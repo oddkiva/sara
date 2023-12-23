@@ -160,18 +160,80 @@ namespace DO { namespace Sara {
     font.setBold(bold);
     font.setUnderline(underline);
 
+    const auto qstr = QString::QString::fromLocal8Bit(text.c_str());
     auto textPath = QPainterPath{};
     const auto baseline = QPointF{0, 0};
-    textPath.addText(baseline, font,
-                     QString::QString::fromLocal8Bit(text.c_str()));
+    textPath.addText(baseline, font, qstr);
 
     // Outline the text by default for more visibility.
-    p.setBrush(to_QColor(color));
+    const auto qcolor = to_QColor(color);
+    p.setBrush(qcolor);
     p.setPen(QPen(Qt::black, pen_width));
     p.setFont(font);
 
     p.translate(x, y);
     p.rotate(static_cast<qreal>(orientation));
+    p.drawPath(textPath);
+  }
+
+  auto TextStyle::text_box(const std::string& text) const -> Eigen::Vector4d
+  {
+    auto font = QFont{};
+    font.setPointSize(size);
+    font.setItalic(italic);
+    font.setBold(bold);
+    font.setUnderline(underline);
+
+    const auto fm = QFontMetrics{font};
+    const auto qstr = QString::QString::fromLocal8Bit(text.c_str());
+    const auto qstr_bbox = fm.boundingRect(qstr);
+
+    return {
+        qstr_bbox.x(),
+        qstr_bbox.y(),
+        qstr_bbox.width(),
+        qstr_bbox.height(),
+    };
+  }
+
+  auto draw_boxed_text(ImageView<Rgb8>& image, const std::string& text,
+                       const Eigen::Vector2i& xy, const BoxedTextStyle& style,
+                       const float orientation, const bool antialiasing) -> void
+  {
+    auto qimage = as_QImage(image);
+
+    QPainter p(&qimage);
+    p.setRenderHints(QPainter::Antialiasing, antialiasing);
+
+    auto font = QFont{};
+    font.setPointSize(style.size);
+    font.setItalic(style.italic);
+    font.setBold(style.bold);
+    font.setUnderline(style.underline);
+
+    const auto qstr = QString::QString::fromLocal8Bit(text.c_str());
+    const auto baseline = QPointF{0, 0};
+    auto textPath = QPainterPath{};
+    textPath.addText(baseline, font, qstr);
+
+    const auto fm = QFontMetrics{font};
+    const auto qstr_bbox = fm.boundingRect(qstr);
+
+    // Outline the text by default for more visibility.
+    const auto qcolor = to_QColor(style.color);
+    const auto qbox_color = to_QColor(style.box_color);
+
+    // Geometry transform.
+    p.translate(xy.x(), xy.y());
+    p.rotate(static_cast<qreal>(orientation));
+
+    // Render the box.
+    p.fillRect(qstr_bbox, qbox_color);
+
+    // Render the text.
+    p.setBrush(qcolor);
+    p.setPen(QPen(Qt::black, style.outline_radius));
+    p.setFont(font);
     p.drawPath(textPath);
   }
 

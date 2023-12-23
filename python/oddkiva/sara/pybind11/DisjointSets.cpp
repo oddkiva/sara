@@ -25,7 +25,7 @@ auto compute_adjacency_list_2d(py::array_t<int> labels)
 {
   using namespace sara;
 
-  const auto im = to_image_view(labels);
+  const auto im = to_image_view_2d(labels);
   const auto adj_list = compute_adjacency_list_2d(im);
 
   return adj_list;
@@ -35,7 +35,7 @@ auto compute_connected_components(py::array_t<int> labels)
 {
   using namespace sara;
 
-  const auto im = to_image_view(labels);
+  const auto im = to_image_view_2d(labels);
 
   auto adj_list_data = compute_adjacency_list_2d(im);
   AdjacencyList adj_list{adj_list_data};

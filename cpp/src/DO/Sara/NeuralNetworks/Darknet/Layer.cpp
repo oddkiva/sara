@@ -128,9 +128,6 @@ auto Convolution::to_output_stream(std::ostream& os) const -> void
 
 auto Convolution::load_weights(FILE* fp, bool inference) -> void
 {
-  // 1. Read bias weights.
-  // 2. Read batch normalization weights.
-  // 3. Read convolution weights.
   // 1. Convolutional bias weights.
   weights.b.resize(filters);
   const auto bias_weight_count =

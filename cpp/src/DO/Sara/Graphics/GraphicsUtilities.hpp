@@ -63,6 +63,11 @@ namespace DO { namespace Sara {
   {
     return QColor{c[0], c[1], c[2]};
   }
+
+  inline QColor to_QColor(const Rgba8& c)
+  {
+    return QColor{c[0], c[1], c[2], c[3]};
+  }
   //! @}
 
   //! @}

@@ -14,12 +14,11 @@ import coremltools as ct
 
 
 PYTHON_VERSION = version.parse(python_version())
-if PYTHON_VERSION.minor > 10:
+if PYTHON_VERSION.minor > 11:
     raise RuntimeError(
-        "This Python version is currently not supported. "
-        "See discussion on GitHub in: {}".format(
-            "https://github.com/apple/coremltools/issues/1730"
-        ))
+        "This Python version might not be supported at this time.\n"
+        "Check by running `pip install -r requirements.txt`"
+    ))
 
 torch_model = torchvision.models.mobilenet_v2(pretrained=True)
 torch_model.eval()

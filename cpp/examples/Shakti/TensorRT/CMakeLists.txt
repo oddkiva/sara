@@ -22,7 +22,9 @@ foreach(file ${TRT_SOURCE_FILES})
             DO::Sara::Darknet
             DO::Shakti::Cuda::MultiArray
             DO::Shakti::Cuda::Utilities
-            DO::Shakti::Cuda::TensorRT)
+            DO::Shakti::Cuda::TensorRT
+            tinycolormap
+            fmt::fmt)
 
   set_target_properties(
     ${filename} PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS}
