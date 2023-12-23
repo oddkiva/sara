@@ -16,8 +16,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 class Network(nn.Module):
 
-    def __init__(self, cfg: darknet.Config, inference=True,
-                 up_to_layer: Optional[int]=None):
+    def __init__(self, cfg: darknet.Config, up_to_layer: Optional[int]=None):
         super(Network, self).__init__()
 
         input_shape = (
@@ -49,7 +48,7 @@ class Network(nn.Module):
         yolo_id = 0
 
         for (i, block) in enumerate(cfg._model):
-            if self.up_to_layer is not None and i >= self.up_to_layer:
+            if self.up_to_layer is not None and i > self.up_to_layer:
                 break
 
             layer_name = list(block.keys())[0]
@@ -86,7 +85,7 @@ class Network(nn.Module):
         weight_loader = v4.NetworkWeightLoader(weights_file)
 
         for block_idx, block in enumerate(self.model):
-            if self.up_to_layer is not None and block_idx >= self.up_to_layer:
+            if self.up_to_layer is not None and block_idx > self.up_to_layer:
                 break
             if type(block) is not darknet.ConvBNA:
                 continue
@@ -313,6 +312,6 @@ class Network(nn.Module):
     def forward(self, x):
         ys, boxes = self._forward(x)
         if self.up_to_layer is None:
-            return boxes[0]
+            return tuple(boxes)
         else:
             return ys[-1]

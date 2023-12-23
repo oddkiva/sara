@@ -71,48 +71,50 @@ class MaxPool(nn.Module):
 
     def __init__(self, kernel_size, stride):
         super(MaxPool, self).__init__()
-        self.kernel_size = [kernel_size, kernel_size]
+        self.kernel_size = kernel_size
         self.stride = stride
 
-        from functools import reduce
-        from operator import __add__
-        self.zero_pad_2d = nn.ZeroPad2d(reduce(__add__,
-            [(k // 2 + (k - 2 * (k // 2)) - 1, k // 2) for k in self.kernel_size[::-1]]))
+        # self.kernel_size = [kernel_size, kernel_size]
+        # from functools import reduce
+        # from operator import __add__
+        # self.zero_pad_2d = nn.ZeroPad2d(reduce(__add__,
+        #     [(k // 2 + (k - 2 * (k // 2)) - 1, k // 2) for k in self.kernel_size[::-1]]))
 
     def forward(self, x):
-        x_padded = self.zero_pad_2d(x)
-        # # Let's use shortcut variables.
-        # s = self.stride
-        # # Get the height and width of the input signal.
-        # h, w = x.shape[2:]
+        # x_padded = self.zero_pad_2d(x)
 
-        # # The kernel radius is calculated as
-        # r = self.kernel_size // 2
+        # Let's use shortcut variables.
+        s = self.stride
+        # Get the height and width of the input signal.
+        h, w = x.shape[2:]
 
-        # # We calculate the easy part of the padding.
-        # p_left = r - 1 if self.kernel_size % 2 == 0 else r
-        # p_top = r - 1 if self.kernel_size % 2 == 0 else r
+        # The kernel radius is calculated as
+        r = self.kernel_size // 2
 
-        # # Now moving on the trickiest part of the padding.
-        # #
-        # # The max pool layers collects (w // s) x (h // s) samples from the
-        # # input signal.
-        # #
-        # # If we reason in 1D, the samples are located at:
-        # #   0, s, 2s, 3s, ... , (w // s) * s
-        # #
-        # # The input signal is extended spatially so that it contains the
-        # # following sample points.
-        # x_last = ((w - 1) // s) * s + r
-        # y_last = ((h - 1) // s) * s + r
-        # # Therefore the last two padding are
-        # p_right = 0 if x_last == w - 1 else x_last - w + 1
-        # p_bottom = 0 if y_last == h - 1 else y_last - h + 1
+        # We calculate the easy part of the padding.
+        p_left = r - 1 if self.kernel_size % 2 == 0 else r
+        p_top = r - 1 if self.kernel_size % 2 == 0 else r
 
-        # # Apply the padding with negative infinity value.
-        # pad_size = (p_left, p_right, p_top, p_bottom)
-        # x_padded = F.pad(x, pad_size, mode='constant', value=-float('inf'))
-        # # print(f'x_padded = \n{x_padded}')
+        # Now moving on the trickiest part of the padding.
+        #
+        # The max pool layers collects (w // s) x (h // s) samples from the
+        # input signal.
+        #
+        # If we reason in 1D, the samples are located at:
+        #   0, s, 2s, 3s, ... , (w // s) * s
+        #
+        # The input signal is extended spatially so that it contains the
+        # following sample points.
+        x_last = ((w - 1) // s) * s + r
+        y_last = ((h - 1) // s) * s + r
+        # Therefore the last two padding are
+        p_right = 0 if x_last == w - 1 else x_last - w + 1
+        p_bottom = 0 if y_last == h - 1 else y_last - h + 1
+
+        # Apply the padding with negative infinity value.
+        pad_size = (p_left, p_right, p_top, p_bottom)
+        x_padded = F.pad(x, pad_size, mode='constant', value=-float('inf'))
+        # print(f'x_padded = \n{x_padded}')
 
         # Apply the spatial max-pool function.
         y = F.max_pool2d(x_padded, self.kernel_size, self.stride)
@@ -205,24 +207,32 @@ class Yolo(nn.Module):
         num_box_features = 5 + self.num_classes
         assert num_box_features == 85
 
+        # Copy the input.
         y = torch.clone(x)
 
+        # Reshape the 4D tensor as a 5D tensor.
+        # We do so by splitting the list of channels by boxes.
+        b = len(self.masks)
+        n, ci, h, w = x.shape
+        co = ci // b
+        y = y.reshape((n, b, co, h, w))
+
         # Box positions
-        xs = [box * num_box_features + 0 for box in range(3)]
-        ys = [box * num_box_features + 1 for box in range(3)]
-        y[:, xs] = self.alpha * torch.sigmoid(x[:, xs]) + self.beta
-        y[:, ys] = self.alpha * torch.sigmoid(x[:, ys]) + self.beta
+        xs = 0
+        ys = 1
+        y[:, :, xs] = self.alpha * torch.sigmoid(y[:, :, xs]) + self.beta
+        y[:, :, ys] = self.alpha * torch.sigmoid(y[:, :, ys]) + self.beta
 
-        # Box sizes
-        # ws = [box * num_box_features + 2 for box in range(3)]
-        # hs = [box * num_box_features + 3 for box in range(3)]
-        # y[:, ws, :, :] = x[:, ws, :, :]
-        # y[:, hs, :, :] = x[:, hs, :, :]
+        # Box sizes: DO NOTHING since they are already copied
+        #
+        # ws = 2
+        # hs = 3
+        # y[:, :, ws] = x[:, :, ws]
+        # y[:, :, hs] = x[:, :, hs]
 
-        # P[object] and P[class|object] probabilities.
-        for box in range(0, 3):
-            c_begin = box * num_box_features + 4
-            c_end = (box + 1) * num_box_features
-            y[:, c_begin:c_end] = torch.sigmoid(x[:, c_begin:c_end])
+        # P[object] and all P[class|object] probabilities.
+        prob_objects = 4
+        y[:, :, prob_objects:num_box_features] = \
+            torch.sigmoid(y[:, :, prob_objects:num_box_features])
 
         return y
