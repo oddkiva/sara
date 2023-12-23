@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 
@@ -15,7 +16,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 class Network(nn.Module):
 
-    def __init__(self, cfg: darknet.Config, inference=True):
+    def __init__(self, cfg: darknet.Config, inference=True,
+                 up_to_layer: Optional[int]=None):
         super(Network, self).__init__()
 
         input_shape = (
@@ -26,6 +28,7 @@ class Network(nn.Module):
         )
         self.in_shape_at_block = [input_shape]
         self.out_shape_at_block = [input_shape]
+        self.up_to_layer = up_to_layer
         self.model = self.create_network(cfg)
 
     def input_shape(self):
@@ -45,7 +48,10 @@ class Network(nn.Module):
         upsample_id = 0
         yolo_id = 0
 
-        for block in cfg._model:
+        for (i, block) in enumerate(cfg._model):
+            if self.up_to_layer is not None and i >= self.up_to_layer:
+                break
+
             layer_name = list(block.keys())[0]
             layer_params = block[layer_name]
 
@@ -71,13 +77,17 @@ class Network(nn.Module):
 
         return model
 
-    def load_convolutional_weights(self, weights_file: Path, version='v4'):
+    def load_convolutional_weights(self,
+                                   weights_file: Path,
+                                   version: str='v4'):
         if version != 'v4':
             raise NotImplementedError
 
         weight_loader = v4.NetworkWeightLoader(weights_file)
 
         for block_idx, block in enumerate(self.model):
+            if self.up_to_layer is not None and block_idx >= self.up_to_layer:
+                break
             if type(block) is not darknet.ConvBNA:
                 continue
 
@@ -125,7 +135,8 @@ class Network(nn.Module):
 
         logging.debug(f'weight loader cursor = {weight_loader._cursor}')
         logging.debug(f'weights num elements = {weight_loader._weights.size}')
-        assert weight_loader._cursor == weight_loader._weights.size
+        if self.up_to_layer is None:
+            assert weight_loader._cursor == weight_loader._weights.size
 
     def _read_weights(self, shape, weight_loader):
         return weight_loader.read(shape[0]).reshape(shape)
@@ -200,7 +211,7 @@ class Network(nn.Module):
             self.out_shape_at_block.append(shape_out)
 
             # Append the route-concat block.
-            model.append(darknet.RouteConcat(layers, route_id))
+            model.append(darknet.RouteConcat2(layers, route_id))
             logging.debug(
                 f'[Route {route_id}] (Concat): '
                 f'{shape_ins} -> {shape_out}\n'
@@ -276,7 +287,7 @@ class Network(nn.Module):
                 x = ys[slice.layer]
                 y = slice(x)
                 ys.append(y)
-            elif type(block) is darknet.RouteConcat:
+            elif type(block) is darknet.RouteConcat2:
                 concat = block
 
                 ids = [l if l < 0 else l + 1 for l in concat.layers]
@@ -300,5 +311,8 @@ class Network(nn.Module):
         return ys, boxes
 
     def forward(self, x):
-        _, boxes = self._forward(x)
-        return boxes
+        ys, boxes = self._forward(x)
+        if self.up_to_layer is None:
+            return boxes[0]
+        else:
+            return ys[-1]

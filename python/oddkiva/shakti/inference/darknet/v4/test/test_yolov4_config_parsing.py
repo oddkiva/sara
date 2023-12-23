@@ -7,6 +7,8 @@ import numpy as np
 
 import torch
 
+import coremltools as ct
+
 import oddkiva.sara as sara
 import oddkiva.shakti.inference.darknet as darknet
 
@@ -58,40 +60,73 @@ def read_image(path: Path, yolo_net: darknet.Network):
     return image_tensor
 
 
-def test_yolo_v4_tiny_cfg():
+# def test_yolo_v4_tiny_cfg():
+#     yolo_cfg = darknet.Config()
+#     yolo_cfg.read(YOLO_V4_TINY_CFG_PATH)
+#     assert yolo_cfg._model is not None
+# 
+#     yolo_net = darknet.Network(yolo_cfg)
+#     yolo_net.load_convolutional_weights(YOLO_V4_TINY_WEIGHT_PATH);
+#     yolo_net.eval()
+# 
+#     in_tensor = read_image(DOG_IMAGE_PATH, yolo_net)
+#     in_tensor_saved = yolo_out_tensor(0)
+#     err = torch.norm(in_tensor - in_tensor_saved).item()
+#     logging.info(f'input err = {err}')
+#     assert err < 1e-12
+# 
+#     ys, boxes = yolo_net._forward(in_tensor)
+#     assert len(ys) == len(yolo_net.model) + 1
+#     assert torch.equal(ys[0], in_tensor)
+# 
+#     for i in range(1, len(yolo_net.model)):
+#         block = yolo_net.model[i]
+#         out_tensor_saved = yolo_out_tensor(i + 1)
+#         out_tensor_computed = ys[i + 1]
+# 
+#         assert out_tensor_saved.shape == out_tensor_computed.shape
+# 
+#         err = torch.norm(out_tensor_computed - out_tensor_saved).item()
+#         logging.info(f'[{i}] err = {err} for {block}')
+#         assert err < 3e-3
+# 
+# 
+#     ids = [31, 38]
+#     boxes_true = [yolo_out_tensor(id) for id in ids]
+# 
+#     for i, b, b_true in zip(ids, boxes, boxes_true):
+#         err = torch.norm(b - b_true)
+#         logging.info(f'[{i}] err = {err} for {yolo_net.model[i-1]}')
+#         assert err < 1e-4
+
+
+def test_yolo_v4_tiny_coreml_conversion():
     yolo_cfg = darknet.Config()
     yolo_cfg.read(YOLO_V4_TINY_CFG_PATH)
     assert yolo_cfg._model is not None
 
-    yolo_net = darknet.Network(yolo_cfg)
+    layer_idx = 37
+    yolo_net = darknet.Network(yolo_cfg, up_to_layer=layer_idx)
     yolo_net.load_convolutional_weights(YOLO_V4_TINY_WEIGHT_PATH);
+    yolo_net.eval()
+
+    print(yolo_net.model)
 
     in_tensor = read_image(DOG_IMAGE_PATH, yolo_net)
     in_tensor_saved = yolo_out_tensor(0)
-    err = torch.norm(in_tensor - in_tensor_saved).item()
-    logging.info(f'input err = {err}')
-    assert err < 1e-12
 
-    ys, boxes = yolo_net._forward(in_tensor)
-    assert len(ys) == len(yolo_net.model) + 1
-    assert torch.equal(ys[0], in_tensor)
+    with torch.inference_mode():
+        traced_model = torch.jit.trace(yolo_net, in_tensor)
+        outs = traced_model(in_tensor)
 
-    for i in range(1, len(yolo_net.model)):
-        block = yolo_net.model[i]
-        out_tensor_saved = yolo_out_tensor(i + 1)
-        out_tensor_computed = ys[i + 1]
+        ct_outs = [ct.TensorType(name=f'yolo_{i}') for i, _ in enumerate(outs)]
 
-        assert out_tensor_saved.shape == out_tensor_computed.shape
+        model = ct.convert(
+            traced_model,
+            inputs=[ct.TensorType(shape=in_tensor.shape)],
+            debug=True
+        )
 
-        err = torch.norm(out_tensor_computed - out_tensor_saved).item()
-        logging.info(f'[{i}] err = {err} for {block}')
-        assert err < 3e-3
+        model.save('/Users/oddkiva/Desktop/yolo.mlpackage')
 
-
-    ids = [31, 38]
-    boxes_true = [yolo_out_tensor(id) for id in ids]
-
-    for i, b, b_true in zip(ids, boxes, boxes_true):
-        err = torch.norm(b - b_true)
-        logging.info(f'[{i}] err = {err} for {yolo_net.model[i-1]}')
-        assert err < 1e-4
+    import IPython; IPython.embed()

@@ -71,42 +71,48 @@ class MaxPool(nn.Module):
 
     def __init__(self, kernel_size, stride):
         super(MaxPool, self).__init__()
-        self.kernel_size = kernel_size
+        self.kernel_size = [kernel_size, kernel_size]
         self.stride = stride
 
+        from functools import reduce
+        from operator import __add__
+        self.zero_pad_2d = nn.ZeroPad2d(reduce(__add__,
+            [(k // 2 + (k - 2 * (k // 2)) - 1, k // 2) for k in self.kernel_size[::-1]]))
+
     def forward(self, x):
-        # Let's use shortcut variables.
-        s = self.stride
-        # Get the height and width of the input signal.
-        h, w = x.shape[2:]
+        x_padded = self.zero_pad_2d(x)
+        # # Let's use shortcut variables.
+        # s = self.stride
+        # # Get the height and width of the input signal.
+        # h, w = x.shape[2:]
 
-        # The kernel radius is calculated as
-        r = self.kernel_size // 2
+        # # The kernel radius is calculated as
+        # r = self.kernel_size // 2
 
-        # We calculate the easy part of the padding.
-        p_left = r - 1 if self.kernel_size % 2 == 0 else r
-        p_top = r - 1 if self.kernel_size % 2 == 0 else r
+        # # We calculate the easy part of the padding.
+        # p_left = r - 1 if self.kernel_size % 2 == 0 else r
+        # p_top = r - 1 if self.kernel_size % 2 == 0 else r
 
-        # Now moving on the trickiest part of the padding.
-        #
-        # The max pool layers collects (w // s) x (h // s) samples from the
-        # input signal.
-        #
-        # If we reason in 1D, the samples are located at:
-        #   0, s, 2s, 3s, ... , (w // s) * s
-        #
-        # The input signal is extended spatially so that it contains the
-        # following sample points.
-        x_last = ((w - 1) // s) * s + r
-        y_last = ((h - 1) // s) * s + r
-        # Therefore the last two padding are
-        p_right = 0 if x_last == w - 1 else x_last - w + 1
-        p_bottom = 0 if y_last == h - 1 else y_last - h + 1
+        # # Now moving on the trickiest part of the padding.
+        # #
+        # # The max pool layers collects (w // s) x (h // s) samples from the
+        # # input signal.
+        # #
+        # # If we reason in 1D, the samples are located at:
+        # #   0, s, 2s, 3s, ... , (w // s) * s
+        # #
+        # # The input signal is extended spatially so that it contains the
+        # # following sample points.
+        # x_last = ((w - 1) // s) * s + r
+        # y_last = ((h - 1) // s) * s + r
+        # # Therefore the last two padding are
+        # p_right = 0 if x_last == w - 1 else x_last - w + 1
+        # p_bottom = 0 if y_last == h - 1 else y_last - h + 1
 
-        # Apply the padding with negative infinity value.
-        pad_size = (p_left, p_right, p_top, p_bottom)
-        x_padded = F.pad(x, pad_size, mode='constant', value=-float('inf'))
-        # print(f'x_padded = \n{x_padded}')
+        # # Apply the padding with negative infinity value.
+        # pad_size = (p_left, p_right, p_top, p_bottom)
+        # x_padded = F.pad(x, pad_size, mode='constant', value=-float('inf'))
+        # # print(f'x_padded = \n{x_padded}')
 
         # Apply the spatial max-pool function.
         y = F.max_pool2d(x_padded, self.kernel_size, self.stride)
@@ -140,17 +146,17 @@ class RouteSlice(nn.Module):
             return x[:, c1:c2, :, :]
 
 
-class RouteConcat(nn.Module):
+class RouteConcat2(nn.Module):
 
     def __init__(self, layers: [int], id: Optional[int] = None):
-        super(RouteConcat, self).__init__()
+        super(RouteConcat2, self).__init__()
         self.layers = layers
         self.id = id
 
-    def forward(self, *xs):
-        if len(self.layers) != len(xs):
-            raise RuntimeError(f"This route-concat layer requires {self.layers} inputs")
-        return torch.cat(xs, 1)
+    def forward(self, x1, x2):
+        if len(self.layers) != 2:
+            raise RuntimeError(f"This route-concat layer requires 2 inputs")
+        return torch.cat((x1, x2), 1)
 
 
 class Shortcut(nn.Module):

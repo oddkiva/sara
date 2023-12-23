@@ -23,16 +23,16 @@ def test_mish():
 
 def test_maxpool():
     for sz in range(1, 10):
-        # print(f'\nsz = {sz}')
+        print(f'\nsz = {sz}')
         w, h = sz, sz
         x_np = np.arange(sz ** 2).reshape(1, 1, h, w).astype(np.float32)
         x = torch.tensor(x_np)
-        # print(x)
+        print(x)
 
         max_pool = MaxPool(2, 2)
 
         y = max_pool(x)
-        # print(y)
+        print(y)
 
         # Just check the dimensions for now.
         hy, wy = y.shape[2:]

@@ -6,16 +6,13 @@ ipython
 ipdb
 ipdbplugin
 
-numpy
-scipy
-sympy
-
 Pillow
 
+torch==2.1.1
+torchvision==0.16.1
+torchaudio==2.1.1
+
 coremltools
-torch
-torchvision
-torchaudio
 
 PyOpenGL
-PySide2
+# PySide2
