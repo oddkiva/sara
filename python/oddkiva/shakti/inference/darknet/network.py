@@ -43,6 +43,7 @@ class Network(nn.Module):
 
         conv_id = 0
         route_id = 0
+        shortcut_id = 0
         max_pool_id = 0
         upsample_id = 0
         yolo_id = 0
@@ -60,6 +61,9 @@ class Network(nn.Module):
             elif layer_name == 'route':
                 self._append_route(model, layer_params, route_id)
                 route_id += 1
+            elif layer_name == 'shortcut':
+                self._append_shortcut(model, layer_params, shortcut_id)
+                shortcut_id += 1
             elif layer_name == 'maxpool':
                 self._append_max_pool(model, layer_params, max_pool_id)
                 max_pool_id += 1
@@ -210,12 +214,41 @@ class Network(nn.Module):
             self.out_shape_at_block.append(shape_out)
 
             # Append the route-concat block.
-            model.append(darknet.RouteConcat2(layers, route_id))
+            if len(layers) == 2:
+                model.append(darknet.RouteConcat2(layers, route_id))
+            elif len(layers) == 4:
+                model.append(darknet.RouteConcat4(layers, route_id))
+            else:
+                raise NotImplementedError(
+                    "Route-Concat supports only 2 or 4 inputs")
             logging.debug(
                 f'[Route {route_id}] (Concat): '
                 f'{shape_ins} -> {shape_out}\n'
                 f'                    layers = {layers}'
             )
+
+    def _append_shortcut(self, model, layer_params, shortcut_id):
+        # Fetch all the input shapes.
+        from_layer = layer_params['from']
+        activation = layer_params['activation']
+        layers = [-1, from_layer] 
+        shape_ins = [self.out_shape_at_block[l] for l in layers]
+
+        # Calculate the output shape.
+        assert shape_ins[0][2:] == shape_ins[1][2:]
+        n, _, h_in, w_in = shape_ins[0]
+        c_out = sum([shape_in[1] for shape_in in shape_ins])
+        shape_out = (n, c_out, h_in, w_in)
+
+        # Store.
+        self.in_shape_at_block.append(shape_ins)
+        self.out_shape_at_block.append(shape_out)
+
+        model.append(darknet.Shortcut(from_layer, activation))
+        logging.debug(
+            f'[Shortcut {shortcut_id}] {shape_ins} -> {shape_out}\n'
+            f'                         from_layer = {from_layer}'
+        )
 
     def _append_max_pool(self, model, layer_params, max_pool_id):
         # Extract the input shape
@@ -293,6 +326,24 @@ class Network(nn.Module):
                 xs = [ys[i] for i in ids]
                 y = concat(*xs)
                 ys.append(y)
+            elif type(block) is darknet.RouteConcat4:
+                concat = block
+
+                ids = [l if l < 0 else l + 1 for l in concat.layers]
+                xs = [ys[i] for i in ids]
+                y = concat(*xs)
+                ys.append(y)
+            elif type(block) is darknet.Shortcut:
+                shortcut = block
+                i1 = -1
+                if shortcut.self.from_layer < 0:
+                    i2 = shortcut.from_layer
+                else:
+                    i2 = shortcut.from_layer + 1
+                xs = [ys[i] for i in [i1, i2]]
+                y = shortcut(*xs)
+                ys.append(y)
+
             elif type(block) is darknet.Upsample:
                 upsample = block
                 x = ys[-1]

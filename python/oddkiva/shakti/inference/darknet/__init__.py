@@ -5,6 +5,7 @@ from oddkiva.shakti.inference.darknet.torch_layers import (
     MaxPool,
     RouteSlice,
     RouteConcat2,
+    RouteConcat4,
     Shortcut,
     Upsample,
     Yolo

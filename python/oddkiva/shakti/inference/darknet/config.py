@@ -127,6 +127,29 @@ class Config:
             }
         }
 
+    def typify_shortcut_parameters(self, layer_index):
+        if self._model is None:
+            raise ValueError('Model is None!')
+
+        section = self._model[layer_index]
+
+        section_name = list(section.keys())[0]
+        if section_name != 'shortcut':
+            raise RuntimeError('Not a shortcut layer!')
+
+        shortcut_params = section[section_name]
+
+        # The following parameters must be present in the config file.
+        from_layer = int(shortcut_params['from'])
+        activation = shortcut_params['activation']
+
+        self._model[layer_index] = {
+            'shortcut': {
+                'from': from_layer,
+                'activation': activation
+            }
+        }
+
     def typify_maxpool_parameters(self, layer_index):
         if self._model is None:
             raise ValueError('Model is None!')
@@ -200,8 +223,8 @@ class Config:
         iou_loss = yolo_params['iou_loss']
         ignore_thresh = yolo_params['ignore_thresh']
         truth_thresh = yolo_params['truth_thresh']
-        random = yolo_params['random']
-        resize = float(yolo_params['resize'])
+        random = yolo_params.get('random')
+        resize = float(yolo_params.get('resize', 'inf'))
         nms_kind = yolo_params['nms_kind']
         beta_nms = float(yolo_params['beta_nms'])
 
@@ -241,9 +264,15 @@ class Config:
                 self.typify_convolutional_parameters(layer_index)
             elif layer_name == 'route':
                 self.typify_route_parameters(layer_index)
+            elif layer_name == 'shortcut':
+                self.typify_shortcut_parameters(layer_index)
             elif layer_name == 'maxpool':
                 self.typify_maxpool_parameters(layer_index)
             elif layer_name == 'upsample':
                 self.typify_upsample_parameters(layer_index)
             elif layer_name == 'yolo':
                 self.typify_yolo_parameters(layer_index)
+            else:
+                raise NotImplementedError(
+                    f'{layer_name} parse is not implemented'
+                )

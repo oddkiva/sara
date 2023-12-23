@@ -161,10 +161,24 @@ class RouteConcat2(nn.Module):
         return torch.cat((x1, x2), 1)
 
 
+class RouteConcat4(nn.Module):
+
+    def __init__(self, layers: [int], id: Optional[int] = None):
+        super(RouteConcat4, self).__init__()
+        self.layers = layers
+        self.id = id
+
+    def forward(self, x1, x2, x3, x4):
+        if len(self.layers) != 4:
+            raise RuntimeError(f"This route-concat layer requires 4 inputs")
+        return torch.cat((x1, x2, x3, x4), 1)
+
+
 class Shortcut(nn.Module):
 
-    def __init__(self, activation: str):
+    def __init__(self, from_layer: int, activation: str):
         super(Shortcut, self).__init__()
+        self.from_layer = from_layer
         if activation == 'linear':
             self.activation_fn = nn.Identity()
         elif activation == 'leaky':
