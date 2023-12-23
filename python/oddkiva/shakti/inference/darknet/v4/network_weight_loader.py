@@ -39,10 +39,8 @@ class NetworkWeightLoader:
             self._cursor = 0
 
     def read(self, num_elements: int) -> np.ndarray:
-        logging.debug(f'cursor = {self._cursor}')
         i1 = self._cursor
         i2 = i1 + num_elements
-        logging.debug(f'[i1, i2[ = [{i1}, {i2}[')
         x = self._weights[i1:i2]
         self._cursor += num_elements
         return x

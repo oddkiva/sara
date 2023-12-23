@@ -1,6 +1,8 @@
 import logging
 from pathlib import Path
 
+import numpy as np
+
 import torch
 import torch.nn as nn
 
@@ -69,7 +71,7 @@ class Network(nn.Module):
 
         return model
 
-    def load_convolutional_weights(self, weights_file: Path, version = 'v4'):
+    def load_convolutional_weights(self, weights_file: Path, version='v4'):
         if version != 'v4':
             raise NotImplementedError
 
@@ -79,11 +81,9 @@ class Network(nn.Module):
             if type(block) is not darknet.ConvBNA:
                 continue
 
-            logging.debug(block_idx)
+            logging.debug(f'[LOADING] {block_idx} {block}')
 
-            conv = block.block[0]
-            if block.batch_normalize:
-                bn = block.block[1]
+            conv = block.layers[0]
 
             # Read in the following order.
             # 1. Convolution bias weights
@@ -91,17 +91,44 @@ class Network(nn.Module):
 
             # 2. BN weights
             if block.batch_normalize:
-                bn = block.block[1]
-                self._load_weights(bn.weight, weight_loader)
-                self._load_weights(bn.running_mean, weight_loader)
-                self._load_weights(bn.running_var, weight_loader)
+                if block.fuse_conv_bn_layer:
+                    shape = (conv.weight.shape[0],)
+                    block.bn_weights['scale'] = self._read_weights(
+                        shape, weight_loader)
+                    block.bn_weights['running_mean'] = self._read_weights(
+                        shape, weight_loader)
+                    block.bn_weights['running_var'] = self._read_weights(
+                        shape, weight_loader)
+                    if block_idx == 0:
+                        logging.info(block.bn_weights)
+                else:
+                    bn = block.layers[1]
+                    self._load_weights(bn.weight, weight_loader)
+                    self._load_weights(bn.running_mean, weight_loader)
+                    self._load_weights(bn.running_var, weight_loader)
 
             # 3. Convolution weights.
             self._load_weights(conv.weight, weight_loader)
 
+            # 4. Recalculate the weights and bias if we fuse.
+            if block.fuse_conv_bn_layer:
+                eps = .00001
+                bn_mean = block.bn_weights['running_mean']
+                bn_var = block.bn_weights['running_var']
+                bn_scale = block.bn_weights['scale']
+
+                factor = bn_mean / np.sqrt(bn_var + eps)
+                conv.bias.data -= torch.from_numpy(bn_scale * factor)
+                for c_out in range(conv.weight.shape[0]):
+                    scale_w = bn_scale[c_out] / np.sqrt(bn_var[c_out] + eps)
+                    conv.weight.data[c_out, :, :, :] *= scale_w
+
         logging.debug(f'weight loader cursor = {weight_loader._cursor}')
         logging.debug(f'weights num elements = {weight_loader._weights.size}')
         assert weight_loader._cursor == weight_loader._weights.size
+
+    def _read_weights(self, shape, weight_loader):
+        return weight_loader.read(shape[0]).reshape(shape)
 
     def _load_weights(self, block_params, weight_loader):
         params_as_np = weight_loader\
@@ -133,6 +160,7 @@ class Network(nn.Module):
             f'[Conv {conv_id}] '
             f'{shape_in} -> {shape_out}'
         )
+        logging.debug(f'{layer_params}')
 
     def _append_route(self, model, layer_params, route_id):
         layers = layer_params['layers']
@@ -229,45 +257,48 @@ class Network(nn.Module):
         logging.debug(f'[YOLO {yolo_id}] '
                       f'{shape_in} -> {shape_out}')
 
-    def forward(self, x):
+    def _forward(self, x):
         ys = [x]
         boxes = []
         for block in self.model:
-            logging.debug(f'{block}')
             if type(block) is darknet.ConvBNA:
                 conv = block
                 x = ys[-1]
                 y = conv.forward(x)
+                ys.append(y)
             elif type(block) is darknet.MaxPool:
                 maxpool = block
                 x = ys[-1]
                 y = maxpool(x)
+                ys.append(y)
             elif type(block) is darknet.RouteSlice:
                 slice = block
                 x = ys[slice.layer]
                 y = slice(x)
+                ys.append(y)
             elif type(block) is darknet.RouteConcat:
                 concat = block
-                if len(concat.layers) == 2:
-                    xs = [ys[l] for l in concat.layers]
-                    y = concat(*xs)
-                else:
-                    raise NotImplementedError(
-                        'Unsupported number of inputs for concat'
-                    )
+
+                ids = [l if l < 0 else l + 1 for l in concat.layers]
+                xs = [ys[i] for i in ids]
+                y = concat(*xs)
+                ys.append(y)
             elif type(block) is darknet.Upsample:
                 upsample = block
                 x = ys[-1]
                 y = upsample(x)
+                ys.append(y)
             elif type(block) is darknet.Yolo:
                 yolo = block
                 x = ys[-1]
                 y = yolo(x)
+                ys.append(y)
+                boxes.append(y)
             else:
                 raise NotImplementedError
 
-            ys.append(y)
-            if type(block) is darknet.Yolo:
-                boxes.append(y)
+        return ys, boxes
 
+    def forward(self, x):
+        _, boxes = self._forward(x)
         return boxes

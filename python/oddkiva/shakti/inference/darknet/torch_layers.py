@@ -1,9 +1,13 @@
 from pathlib import Path
 from typing import Any, Optional
+import logging
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class ConvBNA(nn.Module):
@@ -11,7 +15,7 @@ class ConvBNA(nn.Module):
     def __init__(self, in_channels, darknet_params: dict[str, Any], id: int,
                  inference=True):
         super(ConvBNA, self).__init__()
-        self.block = nn.Sequential()
+        self.layers = nn.Sequential()
 
         # Unpack the block parameters from the Darknet configuration.
         batch_normalize = darknet_params['batch_normalize']
@@ -23,8 +27,7 @@ class ConvBNA(nn.Module):
         pad_size = (kernel_size - 1) // 2 if add_padding else 0
 
         self.batch_normalize = batch_normalize
-
-        self.fuse_conv_bn_layer = False  # inference and batch_normalize
+        self.fuse_conv_bn_layer = inference and batch_normalize
 
         # Add the convolutional layer
         conv = nn.Conv2d(
@@ -33,11 +36,17 @@ class ConvBNA(nn.Module):
             bias=True,
             padding_mode='zeros' # Let's be explicit about the padding value
         )
-        self.block.add_module(f'conv{id}', conv)
+        self.layers.add_module(f'conv_{id}', conv)
 
         # Add the batch-normalization layer
-        if not self.fuse_conv_bn_layer:
-            self.block.add_module(f'batch_norm{id}', nn.BatchNorm2d(out_channels))
+        if self.batch_normalize and not self.fuse_conv_bn_layer:
+            self.layers.add_module(f'batch_norm_{id}', nn.BatchNorm2d(out_channels))
+        else:
+            self.bn_weights = {
+                'scales': None,
+                'running_mean': None,
+                'running_var': None,
+            }
 
         # Add the activation layer
         if activation == 'leaky':
@@ -47,15 +56,15 @@ class ConvBNA(nn.Module):
         elif activation == 'mish':
             activation_fn = nn.Mish()
         elif activation == 'linear':
-            activation_fn = nn.Identity()
+            activation_fn = nn.Identity(inplace=True)
         elif activation == 'logistic':
             activation_fn = nn.Sigmoid()
         else:
             raise ValueError(f'No convolutional activation named {activation}')
-        self.block.add_module(f'{activation}{id}', activation_fn);
+        self.layers.add_module(f'{activation}_{id}', activation_fn);
 
     def forward(self, x):
-        return self.block.forward(x)
+        return self.layers.forward(x)
 
 
 class MaxPool(nn.Module):
@@ -190,20 +199,24 @@ class Yolo(nn.Module):
         num_box_features = 5 + self.num_classes
         assert num_box_features == 85
 
-        y = x
+        y = torch.clone(x)
 
-        # Box prediction
+        # Box positions
         xs = [box * num_box_features + 0 for box in range(3)]
         ys = [box * num_box_features + 1 for box in range(3)]
+        y[:, xs] = self.alpha * torch.sigmoid(x[:, xs]) + self.beta
+        y[:, ys] = self.alpha * torch.sigmoid(x[:, ys]) + self.beta
+
+        # Box sizes
         # ws = [box * num_box_features + 2 for box in range(3)]
         # hs = [box * num_box_features + 3 for box in range(3)]
-        y[:, xs, :, :] = self.alpha * torch.sigmoid(x[:, xs, :, :]) + self.beta
-        y[:, ys, :, :] = self.alpha * torch.sigmoid(x[:, ys, :, :]) + self.beta
+        # y[:, ws, :, :] = x[:, ws, :, :]
+        # y[:, hs, :, :] = x[:, hs, :, :]
 
         # P[object] and P[class|object] probabilities.
         for box in range(0, 3):
             c_begin = box * num_box_features + 4
             c_end = (box + 1) * num_box_features
-            y[:, c_begin:c_end, :, :] = torch.sigmoid(x[:, c_begin:c_end, :, :])
+            y[:, c_begin:c_end] = torch.sigmoid(x[:, c_begin:c_end])
 
         return y

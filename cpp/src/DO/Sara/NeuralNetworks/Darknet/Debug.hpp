@@ -22,6 +22,21 @@
 namespace DO::Sara::Darknet {
 
   // CAVEAT: this is sensitive to the CPU architecture endianness.
+  inline auto write_tensor(const TensorView_<float, 4>& x,
+                           const std::string& filepath) -> void
+  {
+    auto file = std::ofstream{filepath, std::ios::binary};
+    if (!file.is_open())
+      throw std::runtime_error{"Error: could not open file: " + filepath + "!"};
+
+    file.write(reinterpret_cast<const char*>(x.sizes().data()),
+               x.sizes().size() * sizeof(int));
+
+    file.write(reinterpret_cast<const char*>(x.data()),
+               x.size() * sizeof(float));
+  }
+
+  // CAVEAT: this is sensitive to the CPU architecture endianness.
   inline auto read_tensor(const std::string& filepath) -> Tensor_<float, 4>
   {
     auto file = std::ifstream{filepath, std::ios::binary};
@@ -29,7 +44,7 @@ namespace DO::Sara::Darknet {
       throw std::runtime_error{"Error: could not open file: " + filepath + "!"};
 
     auto sizes = Eigen::Vector4i{};
-    file.read(reinterpret_cast<char*>(sizes.data()), sizeof(float) * 4);
+    file.read(reinterpret_cast<char*>(sizes.data()), sizeof(int) * 4);
 
     auto output = Tensor_<float, 4>{sizes};
     const auto num_elements = std::accumulate(sizes.data(), sizes.data() + 4, 1,

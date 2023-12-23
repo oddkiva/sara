@@ -9,14 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include "Utilities.hpp"
+
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
-
-#include "DO/Sara/Core/DebugUtilities.hpp"
-#include "DO/Sara/Core/Pixel/Typedefs.hpp"
-#include "DO/Sara/ImageIO/ImageIO.hpp"
-#include "Utilities.hpp"
 
 
 namespace py = pybind11;
@@ -27,13 +24,13 @@ auto resize(py::array_t<float, py::array::c_style | py::array::forcecast> src,
             py::array_t<float, py::array::c_style | py::array::forcecast> dst)
     -> void
 {
-  const auto tsrc = to_tensor_view_3d(src);
-  auto tdst = to_tensor_view_3d(dst);
+  const auto tensor_src = to_tensor_view_3d(src);
+  auto tensor_dst = to_tensor_view_3d(dst);
 
   for (auto i = 0; i < src.shape(0); ++i)
   {
-    const auto plane_src_i = sara::image_view(tsrc[i]);
-    auto plane_dst_i = sara::image_view(tdst[i]);
+    const auto plane_src_i = sara::image_view(tensor_src[i]);
+    auto plane_dst_i = sara::image_view(tensor_dst[i]);
     sara::resize_v2(plane_src_i, plane_dst_i);
   }
 }
