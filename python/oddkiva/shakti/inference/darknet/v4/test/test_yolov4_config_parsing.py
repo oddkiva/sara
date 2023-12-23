@@ -46,7 +46,7 @@ def yolo_out_tensor(id: int):
 
 
 def read_image(path: Path, yolo_net: darknet.Network):
-    image = Image.open(DOG_IMAGE_PATH)
+    image = Image.open(path)
     image = np.asarray(image).astype(np.float32) / 255
     image = image.transpose((2, 0, 1))
 
