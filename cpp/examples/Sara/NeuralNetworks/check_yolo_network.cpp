@@ -103,14 +103,12 @@ auto save_network_fused_conv_weights(d::Network& model,
       continue;
 
     d::write_tensor(conv->weights.w,
-                    output_dir /
-                        fmt::format("conv_weight_{}.bin", conv_idx));
+                    output_dir / fmt::format("conv_weight_{}.bin", conv_idx));
 
     const auto b_tensor = sara::TensorView_<float, 1>{
         conv->weights.b.data(), static_cast<int>(conv->weights.b.size())};
     d::write_tensor(b_tensor,
-                    output_dir /
-                        fmt::format("conv_weight_{}.bin", conv_idx));
+                    output_dir / fmt::format("conv_weight_{}.bin", conv_idx));
     ++conv_idx;
   }
 }
@@ -169,11 +167,12 @@ auto graphics_main(int, char**) -> int
   const auto model_dir_path = fs::canonical(  //
       fs::path{src_path("trained_models")}    //
   );
+
   fmt::print("YOLO: {}\n", model_dir_path.string());
   if (!fs::exists(model_dir_path))
     throw std::runtime_error{"trained_models directory does not exist"};
   static constexpr auto yolo_version = 4;
-  static constexpr auto is_tiny = true;
+  static constexpr auto is_tiny = false;
   const auto yolo_model_name =
       "yolov" + std::to_string(yolo_version) + (is_tiny ? "-tiny" : "");
   const auto yolo_dir_path = model_dir_path / yolo_model_name;
@@ -182,18 +181,18 @@ auto graphics_main(int, char**) -> int
   auto model = d::load_yolo_model(yolo_dir_path, yolo_version, is_tiny);
   fmt::print("Load model OK!");
 
-  const auto yolo_out_dir_path =
-      fs::path{"/Users/oddkiva/Desktop/"} / yolo_model_name;
-  if (!fs::exists(yolo_out_dir_path))
-    fs::create_directory(yolo_out_dir_path);
+  const auto yolo_data_check_dir_path = yolo_dir_path / "data_check";
+  if (!fs::exists(yolo_data_check_dir_path))
+    fs::create_directory(yolo_data_check_dir_path);
 
   const auto data_dir_path = fs::canonical(fs::path{src_path("data")});
   const auto image_path = data_dir_path / "dog.jpg";
   if (!fs::exists(image_path))
     throw std::runtime_error{"image does not exist!"};
 
-  save_network_fused_conv_weights(model, yolo_out_dir_path);
-  save_network_intermediate_outputs(model, image_path, yolo_out_dir_path);
+  save_network_fused_conv_weights(model, yolo_data_check_dir_path);
+  save_network_intermediate_outputs(model, image_path,
+                                    yolo_data_check_dir_path);
 
   return 0;
 }
