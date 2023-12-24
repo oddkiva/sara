@@ -108,7 +108,7 @@ auto save_network_fused_conv_weights(d::Network& model,
     const auto b_tensor = sara::TensorView_<float, 1>{
         conv->weights.b.data(), static_cast<int>(conv->weights.b.size())};
     d::write_tensor(b_tensor,
-                    output_dir / fmt::format("conv_weight_{}.bin", conv_idx));
+                    output_dir / fmt::format("conv_bias_{}.bin", conv_idx));
     ++conv_idx;
   }
 }
@@ -172,7 +172,7 @@ auto graphics_main(int, char**) -> int
   if (!fs::exists(model_dir_path))
     throw std::runtime_error{"trained_models directory does not exist"};
   static constexpr auto yolo_version = 4;
-  static constexpr auto is_tiny = false;
+  static constexpr auto is_tiny = true;
   const auto yolo_model_name =
       "yolov" + std::to_string(yolo_version) + (is_tiny ? "-tiny" : "");
   const auto yolo_dir_path = model_dir_path / yolo_model_name;
