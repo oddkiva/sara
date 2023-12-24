@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_tensor_io)
 
   const auto x2 = d::read_tensor(x_path.string());
 
-  BOOST_CHECK(x != x2);
+  BOOST_CHECK(x == x2);
 }
 
 BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
