@@ -112,8 +112,6 @@ class Network(nn.Module):
                         shape, weight_loader)
                     block.bn_weights['running_var'] = self._read_weights(
                         shape, weight_loader)
-                    if block_idx == 0:
-                        logging.info(block.bn_weights)
                 else:
                     bn = block.layers[1]
                     self._load_weights(bn.weight, weight_loader)
@@ -236,9 +234,8 @@ class Network(nn.Module):
 
         # Calculate the output shape.
         assert shape_ins[0][2:] == shape_ins[1][2:]
-        n, _, h_in, w_in = shape_ins[0]
-        c_out = sum([shape_in[1] for shape_in in shape_ins])
-        shape_out = (n, c_out, h_in, w_in)
+        n, c_in, h_in, w_in = shape_ins[0]
+        shape_out = (n, c_in, h_in, w_in)
 
         # Store.
         self.in_shape_at_block.append(shape_ins)
@@ -316,7 +313,8 @@ class Network(nn.Module):
                 ys.append(y)
             elif type(block) is darknet.RouteSlice:
                 slice = block
-                x = ys[slice.layer]
+                y_idx = slice.layer if slice.layer < 0 else slice.layer + 1
+                x = ys[y_idx]
                 y = slice(x)
                 ys.append(y)
             elif type(block) is darknet.RouteConcat2:
@@ -336,7 +334,7 @@ class Network(nn.Module):
             elif type(block) is darknet.Shortcut:
                 shortcut = block
                 i1 = -1
-                if shortcut.self.from_layer < 0:
+                if shortcut.from_layer < 0:
                     i2 = shortcut.from_layer
                 else:
                     i2 = shortcut.from_layer + 1

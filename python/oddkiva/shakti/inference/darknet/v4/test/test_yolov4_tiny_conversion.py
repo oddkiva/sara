@@ -1,5 +1,5 @@
-from pathlib import Path
 import logging
+from pathlib import Path
 
 from PIL import Image
 
@@ -11,6 +11,7 @@ import coremltools as ct
 
 import oddkiva.sara as sara
 import oddkiva.shakti.inference.darknet as darknet
+import oddkiva.shakti.inference.coreml.yolo_v4 as ct
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -24,9 +25,9 @@ YOLO_V4_TINY_DIR_PATH = SARA_MODEL_DIR_PATH / 'yolov4-tiny'
 
 YOLO_V4_TINY_CFG_PATH = YOLO_V4_TINY_DIR_PATH / 'yolov4-tiny.cfg'
 YOLO_V4_TINY_WEIGHT_PATH = YOLO_V4_TINY_DIR_PATH / 'yolov4-tiny.weights'
+YOLO_V4_TINY_CXX_DATA_CHECK_DIR_PATH = YOLO_V4_TINY_DIR_PATH / "data_check"
 
 DOG_IMAGE_PATH = SARA_DATA_DIR_PATH / 'dog.jpg'
-YOLO_INTER_OUT_DIR_PATH = Path('/Users/oddkiva/Desktop/yolo-intermediate-out')
 
 assert SARA_MODEL_DIR_PATH.exists()
 assert YOLO_V4_TINY_CFG_PATH.exists()
@@ -35,7 +36,7 @@ assert DOG_IMAGE_PATH.exists()
 
 
 def yolo_out_path(id: int):
-    return YOLO_INTER_OUT_DIR_PATH / f'yolo_inter_{id}.bin'
+    return YOLO_V4_TINY_CXX_DATA_CHECK_DIR_PATH / f'yolo_inter_{id}.bin'
 
 def yolo_out_tensor(id: int):
     yp = yolo_out_path(id)
@@ -118,27 +119,8 @@ def test_yolo_v4_tiny_coreml_conversion():
     yolo_net.eval()
 
     in_tensor = read_image(DOG_IMAGE_PATH, yolo_net)
-    in_tensor_saved = yolo_out_tensor(0)
 
-    with torch.inference_mode():
-        traced_model = torch.jit.trace(yolo_net, in_tensor)
-        outs = traced_model(in_tensor)
-
-        ct_ins = [
-            ct.ImageType(name="image",
-                         shape=in_tensor.shape,
-                         scale=1 / 255)
-        ]
-        ct_outs = [ct.TensorType(name=f'yolo_{i}') for i, _ in enumerate(outs)]
-
-        model = ct.convert(
-            traced_model,
-            inputs=ct_ins,
-            outputs=ct_outs,
-            debug=True
-        )
-        model.input_description["image"] = "Input RGB image"
-        model.output_description["yolo_0"] = "Box predictions at scale 0"
-        model.output_description["yolo_1"] = "Box predictions at scale 1"
-
-        model.save('/Users/oddkiva/Desktop/yolo-v4-tiny.mlpackage')
+    ct.convert_yolo_v4_to_coreml(
+        yolo_net, in_tensor,
+        YOLO_V4_TINY_DIR_PATH / "yolov4-tiny.mlpackage"
+    )

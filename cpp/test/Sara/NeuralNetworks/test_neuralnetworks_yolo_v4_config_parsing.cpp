@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/NeuralNetworks/Darknet/Debug.hpp>
 #include <DO/Sara/NeuralNetworks/Darknet/Layer.hpp>
 #include <DO/Sara/NeuralNetworks/Darknet/Parser.hpp>
 
@@ -26,6 +27,27 @@ namespace sara = DO::Sara;
 
 
 BOOST_AUTO_TEST_SUITE(TestLayers)
+
+BOOST_AUTO_TEST_CASE(test_tensor_io)
+{
+  namespace d = sara::Darknet;
+
+  const auto shape = Eigen::Vector4i{1, 1, 3, 3};
+  auto x = sara::Tensor_<float, 4>{shape};
+  // clang-format off
+  x.flat_array() <<
+    0, 1, 2,
+    3, 4, 5,
+    6, 7, 8;
+  // clang-format on
+
+  const auto x_path = fs::path{"x.bin"};
+  d::write_tensor(x, x_path.string());
+
+  const auto x2 = d::read_tensor(x_path.string());
+
+  BOOST_CHECK(x == x2);
+}
 
 BOOST_AUTO_TEST_CASE(test_yolov4_tiny_config_parsing)
 {
