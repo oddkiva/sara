@@ -1,5 +1,5 @@
-from PySide2.QtCore import QMutex, QObject, QThread, Qt, QWaitCondition, Signal
-from PySide2.QtWidgets import QApplication
+from PySide6.QtCore import QMutex, QObject, QThread, Qt, QWaitCondition, Signal
+from PySide6.QtWidgets import QApplication
 
 
 class UserThreadSignals(QObject):

@@ -1,7 +1,7 @@
 import random
 import sys
 
-from PySide2 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 
 class MyWidget(QtWidgets.QWidget):
@@ -32,4 +32,4 @@ if __name__ == '__main__':
     widget.resize(800, 600)
     widget.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -15,4 +15,4 @@ torchaudio==2.1.1
 coremltools
 
 PyOpenGL
-# PySide2
+pyside6

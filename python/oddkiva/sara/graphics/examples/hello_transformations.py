@@ -5,18 +5,18 @@ import numpy as np
 
 import OpenGL.GL as gl
 
-from PySide2.QtCore import QObject, QElapsedTimer, QTimer
-from PySide2.QtGui import (QGuiApplication,
+from PySide6.QtCore import QObject, QElapsedTimer, QTimer
+from PySide6.QtGui import (QGuiApplication,
                            QImage,
                            QMatrix4x4,
-                           QOpenGLBuffer,
-                           QOpenGLShader,
-                           QOpenGLShaderProgram,
-                           QOpenGLTexture,
-                           QOpenGLVertexArrayObject,
-                           QOpenGLWindow,
                            QSurfaceFormat,
                            QVector3D)
+from PySide6.QtOpenGL import (QOpenGLBuffer,
+                              QOpenGLShader,
+                              QOpenGLShaderProgram,
+                              QOpenGLTexture,
+                              QOpenGLVertexArrayObject,
+                              QOpenGLWindow)
 
 
 DATA_DIR = path.join(path.dirname(__file__), '../../../../..', 'data')
@@ -128,7 +128,7 @@ class SquareObject(QObject):
             raise ValueError('Could not create VBO')
         self.vbo.bind()
         self.vbo.setUsagePattern(QOpenGLBuffer.StaticDraw)
-        vertices_data = self.vertices.tostring()
+        vertices_data = self.vertices.tobytes()
         self.vbo.allocate(len(vertices_data))
         self.vbo.write(0, vertices_data, len(vertices_data))
 
@@ -137,7 +137,7 @@ class SquareObject(QObject):
             raise ValueError('Could not create EBO')
         self.ebo.bind()
         self.ebo.setUsagePattern(QOpenGLBuffer.StaticDraw)
-        triangles_data = self.triangles.tostring()
+        triangles_data = self.triangles.tobytes()
         self.ebo.allocate(len(triangles_data))
         self.ebo.write(0, triangles_data, len(triangles_data))
 
@@ -260,4 +260,4 @@ if __name__ == '__main__':
 
     app.aboutToQuit.connect(cleanup)
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
