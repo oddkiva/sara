@@ -4,16 +4,16 @@ import numpy as np
 
 import OpenGL.GL as gl
 
-from PySide2 import QtGui
+from PySide6 import QtGui, QtOpenGL
 
 
-class TriangleWindow(QtGui.QOpenGLWindow):
+class TriangleWindow(QtOpenGL.QOpenGLWindow):
 
     def __init__(self):
         super(TriangleWindow, self).__init__()
 
     def setup_shader_program(self):
-        self._program = QtGui.QOpenGLShaderProgram(self.context())
+        self._program = QtOpenGL.QOpenGLShaderProgram(self.context())
         self._vertex_shader = """
 #version 330 core
   layout (location = 0) in vec3 in_coords;
@@ -50,15 +50,15 @@ class TriangleWindow(QtGui.QOpenGLWindow):
         self._arg_pos = {'in_coords': 0, 'in_color': 1, 'out_color': 0}
 
         self._program.addCacheableShaderFromSourceCode(
-            QtGui.QOpenGLShader.Vertex, self._vertex_shader)
+            QtOpenGL.QOpenGLShader.Vertex, self._vertex_shader)
         self._program.addCacheableShaderFromSourceCode(
-            QtGui.QOpenGLShader.Fragment, self._fragment_shader)
+            QtOpenGL.QOpenGLShader.Fragment, self._fragment_shader)
 
-        self._vao = QtGui.QOpenGLVertexArrayObject(self.context())
+        self._vao = QtOpenGL.QOpenGLVertexArrayObject(self.context())
         if not self._vao.create():
             raise QtCore.QException()
 
-        self._vbo = QtGui.QOpenGLBuffer()
+        self._vbo = QtOpenGL.QOpenGLBuffer()
         if not self._vbo.create():
             raise QtCore.QException()
 
@@ -72,7 +72,7 @@ class TriangleWindow(QtGui.QOpenGLWindow):
         self._program.bind()
         self._vao.bind()
         self._vbo.bind()
-        self._vbo.setUsagePattern(QtGui.QOpenGLBuffer.StaticDraw)
+        self._vbo.setUsagePattern(QtOpenGL.QOpenGLBuffer.StaticDraw)
         self._vbo.allocate(len(self._data))
         self._vbo.write(0, self._data, len(self._data))
 
@@ -119,4 +119,4 @@ if __name__ == '__main__':
     win.setFormat(format)
     win.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

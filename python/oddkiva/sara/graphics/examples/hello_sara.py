@@ -1,6 +1,6 @@
 import sys
 
-from PySide2.QtCore import Qt
+from PySide6.QtCore import Qt
 
 import numpy as np
 

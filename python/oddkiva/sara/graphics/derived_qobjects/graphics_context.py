@@ -1,5 +1,5 @@
-from PySide2.QtCore import QObject, Qt
-from PySide2.QtWidgets import QApplication
+from PySide6.QtCore import QObject, Qt
+from PySide6.QtWidgets import QApplication
 
 from oddkiva.sara.graphics.derived_qobjects.painting_window import PaintingWindow
 from oddkiva.sara.graphics.derived_qobjects.user_thread import UserThread

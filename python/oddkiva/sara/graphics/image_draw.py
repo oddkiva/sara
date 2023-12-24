@@ -1,5 +1,5 @@
-from PySide2.QtCore import QPointF
-from PySide2.QtGui import QColor, QFont, QImage, QPainter, QPen
+from PySide6.QtCore import QPointF
+from PySide6.QtGui import QColor, QFont, QImage, QPainter, QPen
 
 
 def to_qimage(array):

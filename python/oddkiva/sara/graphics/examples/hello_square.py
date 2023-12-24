@@ -4,14 +4,14 @@ import numpy as np
 
 import OpenGL.GL as gl
 
-from PySide2.QtCore import QObject
-from PySide2.QtGui import (QGuiApplication,
-                           QOpenGLBuffer,
-                           QOpenGLShader,
-                           QOpenGLShaderProgram,
-                           QOpenGLVertexArrayObject,
-                           QOpenGLWindow,
+from PySide6.QtCore import QObject
+from PySide6.QtGui import (QGuiApplication,
                            QSurfaceFormat)
+from PySide6.QtOpenGL import (QOpenGLBuffer,
+                              QOpenGLShader,
+                              QOpenGLShaderProgram,
+                              QOpenGLVertexArrayObject,
+                              QOpenGLWindow)
 
 
 class SquareObject(QObject):
@@ -161,4 +161,4 @@ if __name__ == '__main__':
     win.resize(800, 600)
     win.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

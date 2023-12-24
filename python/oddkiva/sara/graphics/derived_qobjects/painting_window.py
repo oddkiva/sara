@@ -1,7 +1,7 @@
-from PySide2.QtCore import (QObject, QPointF, QRectF, QTimer, Qt, qWarning,
+from PySide6.QtCore import (QObject, QPointF, QRectF, QTimer, Qt, qWarning,
                             Signal, Slot)
-from PySide2.QtWidgets import QApplication, QScrollArea, QWidget
-from PySide2.QtGui import QColor, QFont, QPainter, QPen, QPixmap
+from PySide6.QtWidgets import QApplication, QScrollArea, QWidget
+from PySide6.QtGui import QColor, QFont, QPainter, QPen, QPixmap
 
 
 class ScrollArea(QScrollArea):
@@ -60,8 +60,12 @@ class PaintingWindow(QWidget):
         self._scroll_area.setFocusProxy(self)
 
         # Maximize if necessary.
-        if w >= QApplication.instance().desktop().width() or \
-                h >= QApplication.instance().desktop().height():
+        w_screen, h_screen = QApplication.instance()\
+            .screens()[0]\
+            .size()\
+            .toTuple()
+        if w >= w_screen or \
+                h >= h_screen:
             self._scroll_area.showMaximized()
         # Resize the scroll area with the size plus a two-pixel offset.
         else:
