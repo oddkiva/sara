@@ -14,6 +14,7 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/NeuralNetworks/Darknet/Debug.hpp>
 #include <DO/Sara/NeuralNetworks/Darknet/Network.hpp>
 #include <DO/Sara/NeuralNetworks/Darknet/Parser.hpp>
 #include <DO/Sara/NeuralNetworks/Darknet/YoloUtilities.hpp>
@@ -27,11 +28,6 @@
 
 #ifdef _OPENMP
 #  include <omp.h>
-#endif
-
-#define COMPARE_WITH_DARKNET_OUTPUT
-#if defined(COMPARE_WITH_DARKNET_OUTPUT)
-#  include <DO/Sara/NeuralNetworks/Darknet/Debug.hpp>
 #endif
 
 
@@ -89,6 +85,37 @@ auto check_yolo_implementation(d::Network& model, const fs::path& output_dir)
 }
 
 
+auto save_network_fused_conv_weights(d::Network& model,
+                                     const fs::path& output_dir) -> void
+{
+  if (!fs::exists(output_dir))
+    throw std::runtime_error{fmt::format("Ouput directory '{}' does not exist!",
+                                         output_dir.string())};
+
+  model.debug = true;
+
+  const auto& net = model.net;
+  auto conv_idx = 0;
+
+  for (auto layer = 1u; layer < net.size(); ++layer)
+  {
+    auto conv = dynamic_cast<d::Convolution*>(net[layer].get());
+    if (!conv)
+      continue;
+
+    d::write_tensor(conv->weights.w,
+                    output_dir /
+                        fmt::format("conv_weight_{conv_idx}.bin", layer));
+
+    const auto b_tensor = sara::TensorView_<float, 1>{
+        conv->weights.b.data(), static_cast<int>(conv->weights.b.size())};
+    d::write_tensor(b_tensor,
+                    output_dir /
+                        fmt::format("conv_weight_{conv_idx}.bin", layer));
+    ++conv_idx;
+  }
+}
+
 auto save_network_intermediate_outputs(d::Network& model,
                                        const fs::path& image_path,
                                        const fs::path& output_dir) -> void
@@ -105,7 +132,7 @@ auto save_network_intermediate_outputs(d::Network& model,
   const auto input_chw = sara::tensor_view(input_hwc).transpose({2, 0, 1});
   static_assert(std::is_same_v<decltype(input_chw),  //
                                const sara::Tensor_<float, 3>>);
-  sara::toc("Image transpose");
+  sara::toc("Image transpose (HWC -> CHW)");
 
   sara::tic();
   const auto& input_layer = dynamic_cast<const d::Input&>(*model.net.front());
@@ -123,9 +150,7 @@ auto save_network_intermediate_outputs(d::Network& model,
   model.forward(input_nchw);
 
   // Save the input tensor.
-  static const auto data_dir_path =
-      fs::path{"/Users/oddkiva/Desktop/yolo-intermediate-out/"};
-  d::write_tensor(input_nchw, data_dir_path / "yolo_inter_0.bin");
+  d::write_tensor(input_nchw, output_dir / "yolo_inter_0.bin");
 
   // Save the intermediate output tensors.
   const auto& net = model.net;
@@ -136,36 +161,12 @@ auto save_network_intermediate_outputs(d::Network& model,
               << *net[layer] << std::endl;
 
     d::write_tensor(net[layer]->output,
-                    data_dir_path / fmt::format("yolo_inter_{}.bin", layer));
+                    output_dir / fmt::format("yolo_inter_{}.bin", layer));
   }
 }
 
 auto graphics_main(int, char**) -> int
 {
-#if defined(DEBUG_TENSOR_IO)
-  const auto shape = Eigen::Vector4i{1, 1, 3, 3};
-  auto x = sara::Tensor_<float, 4>{shape};
-  // clang-format off
-  x.flat_array() <<
-    0, 1, 2,
-    3, 4, 5,
-    6, 7, 8;
-  // clang-format on
-
-  const auto data_dir_path =
-      fs::path{"/Users/oddkiva/Desktop/yolo-intermediate-out"};
-  if (!fs::exists(data_dir_path))
-    fs::create_directory(data_dir_path);
-
-  const auto x_path = data_dir_path / "x.bin";
-  d::write_tensor(x, x_path.string());
-
-  const auto x2 = d::read_tensor(x_path.string());
-
-  if (x != x2)
-    throw std::runtime_error{"Implementation error for 4D-tensor IO"};
-  fmt::print("TENSOR IO: ALL GOOD!\n");
-#else
   const auto model_dir_path = fs::canonical(  //
       fs::path{src_path("trained_models")}    //
   );
@@ -183,7 +184,7 @@ auto graphics_main(int, char**) -> int
   fmt::print("Load model OK!");
 
   const auto yolo_out_dir_path =
-      fs::path{"/Users/oddkiva/Desktop/yolo-intermediate-out"};
+      fs::path{"/Users/oddkiva/Desktop/"} / yolo_model_name;
   if (!fs::exists(yolo_out_dir_path))
     fs::create_directory(yolo_out_dir_path);
 
@@ -193,7 +194,6 @@ auto graphics_main(int, char**) -> int
     throw std::runtime_error{"image does not exist!"};
 
   save_network_intermediate_outputs(model, image_path, yolo_out_dir_path);
-#endif
 
   return 0;
 }

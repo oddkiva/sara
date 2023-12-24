@@ -22,18 +22,20 @@
 namespace DO::Sara::Darknet {
 
   // CAVEAT: this is sensitive to the CPU architecture endianness.
-  inline auto write_tensor(const TensorView_<float, 4>& x,
+  template <typename T, int N>
+  inline auto write_tensor(const TensorView_<T, N>& x,
                            const std::string& filepath) -> void
   {
     auto file = std::ofstream{filepath, std::ios::binary};
     if (!file.is_open())
       throw std::runtime_error{"Error: could not open file: " + filepath + "!"};
 
+    // Write the tensor dimension.
     file.write(reinterpret_cast<const char*>(x.sizes().data()),
                x.sizes().size() * sizeof(int));
 
-    file.write(reinterpret_cast<const char*>(x.data()),
-               x.size() * sizeof(float));
+    // Copy the tensor content.
+    file.write(reinterpret_cast<const char*>(x.data()), x.size() * sizeof(T));
   }
 
   // CAVEAT: this is sensitive to the CPU architecture endianness.
