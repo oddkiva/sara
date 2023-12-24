@@ -124,13 +124,21 @@ def test_yolo_v4_tiny_coreml_conversion():
         traced_model = torch.jit.trace(yolo_net, in_tensor)
         outs = traced_model(in_tensor)
 
+        ct_ins = [
+            ct.ImageType(name="image",
+                         shape=in_tensor.shape,
+                         scale=1 / 255)
+        ]
         ct_outs = [ct.TensorType(name=f'yolo_{i}') for i, _ in enumerate(outs)]
 
         model = ct.convert(
             traced_model,
-            inputs=[ct.TensorType(shape=in_tensor.shape)],
+            inputs=ct_ins,
             outputs=ct_outs,
             debug=True
         )
+        model.input_description["image"] = "Input RGB image"
+        model.output_description["yolo_0"] = "Box predictions at scale 0"
+        model.output_description["yolo_1"] = "Box predictions at scale 1"
 
         model.save('/Users/oddkiva/Desktop/yolo-v4-tiny.mlpackage')

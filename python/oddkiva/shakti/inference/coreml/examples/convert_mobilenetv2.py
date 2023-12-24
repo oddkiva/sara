@@ -18,7 +18,7 @@ if PYTHON_VERSION.minor > 11:
     raise RuntimeError(
         "This Python version might not be supported at this time.\n"
         "Check by running `pip install -r requirements.txt`"
-    ))
+    )
 
 torch_model = torchvision.models.mobilenet_v2(pretrained=True)
 torch_model.eval()
