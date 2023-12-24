@@ -9,7 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
@@ -31,9 +30,9 @@
 #endif
 
 
-namespace d = DO::Sara::Darknet;
 namespace fs = std::filesystem;
 namespace sara = DO::Sara;
+namespace d = DO::Sara::Darknet;
 
 
 auto check_yolo_implementation(d::Network& model, const fs::path& output_dir)
@@ -105,13 +104,13 @@ auto save_network_fused_conv_weights(d::Network& model,
 
     d::write_tensor(conv->weights.w,
                     output_dir /
-                        fmt::format("conv_weight_{conv_idx}.bin", layer));
+                        fmt::format("conv_weight_{}.bin", conv_idx));
 
     const auto b_tensor = sara::TensorView_<float, 1>{
         conv->weights.b.data(), static_cast<int>(conv->weights.b.size())};
     d::write_tensor(b_tensor,
                     output_dir /
-                        fmt::format("conv_weight_{conv_idx}.bin", layer));
+                        fmt::format("conv_weight_{}.bin", conv_idx));
     ++conv_idx;
   }
 }
@@ -193,6 +192,7 @@ auto graphics_main(int, char**) -> int
   if (!fs::exists(image_path))
     throw std::runtime_error{"image does not exist!"};
 
+  save_network_fused_conv_weights(model, yolo_out_dir_path);
   save_network_intermediate_outputs(model, image_path, yolo_out_dir_path);
 
   return 0;
