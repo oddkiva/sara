@@ -24,18 +24,21 @@ namespace DO::Sara::Darknet {
     const Eigen::Vector2f scale = original_sizes.cast<float>().array() /
                                   network_input_sizes.cast<float>().array();
 
-    auto boxes = std::vector<YoloBox>{};
     const auto num_boxes = static_cast<int>(masks.size());
+    const auto out4d = output.reshape(Eigen::Vector4i{
+        num_boxes, output.size(0) / num_boxes, output.size(1), output.size(2)});
+
+    auto boxes = std::vector<YoloBox>{};
     for (auto box = 0; box < num_boxes; ++box)
     {
       // Box center
-      const auto rel_x = output[box * 85 + 0];
-      const auto rel_y = output[box * 85 + 1];
+      const auto rel_x = out4d[box][0];
+      const auto rel_y = out4d[box][1];
       // Box log sizes
-      const auto log_w = output[box * 85 + 2];
-      const auto log_h = output[box * 85 + 3];
+      const auto log_w = out4d[box][2];
+      const auto log_h = out4d[box][3];
       // Objectness probability.
-      const auto objectness = output[box * 85 + 4];
+      const auto objectness = out4d[box][4];
 
       // Fetch the box size prior.
       const auto& w_prior = box_sizes_prior[2 * masks[box] + 0];
@@ -69,7 +72,7 @@ namespace DO::Sara::Darknet {
           const auto obj_prob = objectness(i, j);
           auto class_probs = Eigen::VectorXf{80};
           for (auto c = 0; c < 80; ++c)
-            class_probs(c) = output[box * 85 + 5 + c](i, j);
+            class_probs(c) = out4d[box][5 + c](i, j);
 
           boxes.push_back({xywh, obj_prob, class_probs});
         }
