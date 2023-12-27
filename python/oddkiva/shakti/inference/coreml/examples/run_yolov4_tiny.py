@@ -15,27 +15,29 @@ THIS_FILE = __file__
 SARA_SOURCE_DIR_PATH = Path(THIS_FILE[:THIS_FILE.find('sara') + len('sara')])
 SARA_DATA_DIR_PATH = SARA_SOURCE_DIR_PATH / 'data'
 SARA_TRAINED_MODEL_DIR_PATH = SARA_SOURCE_DIR_PATH / 'trained_models'
-SARA_YOLOV4_MODEL_DIR_PATH = SARA_SOURCE_DIR_PATH / 'trained_models'
+SARA_YOLOV4_MODEL_DIR_PATH = SARA_TRAINED_MODEL_DIR_PATH / 'yolov4-tiny'
 
-YOLO_V4_COREML_PATH = SARA_YOLOV4_MODEL_DIR_PATH / 'yolo-v4.mlpackage'
+YOLO_V4_COREML_PATH = SARA_YOLOV4_MODEL_DIR_PATH / 'yolov4-tiny.mlpackage'
 YOLO_V4_COCO_CLASSES_PATH = SARA_YOLOV4_MODEL_DIR_PATH / 'classes.txt'
 assert YOLO_V4_COREML_PATH.exists()
-YOLO_V4_CFG_PATH = SARA_YOLOV4_MODEL_DIR_PATH / 'yolov4.cfg'
+YOLO_V4_CFG_PATH = SARA_YOLOV4_MODEL_DIR_PATH / 'yolov4-tiny.cfg'
 assert YOLO_V4_CFG_PATH.exists()
 
 DOG_IMAGE_PATH = SARA_DATA_DIR_PATH / 'dog.jpg'
 assert DOG_IMAGE_PATH.exists()
 
 
-Box = namedtuple('x', 'y', 'w', 'h', 'p_object', 'class_id', 'p_class')
+Box = namedtuple('Box', ['x', 'y', 'w', 'h', 'p_object', 'class_id', 'p_class'])
 
 
 def get_yolo_boxes(yolo_out: np.ndarray, yolo_layers: dict['str': Any],
                    objectness_thres,
                    image_ori_sizes, yolo_input_sizes):
-    B = len(yolo_layers['masks'])
-    N, C, H, W = yolo_out.shape
-    out = yolo_out.reshape((N, B, C // B, H, W))
+    mask = yolo_layers['mask']
+    anchors = yolo_layers['anchors']
+    _, B, _, H, W = yolo_out.shape
+
+    out = yolo_out
     rel_x = out[:, :, 0]
     rel_y = out[:, :, 1]
     log_w = out[:, :, 2]
@@ -45,39 +47,43 @@ def get_yolo_boxes(yolo_out: np.ndarray, yolo_layers: dict['str': Any],
 
     yi, xi = np.meshgrid(range(H), range(W), indexing='ij')
 
-    mask = yolo_layers['mask']
-    anchors = yolo_layers['anchors']
-    w_prior = [anchors[2 * mask[b] + 0] for b in range(B)]
-    h_prior = [anchors[2 * mask[b] + 1] for b in range(B)]
+    w_prior = [anchors[mask[b]][0] for b in range(B)]
+    h_prior = [anchors[mask[b]][1] for b in range(B)]
 
-    sx = yolo_input_sizes[0] / image_ori_sizes[0]
-    sy = yolo_input_sizes[1] / image_ori_sizes[1]
+    sx = image_ori_sizes[1] / yolo_input_sizes[0]
+    sy = image_ori_sizes[0] / yolo_input_sizes[1]
 
-    x = (rel_x + xi) / W * image_ori_sizes[0]
-    y = (rel_y + yi) / H * image_ori_sizes[1]
+    x = (rel_x + xi) / W * image_ori_sizes[1]
+    y = (rel_y + yi) / H * image_ori_sizes[0]
+    w = log_w
+    h = log_h
     for b in range(B):
-        w = np.exp(log_w)[:, :, b] * w_prior[b] * sx
-        h = np.exp(log_h)[:, :, b] * h_prior[b] * sy
+        w[:, :, b] = np.exp(log_w)[:, :, b] * w_prior[b] * sx
+        h[:, :, b] = np.exp(log_h)[:, :, b] * h_prior[b] * sy
 
     p_class_idx = np.argmax(p_classes, axis=2)
 
-    # Get the 5D indices 
-    object_ids = np.where(p_objectness > objectness_thres)
+    # Get the 4D indices 
+    object_ids = np.nonzero(p_objectness > objectness_thres)
     x = x[object_ids]
     y = y[object_ids]
     w = w[object_ids]
     h = h[object_ids]
     p_objectness = p_objectness[object_ids]
     class_ids = p_class_idx[object_ids]
-    p_classes = p_classes[object_ids]
+    ixs = (object_ids[0], object_ids[1], class_ids, object_ids[2],
+           object_ids[3])
+    p_classes = p_classes[ixs]
 
-    boxes = np.stack((x, y, w, h, p_objectness, class_ids, p_classes))
-    boxes = [Box(b) for b in boxes] 
+    boxes = np.stack((x, y, w, h, p_objectness, class_ids,
+                      p_classes)).transpose().tolist()
+    boxes = [Box(*b) for b in boxes] 
     return boxes
 
 def nms(boxes_ndarr: [Box], iou_thres=0.4):
-    boxes_sorted = sorted(boxes_ndarr,
-                          cmp=def compare(x, y): x.p_object > y.p_object)
+    def compare(x: Box, y: Box):
+        return x.p_object > y.p_object
+    boxes_sorted = sorted(boxes_ndarr, cmp=compare)
     boxes_filtered = []
     for box in boxes_sorted:
         if not boxes_filtered:
@@ -118,7 +124,16 @@ yolo_input_sizes = (yolo_cfg._metadata['width'], yolo_cfg._metadata['height'])
 yolo_layers = [layer['yolo'] for layer in yolo_cfg._model
                if 'yolo' in layer.keys()]
 
-image = Image.open(DOG_IMAGE_PATH).resize(yolo_input_sizes,
-                                          resample=Image.Resampling.LANCZOS)
+image_ori = Image.open(DOG_IMAGE_PATH)
+image_ori_sizes = np.asarray(image_ori).shape[:2]
 
-yolo_outs = model.predict({'image': image})
+image_resized = image_ori.resize(yolo_input_sizes,
+                                 resample=Image.Resampling.LANCZOS)
+yolo_outs = yolo_model.predict({'image': image_resized})
+yolo_outs = [yolo_outs[f'yolo_{i}'] for i in range(len(yolo_layers))]
+
+
+yolo_boxes = get_yolo_boxes(yolo_outs[0], yolo_layers[0], 0.4, image_ori_sizes,
+                            yolo_input_sizes)
+
+import IPython; IPython.embed()
