@@ -8,6 +8,7 @@ import numpy as np
 
 import coremltools as ct
 
+import oddkiva.sara as sara
 import oddkiva.shakti.inference.darknet as darknet
 
 
@@ -50,25 +51,27 @@ def get_yolo_boxes(yolo_out: np.ndarray, yolo_layers: dict['str': Any],
     w_prior = [anchors[mask[b]][0] for b in range(B)]
     h_prior = [anchors[mask[b]][1] for b in range(B)]
 
-    sx = image_ori_sizes[1] / yolo_input_sizes[0]
-    sy = image_ori_sizes[0] / yolo_input_sizes[1]
+    sx = image_ori_sizes[1] / yolo_input_sizes[1]
+    sy = image_ori_sizes[0] / yolo_input_sizes[0]
 
     x = (rel_x + xi) / W * image_ori_sizes[1]
     y = (rel_y + yi) / H * image_ori_sizes[0]
-    w = log_w
-    h = log_h
+    w = np.copy(log_w)
+    h = np.copy(log_h)
     for b in range(B):
-        w[:, :, b] = np.exp(log_w)[:, :, b] * w_prior[b] * sx
-        h[:, :, b] = np.exp(log_h)[:, :, b] * h_prior[b] * sy
+        w[:, b] = np.exp(log_w)[:, b] * w_prior[b] * sx
+        h[:, b] = np.exp(log_h)[:, b] * h_prior[b] * sy
 
     p_class_idx = np.argmax(p_classes, axis=2)
 
-    # Get the 4D indices 
+    # Get the 4D indices
     object_ids = np.nonzero(p_objectness > objectness_thres)
     x = x[object_ids]
     y = y[object_ids]
     w = w[object_ids]
     h = h[object_ids]
+    x -= 0.5 * w
+    y -= 0.5 * h
     p_objectness = p_objectness[object_ids]
     class_ids = p_class_idx[object_ids]
     ixs = (object_ids[0], object_ids[1], class_ids, object_ids[2],
@@ -77,13 +80,15 @@ def get_yolo_boxes(yolo_out: np.ndarray, yolo_layers: dict['str': Any],
 
     boxes = np.stack((x, y, w, h, p_objectness, class_ids,
                       p_classes)).transpose().tolist()
-    boxes = [Box(*b) for b in boxes] 
+    boxes = [Box(*b) for b in boxes]
     return boxes
 
-def nms(boxes_ndarr: [Box], iou_thres=0.4):
+def nms(boxes: [Box], iou_thres=0.4):
     def compare(x: Box, y: Box):
-        return x.p_object > y.p_object
-    boxes_sorted = sorted(boxes_ndarr, cmp=compare)
+        return y.p_object - x.p_object
+    from functools import cmp_to_key
+    boxes_sorted = sorted(boxes, key=cmp_to_key(compare))
+
     boxes_filtered = []
     for box in boxes_sorted:
         if not boxes_filtered:
@@ -93,47 +98,82 @@ def nms(boxes_ndarr: [Box], iou_thres=0.4):
         y1 = np.array([box.y for box in boxes_filtered])
         w = np.array([box.w for box in boxes_filtered])
         h = np.array([box.h for box in boxes_filtered])
-        x2 = x1 + w 
-        y2 = y1 + h 
+        x2 = x1 + w
+        y2 = y1 + h
 
         inter_x1 = np.maximum(x1, box.x)
         inter_y1 = np.maximum(y1, box.y)
         inter_x2 = np.minimum(x2, box.x + box.w)
         inter_y2 = np.minimum(y2, box.y + box.h)
 
-        inter = inter_x1 <= inter_x2 and inter_y1 <= inter_y2
+        inter = np.logical_and(inter_x1 <= inter_x2, inter_y1 <= inter_y2)
         inter_area = \
-            (inter_x2 - inter_x2) * (inter_y2 - inter_y1) * \
+            (inter_x2 - inter_x1) * (inter_y2 - inter_y1) * \
             inter.astype(np.float32)
 
         union_area = w * h + box.w * box.h - inter_area
 
         iou = inter_area / union_area
 
-        ids = np.where(iou > iou_thres)
-        if not ids:
+        overlap = np.any(iou > iou_thres)
+        if not overlap:
             boxes_filtered.append(box)
 
     return boxes_filtered
 
 
-yolo_model = ct.models.CompiledMLModel(str(YOLO_V4_COREML_PATH))
-yolo_cfg = darknet.Config()
-yolo_cfg.read(YOLO_V4_CFG_PATH)
-yolo_input_sizes = (yolo_cfg._metadata['width'], yolo_cfg._metadata['height'])
-yolo_layers = [layer['yolo'] for layer in yolo_cfg._model
-               if 'yolo' in layer.keys()]
+def detect(yolo_model, yolo_layers, image_ori, yolo_input_sizes):
+    image_ori_sizes = np.asarray(image_ori).shape[:2]
+    image_resized = image_ori.resize(yolo_input_sizes,
+                                     resample=Image.Resampling.LANCZOS)
 
-image_ori = Image.open(DOG_IMAGE_PATH)
-image_ori_sizes = np.asarray(image_ori).shape[:2]
+    yolo_outs = yolo_model.predict({'image': image_resized})
+    yolo_outs = [yolo_outs[f'yolo_{i}'] for i in range(len(yolo_layers))]
 
-image_resized = image_ori.resize(yolo_input_sizes,
-                                 resample=Image.Resampling.LANCZOS)
-yolo_outs = yolo_model.predict({'image': image_resized})
-yolo_outs = [yolo_outs[f'yolo_{i}'] for i in range(len(yolo_layers))]
+    yolo_boxes = [get_yolo_boxes(yolo_outs[i], yolo_layers[i], 0.4,
+                                 image_ori_sizes, yolo_input_sizes)
+                  for i in range(len(yolo_layers))]
+    yolo_boxes = sum(yolo_boxes, [])
+
+    yolo_boxes = nms(yolo_boxes)
+
+    return yolo_boxes
 
 
-yolo_boxes = get_yolo_boxes(yolo_outs[0], yolo_layers[0], 0.4, image_ori_sizes,
-                            yolo_input_sizes)
+def draw_detection(
+    b: Box,
+    class_name: str,
+    color: tuple[int, int, int],
+    font_size: int = 20
+) -> None:
 
-import IPython; IPython.embed()
+    sara.draw_rect((b.x, b.y), (b.w, b.h), (255, 0, 0), 3)
+    sara.draw_text((b.x, b.y - 4), class_name, color, font_size, 0, False, True, False)
+
+def user_main():
+    yolo_model = ct.models.CompiledMLModel(str(YOLO_V4_COREML_PATH))
+    yolo_cfg = darknet.Config()
+    yolo_cfg.read(YOLO_V4_CFG_PATH)
+    yolo_input_sizes = (yolo_cfg._metadata['width'], yolo_cfg._metadata['height'])
+    yolo_layers = [layer['yolo'] for layer in yolo_cfg._model
+                   if 'yolo' in layer.keys()]
+    with open(YOLO_V4_COCO_CLASSES_PATH, 'r') as fp:
+        yolo_classes = [l.strip(' \n') for l in fp.readlines() if l]
+        print(yolo_classes)
+
+    image_ori = Image.open(DOG_IMAGE_PATH)
+
+    yolo_boxes = detect(yolo_model, yolo_layers, image_ori, yolo_input_sizes)
+
+    sara.create_window(*image_ori.size)
+    sara.set_antialiasing(True)
+    sara.draw_image(np.asarray(image_ori))
+    for b in yolo_boxes:
+        class_name = yolo_classes[int(b.class_id)]
+        draw_detection(b, class_name, (191, 0, 0))
+
+    sara.get_key()
+
+
+if __name__ == '__main__':
+    sara.run_graphics(user_main)
