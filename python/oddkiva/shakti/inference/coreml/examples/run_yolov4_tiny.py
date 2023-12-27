@@ -83,7 +83,7 @@ def get_yolo_boxes(yolo_out: np.ndarray, yolo_layers: dict['str': Any],
     boxes = [Box(*b) for b in boxes]
     return boxes
 
-def nms(boxes: [Box], iou_thres=0.4):
+def nms(boxes: list[Box], iou_thres=0.4):
     def compare(x: Box, y: Box):
         return y.p_object - x.p_object
     from functools import cmp_to_key
