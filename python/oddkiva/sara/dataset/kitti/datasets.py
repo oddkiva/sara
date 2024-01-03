@@ -186,20 +186,20 @@ def draw_projected_bbox(image, xs):
 
     # Draw the edges of the front face.
     for i in range(4):
-        xa, ya = xs[i][:2].astype(np.int)
-        xb, yb = xs[(i + 1) % 4][:2].astype(np.int)
+        xa, ya = xs[i][:2].astype(np.int32)
+        xb, yb = xs[(i + 1) % 4][:2].astype(np.int32)
         cv2.line(image, (xa, ya), (xb, yb), (0, 0, 255), 1, cv2.LINE_AA)
 
     # Draw the edges of the back face.
     for i in range(4):
-        xa, ya = xs[4 + i][:2].astype(np.int)
-        xb, yb = xs[4 + (i + 1) % 4][:2].astype(np.int)
+        xa, ya = xs[4 + i][:2].astype(np.int32)
+        xb, yb = xs[4 + (i + 1) % 4][:2].astype(np.int32)
         cv2.line(image, (xa, ya), (xb, yb), (0, 0, 127), 1, cv2.LINE_AA)
 
     # Draw the edges of the left and right side faces.
     for i in range(4):
-        (xa, ya) = xs[0 + i][:2].astype(np.int)
-        (xb, yb) = xs[4 + i][:2].astype(np.int)
+        (xa, ya) = xs[0 + i][:2].astype(np.int32)
+        (xb, yb) = xs[4 + i][:2].astype(np.int32)
         cv2.line(image, (xa, ya), (xb, yb), (0, 0, 191), 1, cv2.LINE_AA)
 
 
