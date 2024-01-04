@@ -1,5 +1,10 @@
-find_package(DO_Sara
-             COMPONENTS Core Graphics Geometry ImageIO SfM VideoIO REQUIRED)
+set(DO_Sara_LIBRARIES
+  DO::Sara::Core
+  DO::Sara::Graphics
+  DO::Sara::Geometry
+  DO::Sara::ImageIO
+  DO::Sara::SfM
+  DO::Sara::VideoIO)
 
 # N.B.: with MSVC, this link helped to solve already defined symbol errors:
 # https://github.com/halide/Halide/issues/740

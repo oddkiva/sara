@@ -302,18 +302,3 @@ shakti_halide_library_v2(
   NAME shakti_stream_compaction_gpu
   SRCS StreamCompactionGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-# ------------------------------------------------------------------------------
-# Examples
-# ------------------------------------------------------------------------------
-if (SARA_BUILD_SAMPLES)
-  add_subdirectory(examples)
-endif ()
-
-
-# ------------------------------------------------------------------------------
-# Examples
-# ------------------------------------------------------------------------------
-if (SARA_BUILD_TESTS)
-  add_subdirectory(test)
-endif ()
