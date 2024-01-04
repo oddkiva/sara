@@ -21,15 +21,15 @@
 
 #include <DO/Shakti/Halide/Utilities.hpp>
 
-#include "shakti_rgb8u_to_gray32f_cpu.h"
 #include "shakti_gaussian_convolution_gpu.h"
 #include "shakti_polar_gradient_2d_32f_gpu_v2.h"
+#include "shakti_rgb8u_to_gray32f_cpu.h"
 #include "shakti_scale_32f_gpu.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #ifdef _OPENMP
-#include <omp.h>
+#  include <omp.h>
 #endif
 
 
@@ -192,16 +192,15 @@ int sara_graphics_main(int argc, char** argv)
 {
   using namespace std::string_literals;
 
+  if (argc < 2)
+  {
+    std::cerr << "Usage: " << argv[0] << " video_file_path [downscale_factor]"
+              << std::endl;
+    return 1;
+  }
+
   // Parse command line.
-  const auto video_filepath = argc >= 2
-                                  ? argv[1]
-#ifdef _WIN32
-                                  : "C:/Users/David/Desktop/GOPR0542.MP4"s;
-#elif __APPLE__
-                                  : "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
-#else
-                                  : "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-#endif
+  const auto video_filepath = argv[1];
   const auto downscale_factor = argc >= 3 ? std::atoi(argv[2]) : 2;
 
   // OpenMP.
@@ -245,11 +244,12 @@ int sara_graphics_main(int argc, char** argv)
           frame_gray32f_downscaled_tensor_view);
 
   // Output save.
-  namespace fs = boost::filesystem;
+  namespace fs = std::filesystem;
+  const auto dir_path = fs::path(video_filepath).parent_path();
   const auto basename = fs::path(video_filepath).stem().string();
   VideoWriter video_writer{
 #ifdef __APPLE__
-      "/Users/david/Desktop/" + basename + ".edge-detection.mp4",
+      dir_path / (basename + ".edge-detection.mp4"),
 #elif _WIN32
       "C:/Users/David/Desktop/" + basename + ".edge - detection.mp4",
 

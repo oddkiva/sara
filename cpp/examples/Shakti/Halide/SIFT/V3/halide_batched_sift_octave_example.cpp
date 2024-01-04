@@ -88,27 +88,27 @@ auto debug_sift_octave(halide::v3::SiftOctavePipeline& sift_octave)
   SARA_CHECK(sift_octave.extrema_oriented.size());
 }
 
-auto test_on_video()
+auto test_on_video(int const argc, char** const argv) -> int
 {
-  using namespace std::string_literals;
+  if (argc < 2)
+  {
+    std::cerr << "Usage: " << argv[0] << " video_file" << std::endl;
+    return 1;
+  }
 
-#ifdef _WIN32
-  const auto video_filepath = "C:/Users/David/Desktop/sfm-data/GOPR0542.MP4"s;
-#elif __APPLE__
-  const auto
-      video_filepath =  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
-#else
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  // const auto video_filepath = "/home/david/Desktop/GOPR0542.MP4"s;
+  // Optimization.
+#ifdef _OPENMP
+  omp_set_num_threads(omp_get_max_threads());
 #endif
+  std::ios_base::sync_with_stdio(false);
 
 
   // ===========================================================================
   // SARA PIPELINE
   //
   // Input and output from Sara.
-  sara::VideoStream video_stream(video_filepath);
+  const auto video_filepath = argv[1];
+  auto video_stream = sara::VideoStream{video_filepath};
   auto frame = video_stream.frame();
   auto frame_gray = sara::Image<float>{frame.sizes()};
   auto frame_gray_tensor =
@@ -173,17 +173,13 @@ auto test_on_video()
 
     // debug_sift_octave(sift_octave);
   }
+
+  return 0;
 }
 
-GRAPHICS_MAIN()
+auto main(int argc, char** const argv) -> int
 {
-  // Optimization.
-#ifdef _OPENMP
-  omp_set_num_threads(omp_get_max_threads());
-#endif
-  std::ios_base::sync_with_stdio(false);
-
-  // test_on_image();
-  test_on_video();
-  return 0;
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(test_on_video);
+  return app.exec();
 }

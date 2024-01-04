@@ -13,6 +13,7 @@ if(CMAKE_CUDA_COMPILER)
   endif()
 endif()
 
+add_subdirectory(Halide)
 add_subdirectory(OpenCL)
 add_subdirectory(Vulkan)
 

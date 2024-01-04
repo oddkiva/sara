@@ -11,13 +11,6 @@
 
 //! @example
 
-#include <algorithm>
-#include <cmath>
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
@@ -27,19 +20,28 @@
 #include <DO/Shakti/Halide/SIFT/Draw.hpp>
 #include <DO/Shakti/Halide/SIFT/V2/Pipeline.hpp>
 
+#include <algorithm>
+#include <cmath>
+
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
+
 
 namespace sara = DO::Sara;
 namespace halide = DO::Shakti::HalideBackend;
 
 
-auto test_on_image()
+auto test_on_image(int const argc, char** const argv) -> int
 {
-  const auto image_filepath =
-#ifdef __APPLE__
-      "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg";
-#else
-      "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg";
-#endif
+  if (argc < 2)
+  {
+    std::cerr << "Usage: " << argv[0] << " image_file" << std::endl;
+    return 1;
+  }
+
+  const auto image_filepath = argv[1];
+
   auto image = sara::imread<float>(image_filepath);
   auto image_tensor = tensor_view(image).reshape(
       Eigen::Vector4i{1, 1, image.height(), image.width()});
@@ -47,8 +49,8 @@ auto test_on_image()
 
   auto sift_octave_pipeline = halide::v2::SiftOctavePipeline{};
   static constexpr auto scale_count = 3;
-  sift_octave_pipeline.initialize_buffers(scale_count,
-                                          image.width(), image.height());
+  sift_octave_pipeline.initialize_buffers(scale_count, image.width(),
+                                          image.height());
 
   auto timer = sara::Timer{};
   timer.restart();
@@ -69,23 +71,25 @@ auto test_on_image()
   sara::toc("Display");
 
   sara::get_key();
+
+  return 0;
 }
 
-auto test_on_video()
+auto test_on_video(int const argc, char** const argv) -> int
 {
-  using namespace std::string_literals;
+  if (argc < 2)
+  {
+    std::cerr << "Usage: " << argv[0] << " video_file" << std::endl;
+    return 1;
+  }
 
-#ifdef _WIN32
-  const auto video_filepath = "C:/Users/David/Desktop/GOPR0542.MP4"s;
-#elif __APPLE__
-  const auto
-      video_filepath =  //"/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
-#else
-  const auto video_filepath =
-      // "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.mp4"s;
+  // Optimization.
+#ifdef _OPENMP
+  omp_set_num_threads(omp_get_max_threads());
 #endif
+  std::ios_base::sync_with_stdio(false);
+
+  const auto video_filepath = argv[1];
 
 
   // ===========================================================================
@@ -109,8 +113,8 @@ auto test_on_video()
 
   auto sift_octave_pipeline = halide::v2::SiftOctavePipeline{};
   static constexpr auto scale_count_per_octave = 3;
-  sift_octave_pipeline.initialize_buffers(scale_count_per_octave,
-                                          frame.width(), frame.height());
+  sift_octave_pipeline.initialize_buffers(scale_count_per_octave, frame.width(),
+                                          frame.height());
 
   // Show the local extrema.
   sara::create_window(frame.sizes());
@@ -187,18 +191,14 @@ auto test_on_video()
     sara::display(frame);
     sara::toc("Display");
   }
+
+  return 0;
 }
 
 
-GRAPHICS_MAIN()
+auto main(int argc, char** const argv) -> int
 {
-  // Optimization.
-#ifdef _OPENMP
-  omp_set_num_threads(omp_get_max_threads());
-#endif
-  std::ios_base::sync_with_stdio(false);
-
-  // test_on_image();
-  test_on_video();
-  return 0;
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(test_on_video);
+  return app.exec();
 }

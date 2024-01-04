@@ -28,7 +28,3 @@ target_link_libraries(
           ${HALIDE_SIFT_BLOCK_LIBRARIES_V2})
 set_property(TARGET DO_Shakti_Halide_Sift_gpu_v2
              PROPERTY FOLDER "Libraries/Shakti/Halide")
-
-if(SARA_BUILD_SAMPLES)
-  add_subdirectory(examples)
-endif()

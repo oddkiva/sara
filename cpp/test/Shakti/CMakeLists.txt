@@ -40,5 +40,6 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/../)
 
 add_subdirectory(Cuda)
+add_subdirectory(Halide)
 add_subdirectory(OpenCL)
 add_subdirectory(Vulkan)
