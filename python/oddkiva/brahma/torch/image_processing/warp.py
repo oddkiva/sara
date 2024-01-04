@@ -2,14 +2,10 @@ import torch as T
 
 
 def enumerate_coords(w: int, h: int) -> T.Tensor:
-    x, y = T.meshgrid(T.range(0, w - 1), T.range(0, h - 1))
+    x, y = T.meshgrid(T.arange(0, w), T.arange(0, h), indexing='xy')
     x, y = x.reshape((w * h,)), y.reshape((w * h,))
     p = T.stack((x, y))
     return p
-
-
-def which_coords_is_in_domain(x, xmin, xmax):
-    return T.logical_and(xmin <= x, x < xmax)
 
 
 def bilinear_interpolation_2d(image: T.Tensor, coords: T.Tensor) -> T.Tensor:
@@ -21,10 +17,10 @@ def bilinear_interpolation_2d(image: T.Tensor, coords: T.Tensor) -> T.Tensor:
 
     h, w = image.shape[0], image.shape[1]
 
-    xmap0 = which_coords_is_in_domain(x0, 0, w - 1)
-    xmap1 = which_coords_is_in_domain(x1, 0, w - 1)
-    ymap0 = which_coords_is_in_domain(y0, 0, h - 1)
-    ymap1 = which_coords_is_in_domain(y1, 0, h - 1)
+    xmap0 = T.logical_and(0 <= x0, x0 <= w - 1)
+    xmap1 = T.logical_and(0 <= x1, x1 <= w - 1)
+    ymap0 = T.logical_and(0 <= y0, y0 <= h - 1)
+    ymap1 = T.logical_and(0 <= y1, y1 <= h - 1)
 
     # The interpolation can happen only if all the 4 corners are in the image
     # domain
@@ -39,19 +35,22 @@ def bilinear_interpolation_2d(image: T.Tensor, coords: T.Tensor) -> T.Tensor:
     # Filter the coordinates
     x = x[ixs_where_all_corners_in_image_domain]
     y = y[ixs_where_all_corners_in_image_domain]
-    x0 = x0[ixs_where_all_corners_in_image_domain]
-    x1 = x1[ixs_where_all_corners_in_image_domain]
-    y0 = y0[ixs_where_all_corners_in_image_domain]
-    y1 = y1[ixs_where_all_corners_in_image_domain]
+    x0 = x0[ixs_where_all_corners_in_image_domain].int()
+    x1 = x1[ixs_where_all_corners_in_image_domain].int()
+    y0 = y0[ixs_where_all_corners_in_image_domain].int()
+    y1 = y1[ixs_where_all_corners_in_image_domain].int()
+
+    image_flat = image.flatten()
+    v00 = image_flat[y0 * w + x0]
+    v10 = image_flat[y0 * w + x1]
+    v01 = image_flat[y1 * w + x0]
+    v11 = image_flat[y1 * w + x1]
 
     ax0, ax1 = x1 - x, x - x0
     ay0, ay1 = y1 - y, y - y0
 
     values = \
-        ax0 * ay0 * image[y0][x0] + ax1 * ay0 * image[y0][x1] + \
-        ax0 * ay1 * image[y1][x0] + ax1 * ay1 * image[y1][x1]
+        ax0 * ay0 * v00 + ax1 * ay0 * v10 + \
+        ax0 * ay1 * v01 + ax1 * ay1 * v11
 
-    out_image = T.zeros(image.shape, device=image.device)
-    out_image.flatten()[y * w + x] = values
-
-    return out_image
+    return values, T.stack((x, y))

@@ -1,0 +1,50 @@
+import torch
+
+import oddkiva.brahma.torch.image_processing.warp as W
+
+def test_enumerate_coords():
+    coords = W.enumerate_coords(3, 4)
+    assert torch.equal(
+        coords,
+        torch.Tensor([
+            [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2],
+            [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3],
+        ]))
+
+def test_filter_coords():
+    coords = torch.Tensor([[0, 1],
+                           [1, 2]])
+
+    w, h = 3, 4
+    x = torch.zeros((h, w))
+
+    ixs = (coords[1,:] * w + coords[0, :]).int()
+    x.flatten()[ixs] = 1
+
+    assert torch.equal(
+        x,
+        torch.Tensor([
+            [0, 0, 0],
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 0]
+        ]))
+
+def test_bilinear_interpolation_2d():
+    values = torch.Tensor([[0., 1.],
+                           [2., 3.],
+                           [4., 5.]])
+
+    x = torch.Tensor([0.5, 0.5, 0.5])
+    y = torch.Tensor([0.5, 1.5, 1.5])
+    coords = torch.stack((x, y))
+
+    interp_values, valid_coords = W.bilinear_interpolation_2d(values, coords)
+    assert torch.equal(
+        interp_values,
+        torch.Tensor([1.5, 3.5, 3.5])
+    )
+    assert torch.equal(
+        valid_coords,
+        torch.stack((x, y))
+    )
