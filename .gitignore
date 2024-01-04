@@ -5,6 +5,8 @@ doc/source/xml/
 html/
 latex/
 
+config.toml
+
 # Model weights.
 *.weights
 *.onnx
