@@ -10,11 +10,9 @@ def test_conv_bn_activation_block():
     x_np = np.arange(9).reshape(1, 1, 3, 3).astype(np.float32)
     x = torch.tensor(x_np, device=DEFAULT_DEVICE)
 
-    conv_bn_act = R.ConvBNA(1, 64, 3, 1, True, 'relu', 0).to(DEFAULT_DEVICE)
+    conv_bn_act = R.ConvBNA(1, 64, 3, 1, True, "relu", 0).to(DEFAULT_DEVICE)
     y = conv_bn_act.forward(x)
 
-    conv = conv_bn_act.layers[0]
-    bn = conv_bn_act.layers[1]
     assert y.shape == (1, 64, 3, 3)
 
 

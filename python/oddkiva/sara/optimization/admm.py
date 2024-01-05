@@ -3,7 +3,7 @@ import numpy as np
 import scipy.linalg as la
 
 
-def admm(A, b, num_iter=1000, eps=1e-8, rho=1):
+def admm(A, x, b, num_iter=1000, eps=1e-8, rho=1):
     """
     Solves min_x |Ax - b|_1
 
@@ -31,12 +31,12 @@ def admm(A, b, num_iter=1000, eps=1e-8, rho=1):
     """
 
     # Soft thresholding operator.
-    soft_thres = lambda (x, a): la.sign(x) * la.max(la.abs(x) - a, 0)
+    soft_thres = lambda x, a: la.sign(x) * la.max(la.abs(x) - a, 0)
 
     # Functions to update (x, z, u).
-    x_next = lambda (z0, u0): la.lstsq(A.T.dot(A), A.T.dot(z0 + b - u0))[0]
-    z_next = lambda (x1, u0): soft_thres(A.dot(x1) - b + u0, 1. / rho)
-    u_next = lambda (u0, x1, z1): u0 + A.dot(x1) - z1 - b
+    x_next = lambda z0, u0: la.lstsq(A.T.dot(A), A.T.dot(z0 + b - u0))[0]
+    z_next = lambda x1, u0: soft_thres(A.dot(x1) - b + u0, 1.0 / rho)
+    u_next = lambda u0, x1, z1: u0 + A.dot(x1) - z1 - b
 
     # Initialize (x0, z0, u0).
     x0 = x

@@ -14,22 +14,26 @@ from oddkiva.brahma.torch import DEFAULT_DEVICE
 
 
 def rotation(theta):
+    # fmt: off
     return np.array([[np.cos(theta), -np.sin(theta), 0],
                      [np.sin(theta),  np.cos(theta), 0],
                      [            0,              0, 1]])
+    # fmt: on
 
 
 THIS_FILE = __file__
-SARA_SOURCE_DIR_PATH = Path(THIS_FILE[:THIS_FILE.find('sara') + len('sara')])
-SARA_DATA_DIR_PATH = SARA_SOURCE_DIR_PATH / 'data'
-DOG_IMAGE_PATH = SARA_DATA_DIR_PATH / 'dog.jpg'
+SARA_SOURCE_DIR_PATH = Path(THIS_FILE[: THIS_FILE.find("sara") + len("sara")])
+SARA_DATA_DIR_PATH = SARA_SOURCE_DIR_PATH / "data"
+DOG_IMAGE_PATH = SARA_DATA_DIR_PATH / "dog.jpg"
 assert DOG_IMAGE_PATH.exists()
 
 # Image format converters.
-to_float_chw = v2.Compose([v2.ToImage(),
-                           v2.ToDtype(torch.float32, scale=True)])
-to_uint8_hwc = v2.Compose([v2.ToDtype(torch.uint8, scale=True),
-                           v2.ToPILImage()])
+to_float_chw = v2.Compose(
+    [v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]
+)
+to_uint8_hwc = v2.Compose(
+    [v2.ToDtype(torch.uint8, scale=True), v2.ToPILImage()]
+)
 
 
 # Image input

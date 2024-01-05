@@ -5,14 +5,14 @@ import torch.nn as nn
 
 
 def enumerate_coords(w: int, h: int) -> T.Tensor:
-    x, y = T.meshgrid(T.arange(0, w), T.arange(0, h), indexing='xy')
+    x, y = T.meshgrid(T.arange(0, w), T.arange(0, h), indexing="xy")
     x, y = x.reshape((w * h,)), y.reshape((w * h,))
     p = T.stack((x, y))
     return p
 
+
 def bilinear_interpolation_2d(
-    image: T.Tensor,
-    coords: T.Tensor
+    image: T.Tensor, coords: T.Tensor
 ) -> Tuple[T.Tensor, T.Tensor]:
     x, y = coords[0, :], coords[1, :]
 
@@ -30,10 +30,9 @@ def bilinear_interpolation_2d(
     # The interpolation can happen only if all the 4 corners are in the image
     # domain
     all_corners_in_image_domain = T.logical_and(
-        T.logical_and(xmap0, xmap1),
-        T.logical_and(ymap0, ymap1)
+        T.logical_and(xmap0, xmap1), T.logical_and(ymap0, ymap1)
     )
-    ixs_where_all_corners_in_image_domain, = T.where(
+    (ixs_where_all_corners_in_image_domain,) = T.where(
         all_corners_in_image_domain
     )
 
@@ -59,11 +58,14 @@ def bilinear_interpolation_2d(
     ax0, ax1 = x1f - xf, xf - x0f
     ay0, ay1 = y1f - yf, yf - y0f
 
+    # fmt: off
     values = \
         ax0 * ay0 * v00 + ax1 * ay0 * v10 + \
         ax0 * ay1 * v01 + ax1 * ay1 * v11
+    # fmt: on
 
     return values, ixs_where_all_corners_in_image_domain
+
 
 def homogeneous(xy: T.Tensor) -> T.Tensor:
     n = xy.shape[1]
@@ -71,13 +73,13 @@ def homogeneous(xy: T.Tensor) -> T.Tensor:
     xyh[:2] = xy
     return xyh
 
+
 def euclidean(xyh: T.Tensor) -> T.Tensor:
-    xy1 = (xyh / xyh[2, :])
+    xy1 = xyh / xyh[2, :]
     return xy1[:2]
 
 
 class BilinearInterpolation2d(nn.Module):
-
     def __init__(self):
         super().__init__()
 
@@ -86,7 +88,6 @@ class BilinearInterpolation2d(nn.Module):
 
 
 class Homography(nn.Module):
-
     def __init__(self):
         super().__init__()
         self.interp = BilinearInterpolation2d()
