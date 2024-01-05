@@ -10,7 +10,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set the version major and minor manually.
 set(DO_Sara_VERSION_MAJOR 1)
-set(DO_Sara_VERSION_MINOR 7)
+set(DO_Sara_VERSION_MINOR 11)
 
 if(APPLE)
   set(CMAKE_MACOSX_RPATH ON)
