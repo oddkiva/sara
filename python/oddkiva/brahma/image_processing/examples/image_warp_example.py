@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 import torch
 import torchvision.transforms.v2 as v2
 
-import oddkiva.brahma.torch.image_processing.warp as W
-from oddkiva.brahma.torch import DEFAULT_DEVICE
+import oddkiva.brahma.image_processing.warp as W
+from oddkiva.brahma import DEFAULT_DEVICE
 
 
 def rotation(theta):

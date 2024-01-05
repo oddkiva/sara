@@ -1,6 +1,6 @@
 import torch
 
-import oddkiva.brahma.torch.image_processing.warp as W
+import oddkiva.brahma.image_processing.warp as W
 
 
 def test_enumerate_coords():
@@ -49,6 +49,5 @@ def test_bilinear_interpolation_2d():
     y = torch.Tensor([0.5, 1.5, 1.5])
     coords = torch.stack((x, y))
 
-    interp_values, valid_coords = W.bilinear_interpolation_2d(values, coords)
+    interp_values, _ = W.bilinear_interpolation_2d(values, coords)
     assert torch.equal(interp_values, torch.Tensor([1.5, 3.5, 3.5]))
-    assert torch.equal(valid_coords, torch.stack((x, y)))

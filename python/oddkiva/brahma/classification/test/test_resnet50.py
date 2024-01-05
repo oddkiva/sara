@@ -2,8 +2,8 @@ import numpy as np
 
 import torch
 
-import oddkiva.brahma.torch.classification.resnet50 as R
-from oddkiva.brahma.torch import DEFAULT_DEVICE
+import oddkiva.brahma.classification.resnet50 as R
+from oddkiva.brahma import DEFAULT_DEVICE
 
 
 def test_conv_bn_activation_block():
