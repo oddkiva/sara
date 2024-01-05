@@ -77,6 +77,7 @@ def euclidean(xyh: T.Tensor) -> T.Tensor:
     xy1 = (xyh / xyh[2, :])
     return xy1[:2]
 
+
 class BilinearInterpolation2d(nn.Module):
 
     def __init__(self):
@@ -99,7 +100,7 @@ class Homography(nn.Module):
 
         # Apply the homography
         p3 = homogeneous(p2).float().to(image.device)
-        H = self.homography
+        H = T.inverse(self.homography)
         Hp3 = T.matmul(H, p3)
         Hp2 = euclidean(Hp3)
 

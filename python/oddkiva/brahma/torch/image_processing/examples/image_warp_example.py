@@ -38,11 +38,10 @@ image = image[None, :]
 
 # Geometric transform input.
 R = torch.Tensor(rotation(np.pi / 6))
-Rinv = torch.Tensor(R.T)
 
 # Differential geometry block
 H = W.Homography()
-H.homography.data = Rinv
+H.homography.data = R
 H = H.to(DEFAULT_DEVICE)
 
 image_warped = H.forward(image)
