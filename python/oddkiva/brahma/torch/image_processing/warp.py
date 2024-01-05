@@ -1,5 +1,4 @@
 from typing import Tuple
-from oddkiva.brahma.torch import DEFAULT_DEVICE
 
 import torch as T
 import torch.nn as nn
@@ -68,7 +67,6 @@ def bilinear_interpolation_2d(
 
 def homogeneous(xy: T.Tensor) -> T.Tensor:
     n = xy.shape[1]
-    ones = T.ones(n)
     xyh = T.ones((3, n))
     xyh[:2] = xy
     return xyh
