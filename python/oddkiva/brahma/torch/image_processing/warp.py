@@ -1,4 +1,5 @@
 from typing import Tuple
+from oddkiva.brahma.torch import DEFAULT_DEVICE
 
 import torch as T
 import torch.nn as nn
@@ -9,7 +10,6 @@ def enumerate_coords(w: int, h: int) -> T.Tensor:
     x, y = x.reshape((w * h,)), y.reshape((w * h,))
     p = T.stack((x, y))
     return p
-
 
 def bilinear_interpolation_2d(
     image: T.Tensor,
@@ -66,6 +66,16 @@ def bilinear_interpolation_2d(
 
     return values, ixs_where_all_corners_in_image_domain
 
+def homogeneous(xy: T.Tensor) -> T.Tensor:
+    n = xy.shape[1]
+    ones = T.ones(n)
+    xyh = T.ones((3, n))
+    xyh[:2] = xy
+    return xyh
+
+def euclidean(xyh: T.Tensor) -> T.Tensor:
+    xy1 = (xyh / xyh[2, :])
+    return xy1[:2]
 
 class BilinearInterpolation2d(nn.Module):
 
@@ -74,3 +84,32 @@ class BilinearInterpolation2d(nn.Module):
 
     def forward(self, x, coords):
         return bilinear_interpolation_2d(x, coords)
+
+
+class Homography(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+        self.interp = BilinearInterpolation2d()
+        self.homography = nn.Parameter(T.zeros((3, 3)))
+
+    def forward(self, image: T.Tensor):
+        h, w = image.shape[2:]
+        p2 = enumerate_coords(w, h)
+
+        # Apply the homography
+        p3 = homogeneous(p2).float().to(image.device)
+        H = self.homography
+        Hp3 = T.matmul(H, p3)
+        Hp2 = euclidean(Hp3)
+
+        image_warped = T.zeros_like(image)
+
+        N, C = image.shape[:2]
+        for n in range(N):
+            for c in range(C):
+                values, ixs = self.interp.forward(image[n, c], Hp2)
+                plane_warped_c = image_warped[n, c].flatten()
+                plane_warped_c[ixs] = values
+
+        return image_warped

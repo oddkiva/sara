@@ -14,8 +14,9 @@ from oddkiva.brahma.torch import DEFAULT_DEVICE
 
 
 def rotation(theta):
-    return np.array([[np.cos(theta), -np.sin(theta)],
-                     [np.sin(theta),  np.cos(theta)]])
+    return np.array([[np.cos(theta), -np.sin(theta), 0],
+                     [np.sin(theta),  np.cos(theta), 0],
+                     [            0,              0, 1]])
 
 
 THIS_FILE = __file__
@@ -24,30 +25,28 @@ SARA_DATA_DIR_PATH = SARA_SOURCE_DIR_PATH / 'data'
 DOG_IMAGE_PATH = SARA_DATA_DIR_PATH / 'dog.jpg'
 assert DOG_IMAGE_PATH.exists()
 
+# Image format converters.
 to_float_chw = v2.Compose([v2.ToImage(),
                            v2.ToDtype(torch.float32, scale=True)])
-image = to_float_chw(Image.open(DOG_IMAGE_PATH)).to(DEFAULT_DEVICE)
+to_uint8_hwc = v2.Compose([v2.ToDtype(torch.uint8, scale=True),
+                           v2.ToPILImage()])
 
-# Geometric transform.
+
+# Image input
+image = to_float_chw(Image.open(DOG_IMAGE_PATH)).to(DEFAULT_DEVICE)
+image = image[None, :]
+
+# Geometric transform input.
 R = torch.Tensor(rotation(np.pi / 6))
 Rinv = torch.Tensor(R.T).to(DEFAULT_DEVICE)
 
-# Enumerate all the coordinates.
-h, w = image[0].shape
-p = W.enumerate_coords(w, h).to(DEFAULT_DEVICE)
-pinv = torch.matmul(Rinv, p.float())
+# Differential geometry block
+H = W.Homography()
+H.homography.data = Rinv
+H = H.to(DEFAULT_DEVICE)
 
-# Differentiable geometric computational block
-interp = W.BilinearInterpolation2d().to(DEFAULT_DEVICE)
+image_warped = H.forward(image)
+image_warped_hwc = to_uint8_hwc(image_warped[0])
 
-image_warped = torch.zeros_like(image)
-
-for c in range(3):
-    values, ixs_flat = interp.forward(image[c], pinv)
-    image_warped_plane_c = image_warped[c].flatten()
-    image_warped_plane_c[ixs_flat] = values
-
-image_warped_np = torch.permute(image_warped, (1, 2, 0)).cpu().numpy()
-
-plt.imshow(image_warped_np)
+plt.imshow(image_warped_hwc)
 plt.show()
