@@ -17,7 +17,7 @@ def bilinear_interpolation_2d(
 ) -> Tuple[T.Tensor, T.Tensor]:
     x, y = coords[0, :], coords[1, :]
 
-    # Calculate the corners for each coordinates.
+    # Calculate the integral corners of each 2D point.
     x0, x1 = T.floor(x), T.floor(x) + 1
     y0, y1 = T.floor(y), T.floor(y) + 1
 
