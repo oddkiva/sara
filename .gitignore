@@ -5,8 +5,6 @@ doc/source/xml/
 html/
 latex/
 
-config.toml
-
 # Model weights.
 *.weights
 *.onnx
@@ -21,13 +19,15 @@ CMakeLists.txt.user
 *.pyc
 *.pyo
 *.coverage
+config.toml
 
 # Rmarkdown
 .RData
 .Rhistory
-sara_book.log
 _book/
 _bookdown_files/
+sara_book.log
+sara.svg
 
 # cache folder
 .cache
