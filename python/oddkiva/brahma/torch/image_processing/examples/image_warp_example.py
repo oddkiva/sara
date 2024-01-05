@@ -38,7 +38,7 @@ image = image[None, :]
 
 # Geometric transform input.
 R = torch.Tensor(rotation(np.pi / 6))
-Rinv = torch.Tensor(R.T).to(DEFAULT_DEVICE)
+Rinv = torch.Tensor(R.T)
 
 # Differential geometry block
 H = W.Homography()
