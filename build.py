@@ -329,7 +329,7 @@ def serve_book():
 
 def build_book_docker():
     # Build the docker image.
-    sara_book_build_image = "sara-book-build"
+    sara_book_build_image = "oddkiva/sara-book-build"
     ret = subprocess.Popen(
         [
             "docker",
@@ -343,6 +343,15 @@ def build_book_docker():
         cwd=SARA_SOURCE_DIR,
     ).wait()
 
+    execute(
+        [
+            "docker",
+            "push",
+            f"{sara_book_build_image}",
+        ],
+        SARA_SOURCE_DIR
+    )
+
     # Run the docker image.
     ret = subprocess.Popen(
         [
@@ -351,7 +360,7 @@ def build_book_docker():
             "-it",
             "-v",
             f"{SARA_SOURCE_DIR}:/workspace/sara",
-            sara_book_build_image,
+            f"{sara_book_build_image}",
             "/bin/bash",
         ],
         cwd=(SARA_SOURCE_DIR / "doc" / "book"),
