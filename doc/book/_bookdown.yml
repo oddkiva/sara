@@ -34,10 +34,15 @@ rmd_files:
     "datasets.Rmd",
     "datasets/kitti.Rmd",
     "datasets/nuscenes.Rmd",
+
     # "learning_journeys.Rmd",
     # "learning_journey_in_R.Rmd",
     # "learning_halide.Rmd",
     # "computer_graphics.Rmd",
+
+    "random.Rmd",
+    "random/python_code_that_suck_less.Rmd",
+    "random/bilinear_interpolation.Rmd",
     "bibliography.Rmd"
   ]
   latex: [

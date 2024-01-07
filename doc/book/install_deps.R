@@ -7,4 +7,7 @@ install.packages(c("berryFunctions",
                    "bookdown",
                    "downlit",
                    "xml2",
-                   "servr"))
+                   "servr",
+                   "remotes"))
+
+remotes::install_git("https://git.rud.is/hrbrmstr/swiftr.git")

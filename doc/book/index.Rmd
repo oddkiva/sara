@@ -20,10 +20,10 @@ and extending the library *Sara*. The audience I am targeting here are students,
 scientists or software developers who want to understand those kind of details.
 
 Recently, I have started compiling various notes about the different
-mathematical and practical aspects related to this fascinating discipline. By
-snowball effect, little by little, these notes have been becoming more and more
-structured as I keep learning more and more and retouching the writing here and
-there.
+mathematical and practical aspects related to this discipline that I enjoy
+practising every day. By snowball effect, little by little, these notes have
+been becoming more and more structured as I keep learning more and more and
+retouching the writing here and there.
 
 I believe these notes carry some value and it would be a real shame to reduce
 these as either mere blog posts or as parts of documentation regarding *Sara*'s
@@ -47,6 +47,26 @@ time to detail these for algorithms and methods that I understand well.
 While I work hard to check that my contents are factually correct, I, as a human
 being, am not certainly not immune to misunderstanding or errors.  Should you
 find any, __please pretty please__ report back to me and explain to me.*
+
+At the end of the day, I am a human being with emotions, enjoying myself. It
+took me a long time to realize that writing is very cathartic. It helps you to
+make peace with yourself. I don't think it is healthy to suppress yourself, your
+emotions not even in writing.
+
+The anger, the frustration, or any negative emotions I had that time at some
+context, I had to write it and it helps me to move on. At the end of the day,
+science or engineering is never the problem. The people and my interaction with
+them are the problem. Just like in any other art, this book is first of all
+deeply personal. This is not a publication either. I write it for me. Then I do
+try to make it useful by disseminating what I do know and understand.
+
+There is a culture in the Western world where we like to pride ourselves in
+displaying scientific concepts in a cold and dry manner. I am not a white
+person. It is not true to claim that everything is born out of rationality,
+logic. Scientific concepts are like construction games, where we design,
+manipulate and stack them to achieve some goal. The journey to achieve this goal
+is the enjoyment where ultimately **emotions** are driving **creativity** in
+science.
 
 ```{r, echo = FALSE}
 include_svg = function(path) {
