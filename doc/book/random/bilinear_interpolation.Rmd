@@ -1,0 +1,213 @@
+# Bilinear interpolation
+
+Let's start with a little story time before diving in this exercise.
+
+I gave it once as a small homework to screen people for computer vision roles.
+Even if I didn't give any time constraints whatsoever, nobody even tried.
+Literally: nobody.
+
+This is a technical exercise I do find interesting because it helps to know
+whether someone can fix the insides of an existing pipeline. It's not simple but
+it's not that hard either.
+
+Eventually I lowered my expectations by just asking to complete a simple machine
+learning training pipeline. And everybody just jumped their guns and were happy
+to impress you how they know about the bleeding edge neural architecture what
+not.^[The world never changes... Just shows how people most of the time likes to
+mansplain by displaying their knowledge more than their ability to think. So
+much ego all in all...]
+
+Let's see how we can do this in Python in a NumPy-like style. I leave it as an
+exercise in C++.
+
+The NumPy way of doing things is to not use any for loops but to use its library
+of CPU optimized functions that operates on arrays. This boils down to think of
+an array as a single scalar value, where only certain transformation rules are
+allowed so that we leverage parallelization. Likewise PyTorch and Tensorflow
+have equivalent optimized functions for CPU, GPU and other less mainstream TPUs.
+
+## PyTorch implementation
+
+According to Reddit, Tensorflow (TF) is dying slowly. Retrospectively, it is not
+so surprising. Not completely unrelated but here is one anecdotal mishap before
+we start.
+
+TF was very tedious at its version 1.x. The constant need to invoke TF
+operations within a `tf.Session` context was a hassle. At first I accepted since
+I did not know any better. However the interoperability with Keras was not
+smooth. One serious bug I experienced was that loading weights from a Keras
+trained model to a tensorflow did not work. I remember a few days of work was
+spent to just reimplement this in my own way.
+
+PyTorch does not have any of that and feels just like NumPy. Transitioning from
+TF to PT should be straightforward.
+
+Given a grayscale image $\mathbf{y} \in \mathbb{R}^2$ with values in $[0, 1]$ in
+single-precision floating precision format `torch.float32`, the goal is to
+calculate the interpolated values for a set of non integral coordinates
+$\mathbf{x}_i$.
+
+
+```{python}
+from typing import Tuple
+
+import torch as T
+
+
+def bilinear_interpolation_2d(
+    image: T.Tensor, coords: T.Tensor
+) -> Tuple[T.Tensor, T.Tensor]:
+    x, y = coords[0, :], coords[1, :]
+
+    # Calculate the integral corners of each 2D point.
+    x0, x1 = T.floor(x), T.floor(x) + 1
+    y0, y1 = T.floor(y), T.floor(y) + 1
+
+    h, w = image.shape[0], image.shape[1]
+
+    xmap0 = T.logical_and(0 <= x0, x0 <= w - 1)
+    xmap1 = T.logical_and(0 <= x1, x1 <= w - 1)
+    ymap0 = T.logical_and(0 <= y0, y0 <= h - 1)
+    ymap1 = T.logical_and(0 <= y1, y1 <= h - 1)
+
+    # The interpolation can happen only if all the 4 corners are in the image
+    # domain
+    all_corners_in_image_domain = T.logical_and(
+        T.logical_and(xmap0, xmap1), T.logical_and(ymap0, ymap1)
+    )
+    (ixs_where_all_corners_in_image_domain,) = T.where(
+        all_corners_in_image_domain
+    )
+
+    # Filter the coordinates
+    xf = x[ixs_where_all_corners_in_image_domain]
+    yf = y[ixs_where_all_corners_in_image_domain]
+    x0f = x0[ixs_where_all_corners_in_image_domain]
+    x1f = x1[ixs_where_all_corners_in_image_domain]
+    y0f = y0[ixs_where_all_corners_in_image_domain]
+    y1f = y1[ixs_where_all_corners_in_image_domain]
+
+    x0i = x0f.int()
+    x1i = x1f.int()
+    y0i = y0f.int()
+    y1i = y1f.int()
+
+    image_flat = image.flatten()
+    v00 = image_flat[y0i * w + x0i]
+    v10 = image_flat[y0i * w + x1i]
+    v01 = image_flat[y1i * w + x0i]
+    v11 = image_flat[y1i * w + x1i]
+
+    ax0, ax1 = x1f - xf, xf - x0f
+    ay0, ay1 = y1f - yf, yf - y0f
+
+    values = \
+        ax0 * ay0 * v00 + ax1 * ay0 * v10 + \
+        ax0 * ay1 * v01 + ax1 * ay1 * v11
+
+    return values, ixs_where_all_corners_in_image_domain
+```
+
+PyTorch and TF have very similar function names so it's not worth sketching TF's
+implementation. You would almost copy verbatim the code from PyTorch and replace
+the name import.
+
+Let us verify the implementation on a toy test:
+
+```{python}
+values = T.Tensor([[0., 1.],
+                   [2., 3.],
+                   [4., 5.]])
+
+x = T.Tensor([0.5, 0.5, 0.5])
+y = T.Tensor([0.5, 1.5, 1.5])
+coords = T.stack((x, y))
+
+interp_values, _ = bilinear_interpolation_2d(values, coords)
+assert T.equal(interp_values, T.Tensor([1.5, 3.5, 3.5]))
+
+interp_values
+```
+
+## Image Warping
+
+Sounded boring? Well you're wrong... This is a key stepping stone to perform for
+image processing with your GPU, and to perform differentiation on geometric
+transform should we need to optimize what not.
+
+Start import *Sara*'s Python API alongside other packages to catch a glimpse of
+it:
+
+
+```{python}
+import logging
+import os
+from pathlib import Path
+
+from PIL import Image
+
+import numpy as np
+
+import matplotlib.pyplot as plt
+
+import torch
+import torchvision.transforms.v2 as v2
+
+import oddkiva.brahma.image_processing.warp as W
+from oddkiva.brahma import DEFAULT_DEVICE
+
+# Turn off debug logs.
+logging.getLogger("PIL").propagate = False
+logging.getLogger("matplotlib").propagate = False
+```
+
+Let us define a geometric transformation:
+
+```{python}
+def rotation(theta):
+    return np.array([[np.cos(theta), -np.sin(theta), 0],
+                     [np.sin(theta),  np.cos(theta), 0],
+                     [            0,              0, 1]])
+```
+
+Next load an image:
+
+```{python}
+THIS_DIR = os.getcwd()
+SARA_SOURCE_DIR_PATH = Path(THIS_DIR[: THIS_DIR.find("sara") + len("sara")])
+SARA_DATA_DIR_PATH = SARA_SOURCE_DIR_PATH / "data"
+DOG_IMAGE_PATH = SARA_DATA_DIR_PATH / "dog.jpg"
+assert DOG_IMAGE_PATH.exists()
+
+# Image format converters.
+to_float_chw = v2.Compose(
+    [v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]
+)
+to_uint8_hwc = v2.Compose(
+    [v2.ToDtype(torch.uint8, scale=True), v2.ToPILImage()]
+)
+
+# Image input
+image = to_float_chw(Image.open(DOG_IMAGE_PATH)).to(DEFAULT_DEVICE)
+image = image[None, :]
+```
+
+Apply the geometric transform and plot the warped image.
+```
+# Geometric transform input.
+R = torch.Tensor(rotation(np.pi / 6))
+
+# Differential geometry block
+H = W.Homography()
+H.homography.data = R
+H = H.to(DEFAULT_DEVICE)
+
+image_warped = H.forward(image)
+image_warped_hwc = to_uint8_hwc(image_warped[0])
+
+plt.imshow(image_warped_hwc)
+plt.show()
+```
+
+How I implemented it is left as an exercise to the reader and you can have a
+look in *Sara*'s repository.

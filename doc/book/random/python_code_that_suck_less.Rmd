@@ -1,0 +1,368 @@
+# Writing Python code that sucks less
+
+I used to know enough Python and to write code to just get the job done
+regardless of how readable it is. After lots of time spent in writing and
+debugging code in C++03, naturally I loved the dynamic nature of Python.
+
+Much later, past this honeymoon period, I found myself disliking Python more and
+more. I spent so much time debugging Tensorflow code and to write list
+comprehensions that turned out to be very hard to read months later. This was
+one of the reasons that gave me little incentive to go back to machine learning.
+
+Things did not get any better as modern C++ did catch up with introducing many
+syntactical sugars and new features and as I got better in reading and writing
+code. Couple this with the appropriate tooling such as `ccache`, and sanitizer
+tools, one can arguably become as productive in C++ as in Python.
+
+Unfortunately, Python is the **lingua franca** for neural networks especially
+with PyTorch's popularity. So I have to bear with it.
+
+Here are a few things I found to make Python code suck less.
+
+## Data structures that suck less
+
+### The Good
+
+I learnt at this time of writing that we can finally define structures like in
+C:
+
+```{python}
+from dataclasses import dataclass
+
+@dataclass
+class ObjectBox:
+    x: float
+    y: float
+    w: float
+    h: float
+    p_object: float
+    class_id: int
+    p_class: float
+```
+
+### The Bad
+
+Whereas in my very early Python days, I would write the annoying way without
+type hints:
+
+```{python}
+class OldEffingFashionedObjectBoxClass:
+
+    def __init__(self, x, y, w, h, p_object, class_id, p_class):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.p_object = p_object
+        # etc.
+        # Ugh! So tedious to write...
+```
+
+### The Ugly
+
+then later as a quick-n-dirty unnamed tuple, or a bit better (if I cared enough)
+as a named tuple:
+
+```{python}
+from collections import namedtuple
+
+Box = namedtuple(
+    'Box',
+    ['x', 'y', 'w', 'h', 'p_object', 'class_id', 'p_class']
+)
+```
+
+Python type hints seems to act like a linter and don't help to catch all errors
+but it's better than nothing.
+
+## In Swift and C-family languages
+Compare this to the slightly more verbose yet elegant equivalent in Swift
+
+```{swift}
+struct ObjectBox {
+  var xywh: (Float, Float, Float, Float)
+  var objectnessProb: Float
+  var classId: Int
+  var classProb: Float
+}
+```
+
+Or to C++
+```{Rcpp}
+#include <array>
+
+struct ObjectBox {
+  std::array<float, 4> xywh;
+  float object_prob;
+  int class_id;
+  float class_prob;
+};
+```
+
+## Non-Maximum Suppression of Object Boxes
+
+Translating code back and forth between Swift and Python turn out to be easy.
+
+To convince ourselves, let's have a look at a real-world example such as the
+Non-Maximum Suppression (NMS) algorithm.
+
+### The algorithm described
+
+The NMS aims at filtering the best object boxes. The best object boxes must have
+the highest objectness score and each one of them can't overlap too much with
+each other.
+
+The objectness score is the probability that the object box contains an object
+with "reasonably" finite spatial extent.^[That means the cloud is not an object
+according to this definition.]
+
+- To do so, we start by sorting the list of object boxes in descending
+  objectness score.
+
+- Then we process greedily by
+  1. first keeping the first object box of the list, since it has the highest object
+     box.
+
+  2. Next we examine the second best object box and we keep if it does not
+     overlap with the first box or if it overlaps, it should overlap very
+     little. A good metric is the ratio of the **intersection** area between the
+     first box and second box *over the union* area, the so-called IoU score.
+
+     Let's imagine the second box does not overlap with the first one.
+
+  3. Next we examine the third best box. Then we check that it does not overlap
+     with the first and second best object boxes, we just kept.
+
+  4. And so on.
+
+Two ingredients are needed to implement the NMS:
+
+1. The flow of the greedy algorithm from a higher level,
+2. The IoU at a finer detail.
+
+
+### Implementation
+
+Let's exhibit an efficient implementation in Python.
+
+Normally I would start showing the greedy algorithm of the NMS first before the
+IoU, but since I am writing with Rmarkdown, which compiles my code chunks, and
+since we cannot forward-declare functions in Python, I will do the other way
+around.
+
+The IoU can be implemented as follows with NumPy.
+
+```{python}
+import numpy as np
+
+def iou_batch(boxes_kept: list[ObjectBox], next_box: ObjectBox):
+    # Unpack the coordinates of the best kept boxes.
+    x1 = np.array([box.x for box in boxes_kept])
+    y1 = np.array([box.y for box in boxes_kept])
+    w = np.array([box.w for box in boxes_kept])
+    h = np.array([box.h for box in boxes_kept])
+    x2 = x1 + w
+    y2 = y1 + h
+
+    # Compare the coordinates of kept boxes and the next best box.
+    inter_x1 = np.maximum(x1, next_box.x)
+    inter_y1 = np.maximum(y1, next_box.y)
+    inter_x2 = np.minimum(x2, next_box.x + next_box.w)
+    inter_y2 = np.minimum(y2, next_box.y + next_box.h)
+
+    # The intersection area.
+    inter = np.logical_and(inter_x1 <= inter_x2, inter_y1 <= inter_y2)
+    inter_area = \
+        (inter_x2 - inter_x1) * (inter_y2 - inter_y1) * \
+        inter.astype(np.float32)
+
+    # The union area.
+    union_area = w * h + next_box.w * next_box.h - inter_area
+
+    # Finally the IoU ratio.
+    iou = inter_area / union_area
+    return iou
+```
+
+We can plug it within the greedy algorithm to perform the NMS.
+
+```{python}
+def nms(boxes: list[ObjectBox], iou_thres: float = 0.4) -> [ObjectBox]:
+    # Sort boxes in descending score.
+    def compare(x: ObjectBox, y: ObjectBox):
+        return y.p_object - x.p_object
+
+    from functools import cmp_to_key
+
+    boxes_sorted = sorted(boxes, key=cmp_to_key(compare))
+
+    # The greedy algorithm.
+    boxes_filtered = []
+    for box in boxes_sorted:
+        if not boxes_filtered:
+            boxes_filtered.append(box)
+            continue
+
+        iou = iou_batch(boxes_filtered, box)
+
+        overlap = np.any(iou > iou_thres)
+        if not overlap:
+            boxes_filtered.append(box)
+
+    return boxes_filtered
+```
+
+Notice the implementation oddity to sort the list. This to me is an ergonomic
+flaw in the language. We don't do this in Swift or in C++ to sort arrays. It is
+very unnatural and I had to google it to do that...
+
+### Swift implementation
+
+Compare the Python implementation with its fairly equivalent in Swift.
+
+Swift does not have any NumPy equivalent in its standard library but we can
+reimplement the NumPy functions very naturally. Like in Python, transforming,
+filtering, zipping arrays are supported in the Swift standard library. However I
+find that Swift has arguably better language ergonomics than Python.
+
+```{swift}
+func nms(boxes: [ObjectBox]) -> [ObjectBox] {
+  // Sort boxes in descending order.
+  let boxesSorted = boxes.sorted {
+    $0.objectnessProb > $1.objectnessProb
+  }
+
+  var boxesFiltered = [ObjectBox]()
+
+  // Greedy algorithm.
+  for box in boxesSorted {
+    if boxesFiltered.isEmpty {
+      boxesFiltered.append(box)
+      continue
+    }
+
+    // Unpack the coordinates.
+    let x1 = boxesFiltered.map { $0.xywh.0 }
+    let y1 = boxesFiltered.map { $0.xywh.1 }
+    let x2 = boxesFiltered.map { $0.xywh.0 + $0.xywh.2 }
+    let y2 = boxesFiltered.map { $0.xywh.1 + $0.xywh.3 }
+    let w = boxesFiltered.map { $0.xywh.2 }
+    let h = boxesFiltered.map { $0.xywh.3 }
+    let wh = zip(w, h).map { (wi, hi) in wi * hi }
+
+    // Intersection.
+    let x1Inter = x1.map { max($0, box.xywh.0) }
+    let y1Inter = y1.map { max($0, box.xywh.1) }
+    let x2Inter = x2.map { min($0, box.xywh.0 + box.xywh.2) }
+    let y2Inter = y2.map { min($0, box.xywh.1 + box.xywh.3) }
+    let xIntersect = zip(x1Inter, x2Inter).map { (x1i, x2i) in x1i <= x2i }
+    let yIntersect = zip(y1Inter, y2Inter).map { (y1i, y2i) in y1i <= y2i }
+    let intersect = zip(xIntersect, yIntersect).map { (bx, by) in bx && by }
+
+    // Intersection areas
+    let wInter = zip(x1Inter, x2Inter).map { (x1i, x2i) in x2i - x1i }
+    let hInter = zip(y1Inter, y2Inter).map { (y1i, y2i) in y2i - y1i }
+    let whInter = zip(wInter, hInter).map { (wi, hi) in wi * hi }
+    let areaInter = zip(whInter, intersect).map { (val, doesIntersect) in
+      if !doesIntersect {
+        return Float(0)
+      }
+      return val
+    }
+
+    // Union areas.
+    let areaUnion = zip(wh, areaInter).map { (whi, areaInteri) in
+      whi + box.xywh.2 * box.xywh.3 - areaInteri
+    }
+
+    // IoU
+    let iou = zip(areaInter, areaUnion).map { (interi, unioni) in
+      interi / unioni
+    }
+
+    let tooMuchIoU = iou.filter { $0 >= iouThreshold }
+    if tooMuchIoU.isEmpty {
+      boxesFiltered.append(box)
+    }
+  }
+
+  return boxesFiltered
+}
+```
+
+Since I very much prefer compiled languages over dynamic ones, Swift is the big
+winner for me. Thanks to its strong type system, it is not only readable but
+also much easier to maintain. So it is a real pity the language did not gain
+much traction in the ML community.
+
+## In defense of **snake_case** against **camelCase** in scientific programming
+
+Alright this needs to be said. I am team **snake_case**. Hear me out.
+
+I don't like the **camelCase** style that dominates in Swift, but I learnt to
+accomodate with it. In contrast, Python got it right by advocating for the
+**snake_case** style.
+
+First, let's put aside flaming wars on this topic which we can find on
+StackOverflow and Reddit. They go nowhere. I did get annoyed in my career with
+other developers who have done little mathematics in their life trying to
+enforce blindly rules without even trying to understand the context.^[Yes I
+worked with a few people with serious sociopathic personality problems in this
+effing industry... Some of my previous colleagues and I suffered in silence.]
+
+Going back to the topic, I do believe the camelCase style is quite ill-suited
+for scientific code involving mathematical notations. I still followed the
+camelCase rule for the NMS. But in this specific case of scientific programming,
+breaking the camelCase rule and using capital letters will make your developer
+life easier. The code compiles anyway... so what?
+
+Consider the following example where we access the 3D voxel of an input image
+$\mathbf{x}$:
+
+```{cpp}
+const auto& x_ijk = x[{i, j, k}];
+```
+
+This is aesthetically better and more meaningful than
+```{cpp}
+const auto& xijk = ...; // too crammed
+```
+
+or the ugly
+
+```{cpp}
+const auto& xIJK = ...; // can be confusing
+```
+
+Secondly we underestimate the fact that the underscore notation does have a
+meaning in $\LaTeX$. It is used to subscript indices as in $\LaTeX$ mathematical
+formulas. The snake_case notation is indeed reminiscent of the code `x_{ijk}`,
+which renders as $x_{ijk}$.
+
+Thirdly, the capital letters $I, J, K$ are often used to denote **sets** of
+integers in mathematics. Instead the lowercase letters $i, j, k$ denotes three
+integers.
+
+Hence my dislike of the camelCase style especially in the context of *scientific
+programming*.
+
+### Capital letters and Unicode characters for better code readability.
+
+To push the rationale further, I like to use and abuse of Greek notations to
+declare variables as explained in published papers. Without trying to go very
+far, denoting a covariance matrix by its capital Greek letter $\mathbf{\Sigma}$
+is not only more elegant but also eases the cognitive overhead in associating
+the variable to the right contextual meaning as it feels more like reading
+mathematics.
+
+```{Rcpp}
+// [[Rcpp::depends(RcppEigen)]]
+
+#include <RcppEigen.h>
+
+// So satisfying and so much more readable:
+auto Σ = Eigen::MatrixXf{10, 10};
+
+// This is so much better than writing:
+auto cov = Eigen::MatrixXf{10, 10};
+```
