@@ -192,7 +192,7 @@ image = image[None, :]
 ```
 
 Apply the geometric transform and plot the warped image.
-```
+```{python}
 # Geometric transform input.
 R = torch.Tensor(rotation(np.pi / 6))
 
@@ -204,6 +204,7 @@ H = H.to(DEFAULT_DEVICE)
 image_warped = H.forward(image)
 image_warped_hwc = to_uint8_hwc(image_warped[0])
 
+plt.axis("off")
 plt.imshow(image_warped_hwc)
 plt.show()
 ```

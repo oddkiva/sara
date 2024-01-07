@@ -344,14 +344,13 @@ def build_book_docker():
     ).wait()
 
     # Run the docker image.
-    book_dir_path = SARA_SOURCE_DIR / "doc" / "book"
     ret = subprocess.Popen(
         [
             "docker",
             "run",
             "-it",
             "-v",
-            f"{book_dir_path}:/workspace/book",
+            f"{SARA_SOURCE_DIR}:/workspace/sara",
             sara_book_build_image,
             "/bin/bash",
         ],
