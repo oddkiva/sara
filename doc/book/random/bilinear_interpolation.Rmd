@@ -135,8 +135,7 @@ Sounded boring? Well you're wrong... This is a key stepping stone to perform for
 image processing with your GPU, and to perform differentiation on geometric
 transform should we need to optimize what not.
 
-Start import *Sara*'s Python API alongside other packages to catch a glimpse of
-it:
+Let's start importing *Sara*'s Python API alongside with other packages:
 
 
 ```{python}
