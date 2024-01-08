@@ -6,16 +6,16 @@ I gave it once as a small homework to screen people for computer vision roles.
 Even if I didn't give any time constraints whatsoever, nobody even tried.
 Literally: nobody.
 
-This is a technical exercise I do find interesting because it helps to know
-whether someone can fix the insides of an existing pipeline. It's not simple but
-it's not that hard either.
+This is a technical exercise I do find interesting because it helps me to know
+whether someone can fix the technical insides of an existing pipeline. It's not
+simple but it's not that hard either.
 
 Eventually I lowered my expectations by just asking to complete a simple machine
 learning training pipeline. And everybody just jumped their guns and were happy
-to impress you how they know about the bleeding edge neural architecture what
-not.^[The world never changes... Just shows how people most of the time likes to
-mansplain by displaying their knowledge more than their ability to think. So
-much ego all in all...]
+to impress you about how much they know about the bleeding edge neural
+architecture and what not.^[The world never changes... Just shows how people
+most of the time likes to mansplain by displaying their knowledge more than
+their ability to think. So much ego all in all...]
 
 Let's see how we can do this in Python in a NumPy-like style. I leave it as an
 exercise in C++.
@@ -24,13 +24,14 @@ The NumPy way of doing things is to not use any for loops but to use its library
 of CPU optimized functions that operates on arrays. This boils down to think of
 an array as a single scalar value, where only certain transformation rules are
 allowed so that we leverage parallelization. Likewise PyTorch and Tensorflow
-have equivalent optimized functions for CPU, GPU and other less mainstream TPUs.
+have equivalent optimized functions for CPUs, GPUs and other less mainstream
+TPUs.
 
 ## PyTorch implementation
 
 According to Reddit, Tensorflow (TF) is dying slowly. Retrospectively, it is not
-so surprising. Not completely unrelated but here is one anecdotal mishap before
-we start.
+so surprising. Not completely related but let me tell one anecdotal mishap
+before we start.
 
 TF was very tedious at its version 1.x. The constant need to invoke TF
 operations within a `tf.Session` context was a hassle. At first I accepted since
@@ -42,7 +43,7 @@ spent to just reimplement this in my own way.
 PyTorch does not have any of that and feels just like NumPy. Transitioning from
 TF to PT should be straightforward.
 
-Given a grayscale image $\mathbf{y} \in \mathbb{R}^2$ with values in $[0, 1]$ in
+Back to the topic, given a grayscale image $\mathbf{y} \in \mathbb{R}^2$ with values in $[0, 1]$ in
 single-precision floating precision format `torch.float32`, the goal is to
 calculate the interpolated values for a set of non integral coordinates
 $\mathbf{x}_i$.
@@ -133,7 +134,8 @@ interp_values
 
 Sounded boring? Well you're wrong... This is a key stepping stone to perform for
 image processing with your GPU, and to perform differentiation on geometric
-transform should we need to optimize what not.
+transform should we need to optimize some optimization cost function and what
+not.
 
 Let's start importing *Sara*'s Python API alongside with other packages:
 
