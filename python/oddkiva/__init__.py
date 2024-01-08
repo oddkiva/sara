@@ -1,8 +1,9 @@
 import pathlib
-import tomllib
 
 
 CONFIG_FILE_PATH= pathlib.Path(__file__).parent / 'config.toml'
-with open(CONFIG_FILE_PATH, 'rb') as f:
-    CONFIG = tomllib.load(f)
-    DATA_DIR_PATH = pathlib.Path(CONFIG['data']['path'])
+if CONFIG_FILE_PATH.exists():
+    with open(CONFIG_FILE_PATH, 'rb') as f:
+        from pip._vendor import tomli
+        CONFIG = tomli.load(f)
+        DATA_DIR_PATH = pathlib.Path(CONFIG['data']['path'])

@@ -72,7 +72,7 @@ Box = namedtuple(
 )
 ```
 
-Python type hints seems to act like a linter and don't help to catch all errors
+Python type hints seem to act like a linter and don't help to catch all errors
 but it's better than nothing.
 
 ## In Swift and C-family languages
