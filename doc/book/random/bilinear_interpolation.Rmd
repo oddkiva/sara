@@ -154,26 +154,27 @@ import torchvision.transforms.v2 as v2
 
 import oddkiva.brahma.image_processing.warp as W
 from oddkiva.brahma import DEFAULT_DEVICE
+```
 
+```{python, echo=FALSE}
 # Turn off debug logs.
 logging.getLogger("PIL").propagate = False
 logging.getLogger("matplotlib").propagate = False
 ```
 
-Let us define a geometric transformation:
-
-```{python}
-def rotation(theta):
-    return np.array([[np.cos(theta), -np.sin(theta), 0],
-                     [np.sin(theta),  np.cos(theta), 0],
-                     [            0,              0, 1]])
-```
-
 Next load an image:
 
-```{python}
+```{python, echo=FALSE}
 THIS_DIR = os.getcwd()
-SARA_SOURCE_DIR_PATH = Path(THIS_DIR[: THIS_DIR.find("sara") + len("sara")])
+if THIS_DIR.find('sara-book/sara') != -1:
+    idx = THIS_DIR.find("sara-book/sara") + len("sara-book/sara")
+    SARA_SOURCE_DIR_PATH = Path(THIS_DIR[:idx])
+else:
+    idx = THIS_DIR.find("sara") + len("sara")
+    SARA_SOURCE_DIR_PATH = Path(THIS_DIR[:idx])
+```
+
+```{python}
 SARA_DATA_DIR_PATH = SARA_SOURCE_DIR_PATH / "data"
 DOG_IMAGE_PATH = SARA_DATA_DIR_PATH / "dog.jpg"
 assert DOG_IMAGE_PATH.exists()
@@ -189,6 +190,15 @@ to_uint8_hwc = v2.Compose(
 # Image input
 image = to_float_chw(Image.open(DOG_IMAGE_PATH)).to(DEFAULT_DEVICE)
 image = image[None, :]
+```
+
+Let us define a geometric transformation:
+
+```{python}
+def rotation(theta):
+    return np.array([[np.cos(theta), -np.sin(theta), 0],
+                     [np.sin(theta),  np.cos(theta), 0],
+                     [            0,              0, 1]])
 ```
 
 Apply the geometric transform and plot the warped image.
