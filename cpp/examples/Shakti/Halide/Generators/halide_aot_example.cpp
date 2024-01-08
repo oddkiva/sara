@@ -18,21 +18,17 @@ using namespace std;
 using namespace DO::Sara;
 
 
-auto halide_pipeline() -> void
+auto halide_pipeline(int argc, char** argv) -> int
 {
   using namespace std::string_literals;
 
-#ifdef _WIN32
-  const auto video_filepath =
-      "C:/Users/David/Desktop/GOPR0542.MP4"s;
-#elif __APPLE__
-  const auto video_filepath =
-      "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
-#else
-  // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  const auto video_filepath = "/home/David/Desktop/GOPR0542.MP4"s;
-#endif
+  if (argc < 2)
+  {
+    std::cerr << "Usage: " << argv[0] << " video_path" << std::endl;
+    return 1;
+  }
 
+  const auto video_filepath = argv[1];
   VideoStream video_stream(video_filepath);
 
   // Input and output images.
@@ -48,7 +44,7 @@ auto halide_pipeline() -> void
       halide::as_runtime_buffer<float>(frame_gray32f_blurred);
   auto buffer_gray8 = halide::as_interleaved_runtime_buffer(frame_gray_as_rgb);
 
-  const auto sigma = 3.f;
+  const auto sigma = 5.f;
   const auto truncation_factor = 4;
 
   create_window(video_stream.sizes());
@@ -67,10 +63,10 @@ auto halide_pipeline() -> void
       // Use parallelization and vectorization.
       shakti_rgb8u_to_gray32f_cpu(buffer_rgb, buffer_gray32f);
 
-#define USE_HALIDE_AOT_IMPLEMENTATION
-//#define USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION
-//#define USE_SARA_DERICHE_IMPLEMENTATION
-#if defined(USE_HALIDE_AOT_IMPLEMENTATION)
+// #define USE_HALIDE_AOT_GPU_IMPL
+#define USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION
+// #define USE_SARA_DERICHE_IMPLEMENTATION
+#if defined(USE_HALIDE_AOT_GPU_IMPL)
       // The strategy is to transpose the array and then convolve the rows. So
       // (1) we transpose the matrix and convolve the (transposed) columns.
       // (2) we transpose the matrix and convolve the rows.
@@ -102,7 +98,8 @@ auto halide_pipeline() -> void
       //
       // Parallelizing the implementation of the linear filtering with OpenMP,
       // we are then down to 25ms, not bad at all for a very minimal change!
-      apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, sigma);
+      apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, sigma,
+                            truncation_factor);
       shakti_gray32f_to_rgb8u_cpu(buffer_gray32f_blurred, buffer_gray8);
       toc("Sara Gaussian");
 #elif defined(USE_SARA_DERICHE_IMPLEMENTATION)
@@ -116,11 +113,14 @@ auto halide_pipeline() -> void
 
     display(frame_gray_as_rgb);
   }
+
+  return 0;
 }
 
 
-GRAPHICS_MAIN()
+auto main(int argc, char** const argv) -> int
 {
-  halide_pipeline();
-  return 0;
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(halide_pipeline);
+  return app.exec();
 }

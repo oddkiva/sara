@@ -12,6 +12,8 @@
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 
+// #define PROFILE_ME
+
 #ifdef DO_SARA_USE_HALIDE
 #  include <DO/Shakti/Halide/RuntimeUtilities.hpp>
 
@@ -56,11 +58,6 @@ namespace DO::Sara {
     const auto elapsed = timer.elapsed_ms();
     SARA_DEBUG << "[CPU Halide Gaussian][" << src.sizes().transpose() << "] "
                << elapsed << " ms" << std::endl;
-    auto src_buffer = DO::Shakti::Halide::as_runtime_buffer_4d(src);
-    auto kernel_buffer = DO::Shakti::Halide::as_runtime_buffer(kernel);
-    auto dst_buffer = DO::Shakti::Halide::as_runtime_buffer_4d(dst);
-    shakti_separable_convolution_2d_cpu(src_buffer, kernel_buffer, kernel_size,
-                                        -center, dst_buffer);
 #  endif
 #else
     const auto kernel = make_gaussian_kernel(sigma, gauss_truncate);

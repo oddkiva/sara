@@ -11,7 +11,7 @@ rmd_files:
     "features/corner_detection.Rmd",
     "features/blob_detection.Rmd",
     "features/normalizing_feature_transform.Rmd",
-    "descriptors.Rmd",
+    # "descriptors.Rmd",
     "geometry_2d.Rmd",
     "geometry_2d/ellipse_intersection.Rmd",
     "geometry_3d.Rmd",
