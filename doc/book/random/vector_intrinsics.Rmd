@@ -1,0 +1,191 @@
+# Nice Vectorized Code
+
+Story time before we dive into an existing example.
+
+I applied for a C++ technical leadership role once at some company. I was
+considered for the role after a behavioral screening by the CTO. He explained to
+me how the next steps of the interviews would be. A few days later, he called me
+back for a quick chat. He ended up telling me they would not move forward after
+examining sara's image processing code. One of their senior engineers
+disqualified me as he did care more about my ability in manipulating CPU vector
+instructions.
+
+The CTO profusedly apologized to me by saying that I certainly was gifted but my
+image processing code was very slow because of their naive implementation. It
+did sound unfair to me. What do you think? You tell me.
+
+I have mostly an applied math background, so it did sound unfair to me. The
+way it was made me realize that you are never enough. Like you would have to know
+every single aspect of engineering from designing and implementing an energy
+formulation down to every technical tricks to optimize existing BLAS-like
+routine in any architecture sounded absolutely crazy to me. This is another job
+spec that I was not cut for. What can you do when you are already being shut the
+door? They already made their mind no matter how you tried saying that you are
+willing to learn would not sway them.
+
+Right. So how can we achieve that? Nowadays, we have some answers with Halide.
+One beauty with Halide is that it abstracts CPU, GPU intrinsics for you in a
+generic C++ code for a large range of hardware platforms. You don't have to know
+CPU vector intrinsics, but you do need to know scheduling strategies to say
+optimize the speed at which your convolutional operations run.
+
+Another beautiful aspect with Halide is that you can decouple the algorithm and
+the scheduling strategy. Halide provides guarantees that your algorithm remains
+correct and stay invariant for any scheduling you are implementing.
+
+## 2D separable convolutional operation.
+
+Implementation
+
+Separable 2D convolution
+```
+auto x = Halide::Var{"x"};
+auto y = Halide::Var{"y"};
+
+auto xo = Halide::Var{"xo"};
+auto yo = Halide::Var{"yo"};
+
+auto xi = Halide::Var{"xi"};
+auto yi = Halide::Var{"yi"};
+auto tile = Halide::Var{"tile"};
+
+auto input = Halide::Func{"input"};
+auto kernel = Halide::Func{"kernel"};
+
+input(x, y) = x + y;
+kernel(x) = Halide::exp(-x);
+
+auto conv_x = Halide::Func{"conv_x"};
+auto conv_y = Halide::Func{"conv_y"};
+
+const auto ksz = 20;
+auto k = Halide::RDom(0, ksz, "k");
+
+// The algorithm
+conv_x(x, y) = Halide::sum(input(x + k - ksz / 2, y) * kernel(k), "conv_x");
+conv_y(x, y) = Halide::sum(conv_x(x, y + k - ksz / 2) * kernel(k), "conv_y");
+```
+
+The optimal scheduling is not that obvious in CPU.
+
+The first obvious strategy to do is to calculate the x-convolution first. Then
+calculate the transpose of the y-convoluved map and transpose it back to obtain
+the final results.
+
+We can do a lot better by dividing the final convolved image into tiles of 64
+by 64 pixels. Each image block is like a smaller independent image on which we
+perform the 2D separable convolution.
+
+Scheduling
+```
+// The schedule
+kernel.compute_root();
+
+conv_y  //
+    .tile(x, y, xo, yo, xi, yi, 64, 64)
+    .fuse(xo, yo, tile)
+    .parallel(tile)
+    // .parallel(yo)
+    .vectorize(xi, 4, Halide::TailStrategy::GuardWithIf)  //
+    ;
+conv_x  //
+        // .store_at(conv_y, tile)
+    .compute_at(conv_y, xi)                               //
+    .vectorize(x, 4, Halide::TailStrategy::GuardWithIf)  //
+    ;
+```
+
+There is a lot to unpack here. Let's break it down bit by bit.
+
+The line
+```
+  conv_y.tile(x, y, xo, yo, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+      .fuse(xo, yo, tile_index)
+      .parallel(tile_index);
+      .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
+```
+
+translates in C++ as
+
+This is according to my second-guessing:
+```
+#pragma omp parallel for  // .parallel(y)
+for (auto tile_index = 0; tile_index < T; ++T)
+{
+  // Process the tile (xo, yo).
+  const auto yo = tile_index / T;
+  const auto xo = tile_index % T;
+
+#pragma omp parallel for
+  for (auto yi = 0; yi < 64; ++yi)
+  {
+    for (auto xi = 0; xi < 64; ++yi)
+    {
+      const auto xi_begin = xo * 64 + xi;
+      const auto xi_end = (xo + 1) * 64 + xi;
+
+      // Recompose x and y.
+      const auto y = yo * 64 + yi;
+      const auto x = xo * 64 + xi;
+
+
+      // conv_y(x, y) = sum(conv_x(x, y + k) * kernel(k));
+      //
+      // means:
+      //
+      // conv_y(x, y) = conv_x(x, y + 0) * kernel(0) 
+      //              + conv_x(x, y + 1) * kernel(1)
+      //              + ...
+      //              + conv_x(x, y + ksz -1) * kernel(ksz -1)
+      //
+      // Then with:
+      // conv_x.compute_at(conv_y, x)
+      //
+      // Inferring
+      https://halide-lang.org/docs/class_halide_1_1_func.html#a800cbcc3ca5e3d3fa1707f6e1990ec83.
+      // The storage **has** to be 2D, if we unwrap conv_x
+      float conv_x[ksz][ksz];
+
+      // TODO: verify this.
+      //
+      // Vectorizable.
+      for (auto k = 0; k < ksz; ++k)
+        conv_x[yi][xi] = 0.f;
+      // Vectorizable in xi? Unclear.
+      for (auto k = 0; k < ksz; ++k)
+        conv_x[yi][xi] += in[y][x + k] * kernel[k];
+
+      // Vectorize in xi
+      for (auto k = 0; k < ksz; ++ksz)
+        conv[y][x] = 0.f;
+
+      // Vectorizable in xi? Unclear.
+      for (auto k = 0; k < ksz; ++ksz)
+        conv_y[y][x] += conv_x[yi+k][xi] * kernel[k];
+    }
+  }
+
+  conv_y = 
+}
+```
+
+To have a more definite answer, the best thing is to actually generate the
+compiled code with
+
+Second-guessing is not an option to get a serious understanding. So we need to
+spend some time to learn how to actually read assembly code.
+
+Halide developers has done a very good job to help us understand what assembly
+code is generated mapping the assembly code to the pseudo code.
+
+```
+# Generate code as follows
+conv_y.compile_to_stmt("separable_conv_2d.stmt.html", {}, Halide::HTML);
+```
+
+It becomes clear that convolution operation operates in batch via fma operation.
+
+
+References:
+- https://diveintosystems.org/book/C9-ARM64/common.html
+- https://developer.arm.com/documentation/ddi0602/2023-12/SIMD-FP-Instructions/FMLA--vector---Floating-point-fused-Multiply-Add-to-accumulator--vector--?lang=en
