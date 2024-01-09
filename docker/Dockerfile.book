@@ -1,4 +1,4 @@
-FROM rocker/verse:4.2.1
+FROM rocker/verse:4.3.2
 
 MAINTAINER "Odd Kiva"
 
@@ -7,11 +7,26 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Install necessary packages to add APT repositories.
 RUN apt-get update -y -qq && \
-  apt-get install -y -qq python3 python3-pip librsvg2-bin
+  apt-get install -y -qq ninja-build python3 python3-pip librsvg2-bin
 
 # cf. this crazy issue: https://github.com/rstudio/reticulate/issues/1133#issuecomment-1021783041
+RUN pip3 install Cython
 RUN pip3 install --no-binary="numpy" numpy --ignore-installed
-RUN pip3 install matplotlib sympy
+RUN pip3 install ipython matplotlib sympy
+RUN pip3 install torch
+RUN pip3 install torchvision
 
-RUN Rscript -e 'devtools::install_cran(c("berryFunctions", "gifski", "reticulate", "Rcpp", "RcppEigen", "tinytex"))'
-RUN Rscript -e 'tinytex::install_tinytex()'
+#!/usr/bin/env Rscript
+RUN Rscript -e "install.packages('berryFunctions')"
+RUN Rscript -e "install.packages('gifski')"
+RUN Rscript -e "install.packages('reticulate')"
+RUN Rscript -e "install.packages(c('Rcpp', 'RcppEigen'))"
+RUN Rscript -e "install.packages('bookdown')"
+RUN Rscript -e "install.packages('downlit')"
+RUN Rscript -e "install.packages('xml2')"
+RUN Rscript -e "install.packages('servr')"
+RUN Rscript -e "install.packages('remotes')"
+RUN Rscript -e "remotes::install_git('https://git.rud.is/hrbrmstr/swiftr.git')"
+# RUN Rscript -e 'tinytex::install_tinytex()'
+
+WORKDIR /workspace

@@ -1,4 +1,4 @@
-from collections import namedtuple
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -13,29 +13,41 @@ import oddkiva.shakti.inference.darknet as darknet
 
 
 THIS_FILE = __file__
-SARA_SOURCE_DIR_PATH = Path(THIS_FILE[:THIS_FILE.find('sara') + len('sara')])
-SARA_DATA_DIR_PATH = SARA_SOURCE_DIR_PATH / 'data'
-SARA_TRAINED_MODEL_DIR_PATH = SARA_SOURCE_DIR_PATH / 'trained_models'
-SARA_YOLOV4_MODEL_DIR_PATH = SARA_TRAINED_MODEL_DIR_PATH / 'yolov4-tiny'
+SARA_SOURCE_DIR_PATH = Path(THIS_FILE[: THIS_FILE.find("sara") + len("sara")])
+SARA_DATA_DIR_PATH = SARA_SOURCE_DIR_PATH / "data"
+SARA_TRAINED_MODEL_DIR_PATH = SARA_SOURCE_DIR_PATH / "trained_models"
+SARA_YOLOV4_MODEL_DIR_PATH = SARA_TRAINED_MODEL_DIR_PATH / "yolov4-tiny"
 
-YOLO_V4_COREML_PATH = SARA_YOLOV4_MODEL_DIR_PATH / 'yolov4-tiny.mlpackage'
-YOLO_V4_COCO_CLASSES_PATH = SARA_YOLOV4_MODEL_DIR_PATH / 'classes.txt'
+YOLO_V4_COREML_PATH = SARA_YOLOV4_MODEL_DIR_PATH / "yolov4-tiny.mlpackage"
+YOLO_V4_COCO_CLASSES_PATH = SARA_YOLOV4_MODEL_DIR_PATH / "classes.txt"
 assert YOLO_V4_COREML_PATH.exists()
-YOLO_V4_CFG_PATH = SARA_YOLOV4_MODEL_DIR_PATH / 'yolov4-tiny.cfg'
+YOLO_V4_CFG_PATH = SARA_YOLOV4_MODEL_DIR_PATH / "yolov4-tiny.cfg"
 assert YOLO_V4_CFG_PATH.exists()
 
-DOG_IMAGE_PATH = SARA_DATA_DIR_PATH / 'dog.jpg'
+DOG_IMAGE_PATH = SARA_DATA_DIR_PATH / "dog.jpg"
 assert DOG_IMAGE_PATH.exists()
 
 
-Box = namedtuple('Box', ['x', 'y', 'w', 'h', 'p_object', 'class_id', 'p_class'])
+@dataclass
+class Box:
+    x: float
+    y: float
+    w: float
+    h: float
+    p_object: float
+    class_id: int
+    p_class: np.ndarray
 
 
-def get_yolo_boxes(yolo_out: np.ndarray, yolo_layers: dict['str': Any],
-                   objectness_thres,
-                   image_ori_sizes, yolo_input_sizes):
-    mask = yolo_layers['mask']
-    anchors = yolo_layers['anchors']
+def get_yolo_boxes(
+    yolo_out: np.ndarray,
+    yolo_layers: dict["str":Any],
+    objectness_thres,
+    image_ori_sizes,
+    yolo_input_sizes,
+):
+    mask = yolo_layers["mask"]
+    anchors = yolo_layers["anchors"]
     _, B, _, H, W = yolo_out.shape
 
     out = yolo_out
@@ -46,7 +58,7 @@ def get_yolo_boxes(yolo_out: np.ndarray, yolo_layers: dict['str': Any],
     p_objectness = out[:, :, 4]
     p_classes = out[:, :, 5:]
 
-    yi, xi = np.meshgrid(range(H), range(W), indexing='ij')
+    yi, xi = np.meshgrid(range(H), range(W), indexing="ij")
 
     w_prior = [anchors[mask[b]][0] for b in range(B)]
     h_prior = [anchors[mask[b]][1] for b in range(B)]
@@ -74,19 +86,30 @@ def get_yolo_boxes(yolo_out: np.ndarray, yolo_layers: dict['str': Any],
     y -= 0.5 * h
     p_objectness = p_objectness[object_ids]
     class_ids = p_class_idx[object_ids]
-    ixs = (object_ids[0], object_ids[1], class_ids, object_ids[2],
-           object_ids[3])
+    ixs = (
+        object_ids[0],
+        object_ids[1],
+        class_ids,
+        object_ids[2],
+        object_ids[3],
+    )
     p_classes = p_classes[ixs]
 
-    boxes = np.stack((x, y, w, h, p_objectness, class_ids,
-                      p_classes)).transpose().tolist()
+    boxes = (
+        np.stack((x, y, w, h, p_objectness, class_ids, p_classes))
+        .transpose()
+        .tolist()
+    )
     boxes = [Box(*b) for b in boxes]
     return boxes
 
-def nms(boxes: list[Box], iou_thres=0.4):
+
+def nms(boxes: list[Box], iou_thres: float = 0.4):
     def compare(x: Box, y: Box):
         return y.p_object - x.p_object
+
     from functools import cmp_to_key
+
     boxes_sorted = sorted(boxes, key=cmp_to_key(compare))
 
     boxes_filtered = []
@@ -107,9 +130,11 @@ def nms(boxes: list[Box], iou_thres=0.4):
         inter_y2 = np.minimum(y2, box.y + box.h)
 
         inter = np.logical_and(inter_x1 <= inter_x2, inter_y1 <= inter_y2)
-        inter_area = \
-            (inter_x2 - inter_x1) * (inter_y2 - inter_y1) * \
-            inter.astype(np.float32)
+        inter_area = (
+            (inter_x2 - inter_x1)
+            * (inter_y2 - inter_y1)
+            * inter.astype(np.float32)
+        )
 
         union_area = w * h + box.w * box.h - inter_area
 
@@ -124,15 +149,23 @@ def nms(boxes: list[Box], iou_thres=0.4):
 
 def detect(yolo_model, yolo_layers, image_ori, yolo_input_sizes):
     image_ori_sizes = np.asarray(image_ori).shape[:2]
-    image_resized = image_ori.resize(yolo_input_sizes,
-                                     resample=Image.Resampling.LANCZOS)
+    image_resized = image_ori.resize(
+        yolo_input_sizes, resample=Image.Resampling.LANCZOS
+    )
 
-    yolo_outs = yolo_model.predict({'image': image_resized})
-    yolo_outs = [yolo_outs[f'yolo_{i}'] for i in range(len(yolo_layers))]
+    yolo_outs = yolo_model.predict({"image": image_resized})
+    yolo_outs = [yolo_outs[f"yolo_{i}"] for i in range(len(yolo_layers))]
 
-    yolo_boxes = [get_yolo_boxes(yolo_outs[i], yolo_layers[i], 0.4,
-                                 image_ori_sizes, yolo_input_sizes)
-                  for i in range(len(yolo_layers))]
+    yolo_boxes = [
+        get_yolo_boxes(
+            yolo_outs[i],
+            yolo_layers[i],
+            0.4,
+            image_ori_sizes,
+            yolo_input_sizes,
+        )
+        for i in range(len(yolo_layers))
+    ]
     yolo_boxes = sum(yolo_boxes, [])
 
     yolo_boxes = nms(yolo_boxes)
@@ -141,24 +174,27 @@ def detect(yolo_model, yolo_layers, image_ori, yolo_input_sizes):
 
 
 def draw_detection(
-    b: Box,
-    class_name: str,
-    color: tuple[int, int, int],
-    font_size: int = 20
+    b: Box, class_name: str, color: tuple[int, int, int], font_size: int = 20
 ) -> None:
-
     sara.draw_rect((b.x, b.y), (b.w, b.h), (255, 0, 0), 3)
-    sara.draw_text((b.x, b.y - 4), class_name, color, font_size, 0, False, True, False)
+    sara.draw_text(
+        (b.x, b.y - 4), class_name, color, font_size, 0, False, True, False
+    )
+
 
 def user_main():
     yolo_model = ct.models.CompiledMLModel(str(YOLO_V4_COREML_PATH))
     yolo_cfg = darknet.Config()
     yolo_cfg.read(YOLO_V4_CFG_PATH)
-    yolo_input_sizes = (yolo_cfg._metadata['width'], yolo_cfg._metadata['height'])
-    yolo_layers = [layer['yolo'] for layer in yolo_cfg._model
-                   if 'yolo' in layer.keys()]
-    with open(YOLO_V4_COCO_CLASSES_PATH, 'r') as fp:
-        yolo_classes = [l.strip(' \n') for l in fp.readlines() if l]
+    yolo_input_sizes = (
+        yolo_cfg._metadata["width"],
+        yolo_cfg._metadata["height"],
+    )
+    yolo_layers = [
+        layer["yolo"] for layer in yolo_cfg._model if "yolo" in layer.keys()
+    ]
+    with open(YOLO_V4_COCO_CLASSES_PATH, "r") as fp:
+        yolo_classes = [l.strip(" \n") for l in fp.readlines() if l]
         print(yolo_classes)
 
     image_ori = Image.open(DOG_IMAGE_PATH)
@@ -175,5 +211,5 @@ def user_main():
     sara.get_key()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sara.run_graphics(user_main)
