@@ -154,11 +154,11 @@ namespace DO::Shakti::HalideBackend {
                   Halide::TailStrategy::GuardWithIf)
             .fuse(xo, yo, tile)
             .parallel(tile)
-            .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf);
+            .vectorize(xi, 32, Halide::TailStrategy::GuardWithIf);
         conv_x  //
-            .store_at(conv_y, tile)
+            // .store_at(conv_y, tile)
             .compute_at(conv_y, tile)
-            .vectorize(x, 16, Halide::TailStrategy::GuardWithIf);
+            .vectorize(x, 32, Halide::TailStrategy::GuardWithIf);
 #endif
       }
     }
