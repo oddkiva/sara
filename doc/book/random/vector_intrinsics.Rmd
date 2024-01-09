@@ -1,44 +1,147 @@
-# Nice Vectorized Code
+# Super Fast Separable Convolutions
+
+Sounds boring? I promise you this is going to be way more interesting than you
+might think. There's quite a bit interesting things to learn.
 
 Story time before we dive into an existing example.
 
 I applied for a C++ technical leadership role once at some company. I was
-considered for the role after a behavioral screening by the CTO. He explained to
-me how the next steps of the interviews would be. A few days later, he called me
-back for a quick chat. He ended up telling me they would not move forward after
-examining sara's image processing code. One of their senior engineers
-disqualified me as he did care more about my ability in manipulating CPU vector
-instructions.
+considered for the role after a preliminary behavioral screening by the CTO. He
+then told me who I would be interviewing with in the next interviews. A few days
+later, he called me back for a quick chat. He ended up telling me they would not
+move forward after examining sara's image processing code. Without really
+explaining why, I guessed that probably one of their senior engineers
+disqualified me as he did care more about my ability in understanding and
+manipulating CPU vector instructions.
 
 The CTO profusedly apologized to me by saying that I certainly was gifted but my
-image processing code was very slow because of their naive implementation. It
-did sound unfair to me. What do you think? You tell me.
+image processing code was very slow because of my naive implementation. It did
+sound unfair to me.
 
-I have mostly an applied math background, so it did sound unfair to me. The
-way it was made me realize that you are never enough. Like you would have to know
-every single aspect of engineering from designing and implementing an energy
-formulation down to every technical tricks to optimize existing BLAS-like
-routine in any architecture sounded absolutely crazy to me. This is another job
-spec that I was not cut for. What can you do when you are already being shut the
-door? They already made their mind no matter how you tried saying that you are
-willing to learn would not sway them.
+I have mostly an applied math background, so it sounded unfair to me. It did
+made me feel that you are never enough whatever you achieve. Like you do need to
+know every single aspect of engineering from high level to low level. In
+hindsight I would not have been happy with the job anyways. Still frustrating...
+In that moment, I was telling myself: what can you do when you are already being
+shut the door? Going by the same logic, David Lowe showcased his SIFT research
+code, he would not qualify for the job either: I learnt from studying his code.
 
-Right. So how can we achieve that? Nowadays, we have some answers with Halide.
-One beauty with Halide is that it abstracts CPU, GPU intrinsics for you in a
-generic C++ code for a large range of hardware platforms. You don't have to know
-CPU vector intrinsics, but you do need to know scheduling strategies to say
-optimize the speed at which your convolutional operations run.
+Right, back to the topic: today how can we achieve that? Nowadays, we have some
+answers with Halide. And we can do it very elegantly without coding in assembly
+directly.
 
-Another beautiful aspect with Halide is that you can decouple the algorithm and
-the scheduling strategy. Halide provides guarantees that your algorithm remains
-correct and stay invariant for any scheduling you are implementing.
+The main beauty with Halide is that you can decouple (1) the algorithm: the
+separable convolution and (2) the scheduling strategy, i.e., how do you make it
+as fast as the baseline: OpenCV's Gaussian blur?
+
+Halide can check and provide guarantees that your algorithm remains correct for
+the schedule you are implementing.
+
+Another beauty with Halide is that it abstracts CPU, GPU intrinsics for you in a
+generic C++ code for a wide range of platforms. You don't have to be an expert
+in CPU vector intrinsics, but you do need to know the scheduling strategies to
+say optimize the speed at which your convolutional operations run. So unless you
+read publications and the presentations, it is hard for the layman or the novice
+to know what works and what doesn't.
+
+
+## Naive Implementation of the Gaussian blur in C.
+
+Right, myself more than 15 years ago, let's imagine that I am a fresh graduate
+with a Master's degree looking for an internship. I was a bit aware of CPU
+registers but I can't see how it would fit in the grand scheme of things. I've
+heard of vector instructions but never really. As an avid StackOverflow reader,
+I have been told the big lie: don't prematurely optimize and just let the
+compiler do its job. And just make things work.
+
+I did learn the Gaussian filter is separable. Don't write the 2D convolution,
+but exploit its separable properties. With the innocence of my youth, I am
+proudly exhibiting a naive implementation in C++ in my Sara repo, something
+along the lines:
+
+```{Rcpp}
+auto conv_x(const float *in, const float *kernel, float *out,
+            const int w, const int h, const int ksz) -> void
+{
+  const auto r = ksz / 2;
+  for (auto y = 0; y < h; ++y)
+  {
+    for (auto x = 0; x < w; ++x)
+    {
+      auto val = 0.f;
+      for (auto k = 0; k < ksz; ++k)
+      {
+        auto xk = x - r + k;
+
+        // Check the boundary conditions.
+        if (xk < 0)
+          xk = 0;
+        else if (xk >= w)
+          xk = w - 1;
+
+        // Accumulate.
+        const auto xy = y * w + xk;
+        val += in[xy] * kernel[k];
+      }
+
+      out[y * w + x] = val;
+    }
+  }
+}
+
+auto conv_y(const float *in, const float *kernel, float *out,
+            const int w, const int h, const int ksz) -> void
+{
+  const auto r = ksz / 2;
+  for (auto y = 0; y < h; ++y)
+  {
+    for (auto x = 0; x < w; ++x)
+    {
+      auto val = 0.f;
+      for (auto k = 0; k < ksz; ++k)
+      {
+        auto yk = y - r + k;
+
+        // Check the boundary conditions.
+        if (yk < 0)
+          yk = 0;
+        else if (yk >= h)
+          yk = h - 1;
+
+        // Accumulate.
+        const auto xy = yk * w + x;
+        val += in[xy] * kernel[k];
+      }
+
+      out[y * w + x] = val;
+    }
+  }
+}
+```
+
+I write unit tests, validate on synthetic tests, check the boundary conditions
+and try it on a real image with a Gaussian kernel. I am happy it works
+reasonably fast when compiling in Release mode on Visual Studio. Job done! I am
+proudly showcasing my code on GitHub. Never complained about it as I bothered
+about real-time issues as later I learnt about in CUDA and would write in CUDA
+anyways.
+
 
 ## 2D separable convolutional operation.
 
-Implementation
+Many years later, the CTO and his minion tells you that you are not good enough
+without elaborating what he was expecting. OK, let's make it better!
 
-Separable 2D convolution
+How? I vaguely understand you have to write the code with CPU intrinsics? Should
+I write in C-style or in ASM. How to do it with limited bandwidth after
+finishing your day job and wanting to learn?
+
+Use Halide! Halide is very elegant language. Here is how we could rewrite the 2D
+separable convolution.
+
 ```
+#include <Halide.h>
+
 auto x = Halide::Var{"x"};
 auto y = Halide::Var{"y"};
 
@@ -133,7 +236,7 @@ for (auto tile_index = 0; tile_index < T; ++T)
       //
       // means:
       //
-      // conv_y(x, y) = conv_x(x, y + 0) * kernel(0) 
+      // conv_y(x, y) = conv_x(x, y + 0) * kernel(0)
       //              + conv_x(x, y + 1) * kernel(1)
       //              + ...
       //              + conv_x(x, y + ksz -1) * kernel(ksz -1)
@@ -165,7 +268,7 @@ for (auto tile_index = 0; tile_index < T; ++T)
     }
   }
 
-  conv_y = 
+  conv_y =
 }
 ```
 
