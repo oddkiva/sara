@@ -47,7 +47,7 @@ auto main() -> int
   conv_y.print_loop_nest();
   conv_y.compile_to_lowered_stmt("separable_conv_2d.stmt.html", {},
                                  Halide::HTML);
-  conv_y.compile_to_assembly("separable_conv_2d.s", {});
+  // conv_y.compile_to_assembly("separable_conv_2d.s", {});
 
   return 0;
 }
