@@ -326,6 +326,10 @@ const auto& x_ijk = x[{i, j, k}];
 This is aesthetically better and more meaningful than
 ```{cpp}
 const auto& xijk = ...; // too crammed
+
+// The following is fine too as typing the underscore symbol can be a hassle.
+// I am not a snake_case zealot either...
+const auto xi = x[i];
 ```
 
 or the ugly
