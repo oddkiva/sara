@@ -148,15 +148,17 @@ namespace DO::Shakti::HalideBackend {
         conv_x.compute_at(conv_y, x).vectorize(
             x, 16, Halide::TailStrategy::GuardWithIf);
 #else
+        // This schedule is optimized on Apple Silicon M2
         const auto tile = Halide::Var{"tile"};
         conv_y
             .tile(x, y, xo, yo, xi, yi, 64, 64,
                   Halide::TailStrategy::GuardWithIf)
             .fuse(xo, yo, tile)
             .parallel(tile)
-            .vectorize(xi, 32, Halide::TailStrategy::GuardWithIf);
-        conv_x  //
-            // .store_at(conv_y, tile)
+            .vectorize(xi, 32,
+                       Halide::TailStrategy::GuardWithIf);  // 32 is the
+                                                            // good size.
+        conv_x                                              //
             .compute_at(conv_y, tile)
             .vectorize(x, 32, Halide::TailStrategy::GuardWithIf);
 #endif
