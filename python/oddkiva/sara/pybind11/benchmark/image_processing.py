@@ -1,6 +1,6 @@
 import sys
 
-from PySide2.QtCore import Qt
+from PySide6.QtCore import Qt
 
 import numpy as np
 
@@ -13,7 +13,7 @@ import cv2
 def user_main():
     video_file = sys.argv[1]
     video_stream = sara.VideoStream()
-    video_stream.open(video_file)
+    video_stream.open(video_file, True)
 
     h, w, _ = video_stream.sizes()
 

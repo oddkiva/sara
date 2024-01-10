@@ -1,0 +1,485 @@
+# Super Fast Separable Convolutions
+
+Sounds boring? I promise you this is going to be way more interesting than you
+might think. There's quite a bit interesting things to learn.
+
+Story time before we dive into the implementation of the Gaussian blur.
+
+## Story Time
+
+Once I applied for a C++ technical leadership role for some company. I was
+considered for the role after a preliminary behavioral screening by the CTO. He
+then told me who I would be interviewing with in the next interviews. A few days
+later, he called me back for a quick chat. He ended up telling me they would not
+move forward after examining sara's image processing code. Without really
+explaining why, I guessed that probably one of their senior engineers
+disqualified me as he did care more about my ability in understanding and
+manipulating CPU vector instructions.
+
+The CTO profusedly apologized to me. He said politely that I certainly was
+gifted but my C++ code was not to their standard. From what I guessed, they
+probably found that my image processing code was implemented too naively.
+
+This was based on the fact that the CTO told me they were doing lots of
+optimization involving CPU vector intrinsics in order to calculate data as fast
+as possible. That it really was not that difficult and that I could get up to
+speed fairly quickly.
+
+I have mostly an applied math background, so it did sound unfair to me. It did
+made me feel that you are never enough whatever you achieve. Like you do need to
+know every single aspect of engineering from high level to low level. In
+hindsight I would not have been happy with the job anyways. Still frustrating...
+In that moment, I was telling myself: what can you do when you are already being
+shut the door? Going by the same logic, if David Lowe showcased his SIFT
+research code, he would not qualify for the job either: I learnt from studying
+his code.
+
+Right, back to the topic: today how can we achieve that? Nowadays, we have some
+answers with Halide. And we can do it very elegantly without coding in assembly
+directly.
+
+## What is Halide?
+
+With Halide you can write a an image processing filter and optimize the way it is run.
+
+You write sets of arithmetic instructions that operates on image buffers with
+specific parallelism patterns (multicore and vectorization). Then you can tell
+to compile with a C++ method to generate the optimize the image filter as a C++
+static library.
+
+The main beauty with Halide is that you can decouple:
+
+1. The algorithm: the separable convolution and,
+2. the scheduling strategy: the parallelism strategy to make it as fast as the
+baseline if not faster than OpenCV's Gaussian blur.
+
+Halide can check and provide guarantees that your algorithm remains correct for
+the schedule you are implementing.
+
+With Halide, you won't write any nested `for` loops and multi-threaded
+processing with bound-checking. So you can express ideas at a higher level.
+
+Halide abstracts these parallelisms for you and supports a wide range of
+platforms. You don't have to be an expert in CPU vector intrinsics, but you do
+need to know the schedule strategies to say optimize the speed at which your
+convolutional operations run. Halide has identified the most common schedule
+patterns that are used to optimize image processing code.
+
+You still need to skim the publications and the presentations, practise. But in
+my experience, it is still difficult for the layman or the novice to identify
+the schedule patterns that work and those that don't.
+
+
+## Naive C++ Implementation of the Gaussian Blur
+
+Right, let's rewind back in time and imagine myself more than 15 years ago.
+Freshly graduated with a Master's degree looking to showcase some work
+portfolio. I am a bit aware of CPU registers but I can't see how it would fit in
+the grand scheme of things. I've heard of vector instructions but never
+understood what they were about. As an avid Internet reader, I have been sold
+the big lie: don't prematurely optimize and just let the compiler do its job.
+And just make things work.
+
+I did learn in class that the Gaussian filter is separable: Don't write the 2D
+convolution naively, exploit its separable property. I am proudly exhibiting a
+naive implementation in C++ in my Sara repo, something along the lines:
+
+Icing on the cake, I have discovered multicore parallelism via OpenMP.
+
+```{Rcpp}
+auto conv_x(const float *in, const float *kernel, float *out,
+            const int w, const int h, const int ksz) -> void
+{
+  const auto r = ksz / 2;
+
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+  for (auto y = 0; y < h; ++y)
+  {
+    for (auto x = 0; x < w; ++x)
+    {
+      auto val = 0.f;
+      for (auto k = 0; k < ksz; ++k)
+      {
+        auto xk = x - r + k;
+
+        // Check the boundary conditions.
+        if (xk < 0)
+          xk = 0;
+        else if (xk >= w)
+          xk = w - 1;
+
+        // Accumulate.
+        const auto xy = y * w + xk;
+        val += in[xy] * kernel[k];
+      }
+
+      out[y * w + x] = val;
+    }
+  }
+}
+```
+
+We execute the same dance for the y-convolution:
+
+```{Rcpp}
+auto conv_y(const float *in, const float *kernel, float *out,
+            const int w, const int h, const int ksz) -> void
+{
+  const auto r = ksz / 2;
+
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+  for (auto y = 0; y < h; ++y)
+  {
+    for (auto x = 0; x < w; ++x)
+    {
+      auto val = 0.f;
+      for (auto k = 0; k < ksz; ++k)
+      {
+        auto yk = y - r + k;
+
+        // Check the boundary conditions.
+        if (yk < 0)
+          yk = 0;
+        else if (yk >= h)
+          yk = h - 1;
+
+        // Accumulate.
+        const auto xy = yk * w + x;
+        val += in[xy] * kernel[k];
+      }
+
+      out[y * w + x] = val;
+    }
+  }
+}
+```
+
+I diligently write unit tests, validate on synthetic tests, check the boundary
+conditions and try it on a real image with a Gaussian kernel. I am happy it
+works reasonably fast when compiling in Release mode on Visual Studio. Job done!
+I am proudly showcasing my code on GitHub. Never complained about it as I
+bothered about real-time issues as later I learnt about in CUDA and would write
+in CUDA anyways.
+
+
+## Halide Implementation of the Algorithm
+
+Back to the time where the CTO and his minions tell you that you are not good
+enough without elaborating why and what he was expecting to see.
+
+Fine! let's see how we could optimize the code...
+
+OK How? I vaguely understand you have to write the code with CPU intrinsics?
+Should I write in C-style or in ASM. How to do it with limited bandwidth after
+finishing your day job and wanting to learn?
+
+Use Halide? Yes! It is a very elegant language. It can also compile your code
+directly in OpenCL and Vulkan, Direct3D bit code. Here is how we could rewrite
+the 2D separable convolution.
+
+Let us write the implementation first.
+
+```{cpp}
+#include <Halide.h>
+
+auto x = Halide::Var{"x"};
+auto y = Halide::Var{"y"};
+
+auto input = Halide::Func{"input"};
+auto kernel = Halide::Func{"kernel"};
+
+static constexpr auto sigma = 3.f;
+static constexpr auto truncation_factor = 4.f;
+static constexpr auto ksz = static_cast<int>(2 * sigma * truncation_factor);
+static constexpr auto kr = ksz / 2;
+
+input(x, y) = x + y;
+kernel(x) = Halide::exp(-x * x / (0.5f * sigma * sigma));
+
+auto conv_x = Halide::Func{"conv_x"};
+auto conv_y = Halide::Func{"conv_y"};
+
+auto k = Halide::RDom(0, ksz, "k");
+
+// The algorithm
+conv_x(x, y) = Halide::sum(input(x + k - kr, y) * kernel(k));
+conv_y(x, y) = Halide::sum(conv_x(x, y + k - kr / 2) * kernel(k));
+```
+
+## Shedule Optimization
+
+### Two Types of Parallelisms on CPUs
+
+There are two types of parallelisms on the CPU.
+
+1. Multicore processing:
+   This is straightforward to understand and is about keep all the CPU cores as
+   busy as possible with minimal data sharing. OpenMP is simple and helps to
+   parallelize image filter quite easily once we identify the parts of the
+   algorithm that operate independently.
+
+2. Vector instructions:
+   Until I implemented filters with Halide, I could not understand what CPU
+   instrutions were really about.
+   I am not going to pretend to be an expert in CPU optimization but this little
+   paragraph should convince you why it is so interesting to apply vector
+   instructions wherever possible.
+   So, as a first approximation, a CPU vector instruction typically enables the
+   programmer to perform arithmetic operations on small vectors in a single CPU
+   cycle. Typically arithmetic operations such addition, multiplication and more
+   can operate on 4D vectors. That is where we can observe additional 4x speed
+   up or more if your CPU can process those operations on bigger vectors.
+
+For more accurate and more comprehensive information, I will simply encourage
+you to do your own research and share what you have learnt.
+
+Like image filter, BLAS routines makes extensive use of the two types
+parallelism on CPU platforms.
+
+### Schedule 1
+
+The obvious strategy is to start from the idea of separable convolution and
+vectorize the convolution wherever possible.
+
+We parallelize the computation of image rows. We apply Halide's magic invocation
+to vectorize the convolution without really understanding why but thinks it
+works.
+
+```
+kernel.compute_root();
+
+conv_x
+    .compute_root()
+    .parallel(y)
+    .vectorize(x, 32, Halide::TailStrategy::GuardWithIf)
+    ;
+conv_y
+    .parallel(y)
+    .vectorize(x, 32, Halide::TailStrategy::GuardWithIf)
+    ;
+```
+
+Nice improvements over your naive implementation but then you decide to compete
+with OpenCV just to see that it still crushes your implementation by being 2x
+faster.
+
+### Schedule 2: found in one Halide publication.
+
+In fact, the optimal schedule is really not obvious in CPU as exposed in Halide
+presentations. Until you dig into Halide publications, you start to understand
+how much work and expertise it is to optimize a typical image processing filter
+in Photoshop and took 3 months of hard work to correctly invoke CPU vector
+instructions.
+
+After digging in the publications, I find this schedule in one of Halide's
+publications:
+
+```{cpp}
+auto xo = Halide::Var{"xo"};
+auto yo = Halide::Var{"yo"};
+
+auto xi = Halide::Var{"xi"};
+auto yi = Halide::Var{"yi"};
+
+conv_y.tile(x, y, xo, yo, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+    .fuse(xo, yo, tile_index)
+    .parallel(tile_index);
+    .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
+```
+
+This crushes OpenCV's implementation but I don't understand why.
+
+The first step to achieve this to divide the final convolved image into tiles of
+64 by 64 pixels. The set of tiles can be seen as an input batch of many smaller
+images. The output is another batch of image tiles with the same image sizes
+(let's just assume that the image width and height are multiple of 64.)
+
+
+### Schedule 3: A better one found by myself
+
+Because each output image tile is independent of each other, we can calculate
+smaller x-convolution and y-convolution. For each tile we can fit the
+x-convolution in the CPU cache and it improves data locality in the memory
+cache. Then we explot the CPU vector instructions to calculate convolution in
+batch.
+
+
+```{cpp}
+auto xo = Halide::Var{"xo"};
+auto yo = Halide::Var{"yo"};
+
+auto xi = Halide::Var{"xi"};
+auto yi = Halide::Var{"yi"};
+
+auto tile = Halide::Var{"tile"};
+
+// Precalculate the kernel.
+// We want this and this will avoid cluttering Halide's compiled statement later
+// on.
+kernel.compute_root();
+
+// The schedule
+conv_y  //
+    .tile(x, y, xo, yo, xi, yi, 64, 64)
+    .fuse(xo, yo, tile)
+    .parallel(tile)
+    .vectorize(xi, 32, Halide::TailStrategy::GuardWithIf)  //
+    ;
+conv_x
+    .compute_at(conv_y, xi)                               //
+    .vectorize(x, 32, Halide::TailStrategy::GuardWithIf)  //
+    ;
+```
+
+#### Second-Guessing what Halide does
+
+There is a lot to unpack here. Let's try to break it down bit by bit the
+schedule below:
+
+```{cpp}
+  conv_y.tile(x, y, xo, yo, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+      .fuse(xo, yo, tile_index)
+      .parallel(tile_index);
+      .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
+```
+
+According to how I understand it:
+```{cpp}
+#pragma omp parallel for  // .parallel(y)
+for (auto tile_index = 0; tile_index < T; ++T)
+{
+  // Process the tile (xo, yo).
+  const auto yo = tile_index / T;
+  const auto xo = tile_index % T;
+
+  for (auto yi = 0; yi < 64; ++yi)
+  {
+    for (auto xi = 0; xi < 64; ++yi)
+    {
+      const auto xi_begin = xo * 64 + xi;
+      const auto xi_end = (xo + 1) * 64 + xi;
+
+      // Recompose x and y.
+      const auto y = yo * 64 + yi;
+      const auto x = xo * 64 + xi;
+
+
+      // Inferring from:
+      // https://halide-lang.org/docs/class_halide_1_1_func.html#a800cbcc3ca5e3d3fa1707f6e1990ec83.
+      //
+      // Halide must allocate some storage on the stack
+      //
+      // I understand that the storage **has** to be 2D, if we want to calculate
+      // conv_y to ensure maximum data locality.
+      float conv_x[ksz][ksz];
+
+      // TODO: verify this.
+      //
+      // This is trivially vectorizable.
+      for (auto k = 0; k < ksz; ++k)
+        conv_x[yi][xi] = 0.f;
+
+      // Vectorizable in xi? I don't understand how.
+      for (auto k = 0; k < ksz; ++k)
+        conv_x[yi][xi] += in[y][x + k] * kernel[k];
+
+      // Vectorizable in xi? I don't understand how.
+      for (auto k = 0; k < ksz; ++ksz)
+        conv[y][x] = 0.f;
+
+      // Vectorizable in xi? I don't understand how.
+      for (auto k = 0; k < ksz; ++ksz)
+        conv_y[y][x] += conv_x[yi+k][xi] * kernel[k];
+    }
+  }
+}
+```
+
+I still don't understand how the convolutions are vectorized in the variable
+`xi`. This is the goal of the next paragraph.
+
+### Understanding with Halide Compiled Statement
+
+OK the second-guessing turns out to be not that bad but we really understand
+what Halide does for us.
+
+To get a more definite answer, let's pluck up the courage to actually inspect
+the assembly code generated by Halide.
+
+```{cpp}
+conv_y.compile_to_stmt(
+  "separable_conv_2d.stmt.html",
+  {},
+  Halide::HTML
+);
+```
+
+Halide generates a nicely illustrated HTML document. Still The generated code is
+overwhelming as there is a lot to unpack. How are we going to learn how to read
+a bit of assembly code.
+
+To digest the algorithmic flow, start by commenting out the different
+parallelisms in the schedule:
+
+1. the multicore parallelism
+   ```{cpp}
+   conv_y.
+     ...
+     // .fuse(xo, yo)
+     // .parallel(tile)`
+   ```
+2. the vectorization parallelism
+   ```{cpp}
+   conv_y.
+     ...
+     // vectorize(xi, 32, GuardWithIf);
+
+   conv_x.
+     ...
+     // vectorize(xi, 32, GuardWithIf);
+   ```
+
+This will help us to map out mentally the algorithmic roadmap and understand how
+the HTML visually maps out the **three-way** correspondence between:
+1. each part of the pseudo-code
+2. each diagram block and
+3. each of the assembly code.
+
+After a bit of inspection, by reinstating progressively all the different
+parallelisms, we start to understand how the parallel patterns are implemented
+on assembly code.
+
+### Vectorizing in the Convolution
+
+Eventually, this was not so hard and this gives a very tangible hands-on
+introduction to assembly code.
+
+Then it becomes clear that the convolution operation is implemented by batch
+where we calculate 4, 8 or 16 convolved values at the same time by repeating
+the vectorized fused multiply-add `fmla.4s` operation.
+
+The vectorization the x-convolution can be translated in terms of NumPy equivalent code
+
+```
+import numpy as np
+
+def convolve_vectorized(conv_x, in, kernel, tile, xi, yi):
+    # Trivially vectorizable initialization.
+    conv_x[tile, yi, xi:xi+ksz] = 0
+
+    # Repeat the fused multiply-add operation as follows.
+    ksz = kernel.shape[0]
+    for k in range(ksz):
+        conv_x[tile, yi, xi:xi+32] = conv_x[tile, yi, xi:xi+32] \
+                                   + in[tile, yi, xi:xi+32] * kernel[k]
+```
+
+
+References:
+
+- https://diveintosystems.org/book/C9-ARM64/common.html
+- https://developer.arm.com/documentation/

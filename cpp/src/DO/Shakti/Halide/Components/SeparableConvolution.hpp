@@ -30,9 +30,9 @@ namespace DO::Shakti::HalideBackend {
 
     template <typename Input, typename Kernel, typename Output>
     void generate(Input& input,                                             //
-                  Kernel& kernel_x,                                   //
+                  Kernel& kernel_x,                                         //
                   Halide::Expr kernel_x_size, Halide::Expr kernel_x_shift,  //
-                  Kernel& kernel_y,                                   //
+                  Kernel& kernel_y,                                         //
                   Halide::Expr kernel_y_size, Halide::Expr kernel_y_shift,  //
                   Output& output,                                           //
                   Halide::Expr w, Halide::Expr h)
@@ -140,11 +140,32 @@ namespace DO::Shakti::HalideBackend {
       // CPU schedule.
       else
       {
+// #define FIRST_VERSION
+#ifdef FIRST_VERSION
         conv_y.tile(x, y, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
             .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
             .parallel(y);
         conv_x.compute_at(conv_y, x).vectorize(
-            x, 16, Halide::TailStrategy::GuardWithIf);
+            x, 32, Halide::TailStrategy::GuardWithIf);
+#else
+        // This schedule is a lot better on these machines on a 4K video:
+        // - Apple Silicon M2 Max
+        // - CPU Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz (cat /proc/cpuinfo)
+        //
+        // 13-19 ms instead 25-27 ms
+        const auto tile = Halide::Var{"tile"};
+        conv_y
+            .tile(x, y, xo, yo, xi, yi, 64, 64,
+                  Halide::TailStrategy::GuardWithIf)
+            .fuse(xo, yo, tile)
+            .parallel(tile)
+            .vectorize(xi, 32,
+                       Halide::TailStrategy::GuardWithIf);  // 32 is the
+                                                            // good size.
+        conv_x                                              //
+            .compute_at(conv_y, tile)
+            .vectorize(x, 32, Halide::TailStrategy::GuardWithIf);
+#endif
       }
     }
 

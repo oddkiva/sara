@@ -43,6 +43,7 @@ rmd_files:
     "random.Rmd",
     "random/python_code_that_suck_less.Rmd",
     "random/bilinear_interpolation.Rmd",
+    # "random/vector_intrinsics.Rmd",
     "bibliography.Rmd"
   ]
   latex: [
