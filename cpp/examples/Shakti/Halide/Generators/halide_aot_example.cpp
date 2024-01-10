@@ -98,6 +98,9 @@ auto halide_pipeline(int argc, char** argv) -> int
       //
       // Parallelizing the implementation of the linear filtering with OpenMP,
       // we are then down to 25ms, not bad at all for a very minimal change!
+      //
+      // I have implemented a better schedule for CPU, it performs better than
+      // Halide GPU implementation (OMG!).
       apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, sigma,
                             truncation_factor);
       shakti_gray32f_to_rgb8u_cpu(buffer_gray32f_blurred, buffer_gray8);
