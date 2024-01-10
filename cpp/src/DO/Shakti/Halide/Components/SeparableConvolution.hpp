@@ -146,9 +146,13 @@ namespace DO::Shakti::HalideBackend {
             .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
             .parallel(y);
         conv_x.compute_at(conv_y, x).vectorize(
-            x, 16, Halide::TailStrategy::GuardWithIf);
+            x, 32, Halide::TailStrategy::GuardWithIf);
 #else
-        // This schedule is optimized on Apple Silicon M2
+        // This schedule is a lot better on these machines on a 4K video:
+        // - Apple Silicon M2 Max
+        // - CPU Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz (cat /proc/cpuinfo)
+        //
+        // 13-19 ms instead 25-27 ms
         const auto tile = Halide::Var{"tile"};
         conv_y
             .tile(x, y, xo, yo, xi, yi, 64, 64,
