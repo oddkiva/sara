@@ -73,12 +73,12 @@ the schedule patterns that work and those that don't.
 ## Naive C++ Implementation of the Gaussian Blur
 
 Right, let's rewind back in time and imagine myself more than 15 years ago.
-Freshly graduated with a Master's degree looking for an internship. I am a bit
-aware of CPU registers but I can't see how it would fit in the grand scheme of
-things. I've heard of vector instructions but never understood what they were
-about. As an avid Internet reader, I have been sold the big lie: don't
-prematurely optimize and just let the compiler do its job. And just make things
-work.
+Freshly graduated with a Master's degree looking to showcase some work
+portfolio. I am a bit aware of CPU registers but I can't see how it would fit in
+the grand scheme of things. I've heard of vector instructions but never
+understood what they were about. As an avid Internet reader, I have been sold
+the big lie: don't prematurely optimize and just let the compiler do its job.
+And just make things work.
 
 I did learn in class that the Gaussian filter is separable: Don't write the 2D
 convolution naively, exploit its separable property. I am proudly exhibiting a
@@ -189,13 +189,6 @@ Let us write the implementation first.
 auto x = Halide::Var{"x"};
 auto y = Halide::Var{"y"};
 
-auto xo = Halide::Var{"xo"};
-auto yo = Halide::Var{"yo"};
-
-auto xi = Halide::Var{"xi"};
-auto yi = Halide::Var{"yi"};
-auto tile = Halide::Var{"tile"};
-
 auto input = Halide::Func{"input"};
 auto kernel = Halide::Func{"kernel"};
 
@@ -252,6 +245,10 @@ parallelism on CPU platforms.
 The obvious strategy is to start from the idea of separable convolution and
 vectorize the convolution wherever possible.
 
+We parallelize the computation of image rows. We apply Halide's magic invocation
+to vectorize the convolution without really understanding why but thinks it
+works.
+
 ```
 kernel.compute_root();
 
@@ -266,18 +263,43 @@ conv_y
     ;
 ```
 
-Then you decide to compete with OpenCV and you
-realize that it crushes your implementation performance by being 2x faster.
+Nice improvements over your naive implementation but then you decide to compete
+with OpenCV just to see that it still crushes your implementation by being 2x
+faster.
+
+### Schedule 2: found in one Halide publication.
 
 In fact, the optimal schedule is really not obvious in CPU as exposed in Halide
 presentations. Until you dig into Halide publications, you start to understand
 how much work and expertise it is to optimize a typical image processing filter
-in Photoshop and took 3 months of hard work to call CPU vector intrinsics.
+in Photoshop and took 3 months of hard work to correctly invoke CPU vector
+instructions.
+
+After digging in the publications, I find this schedule in one of Halide's
+publications:
+
+```{cpp}
+auto xo = Halide::Var{"xo"};
+auto yo = Halide::Var{"yo"};
+
+auto xi = Halide::Var{"xi"};
+auto yi = Halide::Var{"yi"};
+
+conv_y.tile(x, y, xo, yo, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+    .fuse(xo, yo, tile_index)
+    .parallel(tile_index);
+    .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
+```
+
+This crushes OpenCV's implementation but I don't understand why.
 
 The first step to achieve this to divide the final convolved image into tiles of
 64 by 64 pixels. The set of tiles can be seen as an input batch of many smaller
 images. The output is another batch of image tiles with the same image sizes
 (let's just assume that the image width and height are multiple of 64.)
+
+
+### Schedule 3: A better one found by myself
 
 Because each output image tile is independent of each other, we can calculate
 smaller x-convolution and y-convolution. For each tile we can fit the
@@ -285,28 +307,39 @@ x-convolution in the CPU cache and it improves data locality in the memory
 cache. Then we explot the CPU vector instructions to calculate convolution in
 batch.
 
-### Schedule 2: Parallel tile processing, vectorize, CPU cache fitting
 
-```
-// The schedule
+```{cpp}
+auto xo = Halide::Var{"xo"};
+auto yo = Halide::Var{"yo"};
+
+auto xi = Halide::Var{"xi"};
+auto yi = Halide::Var{"yi"};
+
+auto tile = Halide::Var{"tile"};
+
+// Precalculate the kernel.
+// We want this and this will avoid cluttering Halide's compiled statement later
+// on.
 kernel.compute_root();
 
+// The schedule
 conv_y  //
     .tile(x, y, xo, yo, xi, yi, 64, 64)
     .fuse(xo, yo, tile)
     .parallel(tile)
-    .vectorize(xi, 4, Halide::TailStrategy::GuardWithIf)  //
+    .vectorize(xi, 32, Halide::TailStrategy::GuardWithIf)  //
     ;
 conv_x
     .compute_at(conv_y, xi)                               //
-    .vectorize(x, 4, Halide::TailStrategy::GuardWithIf)  //
+    .vectorize(x, 32, Halide::TailStrategy::GuardWithIf)  //
     ;
 ```
 
 #### Second-Guessing what Halide does
-There is a lot to unpack here. Let's break it down bit by bit.
 
-The line
+There is a lot to unpack here. Let's try to break it down bit by bit the
+schedule below:
+
 ```{cpp}
   conv_y.tile(x, y, xo, yo, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
       .fuse(xo, yo, tile_index)
@@ -314,9 +347,7 @@ The line
       .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
 ```
 
-translates in C++ as
-
-This is according to my second-guessing:
+According to how I understand it:
 ```{cpp}
 #pragma omp parallel for  // .parallel(y)
 for (auto tile_index = 0; tile_index < T; ++T)
@@ -325,7 +356,6 @@ for (auto tile_index = 0; tile_index < T; ++T)
   const auto yo = tile_index / T;
   const auto xo = tile_index % T;
 
-#pragma omp parallel for
   for (auto yi = 0; yi < 64; ++yi)
   {
     for (auto xi = 0; xi < 64; ++yi)
@@ -338,65 +368,118 @@ for (auto tile_index = 0; tile_index < T; ++T)
       const auto x = xo * 64 + xi;
 
 
-      // conv_y(x, y) = sum(conv_x(x, y + k) * kernel(k));
+      // Inferring from:
+      // https://halide-lang.org/docs/class_halide_1_1_func.html#a800cbcc3ca5e3d3fa1707f6e1990ec83.
       //
-      // means:
+      // Halide must allocate some storage on the stack
       //
-      // conv_y(x, y) = conv_x(x, y + 0) * kernel(0)
-      //              + conv_x(x, y + 1) * kernel(1)
-      //              + ...
-      //              + conv_x(x, y + ksz -1) * kernel(ksz -1)
-      //
-      // Then with:
-      // conv_x.compute_at(conv_y, x)
-      //
-      // Inferring
-      https://halide-lang.org/docs/class_halide_1_1_func.html#a800cbcc3ca5e3d3fa1707f6e1990ec83.
-      // The storage **has** to be 2D, if we unwrap conv_x
+      // I understand that the storage **has** to be 2D, if we want to calculate
+      // conv_y to ensure maximum data locality.
       float conv_x[ksz][ksz];
 
       // TODO: verify this.
       //
-      // Vectorizable.
+      // This is trivially vectorizable.
       for (auto k = 0; k < ksz; ++k)
         conv_x[yi][xi] = 0.f;
-      // Vectorizable in xi? Unclear.
+
+      // Vectorizable in xi? I don't understand how.
       for (auto k = 0; k < ksz; ++k)
         conv_x[yi][xi] += in[y][x + k] * kernel[k];
 
-      // Vectorize in xi
+      // Vectorizable in xi? I don't understand how.
       for (auto k = 0; k < ksz; ++ksz)
         conv[y][x] = 0.f;
 
-      // Vectorizable in xi? Unclear.
+      // Vectorizable in xi? I don't understand how.
       for (auto k = 0; k < ksz; ++ksz)
         conv_y[y][x] += conv_x[yi+k][xi] * kernel[k];
     }
   }
-
-  conv_y =
 }
 ```
 
-To have a more definite answer, the best thing is to actually generate the
-compiled code with
+I still don't understand how the convolutions are vectorized in the variable
+`xi`. This is the goal of the next paragraph.
 
-Second-guessing is not an option to get a serious understanding. So we need to
-spend some time to learn how to actually read assembly code.
+### Understanding with Halide Compiled Statement
 
-Halide developers has done a very good job to help us understand what assembly
-code is generated mapping the assembly code to the pseudo code.
+OK the second-guessing turns out to be not that bad but we really understand
+what Halide does for us.
+
+To get a more definite answer, let's pluck up the courage to actually inspect
+the assembly code generated by Halide.
 
 ```{cpp}
-# Generate code as follows
-conv_y.compile_to_stmt("separable_conv_2d.stmt.html", {}, Halide::HTML);
+conv_y.compile_to_stmt(
+  "separable_conv_2d.stmt.html",
+  {},
+  Halide::HTML
+);
 ```
+
+Halide generates a nicely illustrated HTML document. Still The generated code is
+overwhelming as there is a lot to unpack. How are we going to learn how to read
+a bit of assembly code.
+
+To digest the algorithmic flow, start by commenting out the different
+parallelisms in the schedule:
+
+1. the multicore parallelism
+   ```{cpp}
+   conv_y.
+     ...
+     // .fuse(xo, yo)
+     // .parallel(tile)`
+   ```
+2. the vectorization parallelism
+   ```{cpp}
+   conv_y.
+     ...
+     // vectorize(xi, 32, GuardWithIf);
+
+   conv_x.
+     ...
+     // vectorize(xi, 32, GuardWithIf);
+   ```
+
+This will help us to map out mentally the algorithmic roadmap and understand how
+the HTML visually maps out the **three-way** correspondence between:
+1. each part of the pseudo-code
+2. each diagram block and
+3. each of the assembly code.
+
+After a bit of inspection, by reinstating progressively all the different
+parallelisms, we start to understand how the parallel patterns are implemented
+on assembly code.
+
+### Vectorizing in the Convolution
+
+Eventually, this was not so hard and this gives a very tangible hands-on
+introduction to assembly code.
 
 Then it becomes clear that the convolution operation is implemented by batch
 where we calculate 4, 8 or 16 convolved values at the same time by repeating
 the vectorized fused multiply-add `fmla.4s` operation.
 
+The vectorization the x-convolution can be translated in terms of NumPy equivalent code
+
+```
+import numpy as np
+
+def convolve_vectorized(conv_x, in, kernel, tile, xi, yi):
+    # Trivially vectorizable initialization.
+    conv_x[tile, yi, xi:xi+ksz] = 0
+
+    # Repeat the fused multiply-add operation as follows.
+    ksz = kernel.shape[0]
+    for k in range(ksz):
+        conv_x[tile, yi, xi:xi+32] = conv_x[tile, yi, xi:xi+32] \
+                                   + in[tile, yi, xi:xi+32] * kernel[k]
+```
+
 
 References:
+
 - https://diveintosystems.org/book/C9-ARM64/common.html
 - https://developer.arm.com/documentation/
