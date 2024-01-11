@@ -453,6 +453,16 @@ After a bit of inspection, by reinstating progressively all the different
 parallelisms, we start to understand how the parallel patterns are implemented
 on assembly code.
 
+This is how it looks like.
+<iframe src="./random/separable_conv_2d.stmt.html" height="405" width="720"
+style="border: 1px solid #464646;" allowfullscreen>
+</iframe>
+
+It is not practical to view the embedded HTML page, so go to this <a
+href="./random/separable_conv_2d.stmt.html">link</a> below to fully explore the
+compiled statement as a full page:
+
+
 ### Vectorizing in the Convolution
 
 Eventually, this was not so hard and this gives a very tangible hands-on
