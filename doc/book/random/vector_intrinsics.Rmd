@@ -1,51 +1,51 @@
 # Super Fast Separable Convolutions
 
 Sounds boring? I promise you this is going to be way more interesting than you
-might think. There's quite a bit interesting things to learn.
+might think. While this is a common operation in low-level operation, there is
+quite a few interesting things to learn how to leverage the hardware to
+accelerate computing.
 
 Story time before we dive into the implementation of the Gaussian blur.
 
 ## Story Time
 
-Once I applied for a C++ technical leadership role for some company. I was
-considered for the role after a preliminary behavioral screening by the CTO. He
-then told me who I would be interviewing with in the next interviews. A few days
-later, he called me back for a quick chat. He ended up telling me they would not
-move forward after examining sara's image processing code. Without really
-explaining why, I guessed that probably one of their senior engineers
-disqualified me as he did care more about my ability in understanding and
-manipulating CPU vector instructions.
+Once, I applied for a C++ technical leadership role for some company. I did a
+behavioral interview with their CTO. He then told me who I would be interviewing
+with in the next interviews. A few days later, he called me back for a quick
+chat. He ended up telling me they would not move forward after examining sara's
+image processing code. Without really explaining why, the most likely reason I
+could guess was that one of their senior engineers disqualified me because all
+he cared about was whether I could understand and write code with CPU vector
+instructions.
 
 The CTO profusedly apologized to me. He said politely that I certainly was
-gifted but my C++ code was not to their standard. From what I guessed, they
-probably found that my image processing code was implemented too naively.
+gifted but my code was not up to their standard. Indeed they must have deemed that
+my image processing code was implemented too naively.
 
-This was based on the fact that the CTO told me they were doing lots of
+During the behavioral interview, the CTO told me they were doing lots of
 optimization involving CPU vector intrinsics in order to calculate data as fast
 as possible. That it really was not that difficult and that I could get up to
-speed fairly quickly.
+speed fairly quickly. That was the main reason I believe they disqualified me.
 
-I have mostly an applied math background, so it did sound unfair to me. It did
-made me feel that you are never enough whatever you achieve. Like you do need to
-know every single aspect of engineering from high level to low level. In
-hindsight I would not have been happy with the job anyways. Still frustrating...
-In that moment, I was telling myself: what can you do when you are already being
-shut the door? Going by the same logic, if David Lowe showcased his SIFT
-research code, he would not qualify for the job either: I learnt from studying
-his code.
+Having mostly an applied math background, it did sound unfair and hypocritical
+to me. Hypocritical because, if it really was easy, then why can you not learn
+on the job?
+So it did make me feel that you are never enough whatever you achieve in life.
+Oh, so you're supposed to master every single damn thing of software engineering
+from high level to low level when you start a job?
+Going by the same logic, if David Lowe showcased his SIFT research code, he
+would not qualify for the job either since I learnt from studying his code.
 
-Right, back to the topic: today how can we achieve that? Nowadays, we have some
-answers with Halide. And we can do it very elegantly without coding in assembly
-directly.
+End of the rant... In hindsight I would not have been happy with the job
+anyways. Back to the topic: today how can we achieve that? Nowadays, we have
+some answers with Halide. And we can do it very elegantly without coding in
+assembly code directly.
 
 ## What is Halide?
 
-With Halide you can write a an image processing filter and optimize the way it is run.
-
-You write sets of arithmetic instructions that operates on image buffers with
-specific parallelism patterns (multicore and vectorization). Then you can tell
-to compile with a C++ method to generate the optimize the image filter as a C++
-static library.
+With Halide you can write a an image processing filter and optimize for each
+specific hardware and architecture. All of this in a *very few lines of code*.
+Then Halide will compile the resulting code into usable assembly code.
 
 The main beauty with Halide is that you can decouple:
 
@@ -57,17 +57,39 @@ Halide can check and provide guarantees that your algorithm remains correct for
 the schedule you are implementing.
 
 With Halide, you won't write any nested `for` loops and multi-threaded
-processing with bound-checking. So you can express ideas at a higher level.
+processing with bound-checking. Instead you express these ideas at a higher
+level.
 
-Halide abstracts these parallelisms for you and supports a wide range of
-platforms. You don't have to be an expert in CPU vector intrinsics, but you do
-need to know the schedule strategies to say optimize the speed at which your
-convolutional operations run. Halide has identified the most common schedule
-patterns that are used to optimize image processing code.
+Halide abstracts the different kind of parallelisms for you and supports a wide
+range of platforms. You don't have to be an expert in CPU vector intrinsics, but
+you do need to know the schedule strategies to say optimize the speed at which
+your convolutional operations run.
 
-You still need to skim the publications and the presentations, practise. But in
-my experience, it is still difficult for the layman or the novice to identify
-the schedule patterns that work and those that don't.
+You still need to skim through the publications, the presentations and practise.
+But in my experience, it is still difficult for the layman or the novice to
+identify the schedule patterns that work and those that don't.
+
+### Halide vs Explicit CPU intrisic code
+
+Naysayers be like: "but Halide is too high level and does too much magic!"
+
+Optimizing algorithms by writing explicitly CPU intrinsic instructions can
+certainly be done. But you would have to pay a very costly engineering price.
+You have to optimize for different CPU platforms: x86-64, ARM, RISC-V and learn
+about their different intrinsic API. The resulting code is much harder to
+maintain than using a unified language that allows you to write these in a very
+lines of codes.
+
+Unless this is your full-time job and something you really want to learn, that's
+not something a computer vision scientist like me would like to spend time to...
+Halide has done an excellent job in abstracting this at the least on the CPU
+side. So know who you are and decide what you want to do.
+
+Let's conclude this paragraph with a few words regarding the GPU acceleration
+with Halide. On the GPU side, Halide is indeed not yet mature. For one thing,
+the documentation is still lacking regarding the memory model at this time of
+writing. You will be much better off writing code in CUDA, Vulkan, or OpenCL to
+fully control your GPU.
 
 
 ## Naive C++ Implementation of the Gaussian Blur
@@ -81,11 +103,11 @@ the big lie: don't prematurely optimize and just let the compiler do its job.
 And just make things work.
 
 I did learn in class that the Gaussian filter is separable: Don't write the 2D
-convolution naively, exploit its separable property. I am proudly exhibiting a
-naive implementation in C++ in my Sara repo, something along the lines:
+convolution naively, exploit its separable property. Icing on the cake, I have
+discovered multicore parallelism via OpenMP. I am proudly exhibiting a naive
+implementation in C++ in my Sara repo, something along the lines below.
 
-Icing on the cake, I have discovered multicore parallelism via OpenMP.
-
+Below is the first step, that is the x-convolution.
 ```{Rcpp}
 auto conv_x(const float *in, const float *kernel, float *out,
             const int w, const int h, const int ksz) -> void
@@ -121,7 +143,7 @@ auto conv_x(const float *in, const float *kernel, float *out,
 }
 ```
 
-We execute the same dance for the y-convolution:
+Then we perform the same dance for the y-convolution:
 
 ```{Rcpp}
 auto conv_y(const float *in, const float *kernel, float *out,
@@ -173,13 +195,13 @@ enough without elaborating why and what he was expecting to see.
 
 Fine! let's see how we could optimize the code...
 
-OK How? I vaguely understand you have to write the code with CPU intrinsics?
-Should I write in C-style or in ASM. How to do it with limited bandwidth after
-finishing your day job and wanting to learn?
+I vaguely understand we have to rewrite the code explicitly with CPU intrinsics?
+Should I write it in C-style or in ASM code? How to do it with limited bandwidth
+after finishing your day job and wanting to learn?
 
-Use Halide? Yes! It is a very elegant language. It can also compile your code
-directly in OpenCL and Vulkan, Direct3D bit code. Here is how we could rewrite
-the 2D separable convolution.
+Can we use Halide? Yes! It is a very elegant language. It can also compile your
+code directly in OpenCL and Vulkan, Direct3D bit code. Here is how we could
+rewrite the 2D separable convolution.
 
 Let us write the implementation first.
 
