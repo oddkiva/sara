@@ -108,8 +108,8 @@ Non-Maximum Suppression (NMS) algorithm.
 
 ### The algorithm described
 
-The NMS aims at filtering the best object boxes. The best object boxes must have
-the highest objectness score and each one of them can't overlap too much with
+The NMS aims at keeping the best object boxes. The best object boxes are those
+with the highest objectness score and each one of them overlap very little with
 each other.
 
 The objectness score is the probability that the object box contains an object
@@ -120,13 +120,13 @@ according to this definition.]
   objectness score.
 
 - Then we process greedily by
-  1. first keeping the first object box of the list, since it has the highest object
-     box.
+  1. first keeping the first object box of the list, since it has the highest
+     objectness score.
 
   2. Next we examine the second best object box and we keep if it does not
-     overlap with the first box or if it overlaps, it should overlap very
-     little. A good metric is the ratio of the **intersection** area between the
-     first box and second box *over the union* area, the so-called IoU score.
+     overlap with the first box or if it overlaps, it should do so very little.
+     A good metric is the ratio of the **intersection** area between the first
+     box and second box **over the union** area, the so-called IoU score.
 
      Let's imagine the second box does not overlap with the first one.
 
@@ -327,7 +327,7 @@ This is aesthetically better and more meaningful than
 ```{cpp}
 const auto& xijk = ...; // too crammed
 
-// The following is fine too as typing the underscore symbol can be a hassle.
+// The following is fine as typing the underscore symbol can be a hassle.
 // I am not a snake_case zealot either...
 const auto xi = x[i];
 ```
