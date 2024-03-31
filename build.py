@@ -28,7 +28,7 @@ UBUNTU_VERSION = "22.04"
 CUDA_VERSION = "12.1.0"
 TRT_VERSION = "8.6"
 SWIFT_VERSION = "5.9.1"
-HALIDE_VERSION = "16.0.0"
+HALIDE_VERSION = "17.0.0"
 
 # Docker
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
@@ -186,7 +186,7 @@ def generate_project(
         my_cmake_prefix_paths.append(HALIDE_ROOT_PATH)
     elif SYSTEM == "Darwin":
         cmake_options.append("-D SARA_USE_HALIDE:BOOL=ON")
-        llvm_dir = subprocess.check_output(["brew", "--prefix", "llvm@16"])
+        llvm_dir = subprocess.check_output(["brew", "--prefix", "llvm"])
         llvm_dir = llvm_dir.decode(sys.stdout.encoding).strip()
         llvm_cmake_dir = pathlib.Path(llvm_dir) / "lib" / "cmake" / "llvm"
         cmake_options.append(f"-D LLVM_DIR={llvm_cmake_dir}")
