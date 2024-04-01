@@ -19,8 +19,8 @@ he cared about was whether I could understand and write code with CPU vector
 instructions.
 
 The CTO profusedly apologized to me. He said politely that I certainly was
-gifted but my code was not up to their standard. Indeed they must have deemed that
-my image processing code was implemented too naively.
+gifted but my code was not up to their standard. They must have deemed that my
+image processing code was implemented too naively.
 
 During the behavioral interview, the CTO told me they were doing lots of
 optimization involving CPU vector intrinsics in order to calculate data as fast
@@ -36,54 +36,66 @@ from high level to low level when you start a job?
 Going by the same logic, if David Lowe showcased his SIFT research code, he
 would not qualify for the job either since I learnt from studying his code.
 
-End of the rant... In hindsight I would not have been happy with the job
-anyways. Back to the topic: today how can we achieve that? Nowadays, we have
-some answers with Halide. And we can do it very elegantly without coding in
-assembly code directly.
+In hindsight I would not have been happy with the job anyways. End of the rant
+and back to the topic: today how can we achieve that? Nowadays, we have some
+answers with Halide. And we can do it very elegantly without coding in assembly
+code directly.
 
 ## What is Halide?
 
-With Halide you can write a an image processing filter and optimize for each
-specific hardware and architecture. All of this in a *very few lines of code*.
-Then Halide will compile the resulting code into usable assembly code.
+In a technical jargon, Halide is an domain specific language embedded in C++.
+The specific domain we are dealing is image processing. It is a real language
+because it compile your optimized algorithm into assembly code.
 
-The main beauty with Halide is that you can decouple:
+With Halide, you can write an image processing filter and optimize for each
+specific hardware and architecture. All of this elegangtly in a *very few lines
+of code*. Then Halide will compile the C++ code into usable assembly code.
 
-1. The algorithm: the separable convolution and,
-2. the scheduling strategy: the parallelism strategy to make it as fast as the
-baseline if not faster than OpenCV's Gaussian blur.
+The main beauty with Halide is that you decouple:
+
+1. the algorithm: in our case, the separable convolution and,
+2. the scheduling strategy: which exploits the different kinds of
+   parallelism that the hardware offers,
+
+so that our implementation is as fast as the baseline implementation. In our
+case, the baseline implementation is OpenCV's Gaussian blur.
 
 Halide can check and provide guarantees that your algorithm remains correct for
 the schedule you are implementing.
 
-With Halide, you won't write any nested `for` loops and multi-threaded
-processing with bound-checking. Instead you express these ideas at a higher
-level.
+Halide is trying to unify the common programming patterns from CPU to GPU
+programming in CUDA, OpenCL, Metal, Vulkan. Similarly to CUDA, an image
+processing algorithm can often expressed as a succesion of CUDA kernels.
+Therfore you don't need to write any nested loops.
 
 Halide abstracts the different kind of parallelisms for you and supports a wide
 range of platforms. You don't have to be an expert in CPU vector intrinsics, but
-you do need to know the schedule strategies to say optimize the speed at which
-your convolutional operations run.
-
-You still need to skim through the publications, the presentations and practise.
-But in my experience, it is still difficult for the layman or the novice to
-identify the schedule patterns that work and those that don't.
+you do need to know some scheduling strategies to best optimize the
+convolutional operation.
+When I began learning Halide, I knew very little about optimal schedules.
+Skimming through publications and the presentations by Halide authors was the
+only way for me to really learn. And of course practise, practise, practise. So
+all in all, in my experience, the entry barrier is still very high for the
+average programmer to identify which schedule patterns work best and those that
+don't.
 
 ### Halide vs Explicit CPU intrisic code
 
 Naysayers be like: "but Halide is too high level and does too much magic!"
 
-Optimizing algorithms by writing explicitly CPU intrinsic instructions can
-certainly be done. But you would have to pay a very costly engineering price.
-You have to optimize for different CPU platforms: x86-64, ARM, RISC-V and learn
-about their different intrinsic API. The resulting code is much harder to
-maintain than using a unified language that allows you to write these in a very
-lines of codes.
+Certainly! Optimizing algorithms by writing explicitly CPU intrinsic
+instructions can be done. But you would have to pay a very costly engineering
+price.
 
-Unless this is your full-time job and something you really want to learn, that's
-not something a computer vision scientist like me would like to spend time to...
-Halide has done an excellent job in abstracting this at the least on the CPU
-side. So know who you are and decide what you want to do.
+You would have to optimize for different CPU platforms: x86-64, ARM, RISC-V and
+learn about their C API to utilize SIMD instructions. The resulting code would
+be much harder to maintain than using a unified language that allows you to
+write these in a very few lines of codes.
+
+Unless this is your full-time job or it's something you really want to learn,
+personally I don't want to spend time into this. Halide has done an excellent
+job in abstracting this at the least on the CPU side. So know who you are and
+decide what you want to do.
 
 Let's conclude this paragraph with a few words regarding the GPU acceleration
 with Halide. On the GPU side, Halide is indeed not yet mature. For one thing,
@@ -92,7 +104,7 @@ writing. You will be much better off writing code in CUDA, Vulkan, or OpenCL to
 fully control your GPU.
 
 
-## Naive C++ Implementation of the Gaussian Blur
+## A Naive Implementation of the Gaussian Blur in C++
 
 Right, let's rewind back in time and imagine myself more than 15 years ago.
 Freshly graduated with a Master's degree looking to showcase some work
@@ -187,23 +199,40 @@ I am proudly showcasing my code on GitHub. Never complained about it as I
 bothered about real-time issues as later I learnt about in CUDA and would write
 in CUDA anyways.
 
+### Issues in the C++ code
 
-## Halide Implementation of the Algorithm
+Let's enumerate some issues and ideas that we will address later on.
 
-Back to the time where the CTO and his minions tell you that you are not good
-enough without elaborating why and what he was expecting to see.
+1. The only parallelism we are using is the **multi-threading**.
+2. It is not clear how the **CPU vector intrinsics** can be applied in the convolution.
+   - For one thing, the boundary checking does not easily allow the compiler to
+   vectorize the C++ code.
+   - There is actually a better way to exploit the CPU vector instructions for
+     the convolutional operation and the C++ code does not do this way.
+3. **Data locality** is very important aspect, which we are not exploiting.
 
-Fine! let's see how we could optimize the code...
+It certainly wasn't the fault of my younger self who did not know any better.
+Let us now address these issues and ideas in Halide.
 
-I vaguely understand we have to rewrite the code explicitly with CPU intrinsics?
-Should I write it in C-style or in ASM code? How to do it with limited bandwidth
-after finishing your day job and wanting to learn?
 
-Can we use Halide? Yes! It is a very elegant language. It can also compile your
-code directly in OpenCL and Vulkan, Direct3D bit code. Here is how we could
-rewrite the 2D separable convolution.
+## A Very Fast Implementation in Halide
 
-Let us write the implementation first.
+As we said it earlier, Halide splits an algorithm into two parts:
+
+1. the implementation and
+2. the schedule for any algorithm.
+
+We will now detail each part. This section will divided in 3 parts.
+
+1. First we implement the separable convolution in Halide.
+2. Then we explain the different kinds of parallelisms that the CPU offers.
+3. Finally we explain the schedule part of the algorithm in Halide and we will
+   explore a few different schedules.
+
+### The Algorithm
+
+First, let us write the implementation that exploits the separability of the
+Gaussian filter.
 
 ```{cpp}
 #include <Halide.h>
@@ -219,7 +248,11 @@ static constexpr auto truncation_factor = 4.f;
 static constexpr auto ksz = static_cast<int>(2 * sigma * truncation_factor);
 static constexpr auto kr = ksz / 2;
 
+// N.B.: we just need to define something for the input... but just think of it
+// as an image.
 input(x, y) = x + y;
+
+// The 1D Gaussian filter.
 kernel(x) = Halide::exp(-x * x / (0.5f * sigma * sigma));
 
 auto conv_x = Halide::Func{"conv_x"};
@@ -232,73 +265,92 @@ conv_x(x, y) = Halide::sum(input(x + k - kr, y) * kernel(k));
 conv_y(x, y) = Halide::sum(conv_x(x, y + k - kr / 2) * kernel(k));
 ```
 
-## Shedule Optimization
-
 ### Two Types of Parallelisms on CPUs
 
-There are two types of parallelisms on the CPU.
+There are two types of parallelisms on the CPU which we can exploit altogether.
 
 1. Multicore processing:
-   This is straightforward to understand and is about keep all the CPU cores as
-   busy as possible with minimal data sharing. OpenMP is simple and helps to
-   parallelize image filter quite easily once we identify the parts of the
-   algorithm that operate independently.
+
+   This is straightforward to understand. A CPU can be thought as a factory of
+   workers, each one of them being called a CPU core. The multicore processing
+   consists in keeping each CPU core as busy as possible with minimal data
+   sharing.
+
+   OpenMP is one implementation of multicore processing among others to
+   parallelise our image filter.
 
 2. Vector instructions:
-   Until I implemented filters with Halide, I could not understand what CPU
-   instrutions were really about.
-   I am not going to pretend to be an expert in CPU optimization but this little
-   paragraph should convince you why it is so interesting to apply vector
-   instructions wherever possible.
-   So, as a first approximation, a CPU vector instruction typically enables the
-   programmer to perform arithmetic operations on small vectors in a single CPU
-   cycle. Typically arithmetic operations such addition, multiplication and more
-   can operate on 4D vectors. That is where we can observe additional 4x speed
-   up or more if your CPU can process those operations on bigger vectors.
 
-For more accurate and more comprehensive information, I will simply encourage
-you to do your own research and share what you have learnt.
+   Until I implemented filters with Halide, I really did not understand what CPU
+   vector instrutions were really about.
 
-Like image filter, BLAS routines makes extensive use of the two types
-parallelism on CPU platforms.
+   Mainly, a CPU vector instruction enables a CPU core to perform arithmetic
+   operations on small vectors in a **single** CPU cycle.
+   That means that additions, subtractions, dot products on 4D float vectors can
+   be executed in a single CPU cycle instead of 4 CPU cycles (7 CPU cycles for
+   the dot product).
 
-### Schedule 1
+   That is very significant on a very large scale as we can observe additional
+   4x speed up or more on very very large arrays and therefore image data.
+
+Nowadays, an Intel CPU that supports AVX-512 vector instructions can perform
+operations on 16D vectors of 32-bit floating point data in a single CPU
+instruction.
+
+So when we combine parallelism 1 and 2 on an 12-core Intel CPU with AVX-512
+instructions, an optimized algorithm could theoretically be sped up by a factor
+of $12 \times 16 = 192$ on 32-bit floating point array. This is huge.
+
+Now, for more accurate and more comprehensive information, I will simply
+encourage you to do your own research on ARM, RISC-V CPUs, and share what you
+have learnt.
+
+Likewise, optimized linear algebra routines like OpenBLAS makes extensive use of
+the two types parallelism on CPU platforms.
+
+We are now moving to the schedule, which is the most difficult part of the
+implementation. We will explore 3 schedules with Halide.
+
+### Schedule 1: Naive Strategy
 
 The obvious strategy is to start from the idea of separable convolution and
 vectorize the convolution wherever possible.
 
 We parallelize the computation of image rows. We apply Halide's magic invocation
-to vectorize the convolution without really understanding why but thinks it
-works.
+to vectorize the convolution without trying to really understand why it works.
 
-```
+```{cpp}
+// Precompute the kernel all at once.
+//
+// This is irrelevant in the schedule but necessary when you want to understand
+// the assembly code generated by Halide.
 kernel.compute_root();
 
+// First, compute the x-convolution in a separate memory buffer and use CPU
+// vector instructions.
 conv_x
     .compute_root()
     .parallel(y)
     .vectorize(x, 32, Halide::TailStrategy::GuardWithIf)
     ;
+
+// Second, compute the y-convolution as a second step.
 conv_y
     .parallel(y)
-    .vectorize(x, 32, Halide::TailStrategy::GuardWithIf)
-    ;
+    .vectorize(x, 32, Halide::TailStrategy::GuardWithIf) ;
 ```
 
-Nice improvements over your naive implementation but then you decide to compete
-with OpenCV just to see that it still crushes your implementation by being 2x
-faster.
+Thanks to the CPU vectorization, this schedule is a nice improvement over the
+naive C++ implementation as we exploit the CPU data vectorization. Yet OpenCV's
+implementation is still better than this schedule by a factor 2.
 
-### Schedule 2: found in one Halide publication.
+We will worry about how the CPU vectorization is implemented later by examining
+a better schedule. Let's move on to a better schedule: schedule #2.
 
-In fact, the optimal schedule is really not obvious in CPU as exposed in Halide
-presentations. Until you dig into Halide publications, you start to understand
-how much work and expertise it is to optimize a typical image processing filter
-in Photoshop and took 3 months of hard work to correctly invoke CPU vector
-instructions.
+### Schedule 2: From a Publication
 
-After digging in the publications, I find this schedule in one of Halide's
-publications:
+In fact, the optimal schedule is really not obvious in CPU. After digging in the
+publications, I find this schedule in one of Halide publications:
 
 ```{cpp}
 auto xo = Halide::Var{"xo"};
@@ -313,21 +365,29 @@ conv_y.tile(x, y, xo, yo, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
     .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
 ```
 
-This crushes OpenCV's implementation but I don't understand why.
+This literally crushes OpenCV's implementation but I didn't understand why at
+that time. However the main idea in this schedule is to better exploit data
+locality but splitting the image into smaller images.
 
-The first step to achieve this to divide the final convolved image into tiles of
-64 by 64 pixels. The set of tiles can be seen as an input batch of many smaller
-images. The output is another batch of image tiles with the same image sizes
-(let's just assume that the image width and height are multiple of 64.)
+As argued in a presentation by Halide authors, without Halide, the optimal
+schedule is definitely not obvious and would have necessitated at least 3 months
+of work in order how to exploit CPU SIMD instructions and the data locality in
+the memory cache.
 
+Specifically this schedule the final convolved image into square tiles of 64 by
+64 pixels. The set of input tiles can be seen as an input batch of many smaller
+images and processed in parallel. The output image is obtained by reassembling
+the batch of output image tiles.
 
-### Schedule 3: A better one found by myself
+We will detail later how the vectorization of the convolution is done.
+
+### Schedule 3: An Improved Version by Myself
 
 Because each output image tile is independent of each other, we can calculate
-smaller x-convolution and y-convolution. For each tile we can fit the
-x-convolution in the CPU cache and it improves data locality in the memory
-cache. Then we explot the CPU vector instructions to calculate convolution in
-batch.
+smaller x-convolution and y-convolution that can fit in the memory cache. For
+each tile we can fit the x-convolution in the CPU cache and it improves data
+locality in the memory cache. Then we explot the CPU vector instructions to
+calculate convolution in batch.
 
 
 ```{cpp}
@@ -340,8 +400,7 @@ auto yi = Halide::Var{"yi"};
 auto tile = Halide::Var{"tile"};
 
 // Precalculate the kernel.
-// We want this and this will avoid cluttering Halide's compiled statement later
-// on.
+// We want this to avoid cluttering Halide's compiled statement later on.
 kernel.compute_root();
 
 // The schedule
@@ -357,7 +416,7 @@ conv_x
     ;
 ```
 
-#### Second-Guessing what Halide does
+### Second-Guessing what Halide does
 
 There is a lot to unpack here. Let's try to break it down bit by bit the
 schedule below:
@@ -371,12 +430,11 @@ schedule below:
 
 According to how I understand it:
 ```{cpp}
-#pragma omp parallel for  // .parallel(y)
+#pragma omp parallel for
 for (auto tile_index = 0; tile_index < T; ++T)
 {
-  // Process the tile (xo, yo).
-  const auto yo = tile_index / T;
-  const auto xo = tile_index % T;
+  // Process the tile (xo, yo). const auto yo = tile_index / T; const auto xo =
+  tile_index % T;
 
   for (auto yi = 0; yi < 64; ++yi)
   {
@@ -390,30 +448,26 @@ for (auto tile_index = 0; tile_index < T; ++T)
       const auto x = xo * 64 + xi;
 
 
-      // Inferring from:
+      // compute_at(...) allocates memory on the stack as explained in:
       // https://halide-lang.org/docs/class_halide_1_1_func.html#a800cbcc3ca5e3d3fa1707f6e1990ec83.
-      //
-      // Halide must allocate some storage on the stack
       //
       // I understand that the storage **has** to be 2D, if we want to calculate
       // conv_y to ensure maximum data locality.
       float conv_x[ksz][ksz];
 
-      // TODO: verify this.
-      //
-      // This is trivially vectorizable.
+      // Trivially vectorizable.
       for (auto k = 0; k < ksz; ++k)
         conv_x[yi][xi] = 0.f;
 
-      // Vectorizable in xi? I don't understand how.
+      // Vectorizable in xi? How?
       for (auto k = 0; k < ksz; ++k)
         conv_x[yi][xi] += in[y][x + k] * kernel[k];
 
-      // Vectorizable in xi? I don't understand how.
+      // Vectorizable in xi? How?
       for (auto k = 0; k < ksz; ++ksz)
         conv[y][x] = 0.f;
 
-      // Vectorizable in xi? I don't understand how.
+      // Vectorizable in xi? How?
       for (auto k = 0; k < ksz; ++ksz)
         conv_y[y][x] += conv_x[yi+k][xi] * kernel[k];
     }
@@ -421,16 +475,16 @@ for (auto tile_index = 0; tile_index < T; ++T)
 }
 ```
 
-I still don't understand how the convolutions are vectorized in the variable
+It is not yet clear to me how the convolutions are vectorized in the variable
 `xi`. This is the goal of the next paragraph.
 
 ### Understanding with Halide Compiled Statement
 
-OK the second-guessing turns out to be not that bad but we really understand
-what Halide does for us.
+The second-guessing turns out to be not that bad but we really need to
+understand what Halide does for us. How is the CPU vectorization done?
 
-To get a more definite answer, let's pluck up the courage to actually inspect
-the assembly code generated by Halide.
+To get a more definite answer, let's actually inspect the assembly code
+generated by Halide.
 
 ```{cpp}
 conv_y.compile_to_stmt(
@@ -481,7 +535,7 @@ style="border: 1px solid #464646;" allowfullscreen>
 </iframe>
 
 It is not practical to view the embedded HTML page, so go to this <a
-href="./random/separable_conv_2d.stmt.html">link</a> below to fully explore the
+href="./random/separable_conv_2d.stmt.html">link</a> to fully explore the
 compiled statement as a full page:
 
 
