@@ -12,40 +12,41 @@ Story time before we dive into the implementation of the Gaussian blur.
 Once, I applied for a C++ technical leadership role for some company. I did a
 behavioral interview with their CTO. He then told me who I would be interviewing
 with in the next interviews. A few days later, he called me back for a quick
-chat. He ended up telling me they would not move forward after examining sara's
-image processing code. Without really explaining why, the most likely reason I
-could guess was that one of their senior engineers disqualified me because all
-he cared about was whether I could understand and write code with CPU vector
-instructions.
+chat. He ended up telling me they would not move forward after examining
+*Sara*'s image processing code. Without really explaining why, the most likely
+reason I could come up with was that one of their senior engineers disqualified
+me because all he cared about was whether I could understand and write code with
+CPU vector instructions.
 
 The CTO profusedly apologized to me. He said politely that I certainly was
 gifted but my code was not up to their standard. They must have deemed that my
 image processing code was implemented too naively.
 
-During the behavioral interview, the CTO told me they were doing lots of
-optimization involving CPU vector intrinsics in order to calculate data as fast
-as possible. That it really was not that difficult and that I could get up to
-speed fairly quickly. That was the main reason I believe they disqualified me.
+Indeed I remembered that during the behavioral interview, the CTO told me they
+were doing lots of optimization involving CPU vector instructions in order to
+process data as fast as possible. That it really was not that difficult and that
+I could get up to speed fairly quickly, and blah blah blah... That was the only
+reason for which, I believe, they disqualified me.
 
 Having mostly an applied math background, it did sound unfair and hypocritical
 to me. Hypocritical because, if it really was easy, then why can you not learn
-on the job?
-So it did make me feel that you are never enough whatever you achieve in life.
+it on the job?
+So, yes, it did make me feel that you are never enough whatever you achieve in
+life.
 Oh, so you're supposed to master every single damn thing of software engineering
-from high level to low level when you start a job?
+when you start a job?
 Going by the same logic, if David Lowe showcased his SIFT research code, he
 would not qualify for the job either since I learnt from studying his code.
 
 In hindsight I would not have been happy with the job anyways. End of the rant
 and back to the topic: today how can we achieve that? Nowadays, we have some
-answers with Halide. And we can do it very elegantly without coding in assembly
-code directly.
+answers with Halide, which allows us to do it very elegantly.
 
 ## What is Halide?
 
 In a technical jargon, Halide is an domain specific language embedded in C++.
-The specific domain we are dealing is image processing. It is a real language
-because it compile your optimized algorithm into assembly code.
+The specific domain we are dealing is image processing. It is a language because
+it compiles your optimized algorithm into assembly code.
 
 With Halide, you can write an image processing filter and optimize for each
 specific hardware and architecture. All of this elegangtly in a *very few lines
@@ -60,18 +61,16 @@ The main beauty with Halide is that you decouple:
 so that our implementation is as fast as the baseline implementation. In our
 case, the baseline implementation is OpenCV's Gaussian blur.
 
-Halide can check and provide guarantees that your algorithm remains correct for
-the schedule you are implementing.
+Halide is trying to unify common programming patterns that arise from CPU to GPU
+programming in CUDA, OpenCL, Metal, Vulkan. In Halide, an image processing
+algorithm can often expressed as a succesion of CUDA kernels. Therefore you
+don't need to write any nested loops.
 
-Halide is trying to unify the common programming patterns from CPU to GPU
-programming in CUDA, OpenCL, Metal, Vulkan. Similarly to CUDA, an image
-processing algorithm can often expressed as a succesion of CUDA kernels.
-Therfore you don't need to write any nested loops.
+Halide abstracts different kinds of parallelism and supports a wide range of
+platforms. While we don't have to know about the C API to call the vector
+instructions, we still need to know the common programming patterns that
+involves CPU vector instructions.
 
-Halide abstracts the different kind of parallelisms for you and supports a wide
-range of platforms. You don't have to be an expert in CPU vector intrinsics, but
-you do need to know some scheduling strategies to best optimize the
-convolutional operation.
 When I began learning Halide, I knew very little about optimal schedules.
 Skimming through publications and the presentations by Halide authors was the
 only way for me to really learn. And of course practise, practise, practise. So
@@ -81,11 +80,10 @@ don't.
 
 ### Halide vs Explicit CPU intrisic code
 
-Naysayers be like: "but Halide is too high level and does too much magic!"
+Naysayers will argue: "But Halide is too high level and does too much magic!"
 
-Certainly! Optimizing algorithms by writing explicitly CPU intrinsic
-instructions can be done. But you would have to pay a very costly engineering
-price.
+Certainly, optimizing algorithms by writing explicitly CPU vector instructions
+can be done. But we would have to pay a very costly engineering price.
 
 You would have to optimize for different CPU platforms: x86-64, ARM, RISC-V and
 learn about their C API to utilize SIMD instructions. The resulting code would
@@ -117,7 +115,7 @@ And just make things work.
 I did learn in class that the Gaussian filter is separable: Don't write the 2D
 convolution naively, exploit its separable property. Icing on the cake, I have
 discovered multicore parallelism via OpenMP. I am proudly exhibiting a naive
-implementation in C++ in my Sara repo, something along the lines below.
+implementation in C++ in my *Sara* repo, something along the lines below.
 
 Below is the first step, that is the x-convolution.
 ```{Rcpp}
@@ -272,9 +270,11 @@ There are two types of parallelisms on the CPU which we can exploit altogether.
 1. Multicore processing:
 
    This is straightforward to understand. A CPU can be thought as a factory of
-   workers, each one of them being called a CPU core. The multicore processing
-   consists in keeping each CPU core as busy as possible with minimal data
-   sharing.
+   workers, each one of them being called a CPU core.
+
+   The multicore processing becomes most effective when each CPU core is being
+   kept as busy as possible and the CPU cores don't need to communicate with
+   each other via data synchronization.
 
    OpenMP is one implementation of multicore processing among others to
    parallelise our image filter.
@@ -298,15 +298,24 @@ operations on 16D vectors of 32-bit floating point data in a single CPU
 instruction.
 
 So when we combine parallelism 1 and 2 on an 12-core Intel CPU with AVX-512
-instructions, an optimized algorithm could theoretically be sped up by a factor
-of $12 \times 16 = 192$ on 32-bit floating point array. This is huge.
+instructions, an optimized algorithm could in principle be sped up by a factor
+of
 
-Now, for more accurate and more comprehensive information, I will simply
-encourage you to do your own research on ARM, RISC-V CPUs, and share what you
-have learnt.
+\begin{equation}
+  \#\{\text{CPUs}\} \times \text{SIMD max dim} = 12 \times 16 = 192
+\end{equation}
+
+on single-precision floating point data.
+
+While we should instead use Amdahl's law instead of this naive formula, applying
+this formula is not so simple and we will be content to just benchmark and
+measure the performance gain.
 
 Likewise, optimized linear algebra routines like OpenBLAS makes extensive use of
 the two types parallelism on CPU platforms.
+
+For more accurate and more comprehensive information, I will simply encourage
+you to do your own research on ARM, RISC-V CPUs, and share what you have learnt.
 
 We are now moving to the schedule, which is the most difficult part of the
 implementation. We will explore 3 schedules with Halide.
@@ -340,17 +349,18 @@ conv_y
     .vectorize(x, 32, Halide::TailStrategy::GuardWithIf) ;
 ```
 
-Thanks to the CPU vectorization, this schedule is a nice improvement over the
-naive C++ implementation as we exploit the CPU data vectorization. Yet OpenCV's
-implementation is still better than this schedule by a factor 2.
+This schedule is a nice improvement over the naive C++ implementation as we
+exploit the CPU data vectorization. Yet OpenCV's implementation is still better
+than this schedule by a factor 2.
 
-We will worry about how the CPU vectorization is implemented later by examining
-a better schedule. Let's move on to a better schedule: schedule #2.
+Later we will examine how the CPU vectorization is implemented by inspecting a
+better schedule. So let's move on to a better schedule: schedule #2.
 
 ### Schedule 2: From a Publication
 
-In fact, the optimal schedule is really not obvious in CPU. After digging in the
-publications, I find this schedule in one of Halide publications:
+The optimal schedule is really not obvious in CPU, at least for me. After
+digging in the publications, I found this schedule in one of Halide
+publications:
 
 ```{cpp}
 auto xo = Halide::Var{"xo"};
@@ -359,7 +369,8 @@ auto yo = Halide::Var{"yo"};
 auto xi = Halide::Var{"xi"};
 auto yi = Halide::Var{"yi"};
 
-conv_y.tile(x, y, xo, yo, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+conv_y.tile(x, y, xo, yo, xi, yi, 64, 64,
+            Halide::TailStrategy::GuardWithIf)
     .fuse(xo, yo, tile_index)
     .parallel(tile_index);
     .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
@@ -554,7 +565,7 @@ in NumPy code as
 import numpy as np
 
 def convolve_vectorized(conv_x, input, kernel, tile, xi, yi):
-    # Trivially vectorized initialization.
+    # Trivially vectorized.
     conv_x[tile, yi, xi:xi+ksz] = 0
 
     # Repeat the fused multiply-add operation as follows.
