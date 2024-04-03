@@ -27,8 +27,8 @@ BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 UBUNTU_VERSION = "22.04"
 CUDA_VERSION = "12.1.0"
 TRT_VERSION = "8.6"
-SWIFT_VERSION = "5.9.1"
-HALIDE_VERSION = "17.0.0"
+SWIFT_VERSION = "5.10"
+HALIDE_VERSION = "17.0.1"
 
 # Docker
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()

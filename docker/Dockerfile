@@ -75,14 +75,14 @@ RUN pip3 install \
       pybind11
 
 # Install Swift toolchain.
-RUN wget https://download.swift.org/swift-5.9.1-release/ubuntu2204/swift-5.9.1-RELEASE/swift-5.9.1-RELEASE-ubuntu22.04.tar.gz
-RUN tar xvzf swift-5.9.1-RELEASE-ubuntu22.04.tar.gz  \
-      && mv swift-5.9.1-RELEASE-ubuntu22.04 /opt
+RUN wget https://download.swift.org/swift-5.10-release/ubuntu2204/swift-5.10-RELEASE/swift-5.10-RELEASE-ubuntu22.04.tar.gz
+RUN tar xvzf swift-5.10-RELEASE-ubuntu22.04.tar.gz  \
+      && mv swift-5.10-RELEASE-ubuntu22.04 /opt
 
 # Install Halide.
-RUN wget https://github.com/halide/Halide/releases/download/v16.0.0/Halide-16.0.0-x86-64-linux-1e963ff817ef0968cc25d811a25a7350c8953ee6.tar.gz
-RUN tar xvzf Halide-16.0.0-x86-64-linux-1e963ff817ef0968cc25d811a25a7350c8953ee6.tar.gz && \
-      mv Halide-16.0.0-x86-64-linux /opt
+RUN wget https://github.com/halide/Halide/releases/download/v17.0.1/Halide-17.0.1-x86-64-linux-52541176253e74467dabc42eeee63d9a62c199f6.tar.gz
+RUN tar xvzf Halide-17.0.1-x86-64-linux-52541176253e74467dabc42eeee63d9a62c199f6.tar.gz && \
+      mv Halide-17.0.1-x86-64-linux /opt
 
 # Please make my life easier
 # TODO: install neovim, etc.
