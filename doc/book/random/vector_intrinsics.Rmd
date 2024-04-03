@@ -424,15 +424,15 @@ auto tile = Halide::Var{"tile"};
 kernel.compute_root();
 
 // The schedule
-conv_y  //
+conv_y
     .tile(x, y, xo, yo, xi, yi, 64, 64)
     .fuse(xo, yo, tile)
     .parallel(tile)
-    .vectorize(xi, 32, Halide::TailStrategy::GuardWithIf)  //
+    .vectorize(xi, 32, Halide::TailStrategy::GuardWithIf)
     ;
 conv_x
-    .compute_at(conv_y, xi)                               //
-    .vectorize(x, 32, Halide::TailStrategy::GuardWithIf)  //
+    .compute_at(conv_y, xi)
+    .vectorize(x, 32, Halide::TailStrategy::GuardWithIf)
     ;
 ```
 
