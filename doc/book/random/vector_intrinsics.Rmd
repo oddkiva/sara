@@ -12,40 +12,41 @@ Story time before we dive into the implementation of the Gaussian blur.
 Once, I applied for a C++ technical leadership role for some company. I did a
 behavioral interview with their CTO. He then told me who I would be interviewing
 with in the next interviews. A few days later, he called me back for a quick
-chat. He ended up telling me they would not move forward after examining sara's
-image processing code. Without really explaining why, the most likely reason I
-could guess was that one of their senior engineers disqualified me because all
-he cared about was whether I could understand and write code with CPU vector
-instructions.
+chat. He ended up telling me they would not move forward after examining
+*Sara*'s image processing code. Without really explaining why, the most likely
+reason I could come up with was that one of their senior engineers disqualified
+me because all he cared about was whether I could understand and write code with
+CPU vector instructions.
 
 The CTO profusedly apologized to me. He said politely that I certainly was
 gifted but my code was not up to their standard. They must have deemed that my
 image processing code was implemented too naively.
 
-During the behavioral interview, the CTO told me they were doing lots of
-optimization involving CPU vector intrinsics in order to calculate data as fast
-as possible. That it really was not that difficult and that I could get up to
-speed fairly quickly. That was the main reason I believe they disqualified me.
+Indeed I remembered that during the behavioral interview, the CTO told me they
+were doing lots of optimization involving CPU vector instructions in order to
+process data as fast as possible. That it really was not that difficult and that
+I could get up to speed fairly quickly, and blah blah blah... That was the only
+reason for which, I believe, they disqualified me.
 
 Having mostly an applied math background, it did sound unfair and hypocritical
 to me. Hypocritical because, if it really was easy, then why can you not learn
-on the job?
-So it did make me feel that you are never enough whatever you achieve in life.
+it on the job?
+So, yes, it did make me feel that you are never enough whatever you achieve in
+life.
 Oh, so you're supposed to master every single damn thing of software engineering
-from high level to low level when you start a job?
+when you start a job?
 Going by the same logic, if David Lowe showcased his SIFT research code, he
 would not qualify for the job either since I learnt from studying his code.
 
 In hindsight I would not have been happy with the job anyways. End of the rant
 and back to the topic: today how can we achieve that? Nowadays, we have some
-answers with Halide. And we can do it very elegantly without coding in assembly
-code directly.
+answers with Halide, which allows us to do it very elegantly.
 
 ## What is Halide?
 
 In a technical jargon, Halide is an domain specific language embedded in C++.
-The specific domain we are dealing is image processing. It is a real language
-because it compile your optimized algorithm into assembly code.
+The specific domain we are dealing is image processing. It is a language because
+it compiles your optimized algorithm into assembly code.
 
 With Halide, you can write an image processing filter and optimize for each
 specific hardware and architecture. All of this elegangtly in a *very few lines
@@ -53,44 +54,40 @@ of code*. Then Halide will compile the C++ code into usable assembly code.
 
 The main beauty with Halide is that you decouple:
 
-1. the algorithm: in our case, the separable convolution and,
-2. the scheduling strategy: which exploits the different kinds of
-   parallelism that the hardware offers,
+1. the **algorithm**: in our case, the **separable convolution** and,
+2. the **schedule**: which exploits the different **kinds of parallelism** that
+   the hardware offers,
 
 so that our implementation is as fast as the baseline implementation. In our
 case, the baseline implementation is OpenCV's Gaussian blur.
 
-Halide can check and provide guarantees that your algorithm remains correct for
-the schedule you are implementing.
+Halide abstracts and unifies the **common programming patterns** that arise from
+CPU to GPU programming in CUDA, OpenCL, Metal, Vulkan. Besides, an image
+processing algorithm can often expressed as a sequence of CUDA kernels, you
+don't need to write any nested loops.
 
-Halide is trying to unify the common programming patterns from CPU to GPU
-programming in CUDA, OpenCL, Metal, Vulkan. Similarly to CUDA, an image
-processing algorithm can often expressed as a succesion of CUDA kernels.
-Therfore you don't need to write any nested loops.
+Halide abstracts different kinds of parallelism and supports a wide range of
+platforms. While we don't have to know the C API to invoke vector instructions,
+we still need to know those common programming patterns that involves CPU vector
+instructions.
 
-Halide abstracts the different kind of parallelisms for you and supports a wide
-range of platforms. You don't have to be an expert in CPU vector intrinsics, but
-you do need to know some scheduling strategies to best optimize the
-convolutional operation.
 When I began learning Halide, I knew very little about optimal schedules.
 Skimming through publications and the presentations by Halide authors was the
 only way for me to really learn. And of course practise, practise, practise. So
 all in all, in my experience, the entry barrier is still very high for the
-average programmer to identify which schedule patterns work best and those that
-don't.
+average programmer to identify which schedules work best and those that don't.
 
 ### Halide vs Explicit CPU intrisic code
 
-Naysayers be like: "but Halide is too high level and does too much magic!"
+Naysayers will argue: "But Halide is too high level and does too much magic!"
 
-Certainly! Optimizing algorithms by writing explicitly CPU intrinsic
-instructions can be done. But you would have to pay a very costly engineering
-price.
+Certainly, optimizing algorithms by writing explicitly CPU vector instructions
+can be done. But we would have to pay a very costly engineering price.
 
-You would have to optimize for different CPU platforms: x86-64, ARM, RISC-V and
-learn about their C API to utilize SIMD instructions. The resulting code would
-be much harder to maintain than using a unified language that allows you to
-write these in a very few lines of codes.
+You would have to optimize for different CPU platforms: *x86-64*, *ARM*,
+*RISC-V* and learn their respective C API to utilize hardware SIMD instructions.
+The resulting code would be much lengthier and harder to maintain than using a
+unified language that allows you to write these in a very few lines of codes.
 
 Unless this is your full-time job or it's something you really want to learn,
 personally I don't want to spend time into this. Halide has done an excellent
@@ -117,10 +114,14 @@ And just make things work.
 I did learn in class that the Gaussian filter is separable: Don't write the 2D
 convolution naively, exploit its separable property. Icing on the cake, I have
 discovered multicore parallelism via OpenMP. I am proudly exhibiting a naive
-implementation in C++ in my Sara repo, something along the lines below.
+implementation in C++ in my *Sara* repo, something along the lines below.
+
+### The x-convolution
 
 Below is the first step, that is the x-convolution.
 ```{Rcpp}
+#include <algorithm>
+
 auto conv_x(const float *in, const float *kernel, float *out,
             const int w, const int h, const int ksz) -> void
 {
@@ -134,15 +135,12 @@ auto conv_x(const float *in, const float *kernel, float *out,
     for (auto x = 0; x < w; ++x)
     {
       auto val = 0.f;
+
+      // Calculate the convolved value.
       for (auto k = 0; k < ksz; ++k)
       {
-        auto xk = x - r + k;
-
         // Check the boundary conditions.
-        if (xk < 0)
-          xk = 0;
-        else if (xk >= w)
-          xk = w - 1;
+        const auto xk = std::clamp(x - r + k, 0, w - 1);
 
         // Accumulate.
         const auto xy = y * w + xk;
@@ -155,9 +153,13 @@ auto conv_x(const float *in, const float *kernel, float *out,
 }
 ```
 
-Then we perform the same dance for the y-convolution:
+### The y-convolution
+
+Then we perform the same dance for the y-convolution in a similar fashion.
 
 ```{Rcpp}
+#include <algorithm>
+
 auto conv_y(const float *in, const float *kernel, float *out,
             const int w, const int h, const int ksz) -> void
 {
@@ -171,15 +173,12 @@ auto conv_y(const float *in, const float *kernel, float *out,
     for (auto x = 0; x < w; ++x)
     {
       auto val = 0.f;
+
+      // Calculate the convolved value.
       for (auto k = 0; k < ksz; ++k)
       {
-        auto yk = y - r + k;
-
         // Check the boundary conditions.
-        if (yk < 0)
-          yk = 0;
-        else if (yk >= h)
-          yk = h - 1;
+        const auto yk = std::clamp(y - r + k, 0, w - 1);
 
         // Accumulate.
         const auto xy = yk * w + x;
@@ -195,21 +194,27 @@ auto conv_y(const float *in, const float *kernel, float *out,
 I diligently write unit tests, validate on synthetic tests, check the boundary
 conditions and try it on a real image with a Gaussian kernel. I am happy it
 works reasonably fast when compiling in Release mode on Visual Studio. Job done!
-I am proudly showcasing my code on GitHub. Never complained about it as I
-bothered about real-time issues as later I learnt about in CUDA and would write
-in CUDA anyways.
+I am proudly showcasing my code on GitHub. Never complained about it as I never
+bothered about real-time considerations. Instead I would port the code to make
+the algorithm run faster.
 
 ### Issues in the C++ code
 
 Let's enumerate some issues and ideas that we will address later on.
 
 1. The only parallelism we are using is the **multi-threading**.
-2. It is not clear how the **CPU vector intrinsics** can be applied in the convolution.
+
+   Each row is processed in parallel but can we do better than parallel row
+   processing?
+
+2. It is not clear how the **CPU vector instructions** can be applied in the
+   convolution.
    - For one thing, the boundary checking does not easily allow the compiler to
    vectorize the C++ code.
    - There is actually a better way to exploit the CPU vector instructions for
      the convolutional operation and the C++ code does not do this way.
-3. **Data locality** is very important aspect, which we are not exploiting.
+3. **Data locality** is a very important aspect, which the parallel row
+   processing does not easily allow to leverage.
 
 It certainly wasn't the fault of my younger self who did not know any better.
 Let us now address these issues and ideas in Halide.
@@ -272,9 +277,11 @@ There are two types of parallelisms on the CPU which we can exploit altogether.
 1. Multicore processing:
 
    This is straightforward to understand. A CPU can be thought as a factory of
-   workers, each one of them being called a CPU core. The multicore processing
-   consists in keeping each CPU core as busy as possible with minimal data
-   sharing.
+   workers, each one of them being called a CPU core.
+
+   The multicore processing becomes most effective when each CPU core is being
+   kept as busy as possible and the CPU cores don't need to communicate with
+   each other via data synchronization.
 
    OpenMP is one implementation of multicore processing among others to
    parallelise our image filter.
@@ -298,15 +305,24 @@ operations on 16D vectors of 32-bit floating point data in a single CPU
 instruction.
 
 So when we combine parallelism 1 and 2 on an 12-core Intel CPU with AVX-512
-instructions, an optimized algorithm could theoretically be sped up by a factor
-of $12 \times 16 = 192$ on 32-bit floating point array. This is huge.
+instructions, an optimized algorithm could in principle be sped up by a factor
+of
 
-Now, for more accurate and more comprehensive information, I will simply
-encourage you to do your own research on ARM, RISC-V CPUs, and share what you
-have learnt.
+\begin{equation}
+  \#\{\text{CPUs}\} \times \text{SIMD max dim} = 12 \times 16 = 192
+\end{equation}
+
+on single-precision floating point data.
+
+While we should instead use Amdahl's law instead of this naive formula, applying
+Amdahl's law is not so simple and we will be content to just benchmark and
+measure the performance gain.
 
 Likewise, optimized linear algebra routines like OpenBLAS makes extensive use of
 the two types parallelism on CPU platforms.
+
+For more accurate and more comprehensive information, I will simply encourage
+you to do your own research on ARM, RISC-V CPUs, and share what you have learnt.
 
 We are now moving to the schedule, which is the most difficult part of the
 implementation. We will explore 3 schedules with Halide.
@@ -340,17 +356,18 @@ conv_y
     .vectorize(x, 32, Halide::TailStrategy::GuardWithIf) ;
 ```
 
-Thanks to the CPU vectorization, this schedule is a nice improvement over the
-naive C++ implementation as we exploit the CPU data vectorization. Yet OpenCV's
-implementation is still better than this schedule by a factor 2.
+This schedule is a nice improvement over the naive C++ implementation as we
+exploit the CPU data vectorization. Yet OpenCV's implementation is still better
+than this schedule by a factor 2.
 
-We will worry about how the CPU vectorization is implemented later by examining
-a better schedule. Let's move on to a better schedule: schedule #2.
+Later we will examine how the CPU vectorization is implemented by inspecting a
+better schedule. So let's move on to a better schedule: schedule #2.
 
 ### Schedule 2: From a Publication
 
-In fact, the optimal schedule is really not obvious in CPU. After digging in the
-publications, I find this schedule in one of Halide publications:
+The optimal schedule is really not obvious in CPU, at least for me. After
+digging in the publications, I found this schedule in one of Halide
+publications:
 
 ```{cpp}
 auto xo = Halide::Var{"xo"};
@@ -359,7 +376,10 @@ auto yo = Halide::Var{"yo"};
 auto xi = Halide::Var{"xi"};
 auto yi = Halide::Var{"yi"};
 
-conv_y.tile(x, y, xo, yo, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+auto tile_index = Halide::Var{"t"};
+
+conv_y.tile(x, y, xo, yo, xi, yi, 64, 64,
+            Halide::TailStrategy::GuardWithIf)
     .fuse(xo, yo, tile_index)
     .parallel(tile_index);
     .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
@@ -404,15 +424,15 @@ auto tile = Halide::Var{"tile"};
 kernel.compute_root();
 
 // The schedule
-conv_y  //
+conv_y
     .tile(x, y, xo, yo, xi, yi, 64, 64)
     .fuse(xo, yo, tile)
     .parallel(tile)
-    .vectorize(xi, 32, Halide::TailStrategy::GuardWithIf)  //
+    .vectorize(xi, 32, Halide::TailStrategy::GuardWithIf)
     ;
 conv_x
-    .compute_at(conv_y, xi)                               //
-    .vectorize(x, 32, Halide::TailStrategy::GuardWithIf)  //
+    .compute_at(conv_y, xi)
+    .vectorize(x, 32, Halide::TailStrategy::GuardWithIf)
     ;
 ```
 
@@ -422,7 +442,8 @@ There is a lot to unpack here. Let's try to break it down bit by bit the
 schedule below:
 
 ```{cpp}
-  conv_y.tile(x, y, xo, yo, xi, yi, 64, 64, Halide::TailStrategy::GuardWithIf)
+  conv_y.tile(x, y, xo, yo, xi, yi, 64, 64,
+              Halide::TailStrategy::GuardWithIf)
       .fuse(xo, yo, tile_index)
       .parallel(tile_index);
       .vectorize(xi, 16, Halide::TailStrategy::GuardWithIf)
@@ -434,8 +455,9 @@ According to how I understand it:
 #pragma omp parallel for
 for (auto tile_index = 0; tile_index < T; ++T)
 {
-  // Process the tile (xo, yo). const auto yo = tile_index / T; const auto xo =
-  tile_index % T;
+  // Process the tile (xo, yo).
+  const auto yo = tile_index / T;
+  const auto xo = tile_index % T;
 
   for (auto yi = 0; yi < 64; ++yi)
   {
@@ -520,11 +542,12 @@ parallelisms in the schedule:
      // vectorize(xi, 32, GuardWithIf);
    ```
 
-This will help us to map out mentally the algorithmic roadmap and understand how
-the HTML visually maps out the **three-way** correspondence between:
-1. each part of the pseudo-code
+This will help us to break down the algorithmic roadmap and understand how the
+HTML visually maps out the **three-way** correspondence between:
+
+1. each part of the pseudo-code,
 2. each diagram block and
-3. each of the assembly code.
+3. each part of the assembly code.
 
 After a bit of inspection, by reinstating progressively all the different
 parallelisms, we start to understand how the parallel patterns are implemented
@@ -554,7 +577,7 @@ in NumPy code as
 import numpy as np
 
 def convolve_vectorized(conv_x, input, kernel, tile, xi, yi):
-    # Trivially vectorized initialization.
+    # Trivially vectorized.
     conv_x[tile, yi, xi:xi+ksz] = 0
 
     # Repeat the fused multiply-add operation as follows.
