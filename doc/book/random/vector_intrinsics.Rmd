@@ -274,7 +274,7 @@ conv_y(x, y) = Halide::sum(conv_x(x, y + k - kr / 2) * kernel(k));
 
 There are two types of parallelisms on the CPU which we can exploit altogether.
 
-1. Multicore processing:
+1. *Multicore processing*:
 
    This is straightforward to understand. A CPU can be thought as a factory of
    workers, each one of them being called a CPU core.
@@ -286,25 +286,26 @@ There are two types of parallelisms on the CPU which we can exploit altogether.
    OpenMP is one implementation of multicore processing among others to
    parallelise our image filter.
 
-2. Vector instructions:
+2. *Vector instructions*:
 
-   Until I implemented filters with Halide, I really did not understand what CPU
-   vector instrutions were really about.
+   Until I implemented filters with Halide, I did not understand what CPU vector
+   instructions were really about.
 
    Mainly, a CPU vector instruction enables a CPU core to perform arithmetic
    operations on small vectors in a **single** CPU cycle.
    That means that additions, subtractions, dot products on 4D float vectors can
    be executed in a single CPU cycle instead of 4 CPU cycles (7 CPU cycles for
-   the dot product).
+   the dot product). **(PLEASE RESEARCH THIS MORE: this is not true although the
+   idea is there...)**
 
-   That is very significant on a very large scale as we can observe additional
-   4x speed up or more on very very large arrays and therefore image data.
+   The performance is very significant on a large scale as we can observe
+   additional 4x speed up or more.
 
 Nowadays, an Intel CPU that supports AVX-512 vector instructions can perform
 operations on 16D vectors of 32-bit floating point data in a single CPU
 instruction.
 
-So when we combine parallelism 1 and 2 on an 12-core Intel CPU with AVX-512
+By combining parallelisms 1 and 2 on an 12-core Intel CPU with AVX-512
 instructions, an optimized algorithm could in principle be sped up by a factor
 of
 
@@ -314,9 +315,9 @@ of
 
 on single-precision floating point data.
 
-While we should instead use Amdahl's law instead of this naive formula, applying
-Amdahl's law is not so simple and we will be content to just benchmark and
-measure the performance gain.
+While we should instead use *Amdahl's law* instead of this naive formula,
+applying Amdahl's law is not so simple and we will be content to just benchmark
+and measure the performance gain.
 
 Likewise, optimized linear algebra routines like OpenBLAS makes extensive use of
 the two types parallelism on CPU platforms.
@@ -518,10 +519,9 @@ conv_y.compile_to_stmt(
 ```
 
 Halide generates a nicely illustrated HTML document. Still The generated code is
-overwhelming as there is a lot to unpack. How are we going to learn how to read
-a bit of assembly code.
+overwhelming as there is a lot to unpack. How are we going to learn how to read a bit of assembly code?
 
-To digest the algorithmic flow, start by commenting out the different
+To digest the algorithmic flow, I started by commenting out the different
 parallelisms in the schedule:
 
 1. the multicore parallelism
@@ -558,12 +558,12 @@ This is how it looks like.
 style="border: 1px solid #464646;" allowfullscreen>
 </iframe>
 
-It is not practical to view the embedded HTML page, so go to this <a
-href="./random/separable_conv_2d.stmt.html">link</a> to fully explore the
-compiled statement as a full page:
+It is not practical to view the embedded HTML page, so you can click on this
+link <a href="./random/separable_conv_2d.stmt.html">link</a> to fully explore
+the compiled statement as a full page:
 
 
-### Vectorizing in the Convolution
+### Vectorizing the Convolution
 
 Upon inspection of the compiled statement, it turns out that the convolution
 operation is implemented by batch where we calculate 4, 8 or 16 convolved values
