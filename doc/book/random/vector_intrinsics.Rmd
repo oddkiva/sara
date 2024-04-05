@@ -1,9 +1,15 @@
 # Super Fast Separable Convolutions
 
-Sounds boring? I promise you this is going to be way more interesting than you
-might think. While this is a common operation in low-level operation, there is
-quite a few interesting things to learn how to leverage the hardware to
-accelerate computing.
+Sounds boring?
+
+I promise you this is going to be way more interesting than you might think.
+While this is a common operation in low-level operation, there is quite a few
+interesting things to learn how to use the hardware to accelerate computing.
+This topic can be read nonlinearly and you can directly move to the sections of
+interest.
+
+In a nutshell, I can give you some tools to reimplement *algorithms that run
+much faster than OpenCV*.
 
 Story time before we dive into the implementation of the Gaussian blur.
 
@@ -13,10 +19,10 @@ Once, I applied for a C++ technical leadership role for some company. I did a
 behavioral interview with their CTO. He then told me who I would be interviewing
 with in the next interviews. A few days later, he called me back for a quick
 chat. He ended up telling me they would not move forward after examining
-*Sara*'s image processing code. Without really explaining why, the most likely
-reason I could come up with was that one of their senior engineers disqualified
-me because all he cared about was whether I could understand and write code with
-CPU vector instructions.
+*Sara*'s image processing code. He did not really explain why. Nevertheless, the
+most likely explanation I could come up with was that one of their senior
+engineers disqualified me because all he seemed to care about was whether I
+could understand and write code with CPU vector instructions.
 
 The CTO profusedly apologized to me. He said politely that I certainly was
 gifted but my code was not up to their standard. They must have deemed that my
@@ -28,19 +34,20 @@ process data as fast as possible. That it really was not that difficult and that
 I could get up to speed fairly quickly, and blah blah blah... That was the only
 reason for which, I believe, they disqualified me.
 
-Having mostly an applied math background, it did sound unfair and hypocritical
-to me. Hypocritical because, if it really was easy, then why can you not learn
-it on the job?
-So, yes, it did make me feel that you are never enough whatever you achieve in
-life.
+Having mostly an applied math background and being a self-taught programmer, it
+did sound unfair and hypocritical to me. Hypocritical because, if it really was
+easy, then why can you not learn it on the job? So, yes, it did make me feel
+that you are never enough whatever you achieve in life.
 Oh, so you're supposed to master every single damn thing of software engineering
 when you start a job?
 Going by the same logic, if David Lowe showcased his SIFT research code, he
 would not qualify for the job either since I learnt from studying his code.
 
-In hindsight I would not have been happy with the job anyways. End of the rant
-and back to the topic: today how can we achieve that? Nowadays, we have some
-answers with Halide, which allows us to do it very elegantly.
+In hindsight I would not have been happy with the job anyways.
+
+End of my angry rant and back to the topic: today how can we achieve that?
+Nowadays, we have some answers with Halide, which allows us to do it very
+elegantly.
 
 ## What is Halide?
 
@@ -55,7 +62,7 @@ of code*. Then Halide will compile the C++ code into usable assembly code.
 The main beauty with Halide is that you decouple:
 
 1. the **algorithm**: in our case, the **separable convolution** and,
-2. the **schedule**: which exploits the different **kinds of parallelism** that
+2. the **schedule**: which leverages the different **kinds of parallelism** that
    the hardware offers,
 
 so that our implementation is as fast as the baseline implementation. In our
@@ -82,17 +89,20 @@ average programmer to identify which schedules work best and those that don't.
 Naysayers will argue: "But Halide is too high level and does too much magic!"
 
 Certainly, optimizing algorithms by writing explicitly CPU vector instructions
-can be done. But we would have to pay a very costly engineering price.
+can be done. But we would have to pay a very costly engineering price. If I were
+the head of a small business, this would be hard to justify the heavy
+engineering time and money, that it entails to.
 
-You would have to optimize for different CPU platforms: *x86-64*, *ARM*,
-*RISC-V* and learn their respective C API to utilize hardware SIMD instructions.
-The resulting code would be much lengthier and harder to maintain than using a
-unified language that allows you to write these in a very few lines of codes.
+Nowadays, would be ready spend time on optimizing for different CPU platforms:
+*x86-64*, *ARM*, *RISC-V* and learn their respective C API to invoke SIMD
+instructions? On top of that, the resulting code would be much lengthier and
+harder to maintain than using a unified language that allows you to write these
+in a very few lines of codes.
 
 Unless this is your full-time job or it's something you really want to learn,
-personally I don't want to spend time into this. Halide has done an excellent
-job in abstracting this at the least on the CPU side. So know who you are and
-decide what you want to do.
+personally I don't want to spend time into this. Either way... Halide has done
+an excellent job in making CPU vector instructions *platform-agnostic* and it
+will help you learn the C API faster.
 
 Let's conclude this paragraph with a few words regarding the GPU acceleration
 with Halide. On the GPU side, Halide is indeed not yet mature. For one thing,
@@ -178,7 +188,7 @@ auto conv_y(const float *in, const float *kernel, float *out,
       for (auto k = 0; k < ksz; ++k)
       {
         // Check the boundary conditions.
-        const auto yk = std::clamp(y - r + k, 0, w - 1);
+        const auto yk = std::clamp(y - r + k, 0, h - 1);
 
         // Accumulate.
         const auto xy = yk * w + x;
@@ -195,8 +205,8 @@ I diligently write unit tests, validate on synthetic tests, check the boundary
 conditions and try it on a real image with a Gaussian kernel. I am happy it
 works reasonably fast when compiling in Release mode on Visual Studio. Job done!
 I am proudly showcasing my code on GitHub. Never complained about it as I never
-bothered about real-time considerations. Instead I would port the code to make
-the algorithm run faster.
+bothered about real-time considerations. Instead I would port the code in CUDA
+to make the algorithm run faster.
 
 ### Issues in the C++ code
 
@@ -209,15 +219,25 @@ Let's enumerate some issues and ideas that we will address later on.
 
 2. It is not clear how the **CPU vector instructions** can be applied in the
    convolution.
-   - For one thing, the boundary checking does not easily allow the compiler to
-   vectorize the C++ code.
+   - For one thing, the boundary check via clamping does not easily allow the
+     compiler to vectorize the C++ code.
    - There is actually a better way to exploit the CPU vector instructions for
      the convolutional operation and the C++ code does not do this way.
-3. **Data locality** is a very important aspect, which the parallel row
-   processing does not easily allow to leverage.
 
-It certainly wasn't the fault of my younger self who did not know any better.
-Let us now address these issues and ideas in Halide.
+3. **Data locality** is a very important aspect, which the parallel row
+   processing may not easily allow to do so.
+
+   Just like in CUDA programming, processing the image into tiles on CPU is much
+   more efficient in practice.
+
+   Let's note that processing tiles in parallel is a pattern that keeps
+   repeating in optimized linear algebra routines (OpenBLAS etc.), in particular
+   the matrix-matrix multiplication *gemm* operation, which is one fundamental
+   operation in deep learning.
+
+There are probably more issues. Hopefully I pointed out the most problematic
+ones. It certainly wasn't the fault of my younger self who did not know any
+better. Let us now address these issues and ideas in Halide.
 
 
 ## A Very Fast Implementation in Halide
