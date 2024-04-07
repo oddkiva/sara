@@ -24,7 +24,7 @@ namespace DO::Sara {
   private:
     CameraPoseGraph& _camera_pose_graph;
     const FeatureGraph& _feature_graph;
-    PointCloud& _point_cloud;
+    PointCloudManipulator::PointCloud& _point_cloud;
   };
 
 }  // namespace DO::Sara

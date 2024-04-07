@@ -16,6 +16,7 @@
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/Core/Pixel.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/QuaternionBasedPose.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 #include <DO/Sara/SfM/Graph/ImageFeatures.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
@@ -28,13 +29,15 @@ namespace DO::Sara {
 
   struct RelativePoseEdge
   {
-    int src_camera = -1;
-    int dst_camera = -1;
+    using camera_id_t = int;
+    static constexpr auto undefined_camera_id = -1;
+
+    camera_id_t src_camera = undefined_camera_id;
+    camera_id_t dst_camera = undefined_camera_id;
 
     std::vector<std::pair<int, int>> _matches;
     std::vector<std::uint8_t> _inliers;
-    Eigen::Matrix3d R;
-    Eigen::Vector3d t;
+    Motion _motion;
   };
 
   struct CameraPoseGraph
