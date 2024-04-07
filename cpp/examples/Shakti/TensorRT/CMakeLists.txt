@@ -2,9 +2,16 @@ if(NOT CMAKE_CUDA_COMPILER OR NOT TensorRT_FOUND)
   return()
 endif()
 
-file(GLOB TRT_SOURCE_FILES FILES *.cu)
+# This is a workaround with MSVC to avoid fighting with CMake and CUDA.
+add_library(tensorrt_yolov4_utilities downsample.hpp downsample.cu)
+target_link_libraries(tensorrt_yolov4_utilities PRIVATE DO::Shakti::Cuda::TensorRT)
+set_property(TARGET tensorrt_yolov4_utilities
+             PROPERTY FOLDER "Examples/Shakti/NeuralNetworks")
 
-foreach(file ${TRT_SOURCE_FILES})
+
+list(APPEND TRT_EXAMPLE_FILES FILES tensorrt_yolov4_example.cpp)
+
+foreach(file ${TRT_EXAMPLE_FILES})
   get_filename_component(filename ${file} NAME_WE)
 
   add_executable(${filename} ${file})
@@ -24,7 +31,8 @@ foreach(file ${TRT_SOURCE_FILES})
             DO::Shakti::Cuda::Utilities
             DO::Shakti::Cuda::TensorRT
             tinycolormap
-            fmt::fmt)
+            fmt::fmt
+            tensorrt_yolov4_utilities)
 
   set_target_properties(
     ${filename} PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS}
