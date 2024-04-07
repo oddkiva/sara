@@ -24,11 +24,12 @@ namespace DO::Sara::Darknet {
   // CAVEAT: this is sensitive to the CPU architecture endianness.
   template <typename T, int N>
   inline auto write_tensor(const TensorView_<T, N>& x,
-                           const std::string& filepath) -> void
+                           const std::filesystem::path& filepath) -> void
   {
-    auto file = std::ofstream{filepath, std::ios::binary};
+    auto file = std::ofstream{filepath.string(), std::ios::binary};
     if (!file.is_open())
-      throw std::runtime_error{"Error: could not open file: " + filepath + "!"};
+      throw std::runtime_error{
+          "Error: could not open file: " + filepath.string() + "!"};
 
     // Write the tensor dimension.
     file.write(reinterpret_cast<const char*>(x.sizes().data()),
@@ -39,11 +40,13 @@ namespace DO::Sara::Darknet {
   }
 
   // CAVEAT: this is sensitive to the CPU architecture endianness.
-  inline auto read_tensor(const std::string& filepath) -> Tensor_<float, 4>
+  inline auto read_tensor(const std::filesystem::path& filepath)
+      -> Tensor_<float, 4>
   {
-    auto file = std::ifstream{filepath, std::ios::binary};
+    auto file = std::ifstream{filepath.string(), std::ios::binary};
     if (!file.is_open())
-      throw std::runtime_error{"Error: could not open file: " + filepath + "!"};
+      throw std::runtime_error{
+          "Error: could not open file: " + filepath.string() + "!"};
 
     auto sizes = Eigen::Vector4i{};
     file.read(reinterpret_cast<char*>(sizes.data()), sizeof(int) * 4);
@@ -58,7 +61,8 @@ namespace DO::Sara::Darknet {
   }
 
   // CAVEAT: this is sensitive to the CPU architecture endianness.
-  inline auto read_all_intermediate_outputs(const std::string& dir_path)
+  inline auto
+  read_all_intermediate_outputs(const std::filesystem::path& dir_path)
   {
     namespace fs = std::filesystem;
 
@@ -157,9 +161,9 @@ namespace DO::Sara::Darknet {
     }
   }
 
-  inline auto check_convolutional_weights(const Network& model,
-                                          const std::string& data_dirpath)
-      -> void
+  inline auto
+  check_convolutional_weights(const Network& model,
+                              const std::filesystem::path& data_dirpath) -> void
   {
     const auto stringify = [](int n) {
       std::ostringstream ss;
@@ -175,9 +179,9 @@ namespace DO::Sara::Darknet {
         SARA_DEBUG << "Checking convolution weights " << i << std::endl;
 
         const auto weights_fp =
-            data_dirpath + "/kernel-" + stringify(i - 1) + ".bin";
+            data_dirpath / ("/kernel-" + stringify(i - 1) + ".bin");
         const auto biases_fp =
-            data_dirpath + "/bias-" + stringify(i - 1) + ".bin";
+            data_dirpath / ("/bias-" + stringify(i - 1) + ".bin");
 
         const auto w = read_tensor(weights_fp).reshape(conv->weights.w.sizes());
         const auto b = read_tensor(biases_fp);

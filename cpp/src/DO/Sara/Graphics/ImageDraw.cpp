@@ -186,7 +186,7 @@ namespace DO { namespace Sara {
 
     const auto fm = QFontMetrics{font};
     const auto qstr = QString::QString::fromLocal8Bit(text.c_str());
-    const auto qstr_bbox = fm.boundingRect(qstr);
+    const auto qstr_bbox = QRectF{fm.boundingRect(qstr)};
 
     return {
         qstr_bbox.x(),
