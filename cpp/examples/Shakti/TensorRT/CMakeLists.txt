@@ -4,12 +4,12 @@ endif()
 
 # This is a workaround with MSVC to avoid fighting with CMake and CUDA.
 add_library(tensorrt_yolov4_utilities downsample.hpp downsample.cu)
-target_link_libraries(tensorrt_yolov4_utilities PRIVATE DO::Shakti::Cuda::TensorRT)
+target_link_libraries(tensorrt_yolov4_utilities
+                      PRIVATE DO::Shakti::Cuda::TensorRT)
 set_property(TARGET tensorrt_yolov4_utilities
              PROPERTY FOLDER "Examples/Shakti/NeuralNetworks")
 
-
-list(APPEND TRT_EXAMPLE_FILES FILES tensorrt_yolov4_example.cpp)
+list(APPEND TRT_EXAMPLE_FILES tensorrt_yolov4_example.cpp)
 
 foreach(file ${TRT_EXAMPLE_FILES})
   get_filename_component(filename ${file} NAME_WE)
