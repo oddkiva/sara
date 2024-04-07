@@ -9,6 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#if (defined(_WIN32) || defined(_WIN32_WCE)) && !defined(NOMINMAX)
+#  define NOMINMAX
+#endif
+
 #include <DO/Shakti/Cuda/TensorRT/DarknetParser.hpp>
 #include <DO/Shakti/Cuda/TensorRT/IO.hpp>
 #include <DO/Shakti/Cuda/TensorRT/Mish.hpp>

@@ -84,6 +84,8 @@ auto serialize_onnx_model_as_tensort_engine(
     throw std::runtime_error{"Failed to serialize the ONNX model!"};
   if (plan->size() == 0)
     throw std::runtime_error{"The byte size of the serialized engine is 0!"};
+
+  return plan;
 }
 
 
