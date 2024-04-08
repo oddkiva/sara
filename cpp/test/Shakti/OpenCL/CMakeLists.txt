@@ -1,3 +1,7 @@
+if (NOT OpenCL_FOUND)
+  return()
+endif ()
+
 file(GLOB test_OpenCL_SOURCE_FILES FILES test_*.cpp)
 
 foreach(file IN LISTS test_OpenCL_SOURCE_FILES)

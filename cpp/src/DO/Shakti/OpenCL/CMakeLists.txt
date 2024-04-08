@@ -1,3 +1,7 @@
+if (NOT OpenCL_FOUND)
+  return()
+endif ()
+
 file(GLOB DO_Sara_OpenCL_FILES FILES *.hpp)
 set_source_files_properties(${DO_Sara_OpenCL_FILES} PROPERTIES LANGUAGE CXX)
 
