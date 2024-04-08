@@ -14,7 +14,8 @@ if(SARA_USE_FROM_SOURCE)
     target_link_libraries(
       DO_Sara_SfM
       PRIVATE tinyply Boost::filesystem
-      PUBLIC DO::Sara::Features
+      PUBLIC DO::Sara::Logging
+             DO::Sara::Features
              DO::Sara::FeatureDetectors
              DO::Sara::FeatureDescriptors
              DO::Sara::FeatureMatching

@@ -11,23 +11,33 @@
 
 #pragma once
 
-#include <DO/Sara/Defines.hpp>
-
 #include <DO/Sara/Core/Image.hpp>
-#include <DO/Sara/Core/Pixel.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/QuaternionBasedPose.hpp>
+#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
-#include <DO/Sara/SfM/Graph/ImageFeatures.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/QuaternionBasedPose.hpp>
+
+#include <DO/Sara/SfM/BuildingBlocks/v2/FeatureTracker.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/v2/RelativePoseEstimator.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
-
-#include <optional>
-#include <vector>
 
 
 namespace DO::Sara {
 
-  struct RelativePoseEdge
+  struct CameraPoseData
+  {
+    //! @brief The corresponding image frame index.
+    int frame_index;
+
+    //! @brief The keypoints detected in the image.
+    KeypointList<OERegion, float> keypoints;
+
+    //! @brief "Absolute" pose w.r.t. some reference frame.
+    QuaternionBasedPose<double> pose;
+  };
+
+  struct RelativeMotionData
   {
     using camera_id_t = int;
     static constexpr auto undefined_camera_id = -1;
@@ -35,22 +45,35 @@ namespace DO::Sara {
     camera_id_t src_camera = undefined_camera_id;
     camera_id_t dst_camera = undefined_camera_id;
 
-    std::vector<std::pair<int, int>> _matches;
-    std::vector<std::uint8_t> _inliers;
-    Motion _motion;
+    std::vector<Match> matches;
+    Tensor_<bool, 1> inliers;
+
+    Motion motion;
   };
 
-  struct CameraPoseGraph
+  class CameraPoseGraph
   {
+  public:
     using GraphImpl =
         boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
-                              QuaternionBasedPose<double>, RelativePoseEdge>;
+                              CameraPoseData, RelativeMotionData>;
+
+  public:
     using Vertex = boost::graph_traits<GraphImpl>::vertex_descriptor;
     using Edge = boost::graph_traits<GraphImpl>::edge_descriptor;
 
-    GraphImpl _pose_graph;
-    std::vector<std::optional<Image<Rgb8>>> _images;
-    ImageKeypoints _image_keypoints;
+    auto detect_keypoints(const v2::FeatureTracker& feature_tracker,
+                          const ImageView<float>& image,  //
+                          const int frame_index) -> void;
+
+    auto estimate_relative_motion(
+        const v2::FeatureTracker& feature_tracker,                 //
+        const v2::RelativePoseEstimator& relative_pose_estimator,  //
+        const Vertex src, const Vertex dst) -> void;
+
+  private:
+    //! @brief The graph data structure shortened as g.
+    GraphImpl _g;
   };
 
 } /* namespace DO::Sara */
