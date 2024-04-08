@@ -23,16 +23,16 @@
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
+#include <DO/Sara/MultiViewGeometry/Graph/EpipolarGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/InlierPredicates.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 
-#include <DO/Sara/SfM/BuildingBlocks/EssentialMatrixEstimation.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
+#include <DO/Sara/SfM/Helpers/EssentialMatrixEstimation.hpp>
+#include <DO/Sara/SfM/Helpers/FundamentalMatrixEstimation.hpp>
+#include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
+#include <DO/Sara/SfM/Helpers/Triangulation.hpp>
 
 
 using namespace std::string_literals;

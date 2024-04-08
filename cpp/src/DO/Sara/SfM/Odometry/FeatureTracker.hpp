@@ -3,7 +3,7 @@
 #include <DO/Sara/Core/Image.hpp>
 
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
+#include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 
 
 namespace DO::Sara {

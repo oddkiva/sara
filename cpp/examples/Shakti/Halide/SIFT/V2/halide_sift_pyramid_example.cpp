@@ -17,7 +17,7 @@
 #include <DO/Sara/Features.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
+#include <DO/Sara/SfM/Helpers/FundamentalMatrixEstimation.hpp>
 #include <DO/Sara/Visualization.hpp>
 
 #include <DO/Shakti/Halide/SIFT/Draw.hpp>

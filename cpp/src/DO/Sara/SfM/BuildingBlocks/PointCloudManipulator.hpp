@@ -1,8 +1,8 @@
 #pragma once
 
+#include <DO/Sara/SfM/BuildingBlocks/RgbColoredPoint.hpp>
 #include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
 #include <DO/Sara/SfM/Graph/FeatureGraph.hpp>
-#include <DO/Sara/SfM/Graph/RgbColoredPoint.hpp>
 
 
 namespace DO::Sara {

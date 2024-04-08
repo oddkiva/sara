@@ -49,8 +49,11 @@ target_link_libraries(essential_5_point_example PRIVATE tinyply)
 # Visual odometry.
 sara_add_example(visual_odometry_example)
 target_link_libraries(visual_odometry_example PRIVATE DO::Kalpana::EasyGL #
-                                                      fmt::fmt
-                                                      glfw)
+                                                      fmt::fmt glfw)
+
+sara_add_example(visual_odometry_example_v2)
+target_link_libraries(visual_odometry_example_v2 PRIVATE DO::Kalpana::EasyGL #
+                                                         fmt::fmt glfw)
 
 # Bundle adjustment.
 sara_add_example(two_view_bundle_adjustment_example)

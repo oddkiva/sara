@@ -9,11 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/MultiViewGeometry/Graph/EpipolarGraph.hpp>
+
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Features.hpp>
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/HDF5.hpp>
 
 

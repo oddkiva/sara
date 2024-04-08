@@ -12,7 +12,7 @@
 #pragma once
 
 #include <DO/Sara/Core/Tensor.hpp>
-#include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
+#include <DO/Sara/MultiViewGeometry/Graph/FeatureGraph.hpp>
 
 #include <vector>
 

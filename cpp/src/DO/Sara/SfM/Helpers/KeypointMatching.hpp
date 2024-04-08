@@ -11,9 +11,7 @@
 
 #pragma once
 
-#include <DO/Sara/Defines.hpp>
-
-#include <string>
+#include <DO/Sara/Match.hpp>
 
 
 namespace DO::Sara {
@@ -21,14 +19,10 @@ namespace DO::Sara {
   //! @addtogroup SfM
   //! @{
 
-  //! @{
-  //! @brief Keypoint detection.
-  auto detect_keypoints(const std::string& dirpath,
-                        const std::string& h5_filepath, bool overwrite) -> void;
-
-  auto read_keypoints(const std::string& dirpath,
-                      const std::string& h5_filepath) -> void;
-  //! @}
+  //! @brief Keypoint matching.
+  auto match(const KeypointList<OERegion, float>& keys1,
+             const KeypointList<OERegion, float>& keys2,
+             float lowe_ratio = 0.6f) -> std::vector<Match>;
 
   //! @}
 

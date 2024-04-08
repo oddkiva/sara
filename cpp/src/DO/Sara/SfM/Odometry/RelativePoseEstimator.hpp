@@ -10,7 +10,7 @@
 
 #include <DO/Sara/RANSAC/RANSACv2.hpp>
 
-#include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
+#include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 
 
 namespace DO::Sara {

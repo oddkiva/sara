@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Features/KeypointList.hpp>
-#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
+#include <DO/Sara/MultiViewGeometry/Graph/EpipolarGraph.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>

@@ -9,41 +9,42 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-
 #include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
 
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Features/KeypointList.hpp>
 #include <DO/Sara/Logging/Logger.hpp>
+#include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 
 
 using namespace DO::Sara;
 
-auto CameraPoseGraph::detect_keypoints(
-    const v2::FeatureTracker& feature_tracker,
-    const ImageView<float>& image,  //
-    const int frame_index) -> void
 
+auto CameraPoseGraph::add_absolute_pose(
+    KeypointList<OERegion, float>&& keypoints,  //
+    const int image_id) -> CameraPoseGraph::Vertex
 {
   auto& logger = Logger::get();
 
-  SARA_LOGI(logger, "Detecting keypoints for image frame {}", frame_index);
+  SARA_LOGI(logger, "Detecting keypoints for image frame {}", image_id);
 
   // Grow the pose graph by creating a new camera vertex.
   const auto v = boost::add_vertex(_g);
 
   // Store the camera pose data.
-  auto& camera_pose_data = _g[v];
-  camera_pose_data.frame_index = frame_index;
-  camera_pose_data.keypoints = compute_sift_keypoints(image);
+  auto& pose_data = _g[v];
+  pose_data.image_id = image_id;
+  pose_data.keypoints = std::move(keypoints);
 
-  const auto& f = features(camera_pose_data.keypoints);
-  SARA_LOGI(logger, "Camera vertex: {} keypoints", f.size());
+  const auto& f = features(pose_data.keypoints);
+  SARA_LOGI(logger, "Camera {}: {} keypoints", v, f.size());
+
+  return v;
 }
 
-auto CameraPoseGraph::estimate_relative_motion(
-    const v2::FeatureTracker& feature_tracker,                 //
+auto CameraPoseGraph::add_relative_pose(
     const v2::RelativePoseEstimator& relative_pose_estimator,  //
+    const FeatureParams& feature_params,                       //
     const Vertex u, const Vertex v) -> void
 {
   auto& logger = Logger::get();
@@ -51,9 +52,14 @@ auto CameraPoseGraph::estimate_relative_motion(
   SARA_LOGI(logger, "Match features...");
   const auto& src_keys = _g[u].keypoints;
   const auto& dst_keys = _g[v].keypoints;
-  auto matches = feature_tracker.match_features(src_keys, dst_keys);
+  if (features(src_keys).empty() || features(dst_keys).empty())
+    return;
+
+  auto matches = match(src_keys, dst_keys, feature_params.sift_nn_ratio);
   if (matches.empty())
     return;
+  if (matches.size() > feature_params.num_matches_max)
+    matches.resize(feature_params.num_matches_max);
 
   SARA_LOGI(logger, "Estimating relative pose...");
   auto [geometry, inliers, sample_best] =
@@ -71,7 +77,5 @@ auto CameraPoseGraph::estimate_relative_motion(
     auto& relative_motion_data = _g[e];
     relative_motion_data.matches = std::move(matches);
     relative_motion_data.inliers = std::move(inliers);
-    relative_motion_data.src_camera = u;
-    relative_motion_data.dst_camera = v;
   }
 }

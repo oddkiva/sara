@@ -2,7 +2,7 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/MultiViewGeometry/PointCorrespondenceList.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
+#include <DO/Sara/SfM/Helpers/Triangulation.hpp>
 
 
 namespace DO::Sara {

@@ -12,8 +12,8 @@
 #include <DO/Sara/SfM/Graph/FeatureGraph.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/pending/disjoint_sets.hpp>
 #include <boost/graph/incremental_components.hpp>
+#include <boost/pending/disjoint_sets.hpp>
 
 
 using namespace DO::Sara;
@@ -22,12 +22,8 @@ using namespace DO::Sara;
 auto FeatureGraph::calculate_feature_tracks() const
     -> std::vector<FeatureGraph::Track>
 {
-  using VertexIndex = boost::graph_traits<FeatureGraph::GraphImpl>::vertices_size_type;
-
   using Rank = VertexIndex*;
   using Parent = Vertex*;
-
-  // using DisjointSets = boost::disjoint_sets<Rank, Parent>;
 
   using Components = boost::component_index<VertexIndex>;
 
