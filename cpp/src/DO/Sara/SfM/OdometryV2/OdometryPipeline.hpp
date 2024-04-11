@@ -12,10 +12,8 @@
 #pragma once
 
 #include <DO/Sara/Features/KeypointList.hpp>
-#include <DO/Sara/Graphics/ImageDraw.hpp>
 #include <DO/Sara/SfM/Odometry/ImageDistortionCorrector.hpp>
 #include <DO/Sara/SfM/Odometry/VideoStreamer.hpp>
-#include <DO/Sara/Visualization/Features/Draw.hpp>
 
 #include <DO/Sara/SfM/BuildingBlocks/RelativePoseEstimator.hpp>
 #include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
@@ -26,9 +24,9 @@ namespace DO::Sara::v2 {
   class OdometryPipeline
   {
   public:
-    auto set_config(const std::filesystem::path& video_path,
-                    const v2::BrownConradyDistortionModel<double>& camera)
-        -> void;
+    auto
+    set_config(const std::filesystem::path& video_path,
+               const v2::BrownConradyDistortionModel<double>& camera) -> void;
 
     auto read() -> bool;
 
@@ -47,7 +45,7 @@ namespace DO::Sara::v2 {
   private: /* graph update tasks */
     auto add_camera_pose_and_grow_point_cloud() -> bool;
 
-  private: /* data members */
+  public: /* data members */
     VideoStreamer _video_streamer;
     v2::BrownConradyDistortionModel<double> _camera;
 

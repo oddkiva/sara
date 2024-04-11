@@ -93,7 +93,7 @@ namespace DO::Sara {
     auto add_relative_pose(
         const v2::RelativePoseEstimator& relative_pose_estimator,  //
         const FeatureParams& feature_params,                       //
-        const Vertex src, const Vertex dst) -> void;
+        const Vertex src, const Vertex dst) -> std::pair<Edge, bool>;
 
   private:
     //! @brief The graph data structure shortened as g.

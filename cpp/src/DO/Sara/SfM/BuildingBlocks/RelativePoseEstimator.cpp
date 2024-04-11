@@ -8,12 +8,6 @@
 
 using namespace DO::Sara::v2;
 
-RelativePoseEstimator::RelativePoseEstimator(
-    const v2::BrownConradyDistortionModel<double>& camera)
-{
-  configure(camera);
-}
-
 auto RelativePoseEstimator::configure(
     const v2::BrownConradyDistortionModel<double>& camera) -> void
 {

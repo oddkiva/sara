@@ -12,7 +12,6 @@
 #pragma once
 
 #include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
-#include <boost/graph/detail/adjacency_list.hpp>
 
 
 namespace DO::Sara {

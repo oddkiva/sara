@@ -45,7 +45,7 @@ auto CameraPoseGraph::add_absolute_pose(
 auto CameraPoseGraph::add_relative_pose(
     const v2::RelativePoseEstimator& relative_pose_estimator,  //
     const FeatureParams& feature_params,                       //
-    const Vertex u, const Vertex v) -> void
+    const Vertex u, const Vertex v) -> std::pair<Edge, bool>
 {
   auto& logger = Logger::get();
 
@@ -53,11 +53,11 @@ auto CameraPoseGraph::add_relative_pose(
   const auto& src_keys = _g[u].keypoints;
   const auto& dst_keys = _g[v].keypoints;
   if (features(src_keys).empty() || features(dst_keys).empty())
-    return;
+    return {{}, false};
 
   auto matches = match(src_keys, dst_keys, feature_params.sift_nn_ratio);
   if (matches.empty())
-    return;
+    return {{}, false};
   if (matches.size() > feature_params.num_matches_max)
     matches.resize(feature_params.num_matches_max);
 
@@ -78,4 +78,6 @@ auto CameraPoseGraph::add_relative_pose(
     relative_motion_data.matches = std::move(matches);
     relative_motion_data.inliers = std::move(inliers);
   }
+
+  return {e, edge_added};
 }

@@ -11,7 +11,12 @@
 
 #include <DO/Sara/SfM/OdometryV2/OdometryPipeline.hpp>
 
-#include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
+
+#include <DO/Sara/Graphics/ImageDraw.hpp>
+#include <DO/Sara/Visualization/Features/Draw.hpp>
+
+#include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 
 
@@ -53,29 +58,28 @@ auto v2::OdometryPipeline::make_display_frame() const -> Image<Rgb8>
   return _distortion_corrector->frame_rgb8();
 }
 
-auto v2::OdometryPipeline::detect_keypoints() const
+auto v2::OdometryPipeline::detect_keypoints(const ImageView<float>& image) const
     -> KeypointList<OERegion, float>
 {
-  return compute_sift_keypoints(_distortion_corrector->frame_gray32f(),
-                                _feature_params.image_pyr_params);
+  return compute_sift_keypoints(image, _feature_params.image_pyr_params);
 }
 
 auto v2::OdometryPipeline::estimate_relative_pose(
-    const CameraPoseGraph::Vertex u,  //
-    const CameraPoseGraph::Vertex v) const
+    const CameraPoseGraph::Vertex pose_u,  //
+    const CameraPoseGraph::Vertex pose_v) const
     -> std::pair<RelativePoseData, TwoViewGeometry>
 {
   auto& logger = Logger::get();
 
   SARA_LOGI(logger, "Matching features...");
-  const auto& keys_u = _pose_graph[u].keypoints;
-  const auto& keys_v = _pose_graph[v].keypoints;
+  const auto& keys_u = _pose_graph[pose_u].keypoints;
+  const auto& keys_v = _pose_graph[pose_v].keypoints;
   if (features(keys_u).empty() || features(keys_v).empty())
-    return;
+    return {};
 
   auto matches = match(keys_u, keys_v, _feature_params.sift_nn_ratio);
   if (matches.empty())
-    return;
+    return {};
   if (matches.size() > _feature_params.num_matches_max)
     matches.resize(_feature_params.num_matches_max);
 
@@ -85,15 +89,14 @@ auto v2::OdometryPipeline::estimate_relative_pose(
   const auto num_inliers = inliers.flat_array().count();
   SARA_LOGI(logger, "inlier count: {}", num_inliers);
 
-  const auto num_inliers = inliers.flat_array().count();
-  SARA_LOGI(logger, "inlier count: {}", num_inliers);
+  return {
+      RelativePoseData{.matches = std::move(matches),
+                       .inliers = std::move(inliers),
+                       .motion = {}
 
-  return std::make_pair(RelativePoseData{.matches = std::move(matches),
-                                         .inliers = std::move(inliers),
-                                         .motion = {}
-
-                        },
-                        geometry);
+      },
+      geometry  //
+  };
 }
 
 auto v2::OdometryPipeline::add_camera_pose_and_grow_point_cloud() -> bool
