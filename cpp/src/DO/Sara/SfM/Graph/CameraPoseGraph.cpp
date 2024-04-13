@@ -43,41 +43,10 @@ auto CameraPoseGraph::add_absolute_pose(
 }
 
 auto CameraPoseGraph::add_relative_pose(
-    const v2::RelativePoseEstimator& relative_pose_estimator,  //
-    const FeatureParams& feature_params,                       //
-    const Vertex u, const Vertex v) -> std::pair<Edge, bool>
+    const RelativePoseData& relative_pose_data,  //
+    const Vertex u, const Vertex v) -> bool
 {
-  auto& logger = Logger::get();
-
-  SARA_LOGI(logger, "Match features...");
-  const auto& src_keys = _g[u].keypoints;
-  const auto& dst_keys = _g[v].keypoints;
-  if (features(src_keys).empty() || features(dst_keys).empty())
-    return {{}, false};
-
-  auto matches = match(src_keys, dst_keys, feature_params.sift_nn_ratio);
-  if (matches.empty())
-    return {{}, false};
-  if (matches.size() > feature_params.num_matches_max)
-    matches.resize(feature_params.num_matches_max);
-
-  SARA_LOGI(logger, "Estimating relative pose...");
-  auto [geometry, inliers, sample_best] =
-      relative_pose_estimator.estimate_relative_pose(src_keys, dst_keys,
-                                                     matches);
-  const auto num_inliers = inliers.flat_array().count();
-  SARA_LOGI(logger, "inlier count: {}", num_inliers);
-
-  const auto success = num_inliers > 100;
-  auto e = Edge{};
-  auto edge_added = false;
-  if (success)
-  {
-    std::tie(e, edge_added) = boost::add_edge(u, v, _g);
-    auto& relative_motion_data = _g[e];
-    relative_motion_data.matches = std::move(matches);
-    relative_motion_data.inliers = std::move(inliers);
-  }
-
-  return {e, edge_added};
+  const auto [e, edge_added] = boost::add_edge(u, v, _g);
+  _g[e] = relative_pose_data;
+  return edge_added;
 }

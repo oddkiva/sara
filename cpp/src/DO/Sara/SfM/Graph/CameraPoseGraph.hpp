@@ -82,6 +82,11 @@ namespace DO::Sara {
       return _g[e];
     }
 
+    auto edge(const Vertex u, const Vertex v) const -> std::pair<Edge, bool>
+    {
+      return boost::edge(u, v, _g);
+    }
+
     auto num_vertices() const -> VertexIndex
     {
       return boost::num_vertices(_g);
@@ -90,10 +95,8 @@ namespace DO::Sara {
     auto add_absolute_pose(KeypointList<OERegion, float>&& keypoints,
                            const int image_id) -> Vertex;
 
-    auto add_relative_pose(
-        const v2::RelativePoseEstimator& relative_pose_estimator,  //
-        const FeatureParams& feature_params,                       //
-        const Vertex src, const Vertex dst) -> std::pair<Edge, bool>;
+    auto add_relative_pose(const RelativePoseData& relative_pose_data,  //
+                           const Vertex src, const Vertex dst) -> bool;
 
   private:
     //! @brief The graph data structure shortened as g.

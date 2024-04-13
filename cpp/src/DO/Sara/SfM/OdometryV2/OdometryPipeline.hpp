@@ -24,9 +24,9 @@ namespace DO::Sara::v2 {
   class OdometryPipeline
   {
   public:
-    auto
-    set_config(const std::filesystem::path& video_path,
-               const v2::BrownConradyDistortionModel<double>& camera) -> void;
+    auto set_config(const std::filesystem::path& video_path,
+                    const v2::BrownConradyDistortionModel<double>& camera)
+        -> void;
 
     auto read() -> bool;
 
@@ -41,6 +41,10 @@ namespace DO::Sara::v2 {
     auto estimate_relative_pose(const CameraPoseGraph::Vertex u,
                                 const CameraPoseGraph::Vertex v) const
         -> std::pair<RelativePoseData, TwoViewGeometry>;
+
+    auto update_absolute_pose_from_latest_relative_pose_data(
+        const RelativePoseData& relative_pose_data,
+        const TwoViewGeometry& two_view_geometry) -> bool;
 
   private: /* graph update tasks */
     auto add_camera_pose_and_grow_point_cloud() -> bool;
