@@ -19,75 +19,78 @@
 using namespace DO::Sara;
 
 auto FeatureTracker::update_feature_tracks(
-    const CameraPoseGraph& camera_pose_graph,
-    const CameraPoseGraph::Edge relative_pose_edge) -> void
+    const CameraPoseGraph& pose_graph,
+    const CameraPoseGraph::Edge pose_edge) -> void
 {
   auto& logger = Logger::get();
 
-  const CameraPoseGraph::Impl& cg = camera_pose_graph;
+  const CameraPoseGraph::Impl& pg = pose_graph;
   FeatureGraph::Impl& fg = _feature_graph;
 
-  // Retrieve the two camera vertices from the relative pose edge.
-  const auto pose_i = boost::source(relative_pose_edge, cg);
-  const auto pose_j = boost::target(relative_pose_edge, cg);
+  // Retrieve the camera poses from the relative pose edge.
+  const auto pose_u = boost::source(pose_edge, pg);
+  const auto pose_v = boost::target(pose_edge, pg);
   // The relative pose edge contains the set of all feature correspondences.
-  const auto& matches = cg[relative_pose_edge].matches;
+  const auto& matches = pg[pose_edge].matches;
   // Which of these feature correspondences are marked as inliers?
-  const auto& inliers = cg[relative_pose_edge].inliers;
+  const auto& inliers = pg[pose_edge].inliers;
 
-  // Loop over the feature correspondence and add the feature graph edges.
-  SARA_LOGD(logger, "Pose {} <-> Pose {}", pose_i, pose_j);
+  // Add the feature graph edges.
+  //
+  // They are feature matches that are deemed inliers according the relative
+  // pose estimation task.
+  SARA_LOGD(logger, "Pose {} <-> Pose {}", pose_u, pose_v);
   SARA_LOGD(logger, "Add feature correspondences...");
   for (auto m = 0u; m < matches.size(); ++m)
   {
     if (!inliers(m))
       continue;
 
+    // The feature match is 'm = (ix, iy)'
+    // where 'ix' and 'iy' are the local IDs of feature 'x' and 'y'.
     const auto& match = matches[m];
 
-    // Local feature indices.
-    const auto& f1 = match.x_index();
-    const auto& f2 = match.y_index();
-
-    // Create their corresponding feature GIDs.
-    const auto gid1 = FeatureGID{
-        .pose_vertex = pose_i,  //
-        .feature_index = f1     //
+    // 'x' and 'y' are respectively identified by their GID 'gid_x' and 'gid_y',
+    // which are defined as follows.
+    const auto gid_x = FeatureGID{
+        .pose_vertex = pose_u,            //
+        .feature_index = match.x_index()  //
     };
-    const auto gid2 = FeatureGID{
-        .pose_vertex = pose_j,  //
-        .feature_index = f2     //
+    const auto gid_y = FeatureGID{
+        .pose_vertex = pose_v,            //
+        .feature_index = match.y_index()  //
     };
 
-    // Locate their corresponding pair of vertices (u, v) in the graph?
-    // Do they exist yet in the first place?
-    const auto u_it = _feature_vertex.find(gid1);
-    const auto v_it = _feature_vertex.find(gid2);
+    // Are features 'x' and 'y' already added in the graph, i.e.,
+    // are vertex 'gid_x' and 'gid_y' already added in the graph?
+    const auto it_x = _feature_vertex.find(gid_x);
+    const auto it_y = _feature_vertex.find(gid_y);
 
-    const auto u_does_not_exist_yet = u_it == _feature_vertex.end();
-    const auto v_does_not_exist_yet = v_it == _feature_vertex.end();
+    const auto x_does_not_exist_yet = it_x == _feature_vertex.end();
+    const auto y_does_not_exist_yet = it_y == _feature_vertex.end();
 
     // If not, add them if necessary.
-    const auto u = u_does_not_exist_yet ? boost::add_vertex(fg) : u_it->second;
-    const auto v = v_does_not_exist_yet ? boost::add_vertex(fg) : v_it->second;
+    const auto x = x_does_not_exist_yet ? boost::add_vertex(fg) : it_x->second;
+    const auto y = y_does_not_exist_yet ? boost::add_vertex(fg) : it_y->second;
 
-    if (u_does_not_exist_yet)
+    if (x_does_not_exist_yet)
     {
-      fg[u] = gid1;
-      _feature_vertex[gid1] = u;
+      fg[x] = gid_x;
+      _feature_vertex[gid_x] = x;
     }
-    if (v_does_not_exist_yet)
+    if (y_does_not_exist_yet)
     {
-      fg[v] = gid2;
-      _feature_vertex[gid2] = v;
+      fg[y] = gid_y;
+      _feature_vertex[gid_y] = y;
     }
 
-    // Finally, store the feature match as an edge in the feature graph.
-    const auto [uv, uv_added] = boost::add_edge(u, v, fg);
-    auto& uv_attrs = fg[uv];
-    uv_attrs.i = boost::source(relative_pose_edge, cg);
-    uv_attrs.j = boost::target(relative_pose_edge, cg);
-    uv_attrs.index = m;
+    // Finally, store the feature match as an edge in the feature graph to
+    // navigate between the feature graph to the pose graph.
+    const auto [xy, xy_added] = boost::add_edge(x, y, fg);
+    auto& xy_attrs = fg[xy];
+    xy_attrs.pose_src = boost::source(pose_edge, pg);
+    xy_attrs.pose_dst = boost::target(pose_edge, pg);
+    xy_attrs.index = m;
   }
 
   // Update the feature disjoint-sets

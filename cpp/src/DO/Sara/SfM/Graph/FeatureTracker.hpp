@@ -41,12 +41,11 @@ namespace DO::Sara {
     //! match index).
     std::map<MatchGID, FeatureGraph::Edge> _feature_match;
 
-    auto update_feature_tracks(  //
-        const CameraPoseGraph& camera_pose_graph,
-        const CameraPoseGraph::Edge relative_pose_edge_id) -> void;
+    auto update_feature_tracks(const CameraPoseGraph&,
+                               const CameraPoseGraph::Edge) -> void;
 
     auto calculate_alive_feature_tracks(
-        const CameraPoseGraph::Vertex camera_vertex_curr) const
+        const CameraPoseGraph::Vertex last_pose_vertex) const
         -> std::tuple<TrackArray, TrackVisibilityCountArray>;
   };
 

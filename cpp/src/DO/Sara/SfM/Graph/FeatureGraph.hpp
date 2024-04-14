@@ -40,20 +40,23 @@ namespace DO::Sara {
   struct MatchGID
   {
     //! @brief Index of the epipolar edge connecting camera i and camera j.
-    CameraPoseGraph::Vertex i;
-    CameraPoseGraph::Vertex j;
+    CameraPoseGraph::Vertex pose_src;
+    CameraPoseGraph::Vertex pose_dst;
     //! @brief Local match index.
     std::size_t index;
 
     auto operator==(const MatchGID& other) const -> bool
     {
-      return i == other.i && j == other.j && index == other.index;
+      return pose_src == other.pose_src && pose_dst == other.pose_dst &&
+             index == other.index;
     }
 
     auto operator<(const MatchGID& other) const -> bool
     {
-      return (i < other.i) || (i == other.i && j < other.j) ||
-             (i == other.i && j == other.j && index < other.index);
+      return (pose_src < other.pose_src) ||
+             (pose_src == other.pose_src && pose_dst < other.pose_dst) ||
+             (pose_src == other.pose_src && pose_dst == other.pose_dst &&
+              index < other.index);
     }
   };
 
@@ -97,9 +100,8 @@ namespace DO::Sara {
     auto calculate_feature_tracks() const -> std::vector<Track>;
     auto filter_by_non_max_suppression(const Track&,
                                        const CameraPoseGraph&) const -> Track;
-    auto find_vertex_from_camera_view(const Track&,
-                                      const CameraPoseGraph::Vertex&) const
-        -> Vertex;
+    auto find_vertex_from_camera_view(
+        const Track&, const CameraPoseGraph::Vertex&) const -> Vertex;
 
   private:
     Impl _feature_graph;

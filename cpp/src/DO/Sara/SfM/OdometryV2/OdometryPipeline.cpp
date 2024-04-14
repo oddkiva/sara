@@ -120,6 +120,7 @@ auto v2::OdometryPipeline::add_camera_pose() -> bool
   const auto frame_number = _video_streamer.frame_number();
   auto keys_curr = detect_keypoints(frame);
 
+  // Boundary case.
   if (_pose_graph.num_vertices() == 1)
   {
     // Initialize the new camera pose from the latest image frame.
@@ -133,52 +134,64 @@ auto v2::OdometryPipeline::add_camera_pose() -> bool
 
     return true;
   }
-  else
+
+  const auto& keys_prev = _pose_graph[_pose_prev].keypoints;
+  auto [rel_pose_data, two_view_geometry] =
+      estimate_relative_pose(keys_prev, keys_curr);
+  const auto num_inliers = rel_pose_data.inliers.flat_array().count();
+  SARA_LOGI(logger, "[SfM] Relative pose inliers: {} 3D points", num_inliers);
+  if (num_inliers < _feature_params.num_inliers_min)
   {
-    const auto& keys_prev = _pose_graph[_pose_prev].keypoints;
-    auto [rel_pose_data, two_view_geometry] =
-        estimate_relative_pose(keys_prev, keys_curr);
-    const auto num_inliers = rel_pose_data.inliers.flat_array().count();
-    SARA_LOGI(logger, "[SfM] Relative pose inliers: {} 3D points", num_inliers);
-    if (num_inliers < _feature_params.num_inliers_min)
-    {
-      SARA_LOGI(logger, "[SfM] Relative pose failed!");
-      return false;
-    }
-    SARA_LOGI(logger, "[SfM] Relative pose succeeded!");
+    SARA_LOGI(logger, "[SfM] Relative pose failed!");
+    return false;
+  }
+  SARA_LOGI(logger, "[SfM] Relative pose succeeded!");
 
-    if (_pose_graph.num_vertices() == 2)
-    {
-      auto abs_pose_curr = QuaternionBasedPose<double>{
-          .q = Eigen::Quaterniond{rel_pose_data.motion.R},
-          .t = rel_pose_data.motion.t  //
-      };
+  if (_pose_graph.num_vertices() == 2)
+  {
+    auto abs_pose_curr = QuaternionBasedPose<double>{
+        .q = Eigen::Quaterniond{rel_pose_data.motion.R},
+        .t = rel_pose_data.motion.t  //
+    };
 
-      auto abs_pose_data = AbsolutePoseData{
-          frame_number,             //
-          std::move(keys_curr),     //
-          std::move(abs_pose_curr)  //
-      };
+    auto abs_pose_data = AbsolutePoseData{
+        frame_number,             //
+        std::move(keys_curr),     //
+        std::move(abs_pose_curr)  //
+    };
 
-      // 1. Add the absolute pose vertex.
-      _pose_graph.add_absolute_pose(std::move(abs_pose_data));
+    // 1. Add the absolute pose vertex.
+    _pose_graph.add_absolute_pose(std::move(abs_pose_data));
 
-      // 2. Add the pose edge, which will invalidate the relative pose data.
-      _pose_graph.add_relative_pose(_pose_prev, _pose_curr,
-                                    std::move(rel_pose_data));
+    // 2. Add the pose edge, which will invalidate the relative pose data.
+    const auto pose_edge = _pose_graph.add_relative_pose(
+        _pose_prev, _pose_curr, std::move(rel_pose_data));
 
-      // 3. TODO: Init point cloud
+    // 3. Grow the feature graph by adding the feature matches.
+    _feature_tracker.update_feature_tracks(_pose_graph, pose_edge);
 
-      return true;
-    }
-    else
-    {
-      // 1. Add the absolute pose vertex.
+    // 4. TODO: Init point cloud
 
-      // TODO: Grow point cloud by triangulation.
-      return false;
-    }
+    // 5. TODO: don't add 3D scene points that are too far, like point in the
+    //    sky
+
+    return true;
   }
 
+  // 1. Grow the feature graph first by adding the feature matches that are
+  //    deemed reliable from the relative pose estimation.
+  // 2. Recalculate the feature tracks.
+  // 3. Get the feature tracks that are still alive.
+  // 4. For each feature track still alive, get the corresponding scene
+  //    points.
+  //    Each alive feature track still has the same old feature IDs in the
+  //    previous image frames, and we know their scene points.
+  //    Use triangulation computer vision task, to calculate the new camera
+  //    absolute pose.
+  // 5. With the camera absolute pose, add the new scene points.
+  //    Specifically, they are the alive feature tracks (with cardinality 2)
+  //    for which we don't know the scene points yet.
+
+  // TODO: Grow point cloud by triangulation.
   return false;
 }
