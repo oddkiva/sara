@@ -51,6 +51,8 @@ auto v2::OdometryPipeline::process() -> void
     return;
 
   _distortion_corrector->undistort();
+
+  add_camera_pose();
 }
 
 auto v2::OdometryPipeline::make_display_frame() const -> Image<Rgb8>
@@ -67,21 +69,19 @@ auto v2::OdometryPipeline::detect_keypoints(const ImageView<float>& image) const
 }
 
 auto v2::OdometryPipeline::estimate_relative_pose(
-    const CameraPoseGraph::Vertex pose_u,  //
-    const CameraPoseGraph::Vertex pose_v) const
+    const KeypointList<OERegion, float>& keys_src,
+    const KeypointList<OERegion, float>& keys_dst) const
     -> std::pair<RelativePoseData, TwoViewGeometry>
 {
   auto& logger = Logger::get();
 
-  const auto& keys_u = _pose_graph[pose_u].keypoints;
-  const auto& keys_v = _pose_graph[pose_v].keypoints;
-  if (features(keys_u).empty() || features(keys_v).empty())
+  if (features(keys_src).empty() || features(keys_dst).empty())
   {
     SARA_LOGI(logger, "[Relative Pose] Skipped image matching...");
     return {};
   }
 
-  auto matches = match(keys_u, keys_v, _feature_params.sift_nn_ratio);
+  auto matches = match(keys_src, keys_dst, _feature_params.sift_nn_ratio);
   SARA_LOGI(logger, "[Relative Pose] Matched image keypoints...");
   if (matches.empty())
     return {};
@@ -89,10 +89,11 @@ auto v2::OdometryPipeline::estimate_relative_pose(
     matches.resize(_feature_params.num_matches_max);
 
   auto [two_view_geometry, inliers, sample_best] =
-      _relative_pose_estimator.estimate_relative_pose(keys_u, keys_v, matches);
+      _relative_pose_estimator.estimate_relative_pose(keys_src, keys_dst,
+                                                      matches);
   SARA_LOGI(logger, "[Relative Pose] Estimated relative pose...");
 
-  const auto res = std::pair{
+  const auto res = std::make_pair(  //
       RelativePoseData{.matches = std::move(matches),
                        .inliers = std::move(inliers),
                        .motion =
@@ -102,98 +103,82 @@ auto v2::OdometryPipeline::estimate_relative_pose(
                            }
 
       },
-      two_view_geometry  //
-  };
+      std::move(two_view_geometry)  //
+  );
 
   return res;
 }
 
-auto v2::OdometryPipeline::update_absolute_pose_from_latest_relative_pose_data(
-    const RelativePoseData& relative_pose_data,
-    const TwoViewGeometry& two_view_geometry) -> bool
-{
-  auto& logger = Logger::get();
-
-  const auto num_inliers = relative_pose_data.inliers.flat_array().count();
-  SARA_LOGI(logger, "[SfM] Relative pose inliers: {} 3D points", num_inliers);
-  if (num_inliers < _feature_params.num_inliers_min)
-  {
-    SARA_LOGI(logger, "[SfM] Relative pose failed!");
-    return false;
-  }
-  SARA_LOGI(logger, "[SfM] Relative pose succeeded!");
-
-  if (_pose_graph.num_vertices() == 2)
-  {
-    SARA_LOGI(logger, "Initializing the first two camera poses...");
-    // Set the absolute pose of the first camera which is the identity rigid
-    // body transformation.
-    auto& initial_pose = _pose_graph[_pose_prev].pose;
-    {
-      initial_pose.q.setIdentity();
-      initial_pose.t.setZero();
-    }
-
-    // Set the absolute pose of the first camera as the first relative pose.
-    auto& second_pose = _pose_graph[_pose_curr].pose;
-    {
-      // HEURISTICS: Advance from only 5 cm at most to view something nice.
-      const auto [e, edge_exists] = _pose_graph.edge(_pose_prev, _pose_curr);
-      if (!edge_exists)
-        throw std::runtime_error{"Edge must exist!"};
-
-      _pose_graph[e] = relative_pose_data;
-    }
-
-    // TODO: make a new function for this.
-    // SARA_LOGI(logger, "Initializing the point cloud...");
-    // _point_cloud_operator->init_point_cloud(_tracks_alive, current_image,
-    //                                         _relative_pose_edge_id, _camera);
-  }
-}
-
-
-auto v2::OdometryPipeline::add_camera_pose_and_grow_point_cloud() -> bool
+auto v2::OdometryPipeline::add_camera_pose() -> bool
 {
   auto& logger = Logger::get();
 
   // Detect and describe the local features.
   _pose_prev = _pose_curr;
+
   const auto frame = _distortion_corrector->frame_gray32f();
   const auto frame_number = _video_streamer.frame_number();
-  auto keypoints = detect_keypoints(frame);
-  _pose_curr = _pose_graph.add_absolute_pose(std::move(keypoints),  //
-                                             frame_number);
+  auto keys_curr = detect_keypoints(frame);
 
-  const auto& pose_data = _pose_graph[_pose_curr];
-  SARA_LOGI(logger,
-            "[SfM] Initialized new camera pose[frame:{}]: {} keypoints",  //
-            pose_data.image_id, features(pose_data.keypoints).size());
-
-  // We need two frames at least for the epipolar geometry.
-  if (_pose_graph.num_vertices() < 2)
-    return false;
-
-  const auto [relative_pose_data, two_view_geometry] =
-      this->estimate_relative_pose(_pose_prev, _pose_curr);
-  const auto num_inliers = relative_pose_data.inliers.flat_array().count();
-  SARA_LOGI(logger, "[SfM] Relative pose inliers: {} 3D points", num_inliers);
-  if (num_inliers < _feature_params.num_inliers_min)
+  if (_pose_graph.num_vertices() == 1)
   {
-    SARA_LOGI(logger, "[SfM] Relative pose failed!");
-    return false;
-  }
-  SARA_LOGI(logger, "[SfM] Relative pose succeeded!");
+    // Initialize the new camera pose from the latest image frame.
+    auto abs_pose_curr = QuaternionBasedPose<double>::identity();
+    auto abs_pose_data = AbsolutePoseData{
+        frame_number,             //
+        std::move(keys_curr),     //
+        std::move(abs_pose_curr)  //
+    };
+    _pose_curr = _pose_graph.add_absolute_pose(std::move(abs_pose_data));
 
-  if (_pose_graph.num_vertices() == 2)
-  {
-    // Init point cloud.
+    return true;
   }
   else
   {
-    // Grow point cloud by triangulation.
-  }
+    const auto& keys_prev = _pose_graph[_pose_prev].keypoints;
+    auto [rel_pose_data, two_view_geometry] =
+        estimate_relative_pose(keys_prev, keys_curr);
+    const auto num_inliers = rel_pose_data.inliers.flat_array().count();
+    SARA_LOGI(logger, "[SfM] Relative pose inliers: {} 3D points", num_inliers);
+    if (num_inliers < _feature_params.num_inliers_min)
+    {
+      SARA_LOGI(logger, "[SfM] Relative pose failed!");
+      return false;
+    }
+    SARA_LOGI(logger, "[SfM] Relative pose succeeded!");
 
+    if (_pose_graph.num_vertices() == 2)
+    {
+      auto abs_pose_curr = QuaternionBasedPose<double>{
+          .q = Eigen::Quaterniond{rel_pose_data.motion.R},
+          .t = rel_pose_data.motion.t  //
+      };
+
+      auto abs_pose_data = AbsolutePoseData{
+          frame_number,             //
+          std::move(keys_curr),     //
+          std::move(abs_pose_curr)  //
+      };
+
+      // 1. Add the absolute pose vertex.
+      _pose_graph.add_absolute_pose(std::move(abs_pose_data));
+
+      // 2. Add the pose edge, which will invalidate the relative pose data.
+      _pose_graph.add_relative_pose(_pose_prev, _pose_curr,
+                                    std::move(rel_pose_data));
+
+      // 3. TODO: Init point cloud
+
+      return true;
+    }
+    else
+    {
+      // 1. Add the absolute pose vertex.
+
+      // TODO: Grow point cloud by triangulation.
+      return false;
+    }
+  }
 
   return false;
 }

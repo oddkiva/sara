@@ -20,33 +20,33 @@
 using namespace DO::Sara;
 
 
-auto CameraPoseGraph::add_absolute_pose(
-    KeypointList<OERegion, float>&& keypoints,  //
-    const int image_id) -> CameraPoseGraph::Vertex
+auto CameraPoseGraph::add_absolute_pose(AbsolutePoseData&& data)
+    -> CameraPoseGraph::Vertex
 {
   auto& logger = Logger::get();
-
-  SARA_LOGI(logger, "Detecting keypoints for image frame {}", image_id);
 
   // Grow the pose graph by creating a new camera vertex.
   const auto v = boost::add_vertex(_g);
 
   // Store the camera pose data.
-  auto& pose_data = _g[v];
-  pose_data.image_id = image_id;
-  pose_data.keypoints = std::move(keypoints);
+  _g[v] = std::move(data);
 
-  const auto& f = features(pose_data.keypoints);
-  SARA_LOGI(logger, "Camera {}: {} keypoints", v, f.size());
+  SARA_LOGI(logger,
+            "[SfM] Added camera absolute pose[frame:{}]:\n"
+            "Keypoints: {} points\n"
+            "Absolute pose: {}\n",             //
+            _g[v].image_id,                    //
+            features(_g[v].keypoints).size(),  //
+            _g[v].pose.matrix34());
 
   return v;
 }
 
-auto CameraPoseGraph::add_relative_pose(
-    const RelativePoseData& relative_pose_data,  //
-    const Vertex u, const Vertex v) -> bool
+auto CameraPoseGraph::add_relative_pose(const Vertex u, const Vertex v,
+                                        RelativePoseData&& relative_pose_data)
+    -> CameraPoseGraph::Edge
 {
   const auto [e, edge_added] = boost::add_edge(u, v, _g);
-  _g[e] = relative_pose_data;
-  return edge_added;
+  _g[e] = std::move(relative_pose_data);
+  return e;
 }

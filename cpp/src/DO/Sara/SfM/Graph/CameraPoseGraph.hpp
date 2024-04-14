@@ -33,6 +33,23 @@ namespace DO::Sara {
     KeypointList<OERegion, float> keypoints;
     //! @brief "Absolute" pose w.r.t. some reference frame.
     QuaternionBasedPose<double> pose;
+
+    AbsolutePoseData() = default;
+
+    AbsolutePoseData(const AbsolutePoseData&) = default;
+
+    AbsolutePoseData(AbsolutePoseData&&) = default;
+
+    AbsolutePoseData(const int image_id,
+                     KeypointList<OERegion, float>&& keypoints,
+                     QuaternionBasedPose<double>&& pose)
+      : image_id{image_id}
+      , keypoints{std::move(keypoints)}
+      , pose{std::move(pose)}
+    {
+    }
+
+    auto operator=(AbsolutePoseData&&) -> AbsolutePoseData& = default;
   };
 
   struct RelativePoseData
@@ -92,11 +109,10 @@ namespace DO::Sara {
       return boost::num_vertices(_g);
     }
 
-    auto add_absolute_pose(KeypointList<OERegion, float>&& keypoints,
-                           const int image_id) -> Vertex;
+    auto add_absolute_pose(AbsolutePoseData&& data) -> Vertex;
 
-    auto add_relative_pose(const RelativePoseData& relative_pose_data,  //
-                           const Vertex src, const Vertex dst) -> bool;
+    auto add_relative_pose(const Vertex src, const Vertex dst,
+                           RelativePoseData&& relative_pose_data) -> Edge;
 
   private:
     //! @brief The graph data structure shortened as g.

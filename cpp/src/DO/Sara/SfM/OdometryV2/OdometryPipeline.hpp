@@ -24,9 +24,9 @@ namespace DO::Sara::v2 {
   class OdometryPipeline
   {
   public:
-    auto set_config(const std::filesystem::path& video_path,
-                    const v2::BrownConradyDistortionModel<double>& camera)
-        -> void;
+    auto
+    set_config(const std::filesystem::path& video_path,
+               const v2::BrownConradyDistortionModel<double>& camera) -> void;
 
     auto read() -> bool;
 
@@ -34,20 +34,19 @@ namespace DO::Sara::v2 {
 
     auto make_display_frame() const -> Image<Rgb8>;
 
+    auto detect_keypoints() -> const KeypointList<OERegion, float>&;
+    auto estimate_relative_pose() -> const RelativePoseData&;
+
   private: /* computer vision tasks */
     auto detect_keypoints(const ImageView<float>&) const
         -> KeypointList<OERegion, float>;
 
-    auto estimate_relative_pose(const CameraPoseGraph::Vertex u,
-                                const CameraPoseGraph::Vertex v) const
-        -> std::pair<RelativePoseData, TwoViewGeometry>;
-
-    auto update_absolute_pose_from_latest_relative_pose_data(
-        const RelativePoseData& relative_pose_data,
-        const TwoViewGeometry& two_view_geometry) -> bool;
+    auto estimate_relative_pose(const KeypointList<OERegion, float>& keys_src,
+                                const KeypointList<OERegion, float>& keys_dst)
+        const -> std::pair<RelativePoseData, TwoViewGeometry>;
 
   private: /* graph update tasks */
-    auto add_camera_pose_and_grow_point_cloud() -> bool;
+    auto add_camera_pose() -> bool;
 
   public: /* data members */
     VideoStreamer _video_streamer;
