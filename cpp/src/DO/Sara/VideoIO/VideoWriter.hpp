@@ -67,13 +67,10 @@ namespace DO::Sara {
     OutputStream _audio_stream;
     const AVOutputFormat* _output_format = nullptr;
     AVFormatContext* _format_context;
-    const AVCodec* _audio_codec = nullptr;
     const AVCodec* _video_codec = nullptr;
     AVDictionary* _options = nullptr;
 
-    int _have_audio = 0;
     int _have_video = 0;
-    int _encode_audio = 0;
     int _encode_video = 0;
   };
 
