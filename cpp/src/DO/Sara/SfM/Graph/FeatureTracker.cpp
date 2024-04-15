@@ -19,21 +19,18 @@
 using namespace DO::Sara;
 
 auto FeatureTracker::update_feature_tracks(
-    const CameraPoseGraph& pose_graph,
-    const CameraPoseGraph::Edge pose_edge) -> void
+    const CameraPoseGraph& pose_graph, const CameraPoseGraph::Edge pose_edge)
+    -> void
 {
   auto& logger = Logger::get();
 
-  const CameraPoseGraph::Impl& pg = pose_graph;
-  FeatureGraph::Impl& fg = _feature_graph;
-
   // Retrieve the camera poses from the relative pose edge.
-  const auto pose_u = boost::source(pose_edge, pg);
-  const auto pose_v = boost::target(pose_edge, pg);
+  const auto pose_u = pose_graph.source(pose_edge);
+  const auto pose_v = pose_graph.target(pose_edge);
   // The relative pose edge contains the set of all feature correspondences.
-  const auto& matches = pg[pose_edge].matches;
+  const auto& matches = pose_graph[pose_edge].matches;
   // Which of these feature correspondences are marked as inliers?
-  const auto& inliers = pg[pose_edge].inliers;
+  const auto& inliers = pose_graph[pose_edge].inliers;
 
   // Add the feature graph edges.
   //
@@ -70,6 +67,7 @@ auto FeatureTracker::update_feature_tracks(
     const auto y_does_not_exist_yet = it_y == _feature_vertex.end();
 
     // If not, add them if necessary.
+    FeatureGraph::Impl& fg = _feature_graph;
     const auto x = x_does_not_exist_yet ? boost::add_vertex(fg) : it_x->second;
     const auto y = y_does_not_exist_yet ? boost::add_vertex(fg) : it_y->second;
 
@@ -88,8 +86,8 @@ auto FeatureTracker::update_feature_tracks(
     // navigate between the feature graph to the pose graph.
     const auto [xy, xy_added] = boost::add_edge(x, y, fg);
     auto& xy_attrs = fg[xy];
-    xy_attrs.pose_src = boost::source(pose_edge, pg);
-    xy_attrs.pose_dst = boost::target(pose_edge, pg);
+    xy_attrs.pose_src = pose_graph.source(pose_edge);
+    xy_attrs.pose_dst = pose_graph.target(pose_edge);
     xy_attrs.index = m;
   }
 

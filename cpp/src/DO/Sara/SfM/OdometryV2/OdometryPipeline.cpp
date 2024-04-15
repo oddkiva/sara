@@ -120,9 +120,9 @@ auto v2::OdometryPipeline::add_camera_pose() -> bool
   // Detect and describe the local features.
   _pose_prev = _pose_curr;
 
-  const auto frame = _distortion_corrector->frame_gray32f();
+  const auto frame_gray32f = _distortion_corrector->frame_gray32f();
   const auto frame_number = _video_streamer.frame_number();
-  auto keys_curr = detect_keypoints(frame);
+  auto keys_curr = detect_keypoints(frame_gray32f);
 
   // Boundary case: the graphs are empty.
   if (_pose_graph.num_vertices() == 0)
@@ -176,27 +176,41 @@ auto v2::OdometryPipeline::add_camera_pose() -> bool
     std::tie(_tracks_alive, _track_visibility_count) =
         _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
 
-    // 4. TODO: Init point cloud
-
-    // 5. TODO: don't add 3D scene points that are too far, like point in the
-    //    sky
+    // 4. Initialize the point cloud.
+    //
+    // TODO: don't add 3D scene points that are too far, like point in the
+    // sky
+    const auto frame_rgb8 = _distortion_corrector->frame_rgb8();
+    _point_cloud_generator->seed_point_cloud(_tracks_alive, frame_rgb8,
+                                             pose_edge, _camera);
 
     return true;
   }
 
-  // 1. Grow the feature graph first by adding the feature matches that are
-  //    deemed reliable from the relative pose estimation.
-  // 2. Recalculate the feature tracks.
-  // 3. Get the feature tracks that are still alive.
-  // 4. For each feature track still alive, get the corresponding scene
-  //    points.
-  //    Each alive feature track still has the same old feature IDs in the
-  //    previous image frames, and we know their scene points.
-  //    Use triangulation computer vision task, to calculate the new camera
-  //    absolute pose.
-  // 5. With the camera absolute pose, add the new scene points.
-  //    Specifically, they are the alive feature tracks (with cardinality 2)
-  //    for which we don't know the scene points yet.
+  // 1. Update the feature tracks by adding the feature matches that are
+  //    verified by the relative pose estimation.
+  const auto pose_edge = _pose_graph.add_relative_pose(  //
+      _pose_prev, _pose_curr,                            //
+      std::move(rel_pose_data));
+  _feature_tracker.update_feature_tracks(_pose_graph, pose_edge);
+
+  // 2. Recalculate the feature tracks that are still alive.
+  std::tie(_tracks_alive, _track_visibility_count) =
+      _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
+
+  // 2. Propagate the scene point to the feature tracks that grew longer.
+  //    The feature tracks that grew longer can only be those among the tracks
+  //    still alive.
+  SARA_LOGI(logger, "Propagating the scene points to new features...");
+  _point_cloud_generator->propagate_scene_point_indices(_tracks_alive);
+
+  // 3. Reassign a unique scene point cloud to each feature tracks by
+  //    compressing the point cloud.
+  SARA_LOGI(logger, "Compressing the point cloud...");
+  _point_cloud_generator->compress_point_cloud(
+      _feature_tracker._feature_tracks);
+
+  // 4. Determine the current absolute pose from the alive tracks.
 
   // TODO: Grow point cloud by triangulation.
   return false;

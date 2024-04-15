@@ -289,3 +289,92 @@ auto PointCloudGenerator::seed_point_cloud(
 
   SARA_LOGD(logger, "point cloud: {} 3D points", _point_cloud.size());
 }
+
+auto PointCloudGenerator::propagate_scene_point_indices(
+    const std::vector<FeatureTrack>& tracks) -> void
+{
+  auto& logger = Logger::get();
+
+  SARA_LOGI(logger,
+            "Propagating scene point indices to new feature vertices...");
+
+  for (const auto& track : tracks)
+  {
+    const auto scene_point_indices = list_scene_point_indices(track);
+    if (scene_point_indices.empty())
+      continue;
+
+#if defined(DEBUG_ME)
+    if (scene_point_indices.size() > 1)
+    {
+      SARA_LOGT(logger, "Found a fused feature track...");
+
+      using ScenePointIndexVector = Eigen::RowVector<  //
+          ScenePointIndex, Eigen::Dynamic>;
+      using FeatureVerticesAsVector = Eigen::Map<
+          const Eigen::RowVector<FeatureVertexIndex, Eigen::Dynamic>>;
+      using ScenePointIndicesAsVector = Eigen::Map<  //
+          const Eigen::RowVector<ScenePointIndex, Eigen::Dynamic>>;
+
+      const ScenePointIndexVector track_vector =
+          FeatureVerticesAsVector(track.data(), track.size())
+              .cast<ScenePointIndex>();
+
+      const ScenePointIndexVector scene_index_vector =
+          ScenePointIndicesAsVector(scene_point_indices.data(),
+                                    scene_point_indices.size());
+      SARA_LOGT(logger, "track indices: {}", track_vector);
+      SARA_LOGT(logger, "scene point indices: {}", scene_index_vector);
+
+      for (const auto& i : scene_point_indices)
+        SARA_LOGT(logger, "scene coords[{}]: {}", i,
+                  Eigen::RowVector3d(_point_cloud[i].coords().transpose()));
+    }
+#endif
+
+    // 1. Calculating the barycentric scene point coordinates to disambiguate
+    // the cluster of scene points.
+    const auto scene_point = barycenter(scene_point_indices);
+    for (const auto& i : scene_point_indices)
+      _point_cloud[i] = scene_point;
+
+    // 2. Assigning a unique scene point index for each vertex of the feature
+    // track.
+    const auto& scene_point_index = scene_point_indices.front();
+    for (const auto& v : track)
+      _from_vertex_to_scene_point_index[v] = scene_point_index;
+  }
+}
+
+auto PointCloudOperator::compress_point_cloud(
+    const std::vector<FeatureTrack>& tracks) -> bool
+{
+  auto& logger = Logger::get();
+  SARA_LOGI(logger, "Compressing the point cloud...");
+
+  // Calculate the barycentric scene point for a given feature track.
+  auto point_cloud_compressed = std::vector<ScenePoint>{};
+  point_cloud_compressed.reserve(tracks.size());
+
+  // Reset the scene point index for each feature track.
+  for (auto t = ScenePointIndex{}; t < tracks.size(); ++t)
+  {
+    const auto scene_point_indices = list_scene_point_indices(tracks[t]);
+    if (scene_point_indices.empty())
+      continue;
+
+    // Reassign the scene point index for the given feature track.
+    for (const auto& v : track)
+      _from_vertex_to_scene_point_index[v] = t;
+
+    // Recalculate the scene point index as a barycenter.
+    const auto scene_point =
+        barycenter(scene_point_indices)
+            point_cloud_compressed.emplace_back(scene_point);
+  }
+
+  // Swap the point cloud with the set of barycenters.
+  std::swap(_point_cloud, point_cloud_compressed);
+
+  return true;
+}
