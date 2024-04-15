@@ -99,6 +99,17 @@ namespace DO::Sara {
       return _g[e];
     }
 
+    auto source(const Edge e) const -> Vertex
+    {
+      return boost::source(e, _g);
+    }
+
+    auto target(const Edge e) const -> Vertex
+    {
+      return boost::target(e, _g);
+    }
+
+
     auto edge(const Vertex u, const Vertex v) const -> std::pair<Edge, bool>
     {
       return boost::edge(u, v, _g);

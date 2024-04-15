@@ -18,7 +18,7 @@
 
 namespace DO::Sara {
 
-  class PointCloudManipulator
+  class PointCloudGenerator
   {
   public:
     using PoseVertex = CameraPoseGraph::Vertex;
@@ -30,9 +30,9 @@ namespace DO::Sara {
     using PointCloud = std::vector<RgbColoredPoint<double>>;
     using FeatureTrack = FeatureTracker::Track;
 
-    PointCloudManipulator(const CameraPoseGraph& camera_pose_graph,
-                          const FeatureGraph& feature_graph,
-                          PointCloud& point_cloud)
+    PointCloudGenerator(const CameraPoseGraph& camera_pose_graph,
+                        const FeatureGraph& feature_graph,
+                        PointCloud& point_cloud)
       : _pose_graph{camera_pose_graph}
       , _feature_graph{feature_graph}
       , _point_cloud{point_cloud}
