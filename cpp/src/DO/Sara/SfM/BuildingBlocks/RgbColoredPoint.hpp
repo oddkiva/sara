@@ -12,32 +12,32 @@ namespace DO::Sara {
     using Coords = Eigen::Vector<T, 3>;
     using Color = Eigen::Vector<T, 3>;
 
-    operator Value&()
+    inline operator Value&()
     {
       return value;
     }
 
-    operator const Value&() const
+    inline operator const Value&() const
     {
       return value;
     }
 
-    auto coords() -> Eigen::Map<Coords>
+    inline auto coords() -> Eigen::Map<Coords>
     {
       return Eigen::Map<Eigen::Vector3<T>>{value.data()};
     }
 
-    auto coords() const -> Eigen::Map<const Coords>
+    inline auto coords() const -> Eigen::Map<const Coords>
     {
       return Eigen::Map<const Coords>{value.data()};
     }
 
-    auto color() -> Eigen::Map<Color>
+    inline auto color() -> Eigen::Map<Color>
     {
       return Eigen::Map<Color>{value.data() + 3};
     }
 
-    auto color() const -> Eigen::Map<const Color>
+    inline auto color() const -> Eigen::Map<const Color>
     {
       return Eigen::Map<const Color>{value.data() + 3};
     }
