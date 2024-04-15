@@ -83,8 +83,8 @@ auto PointCloudGenerator::filter_by_non_max_suppression(
 }
 
 auto PointCloudGenerator::find_feature_vertex_at_pose(
-    const FeatureTrack& track, const PoseVertex pose_vertex) const
-    -> std::optional<FeatureVertex>
+    const FeatureTrack& track,
+    const PoseVertex pose_vertex) const -> std::optional<FeatureVertex>
 {
   auto v = std::find_if(track.begin(), track.end(),
                         [this, pose_vertex](const auto& v) {
@@ -92,7 +92,6 @@ auto PointCloudGenerator::find_feature_vertex_at_pose(
                         });
   return v == track.end() ? std::nullopt : std::make_optional(*v);
 }
-
 
 auto PointCloudGenerator::barycenter(
     const std::vector<ScenePointIndex>& scene_point_indices) const -> ScenePoint
@@ -177,7 +176,6 @@ auto PointCloudGenerator::retrieve_scene_point_color(
 
   return rgb64f;
 }
-
 
 auto PointCloudGenerator::seed_point_cloud(
     const std::vector<FeatureTrack>& tracks,
@@ -346,7 +344,7 @@ auto PointCloudGenerator::propagate_scene_point_indices(
   }
 }
 
-auto PointCloudOperator::compress_point_cloud(
+auto PointCloudGenerator::compress_point_cloud(
     const std::vector<FeatureTrack>& tracks) -> bool
 {
   auto& logger = Logger::get();
@@ -359,7 +357,9 @@ auto PointCloudOperator::compress_point_cloud(
   // Reset the scene point index for each feature track.
   for (auto t = ScenePointIndex{}; t < tracks.size(); ++t)
   {
-    const auto scene_point_indices = list_scene_point_indices(tracks[t]);
+    const auto& track = tracks[t];
+
+    const auto scene_point_indices = list_scene_point_indices(track);
     if (scene_point_indices.empty())
       continue;
 
@@ -368,9 +368,8 @@ auto PointCloudOperator::compress_point_cloud(
       _from_vertex_to_scene_point_index[v] = t;
 
     // Recalculate the scene point index as a barycenter.
-    const auto scene_point =
-        barycenter(scene_point_indices)
-            point_cloud_compressed.emplace_back(scene_point);
+    const auto scene_point = barycenter(scene_point_indices);
+    point_cloud_compressed.emplace_back(scene_point);
   }
 
   // Swap the point cloud with the set of barycenters.

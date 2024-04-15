@@ -45,11 +45,11 @@ namespace DO::Sara {
     {
     }
 
-    auto seed_point_cloud(const std::vector<FeatureTrack>&,  //
-                          const ImageView<Rgb8>&,            //
-                          const PoseEdge,
-                          const v2::BrownConradyDistortionModel<double>&)
-        -> void;
+    auto
+    seed_point_cloud(const std::vector<FeatureTrack>&,  //
+                     const ImageView<Rgb8>&,            //
+                     const PoseEdge,
+                     const v2::BrownConradyDistortionModel<double>&) -> void;
 
   public: /* helper feature retrieval methods */
     auto gid(const FeatureVertex u) const -> const FeatureGID&
@@ -84,16 +84,31 @@ namespace DO::Sara {
         const v2::BrownConradyDistortionModel<double>& camera) const -> Rgb64f;
 
   public: /* data transformation methods */
+    //! @brief Calculate the barycentric scene point.
+    //!
+    //! We expect the array of scene point indices to be originated from a
+    //! feature track.
     auto barycenter(const std::vector<ScenePointIndex>&) const -> ScenePoint;
 
+    //! @brief A track is a sequence of feature.
     auto filter_by_non_max_suppression(const FeatureTrack&) const  //
         -> FeatureTrack;
 
+    //! @brief Split the list of feature tracks into two lists.
+    //!
+    //! The first list contains the tracks for which a scene point is calculated.
+    //! The second list contains the tracks for which a scene point is not yet
+    //! calculated.
     auto split_by_scene_point_knowledge(const std::vector<FeatureTrack>&) const
         -> std::pair<std::vector<FeatureTrack>, std::vector<FeatureTrack>>;
 
-    auto propagate_scene_point_indices(const std::vector<FeatureTrack>&)
-        -> void;
+    //! - The point cloud compression reassigns a unique scene point cloud to
+    //!   each feature tracks.
+    //! - The scene point is recalculated as a the barycenter of the
+    //!   possibly multiple scene points we have found after recalculating the
+    //!   feature tracks.
+    auto
+    propagate_scene_point_indices(const std::vector<FeatureTrack>&) -> void;
 
     //! - The point cloud compression reassigns a unique scene point cloud to
     //!   each feature tracks.

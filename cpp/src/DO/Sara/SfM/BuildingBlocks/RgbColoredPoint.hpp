@@ -15,6 +15,11 @@ namespace DO::Sara {
 
     RgbColoredPoint() = default;
 
+    RgbColoredPoint(const Coords& coords, const Color& color)
+    {
+      _v << coords, color;
+    }
+
     RgbColoredPoint(const Value& v)
       : _v{v}
     {
