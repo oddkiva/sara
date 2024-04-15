@@ -359,7 +359,7 @@ auto main(int const argc, char** const argv) -> int
     // clang-format off
     camera.k() <<
       -0.2338367557617234,
-      0.05952465745165465,
+      +0.05952465745165465,
       -0.007947847982157091;
     // clang-format on
     camera.p() << -0.0003137658969742134, 0.00021943576376532096;

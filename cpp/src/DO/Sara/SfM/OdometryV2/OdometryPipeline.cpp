@@ -38,6 +38,8 @@ auto v2::OdometryPipeline::set_config(
       _camera                           //
   );
   _relative_pose_estimator.configure(_camera);
+  _point_cloud_generator = std::make_unique<PointCloudGenerator>(
+      _pose_graph, _feature_tracker._feature_graph, _point_cloud);
 }
 
 auto v2::OdometryPipeline::read() -> bool
@@ -64,8 +66,10 @@ auto v2::OdometryPipeline::detect_keypoints(const ImageView<float>& image) const
     -> KeypointList<OERegion, float>
 {
   auto& logger = Logger::get();
-  SARA_LOGI(logger, "[Feature Detection] Matching image keypoints...");
-  return compute_sift_keypoints(image, _feature_params.image_pyr_params);
+  const auto keys = compute_sift_keypoints(image,  //
+                                           _feature_params.image_pyr_params);
+  SARA_LOGI(logger, "[Feature Detection] {} keypoints", features(keys).size());
+  return keys;
 }
 
 auto v2::OdometryPipeline::estimate_relative_pose(
@@ -120,8 +124,8 @@ auto v2::OdometryPipeline::add_camera_pose() -> bool
   const auto frame_number = _video_streamer.frame_number();
   auto keys_curr = detect_keypoints(frame);
 
-  // Boundary case.
-  if (_pose_graph.num_vertices() == 1)
+  // Boundary case: the graphs are empty.
+  if (_pose_graph.num_vertices() == 0)
   {
     // Initialize the new camera pose from the latest image frame.
     auto abs_pose_curr = QuaternionBasedPose<double>::identity();
@@ -147,7 +151,7 @@ auto v2::OdometryPipeline::add_camera_pose() -> bool
   }
   SARA_LOGI(logger, "[SfM] Relative pose succeeded!");
 
-  if (_pose_graph.num_vertices() == 2)
+  if (_pose_graph.num_vertices() == 1)
   {
     auto abs_pose_curr = QuaternionBasedPose<double>{
         .q = Eigen::Quaterniond{rel_pose_data.motion.R},
@@ -169,6 +173,8 @@ auto v2::OdometryPipeline::add_camera_pose() -> bool
 
     // 3. Grow the feature graph by adding the feature matches.
     _feature_tracker.update_feature_tracks(_pose_graph, pose_edge);
+    std::tie(_tracks_alive, _track_visibility_count) =
+        _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
 
     // 4. TODO: Init point cloud
 

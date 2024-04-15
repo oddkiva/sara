@@ -29,6 +29,8 @@ namespace DO::Sara {
 
     using PointCloud = std::vector<RgbColoredPoint<double>>;
     using FeatureTrack = FeatureTracker::Track;
+    using FeatureToScenePointMap = std::unordered_map<FeatureVertex,  //
+                                                      ScenePointIndex>;
 
     PointCloudGenerator(const CameraPoseGraph& camera_pose_graph,
                         const FeatureGraph& feature_graph,
@@ -48,11 +50,11 @@ namespace DO::Sara {
     auto split_by_scene_point_knowledge(const std::vector<FeatureTrack>&) const
         -> std::pair<std::vector<FeatureTrack>, std::vector<FeatureTrack>>;
 
-    auto
-    init_point_cloud(const std::vector<FeatureTrack>&,  //
-                     const ImageView<Rgb8>&,            //
-                     const PoseEdge,
-                     const v2::BrownConradyDistortionModel<double>&) -> void;
+    auto init_point_cloud(const std::vector<FeatureTrack>&,  //
+                          const ImageView<Rgb8>&,            //
+                          const PoseEdge,
+                          const v2::BrownConradyDistortionModel<double>&)
+        -> void;
 
   public: /* utility methods */
     auto gid(const FeatureVertex u) const -> const FeatureGID&
@@ -84,8 +86,7 @@ namespace DO::Sara {
     const FeatureGraph& _feature_graph;
     PointCloud& _point_cloud;
 
-    std::unordered_map<FeatureVertex, ScenePointIndex>
-        _from_vertex_to_scene_point_index;
+    FeatureToScenePointMap _from_vertex_to_scene_point_index;
   };
 
 }  // namespace DO::Sara
