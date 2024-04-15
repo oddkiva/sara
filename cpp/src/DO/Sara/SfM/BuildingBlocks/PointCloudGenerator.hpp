@@ -50,7 +50,7 @@ namespace DO::Sara {
     auto split_by_scene_point_knowledge(const std::vector<FeatureTrack>&) const
         -> std::pair<std::vector<FeatureTrack>, std::vector<FeatureTrack>>;
 
-    auto init_point_cloud(const std::vector<FeatureTrack>&,  //
+    auto seed_point_cloud(const std::vector<FeatureTrack>&,  //
                           const ImageView<Rgb8>&,            //
                           const PoseEdge,
                           const v2::BrownConradyDistortionModel<double>&)
@@ -67,6 +67,11 @@ namespace DO::Sara {
       const auto& [pose_vertex, feature_index] = gid(u);
       const auto& f = features(_pose_graph[pose_vertex].keypoints);
       return f[feature_index];
+    }
+
+    auto pixel_coords(const FeatureVertex u) const -> const Eigen::Vector2f&
+    {
+      return feature(u).center();
     }
 
     auto barycenter(const std::vector<ScenePointIndex>&) const -> ScenePoint;
