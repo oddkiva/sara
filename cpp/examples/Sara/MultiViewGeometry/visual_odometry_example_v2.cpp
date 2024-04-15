@@ -18,6 +18,7 @@
 #include <DO/Kalpana/Math/Projection.hpp>
 #include <DO/Kalpana/Math/Viewport.hpp>
 
+#include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/SfM/OdometryV2/OdometryPipeline.hpp>
 
 #if defined(_WIN32)
@@ -170,8 +171,21 @@ private:
 
   auto upload_point_cloud_data_to_opengl() -> void
   {
-    // _point_cloud.upload_host_data_to_gl(
-    //     _pipeline._triangulator->_colored_point_cloud);
+    const auto& point_cloud = _pipeline.point_cloud();
+    const auto ptr =
+        const_cast<sara::PointCloudGenerator::ScenePoint*>(point_cloud.data());
+    const auto ptrd = reinterpret_cast<double*>(ptr);
+
+    const auto num_points = static_cast<int>(point_cloud.size());
+    static constexpr auto dim = 6;
+    const auto pc_tview = sara::TensorView_<double, 2>{
+        ptrd,              //
+        {num_points, dim}  //
+    };
+
+    auto& logger = sara::Logger::get();
+    SARA_LOGW(logger, "point cloud dimensions: {} ", pc_tview.sizes());
+    _point_cloud.upload_host_data_to_gl(pc_tview.cast<float>());
   }
 
   auto render_video() -> void

@@ -54,7 +54,7 @@ auto v2::OdometryPipeline::process() -> void
 
   _distortion_corrector->undistort();
 
-  add_camera_pose();
+  grow_geometry();
 }
 
 auto v2::OdometryPipeline::make_display_frame() const -> Image<Rgb8>
@@ -113,7 +113,7 @@ auto v2::OdometryPipeline::estimate_relative_pose(
   return res;
 }
 
-auto v2::OdometryPipeline::add_camera_pose() -> bool
+auto v2::OdometryPipeline::grow_geometry() -> bool
 {
   auto& logger = Logger::get();
 
@@ -151,67 +151,68 @@ auto v2::OdometryPipeline::add_camera_pose() -> bool
   }
   SARA_LOGI(logger, "[SfM] Relative pose succeeded!");
 
-  if (_pose_graph.num_vertices() == 1)
-  {
-    auto abs_pose_curr = QuaternionBasedPose<double>{
-        .q = Eigen::Quaterniond{rel_pose_data.motion.R},
-        .t = rel_pose_data.motion.t  //
-    };
+  // if (_pose_graph.num_vertices() == 1)
+  // {
+  auto abs_pose_curr = QuaternionBasedPose<double>{
+      .q = Eigen::Quaterniond{rel_pose_data.motion.R},
+      .t = rel_pose_data.motion.t  //
+  };
 
-    auto abs_pose_data = AbsolutePoseData{
-        frame_number,             //
-        std::move(keys_curr),     //
-        std::move(abs_pose_curr)  //
-    };
+  auto abs_pose_data = AbsolutePoseData{
+      frame_number,             //
+      std::move(keys_curr),     //
+      std::move(abs_pose_curr)  //
+  };
 
-    // 1. Add the absolute pose vertex.
-    _pose_graph.add_absolute_pose(std::move(abs_pose_data));
+  // 1. Add the absolute pose vertex.
+  _pose_graph.add_absolute_pose(std::move(abs_pose_data));
 
-    // 2. Add the pose edge, which will invalidate the relative pose data.
-    const auto pose_edge = _pose_graph.add_relative_pose(
-        _pose_prev, _pose_curr, std::move(rel_pose_data));
+  // 2. Add the pose edge, which will invalidate the relative pose data.
+  const auto pose_edge = _pose_graph.add_relative_pose(
+      _pose_prev, _pose_curr, std::move(rel_pose_data));
 
-    // 3. Grow the feature graph by adding the feature matches.
-    _feature_tracker.update_feature_tracks(_pose_graph, pose_edge);
-    std::tie(_tracks_alive, _track_visibility_count) =
-        _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
-
-    // 4. Initialize the point cloud.
-    //
-    // TODO: don't add 3D scene points that are too far, like point in the
-    // sky
-    const auto frame_rgb8 = _distortion_corrector->frame_rgb8();
-    _point_cloud_generator->seed_point_cloud(_tracks_alive, frame_rgb8,
-                                             pose_edge, _camera);
-
-    return true;
-  }
-
-  // 1. Update the feature tracks by adding the feature matches that are
-  //    verified by the relative pose estimation.
-  const auto pose_edge = _pose_graph.add_relative_pose(  //
-      _pose_prev, _pose_curr,                            //
-      std::move(rel_pose_data));
+  // 3. Grow the feature graph by adding the feature matches.
   _feature_tracker.update_feature_tracks(_pose_graph, pose_edge);
-
-  // 2. Recalculate the feature tracks that are still alive.
   std::tie(_tracks_alive, _track_visibility_count) =
       _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
 
-  // 2. Propagate the scene point to the feature tracks that grew longer.
-  //    The feature tracks that grew longer can only be those among the tracks
-  //    still alive.
-  SARA_LOGI(logger, "Propagating the scene points to new features...");
-  _point_cloud_generator->propagate_scene_point_indices(_tracks_alive);
+  // 4. Initialize the point cloud.
+  //
+  // TODO: don't add 3D scene points that are too far, like point in the
+  // sky
+  const auto frame_rgb8 = _distortion_corrector->frame_rgb8();
+  _point_cloud_generator->seed_point_cloud(_tracks_alive, frame_rgb8, pose_edge,
+                                           _camera);
 
-  // 3. Reassign a unique scene point cloud to each feature tracks by
-  //    compressing the point cloud.
-  SARA_LOGI(logger, "Compressing the point cloud...");
-  _point_cloud_generator->compress_point_cloud(
-      _feature_tracker._feature_tracks);
+  return true;
+  // }
 
-  // 4. Determine the current absolute pose from the alive tracks.
+  // // 1. Update the feature tracks by adding the feature matches that are
+  // //    verified by the relative pose estimation.
+  // const auto pose_edge = _pose_graph.add_relative_pose(  //
+  //     _pose_prev, _pose_curr,                            //
+  //     std::move(rel_pose_data));
+  // _feature_tracker.update_feature_tracks(_pose_graph, pose_edge);
 
-  // TODO: Grow point cloud by triangulation.
-  return false;
+  // // 2. Recalculate the feature tracks that are still alive.
+  // std::tie(_tracks_alive, _track_visibility_count) =
+  //     _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
+
+  // // 2. Propagate the scene point to the feature tracks that grew longer.
+  // //    The feature tracks that grew longer can only be those among the
+  // tracks
+  // //    still alive.
+  // SARA_LOGI(logger, "Propagating the scene points to new features...");
+  // _point_cloud_generator->propagate_scene_point_indices(_tracks_alive);
+
+  // // 3. Reassign a unique scene point cloud to each feature tracks by
+  // //    compressing the point cloud.
+  // SARA_LOGI(logger, "Compressing the point cloud...");
+  // _point_cloud_generator->compress_point_cloud(
+  //     _feature_tracker._feature_tracks);
+
+  // // 4. Determine the current absolute pose from the alive tracks.
+
+  // // TODO: Grow point cloud by triangulation.
+  // return false;
 }

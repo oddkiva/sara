@@ -34,8 +34,10 @@ namespace DO::Sara::v2 {
 
     auto make_display_frame() const -> Image<Rgb8>;
 
-    auto detect_keypoints() -> const KeypointList<OERegion, float>&;
-    auto estimate_relative_pose() -> const RelativePoseData&;
+    auto point_cloud() const -> const PointCloudGenerator::PointCloud&
+    {
+      return _point_cloud;
+    }
 
   private: /* computer vision tasks */
     auto detect_keypoints(const ImageView<float>&) const
@@ -47,7 +49,7 @@ namespace DO::Sara::v2 {
         -> std::pair<RelativePoseData, TwoViewGeometry>;
 
   private: /* graph update tasks */
-    auto add_camera_pose() -> bool;
+    auto grow_geometry() -> bool;
 
   public: /* data members */
     VideoStreamer _video_streamer;
