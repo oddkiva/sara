@@ -181,7 +181,7 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
   // TODO: don't add 3D scene points that are too far, like point in the
   // sky
   const auto frame_rgb8 = _distortion_corrector->frame_rgb8();
-  _point_cloud_generator->seed_point_cloud(_tracks_alive, frame_rgb8, pose_edge,
+  _point_cloud_generator->grow_point_cloud(_tracks_alive, frame_rgb8, pose_edge,
                                            _camera);
 
   return true;
@@ -214,5 +214,7 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
   // // 4. Determine the current absolute pose from the alive tracks.
 
   // // TODO: Grow point cloud by triangulation.
+  // _point_cloud_generator->grow_point_cloud(_ftracks_without_scene_point,
+  //                                          frame_rgb8, pose_edge, _camera);
   // return false;
 }

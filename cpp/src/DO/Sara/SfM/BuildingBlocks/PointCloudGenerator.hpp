@@ -35,7 +35,7 @@ namespace DO::Sara {
     using FeatureToScenePointMap = std::unordered_map<FeatureVertex,  //
                                                       ScenePointIndex>;
 
-  public: /* main interface */
+  public: /* constructor */
     PointCloudGenerator(const CameraPoseGraph& camera_pose_graph,
                         const FeatureGraph& feature_graph,
                         PointCloud& point_cloud)
@@ -44,12 +44,6 @@ namespace DO::Sara {
       , _point_cloud{point_cloud}
     {
     }
-
-    auto
-    seed_point_cloud(const std::vector<FeatureTrack>&,  //
-                     const ImageView<Rgb8>&,            //
-                     const PoseEdge,
-                     const v2::BrownConradyDistortionModel<double>&) -> void;
 
   public: /* helper feature retrieval methods */
     auto gid(const FeatureVertex u) const -> const FeatureGID&
@@ -96,9 +90,9 @@ namespace DO::Sara {
 
     //! @brief Split the list of feature tracks into two lists.
     //!
-    //! The first list contains the tracks for which a scene point is calculated.
-    //! The second list contains the tracks for which a scene point is not yet
-    //! calculated.
+    //! The first list contains the tracks for which a scene point is
+    //! calculated. The second list contains the tracks for which a scene point
+    //! is not yet calculated.
     auto split_by_scene_point_knowledge(const std::vector<FeatureTrack>&) const
         -> std::pair<std::vector<FeatureTrack>, std::vector<FeatureTrack>>;
 
@@ -107,8 +101,8 @@ namespace DO::Sara {
     //! - The scene point is recalculated as a the barycenter of the
     //!   possibly multiple scene points we have found after recalculating the
     //!   feature tracks.
-    auto
-    propagate_scene_point_indices(const std::vector<FeatureTrack>&) -> void;
+    auto propagate_scene_point_indices(const std::vector<FeatureTrack>&)
+        -> void;
 
     //! - The point cloud compression reassigns a unique scene point cloud to
     //!   each feature tracks.
@@ -116,6 +110,18 @@ namespace DO::Sara {
     //!   possibly multiple scene points we have found after recalculating the
     //!   feature tracks.
     auto compress_point_cloud(const std::vector<FeatureTrack>&) -> bool;
+
+    //! Grow the point cloud becomes possible when the most recent absolute pose
+    //! is known.
+    //!
+    //! This calculates the new 3D scene points. Specifically the new 3D scene
+    //! points are those calculated from the feature tracks for which we didn't
+    //! know their scene point values.
+    auto grow_point_cloud(
+        const std::vector<FeatureTrack>& feature_tracks_without_scene_point,
+        const ImageView<Rgb8>& image,  //
+        const PoseEdge pose_edge,
+        const v2::BrownConradyDistortionModel<double>& camera) -> void;
 
   private: /* data members */
     const CameraPoseGraph& _pose_graph;
