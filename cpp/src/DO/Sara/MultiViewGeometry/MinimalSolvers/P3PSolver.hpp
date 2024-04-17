@@ -42,9 +42,9 @@ namespace DO::Sara {
   {
     using Model = Eigen::Matrix<double, 3, 4>;
 
-    CameraModel camera;
+    const CameraModel* camera = nullptr;
     Model pose;
-    double pixel_reprojection_error;
+    double image_reproj_err_max;
 
     CheiralPnPConsistency() = default;
 
@@ -63,21 +63,26 @@ namespace DO::Sara {
                     const Eigen::MatrixBase<Derived>& rays) const
         -> Eigen::Array<bool, 1, Eigen::Dynamic>
     {
-      Eigen::MatrixXd u1n = pose * scene_points;
-      Eigen::MatrixXd u2{rays.rows(), rays.cols()};
+      if (camera == nullptr)
+        throw std::runtime_error{
+            "Error: you must initialize the intrinsic camera parameters!"};
 
+      Eigen::MatrixXd u1n = pose * scene_points;
       auto u1 = Eigen::MatrixXd{2, scene_points.cols()};
       for (auto i = 0; i < u1.cols(); ++i)
-        u1.col(i) = camera.project(u1.col(i));
+        u1.col(i) = camera->project(u1.col(i));
 
+      Eigen::MatrixXd u2{rays.rows(), rays.cols()};
       for (auto i = 0; i < u2.cols(); ++i)
-        u2.col(i) = camera.project(rays.col(i));
+        u2.col(i) = camera->project(rays.col(i));
 
-      const auto err_max = square(pixel_reprojection_error);
+      // Check the cheirality w.r.t. the candidate pose.
+      const auto cheiral = u1n.row(2).array() > 0;
 
+      // Checka the image reprojection errors.
+      const auto err_max = square(image_reproj_err_max);
       const auto small_reproj_error =
           (u2 - u1).colwise().squaredNorm().array() < err_max;
-      const auto cheiral = scene_points.row(2).array() > 0;
 
       return small_reproj_error && cheiral;
     }
