@@ -32,9 +32,10 @@ auto CameraPoseGraph::add_absolute_pose(AbsolutePoseData&& data)
   _g[v] = std::move(data);
 
   SARA_LOGI(logger,
-            "[SfM] Added camera absolute pose[frame:{}]:\n"
-            "Keypoints: {} points\n"
-            "Absolute pose: {}\n",             //
+            "[SfM] Added camera absolute pose:\n"
+            "- Frame        : {}\n"
+            "- Keypoints    : {}\n"
+            "- Absolute pose:\n{}\n",          //
             _g[v].image_id,                    //
             features(_g[v].keypoints).size(),  //
             _g[v].pose.matrix34());

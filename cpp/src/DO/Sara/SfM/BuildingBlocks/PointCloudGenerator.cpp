@@ -360,7 +360,7 @@ auto PointCloudGenerator::grow_point_cloud(
       rays_u, rays_v);
 
   SARA_LOGD(logger, "Adding new scene points to point cloud...");
-  SARA_LOGD(logger, "[BEFORE] point cloud: {} 3D points", _point_cloud.size());
+  SARA_LOGD(logger, "[BEFORE] {} scene points", _point_cloud.size());
 
   // N.B.: start with the right offset for the scene point index.
   auto scene_point_index = _point_cloud.size();
@@ -390,5 +390,5 @@ auto PointCloudGenerator::grow_point_cloud(
     ++scene_point_index;
   }
 
-  SARA_LOGD(logger, "[AFTER ] point cloud: {} 3D points", _point_cloud.size());
+  SARA_LOGD(logger, "[AFTER ] {} scene points", _point_cloud.size());
 }

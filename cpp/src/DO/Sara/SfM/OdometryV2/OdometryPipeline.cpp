@@ -13,11 +13,11 @@
 
 #include <DO/Sara/Logging/Logger.hpp>
 
-#include <DO/Sara/Graphics/ImageDraw.hpp>
-#include <DO/Sara/Visualization/Features/Draw.hpp>
-
+#include <DO/Sara/Core/Math/Rotation.hpp>
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
+#include <DO/Sara/Graphics/ImageDraw.hpp>
 #include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
+#include <DO/Sara/Visualization/Features/Draw.hpp>
 
 
 using namespace DO::Sara;
@@ -130,10 +130,6 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
   const auto frame_number = _video_streamer.frame_number();
   auto keys_curr = detect_keypoints(frame_gray32f);
 
-  // TODO: CHECK EVERYTHING UNTIL HERE.
-  return true;
-
-
   // Boundary case: the graphs are empty.
   if (_pose_graph.num_vertices() == 0)
   {
@@ -161,12 +157,39 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
   }
   SARA_LOGI(logger, "[SfM] Relative pose succeeded!");
 
+
   // if (_pose_graph.num_vertices() == 1)
   // {
   auto abs_pose_curr = QuaternionBasedPose<double>{
       .q = Eigen::Quaterniond{rel_pose_data.motion.R},
       .t = rel_pose_data.motion.t  //
   };
+
+  // The rotation is expressed in the camera coordinates.
+  // But the calculation is done in the automotive/aeronautics coordinate
+  // system.
+  //
+  // The z-coordinate of the camera coordinates is the x-axis of the automotive
+  // coordinates
+  //
+  // clang-format off
+  static const auto P = (Eigen::Matrix3d{} <<
+     0,  0, 1,
+    -1,  0, 0,
+     0, -1, 0
+  ).finished();
+  // clang-format on
+
+  const auto& R = rel_pose_data.motion.R;
+  const Eigen::Matrix3d R_delta_abs = P * R.transpose() * P.transpose();
+  _current_global_rotation = R_delta_abs * _current_global_rotation;
+
+  const auto q_global = Eigen::Quaterniond{_current_global_rotation};
+  auto angles = calculate_yaw_pitch_roll(q_global);
+  static constexpr auto degrees = 180. / M_PI;
+  SARA_LOGI(logger, "Global yaw   = {} deg", angles(0) * degrees);
+  SARA_LOGI(logger, "Global pitch = {} deg", angles(1) * degrees);
+  SARA_LOGI(logger, "Global roll  = {} deg", angles(2) * degrees);
 
   auto abs_pose_data = AbsolutePoseData{
       frame_number,             //
@@ -175,7 +198,7 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
   };
 
   // 1. Add the absolute pose vertex.
-  _pose_graph.add_absolute_pose(std::move(abs_pose_data));
+  _pose_curr = _pose_graph.add_absolute_pose(std::move(abs_pose_data));
 
   // 2. Add the pose edge, which will invalidate the relative pose data.
   const auto pose_edge = _pose_graph.add_relative_pose(
@@ -185,7 +208,6 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
   _feature_tracker.update_feature_tracks(_pose_graph, pose_edge);
   std::tie(_tracks_alive, _track_visibility_count) =
       _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
-
 
   // 4. Initialize the point cloud.
   //
