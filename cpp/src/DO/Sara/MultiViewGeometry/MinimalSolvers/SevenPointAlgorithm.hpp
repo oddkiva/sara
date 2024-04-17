@@ -6,8 +6,6 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 
-#include <optional>
-
 
 namespace DO::Sara {
 
