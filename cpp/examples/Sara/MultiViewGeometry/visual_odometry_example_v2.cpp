@@ -72,6 +72,7 @@ public:
     glfwSetWindowUserPointer(_window, this);
     // Register callbacks.
     glfwSetWindowSizeCallback(_window, window_size_callback);
+    glfwSetKeyCallback(_window, key_callback);
   }
 
   ~SingleWindowApp()
@@ -115,12 +116,24 @@ public:
     glfwSwapInterval(1);
     while (!glfwWindowShouldClose(_window))
     {
-      if (!_pipeline.read())
-        break;
+      if (!_pause)
+      {
+        if (!_pipeline.read())
+          break;
 
-      _pipeline.process();
-      // Load data to OpenGL.
-      upload_point_cloud_data_to_opengl();
+        if (!_pipeline._video_streamer.skip())
+        {
+          _pipeline.process();
+
+          // Load data to OpenGL.
+          //
+          // TODO: upload only if we have a new image frame to process and only
+          // if the absolute pose estimation is successful.
+          upload_point_cloud_data_to_opengl();
+
+          _pause = true;
+        }
+      }
 
       // Clear the color buffer and the buffer testing.
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -172,19 +185,22 @@ private:
   auto upload_point_cloud_data_to_opengl() -> void
   {
     const auto& point_cloud = _pipeline.point_cloud();
+
+    static constexpr auto dim = 6;
+    const auto num_points = static_cast<int>(point_cloud.size());
+    if (num_points == 0)
+      return;
+
     const auto ptr =
         const_cast<sara::PointCloudGenerator::ScenePoint*>(point_cloud.data());
     const auto ptrd = reinterpret_cast<double*>(ptr);
-
-    const auto num_points = static_cast<int>(point_cloud.size());
-    static constexpr auto dim = 6;
     const auto pc_tview = sara::TensorView_<double, 2>{
         ptrd,              //
         {num_points, dim}  //
     };
 
     auto& logger = sara::Logger::get();
-    SARA_LOGW(logger, "point cloud dimensions: {} ", pc_tview.sizes());
+    SARA_LOGI(logger, "point cloud dimensions: {} ", pc_tview.sizes());
     _point_cloud.upload_host_data_to_gl(pc_tview.cast<float>());
   }
 
@@ -271,6 +287,22 @@ private:
     self._point_cloud_projection = self._point_cloud_viewport.perspective();
   }
 
+  static auto key_callback(GLFWwindow* window,  //
+                           int key,             //
+                           int /* scancode */,  //
+                           int action,          //
+                           int /* mods */) -> void
+  {
+    auto& app = get_self(window);
+    if (app._pause && key == GLFW_KEY_SPACE &&
+        (action == GLFW_RELEASE || action == GLFW_REPEAT))
+    {
+      app._pause = false;
+      std::cout << "RESUME" << std::endl;
+      return;
+    }
+  }
+
 private:
   static auto init_glfw() -> void
   {
@@ -342,6 +374,9 @@ private:
   Eigen::Matrix4f _point_cloud_projection;
   // kgl::Camera _point_cloud_camera;
   float _point_size = 5.f;
+
+  //! @brief User interaction.
+  bool _pause = false;
 };
 
 bool SingleWindowApp::_glfw_initialized = false;

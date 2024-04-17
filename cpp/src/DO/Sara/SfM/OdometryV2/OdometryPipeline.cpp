@@ -52,6 +52,12 @@ auto v2::OdometryPipeline::process() -> void
   if (_video_streamer.skip())
     return;
 
+  auto& logger = Logger::get();
+  SARA_LOGI(logger, "[Video Stream] Processing image frame {}",
+            _video_streamer.frame_number());
+
+  SARA_LOGI(logger, "[Image Distortion] Undistort image frame {}",
+            _video_streamer.frame_number());
   _distortion_corrector->undistort();
 
   grow_geometry();
@@ -68,7 +74,7 @@ auto v2::OdometryPipeline::detect_keypoints(const ImageView<float>& image) const
   auto& logger = Logger::get();
   const auto keys = compute_sift_keypoints(image,  //
                                            _feature_params.image_pyr_params);
-  SARA_LOGI(logger, "[Feature Detection] {} keypoints", features(keys).size());
+  SARA_LOGI(logger, "[Keypoint Detection] {} keypoints", features(keys).size());
   return keys;
 }
 
@@ -124,6 +130,10 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
   const auto frame_number = _video_streamer.frame_number();
   auto keys_curr = detect_keypoints(frame_gray32f);
 
+  // TODO: CHECK EVERYTHING UNTIL HERE.
+  return true;
+
+
   // Boundary case: the graphs are empty.
   if (_pose_graph.num_vertices() == 0)
   {
@@ -176,10 +186,14 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
   std::tie(_tracks_alive, _track_visibility_count) =
       _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
 
+
   // 4. Initialize the point cloud.
   //
   // TODO: don't add 3D scene points that are too far, like point in the
   // sky
+  //
+  // TODO: don't clear next time we just need to debug at this time.
+  _point_cloud.clear();
   const auto frame_rgb8 = _distortion_corrector->frame_rgb8();
   _point_cloud_generator->grow_point_cloud(_tracks_alive, frame_rgb8, pose_edge,
                                            _camera);
