@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(test_robust_line_fit)
 {
   auto points = PointList<double, 2>{Tensor_<double, 2>{6, 3}};
   // clang-format off
-  points._data.matrix() <<              0.00,                      0.00, 1,
+  points.data.matrix() <<               0.00,                      0.00, 1,
                                         1.00,                      1.10, 1,
                                         3.40,                      3.46, 1,
                                         9.80,                     10.10, 1,
