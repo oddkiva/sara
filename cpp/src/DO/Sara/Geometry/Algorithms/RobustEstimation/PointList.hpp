@@ -23,25 +23,25 @@ namespace DO::Sara {
 
     operator TensorView<T, D>&()
     {
-      return _data;
+      return data;
     }
 
     operator const TensorView<T, D>&() const
     {
-      return _data;
+      return data;
     }
 
     auto operator[](const int n) const -> value_type
     {
-      return _data[n];
+      return data[n];
     }
 
     auto size() const -> int
     {
-      return _data.size(0);
+      return data.size(0);
     }
 
-    Tensor_<T, D> _data;
+    Tensor_<T, D> data;
   };
 
 }  // namespace DO::Sara

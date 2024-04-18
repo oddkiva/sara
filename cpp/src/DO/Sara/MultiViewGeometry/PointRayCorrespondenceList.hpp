@@ -17,10 +17,13 @@
 
 namespace DO::Sara {
 
+  //! @brief Convenient aliases.
+  //! @{
   template <typename T>
   using PointRayCorrespondenceList = PointCorrespondenceList<T>;
 
   template <typename T>
   using PointRayCorrespondenceSubsetList = PointCorrespondenceSubsetList<T>;
+  //! @}
 
 }  // namespace DO::Sara

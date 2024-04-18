@@ -151,7 +151,7 @@ namespace DO::Sara {
     inline auto operator()(const PointList<T, D>& X) const
         -> Array<bool, 1, Dynamic>
     {
-      return distance(X._data.colmajor_view().matrix()).array() <
+      return distance(X.data.colmajor_view().matrix()).array() <
              static_cast<float>(err_threshold);
     }
 
@@ -160,8 +160,8 @@ namespace DO::Sara {
     inline auto operator()(const PointCorrespondenceList<T>& m) const
         -> Array<bool, 1, Dynamic>
     {
-      return distance(m._p1.colmajor_view().matrix(),
-                      m._p2.colmajor_view().matrix())
+      return distance(m.x.colmajor_view().matrix(),
+                      m.y.colmajor_view().matrix())
                  .array() < err_threshold;
     }
   };

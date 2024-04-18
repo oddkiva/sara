@@ -16,6 +16,22 @@
 
 namespace DO::Sara {
 
+  //! @brief The data structure to store the list of point correspondences.
+  //!
+  //! A point correspondence is denoted as $(x[i], y[i])$.
+  //!
+  //! In my opinion, 'x' and 'y' are the lightest and most agnostic notations I
+  //! could find.
+  //! We do lose expressivity because they may be too neutral, but it still
+  //! feels natural and mathematical at the same time.
+  //!
+  //! Notice that we are not assuming anythin about the dimensions of x[i] and
+  //! y[i].
+  //! - x[i] and y[i] don't have to have the same dimensions.
+  //! - (x[i], y[i]) can be 2D point <-> 2D point correspondence in two
+  //!   different images, or
+  //! - (x[i], y[i]) can be a 3D point <-> 2D point correspondence, or
+  //! - (x[i], y[i]) can be a 3D scene point <-> 3D ray correspondence.
   template <typename T>
   struct PointCorrespondenceList
   {
@@ -24,37 +40,40 @@ namespace DO::Sara {
     PointCorrespondenceList() = default;
 
     PointCorrespondenceList(const TensorView_<int, 2>& M,
-                            const TensorView_<T, 2>& p1,
-                            const TensorView_<T, 2>& p2)
-      : _p1{M.size(0), p1.size(1)}
-      , _p2{M.size(0), p2.size(1)}
+                            const TensorView_<T, 2>& x_all,
+                            const TensorView_<T, 2>& y_all)
+      : x{M.size(0), x_all.size(1)}
+      , y{M.size(0), y_all.size(1)}
     {
-      auto p1_mat = p1.matrix();
-      auto p2_mat = p2.matrix();
-      auto p1_matched = _p1.matrix();
-      auto p2_matched = _p2.matrix();
+      auto x_all_mat = x_all.matrix();
+      auto y_all_mat = y_all.matrix();
+      auto x_matched = x.matrix();
+      auto y_matched = y.matrix();
       for (auto m = 0; m < M.size(0); ++m)
       {
-        const auto& i1 = M(m, 0);
-        const auto& i2 = M(m, 1);
+        const auto& x_idx = M(m, 0);
+        const auto& y_idx = M(m, 1);
 
-        p1_matched.row(m) = p1_mat.row(i1);
-        p2_matched.row(m) = p2_mat.row(i2);
+        x_matched.row(m) = x_all_mat.row(x_idx);
+        y_matched.row(m) = y_all_mat.row(y_idx);
       }
     }
 
     auto size() const -> int
     {
-      return _p1.size(0);
+      return x.size(0);
     }
 
     auto operator[](const int n) const -> value_type
     {
-      return {_p1[n], _p2[n]};
+      return {x[n], y[n]};
     }
 
-    Tensor_<T, 2> _p1;
-    Tensor_<T, 2> _p2;
+    //! @brief The correspondences are: (x[i], y[i]).
+    //! @{
+    Tensor_<T, 2> x;
+    Tensor_<T, 2> y;
+    //! @}
   };
 
   template <typename T>
@@ -64,11 +83,11 @@ namespace DO::Sara {
 
     auto operator[](const int n) const -> value_type
     {
-      return {_p1[n], _p2[n]};
+      return {x[n], y[n]};
     }
 
-    Tensor_<T, 3> _p1;
-    Tensor_<T, 3> _p2;
+    Tensor_<T, 3> x;
+    Tensor_<T, 3> y;
   };
 
 }  // namespace DO::Sara

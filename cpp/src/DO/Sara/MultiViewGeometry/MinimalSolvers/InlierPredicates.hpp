@@ -43,7 +43,8 @@ namespace DO::Sara {
       // THE BUG IS HERE: we need to pass backprojected rays and instead we are
       // giving pixel coordinates.
       const auto [X, s1, s2] = triangulate_linear_eigen(P1, P2, u1, u2);
-      const auto cheirality = (s1.transpose().array()) > 0 && (s2.transpose().array() > 0);
+      const auto cheirality =
+          (s1.transpose().array()) > 0 && (s2.transpose().array() > 0);
 
       return epipolar_consistent && cheirality;
 #else
@@ -57,8 +58,8 @@ namespace DO::Sara {
     inline auto operator()(const PointCorrespondenceList<T>& m) const
         -> Array<bool, 1, Dynamic>
     {
-      return this->operator()(m._p1.colmajor_view().matrix(),
-                              m._p2.colmajor_view().matrix());
+      return this->operator()(m.x.colmajor_view().matrix(),
+                              m.y.colmajor_view().matrix());
     }
   };
 
