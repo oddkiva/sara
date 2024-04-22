@@ -40,22 +40,26 @@ namespace DO::Sara {
   template <typename CameraModel>
   struct CheiralPnPConsistency
   {
-    using Model = Eigen::Matrix<double, 3, 4>;
+    using PoseMatrix = Eigen::Matrix<double, 3, 4>;
+    using Model = PoseMatrix;
 
+    //! @brief The camera model for the image.
     const CameraModel* camera = nullptr;
-    Model pose;
-    double image_reproj_err_max;
+    //! @brief The pose matrix.
+    PoseMatrix T;
+    //! @brief Image reprojection error in pixel.
+    double ε;
 
-    CheiralPnPConsistency() = default;
+    inline CheiralPnPConsistency() = default;
 
-    CheiralPnPConsistency(const Model& pose)
+    inline CheiralPnPConsistency(const PoseMatrix& pose_matrix)
     {
-      set_model(pose);
+      set_model(pose_matrix);
     }
 
-    auto set_model(const Model& p) -> void
+    inline auto set_model(const PoseMatrix& pose_matrix) -> void
     {
-      pose = p;
+      T = pose_matrix;
     }
 
     template <typename Derived>
@@ -67,33 +71,34 @@ namespace DO::Sara {
         throw std::runtime_error{
             "Error: you must initialize the intrinsic camera parameters!"};
 
-      Eigen::MatrixXd u1n = pose * scene_points;
+      const auto& X_world = scene_points;
+      const Eigen::MatrixXd X_camera = T * X_world;
+
       auto u1 = Eigen::MatrixXd{2, scene_points.cols()};
       for (auto i = 0; i < u1.cols(); ++i)
-        u1.col(i) = camera->project(u1.col(i));
+        u1.col(i) = camera->project(X_camera.col(i));
 
-      Eigen::MatrixXd u2{rays.rows(), rays.cols()};
+      auto u2 = Eigen::MatrixXd{rays.rows(), rays.cols()};
       for (auto i = 0; i < u2.cols(); ++i)
         u2.col(i) = camera->project(rays.col(i));
 
       // Check the cheirality w.r.t. the candidate pose.
-      const auto cheiral = u1n.row(2).array() > 0;
+      const auto cheiral = X_camera.row(2).array() > 0;
 
-      // Checka the image reprojection errors.
-      const auto err_max = square(image_reproj_err_max);
-      const auto small_reproj_error =
-          (u2 - u1).colwise().squaredNorm().array() < err_max;
+      // Check the **squared** image reprojection errors.
+      const auto ε_max = square(ε);
+      const auto ε_small = (u2 - u1).colwise().squaredNorm().array() < ε_max;
 
-      return small_reproj_error && cheiral;
+      return ε_small && cheiral;
     }
 
     //! @brief Check the inlier predicate on a list of correspondences.
     template <typename T>
     inline auto operator()(const PointRayCorrespondenceSubsetList<T>& m) const
-        -> Array<bool, 1, Dynamic>
+        -> Eigen::Array<bool, 1, Eigen::Dynamic>
     {
-      const auto& scene_points = m._p1.colmajor_view().matrix();
-      const auto& backprojected_rays = m._p2.colmajor_view().matrix();
+      const auto& scene_points = m.x.colmajor_view().matrix();
+      const auto& backprojected_rays = m.y.colmajor_view().matrix();
       return this->operator()(scene_points, backprojected_rays);
     }
   };
