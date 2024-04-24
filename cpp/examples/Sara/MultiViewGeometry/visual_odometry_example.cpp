@@ -73,11 +73,18 @@ public:
     glfwSetWindowSizeCallback(_window, window_size_callback);
   }
 
-  //! @brief Note: RAII does not work on OpenGL applications.
-  //!
-  //! So the destructor gets a default implementation and we neeed to explicitly
-  //! call the terminate method.
-  ~SingleWindowApp() = default;
+  ~SingleWindowApp()
+  {
+    // Destroy GL objects.
+    deinit_gl_resources();
+
+    // Destroy GLFW.
+    if (_window != nullptr)
+      glfwDestroyWindow(_window);
+
+    if (_glfw_initialized)
+      glfwTerminate();
+  }
 
   auto set_config(const fs::path& video_path,
                   const sara::v2::BrownConradyDistortionModel<double>& camera)
@@ -123,17 +130,6 @@ public:
       glfwSwapBuffers(_window);
       glfwPollEvents();
     }
-  }
-
-  auto terminate() -> void
-  {
-    // Destroy GL objects.
-    deinit_gl_resources();
-
-    // Destroy GLFW.
-    if (_window != nullptr)
-      glfwDestroyWindow(_window);
-    glfwTerminate();
   }
 
 private:
@@ -264,8 +260,13 @@ private:
 private:
   static auto init_glfw() -> void
   {
+    if (_glfw_initialized)
+      throw std::runtime_error{
+          "Error: cannot instantiate more than one GLFW application!"};
+
     // Initialize the windows manager.
-    if (!glfwInit())
+    _glfw_initialized = glfwInit();
+    if (!_glfw_initialized)
       throw std::runtime_error{"Error: failed to initialize GLFW!"};
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -292,6 +293,8 @@ private:
   }
 
 private:
+  static bool _glfw_initialized;
+
   GLFWwindow* _window = nullptr;
   //! @brief Framebuffer sizes
   //! We want to use this and not the window sizes because of MacOS retina
@@ -327,6 +330,8 @@ private:
   float _point_size = 5.f;
 };
 
+bool SingleWindowApp::_glfw_initialized = false;
+
 
 auto main(int const argc, char** const argv) -> int
 {
@@ -340,7 +345,7 @@ auto main(int const argc, char** const argv) -> int
   {
     std::cout << fmt::format("Usage: {} VIDEO_PATH\n",
                              std::string_view{argv[0]});
-    return 1;
+    return EXIT_FAILURE;
   }
 
   const auto video_path = fs::path{argv[1]};
@@ -360,10 +365,17 @@ auto main(int const argc, char** const argv) -> int
     camera.p() << -0.0003137658969742134, 0.00021943576376532096;
   }
 
-  auto app = SingleWindowApp{{800, 600}, "Odometry: " + video_path.string()};
-  app.set_config(video_path, camera);
-  app.run();
-  app.terminate();
+  try
+  {
+    auto app = SingleWindowApp{{800, 600}, "Odometry: " + video_path.string()};
+    app.set_config(video_path, camera);
+    app.run();
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
 
-  return 0;
+  return EXIT_SUCCESS;
 }

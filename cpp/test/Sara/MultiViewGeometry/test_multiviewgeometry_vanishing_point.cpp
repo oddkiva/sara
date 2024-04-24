@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(test_vp_detection)
   const auto vp = Eigen::Vector3f(500, 500, 1);
 
   auto line_list = PointList<float, 2>{};
-  auto& lines = line_list._data;
+  auto& lines = line_list.data;
 
   lines = Tensor_<float, 2>{6, 3};
   auto lines_as_matrix = lines.matrix();

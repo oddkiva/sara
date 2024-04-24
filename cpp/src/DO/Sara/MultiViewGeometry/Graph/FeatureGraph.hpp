@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Features/KeypointList.hpp>
-#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
+#include <DO/Sara/MultiViewGeometry/Graph/EpipolarGraph.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
@@ -30,11 +30,17 @@ namespace DO::Sara {
   //! @defgroup FeatureGraph Feature Correspondence Graph
   //! @{
 
-  //! @brief Feature global ID (GID).
+  //! @brief Feature Global ID (GID).
   struct FeatureGID
   {
-    int image_id{-1};
-    int local_id{-1};
+    using image_id_t = int;
+    using local_id_t = int;
+
+    static constexpr auto undefined_image_id = -1;
+    static constexpr auto undefined_local_id = -1;
+
+    image_id_t image_id = undefined_image_id;
+    local_id_t local_id = undefined_local_id;
 
     auto operator==(const FeatureGID& other) const -> bool
     {
@@ -49,11 +55,17 @@ namespace DO::Sara {
   };
 
 
-  //! @brief Match global ID (GID).
+  //! @brief Match Global ID (GID).
   struct MatchGID
   {
-    int ij;
-    int m;
+    using image_pair_t = int;
+    using match_t = int;
+
+    static constexpr auto undefined_image_pair = -1;
+    static constexpr auto undefined_match = -1;
+
+    image_pair_t ij = undefined_image_pair;
+    match_t m = undefined_match;
 
     auto operator==(const MatchGID& other) const -> bool
     {

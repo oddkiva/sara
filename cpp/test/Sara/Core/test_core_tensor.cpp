@@ -113,16 +113,17 @@ BOOST_AUTO_TEST_CASE(test_matrix_case)
   auto img = Image<Matrix<float, M, N>>{W, H};  // Indexed by (y, x, j, i).
 
   auto img_elem = Matrix<float, M, N>{};
-  std::iota(img_elem.data(), img_elem.data() + M * N, 0);
+  for (auto i = 0; i < M * N; ++i)
+    img_elem.data()[i] = static_cast<float>(i);
   img.flat_array().fill(img_elem);
 
   auto m = img.matrix();
-  m(0, 0) *= 0;
-  m(0, 1) *= 1;
-  m(1, 0) *= 2;
-  m(1, 1) *= 3;
-  m(2, 0) *= 4;
-  m(2, 1) *= 5;
+  // clang-format off
+  m(0, 0) *= 0; m(0, 1) *= 1;
+  m(1, 0) *= 2; m(1, 1) *= 3;
+  m(2, 0) *= 4; m(2, 1) *= 5;
+  // clang-format on
+
   /*
    * [[0, 0, 0],  [[0, 2, 4],
    *  [0, 0, 0]]   [1, 3, 5]]

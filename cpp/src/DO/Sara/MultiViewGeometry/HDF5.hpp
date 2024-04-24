@@ -12,9 +12,9 @@
 #pragma once
 
 #include <DO/Sara/Core/HDF5.hpp>
-#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Graph/EpipolarGraph.hpp>
 
 
 namespace DO::Sara {

@@ -12,8 +12,7 @@ namespace DO::Sara {
     Eigen::Quaternion<T> q;
     Eigen::Vector3<T> t;
 
-    inline auto operator()(const Eigen::Vector3<T>& x) const
-        -> Eigen::Vector3<T>
+    inline auto operator*(const Eigen::Vector3<T>& x) const -> Eigen::Vector3<T>
     {
       return q * x + t;
     }
@@ -25,9 +24,15 @@ namespace DO::Sara {
 
     inline auto matrix4() const -> Eigen::Matrix4<T>
     {
-      return (Eigen::Matrix<T, 4, 4>{} <<
-              matrix34(), Eigen::RowVector3<T>::Zero().homogeneous())
-          .finished();
+      auto r = Eigen::Matrix<T, 4, 4>{};
+      r << matrix34(), Eigen::RowVector3<T>::Zero().homogeneous();
+      return r;
+    }
+
+    static inline auto identity() -> QuaternionBasedPose<T>
+    {
+      return {.q = Eigen::Quaternion<T>::Identity(),
+              .t = Eigen::Vector3<T>::Zero()};
     }
   };
 

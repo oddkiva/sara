@@ -96,7 +96,7 @@ namespace DO::Sara {
     inline auto normalize(const PointList<S, 2>& X) const
     {
       auto Xn = PointList<S, 2>{};
-      Xn._data = apply_transform(T, X._data);
+      Xn.data = apply_transform(T, X.data);
       return Xn;
     }
 

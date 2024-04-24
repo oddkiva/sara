@@ -9,6 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#pragma once
+
+#ifndef GLOG_USE_GLOG_EXPORT
+#  define GLOG_USE_GLOG_EXPORT
+#endif
+
 #include <Eigen/Core>
 
 #include <ceres/ceres.h>

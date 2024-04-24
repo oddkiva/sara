@@ -48,6 +48,11 @@ namespace DO::Sara {
       return _video_stream.height();
     }
 
+    auto frame_number() const -> int
+    {
+      return _frame_index;
+    }
+
     auto skip() const -> bool
     {
       return _frame_index % (_num_skips + 1) != 0;

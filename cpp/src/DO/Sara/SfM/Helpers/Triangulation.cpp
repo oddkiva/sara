@@ -12,7 +12,7 @@
 #include <DO/Sara/Core/MultiArray/DataTransformations.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
-#include <DO/Sara/SfM/BuildingBlocks.hpp>
+#include <DO/Sara/SfM/Helpers.hpp>
 
 
 using namespace std;

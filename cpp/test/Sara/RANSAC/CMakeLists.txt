@@ -5,6 +5,6 @@ foreach (file ${test_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES DO::Sara::MultiViewGeometry DO::Sara::RANSAC
+    DEPENDENCIES DO::Sara::MultiViewGeometry DO::Sara::RANSAC fmt::fmt
     FOLDER RANSAC)
 endforeach ()

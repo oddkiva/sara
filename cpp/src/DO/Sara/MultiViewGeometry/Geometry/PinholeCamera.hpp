@@ -11,8 +11,6 @@
 
 #pragma once
 
-#include <DO/Sara/Defines.hpp>
-
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 
@@ -37,9 +35,9 @@ namespace DO::Sara {
       return K * Rt;
     }
 
-    Eigen::Matrix3d K{Eigen::Matrix3d::Identity()};
-    Eigen::Matrix3d R{Eigen::Matrix3d::Identity()};
-    Eigen::Vector3d t{Eigen::Vector3d::Zero()};
+    Eigen::Matrix3d K = Eigen::Matrix3d::Identity();
+    Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
+    Eigen::Vector3d t = Eigen::Vector3d::Zero();
   };
 
   inline auto normalized_camera(const Eigen::Matrix3d& R,

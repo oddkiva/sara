@@ -20,8 +20,7 @@ namespace DO::Sara {
   //! @addtogroup SfM
   //! @{
 
-  //! @{
-  //! @brief Fundamental matrix estimation.
+  //! @brief Helper to estimate the fundamental matrix.
   auto estimate_fundamental_matrix(const std::vector<Match>& Mij,
                                    const KeypointList<OERegion, float>& ki,
                                    const KeypointList<OERegion, float>& kj,
@@ -29,11 +28,7 @@ namespace DO::Sara {
                                    const double err_thres)
       -> std::tuple<FundamentalMatrix, Tensor_<bool, 1>, Tensor_<int, 1>>;
 
-  auto estimate_fundamental_matrices(const std::string& dirpath,
-                                     const std::string& h5_filepath,
-                                     bool overwrite, bool debug,
-                                     bool wait_key = false) -> void;
-
+  //! @brief Inspect visually the epipolar constraints.
   auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
                                   const FundamentalMatrix& F,
                                   const std::vector<Match>& Mij,
@@ -41,11 +36,6 @@ namespace DO::Sara {
                                   const TensorView_<bool, 1>& inliers,
                                   int display_step, bool wait_key = true)
       -> void;
-
-  auto inspect_fundamental_matrices(const std::string& dirpath,
-                                    const std::string& h5_filepath,
-                                    int display_step, bool wait_key) -> void;
-  //! @}
 
   //! @}
 

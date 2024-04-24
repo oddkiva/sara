@@ -12,14 +12,15 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/Geometry/Feature Graph"
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
-#include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
+#include <DO/Sara/MultiViewGeometry/Graph/EpipolarGraph.hpp>
+#include <DO/Sara/MultiViewGeometry/Graph/FeatureGraph.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <filesystem>
 
-namespace fs = boost::filesystem;
+
+namespace fs = std::filesystem;
 using namespace DO::Sara;
 
 
@@ -72,10 +73,10 @@ BOOST_AUTO_TEST_CASE(test_incremental_connected_components)
   auto ds = ICC::initialize_disjoint_sets(rank, parent);
   ICC::initialize_incremental_components(graph, ds);
 
-  for (auto r: rank)
+  for (auto r : rank)
     std::cout << "rank = " << r << std::endl;
 
-  for (auto p: parent)
+  for (auto p : parent)
     std::cout << "p = " << p << std::endl;
 
   auto add_edge = [&](auto u, auto v) {
@@ -187,11 +188,9 @@ BOOST_AUTO_TEST_CASE(test_read_write_feature_graph_to_hdf5)
 
 BOOST_AUTO_TEST_CASE(test_populate_feature_gids)
 {
-  auto keys = std::vector{
-    KeypointList<OERegion, float>{},
-    KeypointList<OERegion, float>{},
-    KeypointList<OERegion, float>{}
-  };
+  auto keys = std::vector{KeypointList<OERegion, float>{},
+                          KeypointList<OERegion, float>{},
+                          KeypointList<OERegion, float>{}};
 
   features(keys[0]).resize(3);
   features(keys[1]).resize(1);
@@ -209,11 +208,9 @@ BOOST_AUTO_TEST_CASE(test_populate_feature_gids)
 
 BOOST_AUTO_TEST_CASE(test_calculate_of_feature_id_offset)
 {
-  auto keys = std::vector{
-    KeypointList<OERegion, float>{},
-    KeypointList<OERegion, float>{},
-    KeypointList<OERegion, float>{}
-  };
+  auto keys = std::vector{KeypointList<OERegion, float>{},
+                          KeypointList<OERegion, float>{},
+                          KeypointList<OERegion, float>{}};
 
   features(keys[0]).resize(3);
   features(keys[1]).resize(1);
@@ -300,7 +297,7 @@ BOOST_AUTO_TEST_CASE(test_populate_feature_tracks)
     const auto& component = components[c];
 
     std::cout << "Component " << c << " : ";
-    for (const auto& v: component)
+    for (const auto& v : component)
       std::cout << "GID[" << v << "] = {" << graph[v].image_id << ", "
                 << graph[v].local_id << "}, ";
     std::cout << std::endl;

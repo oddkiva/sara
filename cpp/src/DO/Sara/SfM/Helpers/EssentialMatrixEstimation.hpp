@@ -11,8 +11,7 @@
 
 #pragma once
 
-#include <DO/Sara/Defines.hpp>
-#include <DO/Sara/Match.hpp>
+#include <DO/Sara/MultiViewGeometry.hpp>
 
 
 namespace DO::Sara {
@@ -20,15 +19,15 @@ namespace DO::Sara {
   //! @addtogroup SfM
   //! @{
 
-  //! @{
-  //! @brief Keypoint matching.
-  auto match(const KeypointList<OERegion, float>& keys1,
-             const KeypointList<OERegion, float>& keys2,
-             float lowe_ratio = 0.6f) -> std::vector<Match>;
+  //! @brief Helper to estimate the essential matrix.
+  auto estimate_essential_matrix(const std::vector<Match>& Mij,
+                                 const KeypointList<OERegion, float>& ki,
+                                 const KeypointList<OERegion, float>& kj,
+                                 const Eigen::Matrix3d& Ki_inv,
+                                 const Eigen::Matrix3d& Kj_inv, int num_samples,
+                                 double err_thres)
+      -> std::tuple<EssentialMatrix, Tensor_<bool, 1>, Tensor_<int, 1>>;
 
-  auto match_keypoints(const std::string& dirpath,
-                       const std::string& h5_filepath, bool overwrite) -> void;
-  //! @}
 
   //! @}
 

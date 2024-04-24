@@ -62,7 +62,7 @@ namespace DO::Sara {
   auto from_index_to_point(const TensorView_<int, 2>& point_indices,
                            const PointList<T, D>& points) -> Tensor_<T, D + 1>
   {
-    return from_index_to_point(point_indices, points._data);
+    return from_index_to_point(point_indices, points.data);
   };
 
   template <typename T>
@@ -71,8 +71,8 @@ namespace DO::Sara {
       -> PointCorrespondenceSubsetList<T>
   {
     auto res = PointCorrespondenceSubsetList<T>{};
-    res._p1 = from_index_to_point(point_indices, correspondences._p1);
-    res._p2 = from_index_to_point(point_indices, correspondences._p2);
+    res.x = from_index_to_point(point_indices, correspondences.x);
+    res.y = from_index_to_point(point_indices, correspondences.y);
     return res;
   };
 

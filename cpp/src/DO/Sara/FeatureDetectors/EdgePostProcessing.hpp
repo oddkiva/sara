@@ -194,8 +194,8 @@ namespace DO::Sara {
 
     const auto num_curve_points = static_cast<int>(curve_points.size());
     auto point_list = PointList<float, 2>{};
-    point_list._data.resize(num_curve_points, 3);
-    auto& points = point_list._data;
+    point_list.data.resize(num_curve_points, 3);
+    auto& points = point_list.data;
     auto point_matrix = points.matrix();
     for (auto r = 0; r < num_curve_points; ++r)
       point_matrix.row(r) = curve_points[r]      //
