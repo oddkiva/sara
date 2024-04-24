@@ -13,6 +13,8 @@
 
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
+
 
 namespace DO::Sara::v2 {
 
@@ -100,9 +102,9 @@ namespace DO::Sara::v2 {
           inliers_best.flat_array() = inliers;
           subset_best = minimal_index_subsets[n];
 
-          //
-          inlier_ratio_current =
-              num_inliers / static_cast<double>(data_points.size());
+          inlier_ratio_current = std::clamp(
+              num_inliers / static_cast<double>(data_points.size()),  //
+              0., 1.);
           update_num_iterations();
 
           if (verbose)

@@ -186,9 +186,9 @@ namespace DO::Sara {
                                  double confidence = 0.99) -> std::uint64_t
   {
     // Check the range of values...
-    if (!(0 <= inlier_ratio && inlier_ratio < 1))
+    if (!(0 <= inlier_ratio && inlier_ratio <= 1))
       throw std::runtime_error{
-          "Error: the inlier ratio must be in the open interval [0, 1["};
+          "Error: the inlier ratio must be in the open interval [0, 1]"};
     if (!(0 <= confidence && confidence < 1))
       throw std::runtime_error{
           "Error: the confidence value must be in the open interval [0, 1["};

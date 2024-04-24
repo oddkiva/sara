@@ -11,8 +11,6 @@
 
 #pragma once
 
-#include <DO/Sara/Defines.hpp>
-
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 

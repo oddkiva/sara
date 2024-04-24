@@ -34,7 +34,8 @@ inline auto make_cube_vertices()
   return cube;
 }
 
-inline auto make_planar_chessboard_corners(int rows, int cols, double square_size)
+inline auto make_planar_chessboard_corners(int rows, int cols,
+                                           double square_size)
 {
   auto corners = Eigen::MatrixXd{4, rows * cols};
   for (auto y = 0; y < rows; ++y)
@@ -47,10 +48,8 @@ inline auto make_planar_chessboard_corners(int rows, int cols, double square_siz
 inline auto make_relative_motion(double x = 0.1, double y = 0.3, double z = 0.2)
     -> DO::Sara::Motion
 {
-  using namespace DO::Sara;
-
   // Euler composite rotation.
-  const Eigen::Matrix3d R = rotation(z, y, x);
+  const Eigen::Matrix3d R = DO::Sara::rotation(z, y, x);
   // - The axes of the world coordinate system has turned by the following
   //   rotational quantity.
   // - The columns of R are the vector coordinates of the world axes w.r.t.

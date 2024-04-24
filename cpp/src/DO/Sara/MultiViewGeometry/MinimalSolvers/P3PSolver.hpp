@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2024 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2024-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "DO/Sara/Core/Math/UsualFunctions.hpp"
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/MultiViewGeometry/PnP/LambdaTwist.hpp>
 #include <DO/Sara/MultiViewGeometry/PointRayCorrespondenceList.hpp>
 
@@ -24,15 +24,28 @@ namespace DO::Sara {
     static constexpr auto num_points = 3;
     static constexpr auto num_models = 4;
 
-    using data_point_type = TensorView_<T, 2>;
+    using tensor_view_type = TensorView_<T, 2>;
+    using data_point_type = std::array<TensorView_<T, 2>, 2>;
     using model_type = Eigen::Matrix<T, 3, 4>;
 
-    inline auto operator()(const data_point_type& x) const
+    inline auto operator()(const tensor_view_type& scene_points,
+                           const tensor_view_type& rays) const
         -> std::vector<model_type>
     {
-      const Eigen::Matrix3<T> scene_points = x.matrix().leftCols(3);
-      const Eigen::Matrix3<T> backprojected_rays = x.matrix().rightCols(3);
-      return solve_p3p(scene_points, backprojected_rays);
+      const auto sp_mat_ = scene_points.colmajor_view().matrix();
+
+      Eigen::Matrix3<T> sp_mat = sp_mat_.topRows(3);
+      if (sp_mat_.cols() == 4)
+        sp_mat.array().rowwise() /= sp_mat_.array().row(3);
+
+      const Eigen::Matrix3<T> ray_mat = rays.colmajor_view().matrix();
+      return solve_p3p(sp_mat, ray_mat);
+    }
+
+    inline auto operator()(const data_point_type& X) -> std::vector<model_type>
+    {
+      const auto& [scene_points, backprojected_rays] = X;
+      return this->operator()(scene_points, backprojected_rays);
     }
   };
 
@@ -47,7 +60,7 @@ namespace DO::Sara {
     const CameraModel* camera = nullptr;
     //! @brief The pose matrix.
     PoseMatrix T;
-    //! @brief Image reprojection error in pixel.
+    //! @brief Image reprojection error in pixels.
     double ε;
 
     inline CheiralPnPConsistency() = default;
@@ -71,14 +84,26 @@ namespace DO::Sara {
         throw std::runtime_error{
             "Error: you must initialize the intrinsic camera parameters!"};
 
+      if (scene_points.cols() != rays.cols())
+        throw std::runtime_error{
+            "Error: the number of scene points and rays must be equal!"};
+
       const auto& X_world = scene_points;
-      const Eigen::MatrixXd X_camera = T * X_world;
+      auto X_camera = Eigen::MatrixXd{};
+      if (X_world.rows() == 3)
+        X_camera = T * X_world.colwise().homogeneous();
+      else if (X_world.rows() == 4)
+        X_camera = T * X_world;
+      else
+        throw std::runtime_error{
+            "The dimension of scene points is incorrect. They must either 3D "
+            "(Euclidean) or 4D (homogeneous)!"};
 
       auto u1 = Eigen::MatrixXd{2, scene_points.cols()};
       for (auto i = 0; i < u1.cols(); ++i)
         u1.col(i) = camera->project(X_camera.col(i));
 
-      auto u2 = Eigen::MatrixXd{rays.rows(), rays.cols()};
+      auto u2 = Eigen::MatrixXd{2, rays.cols()};
       for (auto i = 0; i < u2.cols(); ++i)
         u2.col(i) = camera->project(rays.col(i));
 
@@ -94,7 +119,7 @@ namespace DO::Sara {
 
     //! @brief Check the inlier predicate on a list of correspondences.
     template <typename T>
-    inline auto operator()(const PointRayCorrespondenceSubsetList<T>& m) const
+    inline auto operator()(const PointRayCorrespondenceList<T>& m) const
         -> Eigen::Array<bool, 1, Eigen::Dynamic>
     {
       const auto& scene_points = m.x.colmajor_view().matrix();
@@ -102,5 +127,8 @@ namespace DO::Sara {
       return this->operator()(scene_points, backprojected_rays);
     }
   };
+
+
+  //! @}
 
 }  // namespace DO::Sara

@@ -25,6 +25,8 @@ namespace DO::Sara {
   //! @ingroup GeometryDataNormalizer
 
   //! @{
+
+  //! @brief Normalizer for the two-view homography estimation.
   template <>
   struct Normalizer<Homography>
   {
@@ -70,7 +72,7 @@ namespace DO::Sara {
     Eigen::Matrix3d T2_inv;
   };
 
-
+  //! @brief Normalizer for the two-view fundamental matrix estimation.
   template <>
   struct Normalizer<FundamentalMatrix>
   {
@@ -150,6 +152,7 @@ namespace DO::Sara {
     Eigen::Matrix3d K2_inv;
   };
 
+  //! @brief Normalizer for the two-view relative pose estimation.
   template <>
   struct Normalizer<TwoViewGeometry>
   {
@@ -187,6 +190,31 @@ namespace DO::Sara {
 
     Eigen::Matrix3d K1_inv;
     Eigen::Matrix3d K2_inv;
+  };
+
+  //! @brief Normalizer for the PnP estimation.
+  template <>
+  struct Normalizer<Eigen::Matrix<double, 3, 4>>
+  {
+    using PoseMatrix = Eigen::Matrix<double, 3, 4>;
+
+    Normalizer() = default;
+
+    auto normalize(const TensorView_<double, 2>& scene_points,
+                   const TensorView_<double, 2>& backprojected_rays) const
+    {
+      return std::make_tuple(scene_points, backprojected_rays);
+    }
+
+    auto normalize(const PointCorrespondenceList<double>& M) const
+        -> PointCorrespondenceList<double>
+    {
+      return M;
+    }
+
+    auto denormalize(const PoseMatrix&) const -> void
+    {
+    }
   };
 
   //! @}

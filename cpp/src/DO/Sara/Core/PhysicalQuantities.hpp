@@ -252,8 +252,6 @@ namespace DO::Sara {
     {
     }
 
-    auto operator=(const self_type&) -> self_type& = default;
-
     inline constexpr operator scalar_type() const
     {
       return value;
