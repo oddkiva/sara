@@ -26,10 +26,10 @@ namespace DO::Sara {
   {
   public:
     using FeatureTrack = PointCloudGenerator::FeatureTrack;
-    using CameraModel = v2::BrownConradyDistortionModel<double>;
+    using CameraIntrinsicModel = v2::BrownConradyDistortionModel<double>;
     using PoseMatrix = Eigen::Matrix<double, 3, 4>;
     using Inlier = Tensor_<bool, 1>;
-    using MinimalSamples = Tensor_<int, 1>;
+    using MinimalSample = Tensor_<int, 1>;
 
     //! @brief Constructor
     CameraPoseEstimator()
@@ -37,6 +37,7 @@ namespace DO::Sara {
       set_estimation_params();
     }
 
+    //! @brief Set robust estimation parameters.
     auto set_estimation_params(const PixelUnit error_max = 0.5_px,
                                const int ransac_iter_max = 1000u,
                                const double ransac_confidence_min = 0.99)
@@ -47,19 +48,21 @@ namespace DO::Sara {
       _ransac_confidence_min = ransac_confidence_min;
     }
 
+    //! @brief Estimate the absolute pose from the data and the camera intrinsic
+    //! parameters.
     auto estimate_pose(const PointRayCorrespondenceList<double>&,
-                       const CameraModel&)
-        -> std::tuple<PoseMatrix, Inlier, MinimalSamples>;
+                       const CameraIntrinsicModel&)
+        -> std::tuple<PoseMatrix, Inlier, MinimalSample>;
 
     auto estimate_pose(const std::vector<FeatureTrack>&,
                        const CameraPoseGraph::Vertex,  //
-                       const CameraModel&,             //
+                       const CameraIntrinsicModel&,    //
                        const PointCloudGenerator&)
         -> std::pair<PoseMatrix, bool>;
 
   private:
     P3PSolver<double> _solver;
-    CheiralPnPConsistency<CameraModel> _inlier_predicate;
+    CheiralPnPConsistency<CameraIntrinsicModel> _inlier_predicate;
     int _ransac_inliers_min = 100;
     int _ransac_iter_max;
     double _ransac_confidence_min;

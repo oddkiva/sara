@@ -37,7 +37,7 @@ auto v2::OdometryPipeline::set_config(
       _video_streamer.frame_gray32f(),  //
       _camera                           //
   );
-  _relative_pose_estimator.configure(_camera);
+  _rel_pose_estimator.configure(_camera);
   _point_cloud_generator = std::make_unique<PointCloudGenerator>(
       _pose_graph, _feature_tracker._feature_graph, _point_cloud);
 }
@@ -99,7 +99,7 @@ auto v2::OdometryPipeline::estimate_relative_pose(
     matches.resize(_feature_params.num_matches_max);
 
   auto [two_view_geometry, inliers, sample_best] =
-      _relative_pose_estimator.estimate_relative_pose(keys_src, keys_dst,
+      _rel_pose_estimator.estimate_relative_pose(keys_src, keys_dst,
                                                       matches);
   SARA_LOGI(logger, "[Relative Pose] Estimated relative pose...");
 

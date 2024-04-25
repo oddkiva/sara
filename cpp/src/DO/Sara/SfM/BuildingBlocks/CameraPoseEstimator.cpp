@@ -20,7 +20,8 @@ using namespace DO::Sara;
 
 auto CameraPoseEstimator::estimate_pose(
     const PointRayCorrespondenceList<double>& point_ray_pairs,
-    const CameraModel& camera) -> std::tuple<PoseMatrix, Inlier, MinimalSamples>
+    const CameraIntrinsicModel& camera)
+    -> std::tuple<PoseMatrix, Inlier, MinimalSample>
 {
   _inlier_predicate.set_camera(camera);
 
@@ -31,7 +32,7 @@ auto CameraPoseEstimator::estimate_pose(
 auto CameraPoseEstimator::estimate_pose(
     const std::vector<FeatureTrack>& valid_ftracks,
     const CameraPoseGraph::Vertex pv,
-    const CameraPoseEstimator::CameraModel& camera,
+    const CameraPoseEstimator::CameraIntrinsicModel& camera,
     const PointCloudGenerator& pcg) -> std::pair<PoseMatrix, bool>
 {
   auto& logger = Logger::get();

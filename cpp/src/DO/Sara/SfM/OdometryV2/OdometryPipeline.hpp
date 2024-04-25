@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "DO/Sara/SfM/BuildingBlocks/CameraPoseEstimator.hpp"
 #include <DO/Sara/Features/KeypointList.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/PointCloudGenerator.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/RelativePoseEstimator.hpp>
@@ -58,7 +59,8 @@ namespace DO::Sara::v2 {
     //! @brief Data mutators.
     //! @{
     std::unique_ptr<ImageDistortionCorrector> _distortion_corrector;
-    v2::RelativePoseEstimator _relative_pose_estimator;
+    v2::RelativePoseEstimator _rel_pose_estimator;
+    CameraPoseEstimator _abs_pose_estimator;
     std::unique_ptr<PointCloudGenerator> _point_cloud_generator;
     //! @}
 
