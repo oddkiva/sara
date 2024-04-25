@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp"
 #include "DO/Sara/SfM/BuildingBlocks/CameraPoseEstimator.hpp"
 #include <DO/Sara/Features/KeypointList.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/PointCloudGenerator.hpp>
@@ -25,9 +26,9 @@ namespace DO::Sara::v2 {
   class OdometryPipeline
   {
   public:
-    auto set_config(const std::filesystem::path& video_path,
-                    const v2::BrownConradyDistortionModel<double>& camera)
-        -> void;
+    auto
+    set_config(const std::filesystem::path& video_path,
+               const v2::BrownConradyDistortionModel<double>& camera) -> void;
 
     auto read() -> bool;
 
@@ -44,10 +45,9 @@ namespace DO::Sara::v2 {
     auto detect_keypoints(const ImageView<float>&) const
         -> KeypointList<OERegion, float>;
 
-    auto
-    estimate_relative_pose(const KeypointList<OERegion, float>& keys_src,
-                           const KeypointList<OERegion, float>& keys_dst) const
-        -> std::pair<RelativePoseData, TwoViewGeometry>;
+    auto estimate_relative_pose(const KeypointList<OERegion, float>& keys_src,
+                                const KeypointList<OERegion, float>& keys_dst)
+        const -> std::pair<RelativePoseData, TwoViewGeometry>;
 
   private: /* graph update tasks */
     auto grow_geometry() -> bool;
@@ -55,6 +55,7 @@ namespace DO::Sara::v2 {
   public: /* data members */
     VideoStreamer _video_streamer;
     v2::BrownConradyDistortionModel<double> _camera;
+    v2::PinholeCamera<double> _camera_corrected;
 
     //! @brief Data mutators.
     //! @{
@@ -78,6 +79,8 @@ namespace DO::Sara::v2 {
     CameraPoseGraph::Vertex _pose_curr;
     CameraPoseGraph::Edge _relative_pose_edge;
     FeatureTracker::TrackArray _tracks_alive;
+    FeatureTracker::TrackArray _tracks_alive_with_known_scene_point;
+    FeatureTracker::TrackArray _tracks_alive_without_scene_point;
     FeatureTracker::TrackVisibilityCountArray _track_visibility_count;
     Eigen::Matrix3d _current_global_rotation = Eigen::Matrix3d::Identity();
     //! @}

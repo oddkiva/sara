@@ -83,8 +83,8 @@ auto PointCloudGenerator::filter_by_non_max_suppression(
 }
 
 auto PointCloudGenerator::find_feature_vertex_at_pose(
-    const FeatureTrack& track, const PoseVertex pose_vertex) const
-    -> std::optional<FeatureVertex>
+    const FeatureTrack& track,
+    const PoseVertex pose_vertex) const -> std::optional<FeatureVertex>
 {
   auto v = std::find_if(track.begin(), track.end(),
                         [this, pose_vertex](const auto& v) {
@@ -148,7 +148,7 @@ auto PointCloudGenerator::retrieve_scene_point_color(
     const Eigen::Vector3d& scene_point,  //
     const ImageView<Rgb8>& image,        //
     const QuaternionBasedPose<double>& pose,
-    const v2::BrownConradyDistortionModel<double>& camera) const -> Rgb64f
+    const v2::PinholeCamera<double>& camera) const -> Rgb64f
 {
   const auto& w = image.width();
   const auto& h = image.height();
@@ -270,8 +270,8 @@ auto PointCloudGenerator::compress_point_cloud(
 auto PointCloudGenerator::grow_point_cloud(
     const std::vector<FeatureTrack>& ftracks_without_scene_point,
     const ImageView<Rgb8>& image,  //
-    const PoseEdge pose_edge,
-    const v2::BrownConradyDistortionModel<double>& camera) -> void
+    const PoseEdge pose_edge,      //
+    const v2::PinholeCamera<double>& camera) -> void
 {
   auto& logger = Logger::get();
 
