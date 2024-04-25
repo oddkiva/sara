@@ -9,7 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "DO/Sara/MultiViewGeometry/Geometry/QuaternionBasedPose.hpp"
 #include <DO/Sara/SfM/OdometryV2/OdometryPipeline.hpp>
 
 #include <DO/Sara/Logging/Logger.hpp>
