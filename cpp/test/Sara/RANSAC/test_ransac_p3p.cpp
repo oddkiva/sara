@@ -51,8 +51,8 @@ BOOST_AUTO_TEST_CASE(test_ransac_with_p3p_solver)
   const auto p3p_solver = sara::P3PSolver<double>{};
   auto p3p_inlier_predicate = sara::CheiralPnPConsistency<  //
       sara::v2::PinholeCamera<double>>{};
+  p3p_inlier_predicate.set_camera(camera);
   p3p_inlier_predicate.ε = 0.2 /* pixels */;
-  p3p_inlier_predicate.camera = &camera;
 
 
   for (auto i = 0u; i < xa.size(); ++i)

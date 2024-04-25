@@ -57,7 +57,7 @@ namespace DO::Sara {
     using Model = PoseMatrix;
 
     //! @brief The camera model for the image.
-    const CameraModel* camera = nullptr;
+    const CameraModel* C = nullptr;
     //! @brief The pose matrix.
     PoseMatrix T;
     //! @brief Image reprojection error in pixels.
@@ -70,6 +70,11 @@ namespace DO::Sara {
       set_model(pose_matrix);
     }
 
+    inline auto set_camera(const CameraModel& camera_) -> void
+    {
+      C = &camera_;
+    }
+
     inline auto set_model(const PoseMatrix& pose_matrix) -> void
     {
       T = pose_matrix;
@@ -80,7 +85,7 @@ namespace DO::Sara {
                     const Eigen::MatrixBase<Derived>& rays) const
         -> Eigen::Array<bool, 1, Eigen::Dynamic>
     {
-      if (camera == nullptr)
+      if (C == nullptr)
         throw std::runtime_error{
             "Error: you must initialize the intrinsic camera parameters!"};
 
@@ -88,24 +93,36 @@ namespace DO::Sara {
         throw std::runtime_error{
             "Error: the number of scene points and rays must be equal!"};
 
+      // Calculate the scene point coordinates in the camera frame.
       const auto& X_world = scene_points;
       auto X_camera = Eigen::MatrixXd{};
-      if (X_world.rows() == 3)
+
+      if (X_world.rows() == 3)  // Euclidean coordinates.
         X_camera = T * X_world.colwise().homogeneous();
-      else if (X_world.rows() == 4)
+      else if (X_world.rows() == 4)  // Homogeneous coordinates.
         X_camera = T * X_world;
       else
         throw std::runtime_error{
-            "The dimension of scene points is incorrect. They must either 3D "
-            "(Euclidean) or 4D (homogeneous)!"};
+            "The dimension of scene points is incorrect. "
+            "They must either 3D (Euclidean) or 4D (homogeneous)!"};
 
+      // Project the camera coordinates to the image plane.
+      //
+      // The result is a list of pixel coordinates.
       auto u1 = Eigen::MatrixXd{2, scene_points.cols()};
       for (auto i = 0; i < u1.cols(); ++i)
-        u1.col(i) = camera->project(X_camera.col(i));
+        u1.col(i) = C->project(X_camera.col(i));
 
+      // Reproject the backprojected rays to the image plane.
+      //
+      // The result is again a list of pixel coordinates.
+      //
+      // This is an awkward and potentially wasteful operation.
+      // TODO: see if we can do this in the normalization operation:
+      //       via the class Normalizer<P3PSolver>
       auto u2 = Eigen::MatrixXd{2, rays.cols()};
       for (auto i = 0; i < u2.cols(); ++i)
-        u2.col(i) = camera->project(rays.col(i));
+        u2.col(i) = C->project(rays.col(i));
 
       // Check the cheirality w.r.t. the candidate pose.
       const auto cheiral = X_camera.row(2).array() > 0;

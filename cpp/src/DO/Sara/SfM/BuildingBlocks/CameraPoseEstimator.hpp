@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "DO/Sara/MultiViewGeometry/PointRayCorrespondenceList.hpp"
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/BrownConradyCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/P3PSolver.hpp>
@@ -25,9 +26,10 @@ namespace DO::Sara {
   {
   public:
     using FeatureTrack = PointCloudGenerator::FeatureTrack;
-
     using CameraModel = v2::BrownConradyDistortionModel<double>;
     using PoseMatrix = Eigen::Matrix<double, 3, 4>;
+    using Inlier = Tensor_<bool, 1>;
+    using MinimalSamples = Tensor_<int, 1>;
 
     //! @brief Constructor
     CameraPoseEstimator()
@@ -44,6 +46,10 @@ namespace DO::Sara {
       _ransac_iter_max = ransac_iter_max;
       _ransac_confidence_min = ransac_confidence_min;
     }
+
+    auto estimate_pose(const PointRayCorrespondenceList<double>&,
+                       const CameraModel&)
+        -> std::tuple<PoseMatrix, Inlier, MinimalSamples>;
 
     auto estimate_pose(const std::vector<FeatureTrack>&,
                        const CameraPoseGraph::Vertex,  //

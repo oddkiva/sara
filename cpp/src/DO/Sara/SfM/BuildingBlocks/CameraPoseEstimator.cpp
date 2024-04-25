@@ -19,6 +19,16 @@ using namespace DO::Sara;
 
 
 auto CameraPoseEstimator::estimate_pose(
+    const PointRayCorrespondenceList<double>& point_ray_pairs,
+    const CameraModel& camera) -> std::tuple<PoseMatrix, Inlier, MinimalSamples>
+{
+  _inlier_predicate.set_camera(camera);
+
+  return v2::ransac(point_ray_pairs, _solver, _inlier_predicate,
+                    _ransac_iter_max, _ransac_confidence_min);
+}
+
+auto CameraPoseEstimator::estimate_pose(
     const std::vector<FeatureTrack>& valid_ftracks,
     const CameraPoseGraph::Vertex pv,
     const CameraPoseEstimator::CameraModel& camera,
@@ -51,7 +61,9 @@ auto CameraPoseEstimator::estimate_pose(
   point_ray_pairs.x.resize({num_ftracks, 3});
   point_ray_pairs.y.resize({num_ftracks, 3});
 
-  // First collect the scene point coordinates.
+  // Data collection.
+  //
+  // 1. Collect the scene point coordinates.
   SARA_LOGD(logger, "Retrieving scene points for each feature track...");
   auto scene_coords = point_ray_pairs.x.colmajor_view().matrix();
   for (auto t = 0; t < num_ftracks; ++t)
@@ -69,8 +81,8 @@ auto CameraPoseEstimator::estimate_pose(
     scene_coords.col(t) = pcg.barycenter(scene_point_indices).coords();
   }
 
-  // Second collect the backprojected rays from the current camera view for each
-  // feature track.
+  // 2. Collect the backprojected rays from the current camera view for each
+  //    feature track.
   SARA_LOGD(logger, "Calculating backprojected rays for each feature track...");
   auto rays = point_ray_pairs.y.colmajor_view().matrix();
   for (auto t = 0; t < num_ftracks; ++t)
@@ -84,11 +96,9 @@ auto CameraPoseEstimator::estimate_pose(
     rays.col(t) = camera.backproject(pixel_coords);
   }
 
-  // Then solve the PnP problem with RANSAC.
-  const auto [pose, inliers, sample_best] = v2::ransac(  //
-      point_ray_pairs,                                   //
-      _solver, _inlier_predicate,                        //
-      _ransac_iter_max, _ransac_confidence_min);
+  // 3. solve the PnP problem with RANSAC.
+  const auto [pose, inliers, sample_best] =
+      estimate_pose(point_ray_pairs, camera);
   const auto pose_estimated_successfully =
       inliers.flat_array().count() >= _ransac_inliers_min;
 
