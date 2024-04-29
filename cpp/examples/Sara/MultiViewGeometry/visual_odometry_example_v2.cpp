@@ -382,7 +382,8 @@ private:
 bool SingleWindowApp::_glfw_initialized = false;
 
 
-auto main(int const argc, char** const argv) -> int
+auto main([[maybe_unused]] int const argc,
+          [[maybe_unused]] char** const argv) -> int
 {
 #if defined(_OPENMP)
   const auto num_threads = omp_get_max_threads();
@@ -390,6 +391,15 @@ auto main(int const argc, char** const argv) -> int
   Eigen::setNbThreads(num_threads);
 #endif
 
+#define USE_HARDCODED_VIDEO_PATH
+#if defined(USE_HARDCODED_VIDEO_PATH)
+  const auto video_path = fs::path{"/Users/oddkiva/Desktop/datasets/sample-1.mp4"};
+  if (!fs::exists(video_path))
+  {
+    fmt::print("Video {} does not exist", video_path.string());
+    return EXIT_FAILURE;
+  }
+#else
   if (argc < 2)
   {
     std::cout << fmt::format("Usage: {} VIDEO_PATH\n",
@@ -398,6 +408,7 @@ auto main(int const argc, char** const argv) -> int
   }
 
   const auto video_path = fs::path{argv[1]};
+#endif
   auto camera = sara::v2::BrownConradyDistortionModel<double>{};
   {
     camera.fx() = 917.2878392016245;

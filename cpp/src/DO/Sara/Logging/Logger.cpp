@@ -11,7 +11,6 @@
 
 namespace logging = boost::log;
 namespace expr = boost::log::expressions;
-namespace src = boost::log::sources;
 namespace sinks = boost::log::sinks;
 
 
@@ -20,6 +19,7 @@ namespace DO::Sara {
   static auto log_formatter(const boost::log::record_view& rec,
                             boost::log::formatting_ostream& strm) -> void
   {
+#if !defined(__APPLE__)
     auto severity = rec[logging::trivial::severity];
     if (severity)
     {
@@ -41,11 +41,11 @@ namespace DO::Sara {
         break;
       }
     }
+#endif
 
     // Get the LineID attribute value and put it into the stream
     strm << logging::extract<unsigned int>("LineID", rec) << ": ";
-    logging::value_ref<std::string> fullpath =
-        logging::extract<std::string>("File", rec);
+    const auto fullpath = logging::extract<std::string>("File", rec);
     strm << boost::filesystem::path(fullpath.get()).filename().string() << ": ";
     strm << logging::extract<std::string>("Function", rec) << ": ";
     strm << logging::extract<int>("Line", rec) << ": ";
@@ -54,9 +54,11 @@ namespace DO::Sara {
     // The simplified syntax is possible if attribute keywords are used.
     strm << "<" << rec[logging::trivial::severity] << "> ";
 
+#if !defined(__APPLE__)
     // Restore the default color
     if (severity)
       strm << "\033[0m";
+#endif
 
     // Finally, put the record message to the stream
     strm << rec[expr::smessage];

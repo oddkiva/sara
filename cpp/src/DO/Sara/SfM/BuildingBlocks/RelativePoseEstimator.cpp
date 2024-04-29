@@ -49,5 +49,5 @@ auto RelativePoseEstimator::estimate_relative_pose(
       std::make_optional(Normalizer<TwoViewGeometry>{_K, _K});
 
   return v2::ransac(X, _solver, _inlier_predicate, ransac_iterations_max,
-                    ransac_confidence, data_normalizer, true);
+                    ransac_confidence, data_normalizer);
 }

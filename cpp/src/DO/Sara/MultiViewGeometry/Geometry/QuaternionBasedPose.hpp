@@ -34,6 +34,16 @@ namespace DO::Sara {
       return {.q = Eigen::Quaternion<T>::Identity(),
               .t = Eigen::Vector3<T>::Zero()};
     }
+
+    static inline auto nan() -> QuaternionBasedPose<T>
+    {
+      static constexpr auto nan = std::numeric_limits<T>::quiet_NaN();
+
+      auto r = QuaternionBasedPose<T>{};
+      r.q = Eigen::Quaternion<T>(nan, nan, nan, nan);
+      r.t.fill(nan);
+      return r;
+    }
   };
 
 }  // namespace DO::Sara

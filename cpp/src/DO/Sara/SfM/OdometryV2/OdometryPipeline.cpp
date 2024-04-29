@@ -162,13 +162,12 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
   SARA_LOGI(logger, "[SfM] Relative pose succeeded!");
 
   // 1. Add the absolute pose vertex.
-  auto abs_pose_curr =
-      _pose_graph.num_vertices() == 1
-          ? QuaternionBasedPose<double>{}
-          : QuaternionBasedPose<double>{
-                .q = Eigen::Quaterniond{rel_pose_data.motion.R},
-                .t = rel_pose_data.motion.t  //
-            };
+  auto abs_pose_curr = QuaternionBasedPose<double>::nan();
+  if (_pose_graph.num_vertices() == 1)
+    abs_pose_curr = {
+        .q = Eigen::Quaterniond{rel_pose_data.motion.R},  //
+        .t = rel_pose_data.motion.t                       //
+    };
   auto abs_pose_data = AbsolutePoseData{
       frame_number,             //
       std::move(keys_curr),     //
@@ -263,9 +262,9 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
   const auto q_global = Eigen::Quaterniond{_current_global_rotation};
   auto angles = calculate_yaw_pitch_roll(q_global);
   static constexpr auto degrees = 180. / M_PI;
-  SARA_LOGI(logger, "Global yaw   = {} deg", angles(0) * degrees);
-  SARA_LOGI(logger, "Global pitch = {} deg", angles(1) * degrees);
-  SARA_LOGI(logger, "Global roll  = {} deg", angles(2) * degrees);
+  SARA_LOGI(logger, "Global yaw   = {:0.3f} deg", angles(0) * degrees);
+  SARA_LOGI(logger, "Global pitch = {:0.3f} deg", angles(1) * degrees);
+  SARA_LOGI(logger, "Global roll  = {:0.3f} deg", angles(2) * degrees);
 
   return true;
 }
