@@ -87,6 +87,9 @@ namespace DO::Sara::v2 {
                         data_normalizer->denormalize(model);
                       });
 
+      if (verbose)
+        SARA_CHECK(candidate_models.size());
+
       // Count the inliers.
       for (const auto& model : candidate_models)
       {

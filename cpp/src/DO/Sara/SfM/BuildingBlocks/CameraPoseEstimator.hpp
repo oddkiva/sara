@@ -39,7 +39,7 @@ namespace DO::Sara {
 
     //! @brief Set robust estimation parameters.
     auto
-    set_estimation_params(const PixelUnit error_max = 0.5_px,
+    set_estimation_params(const PixelUnit error_max = 5._px,
                           const int ransac_iter_max = 1000u,
                           const double ransac_confidence_min = 0.99) -> void
     {

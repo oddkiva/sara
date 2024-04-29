@@ -25,8 +25,10 @@ auto CameraPoseEstimator::estimate_pose(
 {
   _inlier_predicate.set_camera(camera);
 
+  static constexpr auto debug = true;
   return v2::ransac(point_ray_pairs, _solver, _inlier_predicate,
-                    _ransac_iter_max, _ransac_confidence_min);
+                    _ransac_iter_max, _ransac_confidence_min, std::nullopt,
+                    debug);
 }
 
 auto CameraPoseEstimator::estimate_pose(
@@ -39,7 +41,7 @@ auto CameraPoseEstimator::estimate_pose(
 
   const auto num_ftracks = static_cast<Eigen::Index>(valid_ftracks.size());
 
-  SARA_LOGD(logger, "Cleaning feature tracks using NMS...");
+  SARA_LOGD(logger, "Applying NMS to the {} feature tracks...", num_ftracks);
 
   auto ftracks_filtered = std::vector<FeatureTrack>{};
   ftracks_filtered.resize(num_ftracks);
@@ -53,8 +55,8 @@ auto CameraPoseEstimator::estimate_pose(
           throw std::runtime_error{"Error: the filtered track must contain the "
                                    "target camera vertex!"};
         if (ftrack_filtered.size() <= 2)
-          throw std::runtime_error{
-              "Error: a filtered feature track can't possibly be of size 2!"};
+          throw std::runtime_error{"Error: a filtered feature track can't "
+                                   "possibly have cardinality 2!"};
         return ftrack_filtered;
       });
 
@@ -80,11 +82,16 @@ auto CameraPoseEstimator::estimate_pose(
     // If there are more than one scene point index, we fetch the barycentric
     // coordinates anyway.
     scene_coords.col(t) = pcg.barycenter(scene_point_indices).coords();
+    if (t < 10)
+      std::cout << t << " -> " << scene_coords.col(t).transpose() << std::endl;
   }
 
   // 2. Collect the backprojected rays from the current camera view for each
   //    feature track.
-  SARA_LOGD(logger, "Calculating backprojected rays for each feature track...");
+  SARA_LOGD(logger,
+            "Calculating backprojected rays from camera pose [{}] for each "
+            "feature track...",
+            pv);
   auto rays = point_ray_pairs.y.colmajor_view().matrix();
   for (auto t = 0; t < num_ftracks; ++t)
   {
@@ -94,7 +101,11 @@ auto CameraPoseEstimator::estimate_pose(
     if (!fv.has_value())
       throw std::runtime_error{"Error: the feature track must be alive!"};
     const auto pixel_coords = pcg.pixel_coords(*fv).cast<double>();
-    rays.col(t) = camera.backproject(pixel_coords);
+    if (t < 10)
+      SARA_LOGD(logger, "Backprojecting point {}: {}", t,
+                pixel_coords.transpose().eval());
+    // Normalize the rays. This is important for Lambda-Twist P3P method.
+    rays.col(t) = camera.backproject(pixel_coords).normalized();
   }
 
   // 3. solve the PnP problem with RANSAC.

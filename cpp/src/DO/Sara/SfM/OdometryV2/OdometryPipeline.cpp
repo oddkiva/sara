@@ -222,7 +222,10 @@ auto v2::OdometryPipeline::grow_geometry() -> bool
                                           _pose_curr, _camera_corrected,
                                           *_point_cloud_generator);
     if (!abs_pose_est_successful)
+    {
+      SARA_LOGI(logger, "Failed to estimate the absolute pose!");
       return false;
+    }
 
     // 7. Update the current absolute pose, which was initialized dummily.
     abs_pose_curr = QuaternionBasedPose<double>{
