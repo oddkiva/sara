@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(test_ransac_with_p3p_solver)
     point_ray_pairs.y = sara::TensorView_<double, 2>{
         const_cast<double*>(Yc.data()), {Yc.cols(), Yc.rows()}};
     const auto [pose, inliers, sample_best] = sara::v2::ransac(
-        point_ray_pairs, p3p_solver, p3p_inlier_predicate, 10, 0.99);
+        point_ray_pairs, p3p_solver, p3p_inlier_predicate, 100, 0.99);
 
     // The estimation should be perfect.
     BOOST_CHECK(inliers.flat_array().count() == Xw.cols());
