@@ -7,7 +7,6 @@
 
 namespace DO::Sara {
 
-
   class ImageDistortionCorrector
   {
   public:
