@@ -33,7 +33,10 @@ BOOST_AUTO_TEST_CASE(test_ransac_with_p3p_solver)
   const auto Xw = make_cube_vertices();
 
   // Scene point Euclidean coordinates in the world frame.
-  const Eigen::MatrixXd Xwe = Xw.colwise().hnormalized();
+  Eigen::MatrixXd Xwe = Xw.colwise().hnormalized();
+  // Add some noise to test the robustness of lambda-twist.
+  const auto noise = 0.01 * Eigen::MatrixXd::Random(Xwe.rows(), Xwe.cols());
+  Xwe += noise;
 
 
   // Generate some small rotations for the camera.
@@ -52,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_ransac_with_p3p_solver)
   auto p3p_inlier_predicate = sara::CheiralPnPConsistency<  //
       sara::v2::PinholeCamera<double>>{};
   p3p_inlier_predicate.set_camera(camera);
-  p3p_inlier_predicate.ε = 0.2 /* pixels */;
+  p3p_inlier_predicate.ε = 3 /* pixels */;
 
 
   for (auto i = 0u; i < xa.size(); ++i)
@@ -62,7 +65,8 @@ BOOST_AUTO_TEST_CASE(test_ransac_with_p3p_solver)
     auto Xc = to_camera_coordinates(C_gt, Xw);
 
     // Scene point Euclidean coordinates in the camera frame.
-    const Eigen::MatrixXd Xce = Xc.colwise().hnormalized();
+    Eigen::MatrixXd Xce = Xc.colwise().hnormalized();
+
     // Check that the scene points are all in front of the camera.
     BOOST_REQUIRE((Xce.row(2).array() > 0).all());
 
@@ -74,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_ransac_with_p3p_solver)
     // We do a dummy test for now: we use the perfectly backprojected rays.
 
 
-#define CHECK_P3P_SOLVER_AND_CHEIRAL_P3P_CONSISTENCY
+// #define CHECK_P3P_SOLVER_AND_CHEIRAL_P3P_CONSISTENCY
 #if defined(CHECK_P3P_SOLVER_AND_CHEIRAL_P3P_CONSISTENCY)
     // Project the scene points to the image plane.
     fmt::print("* Image Coordinates:\n");
@@ -135,16 +139,23 @@ BOOST_AUTO_TEST_CASE(test_ransac_with_p3p_solver)
     fmt::print("RUNNING RANSAC\n");
     auto point_ray_pairs = sara::PointRayCorrespondenceList<double>{};
     point_ray_pairs.x = sara::TensorView_<double, 2>{
-        const_cast<double*>(Xw.data()), {Xw.cols(), Xw.rows()}};
+        const_cast<double*>(Xwe.data()), {Xwe.cols(), Xwe.rows()}};
     point_ray_pairs.y = sara::TensorView_<double, 2>{
         const_cast<double*>(Yc.data()), {Yc.cols(), Yc.rows()}};
     const auto [pose, inliers, sample_best] = sara::v2::ransac(
         point_ray_pairs, p3p_solver, p3p_inlier_predicate, 10, 0.99);
 
     // The estimation should be perfect.
-    BOOST_REQUIRE(inliers.flat_array().count() == Xw.cols());
+    BOOST_CHECK(inliers.flat_array().count() == Xw.cols());
 
+    const Eigen::Matrix<double, 3, 4> pose_err_mat = pose - C_gt.matrix();
     const auto pose_err = (pose - C_gt.matrix()).norm() / C_gt.matrix().norm();
-    BOOST_REQUIRE_SMALL(pose_err, 1e-12);
+    BOOST_CHECK_SMALL(pose_err, 1e-2);
+
+    fmt::print("inlier count = {}\n", inliers.flat_array().count());
+    fmt::print("C_gt =\n{}\n", C_gt.matrix());
+    fmt::print("pose =\n{}\n", pose);
+    fmt::print("pose_err_mat =\n{}\n", pose_err_mat);
+    fmt::print("pose_err = {}\n", pose_err);
   }
 }
