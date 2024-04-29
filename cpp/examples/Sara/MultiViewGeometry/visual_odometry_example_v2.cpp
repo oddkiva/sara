@@ -392,7 +392,7 @@ auto main([[maybe_unused]] int const argc,
 #endif
 
 #define USE_HARDCODED_VIDEO_PATH
-#if defined(USE_HARDCODED_VIDEO_PATH)
+#if defined(USE_HARDCODED_VIDEO_PATH) && defined(__APPLE__)
   const auto video_path = fs::path{"/Users/oddkiva/Desktop/datasets/sample-1.mp4"};
   if (!fs::exists(video_path))
   {
