@@ -108,8 +108,6 @@ namespace DO::Sara {
             "The dimension of scene points is incorrect. "
             "They must either 3D (Euclidean) or 4D (homogeneous)!"};
 
-      fmt::print("Pose:\n{}\n", T);
-
       // Project the camera coordinates to the image plane.
       //
       // The result is a list of pixel coordinates.
@@ -136,6 +134,8 @@ namespace DO::Sara {
       const auto ε_squared = (u2 - u1).colwise().squaredNorm().array();
       const auto ε_small = ε_squared < ε_max;
 
+#if 0
+      fmt::print("Pose:\n{}\n", T);
       const auto ε_debug = Eigen::VectorXd{ε_squared.sqrt()};
       const auto col_max = std::min(Eigen::Index{10}, u2.cols());
       for (auto i = 0; i < col_max; ++i)
@@ -146,6 +146,7 @@ namespace DO::Sara {
       }
       fmt::print("ε =\n{}\n", ε_debug.head(col_max).eval());
       fmt::print("ε_small.count() = {}\n", ε_small.count());
+#endif
 
       return ε_small && cheiral;
     }

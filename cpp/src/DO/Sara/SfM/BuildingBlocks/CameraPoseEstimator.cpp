@@ -25,7 +25,7 @@ auto CameraPoseEstimator::estimate_pose(
 {
   _inlier_predicate.set_camera(camera);
 
-  static constexpr auto debug = true;
+  static constexpr auto debug = false;
   return v2::ransac(point_ray_pairs, _solver, _inlier_predicate,
                     _ransac_iter_max, _ransac_confidence_min, std::nullopt,
                     debug);
@@ -101,16 +101,20 @@ auto CameraPoseEstimator::estimate_pose(
     if (!fv.has_value())
       throw std::runtime_error{"Error: the feature track must be alive!"};
     const auto pixel_coords = pcg.pixel_coords(*fv).cast<double>();
-    if (t < 10)
-      SARA_LOGD(logger, "Backprojecting point {}: {}", t,
-                pixel_coords.transpose().eval());
     // Normalize the rays. This is important for Lambda-Twist P3P method.
     rays.col(t) = camera.backproject(pixel_coords).normalized();
+    if (t < 10)
+      SARA_LOGD(logger, "Backproject point {}:\n{} -> {}", t,
+                pixel_coords.transpose().eval(),
+                rays.col(t).transpose().eval());
   }
 
   // 3. solve the PnP problem with RANSAC.
   const auto [pose, inliers, sample_best] =
       estimate_pose(point_ray_pairs, camera);
+  SARA_LOGD(logger, "[AbsPoseEst] Pose:\n{}", pose);
+  SARA_LOGD(logger, "[AbsPoseEst] inlier count: {}",
+            inliers.flat_array().count());
   const auto pose_estimated_successfully =
       inliers.flat_array().count() >= _ransac_inliers_min;
 
