@@ -11,11 +11,10 @@
 
 #pragma once
 
+#include <DO/Sara/Core/EigenFormatInterop.hpp>
 #include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/MultiViewGeometry/PnP/LambdaTwist.hpp>
 #include <DO/Sara/MultiViewGeometry/PointRayCorrespondenceList.hpp>
-
-#include <fmt/format.h>
 
 
 namespace DO::Sara {
@@ -30,9 +29,9 @@ namespace DO::Sara {
     using data_point_type = std::array<TensorView_<T, 2>, 2>;
     using model_type = Eigen::Matrix<T, 3, 4>;
 
-    inline auto
-    operator()(const tensor_view_type& scene_points,
-               const tensor_view_type& rays) const -> std::vector<model_type>
+    inline auto operator()(const tensor_view_type& scene_points,
+                           const tensor_view_type& rays) const
+        -> std::vector<model_type>
     {
       const auto sp_mat_ = scene_points.colmajor_view().matrix();
 
@@ -108,6 +107,7 @@ namespace DO::Sara {
             "The dimension of scene points is incorrect. "
             "They must either 3D (Euclidean) or 4D (homogeneous)!"};
 
+#if defined(USE_CALIBRATION_MATRIX)
       // Project the camera coordinates to the image plane.
       //
       // The result is a list of pixel coordinates.
@@ -125,6 +125,10 @@ namespace DO::Sara {
       auto u2 = Eigen::MatrixXd{2, rays.cols()};
       for (auto i = 0; i < u2.cols(); ++i)
         u2.col(i) = C->project(rays.col(i));
+#else
+      const Eigen::MatrixXd u1 = X_camera.colwise().hnormalized();
+      const Eigen::MatrixXd u2 = rays.colwise().hnormalized();
+#endif
 
       // Check the cheirality w.r.t. the candidate pose.
       const auto cheiral = X_camera.row(2).array() > 0;
@@ -134,7 +138,7 @@ namespace DO::Sara {
       const auto ε_squared = (u2 - u1).colwise().squaredNorm().array();
       const auto ε_small = ε_squared < ε_max;
 
-#if 0
+#if defined(CHECK_PNP_RESIDUALS)
       fmt::print("Pose:\n{}\n", T);
       const auto ε_debug = Eigen::VectorXd{ε_squared.sqrt()};
       const auto col_max = std::min(Eigen::Index{10}, u2.cols());
@@ -161,8 +165,5 @@ namespace DO::Sara {
       return this->operator()(scene_points, backprojected_rays);
     }
   };
-
-
-  //! @}
 
 }  // namespace DO::Sara

@@ -315,9 +315,18 @@ auto OdometryPipeline::grow_geometry() -> bool
   const auto q_global = Eigen::Quaterniond{_current_global_rotation};
   auto angles = calculate_yaw_pitch_roll(q_global);
   static constexpr auto degrees = 180. / M_PI;
-  SARA_LOGI(logger, "Global yaw   = {:0.3f} deg", angles(0) * degrees);
-  SARA_LOGI(logger, "Global pitch = {:0.3f} deg", angles(1) * degrees);
-  SARA_LOGI(logger, "Global roll  = {:0.3f} deg", angles(2) * degrees);
+  SARA_LOGI(logger, "[Rel] Global yaw   = {:0.3f} deg", angles(0) * degrees);
+  SARA_LOGI(logger, "[Rel] Global pitch = {:0.3f} deg", angles(1) * degrees);
+  SARA_LOGI(logger, "[Rel] Global roll  = {:0.3f} deg", angles(2) * degrees);
+
+
+  const auto R_abs = _pose_graph[_pose_curr].pose.q.toRotationMatrix();
+  const auto q_global_2 =
+      Eigen::Quaterniond{P * R_abs.transpose() * P.transpose()};
+  angles = calculate_yaw_pitch_roll(q_global_2);
+  SARA_LOGI(logger, "[Rel] Global yaw   = {:0.3f} deg", angles(0) * degrees);
+  SARA_LOGI(logger, "[Rel] Global pitch = {:0.3f} deg", angles(1) * degrees);
+  SARA_LOGI(logger, "[Rel] Global roll  = {:0.3f} deg", angles(2) * degrees);
 
   return true;
 }
