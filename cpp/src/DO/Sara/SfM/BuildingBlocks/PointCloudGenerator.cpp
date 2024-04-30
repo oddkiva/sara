@@ -13,6 +13,8 @@
 
 #include <DO/Sara/Logging/Logger.hpp>
 
+#include <algorithm>
+
 
 using namespace DO::Sara;
 
@@ -391,4 +393,25 @@ auto PointCloudGenerator::grow_point_cloud(
   }
 
   SARA_LOGD(logger, "[AFTER ] {} scene points", _point_cloud.size());
+
+  if (_point_cloud.empty())
+    return;
+
+  static constexpr auto zcomp = [](const RgbColoredPoint<double>& a,
+                                   const RgbColoredPoint<double>& b) {
+    return a.coords().z() < b.coords().z();
+  };
+  const auto [zmin, zmax] =
+      std::minmax_element(_point_cloud.begin(), _point_cloud.end(), zcomp);
+  auto pct = _point_cloud;
+  auto zmed = pct.begin() + pct.size() / 2;
+  std::nth_element(pct.begin(), zmed, pct.end(), zcomp);
+
+  SARA_LOGD(logger, "[AFTER ] zmin coords = {}",
+            zmin->coords().transpose().eval());
+  SARA_LOGD(logger, "[AFTER ] zmax coords = {}",
+            zmax->coords().transpose().eval());
+  SARA_LOGD(logger, "[AFTER ] zmed coords = {}",
+            zmed->coords().transpose().eval());
+  SARA_LOGD(logger, "[AFTER ] zmed index  = {}", zmed - pct.begin());
 }

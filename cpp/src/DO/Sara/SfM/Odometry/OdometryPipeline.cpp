@@ -267,6 +267,7 @@ auto OdometryPipeline::grow_geometry() -> bool
     std::tie(_tracks_alive_with_known_scene_point,
              _tracks_alive_without_scene_point) =
         _point_cloud_generator->split_by_scene_point_knowledge(_tracks_alive);
+
     const auto [abs_pose_mat, abs_pose_est_successful] =
         _abs_pose_estimator.estimate_pose(_tracks_alive_with_known_scene_point,
                                           _pose_curr, _camera_corrected,
@@ -324,9 +325,9 @@ auto OdometryPipeline::grow_geometry() -> bool
   const auto q_global_2 =
       Eigen::Quaterniond{P * R_abs.transpose() * P.transpose()};
   angles = calculate_yaw_pitch_roll(q_global_2);
-  SARA_LOGI(logger, "[Rel] Global yaw   = {:0.3f} deg", angles(0) * degrees);
-  SARA_LOGI(logger, "[Rel] Global pitch = {:0.3f} deg", angles(1) * degrees);
-  SARA_LOGI(logger, "[Rel] Global roll  = {:0.3f} deg", angles(2) * degrees);
+  SARA_LOGI(logger, "[Abs] Global yaw   = {:0.3f} deg", angles(0) * degrees);
+  SARA_LOGI(logger, "[Abs] Global pitch = {:0.3f} deg", angles(1) * degrees);
+  SARA_LOGI(logger, "[Abs] Global roll  = {:0.3f} deg", angles(2) * degrees);
 
   return true;
 }

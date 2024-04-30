@@ -29,9 +29,9 @@ namespace DO::Sara {
     using data_point_type = std::array<TensorView_<T, 2>, 2>;
     using model_type = Eigen::Matrix<T, 3, 4>;
 
-    inline auto operator()(const tensor_view_type& scene_points,
-                           const tensor_view_type& rays) const
-        -> std::vector<model_type>
+    inline auto
+    operator()(const tensor_view_type& scene_points,
+               const tensor_view_type& rays) const -> std::vector<model_type>
     {
       const auto sp_mat_ = scene_points.colmajor_view().matrix();
 
@@ -107,6 +107,7 @@ namespace DO::Sara {
             "The dimension of scene points is incorrect. "
             "They must either 3D (Euclidean) or 4D (homogeneous)!"};
 
+#define USE_CALIBRATION_MATRIX
 #if defined(USE_CALIBRATION_MATRIX)
       // Project the camera coordinates to the image plane.
       //
@@ -138,18 +139,25 @@ namespace DO::Sara {
       const auto ε_squared = (u2 - u1).colwise().squaredNorm().array();
       const auto ε_small = ε_squared < ε_max;
 
+#define CHECK_PNP_RESIDUALS
 #if defined(CHECK_PNP_RESIDUALS)
       fmt::print("Pose:\n{}\n", T);
-      const auto ε_debug = Eigen::VectorXd{ε_squared.sqrt()};
+      auto ε_debug = Eigen::VectorXd{ε_squared.sqrt()};
       const auto col_max = std::min(Eigen::Index{10}, u2.cols());
+      fmt::print("X_world =\n{}\n", X_world.leftCols(col_max).eval());
+      fmt::print("X_camera =\n{}\n", X_camera.leftCols(col_max).eval());
       for (auto i = 0; i < col_max; ++i)
       {
         fmt::print("u1[{}]: {}   u2[{}]: {}\n",      //
                    i, u1.col(i).transpose().eval(),  //
                    i, u2.col(i).transpose().eval());
       }
-      fmt::print("ε =\n{}\n", ε_debug.head(col_max).eval());
+      fmt::print("ε = {}\n", ε_debug.head(col_max).transpose().eval());
+      fmt::print("cheiral.count() = {}\n", cheiral.count());
       fmt::print("ε_small.count() = {}\n", ε_small.count());
+
+      std::sort(ε_debug.data(), ε_debug.data() + ε_debug.size());
+      fmt::print("ε_sorted = {}\n", ε_debug.head(col_max).transpose().eval());
 #endif
 
       return ε_small && cheiral;

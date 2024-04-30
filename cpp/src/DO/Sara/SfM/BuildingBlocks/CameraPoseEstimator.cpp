@@ -25,7 +25,7 @@ auto CameraPoseEstimator::estimate_pose(
 {
   _inlier_predicate.set_camera(camera);
 
-  static constexpr auto debug = false;
+  static constexpr auto debug = true;
   return v2::ransac(point_ray_pairs, _solver, _inlier_predicate,
                     _ransac_iter_max, _ransac_confidence_min, std::nullopt,
                     debug);
@@ -60,15 +60,8 @@ auto CameraPoseEstimator::estimate_pose(
         return ftrack_filtered;
       });
 
-  auto point_ray_pairs = PointRayCorrespondenceList<double>{};
-  point_ray_pairs.x.resize({num_ftracks, 3});
-  point_ray_pairs.y.resize({num_ftracks, 3});
-
-  // Data collection.
-  //
-  // 1. Collect the scene point coordinates.
-  SARA_LOGD(logger, "Retrieving scene points for each feature track...");
-  auto scene_coords = point_ray_pairs.x.colmajor_view().matrix();
+  // Use only feature tracks with reasonable point z-depth value.
+  auto ftrack_indices_plausible = std::vector<Eigen::Index>{};
   for (auto t = 0; t < num_ftracks; ++t)
   {
     const auto& ftrack = ftracks_filtered[t];
@@ -79,11 +72,40 @@ auto CameraPoseEstimator::estimate_pose(
       throw std::runtime_error{
           "Error: a feature track must be assigned a scene point index!"};
 
+    const auto coords = pcg.barycenter(scene_point_indices).coords();
+    if (coords.z() < 0 || coords.z() > 100)
+      continue;
+
+    ftrack_indices_plausible.push_back(t);
+  }
+
+  const auto num_ftracks_plausible =
+      static_cast<Eigen::Index>(ftrack_indices_plausible.size());
+  SARA_LOGD(logger, "Plausible feature tracks: {}", num_ftracks_plausible);
+
+  auto point_ray_pairs = PointRayCorrespondenceList<double>{};
+  point_ray_pairs.x.resize({num_ftracks_plausible, 3});
+  point_ray_pairs.y.resize({num_ftracks_plausible, 3});
+
+  // Data collection.
+  //
+  // 1. Collect the scene point coordinates.
+  SARA_LOGD(logger, "Retrieving scene points for each feature track...");
+  auto scene_coords = point_ray_pairs.x.colmajor_view().matrix();
+  for (auto ti = 0; ti < num_ftracks_plausible; ++ti)
+  {
+    const auto& t = ftrack_indices_plausible[ti];
+    const auto& ftrack = ftracks_filtered[t];
+
+    // Fetch the 3D scene coordinates.
+    const auto scene_point_indices = pcg.list_scene_point_indices(ftrack);
+    if (scene_point_indices.empty())
+      throw std::runtime_error{
+          "Error: a feature track must be assigned a scene point index!"};
+
     // If there are more than one scene point index, we fetch the barycentric
     // coordinates anyway.
-    scene_coords.col(t) = pcg.barycenter(scene_point_indices).coords();
-    if (t < 10)
-      std::cout << t << " -> " << scene_coords.col(t).transpose() << std::endl;
+    scene_coords.col(ti) = pcg.barycenter(scene_point_indices).coords();
   }
 
   // 2. Collect the backprojected rays from the current camera view for each
@@ -93,8 +115,9 @@ auto CameraPoseEstimator::estimate_pose(
             "feature track...",
             pv);
   auto rays = point_ray_pairs.y.colmajor_view().matrix();
-  for (auto t = 0; t < num_ftracks; ++t)
+  for (auto ti = 0; ti < num_ftracks_plausible; ++ti)
   {
+    const auto& t = ftrack_indices_plausible[ti];
     const auto& ftrack = ftracks_filtered[t];
     // Calculate the backprojected ray.
     const auto& fv = pcg.find_feature_vertex_at_pose(ftrack, pv);
@@ -102,12 +125,16 @@ auto CameraPoseEstimator::estimate_pose(
       throw std::runtime_error{"Error: the feature track must be alive!"};
     const auto pixel_coords = pcg.pixel_coords(*fv).cast<double>();
     // Normalize the rays. This is important for Lambda-Twist P3P method.
-    rays.col(t) = camera.backproject(pixel_coords).normalized();
-    if (t < 10)
-      SARA_LOGD(logger, "Backproject point {}:\n{} -> {}", t,
+    rays.col(ti) = camera.backproject(pixel_coords).normalized();
+    if (ti < 10)
+      SARA_LOGD(logger, "Backproject point {}:\n{} -> {}", ti,
                 pixel_coords.transpose().eval(),
-                rays.col(t).transpose().eval());
+                rays.col(ti).transpose().eval());
   }
+
+  SARA_LOGD(logger, "Scene points:\n{}", scene_coords.leftCols(10).eval());
+  SARA_LOGD(logger, "Rays:\n{}", rays.leftCols(10).eval());
+
 
   // 3. solve the PnP problem with RANSAC.
   const auto [pose, inliers, sample_best] =

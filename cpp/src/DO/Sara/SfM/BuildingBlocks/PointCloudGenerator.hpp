@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp"
+#include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/RgbColoredPoint.hpp>
 #include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
 #include <DO/Sara/SfM/Graph/FeatureTracker.hpp>
