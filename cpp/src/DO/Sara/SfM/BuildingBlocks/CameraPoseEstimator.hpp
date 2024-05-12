@@ -38,10 +38,10 @@ namespace DO::Sara {
     }
 
     //! @brief Set robust estimation parameters.
-    auto
-    set_estimation_params(const PixelUnit error_max = 5._px,
-                          const int ransac_iter_max = 1000,
-                          const double ransac_confidence_min = 0.99) -> void
+    auto set_estimation_params(const PixelUnit error_max = 5._px,
+                               const int ransac_iter_max = 100,
+                               const double ransac_confidence_min = 0.99)
+        -> void
     {
       _inlier_predicate.ε = error_max.value;
       _ransac_iter_max = ransac_iter_max;
@@ -54,10 +54,22 @@ namespace DO::Sara {
                        const CameraIntrinsicModel&)
         -> std::tuple<PoseMatrix, Inlier, MinimalSample>;
 
+    auto estimate_pose(const PointRayCorrespondenceList<double>&,
+                       const CameraIntrinsicModel&,
+                       const Eigen::Matrix3d& absolute_rotation)
+        -> std::tuple<PoseMatrix, Inlier, MinimalSample>;
+
     auto estimate_pose(const std::vector<FeatureTrack>&,
                        const CameraPoseGraph::Vertex,  //
                        const CameraIntrinsicModel&,    //
                        const PointCloudGenerator&)
+        -> std::pair<PoseMatrix, bool>;
+
+    auto estimate_pose(const std::vector<FeatureTrack>&,
+                       const CameraPoseGraph::Vertex,  //
+                       const CameraIntrinsicModel&,    //
+                       const PointCloudGenerator&,
+                       const Eigen::Matrix3d& absolute_rotation)
         -> std::pair<PoseMatrix, bool>;
 
   private:

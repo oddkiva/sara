@@ -1,19 +1,3 @@
-VULKAN
-======
-- Hello Triangle tutorial.
-
-
-Bundle Adjustment Tests
-=======================
-
-Form the bundle adjustment problem.
-TODO:
-- Choose a reference camera.
-- Populate the list of cameras in BundleAdjustmentProblems:
-  As a reminder:
-  image #i -> camera #i -> BundleAdjustmentProblem.camera_parameters.row(i)
-- Initialize the absolute camera poses.
-
 Vanishing Point Detection with Radial Distortion
 ================================================
 Unsupervised Vanishing Point Detection and Camera Calibration from a Single

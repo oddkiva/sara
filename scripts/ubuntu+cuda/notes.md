@@ -56,3 +56,14 @@ N.B.: the notes may not be entirely accurate, so please refer to the Dockerfile:
 
   More info on this page:
   [https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html#installing]
+
+
+
+# Desperate commands
+
+```
+dpkg --force-all --configure -a
+dpkg --purge --force-depends libnettle6 (cf. this post)
+apt --fix-broken install
+apt-get -f install
+```
