@@ -54,6 +54,9 @@ target_link_libraries(
           fmt::fmt #
           glfw)
 
+# Debug the pose recovery.
+sara_add_example(debug_pose_recovery)
+
 # Bundle adjustment.
 sara_add_example(two_view_bundle_adjustment_example)
 target_include_directories(two_view_bundle_adjustment_example
