@@ -36,8 +36,8 @@ auto draw_feature_tracks(DO::Sara::ImageView<Rgb8>& display,  //
     const auto& track = tracks_alive[t];
 
     // Just to double check.
-    if (track_visibility_count[t] < 3u)
-      continue;
+    // if (track_visibility_count[t] < 3u)
+    //   continue;
 
     auto p = std::array<Eigen::Vector2f, 2>{};
     auto r = std::array<float, 2>{};
@@ -69,6 +69,34 @@ auto draw_feature_tracks(DO::Sara::ImageView<Rgb8>& display,  //
   }
 }
 
+auto save_point_correspondences(
+    const CameraPoseGraph& pgraph,  //
+    const FeatureGraph& fgraph,     //
+    const CameraPoseGraph::Vertex pose_u,
+    const std::vector<FeatureTracker::Track>& tracks_alive,
+    const std::filesystem out_csv_fp) -> void
+{
+  std::ofstream out{out_csv_fp.string()};
+  if (!out)
+    throw std::runtime_error{"Cannot create output CSV!"};
+
+  for (auto t = 0u; t < tracks_alive.size(); ++t)
+  {
+    const auto& track = tracks_alive[t];
+
+    auto p = std::array<Eigen::Vector2f, 2>{};
+
+    const auto& [pose_v0, k0] = fgraph[track.front()];
+    const auto& f0 = features(pgraph[pose_v0].keypoints)[k0];
+    p[0] = f0.center();
+
+    const auto& [pose_v1, k1] = fgraph[track.back()];
+    const auto& f1 = features(pgraph[pose_v1].keypoints)[k1];
+    p[1] = f1.center();
+
+    out << fmt::format("{},{},{},{}\n", p[0].x(), p[0].y(), p[1].x(), p[1].y());
+  }
+}
 
 auto OdometryPipeline::set_config(
     const std::filesystem::path& video_path,
@@ -76,6 +104,7 @@ auto OdometryPipeline::set_config(
 {
   // Build the dependency graph.
   _video_streamer.open(video_path);
+  _video_streamer.set_num_skips(4);
   // The original camera.
   _camera = camera;
   // The virtual camera for the undistorted image.
@@ -177,6 +206,22 @@ auto OdometryPipeline::grow_geometry() -> bool
 {
   auto& logger = Logger::get();
 
+  // The rotation is expressed in the camera coordinates.
+  // But the calculation is done in the automotive/aeronautics coordinate
+  // system.
+  //
+  // The z-coordinate of the camera coordinates is the x-axis of the
+  // automotive coordinates
+  //
+  // clang-format off
+  static const auto P = (Eigen::Matrix3d{} <<
+     0,  0, 1,
+    -1,  0, 0,
+     0, -1, 0
+  ).finished();
+  // clang-format on
+
+
   // Detect and describe the local features.
   _pose_prev = _pose_curr;
 
@@ -227,7 +272,8 @@ auto OdometryPipeline::grow_geometry() -> bool
 
   // 2. Update the feature tracks by adding the feature matches that are
   //    verified by the relative pose estimation.
-  //    Notice move semantics which will the relative pose data after this call.
+  //    Notice move semantics which will the relative pose data after this
+  //    call.
   //
   // Note that in the case of only two views, feature tracks are "compressed"
   // feature matches.
@@ -235,6 +281,18 @@ auto OdometryPipeline::grow_geometry() -> bool
       _pose_prev, _pose_curr,                            //
       std::move(rel_pose_data));
   _feature_tracker.update_feature_tracks(_pose_graph, pose_edge);
+  // Update the absolute rotation by composition.
+  const auto& R_delta = _pose_graph[pose_edge].motion.R;
+  _current_global_rotation = R_delta * _current_global_rotation;
+  SARA_LOGI(logger, "Current rotation =\n{}", _current_global_rotation);
+  const auto q_global = Eigen::Quaterniond{
+      P * _current_global_rotation.transpose() * P.transpose()};
+  auto angles = calculate_yaw_pitch_roll(q_global);
+  static constexpr auto degrees = 180. / M_PI;
+  SARA_LOGI(logger, "[Rel] Global yaw   = {:0.3f} deg", angles(0) * degrees);
+  SARA_LOGI(logger, "[Rel] Global pitch = {:0.3f} deg", angles(1) * degrees);
+  SARA_LOGI(logger, "[Rel] Global roll  = {:0.3f} deg", angles(2) * degrees);
+
 
   // 3. Recalculate the feature tracks that are still alive.
   std::tie(_tracks_alive, _track_visibility_count) =
@@ -262,16 +320,26 @@ auto OdometryPipeline::grow_geometry() -> bool
     _point_cloud_generator->compress_point_cloud(
         _feature_tracker._feature_tracks);
 
-    // 6. Determine the current absolute pose from the alive tracks using a PnP
+    // 6. Determine the current absolute pose from the alive tracks using a
+    // PnP
     //    approach.
     std::tie(_tracks_alive_with_known_scene_point,
              _tracks_alive_without_scene_point) =
         _point_cloud_generator->split_by_scene_point_knowledge(_tracks_alive);
 
+#define USE_ABSOLUTE_ROTATION
+#if defined(USE_ABSOLUTE_ROTATION)
+    const auto [abs_pose_mat, abs_pose_est_successful] =
+        _abs_pose_estimator.estimate_pose(
+            _tracks_alive_with_known_scene_point, _pose_curr, _camera_corrected,
+            *_point_cloud_generator, _current_global_rotation);
+#else
     const auto [abs_pose_mat, abs_pose_est_successful] =
         _abs_pose_estimator.estimate_pose(_tracks_alive_with_known_scene_point,
                                           _pose_curr, _camera_corrected,
                                           *_point_cloud_generator);
+#endif
+
     if (!abs_pose_est_successful)
     {
       SARA_LOGI(logger, "Failed to estimate the absolute pose!");
@@ -294,33 +362,9 @@ auto OdometryPipeline::grow_geometry() -> bool
                                            frame_corrected, pose_edge,
                                            _camera_corrected);
 
-  // The rotation is expressed in the camera coordinates.
-  // But the calculation is done in the automotive/aeronautics coordinate
-  // system.
+  // ---------------------------------------------------------------------------
+  // FOR DEBUGGING PURPOSES.
   //
-  // The z-coordinate of the camera coordinates is the x-axis of the
-  // automotive coordinates
-  //
-  // clang-format off
-  static const auto P = (Eigen::Matrix3d{} <<
-     0,  0, 1,
-    -1,  0, 0,
-     0, -1, 0
-  ).finished();
-  // clang-format on
-
-  const auto& R = _pose_graph[pose_edge].motion.R;
-  const Eigen::Matrix3d R_delta_abs = P * R.transpose() * P.transpose();
-  _current_global_rotation = R_delta_abs * _current_global_rotation;
-
-  const auto q_global = Eigen::Quaterniond{_current_global_rotation};
-  auto angles = calculate_yaw_pitch_roll(q_global);
-  static constexpr auto degrees = 180. / M_PI;
-  SARA_LOGI(logger, "[Rel] Global yaw   = {:0.3f} deg", angles(0) * degrees);
-  SARA_LOGI(logger, "[Rel] Global pitch = {:0.3f} deg", angles(1) * degrees);
-  SARA_LOGI(logger, "[Rel] Global roll  = {:0.3f} deg", angles(2) * degrees);
-
-
   const auto R_abs = _pose_graph[_pose_curr].pose.q.toRotationMatrix();
   const auto q_global_2 =
       Eigen::Quaterniond{P * R_abs.transpose() * P.transpose()};
@@ -328,6 +372,8 @@ auto OdometryPipeline::grow_geometry() -> bool
   SARA_LOGI(logger, "[Abs] Global yaw   = {:0.3f} deg", angles(0) * degrees);
   SARA_LOGI(logger, "[Abs] Global pitch = {:0.3f} deg", angles(1) * degrees);
   SARA_LOGI(logger, "[Abs] Global roll  = {:0.3f} deg", angles(2) * degrees);
+  //
+  // ---------------------------------------------------------------------------
 
   return true;
 }

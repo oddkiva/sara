@@ -85,8 +85,8 @@ auto PointCloudGenerator::filter_by_non_max_suppression(
 }
 
 auto PointCloudGenerator::find_feature_vertex_at_pose(
-    const FeatureTrack& track,
-    const PoseVertex pose_vertex) const -> std::optional<FeatureVertex>
+    const FeatureTrack& track, const PoseVertex pose_vertex) const
+    -> std::optional<FeatureVertex>
 {
   auto v = std::find_if(track.begin(), track.end(),
                         [this, pose_vertex](const auto& v) {
@@ -414,4 +414,18 @@ auto PointCloudGenerator::grow_point_cloud(
   SARA_LOGD(logger, "[AFTER ] zmed coords = {}",
             zmed->coords().transpose().eval());
   SARA_LOGD(logger, "[AFTER ] zmed index  = {}", zmed - pct.begin());
+}
+
+auto PointCloudGenerator::save_point_cloud(
+    const std::vector<FeatureTrack>& ftracks,
+    const std::filesystem::path& out_csv) const -> void
+{
+  std::ofstream out{out_csv.string()};
+
+  for (const auto& ftrack : ftracks)
+  {
+    const auto i = _from_vertex_to_scene_point_index.at(ftrack.front());
+    const auto& p = _point_cloud[i].coords();
+    out << fmt::format("{},{},{}\n", p.x(), p.y(), p.z());
+  }
 }

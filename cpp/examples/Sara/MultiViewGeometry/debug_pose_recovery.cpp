@@ -14,6 +14,7 @@
 
 #include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/SfM/Odometry/OdometryPipeline.hpp>
+#include <DO/Sara/Visualization/Match/PairWiseDrawer.hpp>
 
 #include <string_view>
 
@@ -64,8 +65,19 @@ public:
 
         const auto frame_annotated = _pipeline.make_display_frame();
         frames.emplace_back(frame_annotated);
-        sara::display(frames.back());
 
+        // auto frame = _pipeline._distortion_corrector->frame_rgb8();
+        // frames.emplace_back(std::move(frame));
+        // if (frames.size() <= 1)
+        //   continue;
+
+        // const auto& tracks_alive = _pipeline._tracks_alive;
+        // const auto t = std::array{0, static_cast<int>(frames.size()) - 1};
+
+        // // Collect the match.
+        // const auto& tracker = _pipeline._feature_tracker;
+
+        sara::display(frames.back());
         sara::get_key();
       }
     }

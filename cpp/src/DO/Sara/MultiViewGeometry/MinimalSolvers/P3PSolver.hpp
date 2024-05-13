@@ -29,9 +29,9 @@ namespace DO::Sara {
     using data_point_type = std::array<TensorView_<T, 2>, 2>;
     using model_type = Eigen::Matrix<T, 3, 4>;
 
-    inline auto
-    operator()(const tensor_view_type& scene_points,
-               const tensor_view_type& rays) const -> std::vector<model_type>
+    inline auto operator()(const tensor_view_type& scene_points,
+                           const tensor_view_type& rays) const
+        -> std::vector<model_type>
     {
       const auto sp_mat_ = scene_points.colmajor_view().matrix();
 
