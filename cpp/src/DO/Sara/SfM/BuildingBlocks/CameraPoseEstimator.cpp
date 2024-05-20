@@ -189,6 +189,8 @@ auto CameraPoseEstimator::estimate_pose(
   SARA_LOGD(logger, "[AbsPoseEst] Pose:\n{}", pose);
   SARA_LOGD(logger, "[AbsPoseEst] inlier count: {}",
             inliers.flat_array().count());
+  SARA_LOGD(logger, "[AbsPoseEst] num points: {}",
+            inliers.flat_array().size());
   const auto pose_estimated_successfully =
       inliers.flat_array().count() >= _ransac_inliers_min;
 

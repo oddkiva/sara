@@ -373,7 +373,7 @@ private:
   //! @brief Point cloud rendering options.
   Eigen::Matrix4f _point_cloud_projection;
   // kgl::Camera _point_cloud_camera;
-  float _point_size = 5.f;
+  float _point_size = 3.f;
 
   //! @brief User interaction.
   bool _pause = false;

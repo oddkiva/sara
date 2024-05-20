@@ -433,8 +433,6 @@ auto PointCloudGenerator::write_point_cloud(
 {
   std::ofstream out{out_csv.string()};
 
-  // Just for debug from MacOS viewer app.
-  auto i = 0;
   for (const auto& ftrack : ftracks)
   {
     // Please note that not all feature tracks has a finite cheiral 3D scene
@@ -453,8 +451,6 @@ auto PointCloudGenerator::write_point_cloud(
 
     // Save the scene point coordinates.
     const auto p = _point_cloud[pi].coords();
-    out << fmt::format("{},{},{},{},{}\n", i, pi, p.x(), p.y(), p.z());
-
-    ++i;
+    out << fmt::format("{},{},{},{}\n", pi, p.x(), p.y(), p.z());
   }
 }
