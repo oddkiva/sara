@@ -452,7 +452,7 @@ auto PointCloudGenerator::write_point_cloud(
           pi, std::size_t{}, _point_cloud.size())};
 
     // Save the scene point coordinates.
-    const Eigen::Vector3d p = _point_cloud[pi].coords();
+    const auto p = _point_cloud[pi].coords();
     out << fmt::format("{},{},{},{},{}\n", i, pi, p.x(), p.y(), p.z());
 
     ++i;
