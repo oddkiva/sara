@@ -27,7 +27,7 @@ auto CameraPoseEstimator::estimate_pose(
 {
   _inlier_predicate.set_camera(camera);
 
-  static constexpr auto debug = true;
+  static constexpr auto debug = false;
   return v2::ransac(point_ray_pairs, _solver, _inlier_predicate,
                     _ransac_iter_max, _ransac_confidence_min, std::nullopt,
                     debug);
