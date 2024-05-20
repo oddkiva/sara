@@ -18,6 +18,7 @@
 #include <DO/Kalpana/Math/Projection.hpp>
 #include <DO/Kalpana/Math/Viewport.hpp>
 
+#include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/SfM/Odometry/OdometryPipeline.hpp>
 
 #if defined(_WIN32)
@@ -71,6 +72,7 @@ public:
     glfwSetWindowUserPointer(_window, this);
     // Register callbacks.
     glfwSetWindowSizeCallback(_window, window_size_callback);
+    glfwSetKeyCallback(_window, key_callback);
   }
 
   ~SingleWindowApp()
@@ -114,12 +116,24 @@ public:
     glfwSwapInterval(1);
     while (!glfwWindowShouldClose(_window))
     {
-      if (!_pipeline.read())
-        break;
+      if (!_pause)
+      {
+        if (!_pipeline.read())
+          break;
 
-      _pipeline.process();
-      // Load data to OpenGL.
-      upload_point_cloud_data_to_opengl();
+        if (!_pipeline._video_streamer.skip())
+        {
+          _pipeline.process();
+
+          // Load data to OpenGL.
+          //
+          // TODO: upload only if we have a new image frame to process and only
+          // if the absolute pose estimation is successful.
+          upload_point_cloud_data_to_opengl();
+
+          _pause = true;
+        }
+      }
 
       // Clear the color buffer and the buffer testing.
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -170,8 +184,24 @@ private:
 
   auto upload_point_cloud_data_to_opengl() -> void
   {
-    _point_cloud.upload_host_data_to_gl(
-        _pipeline._triangulator->_colored_point_cloud);
+    const auto& point_cloud = _pipeline.point_cloud();
+
+    static constexpr auto dim = 6;
+    const auto num_points = static_cast<int>(point_cloud.size());
+    if (num_points == 0)
+      return;
+
+    const auto ptr =
+        const_cast<sara::PointCloudGenerator::ScenePoint*>(point_cloud.data());
+    const auto ptrd = reinterpret_cast<double*>(ptr);
+    const auto pc_tview = sara::TensorView_<double, 2>{
+        ptrd,              //
+        {num_points, dim}  //
+    };
+
+    auto& logger = sara::Logger::get();
+    SARA_LOGI(logger, "point cloud dimensions: {} ", pc_tview.sizes());
+    _point_cloud.upload_host_data_to_gl(pc_tview.cast<float>());
   }
 
   auto render_video() -> void
@@ -230,8 +260,8 @@ private:
     return *app_ptr;
   }
 
-  static auto window_size_callback(GLFWwindow* window, const int, const int)
-      -> void
+  static auto window_size_callback(GLFWwindow* window, const int,
+                                   const int) -> void
   {
     auto& self = get_self(window);
 
@@ -255,6 +285,22 @@ private:
 
     // Point cloud projection matrix.
     self._point_cloud_projection = self._point_cloud_viewport.perspective();
+  }
+
+  static auto key_callback(GLFWwindow* window,  //
+                           int key,             //
+                           int /* scancode */,  //
+                           int action,          //
+                           int /* mods */) -> void
+  {
+    auto& app = get_self(window);
+    if (app._pause && key == GLFW_KEY_SPACE &&
+        (action == GLFW_RELEASE || action == GLFW_REPEAT))
+    {
+      app._pause = false;
+      std::cout << "RESUME" << std::endl;
+      return;
+    }
   }
 
 private:
@@ -327,13 +373,17 @@ private:
   //! @brief Point cloud rendering options.
   Eigen::Matrix4f _point_cloud_projection;
   // kgl::Camera _point_cloud_camera;
-  float _point_size = 5.f;
+  float _point_size = 3.f;
+
+  //! @brief User interaction.
+  bool _pause = false;
 };
 
 bool SingleWindowApp::_glfw_initialized = false;
 
 
-auto main(int const argc, char** const argv) -> int
+auto main([[maybe_unused]] int const argc,
+          [[maybe_unused]] char** const argv) -> int
 {
 #if defined(_OPENMP)
   const auto num_threads = omp_get_max_threads();
@@ -341,6 +391,16 @@ auto main(int const argc, char** const argv) -> int
   Eigen::setNbThreads(num_threads);
 #endif
 
+#define USE_HARDCODED_VIDEO_PATH
+#if defined(USE_HARDCODED_VIDEO_PATH) && defined(__APPLE__)
+  const auto video_path =
+      fs::path{"/Users/oddkiva/Desktop/datasets/sample-1.mp4"};
+  if (!fs::exists(video_path))
+  {
+    fmt::print("Video {} does not exist", video_path.string());
+    return EXIT_FAILURE;
+  }
+#else
   if (argc < 2)
   {
     std::cout << fmt::format("Usage: {} VIDEO_PATH\n",
@@ -349,6 +409,7 @@ auto main(int const argc, char** const argv) -> int
   }
 
   const auto video_path = fs::path{argv[1]};
+#endif
   auto camera = sara::v2::BrownConradyDistortionModel<double>{};
   {
     camera.fx() = 917.2878392016245;
@@ -359,7 +420,7 @@ auto main(int const argc, char** const argv) -> int
     // clang-format off
     camera.k() <<
       -0.2338367557617234,
-      0.05952465745165465,
+      +0.05952465745165465,
       -0.007947847982157091;
     // clang-format on
     camera.p() << -0.0003137658969742134, 0.00021943576376532096;

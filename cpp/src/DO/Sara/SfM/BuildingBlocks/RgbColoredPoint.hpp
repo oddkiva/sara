@@ -37,7 +37,7 @@ namespace DO::Sara {
 
     inline auto coords() -> Eigen::Map<Coords>
     {
-      return Eigen::Map<Eigen::Vector3<T>>{_v.data()};
+      return Eigen::Map<Coords>{_v.data()};
     }
 
     inline auto coords() const -> Eigen::Map<const Coords>

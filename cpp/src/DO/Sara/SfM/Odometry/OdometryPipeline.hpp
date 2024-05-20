@@ -1,98 +1,90 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2024-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
-#include <DO/Sara/Graphics/ImageDraw.hpp>
-#include <DO/Sara/SfM/Odometry/FeatureTracker.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/CameraPoseEstimator.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/PointCloudGenerator.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/RelativePoseEstimator.hpp>
+#include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
+#include <DO/Sara/SfM/Graph/FeatureTracker.hpp>
 #include <DO/Sara/SfM/Odometry/ImageDistortionCorrector.hpp>
-#include <DO/Sara/SfM/Odometry/RelativePoseEstimator.hpp>
-#include <DO/Sara/SfM/Odometry/Triangulator.hpp>
 #include <DO/Sara/SfM/Odometry/VideoStreamer.hpp>
-#include <DO/Sara/Visualization/Features/Draw.hpp>
-
 
 namespace DO::Sara {
 
-  struct OdometryPipeline
+  class OdometryPipeline
   {
+  public:
     auto set_config(const std::filesystem::path& video_path,
                     const v2::BrownConradyDistortionModel<double>& camera)
-        -> void
+        -> void;
+
+    auto read() -> bool;
+
+    auto process() -> void;
+
+    auto make_display_frame() const -> Image<Rgb8>;
+
+    auto point_cloud() const -> const PointCloudGenerator::PointCloud&
     {
-      // Build the dependency graph.
-      _video_streamer.open(video_path);
-      _camera = camera;
-
-      _distortion_corrector = std::make_unique<ImageDistortionCorrector>(
-          _video_streamer.frame_rgb8(),     //
-          _video_streamer.frame_gray32f(),  //
-          _camera                           //
-      );
-
-      _feature_tracker = std::make_unique<FeatureTracker>(
-          _distortion_corrector->frame_gray32f());
-
-      _relative_pose_estimator = std::make_unique<RelativePoseEstimator>(
-          _feature_tracker->keys, _feature_tracker->matches, _camera);
-
-      _triangulator = std::make_unique<Triangulator>(
-          _relative_pose_estimator->_geometry.C1,
-          _relative_pose_estimator->_geometry.C2,  //
-          _relative_pose_estimator->_K, _relative_pose_estimator->_K_inv,
-          _relative_pose_estimator->_X, _relative_pose_estimator->_inliers);
+      return _point_cloud;
     }
 
-    auto read() -> bool
-    {
-      return _video_streamer.read();
-    }
+  private: /* computer vision tasks */
+    auto detect_keypoints(const ImageView<float>&) const
+        -> KeypointList<OERegion, float>;
 
-    auto process() -> void
-    {
-      if (_video_streamer.skip())
-        return;
+    auto
+    estimate_relative_pose(const KeypointList<OERegion, float>& keys_src,
+                           const KeypointList<OERegion, float>& keys_dst) const
+        -> std::pair<RelativePoseData, TwoViewGeometry>;
 
-      _distortion_corrector->undistort();
+  private: /* graph update tasks */
+    auto grow_geometry() -> bool;
 
-      // N.B.: detect the features on the **undistorted** image.
-      _feature_tracker->detect_features();
-      _feature_tracker->match_features();
-
-      const auto success = _relative_pose_estimator->estimate_relative_pose();
-      if (!success)
-        return;
-
-      _triangulator->triangulate();
-      _triangulator->extract_colors(_distortion_corrector->frame_rgb8(0),
-                                    _distortion_corrector->frame_rgb8(1));
-      _triangulator->update_colored_point_cloud();
-    }
-
-    auto make_display_frame() const -> Image<Rgb8>
-    {
-      Image<Rgb8> display = _distortion_corrector->frame_rgb8();
-      const auto& matches = _feature_tracker->matches;
-      const auto& inliers = _relative_pose_estimator->_inliers;
-      const auto num_matches = static_cast<int>(matches.size());
-#pragma omp parallel for
-      for (auto m = 0; m < num_matches; ++m)
-      {
-        if (!inliers(m))
-          continue;
-        const auto& match = matches[m];
-        draw(display, match.x(), Blue8);
-        draw(display, match.y(), Cyan8);
-        draw_arrow(display, match.x_pos(), match.y_pos(), Yellow8);
-      }
-
-      return display;
-    }
-
+  public: /* data members */
     VideoStreamer _video_streamer;
     v2::BrownConradyDistortionModel<double> _camera;
+    v2::PinholeCamera<double> _camera_corrected;
 
+    //! @brief Data mutators.
+    //! @{
     std::unique_ptr<ImageDistortionCorrector> _distortion_corrector;
-    std::unique_ptr<FeatureTracker> _feature_tracker;
-    std::unique_ptr<RelativePoseEstimator> _relative_pose_estimator;
-    std::unique_ptr<Triangulator> _triangulator;
+    v2::RelativePoseEstimator _rel_pose_estimator;
+    CameraPoseEstimator _abs_pose_estimator;
+    std::unique_ptr<PointCloudGenerator> _point_cloud_generator;
+    //! @}
+
+    //! @brief SfM data.
+    //! @{
+    FeatureParams _feature_params;
+    FeatureTracker _feature_tracker;
+    CameraPoseGraph _pose_graph;
+    PointCloudGenerator::PointCloud _point_cloud;
+    //! @}
+
+    //! @brief SfM state.
+    //! @{
+    CameraPoseGraph::Vertex _pose_prev;
+    CameraPoseGraph::Vertex _pose_curr;
+    CameraPoseGraph::Edge _relative_pose_edge;
+    FeatureTracker::TrackArray _tracks_alive;
+    FeatureTracker::TrackArray _tracks_alive_with_known_scene_point;
+    FeatureTracker::TrackArray _tracks_alive_without_scene_point;
+    FeatureTracker::TrackVisibilityCountArray _track_visibility_count;
+    Eigen::Matrix3d _current_global_rotation = Eigen::Matrix3d::Identity();
+    //! @}
   };
 
 }  // namespace DO::Sara

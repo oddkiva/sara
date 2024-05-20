@@ -12,9 +12,9 @@
 #pragma once
 
 #include <DO/Sara/Core/Math/UsualFunctions.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/MultiViewGeometry/PnP/LambdaTwist.hpp>
 #include <DO/Sara/MultiViewGeometry/PointRayCorrespondenceList.hpp>
-
 
 namespace DO::Sara {
 
@@ -28,9 +28,9 @@ namespace DO::Sara {
     using data_point_type = std::array<TensorView_<T, 2>, 2>;
     using model_type = Eigen::Matrix<T, 3, 4>;
 
-    inline auto operator()(const tensor_view_type& scene_points,
-                           const tensor_view_type& rays) const
-        -> std::vector<model_type>
+    inline auto
+    operator()(const tensor_view_type& scene_points,
+               const tensor_view_type& rays) const -> std::vector<model_type>
     {
       const auto sp_mat_ = scene_points.colmajor_view().matrix();
 
@@ -57,7 +57,7 @@ namespace DO::Sara {
     using Model = PoseMatrix;
 
     //! @brief The camera model for the image.
-    const CameraModel* camera = nullptr;
+    const CameraModel* C = nullptr;
     //! @brief The pose matrix.
     PoseMatrix T;
     //! @brief Image reprojection error in pixels.
@@ -70,6 +70,11 @@ namespace DO::Sara {
       set_model(pose_matrix);
     }
 
+    inline auto set_camera(const CameraModel& camera_) -> void
+    {
+      C = &camera_;
+    }
+
     inline auto set_model(const PoseMatrix& pose_matrix) -> void
     {
       T = pose_matrix;
@@ -80,7 +85,7 @@ namespace DO::Sara {
                     const Eigen::MatrixBase<Derived>& rays) const
         -> Eigen::Array<bool, 1, Eigen::Dynamic>
     {
-      if (camera == nullptr)
+      if (C == nullptr)
         throw std::runtime_error{
             "Error: you must initialize the intrinsic camera parameters!"};
 
@@ -88,31 +93,72 @@ namespace DO::Sara {
         throw std::runtime_error{
             "Error: the number of scene points and rays must be equal!"};
 
+      // Calculate the scene point coordinates in the camera frame.
       const auto& X_world = scene_points;
       auto X_camera = Eigen::MatrixXd{};
-      if (X_world.rows() == 3)
+
+      if (X_world.rows() == 3)  // Euclidean coordinates.
         X_camera = T * X_world.colwise().homogeneous();
-      else if (X_world.rows() == 4)
+      else if (X_world.rows() == 4)  // Homogeneous coordinates.
         X_camera = T * X_world;
       else
         throw std::runtime_error{
-            "The dimension of scene points is incorrect. They must either 3D "
-            "(Euclidean) or 4D (homogeneous)!"};
+            "The dimension of scene points is incorrect. "
+            "They must either 3D (Euclidean) or 4D (homogeneous)!"};
 
+#define PROJECT_TO_IMAGE_PLANE  // And we should...
+#if defined(PROJECT_TO_IMAGE_PLANE)
+      // Project the camera coordinates to the image plane.
+      //
+      // The result is a list of pixel coordinates.
       auto u1 = Eigen::MatrixXd{2, scene_points.cols()};
       for (auto i = 0; i < u1.cols(); ++i)
-        u1.col(i) = camera->project(X_camera.col(i));
+        u1.col(i) = C->project(X_camera.col(i));
 
+      // Reproject the backprojected rays to the image plane.
+      //
+      // The result is again a list of pixel coordinates.
+      //
+      // This is an awkward and potentially wasteful operation.
+      // TODO: see if we can do this in the normalization operation:
+      //       via the class Normalizer<P3PSolver>
       auto u2 = Eigen::MatrixXd{2, rays.cols()};
       for (auto i = 0; i < u2.cols(); ++i)
-        u2.col(i) = camera->project(rays.col(i));
+        u2.col(i) = C->project(rays.col(i));
+#else
+      const Eigen::MatrixXd u1 = X_camera.colwise().hnormalized();
+      const Eigen::MatrixXd u2 = rays.colwise().hnormalized();
+#endif
 
       // Check the cheirality w.r.t. the candidate pose.
       const auto cheiral = X_camera.row(2).array() > 0;
 
       // Check the **squared** image reprojection errors.
       const auto ε_max = square(ε);
-      const auto ε_small = (u2 - u1).colwise().squaredNorm().array() < ε_max;
+      const auto ε_squared = (u2 - u1).colwise().squaredNorm().array();
+      const auto ε_small = ε_squared < ε_max;
+
+// #define CHECK_PNP_RESIDUALS
+#if defined(CHECK_PNP_RESIDUALS)
+      auto& logger = Logger::get();
+      SARA_LOGD(logger, "Pose:\n{}", T);
+      auto ε_debug = Eigen::VectorXd{ε_squared.sqrt()};
+      const auto col_max = std::min(Eigen::Index{10}, u2.cols());
+      SARA_LOGD(logger, "X_world =\n{}", X_world.leftCols(col_max).eval());
+      SARA_LOGD(logger, "X_camera =\n{}", X_camera.leftCols(col_max).eval());
+      for (auto i = 0; i < col_max; ++i)
+      {
+        SARA_LOGD(logger, "u1[{}]: {}   u2[{}]: {}",  //
+                  i, u1.col(i).transpose().eval(),      //
+                  i, u2.col(i).transpose().eval());
+      }
+      SARA_LOGD(logger, "ε = {}\n", ε_debug.head(col_max).transpose().eval());
+      SARA_LOGD(logger, "cheiral.count() = {}", cheiral.count());
+      SARA_LOGD(logger, "ε_small.count() = {}", ε_small.count());
+
+      std::sort(ε_debug.data(), ε_debug.data() + ε_debug.size());
+      SARA_LOGD(logger, "ε_sorted = {}\n", ε_debug.head(col_max).transpose().eval());
+#endif
 
       return ε_small && cheiral;
     }
@@ -127,8 +173,5 @@ namespace DO::Sara {
       return this->operator()(scene_points, backprojected_rays);
     }
   };
-
-
-  //! @}
 
 }  // namespace DO::Sara

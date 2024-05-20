@@ -11,9 +11,12 @@
 
 #pragma once
 
+#include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/RgbColoredPoint.hpp>
 #include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
 #include <DO/Sara/SfM/Graph/FeatureTracker.hpp>
+
+#include <filesystem>
 
 
 namespace DO::Sara {
@@ -71,11 +74,12 @@ namespace DO::Sara {
                                      const PoseVertex) const
         -> std::optional<FeatureVertex>;
 
-    auto retrieve_scene_point_color(
-        const Eigen::Vector3d& scene_point,  //
-        const ImageView<Rgb8>& image,        //
-        const QuaternionBasedPose<double>& pose,
-        const v2::BrownConradyDistortionModel<double>& camera) const -> Rgb64f;
+    auto
+    retrieve_scene_point_color(const Eigen::Vector3d& scene_point,  //
+                               const ImageView<Rgb8>& image,        //
+                               const QuaternionBasedPose<double>& pose,
+                               const v2::PinholeCamera<double>& camera) const
+        -> Rgb64f;
 
   public: /* data transformation methods */
     //! @brief Calculate the barycentric scene point.
@@ -118,10 +122,13 @@ namespace DO::Sara {
     //! points are those calculated from the feature tracks for which we didn't
     //! know their scene point values.
     auto grow_point_cloud(
-        const std::vector<FeatureTrack>& feature_tracks_without_scene_point,
+        const std::vector<FeatureTrack>& ftracks_without_scene_point,
         const ImageView<Rgb8>& image,  //
-        const PoseEdge pose_edge,
-        const v2::BrownConradyDistortionModel<double>& camera) -> void;
+        const PoseEdge pose_edge,      //
+        const v2::PinholeCamera<double>& camera) -> void;
+
+    auto write_point_cloud(const std::vector<FeatureTrack>& ftracks,
+                          const std::filesystem::path& out_csv) const -> void;
 
   private: /* data members */
     const CameraPoseGraph& _pose_graph;
