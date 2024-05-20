@@ -59,17 +59,6 @@ namespace DO::Sara {
       const translation_vector_type t = x.head(3);
       const scale_vector_type scales = x.tail(2);
 
-#if 0
-      SARA_DEBUG << "Rx =\n" << Rx << std::endl;
-      SARA_DEBUG << "y =\n" << y << std::endl;
-      SARA_DEBUG << "Rx0.cross(y0) = " << x0.cross(y0) << std::endl;
-      SARA_DEBUG << "Rx1.cross(y1) = " << x1.cross(y1) << std::endl;
-      SARA_DEBUG << "A =\n" << A << std::endl;
-      SARA_DEBUG << "b =\n" << b << std::endl;
-      SARA_CHECK(t.transpose());
-      SARA_CHECK(scales.transpose());
-#endif
-
       return {t, scales};
     }
   };
