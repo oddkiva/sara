@@ -116,9 +116,11 @@ auto CameraPoseEstimator::estimate_pose(
       throw std::runtime_error{
           "Error: a feature track must be assigned a scene point index!"};
 
+#ifdef FILTER_COORDS
     const auto coords = pcg.barycenter(scene_point_indices).coords();
     if (coords.z() < 0 || coords.z() > 100)
       continue;
+#endif
 
     ftrack_indices_plausible.push_back(t);
   }
