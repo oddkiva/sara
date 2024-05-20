@@ -20,6 +20,9 @@
 #include <DO/Sara/Visualization/Features/Draw.hpp>
 
 
+#define DEBUG_ABSOLUTE_POSE_RECOVERY
+
+
 using namespace DO::Sara;
 
 
@@ -69,12 +72,11 @@ auto draw_feature_tracks(DO::Sara::ImageView<Rgb8>& display,  //
   }
 }
 
-auto save_point_correspondences(
+auto write_point_correspondences(
     const CameraPoseGraph& pgraph,  //
     const FeatureGraph& fgraph,     //
-    const CameraPoseGraph::Vertex pose_u,
     const std::vector<FeatureTracker::Track>& tracks_alive,
-    const std::filesystem out_csv_fp) -> void
+    const std::filesystem::path& out_csv_fp) -> void
 {
   std::ofstream out{out_csv_fp.string()};
   if (!out)
@@ -206,12 +208,14 @@ auto OdometryPipeline::grow_geometry() -> bool
 {
   auto& logger = Logger::get();
 
-  // The rotation is expressed in the camera coordinates.
-  // But the calculation is done in the automotive/aeronautics coordinate
-  // system.
+  // IMPORTANT:
+  // The rotation of is expressed in the camera frame. However, the yaw,
+  // pitch and roll angles is calculated in the automotive/aeronautics
+  // frame.
   //
-  // The z-coordinate of the camera coordinates is the x-axis of the
-  // automotive coordinates
+  // For one thing: observe that the z-coordinate of the camera frame is the
+  // x-axis of the automotive coordinates. The rest is easily deduced by the
+  // attentive reader.
   //
   // clang-format off
   static const auto P = (Eigen::Matrix3d{} <<
@@ -298,6 +302,13 @@ auto OdometryPipeline::grow_geometry() -> bool
   std::tie(_tracks_alive, _track_visibility_count) =
       _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
 
+#if defined(DEBUG_ABSOLUTE_POSE_RECOVERY)
+  const auto corr_csv_fp = fmt::format("/Users/oddkiva/Desktop/corr_{}.csv",
+                                       _pose_curr);
+  write_point_correspondences(_pose_graph, _feature_tracker._feature_graph,
+                             _tracks_alive, corr_csv_fp);
+#endif
+
   // Extra steps for when the pose graph contains 2 poses.
   if (_pose_graph.num_vertices() == 2)
   {
@@ -361,6 +372,11 @@ auto OdometryPipeline::grow_geometry() -> bool
   _point_cloud_generator->grow_point_cloud(_tracks_alive_without_scene_point,
                                            frame_corrected, pose_edge,
                                            _camera_corrected);
+#if defined(DEBUG_ABSOLUTE_POSE_RECOVERY)
+  const auto scene_csv_fp = fmt::format("/Users/oddkiva/Desktop/scene_{}.csv",
+                                        _pose_curr);
+  _point_cloud_generator->write_point_cloud(_tracks_alive, scene_csv_fp);
+#endif
 
   // ---------------------------------------------------------------------------
   // FOR DEBUGGING PURPOSES.

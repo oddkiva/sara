@@ -83,6 +83,44 @@ public:
     }
   }
 
+  auto read_point_cloud_csv(const std::filesystem::path& csv_fp)
+    -> std::vector<Eigen::Vector3d>
+  {
+    auto points = std::vector<Eigen::Vector3d>{};
+
+    auto csv = std::ifstream{csv_fp};
+    if (!csv)
+      throw std::runtime_error{
+        fmt::format("error: could not read csv: {}", csv_fp.string())};
+
+    auto csv_line = std::string{};
+    while (std::getline(csv, csv_line))
+    {
+      throw "Not Implemented!";
+    }
+
+    return points;
+  }
+
+  auto read_corr_csv(const std::filesystem::path& csv_fp)
+    -> std::vector<std::array<Eigen::Vector2f, 2>>
+  {
+    auto corr = std::vector<std::array<Eigen::Vector2f, 2>>{};
+
+    auto csv = std::ifstream{csv_fp};
+    if (!csv)
+      throw std::runtime_error{
+        fmt::format("error: could not read csv: {}", csv_fp.string())};
+
+    auto csv_line = std::string{};
+    while (std::getline(csv, csv_line))
+    {
+      throw "Not Implemented!";
+    }
+
+    return corr;
+  }
+
 private:
   std::string _title;
   sara::OdometryPipeline _pipeline;

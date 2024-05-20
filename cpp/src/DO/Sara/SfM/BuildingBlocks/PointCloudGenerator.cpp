@@ -416,7 +416,7 @@ auto PointCloudGenerator::grow_point_cloud(
   SARA_LOGD(logger, "[AFTER ] zmed index  = {}", zmed - pct.begin());
 }
 
-auto PointCloudGenerator::save_point_cloud(
+auto PointCloudGenerator::write_point_cloud(
     const std::vector<FeatureTrack>& ftracks,
     const std::filesystem::path& out_csv) const -> void
 {

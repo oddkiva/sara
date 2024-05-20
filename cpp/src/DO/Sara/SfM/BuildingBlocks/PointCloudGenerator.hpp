@@ -127,8 +127,8 @@ namespace DO::Sara {
         const PoseEdge pose_edge,      //
         const v2::PinholeCamera<double>& camera) -> void;
 
-    auto save_point_cloud(const std::filesystem::path& out_csv_path) const
-        -> void;
+    auto write_point_cloud(const std::vector<FeatureTrack>& ftracks,
+                          const std::filesystem::path& out_csv) const -> void;
 
   private: /* data members */
     const CameraPoseGraph& _pose_graph;
