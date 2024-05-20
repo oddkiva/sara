@@ -338,7 +338,7 @@ auto OdometryPipeline::grow_geometry() -> bool
              _tracks_alive_without_scene_point) =
         _point_cloud_generator->split_by_scene_point_knowledge(_tracks_alive);
 
-#define USE_ABSOLUTE_ROTATION
+// #define USE_ABSOLUTE_ROTATION
 #if defined(USE_ABSOLUTE_ROTATION)
     const auto [abs_pose_mat, abs_pose_est_successful] =
         _abs_pose_estimator.estimate_pose(

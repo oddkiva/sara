@@ -397,10 +397,10 @@ auto PointCloudGenerator::grow_point_cloud(
     ++scene_point_index;
   }
 
-  SARA_LOGD(logger, "Check vertex -> scene point index");
+  SARA_LOGT(logger, "Check mapping: vertex -> scene point index");
   for (const auto& [v, i] : _from_vertex_to_scene_point_index)
   {
-    SARA_LOGD(logger, "v:{} -> i:{}", v, i);
+    SARA_LOGT(logger, "v:{} -> i:{}", v, i);
     if (i >= _point_cloud.size())
       throw std::runtime_error{fmt::format(
           "Error: scene point index {} is out of the range: [{}, {}[",  //
@@ -454,8 +454,6 @@ auto PointCloudGenerator::write_point_cloud(
     // Save the scene point coordinates.
     const Eigen::Vector3d p = _point_cloud[pi].coords();
     out << fmt::format("{},{},{},{},{}\n", i, pi, p.x(), p.y(), p.z());
-
-    // fmt::print("{},{},{},{},{}\n", i, pi, p.x(), p.y(), p.z());
 
     ++i;
   }
