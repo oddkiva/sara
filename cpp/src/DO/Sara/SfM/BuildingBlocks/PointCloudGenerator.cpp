@@ -19,6 +19,12 @@
 using namespace DO::Sara;
 
 
+static constexpr auto zcomp = [](const RgbColoredPoint<double>& a,
+                                 const RgbColoredPoint<double>& b) {
+  return a.coords().z() < b.coords().z();
+};
+
+
 auto PointCloudGenerator::list_scene_point_indices(
     const FeatureTrack& track) const -> std::vector<ScenePointIndex>
 {
@@ -85,8 +91,8 @@ auto PointCloudGenerator::filter_by_non_max_suppression(
 }
 
 auto PointCloudGenerator::find_feature_vertex_at_pose(
-    const FeatureTrack& track, const PoseVertex pose_vertex) const
-    -> std::optional<FeatureVertex>
+    const FeatureTrack& track,
+    const PoseVertex pose_vertex) const -> std::optional<FeatureVertex>
 {
   auto v = std::find_if(track.begin(), track.end(),
                         [this, pose_vertex](const auto& v) {
@@ -256,7 +262,7 @@ auto PointCloudGenerator::compress_point_cloud(
 
     // Reassign the scene point index for the given feature track.
     for (const auto& v : track)
-      _from_vertex_to_scene_point_index[v] = t;
+      _from_vertex_to_scene_point_index[v] = scene_point_indices.front();
 
     // Recalculate the scene point index as a barycenter.
     const auto scene_point = barycenter(scene_point_indices);
@@ -327,7 +333,6 @@ auto PointCloudGenerator::grow_point_cloud(
         SARA_LOGD(logger, "track indices: {}", feature_vector);
 #endif
 
-
         // Retrieve the cleaned up feature correspondence.
         const auto fu = find_feature_vertex_at_pose(ftrack_nms, pose_u);
         const auto fv = find_feature_vertex_at_pose(ftrack_nms, pose_v);
@@ -392,15 +397,21 @@ auto PointCloudGenerator::grow_point_cloud(
     ++scene_point_index;
   }
 
+  SARA_LOGD(logger, "Check vertex -> scene point index");
+  for (const auto& [v, i] : _from_vertex_to_scene_point_index)
+  {
+    SARA_LOGD(logger, "v:{} -> i:{}", v, i);
+    if (i >= _point_cloud.size())
+      throw std::runtime_error{fmt::format(
+          "Error: scene point index {} is out of the range: [{}, {}[",  //
+          i, std::size_t{}, _point_cloud.size())};
+  }
+
   SARA_LOGD(logger, "[AFTER ] {} scene points", _point_cloud.size());
 
   if (_point_cloud.empty())
     return;
 
-  static constexpr auto zcomp = [](const RgbColoredPoint<double>& a,
-                                   const RgbColoredPoint<double>& b) {
-    return a.coords().z() < b.coords().z();
-  };
   const auto [zmin, zmax] =
       std::minmax_element(_point_cloud.begin(), _point_cloud.end(), zcomp);
   auto pct = _point_cloud;
@@ -422,10 +433,30 @@ auto PointCloudGenerator::write_point_cloud(
 {
   std::ofstream out{out_csv.string()};
 
+  // Just for debug from MacOS viewer app.
+  auto i = 0;
   for (const auto& ftrack : ftracks)
   {
-    const auto i = _from_vertex_to_scene_point_index.at(ftrack.front());
-    const auto& p = _point_cloud[i].coords();
-    out << fmt::format("{},{},{}\n", p.x(), p.y(), p.z());
+    // Please note that not all feature tracks has a finite cheiral 3D scene
+    // point. And in that case, the feature track simply does not have a 3D
+    // scene point that is physically plausible.
+    const auto it = _from_vertex_to_scene_point_index.find(ftrack.front());
+    if (it == _from_vertex_to_scene_point_index.end())
+      continue;
+
+    // Get the scene point index.
+    const auto pi = it->second;
+    if (pi < 0 || pi >= _point_cloud.size())
+      throw std::runtime_error{fmt::format(
+          "Error: scene point index {} is out of the range: [{}, {}[",  //
+          pi, std::size_t{}, _point_cloud.size())};
+
+    // Save the scene point coordinates.
+    const Eigen::Vector3d p = _point_cloud[pi].coords();
+    out << fmt::format("{},{},{},{},{}\n", i, pi, p.x(), p.y(), p.z());
+
+    // fmt::print("{},{},{},{},{}\n", i, pi, p.x(), p.y(), p.z());
+
+    ++i;
   }
 }
