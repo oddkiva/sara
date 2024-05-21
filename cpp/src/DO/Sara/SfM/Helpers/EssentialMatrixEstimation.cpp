@@ -14,7 +14,7 @@
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
-#include <DO/Sara/RANSAC/RANSAC.hpp>
+#include <DO/Sara/RANSAC/RANSACv2.hpp>
 #include <DO/Sara/SfM/Helpers/FundamentalMatrixEstimation.hpp>
 
 
@@ -46,7 +46,7 @@ namespace DO::Sara {
     inlier_predicate.err_threshold = err_thres;
 
     const auto [E, inliers, sample_best] =
-        ransac(Xij, ESolver{}, inlier_predicate, num_samples);
+        v2::ransac(Xij, ESolver{}, inlier_predicate, num_samples);
 
     SARA_CHECK(E);
     SARA_CHECK(inliers.row_vector());
