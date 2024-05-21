@@ -135,7 +135,7 @@ GRAPHICS_MAIN()
   print_stage("Loading images...");
   const auto data_dir =
 #if defined(__APPLE__)
-      "/Users/david/Desktop/Datasets/sfm/castle_int"s;
+      "/Users/oddkiva/Desktop/Datasets/sfm/castle_int"s;
 #else
       "/home/david/Desktop/Datasets/sfm/castle_int"s;
 #endif

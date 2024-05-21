@@ -26,6 +26,7 @@ if(SARA_USE_FROM_SOURCE)
                 ${TIFF_LIBRARIES} #
                 ${ZLIB_LIBRARIES} #
                 HEIF::HEIF #
+                fmt::fmt #
                 $<IF:$<CXX_COMPILER_ID:MSVC>,WebP::webp,WebP::WebP>
                 $<$<CXX_COMPILER_ID:MSVC>:WebP::webpdecoder>
                 $<$<CXX_COMPILER_ID:MSVC>:WebP::webpdemux>)

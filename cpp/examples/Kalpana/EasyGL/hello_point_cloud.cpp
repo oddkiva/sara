@@ -66,7 +66,7 @@ auto make_point_cloud()
 {
   // Encode the vertex data in a tensor.
 #if defined(__APPLE__)
-  const auto vertex_data = read_point_cloud("/Users/david/Desktop/geometry.h5");
+  const auto vertex_data = read_point_cloud("/Users/oddkiva/Desktop/geometry.h5");
 #else
   const auto vertex_data = read_point_cloud("/home/david/Desktop/geometry.h5");
 #endif

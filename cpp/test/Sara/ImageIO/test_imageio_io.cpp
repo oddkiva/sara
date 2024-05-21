@@ -42,8 +42,10 @@ BOOST_AUTO_TEST_CASE(test_rgb_image_read_write)
   };
 
   auto true_image = Image<Rgb8>{2, 2};
+  // clang-format off
   true_image(0,0) = White8; true_image(1,0) = Black8;
   true_image(0,1) = Black8; true_image(1,1) = White8;
+  // clang-format on
 
   for (int i = 0; i < 3; ++i)
   {
@@ -89,10 +91,11 @@ BOOST_AUTO_TEST_CASE(test_read_exif_info)
 
   ostringstream os;
   os << exif_info;
-  auto content = os.str();
+  const auto content = os.str();
 
   auto pos = size_t{};
 
+  // clang-format off
   pos = content.find("Camera make");        BOOST_CHECK_NE(string::npos, pos);
   pos = content.find("Camera model");       BOOST_CHECK_NE(string::npos, pos);
   pos = content.find("Software");           BOOST_CHECK_NE(string::npos, pos);
@@ -102,9 +105,9 @@ BOOST_AUTO_TEST_CASE(test_read_exif_info)
   pos = content.find("Image description");  BOOST_CHECK_NE(string::npos, pos);
   pos = content.find("Image orientation");  BOOST_CHECK_NE(string::npos, pos);
   pos = content.find("Image copyright");    BOOST_CHECK_NE(string::npos, pos);
-  pos = content.find("Image date/time");    BOOST_CHECK_NE(string::npos, pos);
-  pos = content.find("Original date/time"); BOOST_CHECK_NE(string::npos, pos);
-  pos = content.find("Digitize date/time"); BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Image datetime");     BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Original datetime");  BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Digitize datetime");  BOOST_CHECK_NE(string::npos, pos);
   pos = content.find("Subsecond time");     BOOST_CHECK_NE(string::npos, pos);
   pos = content.find("Exposure time");      BOOST_CHECK_NE(string::npos, pos);
   pos = content.find("F-stop");             BOOST_CHECK_NE(string::npos, pos);
@@ -118,6 +121,7 @@ BOOST_AUTO_TEST_CASE(test_read_exif_info)
   pos = content.find("GPS Latitude");       BOOST_CHECK_NE(string::npos, pos);
   pos = content.find("GPS Longitude");      BOOST_CHECK_NE(string::npos, pos);
   pos = content.find("GPS Altitude");       BOOST_CHECK_NE(string::npos, pos);
+  // clang-format on
 }
 
 BOOST_AUTO_TEST_SUITE_END()
