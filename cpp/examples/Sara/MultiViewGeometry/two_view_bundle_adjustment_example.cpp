@@ -14,9 +14,8 @@
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/MultiViewGeometry/BundleAdjustmentProblem.hpp>
-#include <DO/Sara/MultiViewGeometry/Graph/EpipolarGraph.hpp>
-#include <DO/Sara/MultiViewGeometry/Graph/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/SfM/Helpers/EssentialMatrixEstimation.hpp>
@@ -33,10 +32,14 @@
 #endif
 #include <ceres/rotation.h>
 
+#include <filesystem>
+
 
 using namespace std;
 using namespace std::string_literals;
 using namespace DO::Sara;
+
+namespace fs = std::filesystem;
 
 
 struct ReprojectionError
@@ -127,58 +130,59 @@ auto map_feature_gid_to_match_gid(const EpipolarEdgeAttributes& epipolar_edges)
 
 GRAPHICS_MAIN()
 {
-  // Use the following data structure to load images, keypoints, camera
-  // parameters.
-  auto views = ViewAttributes{};
+  auto& logger = Logger::get();
 
   // Load images.
-  print_stage("Loading images...");
-  const auto data_dir =
+  SARA_LOGI(logger, "Loading images...");
+  const auto data_dir = fs::path
+  {
 #if defined(__APPLE__)
-      "/Users/oddkiva/Desktop/Datasets/sfm/castle_int"s;
+    "/Users/oddkiva/Desktop/Datasets/sfm/castle_int"s
 #else
-      "/home/david/Desktop/Datasets/sfm/castle_int"s;
+    "/home/david/Desktop/Datasets/sfm/castle_int"s
 #endif
-  views.image_paths = {
-      data_dir + "/" + "0000.png",
-      data_dir + "/" + "0001.png",
   };
-  views.read_images();
+  const auto image_ids = std::array<std::string, 2>{"0000", "0001"};
+  const auto image_paths = std::array{
+      data_dir / (image_ids[0] + ".png"),
+      data_dir / (image_ids[1] + ".png")  //
+  };
+  const auto images = std::array{
+      imread<Rgb8>(image_paths[0]),  //
+      imread<Rgb8>(image_paths[1])   //
+  };
 
+  SARA_LOGI(logger, "Loading the internal camera matrices...");
+  const auto K = std::array{
+      read_internal_camera_parameters(
+          (data_dir / (image_ids[0] + ".png.K")).string())
+          .cast<double>(),
+      read_internal_camera_parameters(
+          (data_dir / (image_ids[1] + ".png.K")).string())
+          .cast<double>()  //
+  };
+  for (auto i = 0; i < 2; ++i)
+    SARA_LOGD(logger, "K[{}] =\n{}", i, K[i]);
 
-  print_stage("Loading the internal camera matrices...");
-  views.cameras.resize(2 /* views */);
-  views.cameras[0].K =
-      read_internal_camera_parameters(data_dir + "/" + "0000.png.K")
-          .cast<double>();
-  views.cameras[1].K =
-      read_internal_camera_parameters(data_dir + "/" + "0001.png.K")
-          .cast<double>();
+  SARA_LOGI(logger, "Computing keypoints...");
+  const auto image_pyr_params = ImagePyramidParams(-1);
+  const auto keypoints = std::array{
+      compute_sift_keypoints(images[0].convert<float>(), image_pyr_params),
+      compute_sift_keypoints(images[1].convert<float>(), image_pyr_params)  //
+  };
 
+  SARA_LOGI(logger, "Matching keypoints...");
+  const auto matches = match(keypoints[0], keypoints[1]);
 
-  print_stage("Computing keypoints...");
-  views.keypoints = {compute_sift_keypoints(views.images[0].convert<float>()),
-                     compute_sift_keypoints(views.images[1].convert<float>())};
-
-  // Use the following data structures to store the epipolar geometry data.
-  auto epipolar_edges = EpipolarEdgeAttributes{};
-  epipolar_edges.initialize_edges(2 /* views */);
-  epipolar_edges.resize_fundamental_edge_list();
-  epipolar_edges.resize_essential_edge_list();
-
-
-  print_stage("Matching keypoints...");
-  epipolar_edges.matches = {match(views.keypoints[0], views.keypoints[1])};
-  const auto& matches = epipolar_edges.matches[0];
-
-
-  print_stage("Performing data transformations...");
+  SARA_LOGI(logger, "Performing data transformations...");
   // Invert the internal camera matrices.
-  const auto K_inv = std::array<Matrix3d, 2>{views.cameras[0].K.inverse(),
-                                             views.cameras[1].K.inverse()};
+  const auto K_inv = std::array<Eigen::Matrix3d, 2>{
+      K[0].inverse(),
+      K[1].inverse()  //
+  };
   // Tensors of image coordinates.
-  const auto& f0 = features(views.keypoints[0]);
-  const auto& f1 = features(views.keypoints[1]);
+  const auto& f0 = features(keypoints[0]);
+  const auto& f1 = features(keypoints[1]);
   const auto u = std::array{homogeneous(extract_centers(f0)).cast<double>(),
                             homogeneous(extract_centers(f1)).cast<double>()};
   // Tensors of camera coordinates.
@@ -190,59 +194,39 @@ GRAPHICS_MAIN()
   const auto M = to_tensor(matches);
   const auto X = PointCorrespondenceList{M, un[0], un[1]};
 
-  print_stage("Estimating the essential matrix...");
-  auto& E = epipolar_edges.E[0];
-  auto& num_samples = epipolar_edges.E_num_samples[0];
-  auto& err_thres = epipolar_edges.E_noise[0];
-  auto& inliers = epipolar_edges.E_inliers[0];
-  auto sample_best = Tensor_<int, 1>{};
-  {
-    num_samples = 1000;
-    err_thres = 1e-3;
+  SARA_LOGI(logger, "Estimating the essential matrix...");
+  const auto num_samples = 1000;
+  const auto err_thres = 1e-3;
+  auto inlier_predicate = InlierPredicate<SampsonEpipolarDistance>{};
+  inlier_predicate.err_threshold = err_thres;
 
-    auto inlier_predicate = InlierPredicate<SampsonEpipolarDistance>{};
-    inlier_predicate.err_threshold = err_thres;
-
-    std::tie(E, inliers, sample_best) =
-        ransac(X, NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
-
-    epipolar_edges.E_inliers[0] = inliers;
-    epipolar_edges.E_best_samples[0] = sample_best;
-  }
-
+  const auto [E, inliers, sample_best] =
+      ransac(X, NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
 
   // Calculate the fundamental matrix.
-  print_stage("Computing the fundamental matrix...");
-  auto& F = epipolar_edges.F[0];
-  {
-    F.matrix() = K_inv[1].transpose() * E.matrix() * K_inv[0];
-
-    epipolar_edges.F_num_samples[0] = 1000;
-    epipolar_edges.F_noise = epipolar_edges.E_noise;
-    epipolar_edges.F_inliers = epipolar_edges.E_inliers;
-    epipolar_edges.F_best_samples = epipolar_edges.E_best_samples;
-  }
+  SARA_LOGI(logger, "Computing the fundamental matrix...");
+  auto F = FundamentalMatrix{};
+  F.matrix() = K_inv[1].transpose() * E.matrix() * K_inv[0];
 
 
   // Extract the two-view geometry.
-  print_stage("Estimating the two-view geometry...");
-  epipolar_edges.two_view_geometries = {
-      estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best)};
-  auto& two_view_geometry = epipolar_edges.two_view_geometries.front();
-  two_view_geometry.C1.K = views.cameras[0].K;
-  two_view_geometry.C2.K = views.cameras[1].K;
+  SARA_LOGI(logger, "Estimating the two-view geometry...");
+  auto two_view_geometry =
+      estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best);
+  two_view_geometry.C1.K = K[0];
+  two_view_geometry.C2.K = K[1];
 
-
-  print_stage("Mapping feature GID to match GID...");
+#if 0
+  SARA_LOGI(logger, "Mapping feature GID to match GID...");
   const auto match_index = map_feature_gid_to_match_gid(epipolar_edges);
 
 
-  print_stage("Populating the feature tracks...");
+  SARA_LOGI(logger, "Populating the feature tracks...");
   const auto [feature_graph, components] =
       populate_feature_tracks(views, epipolar_edges);
 
   // Keep feature tracks of size 2 at least.
-  print_stage("Checking the feature tracks...");
+  SARA_LOGI(logger, "Checking the feature tracks...");
   const auto feature_tracks =
       filter_feature_tracks(feature_graph, components, views);
   for (const auto& track : feature_tracks)
@@ -297,14 +281,14 @@ GRAPHICS_MAIN()
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.BriefReport() << std::endl;
 
-
-  print_stage("Check the SfM...");
+  SARA_LOGI(logger, "Check the SfM...");
   SARA_DEBUG << "camera_parameters =\n"
              << ba_problem.camera_parameters.matrix() << std::endl;
   SARA_DEBUG << "points =\n"
              << ba_problem.points_abs_coords_3d.matrix() << std::endl;
 
   // TODO: check the point reprojection errors.
+#endif
 
   return 0;
 }

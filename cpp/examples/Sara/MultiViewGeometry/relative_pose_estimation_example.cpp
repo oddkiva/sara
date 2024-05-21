@@ -33,6 +33,8 @@
 #include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 #include <DO/Sara/SfM/Helpers/Triangulation.hpp>
 
+#include <filesystem>
+
 
 using namespace std::string_literals;
 using namespace DO::Sara;
@@ -94,7 +96,7 @@ int sara_graphics_main(int argc, char** argv)
   const auto matches = match(keypoints[0], keypoints[1], sift_nn_ratio);
 
 
-  print_stage("Performing data transformations...");
+  SARA_LOGI(logger, "Performing data transformations...");
   // Invert the internal camera matrices.
   const auto K_inv = std::array<Eigen::Matrix3d, 2>{
       K[0].inverse(),
@@ -108,7 +110,7 @@ int sara_graphics_main(int argc, char** argv)
 
   // List the matches as a 2D-tensor where each row encodes a match 'm' as a
   // pair of point indices (i, j).
-  print_stage("Estimating the two view geometry...");
+  SARA_LOGI(logger, "Estimating the two view geometry...");
   const auto M = to_tensor(matches);
   const auto X = PointCorrespondenceList{M, u[0], u[1]};
   const auto num_samples = argc < 6 ? 1000 : std::stoi(argv[5]);
@@ -131,16 +133,16 @@ int sara_graphics_main(int argc, char** argv)
   SARA_DEBUG << "inliers count = " << inliers.flat_array().count() << std::endl;
 
   // Retrieve the essential matrix.
-  print_stage("Saving the data from the essential matrix estimation...");
+  SARA_LOGI(logger, "Saving the data from the essential matrix estimation...");
   const auto E = essential_matrix(geometry.C2.R, geometry.C2.t);
 
   // Retrieve the fundamental matrix.
-  print_stage("Saving the fundamental matrix...");
+  SARA_LOGI(logger, "Saving the fundamental matrix...");
   auto F = FundamentalMatrix{};
   F.matrix() = K_inv[1].transpose() * E.matrix() * K_inv[0];
 
   // Retrieve all the 3D points by triangulation.
-  print_stage("Retriangulating the inliers...");
+  SARA_LOGI(logger, "Retriangulating the inliers...");
   auto& points = geometry.X;
   auto& s1 = geometry.scales1;
   auto& s2 = geometry.scales2;
@@ -187,12 +189,12 @@ int sara_graphics_main(int argc, char** argv)
       "K", (data_dir / (image_ids[1] + ".png.K")).string(), true);
 
   // Inspect the fundamental matrix.
-  print_stage("Inspecting the fundamental matrix estimation...");
+  SARA_LOGI(logger, "Inspecting the fundamental matrix estimation...");
   check_epipolar_constraints(images[0], images[1], F, matches, sample_best,
                              inliers,
                              /* display_step */ 20, /* wait_key */ true);
 
-  print_stage("Sort the points by depth...");
+  SARA_LOGI(logger, "Sort the points by depth...");
   const auto num_points = static_cast<int>(geometry.X.cols());
   const auto indices = range(num_points);
 

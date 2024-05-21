@@ -23,6 +23,8 @@
 #include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 #include <DO/Sara/SfM/Helpers/Triangulation.hpp>
 
+#include <filesystem>
+
 
 namespace fs = std::filesystem;
 
