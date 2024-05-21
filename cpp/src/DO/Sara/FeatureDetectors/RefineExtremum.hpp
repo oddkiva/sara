@@ -86,9 +86,11 @@ namespace DO::Sara {
    *  Otherwise, we cannot refine the position of the extremum.
    */
   DO_SARA_EXPORT
-  bool refine_extremum(const ImagePyramid<float>& I, int x, int y, int s, int o,
-                       int type, Point3f& pos, float& val, int border_size = 1,
-                       int num_iter = 5);
+  auto refine_extremum(const ImagePyramid<float>& I,          //
+                       int x, int y, int s, int o, int type,  //
+                       Point3f& pos,
+                       float& val,  //
+                       int border_size = 1, int num_iter = 5) -> bool;
   /*!
    *  @brief This function refines the coordinates using the interpolation
    *  method in [Lowe, IJCV 2004] and [Brown and Lowe, BMVC 2002].
@@ -97,30 +99,30 @@ namespace DO::Sara {
    *  refinement here.
    */
   DO_SARA_EXPORT
-  bool refine_extremum(const ImageView<float>& I, int x, int y, int type,
-                       Point2f& pos, float& val, int border_size = 1,
-                       int num_iter = 5);
+  auto refine_extremum(const ImageView<float>& I, int x, int y, int type,
+                       Point2f& pos, float& val,  //
+                       int border_size = 1, int num_iter = 5) -> bool;
   /*!
    *  @brief Localizes all local extrema in scale-space at scale
    *  \f$\sigma = 2^{s/S+o}\f$.
    *  Note that the default parameters are suited for the DoG extrema.
    */
   DO_SARA_EXPORT
-  std::vector<OERegion> local_scale_space_extrema(const ImagePyramid<float>& I,
-                                                  int s, int o,
-                                                  float extremum_thres = 0.03f,
-                                                  float edge_ratio_thres = 10.f,
-                                                  int img_padding_sz = 1,
-                                                  int refine_iterations = 5);
+  auto local_scale_space_extrema(const ImagePyramid<float>& I, int s, int o,
+                                 float extremum_thres = 0.03f,
+                                 float edge_ratio_thres = 10.f,
+                                 int img_padding_sz = 1,
+                                 int refine_iterations = 5)
+      -> std::vector<OERegion>;
 
   /*!
    *  Scale selection based on the normalized Laplacian of Gaussians for the
    *  simplified Harris-Laplace and Hessian-Laplace interest points.
    */
   DO_SARA_EXPORT
-  bool select_laplace_scale(float& scale, int x, int y, int s, int o,
+  auto select_laplace_scale(float& scale, int x, int y, int s, int o,
                             const ImagePyramid<float>& gauss_pyramid,
-                            int num_scales = 10);
+                            int num_scales = 10) -> bool;
 
   /*!
    *  @brief Localizes local maxima in space only and tries to assign a
@@ -131,11 +133,11 @@ namespace DO::Sara {
    *  points.
    */
   DO_SARA_EXPORT
-  std::vector<OERegion>
-  laplace_maxima(const ImagePyramid<float>& function,
-                 const ImagePyramid<float>& gaussian_pyramid, int s, int o,
-                 float extremum_thres = 1e-6f, int img_padding_sz = 1,
-                 int num_scales = 10, int refine_iterations = 5);
+  auto laplace_maxima(const ImagePyramid<float>& function,
+                      const ImagePyramid<float>& gaussian_pyramid,  //
+                      int s, int o, float extremum_thres = 1e-6f,
+                      int img_padding_sz = 1, int num_scales = 10,
+                      int refine_iterations = 5) -> std::vector<OERegion>;
 
   //! @}
 
