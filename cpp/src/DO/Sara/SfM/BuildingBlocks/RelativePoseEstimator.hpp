@@ -10,7 +10,7 @@
 #include <DO/Sara/RANSAC/RANSACv2.hpp>
 
 
-namespace DO::Sara::v2 {
+namespace DO::Sara {
 
   struct RelativePoseEstimator
   {
@@ -26,8 +26,8 @@ namespace DO::Sara::v2 {
     Eigen::Matrix3d _K;
     Eigen::Matrix3d _K_inv;
 
-    auto
-    configure(const v2::BrownConradyDistortionModel<double>& camera) -> void;
+    auto configure(const v2::BrownConradyDistortionModel<double>& camera)
+        -> void;
 
     auto estimate_relative_pose(const KeypointList<OERegion, float>& src_keys,
                                 const KeypointList<OERegion, float>& dst_keys,
@@ -35,4 +35,4 @@ namespace DO::Sara::v2 {
         -> std::tuple<TwoViewGeometry, Tensor_<bool, 1>, Tensor_<int, 1>>;
   };
 
-}  // namespace DO::Sara::v2
+}  // namespace DO::Sara
