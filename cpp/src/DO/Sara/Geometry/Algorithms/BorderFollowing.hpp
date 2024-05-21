@@ -11,11 +11,12 @@
 
 #pragma once
 
+#include <DO/Sara/Core/Image/Image.hpp>
+#include <DO/Sara/Geometry/Algorithms/Region.hpp>
+
 #include <stdexcept>
 #include <unordered_map>
 
-#include <DO/Sara/Core/Image/Image.hpp>
-#include <DO/Sara/Geometry/Algorithms/Region.hpp>
 
 namespace DO::Sara {
 
