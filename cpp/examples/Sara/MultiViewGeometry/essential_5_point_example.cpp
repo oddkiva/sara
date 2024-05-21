@@ -19,7 +19,6 @@
 #include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
-#include <DO/Sara/SfM/Helpers/EssentialMatrixEstimation.hpp>
 #include <DO/Sara/SfM/Helpers/FundamentalMatrixEstimation.hpp>
 #include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 #include <DO/Sara/SfM/Helpers/Triangulation.hpp>
@@ -185,8 +184,8 @@ auto sara_graphics_main(int argc, char** argv) -> int
   const auto P2 = geometry.C2.matrix();
 
   // Calculate the image coordinates from the normalized camera coordinates.
-  const MatrixXd u1 = (P1 * geometry.X).colwise().hnormalized();
-  const MatrixXd u2 = (P2 * geometry.X).colwise().hnormalized();
+  const Eigen::MatrixXd u1 = (P1 * geometry.X).colwise().hnormalized();
+  const Eigen::MatrixXd u2 = (P2 * geometry.X).colwise().hnormalized();
 
   using depth_t = float;
   auto points = std::vector<std::pair<int, depth_t>>{};

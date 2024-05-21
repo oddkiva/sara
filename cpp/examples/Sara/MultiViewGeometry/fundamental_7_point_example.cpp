@@ -15,16 +15,15 @@
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/SevenPointAlgorithm.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
+#include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 #include <DO/Sara/Visualization.hpp>
 
-#include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 
-
-using namespace std;
 using namespace std::string_literals;
 using namespace DO::Sara;
 
@@ -33,7 +32,8 @@ using namespace DO::Sara;
 // Feature detection and matching.
 //
 // Detect or read SIFT keypoints.
-auto get_keypoints(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
+auto get_keypoints([[maybe_unused]] const Image<Rgb8>& image1,
+                   [[maybe_unused]] const Image<Rgb8>& image2,
                    const std::string& keys1_filepath,
                    const std::string& keys2_filepath,
                    KeypointList<OERegion, float>& keys1,
@@ -53,8 +53,6 @@ auto get_keypoints(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
   write_keypoints(f1, d1, keys1_filepath);
   write_keypoints(f2, d2, keys2_filepath);
 #else
-  (void) image1;
-  (void) image2;
   auto& [f1, d1] = keys1;
   auto& [f2, d2] = keys2;
 
@@ -70,7 +68,7 @@ using FEstimator = SevenPointAlgorithmDoublePrecision;
 
 auto estimate_fundamental_matrix(const KeypointList<OERegion, float>& keys1,
                                  const KeypointList<OERegion, float>& keys2,
-                                 const vector<Match>& matches,  //
+                                 const std::vector<Match>& matches,  //
                                  int num_samples, double f_err_thres)
 {
   // Transform matches to an array of indices.
@@ -102,18 +100,17 @@ auto estimate_fundamental_matrix(const KeypointList<OERegion, float>& keys1,
 // =============================================================================
 // Visual inspection.
 //
-void inspect_fundamental_matrix_estimation(const Image<Rgb8>& image1,
-                                           const Image<Rgb8>& image2,  //
-                                           const vector<Match>& matches,
-                                           const FundamentalMatrix& F,
-                                           const Tensor_<bool, 1>& inliers,
-                                           const Tensor_<int, 1>& sample_best)
+auto inspect_fundamental_matrix_estimation(
+    const Image<Rgb8>& image1, const Image<Rgb8>& image2,
+    const std::vector<Match>& matches,  //
+    const FundamentalMatrix& F, const Tensor_<bool, 1>& inliers,
+    const Tensor_<int, 1>& sample_best) -> void
 {
   // ==========================================================================
   // Setup the visualization.
   const auto scale = .25f;
   const auto w = int((image1.width() + image2.width()) * scale);
-  const auto h = int(max(image1.height(), image2.height()) * scale);
+  const auto h = int(std::max(image1.height(), image2.height()) * scale);
 
   create_window(w, h);
   set_antialiasing();
@@ -187,15 +184,17 @@ void inspect_fundamental_matrix_estimation(const Image<Rgb8>& image1,
 }
 
 
-int main(int argc, char** argv)
+auto main(int argc, char** argv) -> int
 {
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
-int sara_graphics_main(int argc, char** argv)
+auto sara_graphics_main(int argc, char** argv) -> int
 {
+  auto& logger = Logger::get();
+
   if (argc < 3)
   {
     std::cerr << "Usage: " << argv[0] << " image1 image2" << std::endl;
@@ -203,30 +202,30 @@ int sara_graphics_main(int argc, char** argv)
   }
 
   // Load images.
-  print_stage("Loading images...");
+  SARA_LOGI(logger, "Loading images...");
   const auto images = std::array{imread<Rgb8>(argv[1]), imread<Rgb8>(argv[2])};
 
   // Use the following data structure to load images, keypoints, camera
   // parameters.
-  print_stage("Computing keypoints...");
+  SARA_LOGI(logger, "Computing keypoints...");
   const auto image_pyr_params = ImagePyramidParams(-1);
   auto keypoints = std::array{
       compute_sift_keypoints(images[0].convert<float>(), image_pyr_params),
       compute_sift_keypoints(images[1].convert<float>(), image_pyr_params)};
 
-  print_stage("Matching keypoints...");
+  SARA_LOGI(logger, "Matching keypoints...");
   const auto sift_nn_ratio = argc < 6 ? 0.6f : std::stof(argv[5]);
   const auto matches = match(keypoints[0], keypoints[1], sift_nn_ratio);
 
 
-  print_stage("Estimating the fundamental matrix...");
+  SARA_LOGI(logger, "Estimating the fundamental matrix...");
   const auto num_samples = argc < 4 ? 200 : std::stoi(argv[3]);
   const auto f_err_thres = argc < 5 ? 1. : std::stod(argv[4]);
   const auto [F, inliers, sample_best] = estimate_fundamental_matrix(
       keypoints[0], keypoints[1], matches, num_samples, f_err_thres);
 
 
-  print_stage("Inspecting the fundamental matrix estimation...");
+  SARA_LOGI(logger, "Inspecting the fundamental matrix estimation...");
   inspect_fundamental_matrix_estimation(images[0], images[1], matches, F,
                                         inliers, sample_best);
 
