@@ -248,7 +248,7 @@ GRAPHICS_MAIN()
   feature_tracker.update_feature_tracks(pose_graph, pose_edge);
 
   // 3. Recalculate the feature tracks that are still alive.
-  const auto [tracks_alive, track_visibility_count] =
+  const auto [tracks, track_visibility_count] =
       feature_tracker.calculate_alive_feature_tracks(1);
 
   auto point_cloud = sara::PointCloudGenerator::PointCloud{};
@@ -261,18 +261,12 @@ GRAPHICS_MAIN()
   pinhole_camera.shear() = K[1](0, 1);
   pinhole_camera.u0() = K[1](0, 2);
   pinhole_camera.v0() = K[1](1, 2);
-  point_cloud_generator.grow_point_cloud(tracks_alive, images[1], pose_edge,
+  point_cloud_generator.grow_point_cloud(tracks, images[1], pose_edge,
                                          pinhole_camera);
 
 #if 0
-  // Prepare the bundle adjustment problem formulation .
-  auto ba_problem = BundleAdjustmentProblem{};
-  ba_problem.populate_data_from_two_view_geometry(
-      feature_tracks, views.keypoints, match_index, two_view_geometry);
-
-
   // Solve the bundle adjustment problem with Ceres.
-  ceres::Problem problem;
+  auto problem = ceres::Problem{};
   for (int i = 0; i < ba_problem.observations.size(0); ++i)
   {
     auto cost_fn = ReprojectionError::create(ba_problem.observations(i, 0),
