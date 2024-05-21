@@ -98,7 +98,6 @@ auto sara_graphics_main(int argc, char** argv) -> int
   // List the matches as a 2D-tensor where each row encodes a match 'm' as a
   // pair of point indices (i, j).
   const auto M = to_tensor(matches);
-
   const auto X = PointCorrespondenceList{M, u[0], u[1]};
 
   auto data_normalizer =

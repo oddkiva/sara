@@ -23,12 +23,11 @@
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/MultiViewGeometry/Graph/EpipolarGraph.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/InlierPredicates.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
-
 #include <DO/Sara/SfM/Helpers/EssentialMatrixEstimation.hpp>
 #include <DO/Sara/SfM/Helpers/FundamentalMatrixEstimation.hpp>
 #include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
@@ -37,6 +36,8 @@
 
 using namespace std::string_literals;
 using namespace DO::Sara;
+
+namespace fs = std::filesystem;
 
 
 int main(int argc, char** argv)
@@ -48,66 +49,60 @@ int main(int argc, char** argv)
 
 int sara_graphics_main(int argc, char** argv)
 {
-  // Use the following data structure to load images, keypoints, camera
-  // parameters.
-  auto views = ViewAttributes{};
+  auto& logger = Logger::get();
 
   // Load images.
-  print_stage("Loading images...");
-  const auto data_dir = argc < 2
-                            ? "/Users/david/Desktop/Datasets/sfm/castle_int"s
-                            : std::string{argv[1]};
-  const auto image_id1 = std::string{argv[2]};
-  const auto image_id2 = std::string{argv[3]};
-  views.image_paths = {
-      data_dir + "/" + image_id1 + ".png",
-      data_dir + "/" + image_id2 + ".png",
+  SARA_LOGI(logger, "Loading images...");
+  const auto data_dir =
+      argc < 2 ? fs::path{"/Users/oddkiva/Desktop/datasets/sfm/fountain_int"}
+               : fs::path{argv[1]};
+  const auto image_ids = std::array<std::string, 2>{
+      argc < 3 ? "0000" : argv[2],
+      argc < 4 ? "0001" : argv[3],
   };
-  views.read_images();
-  SARA_CHECK(views.images[0].sizes().transpose());
-  SARA_CHECK(views.images[1].sizes().transpose());
+  const auto image_paths = std::array{
+      (data_dir / (image_ids[0] + ".png")).string(),
+      (data_dir / (image_ids[1] + ".png")).string()  //
+  };
+  const auto images = std::array{
+      imread<Rgb8>(image_paths[0]),  //
+      imread<Rgb8>(image_paths[1])   //
+  };
 
+  SARA_LOGI(logger, "Loading the internal camera matrices...");
+  const auto K = std::array{
+      read_internal_camera_parameters(
+          (data_dir / (image_ids[0] + ".png.K")).string())
+          .cast<double>(),
+      read_internal_camera_parameters(
+          (data_dir / (image_ids[1] + ".png.K")).string())
+          .cast<double>()  //
+  };
+  for (auto i = 0; i < 2; ++i)
+    SARA_LOGD(logger, "K[{}] =\n{}", i, K[i]);
 
-  print_stage("Loading the internal camera matrices...");
-  views.cameras.resize(2 /* views */);
-  views.cameras[0].K =
-      read_internal_camera_parameters(data_dir + "/" + image_id1 + ".png.K")
-          .cast<double>();
-  views.cameras[1].K =
-      read_internal_camera_parameters(data_dir + "/" + image_id2 + ".png.K")
-          .cast<double>();
-  SARA_DEBUG << "K[0] =\n" << views.cameras[0].K << "\n";
-  SARA_DEBUG << "K[1] =\n" << views.cameras[1].K << "\n";
-
-
-  print_stage("Computing keypoints...");
+  SARA_LOGI(logger, "Computing keypoints...");
   const auto image_pyr_params = ImagePyramidParams(-1);
-  views.keypoints = {compute_sift_keypoints(views.images[0].convert<float>(),
-                                            image_pyr_params),
-                     compute_sift_keypoints(views.images[1].convert<float>(),
-                                            image_pyr_params)};
+  const auto keypoints = std::array{
+      compute_sift_keypoints(images[0].convert<float>(), image_pyr_params),
+      compute_sift_keypoints(images[1].convert<float>(), image_pyr_params)  //
+  };
 
   // Use the following data structures to store the epipolar geometry data.
-  auto epipolar_edges = EpipolarEdgeAttributes{};
-  epipolar_edges.initialize_edges(2 /* views */);
-  epipolar_edges.resize_fundamental_edge_list();
-  epipolar_edges.resize_essential_edge_list();
-
-
-  print_stage("Matching keypoints...");
+  SARA_LOGI(logger, "Matching keypoints...");
   const auto sift_nn_ratio = argc < 5 ? 0.6f : std::stof(argv[4]);
-  epipolar_edges.matches = {
-      match(views.keypoints[0], views.keypoints[1], sift_nn_ratio)};
-  const auto& matches = epipolar_edges.matches[0];
+  const auto matches = match(keypoints[0], keypoints[1], sift_nn_ratio);
 
 
   print_stage("Performing data transformations...");
   // Invert the internal camera matrices.
-  const auto K_inv = std::array<Matrix3d, 2>{views.cameras[0].K.inverse(),
-                                             views.cameras[1].K.inverse()};
+  const auto K_inv = std::array<Eigen::Matrix3d, 2>{
+      K[0].inverse(),
+      K[1].inverse()  //
+  };
   // Tensors of image coordinates.
-  const auto& f0 = features(views.keypoints[0]);
-  const auto& f1 = features(views.keypoints[1]);
+  const auto& f0 = features(keypoints[0]);
+  const auto& f1 = features(keypoints[1]);
   const auto u = std::array{homogeneous(extract_centers(f0)).cast<double>(),
                             homogeneous(extract_centers(f1)).cast<double>()};
 
@@ -121,8 +116,8 @@ int sara_graphics_main(int argc, char** argv)
 
   auto solver = RelativePoseSolver<NisterFivePointAlgorithm>{};
 
-  auto data_normalizer = std::make_optional(
-      Normalizer<TwoViewGeometry>{views.cameras[0].K, views.cameras[1].K});
+  auto data_normalizer =
+      std::make_optional(Normalizer<TwoViewGeometry>{K[0], K[1]});
 
   auto inlier_predicate = CheiralAndEpipolarConsistency{};
   inlier_predicate.distance.K1_inv = K_inv[0];
@@ -137,23 +132,12 @@ int sara_graphics_main(int argc, char** argv)
 
   // Retrieve the essential matrix.
   print_stage("Saving the data from the essential matrix estimation...");
-  epipolar_edges.E[0] = essential_matrix(geometry.C2.R, geometry.C2.t);
-  epipolar_edges.E_num_samples[0] = num_samples;
-  epipolar_edges.E_noise[0] = err_thres;
-  epipolar_edges.E_inliers[0] = inliers;
-
+  const auto E = essential_matrix(geometry.C2.R, geometry.C2.t);
 
   // Retrieve the fundamental matrix.
   print_stage("Saving the fundamental matrix...");
-  auto& F = epipolar_edges.F[0];
-  {
-    const auto& E = epipolar_edges.E[0];
-    F.matrix() = K_inv[1].transpose() * E.matrix() * K_inv[0];
-
-    epipolar_edges.F_num_samples[0] = num_samples;
-    epipolar_edges.F_noise = epipolar_edges.E_noise;
-    epipolar_edges.F_inliers = epipolar_edges.E_inliers;
-  }
+  auto F = FundamentalMatrix{};
+  F.matrix() = K_inv[1].transpose() * E.matrix() * K_inv[0];
 
   // Retrieve all the 3D points by triangulation.
   print_stage("Retriangulating the inliers...");
@@ -185,29 +169,27 @@ int sara_graphics_main(int argc, char** argv)
     throw std::runtime_error{"Uh Oh.... Cheirality is wrong!"};
 
   // Add the internal camera matrices to the camera.
-  geometry.C1.K = views.cameras[0].K;
-  geometry.C2.K = views.cameras[1].K;
-  auto colors = extract_colors(views.images[0],  //
-                               views.images[1],  //
-                               geometry);
+  geometry.C1.K = K[0];
+  geometry.C2.K = K[1];
+  auto colors = extract_colors(images[0], images[1], geometry);
 
 #if defined(__APPLE__)
-  const auto geometry_h5_filepath = "/Users/david/Desktop/geometry.h5"s;
+  const auto geometry_h5_filepath = "/Users/oddkiva/Desktop/geometry.h5"s;
 #else
   const auto geometry_h5_filepath = "/home/david/Desktop/geometry.h5"s;
 #endif
   auto geometry_h5_file = H5File{geometry_h5_filepath, H5F_ACC_TRUNC};
   save_to_hdf5(geometry_h5_file, geometry, colors);
   geometry_h5_file.write_dataset("dataset_folder", data_dir, true);
-  geometry_h5_file.write_dataset("image_1", views.image_paths[0], true);
-  geometry_h5_file.write_dataset("image_2", views.image_paths[1], true);
-  geometry_h5_file.write_dataset("K", data_dir + "/" + image_id1 + ".png.K",
-                                 true);
+  geometry_h5_file.write_dataset("image_1", image_paths[0], true);
+  geometry_h5_file.write_dataset("image_2", image_paths[1], true);
+  geometry_h5_file.write_dataset(
+      "K", (data_dir / (image_ids[1] + ".png.K")).string(), true);
 
   // Inspect the fundamental matrix.
   print_stage("Inspecting the fundamental matrix estimation...");
-  check_epipolar_constraints(views.images[0], views.images[1], F, matches,
-                             sample_best, inliers,
+  check_epipolar_constraints(images[0], images[1], F, matches, sample_best,
+                             inliers,
                              /* display_step */ 20, /* wait_key */ true);
 
   print_stage("Sort the points by depth...");
@@ -219,8 +201,8 @@ int sara_graphics_main(int argc, char** argv)
   const auto P2 = geometry.C2.matrix();
 
   // Calculate the image coordinates from the normalized camera coordinates.
-  const MatrixXd u1 = (P1 * geometry.X).colwise().hnormalized();
-  const MatrixXd u2 = (P2 * geometry.X).colwise().hnormalized();
+  const Eigen::MatrixXd u1 = (P1 * geometry.X).colwise().hnormalized();
+  const Eigen::MatrixXd u2 = (P2 * geometry.X).colwise().hnormalized();
 
   using depth_t = float;
   auto depths = std::vector<std::pair<int, depth_t>>{};
@@ -230,7 +212,7 @@ int sara_graphics_main(int argc, char** argv)
   std::sort(depths.begin(), depths.end(),
             [](const auto& a, const auto& b) { return a.second < b.second; });
 
-  display(views.images[0], Point2i::Zero(), 0.25);
+  display(images[0], Point2i::Zero(), 0.25);
 
   // The brighter the color, the further the point is.
   const auto depth_min = depths.front().second;
