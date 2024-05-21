@@ -138,6 +138,9 @@ GRAPHICS_MAIN()
           (data_dir_path / (image_ids[1] + ".png.K")).string())
           .cast<double>()  //
   };
+  if ((K[0] - K[1]).norm() > 1e-8)
+    throw std::runtime_error{
+        "We require identical camera matrices in for now!"};
   for (auto i = 0; i < 2; ++i)
     SARA_LOGD(logger, "K[{}] =\n{}", i, K[i]);
 
@@ -253,6 +256,11 @@ GRAPHICS_MAIN()
       pose_graph, feature_tracker._feature_graph, point_cloud};
 
   auto pinhole_camera = sara::v2::PinholeCamera<double>{};
+  pinhole_camera.fx() = K[1](0, 0);
+  pinhole_camera.fy() = K[1](1, 1);
+  pinhole_camera.shear() = K[1](0, 1);
+  pinhole_camera.u0() = K[1](0, 2);
+  pinhole_camera.v0() = K[1](1, 2);
   point_cloud_generator.grow_point_cloud(tracks_alive, images[1], pose_edge,
                                          pinhole_camera);
 
