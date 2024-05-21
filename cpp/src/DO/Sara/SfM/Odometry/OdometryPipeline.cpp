@@ -20,7 +20,7 @@
 #include <DO/Sara/Visualization/Features/Draw.hpp>
 
 
-#define DEBUG_ABSOLUTE_POSE_RECOVERY
+// #define DEBUG_ABSOLUTE_POSE_RECOVERY
 
 
 using namespace DO::Sara;

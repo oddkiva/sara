@@ -29,8 +29,8 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
 #if defined(PROFILE_VIDEOSTREAM)
 #  include <DO/Sara/Core/Timer.hpp>
 #endif
@@ -148,6 +148,8 @@ namespace DO::Sara {
   auto VideoStream::open(const std::string& file_path, const bool autorotate)
       -> void
   {
+    auto& logger = Logger::get();
+
     // Read the video file.
     if (avformat_open_input(&_video_format_context, file_path.c_str(), nullptr,
                             nullptr) < 0)
@@ -182,8 +184,7 @@ namespace DO::Sara {
       if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
           config->device_type == _hw_device_type)
       {
-        SARA_DEBUG << "Successfully initialized hardware AV codec config!"
-                   << std::endl;
+        SARA_LOGD(logger, "Successfully initialized hardware AV codec config!");
         hw_pix_fmt = config->pix_fmt;
         break;
       }
@@ -244,28 +245,26 @@ namespace DO::Sara {
         _video_codec_context->width,  //
         _video_codec_context->height  //
     };
-    SARA_DEBUG << "#[VideoStream] sizes = " << sizes_original.transpose()
-               << std::endl;
-    SARA_DEBUG << "#[VideoStream] pixel format = "
-               << av_get_pix_fmt_name(_video_codec_context->pix_fmt)
-               << std::endl;
-    SARA_DEBUG
-        << "#[VideoStream] time base = " << _video_stream_index << ": "
-        << _video_format_context->streams[_video_stream_index]->time_base.num
-        << "/"
-        << _video_format_context->streams[_video_stream_index]->time_base.den
-        << std::endl;
+    SARA_LOGD(logger, "Image sizes  : {}", sizes_original.transpose().eval());
+    SARA_LOGD(logger, "Pixel format : {}",
+              av_get_pix_fmt_name(_video_codec_context->pix_fmt));
+    SARA_LOGD(
+        logger, "Time base    : {}: {}/{}",  //
+        _video_stream_index,
+        _video_format_context->streams[_video_stream_index]->time_base.num,
+        _video_format_context->streams[_video_stream_index]->time_base.den);
 
     // Get video format converter to RGB24.
-    _sws_context =
-        sws_getContext(sizes_original.x(), sizes_original.y(),
+    _sws_context = sws_getContext(  //
+        sizes_original.x(), sizes_original.y(),
 #if defined(HWACCEL)
-                       AV_PIX_FMT_NV12,
+        AV_PIX_FMT_NV12,
 #else
-                       _video_codec_context->pix_fmt,
+        _video_codec_context->pix_fmt,
 #endif
-                       sizes_original.x(), sizes_original.y(), AV_PIX_FMT_RGB24,
-                       SWS_POINT, nullptr, nullptr, nullptr);
+        sizes_original.x(), sizes_original.y(),  //
+        AV_PIX_FMT_RGB24, SWS_POINT,             //
+        nullptr, nullptr, nullptr);
     if (_sws_context == nullptr)
       throw std::runtime_error{"Could not allocate SWS context!"};
 

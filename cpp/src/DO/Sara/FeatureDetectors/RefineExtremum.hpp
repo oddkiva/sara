@@ -13,8 +13,13 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
 
-namespace DO { namespace Sara {
+#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
+
+
+namespace DO::Sara {
 
   /*!
    *  @ingroup FeatureDetectors
@@ -34,10 +39,11 @@ namespace DO { namespace Sara {
    *    \frac{(r+1)^2}{r}
    *  \f$,
    *  where \f$r\f$ is the ratio between the eigenvalues of \f$\mathbf{H}\f$
-   *  and corresponds to the variable **edgeRatio**.
+   *  and corresponds to the variable **edge_ratio**.
    */
   DO_SARA_EXPORT
-  bool on_edge(const ImageView<float>& I, int x, int y, float edge_ratio = 10.f);
+  bool on_edge(const ImageView<float>& I, int x, int y,
+               float edge_ratio = 10.f);
 
   /*!
    *  @brief Extremum position refinement in scale-space based on Newton's
@@ -55,13 +61,14 @@ namespace DO { namespace Sara {
    *    This variable controls the number of iterations to refine the
    *    localization of DoG extrema in scale-space. The refinement process is
    *    based on the function **DO::refineExtremum()**.
-
-   *  Let \f$D : \mathbf{R}^3 \mapsto \mathbf{R}\f$ be the difference of gaussian
-   *  function and \f$(x,y,\sigma)\f$ be the approximate position
+   *
+   *  Let \f$D : \mathbf{R}^3 \mapsto \mathbf{R}\f$ be the difference of
+   *  gaussian function and \f$(x,y,\sigma)\f$ be the approximate position
    *  of a local extremum of \f$D\f$.
    *
-   *  If \f$(x,y,\sigma)\f$ is the current guess of the local extremum, the refinement
-   *  procedure seeks to minimize the following objective function iteratively:
+   *  If \f$(x,y,\sigma)\f$ is the current guess of the local extremum, the
+   *  refinement procedure seeks to minimize the following objective function
+   *  iteratively:
    *  \f{eqnarray*}{
    *    \mathrm{minimize}_{\mathbf{h}}
    *        D(\mathbf{x})
@@ -69,8 +76,9 @@ namespace DO { namespace Sara {
    *      + 1/2 \mathbf{h}^T D''(\mathbf{x}) \mathbf{h}^T .
    *  \f}
    *  In practice the gradient vector \f$D'(\mathbf{x})\f$ and hessian matrix
-   *  \f$D''(\mathbf{x})\f$ are approximated by finite difference and one must check
-   *  that the hessian matrix \f$D''(\mathbf{x})\f$ is indeed **positive-definite**.
+   *  \f$D''(\mathbf{x})\f$ are approximated by finite difference and one must
+   *  check that the hessian matrix \f$D''(\mathbf{x})\f$ is indeed
+   *  **positive-definite**.
    *
    *  Likewise, if \f$\mathbf{x}\f$ is a minimum, then one must check that
    *  \f$D''(\mathbf{x})\f$ is **negative-definite**.
@@ -78,21 +86,20 @@ namespace DO { namespace Sara {
    *  Otherwise, we cannot refine the position of the extremum.
    */
   DO_SARA_EXPORT
-  bool refine_extremum(const ImagePyramid<float>& I,
-                       int x, int y, int s, int o, int type,
-                       Point3f& pos, float& val,
-                       int border_size = 1, int num_iter = 5);
+  bool refine_extremum(const ImagePyramid<float>& I, int x, int y, int s, int o,
+                       int type, Point3f& pos, float& val, int border_size = 1,
+                       int num_iter = 5);
   /*!
-   *  @brief This function refines the coordinates using the interpolation method
-   *  in [Lowe, IJCV 2004] and [Brown and Lowe, BMVC 2002].
+   *  @brief This function refines the coordinates using the interpolation
+   *  method in [Lowe, IJCV 2004] and [Brown and Lowe, BMVC 2002].
    *
    *  It refines the spatial coordinates \f$(x,y)\f$. However, there is no scale
    *  refinement here.
    */
   DO_SARA_EXPORT
   bool refine_extremum(const ImageView<float>& I, int x, int y, int type,
-                       Point2f& pos, float& val,
-                       int border_size = 1, int num_iter = 5);
+                       Point2f& pos, float& val, int border_size = 1,
+                       int num_iter = 5);
   /*!
    *  @brief Localizes all local extrema in scale-space at scale
    *  \f$\sigma = 2^{s/S+o}\f$.
@@ -111,8 +118,7 @@ namespace DO { namespace Sara {
    *  simplified Harris-Laplace and Hessian-Laplace interest points.
    */
   DO_SARA_EXPORT
-  bool select_laplace_scale(float& scale,
-                            int x, int y, int s, int o,
+  bool select_laplace_scale(float& scale, int x, int y, int s, int o,
                             const ImagePyramid<float>& gauss_pyramid,
                             int num_scales = 10);
 
@@ -125,15 +131,12 @@ namespace DO { namespace Sara {
    *  points.
    */
   DO_SARA_EXPORT
-  std::vector<OERegion> laplace_maxima(const ImagePyramid<float>& function,
-                                       const ImagePyramid<float>& gaussian_pyramid,
-                                       int s, int o,
-                                       float extremum_thres = 1e-6f,
-                                       int img_padding_sz = 1,
-                                       int num_scales = 10,
-                                       int refine_iterations = 5);
+  std::vector<OERegion>
+  laplace_maxima(const ImagePyramid<float>& function,
+                 const ImagePyramid<float>& gaussian_pyramid, int s, int o,
+                 float extremum_thres = 1e-6f, int img_padding_sz = 1,
+                 int num_scales = 10, int refine_iterations = 5);
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara

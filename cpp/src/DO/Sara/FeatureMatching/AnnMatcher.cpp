@@ -9,10 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/FeatureMatching/AnnMatcher.hpp>
 
-#include <DO/Sara/FeatureMatching.hpp>
+#include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
 
 #if defined(_MSC_VER)
 #  pragma warning(push)
@@ -218,6 +218,7 @@ namespace DO { namespace Sara {
   //! Compute candidate matches using the Euclidean distance.
   auto AnnMatcher::compute_matches() -> vector<Match>
   {
+    auto& logger = Logger::get();
     auto t = Timer{};
 
     const auto& dmat1 = descriptors(_keys1);
@@ -231,7 +232,8 @@ namespace DO { namespace Sara {
     flann::Index<flann::L2<float>> tree2(data2, params);
     tree1.buildIndex();
     tree2.buildIndex();
-    SARA_DEBUG << "Built trees in " << t.elapsed() << " seconds." << endl;
+
+    SARA_LOGD(logger, "Built trees in {:0.2f} ms.", t.elapsed_ms());
 
     auto matches = vector<Match>{};
     matches.reserve(100'000);
@@ -271,8 +273,8 @@ namespace DO { namespace Sara {
       return m1.score() < m2.score();
     });
 
-    SARA_DEBUG << "Computed " << matches.size() << " matches in " << t.elapsed()
-               << " seconds." << endl;
+    SARA_LOGD(logger, "Computed {} matches in {:0.2f} seconds.", matches.size(),
+              t.elapsed_ms());
 
     return matches;
   }

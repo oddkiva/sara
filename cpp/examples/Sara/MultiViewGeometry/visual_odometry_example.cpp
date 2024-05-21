@@ -200,7 +200,7 @@ private:
     };
 
     auto& logger = sara::Logger::get();
-    SARA_LOGI(logger, "point cloud dimensions: {} ", pc_tview.sizes());
+    SARA_LOGI(logger, "point cloud dimensions: {} ", pc_tview.sizes().transpose().eval());
     _point_cloud.upload_host_data_to_gl(pc_tview.cast<float>());
   }
 
