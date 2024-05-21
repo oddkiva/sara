@@ -6,7 +6,9 @@
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/InlierPredicates.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
 
-using namespace DO::Sara::v2;
+
+using namespace DO::Sara;
+
 
 auto RelativePoseEstimator::configure(
     const v2::BrownConradyDistortionModel<double>& camera) -> void
