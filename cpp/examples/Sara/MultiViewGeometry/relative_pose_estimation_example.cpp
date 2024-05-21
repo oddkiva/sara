@@ -28,10 +28,7 @@
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
-#include <DO/Sara/SfM/Helpers/EssentialMatrixEstimation.hpp>
-#include <DO/Sara/SfM/Helpers/FundamentalMatrixEstimation.hpp>
-#include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
-#include <DO/Sara/SfM/Helpers/Triangulation.hpp>
+#include <DO/Sara/SfM/Helpers.hpp>
 
 #include <filesystem>
 

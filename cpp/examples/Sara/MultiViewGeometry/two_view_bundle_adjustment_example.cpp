@@ -18,8 +18,6 @@
 #include <DO/Sara/MultiViewGeometry/BundleAdjustmentProblem.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
-#include <DO/Sara/SfM/Helpers/EssentialMatrixEstimation.hpp>
-#include <DO/Sara/SfM/Helpers/FundamentalMatrixEstimation.hpp>
 #include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 #include <DO/Sara/SfM/Helpers/Triangulation.hpp>
 
@@ -99,33 +97,6 @@ struct ReprojectionError
   double observed_x;
   double observed_y;
 };
-
-
-auto map_feature_gid_to_match_gid(const EpipolarEdgeAttributes& epipolar_edges)
-{
-  auto mapping = std::multimap<FeatureGID, MatchGID>{};
-  for (const auto& ij : epipolar_edges.edge_ids)
-  {
-    const auto view_i = epipolar_edges.edges[ij].first;
-    const auto view_j = epipolar_edges.edges[ij].second;
-    const auto& M_ij = epipolar_edges.matches[ij];
-    const auto& E_inliers_ij = epipolar_edges.E_inliers[ij];
-    const auto& two_view_geometry_ij = epipolar_edges.two_view_geometries[ij];
-
-    for (auto m = 0; m < int(M_ij.size()); ++m)
-    {
-      if (E_inliers_ij(m) && two_view_geometry_ij.cheirality(m))
-      {
-        mapping.insert(
-            {FeatureGID{view_i, M_ij[m].x_index()}, MatchGID{ij, m}});
-        mapping.insert(
-            {FeatureGID{view_j, M_ij[m].y_index()}, MatchGID{ij, m}});
-      }
-    }
-  }
-
-  return mapping;
-}
 
 
 GRAPHICS_MAIN()

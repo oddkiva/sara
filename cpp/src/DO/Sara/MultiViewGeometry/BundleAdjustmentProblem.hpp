@@ -12,7 +12,6 @@
 #pragma once
 
 #include <DO/Sara/Core/Tensor.hpp>
-#include <DO/Sara/MultiViewGeometry/Graph/FeatureGraph.hpp>
 
 #include <vector>
 
@@ -69,6 +68,7 @@ namespace DO::Sara {
     const T* parameters;
   };
 
+#if 0
   //! @brief Observation reference class.
   struct ObservationRef
   {
@@ -158,10 +158,10 @@ namespace DO::Sara {
         const auto p = match_index.find(*track->begin())->second.m;
         const auto point_p = two_view_geometry.X.col(p);
         points_view.col(t) = point_p.hnormalized();
-#if DEBUG
+#  if DEBUG
         SARA_DEBUG << "Point[" << t << "] = "  //
                    << points_view.col(t).transpose() << std::endl;
-#endif
+#  endif
       }
     }
 
@@ -260,6 +260,7 @@ namespace DO::Sara {
       populate_camera_parameters(two_view_geometry);
     }
   };
+#endif
 
   //! @}
 

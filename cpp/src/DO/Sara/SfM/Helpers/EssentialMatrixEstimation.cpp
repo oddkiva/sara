@@ -11,6 +11,9 @@
 
 #include <DO/Sara/SfM/Helpers/EssentialMatrixEstimation.hpp>
 
+#include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/SfM/Helpers/FundamentalMatrixEstimation.hpp>
 
