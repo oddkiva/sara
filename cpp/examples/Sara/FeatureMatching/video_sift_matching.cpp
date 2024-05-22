@@ -21,15 +21,18 @@
 #include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+
+#include <fmt/format.h>
 
 #if defined(OPENMP)
 #  include <omp.h>
 #endif
 
+#include <filesystem>
 
-namespace fs = boost::filesystem;
+
+namespace fs = std::filesystem;
 namespace po = boost::program_options;
 namespace sara = DO::Sara;
 
@@ -225,14 +228,14 @@ int sara_graphics_main(int argc, char** argv)
         draw_arrow(frame_annotated, a, b, Yellow8, 4);
       }
     }
-    draw_text(frame_annotated, 100, 50,                     //
-              sara::format("SIFT: %0.f ms", feature_time),  //
+    draw_text(frame_annotated, 100, 50,                  //
+              fmt::format("SIFT: {} ms", feature_time),  //
               White8, 40, 0, false, true, false);
     draw_text(frame_annotated, 100, 100,
-              sara::format("Matching: %0.3f ms", matching_time),  //
+              fmt::format("Matching: {:0.3f} ms", matching_time),  //
               White8, 40, 0, false, true, false);
-    draw_text(frame_annotated, 100, 150,                   //
-              sara::format("Tracks: %u", matches.size()),  //
+    draw_text(frame_annotated, 100, 150,                  //
+              fmt::format("Tracks: {}", matches.size()),  //
               White8, 40, 0, false, true, false);
     set_active_window(w);
     display(frame_annotated);

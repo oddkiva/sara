@@ -7,13 +7,13 @@
 #include <DO/Shakti/Halide/Resize.hpp>
 #include <DO/Shakti/Halide/SeparableConvolution2d.hpp>
 
-#include "shakti_gray32f_to_rgb8u_cpu.h"
+#include <fmt/format.h>
 
 #include "shakti_dominant_gradient_orientations_gpu_v2.h"
+#include "shakti_gray32f_to_rgb8u_cpu.h"
 #include "shakti_local_scale_space_extremum_32f_gpu_v2.h"
 #include "shakti_polar_gradient_2d_32f_gpu_v2.h"
 #include "shakti_refine_scale_space_extrema_gpu_v2.h"
-
 #include "shakti_sift_descriptor_gpu_v5.h"
 
 
@@ -233,10 +233,10 @@ namespace DO::Shakti::HalideBackend::v2 {
     for (auto s = 0; s < static_cast<int>(extrema_maps.size()); ++s)
     {
       const auto& dog_ext_map = extrema_maps[s];
-      const auto num_extrema = static_cast<int>(std::count_if(      //
-          dog_ext_map.begin(), dog_ext_map.end(),  //
-          [](const auto& v) { return v != 0; }     //
-      ));
+      const auto num_extrema = static_cast<int>(std::count_if(  //
+          dog_ext_map.begin(), dog_ext_map.end(),               //
+          [](const auto& v) { return v != 0; }                  //
+          ));
 
       if (num_extrema == 0)
         continue;
@@ -511,17 +511,17 @@ namespace DO::Shakti::HalideBackend::v2 {
       if (profile)
       {
         const auto elapsed = timer.elapsed_ms();
-        SARA_DEBUG << Sara::format("SIFT Octave %d [%dx%d]: %f ms",
-                                   start_octave_index + o,
-                                   octaves[o].gaussians[0].width(),
-                                   octaves[o].gaussians[0].height(), elapsed)
+        SARA_DEBUG << fmt::format("SIFT Octave {} [{}x{}]: {} ms",
+                                  start_octave_index + o,
+                                  octaves[o].gaussians[0].width(),
+                                  octaves[o].gaussians[0].height(), elapsed)
                    << std::endl;
       }
     }
   }
 
-  auto SiftPyramidPipeline::get_keypoints(Sara::KeypointList<Sara::OERegion, float>& keys) const
-      -> void
+  auto SiftPyramidPipeline::get_keypoints(
+      Sara::KeypointList<Sara::OERegion, float>& keys) const -> void
   {
     // Count the number of features.
     auto num_features = 0;

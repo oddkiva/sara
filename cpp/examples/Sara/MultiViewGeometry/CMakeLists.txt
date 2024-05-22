@@ -36,7 +36,8 @@ target_include_directories(orthogonal_vanishing_point_detection
                            PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
 target_link_libraries(
   orthogonal_vanishing_point_detection
-  PRIVATE Boost::filesystem Boost::program_options
+  PRIVATE fmt::fmt #
+          Boost::program_options #
           $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
 
 # Two-view geometry.

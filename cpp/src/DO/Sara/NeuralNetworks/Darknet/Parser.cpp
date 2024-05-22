@@ -13,6 +13,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <fmt/format.h>
+
 #include <fstream>
 
 
@@ -188,8 +190,8 @@ namespace DO::Sara::Darknet {
       seen = iseen;
     }
     if (debug)
-      SARA_DEBUG << format(
-          "Trained: %.0f K-images (%.0f K-batch of 64 images)\n",
+      SARA_DEBUG << fmt::format(
+          "Trained: {} K-images ({} K-batch of 64 images)\n",
           static_cast<float>(seen) / 1000, static_cast<float>(seen) / 64000);
     transpose = (major > 1000) || (minor > 1000);
 

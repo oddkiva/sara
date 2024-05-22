@@ -27,15 +27,17 @@
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <boost/filesystem.hpp>
+#include <fmt/format.h>
+
 #include <boost/program_options.hpp>
+
+#include <filesystem>
 
 #if defined(OPENMP)
 #  include <omp.h>
 #endif
 
-
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 namespace po = boost::program_options;
 
 using namespace DO::Sara;
@@ -439,9 +441,10 @@ int sara_graphics_main(int argc, char** argv)
       {
         const auto angular_diff_degree =
             angular_distance(R0, R1) / M_PI * 180.f;
-        draw_text(100, 100,
-                  format("Angle diff = %0.2f degree", angular_diff_degree),
-                  White8, 20, 0, false, true);
+        draw_text(
+            100, 100,
+            fmt::format("Angle diff = {:0.2f} degree", angular_diff_degree),
+            White8, 20, 0, false, true);
       }
     }
     toc("Display");

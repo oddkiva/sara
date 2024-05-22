@@ -39,5 +39,6 @@ foreach(file ${SRC_FILES})
     DO::Sara::VideoIO
     DO::Shakti::Cuda::MultiArray
     DO::Shakti::Cuda::Utilities
-    DO::Shakti::Cuda::FeatureDetectors)
+    DO::Shakti::Cuda::FeatureDetectors
+    fmt::fmt)
 endforeach()
