@@ -33,6 +33,7 @@
 #endif
 #include <ceres/rotation.h>
 
+#include <algorithm>
 #include <filesystem>
 
 
@@ -43,9 +44,13 @@ namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 
 
-#if 0
 struct ReprojectionError
 {
+  static constexpr auto ResidualDimension = 2;
+  static constexpr auto IntrinsicParameterCount = 4;
+  static constexpr auto ExtrinsicParameterCount = 6;
+  static constexpr auto PointDimension = 3;
+
   ReprojectionError(double observed_x, double observed_y)
     : observed_x{observed_x}
     , observed_y{observed_y}
@@ -53,36 +58,32 @@ struct ReprojectionError
   }
 
   template <typename T>
-  bool operator()(const T* const camera,  // (1) camera parameters to optimize.
-                  const T* const point,   // (2) 3D points to optimize
+  bool operator()(const T* const extrinsics,  // (1) extrinsic camera parameters
+                  const T* const intrinsics,  //(2) extrinsic camera parameters
+                  const T* const point,       // (2) 3D points
                   T* residuals) const
   {
     T p[3];
 
-    auto camera_view = CameraModelView<T>{camera};
-
     // Rotate the point.
-    ceres::AngleAxisRotatePoint(camera_view.angle_axis(), point, p);
+    ceres::AngleAxisRotatePoint(extrinsics, point, p);
     // Translate the point.
-    p[0] += camera_view.t()[0];
-    p[1] += camera_view.t()[1];
-    p[2] += camera_view.t()[2];
+    const auto t = extrinsics + 3;
+    p[0] += t[0];
+    p[1] += t[1];
+    p[2] += t[2];
 
     // Normalized camera coordinates.
     T xp = p[0] / p[2];
     T yp = p[1] / p[2];
 
-    // Apply second and fourth order order radial distortion.
-    const auto& l1 = camera_view.l1();
-    const auto& l2 = camera_view.l2();
-    const auto r2 = xp * xp + yp * yp;
-    const auto distortion = T(1) + r2 * (l1 + l2 * r2);
-    xp *= distortion;
-    yp *= distortion;
-
-    // Apply the internal camera matrix.
-    const auto predicted_x = camera_view.fx() * xp + camera_view.x0();
-    const auto predicted_y = camera_view.fy() * yp + camera_view.y0();
+    // Apply the internal parameters.
+    const auto& fx = intrinsics[0];
+    const auto& fy = intrinsics[1];
+    const auto& u0 = intrinsics[2];
+    const auto& v0 = intrinsics[3];
+    const auto predicted_x = fx * xp + u0;
+    const auto predicted_y = fy * yp + v0;
 
     residuals[0] = predicted_x - T(observed_x);
     residuals[1] = predicted_y - T(observed_y);
@@ -93,15 +94,16 @@ struct ReprojectionError
   static ceres::CostFunction* create(const double observed_x,
                                      const double observed_y)
   {
-    constexpr auto NumParams = 6 /* camera parameters */ + 3 /* points */;
-    return new ceres::AutoDiffCostFunction<ReprojectionError, 2, NumParams, 3>{
-        new ReprojectionError{observed_x, observed_y}};
+    return new ceres::AutoDiffCostFunction<
+        ReprojectionError, ResidualDimension,  //
+        ExtrinsicParameterCount, IntrinsicParameterCount, PointDimension>{
+        new ReprojectionError{observed_x, observed_y}  //
+    };
   }
 
   double observed_x;
   double observed_y;
 };
-#endif
 
 
 GRAPHICS_MAIN()
@@ -264,20 +266,134 @@ GRAPHICS_MAIN()
   point_cloud_generator.grow_point_cloud(tracks, images[1], pose_edge,
                                          pinhole_camera);
 
-#if 0
-  // Solve the bundle adjustment problem with Ceres.
-  auto problem = ceres::Problem{};
-  for (int i = 0; i < ba_problem.observations.size(0); ++i)
+  // Filter the feature tracks by NMS.
+  auto tracks_filtered = std::vector<sara::FeatureTracker::Track>{};
+  for (const auto& track : tracks)
   {
-    auto cost_fn = ReprojectionError::create(ba_problem.observations(i, 0),
-                                             ba_problem.observations(i, 1));
+    // Does a track have a 3D point? If not, discard it.
+    const auto p = point_cloud_generator.scene_point(track.front());
+    if (p == std::nullopt)
+      continue;
 
-    problem.AddResidualBlock(cost_fn, nullptr /* squared loss */,
-                             ba_problem.camera_parameters.data() +
-                                 ba_problem.camera_indices[i] *
-                                     CameraModelView<double>::dof(),
-                             ba_problem.points_abs_coords_3d.data() +
-                                 ba_problem.point_indices[i] * 3);
+    // Filter the feature track by NMS: there should be only 1 feature per
+    // image.
+    auto track_filtered = point_cloud_generator  //
+                              .filter_by_non_max_suppression(track);
+
+    tracks_filtered.emplace_back(std::move(track_filtered));
+  }
+
+  // Collect the BA data.
+  const auto num_scene_points = static_cast<int>(tracks_filtered.size());
+  auto num_image_points = 0;
+  for (const auto& track : tracks_filtered)
+    num_image_points += static_cast<int>(track.size());
+
+  auto ba_data = sara::BundleAdjustmentData{};
+  static constexpr auto num_views = 2;
+  static constexpr auto num_intrinsics = 4;  // fx, fy, u0, v0
+  static constexpr auto num_extrinsics = 6;
+  ba_data.resize(num_image_points, num_scene_points, num_views, num_intrinsics,
+                 num_extrinsics);
+
+  SARA_LOGI(logger, "Populating the BA observation/image point data...");
+  auto o = 0;  // observation index.
+  for (auto t = std::size_t{}; t < tracks_filtered.size(); ++t)
+  {
+    const auto& track = tracks_filtered[t];
+    for (const auto& u : track)
+    {
+      const Eigen::Vector2d pixel_coords = point_cloud_generator  //
+                                               .pixel_coords(u)
+                                               .cast<double>();
+      ba_data.observations(o, 0) = pixel_coords.x();
+      ba_data.observations(o, 1) = pixel_coords.y();
+
+      ba_data.point_indices[o] = static_cast<int>(t);
+      ba_data.camera_indices[o] =
+          static_cast<int>(feature_tracker._feature_graph[u].pose_vertex);
+
+      ++o;
+    }
+  }
+
+  SARA_LOGI(logger, "Populating the BA (3D) point data...");
+  for (auto t = std::size_t{}; t < tracks_filtered.size(); ++t)
+  {
+    // Retrieve the scene point.
+    const auto& track = tracks_filtered[t];
+    const auto scene_point = point_cloud_generator.scene_point(track.front());
+
+    // Store.
+    const auto tt = static_cast<int>(t);
+    ba_data.point_coords[tt].vector() = scene_point->coords();
+  }
+
+  SARA_LOGI(logger, "Populating the BA camera parameter data...");
+  auto extrinsics_params = ba_data.extrinsics.matrix();
+  auto intrinsics_params = ba_data.intrinsics.matrix();
+  for (auto v = 0; pose_graph.num_vertices(); ++v)
+  {
+    // Angle axis vector.
+    auto extrinsics_v = extrinsics_params.row(v);
+    auto intrinsics_v = intrinsics_params.row(v);
+
+    // The original data.
+    const auto& pose_v = pose_graph[v].pose;
+    const auto aaxis_v = Eigen::AngleAxisd{pose_v.q};
+    const Eigen::Vector3d aaxis_v_3d = aaxis_v.angle() * aaxis_v.axis();
+    // Initialize the absolute rotation.
+    extrinsics_v.head(3) = aaxis_v_3d.transpose();
+    // Initialize the absolute translation.
+    extrinsics_v.tail(3) = pose_v.t.transpose();
+
+    // Initialize the internal camera parameters.
+    intrinsics_v(0) = K[v](0, 0);  // fx
+    intrinsics_v(1) = K[v](1, 1);  // fy
+    intrinsics_v(2) = K[v](0, 2);  // u0
+    intrinsics_v(3) = K[v](1, 2);  // v0
+  }
+
+  // Solve the bundle adjustment problem with Ceres.
+  auto ba_problem = ceres::Problem{};
+  for (auto i = 0; i < num_image_points; ++i)
+  {
+    // Create a cost residual function.
+    const auto cost_fn = ReprojectionError::create(ba_data.observations(i, 0),
+                                                   ba_data.observations(i, 1));
+
+    const auto camera_idx = ba_data.camera_indices[i];
+    // Locate the parameter data.
+    const auto extrinsics_ptr =
+        extrinsics_params.data() +
+        camera_idx * ReprojectionError::ExtrinsicParameterCount;
+    const auto intrinsics_ptr =
+        intrinsics_params.data() +
+        camera_idx * ReprojectionError::IntrinsicParameterCount;
+    const auto scene_point_ptr =
+        ba_data.point_coords.data() +
+        ba_data.point_indices[i] * ReprojectionError::PointDimension;
+
+    ba_problem.AddResidualBlock(cost_fn, nullptr /* squared loss */,  //
+                                extrinsics_ptr, intrinsics_ptr,
+                                scene_point_ptr);
+  }
+
+  // Freeze all the intrinsic parameters during the optimization.
+  for (auto v = 0; v < 2; ++v)
+  {
+    const auto intrinsics_ptr = intrinsics_params.data() +
+                                v * ReprojectionError::IntrinsicParameterCount;
+    ba_problem.SetParameterBlockConstant(intrinsics_ptr);
+  }
+
+  // Freeze the first absolute pose parameters.
+  {
+    const auto camera_idx = 0;
+    const auto extrinsics_ptr =
+        extrinsics_params.data() +
+        camera_idx * ReprojectionError::ExtrinsicParameterCount;
+    ba_problem.SetParameterBlockConstant(extrinsics_ptr);
   }
 
   auto options = ceres::Solver::Options{};
@@ -285,17 +401,13 @@ GRAPHICS_MAIN()
   options.minimizer_progress_to_stdout = true;
 
   auto summary = ceres::Solver::Summary{};
-  ceres::Solve(options, &problem, &summary);
+  ceres::Solve(options, &ba_problem, &summary);
   std::cout << summary.BriefReport() << std::endl;
 
   SARA_LOGI(logger, "Check the SfM...");
   SARA_DEBUG << "camera_parameters =\n"
-             << ba_problem.camera_parameters.matrix() << std::endl;
-  SARA_DEBUG << "points =\n"
-             << ba_problem.points_abs_coords_3d.matrix() << std::endl;
-
-  // TODO: check the point reprojection errors.
-#endif
+             << ba_data.extrinsics.matrix() << std::endl;
+  SARA_DEBUG << "points =\n" << ba_data.point_coords.matrix() << std::endl;
 
   return 0;
 }
