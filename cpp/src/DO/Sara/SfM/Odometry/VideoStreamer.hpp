@@ -63,7 +63,7 @@ namespace DO::Sara {
     ImageView<Rgb8> _rgb8;
     Image<float> _gray32f;
 
-    int _num_skips = 2;
+    int _num_skips = 4;
     int _frame_index = -1;
   };
 

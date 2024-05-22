@@ -22,7 +22,7 @@
 #include <stdexcept>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   /*!
    *  @addtogroup Features
@@ -180,4 +180,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-}}  // namespace DO::Sara
+}  // namespace DO::Sara

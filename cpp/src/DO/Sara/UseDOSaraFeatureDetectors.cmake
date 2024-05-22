@@ -13,8 +13,10 @@ if(SARA_USE_FROM_SOURCE)
 
     target_link_libraries(
       DO_Sara_FeatureDetectors
-      PRIVATE DO::Sara::Geometry DO::Sara::FeatureDescriptors
-              DO::Sara::ImageProcessing
+      PRIVATE DO::Sara::Geometry #
+              DO::Sara::FeatureDescriptors #
+              DO::Sara::ImageProcessing #
+              DO::Sara::Logging
       PUBLIC DO::Sara::Core $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   endif()
 endif()

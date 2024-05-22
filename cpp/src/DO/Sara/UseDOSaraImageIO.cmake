@@ -30,8 +30,11 @@ if(SARA_USE_FROM_SOURCE)
                 $<$<CXX_COMPILER_ID:MSVC>:WebP::webpdecoder>
                 $<$<CXX_COMPILER_ID:MSVC>:WebP::webpdemux>)
     endif()
-    target_link_libraries(DO_Sara_ImageIO PUBLIC DO::Sara::Core #
-                                                 easyexif)
+    target_link_libraries(
+      DO_Sara_ImageIO
+      PUBLIC DO::Sara::Core #
+             fmt::fmt #
+             easyexif)
 
     target_compile_definitions(
       DO_Sara_ImageIO

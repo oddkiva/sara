@@ -9,6 +9,7 @@ if (SARA_USE_FROM_SOURCE)
       PRIVATE
       DO::Sara::Match
       DO::Sara::KDTree
+      DO::Sara::Logging
       PUBLIC
       DO::Sara::Core
       DO::Sara::Features

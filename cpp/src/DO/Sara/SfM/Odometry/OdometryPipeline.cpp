@@ -20,7 +20,7 @@
 #include <DO/Sara/Visualization/Features/Draw.hpp>
 
 
-#define DEBUG_ABSOLUTE_POSE_RECOVERY
+// #define DEBUG_ABSOLUTE_POSE_RECOVERY
 
 
 using namespace DO::Sara;
@@ -106,7 +106,6 @@ auto OdometryPipeline::set_config(
 {
   // Build the dependency graph.
   _video_streamer.open(video_path);
-  _video_streamer.set_num_skips(4);
   // The original camera.
   _camera = camera;
   // The virtual camera for the undistorted image.

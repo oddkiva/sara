@@ -269,7 +269,7 @@ private:
     // Encode the vertex data in a tensor.
 #ifdef __APPLE__
     const auto vertex_data =
-        read_point_cloud("/Users/david/Desktop/geometry.h5");
+        read_point_cloud("/Users/oddkiva/Desktop/geometry.h5");
 #else
     const auto vertex_data =
         read_point_cloud("/home/david/Desktop/geometry.h5");

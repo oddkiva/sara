@@ -11,7 +11,9 @@
 
 #pragma once
 
-#include <DO/Sara/MultiViewGeometry.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
+#include <DO/Sara/Match/Match.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 
 
 namespace DO::Sara {

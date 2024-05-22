@@ -9,9 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/FeatureDescriptors.hpp>
-#include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/FeatureDetectors/SIFT.hpp>
+
+#include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/FeatureDescriptors/Orientation.hpp>
+#include <DO/Sara/FeatureDescriptors/SIFT.hpp>
+#include <DO/Sara/FeatureDetectors/DoG.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
 
 #ifdef _OPENMP
 #  include <omp.h>
@@ -22,20 +26,18 @@ namespace DO::Sara {
 
   auto compute_sift_keypoints(const ImageView<float>& image,
                               const ImagePyramidParams& pyramid_params,
-                              float gauss_truncate,
-                              float extremum_thres,
+                              float gauss_truncate, float extremum_thres,
                               float edge_ratio_thres,
-                              int extremum_refinement_iter,
-                              bool parallel) -> KeypointList<OERegion, float>
+                              int extremum_refinement_iter, bool parallel)
+      -> KeypointList<OERegion, float>
   {
-    using namespace std;
-
     // Time everything.
+    auto& logger = Logger::get();
     auto timer = Timer{};
     auto elapsed = 0.;
 
     // We describe the work flow of the feature detection and description.
-    auto DoGs = vector<OERegion>{};
+    auto DoGs = std::vector<OERegion>{};
     auto SIFTDescriptors = Tensor_<float, 2>{};
 
     // 1. Feature extraction.
@@ -47,11 +49,11 @@ namespace DO::Sara {
         edge_ratio_thres,         //
         extremum_refinement_iter  //
     };
-    auto scale_octave_pairs = vector<Point2i>{};
+    auto scale_octave_pairs = std::vector<Point2i>{};
     DoGs = compute_DoGs(image, &scale_octave_pairs);
     const auto dog_detection_time = timer.elapsed_ms();
     elapsed += dog_detection_time;
-    SARA_DEBUG << "[DoG        ] " << dog_detection_time << " ms" << std::endl;
+    SARA_LOGD(logger, "[DoG        ] {:0.2f} ms", dog_detection_time);
 
     // 2. Feature orientation.
     // Prepare the computation of gradients on gaussians.
@@ -59,7 +61,7 @@ namespace DO::Sara {
     auto nabla_G = gradient_polar_coordinates(compute_DoGs.gaussians());
     const auto grad_gaussian_time = timer.elapsed_ms();
     elapsed += grad_gaussian_time;
-    SARA_DEBUG << "[Gradient   ] " << grad_gaussian_time << " ms" << endl;
+    SARA_LOGD(logger, "[Gradient   ] {:0.2f} ms", grad_gaussian_time);
 
     // Find dominant gradient orientations.
     timer.restart();
@@ -67,7 +69,7 @@ namespace DO::Sara {
     assign_dominant_orientations(nabla_G, DoGs, scale_octave_pairs);
     const auto ori_assign_time = timer.elapsed_ms();
     elapsed += ori_assign_time;
-    SARA_DEBUG << "[Orientation] " << ori_assign_time << " ms" << std::endl;
+    SARA_LOGD(logger, "[Orientation] {:0.2f} ms", ori_assign_time);
 
     if (parallel)
     {
@@ -95,12 +97,11 @@ namespace DO::Sara {
     }
 
     elapsed += sift_description_time;
-    SARA_DEBUG << "[Descriptors] " << sift_description_time << " ms" << endl;
+    SARA_LOGD(logger, "[Descriptors] {:0.2f} ms", sift_description_time);
 
     // Summary in terms of computation time.
-    SARA_DEBUG << "[SIFT Total] " << elapsed << " ms" << endl;
-    SARA_DEBUG << "#{SIFT} = " << SIFTDescriptors.rows() << std::endl;
-
+    SARA_LOGD(logger, "[SIFT Total] {:0.2f} ms", elapsed);
+    SARA_LOGD(logger, "[SIFT Total] {} features", SIFTDescriptors.rows());
 
     return {DoGs, SIFTDescriptors};
   }

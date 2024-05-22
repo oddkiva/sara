@@ -14,6 +14,7 @@ if(SARA_USE_FROM_SOURCE)
     target_link_libraries(
       DO_Sara_VideoIO
       PRIVATE DO::Sara::Core #
+              DO::Sara::Logging #
               DO::Sara::ImageProcessing #
               ${FFMPEG_LIBRARIES})
   endif()

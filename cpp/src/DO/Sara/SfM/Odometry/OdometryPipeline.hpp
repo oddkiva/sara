@@ -61,7 +61,7 @@ namespace DO::Sara {
     //! @brief Data mutators.
     //! @{
     std::unique_ptr<ImageDistortionCorrector> _distortion_corrector;
-    v2::RelativePoseEstimator _rel_pose_estimator;
+    RelativePoseEstimator _rel_pose_estimator;
     CameraPoseEstimator _abs_pose_estimator;
     std::unique_ptr<PointCloudGenerator> _point_cloud_generator;
     //! @}

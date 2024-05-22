@@ -66,6 +66,14 @@ namespace DO::Sara {
       return feature(u).center();
     }
 
+    auto scene_point(const FeatureVertex u) const -> std::optional<ScenePoint>
+    {
+      const auto it = _from_vertex_to_scene_point_index.find(u);
+      if (it == _from_vertex_to_scene_point_index.end())
+        return std::nullopt;
+      return _point_cloud[it->second];
+    }
+
   public: /* helper query methods */
     auto list_scene_point_indices(const FeatureTrack&) const
         -> std::vector<ScenePointIndex>;
@@ -128,7 +136,7 @@ namespace DO::Sara {
         const v2::PinholeCamera<double>& camera) -> void;
 
     auto write_point_cloud(const std::vector<FeatureTrack>& ftracks,
-                          const std::filesystem::path& out_csv) const -> void;
+                           const std::filesystem::path& out_csv) const -> void;
 
   private: /* data members */
     const CameraPoseGraph& _pose_graph;

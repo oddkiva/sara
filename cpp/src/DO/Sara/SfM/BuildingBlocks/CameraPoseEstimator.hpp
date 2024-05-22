@@ -39,7 +39,7 @@ namespace DO::Sara {
 
     //! @brief Set robust estimation parameters.
     auto set_estimation_params(const PixelUnit error_max = 5._px,
-                               const int ransac_iter_max = 100,
+                               const int ransac_iter_max = 1000,
                                const double ransac_confidence_min = 0.99)
         -> void
     {
@@ -75,7 +75,7 @@ namespace DO::Sara {
   private:
     P3PSolver<double> _solver;
     CheiralPnPConsistency<CameraIntrinsicModel> _inlier_predicate;
-    int _ransac_inliers_min = 100;
+    int _ransac_inliers_min = 50;
     int _ransac_iter_max;
     double _ransac_confidence_min;
   };
