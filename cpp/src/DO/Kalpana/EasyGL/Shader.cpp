@@ -11,7 +11,7 @@
 
 #include <DO/Kalpana/EasyGL/Shader.hpp>
 
-#include <DO/Sara/Core/StringFormat.hpp>
+#include <fmt/format.h>
 
 #include <fstream>
 #include <iostream>
@@ -50,11 +50,11 @@ namespace DO::Kalpana::GL {
     log.resize(log_sz);
 
     throw std::runtime_error{
-        Sara::format("Error: failed to create shader from source:\n"
-                     "%s.\n"
-                     "Compilation log:\n"
-                     "%s",
-                     source.c_str(), log.c_str())};
+        fmt::format("Error: failed to create shader from source:\n"
+                    "{}.\n"
+                    "Compilation log:\n"
+                    "{}",
+                    source, log)};
   }
 
   void Shader::create_from_file(GLenum shader_type_,
@@ -64,7 +64,7 @@ namespace DO::Kalpana::GL {
     std::ifstream file{filepath.c_str()};
     if (!file.is_open())
       throw std::runtime_error{
-          Sara::format("Error: cannot open file: %s", filepath.c_str())};
+          fmt::format("Error: cannot open file: {}", filepath)};
 
     auto source = std::string{};
     file.seekg(0, std::ios::end);
@@ -88,7 +88,7 @@ namespace DO::Kalpana::GL {
     glGetShaderiv(shader_object, GL_DELETE_STATUS, &success);
     if (success == GL_FALSE)
       throw std::runtime_error{
-          Sara::format("Error: failed to delete shader: %d.", success)};
+          fmt::format("Error: failed to delete shader: {}.", success)};
 
     shader_object = 0;
   }
@@ -131,9 +131,10 @@ namespace DO::Kalpana::GL {
       log.resize(log_sz);
 
       throw std::runtime_error{
-          Sara::format("Failed to link shader program: %d.\n"
-                       "Linkage log:\n%s",
-                       success, log.data())};
+          fmt::format("Failed to link shader program: {}.\n"
+                      "Linkage log:\n"
+                      "{}",
+                      success, log)};
     }
   }
 
@@ -156,9 +157,10 @@ namespace DO::Kalpana::GL {
     glGetProgramInfoLog(program_object, log_max_sz, &log_sz, &log[0]);
     log.resize(log_sz);
 
-    throw std::runtime_error{Sara::format("Failed to link shader program: %d\n"
-                                          "Linkage log:\n%s",
-                                          success, log.data())};
+    throw std::runtime_error{fmt::format("Failed to link shader program: {}\n"
+                                         "Linkage log:\n"
+                                         "{}",
+                                         success, log)};
   }
 
   void ShaderProgram::detach()
@@ -217,9 +219,9 @@ namespace DO::Kalpana::GL {
 
     program_object = 0;
 
-    throw std::runtime_error{Sara::format("Failed to delete shader program: %d."
-                                          "Delete log:\n%s)log",
-                                          success, log.data())};
+    throw std::runtime_error{fmt::format("Failed to delete shader program: %d."
+                                         "Delete log:\n{}",
+                                         success, log)};
   }
 
 }  // namespace DO::Kalpana::GL

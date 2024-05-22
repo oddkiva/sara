@@ -2,9 +2,9 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <DO/Sara/Core/StringFormat.hpp>
-
 #include <DO/Kalpana/Qt/3D.hpp>
+
+#include <fmt/format.h>
 
 
 using namespace std;
@@ -26,7 +26,7 @@ namespace DO { namespace Kalpana {
     _shader_type = shader_type;
     _shader_object = glCreateShader(shader_type);
 
-    auto shader_src_data = reinterpret_cast<const GLchar *>(source.data());
+    auto shader_src_data = reinterpret_cast<const GLchar*>(source.data());
     auto shader_src_sz = static_cast<GLint>(source.size());
 
     glShaderSource(_shader_object, 1, &shader_src_data, &shader_src_sz);
@@ -34,8 +34,8 @@ namespace DO { namespace Kalpana {
 
     // Compilation sanity check.
     auto success = GLint{};
-    auto log_max_sz = GLint{ 0 };
-    auto log_sz = GLsizei{ 0 };
+    auto log_max_sz = GLint{0};
+    auto log_sz = GLsizei{0};
     auto log = string{};
 
     glGetShaderiv(_shader_object, GL_COMPILE_STATUS, &success);
@@ -47,11 +47,12 @@ namespace DO { namespace Kalpana {
       glGetShaderInfoLog(_shader_object, log_max_sz, &log_sz, &log[0]);
       log.resize(log_sz);
 
-      std::cerr << Sara::format("Error: failed to create shader from source:\n"
-                                "%s.\n"
-                                "Compilation log:\n"
-                                "%s",
-                                source.c_str(), log.c_str()) << std::endl;
+      std::cerr << fmt::format("Error: failed to create shader from source:\n"
+                               "{}.\n"
+                               "Compilation log:\n"
+                               "{}",
+                               source, log)
+                << std::endl;
       return false;
     }
 
@@ -61,10 +62,10 @@ namespace DO { namespace Kalpana {
   bool Shader::create_from_file(GLenum shader_type, const std::string& filepath)
   {
     // Read source fle.
-    std::ifstream file{ filepath.c_str() };
+    std::ifstream file{filepath.c_str()};
     if (!file.is_open())
     {
-      std::cerr << Sara::format("Error: cannot open file: %s", filepath.c_str())
+      std::cerr << fmt::format("Error: cannot open file: {}", filepath)
                 << std::endl;
       return false;
     }
@@ -90,8 +91,8 @@ namespace DO { namespace Kalpana {
       glGetShaderiv(_shader_object, GL_DELETE_STATUS, &success);
       if (!success)
       {
-        std::cerr << Sara::format("Error: failed to delete shader: %d.",
-                                  success) << std::endl;
+        std::cerr << fmt::format("Error: failed to delete shader: {}.", success)
+                  << std::endl;
         return false;
       }
 
@@ -123,8 +124,8 @@ namespace DO { namespace Kalpana {
 
     // Linking sanity check.
     auto success = GLint{};
-    auto log_max_sz = GLint{ 0 };
-    auto log_sz = GLsizei{ 0 };
+    auto log_max_sz = GLint{0};
+    auto log_sz = GLsizei{0};
     auto log = std::string{};
 
     glGetProgramiv(_program_object, GL_LINK_STATUS, &success);
@@ -136,9 +137,11 @@ namespace DO { namespace Kalpana {
       glGetProgramInfoLog(_program_object, log_max_sz, &log_sz, &log[0]);
       log.resize(log_sz);
 
-      std::cerr << Sara::format("Failed to link shader program: %d.\n"
-                                "Linkage log:\n%s",
-                                success, log.data()) << std::endl;
+      std::cerr << fmt::format("Failed to link shader program: {}.\n"
+                               "Linkage log:\n"
+                               "{}",
+                               success, log)
+                << std::endl;
       return false;
     }
 
@@ -154,9 +157,11 @@ namespace DO { namespace Kalpana {
       glGetProgramInfoLog(_program_object, log_max_sz, &log_sz, &log[0]);
       log.resize(log_sz);
 
-      std::cerr << Sara::format("Failed to link shader program: %d\n"
-                                "Linkage log:\n%s",
-                                success, log.data()) << std::endl;
+      std::cerr << fmt::format("Failed to link shader program: {}\n"
+                               "Linkage log:\n"
+                               "{}",
+                               success, log)
+                << std::endl;
       return false;
     }
 
@@ -211,8 +216,8 @@ namespace DO { namespace Kalpana {
     {
       glValidateProgram(_program_object);
 
-      auto log_max_sz = GLint{ 0 };
-      auto log_sz = GLsizei{ 0 };
+      auto log_max_sz = GLint{0};
+      auto log_sz = GLsizei{0};
       auto log = std::string{};
 
       glGetProgramiv(_program_object, GL_INFO_LOG_LENGTH, &log_max_sz);
@@ -221,9 +226,11 @@ namespace DO { namespace Kalpana {
       glGetProgramInfoLog(_program_object, log_max_sz, &log_sz, &log[0]);
       log.resize(log_sz);
 
-      std::cerr << Sara::format("Failed to delete shader program: %d.\n"
-                                "Deletion log:\n%s",
-                                success, log.data()) << std::endl;
+      std::cerr << fmt::format("Failed to delete shader program: {}.\n"
+                               "Deletion log:\n"
+                               "{}",
+                               success, log)
+                << std::endl;
 
       return false;
     }
@@ -233,8 +240,8 @@ namespace DO { namespace Kalpana {
     return true;
   }
 
-  bool ShaderProgram::set_uniform_matrix4f(const char *mat_name,
-                                           const float *mat_coeffs)
+  bool ShaderProgram::set_uniform_matrix4f(const char* mat_name,
+                                           const float* mat_coeffs)
   {
     auto mat_location = glGetUniformLocation(_program_object, mat_name);
     if (GL_INVALID_VALUE == mat_location ||
@@ -249,5 +256,4 @@ namespace DO { namespace Kalpana {
     return true;
   }
 
-} /* namespace Kalpana */
-} /* namespace DO */
+}}  // namespace DO::Kalpana
