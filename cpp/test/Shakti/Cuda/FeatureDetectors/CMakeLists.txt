@@ -7,5 +7,6 @@ foreach(file ${test_FILES})
                  DO::Shakti::Cuda::MultiArray
                  DO::Shakti::Cuda::Utilities
                  DO::Shakti::Cuda::FeatureDetectors
+                 fmt::fmt
     FOLDER CUDA)
 endforeach()
