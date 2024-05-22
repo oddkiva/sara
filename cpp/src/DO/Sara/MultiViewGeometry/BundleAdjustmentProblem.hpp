@@ -76,7 +76,7 @@ namespace DO::Sara {
       // Update the memory views.
       auto intrinsics_new = TensorView_<double, 2>{
           parameters.data(),             //
-          {num_cameras, num_extrinsics}  //
+          {num_cameras, num_intrinsics}  //
       };
       auto extrinsics_new = TensorView_<double, 2>{
           parameters.data() + num_cameras * num_intrinsics,  //

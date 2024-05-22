@@ -11,6 +11,7 @@
 
 //! @example
 
+#include <DO/Sara/Core/Math/Rotation.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
@@ -59,8 +60,8 @@ struct ReprojectionError
 
   template <typename T>
   bool operator()(const T* const extrinsics,  // (1) extrinsic camera parameters
-                  const T* const intrinsics,  //(2) extrinsic camera parameters
-                  const T* const point,       // (2) 3D points
+                  const T* const intrinsics,  // (2) intrinsic camera parameters
+                  const T* const point,       // (3) 3D point
                   T* residuals) const
   {
     T p[3];
@@ -147,7 +148,7 @@ GRAPHICS_MAIN()
     SARA_LOGD(logger, "K[{}] =\n{}", i, K[i]);
 
   SARA_LOGI(logger, "Computing keypoints...");
-  const auto image_pyr_params = sara::ImagePyramidParams(-1);
+  const auto image_pyr_params = sara::ImagePyramidParams(0);
   auto abs_pose_data = std::array{
       sara::AbsolutePoseData{
           0,
@@ -293,8 +294,8 @@ GRAPHICS_MAIN()
   static constexpr auto num_views = 2;
   static constexpr auto num_intrinsics = 4;  // fx, fy, u0, v0
   static constexpr auto num_extrinsics = 6;
-  ba_data.resize(num_image_points, num_scene_points, num_views, num_intrinsics,
-                 num_extrinsics);
+  ba_data.resize(num_image_points, num_scene_points, num_views,  //
+                 num_intrinsics, num_extrinsics);
 
   SARA_LOGI(logger, "Populating the BA observation/image point data...");
   auto o = 0;  // observation index.
@@ -332,7 +333,9 @@ GRAPHICS_MAIN()
   SARA_LOGI(logger, "Populating the BA camera parameter data...");
   auto extrinsics_params = ba_data.extrinsics.matrix();
   auto intrinsics_params = ba_data.intrinsics.matrix();
-  for (auto v = 0; pose_graph.num_vertices(); ++v)
+  SARA_LOGI(logger, "Filling parameters...");
+  using PoseVertex = sara::CameraPoseGraph::Vertex;
+  for (auto v = PoseVertex{}; v < pose_graph.num_vertices(); ++v)
   {
     // Angle axis vector.
     auto extrinsics_v = extrinsics_params.row(v);
@@ -343,21 +346,26 @@ GRAPHICS_MAIN()
     const auto aaxis_v = Eigen::AngleAxisd{pose_v.q};
     const Eigen::Vector3d aaxis_v_3d = aaxis_v.angle() * aaxis_v.axis();
     // Initialize the absolute rotation.
-    extrinsics_v.head(3) = aaxis_v_3d.transpose();
-    // Initialize the absolute translation.
-    extrinsics_v.tail(3) = pose_v.t.transpose();
+    extrinsics_v << aaxis_v_3d.transpose(), pose_v.t.transpose();
+
+    std::cout << extrinsics_v << std::endl;
+    SARA_LOGD(logger, "Populating extrinsics[{}]=\n{}", v, extrinsics_v.eval());
 
     // Initialize the internal camera parameters.
     intrinsics_v(0) = K[v](0, 0);  // fx
     intrinsics_v(1) = K[v](1, 1);  // fy
     intrinsics_v(2) = K[v](0, 2);  // u0
     intrinsics_v(3) = K[v](1, 2);  // v0
+    SARA_LOGD(logger, "Populating intrinsics[{}]=\n{}", v, intrinsics_v.eval());
   }
 
   // Solve the bundle adjustment problem with Ceres.
+  SARA_LOGI(logger, "Forming the BA problem...");
   auto ba_problem = ceres::Problem{};
   for (auto i = 0; i < num_image_points; ++i)
   {
+    SARA_LOGT(logger, "Adding residual with image point {}...", i);
+
     // Create a cost residual function.
     const auto cost_fn = ReprojectionError::create(ba_data.observations(i, 0),
                                                    ba_data.observations(i, 1));
@@ -380,6 +388,7 @@ GRAPHICS_MAIN()
   }
 
   // Freeze all the intrinsic parameters during the optimization.
+  SARA_LOGI(logger, "Freezing intrinsic camera parameters...");
   for (auto v = 0; v < 2; ++v)
   {
     const auto intrinsics_ptr = intrinsics_params.data() +
@@ -388,6 +397,7 @@ GRAPHICS_MAIN()
   }
 
   // Freeze the first absolute pose parameters.
+  SARA_LOGI(logger, "Freezing first absolute pose...");
   {
     const auto camera_idx = 0;
     const auto extrinsics_ptr =
@@ -396,18 +406,73 @@ GRAPHICS_MAIN()
     ba_problem.SetParameterBlockConstant(extrinsics_ptr);
   }
 
+  SARA_LOGI(logger, "[BA][BEFORE] camera_parameters =\n{}",
+            Eigen::MatrixXd{ba_data.extrinsics.matrix()});
+  SARA_LOGI(
+      logger, "[BA][BEFORE] points =\n{}",
+      Eigen::MatrixXd{ba_data.point_coords.matrix().topRows<20>().eval()});
+  // The rotation is expressed in the camera coordinates.
+  // But the calculation is done in the automotive/aeronautics coordinate
+  // system.
+  //
+  // The z-coordinate of the camera coordinates is the x-axis of the automotive
+  // coordinates
+  //
+  // clang-format off
+  static const auto P = (Eigen::Matrix3d{} <<
+     0,  0, 1,
+    -1,  0, 0,
+     0, -1, 0
+  ).finished();
+  // clang-format on
+  {
+    const auto aaxis_1 =
+        Eigen::Vector3d{ba_data.extrinsics.matrix().row(1).head(3)};
+    const auto angle_1 = aaxis_1.norm();
+    const auto axis_1 = Eigen::Vector3d{aaxis_1.normalized()};
+    const auto R_1 = Eigen::AngleAxisd{angle_1, axis_1}  //
+                         .toRotationMatrix();
+    const Eigen::Matrix3d Rw_1 = P * R_1.transpose() * P.transpose();
+    const auto angles =
+        sara::calculate_yaw_pitch_roll(Eigen::Quaterniond{Rw_1});
+    static constexpr auto degree = 180. / M_PI;
+    SARA_LOGI(logger, "[BEFORE] yaw   = {} deg", angles(0) * degree);
+    SARA_LOGI(logger, "[BEFORE] pitch = {} deg", angles(1) * degree);
+    SARA_LOGI(logger, "[BEFORE] roll  = {} deg", angles(2) * degree);
+  }
+
+  SARA_LOGI(logger, "[BA]Solving the BA problem...");
   auto options = ceres::Solver::Options{};
   options.linear_solver_type = ceres::DENSE_SCHUR;
   options.minimizer_progress_to_stdout = true;
 
   auto summary = ceres::Solver::Summary{};
   ceres::Solve(options, &ba_problem, &summary);
+
+  SARA_LOGI(logger, "Checking the BA...");
+  SARA_LOGI(logger, "[BA][AFTER ] camera_parameters =\n{}",
+            Eigen::MatrixXd{ba_data.extrinsics.matrix()});
+  SARA_LOGI(logger, "[BA][AFTER ] points =\n{}",
+            Eigen::MatrixXd{ba_data.point_coords.matrix().topRows<20>()});
+
   std::cout << summary.BriefReport() << std::endl;
 
-  SARA_LOGI(logger, "Check the SfM...");
-  SARA_DEBUG << "camera_parameters =\n"
-             << ba_data.extrinsics.matrix() << std::endl;
-  SARA_DEBUG << "points =\n" << ba_data.point_coords.matrix() << std::endl;
+  {
+    const auto aaxis_1 =
+        Eigen::Vector3d{ba_data.extrinsics.matrix().row(1).head(3)};
+    const auto angle_1 = aaxis_1.norm();
+    const auto axis_1 = Eigen::Vector3d{aaxis_1.normalized()};
+    const auto R_1 = Eigen::AngleAxisd{angle_1, axis_1}  //
+                         .toRotationMatrix();
+    const Eigen::Matrix3d Rw_1 = P * R_1.transpose() * P.transpose();
+    const auto angles =
+        sara::calculate_yaw_pitch_roll(Eigen::Quaterniond{Rw_1});
+    static constexpr auto degree = 180. / M_PI;
+    SARA_LOGI(logger, "[AFTER ] yaw   = {} deg", angles(0) * degree);
+    SARA_LOGI(logger, "[AFTER ] pitch = {} deg", angles(1) * degree);
+    SARA_LOGI(logger, "[AFTER ] roll  = {} deg", angles(2) * degree);
+  }
+
 
   return 0;
 }
