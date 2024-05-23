@@ -26,13 +26,14 @@
 using namespace DO::Sara;
 
 
-auto draw_feature_tracks(DO::Sara::ImageView<Rgb8>& display,  //
-                         const CameraPoseGraph& pgraph,       //
-                         const FeatureGraph& fgraph,          //
-                         const CameraPoseGraph::Vertex pose_u,
-                         const std::vector<FeatureTracker::Track>& tracks_alive,
-                         const std::vector<std::size_t>& track_visibility_count,
-                         const float scale) -> void
+auto draw_feature_tracks(
+    DO::Sara::ImageView<Rgb8>& display,  //
+    const CameraPoseGraph& pgraph,       //
+    const FeatureGraph& fgraph,          //
+    const CameraPoseGraph::Vertex pose_u,
+    const std::vector<FeatureTracker::Track>& tracks_alive,
+    [[maybe_unused]] const std::vector<std::size_t>& track_visibility_count,
+    const float scale) -> void
 {
   for (auto t = 0u; t < tracks_alive.size(); ++t)
   {

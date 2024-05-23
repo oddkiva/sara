@@ -65,8 +65,8 @@ namespace DO::Sara {
   {
     using PoseVertex = CameraPoseGraph::Vertex;
 
-    BundleAdjustmentData ba_data;
-    std::unique_ptr<ceres::Problem> ba_problem;
+    BundleAdjustmentData data;
+    std::unique_ptr<ceres::Problem> problem;
 
     auto allocate_data(const CameraPoseGraph& pose_graph,
                        const std::vector<FeatureTracker::Track>& tracks,
@@ -86,9 +86,7 @@ namespace DO::Sara {
     //! populating the camera parameters.
     auto populate_camera_params(
         const CameraPoseGraph& pose_graph,
-        const std::vector<Eigen::Matrix3d>& calibration_matrices,
-        const PointCloudGenerator& point_cloud_generator,
-        const std::vector<FeatureTracker::Track>& tracks) -> void;
+        const std::vector<Eigen::Matrix3d>& calibration_matrices) -> void;
 
     auto form_problem(const CameraPoseGraph& pose_graph,
                       const FeatureTracker& feature_tracker,

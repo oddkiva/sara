@@ -68,14 +68,14 @@ auto BundleAdjuster::allocate_data(
     const int extrinsics_dim_per_camera) -> void
 {
   // Allocate memory for the BA data.
-  const auto num_poses = pose_graph.num_vertices();
+  const auto num_poses = static_cast<int>(pose_graph.num_vertices());
   const auto num_scene_points = static_cast<int>(tracks.size());
   auto num_image_points = 0;
   for (const auto& track : tracks)
     num_image_points += static_cast<int>(track.size());
 
-  ba_data.resize(num_image_points, num_scene_points, num_poses,  //
-                 intrinsics_dim_per_camera, extrinsics_dim_per_camera);
+  data.resize(num_image_points, num_scene_points, num_poses,  //
+              intrinsics_dim_per_camera, extrinsics_dim_per_camera);
 }
 
 auto BundleAdjuster::populate_image_points(
@@ -84,7 +84,7 @@ auto BundleAdjuster::populate_image_points(
     const std::vector<FeatureTracker::Track>& tracks) -> void
 {
   auto& logger = Logger::get();
-  SARA_LOGI(logger, "Populating the BA observation/image point data...");
+  SARA_LOGI(logger, "Populating the observation/image point data...");
 
   auto o = 0;  // observation index.
   for (auto t = std::size_t{}; t < tracks.size(); ++t)
@@ -95,11 +95,11 @@ auto BundleAdjuster::populate_image_points(
       const Eigen::Vector2d pixel_coords = point_cloud_generator  //
                                                .pixel_coords(u)
                                                .cast<double>();
-      ba_data.observations(o, 0) = pixel_coords.x();
-      ba_data.observations(o, 1) = pixel_coords.y();
+      data.observations(o, 0) = pixel_coords.x();
+      data.observations(o, 1) = pixel_coords.y();
 
-      ba_data.point_indices[o] = static_cast<int>(t);
-      ba_data.camera_indices[o] =
+      data.point_indices[o] = static_cast<int>(t);
+      data.camera_indices[o] =
           static_cast<int>(feature_tracker._feature_graph[u].pose_vertex);
 
       ++o;
@@ -122,21 +122,19 @@ auto BundleAdjuster::populate_scene_points(
 
     // Store.
     const auto tt = static_cast<int>(t);
-    ba_data.point_coords[tt].vector() = scene_point->coords();
+    data.point_coords[tt].vector() = scene_point->coords();
   }
 }
 
 auto BundleAdjuster::populate_camera_params(
     const CameraPoseGraph& pose_graph,
-    const std::vector<Eigen::Matrix3d>& calibration_matrices,
-    const PointCloudGenerator& point_cloud_generator,
-    const std::vector<FeatureTracker::Track>& tracks) -> void
+    const std::vector<Eigen::Matrix3d>& calibration_matrices) -> void
 {
   auto& logger = Logger::get();
 
   SARA_LOGI(logger, "Populating the BA camera parameter data...");
-  auto extrinsics_params = ba_data.extrinsics.matrix();
-  auto intrinsics_params = ba_data.intrinsics.matrix();
+  auto extrinsics_params = data.extrinsics.matrix();
+  auto intrinsics_params = data.intrinsics.matrix();
   for (auto v = PoseVertex{}; v < pose_graph.num_vertices(); ++v)
   {
     // Angle axis vector.
@@ -167,53 +165,53 @@ auto BundleAdjuster::form_problem(
     const std::vector<Eigen::Matrix3d>& calibration_matrices,
     const PointCloudGenerator& point_cloud_generator,
     const std::vector<FeatureTracker::Track>& tracks,
-    const int intrinsics_dim_per_camera, const int extrinsics_dim_per_camera)
-    -> void
+    const int intrinsics_dim_per_camera,
+    const int extrinsics_dim_per_camera) -> void
 {
   allocate_data(pose_graph, tracks, intrinsics_dim_per_camera,
                 extrinsics_dim_per_camera);
 
   populate_image_points(feature_tracker, point_cloud_generator, tracks);
   populate_scene_points(point_cloud_generator, tracks);
-  populate_camera_params(pose_graph, calibration_matrices,
-                         point_cloud_generator, tracks);
+  populate_camera_params(pose_graph, calibration_matrices);
 
   // Solve the bundle adjustment problem with Ceres.
   auto& logger = Logger::get();
   SARA_LOGI(logger, "Forming the BA problem...");
-  ba_problem.reset(new ceres::Problem{});
-  const auto num_image_points = ba_data.observations.size(0);
+  problem.reset(new ceres::Problem{});
+  const auto num_image_points = data.observations.size(0);
   for (auto i = 0; i < num_image_points; ++i)
   {
     SARA_LOGT(logger, "Adding residual with image point {}...", i);
 
     // Create a cost residual function.
-    const auto obs_x = ba_data.observations(i, 0);
-    const auto obs_y = ba_data.observations(i, 1);
+    const auto obs_x = data.observations(i, 0);
+    const auto obs_y = data.observations(i, 1);
     const auto cost_fn = ReprojectionError::create(obs_x, obs_y);
 
     // Locate the parameter data.
-    const auto camera_idx = ba_data.camera_indices[i];
-    const auto point_idx = ba_data.point_indices[i];
-    const auto extrinsics_ptr = ba_data.extrinsics[camera_idx].data();
-    const auto intrinsics_ptr = ba_data.intrinsics[camera_idx].data();
-    const auto scene_point_ptr = ba_data.point_coords[point_idx].data();
+    const auto camera_idx = data.camera_indices[i];
+    const auto point_idx = data.point_indices[i];
+    const auto extrinsics_ptr = data.extrinsics[camera_idx].data();
+    const auto intrinsics_ptr = data.intrinsics[camera_idx].data();
+    const auto scene_point_ptr = data.point_coords[point_idx].data();
 
-    ba_problem->AddResidualBlock(cost_fn, nullptr /* squared loss */,  //
-                                 extrinsics_ptr, intrinsics_ptr,
-                                 scene_point_ptr);
+    problem->AddResidualBlock(cost_fn, nullptr /* squared loss */,  //
+                              extrinsics_ptr, intrinsics_ptr, scene_point_ptr);
   }
 }
 
 auto BundleAdjuster::solve() -> void
 {
+  auto& logger = Logger::get();
+
+  SARA_LOGI(logger, "Solving the BA problem...");
   auto options = ceres::Solver::Options{};
   options.linear_solver_type = ceres::DENSE_SCHUR;
   options.minimizer_progress_to_stdout = true;
 
   auto summary = ceres::Solver::Summary{};
-  ceres::Solve(options, ba_problem.get(), &summary);
+  ceres::Solve(options, problem.get(), &summary);
 
-  auto& logger = Logger::get();
   SARA_LOGI(logger, "{}", summary.BriefReport());
 }
