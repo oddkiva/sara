@@ -16,7 +16,6 @@ if(SARA_USE_FROM_SOURCE)
       PRIVATE DO::Sara::Core #
               DO::Sara::Logging #
               DO::Sara::ImageProcessing #
-              fmt::fmt #
               ${FFMPEG_LIBRARIES})
   endif()
 endif()

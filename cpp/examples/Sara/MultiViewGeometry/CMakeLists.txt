@@ -31,15 +31,13 @@ sara_add_example(omnidirectional_camera_example)
 
 # Single view geometry.
 sara_add_example(metric_birds_eye_viewer)
-target_link_libraries(metric_birds_eye_viewer PRIVATE fmt::fmt)
 
 sara_add_example(orthogonal_vanishing_point_detection)
 target_include_directories(orthogonal_vanishing_point_detection
                            PRIVATE ${CMAKE_SOURCE_DIR}/cpp)
 target_link_libraries(
   orthogonal_vanishing_point_detection
-  PRIVATE fmt::fmt #
-          Boost::program_options #
+  PRIVATE Boost::program_options #
           $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
 
 # Two-view geometry.
@@ -52,9 +50,8 @@ target_link_libraries(essential_5_point_example PRIVATE tinyply)
 # Visual odometry.
 sara_add_example(visual_odometry_example)
 target_link_libraries(
-  visual_odometry_example
+  visual_odometry_example #
   PRIVATE DO::Kalpana::EasyGL #
-          fmt::fmt #
           glfw)
 
 # Bundle adjustment.

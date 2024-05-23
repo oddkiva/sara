@@ -10,7 +10,9 @@ if(NOT DO_Sara_Core_ADDED)
     PUBLIC ${CMAKE_SOURCE_DIR}/cpp/third-party/eigen #
            $<$<NOT:$<PLATFORM_ID:iOS>>:${HDF5_INCLUDE_DIRS}>)
   target_link_libraries(
-    DO_Sara_Core PUBLIC $<$<NOT:$<PLATFORM_ID:iOS>>:${HDF5_CXX_LIBRARIES}>)
+    DO_Sara_Core #
+    PUBLIC fmt::fmt # This is a deliberate choice.
+           $<$<NOT:$<PLATFORM_ID:iOS>>:${HDF5_CXX_LIBRARIES}>)
   target_compile_definitions(
     DO_Sara_Core
     PUBLIC
@@ -21,6 +23,5 @@ if(NOT DO_Sara_Core_ADDED)
     PUBLIC
       "$<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<PLATFORM_ID:Linux>>:SHELL:-Xcudafe --diag_suppress=20236>"
       "$<$<AND:$<COMPILE_LANGUAGE:CUDA>,$<PLATFORM_ID:Linux>>:SHELL:-Xcudafe --diag_suppress=20012>"
-      $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
-  )
+      $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>)
 endif()

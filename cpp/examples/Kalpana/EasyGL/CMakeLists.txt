@@ -11,7 +11,6 @@ foreach(file ${example_FILES})
             DO::Sara::ImageIO #
             DO::Kalpana::EasyGL #
             ${HDF5_LIBRARIES} #
-            fmt::fmt #
             glfw)
   target_compile_definitions(
     ${filename}

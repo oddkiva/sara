@@ -31,7 +31,6 @@ foreach(file ${TRT_EXAMPLE_FILES})
             DO::Shakti::Cuda::Utilities
             DO::Shakti::Cuda::TensorRT
             tinycolormap
-            fmt::fmt
             tensorrt_yolov4_utilities)
 
   set_target_properties(

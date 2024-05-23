@@ -32,7 +32,6 @@ target_link_libraries(halide_sift_pyramid_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
   ${Boost_LIBRARIES}
-  fmt::fmt
   DO_Shakti_Halide_Sift_gpu_v2
   $<$<BOOL:${CMAKE_CUDA_COMPILER}>:${CUDA_CUDA_LIBRARY}>
   $<$<BOOL:${NvidiaVideoCodec_ROOT}>:DO::Shakti::Cuda::VideoIO>)

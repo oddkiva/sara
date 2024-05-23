@@ -52,7 +52,6 @@ target_link_libraries(
           DO::Sara::ImageIO
           DO::Sara::SfM
           DO::Sara::VideoIO
-          fmt::fmt
           ${HALIDE_SIFT_LIBRARIES})
 set_property(TARGET halide_batched_sift_octave_example
              PROPERTY FOLDER "Examples/Shakti/Halide")

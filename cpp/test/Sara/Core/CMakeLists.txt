@@ -18,7 +18,7 @@ foreach (file ${test_core_SOURCE_FILES})
   sara_add_test(
     NAME ${filename}
     SOURCES ${file}
-    DEPENDENCIES DO::Sara::Core fmt::fmt
+    DEPENDENCIES DO::Sara::Core
     FOLDER Core)
 endforeach ()
 
