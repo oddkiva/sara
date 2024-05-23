@@ -101,8 +101,9 @@ int main()
   auto err = glewInit();
   if (err != GLEW_OK)
   {
-    std::cerr << format("Error: could not start GLEW: %s",
-                        glewGetErrorString(err))
+    std::cerr << fmt::format(
+                     "Error: could not start GLEW: {}",
+                     reinterpret_cast<const char*>(glewGetErrorString(err)))
               << std::endl;
     return EXIT_FAILURE;
   }

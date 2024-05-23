@@ -7,6 +7,7 @@ target_link_libraries(
           ImGui
           ImPlot
           ${HDF5_LIBRARIES} #
+          fmt::fmt
           glfw)
 target_compile_definitions(
   implot_example

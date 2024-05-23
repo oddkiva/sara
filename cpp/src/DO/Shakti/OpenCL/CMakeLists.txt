@@ -15,7 +15,8 @@ target_include_directories(
 target_link_libraries(
   DO_Sara_OpenCL #
   INTERFACE DO::Sara::Core #
-            OpenCL::OpenCL)
+            OpenCL::OpenCL #
+            fmt::fmt)
 
 target_compile_definitions(
   DO_Sara_OpenCL

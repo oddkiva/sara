@@ -27,6 +27,8 @@
 #  include <omp.h>
 #endif
 
+#include <fmt/format.h>
+
 #include <boost/program_options.hpp>
 
 
@@ -246,14 +248,14 @@ int __main(int argc, char** argv)
       }
     }
 
-    draw_text(frame_rgb, 100, 50,                           //
-              sara::format("SIFT: %0.f ms", feature_time),  //
+    draw_text(frame_rgb, 100, 50,                        //
+              fmt::format("SIFT: {} ms", feature_time),  //
               sara::White8, 40, 0, false, true, false);
     draw_text(frame_rgb, 100, 100,
-              sara::format("Matching: %0.3f ms", matching_time),  //
+              fmt::format("Matching: {:0.3f} ms", matching_time),  //
               sara::White8, 40, 0, false, true, false);
-    draw_text(frame_rgb, 100, 150,                                          //
-              sara::format("F-Inliers: %d", inliers.flat_array().count()),  //
+    draw_text(frame_rgb, 100, 150,                                         //
+              fmt::format("F-Inliers: {}", inliers.flat_array().count()),  //
               sara::White8, 40, 0, false, true, false);
 
     sara::display(frame_rgb);

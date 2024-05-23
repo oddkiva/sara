@@ -32,14 +32,14 @@
 
 #define BOOST_TEST_MODULE "Shakti/CUDA/FeatureDetectors/Gaussian Convolution"
 
-#include <boost/test/unit_test.hpp>
-
-#include <DO/Sara/Core/StringFormat.hpp>
-
 #include <DO/Shakti/Cuda/FeatureDetectors/TunedConvolutions/SmallGaussianConvolutionFP32.hpp>
 #include <DO/Shakti/Cuda/MultiArray.hpp>
 #include <DO/Shakti/Cuda/Utilities/DeviceInfo.hpp>
 #include <DO/Shakti/Cuda/Utilities/Timer.hpp>
+
+#include <fmt/format.h>
+
+#include <boost/test/unit_test.hpp>
 
 
 namespace sara = DO::Sara;
@@ -110,8 +110,8 @@ BOOST_AUTO_TEST_CASE(test_convolve)
       }
       elapsed = timer.elapsed_ms();
       gauss_compute_time += elapsed;
-      SARA_DEBUG << sara::format("[gaussf][s=%d] %0.3f ms", kernel_index,
-                                 gauss_compute_time)
+      SARA_DEBUG << fmt::format("[gaussf][s={}] {:0.3f} ms", kernel_index,
+                                gauss_compute_time)
                  << std::endl;
       octave_compute_time += gauss_compute_time;
 
@@ -131,9 +131,9 @@ BOOST_AUTO_TEST_CASE(test_convolve)
       }
     }
 
-    SARA_DEBUG << sara::format("[octave][%4dx%4dx%u] %0.3f ms",  //
-                               w, h, host_kernels.scales.size(),
-                               octave_compute_time)
+    SARA_DEBUG << fmt::format("[octave][{:4d}x{:4d}x{}] {:0.3f} ms",  //
+                              w, h, host_kernels.scales.size(),
+                              octave_compute_time)
                << std::endl;
 
     pyramid_compute_time += octave_compute_time;
@@ -145,8 +145,8 @@ BOOST_AUTO_TEST_CASE(test_convolve)
 
   } while (w >= 32 && h >= 16);
 
-  SARA_DEBUG << sara::format("[pyramid][%4dx%4dx%u] %0.3f ms",  //
-                             w0, h0, host_kernels.scales.size(),
-                             pyramid_compute_time)
+  SARA_DEBUG << fmt::format("[pyramid][{:4d}x{:4d}x{}] {:0.3f} ms",  //
+                            w0, h0, host_kernels.scales.size(),
+                            pyramid_compute_time)
              << std::endl;
 }

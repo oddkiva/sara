@@ -15,12 +15,13 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/HDF5.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
 #include <DO/Kalpana/Math/Projection.hpp>
+
+#include <fmt/format.h>
 
 #if defined(_WIN32)
 #  include <windows.h>
@@ -66,7 +67,8 @@ auto make_point_cloud()
 {
   // Encode the vertex data in a tensor.
 #if defined(__APPLE__)
-  const auto vertex_data = read_point_cloud("/Users/oddkiva/Desktop/geometry.h5");
+  const auto vertex_data =
+      read_point_cloud("/Users/oddkiva/Desktop/geometry.h5");
 #else
   const auto vertex_data = read_point_cloud("/home/david/Desktop/geometry.h5");
 #endif
@@ -319,8 +321,9 @@ private: /* convenience free functions*/
     // Initialize GLEW.
     const auto err = glewInit();
     if (err != GLEW_OK)
-      throw std::runtime_error{sara::format(
-          "Error: failed to initialize GLEW: %s", glewGetErrorString(err))};
+      throw std::runtime_error{
+          fmt::format("Error: failed to initialize GLEW: {}",
+                      reinterpret_cast<const char*>(glewGetErrorString(err)))};
 #endif
   }
 

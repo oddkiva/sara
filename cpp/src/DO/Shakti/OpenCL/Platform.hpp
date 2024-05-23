@@ -13,7 +13,7 @@
 
 #include <DO/Shakti/OpenCL/Error.hpp>
 
-#include <DO/Sara/Core/StringFormat.hpp>
+#include <fmt/format.h>
 
 #include <iomanip>
 #include <iostream>
@@ -68,16 +68,16 @@ namespace DO::Sara {
     size_t buffer_length;
     err = clGetPlatformInfo(platform_id, _InfoType, 0, nullptr, &buffer_length);
     if (err < 0)
-      throw std::runtime_error(
-          format("Error: cannot get platform info! %s", get_error_string(err)));
+      throw std::runtime_error(fmt::format(
+          "Error: cannot get platform info! {}", get_error_string(err)));
 
     std::vector<char> buffer;
     buffer.resize(buffer_length);
     err = clGetPlatformInfo(platform_id, _InfoType, buffer_length, &buffer[0],
                             nullptr);
     if (err < 0)
-      throw std::runtime_error(
-          format("Error: cannot get platform info! %s", get_error_string(err)));
+      throw std::runtime_error(fmt::format(
+          "Error: cannot get platform info! {}", get_error_string(err)));
 
     return std::string(buffer.begin(), buffer.end());
   }
@@ -90,14 +90,15 @@ namespace DO::Sara {
     cl_uint num_platforms;
     err = clGetPlatformIDs(1, nullptr, &num_platforms);
     if (err < 0)
-      throw std::runtime_error(format(
-          "Error: cannot get number of platforms! %s", get_error_string(err)));
+      throw std::runtime_error{fmt::format(
+          "Error: cannot get number of platforms! {}", get_error_string(err))};
 
     std::vector<cl_platform_id> platform_ids(num_platforms);
     err = clGetPlatformIDs(num_platforms, &platform_ids[0], nullptr);
     if (err < 0)
-      throw std::runtime_error(format("Error: cannot get the list of platforms",
-                                      get_error_string(err)));
+      throw std::runtime_error{
+          fmt::format("Error: cannot get the list of platforms! {}",
+                      get_error_string(err))};
 
 
     std::vector<Platform> platforms(num_platforms);

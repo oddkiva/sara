@@ -7,6 +7,8 @@
 
 #include <drafts/Taskflow/SafeQueue.hpp>
 
+#include <fmt/format.h>
+
 
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
@@ -65,9 +67,9 @@ struct DisplayTask
         sara::draw_circle(image, x, y, r, sara::Blue8, 3);
     }
 
-    sara::draw_text(image, 100, 50, sara::format("Frame: %d", index),
+    sara::draw_text(image, 100, 50, fmt::format("Frame: {}", index),
                     sara::White8, 30);
-    sara::draw_text(image, 100, 100, sara::format("#Extrema: %d", num_extrema),
+    sara::draw_text(image, 100, 100, fmt::format("#Extrema: {}", num_extrema),
                     sara::White8, 30);
 
     sara::display(image);

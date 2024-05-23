@@ -40,7 +40,6 @@
 // Miscellaneous
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 
 
 /*!

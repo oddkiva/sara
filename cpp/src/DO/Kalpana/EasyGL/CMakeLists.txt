@@ -5,7 +5,8 @@ add_library(DO_Kalpana_EasyGL ${DO_Kalpana_EasyGL_FILES})
 target_compile_definitions(DO_Kalpana_EasyGL PUBLIC GL_SILENCE_DEPRECATION)
 target_link_libraries(
   DO_Kalpana_EasyGL
-  PRIVATE DO::Sara::Core
+  PRIVATE DO::Sara::Core #
+          fmt::fmt
   PUBLIC ${OPENGL_LIBRARIES})
 if(NOT APPLE)
   target_include_directories(DO_Kalpana_EasyGL #

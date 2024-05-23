@@ -37,8 +37,8 @@ namespace DO::Sara {
         return;
       cl_int err = clReleaseKernel(_kernel);
       if (err < 0)
-        std::cerr << format("Error: failed to release kernel! %s",
-                            get_error_string(err))
+        std::cerr << fmt::format("Error: failed to release kernel! {}",
+                                 get_error_string(err))
                   << std::endl;
     }
 
@@ -54,8 +54,8 @@ namespace DO::Sara {
 
       if (err < 0)
       {
-        std::cerr << format("Error: failed to set kernel argument! %s",
-                            get_error_string(err))
+        std::cerr << fmt::format("Error: failed to set kernel argument! {}",
+                                 get_error_string(err))
                   << std::endl;
         return false;
       }
@@ -71,8 +71,8 @@ namespace DO::Sara {
 
       if (err < 0)
       {
-        std::cerr << format("Error: failed to set kernel argument! %s",
-                            get_error_string(err))
+        std::cerr << fmt::format("Error: failed to set kernel argument! {}",
+                                 get_error_string(err))
                   << std::endl;
         return false;
       }
@@ -88,8 +88,8 @@ namespace DO::Sara {
 
       if (err < 0)
       {
-        std::cerr << format("Error: failed to set kernel argument! %s",
-                            get_error_string(err))
+        std::cerr << fmt::format("Error: failed to set kernel argument! {}",
+                                 get_error_string(err))
                   << std::endl;
         return false;
       }
@@ -107,9 +107,10 @@ namespace DO::Sara {
       err = clCreateKernelsInProgram(program, 0, nullptr, &num_kernels);
       if (err < 0)
       {
-        std::cerr << format("Error: failed to fetch the number of kernels from "
-                            "program! %s",
-                            get_error_string(err))
+        std::cerr << fmt::format(
+                         "Error: failed to fetch the number of kernels from "
+                         "program! {}",
+                         get_error_string(err))
                   << std::endl;
         return false;
       }
@@ -121,9 +122,10 @@ namespace DO::Sara {
                                      &cl_kernels[0], nullptr);
       if (err < 0)
       {
-        std::cerr << format("Error: failed to fetch the number of kernels from "
-                            "program! %s",
-                            get_error_string(err))
+        std::cerr << fmt::format(
+                         "Error: failed to fetch the number of kernels from "
+                         "program! {}",
+                         get_error_string(err))
                   << std::endl;
         return false;
       }

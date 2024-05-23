@@ -1,5 +1,6 @@
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/VideoIO/VideoWriter.hpp>
+
+#include <fmt/format.h>
 
 #include <cmath>
 #include <cstdio>
@@ -79,8 +80,8 @@ namespace DO::Sara {
     // send the frame to the encoder
     ret = avcodec_send_frame(c, frame);
     if (ret < 0)
-      throw std::runtime_error{format(
-          "Error sending a frame to the encoder: %s\n", av_err2str(ret))};
+      throw std::runtime_error{fmt::format(
+          "Error sending a frame to the encoder: {}\n", av_err2str(ret))};
 
     while (ret >= 0)
     {
@@ -90,7 +91,7 @@ namespace DO::Sara {
         break;
       else if (ret < 0)
         throw std::runtime_error{
-            format("Error encoding a frame: %s\n", av_err2str(ret))};
+            fmt::format("Error encoding a frame: {}\n", av_err2str(ret))};
 
       // Rescale output packet timestamp values from codec to stream timebase.
       av_packet_rescale_ts(&packet, c->time_base, st->time_base);
@@ -101,8 +102,8 @@ namespace DO::Sara {
       ret = av_interleaved_write_frame(format_context, &packet);
       av_packet_unref(&packet);
       if (ret < 0)
-        throw std::runtime_error{
-            format("Error while writing output packet: %s", av_err2str(ret))};
+        throw std::runtime_error{fmt::format(
+            "Error while writing output packet: {}", av_err2str(ret))};
     }
 
     return ret == AVERROR_EOF ? 1 : 0;
@@ -113,16 +114,15 @@ namespace DO::Sara {
   // Add an output stream.
   static void add_video_stream(OutputStream* ostream,
                                AVFormatContext* format_context,
-                               const AVCodec** codec,
-                               enum AVCodecID codec_id, int width, int height,
-                               int frame_rate)
+                               const AVCodec** codec, enum AVCodecID codec_id,
+                               int width, int height, int frame_rate)
   {
     AVCodecContext* c;
     /* find the encoder */
     *codec = avcodec_find_encoder(codec_id);
     if (!(*codec))
-      throw std::runtime_error{format("Could not find encoder for '%s'",
-                                      avcodec_get_name(codec_id))};
+      throw std::runtime_error{fmt::format("Could not find encoder for '{}'",
+                                           avcodec_get_name(codec_id))};
 
     ostream->stream = avformat_new_stream(format_context, nullptr);
     if (!ostream->stream)
@@ -200,7 +200,7 @@ namespace DO::Sara {
     av_dict_free(&opt);
     if (ret < 0)
       throw std::runtime_error{
-          format("Could not open video codec: %s", av_err2str(ret))};
+          fmt::format("Could not open video codec: {}", av_err2str(ret))};
 
     /* allocate and init a re-usable frame */
     ostream->frame = allocate_picture(c->pix_fmt, c->width, c->height);
@@ -279,15 +279,15 @@ namespace DO::Sara {
     {
       ret = avio_open(&_format_context->pb, filepath.c_str(), AVIO_FLAG_WRITE);
       if (ret < 0)
-        throw std::runtime_error{format("Could not open '%s': %s!",
-                                        filepath.c_str(), av_err2str(ret))};
+        throw std::runtime_error{fmt::format(
+            "Could not open '{}': {}!", filepath.c_str(), av_err2str(ret))};
     }
 
     /* Write the stream header, if any. */
     ret = avformat_write_header(_format_context, &_options);
     if (ret < 0)
-      throw std::runtime_error{format(
-          "Error occurred when opening output file: %s\n", av_err2str(ret))};
+      throw std::runtime_error{fmt::format(
+          "Error occurred when opening output file: {}\n", av_err2str(ret))};
   }
 
   VideoWriter::~VideoWriter()

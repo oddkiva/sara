@@ -10,21 +10,22 @@
 // ========================================================================== //
 
 
-#include <vector>
-
 #if defined(_WIN32) || defined(_WIN32_WCE)
 #  define NOMINMAX
 #  include <windows.h>
 #endif
 
 #include <DO/Sara/Core/Image.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 
 #include <DO/Sara/ImageIO/Details/Exif.hpp>
 #include <DO/Sara/ImageIO/Details/Heif.hpp>
 #include <DO/Sara/ImageIO/Details/ImageIOObjects.hpp>
 #include <DO/Sara/ImageIO/Details/WebP.hpp>
 #include <DO/Sara/ImageIO/ImageIO.hpp>
+
+#include <fmt/format.h>
+
+#include <vector>
 
 
 using namespace std;
@@ -158,10 +159,8 @@ namespace DO::Sara {
         read_image_with<TiffFileReader>(image, filepath.c_str());
 #endif
       else
-        throw std::runtime_error{
-            format("Image format: %s is either unsupported or invalid",
-                   ext.c_str())
-                .c_str()};
+        throw std::runtime_error{fmt::format(
+            "Image format: {} is either unsupported or invalid", ext)};
 
       auto info = EXIFInfo{};
       if (read_exif_info(info, filepath))
@@ -185,10 +184,8 @@ namespace DO::Sara {
         image = read_webp_file_as_interleaved_rgb_image(filepath);
 #endif
       else
-        throw std::runtime_error{
-            format("Image format: %s is either unsupported or invalid",
-                   ext.c_str())
-                .c_str()};
+        throw std::runtime_error{fmt::format(
+            "Image format: {} is either unsupported or invalid", ext)};
 
       auto info = EXIFInfo{};
       if (read_exif_info(info, filepath))

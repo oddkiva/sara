@@ -11,6 +11,7 @@
 
 //! @example
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Shakti/OpenCL/CommandQueue.hpp>
 #include <DO/Shakti/OpenCL/DeviceBuffer.hpp>
 
@@ -46,7 +47,7 @@ int main()
   CommandQueue command_queue(context, gpu_device);
 
   // Build the `square_array` program.
-  auto source_filepath = std::string{ src_path("square_array.cl") };
+  auto source_filepath = std::string{src_path("square_array.cl")};
   Program program(context, gpu_device);
   program.create_from_file(source_filepath);
   program.build();
@@ -78,8 +79,8 @@ int main()
   // Execute the kernel.
   constexpr size_t work_dims = 1;
   constexpr size_t work_items_per_kernel[] = {N};
-  command_queue.enqueue_nd_range_kernel(
-    kernel, work_dims, nullptr, work_items_per_kernel, nullptr);
+  command_queue.enqueue_nd_range_kernel(kernel, work_dims, nullptr,
+                                        work_items_per_kernel, nullptr);
 
   // Wait for the commands to get serviced before reading back results.
   command_queue.finish();

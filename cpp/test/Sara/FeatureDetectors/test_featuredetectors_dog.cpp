@@ -13,7 +13,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/FeatureDetectors/DoG.hpp>
 

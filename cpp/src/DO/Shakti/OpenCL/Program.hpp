@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include <DO/Shakti/OpenCL/OpenCL.hpp>
 #include <DO/Shakti/OpenCL/Context.hpp>
 #include <DO/Shakti/OpenCL/Device.hpp>
+#include <DO/Shakti/OpenCL/OpenCL.hpp>
 
 #include <fstream>
 #include <streambuf>
@@ -66,8 +66,9 @@ namespace DO::Sara {
 
       if (err < 0)
       {
-        std::cerr << format("Error: failed to create program from source: %s",
-                            source.c_str())
+        std::cerr << fmt::format(
+                         "Error: failed to create program from source: {}",
+                         source)
                   << std::endl;
         return false;
       }
@@ -81,7 +82,7 @@ namespace DO::Sara {
       std::ifstream file(filepath.c_str());
       if (!file.is_open())
       {
-        std::cerr << format("Error: cannot open file: %s", filepath.c_str())
+        std::cerr << fmt::format("Error: cannot open file: {}", filepath)
                   << std::endl;
         return false;
       }
@@ -106,8 +107,8 @@ namespace DO::Sara {
 
       if (err < 0)
       {
-        std::cerr << format("Error: failed to build OpenCL program:\n%s",
-                            get_build_logs().c_str())
+        std::cerr << fmt::format("Error: failed to build OpenCL program:\n{}",
+                                 get_build_logs())
                   << std::endl;
         return false;
       }
@@ -123,14 +124,14 @@ namespace DO::Sara {
       err = clGetProgramBuildInfo(_program, device, CL_PROGRAM_BUILD_LOG, 0,
                                   NULL, &build_log_size);
       if (err < 0)
-        throw std::runtime_error("Error: failed to get build log size!");
+        throw std::runtime_error{"Error: failed to get build log size!"};
 
       std::string build_log;
       build_log.resize(build_log_size);
       err = clGetProgramBuildInfo(_program, device, CL_PROGRAM_BUILD_LOG,
                                   build_log.size(), &build_log[0], nullptr);
       if (err < 0)
-        throw std::runtime_error("Error: failed to get build log!");
+        throw std::runtime_error{"Error: failed to get build log!"};
 
       return build_log;
     }

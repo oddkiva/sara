@@ -14,11 +14,12 @@
 #include <DO/Kalpana/EasyGL.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>
+
+#include <fmt/format.h>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -344,8 +345,9 @@ private: /* convenience free functions*/
     // Initialize GLEW.
     const auto err = glewInit();
     if (err != GLEW_OK)
-      throw std::runtime_error{sara::format(
-          "Error: failed to initialize GLEW: %s", glewGetErrorString(err))};
+      throw std::runtime_error{
+          fmt::format("Error: failed to initialize GLEW: {}",
+                      reinterpret_cast<const char*>(glewGetErrorString(err)))};
 #endif
   }
 

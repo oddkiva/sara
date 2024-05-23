@@ -12,16 +12,17 @@
 //! @example
 
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <fmt/format.h>
+
 #include <array>
 
 #if defined(OPENMP)
-#include <omp.h>
+#  include <omp.h>
 #endif
 
 
@@ -96,7 +97,8 @@ auto to_map_view(const sara::BrownConradyCamera32<float>& C,
   return map_view;
 }
 
-auto make_make_conrady_camera_1() {
+auto make_make_conrady_camera_1()
+{
   const auto f = 1305.f;
   const auto u0 = 960.f;
   const auto v0 = 540.f;
@@ -105,17 +107,20 @@ auto make_make_conrady_camera_1() {
 
   auto camera_parameters = sara::BrownConradyCamera32<float>{};
   camera_parameters.image_sizes << 1920, 1080;
+  // clang-format off
   camera_parameters.K <<
     f, 0, u0,
     0, f, v0,
     0, 0,  1;
+  // clang-format on
   camera_parameters.distortion_model.k = k;
   camera_parameters.distortion_model.p = p;
 
   return camera_parameters;
 }
 
-auto make_make_conrady_camera_2() {
+auto make_make_conrady_camera_2()
+{
   const auto f = 946.898442557f;
   const auto u0 = 960.f;
   const auto v0 = 540.f;
@@ -128,26 +133,31 @@ auto make_make_conrady_camera_2() {
 
   auto camera_parameters = sara::BrownConradyCamera32<float>{};
   camera_parameters.image_sizes << 1920, 1080;
+  // clang-format off
   camera_parameters.K <<
     f, 0, u0,
     0, f, v0,
     0, 0,  1;
+  // clang-format on
   camera_parameters.distortion_model.k = k;
   camera_parameters.distortion_model.p = p;
 
   return camera_parameters;
 }
 
-auto make_make_conrady_camera_3() {
+auto make_make_conrady_camera_3()
+{
   const auto f = 650._px;
   const auto u0 = 640._px;
   const auto v0 = 360._px;
 
   auto camera_parameters = sara::BrownConradyCamera32<float>{};
+  // clang-format off
   camera_parameters.K <<
     f, 0, u0,
     0, f, v0,
     0, 0,  1;
+  // clang-format on
   camera_parameters.distortion_model.k.setZero();
   camera_parameters.distortion_model.p.setZero();
 
@@ -155,7 +165,7 @@ auto make_make_conrady_camera_3() {
 }
 
 
-int __main(int argc, char**argv)
+int __main(int argc, char** argv)
 {
   if (argc < 2)
     return -1;
@@ -166,13 +176,15 @@ int __main(int argc, char**argv)
 #endif
 
   auto video_stream = sara::VideoStream{video_filepath};
-  auto video_writer = sara::VideoWriter{
+  auto video_writer = sara::VideoWriter
+  {
 #if defined(__APPLE__)
-      "/Users/david/Desktop/test.mp4",
+    "/Users/david/Desktop/test.mp4",
 #else
-      "/home/david/Desktop/test.mp4",
+    "/home/david/Desktop/test.mp4",
 #endif
-      Eigen::Vector2i(map_pixel_dims[0].value, map_pixel_dims[1].value)};
+        Eigen::Vector2i(map_pixel_dims[0].value, map_pixel_dims[1].value)
+  };
 
   // one example of distortion correction.
   auto camera_parameters = make_make_conrady_camera_2();
@@ -181,11 +193,11 @@ int __main(int argc, char**argv)
 
   auto wu = sara::create_window(video_stream.frame().sizes(),  //
                                 "Undistorted Frame");
-  auto wmap = sara::create_window(                          //
-      map_pixel_dims[0].value,                              //
-      map_pixel_dims[1].value,                              //
-      sara::format("Bird's Eye View [Scale: %d px = 1 m]",  //
-                   int(px_per_meter.value)));
+  auto wmap = sara::create_window(                         //
+      map_pixel_dims[0].value,                             //
+      map_pixel_dims[1].value,                             //
+      fmt::format("Bird's Eye View [Scale: {} px = 1 m]",  //
+                  int(px_per_meter.value)));
 
   while (video_stream.read())
   {
@@ -207,7 +219,7 @@ int __main(int argc, char**argv)
     }
     sara::display(map_view);
 
-    //video_writer.write(map_view);
+    // video_writer.write(map_view);
   }
 
   sara::close_window(wu);
