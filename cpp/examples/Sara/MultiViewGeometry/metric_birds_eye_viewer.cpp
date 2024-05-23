@@ -107,7 +107,12 @@ auto make_make_conrady_camera_1()
 
   auto camera_parameters = sara::BrownConradyCamera32<float>{};
   camera_parameters.image_sizes << 1920, 1080;
-  camera_parameters.K << f, 0, u0, 0, f, v0, 0, 0, 1;
+  // clang-format off
+  camera_parameters.K <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  // clang-format on
   camera_parameters.distortion_model.k = k;
   camera_parameters.distortion_model.p = p;
 
@@ -128,7 +133,12 @@ auto make_make_conrady_camera_2()
 
   auto camera_parameters = sara::BrownConradyCamera32<float>{};
   camera_parameters.image_sizes << 1920, 1080;
-  camera_parameters.K << f, 0, u0, 0, f, v0, 0, 0, 1;
+  // clang-format off
+  camera_parameters.K <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  // clang-format on
   camera_parameters.distortion_model.k = k;
   camera_parameters.distortion_model.p = p;
 
@@ -142,7 +152,12 @@ auto make_make_conrady_camera_3()
   const auto v0 = 360._px;
 
   auto camera_parameters = sara::BrownConradyCamera32<float>{};
-  camera_parameters.K << f, 0, u0, 0, f, v0, 0, 0, 1;
+  // clang-format off
+  camera_parameters.K <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  // clang-format on
   camera_parameters.distortion_model.k.setZero();
   camera_parameters.distortion_model.p.setZero();
 
