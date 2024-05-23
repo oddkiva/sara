@@ -31,6 +31,8 @@ sara_add_example(omnidirectional_camera_example)
 
 # Single view geometry.
 sara_add_example(metric_birds_eye_viewer)
+target_link_libraries(metric_birds_eye_viewer PRIVATE fmt::fmt)
+
 sara_add_example(orthogonal_vanishing_point_detection)
 target_include_directories(orthogonal_vanishing_point_detection
                            PRIVATE ${CMAKE_SOURCE_DIR}/cpp)

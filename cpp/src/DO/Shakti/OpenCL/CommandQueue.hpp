@@ -46,8 +46,8 @@ namespace DO::Sara {
       _queue = clCreateCommandQueue(context, device, _properties, &err);
       if (err < 0)
         throw std::runtime_error(
-            format("Error: failed to create command queue! %s\n",
-                   get_error_string(err)));
+            fmt::format("Error: failed to create command queue! {}",
+                        get_error_string(err)));
     }
 
     void release()
@@ -55,17 +55,17 @@ namespace DO::Sara {
       auto err = clReleaseCommandQueue(_queue);
       if (err < 0)
         throw std::runtime_error(
-            format("Error: failed to release command queue! %s\n",
-                   get_error_string(err)));
+            fmt::format("Error: failed to release command queue! {}",
+                        get_error_string(err)));
     }
 
     void finish()
     {
       auto err = clFinish(_queue);
       if (err < 0)
-        throw std::runtime_error(
-            format("Error: failed to finish command queue! %s\n",
-                   get_error_string(err)));
+        throw std::runtime_error{
+            fmt::format("Error: failed to finish command queue! {}",
+                        get_error_string(err))};
     }
 
     void enqueue_nd_range_kernel(Kernel& kernel, cl_uint work_dims,
@@ -77,8 +77,8 @@ namespace DO::Sara {
                                         global_work_offsets, global_work_sizes,
                                         local_work_sizes, 0, nullptr, nullptr);
       if (err)
-        throw std::runtime_error(format("Error: Failed to execute kernel! %s",
-                                        get_error_string(err)));
+        throw std::runtime_error{fmt::format(
+            "Error: Failed to execute kernel! {}", get_error_string(err))};
     }
 
     template <typename T>
@@ -88,9 +88,9 @@ namespace DO::Sara {
           clEnqueueReadBuffer(_queue, src, cl_bool(blocking), 0,
                               src.size() * sizeof(T), dst, 0, nullptr, nullptr);
       if (err)
-        throw std::runtime_error(
-            format("Error: Failed to copy buffer from device to host! %s",
-                   get_error_string(err)));
+        throw std::runtime_error{
+            fmt::format("Error: Failed to copy buffer from device to host! {}",
+                        get_error_string(err))};
     }
 
     template <typename T>
@@ -103,9 +103,9 @@ namespace DO::Sara {
       cl_int err = clEnqueueReadImage(_queue, src, cl_bool(blocking), origin,
                                       region, 0, 0, dst, 0, nullptr, nullptr);
       if (err)
-        throw std::runtime_error(
-            format("Error: Failed to copy buffer from device to host! %s",
-                   get_error_string(err)));
+        throw std::runtime_error{
+            fmt::format("Error: Failed to copy buffer from device to host! {}",
+                        get_error_string(err))};
     }
 
     operator cl_command_queue() const

@@ -14,7 +14,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <DO/Shakti/Cuda/MultiArray.hpp>

@@ -15,13 +15,14 @@
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/MultiArray/DataTransformations.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArray.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
-#include <DO/Sara/Core/MultiArray/DataTransformations.hpp>
 #include <DO/Sara/Core/MultiArray/Slice.hpp>
 #include <DO/Sara/Core/Numpy.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
+
+#include <fmt/format.h>
 
 
 using namespace std;
@@ -114,8 +115,8 @@ BOOST_AUTO_TEST_CASE(test_sliced_view)
 
   for (int y = 0; y < X_sliced.size(0); ++y)
     for (int x = 0; x < X_sliced.size(1); ++x)
-      SARA_DEBUG << format("X_sliced(%d, %d) = %f", y, x,
-                           X_sliced(Vector2i{y, x}))
+      SARA_DEBUG << fmt::format("X_sliced({}, {}) = {}", y, x,
+                                X_sliced(Vector2i{y, x}))
                  << std::endl;
 }
 
@@ -123,9 +124,8 @@ BOOST_AUTO_TEST_CASE(test_filtered_transformed_operations)
 {
   auto v = arange(-10.f, 10.f, 1.f);
 
-  auto v2 = v
-    | filtered([](float x) { return x > 0; })
-    | transformed([](float x) { return int(x * x); });
+  auto v2 = v | filtered([](float x) { return x > 0; }) |
+            transformed([](float x) { return int(x * x); });
 
   SARA_DEBUG << v2.row_vector() << std::endl;
 }

@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include <stdexcept>
-#include <string>
-#include <vector>
-
 #include <DO/Shakti/OpenCL/Error.hpp>
 #include <DO/Shakti/OpenCL/OpenCL.hpp>
 #include <DO/Shakti/OpenCL/Platform.hpp>
+
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 
 namespace DO::Sara {
@@ -78,8 +78,8 @@ namespace DO::Sara {
     err = clGetDeviceInfo(device_id, _InfoType, 0, nullptr, &buffer_length);
     if (err < 0)
     {
-      std::cerr << format("Error: cannot get device info! %s",
-                          get_error_string(err))
+      std::cerr << fmt::format("Error: cannot get device info! {}",
+                               get_error_string(err))
                 << std::endl;
       return std::string{};
     }
@@ -90,8 +90,8 @@ namespace DO::Sara {
                           nullptr);
     if (err < 0)
     {
-      std::cerr << format("Error: cannot get device info! %s",
-                          get_error_string(err))
+      std::cerr << fmt::format("Error: cannot get device info! {}",
+                               get_error_string(err))
                 << std::endl;
       return std::string{};
     }
@@ -108,8 +108,8 @@ namespace DO::Sara {
     auto err = clGetDeviceInfo(device_id, InfoType, sizeof(T), &info, nullptr);
     if (err < 0)
     {
-      std::cerr << format("Error: cannot get device info! %s\n",
-                          get_error_string(err))
+      std::cerr << fmt::format("Error: cannot get device info! {}\n",
+                               get_error_string(err))
                 << std::endl;
     }
 
@@ -137,9 +137,9 @@ namespace DO::Sara {
     if (err < 0)
     {
       std::cerr
-          << format(
-                 "Error: cannot get number of devices from platform %p! %s\n",
-                 platform.id, get_error_string(err))
+          << fmt::format(
+                 "Error: cannot get number of devices from platform {}! {}\n",
+                 fmt::ptr(platform.id), get_error_string(err))
           << std::endl;
       return std::vector<Device>{};
     }

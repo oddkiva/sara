@@ -66,9 +66,9 @@ namespace DO::Sara {
       _buffer = clCreateImage2D(context, flags, &image_format, _sizes[0],
                                 _sizes[1], 0, (void*) data, &err);
       if (err < 0)
-        throw std::runtime_error(
-            format("Error: failed to allocate buffer in device memory! %s\n",
-                   get_error_string(err)));
+        throw std::runtime_error{
+            fmt::format("Error: failed to allocate buffer in device memory! {}",
+                        get_error_string(err))};
     }
 
     DeviceImage(Context& context, size_t width, size_t height, size_t depth,
@@ -80,17 +80,17 @@ namespace DO::Sara {
       _buffer = clCreateImage3D(context, flags, &image_format, _sizes[0],
                                 _sizes[1], _sizes[2], 0, (void*) data, &err);
       if (err < 0)
-        throw std::runtime_error(
-            format("Error: failed to allocate buffer in device memory! %s\n",
-                   get_error_string(err)));
+        throw std::runtime_error{
+            fmt::format("Error: failed to allocate buffer in device memory! {}",
+                        get_error_string(err))};
     }
 
     ~DeviceImage()
     {
       auto err = clReleaseMemObject(_buffer);
       if (err < 0)
-        std::cerr << format(
-                         "Error: failed to release buffer in device memory! %s",
+        std::cerr << fmt::format(
+                         "Error: failed to release buffer in device memory! {}",
                          get_error_string(err))
                   << std::endl;
     }

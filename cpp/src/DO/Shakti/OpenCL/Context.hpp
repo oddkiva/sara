@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include <DO/Sara/Core/StringFormat.hpp>
-
 #include <DO/Shakti/OpenCL/Device.hpp>
 #include <DO/Shakti/OpenCL/OpenCL.hpp>
+
+#include <fmt/format.h>
 
 #include <vector>
 
@@ -34,8 +34,9 @@ namespace DO::Sara {
           clCreateContext(nullptr, 1, &device.id, nullptr, nullptr, &err);
       if (err < 0)
         std::cerr
-            << format("Error: failed to create context from device: %d! %s\n",
-                      device.id, get_error_string(err))
+            << fmt::format(
+                   "Error: failed to create context from device: {}! {}\n",
+                   fmt::ptr(device.id), get_error_string(err))
             << std::endl;
 
       err = clGetContextInfo(_context, CL_CONTEXT_REFERENCE_COUNT,
@@ -46,8 +47,9 @@ namespace DO::Sara {
     {
       auto err = clReleaseContext(_context);
       if (err < 0)
-        std::cerr << format("Error: failed to release OpenCL context! %s\n",
-                            get_error_string(err))
+        std::cerr << fmt::format(
+                         "Error: failed to release OpenCL context! {}\n",
+                         get_error_string(err))
                   << std::endl;
     }
 

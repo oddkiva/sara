@@ -34,17 +34,17 @@ namespace DO::Sara {
       auto err = cl_int{};
       _buffer = clCreateBuffer(context, flags, size * sizeof(T), _data, &err);
       if (err != CL_SUCCESS)
-        throw std::runtime_error(
-            format("Error: failed to allocate buffer in device memory! %s\n",
-                   get_error_string(err)));
+        throw std::runtime_error{fmt::format(
+            "Error: failed to allocate buffer in device memory! {}\n",
+            get_error_string(err))};
     }
 
     inline ~DeviceBuffer()
     {
       const auto err = clReleaseMemObject(_buffer);
       if (err != CL_SUCCESS)
-        std::cerr << format(
-                         "Error: failed to release buffer in device memory! %s",
+        std::cerr << fmt::format(
+                         "Error: failed to release buffer in device memory! {}",
                          get_error_string(err))
                   << std::endl;
     }

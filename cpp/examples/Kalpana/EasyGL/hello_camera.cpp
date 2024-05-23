@@ -20,12 +20,13 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/HDF5.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
 #include <GLFW/glfw3.h>
+
+#include <fmt/format.h>
 
 #include <map>
 
@@ -225,7 +226,7 @@ public:
       if (responder.show_checkerboard)
         _checkerboard.render(transform.matrix(), view_matrix, projection);
 
-        // Draw point cloud.
+      // Draw point cloud.
       _point_cloud_renderer.render(_point_cloud, 2.f,
                                    scale_point_cloud.matrix(), view_matrix,
                                    projection);
@@ -359,8 +360,9 @@ private: /* convenience free functions*/
     // Initialize GLEW.
     const auto err = glewInit();
     if (err != GLEW_OK)
-      throw std::runtime_error{sara::format(
-          "Error: failed to initialize GLEW: %s", glewGetErrorString(err))};
+      throw std::runtime_error{
+          fmt::format("Error: failed to initialize GLEW: {}",
+                      reinterpret_cast<const char*>(glewGetErrorString(err)))};
 #endif
   }
 

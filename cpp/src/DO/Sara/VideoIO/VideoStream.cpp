@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/VideoIO/VideoStream.hpp>
+
 // #define PROFILE_VIDEOSTREAM
 #if defined(__APPLE__)
 // #define HWACCEL
@@ -29,14 +31,12 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Logging/Logger.hpp>
 #if defined(PROFILE_VIDEOSTREAM)
 #  include <DO/Sara/Core/Timer.hpp>
 #endif
 
 #include <DO/Sara/ImageProcessing/Rotate.hpp>
-#include <DO/Sara/VideoIO/VideoStream.hpp>
 
 #include <optional>
 #include <thread>
@@ -177,8 +177,8 @@ namespace DO::Sara {
       const AVCodecHWConfig* config = avcodec_get_hw_config(_video_codec, i);
       if (!config)
       {
-        throw std::runtime_error{format(
-            "Decoder %s does not support device type %s.\n", _video_codec->name,
+        throw std::runtime_error{fmt::format(
+            "Decoder %s does not support device type {}", _video_codec->name,
             av_hwdevice_get_type_name(AVHWDeviceType(_hw_device_type)))};
       }
       if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
