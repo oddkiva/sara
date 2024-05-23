@@ -17,13 +17,11 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Logging/Logger.hpp>
-#include <DO/Sara/MultiViewGeometry/BundleAdjustmentProblem.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/PointCloudGenerator.hpp>
-#include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
-#include <DO/Sara/SfM/Graph/FeatureTracker.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/BAReprojectionError.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/BundleAdjuster.hpp>
 #include <DO/Sara/SfM/Helpers.hpp>
 
 #if defined(_WIN32)
@@ -44,68 +42,6 @@ using namespace std::string_literals;
 
 namespace fs = std::filesystem;
 namespace sara = DO::Sara;
-
-
-struct ReprojectionError
-{
-  static constexpr auto ResidualDimension = 2;
-  static constexpr auto IntrinsicParameterCount = 4;
-  static constexpr auto ExtrinsicParameterCount = 6;
-  static constexpr auto PointDimension = 3;
-
-  ReprojectionError(double observed_x, double observed_y)
-    : observed_x{observed_x}
-    , observed_y{observed_y}
-  {
-  }
-
-  template <typename T>
-  bool operator()(const T* const extrinsics,  // (1) extrinsic camera parameters
-                  const T* const intrinsics,  // (2) intrinsic camera parameters
-                  const T* const point,       // (3) 3D point
-                  T* residuals) const
-  {
-    T p[3];
-
-    // Rotate the point.
-    ceres::AngleAxisRotatePoint(extrinsics, point, p);
-    // Translate the point.
-    const auto t = extrinsics + 3;
-    p[0] += t[0];
-    p[1] += t[1];
-    p[2] += t[2];
-
-    // Normalized camera coordinates.
-    T xp = p[0] / p[2];
-    T yp = p[1] / p[2];
-
-    // Apply the internal parameters.
-    const auto& fx = intrinsics[0];
-    const auto& fy = intrinsics[1];
-    const auto& u0 = intrinsics[2];
-    const auto& v0 = intrinsics[3];
-    const auto predicted_x = fx * xp + u0;
-    const auto predicted_y = fy * yp + v0;
-
-    residuals[0] = predicted_x - T(observed_x);
-    residuals[1] = predicted_y - T(observed_y);
-
-    return true;
-  }
-
-  static ceres::CostFunction* create(const double observed_x,
-                                     const double observed_y)
-  {
-    return new ceres::AutoDiffCostFunction<
-        ReprojectionError, ResidualDimension,  //
-        ExtrinsicParameterCount, IntrinsicParameterCount, PointDimension>{
-        new ReprojectionError{observed_x, observed_y}  //
-    };
-  }
-
-  double observed_x;
-  double observed_y;
-};
 
 
 GRAPHICS_MAIN()
@@ -292,11 +228,11 @@ GRAPHICS_MAIN()
     num_image_points += static_cast<int>(track.size());
 
   auto ba_data = sara::BundleAdjustmentData{};
-  static constexpr auto num_views = 2;
-  static constexpr auto num_intrinsics = 4;  // fx, fy, u0, v0
-  static constexpr auto num_extrinsics = 6;
-  ba_data.resize(num_image_points, num_scene_points, num_views,  //
-                 num_intrinsics, num_extrinsics);
+  const auto num_poses = pose_graph.num_vertices();
+  static constexpr auto intrinsics_dim = 4;  // fx, fy, u0, v0
+  static constexpr auto extrinsics_dim = 6;
+  ba_data.resize(num_image_points, num_scene_points, num_poses,  //
+                 intrinsics_dim, extrinsics_dim);
 
   SARA_LOGI(logger, "Populating the BA observation/image point data...");
   auto o = 0;  // observation index.
@@ -368,8 +304,8 @@ GRAPHICS_MAIN()
     SARA_LOGT(logger, "Adding residual with image point {}...", i);
 
     // Create a cost residual function.
-    const auto cost_fn = ReprojectionError::create(ba_data.observations(i, 0),
-                                                   ba_data.observations(i, 1));
+    const auto cost_fn = sara::ReprojectionError::create(
+        ba_data.observations(i, 0), ba_data.observations(i, 1));
 
     // Locate the parameter data.
     const auto camera_idx = ba_data.camera_indices[i];

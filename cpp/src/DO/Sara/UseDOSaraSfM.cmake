@@ -7,8 +7,10 @@ if(SARA_USE_FROM_SOURCE)
     sara_generate_library("SfM")
 
     target_include_directories(
-      DO_Sara_SfM PRIVATE ${DO_Sara_ThirdParty_DIR}/eigen
-                          ${DO_Sara_INCLUDE_DIR})
+      DO_Sara_SfM
+      PUBLIC ${CERES_INCLUDE_DIRS}
+      PRIVATE ${DO_Sara_ThirdParty_DIR}/eigen #
+              ${DO_Sara_INCLUDE_DIR})
     target_compile_definitions(DO_Sara_SfM PRIVATE BOOST_ALL_DYN_LINK
                                                    BOOST_ALL_NO_LIB)
     target_link_libraries(
@@ -21,6 +23,7 @@ if(SARA_USE_FROM_SOURCE)
              DO::Sara::FeatureMatching
              DO::Sara::MultiViewGeometry
              DO::Sara::Visualization
+             ${CERES_LIBRARIES}
              $<$<BOOL:${SARA_BUILD_VIDEOIO}>:DO::Sara::VideoIO>
              $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   endif()

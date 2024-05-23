@@ -58,5 +58,7 @@ target_link_libraries(
 sara_add_example(two_view_bundle_adjustment_example)
 target_include_directories(two_view_bundle_adjustment_example
                            PRIVATE ${CERES_INCLUDE_DIRS})
-target_link_libraries(two_view_bundle_adjustment_example
-                      PRIVATE ${CERES_LIBRARIES})
+target_link_libraries(
+  two_view_bundle_adjustment_example #
+  PRIVATE DO::Sara::SfM #
+          ${CERES_LIBRARIES})
