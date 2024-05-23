@@ -11,11 +11,11 @@
 
 #include <DO/Sara/SfM/Odometry/OdometryPipeline.hpp>
 
-#include <DO/Sara/Logging/Logger.hpp>
-
+#include <DO/Sara/Core/Math/AxisConvention.hpp>
 #include <DO/Sara/Core/Math/Rotation.hpp>
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics/ImageDraw.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/SfM/Helpers/KeypointMatching.hpp>
 #include <DO/Sara/Visualization/Features/Draw.hpp>
 
@@ -215,14 +215,8 @@ auto OdometryPipeline::grow_geometry() -> bool
   // For one thing: observe that the z-coordinate of the camera frame is the
   // x-axis of the automotive coordinates. The rest is easily deduced by the
   // attentive reader.
-  //
-  // clang-format off
-  static const auto P = (Eigen::Matrix3d{} <<
-     0,  0, 1,
-    -1,  0, 0,
-     0, -1, 0
-  ).finished();
-  // clang-format on
+  static const Eigen::Matrix3d P =
+      axis_permutation_matrix(AxisConvention::Automotive).cast<double>();
 
 
   // Detect and describe the local features.
@@ -302,10 +296,10 @@ auto OdometryPipeline::grow_geometry() -> bool
       _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
 
 #if defined(DEBUG_ABSOLUTE_POSE_RECOVERY)
-  const auto corr_csv_fp = fmt::format("/Users/oddkiva/Desktop/corr_{}.csv",
-                                       _pose_curr);
+  const auto corr_csv_fp =
+      fmt::format("/Users/oddkiva/Desktop/corr_{}.csv", _pose_curr);
   write_point_correspondences(_pose_graph, _feature_tracker._feature_graph,
-                             _tracks_alive, corr_csv_fp);
+                              _tracks_alive, corr_csv_fp);
 #endif
 
   // Extra steps for when the pose graph contains 2 poses.
@@ -372,8 +366,8 @@ auto OdometryPipeline::grow_geometry() -> bool
                                            frame_corrected, pose_edge,
                                            _camera_corrected);
 #if defined(DEBUG_ABSOLUTE_POSE_RECOVERY)
-  const auto scene_csv_fp = fmt::format("/Users/oddkiva/Desktop/scene_{}.csv",
-                                        _pose_curr);
+  const auto scene_csv_fp =
+      fmt::format("/Users/oddkiva/Desktop/scene_{}.csv", _pose_curr);
   _point_cloud_generator->write_point_cloud(_tracks_alive, scene_csv_fp);
 #endif
 

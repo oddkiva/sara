@@ -11,6 +11,7 @@
 
 //! @example
 
+#include <DO/Sara/Core/Math/AxisConvention.hpp>
 #include <DO/Sara/Core/Math/Rotation.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -370,17 +371,12 @@ GRAPHICS_MAIN()
     const auto cost_fn = ReprojectionError::create(ba_data.observations(i, 0),
                                                    ba_data.observations(i, 1));
 
-    const auto camera_idx = ba_data.camera_indices[i];
     // Locate the parameter data.
-    const auto extrinsics_ptr =
-        extrinsics_params.data() +
-        camera_idx * ReprojectionError::ExtrinsicParameterCount;
-    const auto intrinsics_ptr =
-        intrinsics_params.data() +
-        camera_idx * ReprojectionError::IntrinsicParameterCount;
-    const auto scene_point_ptr =
-        ba_data.point_coords.data() +
-        ba_data.point_indices[i] * ReprojectionError::PointDimension;
+    const auto camera_idx = ba_data.camera_indices[i];
+    const auto point_idx = ba_data.point_indices[i];
+    const auto extrinsics_ptr = ba_data.extrinsics[camera_idx].data();
+    const auto intrinsics_ptr = ba_data.intrinsics[camera_idx].data();
+    const auto scene_point_ptr = ba_data.point_coords[point_idx].data();
 
     ba_problem.AddResidualBlock(cost_fn, nullptr /* squared loss */,  //
                                 extrinsics_ptr, intrinsics_ptr,
@@ -390,21 +386,11 @@ GRAPHICS_MAIN()
   // Freeze all the intrinsic parameters during the optimization.
   SARA_LOGI(logger, "Freezing intrinsic camera parameters...");
   for (auto v = 0; v < 2; ++v)
-  {
-    const auto intrinsics_ptr = intrinsics_params.data() +
-                                v * ReprojectionError::IntrinsicParameterCount;
-    ba_problem.SetParameterBlockConstant(intrinsics_ptr);
-  }
+    ba_problem.SetParameterBlockConstant(ba_data.intrinsics[v].data());
 
   // Freeze the first absolute pose parameters.
   SARA_LOGI(logger, "Freezing first absolute pose...");
-  {
-    const auto camera_idx = 0;
-    const auto extrinsics_ptr =
-        extrinsics_params.data() +
-        camera_idx * ReprojectionError::ExtrinsicParameterCount;
-    ba_problem.SetParameterBlockConstant(extrinsics_ptr);
-  }
+  ba_problem.SetParameterBlockConstant(ba_data.extrinsics[0].data());
 
   SARA_LOGI(logger, "[BA][BEFORE] camera_parameters =\n{}",
             Eigen::MatrixXd{ba_data.extrinsics.matrix()});
@@ -417,17 +403,12 @@ GRAPHICS_MAIN()
   //
   // The z-coordinate of the camera coordinates is the x-axis of the automotive
   // coordinates
-  //
-  // clang-format off
-  static const auto P = (Eigen::Matrix3d{} <<
-     0,  0, 1,
-    -1,  0, 0,
-     0, -1, 0
-  ).finished();
-  // clang-format on
+  static const auto P =
+      sara::axis_permutation_matrix(sara::AxisConvention::Automotive)
+          .cast<double>()
+          .eval();
   {
-    const auto aaxis_1 =
-        Eigen::Vector3d{ba_data.extrinsics.matrix().row(1).head(3)};
+    const auto aaxis_1 = ba_data.extrinsics.matrix().row(1).head(3);
     const auto angle_1 = aaxis_1.norm();
     const auto axis_1 = Eigen::Vector3d{aaxis_1.normalized()};
     const auto R_1 = Eigen::AngleAxisd{angle_1, axis_1}  //
@@ -448,6 +429,7 @@ GRAPHICS_MAIN()
 
   auto summary = ceres::Solver::Summary{};
   ceres::Solve(options, &ba_problem, &summary);
+  SARA_LOGI(logger, "{}", summary.BriefReport());
 
   SARA_LOGI(logger, "Checking the BA...");
   SARA_LOGI(logger, "[BA][AFTER ] camera_parameters =\n{}",
@@ -455,11 +437,8 @@ GRAPHICS_MAIN()
   SARA_LOGI(logger, "[BA][AFTER ] points =\n{}",
             Eigen::MatrixXd{ba_data.point_coords.matrix().topRows<20>()});
 
-  std::cout << summary.BriefReport() << std::endl;
-
   {
-    const auto aaxis_1 =
-        Eigen::Vector3d{ba_data.extrinsics.matrix().row(1).head(3)};
+    const auto aaxis_1 = ba_data.extrinsics.matrix().row(1).head(3);
     const auto angle_1 = aaxis_1.norm();
     const auto axis_1 = Eigen::Vector3d{aaxis_1.normalized()};
     const auto R_1 = Eigen::AngleAxisd{angle_1, axis_1}  //
