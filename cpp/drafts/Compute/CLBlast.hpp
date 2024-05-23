@@ -12,9 +12,10 @@
 #pragma once
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Timer.hpp>
+
+#include <fmt/format.h>
 
 #if defined(__APPLE__) || defined(__MACOSX)
 #  include <OpenCL/cl.hpp>
@@ -115,13 +116,14 @@ namespace DO::Sara {
 
       if (status != clblast::StatusCode::kSuccess)
         throw std::runtime_error{
-            format("Batched GEMM operation failed! Status code = %d", status)};
+            fmt::format("Batched GEMM operation failed! Status code = {}",
+                        static_cast<int>(status))};
 
       clWaitForEvents(1, &event);
       clReleaseEvent(event);
     }
     const auto elapsed_time = timer.elapsed_ms();
-    SARA_DEBUG << format("Completed batched SGEMM in %.3lf ms", elapsed_time)
+    SARA_DEBUG << fmt::format("Completed batched SGEMM in {} ms", elapsed_time)
                << std::endl;
 
     {
@@ -130,9 +132,10 @@ namespace DO::Sara {
           /* offset */ 0, C.size() * sizeof(float), C.data());
 
       if (status)
-        throw std::runtime_error{format("Error: Failed to read buffer from "
-                                        "device to host! Status code = %d",
-                                        status)};
+        throw std::runtime_error{
+            fmt::format("Error: Failed to read buffer from device to host! "
+                        "Status code = {}",
+                        status)};
     }
   }
 
