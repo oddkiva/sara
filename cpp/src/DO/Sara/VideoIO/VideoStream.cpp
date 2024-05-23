@@ -11,6 +11,9 @@
 
 #include <DO/Sara/VideoIO/VideoStream.hpp>
 
+#include <DO/Sara/ImageProcessing/Rotate.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
+
 // #define PROFILE_VIDEOSTREAM
 #if defined(__APPLE__)
 // #define HWACCEL
@@ -31,12 +34,9 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include <DO/Sara/Logging/Logger.hpp>
 #if defined(PROFILE_VIDEOSTREAM)
 #  include <DO/Sara/Core/Timer.hpp>
 #endif
-
-#include <DO/Sara/ImageProcessing/Rotate.hpp>
 
 #include <optional>
 #include <thread>
