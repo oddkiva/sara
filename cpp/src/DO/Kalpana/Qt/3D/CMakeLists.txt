@@ -10,6 +10,5 @@ target_link_libraries(
          Qt${QT_VERSION}::OpenGL #
          $<$<EQUAL:${QT_VERSION},6>:Qt6::OpenGLWidgets> #
          ${OPENGL_LIBRARIES} #
-         DO::Sara::Core
-  PRIVATE fmt::fmt)
+         DO::Sara::Core)
 set_property(TARGET DO_Kalpana_Qt_3D PROPERTY FOLDER "Libraries/Kalpana")

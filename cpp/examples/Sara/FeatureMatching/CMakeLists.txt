@@ -28,5 +28,4 @@ sara_add_example(video_edge_matching)
 target_link_libraries(video_edge_matching PRIVATE Boost::filesystem)
 
 sara_add_example(video_sift_matching)
-target_link_libraries(video_sift_matching PRIVATE fmt::fmt #
-                                                  Boost::program_options)
+target_link_libraries(video_sift_matching PRIVATE Boost::program_options)

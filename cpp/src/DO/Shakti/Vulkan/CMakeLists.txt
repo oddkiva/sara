@@ -11,7 +11,6 @@ target_link_libraries(
   DO_Shakti_Vulkan
   PUBLIC DO::Sara::Core #
          Vulkan::Vulkan #
-         glfw #
-         fmt::fmt)
+         glfw)
 
 set_target_properties(DO_Shakti_Vulkan PROPERTIES FOLDER "Libraries/Shakti")
