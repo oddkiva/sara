@@ -13,6 +13,8 @@
 
 #include <DO/Sara/Logging/Logger.hpp>
 
+#include <tinyply-2.2/source/tinyply.h>
+
 #include <algorithm>
 
 
@@ -455,4 +457,35 @@ auto PointCloudGenerator::write_point_cloud(
     const auto p = _point_cloud[pi].coords();
     out << fmt::format("{},{},{},{}\n", pi, p.x(), p.y(), p.z());
   }
+}
+
+
+auto PointCloudGenerator::write_ply(const std::filesystem::path& out_ply) const
+    -> void
+{
+  auto coords = std::vector<Eigen::Vector3d>(_point_cloud.size());
+  auto colors = std::vector<Eigen::Vector3d>(_point_cloud.size());
+  std::transform(_point_cloud.begin(), _point_cloud.end(), coords.begin(),
+                 [](const ScenePoint& x) { return x.coords(); });
+  std::transform(_point_cloud.begin(), _point_cloud.end(), colors.begin(),
+                 [](const ScenePoint& x) { return x.color(); });
+
+  auto fb = std::filebuf{};
+  fb.open(out_ply, std::ios::out);
+  std::ostream ostr(&fb);
+  if (ostr.fail())
+    throw std::runtime_error{"Error: failed to create PLY!"};
+
+  auto ply = tinyply::PlyFile{};
+  ply.add_properties_to_element("vertex", {"x", "y", "z"},
+                                tinyply::Type::FLOAT64, coords.size(),
+                                reinterpret_cast<std::uint8_t*>(coords.data()),
+                                tinyply::Type::INVALID, 0);
+
+  ply.add_properties_to_element("vertex", {"red", "green", "blue"},
+                                tinyply::Type::FLOAT64, colors.size(),
+                                reinterpret_cast<std::uint8_t*>(colors.data()),
+                                tinyply::Type::INVALID, 0);
+
+  ply.write(ostr, false);
 }

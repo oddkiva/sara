@@ -146,6 +146,8 @@ namespace DO::Sara {
     auto write_point_cloud(const std::vector<FeatureTrack>& ftracks,
                            const std::filesystem::path& out_csv) const -> void;
 
+    auto write_ply(const std::filesystem::path& out_ply) const -> void;
+
   private: /* data members */
     const CameraPoseGraph& _pose_graph;
     const FeatureGraph& _feature_graph;
