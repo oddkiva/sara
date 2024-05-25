@@ -260,12 +260,14 @@ auto PointCloudGenerator::compress_point_cloud(
     if (scene_point_indices.empty())
       continue;
 
-    // Reassign the scene point index for the given feature track.
-    for (const auto& v : track)
-      _from_vertex_to_scene_point_index[v] = scene_point_indices.front();
-
     // Recalculate the scene point index as a barycenter.
     const auto scene_point = barycenter(scene_point_indices);
+
+    // Reassign the scene point index for the given feature track.
+    for (const auto& v : track)
+      _from_vertex_to_scene_point_index[v] = point_cloud_compressed.size();
+
+    // Only then store the new point coordinates. Otherwise the index is wrong!
     point_cloud_compressed.emplace_back(scene_point);
   }
 
@@ -388,12 +390,12 @@ auto PointCloudGenerator::grow_point_cloud(
     auto scene_point_value = ScenePoint{coords, color};
     _point_cloud.emplace_back(std::move(scene_point_value));
 
-    // Recall that a match is a pair of feature vertex.
-    const auto& [x, y] = fmatches[j];
-
     // Assign a scene point index to the two feature vertices.
-    _from_vertex_to_scene_point_index[x] = scene_point_index;
-    _from_vertex_to_scene_point_index[y] = scene_point_index;
+    const auto& ftrack = ftracks_without_scene_point[j];
+    for (const auto& v : ftrack)
+      _from_vertex_to_scene_point_index[v] = scene_point_index;
+
+    // Increment the scene point index.
     ++scene_point_index;
   }
 

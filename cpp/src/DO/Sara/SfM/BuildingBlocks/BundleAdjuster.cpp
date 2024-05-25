@@ -147,7 +147,7 @@ auto BundleAdjuster::populate_camera_params(
     const Eigen::Vector3d aaxis_v_3d = aaxis_v.angle() * aaxis_v.axis();
     // Initialize the absolute rotation.
     extrinsics_v << aaxis_v_3d.transpose(), pose_v.t.transpose();
-    SARA_LOGD(logger, "Populating extrinsics[{}]=\n{}", v, extrinsics_v.eval());
+    SARA_LOGT(logger, "Populating extrinsics[{}]=\n{}", v, extrinsics_v.eval());
 
     // Initialize the internal camera parameters.
     const auto& K = calibration_matrices[v];
@@ -155,7 +155,7 @@ auto BundleAdjuster::populate_camera_params(
     intrinsics_v(1) = K(1, 1);  // fy
     intrinsics_v(2) = K(0, 2);  // u0
     intrinsics_v(3) = K(1, 2);  // v0
-    SARA_LOGD(logger, "Populating intrinsics[{}]=\n{}", v, intrinsics_v.eval());
+    SARA_LOGT(logger, "Populating intrinsics[{}]=\n{}", v, intrinsics_v.eval());
   }
 }
 
@@ -208,6 +208,7 @@ auto BundleAdjuster::solve() -> void
   SARA_LOGI(logger, "Solving the BA problem...");
   auto options = ceres::Solver::Options{};
   options.linear_solver_type = ceres::DENSE_SCHUR;
+  options.max_num_iterations = 200;
   options.minimizer_progress_to_stdout = true;
 
   auto summary = ceres::Solver::Summary{};

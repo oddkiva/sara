@@ -247,23 +247,21 @@ GRAPHICS_MAIN()
     tracks_filtered.emplace_back(std::move(track_filtered));
   }
 
-  auto ba_problem = sara::BundleAdjuster{};
+  auto ba = sara::BundleAdjuster{};
   static constexpr auto intrinsics_dim = 4;  // fx, fy, u0, v0
   static constexpr auto extrinsics_dim = 6;
-  ba_problem.form_problem(pose_graph, feature_tracker, K, point_cloud_generator,
-                          tracks_filtered, intrinsics_dim, extrinsics_dim);
+  ba.form_problem(pose_graph, feature_tracker, K, point_cloud_generator,
+                  tracks_filtered, intrinsics_dim, extrinsics_dim);
   // Freeze all the intrinsic parameters during the optimization.
   SARA_LOGI(logger, "Freezing intrinsic camera parameters...");
   for (auto v = 0; v < 2; ++v)
-    ba_problem.problem->SetParameterBlockConstant(
-        ba_problem.data.intrinsics[v].data());
+    ba.problem->SetParameterBlockConstant(ba.data.intrinsics[v].data());
 
   // Freeze the first absolute pose parameters.
   SARA_LOGI(logger, "Freezing first absolute pose...");
-  ba_problem.problem->SetParameterBlockConstant(
-      ba_problem.data.extrinsics[0].data());
+  ba.problem->SetParameterBlockConstant(ba.data.extrinsics[0].data());
 
-  const auto& ba_data = ba_problem.data;
+  const auto& ba_data = ba.data;
   SARA_LOGI(
       logger, "[BA][BEFORE] points =\n{}",
       Eigen::MatrixXd{ba_data.point_coords.matrix().topRows<20>().eval()});
@@ -277,7 +275,7 @@ GRAPHICS_MAIN()
   }
 
   // Solve the BA.
-  ba_problem.solve();
+  ba.solve();
 
   SARA_LOGI(logger, "Checking the BA...");
   SARA_LOGI(logger, "[BA][AFTER ] camera_parameters =\n{}",
