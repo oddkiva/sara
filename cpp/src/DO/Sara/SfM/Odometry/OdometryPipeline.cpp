@@ -390,15 +390,15 @@ auto OdometryPipeline::adjust_bundles() -> void
   }
 
   // Update the point cloud.
-  for (const auto& ftrack : ftracks_filtered)
+  for (auto t = std::size_t{}; t < ftracks_filtered.size(); ++t)
   {
+    const auto& ftrack = ftracks_filtered[t];
     const auto idx = _point_cloud_generator->scene_point_index(ftrack.front());
     if (idx == std::nullopt)
       throw std::runtime_error{fmt::format(
           "Error: the feature vertex {} must have a scene point index!",
           ftrack.front())};
 
-    const auto i = static_cast<int>(*idx);
-    _point_cloud[i].coords() = ba_data.point_coords[i].vector();
+    _point_cloud[*idx].coords() = ba_data.point_coords[static_cast<int>(t)].vector();
   }
 }
