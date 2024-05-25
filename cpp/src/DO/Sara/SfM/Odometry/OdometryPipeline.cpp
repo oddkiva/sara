@@ -250,8 +250,7 @@ auto OdometryPipeline::grow_geometry() -> bool
         _feature_tracker._feature_tracks);
 
     // 6. Determine the current absolute pose from the alive tracks using a
-    // PnP
-    //    approach.
+    //    PnP approach.
     std::tie(_tracks_alive_with_known_scene_point,
              _tracks_alive_without_scene_point) =
         _point_cloud_generator->split_by_scene_point_knowledge(_tracks_alive);
