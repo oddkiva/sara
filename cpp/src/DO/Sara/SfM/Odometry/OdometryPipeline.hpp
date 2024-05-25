@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Features/KeypointList.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/BundleAdjuster.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/CameraPoseEstimator.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/PointCloudGenerator.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/RelativePoseEstimator.hpp>
@@ -26,9 +27,9 @@ namespace DO::Sara {
   class OdometryPipeline
   {
   public:
-    auto set_config(const std::filesystem::path& video_path,
-                    const v2::BrownConradyDistortionModel<double>& camera)
-        -> void;
+    auto
+    set_config(const std::filesystem::path& video_path,
+               const v2::BrownConradyDistortionModel<double>& camera) -> void;
 
     auto read() -> bool;
 
@@ -45,13 +46,13 @@ namespace DO::Sara {
     auto detect_keypoints(const ImageView<float>&) const
         -> KeypointList<OERegion, float>;
 
-    auto
-    estimate_relative_pose(const KeypointList<OERegion, float>& keys_src,
-                           const KeypointList<OERegion, float>& keys_dst) const
-        -> std::pair<RelativePoseData, TwoViewGeometry>;
+    auto estimate_relative_pose(const KeypointList<OERegion, float>& keys_src,
+                                const KeypointList<OERegion, float>& keys_dst)
+        const -> std::pair<RelativePoseData, TwoViewGeometry>;
 
   private: /* graph update tasks */
     auto grow_geometry() -> bool;
+    auto adjust_bundles() -> void;
 
   public: /* data members */
     VideoStreamer _video_streamer;
@@ -64,6 +65,7 @@ namespace DO::Sara {
     RelativePoseEstimator _rel_pose_estimator;
     CameraPoseEstimator _abs_pose_estimator;
     std::unique_ptr<PointCloudGenerator> _point_cloud_generator;
+    BundleAdjuster _bundle_adjuster;
     //! @}
 
     //! @brief SfM data.

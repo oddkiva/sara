@@ -296,6 +296,8 @@ auto OdometryPipeline::grow_geometry() -> bool
   _point_cloud_generator->write_point_cloud(_tracks_alive, scene_csv_fp);
 #endif
 
+  this->adjust_bundles();
+
   // ---------------------------------------------------------------------------
   // FOR DEBUGGING PURPOSES.
   //
@@ -310,4 +312,93 @@ auto OdometryPipeline::grow_geometry() -> bool
   // ---------------------------------------------------------------------------
 
   return true;
+}
+
+
+auto OdometryPipeline::adjust_bundles() -> void
+{
+  auto& logger = Logger::get();
+
+  // Filter the feature tracks by NMS.
+  SARA_LOGI(logger, "Collect all tracks that have a scene point...");
+  auto ftracks_filtered = std::vector<FeatureTracker::Track>{};
+  for (const auto& ftrack : _feature_tracker._feature_tracks)
+  {
+    // Does a track have a 3D point? If not, discard it.
+    const auto p = _point_cloud_generator->scene_point(ftrack.front());
+    if (p == std::nullopt)
+      continue;
+
+    // Filter the feature track by NMS: there should be only 1 feature per
+    // image.
+    auto ftrack_filtered = _point_cloud_generator  //
+                               ->filter_by_non_max_suppression(ftrack);
+
+    ftracks_filtered.emplace_back(std::move(ftrack_filtered));
+  }
+
+
+  auto K = Eigen::Matrix3d{};
+  const auto fx = _camera_corrected.fx();
+  const auto fy = _camera_corrected.fy();
+  const auto s = _camera_corrected.shear();
+  const auto u0 = _camera_corrected.u0();
+  const auto v0 = _camera_corrected.v0();
+  if (s != 0)
+    throw std::runtime_error{
+        "Unimplemented: we require the shear value to be 0!"};
+  // clang-format off
+  K <<
+    fx,  0, u0,
+     0, fy, v0,
+     0,  0,  1;
+  // clang-format on
+  const auto Ks = std::vector<Eigen::Matrix3d>(_pose_graph.num_vertices(), K);
+  static constexpr auto intrinsics_dim = 4;  // fx, fy, u0, v0
+  static constexpr auto extrinsics_dim = 6;
+  _bundle_adjuster.form_problem(_pose_graph, _feature_tracker, Ks,
+                                *_point_cloud_generator, ftracks_filtered,
+                                intrinsics_dim, extrinsics_dim);
+
+  // Freeze all the intrinsic parameters during the optimization.
+  SARA_LOGI(logger, "Freezing intrinsic camera parameters...");
+  const auto num_vertices = static_cast<int>(_pose_graph.num_vertices());
+  for (auto v = 0; v < num_vertices; ++v)
+    _bundle_adjuster.problem->SetParameterBlockConstant(
+        _bundle_adjuster.data.intrinsics[v].data());
+
+  // Freeze the first absolute pose parameters.
+  SARA_LOGI(logger, "Freezing first absolute pose...");
+  _bundle_adjuster.problem->SetParameterBlockConstant(
+      _bundle_adjuster.data.extrinsics[0].data());
+
+  // Solve the BA.
+  _bundle_adjuster.solve();
+
+  // Update the absolute poses.
+  const auto& ba_data = _bundle_adjuster.data;
+  for (auto v = 0; v < num_vertices; ++v)
+  {
+    const auto aaxis_3d =
+        ba_data.extrinsics.matrix().row(v).head(3).transpose();
+    const auto angle = aaxis_3d.norm();
+    const auto axis = aaxis_3d.normalized();
+    const auto aaxis = Eigen::AngleAxisd{angle, axis};
+    const auto t = ba_data.extrinsics.matrix().row(v).tail(3).transpose();
+    _pose_graph[v].pose.q = Eigen::Quaterniond{aaxis};
+    _pose_graph[v].pose.t = t;
+  }
+
+  // Update the point cloud.
+  for (const auto& ftrack : ftracks_filtered)
+  {
+    const auto idx = _point_cloud_generator->scene_point_index(ftrack.front());
+    if (idx == std::nullopt)
+      throw std::runtime_error{fmt::format(
+          "Error: the feature vertex {} must have a scene point index!",
+          ftrack.front())};
+
+    const auto i = static_cast<int>(*idx);
+    _point_cloud[i].coords() = ba_data.point_coords[i].vector();
+  }
 }
