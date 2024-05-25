@@ -296,7 +296,7 @@ auto OdometryPipeline::grow_geometry() -> bool
   _point_cloud_generator->write_point_cloud(_tracks_alive, scene_csv_fp);
 #endif
 
-  this->adjust_bundles();
+  // this->adjust_bundles();
 
   // ---------------------------------------------------------------------------
   // FOR DEBUGGING PURPOSES.

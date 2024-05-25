@@ -260,13 +260,13 @@ auto PointCloudGenerator::compress_point_cloud(
     if (scene_point_indices.empty())
       continue;
 
-    // Reassign the scene point index for the given feature track.
-    for (const auto& v : track)
-      _from_vertex_to_scene_point_index[v] = scene_point_indices.front();
-
     // Recalculate the scene point index as a barycenter.
     const auto scene_point = barycenter(scene_point_indices);
     point_cloud_compressed.emplace_back(scene_point);
+
+    // Reassign the scene point index for the given feature track.
+    for (const auto& v : track)
+      _from_vertex_to_scene_point_index[v] = point_cloud_compressed.size();
   }
 
   // Swap the point cloud with the set of barycenters.
