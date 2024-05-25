@@ -208,6 +208,7 @@ auto BundleAdjuster::solve() -> void
   SARA_LOGI(logger, "Solving the BA problem...");
   auto options = ceres::Solver::Options{};
   options.linear_solver_type = ceres::DENSE_SCHUR;
+  options.max_num_iterations = 200;
   options.minimizer_progress_to_stdout = true;
 
   auto summary = ceres::Solver::Summary{};

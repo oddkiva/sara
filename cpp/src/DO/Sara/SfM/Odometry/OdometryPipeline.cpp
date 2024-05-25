@@ -295,7 +295,7 @@ auto OdometryPipeline::grow_geometry() -> bool
   _point_cloud_generator->write_point_cloud(_tracks_alive, scene_csv_fp);
 #endif
 
-  // this->adjust_bundles();
+  adjust_bundles();
 
   // ---------------------------------------------------------------------------
   // FOR DEBUGGING PURPOSES.
@@ -324,17 +324,21 @@ auto OdometryPipeline::adjust_bundles() -> void
   for (const auto& ftrack : _feature_tracker._feature_tracks)
   {
     // Does a track have a 3D point? If not, discard it.
-    const auto p = _point_cloud_generator->scene_point(ftrack.front());
-    if (p == std::nullopt)
+    const auto idx = _point_cloud_generator->scene_point_index(ftrack.front());
+    if (idx == std::nullopt)
       continue;
 
     // Filter the feature track by NMS: there should be only 1 feature per
     // image.
-    auto ftrack_filtered = _point_cloud_generator  //
-                               ->filter_by_non_max_suppression(ftrack);
+    auto ftrack_filtered =
+        _point_cloud_generator->filter_by_non_max_suppression(ftrack);
 
     ftracks_filtered.emplace_back(std::move(ftrack_filtered));
   }
+  SARA_LOGI(logger, "Feature tracks total: {}",
+            _feature_tracker._feature_tracks.size());
+  SARA_LOGI(logger, "Feature tracks filtered with known scene point: {}",
+            ftracks_filtered.size());
 
 
   auto K = Eigen::Matrix3d{};
@@ -375,6 +379,7 @@ auto OdometryPipeline::adjust_bundles() -> void
   _bundle_adjuster.solve();
 
   // Update the absolute poses.
+  SARA_LOGI(logger, "Update the absolute poses from BA...");
   const auto& ba_data = _bundle_adjuster.data;
   for (auto v = 0; v < num_vertices; ++v)
   {
@@ -389,15 +394,28 @@ auto OdometryPipeline::adjust_bundles() -> void
   }
 
   // Update the point cloud.
+  // SARA_LOGI(logger, "Update the point cloud from BA...");
+  SARA_LOGI(logger, "Check the scene point indices...");
   for (auto t = std::size_t{}; t < ftracks_filtered.size(); ++t)
   {
     const auto& ftrack = ftracks_filtered[t];
     const auto idx = _point_cloud_generator->scene_point_index(ftrack.front());
     if (idx == std::nullopt)
-      throw std::runtime_error{fmt::format(
-          "Error: the feature vertex {} must have a scene point index!",
-          ftrack.front())};
+      continue;
+      // throw std::runtime_error{fmt::format(
+      //     "Error: the feature vertex {} must have a scene point index!",
+      //     ftrack.front())};
 
-    _point_cloud[*idx].coords() = ba_data.point_coords[static_cast<int>(t)].vector();
+    if (*idx >= _point_cloud.size())
+      throw std::runtime_error{
+          fmt::format("Scene point index {} out of range [0, {}[", *idx,
+                      _point_cloud.size())};
+
+    const Eigen::Vector3d p = ba_data  //
+                                  .point_coords[static_cast<int>(t)]
+                                  .vector();
+    SARA_LOGT(logger, "[point:{}] {}", t, p.transpose().eval());
+
+    _point_cloud[*idx].coords() = p;
   }
 }
