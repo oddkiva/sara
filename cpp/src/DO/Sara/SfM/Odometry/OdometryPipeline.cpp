@@ -401,10 +401,15 @@ auto OdometryPipeline::adjust_bundles() -> void
     const auto& ftrack = ftracks_filtered[t];
     const auto idx = _point_cloud_generator->scene_point_index(ftrack.front());
     if (idx == std::nullopt)
-      continue;
-      // throw std::runtime_error{fmt::format(
-      //     "Error: the feature vertex {} must have a scene point index!",
-      //     ftrack.front())};
+#ifdef BUG_DEBUG_ME
+      throw std::runtime_error{fmt::format(
+          "Error: the feature vertex {} must have a scene point index!",
+          ftrack.front())};
+#else
+      SARA_LOGE(logger,
+                "Error: the feature vertex {} must have a scene point index!",
+                ftrack.front());
+#endif
 
     if (*idx >= _point_cloud.size())
       throw std::runtime_error{
