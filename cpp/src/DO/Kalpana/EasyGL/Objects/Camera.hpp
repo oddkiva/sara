@@ -25,7 +25,7 @@ namespace DO::Kalpana {
     static constexpr auto YAW = -90.0f;
     static constexpr auto PITCH = 0.0f;
     static constexpr auto SPEED = 1e-1f;
-    static constexpr auto SENSITIVITY = 1e-1f;
+    static constexpr auto SENSITIVITY = 5e-1f;
     static constexpr auto ZOOM = 45.0f;
 
     Eigen::Vector3f position{10.f * Eigen::Vector3f::UnitY()};
