@@ -321,11 +321,6 @@ private:
     if (action == GLFW_RELEASE || action == GLFW_REPEAT)
     {
       app.move_point_cloud_camera_with_keyboard(key);
-      return;
-    }
-
-    if (action == GLFW_RELEASE || action == GLFW_REPEAT)
-    {
       app.resize_point_size(key);
       return;
     }
@@ -347,14 +342,14 @@ private:
     if (key == GLFW_KEY_D)
       _point_cloud_camera.move_right(delta);
 
-    if (key == GLFW_KEY_J)
+    if (key == GLFW_KEY_H)
       _point_cloud_camera.no_head_movement(-angle_delta);  // CCW
-    if (key == GLFW_KEY_L)
+    if (key == GLFW_KEY_K)
       _point_cloud_camera.no_head_movement(+angle_delta);  // CW
 
-    if (key == GLFW_KEY_I)
+    if (key == GLFW_KEY_U)
       _point_cloud_camera.yes_head_movement(+angle_delta);
-    if (key == GLFW_KEY_K)
+    if (key == GLFW_KEY_J)
       _point_cloud_camera.yes_head_movement(-angle_delta);
 
     if (key == GLFW_KEY_R)
@@ -362,9 +357,9 @@ private:
     if (key == GLFW_KEY_F)
       _point_cloud_camera.move_down(delta);
 
-    if (key == GLFW_KEY_U)
+    if (key == GLFW_KEY_Y)
       _point_cloud_camera.maybe_head_movement(-angle_delta);
-    if (key == GLFW_KEY_O)
+    if (key == GLFW_KEY_I)
       _point_cloud_camera.maybe_head_movement(+angle_delta);
 
     _point_cloud_camera.update();
