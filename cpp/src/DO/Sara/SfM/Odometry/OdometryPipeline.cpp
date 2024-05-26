@@ -218,7 +218,7 @@ auto OdometryPipeline::grow_geometry() -> bool
 
   // 3. Recalculate the feature tracks that are still alive.
   std::tie(_tracks_alive, _track_visibility_count) =
-      _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
+      _feature_tracker.find_feature_tracks_at_pose(_pose_curr);
 
 #if defined(DEBUG_ABSOLUTE_POSE_RECOVERY)
   const auto corr_csv_fp = fmt::format("corr_{}.csv", _pose_curr);

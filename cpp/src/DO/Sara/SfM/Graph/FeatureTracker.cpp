@@ -129,8 +129,8 @@ auto FeatureTracker::update_feature_tracks(
             _feature_tracks.size());
 }
 
-auto FeatureTracker::calculate_alive_feature_tracks(
-    const CameraPoseGraph::Vertex camera_vertex_curr) const
+auto FeatureTracker::find_feature_tracks_at_pose(
+    const CameraPoseGraph::Vertex pose_vertex) const
     -> std::tuple<TrackArray, TrackVisibilityCountArray>
 {
   auto& logger = Logger::get();
@@ -139,7 +139,7 @@ auto FeatureTracker::calculate_alive_feature_tracks(
   const FeatureGraph::Impl& fgraph = _feature_graph;
 
   const auto& ftracks = _feature_tracks;
-  auto tracks_alive = TrackArray{};
+  auto tracks_filtered = TrackArray{};
   auto track_visibility_count = TrackVisibilityCountArray{};
 
   for (const auto& ftrack : ftracks)
@@ -147,15 +147,15 @@ auto FeatureTracker::calculate_alive_feature_tracks(
     // Do we still see the track in the image.
     const auto is_alive =
         std::find_if(ftrack.begin(), ftrack.end(),
-                     [&fgraph, camera_vertex_curr](const auto& v) {
-                       return fgraph[v].pose_vertex == camera_vertex_curr;
+                     [&fgraph, pose_vertex](const auto& v) {
+                       return fgraph[v].pose_vertex == pose_vertex;
                      }) != ftrack.end();
 
     if (!is_alive)
       continue;
 
     // Add the newly found alive track.
-    tracks_alive.push_back(ftrack);
+    tracks_filtered.push_back(ftrack);
 
     // Carefully count the track life, it's not the number of vertices, but
     // the number of camera views in which the feature reappears.
@@ -167,7 +167,7 @@ auto FeatureTracker::calculate_alive_feature_tracks(
                    [&fgraph](const auto& v) { return fgraph[v].pose_vertex; });
     track_visibility_count.push_back(camera_vertices_where_present.size());
   }
-  SARA_LOGD(logger, "Num tracks alive: {}", tracks_alive.size());
+  SARA_LOGD(logger, "Num tracks alive: {}", tracks_filtered.size());
 
   const auto longest_track_alive = std::max_element(
       track_visibility_count.begin(), track_visibility_count.end());
@@ -186,5 +186,5 @@ auto FeatureTracker::calculate_alive_feature_tracks(
 #endif
   }
 
-  return std::make_tuple(tracks_alive, track_visibility_count);
+  return std::make_tuple(tracks_filtered, track_visibility_count);
 }
