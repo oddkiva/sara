@@ -165,6 +165,8 @@ namespace DO::Sara {
 
     FeatureToScenePointMap _from_vertex_to_scene_point_index;
 
+    //! @brief Even if we don't have a metric reconstruction, this default value
+    //! works well in practice.
     double _distance_max = +1e3;
   };
 

@@ -268,8 +268,8 @@ private:
     return *app_ptr;
   }
 
-  static auto window_size_callback(GLFWwindow* window, const int, const int)
-      -> void
+  static auto window_size_callback(GLFWwindow* window, const int,
+                                   const int) -> void
   {
     auto& self = get_self(window);
 
@@ -310,9 +310,6 @@ private:
       return;
     }
 
-    if (action == GLFW_RELEASE || action == GLFW_REPEAT)
-      app.move_point_cloud_camera_with_keyboard(key);
-
     // Use the escape key to smoothly exit the OpenGL app.
     if ((action == GLFW_RELEASE || action == GLFW_REPEAT) &&
         key == GLFW_KEY_ESCAPE)
@@ -321,7 +318,17 @@ private:
       return;
     }
 
-    app.resize_point_size(action, key);
+    if (action == GLFW_RELEASE || action == GLFW_REPEAT)
+    {
+      app.move_point_cloud_camera_with_keyboard(key);
+      return;
+    }
+
+    if (action == GLFW_RELEASE || action == GLFW_REPEAT)
+    {
+      app.resize_point_size(key);
+      return;
+    }
   }
 
   auto move_point_cloud_camera_with_keyboard(const int key) -> void
@@ -364,14 +371,12 @@ private:
     _model_view = _point_cloud_camera.view_matrix();
   }
 
-  auto resize_point_size(const int action, const int key) -> void
+  auto resize_point_size(const int key) -> void
   {
-    if ((action == GLFW_RELEASE || action == GLFW_REPEAT) &&
-        key == GLFW_KEY_MINUS)
+    if (key == GLFW_KEY_MINUS)
       _point_size /= 1.1f;
 
-    if ((action == GLFW_RELEASE || action == GLFW_REPEAT) &&
-        key == GLFW_KEY_EQUAL)
+    if (key == GLFW_KEY_EQUAL)
       _point_size *= 1.1f;
   }
 
@@ -458,8 +463,8 @@ private:
 bool SingleWindowApp::_glfw_initialized = false;
 
 
-auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
-    -> int
+auto main([[maybe_unused]] int const argc,
+          [[maybe_unused]] char** const argv) -> int
 {
 #if defined(_OPENMP)
   const auto num_threads = omp_get_max_threads();
