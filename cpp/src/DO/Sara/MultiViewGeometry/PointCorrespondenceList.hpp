@@ -21,11 +21,10 @@ namespace DO::Sara {
   //! A point correspondence is denoted as $(x[i], y[i])$.
   //!
   //! In my opinion, 'x' and 'y' are the lightest and most agnostic notations I
-  //! could find.
-  //! We do lose expressivity because they may be too neutral, but it still
-  //! feels natural and mathematical at the same time.
+  //! could think of. We do lose expressivity because they may be too neutral,
+  //! but it still feels natural and mathematical at the same time.
   //!
-  //! Notice that we are not assuming anythin about the dimensions of x[i] and
+  //! Notice that we are not assuming anything about the dimensions of x[i] and
   //! y[i].
   //! - x[i] and y[i] don't have to have the same dimensions.
   //! - (x[i], y[i]) can be 2D point <-> 2D point correspondence in two

@@ -308,6 +308,8 @@ auto OdometryPipeline::grow_geometry() -> bool
   //
   // ---------------------------------------------------------------------------
 
+  _point_cloud_generator->write_ply(fmt::format("scene_{:04d}.ply", _pose_curr));
+
   return true;
 }
 
