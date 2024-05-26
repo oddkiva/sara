@@ -104,8 +104,7 @@ public:
   {
     // Current projection matrix
     _projection = _video_viewport.orthographic_projection();
-    // _point_cloud_projection =
-    _point_cloud_viewport.orthographic_projection();
+    _point_cloud_projection = _point_cloud_viewport.orthographic_projection();
     // _point_cloud_projection =
     //     _point_cloud_viewport.perspective(120.f, 1e-6f, 1e3f);
 
@@ -251,9 +250,10 @@ private:
     // clang-format on
 
     // Render the point cloud.
+    const Eigen::Matrix4f model_view_final = _model_view * _scale_mat;
     _point_cloud_renderer.render(_point_cloud, _point_size,
                                  from_cam_to_gl.matrix(),  //
-                                 _model_view, _point_cloud_projection);
+                                 model_view_final, _point_cloud_projection);
   }
 
   auto get_framebuffer_sizes() const -> Eigen::Vector2i
@@ -329,6 +329,7 @@ private:
       app.move_point_cloud_camera_with_keyboard(key);
       app.resize_point_size(key);
       app.change_camera_step_size(key);
+      app.change_model_scale(key);
       return;
     }
   }
@@ -384,6 +385,15 @@ private:
 
     if (key == GLFW_KEY_2)
       _delta *= 1.1f;
+  }
+
+  auto change_model_scale(const int key) -> void
+  {
+    if (key == GLFW_KEY_Z)
+      _scale_mat.topLeftCorner<3, 3>() /= 1.1f;
+
+    if (key == GLFW_KEY_X)
+      _scale_mat.topLeftCorner<3, 3>() *= 1.1f;
   }
 
 private:
@@ -458,10 +468,10 @@ private:
   //! @brief Camera of the point cloud scene.
   k::Camera _point_cloud_camera;
   Eigen::Matrix4f _model_view = Eigen::Matrix4f::Identity();
+  Eigen::Matrix4f _scale_mat = Eigen::Matrix4f::Identity();
   float _point_size = 1.5f;
   double _delta = (5._m).value;
   double _angle_delta = (10._deg).value;
-
 
   //! @brief User interaction.
   bool _pause = false;
