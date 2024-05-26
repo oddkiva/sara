@@ -219,7 +219,7 @@ namespace DO::Kalpana::GL {
 
     program_object = 0;
 
-    throw std::runtime_error{fmt::format("Failed to delete shader program: %d."
+    throw std::runtime_error{fmt::format("Failed to delete shader program: {}."
                                          "Delete log:\n{}",
                                          success, log)};
   }

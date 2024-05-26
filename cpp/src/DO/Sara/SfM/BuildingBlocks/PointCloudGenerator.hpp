@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/RgbColoredPoint.hpp>
 #include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
@@ -46,6 +47,16 @@ namespace DO::Sara {
       , _feature_graph{feature_graph}
       , _point_cloud{point_cloud}
     {
+    }
+
+    auto distance_max() const -> double
+    {
+      return _distance_max;
+    }
+
+    auto distance_max_squared() const -> double
+    {
+      return square(_distance_max);
     }
 
   public: /* helper feature retrieval methods */
@@ -91,11 +102,12 @@ namespace DO::Sara {
                                      const PoseVertex) const
         -> std::optional<FeatureVertex>;
 
-    auto retrieve_scene_point_color(
-        const Eigen::Vector3d& scene_point,  //
-        const ImageView<Rgb8>& image,        //
-        const QuaternionBasedPose<double>& pose,
-        const v2::PinholeCamera<double>& camera) const -> Rgb64f;
+    auto
+    retrieve_scene_point_color(const Eigen::Vector3d& scene_point,  //
+                               const ImageView<Rgb8>& image,        //
+                               const QuaternionBasedPose<double>& pose,
+                               const v2::PinholeCamera<double>& camera) const
+        -> Rgb64f;
 
   public: /* data transformation methods */
     //! @brief Calculate the barycentric scene point.
@@ -121,8 +133,8 @@ namespace DO::Sara {
     //! - The scene point is recalculated as a the barycenter of the
     //!   possibly multiple scene points we have found after recalculating the
     //!   feature tracks.
-    auto
-    propagate_scene_point_indices(const std::vector<FeatureTrack>&) -> void;
+    auto propagate_scene_point_indices(const std::vector<FeatureTrack>&)
+        -> void;
 
     //! - The point cloud compression reassigns a unique scene point cloud to
     //!   each feature tracks.
@@ -152,6 +164,10 @@ namespace DO::Sara {
     PointCloud& _point_cloud;
 
     FeatureToScenePointMap _from_vertex_to_scene_point_index;
+
+    //! @brief Even if we don't have a metric reconstruction, this default value
+    //! works well in practice.
+    double _distance_max = +1e3;
   };
 
 }  // namespace DO::Sara
