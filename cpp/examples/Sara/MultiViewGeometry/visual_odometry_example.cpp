@@ -119,6 +119,9 @@ public:
     {
       if (!_pause)
       {
+        if (_quit)
+          break;
+
         if (!_pipeline.read())
           break;
 
@@ -135,6 +138,9 @@ public:
           _pause = true;
         }
       }
+
+      if (_quit)
+        break;
 
       // Clear the color buffer and the buffer testing.
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -222,6 +228,9 @@ private:
 
   auto render_point_cloud() -> void
   {
+    if (_pipeline.point_cloud().empty())
+      return;
+
     glViewport(_point_cloud_viewport.x(), _point_cloud_viewport.y(),
                _point_cloud_viewport.width(), _point_cloud_viewport.height());
 
@@ -303,6 +312,16 @@ private:
 
     if (action == GLFW_RELEASE || action == GLFW_REPEAT)
       app.move_point_cloud_camera_with_keyboard(key);
+
+    // Use the escape key to smoothly exit the OpenGL app.
+    if ((action == GLFW_RELEASE || action == GLFW_REPEAT) &&
+        key == GLFW_KEY_ESCAPE)
+    {
+      app._quit = true;
+      return;
+    }
+
+    app.resize_point_size(action, key);
   }
 
   auto move_point_cloud_camera_with_keyboard(const int key) -> void
@@ -310,7 +329,7 @@ private:
     using sara::operator""_m;
     using sara::operator""_deg;
     static constexpr auto delta = (5._m).value;
-    static constexpr auto angle_delta = (40._deg).value;
+    static constexpr auto angle_delta = (10._deg).value;
 
     if (key == GLFW_KEY_W)
       _point_cloud_camera.move_forward(delta);
@@ -343,6 +362,17 @@ private:
 
     _point_cloud_camera.update();
     _model_view = _point_cloud_camera.view_matrix();
+  }
+
+  auto resize_point_size(const int action, const int key) -> void
+  {
+    if ((action == GLFW_RELEASE || action == GLFW_REPEAT) &&
+        key == GLFW_KEY_MINUS)
+      _point_size /= 1.1f;
+
+    if ((action == GLFW_RELEASE || action == GLFW_REPEAT) &&
+        key == GLFW_KEY_EQUAL)
+      _point_size *= 1.1f;
   }
 
 private:
@@ -422,6 +452,7 @@ private:
 
   //! @brief User interaction.
   bool _pause = false;
+  bool _quit = false;
 };
 
 bool SingleWindowApp::_glfw_initialized = false;

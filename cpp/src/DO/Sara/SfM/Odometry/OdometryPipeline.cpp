@@ -221,8 +221,7 @@ auto OdometryPipeline::grow_geometry() -> bool
       _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
 
 #if defined(DEBUG_ABSOLUTE_POSE_RECOVERY)
-  const auto corr_csv_fp =
-      fmt::format("/Users/oddkiva/Desktop/corr_{}.csv", _pose_curr);
+  const auto corr_csv_fp = fmt::format("corr_{}.csv", _pose_curr);
   write_point_correspondences(_pose_graph, _feature_tracker._feature_graph,
                               _tracks_alive, corr_csv_fp);
 #endif
@@ -290,8 +289,7 @@ auto OdometryPipeline::grow_geometry() -> bool
                                            frame_corrected, pose_edge,
                                            _camera_corrected);
 #if defined(DEBUG_ABSOLUTE_POSE_RECOVERY)
-  const auto scene_csv_fp =
-      fmt::format("/Users/oddkiva/Desktop/scene_{}.csv", _pose_curr);
+  const auto scene_csv_fp = fmt::format("scene_{}.csv", _pose_curr);
   _point_cloud_generator->write_point_cloud(_tracks_alive, scene_csv_fp);
 #endif
 
@@ -324,8 +322,13 @@ auto OdometryPipeline::adjust_bundles() -> void
   for (const auto& ftrack : _feature_tracker._feature_tracks)
   {
     // Does a track have a 3D point? If not, discard it.
-    const auto idx = _point_cloud_generator->scene_point_index(ftrack.front());
-    if (idx == std::nullopt)
+    const auto p = _point_cloud_generator->scene_point(ftrack.front());
+    if (p == std::nullopt)
+      continue;
+
+    // Discard point at infinity.
+    if (p->coords().squaredNorm() >
+        _point_cloud_generator->distance_max_squared())
       continue;
 
     // Filter the feature track by NMS: there should be only 1 feature per
