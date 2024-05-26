@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <DO/Sara/Core/Math/UsualFunctions.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/RgbColoredPoint.hpp>
 #include <DO/Sara/SfM/Graph/CameraPoseGraph.hpp>
@@ -48,9 +49,14 @@ namespace DO::Sara {
     {
     }
 
-    auto zmax() const -> double
+    auto distance_max() const -> double
     {
-      return _zmax;
+      return _distance_max;
+    }
+
+    auto distance_max_squared() const -> double
+    {
+      return square(_distance_max);
     }
 
   public: /* helper feature retrieval methods */
@@ -159,7 +165,7 @@ namespace DO::Sara {
 
     FeatureToScenePointMap _from_vertex_to_scene_point_index;
 
-    double _zmax = +1e3;
+    double _distance_max = +1e3;
   };
 
 }  // namespace DO::Sara

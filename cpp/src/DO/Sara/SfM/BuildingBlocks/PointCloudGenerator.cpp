@@ -266,7 +266,7 @@ auto PointCloudGenerator::compress_point_cloud(
     const auto scene_point = barycenter(scene_point_indices);
 
     // Discard point at infinity.
-    if (std::abs(scene_point.coords().z()) > _zmax)
+    if (scene_point.coords().squaredNorm() > distance_max_squared())
       continue;
 
     // Reassign the scene point index for the given feature track.
@@ -390,7 +390,7 @@ auto PointCloudGenerator::grow_point_cloud(
 
     // Calculate the scene point.
     const Eigen::Vector3d coords = X.col(j).hnormalized();
-    if (coords.z() > _zmax)  // We deem it to be a point at infinity.
+    if (coords.squaredNorm() > distance_max_squared())  // We deem it to be a point at infinity.
       continue;
 
     const auto color = retrieve_scene_point_color(coords, image,  //

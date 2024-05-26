@@ -327,7 +327,8 @@ auto OdometryPipeline::adjust_bundles() -> void
       continue;
 
     // Discard point at infinity.
-    if (std::abs(p->coords().z()) > _point_cloud_generator->zmax())
+    if (p->coords().squaredNorm() >
+        _point_cloud_generator->distance_max_squared())
       continue;
 
     // Filter the feature track by NMS: there should be only 1 feature per
