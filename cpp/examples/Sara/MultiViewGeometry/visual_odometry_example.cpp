@@ -313,9 +313,15 @@ private:
     if (action == GLFW_RELEASE || action == GLFW_REPEAT)
       app.move_point_cloud_camera_with_keyboard(key);
 
+    // Use the escape key to smoothly exit the OpenGL app.
     if ((action == GLFW_RELEASE || action == GLFW_REPEAT) &&
         key == GLFW_KEY_ESCAPE)
+    {
       app._quit = true;
+      return;
+    }
+
+    app.resize_point_size(action, key);
   }
 
   auto move_point_cloud_camera_with_keyboard(const int key) -> void
@@ -356,6 +362,17 @@ private:
 
     _point_cloud_camera.update();
     _model_view = _point_cloud_camera.view_matrix();
+  }
+
+  auto resize_point_size(const int action, const int key) -> void
+  {
+    if ((action == GLFW_RELEASE || action == GLFW_REPEAT) &&
+        key == GLFW_KEY_MINUS)
+      _point_size /= 1.1f;
+
+    if ((action == GLFW_RELEASE || action == GLFW_REPEAT) &&
+        key == GLFW_KEY_EQUAL)
+      _point_size *= 1.1f;
   }
 
 private:

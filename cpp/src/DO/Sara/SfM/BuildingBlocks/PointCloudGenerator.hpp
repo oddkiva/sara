@@ -48,6 +48,11 @@ namespace DO::Sara {
     {
     }
 
+    auto zmax() const -> double
+    {
+      return _zmax;
+    }
+
   public: /* helper feature retrieval methods */
     auto gid(const FeatureVertex u) const -> const FeatureGID&
     {
@@ -91,11 +96,12 @@ namespace DO::Sara {
                                      const PoseVertex) const
         -> std::optional<FeatureVertex>;
 
-    auto retrieve_scene_point_color(
-        const Eigen::Vector3d& scene_point,  //
-        const ImageView<Rgb8>& image,        //
-        const QuaternionBasedPose<double>& pose,
-        const v2::PinholeCamera<double>& camera) const -> Rgb64f;
+    auto
+    retrieve_scene_point_color(const Eigen::Vector3d& scene_point,  //
+                               const ImageView<Rgb8>& image,        //
+                               const QuaternionBasedPose<double>& pose,
+                               const v2::PinholeCamera<double>& camera) const
+        -> Rgb64f;
 
   public: /* data transformation methods */
     //! @brief Calculate the barycentric scene point.
@@ -121,8 +127,8 @@ namespace DO::Sara {
     //! - The scene point is recalculated as a the barycenter of the
     //!   possibly multiple scene points we have found after recalculating the
     //!   feature tracks.
-    auto
-    propagate_scene_point_indices(const std::vector<FeatureTrack>&) -> void;
+    auto propagate_scene_point_indices(const std::vector<FeatureTrack>&)
+        -> void;
 
     //! - The point cloud compression reassigns a unique scene point cloud to
     //!   each feature tracks.
@@ -152,6 +158,8 @@ namespace DO::Sara {
     PointCloud& _point_cloud;
 
     FeatureToScenePointMap _from_vertex_to_scene_point_index;
+
+    double _zmax = +1e3;
   };
 
 }  // namespace DO::Sara
