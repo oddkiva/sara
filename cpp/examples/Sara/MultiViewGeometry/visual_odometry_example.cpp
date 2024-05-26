@@ -10,6 +10,7 @@
 // ========================================================================== //
 
 #include <DO/Kalpana/EasyGL.hpp>
+#include <DO/Kalpana/EasyGL/Objects/Camera.hpp>
 #include <DO/Kalpana/EasyGL/Objects/ColoredPointCloud.hpp>
 #include <DO/Kalpana/EasyGL/Objects/TexturedImage.hpp>
 #include <DO/Kalpana/EasyGL/Objects/TexturedQuad.hpp>
@@ -234,13 +235,10 @@ private:
       0,  0, -1;
     // clang-format on
 
-    // Update the model view matrix.
-    const Eigen::Matrix4f model_view = Eigen::Matrix4f::Identity();
-
     // Render the point cloud.
     _point_cloud_renderer.render(_point_cloud, _point_size,
                                  from_cam_to_gl.matrix(),  //
-                                 model_view, _point_cloud_projection);
+                                 _model_view, _point_cloud_projection);
   }
 
   auto get_framebuffer_sizes() const -> Eigen::Vector2i
@@ -302,6 +300,49 @@ private:
       std::cout << "RESUME" << std::endl;
       return;
     }
+
+    if (action == GLFW_RELEASE || action == GLFW_REPEAT)
+      app.move_point_cloud_camera_with_keyboard(key);
+  }
+
+  auto move_point_cloud_camera_with_keyboard(const int key) -> void
+  {
+    using sara::operator""_m;
+    using sara::operator""_deg;
+    static constexpr auto delta = (5._m).value;
+    static constexpr auto angle_delta = (40._deg).value;
+
+    if (key == GLFW_KEY_W)
+      _point_cloud_camera.move_forward(delta);
+    if (key == GLFW_KEY_S)
+      _point_cloud_camera.move_backward(delta);
+    if (key == GLFW_KEY_A)
+      _point_cloud_camera.move_left(delta);
+    if (key == GLFW_KEY_D)
+      _point_cloud_camera.move_right(delta);
+
+    if (key == GLFW_KEY_DELETE)
+      _point_cloud_camera.no_head_movement(-angle_delta);  // CCW
+    if (key == GLFW_KEY_PAGE_DOWN)
+      _point_cloud_camera.no_head_movement(+angle_delta);  // CW
+
+    if (key == GLFW_KEY_HOME)
+      _point_cloud_camera.yes_head_movement(+angle_delta);
+    if (key == GLFW_KEY_END)
+      _point_cloud_camera.yes_head_movement(-angle_delta);
+
+    if (key == GLFW_KEY_R)
+      _point_cloud_camera.move_up(delta);
+    if (key == GLFW_KEY_F)
+      _point_cloud_camera.move_down(delta);
+
+    if (key == GLFW_KEY_INSERT)
+      _point_cloud_camera.maybe_head_movement(-angle_delta);
+    if (key == GLFW_KEY_PAGE_UP)
+      _point_cloud_camera.maybe_head_movement(+angle_delta);
+
+    _point_cloud_camera.update();
+    _model_view = _point_cloud_camera.view_matrix();
   }
 
 private:
@@ -373,8 +414,11 @@ private:
   kgl::ColoredPointCloudRenderer _point_cloud_renderer;
   //! @brief Point cloud rendering options.
   Eigen::Matrix4f _point_cloud_projection;
+  //! @brief Camera of the point cloud scene.
+  k::Camera _point_cloud_camera;
+  Eigen::Matrix4f _model_view = Eigen::Matrix4f::Identity();
   // kgl::Camera _point_cloud_camera;
-  float _point_size = 3.f;
+  float _point_size = 1.5f;
 
   //! @brief User interaction.
   bool _pause = false;
