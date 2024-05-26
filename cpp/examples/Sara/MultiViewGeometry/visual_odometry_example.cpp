@@ -321,14 +321,14 @@ private:
     if (key == GLFW_KEY_D)
       _point_cloud_camera.move_right(delta);
 
-    if (key == GLFW_KEY_DELETE)
+    if (key == GLFW_KEY_J)
       _point_cloud_camera.no_head_movement(-angle_delta);  // CCW
-    if (key == GLFW_KEY_PAGE_DOWN)
+    if (key == GLFW_KEY_L)
       _point_cloud_camera.no_head_movement(+angle_delta);  // CW
 
-    if (key == GLFW_KEY_HOME)
+    if (key == GLFW_KEY_I)
       _point_cloud_camera.yes_head_movement(+angle_delta);
-    if (key == GLFW_KEY_END)
+    if (key == GLFW_KEY_K)
       _point_cloud_camera.yes_head_movement(-angle_delta);
 
     if (key == GLFW_KEY_R)
@@ -336,9 +336,9 @@ private:
     if (key == GLFW_KEY_F)
       _point_cloud_camera.move_down(delta);
 
-    if (key == GLFW_KEY_INSERT)
+    if (key == GLFW_KEY_U)
       _point_cloud_camera.maybe_head_movement(-angle_delta);
-    if (key == GLFW_KEY_PAGE_UP)
+    if (key == GLFW_KEY_O)
       _point_cloud_camera.maybe_head_movement(+angle_delta);
 
     _point_cloud_camera.update();
@@ -439,7 +439,7 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
 #define USE_HARDCODED_VIDEO_PATH
 #if defined(USE_HARDCODED_VIDEO_PATH) && defined(__APPLE__)
   const auto video_path =
-      fs::path{"/Users/oddkiva/Desktop/datasets/odometry/turn_bikes.mp4"};
+      fs::path{"/Users/oddkiva/Desktop/datasets/odometry/pass_bikes.mp4"};
   if (!fs::exists(video_path))
   {
     fmt::print("Video {} does not exist", video_path.string());
