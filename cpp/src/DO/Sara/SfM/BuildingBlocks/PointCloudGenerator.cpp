@@ -93,8 +93,8 @@ auto PointCloudGenerator::filter_by_non_max_suppression(
 }
 
 auto PointCloudGenerator::find_feature_vertex_at_pose(
-    const FeatureTrack& track, const PoseVertex pose_vertex) const
-    -> std::optional<FeatureVertex>
+    const FeatureTrack& track,
+    const PoseVertex pose_vertex) const -> std::optional<FeatureVertex>
 {
   auto v = std::find_if(track.begin(), track.end(),
                         [this, pose_vertex](const auto& v) {
@@ -392,7 +392,8 @@ auto PointCloudGenerator::grow_point_cloud(
 
     // Calculate the scene point.
     const Eigen::Vector3d coords = X.col(j).hnormalized();
-    if (coords.squaredNorm() > distance_max_squared())  // We deem it to be a point at infinity.
+    if (coords.squaredNorm() >
+        distance_max_squared())  // We deem it to be a point at infinity.
       continue;
 
     const auto color = retrieve_scene_point_color(coords, image,  //
@@ -474,11 +475,16 @@ auto PointCloudGenerator::write_ply(const std::filesystem::path& out_ply) const
     -> void
 {
   auto coords = std::vector<Eigen::Vector3d>(_point_cloud.size());
-  auto colors = std::vector<Eigen::Vector3d>(_point_cloud.size());
+  auto colors = std::vector<Eigen::Vector3<std::uint8_t>>(_point_cloud.size());
   std::transform(_point_cloud.begin(), _point_cloud.end(), coords.begin(),
                  [](const ScenePoint& x) { return x.coords(); });
   std::transform(_point_cloud.begin(), _point_cloud.end(), colors.begin(),
-                 [](const ScenePoint& x) { return x.color(); });
+                 [](const ScenePoint& x) -> Eigen::Vector3<std::uint8_t> {
+                   Eigen::Vector3d x255 = x.color() * 255;
+                   for (auto i = 0; i < 3; ++i)
+                     x255(i) = std::clamp(x255(i), 0., 255.);
+                   return x255.cast<std::uint8_t>();
+                 });
 
   auto fb = std::filebuf{};
   fb.open(out_ply, std::ios::out);
@@ -493,7 +499,7 @@ auto PointCloudGenerator::write_ply(const std::filesystem::path& out_ply) const
                                 tinyply::Type::INVALID, 0);
 
   ply.add_properties_to_element("vertex", {"red", "green", "blue"},
-                                tinyply::Type::FLOAT64, colors.size(),
+                                tinyply::Type::UINT8, colors.size(),
                                 reinterpret_cast<std::uint8_t*>(colors.data()),
                                 tinyply::Type::INVALID, 0);
 
