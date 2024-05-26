@@ -10,6 +10,7 @@
 // ========================================================================== //
 
 #include <DO/Kalpana/EasyGL.hpp>
+#include <DO/Kalpana/EasyGL/Objects/Camera.hpp>
 #include <DO/Kalpana/EasyGL/Objects/ColoredPointCloud.hpp>
 #include <DO/Kalpana/EasyGL/Objects/TexturedImage.hpp>
 #include <DO/Kalpana/EasyGL/Objects/TexturedQuad.hpp>
@@ -40,6 +41,9 @@ namespace fs = std::filesystem;
 namespace sara = DO::Sara;
 namespace k = DO::Kalpana;
 namespace kgl = DO::Kalpana::GL;
+
+using sara::operator""_m;
+using sara::operator""_deg;
 
 
 class SingleWindowApp
@@ -101,6 +105,8 @@ public:
     // Current projection matrix
     _projection = _video_viewport.orthographic_projection();
     _point_cloud_projection = _point_cloud_viewport.orthographic_projection();
+    // _point_cloud_projection =
+    //     _point_cloud_viewport.perspective(120.f, 1e-6f, 1e3f);
 
     // Background color.
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -118,6 +124,9 @@ public:
     {
       if (!_pause)
       {
+        if (_quit)
+          break;
+
         if (!_pipeline.read())
           break;
 
@@ -134,6 +143,9 @@ public:
           _pause = true;
         }
       }
+
+      if (_quit)
+        break;
 
       // Clear the color buffer and the buffer testing.
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -220,6 +232,9 @@ private:
 
   auto render_point_cloud() -> void
   {
+    if (_pipeline.point_cloud().empty())
+      return;
+
     glViewport(_point_cloud_viewport.x(), _point_cloud_viewport.y(),
                _point_cloud_viewport.width(), _point_cloud_viewport.height());
 
@@ -233,13 +248,11 @@ private:
       0,  0, -1;
     // clang-format on
 
-    // Update the model view matrix.
-    const Eigen::Matrix4f model_view = Eigen::Matrix4f::Identity();
-
     // Render the point cloud.
+    const Eigen::Matrix4f model_view_final = _model_view * _scale_mat;
     _point_cloud_renderer.render(_point_cloud, _point_size,
                                  from_cam_to_gl.matrix(),  //
-                                 model_view, _point_cloud_projection);
+                                 model_view_final, _point_cloud_projection);
   }
 
   auto get_framebuffer_sizes() const -> Eigen::Vector2i
@@ -301,6 +314,85 @@ private:
       std::cout << "RESUME" << std::endl;
       return;
     }
+
+    // Use the escape key to smoothly exit the OpenGL app.
+    if ((action == GLFW_RELEASE || action == GLFW_REPEAT) &&
+        key == GLFW_KEY_ESCAPE)
+    {
+      app._quit = true;
+      return;
+    }
+
+    if (action == GLFW_RELEASE || action == GLFW_REPEAT)
+    {
+      app.move_point_cloud_camera_with_keyboard(key);
+      app.resize_point_size(key);
+      app.change_camera_step_size(key);
+      app.change_model_scale(key);
+      return;
+    }
+  }
+
+  auto move_point_cloud_camera_with_keyboard(const int key) -> void
+  {
+    if (key == GLFW_KEY_W)
+      _point_cloud_camera.move_forward(_delta);
+    if (key == GLFW_KEY_S)
+      _point_cloud_camera.move_backward(_delta);
+    if (key == GLFW_KEY_A)
+      _point_cloud_camera.move_left(_delta);
+    if (key == GLFW_KEY_D)
+      _point_cloud_camera.move_right(_delta);
+
+    if (key == GLFW_KEY_H)
+      _point_cloud_camera.no_head_movement(-_angle_delta);  // CCW
+    if (key == GLFW_KEY_K)
+      _point_cloud_camera.no_head_movement(+_angle_delta);  // CW
+
+    if (key == GLFW_KEY_U)
+      _point_cloud_camera.yes_head_movement(+_angle_delta);
+    if (key == GLFW_KEY_J)
+      _point_cloud_camera.yes_head_movement(-_angle_delta);
+
+    if (key == GLFW_KEY_R)
+      _point_cloud_camera.move_up(_delta);
+    if (key == GLFW_KEY_F)
+      _point_cloud_camera.move_down(_delta);
+
+    if (key == GLFW_KEY_Y)
+      _point_cloud_camera.maybe_head_movement(-_angle_delta);
+    if (key == GLFW_KEY_I)
+      _point_cloud_camera.maybe_head_movement(+_angle_delta);
+
+    _point_cloud_camera.update();
+    _model_view = _point_cloud_camera.view_matrix();
+  }
+
+  auto resize_point_size(const int key) -> void
+  {
+    if (key == GLFW_KEY_MINUS)
+      _point_size /= 1.1f;
+
+    if (key == GLFW_KEY_EQUAL)
+      _point_size *= 1.1f;
+  }
+
+  auto change_camera_step_size(const int key) -> void
+  {
+    if (key == GLFW_KEY_1)
+      _delta /= 1.1f;
+
+    if (key == GLFW_KEY_2)
+      _delta *= 1.1f;
+  }
+
+  auto change_model_scale(const int key) -> void
+  {
+    if (key == GLFW_KEY_Z)
+      _scale_mat.topLeftCorner<3, 3>() /= 1.1f;
+
+    if (key == GLFW_KEY_X)
+      _scale_mat.topLeftCorner<3, 3>() *= 1.1f;
   }
 
 private:
@@ -372,11 +464,17 @@ private:
   kgl::ColoredPointCloudRenderer _point_cloud_renderer;
   //! @brief Point cloud rendering options.
   Eigen::Matrix4f _point_cloud_projection;
-  // kgl::Camera _point_cloud_camera;
-  float _point_size = 3.f;
+  //! @brief Camera of the point cloud scene.
+  k::Camera _point_cloud_camera;
+  Eigen::Matrix4f _model_view = Eigen::Matrix4f::Identity();
+  Eigen::Matrix4f _scale_mat = Eigen::Matrix4f::Identity();
+  float _point_size = 1.5f;
+  double _delta = (5._m).value;
+  double _angle_delta = (10._deg).value;
 
   //! @brief User interaction.
   bool _pause = false;
+  bool _quit = false;
 };
 
 bool SingleWindowApp::_glfw_initialized = false;

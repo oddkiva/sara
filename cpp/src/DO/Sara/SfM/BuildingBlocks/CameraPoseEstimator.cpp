@@ -172,18 +172,7 @@ auto CameraPoseEstimator::estimate_pose(
     const auto pixel_coords = pcg.pixel_coords(*fv).cast<double>();
     // Normalize the rays. This is important for Lambda-Twist P3P method.
     rays.col(ti) = camera.backproject(pixel_coords).normalized();
-#if 0
-    if (ti < 10)
-      SARA_LOGD(logger, "Backproject point {}:\n{} -> {}", ti,
-                pixel_coords.transpose().eval(),
-                rays.col(ti).transpose().eval());
-#endif
   }
-
-#if 0
-  SARA_LOGD(logger, "Scene points:\n{}", scene_coords.leftCols(10).eval());
-  SARA_LOGD(logger, "Rays:\n{}", rays.leftCols(10).eval());
-#endif
 
   // 3. solve the PnP problem with RANSAC.
   const auto [pose, inliers, sample_best] =

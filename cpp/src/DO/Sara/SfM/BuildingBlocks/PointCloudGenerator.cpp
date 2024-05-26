@@ -93,8 +93,8 @@ auto PointCloudGenerator::filter_by_non_max_suppression(
 }
 
 auto PointCloudGenerator::find_feature_vertex_at_pose(
-    const FeatureTrack& track,
-    const PoseVertex pose_vertex) const -> std::optional<FeatureVertex>
+    const FeatureTrack& track, const PoseVertex pose_vertex) const
+    -> std::optional<FeatureVertex>
 {
   auto v = std::find_if(track.begin(), track.end(),
                         [this, pose_vertex](const auto& v) {
@@ -253,6 +253,8 @@ auto PointCloudGenerator::compress_point_cloud(
   auto point_cloud_compressed = std::vector<ScenePoint>{};
   point_cloud_compressed.reserve(tracks.size());
 
+  auto from_vertex_to_scene_point_index_new = FeatureToScenePointMap{};
+
   // Reset the scene point index for each feature track.
   for (auto t = ScenePointIndex{}; t < tracks.size(); ++t)
   {
@@ -265,9 +267,13 @@ auto PointCloudGenerator::compress_point_cloud(
     // Recalculate the scene point index as a barycenter.
     const auto scene_point = barycenter(scene_point_indices);
 
+    // Discard point at infinity.
+    if (scene_point.coords().squaredNorm() > distance_max_squared())
+      continue;
+
     // Reassign the scene point index for the given feature track.
     for (const auto& v : track)
-      _from_vertex_to_scene_point_index[v] = point_cloud_compressed.size();
+      from_vertex_to_scene_point_index_new[v] = point_cloud_compressed.size();
 
     // Only then store the new point coordinates. Otherwise the index is wrong!
     point_cloud_compressed.emplace_back(scene_point);
@@ -275,6 +281,7 @@ auto PointCloudGenerator::compress_point_cloud(
 
   // Swap the point cloud with the set of barycenters.
   std::swap(_point_cloud, point_cloud_compressed);
+  _from_vertex_to_scene_point_index.swap(from_vertex_to_scene_point_index_new);
 
   return true;
 }
@@ -385,6 +392,9 @@ auto PointCloudGenerator::grow_point_cloud(
 
     // Calculate the scene point.
     const Eigen::Vector3d coords = X.col(j).hnormalized();
+    if (coords.squaredNorm() > distance_max_squared())  // We deem it to be a point at infinity.
+      continue;
+
     const auto color = retrieve_scene_point_color(coords, image,  //
                                                   tsfm_v, camera);
 
@@ -435,7 +445,7 @@ auto PointCloudGenerator::write_point_cloud(
     const std::vector<FeatureTrack>& ftracks,
     const std::filesystem::path& out_csv) const -> void
 {
-  std::ofstream out{out_csv.string()};
+  auto out = std::ofstream{out_csv.string()};
 
   for (const auto& ftrack : ftracks)
   {
