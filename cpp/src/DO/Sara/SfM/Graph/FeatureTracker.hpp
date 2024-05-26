@@ -44,7 +44,7 @@ namespace DO::Sara {
     auto update_feature_tracks(const CameraPoseGraph&,
                                const CameraPoseGraph::Edge) -> void;
 
-    auto calculate_alive_feature_tracks(
+    auto find_feature_tracks_at_pose(
         const CameraPoseGraph::Vertex last_pose_vertex) const
         -> std::tuple<TrackArray, TrackVisibilityCountArray>;
   };

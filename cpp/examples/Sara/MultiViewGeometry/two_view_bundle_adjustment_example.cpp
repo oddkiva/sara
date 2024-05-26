@@ -215,7 +215,7 @@ GRAPHICS_MAIN()
 
   // 3. Recalculate the feature tracks that are still alive.
   const auto [tracks, track_visibility_count] =
-      feature_tracker.calculate_alive_feature_tracks(1);
+      feature_tracker.find_feature_tracks_at_pose(1);
 
   auto point_cloud = sara::PointCloudGenerator::PointCloud{};
   auto point_cloud_generator = sara::PointCloudGenerator{

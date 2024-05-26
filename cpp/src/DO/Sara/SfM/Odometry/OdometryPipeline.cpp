@@ -19,6 +19,7 @@
 #include <DO/Sara/SfM/Helpers/Utilities.hpp>
 
 
+// #define USE_ABSOLUTE_ROTATION
 // #define DEBUG_ABSOLUTE_POSE_RECOVERY
 
 
@@ -218,7 +219,7 @@ auto OdometryPipeline::grow_geometry() -> bool
 
   // 3. Recalculate the feature tracks that are still alive.
   std::tie(_tracks_alive, _track_visibility_count) =
-      _feature_tracker.calculate_alive_feature_tracks(_pose_curr);
+      _feature_tracker.find_feature_tracks_at_pose(_pose_curr);
 
 #if defined(DEBUG_ABSOLUTE_POSE_RECOVERY)
   const auto corr_csv_fp = fmt::format("corr_{}.csv", _pose_curr);
@@ -254,7 +255,6 @@ auto OdometryPipeline::grow_geometry() -> bool
              _tracks_alive_without_scene_point) =
         _point_cloud_generator->split_by_scene_point_knowledge(_tracks_alive);
 
-// #define USE_ABSOLUTE_ROTATION
 #if defined(USE_ABSOLUTE_ROTATION)
     const auto [abs_pose_mat, abs_pose_est_successful] =
         _abs_pose_estimator.estimate_pose(
@@ -282,16 +282,10 @@ auto OdometryPipeline::grow_geometry() -> bool
   }
 
   // 8. Grow point cloud by triangulation.
-  //
-  // TODO: don't add 3D scene points that are too far, like points in the sky
   const auto frame_corrected = _distortion_corrector->frame_rgb8();
   _point_cloud_generator->grow_point_cloud(_tracks_alive_without_scene_point,
                                            frame_corrected, pose_edge,
                                            _camera_corrected);
-#if defined(DEBUG_ABSOLUTE_POSE_RECOVERY)
-  const auto scene_csv_fp = fmt::format("scene_{}.csv", _pose_curr);
-  _point_cloud_generator->write_point_cloud(_tracks_alive, scene_csv_fp);
-#endif
 
   adjust_bundles();
 
@@ -308,7 +302,11 @@ auto OdometryPipeline::grow_geometry() -> bool
   //
   // ---------------------------------------------------------------------------
 
-  _point_cloud_generator->write_ply(fmt::format("scene_{:04d}.ply", _pose_curr));
+#if defined(DEBUG_ABSOLUTE_POSE_RECOVERY)
+  const auto scene_ply = fmt::format("scene_{:04d}.ply", _pose_curr);
+  SARA_LOGI(logger, "Saving PLY {}", scene_ply);
+  _point_cloud_generator->write_ply(scene_ply);
+#endif
 
   return true;
 }
