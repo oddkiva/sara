@@ -465,15 +465,20 @@ private:
   Eigen::Matrix4f _point_cloud_projection;
   //! @brief Camera of the point cloud scene.
   k::Camera _point_cloud_camera;
+  //! @{
+  //! @brief Viewing parameters.
   Eigen::Matrix4f _model_view = Eigen::Matrix4f::Identity();
   Eigen::Matrix4f _scale_mat = Eigen::Matrix4f::Identity();
   float _point_size = 1.5f;
   double _delta = (5._m).value;
   double _angle_delta = (10._deg).value;
+  //! @}
 
+  //! @{
   //! @brief User interaction.
   bool _pause = false;
   bool _quit = false;
+  //! @}
 };
 
 bool SingleWindowApp::_glfw_initialized = false;
