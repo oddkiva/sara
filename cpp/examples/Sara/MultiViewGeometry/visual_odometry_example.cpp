@@ -104,8 +104,10 @@ public:
   {
     // Current projection matrix
     _projection = _video_viewport.orthographic_projection();
-    // _point_cloud_projection = _point_cloud_viewport.orthographic_projection();
-    _point_cloud_projection = _point_cloud_viewport.perspective(120.f, 1e-6f, 1e3f);
+    // _point_cloud_projection =
+    // _point_cloud_viewport.orthographic_projection();
+    _point_cloud_projection =
+        _point_cloud_viewport.perspective(120.f, 1e-6f, 1e3f);
 
     // Background color.
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -272,8 +274,8 @@ private:
     return *app_ptr;
   }
 
-  static auto window_size_callback(GLFWwindow* window, const int, const int)
-      -> void
+  static auto window_size_callback(GLFWwindow* window, const int,
+                                   const int) -> void
   {
     auto& self = get_self(window);
 
@@ -484,8 +486,8 @@ private:
 bool SingleWindowApp::_glfw_initialized = false;
 
 
-auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
-    -> int
+auto main([[maybe_unused]] int const argc,
+          [[maybe_unused]] char** const argv) -> int
 {
 #if defined(_OPENMP)
   const auto num_threads = omp_get_max_threads();
@@ -496,7 +498,8 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
 #define USE_HARDCODED_VIDEO_PATH
 #if defined(USE_HARDCODED_VIDEO_PATH) && defined(__APPLE__)
   const auto video_path =
-      fs::path{"/Users/oddkiva/Desktop/datasets/sample-1.mp4"};
+      // fs::path{"/Users/oddkiva/Desktop/datasets/sample-1.mp4"};
+      fs::path{"/Users/oddkiva/Downloads/IMG_7971.MOV"};
   if (!fs::exists(video_path))
   {
     fmt::print("Video {} does not exist", video_path.string());
@@ -514,6 +517,7 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
 #endif
   auto camera = sara::v2::BrownConradyDistortionModel<double>{};
   {
+#if 0
     camera.fx() = 917.2878392016245;
     camera.fy() = 917.2878392016245;
     camera.shear() = 0.;
@@ -526,6 +530,15 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
       -0.007947847982157091;
     // clang-format on
     camera.p() << -0.0003137658969742134, 0.00021943576376532096;
+#else  // iPhone 12 mini 4K - 1x
+    camera.fx() = 3229.074544798197;
+    camera.fy() = 3229.074544798197;
+    camera.shear() = 0.;
+    camera.u0() = 1080.;
+    camera.v0() = 1920.;
+    camera.k().setZero();
+    camera.p().setZero();
+#endif
   }
 
   try

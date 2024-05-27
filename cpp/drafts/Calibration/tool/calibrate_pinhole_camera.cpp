@@ -52,20 +52,23 @@ inline auto inspect(sara::ImageView<sara::Rgb8>& image,             //
                     const Eigen::Vector3d& t,                       //
                     bool pause = false) -> void
 {
-  const auto o = chessboard.image_point(0, 0);
-  const auto i = chessboard.image_point(1, 0);
-  const auto j = chessboard.image_point(0, 1);
   const auto s = chessboard.square_size().value;
 
-  // The z-vector.
+  // Draw the axes by projecting them onto the image plane.
+  const Eigen::Vector3d& o3 = t;
+  const Eigen::Vector3d i3 = R * Eigen::Vector3d::UnitX() * s + t;
+  const Eigen::Vector3d j3 = R * Eigen::Vector3d::UnitY() * s + t;
   const Eigen::Vector3d k3 = R * Eigen::Vector3d::UnitZ() * s + t;
+  const Eigen::Vector2f o = camera.project(o3).cast<float>();
+  const Eigen::Vector2f i = camera.project(i3).cast<float>();
+  const Eigen::Vector2f j = camera.project(j3).cast<float>();
   const Eigen::Vector2f k = camera.project(k3).cast<float>();
 
   static const auto red = sara::Rgb8{167, 0, 0};
   static const auto green = sara::Rgb8{89, 216, 26};
   sara::draw_arrow(image, o, i, red, 6);
   sara::draw_arrow(image, o, j, green, 6);
-  sara::draw_arrow(image, o, k, sara::Blue8, 6);
+  sara::draw_arrow(image, o, k, sara::Cyan8, 6);
 
   for (auto y = 0; y < chessboard.height(); ++y)
   {
@@ -77,7 +80,8 @@ inline auto inspect(sara::ImageView<sara::Rgb8>& image,             //
       const Eigen::Vector2f p1 = chessboard.image_point(x, y);
       const Eigen::Vector2f p2 = camera.project(P).cast<float>();
 
-      draw_circle(image, p1, 3.f, sara::Cyan8, 3);
+      if (!sara::is_nan(p1))
+        draw_circle(image, p1, 3.f, sara::Cyan8, 3);
       draw_circle(image, p2, 3.f, sara::Magenta8, 3);
       if (pause)
       {
@@ -370,7 +374,20 @@ auto sara_graphics_main(int argc, char** argv) -> int
   auto chessboards = std::vector<sara::ChessboardCorners>{};
 
   // Initialize the calibration matrix.
+#if 0
   const auto K_initial = init_calibration_matrix(frame.width(), frame.height());
+#else /* bootstrap manually */
+  auto K_initial = Eigen::Matrix3d{};
+  static constexpr auto f = 3228.8689050563653;  // 3229.074544798197
+  static constexpr auto u0 = 1080.;
+  static constexpr auto v0 = 1920.;
+  // clang-format off
+  K_initial <<
+    f, 0, u0,
+    0, f, v0,
+    0, 0,  1;
+  // clang-format on
+#endif
 
   // Initialize the calibration problem.
   auto calibration_data = ChessboardCalibrationData{};

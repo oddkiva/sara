@@ -32,6 +32,7 @@ auto OdometryPipeline::set_config(
 {
   // Build the dependency graph.
   _video_streamer.open(video_path);
+  _video_streamer.set_num_skips(9);
   // The original camera.
   _camera = camera;
   // The virtual camera for the undistorted image.
