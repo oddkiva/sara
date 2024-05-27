@@ -11,13 +11,14 @@
 
 //! @file
 
+#include <DO/Sara/Core/EigenFormatInterop.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
-#include <DO/Sara/MultiViewGeometry/Calibration/OmnidirectionalCameraReprojectionError.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Calibration/PinholeCameraReprojectionError.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
 
 #include <drafts/Calibration/Chessboard.hpp>
 #include <drafts/Calibration/HomographyDecomposition.hpp>
@@ -28,7 +29,7 @@ namespace sara = DO::Sara;
 
 
 // This seems to work well...
-static inline auto init_K(int w, int h) -> Eigen::Matrix3d
+static inline auto init_calibration_matrix(int w, int h) -> Eigen::Matrix3d
 {
   const auto d = static_cast<double>(std::max(w, h));
   const auto f = 0.5 * d;
@@ -44,11 +45,11 @@ static inline auto init_K(int w, int h) -> Eigen::Matrix3d
   return K;
 }
 
-inline auto inspect(sara::ImageView<sara::Rgb8>& image,                 //
-                    const sara::ChessboardCorners& chessboard,          //
-                    const sara::OmnidirectionalCamera<double>& camera,  //
-                    const Eigen::Matrix3d& R,                           //
-                    const Eigen::Vector3d& t,                           //
+inline auto inspect(sara::ImageView<sara::Rgb8>& image,             //
+                    const sara::ChessboardCorners& chessboard,      //
+                    const sara::v2::PinholeCamera<double>& camera,  //
+                    const Eigen::Matrix3d& R,                       //
+                    const Eigen::Vector3d& t,                       //
                     bool pause = false) -> void
 {
   const auto o = chessboard.image_point(0, 0);
@@ -56,7 +57,7 @@ inline auto inspect(sara::ImageView<sara::Rgb8>& image,                 //
   const auto j = chessboard.image_point(0, 1);
   const auto s = chessboard.square_size().value;
 
-
+  // The z-vector.
   const Eigen::Vector3d k3 = R * Eigen::Vector3d::UnitZ() * s + t;
   const Eigen::Vector2f k = camera.project(k3).cast<float>();
 
@@ -88,54 +89,28 @@ inline auto inspect(sara::ImageView<sara::Rgb8>& image,                 //
 }
 
 
-class ChessboardCalibrationProblem
+class ChessboardCalibrationData
 {
 public:
-  static constexpr auto intrinsic_parameter_count =
-      sara::OmnidirectionalCameraReprojectionError::intrinsic_parameter_count;
   static constexpr auto extrinsic_parameter_count =
-      sara::OmnidirectionalCameraReprojectionError::extrinsic_parameter_count;
+      sara::PinholeCameraReprojectionError::extrinsic_parameter_count;
 
-  enum CameraType : std::uint8_t
-  {
-    Pinhole,
-    Fisheye,
-    General
-  };
-
-  inline auto set_camera_type(CameraType camera_type) -> void
-  {
-    _camera_type = camera_type;
-  }
-
-  inline auto initialize_intrinsics(const Eigen::Matrix3d& K,
-                                    const Eigen::Vector3d& k,
-                                    const Eigen::Vector2d& p,  //
-                                    const double xi) -> void
+  auto initialize_intrinsics(const Eigen::Matrix3d& K) -> void
   {
     // fx
-    _intrinsics[0] = K(0, 0);
-    // fy
-    _intrinsics[1] = K(1, 1);
-    // shear
-    _intrinsics[2] = K(0, 1) / K(0, 0);
+    _intrinsics.fx() = K(0, 0);
+    // fy (NORMALIZED)
+    _intrinsics.fy() = K(1, 1) / K(0, 0);
+    // shear (NORMALIZED)
+    _intrinsics.shear() = K(0, 1) / K(0, 0);
     // u0
-    _intrinsics[3] = K(0, 2);
+    _intrinsics.u0() = K(0, 2);
     // v0
-    _intrinsics[4] = K(1, 2);
-    // k
-    _intrinsics[5] = k(0);
-    _intrinsics[6] = k(1);
-    // _intrinsics[7] = k(2);
-    // p
-    _intrinsics[7] = p(0);
-    _intrinsics[8] = p(1);
-    // xi
-    _intrinsics[9] = xi;
+    _intrinsics.v0() = K(1, 2);
   }
 
-  inline auto add(const sara::ChessboardCorners& chessboard,
-                  const Eigen::Matrix3d& R, const Eigen::Vector3d& t)
+  auto add(const sara::ChessboardCorners& chessboard,  //
+           const Eigen::Matrix3d& R, const Eigen::Vector3d& t) -> void
   {
     ++_num_images;
 
@@ -185,7 +160,7 @@ public:
 
   inline auto mutable_intrinsics() -> double*
   {
-    return _intrinsics.data();
+    return _intrinsics.data.data();
   }
 
   inline auto mutable_extrinsics(int n) -> double*
@@ -214,7 +189,7 @@ public:
     return {x, y, z};
   }
 
-  inline auto transform_into_ceres_problem(ceres::Problem& problem) -> void
+  auto transform_into_ceres_problem(ceres::Problem& problem) -> void
   {
     auto loss_fn = nullptr;  // new ceres::HuberLoss{1.0};
     auto data_pos = std::size_t{};
@@ -228,111 +203,73 @@ public:
         const Eigen::Vector2d scene_point = Eigen::Map<const Eigen::Vector2d>(
             _observations_3d.data() + data_pos);
 
-        auto cost_function =
-            sara::OmnidirectionalCameraReprojectionError::create(image_point,
-                                                                 scene_point);
+        auto cost_function = sara::PinholeCameraReprojectionError::create(
+            image_point, scene_point);
 
-        problem.AddResidualBlock(cost_function, loss_fn,  //
-                                 mutable_intrinsics(), mutable_extrinsics(n));
+        problem.AddResidualBlock(cost_function, loss_fn,                //
+                                 &_intrinsics.fx(), &_intrinsics.fy(),  //
+                                 &_intrinsics.shear(),                  //
+                                 _intrinsics.principal_point().data(),  //
+                                 mutable_extrinsics(n));
 
         data_pos += 2;
       }
     }
 
-    static constexpr auto fx = 0;
-    static constexpr auto fy = 1;
-    // alpha is the normalized_shear.
-    static constexpr auto alpha = 2;  // shear = alpha * fx
-    static constexpr auto k0 = 5;
-    static constexpr auto k1 = 6;
-    static constexpr auto p0 = 7;
-    static constexpr auto p1 = 8;
-    static constexpr auto xi = 9;
+    // Bounds on fx.
+    problem.SetParameterLowerBound(&_intrinsics.fx(), 0, 500);
+    problem.SetParameterUpperBound(&_intrinsics.fx(), 0, 5000);
 
-    // Bounds on the calibration matrix.
-    for (const auto& f : {fx, fy})
-    {
-      problem.SetParameterLowerBound(mutable_intrinsics(), f, 500);
-      problem.SetParameterUpperBound(mutable_intrinsics(), f, 5000);
-    }
-    // Normalized shear.
+    // Bounds on fy (NORMALIZED).
+    problem.SetParameterLowerBound(&_intrinsics.fy(), 0, 0.1);
+    problem.SetParameterUpperBound(&_intrinsics.fy(), 0, 2.0);
+
+    // Bounds on the shear (NORMALIZED).
     // - We should not need any further adjustment on the bounds.
-    problem.SetParameterLowerBound(mutable_intrinsics(), alpha, -1.);
-    problem.SetParameterUpperBound(mutable_intrinsics(), alpha, 1.);
+    problem.SetParameterLowerBound(&_intrinsics.shear(), 0, -1.);
+    problem.SetParameterUpperBound(&_intrinsics.shear(), 0, 1.);
+
     // So far no need for (u0, v0)
-
-    // Bounds on the distortion coefficients.
-    // - We should not need any further adjustment on the bounds.
-    for (const auto& dist_coeff : {k0, k1, p0, p1})
-    {
-      problem.SetParameterLowerBound(mutable_intrinsics(), dist_coeff, -1);
-      problem.SetParameterUpperBound(mutable_intrinsics(), dist_coeff, 1);
-    }
-
-    // Bounds on the mirror parameter.
-    //
-    // - If we are dealing with a fisheye camera, we should freeze the xi
-    //   parameter to 1.
-    static constexpr auto tolerance =
-        0.01;  // too little... and the optimizer may
-               // get stuck into a bad local minimum.
-    switch (_camera_type)
-    {
-    case CameraType::Fisheye:
-      // - This is a quick and dirty approach...
-      problem.SetParameterLowerBound(mutable_intrinsics(), xi, 1 - tolerance);
-      problem.SetParameterUpperBound(mutable_intrinsics(), xi, 1 + tolerance);
-
-      // Otherwise add a penalty residual block:
-      // auto penalty_block = /* TODO */;
-      // problem.AddResidualBlock(penalty_block, nullptr, mutable_intrinsics());
-      break;
-    case CameraType::Pinhole:
-      problem.SetParameterLowerBound(mutable_intrinsics(), xi, -tolerance);
-      problem.SetParameterUpperBound(mutable_intrinsics(), xi, tolerance);
-      break;
-    default:
-      problem.SetParameterLowerBound(mutable_intrinsics(), xi, -10.);
-      problem.SetParameterUpperBound(mutable_intrinsics(), xi, 10.);
-      break;
-    }
   }
 
-  inline auto
-  copy_camera_intrinsics(sara::OmnidirectionalCamera<double>& camera) -> void
+  auto fix_fy_normalized(ceres::Problem& problem) -> void
+  {
+    problem.SetParameterBlockConstant(&_intrinsics.fy());
+  }
+
+  auto fix_shear_normalized(ceres::Problem& problem) -> void
+  {
+    problem.SetParameterBlockConstant(&_intrinsics.shear());
+  }
+
+  auto fix_principal_point(ceres::Problem& problem) -> void
+  {
+    problem.SetParameterBlockConstant(_intrinsics.principal_point().data());
+  }
+
+  auto copy_camera_intrinsics(sara::v2::PinholeCamera<double>& camera) -> void
   {
     // Copy back the final parameter to the omnidirectional camera parameter
     // object.
-    const auto fx = mutable_intrinsics()[0];
-    const auto fy = mutable_intrinsics()[1];
-    const auto alpha = mutable_intrinsics()[2];
-    const auto shear = fx * alpha;
-    const auto u0 = mutable_intrinsics()[3];
-    const auto v0 = mutable_intrinsics()[4];
-    const auto k0 = mutable_intrinsics()[5];
-    const auto k1 = mutable_intrinsics()[6];
-    const auto p0 = mutable_intrinsics()[7];
-    const auto p1 = mutable_intrinsics()[8];
-    const auto xi = mutable_intrinsics()[9];
-    // clang-format off
-    auto K = Eigen::Matrix3d{};
-    K << fx, shear, u0,
-          0,   fy, v0,
-          0,    0,  1;
-    // clang-format on
-    camera.set_calibration_matrix(K);
-    camera.radial_distortion_coefficients << k0, k1, 0;
-    camera.tangential_distortion_coefficients << p0, p1;
-    camera.xi = xi;
+    const auto fx = _intrinsics.fx();
+    const auto fy_normalized = _intrinsics.fy();
+    const auto fy = fx * fy_normalized;
+    const auto shear_normalized = _intrinsics.shear();
+    const auto shear = fx * shear_normalized;
+    const auto u0 = _intrinsics.u0();
+    const auto v0 = _intrinsics.v0();
+    camera.fx() = fx;
+    camera.fy() = fy;
+    camera.shear() = shear;
+    camera.u0() = u0;
+    camera.v0() = v0;
   }
 
   inline auto reinitialize_extrinsic_parameters() -> void
   {
     throw std::runtime_error{"Implementation incomplete!"};
 
-    const auto to_camera =
-        [](const double*) -> sara::OmnidirectionalCamera<double> { return {}; };
-    const auto camera = to_camera(_intrinsics.data());
+    const auto camera = sara::v2::PinholeCamera<double>{};
 
     auto data_pos = std::size_t{};
 
@@ -366,22 +303,15 @@ public:
       }
 
       // TODO: reestimate the extrinsics with the PnP algorithm.
-
       auto extrinsics = mutable_extrinsics(image_index);
       auto angle_axis_ptr = extrinsics;
       auto translation_ptr = extrinsics + 3;
 
-#if 0
-      const auto angle_axis = Eigen::AngleAxisd{Rs.front()};
-      const auto& angle = angle_axis.angle();
-      const auto& axis = angle_axis.axis();
-#else
       for (auto k = 0; k < 3; ++k)
-        angle_axis_ptr[k] = 0;  // angle * axis(k);
+        angle_axis_ptr[k] = 0;
 
       for (auto k = 0; k < 3; ++k)
-        translation_ptr[k] = 0;  // ts.front()(k);
-#endif
+        translation_ptr[k] = 0;
     }
   }
 
@@ -393,13 +323,12 @@ private:
   std::vector<int> _num_points_at_image;
   std::vector<double> _observations_2d;
   std::vector<double> _observations_3d;
-  std::array<double, intrinsic_parameter_count> _intrinsics;
+  sara::v2::PinholeCamera<double> _intrinsics;
   std::vector<double> _extrinsics;
-  CameraType _camera_type = CameraType::General;
 };
 
 
-int __main(int argc, char** argv)
+auto sara_graphics_main(int argc, char** argv) -> int
 {
   if (argc < 5)
   {
@@ -441,17 +370,11 @@ int __main(int argc, char** argv)
   auto chessboards = std::vector<sara::ChessboardCorners>{};
 
   // Initialize the calibration matrix.
-  auto camera = sara::OmnidirectionalCamera<double>{};
-  camera.K = init_K(frame.width(), frame.height());
-  camera.radial_distortion_coefficients.setZero();
-  camera.tangential_distortion_coefficients.setZero();
-  camera.xi = 1;
+  const auto K_initial = init_calibration_matrix(frame.width(), frame.height());
 
   // Initialize the calibration problem.
-  auto calibration_problem = ChessboardCalibrationProblem{};
-  calibration_problem.initialize_intrinsics(
-      camera.K, camera.radial_distortion_coefficients,
-      camera.tangential_distortion_coefficients, camera.xi);
+  auto calibration_data = ChessboardCalibrationData{};
+  calibration_data.initialize_intrinsics(K_initial);
 
   auto selected_frames = std::vector<sara::Image<sara::Rgb8>>{};
   sara::create_window(frame.sizes());
@@ -463,9 +386,6 @@ int __main(int argc, char** argv)
 
     if (i % 3 != 0)
       continue;
-
-    if (selected_frames.size() > 100)
-      break;
 
     sara::tic();
     sara::from_rgb8_to_gray32f(frame, frame_gray32f);
@@ -485,11 +405,11 @@ int __main(int argc, char** argv)
       auto ts = std::vector<Eigen::Vector3d>{};
       auto ns = std::vector<Eigen::Vector3d>{};
 
-// #define USE_QR_FACTORIZATION
+#define USE_QR_FACTORIZATION
 #ifdef USE_QR_FACTORIZATION
       // This simple approach gives the best results.
       const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
-      decompose_H_RQ_factorization(H, camera.K, Rs, ts, ns);
+      decompose_H_RQ_factorization(H, K_initial, Rs, ts, ns);
 #else
       Rs = {Eigen::Matrix3d::Identity()};
       ts = {Eigen::Vector3d::Zero()};
@@ -500,9 +420,9 @@ int __main(int argc, char** argv)
       SARA_DEBUG << "\nt =\n" << ts[0] << std::endl;
       SARA_DEBUG << "\nn =\n" << ns[0] << std::endl;
 
-      calibration_problem.add(chessboard, Rs[0], ts[0]);
+      calibration_data.add(chessboard, Rs[0], ts[0]);
 
-      inspect(frame_copy, chessboard, camera.K, Rs[0], ts[0]);
+      inspect(frame_copy, chessboard, K_initial, Rs[0], ts[0]);
       sara::draw_text(frame_copy, 80, 80, "Chessboard: FOUND!", sara::White8,
                       60, 0, false, true);
       sara::display(frame_copy);
@@ -521,9 +441,10 @@ int __main(int argc, char** argv)
 
   SARA_DEBUG << "Instantiating Ceres Problem..." << std::endl;
   auto problem = ceres::Problem{};
-  calibration_problem.set_camera_type(
-      ChessboardCalibrationProblem::CameraType::General);
-  calibration_problem.transform_into_ceres_problem(problem);
+  calibration_data.transform_into_ceres_problem(problem);
+  calibration_data.fix_fy_normalized(problem);
+  calibration_data.fix_shear_normalized(problem);
+  calibration_data.fix_principal_point(problem);
 
   // Restarting the optimization solver is better than increasing the number of
   // iterations.
@@ -533,6 +454,7 @@ int __main(int argc, char** argv)
   // "my guess is that this is because the LBFGS direction is poor and
   // re-starting the solver resets it to an identity matrix."
   auto convergence = false;
+  auto camera = sara::v2::PinholeCamera<double>{};
   for (auto i = 0; i < 20 && !convergence; ++i)
   {
     SARA_DEBUG << "Solving Ceres Problem..." << std::endl;
@@ -555,21 +477,19 @@ int __main(int argc, char** argv)
     if (summary.termination_type == ceres::CONVERGENCE && rms_final < 1.)
       convergence = true;
 
-    calibration_problem.copy_camera_intrinsics(camera);
+    calibration_data.copy_camera_intrinsics(camera);
 
-    SARA_DEBUG << "K =\n" << camera.K << std::endl;
-    SARA_DEBUG << "k = " << camera.radial_distortion_coefficients.transpose()
-               << std::endl;
-    SARA_DEBUG << "p = "
-               << camera.tangential_distortion_coefficients.transpose()
-               << std::endl;
-    SARA_DEBUG << "xi = " << camera.xi << std::endl;
+    SARA_DEBUG << fmt::format("camera.fx() = {}\n", camera.fx());
+    SARA_DEBUG << fmt::format("camera.fy() = {}\n", camera.fy());
+    SARA_DEBUG << fmt::format("camera.shear() = {}\n", camera.shear());
+    SARA_DEBUG << fmt::format("camera.principal_point() = {}\n",
+                              camera.principal_point().transpose().eval());
   }
 
   for (auto i = 0u; i < chessboards.size(); ++i)
   {
-    const auto R = calibration_problem.rotation(i).toRotationMatrix();
-    const auto t = calibration_problem.translation(i);
+    const auto R = calibration_data.rotation(i).toRotationMatrix();
+    const auto t = calibration_data.translation(i);
 
     auto frame_copy = selected_frames[i];
     inspect(frame_copy, chessboards[i], camera, R, t);
@@ -584,6 +504,6 @@ int __main(int argc, char** argv)
 auto main(int argc, char** argv) -> int
 {
   DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }

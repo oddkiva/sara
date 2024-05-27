@@ -103,7 +103,6 @@ namespace DO::Sara::v2 {
       return ConstVectorView<T, 2>{data.data() + FX};
     }
 
-
     auto principal_point() const -> ConstVectorView<T, 2>
     {
       return ConstVectorView<T, 2>{data.data() + U0};

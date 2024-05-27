@@ -14,14 +14,19 @@ namespace DO::Kalpana::GL {
 
   struct PointCloudScene : BasicScene
   {
-    auto set_viewport_box(const AxisAlignedBoundingBox<int>& box) -> void
+    PointCloudScene()
     {
-      BasicScene::_viewport = Viewport{box};
-      _projection = _viewport.perspective_projection(80.f, 0.5f, 5000.f);
-      _model_view = _point_cloud_camera.view_matrix();
       // CAVEAT: re-express the point cloud in OpenGL axis convention.
-      gl_Rt_cam.setIdentity();
-      gl_Rt_cam.matrix().topLeftCorner<3, 3>() = gl_R_cam;
+      const Eigen::Matrix3f P3 =
+          axis_permutation_matrix(Sara::AxisConvention::OpenGL).cast<float>();
+      _P.setIdentity();
+      _P.matrix().topLeftCorner<3, 3>() = P3;
+    }
+
+    auto set_viewport_box(const Sara::AxisAlignedBoundingBox<int, 2>& box)
+        -> void
+    {
+      _viewport = Viewport{box};
     }
 
     auto init() -> void
@@ -48,12 +53,12 @@ namespace DO::Kalpana::GL {
                                     _projection);
 
       // Render the point cloud.
-      _point_cloud_renderer.render(_point_cloud, _point_size,
-                                   gl_Rt_cam.matrix(),  //
+      _point_cloud_renderer.render(_point_cloud, _point_size, _P.matrix(),
                                    _model_view, _projection);
     }
 
-    auto update_point_cloud(const TensorView_<float, 2>& colored_point_cloud)
+    auto
+    update_point_cloud(const Sara::TensorView_<float, 2>& colored_point_cloud)
         -> void
     {
       _point_cloud.upload_host_data_to_gl(colored_point_cloud);
@@ -71,10 +76,9 @@ namespace DO::Kalpana::GL {
     //! @brief Point cloud rendering options.
     Camera _point_cloud_camera;
     float _point_size = 3.f;
-
-    const Eigen::Matrix3f gl_R_cam =
-        axis_permutation_matrix(AxisConvention::OpenGL).cast<float>();
-    Eigen::Transform<float, 3, Eigen::Projective> gl_Rt_cam;
+    //! @brief The conversion matrix from the computer vision axis convention to
+    //! OpenGL axis convention.
+    Eigen::Transform<float, 3, Eigen::Projective> _P;
   };
 
 
