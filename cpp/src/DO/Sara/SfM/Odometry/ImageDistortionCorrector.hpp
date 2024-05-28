@@ -22,14 +22,19 @@ namespace DO::Sara {
   {
   public:
     ImageDistortionCorrector(
-        const ImageView<Rgb8>& image_rgb8,     //
+        const ImageView<Rgb8>& image_rgb8,      //
         const ImageView<float>& image_gray32f,  //
         const v2::BrownConradyDistortionModel<double>& camera)
       : _rgb8{image_rgb8}
       , _gray32f{image_gray32f}
     {
-      std::tie(_umap, _vmap) = generate_undistortion_map(camera,  //
-                                                         image_rgb8.sizes());
+      if (camera.k(0) == 0 && camera.k(1) == 0 && camera.k(2) == 0 &&  //
+          camera.p(0) == 0 && camera.p(1) == 0)
+        _has_distortion = false;
+
+      if (_has_distortion)
+        std::tie(_umap, _vmap) = generate_undistortion_map(camera,  //
+                                                           image_rgb8.sizes());
       for (auto i = 0; i < 2; ++i)
       {
         _rgb8_undistorted[i].resize(image_rgb8.sizes());
@@ -40,10 +45,16 @@ namespace DO::Sara {
     auto undistort() -> void
     {
       _gray32f_undistorted.front().swap(_gray32f_undistorted.back());
-      warp(_umap, _vmap, _gray32f, _gray32f_undistorted.back());
+      if (_has_distortion)
+        warp(_umap, _vmap, _gray32f, _gray32f_undistorted.back());
+      else
+        _gray32f_undistorted.back() = _gray32f;
 
       _rgb8_undistorted.front().swap(_rgb8_undistorted.back());
-      warp(_umap, _vmap, _rgb8, _rgb8_undistorted.back());
+      if (_has_distortion)
+        warp(_umap, _vmap, _rgb8, _rgb8_undistorted.back());
+      else
+        _rgb8_undistorted.back() = _rgb8;
     }
 
     auto frame_gray32f(int i = 1) const -> const ImageView<float>&
@@ -87,6 +98,7 @@ namespace DO::Sara {
     const ImageView<Rgb8>& _rgb8;
     const ImageView<float>& _gray32f;
 
+    bool _has_distortion = true;
     Image<float> _umap;
     Image<float> _vmap;
     std::array<Image<Rgb8>, 2> _rgb8_undistorted;
