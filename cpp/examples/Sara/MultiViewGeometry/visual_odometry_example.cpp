@@ -16,6 +16,7 @@
 #include <DO/Kalpana/EasyGL/Objects/TexturedQuad.hpp>
 #include <DO/Kalpana/EasyGL/Renderer/ColoredPointCloudRenderer.hpp>
 #include <DO/Kalpana/EasyGL/Renderer/TextureRenderer.hpp>
+#include <DO/Kalpana/EasyGL/SimpleSceneRenderer/PointCloudScene.hpp>
 #include <DO/Kalpana/Math/Projection.hpp>
 #include <DO/Kalpana/Math/Viewport.hpp>
 
@@ -46,6 +47,89 @@ using sara::operator""_m;
 using sara::operator""_deg;
 
 
+struct MyPointCloudScene : kgl::PointCloudScene
+{
+  MyPointCloudScene()
+    : kgl::PointCloudScene{}
+  {
+    _model_view = _view * _model;
+  }
+
+  auto move_point_cloud_camera_with_keyboard(const int key) -> void
+  {
+    if (key == GLFW_KEY_W)
+      _camera.move_forward(_delta);
+    if (key == GLFW_KEY_S)
+      _camera.move_backward(_delta);
+    if (key == GLFW_KEY_A)
+      _camera.move_left(_delta);
+    if (key == GLFW_KEY_D)
+      _camera.move_right(_delta);
+
+    if (key == GLFW_KEY_H)
+      _camera.no_head_movement(-_angle_delta);  // CCW
+    if (key == GLFW_KEY_K)
+      _camera.no_head_movement(+_angle_delta);  // CW
+
+    if (key == GLFW_KEY_U)
+      _camera.yes_head_movement(+_angle_delta);
+    if (key == GLFW_KEY_J)
+      _camera.yes_head_movement(-_angle_delta);
+
+    if (key == GLFW_KEY_R)
+      _camera.move_up(_delta);
+    if (key == GLFW_KEY_F)
+      _camera.move_down(_delta);
+
+    if (key == GLFW_KEY_Y)
+      _camera.maybe_head_movement(-_angle_delta);
+    if (key == GLFW_KEY_I)
+      _camera.maybe_head_movement(+_angle_delta);
+
+    _camera.update();
+    _view = _camera.view_matrix();
+    _model_view = _view * _model;
+  }
+
+  auto resize_point_size(const int key) -> void
+  {
+    if (key == GLFW_KEY_MINUS)
+      _point_size /= 1.1f;
+
+    if (key == GLFW_KEY_EQUAL)
+      _point_size *= 1.1f;
+  }
+
+  auto change_camera_step_size(const int key) -> void
+  {
+    if (key == GLFW_KEY_1)
+      _delta /= 1.1f;
+
+    if (key == GLFW_KEY_2)
+      _delta *= 1.1f;
+  }
+
+  auto change_model_scale(const int key) -> void
+  {
+    if (key == GLFW_KEY_Z)
+      _model.topLeftCorner<3, 3>() /= 1.1f;
+
+    if (key == GLFW_KEY_X)
+      _model.topLeftCorner<3, 3>() *= 1.1f;
+
+    _model_view = _view * _model;
+  }
+
+  //! @{
+  //! @brief Viewing parameters.
+  Eigen::Matrix4f _view = Eigen::Matrix4f::Identity();
+  Eigen::Matrix4f _model = Eigen::Matrix4f::Identity();
+  double _delta = (5._m).value;
+  double _angle_delta = (10._deg).value;
+  //! @}
+};
+
+
 class SingleWindowApp
 {
 public:
@@ -62,8 +146,8 @@ public:
     _fb_sizes = get_framebuffer_sizes();
 
     // Initialize the point cloud viewport.
-    _point_cloud_viewport.top_left().setZero();
-    _point_cloud_viewport.sizes() << _fb_sizes.x() / 2, _fb_sizes.y();
+    _pc_scene._viewport.top_left().setZero();
+    _pc_scene._viewport.sizes() << _fb_sizes.x() / 2, _fb_sizes.y();
 
     // Initialize the video viewport.
     _video_viewport.top_left() << _fb_sizes.x() / 2, 0;
@@ -106,8 +190,7 @@ public:
     _projection = _video_viewport.orthographic_projection();
     // _point_cloud_projection =
     // _point_cloud_viewport.orthographic_projection();
-    _point_cloud_projection =
-        _point_cloud_viewport.perspective(120.f, 1e-6f, 1e3f);
+    _pc_scene._projection = _pc_scene._viewport.perspective(120.f, 1e-6f, 1e3f);
 
     // Background color.
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -181,8 +264,7 @@ private:
     _texture_renderer.initialize();
 
     // Point cloud rendering
-    _point_cloud.initialize();
-    _point_cloud_renderer.initialize();
+    _pc_scene.init();
   }
 
   auto deinit_gl_resources() -> void
@@ -191,8 +273,7 @@ private:
     _quad.destroy();
     _texture_renderer.destroy();
 
-    _point_cloud.destroy();
-    _point_cloud_renderer.destroy();
+    _pc_scene.deinit();
   }
 
   auto upload_point_cloud_data_to_opengl() -> void
@@ -215,7 +296,7 @@ private:
     auto& logger = sara::Logger::get();
     SARA_LOGI(logger, "point cloud dimensions: {} ",
               pc_tview.sizes().transpose().eval());
-    _point_cloud.upload_host_data_to_gl(pc_tview.cast<float>());
+    _pc_scene.update_point_cloud(pc_tview.cast<float>());
   }
 
   auto render_video() -> void
@@ -235,25 +316,7 @@ private:
   {
     if (_pipeline.point_cloud().empty())
       return;
-
-    glViewport(_point_cloud_viewport.x(), _point_cloud_viewport.y(),
-               _point_cloud_viewport.width(), _point_cloud_viewport.height());
-
-    // CAVEAT: re-express the point cloud in OpenGL axis convention.
-    auto from_cam_to_gl = Eigen::Transform<float, 3, Eigen::Projective>{};
-    from_cam_to_gl.setIdentity();
-    // clang-format off
-    from_cam_to_gl.matrix().topLeftCorner<3, 3>() <<
-      1,  0,  0,
-      0, -1,  0,
-      0,  0, -1;
-    // clang-format on
-
-    // Render the point cloud.
-    const Eigen::Matrix4f model_view_final = _model_view * _scale_mat;
-    _point_cloud_renderer.render(_point_cloud, _point_size,
-                                 from_cam_to_gl.matrix(),  //
-                                 model_view_final, _point_cloud_projection);
+    _pc_scene.render();
   }
 
   auto get_framebuffer_sizes() const -> Eigen::Vector2i
@@ -274,8 +337,8 @@ private:
     return *app_ptr;
   }
 
-  static auto window_size_callback(GLFWwindow* window, const int,
-                                   const int) -> void
+  static auto window_size_callback(GLFWwindow* window, const int, const int)
+      -> void
   {
     auto& self = get_self(window);
 
@@ -283,8 +346,8 @@ private:
     fb_sizes = self.get_framebuffer_sizes();
 
     // Point cloud viewport rectangle geometry.
-    self._point_cloud_viewport.top_left().setZero();
-    self._point_cloud_viewport.sizes() << fb_sizes.x() / 2, fb_sizes.y();
+    self._pc_scene._viewport.top_left().setZero();
+    self._pc_scene._viewport.sizes() << fb_sizes.x() / 2, fb_sizes.y();
 
     // Video viewport rectangle geometry.
     self._video_viewport.top_left() << fb_sizes.x() / 2, 0;
@@ -298,7 +361,7 @@ private:
     self._projection = self._video_viewport.orthographic_projection(scale);
 
     // Point cloud projection matrix.
-    self._point_cloud_projection = self._point_cloud_viewport.perspective();
+    self._pc_scene._projection = self._pc_scene._viewport.perspective();
   }
 
   static auto key_callback(GLFWwindow* window,  //
@@ -326,74 +389,12 @@ private:
 
     if (action == GLFW_RELEASE || action == GLFW_REPEAT)
     {
-      app.move_point_cloud_camera_with_keyboard(key);
-      app.resize_point_size(key);
-      app.change_camera_step_size(key);
-      app.change_model_scale(key);
+      app._pc_scene.move_point_cloud_camera_with_keyboard(key);
+      app._pc_scene.resize_point_size(key);
+      app._pc_scene.change_camera_step_size(key);
+      app._pc_scene.change_model_scale(key);
       return;
     }
-  }
-
-  auto move_point_cloud_camera_with_keyboard(const int key) -> void
-  {
-    if (key == GLFW_KEY_W)
-      _point_cloud_camera.move_forward(_delta);
-    if (key == GLFW_KEY_S)
-      _point_cloud_camera.move_backward(_delta);
-    if (key == GLFW_KEY_A)
-      _point_cloud_camera.move_left(_delta);
-    if (key == GLFW_KEY_D)
-      _point_cloud_camera.move_right(_delta);
-
-    if (key == GLFW_KEY_H)
-      _point_cloud_camera.no_head_movement(-_angle_delta);  // CCW
-    if (key == GLFW_KEY_K)
-      _point_cloud_camera.no_head_movement(+_angle_delta);  // CW
-
-    if (key == GLFW_KEY_U)
-      _point_cloud_camera.yes_head_movement(+_angle_delta);
-    if (key == GLFW_KEY_J)
-      _point_cloud_camera.yes_head_movement(-_angle_delta);
-
-    if (key == GLFW_KEY_R)
-      _point_cloud_camera.move_up(_delta);
-    if (key == GLFW_KEY_F)
-      _point_cloud_camera.move_down(_delta);
-
-    if (key == GLFW_KEY_Y)
-      _point_cloud_camera.maybe_head_movement(-_angle_delta);
-    if (key == GLFW_KEY_I)
-      _point_cloud_camera.maybe_head_movement(+_angle_delta);
-
-    _point_cloud_camera.update();
-    _model_view = _point_cloud_camera.view_matrix();
-  }
-
-  auto resize_point_size(const int key) -> void
-  {
-    if (key == GLFW_KEY_MINUS)
-      _point_size /= 1.1f;
-
-    if (key == GLFW_KEY_EQUAL)
-      _point_size *= 1.1f;
-  }
-
-  auto change_camera_step_size(const int key) -> void
-  {
-    if (key == GLFW_KEY_1)
-      _delta /= 1.1f;
-
-    if (key == GLFW_KEY_2)
-      _delta *= 1.1f;
-  }
-
-  auto change_model_scale(const int key) -> void
-  {
-    if (key == GLFW_KEY_Z)
-      _scale_mat.topLeftCorner<3, 3>() /= 1.1f;
-
-    if (key == GLFW_KEY_X)
-      _scale_mat.topLeftCorner<3, 3>() *= 1.1f;
   }
 
 private:
@@ -455,26 +456,7 @@ private:
   //! @brief Model-view-projection matrices.
   Eigen::Matrix4f _projection;
 
-  //! Point cloud rendering
-  //!
-  //! @brief The viewport.
-  k::Viewport _point_cloud_viewport;
-  //! @brief Point cloud GPU data.
-  kgl::ColoredPointCloud _point_cloud;
-  //! @brief Point cloud GPU renderer.
-  kgl::ColoredPointCloudRenderer _point_cloud_renderer;
-  //! @brief Point cloud rendering options.
-  Eigen::Matrix4f _point_cloud_projection;
-  //! @brief Camera of the point cloud scene.
-  k::Camera _point_cloud_camera;
-  //! @{
-  //! @brief Viewing parameters.
-  Eigen::Matrix4f _model_view = Eigen::Matrix4f::Identity();
-  Eigen::Matrix4f _scale_mat = Eigen::Matrix4f::Identity();
-  float _point_size = 1.5f;
-  double _delta = (5._m).value;
-  double _angle_delta = (10._deg).value;
-  //! @}
+  MyPointCloudScene _pc_scene;
 
   //! @{
   //! @brief User interaction.
@@ -486,8 +468,8 @@ private:
 bool SingleWindowApp::_glfw_initialized = false;
 
 
-auto main([[maybe_unused]] int const argc,
-          [[maybe_unused]] char** const argv) -> int
+auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
+    -> int
 {
 #if defined(_OPENMP)
   const auto num_threads = omp_get_max_threads();
@@ -498,8 +480,8 @@ auto main([[maybe_unused]] int const argc,
 #define USE_HARDCODED_VIDEO_PATH
 #if defined(USE_HARDCODED_VIDEO_PATH) && defined(__APPLE__)
   const auto video_path =
-      // fs::path{"/Users/oddkiva/Desktop/datasets/sample-1.mp4"};
-      fs::path{"/Users/oddkiva/Downloads/IMG_7971.MOV"};
+      fs::path{"/Users/oddkiva/Desktop/datasets/sample-1.mp4"};
+  // fs::path{"/Users/oddkiva/Downloads/IMG_7971.MOV"};
   if (!fs::exists(video_path))
   {
     fmt::print("Video {} does not exist", video_path.string());
@@ -517,7 +499,7 @@ auto main([[maybe_unused]] int const argc,
 #endif
   auto camera = sara::v2::BrownConradyDistortionModel<double>{};
   {
-#if 0
+#if 1
     camera.fx() = 917.2878392016245;
     camera.fy() = 917.2878392016245;
     camera.shear() = 0.;
