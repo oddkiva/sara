@@ -43,14 +43,15 @@ namespace DO::Kalpana::GL {
       _point_renderer.destroy();
     }
 
-    auto render() -> void
+    auto render(const bool render_checkerboard = false) -> void
     {
       glViewport(_viewport.top_left().x(), _viewport.top_left().y(),
                  _viewport.width(), _viewport.height());
 
       // Render the checkerboard.
-      _checkerboard_renderer.render(Eigen::Matrix4f::Identity(), _model_view,
-                                    _projection);
+      if (render_checkerboard)
+        _checkerboard_renderer.render(Eigen::Matrix4f::Identity(), _model_view,
+                                      _projection);
 
       // Render the point cloud.
       _point_renderer.render(_point_vbo, _point_size, _P.matrix(), _model_view,
