@@ -1,0 +1,14 @@
+{
+    "model": "iPhone 12 mini",
+    "mode": "HD",
+    "zoom": 1,
+    "focal_length": {
+        "x": 1649.2068306381805,
+        "y": 1649.2068306381805
+    },
+    "shear": 0,
+    "principal_point": {
+        "x": 540,
+        "y": 960
+    }
+}
