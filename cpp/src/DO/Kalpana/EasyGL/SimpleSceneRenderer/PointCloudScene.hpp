@@ -76,7 +76,7 @@ namespace DO::Kalpana::GL {
 
     //! @brief Point cloud rendering options.
     Camera _camera;
-    float _point_size = 3.f;
+    float _point_size = 1.5f;
     //! @brief The conversion matrix from the computer vision axis convention to
     //! OpenGL axis convention.
     Eigen::Transform<float, 3, Eigen::Projective> _P;

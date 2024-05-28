@@ -17,6 +17,7 @@
 #include <DO/Kalpana/EasyGL/Renderer/ColoredPointCloudRenderer.hpp>
 #include <DO/Kalpana/EasyGL/Renderer/TextureRenderer.hpp>
 #include <DO/Kalpana/EasyGL/SimpleSceneRenderer/PointCloudScene.hpp>
+#include <DO/Kalpana/EasyGL/SimpleSceneRenderer/VideoScene.hpp>
 #include <DO/Kalpana/Math/Projection.hpp>
 #include <DO/Kalpana/Math/Viewport.hpp>
 
@@ -46,6 +47,10 @@ namespace kgl = DO::Kalpana::GL;
 using sara::operator""_m;
 using sara::operator""_deg;
 
+
+struct MyVideoScene : kgl::VideoScene
+{
+};
 
 struct MyPointCloudScene : kgl::PointCloudScene
 {
@@ -150,8 +155,8 @@ public:
     _pc_scene._viewport.sizes() << _fb_sizes.x() / 2, _fb_sizes.y();
 
     // Initialize the video viewport.
-    _video_viewport.top_left() << _fb_sizes.x() / 2, 0;
-    _video_viewport.sizes() << _fb_sizes.x() / 2, _fb_sizes.y();
+    _video_scene._viewport.top_left() << _fb_sizes.x() / 2, 0;
+    _video_scene._viewport.sizes() << _fb_sizes.x() / 2, _fb_sizes.y();
 
     // Prepare OpenGL first before any OpenGL calls.
     init_opengl();
@@ -187,9 +192,7 @@ public:
   auto run() -> void
   {
     // Current projection matrix
-    _projection = _video_viewport.orthographic_projection();
-    // _point_cloud_projection =
-    // _point_cloud_viewport.orthographic_projection();
+    _video_scene._projection = _video_scene._viewport.orthographic_projection();
     _pc_scene._projection = _pc_scene._viewport.perspective(120.f, 1e-6f, 1e3f);
 
     // Background color.
@@ -251,28 +254,13 @@ private:
 
   auto init_gl_resources() -> void
   {
-    // Video texture rendering
-    _texture.initialize(_pipeline._video_streamer.frame_rgb8(), 0);
-
-    const auto& w = _pipeline._video_streamer.width();
-    const auto& h = _pipeline._video_streamer.height();
-    const auto aspect_ratio = static_cast<float>(w) / h;
-    auto vertices = _quad.host_vertices().matrix();
-    vertices.col(0) *= aspect_ratio;
-    _quad.initialize();
-
-    _texture_renderer.initialize();
-
-    // Point cloud rendering
+    _video_scene.init(_pipeline._video_streamer.frame_rgb8());
     _pc_scene.init();
   }
 
   auto deinit_gl_resources() -> void
   {
-    _texture.destroy();
-    _quad.destroy();
-    _texture_renderer.destroy();
-
+    _video_scene.deinit();
     _pc_scene.deinit();
   }
 
@@ -301,15 +289,8 @@ private:
 
   auto render_video() -> void
   {
-    // Render on the right half of the window surface.
-    glViewport(_video_viewport.x(), _video_viewport.y(),  //
-               _video_viewport.width(), _video_viewport.height());
-    // Transfer the CPU image frame data to the OpenGL texture.
-    _texture.reset(_pipeline.make_display_frame());
-    // Render the texture on the quad.
-    auto model_view = Eigen::Transform<float, 3, Eigen::Projective>{};
-    model_view.setIdentity();
-    _texture_renderer.render(_texture, _quad, model_view.matrix(), _projection);
+    _video_scene._texture.reset(_pipeline.make_display_frame());
+    _video_scene.render();
   }
 
   auto render_point_cloud() -> void
@@ -350,18 +331,21 @@ private:
     self._pc_scene._viewport.sizes() << fb_sizes.x() / 2, fb_sizes.y();
 
     // Video viewport rectangle geometry.
-    self._video_viewport.top_left() << fb_sizes.x() / 2, 0;
-    self._video_viewport.sizes() << fb_sizes.x() / 2, fb_sizes.y();
+    self._video_scene._viewport.top_left() << fb_sizes.x() / 2, 0;
+    self._video_scene._viewport.sizes() << fb_sizes.x() / 2, fb_sizes.y();
 
     // Update the current projection matrices.
     auto scale = 0.5f;
-    if (self._video_viewport.width() < self._pipeline._video_streamer.width())
+    if (self._video_scene._viewport.width() <
+        self._pipeline._video_streamer.width())
       scale *= static_cast<float>(self._pipeline._video_streamer.width()) /
-               self._video_viewport.width();
-    self._projection = self._video_viewport.orthographic_projection(scale);
+               self._video_scene._viewport.width();
+    self._video_scene._projection =
+        self._video_scene._viewport.orthographic_projection(scale);
 
     // Point cloud projection matrix.
-    self._pc_scene._projection = self._pc_scene._viewport.perspective();
+    self._pc_scene._projection =
+        self._pc_scene._viewport.perspective(120.f, 1e-6f, 1e3f);
   }
 
   static auto key_callback(GLFWwindow* window,  //
@@ -443,19 +427,9 @@ private:
 
   sara::OdometryPipeline _pipeline;
 
-  //! Video rendering
-  //!
-  //! The viewport
-  k::Viewport _video_viewport;
-  //! @brief the video texture.
-  kgl::TexturedImage2D _texture;
-  //! @brief the video quad.
-  kgl::TexturedQuad _quad;
-  //! @brief Texture renderer.
-  kgl::TextureRenderer _texture_renderer;
-  //! @brief Model-view-projection matrices.
-  Eigen::Matrix4f _projection;
-
+  //! @brief Video scene
+  MyVideoScene _video_scene;
+  //! @brief Point cloud rendering.
   MyPointCloudScene _pc_scene;
 
   //! @{
