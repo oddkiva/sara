@@ -12,13 +12,14 @@ namespace DO::Kalpana::GL {
 
   struct VideoScene : BasicScene
   {
-    auto set_viewport_box(const AxisAlignedBoundingBox<int>& box) -> void
+    auto set_viewport_box(const Sara::AxisAlignedBoundingBox<int, 2>& box)
+        -> void
     {
       BasicScene::_viewport = Viewport{box};
       update_projection(_scale);
     }
 
-    auto init(const ImageView<Bgr8>& image) -> void
+    auto init(const Sara::ImageView<Sara::Rgb8>& image) -> void
     {
       // Initialize the OpenGL device texture.
       _texture.initialize(image, 0);
@@ -45,7 +46,7 @@ namespace DO::Kalpana::GL {
       _texture_renderer.destroy();
     }
 
-    auto update_texture(const ImageView<Bgr8>& image) -> void
+    auto update_texture(const Sara::ImageView<Sara::Rgb8>& image) -> void
     {
       _texture.reset(image);
     }
