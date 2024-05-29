@@ -179,6 +179,14 @@ auto BundleAdjuster::form_problem(
   auto& logger = Logger::get();
   SARA_LOGI(logger, "Forming the BA problem...");
   problem.reset(new ceres::Problem{});
+
+  // We definitely need a robust loss function.
+  static constexpr auto thres_pix = 4. /* pixels */;
+  const auto loss_fn = new ceres::LossFunctionWrapper{
+      new ceres::HuberLoss{square(thres_pix)},  //
+      ceres::TAKE_OWNERSHIP                     //
+  };
+
   const auto num_image_points = data.observations.size(0);
   for (auto i = 0; i < num_image_points; ++i)
   {
@@ -196,7 +204,7 @@ auto BundleAdjuster::form_problem(
     const auto intrinsics_ptr = data.intrinsics[camera_idx].data();
     const auto scene_point_ptr = data.point_coords[point_idx].data();
 
-    problem->AddResidualBlock(cost_fn, nullptr /* squared loss */,  //
+    problem->AddResidualBlock(cost_fn, loss_fn,  //
                               extrinsics_ptr, intrinsics_ptr, scene_point_ptr);
   }
 }

@@ -217,11 +217,10 @@ namespace DO::Kalpana::GL {
     glGetProgramInfoLog(program_object, log_max_sz, &log_sz, &log[0]);
     log.resize(log_sz);
 
+    std::cerr << fmt::format("Error: failed to delete shader program {}: {}."
+                             "Delete log:\n{}",
+                             program_object, success, log);
     program_object = 0;
-
-    throw std::runtime_error{fmt::format("Failed to delete shader program: {}."
-                                         "Delete log:\n{}",
-                                         success, log)};
   }
 
 }  // namespace DO::Kalpana::GL
