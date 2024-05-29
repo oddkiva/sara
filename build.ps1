@@ -102,7 +102,6 @@ $vcpkg_toolchain_file = "c:/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
 $cmake_options  = "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=$vcpkg_toolchain_file "
 $cmake_options += "-DCMAKE_PREFIX_PATH=`"$cudnn_dir;$tensorrt_dir;$qt_dir`" "
-$cmake_options += "-DHALIDE_DISTRIB_DIR:PATH=$halide_dir "
 $cmake_options += "-DHalideHelpers_DIR:PATH=$halide_dir\lib\cmake\HalideHelpers "
 $cmake_options += "-DSARA_USE_QT6:BOOL=ON "
 $cmake_options += "-DSARA_BUILD_VIDEOIO:BOOL=ON "
