@@ -10,16 +10,8 @@
 // ========================================================================== //
 
 #include <DO/Kalpana/EasyGL.hpp>
-#include <DO/Kalpana/EasyGL/Objects/Camera.hpp>
-#include <DO/Kalpana/EasyGL/Objects/ColoredPointCloud.hpp>
-#include <DO/Kalpana/EasyGL/Objects/TexturedImage.hpp>
-#include <DO/Kalpana/EasyGL/Objects/TexturedQuad.hpp>
-#include <DO/Kalpana/EasyGL/Renderer/ColoredPointCloudRenderer.hpp>
-#include <DO/Kalpana/EasyGL/Renderer/TextureRenderer.hpp>
 #include <DO/Kalpana/EasyGL/SimpleSceneRenderer/PointCloudScene.hpp>
 #include <DO/Kalpana/EasyGL/SimpleSceneRenderer/VideoScene.hpp>
-#include <DO/Kalpana/Math/Projection.hpp>
-#include <DO/Kalpana/Math/Viewport.hpp>
 
 #include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/SfM/Odometry/OdometryPipeline.hpp>
@@ -32,8 +24,6 @@
 
 #include <fmt/format.h>
 
-#include <string_view>
-
 #if defined(_OPENMP)
 #  include <omp.h>
 #endif
@@ -41,7 +31,6 @@
 
 namespace fs = std::filesystem;
 namespace sara = DO::Sara;
-namespace k = DO::Kalpana;
 namespace kgl = DO::Kalpana::GL;
 
 using sara::operator""_m;
@@ -138,6 +127,8 @@ struct MyPointCloudScene : kgl::PointCloudScene
 class SingleWindowApp
 {
 public:
+  SingleWindowApp() = delete;
+
   SingleWindowApp(const Eigen::Vector2i& sizes, const std::string& title)
   {
     // Init GLFW.
@@ -147,7 +138,6 @@ public:
     _window = glfwCreateWindow(sizes.x(), sizes.y(),  //
                                title.c_str(),         //
                                nullptr, nullptr);
-
     _fb_sizes = get_framebuffer_sizes();
 
     // Initialize the point cloud viewport.
@@ -161,7 +151,7 @@ public:
     // Prepare OpenGL first before any OpenGL calls.
     init_opengl();
 
-    // The magic function.
+    // The magic function necessary to register the callbacks.
     glfwSetWindowUserPointer(_window, this);
     // Register callbacks.
     glfwSetWindowSizeCallback(_window, window_size_callback);
@@ -178,7 +168,10 @@ public:
       glfwDestroyWindow(_window);
 
     if (_glfw_initialized)
+    {
       glfwTerminate();
+      _glfw_initialized = false;
+    }
   }
 
   auto set_config(const fs::path& video_path,
@@ -318,23 +311,24 @@ private:
     return *app_ptr;
   }
 
-  static auto window_size_callback(GLFWwindow* window, const int, const int)
-      -> void
+  static auto window_size_callback(GLFWwindow* window, const int,
+                                   const int) -> void
   {
     auto& self = get_self(window);
 
+    // Update the framebuffer sizes.
     auto& fb_sizes = self._fb_sizes;
     fb_sizes = self.get_framebuffer_sizes();
 
-    // Point cloud viewport rectangle geometry.
+    // Update the point cloud viewport geometry.
     self._pc_scene._viewport.top_left().setZero();
     self._pc_scene._viewport.sizes() << fb_sizes.x() / 2, fb_sizes.y();
 
-    // Video viewport rectangle geometry.
+    // Update the video viewport geometry.
     self._video_scene._viewport.top_left() << fb_sizes.x() / 2, 0;
     self._video_scene._viewport.sizes() << fb_sizes.x() / 2, fb_sizes.y();
 
-    // Update the current projection matrices.
+    // Update the video projection matrix.
     auto scale = 0.5f;
     if (self._video_scene._viewport.width() <
         self._pipeline._video_streamer.width())
@@ -343,7 +337,7 @@ private:
     self._video_scene._projection =
         self._video_scene._viewport.orthographic_projection(scale);
 
-    // Point cloud projection matrix.
+    // Update the point cloud projection matrix.
     self._pc_scene._projection =
         self._pc_scene._viewport.perspective(120.f, 1e-6f, 1e3f);
   }
@@ -425,12 +419,13 @@ private:
   //! display.
   Eigen::Vector2i _fb_sizes = -Eigen::Vector2i::Ones();
 
-  sara::OdometryPipeline _pipeline;
-
   //! @brief Video scene
   MyVideoScene _video_scene;
   //! @brief Point cloud rendering.
   MyPointCloudScene _pc_scene;
+
+  //! @brief Our engine.
+  sara::OdometryPipeline _pipeline;
 
   //! @{
   //! @brief User interaction.
@@ -442,8 +437,8 @@ private:
 bool SingleWindowApp::_glfw_initialized = false;
 
 
-auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
-    -> int
+auto main([[maybe_unused]] int const argc,
+          [[maybe_unused]] char** const argv) -> int
 {
 #if defined(_OPENMP)
   const auto num_threads = omp_get_max_threads();
@@ -454,8 +449,8 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
 #define USE_HARDCODED_VIDEO_PATH
 #if defined(USE_HARDCODED_VIDEO_PATH) && defined(__APPLE__)
   const auto video_path =
-      fs::path{"/Users/oddkiva/Desktop/datasets/sample-1.mp4"};
-  // fs::path{"/Users/oddkiva/Downloads/IMG_7971.MOV"};
+      //fs::path{"/Users/oddkiva/Desktop/datasets/sample-1.mp4"};
+      fs::path{"/Users/oddkiva/Downloads/IMG_7998.MOV"};
   if (!fs::exists(video_path))
   {
     fmt::print("Video {} does not exist", video_path.string());
@@ -473,7 +468,7 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
 #endif
   auto camera = sara::v2::BrownConradyDistortionModel<double>{};
   {
-#if 1
+#if !defined(__APPLE__)
     camera.fx() = 917.2878392016245;
     camera.fy() = 917.2878392016245;
     camera.shear() = 0.;
@@ -484,8 +479,10 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
       -0.2338367557617234,
       +0.05952465745165465,
       -0.007947847982157091;
+    camera.p() <<
+      -0.0003137658969742134,
+      +0.00021943576376532096;
     // clang-format on
-    camera.p() << -0.0003137658969742134, 0.00021943576376532096;
 #else  // iPhone 12 mini 4K - 1x
     camera.fx() = 3229.074544798197;
     camera.fy() = 3229.074544798197;
