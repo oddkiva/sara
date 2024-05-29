@@ -35,7 +35,13 @@ namespace {
       input.dim(0).set_stride(3).dim(2).set_stride(1);
       input.dim(2).set_bounds(0, 3);
 
-      output(x, y, c) = input(y, x, c);
+      // Disambiguate the notations.
+      auto& x_out = x;
+      auto& y_out = y;
+      auto& x_in = y;
+      auto& y_in = x;
+      const auto h_in = input.dim(1).extent();
+      output(x_out, y_out, c) = input(x_in, h_in - 1 - y_in, c);
 
       output.dim(0).set_stride(3).dim(2).set_stride(1);
       output.dim(2).set_bounds(0, 3);
