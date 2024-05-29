@@ -182,11 +182,24 @@ public:
     init_gl_resources();
   }
 
+  auto fov_degrees() const -> float
+  {
+    static const auto degree = 180 / M_PI;
+    const auto h = _pipeline._video_streamer.height();
+    const auto fy = _pipeline._camera_corrected.fy();
+    return static_cast<float>(2. * std::atan(h / fy) * degree);
+  }
+
+  auto perspective_matrix() const -> Eigen::Matrix4f
+  {
+    return _pc_scene._viewport.perspective(fov_degrees(), 1e-6f, 1e3f);
+  }
+
   auto run() -> void
   {
     // Current projection matrix
     _video_scene._projection = _video_scene._viewport.orthographic_projection();
-    _pc_scene._projection = _pc_scene._viewport.perspective(120.f, 1e-6f, 1e3f);
+    _pc_scene._projection = perspective_matrix();
 
     // Background color.
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -338,8 +351,7 @@ private:
         self._video_scene._viewport.orthographic_projection(scale);
 
     // Update the point cloud projection matrix.
-    self._pc_scene._projection =
-        self._pc_scene._viewport.perspective(120.f, 1e-6f, 1e3f);
+    self._pc_scene._projection = self.perspective_matrix();
   }
 
   static auto key_callback(GLFWwindow* window,  //
@@ -449,8 +461,8 @@ auto main([[maybe_unused]] int const argc,
 #define USE_HARDCODED_VIDEO_PATH
 #if defined(USE_HARDCODED_VIDEO_PATH) && defined(__APPLE__)
   const auto video_path =
-      //fs::path{"/Users/oddkiva/Desktop/datasets/sample-1.mp4"};
-      fs::path{"/Users/oddkiva/Downloads/IMG_7998.MOV"};
+      // fs::path{"/Users/oddkiva/Desktop/datasets/odometry/field.mp4"};
+      fs::path{"/Users/oddkiva/Downloads/IMG_7966.MOV"};
   if (!fs::exists(video_path))
   {
     fmt::print("Video {} does not exist", video_path.string());
