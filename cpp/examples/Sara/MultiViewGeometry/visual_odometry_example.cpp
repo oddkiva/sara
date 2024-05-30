@@ -12,7 +12,9 @@
 #include <DO/Kalpana/EasyGL.hpp>
 #include <DO/Kalpana/EasyGL/SimpleSceneRenderer/PointCloudScene.hpp>
 #include <DO/Kalpana/EasyGL/SimpleSceneRenderer/VideoScene.hpp>
+#include <DO/Kalpana/EasyGL/TrackBall.hpp>
 
+#include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/SfM/Odometry/OdometryPipeline.hpp>
 
@@ -31,10 +33,87 @@
 
 namespace fs = std::filesystem;
 namespace sara = DO::Sara;
+namespace k = DO::Kalpana;
 namespace kgl = DO::Kalpana::GL;
 
 using sara::operator""_m;
 using sara::operator""_deg;
+
+
+struct UserInteractionResponder
+{
+  struct Time
+  {
+    void update()
+    {
+      last_frame = current_frame;
+      current_frame = static_cast<float>(timer.elapsed_ms());
+      delta_time = current_frame - last_frame;
+    }
+
+    sara::Timer timer;
+    float delta_time = 0.f;
+    float last_frame = 0.f;
+    float current_frame = 0.f;
+  };
+
+  Time gtime = Time{};
+
+  //! @brief View objects.
+  //! @{
+  k::Camera camera = {};
+  kgl::TrackBall trackball = {};
+  //! @}
+
+  //! @brief View parameters.
+  //! @{
+  bool show_checkerboard = true;
+  float scale = 1.f;
+  static constexpr auto scale_factor = 1.05f;
+  //! @}
+
+  auto normalize_cursor_pos(GLFWwindow* const window,
+                            const Eigen::Vector2d& pos) const -> Eigen::Vector2d
+  {
+    auto w = int{};
+    auto h = int{};
+    glfwGetWindowSize(window, &w, &h);
+
+    const Eigen::Vector2d c = Eigen::Vector2i(w, h).cast<double>() * 0.5;
+
+    Eigen::Vector2d normalized_pos = ((pos - c).array() / c.array()).matrix();
+    normalized_pos.y() *= -1;
+    return normalized_pos;
+  };
+
+
+  auto mouse_pressed(GLFWwindow* const window, const int button,
+                     const int action) -> void
+  {
+    if (button != GLFW_MOUSE_BUTTON_LEFT)
+      return;
+
+    auto p = Eigen::Vector2d{};
+    glfwGetCursorPos(window, &p.x(), &p.y());
+
+    const Eigen::Vector2f pf = normalize_cursor_pos(window, p).cast<float>();
+    if (action == GLFW_PRESS && !trackball.pressed())
+      trackball.push(pf);
+    else if (action == GLFW_RELEASE && trackball.pressed())
+      trackball.release(pf);
+  }
+
+  auto mouse_moved(GLFWwindow* const window, const double x, const double y)
+      -> void
+  {
+    const auto curr_pos = Eigen::Vector2d{x, y};
+    const Eigen::Vector2f p =
+        normalize_cursor_pos(window, curr_pos).cast<float>();
+
+    if (trackball.pressed())
+      trackball.move(p);
+  }
+};
 
 
 struct MyVideoScene : kgl::VideoScene
@@ -156,6 +235,8 @@ public:
     // Register callbacks.
     glfwSetWindowSizeCallback(_window, window_size_callback);
     glfwSetKeyCallback(_window, key_callback);
+    glfwSetCursorPosCallback(_window, move_trackball);
+    glfwSetMouseButtonCallback(_window, use_trackball);
   }
 
   ~SingleWindowApp()
@@ -324,8 +405,8 @@ private:
     return *app_ptr;
   }
 
-  static auto window_size_callback(GLFWwindow* window, const int,
-                                   const int) -> void
+  static auto window_size_callback(GLFWwindow* window, const int, const int)
+      -> void
   {
     auto& self = get_self(window);
 
@@ -387,6 +468,24 @@ private:
     }
   }
 
+
+  static auto use_trackball(GLFWwindow* window, int button, int action,
+                            int /* mods */) -> void
+  {
+    auto& app = get_self(window);
+    app._responder.mouse_pressed(window, button, action);
+  }
+
+  static auto move_trackball(GLFWwindow* window, double x, double y) -> void
+  {
+    auto& app = get_self(window);
+    app._responder.mouse_moved(window, x, y);
+
+    app._pc_scene._view.topLeftCorner<3, 3>() =
+        app._responder.trackball.rotation().toRotationMatrix();
+    app._pc_scene._model_view = app._pc_scene._view * app._pc_scene._model;
+  }
+
 private:
   static auto init_glfw() -> void
   {
@@ -436,6 +535,8 @@ private:
   //! @brief Point cloud rendering.
   MyPointCloudScene _pc_scene;
 
+  UserInteractionResponder _responder;
+
   //! @brief Our engine.
   sara::OdometryPipeline _pipeline;
 
@@ -449,8 +550,8 @@ private:
 bool SingleWindowApp::_glfw_initialized = false;
 
 
-auto main([[maybe_unused]] int const argc,
-          [[maybe_unused]] char** const argv) -> int
+auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
+    -> int
 {
 #if defined(_OPENMP)
   const auto num_threads = omp_get_max_threads();
