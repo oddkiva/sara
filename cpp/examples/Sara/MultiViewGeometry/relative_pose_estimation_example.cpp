@@ -179,7 +179,7 @@ int sara_graphics_main(int argc, char** argv)
 #endif
   auto geometry_h5_file = H5File{geometry_h5_filepath, H5F_ACC_TRUNC};
   save_to_hdf5(geometry_h5_file, geometry, colors);
-  geometry_h5_file.write_dataset("dataset_folder", data_dir, true);
+  geometry_h5_file.write_dataset("dataset_folder", data_dir.string(), true);
   geometry_h5_file.write_dataset("image_1", image_paths[0], true);
   geometry_h5_file.write_dataset("image_2", image_paths[1], true);
   geometry_h5_file.write_dataset(
