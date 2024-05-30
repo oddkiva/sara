@@ -90,8 +90,8 @@ GRAPHICS_MAIN()
       data_dir_path / (image_ids[1] + ".png")  //
   };
   const auto images = std::array{
-      sara::imread<sara::Rgb8>(image_paths[0]),  //
-      sara::imread<sara::Rgb8>(image_paths[1])   //
+      sara::imread<sara::Rgb8>(image_paths[0].string()),  //
+      sara::imread<sara::Rgb8>(image_paths[1].string())   //
   };
 
   // Load the calibration matrices.
