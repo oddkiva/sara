@@ -117,8 +117,7 @@ echo "`n"
 
 cd ..\$build_dir
 $cmake_command  = "cmake -S `"..\sara`" -B `".`" -G `"Visual Studio $vsver2 $vsver`" "
-# Not applicable to VS 2019.
-# $cmake_command += "-T `"$cmake_toolset`" "
+$cmake_command += "-T `"$cmake_toolset`" "
 $cmake_command += "$cmake_options"
 iex "$cmake_command"
 echo "`n"
