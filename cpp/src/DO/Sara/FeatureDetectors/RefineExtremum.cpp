@@ -229,14 +229,14 @@ namespace DO::Sara {
       -> vector<OERegion>
   {
 // #define PROFILE_ME
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     auto timer = Timer{};
     auto tic_ = [&timer]() { timer.restart(); };
     auto toc_ = [&timer](const std::string& what) {
       const auto elapsed = timer.elapsed_ms();
       SARA_DEBUG << "[" << what << "] " << elapsed << "ms\n";
     };
-#endif
+#  endif
 
     // ========================================================================
     // Classify extrema.
@@ -251,22 +251,22 @@ namespace DO::Sara {
     const auto& me = I(s, o);
     const auto& next = I(s + 1, o);
 
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     tic_();
-#endif
+#  endif
     scale_space_dog_extremum_map(previous, me, next, edge_ratio_thres,
                                  extremum_thres, map);
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     toc_("[Halide] DoG extremum map");
-#endif
+#  endif
 
 
     // ========================================================================
     // Refine the location of extrema.
     // ========================================================================
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     tic_();
-#endif
+#  endif
     auto location_refined = Image<Vector3f>{I(s, o).sizes()};
     auto extremum_value = Image<float>{I(s, o).sizes()};
 
@@ -274,9 +274,9 @@ namespace DO::Sara {
     const auto& h = I(s, o).height();
     const auto wh = w * h;
 
-#ifdef _OPENMP
-#  pragma omp parallel for
-#endif
+#  ifdef _OPENMP
+#    pragma omp parallel for
+#  endif
     for (int xy = 0; xy < wh; ++xy)
     {
       const auto y = xy / w;
@@ -299,25 +299,39 @@ namespace DO::Sara {
       refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
                       refine_iterations);
 
-#ifndef STRICT_LOCAL_EXTREMA
-      // Reject if contrast too low.
-      if (std::abs(val) < extremum_thres)
+      // Approximate scale.
+      const auto scale_approx = I.scale_relative_to_octave(s);
+      const auto scale_refined = pos.z();
+      // Reject if the refined scale is unreasonably low or high, it has has to
+      // be not too from the approximate scale at which it has been detected.
+      static constexpr auto ratio_max = 4.f;  // large enough in my opinion
+      static constexpr auto ratio_min = 1 / ratio_max;
+      const auto scale_min = ratio_min * scale_approx;
+      const auto scale_max = ratio_max * scale_approx;
+      const auto scale_implausible =
+          !(scale_min < scale_refined && scale_refined < scale_max);
+
+      const auto too_low_contrast = std::abs(val) < extremum_thres;
+
+#  ifndef STRICT_LOCAL_EXTREMA
+      // Reject if contrast too low or if the scale is implausible
+      if (too_low_contrast || scale_implausible)
       {
         // SARA_DEBUG << "Reject " << x << " " << y << std::endl;
         map(x, y) = 0;
       }
-#endif
+#  endif
     }
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     toc_("Calculating Location Residual");
-#endif
+#  endif
 
     // ========================================================================
     // Fill the list of DoG extrema.
     // ========================================================================
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     tic_();
-#endif
+#  endif
     auto extrema = std::vector<OERegion>{};
     extrema.reserve(10000);
     for (int xy = 0; xy < wh; ++xy)
@@ -339,27 +353,27 @@ namespace DO::Sara {
           type == 1 ? OERegion::ExtremumType::Max : OERegion::ExtremumType::Min;
       extrema.push_back(dog);
     }
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     toc_("Populating Extrema");
-#endif
+#  endif
 
     return extrema;
   }
 #else
   auto local_scale_space_extrema(const ImagePyramid<float>& I, int s, int o,
-                                     float extremum_thres,
-                                     float edge_ratio_thres, int img_padding_sz,
-                                     int refine_iterations) -> vector<OERegion>
+                                 float extremum_thres, float edge_ratio_thres,
+                                 int img_padding_sz, int refine_iterations)
+      -> vector<OERegion>
   {
 // #define PROFILE_ME
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     auto timer = Timer{};
     auto tic_ = [&timer]() { timer.restart(); };
     auto toc_ = [&timer](const std::string& what) {
       const auto elapsed = timer.elapsed_ms();
       SARA_DEBUG << "[" << what << "] " << elapsed << "ms\n";
     };
-#endif
+#  endif
 
     const auto& w = I(s, o).width();
     const auto& h = I(s, o).height();
@@ -429,14 +443,14 @@ namespace DO::Sara {
     // ========================================================================
     // Refine the location of extrema.
     // ========================================================================
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     tic_();
-#endif
+#  endif
     auto location_refined = Image<Vector3f>{I(s, o).sizes()};
     auto extremum_value = Image<float>{I(s, o).sizes()};
-#ifdef _OPENMP
-#  pragma omp parallel for
-#endif
+#  ifdef _OPENMP
+#    pragma omp parallel for
+#  endif
     for (int xy = 0; xy < wh; ++xy)
     {
       const auto y = xy / w;
@@ -459,25 +473,25 @@ namespace DO::Sara {
       refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
                       refine_iterations);
 
-#ifndef STRICT_LOCAL_EXTREMA
+#  ifndef STRICT_LOCAL_EXTREMA
       // Reject if contrast too low.
       if (std::abs(val) < extremum_thres)
       {
         // SARA_DEBUG << "Reject " << x << " " << y << std::endl;
         map(x, y) = 0;
       }
-#endif
+#  endif
     }
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     toc_("Calculating Location Residual");
-#endif
+#  endif
 
     // ========================================================================
     // Fill the list of DoG extrema.
     // ========================================================================
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     tic_();
-#endif
+#  endif
     auto extrema = std::vector<OERegion>{};
     extrema.reserve(10000);
     for (int xy = 0; xy < wh; ++xy)
@@ -499,9 +513,9 @@ namespace DO::Sara {
           type == 1 ? OERegion::ExtremumType::Max : OERegion::ExtremumType::Min;
       extrema.push_back(dog);
     }
-#ifdef PROFILE_ME
+#  ifdef PROFILE_ME
     toc_("Populating Extrema");
-#endif
+#  endif
 
     return extrema;
   }

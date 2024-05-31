@@ -88,6 +88,7 @@ namespace DO::Sara {
 
     // 4. Rescale  the feature position and scale $(x, y, \sigma)$ with the
     //    octave scale.
+    SARA_LOGD(logger, "[Descriptors] {} keypoints to describe with SIFT", DoGs.size());
     for (size_t i = 0; i != DoGs.size(); ++i)
     {
       const auto octave_scale_factor = static_cast<float>(
