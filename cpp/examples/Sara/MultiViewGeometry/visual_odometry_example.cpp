@@ -563,7 +563,7 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
 #if defined(USE_HARDCODED_VIDEO_PATH) && defined(__APPLE__)
   const auto video_path =
       // fs::path{"/Users/oddkiva/Desktop/datasets/odometry/field.mp4"};
-      fs::path{"/Users/oddkiva/Downloads/IMG_7966.MOV"};
+      fs::path{"/Users/oddkiva/Desktop/datasets/oddkiva/food/IMG_8023.MOV"};
   if (!fs::exists(video_path))
   {
     fmt::print("Video {} does not exist", video_path.string());

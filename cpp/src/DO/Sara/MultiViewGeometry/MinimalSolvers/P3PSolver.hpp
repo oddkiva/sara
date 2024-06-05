@@ -106,8 +106,6 @@ namespace DO::Sara {
             "The dimension of scene points is incorrect. "
             "They must either 3D (Euclidean) or 4D (homogeneous)!"};
 
-#define PROJECT_TO_IMAGE_PLANE  // And we should...
-#if defined(PROJECT_TO_IMAGE_PLANE)
       // Project the camera coordinates to the image plane.
       //
       // The result is a list of pixel coordinates.
@@ -125,10 +123,6 @@ namespace DO::Sara {
       auto u2 = Eigen::MatrixXd{2, rays.cols()};
       for (auto i = 0; i < u2.cols(); ++i)
         u2.col(i) = C->project(rays.col(i));
-#else
-      const Eigen::MatrixXd u1 = X_camera.colwise().hnormalized();
-      const Eigen::MatrixXd u2 = rays.colwise().hnormalized();
-#endif
 
       // Check the cheirality w.r.t. the candidate pose.
       const auto cheiral = X_camera.row(2).array() > 0;
