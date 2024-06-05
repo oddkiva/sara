@@ -256,10 +256,12 @@ public:
   }
 
   auto set_config(const fs::path& video_path,
-                  const sara::v2::BrownConradyDistortionModel<double>& camera)
+                  const sara::v2::BrownConradyDistortionModel<double>& camera,
+                  const int num_frames_to_skip = 4)
       -> void
   {
     _pipeline.set_config(video_path, camera);
+    _pipeline._video_streamer.set_num_skips(num_frames_to_skip);
     init_gl_resources();
   }
 
@@ -563,7 +565,8 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
 #if defined(USE_HARDCODED_VIDEO_PATH) && defined(__APPLE__)
   const auto video_path =
       // fs::path{"/Users/oddkiva/Desktop/datasets/odometry/field.mp4"};
-      fs::path{"/Users/oddkiva/Desktop/datasets/oddkiva/food/IMG_8023.MOV"};
+      // fs::path{"/Users/oddkiva/Desktop/datasets/oddkiva/food/IMG_8023.MOV"};
+      fs::path{"/Users/oddkiva/Desktop/datasets/oddkiva/cambodia/oudong/IMG_4230.MOV"};
   if (!fs::exists(video_path))
   {
     fmt::print("Video {} does not exist", video_path.string());
@@ -579,6 +582,7 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
 
   const auto video_path = fs::path{argv[1]};
 #endif
+  auto num_frames_to_skip = 0;
   auto camera = sara::v2::BrownConradyDistortionModel<double>{};
   {
 #if !defined(__APPLE__)
@@ -596,21 +600,34 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
       -0.0003137658969742134,
       +0.00021943576376532096;
     // clang-format on
+    num_frames_to_skip = 4;
 #else  // iPhone 12 mini 4K - 1x
-    camera.fx() = 3229.074544798197;
-    camera.fy() = 3229.074544798197;
+    // camera.fx() = 3229.074544798197;
+    // camera.fy() = 3229.074544798197;
+    // camera.shear() = 0.;
+    // camera.u0() = 1080.;
+    // camera.v0() = 1920.;
+    // camera.k().setZero();
+    // camera.p().setZero();
+    // num_frames_to_skip = 9;
+
+    // iPhone 12 mini 1440p - 1x
+    camera.fx() = 1618.2896144891963;
+    camera.fy() = 1618.2896144891963;
     camera.shear() = 0.;
-    camera.u0() = 1080.;
-    camera.v0() = 1920.;
+    camera.u0() = 720;
+    camera.v0() = 960;
     camera.k().setZero();
     camera.p().setZero();
+    num_frames_to_skip = 14;
 #endif
   }
 
   try
   {
-    auto app = SingleWindowApp{{800, 600}, "Odometry: " + video_path.string()};
-    app.set_config(video_path, camera);
+    const auto app_title = "Odometry: " + video_path.string();
+    auto app = SingleWindowApp{{800, 600}, app_title};
+    app.set_config(video_path, camera, num_frames_to_skip);
     app.run();
   }
   catch (std::exception& e)
