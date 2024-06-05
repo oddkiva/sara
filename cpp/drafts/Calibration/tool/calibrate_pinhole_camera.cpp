@@ -29,7 +29,7 @@
 namespace sara = DO::Sara;
 
 
-// This seems to work well...
+// This works quite well in my experience.
 static inline auto init_calibration_matrix(int w, int h) -> Eigen::Matrix3d
 {
   const auto d = static_cast<double>(std::max(w, h));
@@ -82,8 +82,8 @@ inline auto inspect(sara::ImageView<sara::Rgb8>& image,             //
       const Eigen::Vector2f p2 = camera.project(P).cast<float>();
 
       if (!sara::is_nan(p1))
-        draw_circle(image, p1, 3.f, sara::Cyan8, 3);
-      draw_circle(image, p2, 3.f, sara::Magenta8, 3);
+        sara::draw_circle(image, p1, 3.f, sara::Cyan8, 3);
+      sara::draw_circle(image, p2, 3.f, sara::Magenta8, 3);
       if (pause)
       {
         sara::display(image);
@@ -129,7 +129,7 @@ auto estimate_pose_with_p3p(const sara::ChessboardCorners& cb,
     return std::nullopt;
 
   // Find the best poses.
-  SARA_DEBUG << "Find best pose..." << std::endl;
+  SARA_DEBUG << "Determining the best pose..." << std::endl;
   auto errors = std::vector<double>{};
   for (const auto& pose : poses)
   {
@@ -161,6 +161,7 @@ auto estimate_pose_with_p3p(const sara::ChessboardCorners& cb,
       std::min_element(errors.begin(), errors.end()) - errors.begin();
   const auto& best_pose = poses[best_pose_index];
   SARA_DEBUG << "Best pose:\n" << best_pose << std::endl;
+
   return best_pose;
 }
 
@@ -477,31 +478,16 @@ auto sara_graphics_main(int argc, char** argv) -> int
       auto frame_copy = sara::Image<sara::Rgb8>{frame};
       draw_chessboard(frame_copy, chessboard);
 
-      auto Rs = std::vector<Eigen::Matrix3d>{};
-      auto ts = std::vector<Eigen::Vector3d>{};
-      auto ns = std::vector<Eigen::Vector3d>{};
-
-// #define USE_RQ_FACTORIZATION
-#ifdef USE_RQ_FACTORIZATION
-      const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
-      decompose_H_RQ_factorization(H, K_initial, Rs, ts, ns);
-#else
       const auto pose = estimate_pose_with_p3p(chessboard, K_initial);
       if (pose == std::nullopt || sara::is_nan(*pose))
         continue;
-      Rs.resize(1);
-      ts.resize(1);
-      ns.resize(1);
-      Rs[0] = pose->topLeftCorner<3, 3>();
-      ts[0] = pose->col(3);
-      ns[0] = Eigen::Vector3d::Zero();
-#endif
 
-      SARA_DEBUG << "\nR =\n" << Rs[0] << std::endl;
-      SARA_DEBUG << "\nt =\n" << ts[0] << std::endl;
-      SARA_DEBUG << "\nn =\n" << ns[0] << std::endl;
+      const Eigen::Matrix3d R = pose->topLeftCorner<3, 3>();
+      const Eigen::Vector3d t = pose->col(3);
+      SARA_DEBUG << "\nR =\n" << R << std::endl;
+      SARA_DEBUG << "\nt =\n" << t << std::endl;
 
-      calibration_data.add(chessboard, Rs[0], ts[0]);
+      calibration_data.add(chessboard, R, t);
 
       // inspect(frame_copy, chessboard, K_initial, Rs[0], ts[0]);
       auto camera = sara::v2::PinholeCamera<double>();
