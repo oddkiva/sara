@@ -46,56 +46,8 @@ static inline auto init_calibration_matrix(int w, int h) -> Eigen::Matrix3d
   return K;
 }
 
-inline auto inspect(sara::ImageView<sara::Rgb8>& image,             //
-                    const sara::ChessboardCorners& chessboard,      //
-                    const sara::v2::PinholeCamera<double>& camera,  //
-                    const Eigen::Matrix3d& R,                       //
-                    const Eigen::Vector3d& t,                       //
-                    bool pause = false) -> void
-{
-  const auto s = chessboard.square_size().value;
-
-  // Draw the axes by projecting them onto the image plane.
-  const Eigen::Vector3d& o3 = t;
-  const Eigen::Vector3d i3 = R * Eigen::Vector3d::UnitX() * s + t;
-  const Eigen::Vector3d j3 = R * Eigen::Vector3d::UnitY() * s + t;
-  const Eigen::Vector3d k3 = R * Eigen::Vector3d::UnitZ() * s + t;
-  const Eigen::Vector2f o = camera.project(o3).cast<float>();
-  const Eigen::Vector2f i = camera.project(i3).cast<float>();
-  const Eigen::Vector2f j = camera.project(j3).cast<float>();
-  const Eigen::Vector2f k = camera.project(k3).cast<float>();
-
-  static const auto red = sara::Rgb8{167, 0, 0};
-  static const auto green = sara::Rgb8{89, 216, 26};
-  sara::draw_arrow(image, o, i, red, 6);
-  sara::draw_arrow(image, o, j, green, 6);
-  sara::draw_arrow(image, o, k, sara::Cyan8, 6);
-
-  for (auto y = 0; y < chessboard.height(); ++y)
-  {
-    for (auto x = 0; x < chessboard.width(); ++x)
-    {
-      auto P = chessboard.scene_point(x, y);
-      P = R * P + t;
-
-      const Eigen::Vector2f p1 = chessboard.image_point(x, y);
-      const Eigen::Vector2f p2 = camera.project(P).cast<float>();
-
-      if (!sara::is_nan(p1))
-        sara::draw_circle(image, p1, 3.f, sara::Cyan8, 3);
-      sara::draw_circle(image, p2, 3.f, sara::Magenta8, 3);
-      if (pause)
-      {
-        sara::display(image);
-        sara::get_key();
-      }
-    }
-  }
-}
-
-
-auto estimate_pose_with_p3p(const sara::ChessboardCorners& cb,
-                            const Eigen::Matrix3d& K)
+static auto estimate_pose_with_p3p(const sara::ChessboardCorners& cb,
+                                   const Eigen::Matrix3d& K)
     -> std::optional<Eigen::Matrix<double, 3, 4>>
 {
   auto points = Eigen::Matrix3d{};
@@ -163,6 +115,54 @@ auto estimate_pose_with_p3p(const sara::ChessboardCorners& cb,
   SARA_DEBUG << "Best pose:\n" << best_pose << std::endl;
 
   return best_pose;
+}
+
+
+inline auto inspect(sara::ImageView<sara::Rgb8>& image,             //
+                    const sara::ChessboardCorners& chessboard,      //
+                    const sara::v2::PinholeCamera<double>& camera,  //
+                    const Eigen::Matrix3d& R,                       //
+                    const Eigen::Vector3d& t,                       //
+                    bool pause = false) -> void
+{
+  const auto s = chessboard.square_size().value;
+
+  // Draw the axes by projecting them onto the image plane.
+  const Eigen::Vector3d& o3 = t;
+  const Eigen::Vector3d i3 = R * Eigen::Vector3d::UnitX() * s + t;
+  const Eigen::Vector3d j3 = R * Eigen::Vector3d::UnitY() * s + t;
+  const Eigen::Vector3d k3 = R * Eigen::Vector3d::UnitZ() * s + t;
+  const Eigen::Vector2f o = camera.project(o3).cast<float>();
+  const Eigen::Vector2f i = camera.project(i3).cast<float>();
+  const Eigen::Vector2f j = camera.project(j3).cast<float>();
+  const Eigen::Vector2f k = camera.project(k3).cast<float>();
+
+  static const auto red = sara::Rgb8{167, 0, 0};
+  static const auto green = sara::Rgb8{89, 216, 26};
+  sara::draw_arrow(image, o, i, red, 6);
+  sara::draw_arrow(image, o, j, green, 6);
+  sara::draw_arrow(image, o, k, sara::Cyan8, 6);
+
+  for (auto y = 0; y < chessboard.height(); ++y)
+  {
+    for (auto x = 0; x < chessboard.width(); ++x)
+    {
+      auto P = chessboard.scene_point(x, y);
+      P = R * P + t;
+
+      const Eigen::Vector2f p1 = chessboard.image_point(x, y);
+      const Eigen::Vector2f p2 = camera.project(P).cast<float>();
+
+      if (!sara::is_nan(p1))
+        sara::draw_circle(image, p1, 3.f, sara::Cyan8, 3);
+      sara::draw_circle(image, p2, 3.f, sara::Magenta8, 3);
+      if (pause)
+      {
+        sara::display(image);
+        sara::get_key();
+      }
+    }
+  }
 }
 
 

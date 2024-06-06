@@ -198,7 +198,7 @@ struct MyPointCloudScene : kgl::PointCloudScene
   Eigen::Matrix4f _view = Eigen::Matrix4f::Identity();
   Eigen::Matrix4f _model = Eigen::Matrix4f::Identity();
   double _delta = (5._m).value;
-  double _angle_delta = (10._deg).value;
+  double _angle_delta = (20._deg).value;
   //! @}
 };
 
