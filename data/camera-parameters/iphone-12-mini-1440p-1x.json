@@ -1,14 +1,14 @@
 {
-    "model": "iPhone 12 mini",
-    "mode": "1440p",
-    "zoom": 1,
-    "focal_length": {
-        "x": 1618.2896144891963,
-        "y": 1618.2896144891963
-    },
-    "shear": 0,
-    "principal_point": {
-        "x": 720,
-        "y": 960
-    }
+  "model": "iPhone 12 mini",
+  "mode": "1440p",
+  "zoom": 1,
+  "focal_length": {
+    "x": 1618.2896144891963,
+    "y": 1618.2896144891963
+  },
+  "shear": 0,
+  "principal_point": {
+    "x": 720,
+    "y": 960
+  }
 }
