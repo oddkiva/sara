@@ -496,8 +496,8 @@ auto sara_graphics_main(int argc, char** argv) -> int
       camera.shear() = K_initial(0, 1);
       camera.u0() = K_initial(0, 2);
       camera.v0() = K_initial(1, 2);
-      inspect(frame_copy, chessboard, camera, Rs[0], ts[0]);
 
+      inspect(frame_copy, chessboard, camera, R, t);
       sara::draw_text(frame_copy, 80, 80, "Chessboard: FOUND!", sara::White8,
                       60, 0, false, true);
       sara::display(frame_copy);
