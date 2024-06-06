@@ -517,6 +517,7 @@ auto sara_graphics_main(int argc, char** argv) -> int
   // Initialize the calibration matrix.
   auto camera = sara::OmnidirectionalCamera<double>{};
   camera.K = init_K(frame.width(), frame.height());
+  camera.K_inverse = camera.K.inverse();
   camera.radial_distortion_coefficients.setZero();
   camera.tangential_distortion_coefficients.setZero();
   camera.xi = 1;
@@ -567,10 +568,9 @@ auto sara_graphics_main(int argc, char** argv) -> int
       calibration_problem.add(chessboard, R, t);
 
       inspect(frame_copy, chessboard, camera, R, t);
+      sara::display(frame_copy);
       sara::draw_text(frame_copy, 80, 80, "Chessboard: FOUND!", sara::White8,
                       60, 0, false, true);
-      sara::display(frame_copy);
-      sara::get_key();
 
       selected_frames.emplace_back(video_stream.frame());
       chessboards.emplace_back(std::move(chessboard));
