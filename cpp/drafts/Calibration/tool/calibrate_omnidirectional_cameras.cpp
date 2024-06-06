@@ -11,155 +11,18 @@
 
 //! @file
 
+#include <drafts/Calibration/Chessboard.hpp>
+#include <drafts/Calibration/Utilities.hpp>
+
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/MultiViewGeometry/Calibration/OmnidirectionalCameraReprojectionError.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
-#include <DO/Sara/MultiViewGeometry/PnP/LambdaTwist.hpp>
-
-#include <drafts/Calibration/Chessboard.hpp>
-#include <drafts/Calibration/HomographyDecomposition.hpp>
-#include <drafts/Calibration/HomographyEstimation.hpp>
 
 
 namespace sara = DO::Sara;
-
-
-// This seems to work well...
-static inline auto init_K(int w, int h) -> Eigen::Matrix3d
-{
-  const auto d = static_cast<double>(std::max(w, h));
-  const auto f = 0.5 * d;
-
-  // clang-format off
-  const auto K = (Eigen::Matrix3d{} <<
-    f, 0, w * 0.5,
-    0, f, h * 0.5,
-    0, 0,       1
-  ).finished();
-  // clang-format on
-
-  return K;
-}
-
-static auto estimate_pose_with_p3p(const sara::ChessboardCorners& cb,
-                                   const sara::OmnidirectionalCamera<double>& K)
-    -> std::optional<Eigen::Matrix<double, 3, 4>>
-{
-  auto points = Eigen::Matrix3d{};
-  auto rays = Eigen::Matrix3d{};
-
-  SARA_DEBUG << "Filling points and rays for P3P..." << std::endl;
-  auto xs = std::array{0, 1, 0};
-  auto ys = std::array{0, 0, 1};
-  for (auto n = 0; n < 3; ++n)
-  {
-    const auto& x = xs[n];
-    const auto& y = ys[n];
-    const Eigen::Vector2d xn = cb.image_point(x, y).cast<double>();
-    if (sara::is_nan(xn))
-      continue;
-
-    points.col(n) = cb.scene_point(x, y);
-    rays.col(n) = K.backproject(xn).normalized();
-  }
-  if (sara::is_nan(points) || sara::is_nan(rays))
-    return std::nullopt;
-
-  SARA_DEBUG << "Solving P3P..." << std::endl;
-  SARA_DEBUG << "Points =\n" << points << std::endl;
-  SARA_DEBUG << "Rays   =\n" << rays << std::endl;
-  const auto poses = sara::solve_p3p(points, rays);
-  if (poses.empty())
-    return std::nullopt;
-
-  // Find the best poses.
-  SARA_DEBUG << "Determining the best pose..." << std::endl;
-  auto errors = std::vector<double>{};
-  for (const auto& pose : poses)
-  {
-    auto error = 0;
-
-    auto n = 0;
-    for (auto y = 0; y < cb.height(); ++y)
-    {
-      for (auto x = 0; x < cb.width(); ++x)
-      {
-        auto x0 = cb.image_point(x, y);
-        if (sara::is_nan(x0))
-          continue;
-
-        const auto& R = pose.topLeftCorner<3, 3>();
-        const auto& t = pose.col(3);
-        const auto X = (R * cb.scene_point(x, y) + t);
-
-
-        const Eigen::Vector2f x1 = K.project(X).cast<float>();
-        error += (x1 - x0).squaredNorm();
-        ++n;
-      }
-    }
-
-    errors.emplace_back(error / n);
-  }
-
-  const auto best_pose_index =
-      std::min_element(errors.begin(), errors.end()) - errors.begin();
-  const auto& best_pose = poses[best_pose_index];
-  SARA_DEBUG << "Best pose:\n" << best_pose << std::endl;
-
-  return best_pose;
-}
-
-
-inline auto inspect(sara::ImageView<sara::Rgb8>& image,                 //
-                    const sara::ChessboardCorners& chessboard,          //
-                    const sara::OmnidirectionalCamera<double>& camera,  //
-                    const Eigen::Matrix3d& R,                           //
-                    const Eigen::Vector3d& t,                           //
-                    bool pause = false) -> void
-{
-  const auto s = chessboard.square_size().value;
-
-  const Eigen::Vector3d& o3 = t;
-  const Eigen::Vector3d i3 = R * Eigen::Vector3d::UnitX() * s + t;
-  const Eigen::Vector3d j3 = R * Eigen::Vector3d::UnitY() * s + t;
-  const Eigen::Vector3d k3 = R * Eigen::Vector3d::UnitZ() * s + t;
-  const Eigen::Vector2f o = camera.project(o3).cast<float>();
-  const Eigen::Vector2f i = camera.project(i3).cast<float>();
-  const Eigen::Vector2f j = camera.project(j3).cast<float>();
-  const Eigen::Vector2f k = camera.project(k3).cast<float>();
-
-  static const auto red = sara::Rgb8{167, 0, 0};
-  static const auto green = sara::Rgb8{89, 216, 26};
-  sara::draw_arrow(image, o, i, red, 6);
-  sara::draw_arrow(image, o, j, green, 6);
-  sara::draw_arrow(image, o, k, sara::Blue8, 6);
-
-  for (auto y = 0; y < chessboard.height(); ++y)
-  {
-    for (auto x = 0; x < chessboard.width(); ++x)
-    {
-      Eigen::Vector3d P = chessboard.scene_point(x, y).cast<double>();
-      P = R * P + t;
-
-      const Eigen::Vector2f p1 = chessboard.image_point(x, y);
-      const Eigen::Vector2f p2 = camera.project(P).cast<float>();
-
-      if (!sara::is_nan(p1))
-        sara::draw_circle(image, p1, 3.f, sara::Cyan8, 3);
-      draw_circle(image, p2, 3.f, sara::Magenta8, 3);
-      if (pause)
-      {
-        sara::display(image);
-        sara::get_key();
-      }
-    }
-  }
-}
 
 
 class ChessboardCalibrationProblem
@@ -516,7 +379,7 @@ auto sara_graphics_main(int argc, char** argv) -> int
 
   // Initialize the calibration matrix.
   auto camera = sara::OmnidirectionalCamera<double>{};
-  camera.K = init_K(frame.width(), frame.height());
+  camera.K = sara::init_calibration_matrix(frame.width(), frame.height());
   camera.K_inverse = camera.K.inverse();
   camera.radial_distortion_coefficients.setZero();
   camera.tangential_distortion_coefficients.setZero();
