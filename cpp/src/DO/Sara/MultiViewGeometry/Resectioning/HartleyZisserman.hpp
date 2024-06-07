@@ -19,6 +19,9 @@
 
 namespace DO::Sara {
 
+  //! N.B.: this won't work if the scene points 'X' are lying on a plane.
+  //! This is a degenerate configuration the DLT method described by Hartley
+  //! cannot deal.
   template <typename T>
   auto resectioning_hartley_zisserman(const TensorView_<T, 2>& X,
                                       const TensorView_<T, 2>& x)

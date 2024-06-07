@@ -13,6 +13,9 @@
 
 #pragma once
 
+#if defined(DEBUG_SIFT)
+#  include <DO/Sara/Core/DebugUtilities.hpp>
+#endif
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Image/Image.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
@@ -54,25 +57,27 @@ namespace DO { namespace Sara {
     {
     }
 
-    //! @brief Computes the SIFT descriptor for keypoint @f$ (x,y,\sigma,\theta) @f$.
-    auto operator()(float x, float y, float sigma, float theta,
+    //! @brief Computes the SIFT descriptor for keypoint @f$ (x,y,\sigma,\theta)
+    //! @f$.
+    auto operator()(float x, float y, float s, float theta,
                     const ImageView<Vector2f>& grad_polar_coords,
-                    bool do_normalization = true) const
-        -> descriptor_type
+                    bool do_normalization = true) const -> descriptor_type
     {
       constexpr auto pi = static_cast<float>(M_PI);
 
       // The radius of each overlapping patches.
       const auto& lambda = _bin_scale_unit_length;
-      const auto l = lambda * sigma;
+      const auto l = lambda * s;
 
       // The radius of the total patch.
       const auto r = sqrt(2.f) * l * (N + 1) / 2.f;
 
       // Linear part of the patch normalization transform.
       auto T = Matrix2f{};
+      // clang-format off
       T << cos(theta), sin(theta),
           -sin(theta), cos(theta);
+      // clang-format on
       T /= l;
 
       // The SIFT descriptor.
@@ -82,6 +87,13 @@ namespace DO { namespace Sara {
       const int rounded_r = int_round(r);
       const int rounded_x = int_round(x);
       const int rounded_y = int_round(y);
+#if defined(DEBUG_SIFT)
+      SARA_CHECK(rounded_r);
+      SARA_CHECK(rounded_x);
+      SARA_CHECK(rounded_y);
+      SARA_CHECK(s);
+      SARA_CHECK(theta);
+#endif
 
       for (auto v = -rounded_r; v <= rounded_r; ++v)
       {
@@ -130,7 +142,6 @@ namespace DO { namespace Sara {
       }
 
       return h;
-
     }
 
     //! @brief Computes the **upright** SIFT descriptor for keypoint
@@ -155,8 +166,7 @@ namespace DO { namespace Sara {
     auto operator()(const std::vector<OERegion>& features,
                     const std::vector<Point2i>& scale_octave_pairs,
                     const ImagePyramid<Vector2f>& gradient_polar_coords,
-                    bool parallel = false) const
-        -> Tensor_<float, 2>
+                    bool parallel = false) const -> Tensor_<float, 2>
     {
       auto sifts = Tensor_<float, 2>{{int(features.size()), Dim}};
       if (parallel)
@@ -176,6 +186,9 @@ namespace DO { namespace Sara {
       {
         for (size_t i = 0; i < features.size(); ++i)
         {
+#if defined(DEBUG_SIFT)
+          SARA_CHECK(i);
+#endif
           sifts.matrix().row(i) =
               this->operator()(features[i],
                                gradient_polar_coords(scale_octave_pairs[i](0),
@@ -252,5 +265,4 @@ namespace DO { namespace Sara {
   //! @}
 
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

@@ -30,11 +30,16 @@ auto ColoredPointCloudRenderer::initialize() -> void
 
     void main()
     {
-      vec4  cam_coords = view * transform * vec4(in_coords, 1.0);
+      vec4 cam_coords = view * transform * vec4(in_coords, 1.0);
       gl_Position = projection * cam_coords;
-      float z2 = cam_coords.z * cam_coords.z;
-      float sigma2 = pow(150., 2.);  // sigma = 150 meters
-      gl_PointSize = clamp(5. * point_size * exp(-z2 / sigma2), 2., 15.);
+
+      // float z2 = cam_coords.z * cam_coords.z;
+      // float sigma2 = pow(150., 2.);  // sigma = 150 meters
+      // gl_PointSize = clamp(5. * point_size * exp(-z2 / sigma2), 2., 15.);
+
+      // Simplify the implementation...
+      gl_PointSize = point_size;
+
       out_color = in_color;
     }
   )shader";
@@ -93,12 +98,10 @@ auto ColoredPointCloudRenderer::destroy() -> void
   _shader_program.clear();
 }
 
-auto ColoredPointCloudRenderer::render(const ColoredPointCloud& point_cloud,
-                                       const float point_size,
-                                       const Eigen::Matrix4f& transform,
-                                       const Eigen::Matrix4f& model_view,
-                                       const Eigen::Matrix4f& projection)
-    -> void
+auto ColoredPointCloudRenderer::render(
+    const ColoredPointCloud& point_cloud, const float point_size,
+    const Eigen::Matrix4f& transform, const Eigen::Matrix4f& model_view,
+    const Eigen::Matrix4f& projection) -> void
 {
   _shader_program.use();
 

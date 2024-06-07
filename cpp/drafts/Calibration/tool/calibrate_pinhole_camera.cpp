@@ -11,6 +11,8 @@
 
 //! @file
 
+#include <drafts/Calibration/Utilities.hpp>
+
 #include <DO/Sara/Core/EigenFormatInterop.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -19,78 +21,10 @@
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/MultiViewGeometry/Calibration/PinholeCameraReprojectionError.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
-
-#include <drafts/Calibration/Chessboard.hpp>
-#include <drafts/Calibration/HomographyDecomposition.hpp>
-#include <drafts/Calibration/HomographyEstimation.hpp>
+#include <DO/Sara/MultiViewGeometry/PnP/LambdaTwist.hpp>
 
 
 namespace sara = DO::Sara;
-
-
-// This seems to work well...
-static inline auto init_calibration_matrix(int w, int h) -> Eigen::Matrix3d
-{
-  const auto d = static_cast<double>(std::max(w, h));
-  const auto f = 0.5 * d;
-
-  // clang-format off
-  const auto K = (Eigen::Matrix3d{} <<
-    f, 0, w * 0.5,
-    0, f, h * 0.5,
-    0, 0,       1
-  ).finished();
-  // clang-format on
-
-  return K;
-}
-
-inline auto inspect(sara::ImageView<sara::Rgb8>& image,             //
-                    const sara::ChessboardCorners& chessboard,      //
-                    const sara::v2::PinholeCamera<double>& camera,  //
-                    const Eigen::Matrix3d& R,                       //
-                    const Eigen::Vector3d& t,                       //
-                    bool pause = false) -> void
-{
-  const auto s = chessboard.square_size().value;
-
-  // Draw the axes by projecting them onto the image plane.
-  const Eigen::Vector3d& o3 = t;
-  const Eigen::Vector3d i3 = R * Eigen::Vector3d::UnitX() * s + t;
-  const Eigen::Vector3d j3 = R * Eigen::Vector3d::UnitY() * s + t;
-  const Eigen::Vector3d k3 = R * Eigen::Vector3d::UnitZ() * s + t;
-  const Eigen::Vector2f o = camera.project(o3).cast<float>();
-  const Eigen::Vector2f i = camera.project(i3).cast<float>();
-  const Eigen::Vector2f j = camera.project(j3).cast<float>();
-  const Eigen::Vector2f k = camera.project(k3).cast<float>();
-
-  static const auto red = sara::Rgb8{167, 0, 0};
-  static const auto green = sara::Rgb8{89, 216, 26};
-  sara::draw_arrow(image, o, i, red, 6);
-  sara::draw_arrow(image, o, j, green, 6);
-  sara::draw_arrow(image, o, k, sara::Cyan8, 6);
-
-  for (auto y = 0; y < chessboard.height(); ++y)
-  {
-    for (auto x = 0; x < chessboard.width(); ++x)
-    {
-      Eigen::Vector3d P = chessboard.scene_point(x, y).cast<double>();
-      P = R * P + t;
-
-      const Eigen::Vector2f p1 = chessboard.image_point(x, y);
-      const Eigen::Vector2f p2 = camera.project(P).cast<float>();
-
-      if (!sara::is_nan(p1))
-        draw_circle(image, p1, 3.f, sara::Cyan8, 3);
-      draw_circle(image, p2, 3.f, sara::Magenta8, 3);
-      if (pause)
-      {
-        sara::display(image);
-        sara::get_key();
-      }
-    }
-  }
-}
 
 
 class ChessboardCalibrationData
@@ -152,27 +86,27 @@ public:
     _num_points_at_image.push_back(num_points);
   }
 
-  inline auto obs_2d() const -> const double*
+  auto obs_2d() const -> const double*
   {
     return _observations_2d.data();
   }
 
-  inline auto obs_3d() const -> const double*
+  auto obs_3d() const -> const double*
   {
     return _observations_3d.data();
   }
 
-  inline auto mutable_intrinsics() -> double*
+  auto mutable_intrinsics() -> double*
   {
     return _intrinsics.data.data();
   }
 
-  inline auto mutable_extrinsics(int n) -> double*
+  auto mutable_extrinsics(int n) -> double*
   {
     return _extrinsics.data() + extrinsic_parameter_count * n;
   }
 
-  inline auto rotation(int n) const -> Eigen::AngleAxisd
+  auto rotation(int n) const -> Eigen::AngleAxisd
   {
     auto x = _extrinsics[extrinsic_parameter_count * n + 0];
     auto y = _extrinsics[extrinsic_parameter_count * n + 1];
@@ -185,7 +119,7 @@ public:
     return {angle, Eigen::Vector3d{x, y, z}};
   }
 
-  inline auto translation(int n) const -> Eigen::Vector3d
+  auto translation(int n) const -> Eigen::Vector3d
   {
     auto x = _extrinsics[extrinsic_parameter_count * n + 3 + 0];
     auto y = _extrinsics[extrinsic_parameter_count * n + 3 + 1];
@@ -269,7 +203,7 @@ public:
     camera.v0() = v0;
   }
 
-  inline auto reinitialize_extrinsic_parameters() -> void
+  auto reinitialize_extrinsic_parameters() -> void
   {
     throw std::runtime_error{"Implementation incomplete!"};
 
@@ -374,20 +308,8 @@ auto sara_graphics_main(int argc, char** argv) -> int
   auto chessboards = std::vector<sara::ChessboardCorners>{};
 
   // Initialize the calibration matrix.
-#if 0
-  const auto K_initial = init_calibration_matrix(frame.width(), frame.height());
-#else /* bootstrap manually */
-  auto K_initial = Eigen::Matrix3d{};
-  static constexpr auto f = 3228.8689050563653;  // 3229.074544798197
-  static constexpr auto u0 = 1080.;
-  static constexpr auto v0 = 1920.;
-  // clang-format off
-  K_initial <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
-  // clang-format on
-#endif
+  const auto K_initial =
+      sara::init_calibration_matrix(frame.width(), frame.height());
 
   // Initialize the calibration problem.
   auto calibration_data = ChessboardCalibrationData{};
@@ -418,28 +340,26 @@ auto sara_graphics_main(int argc, char** argv) -> int
       auto frame_copy = sara::Image<sara::Rgb8>{frame};
       draw_chessboard(frame_copy, chessboard);
 
-      auto Rs = std::vector<Eigen::Matrix3d>{};
-      auto ts = std::vector<Eigen::Vector3d>{};
-      auto ns = std::vector<Eigen::Vector3d>{};
+      const auto pose = estimate_pose_with_p3p(chessboard, K_initial);
+      if (pose == std::nullopt || sara::is_nan(*pose))
+        continue;
 
-#define USE_QR_FACTORIZATION
-#ifdef USE_QR_FACTORIZATION
-      // This simple approach gives the best results.
-      const Eigen::Matrix3d H = estimate_H(chessboard).normalized();
-      decompose_H_RQ_factorization(H, K_initial, Rs, ts, ns);
-#else
-      Rs = {Eigen::Matrix3d::Identity()};
-      ts = {Eigen::Vector3d::Zero()};
-      ns = {Eigen::Vector3d::Zero()};
-#endif
+      const Eigen::Matrix3d R = pose->topLeftCorner<3, 3>();
+      const Eigen::Vector3d t = pose->col(3);
+      SARA_DEBUG << "\nR =\n" << R << std::endl;
+      SARA_DEBUG << "\nt =\n" << t << std::endl;
 
-      SARA_DEBUG << "\nR =\n" << Rs[0] << std::endl;
-      SARA_DEBUG << "\nt =\n" << ts[0] << std::endl;
-      SARA_DEBUG << "\nn =\n" << ns[0] << std::endl;
+      calibration_data.add(chessboard, R, t);
 
-      calibration_data.add(chessboard, Rs[0], ts[0]);
+      // inspect(frame_copy, chessboard, K_initial, Rs[0], ts[0]);
+      auto camera = sara::v2::PinholeCamera<double>();
+      camera.fx() = K_initial(0, 0);
+      camera.fy() = K_initial(1, 1);
+      camera.shear() = K_initial(0, 1);
+      camera.u0() = K_initial(0, 2);
+      camera.v0() = K_initial(1, 2);
 
-      inspect(frame_copy, chessboard, K_initial, Rs[0], ts[0]);
+      inspect(frame_copy, chessboard, camera, R, t);
       sara::draw_text(frame_copy, 80, 80, "Chessboard: FOUND!", sara::White8,
                       60, 0, false, true);
       sara::display(frame_copy);

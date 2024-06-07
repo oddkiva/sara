@@ -57,7 +57,7 @@ auto draw_corner(sara::ImageView<sara::Rgb8>& display,
 }
 
 
-auto __main(int argc, char** argv) -> int
+auto sara_graphics_main(int argc, char** argv) -> int
 {
   try
   {
@@ -178,7 +178,7 @@ auto __main(int argc, char** argv) -> int
 
 auto main(int argc, char** argv) -> int
 {
-  DO::Sara::GraphicsApplication app(argc, argv);
-  app.register_user_main(__main);
+  auto app = sara::GraphicsApplication(argc, argv);
+  app.register_user_main(sara_graphics_main);
   return app.exec();
 }
