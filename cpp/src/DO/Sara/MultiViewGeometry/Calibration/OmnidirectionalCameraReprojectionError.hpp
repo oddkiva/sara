@@ -23,72 +23,10 @@
 
 namespace DO::Sara {
 
-  template <typename T>
-  struct OmnidirectionalCameraParameterVector
-  {
-    static constexpr auto size = 10;
-    enum Index
-    {
-      FX = 0,
-      FY = 1,
-      NORMALIZED_SHEAR = 2,
-      U0 = 3,
-      V0 = 4,
-      K0 = 5,
-      K1 = 6,
-      P0 = 7,
-      P1 = 8,
-      XI = 9
-    };
-
-    const T* data = nullptr;
-
-    inline auto f(const int i) const -> const T&
-    {
-      return data[FX + i];
-    }
-
-    inline auto normalized_shear() const -> const T&
-    {
-      return data[NORMALIZED_SHEAR];
-    }
-
-    inline auto shear() const -> T
-    {
-      return data[NORMALIZED_SHEAR] * data[FX];
-    }
-
-    inline auto u0() const -> const T&
-    {
-      return data[U0];
-    }
-
-    inline auto v0() const -> const T&
-    {
-      return data[U0];
-    }
-
-    inline auto k(const int i) const -> const T&
-    {
-      return data[K0 + i];
-    }
-
-    inline auto p(const int i) const -> const T&
-    {
-      return data[P0 + i];
-    }
-
-    inline auto xi() const -> const T&
-    {
-      return data[XI];
-    }
-  };
-
   struct OmnidirectionalCameraReprojectionError
   {
     static constexpr auto residual_dimension = 2;
-    static constexpr auto intrinsic_parameter_count =
-        OmnidirectionalCameraParameterVector<double>::size;
+    static constexpr auto intrinsic_parameter_count = 10;
     static constexpr auto extrinsic_parameter_count = 6;
 
     inline OmnidirectionalCameraReprojectionError(
@@ -100,9 +38,9 @@ namespace DO::Sara {
     }
 
     template <typename T>
-    inline auto apply_mirror_transformation(const Eigen::Matrix<T, 3, 1>& Xc,
-                                            const T& xi) const
-        -> Eigen::Matrix<T, 2, 1>
+    inline auto
+    apply_mirror_transformation(const Eigen::Matrix<T, 3, 1>& Xc,
+                                const T& xi) const -> Eigen::Matrix<T, 2, 1>
     {
       using Vector2 = Eigen::Matrix<T, 2, 1>;
       using Vector3 = Eigen::Matrix<T, 3, 1>;
@@ -112,7 +50,7 @@ namespace DO::Sara {
       // 1. Project on the unit sphere (reflection from the spherical mirror).
       const Vector3 Xs = Xc.normalized();
       const Vector3 Xe = Xs + xi * Vector3::UnitZ();
-      // 3. Project the reflected ray by the mirror to the normalized plane z
+      // 2. Project the reflected ray by the mirror to the normalized plane z
       // = 1.
       const Vector2 m = Xe.hnormalized();
 
@@ -121,8 +59,8 @@ namespace DO::Sara {
 
     template <typename T>
     inline auto apply_distortion(const Eigen::Matrix<T, 2, 1>& mu, const T& k1,
-                                 const T& k2, const T& p1, const T& p2) const
-        -> Eigen::Matrix<T, 2, 1>
+                                 const T& k2, const T& p1,
+                                 const T& p2) const -> Eigen::Matrix<T, 2, 1>
     {
       using Vector2 = Eigen::Matrix<T, 2, 1>;
 
@@ -177,7 +115,8 @@ namespace DO::Sara {
 
       // Apply the calibration matrix.
       const auto& fx = intrinsics[0];
-      const auto& fy = intrinsics[1];
+      const auto fy_normalized = intrinsics[1];
+      const auto fy = fy_normalized * fx;
       const auto& alpha = intrinsics[2];
       const auto shear = fx * alpha;
       const auto& u0 = intrinsics[3];
@@ -209,42 +148,4 @@ namespace DO::Sara {
     Eigen::Vector2d scene_point;
   };
 
-  struct DistortionParamRegularizer
-  {
-    static constexpr auto residual_dimension = 4;
-    static constexpr auto intrinsic_parameter_count =
-        OmnidirectionalCameraParameterVector<double>::size;
-
-    inline DistortionParamRegularizer(double scale = 1.0)
-      : scale{scale}
-    {
-    }
-
-    template <typename T>
-    inline auto operator()(const T* const intrinsics, T* residuals) const
-        -> bool
-    {
-      const auto& k1 = intrinsics[5];
-      const auto& k2 = intrinsics[6];
-      const auto& p1 = intrinsics[7];
-      const auto& p2 = intrinsics[8];
-
-      residuals[0] = scale * k1;
-      residuals[1] = scale * k2;
-      residuals[0] = scale * p1;
-      residuals[1] = scale * p2;
-
-      return true;
-    }
-
-    static inline auto create(double scale)
-    {
-      return new ceres::AutoDiffCostFunction<DistortionParamRegularizer,  //
-                                             residual_dimension,
-                                             intrinsic_parameter_count>(
-          new DistortionParamRegularizer{scale});
-    }
-
-    double scale;
-  };
 }  // namespace DO::Sara

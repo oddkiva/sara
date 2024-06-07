@@ -52,8 +52,8 @@ public:
   {
     // fx
     _intrinsics[0] = K(0, 0);
-    // fy
-    _intrinsics[1] = K(1, 1);
+    // fy (NORMALIZED)
+    _intrinsics[1] = K(1, 1) / K(0, 0);
     // shear (NORMALIZED)
     _intrinsics[2] = K(0, 1) / K(0, 0);
     // u0
@@ -177,9 +177,11 @@ public:
     }
 
     static constexpr auto fx = 0;
-    static constexpr auto fy = 1;
+    static constexpr auto fy_normalized = 1;
     // alpha is the normalized_shear.
     static constexpr auto alpha = 2;  // shear = alpha * fx
+    static constexpr auto u0 = 3;
+    static constexpr auto v0 = 4;
     static constexpr auto k0 = 5;
     static constexpr auto k1 = 6;
     static constexpr auto p0 = 7;
@@ -187,11 +189,12 @@ public:
     static constexpr auto xi = 9;
 
     // Bounds on the calibration matrix.
-    for (const auto& f : {fx, fy})
-    {
-      problem.SetParameterLowerBound(mutable_intrinsics(), f, 500);
-      problem.SetParameterUpperBound(mutable_intrinsics(), f, 5000);
-    }
+    problem.SetParameterLowerBound(mutable_intrinsics(), fx, 500);
+    problem.SetParameterUpperBound(mutable_intrinsics(), fx, 5000);
+
+    problem.SetParameterLowerBound(mutable_intrinsics(), fy_normalized, 0.);
+    problem.SetParameterUpperBound(mutable_intrinsics(), fy_normalized, 2.);
+
     // Normalized shear.
     // - We should not need any further adjustment on the bounds.
     problem.SetParameterLowerBound(mutable_intrinsics(), alpha, -1.);
@@ -206,33 +209,39 @@ public:
       problem.SetParameterUpperBound(mutable_intrinsics(), dist_coeff, 1);
     }
 
+    // for (const auto& i : {u0, v0})
+    // {
+    //   problem.SetParameterLowerBound(mutable_intrinsics(), i, mutable_intrinsics()[i] - 1);
+    //   problem.SetParameterUpperBound(mutable_intrinsics(), i, mutable_intrinsics()[i] + 1);
+    // }
+
     // Bounds on the mirror parameter.
     //
     // - If we are dealing with a fisheye camera, we should freeze the xi
     //   parameter to 1.
-    static constexpr auto tolerance =
-        0.01;  // too little... and the optimizer may
-               // get stuck into a bad local minimum.
+    //
+    // By default freeze the principal point.
+    auto intrinsics_to_freeze = std::vector<int>{};
     switch (_camera_type)
     {
     case CameraType::Fisheye:
-      // - This is a quick and dirty approach...
-      problem.SetParameterLowerBound(mutable_intrinsics(), xi, 1 - tolerance);
-      problem.SetParameterUpperBound(mutable_intrinsics(), xi, 1 + tolerance);
-
-      // Otherwise add a penalty residual block:
-      // auto penalty_block = /* TODO */;
-      // problem.AddResidualBlock(penalty_block, nullptr, mutable_intrinsics());
+      mutable_intrinsics()[xi] = 1.;
+      intrinsics_to_freeze.push_back(xi);
       break;
     case CameraType::Pinhole:
-      problem.SetParameterLowerBound(mutable_intrinsics(), xi, -tolerance);
-      problem.SetParameterUpperBound(mutable_intrinsics(), xi, tolerance);
+      mutable_intrinsics()[xi] = 0.;
+      intrinsics_to_freeze.push_back(xi);
       break;
     default:
       problem.SetParameterLowerBound(mutable_intrinsics(), xi, -10.);
       problem.SetParameterUpperBound(mutable_intrinsics(), xi, 10.);
       break;
     }
+
+    // Impose a fixed principal point.
+    auto intrinsic_manifold =
+        new ceres::SubsetManifold{10, intrinsics_to_freeze};
+    problem.SetManifold(mutable_intrinsics(), intrinsic_manifold);
   }
 
   inline auto
@@ -241,7 +250,7 @@ public:
     // Copy back the final parameter to the omnidirectional camera parameter
     // object.
     const auto fx = mutable_intrinsics()[0];
-    const auto fy = mutable_intrinsics()[1];
+    const auto fy = mutable_intrinsics()[1] * fx;
     const auto alpha = mutable_intrinsics()[2];
     const auto shear = fx * alpha;
     const auto u0 = mutable_intrinsics()[3];
@@ -254,8 +263,8 @@ public:
     // clang-format off
     auto K = Eigen::Matrix3d{};
     K << fx, shear, u0,
-          0,   fy, v0,
-          0,    0,  1;
+          0,    fy, v0,
+          0,     0,  1;
     // clang-format on
     camera.set_calibration_matrix(K);
     camera.radial_distortion_coefficients << k0, k1, 0;
@@ -302,8 +311,6 @@ public:
         }
       }
 
-      // TODO: reestimate the extrinsics with the PnP algorithm.
-
       auto extrinsics = mutable_extrinsics(image_index);
       auto angle_axis_ptr = extrinsics;
       auto translation_ptr = extrinsics + 3;
@@ -332,7 +339,7 @@ private:
   std::vector<double> _observations_3d;
   std::array<double, intrinsic_parameter_count> _intrinsics;
   std::vector<double> _extrinsics;
-  CameraType _camera_type = CameraType::General;
+  CameraType _camera_type = CameraType::Pinhole;
 };
 
 
