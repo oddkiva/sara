@@ -40,15 +40,14 @@ public:
     General
   };
 
-  inline auto set_camera_type(CameraType camera_type) -> void
+  auto set_camera_type(CameraType camera_type) -> void
   {
     _camera_type = camera_type;
   }
 
-  inline auto initialize_intrinsics(const Eigen::Matrix3d& K,
-                                    const Eigen::Vector3d& k,
-                                    const Eigen::Vector2d& p,  //
-                                    const double xi) -> void
+  auto initialize_intrinsics(const Eigen::Matrix3d& K, const Eigen::Vector3d& k,
+                             const Eigen::Vector2d& p,  //
+                             const double xi) -> void
   {
     // fx
     _intrinsics[0] = K(0, 0);
@@ -71,8 +70,8 @@ public:
     _intrinsics[9] = xi;
   }
 
-  inline auto add(const sara::ChessboardCorners& chessboard,
-                  const Eigen::Matrix3d& R, const Eigen::Vector3d& t)
+  auto add(const sara::ChessboardCorners& chessboard, const Eigen::Matrix3d& R,
+           const Eigen::Vector3d& t)
   {
     ++_num_images;
 
@@ -110,27 +109,27 @@ public:
     _num_points_at_image.push_back(num_points);
   }
 
-  inline auto obs_2d() const -> const double*
+  auto obs_2d() const -> const double*
   {
     return _observations_2d.data();
   }
 
-  inline auto obs_3d() const -> const double*
+  auto obs_3d() const -> const double*
   {
     return _observations_3d.data();
   }
 
-  inline auto mutable_intrinsics() -> double*
+  auto mutable_intrinsics() -> double*
   {
     return _intrinsics.data();
   }
 
-  inline auto mutable_extrinsics(int n) -> double*
+  auto mutable_extrinsics(int n) -> double*
   {
     return _extrinsics.data() + extrinsic_parameter_count * n;
   }
 
-  inline auto rotation(int n) const -> Eigen::AngleAxisd
+  auto rotation(int n) const -> Eigen::AngleAxisd
   {
     auto x = _extrinsics[extrinsic_parameter_count * n + 0];
     auto y = _extrinsics[extrinsic_parameter_count * n + 1];
@@ -143,7 +142,7 @@ public:
     return {angle, Eigen::Vector3d{x, y, z}};
   }
 
-  inline auto translation(int n) const -> Eigen::Vector3d
+  auto translation(int n) const -> Eigen::Vector3d
   {
     auto x = _extrinsics[extrinsic_parameter_count * n + 3 + 0];
     auto y = _extrinsics[extrinsic_parameter_count * n + 3 + 1];
@@ -151,7 +150,7 @@ public:
     return {x, y, z};
   }
 
-  inline auto transform_into_ceres_problem(ceres::Problem& problem) -> void
+  auto transform_into_ceres_problem(ceres::Problem& problem) -> void
   {
     auto loss_fn = nullptr;  // new ceres::HuberLoss{1.0};
     auto data_pos = std::size_t{};
@@ -211,8 +210,10 @@ public:
 
     // for (const auto& i : {u0, v0})
     // {
-    //   problem.SetParameterLowerBound(mutable_intrinsics(), i, mutable_intrinsics()[i] - 1);
-    //   problem.SetParameterUpperBound(mutable_intrinsics(), i, mutable_intrinsics()[i] + 1);
+    //   problem.SetParameterLowerBound(mutable_intrinsics(), i,
+    //   mutable_intrinsics()[i] - 1);
+    //   problem.SetParameterUpperBound(mutable_intrinsics(), i,
+    //   mutable_intrinsics()[i] + 1);
     // }
 
     // Bounds on the mirror parameter.
@@ -244,7 +245,7 @@ public:
     problem.SetManifold(mutable_intrinsics(), intrinsic_manifold);
   }
 
-  inline auto
+  auto
   copy_camera_intrinsics(sara::OmnidirectionalCamera<double>& camera) -> void
   {
     // Copy back the final parameter to the omnidirectional camera parameter
@@ -272,7 +273,7 @@ public:
     camera.xi = xi;
   }
 
-  inline auto reinitialize_extrinsic_parameters() -> void
+  auto reinitialize_extrinsic_parameters() -> void
   {
     throw std::runtime_error{"Implementation incomplete!"};
 
