@@ -55,19 +55,20 @@ public:
     _intrinsics[1] = K(1, 1) / K(0, 0);
     // shear (NORMALIZED)
     _intrinsics[2] = K(0, 1) / K(0, 0);
-    // u0
+    // principal point (u0, v0)
     _intrinsics[3] = K(0, 2);
-    // v0
     _intrinsics[4] = K(1, 2);
+
+    // Mirror parameter: xi
+    _intrinsics[5] = xi;
+
     // k
-    _intrinsics[5] = k(0);
-    _intrinsics[6] = k(1);
-    // _intrinsics[7] = k(2);
+    _intrinsics[6] = k(0);
+    _intrinsics[7] = k(1);
+    _intrinsics[8] = k(2);
     // p
-    _intrinsics[7] = p(0);
-    _intrinsics[8] = p(1);
-    // xi
-    _intrinsics[9] = xi;
+    _intrinsics[9] = p(0);
+    _intrinsics[10] = p(1);
   }
 
   auto add(const sara::ChessboardCorners& chessboard, const Eigen::Matrix3d& R,
@@ -206,7 +207,7 @@ public:
 
     // Bounds on the distortion coefficients.
     // - We should not need any further adjustment on the bounds.
-    for (const auto& idx : {k0, k1, p0, p1})
+    for (const auto& idx : {k0, k1, k2, p0, p1})
     {
       problem.SetParameterLowerBound(mutable_intrinsics(), idx, -1.);
       problem.SetParameterUpperBound(mutable_intrinsics(), idx, 1.);
@@ -226,8 +227,7 @@ public:
     //   parameter to 1.
     //
     // By default freeze the principal point.
-    auto intrinsics_to_freeze =
-        std::vector<int>{fy_normalized, alpha, u0, v0, k2};
+    auto intrinsics_to_freeze = std::vector<int>{};
     switch (_camera_type)
     {
     case CameraType::Fisheye:
