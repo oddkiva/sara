@@ -101,6 +101,7 @@ public:
 
         _observations_3d.push_back(x * square_size);
         _observations_3d.push_back(y * square_size);
+        _observations_3d.push_back(0);
 
         ++num_points;
       }
@@ -153,16 +154,17 @@ public:
   auto transform_into_ceres_problem(ceres::Problem& problem) -> void
   {
     auto loss_fn = nullptr;  // new ceres::HuberLoss{1.0};
-    auto data_pos = std::size_t{};
+    auto obs_ptr = _observations_2d.data();
+    auto scene_ptr = _observations_3d.data();
     for (auto n = 0; n < _num_images; ++n)
     {
       const auto& num_points = _num_points_at_image[n];
       for (auto p = 0; p < num_points; ++p)
       {
-        const Eigen::Vector2d image_point = Eigen::Map<const Eigen::Vector2d>(
-            _observations_2d.data() + data_pos);
-        const Eigen::Vector2d scene_point = Eigen::Map<const Eigen::Vector2d>(
-            _observations_3d.data() + data_pos);
+        const Eigen::Vector2d image_point =
+            Eigen::Map<const Eigen::Vector2d>(obs_ptr);
+        const Eigen::Vector3d scene_point =
+            Eigen::Map<const Eigen::Vector3d>(scene_ptr);
 
         auto cost_function =
             sara::OmnidirectionalCameraReprojectionError::create(image_point,
@@ -171,7 +173,8 @@ public:
         problem.AddResidualBlock(cost_function, loss_fn,  //
                                  mutable_intrinsics(), mutable_extrinsics(n));
 
-        data_pos += 2;
+        obs_ptr += 2;
+        scene_ptr += 3;
       }
     }
 
@@ -179,13 +182,14 @@ public:
     static constexpr auto fy_normalized = 1;
     // alpha is the normalized_shear.
     static constexpr auto alpha = 2;  // shear = alpha * fx
-    static constexpr auto u0 = 3;
-    static constexpr auto v0 = 4;
-    static constexpr auto k0 = 5;
-    static constexpr auto k1 = 6;
-    static constexpr auto p0 = 7;
-    static constexpr auto p1 = 8;
-    static constexpr auto xi = 9;
+    [[maybe_unused]] static constexpr auto u0 = 3;
+    [[maybe_unused]] static constexpr auto v0 = 4;
+    static constexpr auto xi = 5;
+    static constexpr auto k0 = 6;
+    static constexpr auto k1 = 7;
+    static constexpr auto k2 = 8;
+    static constexpr auto p0 = 9;
+    static constexpr auto p1 = 10;
 
     // Bounds on the calibration matrix.
     problem.SetParameterLowerBound(mutable_intrinsics(), fx, 500);
@@ -202,10 +206,10 @@ public:
 
     // Bounds on the distortion coefficients.
     // - We should not need any further adjustment on the bounds.
-    for (const auto& dist_coeff : {k0, k1, p0, p1})
+    for (const auto& idx : {k0, k1, p0, p1})
     {
-      problem.SetParameterLowerBound(mutable_intrinsics(), dist_coeff, -1);
-      problem.SetParameterUpperBound(mutable_intrinsics(), dist_coeff, 1);
+      problem.SetParameterLowerBound(mutable_intrinsics(), idx, -1.);
+      problem.SetParameterUpperBound(mutable_intrinsics(), idx, 1.);
     }
 
     // for (const auto& i : {u0, v0})
@@ -222,7 +226,8 @@ public:
     //   parameter to 1.
     //
     // By default freeze the principal point.
-    auto intrinsics_to_freeze = std::vector<int>{};
+    auto intrinsics_to_freeze =
+        std::vector<int>{fy_normalized, alpha, u0, v0, k2};
     switch (_camera_type)
     {
     case CameraType::Fisheye:
@@ -240,8 +245,8 @@ public:
     }
 
     // Impose a fixed principal point.
-    auto intrinsic_manifold =
-        new ceres::SubsetManifold{10, intrinsics_to_freeze};
+    auto intrinsic_manifold = new ceres::SubsetManifold{
+        intrinsic_parameter_count, intrinsics_to_freeze};
     problem.SetManifold(mutable_intrinsics(), intrinsic_manifold);
   }
 
@@ -250,17 +255,25 @@ public:
   {
     // Copy back the final parameter to the omnidirectional camera parameter
     // object.
-    const auto fx = mutable_intrinsics()[0];
-    const auto fy = mutable_intrinsics()[1] * fx;
-    const auto alpha = mutable_intrinsics()[2];
+
+    // Calibration matrix.
+    const auto& fx = mutable_intrinsics()[0];
+    const auto& fy_normalized = mutable_intrinsics()[1];
+    const auto& alpha = mutable_intrinsics()[2];
+    const auto fy = fy_normalized * fx;
     const auto shear = fx * alpha;
-    const auto u0 = mutable_intrinsics()[3];
-    const auto v0 = mutable_intrinsics()[4];
-    const auto k0 = mutable_intrinsics()[5];
-    const auto k1 = mutable_intrinsics()[6];
-    const auto p0 = mutable_intrinsics()[7];
-    const auto p1 = mutable_intrinsics()[8];
-    const auto xi = mutable_intrinsics()[9];
+    const auto& u0 = mutable_intrinsics()[3];
+    const auto& v0 = mutable_intrinsics()[4];
+
+    // Mirror parameter.
+    const auto& xi = mutable_intrinsics()[5];
+
+    // Distortion parameters.
+    const auto& k0 = mutable_intrinsics()[6];
+    const auto& k1 = mutable_intrinsics()[7];
+    const auto& k2 = mutable_intrinsics()[8];
+    const auto& p0 = mutable_intrinsics()[9];
+    const auto& p1 = mutable_intrinsics()[10];
     // clang-format off
     auto K = Eigen::Matrix3d{};
     K << fx, shear, u0,
@@ -268,71 +281,12 @@ public:
           0,     0,  1;
     // clang-format on
     camera.set_calibration_matrix(K);
-    camera.radial_distortion_coefficients << k0, k1, 0;
+    camera.radial_distortion_coefficients << k0, k1, k2;
     camera.tangential_distortion_coefficients << p0, p1;
     camera.xi = xi;
   }
 
-  auto reinitialize_extrinsic_parameters() -> void
-  {
-    throw std::runtime_error{"Implementation incomplete!"};
-
-    const auto to_camera =
-        [](const double*) -> sara::OmnidirectionalCamera<double> { return {}; };
-    const auto camera = to_camera(_intrinsics.data());
-
-    auto data_pos = std::size_t{};
-
-    for (auto image_index = 0; image_index < _num_images; ++image_index)
-    {
-      const auto& num_points = _num_points_at_image[image_index];
-      auto p2ns = Eigen::MatrixXd{3, num_points};
-      auto p3s = Eigen::MatrixXd{3, num_points};
-
-      auto c = 0;
-      for (auto y = 0; y < _h; ++y)
-      {
-        for (auto x = 0; x < _w; ++x)
-        {
-          const Eigen::Vector2d p2 = Eigen::Map<const Eigen::Vector2d>(
-              _observations_2d.data() + data_pos);
-
-          const Eigen::Vector3d p3 = Eigen::Map<const Eigen::Vector2d>(
-                                         _observations_2d.data() + data_pos)
-                                         .homogeneous();
-
-          const Eigen::Vector3d ray = camera.backproject(p2);
-          const Eigen::Vector2d p2n = ray.hnormalized();
-
-          p2ns.col(c) << p2n, 1;
-          p3s.col(c) = p3;
-
-          ++c;
-          data_pos += 2;
-        }
-      }
-
-      auto extrinsics = mutable_extrinsics(image_index);
-      auto angle_axis_ptr = extrinsics;
-      auto translation_ptr = extrinsics + 3;
-
-#if 0
-      const auto angle_axis = Eigen::AngleAxisd{Rs.front()};
-      const auto& angle = angle_axis.angle();
-      const auto& axis = angle_axis.axis();
-#else
-      for (auto k = 0; k < 3; ++k)
-        angle_axis_ptr[k] = 0;  // angle * axis(k);
-
-      for (auto k = 0; k < 3; ++k)
-        translation_ptr[k] = 0;  // ts.front()(k);
-#endif
-    }
-  }
-
 private:
-  int _w = 0;
-  int _h = 0;
   int _num_images = 0;
 
   std::vector<int> _num_points_at_image;
