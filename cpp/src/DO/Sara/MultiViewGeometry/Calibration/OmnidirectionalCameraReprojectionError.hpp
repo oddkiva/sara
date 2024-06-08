@@ -23,86 +23,24 @@
 
 namespace DO::Sara {
 
-  template <typename T>
-  struct OmnidirectionalCameraParameterVector
-  {
-    static constexpr auto size = 10;
-    enum Index
-    {
-      FX = 0,
-      FY = 1,
-      NORMALIZED_SHEAR = 2,
-      U0 = 3,
-      V0 = 4,
-      K0 = 5,
-      K1 = 6,
-      P0 = 7,
-      P1 = 8,
-      XI = 9
-    };
-
-    const T* data = nullptr;
-
-    inline auto f(const int i) const -> const T&
-    {
-      return data[FX + i];
-    }
-
-    inline auto normalized_shear() const -> const T&
-    {
-      return data[NORMALIZED_SHEAR];
-    }
-
-    inline auto shear() const -> T
-    {
-      return data[NORMALIZED_SHEAR] * data[FX];
-    }
-
-    inline auto u0() const -> const T&
-    {
-      return data[U0];
-    }
-
-    inline auto v0() const -> const T&
-    {
-      return data[U0];
-    }
-
-    inline auto k(const int i) const -> const T&
-    {
-      return data[K0 + i];
-    }
-
-    inline auto p(const int i) const -> const T&
-    {
-      return data[P0 + i];
-    }
-
-    inline auto xi() const -> const T&
-    {
-      return data[XI];
-    }
-  };
-
   struct OmnidirectionalCameraReprojectionError
   {
     static constexpr auto residual_dimension = 2;
-    static constexpr auto intrinsic_parameter_count =
-        OmnidirectionalCameraParameterVector<double>::size;
+    static constexpr auto intrinsic_parameter_count = 11;
     static constexpr auto extrinsic_parameter_count = 6;
 
     inline OmnidirectionalCameraReprojectionError(
         const Eigen::Vector2d& image_point,  //
-        const Eigen::Vector2d& scene_point)
+        const Eigen::Vector3d& scene_point)
       : image_point{image_point}
       , scene_point{scene_point}
     {
     }
 
     template <typename T>
-    inline auto apply_mirror_transformation(const Eigen::Matrix<T, 3, 1>& Xc,
-                                            const T& xi) const
-        -> Eigen::Matrix<T, 2, 1>
+    inline auto
+    apply_mirror_transformation(const Eigen::Matrix<T, 3, 1>& Xc,
+                                const T& xi) const -> Eigen::Matrix<T, 2, 1>
     {
       using Vector2 = Eigen::Matrix<T, 2, 1>;
       using Vector3 = Eigen::Matrix<T, 3, 1>;
@@ -112,7 +50,7 @@ namespace DO::Sara {
       // 1. Project on the unit sphere (reflection from the spherical mirror).
       const Vector3 Xs = Xc.normalized();
       const Vector3 Xe = Xs + xi * Vector3::UnitZ();
-      // 3. Project the reflected ray by the mirror to the normalized plane z
+      // 2. Project the reflected ray by the mirror to the normalized plane z
       // = 1.
       const Vector2 m = Xe.hnormalized();
 
@@ -121,15 +59,16 @@ namespace DO::Sara {
 
     template <typename T>
     inline auto apply_distortion(const Eigen::Matrix<T, 2, 1>& mu, const T& k1,
-                                 const T& k2, const T& p1, const T& p2) const
-        -> Eigen::Matrix<T, 2, 1>
+                                 const T& k2, const T& k3, const T& p1,
+                                 const T& p2) const -> Eigen::Matrix<T, 2, 1>
     {
       using Vector2 = Eigen::Matrix<T, 2, 1>;
 
       // Radial component (additive).
       const auto r2 = mu.squaredNorm();
       const auto r4 = r2 * r2;
-      const Vector2 radial_factor = mu * (k1 * r2 + k2 * r4);
+      const auto r6 = r4 * r2;
+      const Vector2 radial_factor = mu * (k1 * r2 + k2 * r4 + k3 * r6);
 
       // Tangential component (additive).
       static constexpr auto two = 2.;
@@ -152,11 +91,7 @@ namespace DO::Sara {
       // 1. Apply [R|t] = extrinsics[...]
       //
       // a) extrinsics[0, 1, 2] are the angle-axis rotation.
-      const auto scene_coords = Vector3{
-          static_cast<T>(scene_point.x()),  //
-          static_cast<T>(scene_point.y()),  //
-          T{}                               //
-      };
+      const Vector3 scene_coords = scene_point.template cast<T>();
       auto camera_coords = Vector3{};
       ceres::AngleAxisRotatePoint(extrinsics, scene_coords.data(),
                                   camera_coords.data());
@@ -165,19 +100,31 @@ namespace DO::Sara {
       const auto t = Eigen::Map<const Vector3>{extrinsics + 3};
       camera_coords += t;
 
-      const auto& xi = intrinsics[9];
+      // Project the scene point to the spherical mirror by shooting a ray.
+      // The ray leaves the scene point, passes through the optical center and
+      // hits the spherical mirror.
+      const auto& xi = intrinsics[5];
       const auto m = apply_mirror_transformation(camera_coords, xi);
 
-      // Distortion.
-      const auto& k1 = intrinsics[5];
-      const auto& k2 = intrinsics[6];
-      const auto& p1 = intrinsics[7];
-      const auto& p2 = intrinsics[8];
-      const Vector2 m_distorted = apply_distortion(m, k1, k2, p1, p2);
+      // The ray is then reflected by the spherical mirror and finally hits the
+      // image plane.
+      //
+      // The spherical mirror or the image plane has an imperfect geometry, so
+      // apply the distortion. (?).
+      //
+      // TODO: re-read the paper just to make sure we understood right.
+      const auto& k1 = intrinsics[6];
+      const auto& k2 = intrinsics[7];
+      const auto& k3 = intrinsics[8];
+      const auto& p1 = intrinsics[9];
+      const auto& p2 = intrinsics[10];
+      const Vector2 m_distorted = apply_distortion(m, k1, k2, k3, p1, p2);
 
-      // Apply the calibration matrix.
+      // Apply the calibration matrix to get the pixel coordinates of the point
+      // of impact.
       const auto& fx = intrinsics[0];
-      const auto& fy = intrinsics[1];
+      const auto fy_normalized = intrinsics[1];
+      const auto fy = fy_normalized * fx;
       const auto& alpha = intrinsics[2];
       const auto shear = fx * alpha;
       const auto& u0 = intrinsics[3];
@@ -196,7 +143,7 @@ namespace DO::Sara {
     }
 
     static inline auto create(const Eigen::Vector2d& image_point,
-                              const Eigen::Vector2d& scene_point)
+                              const Eigen::Vector3d& scene_point)
     {
       return new ceres::AutoDiffCostFunction<
           OmnidirectionalCameraReprojectionError,  //
@@ -206,45 +153,7 @@ namespace DO::Sara {
     }
 
     Eigen::Vector2d image_point;
-    Eigen::Vector2d scene_point;
+    Eigen::Vector3d scene_point;
   };
 
-  struct DistortionParamRegularizer
-  {
-    static constexpr auto residual_dimension = 4;
-    static constexpr auto intrinsic_parameter_count =
-        OmnidirectionalCameraParameterVector<double>::size;
-
-    inline DistortionParamRegularizer(double scale = 1.0)
-      : scale{scale}
-    {
-    }
-
-    template <typename T>
-    inline auto operator()(const T* const intrinsics, T* residuals) const
-        -> bool
-    {
-      const auto& k1 = intrinsics[5];
-      const auto& k2 = intrinsics[6];
-      const auto& p1 = intrinsics[7];
-      const auto& p2 = intrinsics[8];
-
-      residuals[0] = scale * k1;
-      residuals[1] = scale * k2;
-      residuals[0] = scale * p1;
-      residuals[1] = scale * p2;
-
-      return true;
-    }
-
-    static inline auto create(double scale)
-    {
-      return new ceres::AutoDiffCostFunction<DistortionParamRegularizer,  //
-                                             residual_dimension,
-                                             intrinsic_parameter_count>(
-          new DistortionParamRegularizer{scale});
-    }
-
-    double scale;
-  };
 }  // namespace DO::Sara
