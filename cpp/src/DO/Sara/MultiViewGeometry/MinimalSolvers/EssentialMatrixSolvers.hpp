@@ -58,10 +58,9 @@ namespace DO::Sara {
         -> Polynomial<Matrix3d>;
 
     DO_SARA_EXPORT
-    auto
-    build_essential_matrix_constraints(const Polynomial<Matrix3d>&,
-                                       const std::array<Monomial, 20>&) const
-        -> Matrix<double, 10, 20>;
+    auto build_essential_matrix_constraints(
+        const Polynomial<Matrix3d>&,
+        const std::array<Monomial, 20>&) const -> Matrix<double, 10, 20>;
   };
 
 
@@ -75,15 +74,33 @@ namespace DO::Sara {
     static constexpr auto num_points = 5;
     static constexpr auto num_models = 10;
 
+    // clang-format off
     const std::array<Monomial, 20> monomials{
-        x.pow(3), y.pow(3), x.pow(2) * y, x* y.pow(2), x.pow(2) * z, x.pow(2),
-        y.pow(2) * z, y.pow(2), x* y* z, x* y,
+        x.pow(3),
+        y.pow(3),
+        x.pow(2) * y,
+        x * y.pow(2),
+        x.pow(2) * z,
+        x.pow(2),
+        y.pow(2) * z,
+        y.pow(2),
+        x * y * z,
+        x * y,
         //
-        x, x* z, x* z.pow(2),
+        x,
+        x * z,
+        x * z.pow(2),
         //
-        y, y* z, y* z.pow(2),
+        y,
+        y * z,
+        y * z.pow(2),
         //
-        one_, z, z.pow(2), z.pow(3)};
+        one_,
+        z,
+        z.pow(2),
+        z.pow(3)
+    };
+    // clang-format on
 
     auto build_essential_matrix_constraints(const Polynomial<Matrix3d>& E) const
         -> Matrix<double, 10, 20>
@@ -93,13 +110,13 @@ namespace DO::Sara {
     }
 
     DO_SARA_EXPORT
-    auto inplace_gauss_jordan_elimination(Matrix<double, 10, 20>&) const
-        -> void;
+    auto
+    inplace_gauss_jordan_elimination(Matrix<double, 10, 20>&) const -> void;
 
     DO_SARA_EXPORT
-    auto form_resultant_matrix(const Matrix<double, 6, 10>&,
-                               UnivariatePolynomial<double, -1>[3][3]) const
-        -> void;
+    auto
+    form_resultant_matrix(const Matrix<double, 6, 10>&,
+                          UnivariatePolynomial<double, -1>[3][3]) const -> void;
 
     DO_SARA_EXPORT
     auto solve_essential_matrix_constraints(const std::array<Matrix3d, 4>&,
@@ -117,8 +134,8 @@ namespace DO::Sara {
       return find_essential_matrices(left, right);
     }
 
-    auto operator()(const data_point_type& X) const
-        -> std::vector<EssentialMatrix>
+    auto
+    operator()(const data_point_type& X) const -> std::vector<EssentialMatrix>
     {
       const matrix_type left = X[0].colmajor_view().matrix();
       const matrix_type right = X[1].colmajor_view().matrix();
@@ -137,11 +154,31 @@ namespace DO::Sara {
     static constexpr auto num_points = 5;
     static constexpr auto num_models = 10;
 
+    // clang-format off
     const std::array<Monomial, 20> monomials{
-        x * x * x, x* x* y, x* y* y, y* y* y, x* x* z, x* y* z, y* y* z,
-        x* z* z, y* z* z, z* z* z, x* x, x* y, y* y, x* z, y* z, z* z,
+        x * x * x,
+        x * x * y,
+        x * y * y,
+        y * y * y,
+        x * x * z,
+        x * y * z,
+        y * y * z,
+        x * z * z,
+        y * z * z,
+        z * z * z,
+        x * x,
+        x * y,
+        y * y,
+        x * z,
+        y * z,
+        z * z,
         //  The solutions of interests
-        x, y, z, one_};
+        x,
+        y,
+        z,
+        one_
+    };
+    // clang-format on
 
     auto build_essential_matrix_constraints(const Polynomial<Matrix3d>& E) const
         -> Matrix<double, 10, 20>
@@ -166,8 +203,8 @@ namespace DO::Sara {
       return find_essential_matrices(left, right);
     }
 
-    auto operator()(const data_point_type& X) const
-        -> std::vector<EssentialMatrix>
+    auto
+    operator()(const data_point_type& X) const -> std::vector<EssentialMatrix>
     {
       const matrix_type left = X[0].colmajor_view().matrix();
       const matrix_type right = X[1].colmajor_view().matrix();
