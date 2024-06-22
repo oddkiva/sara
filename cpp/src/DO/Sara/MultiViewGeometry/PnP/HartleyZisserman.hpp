@@ -23,8 +23,8 @@ namespace DO::Sara {
   //! This is a degenerate configuration the DLT method described by Hartley
   //! cannot deal.
   template <typename T>
-  auto resectioning_hartley_zisserman(const TensorView_<T, 2>& X,
-                                      const TensorView_<T, 2>& x)
+  auto pnp_dlt_hartley_zisserman(const TensorView_<T, 2>& X,
+                                 const TensorView_<T, 2>& x)
       -> PinholeCameraDecomposition
   {
     if (X.rows() != x.rows())

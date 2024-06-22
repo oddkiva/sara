@@ -13,7 +13,7 @@
 
 #include "SyntheticDataUtilities.hpp"
 
-#include <DO/Sara/MultiViewGeometry/Resectioning/HartleyZisserman.hpp>
+#include <DO/Sara/MultiViewGeometry/PnP/HartleyZisserman.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_hartley_zisserman)
     const auto x1 = tensor_view(x);
     SARA_CHECK(Xw1.sizes().transpose());
     SARA_CHECK(x1.sizes().transpose());
-    const auto [K, R, t] = sara::resectioning_hartley_zisserman(Xw1, x1);
+    const auto [K, R, t] = sara::pnp_dlt_hartley_zisserman(Xw1, x1);
     const auto C1 = sara::PinholeCameraDecomposition{K, R, t};
 
     std::cout << "Calibration matrix:" << std::endl;

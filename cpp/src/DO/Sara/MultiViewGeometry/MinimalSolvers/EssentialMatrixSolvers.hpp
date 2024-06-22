@@ -109,6 +109,13 @@ namespace DO::Sara {
           E, monomials);
     }
 
+    auto build_essential_matrix_constraints_optimized(const double X[9],  //
+                                                      const double Y[9],  //
+                                                      const double Z[9],  //
+                                                      const double W[9]) const
+        -> Eigen::Matrix<double, 10, 20>;
+
+
     DO_SARA_EXPORT
     auto
     inplace_gauss_jordan_elimination(Matrix<double, 10, 20>&) const -> void;
@@ -142,7 +149,6 @@ namespace DO::Sara {
       return this->operator()(left, right);
     }
   };
-
 
   struct SteweniusFivePointAlgorithm : FivePointAlgorithmBase
   {

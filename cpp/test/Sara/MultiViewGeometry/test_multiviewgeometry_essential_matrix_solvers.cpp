@@ -254,6 +254,15 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
   const auto E_expr = solver.essential_matrix_expression(E_bases_reshaped);
   const auto E_constraints = solver.build_essential_matrix_constraints(E_expr);
 
+  const auto X = E_bases.col(0).data();
+  const auto Y = E_bases.col(1).data();
+  const auto Z = E_bases.col(2).data();
+  const auto W = E_bases.col(3).data();
+  const auto E_constraints_2 =
+      solver.build_essential_matrix_constraints_optimized(X, Y, Z, W);
+  BOOST_CHECK_LE((E_constraints - E_constraints_2).norm(), 1e-15);
+
+
   // 3. Solve the epipolar constraints.
   const auto Es = solver.solve_essential_matrix_constraints(E_bases_reshaped,
                                                             E_constraints);

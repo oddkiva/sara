@@ -10,6 +10,11 @@ def get_sara_src_dir_path():
     sara_src_dir_path = __file__[:idx]
     return Path(sara_src_dir_path)
 
+def get_sara_src_dir_path():
+    idx = __file__.find("oddkiva/sara") + len("oddkiva/sara")
+    sara_src_dir_path = __file__[:idx]
+    return Path(sara_src_dir_path)
+
 
 def build_essential_matrix_contraints(P, Q, M):
     rows = []
@@ -130,12 +135,11 @@ Q = sp.simplify(E.det().as_poly(x, y, z))
 
 A = build_essential_matrix_contraints(P, Q, M)
 
+mvg_src_dir_path = (get_sara_src_dir_path() / "cpp" / "src" / "DO" / "Sara" / "MultiViewGeometry")
+nister_src_dir_path = mvg_src_dir_path / "MinimalSolvers" / "Nister"
+
 expand_opt = create_expand_pow_optimization(3)
-e_constraints_file_path = (
-    get_sara_src_dir_path() / "cpp" / "src" / "DO" / "Sara" /
-        "MultiViewGeometry" / "MinimalSolvers" / "Precomputed" /
-        "EssentialMatrixPolynomialConstraints.hpp"
-)
+e_constraints_file_path = nister_src_dir_path / "EssentialMatrixPolynomialConstraints.hpp"
 with open(e_constraints_file_path, "w") as f:
     for i in range(A.shape[0]):
         for j in range(A.shape[1]):
@@ -150,14 +154,10 @@ S = sp.MatrixSymbol('S', 6, 10)
 B = form_determinant_of_resultant_matrix(S, M)
 n, p = calculate_determinant(B)
 
-resulting_determinant_file_path = (
-    get_sara_src_dir_path() / "cpp" / "src" / "DO" / "Sara" /
-        "MultiViewGeometry" / "MinimalSolvers" / "Precomputed" /
-        "EssentialMatrixResultingDeterminant.hpp"
-)
+resulting_determinant_file_path = nister_src_dir_path / "EssentialMatrixResultingDeterminant.hpp"
 with open(resulting_determinant_file_path, "w") as f:
     n = expand_opt(n)
-    for i in range(10):
+    for i in range(10 + 1):
         code_i = sp.cxxcode(n.coeff_monomial(z ** i), assign_to=f"n[{i}]")
         f.write(f"{code_i}\n")
 
