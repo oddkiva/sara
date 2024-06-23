@@ -109,10 +109,10 @@ namespace DO::Sara {
           E, monomials);
     }
 
-    auto build_essential_matrix_constraints_optimized(const double X[9],  //
-                                                      const double Y[9],  //
-                                                      const double Z[9],  //
-                                                      const double W[9]) const
+    auto build_essential_matrix_fast(const double X[9],  //
+                                     const double Y[9],  //
+                                     const double Z[9],  //
+                                     const double W[9]) const
         -> Eigen::Matrix<double, 10, 20>;
 
 
@@ -135,10 +135,15 @@ namespace DO::Sara {
                                  const Matrix<double, 3, 5>& right) const
         -> std::vector<EssentialMatrix>;
 
+    DO_SARA_EXPORT
+    auto find_essential_matrices_fast(const Matrix<double, 3, 5>& left,
+                                      const Matrix<double, 3, 5>& right) const
+        -> std::vector<EssentialMatrix>;
+
     auto operator()(const Matrix<double, 3, 5>& left,
                     const Matrix<double, 3, 5>& right) const
     {
-      return find_essential_matrices(left, right);
+      return find_essential_matrices_fast(left, right);
     }
 
     auto

@@ -565,8 +565,8 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
 #if defined(USE_HARDCODED_VIDEO_PATH) && defined(__APPLE__)
   const auto video_path =
       // fs::path{"/Users/oddkiva/Desktop/datasets/odometry/field.mp4"};
-      // fs::path{"/Users/oddkiva/Desktop/datasets/oddkiva/food/IMG_8023.MOV"};
-      fs::path{"/Users/oddkiva/Desktop/datasets/oddkiva/cambodia/oudong/IMG_4230.MOV"};
+      fs::path{"/Users/oddkiva/Desktop/datasets/oddkiva/food/IMG_8023.MOV"};
+      // s::path{"/Users/oddkiva/Desktop/datasets/oddkiva/cambodia/oudong/IMG_4230.MOV"};
   if (!fs::exists(video_path))
   {
     fmt::print("Video {} does not exist", video_path.string());
@@ -602,24 +602,24 @@ auto main([[maybe_unused]] int const argc, [[maybe_unused]] char** const argv)
     // clang-format on
     num_frames_to_skip = 4;
 #else  // iPhone 12 mini 4K - 1x
-    // camera.fx() = 3229.074544798197;
-    // camera.fy() = 3229.074544798197;
-    // camera.shear() = 0.;
-    // camera.u0() = 1080.;
-    // camera.v0() = 1920.;
-    // camera.k().setZero();
-    // camera.p().setZero();
-    // num_frames_to_skip = 9;
+     camera.fx() = 3229.074544798197;
+     camera.fy() = 3229.074544798197;
+     camera.shear() = 0.;
+     camera.u0() = 1080.;
+     camera.v0() = 1920.;
+     camera.k().setZero();
+     camera.p().setZero();
+     num_frames_to_skip = 9;
 
-    // iPhone 12 mini 1440p - 1x
-    camera.fx() = 1618.2896144891963;
-    camera.fy() = 1618.2896144891963;
-    camera.shear() = 0.;
-    camera.u0() = 720;
-    camera.v0() = 960;
-    camera.k().setZero();
-    camera.p().setZero();
-    num_frames_to_skip = 14;
+//    // iPhone 12 mini 1440p - 1x
+//    camera.fx() = 1618.2896144891963;
+//    camera.fy() = 1618.2896144891963;
+//    camera.shear() = 0.;
+//    camera.u0() = 720;
+//    camera.v0() = 960;
+//    camera.k().setZero();
+//    camera.p().setZero();
+//    num_frames_to_skip = 14;
 #endif
   }
 

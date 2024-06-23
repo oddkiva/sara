@@ -80,9 +80,9 @@ def form_determinant_of_resultant_matrix(S, M):
 def calculate_determinant(B):
     # Calculate the determinant minors.
     # They are also univariate polynomial w.r.t. variable z.
-    p0 = B[0, 1] * B[1, 2] - B[0, 2] * B[1, 1]
-    p1 = B[0, 2] * B[1, 0] - B[0, 0] * B[1, 2]
-    p2 = B[0, 0] * B[1, 1] - B[0, 1] * B[1, 0]
+    p0 = (B[0, 1] * B[1, 2] - B[0, 2] * B[1, 1]).as_poly(z)
+    p1 = (B[0, 2] * B[1, 0] - B[0, 0] * B[1, 2]).as_poly(z)
+    p2 = (B[0, 0] * B[1, 1] - B[0, 1] * B[1, 0]).as_poly(z)
 
     # Finally the determinant polynomial in the variable z.
     n = (p0 * B[2, 0] + p1 * B[2, 1] + p2 * B[2, 2]).as_poly(z)
@@ -153,13 +153,25 @@ with open(e_constraints_file_path, "w") as f:
 S = sp.MatrixSymbol('S', 6, 10)
 B = form_determinant_of_resultant_matrix(S, M)
 n, p = calculate_determinant(B)
+p = [*p]  # Convert to list
 
-resulting_determinant_file_path = nister_src_dir_path / "EssentialMatrixResultingDeterminant.hpp"
+resulting_determinant_file_path = (
+    nister_src_dir_path / "EssentialMatrixResultingDeterminant.hpp"
+)
 with open(resulting_determinant_file_path, "w") as f:
     n = expand_opt(n)
-    for i in range(10 + 1):
+    for i in range(n.degree() + 1):
         code_i = sp.cxxcode(n.coeff_monomial(z ** i), assign_to=f"n[{i}]")
         f.write(f"{code_i}\n")
 
-
-import IPython; IPython.embed()
+for i in range(3):
+    resulting_minor_file_path = (
+        nister_src_dir_path /
+            f"EssentialMatrixResultingMinor_{i}.hpp"
+    )
+    with open(resulting_minor_file_path, "w") as f:
+        p[i] = expand_opt(p[i])
+        for d in range(p[i].degree() + 1):
+            pi_d = sp.cxxcode(p[i].coeff_monomial(z ** d),
+                                assign_to=f"p[{i}][{d}]")
+            f.write(f"{pi_d}\n")

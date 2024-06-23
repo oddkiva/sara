@@ -9,8 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Math/JenkinsTraub.hpp>
+#include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
 
@@ -94,7 +94,7 @@ namespace DO::Sara {
     return A;
   }
 
-  auto NisterFivePointAlgorithm::build_essential_matrix_constraints_optimized(
+  auto NisterFivePointAlgorithm::build_essential_matrix_fast(
       const double X[9],  //
       const double Y[9],  //
       const double Z[9],  //
@@ -108,7 +108,13 @@ namespace DO::Sara {
   auto NisterFivePointAlgorithm::inplace_gauss_jordan_elimination(
       Eigen::Matrix<double, 10, 20>& U) const -> void
   {
-    U = U.fullPivLu().matrixLU().triangularView<Eigen::Upper>();
+    for (auto i = 0; i < 10; ++i)
+    {
+      U.row(i) /= U(i, i);
+      for (auto j = i + 1; j < 10; ++j)
+        U.row(j) = U.row(j) / U(j, i) - U.row(i);
+    }
+
     for (auto i = 0; i < 10; ++i)
       U.row(i) *= 1 / U(i, i);
 
@@ -343,22 +349,138 @@ namespace DO::Sara {
 
     // 2. Form the epipolar constraints.
     const auto E_bases_reshaped = reshape_null_space(E_bases);
-#if 0
     const auto E_expr = essential_matrix_expression(E_bases_reshaped);
     const auto E_constraints = build_essential_matrix_constraints(E_expr);
-#else
-    const auto X = E_bases.col(0).data();
-    const auto Y = E_bases.col(1).data();
-    const auto Z = E_bases.col(2).data();
-    const auto W = E_bases.col(3).data();
-    const auto E_constraints =
-        build_essential_matrix_constraints_optimized(X, Y, Z, W);
-#endif
 
     // 3. Solve the epipolar constraints.
     return solve_essential_matrix_constraints(E_bases_reshaped, E_constraints);
   }
 
+  auto NisterFivePointAlgorithm::find_essential_matrices_fast(
+      const Eigen::Matrix<double, 3, 5>& x1,
+      const Eigen::Matrix<double, 3, 5>& x2) const
+      -> std::vector<EssentialMatrix>
+  {
+    // 1. Extract the null space.
+    const auto E_bases = extract_null_space(x1, x2);
+
+    // 2. Build the polynomial system that the essential matrix must satisfy.
+    //    This is fast because each coefficient of the polynomial system is
+    //    precomputed with SymPy.
+    const auto X = E_bases.col(0).data();
+    const auto Y = E_bases.col(1).data();
+    const auto Z = E_bases.col(2).data();
+    const auto W = E_bases.col(3).data();
+    const auto A = build_essential_matrix_fast(X, Y, Z, W);
+
+    // 3. Gauss-Jordan elimination.
+    //    Use Eigen LU algorithm as it is more stable numerically.
+    auto U = A;
+#if 0
+    U = A.fullPivLu().matrixLU().triangularView<Eigen::Upper>();
+
+    // Rescale the first monomial coefficient to coefficient 1.
+    for (auto i = 0; i < 10; ++i)
+      U.row(i) *= 1 / U(i, i);
+
+    // Simplify the upper triangular matrix further.
+    for (auto i = 9; i >= 4; --i)
+    {
+      for (auto j = i - 1; j >= 4; --j)
+      {
+        U.row(j) = U.row(j) / U(j, i) - U.row(i);
+        U.row(j) /= U(j, j);
+      }
+    }
+#else
+    inplace_gauss_jordan_elimination(U);
+#endif
+
+    // 4. Extract the resultant matrix from the upper triangular matrix.
+    //    Using some clever algebraic operation, we find that necessarily
+    //    [x, y, 1]^T must live in the nullspace of some 3x3 matrix `B`.
+    //
+    //    The coefficients of matrix B are polynomials in the variable `z`.
+    //    So that means the polynomial det(B)(z) = 0.
+    const Eigen::Matrix<double, 6, 10, Eigen::RowMajor> U_reduced =
+        U.bottomRightCorner<6, 10>();
+    const auto S = U_reduced.data();
+
+    auto n = UnivariatePolynomial<double>{10};
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Nister/EssentialMatrixResultingDeterminant.hpp>
+
+    auto p = std::array{UnivariatePolynomial<double>{7},
+                        UnivariatePolynomial<double>{7},
+                        UnivariatePolynomial<double>{6}};
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Nister/EssentialMatrixResultingMinor_0.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Nister/EssentialMatrixResultingMinor_1.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Nister/EssentialMatrixResultingMinor_2.hpp>
+
+    const auto [roots_extracted_successfully, roots] = rpoly(n);
+
+    // If rpoly fails, then let's take a conservative behaviour, minimize the
+    // risk of providing false essential matrices...
+    //
+    // It probably means the polynomial have ill-conditioned coefficients, and
+    // that probably generated from wrong correspondences.
+    if (!roots_extracted_successfully)
+      return {};
+
+#ifdef SHOW_DEBUG_LOG
+    SARA_DEBUG << "Extraction of xyz" << endl;
+#endif
+
+    auto xyzs = std::vector<Vector3d>{};
+    for (const auto& z_complex : roots)
+    {
+      if (z_complex.imag() != 0)
+        continue;
+
+      const auto z = z_complex.real();
+
+      const auto p0_z = p[0](z);
+      const auto p1_z = p[1](z);
+      const auto p2_z = p[2](z);
+
+      const auto x = p0_z / p2_z;
+      const auto y = p1_z / p2_z;
+
+      if (std::isnan(x) || std::isinf(x) || std::isnan(y) || std::isinf(y))
+        continue;
+
+      xyzs.push_back({x, y, z});
+    }
+
+    // 4. Build essential matrices for the real solutions.
+#ifdef SHOW_DEBUG_LOG
+    SARA_DEBUG << "Extraction of essential matrices..." << endl;
+#endif
+    auto Es = std::vector<EssentialMatrix>{};
+    Es.reserve(10);
+
+    const auto X33 =
+        Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(X);
+    const auto Y33 =
+        Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(Y);
+    const auto Z33 =
+        Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(Z);
+    const auto W33 =
+        Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(W);
+    for (const auto& xyz : xyzs)
+    {
+      auto E = EssentialMatrix{};
+      E.matrix() = xyz[0] * X33 + xyz[1] * Y33 + xyz[2] * Z33 + W33;
+
+      // Normalizing the essential matrix will make sure the epipolar line-point
+      // distances have nice value and it's useful to do it before counting the
+      // inliers in RANSAC.
+      E.matrix().normalize();
+
+      Es.push_back(E);
+    }
+
+    return Es;
+  }
 
   auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
       const Eigen::Matrix<double, 9, 4>& E_bases,
