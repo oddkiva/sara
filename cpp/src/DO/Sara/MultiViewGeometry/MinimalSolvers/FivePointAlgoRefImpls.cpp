@@ -9,15 +9,17 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FivePointAlgoRefImpls.hpp>
+
 #include <DO/Sara/Core/Math/JenkinsTraub.hpp>
-#include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
 
 // #define SHOW_DEBUG_LOG
 
 
 using namespace DO::Sara::v1;
+
+using Matrix10d = Eigen::Matrix<double, 10, 10>;
 
 
 auto FivePointAlgorithmBase::extract_null_space(

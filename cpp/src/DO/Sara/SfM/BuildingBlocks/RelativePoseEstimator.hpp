@@ -6,6 +6,7 @@
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/InlierPredicates.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/RelativePoseSolver.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/NisterFivePointAlgorithm.hpp>
 
 #include <DO/Sara/RANSAC/RANSACv2.hpp>
 
@@ -20,7 +21,7 @@ namespace DO::Sara {
 
     // Use Stewenius' algorithm instead of Nister's for now. The polynomial
     // solver must have some convergence problems.
-    const RelativePoseSolver<NisterFivePointAlgorithm> _solver;
+    const RelativePoseSolver<v2::NisterFivePointAlgorithm> _solver;
     CheiralAndEpipolarConsistency _inlier_predicate;
 
     Eigen::Matrix3d _K;

@@ -9,9 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/NisterFivePointAlgorithm.hpp>
+
 #include <DO/Sara/Core/Math/JenkinsTraub.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
 
 
 using namespace DO::Sara::v2;
@@ -33,6 +34,17 @@ auto NisterFivePointAlgorithm::extract_null_space(
   const Eigen::Matrix<double, 9, 4> K =
       A.bdcSvd(Eigen::ComputeFullV).matrixV().rightCols(4);
   return K;
+}
+
+auto NisterFivePointAlgorithm::build_essential_matrix_constraints(
+    const double X[9],  //
+    const double Y[9],  //
+    const double Z[9],  //
+    const double W[9]) const -> Eigen::Matrix<double, 10, 20>
+{
+  auto A = Eigen::Matrix<double, 10, 20>{};
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/Nister/EssentialMatrixPolynomialConstraints.hpp>
+  return A;
 }
 
 auto NisterFivePointAlgorithm::inplace_gauss_jordan_elimination(

@@ -17,7 +17,7 @@
 #include <DO/Sara/Core/TensorDebug.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FivePointAlgoRefImpls.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = NisterFivePointAlgorithm{};
+  auto solver = v1::NisterFivePointAlgorithm{};
 
   const auto null = solver.extract_null_space(x1, x2);
   {
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = NisterFivePointAlgorithm{};
+  auto solver = v1::NisterFivePointAlgorithm{};
 
   // 1. Extract the null space.
   const auto E_bases = solver.extract_null_space(x1, x2);
@@ -212,21 +212,9 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
   const auto E_expr = solver.essential_matrix_expression(E_bases_reshaped);
   const auto E_constraints = solver.build_essential_matrix_constraints(E_expr);
 
-  const auto X = E_bases.col(0).data();
-  const auto Y = E_bases.col(1).data();
-  const auto Z = E_bases.col(2).data();
-  const auto W = E_bases.col(3).data();
-  const auto E_constraints_2 = solver.build_essential_matrix_fast(X, Y, Z, W);
-  BOOST_CHECK_LE((E_constraints - E_constraints_2).norm(), 1e-15);
-
-
   // 3. Solve the epipolar constraints.
-#if 0
   const auto Es = solver.solve_essential_matrix_constraints(E_bases_reshaped,
                                                             E_constraints);
-#else
-  const auto Es = solver.find_essential_matrices_fast(x1, x2);
-#endif
 
   // Check essential matrix constraints.
   for (auto i = 0u; i < Es.size(); ++i)
@@ -259,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm)
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = SteweniusFivePointAlgorithm{};
+  auto solver = v1::SteweniusFivePointAlgorithm{};
 
   // 1. Extract the null space.
   const auto E_bases = solver.extract_null_space(x1, x2);

@@ -128,9 +128,9 @@ auto sara_graphics_main(int argc, char** argv) -> int
     std::tie(E, inliers, sample_best) = ransac(  //
         X,
 #if defined(NISTER_METHOD)
-        NisterFivePointAlgorithm{},  //
+        v1::NisterFivePointAlgorithm{},  //
 #else
-        SteweniusFivePointAlgorithm{},
+        v1::SteweniusFivePointAlgorithm{},
 #endif
         inlier_predicate, num_samples, data_normalizer, true);
   }

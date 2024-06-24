@@ -20,7 +20,7 @@ using namespace std;
 
 namespace DO::Sara {
 
-  using EEstimator = NisterFivePointAlgorithm;
+  using EEstimator = v1::NisterFivePointAlgorithm;
 
   void inspect_geometry(const TwoViewGeometry& g,
                         const Matrix<double, 3, EEstimator::num_points>& un1_s,

@@ -42,7 +42,7 @@ namespace DO::Sara::v2 {
     DO_SARA_EXPORT
     auto extract_null_space(const Matrix<double, 3, 5>& p_left,
                             const Matrix<double, 3, 5>& p_right) const
-        -> Matrix<double, 9, 4>;
+        -> Eigen::Matrix<double, 9, 4>;
 
     DO_SARA_EXPORT
     auto build_essential_matrix_constraints(const double X[9],  //
