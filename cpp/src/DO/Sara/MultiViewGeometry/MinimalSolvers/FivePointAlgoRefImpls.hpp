@@ -21,19 +21,11 @@
 #include <array>
 
 
-namespace DO::Sara {
+namespace DO::Sara::v1 {
 
   //! @ingroup MultiViewGeometry
   //! @defgroup MinimalSolvers Minimal Solvers
   //! @{
-
-  //! @brief Matrix aliases.
-  //! @{
-  using Matrix10d = Eigen::Matrix<double, 10, 10>;
-  using Vector10d = Eigen::Matrix<double, 10, 10>;
-  using Vector9d = Eigen::Matrix<double, 9, 1>;
-  //! @}
-
 
   //! @brief Five-point algorithm for the essential matrix.
   //! @{
@@ -64,6 +56,10 @@ namespace DO::Sara {
   };
 
 
+  //! @brief Reference implementation of Nister's method.
+  //!
+  //! We keep it for reference but avoid it because it is slow because because
+  //! we do symbolic calculus everytime we solve the essential matrix.
   struct NisterFivePointAlgorithm : FivePointAlgorithmBase
   {
     using model_type = EssentialMatrix;
@@ -109,13 +105,6 @@ namespace DO::Sara {
           E, monomials);
     }
 
-    auto build_essential_matrix_fast(const double X[9],  //
-                                     const double Y[9],  //
-                                     const double Z[9],  //
-                                     const double W[9]) const
-        -> Eigen::Matrix<double, 10, 20>;
-
-
     DO_SARA_EXPORT
     auto
     inplace_gauss_jordan_elimination(Matrix<double, 10, 20>&) const -> void;
@@ -135,15 +124,10 @@ namespace DO::Sara {
                                  const Matrix<double, 3, 5>& right) const
         -> std::vector<EssentialMatrix>;
 
-    DO_SARA_EXPORT
-    auto find_essential_matrices_fast(const Matrix<double, 3, 5>& left,
-                                      const Matrix<double, 3, 5>& right) const
-        -> std::vector<EssentialMatrix>;
-
     auto operator()(const Matrix<double, 3, 5>& left,
                     const Matrix<double, 3, 5>& right) const
     {
-      return find_essential_matrices_fast(left, right);
+      return find_essential_matrices(left, right);
     }
 
     auto
@@ -155,6 +139,10 @@ namespace DO::Sara {
     }
   };
 
+  //! @brief Reference implementation of Stewenius' method.
+  //!
+  //! We keep it for reference but avoid it because it is slow because because
+  //! we do symbolic calculus everytime we solve the essential matrix.
   struct SteweniusFivePointAlgorithm : FivePointAlgorithmBase
   {
     using model_type = EssentialMatrix;
@@ -226,4 +214,4 @@ namespace DO::Sara {
 
   //! @}
 
-} /* namespace DO::Sara */
+}  // namespace DO::Sara::v1

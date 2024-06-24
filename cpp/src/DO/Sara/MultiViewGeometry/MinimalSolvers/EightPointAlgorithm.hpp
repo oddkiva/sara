@@ -46,14 +46,12 @@ namespace DO::Sara {
       return this->operator()(x_view, y_view);
     }
 
-    auto operator()(const data_point_type& X) const
-        -> std::array<model_type, 1>
+    auto operator()(const data_point_type& X) const -> std::array<model_type, 1>
     {
       const auto X0 = X[0].colmajor_view().matrix();
       const auto X1 = X[1].colmajor_view().matrix();
       return this->operator()(X0, X1);
     }
-
   };
 
   //! @}
