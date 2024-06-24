@@ -109,35 +109,11 @@ auto NisterFivePointAlgorithm::calculate_resultant_determinant_minors(
   return p;
 }
 
-
-auto NisterFivePointAlgorithm::find_essential_matrices(
-    const Eigen::Matrix<double, 3, 5>& x1,
-    const Eigen::Matrix<double, 3, 5>& x2) const -> std::vector<EssentialMatrix>
+auto NisterFivePointAlgorithm::solve_reduced_constraint_system(
+    const Eigen::Matrix<double, 6, 10, Eigen::RowMajor>& U_reduced,
+    const double X[9], const double Y[9],  //
+    const double Z[9], const double W[9]) const -> std::vector<EssentialMatrix>
 {
-  // 1. Extract the null space.
-  const auto E_bases = extract_null_space(x1, x2);
-
-  // 2. Build the polynomial system that the essential matrix must satisfy.
-  //    This is fast because each coefficient of the polynomial system is
-  //    precomputed with SymPy.
-  const auto X = E_bases.col(0).data();
-  const auto Y = E_bases.col(1).data();
-  const auto Z = E_bases.col(2).data();
-  const auto W = E_bases.col(3).data();
-  const auto A = build_essential_matrix_constraints(X, Y, Z, W);
-
-  // 3. Gauss-Jordan elimination.
-  auto U = A;
-  inplace_gauss_jordan_elimination(U);
-
-  // 4. Extract the resultant matrix from the upper triangular matrix.
-  //    Using some clever algebraic operation, we find that necessarily
-  //    [x, y, 1]^T must live in the nullspace of some 3x3 matrix `B`.
-  //
-  //    The coefficients of matrix B are polynomials in the variable `z`.
-  //    So that means the polynomial det(B)(z) = 0.
-  const Eigen::Matrix<double, 6, 10, Eigen::RowMajor> U_reduced =
-      U.bottomRightCorner<6, 10>();
   const auto S = U_reduced.data();
 
   const auto n = calculate_resultant_determinant(S);
@@ -201,5 +177,36 @@ auto NisterFivePointAlgorithm::find_essential_matrices(
     Es.emplace_back(E);
   }
 
+  return Es;
+}
+
+auto NisterFivePointAlgorithm::find_essential_matrices(
+    const Eigen::Matrix<double, 3, 5>& x1,
+    const Eigen::Matrix<double, 3, 5>& x2) const -> std::vector<EssentialMatrix>
+{
+  // 1. Extract the null space.
+  const auto E_bases = extract_null_space(x1, x2);
+
+  // 2. Build the polynomial system that the essential matrix must satisfy.
+  //    This is fast because each coefficient of the polynomial system is
+  //    precomputed with SymPy.
+  const auto X = E_bases.col(0).data();
+  const auto Y = E_bases.col(1).data();
+  const auto Z = E_bases.col(2).data();
+  const auto W = E_bases.col(3).data();
+  auto A = build_essential_matrix_constraints(X, Y, Z, W);
+
+  // 3. Gauss-Jordan elimination.
+  inplace_gauss_jordan_elimination(A);
+
+  // 4. Extract the resultant matrix from the upper triangular matrix.
+  //    Using some clever algebraic operation, we find that necessarily
+  //    [x, y, 1]^T must live in the nullspace of some 3x3 matrix `B`.
+  //
+  //    The coefficients of matrix B are polynomials in the variable `z`.
+  //    So that means the polynomial det(B)(z) = 0.
+  const Eigen::Matrix<double, 6, 10, Eigen::RowMajor> A_reduced =
+      A.bottomRightCorner<6, 10>();
+  const auto Es = solve_reduced_constraint_system(A_reduced, X, Y, Z, W);
   return Es;
 }

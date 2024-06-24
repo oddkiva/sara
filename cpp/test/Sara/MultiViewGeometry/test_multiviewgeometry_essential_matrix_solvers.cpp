@@ -18,6 +18,7 @@
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/FivePointAlgoRefImpls.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/NisterFivePointAlgorithm.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
@@ -196,7 +197,7 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
+BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v1)
 {
   const auto test_data = generate_test_data();
   const auto& x1 = test_data.u1;
@@ -241,7 +242,41 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm)
+BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v2)
+{
+  const auto test_data = generate_test_data();
+  const auto& x1 = test_data.u1;
+  const auto& x2 = test_data.u2;
+
+  auto solver = v2::NisterFivePointAlgorithm{};
+  const auto Es = solver(x1, x2);
+
+  // Check essential matrix constraints.
+  for (auto i = 0u; i < Es.size(); ++i)
+  {
+    const auto& Ei = Es[i].matrix();
+
+    // SARA_DEBUG << "i = " << i << endl;
+    // SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
+    // SARA_DEBUG << "En =\n" << E.normalized() << endl;
+    // SARA_DEBUG << "norm(Ein - En) = "
+    //           << (Ei.normalized() - E.normalized()).norm() << endl;
+    // SARA_DEBUG << "norm(Ein + En) = "
+    //           << (Ei.normalized() + E.normalized()).norm() << endl;
+
+    BOOST_CHECK_SMALL(Ei.determinant(), 1e-10);
+    BOOST_CHECK_SMALL(
+        (2. * Ei * Ei.transpose() * Ei - (Ei * Ei.transpose()).trace() * Ei)
+            .norm(),
+        1e-10);
+
+    // Paranoid check.
+    for (auto j = 0; j < x1.cols(); ++j)
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * Ei * x1.col(j)), 1e-12);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v1)
 {
   const auto test_data = generate_test_data();
   const auto& x1 = test_data.u1;

@@ -52,8 +52,8 @@ namespace DO::Sara::v2 {
         -> Eigen::Matrix<double, 10, 20>;
 
     DO_SARA_EXPORT
-    auto
-    inplace_gauss_jordan_elimination(Matrix<double, 10, 20>&) const -> void;
+    auto inplace_gauss_jordan_elimination(Matrix<double, 10, 20>&) const
+        -> void;
 
     DO_SARA_EXPORT
     auto calculate_resultant_determinant(
@@ -66,6 +66,13 @@ namespace DO::Sara::v2 {
         -> std::array<UnivariatePolynomial<double>, 3>;
 
     DO_SARA_EXPORT
+    auto solve_reduced_constraint_system(
+        const Eigen::Matrix<double, 6, 10, Eigen::RowMajor>&,  //
+        const double X[9], const double Y[9],                  //
+        const double Z[9], const double W[9]) const
+        -> std::vector<EssentialMatrix>;
+
+    DO_SARA_EXPORT
     auto find_essential_matrices(const Matrix<double, 3, 5>& left,
                                  const Matrix<double, 3, 5>& right) const
         -> std::vector<EssentialMatrix>;
@@ -76,8 +83,8 @@ namespace DO::Sara::v2 {
       return find_essential_matrices(left, right);
     }
 
-    auto
-    operator()(const data_point_type& X) const -> std::vector<EssentialMatrix>
+    auto operator()(const data_point_type& X) const
+        -> std::vector<EssentialMatrix>
     {
       const matrix_type left = X[0].colmajor_view().matrix();
       const matrix_type right = X[1].colmajor_view().matrix();

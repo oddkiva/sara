@@ -387,8 +387,8 @@ auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
     if (V(s).imag() != 0)
       continue;
 
-    auto E = Matrix3d{};
-    auto vec_E = Map<Matrix<double, 9, 1>>(E.data());
+    auto E = Eigen::Matrix3d{};
+    auto vec_E = Eigen::Map<Eigen::Vector<double, 9>>{E.data()};
     vec_E = E_bases * U.col(s).tail<4>().real();
 
     // Normalizing the essential matrix will make sure the epipolar line-point

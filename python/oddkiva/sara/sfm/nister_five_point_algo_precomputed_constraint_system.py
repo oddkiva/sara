@@ -10,11 +10,6 @@ def get_sara_src_dir_path():
     sara_src_dir_path = __file__[:idx]
     return Path(sara_src_dir_path)
 
-def get_sara_src_dir_path():
-    idx = __file__.find("oddkiva/sara") + len("oddkiva/sara")
-    sara_src_dir_path = __file__[:idx]
-    return Path(sara_src_dir_path)
-
 
 def build_essential_matrix_contraints(P, Q, M):
     rows = []
