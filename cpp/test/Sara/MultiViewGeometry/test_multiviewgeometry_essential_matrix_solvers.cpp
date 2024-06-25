@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v2)
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = v2::NisterFivePointAlgorithm{};
+  const auto solver = v2::NisterFivePointAlgorithm{};
   const auto Es = solver(x1, x2);
 
   // Check essential matrix constraints.
@@ -274,6 +274,39 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v2)
     // Paranoid check.
     for (auto j = 0; j < x1.cols(); ++j)
       BOOST_CHECK_SMALL(double(x2.col(j).transpose() * Ei * x1.col(j)), 1e-12);
+  }
+
+  // Compare the intermediate results with the reference implementation.
+  {
+    const auto solver_ref = v1::NisterFivePointAlgorithm{};
+    const auto E_bases = solver_ref.extract_null_space(x1, x2);
+    const auto E_bases_ref = solver_ref.extract_null_space(x1, x2);
+    BOOST_CHECK_SMALL((E_bases - E_bases_ref).norm() / E_bases_ref.norm(),
+                      1e-12);
+
+    const auto X = E_bases.col(0).data();
+    const auto Y = E_bases.col(1).data();
+    const auto Z = E_bases.col(2).data();
+    const auto W = E_bases.col(3).data();
+    const auto E_constraints =
+        solver.build_essential_matrix_constraints(X, Y, Z, W);
+
+    const auto E_bases_33_ref = solver_ref.reshape_null_space(E_bases);
+    const auto E_constraint_expr_ref =
+        solver_ref.essential_matrix_expression(E_bases_33_ref);
+    const auto E_constraints_ref =
+        solver_ref.build_essential_matrix_constraints(E_constraint_expr_ref);
+    BOOST_CHECK_SMALL((E_constraints - E_constraints_ref).norm() /
+                          E_constraints_ref.norm(),
+                      1e-12);
+
+    const auto Es_ref = solver_ref.solve_essential_matrix_constraints(
+        E_bases_33_ref, E_constraints_ref);
+    BOOST_CHECK_EQUAL(Es.size(), Es_ref.size());
+    for (auto i = 0u; i < Es.size(); ++i)
+      BOOST_CHECK_SMALL((Es[i].matrix() - Es_ref[i].matrix()).norm() /
+                            Es_ref[i].matrix().norm(),
+                        1e-12);
   }
 }
 
@@ -369,7 +402,8 @@ BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v2)
 
     // Check the equality of the span of the nullspace.
     const auto E_bases_ref = solver_ref.extract_null_space(x1, x2);
-    BOOST_CHECK_SMALL((E_bases - E_bases_ref).norm(), 1e-12);
+    BOOST_CHECK_SMALL((E_bases - E_bases_ref).norm() / E_bases_ref.norm(),
+                      1e-12);
 
     // Check the equality of polynomial systems.
     const auto E_bases_reshaped = solver_ref.reshape_null_space(E_bases);
@@ -377,12 +411,16 @@ BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v2)
         solver_ref.essential_matrix_expression(E_bases_reshaped);
     const auto E_constraints_ref =
         solver_ref.build_essential_matrix_constraints(E_expr);
-    BOOST_CHECK_SMALL((E_constraints - E_constraints_ref).norm(), 1e-12);
+    BOOST_CHECK_SMALL((E_constraints - E_constraints_ref).norm() /
+                          E_constraints_ref.norm(),
+                      1e-12);
 
     const auto Es_ref = solver_ref.solve_essential_matrix_constraints(
         E_bases_ref, E_constraints_ref);
     for (auto i = 0u; i < Es.size(); ++i)
-      BOOST_CHECK_SMALL((Es[i].matrix() - Es_ref[i].matrix()).norm(), 1e-12);
+      BOOST_CHECK_SMALL((Es[i].matrix() - Es_ref[i].matrix()).norm() /
+                            Es_ref[i].matrix().norm(),
+                        1e-12);
   }
 }
 
