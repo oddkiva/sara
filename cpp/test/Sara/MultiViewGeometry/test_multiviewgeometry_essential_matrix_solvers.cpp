@@ -19,6 +19,7 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/FivePointAlgoRefImpls.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/NisterFivePointAlgorithm.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/SteweniusFivePointAlgorithm.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
@@ -321,6 +322,69 @@ BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v1)
   }
 }
 
+BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v2)
+{
+  const auto test_data = generate_test_data();
+  const auto& x1 = test_data.u1;
+  const auto& x2 = test_data.u2;
+
+  auto solver = v2::SteweniusFivePointAlgorithm{};
+
+  // 1. Extract the null space.
+  const auto E_bases = solver.extract_null_space(x1, x2);
+
+  // 2. Form the constraint system for the essential matrix.
+  const auto E_constraints = solver.build_essential_matrix_constraints(E_bases);
+  // 3. Solve the epipolar constraints.
+  const auto Es =
+      solver.solve_essential_matrix_constraints(E_bases, E_constraints);
+
+  // Check essential matrix constraints.
+  for (auto i = 0u; i < Es.size(); ++i)
+  {
+    const auto& Ei = Es[i].matrix();
+
+    // SARA_DEBUG << "i = " << i << endl;
+    // SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
+    // SARA_DEBUG << "En =\n" << E.normalized() << endl;
+    // SARA_DEBUG << "norm(Ein - En) = "
+    //           << (Ei.normalized() - E.normalized()).norm() << endl;
+    // SARA_DEBUG << "norm(Ein + En) = "
+    //           << (Ei.normalized() + E.normalized()).norm() << endl;
+
+    BOOST_CHECK_SMALL(Ei.determinant(), 1e-12);
+    BOOST_CHECK_SMALL(
+        (2. * Ei * Ei.transpose() * Ei - (Ei * Ei.transpose()).trace() * Ei)
+            .norm(),
+        1e-12);
+
+    // Paranoid check.
+    for (auto j = 0; j < x1.cols(); ++j)
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * Ei * x1.col(j)), 1e-12);
+  }
+
+  // Compare each intermediate results with the reference implementation.
+  {
+    auto solver_ref = v1::SteweniusFivePointAlgorithm{};
+
+    // Check the equality of the span of the nullspace.
+    const auto E_bases_ref = solver_ref.extract_null_space(x1, x2);
+    BOOST_CHECK_SMALL((E_bases - E_bases_ref).norm(), 1e-12);
+
+    // Check the equality of polynomial systems.
+    const auto E_bases_reshaped = solver_ref.reshape_null_space(E_bases);
+    const auto E_expr =
+        solver_ref.essential_matrix_expression(E_bases_reshaped);
+    const auto E_constraints_ref =
+        solver_ref.build_essential_matrix_constraints(E_expr);
+    BOOST_CHECK_SMALL((E_constraints - E_constraints_ref).norm(), 1e-12);
+
+    const auto Es_ref = solver_ref.solve_essential_matrix_constraints(
+        E_bases_ref, E_constraints_ref);
+    for (auto i = 0u; i < Es.size(); ++i)
+      BOOST_CHECK_SMALL((Es[i].matrix() - Es_ref[i].matrix()).norm(), 1e-12);
+  }
+}
 
 BOOST_AUTO_TEST_CASE(test_extract_relative_motions_functions)
 {

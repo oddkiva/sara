@@ -95,7 +95,7 @@ def generate_nister_polynomial_systems():
     Y = sp.MatrixSymbol('Y', 3, 3)
     Z = sp.MatrixSymbol('Z', 3, 3)
     W = sp.MatrixSymbol('W', 3, 3)
-    
+
     # IMPORTANT: enumerate the monomials in the following order.
     # The order of the first 10 monomials don't matter but the order of the
     # last 10 coefficients is important.
@@ -128,16 +128,16 @@ def generate_nister_polynomial_systems():
         z ** 2,
         z ** 3
     ]
-    
+
     # Form the polynomial constraints.
     #
     # First the essential matrix lives in the nullspace of the matrix formed by
     # the direct linear transform (DLT).
     E = sp.Matrix(x * X + y * Y + z * Z + W)
-    
+
     # Let's make an auxiliary variable for convenience to alleviate the code.
     EEt = sp.Matrix(E * E.transpose())
-    
+
     # 1. The essential matrix must satisfy the following algebraic condition:
     #    E @ E.T @ E - (1/2) * trace(E @ E.T) * E = 0.
     P = sp.Matrix(EEt * E) - EEt.trace() / 2 * E
@@ -151,20 +151,21 @@ def generate_nister_polynomial_systems():
     # 3. Perform the symbolic calculus of the polynomial constraint matrix.
     #    We will plug the formula in the C++ code.
     A = build_essential_matrix_contraints(P, Q, M)
-    
+
     # 4. Save the formula in the form of C++ code.
     mvg_src_dir_path = (get_sara_src_dir_path() / "cpp" / "src" / "DO" / "Sara" / "MultiViewGeometry")
     nister_src_dir_path = mvg_src_dir_path / "MinimalSolvers" / "Nister"
-    
+
     expand_opt = create_expand_pow_optimization(3)
     e_constraints_file_path = nister_src_dir_path / "EssentialMatrixPolynomialConstraints.hpp"
     with open(e_constraints_file_path, "w") as f:
-        for i in range(A.shape[0]):
-            for j in range(A.shape[1]):
+        # Enumerate in column-major order because of Eigen.
+        for j in range(A.shape[1]):
+            for i in range(A.shape[0]):
                 A_ij = expand_opt(A[i, j])
                 code_ij = sp.cxxcode(A_ij, assign_to=f"A({i}, {j})")
                 f.write(f"{code_ij}\n")
-    
+
     # From there, we perform the Gauss-Jordan elimination and some clever
     # algebraic operations so that the system
     #   A(x, y, z) = 0
@@ -193,7 +194,7 @@ def generate_nister_polynomial_systems():
     #    We also want the symbolic formula for each determinant minor.
     n, p = calculate_determinant(B)
     p = [*p]  # Convert to list
-    
+
     # Save the generated C++ code.
     resulting_determinant_file_path = (
         nister_src_dir_path / "EssentialMatrixResultingDeterminant.hpp"
@@ -203,17 +204,17 @@ def generate_nister_polynomial_systems():
         for i in range(n.degree() + 1):
             code_i = sp.cxxcode(n.coeff_monomial(z ** i), assign_to=f"n[{i}]")
             f.write(f"{code_i}\n")
-    
+
     for i in range(3):
         resulting_minor_file_path = (
             nister_src_dir_path /
-                f"EssentialMatrixResultingMinor_{i}.hpp"
+            f"EssentialMatrixResultingMinor_{i}.hpp"
         )
         with open(resulting_minor_file_path, "w") as f:
             p[i] = expand_opt(p[i])
             for d in range(p[i].degree() + 1):
                 pi_d = sp.cxxcode(p[i].coeff_monomial(z ** d),
-                                    assign_to=f"p[{i}][{d}]")
+                                  assign_to=f"p[{i}][{d}]")
                 f.write(f"{pi_d}\n")
 
 def generate_stewenius_polynomial_system():
@@ -228,13 +229,13 @@ def generate_stewenius_polynomial_system():
     Y = sp.MatrixSymbol('Y', 3, 3)
     Z = sp.MatrixSymbol('Z', 3, 3)
     W = sp.MatrixSymbol('W', 3, 3)
-    
+
     # The essential matrix lives in the nullspace.
     E = sp.Matrix(x * X + y * Y + z * Z + W)
-    
+
     # Auxiliary variable.
     EEt = sp.Matrix(E * E.transpose())
-    
+
     # M = the following list of monomials enumerated in the order below.
     M = [
         x * x * x,
@@ -258,21 +259,26 @@ def generate_stewenius_polynomial_system():
         z,
         1
     ]
-    
+
     # Constraints
     P = sp.Matrix(EEt * E) - EEt.trace() / 2 * E
     Q = sp.simplify(E.det().as_poly(x, y, z))
-    
+
     A = build_essential_matrix_contraints(P, Q, M)
-    
+
     mvg_src_dir_path = (get_sara_src_dir_path() / "cpp" / "src" / "DO" / "Sara" / "MultiViewGeometry")
     stewenius_src_dir_path = mvg_src_dir_path / "MinimalSolvers" / "Stewenius"
-    
+
     expand_opt = create_expand_pow_optimization(3)
     e_constraints_file_path = stewenius_src_dir_path / "EssentialMatrixPolynomialConstraints.hpp"
     with open(e_constraints_file_path, "w") as f:
-        for i in range(A.shape[0]):
-            for j in range(A.shape[1]):
+        # Enumerate in column-major order because of Eigen.
+        for j in range(A.shape[1]):
+            for i in range(A.shape[0]):
                 A_ij = expand_opt(A[i, j])
                 code_ij = sp.cxxcode(A_ij, assign_to=f"A({i}, {j})")
                 f.write(f"{code_ij}\n")
+
+
+generate_nister_polynomial_systems()
+generate_stewenius_polynomial_system()

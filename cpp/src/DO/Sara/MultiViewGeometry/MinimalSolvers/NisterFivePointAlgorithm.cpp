@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2019 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2024 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -12,7 +12,7 @@
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/NisterFivePointAlgorithm.hpp>
 
 #include <DO/Sara/Core/Math/JenkinsTraub.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 
 
 using namespace DO::Sara::v2;
@@ -111,8 +111,10 @@ auto NisterFivePointAlgorithm::calculate_resultant_determinant_minors(
 
 auto NisterFivePointAlgorithm::solve_reduced_constraint_system(
     const Eigen::Matrix<double, 6, 10, Eigen::RowMajor>& U_reduced,
-    const double X[9], const double Y[9],  //
-    const double Z[9], const double W[9]) const -> std::vector<EssentialMatrix>
+    const double X[9],  //
+    const double Y[9],  //
+    const double Z[9],  //
+    const double W[9]) const -> std::vector<EssentialMatrix>
 {
   const auto S = U_reduced.data();
 
