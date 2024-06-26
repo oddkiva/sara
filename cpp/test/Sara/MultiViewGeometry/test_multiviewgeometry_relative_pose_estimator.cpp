@@ -78,15 +78,15 @@ BOOST_AUTO_TEST_CASE(test_relative_pose_estimator)
   const auto& u1 = test_data.u1;
   const auto& u2 = test_data.u2;
 
-  const auto motions1 = RelativePoseSolver<NisterFivePointAlgorithm>{}(u1, u2);
+  const auto motions1 = RelativePoseSolver<v1::NisterFivePointAlgorithm>{}(u1, u2);
 
-  const auto motions2 = RelativePoseSolver<NisterFivePointAlgorithm>{}(u1, u2);
+  const auto motions2 = RelativePoseSolver<v1::NisterFivePointAlgorithm>{}(u1, u2);
   BOOST_CHECK_EQUAL(motions1.size(), motions2.size());
 
-  const auto motions3 = RelativePoseSolver<NisterFivePointAlgorithm>{}(u1, u2);
+  const auto motions3 = RelativePoseSolver<v1::NisterFivePointAlgorithm>{}(u1, u2);
   BOOST_CHECK_LE(motions3.size(), motions2.size());
 
-  const auto motions4 = RelativePoseSolver<NisterFivePointAlgorithm>{}(u1, u2);
+  const auto motions4 = RelativePoseSolver<v1::NisterFivePointAlgorithm>{}(u1, u2);
   BOOST_CHECK_GE(motions4.size(), motions3.size());
 }
 

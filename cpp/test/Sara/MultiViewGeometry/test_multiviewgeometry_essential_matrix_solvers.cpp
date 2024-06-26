@@ -17,7 +17,9 @@
 #include <DO/Sara/Core/TensorDebug.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FivePointAlgoRefImpls.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/NisterFivePointAlgorithm.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/SteweniusFivePointAlgorithm.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
@@ -38,19 +40,13 @@ BOOST_AUTO_TEST_CASE(test_extract_centers)
 
   const auto x = extract_centers(features);
   auto expected_x = Tensor_<float, 2>{x.sizes()};
-  expected_x.matrix() <<
-    0, 0,
-    1, 1,
-    2, 2;
+  expected_x.matrix() << 0, 0, 1, 1, 2, 2;
 
   BOOST_CHECK(x.matrix() == expected_x.matrix());
 
   const auto X = homogeneous(x);
   auto expected_X = Tensor_<float, 2>{X.sizes()};
-  expected_X.matrix() <<
-    0, 0, 1,
-    1, 1, 1,
-    2, 2, 1;
+  expected_X.matrix() << 0, 0, 1, 1, 1, 1, 2, 2, 1;
   BOOST_CHECK(X.matrix() == expected_X.matrix());
 }
 
@@ -61,31 +57,16 @@ BOOST_AUTO_TEST_CASE(test_to_point_indices)
   constexpr auto sample_size = 4;
 
   auto matches = Tensor_<int, 2>{num_matches, 2};
-  matches.matrix() <<
-    0, 0,
-    1, 1,
-    2, 2,
-    3, 3,
-    4, 0;
+  matches.matrix() << 0, 0, 1, 1, 2, 2, 3, 3, 4, 0;
 
   auto samples = Tensor_<int, 2>{num_samples, sample_size};
-  samples.matrix() <<
-    0, 1, 2, 3,
-    4, 2, 3, 1;
+  samples.matrix() << 0, 1, 2, 3, 4, 2, 3, 1;
 
   auto point_indices = to_point_indices(samples, matches);
 
   auto expected_point_indices = Tensor_<int, 3>{num_samples, sample_size, 2};
-  expected_point_indices[0].matrix() <<
-    0, 0,
-    1, 1,
-    2, 2,
-    3, 3;
-  expected_point_indices[1].matrix() <<
-    4, 0,
-    2, 2,
-    3, 3,
-    1, 1;
+  expected_point_indices[0].matrix() << 0, 0, 1, 1, 2, 2, 3, 3;
+  expected_point_indices[1].matrix() << 4, 0, 2, 2, 3, 3, 1, 1;
 
   BOOST_CHECK(point_indices.vector() == expected_point_indices.vector());
 }
@@ -107,34 +88,21 @@ BOOST_AUTO_TEST_CASE(test_to_coordinates)
   const auto points2 = extract_centers(features2);
 
   auto matches = Tensor_<int, 2>{num_matches, 2};
-  matches.matrix() <<
-    0, 0,
-    1, 1,
-    2, 2,
-    0, 1,
-    1, 2;
+  matches.matrix() << 0, 0, 1, 1, 2, 2, 0, 1, 1, 2;
 
   auto samples = Tensor_<int, 2>{num_samples, sample_size};
-  samples.matrix() <<
-    0, 1, 2, 3,
-    1, 2, 3, 4;
+  samples.matrix() << 0, 1, 2, 3, 1, 2, 3, 4;
 
   const auto point_indices = to_point_indices(samples, matches);
   const auto coords = to_coordinates(point_indices, points1, points2);
 
   //                                        N            K            P  C
   auto expected_coords = Tensor_<float, 4>{{num_samples, sample_size, 2, 2}};
-  expected_coords[0].flat_array() <<
-    0.f, 0.f, 1.f, 1.f,
-    1.f, 1.f, 2.f, 2.f,
-    2.f, 2.f, 3.f, 3.f,
-    0.f, 0.f, 2.f, 2.f;
+  expected_coords[0].flat_array() << 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, 2.f, 2.f,
+      2.f, 2.f, 3.f, 3.f, 0.f, 0.f, 2.f, 2.f;
 
-  expected_coords[1].flat_array() <<
-    1.f, 1.f, 2.f, 2.f,
-    2.f, 2.f, 3.f, 3.f,
-    0.f, 0.f, 2.f, 2.f,
-    1.f, 1.f, 3.f, 3.f;
+  expected_coords[1].flat_array() << 1.f, 1.f, 2.f, 2.f, 2.f, 2.f, 3.f, 3.f,
+      0.f, 0.f, 2.f, 2.f, 1.f, 1.f, 3.f, 3.f;
 
   BOOST_CHECK(expected_coords.vector() == coords.vector());
   BOOST_CHECK(expected_coords.sizes() == coords.sizes());
@@ -145,16 +113,11 @@ BOOST_AUTO_TEST_CASE(test_to_coordinates)
 
   auto expected_sample1 = Tensor_<float, 3>{sample1.sizes()};
   expected_sample1.flat_array() <<
-    // P1
-    0.f, 0.f,
-    1.f, 1.f,
-    2.f, 2.f,
-    0.f, 0.f,
-    // P2
-    1.f, 1.f,
-    2.f, 2.f,
-    3.f, 3.f,
-    2.f, 2.f;
+      // P1
+      0.f,
+      0.f, 1.f, 1.f, 2.f, 2.f, 0.f, 0.f,
+      // P2
+      1.f, 1.f, 2.f, 2.f, 3.f, 3.f, 2.f, 2.f;
 
   // print_3d_interleaved_array(expected_sample1);
   // print_3d_interleaved_array(sample1);
@@ -166,10 +129,7 @@ BOOST_AUTO_TEST_CASE(test_skew_symmetric_matrix)
 {
   Vector3f t{1, 2, 3};
   Matrix3f T;
-  T <<
-     0, -3,  2,
-     3,  0, -1,
-    -2,  1,  0;
+  T << 0, -3, 2, 3, 0, -1, -2, 1, 0;
 
   BOOST_CHECK(skew_symmetric_matrix(t) == T);
 }
@@ -193,10 +153,9 @@ auto generate_test_data() -> TestData
 {
   // 3D points.
   MatrixXd X(4, 5);  // coefficients are in [-1, 1].
-  X.topRows<3>() <<
-    -1.49998,   -0.5827,  -1.40591,  0.369386,  0.161931, //
-    -1.23692, -0.434466, -0.142271, -0.732996,  -1.43086, //
-     1.51121,  0.437918,   1.35859,   1.03883,  0.106923; //
+  X.topRows<3>() << -1.49998, -0.5827, -1.40591, 0.369386, 0.161931,  //
+      -1.23692, -0.434466, -0.142271, -0.732996, -1.43086,            //
+      1.51121, 0.437918, 1.35859, 1.03883, 0.106923;                  //
   X.bottomRows<1>().fill(1.);
 
   const Matrix3d R = rotation(0.3, 0.2, 0.1);
@@ -204,12 +163,13 @@ auto generate_test_data() -> TestData
 
   const auto E = essential_matrix(R, t);
 
-  const Matrix34d C1 = PinholeCameraDecomposition{Matrix3d::Identity(),
-                                          Matrix3d::Identity(),
-                                          Vector3d::Zero()};
+  const Matrix34d C1 = PinholeCameraDecomposition{
+      Matrix3d::Identity(), Matrix3d::Identity(), Vector3d::Zero()};
   const Matrix34d C2 = PinholeCameraDecomposition{Matrix3d::Identity(), R, t};
-  MatrixXd x1 = C1 * X; x1.array().rowwise() /= x1.row(2).array();
-  MatrixXd x2 = C2 * X; x2.array().rowwise() /= x2.row(2).array();
+  MatrixXd x1 = C1 * X;
+  x1.array().rowwise() /= x1.row(2).array();
+  MatrixXd x2 = C2 * X;
+  x2.array().rowwise() /= x2.row(2).array();
 
   return {X, R, t, E, C1, C2, x1, x2};
 }
@@ -221,7 +181,7 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = NisterFivePointAlgorithm{};
+  auto solver = v1::NisterFivePointAlgorithm{};
 
   const auto null = solver.extract_null_space(x1, x2);
   {
@@ -238,13 +198,13 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
+BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v1)
 {
   const auto test_data = generate_test_data();
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = NisterFivePointAlgorithm{};
+  auto solver = v1::NisterFivePointAlgorithm{};
 
   // 1. Extract the null space.
   const auto E_bases = solver.extract_null_space(x1, x2);
@@ -283,13 +243,80 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm)
+BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v2)
 {
   const auto test_data = generate_test_data();
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = SteweniusFivePointAlgorithm{};
+  const auto solver = v2::NisterFivePointAlgorithm{};
+  const auto Es = solver(x1, x2);
+
+  // Check essential matrix constraints.
+  for (auto i = 0u; i < Es.size(); ++i)
+  {
+    const auto& Ei = Es[i].matrix();
+
+    // SARA_DEBUG << "i = " << i << endl;
+    // SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
+    // SARA_DEBUG << "En =\n" << E.normalized() << endl;
+    // SARA_DEBUG << "norm(Ein - En) = "
+    //           << (Ei.normalized() - E.normalized()).norm() << endl;
+    // SARA_DEBUG << "norm(Ein + En) = "
+    //           << (Ei.normalized() + E.normalized()).norm() << endl;
+
+    BOOST_CHECK_SMALL(Ei.determinant(), 1e-10);
+    BOOST_CHECK_SMALL(
+        (2. * Ei * Ei.transpose() * Ei - (Ei * Ei.transpose()).trace() * Ei)
+            .norm(),
+        1e-10);
+
+    // Paranoid check.
+    for (auto j = 0; j < x1.cols(); ++j)
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * Ei * x1.col(j)), 1e-12);
+  }
+
+  // Compare the intermediate results with the reference implementation.
+  {
+    const auto solver_ref = v1::NisterFivePointAlgorithm{};
+    const auto E_bases = solver_ref.extract_null_space(x1, x2);
+    const auto E_bases_ref = solver_ref.extract_null_space(x1, x2);
+    BOOST_CHECK_SMALL((E_bases - E_bases_ref).norm() / E_bases_ref.norm(),
+                      1e-12);
+
+    const auto X = E_bases.col(0).data();
+    const auto Y = E_bases.col(1).data();
+    const auto Z = E_bases.col(2).data();
+    const auto W = E_bases.col(3).data();
+    const auto E_constraints =
+        solver.build_essential_matrix_constraints(X, Y, Z, W);
+
+    const auto E_bases_33_ref = solver_ref.reshape_null_space(E_bases);
+    const auto E_constraint_expr_ref =
+        solver_ref.essential_matrix_expression(E_bases_33_ref);
+    const auto E_constraints_ref =
+        solver_ref.build_essential_matrix_constraints(E_constraint_expr_ref);
+    BOOST_CHECK_SMALL((E_constraints - E_constraints_ref).norm() /
+                          E_constraints_ref.norm(),
+                      1e-12);
+
+    const auto Es_ref = solver_ref.solve_essential_matrix_constraints(
+        E_bases_33_ref, E_constraints_ref);
+    BOOST_CHECK_EQUAL(Es.size(), Es_ref.size());
+    for (auto i = 0u; i < Es.size(); ++i)
+      BOOST_CHECK_SMALL((Es[i].matrix() - Es_ref[i].matrix()).norm() /
+                            Es_ref[i].matrix().norm(),
+                        1e-12);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v1)
+{
+  const auto test_data = generate_test_data();
+  const auto& x1 = test_data.u1;
+  const auto& x2 = test_data.u2;
+
+  auto solver = v1::SteweniusFivePointAlgorithm{};
 
   // 1. Extract the null space.
   const auto E_bases = solver.extract_null_space(x1, x2);
@@ -328,6 +355,74 @@ BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm)
   }
 }
 
+BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v2)
+{
+  const auto test_data = generate_test_data();
+  const auto& x1 = test_data.u1;
+  const auto& x2 = test_data.u2;
+
+  auto solver = v2::SteweniusFivePointAlgorithm{};
+
+  // 1. Extract the null space.
+  const auto E_bases = solver.extract_null_space(x1, x2);
+
+  // 2. Form the constraint system for the essential matrix.
+  const auto E_constraints = solver.build_essential_matrix_constraints(E_bases);
+  // 3. Solve the epipolar constraints.
+  const auto Es =
+      solver.solve_essential_matrix_constraints(E_bases, E_constraints);
+
+  // Check essential matrix constraints.
+  for (auto i = 0u; i < Es.size(); ++i)
+  {
+    const auto& Ei = Es[i].matrix();
+
+    // SARA_DEBUG << "i = " << i << endl;
+    // SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
+    // SARA_DEBUG << "En =\n" << E.normalized() << endl;
+    // SARA_DEBUG << "norm(Ein - En) = "
+    //           << (Ei.normalized() - E.normalized()).norm() << endl;
+    // SARA_DEBUG << "norm(Ein + En) = "
+    //           << (Ei.normalized() + E.normalized()).norm() << endl;
+
+    BOOST_CHECK_SMALL(Ei.determinant(), 1e-12);
+    BOOST_CHECK_SMALL(
+        (2. * Ei * Ei.transpose() * Ei - (Ei * Ei.transpose()).trace() * Ei)
+            .norm(),
+        1e-12);
+
+    // Paranoid check.
+    for (auto j = 0; j < x1.cols(); ++j)
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * Ei * x1.col(j)), 1e-12);
+  }
+
+  // Compare each intermediate results with the reference implementation.
+  {
+    auto solver_ref = v1::SteweniusFivePointAlgorithm{};
+
+    // Check the equality of the span of the nullspace.
+    const auto E_bases_ref = solver_ref.extract_null_space(x1, x2);
+    BOOST_CHECK_SMALL((E_bases - E_bases_ref).norm() / E_bases_ref.norm(),
+                      1e-12);
+
+    // Check the equality of polynomial systems.
+    const auto E_bases_reshaped = solver_ref.reshape_null_space(E_bases);
+    const auto E_expr =
+        solver_ref.essential_matrix_expression(E_bases_reshaped);
+    const auto E_constraints_ref =
+        solver_ref.build_essential_matrix_constraints(E_expr);
+    BOOST_CHECK_SMALL((E_constraints - E_constraints_ref).norm() /
+                          E_constraints_ref.norm(),
+                      1e-12);
+
+    const auto Es_ref = solver_ref.solve_essential_matrix_constraints(
+        E_bases_ref, E_constraints_ref);
+    for (auto i = 0u; i < Es.size(); ++i)
+      BOOST_CHECK_SMALL((Es[i].matrix() - Es_ref[i].matrix()).norm() /
+                            Es_ref[i].matrix().norm(),
+                        1e-12);
+  }
+}
 
 BOOST_AUTO_TEST_CASE(test_extract_relative_motions_functions)
 {

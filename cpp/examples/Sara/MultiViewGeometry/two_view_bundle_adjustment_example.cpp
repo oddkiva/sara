@@ -171,7 +171,7 @@ GRAPHICS_MAIN()
   inlier_predicate.err_threshold = err_thres;
 
   auto [E, inliers, sample_best] = sara::ransac(
-      X, sara::NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
+      X, sara::v1::NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
 
   // Calculate the fundamental matrix.
   SARA_LOGI(logger, "Computing the fundamental matrix...");

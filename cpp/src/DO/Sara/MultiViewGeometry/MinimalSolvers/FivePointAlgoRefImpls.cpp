@@ -9,24 +9,24 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FivePointAlgoRefImpls.hpp>
+
 #include <DO/Sara/Core/Math/JenkinsTraub.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
-//#define SHOW_DEBUG_LOG
+// #define SHOW_DEBUG_LOG
 
 
-using namespace std;
+using namespace DO::Sara::v1;
 
+using Matrix10d = Eigen::Matrix<double, 10, 10>;
 
-namespace DO::Sara {
 
 auto FivePointAlgorithmBase::extract_null_space(
-    const Matrix<double, 3, 5>& p_left,
-    const Matrix<double, 3, 5>& p_right) const -> Matrix<double, 9, 4>
+    const Eigen::Matrix<double, 3, 5>& p_left,
+    const Eigen::Matrix<double, 3, 5>& p_right) const -> Matrix<double, 9, 4>
 {
-  auto A = Matrix<double, 5, 9>{};
+  auto A = Eigen::Matrix<double, 5, 9>{};
 
   for (int i = 0; i < 5; ++i)
     A.row(i) <<                                     //
@@ -35,13 +35,13 @@ auto FivePointAlgorithmBase::extract_null_space(
         p_right(2, i) * p_left.col(i).transpose();
 
   // The essential matrix lives in right null space of A.
-  const Matrix<double, 9, 4> K =
+  const Eigen::Matrix<double, 9, 4> K =
       A.bdcSvd(Eigen::ComputeFullV).matrixV().rightCols(4);
   return K;
 }
 
 auto FivePointAlgorithmBase::reshape_null_space(
-    const Matrix<double, 9, 4>& K) const -> std::array<Matrix3d, 4>
+    const Eigen::Matrix<double, 9, 4>& K) const -> std::array<Matrix3d, 4>
 {
   const auto X = Map<const Matrix<double, 3, 3, RowMajor>>{K.col(0).data()};
   const auto Y = Map<const Matrix<double, 3, 3, RowMajor>>{K.col(1).data()};
@@ -52,7 +52,7 @@ auto FivePointAlgorithmBase::reshape_null_space(
 }
 
 auto FivePointAlgorithmBase::essential_matrix_expression(
-    const std::array<Matrix3d, 4>& null_space_bases) const
+    const std::array<Eigen::Matrix3d, 4>& null_space_bases) const
     -> Polynomial<Matrix3d>
 {
   const auto& [X, Y, Z, W] = null_space_bases;
@@ -60,7 +60,7 @@ auto FivePointAlgorithmBase::essential_matrix_expression(
 }
 
 auto FivePointAlgorithmBase::build_essential_matrix_constraints(
-    const Polynomial<Matrix3d>& E,
+    const Polynomial<Eigen::Matrix3d>& E,
     const std::array<Monomial, 20>& monomials) const -> Matrix<double, 10, 20>
 {
   const auto EEt = E * E.t();
@@ -94,9 +94,8 @@ auto FivePointAlgorithmBase::build_essential_matrix_constraints(
   return A;
 }
 
-
 auto NisterFivePointAlgorithm::inplace_gauss_jordan_elimination(
-    Matrix<double, 10, 20>& U) const -> void
+    Eigen::Matrix<double, 10, 20>& U) const -> void
 {
   for (auto i = 0; i < 10; ++i)
   {
@@ -104,6 +103,9 @@ auto NisterFivePointAlgorithm::inplace_gauss_jordan_elimination(
     for (auto j = i + 1; j < 10; ++j)
       U.row(j) = U.row(j) / U(j, i) - U.row(i);
   }
+
+  for (auto i = 0; i < 10; ++i)
+    U.row(i) *= 1 / U(i, i);
 
   for (auto i = 9; i >= 4; --i)
   {
@@ -116,7 +118,7 @@ auto NisterFivePointAlgorithm::inplace_gauss_jordan_elimination(
 }
 
 auto NisterFivePointAlgorithm::form_resultant_matrix(
-    const Matrix<double, 6, 10>& B_mat,
+    const Eigen::Matrix<double, 6, 10>& B_mat,
     UnivariatePolynomial<double> B[3][3]) const -> void
 {
   auto to_poly = [this](const auto& row_vector) {
@@ -230,8 +232,9 @@ auto NisterFivePointAlgorithm::form_resultant_matrix(
 }
 
 auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
-    const std::array<Matrix3d, 4>& E_bases,
-    const Matrix<double, 10, 20>& A) const -> std::vector<EssentialMatrix>
+    const std::array<Eigen::Matrix3d, 4>& E_bases,
+    const Eigen::Matrix<double, 10, 20>& A) const
+    -> std::vector<EssentialMatrix>
 {
   // Perform the Gauss-Jordan elimination on A and stop four rows earlier (cf.
   // paragraph 3.2.3).
@@ -268,8 +271,8 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
 
   const auto [roots_extracted_successfully, roots] = rpoly(n);
 
-  // If rpoly fails, then let's take a conservative behaviour, minimize the risk
-  // of providing false essential matrices...
+  // If rpoly fails, then let's take a conservative behaviour, minimize the
+  // risk of providing false essential matrices...
   //
   // It probably means the polynomial have ill-conditioned coefficients, and
   // that probably generated from wrong correspondences.
@@ -308,7 +311,7 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
   auto Es = std::vector<EssentialMatrix>{};
   Es.reserve(10);
 
-  for (const auto& xyz: xyzs)
+  for (const auto& xyz : xyzs)
   {
     auto E = EssentialMatrix{};
     E.matrix() = xyz[0] * E_bases[0] + xyz[1] * E_bases[1] +
@@ -326,8 +329,8 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
 }
 
 auto NisterFivePointAlgorithm::find_essential_matrices(
-    const Matrix<double, 3, 5>& x1, const Matrix<double, 3, 5>& x2) const
-    -> std::vector<EssentialMatrix>
+    const Eigen::Matrix<double, 3, 5>& x1,
+    const Eigen::Matrix<double, 3, 5>& x2) const -> std::vector<EssentialMatrix>
 {
   // 1. Extract the null space.
   const auto E_bases = extract_null_space(x1, x2);
@@ -341,9 +344,9 @@ auto NisterFivePointAlgorithm::find_essential_matrices(
   return solve_essential_matrix_constraints(E_bases_reshaped, E_constraints);
 }
 
-
 auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
-    const Matrix<double, 9, 4>& E_bases, const Matrix<double, 10, 20>& M) const
+    const Eigen::Matrix<double, 9, 4>& E_bases,
+    const Eigen::Matrix<double, 10, 20>& M) const
     -> std::vector<EssentialMatrix>
 {
   // This follows the Matlab code at the end of section 4. of "Recent
@@ -362,7 +365,7 @@ auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
   // At.row(4) = -B.row(5);
   // At.row(5) = -B.row(7);
   At.block<3, 10>(0, 0) = -B.block<3, 10>(0, 0);
-  At.block<2, 10>(3, 0) = - B.block<2, 10>(4, 0);
+  At.block<2, 10>(3, 0) = -B.block<2, 10>(4, 0);
   At.row(5) = -B.row(7);
 
   At(6, 0) = 1;
@@ -384,8 +387,8 @@ auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
     if (V(s).imag() != 0)
       continue;
 
-    auto E = Matrix3d{};
-    auto vec_E = Map<Matrix<double, 9, 1>>(E.data());
+    auto E = Eigen::Matrix3d{};
+    auto vec_E = Eigen::Map<Eigen::Vector<double, 9>>{E.data()};
     vec_E = E_bases * U.col(s).tail<4>().real();
 
     // Normalizing the essential matrix will make sure the epipolar line-point
@@ -400,8 +403,8 @@ auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
 }
 
 auto SteweniusFivePointAlgorithm::find_essential_matrices(
-    const Matrix<double, 3, 5>& x1, const Matrix<double, 3, 5>& x2) const
-    -> std::vector<EssentialMatrix>
+    const Eigen::Matrix<double, 3, 5>& x1,
+    const Eigen::Matrix<double, 3, 5>& x2) const -> std::vector<EssentialMatrix>
 {
   // 1. Extract the null space.
   const auto E_bases = extract_null_space(x1, x2);
@@ -414,5 +417,3 @@ auto SteweniusFivePointAlgorithm::find_essential_matrices(
   // 3. Solve the epipolar constraints.
   return solve_essential_matrix_constraints(E_bases, E_constraints);
 }
-
-} /* namespace DO::Sara */

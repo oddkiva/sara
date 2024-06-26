@@ -12,7 +12,7 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
 
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FundamentalMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EightPointAlgorithm.hpp>
 
 
 namespace DO::Sara {

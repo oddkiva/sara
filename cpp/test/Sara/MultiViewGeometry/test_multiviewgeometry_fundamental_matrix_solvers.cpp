@@ -16,7 +16,7 @@
 
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FundamentalMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EightPointAlgorithm.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/SevenPointAlgorithm.hpp>
 
 #include <boost/test/unit_test.hpp>

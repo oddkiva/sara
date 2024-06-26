@@ -16,7 +16,7 @@
 
 #include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FivePointAlgoRefImpls.hpp>
 
 #include <iterator>
 
@@ -43,7 +43,7 @@ namespace DO::Sara {
                     const Matrix<double, 3, N>& right) const
         -> std::vector<TwoViewGeometry>
     {
-      const auto Es = this->Method::find_essential_matrices(left, right);
+      const auto Es = this->Method::operator()(left, right);
       // There is no two-view geometry if we could not compute any essential
       // matrices from the minimal subset.
       if (Es.empty())
@@ -89,8 +89,8 @@ namespace DO::Sara {
     }
   };
 
-  extern template struct RelativePoseSolver<NisterFivePointAlgorithm>;
-  extern template struct RelativePoseSolver<SteweniusFivePointAlgorithm>;
+  extern template struct RelativePoseSolver<v1::NisterFivePointAlgorithm>;
+  extern template struct RelativePoseSolver<v1::SteweniusFivePointAlgorithm>;
 
   //! @}
 

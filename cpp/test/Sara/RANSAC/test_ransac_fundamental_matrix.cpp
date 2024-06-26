@@ -14,7 +14,7 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FundamentalMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EightPointAlgorithm.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/SevenPointAlgorithm.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 

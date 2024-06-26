@@ -245,13 +245,19 @@ public:
     }
 
     // Impose a fixed principal point.
+#if CERES_VERSION_MAJOR == 2 && CERES_VERSION_MINOR >= 2
     auto intrinsic_manifold = new ceres::SubsetManifold{
         intrinsic_parameter_count, intrinsics_to_freeze};
     problem.SetManifold(mutable_intrinsics(), intrinsic_manifold);
+#else
+    auto intrinsic_manifold = new ceres::SubsetParameterization{
+        intrinsic_parameter_count, intrinsics_to_freeze};
+    problem.SetParameterization(mutable_intrinsics(), intrinsic_manifold);
+#endif
   }
 
-  auto
-  copy_camera_intrinsics(sara::OmnidirectionalCamera<double>& camera) -> void
+  auto copy_camera_intrinsics(sara::OmnidirectionalCamera<double>& camera)
+      -> void
   {
     // Copy back the final parameter to the omnidirectional camera parameter
     // object.

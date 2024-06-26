@@ -13,14 +13,14 @@
 
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FivePointAlgoRefImpls.hpp>
 #include <DO/Sara/RANSAC/RANSACv2.hpp>
 #include <DO/Sara/SfM/Helpers/FundamentalMatrixEstimation.hpp>
 
 
 namespace DO::Sara {
 
-  using ESolver = NisterFivePointAlgorithm;
+  using ESolver = v1::NisterFivePointAlgorithm;
 
   auto estimate_essential_matrix(const std::vector<Match>& Mij,            //
                                  const KeypointList<OERegion, float>& ki,  //

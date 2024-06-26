@@ -25,8 +25,8 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
 
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/ErrorMeasures.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EssentialMatrixSolvers.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FundamentalMatrixSolvers.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FivePointAlgoRefImpls.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/EightPointAlgorithm.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/HomographySolver.hpp>
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/SevenPointAlgorithm.hpp>
 

@@ -113,7 +113,7 @@ int sara_graphics_main(int argc, char** argv)
   const auto num_samples = argc < 6 ? 1000 : std::stoi(argv[5]);
   const auto err_thres = argc < 7 ? 2. : std::stod(argv[6]);
 
-  auto solver = RelativePoseSolver<NisterFivePointAlgorithm>{};
+  auto solver = RelativePoseSolver<v1::NisterFivePointAlgorithm>{};
 
   auto data_normalizer =
       std::make_optional(Normalizer<TwoViewGeometry>{K[0], K[1]});

@@ -16,6 +16,7 @@
 #include <DO/Sara/MultiViewGeometry/PnP/LambdaTwist.hpp>
 #include <DO/Sara/MultiViewGeometry/PointRayCorrespondenceList.hpp>
 
+
 namespace DO::Sara {
 
   template <typename T>

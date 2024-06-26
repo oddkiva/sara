@@ -17,7 +17,7 @@
 
 namespace DO::Sara {
 
-template struct DO_SARA_EXPORT RelativePoseSolver<NisterFivePointAlgorithm>;
-template struct DO_SARA_EXPORT RelativePoseSolver<SteweniusFivePointAlgorithm>;
+template struct DO_SARA_EXPORT RelativePoseSolver<v1::NisterFivePointAlgorithm>;
+template struct DO_SARA_EXPORT RelativePoseSolver<v1::SteweniusFivePointAlgorithm>;
 
 } /* namespace DO::Sara */
