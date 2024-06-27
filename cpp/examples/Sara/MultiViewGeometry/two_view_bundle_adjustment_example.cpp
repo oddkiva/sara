@@ -18,6 +18,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Logging/Logger.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/NisterFivePointAlgorithm.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/BAReprojectionError.hpp>
@@ -171,7 +172,7 @@ GRAPHICS_MAIN()
   inlier_predicate.err_threshold = err_thres;
 
   auto [E, inliers, sample_best] = sara::ransac(
-      X, sara::v1::NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
+      X, sara::NisterFivePointAlgorithm{}, inlier_predicate, num_samples);
 
   // Calculate the fundamental matrix.
   SARA_LOGI(logger, "Computing the fundamental matrix...");

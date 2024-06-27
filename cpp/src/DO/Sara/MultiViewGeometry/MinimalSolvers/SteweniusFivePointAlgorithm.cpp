@@ -12,7 +12,7 @@
 #include <DO/Sara/MultiViewGeometry/MinimalSolvers/SteweniusFivePointAlgorithm.hpp>
 
 
-using namespace DO::Sara::v2;
+using namespace DO::Sara;
 
 
 auto SteweniusFivePointAlgorithm::extract_null_space(

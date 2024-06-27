@@ -11,6 +11,7 @@
 
 #include <DO/Sara/Core/MultiArray/DataTransformations.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/NisterFivePointAlgorithm.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/SfM/Helpers.hpp>
 
@@ -20,7 +21,7 @@ using namespace std;
 
 namespace DO::Sara {
 
-  using EEstimator = v1::NisterFivePointAlgorithm;
+  using EEstimator = NisterFivePointAlgorithm;
 
   void inspect_geometry(const TwoViewGeometry& g,
                         const Matrix<double, 3, EEstimator::num_points>& un1_s,
@@ -68,13 +69,11 @@ namespace DO::Sara {
   }
 
 
-  auto estimate_two_view_geometry(const TensorView_<int, 2>& M,
-                                  const TensorView_<double, 2>& un1,
-                                  const TensorView_<double, 2>& un2,
-                                  const EssentialMatrix& E,
-                                  const TensorView_<bool, 1>& inliers,
-                                  const TensorView_<int, 1>& sample_best)
-      -> TwoViewGeometry
+  auto estimate_two_view_geometry(
+      const TensorView_<int, 2>& M, const TensorView_<double, 2>& un1,
+      const TensorView_<double, 2>& un2, const EssentialMatrix& E,
+      const TensorView_<bool, 1>& inliers,
+      const TensorView_<int, 1>& sample_best) -> TwoViewGeometry
   {
     // Collect the point correspondences from the best sample found by RANSAC.
     static constexpr auto L = EEstimator::num_points;

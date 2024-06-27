@@ -16,9 +16,8 @@
 
 #include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
-#include <DO/Sara/MultiViewGeometry/MinimalSolvers/FivePointAlgoRefImpls.hpp>
-
-#include <iterator>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/NisterFivePointAlgorithm.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/SteweniusFivePointAlgorithm.hpp>
 
 
 namespace DO::Sara {
@@ -89,8 +88,8 @@ namespace DO::Sara {
     }
   };
 
-  extern template struct RelativePoseSolver<v1::NisterFivePointAlgorithm>;
-  extern template struct RelativePoseSolver<v1::SteweniusFivePointAlgorithm>;
+  extern template struct RelativePoseSolver<NisterFivePointAlgorithm>;
+  extern template struct RelativePoseSolver<SteweniusFivePointAlgorithm>;
 
   //! @}
 

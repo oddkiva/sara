@@ -21,7 +21,7 @@ namespace DO::Sara {
 
     // Use Stewenius' algorithm instead of Nister's for now. The polynomial
     // solver must have some convergence problems.
-    const RelativePoseSolver<v2::NisterFivePointAlgorithm> _solver;
+    const RelativePoseSolver<NisterFivePointAlgorithm> _solver;
     CheiralAndEpipolarConsistency _inlier_predicate;
 
     Eigen::Matrix3d _K;

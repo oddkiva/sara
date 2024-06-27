@@ -15,7 +15,7 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 
 
-using namespace DO::Sara::v2;
+using namespace DO::Sara;
 
 
 auto NisterFivePointAlgorithm::extract_null_space(
