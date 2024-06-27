@@ -29,6 +29,8 @@
 using namespace std;
 using namespace DO::Sara;
 
+namespace ref = DO::Sara::Reference;
+
 
 BOOST_AUTO_TEST_SUITE(TestMultiViewGeometry)
 
@@ -181,7 +183,7 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = v1::NisterFivePointAlgorithm{};
+  auto solver = ref::NisterFivePointAlgorithm{};
 
   const auto null = solver.extract_null_space(x1, x2);
   {
@@ -198,13 +200,13 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v1)
+BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_ref_impl)
 {
   const auto test_data = generate_test_data();
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = v1::NisterFivePointAlgorithm{};
+  auto solver = ref::NisterFivePointAlgorithm{};
 
   // 1. Extract the null space.
   const auto E_bases = solver.extract_null_space(x1, x2);
@@ -243,13 +245,13 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v1)
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v2)
+BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
 {
   const auto test_data = generate_test_data();
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  const auto solver = v2::NisterFivePointAlgorithm{};
+  const auto solver = NisterFivePointAlgorithm{};
   const auto Es = solver(x1, x2);
 
   // Check essential matrix constraints.
@@ -278,7 +280,7 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v2)
 
   // Compare the intermediate results with the reference implementation.
   {
-    const auto solver_ref = v1::NisterFivePointAlgorithm{};
+    const auto solver_ref = ref::NisterFivePointAlgorithm{};
     const auto E_bases = solver_ref.extract_null_space(x1, x2);
     const auto E_bases_ref = solver_ref.extract_null_space(x1, x2);
     BOOST_CHECK_SMALL((E_bases - E_bases_ref).norm() / E_bases_ref.norm(),
@@ -310,13 +312,13 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm_v2)
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v1)
+BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_ref_impl)
 {
   const auto test_data = generate_test_data();
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = v1::SteweniusFivePointAlgorithm{};
+  auto solver = ref::SteweniusFivePointAlgorithm{};
 
   // 1. Extract the null space.
   const auto E_bases = solver.extract_null_space(x1, x2);
@@ -355,13 +357,13 @@ BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v1)
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v2)
+BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm)
 {
   const auto test_data = generate_test_data();
   const auto& x1 = test_data.u1;
   const auto& x2 = test_data.u2;
 
-  auto solver = v2::SteweniusFivePointAlgorithm{};
+  auto solver = SteweniusFivePointAlgorithm{};
 
   // 1. Extract the null space.
   const auto E_bases = solver.extract_null_space(x1, x2);
@@ -398,7 +400,7 @@ BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm_v2)
 
   // Compare each intermediate results with the reference implementation.
   {
-    auto solver_ref = v1::SteweniusFivePointAlgorithm{};
+    auto solver_ref = ref::SteweniusFivePointAlgorithm{};
 
     // Check the equality of the span of the nullspace.
     const auto E_bases_ref = solver_ref.extract_null_space(x1, x2);

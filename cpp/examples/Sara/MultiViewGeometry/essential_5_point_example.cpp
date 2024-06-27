@@ -17,6 +17,8 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Logging/Logger.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/NisterFivePointAlgorithm.hpp>
+#include <DO/Sara/MultiViewGeometry/MinimalSolvers/SteweniusFivePointAlgorithm.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/SfM/Helpers/FundamentalMatrixEstimation.hpp>
@@ -128,9 +130,9 @@ auto sara_graphics_main(int argc, char** argv) -> int
     std::tie(E, inliers, sample_best) = ransac(  //
         X,
 #if defined(NISTER_METHOD)
-        v1::NisterFivePointAlgorithm{},  //
+        NisterFivePointAlgorithm{},  //
 #else
-        v1::SteweniusFivePointAlgorithm{},
+        SteweniusFivePointAlgorithm{},
 #endif
         inlier_predicate, num_samples, data_normalizer, true);
   }

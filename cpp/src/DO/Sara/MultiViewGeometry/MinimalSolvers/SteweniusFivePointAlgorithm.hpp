@@ -18,7 +18,7 @@
 #include <array>
 
 
-namespace DO::Sara::v2 {
+namespace DO::Sara {
 
   //! @ingroup MultiViewGeometry
   //! @defgroup MinimalSolvers Minimal Solvers
@@ -60,8 +60,8 @@ namespace DO::Sara::v2 {
                     const Matrix<double, 3, 5>& right) const
         -> std::vector<EssentialMatrix>;
 
-    auto operator()(const data_point_type& X) const
-        -> std::vector<EssentialMatrix>
+    auto
+    operator()(const data_point_type& X) const -> std::vector<EssentialMatrix>
     {
       const matrix_type left = X[0].colmajor_view().matrix();
       const matrix_type right = X[1].colmajor_view().matrix();
@@ -71,4 +71,4 @@ namespace DO::Sara::v2 {
 
   //! @}
 
-}  // namespace DO::Sara::v2
+}  // namespace DO::Sara

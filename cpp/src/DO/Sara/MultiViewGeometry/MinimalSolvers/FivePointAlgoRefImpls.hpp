@@ -21,7 +21,7 @@
 #include <array>
 
 
-namespace DO::Sara::v1 {
+namespace DO::Sara::Reference {
 
   //! @ingroup MultiViewGeometry
   //! @defgroup MinimalSolvers Minimal Solvers
@@ -214,4 +214,4 @@ namespace DO::Sara::v1 {
 
   //! @}
 
-}  // namespace DO::Sara::v1
+}  // namespace DO::Sara::Reference

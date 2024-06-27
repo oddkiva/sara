@@ -17,9 +17,7 @@
 // #define SHOW_DEBUG_LOG
 
 
-using namespace DO::Sara::v1;
-
-using Matrix10d = Eigen::Matrix<double, 10, 10>;
+using namespace DO::Sara::Reference;
 
 
 auto FivePointAlgorithmBase::extract_null_space(
@@ -351,6 +349,8 @@ auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
 {
   // This follows the Matlab code at the end of section 4. of "Recent
   // Developments on Direct Relative Orientation", Stewenius et al.
+
+  using Matrix10d = Eigen::Matrix<double, 10, 10>;
 
   Eigen::FullPivLU<Matrix10d> lu(M.block<10, 10>(0, 0));
   const Matrix10d B = lu.solve(M.block<10, 10>(0, 10));
