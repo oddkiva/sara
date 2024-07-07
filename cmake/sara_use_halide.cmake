@@ -85,9 +85,10 @@ function (shakti_halide_library_v2)
   target_include_directories(${generator_NAME}.generator
     PRIVATE
     ${DO_Sara_DIR}/cpp/src
-    ${DO_Sara_ThirdParty_DIR}
-    ${DO_Sara_ThirdParty_DIR}/eigen)
-  target_link_libraries(${generator_NAME}.generator PRIVATE Halide::Generator)
+    ${DO_Sara_ThirdParty_DIR})
+  target_link_libraries(${generator_NAME}.generator
+    PRIVATE Eigen3::Eigen
+            Halide::Generator)
 
   if (generator_HALIDE_TARGET_FEATURES)
     add_halide_library(${generator_NAME}

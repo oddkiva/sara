@@ -13,6 +13,7 @@ if(SARA_USE_FROM_SOURCE)
     target_include_directories(DO_Sara_VideoIO PRIVATE ${FFMPEG_INCLUDE_DIRS})
     target_link_libraries(
       DO_Sara_VideoIO
+      PUBLIC Eigen3::Eigen
       PRIVATE DO::Sara::Core #
               DO::Sara::Logging #
               DO::Sara::ImageProcessing #

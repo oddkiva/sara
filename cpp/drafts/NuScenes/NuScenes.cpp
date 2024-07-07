@@ -11,16 +11,17 @@
 
 #include <drafts/NuScenes/NuScenes.hpp>
 
-#include <boost/filesystem.hpp>
-
 #include <nlohmann/json.hpp>
+
+#include <filesystem>
+
+
+namespace fs = std::filesystem;
 
 
 static auto load_json(const std::string& dataroot, const std::string& version,
                       const std::string& table_name) -> nlohmann::json
 {
-  namespace fs = boost::filesystem;
-
   const auto table_json_filepath =
       fs::path{dataroot} / version / (table_name + ".json");
 
@@ -257,7 +258,6 @@ auto NuScenes::load_sensor_table() -> void
 
 auto NuScenes::get_data_path(const SampleData& data) const -> std::string
 {
-  namespace fs = boost::filesystem;
   return (fs::path{dataroot} / data.filename).string();
 }
 

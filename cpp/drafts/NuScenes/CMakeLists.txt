@@ -1,9 +1,8 @@
 add_library(NuScenes STATIC NuImages.hpp NuImages.cpp NuScenes.hpp NuScenes.cpp)
 target_include_directories(
   NuScenes #
-  PUBLIC ${CMAKE_SOURCE_DIR}/cpp/third-party
-         ${CMAKE_SOURCE_DIR}/cpp/third-party/eigen)
-target_link_libraries(NuScenes PRIVATE Boost::filesystem)
+  PUBLIC ${CMAKE_SOURCE_DIR}/cpp/third-party)
+target_link_libraries(NuScenes PUBLIC Eigen3::Eigen)
 set_property(TARGET NuScenes PROPERTY FOLDER "Datasets/NuScenes")
 
 add_executable(nuimages_cpp_devkit_usage_example

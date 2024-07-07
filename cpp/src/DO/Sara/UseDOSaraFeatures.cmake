@@ -7,12 +7,10 @@ if (SARA_USE_FROM_SOURCE)
     sara_generate_library("Features")
 
     target_include_directories(DO_Sara_Features
-      PUBLIC
-      ${HDF5_INCLUDE_DIRS})
+      PUBLIC ${HDF5_INCLUDE_DIRS})
     target_link_libraries(DO_Sara_Features
-      PRIVATE
-      DO::Sara::Geometry
-      PUBLIC
-      ${HDF5_LIBRARIES})
+      PRIVATE DO::Sara::Geometry
+      PUBLIC Eigen3::Eigen
+             ${HDF5_LIBRARIES})
   endif ()
 endif ()

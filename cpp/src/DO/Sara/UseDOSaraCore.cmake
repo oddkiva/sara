@@ -7,11 +7,11 @@ if(NOT DO_Sara_Core_ADDED)
 
   target_include_directories(
     DO_Sara_Core #
-    PUBLIC ${CMAKE_SOURCE_DIR}/cpp/third-party/eigen #
-           $<$<NOT:$<PLATFORM_ID:iOS>>:${HDF5_INCLUDE_DIRS}>)
+    PUBLIC $<$<NOT:$<PLATFORM_ID:iOS>>:${HDF5_INCLUDE_DIRS}>)
   target_link_libraries(
     DO_Sara_Core #
-    PUBLIC fmt::fmt # This is a deliberate choice.
+    PUBLIC fmt::fmt #
+           Eigen3::Eigen #
            $<$<NOT:$<PLATFORM_ID:iOS>>:${HDF5_CXX_LIBRARIES}>)
   target_compile_definitions(
     DO_Sara_Core

@@ -14,6 +14,7 @@ if(SARA_USE_FROM_SOURCE)
       target_link_libraries(
         DO_Sara_ImageProcessing
         PUBLIC ${CMAKE_DL_LIBS}
+               Eigen3::Eigen
         PRIVATE Halide::Halide
                 # Fast color conversion
                 shakti_rgb8u_to_gray32f_cpu
