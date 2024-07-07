@@ -91,6 +91,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL iOS)
       /Users/david/GitHub/Apple-Boost-BuildScript/dist/boost.xcframework/ios-arm64/libboost.a
   )
 elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  find_package(TBB)
+
   # set(Boost_DEBUG ON)
   set(Boost_USE_STATIC_LIBS OFF)
   set(Boost_USE_MULTITHREADED ON)
