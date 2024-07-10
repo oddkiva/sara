@@ -25,23 +25,7 @@
 #  define NOMINMAX
 #endif
 
-#if defined(__GNUC__)
-#  pragma GCC diagnostic push
-#  if defined(__has_warning)  // clang
-#    if __has_warning("-Wmaybe-uninitialized")
-#      pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#    endif
-#    if __has_warning("-Wconversion")
-#      pragma GCC diagnostic ignored "-Wconversion"
-#    endif
-#  else  // GCC
-#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#  endif
-#endif
 #include <Eigen/Eigen>
-#if defined(__GNUC__)
-#  pragma GCC diagnostic pop
-#endif
 
 #include <sstream>
 
@@ -137,7 +121,7 @@ namespace Eigen {
 //! @}
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   /*!
     @ingroup Core
@@ -217,4 +201,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-}}  // namespace DO::Sara
+}  // namespace DO::Sara

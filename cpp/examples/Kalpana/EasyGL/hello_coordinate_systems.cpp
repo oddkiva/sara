@@ -236,7 +236,7 @@ private:
   {
     // Encode the vertex data in a tensor.
     const auto vertices = make_cube();
-    _num_vertices = vertices.size();
+    _num_vertices = static_cast<GLsizei>(vertices.size());
 
     _vao.generate();
     _vbo.generate();

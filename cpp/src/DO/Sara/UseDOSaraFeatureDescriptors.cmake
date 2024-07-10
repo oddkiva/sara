@@ -12,7 +12,8 @@ if(SARA_USE_FROM_SOURCE)
     endif ()
     target_link_libraries(
       DO_Sara_FeatureDescriptors
-      PUBLIC DO::Sara::Features #
+      PUBLIC Eigen3::Eigen #
+             DO::Sara::Features #
              DO::Sara::ImageProcessing
              $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   endif()

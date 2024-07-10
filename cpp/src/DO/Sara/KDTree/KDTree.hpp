@@ -22,7 +22,7 @@
 #    if __has_warning("-Wconversion")
 #      pragma GCC diagnostic ignored "-Wconversion"
 #    endif
-#  pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#    pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #  endif
 #endif
 #include <flann/flann.hpp>
@@ -59,10 +59,10 @@ namespace DO::Sara {
 
     //! k-NN search for a single query column vector.
     template <int N, int Options, int MaxRows, int MaxCols>
-    void
-    knn_search(const Eigen::Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
-               int num_nearest_neighbors, std::vector<int>& nn_indices,
-               std::vector<double>& nn_squared_distances)
+    void knn_search(
+        const Eigen::Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
+        int num_nearest_neighbors, std::vector<int>& nn_indices,
+        std::vector<double>& nn_squared_distances)
     {
       if (static_cast<int>(_row_major_matrix_view.cols) != query.size())
         throw std::runtime_error{"Dimension of query vector do not match "
@@ -93,11 +93,11 @@ namespace DO::Sara {
 
     //! Radius search for a single query column vector.
     template <int N, int Options, int MaxRows, int MaxCols>
-    int
-    radius_search(const Eigen::Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
-                  double squared_search_radius, std::vector<int>& nn_indices,
-                  std::vector<double>& nn_squared_distances,
-                  int max_num_nearest_neighbors = -1)
+    int radius_search(
+        const Eigen::Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
+        double squared_search_radius, std::vector<int>& nn_indices,
+        std::vector<double>& nn_squared_distances,
+        int max_num_nearest_neighbors = -1)
     {
       if (static_cast<int>(_row_major_matrix_view.cols) != query.size())
         throw std::runtime_error{"Dimension of query vector do not match "
@@ -110,7 +110,8 @@ namespace DO::Sara {
     }
 
     //! Radius search for a set of of query column vectors.
-    void radius_search(const Eigen::MatrixXd& queries, double squared_search_radius,
+    void radius_search(const Eigen::MatrixXd& queries,
+                       double squared_search_radius,
                        std::vector<std::vector<int>>& nn_indices,
                        std::vector<std::vector<double>>& nn_squared_distances,
                        int max_num_nearest_neighbors = -1);

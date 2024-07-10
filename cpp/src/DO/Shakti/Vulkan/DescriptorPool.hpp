@@ -133,7 +133,7 @@ namespace DO::Shakti::Vulkan {
       pool._device = _device;
 
       _create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-      _create_info.poolSizeCount = _pool_sizes.size();
+      _create_info.poolSizeCount = static_cast<std::uint32_t>(_pool_sizes.size());
       _create_info.pPoolSizes = _pool_sizes.data();
 
       const auto status = vkCreateDescriptorPool(_device, &_create_info,

@@ -6,7 +6,10 @@ if(SARA_USE_FROM_SOURCE)
     sara_create_common_variables("ImageProcessing")
     sara_generate_library("ImageProcessing")
 
-    target_link_libraries(DO_Sara_ImageProcessing PRIVATE DO::Sara::Core)
+    target_link_libraries(
+      DO_Sara_ImageProcessing
+      PUBLIC Eigen3::Eigen
+      PRIVATE DO::Sara::Core)
 
     if(SARA_USE_HALIDE)
       target_compile_definitions(DO_Sara_ImageProcessing

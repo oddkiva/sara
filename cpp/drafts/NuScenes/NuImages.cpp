@@ -11,16 +11,17 @@
 
 #include <drafts/NuScenes/NuImages.hpp>
 
-#include <boost/filesystem.hpp>
-
 #include <nlohmann/json.hpp>
+
+#include <filesystem>
+
+
+namespace fs = std::filesystem;
 
 
 static auto load_json(const std::string& dataroot, const std::string& version,
                       const std::string& table_name) -> nlohmann::json
 {
-  namespace fs = boost::filesystem;
-
   const auto table_json_filepath =
       fs::path{dataroot} / version / (table_name + ".json");
 
@@ -36,7 +37,7 @@ static auto load_json(const std::string& dataroot, const std::string& version,
 NuImages::NuImages(const std::string& version_,   //
                    const std::string& dataroot_,  //
                    bool verbose_/*,               //
-                                  float map_resolution = 0.1*/)
+                   float map_resolution = 0.1*/)
 : version{version_}
 , dataroot{dataroot_}
 , verbose{verbose_}
@@ -233,7 +234,6 @@ auto NuImages::load_log_table() -> void
 
 auto NuImages::get_data_path(const SampleData& data) const -> std::string
 {
-  namespace fs = boost::filesystem;
   return (fs::path{dataroot} / data.filename).string();
 }
 

@@ -61,6 +61,7 @@ sara_dissect_version()
 include(sara_use_ccache)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  set(EIGEN3_INCLUDE_DIRECTORY "/usr/include/eigen3")
   set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
 endif()
 
@@ -89,6 +90,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL iOS)
       /Users/david/GitHub/Apple-Boost-BuildScript/dist/boost.xcframework/ios-arm64/libboost.a
   )
 elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+
   find_package(TBB)
 
   # set(Boost_DEBUG ON)
