@@ -198,7 +198,7 @@ private:
       0, 1, 2,
       2, 3, 0;
     // clang-format on
-    _num_triangle_indices = triangles.size();
+    _num_triangle_indices = static_cast<GLsizei>(triangles.size());
 
     _vao.generate();
 

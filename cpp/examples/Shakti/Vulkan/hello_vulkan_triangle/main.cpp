@@ -252,7 +252,7 @@ public:
           _mvp_dmems[i].map_memory<ModelViewProjectionStack>(1));
     }
 
-    for (auto i = std::size_t{}; i != num_frames_in_flight; ++i)
+    for (auto i = 0u; i != num_frames_in_flight; ++i)
     {
       // 4.a) Register the byte size, the type of buffer which the descriptor
       //      references to.

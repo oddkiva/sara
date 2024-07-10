@@ -91,14 +91,14 @@ namespace DO::Sara {
   auto read_exif_info(EXIFInfo& info, const std::string& file_path) -> bool
   {
     // Read the JPEG file into a buffer
-    FILE* fp = fopen(file_path.c_str(), "rb");
+    const auto fp = fopen(file_path.c_str(), "rb");
     if (!fp)
     {
       std::cout << "Can't open file:" << std::endl << file_path << std::endl;
       return false;
     }
     fseek(fp, 0, SEEK_END);
-    unsigned long fsize = ftell(fp);
+    const auto fsize = ftell(fp);
     rewind(fp);
 
     std::vector<unsigned char> buf(fsize);
@@ -110,7 +110,7 @@ namespace DO::Sara {
     fclose(fp);
 
     // Parse EXIF info.
-    const auto code = info.parseFrom(&buf[0], fsize);
+    const auto code = info.parseFrom(&buf[0], static_cast<unsigned int>(fsize));
 
     return !code;
   }

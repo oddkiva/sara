@@ -332,7 +332,7 @@ private: /* Methods to initialize objects for the graphics pipeline. */
   auto define_descriptor_set_types() -> void
   {
     const auto num_frames_in_flight = _swapchain.images.size();
-    for (auto i = std::size_t{}; i != num_frames_in_flight; ++i)
+    for (auto i = 0u; i != num_frames_in_flight; ++i)
     {
       // 1. Descriptor set #1: the model-view-projection matrix stack uniform.
       auto buffer_info = VkDescriptorBufferInfo{};
