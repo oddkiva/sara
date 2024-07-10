@@ -60,8 +60,6 @@ sara_dissect_version()
 # Use CCache if available to speed up builds.
 include(sara_use_ccache)
 
-find_package(Eigen3 3.4 REQUIRED NO_MODULE)
-
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
 endif()
@@ -91,6 +89,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL iOS)
       /Users/david/GitHub/Apple-Boost-BuildScript/dist/boost.xcframework/ios-arm64/libboost.a
   )
 elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+
   find_package(TBB)
 
   # set(Boost_DEBUG ON)
