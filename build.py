@@ -383,6 +383,15 @@ def build_emsdk_docker():
         cwd=SARA_SOURCE_DIR,
     ).wait()
 
+    ret = subprocess.Popen(
+        [
+            "docker",
+            "push",
+            f"{sara_emsdk_build_image}:latest",
+        ],
+        cwd=SARA_SOURCE_DIR
+    ).wait()
+
     # Run the docker image.
     ret = subprocess.Popen(
         [

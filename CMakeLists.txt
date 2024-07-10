@@ -61,6 +61,7 @@ sara_dissect_version()
 include(sara_use_ccache)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  set(EIGEN3_INCLUDE_DIRECTORY "/usr/include/eigen3")
   set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
 endif()
 

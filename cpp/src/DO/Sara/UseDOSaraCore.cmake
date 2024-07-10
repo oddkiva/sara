@@ -7,11 +7,12 @@ if(NOT DO_Sara_Core_ADDED)
 
   target_include_directories(
     DO_Sara_Core #
-    PUBLIC $<$<NOT:$<PLATFORM_ID:iOS>>:${HDF5_INCLUDE_DIRS}>)
+    PUBLIC $<$<PLATFORM_ID:Emscripten>:${EIGEN3_INCLUDE_DIRECTORY}> #
+           $<$<NOT:$<PLATFORM_ID:iOS>>:${HDF5_INCLUDE_DIRS}>)
   target_link_libraries(
     DO_Sara_Core #
     PUBLIC fmt::fmt #
-           Eigen3::Eigen #
+           $<$<NOT:$<PLATFORM_ID:Emscripten>>:Eigen3::Eigen> #
            $<$<NOT:$<PLATFORM_ID:iOS>>:${HDF5_CXX_LIBRARIES}>)
   target_compile_definitions(
     DO_Sara_Core
