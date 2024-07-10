@@ -170,7 +170,7 @@ namespace DO::Sara::Darknet {
                           : shortcut.from;
       const auto& fx = net[i1]->output;
       const auto& x = net[i2]->output;
-      shortcut.forward(fx, x);
+      shortcut.forward_2(fx, x);
 
       if (profile)
         toc("Shortcut");

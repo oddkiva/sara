@@ -98,7 +98,7 @@ namespace DO::Sara {
       return false;
     }
     fseek(fp, 0, SEEK_END);
-    const auto fsize = ftell(fp);
+    const auto fsize = static_cast<unsigned long>(ftell(fp));
     rewind(fp);
 
     std::vector<unsigned char> buf(fsize);

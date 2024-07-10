@@ -340,7 +340,8 @@ auto Shortcut::to_output_stream(std::ostream& os) const -> void
   os << "- activation     = " << activation;
 }
 
-auto Shortcut::forward(const TensorView_<float, 4>& fx, const TensorView_<float, 4>& x)
+auto Shortcut::forward_2(const TensorView_<float, 4>& fx,
+                         const TensorView_<float, 4>& x)
     -> const TensorView_<float, 4>&
 {
   output.flat_array() = fx.flat_array() + x.flat_array();
