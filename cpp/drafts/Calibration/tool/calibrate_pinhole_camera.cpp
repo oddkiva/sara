@@ -340,7 +340,7 @@ auto sara_graphics_main(int argc, char** argv) -> int
       auto frame_copy = sara::Image<sara::Rgb8>{frame};
       draw_chessboard(frame_copy, chessboard);
 
-      const auto pose = estimate_pose_with_p3p(chessboard, K_initial);
+      const auto pose = estimate_pose_with_p3p(chessboard, camera);
       if (pose == std::nullopt || sara::is_nan(*pose))
         continue;
 

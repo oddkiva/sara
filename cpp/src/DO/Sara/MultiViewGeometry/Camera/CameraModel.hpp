@@ -11,30 +11,15 @@
 
 #pragma once
 
-#include <iostream>
-#include <memory>
-
-#if defined(__GNUC__)
-#  pragma GCC diagnostic push
-#  if defined(__has_warning)  // clang
-#    if __has_warning("-Wmaybe-uninitialized")
-#      pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#    endif
-#    if __has_warning("-Wconversion")
-#      pragma GCC diagnostic ignored "-Wconversion"
-#    endif
-#  else  // GCC
-#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#  endif
-#endif
-#include <Eigen/Core>
-#if defined(__GNUC__)
-#  pragma GCC diagnostic pop
-#endif
+#include <DO/Sara/MultiViewGeometry/Camera/PinholeCamera.hpp>
 
 #include <DO/Sara/Core/Image.hpp>
 
-#include <DO/Sara/MultiViewGeometry/Camera/PinholeCamera.hpp>
+#include <Eigen/Core>
+
+#include <iostream>
+#include <memory>
+
 
 
 namespace DO::Sara {
@@ -196,7 +181,8 @@ namespace DO::Sara {
   auto undistort(const CameraModelType& camera, const ImageView<PixelType>& src,
                  ImageView<PixelType>& dst)
   {
-    using vector2_type = typename CameraModelType::vector2_type;
+    using T = typename CameraModelType::T;
+    using vector2_type = Eigen::Vector2<T>;
 
     const auto& w = dst.width();
     const auto& h = dst.height();

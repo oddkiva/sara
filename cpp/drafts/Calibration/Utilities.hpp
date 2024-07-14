@@ -21,11 +21,11 @@
 
 namespace DO::Sara {
 
-  template <typename Camera>
-  inline auto init_calibration_matrix(Camera& camera,
+  template <typename CameraIntrinsicParameters>
+  inline auto init_calibration_matrix(CameraIntrinsicParameters& camera,
                                       const int w, const int h) -> void
   {
-    using T = typename Camera::T;
+    using T = typename CameraIntrinsicParameters::T;
     const auto d = static_cast<T>(std::max(w, h));
     const auto f = 0.5 * d;
 
@@ -36,8 +36,9 @@ namespace DO::Sara {
     camera.v0() = static_cast<T>(h * 0.5);
   }
 
-  inline auto estimate_pose_with_p3p(const ChessboardCorners& cb,
-                                     const v2::OmnidirectionalCamera<double>& K)
+  template <typename CameraIntrinsicParameters>
+  auto estimate_pose_with_p3p(const ChessboardCorners& chessboard,
+                              const CameraIntrinsicParameters& camera)
       -> std::optional<Eigen::Matrix<double, 3, 4>>
   {
     auto points = Eigen::Matrix3d{};
@@ -50,12 +51,12 @@ namespace DO::Sara {
     {
       const auto& x = xs[n];
       const auto& y = ys[n];
-      const Eigen::Vector2d xn = cb.image_point(x, y).cast<double>();
+      const Eigen::Vector2d xn = chessboard.image_point(x, y).cast<double>();
       if (is_nan(xn))
         continue;
 
-      points.col(n) = cb.scene_point(x, y);
-      rays.col(n) = K.backproject(xn).normalized();
+      points.col(n) = chessboard.scene_point(x, y);
+      rays.col(n) = camera.backproject(xn).normalized();
     }
     if (is_nan(points) || is_nan(rays))
       return std::nullopt;
@@ -75,20 +76,19 @@ namespace DO::Sara {
       auto error = 0;
 
       auto n = 0;
-      for (auto y = 0; y < cb.height(); ++y)
+      for (auto y = 0; y < chessboard.height(); ++y)
       {
-        for (auto x = 0; x < cb.width(); ++x)
+        for (auto x = 0; x < chessboard.width(); ++x)
         {
-          auto x0 = cb.image_point(x, y);
+          auto x0 = chessboard.image_point(x, y);
           if (is_nan(x0))
             continue;
 
           const auto& R = pose.topLeftCorner<3, 3>();
           const auto& t = pose.col(3);
-          const auto X = (R * cb.scene_point(x, y) + t);
+          const auto X = (R * chessboard.scene_point(x, y) + t);
 
-
-          const Eigen::Vector2f x1 = K.project(X).cast<float>();
+          const Eigen::Vector2f x1 = camera.project(X).template cast<float>();
           error += (x1 - x0).squaredNorm();
           ++n;
         }
@@ -104,78 +104,6 @@ namespace DO::Sara {
 
     return best_pose;
   }
-
-  inline auto estimate_pose_with_p3p(const ChessboardCorners& cb,
-                                     const Eigen::Matrix3d& K)
-      -> std::optional<Eigen::Matrix<double, 3, 4>>
-  {
-    auto points = Eigen::Matrix3d{};
-    auto rays = Eigen::Matrix3d{};
-
-    const Eigen::Matrix3d K_inv = K.inverse();
-
-    SARA_DEBUG << "Filling points and rays for P3P..." << std::endl;
-    auto xs = std::array{0, 1, 0};
-    auto ys = std::array{0, 0, 1};
-    for (auto n = 0; n < 3; ++n)
-    {
-      const auto& x = xs[n];
-      const auto& y = ys[n];
-      const Eigen::Vector3d xn =
-          cb.image_point(x, y).homogeneous().cast<double>();
-      if (is_nan(xn))
-        continue;
-
-      points.col(n) = cb.scene_point(x, y);
-      rays.col(n) = (K_inv * xn).normalized();
-    }
-    if (is_nan(points) || is_nan(rays))
-      return std::nullopt;
-
-    SARA_DEBUG << "Solving P3P..." << std::endl;
-    SARA_DEBUG << "Points =\n" << points << std::endl;
-    SARA_DEBUG << "Rays   =\n" << rays << std::endl;
-    const auto poses = solve_p3p(points, rays);
-    if (poses.empty())
-      return std::nullopt;
-
-    // Find the best poses.
-    SARA_DEBUG << "Determining the best pose..." << std::endl;
-    auto errors = std::vector<double>{};
-    for (const auto& pose : poses)
-    {
-      auto error = 0;
-
-      auto n = 0;
-      for (auto y = 0; y < cb.height(); ++y)
-      {
-        for (auto x = 0; x < cb.width(); ++x)
-        {
-          auto x0 = cb.image_point(x, y);
-          if (is_nan(x0))
-            continue;
-
-          const auto& R = pose.topLeftCorner<3, 3>();
-          const auto& t = pose.col(3);
-
-          const Eigen::Vector2f x1 =
-              (K * (R * cb.scene_point(x, y) + t)).hnormalized().cast<float>();
-          error += (x1 - x0).squaredNorm();
-          ++n;
-        }
-      }
-
-      errors.emplace_back(error / n);
-    }
-
-    const auto best_pose_index =
-        std::min_element(errors.begin(), errors.end()) - errors.begin();
-    const auto& best_pose = poses[best_pose_index];
-    SARA_DEBUG << "Best pose:\n" << best_pose << std::endl;
-
-    return best_pose;
-  }
-
 
   template <typename CameraModel>
   inline auto inspect(ImageView<Rgb8>& image,               //
