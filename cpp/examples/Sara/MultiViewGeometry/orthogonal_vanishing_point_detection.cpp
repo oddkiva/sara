@@ -21,7 +21,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/v2/BrownConradyDistortionModel.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/BrownConradyCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/VideoIO.hpp>

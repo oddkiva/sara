@@ -345,7 +345,7 @@ auto sara_graphics_main(int argc, char** argv) -> int
 
   // Initialize the calibration matrix.
   auto camera = sara::v2::OmnidirectionalCamera<double>{};
-  camera.K = sara::init_calibration_matrix(frame.width(), frame.height());
+  sara::init_calibration_matrix(camera, frame.width(), frame.height());
   camera.k().setZero();
   camera.p().setZero();
   camera.xi() = 1;
@@ -448,13 +448,14 @@ auto sara_graphics_main(int argc, char** argv) -> int
 
     calibration_problem.copy_camera_intrinsics(camera);
 
-    SARA_DEBUG << "K =\n" << camera.K << std::endl;
-    SARA_DEBUG << "k = " << camera.radial_distortion_coefficients.transpose()
-               << std::endl;
-    SARA_DEBUG << "p = "
-               << camera.tangential_distortion_coefficients.transpose()
-               << std::endl;
-    SARA_DEBUG << "xi = " << camera.xi << std::endl;
+    SARA_DEBUG << "fx = " << camera.fx() << std::endl;
+    SARA_DEBUG << "fy = " << camera.fy() << std::endl;
+    SARA_DEBUG << "shear = " << camera.shear() << std::endl;
+    SARA_DEBUG << "u0 = " << camera.u0() << std::endl;
+    SARA_DEBUG << "v0 = " << camera.v0() << std::endl;
+    SARA_DEBUG << "k = " << camera.k().transpose() << std::endl;
+    SARA_DEBUG << "p = " << camera.p().transpose() << std::endl;
+    SARA_DEBUG << "xi = " << camera.xi() << std::endl;
   }
 
   for (auto i = 0u; i < chessboards.size(); ++i)

@@ -14,7 +14,7 @@
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/v2/BrownConradyDistortionModel.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/BrownConradyCamera.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <fmt/format.h>
@@ -41,7 +41,7 @@ const auto map_pixel_dims = std::array{map_metric_dims[0] * px_per_meter,
                                        map_metric_dims[1] * px_per_meter};
 
 
-auto to_map_view(const sara::BrownConradyCamera32<float>& C,
+auto to_map_view(const sara::v2::BrownConradyDistortionModel<float>& C,
                  const sara::ImageView<sara::Rgb8>& image_plane)
     -> sara::Image<sara::Rgb8>
 {
@@ -69,12 +69,12 @@ auto to_map_view(const sara::BrownConradyCamera32<float>& C,
         continue;
 
       // Convert the corresponding metric coordinates.
-      auto xyz = Eigen::Vector3f(x / px_per_meter.value,  //
-                                 camera_height.value,     //
-                                 y / px_per_meter.value);
+      const auto xyz = Eigen::Vector3f(x / px_per_meter.value,  //
+                                       camera_height.value,     //
+                                       y / px_per_meter.value);
 
       // Project to the image.
-      Eigen::Vector2d p = (C.K * xyz).hnormalized().cast<double>();
+      const Eigen::Vector2d p = C.project(xyz).cast<double>();
 
       const auto in_image_domain = 0 <= p.x() && p.x() < w - 1 &&  //
                                    0 <= p.y() && p.y() < h - 1;
@@ -129,16 +129,14 @@ auto make_make_conrady_camera_2()
       -0.007399008111054717f  //
   };
 
-  auto camera_parameters = sara::BrownConradyCamera32<float>{};
-  camera_parameters.image_sizes << 1920, 1080;
-  // clang-format off
-  camera_parameters.K <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
-  // clang-format on
-  camera_parameters.distortion_model.k = k;
-  camera_parameters.distortion_model.p = p;
+  auto camera_parameters = sara::v2::BrownConradyDistortionModel<float>{};
+  camera_parameters.fx() = f;
+  camera_parameters.fy() = f;
+  camera_parameters.shear() = 0;
+  camera_parameters.u0() = u0;
+  camera_parameters.v0() = v0;
+  camera_parameters.k() = k;
+  camera_parameters.p() = p;
 
   return camera_parameters;
 }
@@ -149,15 +147,14 @@ auto make_make_conrady_camera_3()
   const auto u0 = 640._px;
   const auto v0 = 360._px;
 
-  auto camera_parameters = sara::BrownConradyCamera32<float>{};
-  // clang-format off
-  camera_parameters.K <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
-  // clang-format on
-  camera_parameters.distortion_model.k.setZero();
-  camera_parameters.distortion_model.p.setZero();
+  auto camera_parameters = sara::v2::BrownConradyDistortionModel<float>{};
+  camera_parameters.fx() = f;
+  camera_parameters.fy() = f;
+  camera_parameters.shear() = 0;
+  camera_parameters.u0() = u0;
+  camera_parameters.v0() = v0;
+  camera_parameters.k().setZero();
+  camera_parameters.p().setZero();
 
   return camera_parameters;
 }

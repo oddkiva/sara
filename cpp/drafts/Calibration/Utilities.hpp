@@ -21,17 +21,19 @@
 
 namespace DO::Sara {
 
-  inline auto init_calibration_matrix(v2::OmnidirectionalCamera<double>& camera,
+  template <typename Camera>
+  inline auto init_calibration_matrix(Camera& camera,
                                       const int w, const int h) -> void
   {
-    const auto d = static_cast<double>(std::max(w, h));
+    using T = typename Camera::T;
+    const auto d = static_cast<T>(std::max(w, h));
     const auto f = 0.5 * d;
 
     camera.fx() = f;
     camera.fy() = f;
     camera.shear() = 0;
-    camera.u0() = w * 0.5;
-    camera.v0() = w * 0.5;
+    camera.u0() = static_cast<T>(w * 0.5);
+    camera.v0() = static_cast<T>(h * 0.5);
   }
 
   inline auto estimate_pose_with_p3p(const ChessboardCorners& cb,
