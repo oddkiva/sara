@@ -253,10 +253,10 @@ auto MetricGridRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   _shader_program.set_uniform_matrix3f(  //
       _K_loc, lines._intrinsics.K.data());
   _shader_program.set_uniform_vector2f(  //
-      _k_loc, lines._intrinsics.radial_distortion_coefficients.data());
+      _k_loc, lines._intrinsics.k().data());
   _shader_program.set_uniform_vector2f(  //
-      _p_loc, lines._intrinsics.tangential_distortion_coefficients.data());
-  _shader_program.set_uniform_param(_xi_loc, lines._intrinsics.xi);
+      _p_loc, lines._intrinsics.p().data());
+  _shader_program.set_uniform_param(_xi_loc, lines._intrinsics.xi());
 
   // Color.
   _shader_program.set_uniform_vector4f(_color_loc, lines._color.data());

@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/OmnidirectionalCamera.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #ifdef _OPENMP

@@ -12,7 +12,6 @@
 #define BOOST_TEST_MODULE                                                      \
   "MultiViewGeometry/Brown-Conrady Camera Distortion Model"
 
-#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/BrownConradyCamera.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -25,26 +24,22 @@ using namespace DO::Sara;
 
 auto make_gopro4_camera()
 {
-  auto camera = BrownConradyCamera32<float>{};
+  auto camera = v2::BrownConradyDistortionModel<float>{};
 
-  const auto w = 1920;
-  const auto h = 1080;
-
-  camera.image_sizes << w, h;
-
-  // clang-format off
   // Calibration matrix.
-  camera.set_calibration_matrix((Eigen::Matrix3f{} <<
-    8.7217820124018249e+02f,                        0, 960,
-                          0., 8.7432544275392024e+02f, 540,
-                          0,                        0,   1).finished());
+  camera.fx() = 8.7217820124018249e+02f;
+  camera.fy() = 8.7432544275392024e+02f;
+  camera.shear() = 0.f;
+  camera.u0() = 960.f;
+  camera.v0() = 540.f;
 
   // Distortion model.
-  camera.distortion_model.k <<
+  // clang-format off
+  camera.k() <<
     -2.9131825247866094e-01f,
     1.1617227061207483e-01f,
     1.3047182418863507e-02f;
-  camera.distortion_model.p <<
+  camera.p() <<
     4.7283170922189409e-03f,
     2.0814815668955206e-03f;
   // clang-format on
@@ -56,12 +51,13 @@ auto make_gopro4_camera()
 BOOST_AUTO_TEST_CASE(test_brown_conrady_camera_model)
 {
   const auto camera = make_gopro4_camera();
-  const auto& w = camera.image_sizes.x();
-  const auto& h = camera.image_sizes.y();
+
+  static constexpr auto w = 1920.f;
+  static constexpr auto h = 1080.f;
 
   // Check the projection and backprojection.
   {
-    const auto center = Eigen::Vector2f(960, 540);
+    const auto center = Eigen::Vector2f{w / 2, h / 2};
 
     // The backprojected ray must have positive depth, i.e., z > 0?
     //

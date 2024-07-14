@@ -15,7 +15,7 @@
 
 #include "ImagePlaneRenderer.hpp"
 
-#include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/OmnidirectionalCamera.hpp>
 
 #include <DO/Kalpana/EasyGL.hpp>
 
@@ -46,7 +46,7 @@ struct MetricGridRenderer
     //! @brief The extrinsic camera matrix as a uniform variables.
     Eigen::Matrix4f _extrinsics;
     //! @brief The intrinsic camera parameters as uniform variables.
-    DO::Sara::OmnidirectionalCamera<float> _intrinsics;
+    DO::Sara::v2::OmnidirectionalCamera<float> _intrinsics;
 
     //! @brief OpenGL buffer objects.
     DO::Kalpana::GL::VertexArray _vao;

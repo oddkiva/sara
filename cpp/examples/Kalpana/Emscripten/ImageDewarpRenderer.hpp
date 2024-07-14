@@ -15,7 +15,7 @@
 
 #include "ImagePlaneRenderer.hpp"
 
-#include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/OmnidirectionalCamera.hpp>
 
 #include <DO/Kalpana/EasyGL.hpp>
 
@@ -32,7 +32,7 @@ struct ImageDewarpRenderer
     Eigen::Matrix3f R;
 
     //! @brief The source intrinsic camera parameters.
-    DO::Sara::OmnidirectionalCamera<float> _intrinsics;
+    DO::Sara::v2::OmnidirectionalCamera<float> _intrinsics;
   };
 
   // OpenGL Shader program.
@@ -49,6 +49,7 @@ struct ImageDewarpRenderer
   GLint _K_inverse_loc;
   GLint _dewarp_mode_loc;
   // Source camera params locations.
+  Eigen::Matrix3f _K;
   GLint _K_loc;
   GLint _k_loc;
   GLint _p_loc;

@@ -220,27 +220,32 @@ private:
   {
     _image_dewarp_renderer.initialize();
 
+    _camera_params._intrinsics.fx() = 1041.55762f;
+    _camera_params._intrinsics.fy() = 1041.53857f;
+     _camera_params._intrinsics.shear() = -2.31719828f;
+    _camera_params._intrinsics.u0() = 942.885742f;
+    _camera_params._intrinsics.v0() = 589.198425f;
+    _camera_params._intrinsics.k() << 0.442631334f, -0.156340882f;
+    _camera_params._intrinsics.p() << -0.000787709199f, -0.000381082471f;
+    _camera_params._intrinsics.xi() = 1.43936455f;
+
+    // TODO: optimize this workaround.
+    const auto& fx = _camera_params._intrinsics.fx();
+    const auto& fy = _camera_params._intrinsics.fy();
+    const auto& s = _camera_params._intrinsics.shear();
+    const auto& u0 = _camera_params._intrinsics.u0();
+    const auto& v0 = _camera_params._intrinsics.v0();
     // clang-format off
-    const auto K = (Eigen::Matrix3f{} <<
-      1041.55762f, -2.31719828f, 942.885742f,
-              0.f,  1041.53857f, 589.198425f,
-              0.f,          0.f,         1.f
-    ).finished();
-    _camera_params._intrinsics.set_calibration_matrix(K);
-    _camera_params._intrinsics.radial_distortion_coefficients <<
-       0.442631334f,
-      -0.156340882f,
-       0;
-    _camera_params._intrinsics.tangential_distortion_coefficients <<
-      -0.000787709199f,
-      -0.000381082471f;
+    _image_dewarp_renderer._K <<
+        fx,  s, u0,
+         0, fy, v0,
+         0,  0,  1;
     // clang-format on
-    _camera_params._intrinsics.xi = 1.43936455f;
 
     // Destination stereographic reprojection.
     _camera_params.R.setIdentity();
-    _camera_params.K = K;
-    _camera_params.K_inverse = K.inverse();
+    _camera_params.K = _image_dewarp_renderer._K;
+    _camera_params.K_inverse = _image_dewarp_renderer._K.inverse();
   }
 
   auto cleanup_gl_objects() -> void

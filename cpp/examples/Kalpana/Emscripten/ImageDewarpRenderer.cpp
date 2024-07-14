@@ -319,14 +319,27 @@ auto ImageDewarpRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   _shader_program.set_uniform_param(_dewarp_mode_loc, dewarp_mode);
 
   // Source omnidirectional camera parameters.
+  //
+  // TODO: optimize this workaround.
+  const auto& fx = camera._intrinsics.fx();
+  const auto& fy = camera._intrinsics.fy();
+  const auto& s = camera._intrinsics.shear();
+  const auto& u0 = camera._intrinsics.u0();
+  const auto& v0 = camera._intrinsics.v0();
+  // clang-format off
+  _K << fx,  s, u0,
+         0, fy, v0,
+         0,  0,  1;
+  // clang-format on
+
   _shader_program.set_uniform_matrix3f(  //
-      _K_loc, camera._intrinsics.K.data());
+      _K_loc, _K.data());
   _shader_program.set_uniform_vector2f(
-      _k_loc, camera._intrinsics.radial_distortion_coefficients.data());
+      _k_loc, camera._intrinsics.k().data());
   _shader_program.set_uniform_vector2f(
-      _p_loc, camera._intrinsics.tangential_distortion_coefficients.data());
+      _p_loc, camera._intrinsics.p().data());
   _shader_program.set_uniform_param(  //
-      _xi_loc, camera._intrinsics.xi);
+      _xi_loc, camera._intrinsics.xi());
 
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

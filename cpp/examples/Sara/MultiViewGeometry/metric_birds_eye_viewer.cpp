@@ -14,7 +14,7 @@
 #include <DO/Sara/Core/PhysicalQuantities.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/BrownConradyDistortionModel.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <fmt/format.h>
@@ -105,16 +105,14 @@ auto make_make_conrady_camera_1()
   const auto p = Eigen::Vector2f{0, 0};
   const auto k = Eigen::Vector3f{0.328456f, 0.0589776f, 0};
 
-  auto camera_parameters = sara::BrownConradyCamera32<float>{};
-  camera_parameters.image_sizes << 1920, 1080;
-  // clang-format off
-  camera_parameters.K <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1;
-  // clang-format on
-  camera_parameters.distortion_model.k = k;
-  camera_parameters.distortion_model.p = p;
+  auto camera_parameters = sara::v2::BrownConradyDistortionModel<float>{};
+  camera_parameters.fx() = f;
+  camera_parameters.fy() = f;
+  camera_parameters.shear() = f;
+  camera_parameters.u0() = u0;
+  camera_parameters.v0() = v0;
+  camera_parameters.k() = k;
+  camera_parameters.p() = p;
 
   return camera_parameters;
 }
