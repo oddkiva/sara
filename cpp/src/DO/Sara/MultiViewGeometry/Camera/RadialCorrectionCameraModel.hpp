@@ -24,10 +24,10 @@ namespace DO::Sara {
   template <typename T>
   struct RadialRationalCorrectionFunction
   {
-    Eigen::Matrix<T, 2, 1> k;
-    Eigen::Matrix<T, 2, 1> distortion_center;
+    Eigen::Vector2<T> k;
+    Eigen::Vector2<T> distortion_center;
 
-    auto apply(const Eigen::Matrix<T, 2, 1>& xd) const -> Eigen::Matrix<T, 2, 1>
+    auto apply(const Eigen::Vector2<T>& xd) const -> Eigen::Vector2<T>
     {
       const auto r2 = (xd - distortion_center).squaredNorm();
       const auto r4 = r2 * r2;
@@ -36,8 +36,8 @@ namespace DO::Sara {
       return c + distortion_factor * (xd - c);
     }
 
-    auto apply_inverse(const Eigen::Matrix<T, 2, 1>& xu, int max_iter = 20,
-                       T eps = T{1e-6}) const -> Eigen::Matrix<T, 2, 1>
+    auto apply_inverse(const Eigen::Vector2<T>& xu, int max_iter = 20,
+                       T eps = T{1e-6}) const -> Eigen::Vector2<T>
     {
       const auto& c = distortion_center;
       const auto ru = (xu - c).norm();
@@ -61,10 +61,10 @@ namespace DO::Sara {
   template <typename T>
   struct RadialPolynomialCorrectionFunction
   {
-    Eigen::Matrix<T, 2, 1> k;
-    Eigen::Matrix<T, 2, 1> distortion_center;
+    Eigen::Vector2<T> k;
+    Eigen::Vector2<T> distortion_center;
 
-    auto apply(const Eigen::Matrix<T, 2, 1>& xd) const -> Eigen::Matrix<T, 2, 1>
+    auto apply(const Eigen::Vector2<T>& xd) const -> Eigen::Vector2<T>
     {
       const auto r2 = (xd - distortion_center).squaredNorm();
       const auto r4 = r2 * r2;
@@ -73,8 +73,8 @@ namespace DO::Sara {
       return c + distortion_factor * (xd - c);
     }
 
-    auto apply_inverse(const Eigen::Matrix<T, 2, 1>& xu, int max_iter = 20,
-                       T eps = T{1e-6}) const -> Eigen::Matrix<T, 2, 1>
+    auto apply_inverse(const Eigen::Vector2<T>& xu, int max_iter = 20,
+                       T eps = T{1e-6}) const -> Eigen::Vector2<T>
     {
       const auto& c = distortion_center;
       const auto ru = (xu - c).squaredNorm();
