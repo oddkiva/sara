@@ -17,7 +17,7 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #ifdef _OPENMP
-#include <omp.h>
+#  include <omp.h>
 #endif
 
 
@@ -26,10 +26,7 @@ namespace sara = DO::Sara;
 
 auto make_omnidirectional_camera()
 {
-  auto camera_parameters = sara::OmnidirectionalCamera<float>{};
-
-  const auto w = 1920;
-  const auto h = 1080;
+  auto camera_parameters = sara::v2::OmnidirectionalCamera<float>{};
 
   // Focal lengths in each dimension.
   const auto fx = 1063.30738864f;
@@ -40,26 +37,20 @@ auto make_omnidirectional_camera()
   const auto u0 = 969.55702157f;
   const auto v0 = 541.26230733f;
 
-  camera_parameters.image_sizes << w, h;
-  // clang-format off
-  camera_parameters.set_calibration_matrix((Eigen::Matrix3f{} <<
-      fx,  s, u0,
-       0, fy, v0,
-       0,  0,  1).finished());
-  camera_parameters.radial_distortion_coefficients <<
-      0.50776095f,
-      -0.16478652f,
-      0.0f;
-  camera_parameters.tangential_distortion_coefficients <<
-      0.00023093f,
-      0.00078712f;
-  // clang-format on
-  camera_parameters.xi = 1.50651524f;
+  camera_parameters.fx() = fx;
+  camera_parameters.fy() = fy;
+  camera_parameters.shear() = s;
+  camera_parameters.u0() = u0;
+  camera_parameters.v0() = v0;
+  camera_parameters.k() << 0.50776095f, -0.16478652f;
+  camera_parameters.p() << 0.00023093f, 0.00078712f;
+  camera_parameters.xi() = 1.50651524f;
 
   return camera_parameters;
 }
 
-auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& omni_camera)
+auto make_pinhole_camera(
+    const sara::v2::OmnidirectionalCamera<float>& omni_camera)
 {
   auto K = omni_camera.K;
 
@@ -90,7 +81,7 @@ auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& omni_camera)
 
 auto undistort_image(const sara::ImageView<sara::Rgb8>& frame,
                      sara::ImageView<sara::Rgb8>& frame_undistorted,
-                     const sara::OmnidirectionalCamera<float>& camera,
+                     const sara::v2::OmnidirectionalCamera<float>& camera,
                      float x_min, float y_min, float scale)
 {
   const auto w = frame.width();
@@ -128,7 +119,7 @@ auto undistort_image(const sara::ImageView<sara::Rgb8>& frame,
 }
 
 
-auto flag_behind_camera(const sara::OmnidirectionalCamera<float>& camera)
+auto flag_behind_camera(const sara::v2::OmnidirectionalCamera<float>& camera)
     -> sara::Image<std::uint8_t>
 {
   const auto w = static_cast<int>(camera.image_sizes.x());
@@ -177,7 +168,7 @@ auto flag_behind_camera(const sara::ImageView<sara::Rgb8>& frame,
 
 
 auto stereographic_projection(
-    const sara::OmnidirectionalCamera<float>& camera_src,
+    const sara::v2::OmnidirectionalCamera<float>& camera_src,
     const sara::PinholeCamera<float>& camera_dst,
     const Eigen::Matrix3f& camera_rotation_dst)
 {

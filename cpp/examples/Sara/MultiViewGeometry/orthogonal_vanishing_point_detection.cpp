@@ -21,8 +21,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/ImageProcessing/EdgeGrouping.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/CameraModel.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/BrownConradyDistortionModel.hpp>
 #include <DO/Sara/MultiViewGeometry/SingleView/VanishingPoint.hpp>
 #include <DO/Sara/RANSAC/RANSAC.hpp>
 #include <DO/Sara/VideoIO.hpp>
@@ -45,43 +44,41 @@ using namespace DO::Sara;
 
 auto initialize_camera_intrinsics_1()
 {
-  auto intrinsics = BrownConradyCamera32<float>{};
+  auto intrinsics = v2::BrownConradyDistortionModel<float>{};
 
   const auto f = 991.8030424131325f;
   const auto u0 = 960.f;
   const auto v0 = 540.f;
-  intrinsics.image_sizes << 1920, 1080;
-  // clang-format off
-  intrinsics.set_calibration_matrix((Eigen::Matrix3f{} <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1).finished());
-  // clang-format on
-  intrinsics.distortion_model.k.setZero();
-  intrinsics.distortion_model.p.setZero();
+  intrinsics.fx() = f;
+  intrinsics.fy() = f;
+  intrinsics.shear() = 0;
+  intrinsics.u0() = u0;
+  intrinsics.v0() = v0;
+  intrinsics.distortion_model.k().setZero();
+  intrinsics.distortion_model.p().setZero();
 
   return intrinsics;
 }
 
 auto initialize_camera_intrinsics_2()
 {
-  auto intrinsics = BrownConradyCamera32<float>{};
+  auto intrinsics = v2::BrownConradyDistortionModel<float>{};
 
   const auto f = 946.8984425572634f;
   const auto u0 = 960.f;
   const auto v0 = 540.f;
-  intrinsics.image_sizes << 1920, 1080;
+  intrinsics.fx() = f;
+  intrinsics.fy() = f;
+  intrinsics.shear() = 0;
+  intrinsics.u0() = u0;
+  intrinsics.v0() = v0;
   // clang-format off
-  intrinsics.set_calibration_matrix((Eigen::Matrix3f{} <<
-    f, 0, u0,
-    0, f, v0,
-    0, 0,  1).finished());
-  intrinsics.distortion_model.k <<
+  intrinsics.distortion_model.k() <<
     -0.22996356451342749f,
     0.05952465745165465f,
     -0.007399008111054717f;
   // clang-format on
-  intrinsics.distortion_model.p.setZero();
+  intrinsics.distortion_model.p().setZero();
 
   return intrinsics;
 }

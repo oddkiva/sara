@@ -250,12 +250,10 @@ auto MetricGridRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   // Camera parameters.
   _shader_program.set_uniform_matrix4f(  //
       _C_loc, lines._extrinsics.data());
-  _shader_program.set_uniform_matrix3f(  //
-      _K_loc, lines._intrinsics.K.data());
-  _shader_program.set_uniform_vector2f(  //
-      _k_loc, lines._intrinsics.k().data());
-  _shader_program.set_uniform_vector2f(  //
-      _p_loc, lines._intrinsics.p().data());
+
+  _shader_program.set_uniform_matrix3f(_K_loc, lines._K.data());
+  _shader_program.set_uniform_vector2f(_k_loc, lines._intrinsics.k().data());
+  _shader_program.set_uniform_vector2f(_p_loc, lines._intrinsics.p().data());
   _shader_program.set_uniform_param(_xi_loc, lines._intrinsics.xi());
 
   // Color.

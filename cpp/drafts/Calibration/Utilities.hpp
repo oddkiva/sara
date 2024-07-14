@@ -14,32 +14,28 @@
 #include <drafts/Calibration/Chessboard.hpp>
 
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/OmnidirectionalCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/PnP/LambdaTwist.hpp>
 
 
 namespace DO::Sara {
 
-  inline auto init_calibration_matrix(const int w, const int h)
-      -> Eigen::Matrix3d
+  inline auto init_calibration_matrix(v2::OmnidirectionalCamera<double>& camera,
+                                      const int w, const int h) -> void
   {
     const auto d = static_cast<double>(std::max(w, h));
     const auto f = 0.5 * d;
 
-    // clang-format off
-  const auto K = (Eigen::Matrix3d{} <<
-    f, 0, w * 0.5,
-    0, f, h * 0.5,
-    0, 0,       1
-  ).finished();
-    // clang-format on
-
-    return K;
+    camera.fx() = f;
+    camera.fy() = f;
+    camera.shear() = 0;
+    camera.u0() = w * 0.5;
+    camera.v0() = w * 0.5;
   }
 
   inline auto estimate_pose_with_p3p(const ChessboardCorners& cb,
-                                     const OmnidirectionalCamera<double>& K)
+                                     const v2::OmnidirectionalCamera<double>& K)
       -> std::optional<Eigen::Matrix<double, 3, 4>>
   {
     auto points = Eigen::Matrix3d{};

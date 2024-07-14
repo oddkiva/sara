@@ -46,6 +46,7 @@ struct MetricGridRenderer
     //! @brief The extrinsic camera matrix as a uniform variables.
     Eigen::Matrix4f _extrinsics;
     //! @brief The intrinsic camera parameters as uniform variables.
+    Eigen::Matrix3f _K;
     DO::Sara::v2::OmnidirectionalCamera<float> _intrinsics;
 
     //! @brief OpenGL buffer objects.
