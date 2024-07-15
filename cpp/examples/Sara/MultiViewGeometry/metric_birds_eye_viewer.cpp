@@ -97,7 +97,7 @@ auto to_map_view(const sara::v2::BrownConradyDistortionModel<float>& C,
   return map_view;
 }
 
-auto make_make_conrady_camera_1()
+auto make_conrady_camera_1()
 {
   const auto f = 1305.f;
   const auto u0 = 960.f;
@@ -117,7 +117,7 @@ auto make_make_conrady_camera_1()
   return camera_parameters;
 }
 
-auto make_make_conrady_camera_2()
+auto make_conrady_camera_2()
 {
   const auto f = 946.898442557f;
   const auto u0 = 960.f;
@@ -141,7 +141,7 @@ auto make_make_conrady_camera_2()
   return camera_parameters;
 }
 
-auto make_make_conrady_camera_3()
+auto make_conrady_camera_3()
 {
   const auto f = 650._px;
   const auto u0 = 640._px;
@@ -182,7 +182,7 @@ int __main(int argc, char** argv)
   };
 
   // one example of distortion correction.
-  auto camera_parameters = make_make_conrady_camera_2();
+  auto camera_parameters = make_conrady_camera_2();
 
   auto frame_undistorted = sara::Image<sara::Rgb8>{video_stream.sizes()};
 

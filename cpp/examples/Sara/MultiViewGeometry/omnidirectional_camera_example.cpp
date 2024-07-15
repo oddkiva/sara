@@ -43,7 +43,7 @@ auto make_omnidirectional_camera()
   camera_parameters.shear() = s;
   camera_parameters.u0() = u0;
   camera_parameters.v0() = v0;
-  camera_parameters.k() << 0.50776095f, -0.16478652f;
+  camera_parameters.k() << 0.50776095f, -0.16478652f, 0.f;
   camera_parameters.p() << 0.00023093f, 0.00078712f;
   camera_parameters.xi() = 1.50651524f;
 
