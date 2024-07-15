@@ -15,8 +15,7 @@ if(SARA_USE_FROM_SOURCE)
               ${TIFF_INCLUDE_DIR} #
               ${ZLIB_INCLUDE_DIRS} #
       PUBLIC ${DO_Sara_INCLUDE_DIR} #
-             ${DO_Sara_ThirdParty_DIR} #
-             ${DO_Sara_ThirdParty_DIR}/eigen)
+             ${DO_Sara_ThirdParty_DIR})
 
     if(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
       target_link_libraries(

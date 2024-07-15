@@ -9,8 +9,7 @@ if(SARA_USE_FROM_SOURCE)
     target_include_directories(
       DO_Sara_SfM
       PUBLIC ${CERES_INCLUDE_DIRS}
-      PRIVATE ${DO_Sara_ThirdParty_DIR}/eigen #
-              ${DO_Sara_INCLUDE_DIR})
+      PRIVATE ${DO_Sara_INCLUDE_DIR})
     target_compile_definitions(DO_Sara_SfM PRIVATE BOOST_ALL_DYN_LINK
                                                    BOOST_ALL_NO_LIB)
     target_link_libraries(
