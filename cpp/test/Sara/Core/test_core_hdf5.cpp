@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_array)
 
     auto true_matrix = MatrixXf(3, 2);
     // clang-format off
-    array.matrix() <<
+    true_matrix.matrix() <<
       1, 2,
       3, 4,
       5, 6;
