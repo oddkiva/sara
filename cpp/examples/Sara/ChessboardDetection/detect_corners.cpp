@@ -11,17 +11,15 @@
 
 //! @example
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
+#include <DO/Sara/ChessboardDetection/ChessboardDetector.hpp>
 #include <DO/Sara/Graphics.hpp>
-
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 
-#include <drafts/ChessboardDetection/ChessboardDetector.hpp>
-
 #include "Utilities/ImageOrVideoReader.hpp"
+
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 #include <optional>
 

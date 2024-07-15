@@ -32,4 +32,7 @@ include(UseDOSaraRANSAC)
 
 include(UseDOSaraVisualization)
 
+add_subdirectory(ChessboardDetection)
+add_subdirectory(Calibration)
+
 add_subdirectory(NeuralNetworks)

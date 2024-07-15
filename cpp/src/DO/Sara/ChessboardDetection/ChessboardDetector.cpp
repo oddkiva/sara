@@ -9,11 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <drafts/ChessboardDetection/ChessboardDetector.hpp>
-#include <drafts/ChessboardDetection/LineReconstruction.hpp>
-#include <drafts/ChessboardDetection/NonMaximumSuppression.hpp>
-#include <drafts/ChessboardDetection/OrientationHistogram.hpp>
-#include <drafts/ChessboardDetection/SquareReconstruction.hpp>
+#include <DO/Sara/ChessboardDetection/ChessboardDetector.hpp>
+#include <DO/Sara/ChessboardDetection/LineReconstruction.hpp>
+#include <DO/Sara/ChessboardDetection/NonMaximumSuppression.hpp>
+#include <DO/Sara/ChessboardDetection/OrientationHistogram.hpp>
+#include <DO/Sara/ChessboardDetection/SquareReconstruction.hpp>
 
 #include <DO/Sara/FeatureDescriptors/Orientation.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>

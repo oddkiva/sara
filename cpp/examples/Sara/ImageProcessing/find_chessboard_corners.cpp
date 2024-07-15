@@ -24,9 +24,9 @@
 #include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
-#include "Chessboard/CircularProfileExtractor.hpp"
-#include "Chessboard/JunctionDetection.hpp"
-#include "Chessboard/NonMaximumSuppression.hpp"
+#include <DO/Sara/Chessboard/CircularProfileExtractor.hpp>
+#include <DO/Sara/Chessboard/JunctionDetection.hpp>
+#include <DO/Sara/Chessboard/NonMaximumSuppression.hpp>
 
 
 namespace sara = DO::Sara;

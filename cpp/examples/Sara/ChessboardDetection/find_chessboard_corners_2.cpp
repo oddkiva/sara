@@ -13,13 +13,7 @@
 //! This partially implements OpenCV ideas used to detect the chessboard to draw
 //! some intuitions.
 
-#ifdef _OPENMP
-#  include <omp.h>
-#endif
-
-#include <map>
-#include <unordered_map>
-
+#include <DO/Sara/ChessboardDetection/Erode.hpp>
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureDetectors/EdgePostProcessing.hpp>
@@ -32,7 +26,13 @@
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <drafts/ChessboardDetection/Erode.hpp>
+
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
+
+#include <map>
+#include <unordered_map>
 
 
 namespace sara = DO::Sara;

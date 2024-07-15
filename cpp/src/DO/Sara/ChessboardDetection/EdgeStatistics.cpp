@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "EdgeStatistics.hpp"
+#include <DO/Sara/ChessboardDetection/EdgeStatistics.hpp>
 
 
 namespace DO::Sara {

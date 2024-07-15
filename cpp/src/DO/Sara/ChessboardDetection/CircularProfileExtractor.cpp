@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "CircularProfileExtractor.hpp"
+#include <DO/Sara/ChessboardDetection/CircularProfileExtractor.hpp>
 
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 

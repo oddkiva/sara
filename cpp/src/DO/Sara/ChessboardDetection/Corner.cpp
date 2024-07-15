@@ -9,8 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "Corner.hpp"
-#include "NonMaximumSuppression.hpp"
+#include <DO/Sara/ChessboardDetection/Corner.hpp>
+#include <DO/Sara/ChessboardDetection/NonMaximumSuppression.hpp>
 
 #include <DO/Sara/ImageProcessing/JunctionRefinement.hpp>
 

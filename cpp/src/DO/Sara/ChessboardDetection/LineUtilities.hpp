@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "ChessboardDetector.hpp"
+#include <DO/Sara/ChessboardDetection/ChessboardDetector.hpp>
 
 
 namespace DO::Sara {

@@ -9,8 +9,6 @@ if(SARA_BUILD_TESTS)
   add_definitions(-DBOOST_ALL_NO_LIB)
 endif()
 
-add_subdirectory(ChessboardDetection)
-add_subdirectory(Calibration)
 add_subdirectory(Compute)
 add_subdirectory(MatchPropagation)
 add_subdirectory(NuScenes)

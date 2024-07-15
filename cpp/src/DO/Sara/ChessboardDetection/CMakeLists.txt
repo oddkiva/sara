@@ -28,5 +28,3 @@ target_link_libraries(
   DO_Sara_ChessboardDetection
   PUBLIC DO::Sara::ImageProcessing #
          DO::Sara::FeatureDetectors)
-
-add_subdirectory(examples)

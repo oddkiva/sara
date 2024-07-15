@@ -13,4 +13,5 @@ if (SARA_BUILD_VIDEOIO)
   add_subdirectory(VideoIO)
 endif ()
 
+add_subdirectory(ChessboardDetection)
 add_subdirectory(NeuralNetworks)

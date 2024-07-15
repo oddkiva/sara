@@ -9,8 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "LineReconstruction.hpp"
-#include "SquareReconstruction.hpp"
+#include <DO/Sara/ChessboardDetection/LineReconstruction.hpp>
+#include <DO/Sara/ChessboardDetection/SquareReconstruction.hpp>
 
 
 namespace DO::Sara {
