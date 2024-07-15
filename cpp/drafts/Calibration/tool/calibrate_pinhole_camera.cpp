@@ -33,18 +33,18 @@ public:
   static constexpr auto extrinsic_parameter_count =
       sara::PinholeCameraReprojectionError::extrinsic_parameter_count;
 
-  auto initialize_intrinsics(const Eigen::Matrix3d& K) -> void
+  auto initialize_intrinsics(const sara::v2::PinholeCamera<double>& camera) -> void
   {
     // fx
-    _intrinsics.fx() = K(0, 0);
+    _intrinsics.fx() = camera.fx();
     // fy (NORMALIZED)
-    _intrinsics.fy() = K(1, 1) / K(0, 0);
+    _intrinsics.fy() = camera.fy() / camera.fx();
     // shear (NORMALIZED)
-    _intrinsics.shear() = K(0, 1) / K(0, 0);
+    _intrinsics.shear() = camera.shear() / camera.fx();
     // u0
-    _intrinsics.u0() = K(0, 2);
+    _intrinsics.u0() = camera.u0();
     // v0
-    _intrinsics.v0() = K(1, 2);
+    _intrinsics.v0() = camera.v0();
   }
 
   auto add(const sara::ChessboardCorners& chessboard,  //
@@ -308,12 +308,12 @@ auto sara_graphics_main(int argc, char** argv) -> int
   auto chessboards = std::vector<sara::ChessboardCorners>{};
 
   // Initialize the calibration matrix.
-  const auto K_initial =
-      sara::init_calibration_matrix(frame.width(), frame.height());
+  auto camera = sara::v2::PinholeCamera<double>{};
+  sara::init_calibration_matrix(camera, frame.width(), frame.height());
 
   // Initialize the calibration problem.
   auto calibration_data = ChessboardCalibrationData{};
-  calibration_data.initialize_intrinsics(K_initial);
+  calibration_data.initialize_intrinsics(camera);
 
   auto selected_frames = std::vector<sara::Image<sara::Rgb8>>{};
   sara::create_window(frame.sizes());
@@ -340,7 +340,7 @@ auto sara_graphics_main(int argc, char** argv) -> int
       auto frame_copy = sara::Image<sara::Rgb8>{frame};
       draw_chessboard(frame_copy, chessboard);
 
-      const auto pose = estimate_pose_with_p3p(chessboard, K_initial);
+      const auto pose = estimate_pose_with_p3p(chessboard, camera);
       if (pose == std::nullopt || sara::is_nan(*pose))
         continue;
 
@@ -352,13 +352,6 @@ auto sara_graphics_main(int argc, char** argv) -> int
       calibration_data.add(chessboard, R, t);
 
       // inspect(frame_copy, chessboard, K_initial, Rs[0], ts[0]);
-      auto camera = sara::v2::PinholeCamera<double>();
-      camera.fx() = K_initial(0, 0);
-      camera.fy() = K_initial(1, 1);
-      camera.shear() = K_initial(0, 1);
-      camera.u0() = K_initial(0, 2);
-      camera.v0() = K_initial(1, 2);
-
       inspect(frame_copy, chessboard, camera, R, t);
       sara::draw_text(frame_copy, 80, 80, "Chessboard: FOUND!", sara::White8,
                       60, 0, false, true);
@@ -391,7 +384,6 @@ auto sara_graphics_main(int argc, char** argv) -> int
   // "my guess is that this is because the LBFGS direction is poor and
   // re-starting the solver resets it to an identity matrix."
   auto convergence = false;
-  auto camera = sara::v2::PinholeCamera<double>{};
   for (auto i = 0; i < 20 && !convergence; ++i)
   {
     SARA_DEBUG << "Solving Ceres Problem..." << std::endl;

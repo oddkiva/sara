@@ -19,8 +19,8 @@ namespace DO::Sara {
   template <typename T, int K = 3, int P = 2>
   struct PolynomialDistortionModel
   {
-    using Vector2 = Eigen::Matrix<T, 2, 1>;
-    using Matrix2 = Eigen::Matrix<T, 2, 2>;
+    using Vector2 = Eigen::Vector2<T>;
+    using Matrix2 = Eigen::Matrix2<T>;
 
     using RadialCoefficientArray = Eigen::Matrix<T, K, 1>;
     using TangentialCoefficientArray = Eigen::Matrix<T, P, 1>;

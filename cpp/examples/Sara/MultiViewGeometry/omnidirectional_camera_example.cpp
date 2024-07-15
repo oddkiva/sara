@@ -13,11 +13,12 @@
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/OmnidirectionalCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Camera/v2/PinholeCamera.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #ifdef _OPENMP
-#include <omp.h>
+#  include <omp.h>
 #endif
 
 
@@ -26,10 +27,7 @@ namespace sara = DO::Sara;
 
 auto make_omnidirectional_camera()
 {
-  auto camera_parameters = sara::OmnidirectionalCamera<float>{};
-
-  const auto w = 1920;
-  const auto h = 1080;
+  auto camera_parameters = sara::v2::OmnidirectionalCamera<float>{};
 
   // Focal lengths in each dimension.
   const auto fx = 1063.30738864f;
@@ -40,33 +38,27 @@ auto make_omnidirectional_camera()
   const auto u0 = 969.55702157f;
   const auto v0 = 541.26230733f;
 
-  camera_parameters.image_sizes << w, h;
-  // clang-format off
-  camera_parameters.set_calibration_matrix((Eigen::Matrix3f{} <<
-      fx,  s, u0,
-       0, fy, v0,
-       0,  0,  1).finished());
-  camera_parameters.radial_distortion_coefficients <<
-      0.50776095f,
-      -0.16478652f,
-      0.0f;
-  camera_parameters.tangential_distortion_coefficients <<
-      0.00023093f,
-      0.00078712f;
-  // clang-format on
-  camera_parameters.xi = 1.50651524f;
+  camera_parameters.fx() = fx;
+  camera_parameters.fy() = fy;
+  camera_parameters.shear() = s;
+  camera_parameters.u0() = u0;
+  camera_parameters.v0() = v0;
+  camera_parameters.k() << 0.50776095f, -0.16478652f, 0.f;
+  camera_parameters.p() << 0.00023093f, 0.00078712f;
+  camera_parameters.xi() = 1.50651524f;
 
   return camera_parameters;
 }
 
-auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& omni_camera)
+auto make_pinhole_camera(
+    const sara::v2::OmnidirectionalCamera<float>& omni_camera)
 {
-  auto K = omni_camera.K;
-
-  constexpr auto downscale_factor = 3.5f;
-  K(0, 0) /= downscale_factor;
-  K(1, 1) /= downscale_factor;
-  K(1, 2) -= 450;
+  static constexpr auto downscale_factor = 3.5f;
+  const auto fx = omni_camera.fx() / downscale_factor;
+  const auto fy = omni_camera.fy() / downscale_factor;
+  const auto shear = omni_camera.shear();
+  const auto u0 = omni_camera.u0();
+  const auto v0 = omni_camera.v0() - 450.f;
 
   const auto t = static_cast<float>(M_PI / 12);
   const auto c = std::cos(t);
@@ -78,11 +70,12 @@ auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& omni_camera)
                   0,  s,  c).finished();
   // clang-format on
 
-  const auto pinhole_camera = sara::PinholeCamera<float>{
-      omni_camera.image_sizes,  //
-      K,                        //
-      K.inverse()               //
-  };
+  auto pinhole_camera = sara::v2::PinholeCamera<float>{};
+  pinhole_camera.fx() = fx;
+  pinhole_camera.fy() = fy;
+  pinhole_camera.shear() = shear;
+  pinhole_camera.u0() = u0;
+  pinhole_camera.v0() = v0;
 
   return std::make_pair(pinhole_camera, R);
 }
@@ -90,7 +83,7 @@ auto make_pinhole_camera(const sara::OmnidirectionalCamera<float>& omni_camera)
 
 auto undistort_image(const sara::ImageView<sara::Rgb8>& frame,
                      sara::ImageView<sara::Rgb8>& frame_undistorted,
-                     const sara::OmnidirectionalCamera<float>& camera,
+                     const sara::v2::OmnidirectionalCamera<float>& camera,
                      float x_min, float y_min, float scale)
 {
   const auto w = frame.width();
@@ -128,11 +121,12 @@ auto undistort_image(const sara::ImageView<sara::Rgb8>& frame,
 }
 
 
-auto flag_behind_camera(const sara::OmnidirectionalCamera<float>& camera)
+auto flag_behind_camera(const sara::v2::OmnidirectionalCamera<float>& camera,
+                        const Eigen::Vector2i& image_sizes)
     -> sara::Image<std::uint8_t>
 {
-  const auto w = static_cast<int>(camera.image_sizes.x());
-  const auto h = static_cast<int>(camera.image_sizes.y());
+  const auto& w = image_sizes.x();
+  const auto& h = image_sizes.y();
 
   auto is_behind_camera = sara::Image<std::uint8_t>{w, h};
 
@@ -177,17 +171,17 @@ auto flag_behind_camera(const sara::ImageView<sara::Rgb8>& frame,
 
 
 auto stereographic_projection(
-    const sara::OmnidirectionalCamera<float>& camera_src,
-    const sara::PinholeCamera<float>& camera_dst,
-    const Eigen::Matrix3f& camera_rotation_dst)
+    const sara::v2::OmnidirectionalCamera<float>& camera_src,
+    const sara::v2::PinholeCamera<float>& camera_dst,
+    const Eigen::Matrix3f& camera_rotation_dst,
+    const Eigen::Vector2i& dst_image_sizes)
 {
-  const auto size = camera_dst.image_sizes.cast<int>();
-  auto coords_map = sara::Image<Eigen::Vector2f>{size};
+  auto coords_map = sara::Image<Eigen::Vector2f>{dst_image_sizes};
 
   const Eigen::Matrix3f R_inverse = camera_rotation_dst.transpose();
 
-  const auto& w = size.x();
-  const auto& h = size.y();
+  const auto& w = dst_image_sizes.x();
+  const auto& h = dst_image_sizes.y();
 
   for (int v = 0; v < h; ++v)
   {
@@ -273,24 +267,41 @@ int __main(int argc, char** argv)
 #endif
 
   auto video_stream = sara::VideoStream{video_filepath};
+  const auto image_sizes = video_stream.sizes();
 
   const auto camera = make_omnidirectional_camera();
 
-  const auto w = static_cast<int>(camera.image_sizes.x());
-  const auto h = static_cast<int>(camera.image_sizes.y());
+  const auto w = image_sizes.x();
+  const auto h = image_sizes.y();
 
   // Mark the pixels that are in front of the camera according to the
   // mathematical model.
-  const auto is_behind_camera = flag_behind_camera(camera);
+  const auto is_behind_camera = flag_behind_camera(camera, image_sizes);
   auto is_behind_camera_map = sara::Image<sara::Rgb8>{video_stream.sizes()};
   auto xu = sara::Image<float>{video_stream.sizes()};
   auto yu = sara::Image<float>{video_stream.sizes()};
+
+  auto K = Eigen::Matrix3f{};
+  {
+    const auto& fx = camera.fx();
+    const auto& fy = camera.fy();
+    const auto& s = camera.shear();
+    const auto& u0 = camera.u0();
+    const auto& v0 = camera.v0();
+    // clang-format off
+    K << fx,  s, u0,
+          0, fy, v0,
+          0,  0,  1;
+    // clang-format on
+  }
+
   for (auto y = 0; y < h; ++y)
   {
     for (auto x = 0; x < w; ++x)
     {
       const auto ray = camera.backproject(Eigen::Vector2f(x, y));
-      const auto& K = camera.K;
+
+      // Reproject onto a virtual pinhole camera.
       const Eigen::Vector2f pu = (K * ray).hnormalized();
       if (std::abs(pu.x()) < 2e4 && std::abs(pu.y()) < 5e3)
       {
@@ -307,7 +318,7 @@ int __main(int argc, char** argv)
 
   auto [camera_dst, R] = make_pinhole_camera(camera);
   const auto coords_map = stereographic_projection(  //
-      camera, camera_dst, R                          //
+      camera, camera_dst, R, image_sizes              //
   );
   auto stereographic_projection = sara::Image<sara::Rgb8>{w, h};
 

@@ -11,15 +11,16 @@
 
 #define BOOST_TEST_MODULE "ImageIO/Read write HEIF files"
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/ImageIO.hpp>
 
+#include <filesystem>
+
 
 namespace sara = DO::Sara;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 
 BOOST_AUTO_TEST_SUITE(TestImageIO)
@@ -59,7 +60,8 @@ BOOST_AUTO_TEST_CASE(test_heif_image_format_read_and_write)
     }
   }
 
-  // const auto image_path = "/home/david/Desktop/Datasets/oddkiva/regents-park/IMG_2708.HEIC";
+  // const auto image_path =
+  // "/home/david/Desktop/Datasets/oddkiva/regents-park/IMG_2708.HEIC";
 
   // const auto image = sara::imread<sara::Rgb8>(image_path);
   // sara::imwrite(image, "/home/david/Desktop/test.heic");

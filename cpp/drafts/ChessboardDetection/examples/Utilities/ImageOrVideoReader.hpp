@@ -1,7 +1,5 @@
 #pragma once
 
-#include <boost/filesystem.hpp>
-
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
 

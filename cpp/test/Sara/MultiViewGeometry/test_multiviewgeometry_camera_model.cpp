@@ -12,9 +12,7 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/Camera Model"
 
 #include <DO/Sara/MultiViewGeometry/Camera/CameraModel.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/BrownConradyDistortionModel.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/KannalaBrandtFisheyeDistortionModel.hpp>
-#include <DO/Sara/MultiViewGeometry/Camera/OmnidirectionalCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/PinholeCamera.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -27,9 +25,7 @@ BOOST_AUTO_TEST_CASE(test_camera_model)
   auto cameras = std::vector<CameraModelf>{};
 
   cameras.emplace_back(sara::PinholeCamera<float>{});
-  cameras.emplace_back(sara::BrownConradyCamera32<float>{});
   cameras.emplace_back(sara::KannalaBrandtFisheyeDistortionModel<float>{});
-  cameras.emplace_back(sara::OmnidirectionalCamera<float>{});
 
   // clang-format off
   auto K = (Eigen::Matrix3f{} <<

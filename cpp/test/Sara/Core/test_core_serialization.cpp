@@ -16,9 +16,9 @@
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <filesystem>
 #include <fstream>
 
 
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(test_tensor_serialization)
   for (auto i = 0u; i < t_write.size(); ++i)
     t_write.data()[i] = static_cast<float>(i);
 
-  const auto file = (boost::filesystem::current_path() / "tensor").string();
+  const auto file = (std::filesystem::current_path() / "tensor").string();
 
 #ifdef DEBUG
   static_assert(std::is_same<decltype(file), const std::string>::value, "");

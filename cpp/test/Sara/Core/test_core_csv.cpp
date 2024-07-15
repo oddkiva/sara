@@ -11,14 +11,15 @@
 
 #define BOOST_TEST_MODULE "CSV I/O"
 
-#include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/CSV.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <filesystem>
 
-namespace fs = boost::filesystem;
+
+namespace fs = std::filesystem;
 
 
 BOOST_AUTO_TEST_CASE(test_csv_read_write)

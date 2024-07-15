@@ -45,30 +45,30 @@ public:
     _camera_type = camera_type;
   }
 
-  auto initialize_intrinsics(const Eigen::Matrix3d& K, const Eigen::Vector3d& k,
-                             const Eigen::Vector2d& p,  //
-                             const double xi) -> void
+  auto
+  initialize_intrinsics(const sara::v2::OmnidirectionalCamera<double>& camera)
+      -> void
   {
     // fx
-    _intrinsics[0] = K(0, 0);
+    _intrinsics[0] = camera.fx();
     // fy (NORMALIZED)
-    _intrinsics[1] = K(1, 1) / K(0, 0);
+    _intrinsics[1] = camera.fy() / camera.fx();
     // shear (NORMALIZED)
-    _intrinsics[2] = K(0, 1) / K(0, 0);
+    _intrinsics[2] = camera.shear() / camera.fx();
     // principal point (u0, v0)
-    _intrinsics[3] = K(0, 2);
-    _intrinsics[4] = K(1, 2);
+    _intrinsics[3] = camera.u0();
+    _intrinsics[4] = camera.v0();
 
     // Mirror parameter: xi
-    _intrinsics[5] = xi;
+    _intrinsics[5] = camera.xi();
 
     // k
-    _intrinsics[6] = k(0);
-    _intrinsics[7] = k(1);
-    _intrinsics[8] = k(2);
+    _intrinsics[6] = camera.k()(0);
+    _intrinsics[7] = camera.k()(1);
+    _intrinsics[8] = camera.k()(2);
     // p
-    _intrinsics[9] = p(0);
-    _intrinsics[10] = p(1);
+    _intrinsics[9] = camera.p()(0);
+    _intrinsics[10] = camera.p()(1);
   }
 
   auto add(const sara::ChessboardCorners& chessboard, const Eigen::Matrix3d& R,
@@ -256,7 +256,7 @@ public:
 #endif
   }
 
-  auto copy_camera_intrinsics(sara::OmnidirectionalCamera<double>& camera)
+  auto copy_camera_intrinsics(sara::v2::OmnidirectionalCamera<double>& camera)
       -> void
   {
     // Copy back the final parameter to the omnidirectional camera parameter
@@ -270,6 +270,11 @@ public:
     const auto shear = fx * alpha;
     const auto& u0 = mutable_intrinsics()[3];
     const auto& v0 = mutable_intrinsics()[4];
+    camera.fx() = fx;
+    camera.fy() = fy;
+    camera.shear() = shear;
+    camera.u0() = u0;
+    camera.v0() = v0;
 
     // Mirror parameter.
     const auto& xi = mutable_intrinsics()[5];
@@ -280,16 +285,9 @@ public:
     const auto& k2 = mutable_intrinsics()[8];
     const auto& p0 = mutable_intrinsics()[9];
     const auto& p1 = mutable_intrinsics()[10];
-    // clang-format off
-    auto K = Eigen::Matrix3d{};
-    K << fx, shear, u0,
-          0,    fy, v0,
-          0,     0,  1;
-    // clang-format on
-    camera.set_calibration_matrix(K);
-    camera.radial_distortion_coefficients << k0, k1, k2;
-    camera.tangential_distortion_coefficients << p0, p1;
-    camera.xi = xi;
+    camera.k() << k0, k1, k2;
+    camera.p() << p0, p1;
+    camera.xi() = xi;
   }
 
 private:
@@ -346,18 +344,15 @@ auto sara_graphics_main(int argc, char** argv) -> int
   auto chessboards = std::vector<sara::ChessboardCorners>{};
 
   // Initialize the calibration matrix.
-  auto camera = sara::OmnidirectionalCamera<double>{};
-  camera.K = sara::init_calibration_matrix(frame.width(), frame.height());
-  camera.K_inverse = camera.K.inverse();
-  camera.radial_distortion_coefficients.setZero();
-  camera.tangential_distortion_coefficients.setZero();
-  camera.xi = 1;
+  auto camera = sara::v2::OmnidirectionalCamera<double>{};
+  sara::init_calibration_matrix(camera, frame.width(), frame.height());
+  camera.k().setZero();
+  camera.p().setZero();
+  camera.xi() = 1;
 
   // Initialize the calibration problem.
   auto calibration_problem = ChessboardCalibrationProblem{};
-  calibration_problem.initialize_intrinsics(
-      camera.K, camera.radial_distortion_coefficients,
-      camera.tangential_distortion_coefficients, camera.xi);
+  calibration_problem.initialize_intrinsics(camera);
 
   auto selected_frames = std::vector<sara::Image<sara::Rgb8>>{};
   sara::create_window(frame.sizes());
@@ -453,13 +448,14 @@ auto sara_graphics_main(int argc, char** argv) -> int
 
     calibration_problem.copy_camera_intrinsics(camera);
 
-    SARA_DEBUG << "K =\n" << camera.K << std::endl;
-    SARA_DEBUG << "k = " << camera.radial_distortion_coefficients.transpose()
-               << std::endl;
-    SARA_DEBUG << "p = "
-               << camera.tangential_distortion_coefficients.transpose()
-               << std::endl;
-    SARA_DEBUG << "xi = " << camera.xi << std::endl;
+    SARA_DEBUG << "fx = " << camera.fx() << std::endl;
+    SARA_DEBUG << "fy = " << camera.fy() << std::endl;
+    SARA_DEBUG << "shear = " << camera.shear() << std::endl;
+    SARA_DEBUG << "u0 = " << camera.u0() << std::endl;
+    SARA_DEBUG << "v0 = " << camera.v0() << std::endl;
+    SARA_DEBUG << "k = " << camera.k().transpose() << std::endl;
+    SARA_DEBUG << "p = " << camera.p().transpose() << std::endl;
+    SARA_DEBUG << "xi = " << camera.xi() << std::endl;
   }
 
   for (auto i = 0u; i < chessboards.size(); ++i)

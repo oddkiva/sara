@@ -14,11 +14,12 @@
 #include <DO/Sara/Match/HDF5.hpp>
 #include <DO/Sara/Match/IndexMatch.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <filesystem>
 
-namespace fs = boost::filesystem;
+
+namespace fs = std::filesystem;
 using namespace DO::Sara;
 
 

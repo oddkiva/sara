@@ -107,7 +107,7 @@ auto MetricGridRenderer::initialize() -> void
     // Intrinsic camera parameters
     uniform vec2 image_sizes;
     uniform mat3 K;
-    uniform vec2 k;
+    uniform vec3 k;
     uniform vec2 p;
     uniform float xi;
 
@@ -123,7 +123,8 @@ auto MetricGridRenderer::initialize() -> void
       // Radial component (additive).
       float r2 = dot(m, m);
       float r4 = r2 * r2;
-      vec2 radial_factor = (k[0] * r2 + k[1] * r4) * m;
+      float r6 = r2 * r4;
+      vec2 radial_factor = (k[0] * r2 + k[1] * r4 + k[2] * r6) * m;
 
       // Tangential component (additive).
       float tx = 2. * p[0] * m.x * m.y + p[1] * (r2 + 2. * p[0] * m.x);
@@ -250,13 +251,11 @@ auto MetricGridRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
   // Camera parameters.
   _shader_program.set_uniform_matrix4f(  //
       _C_loc, lines._extrinsics.data());
-  _shader_program.set_uniform_matrix3f(  //
-      _K_loc, lines._intrinsics.K.data());
-  _shader_program.set_uniform_vector2f(  //
-      _k_loc, lines._intrinsics.radial_distortion_coefficients.data());
-  _shader_program.set_uniform_vector2f(  //
-      _p_loc, lines._intrinsics.tangential_distortion_coefficients.data());
-  _shader_program.set_uniform_param(_xi_loc, lines._intrinsics.xi);
+
+  _shader_program.set_uniform_matrix3f(_K_loc, lines._K.data());
+  _shader_program.set_uniform_vector3f(_k_loc, lines._intrinsics.k().data());
+  _shader_program.set_uniform_vector2f(_p_loc, lines._intrinsics.p().data());
+  _shader_program.set_uniform_param(_xi_loc, lines._intrinsics.xi());
 
   // Color.
   _shader_program.set_uniform_vector4f(_color_loc, lines._color.data());

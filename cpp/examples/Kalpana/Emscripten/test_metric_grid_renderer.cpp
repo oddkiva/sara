@@ -330,22 +330,21 @@ private:
 
     auto& intrinsics = lines._intrinsics;
 
+    const auto& fx = intrinsics.fx() = 1041.55762f;
+    const auto& fy = intrinsics.fy() = 1041.53857f;
+    const auto& s = intrinsics.shear() = -2.31719828f;
+    const auto& u0 = intrinsics.u0() = 942.885742f;
+    const auto& v0 = intrinsics.v0() = 589.198425f;
     // clang-format off
-    const auto K = (Eigen::Matrix3f{} <<
-      1041.55762f, -2.31719828f, 942.885742f,
-              0.f,  1041.53857f, 589.198425f,
-              0.f,          0.f,         1.f
-    ).finished();
-    intrinsics.set_calibration_matrix(K);
-    intrinsics.radial_distortion_coefficients <<
-       0.442631334f,
-      -0.156340882f,
-       0;
-    intrinsics.tangential_distortion_coefficients <<
-      -0.000787709199f,
-      -0.000381082471f;
+    lines._K <<
+      fx,  s, u0,
+       0, fy, v0,
+       0,  0,  1;
     // clang-format on
-    intrinsics.xi = 1.43936455f;
+
+    intrinsics.k() << 0.442631334f, -0.156340882f, 0.f;
+    intrinsics.p() << -0.000787709199f, -0.000381082471f;
+    intrinsics.xi() = 1.43936455f;
   }
 
   auto initialize_metric_grid(const std::pair<int, int>& xrange,

@@ -100,6 +100,12 @@ namespace DO::Kalpana::GL {
       glUniform2fv(mat_location, 1, mat_coeffs);
     }
 
+    auto set_uniform_vector3f(GLint mat_location, const float* mat_coeffs) const
+        -> void
+    {
+      glUniform3fv(mat_location, 1, mat_coeffs);
+    }
+
     auto set_uniform_vector4f(GLint mat_location, const float* mat_coeffs) const
         -> void
     {
