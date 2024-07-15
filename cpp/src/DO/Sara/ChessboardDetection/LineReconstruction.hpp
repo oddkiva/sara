@@ -11,12 +11,10 @@
 
 #pragma once
 
-#include <unordered_set>
-
+#include <DO/Sara/ChessboardDetection/SquareReconstruction.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 
-#include "SquareReconstruction.hpp"
-
+#include <unordered_set>
 
 namespace DO::Sara {
 

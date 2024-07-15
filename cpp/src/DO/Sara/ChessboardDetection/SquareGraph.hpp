@@ -11,8 +11,7 @@
 
 #pragma once
 
-#include "Corner.hpp"
-
+#include <DO/Sara/ChessboardDetection/Corner.hpp>
 #include <DO/Sara/Graphics.hpp>
 
 #include <cstdint>
@@ -297,9 +296,7 @@ namespace DO::Sara {
       for (auto x = 0; x < cols(cb); ++x)
       {
         new_row.push_back(ChessboardSquare{
-            -1,
-            Eigen::Vector2i{anchor.x() + x, curr_coords.y() - 1},
-            {}  //
+            -1, Eigen::Vector2i{anchor.x() + x, curr_coords.y() - 1}, {}  //
         });
       }
       cb.emplace_front(std::move(new_row));
@@ -312,9 +309,7 @@ namespace DO::Sara {
       for (auto x = 0; x < cols(cb); ++x)
       {
         new_row.push_back(ChessboardSquare{
-            -1,
-            Eigen::Vector2i{anchor.x() + x, curr_coords.y() + 1},
-            {}  //
+            -1, Eigen::Vector2i{anchor.x() + x, curr_coords.y() + 1}, {}  //
         });
       }
 
@@ -327,9 +322,7 @@ namespace DO::Sara {
       for (auto y = 0; y < rows(cb); ++y)
       {
         cb[y].push_front(ChessboardSquare{
-            -1,
-            Eigen::Vector2i{curr_coords.x() - 1, anchor.y() + y},
-            {}  //
+            -1, Eigen::Vector2i{curr_coords.x() - 1, anchor.y() + y}, {}  //
         });
       }
     }
@@ -339,9 +332,7 @@ namespace DO::Sara {
       for (auto y = 0; y < rows(cb); ++y)
       {
         cb[y].push_back(ChessboardSquare{
-            -1,
-            Eigen::Vector2i{curr_coords.x() + 1, anchor.y() + y},
-            {}  //
+            -1, Eigen::Vector2i{curr_coords.x() + 1, anchor.y() + y}, {}  //
         });
       }
     }

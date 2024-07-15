@@ -1,1 +1,2 @@
+add_subdirectory(Calibration)
 add_subdirectory(ImageAnnotator)

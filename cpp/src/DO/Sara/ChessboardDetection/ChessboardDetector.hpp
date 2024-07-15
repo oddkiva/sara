@@ -18,10 +18,10 @@
 #include <DO/Sara/FeatureDetectors/EdgeDetector.hpp>
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 
-#include <drafts/ChessboardDetection/CircularProfileExtractor.hpp>
-#include <drafts/ChessboardDetection/Corner.hpp>
-#include <drafts/ChessboardDetection/EdgeStatistics.hpp>
-#include <drafts/ChessboardDetection/SquareGraph.hpp>
+#include <DO/Sara/ChessboardDetection/CircularProfileExtractor.hpp>
+#include <DO/Sara/ChessboardDetection/Corner.hpp>
+#include <DO/Sara/ChessboardDetection/EdgeStatistics.hpp>
+#include <DO/Sara/ChessboardDetection/SquareGraph.hpp>
 
 
 namespace DO::Sara {

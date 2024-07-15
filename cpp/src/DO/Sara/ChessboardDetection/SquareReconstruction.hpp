@@ -11,10 +11,10 @@
 
 #pragma once
 
+#include <DO/Sara/ChessboardDetection/Corner.hpp>
+
 #include <optional>
 #include <unordered_set>
-
-#include "Corner.hpp"
 
 
 namespace DO::Sara {

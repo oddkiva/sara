@@ -9,19 +9,18 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
+#include <DO/Sara/ChessboardDetection/JunctionDetection.hpp>
 
-#include "JunctionDetection.hpp"
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 
 namespace DO::Sara {
 
   auto junction_map(const ImageView<float>& image,
                     const ImageView<Eigen::Vector2f>& gradients,
-                    const float sigma)
-      -> Image<float>
+                    const float sigma) -> Image<float>
   {
     auto junction_map = Image<float>{image.sizes()};
     junction_map.flat_array().fill(0);

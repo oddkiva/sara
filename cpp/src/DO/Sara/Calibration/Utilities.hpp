@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <drafts/Calibration/Chessboard.hpp>
+#include <DO/Sara/Calibration/Chessboard.hpp>
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/MultiViewGeometry/Camera/v2/OmnidirectionalCamera.hpp>
