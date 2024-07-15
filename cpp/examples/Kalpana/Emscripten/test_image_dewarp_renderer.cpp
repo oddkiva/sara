@@ -225,7 +225,7 @@ private:
      _camera_params._intrinsics.shear() = -2.31719828f;
     _camera_params._intrinsics.u0() = 942.885742f;
     _camera_params._intrinsics.v0() = 589.198425f;
-    _camera_params._intrinsics.k() << 0.442631334f, -0.156340882f;
+    _camera_params._intrinsics.k() << 0.442631334f, -0.156340882f, 0.f;
     _camera_params._intrinsics.p() << -0.000787709199f, -0.000381082471f;
     _camera_params._intrinsics.xi() = 1.43936455f;
 

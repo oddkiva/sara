@@ -342,7 +342,7 @@ private:
        0,  0,  1;
     // clang-format on
 
-    intrinsics.k() << 0.442631334f, -0.156340882f;
+    intrinsics.k() << 0.442631334f, -0.156340882f, 0.f;
     intrinsics.p() << -0.000787709199f, -0.000381082471f;
     intrinsics.xi() = 1.43936455f;
   }

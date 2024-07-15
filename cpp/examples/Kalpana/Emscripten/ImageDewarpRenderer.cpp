@@ -77,7 +77,7 @@ auto ImageDewarpRenderer::initialize() -> void
     // Intrinsic parameters of the source omnidirectional camera.
     uniform vec2 image_sizes;
     uniform mat3 K;
-    uniform vec2 k;
+    uniform vec3 k;
     uniform vec2 p;
     uniform float xi;
 
@@ -105,7 +105,8 @@ auto ImageDewarpRenderer::initialize() -> void
       // Radial component (additive).
       float r2 = dot(m, m);
       float r4 = r2 * r2;
-      vec2 radial_factor = (k[0] * r2 + k[1] * r4) * m;
+      float r6 = r2 * r4;
+      vec2 radial_factor = (k[0] * r2 + k[1] * r4 + k[2] * r6) * m;
 
       // Tangential component (additive).
       float tx = 2. * p[0] * m.x * m.y + p[1] * (r2 + 2. * p[0] * m.x);
@@ -332,14 +333,10 @@ auto ImageDewarpRenderer::render(const ImagePlaneRenderer::ImageTexture& image,
          0,  0,  1;
   // clang-format on
 
-  _shader_program.set_uniform_matrix3f(  //
-      _K_loc, _K.data());
-  _shader_program.set_uniform_vector2f(
-      _k_loc, camera._intrinsics.k().data());
-  _shader_program.set_uniform_vector2f(
-      _p_loc, camera._intrinsics.p().data());
-  _shader_program.set_uniform_param(  //
-      _xi_loc, camera._intrinsics.xi());
+  _shader_program.set_uniform_matrix3f(_K_loc, _K.data());
+  _shader_program.set_uniform_vector3f(_k_loc, camera._intrinsics.k().data());
+  _shader_program.set_uniform_vector2f(_p_loc, camera._intrinsics.p().data());
+  _shader_program.set_uniform_param(_xi_loc, camera._intrinsics.xi());
 
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

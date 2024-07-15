@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2024-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <DO/Sara/MultiViewGeometry/Camera/v2/CameraIntrinsicBase.hpp>
@@ -24,11 +35,12 @@ namespace DO::Sara::v2 {
       S  = 2,
       U0 = 3,
       V0 = 4,
-      K0 = 5,
-      K1 = 6,
-      P0 = 7,
-      P1 = 8,
-      XI = 9
+      XI = 5,
+      K0 = 6,
+      K1 = 7,
+      K2 = 8,
+      P0 = 9,
+      P1 = 10
     };
     // clang-format on
 
@@ -57,9 +69,9 @@ namespace DO::Sara::v2 {
       return data[V0];
     }
 
-    auto k() -> VectorView<T, 2>
+    auto k() -> VectorView<T, 3>
     {
-      return VectorView<T, 2>{data.data() + K0};
+      return VectorView<T, 3>{data.data() + K0};
     }
 
     auto p() -> VectorView<T, 2>
@@ -107,9 +119,9 @@ namespace DO::Sara::v2 {
       return data[V0];
     }
 
-    auto k() const -> ConstVectorView<T, 2>
+    auto k() const -> ConstVectorView<T, 3>
     {
-      return ConstVectorView<T, 2>{data.data() + K0};
+      return ConstVectorView<T, 3>{data.data() + K0};
     }
 
     auto p() const -> ConstVectorView<T, 2>
@@ -179,13 +191,16 @@ namespace DO::Sara::v2 {
       // Distortion.
       const auto& k1 = k(0);
       const auto& k2 = k(1);
+      const auto& k3 = k(2);
       const auto& p1 = p(0);
       const auto& p2 = p(1);
 
       // Radial component (additive).
       const auto r2 = mu.squaredNorm();
       const auto r4 = r2 * r2;
-      const Eigen::Vector2<T> radial_factor = mu * (k1 * r2 + k2 * r4);
+      const auto r6 = r2 * r4;
+      const Eigen::Vector2<T> radial_factor =
+          mu * (k1 * r2 + k2 * r4 + k3 * r6);
 
       // Tangential component (additive).
       static const auto two = static_cast<T>(2);
@@ -296,13 +311,13 @@ namespace DO::Sara::v2 {
 
   template <typename T>
   using OmnidirectionalCameraView =
-      OmnidirectionalCameraBase<VectorView<T, 10>>;
+      OmnidirectionalCameraBase<VectorView<T, 11>>;
 
   template <typename T>
   using OmnidirectionalCameraConstView =
-      OmnidirectionalCameraBase<ConstVectorView<T, 10>>;
+      OmnidirectionalCameraBase<ConstVectorView<T, 11>>;
 
   template <typename T>
-  using OmnidirectionalCamera = OmnidirectionalCameraBase<Eigen::Vector<T, 10>>;
+  using OmnidirectionalCamera = OmnidirectionalCameraBase<Eigen::Vector<T, 11>>;
 
 }  // namespace DO::Sara::v2
