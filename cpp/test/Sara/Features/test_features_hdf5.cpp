@@ -14,14 +14,15 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Features/IO.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <filesystem>
 #include <iostream>
 
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 using namespace DO::Sara;
+
 
 BOOST_AUTO_TEST_CASE(test_hdf5_read_write_array)
 {

@@ -11,15 +11,16 @@
 
 #define BOOST_TEST_MODULE "ImageIO/Read write HEIF files"
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/ImageIO.hpp>
 
+#include <filesystem>
+
 
 namespace sara = DO::Sara;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 
 BOOST_AUTO_TEST_SUITE(TestImageIO)

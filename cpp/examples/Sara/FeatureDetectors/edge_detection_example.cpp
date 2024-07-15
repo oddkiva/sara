@@ -24,11 +24,11 @@
 #include <DO/Sara/ImageProcessing/EdgeShapeStatistics.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 
-#include <boost/filesystem.hpp>
-
 #ifdef _OPENMP
-#include <omp.h>
+#  include <omp.h>
 #endif
+
+#include <filesystem>
 
 
 using namespace std;
@@ -98,17 +98,18 @@ int sara_graphics_main(int argc, char** argv)
   auto frame_gray32f_ds = Image<float>{image_ds_sizes};
 
   // Output save.
-  namespace fs = boost::filesystem;
+  namespace fs = std::filesystem;
   const auto basename = fs::path{video_filepath}.stem().string();
-  VideoWriter video_writer{
+  VideoWriter video_writer
+  {
 #if defined(_WIN32)
-      "C:/Users/David/Desktop/" + basename + ".edge-detection.mp4",
+    "C:/Users/David/Desktop/" + basename + ".edge-detection.mp4",
 #elif defined(__APPLE__)
-      "/Users/david/Desktop/" + basename + ".edge-detection.mp4",
+    "/Users/david/Desktop/" + basename + ".edge-detection.mp4",
 #else
-      "/home/david/Desktop/" + basename + ".edge-detection.mp4",
+    "/home/david/Desktop/" + basename + ".edge-detection.mp4",
 #endif
-      frame.sizes()  //
+        frame.sizes()  //
   };
 
   // Show the local extrema.

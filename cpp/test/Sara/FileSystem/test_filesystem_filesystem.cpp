@@ -17,15 +17,9 @@
 
 #include <boost/test/unit_test.hpp>
 
-#if __has_include(<filesystem>)
-#  include <filesystem>
+#include <filesystem>
+
 namespace fs = std::filesystem;
-#else
-#  include <boost/filesystem.hpp>
-namespace fs = ::filesystem;
-#endif
-
-
 namespace sara = DO::Sara;
 
 

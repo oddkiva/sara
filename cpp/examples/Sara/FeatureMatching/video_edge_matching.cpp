@@ -26,7 +26,7 @@
 
 #include <DO/Sara/VideoIO.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #if defined(OPENMP)
 #include <omp.h>
@@ -427,7 +427,7 @@ int sara_graphics_main(int argc, char** argv)
 
 
   // Output save.
-  namespace fs = boost::filesystem;
+  namespace fs = std::filesystem;
   const auto basename = fs::path(video_filepath).stem().string();
   VideoWriter video_writer{
 #if defined(__APPLE__)

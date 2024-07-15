@@ -11,17 +11,6 @@
 
 //! @example
 
-#if defined(_OPENMP)
-#  include <omp.h>
-#endif
-
-#if __has_include(<execution>) && !defined(__APPLE__)
-#  include <execution>
-#endif
-#include <exception>
-
-#include <boost/filesystem.hpp>
-
 #include <DO/Sara/Core/TicToc.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
@@ -38,9 +27,19 @@
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/ImageProcessing/Otsu.hpp>
 
+#if defined(_OPENMP)
+#  include <omp.h>
+#endif
+
+#if __has_include(<execution>) && !defined(__APPLE__)
+#  include <execution>
+#endif
+#include <exception>
+#include <filesystem>
+
 
 namespace sara = DO::Sara;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 
 template <typename T>

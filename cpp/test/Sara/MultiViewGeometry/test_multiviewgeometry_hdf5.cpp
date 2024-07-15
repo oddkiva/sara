@@ -14,11 +14,12 @@
 #include <DO/Sara/Core/Math/Rotation.hpp>
 #include <DO/Sara/MultiViewGeometry/HDF5.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <filesystem>
 
-namespace fs = boost::filesystem;
+
+namespace fs = std::filesystem;
 using namespace DO::Sara;
 
 

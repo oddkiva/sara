@@ -1,6 +1,6 @@
 #include "ImageOrVideoReader.hpp"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 
 namespace DO::Sara {
@@ -14,7 +14,7 @@ namespace DO::Sara {
 
   auto ImageOrVideoReader::open(const std::string& path) -> void
   {
-    namespace fs = boost::filesystem;
+    namespace fs = std::filesystem;
     if (fs::path{path}.extension().string() == ".png")
     {
       _path = path;

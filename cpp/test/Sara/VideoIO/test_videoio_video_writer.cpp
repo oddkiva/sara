@@ -3,13 +3,14 @@
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
+
+#include <filesystem>
 
 
 using namespace DO::Sara;
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 
 BOOST_AUTO_TEST_SUITE(TestVideoWriter)

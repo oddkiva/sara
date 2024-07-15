@@ -15,7 +15,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Visualization.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 
 using namespace DO::Sara;
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 
 int sara_graphics_main(int argc, char** argv)
 {
-  namespace fs = boost::filesystem;
+  namespace fs = std::filesystem;
 
   const auto image_path =
       fs::path{argc < 2  //
