@@ -28,11 +28,13 @@ namespace sara = DO::Sara;
 class ChessboardCalibrationData
 {
 public:
+  static constexpr auto intrinsic_parameter_count =
+      sara::PinholeCameraReprojectionError::intrinsic_parameter_count;
   static constexpr auto extrinsic_parameter_count =
       sara::PinholeCameraReprojectionError::extrinsic_parameter_count;
 
-  auto initialize_intrinsics(const sara::v2::PinholeCamera<double>& camera)
-      -> void
+  auto
+  initialize_intrinsics(const sara::v2::PinholeCamera<double>& camera) -> void
   {
     // fx
     _intrinsics.fx() = camera.fx();
@@ -77,6 +79,7 @@ public:
 
         _observations_3d.push_back(x * square_size);
         _observations_3d.push_back(y * square_size);
+        _observations_3d.push_back(0);
 
         ++num_points;
       }
@@ -129,59 +132,28 @@ public:
   auto transform_into_ceres_problem(ceres::Problem& problem) -> void
   {
     auto loss_fn = nullptr;  // new ceres::HuberLoss{1.0};
-    auto data_pos = std::size_t{};
+    auto image_point_pos = std::size_t{};
+    auto scene_point_pos = std::size_t{};
     for (auto n = 0; n < _num_images; ++n)
     {
       const auto& num_points = _num_points_at_image[n];
       for (auto p = 0; p < num_points; ++p)
       {
         const Eigen::Vector2d image_point = Eigen::Map<const Eigen::Vector2d>(
-            _observations_2d.data() + data_pos);
-        const Eigen::Vector2d scene_point = Eigen::Map<const Eigen::Vector2d>(
-            _observations_3d.data() + data_pos);
+            _observations_2d.data() + image_point_pos);
+        const Eigen::Vector3d scene_point = Eigen::Map<const Eigen::Vector3d>(
+            _observations_3d.data() + scene_point_pos);
 
         auto cost_function = sara::PinholeCameraReprojectionError::create(
             image_point, scene_point);
 
-        problem.AddResidualBlock(cost_function, loss_fn,                //
-                                 &_intrinsics.fx(), &_intrinsics.fy(),  //
-                                 &_intrinsics.shear(),                  //
-                                 _intrinsics.principal_point().data(),  //
+        problem.AddResidualBlock(cost_function, loss_fn, mutable_intrinsics(),
                                  mutable_extrinsics(n));
 
-        data_pos += 2;
+        image_point_pos += 2;
+        scene_point_pos += 3;
       }
     }
-
-    // Bounds on fx.
-    problem.SetParameterLowerBound(&_intrinsics.fx(), 0, 500);
-    problem.SetParameterUpperBound(&_intrinsics.fx(), 0, 5000);
-
-    // Bounds on fy (NORMALIZED).
-    problem.SetParameterLowerBound(&_intrinsics.fy(), 0, 0.1);
-    problem.SetParameterUpperBound(&_intrinsics.fy(), 0, 2.0);
-
-    // Bounds on the shear (NORMALIZED).
-    // - We should not need any further adjustment on the bounds.
-    problem.SetParameterLowerBound(&_intrinsics.shear(), 0, -1.);
-    problem.SetParameterUpperBound(&_intrinsics.shear(), 0, 1.);
-
-    // So far no need for (u0, v0)
-  }
-
-  auto fix_fy_normalized(ceres::Problem& problem) -> void
-  {
-    problem.SetParameterBlockConstant(&_intrinsics.fy());
-  }
-
-  auto fix_shear_normalized(ceres::Problem& problem) -> void
-  {
-    problem.SetParameterBlockConstant(&_intrinsics.shear());
-  }
-
-  auto fix_principal_point(ceres::Problem& problem) -> void
-  {
-    problem.SetParameterBlockConstant(_intrinsics.principal_point().data());
   }
 
   auto copy_camera_intrinsics(sara::v2::PinholeCamera<double>& camera) -> void
@@ -202,59 +174,12 @@ public:
     camera.v0() = v0;
   }
 
-  auto reinitialize_extrinsic_parameters() -> void
+  auto camera_intrinsics() -> sara::v2::PinholeCamera<double>&
   {
-    throw std::runtime_error{"Implementation incomplete!"};
-
-    const auto camera = sara::v2::PinholeCamera<double>{};
-
-    auto data_pos = std::size_t{};
-
-    for (auto image_index = 0; image_index < _num_images; ++image_index)
-    {
-      const auto& num_points = _num_points_at_image[image_index];
-      auto p2ns = Eigen::MatrixXd{3, num_points};
-      auto p3s = Eigen::MatrixXd{3, num_points};
-
-      auto c = 0;
-      for (auto y = 0; y < _h; ++y)
-      {
-        for (auto x = 0; x < _w; ++x)
-        {
-          const Eigen::Vector2d p2 = Eigen::Map<const Eigen::Vector2d>(
-              _observations_2d.data() + data_pos);
-
-          const Eigen::Vector3d p3 = Eigen::Map<const Eigen::Vector2d>(
-                                         _observations_2d.data() + data_pos)
-                                         .homogeneous();
-
-          const Eigen::Vector3d ray = camera.backproject(p2);
-          const Eigen::Vector2d p2n = ray.hnormalized();
-
-          p2ns.col(c) << p2n, 1;
-          p3s.col(c) = p3;
-
-          ++c;
-          data_pos += 2;
-        }
-      }
-
-      // TODO: reestimate the extrinsics with the PnP algorithm.
-      auto extrinsics = mutable_extrinsics(image_index);
-      auto angle_axis_ptr = extrinsics;
-      auto translation_ptr = extrinsics + 3;
-
-      for (auto k = 0; k < 3; ++k)
-        angle_axis_ptr[k] = 0;
-
-      for (auto k = 0; k < 3; ++k)
-        translation_ptr[k] = 0;
-    }
+    return _intrinsics;
   }
 
 private:
-  int _w = 0;
-  int _h = 0;
   int _num_images = 0;
 
   std::vector<int> _num_points_at_image;
@@ -371,9 +296,32 @@ auto sara_graphics_main(int argc, char** argv) -> int
   SARA_DEBUG << "Instantiating Ceres Problem..." << std::endl;
   auto problem = ceres::Problem{};
   calibration_data.transform_into_ceres_problem(problem);
-  calibration_data.fix_fy_normalized(problem);
-  calibration_data.fix_shear_normalized(problem);
-  calibration_data.fix_principal_point(problem);
+
+  // By default freeze the principal point.
+  auto intrinsics_to_freeze = std::vector<int>{};
+
+  // Fix the normalized focal length fy as 1.
+  calibration_data.camera_intrinsics().fy() = 1.;
+  intrinsics_to_freeze.emplace_back(1);
+
+  // Fix normalized shear value as 0.
+  calibration_data.camera_intrinsics().shear() = 0.;
+  intrinsics_to_freeze.emplace_back(2);
+
+  // Fix the fixed principal point.
+  intrinsics_to_freeze.emplace_back(3);
+  intrinsics_to_freeze.emplace_back(4);
+
+#if CERES_VERSION_MAJOR == 2 && CERES_VERSION_MINOR >= 2
+  auto intrinsic_manifold = new ceres::SubsetManifold{
+      calibration_data.intrinsic_parameter_count, intrinsics_to_freeze};
+  problem.SetManifold(calibration_data.mutable_intrinsics(),
+                      intrinsic_manifold);
+#else
+  auto intrinsic_manifold = new ceres::SubsetParameterization{
+      calibration_data.mutable_intrinsics(), intrinsics_to_freeze};
+  problem.SetParameterization(mutable_intrinsics(), intrinsic_manifold);
+#endif
 
   // Restarting the optimization solver is better than increasing the number of
   // iterations.

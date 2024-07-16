@@ -30,27 +30,23 @@ namespace DO::Sara {
     static constexpr auto extrinsic_parameter_count = 6;
 
     inline PinholeCameraReprojectionError(const Eigen::Vector2d& image_pt,  //
-                                          const Eigen::Vector2d& scene_pt)
+                                          const Eigen::Vector3d& scene_pt)
       : image_point{image_pt}
       , scene_point{scene_pt}
     {
     }
 
     template <typename T>
-    inline auto operator()(const T* const fx, const T* const fy_normalized,
-                           const T* const shear_normalized,  //
-                           const T* const principal_point,   //
-                           const T* const extrinsics, T* residuals) const
+    inline auto operator()(const T* const intrinsics, const T* const extrinsics,
+                           T* residuals) const
         -> bool
     {
+      using Vector3 = Eigen::Matrix<T, 3, 1>;
+      const Vector3 scene_coords = scene_point.template cast<T>();
+
       // 1. Apply [R|t] = extrinsics[...]
       //
       // a) extrinsics[0, 1, 2] are the angle-axis rotation.
-      const auto scene_coords = Eigen::Matrix<T, 3, 1>{
-          static_cast<T>(scene_point.x()),  //
-          static_cast<T>(scene_point.y()),  //
-          T{}                               //
-      };
       auto camera_coords = Eigen::Matrix<T, 3, 1>{};
       ceres::AngleAxisRotatePoint(extrinsics, scene_coords.data(),
                                   camera_coords.data());
@@ -64,13 +60,16 @@ namespace DO::Sara {
       const auto yp = camera_coords[1] / camera_coords[2];
 
       // 3. Apply the calibration matrix.
-      const auto& fy = (*fy_normalized) * (*fx);
-      const auto& s = (*shear_normalized) * (*fx);
-      const auto& u0 = principal_point[0];
-      const auto& v0 = principal_point[1];
+      const auto& fx = intrinsics[0];
+      const auto& fy_normalized = intrinsics[1];
+      const auto& fy = fy_normalized * fx;
+      const auto& shear_normalized = intrinsics[2];
+      const auto& s = shear_normalized * fx;
+      const auto& u0 = intrinsics[3];
+      const auto& v0 = intrinsics[4];
       // clang-format off
-      const auto predicted_x = (*fx) * xp +  s * yp + u0;
-      const auto predicted_y =              fy * yp + v0;
+      const auto predicted_x = fx * xp +  s * yp + u0;
+      const auto predicted_y =           fy * yp + v0;
       // clang-format on
 
       // The error is the difference between the predicted and observed
@@ -82,21 +81,18 @@ namespace DO::Sara {
     }
 
     static inline auto create(const Eigen::Vector2d& image_point,
-                              const Eigen::Vector2d& scene_point)
+                              const Eigen::Vector3d& scene_point)
     {
       return new ceres::AutoDiffCostFunction<PinholeCameraReprojectionError,  //
                                              residual_dimension,              //
-                                             1 /* fx */,                      //
-                                             1 /* fy */,                      //
-                                             1 /* shear */,                   //
-                                             2 /* (u0, v0) */,
+                                             intrinsic_parameter_count,
                                              extrinsic_parameter_count>(
           new PinholeCameraReprojectionError(image_point, scene_point)  //
       );
     }
 
     Eigen::Vector2d image_point;
-    Eigen::Vector2d scene_point;
+    Eigen::Vector3d scene_point;
   };
 
 }  // namespace DO::Sara
