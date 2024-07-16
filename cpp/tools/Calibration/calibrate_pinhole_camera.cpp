@@ -33,8 +33,8 @@ public:
   static constexpr auto extrinsic_parameter_count =
       sara::PinholeCameraReprojectionError::extrinsic_parameter_count;
 
-  auto
-  initialize_intrinsics(const sara::v2::PinholeCamera<double>& camera) -> void
+  auto initialize_intrinsics(const sara::v2::PinholeCamera<double>& camera)
+      -> void
   {
     // fx
     _intrinsics.fx() = camera.fx();
@@ -319,8 +319,9 @@ auto sara_graphics_main(int argc, char** argv) -> int
                       intrinsic_manifold);
 #else
   auto intrinsic_manifold = new ceres::SubsetParameterization{
-      calibration_data.mutable_intrinsics(), intrinsics_to_freeze};
-  problem.SetParameterization(mutable_intrinsics(), intrinsic_manifold);
+      calibration_data.intrinsic_parameter_count, intrinsics_to_freeze};
+  problem.SetParameterization(calibration_data.mutable_intrinsics(),
+                              intrinsic_manifold);
 #endif
 
   // Restarting the optimization solver is better than increasing the number of
