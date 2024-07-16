@@ -21,5 +21,5 @@ foreach(file ${SOURCE_FILES})
   set_target_properties(
     ${filename} PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS}
                            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-  set_property(TARGET ${filename} PROPERTY FOLDER "DRAFTS/Calibration")
+  set_property(TARGET ${filename} PROPERTY FOLDER "Tools/Sara/Calibration")
 endforeach()
