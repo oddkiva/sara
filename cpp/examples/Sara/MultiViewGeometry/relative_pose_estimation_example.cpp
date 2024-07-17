@@ -40,12 +40,12 @@ using namespace DO::Sara;
 namespace fs = std::filesystem;
 
 
-struct AngleFilter
+struct RelativePoseAngleFilter
 {
   const PinholeCameraDecomposition relative_pose;
   double cos_angle_min;
 
-  AngleFilter(const PinholeCameraDecomposition& rel_pose,
+  RelativePoseAngleFilter(const PinholeCameraDecomposition& rel_pose,
               const double angle_min = 5. * (M_PI / 180.))
     : relative_pose{rel_pose}
     , cos_angle_min{std::cos(angle_min)}
@@ -217,7 +217,7 @@ auto sara_graphics_main(int argc, char** argv) -> int
                              /* display_step */ 20, /* wait_key */ true);
 
   const auto angle = std::acos(0.5 * (geometry.C2.R.trace() - 1));
-  SARA_LOGI(logger, "Angle difference between camera poses = {} degrees",
+  SARA_LOGI(logger, "Angle difference between camera rotations = {} degrees",
             (angle / M_PI) * 180);
 
   SARA_LOGI(logger, "Sort the points by depth...");
@@ -237,7 +237,7 @@ auto sara_graphics_main(int argc, char** argv) -> int
   // The angle between the camera rays emanating from the reconstructed point
   // should be 5 degrees at least.
   static constexpr auto angle_min = 5. * (M_PI / 180.);
-  const auto angle_filter = AngleFilter{geometry.C2, angle_min};
+  const auto angle_filter = RelativePoseAngleFilter{geometry.C2, angle_min};
 
   using depth_t = float;
   auto depths = std::vector<std::pair<int, depth_t>>{};
