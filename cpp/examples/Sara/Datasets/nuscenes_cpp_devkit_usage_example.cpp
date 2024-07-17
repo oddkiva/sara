@@ -110,12 +110,13 @@ struct Box
 
     // The coordinates follow the automotive axis convention.
     auto vertices = Eigen::Matrix<float, 3, 8>{};
+    // clang-format off
     vertices <<
         // Back face   | Front face
-        +1,
-        +1, +1, +1, -1, -1, -1, -1,      //
+        +1, +1, +1, +1, -1, -1, -1, -1,  //
         +1, -1, -1, +1, +1, -1, -1, +1,  //
         +1, +1, -1, -1, +1, +1, -1, -1;  //
+    // clang-format on
 
     // The first 4 vertices are the back face, enumerated in the following
     // order:
