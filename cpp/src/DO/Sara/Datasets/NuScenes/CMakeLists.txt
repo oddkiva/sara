@@ -9,4 +9,4 @@ target_include_directories(
   PUBLIC ${CMAKE_SOURCE_DIR}/cpp/src #
          ${CMAKE_SOURCE_DIR}/cpp/third-party)
 target_link_libraries(DO_Sara_NuScenes PUBLIC Eigen3::Eigen)
-set_property(TARGET DO_Sara_NuScenes PROPERTY FOLDER "Sara/Datasets/NuScenes")
+set_property(TARGET DO_Sara_NuScenes PROPERTY FOLDER "Libraries/Datasets/NuScenes")
