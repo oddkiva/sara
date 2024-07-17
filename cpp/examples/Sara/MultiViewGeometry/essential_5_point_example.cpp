@@ -13,6 +13,7 @@
 //! This program parses Strecha's datasets.
 
 #include <DO/Sara/Core/Math/Rotation.hpp>
+#include <DO/Sara/Datasets/Strecha/Utilities.hpp>
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>

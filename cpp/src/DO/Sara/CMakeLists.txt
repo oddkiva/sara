@@ -32,6 +32,8 @@ include(UseDOSaraRANSAC)
 
 include(UseDOSaraVisualization)
 
+add_subdirectory(Datasets)
+
 add_subdirectory(ChessboardDetection)
 add_subdirectory(Calibration)
 

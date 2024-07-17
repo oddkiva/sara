@@ -11,10 +11,9 @@
 
 //! @file
 
+#include <DO/Sara/Datasets/NuScenes/NuScenes.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
-
-#include <drafts/NuScenes/NuScenes.hpp>
 
 
 namespace sara = DO::Sara;
@@ -31,7 +30,7 @@ namespace sara = DO::Sara;
 // In the world reference, the car is:
 // - at the following coordinates given by 'ego_pose.translation'
 // - oriented by the quaternion 'ego_pose.rotation'
-auto local_to_world_transform(const NuScenes::EgoPose& ego_pose)
+auto local_to_world_transform(const sara::NuScenes::EgoPose& ego_pose)
 {
   // return rigid_body_transform(ego_pose.rotation, ego_pose.translation)
 
@@ -48,7 +47,7 @@ auto local_to_world_transform(const NuScenes::EgoPose& ego_pose)
   return T;
 }
 
-auto world_to_local_transform(const NuScenes::EgoPose& ego_pose)
+auto world_to_local_transform(const sara::NuScenes::EgoPose& ego_pose)
 {
   // return rigid_body_transform(ego_pose.rotation, ego_pose.translation)
   //     .inverse();
@@ -67,7 +66,7 @@ auto world_to_local_transform(const NuScenes::EgoPose& ego_pose)
 }
 
 auto local_to_sensor_transform(
-    const NuScenes::CalibratedSensor& calibrated_sensor)
+    const sara::NuScenes::CalibratedSensor& calibrated_sensor)
 {
   const Eigen::Matrix3f Rt = calibrated_sensor        //
                                  .rotation            //
@@ -113,7 +112,8 @@ struct Box
     auto vertices = Eigen::Matrix<float, 3, 8>{};
     vertices <<
         // Back face   | Front face
-        +1, +1, +1, +1, -1, -1, -1, -1,  //
+        +1,
+        +1, +1, +1, -1, -1, -1, -1,      //
         +1, -1, -1, +1, +1, -1, -1, +1,  //
         +1, +1, -1, -1, +1, +1, -1, -1;  //
 
@@ -148,8 +148,8 @@ struct Box
     return vertices;
   }
 
-  auto draw(const NuScenes::EgoPose& ego_pose,
-            const NuScenes::CalibratedSensor& calibrated_sensor) const
+  auto draw(const sara::NuScenes::EgoPose& ego_pose,
+            const sara::NuScenes::CalibratedSensor& calibrated_sensor) const
   {
     const Eigen::Matrix4f T = local_to_sensor_transform(calibrated_sensor) *
                               world_to_local_transform(ego_pose);
@@ -207,7 +207,8 @@ GRAPHICS_MAIN()
   const auto nuscenes_version = "v1.0-mini"s;
   const auto nuscenes_root_path = "/home/david/Downloads/nuscenes"s;
 
-  const auto nuscenes = NuScenes{nuscenes_version, nuscenes_root_path, true};
+  const auto nuscenes =
+      sara::NuScenes{nuscenes_version, nuscenes_root_path, true};
 
   for (const auto& [sample_token, sample] : nuscenes.sample_table)
   {
@@ -312,10 +313,9 @@ GRAPHICS_MAIN()
         const auto& category =
             nuscenes.category_table.at(instance.category_token);
 
-        const auto box = Box{annotation.size,
-                             annotation.rotation.toRotationMatrix(),
-                             annotation.translation,
-                             category.name};
+        const auto box =
+            Box{annotation.size, annotation.rotation.toRotationMatrix(),
+                annotation.translation, category.name};
 
         box.draw(ego_pose, calibrated_sensor);
       }

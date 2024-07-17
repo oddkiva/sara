@@ -16,7 +16,7 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/Defines.hpp>
-#include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
+#include <DO/Sara/Datasets/Strecha/Utilities.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 #include <QGuiApplication>
