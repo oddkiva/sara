@@ -20,6 +20,7 @@
 //! without worrying whether the triangulated points are cheiral just works
 //! better. Then after the pose recovery at the end just gives better results.
 
+#include <DO/Sara/Datasets/Strecha/Utilities.hpp>
 #include <DO/Sara/FeatureDetectors/SIFT.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>

@@ -11,7 +11,6 @@ endif()
 
 add_subdirectory(Compute)
 add_subdirectory(MatchPropagation)
-add_subdirectory(NuScenes)
 add_subdirectory(Taskflow)
 
 # Disable for now because the ONNX runtime library was compiled with CUDA 11 and

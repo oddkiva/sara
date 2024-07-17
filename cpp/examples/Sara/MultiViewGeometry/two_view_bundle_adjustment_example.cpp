@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Core/Math/AxisConvention.hpp>
 #include <DO/Sara/Core/Math/Rotation.hpp>
+#include <DO/Sara/Datasets/Strecha/Utilities.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
