@@ -40,14 +40,38 @@ using namespace DO::Sara;
 namespace fs = std::filesystem;
 
 
-int main(int argc, char** argv)
+struct AngleFilter
+{
+  const PinholeCameraDecomposition relative_pose;
+  double cos_angle_min;
+
+  AngleFilter(const PinholeCameraDecomposition& rel_pose,
+              const double angle_min = 5. * (M_PI / 180.))
+    : relative_pose{rel_pose}
+    , cos_angle_min{std::cos(angle_min)}
+  {
+  }
+
+  auto operator()(const Eigen::Vector3d& X) const -> bool
+  {
+    // The coordinates of camera center 2 in the camera frame 1.
+    const Eigen::Vector3d C2 = relative_pose.R.transpose() * relative_pose.t;
+    const Eigen::Vector3d ray1 = X.normalized();
+    const Eigen::Vector3d ray2 = (X - C2).normalized();
+    const auto cos_angle = ray1.dot(ray2);
+    return cos_angle < cos_angle_min;
+  }
+};
+
+
+auto main(int argc, char** argv) -> int
 {
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(sara_graphics_main);
   return app.exec();
 }
 
-int sara_graphics_main(int argc, char** argv)
+auto sara_graphics_main(int argc, char** argv) -> int
 {
   auto& logger = Logger::get();
 
@@ -192,6 +216,10 @@ int sara_graphics_main(int argc, char** argv)
                              inliers,
                              /* display_step */ 20, /* wait_key */ true);
 
+  const auto angle = std::acos(0.5 * (geometry.C2.R.trace() - 1));
+  SARA_LOGI(logger, "Angle difference between camera poses = {} degrees",
+            (angle / M_PI) * 180);
+
   SARA_LOGI(logger, "Sort the points by depth...");
   const auto num_points = static_cast<int>(geometry.X.cols());
   const auto indices = range(num_points);
@@ -204,10 +232,23 @@ int sara_graphics_main(int argc, char** argv)
   const Eigen::MatrixXd u1 = (P1 * geometry.X).colwise().hnormalized();
   const Eigen::MatrixXd u2 = (P2 * geometry.X).colwise().hnormalized();
 
+  // Filter point at infinity using a simple geometric criterion.
+  //
+  // The angle between the camera rays emanating from the reconstructed point
+  // should be 5 degrees at least.
+  static constexpr auto angle_min = 5. * (M_PI / 180.);
+  const auto angle_filter = AngleFilter{geometry.C2, angle_min};
+
   using depth_t = float;
   auto depths = std::vector<std::pair<int, depth_t>>{};
   for (auto i = 0; i < num_points; ++i)
-    depths.emplace_back(i, geometry.X.col(i).z());
+  {
+    const Eigen::Vector3d Xi = geometry.X.col(i).hnormalized();
+    const auto has_large_angle = angle_filter(Xi);
+    if (!has_large_angle)
+      continue;
+    depths.emplace_back(i, Xi.z());
+  }
 
   std::sort(depths.begin(), depths.end(),
             [](const auto& a, const auto& b) { return a.second < b.second; });
