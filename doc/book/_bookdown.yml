@@ -40,10 +40,10 @@ rmd_files:
     # "learning_halide.Rmd",
     # "computer_graphics.Rmd",
 
-    "random.Rmd",
-    "random/python_code_that_suck_less.Rmd",
-    "random/bilinear_interpolation.Rmd",
-    # "random/vector_intrinsics.Rmd",
+    "misc.Rmd",
+    "misc/python_code_that_suck_less.Rmd",
+    "misc/bilinear_interpolation.Rmd",
+    "misc/vector_intrinsics.Rmd",
     "bibliography.Rmd"
   ]
   latex: [
