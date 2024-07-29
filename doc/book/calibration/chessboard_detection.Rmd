@@ -108,6 +108,63 @@ Detecting x-corner can be done via several mathematical operators:
   template filter which x-corners would respond maximally.
 - Abeles designed a faster corner detector than Harris.
 
+### The Detection Method Step by Step
+
+The chessboard detection method is outlined as follows.
+
+1. Construct a Gaussian pyramid.
+   Because of the motion blur due the physical movement by a human operator and
+   the noisy video acquisition process, we want to optimize the detection of
+   rate of corners.
+
+2. Detect Harris' corners in each scale of the Gaussian pyramid
+
+3. Detect and filter edges using Canny's edge detector
+
+4. Group and filter corners using a NMS and taking into account the scale at
+   which the corner was detected.
+
+   The idea is that if a chessboard corner is detected at a very fine scale, it
+   should detected at the coarser levels of the Gaussian pyramid. The finest
+   scale at which the chessboard corner provides the most accurate pixel
+   coordinates in the image. The coarsest level at which it is detected tells us
+   the minimum separation distance in pixel between each chessboard corner.
+
+   The coarsest detection scale defines the scale of the chessboard corner.
+
+5. Link corners to edge endpoints
+   A chessboard corner must be connected to the endpoints of a chessboard edge.
+   Thus is a corner is close to an edge endpoint, it is likely that the corner
+   is a chesboard corner and the edge is a an edge of a chessboard square.
+
+6. Circular intensity profile of a corner.
+
+   The circular intensity profile is a histogram of pixel values sampled at
+   points on a circle with a radius that is determined from the chessboard
+   corner scale.
+
+   The histogram is normalized in the following fashion. Minimum and maximum
+   intensity values are determined from the sampled points of this circle. Then
+   intensity values are rescaled in the range [-0.5, 0.5].
+
+   If the circular profile of a corner has 4 zero crossings, it is likely this
+   corner is an actual chessboard corner.
+
+7. Calculate the shape statistics of an edge.
+
+   A chessboard square edge should be mostly straight. This is largely the case
+   even on fisheye camera.
+
+   Thus the mean edge gradient should be normal to the edge shape and its
+   gradient covariance matrix should correspond geometrically to a very thin
+   ellipse.
+
+8. Seed corner selection
+
+9. Black and white square parsing
+
+10. Chessboard growing process
+
 #### Multiscale Harris's Corner Detection
 
 I have decided to stick with Harris’s cornerness operator. I still found it to
