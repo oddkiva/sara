@@ -64,9 +64,7 @@ Intuitively we expect to identify interpretable local image features:
 
 While by design the histogram does not localize very precisely the corners, the
 histogram of gradients is a powerful tool to already categorize corners in basic
-semantic groups. This can also prove useful in filtering unwanted corners. For
-example, [@Lowe:2004:ijcv] describes a robust way to identify the dominant
-gradient orientations.
+semantic groups. This can also prove useful in filtering unwanted corners.
 
 ## Small Shifts Inducing Large Intensity Changes
 
