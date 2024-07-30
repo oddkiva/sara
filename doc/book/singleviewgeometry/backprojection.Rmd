@@ -58,27 +58,27 @@ Now let us take it further.
 
   \begin{equation}
   \mathbf{\Pi}(\mathbf{a}, \mathbf{b}) =
-    \mathbf{K}^T \mathbf{l}.
+    \mathbf{K}^\top \mathbf{l}.
   \end{equation}
 
-  $\mathbf{K}^T \mathbf{l}$ is the plane backprojected from the 2D image line $\mathbf{l}$.
+  $\mathbf{K}^\top \mathbf{l}$ is the plane backprojected from the 2D image line $\mathbf{l}$.
 
   ```{proof}
-  $\mathbf{K}^T \mathbf{l}$ is indeed the normal of the backprojected plane
+  $\mathbf{K}^\top \mathbf{l}$ is indeed the normal of the backprojected plane
   because it is orthogonal to both backprojected rays $\mathbf{K}^{-1}
   \mathbf{a}$ and $\mathbf{K}^{-1} \mathbf{b}$.
 
   Indeed, let us write the dot product for $\mathbf{K}^{-1} \mathbf{a}$
 
   \begin{equation}
-    (\mathbf{K}^T \mathbf{l})^T \mathbf{K}^{-1} \mathbf{a} =
-    \mathbf{l}^T \mathbf{K} \mathbf{K}^{-1} \mathbf{a} = 0
+    (\mathbf{K}^\top \mathbf{l})^\top \mathbf{K}^{-1} \mathbf{a} =
+    \mathbf{l}^\top \mathbf{K} \mathbf{K}^{-1} \mathbf{a} = 0
   \end{equation}
 
   and likewise for $\mathbf{K}^{-1} \mathbf{b}$, the dot product is $0$.
 
   Since the backprojected rays form a linear span of the backprojected plane,
   any point on the backprojected plane is a linear combination of the
-  backprojected rays is therefore orthogonal to $\mathbf{K}^T \mathbf{n}$.
+  backprojected rays is therefore orthogonal to $\mathbf{K}^\top \mathbf{n}$.
   ```
 

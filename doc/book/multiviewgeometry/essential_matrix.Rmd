@@ -93,9 +93,9 @@ The reverse rigid body motion is obtained from:
   %
   \mathbf{R} \mathbf{X}^0 + \mathbf{t} &= \mathbf{X}^1 \\
   %
-  \mathbf{X}^0 + \mathbf{R^T} \mathbf{t} &= \mathbf{R}^T \mathbf{X}^1 \\
+  \mathbf{X}^0 + \mathbf{R^\top} \mathbf{t} &= \mathbf{R}^\top \mathbf{X}^1 \\
   %
-  \mathbf{X}^0 &= \mathbf{R}^T \mathbf{X}^1 - \mathbf{R^T} \mathbf{t} \\
+  \mathbf{X}^0 &= \mathbf{R}^\top \mathbf{X}^1 - \mathbf{R^\top} \mathbf{t} \\
   %
   \end{aligned}
 \end{equation}
@@ -103,10 +103,10 @@ The reverse rigid body motion is obtained from:
 By interpreting the inverse rigid body motion, we see that:
 
 - the position of camera $C_1$ w.r.t. camera coordinate system $C_0$,
-  is calculated as $\mathbf{t}_{0 \rightarrow 1} = -\mathbf{R}^T \mathbf{t}$.
+  is calculated as $\mathbf{t}_{0 \rightarrow 1} = -\mathbf{R}^\top \mathbf{t}$.
 - the "gaze orientation", i.e. the rotation matrix, of camera $C_1$ w.r.t. camera
   coordinate system $C_0$ is calculated as $\mathbf{R}_{0
-  \rightarrow 1} = \mathbf{R}^T$
+  \rightarrow 1} = \mathbf{R}^\top$
 
 The following remarks are useful to debug code dealing with structure-from-motion:
 
@@ -120,7 +120,7 @@ The following remarks are useful to debug code dealing with structure-from-motio
 - The coordinates of the second camera center in the second camera coordinate
   system is $(0, 0, 0)$.
 - The coordinates of the second camera center in the first camera coordinate
-  system is $-\mathbf{R}^T \mathbf{t}$.
+  system is $-\mathbf{R}^\top \mathbf{t}$.
 
 - $\mathbf{t}$ goes from camera $C_1$ to camera $C_0$ and not
   the other way around.
@@ -157,7 +157,7 @@ successively the relative motions, we would retrieve the absolute pose by
 applying recursively:
 
 \begin{equation}
-  \mathbf{R}_{j} = \mathbf{R}_{i} \mathbf{R}_{ij} \mathbf{R}_{i}^T \\
+  \mathbf{R}_{j} = \mathbf{R}_{i} \mathbf{R}_{ij} \mathbf{R}_{i}^\top \\
   %
   \mathbf{t}_j = \mathbf{t}_{ij} + \mathbf{t}_i
 \end{equation}

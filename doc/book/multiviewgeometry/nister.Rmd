@@ -19,7 +19,7 @@ on the left image and the right image respectively (in homogeneous coordinates).
 They satisfy the epipolar constraints:
 
 \begin{equation}
-  \bq_i^T \bE \bp_i = 0
+  \bq_i^\top \bE \bp_i = 0
 \end{equation}
 
 Let $\be$ denote the essential matrix in its row-major vectorized
@@ -41,7 +41,7 @@ Expanding the system of five equations, we have equivalently:
 with each row of $\bQ$ defined as
 
 \begin{equation}
-  \mathbf{Q}_i =  \mathrm{vec}(\mathbf{p}_{i} \mathbf{q}_i^T)
+  \mathbf{Q}_i =  \mathrm{vec}(\mathbf{p}_{i} \mathbf{q}_i^\top)
 \end{equation}
 
 $\be$ lives in the nullspace of $\mathbf{Q}$ which is of
@@ -93,7 +93,7 @@ As mentioned in [@nister:2004:pami]:
      \langle e_{20} \rangle & \langle e_{21} \rangle & \langle e_{22} \rangle \\
      \end{bmatrix}
      \iff
-     \bE \bE^T \bE - \frac{1}{2} \mathrm{trace}(\bE\bE^T) \bE = 0
+     \bE \bE^\top \bE - \frac{1}{2} \mathrm{trace}(\bE\bE^\top) \bE = 0
    \end{equation}
 
    This gives $3 \times 3 = 9$ polynomial equations $\langle e_{ij}
@@ -381,7 +381,7 @@ matrix $\mathbf{B}$ confused me a lot. For the sake of brevity,
 coefficient.
 :::
 
-From this matrix notation, it appears that $[x, y, 1]^T$ is a vector in the
+From this matrix notation, it appears that $[x, y, 1]^\top$ is a vector in the
 nullspace of $\mathbf{B}$ where the coefficients are polynomials in the variable
 $z$ of degree $3$ or $4$.
 

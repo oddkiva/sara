@@ -101,18 +101,18 @@ $(\mathbf{R}, \mathbf{t})$
 Going back to the camera coordinates can be done as
 
 \begin{equation}
-  \mathbf{x}_C = \mathbf{R}^T \mathbf{x}_W - \mathbf{R}^T \mathbf{t}
+  \mathbf{x}_C = \mathbf{R}^\top \mathbf{x}_W - \mathbf{R}^\top \mathbf{t}
   (\#eq:coordinate-change)
 \end{equation}
 
-and thus the inverse rigid body transform is $(\mathbf{R}^T, -\mathbf{R}^T
+and thus the inverse rigid body transform is $(\mathbf{R}^\top, -\mathbf{R}^\top
 \mathbf{t})$:
 
 Let us make two useful remarks:
 
-- The inverse rotation matrix $\mathbf{R}^T$ stores the coordinates the
+- The inverse rotation matrix $\mathbf{R}^\top$ stores the coordinates the
   world basis vectors expressed in the camera coordinate system.
-- The translation $-\mathbf{R}^T \mathbf{t}$ stores the coordinates of the
+- The translation $-\mathbf{R}^\top \mathbf{t}$ stores the coordinates of the
   world origin expressed in the camera coordinate system.
 
 Rewriting Equation \@ref(eq:similar-triangles) in vector form
@@ -128,7 +128,7 @@ we see that
 \begin{equation}
   z_C \left[ \begin{array}{c} u_C \\ v_C \\ 1 \end{array} \right] =
   \underbrace{\left[ \begin{array}{c|c}
-    \mathbf{R}^T & -\mathbf{R}^T t
+    \mathbf{R}^\top & -\mathbf{R}^\top t
   \end{array} \right]}_{\mathbf{C}}
   %
   \left[ \begin{array}{c} \mathbf{x}_W \\ 1 \end{array} \right] .
