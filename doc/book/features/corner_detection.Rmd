@@ -108,16 +108,16 @@ function with a first-order Taylor expansion
 
 \begin{equation}
   I(\mathbf{x} + \mathbf{h}) =
-  I(\mathbf{x}) + \mathbf{h}^T \nabla I(\mathbf{x}) + o(\|\mathbf{h}\|)
+  I(\mathbf{x}) + \mathbf{h}^\top \nabla I(\mathbf{x}) + o(\|\mathbf{h}\|)
 \end{equation}
 
 then it follows that the reweighted sum of squares is approximated as
 
 \begin{equation}
   \sum_\mathbf{h} w(\mathbf{h})
-  \ \mathbf{h}^T
+  \ \mathbf{h}^\top
   \left(
-    \nabla I(\mathbf{x}) \nabla I(\mathbf{x})^T
+    \nabla I(\mathbf{x}) \nabla I(\mathbf{x})^\top
   \right)
   \mathbf{h},
 \end{equation}
@@ -219,7 +219,7 @@ We can re-express this more tersely, in functional notation with the $*$ symbol
 to denote a convolution operation
 
 \begin{equation}
-  \mathbf{M} = w * \left( \nabla I\ \nabla I^T \right)
+  \mathbf{M} = w * \left( \nabla I\ \nabla I^\top \right)
 \end{equation}
 
 ### Interpretation
@@ -258,7 +258,7 @@ In practice the image $I$ is first convolved with a Gaussian kernel $g$ of
 standard deviation $\sigma_D$. This is to reduce the aliasing and image noise.
 
 \begin{equation}
-  \mathbf{M} = g_{\sigma_I} * \left( \nabla I_{\sigma_D} \ \nabla I_{\sigma_D}^T \right)
+  \mathbf{M} = g_{\sigma_I} * \left( \nabla I_{\sigma_D} \ \nabla I_{\sigma_D}^\top \right)
 \end{equation}
 where the convolved image with a gaussian kernel is denoted as
 \begin{equation}
@@ -376,7 +376,7 @@ And Förstner's criterion becomes
   \displaystyle \min_\mathbf{x}
   \sum_\mathbf{x'} w\left(\mathbf{x} - \mathbf{x}'\right)
   \left\{
-    \left(\mathbf{x} - \mathbf{x}' \right)^T \nabla I(\mathbf{x}')
+    \left(\mathbf{x} - \mathbf{x}' \right)^\top \nabla I(\mathbf{x}')
   \right\}^2
 \end{equation}
 
@@ -403,6 +403,6 @@ rotation matrix parameterized by an angle $\alpha$ in the structure tensor.
 
 \begin{equation}
   \mathbf{M}(\alpha) = w *
-  \mathbf{R}_\alpha \nabla I \nabla I^T \mathbf{R}_\alpha^T
+  \mathbf{R}_\alpha \nabla I \nabla I^\top \mathbf{R}_\alpha^\top
 \end{equation}
 

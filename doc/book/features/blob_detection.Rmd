@@ -67,7 +67,7 @@ More than just being a point indeed, a feature $x$ is fully characterized by:
   further below] as an ellipse as follows:
 
   \begin{equation}
-    \Shape_x \eqdef \left\{ \x' \in \mathbb{R}^2\ \left|\ (\x'-\x)^T \bSigma_x
+    \Shape_x \eqdef \left\{ \x' \in \mathbb{R}^2\ \left|\ (\x'-\x)^\top \bSigma_x
   (\x'-\x) \leq 1 \right. \right\},
   \end{equation}
 
@@ -85,7 +85,7 @@ The scale matrix $\bSigma_x$ also allows to define a *scale-normalized signed
 distance function* to $x$:
 
 \begin{equation}
-  d_x(\x') \eqdef (\x' - \x)^T \bSigma (\x' - \x) - 1,
+  d_x(\x') \eqdef (\x' - \x)^\top \bSigma (\x' - \x) - 1,
 \end{equation}
 
 where the zero level set is the *elliptic* shape of the feature.
@@ -181,7 +181,7 @@ cumulate the locations of all the pixels $\mathbf{x}'$ in the MSER as follows:
 
 \begin{equation}
   \bSigma_x^{-1} = \frac{1}{\mathrm{area}(x)}
-  \displaystyle \int (\x' - \x)(\x' - \x)^T \mathop{d}\x'
+  \displaystyle \int (\x' - \x)(\x' - \x)^\top \mathop{d}\x'
 \end{equation}
 
 The reason for which I use the integral $\int$ was to avoid the confusion with
