@@ -167,7 +167,7 @@ Let $\mathbf{R}$ be a rotation matrix in $\mathbb{R}^n$ for $n = 2$ or $n = 3$, 
 inverse rotation matrix is calculated by transposition
 
 \begin{equation}
-  \mathbf{R}^{-1} = \mathbf{R}^T
+  \mathbf{R}^{-1} = \mathbf{R}^\top
 \end{equation}
 ```
 :::
@@ -374,8 +374,8 @@ point $v$ where:
   the equality
 
   \begin{align*}
-    (\mathbf{R}_z^T \mathbf{v}) &= \mathbf{R}_y\ (\mathbf{R}_z^T \mathbf{u})  \\
-    \mathbf{v} &= \mathbf{R}_z \mathbf{R}_y \mathbf{R}_z^T\ \mathbf{u}
+    (\mathbf{R}_z^\top \mathbf{v}) &= \mathbf{R}_y\ (\mathbf{R}_z^\top \mathbf{u})  \\
+    \mathbf{v} &= \mathbf{R}_z \mathbf{R}_y \mathbf{R}_z^\top\ \mathbf{u}
   \end{align*}
 
 We have just calculated the pitch rotation in the original coordinate system:
@@ -383,13 +383,13 @@ We have just calculated the pitch rotation in the original coordinate system:
 \begin{equation}
   \mathbf{R}_{y'} = \mathbf{R}_{z}
                     \mathbf{R}_{y}
-                    \mathbf{R}_{z}^T
+                    \mathbf{R}_{z}^\top
 \end{equation}
 
 Likewise the rotation $\mathbf{R}_{x''}$ is obtained as:
 
 \begin{equation}
-  \mathbf{R}_{x''} = \mathbf{R} \mathbf{R}_{x} \mathbf{R}^T
+  \mathbf{R}_{x''} = \mathbf{R} \mathbf{R}_{x} \mathbf{R}^\top
 \end{equation}
 
 where
@@ -401,7 +401,7 @@ where
 And thus
 
 \begin{equation}
-  \mathbf{R}_{x''} = \mathbf{R}_z \mathbf{R}_y \mathbf{R}_{x} \mathbf{R}_y^T \mathbf{R}_z^T
+  \mathbf{R}_{x''} = \mathbf{R}_z \mathbf{R}_y \mathbf{R}_{x} \mathbf{R}_y^\top \mathbf{R}_z^\top
 \end{equation}
 
 By multiplying the three rotations, the inverse rotations will disappear and we get

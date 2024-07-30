@@ -337,7 +337,7 @@ or more concisely by the pair $(\mathbf{x}_{\mathcal{E}},
 \mathcal{S}^{++}_2$ is a positive definite matrix defined by
 
 \begin{equation}
-  \mathbf{\Sigma}_{\mathcal{E}} = \mathbf{R}_{\mathcal{E}} \mathbf{D}_{\mathcal{E}} \mathbf{R}_{\mathcal{E}}^T
+  \mathbf{\Sigma}_{\mathcal{E}} = \mathbf{R}_{\mathcal{E}} \mathbf{D}_{\mathcal{E}} \mathbf{R}_{\mathcal{E}}^\top
   (\#eq:sigma-eps)
 \end{equation}
 
@@ -368,7 +368,7 @@ $a_{\mathcal{E}} \geq b_{\mathcal{E}}$.
 Thus more generally, the ellipse $\mathcal{E}$ is characterized by the equation
 
 \begin{equation}
-  (\mathbf{x} - \mathbf{x}_{\mathcal{E}})^T
+  (\mathbf{x} - \mathbf{x}_{\mathcal{E}})^\top
   \mathbf{\Sigma}_{\mathcal{E}}
   (\mathbf{x}- \mathbf{x}_{\mathcal{E}}) = 1
 \end{equation}
@@ -380,8 +380,8 @@ By expanding this equation, we arrive to the following proposition.
 The quadratic form that characterizes ellipse $\mathcal{E}$ is expressed as
 
 \begin{equation}
-  \mathbf{x}^T \mathbf{A}_{\mathcal{E}} \mathbf{x} +
-  \mathbf{b}_{\mathcal{E}}^T \mathbf{x} +
+  \mathbf{x}^\top \mathbf{A}_{\mathcal{E}} \mathbf{x} +
+  \mathbf{b}_{\mathcal{E}}^\top \mathbf{x} +
   c_{\mathcal{E}} = 0
 \end{equation}
 
@@ -393,7 +393,7 @@ with:
   \mathbf{b}_{\mathcal{E}} &= 2 \mathbf{\Sigma}_{\mathcal{E}}
   \mathbf{x}_{\mathcal{E}} \\
   %
-  c_{\mathcal{E}} &= \mathbf{x}_{\mathcal{E}}^T \mathbf{\Sigma}_{\mathcal{E}}
+  c_{\mathcal{E}} &= \mathbf{x}_{\mathcal{E}}^\top \mathbf{\Sigma}_{\mathcal{E}}
   \mathbf{x}_{\mathcal{E}} - 1
 \end{align}
 ```
@@ -507,7 +507,7 @@ equation system
 And by rewriting this system in matrix notation we see that
 
 ```{proposition, name="Null Space Property"}
-$[1, x, x^2, x^3]^T$ is in the nullspace of $\mathbf{B}(y)$ where
+$[1, x, x^2, x^3]^\top$ is in the nullspace of $\mathbf{B}(y)$ where
 $\mathbf{B}(y)$ is defined as
 
 \begin{equation}
@@ -530,7 +530,7 @@ $\mathbf{B}(y)$ is defined as
 \end{equation}
 ```
 
-We observe that the vector $[1, x, x^2, x^3]^T$ can never be zero for any real
+We observe that the vector $[1, x, x^2, x^3]^\top$ can never be zero for any real
 value $x$. Necessarily the null space $\mathrm{Null}(\mathbf{B}(y))$ is always
 nontrivial and that means the determinant of $\mathbf{B}(y)$ has to be zero.
 
@@ -603,8 +603,8 @@ we respectively denote
   counter-clockwise order, *i.e.*,
 
   \begin{equation}
-    \forall i \in [1, L-1],\quad \angle\left([1,0]^T,
-    \mathbf{p}_i\right) \ < \ \angle\left([1,0]^T, \mathbf{p}_{i+1}\right)
+    \forall i \in [1, L-1],\quad \angle\left([1,0]^\top,
+    \mathbf{p}_i\right) \ < \ \angle\left([1,0]^\top, \mathbf{p}_{i+1}\right)
     (\#eq:counterclockwise)
   \end{equation}
 
