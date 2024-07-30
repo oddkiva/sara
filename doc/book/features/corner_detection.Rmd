@@ -87,7 +87,7 @@ into much details and I will let you find out more by looking into
 
 Now, instead of considering an *ad-hoc* small set of nonzero shifts,
 [@HarrisS:1988:alvey] go further by considering the sum of **weighted** squares
-of intensity differences for any small shift $\mathbf{h}$. 
+of intensity differences for any small shift $\mathbf{h}$.
 
 \begin{equation}
   \sum_\mathbf{h} w(\mathbf{h})
