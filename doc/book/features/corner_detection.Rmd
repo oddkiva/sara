@@ -74,7 +74,7 @@ As the histogram of gradients is calculated on a small image patch, we can only 
 whether there is a corner inside the image patch but not where exactly the image
 corners is located in pixel coordinates.
 
-To localize corners accurately, [@Moravec:1980:phd] starts instead by look for
+To localize corners accurately, [@Moravec:1980:phd] starts instead by looking at
 pixels $\mathbf{x}$ where there exists a large intensity difference
 
 \begin{equation}
