@@ -74,7 +74,7 @@ system, the table of calibrated sensors lists:
    camera projection matrix is calculated as
    \begin{equation}
      \mathbf{K}
-     \mathbf{R}_{c / \text{IMU}}^T
+     \mathbf{R}_{c / \text{IMU}}^\top
      \begin{bmatrix}
        \mathbf{I}_3 & -\mathbf{t}_{c / \text{IMU}}
      \end{bmatrix}
@@ -83,30 +83,30 @@ system, the table of calibrated sensors lists:
 2. the radar poses with respect to the IMU coordinate system
    \begin{equation}
      \begin{bmatrix}
-       \mathbf{R}_{r / \text{IMU}}^T & \mathbf{0}_3 \\
+       \mathbf{R}_{r / \text{IMU}}^\top & \mathbf{0}_3 \\
        %
-       \mathbf{0}_3^T & 1
+       \mathbf{0}_3^\top & 1
      \end{bmatrix}
      %
      \begin{bmatrix}
        \mathbf{I}_3 & -\mathbf{t}_{r / \text{IMU}} \\
        %
-       \mathbf{0}_3^T & 1
+       \mathbf{0}_3^\top & 1
      \end{bmatrix}
    \end{equation}
 
 3. the lidar pose with respect to the IMU coordinate system
    \begin{equation}
      \begin{bmatrix}
-       \mathbf{R}_{l / \text{IMU}}^T & \mathbf{0}_3 \\
+       \mathbf{R}_{l / \text{IMU}}^\top & \mathbf{0}_3 \\
        %
-       \mathbf{0}_3^T & 1
+       \mathbf{0}_3^\top & 1
      \end{bmatrix}
      %
      \begin{bmatrix}
        \mathbf{I}_3 & -\mathbf{t}_{l / \text{IMU}} \\
        %
-       \mathbf{0}_3^T & 1
+       \mathbf{0}_3^\top & 1
      \end{bmatrix}
    \end{equation}
 

@@ -65,7 +65,7 @@ The AQ is therefore characterized by the matrix
   \mathbf{Q}_\infty =
   \begin{bmatrix}
     \mathbf{I}_3 & \mathbf{0}_3 \\
-    \mathbf{0}_3^T & 0
+    \mathbf{0}_3^\top & 0
   \end{bmatrix}
 \end{equation}
 
@@ -73,7 +73,7 @@ And reformulating it again, the AQ is the set of 3D (imaginary) points
 $\tilde{\mathbf{x}} \in \mathbb{C}^4$ such that
 
 \begin{equation}
-  \tilde{\mathbf{x}}^T \mathbf{Q}_\infty \tilde{\mathbf{x}} = 0
+  \tilde{\mathbf{x}}^\top \mathbf{Q}_\infty \tilde{\mathbf{x}} = 0
 \end{equation}
 
 :::note
@@ -103,11 +103,11 @@ coordinates of the transformed point simplifies as
 This transformed point also lies in the AQ, which we will now show.
 
 \begin{equation}
-  \begin{bmatrix} (\mathbf{R} \mathbf{x})^T && 0 \end{bmatrix}
+  \begin{bmatrix} (\mathbf{R} \mathbf{x})^\top && 0 \end{bmatrix}
   %
   \begin{bmatrix}
     \mathbf{I}_3 & \mathbf{0}_3 \\
-    \mathbf{0}_3^T & 0
+    \mathbf{0}_3^\top & 0
   \end{bmatrix}
   %
   \begin{bmatrix} \mathbf{R} \mathbf{x} \\ 0 \end{bmatrix}
@@ -115,11 +115,11 @@ This transformed point also lies in the AQ, which we will now show.
 
 This simplifies further as
 \begin{equation}
-  (\mathbf{R} \mathbf{x})^T  (\mathbf{R} \mathbf{x}) = \mathbf{x}^T \mathbf{R}^T
-  \mathbf{R} \mathbf{x} = \mathbf{x}^T \mathbf{x} = 0
+  (\mathbf{R} \mathbf{x})^\top  (\mathbf{R} \mathbf{x}) = \mathbf{x}^\top \mathbf{R}^\top
+  \mathbf{R} \mathbf{x} = \mathbf{x}^\top \mathbf{x} = 0
 \end{equation}
 
-since $\mathbf{R}^T \mathbf{R} = \mathbf{I}_3$ and $\mathbf{x}$ lies in the
+since $\mathbf{R}^\top \mathbf{R} = \mathbf{I}_3$ and $\mathbf{x}$ lies in the
 absolute conic.
 ```
 
@@ -134,7 +134,7 @@ Suppose we have two orthogonal 3D unit rays $\mathbf{x}$ and $\mathbf{y}$. They
 form a right angle, and thus their dot product is zero:
 
 \begin{equation}
-  \mathbf{x}^T \mathbf{y} = 0
+  \mathbf{x}^\top \mathbf{y} = 0
 \end{equation}
 
 They project onto the image plane at two orthogonal vanishing points
@@ -143,12 +143,12 @@ $\mathbf{v} = \mathbf{K} \mathbf{y}$ respectively.
 
 In other words,
 \begin{equation}
-  \mathbf{u}^T (\mathbf{K}^{-T} \mathbf{K}^T) \mathbf{y} = 0
+  \mathbf{u}^\top (\mathbf{K}^{-T} \mathbf{K}^\top) \mathbf{y} = 0
 \end{equation}
 
 [@HartleyZ:2003:mvg] defines this $3\times3$ matrix as the **Image of the Absolute Conic** (IAC)
 \begin{equation}
-  \mathbf{\Omega}_\infty = \mathbf{K}^{-T} \mathbf{K}^T
+  \mathbf{\Omega}_\infty = \mathbf{K}^{-T} \mathbf{K}^\top
 \end{equation}
 
 The IAC is an interesting matrix because it can tell us if two image
@@ -161,7 +161,7 @@ measure the angle between the backprojected rays as
 \begin{equation}
 \mathrm{arccos}
   \left(
-    \frac{\mathbf{u}^T \mathbf{K}^{-T} \mathbf{K}^{-1} \mathbf{v}}
+    \frac{\mathbf{u}^\top \mathbf{K}^{-T} \mathbf{K}^{-1} \mathbf{v}}
     {\| \mathbf{K}^{-1} \mathbf{u} \| \| \mathbf{K}^{-1} \mathbf{v} \|}
   \right)
 \end{equation}

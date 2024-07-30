@@ -215,8 +215,8 @@ where:
 
 \begin{equation}
   \begin{aligned}
-  \mathbf{R}' &= \mathbf{R}^T \\
-  \mathbf{t}' &= -\mathbf{R}^T \mathbf{t} \\
+  \mathbf{R}' &= \mathbf{R}^\top \\
+  \mathbf{t}' &= -\mathbf{R}^\top \mathbf{t} \\
   \mathbf{x}_C &= \mathbf{R}' \mathbf{x} + \mathbf{t}' \\
   \end{aligned}
 \end{equation}

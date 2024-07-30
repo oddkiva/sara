@@ -252,7 +252,7 @@ Lambda-Twist starts by squaring the distance invariants, yielding the following
 remarkable identity:
 
 \begin{equation}
-  \lambda_i^2 + \lambda_j^2 - 2 \mathbf{y}_i^T \mathbf{y}_j \lambda_i \lambda_j
+  \lambda_i^2 + \lambda_j^2 - 2 \mathbf{y}_i^\top \mathbf{y}_j \lambda_i \lambda_j
   = || \mathbf{x}_i - \mathbf{x}_j ||_2^2
 \end{equation}
 
@@ -268,12 +268,12 @@ By denoting the Euclidean squared distance by
 \end{equation}
 and the cosine of the angle between each backprojected light rays by
 \begin{equation}
-  b_{ij} = \mathbf{y}_i^T \mathbf{y}_j
+  b_{ij} = \mathbf{y}_i^\top \mathbf{y}_j
 \end{equation}
 
 We can rewrite these into quadratic matrix form as
 \begin{equation}
-  \mathbf{\Lambda}^T \mathbf{M}_{ij} \mathbf{\Lambda} = a_{ij}
+  \mathbf{\Lambda}^\top \mathbf{M}_{ij} \mathbf{\Lambda} = a_{ij}
 \end{equation}
 
 where
@@ -312,7 +312,7 @@ characterize these three quadratic form geometrically as follows.
     B^2 - 4AC = 4 b_{ij}^2 - 4 \leq 0
   \end{equation}
   since the cosine of unit vectors $b_{ij}$ verifies $-1 \leq b_{ij} =
-  \mathbf{y}_i^T \mathbf{y}_j \leq 1$
+  \mathbf{y}_i^\top \mathbf{y}_j \leq 1$
 
   Unless we are dealing with 360 cameras (and even then), two backprojected
   light rays are unlikely to be collinear for two different image points. So we
@@ -343,7 +343,7 @@ and
 
 We can easily see that algebraically that
 \begin{equation}
-  \mathbf{\Lambda}^T \mathbf{D}_i \mathbf{\Lambda} = 0
+  \mathbf{\Lambda}^\top \mathbf{D}_i \mathbf{\Lambda} = 0
 \end{equation}
 
 These are the equations that characterizes the two homogeneous quadrics.
@@ -368,7 +368,7 @@ Necessarily a physically feasible solution $\mathbf{\Lambda}$ has to satisfy the
 inhomogeneous quadric defined as
 
 \begin{equation}
-  \mathbf{\Lambda}^T \mathbf{D}_0 \mathbf{\Lambda} = 0.
+  \mathbf{\Lambda}^\top \mathbf{D}_0 \mathbf{\Lambda} = 0.
 \end{equation}
 
 By using a geometric argument, [@PerssonN:2018:eccv] claims that the quadric
@@ -408,12 +408,12 @@ follows.
 \begin{equation}
 \begin{aligned}
   c_3 &=& \det \mathbf{D}_2 \\
-  c_2 &=& \mathbf{D}_{10}^T (\mathbf{D}_{21} \times \mathbf{D}_{22}) \\
-      &+& \mathbf{D}_{11}^T (\mathbf{D}_{22} \times \mathbf{D}_{20}) \\
-      &+& \mathbf{D}_{12}^T (\mathbf{D}_{20} \times \mathbf{D}_{21}) \\
-  c_1 &=& \mathbf{D}_{20}^T (\mathbf{D}_{11} \times \mathbf{D}_{12}) \\
-      &+& \mathbf{D}_{21}^T (\mathbf{D}_{12} \times \mathbf{D}_{10}) \\
-      &+& \mathbf{D}_{22}^T (\mathbf{D}_{10} \times \mathbf{D}_{11}) \\
+  c_2 &=& \mathbf{D}_{10}^\top (\mathbf{D}_{21} \times \mathbf{D}_{22}) \\
+      &+& \mathbf{D}_{11}^\top (\mathbf{D}_{22} \times \mathbf{D}_{20}) \\
+      &+& \mathbf{D}_{12}^\top (\mathbf{D}_{20} \times \mathbf{D}_{21}) \\
+  c_1 &=& \mathbf{D}_{20}^\top (\mathbf{D}_{11} \times \mathbf{D}_{12}) \\
+      &+& \mathbf{D}_{21}^\top (\mathbf{D}_{12} \times \mathbf{D}_{10}) \\
+      &+& \mathbf{D}_{22}^\top (\mathbf{D}_{10} \times \mathbf{D}_{11}) \\
   c_0 &=& \det \mathbf{D}_1 \\
 \end{aligned},
 \end{equation}
@@ -530,7 +530,7 @@ Now because the physically feasible solution $\mathbf{\Lambda}$ lies in the
 first homogeneous quadric, necessarily it has to satisfy
 
 \begin{equation}
-  \mathbf{\Lambda}^T \mathbf{D}_1 \mathbf{\Lambda} = 0
+  \mathbf{\Lambda}^\top \mathbf{D}_1 \mathbf{\Lambda} = 0
 \end{equation}
 
 By expanding the quadric equation, we arrive to an equation that only depends
