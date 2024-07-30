@@ -265,7 +265,7 @@ with this value being the this lower bound.
 
 ## Practical Considerations
 
-## Localization Accuracy
+### Localization Accuracy
 
 In practice the image $I$ is first convolved with a Gaussian kernel $g$ of
 standard deviation $\sigma_D$. This is to reduce the aliasing and image noise.
