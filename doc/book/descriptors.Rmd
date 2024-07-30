@@ -177,15 +177,15 @@ follows
       \begin{array}{c|c}
       \mathbf{I}_2   & \mathbf{0}_2 \\
       \hline
-      \mathbf{0}_2^T & s
+      \mathbf{0}_2^\top & s
       \end{array}
     \right]
     %
     \left[
       \begin{array}{c|c}
-        \mathbf{R}_{\theta}^T & -\mathbf{R}_{\theta}^T \mathbf{x} \\
+        \mathbf{R}_{\theta}^\top & -\mathbf{R}_{\theta}^\top \mathbf{x} \\
         \hline
-        \mathbf{0}_2^T & 1
+        \mathbf{0}_2^\top & 1
       \end{array}
     \right]
     %

@@ -10,9 +10,9 @@ This is a technical exercise I do find interesting because it helps me to know
 whether someone can fix the technical insides of an existing pipeline. It's not
 simple but it's not that hard either.
 
-Eventually I lowered my expectations by just asking to complete applicants a
-simple machine learning training pipeline. And everybody just jumped their guns
-and were happy to impress you about how much they know about the bleeding edge
+Eventually I lowered my expectations by only asking applicants to write a simple
+machine learning training pipeline. And everybody just jumped their guns and
+were happy to impress you about how much they know about the bleeding edge
 neural architecture and what not.^[The world never changes... Just shows how
 people most of the time likes to mansplain by displaying their knowledge more
 than their ability to think. So much ego all in all...]
