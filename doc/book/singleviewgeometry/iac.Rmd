@@ -143,12 +143,12 @@ $\mathbf{v} = \mathbf{K} \mathbf{y}$ respectively.
 
 In other words,
 \begin{equation}
-  \mathbf{u}^\top (\mathbf{K}^{-T} \mathbf{K}^\top) \mathbf{y} = 0
+  \mathbf{u}^\top (\mathbf{K}^{-\top} \mathbf{K}^\top) \mathbf{y} = 0
 \end{equation}
 
 [@HartleyZ:2003:mvg] defines this $3\times3$ matrix as the **Image of the Absolute Conic** (IAC)
 \begin{equation}
-  \mathbf{\Omega}_\infty = \mathbf{K}^{-T} \mathbf{K}^\top
+  \mathbf{\Omega}_\infty = \mathbf{K}^{-\top} \mathbf{K}^\top
 \end{equation}
 
 The IAC is an interesting matrix because it can tell us if two image
@@ -161,7 +161,7 @@ measure the angle between the backprojected rays as
 \begin{equation}
 \mathrm{arccos}
   \left(
-    \frac{\mathbf{u}^\top \mathbf{K}^{-T} \mathbf{K}^{-1} \mathbf{v}}
+    \frac{\mathbf{u}^\top \mathbf{K}^{-\top} \mathbf{K}^{-1} \mathbf{v}}
     {\| \mathbf{K}^{-1} \mathbf{u} \| \| \mathbf{K}^{-1} \mathbf{v} \|}
   \right)
 \end{equation}
