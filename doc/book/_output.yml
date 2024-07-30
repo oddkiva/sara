@@ -1,14 +1,13 @@
 bookdown::bs4_book:
   theme:
     base_font:
-      google: Sen
+      google: Source Sans 3
     heading_font:
       google:
-        family: Bitter
-        wght: 300
+        family: Source Serif 4
     code_font:
       google:
-        family: DM Mono
+        family: Source Code Pro
         local: false
   repo:
     base: https://gitlab.com/oddkiva/sara
