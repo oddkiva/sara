@@ -101,7 +101,7 @@ summation.
 
 This is a much better idea because now we have just introduced a function that
 can be optimized in a mathematical sense. This function will score higher as the
-image patch center get closer to the precise corner location. Thus solving the
+image patch center gets closer to the precise corner location. Thus solving the
 problem of corner localization.
 
 Then because $\mathbf{h}$ is small, we can approximate the summand in the
