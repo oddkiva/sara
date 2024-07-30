@@ -249,8 +249,8 @@ assumption that edges are orthogonal...
 
 ## Cornerness Function
 
-Based on the geometric interpretation, [@HarrisS:1988:alvey] prefer to redefine
-again the cornerness function as
+Based on the geometric interpretation of the structure tensor,
+[@HarrisS:1988:alvey] prefer to redefine again the cornerness function as
 
 \begin{equation}
   C = \det(\mathbf{M}) - \kappa \mathrm{trace}(\mathbf{M})
