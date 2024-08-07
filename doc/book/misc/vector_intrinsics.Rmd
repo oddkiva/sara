@@ -2,16 +2,44 @@
 
 Sounds boring?
 
-I promise you this is going to be way more interesting than you might think.
-While this is a common operation in low-level operation, there is quite a few
-interesting things to learn how to use the hardware to accelerate computing.
-This topic can be read nonlinearly and you can directly move to the sections of
-interest.
+I promise you this is a very interesting topic, maybe way more interesting than
+you might think.
 
-In a nutshell, I can give you some tools to reimplement *algorithms that run
-much faster than OpenCV*.
+Despite its simple formula, it is actually very tricky to implement it in such a
+way that we utilize the acceleration capabilities of the hardware to its
+fullest, be it CPU, GPU or any chip specialized in accelerated computing.
+
+Just like the discrete Fourier transform, I would like to emphasize how
+important the convolution, generally speaking, is for digital information
+processing. For example, the convolutional operation is already used in a large
+spectrum of application ranging from low-level applications such as image
+enhancement on camera devices to visual perception tasks relying on neural
+networks.
+
+For the semiconductor industry, this means reaching applications in digital
+camera manufacturing, or the robotics, automotive, logistics industry.
+
+Therefore we can understand why it has become such a critical business^[and by
+this I mean billions (trillions?) of dollars 🤑💸💰🤑💸💰🤑💸💰] for any chip
+design company like NVIDIA, AMD or ARM to provide such a platform, both software
+and hardware, that can support the processing of such information either in real
+time or at large scale. So it goes without saying that we also stand to gain a
+lot in terms of technical know-how because of its ubiquity.
+
+In this section, I am touching on the topic of *accelerated computing* on the
+*software* side only.
+
+"Alright, what's in it for me?", you might ask. In a nutshell, I can give you,
+you as a developer, the tools to design new algorithms that take control of your
+hardware capabilities or reimplement *algorithms that run much faster than
+OpenCV* on your hardware with relatively little effort.^[without writing code
+explicitly with Intel's or ARM's vector instruction API.]
 
 Story time before we dive into the implementation of the Gaussian blur.
+
+*If you have read me until here, I give you one bonus cookie: you can read this
+section nonlinearly and skip to the subsections of interest.*
+
 
 ## Story Time
 
@@ -88,24 +116,24 @@ average programmer to identify which schedules work best and those that don't.
 
 Naysayers will argue: "But Halide is too high level and does too much magic!"
 
-Certainly, optimizing algorithms by writing explicitly CPU vector instructions
-can be done. But we would have to pay a very costly engineering price. If I were
-the head of a small business, this would be hard to justify the heavy
-engineering time and money, that it entails to.
+Certainly, optimizing algorithms by explicitly writing CPU vector instructions
+can be done. We would have to pay a very costly engineering time, however. If I
+were the engineering head of a small business, this would be hard to justify.
+And time is money.
 
-Nowadays, would be ready spend time on optimizing for different CPU platforms:
-*x86-64*, *ARM*, *RISC-V* and learn their respective C API to invoke SIMD
-instructions? On top of that, the resulting code would be much lengthier and
-harder to maintain than using a unified language that allows you to write these
-in a very few lines of codes.
+Nowadays, who would be ready spend time on optimizing for different CPU
+platforms: *x86-64*, *ARM*, *RISC-V* and learn their respective C API to invoke
+SIMD instructions? On top of that, the resulting code would be much lengthier
+and harder to debug and maintain than using a unified language that allows you
+to write these in a very few lines of codes.
 
-Unless this is your full-time job or it's something you really want to learn,
-personally I don't want to spend time into this. Either way... Halide has done
-an excellent job in making CPU vector instructions *platform-agnostic* and it
-will help you learn the C API faster.
+Unless this is your full-time job or it's something you really want to learn...
+I wouldn't spend time into this. Either way, Halide has done an tremendous job
+in making CPU vector instructions *platform-agnostic*. And it will help you
+learn the vector instructions API provided much faster.
 
 Let's conclude this paragraph with a few words regarding the GPU acceleration
-with Halide. On the GPU side, Halide is indeed not yet mature. For one thing,
+with Halide. On the GPU side, Halide does not seem mature yet. For one thing,
 the documentation is still lacking regarding the memory model at this time of
 writing. You will be much better off writing code in CUDA, Vulkan, or OpenCL to
 fully control your GPU.
@@ -115,11 +143,11 @@ fully control your GPU.
 
 Right, let's rewind back in time and imagine myself more than 15 years ago.
 Freshly graduated with a Master's degree looking to showcase some work
-portfolio. I am a bit aware of CPU registers but I can't see how it would fit in
-the grand scheme of things. I've heard of vector instructions but never
+portfolio. I am a bit aware of CPU registers but I can't see how they would fit
+in the grand scheme of things. I've heard of vector instructions but never
 understood what they were about. As an avid Internet reader, I have been sold
 the big lie: don't prematurely optimize and just let the compiler do its job.
-And just make things work.
+Just make things work.
 
 I did learn in class that the Gaussian filter is separable: Don't write the 2D
 convolution naively, exploit its separable property. Icing on the cake, I have
@@ -218,7 +246,7 @@ Let's enumerate some issues and ideas that we will address later on.
    processing?
 
 2. It is not clear how the **CPU vector instructions** can be applied in the
-   convolution.
+   current implementation.
    - For one thing, the boundary check via clamping does not easily allow the
      compiler to vectorize the C++ code.
    - There is actually a better way to exploit the CPU vector instructions for
@@ -227,17 +255,28 @@ Let's enumerate some issues and ideas that we will address later on.
 3. **Data locality** is a very important aspect, which the parallel row
    processing may not easily allow to do so.
 
-   Just like in CUDA programming, processing the image into tiles on CPU is much
-   more efficient in practice.
+   Just like in CUDA programming, (1) splitting an image into smaller image
+   tiles and (2) processing each of these image tiles independently on CPU is
+   much more efficient in practice.
 
-   Let's note that processing tiles in parallel is a pattern that keeps
-   repeating in optimized linear algebra routines (OpenBLAS etc.), in particular
-   the matrix-matrix multiplication *gemm* operation, which is one fundamental
-   operation in deep learning.
+   By splitting an image into smaller image tiles and processing them
+   individually, we solve the data locality problem. Indeed all the pixel data
+   in this image tile can be copied and fit in the small memory cache, which is
+   much faster than the RAM.
 
-There are probably more issues. Hopefully I pointed out the most problematic
-ones. It certainly wasn't the fault of my younger self who did not know any
-better. Let us now address these issues and ideas in Halide.
+   Doing so enables the CPU fetch the source image data from the RAM only once,
+   whereas unoptimized implementations would force the CPU to fetch the image
+   data from the RAM much more often.
+
+Let's note that processing image tiles in parallel is a pattern that keeps
+recurring in optimized linear algebra routines (OpenBLAS etc.), specifically the
+matrix-matrix multiplication *gemm* operation, which is also one fundamental
+low-level operation in deep learning.
+
+There are probably more issues I have overlooked but I pointed out the most
+problematic ones. Certainly it wasn't the fault of my younger self for not
+knowing any better. Let us now resolve these issues in Halide and... educate my
+younger self.
 
 
 ## A Very Fast Implementation in Halide
@@ -335,9 +374,9 @@ of
 
 on single-precision floating point data.
 
-While we should instead use *Amdahl's law* instead of this naive formula,
-applying Amdahl's law is not so simple and we will be content to just benchmark
-and measure the performance gain.
+While we should instead use *Amdahl's law* instead of this naive formula, it is
+not so simple to apply it and we will be content to just benchmark and measure
+the performance gain.
 
 Likewise, optimized linear algebra routines like OpenBLAS makes extensive use of
 the two types parallelism on CPU platforms.
@@ -345,8 +384,8 @@ the two types parallelism on CPU platforms.
 For more accurate and more comprehensive information, I will simply encourage
 you to do your own research on ARM, RISC-V CPUs, and share what you have learnt.
 
-We are now moving to the schedule, which is the most difficult part of the
-implementation. We will explore 3 schedules with Halide.
+Let's move on to the algorithmic schedule, which is the most difficult part of
+the implementation. We will explore 3 schedules with Halide.
 
 ### Schedule 1: Naive Strategy
 
@@ -407,13 +446,15 @@ conv_y.tile(x, y, xo, yo, xi, yi, 64, 64,
 ```
 
 This literally crushes OpenCV's implementation but I didn't understand why at
-that time. However the main idea in this schedule is to better exploit data
-locality but splitting the image into smaller images.
+that time. Still we do see the main optimization ideas in this schedule which is
+to split the image into smaller image tiles and processing tiles so that data
+locality is utilized. Truly the unclear part is **how Halide applies the vector
+instruction within each image tile** and the publication did not explain it in
+details.
 
 As argued in a presentation by Halide authors, without Halide, the optimal
-schedule is definitely not obvious and would have necessitated at least 3 months
-of work in order how to exploit CPU SIMD instructions and the data locality in
-the memory cache.
+schedule is definitely not obvious and emphasized that at least 3 months of work
+was necessary to find out how to best utilize CPU SIMD instructions.
 
 Specifically this schedule the final convolved image into square tiles of 64 by
 64 pixels. The set of input tiles can be seen as an input batch of many smaller
@@ -585,29 +626,153 @@ the compiled statement as a full page:
 
 ### Vectorizing the Convolution
 
+This paragraph is the most technical part of the writing and it will require a
+bit of time to unwrap the algorithm. I would recommend to draw things on the
+paper.
+
+Let us examine the vectorization of the x-convolution as the same rationale
+applies to the y-convolution.
+
+An important technical assumption in the following is that the image data is
+stored in a row-major format, that is the image is stored row by row in the
+memory.
+
 Upon inspection of the compiled statement, it turns out that the convolution
 operation is implemented by batch where we calculate 4, 8 or 16 convolved values
-at the same time by repeating the vectorized fused multiply-add `fmla.4s`
-operation.
+at the same time by repeating invoking the vectorized fused multiply-add
+`fmla.4s` operation in the following manner.
 
-For example, the vectorization the x-convolution can be translated equivalently
-in NumPy code as
+Because an image $x$ is split into a batch of small image tiles, we can
+reimagine the image as a 3D tensor $\mathbf{x}$. Each element of the tensor
+$\mathbf{x}[t, i, j]$ being read as the pixel value at coordinates $(j, i)$ of
+image tile $t$.
+
+For now, let's simplify by omitting the index $t$ and only consider one image
+tile so that we can alleviate the notation and can keep reasoning in 2D. Instead
+of denoting a source image tile and a destination image tile by
+$\mathbf{x}[t, :, :]$ and $\mathbf{y}[t, :, :]$ respectively, we simplify denote
+them by $\mathbf{x}$ and $\mathbf{y}$
+
+Mathematically speaking, to calculate each convolved value individually
+\begin{equation}
+\mathbf{y}[i, j] = \sum_k g[k] \times \mathbf{x}[i, j{+}k]
+\end{equation}
+
+In pseudo-code, we would apply **unvectorized** FMA operation as follows:
+
+>
+$\mathbf{y}[i, j] \leftarrow 0$
+>
+>
+> For $k = -K$ to $K$:
+>
+$\qquad$ $\mathbf{y}[i, j]
+\leftarrow
+\mathbf{y}[i, j] + g[k] \times \mathbf{x}[i, j{+}k]$
+$\quad$ (FMA operation)
+
+Now instead of calculating each convolved value individually, we repeatedly
+apply the vectorized FMA operation on the first 4 pixels on the same image row
+(or more if the CPU supports more) in each image tile.
+
+Mathematically, this means that we consider the following 4D row-vector:
+
+\begin{equation}
+\mathbf{y}[i, 0{:}4] = \sum_k g[k] \times \mathbf{x}[i, 0{+}k{:}4{+}k]
+\end{equation}
+
+In pseudo-code, it appears we can apply the **vectorized** FMA operation on this
+4D row-vector:
+
+>
+$\begin{bmatrix}
+\mathbf{y}[i, 0] \\
+\mathbf{y}[i, 1] \\
+\mathbf{y}[i, 2] \\
+\mathbf{y}[i, 3]
+\end{bmatrix}
+\leftarrow
+\begin{bmatrix} 0 \\ 0 \\ 0 \\ 0 \end{bmatrix}$ $\quad$ (assignment is parallel)
+>
+>
+> For $k = -K$ to $K$:
+>
+$\qquad$ $\begin{bmatrix}
+\mathbf{y}[i, 0] \\
+\mathbf{y}[i, 1] \\
+\mathbf{y}[i, 2] \\
+\mathbf{y}[i, 3]
+\end{bmatrix}
+\leftarrow
+\qquad$ $\begin{bmatrix}
+\mathbf{y}[i, 0] \\
+\mathbf{y}[i, 1] \\
+\mathbf{y}[i, 2] \\
+\mathbf{y}[i, 3]
+\end{bmatrix}
++
+\begin{bmatrix}
+g[k] \\
+g[k] \\
+g[k] \\
+g[k]
+\end{bmatrix}
+\odot
+\begin{bmatrix}
+\mathbf{x}[i, 0{+}k] \\
+\mathbf{x}[i, 1{+}k] \\
+\mathbf{x}[i, 2{+}k] \\
+\mathbf{x}[i, 3{+}k]
+\end{bmatrix}$
+>
+> $\qquad$ (FMA is a parallel operation)
+
+
+Then we move onto the next 4D row-vector in the same image row and applies the same
+algorithm above.
+
+>
+$\mathbf{y}[i, 4{:}8] = \sum_k g[k] \times \mathbf{x}[i, 4{+}k{:}8{+}k]$
+>
+$\mathbf{y}[i, 8{:}12] = \sum_k g[k] \times \mathbf{x}[i, 8{+}k{:}12{+}k]$
+>
+> ...
+
+Then we move onto the next row of the image tile and so on.
+
+
+There is a crucial technical detail we need to realize. Because the image data
+is in a row-major storage format, we only re-read the image tile data in the
+cache, without ever needing to copy the image data with the appropriate order in
+the CPU register, everything is contiguous during the process.
+
+Equivalently in NumPy code, this time where we view an image as a 3D tensor:
 
 ```{python}
 import numpy as np
 
-def convolve_vectorized(conv_x, input, kernel, tile, xi, yi):
+def convolve_vectorized(conv_x, input, kernel, t, i, j):
     # Trivially vectorized.
-    conv_x[tile, yi, xi:xi+ksz] = 0
+    conv_x[t, i, j:j+4] = 0
 
     # Repeat the fused multiply-add operation as follows.
+    #
+    # I leave the boundary checks to you as an exercise...
     ksz = kernel.shape[0]
     for k in range(ksz):
-        conv_x[tile, yi, xi: xi+ 32] = \
-            conv_x[tile, yi, xi:xi + 32] + \
-            input[tile, yi, xi + k:xi + 32 + k] * kernel[k]
+        conv_x[t, i, j:j+4] = \
+            conv_x[t, i, j:j+4] + \
+            input[t, i, j+k:j+4+k] * kernel[k]
 ```
 
+To apply the same rationale for the y-convolution, there is one more technical
+detail to be aware.
+
+We need to store the transposed x-convolution data (as in matrix transpose) to
+ensure that the data contiguity of image columns in memory. That means that the
+x-convolved image (and thus its tiles) must be stored in a **column-major**
+format. Then the final separable convolved image must be stored back in
+**row-major** format.
 
 References:
 
