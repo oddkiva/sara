@@ -650,7 +650,7 @@ image tile $t$.
 For now, let's simplify by omitting the index $t$ and only consider one image
 tile so that we can alleviate the notation and can keep reasoning in 2D. Instead
 of denoting a source image tile and a destination image tile by
-$\mathbf{x}[t, :, :]$ and $\mathbf{y}[t, :, :]$ respectively, we simplify denote
+$\mathbf{x}[t, :, :]$ and $\mathbf{y}[t, :, :]$ respectively, we simply denote
 them by $\mathbf{x}$ and $\mathbf{y}$
 
 Mathematically speaking, to calculate each convolved value individually
@@ -675,14 +675,14 @@ Now instead of calculating each convolved value individually, we repeatedly
 apply the vectorized FMA operation on the first 4 pixels on the same image row
 (or more if the CPU supports more) in each image tile.
 
-Mathematically, this means that we consider the following 4D row-vector:
+Mathematically, this means that we consider the following 4D row-vector
 
 \begin{equation}
-\mathbf{y}[i, 0{:}4] = \sum_k g[k] \times \mathbf{x}[i, 0{+}k{:}4{+}k]
+\mathbf{y}[i, 0{:}4] = \sum_k g[k] \times \mathbf{x}[i, 0{+}k{:}4{+}k].
 \end{equation}
 
-In pseudo-code, it appears we can apply the **vectorized** FMA operation on this
-4D row-vector:
+In pseudo-code, the **vectorized** FMA operation operates repeatedly on this 4D
+row-vector as follows:
 
 >
 $\begin{bmatrix}
@@ -742,9 +742,9 @@ Then we move onto the next row of the image tile and so on.
 
 
 There is a crucial technical detail we need to realize. Because the image data
-is in a row-major storage format, we only re-read the image tile data in the
-cache, without ever needing to copy the image data with the appropriate order in
-the CPU register, everything is contiguous during the process.
+is in a row-major storage format, all we do is just re-read the image tile data
+in the cache, without ever needing to recopy the data in some appropriate order
+in the memory: the source data is contiguous during the convolutional operation.
 
 Equivalently in NumPy code, this time where we view an image as a 3D tensor:
 
