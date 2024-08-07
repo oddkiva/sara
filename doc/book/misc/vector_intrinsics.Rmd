@@ -658,7 +658,7 @@ Mathematically speaking, to calculate each convolved value individually
 \mathbf{y}[i, j] = \sum_k g[k] \times \mathbf{x}[i, j{+}k]
 \end{equation}
 
-In pseudo-code, we would apply **unvectorized** FMA operation as follows:
+In pseudo-code, we would apply the **unvectorized** FMA operation as follows:
 
 >
 $\mathbf{y}[i, j] \leftarrow 0$
