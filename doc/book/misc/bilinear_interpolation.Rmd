@@ -17,8 +17,8 @@ neural architecture and what not.^[The world never changes... Just shows how
 people most of the time likes to mansplain by displaying their knowledge more
 than their ability to think. So much ego all in all...]
 
-Let's see how we can do this in Python in a NumPy-like style. I leave it as an
-exercise in C++.
+Anyways, let's see how we can do this in Python in a NumPy-like style. I leave
+it as an exercise in C++.
 
 The NumPy way of doing things is to not use any for loops but to use its library
 of CPU optimized functions that operates on arrays. This boils down to think of
@@ -110,7 +110,7 @@ def bilinear_interpolation_2d(
 ```
 
 PyTorch and TF have very similar function names so it's not worth sketching TF's
-implementation. You would almost copy verbatim the code from PyTorch and replace
+implementation: you would almost copy verbatim the code from PyTorch and replace
 the name import.
 
 Let us verify the implementation on a toy test:
@@ -134,8 +134,7 @@ interp_values
 
 Sounded boring? Well you're wrong... This is a key stepping stone to perform for
 image processing with your GPU, and to perform differentiation on geometric
-transform should we need to optimize some optimization cost function and what
-not.
+transform should you need to optimize some cost function and what not.
 
 Let's start importing *Sara*'s Python API alongside with other packages:
 
