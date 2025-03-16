@@ -6,48 +6,49 @@ from torch.utils.data import Sampler
 
 class ClassBalancedSampler(Sampler[int]):
     def __init__(
-        self, ids_partitioned_by_class: List[List[int]], num_samples: int
+        self, sample_ids_grouped_by_class: List[List[int]]
     ):
-        self.ids_partitioned_by_class = ids_partitioned_by_class
-        self.class_count: int = len(ids_partitioned_by_class)
-        self.id_counts_per_class = torch.LongTensor(
-            [len(ixs) for ixs in ids_partitioned_by_class]
+        self.sample_ids_grouped_by_class = sample_ids_grouped_by_class
+        self.class_count: int = len(sample_ids_grouped_by_class)
+        self.sample_counts_per_class = torch.LongTensor(
+            [len(ixs) for ixs in sample_ids_grouped_by_class]
         )
-        self.id_count: int = torch.sum(self.id_counts_per_class).item()
-        self.num_samples = num_samples
+        self.sample_count: int = int(
+            torch.sum(self.sample_counts_per_class).item()
+        )
 
     def __len__(self) -> int:
-        return self.id_count
+        return self.sample_count
 
     def __iter__(self) -> Iterator[int]:
         # Sample the classes uniformly.
         sampled_classes = torch.randint(
-            0, self.class_count, (self.num_samples,)
+            0, self.class_count, (self.sample_count,)
         )
         # print(f'sampled classes = {sampled_classes}')
 
         # Fetch the cardinality of each sampled class.
-        id_counts_in_sampled_classes = self.id_counts_per_class[
+        sample_counts_in_sampled_classes = self.sample_counts_per_class[
             sampled_classes
         ]
-        # print(id_counts_in_sampled_classes)
+        # print(sample_counts_in_sampled_classes)
 
         # Sample a data sample within each sampled class.
         # Draw a sample index within each class.
         sample_ixs = [
-            torch.randint(0, id_count, (1,)).item()
-            for id_count in id_counts_in_sampled_classes
+            torch.randint(0, sample_count, (1,)).item()
+            for sample_count in sample_counts_in_sampled_classes
         ]
         # print(sample_ixs)
 
         # From the sample index, get the actual sample "global" ID.
         sample_ids = [
-            self.ids_partitioned_by_class[c][ix]
+            self.sample_ids_grouped_by_class[c][ix]
             for c, ix in zip(sampled_classes, sample_ixs)
         ]
         # print(sample_ids)
 
-        for i in range(self.num_samples):
+        for i in range(self.sample_count):
             yield sample_ids[i]
 
 
@@ -100,9 +101,12 @@ class ClassBalancedSampler2(Sampler[int]):
             yield from self.sampler
 
 
-sample_labels = [0, 1, 1, 2, 2, 2]
-sampler = ClassBalancedSampler2(sample_labels)
+sample_ids_grouped_by_class = [
+    list(range(1)),
+    list(range(1, 1 + 5)),
+    list(range(6, 6 + 20))
+]
 
-import IPython
+sample_generator = ClassBalancedSampler(sample_ids_grouped_by_class)
 
-IPython.embed()
+import IPython; IPython.embed()
