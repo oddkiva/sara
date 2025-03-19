@@ -1,3 +1,6 @@
+# N.B.: I am not yet convinced with the WeightedRandomSampler class...
+# TODO: check the code again.
+
 from pathlib import Path
 
 import torch
@@ -5,6 +8,7 @@ import torchvision
 import torchvision.transforms.v2 as v2
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import WeightedRandomSampler
+from torch.utils.tensorboard.writer import SummaryWriter
 
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
 
@@ -25,39 +29,51 @@ weights_for_sample = [
     weights_for_class[class_id]
     for class_id in ds._image_label_ixs
 ]
+print(class_sample_counts)
+print(weights_for_class)
+print(len(weights_for_sample))
 
 # NON-BATCHED balanced random sampling
 repeat = 10
 num_samples = ds.class_count * max(class_sample_counts) * repeat
+
+class_generator = WeightedRandomSampler(weights_for_class, num_samples)
+
 sample_generator = WeightedRandomSampler(weights_for_sample, num_samples)
 sample_ids = [*sample_generator]
 
-class_histogram = [0] * ds.class_count
+class_histogram = {}
 for sample_id in sample_ids:
     class_id = ds.image_class_ids[sample_id]
-    class_histogram[class_id] += 1
+    if class_id not in class_histogram:
+        class_histogram[class_id] = 0
+    else:
+        class_histogram[class_id] += 1
+class_histogram = [class_histogram[class_id]
+                   for class_id in sorted(class_histogram.keys())]
 a = min(enumerate(class_histogram), key=lambda v: v[1])
 b = max(enumerate(class_histogram), key=lambda v: v[1])
 uniform_sampling_score = a[1] / b[1]
+print('class histogram=\n', class_histogram)
 print(f'least frequently sampled class ID: {a[0]}, count: {a[1]}')
 print(f'most  frequently sampled class ID: {b[0]}, count: {b[1]}')
 print(f'uniform_sampling_score = {uniform_sampling_score}')
 
+import IPython; IPython.embed()
+exit()
+
 train_dataset = ds
-train_dataloader = DataLoader(train_dataset, sampler=sample_generator)
+train_dataloader = DataLoader(
+    train_dataset,
+    sampler=WeightedRandomSampler(weights_for_sample, num_samples)
+)
 
-X, y = next(iter(train_dataloader))
-
-resnet50 = torchvision.models.resnet50()
-resnet50_backbone = list(resnet50.children())[:-1]
-resnet50_bb = torch.nn.Sequential(*resnet50_backbone)
-resnet50_reid = torch.nn.Sequential(*resnet50_backbone,
-                                    torch.nn.Linear(2048, 1000))
+resnet50 = torchvision.models.resnet50(num_classes=ds.class_count)
 
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(resnet50_reid.parameters())
+optimizer = torch.optim.Adam(resnet50.parameters())
 
-import IPython; IPython.embed()
+writer = SummaryWriter('train/eth123')
 
 
 def train_loop(dataloader, model, loss_fn, optimizer):
@@ -76,9 +92,12 @@ def train_loop(dataloader, model, loss_fn, optimizer):
         optimizer.step()
         optimizer.zero_grad()
 
-        if sample_id % 100 == 0:
+        if sample_id % 10 == 0:
             loss, current = loss.item(), sample_id + len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
+            img = torchvision.utils.make_grid(X)
+            writer.add_image('train image', img)
 
-# train_loop(train_dataloader, resnet50_reid, loss_fn, optimizer)
+
+# train_loop(train_dataloader, resnet50, loss_fn, optimizer)

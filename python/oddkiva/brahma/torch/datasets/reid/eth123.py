@@ -29,8 +29,10 @@ class ETH123(Dataset):
         ]
 
         # Populate the list of image filenames for each class.
-        self._image_filenames_per_class = [ os.listdir(root_path / p) for p in
-                                           self._class_paths ]
+        self._image_filenames_per_class = [
+            os.listdir(root_path / p)
+            for p in self._class_paths
+        ]
 
         # Transform the list of file names into a list of file paths.
         self._image_paths_per_class: List[List[Path]] = []
