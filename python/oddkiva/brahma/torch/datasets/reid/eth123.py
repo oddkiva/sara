@@ -4,9 +4,13 @@ from typing import List, Optional
 from typing_extensions import Tuple
 
 import torch
+import torch.torch_version
 import torchvision.transforms.v2 as v2
 from torch.utils.data import Dataset
-from torchvision.io.image import decode_image
+if torch.torch_version.TorchVersion(torch.__version__) < (2, 6, 0):
+    from torchvision.io.image import read_image as decode_image
+else:
+    from torchvision.io.image import decode_image
 
 
 class ETH123(Dataset):
@@ -71,7 +75,7 @@ class ETH123(Dataset):
 
 
     def __getitem__(self, idx) -> Tuple[torch.Tensor, int]:
-        image = decode_image(self._image_paths[idx])
+        image = decode_image(str(self._image_paths[idx]))
         if self._transform is not None:
             image_transformed = self._transform(image)
         else:

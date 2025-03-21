@@ -1,3 +1,4 @@
+import platform
 from pathlib import Path
 from typing import List
 
@@ -11,10 +12,13 @@ from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
 from oddkiva.brahma.torch.data.class_balanced_sampler import ClassBalancedSampler
 
 # Dataset
-root_path = Path('/Users/oddkiva/Downloads/reid/dataset_ETHZ/')
+if platform.system() == 'Darwin':
+    root_path = Path('/Users/oddkiva/Downloads/reid/dataset_ETHZ/')
+else:
+    root_path = Path('/home/david/GitLab/oddkiva/sara/data/reid/dataset_ETHZ/')
 transform = v2.Compose([
     v2.ToDtype(torch.float32, scale=True),
-    v2.Resize((160, 24))
+    v2.Resize((160, 40))
 ])
 ds = ETH123(root_path, transform=transform)
 

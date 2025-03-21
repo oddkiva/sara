@@ -1,6 +1,7 @@
 # N.B.: I am not yet convinced with the WeightedRandomSampler class...
 # TODO: check the code again.
 
+import platform
 from pathlib import Path
 
 import torch
@@ -13,7 +14,10 @@ from torch.utils.tensorboard.writer import SummaryWriter
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
 
 # Dataset
-root_path = Path('/Users/oddkiva/Downloads/reid/dataset_ETHZ/')
+if platform.system() == 'Darwin':
+    root_path = Path('/Users/oddkiva/Downloads/reid/dataset_ETHZ/')
+else:
+    root_path = Path('/home/david/GitLab/oddkiva/sara/data/reid/dataset_ETHZ/')
 transform = v2.Compose([
     v2.ToDtype(torch.float32, scale=True),
     v2.Resize((160, 24))
