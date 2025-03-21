@@ -16,9 +16,10 @@ if platform.system() == 'Darwin':
     root_path = Path('/Users/oddkiva/Downloads/reid/dataset_ETHZ/')
 else:
     root_path = Path('/home/david/GitLab/oddkiva/sara/data/reid/dataset_ETHZ/')
+# Data transform
 transform = v2.Compose([
     v2.ToDtype(torch.float32, scale=True),
-    v2.Resize((160, 40))
+    v2.Resize((160, 64), antialias=True)
 ])
 ds = ETH123(root_path, transform=transform)
 
@@ -34,7 +35,7 @@ samples_grouped_by_class = []
 for class_id in range(ds.class_count):
     samples_grouped_by_class.append(samples_grouped_by_class_dict[class_id])
 
-sample_gen = ClassBalancedSampler(samples_grouped_by_class, 10)
+sample_gen = ClassBalancedSampler(samples_grouped_by_class, 1)
 sample_ids = [*sample_gen]
 
 def check_class_statistics(sample_ids: List[int]):
@@ -51,16 +52,16 @@ def check_class_statistics(sample_ids: List[int]):
     print(f'uniform_sampling_score = {uniform_sampling_score}')
 check_class_statistics(sample_ids)
 
+batch_size = 32
 train_dataset = ds
-train_dataloader = DataLoader(
-    train_dataset,
-    sampler=sample_gen
-)
+train_dataloader = DataLoader(train_dataset,
+                              sampler=sample_gen,
+                              batch_size=batch_size)
 
 resnet50 = torchvision.models.resnet50(num_classes=ds.class_count)
 loss_fn = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(resnet50.parameters())
 writer = SummaryWriter('train/eth123')
+write_interval = 1
 class_histogram_1 = [0] * ds.class_count
 
 
@@ -81,12 +82,17 @@ def train_loop(dataloader, model, loss_fn, optimizer):
         optimizer.zero_grad()
 
         # Update class statistics
-        class_id = y
-        class_histogram_1[class_id] += 1
+        class_ids = y
+        for class_id in class_ids:
+            class_histogram_1[class_id] += 1
 
-        if step % 10 == 0:
+        if step % write_interval == 0:
+            # Train loss
             loss = loss.item()
-            print(f"loss: {loss:>7f}  [iter: {step:>5d}/{step_count:>5d}]")
+
+            # Train classification error.
+            label_pred = torch.argmax(pred, dim=1)
+            class_error = torch.sum(label_pred != y) / batch_size
 
             img = torchvision.utils.make_grid(X)
             writer.add_image('Train/image', img, step)
@@ -97,6 +103,7 @@ def train_loop(dataloader, model, loss_fn, optimizer):
             b = max(enumerate(class_histogram_1), key=lambda v: v[1])
             uniform_sampling_score = a[1] / b[1]
 
+            # Write for tensorboard.
             writer.add_scalar('ClassBalancedStats/least_frequent_class',
                               a[0], step)
             writer.add_scalar('ClassBalancedStats/least_frequent_class_count',
@@ -107,6 +114,18 @@ def train_loop(dataloader, model, loss_fn, optimizer):
                               b[1], step)
             writer.add_scalar('ClassBalancedStats/uniform_sampling_score',
                               uniform_sampling_score, step)
+            writer.add_scalar('Train/classification_error', class_error, step)
+
+            # Log on the console.
+            print("".join([
+                f"[iter: {step:>5d}/{step_count:>5d}] ",
+                f"loss: {loss:>7f}, ",
+                f"classification_error: {class_error:>7f} "
+            ]))
 
 
-train_loop(train_dataloader, resnet50, loss_fn, optimizer)
+
+for epoch in range(10):
+    optimizer = torch.optim.Adam(resnet50.parameters())
+    train_loop(train_dataloader, resnet50, loss_fn, optimizer)
+    torch.save(resnet50.state_dict(), f'eth123_resnet50_{epoch}.pt')
