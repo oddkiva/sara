@@ -20,7 +20,7 @@ else:
     root_path = Path('/home/david/GitLab/oddkiva/sara/data/reid/dataset_ETHZ/')
 transform = v2.Compose([
     v2.ToDtype(torch.float32, scale=True),
-    v2.Resize((160, 24))
+    v2.Resize((160, 64))
 ])
 ds = ETH123(root_path, transform=transform)
 

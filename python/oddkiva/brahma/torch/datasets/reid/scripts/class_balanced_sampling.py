@@ -11,6 +11,14 @@ from torch.utils.tensorboard.writer import SummaryWriter
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
 from oddkiva.brahma.torch.data.class_balanced_sampler import ClassBalancedSampler
 
+
+class ModelConfig:
+    image_size = (160, 64)
+    batch_size = 32
+
+    summary_write_interval = 1
+
+
 # Dataset
 if platform.system() == 'Darwin':
     root_path = Path('/Users/oddkiva/Downloads/reid/dataset_ETHZ/')
@@ -19,7 +27,7 @@ else:
 # Data transform
 transform = v2.Compose([
     v2.ToDtype(torch.float32, scale=True),
-    v2.Resize((160, 64), antialias=True)
+    v2.Resize(ModelConfig.image_size, antialias=True)
 ])
 ds = ETH123(root_path, transform=transform)
 
@@ -52,21 +60,73 @@ def check_class_statistics(sample_ids: List[int]):
     print(f'uniform_sampling_score = {uniform_sampling_score}')
 check_class_statistics(sample_ids)
 
-batch_size = 32
+
+class ReidDescriptor50(torch.nn.Module):
+
+    def __init__(self, dim: int = 256):
+        self.resnet50_backbone = torch.nn.Sequential(
+            *list(torchvision.models.resnet50().children())[:-2]
+        )
+        self.linear = torch.nn.Linear(2048, dim)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        y = self.resnet50_backbone(x)
+        y = torch.flatten(y, start_dim=2)
+        y = self.linear(y)
+        return y
+
+
+class HypersphericManifoldLoss(torch.nn.Module):
+
+    def __init__(self, num_classes: int, batch_size: int, embedding_dim: int = 256):
+        self.means = torch.empty(num_classes, embedding_dim)
+        self.batch_size = batch_size
+        torch.nn.init.kaiming_uniform_(self.means)
+
+    def forward(self, input, target):
+        input_normalized = input / torch.norm(input, -1)
+        means = self.means[target]
+        means_normalized = means / torch.norm(means, -1)
+
+        # Maximize the cosine similarity between the input and the mean.
+        cosines = torch.sum(input_normalized - means_normalized, -1)
+        # Therefore minimize this positive number
+        diff = (1 - cosines) * 0.5 / self.batch_size # The appropriate scaling.
+
+        # Minimize the mutual cosine similarity between the means.
+        target_unique = torch.unique(target)
+        means_unique = self.means[target_unique]
+        means_unique_normalized = \
+            means_unique[target_unique] / torch.norm(means_unique, -1)
+        mutual_mean_cosines = torch.matmul(means_unique_normalized,
+                                           torch.t(means_unique_normalized))
+
+        # There are at most (N-1) (N - 2)/ 2 cosine
+        mutual_mean_cosines = \
+            torch.triu(mutual_mean_cosines, diagonal=1) / self.batch_size
+
+        # We don't want the coefficients of the means to explode towards
+        # infinity either.
+        regularization_l2 = torch.sum(self.means ** 2) / self.batch_size
+
+        return diff + mutual_mean_cosines + regularization_l2
+
+
 train_dataset = ds
 train_dataloader = DataLoader(train_dataset,
                               sampler=sample_gen,
-                              batch_size=batch_size)
+                              batch_size=ModelConfig.batch_size)
 
 resnet50 = torchvision.models.resnet50(num_classes=ds.class_count)
 loss_fn = torch.nn.CrossEntropyLoss()
+
 writer = SummaryWriter('train/eth123')
-write_interval = 1
 class_histogram_1 = [0] * ds.class_count
 
 
 def train_loop(dataloader, model, loss_fn, optimizer):
     step_count = len(dataloader)
+
     # Set the model to training mode - important for batch normalization and
     # dropout layers
     # Unnecessary in this situation but added for best practices
@@ -86,13 +146,13 @@ def train_loop(dataloader, model, loss_fn, optimizer):
         for class_id in class_ids:
             class_histogram_1[class_id] += 1
 
-        if step % write_interval == 0:
+        if step % ModelConfig.summary_write_interval == 0:
             # Train loss
             loss = loss.item()
 
             # Train classification error.
             label_pred = torch.argmax(pred, dim=1)
-            class_error = torch.sum(label_pred != y) / batch_size
+            class_error = torch.sum(label_pred != y) / ModelConfig.batch_size
 
             img = torchvision.utils.make_grid(X)
             writer.add_image('Train/image', img, step)
@@ -122,7 +182,6 @@ def train_loop(dataloader, model, loss_fn, optimizer):
                 f"loss: {loss:>7f}, ",
                 f"classification_error: {class_error:>7f} "
             ]))
-
 
 
 for epoch in range(10):
