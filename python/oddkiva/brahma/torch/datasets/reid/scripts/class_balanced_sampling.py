@@ -112,6 +112,20 @@ class HypersphericManifoldLoss(torch.nn.Module):
         return diff + mutual_mean_cosines + regularization_l2
 
 
+class NearestAssignmentLoss(torch.nn.Module):
+
+    def __init__(self, means):
+        self.means = means
+
+    def forward(self, input, target):
+        means_n = self.means / torch.norm(input, -1)
+        input_n = input / torch.norm(input, -1)
+        similarities = torch.matmul(input_n, torch.t(means_n))
+        labels_assigned = torch.argmax(similarities, -1)
+        labels_diff = torch.sum(labels_assigned == target)
+        return labels_diff
+
+
 train_dataset = ds
 train_dataloader = DataLoader(train_dataset,
                               sampler=sample_gen,
