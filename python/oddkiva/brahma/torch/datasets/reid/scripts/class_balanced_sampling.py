@@ -100,15 +100,13 @@ class HypersphericManifoldLoss(torch.nn.Module):
         self.batch_size = batch_size
 
     def forward(self, input, target):
-        input_normalized = \
-            input / torch.norm(input, dim=-1)[..., torch.newaxis]
+        input_n = input / torch.norm(input, dim=-1)[..., torch.newaxis]
 
         means = self.means[target]
-        means_normalized = \
-            means / torch.norm(means, dim=-1)[..., torch.newaxis]
+        means_n = means / torch.norm(means, dim=-1)[..., torch.newaxis]
 
         # Maximize the cosine similarity between the input and the mean.
-        cosines = torch.sum(input_normalized * means_normalized, -1)
+        cosines = torch.sum(input_n * means_n, -1)
         # Therefore minimize this positive number
         diff = (1 - cosines) * 0.5 / self.batch_size # The appropriate scaling.
         diff_sum = torch.sum(diff)
@@ -118,9 +116,9 @@ class HypersphericManifoldLoss(torch.nn.Module):
         means_unique = self.means[target_unique]
         means_unique_norm = \
             torch.norm(means_unique, dim=-1)[..., torch.newaxis]
-        means_unique_normalized = means_unique / means_unique_norm
-        mutual_mean_cosines = torch.matmul(means_unique_normalized,
-                                           torch.t(means_unique_normalized))
+        means_unique_n = means_unique / means_unique_norm
+        mutual_mean_cosines = torch.matmul(means_unique_n,
+                                           torch.t(means_unique_n))
 
         # There are at most (N-1) (N - 2)/ 2 cosine
         mutual_mean_cosines = \
@@ -141,11 +139,12 @@ class NearestAssignmentLoss(torch.nn.Module):
         self.means = means
 
     def forward(self, input, target):
-        means_n = self.means / torch.norm(input, dim=-1)
-        input_n = input / torch.norm(input, dim=-1)
+        means = self.means[target]
+        means_n = means / torch.norm(means, dim=-1)[..., torch.newaxis]
+        input_n = input / torch.norm(input, dim=-1)[..., torch.newaxis]
         similarities = torch.matmul(input_n, torch.t(means_n))
         labels_assigned = torch.argmax(similarities, -1)
-        labels_diff = torch.sum(labels_assigned == target)
+        labels_diff = torch.sum(labels_assigned != target)
         return labels_diff
 
 
@@ -227,13 +226,17 @@ def train_loop_v2(dataloader, model, loss_fn, na_loss_fn, optimizer,
         optimizer.step()
         optimizer.zero_grad()
 
-        # Only log on main process
-        if step % ModelConfig.summary_write_interval == 0:
+        # Update class statistics
+        class_ids = y
+        for class_id in class_ids:
+            class_histogram_1[class_id] += 1
+
+        if step != 0 and step % ModelConfig.summary_write_interval == 0:
             # Train loss
             loss = loss.item()
 
             # Train classification error.
-            class_error = na_loss_fn(X, y) / ModelConfig.batch_size
+            class_error = na_loss_fn(pred, y) / ModelConfig.batch_size
 
             img = torchvision.utils.make_grid(X)
             writer.add_image('Train/image', img, step)
