@@ -7,18 +7,10 @@ def to_qimage(array):
     qimage = QImage(array.data, w, h, c * w, QImage.Format_RGB888)
     return qimage
 
-
-def draw_line(array, p1, p2, color, pen_width, antialiasing=True):
-    surface = to_qimage(array)
-    p = QPainter(surface)
-    p.setRenderHints(QPainter.Antialiasing, _antialiasing)
-    p.setPen(QPen(QColor(*color), pen_width))
-    p.drawLine(QPointF(*p1), QPointF(*p2))
-    p.end()
-
 def draw_point(array, x, y, color, antialiasing=True):
     surface = to_qimage(array)
     p = QPainter(surface)
+    p.setRenderHints(QPainter.Antialiasing, antialiasing)
     p.setPen(QColor(*color));
     p.drawPoint(x, y);
     p.end()

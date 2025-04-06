@@ -64,7 +64,7 @@ def user_main():
         if kp_prev is None:
             continue
         with sara.Timer("[SARA] Feature matching"):
-            ann_matcher = sara.AnnMatcher(kp_prev, kp_curr, 0.8)
+            ann_matcher = sara.AnnMatcher(kp_prev, kp_curr, sift_nn_ratio)
             matches = ann_matcher.compute_matches()
 
         with sara.Timer("[SARA] Draw"):
