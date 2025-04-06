@@ -97,39 +97,37 @@ class HypersphericManifoldLoss(torch.nn.Module):
             means = torch.empty(num_classes, embedding_dim)
             torch.nn.init.kaiming_uniform_(means)
             self.means = torch.nn.Parameter(means)
+        self.num_classes = num_classes
         self.batch_size = batch_size
+        self.loss = torch.nn.CrossEntropyLoss()
 
     def forward(self, input, target):
         input_n = input / torch.norm(input, dim=-1)[..., torch.newaxis]
 
-        means = self.means[target]
+        means = self.means
         means_n = means / torch.norm(means, dim=-1)[..., torch.newaxis]
 
-        # Maximize the cosine similarity between the input and the mean.
-        cosines = torch.sum(input_n * means_n, -1)
-        # Therefore minimize this positive number
-        diff = (1 - cosines) * 0.5 / self.batch_size # The appropriate scaling.
-        diff_sum = torch.sum(diff)
+        # Maximize cosine similarities
+        cosines = torch.matmul(input_n, torch.t(means_n))
+        # Think of the cosine similarity value as some sort of probability value.
+        logit = torch.exp((1 + cosines) * 0.5)
+        logit = logit / torch.sum(logit, 1)[..., torch.newaxis]
 
-        # Minimize the mutual cosine similarity between the means.
-        target_unique = torch.unique(target)
-        means_unique = self.means[target_unique]
-        means_unique_norm = \
-            torch.norm(means_unique, dim=-1)[..., torch.newaxis]
-        means_unique_n = means_unique / means_unique_norm
-        mutual_mean_cosines = torch.matmul(means_unique_n,
-                                           torch.t(means_unique_n))
+        target_vecs = torch.nn.functional.one_hot(target, self.num_classes)
 
-        # There are at most (N-1) (N - 2)/ 2 cosine
-        mutual_mean_cosines = \
-            torch.triu(mutual_mean_cosines, diagonal=1) / self.batch_size
-        mutual_mean_cosine_sum = torch.sum(mutual_mean_cosines)
+        xentropy_loss = torch.sum(-logit * target_vecs) / self.batch_size
+
+        # Also minimize mean inter-similarities
+        antitarget_vecs = torch.ones(self.means.shape) - target_vecs
+        means_intersims = torch.matmul(means_n, torch.t(means_n)) ** 2
+        xentropy_loss2 = torch.sum(-torch.log(means_intersims) *
+                                   antitarget_vecs) / (self.batch_size ** 2)
 
         # We don't want the coefficients of the means to explode towards
         # infinity either.
         regularization_l2 = torch.sum(self.means ** 2) / self.batch_size
 
-        return diff_sum + mutual_mean_cosine_sum + regularization_l2
+        return xentropy_loss + xentropy_loss2 + regularization_l2
 
 
 class NearestAssignmentLoss(torch.nn.Module):

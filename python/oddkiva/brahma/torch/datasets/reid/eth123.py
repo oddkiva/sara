@@ -1,19 +1,21 @@
 import os
 from pathlib import Path
-from typing import List, Optional
-from typing_extensions import Tuple
+from typing import List, Optional, Tuple
 
 import torch
 import torch.torch_version
 import torchvision.transforms.v2 as v2
-from torch.utils.data import Dataset
 if torch.torch_version.TorchVersion(torch.__version__) < (2, 6, 0):
     from torchvision.io.image import read_image as decode_image
 else:
     from torchvision.io.image import decode_image
 
+from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
+    ClassificationDatasetABC
+)
 
-class ETH123(Dataset):
+
+class ETH123(ClassificationDatasetABC):
 
     def __init__(
         self,
@@ -73,7 +75,6 @@ class ETH123(Dataset):
     def __len__(self):
         return len(self._image_paths)
 
-
     def __getitem__(self, idx) -> Tuple[torch.Tensor, int]:
         image = decode_image(str(self._image_paths[idx]))
         if self._transform is not None:
@@ -97,4 +98,3 @@ class ETH123(Dataset):
 
     def image_class_name(self, idx: int) -> str:
         return self._image_labels[idx]
-
