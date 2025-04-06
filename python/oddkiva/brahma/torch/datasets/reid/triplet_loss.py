@@ -23,10 +23,20 @@ class TripletLoss(torch.nn.Module):
                 positive_desc: torch.Tensor,
                 negative_desc: torch.Tensor,
                 model_params: List[torch.nn.Parameter]) -> torch.Tensor:
+        # Should be close to zero.
         d_ap = torch.sum((anchor_desc - positive_desc) ** 2, dim=-1)
+        # Cannot be zero and must be a very large positive
         d_an = torch.sum((anchor_desc - negative_desc) ** 2, dim=-1)
 
-        # The triplet loss can be zero.
+        # The triplet loss.
+        # When the train loss converges, we expect:
+        #   d_ap == 0
+        #   d_an >> 1
+        #   triplet_loss <= self.alpha
+        #
+        # - A negative triplet loss provides good confidence in the training.
+        # - A positive triplet loss means we need to wait a bit or tune a bit the
+        #   coefficients (alpha, etc).
         triplet_loss = torch.maximum(self.alpha + d_ap - d_an, torch.tensor(0))
         mean_triplet_loss = torch.mean(triplet_loss)
 
