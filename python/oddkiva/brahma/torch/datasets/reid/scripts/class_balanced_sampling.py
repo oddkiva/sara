@@ -1,6 +1,5 @@
 import platform
 from pathlib import Path
-from typing import List
 
 import torch
 import torch.nn
@@ -9,8 +8,10 @@ import torchvision.transforms.v2 as v2
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
+from oddkiva.brahma.torch.data.class_balanced_sampler import (
+    make_class_balanced_sampler
+)
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
-from oddkiva.brahma.torch.data.class_balanced_sampler import ClassBalancedSampler
 
 
 class ModelConfig:
@@ -35,39 +36,6 @@ DATA_TRANSFORM = v2.Compose([
     v2.Resize(ModelConfig.image_size, antialias=True)
 ])
 ETH123_DS = ETH123(ROOT_PATH, transform=DATA_TRANSFORM)
-
-
-def make_class_balanced_sampler(dataset: ETH123, repeat: int = 1):
-    # Group samples by class.
-    samples_grouped_by_class_dict = {}
-    for sample_id, class_id in enumerate(dataset.image_class_ids):
-        if class_id not in samples_grouped_by_class_dict:
-            samples_grouped_by_class_dict[class_id] = [sample_id]
-        else:
-            samples_grouped_by_class_dict[class_id].append(sample_id)
-
-    samples_grouped_by_class = []
-    for class_id in range(dataset.class_count):
-        samples_grouped_by_class.append(samples_grouped_by_class_dict[class_id])
-
-    sample_gen = ClassBalancedSampler(samples_grouped_by_class, repeat)
-
-    sample_ids = [*sample_gen]
-    def check_class_statistics(sample_ids: List[int]):
-        class_histogram = [0] * dataset.class_count
-        for sample_id in sample_ids:
-            class_id = dataset.image_class_ids[sample_id]
-            class_histogram[class_id] += 1
-        a = min(enumerate(class_histogram), key=lambda v: v[1])
-        b = max(enumerate(class_histogram), key=lambda v: v[1])
-        uniform_sampling_score = a[1] / b[1]
-        print('class histogram=\n', class_histogram)
-        print(f'least frequently sampled class ID: {a[0]}, count: {a[1]}')
-        print(f'most  frequently sampled class ID: {b[0]}, count: {b[1]}')
-        print(f'uniform_sampling_score = {uniform_sampling_score}')
-    check_class_statistics(sample_ids)
-
-    return sample_gen
 
 
 class ReidDescriptor50(torch.nn.Module):
@@ -304,4 +272,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+   main()

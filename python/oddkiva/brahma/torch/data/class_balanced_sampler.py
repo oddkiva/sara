@@ -3,8 +3,14 @@ from typing import Iterator, List
 import torch
 from torch.utils.data import Sampler
 
+from oddkiva.brahma.torch.datasets.utils import group_samples_by_class
+from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
+    ClassificationDatasetABC
+)
+
 
 class ClassBalancedSampler(Sampler[int]):
+
     def __init__(
         self, sample_ids_grouped_by_class: List[List[int]],
         repeat: int = 1
@@ -35,8 +41,9 @@ class ClassBalancedSampler(Sampler[int]):
         # print(f'sampled classes = {sampled_classes}')
 
         # Fetch the cardinality of each sampled class.
-        sample_counts_in_sampled_classes = self.sample_counts_per_class[
-            sampled_classes
+        sample_counts_in_sampled_classes = [
+            int(v.item())
+            for v in self.sample_counts_per_class[sampled_classes]
         ]
         # print(
         #     f'sample_counts_in_sampled_classes = {sample_counts_in_sampled_classes}'
@@ -45,7 +52,7 @@ class ClassBalancedSampler(Sampler[int]):
         # Sample a data sample within each sampled class.
         # Draw a sample index within each class.
         sample_ixs = [
-            torch.randint(0, sample_count, (1,)).item()
+            int(torch.randint(0, sample_count, (1,)).item())
             for sample_count in sample_counts_in_sampled_classes
         ]
         # print(f'sample_ixs = {sample_ixs}')
@@ -59,3 +66,10 @@ class ClassBalancedSampler(Sampler[int]):
 
         for i in range(self.sample_count_balanced):
             yield sample_ids[i]
+
+
+def make_class_balanced_sampler(dataset: ClassificationDatasetABC,
+                                repeat: int = 1):
+    samples_grouped_by_class = group_samples_by_class(dataset)
+    sample_gen = ClassBalancedSampler(samples_grouped_by_class, repeat)
+    return sample_gen
