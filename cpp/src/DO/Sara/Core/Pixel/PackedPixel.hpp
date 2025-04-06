@@ -83,10 +83,10 @@ namespace DO { namespace Sara {
     inline bool operator==(const PackedPixelBase_4& other) const
     {
       return
-        channel_0 == other._channel_0 &&
-        channel_1 == other._channel_1 &&
-        channel_2 == other._channel_2 &&
-        channel_3 == other._channel_3;
+        channel_0 == other.channel_0 &&
+        channel_1 == other.channel_1 &&
+        channel_2 == other.channel_2 &&
+        channel_3 == other.channel_3;
     }
 
     inline bool operator!=(const PackedPixelBase_4& other) const
