@@ -73,8 +73,10 @@ namespace DO::Sara {
                const double normalized_residual) -> double
   {
     return std::log(MinimalSolver::num_candidate_models) +
-           log_combinatorial(num_data_points, subset_size) +
-           log_combinatorial(subset_size, MinimalSolver::num_points) +
+           log_combinatorial(static_cast<int>(num_data_points),
+                             static_cast<int>(subset_size)) +
+           log_combinatorial(static_cast<int>(subset_size),
+                             MinimalSolver::num_points) +
            std::log(normalized_residual) * subset_size;
   }
 

@@ -50,7 +50,7 @@ auto estimate_box_height(
   const Eigen::Matrix<T, 3, 1> b = x * R1 + y * R2 + t;
 
   const Eigen::Matrix<T, 2, 1> solution =
-      A.template colPivHouseholderQr().solve(b);
+      A.colPivHouseholderQr().solve(b);
 
   const auto& scale = solution(0);
   const auto& height = solution(1);
