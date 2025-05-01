@@ -64,8 +64,7 @@ namespace DO::Sara {
     // TODO: remove the first seven points for which they must be 0.
 
     return r;
-
-
+  }
 
   // Calculate the Number of False Alarms (NFA).
   template <typename MinimalSolver>
