@@ -36,11 +36,12 @@ auto sara_graphics_main(int const argc, char** const argv) -> int
   auto video_filepath = fs::path{
 #define READ_HLS_VIDEO_STREAM
 #if defined(READ_HLS_VIDEO_STREAM)
-    "https://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8"
+      "https://sample.vodobox.net/skate_phantom_flex_4k/"
+      "skate_phantom_flex_4k.m3u8"
 #elif defined(_WIN32)
       "C:/Users/David/Desktop/GOPR0542.MP4"
 #elif defined(__APPLE__)
-      // "/Users/david/Desktop/Datasets/videos/sample10.mp4"
+      "/Users/david/Desktop/Datasets/videos/sample10.mp4"
 #else
       "/home/david/Desktop/Datasets/sfm/Family.mp4"
 #endif
