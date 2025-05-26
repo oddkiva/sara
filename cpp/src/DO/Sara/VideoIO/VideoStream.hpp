@@ -25,7 +25,7 @@ struct AVPacket;
 struct SwsContext;
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   //! @defgroup VideoIO Video I/O
   //! @{
@@ -136,4 +136,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-}}  // namespace DO::Sara
+}  // namespace DO::Sara
