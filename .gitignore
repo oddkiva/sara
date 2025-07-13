@@ -15,7 +15,7 @@ latex/
 CMakeLists.txt.user
 
 # Python
-**/__pycache__
+**/__pycache__/
 *.pyc
 *.pyo
 *.coverage

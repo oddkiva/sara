@@ -84,4 +84,3 @@ class TripletDatabase(Dataset):
             triplets.append((anchor_gid, positive_gid, negative_gid))
 
         self.triplets = triplets
-

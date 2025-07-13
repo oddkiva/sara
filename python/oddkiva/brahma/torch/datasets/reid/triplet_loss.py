@@ -8,7 +8,7 @@ class TripletLoss(torch.nn.Module):
 
     def __init__(self,
                  alpha: float = 2e-1,
-                 weight_decay_coeff: float = 5e-4,
+                 weight_decay_coeff: float = 1. / 5e4,
                  summary_writer: Optional[SummaryWriter] = None,
                  summary_write_interval: int = 10):
         self.alpha = alpha
@@ -43,9 +43,16 @@ class TripletLoss(torch.nn.Module):
         # Also small coefficients. So add this L2-norm regularized.
         weight_decay = torch.tensor(0)
         for v in model_params:
-            weight_decay += 0.5 * torch.sum(v ** 2)
-        regularized_triplet_loss = mean_triplet_loss + \
-            self.weight_decay_coeff * weight_decay
+            weight_decay = weight_decay + 0.5 * torch.sum(v ** 2)
+        regularization = self.weight_decay_coeff * weight_decay
+
+        weight_triplet_loss = 10
+        mtl_rw = weight_triplet_loss * mean_triplet_loss
+        regularized_triplet_loss = mtl_rw + regularization
+        # print('mtl =', mean_triplet_loss)
+        # print('wts =', weight_decay)
+        # print('mtl_rw', mtl_rw)
+        # print('wts_rw =', regularization)
 
         self.step += 1
         if self.summary_writer is not None and \
@@ -54,7 +61,6 @@ class TripletLoss(torch.nn.Module):
                                   regularized_triplet_loss)
 
         return regularized_triplet_loss
-
 
     def _write_summaries(self,
                          triplet_loss: torch.Tensor,
