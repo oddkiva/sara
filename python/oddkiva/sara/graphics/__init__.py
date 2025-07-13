@@ -2,7 +2,6 @@ from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QApplication
 
 from oddkiva.sara.graphics.derived_qobjects.graphics_context import GraphicsContext
-import oddkiva.sara.graphics.image_draw as image_draw
 
 
 def millisleep(ms):

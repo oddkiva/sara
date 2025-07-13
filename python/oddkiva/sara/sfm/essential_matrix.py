@@ -41,7 +41,7 @@ def extract_relative_motions_horn(E):
 
 
 def extract_relative_motions_hartley_zisserman(E):
-    U, S, Vt = la.svd(E)
+    U, _, Vt = la.svd(E)
 
     if la.det(U) < 0:
         U[:, 2] *= -1

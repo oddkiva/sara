@@ -14,7 +14,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-auto normalization_transform(const std::vector<Eigen::Vector2f>& points)
+inline auto normalization_transform(const std::vector<Eigen::Vector2f>& points)
     -> Eigen::Matrix3f
 {
   auto T = Eigen::Matrix3f{};
@@ -42,7 +42,8 @@ auto normalization_transform(const std::vector<Eigen::Vector2f>& points)
   return T;
 }
 
-auto apply(const Eigen::Matrix3f& T, const std::vector<Eigen::Vector2f>& points)
+inline auto apply(const Eigen::Matrix3f& T,
+                  const std::vector<Eigen::Vector2f>& points)
     -> std::vector<Eigen::Vector2f>
 {
   auto points_normalized = points;
@@ -52,7 +53,8 @@ auto apply(const Eigen::Matrix3f& T, const std::vector<Eigen::Vector2f>& points)
 }
 
 
-auto y_parabola(const std::vector<Eigen::Vector2f>& points) -> Eigen::Vector3f
+inline auto y_parabola(const std::vector<Eigen::Vector2f>& points)
+    -> Eigen::Vector3f
 {
   auto A = Eigen::MatrixXf(points.size(), 3);
   auto b = Eigen::VectorXf(points.size());
@@ -67,7 +69,8 @@ auto y_parabola(const std::vector<Eigen::Vector2f>& points) -> Eigen::Vector3f
   return f;
 }
 
-auto x_parabola(const std::vector<Eigen::Vector2f>& points) -> Eigen::Vector3f
+inline auto x_parabola(const std::vector<Eigen::Vector2f>& points)
+    -> Eigen::Vector3f
 {
   auto A = Eigen::MatrixXf(points.size(), 3);
   auto b = Eigen::VectorXf(points.size());

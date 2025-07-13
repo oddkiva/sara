@@ -13,6 +13,7 @@
 
 #include <DO/Sara/ChessboardDetection/ChessboardDetector.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageIO/Details/Heif.hpp>
 #include <DO/Sara/ImageProcessing/FastColorConversion.hpp>
 
 #include "Utilities/ImageOrVideoReader.hpp"

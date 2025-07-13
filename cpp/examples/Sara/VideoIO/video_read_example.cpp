@@ -34,7 +34,11 @@ auto sara_graphics_main(int const argc, char** const argv) -> int
   using namespace std::string_literals;
 
   auto video_filepath = fs::path{
-#if defined(_WIN32)
+#define READ_HLS_VIDEO_STREAM
+#if defined(READ_HLS_VIDEO_STREAM)
+      "https://sample.vodobox.net/skate_phantom_flex_4k/"
+      "skate_phantom_flex_4k.m3u8"
+#elif defined(_WIN32)
       "C:/Users/David/Desktop/GOPR0542.MP4"
 #elif defined(__APPLE__)
       "/Users/david/Desktop/Datasets/videos/sample10.mp4"

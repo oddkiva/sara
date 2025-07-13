@@ -1,6 +1,6 @@
 import torch
 
-import oddkiva.brahma.image_processing.warp as W
+import oddkiva.brahma.torch.image_processing.warp as W
 
 
 def test_enumerate_coords():
