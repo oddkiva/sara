@@ -52,12 +52,15 @@ if SYSTEM == "Linux":
     ONNXRUNTIME_ROOT_PATH = OPT_PATH / "onnxruntime-linux-x64-gpu-1.14.0"
     NVIDIA_CODEC_SDK_ROOT_PATH = OPT_PATH / "Video_Codec_SDK_12.1.14"
     if not FORCE_COMPILE_WITH_GCC:
-        SWIFT_TOOLCHAIN_DIR = (
-            pathlib.Path(os.environ["SWIFTLY_TOOLCHAINS_DIR"]) /
-            SWIFT_VERSION
-        )
-        SWIFT_TOOLCHAIN_BIN_DIR = SWIFT_TOOLCHAIN_DIR / "usr" / "bin"
-        SWIFTC_PATH = SWIFT_TOOLCHAIN_BIN_DIR / "swiftc"
+        try:
+            SWIFT_TOOLCHAIN_DIR = (
+                pathlib.Path(os.environ["SWIFTLY_TOOLCHAINS_DIR"]) /
+                SWIFT_VERSION
+            )
+            SWIFT_TOOLCHAIN_BIN_DIR = SWIFT_TOOLCHAIN_DIR / "usr" / "bin"
+            SWIFTC_PATH = SWIFT_TOOLCHAIN_BIN_DIR / "swiftc"
+        except:
+            SWIFTC_PATH = ""
     else:
         SWIFTC_PATH = ""
 elif SYSTEM == "Darwin":
