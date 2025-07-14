@@ -30,6 +30,10 @@ if (UNIX)
   if (APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-copy")
   endif()
+  if (NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+    # Workaround to compile with boost 1.74...
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-constexpr-conversion")
+  endif ()
   # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
   # Additional flags for Release builds.

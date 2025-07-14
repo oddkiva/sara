@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import multiprocessing as mp
+import os
 import pathlib
 import platform
 import shutil
@@ -27,8 +28,8 @@ BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 UBUNTU_VERSION = "22.04"
 CUDA_VERSION = "12.1.0"
 TRT_VERSION = "8.6"
-SWIFT_VERSION = "5.10"
-HALIDE_VERSION = "17.0.1"
+SWIFT_VERSION = "6.1.2"
+HALIDE_VERSION = "19.0.0"
 
 # Docker
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
@@ -51,8 +52,11 @@ if SYSTEM == "Linux":
     ONNXRUNTIME_ROOT_PATH = OPT_PATH / "onnxruntime-linux-x64-gpu-1.14.0"
     NVIDIA_CODEC_SDK_ROOT_PATH = OPT_PATH / "Video_Codec_SDK_12.1.14"
     if not FORCE_COMPILE_WITH_GCC:
-        SWIFT_TOOLCHAIN_DIR = OPT_PATH / f"swift-{SWIFT_VERSION}-RELEASE-ubuntu{UBUNTU_VERSION}"
-        SWIFT_TOOLCHAIN_BIN_DIR = SWIFT_TOOLCHAIN_DIR / "usr/bin"
+        SWIFT_TOOLCHAIN_DIR = (
+            pathlib.Path(os.environ["SWIFTLY_TOOLCHAINS_DIR"]) /
+            SWIFT_VERSION
+        )
+        SWIFT_TOOLCHAIN_BIN_DIR = SWIFT_TOOLCHAIN_DIR / "usr" / "bin"
         SWIFTC_PATH = SWIFT_TOOLCHAIN_BIN_DIR / "swiftc"
     else:
         SWIFTC_PATH = ""
@@ -113,7 +117,7 @@ class BuildConfiguration:
 PROJECT_TYPE = BuildConfiguration.infer_project_type(SYSTEM)
 
 
-def execute(cmd, cwd):
+def execute(cmd, cwd: pathlib.Path):
     with subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
@@ -121,16 +125,17 @@ def execute(cmd, cwd):
         universal_newlines=True,
         cwd=cwd,
     ) as p:
-        for line in p.stdout:
-            print(line, end="")  # process line here
+        if p.stdout is not None:
+            for line in p.stdout:
+                print(line, end="")  # process line here
 
     if p.returncode != 0:
         raise subprocess.CalledProcessError(p.returncode, p.args)
 
 
 def generate_project(
-    source_dir: str,
-    build_dir: str,
+    source_dir: pathlib.Path,
+    build_dir: pathlib.Path,
     build_type: str,
     from_scratch: bool = False,
     build_for_ci: bool = False
@@ -225,12 +230,12 @@ def generate_project(
         cmake_options.append(f"-D PYTHON_INCLUDE_DIR={PYTHON_INCLUDE_DIR}")
         cmake_options.append(f"-D PYTHON_LIBRARY={PYTHON_LIBRARY}")
 
-    cmd = ["cmake", source_dir] + cmake_options
+    cmd = ["cmake", str(source_dir)] + cmake_options
     execute(cmd, build_dir)
 
 
 def generate_project_for_web(
-    build_dir: str,
+    build_dir: pathlib.Path,
     build_type: str,
     from_scratch: bool = False
 ):
@@ -249,7 +254,7 @@ def generate_project_for_web(
     execute(cmd, build_dir)
 
 
-def build_project(build_dir: str, build_type: str):
+def build_project(build_dir: pathlib.Path, build_type: str):
     cpu_count = mp.cpu_count()
     command_line = ["cmake", "--build", ".", f"-j{cpu_count}", "-v"]
     if PROJECT_TYPE == "Xcode":
@@ -258,7 +263,7 @@ def build_project(build_dir: str, build_type: str):
     execute(command_line, build_dir)
 
 
-def run_project_tests(build_dir: str, build_type: str,
+def run_project_tests(build_dir: pathlib.Path, build_type: str,
                       build_for_ci: bool = False):
     command_line = ["ctest", "--output-on-failure"]
     if build_for_ci:
@@ -330,7 +335,7 @@ def serve_book():
 def build_book_docker():
     # Build the docker image.
     sara_book_build_image = "oddkiva/sara-book-build"
-    ret = subprocess.Popen(
+    subprocess.Popen(
         [
             "docker",
             "build",
@@ -353,7 +358,7 @@ def build_book_docker():
     )
 
     # Run the docker image.
-    ret = subprocess.Popen(
+    subprocess.Popen(
         [
             "docker",
             "run",
