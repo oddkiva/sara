@@ -16,3 +16,7 @@ endif ()
 add_subdirectory(Datasets)
 add_subdirectory(ChessboardDetection)
 add_subdirectory(NeuralNetworks)
+
+
+# Cloud development
+add_subdirectory(AWS)
