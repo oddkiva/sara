@@ -29,7 +29,7 @@ UBUNTU_VERSION = "22.04"
 CUDA_VERSION = "12.1.0"
 TRT_VERSION = "8.6"
 SWIFT_VERSION = "6.1.2"
-HALIDE_VERSION = "17.0.1"
+HALIDE_VERSION = "19.0.0"
 
 # Docker
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
@@ -125,8 +125,9 @@ def execute(cmd, cwd: pathlib.Path):
         universal_newlines=True,
         cwd=cwd,
     ) as p:
-        for line in p.stdout:
-            print(line, end="")  # process line here
+        if p.stdout is not None:
+            for line in p.stdout:
+                print(line, end="")  # process line here
 
     if p.returncode != 0:
         raise subprocess.CalledProcessError(p.returncode, p.args)
