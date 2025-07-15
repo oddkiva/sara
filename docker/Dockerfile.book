@@ -1,6 +1,6 @@
-FROM rocker/verse:4.3.2
+FROM rocker/verse:4.4.3
 
-MAINTAINER "Odd Kiva"
+LABEL authors="Odd Kiva"
 
 # To avoid console interaction with apt.
 ARG DEBIAN_FRONTEND=noninteractive
