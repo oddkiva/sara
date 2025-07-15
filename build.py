@@ -47,20 +47,22 @@ FORCE_COMPILE_WITH_GCC = False
 
 # Third-party libraries that makes Sara faster, stronger, cooler...
 if SYSTEM == "Linux":
+    SWIFTLY_TOOLCHAINS_DIR = os.environ.get("SWIFTLY_TOOLCHAINS_DIR")
     OPT_PATH = pathlib.Path("/opt")
     HALIDE_ROOT_PATH = OPT_PATH / (f"Halide-{HALIDE_VERSION}-x86-64-linux")
     ONNXRUNTIME_ROOT_PATH = OPT_PATH / "onnxruntime-linux-x64-gpu-1.14.0"
     NVIDIA_CODEC_SDK_ROOT_PATH = OPT_PATH / "Video_Codec_SDK_12.1.14"
+
     if not FORCE_COMPILE_WITH_GCC:
-        try:
+        if SWIFTLY_TOOLCHAINS_DIR is None:
+            SWIFTC_PATH = ""
+        else:
             SWIFT_TOOLCHAIN_DIR = (
-                pathlib.Path(os.environ["SWIFTLY_TOOLCHAINS_DIR"]) /
+                pathlib.Path(SWIFTLY_TOOLCHAINS_DIR) /
                 SWIFT_VERSION
             )
             SWIFT_TOOLCHAIN_BIN_DIR = SWIFT_TOOLCHAIN_DIR / "usr" / "bin"
             SWIFTC_PATH = SWIFT_TOOLCHAIN_BIN_DIR / "swiftc"
-        except:
-            SWIFTC_PATH = ""
     else:
         SWIFTC_PATH = ""
 elif SYSTEM == "Darwin":
