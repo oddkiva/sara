@@ -1,10 +1,9 @@
 import sys
 
-from PySide6.QtCore import Qt
-
 import numpy as np
 
 import oddkiva.sara as sara
+import oddkiva.sara.graphics.image_draw as image_draw
 import oddkiva.shakti as shakti
 
 
@@ -74,12 +73,9 @@ def user_main():
                     continue
                 color = np.random.randint(0, 255, size=(3,))
                 for a, b in zip(e[:-1], e[1:]):
-                    sara.image_draw.draw_circle(video_frame_display, a, 3,
-                                                color, 2)
-                    sara.image_draw.draw_circle(video_frame_display,b, 3,
-                                                color, 2)
-                    sara.image_draw.draw_line(video_frame_display, a, b, color,
-                                              1)
+                    image_draw.draw_circle(video_frame_display, a, 3, color, 2)
+                    image_draw.draw_circle(video_frame_display,b, 3, color, 2)
+                    image_draw.draw_line(video_frame_display, a, b, color, 1)
             sara.draw_image(video_frame_display)
 
 if __name__ == '__main__':
