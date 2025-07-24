@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from do.sara.sfm.essential_matrix import camera_matrix
+from oddkiva.sara.sfm.essential_matrix import camera_matrix
 
 
 def rq(A):
