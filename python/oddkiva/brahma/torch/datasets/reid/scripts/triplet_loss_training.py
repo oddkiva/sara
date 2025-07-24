@@ -88,7 +88,7 @@ def train_loop(dataloader: DataLoader, model: torch.nn.Module,
             img_pos = torchvision.utils.make_grid(pos)
             img_neg = torchvision.utils.make_grid(neg)
             writer.add_image('Train/anchors', img_anchor, step)
-            writer.add_image('Train/poitives', img_pos, step)
+            writer.add_image('Train/positives', img_pos, step)
             writer.add_image('Train/negatives', img_neg, step)
             writer.add_scalar('Train/triplet_loss', loss, step)
 
@@ -117,6 +117,11 @@ def train_loop(dataloader: DataLoader, model: torch.nn.Module,
 
 
 def main():
+    # THE DATASET
+    train_dataset = ETH123_DS
+    writer = SummaryWriter('train/eth123')
+    class_histogram = [0] * ETH123_DS.class_count
+
     # THE MODEL
     #
     # 1. A feature extractor model.
@@ -126,12 +131,10 @@ def main():
 
     # THE LOSS FUNCTIONS
     #
-    triplet_loss = TripletLoss()
-
-    # THE DATASET
-    train_dataset = ETH123_DS
-    writer = SummaryWriter('train/eth123')
-    class_histogram = [0] * ETH123_DS.class_count
+    triplet_loss = TripletLoss(
+        summary_writer=writer,
+        summary_write_interval=ModelConfig.summary_write_interval
+    )
 
     for epoch in range(10):
         # Restart the state of the Adam optimizer every epoch.

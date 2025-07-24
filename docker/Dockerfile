@@ -1,6 +1,6 @@
 FROM nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
 
-MAINTAINER "Odd Kiva"
+LABEL authors="Odd Kiva"
 
 # To avoid console interaction with apt.
 ARG DEBIAN_FRONTEND=noninteractive

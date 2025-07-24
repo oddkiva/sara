@@ -7,12 +7,14 @@ from torch.utils.tensorboard.writer import SummaryWriter
 class TripletLoss(torch.nn.Module):
 
     def __init__(self,
-                 alpha: float = 2e-1,
+                 alpha: float = 5e-1,
                  weight_decay_coeff: float = 1. / 5e4,
                  summary_writer: Optional[SummaryWriter] = None,
-                 summary_write_interval: int = 10):
+                 summary_write_interval: int = 10,
+                 train_with_regularization: bool = False):
         self.alpha = alpha
         self.weight_decay_coeff = weight_decay_coeff
+        self.train_with_regularization = train_with_regularization
 
         self.summary_writer = summary_writer
         self.step = 0
@@ -44,11 +46,14 @@ class TripletLoss(torch.nn.Module):
         weight_decay = torch.tensor(0)
         for v in model_params:
             weight_decay = weight_decay + 0.5 * torch.sum(v ** 2)
+
         regularization = self.weight_decay_coeff * weight_decay
 
         weight_triplet_loss = 10
         mtl_rw = weight_triplet_loss * mean_triplet_loss
+
         regularized_triplet_loss = mtl_rw + regularization
+
         # print('mtl =', mean_triplet_loss)
         # print('wts =', weight_decay)
         # print('mtl_rw', mtl_rw)
@@ -57,10 +62,16 @@ class TripletLoss(torch.nn.Module):
         self.step += 1
         if self.summary_writer is not None and \
                 self.step % self.summary_write_interval == 0:
-            self._write_summaries(triplet_loss, d_ap, d_an, weight_decay,
+            self._write_summaries(torch.mean(triplet_loss),
+                                  torch.mean(d_ap),
+                                  torch.mean(d_an),
+                                  weight_decay,
                                   regularized_triplet_loss)
 
-        return regularized_triplet_loss
+        if self.train_with_regularization:
+            return regularized_triplet_loss
+        else:
+            return mean_triplet_loss
 
     def _write_summaries(self,
                          triplet_loss: torch.Tensor,
@@ -71,9 +82,9 @@ class TripletLoss(torch.nn.Module):
         if self.summary_writer is None:
             return
 
-        self.summary_writer.add_scalar('triplet_loss', triplet_loss, self.step)
-        self.summary_writer.add_scalar('d_ap', torch.mean(d_ap), self.step)
-        self.summary_writer.add_scalar('d_an', torch.mean(d_an), self.step)
-        self.summary_writer.add_scalar('weight_decay', weight_decay, self.step)
-        self.summary_writer.add_scalar('regularized_triplet_loss',
+        self.summary_writer.add_scalar('TripletLoss/triplet_loss', triplet_loss, self.step)
+        self.summary_writer.add_scalar('TripletLoss/d_ap', torch.mean(d_ap), self.step)
+        self.summary_writer.add_scalar('TripletLoss/d_an', torch.mean(d_an), self.step)
+        self.summary_writer.add_scalar('TripletLoss/weight_decay', weight_decay, self.step)
+        self.summary_writer.add_scalar('TripletLoss/regularized_triplet_loss',
                                        regularized_triplet_loss, self.step)
