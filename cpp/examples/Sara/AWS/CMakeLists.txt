@@ -7,8 +7,13 @@ endif ()
 
 list(APPEND SERVICE_COMPONENTS ec2 kinesisvideo kinesis-video-archived-media)
 
-find_package(AWSSDK REQUIRED COMPONENTS ${SERVICE_COMPONENTS})
+find_package(AWSSDK COMPONENTS ${SERVICE_COMPONENTS})
 find_package(DO_Sara COMPONENTS Core Graphics VideoIO REQUIRED)
+
+if (NOT AWSSDK_FOUND)
+  return ()
+endif ()
+
 
 if (MSVC AND AWSSDK_INSTALL_AS_SHARED_LIBS)
   # Copy relevant AWS SDK for C++ libraries into the current binary directory
