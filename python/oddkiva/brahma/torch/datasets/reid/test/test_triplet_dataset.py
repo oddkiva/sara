@@ -1,13 +1,11 @@
-from pathlib import Path
-
+from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import (
     TripletDatabase)
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
 
 
 def test_triplet_sampling():
-    # eth123_root_path = Path('/Users/oddkiva/Downloads/reid/dataset_ETHZ/')
-    eth123_root_path = Path('/home/david/GitLab/oddkiva/sara/data/reid/dataset_ETHZ/')
+    eth123_root_path = DATA_DIR_PATH / 'reid' / 'dataset_ETHZ/'
     assert eth123_root_path.exists()
     eth123_ds = ETH123(eth123_root_path)
 
