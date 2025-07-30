@@ -18,7 +18,7 @@ jobs:
         # os:  [macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            container: 'oddkiva/sara-devel:cuda12.1.0-ubuntu22.04-trt8.6-swift5.10-halide17.0.1'
+            container: 'oddkiva/sara-devel:cuda12.1.0-ubuntu22.04-trt8.6-swift6.1.2-halide19.0.0'
           - os: ubuntu-latest
             container: 'oddkiva/sara-emsdk-devel:latest'
 
@@ -32,6 +32,9 @@ jobs:
     - name: Build and test on Ubuntu
       if: startsWith(matrix.container, 'oddkiva/sara-devel')
       run: |
+        # Use clang compiler from the Swift toolchain.
+        . /root/.local/share/swiftly/env.sh
+        # Allow labelling with git commit SHA when compiling libraries.
         git config --global --add safe.directory $(pwd)
         ./build.py --tasks library --build_type Release --from_scratch --ci
 
