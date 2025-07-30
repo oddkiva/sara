@@ -33,7 +33,7 @@ jobs:
       if: startsWith(matrix.container, 'oddkiva/sara-devel')
       run: |
         # Use clang compiler from the Swift toolchain.
-        . $HOME/.local/share/swiftly/env.sh
+        . /root/.local/share/swiftly/env.sh
         # Allow labelling with git commit SHA when compiling libraries.
         git config --global --add safe.directory $(pwd)
         ./build.py --tasks library --build_type Release --from_scratch --ci
