@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 
 import torch
@@ -9,6 +10,9 @@ from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
 from oddkiva.brahma.torch.datasets.utils import group_samples_by_class
 
 
+LOGGER = logging.getLogger('TripletDatabase')
+
+
 class TripletDatabase(Dataset):
 
     TripletSample = Tuple[Tuple[torch.Tensor, torch.Tensor, torch.Tensor],
@@ -18,7 +22,9 @@ class TripletDatabase(Dataset):
         self.base_dataset = base_dataset
         self.repeat = repeat
 
+        LOGGER.info('Grouping samples by classes...')
         self._group_samples_by_class()
+        LOGGER.info('Generating triplet samples...')
         self._generate_triplet_samples()
 
     def  __len__(self):
@@ -54,13 +60,22 @@ class TripletDatabase(Dataset):
 
     def _generate_triplet_samples(self):
         # Draw two distincts class indices.
-        positive_negative_class_pairs = []
-        for _ in range(self.sample_count_balanced):
-            positive_negative_class_pairs.append(
-                torch.randperm(self.base_dataset.class_count)[:2]
-            )
+        LOGGER.info('Positive-negative class sampling...')
+        # positive_negative_class_pairs = []
+        # for _ in range(self.sample_count_balanced):
+        #     positive_negative_class_pairs.append(
+        #         torch.randperm(self.base_dataset.class_count)[:2]
+        #     )
+        class_weights = torch.tensor(
+            [1.0] * self.base_dataset.class_count
+        ).expand(
+            self.sample_count_balanced, -1
+        )
+        positive_negative_class_pairs = torch.multinomial(
+            class_weights, num_samples=2, replacement=False)
 
         # Draw triplets of sample indices.
+        LOGGER.info('Triplet sampling...')
         triplets = []
         for class_pair in positive_negative_class_pairs:
             p_class, n_class = [int(v.item()) for v in class_pair]

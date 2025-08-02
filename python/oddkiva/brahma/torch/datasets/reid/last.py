@@ -23,55 +23,32 @@ class LaST(ClassificationDatasetABC):
         transform: Optional[v2.Transform] = None,
         dataset_type: str = 'train'
     ):
-        if dataset_type == 'train':
+        if dataset_type != 'train':
             raise NotImplementedError()
 
-        self._root_path = root_path
+        self._data_dir_path = root_path / dataset_type
         self._transform = transform
 
         # Populate the list of class directory paths
-        paths = [Path(x[0]).relative_to(root_path)
-                 for x in os.walk(root_path)
-                 if '.jpg' in str(p)]
-        self._class_paths = [p.parent for p in paths]
-
-        # Populate the list of image filenames for each class.
-        self._image_filenames_per_class = [
-            os.listdir(root_path / p)
-            for p in self._class_paths
+        self._image_paths = [
+            [Path(dir_path) / fn for fn in files if '.jpg' in str(fn)]
+            for dir_path, _, files in os.walk(self._data_dir_path)
         ]
+        # Flatten the list of list of files
+        self._image_paths = sum(self._image_paths, [])
+        assert all([fp.exists() for fp in self._image_paths])
 
-        # Transform the list of file names into a list of file paths.
-        self._image_paths_per_class: List[List[Path]] = []
-        # fns = filenames
-        for image_fns, class_path in zip(self._image_filenames_per_class,
-                                         self._class_paths):
-            # fp = filepath
-            image_fps = [root_path / class_path / fn for fn in image_fns]
-            self._image_paths_per_class.append(image_fps)
+        image_labels = [p.parent.name for p in self._image_paths]
 
-            image_fps_exist = all([fp.exists() for fp in image_fps])
-            if not image_fps_exist:
-                raise ValueError('OOOOPS')
-
-        self._classes = [str(p) for p in self._class_paths]
-        self._classes.sort()
-
-        self._image_paths = [p
-                             for ps in self._image_paths_per_class
-                             for p in ps]
-
-        def image_class(p: Path) -> str:
-            return '/'.join(
-                str(p.relative_to(root_path)).split('/')[:-1]
-            )
-        self._image_labels = [image_class(p) for p in self._image_paths]
-
-        self._labels = list(set(self._image_labels))
-        self._labels.sort()
-
-        self._image_label_ixs = [self._labels.index(image_label)
-                                 for image_label in self._image_labels]
+        self._class_names = list(set(image_labels))
+        self._class_ixs = {
+            class_name: i
+            for i, class_name in enumerate(self._class_names)
+        }
+        self._image_label_ixs = [
+            self._class_ixs[class_name]
+            for class_name in image_labels
+        ]
 
     def __len__(self):
         return len(self._image_paths)
@@ -87,15 +64,16 @@ class LaST(ClassificationDatasetABC):
 
     @property
     def classes(self):
-        return self._classes
+        return self._class_names
 
     @property
     def class_count(self):
-        return len(self._classes)
+        return len(self._class_names)
 
     @property
     def image_class_ids(self) -> List[int]:
         return self._image_label_ixs
 
     def image_class_name(self, idx: int) -> str:
-        return self._image_labels[idx]
+        class_id = self._image_label_ixs[idx]
+        return self._class_names[class_id]

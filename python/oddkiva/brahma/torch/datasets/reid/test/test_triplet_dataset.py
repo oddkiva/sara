@@ -14,15 +14,20 @@ def test_triplet_sampling():
     n = len(eth123_tds)
     assert n != 0
 
-    (Xa, Xb, Xc), (ya, yb, yc) = eth123_tds[-1]
-    assert Xa is not None
-    assert Xb is not None
-    assert Xc is not None
+    print("Checking all ETH123 triplet samples...")
+    for sample in eth123_tds:
+        (Xa, Xp, Xn), (ya, yp, yn) = sample
+        assert Xa is not None
+        assert Xp is not None
+        assert Xn is not None
 
-    assert type(ya) is int
-    assert type(yb) is int
-    assert type(yc) is int
+        assert type(ya) is int
+        assert type(yp) is int
+        assert type(yn) is int
 
-    assert ya >= 0
-    assert yb >= 0
-    assert yc >= 0
+        assert ya >= 0
+        assert yp >= 0
+        assert yn >= 0
+
+        assert ya == yp
+        assert ya != yn

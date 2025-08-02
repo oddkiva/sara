@@ -3,11 +3,12 @@ from oddkiva.brahma.torch.datasets.reid.caviar import CAVIAR
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDatabase
 
 
-def test_triplet_sampling():
-    caviar_dir_path = DATA_DIR_PATH / 'reid' / 'CAVIARa'
-    assert caviar_dir_path.exists()
+CAVIAR_DIR_PATH = DATA_DIR_PATH / 'reid' / 'CAVIARa'
+assert CAVIAR_DIR_PATH.exists()
 
-    caviar_ds = CAVIAR(caviar_dir_path)
+
+def test_caviar_dataset():
+    caviar_ds = CAVIAR(CAVIAR_DIR_PATH)
     assert len(caviar_ds) > 0
 
     assert len(caviar_ds._labels) > 0
@@ -34,20 +35,27 @@ def test_triplet_sampling():
     assert int(caviar_ds.image_class_name(-1)) - 1 == y
 
 
+def test_triplet_database_using_caviar():
+    caviar_ds = CAVIAR(CAVIAR_DIR_PATH)
     caviar_tds = TripletDatabase(caviar_ds)
 
     n = len(caviar_tds)
     assert n != 0
 
-    (Xa, Xb, Xc), (ya, yb, yc) = caviar_tds[-1]
-    assert Xa is not None
-    assert Xb is not None
-    assert Xc is not None
+    for sample in caviar_tds:
+        (Xa, Xp, Xn), (ya, yp, yn) = sample
+        assert Xa is not None
+        assert Xp is not None
+        assert Xn is not None
 
-    assert type(ya) is int
-    assert type(yb) is int
-    assert type(yc) is int
+        assert type(ya) is int
+        assert type(yp) is int
+        assert type(yn) is int
 
-    assert ya >= 0
-    assert yb >= 0
-    assert yc >= 0
+        assert ya >= 0
+        assert yp >= 0
+        assert yn >= 0
+
+        assert ya == yp
+        assert ya != yn
+        assert yp != yn

@@ -1,4 +1,5 @@
-from oddkiva.sara import ramer_douglas_peucker
+from pysara_pybind11 import ramer_douglas_peucker
+import numpy as np
 
 
 def test_square():

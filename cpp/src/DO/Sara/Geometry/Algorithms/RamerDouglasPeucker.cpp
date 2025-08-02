@@ -15,7 +15,7 @@
 using namespace std;
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   vector<Point2d> ramer_douglas_peucker(vector<Point2d> curve, double eps)
   {
@@ -37,5 +37,4 @@ namespace DO { namespace Sara {
     return detail::ramer_douglas_peucker(&curve.front(), &curve.back(), eps);
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara
