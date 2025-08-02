@@ -46,7 +46,9 @@ auto expose_video_io(pybind11::module& m) -> void
 {
   py::class_<VideoStream>(m, "VideoStream")
       .def(py::init<>())
-      .def("open", &VideoStream::open)
+      .def("open", &VideoStream::open,  //
+           py::arg("video_filepath"),   //
+           py::arg("autorotate") = true)
       .def("close", &VideoStream::close)
       .def("seek", &VideoStream::seek)
       .def("read", &VideoStream::read_rgb_frame)

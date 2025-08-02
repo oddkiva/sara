@@ -68,8 +68,10 @@ class ClassBalancedSampler(Sampler[int]):
             yield sample_ids[i]
 
 
-def make_class_balanced_sampler(dataset: ClassificationDatasetABC,
-                                repeat: int = 1):
+def make_class_balanced_sampler(
+    dataset: ClassificationDatasetABC,
+    repeat: int = 1
+) -> ClassBalancedSampler:
     samples_grouped_by_class = group_samples_by_class(dataset)
     sample_gen = ClassBalancedSampler(samples_grouped_by_class, repeat)
     return sample_gen

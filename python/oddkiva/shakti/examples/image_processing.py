@@ -1,37 +1,22 @@
 import sys
 
-from PySide2.QtCore import Qt
-
 import numpy as np
 
-import do.sara as sara
-import do.shakti as shakti
-
-USE_OPENCV = False
-
-if USE_OPENCV:
-    import cv2
+import oddkiva.sara as sara
+import oddkiva.shakti as shakti
 
 
 def user_main():
     video_file = sys.argv[1]
-    if USE_OPENCV:
-        video_stream = cv2.VideoCapture(video_file)
-        w = int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h = int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        sizes = (h, w, 3)
-    else:
-        video_stream = sara.VideoStream()
-        video_stream.open(video_file)
-        sizes = video_stream.sizes()
-        h, w, _ = sizes
+
+    video_stream = sara.VideoStream()
+    video_stream.open(video_file)
+    sizes = video_stream.sizes()
+    h, w, _ = sizes
 
     video_frame = np.empty(sizes, dtype=np.uint8)
-    video_frame_gray8 = np.empty(sizes[:2], dtype=np.uint8)
     video_frame_gray32f = np.empty(sizes[:2], dtype=np.float32)
     video_frame_convolved = np.empty(sizes[:2], dtype=np.float32)
-    gradx = np.empty(sizes[:2], dtype=np.float32)
-    grady = np.empty(sizes[:2], dtype=np.float32)
     mag = np.empty(sizes[:2], dtype=np.float32)
     ori = np.empty(sizes[:2], dtype=np.float32)
 
@@ -43,11 +28,7 @@ def user_main():
     i = 0
     while True:
         with sara.Timer("Read"):
-            if USE_OPENCV:
-                read_success, _ = video_stream.read(video_frame)
-                if not read_success:
-                    break
-            elif not video_stream.read(video_frame):
+            if not video_stream.read(video_frame):
                 break
 
         if i % 2 == 1:
