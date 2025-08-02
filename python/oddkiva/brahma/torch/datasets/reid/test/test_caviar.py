@@ -1,6 +1,6 @@
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.datasets.reid.caviar import CAVIAR
-from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDatabase
+from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDataset
 
 
 CAVIAR_DIR_PATH = DATA_DIR_PATH / 'reid' / 'CAVIARa'
@@ -37,7 +37,7 @@ def test_caviar_dataset():
 
 def test_triplet_database_using_caviar():
     caviar_ds = CAVIAR(CAVIAR_DIR_PATH)
-    caviar_tds = TripletDatabase(caviar_ds)
+    caviar_tds = TripletDataset(caviar_ds)
 
     n = len(caviar_tds)
     assert n != 0

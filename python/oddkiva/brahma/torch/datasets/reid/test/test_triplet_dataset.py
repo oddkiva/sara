@@ -1,6 +1,6 @@
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import (
-    TripletDatabase)
+    TripletDataset)
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
 
 
@@ -9,7 +9,7 @@ def test_triplet_sampling():
     assert eth123_root_path.exists()
     eth123_ds = ETH123(eth123_root_path)
 
-    eth123_tds = TripletDatabase(eth123_ds)
+    eth123_tds = TripletDataset(eth123_ds)
 
     n = len(eth123_tds)
     assert n != 0

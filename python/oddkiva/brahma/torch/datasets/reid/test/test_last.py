@@ -1,6 +1,6 @@
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.datasets.reid.last import LaST
-from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDatabase
+from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDataset
 
 
 LAST_DIR_PATH = DATA_DIR_PATH / 'reid' / 'last'
@@ -17,7 +17,7 @@ def test_last_dataset():
     print(X.shape)
     assert type(y) is int
 
-    last_tds = TripletDatabase(last_ds)
+    last_tds = TripletDataset(last_ds)
 
     n = len(last_tds)
     assert n > 0

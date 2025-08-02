@@ -10,10 +10,10 @@ from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
 from oddkiva.brahma.torch.datasets.utils import group_samples_by_class
 
 
-LOGGER = logging.getLogger('TripletDatabase')
+LOGGER = logging.getLogger('TripletDataset')
 
 
-class TripletDatabase(Dataset):
+class TripletDataset(Dataset):
 
     TripletSample = Tuple[Tuple[torch.Tensor, torch.Tensor, torch.Tensor],
                           Tuple[int, int, int]]
@@ -61,6 +61,9 @@ class TripletDatabase(Dataset):
     def _generate_triplet_samples(self):
         # Draw two distincts class indices.
         LOGGER.info('Positive-negative class sampling...')
+        # We use the multinomial distribution instead of randperm as we can
+        # leverage parallelization.
+        #
         # positive_negative_class_pairs = []
         # for _ in range(self.sample_count_balanced):
         #     positive_negative_class_pairs.append(
@@ -81,6 +84,10 @@ class TripletDatabase(Dataset):
             p_class, n_class = [int(v.item()) for v in class_pair]
             p_class_count = int(self.sample_counts_per_class[p_class].item())
             n_class_count = int(self.sample_counts_per_class[n_class].item())
+
+            # This does happen and we simply ignore this case.
+            if p_class_count < 2:
+                continue
 
             # Draw a anchor and positive **local** indices (lid) as the indexing is
             # relative to the class group.
