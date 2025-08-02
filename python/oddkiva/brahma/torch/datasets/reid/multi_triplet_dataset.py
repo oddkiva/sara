@@ -3,12 +3,12 @@ from typing import List
 import torch
 from torch.utils.data import Dataset
 
-from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDatabase
+from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDataset
 
 
-class MultiTripletDatabase(Dataset):
+class MultiTripletDataset(Dataset):
 
-    def __init__(self, triplet_datasets: List[TripletDatabase],
+    def __init__(self, triplet_datasets: List[TripletDataset],
                  num_dataset_samples: int):
         self.triplet_datasets = triplet_datasets
 
@@ -22,7 +22,7 @@ class MultiTripletDatabase(Dataset):
     def  __len__(self):
         return self.num_dataset_samples * ([len(tds) for tds in self.triplet_datasets])
 
-    def __getitem__(self, idx: int) -> TripletDatabase.TripletSample:
+    def __getitem__(self, idx: int) -> TripletDataset.TripletSample:
         tds_idx = self.dataset_samples[idx]
         tds = self.triplet_datasets[tds_idx]
 
