@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 
 import torch
@@ -9,7 +10,10 @@ from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
 from oddkiva.brahma.torch.datasets.utils import group_samples_by_class
 
 
-class TripletDatabase(Dataset):
+LOGGER = logging.getLogger('TripletDataset')
+
+
+class TripletDataset(Dataset):
 
     TripletSample = Tuple[Tuple[torch.Tensor, torch.Tensor, torch.Tensor],
                           Tuple[int, int, int]]
@@ -18,7 +22,9 @@ class TripletDatabase(Dataset):
         self.base_dataset = base_dataset
         self.repeat = repeat
 
+        LOGGER.info('Grouping samples by classes...')
         self._group_samples_by_class()
+        LOGGER.info('Generating triplet samples...')
         self._generate_triplet_samples()
 
     def  __len__(self):
@@ -54,18 +60,34 @@ class TripletDatabase(Dataset):
 
     def _generate_triplet_samples(self):
         # Draw two distincts class indices.
-        positive_negative_class_pairs = []
-        for _ in range(self.sample_count_balanced):
-            positive_negative_class_pairs.append(
-                torch.randperm(self.base_dataset.class_count)[:2]
-            )
+        LOGGER.info('Positive-negative class sampling...')
+        # We use the multinomial distribution instead of randperm as we can
+        # leverage parallelization.
+        #
+        # positive_negative_class_pairs = []
+        # for _ in range(self.sample_count_balanced):
+        #     positive_negative_class_pairs.append(
+        #         torch.randperm(self.base_dataset.class_count)[:2]
+        #     )
+        class_weights = torch.tensor(
+            [1.0] * self.base_dataset.class_count
+        ).expand(
+            self.sample_count_balanced, -1
+        )
+        positive_negative_class_pairs = torch.multinomial(
+            class_weights, num_samples=2, replacement=False)
 
         # Draw triplets of sample indices.
+        LOGGER.info('Triplet sampling...')
         triplets = []
         for class_pair in positive_negative_class_pairs:
             p_class, n_class = [int(v.item()) for v in class_pair]
             p_class_count = int(self.sample_counts_per_class[p_class].item())
             n_class_count = int(self.sample_counts_per_class[n_class].item())
+
+            # This does happen and we simply ignore this case.
+            if p_class_count < 2:
+                continue
 
             # Draw a anchor and positive **local** indices (lid) as the indexing is
             # relative to the class group.

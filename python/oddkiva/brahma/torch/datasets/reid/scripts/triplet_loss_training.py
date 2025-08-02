@@ -10,7 +10,7 @@ from torch.utils.tensorboard.writer import SummaryWriter
 
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import (
-    TripletDatabase
+    TripletDataset
 )
 from oddkiva.brahma.torch.datasets.reid.triplet_loss import TripletLoss
 
@@ -141,7 +141,7 @@ def main():
         optimizer = torch.optim.Adam(reid_desc.parameters())
 
         # Resample the list of triplets for each epoch.
-        train_tds = TripletDatabase(train_dataset)
+        train_tds = TripletDataset(train_dataset)
         train_dataloader = DataLoader(train_tds, batch_size=ModelConfig.batch_size)
 
         train_loop(train_dataloader, reid_desc, triplet_loss, optimizer,

@@ -8,11 +8,8 @@ class ClassificationDatasetABC(Dataset):
 
     @property
     @abstractmethod
-    def classes(self):
-        raise NotImplementedError(
-            'Subclasses of ClassificationDataset must implement the '
-            '`classes` property'
-        )
+    def classes(self) -> List:
+        ...
 
     @property
     def class_count(self):
@@ -21,14 +18,8 @@ class ClassificationDatasetABC(Dataset):
     @property
     @abstractmethod
     def image_class_ids(self) -> List[int]:
-        raise NotImplementedError((
-            'Subclasses of ClassificationDataset must implement '
-            'the `image_class_ids` property'
-        ))
+        ...
 
     @abstractmethod
     def image_class_name(self, idx: int) -> str:
-        raise NotImplementedError((
-            'Subclasses of ClassificationDataset must implement '
-            '`image_class_name` method'
-        ))
+        ...

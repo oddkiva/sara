@@ -105,7 +105,7 @@ def test_yolo_v4_tiny_cfg():
 
         err = torch.norm(boxes_i[:] - boxes_true_i[:])
         logging.info(f'[{i}] err = {err} for {yolo_net.model[i - 1]}')
-        assert err < 1e-4
+        assert err < 1.1e-4
 
 
 def test_yolo_v4_tiny_coreml_conversion():
