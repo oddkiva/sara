@@ -30,7 +30,7 @@ class IUSTPersonReID(ClassificationDatasetABC):
         self._root_path = root_path
         self._transform = transform
 
-        self._data_dir_path = root_path / f"bounding_box_{dataset_type}" 
+        self._data_dir_path = root_path / f"bounding_box_{dataset_type}"
 
         # Populate the list of image paths
         self._image_paths = [
@@ -44,7 +44,8 @@ class IUSTPersonReID(ClassificationDatasetABC):
         def extract_image_label(p: Path) -> str:
             return p.name[:4]
 
-        self._image_class_names = [extract_image_label(p) for p in self._image_paths]
+        self._image_class_names = [extract_image_label(p)
+                                   for p in self._image_paths]
 
         self._class_names = list(set(self._image_class_names))
         self._class_names.sort()

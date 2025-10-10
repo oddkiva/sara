@@ -8,6 +8,7 @@ import torchvision.transforms.v2 as v2
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
+from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.data.class_balanced_sampler import (
     make_class_balanced_sampler
 )
@@ -26,14 +27,11 @@ class ModelConfig:
 
 
 # Dataset
-if platform.system() == 'Darwin':
-    ROOT_PATH = Path('/Users/oddkiva/Downloads/reid/dataset_ETHZ/')
-else:
-    ROOT_PATH = Path('/home/david/GitLab/oddkiva/sara/data/reid/dataset_ETHZ/')
+ROOT_PATH = DATA_DIR_PATH / 'reid' / 'dataset_ETHZ'
 # Data transform
 DATA_TRANSFORM = v2.Compose([
+    v2.Resize(ModelConfig.image_size, antialias=True),
     v2.ToDtype(torch.float32, scale=True),
-    v2.Resize(ModelConfig.image_size, antialias=True)
 ])
 ETH123_DS = ETH123(ROOT_PATH, transform=DATA_TRANSFORM)
 
