@@ -1,8 +1,6 @@
-import platform
 from pathlib import Path
 
 import torch
-import torch.nn
 import torchvision.transforms.v2 as v2
 if torch.torch_version.TorchVersion(torch.__version__) < (2, 6, 0):
     from torchvision.io.image import read_image as decode_image

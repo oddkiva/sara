@@ -1,29 +1,22 @@
 import torch
 import torch.nn
 import torchvision
-import torchvision.transforms.v2 as v2
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from oddkiva import DATA_DIR_PATH
-from oddkiva.brahma.torch.datasets.reid.iust_person_reid import IUSTPersonReID
-from oddkiva.brahma.torch.datasets.reid.triplet_dataset import (
-    TripletDataset
-)
-from oddkiva.brahma.torch.datasets.reid.models.configs import (
-    ReID_Resnet50_256 as ModelConfig
+from oddkiva.brahma.torch.datasets.reid.configs import (
+    TrainTestPipelineConfig as PipelineConfig
 )
 from oddkiva.brahma.torch.datasets.reid.triplet_loss import TripletLoss
 
 
 # Dataset
-DATASET_DIR_PATH = DATA_DIR_PATH / 'reid' / 'IUSTPersonReID'
-assert DATASET_DIR_PATH.exists()
 
 
 def validate(
     dataloader: DataLoader, test_global_step: int,
-    model: torch.nn.Module, writer: SummaryWriter
+    model: torch.nn.Module, triplet_loss: torch.nn.Module,
+    writer: SummaryWriter, summary_write_interval: int
 ) -> None:
     model.eval()
 
@@ -33,10 +26,12 @@ def validate(
         for step, (X, _) in enumerate(dataloader):
             anchor, pos, neg = X
             d_anchor, d_pos, d_neg = model(anchor), model(pos), model(neg)
-            dist_ap = torch.norm(d_anchor - d_pos)
-            dist_an = torch.norm(d_anchor - d_neg)
+            dist_ap = torch.mean(torch.sum((d_anchor - d_pos) ** 2, dim=-1))
+            dist_an = torch.mean(torch.sum((d_anchor - d_neg) ** 2, dim=-1))
+            loss = triplet_loss(d_anchor, d_pos, d_neg,
+                                [*model.parameters()])
 
-            if step % ModelConfig.summary_write_interval == 0:
+            if step % summary_write_interval == 0:
                 img_anchor = torchvision.utils.make_grid(anchor)
                 img_pos = torchvision.utils.make_grid(pos)
                 img_neg = torchvision.utils.make_grid(neg)
@@ -45,6 +40,7 @@ def validate(
                 writer.add_image('Val/negatives', img_neg, test_global_step)
                 writer.add_scalar('Val/dist_ap', dist_ap, test_global_step)
                 writer.add_scalar('Val/dist_an', dist_an, test_global_step)
+                writer.add_scalar('Val/triplet_loss', loss, test_global_step)
 
                 # Log on the console.
                 print("".join([
@@ -61,7 +57,8 @@ def train_for_one_epoch(
     dataloader: DataLoader, train_global_step: int,
     model: torch.nn.Module,
     triplet_loss: TripletLoss, optimizer: torch.optim.Optimizer,
-    writer: SummaryWriter, class_histogram_1
+    writer: SummaryWriter, summary_write_interval: int,
+    class_histogram_1
 ) -> None:
     step_count = len(dataloader)
     model.train()
@@ -69,8 +66,7 @@ def train_for_one_epoch(
     for step, (X, y) in enumerate(dataloader):
         anchor, pos, neg = X
         d_anchor, d_pos, d_neg = model(anchor), model(pos), model(neg)
-        loss = triplet_loss.forward(d_anchor, d_pos, d_neg,
-                                    [*model.parameters()])
+        loss = triplet_loss(d_anchor, d_pos, d_neg, [*model.parameters()])
 
         loss.backward()
         optimizer.step()
@@ -82,7 +78,7 @@ def train_for_one_epoch(
             for class_id in class_ids:
                 class_histogram_1[class_id] += 1
 
-        if step % ModelConfig.summary_write_interval == 0:
+        if step % summary_write_interval == 0:
             # Train loss
             loss = loss.item()
 
@@ -122,53 +118,41 @@ def train_for_one_epoch(
 
 def main():
     # THE DATASET
-    data_transform = v2.Compose([
-        v2.Resize(ModelConfig.image_size, antialias=True),
-        v2.ToDtype(torch.float32, scale=True),
-    ])
-    train_ds = IUSTPersonReID(DATASET_DIR_PATH,
-                              transform=data_transform,
-                              dataset_type='train')
-    test_ds = IUSTPersonReID(DATASET_DIR_PATH,
-                             transform=data_transform,
-                             dataset_type='test')
-
-    writer = SummaryWriter(ModelConfig.summary_out_dir)
+    train_ds, val_ds, _ = PipelineConfig.make_datasets()
+    writer = PipelineConfig.make_summary_writer()
     class_histogram = [0] * train_ds.class_count
 
     # THE MODEL
-    reid_model = ModelConfig.make()
+    reid_model = PipelineConfig.make_model()
 
     # THE LOSS FUNCTION
     triplet_loss = TripletLoss(
         summary_writer=writer,
-        summary_write_interval=ModelConfig.summary_write_interval
+        summary_write_interval=PipelineConfig.summary_write_interval
     )
 
     train_global_step = 0
-    test_global_step = 0
+    val_global_step = 0
     for epoch in range(10):
         # Restart the state of the Adam optimizer every epoch.
         optimizer = torch.optim.Adam(reid_model.parameters())
 
         # Resample the list of triplets for each epoch.
-        train_tds = TripletDataset(train_ds)
-        train_dataloader = DataLoader(train_tds, batch_size=ModelConfig.batch_size)
+        train_dl = PipelineConfig.make_triplet_dataset(train_ds)
 
         # Train the model.
-        train_for_one_epoch(train_dataloader, train_global_step,
-                   reid_model, triplet_loss, optimizer,
-                   writer, class_histogram)
+        train_for_one_epoch(train_dl, train_global_step,
+                            reid_model, triplet_loss, optimizer,
+                            writer, PipelineConfig.summary_write_interval,
+                            class_histogram)
 
         # Save the model after each training epoch.
         torch.save(reid_model.state_dict(), f'eth123_resnet50_{epoch}.pt')
 
         # Evaluate the model.
-        test_tds = TripletDataset(test_ds)
-        test_dataloader = DataLoader(test_tds, batch_size=1)
-        validate(test_dataloader, test_global_step,
-                 reid_model, writer)
-
+        val_dl = PipelineConfig.make_triplet_dataset(val_ds)
+        validate(val_dl, val_global_step, reid_model, triplet_loss,
+                 writer, PipelineConfig.summary_write_interval)
 
 
 if __name__ == "__main__":
