@@ -4,13 +4,11 @@ import torchvision
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from oddkiva.brahma.torch.datasets.reid.configs import (
-    TrainTestPipelineConfig as PipelineConfig
-)
+from oddkiva.brahma.torch.datasets.reid.configs.\
+    train_config_resnet50_dim256_iustpersonreid import (
+        TrainTestPipelineConfig as PipelineConfig
+    )
 from oddkiva.brahma.torch.datasets.reid.triplet_loss import TripletLoss
-
-
-# Dataset
 
 
 def validate(
@@ -51,7 +49,6 @@ def validate(
                 ]))
 
                 test_global_step += 1
-
 
 def train_for_one_epoch(
     dataloader: DataLoader, train_global_step: int,
@@ -128,7 +125,7 @@ def main():
     # THE LOSS FUNCTION
     triplet_loss = TripletLoss(
         summary_writer=writer,
-        summary_write_interval=PipelineConfig.summary_write_interval
+        summary_write_interval=PipelineConfig.write_interval
     )
 
     train_global_step = 0
@@ -143,7 +140,7 @@ def main():
         # Train the model.
         train_for_one_epoch(train_dl, train_global_step,
                             reid_model, triplet_loss, optimizer,
-                            writer, PipelineConfig.summary_write_interval,
+                            writer, PipelineConfig.write_interval,
                             class_histogram)
 
         # Save the model after each training epoch.
@@ -152,7 +149,7 @@ def main():
         # Evaluate the model.
         val_dl = PipelineConfig.make_triplet_dataset(val_ds)
         validate(val_dl, val_global_step, reid_model, triplet_loss,
-                 writer, PipelineConfig.summary_write_interval)
+                 writer, PipelineConfig.write_interval)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# I don't like YAML config file, I would rather make use the Python parser.
+from pathlib import Path
 
 import torch
 from torch.utils.data import DataLoader
@@ -17,8 +17,8 @@ from oddkiva.brahma.torch.datasets.reid.configs.reid_resnet import (
 
 
 class ModelConfig:
-    Model = ReidDescriptor50
-    reid_dim = 256
+    Model: type[torch.nn.Module] = ReidDescriptor50
+    reid_dim: int = 256
 
     # Add distributed training configs
     # world_size = int(os.environ.get("WORLD_SIZE", 1))
@@ -30,24 +30,26 @@ class ModelConfig:
 
 
 class TrainValTestDatasetConfig:
-    dataset_dir_path = DATA_DIR_PATH / 'reid' / 'IUSTPersonReID'
-    dataset_class = IUSTPersonReID
-    image_size = (160, 64)
-    batch_size = 32
+    Dataset = IUSTPersonReID
+    dataset_dir_path: Path = DATA_DIR_PATH / 'reid' / 'IUSTPersonReID'
+    image_size: tuple[int, int] = (160, 64)
+    batch_size: int = 32
 
-    transforms = v2.Compose([
+    transforms: v2.Transform = v2.Compose([
         v2.Resize(image_size, antialias=True),
         v2.ToDtype(torch.float32, scale=True)
     ])
 
     @staticmethod
-    def make_datasets():
-        train_dataset = IUSTPersonReID(
+    def make_datasets() -> tuple[ClassificationDatasetABC,
+                                 ClassificationDatasetABC,
+                                 ClassificationDatasetABC]:
+        train_dataset = TrainValTestDatasetConfig.Dataset(
             TrainValTestDatasetConfig.dataset_dir_path,
             transform=TrainValTestDatasetConfig.transforms,
             dataset_type='train'
         )
-        val_dataset = IUSTPersonReID(
+        val_dataset = TrainValTestDatasetConfig.Dataset(
             TrainValTestDatasetConfig.dataset_dir_path,
             transform=TrainValTestDatasetConfig.transforms,
             dataset_type='test'
@@ -57,25 +59,22 @@ class TrainValTestDatasetConfig:
         return train_dataset, val_dataset, test_dataset
 
     @staticmethod
-    def make_triplet_dataset(ds: ClassificationDatasetABC):
+    def make_triplet_dataset(ds: ClassificationDatasetABC) -> DataLoader:
         tds = TripletDataset(ds)
         dl = DataLoader(tds, TrainValTestDatasetConfig.batch_size)
         return dl
 
 
-class LogConfig:
-    summary_out_dir = 'train/IUSTPersonReID'
-    summary_write_interval = 1
+class SummaryWriterConfig:
+    out_dir: str = 'train/IUSTPersonReID'
+    write_interval: int = 1
 
     @staticmethod
     def make_summary_writer() -> SummaryWriter:
-        return SummaryWriter(LogConfig.summary_out_dir)
+        return SummaryWriter(SummaryWriterConfig.out_dir)
 
 
 class TrainTestPipelineConfig(ModelConfig,
                               TrainValTestDatasetConfig,
-                              LogConfig):
-
-    def __init__(self):
-        super(TrainTestPipelineConfig, self).__init__()
-        assert self.dataset_dir_path.exists()
+                              SummaryWriterConfig):
+    pass
