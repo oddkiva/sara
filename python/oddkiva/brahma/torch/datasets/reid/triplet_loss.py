@@ -12,6 +12,7 @@ class TripletLoss(torch.nn.Module):
                  summary_writer: Optional[SummaryWriter] = None,
                  summary_write_interval: int = 10,
                  train_with_regularization: bool = False):
+        super(TripletLoss, self).__init__()
         self.alpha = alpha
         self.weight_decay_coeff = weight_decay_coeff
         self.train_with_regularization = train_with_regularization

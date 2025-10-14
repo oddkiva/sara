@@ -144,7 +144,7 @@ def main():
                             class_histogram)
 
         # Save the model after each training epoch.
-        torch.save(reid_model.state_dict(), f'eth123_resnet50_{epoch}.pt')
+        torch.save(reid_model.state_dict(), f'resnet50_{epoch}.pt')
 
         # Evaluate the model.
         val_dl = PipelineConfig.make_triplet_dataset(val_ds)
