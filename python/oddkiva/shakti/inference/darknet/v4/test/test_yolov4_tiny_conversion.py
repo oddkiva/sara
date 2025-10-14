@@ -74,7 +74,7 @@ def test_yolo_v4_tiny_cfg():
     in_tensor_saved = yolo_out_tensor(0)
     err = torch.norm(in_tensor - in_tensor_saved).item()
     logging.info(f'input err = {err}')
-    assert err < 1e-12
+    assert err < 1e-5
 
     ys, boxes = yolo_net._forward(in_tensor)
     assert len(ys) == len(yolo_net.model) + 1

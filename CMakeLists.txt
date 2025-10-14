@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 4.0.0)
 
 project(Sara LANGUAGES C CXX)
 
@@ -99,8 +99,7 @@ elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   set(Boost_USE_MULTITHREADED ON)
   find_package(
     Boost
-    COMPONENTS filesystem log program_options serialization system
-               unit_test_framework
+    COMPONENTS filesystem log program_options serialization unit_test_framework
     REQUIRED)
 
   find_package(OpenMP)

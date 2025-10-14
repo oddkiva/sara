@@ -7,6 +7,8 @@ if CONFIG_FILE_PATH.exists():
         from pip._vendor import tomli
         CONFIG = tomli.load(f)
         DATA_DIR_PATH = pathlib.Path(CONFIG['data']['path'])
+        assert DATA_DIR_PATH.exists(), \
+            "DATA_DIR_PATH from config.toml is invalid"
 else:
     THIS_FILE = __file__
     THIS_DIR = pathlib.Path(THIS_FILE).parent

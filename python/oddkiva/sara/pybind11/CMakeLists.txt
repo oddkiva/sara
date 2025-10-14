@@ -36,6 +36,7 @@ add_custom_target(copy_pysara_module)
 # Copy pysara.[so, dll] to the runtime output directory.
 set(pysara_LIBRARY_PATH $<TARGET_FILE:pysara_pybind11>)
 add_custom_command(TARGET copy_pysara_module
+  POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E
   copy ${pysara_LIBRARY_PATH} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 set_target_properties(copy_pysara_module PROPERTIES FOLDER "Python")
