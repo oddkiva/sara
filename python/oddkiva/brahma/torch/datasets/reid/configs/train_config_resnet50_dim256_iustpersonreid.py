@@ -29,15 +29,19 @@ class ModelConfig:
         return ModelConfig.Model(ModelConfig.reid_dim)
 
 
+class OptimizationConfig:
+    learning_rate = 1e-4
+
+
 class TrainValTestDatasetConfig:
     Dataset = IUSTPersonReID
     dataset_dir_path: Path = DATA_DIR_PATH / 'reid' / 'IUSTPersonReID'
-    image_size: tuple[int, int] = (160, 64)
+    image_size: tuple[int, int] = (240, 96)
     batch_size: int = 32
 
     transforms: v2.Transform = v2.Compose([
         v2.Resize(image_size, antialias=True),
-        v2.ToDtype(torch.float32, scale=True)
+        v2.ToDtype(torch.float32, scale=True),
     ])
 
     @staticmethod
@@ -76,5 +80,6 @@ class SummaryWriterConfig:
 
 class TrainTestPipelineConfig(ModelConfig,
                               TrainValTestDatasetConfig,
+                              OptimizationConfig,
                               SummaryWriterConfig):
     pass

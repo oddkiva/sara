@@ -4,11 +4,16 @@ import torchvision
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from oddkiva.brahma.torch.datasets.reid.configs.\
-    train_config_resnet50_dim256_iustpersonreid import (
-        TrainTestPipelineConfig as PipelineConfig
-    )
 from oddkiva.brahma.torch.datasets.reid.triplet_loss import TripletLoss
+import oddkiva.brahma.torch.datasets.reid.configs as C
+
+
+CONFIGS = {
+    'ethz': C.Ethz,
+    'iust': C.Iust
+}
+
+PipelineConfig = CONFIGS['iust']
 
 
 def validate(
@@ -132,7 +137,9 @@ def main():
     val_global_step = 0
     for epoch in range(10):
         # Restart the state of the Adam optimizer every epoch.
-        optimizer = torch.optim.Adam(reid_model.parameters())
+        optimizer = torch.optim.Adam(reid_model.parameters(),
+                                     PipelineConfig.learning_rate)
+        print(f'learning rate = {PipelineConfig.learning_rate}')
 
         # Resample the list of triplets for each epoch.
         train_dl = PipelineConfig.make_triplet_dataset(train_ds)
