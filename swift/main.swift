@@ -67,7 +67,7 @@ func testVideoRead() {
     let videoFilePath =
       "/Users/oddkiva/Desktop/datasets/oddkiva/brockwell-park/brockwell-park-varying-focal-length.mov"
   #else
-    let videoFilePath = "/home/david/Desktop/Datasets/sfm/oddkiva/bali-excursion.mp4"
+    let videoFilePath = "/media/Linux Data/Datasets/sfm/oddkiva/bali-excursion.mp4"
   #endif
   let videoStream = VideoStream(filePath: videoFilePath)
 
