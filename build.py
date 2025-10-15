@@ -443,7 +443,17 @@ if __name__ == "__main__":
         action="store_true",
         help="Build only essential parts of the project for Continous Integration",
     )
+    parser.add_argument(
+        "--project_type",
+        help="Specify project type for CMake (Xcode, Ninja, etc.)",
+    )
     args = parser.parse_args()
+
+    if args.project_type:
+        PROJECT_TYPE = args.project_type
+        print(f"GENERATING CUSTOM PROJECT TYPE '{PROJECT_TYPE}'")
+    else:
+        print(f"GENERATING INFERRED PROJECT TYPE '{PROJECT_TYPE}'")
 
     for task in args.tasks:
         if task == "compilation_database":
