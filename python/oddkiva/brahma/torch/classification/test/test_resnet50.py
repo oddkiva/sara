@@ -34,3 +34,12 @@ def test_resnet50():
     y = resnet50.forward(x)
 
     assert y.shape == (1, 2048, 8, 8)
+
+def test_resnet50_variant():
+    x_np = np.zeros((1, 3, 256, 256)).astype(np.float32)
+    x = torch.tensor(x_np, device=DEFAULT_DEVICE)
+
+    resnet50 = R.ResNet50Variant().to(DEFAULT_DEVICE)
+    y = resnet50.forward(x)
+
+    assert y.shape == (1, 2048, 8, 8)

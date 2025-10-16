@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import torch.nn as nn
 
 
@@ -101,10 +102,72 @@ class ResNet50(nn.Module):
     def __init__(self):
         super().__init__()
         self.blocks = nn.Sequential(
+            # From the original paper.
             ConvBNA(3, 64, 7, 2, True, "relu", 0),
             nn.AvgPool2d(3, 2),
             # P0
             nn.Sequential(
+                # Reminder: the output dim is misleading and is not 64!
+                # But 256 = 64 x 2^2 (cf. implementation).
+                ResidualBottleneckBlock(64, 64, 1, "relu"),
+                ResidualBottleneckBlock(256, 64, 1, "relu"),
+                ResidualBottleneckBlock(256, 64, 1, "relu"),
+            ),
+            # P1
+            nn.Sequential(
+                ResidualBottleneckBlock(256, 128, 2, "relu"),
+                ResidualBottleneckBlock(512, 128, 1, "relu"),
+                ResidualBottleneckBlock(512, 128, 1, "relu"),
+                ResidualBottleneckBlock(512, 128, 1, "relu"),
+            ),
+            # P2
+            nn.Sequential(
+                ResidualBottleneckBlock(512, 256, 2, "relu"),
+                ResidualBottleneckBlock(1024, 256, 1, "relu"),
+                ResidualBottleneckBlock(1024, 256, 1, "relu"),
+                ResidualBottleneckBlock(1024, 256, 1, "relu"),
+                ResidualBottleneckBlock(1024, 256, 1, "relu"),
+                ResidualBottleneckBlock(1024, 256, 1, "relu"),
+            ),
+            # P3
+            nn.Sequential(
+                ResidualBottleneckBlock(1024, 512, 2, "relu"),
+                ResidualBottleneckBlock(2048, 512, 1, "relu"),
+                ResidualBottleneckBlock(2048, 512, 1, "relu"),
+            ),
+        )
+
+    def forward(self, x):
+        return self.blocks.forward(x)
+
+
+class ResNet50Variant(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.blocks = nn.Sequential(
+            # I don't like the 7x7 convolution:
+            # ConvBNA(3, 64, 7, 2, True, "relu", 0),
+            # nn.AvgPool2d(3, 2),
+            #
+            # Instead I will use 3x3 filters:
+            nn.Sequential(
+                OrderedDict([
+                    # The composition is the 3 residual blocks has a receptive
+                    # field of 7x7
+                    # x |-> conv1x1 conv3x3 conv1x1)(x) + shortcut(x)
+                    ("conv7x7_step0", ResidualBottleneckBlock(3, 16, 1, "relu")),
+                    # x |-> conv1x1 conv3x3 conv1x1)(x) + shortcut(x)
+                    ("conv7x7_step1", ResidualBottleneckBlock(64, 16, 1, "relu")),
+                    # x |-> conv1x1 conv3x3 conv1x1)(x) + shortcut(x)
+                    ("conv7x7_step2", ResidualBottleneckBlock(64, 16, 2, "relu")),
+
+                    # This will replace nn.AvgPool2d
+                    ("avg_pool_2d_alternative", ResidualBottleneckBlock(64, 16, 2, "relu")),
+                ])
+            ),
+            # P0
+            nn.Sequential(
+                # Out dim is not 64! But 256 (cf. implementation).
                 ResidualBottleneckBlock(64, 64, 1, "relu"),
                 ResidualBottleneckBlock(256, 64, 1, "relu"),
                 ResidualBottleneckBlock(256, 64, 1, "relu"),
