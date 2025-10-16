@@ -1,6 +1,3 @@
-import platform
-from pathlib import Path
-
 import torch
 import torch.nn
 import torchvision
@@ -9,7 +6,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
 from oddkiva import DATA_DIR_PATH
-from oddkiva.brahma.torch.data.class_balanced_sampler import (
+from oddkiva.brahma.torch.sampling.class_balanced_sampler import (
     make_class_balanced_sampler
 )
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123

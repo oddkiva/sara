@@ -11,7 +11,7 @@ from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
 )
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDataset
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
-from oddkiva.brahma.torch.datasets.reid.configs.reid_resnet import (
+from oddkiva.brahma.torch.tasks.reid.configs.reid_resnet import (
     ReidDescriptor50
 )
 

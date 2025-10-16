@@ -6,7 +6,7 @@ from typing import Any
 GLOBAL_CONFIG = {}
 
 
-def register(dct: Any = GLOBAL_CONFIG, name=None, force=False):
+def register(dct: Any = GLOBAL_CONFIG):
     """
     dct:
             if dct is Dict, register foo into dct as key-value pair

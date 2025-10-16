@@ -1,6 +1,8 @@
 from typing import Dict
 
-from oddkiva.brahma.torch.data.class_balanced_sampler import ClassBalancedSampler
+from oddkiva.brahma.torch.sampling.class_balanced_sampler import (
+    ClassBalancedSampler
+)
 
 
 def test_class_balanced_sampler():

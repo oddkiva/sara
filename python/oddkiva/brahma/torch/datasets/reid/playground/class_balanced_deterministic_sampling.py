@@ -1,5 +1,5 @@
 from oddkiva import DATA_DIR_PATH
-from oddkiva.brahma.torch.data.class_balanced_deterministic_sampler import (
+from oddkiva.brahma.torch.sampling.class_balanced_deterministic_sampler import (
     ClassBalancedDeterministicSampler
 )
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
