@@ -37,7 +37,9 @@ class TrainValTestDatasetConfig:
     batch_size: int = 32
 
     transforms: v2.Transform = v2.Compose([
-        v2.Resize(image_size, antialias=True),
+        # v2.Resize(image_size, antialias=True),
+        v2.RandomResizedCrop(image_size, scale=(0.9, 1.1), ratio=(0.9, 1.1)),
+        v2.RandomHorizontalFlip(p=0.5),
         v2.ToDtype(torch.float32, scale=True),
     ])
 
@@ -67,7 +69,7 @@ class TrainValTestDatasetConfig:
 
 
 class OptimizationConfig:
-    learning_rate = 1e-3
+    learning_rate = 1e-4
 
 
 class SummaryWriterConfig:
