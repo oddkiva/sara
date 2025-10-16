@@ -5,15 +5,16 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
 from oddkiva.brahma.torch.datasets.reid.triplet_loss import TripletLoss
-import oddkiva.brahma.torch.datasets.reid.configs as C
+import oddkiva.brahma.torch.tasks.reid.configs as C
 
 
 CONFIGS = {
     'ethz': C.Ethz,
+    'ethz_variant': C.EthzVariant,
     'iust': C.Iust
 }
 
-PipelineConfig = CONFIGS['iust']
+PipelineConfig = CONFIGS['ethz_variant']
 
 
 def validate(
@@ -153,7 +154,7 @@ def main():
         # Save the model after each training epoch.
         torch.save(
             reid_model.state_dict(),
-            str(PipelineConfig.out_dir / f'resnet50_{epoch}.pt')
+            PipelineConfig.out_model_filepath(epoch)
         )
 
         # Evaluate the model.

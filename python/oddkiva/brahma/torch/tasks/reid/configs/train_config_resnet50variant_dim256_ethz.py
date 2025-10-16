@@ -12,12 +12,12 @@ from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDataset
 from oddkiva.brahma.torch.datasets.reid.eth123 import ETH123
 from oddkiva.brahma.torch.tasks.reid.configs.reid_resnet import (
-    Resnet50VariantReid
+    ResNet50VariantReid
 )
 
 
 class ModelConfig:
-    Model: type[torch.nn.Module] = Resnet50VariantReid
+    Model: type[torch.nn.Module] = ResNet50VariantReid
     reid_dim: int = 256
 
     # Add distributed training configs
@@ -32,6 +32,7 @@ class ModelConfig:
 class TrainValTestDatasetConfig:
     Dataset = ETH123
     dataset_dir_path: Path = DATA_DIR_PATH / 'reid' / 'dataset_ETHZ'
+    trained_model_out_dir = Path('train') / 'reid' / 'dataset_ETHZ' / 'models'
     image_size: tuple[int, int] = (160, 64)
     batch_size: int = 32
 
@@ -58,6 +59,11 @@ class TrainValTestDatasetConfig:
         tds = TripletDataset(ds)
         dl = DataLoader(tds, TrainValTestDatasetConfig.batch_size)
         return dl
+
+    @staticmethod
+    def out_model_filepath(epoch: int) -> Path:
+        return (TrainValTestDatasetConfig.trained_model_out_dir /
+                f'trained_model_epoch{epoch}.pt')
 
 
 class OptimizationConfig:
