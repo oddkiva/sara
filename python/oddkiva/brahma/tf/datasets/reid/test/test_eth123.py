@@ -1,5 +1,3 @@
-import tensorflow as tf
-
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.tf.datasets.reid.eth123 import ETH123, ETH123_Internal
 
@@ -8,7 +6,7 @@ def test_eth123_internal():
     assert ds_root_path.exists()
     ds = ETH123_Internal(ds_root_path)
 
-    im, label = ds[0]
+    im, _ = ds[0]
     print(im)
 
 
