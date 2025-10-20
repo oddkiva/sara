@@ -1,26 +1,28 @@
 import os
+from abc import abstractmethod
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 
-import torch
-import torch.torch_version
-import torchvision.transforms.v2 as v2
-if torch.torch_version.TorchVersion(torch.__version__) < (2, 6, 0):
-    from torchvision.io.image import read_image as decode_image
-else:
-    from torchvision.io.image import decode_image
+import tensorflow as tf
 
 from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
 
 
-class ETH123(ClassificationDatasetABC):
+class ImageDataTransform:
+
+    @abstractmethod
+    def __call__(self, image: tf.Tensor) -> tf.Tensor:
+        ...
+
+
+class ETH123_Internal(ClassificationDatasetABC):
 
     def __init__(
         self,
         root_path: Path,
-        transform: Optional[v2.Transform] = None
+        transform: Optional[ImageDataTransform] = None
     ):
         self._root_path = root_path
         self._transform = transform
@@ -41,7 +43,7 @@ class ETH123(ClassificationDatasetABC):
         ]
 
         # Transform the list of file names into a list of file paths.
-        self._image_paths_per_class: List[List[Path]] = []
+        self._image_paths_per_class: list[list[Path]] = []
         # fns = filenames
         for image_fns, class_path in zip(self._image_filenames_per_class,
                                          self._class_paths):
@@ -75,13 +77,14 @@ class ETH123(ClassificationDatasetABC):
     def __len__(self):
         return len(self._image_paths)
 
-    def __getitem__(self, idx) -> Tuple[torch.Tensor, int]:
-        image = decode_image(str(self._image_paths[idx]))
+    def __getitem__(self, idx) -> tuple[tf.Tensor, tf.Tensor]:
+        image_raw_content = tf.io.read_file(str(self._image_paths[idx]))
+        image = tf.io.decode_image(image_raw_content)
         if self._transform is not None:
             image_transformed = self._transform(image)
         else:
             image_transformed = image
-        label = self._image_label_ixs[idx]
+        label = tf.convert_to_tensor(self._image_label_ixs[idx])
         return image_transformed, label
 
     @property
@@ -93,8 +96,21 @@ class ETH123(ClassificationDatasetABC):
         return len(self._classes)
 
     @property
-    def image_class_ids(self) -> List[int]:
+    def image_class_ids(self) -> list[int]:
         return self._image_label_ixs
 
     def image_class_name(self, idx: int) -> str:
         return self._image_labels[idx]
+
+
+class  ETH123(tf.data.Dataset):
+
+    def __new__(cls, root_path: Path):
+        ds = ETH123_Internal(root_path)
+        im, label = ds[0]
+        return tf.data.Dataset.from_generator(
+            lambda: ds,
+            output_signature = (tf.TensorSpec.from_tensor(im),
+                                tf.TensorSpec.from_tensor(label)),
+        )
+

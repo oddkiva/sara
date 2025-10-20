@@ -4,7 +4,7 @@ from typing import Tuple
 import torch
 from torch.utils.data import Dataset
 
-from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
+from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
 from oddkiva.brahma.torch.datasets.utils import group_samples_by_class

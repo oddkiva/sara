@@ -1,6 +1,6 @@
 from typing import List
 
-from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
+from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
 

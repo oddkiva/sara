@@ -4,7 +4,7 @@ import torch
 from torch.utils.data import Sampler
 
 from oddkiva.brahma.torch.datasets.utils import group_samples_by_class
-from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
+from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
 

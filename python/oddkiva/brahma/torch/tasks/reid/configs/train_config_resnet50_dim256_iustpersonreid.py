@@ -6,7 +6,7 @@ from torch.utils.tensorboard.writer import SummaryWriter
 import torchvision.transforms.v2 as v2
 
 from oddkiva import DATA_DIR_PATH
-from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
+from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDataset

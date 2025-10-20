@@ -1,4 +1,3 @@
-from typing import List
 from abc import abstractmethod
 
 from torch.utils.data import Dataset
@@ -8,7 +7,7 @@ class ClassificationDatasetABC(Dataset):
 
     @property
     @abstractmethod
-    def classes(self) -> List:
+    def classes(self) -> list:
         ...
 
     @property
@@ -17,7 +16,7 @@ class ClassificationDatasetABC(Dataset):
 
     @property
     @abstractmethod
-    def image_class_ids(self) -> List[int]:
+    def image_class_ids(self) -> list[int]:
         ...
 
     @abstractmethod

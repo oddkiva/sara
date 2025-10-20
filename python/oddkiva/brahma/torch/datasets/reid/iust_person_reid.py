@@ -11,7 +11,7 @@ if torch.torch_version.TorchVersion(torch.__version__) < (2, 6, 0):
 else:
     from torchvision.io.image import decode_image
 
-from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
+from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
 
