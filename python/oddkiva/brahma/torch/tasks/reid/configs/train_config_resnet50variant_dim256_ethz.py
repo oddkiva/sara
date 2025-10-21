@@ -2,6 +2,7 @@ from pathlib import Path
 
 import torch
 from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard.writer import SummaryWriter
 import torchvision.transforms.v2 as v2
 
@@ -59,7 +60,13 @@ class TrainValTestDatasetConfig:
     @staticmethod
     def make_triplet_dataset(ds: ClassificationDatasetABC) -> DataLoader:
         tds = TripletDataset(ds)
-        dl = DataLoader(tds, TrainValTestDatasetConfig.batch_size)
+        dl = DataLoader(
+            dataset=tds,
+            # The following options are for parallel data training
+            batch_size=TrainValTestDatasetConfig.batch_size,
+            shuffle=False,
+            sampler=DistributedSampler(tds)
+        )
         return dl
 
     @staticmethod

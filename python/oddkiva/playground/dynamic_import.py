@@ -2,9 +2,6 @@ import inspect
 import importlib
 
 
-GLOBAL_CONFIG = {}
-
-
 def register():
     def decorator(foo):
         if inspect.isclass(foo):

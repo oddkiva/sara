@@ -1,9 +1,12 @@
 import torch
+import torch.multiprocessing as mp
 import torch.nn
 import torchvision
+from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
+from oddkiva.brahma.torch.parallel.ddp import ddp_setup, ddp_cleanup
 from oddkiva.brahma.torch.datasets.reid.triplet_loss import TripletLoss
 import oddkiva.brahma.torch.tasks.reid.configs as C
 
@@ -18,7 +21,7 @@ PipelineConfig = CONFIGS['ethz_variant']
 
 
 def validate(
-    dataloader: DataLoader, test_global_step: int,
+    dataloader: DataLoader, gpu_id: int, test_global_step: int,
     model: torch.nn.Module, triplet_loss: torch.nn.Module,
     writer: SummaryWriter, summary_write_interval: int
 ) -> None:
@@ -29,6 +32,12 @@ def validate(
     with torch.no_grad():
         for step, (X, _) in enumerate(dataloader):
             anchor, pos, neg = X
+
+            # Transfer the data to the appropriate GPU node.
+            anchor = anchor.to(gpu_id)
+            pos = pos.to(gpu_id)
+            neg = neg.to(gpu_id)
+
             d_anchor, d_pos, d_neg = model(anchor), model(pos), model(neg)
             dist_ap = torch.mean(torch.sum((d_anchor - d_pos) ** 2, dim=-1))
             dist_an = torch.mean(torch.sum((d_anchor - d_neg) ** 2, dim=-1))
@@ -57,7 +66,9 @@ def validate(
                 test_global_step += 1
 
 def train_for_one_epoch(
-    dataloader: DataLoader, train_global_step: int,
+    dataloader: DataLoader,
+    gpu_id: int,
+    train_global_step: int,
     model: torch.nn.Module,
     triplet_loss: TripletLoss, optimizer: torch.optim.Optimizer,
     writer: SummaryWriter, summary_write_interval: int,
@@ -68,6 +79,12 @@ def train_for_one_epoch(
 
     for step, (X, y) in enumerate(dataloader):
         anchor, pos, neg = X
+
+        # Transfer the data to the appropriate GPU node.
+        anchor = anchor.to(gpu_id)
+        pos = pos.to(gpu_id)
+        neg = neg.to(gpu_id)
+
         d_anchor, d_pos, d_neg = model(anchor), model(pos), model(neg)
         loss = triplet_loss(d_anchor, d_pos, d_neg, [*model.parameters()])
 
@@ -119,20 +136,43 @@ def train_for_one_epoch(
 
             train_global_step += 1
 
-def main():
+
+def main(rank: int, world_size: int):
+    """
+    rank: auto-allocated by DDP, when calling torch.multiprocessing.spawn(...)
+    """
+
+    # --------------------------------------------------------------------------
+    # PARALLEL TRAINING
+    # --------------------------------------------------------------------------
+    ddp_setup(rank, world_size)
+
     # THE DATASET
     train_ds, val_ds, _ = PipelineConfig.make_datasets()
     writer = PipelineConfig.make_summary_writer()
     class_histogram = [0] * train_ds.class_count
 
     # THE MODEL
-    reid_model = PipelineConfig.make_model()
+    #
+    # --------------------------------------------------------------------------
+    # PARALLEL TRAINING
+    # Ensure that we transfer the model weights to the correct GPU node.
+    # --------------------------------------------------------------------------
+    gpu_id = 0
+    base_reid_model = PipelineConfig.make_model()
+    reid_model = DDP(
+        base_reid_model.to(gpu_id),
+        device_ids=[gpu_id]
+    )
 
     # THE LOSS FUNCTION
     triplet_loss = TripletLoss(
         summary_writer=writer,
         summary_write_interval=PipelineConfig.write_interval
     )
+    # There is no model weights on the triplet loss, so the following is not
+    # necessary:
+    # triplet_loss.to(gpu_id)
 
     train_global_step = 0
     val_global_step = 0
@@ -144,24 +184,45 @@ def main():
 
         # Resample the list of triplets for each epoch.
         train_dl = PipelineConfig.make_triplet_dataset(train_ds)
+        train_dl.sampler.set_epoch(epoch)   # call this additional line at every epoch
 
         # Train the model.
-        train_for_one_epoch(train_dl, train_global_step,
+        train_for_one_epoch(train_dl, gpu_id,
+                            train_global_step,
                             reid_model, triplet_loss, optimizer,
                             writer, PipelineConfig.write_interval,
                             class_histogram)
 
         # Save the model after each training epoch.
-        torch.save(
-            reid_model.state_dict(),
-            PipelineConfig.out_model_filepath(epoch)
-        )
+        # Only the node associated with GPU node 0 can save the model.
+        if gpu_id == 0:
+            ckp = reid_model.module.state_dict()
+            torch.save(
+                ckp,
+                PipelineConfig.out_model_filepath(epoch)
+            )
 
         # Evaluate the model.
-        val_dl = PipelineConfig.make_triplet_dataset(val_ds)
-        validate(val_dl, val_global_step, reid_model, triplet_loss,
-                 writer, PipelineConfig.write_interval)
+        if gpu_id == 0:
+            val_dl = PipelineConfig.make_triplet_dataset(val_ds)
+            val_dl.sampler.set_epoch(epoch);
+            validate(val_dl, gpu_id, val_global_step, reid_model, triplet_loss,
+                     writer, PipelineConfig.write_interval)
+
+    # --------------------------------------------------------------------------
+    # PARALLEL TRAINING
+    # Clean up the parallel training environment.
+    # --------------------------------------------------------------------------
+    ddp_cleanup()
 
 
 if __name__ == "__main__":
-    main()
+    # Single-GPU training environment.
+    # main()
+
+    # --------------------------------------------------------------------------
+    # PARALLEL TRAINING
+    # Multi-GPU training environment.
+    # --------------------------------------------------------------------------
+    world_size = 1 #torch.cuda.device_count()
+    mp.spawn(main, args=(world_size,), nprocs=world_size)
