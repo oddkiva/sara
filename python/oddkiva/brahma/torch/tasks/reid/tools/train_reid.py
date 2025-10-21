@@ -17,7 +17,7 @@ CONFIGS = {
     'iust': C.Iust
 }
 
-PipelineConfig = CONFIGS['ethz_variant']
+PipelineConfig = CONFIGS['ethz']
 
 
 def validate(
@@ -74,10 +74,14 @@ def train_for_one_epoch(
     writer: SummaryWriter, summary_write_interval: int,
     class_histogram_1
 ) -> None:
+    torch.autograd.set_detect_anomaly(True)
+
     step_count = len(dataloader)
     model.train()
 
     for step, (X, y) in enumerate(dataloader):
+        optimizer.zero_grad()
+
         anchor, pos, neg = X
 
         # Transfer the data to the appropriate GPU node.
@@ -90,7 +94,6 @@ def train_for_one_epoch(
 
         loss.backward()
         optimizer.step()
-        optimizer.zero_grad()
 
         # Update class statistics
         for yi in y:
@@ -218,11 +221,11 @@ def main(rank: int, world_size: int):
 
 if __name__ == "__main__":
     # Single-GPU training environment.
-    # main()
+    main(0, 1)
 
     # --------------------------------------------------------------------------
     # PARALLEL TRAINING
     # Multi-GPU training environment.
     # --------------------------------------------------------------------------
-    world_size = 1 #torch.cuda.device_count()
-    mp.spawn(main, args=(world_size,), nprocs=world_size)
+    # world_size = 1 #torch.cuda.device_count()
+    # mp.spawn(main, args=(world_size,), nprocs=world_size)
