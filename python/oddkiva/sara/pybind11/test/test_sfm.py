@@ -1,6 +1,6 @@
 import numpy as np
 
-from oddkiva import sara
+import pysara_pybind11 as sara
 
 
 def test_oeregion():

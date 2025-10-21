@@ -1,6 +1,6 @@
 import pathlib
 import numpy as np
-import oddkiva.sara as pysara
+import pysara_pybind11 as pysara
 
 
 def test_me():

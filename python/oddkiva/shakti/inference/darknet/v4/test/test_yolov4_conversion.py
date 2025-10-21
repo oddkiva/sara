@@ -7,7 +7,7 @@ import numpy as np
 
 import torch
 
-import oddkiva.sara as sara
+import pysara_pybind11 as sara
 import oddkiva.shakti.inference.darknet as darknet
 import oddkiva.shakti.inference.coreml.yolo_v4 as ct
 

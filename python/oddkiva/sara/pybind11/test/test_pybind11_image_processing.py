@@ -1,4 +1,4 @@
-import oddkiva.sara as sara
+import pysara_pybind11 as sara
 
 import numpy as np
 

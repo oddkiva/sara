@@ -1,6 +1,6 @@
 import numpy as np
 
-from oddkiva.sara import compute_region_inner_boundaries
+from pysara_pybind11 import compute_region_inner_boundaries
 
 
 def test_compute_region_inner_boundaries():
