@@ -1,19 +1,11 @@
 import inspect
 import importlib
-from typing import Any
 
 
 GLOBAL_CONFIG = {}
 
 
-def register(dct: Any = GLOBAL_CONFIG):
-    """
-    dct:
-            if dct is Dict, register foo into dct as key-value pair
-            if dct is Clas, register as modules attibute
-        force
-            whether force register.
-    """
+def register():
     def decorator(foo):
         if inspect.isclass(foo):
             print("Registering class:", foo)
