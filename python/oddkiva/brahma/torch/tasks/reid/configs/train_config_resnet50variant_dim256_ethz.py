@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import torch
@@ -48,9 +49,11 @@ class TrainValTestDatasetConfig:
     def make_datasets() -> tuple[ClassificationDatasetABC,
                                  ClassificationDatasetABC,
                                  ClassificationDatasetABC]:
+
+        gpu_id = int(os.environ['LOCAL_RANK'])
         train_dataset = TrainValTestDatasetConfig.Dataset(
             TrainValTestDatasetConfig.dataset_dir_path,
-            transform=TrainValTestDatasetConfig.transforms,
+            transform=TrainValTestDatasetConfig.transforms.to(),
         )
         val_dataset = train_dataset
         test_dataset = train_dataset

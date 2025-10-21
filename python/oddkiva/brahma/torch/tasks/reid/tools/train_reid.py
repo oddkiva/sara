@@ -1,12 +1,13 @@
+import os
+
 import torch
-import torch.multiprocessing as mp
 import torch.nn
 import torchvision
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from oddkiva.brahma.torch.parallel.ddp import ddp_setup, ddp_cleanup
+from oddkiva.brahma.torch.parallel.ddp import ddp_setup
 from oddkiva.brahma.torch.datasets.reid.triplet_loss import TripletLoss
 import oddkiva.brahma.torch.tasks.reid.configs as C
 
@@ -34,11 +35,11 @@ def validate(
             anchor, pos, neg = X
 
             # Transfer the data to the appropriate GPU node.
-            anchor = anchor.to(gpu_id)
-            pos = pos.to(gpu_id)
-            neg = neg.to(gpu_id)
+            anchor1 = anchor.to(gpu_id)
+            pos1 = pos.to(gpu_id)
+            neg1 = neg.to(gpu_id)
 
-            d_anchor, d_pos, d_neg = model(anchor), model(pos), model(neg)
+            d_anchor, d_pos, d_neg = model(anchor1), model(pos1), model(neg1)
             dist_ap = torch.mean(torch.sum((d_anchor - d_pos) ** 2, dim=-1))
             dist_an = torch.mean(torch.sum((d_anchor - d_neg) ** 2, dim=-1))
             loss = triplet_loss(d_anchor, d_pos, d_neg,
@@ -101,7 +102,7 @@ def train_for_one_epoch(
             for class_id in class_ids:
                 class_histogram_1[class_id] += 1
 
-        if step % summary_write_interval == 0:
+        if gpu_id == 0 and step % summary_write_interval == 0:
             # Train loss
             loss = loss.item()
 
@@ -140,7 +141,7 @@ def train_for_one_epoch(
             train_global_step += 1
 
 
-def main(rank: int, world_size: int):
+def main():
     """
     rank: auto-allocated by DDP, when calling torch.multiprocessing.spawn(...)
     """
@@ -148,7 +149,7 @@ def main(rank: int, world_size: int):
     # --------------------------------------------------------------------------
     # PARALLEL TRAINING
     # --------------------------------------------------------------------------
-    ddp_setup(rank, world_size)
+    ddp_setup()
 
     # THE DATASET
     train_ds, val_ds, _ = PipelineConfig.make_datasets()
@@ -161,11 +162,17 @@ def main(rank: int, world_size: int):
     # PARALLEL TRAINING
     # Ensure that we transfer the model weights to the correct GPU node.
     # --------------------------------------------------------------------------
-    gpu_id = 0
-    base_reid_model = PipelineConfig.make_model()
+    gpu_id = int(os.environ['LOCAL_RANK'])
+    base_reid_model = PipelineConfig.make_model().to(gpu_id)
+
+    # Because of the presence of batch normalization layers
+    base_reid_model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(
+        base_reid_model
+    )
+
     reid_model = DDP(
-        base_reid_model.to(gpu_id),
-        device_ids=[gpu_id]
+        base_reid_model,
+        device_ids=[gpu_id],
     )
 
     # THE LOSS FUNCTION
@@ -173,9 +180,9 @@ def main(rank: int, world_size: int):
         summary_writer=writer,
         summary_write_interval=PipelineConfig.write_interval
     )
+    triplet_loss.to(gpu_id)
     # There is no model weights on the triplet loss, so the following is not
     # necessary:
-    # triplet_loss.to(gpu_id)
 
     train_global_step = 0
     val_global_step = 0
@@ -199,9 +206,9 @@ def main(rank: int, world_size: int):
         # Save the model after each training epoch.
         # Only the node associated with GPU node 0 can save the model.
         if gpu_id == 0:
-            ckp = reid_model.module.state_dict()
+            ckpt = reid_model.module.state_dict()
             torch.save(
-                ckp,
+                ckpt,
                 PipelineConfig.out_model_filepath(epoch)
             )
 
@@ -212,20 +219,6 @@ def main(rank: int, world_size: int):
             validate(val_dl, gpu_id, val_global_step, reid_model, triplet_loss,
                      writer, PipelineConfig.write_interval)
 
-    # --------------------------------------------------------------------------
-    # PARALLEL TRAINING
-    # Clean up the parallel training environment.
-    # --------------------------------------------------------------------------
-    ddp_cleanup()
-
 
 if __name__ == "__main__":
-    # Single-GPU training environment.
-    main(0, 1)
-
-    # --------------------------------------------------------------------------
-    # PARALLEL TRAINING
-    # Multi-GPU training environment.
-    # --------------------------------------------------------------------------
-    # world_size = 1 #torch.cuda.device_count()
-    # mp.spawn(main, args=(world_size,), nprocs=world_size)
+    main()

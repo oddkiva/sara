@@ -40,27 +40,25 @@ class TripletLoss(torch.nn.Module):
         # - A negative triplet loss provides good confidence in the training.
         # - A positive triplet loss means we need to wait a bit or tune a bit the
         #   coefficients (alpha, etc).
-        # triplet_loss_unclipped = d_ap + (self.alpha - d_an)
-        # triplet_loss = torch.maximum(triplet_loss_unclipped, torch.tensor(0))
-        # mean_triplet_loss = torch.mean(triplet_loss)
-        mean_triplet_loss = torch.sum(d_ap)
+        triplet_loss = torch.maximum(d_ap + (self.alpha - d_an), torch.tensor(0))
+        mean_triplet_loss = torch.mean(triplet_loss)
 
-        # with torch.no_grad():
-        #     # print('triplet_loss', triplet_loss)
-        #     print('min_d_ap = {}  max_d_ap = {}'.format(
-        #         torch.min(d_ap), torch.max(d_ap)))
-        #     print('min_d_an = {}  max_d_an = {}'.format(
-        #         torch.min(d_an), torch.max(d_an)))
-        #     print('mean_tl =', mean_triplet_loss)
-        #     # print('wts =', weight_decay)
-        #     # print('mtl_rw', mtl_rw)
-        #     # print('wts_rw =', regularization)
+        with torch.no_grad():
+            # print('triplet_loss', triplet_loss)
+            print('min_d_ap = {}  max_d_ap = {}'.format(
+                torch.min(d_ap), torch.max(d_ap)))
+            print('min_d_an = {}  max_d_an = {}'.format(
+                torch.min(d_an), torch.max(d_an)))
+            print('mean_tl =', mean_triplet_loss)
+            # print('wts =', weight_decay)
+            # print('mtl_rw', mtl_rw)
+            # print('wts_rw =', regularization)
 
-        #     # Also small coefficients. So add this L2-norm regularized.
-        #     model_wts_norm = torch.tensor(0)
-        #     for v in model_params:
-        #         model_wts_norm = model_wts_norm + 0.5 * torch.sum(v ** 2)
-        #     print('model_wts', model_wts_norm)
+            # Also small coefficients. So add this L2-norm regularized.
+            model_wts_norm = torch.tensor(0)
+            for v in model_params:
+                model_wts_norm = model_wts_norm + 0.5 * torch.sum(v ** 2)
+            print('model_wts', model_wts_norm)
 
         self.step = self.step + 1
         # self._write_summaries(triplet_loss, d_ap, d_an)
