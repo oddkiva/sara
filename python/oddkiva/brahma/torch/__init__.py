@@ -1,8 +1,4 @@
-import logging
-
 import torch
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 DEFAULT_DEVICE = (
@@ -10,4 +6,4 @@ DEFAULT_DEVICE = (
     else "mps" if torch.backends.mps.is_available()
     else "cpu"
 )
-logging.info(f"Default device selected as: {DEFAULT_DEVICE}")
+print(f"Default device selected as: {DEFAULT_DEVICE}")

@@ -1,3 +1,4 @@
+import atexit
 import logging
 from rich.logging import RichHandler
 
@@ -27,6 +28,18 @@ CONFIGS = {
 }
 
 PipelineConfig = CONFIGS['ethz']
+
+
+# --------------------------------------------------------------------------
+# PARALLEL TRAINING
+# Automatically clean up the parallel training environment.
+# --------------------------------------------------------------------------
+@atexit.register
+def ddp_cleanup():
+    local_rank = get_local_rank()
+    rank = get_rank()
+    print(f'[DDP][rank:{rank}][local_rank:{local_rank}] CLEANUP')
+    destroy_process_group()
 
 
 def validate(
