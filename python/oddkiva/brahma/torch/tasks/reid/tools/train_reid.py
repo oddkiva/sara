@@ -30,7 +30,7 @@ CONFIGS = {
     'iust': C.Iust
 }
 
-PipelineConfig = CONFIGS['ethz_variant']
+PipelineConfig = CONFIGS['iust']
 
 
 # --------------------------------------------------------------------------

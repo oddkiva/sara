@@ -70,7 +70,7 @@ class TrainValTestDatasetConfig:
 
 
 class SummaryWriterConfig:
-    out_dir: str = 'train/IUSTPersonReID'
+    out_dir: str = 'train/reid/IUSTPersonReID'
     write_interval: int = 1
 
     @staticmethod
