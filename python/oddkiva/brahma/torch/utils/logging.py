@@ -6,22 +6,22 @@ from oddkiva.brahma.torch.parallel.ddp import (
 )
 
 
-def logd(logger: logging.Logger, message: str):
+def format_msg(msg: str) -> str:
     local_rank = get_local_rank()
     rank = get_rank()
-    msg = f"[R:{rank},LR:{local_rank}]  {message}"
-    logger.debug(msg)
+    if local_rank is not None and rank is not None:
+        return f"[R:{rank},LR:{local_rank}]  {msg}"
+    else:
+        return msg
 
 
-def logi(logger: logging.Logger, message: str):
-    local_rank = get_local_rank()
-    rank = get_rank()
-    msg = f"[R:{rank},LR:{local_rank}]  {message}"
-    logger.info(msg)
+def logd(logger: logging.Logger, msg: str):
+    logger.debug(format_msg(msg))
 
 
-def logw(logger: logging.Logger, message: str):
-    local_rank = get_local_rank()
-    rank = get_rank()
-    msg = f"[R:{rank},LR:{local_rank}]  {message}"
-    logger.warning(msg)
+def logi(logger: logging.Logger, msg: str):
+    logger.info(format_msg(msg))
+
+
+def logw(logger: logging.Logger, msg: str):
+    logger.warning(format_msg(msg))

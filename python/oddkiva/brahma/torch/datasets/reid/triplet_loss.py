@@ -1,5 +1,17 @@
+import logging
+from rich.logging import RichHandler
+
 import torch
 from torch.utils.tensorboard.writer import SummaryWriter
+
+from oddkiva.brahma.torch.utils.logging import logi
+from oddkiva.brahma.torch.parallel.ddp import get_local_rank
+
+
+logging.basicConfig(
+    level="NOTSET", format="%(message)s", handlers=[RichHandler()]
+)
+LOGGER = logging.getLogger(__name__)
 
 
 class TripletLoss(torch.nn.Module):
@@ -23,8 +35,8 @@ class TripletLoss(torch.nn.Module):
                 anchor_desc: torch.Tensor,
                 positive_desc: torch.Tensor,
                 negative_desc: torch.Tensor) -> torch.Tensor:
-                # negative_desc: torch.Tensor,
-                # model_params: List[torch.nn.Parameter]) -> torch.Tensor:
+        # negative_desc: torch.Tensor,
+        # model_params: List[torch.nn.Parameter]) -> torch.Tensor:
         # Should be close to zero.
         d_ap = torch.sum((anchor_desc - positive_desc) ** 2, dim=-1)
         # Cannot be zero and must be a very large positive
@@ -43,51 +55,53 @@ class TripletLoss(torch.nn.Module):
         mean_triplet_loss = torch.mean(triplet_loss)
 
         with torch.no_grad():
-            # print('triplet_loss', triplet_loss)
-            print('min_d_ap = {}  max_d_ap = {}'.format(
+            # logi(LOGGER, 'triplet_loss', triplet_loss)
+            logi(LOGGER, 'min_d_ap = {}  max_d_ap = {}'.format(
                 torch.min(d_ap), torch.max(d_ap)))
-            print('min_d_an = {}  max_d_an = {}'.format(
+            logi(LOGGER, 'min_d_an = {}  max_d_an = {}'.format(
                 torch.min(d_an), torch.max(d_an)))
-            print('mean_tl =', mean_triplet_loss)
-            # print('wts =', weight_decay)
-            # print('mtl_rw', mtl_rw)
-            # print('wts_rw =', regularization)
+            logi(LOGGER, 'mean_tl = {mean_triplet_loss}')
+            # logi(LOGGER, 'wts =', weight_decay)
+            # logi(LOGGER, 'mtl_rw', mtl_rw)
+            # logi(LOGGER, 'wts_rw =', regularization)
 
             # # Also small coefficients. So add this L2-norm regularized.
             # model_wts_norm = torch.tensor(0)
             # for v in model_params:
             #     model_wts_norm = model_wts_norm + 0.5 * torch.sum(v ** 2)
-            # print('model_wts', model_wts_norm)
+            # logi(LOGGER, 'model_wts', model_wts_norm)
 
         self.step = self.step + 1
-        self._write_summaries(triplet_loss, d_ap, d_an)
+        if get_local_rank() is None or get_local_rank() == 0:
+            self._write_summaries(triplet_loss, d_ap, d_an)
+
         return mean_triplet_loss
 
-        # regularization = self.weight_decay_coeff * weight_decay
+    # regularization = self.weight_decay_coeff * weight_decay
 
-        # weight_triplet_loss = 10
-        # mtl_rw = weight_triplet_loss * mean_triplet_loss
+    # weight_triplet_loss = 10
+    # mtl_rw = weight_triplet_loss * mean_triplet_loss
 
-        # regularized_triplet_loss = mtl_rw + regularization
+    # regularized_triplet_loss = mtl_rw + regularization
 
-        # if self.summary_writer is not None and \
-        #         self.step % self.summary_write_interval == 0:
-        # self._write_summaries(triplet_loss,
-        #                       d_ap,
-        #                       d_an,
-        #                       weight_decay,
-        #                       regularized_triplet_loss)
-        # if self.train_with_regularization:
-        #     return regularized_triplet_loss
-        # else:
-        #     return mean_triplet_loss
+    # if self.summary_writer is not None and \
+    #         self.step % self.summary_write_interval == 0:
+    # self._write_summaries(triplet_loss,
+    #                       d_ap,
+    #                       d_an,
+    #                       weight_decay,
+    #                       regularized_triplet_loss)
+    # if self.train_with_regularization:
+    #     return regularized_triplet_loss
+    # else:
+    #     return mean_triplet_loss
 
     def _write_summaries(self,
                          triplet_loss: torch.Tensor,
                          d_ap: torch.Tensor,
                          d_an: torch.Tensor):
-                         # weight_decay: torch.Tensor,
-                         # regularized_triplet_loss: torch.Tensor) -> None:
+        # weight_decay: torch.Tensor,
+        # regularized_triplet_loss: torch.Tensor) -> None:
 
         if self.summary_writer is None:
             return
