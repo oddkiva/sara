@@ -1,4 +1,5 @@
-import os
+import logging
+from rich.logging import RichHandler
 
 import torch
 import torch.nn
@@ -7,10 +8,17 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from oddkiva.brahma.torch.parallel.ddp import ddp_setup
+from oddkiva.brahma.torch.logging import FORMAT
+from oddkiva.brahma.torch.parallel.ddp import ddp_setup, get_local_rank
 from oddkiva.brahma.torch.datasets.reid.triplet_loss import TripletLoss
 import oddkiva.brahma.torch.tasks.reid.configs as C
 
+
+# logging.basicConfig(format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
+logging.basicConfig(
+    level="NOTSET", format=FORMAT, datefmt="[%X]"
+)
+LOGGER = logging.getLogger(__name__)
 
 CONFIGS = {
     'ethz': C.Ethz,
@@ -57,7 +65,7 @@ def validate(
                 writer.add_scalar('Val/triplet_loss', loss, test_global_step)
 
                 # Log on the console.
-                print("".join([
+                LOGGER.info("".join([
                     f"[test_global_step: {test_global_step:>5d}]",
                     f"[iter: {step:>5d}/{step_count:>5d}] ",
                     f"dist_ap: {dist_ap:>7f}  "
@@ -132,7 +140,7 @@ def train_for_one_epoch(
                               uniform_sampling_score, train_global_step)
 
             # Log on the console.
-            print("".join([
+            LOGGER.info("".join([
                 f"[train_global_step: {train_global_step:>5d}]",
                 f"[iter: {step:>5d}/{step_count:>5d}] ",
                 f"triplet_loss: {loss:>7f}"
@@ -142,10 +150,6 @@ def train_for_one_epoch(
 
 
 def main():
-    """
-    rank: auto-allocated by DDP, when calling torch.multiprocessing.spawn(...)
-    """
-
     # --------------------------------------------------------------------------
     # PARALLEL TRAINING
     # --------------------------------------------------------------------------
@@ -160,18 +164,17 @@ def main():
     #
     # --------------------------------------------------------------------------
     # PARALLEL TRAINING
-    # Ensure that we transfer the model weights to the correct GPU node.
+    #
+    # 1. Ensure that we transfer the model weights to the correct GPU node.
     # --------------------------------------------------------------------------
-    gpu_id = int(os.environ['LOCAL_RANK'])
-    base_reid_model = PipelineConfig.make_model().to(gpu_id)
-
-    # Because of the presence of batch normalization layers
-    base_reid_model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(
-        base_reid_model
+    gpu_id = get_local_rank()
+    monogpu_reid_model = PipelineConfig.make_model().to(gpu_id)
+    # 2. Make the batch normalization layers parallel-friendly
+    monogpu_reid_model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(
+        monogpu_reid_model
     )
-
     reid_model = DDP(
-        base_reid_model,
+        monogpu_reid_model,
         device_ids=[gpu_id],
     )
 
@@ -187,10 +190,10 @@ def main():
     train_global_step = 0
     val_global_step = 0
     for epoch in range(10):
+        LOGGER.info(f"learning rate = {PipelineConfig.learning_rate}",  extra={"markup": True})
         # Restart the state of the Adam optimizer every epoch.
         optimizer = torch.optim.Adam(reid_model.parameters(),
                                      PipelineConfig.learning_rate)
-        print(f'learning rate = {PipelineConfig.learning_rate}')
 
         # Resample the list of triplets for each epoch.
         train_dl = PipelineConfig.make_triplet_dataset(train_ds)
