@@ -13,15 +13,3 @@ def format_msg(msg: str) -> str:
         return f"[R:{rank},LR:{local_rank}]  {msg}"
     else:
         return msg
-
-
-def logd(logger: logging.Logger, msg: str):
-    logger.debug(format_msg(msg))
-
-
-def logi(logger: logging.Logger, msg: str):
-    logger.info(format_msg(msg))
-
-
-def logw(logger: logging.Logger, msg: str):
-    logger.warning(format_msg(msg))

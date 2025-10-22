@@ -9,7 +9,7 @@ from torch.distributed import destroy_process_group
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from oddkiva.brahma.torch.utils.logging import logi
+from oddkiva.brahma.torch.utils.logging import format_msg
 from oddkiva.brahma.torch.parallel.ddp import (
     ddp_setup,
     get_local_rank,
@@ -41,7 +41,7 @@ PipelineConfig = CONFIGS['ethz_variant']
 def ddp_cleanup():
     if not torchrun_is_running():
         return
-    logi(LOGGER, "Cleaning DistributedDataParallel environment...")
+    LOGGER.info(format_msg("Cleaning DistributedDataParallel environment..."))
     destroy_process_group()
 
 
@@ -81,12 +81,12 @@ def validate(
                 writer.add_scalar('Val/triplet_loss', loss, test_global_step)
 
                 # Log on the console.
-                logi(LOGGER, "".join([
+                LOGGER.info(format_msg("".join([
                     f"[test_global_step: {test_global_step:>5d}]",
                     f"[iter: {step:>5d}/{step_count:>5d}] ",
                     f"dist_ap: {dist_ap:>7f}  "
                     f"dist_an: {dist_an:>7f}"
-                ]))
+                ])))
 
                 test_global_step += 1
 
@@ -157,11 +157,10 @@ def train_for_one_epoch(
                               uniform_sampling_score, train_global_step)
 
             # Log on the console.
-            logi(LOGGER, "".join([
+            LOGGER.info(format_msg("".join([
                 f"[train_global_step: {train_global_step:>5d}]",
                 f"[iter: {step:>5d}/{step_count:>5d}] ",
-                f"triplet_loss: {loss:>7f}"
-            ]))
+                f"triplet_loss: {loss:>7f}" ])))
 
             train_global_step += 1
 
@@ -189,7 +188,8 @@ def main():
     train_global_step = 0
     val_global_step = 0
     for epoch in range(10):
-        logi(LOGGER, f"learning rate = {PipelineConfig.learning_rate}")
+        LOGGER.info(format_msg(
+            f"learning rate = {PipelineConfig.learning_rate}"))
         # Restart the state of the Adam optimizer every epoch.
         optimizer = torch.optim.Adam(reid_model.parameters(),
                                      PipelineConfig.learning_rate)

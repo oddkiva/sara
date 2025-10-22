@@ -8,9 +8,10 @@ from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
 from oddkiva.brahma.torch.datasets.utils import group_samples_by_class
+from oddkiva.brahma.torch.utils.logging import format_msg
 
 
-LOGGER = logging.getLogger('TripletDataset')
+LOGGER = logging.getLogger(__name__)
 
 
 class TripletDataset(Dataset):
@@ -22,9 +23,9 @@ class TripletDataset(Dataset):
         self.base_dataset = base_dataset
         self.repeat = repeat
 
-        LOGGER.info('Grouping samples by classes...')
+        LOGGER.info(format_msg('Grouping samples by classes...'))
         self._group_samples_by_class()
-        LOGGER.info('Generating triplet samples...')
+        LOGGER.info(format_msg('Generating triplet samples...'))
         self._generate_triplet_samples()
 
     def  __len__(self):
@@ -60,7 +61,7 @@ class TripletDataset(Dataset):
 
     def _generate_triplet_samples(self):
         # Draw two distincts class indices.
-        LOGGER.info('Positive-negative class sampling...')
+        LOGGER.info(format_msg('Positive-negative class sampling...'))
         # We use the multinomial distribution instead of randperm as we can
         # leverage parallelization.
         #
@@ -78,7 +79,7 @@ class TripletDataset(Dataset):
             class_weights, num_samples=2, replacement=False)
 
         # Draw triplets of sample indices.
-        LOGGER.info('Triplet sampling...')
+        LOGGER.info(format_msg('Triplet sampling...'))
         triplets = []
         for class_pair in positive_negative_class_pairs:
             p_class, n_class = [int(v.item()) for v in class_pair]
