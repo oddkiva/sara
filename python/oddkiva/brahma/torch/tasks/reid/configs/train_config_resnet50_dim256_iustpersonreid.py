@@ -11,7 +11,7 @@ from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
 from oddkiva.brahma.torch.parallel.ddp import wrap_model_with_ddp_if_needed
-from oddkiva.brahma.torch.parallel.triplet_dataloader import (
+from oddkiva.brahma.torch.tasks.reid.configs.triplet_dataloader import (
     make_dataloader_for_triplet_loss
 )
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDataset
