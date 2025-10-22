@@ -5,19 +5,22 @@ from rich.logging import RichHandler
 import torch
 import torch.nn
 import torchvision
-from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.distributed import destroy_process_group
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
-from oddkiva.brahma.torch.logging import FORMAT
-from oddkiva.brahma.torch.parallel.ddp import ddp_setup, get_local_rank
+from oddkiva.brahma.torch.parallel.ddp import (
+    ddp_setup,
+    get_local_rank,
+    get_rank,
+    torchrun_is_running
+)
 from oddkiva.brahma.torch.datasets.reid.triplet_loss import TripletLoss
 import oddkiva.brahma.torch.tasks.reid.configs as C
 
 
-# logging.basicConfig(format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
 logging.basicConfig(
-    level="NOTSET", format=FORMAT, datefmt="[%X]"
+    level="NOTSET", format="%(message)s", handlers=[RichHandler()]
 )
 LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +30,7 @@ CONFIGS = {
     'iust': C.Iust
 }
 
-PipelineConfig = CONFIGS['ethz']
+PipelineConfig = CONFIGS['ethz_variant']
 
 
 # --------------------------------------------------------------------------
@@ -36,6 +39,8 @@ PipelineConfig = CONFIGS['ethz']
 # --------------------------------------------------------------------------
 @atexit.register
 def ddp_cleanup():
+    if not torch.cuda.is_available():
+        return
     local_rank = get_local_rank()
     rank = get_rank()
     print(f'[DDP][rank:{rank}][local_rank:{local_rank}] CLEANUP')
@@ -43,7 +48,7 @@ def ddp_cleanup():
 
 
 def validate(
-    dataloader: DataLoader, gpu_id: int, test_global_step: int,
+    dataloader: DataLoader, gpu_id: int | None, test_global_step: int,
     model: torch.nn.Module, triplet_loss: torch.nn.Module,
     writer: SummaryWriter, summary_write_interval: int
 ) -> None:
@@ -56,15 +61,15 @@ def validate(
             anchor, pos, neg = X
 
             # Transfer the data to the appropriate GPU node.
-            anchor1 = anchor.to(gpu_id)
-            pos1 = pos.to(gpu_id)
-            neg1 = neg.to(gpu_id)
+            if gpu_id is not None:
+                anchor = anchor.to(gpu_id)
+                pos = pos.to(gpu_id)
+                neg = neg.to(gpu_id)
 
-            d_anchor, d_pos, d_neg = model(anchor1), model(pos1), model(neg1)
+            d_anchor, d_pos, d_neg = model(anchor), model(pos), model(neg)
             dist_ap = torch.mean(torch.sum((d_anchor - d_pos) ** 2, dim=-1))
             dist_an = torch.mean(torch.sum((d_anchor - d_neg) ** 2, dim=-1))
-            loss = triplet_loss(d_anchor, d_pos, d_neg,
-                                [*model.parameters()])
+            loss = triplet_loss(d_anchor, d_pos, d_neg)
 
             if step % summary_write_interval == 0:
                 img_anchor = torchvision.utils.make_grid(anchor)
@@ -89,7 +94,7 @@ def validate(
 
 def train_for_one_epoch(
     dataloader: DataLoader,
-    gpu_id: int,
+    gpu_id: int | None,
     train_global_step: int,
     model: torch.nn.Module,
     triplet_loss: TripletLoss, optimizer: torch.optim.Optimizer,
@@ -107,12 +112,13 @@ def train_for_one_epoch(
         anchor, pos, neg = X
 
         # Transfer the data to the appropriate GPU node.
-        anchor = anchor.to(gpu_id)
-        pos = pos.to(gpu_id)
-        neg = neg.to(gpu_id)
+        if gpu_id is not None:
+            anchor = anchor.to(gpu_id)
+            pos = pos.to(gpu_id)
+            neg = neg.to(gpu_id)
 
         d_anchor, d_pos, d_neg = model(anchor), model(pos), model(neg)
-        loss = triplet_loss(d_anchor, d_pos, d_neg, [*model.parameters()])
+        loss = triplet_loss(d_anchor, d_pos, d_neg)
 
         loss.backward()
         optimizer.step()
@@ -123,7 +129,7 @@ def train_for_one_epoch(
             for class_id in class_ids:
                 class_histogram_1[class_id] += 1
 
-        if gpu_id == 0 and step % summary_write_interval == 0:
+        if (gpu_id is None or gpu_id == 0) and step % summary_write_interval == 0:
             # Train loss
             loss = loss.item()
 
@@ -163,54 +169,37 @@ def train_for_one_epoch(
 
 
 def main():
-    # --------------------------------------------------------------------------
     # PARALLEL TRAINING
-    # --------------------------------------------------------------------------
     ddp_setup()
 
     # THE DATASET
     train_ds, val_ds, _ = PipelineConfig.make_datasets()
     writer = PipelineConfig.make_summary_writer()
+    # Statistics to assess how balanced the sampling per class is evolving.
     class_histogram = [0] * train_ds.class_count
 
     # THE MODEL
-    #
-    # --------------------------------------------------------------------------
-    # PARALLEL TRAINING
-    #
-    # 1. Ensure that we transfer the model weights to the correct GPU node.
-    # --------------------------------------------------------------------------
     gpu_id = get_local_rank()
-    monogpu_reid_model = PipelineConfig.make_model().to(gpu_id)
-    # 2. Make the batch normalization layers parallel-friendly
-    monogpu_reid_model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(
-        monogpu_reid_model
-    )
-    reid_model = DDP(
-        monogpu_reid_model,
-        device_ids=[gpu_id],
-    )
+    reid_model = PipelineConfig.make_model()
 
     # THE LOSS FUNCTION
     triplet_loss = TripletLoss(
         summary_writer=writer,
         summary_write_interval=PipelineConfig.write_interval
     )
-    triplet_loss.to(gpu_id)
-    # There is no model weights on the triplet loss, so the following is not
-    # necessary:
 
     train_global_step = 0
     val_global_step = 0
     for epoch in range(10):
-        LOGGER.info(f"learning rate = {PipelineConfig.learning_rate}",  extra={"markup": True})
+        LOGGER.info(f"learning rate = {PipelineConfig.learning_rate}")
         # Restart the state of the Adam optimizer every epoch.
         optimizer = torch.optim.Adam(reid_model.parameters(),
                                      PipelineConfig.learning_rate)
 
         # Resample the list of triplets for each epoch.
         train_dl = PipelineConfig.make_triplet_dataset(train_ds)
-        train_dl.sampler.set_epoch(epoch)   # call this additional line at every epoch
+        if torchrun_is_running():
+            train_dl.sampler.set_epoch(epoch)
 
         # Train the model.
         train_for_one_epoch(train_dl, gpu_id,
@@ -220,18 +209,26 @@ def main():
                             class_histogram)
 
         # Save the model after each training epoch.
-        # Only the node associated with GPU node 0 can save the model.
-        if gpu_id == 0:
+        if gpu_id == 0 and torchrun_is_running():
+            # In the case of distributed training, make sure only the node
+            # associated with GPU node 0 can save the model.
             ckpt = reid_model.module.state_dict()
+            torch.save(
+                ckpt,
+                PipelineConfig.out_model_filepath(epoch)
+            )
+        else:
+            ckpt = reid_model.state_dict()
             torch.save(
                 ckpt,
                 PipelineConfig.out_model_filepath(epoch)
             )
 
         # Evaluate the model.
-        if gpu_id == 0:
+        if gpu_id is None or gpu_id == 0:
             val_dl = PipelineConfig.make_triplet_dataset(val_ds)
-            val_dl.sampler.set_epoch(epoch);
+            if torchrun_is_running():
+                val_dl.sampler.set_epoch(epoch);
             validate(val_dl, gpu_id, val_global_step, reid_model, triplet_loss,
                      writer, PipelineConfig.write_interval)
 

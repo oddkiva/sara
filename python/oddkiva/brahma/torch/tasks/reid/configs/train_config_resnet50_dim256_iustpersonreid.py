@@ -1,14 +1,18 @@
 from pathlib import Path
 
 import torch
+from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
-from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard.writer import SummaryWriter
 import torchvision.transforms.v2 as v2
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
+)
+from oddkiva.brahma.torch.parallel.ddp import wrap_model_with_ddp_if_needed
+from oddkiva.brahma.torch.parallel.triplet_dataloader import (
+    make_dataloader_for_triplet_loss
 )
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDataset
 from oddkiva.brahma.torch.datasets.reid.iust_person_reid import IUSTPersonReID
@@ -21,13 +25,11 @@ class ModelConfig:
     Model: type[torch.nn.Module] = ReidDescriptor50
     reid_dim: int = 256
 
-    # Add distributed training configs
-    # world_size = int(os.environ.get("WORLD_SIZE", 1))
-    # rank = int(os.environ.get("RANK", 0))
-
     @staticmethod
-    def make_model() -> torch.nn.Module:
-        return ModelConfig.Model(ModelConfig.reid_dim)
+    def make_model() -> torch.nn.Module | DDP:
+        return wrap_model_with_ddp_if_needed(
+            ModelConfig.Model(ModelConfig.reid_dim)
+        )
 
 
 class OptimizationConfig:
@@ -52,28 +54,19 @@ class TrainValTestDatasetConfig:
         train_dataset = TrainValTestDatasetConfig.Dataset(
             TrainValTestDatasetConfig.dataset_dir_path,
             transform=TrainValTestDatasetConfig.transforms,
-            dataset_type='train'
         )
-        val_dataset = TrainValTestDatasetConfig.Dataset(
-            TrainValTestDatasetConfig.dataset_dir_path,
-            transform=TrainValTestDatasetConfig.transforms,
-            dataset_type='test'
-        )
-        test_dataset = val_dataset
+        val_dataset = train_dataset
+        test_dataset = train_dataset
 
         return train_dataset, val_dataset, test_dataset
 
     @staticmethod
     def make_triplet_dataset(ds: ClassificationDatasetABC) -> DataLoader:
         tds = TripletDataset(ds)
-        dl = DataLoader(
-            dataset=tds,
-            # The following options are for parallel data training
-            batch_size=TrainValTestDatasetConfig.batch_size,
-            shuffle=False,
-            sampler=DistributedSampler(tds)
+        return make_dataloader_for_triplet_loss(
+            tds,
+            TrainValTestDatasetConfig.batch_size
         )
-        return dl
 
 
 class SummaryWriterConfig:
