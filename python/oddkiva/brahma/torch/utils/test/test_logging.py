@@ -1,7 +1,7 @@
 import logging
 from rich.logging import RichHandler
 
-from oddkiva.brahma.torch.utils.logging import logd, logi, logw
+from oddkiva.brahma.torch.utils.logging import format_msg
 
 
 logging.basicConfig(
@@ -11,6 +11,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 def test_log():
-    logd(LOGGER, "Hello, World!")
-    logi(LOGGER, "Hello, World!")
-    logw(LOGGER, "Hello, World!")
+    LOGGER.debug(format_msg("Hello, World!"))
+    LOGGER.info(format_msg("Hello, World!"))
+    LOGGER.warning(format_msg("Hello, World!"))

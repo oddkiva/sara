@@ -19,6 +19,7 @@ BUILD_TASKS = [
     "book_docker",
     "serve_book",
     "emsdk_docker",
+    "pytest_torch_package",
 ]
 
 # Build types.
@@ -417,6 +418,21 @@ def build_emsdk_docker():
     ).wait()
 
 
+def pytest_torch_package():
+    # Build the docker image.
+    ret = subprocess.Popen(
+        [
+            "pytest",
+            "-s",
+            "--ignore=python/oddkiva/brahma/jax",
+            "--ignore=python/oddkiva/brahma/tf"
+        ],
+        cwd=SARA_SOURCE_DIR,
+    ).wait()
+
+    return ret
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sara Build Program Options")
 
@@ -522,3 +538,6 @@ if __name__ == "__main__":
 
         if task == "serve_book":
             serve_book()
+
+        if task == 'pytest_torch_package':
+            pytest_torch_package()
