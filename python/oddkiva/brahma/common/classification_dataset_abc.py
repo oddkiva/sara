@@ -1,7 +1,7 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 
-class ClassificationDatasetABC:
+class ClassificationDatasetABC(ABC):
 
     @property
     @abstractmethod

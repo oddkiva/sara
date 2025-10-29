@@ -28,12 +28,11 @@ def enumerate_anchors(image_sizes: tuple[int, int],
 
     # Box centers.
     with device:
-        x_axis = torch.arange(0, w)
-        y_axis = torch.arange(0, h)
+        x_axis = torch.arange(w, dtype=torch.float32)
+        y_axis = torch.arange(h, dtype=torch.float32)
 
         x, y = torch.meshgrid(x_axis, y_axis, indexing='xy')
         xy = torch.stack((x, y), dim=-1)\
-            .to(dtype=torch.float32)\
             .reshape((num_boxes, 2))
 
         # The box centers are the centers of each pixel of the image
@@ -45,12 +44,13 @@ def enumerate_anchors(image_sizes: tuple[int, int],
             .unsqueeze(0)\
             .repeat((num_boxes, 1))
 
+        if normalize_geometry:
+            wh_inverse = torch.tensor([1. / w, 1. / h])
+            box_centers = box_centers * wh_inverse
+            box_sizes_tensorized = box_sizes_tensorized * wh_inverse
+
         # Stack the box centers and box sizes
         boxes = torch.cat((box_centers, box_sizes_tensorized), dim=-1)
-
-        if normalize_geometry:
-            boxes[:, (0, 2)] /= w
-            boxes[:, (1, 3)] /= h
 
     return boxes
 

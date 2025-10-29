@@ -107,9 +107,8 @@ def train_for_one_epoch(
     for step, (X, y) in enumerate(dataloader):
         optimizer.zero_grad()
 
-        anchor, pos, neg = X
-
         # Transfer the data to the appropriate GPU node.
+        anchor, pos, neg = X
         if gpu_id is not None:
             anchor = anchor.to(gpu_id)
             pos = pos.to(gpu_id)
