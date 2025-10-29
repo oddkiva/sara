@@ -1,7 +1,6 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-import logging
-from typing import Tuple
+from loguru import logger
 
 import torch
 from torch.utils.data import Dataset
@@ -13,21 +12,18 @@ from oddkiva.brahma.torch.datasets.utils import group_samples_by_class
 from oddkiva.brahma.torch.utils.logging import format_msg
 
 
-LOGGER = logging.getLogger(__name__)
-
-
 class TripletDataset(Dataset):
 
-    TripletSample = Tuple[Tuple[torch.Tensor, torch.Tensor, torch.Tensor],
-                          Tuple[int, int, int]]
+    TripletSample = tuple[tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+                          tuple[int, int, int]]
 
     def __init__(self, base_dataset: ClassificationDatasetABC, repeat: int = 1):
         self.base_dataset = base_dataset
         self.repeat = repeat
 
-        LOGGER.info(format_msg('Grouping samples by classes...'))
+        logger.info(format_msg('Grouping samples by classes...'))
         self._group_samples_by_class()
-        LOGGER.info(format_msg('Generating triplet samples...'))
+        logger.info(format_msg('Generating triplet samples...'))
         self._generate_triplet_samples()
 
     def  __len__(self):
@@ -63,7 +59,7 @@ class TripletDataset(Dataset):
 
     def _generate_triplet_samples(self):
         # Draw two distincts class indices.
-        LOGGER.info(format_msg('Positive-negative class sampling...'))
+        logger.info(format_msg('Positive-negative class sampling...'))
         # We use the multinomial distribution instead of randperm as we can
         # leverage parallelization.
         #
@@ -81,7 +77,7 @@ class TripletDataset(Dataset):
             class_weights, num_samples=2, replacement=False)
 
         # Draw triplets of sample indices.
-        LOGGER.info(format_msg('Triplet sampling...'))
+        logger.info(format_msg('Triplet sampling...'))
         triplets = []
         for class_pair in positive_negative_class_pairs:
             p_class, n_class = [int(v.item()) for v in class_pair]

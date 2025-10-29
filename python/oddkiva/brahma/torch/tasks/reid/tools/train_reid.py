@@ -1,8 +1,7 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
 import atexit
-import logging
-from rich.logging import RichHandler
+from loguru import logger
 
 import torch
 import torch.nn
@@ -21,11 +20,6 @@ from oddkiva.brahma.torch.datasets.reid.triplet_loss import TripletLoss
 import oddkiva.brahma.torch.tasks.reid.configs as C
 
 
-logging.basicConfig(
-    level="NOTSET", format="%(message)s", handlers=[RichHandler()]
-)
-LOGGER = logging.getLogger(__name__)
-
 CONFIGS = {
     'ethz': C.Ethz,
     'ethz_variant': C.EthzVariant,
@@ -43,7 +37,7 @@ PipelineConfig = CONFIGS['iust']
 def ddp_cleanup():
     if not torchrun_is_running():
         return
-    LOGGER.info(format_msg("Cleaning DistributedDataParallel environment..."))
+    logger.info(format_msg("Cleaning DistributedDataParallel environment..."))
     destroy_process_group()
 
 
@@ -83,7 +77,7 @@ def validate(
                 writer.add_scalar('Val/triplet_loss', loss, test_global_step)
 
                 # Log on the console.
-                LOGGER.info(format_msg("".join([
+                logger.info(format_msg("".join([
                     f"[test_global_step: {test_global_step:>5d}]",
                     f"[iter: {step:>5d}/{step_count:>5d}] ",
                     f"dist_ap: {dist_ap:>7f}  "
@@ -158,7 +152,7 @@ def train_for_one_epoch(
                               uniform_sampling_score, train_global_step)
 
             # Log on the console.
-            LOGGER.info(format_msg("".join([
+            logger.info(format_msg("".join([
                 f"[train_global_step: {train_global_step:>5d}]",
                 f"[iter: {step:>5d}/{step_count:>5d}] ",
                 f"triplet_loss: {loss:>7f}" ])))
@@ -189,7 +183,7 @@ def main():
     train_global_step = 0
     val_global_step = 0
     for epoch in range(10):
-        LOGGER.info(format_msg(
+        logger.info(format_msg(
             f"learning rate = {PipelineConfig.learning_rate}"))
         # Restart the state of the Adam optimizer every epoch.
         optimizer = torch.optim.Adam(reid_model.parameters(),

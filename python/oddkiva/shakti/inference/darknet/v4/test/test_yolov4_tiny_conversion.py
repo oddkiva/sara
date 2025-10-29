@@ -1,7 +1,7 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-import logging
 from pathlib import Path
+from loguru import logger
 
 from PIL import Image
 
@@ -14,9 +14,6 @@ import coremltools as ct
 import pysara_pybind11 as sara
 import oddkiva.shakti.inference.darknet as darknet
 import oddkiva.shakti.inference.coreml.yolo_v4 as ct
-
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 THIS_FILE = str(__file__)
@@ -75,7 +72,7 @@ def test_yolo_v4_tiny_cfg():
     in_tensor = read_image(DOG_IMAGE_PATH, yolo_net)
     in_tensor_saved = yolo_out_tensor(0)
     err = torch.norm(in_tensor - in_tensor_saved).item()
-    logging.info(f'input err = {err}')
+    logger.info(f'input err = {err}')
     assert err < 1e-5
 
     ys, boxes = yolo_net._forward(in_tensor)
@@ -94,7 +91,7 @@ def test_yolo_v4_tiny_cfg():
         assert out_tensor_saved.shape == out_tensor_computed.shape
 
         err = torch.norm(out_tensor_computed - out_tensor_saved).item()
-        logging.info(f'[{i}] err = {err} for {block}')
+        logger.info(f'[{i}] err = {err} for {block}')
         assert err < 3e-3
 
 
@@ -106,7 +103,7 @@ def test_yolo_v4_tiny_cfg():
         boxes_i = boxes_i.reshape((n, b * c, h, w))
 
         err = torch.norm(boxes_i[:] - boxes_true_i[:])
-        logging.info(f'[{i}] err = {err} for {yolo_net.model[i - 1]}')
+        logger.info(f'[{i}] err = {err} for {yolo_net.model[i - 1]}')
         assert err < 1.1e-4
 
 

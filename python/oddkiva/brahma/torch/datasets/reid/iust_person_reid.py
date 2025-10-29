@@ -1,7 +1,7 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-import logging
 import os
+from loguru import logger
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -16,9 +16,6 @@ else:
 from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
-
-
-LOGGER = logging.getLogger('IUSTPersonReID')
 
 
 class IUSTPersonReID(ClassificationDatasetABC):
@@ -41,7 +38,7 @@ class IUSTPersonReID(ClassificationDatasetABC):
             if '.jpg' in filename
         ]
         self._image_paths.sort()
-        LOGGER.info(f'Populated image paths: {len(self._image_paths)}')
+        logger.info(f'Populated image paths: {len(self._image_paths)}')
 
         def extract_image_label(p: Path) -> str:
             return p.name[:4]
@@ -51,7 +48,7 @@ class IUSTPersonReID(ClassificationDatasetABC):
 
         self._class_names = list(set(self._image_class_names))
         self._class_names.sort()
-        LOGGER.info(f'Populated list of person classes : {len(self._class_names)}')
+        logger.info(f'Populated list of person classes : {len(self._class_names)}')
 
         self._class_ids = {label: i for i, label in enumerate(self._class_names)}
 

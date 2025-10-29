@@ -1,7 +1,7 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
 from pathlib import Path
-import logging
+from loguru import logger
 
 from PIL import Image
 
@@ -12,9 +12,6 @@ import torch
 import pysara_pybind11 as sara
 import oddkiva.shakti.inference.darknet as darknet
 import oddkiva.shakti.inference.coreml.yolo_v4 as ct
-
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 # Sara directories.
@@ -40,10 +37,10 @@ assert DOG_IMAGE_PATH.exists()
 
 
 def read_tensor(path: Path, dims: int):
-    logging.debug(f'Read tensor file = {path}')
+    logger.debug(f'Read tensor file = {path}')
     with open(path, 'rb') as fp:
         shape = np.fromfile(fp, dtype=np.int32, count=dims)
-        logging.debug(f'Read shape = {shape}')
+        logger.debug(f'Read shape = {shape}')
         x = np.fromfile(fp, dtype=np.float32,
                         count=shape.prod()).reshape(shape)
         x = torch.from_numpy(x)
@@ -99,7 +96,7 @@ def test_yolo_v4_weights():
     err_max = 5e-6
     for i, conv_bn_a in enumerate(conv_blocks):
         conv = conv_bn_a.layers[0]
-        logging.info(f'[{i}] Checking fused convolution {conv}')
+        logger.info(f'[{i}] Checking fused convolution {conv}')
         assert type(conv) is torch.nn.Conv2d
 
         w, b = conv_weights[i]
@@ -134,7 +131,7 @@ def test_yolo_v4_prediction():
         assert out_tensor_saved.shape == out_tensor_computed.shape
 
         err = torch.max(torch.abs(out_tensor_computed - out_tensor_saved)).item()
-        logging.info(f'[{i}] err = {err} for {block}')
+        logger.info(f'[{i}] err = {err} for {block}')
         assert err < err_max
 
 

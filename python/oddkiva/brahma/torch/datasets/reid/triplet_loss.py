@@ -1,16 +1,12 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-import logging
-from rich.logging import RichHandler
+from loguru import logger
 
 import torch
 from torch.utils.tensorboard.writer import SummaryWriter
 
 from oddkiva.brahma.torch.utils.logging import format_msg
 from oddkiva.brahma.torch.parallel.ddp import get_local_rank
-
-
-LOGGER = logging.getLogger(__name__)
 
 
 class TripletLoss(torch.nn.Module):
@@ -54,21 +50,21 @@ class TripletLoss(torch.nn.Module):
         mean_triplet_loss = torch.mean(triplet_loss)
 
         with torch.no_grad():
-            # logd(LOGGER, 'triplet_loss', triplet_loss)
-            LOGGER.debug(format_msg(
+            # logger.debug(format_msg('triplet_loss', triplet_loss))
+            logger.debug(format_msg(
                 f'min_d_ap = {torch.min(d_ap)}  max_d_ap = {torch.max(d_ap)}'))
-            LOGGER.debug(format_msg(
+            logger.debug(format_msg(
                 f'min_d_an = {torch.min(d_an)}  max_d_an = {torch.max(d_an)}'))
-            LOGGER.debug(format_msg(f'mean_tl = {mean_triplet_loss}'))
-            # logd(LOGGER, 'wts =', weight_decay)
-            # logd(LOGGER, 'mtl_rw', mtl_rw)
-            # logd(LOGGER, 'wts_rw =', regularization)
+            logger.debug(format_msg(f'mean_tl = {mean_triplet_loss}'))
+            # logger.debug(format_msg('wts =', weight_decay))
+            # logger.debug(format_msg('mtl_rw', mtl_rw))
+            # logger.debug(format_msg('wts_rw =', regularization))
 
             # # Also small coefficients. So add this L2-norm regularized.
             # model_wts_norm = torch.tensor(0)
             # for v in model_params:
             #     model_wts_norm = model_wts_norm + 0.5 * torch.sum(v ** 2)
-            # logd(LOGGER, 'model_wts', model_wts_norm)
+            # logger.debug(format_msg('model_wts', model_wts_norm))
 
         self.step = self.step + 1
         if get_local_rank() is None or get_local_rank() == 0:
