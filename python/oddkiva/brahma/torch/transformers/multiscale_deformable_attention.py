@@ -5,18 +5,18 @@ import torch.nn.functional as F
 
 
 class MultiscaleDeformableAttention(torch.nn.Module):
+    """ As described in the paper:
+    Deformable DETR: Deformable Transformers for End-to-End Object Detection
+    <https://arxiv.org/pdf/2010.04159>
+
+    Everything is summarized in the Figure 2 of the paper.
+    """
 
     def __init__(self, attention_head_count: int,
                  feature_dim: int,
                  value_dim: int,
                  key_count_per_scale: int = 4):
         """Constructs a multiscale deformable attention layer.
-
-        As described in the paper:
-        Deformable DETR: Deformable Transformers for End-to-End Object Detection
-        <https://arxiv.org/pdf/2010.04159>
-
-        Everything is summarized in the Figure 2 of the paper.
 
         Args:
             attention_head_count: the dimension of the output value vector.
@@ -50,7 +50,7 @@ class MultiscaleDeformableAttention(torch.nn.Module):
         self.attention_weight_predictors = [
             torch.nn.Sequential(
                 torch.nn.Linear(feature_dim, key_count_per_scale),
-                torch.nn.Softmax()
+                torch.nn.Softmax(),
                 torch.nn.
             )
             for _ in range(attention_head_count)
