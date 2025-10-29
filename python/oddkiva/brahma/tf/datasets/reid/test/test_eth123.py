@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.tf.datasets.reid.eth123 import ETH123, ETH123_Internal
 

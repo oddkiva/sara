@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from PySide6.QtCore import QMutex, QObject, QThread, Qt, QWaitCondition, Signal
 from PySide6.QtWidgets import QApplication
 

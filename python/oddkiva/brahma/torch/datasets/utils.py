@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from typing import List
 
 from oddkiva.brahma.common.classification_dataset_abc import (

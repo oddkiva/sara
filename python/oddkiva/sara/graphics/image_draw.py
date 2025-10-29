@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from PySide6.QtCore import QPointF
 from PySide6.QtGui import QColor, QFont, QImage, QPainter, QPen
 

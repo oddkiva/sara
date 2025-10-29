@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import torch
 
 import oddkiva.brahma.torch.image_processing.warp as W

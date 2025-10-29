@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from oddkiva.sara.timer import *
 # The following imports may fail because PySide2 may not be available on recent
 # Python versions.

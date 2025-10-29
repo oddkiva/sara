@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import numpy as np
 
 from pysara_pybind11 import (compute_adjacency_list_2d,

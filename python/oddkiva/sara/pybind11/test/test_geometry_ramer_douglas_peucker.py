@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from pysara_pybind11 import ramer_douglas_peucker
 import numpy as np
 

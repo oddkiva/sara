@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from pathlib import Path
 
 import torch
@@ -30,7 +32,6 @@ class ModelConfig:
         return wrap_model_with_ddp_if_needed(
             ModelConfig.Model(ModelConfig.reid_dim)
         )
-
 
 
 class TrainValTestDatasetConfig:

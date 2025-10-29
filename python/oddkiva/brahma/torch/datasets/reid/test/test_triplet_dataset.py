@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import (
     TripletDataset)

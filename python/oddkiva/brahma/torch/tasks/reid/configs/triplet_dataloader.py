@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 

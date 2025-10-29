@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import pathlib
 import numpy as np
 import pysara_pybind11 as pysara

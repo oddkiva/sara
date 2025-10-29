@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from typing import Dict
 
 from oddkiva.brahma.torch.sampling.class_balanced_sampler import (

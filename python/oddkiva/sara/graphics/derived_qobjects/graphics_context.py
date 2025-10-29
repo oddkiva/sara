@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from PySide6.QtCore import QObject, Qt
 
 from oddkiva.sara.graphics.derived_qobjects.painting_window import PaintingWindow

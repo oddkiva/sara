@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from typing import Iterator, List
 
 from torch.utils.data import Sampler

@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from PySide6.QtCore import (QObject, QPointF, QRectF, QTimer, Qt, qWarning,
                             Signal, Slot)
 from PySide6.QtWidgets import QApplication, QScrollArea, QWidget
