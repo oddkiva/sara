@@ -15,8 +15,7 @@ class TransformerEncoderLayer(torch.nn.Module):
                  num_heads: int,
                  feedforward_dim: int = 2048,
                  dropout: float = 0.1,
-                 activation: str = 'relu',
-                 normalize_before: bool = Fale):
+                 normalize_before: bool = False):
         """Constructs the base layer of a Transformer Encoder block with
         reasonable default parameters.
 
