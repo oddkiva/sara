@@ -33,6 +33,8 @@ class TransformerDecoderLayer(torch.nn.Module):
         self.dropout_1 = torch.nn.Dropout(p=dropout)
         self.layer_norm_1 = torch.nn.LayerNorm(embed_dim)
 
+        # TODO: replace this layer with the multiscale-deformable cross
+        # attention.
         self.cross_attention = torch.nn.MultiheadAttention(
             embed_dim, num_heads, dropout=dropout,
             batch_first=True
@@ -60,7 +62,7 @@ class TransformerDecoder(torch.nn.Module):
     """
 
     def __init__(self,
-                 encoder_layer: torch.nn.Module,
+                 decoder_layer: torch.nn.Module,
                  num_layers: int = 6,
                  norm: torch.nn.Module | None = None):
         """ Constructs a transformer encoder block.
@@ -81,7 +83,7 @@ class TransformerDecoder(torch.nn.Module):
 
         super().__init__()
         self.layers = torch.nn.ModuleList([
-            copy.deepcopy(encoder_layer) for _ in range(num_layers)
+            copy.deepcopy(decoder_layer) for _ in range(num_layers)
         ])
         self.norm = norm
 

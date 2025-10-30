@@ -3,7 +3,7 @@
 import time
 
 
-class Timer(object):
+class Timer:
     def __init__(self, name=None):
         self.name = name
 

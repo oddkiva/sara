@@ -1,0 +1,9 @@
+site_name: pysara
+
+theme:
+  name: material
+  highlightjs: true
+
+plugins:
+- search
+- mkdocstrings
