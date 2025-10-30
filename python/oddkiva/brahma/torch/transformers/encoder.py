@@ -7,8 +7,9 @@ import torch
 
 
 class TransformerEncoderLayer(torch.nn.Module):
-    """This class closely follows the proposed implementation of the landmark
-    paper "Attention Is All You Need"
+    """
+    This class closely follows the proposed implementation of the landmark
+    paper "Attention Is All You Need".
     """
 
     def __init__(self, embed_dim: int,

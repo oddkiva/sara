@@ -2,10 +2,6 @@ from typing import Iterable
 
 import torch
 
-from oddkiva.brahma.torch.transformers.embedding.positional_sine_embedding \
-    import (
-        PositionalSineEmbedding2D
-    )
 from oddkiva.brahma.torch.backbone.repvgg import RepVggBaseLayer
 
 class RepVggBlock(torch.nn.Module):
