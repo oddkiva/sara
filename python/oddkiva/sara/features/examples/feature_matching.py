@@ -1,6 +1,9 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
 import sys
+from typing import Iterable
+
+from PySide6.QtCore import QObject, Qt
 
 import numpy as np
 
@@ -8,7 +11,7 @@ import oddkiva.sara as sara
 import oddkiva.shakti as shakti
 
 
-def draw_feature(image, kp, color, pen_width=2):
+def draw_feature(image, kp, color: Iterable[int], pen_width: int = 2):
     r = kp.radius() * np.sqrt(2.)
     o = kp.orientation
     a = kp.coords
@@ -77,6 +80,9 @@ def user_main():
                 draw_feature(video_frame, f2[m.y], (255, 0, 0))
                 sara.image_draw.draw_line(video_frame, x, y, (255, 255, 0), 2)
             sara.draw_image(video_frame)
+
+        # if sara.get_key() == Qt.Key.Key_Escape:
+        #     break
 
 
 if __name__ == '__main__':
