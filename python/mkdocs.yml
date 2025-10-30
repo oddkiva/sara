@@ -2,7 +2,14 @@ site_name: pysara
 
 theme:
   name: material
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
   highlightjs: true
+  font:
+    text: Source Sans 3
+    code: Source Code Pro
 
 markdown_extensions:
   - pymdownx.highlight:
