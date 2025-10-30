@@ -11,7 +11,7 @@ import torch.nn.functional as F
 class ConvBNA(nn.Module):
 
     def __init__(self, in_channels, darknet_params: dict[str, Any], id: int,
-                 inference=True):
+                 inference: bool = True):
         super(ConvBNA, self).__init__()
         self.layers = nn.Sequential()
 

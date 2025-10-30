@@ -163,7 +163,7 @@ class TransformerEncoder(torch.nn.Module):
         self,
         features: torch.Tensor,
         positional_encoding: torch.Tensor | None,
-        attn_mask: torch.Tensor
+        attn_mask: torch.Tensor | None = None
     ) -> torch.Tensor:
         y = features
         for layer in self.layers:

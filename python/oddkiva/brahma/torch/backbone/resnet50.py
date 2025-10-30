@@ -5,6 +5,26 @@ from collections import OrderedDict
 import torch.nn as nn
 
 
+def make_activation_func(activation: str | None, inplace: bool = False):
+    # Add the activation layer
+    if activation == "leaky":
+        return nn.LeakyReLU(0.1, inplace=inplace)
+    elif activation == "relu":
+        return nn.ReLU(inplace=inplace)
+    elif activation == "mish":
+        return nn.Mish(inplace=inplace)
+    elif activation == "linear":
+        return nn.Identity(inplace=inplace)
+    elif activation == "logistic":
+        return nn.Sigmoid()
+    if activation == "silu":
+        return nn.SiLU(inplace=inplace)
+    elif activation is None:
+        return None
+    else:
+        raise ValueError(f"No convolutional activation named {activation}")
+
+
 class ConvBNA(nn.Module):
     def __init__(
         self,
@@ -13,8 +33,9 @@ class ConvBNA(nn.Module):
         kernel_size: int,
         stride: int,
         batch_normalize: bool,
-        activation: str,
+        activation: str | None,
         id: int,
+        inplace_activation: bool = False
     ):
         super(ConvBNA, self).__init__()
         self.layers = nn.Sequential()
@@ -37,20 +58,10 @@ class ConvBNA(nn.Module):
                 f"batch_norm_{id}", nn.BatchNorm2d(out_channels)
             )
 
-        # Add the activation layer
-        if activation == "leaky":
-            activation_fn = nn.LeakyReLU(0.1, inplace=True)
-        elif activation == "relu":
-            activation_fn = nn.ReLU(inplace=True)
-        elif activation == "mish":
-            activation_fn = nn.Mish()
-        elif activation == "linear":
-            activation_fn = nn.Identity(inplace=True)
-        elif activation == "logistic":
-            activation_fn = nn.Sigmoid()
-        else:
-            raise ValueError(f"No convolutional activation named {activation}")
-        self.layers.add_module(f"{activation}_{id}", activation_fn)
+        activation_fn = make_activation_func(activation,
+                                             inplace=inplace_activation)
+        if activation_fn is not None:
+            self.layers.add_module(f"{activation}_{id}", activation_fn)
 
     def forward(self, x):
         return self.layers.forward(x)

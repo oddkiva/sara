@@ -1,0 +1,120 @@
+import torch
+
+from oddkiva.brahma.torch.backbone.resnet50 import (
+    ConvBNA,
+    make_activation_func
+)
+
+
+class RepVggBaseLayer(torch.nn.Module):
+    """
+    This class implements the architecture proposed in the paper [RepVGG:
+    Making VGG-style ConvNets Great Again](https://arxiv.org/pdf/2101.03697)
+
+    The details are summarized in Figure 2 and Figure 4.
+    Notice that in Figure 4, batch normalization also takes place.
+
+    RepVgg has two dually equivalent architecture.
+
+    - At training time, like it has two skip connections that avoids vanishing
+      gradients.
+    - At inference time, the three branches can be merged equivalently into a
+      single convolutional block, which makes it computationally efficient when
+      deploying in production environments.
+    """
+
+    def __init__(self, in_channels: int, out_channels: int,
+                 stride: int = 2,
+                 use_identity_connection: bool = False,
+                 activation: str = 'relu',
+                 inplace_activation: bool = False):
+        """
+        Constructs a RegVggBaseLayer
+
+        The current parameters should be enough to accomodate:
+        - the different types of RepVGG layers as exposed in the original
+          paper, and
+        - the specific needs of RT-DETR, which does not do any downsampling at
+          all.
+
+        In any case, there are at least two branches (conv3x3, conv1x1) and an
+        optional branch (Identity)
+        """
+        super().__init__()
+
+        self.use_identity_connection = use_identity_connection
+
+        if use_identity_connection:
+            self.layers = torch.nn.ModuleList([
+                ConvBNA(in_channels, out_channels, 3, stride, True, None,
+                        3, inplace_activation=inplace_activation),
+                ConvBNA(in_channels, out_channels, 1, stride, True, None,
+                        1, inplace_activation=inplace_activation),
+                torch.nn.Identity()
+            ])
+        else:
+            self.layers = torch.nn.ModuleList([
+                ConvBNA(in_channels, out_channels, 3, stride, True, None, 3),
+                ConvBNA(in_channels, out_channels, 1, stride, True, None, 1)
+            ])
+        self.activation = make_activation_func(activation)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        y = self.layers[0](x)
+        for layer in self.layers[1:]:
+            y = y + layer(x)
+        if self.activation is None:
+            return y
+        return self.activation(y)
+
+    # def deploy_for_inference(self):
+    #     if not hasattr(self, 'conv'):
+    #         self.conv = torch.nn.Conv2d(self.ch_in, self.ch_out, 3, 1, padding=1)
+
+    #     kernel, bias = self._compute_equivalent_single_convolution()
+    #     self.conv.weight.data = kernel
+    #     self.conv.bias.data = bias
+
+    def _compute_equivalent_single_convolution(
+        self
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        w3x3, b3x3 = self._fuse_bn_tensor(self.layers[0])
+
+        w1x1, b1x1 = self._fuse_bn_tensor(self.layers[1])
+        w1x1_as_3x3 = self._transform_w1x1_as_eq_w3x3(w1x1)
+
+        if self.use_identity_connection:
+            one1x1 = torch.tensor([[1]])
+            one1x1_as_3x3 = self._transform_w1x1_as_eq_w3x3(one1x1)
+            return (w3x3 + w1x1_as_3x3 + one1x1_as_3x3,
+                    b3x3 + b1x1)
+        else:
+            return (w3x3 + w1x1_as_3x3,
+                    b3x3 + b1x1)
+
+    def _transform_w1x1_as_eq_w3x3(
+        self,
+        kernel1x1: torch.Tensor
+    ) -> torch.Tensor:
+        return torch.nn.functional.pad(kernel1x1, [1, 1, 1, 1])
+
+    def _fuse_conv_bn_layer(self, branch: ConvBNA):
+        """
+        This is the same implementation as in:
+        `oddkiva/shakti/inference/darknet/network.py`
+        Track the variable `fuse_conv_bn_layer` in the implementation.
+        """
+        conv = branch.layers[0]
+        kernel = conv.weight
+
+        bn = branch.layers[1]
+        eps = bn.eps
+        running_mean = bn.running_mean
+        running_var = bn.running_var
+
+        gamma = bn.weight
+        beta = bn.bias
+        std = (running_var + eps).sqrt()
+        t = (gamma / std).reshape(-1, 1, 1, 1)
+
+        return kernel * t, beta - running_mean * gamma / std
