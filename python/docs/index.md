@@ -2,6 +2,12 @@
 
 Welcome to the Python documentation.
 
+The Python library is divided into 3 subcollections of libraries:
+
+- Sara
+- Shakti
+- Brahma
+
 ## Sara
 
 Sara Python code contains (for the most part):
@@ -14,6 +20,7 @@ Sara Python code contains (for the most part):
 ## Shakti
 
 Shakti contains at the moment:
+
 - accelerated low-level algorithms (CPU and GPU), that runs much faster than the
   Gold standard implementations (OpenCV).
 - optimized inference models (NVIDIA TensorRT and Apple CoreML at the moment)
