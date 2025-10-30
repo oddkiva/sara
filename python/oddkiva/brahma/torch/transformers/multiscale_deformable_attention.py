@@ -12,26 +12,36 @@ class MultiscaleDeformableAttention(torch.nn.Module):
     Everything is summarized in the Figure 2 of the paper.
     """
 
-    def __init__(self, attention_head_count: int,
-                 feature_dim: int,
+    def __init__(self,
+                 embed_dim: int,
+                 attention_head_count: int,
                  value_dim: int,
-                 key_count_per_scale: int = 4):
+                 image_level_count: int = 4,
+                 key_count_per_level: int = 4):
         """Constructs a multiscale deformable attention layer.
 
-        Args:
-            attention_head_count: the dimension of the output value vector.
-            value_dim: the dimension of the output value vector.
-            key_count_per_scale: the number of keys we want to consider for
-                each feature map of the feature pyramid.
+        Parameters
+        ----------
+        embed_dim: the dimension of the query and key vectors.
+        value_dim: the dimension of the value vectors.
+        attention_head_count: the dimension of the output value vector.
+        image_level_count: the number of image levels to use from the feature
+            pyramid.
+        key_count_per_scale: the number of keys we want to consider for
+            each feature map of the feature pyramid.
 
         """
-        super(MultiscaleDeformableAttention, self).__init__()
-        self.attention_head_count = attention_head_count
+        super().__init__()
+
+        self.embed_dim = embed_dim
         self.value_dim = value_dim
-        self.key_count_per_scale = key_count_per_scale
+        self.attention_head_count = attention_head_count
+        self.image_level_count = image_level_count
+        self.key_count_per_level = key_count_per_level
+        self.sampling_point_count_per_query = \
+            attention_head_count * image_level_count * key_count_per_level
 
-        self.value_projector = torch.nn.Linear(feature_dim, value_dim)
-
+        # TODO: debatable.
         self.positional_embedding_fn = torch.nn.Sequential(
             torch.nn.Linear(2, value_dim),
             torch.nn.ReLU(),
@@ -41,21 +51,38 @@ class MultiscaleDeformableAttention(torch.nn.Module):
             torch.nn.ReLU(),
         )
 
-        # As per figure 2 of the paper
-        self.sampling_offset_predictors = [
-            torch.nn.Linear(feature_dim, key_count_per_scale * 2)
-            for _ in range(attention_head_count)
-        ]
+        # As described in figure 2 of the paper, the sampling offset is simply
+        # a linear predictor.
+        #
+        # Notice that we could have done the following:
+        # self.sampling_offset_funcs = [
+        #     torch.nn.Linear(embed_dim, key_count_per_scale * 2)
+        #     for _ in range(attention_head_count)
+        # ]
+        #
+        # But the reference implementation uses equivalently a single linear
+        # predictor and this is more efficient.
+        self.sampling_offset_funcs = torch.nn.Linear(
+            embed_dim,
+            self.sampling_point_count_per_query * 2,
+        )
 
-        self.attention_weight_predictors = [
-            torch.nn.Sequential(
-                torch.nn.Linear(feature_dim, key_count_per_scale),
-                torch.nn.Softmax(),
-                torch.nn.
-            )
-            for _ in range(attention_head_count)
-        ]
+        # Likewise, we learn a single linear predictor
+        self.attn_weights_funcs = torch.nn.Linear(
+            embed_dim,
+            self.sampling_point_count_per_query
+        )
+        # We will need to reshape the sampling offset predictions to reorder
+        # things after that.
+        # N, L, d_K = x.shape
+        # N, L, H * K = y.shape
+        #
+        # Carefully apply the reshape function and the softmax over the last
+        # dimension.
+        # torch.reshape(y, (N, L, H, K))
+        # torch.softmax(y, dim=-1)
 
+        self.value_projector = torch.nn.Linear(embed_dim, value_dim)
         self.final_projections = [torch.nn.Linear(value_dim, value_dim)
                                  for _ in range(attention_head_count)]
 
@@ -79,40 +106,52 @@ class MultiscaleDeformableAttention(torch.nn.Module):
         queries = X_sampled + positional_embeds
         return queries
 
-    def predict_offsets( self, queries: torch.Tensor) -> torch.Tensor:
-        """Predicts the position offset for each key and value vectors.
-
-        The offset prediction should take into account:
-        - the positional embedding tensor ϕ
-        - the feature map X
+    def predict_offsets(self, queries: torch.Tensor) -> torch.Tensor:
         """
-        # As per figure 2 of the paper
-        position_deltas = torch.stack([
-            offset_predictor(queries)
-            for offset_predictor in self.sampling_offset_predictors
-        ], dim=0)
+        Predicts the relative position deltas for each key-value pairs w.r.t
+        the query position.
 
-        return position_deltas
+        We implement it as per figure 2 of the paper.
+        """
+        batch_size, query_count, _ = queries.shape
+
+        position_deltas = self.sampling_offset_funcs(queries)
+        position_deltas = torch.reshape(
+            position_deltas,
+            (batch_size, query_count, self.attention_head_count,
+             self.image_level_count * self.key_count_per_level, 2)
+        )
 
     def predict_attention_weights(
         self,
         queries: torch.Tensor,
     ) -> torch.Tensor:
-        # Predict the attention weights
-        attention_weights = torch.stack([
-            attn_weight_pred(queries)
-            for attn_weight_pred in self.attention_weight_predictors
-        ], dim=0)
-        return attention_weights
+        """
+        Predicts the attention weights for each key-value pairs w.r.t. each
+        query.
 
-    def sample_values(self,
-                      X: torch.Tensor,
-                      query_positions: torch.Tensor,
-                      position_deltas: torch.Tensor) -> torch.Tensor:
-        # The pairs of (key-value) vectors are normalized in the range [0, 1]
-        #
-        # The following coordinates are normalized in [0, 1]
-        # key_value_positions = query_positions + position_deltas
+        We implement it as per figure 2 of the paper.
+        """
+        attn_weights = self.attn_weights_funcs(queries)
+
+        batch_size, query_count, _ = queries.shape
+        attn_weights = torch.reshape(
+            attn_weights,
+            (batch_size, query_count, self.attention_head_count,
+             self.image_level_count * self.key_count_per_level)
+        )
+        attn_weights = torch.softmax(attn_weights, dim=-1)
+
+        return attn_weights
+
+    def sample_values(
+        self,
+        X: torch.Tensor,
+        query_positions: torch.Tensor,
+        position_deltas: torch.Tensor
+    ) -> torch.Tensor:
+        # The positions of the (key-value) pairs are normalized in the range
+        # [0, 1].
         #
         # Good: PyTorch has a function `torch.nn.functional.grid_sample` in its
         # API to sample the feature using bilinear interpolation, but they must
@@ -123,12 +162,18 @@ class MultiscaleDeformableAttention(torch.nn.Module):
             2. * (query_positions + position_deltas) - 1,
             min = -1., max=1.
         ).unsqueeze(1)
-        values = F.grid_sample(X, key_value_positions)
+        values = torch.cat([
+            F.grid_sample(Xi, key_value_positions)
+            for Xi in X
+        ])
         return values
 
-    def predict_value(self,
-                      X: torch.Tensor,
-                      query_positions: torch.Tensor) -> torch.Tensor:
+    def predict_value(
+        self,
+        X: torch.Tensor,
+        query_positions: torch.Tensor
+    ) -> torch.Tensor:
+        # Normalize the query positions in [0, 1]
         query_positions_normalized = self.normalize_query_positions(
             X, query_positions
         )
