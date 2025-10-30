@@ -6,7 +6,7 @@ import scipy.linalg as la
 
 import sympy as sp
 
-from do.sara.sfm.essential_matrix import extract_epipoles
+from oddkiva.sara.sfm.essential_matrix import extract_epipoles
 
 
 def triangulate_longuet_higgins(R, t, left, right):

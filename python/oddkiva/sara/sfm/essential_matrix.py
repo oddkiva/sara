@@ -3,7 +3,7 @@
 import numpy as np
 import scipy.linalg as la
 
-from do.sara.sfm.geometry import cofactors, skew
+from oddkiva.sara.sfm.geometry import cofactors, skew
 
 
 def essential_matrix(R, t):
