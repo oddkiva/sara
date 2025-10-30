@@ -10,6 +10,22 @@ theme:
   font:
     text: Source Sans 3
     code: Source Code Pro
+  palette:
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    primary: custom
+    toggle:
+      icon: material/brightness-7
+      name: Switch to dark mode
+  - media: (prefers-color-scheme)
+    toggle:
+      icon: material/brightness-auto
+      name: Switch to light mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    toggle:
+      icon: material/brightness-4
+      name: Switch to system preference
 
 markdown_extensions:
   - pymdownx.highlight:
