@@ -10,6 +10,8 @@ def to_qimage(array):
     return qimage
 
 def draw_point(array, x, y, color, antialiasing=True):
+    """ Draw a point.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
     p.setRenderHints(QPainter.Antialiasing, antialiasing)
@@ -18,6 +20,8 @@ def draw_point(array, x, y, color, antialiasing=True):
     p.end()
 
 def draw_line(array, p1, p2, color, pen_width, antialiasing=True):
+    """ Draw a line.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
     p.setRenderHints(QPainter.Antialiasing, antialiasing)
@@ -27,6 +31,8 @@ def draw_line(array, p1, p2, color, pen_width, antialiasing=True):
 
 def draw_rect(array, top_left_corner, sizes, color, pen_width,
               antialiasing=True):
+    """ Draw a rectangle.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
     p.setRenderHints(QPainter.Antialiasing, antialiasing)
@@ -36,6 +42,8 @@ def draw_rect(array, top_left_corner, sizes, color, pen_width,
     p.end()
 
 def draw_circle(array, center, radius, color, pen_width, antialiasing=True):
+    """ Draw a circle.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
     p.setRenderHints(QPainter.Antialiasing, antialiasing);
@@ -45,6 +53,8 @@ def draw_circle(array, center, radius, color, pen_width, antialiasing=True):
 
 def draw_ellipse(array, center, r1, r2, angle_in_degrees, color, pen_width,
                  antialiasing=True):
+    """ Draw an ellipse.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
     p.setRenderHints(QPainter.Antialiasing, antialiasing)
@@ -59,6 +69,8 @@ def draw_ellipse(array, center, r1, r2, angle_in_degrees, color, pen_width,
 
 def draw_text(array, p, text, color, font_size, orientation, italic, bold,
               underline, antialiasing=True):
+    """ Draw a string.
+    """
     font = QFont()
     font.setPointSize(font_size)
     font.setItalic(italic)
@@ -80,6 +92,8 @@ def draw_text(array, p, text, color, font_size, orientation, italic, bold,
     p.end()
 
 def draw_image(array, image, offset, scale):
+    """ Draw an image.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
 

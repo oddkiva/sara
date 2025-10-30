@@ -5,8 +5,8 @@ import torch
 
 class PositionalSineEmbedding2D(torch.nn.Module):
     """
-    For prototyping and research purposes, let us not overthink it, let us just
-    favor this before trying the learnable embedding version.
+    For prototyping and research purposes, we should not overthink it and favor
+    this handcrafted embedding before going down the learnable route.
     """
 
     def __init__(self,

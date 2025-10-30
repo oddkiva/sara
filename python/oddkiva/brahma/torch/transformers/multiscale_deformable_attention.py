@@ -5,9 +5,9 @@ import torch.nn.functional as F
 
 
 class MultiscaleDeformableAttention(torch.nn.Module):
-    """ As described in the paper:
-    Deformable DETR: Deformable Transformers for End-to-End Object Detection
-    <https://arxiv.org/pdf/2010.04159>
+    """ This class implements the multiscale deformable attention layer as
+    described in the paper [Deformable DETR: Deformable Transformers for
+    End-to-End Object Detection](https://arxiv.org/pdf/2010.04159).
 
     Everything is summarized in the Figure 2 of the paper.
     """
@@ -16,30 +16,49 @@ class MultiscaleDeformableAttention(torch.nn.Module):
                  embed_dim: int,
                  attention_head_count: int,
                  value_dim: int,
-                 image_level_count: int = 4,
-                 key_count_per_level: int = 4):
+                 pyramid_level_count: int = 4,
+                 kv_count_per_level: int = 4):
         """Constructs a multiscale deformable attention layer.
 
         Parameters
         ----------
-        embed_dim: the dimension of the query and key vectors.
-        value_dim: the dimension of the value vectors.
-        attention_head_count: the dimension of the output value vector.
-        image_level_count: the number of image levels to use from the feature
-            pyramid.
-        key_count_per_scale: the number of keys we want to consider for
-            each feature map of the feature pyramid.
 
+        embed_dim:
+            the dimension of the query and key vectors.
+
+        value_dim:
+            the dimension of the value vectors.
+
+        attention_head_count:
+            the dimension of the output value vector.
+
+        pyramid_level_count:
+            the number of levels to use from the feature pyramid, from the last
+            one.
+
+            Suppose that a CNN backbone produces a feature pyramid with 5
+            levels where at each level $l$, we denote the final feature map by
+            $\\mathbf{F}_l$.
+
+            If, for example, pyramid_level_count is set to 3, then we use only
+            the last 3 feature maps of the feature pyramid
+            $\\mathbf{F}_3, \\mathbf{F}_4, \\mathbf{F}_5$.
+
+        kv_count_per_scale:
+            the number of key-value pairs we want to consider for each feature
+            map of the feature pyramid.
         """
         super().__init__()
 
         self.embed_dim = embed_dim
         self.value_dim = value_dim
         self.attention_head_count = attention_head_count
-        self.image_level_count = image_level_count
-        self.key_count_per_level = key_count_per_level
-        self.sampling_point_count_per_query = \
-            attention_head_count * image_level_count * key_count_per_level
+        self.pyramid_level_count = pyramid_level_count
+        self.kv_count_per_level = kv_count_per_level
+        self.kv_count_per_attention_head = \
+            pyramid_level_count * kv_count_per_level
+        self.kv_count_per_query = \
+            attention_head_count * self.kv_count_per_attention_head
 
         # TODO: debatable.
         self.positional_embedding_fn = torch.nn.Sequential(
@@ -64,13 +83,13 @@ class MultiscaleDeformableAttention(torch.nn.Module):
         # predictor and this is more efficient.
         self.sampling_offset_funcs = torch.nn.Linear(
             embed_dim,
-            self.sampling_point_count_per_query * 2,
+            self.kv_count_per_query * 2,
         )
 
         # Likewise, we learn a single linear predictor
         self.attn_weights_funcs = torch.nn.Linear(
             embed_dim,
-            self.sampling_point_count_per_query
+            self.kv_count_per_query
         )
         # We will need to reshape the sampling offset predictions to reorder
         # things after that.
@@ -118,8 +137,9 @@ class MultiscaleDeformableAttention(torch.nn.Module):
         position_deltas = self.sampling_offset_funcs(queries)
         position_deltas = torch.reshape(
             position_deltas,
-            (batch_size, query_count, self.attention_head_count,
-             self.image_level_count * self.key_count_per_level, 2)
+            (batch_size, query_count,
+             self.attention_head_count,
+             self.kv_count_per_attention_head, 2)
         )
 
     def predict_attention_weights(
@@ -137,8 +157,9 @@ class MultiscaleDeformableAttention(torch.nn.Module):
         batch_size, query_count, _ = queries.shape
         attn_weights = torch.reshape(
             attn_weights,
-            (batch_size, query_count, self.attention_head_count,
-             self.image_level_count * self.key_count_per_level)
+            (batch_size, query_count,
+             self.attention_head_count,
+             self.kv_count_per_attention_head)
         )
         attn_weights = torch.softmax(attn_weights, dim=-1)
 

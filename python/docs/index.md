@@ -1,4 +1,4 @@
-# Sara Python API
+# Introduction
 
 Welcome to the Python documentation.
 
@@ -28,9 +28,3 @@ Shakti contains at the moment:
 ## Brahma
 
 Brahma contains training pipelines for various learning tasks.
-
-# Reference
-
-::: oddkiva.sara.timer.Timer
-::: oddkiva.brahma.torch.backbone.resnet50.ResNet50
-
