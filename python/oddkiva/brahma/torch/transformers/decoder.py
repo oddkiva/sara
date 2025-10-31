@@ -11,8 +11,9 @@ class TransformerDecoderLayer(torch.nn.Module):
     paper "Attention Is All You Need"
     """
 
-    def __init__(self, embed_dim: int,
-                 num_heads: int,
+    def __init__(self,
+                 embed_dim: int,
+                 attention_head_count: int,
                  feedforward_dim: int = 2048,
                  dropout: float = 0.1,
                  normalize_before: bool = False):
@@ -26,17 +27,15 @@ class TransformerDecoderLayer(torch.nn.Module):
         self.normalize_before = normalize_before
 
         self.self_attention = torch.nn.MultiheadAttention(
-            embed_dim, num_heads, dropout=dropout,
+            embed_dim, attention_head_count, dropout=dropout,
             batch_first=True
         )
 
         self.dropout_1 = torch.nn.Dropout(p=dropout)
         self.layer_norm_1 = torch.nn.LayerNorm(embed_dim)
 
-        # TODO: replace this layer with the multiscale-deformable cross
-        # attention.
         self.cross_attention = torch.nn.MultiheadAttention(
-            embed_dim, num_heads, dropout=dropout,
+            embed_dim, attention_head_count, dropout=dropout,
             batch_first=True
         )
         self.dropout_2 = torch.nn.Dropout(p=dropout)
@@ -50,6 +49,16 @@ class TransformerDecoderLayer(torch.nn.Module):
         ]))
         self.dropout_3 = torch.nn.Dropout(p=dropout)
         self.layer_norm_3 = torch.nn.LayerNorm(embed_dim)
+
+    def forward(
+        self,
+        input_embedding: torch.Tensor,
+        positional_encoding: torch.Tensor | None,
+        output_embedding: torch.Tensor,
+        attn_mask: torch.Tensor
+    ) -> torch.Tensor:
+        raise NotImplemented
+
 
 
 class TransformerDecoder(torch.nn.Module):
