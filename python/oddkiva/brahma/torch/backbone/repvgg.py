@@ -31,14 +31,15 @@ class RepVggBaseLayer(torch.nn.Module):
         """
         Constructs a RegVggBaseLayer
 
-        The current parameters should be enough to accomodate:
+        The current parameters should be enough to accommodate:
+
         - the different types of RepVGG layers as exposed in the original
           paper, and
         - the specific needs of RT-DETR, which does not do any downsampling at
           all.
 
         In any case, there are at least two branches (conv3x3, conv1x1) and an
-        optional branch (Identity)
+        optional branch (Identity).
         """
         super().__init__()
 
