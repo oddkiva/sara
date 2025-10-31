@@ -68,6 +68,10 @@ class ConvBNA(nn.Module):
 
 
 class ResidualBottleneckBlock(nn.Module):
+    """
+    This class implements the fundamental residual block used in ResNet.
+    """
+
     def __init__(
         self,
         in_channels: int,
@@ -113,6 +117,10 @@ class ResidualBottleneckBlock(nn.Module):
 
 
 class ResNet50(nn.Module):
+    """
+    The ResNet-50 architecture.
+    """
+
     def __init__(self):
         super().__init__()
         self.blocks = nn.Sequential(

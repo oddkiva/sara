@@ -8,4 +8,4 @@
 
 ## Multi-Scale Deformable Attention
 
-::: oddkiva.brahma.torch.transformers.rtdetr.multiscale_deformable_attention.MultiscaleDeformableAttention
+::: oddkiva.brahma.torch.object_detection.detr.rtdetr.multiscale_deformable_attention.MultiscaleDeformableAttention

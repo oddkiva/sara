@@ -45,16 +45,21 @@ class PositionalSineEmbedding2D(torch.nn.Module):
         """
         Calculates the positional encoding map with shape (H, W, C).
 
-        Notice that the indexing order 'ij' or 'yx' in which the coordinates
+        Notice that the indexing order `ij` or `yx` in which the coordinates
         are enumerated.
 
         if `X` is feature map of shape (N, C, H, W), the flattened feature map
         `X_flat` is such that:
 
+        ```python
         X[n, y, x, c] == X_flat[n, y * w + x, c]
+        ```
 
         This is an important detail to correctly form the query matrix `Q`
+        where:
+        ```python
         Q = X_flat + positional_encoding.flatten(0, 1).unsqueeze(0)
+        ```
         """
         w, h = wh
         w_inverse = 1. / w
