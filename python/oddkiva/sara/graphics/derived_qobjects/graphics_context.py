@@ -16,6 +16,8 @@ class Singleton(type):
 
 
 class WindowManager(QObject):
+    """The `WindowManager` class.
+    """
 
     def __init__(self):
         self._widgets = []
@@ -76,6 +78,8 @@ class WindowManager(QObject):
 
 
 class GraphicsContext(metaclass=Singleton):
+    """ The `GraphicsContext` class
+    """
 
     def __init__(self):
         self._user_thread = UserThread()
