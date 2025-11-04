@@ -1,8 +1,8 @@
-## Graphics API
+# Graphics API
 
 The Graphics API is built around PySide6.
 
-### PySide6 Backend
+## PySide6 Backend
 
 The backend consists essentially derived QObject classes.
 
@@ -19,7 +19,7 @@ Note that there can be only one `GraphicsContext` object as we use the
 ::: oddkiva.sara.graphics.derived_qobjects.user_thread.UserThread
 ::: oddkiva.sara.graphics.derived_qobjects.painting_window.PaintingWindow
 
-### Draw API
+## Draw API
 
 ::: oddkiva.sara.graphics.image_draw.draw_point
 ::: oddkiva.sara.graphics.image_draw.draw_line

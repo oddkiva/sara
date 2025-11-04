@@ -2,8 +2,6 @@
 
 ## Positional Encoding
 
-### Sine-Based
-
 ::: oddkiva.brahma.torch.transformers.embedding.positional_sine_embedding.PositionalSineEmbedding2D
 
 ## Multi-Scale Deformable Attention
