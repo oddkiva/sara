@@ -1,8 +1,8 @@
-## Feature Detection and Matching
+# Feature Detection and Matching
 
 The Python API essentially wraps the optimized C++ code.
 
-### Example
+## Example
 
 The code example shows how to use SIFT feature detection and matching frame by
 frame.
@@ -11,7 +11,7 @@ frame.
 --8<-- "oddkiva/sara/features/examples/feature_matching.py"
 ```
 
-#### Usage
+### Usage
 
 ```bash
 python3 oddkiva/sara/feeatures/examples/feature_matching.py \

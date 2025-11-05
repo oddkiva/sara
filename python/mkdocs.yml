@@ -6,6 +6,7 @@ theme:
     - navigation.instant
     - navigation.tabs
     - navigation.tabs.sticky
+    - toc.integrate
   highlightjs: true
   font:
     text: Source Sans 3
@@ -40,7 +41,13 @@ markdown_extensions:
 
 plugins:
 - search
-- mkdocstrings
+- mkdocstrings:
+    handlers:
+      python:
+        options:
+          heading_level: 3
+          show_root_heading: true
+          show_source: false
 
 extra_javascript:
   - javascripts/katex.js
