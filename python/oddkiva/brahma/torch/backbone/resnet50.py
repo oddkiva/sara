@@ -112,8 +112,19 @@ class ResidualBottleneckBlock(nn.Module):
         else:
             raise ValueError(f"No convolutional activation named {activation}")
 
+        self._in_channels = in_channels
+        self._out_channels = out_channels
+
     def forward(self, x):
         return self.activation(self.convs.forward(x) + self.shortcut(x))
+
+    @property
+    def in_channels(self) -> int:
+        return self._in_channels
+
+    @property
+    def out_channels(self) -> int:
+        return self._out_channels
 
 
 class ResNet50(nn.Module):

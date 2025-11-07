@@ -9,8 +9,8 @@ theme:
     - toc.integrate
   highlightjs: true
   font:
-    text: Source Sans 3
-    code: Source Code Pro
+    text: ET Book
+    code: Noto Mono
   palette:
   - media: "(prefers-color-scheme: light)"
     scheme: default
@@ -56,3 +56,4 @@ extra_javascript:
 
 extra_css:
   - https://unpkg.com/katex@0/dist/katex.min.css
+  - assets/stylesheets/extra.css
