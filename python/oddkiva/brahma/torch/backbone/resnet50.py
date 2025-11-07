@@ -188,11 +188,11 @@ class ResNet50Variant(nn.Module):
                     # The composition is the 3 residual blocks has a receptive
                     # field of 7x7
                     # x |-> conv1x1 conv3x3 conv1x1)(x) + shortcut(x)
-                    ("conv7x7_step0", ResidualBottleneckBlock(3, 16, 1, "relu")),
+                    ("conv3x3_step0", ResidualBottleneckBlock(3, 16, 1, "relu")),
                     # x |-> conv1x1 conv3x3 conv1x1)(x) + shortcut(x)
-                    ("conv7x7_step1", ResidualBottleneckBlock(64, 16, 1, "relu")),
+                    ("conv3x3_step1", ResidualBottleneckBlock(64, 16, 1, "relu")),
                     # x |-> conv1x1 conv3x3 conv1x1)(x) + shortcut(x)
-                    ("conv7x7_step2", ResidualBottleneckBlock(64, 16, 2, "relu")),
+                    ("conv3x3_step2", ResidualBottleneckBlock(64, 16, 2, "relu")),
 
                     # This will replace nn.AvgPool2d
                     ("avg_pool_2d_alternative", ResidualBottleneckBlock(64, 16, 2, "relu")),
