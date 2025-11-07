@@ -1,8 +1,10 @@
 import torch
 
+from oddkiva.brahma.torch.backbone.resnet50 import ConvBNA
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.ccff import (
         DownsampleConvolution,
+        Fusion,
         LateralConvolution
     )
 
@@ -43,3 +45,13 @@ def test_downsample_convolution():
         assert block.layers[1].num_features == hidden_dim
 
         assert type(block.layers[2]) is torch.nn.SiLU
+
+
+def test_fusion():
+    in_channels = 512
+    hidden_dim = 256
+    block = Fusion(in_channels, hidden_dim)
+
+    assert type(block.conv1) is ConvBNA
+    assert type(block.conv2) is ConvBNA
+    assert len(block.repvgg_block.layers) == 3
