@@ -1,4 +1,4 @@
-# CNN backbones
+# Backbones
 
 The classical backbones mostly used in object detection are ResNets and DarkNet.
 

@@ -35,6 +35,7 @@ class ConvBNA(nn.Module):
         batch_normalize: bool,
         activation: str | None,
         id: int,
+        bias: bool = True,
         inplace_activation: bool = False
     ):
         super(ConvBNA, self).__init__()
@@ -49,7 +50,7 @@ class ConvBNA(nn.Module):
             kernel_size,
             stride,
             padding=pad_size,
-            bias=True,
+            bias=bias,
             padding_mode="zeros",  # Let's be explicit about the padding value
         )
         self.layers.add_module(f"conv_{id}", conv)

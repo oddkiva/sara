@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from typing import Iterable
 
 import torch
@@ -27,6 +28,19 @@ class RepVggBlock(torch.nn.Module):
 
 
 class Fusion(torch.nn.Module):
+    """
+    The `Fusion` class implements the building block of the Path-Aggregation
+    architectural scheme described in the PANet paper.
+
+    It is used to recursively flow the semantic information. The fusion block
+    is used in two passes.
+
+    1. The first pass is top-down, where the semantic information flows from
+        coarse feature maps to finer feature maps.
+    2. The second pass is bottom-up manner, where fine feature maps, which are
+       now enriched with semantic information flows back the improved
+       information to coarse feature maps.
+    """
 
     def __init__(self,
                  in_channels: int,
@@ -62,39 +76,48 @@ class Fusion(torch.nn.Module):
         return FS1 + FS2
 
 
-class YellowConvBlock(ConvBNA):
+class LateralConvolution(torch.nn.Module):
     """
-    This class implements the yellow block in Figure 4:
-    (Conv1x1 s1 -> BN -> SiLU).
+    This class implements the yellow convolutional block in Figure 4 of the
+    paper: (Conv1x1 s1 -> BN -> SiLU).
+    The authors call it *lateral convolution* in the original code.
 
-    Basically, it reduces the dimension of the feature vectors.
-
-    I don't know how to name them...
+    Basically, it reduces the dimension of the feature vectors via a linear
+    projection ("channel projection" in the original code of the
+    `HybridEfficientEncoder` class).
     """
 
-    def __init__(self, in_channels: int, out_channels: int, id: int,
-                 activation: str | None = 'silu'):
-        super(YellowConvBlock, self).__init__(
+    def __init__(self, in_channels: int, out_channels: int):
+        super().__init__()
+        conv1x1_unbiased = torch.nn.Conv2d(
             in_channels, out_channels,
-            1, 1,        # Kernel size and stride
-            True,        # Batch-normalization
-            activation,  # Activation
-            id           # ID
+            1, stride=1,  # Kernel size and stride
+            bias=False
         )
+        bn = torch.nn.BatchNorm2d(out_channels)
 
-class BlueConvBlock(ConvBNA):
+        self.layers = torch.nn.Sequential(OrderedDict([
+            ("conv1x1_unbiased", conv1x1_unbiased),
+            ("batch_norm_2d", bn)
+        ]))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self._impl(x)
+
+
+class DownsampleConvolution(ConvBNA):
     """
-    This class implements the blue block in Figure 4:
+    This class implements the blue block in Figure 4 of the paper:
     (Conv3x3 s2 -> BN -> SiLU).
 
-    Basically, it downsamples (and also does more than that) the feature maps.
-
-    I don't know how to name them...
+    The authors did not make a class for that but I do it for the sake of code
+    clarity. Please refer to the original `HybridEfficientEncoder` class, where
+    they add the class member `self.downsample_convs`.
     """
 
     def __init__(self, in_channels: int, out_channels: int, id: int,
                  activation: str | None = 'silu'):
-        super(BlueConvBlock, self).__init__(
+        super(DownsampleConvolution, self).__init__(
             in_channels, out_channels,
             3, 2,        # Kernel size and stride
             True,        # Batch-normalization
@@ -133,12 +156,12 @@ class CCFF(torch.nn.Module):
         super().__init__()
         # Top-down semantic enrichment.
         self.yellow_blocks = torch.nn.ModuleList([
-            YellowConvBlock(feature_dims[i], hidden_dim, i)
+            LateralConvolution(feature_dims[i], hidden_dim, i)
             for i in range(len(feature_dims) - 1)
         ])
         # Bottom-up refinement.
         self.blue_blocks = torch.nn.ModuleList([
-            BlueConvBlock(feature_dims[i], hidden_dim, i)
+            DownsampleConvolution(feature_dims[i], hidden_dim, i)
             for i in range(len(feature_dims) - 1)
         ])
         self.fusions = torch.nn.ModuleList([

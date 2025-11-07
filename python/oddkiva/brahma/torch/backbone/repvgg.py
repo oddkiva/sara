@@ -47,16 +47,28 @@ class RepVggBaseLayer(torch.nn.Module):
 
         if use_identity_connection:
             self.layers = torch.nn.ModuleList([
-                ConvBNA(in_channels, out_channels, 3, stride, True, None,
-                        3, inplace_activation=inplace_activation),
-                ConvBNA(in_channels, out_channels, 1, stride, True, None,
-                        1, inplace_activation=inplace_activation),
-                torch.nn.Identity()
+                ConvBNA(in_channels, out_channels, 3, stride, True, None, 3,
+                        bias=False,
+                        inplace_activation=inplace_activation),
+                ConvBNA(in_channels, out_channels, 1, stride, True, None, 1,
+                        bias=False,
+                        inplace_activation=inplace_activation),
+                torch.nn.BatchNorm2d(out_channels)
             ])
         else:
             self.layers = torch.nn.ModuleList([
-                ConvBNA(in_channels, out_channels, 3, stride, True, None, 3),
-                ConvBNA(in_channels, out_channels, 1, stride, True, None, 1)
+                ConvBNA(in_channels, out_channels, 3, stride,
+                        True,  # batch normalize
+                        None,  # activation
+                        3,     # id
+                        bias=False,
+                        inplace_activation=inplace_activation),
+                ConvBNA(in_channels, out_channels, 1, stride,
+                        True,  # batch normalize
+                        None,  # activation
+                        1,     # id
+                        bias=False,
+                        inplace_activation=inplace_activation)
             ])
         self.activation = make_activation_func(activation)
 
@@ -79,6 +91,10 @@ class RepVggBaseLayer(torch.nn.Module):
     def _compute_equivalent_single_convolution(
         self
     ) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        TODO: check the equations (1-4) of the paper
+        https://arxiv.org/pdf/2101.03697
+        """
         w3x3, b3x3 = self._fuse_bn_tensor(self.layers[0])
 
         w1x1, b1x1 = self._fuse_bn_tensor(self.layers[1])

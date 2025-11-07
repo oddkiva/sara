@@ -1,7 +1,9 @@
 import torch
 
-from oddkiva.brahma.torch.object_detection.detr.rtdetr.aifi import AIFI
-from oddkiva.brahma.torch.object_detection.detr.rtdetr.ccff import CCFF
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.encoder.aifi import AIFI
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.encoder.ccff import CCFF
 
 
 class EfficientHybridEncoder(torch.nn.Module):
