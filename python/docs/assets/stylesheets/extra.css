@@ -1,0 +1,46 @@
+@font-face {
+  font-family: 'ET Book';
+  src: url('/assets/fonts/et-book-roman-old-style-figures/et-book-roman-old-style-figures.woff')
+  format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ET Book';
+  src: url('/assets/fonts/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.woff')
+  format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ET Book';
+  src: url('/assets/fonts/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff')
+  format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+.md-content {
+  p, li {
+  font-family: 'ET Book';
+  font-size: 16px;
+  }
+}
+
+/*
+.md-typeset code, pre, kbd {
+  font-size: 14px;
+}
+*/
+
+/*
+nav {
+  font-family: JetBrains Mono;
+  font-size: 10px;
+}
+*/

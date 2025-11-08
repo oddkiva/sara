@@ -9,8 +9,8 @@ theme:
     - toc.integrate
   highlightjs: true
   font:
-    text: ET Book
-    code: Noto Mono
+    text: Source Sans 3
+    code: Source Code Pro  # Noto Mono
   palette:
   - media: "(prefers-color-scheme: light)"
     scheme: default
@@ -46,8 +46,16 @@ plugins:
       python:
         options:
           heading_level: 3
+          line_length: 80
+          show_docstring_attributes: true
+          show_docstring_functions: true
+          show_docstring_type_parameters: true
           show_root_heading: true
           show_source: false
+          show_signature_annotations: true
+          show_signature_type_parameters: true
+          show_symbol_type_heading: true
+          show_symbol_type_toc: true
 
 extra_javascript:
   - javascripts/katex.js
