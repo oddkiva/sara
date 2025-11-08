@@ -26,9 +26,12 @@
 }
 
 .md-content {
-  p, li {
+  span {
+    font-size: 15px;
+  }
+  p, ul, ol, li {
     font-family: 'ET Book';
-    font-size: 17px;
+    font-size: 16px;
   }
 }
 
@@ -38,9 +41,6 @@
 }
 */
 
-/*
-nav {
-  font-family: JetBrains Mono;
-  font-size: 10px;
+.md-nav {
+  font-size: 12px;
 }
-*/
