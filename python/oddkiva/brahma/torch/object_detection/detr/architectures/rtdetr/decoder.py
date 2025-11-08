@@ -16,7 +16,7 @@ class MultiScaleDeformableTransformerDecoderLayer(torch.nn.Module):
                  feedforward_dim: int = 2048,
                  dropout: float = 0.1,
                  normalize_before: bool = False):
-        """Constructs the base layer of a Transformer Encoder block with
+        """Constructs the base layer of a Transformer Decoder block with
         reasonable default parameters.
 
         Parameters
@@ -44,10 +44,10 @@ class MultiScaleDeformableTransformerDecoderLayer(torch.nn.Module):
         self.layer_norm_2 = torch.nn.LayerNorm(embed_dim)
 
         self.feedforward = torch.nn.Sequential(OrderedDict([
-            ("tsfm-enc-linear-1", torch.nn.Linear(embed_dim, feedforward_dim)),
-            ("tsfm-enc-activation", torch.nn.ReLU()),
-            ("tsfm-enc-dropout", torch.nn.Dropout(p=dropout)),
-            ("tsfm-enc-linear-2", torch.nn.Linear(feedforward_dim, embed_dim))
+            ("dec-linear-1", torch.nn.Linear(embed_dim, feedforward_dim)),
+            ("dec-activation", torch.nn.ReLU()),
+            ("dec-dropout", torch.nn.Dropout(p=dropout)),
+            ("dec-linear-2", torch.nn.Linear(feedforward_dim, embed_dim))
         ]))
         self.dropout_3 = torch.nn.Dropout(p=dropout)
         self.layer_norm_3 = torch.nn.LayerNorm(embed_dim)

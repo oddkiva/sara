@@ -7,9 +7,8 @@ from oddkiva.brahma.torch.backbone.resnet50 import (
 
 
 class RepVggBaseLayer(torch.nn.Module):
-    """
-    This class implements the architecture proposed in the paper [RepVGG:
-    Making VGG-style ConvNets Great Again](https://arxiv.org/pdf/2101.03697)
+    """This class implements the architecture proposed in the paper
+    [RepVGG: Making VGG-style ConvNets Great Again](https://arxiv.org/pdf/2101.03697)
 
     The details are summarized in Figure 2 and Figure 4.
     Notice that in Figure 4, batch normalization also takes place.
@@ -40,8 +39,7 @@ class RepVggBaseLayer(torch.nn.Module):
                  use_identity_connection: bool = False,
                  activation: str = 'relu',
                  inplace_activation: bool = False):
-        """
-        Constructs a RegVggBaseLayer
+        """Constructs a RegVggBaseLayer.
 
         The current parameters should be enough to accommodate:
 
