@@ -20,7 +20,7 @@
   font-family: 'ET Book';
   src: url('/assets/fonts/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff')
   format('woff');
-  font-weight: 500;
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
@@ -28,7 +28,7 @@
 .md-content {
   p, li {
     font-family: 'ET Book';
-    font-size: 15px;
+    font-size: 17px;
   }
 }
 

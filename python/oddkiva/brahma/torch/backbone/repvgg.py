@@ -26,7 +26,7 @@ class RepVggBaseLayer(torch.nn.Module):
     is that the convolutional operations in each branch are *unbiased*, i.e.,
 
     $$
-    \mathrm{conv}(x) = \mathbf{W} * \mathbf{x}
+    \mathrm{conv}(\mathbf{x}) = \mathbf{W} * \mathbf{x}
     $$
 
     By zeroing the bias vector $\mathbf{b}$, we equivalently collapse the 3
