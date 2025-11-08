@@ -48,7 +48,7 @@ class PositionalSineEmbedding2D(torch.nn.Module):
         Notice that the indexing order `ij` or `yx` in which the coordinates
         are enumerated.
 
-        if `X` is feature map of shape (N, C, H, W), the flattened feature map
+        if `X` is feature map of shape `(N, C, H, W)`, the flattened feature map
         `X_flat` is such that:
 
         ```python

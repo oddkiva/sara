@@ -82,10 +82,13 @@ class TransformerDecoder(torch.nn.Module):
 
         Parameters
         ----------
+
         encoder_layer: torch.nn.Module
             Typically a self-attention encoding layer that we want to replicate.
+
         num_layers: int
             The number of self-attention encoding layers.
+
         norm: torch.nn.Module
             Optional layer normalization
         """

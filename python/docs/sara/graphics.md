@@ -15,19 +15,13 @@ Underneath, we implement a graphics context class `GraphicsContext` that control
 Note that there can be only one `GraphicsContext` object as we use the
 *Singleton* pattern.
 
-::: oddkiva.sara.graphics.derived_qobjects.graphics_context.GraphicsContext
-::: oddkiva.sara.graphics.derived_qobjects.user_thread.UserThread
-::: oddkiva.sara.graphics.derived_qobjects.painting_window.PaintingWindow
+::: oddkiva.sara.graphics.derived_qobjects.graphics_context
+::: oddkiva.sara.graphics.derived_qobjects.user_thread
+::: oddkiva.sara.graphics.derived_qobjects.painting_window
 
 ## Draw API
 
-::: oddkiva.sara.graphics.image_draw.draw_point
-::: oddkiva.sara.graphics.image_draw.draw_line
-::: oddkiva.sara.graphics.image_draw.draw_rect
-::: oddkiva.sara.graphics.image_draw.draw_circle
-::: oddkiva.sara.graphics.image_draw.draw_ellipse
-::: oddkiva.sara.graphics.image_draw.draw_text
-::: oddkiva.sara.graphics.image_draw.draw_image
+::: oddkiva.sara.graphics.image_draw
 
 ### Example
 

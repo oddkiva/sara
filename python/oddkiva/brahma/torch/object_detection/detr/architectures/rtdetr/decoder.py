@@ -19,7 +19,11 @@ class MultiScaleDeformableTransformerDecoderLayer(torch.nn.Module):
         """Constructs the base layer of a Transformer Encoder block with
         reasonable default parameters.
 
-        dropout = 0.1 is the default as in the paper.
+        Parameters
+        ----------
+
+        dropout:
+            $0.1$ is the default as in the paper.
         """
         super().__init__()
 
@@ -59,7 +63,9 @@ class MultiScaleDeformableTransformerDecoderLayer(torch.nn.Module):
         """
         Parameters
         ----------
-        memory: enhanced feature maps.
+
+        memory:
+            enhanced feature maps.
         """
         pass
 
