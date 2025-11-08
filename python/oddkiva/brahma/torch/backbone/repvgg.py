@@ -14,13 +14,25 @@ class RepVggBaseLayer(torch.nn.Module):
     The details are summarized in Figure 2 and Figure 4.
     Notice that in Figure 4, batch normalization also takes place.
 
-    RepVgg has two dually equivalent architecture.
+    RepVgg has two dually equivalent architectures:
 
-    - At training time, like it has two skip connections that avoids vanishing
-      gradients.
-    - At inference time, the three branches can be merged equivalently into a
+    - At training time, like ResNet, it has two skip connections that avoids
+      vanishing gradients.
+
+    - At inference time, the three branches are equivalently merged into a
       single convolutional block, which makes it computationally efficient when
       deploying in production environments.
+
+    One major technical detail of this block, that we should pay attention to,
+    is that the convolutional operations in each branch are *unbiased*, i.e.,
+
+    $$
+    \mathrm{conv}(x) = \mathbf{W} * \mathbf{x}
+    $$
+
+    By zeroing the bias vector $\mathbf{b}$, we equivalently collapse the 3
+    convolutional branches into a single convolutional operation at inference
+    time. Please refer to equations (1-4) of the paper.
     """
 
     def __init__(self, in_channels: int, out_channels: int,
@@ -135,3 +147,37 @@ class RepVggBaseLayer(torch.nn.Module):
         t = (gamma / std).reshape(-1, 1, 1, 1)
 
         return kernel * t, beta - running_mean * gamma / std
+
+
+class RepVggBlock(torch.nn.Module):
+    """
+    The `RepVGGBlock` is a convenience class that implements a sequence of
+    repeated base layers `RepVggBaseLayer`, just like the
+    `ResidualBottleneckBlock` class is the convenience building block for
+    ResNet-50.
+    """
+
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 layer_count: int = 4,
+                 activation: str = 'silu',
+                 inplace_activation: bool = False,
+                 use_identity_connection: bool = False):
+        """
+        Construct a RepVggBlock.
+
+        Most of the default parameters are the default ones used to construct
+        the Path-Aggregated Feature Pyramid Network (PA-FPN) of RT-DETR.
+        """
+        super().__init__()
+        self.layers = torch.nn.Sequential(*[
+            RepVggBaseLayer(in_channels, out_channels, stride=1,
+                            use_identity_connection=use_identity_connection,
+                            activation=activation,
+                            inplace_activation=inplace_activation)
+            for _ in range(layer_count)
+        ])
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.layers(x)
