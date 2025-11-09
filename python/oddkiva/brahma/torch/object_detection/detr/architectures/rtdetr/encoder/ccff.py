@@ -140,7 +140,7 @@ class CCFF(torch.nn.Module):
         super().__init__()
         # Top-down semantic enrichment.
         self.lateral_convs = torch.nn.ModuleList([
-            LateralConvolution(feature_dims[i], hidden_dim, i)
+            LateralConvolution(feature_dims[i], hidden_dim)
             for i in range(len(feature_dims) - 1)
         ])
         self.top_down_fusion_blocks = torch.nn.ModuleList([
@@ -161,7 +161,11 @@ class CCFF(torch.nn.Module):
     def upscale(self, x: torch.Tensor) -> torch.Tensor:
         return F.interpolate(x, scale_factor=2, mode='nearest')
 
-    def enrich_topdown(self, F5: torch.Tensor, S: list[torch.Tensor]):
+    def enrich_topdown(
+        self,
+        F5: torch.Tensor,
+        S: list[torch.Tensor]
+    ) -> tuple(list[torch.Tensor], list[torch.Tensor]):
         """
         Enrich the finer-scale feature maps with semantic information, in a
         recursive manner.
@@ -169,15 +173,12 @@ class CCFF(torch.nn.Module):
         Notice that I use peculiar colored references, to help me find out what refers to
         what in the code and in the paper.
 
-        Parameters
-        ----------
-
-        F5:
-            the query matrix as a feature map $(N, d_k, H, W)$
-
-        S:
-            the feature maps of the feature pyramid produced from the CNN
-            backbone
+        Parameters:
+            F5:
+                the query matrix as a feature map $(N, d_k, H, W)$
+            S:
+                the feature maps of the feature pyramid produced from the CNN
+                backbone
         """
 
         query_maps_enriched_topdown = [F5]

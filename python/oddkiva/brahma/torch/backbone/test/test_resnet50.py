@@ -37,6 +37,7 @@ def test_resnet50():
 
     assert y.shape == (1, 2048, 8, 8)
 
+
 def test_resnet50_variant():
     x_np = np.zeros((1, 3, 256, 256)).astype(np.float32)
     x = torch.tensor(x_np, device=DEFAULT_DEVICE)

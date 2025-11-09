@@ -19,11 +19,19 @@ class MultiScaleDeformableTransformerDecoderLayer(torch.nn.Module):
         """Constructs the base layer of a Transformer Decoder block with
         reasonable default parameters.
 
-        Parameters
-        ----------
-
-        dropout:
-            $0.1$ is the default as in the paper.
+        Parameters:
+            embed_dim:
+                the output embedding feature dimension.
+            num_heads:
+                the number of attention heads.
+            feedforward_dim:
+                the output feature dimension of the feed-forward network.
+            dropout:
+                the dropout probability value.
+            normalize_before:
+                Choose to apply the layer norm operation (1) before applying the
+                attention layer and (2) before applying the feed-forward
+                network.
         """
         super().__init__()
 
@@ -61,11 +69,9 @@ class MultiScaleDeformableTransformerDecoderLayer(torch.nn.Module):
         memory: list[torch.Tensor]
     ) -> torch.Tensor:
         """
-        Parameters
-        ----------
-
-        memory:
-            enhanced feature maps.
+        Parameters:
+            memory:
+                the feature maps.
         """
         pass
 

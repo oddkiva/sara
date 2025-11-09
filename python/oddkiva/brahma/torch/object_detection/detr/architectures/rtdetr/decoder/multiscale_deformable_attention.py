@@ -20,33 +20,28 @@ class MultiscaleDeformableAttention(torch.nn.Module):
                  kv_count_per_level: int = 4):
         """Constructs a multiscale deformable attention layer.
 
-        Parameters
-        ----------
+        Parameters:
+            embed_dim:
+                the dimension of the query and key vectors.
+            value_dim:
+                the dimension of the value vectors.
+            attention_head_count:
+                the dimension of the output value vector.
+            pyramid_level_count:
+                the number of levels to use from the feature pyramid, from the last
+                one.
 
-        embed_dim:
-            the dimension of the query and key vectors.
+                Suppose that a CNN backbone produces a feature pyramid with 5
+                levels where at each level $l$, we denote the final feature map by
+                $\\mathbf{F}_l$.
 
-        value_dim:
-            the dimension of the value vectors.
+                If, for example, pyramid_level_count is set to 3, then we use only
+                the last 3 feature maps of the feature pyramid
+                $\\mathbf{F}_3, \\mathbf{F}_4, \\mathbf{F}_5$.
 
-        attention_head_count:
-            the dimension of the output value vector.
-
-        pyramid_level_count:
-            the number of levels to use from the feature pyramid, from the last
-            one.
-
-            Suppose that a CNN backbone produces a feature pyramid with 5
-            levels where at each level $l$, we denote the final feature map by
-            $\\mathbf{F}_l$.
-
-            If, for example, pyramid_level_count is set to 3, then we use only
-            the last 3 feature maps of the feature pyramid
-            $\\mathbf{F}_3, \\mathbf{F}_4, \\mathbf{F}_5$.
-
-        kv_count_per_scale:
-            the number of key-value pairs we want to consider for each feature
-            map of the feature pyramid.
+            kv_count_per_scale:
+                the number of key-value pairs we want to consider for each feature
+                map of the feature pyramid.
         """
         super().__init__()
 

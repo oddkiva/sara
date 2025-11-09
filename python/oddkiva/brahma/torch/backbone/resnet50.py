@@ -6,6 +6,13 @@ import torch.nn as nn
 
 
 def make_activation_func(activation: str | None, inplace: bool = False):
+    """Make an activation function.
+
+    parameters:
+        activation:
+            options are `leaky`, `relu`, `mish`, `linear`, `logistic`,
+            `silu`, `None`.
+    """
     # Add the activation layer
     if activation == "leaky":
         return nn.LeakyReLU(0.1, inplace=inplace)
@@ -85,10 +92,28 @@ class ResidualBottleneckBlock(nn.Module):
     ):
         """Constructs a Residual Bottleneck Block used in ResNet.
 
+        Parameters:
+            in_channels:
+                the input feature dimension.
+            out_channels:
+                the output feature dimension.
+            stride:
+                the spatial step size used for downsampling purposes.
+            activation:
+                the activation function.
+            bias:
+                add learnable biases for every convolutional operations.
+            batch_normalize_after_shortcut:
+                optionally add a post-batch-normalization layer to the shortcut
+                branch.
+
         Notes
         -----
         Unless you have a particular need like in RT-DETR v2, you should leave
-        the default parameter: `use_shortcut_connection` value to `True`
+        the default parameter:
+
+        - `use_shortcut_connection` value to `True`
+        - `batch_normalize_after_shortcut` value to `False`
         """
         super().__init__()
         self.convs = nn.Sequential(
@@ -199,6 +224,9 @@ class ResNet50(nn.Module):
 
 
 class ResNet50Variant(nn.Module):
+    """This class implements an experimental ResNet-50 variant where we replace
+    the first 7x7 convolution with a sequence of residual bottleneck blocks.
+    """
 
     def __init__(self):
         super().__init__()
@@ -260,8 +288,8 @@ class ResNet50Variant(nn.Module):
         return self.blocks.forward(x)
 
 
-class ResNet50RTDETRV2Variant(nn.Module):
-    """This class implements RT-DETR v2 variant form of ResNet-50.
+class ResNet50RTDETRV2Variant(nn.Sequential):
+    """This class implements the ResNet-50 variant used in RT-DETR v2.
 
     This variant has some surprising features.
 
@@ -270,8 +298,8 @@ class ResNet50RTDETRV2Variant(nn.Module):
       incorporates the shortcut connection, contrary to the classical version
       of ResNet-50, where we add shortcuts connections everywhere.
 
-      This proves we can sparingly use shortcut connection for more GFLOP/s
-      without hurting the object detection reliability.
+    RT-DETR v2 shows it is still possible to squeeze even more GFLOP/s without
+    hurting the object detection performance.
     """
 
     def __init__(self):

@@ -48,8 +48,23 @@ class RepVggBaseLayer(torch.nn.Module):
         - the specific needs of RT-DETR, which does not do any downsampling at
           all.
 
-        In any case, there are at least two branches (conv3x3, conv1x1) and an
-        optional branch (Identity).
+        In any case, there are at least two branches
+        ($\mathrm{conv}_{3\\times3}$, $\mathrm{conv}_{1\\times1}$) and an
+        optional identity branch:
+
+        $$
+        \mathbf{y} = \mathrm{Conv}_{3 \\times 3}(\mathbf{x})
+                   + \mathrm{Conv}_{1 \\times 1}(\mathbf{x})
+                   + \mathbf{x}
+        $$
+
+        parameters:
+            in_channels: the input feature dimension
+            out_channels: the output feature dimension
+            stride: the spatial step size for downsampling purposes
+            use_identity_connection: optionally add the identity connection
+            activation: the activation function
+            inplace_activation: apply the activation function in-place
         """
         super().__init__()
 
@@ -167,6 +182,13 @@ class RepVggBlock(torch.nn.Module):
 
         Most of the default parameters are the default ones used to construct
         the Path-Aggregated Feature Pyramid Network (PA-FPN) of RT-DETR.
+
+        parameters:
+            in_channels: the input feature dimension
+            out_channels: the output feature dimension
+            layer_count: the number of `RepVGGBaseLayer` layers to stack
+            activation: the activation function
+            inplace_activation: apply the activation function in-place
         """
         super().__init__()
         self.layers = torch.nn.Sequential(*[
