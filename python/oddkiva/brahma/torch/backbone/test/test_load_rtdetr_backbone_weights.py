@@ -2,9 +2,10 @@ from pathlib import Path
 import pytest
 
 import torch
+import torch.nn as nn
 
 from oddkiva import DATA_DIR_PATH
-from oddkiva.brahma.torch.backbone.resnet50 import ResNet50RTDETRV2Variant
+from oddkiva.brahma.torch.backbone.resnet50 import ConvBNA, ResNet50RTDETRV2Variant
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
@@ -22,9 +23,10 @@ class RTDETRV2Checkpoint:
     }
 
     batch_norm_param_names = ['weight', 'bias', 'running_mean', 'running_var']
+    bottleneck_conv_indices = {0: 'a', 1: 'b', 2: 'c'}
 
-    def __init__(self, ckpt_fp: Path, ):
-        self.ckpt = torch.load(ckpt_fp)
+    def __init__(self, ckpt_fp: Path):
+        self.ckpt = torch.load(ckpt_fp, map_location=torch.device('cpu'))
 
     @property
     def model_weights(self):
@@ -157,6 +159,41 @@ class RTDETRV2Checkpoint:
             for param in RTDETRV2Checkpoint.batch_norm_param_names
         }
 
+    def _copy_conv_bna_weights(self, my_block: ConvBNA,
+                               conv_weight: torch.Tensor,
+                               bn_weights: dict[str, torch.Tensor]) -> None:
+            my_conv: nn.Conv2d = my_block.layers[0]
+            my_bn: nn.BatchNorm2d = my_block.layers[1]
+
+            assert my_conv.weight.shape == conv_weight.shape
+            assert my_bn.weight.shape == bn_weights['weight'].shape
+            assert my_bn.bias.shape == bn_weights['bias'].shape
+            assert my_bn.running_mean.shape == bn_weights['running_mean'].shape
+            assert my_bn.running_var.shape == bn_weights['running_var'].shape
+
+            my_conv.weight.data.copy_(conv_weight)
+            my_bn.weight.data.copy_(bn_weights['weight'])
+            my_bn.bias.data.copy_(bn_weights['bias'])
+            my_bn.running_mean.data.copy_(bn_weights['running_mean'])
+            my_bn.running_var.data.copy_(bn_weights['running_var'])
+
+
+    def _load_backbone_conv_1(self, model):
+        for i in range(3):
+            my_conv_bna = model.blocks[0][i]
+
+            conv_weight = self.conv1_conv_weight(i + 1)
+            bn_weights = self.conv1_bn_weights(i + 1)
+            self._copy_conv_bna_weights(my_conv_bna, conv_weight, bn_weights)
+
+    def load_backbone(self):
+        model = ResNet50RTDETRV2Variant()
+
+        self._load_backbone_conv_1(model)
+
+        return model
+
+
 
 
 def test_rtdetrv2_resnet50_backbone_reconstruction():
@@ -165,8 +202,8 @@ def test_rtdetrv2_resnet50_backbone_reconstruction():
     model = ResNet50RTDETRV2Variant()
 
     for i in [1, 2, 3]:
-        my_conv = model.blocks[0][i - 1].layers[0]
-        my_bn = model.blocks[0][i - 1].layers[1]
+        my_conv: nn.Conv2d = model.blocks[0][i - 1].layers[0]
+        my_bn: nn.BatchNorm2d = model.blocks[0][i - 1].layers[1]
 
         conv_weight = ckpt.conv1_conv_weight(i)
         bn_weights = ckpt.conv1_bn_weights(i)
@@ -177,11 +214,11 @@ def test_rtdetrv2_resnet50_backbone_reconstruction():
         assert my_bn.running_mean.shape == bn_weights['running_mean'].shape
         assert my_bn.running_var.shape == bn_weights['running_var'].shape
 
+    ckpt.load_backbone()
+
     arch_levels = RTDETRV2Checkpoint.res_net_arch_levels[50]
-    print(arch_levels)
+    indexing = RTDETRV2Checkpoint.bottleneck_conv_indices
 
-
-    indexing = {0: 'a', 1: 'b', 2: 'c'}
     for block_idx, subblock_count in enumerate(arch_levels):
 
         for i in range(subblock_count):
@@ -192,8 +229,8 @@ def test_rtdetrv2_resnet50_backbone_reconstruction():
             # ckpt.bottleneck_branch_bn_weights(block_idx, i, 'b')
             # ckpt.bottleneck_branch_bn_weights(block_idx, i, 'c')
 
-            my_bottleneck_stack = model.blocks[block_idx + 1]
-            my_bottleneck_block = my_bottleneck_stack[i]
+            my_bottleneck_stack: nn.Sequential = model.blocks[block_idx + 1]
+            my_bottleneck_block: nn.Sequential = my_bottleneck_stack[i]
 
             # Loop through ['branch2a', 'branch2b', 'branch2c']
             for j in range(3):
@@ -212,8 +249,8 @@ def test_rtdetrv2_resnet50_backbone_reconstruction():
 
             if i == 0:
                 my_shortcut = my_bottleneck_block.shortcut
-                my_conv = my_shortcut.layers[0]
-                my_bn = my_shortcut.layers[1]
+                my_conv: torch.nn.Conv2d = my_shortcut.layers[0]
+                my_bn: torch.nn.BatchNorm2d = my_shortcut.layers[1]
 
                 conv_weight = ckpt.bottleneck_short_conv_weight(block_idx, i)
                 bn_weights = ckpt.bottleneck_short_bn_weights(block_idx, i)
