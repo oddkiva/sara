@@ -19,7 +19,7 @@ class ResidualBottleneckBlock(nn.Module):
 
     - Each convolution operation is unbiased.
     - The downsampling of the feature map happens on the second
-      Convolution+BN+Activaton block and not on the first block.
+      [Convolution+BN+Activation] block and not on the first block.
     - The shortcut connection contains an average pooling layer if the stride
       is 2. This pooling is applied first before the convolutional operation.
 
