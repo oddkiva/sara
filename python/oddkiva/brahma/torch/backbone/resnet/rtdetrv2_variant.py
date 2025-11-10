@@ -10,9 +10,14 @@ from oddkiva.brahma.torch.backbone.resnet.vanilla import (
 
 
 class UnbiasedConvBNA(ConvBNA):
+    """This class is a convenience class that specializes the classical block
+    `ConvBNA`.
+    """
 
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int,
                  stride: int, id: int, activation: str ='relu'):
+        """Constructs an [Unbiased-Conv+BN+Activation] block.
+        """
         super().__init__(in_channels, out_channels, kernel_size, stride, True,
                          activation, id, bias=False)
 
