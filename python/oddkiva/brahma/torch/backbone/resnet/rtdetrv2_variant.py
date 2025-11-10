@@ -38,7 +38,7 @@ class ResidualBottleneckBlock(nn.Module):
 
     The authors have a different vision of the residual bottleneck block and
     the differences are significant enough to justify the writing of a new
-    class. This will keep the code simple.
+    class. This keeps the code simple.
     """
 
     def __init__(
