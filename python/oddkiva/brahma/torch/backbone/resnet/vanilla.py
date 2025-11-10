@@ -77,7 +77,8 @@ class ConvBNA(nn.Module):
 
 class ResidualBottleneckBlock(nn.Module):
     """
-    This class implements the fundamental residual block used in ResNet.
+    This class implements the fundamental residual block used in the classical
+    ResNet architecture.
     """
 
     def __init__(
@@ -87,7 +88,6 @@ class ResidualBottleneckBlock(nn.Module):
         stride: int = 1,
         activation: str = "relu",
         bias: bool = True,
-        use_shortcut_connection: bool = True,
         batch_normalize_after_shortcut: bool = False
     ):
         """Constructs a Residual Bottleneck Block used in ResNet.
@@ -134,30 +134,16 @@ class ResidualBottleneckBlock(nn.Module):
                     bias=bias),
         )
 
-        if use_shortcut_connection:
-            self.shortcut = ConvBNA(
-                in_channels, out_channels * (2**2), 1, stride,
-                batch_normalize_after_shortcut,
-                "linear",
-                0,
-                bias=bias
-            )
-        else:
-            self.shortcut = None
+        self.shortcut = ConvBNA(
+            in_channels, out_channels * (2**2), 1, stride,
+            batch_normalize_after_shortcut,
+            "linear",
+            0,
+            bias=bias
+        )
 
         # Add the activation layer
-        if activation == "leaky":
-            self.activation = nn.LeakyReLU(0.1, inplace=True)
-        elif activation == "relu":
-            self.activation = nn.ReLU(inplace=True)
-        elif activation == "mish":
-            self.activation = nn.Mish()
-        elif activation == "linear":
-            self.activation = nn.Identity(inplace=True)
-        elif activation == "logistic":
-            self.activation = nn.Sigmoid()
-        else:
-            raise ValueError(f"No convolutional activation named {activation}")
+        self.activation = make_activation_func(activation)
 
         self._in_channels = in_channels
         self._out_channels = out_channels
@@ -281,102 +267,6 @@ class ResNet50Variant(nn.Module):
                 ResidualBottleneckBlock(1024, 512, 2, "relu"),
                 ResidualBottleneckBlock(2048, 512, 1, "relu"),
                 ResidualBottleneckBlock(2048, 512, 1, "relu"),
-            ),
-        )
-
-    def forward(self, x):
-        return self.blocks.forward(x)
-
-
-class ResNet50RTDETRV2Variant(nn.Sequential):
-    """This class implements the ResNet-50 variant used in RT-DETR v2.
-
-    This variant has some surprising features.
-
-    - None of its convolutional operations contains a learnable bias.
-    - At each image level, only the first residual bottleneck block
-      incorporates the shortcut connection, contrary to the classical version
-      of ResNet-50, where we add shortcuts connections everywhere.
-
-    RT-DETR v2 shows it is still possible to squeeze even more GFLOP/s without
-    hurting the object detection performance.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.blocks = nn.Sequential(
-            nn.Sequential(
-                OrderedDict([
-                    ("conv3x3_0", ConvBNA(3, 32, 3, 1,
-                                          True,    # Batch-normalization
-                                          "relu",  # Activation function
-                                          0,       # id
-                                          bias=False)),
-                    ("conv3x3_1", ConvBNA(32, 32, 3, 1,
-                                          True,    # Batch-normalization
-                                          "relu",  # Activation function
-                                          1,       # id
-                                          bias=False)),
-                    ("conv3x3_2", ConvBNA(32, 64, 3, 1,
-                                          True,    # Batch-normalization
-                                          "relu",  # Activation function
-                                          1,       # id
-                                          bias=False)),
-                    ("max_pool_2d", nn.MaxPool2d(3, 2, 1)),
-                ])
-            ),
-            # P0
-            nn.Sequential(
-                # Out dim is not 64! But 256 (cf. implementation).
-                ResidualBottleneckBlock(64, 64, 1, "relu", bias=False,
-                                        batch_normalize_after_shortcut=True),
-                # Note that the following residual blocks **do not** use the
-                # shortcut connections in RT-DETR v2!
-                ResidualBottleneckBlock(256, 64, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(256, 64, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-            ),
-            # P1
-            nn.Sequential(
-                ResidualBottleneckBlock(256, 128, 2, "relu", bias=False,
-                                        batch_normalize_after_shortcut=True),
-                # Note that the following residual blocks **do not** use the
-                # shortcut connections in RT-DETR v2!
-                ResidualBottleneckBlock(512, 128, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(512, 128, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(512, 128, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-            ),
-            # P2
-            nn.Sequential(
-                ResidualBottleneckBlock(512, 256, 2, "relu", bias=False,
-                                        batch_normalize_after_shortcut=True),
-                # Note that the following residual blocks **do not** use the
-                # shortcut connections in RT-DETR v2!
-                ResidualBottleneckBlock(1024, 256, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(1024, 256, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(1024, 256, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(1024, 256, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(1024, 256, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-            ),
-            # P3
-            nn.Sequential(
-                ResidualBottleneckBlock(1024, 512, 2, "relu", bias=False,
-                                        batch_normalize_after_shortcut=True),
-                # Note that the following residual blocks **do not** use the
-                # shortcut connections in RT-DETR v2!
-                ResidualBottleneckBlock(2048, 512, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(2048, 512, 1, "relu", bias=False,
-                                        use_shortcut_connection=False),
             ),
         )
 
