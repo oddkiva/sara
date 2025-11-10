@@ -111,23 +111,24 @@ class CCFF(torch.nn.Module):
     """
     CCFF stands for (C)NN-based (C)ross-scale (F)eature (F)usion.
 
-    The AIFI module improves the coarsest feature map $S_5$ of the CNN
-    backbone. The improved feature map is denoted as $F_5$ and should be seen
-    as a query map.
+    The AIFI module improves the coarsest feature map $\mathbf{S}_5$ of the CNN
+    backbone. The improved feature map is denoted as $\mathbf{F}_5$ and should
+    be seen as a query map.
 
     Then, CCFF injects top-down the semantic object information contained in
-    query map $F_5$ to the feature map $S_4$, and recursively to $S_3$ and so
-    on. Therefore, we produce query maps $F_4$ and $F_3$.
+    query map $\mathbf{F}_5$ to the feature map $\mathbf{S}_4$, and recursively
+    to $\mathbf{S}_3$ and so on. Therefore, we produce query maps
+    $\mathbf{F}_4$ and $\mathbf{F}_3$.
 
-    - $F_5$
-    - $F_4 \leftarrow \mathrm{enrich}(F_5, S_4)$
-    - $F3 \leftarrow \mathrm{enrich}(F_4, S_3)$
+    - $\mathbf{F}_5$
+    - $\mathbf{F}_4 \leftarrow \mathrm{enrich}(\mathbf{F}_5, \mathbf{S}_4)$
+    - $\mathbf{F}_3 \leftarrow \mathrm{enrich}(\mathbf{F}_4, \mathbf{S}_3)$
 
     Finally, CCFF refines in a bottom-up the query maps:
 
-    - $F_3^{++} \leftarrow F_3^{++}$
-    - $F_4^{++} \leftarrow \mathrm{refine}(F3^{++}, F_4)$
-    - $F_5^{++} \leftarrow \mathrm{refine}(F4^{++}, F_5)$
+    - $\mathbf{F}_3^{++} \leftarrow \mathbf{F}_3^{++}$
+    - $\mathbf{F}_4^{++} \leftarrow \mathrm{refine}(\mathbf{F}_3^{++}, \mathbf{F}_4)$
+    - $\mathbf{F}_5^{++} \leftarrow \mathrm{refine}(\mathbf{F}_4^{++}, \mathbf{F}_5)$
 
     We follow the implementation as detailed in Figure 4 of the paper.
     """
