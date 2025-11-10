@@ -4,7 +4,7 @@ import numpy as np
 
 import torch
 
-import oddkiva.brahma.torch.backbone.resnet50 as R
+import oddkiva.brahma.torch.backbone.resnet.vanilla as R
 from oddkiva.brahma.torch import DEFAULT_DEVICE
 
 
