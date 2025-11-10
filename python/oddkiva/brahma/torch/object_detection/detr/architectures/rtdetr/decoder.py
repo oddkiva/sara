@@ -21,17 +21,23 @@ class MultiScaleDeformableTransformerDecoderLayer(torch.nn.Module):
 
         Parameters:
             embed_dim:
-                the output embedding feature dimension.
+                The output embedding feature dimension.
             num_heads:
-                the number of attention heads.
+                The number of attention heads in each decoder layer.
             feedforward_dim:
-                the output feature dimension of the feed-forward network.
+                The output feature dimension of the feed-forward network.
             dropout:
-                the dropout probability value.
+                The dropout probability value.
             normalize_before:
-                Choose to apply the layer norm operation (1) before applying the
-                attention layer and (2) before applying the feed-forward
-                network.
+                Optionally choose to apply the layer norm operation:
+
+                1. *before* applying the attention layer, and
+                2. *before* applying the feed-forward network.
+
+                By default, the layer norm operation is applied:
+
+                1. *after* the attention layer, and
+                2. *after* the feed-forward network.
         """
         super().__init__()
 
@@ -68,10 +74,37 @@ class MultiScaleDeformableTransformerDecoderLayer(torch.nn.Module):
         query_pos: torch.Tensor,
         memory: list[torch.Tensor]
     ) -> torch.Tensor:
-        """
+        """Decodes the query matrix $\mathbf{Q}$ into an output value matrix
+        $\mathbf{V}^{+}$.
+
+        - The memory is a peculiar term that simply denotes the 2D feature maps
+          $\mathbf{F}$, which, when flattened, corresponds to the value matrix
+          $\mathbf{V}$.
+
+        - Denoting the position of the query vector $\mathbf{q}$ by $\mathbf{x}$,
+          we calculate its positional embedding $\phi(\mathbf{x})$ and we
+          obtain the key matrix $\mathbf{K} = \mathbf{F} + \phi(\mathbf{X})$.
+
+        In the end, we calculate the decoded object queries as
+
+        $$
+        \mathbf{V}^+ = \sigma \\left( \\frac{1}{\sqrt{d_k}}
+            \mathbf{Q} (\mathbf{F} + \phi(\mathbf{X})^\intercal
+        \\right) \mathbf{V}
+        $$
+
+
         Parameters:
+            query:
+                The query matrix $\mathbf{Q}$
+            query_pos:
+                The 2D coordinates of each query vectors of the matrix
+                $\mathbf{Q}$.
             memory:
                 the feature maps.
+
+        Returns:
+            Decoded queries $\mathbf{V}^+$
         """
         pass
 
