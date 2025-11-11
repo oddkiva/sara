@@ -11,6 +11,19 @@ from oddkiva.brahma.torch.backbone.resnet.vanilla import (
 )
 
 
+class UnbiasedConvBNA(ConvBNA):
+    """This class is a convenience class that specializes the classical block
+    `ConvBNA`.
+    """
+
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int,
+                 stride: int, id: int, activation: str ='relu'):
+        """Constructs an [Unbiased-Conv+BN+Activation] block.
+        """
+        super().__init__(in_channels, out_channels, kernel_size, stride, True,
+                         activation, id, bias=False)
+
+
 class ResidualBottleneckBlock(nn.Module):
     """
     This class implements a variant of fundamental residual block, which is
@@ -21,13 +34,13 @@ class ResidualBottleneckBlock(nn.Module):
 
     - Each convolution operation is unbiased.
     - The downsampling of the feature map happens on the second
-      [Convolution+BN+Activation] block and not on the first block.
+      `UnbiasedConvBNA` block and not on the first block.
     - The shortcut connection contains an average pooling layer if the stride
       is 2. This pooling is applied first before the convolutional operation.
 
     The authors have a different vision of the residual bottleneck block and
     the differences are significant enough to justify the writing of a new
-    class. This will keep the code simple.
+    class. This keeps the code simple.
     """
 
     def __init__(
@@ -45,39 +58,29 @@ class ResidualBottleneckBlock(nn.Module):
 
         super().__init__()
         self.convs = nn.Sequential(
-            ConvBNA(in_channels, out_channels, 1, 1,
-                    True,        # Batch-normalization
-                    activation,  # Activation
-                    0,           # Id
-                    bias=False),
-            ConvBNA(out_channels, out_channels, 3, stride,
-                    True,        # Batch-normalization
-                    activation,  # Activation
-                    1,           # Id
-                    bias=False),
-            ConvBNA(out_channels, out_channels * (2**2), 1, 1,
-                    True,        # Batch-normalization
-                    activation,  # Activation
-                    2,           # Id
-                    bias=False),
+            UnbiasedConvBNA(in_channels, out_channels, 1, 1,
+                            0, activation),  # Id
+            UnbiasedConvBNA(out_channels, out_channels, 3, stride,
+                            1, activation),  # Id
+            UnbiasedConvBNA(out_channels, out_channels * (2**2), 1, 1,
+                            2, activation)   # Id
         )
 
         if use_shortcut_connection:
             if stride == 1:
-                self.shortcut = ConvBNA(
-                    in_channels, out_channels * (2**2), 1, 1, True,
-                    "linear", 0
-                )
+                self.shortcut = UnbiasedConvBNA(in_channels,
+                                                out_channels * (2**2),
+                                                1, 1,
+                                                0, "linear")
             elif stride == 2:
                 self.shortcut = nn.Sequential(
                     nn.AvgPool2d(2, 2, 0, ceil_mode=True),
-                    ConvBNA(
-                        in_channels, out_channels * (2**2), 1, 1, True,
-                        "linear", 0
-                    )
+                    UnbiasedConvBNA(in_channels, out_channels * (2**2),
+                                    1, 1,
+                                    0, "linear")
                 )
             else:
-                ValueError("Stride must be 1 or 2!")
+                ValueError("Unsupported: the stride must be 1 or 2!")
         else:
             self.shortcut = None
 
@@ -131,25 +134,16 @@ class ResNet50RTDETRV2Variant(nn.Module):
             #
             # No pooling is happening too.
             nn.Sequential(
-                ConvBNA(3, 32, 3, 2,   # Downsample here
-                        True,          # Batch-normalization
-                        "relu",        # Activation function
-                        0,             # id
-                        bias=False),
-                ConvBNA(32, 32, 3, 1,
-                        True,          # Batch-normalization
-                        "relu",        # Activation function
-                        1,             # id
-                        bias=False),
-                ConvBNA(32, 64, 3, 1,
-                        True,          # Batch-normalization
-                        "relu",        # Activation function
-                        1,             # id
-                        bias=False),
+                UnbiasedConvBNA(3, 32, 3, 2,   # Downsample here
+                                0),            # id
+                UnbiasedConvBNA(32, 32, 3, 1,
+                                1),            # id
+                UnbiasedConvBNA(32, 64, 3, 1,
+                                1)             # id
             ),
             # P0
             #
-            # No downsample happening here like in the classical ResNet-50.
+            # No downsampling here like in the classical ResNet-50.
             nn.Sequential(
                 # Out dim is not 64! But 256 (cf. implementation).
                 ResidualBottleneckBlock(64, 64, 1, "relu"),
@@ -375,7 +369,7 @@ class RTDETRV2Checkpoint:
             for param in RTDETRV2Checkpoint.batch_norm_param_names
         }
 
-    def _copy_conv_bna_weights(self, my_block: ConvBNA,
+    def _copy_conv_bna_weights(self, my_block: UnbiasedConvBNA,
                                conv_weight: torch.Tensor,
                                bn_weights: dict[str, torch.Tensor]) -> None:
         my_conv: nn.Conv2d = my_block.layers[0]

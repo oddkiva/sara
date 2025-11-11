@@ -4,7 +4,7 @@ import torch
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
-    ConvBNA,
+    UnbiasedConvBNA,
     ResNet50RTDETRV2Variant,
     RTDETRV2Checkpoint
 )
@@ -83,7 +83,7 @@ def test_rtdetrv2_resnet50_backbone_param_shape():
 
             if i == 0:
                 my_shortcut = my_bottleneck_block.shortcut
-                if type(my_shortcut) is ConvBNA:
+                if type(my_shortcut) is UnbiasedConvBNA:
                     my_convbna = my_shortcut
                 elif type(my_shortcut) is torch.nn.Sequential:
                     my_convbna = my_shortcut[1]
