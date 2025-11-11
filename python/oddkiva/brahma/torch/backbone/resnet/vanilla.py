@@ -3,6 +3,7 @@
 from collections import OrderedDict
 
 import torch.nn as nn
+import torchvision.ops as ops
 
 
 def make_activation_func(activation: str | None, inplace: bool = False):
@@ -44,6 +45,7 @@ class ConvBNA(nn.Module):
         id: int,
         bias: bool = True,
         inplace_activation: bool = False,
+        freeze_batch_norm: bool = False
     ):
         super(ConvBNA, self).__init__()
         self.layers = nn.Sequential()
@@ -62,9 +64,14 @@ class ConvBNA(nn.Module):
         )
         self.layers.add_module(f"conv_{id}", conv)
         if batch_normalize:
-            self.layers.add_module(
-                f"batch_norm_{id}", nn.BatchNorm2d(out_channels)
-            )
+            if freeze_batch_norm:
+                self.layers.add_module(
+                    f"batch_norm_{id}", nn.BatchNorm2d(out_channels)
+                )
+            else:
+                self.layers.add_module(
+                    f"batch_norm_{id}", ops.FrozenBatchNorm2d(out_channels)
+                )
 
         activation_fn = make_activation_func(activation,
                                              inplace=inplace_activation)

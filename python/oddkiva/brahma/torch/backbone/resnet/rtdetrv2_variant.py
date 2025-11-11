@@ -2,6 +2,8 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
+from torch.serialization import MAP_LOCATION
+import torchvision.ops as ops
 
 from oddkiva.brahma.torch.backbone.resnet.vanilla import (
     ConvBNA,
@@ -201,6 +203,31 @@ class ResNet50RTDETRV2Variant(nn.Module):
     def forward(self, x):
         return self.blocks.forward(x)
 
+    def freeze_parameters(self, m: nn.Module):
+        for p in m.parameters():
+            p.requires_grad = False
+
+    def freeze_batch_norm(self, m: nn.Module) -> nn.Module:
+        if isinstance(m, nn.BatchNorm2d):
+            # If m is a leaf module and that leaf module is also a BatchNorm2d
+            # module.
+            m = ops.FrozenBatchNorm2d(m.num_features)
+        else:
+            # DFS visit.
+            for child_tree_name, child_tree in m.named_children():
+                # Go to the child trees.
+                child_tree_transmuted = self.freeze_batch_norm(child_tree)
+
+                # If the child tree has transmuted to a new child.
+                #
+                # A child tree will transmute if it contains BatchNorm2d
+                # leaves.
+                if child_tree_transmuted is not child_tree:
+                    # Update the child.
+                    setattr(m, child_tree_name, child_tree_transmuted)
+        return m
+
+
 
 class RTDETRV2Checkpoint:
 
@@ -214,8 +241,8 @@ class RTDETRV2Checkpoint:
 
     batch_norm_param_names = ['weight', 'bias', 'running_mean', 'running_var']
 
-    def __init__(self, ckpt_fp: Path, ):
-        self.ckpt = torch.load(ckpt_fp)
+    def __init__(self, ckpt_fp: Path, map_location: MAP_LOCATION = None):
+        self.ckpt = torch.load(ckpt_fp, map_location=map_location)
 
     @property
     def model_weights(self):
@@ -351,20 +378,26 @@ class RTDETRV2Checkpoint:
     def _copy_conv_bna_weights(self, my_block: ConvBNA,
                                conv_weight: torch.Tensor,
                                bn_weights: dict[str, torch.Tensor]) -> None:
-            my_conv: nn.Conv2d = my_block.layers[0]
-            my_bn: nn.BatchNorm2d = my_block.layers[1]
+        my_conv: nn.Conv2d = my_block.layers[0]
+        my_bn: nn.BatchNorm2d | ops.FrozenBatchNorm2d= my_block.layers[1]
 
-            assert my_conv.weight.shape == conv_weight.shape
-            assert my_bn.weight.shape == bn_weights['weight'].shape
-            assert my_bn.bias.shape == bn_weights['bias'].shape
-            assert my_bn.running_mean.shape == bn_weights['running_mean'].shape
-            assert my_bn.running_var.shape == bn_weights['running_var'].shape
+        assert my_conv.weight.shape == conv_weight.shape
+        assert my_bn.weight.shape == bn_weights['weight'].shape
+        assert my_bn.bias.shape == bn_weights['bias'].shape
+        assert my_bn.running_mean.shape == bn_weights['running_mean'].shape
+        assert my_bn.running_var.shape == bn_weights['running_var'].shape
 
-            my_conv.weight.data.copy_(conv_weight)
-            my_bn.weight.data.copy_(bn_weights['weight'])
-            my_bn.bias.data.copy_(bn_weights['bias'])
-            my_bn.running_mean.data.copy_(bn_weights['running_mean'])
-            my_bn.running_var.data.copy_(bn_weights['running_var'])
+        my_conv.weight.data.copy_(conv_weight)
+        my_bn.weight.data.copy_(bn_weights['weight'])
+        my_bn.bias.data.copy_(bn_weights['bias'])
+        my_bn.running_mean.data.copy_(bn_weights['running_mean'])
+        my_bn.running_var.data.copy_(bn_weights['running_var'])
+
+        assert torch.equal(my_conv.weight, conv_weight)
+        assert torch.equal(my_bn.weight, bn_weights['weight'])
+        assert torch.equal(my_bn.bias, bn_weights['bias'])
+        assert torch.equal(my_bn.running_mean, bn_weights['running_mean'])
+        assert torch.equal(my_bn.running_var, bn_weights['running_var'])
 
     def _load_backbone_conv_1(self, model):
         for i in range(3):
@@ -376,9 +409,8 @@ class RTDETRV2Checkpoint:
 
     def load_backbone(self):
         model = ResNet50RTDETRV2Variant()
+        model.freeze_batch_norm(model)
 
         self._load_backbone_conv_1(model)
 
         return model
-
-
