@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from loguru import logger
+
 import torch
 import torch.nn as nn
 from torch.serialization import MAP_LOCATION
@@ -17,7 +19,7 @@ class UnbiasedConvBNA(ConvBNA):
     """
 
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int,
-                 stride: int, id: int, activation: str ='relu'):
+                 stride: int, id: int, activation: str | None ='relu'):
         """Constructs an [Unbiased-Conv+BN+Activation] block.
         """
         super().__init__(in_channels, out_channels, kernel_size, stride, True,
@@ -33,6 +35,7 @@ class ResidualBottleneckBlock(nn.Module):
     follows.
 
     - Each convolution operation is unbiased.
+    - The last convolution of the block does not 
     - The downsampling of the feature map happens on the second
       `UnbiasedConvBNA` block and not on the first block.
     - The shortcut connection contains an average pooling layer if the stride
@@ -59,11 +62,14 @@ class ResidualBottleneckBlock(nn.Module):
         super().__init__()
         self.convs = nn.Sequential(
             UnbiasedConvBNA(in_channels, out_channels, 1, 1,
-                            0, activation),  # Id
+                            0,  # Id
+                            activation=activation),
             UnbiasedConvBNA(out_channels, out_channels, 3, stride,
-                            1, activation),  # Id
+                            1,  # Id
+                            activation=activation),
             UnbiasedConvBNA(out_channels, out_channels * (2**2), 1, 1,
-                            2, activation)   # Id
+                            2,  # Id
+                            activation=None),  # oh my! so many modifications.
         )
 
         if use_shortcut_connection:
@@ -71,13 +77,13 @@ class ResidualBottleneckBlock(nn.Module):
                 self.shortcut = UnbiasedConvBNA(in_channels,
                                                 out_channels * (2**2),
                                                 1, 1,
-                                                0, "linear")
+                                                0, activation=None)
             elif stride == 2:
                 self.shortcut = nn.Sequential(
                     nn.AvgPool2d(2, 2, 0, ceil_mode=True),
                     UnbiasedConvBNA(in_channels, out_channels * (2**2),
                                     1, 1,
-                                    0, "linear")
+                                    0, activation=None)
                 )
             else:
                 ValueError("Unsupported: the stride must be 1 or 2!")
@@ -225,7 +231,7 @@ class ResNet50RTDETRV2Variant(nn.Module):
 
 class RTDETRV2Checkpoint:
 
-    res_net_arch_levels = {
+    resnet_arch_levels = {
         18: [2, 2, 2, 2],
         34: [3, 4, 6, 3],
         50: [3, 4, 6, 3],
@@ -354,6 +360,7 @@ class RTDETRV2Checkpoint:
     ) -> torch.Tensor:
         parent_key = self.bottleneck_short_conv_key(block, subblock)
         key = f"{parent_key}.weight"
+        print('shortcut-convbna-key', key)
         return self.model_weights[key]
 
     def bottleneck_short_bn_weights(
@@ -364,6 +371,7 @@ class RTDETRV2Checkpoint:
             param: f"{parent_key}.{param}"
             for param in RTDETRV2Checkpoint.batch_norm_param_names
         }
+        print('shortcut-bn-keys', keys)
         return {
             param: self.model_weights[keys[param]]
             for param in RTDETRV2Checkpoint.batch_norm_param_names
@@ -394,6 +402,7 @@ class RTDETRV2Checkpoint:
         assert torch.equal(my_bn.running_var, bn_weights['running_var'])
 
     def _load_backbone_conv_1(self, model):
+        logger.info('Loading RT-DETR v2 backbone.conv_1')
         for i in range(3):
             my_conv_bna = model.blocks[0][i]
 
@@ -401,10 +410,88 @@ class RTDETRV2Checkpoint:
             bn_weights = self.conv1_bn_weights(i + 1)
             self._copy_conv_bna_weights(my_conv_bna, conv_weight, bn_weights)
 
+    def _load_backbone_res_layers(self, model):
+        logger.info('Loading RT-DETR v2 backbone.conv_1')
+
+        # Convenient variable names.
+        indexing = {0: 'a', 1: 'b', 2: 'c'}
+        resnet50_arch_levels = self.resnet_arch_levels[50]
+
+        for bottleneck_stack_idx, bottleneck_count in enumerate(resnet50_arch_levels):
+
+            for i in range(bottleneck_count):
+                print(f"block_idx = {bottleneck_stack_idx}  i = {i}")
+                my_bottleneck_stack = model.blocks[bottleneck_stack_idx + 1]
+                my_bottleneck_block = my_bottleneck_stack[i]
+
+                # Loop through ['branch2a', 'branch2b', 'branch2c']
+                for j in range(3):
+                    my_convbna = my_bottleneck_block.convs[j]
+                    assert type(my_convbna) is UnbiasedConvBNA
+
+                    my_conv = my_bottleneck_block.convs[j].layers[0]
+                    my_bn = my_bottleneck_block.convs[j].layers[1]
+
+                    letter = indexing[j]
+                    conv_weight = self.bottleneck_branch_conv_weight(bottleneck_stack_idx, i, letter)
+                    bn_weights = self.bottleneck_branch_bn_weights(bottleneck_stack_idx, i, letter)
+
+                    assert my_conv.weight.shape == conv_weight.shape
+                    assert my_bn.weight.shape == bn_weights['weight'].shape
+                    assert my_bn.bias.shape == bn_weights['bias'].shape
+                    assert my_bn.running_mean.shape == bn_weights['running_mean'].shape
+                    assert my_bn.running_var.shape == bn_weights['running_var'].shape
+
+                    logger.info(
+                        ''.join(
+                            f'Loading conv+bn weights for '
+                            f'(s:{bottleneck_stack_idx}, b:{i}, l:{letter})'
+                        )
+                    )
+                    self._copy_conv_bna_weights(my_convbna,
+                                                conv_weight, bn_weights)
+
+                if i == 0:
+                    # Only the first bottleneck in each stack has a shortcut
+                    # connection.
+                    my_shortcut = my_bottleneck_block.shortcut
+                    if type(my_shortcut) is UnbiasedConvBNA:
+                        my_convbna = my_shortcut
+                    elif type(my_shortcut) is torch.nn.Sequential:
+                        my_convbna = my_shortcut[1]
+                        assert type(my_convbna) is UnbiasedConvBNA
+                    else:
+                        TypeError("This should not happen")
+
+                    my_conv = my_convbna.layers[0]
+                    my_bn = my_convbna.layers[1]
+
+                    # TODO: copy the weight and bias.
+
+                    conv_weight = self.bottleneck_short_conv_weight(bottleneck_stack_idx, i)
+                    bn_weights = self.bottleneck_short_bn_weights(bottleneck_stack_idx, i)
+
+                    assert my_conv.weight.shape == conv_weight.shape
+                    assert my_bn.weight.shape == bn_weights['weight'].shape
+                    assert my_bn.bias.shape == bn_weights['bias'].shape
+                    assert my_bn.running_mean.shape == bn_weights['running_mean'].shape
+                    assert my_bn.running_var.shape == bn_weights['running_var'].shape
+
+                    self._copy_conv_bna_weights(my_convbna,
+                                                conv_weight, bn_weights)
+
+                else:
+                    # There are no shortcut connection in this bottleneck
+                    # block.
+                    my_shortcut = my_bottleneck_block.shortcut
+                    assert my_shortcut is None
+
+
     def load_backbone(self):
         model = ResNet50RTDETRV2Variant()
         model.freeze_batch_norm(model)
 
         self._load_backbone_conv_1(model)
+        self._load_backbone_res_layers(model)
 
         return model
