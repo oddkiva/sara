@@ -8,7 +8,6 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import (
-        UnbiasedConvBNA,
         RTDETRV2Checkpoint
     )
 
@@ -43,7 +42,7 @@ def test_backbone_feature_pyramid_projection_computations():
     fp_proj = ckpt.load_encoder_input_proj()
 
     # Check the computations with the data.
-    backbone_outs = data['intermediate']['backbone']
+    backbone_outs = data['intermediate']['backbone']['out']
     fp_proj_outs_true = data['intermediate']['encoder']['input_proj']
     fp_proj_outs = fp_proj(backbone_outs)
 

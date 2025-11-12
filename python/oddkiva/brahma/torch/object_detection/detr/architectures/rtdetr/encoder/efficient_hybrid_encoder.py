@@ -1,8 +1,7 @@
 import torch
 
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
-    UnbiasedConvBNA,
-    ResNet50RTDETRV2Variant
+    UnbiasedConvBNA
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.aifi import AIFI

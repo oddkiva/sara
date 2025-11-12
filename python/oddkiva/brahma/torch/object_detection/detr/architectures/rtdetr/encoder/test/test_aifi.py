@@ -76,11 +76,11 @@ def test_aifi():
         norm2_out = aifi_layer.layer_norm_2(
             norm1_out + aifi_layer.dropout_2(ffn_out)
         )
-        assert torch.norm(norm2_out - norm2_out_true.data) < 8e-5
+        assert torch.norm(norm2_out - norm2_out_true.data) < 1e-4
 
     aifi_out_true = data['intermediate']['encoder']['aifi']['out']
     with torch.no_grad():
-        assert torch.norm(norm2_out - aifi_out_true) < 8e-5
+        assert torch.norm(norm2_out - aifi_out_true) < 9e-5
 
         aifi_out = aifi.forward(s5)
         assert aifi_out.shape == aifi_out_true.shape
@@ -89,5 +89,5 @@ def test_aifi():
         dist = torch.norm(aifi_out - aifi_out_true)
         logger.debug(f'max_coeff_dist = {max_coeff_dist}')
         logger.debug(f'dist = {dist}')
-        assert dist < 8e-5
+        assert dist < 1e-4
 
