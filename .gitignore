@@ -37,6 +37,7 @@ cmake/sara_version.cmake
 compile_commands.json
 
 # Misc byproducts
+cpp/examples/Kalpana/Emscripten/assets/
 train/
 CS_SESSION
 .swift-version

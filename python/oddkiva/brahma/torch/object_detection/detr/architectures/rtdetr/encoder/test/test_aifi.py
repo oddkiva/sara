@@ -90,4 +90,3 @@ def test_aifi():
         logger.debug(f'max_coeff_dist = {max_coeff_dist}')
         logger.debug(f'dist = {dist}')
         assert dist < 1e-4
-
