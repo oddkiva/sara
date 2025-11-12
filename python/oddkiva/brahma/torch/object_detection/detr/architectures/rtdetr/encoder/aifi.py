@@ -43,7 +43,7 @@ class AIFI(torch.nn.Module):
                                                       norm)
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
-        n, c, h, w = X.shape
+        _, _, h, w = X.shape
         pe = self.positional_encoding_fn((w, h))
         pe_flat = pe.flatten(0, 1)[None, ...]
 
