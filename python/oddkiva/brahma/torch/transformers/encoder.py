@@ -36,7 +36,7 @@ class TransformerEncoderLayer(torch.nn.Module):
 
         self.feedforward = torch.nn.Sequential(OrderedDict([
             ("linear-1", torch.nn.Linear(embed_dim, feedforward_dim)),
-            ("activation", torch.nn.ReLU()),
+            ("activation", torch.nn.GELU()),
             ("dropout", torch.nn.Dropout(p=dropout)),
             ("linear-2", torch.nn.Linear(feedforward_dim, embed_dim))
         ]))
@@ -70,7 +70,7 @@ class TransformerEncoderLayer(torch.nn.Module):
         enhanced_value_residuals = self.feed_forward(enhanced_values)
         # Perturb the enhanced value residuals to avoid overfitting in the
         # feed-forward block.
-        enhanced_value_residuals = self.dropout_2(enhanced_values)
+        enhanced_value_residuals = self.dropout_2(enhanced_value_residuals)
         # Now apply the Add layer.
         enhanced_values = enhanced_values + enhanced_value_residuals
 
@@ -87,9 +87,10 @@ class TransformerEncoderLayer(torch.nn.Module):
         keys = queries
         values = input_embedding
         enhanced_value_residuals, _ = self.self_attention.forward(
-            queries, keys, values,
+            queries, keys, value=values,
             attn_mask=attn_mask
         )
+
         # Perturb the enhanced value residuals to avoid overfitting in the
         # self-attention block.
         enhanced_value_residuals = self.dropout_1(enhanced_value_residuals)
@@ -102,7 +103,7 @@ class TransformerEncoderLayer(torch.nn.Module):
         enhanced_value_residuals = self.feedforward(enhanced_values)
         # Perturb the enhanced value residuals to avoid overfitting in the
         # feed-forward block.
-        enhanced_value_residuals = self.dropout_2(enhanced_values)
+        enhanced_value_residuals = self.dropout_2(enhanced_value_residuals)
         # Now apply the Add+Norm layer.
         enhanced_values = self.layer_norm_2(
             enhanced_values + enhanced_value_residuals

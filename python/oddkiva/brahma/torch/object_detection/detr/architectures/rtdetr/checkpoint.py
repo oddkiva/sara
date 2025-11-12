@@ -453,7 +453,7 @@ class RTDETRV2Checkpoint:
                     dropout=dropout,
                     normalize_before=normalize_before,
                     num_layers=num_layers,
-                    norm=norm)
+                    norm=None)
 
         for layer_idx in range(num_layers):
             weights = self.aifi_encoder_layer_weights(layer_idx, i=0)
