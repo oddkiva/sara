@@ -83,9 +83,8 @@ class DownsampleConvolution(UnbiasedConvBNA):
 
     def __init__(self, in_channels: int, out_channels: int, id: int,
                  activation: str | None = 'silu'):
-        super(DownsampleConvolution, self).__init__(
-            in_channels, out_channels,
-            3, 2,                   # Kernel size and stride
+        super().__init__(
+            in_channels, out_channels, 3, 2,  # Kernel size and stride
             id,                     # ID
             activation=activation,  # Activation
         )

@@ -1,12 +1,13 @@
-import pytest
 from loguru import logger
-from pathlib import Path
 
 import torch
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import ResNet50RTDETRV2Variant
+    rtdetr.checkpoint import (
+        ResNet50RTDETRV2Variant,
+        RTDETRV2Checkpoint
+    )
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /

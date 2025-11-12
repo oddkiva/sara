@@ -1,8 +1,8 @@
 import torch
 
-from oddkiva.brahma.torch.backbone.resnet.vanilla import ConvBNA
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.ccff import (
+        UnbiasedConvBNA,
         DownsampleConvolution,
         Fusion,
         LateralConvolution
@@ -52,6 +52,6 @@ def test_fusion():
     hidden_dim = 256
     block = Fusion(in_channels, hidden_dim)
 
-    assert type(block.conv1) is ConvBNA
-    assert type(block.conv2) is ConvBNA
+    assert type(block.conv1) is UnbiasedConvBNA
+    assert type(block.conv2) is UnbiasedConvBNA
     assert len(block.repvgg_block.layers) == 3

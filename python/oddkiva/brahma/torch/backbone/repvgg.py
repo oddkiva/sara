@@ -131,7 +131,7 @@ class RepVggBaseLayer(torch.nn.Module):
     ) -> torch.Tensor:
         return torch.nn.functional.pad(kernel1x1, [1, 1, 1, 1])
 
-    def _fuse_conv_bn_layer(self, branch: ConvBNA):
+    def _fuse_conv_bn_layer(self, branch: UnbiasedConvBNA):
         """
         This is the same implementation as in:
         `oddkiva/shakti/inference/darknet/network.py`
