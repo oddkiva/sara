@@ -31,15 +31,20 @@ class ResidualBottleneckBlock(nn.Module):
     This class implements a variant of fundamental residual block, which is
     used in the ResNet backbone of RT-DETR v2.
 
-    The key differences from the classical residual bottleneck block are as
-    follows.
+    In general, this block tweaks the original implementation to make it as
+    cheap and lightweight in terms of parameters and computational cost:
+
+    Specifically, the key differences from the classical residual bottleneck
+    block are as follows.
 
     - Each convolution operation is unbiased.
-    - The last convolution of the block does not 
+    - The last convolution of the block does not use any activation function.
     - The downsampling of the feature map happens on the second
       `UnbiasedConvBNA` block and not on the first block.
     - The shortcut connection contains an average pooling layer if the stride
       is 2. This pooling is applied first before the convolutional operation.
+    - The identity function is favored over the convolutional operation in the
+      shortcut connection.
 
     The authors have a different vision of the residual bottleneck block and
     the differences are significant enough to justify the writing of a new
@@ -52,7 +57,7 @@ class ResidualBottleneckBlock(nn.Module):
         out_channels: int,
         stride: int = 1,
         activation: str = "relu",
-        use_shortcut_connection: bool = True,
+        make_convolutional_shortcut: bool = False,
         inplace_activation: bool = False
     ):
         """
@@ -69,10 +74,10 @@ class ResidualBottleneckBlock(nn.Module):
                             activation=activation),
             UnbiasedConvBNA(out_channels, out_channels * (2**2), 1, 1,
                             2,  # Id
-                            activation=None),  # oh my! so many modifications.
+                            activation=None),  # oh my! so many modifications!
         )
 
-        if use_shortcut_connection:
+        if make_convolutional_shortcut:
             if stride == 1:
                 self.shortcut = UnbiasedConvBNA(in_channels,
                                                 out_channels * (2**2),
@@ -88,7 +93,7 @@ class ResidualBottleneckBlock(nn.Module):
             else:
                 ValueError("Unsupported: the stride must be 1 or 2!")
         else:
-            self.shortcut = None
+            self.shortcut = nn.Identity()
 
         # Add the activation layer
         self.activation = make_activation_func(
@@ -99,11 +104,7 @@ class ResidualBottleneckBlock(nn.Module):
         self._out_channels = out_channels
 
     def forward(self, x):
-        if self.shortcut is None:
-            out = self.convs(x)
-        else:
-            out = self.convs.forward(x) + self.shortcut(x)
-
+        out = self.convs.forward(x) + self.shortcut(x)
         if self.activation is not None:
             out = self.activation(out)
 
@@ -121,15 +122,17 @@ class ResidualBottleneckBlock(nn.Module):
 class ResNet50RTDETRV2Variant(nn.Module):
     """This class implements RT-DETR v2 variant form of ResNet-50.
 
-    This variant has some surprising features.
+    This variant has some nice features that further reduces the number of
+    learnable parameters and also boosts up the total FLOPs per second.
 
     - None of its convolutional operations contains a learnable bias.
-    - At each image level, only the first residual bottleneck block
-      incorporates the shortcut connection, contrary to the classical version
-      of ResNet-50, where we add shortcuts connections everywhere.
+    - In each image level, we apply a stack of residual bottleneck blocks.
 
-      This proves we can sparingly use shortcut connection for more GFLOP/s
-      without hurting the object detection reliability.
+      - Only the first residual bottleneck block of the stack incorporates a
+        convolutional shortcut connection, contrary to the classical version of
+        ResNet-50.
+      - Then the next residual bottleneck blocks uses the identity shortcut
+        connection, which is what the ResNet paper advocated originally.
     """
 
     def __init__(self):
@@ -137,67 +140,50 @@ class ResNet50RTDETRV2Variant(nn.Module):
         self.blocks = nn.Sequential(
             # Surprising feature: we downsample straight away from the first
             # convolutional operation.
-            #
-            # No pooling is happening too.
             nn.Sequential(
                 UnbiasedConvBNA(3, 32, 3, 2,   # Downsample here
                                 0),            # id
                 UnbiasedConvBNA(32, 32, 3, 1,
                                 1),            # id
                 UnbiasedConvBNA(32, 64, 3, 1,
-                                1)             # id
+                                1),            # id
+                nn.MaxPool2d(3, stride=2, padding=1),
             ),
             # P0
             #
             # No downsampling here like in the classical ResNet-50.
             nn.Sequential(
                 # Out dim is not 64! But 256 (cf. implementation).
-                ResidualBottleneckBlock(64, 64, 1, "relu"),
-                # Note that the following residual blocks **do not** use the
-                # shortcut connections in RT-DETR v2!
-                ResidualBottleneckBlock(256, 64, 1, "relu",
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(256, 64, 1, "relu",
-                                        use_shortcut_connection=False),
+                ResidualBottleneckBlock(64, 64, 1, "relu",
+                                        make_convolutional_shortcut=True),
+                ResidualBottleneckBlock(256, 64, 1, "relu"),
+                ResidualBottleneckBlock(256, 64, 1, "relu"),
             ),
             # P1
             nn.Sequential(
-                ResidualBottleneckBlock(256, 128, 2, "relu"),
-                # Note that the following residual blocks **do not** use the
-                # shortcut connections in RT-DETR v2!
-                ResidualBottleneckBlock(512, 128, 1, "relu",
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(512, 128, 1, "relu",
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(512, 128, 1, "relu",
-                                        use_shortcut_connection=False),
+                ResidualBottleneckBlock(256, 128, 2, "relu",
+                                        make_convolutional_shortcut=True),
+                ResidualBottleneckBlock(512, 128, 1, "relu"),
+                ResidualBottleneckBlock(512, 128, 1, "relu"),
+                ResidualBottleneckBlock(512, 128, 1, "relu"),
             ),
             # P2
             nn.Sequential(
-                ResidualBottleneckBlock(512, 256, 2, "relu"),
-                # Note that the following residual blocks **do not** use the
-                # shortcut connections in RT-DETR v2!
-                ResidualBottleneckBlock(1024, 256, 1, "relu",
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(1024, 256, 1, "relu",
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(1024, 256, 1, "relu",
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(1024, 256, 1, "relu",
-                                        use_shortcut_connection=False),
-                ResidualBottleneckBlock(1024, 256, 1, "relu",
-                                        use_shortcut_connection=False),
+                ResidualBottleneckBlock(512, 256, 2, "relu",
+                                        make_convolutional_shortcut=True),
+                ResidualBottleneckBlock(1024, 256, 1, "relu"),
+                ResidualBottleneckBlock(1024, 256, 1, "relu"),
+                ResidualBottleneckBlock(1024, 256, 1, "relu"),
+                ResidualBottleneckBlock(1024, 256, 1, "relu"),
+                ResidualBottleneckBlock(1024, 256, 1, "relu"),
             ),
-        # P3
-        nn.Sequential(
-            ResidualBottleneckBlock(1024, 512, 2, "relu"),
-            # Note that the following residual blocks **do not** use the
-            # shortcut connections in RT-DETR v2!
-            ResidualBottleneckBlock(2048, 512, 1, "relu",
-                                    use_shortcut_connection=False),
-            ResidualBottleneckBlock(2048, 512, 1, "relu",
-                                    use_shortcut_connection=False),
-        ),
+            # P3
+            nn.Sequential(
+                ResidualBottleneckBlock(1024, 512, 2, "relu",
+                                        make_convolutional_shortcut=True),
+                ResidualBottleneckBlock(2048, 512, 1, "relu"),
+                ResidualBottleneckBlock(2048, 512, 1, "relu"),
+            )
         )
 
     def forward(self, x):
@@ -218,13 +204,23 @@ class ResNet50RTDETRV2Variant(nn.Module):
                 # Go to the child trees.
                 child_tree_transmuted = self.freeze_batch_norm(child_tree)
 
-                # If the child tree has transmuted to a new child.
+                # If the child tree has transmuted to a new child object.
                 #
-                # A child tree will transmute if it contains BatchNorm2d
-                # leaves.
+                # A child tree transmutes if we create a new object referenced
+                # by a new "pointer" value.
+                #
+                # In practice we only leaf nodes tha are BatchNorm2d operations
+                # and it has no children. So this copy-pasted code is a bit
+                # strange.
                 if child_tree_transmuted is not child_tree:
+                    logger.debug(
+                        f"child_tree has transmuted from {child_tree} to {child_tree_transmuted}")
                     # Update the child.
                     setattr(m, child_tree_name, child_tree_transmuted)
+                # else:
+                #     logger.debug(
+                #         f"child_tree has not transmuted: {child_tree_transmuted}"
+                #     )
         return m
 
 
@@ -484,7 +480,7 @@ class RTDETRV2Checkpoint:
                     # There are no shortcut connection in this bottleneck
                     # block.
                     my_shortcut = my_bottleneck_block.shortcut
-                    assert my_shortcut is None
+                    assert type(my_shortcut) is nn.Identity
 
 
     def load_backbone(self):
