@@ -6,31 +6,38 @@ import torch.nn as nn
 import torchvision.ops as ops
 
 
-def make_activation_func(activation: str | None, inplace: bool = False):
+def make_activation_func(
+    activation: str | None,
+    inplace: bool = False
+) -> nn.Module:
     """Make an activation function.
 
     parameters:
         activation:
             options are `leaky`, `relu`, `mish`, `linear`, `logistic`,
-            `silu`, `None`.
+            `silu`, `gelu`, `None`.
     """
     # Add the activation layer
     if activation == "leaky":
         return nn.LeakyReLU(0.1, inplace=inplace)
-    elif activation == "relu":
+    if activation == "relu":
         return nn.ReLU(inplace=inplace)
-    elif activation == "mish":
+    if activation == "mish":
         return nn.Mish(inplace=inplace)
-    elif activation == "linear":
+    if activation == "linear":
         return nn.Identity(inplace=inplace)
-    elif activation == "logistic":
+    if activation == "logistic":
         return nn.Sigmoid()
     if activation == "silu":
         return nn.SiLU(inplace=inplace)
-    elif activation is None:
+    if activation == "gelu":
+        return nn.GELU()
+        
+    if activation is None:
         return None
-    else:
-        raise ValueError(f"No convolutional activation named {activation}")
+
+    raise ValueError(f"No convolutional activation named {activation}")
+    return None
 
 
 class ConvBNA(nn.Module):

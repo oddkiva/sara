@@ -3,6 +3,7 @@ from loguru import logger
 import torch
 
 from oddkiva import DATA_DIR_PATH
+from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import (
         ResNet50RTDETRV2Variant,
@@ -19,7 +20,7 @@ def test_rtdetrv2_resnet50_variant_construction():
     data = torch.load(DATA_FILEPATH)
 
     model = ResNet50RTDETRV2Variant()
-    model.freeze_batch_norm(model)
+    model = freeze_batch_norm(model)
 
     assert model.feature_pyramid_dims == [256, 512, 1024, 2048]
 

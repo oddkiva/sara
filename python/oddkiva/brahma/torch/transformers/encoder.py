@@ -35,10 +35,10 @@ class TransformerEncoderLayer(torch.nn.Module):
         self.layer_norm_1 = torch.nn.LayerNorm(embed_dim)
 
         self.feedforward = torch.nn.Sequential(OrderedDict([
-            ("tsfm-enc-linear-1", torch.nn.Linear(embed_dim, feedforward_dim)),
-            ("tsfm-enc-activation", torch.nn.ReLU()),
-            ("tsfm-enc-dropout", torch.nn.Dropout(p=dropout)),
-            ("tsfm-enc-linear-2", torch.nn.Linear(feedforward_dim, embed_dim))
+            ("linear-1", torch.nn.Linear(embed_dim, feedforward_dim)),
+            ("activation", torch.nn.ReLU()),
+            ("dropout", torch.nn.Dropout(p=dropout)),
+            ("linear-2", torch.nn.Linear(feedforward_dim, embed_dim))
         ]))
 
         self.dropout_2 = torch.nn.Dropout(p=dropout)
@@ -61,7 +61,7 @@ class TransformerEncoderLayer(torch.nn.Module):
         )
         # Perturb the enhanced value residuals to avoid overfitting in the
         # self-attention block.
-        enhanced_value_residuals = self.dropout1(enhanced_value_residuals)
+        enhanced_value_residuals = self.dropout_1(enhanced_value_residuals)
         enhanced_values = values + enhanced_value_residuals
 
         # 2. Normalize -> FFN -> Add
@@ -92,7 +92,7 @@ class TransformerEncoderLayer(torch.nn.Module):
         )
         # Perturb the enhanced value residuals to avoid overfitting in the
         # self-attention block.
-        enhanced_value_residuals = self.dropout1(enhanced_value_residuals)
+        enhanced_value_residuals = self.dropout_1(enhanced_value_residuals)
         # Now apply the Add+Norm layer.
         enhanced_values = self.layer_norm_1(
             values + enhanced_value_residuals

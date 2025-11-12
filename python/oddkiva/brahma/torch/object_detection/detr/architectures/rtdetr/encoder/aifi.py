@@ -51,12 +51,4 @@ class AIFI(torch.nn.Module):
         # Flatten the spatial dimension (N, C, HW)
         # Permute the spatial dimension (N, HW, C)
         X_flat = X.flatten(2).permute(0, 2, 1)
-
-        X_improved_flat = self.transformer_encoder.forward(X_flat, pe_flat)
-
-        X_improved = X_improved_flat\
-            .permute(0, 2, 1)\
-            .reshape((n, c, h, w))\
-            .contiguous()
-
-        return X_improved
+        return self.transformer_encoder.forward(X_flat, pe_flat)
