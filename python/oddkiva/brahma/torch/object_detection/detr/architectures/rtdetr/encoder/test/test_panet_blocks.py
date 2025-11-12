@@ -1,6 +1,6 @@
 import torch
 
-from oddkiva.brahma.torch.backbone.resnet50 import ConvBNA
+from oddkiva.brahma.torch.backbone.resnet.vanilla import ConvBNA
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.ccff import (
         DownsampleConvolution,

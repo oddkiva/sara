@@ -1,6 +1,6 @@
 import torch
 
-from oddkiva.brahma.torch.backbone.resnet50 import ConvBNA
+from oddkiva.brahma.torch.backbone.resnet.vanilla import ConvBNA
 from oddkiva.brahma.torch.backbone.repvgg import RepVggBaseLayer
 
 def test_repvgg_base_layer():

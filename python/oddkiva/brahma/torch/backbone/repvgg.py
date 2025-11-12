@@ -1,7 +1,8 @@
 import torch
 
-from oddkiva.brahma.torch.backbone.resnet50 import (
+from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
     ConvBNA,
+    UnbiasedConvBNA,
     make_activation_func
 )
 
@@ -72,28 +73,18 @@ class RepVggBaseLayer(torch.nn.Module):
 
         if use_identity_connection:
             self.layers = torch.nn.ModuleList([
-                ConvBNA(in_channels, out_channels, 3, stride, True, None, 3,
-                        bias=False,
-                        inplace_activation=inplace_activation),
-                ConvBNA(in_channels, out_channels, 1, stride, True, None, 1,
-                        bias=False,
-                        inplace_activation=inplace_activation),
-                torch.nn.BatchNorm2d(out_channels)
+                UnbiasedConvBNA(in_channels, out_channels, 3, stride, 3,
+                                activation=None),
+                UnbiasedConvBNA(in_channels, out_channels, 1, stride, 1,
+                                activation=None),
+                torch.nn.BatchNorm2d(out_channels)  # (Identity -> BN2d)
             ])
         else:
             self.layers = torch.nn.ModuleList([
-                ConvBNA(in_channels, out_channels, 3, stride,
-                        True,  # batch normalize
-                        None,  # activation
-                        3,     # id
-                        bias=False,
-                        inplace_activation=inplace_activation),
-                ConvBNA(in_channels, out_channels, 1, stride,
-                        True,  # batch normalize
-                        None,  # activation
-                        1,     # id
-                        bias=False,
-                        inplace_activation=inplace_activation)
+                UnbiasedConvBNA(in_channels, out_channels, 3, stride, 3,  # id
+                                activation=None),
+                UnbiasedConvBNA(in_channels, out_channels, 1, stride, 3,  # id
+                                activation=None)
             ])
         self.activation = make_activation_func(activation)
 

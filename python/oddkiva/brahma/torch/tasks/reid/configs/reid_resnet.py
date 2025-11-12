@@ -5,7 +5,7 @@ from collections import OrderedDict
 import torch
 import torchvision
 
-from oddkiva.brahma.torch.backbone.resnet50 import ResNet50Variant
+from oddkiva.brahma.torch.backbone.resnet.vanilla import ResNet50Variant
 
 
 class ReidDescriptor50(torch.nn.Module):

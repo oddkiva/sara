@@ -1,10 +1,9 @@
 from collections import OrderedDict
-from typing import Callable
 
 import torch
 import torch.nn.functional as F
 
-from oddkiva.brahma.torch.backbone.resnet50 import ConvBNA
+from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import UnbiasedConvBNA
 from oddkiva.brahma.torch.backbone.repvgg import RepVggBlock
 
 
@@ -31,18 +30,18 @@ class Fusion(torch.nn.Module):
                  activation: str = 'silu'):
         super().__init__()
         hidden_dim = int(out_channels * hidden_dim_expansion_factor)
-        self.conv1 = ConvBNA(in_channels, hidden_dim,
-                             1, 1, True, activation, 1)
-        self.conv2 = ConvBNA(in_channels, hidden_dim,
-                             1, 1, True, activation, 1)
+        self.conv1 = UnbiasedConvBNA(in_channels, hidden_dim, 1, 1,
+                                     1, activation=activation)
+        self.conv2 = UnbiasedConvBNA(in_channels, hidden_dim, 1, 1,
+                                     2, activation=activation)
         self.repvgg_block = RepVggBlock(
             hidden_dim, hidden_dim,
             layer_count=repvgg_layer_count,
             activation=activation
         )
         if hidden_dim != out_channels:
-            self.conv3 = ConvBNA(hidden_dim, out_channels,
-                                 1, 1, True, activation, 3)
+            self.conv3 = UnbiasedConvBNA(hidden_dim, out_channels, 1, 1,
+                                         3, activation=activation)
         else:
             self.conv3 = torch.nn.Identity()
 
@@ -57,7 +56,7 @@ class Fusion(torch.nn.Module):
         return FS1 + FS2
 
 
-class LateralConvolution(torch.nn.Module):
+class LateralConvolution(UnbiasedConvBNA):
     """
     This class implements the yellow convolutional block in Figure 4 of the
     paper: (Conv1x1 s1 -> BN -> SiLU).
@@ -69,24 +68,10 @@ class LateralConvolution(torch.nn.Module):
     """
 
     def __init__(self, in_channels: int, out_channels: int):
-        super().__init__()
-        conv1x1_unbiased = torch.nn.Conv2d(
-            in_channels, out_channels,
-            1, stride=1,  # Kernel size and stride
-            bias=False
-        )
-        bn = torch.nn.BatchNorm2d(out_channels)
-
-        self.layers = torch.nn.Sequential(OrderedDict([
-            ("conv1x1_unbiased", conv1x1_unbiased),
-            ("batch_norm_2d", bn)
-        ]))
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self._impl(x)
+        super().__init__(in_channels, out_channels, 1, 1, 0, activation=None)
 
 
-class DownsampleConvolution(ConvBNA):
+class DownsampleConvolution(UnbiasedConvBNA):
     """
     This class implements the blue block in Figure 4 of the paper:
     (Conv3x3 s2 -> BN -> SiLU).
@@ -100,10 +85,9 @@ class DownsampleConvolution(ConvBNA):
                  activation: str | None = 'silu'):
         super(DownsampleConvolution, self).__init__(
             in_channels, out_channels,
-            3, 2,        # Kernel size and stride
-            True,        # Batch-normalization
-            activation,  # Activation
-            id           # ID
+            3, 2,                   # Kernel size and stride
+            id,                     # ID
+            activation=activation,  # Activation
         )
 
 
@@ -166,7 +150,7 @@ class CCFF(torch.nn.Module):
         self,
         F5: torch.Tensor,
         S: list[torch.Tensor]
-    ) -> tuple(list[torch.Tensor], list[torch.Tensor]):
+    ): #-> tuple(list[torch.Tensor], list[torch.Tensor]):
         """
         Enrich the finer-scale feature maps with semantic information, in a
         recursive manner.

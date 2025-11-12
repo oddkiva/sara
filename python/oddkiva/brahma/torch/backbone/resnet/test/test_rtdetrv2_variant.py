@@ -5,11 +5,8 @@ from pathlib import Path
 import torch
 
 from oddkiva import DATA_DIR_PATH
-from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
-    UnbiasedConvBNA,
-    ResNet50RTDETRV2Variant,
-    RTDETRV2Checkpoint
-)
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.checkpoint import ResNet50RTDETRV2Variant
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
@@ -22,6 +19,8 @@ def test_rtdetrv2_resnet50_variant_construction():
 
     model = ResNet50RTDETRV2Variant()
     model.freeze_batch_norm(model)
+
+    assert model.feature_pyramid_dims == [256, 512, 1024, 2048]
 
     x = data['input']
     y = model.blocks[0](x)
