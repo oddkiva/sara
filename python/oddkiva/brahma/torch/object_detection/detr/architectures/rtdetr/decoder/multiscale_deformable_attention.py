@@ -39,7 +39,7 @@ class MultiscaleDeformableAttention(torch.nn.Module):
                 the last 3 feature maps of the feature pyramid
                 $\\mathbf{F}_3, \\mathbf{F}_4, \\mathbf{F}_5$.
 
-            kv_count_per_scale:
+            kv_count_per_level:
                 the number of key-value pairs we want to consider for each feature
                 map of the feature pyramid.
         """

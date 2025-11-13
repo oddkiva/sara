@@ -11,11 +11,9 @@ class FocalLoss(torch.nn.Module):
 
     def forward(self, outputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         """ 
-        Parameters
-        ----------
-        outputs: outputs must be normalized in the range [0, 1]
-
-        targets: zeros or ones.
+        Parameters:
+            outputs: outputs must be normalized in the range [0, 1]
+            targets: zeros or ones.
         """
         # The closer to 1, the outputs is, the smaller dynamic weight become.
         dynamic_weight = (1 - outputs) ** self.gamma

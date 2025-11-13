@@ -74,7 +74,7 @@ class MultiScaleDeformableTransformerDecoderLayer(torch.nn.Module):
         query_pos: torch.Tensor,
         memory: list[torch.Tensor]
     ) -> torch.Tensor:
-        """Decodes the query matrix $\mathbf{Q}$ into an output value matrix
+        r"""Decodes the query matrix $\mathbf{Q}$ into an output value matrix
         $\mathbf{V}^{+}$.
 
         - The memory is a peculiar term that simply denotes the 2D feature maps
@@ -88,9 +88,9 @@ class MultiScaleDeformableTransformerDecoderLayer(torch.nn.Module):
         In the end, we calculate the decoded object queries as
 
         $$
-        \mathbf{V}^+ = \sigma \\left( \\frac{1}{\sqrt{d_k}}
+        \mathbf{V}^+ = \sigma \left( \frac{1}{\sqrt{d_k}}
             \mathbf{Q} (\mathbf{F} + \phi(\mathbf{X})^\intercal
-        \\right) \mathbf{V}
+        \right) \mathbf{V}
         $$
 
 

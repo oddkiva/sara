@@ -8,7 +8,7 @@ from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
 
 
 class RepVggBaseLayer(torch.nn.Module):
-    """This class implements the architecture proposed in the paper
+    r"""This class implements the architecture proposed in the paper
     [RepVGG: Making VGG-style ConvNets Great Again](https://arxiv.org/pdf/2101.03697)
 
     The details are summarized in Figure 2 and Figure 4.
@@ -40,7 +40,7 @@ class RepVggBaseLayer(torch.nn.Module):
                  use_identity_connection: bool = False,
                  activation: str = 'relu',
                  inplace_activation: bool = False):
-        """Constructs a RegVggBaseLayer.
+        r"""Constructs a RegVggBaseLayer.
 
         The current parameters should be enough to accommodate:
 
@@ -50,12 +50,12 @@ class RepVggBaseLayer(torch.nn.Module):
           all.
 
         In any case, there are at least two branches
-        ($\mathrm{conv}_{3\\times3}$, $\mathrm{conv}_{1\\times1}$) and an
+        ($\mathrm{conv}_{3\times3}$, $\mathrm{conv}_{1\times1}$) and an
         optional identity branch:
 
         $$
-        \mathbf{y} = \mathrm{Conv}_{3 \\times 3}(\mathbf{x})
-                   + \mathrm{Conv}_{1 \\times 1}(\mathbf{x})
+        \mathbf{y} = \mathrm{Conv}_{3 \times 3}(\mathbf{x})
+                   + \mathrm{Conv}_{1 \times 1}(\mathbf{x})
                    + \mathbf{x}
         $$
 

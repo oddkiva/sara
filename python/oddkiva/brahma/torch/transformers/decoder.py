@@ -8,7 +8,7 @@ import torch
 
 class TransformerDecoderLayer(torch.nn.Module):
     """This class closely follows the proposed implementation of the landmark
-    paper "Attention Is All You Need"
+    paper "Attention Is All You Need".
     """
 
     def __init__(self,
@@ -20,7 +20,7 @@ class TransformerDecoderLayer(torch.nn.Module):
         """Constructs the base layer of a Transformer Encoder block with
         reasonable default parameters.
 
-        dropout = 0.1 is the default as in the paper.
+        `dropout = 0.1` is the default as in the paper.
         """
         super().__init__()
 
@@ -80,17 +80,16 @@ class TransformerDecoder(torch.nn.Module):
         parameters in many research papers since the pape "Attention Is All You
         Need".
 
-        Parameters
-        ----------
+        Parameters:
+            decoder_layer:
+                Typically a self-attention encoding layer that we want to
+                replicate.
 
-        encoder_layer: torch.nn.Module
-            Typically a self-attention encoding layer that we want to replicate.
+            num_layers:
+                The number of self-attention encoding layers.
 
-        num_layers: int
-            The number of self-attention encoding layers.
-
-        norm: torch.nn.Module
-            Optional layer normalization
+            norm:
+                Optional layer normalization
         """
 
         super().__init__()

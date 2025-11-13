@@ -91,7 +91,7 @@ class DownsampleConvolution(UnbiasedConvBNA):
 
 
 class CCFF(torch.nn.Module):
-    """
+    r"""
     CCFF stands for (C)NN-based (C)ross-scale (F)eature (F)usion.
 
     The AIFI module improves the coarsest feature map $\mathbf{S}_5$ of the CNN
