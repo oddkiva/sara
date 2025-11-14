@@ -61,9 +61,10 @@ class FusionBlock(torch.nn.Module):
 
 
 class LateralConvolution(UnbiasedConvBNA):
-    """
+    r"""
     This class implements the yellow convolutional block in Figure 4 of the
-    paper: (Conv1x1 s1 -> BN -> SiLU).
+    paper:
+    ($\mathrm{conv}_{1\times1, s=1} \rightarrow \mathrm{BN} \rightarrow \mathrm{SiLU}$).
     The authors call it *lateral convolution* in the original code.
 
     Basically, it reduces the dimension of the feature vectors via a linear
@@ -77,9 +78,9 @@ class LateralConvolution(UnbiasedConvBNA):
 
 
 class DownsampleConvolution(UnbiasedConvBNA):
-    """
+    r"""
     This class implements the blue block in Figure 4 of the paper:
-    (Conv3x3 s2 -> BN -> SiLU).
+    ($\mathrm{conv}_{3\times3, s=2} \rightarrow \mathrm{BN} \rightarrow \mathrm{SiLU}$).
 
     The authors did not make a class for that but I do it for the sake of code
     clarity. Please refer to the original `HybridEncoder` class, where
@@ -102,6 +103,9 @@ class DownsampleConvolution(UnbiasedConvBNA):
 
 
 class TopDownFusionNet(torch.nn.Module):
+    """
+    Top-down fusion network.
+    """
 
     def __init__(
         self,
@@ -139,9 +143,6 @@ class TopDownFusionNet(torch.nn.Module):
         Enrich the finer-scale feature maps with semantic information, in a
         recursive manner.
 
-        Notice that I use peculiar colored references, to help me find out what
-        refers to what in the code and in the paper.
-
         Parameters:
             F5:
                 the query matrix as a feature map $(N, d_k, H, W)$
@@ -173,6 +174,9 @@ class TopDownFusionNet(torch.nn.Module):
 
 
 class BottomUpFusionNet(torch.nn.Module):
+    """
+    Bottom-up fusion network.
+    """
 
     def __init__(
         self,
@@ -205,6 +209,13 @@ class BottomUpFusionNet(torch.nn.Module):
         self,
         F_topdown_enriched: list[torch.Tensor]
     ) -> list[torch.Tensor]:
+        """
+        Refines the feature pyramid in a recursive bottom-up manner.
+
+        Parameters:
+            F_topdown_enriched:
+                the feature enriched by the top-down fusion network
+        """
         # Bottom-up semantic refinement in a recursive fashion.
         F_bottomup_refined = [F_topdown_enriched[0]]
 
@@ -244,9 +255,9 @@ class CCFF(torch.nn.Module):
 
     Finally, CCFF refines in a bottom-up the query maps:
 
-    - $\mathbf{F}_3^{++} \leftarrow \mathbf{F}_3^{++}$
-    - $\mathbf{F}_4^{++} \leftarrow \mathrm{refine}(\mathbf{F}_3^{++}, \mathbf{F}_4)$
-    - $\mathbf{F}_5^{++} \leftarrow \mathrm{refine}(\mathbf{F}_4^{++}, \mathbf{F}_5)$
+    - $\mathbf{F}_3^{+} \leftarrow \mathbf{F}_3$
+    - $\mathbf{F}_4^{+} \leftarrow \mathrm{refine}(\mathbf{F}_3^{+}, \mathbf{F}_4)$
+    - $\mathbf{F}_5^{+} \leftarrow \mathrm{refine}(\mathbf{F}_4^{+}, \mathbf{F}_5)$
 
     We follow the implementation as detailed in Figure 4 of the paper.
     """

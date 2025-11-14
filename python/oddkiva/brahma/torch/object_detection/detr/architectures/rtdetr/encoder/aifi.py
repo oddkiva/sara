@@ -16,8 +16,8 @@ class AIFI(torch.nn.Module):
 
     It is basically a self-attention module that improves the coarsest feature
     map of the feature pyramid produced by a CNN backbone, by capturing
-    long-distance relationships between features that CNN backbone could not
-    reach.
+    long-distance relationships between features that the CNN backbone could
+    not reach.
     """
 
     def __init__(self,
