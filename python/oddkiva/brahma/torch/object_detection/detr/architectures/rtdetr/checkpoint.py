@@ -17,6 +17,10 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.backbone_feature_pyramid_projection import (
         BackboneFeaturePyramidProjection
     )
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.encoder.ccff import (
+        LateralConvolution
+    )
 
 
 class RTDETRV2Checkpoint:
@@ -210,7 +214,7 @@ class RTDETRV2Checkpoint:
         return f'encoder.encoder.{i}'
 
     def aifi_transformer_encoder_layer_key(self, layer_idx: int, i: int = 0):
-        return f'{self.aifi_key(0)}.layers.{layer_idx}'
+        return f'{self.aifi_key(i)}.layers.{layer_idx}'
 
     def aifi_encoder_layer_weights(
         self, layer_idx: int, i: int = 0
@@ -232,6 +236,23 @@ class RTDETRV2Checkpoint:
     def encoder_lateral_conv_weights(self):
         return {k: self.model_weights[k]
                 for k in self.encoder_keys if 'encoder.lateral_convs' in k}
+
+    def encoder_lateral_conv_weight_key(self, i: int) -> str:
+        return f'encoder.lateral_convs.{i}.conv.weight'
+
+    def encoder_lateral_conv_weight(self, i: int):
+        return self.model_weights[self.encoder_lateral_conv_weight_key(i)]
+
+    def encoder_lateral_bn_weights(self, i: int):
+        parent_key = f'encoder.lateral_convs.{i}.norm'
+        keys = {
+            param: f"{parent_key}.{param}"
+            for param in RTDETRV2Checkpoint.batch_norm_param_names
+        }
+        return {
+            param: self.model_weights[keys[param]]
+            for param in RTDETRV2Checkpoint.batch_norm_param_names
+        }
 
     @property
     def encoder_fpn_weights(self):
@@ -445,7 +466,6 @@ class RTDETRV2Checkpoint:
         num_layers = 1
         dropout = 0.
         normalize_before = False
-        norm = nn.GELU()
 
         aifi = AIFI(hidden_dim,
                     attn_head_count,
@@ -479,3 +499,17 @@ class RTDETRV2Checkpoint:
                                        weights['norm2.bias']),
 
         return aifi
+
+    def load_encoder_lateral_convs(self):
+        lateral_convs = [
+            freeze_batch_norm(LateralConvolution(256, 256))
+            for _ in range(2)
+        ]
+
+        for idx in range(2):
+            my_convbna = lateral_convs[idx]
+            conv_weight = self.encoder_lateral_conv_weight(idx)
+            bn_weights = self.encoder_lateral_bn_weights(idx)
+            self._copy_conv_bna_weights(my_convbna, conv_weight, bn_weights)
+
+        return lateral_convs

@@ -68,7 +68,7 @@ class LateralConvolution(UnbiasedConvBNA):
     """
 
     def __init__(self, in_channels: int, out_channels: int):
-        super().__init__(in_channels, out_channels, 1, 1, 0, activation=None)
+        super().__init__(in_channels, out_channels, 1, 1, 0, activation='silu')
 
 
 class DownsampleConvolution(UnbiasedConvBNA):
