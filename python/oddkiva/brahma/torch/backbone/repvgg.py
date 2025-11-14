@@ -7,7 +7,7 @@ from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
 )
 
 
-class RepVggBaseLayer(torch.nn.Module):
+class RepVggBlock(torch.nn.Module):
     r"""This class implements the architecture proposed in the paper
     [RepVGG: Making VGG-style ConvNets Great Again](https://arxiv.org/pdf/2101.03697)
 
@@ -40,7 +40,7 @@ class RepVggBaseLayer(torch.nn.Module):
                  use_identity_connection: bool = False,
                  activation: str = 'relu',
                  inplace_activation: bool = False):
-        r"""Constructs a RegVggBaseLayer.
+        r"""Constructs a RegVggBlock.
 
         The current parameters should be enough to accommodate:
 
@@ -86,7 +86,8 @@ class RepVggBaseLayer(torch.nn.Module):
                 UnbiasedConvBNA(in_channels, out_channels, 1, stride, 1,  # id
                                 activation=None)
             ])
-        self.activation = make_activation_func(activation)
+        self.activation = make_activation_func(activation,
+                                               inplace=inplace_activation)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         y = self.layers[0](x)
@@ -156,7 +157,7 @@ class RepVggBaseLayer(torch.nn.Module):
 class RepVggStack(torch.nn.Module):
     """
     The `RepVggStack` is a convenience class that implements a sequence of
-    repeated base layers `RepVggBaseLayer`, just like the
+    repeated base layers `RepVggBlock`, just like the
     `ResidualBottleneckBlock` class is the convenience building block for
     ResNet-50.
     """
@@ -183,7 +184,7 @@ class RepVggStack(torch.nn.Module):
         """
         super().__init__()
         self.layers = torch.nn.Sequential(*[
-            RepVggBaseLayer(in_channels, out_channels, stride=1,
+            RepVggBlock(in_channels, out_channels, stride=1,
                             use_identity_connection=use_identity_connection,
                             activation=activation,
                             inplace_activation=inplace_activation)

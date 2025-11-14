@@ -1,14 +1,14 @@
 import torch
 
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import UnbiasedConvBNA
-from oddkiva.brahma.torch.backbone.repvgg import RepVggBaseLayer
+from oddkiva.brahma.torch.backbone.repvgg import RepVggBlock
 
 def test_repvgg_base_layer():
     hidden_dim = 256
-    block = RepVggBaseLayer(hidden_dim, hidden_dim,
-                            stride=1,
-                            use_identity_connection=False,
-                            activation='silu')
+    block = RepVggBlock(hidden_dim, hidden_dim,
+                        stride=1,
+                        use_identity_connection=False,
+                        activation='silu')
 
     print(block)
 
