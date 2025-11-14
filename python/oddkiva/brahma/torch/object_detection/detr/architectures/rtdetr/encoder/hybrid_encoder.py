@@ -26,7 +26,7 @@ class HybridEncoder(torch.nn.Module):
                  attn_dropout: float = 0.1,
                  attn_num_layers: int = 6):
         super().__init__()
-        self.linear_projections = torch.nn.ModuleList([
+        self.backbone_feature_proj = torch.nn.ModuleList([
             UnbiasedConvBNA(input_feature_dim, hidden_dim, 1, 1, id,
                             activation=None)
             for id, input_feature_dim in enumerate(input_feature_dims)
@@ -36,10 +36,14 @@ class HybridEncoder(torch.nn.Module):
                          feedforward_dim=attn_feedforward_dim,
                          dropout=attn_dropout,
                          num_layers=attn_num_layers)
-        self.ccff = CCFF(input_feature_dims, hidden_dim)
+        self.ccff = CCFF(len(input_feature_dims) - 1, hidden_dim)
 
-    def forward(self, feature_pyramid: list[torch.Tensor]) -> torch.Tensor:
-        F5 = self.aifi.forward(feature_pyramid[-1])
-        S = feature_pyramid
+    def forward(
+        self,
+        feature_pyramid: list[torch.Tensor]
+    ) -> list[torch.Tensor]:
+        S = [proj(P)
+             for (proj, P) in zip(self.backbone_feature_proj, feature_pyramid)]
+        F5 = self.aifi.forward(S[-1])
         Q = self.ccff.forward(F5, S)
         return Q

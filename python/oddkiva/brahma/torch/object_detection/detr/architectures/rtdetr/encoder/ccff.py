@@ -5,10 +5,10 @@ from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import UnbiasedConvBN
 from oddkiva.brahma.torch.backbone.repvgg import RepVggStack
 
 
-class Fusion(torch.nn.Module):
+class FusionBlock(torch.nn.Module):
     """
-    The `Fusion` class implements the building block of the Path-Aggregation
-    architectural scheme described in the PANet paper.
+    The `FusionBlock` class implements the building block of the
+    Path-Aggregation architectural scheme described in the PANet paper.
 
     It is used to recursively flow the semantic information. The fusion block
     is used in two passes.
@@ -48,10 +48,16 @@ class Fusion(torch.nn.Module):
         F: torch.Tensor,
         S: torch.Tensor
     ) -> torch.Tensor:
+        assert len(F.shape) == 4
+        assert len(S.shape) == 4
+        F_dim = F.shape[1]
+        S_dim = F.shape[1]
+        assert F_dim == S_dim
+
         FS = torch.cat((F, S), dim=1)
-        FS1 = self.conv1(FS)
-        FS2 = self.repvgg_stack(self.conv2(FS))
-        return FS1 + FS2
+        FS1 = self.repvgg_stack(self.conv1(FS))
+        FS2 = self.conv2(FS)
+        return self.conv3(FS1 + FS2)
 
 
 class LateralConvolution(UnbiasedConvBNA):
@@ -65,8 +71,9 @@ class LateralConvolution(UnbiasedConvBNA):
     `HybridEfficientEncoder` class).
     """
 
-    def __init__(self, in_channels: int, out_channels: int):
-        super().__init__(in_channels, out_channels, 1, 1, 0, activation='silu')
+    def __init__(self, in_channels: int, out_channels: int, id: int = 0):
+        super().__init__(in_channels, out_channels, 1, 1, id,
+                         activation='silu')
 
 
 class DownsampleConvolution(UnbiasedConvBNA):
@@ -79,21 +86,49 @@ class DownsampleConvolution(UnbiasedConvBNA):
     they add the class member `self.downsample_convs`.
     """
 
-    def __init__(self, in_channels: int, out_channels: int, id: int,
-                 activation: str | None = 'silu'):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        activation: str | None = 'silu',
+        id: int = 0
+    ):
         super().__init__(
-            in_channels, out_channels, 3, 2,  # Kernel size and stride
+            in_channels, out_channels,
+            3, 2,  # Kernel size and stride
             id,                     # ID
             activation=activation,  # Activation
         )
 
 
-class TopDownFusion(torch.nn.Module):
+class TopDownFusionNet(torch.nn.Module):
 
-    def __init__(self):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        stack_count: int,
+        hidden_dim_expansion_factor: float = 1.0,
+        repvgg_stack_depth: int = 3,
+        activation: str = 'silu'
+    ):
         super().__init__()
-        self.lateral_convs = []
-        self.top_down_fusions = []
+        self.lateral_convs = torch.nn.ModuleList([
+            LateralConvolution(out_channels, out_channels, stack_idx)
+            for stack_idx in range(stack_count)
+        ])
+        self.fusion_blocks = torch.nn.ModuleList([
+            FusionBlock(in_channels, out_channels,
+                   hidden_dim_expansion_factor=hidden_dim_expansion_factor,
+                   repvgg_layer_count=repvgg_stack_depth,
+                   activation=activation)
+            for _ in range(stack_count)
+        ])
+
+        assert len(self.fusion_blocks) == len(self.lateral_convs)
+
+    def upscale(self, x: torch.Tensor) -> torch.Tensor:
+        return F.interpolate(x, scale_factor=2, mode='nearest')
 
     def forward(
         self,
@@ -104,8 +139,8 @@ class TopDownFusion(torch.nn.Module):
         Enrich the finer-scale feature maps with semantic information, in a
         recursive manner.
 
-        Notice that I use peculiar colored references, to help me find out what refers to
-        what in the code and in the paper.
+        Notice that I use peculiar colored references, to help me find out what
+        refers to what in the code and in the paper.
 
         Parameters:
             F5:
@@ -115,64 +150,79 @@ class TopDownFusion(torch.nn.Module):
                 backbone
         """
 
-        query_maps_enriched_topdown = [F5]
-        query_maps_yellowed = []
+        F_enriched = [F5]
 
-        for i in range(len(S) - 1, 0, -1):
-            # Project the query maps into a lower dimensional space.
-            query_maps_yellowed.append(
-                self.lateral_convs[i - 1](query_maps_enriched_topdown[-1])
-            )
+        num_steps = len(self.fusion_blocks)
+        for step in range(num_steps):
+            # Take the last feature map.
+            F_coarse = F_enriched[-1]
+            S_fine = S[num_steps - 1 - step]
 
             # Upscale the coarse query map.
-            query_map_yellowed_upscaled = self.upscale(query_maps_yellowed[-1])
+            lateral_conv = self.lateral_convs[num_steps - 1 - step]
+            F_coarse_upscaled = self.upscale(lateral_conv(F_coarse))
 
             # Imbue the semantic information to the finer feature map S[i - 1]
             # with a fusion operation.
-            query_maps_enriched_topdown.append(
-                self.top_down_fusion_blocks[i](
-                    query_map_yellowed_upscaled,
-                    S[i - 1])
-            )
+            fuse = self.fusion_blocks[num_steps - 1 - step]
+            F_enriched.append(fuse(F_coarse_upscaled, S_fine))
 
-        query_maps_yellowed.reverse()
-        query_maps_enriched_topdown.reverse()
+        F_enriched.reverse()
 
-        return (query_maps_enriched_topdown, query_maps_yellowed)
+        return F_enriched
 
 
-class BottomUpFusion(torch.nn.Module):
+class BottomUpFusionNet(torch.nn.Module):
 
-    def __init__(self):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        stack_count: int,
+        hidden_dim_expansion_factor: float = 1.0,
+        repvgg_stack_depth: int = 3,
+        activation: str = 'silu'
+    ):
         super().__init__()
-        self.downsample_convs = []
-        self.bottom_up_fusions = []
+        self.downsample_convs = torch.nn.ModuleList([
+            DownsampleConvolution(out_channels, out_channels,
+                                  activation=activation,
+                                  id=stack_idx)
+            for stack_idx in range(stack_count)
+        ])
+        self.fusion_blocks = torch.nn.ModuleList([
+            FusionBlock(
+                in_channels, out_channels,
+                hidden_dim_expansion_factor=hidden_dim_expansion_factor,
+                repvgg_layer_count=repvgg_stack_depth,
+                activation=activation
+            )
+            for _ in range(stack_count)
+        ])
+        assert len(self.fusion_blocks) == len(self.downsample_convs)
 
     def forward(
         self,
-        query_maps_enriched_topdown: list[torch.Tensor],
-        query_maps_yellowed: list[torch.Tensor]
+        F_topdown_enriched: list[torch.Tensor]
     ) -> list[torch.Tensor]:
-        n = len(query_maps_enriched_topdown)
-
         # Bottom-up semantic refinement in a recursive fashion.
-        query_maps_refined_bottomup = [query_maps_enriched_topdown[0]]
-        query_maps_blued = []
+        F_bottomup_refined = [F_topdown_enriched[0]]
 
-        for i in range(1, n):
-            # Downsample the finer-scale query maps.
-            query_maps_blued.append(
-                self.downscale_convs[i](query_maps_refined_bottomup[i])
-            )
-            # Fuse the finer-scale and next coarser-scale query maps.
-            # This should refine the coarser query maps.
-            query_maps_refined_bottomup.append(
-                self.bottom_up_fusion_blocks[i - 1](
-                    query_maps_blued[i],
-                    query_maps_yellowed[i])
-            )
+        num_steps = len(self.fusion_blocks)
+        for step in range(num_steps):
+            # Take the last feature map.
+            F_fine = F_bottomup_refined[step]
+            F_coarse = F_topdown_enriched[step + 1]
 
-        return query_maps_refined_bottomup
+            # Downsample the fine enriched map.
+            downsample = self.downsample_convs[step]
+            F_fine_downsampled = downsample(F_fine)
+
+            fuse = self.fusion_blocks[step]
+            F_coarse_refined = fuse(F_fine_downsampled, F_coarse)
+            F_bottomup_refined.append(F_coarse_refined)
+
+        return F_bottomup_refined
 
 
 class CCFF(torch.nn.Module):
@@ -203,117 +253,46 @@ class CCFF(torch.nn.Module):
 
     def __init__(
         self,
-        feature_dims: list[int],
+        stack_count: int,
         hidden_dim: int = 256,
+        hidden_dim_expansion_factor: float = 1.0,
+        repvgg_stack_depth: int = 3,
+        activation: str = 'silu'
     ):
         super().__init__()
-        # Top-down semantic enrichment.
-        self.lateral_convs = torch.nn.ModuleList([
-            LateralConvolution(feature_dims[i], hidden_dim)
-            for i in range(len(feature_dims) - 1)
-        ])
-        self.top_down_fusion_blocks = torch.nn.ModuleList([
-            Fusion(feature_dims[i], hidden_dim)
-            for i in range(len(feature_dims) - 1)
-        ])
 
-        # Bottom-up refinement.
-        self.downscale_convs = torch.nn.ModuleList([
-            DownsampleConvolution(feature_dims[i], hidden_dim, i)
-            for i in range(len(feature_dims) - 1)
-        ])
-        self.bottom_up_fusion_blocks = torch.nn.ModuleList([
-            Fusion(feature_dims[i], hidden_dim)
-            for i in range(len(feature_dims) - 1)
-        ])
+        assert stack_count > 0
 
-    def upscale(self, x: torch.Tensor) -> torch.Tensor:
-        return F.interpolate(x, scale_factor=2, mode='nearest')
-
-    def enrich_topdown(
-        self,
-        F5: torch.Tensor,
-        S: list[torch.Tensor]
-    ): #-> tuple(list[torch.Tensor], list[torch.Tensor]):
-        """
-        Enrich the finer-scale feature maps with semantic information, in a
-        recursive manner.
-
-        Notice that I use peculiar colored references, to help me find out what refers to
-        what in the code and in the paper.
-
-        Parameters:
-            F5:
-                the query matrix as a feature map $(N, d_k, H, W)$
-            S:
-                the feature maps of the feature pyramid produced from the CNN
-                backbone
-        """
-
-        query_maps_enriched_topdown = [F5]
-        query_maps_yellowed = []
-
-        for i in range(len(S) - 1, 0, -1):
-            # Project the query maps into a lower dimensional space.
-            query_maps_yellowed.append(
-                self.lateral_convs[i - 1](query_maps_enriched_topdown[-1])
-            )
-
-            # Upscale the coarse query map.
-            query_map_yellowed_upscaled = self.upscale(query_maps_yellowed[-1])
-
-            # Imbue the semantic information to the finer feature map S[i - 1]
-            # with a fusion operation.
-            query_maps_enriched_topdown.append(
-                self.top_down_fusion_blocks[i](
-                    query_map_yellowed_upscaled,
-                    S[i - 1])
-            )
-
-        query_maps_yellowed.reverse()
-        query_maps_enriched_topdown.reverse()
-
-        return (query_maps_enriched_topdown, query_maps_yellowed)
-
-    def refine_bottomup(
-        self,
-        query_maps_enriched_topdown: list[torch.Tensor],
-        query_maps_yellowed: list[torch.Tensor]
-    ) -> list[torch.Tensor]:
-        n = len(query_maps_enriched_topdown)
-
-        # Bottom-up semantic refinement in a recursive fashion.
-        query_maps_refined_bottomup = [query_maps_enriched_topdown[0]]
-        query_maps_blued = []
-
-        for i in range(1, n):
-            # Downsample the finer-scale query maps.
-            query_maps_blued.append(
-                self.downscale_convs[i](query_maps_refined_bottomup[i])
-            )
-            # Fuse the finer-scale and next coarser-scale query maps.
-            # This should refine the coarser query maps.
-            query_maps_refined_bottomup.append(
-                self.bottom_up_fusion_blocks[i - 1](
-                    query_maps_blued[i],
-                    query_maps_yellowed[i])
-            )
-
-        return query_maps_refined_bottomup
+        self.fuse_topdown = TopDownFusionNet(
+            hidden_dim, hidden_dim,
+            stack_count,
+            hidden_dim_expansion_factor=hidden_dim_expansion_factor,
+            repvgg_stack_depth=repvgg_stack_depth,
+            activation=activation
+        )
+        self.refine_bottomup = BottomUpFusionNet(
+            hidden_dim, hidden_dim,
+            stack_count,
+            hidden_dim_expansion_factor=hidden_dim_expansion_factor,
+            repvgg_stack_depth=repvgg_stack_depth,
+            activation=activation
+        )
 
     def forward(
         self,
-        F5: torch.Tensor,
-        S: list[torch.Tensor]
-    ) -> torch.Tensor:
-        (query_maps_enriched_topdown,
-         query_maps_yellowed) = self.enrich_topdown(F5, S)
+        aifi_out: torch.Tensor,
+        backbone_feature_pyramid: list[torch.Tensor]
+    ) -> list[torch.Tensor]:
+        # Convenient aliases to retrieve ourselves with the paper.
+        S = backbone_feature_pyramid
+        S5 = S[-1]
+        F5_flat = aifi_out
 
-        query_maps_refined_bottomup = self.refine_bottomup(
-            query_maps_enriched_topdown,
-            query_maps_yellowed
-        )
+        # Reshape the object query matrix as a feature map.
+        n, _, h, w = S5.shape
+        _, c, _ = F5_flat.shape
+        F5 = F5_flat.permute(0, 2, 1).reshape(n, c, h, w)
 
-        return torch.cat(query_maps_refined_bottomup, dim=1)\
-            .flatten(2)\
-            .permute(0, 2, 1)
+        F_topdown_enriched = self.fuse_topdown.forward(F5, S)
+        F_bottomup_refined = self.refine_bottomup.forward(F_topdown_enriched)
+        return F_bottomup_refined

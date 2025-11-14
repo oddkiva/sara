@@ -83,7 +83,7 @@ class RepVggBaseLayer(torch.nn.Module):
             self.layers = torch.nn.ModuleList([
                 UnbiasedConvBNA(in_channels, out_channels, 3, stride, 3,  # id
                                 activation=None),
-                UnbiasedConvBNA(in_channels, out_channels, 1, stride, 3,  # id
+                UnbiasedConvBNA(in_channels, out_channels, 1, stride, 1,  # id
                                 activation=None)
             ])
         self.activation = make_activation_func(activation)
