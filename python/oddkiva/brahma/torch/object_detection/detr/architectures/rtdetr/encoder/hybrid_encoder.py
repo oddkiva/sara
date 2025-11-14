@@ -9,7 +9,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.ccff import CCFF
 
 
-class EfficientHybridEncoder(torch.nn.Module):
+class HybridEncoder(torch.nn.Module):
     """
     1. For each feature map, we project each feature vector into a smaller
        feature space of dimension `hidden_dim`
