@@ -153,9 +153,9 @@ class RepVggBaseLayer(torch.nn.Module):
         return kernel * t, beta - running_mean * gamma / std
 
 
-class RepVggBlock(torch.nn.Module):
+class RepVggStack(torch.nn.Module):
     """
-    The `RepVGGBlock` is a convenience class that implements a sequence of
+    The `RepVggStack` is a convenience class that implements a sequence of
     repeated base layers `RepVggBaseLayer`, just like the
     `ResidualBottleneckBlock` class is the convenience building block for
     ResNet-50.
@@ -169,7 +169,7 @@ class RepVggBlock(torch.nn.Module):
                  inplace_activation: bool = False,
                  use_identity_connection: bool = False):
         """
-        Construct a RepVggBlock.
+        Constructs a RepVggStack.
 
         Most of the default parameters are the default ones used to construct
         the Path-Aggregated Feature Pyramid Network (PA-FPN) of RT-DETR.

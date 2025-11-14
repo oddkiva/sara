@@ -6,7 +6,6 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.ccff import LateralConvolution
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import RTDETRV2Checkpoint
-from torch.nn.modules import SiLU
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
@@ -41,11 +40,6 @@ def test_lateral_convolution_computations():
     n, _, h, w = S[-1].shape
     _, _, c = F5.shape
     F5_map = F5.permute(0, 2, 1).reshape((n, c, h, w))
-
-    # Outputs
-    F_enriched = [F5_map]
-    F_yellowed = []
-
 
     # Check the first lateral convs for now. We need to check the FPN blocks as
     # well.

@@ -19,6 +19,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.ccff import (
+        Fusion,
         LateralConvolution
     )
 
@@ -259,6 +260,52 @@ class RTDETRV2Checkpoint:
         return {k: self.model_weights[k]
                 for k in self.encoder_keys if 'encoder.fpn_blocks' in k}
 
+    def encoder_fpn_conv_weight(self, fusion_idx: int, conv_idx: int):
+        conv_base_key = f'encoder.fpn_blocks.{fusion_idx}'
+        conv_weight_key = f'{conv_base_key}.conv{conv_idx}.conv.weight'
+        return self.model_weights[conv_weight_key]
+
+    def encoder_fpn_bn_weights(self, fusion_idx: int, conv_idx: int):
+        conv_base_key = f'encoder.fpn_blocks.{fusion_idx}'
+        bn_base_key = f'{conv_base_key}.conv{conv_idx}.norm'
+        keys = {
+            param: f"{bn_base_key}.{param}"
+            for param in RTDETRV2Checkpoint.batch_norm_param_names
+        }
+        return {
+            param: self.model_weights[keys[param]]
+            for param in RTDETRV2Checkpoint.batch_norm_param_names
+        }
+
+    def encoder_fpn_fusion_conv_weight(self,
+                                       repvgg_stack_idx: int,
+                                       repvgg_block_idx: int,
+                                       conv_idx: int):
+        conv_key = '.'.join([
+            f'encoder.fpn_blocks.{repvgg_stack_idx}',
+            f'bottlenecks.{repvgg_block_idx}',
+            f'conv{conv_idx}.conv.weight'
+        ])
+        return self.model_weights[conv_key]
+
+    def encoder_fpn_fusion_bn_weights(self,
+                                      repvgg_stack_idx: int,
+                                      repvgg_block_idx: int,
+                                      conv_idx: int):
+        parent_key = '.'.join([
+            f'encoder.fpn_blocks.{repvgg_stack_idx}',
+            f'bottlenecks.{repvgg_block_idx}',
+            f'conv{conv_idx}.norm'
+        ])
+        keys = {
+            param: f"{parent_key}.{param}"
+            for param in RTDETRV2Checkpoint.batch_norm_param_names
+        }
+        return {
+            param: self.model_weights[keys[param]]
+            for param in RTDETRV2Checkpoint.batch_norm_param_names
+        }
+
     @property
     def encoder_downsample_conv_weights(self):
         return {k: self.model_weights[k]
@@ -347,6 +394,9 @@ class RTDETRV2Checkpoint:
         assert torch.equal(module.weight, weight)
         assert torch.equal(module.bias, bias)
 
+    # -------------------------------------------------------------------------
+    # BACKBONE LOAD UTILITIES
+    # -------------------------------------------------------------------------
     def _load_backbone_conv_1(self, model):
         logger.info('Loading RT-DETR v2 backbone.conv_1')
         for i in range(3):
@@ -441,6 +491,9 @@ class RTDETRV2Checkpoint:
 
         return model
 
+    # -------------------------------------------------------------------------
+    # ENCODER LOAD UTILITIES
+    # -------------------------------------------------------------------------
     def load_encoder_input_proj(self) -> nn.Module:
         # Just hardcode the variables to simplify.
         fp_proj = BackboneFeaturePyramidProjection(
@@ -513,3 +566,52 @@ class RTDETRV2Checkpoint:
             self._copy_conv_bna_weights(my_convbna, conv_weight, bn_weights)
 
         return lateral_convs
+
+    def load_encoder_top_down_fpn(self):
+        fusions = [
+            freeze_batch_norm(Fusion(512, 256, hidden_dim_expansion_factor=1.0,
+                                     repvgg_layer_count=3, activation='silu'))
+            for _ in range(2)
+        ]
+
+        print([k for k in self.encoder_fpn_weights.keys()])
+
+        for fusion_idx in range(2):
+            fusion = fusions[fusion_idx]
+            convs = [fusion.conv1, fusion.conv2]
+            repvgg_stack = fusion.repvgg_stack
+
+            # Copy the weights of conv1 and conv2
+            for conv_idx in range(2):
+                conv = convs[conv_idx]
+                conv_weight = self.encoder_fpn_conv_weight(fusion_idx, conv_idx + 1)
+                bn_weights = self.encoder_fpn_bn_weights(fusion_idx, conv_idx + 1)
+                self._copy_conv_bna_weights(conv, conv_weight, bn_weights)
+
+            # Copy the weights of RepVggStack
+            for rep_block_idx in range(len(repvgg_stack.layers)):
+                repvgg = repvgg_stack.layers[rep_block_idx]
+                repvgg_conv3 = repvgg.layers[0]
+                repvgg_conv1 = repvgg.layers[1]
+
+                repvgg_conv3_weight = self.encoder_fpn_fusion_conv_weight(
+                    fusion_idx,rep_block_idx, 1
+                )
+                repvgg_bn3_weights = self.encoder_fpn_fusion_bn_weights(
+                    fusion_idx,rep_block_idx, 1
+                )
+                self._copy_conv_bna_weights(repvgg_conv3,
+                                            repvgg_conv3_weight,
+                                            repvgg_bn3_weights)
+
+                repvgg_conv1_weight = self.encoder_fpn_fusion_conv_weight(
+                    fusion_idx,rep_block_idx, 2
+                )
+                repvgg_bn1_weights = self.encoder_fpn_fusion_bn_weights(
+                    fusion_idx,rep_block_idx, 2
+                )
+                self._copy_conv_bna_weights(repvgg_conv1,
+                                            repvgg_conv1_weight,
+                                            repvgg_bn1_weights)
+
+        return fusions

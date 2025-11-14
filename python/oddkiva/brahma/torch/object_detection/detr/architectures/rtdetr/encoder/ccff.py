@@ -1,10 +1,8 @@
-from collections import OrderedDict
-
 import torch
 import torch.nn.functional as F
 
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import UnbiasedConvBNA
-from oddkiva.brahma.torch.backbone.repvgg import RepVggBlock
+from oddkiva.brahma.torch.backbone.repvgg import RepVggStack
 
 
 class Fusion(torch.nn.Module):
@@ -34,7 +32,7 @@ class Fusion(torch.nn.Module):
                                      1, activation=activation)
         self.conv2 = UnbiasedConvBNA(in_channels, hidden_dim, 1, 1,
                                      2, activation=activation)
-        self.repvgg_block = RepVggBlock(
+        self.repvgg_stack = RepVggStack(
             hidden_dim, hidden_dim,
             layer_count=repvgg_layer_count,
             activation=activation
@@ -52,7 +50,7 @@ class Fusion(torch.nn.Module):
     ) -> torch.Tensor:
         FS = torch.cat((F, S), dim=1)
         FS1 = self.conv1(FS)
-        FS2 = self.repvgg_block(self.conv2(FS))
+        FS2 = self.repvgg_stack(self.conv2(FS))
         return FS1 + FS2
 
 
@@ -77,7 +75,7 @@ class DownsampleConvolution(UnbiasedConvBNA):
     (Conv3x3 s2 -> BN -> SiLU).
 
     The authors did not make a class for that but I do it for the sake of code
-    clarity. Please refer to the original `HybridEfficientEncoder` class, where
+    clarity. Please refer to the original `HybridEncoder` class, where
     they add the class member `self.downsample_convs`.
     """
 
@@ -88,6 +86,93 @@ class DownsampleConvolution(UnbiasedConvBNA):
             id,                     # ID
             activation=activation,  # Activation
         )
+
+
+class TopDownFusion(torch.nn.Module):
+
+    def __init__(self):
+        super().__init__()
+        self.lateral_convs = []
+        self.top_down_fusions = []
+
+    def forward(
+        self,
+        F5: torch.Tensor,
+        S: list[torch.Tensor]
+    ):
+        """
+        Enrich the finer-scale feature maps with semantic information, in a
+        recursive manner.
+
+        Notice that I use peculiar colored references, to help me find out what refers to
+        what in the code and in the paper.
+
+        Parameters:
+            F5:
+                the query matrix as a feature map $(N, d_k, H, W)$
+            S:
+                the feature maps of the feature pyramid produced from the CNN
+                backbone
+        """
+
+        query_maps_enriched_topdown = [F5]
+        query_maps_yellowed = []
+
+        for i in range(len(S) - 1, 0, -1):
+            # Project the query maps into a lower dimensional space.
+            query_maps_yellowed.append(
+                self.lateral_convs[i - 1](query_maps_enriched_topdown[-1])
+            )
+
+            # Upscale the coarse query map.
+            query_map_yellowed_upscaled = self.upscale(query_maps_yellowed[-1])
+
+            # Imbue the semantic information to the finer feature map S[i - 1]
+            # with a fusion operation.
+            query_maps_enriched_topdown.append(
+                self.top_down_fusion_blocks[i](
+                    query_map_yellowed_upscaled,
+                    S[i - 1])
+            )
+
+        query_maps_yellowed.reverse()
+        query_maps_enriched_topdown.reverse()
+
+        return (query_maps_enriched_topdown, query_maps_yellowed)
+
+
+class BottomUpFusion(torch.nn.Module):
+
+    def __init__(self):
+        super().__init__()
+        self.downsample_convs = []
+        self.bottom_up_fusions = []
+
+    def forward(
+        self,
+        query_maps_enriched_topdown: list[torch.Tensor],
+        query_maps_yellowed: list[torch.Tensor]
+    ) -> list[torch.Tensor]:
+        n = len(query_maps_enriched_topdown)
+
+        # Bottom-up semantic refinement in a recursive fashion.
+        query_maps_refined_bottomup = [query_maps_enriched_topdown[0]]
+        query_maps_blued = []
+
+        for i in range(1, n):
+            # Downsample the finer-scale query maps.
+            query_maps_blued.append(
+                self.downscale_convs[i](query_maps_refined_bottomup[i])
+            )
+            # Fuse the finer-scale and next coarser-scale query maps.
+            # This should refine the coarser query maps.
+            query_maps_refined_bottomup.append(
+                self.bottom_up_fusion_blocks[i - 1](
+                    query_maps_blued[i],
+                    query_maps_yellowed[i])
+            )
+
+        return query_maps_refined_bottomup
 
 
 class CCFF(torch.nn.Module):

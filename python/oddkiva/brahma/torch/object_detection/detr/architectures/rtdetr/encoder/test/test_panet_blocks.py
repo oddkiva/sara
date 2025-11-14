@@ -54,4 +54,4 @@ def test_fusion():
 
     assert type(block.conv1) is UnbiasedConvBNA
     assert type(block.conv2) is UnbiasedConvBNA
-    assert len(block.repvgg_block.layers) == 3
+    assert len(block.repvgg_stack.layers) == 3
