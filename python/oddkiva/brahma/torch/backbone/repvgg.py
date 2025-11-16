@@ -81,9 +81,9 @@ class RepVggBlock(torch.nn.Module):
             ])
         else:
             self.layers = torch.nn.ModuleList([
-                UnbiasedConvBNA(in_channels, out_channels, 3, stride, 3,  # id
+                UnbiasedConvBNA(in_channels, out_channels, 3, stride, id=3,
                                 activation=None),
-                UnbiasedConvBNA(in_channels, out_channels, 1, stride, 1,  # id
+                UnbiasedConvBNA(in_channels, out_channels, 1, stride, id=1,
                                 activation=None)
             ])
         self.activation = make_activation_func(activation,

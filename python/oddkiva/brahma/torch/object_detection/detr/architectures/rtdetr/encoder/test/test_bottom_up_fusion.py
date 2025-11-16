@@ -20,8 +20,8 @@ DATA_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
 def test_downsample_convolution_construction():
     in_channels_sequence = [512, 1024, 2048]
     hidden_dim = 256
-    for (id, in_channels) in enumerate(in_channels_sequence):
-        block = DownsampleConvolution(in_channels, hidden_dim, id=id)
+    for in_channels in in_channels_sequence:
+        block = DownsampleConvolution(in_channels, hidden_dim)
 
         assert len(block.layers) == 3
         assert type(block.layers[0]) is torch.nn.Conv2d
@@ -34,7 +34,6 @@ def test_downsample_convolution_construction():
         assert block.layers[1].num_features == hidden_dim
 
         assert type(block.layers[2]) is torch.nn.SiLU
-
 
 def test_downsample_convolution_computations():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
@@ -53,7 +52,6 @@ def test_downsample_convolution_computations():
     out = ds_convs[0](ins[0])
     out_true = ds_outs_true[0]
     assert torch.norm(out - out_true) < 1e-12
-
 
 def test_bottom_up_fusion_blocks():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))

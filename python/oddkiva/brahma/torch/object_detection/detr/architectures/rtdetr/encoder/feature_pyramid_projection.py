@@ -6,14 +6,14 @@ from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
 )
 
 
-class BackboneFeaturePyramidProjection(nn.Module):
+class FeaturePyramidProjection(nn.Module):
 
     def __init__(self, in_channels_list: list[int], out_channels: int):
         super().__init__()
         self.projections = nn.ModuleList([
             UnbiasedConvBNA(in_channels, out_channels, 1, 1,
-                            id, activation=None)
-            for id, in_channels in enumerate(in_channels_list)
+                            activation=None)
+            for in_channels in in_channels_list
         ])
 
     def forward(self, xs: list[torch.Tensor]) -> list[torch.Tensor]:

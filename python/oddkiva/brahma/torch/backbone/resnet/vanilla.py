@@ -2,6 +2,8 @@
 
 from collections import OrderedDict
 
+from loguru import logger
+
 import torch.nn as nn
 import torchvision.ops as ops
 
@@ -9,7 +11,7 @@ import torchvision.ops as ops
 def make_activation_func(
     activation: str | None,
     inplace: bool = False
-) -> nn.Module:
+) -> nn.Module | None:
     """Make an activation function.
 
     parameters:
@@ -32,11 +34,11 @@ def make_activation_func(
         return nn.SiLU(inplace=inplace)
     if activation == "gelu":
         return nn.GELU()
-        
+
     if activation is None:
         return None
 
-    raise ValueError(f"No convolutional activation named {activation}")
+    logger.error(f"No convolutional activation named {activation}")
     return None
 
 
@@ -49,7 +51,7 @@ class ConvBNA(nn.Module):
         stride: int,
         batch_normalize: bool,
         activation: str | None,
-        id: int,
+        id: int | None = None,
         bias: bool = True,
         inplace_activation: bool = False,
         freeze_batch_norm: bool = False
@@ -69,16 +71,30 @@ class ConvBNA(nn.Module):
             bias=bias,
             padding_mode="zeros",  # Let's be explicit about the padding value
         )
-        self.layers.add_module(f"conv_{id}", conv)
-        if batch_normalize:
-            self.layers.add_module(
-                f"batch_norm_{id}", nn.BatchNorm2d(out_channels)
-            )
+        conv_name = 'conv'
+        if id is not None:
+            conv_name = f'{conv_name}_{id}'
+        self.layers.add_module(conv_name, conv)
 
-        activation_fn = make_activation_func(activation,
-                                             inplace=inplace_activation)
+        if batch_normalize:
+            batch_norm_name = 'batch_norm'
+            if id is not None:
+                batch_norm_name = f'{batch_norm_name}_{id}'
+
+            batch_norm_layer = \
+                ops.FrozenBatchNorm2d(out_channels) if freeze_batch_norm else \
+                nn.BatchNorm2d(out_channels)
+            self.layers.add_module(batch_norm_name, batch_norm_layer)
+
+        activation_fn = make_activation_func(
+            activation, inplace=inplace_activation
+        )
+
         if activation_fn is not None:
-            self.layers.add_module(f"{activation}_{id}", activation_fn)
+            activation_name = 'activation'
+            if id is not None:
+                activation_name = f'{activation_name}_{id}'
+            self.layers.add_module(activation_name, activation_fn)
 
     def forward(self, x):
         return self.layers.forward(x)
@@ -129,17 +145,17 @@ class ResidualBottleneckBlock(nn.Module):
             ConvBNA(in_channels, out_channels, 1, stride,
                     True,        # Batch-normalization
                     activation,  # Activation
-                    0,           # Id
+                    id=0,        # Id
                     bias=bias),
             ConvBNA(out_channels, out_channels, 3, 1,
                     True,        # Batch-normalization
                     activation,  # Activation
-                    1,           # Id
+                    id=1,        # Id
                     bias=bias),
             ConvBNA(out_channels, out_channels * (2**2), 1, 1,
                     True,        # Batch-normalization
                     activation,  # Activation
-                    2,           # Id
+                    id=2,        # Id
                     bias=bias),
         )
 
@@ -147,7 +163,6 @@ class ResidualBottleneckBlock(nn.Module):
             in_channels, out_channels * (2**2), 1, stride,
             batch_normalize_after_shortcut,
             "linear",
-            0,
             bias=bias
         )
 
@@ -158,6 +173,7 @@ class ResidualBottleneckBlock(nn.Module):
         self._out_channels = out_channels
 
     def forward(self, x):
+        assert self.activation is not None
         if self.shortcut is None:
             return self.activation(self.convs(x))
         return self.activation(self.convs.forward(x) + self.shortcut(x))

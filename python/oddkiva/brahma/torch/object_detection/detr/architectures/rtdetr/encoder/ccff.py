@@ -29,9 +29,9 @@ class FusionBlock(torch.nn.Module):
         super().__init__()
         hidden_dim = int(out_channels * hidden_dim_expansion_factor)
         self.conv1 = UnbiasedConvBNA(in_channels, hidden_dim, 1, 1,
-                                     1, activation=activation)
+                                     id=1, activation=activation)
         self.conv2 = UnbiasedConvBNA(in_channels, hidden_dim, 1, 1,
-                                     2, activation=activation)
+                                     id=2, activation=activation)
         self.repvgg_stack = RepVggStack(
             hidden_dim, hidden_dim,
             layer_count=repvgg_layer_count,
@@ -39,7 +39,7 @@ class FusionBlock(torch.nn.Module):
         )
         if hidden_dim != out_channels:
             self.conv3 = UnbiasedConvBNA(hidden_dim, out_channels, 1, 1,
-                                         3, activation=activation)
+                                         id=3, activation=activation)
         else:
             self.conv3 = torch.nn.Identity()
 
@@ -72,9 +72,8 @@ class LateralConvolution(UnbiasedConvBNA):
     `HybridEfficientEncoder` class).
     """
 
-    def __init__(self, in_channels: int, out_channels: int, id: int = 0):
-        super().__init__(in_channels, out_channels, 1, 1, id,
-                         activation='silu')
+    def __init__(self, in_channels: int, out_channels: int):
+        super().__init__(in_channels, out_channels, 1, 1, activation='silu')
 
 
 class DownsampleConvolution(UnbiasedConvBNA):
@@ -91,13 +90,11 @@ class DownsampleConvolution(UnbiasedConvBNA):
         self,
         in_channels: int,
         out_channels: int,
-        activation: str | None = 'silu',
-        id: int = 0
+        activation: str | None = 'silu'
     ):
         super().__init__(
             in_channels, out_channels,
             3, 2,  # Kernel size and stride
-            id,                     # ID
             activation=activation,  # Activation
         )
 
@@ -118,8 +115,8 @@ class TopDownFusionNet(torch.nn.Module):
     ):
         super().__init__()
         self.lateral_convs = torch.nn.ModuleList([
-            LateralConvolution(out_channels, out_channels, stack_idx)
-            for stack_idx in range(stack_count)
+            LateralConvolution(out_channels, out_channels)
+            for _ in range(stack_count)
         ])
         self.fusion_blocks = torch.nn.ModuleList([
             FusionBlock(in_channels, out_channels,
@@ -155,17 +152,19 @@ class TopDownFusionNet(torch.nn.Module):
 
         num_steps = len(self.fusion_blocks)
         for step in range(num_steps):
+            lateral_conv = self.lateral_convs[step]
+            F_enriched[-1] = lateral_conv(F_enriched[-1])
+
             # Take the last feature map.
             F_coarse = F_enriched[-1]
             S_fine = S[num_steps - 1 - step]
 
             # Upscale the coarse query map.
-            lateral_conv = self.lateral_convs[num_steps - 1 - step]
-            F_coarse_upscaled = self.upscale(lateral_conv(F_coarse))
+            F_coarse_upscaled = self.upscale(F_coarse)
 
             # Imbue the semantic information to the finer feature map S[i - 1]
             # with a fusion operation.
-            fuse = self.fusion_blocks[num_steps - 1 - step]
+            fuse = self.fusion_blocks[step]
             F_enriched.append(fuse(F_coarse_upscaled, S_fine))
 
         F_enriched.reverse()
@@ -193,9 +192,8 @@ class BottomUpFusionNet(torch.nn.Module):
         super().__init__()
         self.downsample_convs = torch.nn.ModuleList([
             DownsampleConvolution(out_channels, out_channels,
-                                  activation=activation,
-                                  id=stack_idx)
-            for stack_idx in range(stack_count)
+                                  activation=activation)
+            for _ in range(stack_count)
         ])
         self.fusion_blocks = torch.nn.ModuleList([
             FusionBlock(
@@ -304,7 +302,7 @@ class CCFF(torch.nn.Module):
 
         # Reshape the object query matrix as a feature map.
         n, _, h, w = S5.shape
-        _, c, _ = F5_flat.shape
+        _, _, c = F5_flat.shape
         F5 = F5_flat.permute(0, 2, 1).reshape(n, c, h, w)
 
         F_topdown_enriched = self.fuse_topdown.forward(F5, S)

@@ -1,8 +1,7 @@
 import torch
 
-from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
-    UnbiasedConvBNA
-)
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.encoder.feature_pyramid_projection import FeaturePyramidProjection
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.aifi import AIFI
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -26,12 +25,10 @@ class HybridEncoder(torch.nn.Module):
                  attn_dropout: float = 0.1,
                  attn_num_layers: int = 6):
         super().__init__()
-        self.backbone_feature_proj = torch.nn.ModuleList([
-            UnbiasedConvBNA(input_feature_dim, hidden_dim, 1, 1, id,
-                            activation=None)
-            for id, input_feature_dim in enumerate(input_feature_dims)
-        ])
-        self.aifi = AIFI(input_feature_dims[-1],
+
+        self.backbone_feature_proj = FeaturePyramidProjection(
+            input_feature_dims, hidden_dim)
+        self.aifi = AIFI(hidden_dim,
                          attn_head_count,
                          feedforward_dim=attn_feedforward_dim,
                          dropout=attn_dropout,
@@ -42,8 +39,13 @@ class HybridEncoder(torch.nn.Module):
         self,
         feature_pyramid: list[torch.Tensor]
     ) -> list[torch.Tensor]:
-        S = [proj(P)
-             for (proj, P) in zip(self.backbone_feature_proj, feature_pyramid)]
+        # Project the feature vectors of the feature pyramid into the same
+        # dimensional space.
+        S = self.backbone_feature_proj(feature_pyramid)
+        # Perform self-attention of the coarsest feature map of the feature
+        # pyramid.
+        # [F3, F4, F5] for ResNet
         F5 = self.aifi.forward(S[-1])
+        # The top-down then bottom-up fusion scheme.
         Q = self.ccff.forward(F5, S)
         return Q

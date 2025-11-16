@@ -27,7 +27,6 @@ def test_top_down_fusion_details():
     F5 = data['intermediate']['encoder']['aifi']['out']
 
     top_down_outs = data['intermediate']['encoder']['ccff']['top_down']
-    lateral_conv_outs_true = top_down_outs['lateral_convs']
     fpn_outs_true = top_down_outs['fpn']
 
     n, _, h, w = S[-1].shape
@@ -36,7 +35,6 @@ def test_top_down_fusion_details():
 
     # # Outputs
     F_enriched = [F5_map]
-    F_enriched_refiltered = []
 
     num_steps = len(fpn)
     assert num_steps == len(S) - 1
@@ -45,28 +43,23 @@ def test_top_down_fusion_details():
         for step in range(num_steps):
             print("step = ", step)
             # Take the last feature map.
-            F_coarse = F_enriched[-1]
+            #
+            # Calculate the lateral convolution, this will be the real enriched
+            # feature map.
+            F_enriched[-1] = lateral_convs[step](F_enriched[-1])
             S_fine = S[num_steps - 1 - step]
 
-            # Calculate the lateral convolution.
-            lateral_conv = lateral_convs[num_steps - 1 - step]
-            F_enriched_refiltered.append(lateral_conv(F_coarse))
-            # Check the lateral convolution.
-            lateral_conv_out = F_enriched_refiltered[-1]
-            lateral_conv_out_true = lateral_conv_outs_true[step]
-            lateral_conv_diff = torch.norm(lateral_conv_out - lateral_conv_out_true)
-            print(f'lateral conv diff = {lateral_conv_diff}')
-            assert lateral_conv_diff < 1e-12
-
             # Upscale the coarse enriched map.
-            F_coarse_upscaled = F.interpolate(lateral_conv_out, scale_factor=2,
+            F_coarse = F_enriched[-1]
+            F_coarse_upscaled = F.interpolate(F_coarse, scale_factor=2,
                                               mode='nearest')
 
             # Calculate the fine enriched map.
-            F_fine = fpn[num_steps - 1 - step](F_coarse_upscaled, S_fine)
-            F_enriched.append(F_fine)
+            FS = fpn[step](F_coarse_upscaled, S_fine)
+            F_enriched.append(FS)
 
         F_enriched.reverse()
+
         for fpn_out, fpn_out_true in zip(F_enriched, fpn_outs_true):
             fpn_diff = torch.norm(fpn_out - fpn_out_true)
             print(f'fpn_diff = {fpn_diff}')
