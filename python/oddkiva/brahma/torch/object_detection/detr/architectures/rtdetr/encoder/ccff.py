@@ -178,6 +178,9 @@ class TopDownFusionNet(torch.nn.Module):
 class BottomUpFusionNet(torch.nn.Module):
     """
     Bottom-up fusion network.
+
+    This is the bottom-up convolutional network used to perform the "bottom-up
+    path augmentation" 
     """
 
     def __init__(
