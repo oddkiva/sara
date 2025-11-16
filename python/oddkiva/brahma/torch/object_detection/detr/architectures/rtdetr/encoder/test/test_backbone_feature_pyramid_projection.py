@@ -3,8 +3,8 @@ import torch
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.backbone_feature_pyramid_projection import (
-        BackboneFeaturePyramidProjection
+    rtdetr.encoder.feature_pyramid_projection import (
+        FeaturePyramidProjection
     )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import (
@@ -18,20 +18,14 @@ DATA_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
                  'rtdetrv2_r50vd_6x_coco_ema.data.pt')
 
 
-class FeaturePyramidProjection:
-    hidden_dim: int = 256
-
-
 def test_backbone_feature_pyramid_projection_construction():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
 
     backbone = ckpt.load_backbone()
 
     fp_dims = backbone.feature_pyramid_dims[-3:]
-    fp_proj = BackboneFeaturePyramidProjection(
-        fp_dims,
-        FeaturePyramidProjection.hidden_dim
-    )
+    hidden_dim: int = 256
+    fp_proj = FeaturePyramidProjection(fp_dims, hidden_dim)
     fp_proj = freeze_batch_norm(fp_proj)
 
 

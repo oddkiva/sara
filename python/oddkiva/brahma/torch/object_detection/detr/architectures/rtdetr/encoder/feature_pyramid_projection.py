@@ -6,7 +6,7 @@ from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
 )
 
 
-class BackboneFeaturePyramidProjection(nn.Module):
+class FeaturePyramidProjection(nn.Module):
 
     def __init__(self, in_channels_list: list[int], out_channels: int):
         super().__init__()

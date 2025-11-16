@@ -2,8 +2,6 @@ from pathlib import Path
 
 from loguru import logger
 
-from oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.encoder.aifi import AIFI
-from oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.encoder.hybrid_encoder import HybridEncoder
 import torch
 import torch.nn as nn
 import torchvision.ops as ops
@@ -15,9 +13,9 @@ from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
     ResNet50RTDETRV2Variant
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.backbone_feature_pyramid_projection import (
-        BackboneFeaturePyramidProjection
-    )
+    rtdetr.encoder.feature_pyramid_projection import FeaturePyramidProjection
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.encoder.aifi import AIFI
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.ccff import (
         CCFF,
@@ -27,6 +25,10 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
         TopDownFusionNet,
         BottomUpFusionNet
     )
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.encoder.hybrid_encoder import HybridEncoder
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.decoder import MultiScaleDeformableTransformerDecoder
 
 
 class RTDETRV2Checkpoint:
@@ -391,6 +393,29 @@ class RTDETRV2Checkpoint:
     def decoder_weights(self):
         return {k: self.model_weights[k] for k in self.decoder_weights}
 
+    @property
+    def decoder_input_proj_weights(self):
+        return {k: self.model_weights[k]
+                for k in self.decoder_keys if 'decoder.input_proj' in k}
+
+    def decoder_input_proj_weight_key(self, i: int):
+        return f'decoder.input_proj.{i}'
+
+    def decoder_input_proj_conv_weight(self, i: int):
+        key = f'decoder.input_proj.{i}.conv.weight'
+        return self.model_weights[key]
+
+    def decoder_input_proj_bn_weights(self, i: int):
+        parent_key = f'decoder.input_proj.{i}.norm'
+        keys = {
+            param: f"{parent_key}.{param}"
+            for param in RTDETRV2Checkpoint.batch_norm_param_names
+        }
+        return {
+            param: self.model_weights[keys[param]]
+            for param in RTDETRV2Checkpoint.batch_norm_param_names
+        }
+
     # -------------------------------------------------------------------------
     # WEIGHT COPY UTILITIES
     # -------------------------------------------------------------------------
@@ -558,14 +583,14 @@ class RTDETRV2Checkpoint:
     # -------------------------------------------------------------------------
     # ENCODER LOAD UTILITIES
     # -------------------------------------------------------------------------
-    def load_encoder_input_proj(self) -> BackboneFeaturePyramidProjection:
+    def load_encoder_input_proj(self) -> FeaturePyramidProjection:
         # Just hardcode the variables to simplify.
-        fp_proj = BackboneFeaturePyramidProjection(
+        fp_proj = FeaturePyramidProjection(
             [512, 1024, 2048],
             256
         )
         fp_proj = freeze_batch_norm(fp_proj)
-        assert type(fp_proj) is BackboneFeaturePyramidProjection
+        assert type(fp_proj) is FeaturePyramidProjection
 
         # Copy the model weights.
         for i in range(3):
@@ -902,3 +927,57 @@ class RTDETRV2Checkpoint:
         encoder.ccff = self.load_encoder_ccff()
         assert type(encoder) is HybridEncoder
         return encoder
+
+    # -------------------------------------------------------------------------
+    # ENCODER LOAD UTILITIES
+    # -------------------------------------------------------------------------
+    def load_decoder_input_proj(self) -> FeaturePyramidProjection:
+        # Just hardcode the variables to simplify.
+        fp_proj = FeaturePyramidProjection(
+            [256] * 3,
+            256
+        )
+        fp_proj = freeze_batch_norm(fp_proj)
+        assert type(fp_proj) is FeaturePyramidProjection
+
+        # Copy the model weights.
+        for i in range(3):
+            my_convbna = fp_proj.projections[i]
+            conv_weight = self.decoder_input_proj_conv_weight(i)
+            bn_weights = self.decoder_input_proj_bn_weights(i)
+            assert type(my_convbna) is UnbiasedConvBNA
+            self._copy_conv_bna_weights(my_convbna, conv_weight, bn_weights)
+
+        return fp_proj
+
+
+    def load_decoder(self) -> MultiScaleDeformableTransformerDecoder:
+        encoding_dim = 256
+        hidden_dim = 256
+        kv_count_per_level = [4, 4, 4]
+        attn_head_count = 8
+        attn_feedforward_dim = 1024
+        attn_dropout = 0.0
+        attn_num_layers = 6
+        activation = 'relu'
+        normalize_before = False
+        # Multi-scale deformable attention parameters
+
+        noised_true_boxes_count = 100
+        label_noise_ratio = 0.5
+        box_noise_scale = 1.0
+
+        decoder = MultiScaleDeformableTransformerDecoder(
+            encoding_dim,
+            hidden_dim,
+            kv_count_per_level,
+            attn_head_count=attn_head_count,
+            attn_feedforward_dim=attn_feedforward_dim,
+            attn_num_layers=attn_num_layers,
+            attn_dropout=attn_dropout,
+            normalize_before=normalize_before
+        )
+
+        decoder.feature_projectors = self.load_decoder_input_proj()
+
+        return decoder

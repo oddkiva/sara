@@ -1,9 +1,7 @@
 import torch
 
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.backbone_feature_pyramid_projection import (
-        BackboneFeaturePyramidProjection
-    )
+    rtdetr.encoder.feature_pyramid_projection import FeaturePyramidProjection
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.aifi import AIFI
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -28,7 +26,7 @@ class HybridEncoder(torch.nn.Module):
                  attn_num_layers: int = 6):
         super().__init__()
 
-        self.backbone_feature_proj = BackboneFeaturePyramidProjection(
+        self.backbone_feature_proj = FeaturePyramidProjection(
             input_feature_dims, hidden_dim)
         self.aifi = AIFI(hidden_dim,
                          attn_head_count,
