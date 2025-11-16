@@ -57,3 +57,20 @@ def test_decoder_computations():
         for out, out_true in zip(dec_input_proj_outs, dec_input_proj_outs_true):
             assert torch.linalg.vector_norm(out - out_true) < 1e-12
             assert torch.linalg.vector_norm(out - out_true, ord=torch.inf) < 1e-12
+
+    queries_true, spatial_shapes_true = \
+        data['intermediate']['decoder']['_get_encoder_input']
+    queries = [
+        fmap.flatten(2).permute(0, 2, 1)
+        for fmap in dec_input_proj_outs
+    ]
+    queries = torch.cat(queries, dim=1)
+    spatial_shapes = [
+        fmap.shape[2:]
+        for fmap in dec_input_proj_outs
+    ]
+    with torch.no_grad():
+        for out, out_true in zip(queries, queries_true):
+            assert torch.linalg.vector_norm(out - out_true) < 1e-12
+    for shape, shape_true in zip(spatial_shapes, spatial_shapes_true):
+        assert shape == torch.Size(shape_true)
