@@ -12,8 +12,8 @@ class BackboneFeaturePyramidProjection(nn.Module):
         super().__init__()
         self.projections = nn.ModuleList([
             UnbiasedConvBNA(in_channels, out_channels, 1, 1,
-                            id, activation=None)
-            for id, in_channels in enumerate(in_channels_list)
+                            activation=None)
+            for in_channels in in_channels_list
         ])
 
     def forward(self, xs: list[torch.Tensor]) -> list[torch.Tensor]:

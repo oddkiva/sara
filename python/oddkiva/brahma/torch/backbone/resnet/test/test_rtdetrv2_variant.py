@@ -41,6 +41,7 @@ def test_rtdetrv2_resnet_backbone_computation_details():
 
     x = data['input']
     intermediate_outs = data['intermediate']
+    backbone_debug_outs = intermediate_outs['backbone']['debug']
 
     conv1 = model.blocks[0]
     with torch.no_grad():
@@ -57,12 +58,12 @@ def test_rtdetrv2_resnet_backbone_computation_details():
     bblock00c = model.blocks[1][0].convs[2]
     bblock00s = model.blocks[1][0].shortcut
     # 2. The intermediate results.
-    b00a_true = intermediate_outs['debug']['block00a']
-    b00b_true = intermediate_outs['debug']['block00b']
-    b00c_true = intermediate_outs['debug']['block00c']
-    b00s_true = intermediate_outs['debug']['block00s']
+    b00a_true = backbone_debug_outs['block00a']
+    b00b_true = backbone_debug_outs['block00b']
+    b00c_true = backbone_debug_outs['block00c']
+    b00s_true = backbone_debug_outs['block00s']
     # 3. The final result.
-    b00_true = intermediate_outs['debug']['block00']
+    b00_true = backbone_debug_outs['block00']
     with torch.no_grad():
         # 1. Step-by-step.
         b00a = bblock00a(conv1_x)
@@ -85,11 +86,11 @@ def test_rtdetrv2_resnet_backbone_computation_details():
     bblock01b = model.blocks[1][1].convs[1]
     bblock01c = model.blocks[1][1].convs[2]
     # 2. The intermediate results.
-    b01a_true = intermediate_outs['debug']['block01a']
-    b01b_true = intermediate_outs['debug']['block01b']
-    b01c_true = intermediate_outs['debug']['block01c']
+    b01a_true = backbone_debug_outs['block01a']
+    b01b_true = backbone_debug_outs['block01b']
+    b01c_true = backbone_debug_outs['block01c']
     # 3. The final result.
-    b01_true = intermediate_outs['debug']['block01']
+    b01_true = backbone_debug_outs['block01']
     with torch.no_grad():
         # 1. Step-by-step.
         b01a = bblock01a(b00)
@@ -111,11 +112,11 @@ def test_rtdetrv2_resnet_backbone_computation_details():
     bblock02b = model.blocks[1][2].convs[1]
     bblock02c = model.blocks[1][2].convs[2]
     # 2. The intermediate results.
-    b02a_true = intermediate_outs['debug']['block02a']
-    b02b_true = intermediate_outs['debug']['block02b']
-    b02c_true = intermediate_outs['debug']['block02c']
+    b02a_true = backbone_debug_outs['block02a']
+    b02b_true = backbone_debug_outs['block02b']
+    b02c_true = backbone_debug_outs['block02c']
     # 3. The final result.
-    b02_true = intermediate_outs['debug']['block02']
+    b02_true = backbone_debug_outs['block02']
     with torch.no_grad():
         # 1. Step-by-step.
         b02a = bblock02a(b01)
@@ -145,7 +146,7 @@ def test_rtdetrv2_resnet_backbone_computation_details():
             logger.info(f"[{i}] diff = {diff}")
             assert diff < 1e-12
 
-    backbone_true = intermediate_outs['backbone']
+    backbone_true = intermediate_outs['backbone']['out']
     with torch.no_grad():
         for out, out_true in zip(res[1:], backbone_true):
             assert torch.norm(out - out_true) < 1e-12

@@ -11,12 +11,14 @@ class UnbiasedConvBNA(ConvBNA):
     `ConvBNA`.
     """
 
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: int,
-                 stride: int, id: int, activation: str | None ='relu'):
+    def __init__(self, in_channels: int, out_channels: int,
+                 kernel_size: int, stride: int,
+                 activation: str | None ='relu',
+                 id: int | None = None):
         """Constructs an [Unbiased-Conv+BN+Activation] block.
         """
         super().__init__(in_channels, out_channels, kernel_size, stride, True,
-                         activation, id, bias=False)
+                         activation, bias=False, id=id)
 
 
 class ResidualBottleneckBlock(nn.Module):
@@ -60,13 +62,11 @@ class ResidualBottleneckBlock(nn.Module):
         super().__init__()
         self.convs = nn.Sequential(
             UnbiasedConvBNA(in_channels, out_channels, 1, 1,
-                            0,  # Id
-                            activation=activation),
+                            id=0, activation=activation),
             UnbiasedConvBNA(out_channels, out_channels, 3, stride,
-                            1,  # Id
-                            activation=activation),
+                            id=1, activation=activation),
             UnbiasedConvBNA(out_channels, out_channels * (2**2), 1, 1,
-                            2,  # Id
+                            id=2,
                             activation=None),  # oh my! so many modifications!
         )
 
@@ -75,13 +75,12 @@ class ResidualBottleneckBlock(nn.Module):
                 self.shortcut = UnbiasedConvBNA(in_channels,
                                                 out_channels * (2**2),
                                                 1, 1,
-                                                0, activation=None)
+                                                activation=None)
             elif stride == 2:
                 self.shortcut = nn.Sequential(
                     nn.AvgPool2d(2, 2, 0, ceil_mode=True),
                     UnbiasedConvBNA(in_channels, out_channels * (2**2),
-                                    1, 1,
-                                    0, activation=None)
+                                    1, 1, activation=None)
                 )
             else:
                 ValueError("Unsupported: the stride must be 1 or 2!")
@@ -137,11 +136,9 @@ class ResNet50RTDETRV2Variant(nn.Module):
             # And then we downsample again with the max-pool operation.
             nn.Sequential(
                 UnbiasedConvBNA(3, 32, 3, 2,   # Downsample here
-                                0),            # id
-                UnbiasedConvBNA(32, 32, 3, 1,
-                                1),            # id
-                UnbiasedConvBNA(32, 64, 3, 1,
-                                1),            # id
+                                id=0),
+                UnbiasedConvBNA(32, 32, 3, 1, id=1),
+                UnbiasedConvBNA(32, 64, 3, 1, id=1),
                 nn.MaxPool2d(3, stride=2, padding=1),
             ),
             # P0
