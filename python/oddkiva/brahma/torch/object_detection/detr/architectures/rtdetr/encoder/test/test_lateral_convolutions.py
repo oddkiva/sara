@@ -43,7 +43,7 @@ def test_lateral_convolution_computations():
 
     # Check the first lateral convs for now. We need to check the FPN blocks as
     # well.
-    lateral_conv = lateral_convs[-1]
+    lateral_conv = lateral_convs[0]
     lateral_conv_out = lateral_conv(F5_map)
     lateral_conv_out_true = lateral_conv_outs_true[0]
     diff = torch.norm(lateral_conv_out - lateral_conv_out_true)

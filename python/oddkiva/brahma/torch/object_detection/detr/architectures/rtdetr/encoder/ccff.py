@@ -155,17 +155,19 @@ class TopDownFusionNet(torch.nn.Module):
 
         num_steps = len(self.fusion_blocks)
         for step in range(num_steps):
+            lateral_conv = self.lateral_convs[step]
+            F_enriched[-1] = lateral_conv(F_enriched[-1])
+
             # Take the last feature map.
             F_coarse = F_enriched[-1]
             S_fine = S[num_steps - 1 - step]
 
             # Upscale the coarse query map.
-            lateral_conv = self.lateral_convs[num_steps - 1 - step]
-            F_coarse_upscaled = self.upscale(lateral_conv(F_coarse))
+            F_coarse_upscaled = self.upscale(F_coarse)
 
             # Imbue the semantic information to the finer feature map S[i - 1]
             # with a fusion operation.
-            fuse = self.fusion_blocks[num_steps - 1 - step]
+            fuse = self.fusion_blocks[step]
             F_enriched.append(fuse(F_coarse_upscaled, S_fine))
 
         F_enriched.reverse()
@@ -301,7 +303,7 @@ class CCFF(torch.nn.Module):
 
         # Reshape the object query matrix as a feature map.
         n, _, h, w = S5.shape
-        _, c, _ = F5_flat.shape
+        _, _, c = F5_flat.shape
         F5 = F5_flat.permute(0, 2, 1).reshape(n, c, h, w)
 
         F_topdown_enriched = self.fuse_topdown.forward(F5, S)

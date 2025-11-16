@@ -9,7 +9,7 @@ def freeze_parameters(m: nn.Module):
         p.requires_grad = False
 
 
-def freeze_batch_norm(m: nn.Module) -> nn.Module:
+def freeze_batch_norm(m):
     if isinstance(m, nn.BatchNorm2d):
         # If m is a leaf module and that leaf module is also a BatchNorm2d
         # module.

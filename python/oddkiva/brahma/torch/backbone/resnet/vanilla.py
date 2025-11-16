@@ -2,6 +2,8 @@
 
 from collections import OrderedDict
 
+from loguru import logger
+
 import torch.nn as nn
 import torchvision.ops as ops
 
@@ -9,7 +11,7 @@ import torchvision.ops as ops
 def make_activation_func(
     activation: str | None,
     inplace: bool = False
-) -> nn.Module:
+) -> nn.Module | None:
     """Make an activation function.
 
     parameters:
@@ -32,11 +34,11 @@ def make_activation_func(
         return nn.SiLU(inplace=inplace)
     if activation == "gelu":
         return nn.GELU()
-        
+
     if activation is None:
         return None
 
-    raise ValueError(f"No convolutional activation named {activation}")
+    logger.error(f"No convolutional activation named {activation}")
     return None
 
 
@@ -71,9 +73,14 @@ class ConvBNA(nn.Module):
         )
         self.layers.add_module(f"conv_{id}", conv)
         if batch_normalize:
-            self.layers.add_module(
-                f"batch_norm_{id}", nn.BatchNorm2d(out_channels)
-            )
+            if freeze_batch_norm:
+                self.layers.add_module(
+                    f"batch_norm_{id}", ops.FrozenBatchNorm2d(out_channels)
+                )
+            else:
+                self.layers.add_module(
+                    f"batch_norm_{id}", nn.BatchNorm2d(out_channels)
+                )
 
         activation_fn = make_activation_func(activation,
                                              inplace=inplace_activation)
@@ -158,6 +165,7 @@ class ResidualBottleneckBlock(nn.Module):
         self._out_channels = out_channels
 
     def forward(self, x):
+        assert self.activation is not None
         if self.shortcut is None:
             return self.activation(self.convs(x))
         return self.activation(self.convs.forward(x) + self.shortcut(x))
