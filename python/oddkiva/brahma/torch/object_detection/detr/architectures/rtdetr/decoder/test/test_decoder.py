@@ -3,7 +3,7 @@ import torch
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import RTDETRV2Checkpoint
-
+from oddkiva.brahma.torch.object_detection.common.anchors import enumerate_anchors
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder import MultiScaleDeformableTransformerDecoder
 
@@ -65,12 +65,39 @@ def test_decoder_computations():
         for fmap in dec_input_proj_outs
     ]
     queries = torch.cat(queries, dim=1)
-    spatial_shapes = [
-        fmap.shape[2:]
+    wh_sizes = [
+        fmap.shape[2:][::-1]
         for fmap in dec_input_proj_outs
     ]
     with torch.no_grad():
         for out, out_true in zip(queries, queries_true):
             assert torch.linalg.vector_norm(out - out_true) < 1e-12
-    for shape, shape_true in zip(spatial_shapes, spatial_shapes_true):
+    for shape, shape_true in zip(wh_sizes, spatial_shapes_true):
         assert shape == torch.Size(shape_true)
+
+    anchors, valid_mask = \
+        data['intermediate']['decoder']['_generate_anchors']
+
+    # (640, 640)
+    # -> (80, 80) = (640 //  8, 640 //  8)
+    # -> (40, 40) = (640 // 16, 640 // 16)
+    # -> (20, 20) = (640 // 32, 640 // 32)
+    #      ^   ^             ^
+    #      |---|--size       |----------|---- stride
+    #    box
+
+    relative_box_sizes = [0.05 * (2 ** lvl) for lvl in range(len(wh_sizes))]
+    box_sizes = [(f * w, f * h)
+                 for f, (w, h) in zip(relative_box_sizes, wh_sizes)]
+    anchors = [
+        enumerate_anchors(wh, bsizes, True, torch.device('cpu'))
+        for wh, bsizes in zip(wh_sizes, box_sizes)
+    ]
+    anchors = torch.cat(anchors, dim=1).to(device)
+    # For the logits
+    eps = 1e-2
+    valid_mask = ((anchors > eps) * (anchors < (1 - eps)))\
+        .all(-1, keepdim=True)
+
+    anchor_logits = torch.log(anchors / (1 - anchors))
+    anchors = torch.where(valid_mask, anchors, torch.inf)
