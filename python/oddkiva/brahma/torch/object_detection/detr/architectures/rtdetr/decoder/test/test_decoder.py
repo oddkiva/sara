@@ -3,7 +3,10 @@ import torch
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import RTDETRV2Checkpoint
-from oddkiva.brahma.torch.object_detection.common.anchors import enumerate_anchors
+from oddkiva.brahma.torch.object_detection.common.anchors import (
+    calculate_anchor_logits,
+    enumerate_pyramid_anchors
+)
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder import MultiScaleDeformableTransformerDecoder
 
@@ -43,6 +46,36 @@ def test_decoder_construction():
     assert len(decoder.feature_projectors) == 3
 
 
+def test_decoder_anchor_generation():
+    data = torch.load(DATA_FILEPATH, torch.device('cpu'))
+    anchor_logits_true, anchor_valid_mask_true = \
+        data['intermediate']['decoder']['_generate_anchors']
+
+    pyramid_image_sizes = [(80, 80), (40, 40), (20, 20)]
+    normalized_base_box_size = 0.05  # percentage in w.r.t. image sizes
+    device = torch.device('cpu')
+
+    anchor_pyramid = enumerate_pyramid_anchors(
+        pyramid_image_sizes,
+        normalized_base_box_size=normalized_base_box_size,
+        normalize_anchor_geometry=True,
+        device=device
+    )
+    anchors = torch.cat(anchor_pyramid, dim=0)
+    anchor_logits, anchor_valid_mask = calculate_anchor_logits(
+        anchors, eps=1e-2
+    )
+
+    assert torch.equal(anchor_valid_mask_true[0], anchor_valid_mask)
+
+    # Filter out the invalid rows.
+    # with this recipe...
+    valid_anchor_logits = anchor_logits[anchor_valid_mask[:, 0], :]
+    valid_anchor_logits_true = \
+        anchor_logits_true[0, anchor_valid_mask_true[0, :, 0], :]
+    assert torch.norm(valid_anchor_logits - valid_anchor_logits_true) < 1e-5
+
+
 def test_decoder_computations():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
@@ -58,49 +91,22 @@ def test_decoder_computations():
             assert torch.linalg.vector_norm(out - out_true) < 1e-12
             assert torch.linalg.vector_norm(out - out_true, ord=torch.inf) < 1e-12
 
-    queries_true, spatial_shapes_true = \
+    query_pyramid_true, pyramid_image_sizes_true = \
         data['intermediate']['decoder']['_get_encoder_input']
-    queries = [
+    query_pyramid = [
         fmap.flatten(2).permute(0, 2, 1)
         for fmap in dec_input_proj_outs
     ]
-    queries = torch.cat(queries, dim=1)
-    wh_sizes = [
+    query_pyramid = torch.cat(query_pyramid, dim=1)
+
+    pyramid_image_sizes = [
         fmap.shape[2:][::-1]
         for fmap in dec_input_proj_outs
     ]
     with torch.no_grad():
-        for out, out_true in zip(queries, queries_true):
+        for out, out_true in zip(query_pyramid, query_pyramid_true):
             assert torch.linalg.vector_norm(out - out_true) < 1e-12
-    for shape, shape_true in zip(wh_sizes, spatial_shapes_true):
+    for shape, shape_true in zip(pyramid_image_sizes,
+                                 pyramid_image_sizes_true):
         assert shape == torch.Size(shape_true)
 
-    anchors, valid_mask = \
-        data['intermediate']['decoder']['_generate_anchors']
-
-    # (640, 640)
-    # -> (80, 80) = (640 //  8, 640 //  8)
-    # -> (40, 40) = (640 // 16, 640 // 16)
-    # -> (20, 20) = (640 // 32, 640 // 32)
-    #      ^   ^             ^
-    #      |---|--size       |----------|---- stride
-    #    box
-
-    device = torch.device('cpu')
-
-    relative_box_sizes = [0.05 * (2 ** lvl) for lvl in range(len(wh_sizes))]
-    box_sizes = [(f * w, f * h)
-                 for f, (w, h) in zip(relative_box_sizes, wh_sizes)]
-    anchors = [
-        enumerate_anchors(wh, bsizes, True, device)
-        for wh, bsizes in zip(wh_sizes, box_sizes)
-    ]
-    anchors = torch.cat(anchors, dim=1).to(device)
-    # For the logits
-    eps = 1e-2
-    valid_mask = ((anchors > eps) * (anchors < (1 - eps)))\
-        .all(-1, keepdim=True)
-
-    # anchor encodings are the logits
-    anchor_logits = torch.log(anchors / (1 - anchors))
-    anchor_logits = torch.where(valid_mask, anchor_logits, torch.inf)
