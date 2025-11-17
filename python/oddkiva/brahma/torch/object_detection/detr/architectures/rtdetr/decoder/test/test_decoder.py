@@ -86,11 +86,13 @@ def test_decoder_computations():
     #      |---|--size       |----------|---- stride
     #    box
 
+    device = torch.device('cpu')
+
     relative_box_sizes = [0.05 * (2 ** lvl) for lvl in range(len(wh_sizes))]
     box_sizes = [(f * w, f * h)
                  for f, (w, h) in zip(relative_box_sizes, wh_sizes)]
     anchors = [
-        enumerate_anchors(wh, bsizes, True, torch.device('cpu'))
+        enumerate_anchors(wh, bsizes, True, device)
         for wh, bsizes in zip(wh_sizes, box_sizes)
     ]
     anchors = torch.cat(anchors, dim=1).to(device)
@@ -99,5 +101,6 @@ def test_decoder_computations():
     valid_mask = ((anchors > eps) * (anchors < (1 - eps)))\
         .all(-1, keepdim=True)
 
+    # anchor encodings are the logits
     anchor_logits = torch.log(anchors / (1 - anchors))
-    anchors = torch.where(valid_mask, anchors, torch.inf)
+    anchor_logits = torch.where(valid_mask, anchor_logits, torch.inf)
