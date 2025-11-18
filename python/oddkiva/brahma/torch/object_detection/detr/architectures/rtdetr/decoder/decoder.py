@@ -144,10 +144,36 @@ class MultiScaleDeformableTransformerDecoder(torch.nn.Module):
         ])
 
 
-    def forward(self, feature_maps: list[torch.Tensor]) -> list[torch.Tensor]:
-        fmaps_projected = [
+    def feature_pyramid_as_memory_matrix(
+        self,
+        feature_pyramid: list[torch.Tensor]
+     ) -> torch.Tensor:
+        """Fuse the feature maps of the feature pyramid into a single memory
+        matrix.
+
+        The memory matrix is basically the value matrix that will be used for
+        attention-based decoder.
+        """
+        object_query_matrices = [
+            fmap.flatten(2).permute(0, 2, 1)
+            for fmap in feature_pyramid
+        ]
+        object_query_matrix_final = torch.cat(object_query_matrices, dim=1)
+        return object_query_matrix_final
+
+
+    def forward(self, feature_pyramid: list[torch.Tensor]) -> list[torch.Tensor]:
+        feature_pyramid_projected = [
             proj(fmap)
-            for proj, fmap in zip(self.feature_projectors, feature_maps)
+            for proj, fmap in zip(self.feature_projectors, feature_pyramid)
         ]
 
-        return fmaps_projected
+        memory = self.feature_pyramid_as_memory_matrix(
+            feature_pyramid_projected
+        )
+        spatial_shapes = [
+            fmap.shape[2:]
+            for fmap in feature_pyramid_projected
+        ]
+
+        return feature_pyramid_projected

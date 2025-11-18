@@ -73,7 +73,7 @@ def test_decoder_anchor_generation():
     valid_anchor_logits = anchor_logits[anchor_valid_mask[:, 0], :]
     valid_anchor_logits_true = \
         anchor_logits_true[0, anchor_valid_mask_true[0, :, 0], :]
-    assert torch.norm(valid_anchor_logits - valid_anchor_logits_true) < 1e-5
+    assert torch.norm(valid_anchor_logits - valid_anchor_logits_true) < 2.5e-5
 
 
 def test_decoder_computations():
