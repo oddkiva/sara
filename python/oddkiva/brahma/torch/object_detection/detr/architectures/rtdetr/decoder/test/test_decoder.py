@@ -67,11 +67,16 @@ def test_decoder_anchor_generation():
     # Filter out the invalid rows with this recipe...
     valid_anchor_logits = anchor_logits[anchor_mask[:, 0], :]
     valid_anchor_logits_true = \
+<<<<<<< HEAD
         anchor_logits_true[0, anchor_mask_true[0, :, 0], :]
 
     assert torch.equal(anchor_mask_true[0], anchor_mask)
     assert torch.norm(valid_anchor_logits - valid_anchor_logits_true) < 2.5e-5
 
+=======
+        anchor_logits_true[0, anchor_valid_mask_true[0, :, 0], :]
+    assert torch.norm(valid_anchor_logits - valid_anchor_logits_true) < 2.5e-5
+>>>>>>> cb44cf3aa49b3d8e19a255314a3759b94abc4e0a
 
 
 def test_decoder_computations():
