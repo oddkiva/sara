@@ -418,6 +418,38 @@ class RTDETRV2Checkpoint:
             for param in RTDETRV2Checkpoint.batch_norm_param_names
         }
 
+    def decoder_enc_output_proj_weight(self):
+        key = f'decoder.enc_output.proj.weight'
+        return self.model_weights[key]
+
+    def decoder_enc_output_proj_bias(self):
+        key = f'decoder.enc_output.proj.bias'
+        return self.model_weights[key]
+
+    def decoder_enc_output_norm_weight(self):
+        key = f'decoder.enc_output.norm.weight'
+        return self.model_weights[key]
+
+    def decoder_enc_output_norm_bias(self):
+        key = f'decoder.enc_output.norm.bias'
+        return self.model_weights[key]
+
+    def decoder_enc_score_head_weight(self):
+        key = f'decoder.enc_score_head.weight'
+        return self.model_weights[key]
+
+    def decoder_enc_score_head_bias(self):
+        key = f'decoder.enc_score_head.bias'
+        return self.model_weights[key]
+
+    def decoder_enc_bbox_head_weight(self, i: int):
+        key = f'decoder.enc_bbox_head.layers.{i}.weight'
+        return self.model_weights[key]
+
+    def decoder_enc_bbox_head_bias(self, i: int):
+        key = f'decoder.enc_bbox_head.layers.{i}.bias'
+        return self.model_weights[key]
+
     # -------------------------------------------------------------------------
     # WEIGHT COPY UTILITIES
     # -------------------------------------------------------------------------
@@ -969,7 +1001,32 @@ class RTDETRV2Checkpoint:
             initial_class_probability=0.1
         )
         anchor_decoder = freeze_batch_norm(anchor_decoder)
-        import ipdb; ipdb.set_trace()
+
+        self._copy_weight_and_bias(
+            anchor_decoder.decoder_base.projector,
+            self.decoder_enc_output_proj_weight(),
+            self.decoder_enc_output_proj_bias()
+        )
+        self._copy_weight_and_bias(
+            anchor_decoder.decoder_base.layer_norm,
+            self.decoder_enc_output_norm_weight(),
+            self.decoder_enc_output_norm_bias()
+        )
+
+        self._copy_weight_and_bias(
+            anchor_decoder.class_logit_head,
+            self.decoder_enc_score_head_weight(),
+            self.decoder_enc_score_head_bias()
+        )
+
+        for i in range(anchor_decoder.geometry_residual_head.layer_count):
+            linear = anchor_decoder.geometry_residual_head.layers[i]
+            assert type(linear) is nn.Linear
+            self._copy_weight_and_bias(
+                linear,
+                self.decoder_enc_bbox_head_weight(i),
+                self.decoder_enc_bbox_head_bias(i)
+            )
 
         assert type(anchor_decoder) is AnchorDecoder
         return anchor_decoder

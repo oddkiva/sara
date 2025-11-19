@@ -21,21 +21,16 @@ class MultiLayerPerceptron(nn.Module):
         activation_fn = make_activation_func(activation)
         assert activation_fn is not None
 
-        self._layers = nn.Sequential()
-        for in_channels, out_channels in zip(in_dim_seq, out_dim_seq):
-            self._layers.append(nn.Linear(in_channels, out_channels))
-            self._layers.append(activation_fn)
+        self.layers = nn.ModuleList(nn.Linear(n, k) for n, k in zip(in_dim_seq,
+                                                                    out_dim_seq))
+        self.activation = activation_fn
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self._layers(x)
+    def forward(self, x):
+        for i, layer in enumerate(self.layers):
+            x = self.activation(layer(x)) if i < self.layer_count - 1 else layer(x)
+        return x
+
 
     @property
-    def layers(self):
-        return self._layers
-
-    @property
-    def layer_count(self):
-        return len(self.layers) // 2
-
-
-
+    def layer_count(self) -> int:
+        return len(self.layers)

@@ -108,14 +108,14 @@ class AnchorDecoder(nn.Module):
             eps=logit_eps
         )
 
-        self._anchor_decoder_base = nn.Sequential(OrderedDict([
+        self.decoder_base = nn.Sequential(OrderedDict([
             ('projector', nn.Linear(hidden_dim, hidden_dim)),
             ('layer_norm', nn.LayerNorm(hidden_dim,))
         ]))
 
-        self._class_logit_head = nn.Linear(hidden_dim, num_classes)
+        self.class_logit_head = nn.Linear(hidden_dim, num_classes)
 
-        self._geometry_residual_head = AnchorGeomeryResidualHead(
+        self.geometry_residual_head = AnchorGeomeryResidualHead(
             encoding_dim, hidden_dim, geometry_head_layer_count,
             activation=geometry_head_activation
         )
@@ -143,18 +143,18 @@ class AnchorDecoder(nn.Module):
     def _reinitialize_learning_parameters(self,
                                           initial_class_probability: float):
         # Initialize the weight of the base network.
-        nn.init.xavier_uniform_(self._anchor_decoder_base[0].weight)
+        nn.init.xavier_uniform_(self.decoder_base[0].weight)
 
         # Initialize the bias of the class logit head.
         nn.init.constant_(
-            self._class_logit_head.bias,
+            self.class_logit_head.bias,
             self._initial_class_logit_value(prob=initial_class_probability)
         )
 
         # Initialize the weight and bias of the last layer of the geometry
         # residual head.
-        nn.init.constant_(self._geometry_residual_head.layers[-2].weight, 0)
-        nn.init.constant_(self._geometry_residual_head.layers[-2].bias, 0)
+        nn.init.constant_(self.geometry_residual_head.layers[-1].weight, 0)
+        nn.init.constant_(self.geometry_residual_head.layers[-1].bias, 0)
 
     def forward(
         self,
@@ -176,11 +176,11 @@ class AnchorDecoder(nn.Module):
                 )
 
         memory_filtered = anchor_mask.to(dtype=memory.dtype) * memory
-        memory_filtered = self._anchor_decoder_base(memory_filtered)
+        memory_filtered = self.decoder_base(memory_filtered)
 
-        anchor_class_logits = self._class_logit_head(memory_filtered)
+        anchor_class_logits = self.class_logit_head(memory_filtered)
         anchor_geometry_residual_logits = \
-            self._geometry_residual_head(memory_filtered)
+            self.geometry_residual_head(memory_filtered)
 
         anchor_geometry_logits_refined = \
             anchor_geometry_logits_refined + anchor_geometry_residual_logits
