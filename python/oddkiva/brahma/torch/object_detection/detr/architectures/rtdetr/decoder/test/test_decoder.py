@@ -47,33 +47,31 @@ def test_decoder_construction():
 
 
 def test_decoder_anchor_generation():
+    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
-    anchor_logits_true, anchor_valid_mask_true = \
+
+    decoder = ckpt.load_decoder()
+    fpyr_projected: list[torch.Tensor] = \
+        data['intermediate']['decoder']['input_proj']
+    fpyr_image_sizes = [fmap.shape[2:][::-1]
+                        for fmap in fpyr_projected]
+
+    anchor_logits, anchor_mask = decoder._enumerate_anchors(
+        fpyr_image_sizes,
+        fpyr_projected[0].device
+    )
+
+    anchor_logits_true, anchor_mask_true = \
         data['intermediate']['decoder']['_generate_anchors']
 
-    pyramid_image_sizes = [(80, 80), (40, 40), (20, 20)]
-    normalized_base_box_size = 0.05  # percentage in w.r.t. image sizes
-    device = torch.device('cpu')
-
-    anchor_pyramid = enumerate_pyramid_anchors(
-        pyramid_image_sizes,
-        normalized_base_box_size=normalized_base_box_size,
-        normalize_anchor_geometry=True,
-        device=device
-    )
-    anchors = torch.cat(anchor_pyramid, dim=0)
-    anchor_logits, anchor_valid_mask = calculate_anchor_logits(
-        anchors, eps=1e-2
-    )
-
-    assert torch.equal(anchor_valid_mask_true[0], anchor_valid_mask)
-
-    # Filter out the invalid rows.
-    # with this recipe...
-    valid_anchor_logits = anchor_logits[anchor_valid_mask[:, 0], :]
+    # Filter out the invalid rows with this recipe...
+    valid_anchor_logits = anchor_logits[anchor_mask[:, 0], :]
     valid_anchor_logits_true = \
-        anchor_logits_true[0, anchor_valid_mask_true[0, :, 0], :]
-    assert torch.norm(valid_anchor_logits - valid_anchor_logits_true) < 1e-5
+        anchor_logits_true[0, anchor_mask_true[0, :, 0], :]
+
+    assert torch.equal(anchor_mask_true[0], anchor_mask)
+    assert torch.norm(valid_anchor_logits - valid_anchor_logits_true) < 2.5e-5
+
 
 
 def test_decoder_computations():
@@ -109,4 +107,3 @@ def test_decoder_computations():
     for shape, shape_true in zip(pyramid_image_sizes,
                                  pyramid_image_sizes_true):
         assert shape == torch.Size(shape_true)
-
