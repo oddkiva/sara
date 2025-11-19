@@ -1,10 +1,11 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 
 
-class MultiscaleDeformableAttention(torch.nn.Module):
+class MultiscaleDeformableAttention(nn.Module):
     """ This class implements the multiscale deformable attention layer as
     described in the paper [Deformable DETR: Deformable Transformers for
     End-to-End Object Detection](https://arxiv.org/pdf/2010.04159).
@@ -55,34 +56,24 @@ class MultiscaleDeformableAttention(torch.nn.Module):
         self.kv_count_per_query = \
             attention_head_count * self.kv_count_per_attention_head
 
-        # TODO: debatable.
-        self.positional_embedding_fn = torch.nn.Sequential(
-            torch.nn.Linear(2, value_dim),
-            torch.nn.ReLU(),
-            torch.nn.Linear(value_dim, value_dim),
-            torch.nn.ReLU(),
-            torch.nn.Linear(value_dim, value_dim),
-            torch.nn.ReLU(),
-        )
-
         # As described in figure 2 of the paper, the sampling offset is simply
         # a linear predictor.
         #
         # Notice that we could have done the following:
         # self.sampling_offset_funcs = [
-        #     torch.nn.Linear(embed_dim, key_count_per_scale * 2)
+        #     nn.Linear(embed_dim, key_count_per_scale * 2)
         #     for _ in range(attention_head_count)
         # ]
         #
         # But the reference implementation uses equivalently a single linear
-        # predictor and this is more efficient.
-        self.sampling_offset_funcs = torch.nn.Linear(
+        # predictor and this is more efficient as we do a single call.
+        self.sampling_offset_funcs = nn.Linear(
             embed_dim,
             self.kv_count_per_query * 2,
         )
 
         # Likewise, we learn a single linear predictor
-        self.attn_weights_funcs = torch.nn.Linear(
+        self.attn_weight_predictors = nn.Linear(
             embed_dim,
             self.kv_count_per_query
         )
@@ -96,31 +87,11 @@ class MultiscaleDeformableAttention(torch.nn.Module):
         # torch.reshape(y, (N, L, H, K))
         # torch.softmax(y, dim=-1)
 
-        self.value_projector = torch.nn.Linear(embed_dim, value_dim)
-        self.final_projections = [torch.nn.Linear(value_dim, value_dim)
+        self.value_projector = nn.Linear(embed_dim, value_dim)
+        self.final_projections = [nn.Linear(value_dim, value_dim)
                                  for _ in range(attention_head_count)]
 
-    def normalize_query_positions(
-        self,
-        X: torch.Tensor,
-        query_positions: torch.Tensor
-    ) -> torch.Tensor:
-        _, h, w, _ = X.shape
-        wh_inverse = torch.tensor([1. / w, 1. / h], dtype=torch.float32)
-        query_positions_normalized = query_positions * wh_inverse
-        return query_positions_normalized
-
-    def form_queries(
-        self,
-        X: torch.Tensor,
-        query_positions: torch.Tensor
-    ) -> torch.Tensor:
-        X_sampled = X[query_positions]
-        positional_embeds = self.positional_embedding_fn(query_positions)
-        queries = X_sampled + positional_embeds
-        return queries
-
-    def predict_offsets(self, queries: torch.Tensor) -> torch.Tensor:
+    def predict_positional_offsets(self, queries: torch.Tensor) -> torch.Tensor:
         """
         Predicts the relative position deltas for each key-value pairs w.r.t
         the query position.
@@ -139,7 +110,7 @@ class MultiscaleDeformableAttention(torch.nn.Module):
 
     def predict_attention_weights(
         self,
-        queries: torch.Tensor,
+        queries: torch.Tensor
     ) -> torch.Tensor:
         """
         Predicts the attention weights for each key-value pairs w.r.t. each
@@ -147,7 +118,7 @@ class MultiscaleDeformableAttention(torch.nn.Module):
 
         We implement it as per figure 2 of the paper.
         """
-        attn_weights = self.attn_weights_funcs(queries)
+        attn_weights = self.attn_weight_predictors(queries)
 
         batch_size, query_count, _ = queries.shape
         attn_weights = torch.reshape(
@@ -162,7 +133,7 @@ class MultiscaleDeformableAttention(torch.nn.Module):
 
     def sample_values(
         self,
-        X: torch.Tensor,
+        query_encodings: torch.Tensor,
         query_positions: torch.Tensor,
         position_deltas: torch.Tensor
     ) -> torch.Tensor:
@@ -179,25 +150,25 @@ class MultiscaleDeformableAttention(torch.nn.Module):
             min = -1., max=1.
         ).unsqueeze(1)
         values = torch.cat([
-            F.grid_sample(Xi, key_value_positions)
-            for Xi in X
+            F.grid_sample(q, key_value_positions)
+            for q in query_encodings
         ])
         return values
 
     def predict_value(
         self,
-        X: torch.Tensor,
-        query_positions: torch.Tensor
+        query_encodings: torch.Tensor,
+        query_positional_embeds: torch.Tensor | None
     ) -> torch.Tensor:
-        # Normalize the query positions in [0, 1]
-        query_positions_normalized = self.normalize_query_positions(
-            X, query_positions
-        )
-        queries = self.form_queries(X, query_positions_normalized)
-        position_deltas = self.predict_offsets(queries)
+        if query_positional_embeds is None:
+            queries = query_encodings
+        else:
+            queries = query_encodings + query_positional_embeds
+
+        position_deltas = self.predict_positional_offsets(queries)
 
         attn_weigths_sampled = self.predict_attention_weights(queries)
-        values_sampled = self.sample_values(X,
+        values_sampled = self.sample_values(query_encodings,
                                             query_positions_normalized,
                                             position_deltas)
 
@@ -213,7 +184,32 @@ class MultiscaleDeformableAttention(torch.nn.Module):
 
 
     def forward(self,
-                X: torch.Tensor,
-                query_positions: torch.Tensor,
-                values: torch.Tensor) -> torch.Tensor:
+                query_encodings: torch.Tensor,
+                query_geometry_logits: torch.Tensor,
+                memory: torch.Tensor,
+                memory_mask: torch.Tensor | None = None) -> torch.Tensor:
         pass
+
+
+
+    # def normalize_query_positions(
+    #     self,
+    #     X: torch.Tensor,
+    #     query_positions: torch.Tensor
+    # ) -> torch.Tensor:
+    #     _, h, w, _ = X.shape
+    #     wh_inverse = torch.tensor([1. / w, 1. / h], dtype=torch.float32)
+    #     query_positions_normalized = query_positions * wh_inverse
+    #     return query_positions_normalized
+
+
+    # def form_queries(
+    #     self,
+    #     X: torch.Tensor,
+    #     query_positions: torch.Tensor
+    # ) -> torch.Tensor:
+    #     X_sampled = X[query_positions]
+    #     positional_embeds = self.positional_embedding_fn(query_positions)
+    #     queries = X_sampled + positional_embeds
+    #     return queries
+

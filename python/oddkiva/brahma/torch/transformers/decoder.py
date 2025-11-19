@@ -60,7 +60,6 @@ class TransformerDecoderLayer(torch.nn.Module):
         raise NotImplemented
 
 
-
 class TransformerDecoder(torch.nn.Module):
     """
     The TransformerDecoder class is typically a stack of cross-attention layers.
@@ -111,4 +110,3 @@ class TransformerDecoder(torch.nn.Module):
         if self.norm is not None:
             y = self.norm(y)
         return y
-

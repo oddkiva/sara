@@ -135,7 +135,10 @@ class AnchorDecoder(nn.Module):
             self.anchor_mask = None
 
     def _initial_class_logit_value(self, prob: float) -> float:
-        """ The interpretatiion is the probability that a
+        """
+        The interpretation is the bias is a low starting probability value that
+        any anchor with box size of 5% of the image size contains an object of
+        any class.
         """
         logit_value = -math.log((1 - prob) / prob)
         return logit_value
