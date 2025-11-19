@@ -109,7 +109,11 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         Returns:
             Decoded queries $\mathbf{V}^+$
         """
-        pass
+
+        # IMPORTANT: In RT-DETR, a query is considered to be a new independent
+        # input even if it is actually produced by the CNN backbone extractor
+        # and the encoder.
+        assert query.requires_grad is False
 
 
 class MultiScaleDeformableTransformerDecoder(nn.Module):

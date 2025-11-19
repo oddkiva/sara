@@ -61,6 +61,8 @@ def test_anchor_logit_enumerator():
         fpyr_image_sizes,
         fpyr_projected[0].device
     )
+    assert anchor_logits.requires_grad is False
+    assert anchor_mask.requires_grad is False
 
     anchor_logits_true, anchor_mask_true = \
         data['intermediate']['decoder']['_generate_anchors']

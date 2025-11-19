@@ -42,10 +42,10 @@ class TransformerDecoderLayer(torch.nn.Module):
         self.layer_norm_2 = torch.nn.LayerNorm(embed_dim)
 
         self.feedforward = torch.nn.Sequential(OrderedDict([
-            ("tsfm-enc-linear-1", torch.nn.Linear(embed_dim, feedforward_dim)),
-            ("tsfm-enc-activation", torch.nn.ReLU()),
-            ("tsfm-enc-dropout", torch.nn.Dropout(p=dropout)),
-            ("tsfm-enc-linear-2", torch.nn.Linear(feedforward_dim, embed_dim))
+            ("linear-1", torch.nn.Linear(embed_dim, feedforward_dim)),
+            ("activation", torch.nn.ReLU()),
+            ("dropout", torch.nn.Dropout(p=dropout)),
+            ("linear-2", torch.nn.Linear(feedforward_dim, embed_dim))
         ]))
         self.dropout_3 = torch.nn.Dropout(p=dropout)
         self.layer_norm_3 = torch.nn.LayerNorm(embed_dim)
