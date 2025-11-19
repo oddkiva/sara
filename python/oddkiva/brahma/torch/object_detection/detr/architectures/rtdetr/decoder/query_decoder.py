@@ -12,56 +12,6 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 
 
-class ObjectQueryDecoder(nn.Module):
-
-    def __init__(self,
-                 num_classes: int,
-                 hidden_dim: int,
-                 num_layers: int,
-                 num_queries: int = 300):
-        super().__init__()
-
-        self.query_geometry_to_embedding_func = MultiLayerPerceptron(
-            4,               # Unactivated query geoemtry dimension
-            2 * hidden_dim,  # Internal hidden dimension
-            hidden_dim,      # Embedding dimension
-            2                # Number of layers
-        )
-
-        # Instantiate the decoder heads.
-        #
-        # Store the decoded values (box geometries and probabilities) at each
-        # iteration.
-        #
-        # The rationale is that we want to optimize each iteration as much
-        # as possible during training time.
-        self.class_logits_head = nn.ModuleList(
-            nn.Linear(hidden_dim, num_classes)
-            for _ in range(num_layers)
-        )
-        self.box_geometry_head = nn.ModuleList(
-            MultiLayerPerceptron(hidden_dim, hidden_dim, 4, 3)
-            for _ in range(num_layers)
-        )
-
-    def _reinitialize_learning_parameters(self):
-        if self.learn_query_content:
-            nn.init.xavier_uniform_(self.query_embedding.weight)
-
-        for _cls, _reg in zip(self.class_logits_head, self.box_geometry_head):
-            nn.init.constant_(_cls.bias, bias)
-            nn.init.constant_(_reg.layers[-1].weight, 0)
-            nn.init.constant_(_reg.layers[-1].bias, 0)
-
-        for i in range(self.query_geometry_to_embedding_func.layer_count):
-            nn.init.xavier_uniform_(
-                self.query_geometry_to_embedding_func.layers[i].weight
-            )
-
-    def forward(self, _: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        raise NotImplementedError()
-
-
 class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
 
     def __init__(self,
@@ -191,10 +141,14 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             for _ in range(attn_num_layers)
         ])
 
-        # OBJECT QUERY CLASS LOGITS
+        # These two heads are mainly there to accelerate the training
+        # convergence
+        #
+        # Query class logits
         self.decoder_class_logits_head = nn.ModuleList(
             nn.Linear(hidden_dim, num_classes) for _ in range(attn_num_layers)
         )
+        # Query geometry logits
         self.decoder_box_geometry_head = nn.ModuleList(
             MultiLayerPerceptron(hidden_dim, hidden_dim, 4, 3)
             for _ in range(attn_num_layers)

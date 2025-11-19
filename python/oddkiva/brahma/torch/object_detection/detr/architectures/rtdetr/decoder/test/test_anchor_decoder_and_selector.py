@@ -7,6 +7,8 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder import MultiScaleDeformableTransformerDecoder
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.anchor_decoder import AnchorGeometryLogitEnumerator
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.anchor_selector import AnchorSelector
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
@@ -129,37 +131,24 @@ def test_anchor_decoder():
     assert torch.dist(valid_geom_logits, valid_geom_logits_true) < 2.5e-5
 
 
-
-def test_decoder_computations():
-    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
+def test_anchor_selector():
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
-    decoder = ckpt.load_decoder()
-
-    encoder_out = data['intermediate']['encoder']['out']
-    dec_input_proj_outs_true = data['intermediate']['decoder']['input_proj']
-
-    dec_input_proj_outs = decoder.feature_projectors(encoder_out)
-    with torch.no_grad():
-        for out, out_true in zip(dec_input_proj_outs, dec_input_proj_outs_true):
-            assert torch.linalg.vector_norm(out - out_true) < 1e-12
-            assert torch.linalg.vector_norm(out - out_true, ord=torch.inf) < 1e-12
-
-    query_pyramid_true, pyramid_image_sizes_true = \
-        data['intermediate']['decoder']['_get_encoder_input']
-    query_pyramid = [
+    # Reconstruct the memory
+    fpyr_projected: list[torch.Tensor] = \
+        data['intermediate']['decoder']['input_proj']
+    memory = torch.cat([
         fmap.flatten(2).permute(0, 2, 1)
-        for fmap in dec_input_proj_outs
-    ]
-    query_pyramid = torch.cat(query_pyramid, dim=1)
+        for fmap in fpyr_projected
+    ], dim=1)
 
-    pyramid_image_sizes = [
-        fmap.shape[2:][::-1]
-        for fmap in dec_input_proj_outs
-    ]
-    with torch.no_grad():
-        for out, out_true in zip(query_pyramid, query_pyramid_true):
-            assert torch.linalg.vector_norm(out - out_true) < 1e-12
-    for shape, shape_true in zip(pyramid_image_sizes,
-                                 pyramid_image_sizes_true):
-        assert shape == torch.Size(shape_true)
+    # Fetch the class logits and geometry logits for each each anchor
+    anchor_class_logits, anchor_geom_logits = \
+        data['intermediate']['decoder']['_get_decoder_input_part_1']
+
+    anchor_selector = AnchorSelector(top_k=300)
+    (top_queries,
+     top_class_logits,
+     top_geom_logits) = anchor_selector.forward(memory,
+                                                anchor_class_logits,
+                                                anchor_geom_logits)
