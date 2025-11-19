@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 
 from oddkiva.brahma.torch.backbone.resnet.vanilla import make_activation_func
@@ -21,8 +20,10 @@ class MultiLayerPerceptron(nn.Module):
         activation_fn = make_activation_func(activation)
         assert activation_fn is not None
 
-        self.layers = nn.ModuleList(nn.Linear(n, k) for n, k in zip(in_dim_seq,
-                                                                    out_dim_seq))
+        self.layers = nn.ModuleList(
+            nn.Linear(in_channels, out_channels)
+            for in_channels, out_channels in zip(in_dim_seq, out_dim_seq)
+        )
         self.activation = activation_fn
 
     def forward(self, x):
