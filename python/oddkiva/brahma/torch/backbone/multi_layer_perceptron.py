@@ -17,14 +17,13 @@ class MultiLayerPerceptron(nn.Module):
         in_dim_seq = [in_dim] + hidden_dim_seq
         out_dim_seq = hidden_dim_seq + [out_dim]
 
-        activation_fn = make_activation_func(activation)
-        assert activation_fn is not None
-
         self.layers = nn.ModuleList(
             nn.Linear(in_channels, out_channels)
             for in_channels, out_channels in zip(in_dim_seq, out_dim_seq)
         )
-        self.activation = activation_fn
+        self.activation = make_activation_func(activation)
+        assert self.activation is not None
+
 
     def forward(self, x):
         for i, layer in enumerate(self.layers):
