@@ -62,7 +62,7 @@ def enumerate_anchors(image_sizes: tuple[int, int],
     return boxes
 
 
-def enumerate_pyramid_anchors(
+def enumerate_anchor_pyramid(
     pyramid_image_sizes: list[tuple[int, int]],
     normalized_base_box_size: float = 0.05,
     normalize_anchor_geometry: bool = True,
