@@ -28,7 +28,9 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.hybrid_encoder import HybridEncoder
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.decoder import MultiScaleDeformableTransformerDecoder
+    rtdetr.decoder.anchor_decoder import AnchorDecoder
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.rtdetrv2_decoder import RTDETRv2Decoder
 
 
 class RTDETRV2Checkpoint:
@@ -950,32 +952,55 @@ class RTDETRV2Checkpoint:
 
         return fp_proj
 
-
-    def load_decoder(self) -> MultiScaleDeformableTransformerDecoder:
+    def load_decoder_anchor_decoder(self) -> AnchorDecoder:
         encoding_dim = 256
         hidden_dim = 256
-        kv_count_per_level = [4, 4, 4]
-        attn_head_count = 8
-        attn_feedforward_dim = 1024
-        attn_dropout = 0.0
-        attn_num_layers = 6
-        activation = 'relu'
-        normalize_before = False
-        # Multi-scale deformable attention parameters
+        num_classes = 80
 
-        noised_true_boxes_count = 100
-        label_noise_ratio = 0.5
-        box_noise_scale = 1.0
+        anchor_decoder = AnchorDecoder(
+            encoding_dim, hidden_dim, num_classes,
+            geometry_head_layer_count=3,
+            geometry_head_activation='relu',
+            normalized_base_size=0.05,
+            logit_eps=1e-2,
+            precalculate_anchor_geometry_logits=True,
+            image_pyramid_wh_sizes=[(80, 80), (40, 40), (20, 20)],
+            device = torch.device('cpu'),
+            initial_class_probability=0.1
+        )
+        anchor_decoder = freeze_batch_norm(anchor_decoder)
+        import ipdb; ipdb.set_trace()
 
-        decoder = MultiScaleDeformableTransformerDecoder(
+        assert type(anchor_decoder) is AnchorDecoder
+        return anchor_decoder
+
+    def load_decoder(self) -> RTDETRv2Decoder:
+        # encoding_dim = 256
+        # hidden_dim = 256
+        # kv_count_per_level = [4, 4, 4]
+        # attn_head_count = 8
+        # attn_feedforward_dim = 1024
+        # attn_dropout = 0.0
+        # attn_num_layers = 6
+        # activation = 'relu'
+        # normalize_before = False
+        # # Multi-scale deformable attention parameters
+
+        # noised_true_boxes_count = 100
+        # label_noise_ratio = 0.5
+        # box_noise_scale = 1.0
+
+        num_classes = 80
+        encoding_dim = 256
+        hidden_dim = 256
+        pyramid_level_count = 3
+
+        decoder = RTDETRv2Decoder(
+            num_classes,
             encoding_dim,
             hidden_dim,
-            kv_count_per_level,
-            attn_head_count=attn_head_count,
-            attn_feedforward_dim=attn_feedforward_dim,
-            attn_num_layers=attn_num_layers,
-            attn_dropout=attn_dropout,
-            normalize_before=normalize_before
+            pyramid_level_count,
+            precalculate_anchor_geometry_logits=False
         )
 
         decoder.feature_projectors = self.load_decoder_input_proj()

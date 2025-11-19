@@ -88,7 +88,7 @@ def enumerate_anchor_pyramid(
     return anchors
 
 
-def calculate_anchor_logits(
+def calculate_anchor_geometry_logits(
     anchors: torch.Tensor,
     eps: float = 1e-2
 ) -> tuple[torch.Tensor, torch.Tensor]:

@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 
+from oddkiva.brahma.torch.backbone.resnet.vanilla import make_activation_func
+
+
 class MultiLayerPerceptron(nn.Module):
 
     def __init__(self,

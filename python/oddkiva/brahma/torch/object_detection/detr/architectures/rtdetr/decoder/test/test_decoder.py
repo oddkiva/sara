@@ -3,12 +3,10 @@ import torch
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import RTDETRV2Checkpoint
-from oddkiva.brahma.torch.object_detection.common.anchors import (
-    calculate_anchor_logits,
-    enumerate_pyramid_anchors
-)
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder import MultiScaleDeformableTransformerDecoder
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.anchor_decoder import AnchorGeometryLogitEnumerator
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
@@ -18,23 +16,22 @@ DATA_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
 
 
 def test_decoder_construction():
-    encoding_dim = 256
     hidden_dim = 256
     kv_count_per_level = [4, 4, 4]
     attn_head_count = 8
     attn_feedforward_dim = 1024
     attn_dropout = 0.0
     attn_num_layers = 6
-    activation = 'relu'
+    # activation = 'relu'
     normalize_before = False
     # Multi-scale deformable attention parameters
 
-    noised_true_boxes_count = 100
-    label_noise_ratio = 0.5
-    box_noise_scale = 1.0
+    # DN-DETR parameters
+    # noised_true_boxes_count = 100
+    # label_noise_ratio = 0.5
+    # box_noise_scale = 1.0
 
-    decoder = MultiScaleDeformableTransformerDecoder(
-        encoding_dim,
+    MultiScaleDeformableTransformerDecoder(
         hidden_dim,
         kv_count_per_level,
         attn_head_count=attn_head_count,
@@ -43,20 +40,22 @@ def test_decoder_construction():
         attn_dropout=attn_dropout,
         normalize_before=normalize_before
     )
-    assert len(decoder.feature_projectors) == 3
 
 
-def test_decoder_anchor_generation():
-    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
+def test_anchor_logit_enumerator():
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
-    decoder = ckpt.load_decoder()
     fpyr_projected: list[torch.Tensor] = \
         data['intermediate']['decoder']['input_proj']
     fpyr_image_sizes = [fmap.shape[2:][::-1]
                         for fmap in fpyr_projected]
 
-    anchor_logits, anchor_mask = decoder._enumerate_anchors(
+    anchor_logit_enumerator = AnchorGeometryLogitEnumerator(
+        normalized_base_size=0.05,
+        eps=1e-2
+    )
+
+    anchor_logits, anchor_mask = anchor_logit_enumerator(
         fpyr_image_sizes,
         fpyr_projected[0].device
     )
@@ -67,16 +66,17 @@ def test_decoder_anchor_generation():
     # Filter out the invalid rows with this recipe...
     valid_anchor_logits = anchor_logits[anchor_mask[:, 0], :]
     valid_anchor_logits_true = \
-<<<<<<< HEAD
         anchor_logits_true[0, anchor_mask_true[0, :, 0], :]
 
     assert torch.equal(anchor_mask_true[0], anchor_mask)
     assert torch.norm(valid_anchor_logits - valid_anchor_logits_true) < 2.5e-5
 
-=======
-        anchor_logits_true[0, anchor_valid_mask_true[0, :, 0], :]
-    assert torch.norm(valid_anchor_logits - valid_anchor_logits_true) < 2.5e-5
->>>>>>> cb44cf3aa49b3d8e19a255314a3759b94abc4e0a
+
+def test_anchor_decoder():
+    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
+    data = torch.load(DATA_FILEPATH, torch.device('cpu'))
+    anchor_decoder = ckpt.load_decoder_anchor_decoder()
+
 
 
 def test_decoder_computations():
