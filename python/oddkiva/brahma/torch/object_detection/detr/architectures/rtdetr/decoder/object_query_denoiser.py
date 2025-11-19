@@ -30,5 +30,3 @@ class ObjectQueryDenoiser(nn.Module):
                                       padding_idx=num_classes)
 
         nn.init.normal_(self.embedding.weight[:-1])
-
-    def 
