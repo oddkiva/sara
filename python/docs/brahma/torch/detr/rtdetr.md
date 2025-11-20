@@ -21,3 +21,4 @@
 ::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.anchor_decoder
 ::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.anchor_selector
 ::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.query_decoder
+::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.rtdetrv2_decoder

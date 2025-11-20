@@ -47,7 +47,7 @@ class RTDETRv2Decoder(nn.Module):
         # if self.learn_query_content:
         #     nn.init.xavier_uniform_(self.tgt_embed.weight)
 
-        # Reset the parametesr
+        # Reset the parameters
         for convbna in self.feature_projectors:
             conv = convbna.layers[0]
             nn.init.xavier_uniform_(conv.weight)

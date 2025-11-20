@@ -155,26 +155,17 @@ class MultiscaleDeformableAttention(nn.Module):
         ])
         return values
 
-    def predict_value(
-        self,
-        query_encodings: torch.Tensor,
-        query_positional_embeds: torch.Tensor | None
-    ) -> torch.Tensor:
-        if query_positional_embeds is None:
-            queries = query_encodings
-        else:
-            queries = query_encodings + query_positional_embeds
-
+    def predict_value(self, queries: torch.Tensor) -> torch.Tensor:
         position_deltas = self.predict_positional_offsets(queries)
 
-        attn_weigths_sampled = self.predict_attention_weights(queries)
-        values_sampled = self.sample_values(query_encodings,
+        attn_weights_sampled = self.predict_attention_weights(queries)
+        values_sampled = self.sample_values(queries,
                                             query_positions_normalized,
                                             position_deltas)
 
         # Aggregate by linearly combining the sampled values with the attention
         # weights.
-        values_aggregated = torch.sum(attn_weigths_sampled * values_sampled)
+        values_aggregated = torch.sum(attn_weights_sampled * values_sampled)
 
         final_value = torch.sum([
             self.final_projections(values_aggregated)
@@ -184,10 +175,10 @@ class MultiscaleDeformableAttention(nn.Module):
 
 
     def forward(self,
-                query_encodings: torch.Tensor,
+                queries: torch.Tensor,
                 query_geometry_logits: torch.Tensor,
-                memory: torch.Tensor,
-                memory_mask: torch.Tensor | None = None) -> torch.Tensor:
+                value: torch.Tensor,
+                value_mask: torch.Tensor | None = None) -> torch.Tensor:
         pass
 
 

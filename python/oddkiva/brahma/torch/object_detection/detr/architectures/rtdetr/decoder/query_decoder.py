@@ -4,6 +4,7 @@ import math
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from oddkiva.brahma.torch.backbone.multi_layer_perceptron import (
     MultiLayerPerceptron
@@ -14,7 +15,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 
 
-class BoxGeometryLogitToEmbedMap(MultiLayerPerceptron):
+class BoxGeometryToPositionalEmbedMap(MultiLayerPerceptron):
 
     def __init__(self, embed_dim: int):
         super().__init__(4, 2 * embed_dim, embed_dim, 2, activation='relu')
@@ -137,8 +138,8 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
     def forward(
         self,
         query_embeds: torch.Tensor,
-        query_geometry_logits: torch.Tensor,
-        memory: list[torch.Tensor],
+        query_geometry: torch.Tensor,
+        memory: torch.Tensor,
         query_positional_embeds: torch.Tensor | None = None,
         attn_mask: torch.Tensor | None = None,
         memory_mask: torch.Tensor | None = None
@@ -164,10 +165,10 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         $$
 
         Parameters:
-            query:
-                The query matrix $\mathbf{Q}$
-            query_pos:
-                The 2D coordinates of each query vectors of the matrix
+            query_embeds:
+                The query encoding stacked as row vectors
+            query_geometry_logits:
+                The 4D box geometry for each object query row vectors of
                 $\mathbf{Q}$.
             memory:
                 the concatenated query vectors that are calculated from the
@@ -178,9 +179,12 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
             Decoded queries $\mathbf{V}^+$
         """
 
-        # IMPORTANT: In RT-DETR, a query is considered to be a new independent
-        # input even if it is actually produced by the CNN backbone extractor
-        # and the encoder.
+        # IMPORTANT
+        # ---------
+        #
+        # In RT-DETR, a query is considered to be a new independent input even
+        # if it is actually produced by the CNN backbone extractor and the
+        # encoder.
         assert query_embeds.requires_grad is False
         assert query_geometry_logits.requires_grad is False
 
@@ -262,5 +266,69 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
     #     for m in self.input_proj:
     #         init.xavier_uniform_(m[0].weight)
 
-    def forward(self, feature_pyramid: list[torch.Tensor]) -> list[torch.Tensor]:
-        raise NotImplementedError()
+    def forward(
+        self,
+        query: torch.Tensor, query_geometry_logits: torch.Tensor,
+        value: torch.Tensor,
+        box_geometry_to_geometry_embed_map: BoxGeometryToPositionalEmbedMap,
+        box_geometry_logit_heads: list[nn.Module],
+        box_class_logit_heads: list[nn.Module],
+        value_mask: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        assert query.requires_grad is False
+        assert query_geometry_logits.requires_grad is False
+
+        # Get the actual query geometry by activating the logits with the
+        # sigmoid function.
+
+        # Initialize:
+        # - the current query embedding
+        # - the current query geometry logits (the object geometry before the
+        #   sigmoid activation)
+        # - the current query geometry (the object box geometry)
+        query_curr = query
+        query_geom_logits_curr = query_geometry_logits
+        query_geom_curr = F.sigmoid(query_geom_logits_curr)
+
+        query_next: torch.Tensor | None = None
+        query_class_logits_next: torch.Tensor | None = None
+        query_geom_logits_next: torch.Tensor | None = None
+        query_geom_next: torch.Tensor | None = None
+
+        query_geometries_denoised = []
+        query_class_logits_denoised = []
+
+        for i, decoder_layer in enumerate(self.decoder):
+            assert type(decoder_layer) is MultiScaleDeformableTransformerDecoderLayer
+
+            # Calculate the corresponding embed vector of the box geometry
+            query_geom_embed_curr = box_geometry_to_geometry_embed_map\
+                .forward(query_geom_curr)
+
+            # Denoise the current query.
+            query_next = decoder_layer.forward(
+                query_curr, query_geom_curr, value,
+                query_positional_embeds=query_geom_embed_curr,
+                attn_mask=value_mask, memory_mask=None
+            )
+
+            # Estimate the new object class logits (object class probabilities).
+            query_class_logits_next = box_class_logit_heads[i](query_next)
+
+            # Estimate the new object geometry (cx cy w h).
+            Δ_query_geom_logits = box_geometry_logit_heads[i](query_next)
+            query_geom_logits_next = \
+                query_geom_logits_curr + Δ_query_geom_logits
+            query_geom_next = F.sigmoid(query_geom_logits_next)
+
+            # Store the denoised results.
+            query_geometries_denoised.append(query_geom_next)
+            query_class_logits_denoised.append(query_class_logits_next)
+
+            # Update for the next denoising iteration.
+            query_curr = query_next
+            query_geom_logits_curr = query_geom_logits_next
+            query_geom_curr = query_geom_next
+
+        return (torch.stack(query_geometries_denoised),
+                torch.stack(query_class_logits_denoised))
