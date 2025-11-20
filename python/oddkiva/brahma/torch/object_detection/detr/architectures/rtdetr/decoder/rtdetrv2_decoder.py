@@ -49,7 +49,9 @@ class RTDETRv2Decoder(nn.Module):
 
         # Reset the parameters
         for convbna in self.feature_projectors:
+            assert type(convbna) is UnbiasedConvBNA
             conv = convbna.layers[0]
+            assert type(conv) is nn.Conv2d
             nn.init.xavier_uniform_(conv.weight)
 
     def _transform_feature_pyramid_into_memory(

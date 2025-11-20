@@ -26,7 +26,7 @@ class BoxGeometryToPositionalEmbedMap(MultiLayerPerceptron):
             nn.init.xavier_uniform_(layer.weight)
 
 
-class ClassLogitHead(nn.Linear):
+class BoxObjectClassLogitHead(nn.Linear):
 
     def __init__(self,
                  embed_dim: int,
@@ -47,7 +47,7 @@ class ClassLogitHead(nn.Linear):
         logit_value = -math.log((1 - prob) / prob)
         return logit_value
 
-class GeometryLogitHead(MultiLayerPerceptron):
+class BoxGeometryLogitHead(MultiLayerPerceptron):
 
     def __init__(self,
                  embed_dim: int,
@@ -259,20 +259,14 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             for _ in range(attn_num_layers)
         )
 
-    # def _reinitialize_learning_parameters(self):
-    #     if self.learn_query_content:
-    #         init.xavier_uniform_(self.tgt_embed.weight)
-
-    #     for m in self.input_proj:
-    #         init.xavier_uniform_(m[0].weight)
+        self.box_geometry_to_geometry_embed_map: BoxGeometryToPositionalEmbedMap
+        self.box_geometry_logit_heads: list[BoxGeometryLogitHead]
+        self.box_class_logit_heads: list[BoxObjectClassLogitHead]
 
     def forward(
         self,
         query: torch.Tensor, query_geometry_logits: torch.Tensor,
         value: torch.Tensor,
-        box_geometry_to_geometry_embed_map: BoxGeometryToPositionalEmbedMap,
-        box_geometry_logit_heads: list[nn.Module],
-        box_class_logit_heads: list[nn.Module],
         value_mask: torch.Tensor | None = None
     ) -> tuple[torch.Tensor, torch.Tensor]:
         assert query.requires_grad is False
@@ -302,7 +296,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             assert type(decoder_layer) is MultiScaleDeformableTransformerDecoderLayer
 
             # Calculate the corresponding embed vector of the box geometry
-            query_geom_embed_curr = box_geometry_to_geometry_embed_map\
+            query_geom_embed_curr = self.box_geometry_to_geometry_embed_map\
                 .forward(query_geom_curr)
 
             # Denoise the current query.
@@ -313,10 +307,10 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             )
 
             # Estimate the new object class logits (object class probabilities).
-            query_class_logits_next = box_class_logit_heads[i](query_next)
+            query_class_logits_next = self.box_class_logit_heads[i](query_next)
 
             # Estimate the new object geometry (cx cy w h).
-            Δ_query_geom_logits = box_geometry_logit_heads[i](query_next)
+            Δ_query_geom_logits = self.box_geometry_logit_heads[i](query_next)
             query_geom_logits_next = \
                 query_geom_logits_curr + Δ_query_geom_logits
             query_geom_next = F.sigmoid(query_geom_logits_next)
