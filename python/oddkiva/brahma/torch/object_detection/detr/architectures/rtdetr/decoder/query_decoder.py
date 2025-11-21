@@ -15,7 +15,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 
 
-class BoxGeometryToPositionalEmbedMap(MultiLayerPerceptron):
+class BoxGeometryEmbeddingMap(MultiLayerPerceptron):
 
     def __init__(self, embed_dim: int):
         super().__init__(4, 2 * embed_dim, embed_dim, 2, activation='relu')
@@ -167,7 +167,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         Parameters:
             query_embeds:
                 The query encoding stacked as row vectors
-            query_geometry_logits:
+            query_geometry:
                 The 4D box geometry for each object query row vectors of
                 $\mathbf{Q}$.
             memory:
@@ -186,7 +186,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         # if it is actually produced by the CNN backbone extractor and the
         # encoder.
         assert query_embeds.requires_grad is False
-        assert query_geometry_logits.requires_grad is False
+        assert query_geometry.requires_grad is False
 
         # Prepare the data.
         Q = K = self.with_positional_embeds(query_embeds, query_positional_embeds)
@@ -259,7 +259,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             for _ in range(attn_num_layers)
         )
 
-        self.box_geometry_to_geometry_embed_map: BoxGeometryToPositionalEmbedMap
+        self.box_geometry_embedding_map: BoxGeometryEmbeddingMap
         self.box_geometry_logit_heads: list[BoxGeometryLogitHead]
         self.box_class_logit_heads: list[BoxObjectClassLogitHead]
 
@@ -296,7 +296,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             assert type(decoder_layer) is MultiScaleDeformableTransformerDecoderLayer
 
             # Calculate the corresponding embed vector of the box geometry
-            query_geom_embed_curr = self.box_geometry_to_geometry_embed_map\
+            query_geom_embed_curr = self.box_geometry_embedding_map\
                 .forward(query_geom_curr)
 
             # Denoise the current query.

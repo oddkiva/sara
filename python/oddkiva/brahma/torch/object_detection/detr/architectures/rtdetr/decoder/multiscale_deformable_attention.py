@@ -67,7 +67,7 @@ class MultiscaleDeformableAttention(nn.Module):
         #
         # But the reference implementation uses equivalently a single linear
         # predictor and this is more efficient as we do a single call.
-        self.sampling_offset_funcs = nn.Linear(
+        self.sampling_offset_predictors = nn.Linear(
             embed_dim,
             self.kv_count_per_query * 2,
         )
@@ -88,8 +88,10 @@ class MultiscaleDeformableAttention(nn.Module):
         # torch.softmax(y, dim=-1)
 
         self.value_projector = nn.Linear(embed_dim, value_dim)
-        self.final_projections = [nn.Linear(value_dim, value_dim)
-                                 for _ in range(attention_head_count)]
+        self.final_projections = nn.ModuleList(
+            nn.Linear(value_dim, value_dim)
+            for _ in range(attention_head_count)
+        )
 
     def predict_positional_offsets(self, queries: torch.Tensor) -> torch.Tensor:
         """
@@ -100,7 +102,7 @@ class MultiscaleDeformableAttention(nn.Module):
         """
         batch_size, query_count, _ = queries.shape
 
-        position_deltas = self.sampling_offset_funcs(queries)
+        position_deltas = self.sampling_offset_predictors(queries)
         position_deltas = torch.reshape(
             position_deltas,
             (batch_size, query_count,

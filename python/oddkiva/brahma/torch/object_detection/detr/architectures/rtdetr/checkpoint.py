@@ -2,6 +2,7 @@ from pathlib import Path
 
 from loguru import logger
 
+from oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.multiscale_deformable_attention import MultiscaleDeformableAttention
 import torch
 import torch.nn as nn
 import torchvision.ops as ops
@@ -29,6 +30,10 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.hybrid_encoder import HybridEncoder
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.anchor_decoder import AnchorDecoder
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.query_decoder import (BoxGeometryEmbeddingMap,
+                                         BoxGeometryLogitHead,
+                                         BoxObjectClassLogitHead)
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.rtdetrv2_decoder import RTDETRv2Decoder
 
@@ -449,6 +454,31 @@ class RTDETRV2Checkpoint:
     def decoder_enc_bbox_head_bias(self, i: int):
         key = f'decoder.enc_bbox_head.layers.{i}.bias'
         return self.model_weights[key]
+
+    def decoder_query_pos_head_weight(self, i: int):
+        key = f'decoder.query_pos_head.layers.{i}.weight'
+        return self.model_weights[key]
+
+    def decoder_query_pos_head_bias(self, i: int):
+        key = f'decoder.query_pos_head.layers.{i}.bias'
+        return self.model_weights[key]
+
+    def decoder_score_head_weight(self, iteration: int):
+        key = f'decoder.dec_score_head.{iteration}.weight'
+        return self.model_weights[key]
+
+    def decoder_score_head_bias(self, iteration: int):
+        key = f'decoder.dec_score_head.{iteration}.bias'
+        return self.model_weights[key]
+
+    def decoder_bbox_head_weight(self, iteration: int, layer_idx: int):
+        key = f'decoder.dec_bbox_head.{iteration}.layers.{layer_idx}.weight'
+        return self.model_weights[key]
+
+    def decoder_bbox_head_bias(self, iteration: int, layer_idx: int):
+        key = f'decoder.dec_bbox_head.{iteration}.layers.{layer_idx}.bias'
+        return self.model_weights[key]
+
 
     # -------------------------------------------------------------------------
     # WEIGHT COPY UTILITIES
@@ -963,7 +993,7 @@ class RTDETRV2Checkpoint:
         return encoder
 
     # -------------------------------------------------------------------------
-    # ENCODER LOAD UTILITIES
+    # DECODER LOAD UTILITIES
     # -------------------------------------------------------------------------
     def load_decoder_input_proj(self) -> FeaturePyramidProjection:
         # Just hardcode the variables to simplify.
@@ -1031,22 +1061,115 @@ class RTDETRV2Checkpoint:
         assert type(anchor_decoder) is AnchorDecoder
         return anchor_decoder
 
+    def load_box_geometry_embedding_map(self) -> BoxGeometryEmbeddingMap:
+        embed_dim = 256
+        embed_fn = BoxGeometryEmbeddingMap(embed_dim)
+        for i, layer in enumerate(embed_fn.layers):
+            assert type(layer) is nn.Linear
+            self._copy_weight_and_bias(
+                layer,
+                self.decoder_query_pos_head_weight(i),
+                self.decoder_query_pos_head_bias(i)
+            )
+
+        return embed_fn
+
+    def load_box_geometry_logit_heads(self) -> list[BoxGeometryLogitHead]:
+        embed_dim = 256
+        iterations = 6
+        num_layers = 3
+
+        heads = []
+        for i in range(iterations):
+            head = BoxGeometryLogitHead(embed_dim, num_layers)
+
+            for layer_idx, layer in enumerate(head.layers):
+                assert type(layer) is nn.Linear
+                self._copy_weight_and_bias(
+                    layer,
+                    self.decoder_bbox_head_weight(i, layer_idx),
+                    self.decoder_bbox_head_bias(i, layer_idx)
+                )
+
+            heads.append(head)
+
+        return heads
+
+    def load_box_class_logit_heads(self) -> list[BoxObjectClassLogitHead]:
+        embed_dim = 256
+        num_classes = 80
+        iterations = 6
+
+        heads = []
+        for i in range(iterations):
+            head = BoxObjectClassLogitHead(embed_dim, num_classes)
+            self._copy_weight_and_bias(
+                head,
+                self.decoder_score_head_weight(i),
+                self.decoder_score_head_bias(i)
+            )
+            heads.append(head)
+
+        return heads
+
+    def load_multiscale_deformable_attention(
+        self, iteration: int
+    ) -> MultiscaleDeformableAttention:
+        embed_dim = 256
+        num_heads = 8
+        value_dim = 64
+
+        msda = MultiscaleDeformableAttention(
+            embed_dim, num_heads, value_dim,
+            pyramid_level_count=3,
+            kv_count_per_level=4
+        )
+
+        parent_key = f'decoder.decoder.layers.{iteration}.cross_attn'
+
+        key = f'{parent_key}.sampling_offsets'
+        self._copy_weight_and_bias(
+            msda.sampling_offset_predictors,
+            self.model_weights[f'{key}.weight'],
+            self.model_weights[f'{key}.bias']
+        )
+
+        key = f'{parent_key}.attention_weights'
+        self._copy_weight_and_bias(
+            msda.attn_weight_predictors,
+            self.model_weights[f'{key}.weight'],
+            self.model_weights[f'{key}.bias']
+        )
+
+        key = f'{parent_key}.value_proj'
+        self._copy_weight_and_bias(
+            msda.attn_weight_predictors,
+            self.model_weights[f'{key}.weight'],
+            self.model_weights[f'{key}.bias']
+        )
+
+        key = f'{parent_key}.output_proj'
+        self._copy_weight_and_bias(
+            msda.attn_weight_predictors,
+            self.model_weights[f'{key}.weight'],
+            self.model_weights[f'{key}.bias']
+        )
+
+        return msda
+
+    def load_transformer_decoder_layer_self_attention(
+        self, iteration: int
+    ) -> nn.MultiheadAttention:
+        embed_dim = 256
+        num_heads = 8
+        value_dim = 64
+
+        self_attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=0.,
+                                          batch_first=True)
+        self._copy_self_attn_weights(self_attn,
+        return self_attn
+
     def load_decoder(self) -> RTDETRv2Decoder:
-        # encoding_dim = 256
-        # hidden_dim = 256
-        # kv_count_per_level = [4, 4, 4]
-        # attn_head_count = 8
-        # attn_feedforward_dim = 1024
-        # attn_dropout = 0.0
-        # attn_num_layers = 6
-        # activation = 'relu'
-        # normalize_before = False
-        # # Multi-scale deformable attention parameters
-
-        # noised_true_boxes_count = 100
-        # label_noise_ratio = 0.5
-        # box_noise_scale = 1.0
-
         num_classes = 80
         encoding_dim = 256
         hidden_dim = 256
