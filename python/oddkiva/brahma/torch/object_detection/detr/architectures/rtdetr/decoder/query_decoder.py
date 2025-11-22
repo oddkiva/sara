@@ -47,6 +47,7 @@ class BoxObjectClassLogitHead(nn.Linear):
         logit_value = -math.log((1 - prob) / prob)
         return logit_value
 
+
 class BoxGeometryLogitHead(MultiLayerPerceptron):
 
     def __init__(self,
@@ -204,7 +205,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         # 2. Cross-attention -> (Dropout -> Add -> Norm)
         ΔV = self.cross_attention.forward(
             self.with_positional_embeds(V_super, query_positional_embeds),
-            query_geometry_logits,
+            query_geometry,
             memory,
             memory_mask
         )
@@ -293,7 +294,8 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         query_class_logits_denoised = []
 
         for i, decoder_layer in enumerate(self.decoder):
-            assert type(decoder_layer) is MultiScaleDeformableTransformerDecoderLayer
+            assert type(decoder_layer) is \
+                MultiScaleDeformableTransformerDecoderLayer
 
             # Calculate the corresponding embed vector of the box geometry
             query_geom_embed_curr = self.box_geometry_embedding_map\
