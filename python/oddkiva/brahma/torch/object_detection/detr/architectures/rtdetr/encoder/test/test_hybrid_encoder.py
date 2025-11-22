@@ -38,7 +38,6 @@ def test_hybrid_encoder_construction():
                             attn_num_layers=attn_num_layers)
     assert len(encoder.aifi.transformer_encoder.layers) == 1
 
-
     stack_count =  len(input_feature_dims) - 1
     assert type(encoder.ccff.fuse_topdown) is TopDownFusionNet
     assert len(encoder.ccff.fuse_topdown.lateral_convs) == stack_count
@@ -53,35 +52,8 @@ def test_hybrid_encoder_computations():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
-    # encoder_debug_data = torch.load(ENCODER_DEBUG_FILEPATH, torch.device('cpu'))
-    # encoder_frozen_state = torch.load(ENCODER_FROZEN_STATE_DEBUG_FILEPATH,
-    #                                   torch.device('cpu'))
-
     encoder = ckpt.load_encoder()
     assert len(encoder.aifi.transformer_encoder.layers) == 1
-
-    # for i in range(3):
-    #     conv_w1 = encoder.backbone_feature_proj.projections[i].layers[0].weight
-    #     conv_w2 = encoder_frozen_state[f'input_proj.{i}.conv.weight']
-    #     assert torch.norm(conv_w1 - conv_w2) < 1e-12
-
-    #     bn_w1 = encoder.backbone_feature_proj.projections[i].layers[1].weight
-    #     bn_w2 = encoder_frozen_state[f'input_proj.{i}.norm.weight']
-    #     assert torch.norm(bn_w1 - bn_w2) < 1e-12
-
-    #     bn_b1 = encoder.backbone_feature_proj.projections[i].layers[1].bias
-    #     bn_b2 = encoder_frozen_state[f'input_proj.{i}.norm.bias']
-    #     assert torch.norm(bn_b1 - bn_b2) < 1e-12
-
-    #     bn_rm1 = encoder.backbone_feature_proj.projections[i].layers[1]\
-    #         .running_mean
-    #     bn_rm2 = encoder_frozen_state[f'input_proj.{i}.norm.running_mean']
-    #     assert torch.norm(bn_rm1 - bn_rm2) < 1e-12
-
-    #     bn_rv1 = encoder.backbone_feature_proj.projections[i].layers[1]\
-    #         .running_var
-    #     bn_rv2 = encoder_frozen_state[f'input_proj.{i}.norm.running_var']
-    #     assert torch.norm(bn_rv1 - bn_rv2) < 1e-12
 
     backbone_outs = data['intermediate']['backbone']['out']
     fp_proj_outs_true = data['intermediate']['encoder']['input_proj']
@@ -109,17 +81,6 @@ def test_hybrid_encoder_computations():
         for out, out_true in zip(Q, ccff_out_true):
             assert torch.linalg.vector_norm(out - out_true) < 2e-3
             assert torch.linalg.vector_norm(out - out_true, ord=torch.inf) < 5e-5
-
-
-    # S_true = encoder_debug_data['proj_feats']
-    # for Si, Si_true in zip(fp_proj_outs, S_true):
-    #     assert torch.linalg.vector_norm(Si - Si_true) < 1e-12
-
-    # F5_true = encoder_debug_data['aifi']['memory']
-    # assert torch.linalg.vector_norm(F5_true - aifi_out_true) < 1e-12
-    # assert torch.linalg.vector_norm(F5_true - aifi_out_true) < 1e-12
-    # assert torch.linalg.vector_norm(F5_true - F5) < 1e-4
-
 
     # THE WHOLE IMPLEMENTATION
     Q2 = encoder(backbone_outs)
