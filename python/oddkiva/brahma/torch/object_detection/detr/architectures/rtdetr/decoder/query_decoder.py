@@ -117,11 +117,13 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         self.layer_norm_2 = torch.nn.LayerNorm(embed_dim)
 
         self.feedforward = torch.nn.Sequential(OrderedDict([
-            ("linear-1", torch.nn.Linear(embed_dim, feedforward_dim)),
+            ("linear1", torch.nn.Linear(embed_dim, feedforward_dim)),
             ("activation", torch.nn.ReLU()),
             ("dropout", torch.nn.Dropout(p=dropout)),
-            ("linear-2", torch.nn.Linear(feedforward_dim, embed_dim))
+            ("linear2", torch.nn.Linear(feedforward_dim, embed_dim))
         ]))
+        assert type(self.feedforward.linear1) is nn.Linear
+        assert type(self.feedforward.linear2) is nn.Linear
         self.dropout_3 = torch.nn.Dropout(p=dropout)
         self.layer_norm_3 = torch.nn.LayerNorm(embed_dim)
 

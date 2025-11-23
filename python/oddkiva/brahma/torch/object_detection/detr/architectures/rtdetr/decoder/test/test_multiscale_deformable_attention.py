@@ -15,5 +15,5 @@ def test_multiscale_deformable_attention():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
-    head = ckpt.load_multiscale_deformable_attentions()
+    decoder = ckpt.load_transformer_decoder()
 
