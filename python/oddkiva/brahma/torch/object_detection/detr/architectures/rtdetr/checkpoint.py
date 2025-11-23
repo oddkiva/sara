@@ -2,7 +2,6 @@ from pathlib import Path
 
 from loguru import logger
 
-from oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.multiscale_deformable_attention import MultiscaleDeformableAttention
 import torch
 import torch.nn as nn
 import torchvision.ops as ops
@@ -26,6 +25,9 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
         TopDownFusionNet,
         BottomUpFusionNet
     )
+from oddkiva.brahma.torch.transformers.encoder import (
+    TransformerEncoderLayer
+)
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.hybrid_encoder import HybridEncoder
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -34,6 +36,15 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.query_decoder import (BoxGeometryEmbeddingMap,
                                          BoxGeometryLogitHead,
                                          BoxObjectClassLogitHead)
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.multiscale_deformable_attention import (
+        MultiscaleDeformableAttention
+    )
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.query_decoder import (
+        MultiScaleDeformableTransformerDecoderLayer,
+        MultiScaleDeformableTransformerDecoder
+    )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.rtdetrv2_decoder import RTDETRv2Decoder
 
@@ -211,7 +222,7 @@ class RTDETRV2Checkpoint:
                 for k in self.encoder_keys if 'encoder.encoder' in k}
 
     @property
-    def encoder_layer_key_suffixes(self):
+    def aifi_layer_suffixes(self):
         return ['self_attn.in_proj_weight',
                 'self_attn.in_proj_bias',
                 'self_attn.out_proj.weight',
@@ -239,11 +250,11 @@ class RTDETRV2Checkpoint:
                 self.aifi_transformer_encoder_layer_key(layer_idx, i),
                 suffix
             ])
-            for suffix in self.encoder_layer_key_suffixes
+            for suffix in self.aifi_layer_suffixes
         }
         weights = {
             suffix: self.model_weights[weight_keys[suffix]]
-            for suffix in self.encoder_layer_key_suffixes
+            for suffix in self.aifi_layer_suffixes
         }
         return weights
 
@@ -479,6 +490,36 @@ class RTDETRV2Checkpoint:
         key = f'decoder.dec_bbox_head.{iteration}.layers.{layer_idx}.bias'
         return self.model_weights[key]
 
+    def decoder_decoder_base_key(self) -> str:
+        return 'decoder.decoder'
+
+    def decoder_decoder_layer_base_key(self, iteration: int) -> str:
+        return f'decoder.decoder.layers.{iteration}'
+
+    @property
+    def self_attn_layer_suffixes(self):
+        return [
+            'self_attn.in_proj_weight',
+            'self_attn.in_proj_bias',
+            'self_attn.out_proj.weight',
+            'self_attn.out_proj.bias'
+        ]
+
+    def decoder_layer_self_attn_weights(
+        self, iteration: int
+    ) -> dict[str, torch.Tensor]:
+        weight_keys = {
+            suffix: '.'.join([
+                self.decoder_decoder_layer_base_key(iteration),
+                suffix
+            ])
+            for suffix in self.self_attn_layer_suffixes
+        }
+        weights = {
+            suffix: self.model_weights[weight_keys[suffix]]
+            for suffix in self.self_attn_layer_suffixes
+        }
+        return weights
 
     # -------------------------------------------------------------------------
     # WEIGHT COPY UTILITIES
@@ -685,6 +726,7 @@ class RTDETRV2Checkpoint:
         for layer_idx in range(num_layers):
             weights = self.aifi_encoder_layer_weights(layer_idx, i=0)
             layer = aifi.transformer_encoder.layers[layer_idx]
+            assert type(layer) is TransformerEncoderLayer
 
             # Self-attention weights.
             self._copy_self_attn_weights(layer.self_attention, weights)
@@ -700,10 +742,10 @@ class RTDETRV2Checkpoint:
             # Copy the layer norms 1 and 2.
             self._copy_weight_and_bias(layer.layer_norm_1,
                                        weights['norm1.weight'],
-                                       weights['norm1.bias']),
+                                       weights['norm1.bias'])
             self._copy_weight_and_bias(layer.layer_norm_2,
                                        weights['norm2.weight'],
-                                       weights['norm2.bias']),
+                                       weights['norm2.bias'])
 
         return aifi
 
@@ -1112,7 +1154,7 @@ class RTDETRV2Checkpoint:
 
         return heads
 
-    def load_multiscale_deformable_attention(
+    def load_transformer_decoder_layer_cross_attention(
         self, iteration: int
     ) -> MultiscaleDeformableAttention:
         embed_dim = 256
@@ -1125,7 +1167,6 @@ class RTDETRV2Checkpoint:
             kv_count_per_level=4
         )
 
-        parent_key = f'decoder.decoder.layers.{iteration}.cross_attn'
 
         key = f'{parent_key}.sampling_offsets'
         self._copy_weight_and_bias(
@@ -1162,12 +1203,109 @@ class RTDETRV2Checkpoint:
     ) -> nn.MultiheadAttention:
         embed_dim = 256
         num_heads = 8
-        value_dim = 64
 
         self_attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=0.,
                                           batch_first=True)
-        self._copy_self_attn_weights(self_attn,
+        self._copy_self_attn_weights(
+            self_attn,
+            self.decoder_layer_self_attn_weights(iteration)
+        )
         return self_attn
+
+    def _copy_decoder_layer_feedforward_weights(
+        self, ffn: nn.Sequential, iteration: int
+    ) -> None:
+        # Load the remaining weights
+        assert type(ffn.linear1) is nn.Linear
+        assert type(ffn.linear2) is nn.Linear
+
+        parent_key = f'decoder.decoder.layers.{iteration}'
+        w1 = self.model_weights[f'{parent_key}.linear1.weight']
+        b1 = self.model_weights[f'{parent_key}.linear1.bias']
+        self._copy_conv_bna_weights(ffn.linear1, w1, b1)
+
+        w2 = self.model_weights[f'{parent_key}.linear2.weight']
+        b2 = self.model_weights[f'{parent_key}.linear2.bias']
+        self._copy_conv_bna_weights(ffn.linear2, w2, b2)
+
+    def _copy_decoder_layer_norm_weights(
+        self,
+        dlayer: MultiScaleDeformableTransformerDecoderLayer,
+        iteration: int
+    ) -> None:
+        parent_key = f'decoder.decoder.layers.{iteration}'
+
+        w1 = self.model_weights[f'{parent_key}.norm1.weight']
+        b1 = self.model_weights[f'{parent_key}.norm1.bias']
+        self._copy_weight_and_bias(dlayer.layer_norm_1, w1, b1)
+
+        w2 = self.model_weights[f'{parent_key}.norm2.weight']
+        b2 = self.model_weights[f'{parent_key}.norm2.bias']
+        self._copy_weight_and_bias(dlayer.layer_norm_2, w2, b2)
+
+        w3 = self.model_weights[f'{parent_key}.norm3.weight']
+        b3 = self.model_weights[f'{parent_key}.norm3.bias']
+        self._copy_weight_and_bias(dlayer.layer_norm_3, w3, b3)
+
+    def load_transformer_decoder_layer(
+        self, iteration: int
+    ) -> MultiScaleDeformableTransformerDecoderLayer:
+        hidden_dim = 256
+        image_level_count = 3
+        attn_head_count = 8
+        feedforward_dim = 1024
+        dropout = 0.
+        normalize_before = False
+
+        dlayer = MultiScaleDeformableTransformerDecoderLayer(
+            hidden_dim,
+            attn_head_count,
+            image_level_count,
+            feedforward_dim=feedforward_dim,
+            dropout=dropout,
+            normalize_before=normalize_before,
+        )
+
+        dlayer.self_attention = \
+            self.load_transformer_decoder_layer_self_attention(
+                iteration
+            )
+
+        dlayer.cross_attention = \
+            self.load_transformer_decoder_layer_cross_attention(
+                iteration
+            )
+
+        self._copy_decoder_layer_feedforward_weights(
+            dlayer.feedforward,
+            iteration
+        )
+        self._copy_decoder_layer_norm_weights(dlayer, iteration)
+
+        return dlayer
+
+    def load_transformer_decoder(
+        self
+    ) -> MultiScaleDeformableTransformerDecoder:
+        hidden_dim = 256
+        kv_count_per_level = [4, 4, 4]
+        num_classes = 80
+        attn_head_count = 8
+        attn_num_layers = 6
+        attn_dropout = 0.0
+        normalize_before = False
+
+        decoder = MultiScaleDeformableTransformerDecoder(
+            hidden_dim,
+            kv_count_per_level,
+            num_classes=num_classes,
+            attn_head_count=attn_head_count,
+            attn_num_layers=attn_num_layers,
+            attn_dropout=attn_dropout,
+            normalize_before=normalize_before
+        )
+
+        return decoder
 
     def load_decoder(self) -> RTDETRv2Decoder:
         num_classes = 80

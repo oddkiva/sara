@@ -155,9 +155,10 @@ class TransformerEncoder(torch.nn.Module):
         """
 
         super().__init__()
-        self.layers = torch.nn.ModuleList([
-            copy.deepcopy(encoder_layer) for _ in range(num_layers)
-        ])
+        self.layers = torch.nn.ModuleList(
+            copy.deepcopy(encoder_layer)
+            for _ in range(num_layers)
+        )
         self.norm = norm
 
     def forward(
