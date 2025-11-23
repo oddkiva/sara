@@ -11,9 +11,20 @@ DATA_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
                  'rtdetrv2_r50vd_6x_coco_ema.data.pt')
 
 
-def test_multiscale_deformable_attention():
+def test_box_geometry_embedding_map():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
-    decoder = ckpt.load_transformer_decoder()
+    embed_fn = ckpt.load_box_geometry_embedding_map()
 
+def test_box_geometry_logit_head():
+    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
+    data = torch.load(DATA_FILEPATH, torch.device('cpu'))
+
+    head = ckpt.load_box_geometry_logit_heads()
+
+def test_box_geometry_logit_head():
+    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
+    data = torch.load(DATA_FILEPATH, torch.device('cpu'))
+
+r   head = ckpt.load_box_class_logit_heads()
