@@ -103,30 +103,30 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
 
         self.normalize_before = normalize_before
 
-        self.self_attention = torch.nn.MultiheadAttention(
+        self.self_attention = nn.MultiheadAttention(
             embed_dim, num_heads, dropout=dropout,
             batch_first=True
         )
 
-        self.dropout_1 = torch.nn.Dropout(p=dropout)
-        self.layer_norm_1 = torch.nn.LayerNorm(embed_dim)
+        self.dropout_1 = nn.Dropout(p=dropout)
+        self.layer_norm_1 = nn.LayerNorm(embed_dim)
 
         self.cross_attention = MultiscaleDeformableAttention(
             embed_dim, num_heads, embed_dim, image_level_count
         )
-        self.dropout_2 = torch.nn.Dropout(p=dropout)
-        self.layer_norm_2 = torch.nn.LayerNorm(embed_dim)
+        self.dropout_2 = nn.Dropout(p=dropout)
+        self.layer_norm_2 = nn.LayerNorm(embed_dim)
 
-        self.feedforward = torch.nn.Sequential(OrderedDict([
-            ("linear1", torch.nn.Linear(embed_dim, feedforward_dim)),
-            ("activation", torch.nn.ReLU()),
-            ("dropout", torch.nn.Dropout(p=dropout)),
-            ("linear2", torch.nn.Linear(feedforward_dim, embed_dim))
+        self.feedforward = nn.Sequential(OrderedDict([
+            ("linear1", nn.Linear(embed_dim, feedforward_dim)),
+            ("activation", nn.ReLU()),
+            ("dropout", nn.Dropout(p=dropout)),
+            ("linear2", nn.Linear(feedforward_dim, embed_dim))
         ]))
         assert type(self.feedforward.linear1) is nn.Linear
         assert type(self.feedforward.linear2) is nn.Linear
-        self.dropout_3 = torch.nn.Dropout(p=dropout)
-        self.layer_norm_3 = torch.nn.LayerNorm(embed_dim)
+        self.dropout_3 = nn.Dropout(p=dropout)
+        self.layer_norm_3 = nn.LayerNorm(embed_dim)
 
         self.training = training
 
@@ -190,6 +190,8 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         # encoder.
         assert query_embeds.requires_grad is False
         assert query_geometry.requires_grad is False
+
+        import ipdb; ipdb.set_trace()
 
         # Prepare the data.
         Q = K = self.with_positional_embeds(query_embeds, query_positional_embeds)
@@ -262,9 +264,18 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             for _ in range(attn_num_layers)
         )
 
-        self.box_geometry_embedding_map: BoxGeometryEmbeddingMap
-        self.box_geometry_logit_heads: list[BoxGeometryLogitHead]
-        self.box_class_logit_heads: list[BoxObjectClassLogitHead]
+        self.box_geometry_embedding_map = BoxGeometryEmbeddingMap(hidden_dim)
+
+        # Auxiliary geometry estimator for each decoding iteration.
+        self.box_geometry_logit_heads = nn.ModuleList(
+            BoxGeometryLogitHead(hidden_dim, 3, activation='relu')
+            for _ in range(attn_num_layers)
+        )
+        # Auxiliary object class estimator for each decoding iteration.
+        self.box_class_logit_heads = nn.ModuleList(
+            BoxObjectClassLogitHead(hidden_dim, num_classes)
+            for _ in range(attn_num_layers)
+        )
 
     def forward(
         self,

@@ -181,7 +181,7 @@ class MultiscaleDeformableAttention(nn.Module):
                 query_geometry_logits: torch.Tensor,
                 value: torch.Tensor,
                 value_mask: torch.Tensor | None = None) -> torch.Tensor:
-        pass
+        raise NotImplementedError('')
 
 
 
