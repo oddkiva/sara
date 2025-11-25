@@ -1,7 +1,6 @@
 import torch
 
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
-    ConvBNA,
     UnbiasedConvBNA,
     make_activation_func
 )
