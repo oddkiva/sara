@@ -191,8 +191,6 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         assert query_embeds.requires_grad is False
         assert query_geometry.requires_grad is False
 
-        import ipdb; ipdb.set_trace()
-
         # Prepare the data.
         Q = K = self.with_positional_embeds(query_embeds, query_positional_embeds)
         V = query_embeds

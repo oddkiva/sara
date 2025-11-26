@@ -23,8 +23,8 @@ def test_box_geometry_logit_head():
 
     head = ckpt.load_box_geometry_logit_heads()
 
-def test_box_geometry_logit_head():
+def test_box_class_logit_head():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
-r   head = ckpt.load_box_class_logit_heads()
+    head = ckpt.load_box_class_logit_heads()

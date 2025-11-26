@@ -18,7 +18,8 @@ class MultiscaleDeformableAttention(nn.Module):
                  attention_head_count: int,
                  value_dim: int,
                  pyramid_level_count: int = 4,
-                 kv_count_per_level: int = 4):
+                 kv_count_per_level: int = 4,
+                 sampling_offset_scale_factor: float = 0.5):
         """Constructs a multiscale deformable attention layer.
 
         Parameters:
@@ -43,6 +44,9 @@ class MultiscaleDeformableAttention(nn.Module):
             kv_count_per_level:
                 the number of key-value pairs we want to consider for each feature
                 map of the feature pyramid.
+
+            sampling_offset_scale_factor:
+                yet another hyperparameter.
         """
         super().__init__()
 
@@ -71,6 +75,7 @@ class MultiscaleDeformableAttention(nn.Module):
             embed_dim,
             self.kv_count_per_query * 2,
         )
+        self.sampling_offset_scale_factor = sampling_offset_scale_factor
 
         # Likewise, we learn a single linear predictor
         self.attn_weight_predictors = nn.Linear(
@@ -136,8 +141,7 @@ class MultiscaleDeformableAttention(nn.Module):
     def sample_values(
         self,
         query_encodings: torch.Tensor,
-        query_positions: torch.Tensor,
-        position_deltas: torch.Tensor
+        key_value_positions: torch.Tensor,
     ) -> torch.Tensor:
         # The positions of the (key-value) pairs are normalized in the range
         # [0, 1].
@@ -147,62 +151,61 @@ class MultiscaleDeformableAttention(nn.Module):
         # be in the range [-1, 1], where:
         # - (x=-1, y=-1) is the left-top corner of the feature map
         # - (x=+1, y=+1) is the right-bottom corner of the feature map
-        key_value_positions = torch.clamp(
-            2. * (query_positions + position_deltas) - 1,
+        x_kv = torch.clamp(
+            2. * key_value_positions - 1,
             min = -1., max=1.
         ).unsqueeze(1)
         values = torch.cat([
-            F.grid_sample(q, key_value_positions)
+            F.grid_sample(q, x_kv)
             for q in query_encodings
         ])
         return values
-
-    def predict_value(self, queries: torch.Tensor) -> torch.Tensor:
-        position_deltas = self.predict_positional_offsets(queries)
-
-        attn_weights_sampled = self.predict_attention_weights(queries)
-        values_sampled = self.sample_values(queries,
-                                            query_positions_normalized,
-                                            position_deltas)
-
-        # Aggregate by linearly combining the sampled values with the attention
-        # weights.
-        values_aggregated = torch.sum(attn_weights_sampled * values_sampled)
-
-        final_value = torch.sum([
-            self.final_projections(values_aggregated)
-            for _ in range(attention_head_count)
-        ])
-        return final_value
-
 
     def forward(self,
                 queries: torch.Tensor,
                 query_geometry_logits: torch.Tensor,
                 value: torch.Tensor,
                 value_mask: torch.Tensor | None = None) -> torch.Tensor:
-        raise NotImplementedError('')
+        # Predict the attention weights between the K best keys in the L image
+        # levels for each query q.
+        w_lkq = self.predict_attention_weights(queries)
 
+        # Predict the positional deltas of the K best keys in the L image
+        # levels for each query q.
+        Δx_lkq = self.predict_positional_offsets(queries)
 
+        box_q = F.sigmoid(query_geometry_logits)
+        wh_q = box_q[:, :, :2]
+        cxcy_q = box_q[:, :, :2]
+        x_q = cxcy_q
 
-    # def normalize_query_positions(
-    #     self,
-    #     X: torch.Tensor,
-    #     query_positions: torch.Tensor
-    # ) -> torch.Tensor:
-    #     _, h, w, _ = X.shape
-    #     wh_inverse = torch.tensor([1. / w, 1. / h], dtype=torch.float32)
-    #     query_positions_normalized = query_positions * wh_inverse
-    #     return query_positions_normalized
+        # The scale factor in the original code has gotten me raising a few
+        # eyebrows... Why can't the sampling offset predictor learn it?
+        #
+        # Is there a clear interpretable reason as for why the Deformable-DETR
+        # authors think it should be rescaled by the query box width and
+        # height? My own interpretation is as follows.
+        #
+        # TODO: can we improve the predictor to avoid these multiplications?
+        crazy_scale_factor = wh_q * num_points_scale * \
+            self.sampling_offset_scale_factor
+        Δx_lkq = Δx_lkq * crazy_scale_factor
+        # The final position of the key-value pairs
+        x_lkq = x_q + Δx_q
 
+        if value_mask is None:
+            value_masked = value
+        else:
+            value_masked = value_mask.to(dtype=value.dtype) * value
+        value_lkq = self.sample_values(value_masked, x_lkq)
 
-    # def form_queries(
-    #     self,
-    #     X: torch.Tensor,
-    #     query_positions: torch.Tensor
-    # ) -> torch.Tensor:
-    #     X_sampled = X[query_positions]
-    #     positional_embeds = self.positional_embedding_fn(query_positions)
-    #     queries = X_sampled + positional_embeds
-    #     return queries
+        # Aggregate by linearly combining the sampled values with the attention
+        # weights.
+        value_q = torch.sum(w_lkq * value_lkq)
 
+        value_q = torch.sum([
+            self.final_projections(values_aggregated)
+            for _ in range(self.attention_head_count)
+        ])
+
+        return value_q

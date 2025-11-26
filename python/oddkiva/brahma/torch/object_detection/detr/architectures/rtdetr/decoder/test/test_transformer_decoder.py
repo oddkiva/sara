@@ -18,7 +18,7 @@ def test_transformer_decoder():
     memory, _ = data['intermediate']['decoder']['_get_encoder_input']
     init_ref_contents, init_ref_points_unact, _, _ = \
         data['intermediate']['decoder']['_get_decoder_input']
-    
+
     box_geometries_true, box_class_logits_true = \
         data['intermediate']['decoder']['decoder']
 
