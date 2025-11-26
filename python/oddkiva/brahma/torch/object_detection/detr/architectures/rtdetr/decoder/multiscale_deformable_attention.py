@@ -1,5 +1,9 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
+from typing import Iterable
+
+import itertools
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,7 +14,8 @@ class MultiscaleDeformableAttention(nn.Module):
     described in the paper [Deformable DETR: Deformable Transformers for
     End-to-End Object Detection](https://arxiv.org/pdf/2010.04159).
 
-    Everything is summarized in the Figure 2 of the paper.
+    Everything is summarized in the Figure 2 of the paper -- except the
+    peculiar rescaling of the positional offsets of sample positions.
     """
 
     def __init__(self,
@@ -55,6 +60,7 @@ class MultiscaleDeformableAttention(nn.Module):
         self.attention_head_count = attention_head_count
         self.pyramid_level_count = pyramid_level_count
         self.kv_count_per_level = kv_count_per_level
+        self.kv_count_per_level_inverse = 1. / kv_count_per_level
         self.kv_count_per_attention_head = \
             pyramid_level_count * kv_count_per_level
         self.kv_count_per_query = \
@@ -75,7 +81,7 @@ class MultiscaleDeformableAttention(nn.Module):
             embed_dim,
             self.kv_count_per_query * 2,
         )
-        self.sampling_offset_scale_factor = sampling_offset_scale_factor
+        self.sampling_offset_max_value = sampling_offset_scale_factor
 
         # Likewise, we learn a single linear predictor
         self.attn_weight_predictors = nn.Linear(
@@ -93,26 +99,9 @@ class MultiscaleDeformableAttention(nn.Module):
         # torch.softmax(y, dim=-1)
 
         self.value_projector = nn.Linear(embed_dim, value_dim)
-        self.final_projections = nn.ModuleList(
-            nn.Linear(value_dim, value_dim)
-            for _ in range(attention_head_count)
-        )
-
-    def predict_positional_offsets(self, queries: torch.Tensor) -> torch.Tensor:
-        """
-        Predicts the relative position deltas for each key-value pairs w.r.t
-        the query position.
-
-        We implement it as per figure 2 of the paper.
-        """
-        batch_size, query_count, _ = queries.shape
-
-        position_deltas = self.sampling_offset_predictors(queries)
-        position_deltas = torch.reshape(
-            position_deltas,
-            (batch_size, query_count,
-             self.attention_head_count,
-             self.kv_count_per_attention_head, 2)
+        self.final_projections = nn.Linear(
+            value_dim * attention_head_count,
+            value_dim,
         )
 
     def predict_attention_weights(
@@ -128,56 +117,77 @@ class MultiscaleDeformableAttention(nn.Module):
         attn_weights = self.attn_weight_predictors(queries)
 
         batch_size, query_count, _ = queries.shape
-        attn_weights = torch.reshape(
-            attn_weights,
-            (batch_size, query_count,
-             self.attention_head_count,
-             self.kv_count_per_attention_head)
+        # Reshape appropriately to normalize with respect to the LK attention
+        # weights.
+        attn_weights = attn_weights.reshape(
+            batch_size, query_count,
+            self.attention_head_count,
+            self.kv_count_per_attention_head  # L * K = 3 * 4
         )
+        # Softmax on the last dimension.
         attn_weights = torch.softmax(attn_weights, dim=-1)
+        assert len(attn_weights.shape) == 4
 
         return attn_weights
 
-    def sample_values(
+    def predict_positional_offsets(self, queries: torch.Tensor) -> torch.Tensor:
+        """
+        Predicts the relative position deltas for each key-value pairs w.r.t
+        the query position.
+
+        We implement it as per figure 2 of the paper.
+        """
+        batch_size, query_count, _ = queries.shape
+
+        position_deltas = self.sampling_offset_predictors(queries)
+        position_deltas = position_deltas.reshape(
+            batch_size, query_count,
+            self.attention_head_count,
+            self.kv_count_per_attention_head,
+            2
+        )
+        assert len(position_deltas.shape) == 5
+
+        return position_deltas
+
+    def calculate_sample_positions(
         self,
-        query_encodings: torch.Tensor,
-        key_value_positions: torch.Tensor,
+        query_geometry_logits: torch.Tensor,
+        Δx_lkq: torch.Tensor
     ) -> torch.Tensor:
-        # The positions of the (key-value) pairs are normalized in the range
-        # [0, 1].
+        r"""
+        Returns the locations $(x_lkq, y_lkq)$ of the key-value pairs for each
+        query $q$.
+
+        The location is normalized in the range [0, 1], w.r.t. the image sizes
+        $(w_l, h_l)$ of the feature pyramid at level $l$ for learnability
+        reasons.
+
+        This is a bit tricky implementation because it performs some surprising
+        rescaling operations, which were not explained in the paper.
+        """
+
+        # Activate the query geometries logits to obtain the query geometries.
+        # The query geometry is nothing less than the geometry of the object
+        # bounding box $(x_q, y_q, w_q, h_q)$, where:
         #
-        # Good: PyTorch has a function `torch.nn.functional.grid_sample` in its
-        # API to sample the feature using bilinear interpolation, but they must
-        # be in the range [-1, 1], where:
-        # - (x=-1, y=-1) is the left-top corner of the feature map
-        # - (x=+1, y=+1) is the right-bottom corner of the feature map
-        x_kv = torch.clamp(
-            2. * key_value_positions - 1,
-            min = -1., max=1.
-        ).unsqueeze(1)
-        values = torch.cat([
-            F.grid_sample(q, x_kv)
-            for q in query_encodings
-        ])
-        return values
+        # - $(x_q, y_q)$ is the box center, and
+        # - $(w_q, h_q)$ is the box sizes.
+        #
+        # Let us just denote by $b_q$ the object boxes
+        assert len(query_geometry_logits.shape) == 3
+        assert query_geometry_logits.shape[2] == 4
+        assert query_geometry_logits.shape[:2] == Δx_lkq.shape[:2]
+        n, top_k, _ = query_geometry_logits.shape
 
-    def forward(self,
-                queries: torch.Tensor,
-                query_geometry_logits: torch.Tensor,
-                value: torch.Tensor,
-                value_mask: torch.Tensor | None = None) -> torch.Tensor:
-        # Predict the attention weights between the K best keys in the L image
-        # levels for each query q.
-        w_lkq = self.predict_attention_weights(queries)
+        b_q = F.sigmoid(query_geometry_logits)
 
-        # Predict the positional deltas of the K best keys in the L image
-        # levels for each query q.
-        Δx_lkq = self.predict_positional_offsets(queries)
-
-        box_q = F.sigmoid(query_geometry_logits)
-        wh_q = box_q[:, :, :2]
-        cxcy_q = box_q[:, :, :2]
-        x_q = cxcy_q
+        # The list of box sizes $(w_q, h_q)$
+        wh_q = b_q[:, :, 2:]
+        # The list of box centers $(x_q, y_q)$
+        xy_q = b_q[:, :, :2]
+        # Let's shorten the box centers as
+        x_q = xy_q
 
         # The scale factor in the original code has gotten me raising a few
         # eyebrows... Why can't the sampling offset predictor learn it?
@@ -187,25 +197,163 @@ class MultiscaleDeformableAttention(nn.Module):
         # height? My own interpretation is as follows.
         #
         # TODO: can we improve the predictor to avoid these multiplications?
-        crazy_scale_factor = wh_q * num_points_scale * \
-            self.sampling_offset_scale_factor
-        Δx_lkq = Δx_lkq * crazy_scale_factor
-        # The final position of the key-value pairs
-        x_lkq = x_q + Δx_q
+        the_crazy_scale_factor = wh_q * \
+            self.kv_count_per_level_inverse * \
+            self.sampling_offset_max_value
+        assert the_crazy_scale_factor.shape == (n, top_k, 2)
 
+        Δx_lkq = Δx_lkq * the_crazy_scale_factor[:, :, None, None, :]
+        # The final position of the key-value pairs
+        x_lkq = x_q[:, :, None, None, :] + Δx_lkq
+
+        # Check the dimensionality of position
+        n, top_k, _ = b_q.shape
+        assert x_lkq.shape == (n, top_k,
+                               self.attention_head_count,
+                               self.kv_count_per_attention_head,
+                               2)
+
+        return x_lkq
+
+    def sample_values(
+        self,
+        query_encodings: torch.Tensor,
+        query_pyramid_spatial_sizes: list[torch.Size],
+        key_value_positions: torch.Tensor,
+    ) -> torch.Tensor:
+        assert len(query_pyramid_spatial_sizes) == self.pyramid_level_count
+
+        # Reconstruct the pyramid of query maps from its flattened tensor of
+        # queries.
+        #
+        # 1. Calculate the different strides.
+        pyr_strides = [0] + [
+            hw[0] * hw[1]
+            for hw in query_pyramid_spatial_sizes
+        ]
+        pyr_strides = [*itertools.accumulate(pyr_strides)]
+
+        # 2.   Reconstruct the pyramid of query maps.
+        # 2.1. Separate the tensor into a list of flattened query maps, each
+        #      one of these corresponding to the image level l and reconstruct
+        #      the pyramid of query maps.
+        # 2.2. Reshape the flattened query maps into 2D maps of feature
+        #      vectors.
+        # 2.3. Permute the axes so that we can sample values with the built-in
+        #      function `torch.nn.functional.grid_sample(...)`.
+        n, _, d_k = query_encodings.shape
+        starts = pyr_strides[:-1]
+        ends = pyr_strides[1:]
+        query_pyramid = [
+            query_encodings[:, s:e, :]\
+            .reshape(n, hw[0], hw[1], d_k)\
+            .permute(0, 3, 1, 2)
+            for (s, e, hw) in zip(starts, ends, query_pyramid_spatial_sizes)
+        ]
+
+        # 3. Split the list of key-value positions per image level.
+        s = self.kv_count_per_level
+        x_kv_per_level = [
+            key_value_positions[:, :, :, s*i:s*(i+1), :]
+            for i in range(len(query_pyramid_spatial_sizes))
+        ]
+
+        top_K = key_value_positions.shape[1]
+        values_per_level = []
+        for x_kv, query_map in zip(x_kv_per_level, query_pyramid):
+            # The positions of the (key-value) pairs are normalized in the range
+            # [0, 1].
+            #
+            # Good: PyTorch has a function `torch.nn.functional.grid_sample` in its
+            # API to sample the feature using bilinear interpolation, but they must
+            # be in the range [-1, 1], where:
+            # - (x=-1, y=-1) is the left-top corner of the feature map
+            # - (x=+1, y=+1) is the right-bottom corner of the feature map
+            x_kv_rescaled = torch.clamp(
+                2. * x_kv - 1,
+                min = -1., max=1.
+            )
+            # Collapse the pair of indices (attention head index, key index)
+            # into a 1D index.
+            x_kv_rescaled = x_kv_rescaled.flatten(start_dim=2, end_dim=3)
+            #
+            # x_kv_rescaled has shape (N, top-K, M * K, 2)
+            # M = number of attention heads = 8
+            # K = number of sample points for each image level = 4
+            values_at_level_l = F.grid_sample(query_map, x_kv_rescaled)
+
+            # Make sure we permute the axes again to perform the attention
+            # calculus.
+            values_at_level_l = values_at_level_l\
+                .reshape(n, d_k, top_K,
+                         self.attention_head_count,
+                         self.kv_count_per_level)\
+                .permute(0, 2, 3, 4, 1)
+            values_per_level.append(values_at_level_l)
+
+        values = torch.cat(values_per_level, dim=3)
+
+        return values
+
+    def forward(self,
+                queries: torch.Tensor,
+                query_geometry_logits: torch.Tensor,
+                value: torch.Tensor,
+                value_spatial_sizes: list[Iterable[int]],
+                value_mask: torch.Tensor | None = None) -> torch.Tensor:
+        n, top_k, d_k = queries.shape
+
+        # Predict the attention weights between the K best keys in the L image
+        # levels for each query q.
+        w_qlk = self.predict_attention_weights(queries)
+        assert w_qlk.shape == (n, top_k,
+                               self.attention_head_count,
+                               self.kv_count_per_attention_head)
+
+        # Predict the positional deltas of the K best keys in the L image
+        # levels for each query q.
+        Δx_qlk = self.predict_positional_offsets(queries)
+        assert Δx_qlk.shape == (n, top_k,
+                                 self.attention_head_count,
+                                 self.kv_count_per_attention_head,
+                                 2)
+
+        # Obtain the final positions of the key-value pairs.
+        x_qlk = self.calculate_sample_positions(
+            query_geometry_logits, Δx_qlk
+        )
+        assert x_qlk.shape == (n, top_k,
+                               self.attention_head_count,
+                               self.kv_count_per_attention_head,
+                               2)
+
+
+        # TODO: would it better to project the values **after** sampling? This
+        # would be **a lot less computations**.
+        value_projected = self.value_projector(value)
+        # Zero out the masked attention values.
         if value_mask is None:
             value_masked = value
         else:
-            value_masked = value_mask.to(dtype=value.dtype) * value
-        value_lkq = self.sample_values(value_masked, x_lkq)
+            value_masked = value_mask.to(dtype=value.dtype) * value_projected
+        value_qlk = self.sample_values(value_masked,
+                                       value_spatial_sizes,
+                                       x_qlk)
+
+        assert value_qlk.shape == (n, top_k,
+                                   self.attention_head_count,
+                                   self.kv_count_per_attention_head,
+                                   d_k)
+
 
         # Aggregate by linearly combining the sampled values with the attention
         # weights.
-        value_q = torch.sum(w_lkq * value_lkq)
+        # Summation over the 3rd axis which represents the pair of
+        # indices (image level l, key-value index k) that is collapsed into a
+        # single 1D index.
+        value_q = torch.sum(w_qlk[..., None] * value_qlk, dim=3)
 
-        value_q = torch.sum([
-            self.final_projections(values_aggregated)
-            for _ in range(self.attention_head_count)
-        ])
+        # The value is the refined object query vector.
+        value_q = self.final_projections(value_q.flatten(start_dim=2))
 
         return value_q

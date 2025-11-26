@@ -15,7 +15,8 @@ def test_transformer_decoder():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
-    memory, _ = data['intermediate']['decoder']['_get_encoder_input']
+    memory, memory_spatial_hw_sizes = \
+        data['intermediate']['decoder']['_get_encoder_input']
     init_ref_contents, init_ref_points_unact, _, _ = \
         data['intermediate']['decoder']['_get_decoder_input']
 
@@ -24,7 +25,8 @@ def test_transformer_decoder():
 
     decoder = ckpt.load_transformer_decoder()
     box_geometries, box_class_logits = decoder.forward(
-        init_ref_contents, init_ref_points_unact, memory,
+        init_ref_contents.detach(), init_ref_points_unact,
+        memory, memory_spatial_hw_sizes,
         value_mask=None
     )
 

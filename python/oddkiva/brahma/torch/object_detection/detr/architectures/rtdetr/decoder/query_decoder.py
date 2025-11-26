@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Iterable
 
 import math
 
@@ -143,6 +144,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         query_embeds: torch.Tensor,
         query_geometry: torch.Tensor,
         memory: torch.Tensor,
+        memory_spatial_sizes: list[Iterable[int]],
         query_positional_embeds: torch.Tensor | None = None,
         attn_mask: torch.Tensor | None = None,
         memory_mask: torch.Tensor | None = None
@@ -188,7 +190,6 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         # In RT-DETR, a query is considered to be a new independent input even
         # if it is actually produced by the CNN backbone extractor and the
         # encoder.
-        assert query_embeds.requires_grad is False
         assert query_geometry.requires_grad is False
 
         # Prepare the data.
@@ -209,6 +210,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
             self.with_positional_embeds(V_super, query_positional_embeds),
             query_geometry,
             memory,
+            memory_spatial_sizes,
             memory_mask
         )
         V_super = self.layer_norm_2(V_super + self.dropout_2(ΔV))
@@ -279,6 +281,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         self,
         query: torch.Tensor, query_geometry_logits: torch.Tensor,
         value: torch.Tensor,
+        value_spatial_sizes: list[Iterable[int]],
         value_mask: torch.Tensor | None = None
     ) -> tuple[torch.Tensor, torch.Tensor]:
         assert query.requires_grad is False
@@ -314,7 +317,8 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
 
             # Denoise the current query.
             query_next = decoder_layer.forward(
-                query_curr, query_geom_curr, value,
+                query_curr, query_geom_curr,
+                value, value_spatial_sizes,
                 query_positional_embeds=query_geom_embed_curr,
                 attn_mask=value_mask, memory_mask=None
             )
@@ -335,7 +339,9 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             # Update for the next denoising iteration.
             query_curr = query_next
             query_geom_logits_curr = query_geom_logits_next
-            query_geom_curr = query_geom_next
+            # Make sure that we only optimize the residuals at the training
+            # stage.
+            query_geom_curr = query_geom_next.detach()
 
         return (torch.stack(query_geometries_denoised),
                 torch.stack(query_class_logits_denoised))
