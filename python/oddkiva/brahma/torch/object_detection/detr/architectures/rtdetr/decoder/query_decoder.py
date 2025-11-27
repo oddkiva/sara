@@ -242,7 +242,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         # ---------------------------------------------------------------------
         # OBJECT QUERY DECODING
         # ---------------------------------------------------------------------
-        self.decoder = nn.ModuleList([
+        self.layers = nn.ModuleList([
             MultiScaleDeformableTransformerDecoderLayer(
                 hidden_dim, attn_head_count, len(kv_count_per_level),
                 attn_feedforward_dim, attn_dropout,
@@ -307,7 +307,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         query_geometries_denoised = []
         query_class_logits_denoised = []
 
-        for i, decoder_layer in enumerate(self.decoder):
+        for i, decoder_layer in enumerate(self.layers):
             assert type(decoder_layer) is \
                 MultiScaleDeformableTransformerDecoderLayer
 

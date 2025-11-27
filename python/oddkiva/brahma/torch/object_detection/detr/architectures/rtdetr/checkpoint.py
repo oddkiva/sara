@@ -1159,7 +1159,7 @@ class RTDETRV2Checkpoint:
     ) -> MultiscaleDeformableAttention:
         embed_dim = 256
         num_heads = 8
-        value_dim = 64
+        value_dim = 256
 
         msda = MultiscaleDeformableAttention(
             embed_dim, num_heads, value_dim,
@@ -1167,6 +1167,7 @@ class RTDETRV2Checkpoint:
             kv_count_per_level=4
         )
 
+        parent_key = f'decoder.decoder.layers.{iteration}.cross_attn'
 
         key = f'{parent_key}.sampling_offsets'
         self._copy_weight_and_bias(
@@ -1184,14 +1185,15 @@ class RTDETRV2Checkpoint:
 
         key = f'{parent_key}.value_proj'
         self._copy_weight_and_bias(
-            msda.attn_weight_predictors,
+            msda.value_projector,
             self.model_weights[f'{key}.weight'],
             self.model_weights[f'{key}.bias']
         )
 
         key = f'{parent_key}.output_proj'
+        import ipdb; ipdb.set_trace()
         self._copy_weight_and_bias(
-            msda.attn_weight_predictors,
+            msda.final_projections,
             self.model_weights[f'{key}.weight'],
             self.model_weights[f'{key}.bias']
         )
@@ -1303,6 +1305,20 @@ class RTDETRV2Checkpoint:
             attn_num_layers=attn_num_layers,
             attn_dropout=attn_dropout,
             normalize_before=normalize_before
+        )
+
+        for i in range(attn_num_layers):
+            decoder.layers[i] = self.load_transformer_decoder_layer(i)
+
+        decoder.box_geometry_embedding_map = \
+            self.load_box_geometry_embedding_map()
+
+        decoder.box_class_logit_heads = nn.ModuleList(
+            self.load_box_class_logit_heads()
+        )
+
+        decoder.box_geometry_logit_heads = nn.ModuleList(
+            self.load_box_geometry_logit_heads()
         )
 
         return decoder
