@@ -1159,7 +1159,7 @@ class RTDETRV2Checkpoint:
     ) -> MultiscaleDeformableAttention:
         embed_dim = 256
         num_heads = 8
-        value_dim = 256
+        value_dim = 32
 
         msda = MultiscaleDeformableAttention(
             embed_dim, num_heads, value_dim,
@@ -1191,7 +1191,6 @@ class RTDETRV2Checkpoint:
         )
 
         key = f'{parent_key}.output_proj'
-        import ipdb; ipdb.set_trace()
         self._copy_weight_and_bias(
             msda.final_projections,
             self.model_weights[f'{key}.weight'],
@@ -1224,11 +1223,11 @@ class RTDETRV2Checkpoint:
         parent_key = f'decoder.decoder.layers.{iteration}'
         w1 = self.model_weights[f'{parent_key}.linear1.weight']
         b1 = self.model_weights[f'{parent_key}.linear1.bias']
-        self._copy_conv_bna_weights(ffn.linear1, w1, b1)
+        self._copy_weight_and_bias(ffn.linear1, w1, b1)
 
         w2 = self.model_weights[f'{parent_key}.linear2.weight']
         b2 = self.model_weights[f'{parent_key}.linear2.bias']
-        self._copy_conv_bna_weights(ffn.linear2, w2, b2)
+        self._copy_weight_and_bias(ffn.linear2, w2, b2)
 
     def _copy_decoder_layer_norm_weights(
         self,
