@@ -103,7 +103,7 @@ class MultiscaleDeformableAttention(nn.Module):
             embed_dim,
             value_dim * attention_head_count
         )
-        self.final_projections = nn.Linear(
+        self.backprojector = nn.Linear(
             value_dim * attention_head_count,
             embed_dim
         )
@@ -157,7 +157,7 @@ class MultiscaleDeformableAttention(nn.Module):
     def calculate_sample_positions(
         self,
         query_geometry_logits: torch.Tensor,
-        Δx_lkq: torch.Tensor
+        Δx_qmlk: torch.Tensor
     ) -> torch.Tensor:
         r"""
         Returns the locations $(x_lkq, y_lkq)$ of the key-value pairs for each
@@ -181,7 +181,7 @@ class MultiscaleDeformableAttention(nn.Module):
         # Let us just denote by $b_q$ the object boxes
         assert len(query_geometry_logits.shape) == 3
         assert query_geometry_logits.shape[2] == 4
-        assert query_geometry_logits.shape[:2] == Δx_lkq.shape[:2]
+        assert query_geometry_logits.shape[:2] == Δx_qmlk.shape[:2]
         N, top_K, _ = query_geometry_logits.shape
 
         b_q = F.sigmoid(query_geometry_logits)
@@ -206,49 +206,30 @@ class MultiscaleDeformableAttention(nn.Module):
             self.sampling_offset_max_value
         assert the_crazy_scale_factor.shape == (N, top_K, 2)
 
-        Δx_lkq = Δx_lkq * the_crazy_scale_factor[:, :, None, None, :]
+        Δx_qmlk = Δx_qmlk * the_crazy_scale_factor[:, :, None, None, :]
         # The final position of the key-value pairs
-        x_lkq = x_q[:, :, None, None, :] + Δx_lkq
+        x_qmlk = x_q[:, :, None, None, :] + Δx_qmlk
 
         # Check the dimensionality of position
         N, top_K, _ = b_q.shape
-        assert x_lkq.shape == (N, top_K,
-                               self.attention_head_count,
-                               self.kv_count_per_attention_head,
-                               2)
+        M = self.attention_head_count
+        LK = self.kv_count_per_attention_head
+        assert x_qmlk.shape == (N, top_K, M, LK, 2)
 
-        return x_lkq
+        # Permute the axes and reshape so as to obtain the shape
+        # (N * M, top_K, LK, 2)
+        x_qmlk = x_qmlk.permute(0, 2, 1, 3, 4).flatten(start_dim=0, end_dim=1)
 
-    def sample_values(
+        return x_qmlk
+
+    def reconstruct_value_pyramid(
         self,
         values: torch.Tensor,
-        value_pyramid_hw_sizes: list[torch.Size],
-        value_positions: torch.Tensor,
-    ) -> torch.Tensor:
-        """
-        Implementation note:
-        This method contains a set of technical tensor manipulation.
-
-        The "trick" is to permute the tensor axes and reshape the dimensions in
-        such a way that we collapse the batch index and the attention head
-        index into a single 1D index.
-
-        This is so that we can use the built-in function
-        `torch.nn.functional.grid_sample` in the 2D case.
-        """
-
-        # Shorten the variable names.
-        N, _, d_k = values.shape
-        C = values.shape[2]
+        value_pyramid_hw_sizes: list[torch.Size]
+    ) -> list[torch.Tensor]:
         M = self.attention_head_count
-        L = self.pyramid_level_count
-        K = self.kv_count_per_level
         d_v = self.value_dim
-        top_K = value_positions.shape[1]
-
-        # Check that we are feeding the inputs with appropriate dimensions.
-        assert len(value_pyramid_hw_sizes) == L
-        assert C == M * d_v
+        N, _, M, d_v = values.shape
 
         # Reconstruct the pyramid of query maps from its flattened tensor of
         # queries.
@@ -275,11 +256,11 @@ class MultiscaleDeformableAttention(nn.Module):
         # A value pyramid is a pyramid of 2D value maps, each one of them of
         # shapes (N, C, H_l, W_l)
         value_pyramid = [
-            values[:, s:e, :]\
+            values[:, s:e, :, :]\
             # Reconstruct the value tensor as a 2D maps
-            .reshape(N, H_l, W_l, d_k)\
+            .reshape(N, H_l, W_l, M, d_v)\
             # Rearrange the data as (N, C, H_l, W_l)
-            .permute(0, 3, 1, 2)
+            .permute(0, 3, 4, 1, 2)
             # Reorganize the axes as follows:
             #     (    N,       C, H_l, W_l)
             #  == (    N, M * d_v, H_l, W_l)   (cf. asserts)
@@ -290,12 +271,50 @@ class MultiscaleDeformableAttention(nn.Module):
             # attention heads.
             #
             # Notice the underlying 1D array has not changed in any case.
-            .reshape(N * M, d_v, H_l, W_l)
+            .flatten(start_dim=0, end_dim=1)
             for (s, e, (H_l, W_l)) in zip(ixs_start, ixs_end,
                                           value_pyramid_hw_sizes)
         ]
 
-        # 3. Split the list of key-value positions per image level.
+        return value_pyramid
+
+    def sample_values(
+        self,
+        values: torch.Tensor,
+        value_pyramid_hw_sizes: list[torch.Size],
+        value_positions: torch.Tensor,
+    ) -> torch.Tensor:
+        """
+        Implementation note:
+        This method contains a set of technical tensor manipulation.
+
+        The "trick" is to permute the tensor axes and reshape the dimensions in
+        such a way that we collapse the batch index and the attention head
+        index into a single 1D index.
+
+        This is so that we can use the built-in function
+        `torch.nn.functional.grid_sample` in the 2D case.
+        """
+
+        # Shorten the variable names.
+        N, _, _ = values.shape
+        C = values.shape[2]
+        M = self.attention_head_count
+        L = self.pyramid_level_count
+        K = self.kv_count_per_level
+        d_v = self.value_dim
+        top_K = value_positions.shape[1]
+
+        # Check that we are feeding the inputs with appropriate dimensions.
+        assert len(value_pyramid_hw_sizes) == L
+        assert C == M * d_v
+
+        value_pyramid = self.reconstruct_value_pyramid(
+            values,
+            value_pyramid_hw_sizes
+        )
+
+        # 3. Split the list of value positions per image level.
         #
         #    `x_kv_per_level` is the list of value sample locations for each
         #    image level `l`.
@@ -352,7 +371,7 @@ class MultiscaleDeformableAttention(nn.Module):
                 queries: torch.Tensor,
                 query_geometry_logits: torch.Tensor,
                 value: torch.Tensor,
-                value_spatial_sizes: list[Iterable[int]],
+                value_spatial_sizes: list[torch.Size],
                 value_mask: torch.Tensor | None = None) -> torch.Tensor:
         n, top_k, d_k = queries.shape
         M = self.attention_head_count
@@ -360,20 +379,19 @@ class MultiscaleDeformableAttention(nn.Module):
 
         # Predict the attention weights between the K best keys in the L image
         # levels for each query q.
-        w_qlk = self.predict_attention_weights(queries)
-        assert w_qlk.shape == (n, top_k, M, LK)
+        w_qmlk = self.predict_attention_weights(queries)
+        assert w_qmlk.shape == (n, top_k, M, LK)
 
         # Predict the positional deltas of the K best keys in the L image
         # levels for each query q.
-        Δx_qlk = self.predict_positional_offsets(queries)
-        assert Δx_qlk.shape == (n, top_k, M, LK, 2)
+        Δx_qmlk = self.predict_positional_offsets(queries)
+        assert Δx_qmlk.shape == (n, top_k, M, LK, 2)
 
         # Obtain the final positions of the key-value pairs.
-        x_qlk = self.calculate_sample_positions(
-            query_geometry_logits, Δx_qlk
+        x_qmlk = self.calculate_sample_positions(
+            query_geometry_logits, Δx_qmlk
         )
-        assert x_qlk.shape == (n, top_k, M, LK, 2)
-
+        assert x_qmlk.shape == (n, top_k, M, LK, 2)
 
         # TODO: would it better to project the values **after** sampling? This
         # would be **a lot less computations**.
@@ -383,11 +401,11 @@ class MultiscaleDeformableAttention(nn.Module):
             value_masked = value
         else:
             value_masked = value_mask.to(dtype=value.dtype) * value_projected
-        value_qlk = self.sample_values(value_masked,
-                                       value_spatial_sizes,
-                                       x_qlk)
+        value_qmlk = self.sample_values(value_masked,
+                                        value_spatial_sizes,
+                                        x_qmlk)
 
-        assert value_qlk.shape == (n, top_k, M, LK, d_k)
+        assert value_qmlk.shape == (n, top_k, M, LK, d_k)
 
 
         # Aggregate by linearly combining the sampled values with the attention
@@ -395,9 +413,9 @@ class MultiscaleDeformableAttention(nn.Module):
         # Summation over the 3rd axis which represents the pair of
         # indices (image level l, key-value index k) that is collapsed into a
         # single 1D index.
-        value_q = torch.sum(w_qlk[..., None] * value_qlk, dim=3)
+        value_q = torch.sum(w_qmlk[..., None] * value_qmlk, dim=3).flatten(2)
 
         # The value is the refined object query vector.
-        value_q = self.final_projections(value_q)
+        value_q = self.backprojector(value_q)
 
         return value_q

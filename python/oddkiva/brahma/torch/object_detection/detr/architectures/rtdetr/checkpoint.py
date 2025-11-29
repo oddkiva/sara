@@ -1192,7 +1192,7 @@ class RTDETRV2Checkpoint:
 
         key = f'{parent_key}.output_proj'
         self._copy_weight_and_bias(
-            msda.final_projections,
+            msda.backprojector,
             self.model_weights[f'{key}.weight'],
             self.model_weights[f'{key}.bias']
         )
