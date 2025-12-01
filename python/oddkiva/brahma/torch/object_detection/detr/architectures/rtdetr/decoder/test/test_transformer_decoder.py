@@ -197,7 +197,7 @@ def test_multiscale_deformable_attention_in_decoder_layer_0():
     assert torch.dist(value_q_backprojected, value_q_backprojected_true) < 5e-5
 
 
-def test_transformer_decoder_layer_0():
+def test_transformer_decoder_layer_0_detailed():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
@@ -289,6 +289,39 @@ def test_transformer_decoder_layer_0():
     target = layer.layer_norm_3(target)
     target_true = gt['dropout+add.norm.3']
     assert torch.norm(target - target_true) < 1.5e-4
+
+
+def test_transformer_decoder_layer_0():
+    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
+    data = torch.load(DATA_FILEPATH, torch.device('cpu'))
+
+    decoder_data = data['intermediate']['decoder']
+    # `gt` as in ground truth.
+    gt = decoder_data['decoder.layers.0']
+
+    memory, memory_spatial_hw_sizes = decoder_data['_get_encoder_input']
+    query, query_geometry_logits, _, _ = decoder_data['_get_decoder_input']
+
+    decoder = ckpt.load_transformer_decoder()
+
+    layer = decoder.layers[0]
+    assert type(layer) is MultiScaleDeformableTransformerDecoderLayer
+
+    query_geometries = F.sigmoid(query_geometry_logits)
+    query_geometries_true = gt['ref_points_detach']
+    assert torch.dist(query_geometries, query_geometries_true) < 1e-12
+
+    qgeom_embeds = \
+        decoder.box_geometry_embedding_map(query_geometries)
+    qgeom_embeds_true = gt['query_pos_embed']
+    assert torch.dist(qgeom_embeds, qgeom_embeds_true) < 1e-12
+
+
+    layer_out = layer.forward(query, query_geometries,
+                              memory, memory_spatial_hw_sizes,
+                              query_positional_embeds=qgeom_embeds)
+    layer_out_true = gt['dropout+add.norm.3']
+    assert torch.norm(layer_out - layer_out_true) < 1.5e-4
 
 
 # def test_transformer_decoder():
