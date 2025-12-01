@@ -272,26 +272,23 @@ def test_transformer_decoder_layer_0():
     cross_attn_out_true = gt['cross_attn']
     assert torch.dist(cross_attn_out, cross_attn_out_true) < 5e-5
 
-    # cross_attn_out = V_q
-    # cross_attn_out_true = gt['cross_attn']
-    # assert torch.dist(cross_attn_out.flatten(),
-    #                   cross_attn_out_true.flatten()) < 1e-12
+    target2 = cross_attn_out
 
-    # # Check the 2nd (dropout+add+layer-norm) computation.
-    # target = target + layer.dropout_2(target2)
-    # target = layer.layer_norm_2(target)
-    # target_true = gt['dropout+add+norm.2']
-    # assert torch.norm(target - target_true) < 1e-12
+    # Check the 2nd (dropout+add+layer-norm) computation.
+    target = target + layer.dropout_2(target2)
+    target = layer.layer_norm_2(target)
+    target_true = gt['dropout+add+norm.2']
+    assert torch.norm(target - target_true) < 5e-5
 
-    # # FFN
-    # target2 = layer.feedforward.forward(target)
-    # target2_true = gt['ffn']
-    # assert torch.norm(target2 - target2_true) < 1e-12
+    # FFN
+    target2 = layer.feedforward.forward(target)
+    target2_true = gt['ffn']
+    assert torch.norm(target2 - target2_true) < 1.5e-4
 
-    # target = target + layer.dropout_3(target2)
-    # target = layer.layer_norm_3(target)
-    # target_true = gt['dropout+add.norm.3']
-    # assert torch.norm(target - target_true) < 1e-12
+    target = target + layer.dropout_3(target2)
+    target = layer.layer_norm_3(target)
+    target_true = gt['dropout+add.norm.3']
+    assert torch.norm(target - target_true) < 1.5e-4
 
 
 # def test_transformer_decoder():
