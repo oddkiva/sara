@@ -475,7 +475,6 @@ def test_transformer_decoder_api():
     value = memory
     value_spatial_sizes = memory_spatial_hw_sizes
     value_mask = None
-    memory_mask = None
     assert query.requires_grad is False
     assert query_geometry_logits.requires_grad is False
 
@@ -484,7 +483,7 @@ def test_transformer_decoder_api():
     box_geometries, box_class_logits = decoder.forward(
         query, query_geometry_logits,
         value, value_spatial_sizes,
-        value_mask=None
+        value_mask=value_mask
     )
     box_geometries_true = torch.stack(layers_gt['dec_out_bboxes'])
     box_class_logits_true = torch.stack(layers_gt['dec_out_logits'])
