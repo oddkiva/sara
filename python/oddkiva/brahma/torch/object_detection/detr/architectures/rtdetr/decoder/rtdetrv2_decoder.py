@@ -1,11 +1,15 @@
-from oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.anchor_selector import AnchorSelector
-from oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.query_decoder import MultiScaleDeformableTransformerDecoder
 import torch
 import torch.nn as nn
 
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import UnbiasedConvBNA
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.anchor_decoder import AnchorDecoder
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.anchor_selector import AnchorSelector
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.query_decoder import MultiScaleDeformableTransformerDecoder
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.encoder.hybrid_encoder import FeaturePyramidProjection
 
 
 class RTDETRv2Decoder(nn.Module):
@@ -28,11 +32,10 @@ class RTDETRv2Decoder(nn.Module):
         # The authors feels the need to add another feature projectors.
         #
         # TODO: is it absolutely necessary from a performance point of view?
-        self.feature_projectors = torch.nn.ModuleList(
-            UnbiasedConvBNA(encoding_dim, hidden_dim, 1, 1, activation=None)
-            for _ in range(pyramid_level_count)
+        self.feature_projectors = FeaturePyramidProjection(
+            [encoding_dim] * pyramid_level_count,
+            hidden_dim
         )
-
         self.anchor_decoder = AnchorDecoder(
             encoding_dim,
             hidden_dim,
@@ -46,25 +49,15 @@ class RTDETRv2Decoder(nn.Module):
 
         self.anchor_selector = AnchorSelector(anchor_top_k)
 
-        self.decoder = MultiScaleDeformableTransformerDecoder(32, [4, 4, 4],
-                                                              num_classes=80,
-                                                              attn_head_count=8,
-                                                              attn_feedforward_dim=64,
-                                                              attn_num_layers=6,
-                                                              attn_dropout=0.1)
-
-        self._reinitialize_learning_parameters()
-
-    def _reinitialize_learning_parameters(self):
-        # if self.learn_query_content:
-        #     nn.init.xavier_uniform_(self.tgt_embed.weight)
-
-        # Reset the parameters
-        for convbna in self.feature_projectors:
-            assert type(convbna) is UnbiasedConvBNA
-            conv = convbna.layers[0]
-            assert type(conv) is nn.Conv2d
-            nn.init.xavier_uniform_(conv.weight)
+        assert pyramid_level_count == 3
+        self.decoder = MultiScaleDeformableTransformerDecoder(
+            32, [4, 4, 4],
+            num_classes=num_classes,
+            attn_head_count=8,
+            attn_feedforward_dim=64,
+            attn_num_layers=6,
+            attn_dropout=0.1
+        )
 
     def _transform_feature_pyramid_into_memory(
         self,
@@ -83,32 +76,34 @@ class RTDETRv2Decoder(nn.Module):
         object_query_matrix_final = torch.cat(object_query_matrices, dim=1)
         return object_query_matrix_final
 
-    def forward(self, feature_pyramid: list[torch.Tensor]):
-        feature_pyramid_projected = [
-            proj(fmap)
-            for proj, fmap in zip(self.feature_projectors, feature_pyramid)
-        ]
-
-        feature_pyramid_sizes = [
+    def forward(
+        self,
+        feature_pyramid: list[torch.Tensor]
+    ):
+        fpyr_projected = self.feature_projectors(feature_pyramid)
+        fpyr_sizes = [
             # Extract (w, h) from the shape (n, c, h, w)
             (fmap.shape[3], fmap.shape[2])
-            for fmap in feature_pyramid_projected
+            for fmap in fpyr_projected
         ]
 
         memory = self._transform_feature_pyramid_into_memory(
-            feature_pyramid_projected
+            fpyr_projected
         )
 
-        (memory_postprocessed,
+        (memory_projected,
          anchor_class_logits,
          anchor_geometry_logits) = self.anchor_decoder.forward(
              memory,
-             feature_pyramid_sizes
+             fpyr_sizes
          )
 
-        # Sort the queries by decreasing logit values and keep the top 300
+        # Sort the queries by decreasing logit values and keep the top-K
         # queries.
-
-        return (memory_postprocessed,
-                anchor_class_logits,
-                anchor_geometry_logits)
+        (top_queries,
+         top_class_logits,
+         top_geom_logits) = self.anchor_selector.forward(
+             memory_projected,
+             anchor_class_logits,
+             anchor_geometry_logits
+         )

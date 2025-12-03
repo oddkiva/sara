@@ -1037,12 +1037,7 @@ class RTDETRV2Checkpoint:
     # -------------------------------------------------------------------------
     # DECODER LOAD UTILITIES
     # -------------------------------------------------------------------------
-    def load_decoder_input_proj(self) -> FeaturePyramidProjection:
-        # Just hardcode the variables to simplify.
-        fp_proj = FeaturePyramidProjection(
-            [256] * 3,
-            256
-        )
+    def load_decoder_input_proj(self, fp_proj: FeaturePyramidProjection):
         fp_proj = freeze_batch_norm(fp_proj)
         assert type(fp_proj) is FeaturePyramidProjection
 
@@ -1053,8 +1048,6 @@ class RTDETRV2Checkpoint:
             bn_weights = self.decoder_input_proj_bn_weights(i)
             assert type(my_convbna) is UnbiasedConvBNA
             self._copy_conv_bna_weights(my_convbna, conv_weight, bn_weights)
-
-        return fp_proj
 
     def load_decoder_anchor_decoder(self) -> AnchorDecoder:
         encoding_dim = 256
@@ -1336,6 +1329,6 @@ class RTDETRV2Checkpoint:
             precalculate_anchor_geometry_logits=False
         )
 
-        decoder.feature_projectors = self.load_decoder_input_proj()
+        self.load_decoder_input_proj(decoder.feature_projectors)
 
         return decoder
