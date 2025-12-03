@@ -832,7 +832,7 @@ class RTDETRV2Checkpoint:
             self._copy_conv_bna_weights(my_convbna, conv_weight, bn_weights)
 
         for fusion_idx in range(2):
-            logger.debug('fusion_idx = {fusion_idx}')
+            logger.debug(f'fusion_idx = {fusion_idx}')
             fusion = top_down_fusion.fusion_blocks[fusion_idx]
             convs = [fusion.conv1, fusion.conv2]
             repvgg_stack = fusion.repvgg_stack
