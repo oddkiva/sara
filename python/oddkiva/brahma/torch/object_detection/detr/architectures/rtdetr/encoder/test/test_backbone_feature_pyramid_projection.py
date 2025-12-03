@@ -42,6 +42,6 @@ def test_backbone_feature_pyramid_projection_computations():
 
     with torch.no_grad():
         for fp_proj_out, fp_proj_out_true in zip(fp_proj_outs, fp_proj_outs_true):
-            diff = torch.norm(fp_proj_out - fp_proj_out_true)
+            diff = torch.dist(fp_proj_out, fp_proj_out_true)
             print(diff)
             assert diff < 1e-12

@@ -65,7 +65,7 @@ def test_hybrid_encoder_computations():
     fp_proj_outs = encoder.backbone_feature_proj(backbone_outs)
     with torch.no_grad():
         for Si, Si_true in zip(fp_proj_outs, fp_proj_outs_true):
-            assert torch.norm(Si - Si_true) < 1e-12
+            assert torch.dist(Si, Si_true) < 1e-12
 
     # Perform self-attention of the coarsest feature map of the feature
     # pyramid.
@@ -73,23 +73,23 @@ def test_hybrid_encoder_computations():
     S = fp_proj_outs
     F5 = encoder.aifi.forward(S[-1])
     with torch.no_grad():
-        assert torch.norm(F5 - aifi_out_true) < 1.2e-4
+        assert torch.dist(F5, aifi_out_true) < 1.2e-4
 
     # The top-down then bottom-up fusion scheme.
     Q = encoder.ccff.forward(F5, S)
     with torch.no_grad():
         for out, out_true in zip(Q, ccff_out_true):
-            assert torch.linalg.vector_norm(out - out_true) < 2e-3
-            assert torch.linalg.vector_norm(out - out_true, ord=torch.inf) < 5e-5
+            assert torch.dist(out, out_true) < 2e-3
+            assert torch.dist(out, out_true, p=torch.inf) < 5e-5
 
     # THE WHOLE IMPLEMENTATION
     Q2 = encoder(backbone_outs)
     with torch.no_grad():
         for out, out_true in zip(Q2, ccff_out_true):
-            assert torch.linalg.vector_norm(out - out_true) < 2e-3
-            assert torch.linalg.vector_norm(out - out_true, ord=torch.inf) < 2e-4
+            assert torch.dist(out, out_true) < 2e-3
+            assert torch.dist(out, out_true, p=torch.inf) < 2e-4
 
         encoder_out_true = data['intermediate']['encoder']['out']
         for out, out_true in zip(Q2, encoder_out_true):
-            assert torch.linalg.vector_norm(out - out_true) < 2e-3
-            assert torch.linalg.vector_norm(out - out_true, ord=torch.inf) < 2e-4
+            assert torch.dist(out, out_true) < 2e-3
+            assert torch.dist(out, out_true, p=torch.inf) < 2e-4

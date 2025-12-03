@@ -1,3 +1,5 @@
+from oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.anchor_selector import AnchorSelector
+from oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.query_decoder import MultiScaleDeformableTransformerDecoder
 import torch
 import torch.nn as nn
 
@@ -15,6 +17,7 @@ class RTDETRv2Decoder(nn.Module):
                  pyramid_level_count: int,
                  anchor_normalized_base_size: float = 0.05,
                  anchor_logit_eps: float = 1e-2,
+                 anchor_top_k: int = 300,
                  precalculate_anchor_geometry_logits: bool = True):
         super().__init__()
 
@@ -40,6 +43,15 @@ class RTDETRv2Decoder(nn.Module):
             logit_eps=anchor_logit_eps,
             precalculate_anchor_geometry_logits=precalculate_anchor_geometry_logits
         )
+
+        self.anchor_selector = AnchorSelector(anchor_top_k)
+
+        self.decoder = MultiScaleDeformableTransformerDecoder(32, [4, 4, 4],
+                                                              num_classes=80,
+                                                              attn_head_count=8,
+                                                              attn_feedforward_dim=64,
+                                                              attn_num_layers=6,
+                                                              attn_dropout=0.1)
 
         self._reinitialize_learning_parameters()
 

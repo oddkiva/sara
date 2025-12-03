@@ -51,7 +51,7 @@ def test_downsample_convolution_computations():
     # Just check the first one for now
     out = ds_convs[0](ins[0])
     out_true = ds_outs_true[0]
-    assert torch.norm(out - out_true) < 1e-12
+    assert torch.dist(out, out_true) < 1e-12
 
 def test_bottom_up_fusion_blocks():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
@@ -85,9 +85,9 @@ def test_bottom_up_fusion_blocks():
         F_bottomup_refined.append(F_coarse_refined)
 
     for out, out_true in zip(F_ds, ds_outs_true):
-        assert torch.norm(out - out_true) < 1e-12
+        assert torch.dist(out, out_true) < 1e-12
     for out, out_true in zip(F_bottomup_refined, pan_outs_true):
-        assert torch.norm(out - out_true) < 1e-12
+        assert torch.dist(out, out_true) < 1e-12
 
 def test_bottom_up_fusion_network():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
@@ -105,4 +105,4 @@ def test_bottom_up_fusion_network():
     pan_outs = bu_fusion(ins)
 
     for out, out_true in zip(pan_outs, pan_outs_true):
-        assert torch.norm(out - out_true) < 1e-12
+        assert torch.dist(out, out_true) < 1e-12

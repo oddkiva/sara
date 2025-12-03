@@ -286,17 +286,17 @@ def test_transformer_decoder_layer_0_details():
     target = target + layer.dropout_2(target2)
     target = layer.layer_norm_2(target)
     target_true = gt['dropout+add+norm.2']
-    assert torch.norm(target - target_true) < 5e-5
+    assert torch.dist(target, target_true) < 5e-5
 
     # FFN
     target2 = layer.feedforward.forward(target)
     target2_true = gt['ffn']
-    assert torch.norm(target2 - target2_true) < 1.5e-4
+    assert torch.dist(target2, target2_true) < 1.5e-4
 
     target = target + layer.dropout_3(target2)
     target = layer.layer_norm_3(target)
     target_true = gt['dropout+add.norm.3']
-    assert torch.norm(target - target_true) < 1.5e-4
+    assert torch.dist(target, target_true) < 1.5e-4
 
 
 def test_transformer_decoder_layer_0_api():
@@ -329,7 +329,7 @@ def test_transformer_decoder_layer_0_api():
                               memory, memory_spatial_hw_sizes,
                               query_positional_embeds=qgeom_embeds)
     layer_out_true = gt['dropout+add.norm.3']
-    assert torch.norm(layer_out - layer_out_true) < 1.5e-4
+    assert torch.dist(layer_out, layer_out_true) < 1.5e-4
 
 
 def test_transformer_decoder_details():
@@ -356,9 +356,6 @@ def test_transformer_decoder_details():
     memory_mask = None
     assert query.requires_grad is False
     assert query_geometry_logits.requires_grad is False
-
-    # assert torch.norm(box_geometries - box_geometries_true) < 1e-12
-    # assert torch.norm(box_class_logits - box_class_logits_true) < 1e-12
 
     layers_gt = data['intermediate']['decoder']['decoder.layer-by-layer']
 
@@ -458,6 +455,7 @@ def test_transformer_decoder_details():
         logger.debug(f'[{i}] Checking iterative query class denoising {i}')
         assert torch.dist(qc, qc_true) < 2.5e-3
         assert relative_error(qc, qc_true) < 5e-6
+
 
 def test_transformer_decoder_api():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))

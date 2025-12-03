@@ -61,7 +61,7 @@ def test_top_down_fusion_details():
         F_enriched.reverse()
 
         for fpn_out, fpn_out_true in zip(F_enriched, fpn_outs_true):
-            fpn_diff = torch.norm(fpn_out - fpn_out_true)
+            fpn_diff = torch.dist(fpn_out, fpn_out_true)
             print(f'fpn_diff = {fpn_diff}')
             assert fpn_diff < 1e-12
 
@@ -89,4 +89,4 @@ def test_top_down_fusion_module():
         assert len(fpn_outs) == 3
 
         for out, out_true in zip(fpn_outs, fpn_outs_true):
-            assert torch.norm(out - out_true) < 1e-12
+            assert torch.dist(out, out_true) < 1e-12

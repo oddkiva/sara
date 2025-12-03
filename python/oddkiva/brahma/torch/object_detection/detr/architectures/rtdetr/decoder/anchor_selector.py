@@ -12,6 +12,7 @@ class AnchorSelector(nn.Module):
         super().__init__()
         self._top_k = top_k
 
+    @torch.no_grad()
     def forward(
         self,
         memory: torch.Tensor,

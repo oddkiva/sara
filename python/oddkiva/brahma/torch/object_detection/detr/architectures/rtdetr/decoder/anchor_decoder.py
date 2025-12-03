@@ -60,7 +60,7 @@ class AnchorGeometryLogitEnumerator(nn.Module):
         return anchor_geometry_logits, anchor_mask
 
 
-class AnchorGeomeryResidualHead(MultiLayerPerceptron):
+class AnchorGeometryResidualHead(MultiLayerPerceptron):
 
     def __init__(self,
                  encoding_dim: int,
@@ -115,7 +115,7 @@ class AnchorDecoder(nn.Module):
 
         self.class_logit_head = nn.Linear(hidden_dim, num_classes)
 
-        self.geometry_residual_head = AnchorGeomeryResidualHead(
+        self.geometry_residual_head = AnchorGeometryResidualHead(
             encoding_dim, hidden_dim, geometry_head_layer_count,
             activation=geometry_head_activation
         )

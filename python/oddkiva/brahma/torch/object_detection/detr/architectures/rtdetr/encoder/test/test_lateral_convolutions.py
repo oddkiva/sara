@@ -46,6 +46,6 @@ def test_lateral_convolution_computations():
     lateral_conv = lateral_convs[0]
     lateral_conv_out = lateral_conv(F5_map)
     lateral_conv_out_true = lateral_conv_outs_true[0]
-    diff = torch.norm(lateral_conv_out - lateral_conv_out_true)
+    diff = torch.dist(lateral_conv_out, lateral_conv_out_true)
     print(f'diff = {diff}')
     assert diff < 1e-12

@@ -52,8 +52,8 @@ def test_decoder_computations():
     dec_input_proj_outs = decoder.feature_projectors(encoder_out)
     with torch.no_grad():
         for out, out_true in zip(dec_input_proj_outs, dec_input_proj_outs_true):
-            assert torch.linalg.vector_norm(out - out_true) < 1e-12
-            assert torch.linalg.vector_norm(out - out_true, ord=torch.inf) < 1e-12
+            assert torch.dist(out, out_true) < 1e-12
+            assert torch.dist(out, out_true, p=torch.inf) < 1e-12
 
     query_pyramid_true, pyramid_image_sizes_true = \
         data['intermediate']['decoder']['_get_encoder_input']
@@ -69,7 +69,7 @@ def test_decoder_computations():
     ]
     with torch.no_grad():
         for out, out_true in zip(query_pyramid, query_pyramid_true):
-            assert torch.linalg.vector_norm(out - out_true) < 1e-12
+            assert torch.dist(out, out_true) < 1e-12
     for shape, shape_true in zip(pyramid_image_sizes,
                                  pyramid_image_sizes_true):
         assert shape == torch.Size(shape_true)
