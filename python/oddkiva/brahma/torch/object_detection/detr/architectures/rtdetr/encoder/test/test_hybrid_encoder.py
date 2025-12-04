@@ -3,12 +3,13 @@ import torch
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.config import RTDETRConfig
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import (
         RTDETRV2Checkpoint,
         TopDownFusionNet,
         BottomUpFusionNet
     )
-
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder import HybridEncoder
 
@@ -107,6 +108,29 @@ def test_hybrid_encoder_computations():
             assert torch.dist(out, out_true) < 2e-3
             assert torch.dist(out, out_true, p=torch.inf) < 2e-4
 
+        encoder_out_true = data['intermediate']['encoder']['out']
+        for out, out_true in zip(Q2, encoder_out_true):
+            assert torch.dist(out, out_true) < 2e-3
+            assert torch.dist(out, out_true, p=torch.inf) < 2e-4
+
+
+def test_hybrid_encoder_from_config():
+    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
+    data = torch.load(DATA_FILEPATH, torch.device('cpu'))
+
+    # THE MODEL
+    encoder = RTDETRConfig.make_encoder()
+
+    # Load the model weights.
+    ckpt.load_encoder(encoder)
+    encoder = freeze_batch_norm(encoder)
+    assert type(encoder) is HybridEncoder
+
+    backbone_outs = data['intermediate']['backbone']['out']
+
+    # THE WHOLE IMPLEMENTATION
+    with torch.no_grad():
+        Q2 = encoder(backbone_outs)
         encoder_out_true = data['intermediate']['encoder']['out']
         for out, out_true in zip(Q2, encoder_out_true):
             assert torch.dist(out, out_true) < 2e-3

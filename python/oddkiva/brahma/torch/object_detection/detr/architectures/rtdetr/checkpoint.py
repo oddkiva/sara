@@ -32,6 +32,8 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.anchor_decoder import AnchorDecoder
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.query_selector import QuerySelector
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.query_decoder import (BoxGeometryEmbeddingMap,
                                          BoxGeometryLogitHead,
                                          BoxObjectClassLogitHead)
@@ -1152,6 +1154,13 @@ class RTDETRV2Checkpoint:
         self.load_box_geometry_logit_heads(decoder.box_geometry_logit_heads)
 
         return decoder
+
+    def load_query_selector(
+        self,
+        query_selector: QuerySelector
+    ):
+        self.load_decoder_input_proj(query_selector.feature_projectors)
+        self.load_decoder_anchor_decoder(query_selector.anchor_decoder)
 
     def load_decoder(self) -> RTDETRv2Decoder:
         num_classes = 80

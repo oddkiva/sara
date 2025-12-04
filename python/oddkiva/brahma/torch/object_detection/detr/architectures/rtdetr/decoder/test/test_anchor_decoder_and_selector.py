@@ -1,4 +1,3 @@
-from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 import torch
 
 from oddkiva import DATA_DIR_PATH
@@ -172,7 +171,7 @@ def test_anchor_selector():
         decoder_data['_get_decoder_input_part_1']
 
     (top_queries,
-     top_class_logits,
+     _,
      top_geom_logits) = anchor_selector.forward(memory_filtered,
                                                 anchor_class_logits,
                                                 anchor_geom_logits)
