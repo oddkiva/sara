@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-class ObjectNoiser(nn.Module):
+class BoxGeometryNoiser(nn.Module):
 
     def __init__(self):
         super().__init__()
@@ -12,8 +12,8 @@ class ObjectNoiser(nn.Module):
         ...
 
 
-class ObjectQueryDenoiser(nn.Module):
-    """The `ObjectQueryDenoiser` implements the auxiliary network that learns
+class BoxGeometryDenoiser(nn.Module):
+    """The `BoxGeometryDenoiser` implements the auxiliary network that learns
     to denoised noised ground-truth object boxes as described in the paper
     [DN-DETR: Accelerate DETR Training by Introducing Query
     DeNoising](https://openaccess.thecvf.com/content/CVPR2022/papers/Li_DN-DETR_Accelerate_DETR_Training_by_Introducing_Query_DeNoising_CVPR_2022_paper.pdf)
