@@ -4,6 +4,8 @@ import torch
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.encoder.aifi import AIFI
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import RTDETRV2Checkpoint
 
 
@@ -28,7 +30,15 @@ def test_aifi():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
-    aifi = ckpt.load_encoder_aifi()
+    aifi = AIFI(AIFIConfig.hidden_dim,
+                AIFIConfig.head_count,
+                feedforward_dim=AIFIConfig.feedforward_dim,
+                dropout=AIFIConfig.dropout,
+                normalize_before=AIFIConfig.normalize_before,
+                num_layers=AIFIConfig.num_encoder_layers,
+                norm=None)
+
+    ckpt.load_encoder_aifi(aifi)
 
     input_proj_out = data['intermediate']['encoder']['input_proj']
     s5 = input_proj_out[-1]

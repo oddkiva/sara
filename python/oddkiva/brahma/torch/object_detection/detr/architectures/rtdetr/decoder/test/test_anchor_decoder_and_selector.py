@@ -6,6 +6,8 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.anchor_decoder import AnchorGeometryLogitEnumerator
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.decoder.anchor_decoder import AnchorDecoder
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.anchor_selector import AnchorSelector
 
 
@@ -50,7 +52,23 @@ def test_anchor_logit_enumerator():
 def test_anchor_decoder():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
-    anchor_decoder = ckpt.load_decoder_anchor_decoder()
+
+    encoding_dim = 256
+    hidden_dim = 256
+    num_classes = 80
+
+    anchor_decoder = AnchorDecoder(
+        encoding_dim, hidden_dim, num_classes,
+        geometry_head_layer_count=3,
+        geometry_head_activation='relu',
+        normalized_base_size=0.05,
+        logit_eps=1e-2,
+        precalculate_anchor_geometry_logits=True,
+        image_pyramid_wh_sizes=[(80, 80), (40, 40), (20, 20)],
+        device = torch.device('cpu'),
+        initial_class_probability=0.1
+    )
+    ckpt.load_decoder_anchor_decoder(anchor_decoder)
 
     # -------------------------------------------------------------------------
     # Step 1: check the anchor geometry logits
@@ -105,9 +123,31 @@ def test_anchor_decoder():
 
 
 def test_anchor_selector():
+    # THE DATA
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
     decoder_data = data['intermediate']['decoder']
+
+    # THE MODEL
+    encoding_dim = 256
+    hidden_dim = 256
+    num_classes = 80
+
+    anchor_decoder = AnchorDecoder(
+        encoding_dim, hidden_dim, num_classes,
+        geometry_head_layer_count=3,
+        geometry_head_activation='relu',
+        normalized_base_size=0.05,
+        logit_eps=1e-2,
+        precalculate_anchor_geometry_logits=True,
+        image_pyramid_wh_sizes=[(80, 80), (40, 40), (20, 20)],
+        device = torch.device('cpu'),
+        initial_class_probability=0.1
+    )
+    anchor_selector = AnchorSelector(top_k=300)
+
+    # Load the model weights.
+    ckpt.load_decoder_anchor_decoder(anchor_decoder)
 
     # Reconstruct the memory
     fpyr_projected: list[torch.Tensor] = decoder_data['input_proj']
@@ -120,7 +160,6 @@ def test_anchor_selector():
         for fmap in fpyr_projected
     ]
 
-    anchor_decoder = ckpt.load_decoder_anchor_decoder()
     (memory_filtered,
      anchor_class_logits,
      anchor_geom_logits) = anchor_decoder.forward(memory, memory_wh_sizes)
@@ -130,7 +169,6 @@ def test_anchor_selector():
     anchor_class_logits, anchor_geom_logits = \
         decoder_data['_get_decoder_input_part_1']
 
-    anchor_selector = AnchorSelector(top_k=300)
     (top_queries,
      top_class_logits,
      top_geom_logits) = anchor_selector.forward(memory_filtered,

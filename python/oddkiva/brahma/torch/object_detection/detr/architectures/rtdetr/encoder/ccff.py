@@ -276,14 +276,14 @@ class CCFF(torch.nn.Module):
         assert stack_count > 0
 
         self.fuse_topdown = TopDownFusionNet(
-            hidden_dim, hidden_dim,
+            2 * hidden_dim, hidden_dim,
             stack_count,
             hidden_dim_expansion_factor=hidden_dim_expansion_factor,
             repvgg_stack_depth=repvgg_stack_depth,
             activation=activation
         )
         self.refine_bottomup = BottomUpFusionNet(
-            hidden_dim, hidden_dim,
+            2 * hidden_dim, hidden_dim,
             stack_count,
             hidden_dim_expansion_factor=hidden_dim_expansion_factor,
             repvgg_stack_depth=repvgg_stack_depth,

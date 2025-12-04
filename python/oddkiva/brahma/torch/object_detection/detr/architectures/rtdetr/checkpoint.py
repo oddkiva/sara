@@ -688,44 +688,20 @@ class RTDETRV2Checkpoint:
     # -------------------------------------------------------------------------
     # ENCODER LOAD UTILITIES
     # -------------------------------------------------------------------------
-    def load_encoder_input_proj(self) -> FeaturePyramidProjection:
-        # Just hardcode the variables to simplify.
-        fp_proj = FeaturePyramidProjection(
-            [512, 1024, 2048],
-            256
-        )
+    def load_encoder_input_proj(self, fp_proj: FeaturePyramidProjection):
         fp_proj = freeze_batch_norm(fp_proj)
-        assert type(fp_proj) is FeaturePyramidProjection
 
         # Copy the model weights.
-        for i in range(3):
-            my_convbna = fp_proj.projections[i]
+        for i, proj in enumerate(fp_proj.projections):
+            my_convbna = proj
             conv_weight = self.encoder_input_proj_conv_weight(i)
             bn_weights = self.encoder_input_proj_bn_weights(i)
             assert type(my_convbna) is UnbiasedConvBNA
             self._copy_conv_bna_weights(my_convbna, conv_weight, bn_weights)
 
-        return fp_proj
-
-    def load_encoder_aifi(self) -> AIFI:
-        hidden_dim = 256
-        attn_head_count = 8
-        feedforward_dim = 1024
-        num_layers = 1
-        dropout = 0.
-        normalize_before = False
-
-        aifi = AIFI(hidden_dim,
-                    attn_head_count,
-                    feedforward_dim=feedforward_dim,
-                    dropout=dropout,
-                    normalize_before=normalize_before,
-                    num_layers=num_layers,
-                    norm=None)
-
-        for layer_idx in range(num_layers):
+    def load_encoder_aifi(self, aifi: AIFI):
+        for layer_idx, layer in enumerate(aifi.transformer_encoder.layers):
             weights = self.aifi_encoder_layer_weights(layer_idx, i=0)
-            layer = aifi.transformer_encoder.layers[layer_idx]
             assert type(layer) is TransformerEncoderLayer
 
             # Self-attention weights.
@@ -746,8 +722,6 @@ class RTDETRV2Checkpoint:
             self._copy_weight_and_bias(layer.layer_norm_2,
                                        weights['norm2.weight'],
                                        weights['norm2.bias'])
-
-        return aifi
 
     def load_encoder_lateral_convs(self) -> nn.ModuleList:
         lateral_convs = nn.ModuleList([
@@ -815,25 +789,20 @@ class RTDETRV2Checkpoint:
 
         return fusions
 
-    def load_encoder_top_down_fusion_network(self) -> TopDownFusionNet:
-        top_down_fusion = freeze_batch_norm(TopDownFusionNet(
-            512, 256, 2,
-            hidden_dim_expansion_factor=1.0,
-            repvgg_stack_depth=3,
-            activation='silu'
-        ))
-        assert type(top_down_fusion) is TopDownFusionNet
+    def load_encoder_top_down_fusion_network(
+        self,
+        top_down_fusion: TopDownFusionNet
+    ):
+        top_down_fusion = freeze_batch_norm(top_down_fusion)
 
-        for idx in range(2):
-            my_convbna = top_down_fusion.lateral_convs[idx]
+        for idx, my_convbna in enumerate(top_down_fusion.lateral_convs):
             assert type(my_convbna) is LateralConvolution
             conv_weight = self.encoder_lateral_conv_weight(idx)
             bn_weights = self.encoder_lateral_bn_weights(idx)
             self._copy_conv_bna_weights(my_convbna, conv_weight, bn_weights)
 
-        for fusion_idx in range(2):
+        for fusion_idx, fusion in enumerate(top_down_fusion.fusion_blocks):
             logger.debug(f'fusion_idx = {fusion_idx}')
-            fusion = top_down_fusion.fusion_blocks[fusion_idx]
             convs = [fusion.conv1, fusion.conv2]
             repvgg_stack = fusion.repvgg_stack
 
@@ -869,8 +838,6 @@ class RTDETRV2Checkpoint:
                 self._copy_conv_bna_weights(repvgg_conv1,
                                             repvgg_conv1_weight,
                                             repvgg_bn1_weights)
-
-        return top_down_fusion
 
     def load_encoder_downsample_convs(self) -> nn.ModuleList:
         downsample_convs = nn.ModuleList([
@@ -942,13 +909,11 @@ class RTDETRV2Checkpoint:
 
         return fusions
 
-    def load_encoder_bottom_up_fusion_network(self) -> BottomUpFusionNet:
-        bottom_up_fusion = freeze_batch_norm(BottomUpFusionNet(
-            512, 256, 2,
-            hidden_dim_expansion_factor=1.0,
-            repvgg_stack_depth=3,
-            activation='silu'
-        ))
+    def load_encoder_bottom_up_fusion_network(
+        self,
+        bottom_up_fusion: BottomUpFusionNet
+    ):
+        bottom_up_fusion = freeze_batch_norm(bottom_up_fusion)
         assert type(bottom_up_fusion) is BottomUpFusionNet
 
         for idx in range(2):
@@ -997,42 +962,18 @@ class RTDETRV2Checkpoint:
                                             repvgg_conv1_weight,
                                             repvgg_bn1_weights)
 
-        return bottom_up_fusion
-
-    def load_encoder_ccff(self) -> CCFF:
-        ccff = freeze_batch_norm(CCFF(
-            2,
-            256,
-            hidden_dim_expansion_factor=1.0,
-            repvgg_stack_depth=3,
-            activation='silu'
-        ))
-        ccff.fuse_topdown = self.load_encoder_top_down_fusion_network()
-        ccff.refine_bottomup = self.load_encoder_bottom_up_fusion_network()
+    def load_encoder_ccff(self, ccff: CCFF):
+        ccff = freeze_batch_norm(ccff)
         assert type(ccff) is CCFF
-        return ccff
+        self.load_encoder_top_down_fusion_network(ccff.fuse_topdown)
+        self.load_encoder_bottom_up_fusion_network(ccff.refine_bottomup)
 
-    def load_encoder(self) -> HybridEncoder:
-        input_feature_dims = [512, 1024, 2048]
-        hidden_dim = 256
-        attn_head_count = 8
-        attn_feedforward_dim = 1024
-        attn_dropout = 0.
-        attn_num_layers = 1
-
-        encoder = freeze_batch_norm(HybridEncoder(
-            input_feature_dims,
-            attn_head_count,
-            hidden_dim,
-            attn_feedforward_dim=attn_feedforward_dim,
-            attn_dropout=attn_dropout,
-            attn_num_layers=attn_num_layers
-        ))
-        encoder.backbone_feature_proj = self.load_encoder_input_proj()
-        encoder.aifi = self.load_encoder_aifi()
-        encoder.ccff = self.load_encoder_ccff()
+    def load_encoder(self, encoder: HybridEncoder):
+        encoder = freeze_batch_norm(encoder)
         assert type(encoder) is HybridEncoder
-        return encoder
+        self.load_encoder_input_proj(encoder.backbone_feature_proj)
+        self.load_encoder_aifi(encoder.aifi)
+        self.load_encoder_ccff(encoder.ccff)
 
     # -------------------------------------------------------------------------
     # DECODER LOAD UTILITIES
@@ -1049,23 +990,9 @@ class RTDETRV2Checkpoint:
             assert type(my_convbna) is UnbiasedConvBNA
             self._copy_conv_bna_weights(my_convbna, conv_weight, bn_weights)
 
-    def load_decoder_anchor_decoder(self) -> AnchorDecoder:
-        encoding_dim = 256
-        hidden_dim = 256
-        num_classes = 80
-
-        anchor_decoder = AnchorDecoder(
-            encoding_dim, hidden_dim, num_classes,
-            geometry_head_layer_count=3,
-            geometry_head_activation='relu',
-            normalized_base_size=0.05,
-            logit_eps=1e-2,
-            precalculate_anchor_geometry_logits=True,
-            image_pyramid_wh_sizes=[(80, 80), (40, 40), (20, 20)],
-            device = torch.device('cpu'),
-            initial_class_probability=0.1
-        )
+    def load_decoder_anchor_decoder(self, anchor_decoder: AnchorDecoder):
         anchor_decoder = freeze_batch_norm(anchor_decoder)
+        assert type(anchor_decoder) is AnchorDecoder
 
         self._copy_weight_and_bias(
             anchor_decoder.decoder_base.projector,
@@ -1093,12 +1020,10 @@ class RTDETRV2Checkpoint:
                 self.decoder_enc_bbox_head_bias(i)
             )
 
-        assert type(anchor_decoder) is AnchorDecoder
-        return anchor_decoder
-
-    def load_box_geometry_embedding_map(self) -> BoxGeometryEmbeddingMap:
-        embed_dim = 256
-        embed_fn = BoxGeometryEmbeddingMap(embed_dim)
+    def load_box_geometry_embedding_map(
+        self,
+        embed_fn: BoxGeometryEmbeddingMap
+    ):
         for i, layer in enumerate(embed_fn.layers):
             assert type(layer) is nn.Linear
             self._copy_weight_and_bias(
@@ -1107,16 +1032,9 @@ class RTDETRV2Checkpoint:
                 self.decoder_query_pos_head_bias(i)
             )
 
-        return embed_fn
-
-    def load_box_geometry_logit_heads(self) -> list[BoxGeometryLogitHead]:
-        embed_dim = 256
-        iterations = 6
-        num_layers = 3
-
-        heads = []
-        for i in range(iterations):
-            head = BoxGeometryLogitHead(embed_dim, num_layers)
+    def load_box_geometry_logit_heads(self, heads: nn.ModuleList):
+        for i, head in enumerate(heads):
+            assert type(head) is BoxGeometryLogitHead
 
             for layer_idx, layer in enumerate(head.layers):
                 assert type(layer) is nn.Linear
@@ -1126,40 +1044,18 @@ class RTDETRV2Checkpoint:
                     self.decoder_bbox_head_bias(i, layer_idx)
                 )
 
-            heads.append(head)
-
-        return heads
-
-    def load_box_class_logit_heads(self) -> list[BoxObjectClassLogitHead]:
-        embed_dim = 256
-        num_classes = 80
-        iterations = 6
-
-        heads = []
-        for i in range(iterations):
-            head = BoxObjectClassLogitHead(embed_dim, num_classes)
+    def load_box_class_logit_heads(self, heads: nn.ModuleList):
+        for i, head in enumerate(heads):
+            assert type(head) is BoxObjectClassLogitHead
             self._copy_weight_and_bias(
                 head,
                 self.decoder_score_head_weight(i),
                 self.decoder_score_head_bias(i)
             )
-            heads.append(head)
-
-        return heads
 
     def load_transformer_decoder_layer_cross_attention(
-        self, iteration: int
-    ) -> MultiscaleDeformableAttention:
-        embed_dim = 256
-        num_heads = 8
-        value_dim = 32
-
-        msda = MultiscaleDeformableAttention(
-            embed_dim, num_heads, value_dim,
-            pyramid_level_count=3,
-            kv_count_per_level=4
-        )
-
+        self, iteration: int, msda: MultiscaleDeformableAttention
+    ):
         parent_key = f'decoder.decoder.layers.{iteration}.cross_attn'
 
         key = f'{parent_key}.sampling_offsets'
@@ -1190,21 +1086,13 @@ class RTDETRV2Checkpoint:
             self.model_weights[f'{key}.bias']
         )
 
-        return msda
-
     def load_transformer_decoder_layer_self_attention(
-        self, iteration: int
-    ) -> nn.MultiheadAttention:
-        embed_dim = 256
-        num_heads = 8
-
-        self_attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=0.,
-                                          batch_first=True)
+        self, iteration: int, self_attn: nn.MultiheadAttention
+    ):
         self._copy_self_attn_weights(
             self_attn,
             self.decoder_layer_self_attn_weights(iteration)
         )
-        return self_attn
 
     def _copy_decoder_layer_feedforward_weights(
         self, ffn: nn.Sequential, iteration: int
@@ -1242,33 +1130,15 @@ class RTDETRV2Checkpoint:
         self._copy_weight_and_bias(dlayer.layer_norm_3, w3, b3)
 
     def load_transformer_decoder_layer(
-        self, iteration: int
-    ) -> MultiScaleDeformableTransformerDecoderLayer:
-        hidden_dim = 256
-        image_level_count = 3
-        attn_head_count = 8
-        feedforward_dim = 1024
-        dropout = 0.
-        normalize_before = False
-
-        dlayer = MultiScaleDeformableTransformerDecoderLayer(
-            hidden_dim,
-            attn_head_count,
-            image_level_count,
-            feedforward_dim=feedforward_dim,
-            dropout=dropout,
-            normalize_before=normalize_before,
+        self, iteration: int, dlayer: MultiScaleDeformableTransformerDecoderLayer
+    ):
+        self.load_transformer_decoder_layer_self_attention(
+            iteration, dlayer.self_attention
         )
 
-        dlayer.self_attention = \
-            self.load_transformer_decoder_layer_self_attention(
-                iteration
-            )
-
-        dlayer.cross_attention = \
-            self.load_transformer_decoder_layer_cross_attention(
-                iteration
-            )
+        self.load_transformer_decoder_layer_cross_attention(
+            iteration, dlayer.cross_attention
+        )
 
         self._copy_decoder_layer_feedforward_weights(
             dlayer.feedforward,
@@ -1276,42 +1146,38 @@ class RTDETRV2Checkpoint:
         )
         self._copy_decoder_layer_norm_weights(dlayer, iteration)
 
-        return dlayer
-
     def load_transformer_decoder(
         self
     ) -> MultiScaleDeformableTransformerDecoder:
         hidden_dim = 256
         kv_count_per_level = [4, 4, 4]
         num_classes = 80
+        attn_value_dim = 32
         attn_head_count = 8
         attn_num_layers = 6
         attn_dropout = 0.0
+        attn_feedforward_dim = 1024
         normalize_before = False
 
         decoder = MultiScaleDeformableTransformerDecoder(
             hidden_dim,
+            attn_value_dim,
             kv_count_per_level,
             num_classes=num_classes,
             attn_head_count=attn_head_count,
             attn_num_layers=attn_num_layers,
             attn_dropout=attn_dropout,
+            attn_feedforward_dim=attn_feedforward_dim,
             normalize_before=normalize_before
         )
 
-        for i in range(attn_num_layers):
-            decoder.layers[i] = self.load_transformer_decoder_layer(i)
+        for i, layer in enumerate(decoder.layers):
+            assert type(layer) is MultiScaleDeformableTransformerDecoderLayer
+            self.load_transformer_decoder_layer(i, layer)
 
-        decoder.box_geometry_embedding_map = \
-            self.load_box_geometry_embedding_map()
-
-        decoder.box_class_logit_heads = nn.ModuleList(
-            self.load_box_class_logit_heads()
-        )
-
-        decoder.box_geometry_logit_heads = nn.ModuleList(
-            self.load_box_geometry_logit_heads()
-        )
+        self.load_box_geometry_embedding_map(decoder.box_geometry_embedding_map)
+        self.load_box_class_logit_heads(decoder.box_class_logit_heads)
+        self.load_box_geometry_logit_heads(decoder.box_geometry_logit_heads)
 
         return decoder
 

@@ -3,7 +3,8 @@ import torch.nn.functional as F
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import RTDETRV2Checkpoint
+    rtdetr.checkpoint import (RTDETRV2Checkpoint,
+                              TopDownFusionNet)
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
@@ -71,7 +72,13 @@ def test_top_down_fusion_module():
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
     # Load the blocks
-    fpn = ckpt.load_encoder_top_down_fusion_network()
+    fpn = TopDownFusionNet(
+        512, 256, 2,
+        hidden_dim_expansion_factor=1.0,
+        repvgg_stack_depth=3,
+        activation='silu'
+    )
+    ckpt.load_encoder_top_down_fusion_network(fpn)
 
     # Load the data.
     S = data['intermediate']['encoder']['input_proj']

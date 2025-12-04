@@ -70,12 +70,12 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
     def __init__(
         self,
         embed_dim: int,
+        value_dim: int,
         num_heads: int,
         image_level_count: int,
         feedforward_dim: int = 2048,
         dropout: float = 0.1,
-        normalize_before: bool = False,
-        training: bool = False
+        normalize_before: bool = False
     ):
         """Constructs the base layer of a Transformer Decoder block with
         reasonable default parameters.
@@ -113,7 +113,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         self.layer_norm_1 = nn.LayerNorm(embed_dim)
 
         self.cross_attention = MultiscaleDeformableAttention(
-            embed_dim, num_heads, embed_dim, image_level_count
+            embed_dim, num_heads, value_dim, image_level_count
         )
         self.dropout_2 = nn.Dropout(p=dropout)
         self.layer_norm_2 = nn.LayerNorm(embed_dim)
@@ -128,8 +128,6 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         assert type(self.feedforward.linear2) is nn.Linear
         self.dropout_3 = nn.Dropout(p=dropout)
         self.layer_norm_3 = nn.LayerNorm(embed_dim)
-
-        self.training = training
 
     def with_positional_embeds(self,
                        queries: torch.Tensor,
@@ -227,6 +225,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
     def __init__(
         self,
         hidden_dim: int,
+        value_dim: int,
         kv_count_per_level: list[int],
         # QUERY SELECTION
         num_classes: int = 80,
@@ -244,8 +243,10 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         # ---------------------------------------------------------------------
         self.layers = nn.ModuleList([
             MultiScaleDeformableTransformerDecoderLayer(
-                hidden_dim, attn_head_count, len(kv_count_per_level),
-                attn_feedforward_dim, attn_dropout,
+                hidden_dim, value_dim, attn_head_count,
+                len(kv_count_per_level),
+                feedforward_dim=attn_feedforward_dim,
+                dropout=attn_dropout,
                 normalize_before=normalize_before
             )
             for _ in range(attn_num_layers)

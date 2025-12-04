@@ -49,10 +49,26 @@ def test_hybrid_encoder_construction():
 
 
 def test_hybrid_encoder_computations():
+    # THE DATA
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
-    encoder = ckpt.load_encoder()
+    # THE MODEL
+    input_feature_dims = [512, 1024, 2048]
+    hidden_dim = 256
+    attn_head_count = 8
+    attn_feedforward_dim = 1024
+    attn_dropout = 0.
+    attn_num_layers = 1
+    encoder = HybridEncoder(
+        input_feature_dims, attn_head_count, hidden_dim,
+        attn_feedforward_dim=attn_feedforward_dim,
+        attn_dropout=attn_dropout,
+        attn_num_layers=attn_num_layers
+    )
+
+    # Load the model weights.
+    ckpt.load_encoder(encoder)
     assert len(encoder.aifi.transformer_encoder.layers) == 1
 
     backbone_outs = data['intermediate']['backbone']['out']

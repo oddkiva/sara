@@ -33,7 +33,12 @@ def test_backbone_feature_pyramid_projection_computations():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
-    fp_proj = ckpt.load_encoder_input_proj()
+    fp_proj = FeaturePyramidProjection(
+        [512, 1024, 2048],
+        256
+    )
+
+    ckpt.load_encoder_input_proj(fp_proj)
 
     # Check the computations with the data.
     backbone_outs = data['intermediate']['backbone']['out']

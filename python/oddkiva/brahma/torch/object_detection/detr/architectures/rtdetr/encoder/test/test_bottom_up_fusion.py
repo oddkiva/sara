@@ -5,7 +5,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import RTDETRV2Checkpoint
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.ccff import (
-        UnbiasedConvBNA,
+        BottomUpFusionNet,
         DownsampleConvolution,
         FusionBlock,
     )
@@ -97,8 +97,13 @@ def test_bottom_up_fusion_network():
     bu_outs_true = data['intermediate']['encoder']['ccff']['bottom_up']
     pan_outs_true = bu_outs_true['pan']
 
-    # Load the blocks
-    bu_fusion = ckpt.load_encoder_bottom_up_fusion_network()
+    bu_fusion = BottomUpFusionNet(
+        512, 256, 2,
+        hidden_dim_expansion_factor=1.0,
+        repvgg_stack_depth=3,
+        activation='silu'
+    )
+    ckpt.load_encoder_bottom_up_fusion_network(bu_fusion)
     assert len(bu_fusion.downsample_convs) == 2
     assert len(bu_fusion.fusion_blocks) == 2
 

@@ -51,10 +51,10 @@ class RTDETRv2Decoder(nn.Module):
 
         assert pyramid_level_count == 3
         self.decoder = MultiScaleDeformableTransformerDecoder(
-            32, [4, 4, 4],
+            256, 32, [4, 4, 4],
             num_classes=num_classes,
             attn_head_count=8,
-            attn_feedforward_dim=64,
+            attn_feedforward_dim=1024,
             attn_num_layers=6,
             attn_dropout=0.1
         )
