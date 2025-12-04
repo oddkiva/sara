@@ -221,6 +221,12 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
 
 
 class MultiScaleDeformableTransformerDecoder(nn.Module):
+    """This class stacks a sequence of
+    `MultiScaleDeformableTransformerDecoderLayer`.
+
+    Essentially, what this does is that it iteratively refines the box geometry
+    and object class probability vector for each object query.
+    """
 
     def __init__(
         self,

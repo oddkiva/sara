@@ -7,8 +7,11 @@ from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import RTDETRV2Checkpoint
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.config import RTDETRConfig
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.decoder.query_decoder import (
-        MultiScaleDeformableTransformerDecoderLayer
+        MultiScaleDeformableTransformerDecoderLayer,
+        MultiScaleDeformableTransformerDecoder
     )
 
 
@@ -25,6 +28,7 @@ def relative_error(a: torch.Tensor, b: torch.Tensor):
 
 
 def test_multiscale_deformable_attention_in_decoder_layer_0():
+    # THE DATA
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
@@ -37,8 +41,32 @@ def test_multiscale_deformable_attention_in_decoder_layer_0():
     memory, memory_spatial_hw_sizes = decoder_data['_get_encoder_input']
     query, query_geometry_logits, _, _ = decoder_data['_get_decoder_input']
 
-    decoder = ckpt.load_transformer_decoder()
+    # THE MODEL
+    hidden_dim = 256
+    kv_count_per_level = [4, 4, 4]
+    num_classes = 80
+    attn_value_dim = 32
+    attn_head_count = 8
+    attn_num_layers = 6
+    attn_dropout = 0.0
+    attn_feedforward_dim = 1024
+    normalize_before = False
+    decoder = MultiScaleDeformableTransformerDecoder(
+        hidden_dim,
+        attn_value_dim,
+        kv_count_per_level,
+        num_classes=num_classes,
+        attn_head_count=attn_head_count,
+        attn_num_layers=attn_num_layers,
+        attn_dropout=attn_dropout,
+        attn_feedforward_dim=attn_feedforward_dim,
+        normalize_before=normalize_before
+    )
 
+    # Load the model weights.
+    ckpt.load_transformer_decoder(decoder)
+
+    # Check the computations.
     layer = decoder.layers[0]
     assert type(layer) is MultiScaleDeformableTransformerDecoderLayer
 
@@ -206,6 +234,7 @@ def test_multiscale_deformable_attention_in_decoder_layer_0():
 
 
 def test_transformer_decoder_layer_0_details():
+    # THE DATA
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
@@ -216,8 +245,32 @@ def test_transformer_decoder_layer_0_details():
     memory, memory_spatial_hw_sizes = decoder_data['_get_encoder_input']
     query, query_geometry_logits, _, _ = decoder_data['_get_decoder_input']
 
-    decoder = ckpt.load_transformer_decoder()
+    # THE MODEL
+    hidden_dim = 256
+    kv_count_per_level = [4, 4, 4]
+    num_classes = 80
+    attn_value_dim = 32
+    attn_head_count = 8
+    attn_num_layers = 6
+    attn_dropout = 0.0
+    attn_feedforward_dim = 1024
+    normalize_before = False
+    decoder = MultiScaleDeformableTransformerDecoder(
+        hidden_dim,
+        attn_value_dim,
+        kv_count_per_level,
+        num_classes=num_classes,
+        attn_head_count=attn_head_count,
+        attn_num_layers=attn_num_layers,
+        attn_dropout=attn_dropout,
+        attn_feedforward_dim=attn_feedforward_dim,
+        normalize_before=normalize_before
+    )
 
+    # Load the model weights.
+    ckpt.load_transformer_decoder(decoder)
+
+    # Check the computations.
     layer = decoder.layers[0]
     assert type(layer) is MultiScaleDeformableTransformerDecoderLayer
 
@@ -300,18 +353,42 @@ def test_transformer_decoder_layer_0_details():
 
 
 def test_transformer_decoder_layer_0_api():
+    # THE DATA
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
-
+    # CONVENIENCE ALIASES
     decoder_data = data['intermediate']['decoder']
     # `gt` as in ground truth.
     gt = decoder_data['decoder.layers.0']
-
     memory, memory_spatial_hw_sizes = decoder_data['_get_encoder_input']
     query, query_geometry_logits, _, _ = decoder_data['_get_decoder_input']
 
-    decoder = ckpt.load_transformer_decoder()
+    # THE MODEL
+    hidden_dim = 256
+    kv_count_per_level = [4, 4, 4]
+    num_classes = 80
+    attn_value_dim = 32
+    attn_head_count = 8
+    attn_num_layers = 6
+    attn_dropout = 0.0
+    attn_feedforward_dim = 1024
+    normalize_before = False
+    decoder = MultiScaleDeformableTransformerDecoder(
+        hidden_dim,
+        attn_value_dim,
+        kv_count_per_level,
+        num_classes=num_classes,
+        attn_head_count=attn_head_count,
+        attn_num_layers=attn_num_layers,
+        attn_dropout=attn_dropout,
+        attn_feedforward_dim=attn_feedforward_dim,
+        normalize_before=normalize_before
+    )
 
+    # Load the model weights.
+    ckpt.load_transformer_decoder(decoder)
+
+    # Check the computations.
     layer = decoder.layers[0]
     assert type(layer) is MultiScaleDeformableTransformerDecoderLayer
 
@@ -333,21 +410,40 @@ def test_transformer_decoder_layer_0_api():
 
 
 def test_transformer_decoder_details():
+    # THE DATA
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
-
     memory, memory_spatial_hw_sizes = \
         data['intermediate']['decoder']['_get_encoder_input']
     init_ref_contents, init_ref_points_unact, _, _ = \
         data['intermediate']['decoder']['_get_decoder_input']
 
-    decoder = ckpt.load_transformer_decoder()
-    # box_geometries, box_class_logits = decoder.forward(
-    #     init_ref_contents.detach(), init_ref_points_unact,
-    #     memory, memory_spatial_hw_sizes,
-    #     value_mask=None
-    # )
+    # THE MODEL
+    hidden_dim = 256
+    kv_count_per_level = [4, 4, 4]
+    num_classes = 80
+    attn_value_dim = 32
+    attn_head_count = 8
+    attn_num_layers = 6
+    attn_dropout = 0.0
+    attn_feedforward_dim = 1024
+    normalize_before = False
+    decoder = MultiScaleDeformableTransformerDecoder(
+        hidden_dim,
+        attn_value_dim,
+        kv_count_per_level,
+        num_classes=num_classes,
+        attn_head_count=attn_head_count,
+        attn_num_layers=attn_num_layers,
+        attn_dropout=attn_dropout,
+        attn_feedforward_dim=attn_feedforward_dim,
+        normalize_before=normalize_before
+    )
 
+    # Load the model weights.
+    ckpt.load_transformer_decoder(decoder)
+
+    # Check the computations.
     query = init_ref_contents
     query_geometry_logits = init_ref_points_unact
     value = memory
@@ -458,6 +554,62 @@ def test_transformer_decoder_details():
 
 
 def test_transformer_decoder_api():
+    # THE DATA
+    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
+    data = torch.load(DATA_FILEPATH, torch.device('cpu'))
+    memory, memory_spatial_hw_sizes = \
+        data['intermediate']['decoder']['_get_encoder_input']
+    init_ref_contents, init_ref_points_unact, _, _ = \
+        data['intermediate']['decoder']['_get_decoder_input']
+
+    # THE MODEL
+    hidden_dim = 256
+    kv_count_per_level = [4, 4, 4]
+    num_classes = 80
+    attn_value_dim = 32
+    attn_head_count = 8
+    attn_num_layers = 6
+    attn_dropout = 0.0
+    attn_feedforward_dim = 1024
+    normalize_before = False
+    decoder = MultiScaleDeformableTransformerDecoder(
+        hidden_dim,
+        attn_value_dim,
+        kv_count_per_level,
+        num_classes=num_classes,
+        attn_head_count=attn_head_count,
+        attn_num_layers=attn_num_layers,
+        attn_dropout=attn_dropout,
+        attn_feedforward_dim=attn_feedforward_dim,
+        normalize_before=normalize_before
+    )
+
+    # Load the model weights.
+    ckpt.load_transformer_decoder(decoder)
+
+    # Check the computations.
+    query = init_ref_contents
+    query_geometry_logits = init_ref_points_unact
+    value = memory
+    value_spatial_sizes = memory_spatial_hw_sizes
+    value_mask = None
+    assert query.requires_grad is False
+    assert query_geometry_logits.requires_grad is False
+
+    layers_gt = data['intermediate']['decoder']['decoder.layer-by-layer']
+
+    box_geometries, box_class_logits = decoder.forward(
+        query, query_geometry_logits,
+        value, value_spatial_sizes,
+        value_mask=value_mask
+    )
+    box_geometries_true = torch.stack(layers_gt['dec_out_bboxes'])
+    box_class_logits_true = torch.stack(layers_gt['dec_out_logits'])
+
+    assert relative_error(box_geometries, box_geometries_true) < 5e-6
+    assert relative_error(box_class_logits, box_class_logits_true) < 5e-6
+
+def test_transformer_decoder_from_config():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
@@ -466,7 +618,8 @@ def test_transformer_decoder_api():
     init_ref_contents, init_ref_points_unact, _, _ = \
         data['intermediate']['decoder']['_get_decoder_input']
 
-    decoder = ckpt.load_transformer_decoder()
+    decoder = RTDETRConfig.make_decoder()
+    ckpt.load_transformer_decoder(decoder)
 
     query = init_ref_contents
     query_geometry_logits = init_ref_points_unact

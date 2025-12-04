@@ -46,8 +46,6 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
         MultiScaleDeformableTransformerDecoderLayer,
         MultiScaleDeformableTransformerDecoder
     )
-from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.rtdetrv2_decoder import RTDETRv2Decoder
 
 
 class RTDETRV2Checkpoint:
@@ -1121,30 +1119,9 @@ class RTDETRV2Checkpoint:
         self._copy_decoder_layer_norm_weights(dlayer, iteration)
 
     def load_transformer_decoder(
-        self
-    ) -> MultiScaleDeformableTransformerDecoder:
-        hidden_dim = 256
-        kv_count_per_level = [4, 4, 4]
-        num_classes = 80
-        attn_value_dim = 32
-        attn_head_count = 8
-        attn_num_layers = 6
-        attn_dropout = 0.0
-        attn_feedforward_dim = 1024
-        normalize_before = False
-
-        decoder = MultiScaleDeformableTransformerDecoder(
-            hidden_dim,
-            attn_value_dim,
-            kv_count_per_level,
-            num_classes=num_classes,
-            attn_head_count=attn_head_count,
-            attn_num_layers=attn_num_layers,
-            attn_dropout=attn_dropout,
-            attn_feedforward_dim=attn_feedforward_dim,
-            normalize_before=normalize_before
-        )
-
+        self,
+        decoder: MultiScaleDeformableTransformerDecoder
+    ):
         for i, layer in enumerate(decoder.layers):
             assert type(layer) is MultiScaleDeformableTransformerDecoderLayer
             self.load_transformer_decoder_layer(i, layer)
@@ -1153,29 +1130,9 @@ class RTDETRV2Checkpoint:
         self.load_box_class_logit_heads(decoder.box_class_logit_heads)
         self.load_box_geometry_logit_heads(decoder.box_geometry_logit_heads)
 
-        return decoder
-
     def load_query_selector(
         self,
         query_selector: QuerySelector
     ):
         self.load_decoder_input_proj(query_selector.feature_projectors)
         self.load_decoder_anchor_decoder(query_selector.anchor_decoder)
-
-    def load_decoder(self) -> RTDETRv2Decoder:
-        num_classes = 80
-        encoding_dim = 256
-        hidden_dim = 256
-        pyramid_level_count = 3
-
-        decoder = RTDETRv2Decoder(
-            num_classes,
-            encoding_dim,
-            hidden_dim,
-            pyramid_level_count,
-            precalculate_anchor_geometry_logits=False
-        )
-
-        self.load_decoder_input_proj(decoder.feature_projectors)
-
-        return decoder

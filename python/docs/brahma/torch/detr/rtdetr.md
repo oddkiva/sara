@@ -15,10 +15,16 @@
 ::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.encoder.ccff
 ::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.encoder.hybrid_encoder
 
+### Query Denoising
+
+::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.query_denoiser
+
+## Uncertainty-Minimal Query Selection
+
+::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.query_selector
+
 ## Transformer-Based Decoder
 
-::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.object_query_denoiser
 ::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.anchor_decoder
 ::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.anchor_selector
 ::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.query_decoder
-::: oddkiva.brahma.torch.object_detection.detr.architectures.rtdetr.decoder.rtdetrv2_decoder
