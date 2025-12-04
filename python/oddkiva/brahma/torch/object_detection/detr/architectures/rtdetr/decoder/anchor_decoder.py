@@ -120,7 +120,7 @@ class AnchorDecoder(nn.Module):
             activation=geometry_head_activation
         )
 
-        self._reinitialize_learning_parameters(initial_class_probability)
+        self._reinitialize_anchor_decode_parameters(initial_class_probability)
 
         self.precalculate_anchor_geometry_logits = \
             precalculate_anchor_geometry_logits
@@ -143,8 +143,10 @@ class AnchorDecoder(nn.Module):
         logit_value = -math.log((1 - prob) / prob)
         return logit_value
 
-    def _reinitialize_learning_parameters(self,
-                                          initial_class_probability: float):
+    def _reinitialize_anchor_decode_parameters(
+        self,
+        initial_class_probability: float
+    ):
         # Initialize the weight of the base network.
         nn.init.xavier_uniform_(self.decoder_base[0].weight)
 

@@ -3,6 +3,8 @@ import torch
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.config import RTDETRConfig
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.encoder.feature_pyramid_projection import (
         FeaturePyramidProjection
     )
@@ -18,17 +20,6 @@ DATA_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
                  'rtdetrv2_r50vd_6x_coco_ema.data.pt')
 
 
-def test_backbone_feature_pyramid_projection_construction():
-    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
-
-    backbone = ckpt.load_backbone()
-
-    fp_dims = backbone.feature_pyramid_dims[-3:]
-    hidden_dim: int = 256
-    fp_proj = FeaturePyramidProjection(fp_dims, hidden_dim)
-    fp_proj = freeze_batch_norm(fp_proj)
-
-
 def test_backbone_feature_pyramid_projection_computations():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
@@ -39,6 +30,7 @@ def test_backbone_feature_pyramid_projection_computations():
     )
 
     ckpt.load_encoder_input_proj(fp_proj)
+    fp_proj = freeze_batch_norm(fp_proj)
 
     # Check the computations with the data.
     backbone_outs = data['intermediate']['backbone']['out']
@@ -48,5 +40,4 @@ def test_backbone_feature_pyramid_projection_computations():
     with torch.no_grad():
         for fp_proj_out, fp_proj_out_true in zip(fp_proj_outs, fp_proj_outs_true):
             diff = torch.dist(fp_proj_out, fp_proj_out_true)
-            print(diff)
             assert diff < 1e-12

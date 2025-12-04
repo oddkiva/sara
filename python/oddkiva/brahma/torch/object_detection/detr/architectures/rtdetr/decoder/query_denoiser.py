@@ -8,7 +8,7 @@ class BoxGeometryNoiser(nn.Module):
         super().__init__()
 
 
-    def forward(self, ground_truth_boxes: torch.Tensor) -> torch.Tensor:
+    def forward(self, boxes: torch.Tensor) -> torch.Tensor:
         ...
 
 

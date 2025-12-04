@@ -8,9 +8,9 @@ class AnchorSelector(nn.Module):
     geometry logits.
     """
 
-    def __init__(self, top_k: int = 300):
+    def __init__(self, top_K: int = 300):
         super().__init__()
-        self._top_k = top_k
+        self._top_K = top_K
 
     @torch.no_grad()
     def forward(
@@ -23,7 +23,7 @@ class AnchorSelector(nn.Module):
 
         _, topk_ind = torch.topk(
             max_class_logits,
-            self._top_k,
+            self._top_K,
             dim=-1
         )
 

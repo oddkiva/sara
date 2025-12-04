@@ -7,7 +7,6 @@ import torch.nn as nn
 import torchvision.ops as ops
 from torch.serialization import MAP_LOCATION
 
-from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
     UnbiasedConvBNA,
     ResNet50RTDETRV2Variant
@@ -675,22 +674,14 @@ class RTDETRV2Checkpoint:
                     my_shortcut = my_bottleneck_block.shortcut
                     assert type(my_shortcut) is nn.Identity
 
-    def load_backbone(self) -> ResNet50RTDETRV2Variant:
-        model = ResNet50RTDETRV2Variant()
-        model = freeze_batch_norm(model)
-        assert type(model) is ResNet50RTDETRV2Variant
-
+    def load_backbone(self, model: ResNet50RTDETRV2Variant):
         self._load_backbone_conv_1(model)
         self._load_backbone_res_layers(model)
-
-        return model
 
     # -------------------------------------------------------------------------
     # ENCODER LOAD UTILITIES
     # -------------------------------------------------------------------------
     def load_encoder_input_proj(self, fp_proj: FeaturePyramidProjection):
-        fp_proj = freeze_batch_norm(fp_proj)
-
         # Copy the model weights.
         for i, proj in enumerate(fp_proj.projections):
             my_convbna = proj
@@ -724,10 +715,10 @@ class RTDETRV2Checkpoint:
                                        weights['norm2.bias'])
 
     def load_encoder_lateral_convs(self) -> nn.ModuleList:
-        lateral_convs = nn.ModuleList([
-            freeze_batch_norm(LateralConvolution(256, 256))
+        lateral_convs = nn.ModuleList(
+            LateralConvolution(256, 256)
             for _ in range(2)
-        ])
+        )
 
         for idx in range(2):
             my_convbna = lateral_convs[idx]
@@ -740,12 +731,12 @@ class RTDETRV2Checkpoint:
 
     def load_encoder_top_down_fusion_blocks(self) -> nn.ModuleList:
         fusions = nn.ModuleList([
-            freeze_batch_norm(FusionBlock(
+            FusionBlock(
                 512, 256,
                 hidden_dim_expansion_factor=1.0,
                 repvgg_layer_count=3,
                 activation='silu'
-            ))
+            )
             for _ in range(2)
         ])
 
@@ -793,8 +784,6 @@ class RTDETRV2Checkpoint:
         self,
         top_down_fusion: TopDownFusionNet
     ):
-        top_down_fusion = freeze_batch_norm(top_down_fusion)
-
         for idx, my_convbna in enumerate(top_down_fusion.lateral_convs):
             assert type(my_convbna) is LateralConvolution
             conv_weight = self.encoder_lateral_conv_weight(idx)
@@ -841,9 +830,7 @@ class RTDETRV2Checkpoint:
 
     def load_encoder_downsample_convs(self) -> nn.ModuleList:
         downsample_convs = nn.ModuleList([
-            freeze_batch_norm(  # IMPORTANT!
-                DownsampleConvolution(256, 256)
-            )
+            DownsampleConvolution(256, 256)
             for _ in range(2)
         ])
 
@@ -858,13 +845,11 @@ class RTDETRV2Checkpoint:
 
     def load_encoder_bottom_up_fusion_blocks(self) -> nn.ModuleList:
         fusions = nn.ModuleList([
-            freeze_batch_norm(  # IMPORTANT!
-                FusionBlock(
-                    512, 256,
-                    hidden_dim_expansion_factor=1.0,
-                    repvgg_layer_count=3,
-                    activation='silu'
-                )
+            FusionBlock(
+                512, 256,
+                hidden_dim_expansion_factor=1.0,
+                repvgg_layer_count=3,
+                activation='silu'
             )
             for _ in range(2)
         ])
@@ -913,9 +898,6 @@ class RTDETRV2Checkpoint:
         self,
         bottom_up_fusion: BottomUpFusionNet
     ):
-        bottom_up_fusion = freeze_batch_norm(bottom_up_fusion)
-        assert type(bottom_up_fusion) is BottomUpFusionNet
-
         for idx in range(2):
             my_convbna = bottom_up_fusion.downsample_convs[idx]
             assert type(my_convbna) is DownsampleConvolution
@@ -963,14 +945,10 @@ class RTDETRV2Checkpoint:
                                             repvgg_bn1_weights)
 
     def load_encoder_ccff(self, ccff: CCFF):
-        ccff = freeze_batch_norm(ccff)
-        assert type(ccff) is CCFF
         self.load_encoder_top_down_fusion_network(ccff.fuse_topdown)
         self.load_encoder_bottom_up_fusion_network(ccff.refine_bottomup)
 
     def load_encoder(self, encoder: HybridEncoder):
-        encoder = freeze_batch_norm(encoder)
-        assert type(encoder) is HybridEncoder
         self.load_encoder_input_proj(encoder.backbone_feature_proj)
         self.load_encoder_aifi(encoder.aifi)
         self.load_encoder_ccff(encoder.ccff)
@@ -979,9 +957,6 @@ class RTDETRV2Checkpoint:
     # DECODER LOAD UTILITIES
     # -------------------------------------------------------------------------
     def load_decoder_input_proj(self, fp_proj: FeaturePyramidProjection):
-        fp_proj = freeze_batch_norm(fp_proj)
-        assert type(fp_proj) is FeaturePyramidProjection
-
         # Copy the model weights.
         for i in range(3):
             my_convbna = fp_proj.projections[i]
@@ -991,9 +966,6 @@ class RTDETRV2Checkpoint:
             self._copy_conv_bna_weights(my_convbna, conv_weight, bn_weights)
 
     def load_decoder_anchor_decoder(self, anchor_decoder: AnchorDecoder):
-        anchor_decoder = freeze_batch_norm(anchor_decoder)
-        assert type(anchor_decoder) is AnchorDecoder
-
         self._copy_weight_and_bias(
             anchor_decoder.decoder_base.projector,
             self.decoder_enc_output_proj_weight(),

@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 
 from oddkiva import DATA_DIR_PATH
+from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import (RTDETRV2Checkpoint,
                               TopDownFusionNet)
@@ -20,6 +21,11 @@ def test_top_down_fusion_details():
     # Load the blocks
     lateral_convs = ckpt.load_encoder_lateral_convs()
     fpn = ckpt.load_encoder_top_down_fusion_blocks()
+
+    lateral_convs = freeze_batch_norm(lateral_convs)
+    fpn = freeze_batch_norm(fpn)
+    assert type(lateral_convs) is torch.nn.ModuleList
+    assert type(fpn) is torch.nn.ModuleList
     assert len(lateral_convs) == 2
     assert len(fpn) == 2
 
@@ -79,6 +85,8 @@ def test_top_down_fusion_module():
         activation='silu'
     )
     ckpt.load_encoder_top_down_fusion_network(fpn)
+    fpn = freeze_batch_norm(fpn)
+    assert type(fpn) is TopDownFusionNet
 
     # Load the data.
     S = data['intermediate']['encoder']['input_proj']

@@ -1,6 +1,7 @@
 import torch
 
 from oddkiva import DATA_DIR_PATH
+from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import (
         RTDETRV2Checkpoint,
@@ -69,6 +70,7 @@ def test_hybrid_encoder_computations():
 
     # Load the model weights.
     ckpt.load_encoder(encoder)
+    encoder = freeze_batch_norm(encoder)
     assert len(encoder.aifi.transformer_encoder.layers) == 1
 
     backbone_outs = data['intermediate']['backbone']['out']

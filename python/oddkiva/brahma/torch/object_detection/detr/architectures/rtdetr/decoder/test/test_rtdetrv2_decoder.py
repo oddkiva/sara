@@ -1,6 +1,7 @@
 import torch
 
 from oddkiva import DATA_DIR_PATH
+from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import RTDETRV2Checkpoint
 
@@ -16,6 +17,7 @@ def test_decoder_computations():
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
     decoder = ckpt.load_decoder()
+    decoder = freeze_batch_norm(decoder)
 
     fpyramid = data['intermediate']['encoder']['out']
 

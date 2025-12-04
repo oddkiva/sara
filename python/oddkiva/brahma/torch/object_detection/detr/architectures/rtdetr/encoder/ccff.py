@@ -119,10 +119,12 @@ class TopDownFusionNet(torch.nn.Module):
             for _ in range(stack_count)
         ])
         self.fusion_blocks = torch.nn.ModuleList([
-            FusionBlock(in_channels, out_channels,
-                   hidden_dim_expansion_factor=hidden_dim_expansion_factor,
-                   repvgg_layer_count=repvgg_stack_depth,
-                   activation=activation)
+            FusionBlock(
+                in_channels, out_channels,
+                hidden_dim_expansion_factor=hidden_dim_expansion_factor,
+                repvgg_layer_count=repvgg_stack_depth,
+                activation=activation
+            )
             for _ in range(stack_count)
         ])
 

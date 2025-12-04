@@ -1,3 +1,4 @@
+from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 import torch
 
 from oddkiva import DATA_DIR_PATH
@@ -69,6 +70,7 @@ def test_anchor_decoder():
         initial_class_probability=0.1
     )
     ckpt.load_decoder_anchor_decoder(anchor_decoder)
+    assert type(anchor_decoder) is AnchorDecoder
 
     # -------------------------------------------------------------------------
     # Step 1: check the anchor geometry logits
@@ -144,7 +146,7 @@ def test_anchor_selector():
         device = torch.device('cpu'),
         initial_class_probability=0.1
     )
-    anchor_selector = AnchorSelector(top_k=300)
+    anchor_selector = AnchorSelector(top_K=300)
 
     # Load the model weights.
     ckpt.load_decoder_anchor_decoder(anchor_decoder)

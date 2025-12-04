@@ -86,7 +86,7 @@ def test_aifi():
         norm2_out = aifi_layer.layer_norm_2(
             norm1_out + aifi_layer.dropout_2(ffn_out)
         )
-        assert torch.norm(norm2_out - norm2_out_true.data) < 2e-4
+        assert torch.dist(norm2_out, norm2_out_true.data) < 2e-4
 
     aifi_out_true = data['intermediate']['encoder']['aifi']['out']
     with torch.no_grad():

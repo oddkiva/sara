@@ -9,11 +9,20 @@ def freeze_parameters(m: nn.Module):
         p.requires_grad = False
 
 
-def freeze_batch_norm(m):
+def freeze_batch_norm(m: nn.Module):
     if isinstance(m, nn.BatchNorm2d):
         # If m is a leaf module and that leaf module is also a BatchNorm2d
         # module.
-        m = ops.FrozenBatchNorm2d(m.num_features)
+        m_frozen = ops.FrozenBatchNorm2d(m.num_features)
+
+        # Important: recopy the weights please!
+        m_frozen.weight.data.copy_(m.weight)
+        m_frozen.bias.data.copy_(m.bias)
+        m_frozen.running_var.data.copy_(m.running_var)
+        m_frozen.running_mean.data.copy_(m.running_mean)
+        m_frozen.running_var.data.copy_(m.running_var)
+
+        m = m_frozen
     else:
         # DFS visit.
         for child_tree_name, child_tree in m.named_children():

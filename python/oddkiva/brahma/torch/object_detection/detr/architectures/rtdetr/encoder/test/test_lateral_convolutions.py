@@ -1,3 +1,4 @@
+from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 import torch
 import torch.nn as nn
 
@@ -31,6 +32,8 @@ def test_lateral_convolution_computations():
 
     # Load the blocks
     lateral_convs = ckpt.load_encoder_lateral_convs()
+    lateral_convs = freeze_batch_norm(lateral_convs)
+    assert type(lateral_convs) is nn.ModuleList
 
     # Load the data.
     S = data['intermediate']['encoder']['input_proj']

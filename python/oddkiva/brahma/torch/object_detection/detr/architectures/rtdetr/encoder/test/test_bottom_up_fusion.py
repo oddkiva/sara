@@ -1,3 +1,4 @@
+from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 import torch
 
 from oddkiva import DATA_DIR_PATH
@@ -46,6 +47,7 @@ def test_downsample_convolution_computations():
 
     # Load the blocks
     ds_convs = ckpt.load_encoder_downsample_convs()
+    ds_convs = freeze_batch_norm(ds_convs)
     assert len(ds_convs) == 2
 
     # Just check the first one for now
@@ -65,6 +67,11 @@ def test_bottom_up_fusion_blocks():
     # Load the blocks
     ds_convs = ckpt.load_encoder_downsample_convs()
     fusion = ckpt.load_encoder_bottom_up_fusion_blocks()
+
+    # Freeze the batch norm layers.
+    ds_convs = freeze_batch_norm(ds_convs)
+    fusion = freeze_batch_norm(fusion)
+
     assert len(ds_convs) == 2
     assert len(fusion) == 2
     num_steps = len(fusion)
@@ -104,6 +111,8 @@ def test_bottom_up_fusion_network():
         activation='silu'
     )
     ckpt.load_encoder_bottom_up_fusion_network(bu_fusion)
+    bu_fusion = freeze_batch_norm(bu_fusion)
+
     assert len(bu_fusion.downsample_convs) == 2
     assert len(bu_fusion.fusion_blocks) == 2
 

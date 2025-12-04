@@ -9,6 +9,8 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
         ResNet50RTDETRV2Variant,
         RTDETRV2Checkpoint
     )
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.config import RTDETRConfig
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
@@ -20,7 +22,6 @@ def test_rtdetrv2_resnet50_variant_construction():
     data = torch.load(DATA_FILEPATH)
 
     model = ResNet50RTDETRV2Variant()
-    model = freeze_batch_norm(model)
 
     assert model.feature_pyramid_dims == [256, 512, 1024, 2048]
 
@@ -37,7 +38,10 @@ def test_rtdetrv2_resnet50_variant_construction():
 def test_rtdetrv2_resnet_backbone_computation_details():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
-    model = ckpt.load_backbone()
+
+    model = ResNet50RTDETRV2Variant()
+    ckpt.load_backbone(model)
+    model = freeze_batch_norm(model)
 
     x = data['input']
     intermediate_outs = data['intermediate']
@@ -47,7 +51,7 @@ def test_rtdetrv2_resnet_backbone_computation_details():
     with torch.no_grad():
         conv1_x = conv1(x)
         conv1_x_true = intermediate_outs['conv1']
-        assert torch.norm(conv1_x - conv1_x_true) < 10e-30
+        assert torch.dist(conv1_x, conv1_x_true) < 10e-30
 
     # Check the implementation of the bottleneck block (0, 0).
     #
@@ -70,13 +74,13 @@ def test_rtdetrv2_resnet_backbone_computation_details():
         b00b = bblock00b(b00a)
         b00c = bblock00c(b00b)
         b00s = bblock00s(conv1_x)
-        assert torch.norm(b00a - b00a_true) < 1e-12
-        assert torch.norm(b00b - b00b_true) < 1e-12
-        assert torch.norm(b00c - b00c_true) < 1e-12
-        assert torch.norm(b00s - b00s_true) < 1e-12
+        assert torch.dist(b00a, b00a_true) < 1e-12
+        assert torch.dist(b00b, b00b_true) < 1e-12
+        assert torch.dist(b00c, b00c_true) < 1e-12
+        assert torch.dist(b00s, b00s_true) < 1e-12
         # 2. The final result.
         b00 = bblock00(conv1_x)
-        assert torch.norm(b00 - b00_true) < 1e-12
+        assert torch.dist(b00, b00_true) < 1e-12
 
     # Check the implementation of the bottleneck block (0, 1).
     #
@@ -96,12 +100,12 @@ def test_rtdetrv2_resnet_backbone_computation_details():
         b01a = bblock01a(b00)
         b01b = bblock01b(b01a)
         b01c = bblock01c(b01b)
-        assert torch.norm(b01a - b01a_true) < 1e-12
-        assert torch.norm(b01b - b01b_true) < 1e-12
-        assert torch.norm(b01c - b01c_true) < 1e-12
+        assert torch.dist(b01a, b01a_true) < 1e-12
+        assert torch.dist(b01b, b01b_true) < 1e-12
+        assert torch.dist(b01c, b01c_true) < 1e-12
         # 2. The final result.
         b01 = bblock01(b00)
-        assert torch.norm(b01 - b01_true) < 1e-12
+        assert torch.dist(b01, b01_true) < 1e-12
 
 
     # Check the implementation of the bottleneck block (0, 2).
@@ -122,12 +126,12 @@ def test_rtdetrv2_resnet_backbone_computation_details():
         b02a = bblock02a(b01)
         b02b = bblock02b(b02a)
         b02c = bblock02c(b02b)
-        assert torch.norm(b02a - b02a_true) < 1e-12
-        assert torch.norm(b02b - b02b_true) < 1e-12
-        assert torch.norm(b02c - b02c_true) < 1e-12
+        assert torch.dist(b02a, b02a_true) < 1e-12
+        assert torch.dist(b02b, b02b_true) < 1e-12
+        assert torch.dist(b02c, b02c_true) < 1e-12
         # 2. The final result.
         b02 = bblock02(b01)
-        assert torch.norm(b02 - b02_true) < 1e-12
+        assert torch.dist(b02, b02_true) < 1e-12
 
     # Check t
     res = [model.blocks[i] for i in range(1, len(model.blocks))]
@@ -142,12 +146,29 @@ def test_rtdetrv2_resnet_backbone_computation_details():
 
         res = [res0, res1, res2, res3]
         for i, (res_i, res_i_true) in enumerate(zip(res, res_true)):
-            diff = torch.norm(res_i - res_i_true)
+            diff = torch.dist(res_i, res_i_true)
             logger.info(f"[{i}] diff = {diff}")
             assert diff < 1e-12
 
     backbone_true = intermediate_outs['backbone']['out']
     with torch.no_grad():
         for out, out_true in zip(res[1:], backbone_true):
-            assert torch.norm(out - out_true) < 1e-12
+            assert torch.dist(out, out_true) < 1e-12
 
+
+def test_rtdetrv2_resnet_backbone_from_config():
+    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
+    data = torch.load(DATA_FILEPATH)
+    intermediate_outs = data['intermediate']
+
+    backbone = RTDETRConfig.make_backbone()
+    ckpt.load_backbone(backbone)
+    backbone = freeze_batch_norm(backbone)
+
+    x = data['input']
+
+    backbone_outs = backbone(x)
+    backbone_outs_true = intermediate_outs['backbone']['out']
+    with torch.no_grad():
+        for out, out_true in zip(backbone_outs[1:], backbone_outs_true):
+            assert torch.dist(out, out_true) < 1e-12
