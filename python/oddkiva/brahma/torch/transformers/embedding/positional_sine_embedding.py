@@ -38,7 +38,9 @@ class PositionalSineEmbedding2D(torch.nn.Module):
         self.geom_ratio = (1. / temperature) ** (1. / self.embed_dim_4)
         #
         powers = torch.arange(self.embed_dim_4)
-        self.frequency_geom_seq = self.geom_ratio ** powers
+        frequency_geom_seq = self.geom_ratio ** powers
+        self.register_buffer('frequency_geom_seq', frequency_geom_seq,
+                             persistent=False)
 
     @torch.no_grad()
     def forward(self, wh: tuple[int, int], device: torch.device) -> torch.Tensor:
@@ -79,10 +81,10 @@ class PositionalSineEmbedding2D(torch.nn.Module):
             # I don't like the flatten operation in RT-DETR.
             presine_x_embed \
                 = x_rescaled[..., None] \
-                * self.frequency_geom_seq[None, None, :].to(device=device)
+                * self.frequency_geom_seq[None, None, :]
             presine_y_embed \
                 = y_rescaled[..., None] \
-                * self.frequency_geom_seq[None, None, :].to(device=device)
+                * self.frequency_geom_seq[None, None, :]
 
             # Let's not recompose the positional embedding as explained in the
             # paper "Attention is All You Need", the order of the components does

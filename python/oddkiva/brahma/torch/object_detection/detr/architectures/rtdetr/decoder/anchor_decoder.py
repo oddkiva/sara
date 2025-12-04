@@ -42,14 +42,14 @@ class AnchorGeometryLogitEnumerator(nn.Module):
         self.eps = eps
 
     @torch.no_grad()
-    def forward(self,
-                pyramid_image_wh_sizes: list[tuple[int, int]],
-                device: torch.device) -> tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self,
+        pyramid_image_wh_sizes: list[tuple[int, int]]
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         anchor_pyramid = enumerate_anchor_pyramid(
             pyramid_image_wh_sizes,
             normalized_base_box_size=self.normalized_base_size,
-            normalize_anchor_geometry=True,
-            device=device
+            normalize_anchor_geometry=True
         )
 
         anchors = torch.cat(anchor_pyramid, dim=0)
@@ -76,7 +76,7 @@ class AnchorGeometryResidualHead(MultiLayerPerceptron):
 class AnchorDecoder(nn.Module):
     """
     Feature vectors of the feature pyramid are then projected onto a feature
-    space of the same dimention and finally concatenated into the so-called
+    space of the same dimension and finally concatenated into the so-called
     *memory* tensor.
 
     These feature vectors are the encoding of every possible anchors. These
@@ -99,7 +99,6 @@ class AnchorDecoder(nn.Module):
                  logit_eps: float = 1e-2,
                  precalculate_anchor_geometry_logits: bool = True,
                  image_pyramid_wh_sizes: list[tuple[int, int]] | None = None,
-                 device: torch.device | None = None,
                  initial_class_probability: float = 0.1):
         super().__init__()
 
@@ -125,11 +124,24 @@ class AnchorDecoder(nn.Module):
         self.precalculate_anchor_geometry_logits = \
             precalculate_anchor_geometry_logits
         if precalculate_anchor_geometry_logits:
-            if image_pyramid_wh_sizes is None or device is None:
+            if image_pyramid_wh_sizes is None:
                 raise ValueError()
-            self.anchor_geometry_logits, self.anchor_mask = \
+            anchor_geometry_logits, anchor_mask = \
                 self.anchor_geometry_logit_enumerator.forward(
-                    image_pyramid_wh_sizes, device)
+                    image_pyramid_wh_sizes
+                )
+            # These are **not** learning parameters but we need to do this to
+            # move the model to a custom device via the call `.to(device)`.
+            self.register_buffer(
+                'anchor_geometry_logits',
+                anchor_geometry_logits,
+                persistent=False
+            )
+            self.register_buffer(
+                'anchor_mask',
+                anchor_mask,
+                persistent=False
+            )
         else:
             self.anchor_geometry_logits = None
             self.anchor_mask = None
@@ -176,8 +188,7 @@ class AnchorDecoder(nn.Module):
         else:
             anchor_geometry_logits_refined, anchor_mask = \
                 self.anchor_geometry_logit_enumerator.forward(
-                    feature_pyramid_wh_sizes,
-                    memory.device
+                    feature_pyramid_wh_sizes
                 )
 
         memory_filtered = anchor_mask.to(dtype=memory.dtype) * memory

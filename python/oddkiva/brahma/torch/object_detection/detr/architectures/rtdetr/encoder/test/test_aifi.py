@@ -27,8 +27,9 @@ class AIFIConfig:
 
 
 def test_aifi():
-    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
-    data = torch.load(DATA_FILEPATH, torch.device('cpu'))
+    device = torch.device('cpu')
+    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, device)
+    data = torch.load(DATA_FILEPATH, device)
 
     aifi = AIFI(AIFIConfig.hidden_dim,
                 AIFIConfig.head_count,
@@ -45,7 +46,7 @@ def test_aifi():
     s5_flat = s5.flatten(2).permute(0, 2, 1)
 
     h, w = s5.shape[2:]
-    s5_pe = aifi.positional_encoding_fn.forward((w, h))
+    s5_pe = aifi.positional_encoding_fn.forward((w, h), device)
     s5_pe = s5_pe.flatten(0, 1)[None, ...]
     s5_pe_true = data['intermediate']['encoder']['aifi']['debug']['pos_embed']
     self_attn_out_true = \

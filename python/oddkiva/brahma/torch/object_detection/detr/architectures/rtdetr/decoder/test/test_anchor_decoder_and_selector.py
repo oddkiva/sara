@@ -30,10 +30,7 @@ def test_anchor_logit_enumerator():
         eps=1e-2
     )
 
-    anchor_logits, anchor_mask = anchor_logit_enumerator(
-        fpyr_image_sizes,
-        fpyr_projected[0].device
-    )
+    anchor_logits, anchor_mask = anchor_logit_enumerator(fpyr_image_sizes)
     assert anchor_logits.requires_grad is False
     assert anchor_mask.requires_grad is False
 
@@ -65,7 +62,6 @@ def test_anchor_decoder():
         logit_eps=1e-2,
         precalculate_anchor_geometry_logits=True,
         image_pyramid_wh_sizes=[(80, 80), (40, 40), (20, 20)],
-        device = torch.device('cpu'),
         initial_class_probability=0.1
     )
     ckpt.load_decoder_anchor_decoder(anchor_decoder)
@@ -79,10 +75,7 @@ def test_anchor_decoder():
     fpyr_image_sizes = [(fmap.shape[3], fmap.shape[2])
                         for fmap in fpyr_projected]
     anchor_logits, anchor_mask = \
-        anchor_decoder.anchor_geometry_logit_enumerator(
-            fpyr_image_sizes,
-            fpyr_projected[0].device
-        )
+        anchor_decoder.anchor_geometry_logit_enumerator(fpyr_image_sizes)
     anchor_geometry_logits_true, anchor_mask_true = \
         data['intermediate']['decoder']['_generate_anchors']
 
@@ -142,7 +135,6 @@ def test_anchor_selector():
         logit_eps=1e-2,
         precalculate_anchor_geometry_logits=True,
         image_pyramid_wh_sizes=[(80, 80), (40, 40), (20, 20)],
-        device = torch.device('cpu'),
         initial_class_probability=0.1
     )
     anchor_selector = AnchorSelector(top_K=300)

@@ -1,15 +1,14 @@
 import torch
 
-from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
     ResNet50RTDETRV2Variant
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures\
-    .rtdetr.decoder.query_decoder import MultiScaleDeformableTransformerDecoder
+    .rtdetr.encoder.hybrid_encoder import HybridEncoder
 from oddkiva.brahma.torch.object_detection.detr.architectures\
     .rtdetr.decoder.query_selector import QuerySelector
 from oddkiva.brahma.torch.object_detection.detr.architectures\
-    .rtdetr.encoder.hybrid_encoder import HybridEncoder
+    .rtdetr.decoder.query_decoder import MultiScaleDeformableTransformerDecoder
 
 
 class BackboneConfig:
@@ -68,8 +67,6 @@ class EncoderConfig:
 class QuerySelectorConfig:
     Model = QuerySelector
 
-    device: torch.device | None = torch.device(DEFAULT_DEVICE)
-
     # The initial anchor geometries.
     anchor_normalized_base_box_sizes = 0.05
     anchor_geometry_logit_eps = 0.01
@@ -103,8 +100,7 @@ class QuerySelectorConfig:
             initial_object_class_probability=C.initial_object_class_probability,
             precalculate_anchor_geometry_logits=C.precalculate_anchor_geometry_logits,
             anchor_normalized_base_size=C.anchor_normalized_base_box_sizes,
-            anchor_logit_eps=C.anchor_geometry_logit_eps,
-            device=C.device
+            anchor_logit_eps=C.anchor_geometry_logit_eps
         )
 
 

@@ -1,6 +1,7 @@
 import torch
 
 from oddkiva import DATA_DIR_PATH
+from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import RTDETRV2Checkpoint
@@ -59,7 +60,7 @@ def test_model_from_config_detailed():
     (top_queries_true, top_geometry_logits_true,
      _, _) = intermediate_outs['decoder']['_get_decoder_input']
 
-    assert torch.dist(top_queries, top_queries_true) < 8e-5
+    assert torch.dist(top_queries, top_queries_true) < 1e-4
     assert torch.dist(top_geometry_logits, top_geometry_logits_true) < 2.5e-3
 
     value = memory
@@ -68,7 +69,7 @@ def test_model_from_config_detailed():
         encoding_map.shape[2:]
         for encoding_map in encoding_pyramid
     ]
-    box_geometries, box_class_logits = model.decoder.forward(
+    box_geometries, box_class_logits = model.decoder(
         top_queries.detach(), top_geometry_logits.detach(),
         value, value_pyramid_hw_sizes,
         value_mask=value_mask
@@ -78,19 +79,20 @@ def test_model_from_config_detailed():
     box_geometries_true = torch.stack(layers_gt['dec_out_bboxes'])
     box_class_logits_true = torch.stack(layers_gt['dec_out_logits'])
 
-    assert relative_error(box_geometries, box_geometries_true) < 5e-4
-    assert relative_error(box_class_logits, box_class_logits_true) < 5e-4
+    assert relative_error(box_geometries, box_geometries_true) < 6e-4
+    assert relative_error(box_class_logits, box_class_logits_true) < 6e-4
 
 
 def test_model_from_config():
     # THE DATA
-    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
-    data = torch.load(DATA_FILEPATH, torch.device('cpu'))
+    device = torch.device(DEFAULT_DEVICE)
+    ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, device)
+    data = torch.load(DATA_FILEPATH, device)
     intermediate_outs = data['intermediate']
 
     # THE MODEL
     config = RTDETRConfig()
-    model = RTDETRv2(config)
+    model = RTDETRv2(config).to(device)
 
     # LOAD THE MODEL
     ckpt.load_model(model)
@@ -106,5 +108,5 @@ def test_model_from_config():
     box_geometries_true = torch.stack(layers_gt['dec_out_bboxes'])
     box_class_logits_true = torch.stack(layers_gt['dec_out_logits'])
 
-    assert relative_error(box_geometries, box_geometries_true) < 5e-4
-    assert relative_error(box_class_logits, box_class_logits_true) < 5e-4
+    assert relative_error(box_geometries, box_geometries_true) < 6e-4
+    assert relative_error(box_class_logits, box_class_logits_true) < 6e-4

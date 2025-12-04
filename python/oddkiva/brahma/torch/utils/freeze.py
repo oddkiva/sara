@@ -14,6 +14,7 @@ def freeze_batch_norm(m: nn.Module):
         # If m is a leaf module and that leaf module is also a BatchNorm2d
         # module.
         m_frozen = ops.FrozenBatchNorm2d(m.num_features)
+        m_frozen = m_frozen.to(m.weight.device)
 
         # Important: recopy the weights please!
         m_frozen.weight.data.copy_(m.weight)
@@ -34,7 +35,7 @@ def freeze_batch_norm(m: nn.Module):
             # A child tree transmutes if we create a new object referenced
             # by a new "pointer" value.
             #
-            # In practice we only leaf nodes tha are BatchNorm2d operations
+            # In practice we only leaf nodes that are BatchNorm2d operations
             # and it has no children. So this copy-pasted code is a bit
             # strange.
             if child_tree_transmuted is not child_tree:

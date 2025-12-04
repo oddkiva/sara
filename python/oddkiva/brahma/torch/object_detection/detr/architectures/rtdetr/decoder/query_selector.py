@@ -26,8 +26,7 @@ class QuerySelector(nn.Module):
                  initial_object_class_probability: float = 0.1,
                  precalculate_anchor_geometry_logits: bool = True,
                  anchor_normalized_base_size: float = 0.05,
-                 anchor_logit_eps: float = 0.01,
-                 device: torch.device | None = None):
+                 anchor_logit_eps: float = 0.01):
         super().__init__()
 
         # ---------------------------------------------------------------------
@@ -54,7 +53,6 @@ class QuerySelector(nn.Module):
             precalculate_anchor_geometry_logits=precalculate_anchor_geometry_logits,
             image_pyramid_wh_sizes=query_pyramid_wh_sizes,
             initial_class_probability=initial_object_class_probability,
-            device=device
         )
         self.anchor_selector = AnchorSelector(top_K=top_K)
 
