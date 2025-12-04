@@ -41,7 +41,7 @@ class PositionalSineEmbedding2D(torch.nn.Module):
         self.frequency_geom_seq = self.geom_ratio ** powers
 
     @torch.no_grad()
-    def forward(self, wh: tuple[int, int]) -> torch.Tensor:
+    def forward(self, wh: tuple[int, int], device: torch.device) -> torch.Tensor:
         """
         Calculates the positional encoding map with shape (H, W, C).
 
@@ -61,35 +61,37 @@ class PositionalSineEmbedding2D(torch.nn.Module):
         Q = X_flat + positional_encoding.flatten(0, 1).unsqueeze(0)
         ```
         """
-        w, h = wh
-        w_inverse = 1. / w
-        h_inverse = 1. / h
-        x_axis = torch.arange(w)
-        y_axis = torch.arange(h)
-        y, x = torch.meshgrid(y_axis, x_axis, indexing='ij')
-        if self.normalize_coords_01:
-            x = x * w_inverse
-            y = y * h_inverse
 
-        x_rescaled = x * self.scale
-        y_rescaled = y * self.scale
+        with device:
+            w, h = wh
+            w_inverse = 1. / w
+            h_inverse = 1. / h
+            x_axis = torch.arange(w)
+            y_axis = torch.arange(h)
+            y, x = torch.meshgrid(y_axis, x_axis, indexing='ij')
+            if self.normalize_coords_01:
+                x = x * w_inverse
+                y = y * h_inverse
 
-        # I don't like the flatten operation in RT-DETR.
-        presine_x_embed \
-            = x_rescaled[..., None] \
-            * self.frequency_geom_seq[None, None, :]
-        presine_y_embed \
-            = y_rescaled[..., None] \
-            * self.frequency_geom_seq[None, None, :]
+            x_rescaled = x * self.scale
+            y_rescaled = y * self.scale
 
-        # Let's not recompose the positional embedding as explained in the
-        # paper "Attention is All You Need", the order of the components does
-        # not matter.
-        #
-        # We can concatenate the 4 vectors:
-        sine_cos_embed = torch.cat((
-            presine_y_embed.sin(), presine_y_embed.cos(),
-            presine_x_embed.sin(), presine_x_embed.cos()
-        ), dim=-1)
+            # I don't like the flatten operation in RT-DETR.
+            presine_x_embed \
+                = x_rescaled[..., None] \
+                * self.frequency_geom_seq[None, None, :].to(device=device)
+            presine_y_embed \
+                = y_rescaled[..., None] \
+                * self.frequency_geom_seq[None, None, :].to(device=device)
+
+            # Let's not recompose the positional embedding as explained in the
+            # paper "Attention is All You Need", the order of the components does
+            # not matter.
+            #
+            # We can concatenate the 4 vectors:
+            sine_cos_embed = torch.cat((
+                presine_y_embed.sin(), presine_y_embed.cos(),
+                presine_x_embed.sin(), presine_x_embed.cos()
+            ), dim=-1)
 
         return sine_cos_embed

@@ -1,5 +1,6 @@
 import torch
 
+from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
     ResNet50RTDETRV2Variant
 )
@@ -67,7 +68,7 @@ class EncoderConfig:
 class QuerySelectorConfig:
     Model = QuerySelector
 
-    device: torch.device | None = torch.device('cpu')
+    device: torch.device | None = torch.device(DEFAULT_DEVICE)
 
     # The initial anchor geometries.
     anchor_normalized_base_box_sizes = 0.05

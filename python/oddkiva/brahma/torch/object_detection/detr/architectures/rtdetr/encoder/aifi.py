@@ -36,7 +36,9 @@ class AIFI(torch.nn.Module):
                                                  dropout=dropout,
                                                  normalize_before=normalize_before)
 
-        self.positional_encoding_fn = PositionalSineEmbedding2D(feature_dim)
+        self.positional_encoding_fn = PositionalSineEmbedding2D(
+            feature_dim
+        )
 
         self.transformer_encoder = TransformerEncoder(tsfm_enc_layer,
                                                       num_layers,
@@ -44,7 +46,7 @@ class AIFI(torch.nn.Module):
 
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         _, _, h, w = X.shape
-        pe = self.positional_encoding_fn((w, h))
+        pe = self.positional_encoding_fn((w, h), X.device)
         pe_flat = pe.flatten(0, 1)[None, ...]
 
         # The feature map X has shape (N, C, H, W).

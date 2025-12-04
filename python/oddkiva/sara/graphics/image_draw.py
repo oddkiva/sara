@@ -1,6 +1,8 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-from PySide6.QtCore import QPointF
+import numpy as np
+
+from PySide6.QtCore import QPoint, QPointF, QRectF
 from PySide6.QtGui import QColor, QFont, QImage, QPainter, QPen
 
 
@@ -67,8 +69,9 @@ def draw_ellipse(array, center, r1, r2, angle_in_degrees, color, pen_width,
     p.restore()
     p.end()
 
-def draw_text(array, p, text, color, font_size, orientation, italic, bold,
-              underline, antialiasing=True):
+def draw_text(array: np.ndarray, p: QPoint, text: str, color: QColor,
+              font_size: int, orientation: float, italic: bool, bold: bool,
+              underline: bool, antialiasing: bool =True):
     """ Draw a string.
     """
     font = QFont()
@@ -78,20 +81,21 @@ def draw_text(array, p, text, color, font_size, orientation, italic, bold,
     font.setUnderline(underline)
 
     surface = to_qimage(array)
-    p = QPainter(surface)
-    p.setRenderHints(QPainter.Antialiasing, antialiasing)
+    painter = QPainter(surface)
+    painter.setRenderHints(QPainter.Antialiasing, antialiasing)
 
-    p.save()
-    p.setPen(QColor(*color))
-    p.setFont(font)
+    painter.save()
+    painter.setPen(QColor(*color))
+    painter.setFont(font)
 
-    p.translate(p[0], p[1])
-    p.rotate(orientation)
-    p.drawText(0, 0, text)
-    p.restore()
-    p.end()
+    painter.translate(p[0], p[1])
+    painter.rotate(orientation)
+    painter.drawText(0, 0, text)
+    painter.restore()
+    painter.end()
 
-def draw_image(array, image, offset, scale):
+def draw_image(array: np.ndarray, image: np.ndarray, offset: QPoint,
+               scale: float):
     """ Draw an image.
     """
     surface = to_qimage(array)
