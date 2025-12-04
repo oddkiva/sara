@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 from oddkiva.brahma.torch.backbone.resnet.vanilla import (
@@ -126,7 +127,7 @@ class ResNet50RTDETRV2Variant(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.blocks = nn.Sequential(
+        self.blocks = nn.ModuleList([
             # Surprising feature:
             # - we downsample straight away from the first convolutional
             #   operation.
@@ -176,10 +177,15 @@ class ResNet50RTDETRV2Variant(nn.Module):
                 ResidualBottleneckBlock(2048, 512, 1, "relu"),
                 ResidualBottleneckBlock(2048, 512, 1, "relu"),
             )
-        )
+        ])
 
-    def forward(self, x):
-        return self.blocks.forward(x)
+    def forward(self, x) -> list[torch.Tensor]:
+        outs = []
+        out = x
+        for block in self.blocks:
+            out = block(out)
+            outs.append(out)
+        return outs
 
     @property
     def bottleneck_stacks(self):

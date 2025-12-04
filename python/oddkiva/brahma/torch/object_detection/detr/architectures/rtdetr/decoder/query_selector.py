@@ -89,7 +89,7 @@ class QuerySelector(nn.Module):
             feature_pyramid
         )
 
-        (memory_postprocessed,
+        (memory_refined,
          anchor_class_logits,
          anchor_geometry_logits) = self.anchor_decoder(
              memory,
@@ -101,11 +101,12 @@ class QuerySelector(nn.Module):
         (top_initial_queries,
          top_initial_class_logits,
          top_initial_geometry_logits) = self.anchor_selector(
-             memory_postprocessed,
+             memory_refined,
              anchor_class_logits,
              anchor_geometry_logits
          )
 
         return (top_initial_queries,
                 top_initial_class_logits,
-                top_initial_geometry_logits)
+                top_initial_geometry_logits,
+                memory)

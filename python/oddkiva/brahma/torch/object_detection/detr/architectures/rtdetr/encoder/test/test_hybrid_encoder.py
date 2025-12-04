@@ -119,7 +119,7 @@ def test_hybrid_encoder_from_config():
     data = torch.load(DATA_FILEPATH, torch.device('cpu'))
 
     # THE MODEL
-    encoder = RTDETRConfig.make_encoder()
+    encoder = RTDETRConfig.encoder.make_model()
 
     # Load the model weights.
     ckpt.load_encoder(encoder)

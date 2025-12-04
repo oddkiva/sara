@@ -385,7 +385,7 @@ class MultiscaleDeformableAttention(nn.Module):
                 queries: torch.Tensor,
                 query_geometries: torch.Tensor,
                 value: torch.Tensor,
-                value_spatial_sizes: list[torch.Size],
+                value_pyramid_hw_sizes: list[torch.Size],
                 value_mask: torch.Tensor | None = None) -> torch.Tensor:
         N, top_k, _ = queries.shape
         M = self.attention_head_count
@@ -417,7 +417,7 @@ class MultiscaleDeformableAttention(nn.Module):
             value_masked = value_mask.to(dtype=value.dtype) * value_projected
         value_masked = value_masked.reshape(N, value_count, M, d_v)
         value_qmlk = self.sample_values(value_masked,
-                                        value_spatial_sizes,
+                                        value_pyramid_hw_sizes,
                                         x_qmlk)
         assert value_qmlk.shape == (N, top_k, M, LK, d_v)
 

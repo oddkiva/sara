@@ -46,6 +46,8 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
         MultiScaleDeformableTransformerDecoderLayer,
         MultiScaleDeformableTransformerDecoder
     )
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rtdetr.model import RTDETRv2
 
 
 class RTDETRV2Checkpoint:
@@ -1136,3 +1138,10 @@ class RTDETRV2Checkpoint:
     ):
         self.load_decoder_input_proj(query_selector.feature_projectors)
         self.load_decoder_anchor_decoder(query_selector.anchor_decoder)
+
+
+    def load_model(self, model: RTDETRv2):
+        self.load_backbone(model.backbone)
+        self.load_encoder(model.encoder)
+        self.load_query_selector(model.query_selector)
+        self.load_transformer_decoder(model.decoder)

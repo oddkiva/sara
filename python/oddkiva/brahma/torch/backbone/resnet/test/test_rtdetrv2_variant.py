@@ -161,7 +161,7 @@ def test_rtdetrv2_resnet_backbone_from_config():
     data = torch.load(DATA_FILEPATH)
     intermediate_outs = data['intermediate']
 
-    backbone = RTDETRConfig.make_backbone()
+    backbone = RTDETRConfig.backbone.make_model()
     ckpt.load_backbone(backbone)
     backbone = freeze_batch_norm(backbone)
 
@@ -170,5 +170,5 @@ def test_rtdetrv2_resnet_backbone_from_config():
     backbone_outs = backbone(x)
     backbone_outs_true = intermediate_outs['backbone']['out']
     with torch.no_grad():
-        for out, out_true in zip(backbone_outs[1:], backbone_outs_true):
+        for out, out_true in zip(backbone_outs[-3:], backbone_outs_true):
             assert torch.dist(out, out_true) < 1e-12

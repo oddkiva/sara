@@ -618,7 +618,7 @@ def test_transformer_decoder_from_config():
     init_ref_contents, init_ref_points_unact, _, _ = \
         data['intermediate']['decoder']['_get_decoder_input']
 
-    decoder = RTDETRConfig.make_decoder()
+    decoder = RTDETRConfig.decoder.make_model()
     ckpt.load_transformer_decoder(decoder)
 
     query = init_ref_contents
@@ -631,7 +631,7 @@ def test_transformer_decoder_from_config():
 
     layers_gt = data['intermediate']['decoder']['decoder.layer-by-layer']
 
-    box_geometries, box_class_logits = decoder.forward(
+    box_geometries, box_class_logits = decoder(
         query, query_geometry_logits,
         value, value_spatial_sizes,
         value_mask=value_mask
