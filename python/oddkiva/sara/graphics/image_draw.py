@@ -1,5 +1,7 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
+from typing import Iterable
+
 import numpy as np
 
 from PySide6.QtCore import QPoint, QPointF, QRectF
@@ -69,9 +71,10 @@ def draw_ellipse(array, center, r1, r2, angle_in_degrees, color, pen_width,
     p.restore()
     p.end()
 
-def draw_text(array: np.ndarray, p: QPoint, text: str, color: QColor,
-              font_size: int, orientation: float, italic: bool, bold: bool,
-              underline: bool, antialiasing: bool =True):
+def draw_text(array: np.ndarray, p: Iterable[int], text: str,
+              color: Iterable[int], font_size: int, orientation: float,
+              italic: bool, bold: bool, underline: bool,
+              antialiasing: bool =True):
     """ Draw a string.
     """
     font = QFont()

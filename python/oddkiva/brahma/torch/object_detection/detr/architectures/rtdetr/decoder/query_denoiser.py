@@ -2,13 +2,26 @@ import torch
 import torch.nn as nn
 
 
-class BoxGeometryNoiser(nn.Module):
+class BoxObjectClassEmbedding(nn.Module):
 
     def __init__(self):
         super().__init__()
 
 
-    def forward(self, boxes: torch.Tensor) -> torch.Tensor:
+class BoxGeometryNoiser(nn.Module):
+
+    def __init__(self,
+                 box_count: int = 100,
+                 box_noise_scale: float = 1.0):
+        super().__init__()
+
+        self.object_class_embedding_fn: nn.Module
+        self.box_count = box_count
+        self.box_noise_scale = box_noise_scale
+
+
+    def forward(self, ground_truth_boxes: dict[str, list[torch.Tensor]]) -> torch.Tensor:
+        # TODO: understand first how COCO dataset is structurec.
         ...
 
 
