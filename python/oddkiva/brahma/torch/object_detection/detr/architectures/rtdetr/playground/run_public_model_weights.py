@@ -25,7 +25,8 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
 class ModelConfig:
     CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
                      'rtdetrv2_r50vd_6x_coco_ema.pth')
-    LABELS_FILEPATH = DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' / 'labels.txt'
+    LABELS_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
+                       'labels.txt')
     W_INFER = 640
     H_INFER = 640
 
@@ -34,20 +35,19 @@ class ModelConfig:
         assert ModelConfig.CKPT_FILEPATH.exists()
         assert ModelConfig.LABELS_FILEPATH.exists()
 
-        ckpt = RTDETRV2Checkpoint(ModelConfig.CKPT_FILEPATH,
-                                  torch.device('cpu'))
+        device = torch.device(DEFAULT_DEVICE)
+
+        ckpt = RTDETRV2Checkpoint(ModelConfig.CKPT_FILEPATH, device)
 
         # THE MODEL
         config = RTDETRConfig()
-        model = RTDETRv2(config)
+        model = RTDETRv2(config).to(device)
 
         # LOAD THE MODEL
         ckpt.load_model(model)
         model = freeze_batch_norm(model)
         model = model.eval()
         # RUN ON THE GPU PLEASE.
-        device = torch.device(DEFAULT_DEVICE)
-        model = model.to(device=device)
         assert type(model) is RTDETRv2
 
         label_names = [
