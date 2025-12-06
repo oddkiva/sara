@@ -54,6 +54,10 @@ def draw_image(image, offset=(0, 0), scale=1):
     qimage = QImage(image.data, w, h, c * w, QImage.Format_RGB888)
     user_thread.signals.draw_image.emit(qimage, offset, scale)
 
+def fill_rect(top_left_corner, sizes, color):
+    user_thread = GraphicsContext().user_thread
+    user_thread.signals.fill_rect.emit(top_left_corner, sizes, color)
+
 def clear():
     user_thread = GraphicsContext().user_thread
     user_thread.signals.clear.emit()

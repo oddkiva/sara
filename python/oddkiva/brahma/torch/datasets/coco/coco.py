@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, Literal
 from dataclasses import dataclass
 
+from PySide6.QtGui import QFont, QFontMetrics
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -182,10 +183,27 @@ def user_main():
         'train'
     )
 
+    # Color config.
     cmap = plt.get_cmap('rainbow')
-
     colors = cmap(np.linspace(0, 1, len(db.categories)))
     colors = (colors[:, :3] * 255).astype(np.int32)
+
+    # Font config
+    font = QFont()
+    font_size = 12
+    italic, bold, underline = False, True, False
+    font.setPointSize(font_size)
+    font.setItalic(italic)
+    font.setBold(bold)
+    font.setUnderline(underline)
+
+    font_metrics = QFontMetrics(font)
+    text_x_offset = 1
+    def calculate_text_box_size(text: str):
+        label_text_rect = font_metrics.boundingRect(text)
+        size = label_text_rect.size()
+        w, h = size.width() + text_x_offset * 2 + 1, size.height()
+        return w, h
 
     label_categories = {
         c.id: c
@@ -210,8 +228,12 @@ def user_main():
            sara.draw_rect((x, y), (w, h), color, 2)
 
            label_name = label_categories[cat_id].name
-           sara.draw_text((int(x), int(y)), label_name, color, 12, 0.,
-                          False, True, False)
+
+           w, h = calculate_text_box_size(label_name)
+           l, t = (int(x), int(y))
+           sara.fill_rect((l - text_x_offset, int(t - h)), (w, h), color)
+           sara.draw_text((l, t - 2), label_name, (0, 0, 0), font_size, 0.,
+                          italic, bold, underline)
 
        sara.get_key()
 

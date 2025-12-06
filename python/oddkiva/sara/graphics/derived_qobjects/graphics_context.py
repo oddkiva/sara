@@ -59,6 +59,10 @@ class WindowManager(QObject):
             self._active_window.draw_image,
             type=Qt.BlockingQueuedConnection)
 
+        user_thread.signals.fill_rect.connect(
+            self._active_window.fill_rect,
+            type=Qt.QueuedConnection)
+
         user_thread.signals.clear.connect(
             self._active_window.clear,
             type=Qt.BlockingQueuedConnection)
