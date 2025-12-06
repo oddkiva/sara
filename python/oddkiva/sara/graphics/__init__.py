@@ -1,5 +1,6 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
+from collections.abc import Callable
 from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QApplication
 
@@ -15,7 +16,7 @@ def get_key():
     user_thread.get_key()
     return user_thread.key
 
-def create_window(w, h):
+def create_window(w: int, h: int):
     user_thread = GraphicsContext().user_thread
     user_thread.signals.create_window.emit(w, h)
 
@@ -61,7 +62,7 @@ def set_antialiasing(on = True):
     user_thread = GraphicsContext().user_thread
     user_thread.signals.set_antialiasing.emit(on)
 
-def run_graphics(user_main):
+def run_graphics(user_main: Callable[[], None]):
     import sys
 
     app = QApplication(sys.argv)

@@ -115,7 +115,7 @@ class PaintingWindow(QWidget):
     def eventListeningTimerStopped(self):
         pass
 
-    def paintEvent(self, event):
+    def paintEvent(self, _):
         p = QPainter(self)
         p.drawPixmap(0, 0, self._pixmap)
 
