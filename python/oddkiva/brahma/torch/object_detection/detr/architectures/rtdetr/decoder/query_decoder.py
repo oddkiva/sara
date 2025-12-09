@@ -11,7 +11,7 @@ from oddkiva.brahma.torch.backbone.multi_layer_perceptron import (
     MultiLayerPerceptron
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.multiscale_deformable_attention import (
+    deformable_detr.multiscale_deformable_attention import (
         MultiscaleDeformableAttention
     )
 

@@ -2,6 +2,7 @@ from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 import torch
 
 from oddkiva import DATA_DIR_PATH
+from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rtdetr.checkpoint import RTDETRV2Checkpoint
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -18,7 +19,7 @@ DATA_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
 
 def test_query_selector():
     # THE DATA
-    device = torch.device('mps:0')
+    device = torch.device(DEFAULT_DEVICE)
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, map_location=device)
     data = torch.load(DATA_FILEPATH, device)
     decoder_data = data['intermediate']['decoder']
