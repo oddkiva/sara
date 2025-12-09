@@ -2,13 +2,13 @@ import torch
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import RTDETRV2Checkpoint
+    rt_detr.checkpoint import RTDETRV2Checkpoint
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.anchor_decoder import AnchorGeometryLogitEnumerator
+    rt_detr.decoder.anchor_decoder import AnchorGeometryLogitEnumerator
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.anchor_decoder import AnchorDecoder
+    rt_detr.decoder.anchor_decoder import AnchorDecoder
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.anchor_selector import AnchorSelector
+    rt_detr.decoder.anchor_selector import AnchorSelector
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /

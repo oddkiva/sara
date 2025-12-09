@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.config import RTDETRConfig
+    rt_detr.config import RTDETRConfig
 
 
 class RTDETRv2(nn.Module):

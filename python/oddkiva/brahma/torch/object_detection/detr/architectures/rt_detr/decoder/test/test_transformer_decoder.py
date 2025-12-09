@@ -5,11 +5,11 @@ import torch.nn.functional as F
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import RTDETRV2Checkpoint
+    rt_detr.checkpoint import RTDETRV2Checkpoint
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.config import RTDETRConfig
+    rt_detr.config import RTDETRConfig
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.query_decoder import (
+    rt_detr.decoder.query_decoder import (
         MultiScaleDeformableTransformerDecoderLayer,
         MultiScaleDeformableTransformerDecoder
     )

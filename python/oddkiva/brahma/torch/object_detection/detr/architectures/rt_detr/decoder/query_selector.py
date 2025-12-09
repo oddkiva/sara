@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.hybrid_encoder import FeaturePyramidProjection
+    rt_detr.encoder.hybrid_encoder import FeaturePyramidProjection
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import AnchorDecoder
+    rt_detr.checkpoint import AnchorDecoder
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.anchor_selector import AnchorSelector
+    rt_detr.decoder.anchor_selector import AnchorSelector
 
 
 class QuerySelector(nn.Module):

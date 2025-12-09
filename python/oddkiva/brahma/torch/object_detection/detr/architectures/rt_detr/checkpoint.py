@@ -12,11 +12,11 @@ from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
     ResNet50RTDETRV2Variant
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.feature_pyramid_projection import FeaturePyramidProjection
+    rt_detr.encoder.feature_pyramid_projection import FeaturePyramidProjection
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.aifi import AIFI
+    rt_detr.encoder.aifi import AIFI
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.ccff import (
+    rt_detr.encoder.ccff import (
         CCFF,
         DownsampleConvolution,
         FusionBlock,
@@ -28,13 +28,13 @@ from oddkiva.brahma.torch.transformers.encoder import (
     TransformerEncoderLayer
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.hybrid_encoder import HybridEncoder
+    rt_detr.encoder.hybrid_encoder import HybridEncoder
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.anchor_decoder import AnchorDecoder
+    rt_detr.decoder.anchor_decoder import AnchorDecoder
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.query_selector import QuerySelector
+    rt_detr.decoder.query_selector import QuerySelector
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.query_decoder import (BoxGeometryEmbeddingMap,
+    rt_detr.decoder.query_decoder import (BoxGeometryEmbeddingMap,
                                          BoxGeometryLogitHead,
                                          BoxObjectClassLogitHead)
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -42,12 +42,12 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
         MultiscaleDeformableAttention
     )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.query_decoder import (
+    rt_detr.decoder.query_decoder import (
         MultiScaleDeformableTransformerDecoderLayer,
         MultiScaleDeformableTransformerDecoder
     )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.model import RTDETRv2
+    rt_detr.model import RTDETRv2
 
 
 class RTDETRV2Checkpoint:

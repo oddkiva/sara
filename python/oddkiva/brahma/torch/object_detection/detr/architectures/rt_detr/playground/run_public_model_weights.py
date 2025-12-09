@@ -15,11 +15,11 @@ from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import RTDETRV2Checkpoint
+    rt_detr.checkpoint import RTDETRV2Checkpoint
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.config import RTDETRConfig
+    rt_detr.config import RTDETRConfig
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.model import RTDETRv2
+    rt_detr.model import RTDETRv2
 
 
 class ModelConfig:

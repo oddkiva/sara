@@ -4,9 +4,9 @@ import torch
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.aifi import AIFI
+    rt_detr.encoder.aifi import AIFI
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import RTDETRV2Checkpoint
+    rt_detr.checkpoint import RTDETRV2Checkpoint
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /

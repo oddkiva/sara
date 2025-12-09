@@ -3,9 +3,9 @@ import torch
 
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import RTDETRV2Checkpoint
+    rt_detr.checkpoint import RTDETRV2Checkpoint
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.ccff import (
+    rt_detr.encoder.ccff import (
         BottomUpFusionNet,
         DownsampleConvolution,
         FusionBlock,

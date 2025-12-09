@@ -3,12 +3,12 @@ import torch
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
     ResNet50RTDETRV2Variant
 )
-from oddkiva.brahma.torch.object_detection.detr.architectures\
-    .rtdetr.encoder.hybrid_encoder import HybridEncoder
-from oddkiva.brahma.torch.object_detection.detr.architectures\
-    .rtdetr.decoder.query_selector import QuerySelector
-from oddkiva.brahma.torch.object_detection.detr.architectures\
-    .rtdetr.decoder.query_decoder import MultiScaleDeformableTransformerDecoder
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rt_detr.encoder.hybrid_encoder import HybridEncoder
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rt_detr.decoder.query_selector import QuerySelector
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rt_detr.decoder.query_decoder import MultiScaleDeformableTransformerDecoder
 
 
 class BackboneConfig:

@@ -1,2 +1,2 @@
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.hybrid_encoder import HybridEncoder
+    rt_detr.encoder.hybrid_encoder import HybridEncoder

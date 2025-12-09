@@ -4,11 +4,11 @@ import torch
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import RTDETRV2Checkpoint
+    rt_detr.checkpoint import RTDETRV2Checkpoint
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.decoder.query_selector import QuerySelector
+    rt_detr.decoder.query_selector import QuerySelector
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.config import RTDETRConfig
+    rt_detr.config import RTDETRConfig
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /

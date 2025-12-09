@@ -1,11 +1,11 @@
 import torch
 
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.feature_pyramid_projection import FeaturePyramidProjection
+    rt_detr.encoder.feature_pyramid_projection import FeaturePyramidProjection
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.aifi import AIFI
+    rt_detr.encoder.aifi import AIFI
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder.ccff import CCFF
+    rt_detr.encoder.ccff import CCFF
 
 
 class HybridEncoder(torch.nn.Module):

@@ -86,13 +86,7 @@ class BoxGeometryNoiser(nn.Module):
             self.class_count
         )
 
-
-
-        # ----------------------------------------------------------------------
-        #
         # Build the attention mask.
-        #
-        # ----------------------------------------------------------------------
         N = len(boxes)
         G = group_count
         B = box_count_max
@@ -101,54 +95,30 @@ class BoxGeometryNoiser(nn.Module):
         n = 1  # negative group index
 
         rep_box_labels = box_labels.tile((1, 2 * G))
-        # Shape is (N, B * 2 * G)
+        # Shape is (N, (B * 2 * G))
 
         rep_box_geometries = box_labels.tile((1, 2 * G, 1))
-        # Shape is (N, B * 2 * G, 4)
+        # Shape is (N, (B * 2 * G), 4)
 
         rep_box_mask = box_mask.tile((1, 2 * G))
-        # Shape is (N, B * 2 * G, 1)
+        # Shape is (N, (B * 2 * G), 1)
 
         # Remember that the attention mask is the negation of the adjacency
         # graph, It tells which box pairs (i, j) are forbidden to interact with
         # each other.
         #
         # Each box from the same group can interact with each other
-        negative = torch.zeros((N, 2 * B, 1), device=device)
+        negative = torch.zeros([N, 2 * G, 1], device=device)
         negative[:, B:] = 1
-        negative = negative.tile((1, G, 1))
+        negative = negative.tile((1, 2 * G, 1))
         positive = 1 - negative
 
         # shape is (N, 2 * G, 1)
         # [0, 0, 0, 0, 1, 1, 1, 1]
         # [0, 0, 1, 1, 1, 1, 1, 1]
         # [0, 0, 0, 0, 0, 0, 1, 1]
-        positive = positive.squeeze(-1) * box_mask
-        dn_positive_ixs = torch.nonzero(positive)
-
-
-        # ----------------------------------------------------------------------
-        #
-        # Randomly flip the box labels.
-        #
-        # ----------------------------------------------------------------------
-
-
-        # ----------------------------------------------------------------------
-        #
-        # Randomly perturb the box geometries.
-        #
-        # ----------------------------------------------------------------------
-
-
-        # ----------------------------------------------------------------------
-        #
-        # Build the attention mask.
-        #
-        # ----------------------------------------------------------------------
-        noised_true_boxes_count = B * 2 * G
-        attention_mask = torch.full((num_queries + noised_true_boxes_count
-
+        positive = positive.squeeze(-1) * rep_box_mask
+        positive_ixs = torch.nonzero(positive)
 
         return self.Output(box_labels, box_geometries, box_mask, {})
 

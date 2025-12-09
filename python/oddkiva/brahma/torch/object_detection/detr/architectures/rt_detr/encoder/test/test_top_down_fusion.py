@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import (RTDETRV2Checkpoint,
+    rt_detr.checkpoint import (RTDETRV2Checkpoint,
                               TopDownFusionNet)
 
 

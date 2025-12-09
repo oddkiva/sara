@@ -3,15 +3,15 @@ import torch
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.config import RTDETRConfig
+    rt_detr.config import RTDETRConfig
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import (
+    rt_detr.checkpoint import (
         RTDETRV2Checkpoint,
         TopDownFusionNet,
         BottomUpFusionNet
     )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.encoder import HybridEncoder
+    rt_detr.encoder import HybridEncoder
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /

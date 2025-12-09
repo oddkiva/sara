@@ -5,12 +5,12 @@ import torch
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.checkpoint import (
+    rt_detr.checkpoint import (
         ResNet50RTDETRV2Variant,
         RTDETRV2Checkpoint
     )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rtdetr.config import RTDETRConfig
+    rt_detr.config import RTDETRConfig
 
 
 CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
