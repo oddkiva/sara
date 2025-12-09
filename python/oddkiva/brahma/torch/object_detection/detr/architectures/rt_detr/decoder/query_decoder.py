@@ -1,8 +1,10 @@
 from collections import OrderedDict
+from dataclasses import astuple
 from typing import Iterable
 
 import math
 
+from oddkiva.brahma.torch.object_detection.detr.architectures.dn_detr.query_denoiser import BoxNoiser
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -14,6 +16,17 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     deformable_detr.multiscale_deformable_attention import (
         MultiscaleDeformableAttention
     )
+
+
+class BoxClassEmbeddingMap(nn.Module):
+
+    def __init__(self, embed_dim: int, class_count: int):
+        super().__init__()
+
+        self.class_embedding_map = nn.Embedding(
+            class_count + 1, embed_dim, padding_idx=class_count
+        )
+        nn.init.normal_(self.class_embedding_map.weight[:-1])
 
 
 class BoxGeometryEmbeddingMap(MultiLayerPerceptron):
@@ -233,7 +246,6 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         hidden_dim: int,
         value_dim: int,
         kv_count_per_level: list[int],
-        # QUERY SELECTION
         num_classes: int = 80,
         # ATTENTION PARAMS
         attn_head_count: int = 8,
@@ -271,7 +283,22 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             for _ in range(attn_num_layers)
         )
 
+        # ---------------------------------------------------------------------
+        # OBJECT QUERY RE-EMBEDDING FUNCTIONS
+        # ---------------------------------------------------------------------
+        # The two decoupled inverse functions that we learn in order to
+        # transform:
+        # - the box labels into a hidden object class embedding space
+        # - the box geometries into a hidden object geometry embedding space
+        #
+        # These are encoding that are reused for the transformer decoder.
+        self.box_class_embedding_map = BoxClassEmbeddingMap(
+            hidden_dim,
+            num_classes
+        )
         self.box_geometry_embedding_map = BoxGeometryEmbeddingMap(hidden_dim)
+
+        self.box_noiser = BoxNoiser(num_classes, self.box_class_embedding_map)
 
         # Auxiliary geometry estimator for each decoding iteration.
         self.box_geometry_logit_heads = nn.ModuleList(
@@ -284,7 +311,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             for _ in range(attn_num_layers)
         )
 
-    def forward(
+    def decode(
         self,
         query: torch.Tensor, query_geometry_logits: torch.Tensor,
         value: torch.Tensor,
@@ -352,3 +379,23 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
 
         return (torch.stack(query_geometries_denoised),
                 torch.stack(query_class_logits_denoised))
+
+    def forward(
+        self,
+        query: torch.Tensor, query_geometry_logits: torch.Tensor,
+        value: torch.Tensor,
+        value_spatial_sizes: list[Iterable[int]],
+        value_mask: torch.Tensor | None = None,
+        targets: dict[str, list[torch.Tensor]] | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        if targets is not None:
+            query_count = query.shape[1]
+            (dn_labels,
+             dn_geometry_logits,
+             dn_attn_mask,
+             dn_meta) = astuple(self.box_noiser.forward(query_count, target))
+            dn_label_embeds = self.box_geometry_embedding_map(dn_labels)
+            # dn_attn_mask is a self-attention mask
+
+        return self.decode(query, query_geometry_logits,
+                           value, value_spatial_sizes, value_mask=value_mask)

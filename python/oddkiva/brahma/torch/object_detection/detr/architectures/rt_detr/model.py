@@ -21,7 +21,11 @@ class RTDETRv2(nn.Module):
         )
         self.pyramid_level_count = level_count
 
-    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self,
+        x: torch.Tensor,
+        targets: dict[str, list[torch.Tensor]] | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         feature_pyramid = self.backbone(x)
         encoding_pyramid = self.encoder(
             feature_pyramid[-self.pyramid_level_count:]
@@ -42,7 +46,8 @@ class RTDETRv2(nn.Module):
         box_geometries, box_class_logits = self.decoder.forward(
             top_queries.detach(), top_geometry_logits.detach(),
             value, value_pyramid_hw_sizes,
-            value_mask=value_mask
+            value_mask=value_mask,
+            targets=targets
         )
 
         return box_geometries, box_class_logits
