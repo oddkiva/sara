@@ -35,7 +35,10 @@ def test_generation_of_positional_sine_embedding_2d():
             phi = PositionalSineEmbedding2D(embed_dim)((3, 3))
 
     for embed_dim in [4, 8, 16, 32]:
-        phi = PositionalSineEmbedding2D(embed_dim)((3, 3))
+        phi = PositionalSineEmbedding2D(embed_dim)(
+            (3, 3),
+            torch.device('cpu')
+        )
         phi_flat = phi.flatten(0, 1)
 
         phi_true = RTDETR_sine_embedding_original_implementation(
@@ -43,10 +46,11 @@ def test_generation_of_positional_sine_embedding_2d():
 
         assert torch.norm(phi_flat - phi_true) < 1e-6
 
+
 def test_additivity_of_positional_sine_embedding_2d():
     N, C, H, W = (8, 16, 3, 3)
     phi_fn = PositionalSineEmbedding2D(C)
-    phi = phi_fn((W, H))
+    phi = phi_fn((W, H), torch.device('cpu'))
     phi_flat = phi.flatten(0, 1)[None, ...]
 
     ones = torch.ones((N, C, H, W))
