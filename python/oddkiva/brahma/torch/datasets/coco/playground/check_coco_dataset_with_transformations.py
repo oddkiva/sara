@@ -52,25 +52,19 @@ def draw_boxed_text(x: Number, y: Number, text: str,
 def generate_label_colors(
     categories: list[coco.Category],
     colormap: str = 'rainbow'
-) -> dict[int, np.ndarray]:
+) -> np.ndarray:
     cmap = plt.get_cmap(colormap)
     colors = cmap(np.linspace(0, 1, len(categories)))
     colors = (colors[:, :3] * 255).astype(np.int32)
-
-    label_colors = {
-        categories[i].id: colors[i]
-        for i in range(len(categories))
-    }
-
-    return label_colors
+    return colors
 
 
 def user_main():
     transform = v2.Compose([
-        v2.RandomResizedCrop(size=(224, 224), antialias=True),
+        v2.RandomIoUCrop(),
         v2.RandomHorizontalFlip(p=0.5),
-        v2.ToDtype(torch.float32, scale=True),
-        v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        # v2.ToDtype(torch.float32, scale=True),
+        # v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         v2.SanitizeBoundingBoxes()
     ])
 
@@ -88,7 +82,7 @@ def user_main():
     sara.create_window(640, 640)
     for img, boxes, labels in coco_ds:
        sara.clear()
-       sara.draw_image(img.permute(1, 2, 0).numpy())
+       sara.draw_image(img.permute(1, 2, 0).contiguous().numpy())
 
        for box, label in zip(boxes.tolist(), labels.tolist()):
            x, y, w, h = box

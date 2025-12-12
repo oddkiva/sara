@@ -62,7 +62,15 @@ class COCOObjectDetectionDataset(Dataset):
             for category_id in categories
         ], dtype=torch.int32)
 
+        # In order to use v2.Transforms.
+        ann_dict = {
+            'boxes': boxes,
+            'labels': labels
+        }
         if self.transform is not None:
-            image, boxes, labels = self.transform(image, boxes, labels)
+            image, ann_dict = self.transform(image, ann_dict)
+        # Unwrap the dictionary please...
+        boxes = ann_dict['boxes']
+        labels = ann_dict['labels']
 
         return image, boxes, labels
