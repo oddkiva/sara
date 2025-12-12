@@ -5,6 +5,7 @@ from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QApplication
 
 from oddkiva.sara.graphics.derived_qobjects.graphics_context import GraphicsContext
+from torch.types import Number
 
 
 def millisleep(ms):
@@ -20,7 +21,7 @@ def create_window(w: int, h: int):
     user_thread = GraphicsContext().user_thread
     user_thread.signals.create_window.emit(w, h)
 
-def draw_point(x, y, color):
+def draw_point(x: int, y: int, color):
     user_thread = GraphicsContext().user_thread
     user_thread.signals.draw_point.emit(x, y, color)
 
@@ -46,12 +47,12 @@ def draw_text(p, text, color, font_size, orientation, italic, bold, underline):
     user_thread.signals.draw_text.emit(p, text, color, font_size, orientation,
                                        italic, bold, underline)
 
-def draw_image(image, offset=(0, 0), scale=1):
+def draw_image(image, offset: tuple[Number, Number] = (0, 0), scale: float = 1):
     user_thread = GraphicsContext().user_thread
     h, w, c = image.shape
     if c != 3:
         raise NotImplementedError()
-    qimage = QImage(image.data, w, h, c * w, QImage.Format_RGB888)
+    qimage = QImage(image.data, w, h, c * w, QImage.Format.Format_RGB888)
     user_thread.signals.draw_image.emit(qimage, offset, scale)
 
 def fill_rect(top_left_corner, sizes, color):
@@ -62,7 +63,7 @@ def clear():
     user_thread = GraphicsContext().user_thread
     user_thread.signals.clear.emit()
 
-def set_antialiasing(on = True):
+def set_antialiasing(on: bool = True):
     user_thread = GraphicsContext().user_thread
     user_thread.signals.set_antialiasing.emit(on)
 

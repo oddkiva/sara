@@ -5,6 +5,9 @@ import torch
 import torch.nn as nn
 
 
+# ----------------------------------------------------------------------
+# Box operations
+# ----------------------------------------------------------------------
 def from_cxcywh_to_ltrb_box_format(boxes: torch.Tensor) -> torch.Tensor:
     cx, cy, w, h = boxes.unbind(-1)
     l = cx - 0.5 * w
@@ -36,14 +39,33 @@ def from_ltrb_to_cxcywh_box_format(boxes: torch.Tensor) -> torch.Tensor:
     return torch.stack((cx, cy, w, h), dim=-1)
 
 
+# ----------------------------------------------------------------------
+# Math operations.
+# ----------------------------------------------------------------------
 def inverse_sigmoid(x: torch.Tensor, eps: float = 1e-5):
-    x = x.clip(min=0., max=1.)
-    return torch.log(x.clip(min=eps) / (1 - x).clip(min=eps))
+    x = x.clip(min=eps, max=1 - eps)
+    return torch.log(x / (1 - x))
 
 
-class BoxNoiser(nn.Module):
-    """The `BoxGeometryNoiser` constructs groups of perturbed ground-truth
-    object boxes as described in the paper
+# ----------------------------------------------------------------------
+# ContrastiveDenoisingGroupGenerator
+# ----------------------------------------------------------------------
+class ContrastiveDenoisingGroupGenerator(nn.Module):
+    """The `ContrastiveDenoisingGroupGenerator` constructs groups of perturbed
+    ground-truth object boxes as described in the paper
+
+    It is called:
+    - *contrastive* because it generates positive samples and negative samples.
+
+      For each ground-truth labeled box, we generate two sets of samples.
+      - Positive samples are those which are very close to this ground-truth
+        box and which overlap strongly with it.
+      - Negative samples are those which overlap very little with it. Now
+        specifically, they are generated in such a way that they are actually
+        located at the "periphery" of the ground-truth samples, without
+
+    - *denoising* because they are noised ground-truth samples meant to be
+      denoised.
 
     [DN-DETR: Accelerate DETR Training by Introducing Query
     DeNoising](https://openaccess.thecvf.com/content/CVPR2022/papers/Li_DN-DETR_Accelerate_DETR_Training_by_Introducing_Query_DeNoising_CVPR_2022_paper.pdf)

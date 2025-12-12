@@ -2,6 +2,7 @@
 
 from PySide6.QtCore import QObject, Qt
 
+from PySide6.QtWidgets import QWidget
 from oddkiva.sara.graphics.derived_qobjects.painting_window import PaintingWindow
 from oddkiva.sara.graphics.derived_qobjects.user_thread import UserThread
 
@@ -20,8 +21,8 @@ class WindowManager(QObject):
     """
 
     def __init__(self):
-        self._widgets = []
-        self._active_window = None
+        self._widgets: list[QWidget] = []
+        self._active_window: PaintingWindow | None = None
 
     def create_painting_window(self, w, h):
         pw =  PaintingWindow((w, h))
@@ -34,41 +35,43 @@ class WindowManager(QObject):
         if widget is None:
             return
 
+        assert self._active_window is not None
+
         user_thread = GraphicsContext().user_thread
 
         # draw_xxx
         user_thread.signals.draw_point.connect(
             self._active_window.draw_point,
-            type=Qt.QueuedConnection)
+            type=Qt.ConnectionType.QueuedConnection)
         user_thread.signals.draw_line.connect(
             self._active_window.draw_line,
-            type=Qt.QueuedConnection)
+            type=Qt.ConnectionType.QueuedConnection)
         user_thread.signals.draw_rect.connect(
             self._active_window.draw_rect,
-            type=Qt.QueuedConnection)
+            type=Qt.ConnectionType.QueuedConnection)
         user_thread.signals.draw_circle.connect(
             self._active_window.draw_circle,
-            type=Qt.QueuedConnection)
+            type=Qt.ConnectionType.QueuedConnection)
         user_thread.signals.draw_ellipse.connect(
             self._active_window.draw_ellipse,
-            type=Qt.QueuedConnection)
+            type=Qt.ConnectionType.QueuedConnection)
         user_thread.signals.draw_text.connect(
             self._active_window.draw_text,
-            type=Qt.QueuedConnection)
+            type=Qt.ConnectionType.QueuedConnection)
         user_thread.signals.draw_image.connect(
             self._active_window.draw_image,
-            type=Qt.BlockingQueuedConnection)
+            type=Qt.ConnectionType.QueuedConnection)
 
         user_thread.signals.fill_rect.connect(
             self._active_window.fill_rect,
-            type=Qt.QueuedConnection)
+            type=Qt.ConnectionType.QueuedConnection)
 
         user_thread.signals.clear.connect(
             self._active_window.clear,
-            type=Qt.BlockingQueuedConnection)
+            type=Qt.ConnectionType.QueuedConnection)
         user_thread.signals.set_antialiasing.connect(
             self._active_window.set_antialiasing,
-            type=Qt.BlockingQueuedConnection)
+            type=Qt.ConnectionType.QueuedConnection)
 
         widget.signals.pressed_key.connect(user_thread.pressed_key)
 
@@ -92,7 +95,7 @@ class GraphicsContext(metaclass=Singleton):
         # Create connections between signals and slots.
         self._user_thread.signals.create_window.connect(
             self._window_manager.create_painting_window,
-            type=Qt.BlockingQueuedConnection)
+            type=Qt.ConnectionType.BlockingQueuedConnection)
 
     @property
     def user_thread(self):

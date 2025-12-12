@@ -1,18 +1,14 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import json
-from pathlib import Path
-from typing import Any, Literal
 from dataclasses import dataclass
-
-from PySide6.QtGui import QFont, QFontMetrics
-import matplotlib.pyplot as plt
-
-import numpy as np
+from pathlib import Path
+from typing import Any, Literal, Union
 
 import torch
 from torchvision.io import decode_image
 
 from oddkiva import DATA_DIR_PATH
-import oddkiva.sara as sara
 
 
 @dataclass
@@ -82,10 +78,10 @@ class ImageAnnotationDB:
     def __init__(
         self,
         data: list[ImageAnnotations],
-        trainval_type: Literal['train', 'val'] = 'train'
+        train_or_val: Literal['train', 'val'] = 'train'
     ):
         self.data = data
-        if trainval_type == 'train':
+        if train_or_val == 'train':
             self.image_dir_path = COCO.TRAIN_IMAGES_DIR_PATH
         else:
             self.image_dir_path = COCO.VAL_IMAGES_DIR_PATH
@@ -100,10 +96,6 @@ class ImageAnnotationDB:
         image_filepath = self.image_dir_path / image.file_name
         image_data = decode_image(str(image_filepath))
         return image_data
-
-
-def decode_json_array(json_array: list, Class: Any) -> list:
-    return [Class(**j) for j in json_array]
 
 
 class COCO:
@@ -125,6 +117,10 @@ class COCO:
     @staticmethod
     def parse_instancedb_json(jdict: dict[str, Any]) -> InstanceDB:
         info = Info(**jdict['info'])
+
+        def decode_json_array(json_array: list, Class: Any) -> list:
+            return [Class(**j) for j in json_array]
+
         licenses = decode_json_array(jdict['licenses'], License)
         images = decode_json_array(jdict['images'], Image)
         annotations = decode_json_array(jdict['annotations'], Annotation)
@@ -152,7 +148,13 @@ class COCO:
             return COCO.parse_instancedb_json(jdict)
 
     @staticmethod
-    def populate_image_annotations(db: InstanceDB) -> list:
+    def instance_test2017() -> InstanceDB:
+        with open(COCO.INSTANCE_TEST2017_FP, 'r') as fp:
+            jdict = json.load(fp)
+            return COCO.parse_instancedb_json(jdict)
+
+    @staticmethod
+    def group_annotations_by_image(db: InstanceDB) -> list:
         image_dict = {
             im.id: im
             for im in db.images
@@ -175,67 +177,20 @@ class COCO:
 
         return image_annotations
 
+    ObjectDetectionDatasetType = 
 
-def user_main():
-    db = COCO.instance_train2017()
-    ann_db = ImageAnnotationDB(
-        COCO.populate_image_annotations(db),
-        'train'
-    )
+    @staticmethod
+    def make_object_detection_dataset(
+        train_or_val = Union[Literal['train'], Literal['val']]
+    ) -> ImageAnnotationDB:
+        if dataset_type == 'train':
+            db = COCO.instance_train2017()
+        elif dataset_type == 'val':
+            db = COCO.instance_val2017()
+        else:
+            raise ValueError(f'COCO Dataset type must be {'train'} or {'val'}')
 
-    # Color config.
-    cmap = plt.get_cmap('rainbow')
-    colors = cmap(np.linspace(0, 1, len(db.categories)))
-    colors = (colors[:, :3] * 255).astype(np.int32)
-
-    # Font config
-    font = QFont()
-    font_size = 12
-    italic, bold, underline = False, True, False
-    font.setPointSize(font_size)
-    font.setItalic(italic)
-    font.setBold(bold)
-    font.setUnderline(underline)
-
-    font_metrics = QFontMetrics(font)
-    text_x_offset = 1
-    def calculate_text_box_size(text: str):
-        label_text_rect = font_metrics.boundingRect(text)
-        size = label_text_rect.size()
-        w, h = size.width() + text_x_offset * 2 + 1, size.height()
-        return w, h
-
-    label_categories = {
-        c.id: c
-        for c in db.categories
-    }
-    label_colors = {
-        db.categories[i].id: colors[i]
-        for i in range(len(db.categories))
-    }
-
-    sara.create_window(640, 640)
-    for a in ann_db:
-       im = ann_db.read_image(a.image)
-
-       sara.clear()
-       sara.draw_image(im.permute(1, 2, 0).numpy())
-       for ann in a.annotations:
-           x, y, w, h = ann.bbox
-
-           cat_id = ann.category_id
-           color = label_colors[cat_id]
-           sara.draw_rect((x, y), (w, h), color, 2)
-
-           label_name = label_categories[cat_id].name
-
-           w, h = calculate_text_box_size(label_name)
-           l, t = (int(x), int(y))
-           sara.fill_rect((l - text_x_offset, int(t - h)), (w, h), color)
-           sara.draw_text((l, t - 2), label_name, (0, 0, 0), font_size, 0.,
-                          italic, bold, underline)
-
-       sara.get_key()
-
-
-sara.run_graphics(user_main)
+        annotations = ImageAnnotationDB(
+            COCO.populate_image_annotations(db),
+            train_or_val
+        )

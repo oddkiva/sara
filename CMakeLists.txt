@@ -90,8 +90,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL iOS)
       /Users/david/GitHub/Apple-Boost-BuildScript/dist/boost.xcframework/ios-arm64/libboost.a
   )
 elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-  # find_package(Eigen3 3.4...5 REQUIRED NO_MODULE)
-  find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+  find_package(Eigen3 3.4...5 REQUIRED NO_MODULE)
+  # find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 
   find_package(TBB)
 

@@ -4,7 +4,6 @@ from typing import Iterable
 
 import math
 
-from oddkiva.brahma.torch.object_detection.detr.architectures.dn_detr.query_denoiser import BoxNoiser
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,20 +12,18 @@ from oddkiva.brahma.torch.backbone.multi_layer_perceptron import (
     MultiLayerPerceptron
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    dn_detr.query_denoiser import ContrastiveDenoisingGroupGenerator
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
     deformable_detr.multiscale_deformable_attention import (
         MultiscaleDeformableAttention
     )
 
 
-class BoxClassEmbeddingMap(nn.Module):
+class BoxClassEmbeddingMap(nn.Embedding):
 
     def __init__(self, embed_dim: int, class_count: int):
-        super().__init__()
-
-        self.class_embedding_map = nn.Embedding(
-            class_count + 1, embed_dim, padding_idx=class_count
-        )
-        nn.init.normal_(self.class_embedding_map.weight[:-1])
+        super().__init__(class_count + 1, embed_dim, padding_idx=class_count)
+        nn.init.normal_(self.weight[:-1])
 
 
 class BoxGeometryEmbeddingMap(MultiLayerPerceptron):
@@ -37,6 +34,7 @@ class BoxGeometryEmbeddingMap(MultiLayerPerceptron):
 
     def _reinitialize_learning_parameters(self):
         for layer in self.layers:
+            assert type(layer) is nn.Linear
             nn.init.xavier_uniform_(layer.weight)
 
 
@@ -142,9 +140,11 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         self.dropout_3 = nn.Dropout(p=dropout)
         self.layer_norm_3 = nn.LayerNorm(embed_dim)
 
-    def with_positional_embeds(self,
-                       queries: torch.Tensor,
-                       positional_embeds: torch.Tensor | None) -> torch.Tensor:
+    def with_positional_embeds(
+        self,
+        queries: torch.Tensor,
+        positional_embeds: torch.Tensor | None
+    ) -> torch.Tensor:
         if positional_embeds is None:
             return queries
         else:
@@ -298,7 +298,10 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         )
         self.box_geometry_embedding_map = BoxGeometryEmbeddingMap(hidden_dim)
 
-        self.box_noiser = BoxNoiser(num_classes, self.box_class_embedding_map)
+        self.dn_group_gen = ContrastiveDenoisingGroupGenerator(
+            num_classes,
+            self.box_class_embedding_map
+        )
 
         # Auxiliary geometry estimator for each decoding iteration.
         self.box_geometry_logit_heads = nn.ModuleList(
@@ -393,7 +396,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             (dn_labels,
              dn_geometry_logits,
              dn_attn_mask,
-             dn_meta) = astuple(self.box_noiser.forward(query_count, target))
+             dn_meta) = astuple(self.dn_group_gen.forward(query_count, target))
             dn_label_embeds = self.box_geometry_embedding_map(dn_labels)
             # dn_attn_mask is a self-attention mask
 
