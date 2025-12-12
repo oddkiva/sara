@@ -3,7 +3,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal, Union
+from typing import Any, Literal
 
 import torch
 from torchvision.io import decode_image
@@ -77,20 +77,22 @@ class ImageAnnotationDB:
 
     def __init__(
         self,
-        data: list[ImageAnnotations],
+        annotations: list[ImageAnnotations],
+        categories: list[Category],
         train_or_val: Literal['train', 'val'] = 'train'
     ):
-        self.data = data
+        self.annotations = annotations
+        self.categories = categories
         if train_or_val == 'train':
             self.image_dir_path = COCO.TRAIN_IMAGES_DIR_PATH
         else:
             self.image_dir_path = COCO.VAL_IMAGES_DIR_PATH
 
     def __getitem__(self, i: int) -> ImageAnnotations:
-        return self.data[i]
+        return self.annotations[i]
 
     def __len__(self):
-        return len(self.data)
+        return len(self.annotations)
 
     def read_image(self, image: Image) -> torch.Tensor:
         image_filepath = self.image_dir_path / image.file_name
@@ -148,12 +150,6 @@ class COCO:
             return COCO.parse_instancedb_json(jdict)
 
     @staticmethod
-    def instance_test2017() -> InstanceDB:
-        with open(COCO.INSTANCE_TEST2017_FP, 'r') as fp:
-            jdict = json.load(fp)
-            return COCO.parse_instancedb_json(jdict)
-
-    @staticmethod
     def group_annotations_by_image(db: InstanceDB) -> list:
         image_dict = {
             im.id: im
@@ -177,20 +173,19 @@ class COCO:
 
         return image_annotations
 
-    ObjectDetectionDatasetType = 
-
     @staticmethod
     def make_object_detection_dataset(
-        train_or_val = Union[Literal['train'], Literal['val']]
+        train_or_val: Literal['train', 'val']
     ) -> ImageAnnotationDB:
-        if dataset_type == 'train':
+        if train_or_val == 'train':
             db = COCO.instance_train2017()
-        elif dataset_type == 'val':
-            db = COCO.instance_val2017()
         else:
-            raise ValueError(f'COCO Dataset type must be {'train'} or {'val'}')
+            db = COCO.instance_val2017()
 
         annotations = ImageAnnotationDB(
-            COCO.populate_image_annotations(db),
+            COCO.group_annotations_by_image(db),
+            db.categories,
             train_or_val
         )
+
+        return annotations

@@ -1,49 +1,68 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
+from typing import Any, Literal, Optional
+
 import torch
-import torch.torch_version
+from torch.utils.data import Dataset
+import torchvision.tv_tensors as tvt
 import torchvision.transforms.v2 as v2
-if torch.torch_version.TorchVersion(torch.__version__) < (2, 6, 0):
-    from torchvision.io.image import read_image as decode_image
-else:
-    from torchvision.io.image import decode_image
 
 from oddkiva.brahma.torch.datasets.coco import COCO, Annotation
 
 
-class COCOObjectDetectionDataset():
+DatasetType = Literal['train', 'val']
+ImageAnnotations = dict[str, list[Any]]
 
-    DatasetType = Union[Literal['train'], Literal['val']]
+
+class COCOObjectDetectionDataset(Dataset):
 
     def __init__(
         self,
-        transform: Optional[v2.Transform] = None,
-        train_or_val: DatasetType = 'train'
+        train_or_val: DatasetType = 'train',
+        transform: Optional[v2.Transform] = None
     ):
         self.ds = COCO.make_object_detection_dataset(train_or_val)
+        self.transform = transform
+
+        self.category_id_to_label_idx_map = {
+            c.id: i
+            for i, c in enumerate(self.ds.categories)
+        }
 
     def __len__(self):
         return len(self.ds)
 
-    def vectorize_annotations(
+    def _vectorize_annotations(
         self,
         annotations: list[Annotation]
-    ) -> dict[str, list[Any]]:
-       return {
-           'boxes': [ann.bbox for ann in annotations],
-           'labels': [ann.category_id for ann in annotations]
-       }
+    ) -> tuple[list[tuple[float, float, float, float]], list[int]]:
+        return (
+            [ann.bbox for ann in annotations],
+            [ann.category_id for ann in annotations]
+        )
 
-    # def __getitem__(self, idx) -> tuple[torch.Tensor, int]:
-    #     image = decode_image(str(self._image_paths[idx]))
-    #     if self._transform is not None:
-    #         image_transformed = self._transform(image, annotations)
-    #     else:
-    #         image_transformed = image, annotations
-    #     label = self._image_class_ids[idx]
-    #     return image_transformed, label
+    def __getitem__(
+        self,
+        idx: int
+    ) -> tuple[torch.Tensor, tvt.BoundingBoxes, torch.Tensor]:
+        labeled_image = self.ds[idx]
 
-    # @property
-    # def image_class_ids(self) -> list[int]:
-    #     return self._image_class_ids
+        image = self.ds.read_image(labeled_image.image)
+        boxes, categories = self._vectorize_annotations(labeled_image.annotations)
+        _, h, w = image.shape
 
-    # def image_class_name(self, idx: int) -> str:
-    #     return self._image_labels[idx]
+        boxes = tvt.BoundingBoxes(
+            torch.tensor(boxes),
+            format=tvt.BoundingBoxFormat.XYWH,
+            canvas_size=(h, w)
+        )
+
+        labels = torch.tensor([
+            self.category_id_to_label_idx_map[category_id]
+            for category_id in categories
+        ], dtype=torch.int32)
+
+        if self.transform is not None:
+            image, boxes, labels = self.transform(image, boxes, labels)
+
+        return image, boxes, labels

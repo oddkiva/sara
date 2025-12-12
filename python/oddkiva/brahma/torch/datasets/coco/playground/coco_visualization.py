@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from collections.abc import Iterable
 
 import matplotlib.pyplot as plt
@@ -64,7 +66,7 @@ def generate_label_colors(
 def user_main():
     db = coco.COCO.instance_train2017()
     ann_db = coco.ImageAnnotationDB(
-        coco.COCO.populate_image_annotations(db),
+        coco.COCO.group_annotations_by_image(db),
         'train'
     )
 
