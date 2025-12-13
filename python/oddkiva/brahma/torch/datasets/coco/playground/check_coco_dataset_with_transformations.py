@@ -61,35 +61,41 @@ def generate_label_colors(
     return colors
 
 
-def get_or_create_coco_dataset() -> coco.COCOObjectDetectionDataset:
+def get_or_create_coco_dataset(force_recreate: bool = False) -> coco.COCOObjectDetectionDataset:
     coco_fp = DATA_DIR_PATH / 'coco_object_detection_dataset.pkl'
-    if coco_fp.exists():
+    if force_recreate:
+        logger.info("Reserializing the COCO object detection dataset...")
+    if coco_fp.exists() and not force_recreate:
         logger.info( f'Loading COCO Dataset object from file: {coco_fp}...')
         with open(coco_fp, 'rb') as f:
             coco_ds = pickle.load(f)
             assert type(coco_ds) is coco.COCOObjectDetectionDataset
     else:
-        logger.info( f'Generating COCO Dataset object from file: {coco_fp}')
-        transform = v2.Compose([
-            v2.RandomIoUCrop(),
-            v2.RandomHorizontalFlip(p=0.5),
-            # v2.ToDtype(torch.float32, scale=True),
-            # v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            v2.SanitizeBoundingBoxes()
-        ])
-        coco_ds = coco.COCOObjectDetectionDataset(
-            train_or_val='train',
-            transform=transform
-        )
-        logger.info( f'Serializing COCO Dataset object to file: {coco_fp}...')
-        with open(coco_fp, 'ab') as f:
-            pickle.dump(coco_ds, f)
+        with sara.Timer("COCO Dataset Generation"):
+            logger.info( f'Generating COCO Dataset object from file: {coco_fp}')
+            transform = v2.Compose([
+                v2.RandomIoUCrop(),
+                v2.RandomHorizontalFlip(p=0.5),
+                # v2.ToDtype(torch.float32, scale=True),
+                # v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                v2.SanitizeBoundingBoxes()
+            ])
+            coco_ds = coco.COCOObjectDetectionDataset(
+                train_or_val='train',
+                transform=transform
+            )
+        with sara.Timer("COCO Dataset Serialization"):
+            logger.info( f'Serializing COCO Dataset object to file: {coco_fp}...')
+            with open(coco_fp, 'ab') as f:
+                pickle.dump(coco_ds, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     return coco_ds
 
 
 def user_main():
-    coco_ds = get_or_create_coco_dataset()
+    FORCE_RECREATE = False
+    with sara.Timer("Get or create COCO dataset..."):
+        coco_ds = get_or_create_coco_dataset(force_recreate=FORCE_RECREATE)
 
     # Font config
     font = make_font()
