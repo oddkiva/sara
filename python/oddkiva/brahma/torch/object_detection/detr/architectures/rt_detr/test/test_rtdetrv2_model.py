@@ -69,18 +69,21 @@ def test_model_from_config_detailed():
         encoding_map.shape[2:]
         for encoding_map in encoding_pyramid
     ]
-    box_geometries, box_class_logits = model.decoder(
-        top_queries.detach(), top_geometry_logits.detach(),
-        value, value_pyramid_hw_sizes,
-        value_mask=value_mask
-    )
+    (detection_boxes, detection_class_logits,
+     dn_boxes, dn_class_logits) = model.decoder(
+         top_queries.detach(), top_geometry_logits.detach(),
+         value, value_pyramid_hw_sizes,
+         value_mask=value_mask
+     )
 
     layers_gt = intermediate_outs['decoder']['decoder.layer-by-layer']
-    box_geometries_true = torch.stack(layers_gt['dec_out_bboxes'])
-    box_class_logits_true = torch.stack(layers_gt['dec_out_logits'])
+    detection_boxes_true = torch.stack(layers_gt['dec_out_bboxes'])
+    detection_class_logits_true = torch.stack(layers_gt['dec_out_logits'])
 
-    assert relative_error(box_geometries, box_geometries_true) < 6e-4
-    assert relative_error(box_class_logits, box_class_logits_true) < 6e-4
+    assert relative_error(detection_boxes, detection_boxes_true) < 6e-4
+    assert relative_error(detection_class_logits, detection_class_logits_true) < 6e-4
+    assert dn_boxes is None
+    assert dn_class_logits is None
 
 
 def test_model_from_config():

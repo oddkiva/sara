@@ -91,13 +91,13 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
                  class_count: int,
                  shared_box_class_embedding: nn.Embedding,
                  box_count: int = 100,
-                 box_label_flip_probability: float = 0.5,
+                 box_label_alter_prob: float = 0.5,
                  box_noise_relative_scale: float = 1.0):
         super().__init__()
 
         self.class_count = class_count
         self.shared_box_class_embedding = shared_box_class_embedding
-        self.box_label_flip_probability = box_label_flip_probability
+        self.box_label_alter_prob = box_label_alter_prob
         self.box_count = box_count
         self.ltrb_noise_rel_magnitude = box_noise_relative_scale
 
@@ -154,10 +154,10 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         rep_box_mask: torch.Tensor
     ) -> torch.Tensor:
         assert \
-            0.0 < self.box_label_flip_probability and\
-            self.box_label_flip_probability < 1.0
+            0.0 < self.box_label_alter_prob and\
+            self.box_label_alter_prob < 1.0
 
-        p_perturb = self.box_label_flip_probability * 0.5
+        p_perturb = self.box_label_alter_prob * 0.5
         uni01_samples = torch.rand_like(rep_box_labels)
         mask_perturb = uni01_samples < p_perturb
 
@@ -165,6 +165,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
                                           low=0,
                                           high=self.class_count,
                                           dtype=rep_box_labels.dtype)
+        # Alter the labels
         rep_labels_perturbed = torch.where(
             mask_perturb & rep_box_mask, wrong_labels, rep_box_labels
         )
@@ -315,6 +316,6 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
             {
                 'dn_positive_ixs': positive_ixs,
                 'dn_group_count': dn_group_count,
-                'dn_num_splits': (dn_box_count, self.query_count)
+                'dn_partition': (dn_box_count, self.query_count)
             }
         )

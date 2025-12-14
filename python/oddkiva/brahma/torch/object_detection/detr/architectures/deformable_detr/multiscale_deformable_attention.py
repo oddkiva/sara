@@ -219,7 +219,7 @@ class MultiscaleDeformableAttention(nn.Module):
     def reconstruct_value_pyramid(
         self,
         values: torch.Tensor,
-        value_pyramid_hw_sizes: list[torch.Size]
+        value_pyramid_hw_sizes: list[tuple[int, int]]
     ) -> list[torch.Tensor]:
         M = self.attention_head_count
         d_v = self.value_dim
@@ -275,7 +275,7 @@ class MultiscaleDeformableAttention(nn.Module):
     def reconstruct_value_positions(
         self,
         value_positions: torch.Tensor,
-        value_pyramid_hw_sizes: list[torch.Size]
+        value_pyramid_hw_sizes: list[tuple[int, int]]
     ):
         # Permute the axes and reshape so as to obtain the shape
         # (N * M, top_K, LK, 2)
@@ -318,7 +318,7 @@ class MultiscaleDeformableAttention(nn.Module):
     def sample_values(
         self,
         values: torch.Tensor,
-        value_pyramid_hw_sizes: list[torch.Size],
+        value_pyramid_hw_sizes: list[tuple[int, int]],
         value_positions: torch.Tensor,
     ) -> torch.Tensor:
         """
@@ -385,7 +385,7 @@ class MultiscaleDeformableAttention(nn.Module):
                 queries: torch.Tensor,
                 query_geometries: torch.Tensor,
                 value: torch.Tensor,
-                value_pyramid_hw_sizes: list[torch.Size],
+                value_pyramid_hw_sizes: list[tuple[int, int]],
                 value_mask: torch.Tensor | None = None) -> torch.Tensor:
         N, top_k, _ = queries.shape
         M = self.attention_head_count

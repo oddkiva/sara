@@ -12,7 +12,10 @@ from oddkiva.brahma.torch.backbone.multi_layer_perceptron import (
     MultiLayerPerceptron
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    dn_detr.query_denoiser import ContrastiveDenoisingGroupGenerator
+    dn_detr.query_denoiser import (
+        ContrastiveDenoisingGroupGenerator,
+        inverse_sigmoid
+    )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     deformable_detr.multiscale_deformable_attention import (
         MultiscaleDeformableAttention
@@ -155,9 +158,9 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         query_embeds: torch.Tensor,
         query_geometry: torch.Tensor,
         memory: torch.Tensor,
-        memory_spatial_sizes: list[Iterable[int]],
+        memory_spatial_sizes: list[tuple[int, int]],
         query_positional_embeds: torch.Tensor | None = None,
-        attn_mask: torch.Tensor | None = None,
+        query_self_attn_mask: torch.Tensor | None = None,
         memory_mask: torch.Tensor | None = None
     ) -> torch.Tensor:
         r"""
@@ -186,10 +189,19 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
             query_geometry:
                 The 4D box geometry for each object query row vectors of
                 $\mathbf{Q}$.
+            query_self_attn_mask:
+                The self-attention mask.
+
+                It is used only at training time to optimize the auxiliary
+                contrastive denoising task of perturbed ground-truth labeled
+                boxes.
             memory:
                 the concatenated query vectors that are calculated from the
                 feature pyramid
                 (backbone -> AIFI -> CCFF -> projection -> concatenation).
+            memory_mask:
+                the attention mask used for the deformable cross-attention
+                layer.
 
         Returns:
             Decoded queries $\mathbf{V}^+$
@@ -210,7 +222,11 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         # 1. Self-Attention -> (Dropout -> Add -> Norm).
         #
         # 1.1. Self-attention.
-        ΔV, _ = self.self_attention.forward(Q, K, value=V, attn_mask=attn_mask)
+        ΔV, _ = self.self_attention.forward(
+            Q, K,
+            value=V,
+            attn_mask=query_self_attn_mask
+        )
         # 1.2.a) Perturb the enhanced value residuals to avoid overfitting in the
         #        self-attention block with the dropout layer.
         # 1.2.b) Apply the (Add -> Norm) layer.
@@ -222,7 +238,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
             query_geometry,
             memory,
             memory_spatial_sizes,
-            memory_mask
+            value_mask=memory_mask
         )
         V_super = self.layer_norm_2(V_super + self.dropout_2(ΔV))
 
@@ -318,7 +334,8 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         self,
         query: torch.Tensor, query_geometry_logits: torch.Tensor,
         value: torch.Tensor,
-        value_spatial_sizes: list[Iterable[int]],
+        value_spatial_sizes: list[tuple[int, int]],
+        query_self_attn_mask: torch.Tensor | None = None,
         value_mask: torch.Tensor | None = None
     ) -> tuple[torch.Tensor, torch.Tensor]:
         assert query.requires_grad is False
@@ -348,7 +365,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             assert type(decoder_layer) is \
                 MultiScaleDeformableTransformerDecoderLayer
 
-            # Calculate the corresponding embed vector of the box geometry
+            # Calculate the corresponding embed vector for each box geometry
             query_geom_embed_curr = self.box_geometry_embedding_map\
                 .forward(query_geom_curr)
 
@@ -357,7 +374,8 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
                 query_curr, query_geom_curr,
                 value, value_spatial_sizes,
                 query_positional_embeds=query_geom_embed_curr,
-                attn_mask=value_mask, memory_mask=None
+                query_self_attn_mask=query_self_attn_mask,
+                memory_mask=value_mask
             )
 
             # Estimate the new object class logits (object class probabilities).
@@ -383,22 +401,98 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         return (torch.stack(query_geometries_denoised),
                 torch.stack(query_class_logits_denoised))
 
+    def augment_query_with_dn_groups(
+        self,
+        query: torch.Tensor,
+        query_geometry_logits: torch.Tensor,
+        targets: dict[str, list[torch.Tensor]]
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict]:
+        # Pre-conditions:
+        assert query.requires_grad is False
+        assert query_geometry_logits.requires_grad is False
+
+        query_count = query.shape[1]
+        (dn_labels,
+         dn_geometry_logits,
+         dn_self_attn_mask,
+         dn_meta) = astuple(self.dn_group_gen.forward(query_count, targets))
+        # dn_attn_mask is a self-attention mask
+        #
+        # The denoising group generator is so-called "contrastive" as it
+        # generates negative and positive samples.
+        #
+        # It is worth reflecting about the denoising self-attention mask is
+        # doing:
+        #
+        # The self-attention mask reinforces the common features between
+        # negative samples and likewise the common features between
+        # positive samples.
+
+        dn_query = self.box_class_embedding_map(dn_labels)
+
+        # Fuse the noised ground-truth queries and the top-K queries in
+        # that following order because of the construction of the
+        # self-attention mask.
+        query = torch.cat(
+            (dn_query, query),
+            dim=1
+        )
+        query_geometry_logits = torch.cat(
+            (dn_geometry_logits, query_geometry_logits),
+            dim=1
+        )
+
+        # Post-conditions:
+        assert query.requires_grad is False
+        assert query_geometry_logits.requires_grad is False
+
+        return query, query_geometry_logits, dn_self_attn_mask, dn_meta
+
     def forward(
         self,
         query: torch.Tensor, query_geometry_logits: torch.Tensor,
         value: torch.Tensor,
-        value_spatial_sizes: list[Iterable[int]],
+        value_spatial_sizes: list[tuple[int, int]],
         value_mask: torch.Tensor | None = None,
         targets: dict[str, list[torch.Tensor]] | None = None
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor,
+               torch.Tensor | None, torch.Tensor | None]:
         if targets is not None:
-            query_count = query.shape[1]
-            (dn_labels,
-             dn_geometry_logits,
-             dn_attn_mask,
-             dn_meta) = astuple(self.dn_group_gen.forward(query_count, target))
-            dn_label_embeds = self.box_geometry_embedding_map(dn_labels)
-            # dn_attn_mask is a self-attention mask
+            (query,
+             query_geometry_logits,
+             query_self_attn_mask,
+             dn_meta) = self.augment_query_with_dn_groups(
+                 query, query_geometry_logits,
+                 targets
+             )
+        else:
+            dn_meta = None
+            query_self_attn_mask=None
 
-        return self.decode(query, query_geometry_logits,
-                           value, value_spatial_sizes, value_mask=value_mask)
+        query_geometries, query_class_logits = self.decode(
+            query,
+            query_geometry_logits,
+            value, value_spatial_sizes,
+            query_self_attn_mask=query_self_attn_mask,
+            value_mask=value_mask
+        )
+
+        # Separate the denoising groups and the top-K image-based queries.
+        if targets is not None:
+            assert type(dn_meta) is dict
+            partition = dn_meta['dn_partition']
+            dn_boxes, detection_boxes = torch.split(
+                query_geometries, partition, dim=2
+            )
+            dn_class_logits, detection_class_logits = torch.split(
+                query_class_logits, partition, dim=2
+            )
+        else:
+            dn_boxes, detection_boxes = None, query_geometries
+            dn_class_logits, detection_class_logits = None, query_class_logits
+
+
+        return (
+            detection_boxes, detection_class_logits,
+            dn_boxes, dn_class_logits
+        )

@@ -32,7 +32,7 @@ class RTDETRv2(nn.Module):
         )
 
         (top_queries,
-         _,
+         top_class_logits,
          top_geometry_logits,
          memory) = self.query_selector(encoding_pyramid)
 
@@ -43,11 +43,31 @@ class RTDETRv2(nn.Module):
             for encoding_map in encoding_pyramid
         ]
 
-        box_geometries, box_class_logits = self.decoder.forward(
-            top_queries.detach(), top_geometry_logits.detach(),
-            value, value_pyramid_hw_sizes,
-            value_mask=value_mask,
-            targets=targets
+        # IMPORTANT: ensure the embed vectors and geometry logits are made non
+        # differentiable at the decoding stage.
+        (detection_boxes, detection_class_logits,
+         dn_boxes, dn_class_logits) = self.decoder.forward(
+             top_queries.detach(), top_geometry_logits.detach(),
+             value, value_pyramid_hw_sizes,
+             value_mask=value_mask,
+             targets=targets
+         )
+
+        train_outputs = (
+            # To optimize:
+            # - the backbone,
+            # - AIFI+CCFF hybrid encoder,
+            # - anchor decoder inside the self.query_selector
+            # The following outputs are used as feedback:
+            top_class_logits,
+            top_geometry_logits,
+
+            # To optimize the decoder:
+            # - Each detection boxes and class logits are tensors that contains
+            detection_boxes, detection_class_logits,
+            # To accelerate convergence:
+            dn_boxes, dn_class_logits
+
         )
 
-        return box_geometries, box_class_logits
+        return detection_boxes, detection_class_logits

@@ -446,10 +446,10 @@ def test_transformer_decoder_details():
     # Check the computations.
     query = init_ref_contents
     query_geometry_logits = init_ref_points_unact
+    query_self_attn_mask = None
     value = memory
     value_spatial_sizes = memory_spatial_hw_sizes
     value_mask = None
-    memory_mask = None
     assert query.requires_grad is False
     assert query_geometry_logits.requires_grad is False
 
@@ -503,7 +503,8 @@ def test_transformer_decoder_details():
             query_curr, query_geom_curr,
             value, value_spatial_sizes,
             query_positional_embeds=query_geom_embed_curr,
-            attn_mask=value_mask, memory_mask=memory_mask
+            query_self_attn_mask=query_self_attn_mask,
+            memory_mask=value_mask
         )
         query_next_true = layer_gt_i['output_ref_contents']
         assert torch.dist(query_next, query_next_true) < 2.5e-3
@@ -598,16 +599,19 @@ def test_transformer_decoder_api():
 
     layers_gt = data['intermediate']['decoder']['decoder.layer-by-layer']
 
-    box_geometries, box_class_logits = decoder.forward(
-        query, query_geometry_logits,
-        value, value_spatial_sizes,
-        value_mask=value_mask
-    )
+    (box_geometries, box_class_logits,
+     dn_boxes, dn_class_logits) = decoder(
+         query, query_geometry_logits,
+         value, value_spatial_sizes,
+         value_mask=value_mask
+     )
     box_geometries_true = torch.stack(layers_gt['dec_out_bboxes'])
     box_class_logits_true = torch.stack(layers_gt['dec_out_logits'])
 
     assert relative_error(box_geometries, box_geometries_true) < 5e-6
     assert relative_error(box_class_logits, box_class_logits_true) < 5e-6
+    assert dn_boxes is None
+    assert dn_class_logits is None
 
 def test_transformer_decoder_from_config():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
@@ -631,13 +635,16 @@ def test_transformer_decoder_from_config():
 
     layers_gt = data['intermediate']['decoder']['decoder.layer-by-layer']
 
-    box_geometries, box_class_logits = decoder(
-        query, query_geometry_logits,
-        value, value_spatial_sizes,
-        value_mask=value_mask
-    )
+    (box_geometries, box_class_logits,
+     dn_boxes, dn_class_logits) = decoder(
+         query, query_geometry_logits,
+         value, value_spatial_sizes,
+         value_mask=value_mask
+     )
     box_geometries_true = torch.stack(layers_gt['dec_out_bboxes'])
     box_class_logits_true = torch.stack(layers_gt['dec_out_logits'])
 
     assert relative_error(box_geometries, box_geometries_true) < 5e-6
     assert relative_error(box_class_logits, box_class_logits_true) < 5e-6
+    assert dn_boxes is None
+    assert dn_class_logits is None
