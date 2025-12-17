@@ -186,19 +186,33 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         #   box, but it should not be too far from the original one, so that we
         #   learn to effectively denoise perturbed positive ground-truth boxes.
 
-        negative = torch.zeros((N, 2 * B, 1), device=device)
-        negative[:, B:] = 1
-        negative = negative.tile((1, G, 1))
-        positive = 1 - negative
+        # Let us mark the positive and negative samples.
+        #
+        # Starting first with the negative samples with this mask.
+        N_mask = torch.zeros((N, 2 * B, 1), device=device)
+        N_mask[:, B:] = 1
+        # The negative boxes are on the first "rectangle" of shape (N, B, 1)
+        # - M[:, B, :].
+        # The positive boxes are on the second "rectangle" of shape (N, B, 1)
+        # - M[:, :B, :].
+        #
+        # Now repeat the chessboard row like pattern G times.
+        N_mask = N_mask.tile((1, G, 1))
+        # The shape of the negative mask is (N, 2 * G, 1).
+        #
+        # Then the positive mark is the opposite of the negative mask.
+        P_mask = 1 - N_mask
 
-        # shape is (N, 2 * G, 1)
-        positive = positive.squeeze(-1) * rep_box_mask
-        positive_ixs = torch.nonzero(positive)
+        # Remember the positive samples are built off real box data.
+        P_mask = P_mask.squeeze(-1) * rep_box_mask
+        positive_ixs = torch.nonzero(P_mask)
         ltrb_noise_rel_mag = 0.5 * self.ltrb_noise_rel_magnitude
         rep_box_whs = rep_box_geometries[:, :, 2:]
         ltrb_noise_mag_max = rep_box_whs.tile((1, 1, 2))
         noise_magnitudes = ltrb_noise_rel_mag * ltrb_noise_mag_max
 
+        # Generate one part of the noise generation: the +/- sign to determine
+        # whether the noise is additive or subtractive.
         zero_or_one_samples = torch.randint_like(rep_box_geometries, 0, 2)
         noise_signs = zero_or_one_samples * 2 - 1  # -1 or +1
 
@@ -228,12 +242,33 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # Which can lead to negative sizes, and that would be a shame.
         # ----------------------------------------------------------------------
         uni01_samples = torch.rand_like(rep_box_geometries)
-        neg_additive_noise = (uni01_samples + 1.0) * negative
-        pos_additive_noise = uni01_samples * (1 - negative)
-        additive_noise_normalized = neg_additive_noise + pos_additive_noise
+        # TODO: investigate. For me, the 2 lines are *buggy*.
+        #
+        # The positive mask is NOT the opposite of the negative mask ANYMORE.
+        #
+        # If we look closely, the positive samples are still constructed
+        # correctly. But the negative boxes can still be constructed as
+        # positive boxes.
+        # Shouldn't we want clean data? Clean data would accelerate the
+        # training convergence...
+        neg_additive_noise = (uni01_samples + 1.0) * N_mask
+        pos_additive_noise = uni01_samples * (1 - N_mask)
+        # So instead:
+        # neg_additive_noise = (uni01_samples + 1.0) * (1 - P_mask)
+        # pos_additive_noise = uni01_samples * P_mask
+        #
+        # Besides we could simplify the implementation of the P_mask and
+        # N_mask.
 
+        # The rest is straightforward.
+        #
+        # - Recompose the whole additive noise matrix.
+        additive_noise_normalized = neg_additive_noise + pos_additive_noise
+        # - Rescale the noise matrix.
         additive_noise = noise_magnitudes * noise_signs * additive_noise_normalized
 
+        # Finally add the noise to the repeated ground truth boxes in the
+        # appropriate format.
         boxes_noised = from_cxcywh_to_ltrb_box_format(rep_box_geometries)
         boxes_noised = fix_ltrb_boxes(boxes_noised + additive_noise)
         boxes_noised = boxes_noised.clip(min=0.0, max=1.0)
@@ -275,7 +310,6 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
         rep_box_pad_mask = box_pad_mask.tile((1, 2 * G))
         # Shape is (N, B * 2 * G, 1)
-
 
         # ----------------------------------------------------------------------
         # Generate the so-called `denoising` groups of ground-truth boxes as

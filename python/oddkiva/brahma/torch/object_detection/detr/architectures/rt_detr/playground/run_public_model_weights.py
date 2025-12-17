@@ -55,7 +55,6 @@ class ModelConfig:
             for l in open(ModelConfig.LABELS_FILEPATH, 'r').readlines()
         ]
 
-
         return model, label_names, device
 
 
