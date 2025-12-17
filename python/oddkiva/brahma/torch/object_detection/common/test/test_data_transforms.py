@@ -1,16 +1,18 @@
-# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
-
 import pickle
+
 from loguru import logger
 
+import torch
 import torchvision.transforms.v2 as v2
 from torch.utils.data import DataLoader
 
+from oddkiva import DATA_DIR_PATH
+from oddkiva.brahma.torch.object_detection.common.data_transforms import (
+    ToNormalizedCXCYWHBoxes
+)
 import oddkiva.brahma.torch.datasets.coco as coco
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.datasets.coco.dataloader import collate_fn
-from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    dn_detr.query_denoiser import ContrastiveDenoisingGroupGenerator
 
 
 def get_or_create_coco_batch_sample(force_recreate: bool = False):
@@ -50,13 +52,28 @@ def get_or_create_coco_batch_sample(force_recreate: bool = False):
     return sample
 
 
-def test_contrastive_denoising_group_generator():
-    dng = ContrastiveDenoisingGroupGenerator(80)
+def test_box_normalization():
+    sample = get_or_create_coco_batch_sample()
 
-    images, boxes, labels = get_or_create_coco_batch_sample()
+    normalize_boxes = ToNormalizedCXCYWHBoxes()
 
-    assert images.shape == (16, 3, 640, 640)
-    assert len(boxes) == 16
-    assert len(labels) == 16
+    sample_normalized = normalize_boxes(sample)
+    img, boxes, labels = sample
+    img_n, boxes_n, labels_n = sample_normalized
 
-    g = dng.forward(300, boxes, labels)
+    # Check that the image data is unchanged.
+    assert torch.equal(img, img_n)
+
+    # Check that the box coordinate normalization.
+    for b, bn in zip(boxes, boxes_n):
+        l, t, w, h = b.unbind(-1)
+        cx = l + 0.5 * w
+        cy = t + 0.5 * h
+        cxcywh = torch.stack((cx, cy, w, h), dim=-1)
+        whwh = torch.tensor(b.canvas_size[::-1]).tile(2)
+
+        assert torch.dist(cxcywh / whwh, bn) < 1e-6
+
+    # Check that the label data is unchanged.
+    for l, ln in zip(labels, labels_n):
+        assert torch.equal(l, ln)

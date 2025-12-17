@@ -2,11 +2,9 @@
 
 from typing import Any
 from dataclasses import astuple, dataclass
-from loguru import logger
 
 import torch
 import torch.nn as nn
-import torchvision.tv_tensors as tvt
 
 
 # ----------------------------------------------------------------------
@@ -105,15 +103,15 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
     def stack_labeled_boxes(
         self,
-        box_annotations: dict[str, list[torch.Tensor]],
+        boxes: list[torch.Tensor],
+        labels: list[torch.Tensor],
         num_classes: int,
     ) -> StackedBoxAnnotations:
-        boxes = box_annotations['boxes']
-        labels = box_annotations['labels']
         # Let us impose the following hard constraint:
         # -> no empty image annotations, please!
         assert len(boxes) == len(labels)
-        assert all(len(b) > 0 for b in boxes) is True
+        # Relax this constraint because of the data transformations...
+        # assert all(len(b) > 0 for b in boxes) is True
         assert all(len(b) == len(l) for (b, l) in zip(boxes, labels)) is True
 
         # What we do is simply tensorize the ground truth data,
@@ -198,7 +196,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # The positive boxes are on the second "rectangle" of shape (N, B, 1)
         # - M[:, :B, :].
         #
-        # Now repeat the chessboard row like pattern G times.
+        # Now repeat the chessboard-row-like pattern G times.
         N_mask = N_mask.tile((1, G, 1))
         # The shape of the negative mask is (N, 2 * G, 1).
         #
@@ -282,10 +280,9 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
     def forward(
         self,
         query_count: int,
-        ground_truth: dict[str, list[torch.Tensor]]
+        boxes: list[torch.Tensor],
+        labels: list[torch.Tensor]
     ) -> Output:
-        boxes = ground_truth['boxes']
-        labels = ground_truth['labels']
         assert len(boxes) == len(labels)
 
         box_count_max = max([len(b) for b in boxes])
@@ -296,8 +293,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
             dn_group_count = 1
 
         box_labels, box_geometries, box_pad_mask = astuple(self.stack_labeled_boxes(
-            ground_truth,
-            self.class_count
+            boxes, labels, self.class_count
         ))
 
         N = len(boxes)
