@@ -3,6 +3,7 @@
 import pickle
 from loguru import logger
 
+import torch
 import torchvision.transforms.v2 as v2
 from torch.utils.data import DataLoader
 
@@ -10,7 +11,9 @@ import oddkiva.brahma.torch.datasets.coco as coco
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.datasets.coco.dataloader import collate_fn
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    dn_detr.query_denoiser import ContrastiveDenoisingGroupGenerator
+    dn_detr.contrastive_denoising_group_generator import (
+        ContrastiveDenoisingGroupGenerator
+    )
 
 
 def get_or_create_coco_batch_sample(force_recreate: bool = False):
@@ -59,4 +62,5 @@ def test_contrastive_denoising_group_generator():
     assert len(boxes) == 16
     assert len(labels) == 16
 
+    torch.manual_seed(0)
     g = dng.forward(300, boxes, labels)

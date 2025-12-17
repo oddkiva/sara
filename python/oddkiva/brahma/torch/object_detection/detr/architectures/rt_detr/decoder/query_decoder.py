@@ -13,7 +13,9 @@ from oddkiva.brahma.torch.backbone.multi_layer_perceptron import (
     MultiLayerPerceptron
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    dn_detr.query_denoiser import ContrastiveDenoisingGroupGenerator
+    dn_detr.contrastive_denoising_group_generator import (
+        ContrastiveDenoisingGroupGenerator
+    )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     deformable_detr.multiscale_deformable_attention import (
         MultiscaleDeformableAttention
