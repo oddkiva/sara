@@ -1,6 +1,7 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from collections import OrderedDict
 from dataclasses import astuple
-from typing import Iterable
 
 import math
 
@@ -12,10 +13,7 @@ from oddkiva.brahma.torch.backbone.multi_layer_perceptron import (
     MultiLayerPerceptron
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    dn_detr.query_denoiser import (
-        ContrastiveDenoisingGroupGenerator,
-        inverse_sigmoid
-    )
+    dn_detr.query_denoiser import ContrastiveDenoisingGroupGenerator
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     deformable_detr.multiscale_deformable_attention import (
         MultiscaleDeformableAttention
@@ -314,10 +312,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         )
         self.box_geometry_embedding_map = BoxGeometryEmbeddingMap(hidden_dim)
 
-        self.dn_group_gen = ContrastiveDenoisingGroupGenerator(
-            num_classes,
-            self.box_class_embedding_map
-        )
+        self.dn_group_gen = ContrastiveDenoisingGroupGenerator(num_classes)
 
         # Auxiliary geometry estimator for each decoding iteration.
         self.box_geometry_logit_heads = nn.ModuleList(
@@ -467,7 +462,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
              )
         else:
             dn_meta = None
-            query_self_attn_mask=None
+            query_self_attn_mask = None
 
         query_geometries, query_class_logits = self.decode(
             query,

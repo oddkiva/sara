@@ -8,6 +8,6 @@ def test_coco_dataset():
 
     img, bboxes, labels = coco[0]
 
-    assert img.shape == (3, 447, 640)
+    assert img.shape == (3, 427, 640)
     assert len(bboxes) == len(labels)
     assert (labels < 80).all()

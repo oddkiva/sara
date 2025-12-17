@@ -1,11 +1,12 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
 from collections.abc import Callable
+from numbers import Number
+
 from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QApplication
 
 from oddkiva.sara.graphics.derived_qobjects.graphics_context import GraphicsContext
-from torch.types import Number
 
 
 def millisleep(ms):

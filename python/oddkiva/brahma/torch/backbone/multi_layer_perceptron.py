@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import torch.nn as nn
 
 from oddkiva.brahma.torch.backbone.resnet.vanilla import make_activation_func

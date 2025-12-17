@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from typing import Any
 from dataclasses import astuple, dataclass
 
@@ -89,14 +91,12 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
     def __init__(self,
                  class_count: int,
-                 shared_box_class_embedding: nn.Embedding,
                  box_count: int = 100,
                  box_label_alter_prob: float = 0.5,
                  box_noise_relative_scale: float = 1.0):
         super().__init__()
 
         self.class_count = class_count
-        self.shared_box_class_embedding = shared_box_class_embedding
         self.box_label_alter_prob = box_label_alter_prob
         self.box_count = box_count
         self.ltrb_noise_rel_magnitude = box_noise_relative_scale
@@ -242,7 +242,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # Which can lead to negative sizes, and that would be a shame.
         # ----------------------------------------------------------------------
         uni01_samples = torch.rand_like(rep_box_geometries)
-        # TODO: investigate. For me, the 2 lines are *buggy*.
+        # TODO: investigate: for me, the 2 lines below are *buggy*.
         #
         # The positive mask is NOT the opposite of the negative mask ANYMORE.
         #
@@ -253,7 +253,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # training convergence...
         neg_additive_noise = (uni01_samples + 1.0) * N_mask
         pos_additive_noise = uni01_samples * (1 - N_mask)
-        # So instead:
+        # To me, it should be instead:
         # neg_additive_noise = (uni01_samples + 1.0) * (1 - P_mask)
         # pos_additive_noise = uni01_samples * P_mask
         #
@@ -262,7 +262,8 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
         # The rest is straightforward.
         #
-        # - Recompose the whole additive noise matrix.
+        # - Construct the whole additive noise matrix by combining the two
+        #   types of noise together.
         additive_noise_normalized = neg_additive_noise + pos_additive_noise
         # - Rescale the noise matrix.
         additive_noise = noise_magnitudes * noise_signs * additive_noise_normalized

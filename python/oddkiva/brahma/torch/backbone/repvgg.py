@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import torch
 
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (

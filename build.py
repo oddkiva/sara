@@ -29,7 +29,7 @@ BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 UBUNTU_VERSION = "22.04"
 CUDA_VERSION = "12.1.0"
 TRT_VERSION = "8.6"
-SWIFT_VERSION = "6.2.0"
+SWIFT_VERSION = "6.2.2"
 HALIDE_VERSION = "19.0.0"
 
 # Docker

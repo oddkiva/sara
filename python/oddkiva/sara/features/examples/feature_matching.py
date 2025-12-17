@@ -3,8 +3,6 @@
 import sys
 from typing import Iterable
 
-from PySide6.QtCore import QObject, Qt
-
 import numpy as np
 
 import oddkiva.sara as sara
