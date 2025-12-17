@@ -2,9 +2,11 @@
 
 from typing import Any
 from dataclasses import astuple, dataclass
+from loguru import logger
 
 import torch
 import torch.nn as nn
+import torchvision.tv_tensors as tvt
 
 
 # ----------------------------------------------------------------------
@@ -158,7 +160,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
             self.box_label_alter_prob < 1.0
 
         p_perturb = self.box_label_alter_prob * 0.5
-        uni01_samples = torch.rand_like(rep_box_labels)
+        uni01_samples = torch.rand(rep_box_labels.shape)
         mask_perturb = uni01_samples < p_perturb
 
         wrong_labels = torch.randint_like(rep_box_labels,
@@ -351,6 +353,6 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
             {
                 'dn_positive_ixs': positive_ixs,
                 'dn_group_count': dn_group_count,
-                'dn_partition': (dn_box_count, self.query_count)
+                'dn_partition': (dn_box_count, query_count)
             }
         )

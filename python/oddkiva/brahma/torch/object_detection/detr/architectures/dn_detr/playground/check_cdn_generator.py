@@ -4,17 +4,20 @@ import pickle
 from collections.abc import Iterable
 from loguru import logger
 
-import matplotlib.pyplot as plt
-import numpy as np
-
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QFontMetrics
 
 import torchvision.transforms.v2 as v2
+from torch.utils.data import DataLoader
 from torch.types import Number
 
 import oddkiva.sara as sara
 import oddkiva.brahma.torch.datasets.coco as coco
 from oddkiva import DATA_DIR_PATH
+from oddkiva.sara.dataset.colors import generate_label_colors
+from oddkiva.brama.torch.datasets.coco.dataloader import collate_fn
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    dn_detr.query_denoiser import ContrastiveDenoisingGroupGenerator
 
 
 def make_font(font_size: int = 12,
@@ -51,16 +54,6 @@ def draw_boxed_text(x: Number, y: Number, text: str,
                    font.underline())
 
 
-def generate_label_colors(
-    categories: list[coco.Category],
-    colormap: str = 'rainbow'
-) -> np.ndarray:
-    cmap = plt.get_cmap(colormap)
-    colors = cmap(np.linspace(0, 1, len(categories)))
-    colors = (colors[:, :3] * 255).astype(np.int32)
-    return colors
-
-
 def get_or_create_coco_dataset(force_recreate: bool = False) -> coco.COCOObjectDetectionDataset:
     coco_fp = DATA_DIR_PATH / 'coco_object_detection_dataset.pkl'
     if force_recreate:
@@ -78,6 +71,7 @@ def get_or_create_coco_dataset(force_recreate: bool = False) -> coco.COCOObjectD
                 v2.RandomHorizontalFlip(p=0.5),
                 # v2.ToDtype(torch.float32, scale=True),
                 # v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                v2.Resize((640, 640)),
                 v2.SanitizeBoundingBoxes()
             ])
             coco_ds = coco.COCOObjectDetectionDataset(
@@ -97,27 +91,44 @@ def user_main():
     with sara.Timer("Get or create COCO dataset..."):
         coco_ds = get_or_create_coco_dataset(force_recreate=FORCE_RECREATE)
 
-    # Font config
-    font = make_font()
+    coco_dl = DataLoader(
+        dataset=coco_ds,
+        batch_size=16,
+        shuffle=False,
+        collate_fn=collate_fn
+    )
+    img, boxes, labels = iter(coco_dl)
+    assert img.shape == (16, 3, 640, 640)
+    assert len(boxes) == 16
+    assert len(labels) == 16
 
-    # Color config.
+    cdngg = ContrastiveDenoisingGroupGenerator(80)
+    cdng = cdngg.forward(300, {
+        'boxes': boxes,
+        'labels': labels
+    })
+
+
+    # Display config
+    font = make_font()
     label_colors = generate_label_colors(coco_ds.ds.categories)
 
     sara.create_window(640, 640)
-    for img, boxes, labels in coco_ds:
-       sara.clear()
-       sara.draw_image(img.permute(1, 2, 0).contiguous().numpy())
+    sara.draw_image(img.permute(1, 2, 0).contiguous().numpy())
 
-       for box, label in zip(boxes.tolist(), labels.tolist()):
-           x, y, w, h = box
+    for box, label in zip(boxes.tolist(), labels.tolist()):
+        x, y, w, h = box
 
-           label_color = label_colors[label]
-           label_name = coco_ds.ds.categories[label].name
+        label_color = label_colors[label]
+        label_name = coco_ds.ds.categories[label].name
 
-           sara.draw_rect((x, y), (w, h), label_color, 2)
-           draw_boxed_text(x, y, label_name, label_color, font, angle=0.)
+        sara.draw_rect((x, y), (w, h), label_color, 2)
+        draw_boxed_text(x, y, label_name, label_color, font, angle=0.)
 
-       sara.get_key()
+    while sara.get_key() != Qt.Key.Key_Escape:
+        logger.debug("Random key pressed...")
+        continue
+    logger.info("Terminating...")
 
 
 sara.run_graphics(user_main)
