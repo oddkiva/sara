@@ -113,6 +113,7 @@ def user_main():
     sara.set_antialiasing(True)
 
     video_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
+    display_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
     video_frame_index = - 1
     video_frame_skip_count = 2
 
@@ -126,6 +127,8 @@ def user_main():
                 model, video_frame, device
             )
         with sara.Timer("Display"):
+            np.copyto(display_frame, video_frame)
+
             for (l, t, w, h, label, conf) in zip(ls, ts, ws, hs,
                                                  labels, confs):
                 if conf < 0.5:
@@ -134,16 +137,17 @@ def user_main():
                 color = (255, 0, 0)
                 xy = (int(l + 0.5), int(t + 0.5))
                 wh = (int(w + 0.5), int(h + 0.5))
-                image_draw.draw_rect(video_frame, xy, wh, color, 2.)
+                image_draw.draw_rect(display_frame, xy, wh, color, 2.)
 
                 # Draw the label
                 p = (int(l + 0.5 + 5), int(t + 0.5 - 10))
                 text = label_names[label]
                 font_size = 12
                 bold = True
-                image_draw.draw_text(video_frame, p, text, (63, 0, 0), font_size,
-                                     0, False, bold, False)
-            sara.draw_image(video_frame)
+                image_draw.draw_text(display_frame, p, text, (63, 0, 0),
+                                     font_size, 0, False, bold, False)
+
+            sara.draw_image(display_frame)
 
 
 if __name__ == '__main__':
