@@ -25,10 +25,10 @@ def fix_ltrb_boxes(boxes: torch.Tensor) -> torch.Tensor:
     r = boxes[..., 2]
     b = boxes[..., 3]
     boxes_fixed = torch.zeros_like(boxes)
-    boxes_fixed[..., 0] = torch.where(l <= r, l, r)
-    boxes_fixed[..., 1] = torch.where(l > r, r, l)
-    boxes_fixed[..., 2] = torch.where(t <= b, t, b)
-    boxes_fixed[..., 3] = torch.where(t > b, b, t)
+    boxes_fixed[..., 0] = torch.min(l, r)
+    boxes_fixed[..., 1] = torch.min(t, b)
+    boxes_fixed[..., 2] = torch.max(l, r)
+    boxes_fixed[..., 3] = torch.max(t, b)
     return boxes_fixed
 
 
@@ -37,7 +37,7 @@ def from_ltrb_to_cxcywh_box_format(boxes: torch.Tensor) -> torch.Tensor:
     cx = 0.5 * (l + r)
     cy = 0.5 * (t + b)
     w = r - l
-    h = t + b
+    h = b - t
     return torch.stack((cx, cy, w, h), dim=-1)
 
 
@@ -85,7 +85,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
     @dataclass
     class Output:
         box_labels: torch.Tensor
-        box_geometries: torch.Tensor
+        box_geometry_logits: torch.Tensor
         attention_mask: torch.Tensor
         dn_meta: dict[str, Any]
 
@@ -105,7 +105,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         self,
         boxes: list[torch.Tensor],
         labels: list[torch.Tensor],
-        num_classes: int,
+        non_object_idx: int,
     ) -> StackedBoxAnnotations:
         # Let us impose the following hard constraint:
         # -> no empty image annotations, please!
@@ -122,7 +122,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # Stack the list of tensors and appropriately pad each tensors
         stacked_labels = torch.full(
             [batch_size, box_count_max],
-            num_classes,
+            non_object_idx,
             dtype=torch.int32,
             device=boxes[0].device
         )
@@ -172,9 +172,30 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
         return rep_labels_perturbed
 
-    def perturb_box_geometries(self, rep_box_geometries: torch.Tensor,
-                               rep_box_mask: torch.Tensor,
-                               N: int, B: int, G: int):
+    def alter_box_geometries(self, rep_box_geometries: torch.Tensor,
+                             rep_box_mask: torch.Tensor,
+                             N: int, B: int, G: int):
+        r"""
+        Parameters:
+            rep_box_geometries:
+                The tensor encoding the list of repeated ground-truth boxes
+                which we will alter with additive noise.
+                It is of shape $(N, B G 2, 4)$.
+            rep_box_mask:
+                The tensor mask that is of shape $(N, B G 2, 1)$.
+                Each training sample indexed by $n$ has $b_n$ labeled boxes,
+                with $0 \leq b_n \leq B$.
+
+                Then the following assertion holds:
+                `rep_box_mask[n, :b[n], :].all() is True`
+            N:
+                The batch size
+            B:
+                The largest number of labeled boxes found in the batch of
+                samples
+            G:
+                The number of denoising groups
+        """
         device = rep_box_geometries.device
         # Generate positive boxes and negative boxes for each ground-truth
         # box.
@@ -206,12 +227,13 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # Remember the positive samples are built off real box data.
         P_mask = P_mask.squeeze(-1) * rep_box_mask
         positive_ixs = torch.nonzero(P_mask)
-        ltrb_noise_rel_mag = 0.5 * self.ltrb_noise_rel_magnitude
         rep_box_whs = rep_box_geometries[:, :, 2:]
-        ltrb_noise_mag_max = rep_box_whs.tile((1, 1, 2))
-        noise_magnitudes = ltrb_noise_rel_mag * ltrb_noise_mag_max
 
-        # Generate one part of the noise generation: the +/- sign to determine
+        # The noise absolute magnitude is bounded (w/2, h/2).
+        whwh_halved = rep_box_whs.tile((1, 1, 2)) * 0.5
+        noise_magnitudes = self.ltrb_noise_rel_magnitude * whwh_halved
+
+        # Generate one part of the noise: the +/- sign, which determines
         # whether the noise is additive or subtractive.
         zero_or_one_samples = torch.randint_like(rep_box_geometries, 0, 2)
         noise_signs = zero_or_one_samples * 2 - 1  # -1 or +1
@@ -242,31 +264,40 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # Which can lead to negative sizes, and that would be a shame.
         # ----------------------------------------------------------------------
         uni01_samples = torch.rand_like(rep_box_geometries)
-        # TODO: investigate: for me, the 2 lines below are *buggy*.
-        #
+        # NOTE
         # The positive mask is NOT the opposite of the negative mask ANYMORE.
+        # It does not seem to matter after pondering about it.
         #
-        # If we look closely, the positive samples are still constructed
-        # correctly. But the negative boxes can still be constructed as
-        # positive boxes.
-        # Shouldn't we want clean data? Clean data would accelerate the
-        # training convergence...
-        neg_additive_noise = (uni01_samples + 1.0) * N_mask
-        pos_additive_noise = uni01_samples * (1 - N_mask)
-        # To me, it should be instead:
-        # neg_additive_noise = (uni01_samples + 1.0) * (1 - P_mask)
-        # pos_additive_noise = uni01_samples * P_mask
+        # The intention is to generate as many positive samples as negative
+        # samples.
         #
-        # Besides we could simplify the implementation of the P_mask and
-        # N_mask.
+        # The padded tensor wastes a lot of memory but that is fine...
+        #
+        # We could have written instead:
+        # neg_additive_noise = (uni01_samples + 1.0) * (1 - P_mask[..., None])
+        # pos_additive_noise = uni01_samples * P_mask[..., None]
+        #
+        # NOTE: This is the original implementation.
+        ORIGINAL_IMPL = True
+        if ORIGINAL_IMPL:
+            neg_noise_n = (uni01_samples + 1.0) * N_mask
+            pos_noise_n = uni01_samples * (1 - N_mask)
+            noise_n = neg_noise_n + pos_noise_n
 
-        # The rest is straightforward.
-        #
-        # - Construct the whole additive noise matrix by combining the two
-        #   types of noise together.
-        additive_noise_normalized = neg_additive_noise + pos_additive_noise
-        # - Rescale the noise matrix.
-        additive_noise = noise_magnitudes * noise_signs * additive_noise_normalized
+            # The rest is straightforward.
+            #
+            # - Construct the whole additive noise matrix by combining the two
+            #   types of noise together.
+            # - Rescale the noise matrix.
+            additive_noise = noise_magnitudes * noise_signs * noise_n
+        else:
+            # NOTE: This is my vision
+            neg_noise = (
+                whwh_halved + \
+                uni01_samples * noise_magnitudes
+            ) * noise_signs * N_mask
+            pos_noise = uni01_samples * noise_signs * noise_magnitudes * (1 - N_mask)
+            additive_noise = neg_noise + pos_noise
 
         # Finally add the noise to the repeated ground truth boxes in the
         # appropriate format.
@@ -292,8 +323,9 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         if dn_group_count == 0:
             dn_group_count = 1
 
+        non_object_idx = self.class_count
         box_labels, box_geometries, box_pad_mask = astuple(self.stack_labeled_boxes(
-            boxes, labels, self.class_count
+            boxes, labels, non_object_idx
         ))
 
         N = len(boxes)
@@ -315,7 +347,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # explained in DN-DETR.
         # ----------------------------------------------------------------------
         dn_labels = self.perturb_box_labels(rep_box_labels, rep_box_pad_mask)
-        dn_geometries, positive_ixs = self.perturb_box_geometries(
+        dn_geometries, positive_ixs = self.alter_box_geometries(
             rep_box_geometries, rep_box_pad_mask, N, B, G
         )
         dn_geometry_logits = inverse_sigmoid(dn_geometries)

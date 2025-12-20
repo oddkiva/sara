@@ -10,6 +10,9 @@ from torch.utils.data import DataLoader
 import oddkiva.brahma.torch.datasets.coco as coco
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.datasets.coco.dataloader import collate_fn
+from oddkiva.brahma.torch.object_detection.common.data_transforms import (
+    ToNormalizedCXCYWHBoxes
+)
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     dn_detr.contrastive_denoising_group_generator import (
         ContrastiveDenoisingGroupGenerator
@@ -28,7 +31,8 @@ def get_or_create_coco_batch_sample(force_recreate: bool = False):
             v2.RandomIoUCrop(),
             v2.RandomHorizontalFlip(p=0.5),
             v2.Resize((640, 640)),
-            v2.SanitizeBoundingBoxes()
+            v2.SanitizeBoundingBoxes(),
+            ToNormalizedCXCYWHBoxes(),  # IMPORTANT!!!
         ])
         coco_ds = coco.COCOObjectDetectionDataset(
             train_or_val='train',
@@ -54,13 +58,134 @@ def get_or_create_coco_batch_sample(force_recreate: bool = False):
 
 
 def test_contrastive_denoising_group_generator():
-    dng = ContrastiveDenoisingGroupGenerator(80)
+    class_count = 80
+    box_noise_relative_scale = 1.0
+    dn_group_gen = ContrastiveDenoisingGroupGenerator(
+        class_count,
+        box_noise_relative_scale=box_noise_relative_scale
+    )
 
     images, boxes, labels = get_or_create_coco_batch_sample()
+    # VERY IMPORTANT
+    # --------------
+    #
+    # - The boxes must be in CXCYWH format.
+    # - The box coordinates must be **normalized** in [0, 1]
+    #
+    # otherwise the denoising group generator can't generate correct boxes.
+    batch_size = len(images)
 
-    assert images.shape == (16, 3, 640, 640)
-    assert len(boxes) == 16
-    assert len(labels) == 16
+    assert images.shape == (batch_size, 3, 640, 640)
+    assert len(boxes) == batch_size
+    assert len(labels) == batch_size
+    for n in range(batch_size):
+        assert len(boxes[n]) == len(labels[n])
 
     torch.manual_seed(0)
-    g = dng.forward(300, boxes, labels)
+    dn_groups = dn_group_gen.forward(300, boxes, labels)
+
+    B = max([len(b) for b in boxes])
+    G = dn_group_gen.box_count // B
+    assert B == 21
+    assert G == 4
+    assert B * G * 2 == 168
+
+    assert dn_groups.box_labels.shape == (batch_size, B * G * 2)
+    assert dn_groups.box_geometry_logits.shape == (batch_size, B * G * 2, 4)
+
+    group_size = 2 * B
+
+    # Let's confirm our understanding of how `dn_positive_ixs` is constructed.
+    dn_splits = [len(b) * G for b in boxes]
+    dn_pos_ixs = dn_groups.dn_meta['dn_positive_ixs']
+    dn_pos_ixs_partition = torch.split(dn_pos_ixs, dn_splits)
+    assert len(dn_pos_ixs_partition) == batch_size
+
+    # Check the indexing of the replicated positive (noised ground-truth)
+    # boxes.
+    #
+    # Each positive boxes is referenced by the pair (n, b), where
+    # - `n` indexes the training sample.
+    # - `b` is the local index of the positive boxes.
+    #
+    # We are now checking that the partition correctly groups the positive
+    # boxes by training sample.
+    for n, dn_pos_ixs_n in enumerate(dn_pos_ixs_partition):
+        # Check that each subsets of the partition only lists positive boxes in
+        # the training sample `n`.
+        assert torch.all(dn_pos_ixs_n[:, 0] == n)
+
+        # The positive boxes are the replicated ground-truth boxes and they are
+        # replicated `G` times.
+        #
+        # The replicated group   `0` have indices from   0       to 2*B*1-1.
+        # The replicated group   `1` have indices from 2*B       to 2*B*2-1.
+        # ...
+        # The replicated group `G-1` have indices from 2*B*(G-1) to 2*B*G-1.
+        num_boxes_n = len(boxes[n])
+        pos_ixs_n = torch.cat([
+            torch.arange(group_size * g, group_size * g + num_boxes_n)
+            for g in range(G)
+        ], dim = -1)
+        assert torch.equal(pos_ixs_n, dn_pos_ixs_n[:, 1])
+
+    # Check the geometries of replicated boxes.
+    dn_geometries = torch.nn.functional.sigmoid(dn_groups.box_geometry_logits)
+    for n in range(1):#batch_size):
+        logger.debug(f'Examining geometries for training sample {n}...')
+        num_boxes_n = len(boxes[n])
+
+        print(f'boxes[{n}].format\n', boxes[n].format)
+
+        for g in range(G):
+            logger.debug(f'Examining for geometries of group ({n}, {g})...')
+
+            whwh = torch.tensor(boxes[n].canvas_size[::-1]).tile(2)[None, ...]
+            dn_geoms_n = dn_geometries[n, group_size*g:group_size*(g+1), :]
+
+            boxes_n = boxes[n] * whwh
+            pos = (dn_geoms_n[:B] * whwh)[:num_boxes_n]
+            neg = (dn_geoms_n[B:] * whwh)[:num_boxes_n]
+
+            print(f'boxes[{n}]\n', boxes_n)
+            print(f'pos[{n}, {g}]\n', torch.trunc(pos))
+            print(f'neg[{n}, {g}]\n', torch.trunc(neg))
+            print(f'pos err[{n}, {g}]\n',
+                  torch.dist(pos, boxes_n) / torch.norm(boxes_n))
+            print(f'neg err[{n}, {g}]\n',
+                  torch.dist(neg, boxes_n) / torch.norm(boxes_n))
+
+
+    ## Each denoising group g in [0, G[ can be partitioned into two sub-groups:
+    ## - the positive groups.
+    ## - the negative groups are assigned to label ID `class_count`, which
+    ##   corresponds to the 'no-object' category.
+    #dn_box_labels = dn_groups.box_labels
+    #p_alter = dn_group_gen.box_label_alter_prob * 0.5
+    #for n in range(batch_size):
+    #    logger.debug(f'Examining for training sample {n}...')
+    #    num_boxes_n = len(boxes[n])
+
+    #    # Inspect the labels.
+    #    for g in range(G):
+    #        logger.debug(f'Examining group {g}...')
+
+    #        pos_labels_altered = dn_box_labels[
+    #            n,
+    #            group_size*g:group_size*g + num_boxes_n
+    #        ]
+    #        pos_labels = labels[n]
+
+    #        indices_where_equal = torch.where(pos_labels_altered == pos_labels)[0]
+
+    #        freq_alter = abs(len(indices_where_equal) - num_boxes_n) / num_boxes_n
+    #        if num_boxes_n > 10:
+    #            print(pos_labels_altered)
+    #            print(pos_labels)
+    #            print(indices_where_equal)
+    #            print(num_boxes_n)
+    #            assert abs(freq_alter - p_alter) < 0.2
+
+
+
+    # TODO: verify the properties of the contrastive denoising group.
