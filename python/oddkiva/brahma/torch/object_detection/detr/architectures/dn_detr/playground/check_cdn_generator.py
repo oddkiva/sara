@@ -1,60 +1,37 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
 import pickle
-from collections.abc import Iterable
 from loguru import logger
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QFontMetrics
+from PySide6.QtGui import QFont
 
+import numpy as np
+
+import torch
+import torch.nn.functional as F
 import torchvision.transforms.v2 as v2
 from torch.utils.data import DataLoader
-from torch.types import Number
+from torchvision.ops import box_convert
 
 import oddkiva.sara as sara
 import oddkiva.brahma.torch.datasets.coco as coco
 from oddkiva import DATA_DIR_PATH
 from oddkiva.sara.dataset.colors import generate_label_colors
-from oddkiva.brama.torch.datasets.coco.dataloader import collate_fn
+from oddkiva.brahma.torch.datasets.coco.dataloader import collate_fn
+from oddkiva.brahma.torch.object_detection.common.data_transforms import (
+    BoundingBoxes,
+    ToNormalizedCXCYWHBoxes
+)
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    dn_detr.query_denoiser import ContrastiveDenoisingGroupGenerator
+    dn_detr.contrastive_denoising_group_generator import (
+        ContrastiveDenoisingGroupGenerator
+    )
 
 
-def make_font(font_size: int = 12,
-              italic: bool = False,
-              bold: bool = True,
-              underline: bool = False) -> QFont:
-    font = QFont()
-    font.setPointSize(font_size)
-    font.setItalic(italic)
-    font.setBold(bold)
-    font.setUnderline(underline)
-    return font
-
-
-def draw_boxed_text(x: Number, y: Number, text: str,
-                    box_color: Iterable[Number],
-                    font: QFont,
-                    text_color: Iterable[Number] = (0, 0, 0),
-                    angle: float = 0.) -> None:
-    font_metrics = QFontMetrics(font)
-    text_x_offset = 1
-    def calculate_text_box_size(text: str):
-        label_text_rect = font_metrics.boundingRect(text)
-        size = label_text_rect.size()
-        w, h = size.width() + text_x_offset * 2 + 1, size.height()
-        return w, h
-
-    w, h = calculate_text_box_size(text)
-    l, t = (int(x), int(y))
-    sara.fill_rect((l - text_x_offset, int(t - h)), (w, h), box_color)
-
-    sara.draw_text((l, t - 2 * text_x_offset), text, text_color,
-                   font.pointSize(), angle, font.italic(), font.bold(),
-                   font.underline())
-
-
-def get_or_create_coco_dataset(force_recreate: bool = False) -> coco.COCOObjectDetectionDataset:
+def get_or_create_coco_dataset(
+    force_recreate: bool = False
+) -> coco.COCOObjectDetectionDataset:
     coco_fp = DATA_DIR_PATH / 'coco_object_detection_dataset.pkl'
     if force_recreate:
         logger.info("Reserializing the COCO object detection dataset...")
@@ -69,10 +46,9 @@ def get_or_create_coco_dataset(force_recreate: bool = False) -> coco.COCOObjectD
             transform = v2.Compose([
                 v2.RandomIoUCrop(),
                 v2.RandomHorizontalFlip(p=0.5),
-                # v2.ToDtype(torch.float32, scale=True),
-                # v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 v2.Resize((640, 640)),
-                v2.SanitizeBoundingBoxes()
+                v2.SanitizeBoundingBoxes(),
+                ToNormalizedCXCYWHBoxes()
             ])
             coco_ds = coco.COCOObjectDetectionDataset(
                 train_or_val='train',
@@ -86,49 +62,151 @@ def get_or_create_coco_dataset(force_recreate: bool = False) -> coco.COCOObjectD
     return coco_ds
 
 
-def user_main():
-    FORCE_RECREATE = False
-    with sara.Timer("Get or create COCO dataset..."):
-        coco_ds = get_or_create_coco_dataset(force_recreate=FORCE_RECREATE)
+def get_or_create_coco_batch_sample(
+    force_recreate: bool = False
+) -> tuple[torch.Tensor, list[BoundingBoxes], list[torch.Tensor]]:
+    COCO_BATCH_SAMPLE = DATA_DIR_PATH / 'coco_batch_sample.pkl'
+    if COCO_BATCH_SAMPLE.exists() and not force_recreate:
+        logger.info(f"Loading COCO batch sample from {COCO_BATCH_SAMPLE}...")
+        with open(COCO_BATCH_SAMPLE, 'rb') as f:
+            sample = pickle.load(f)
+    else:
+        logger.info(f"Instantiating COCO dataset...")
+        transform = v2.Compose([
+            v2.RandomIoUCrop(),
+            v2.RandomHorizontalFlip(p=0.5),
+            v2.Resize((640, 640)),
+            v2.SanitizeBoundingBoxes(),
+            ToNormalizedCXCYWHBoxes(),  # IMPORTANT!!!
+        ])
+        coco_ds = coco.COCOObjectDetectionDataset(
+            train_or_val='train',
+            transform=transform
+        )
 
-    coco_dl = DataLoader(
-        dataset=coco_ds,
-        batch_size=16,
-        shuffle=False,
-        collate_fn=collate_fn
-    )
-    img, boxes, labels = iter(coco_dl)
-    assert img.shape == (16, 3, 640, 640)
-    assert len(boxes) == 16
-    assert len(labels) == 16
+        logger.info(f"Instantiating COCO dataloader...")
+        coco_dl = DataLoader(
+            dataset=coco_ds,
+            batch_size=16,
+            shuffle=False,
+            collate_fn=collate_fn
+        )
 
-    cdngg = ContrastiveDenoisingGroupGenerator(80)
-    cdng = cdngg.forward(300, {
-        'boxes': boxes,
-        'labels': labels
-    })
+        logger.info(f"Getting first batch sample from COCO dataloader...")
+        coco_it = iter(coco_dl)
+        sample = next(coco_it)
+
+        with open(COCO_BATCH_SAMPLE, 'wb') as f:
+            pickle.dump(sample, f)
+
+    return sample
 
 
-    # Display config
-    font = make_font()
-    label_colors = generate_label_colors(coco_ds.ds.categories)
+def from_normalized_cxcywh_to_ltwh(boxes: BoundingBoxes) -> torch.Tensor:
+    whwh = torch.tensor(boxes.canvas_size[::-1]).tile(2)[None, ...]
+    boxes_rescaled = box_convert(boxes * whwh, 'cxcywh', 'xywh')
+    return boxes_rescaled
 
-    sara.create_window(640, 640)
-    sara.draw_image(img.permute(1, 2, 0).contiguous().numpy())
 
+def get_ltwh_boxes(
+    box_geometry_logits: torch.Tensor,
+    hw: tuple[int, int]
+) -> torch.Tensor:
+    boxes = F.sigmoid(box_geometry_logits)
+    whwh = torch.tensor(hw[::-1]).tile(2)[None, ...]
+    boxes = box_convert(boxes * whwh, 'cxcywh', 'xywh')
+    return boxes
+
+
+def draw_dn_boxes(dn_boxes: torch.Tensor, dn_labels: torch.Tensor,
+                  class_count: int, label_colors: np.ndarray, font: QFont):
+    # The maximum number of boxes in this batch
+    B = 21
+    # The group size (positive and negative boxes)
+    group_size = B * 2
+    for i, box in enumerate(dn_boxes.tolist()):
+        x, y, w, h = box
+
+        is_negative = (i % group_size) >= 21
+        label = int(dn_labels[i].item())
+        if label == class_count:
+            continue
+
+        # Dim the color to show it is a noised box.
+        if is_negative:
+            label_color = (127, 0, 0)
+            label_name = f'N {label}'
+        else:
+            label_color = (label_colors[label] * 0.33).astype(np.int32)
+            label_name = f'P {label}'
+
+        sara.draw_rect((x, y), (w, h), label_color, 3)
+        sara.draw_boxed_text(x, y, label_name, label_color, font, angle=0.)
+
+
+def draw_gt_boxes(boxes: BoundingBoxes, labels: torch.Tensor,
+                  label_colors: np.ndarray, font: QFont):
     for box, label in zip(boxes.tolist(), labels.tolist()):
         x, y, w, h = box
 
         label_color = label_colors[label]
-        label_name = coco_ds.ds.categories[label].name
+        label_name = str(label)
 
-        sara.draw_rect((x, y), (w, h), label_color, 2)
-        draw_boxed_text(x, y, label_name, label_color, font, angle=0.)
+        sara.draw_rect((x, y), (w, h), label_color, 5)
+        sara.draw_boxed_text(x, y, label_name, label_color, font, angle=0.)
 
-    while sara.get_key() != Qt.Key.Key_Escape:
-        logger.debug("Random key pressed...")
-        continue
-    logger.info("Terminating...")
+
+def user_main():
+    class_count = 80
+    query_count = 300
+    img, boxes, labels = get_or_create_coco_batch_sample()
+
+    # NOTE:
+    # The original implementation of the denoising groups sets the relative
+    # noise scale as 1.0.
+    #
+    # This is really large in my opinion. It's very surprising to me that it
+    # lead to very good detection performance.
+    #
+    # Setting it to 0.5 makes more sense to me...
+    #
+    # Next it remains to see as for how the negative samples are being reused
+    # in the training stage.
+    noise_relative_scale = 0.5
+    dn_gen = ContrastiveDenoisingGroupGenerator(
+        class_count,
+        box_noise_relative_scale=noise_relative_scale
+    )
+    dng = dn_gen.forward(query_count, boxes, labels)
+
+    # Display config
+    font = sara.make_font()
+    label_colors = generate_label_colors(class_count)
+
+    sara.create_window(640, 640)
+
+    n = 0
+
+    for n in range(len(img)):
+        sara.draw_image(img[n].permute(1, 2, 0).contiguous().numpy())
+        # Show the noised boxes first before the ground-truth boxes for clarity.
+        dn_boxes = get_ltwh_boxes(dng.box_geometry_logits[n], boxes[n].canvas_size)
+        dn_labels = dng.box_labels[n]
+        draw_dn_boxes(dn_boxes, dn_labels, class_count, label_colors, font)
+
+        # Now show the ground-truth boxes.
+        boxes_n = from_normalized_cxcywh_to_ltwh(boxes[n])
+        labels_n = labels[n]
+        draw_gt_boxes(boxes_n, labels_n, label_colors, font)
+
+        while True:
+            key_pressed = sara.get_key()
+            if key_pressed == Qt.Key.Key_Escape:
+                logger.info("Terminating...")
+                return
+            if key_pressed == Qt.Key.Key_Space:
+                logger.info("Next training sample")
+                break
 
 
 sara.run_graphics(user_main)

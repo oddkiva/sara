@@ -1,6 +1,6 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-from typing import Any
+from typing import Any, Iterable
 from dataclasses import astuple, dataclass
 
 import torch
@@ -278,7 +278,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # pos_additive_noise = uni01_samples * P_mask[..., None]
         #
         # NOTE: This is the original implementation.
-        ORIGINAL_IMPL = True
+        ORIGINAL_IMPL = False
         if ORIGINAL_IMPL:
             neg_noise_n = (uni01_samples + 1.0) * N_mask
             pos_noise_n = uni01_samples * (1 - N_mask)
@@ -291,7 +291,8 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
             # - Rescale the noise matrix.
             additive_noise = noise_magnitudes * noise_signs * noise_n
         else:
-            # NOTE: This is my vision
+            # NOTE: This is my vision.
+            # By visually inspecting them, the negative samples makes more sense.
             neg_noise = (
                 whwh_halved + \
                 uni01_samples * noise_magnitudes
@@ -311,7 +312,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
     def forward(
         self,
         query_count: int,
-        boxes: list[torch.Tensor],
+        boxes: Iterable[torch.Tensor],
         labels: list[torch.Tensor]
     ) -> Output:
         assert len(boxes) == len(labels)
