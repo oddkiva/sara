@@ -12,6 +12,7 @@ import oddkiva.sara as sara
 import oddkiva.sara.graphics.image_draw as image_draw
 
 from oddkiva import DATA_DIR_PATH
+from oddkiva.sara.dataset.colors import generate_label_colors
 from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -117,6 +118,8 @@ def user_main():
     video_frame_index = - 1
     video_frame_skip_count = 2
 
+    label_colors = generate_label_colors(len(label_names))
+
     while video_stream.read(video_frame):
         video_frame_index += 1
         if video_frame_index % (video_frame_skip_count + 1) != 0:
@@ -134,7 +137,7 @@ def user_main():
                 if conf < 0.5:
                     continue
                 # Draw the object box
-                color = (255, 0, 0)
+                color = label_colors[label]
                 xy = (int(l + 0.5), int(t + 0.5))
                 wh = (int(w + 0.5), int(h + 0.5))
                 image_draw.draw_rect(display_frame, xy, wh, color, 2.)
@@ -144,7 +147,7 @@ def user_main():
                 text = label_names[label]
                 font_size = 12
                 bold = True
-                image_draw.draw_text(display_frame, p, text, (63, 0, 0),
+                image_draw.draw_text(display_frame, p, text, color,
                                      font_size, 0, False, bold, False)
 
             sara.draw_image(display_frame)
