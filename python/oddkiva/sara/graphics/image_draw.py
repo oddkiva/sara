@@ -1,7 +1,6 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
 from typing import Iterable
-from numbers import Number
 
 import numpy as np
 
@@ -101,7 +100,8 @@ def draw_text(array: np.ndarray, p: Iterable[int], text: str,
     painter.restore()
     painter.end()
 
-def draw_image(array: np.ndarray, image: np.ndarray, offset: Iterable[Number],
+def draw_image(array: np.ndarray, image: np.ndarray,
+               offset: Iterable[int | float],
                scale: float):
     """ Draw an image.
     """
@@ -111,7 +111,7 @@ def draw_image(array: np.ndarray, image: np.ndarray, offset: Iterable[Number],
     xoff, yoff = offset
     p.translate(xoff, yoff)
     p.scale(scale, scale)
-    p.drawImage(0, 0, image)
+    p.drawImage(0, 0, to_qimage(image))
     p.scale(1 / scale, 1 / scale)
     p.translate(-xoff, -yoff)
     p.end()

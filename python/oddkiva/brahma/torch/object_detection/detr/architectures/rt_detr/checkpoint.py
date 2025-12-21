@@ -11,6 +11,7 @@ from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
     UnbiasedConvBNA,
     ResNet50RTDETRV2Variant
 )
+from oddkiva.brahma.torch.backbone.repvgg import RepVggStack
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.encoder.feature_pyramid_projection import FeaturePyramidProjection
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -536,6 +537,8 @@ class RTDETRV2Checkpoint:
         assert my_conv.weight.shape == conv_weight.shape
         assert my_bn.weight.shape == bn_weights['weight'].shape
         assert my_bn.bias.shape == bn_weights['bias'].shape
+        assert my_bn.running_mean is not None
+        assert my_bn.running_var is not None
         assert my_bn.running_mean.shape == bn_weights['running_mean'].shape
         assert my_bn.running_var.shape == bn_weights['running_var'].shape
 
@@ -702,6 +705,8 @@ class RTDETRV2Checkpoint:
             # Feed-forward weights.
             ffn_linear_1 = layer.feedforward[0]
             ffn_linear_2 = layer.feedforward[3]
+            assert type(ffn_linear_1) is nn.Linear
+            assert type(ffn_linear_2) is nn.Linear
             self._copy_weight_and_bias(ffn_linear_1,
                                        weights['linear1.weight'],
                                        weights['linear1.bias'])
@@ -744,12 +749,14 @@ class RTDETRV2Checkpoint:
 
         for fusion_idx in range(2):
             fusion = fusions[fusion_idx]
+            assert type(fusion) is FusionBlock
             convs = [fusion.conv1, fusion.conv2]
             repvgg_stack = fusion.repvgg_stack
 
             # Copy the weights of conv1 and conv2
             for conv_idx in range(2):
                 conv = convs[conv_idx]
+                assert type(conv) is UnbiasedConvBNA
                 conv_weight = self.encoder_fpn_conv_weight(fusion_idx, conv_idx + 1)
                 bn_weights = self.encoder_fpn_bn_weights(fusion_idx, conv_idx + 1)
                 self._copy_conv_bna_weights(conv, conv_weight, bn_weights)
@@ -757,8 +764,11 @@ class RTDETRV2Checkpoint:
             # Copy the weights of RepVggStack
             for rep_block_idx in range(len(repvgg_stack.layers)):
                 repvgg = repvgg_stack.layers[rep_block_idx]
+
                 repvgg_conv3 = repvgg.layers[0]
                 repvgg_conv1 = repvgg.layers[1]
+                assert type(repvgg_conv3) is UnbiasedConvBNA
+                assert type(repvgg_conv1) is UnbiasedConvBNA
 
                 repvgg_conv3_weight = self.encoder_fpn_fusion_conv_weight(
                     fusion_idx,rep_block_idx, 1
@@ -796,12 +806,14 @@ class RTDETRV2Checkpoint:
             logger.debug(f'fusion_idx = {fusion_idx}')
             convs = [fusion.conv1, fusion.conv2]
             repvgg_stack = fusion.repvgg_stack
+            assert type(repvgg_stack) is RepVggStack
 
             # Copy the weights of conv1 and conv2
             for conv_idx in range(2):
                 conv = convs[conv_idx]
                 conv_weight = self.encoder_fpn_conv_weight(fusion_idx, conv_idx + 1)
                 bn_weights = self.encoder_fpn_bn_weights(fusion_idx, conv_idx + 1)
+                assert type(conv) is UnbiasedConvBNA
                 self._copy_conv_bna_weights(conv, conv_weight, bn_weights)
 
             # Copy the weights of RepVggStack

@@ -1,6 +1,5 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-import pickle
 from loguru import logger
 
 from PySide6.QtCore import Qt

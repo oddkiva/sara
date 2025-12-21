@@ -77,14 +77,11 @@ def test_contrastive_denoising_group_generator():
 
     B = max([len(b) for b in boxes])
     G = dn_group_gen.box_count // B
-    assert B == 21
-    assert G == 4
-    assert B * G * 2 == 168
+    group_size = 2 * B
 
+    assert dn_groups.dn_meta['dn_group_count'] == G
     assert dn_groups.box_labels.shape == (batch_size, B * G * 2)
     assert dn_groups.box_geometry_logits.shape == (batch_size, B * G * 2, 4)
-
-    group_size = 2 * B
 
     # Let's confirm our understanding of how `dn_positive_ixs` is constructed.
     dn_splits = [len(b) * G for b in boxes]

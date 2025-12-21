@@ -8,7 +8,7 @@ from oddkiva.sara.graphics.derived_qobjects.user_thread import UserThread
 
 
 class Singleton(type):
-    _instances = {}
+    _instances: dict = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
