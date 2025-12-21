@@ -92,19 +92,34 @@ class RepVggBlock(torch.nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         y = self.layers[0](x)
-        for layer in self.layers[1:]:
-            y = y + layer(x)
+
+        if len(self.layers) > 1:
+            for layer in self.layers[1:]:
+                y = y + layer(x)
+
         if self.activation is None:
             return y
-        return self.activation(y)
+        else:
+            return self.activation(y)
 
-    # def deploy_for_inference(self):
-    #     if not hasattr(self, 'conv'):
-    #         self.conv = torch.nn.Conv2d(self.ch_in, self.ch_out, 3, 1, padding=1)
+    def deploy_for_inference(self):
+        conv33 = self.layers[0].layers[0]
+        in_channels = conv33.in_channels
+        out_channels = conv33.out_channels
+        ksize = conv33.kernel_size
+        stride = conv33.stride
+        padding = conv33.padding
+        device = conv33.weight.device
 
-    #     kernel, bias = self._compute_equivalent_single_convolution()
-    #     self.conv.weight.data = kernel
-    #     self.conv.bias.data = bias
+        conv = torch.nn.Conv2d(in_channels, out_channels, ksize, stride,
+                               padding=padding)
+
+        kernel, bias = self._compute_equivalent_single_convolution()
+        conv.weight.data.copy_(kernel)
+        conv.bias.data.copy_(bias)
+
+        self.layers = torch.nn.ModuleList([conv])
+        self.layers = self.layers.to(device)
 
     def _compute_equivalent_single_convolution(
         self
@@ -113,9 +128,9 @@ class RepVggBlock(torch.nn.Module):
         TODO: check the equations (1-4) of the paper
         https://arxiv.org/pdf/2101.03697
         """
-        w3x3, b3x3 = self._fuse_bn_tensor(self.layers[0])
+        w3x3, b3x3 = self._fuse_conv_bn_layer(self.layers[0])
 
-        w1x1, b1x1 = self._fuse_bn_tensor(self.layers[1])
+        w1x1, b1x1 = self._fuse_conv_bn_layer(self.layers[1])
         w1x1_as_3x3 = self._transform_w1x1_as_eq_w3x3(w1x1)
 
         if self.use_identity_connection:

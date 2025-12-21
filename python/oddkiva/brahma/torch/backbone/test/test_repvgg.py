@@ -12,8 +12,6 @@ def test_repvgg_base_layer():
                         use_identity_connection=False,
                         activation='silu')
 
-    print(block)
-
     assert len(block.layers) == 2
 
     assert type(block.layers[0]) is UnbiasedConvBNA

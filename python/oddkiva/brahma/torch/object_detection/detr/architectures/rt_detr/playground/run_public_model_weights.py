@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+from loguru import logger
+
 import numpy as np
 
 import torch
@@ -14,6 +16,7 @@ import oddkiva.sara.graphics.image_draw as image_draw
 from oddkiva import DATA_DIR_PATH
 from oddkiva.sara.dataset.colors import generate_label_colors
 from oddkiva.brahma.torch import DEFAULT_DEVICE
+from oddkiva.brahma.torch.backbone.repvgg import RepVggBlock
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.checkpoint import RTDETRV2Checkpoint
@@ -21,6 +24,16 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.config import RTDETRConfig
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.model import RTDETRv2
+
+
+def optimize_repvgg_layer_for_inference(m: nn.Module):
+    if isinstance(m, RepVggBlock):
+        logger.info(f'Found RepVGGBlock {m}')
+        m.deploy_for_inference()
+    else:
+        for child_tree_name, child_tree in m.named_children():
+            logger.info(f'Exploring {child_tree_name}: {child_tree}')
+            optimize_repvgg_layer_for_inference(child_tree)
 
 
 class ModelConfig:
@@ -47,6 +60,7 @@ class ModelConfig:
         # LOAD THE MODEL
         ckpt.load_model(model)
         model = freeze_batch_norm(model)
+        optimize_repvgg_layer_for_inference(model)
         model = model.eval()
         # RUN ON THE GPU PLEASE.
         assert type(model) is RTDETRv2
