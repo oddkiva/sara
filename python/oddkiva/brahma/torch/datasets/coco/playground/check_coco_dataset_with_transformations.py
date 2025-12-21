@@ -13,39 +13,23 @@ from oddkiva import DATA_DIR_PATH
 from oddkiva.sara.dataset.colors import generate_label_colors
 
 
-def get_or_create_coco_dataset(force_recreate: bool = False) -> coco.COCOObjectDetectionDataset:
-    coco_fp = DATA_DIR_PATH / 'coco_object_detection_dataset.pkl'
-    if force_recreate:
-        logger.info("Reserializing the COCO object detection dataset...")
-    if coco_fp.exists() and not force_recreate:
-        logger.info( f'Loading COCO Dataset object from file: {coco_fp}...')
-        with open(coco_fp, 'rb') as f:
-            coco_ds = pickle.load(f)
-            assert type(coco_ds) is coco.COCOObjectDetectionDataset
-    else:
-        with sara.Timer("COCO Dataset Generation"):
-            logger.info( f'Generating COCO Dataset object from file: {coco_fp}')
-            transform = v2.Compose([
-                v2.RandomIoUCrop(),
-                v2.RandomHorizontalFlip(p=0.5),
-                v2.SanitizeBoundingBoxes()
-            ])
-            coco_ds = coco.COCOObjectDetectionDataset(
-                train_or_val='train',
-                transform=transform
-            )
-        with sara.Timer("COCO Dataset Serialization"):
-            logger.info( f'Serializing COCO Dataset object to file: {coco_fp}...')
-            with open(coco_fp, 'wb') as f:
-                pickle.dump(coco_ds, f, protocol=pickle.HIGHEST_PROTOCOL)
+def get_coco_dataset() -> coco.COCOObjectDetectionDataset:
+    transform = v2.Compose([
+        v2.RandomIoUCrop(),
+        v2.RandomHorizontalFlip(p=0.5),
+        v2.SanitizeBoundingBoxes()
+    ])
+    coco_ds = coco.COCOObjectDetectionDataset(
+        train_or_val='val',
+        transform=transform
+    )
 
     return coco_ds
 
 
 def user_main():
-    FORCE_RECREATE = False
-    with sara.Timer("Get or create COCO dataset..."):
-        coco_ds = get_or_create_coco_dataset(force_recreate=FORCE_RECREATE)
+    with sara.Timer("Get COCO dataset..."):
+        coco_ds = get_coco_dataset()
 
     font = sara.make_font()
     label_colors = generate_label_colors(len(coco_ds.ds.categories))

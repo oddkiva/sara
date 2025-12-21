@@ -6,39 +6,11 @@ from dataclasses import astuple, dataclass
 import torch
 import torch.nn as nn
 
-
-# ----------------------------------------------------------------------
-# Box operations
-# ----------------------------------------------------------------------
-def from_cxcywh_to_ltrb_box_format(boxes: torch.Tensor) -> torch.Tensor:
-    cx, cy, w, h = boxes.unbind(-1)
-    l = cx - 0.5 * w
-    r = cx + 0.5 * w
-    t = cy - 0.5 * h
-    b = cy + 0.5 * h
-    return torch.stack((l, t, r, b), dim=-1)
-
-
-def fix_ltrb_boxes(boxes: torch.Tensor) -> torch.Tensor:
-    l = boxes[..., 0]
-    t = boxes[..., 1]
-    r = boxes[..., 2]
-    b = boxes[..., 3]
-    boxes_fixed = torch.zeros_like(boxes)
-    boxes_fixed[..., 0] = torch.min(l, r)
-    boxes_fixed[..., 1] = torch.min(t, b)
-    boxes_fixed[..., 2] = torch.max(l, r)
-    boxes_fixed[..., 3] = torch.max(t, b)
-    return boxes_fixed
-
-
-def from_ltrb_to_cxcywh_box_format(boxes: torch.Tensor) -> torch.Tensor:
-    l, t, r, b = boxes.unbind(-1)
-    cx = 0.5 * (l + r)
-    cy = 0.5 * (t + b)
-    w = r - l
-    h = b - t
-    return torch.stack((cx, cy, w, h), dim=-1)
+from oddkiva.brahma.torch.object_detection.common.box_ops import (
+    from_cxcywh_to_ltrb_format,
+    from_ltrb_to_cxcywh_format,
+    fix_ltrb_coords
+)
 
 
 # ----------------------------------------------------------------------
@@ -264,7 +236,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # Which can lead to negative sizes, and that would be a shame.
         # ----------------------------------------------------------------------
         uni01_samples = torch.rand_like(rep_box_geometries)
-        # NOTE
+        # NOTE:
         # The positive mask is NOT the opposite of the negative mask ANYMORE.
         # It does not seem to matter after pondering about it.
         #
@@ -276,7 +248,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # We could have written instead:
         # neg_additive_noise = (uni01_samples + 1.0) * (1 - P_mask[..., None])
         # pos_additive_noise = uni01_samples * P_mask[..., None]
-        #
+
         # NOTE: This is the original implementation.
         ORIGINAL_IMPL = False
         if ORIGINAL_IMPL:
@@ -302,10 +274,10 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
         # Finally add the noise to the repeated ground truth boxes in the
         # appropriate format.
-        boxes_noised = from_cxcywh_to_ltrb_box_format(rep_box_geometries)
-        boxes_noised = fix_ltrb_boxes(boxes_noised + additive_noise)
+        boxes_noised = from_cxcywh_to_ltrb_format(rep_box_geometries)
+        boxes_noised = fix_ltrb_coords(boxes_noised + additive_noise)
         boxes_noised = boxes_noised.clip(min=0.0, max=1.0)
-        boxes_noised = from_ltrb_to_cxcywh_box_format(boxes_noised)
+        boxes_noised = from_ltrb_to_cxcywh_format(boxes_noised)
 
         return boxes_noised, positive_ixs
 
@@ -347,9 +319,11 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         # Generate the so-called `denoising` groups of ground-truth boxes as
         # explained in DN-DETR.
         # ----------------------------------------------------------------------
-        dn_labels = self.perturb_box_labels(rep_box_labels, rep_box_pad_mask)
+        dn_labels = self.perturb_box_labels(rep_box_labels,
+                                            rep_box_pad_mask)
         dn_geometries, positive_ixs = self.alter_box_geometries(
-            rep_box_geometries, rep_box_pad_mask, N, B, G
+            rep_box_geometries, rep_box_pad_mask,
+            N, B, G
         )
         dn_geometry_logits = inverse_sigmoid(dn_geometries)
 

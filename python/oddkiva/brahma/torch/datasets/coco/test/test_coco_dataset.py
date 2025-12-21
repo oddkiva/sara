@@ -9,7 +9,7 @@ from oddkiva.brahma.torch.datasets.coco.dataloader import collate_fn
 
 def test_coco_dataset():
     coco_ds = COCOObjectDetectionDataset(
-        train_or_val='train',
+        train_or_val='val',
         transform=v2.Compose([
         ])
     )

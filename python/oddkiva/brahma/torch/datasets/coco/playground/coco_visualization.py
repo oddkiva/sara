@@ -28,11 +28,11 @@ def generate_label_color_dict(
 
 def user_main():
     logger.info('Instantiating COCO DB...')
-    db = coco.COCO.instance_train2017()
+    db = coco.COCO.instance_val2017()
     ann_db = coco.ImageAnnotationDB(
         coco.COCO.group_annotations_by_image(db),
         db.categories,
-        'train'
+        'val'
     )
 
     label_categories = {

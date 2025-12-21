@@ -26,7 +26,7 @@ def get_coco_dataset() -> coco.COCOObjectDetectionDataset:
             ToNormalizedCXCYWHBoxes()
         ])
         coco_ds = coco.COCOObjectDetectionDataset(
-            train_or_val='train',
+            train_or_val='val',
             transform=transform
         )
 
@@ -86,4 +86,3 @@ def user_main():
 
 
 sara.run_graphics(user_main)
-

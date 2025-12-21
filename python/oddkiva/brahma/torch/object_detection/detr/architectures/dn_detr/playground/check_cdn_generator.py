@@ -16,7 +16,6 @@ from torchvision.ops import box_convert
 
 import oddkiva.sara as sara
 import oddkiva.brahma.torch.datasets.coco as coco
-from oddkiva import DATA_DIR_PATH
 from oddkiva.sara.dataset.colors import generate_label_colors
 from oddkiva.brahma.torch.datasets.coco.dataloader import collate_fn
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
@@ -29,80 +28,40 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 
 
-def get_or_create_coco_dataset(
-    force_recreate: bool = False
-) -> coco.COCOObjectDetectionDataset:
-    coco_fp = DATA_DIR_PATH / 'coco_object_detection_dataset.pkl'
-    if force_recreate:
-        logger.info("Reserializing the COCO object detection dataset...")
-    if coco_fp.exists() and not force_recreate:
-        logger.info( f'Loading COCO Dataset object from file: {coco_fp}...')
-        with open(coco_fp, 'rb') as f:
-            coco_ds = pickle.load(f)
-            assert type(coco_ds) is coco.COCOObjectDetectionDataset
-    else:
-        with sara.Timer("COCO Dataset Generation"):
-            logger.info( f'Generating COCO Dataset object from file: {coco_fp}')
-            transform = v2.Compose([
-                v2.RandomIoUCrop(),
-                v2.RandomHorizontalFlip(p=0.5),
-                v2.Resize((640, 640)),
-                v2.SanitizeBoundingBoxes(),
-                ToNormalizedCXCYWHBoxes()
-            ])
-            coco_ds = coco.COCOObjectDetectionDataset(
-                train_or_val='train',
-                transform=transform
-            )
-        with sara.Timer("COCO Dataset Serialization"):
-            logger.info( f'Serializing COCO Dataset object to file: {coco_fp}...')
-            with open(coco_fp, 'wb') as f:
-                pickle.dump(coco_ds, f, protocol=pickle.HIGHEST_PROTOCOL)
+def get_coco_batch_sample() -> tuple[torch.Tensor,
+                                     list[BoundingBoxes],
+                                     list[torch.Tensor]]:
+    logger.info(f"Instantiating COCO dataset...")
+    transform = v2.Compose([
+        v2.RandomIoUCrop(),
+        v2.RandomHorizontalFlip(p=0.5),
+        v2.Resize((640, 640)),
+        v2.SanitizeBoundingBoxes(),
+        ToNormalizedCXCYWHBoxes(),  # IMPORTANT!!!
+    ])
+    coco_ds = coco.COCOObjectDetectionDataset(
+        train_or_val='val',
+        transform=transform
+    )
 
-    return coco_ds
+    logger.info(f"Instantiating COCO dataloader...")
+    coco_dl = DataLoader(
+        dataset=coco_ds,
+        batch_size=16,
+        shuffle=False,
+        collate_fn=collate_fn
+    )
 
-
-def get_or_create_coco_batch_sample(
-    force_recreate: bool = False
-) -> tuple[torch.Tensor, list[BoundingBoxes], list[torch.Tensor]]:
-    COCO_BATCH_SAMPLE = DATA_DIR_PATH / 'coco_batch_sample.pkl'
-    if COCO_BATCH_SAMPLE.exists() and not force_recreate:
-        logger.info(f"Loading COCO batch sample from {COCO_BATCH_SAMPLE}...")
-        with open(COCO_BATCH_SAMPLE, 'rb') as f:
-            sample = pickle.load(f)
-    else:
-        logger.info(f"Instantiating COCO dataset...")
-        transform = v2.Compose([
-            v2.RandomIoUCrop(),
-            v2.RandomHorizontalFlip(p=0.5),
-            v2.Resize((640, 640)),
-            v2.SanitizeBoundingBoxes(),
-            ToNormalizedCXCYWHBoxes(),  # IMPORTANT!!!
-        ])
-        coco_ds = coco.COCOObjectDetectionDataset(
-            train_or_val='train',
-            transform=transform
-        )
-
-        logger.info(f"Instantiating COCO dataloader...")
-        coco_dl = DataLoader(
-            dataset=coco_ds,
-            batch_size=16,
-            shuffle=False,
-            collate_fn=collate_fn
-        )
-
-        logger.info(f"Getting first batch sample from COCO dataloader...")
-        coco_it = iter(coco_dl)
-        sample = next(coco_it)
-
-        with open(COCO_BATCH_SAMPLE, 'wb') as f:
-            pickle.dump(sample, f)
+    logger.info(f"Getting first batch sample from COCO dataloader...")
+    coco_it = iter(coco_dl)
+    sample = next(coco_it)
 
     return sample
 
 
-def from_normalized_cxcywh_to_ltwh(boxes: BoundingBoxes) -> torch.Tensor:
+def from_normalized_cxcywh_to_rescaled_ltwh(
+    boxes: BoundingBoxes
+) -> torch.Tensor:
     whwh = torch.tensor(boxes.canvas_size[::-1]).tile(2)[None, ...]
     boxes_rescaled = box_convert(boxes * whwh, 'cxcywh', 'xywh')
     return boxes_rescaled
@@ -159,7 +118,7 @@ def draw_gt_boxes(boxes: BoundingBoxes, labels: torch.Tensor,
 def user_main():
     class_count = 80
     query_count = 300
-    img, boxes, labels = get_or_create_coco_batch_sample()
+    img, boxes, labels = get_coco_batch_sample()
 
     # NOTE:
     # The original implementation of the denoising groups sets the relative
@@ -195,7 +154,7 @@ def user_main():
         draw_dn_boxes(dn_boxes, dn_labels, class_count, label_colors, font)
 
         # Now show the ground-truth boxes.
-        boxes_n = from_normalized_cxcywh_to_ltwh(boxes[n])
+        boxes_n = from_normalized_cxcywh_to_rescaled_ltwh(boxes[n])
         labels_n = labels[n]
         draw_gt_boxes(boxes_n, labels_n, label_colors, font)
 
@@ -205,7 +164,7 @@ def user_main():
                 logger.info("Terminating...")
                 return
             if key_pressed == Qt.Key.Key_Space:
-                logger.info("Next training sample")
+                logger.info("Next labeled sample")
                 break
 
 

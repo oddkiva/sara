@@ -19,40 +19,31 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 
 
-def get_or_create_coco_batch_sample(force_recreate: bool = False):
-    COCO_BATCH_SAMPLE = DATA_DIR_PATH / 'coco_batch_sample.pkl'
-    if COCO_BATCH_SAMPLE.exists() and not force_recreate:
-        logger.info(f"Loading COCO batch sample from {COCO_BATCH_SAMPLE}...")
-        with open(COCO_BATCH_SAMPLE, 'rb') as f:
-            sample = pickle.load(f)
-    else:
-        logger.info(f"Instantiating COCO dataset...")
-        transform = v2.Compose([
-            v2.RandomIoUCrop(),
-            v2.RandomHorizontalFlip(p=0.5),
-            v2.Resize((640, 640)),
-            v2.SanitizeBoundingBoxes(),
-            ToNormalizedCXCYWHBoxes(),  # IMPORTANT!!!
-        ])
-        coco_ds = coco.COCOObjectDetectionDataset(
-            train_or_val='train',
-            transform=transform
-        )
+def get_coco_batch_sample():
+    logger.info(f"Instantiating COCO dataset...")
+    transform = v2.Compose([
+        v2.RandomIoUCrop(),
+        v2.RandomHorizontalFlip(p=0.5),
+        v2.Resize((640, 640)),
+        v2.SanitizeBoundingBoxes(),
+        ToNormalizedCXCYWHBoxes(),  # IMPORTANT!!!
+    ])
+    coco_ds = coco.COCOObjectDetectionDataset(
+        train_or_val='val',
+        transform=transform
+    )
 
-        logger.info(f"Instantiating COCO dataloader...")
-        coco_dl = DataLoader(
-            dataset=coco_ds,
-            batch_size=16,
-            shuffle=False,
-            collate_fn=collate_fn
-        )
+    logger.info(f"Instantiating COCO dataloader...")
+    coco_dl = DataLoader(
+        dataset=coco_ds,
+        batch_size=16,
+        shuffle=False,
+        collate_fn=collate_fn
+    )
 
-        logger.info(f"Getting first batch sample from COCO dataloader...")
-        coco_it = iter(coco_dl)
-        sample = next(coco_it)
-
-        with open(COCO_BATCH_SAMPLE, 'wb') as f:
-            pickle.dump(sample, f)
+    logger.info(f"Getting first batch sample from COCO dataloader...")
+    coco_it = iter(coco_dl)
+    sample = next(coco_it)
 
     return sample
 
@@ -65,7 +56,7 @@ def test_contrastive_denoising_group_generator():
         box_noise_relative_scale=box_noise_relative_scale
     )
 
-    images, boxes, labels = get_or_create_coco_batch_sample()
+    images, boxes, labels = get_coco_batch_sample()
     # VERY IMPORTANT
     # --------------
     #

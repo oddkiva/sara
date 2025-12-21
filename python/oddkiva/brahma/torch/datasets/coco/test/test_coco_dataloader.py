@@ -29,7 +29,7 @@ def test_coco_dataloader():
         v2.SanitizeBoundingBoxes()
     ])
     coco_ds = coco.COCOObjectDetectionDataset(
-        train_or_val='train',
+        train_or_val='val',
         transform=transform
     )
 
