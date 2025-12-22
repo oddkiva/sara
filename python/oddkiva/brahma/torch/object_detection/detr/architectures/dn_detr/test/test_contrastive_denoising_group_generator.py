@@ -1,6 +1,5 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-import pickle
 from loguru import logger
 
 import torch
@@ -8,7 +7,6 @@ import torchvision.transforms.v2 as v2
 from torch.utils.data import DataLoader
 
 import oddkiva.brahma.torch.datasets.coco as coco
-from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.datasets.coco.dataloader import collate_fn
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes
