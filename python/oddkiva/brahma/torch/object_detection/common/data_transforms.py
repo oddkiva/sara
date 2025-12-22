@@ -16,9 +16,7 @@ class ToNormalizedCXCYWHBoxes(v2.Transform):
     def __init__(self) -> None:
         super().__init__()
 
-    def transform(self, inpt: Any, params: dict[str, Any]) -> Any:
-        boxes = inpt
-        assert type(boxes) is BoundingBoxes
+    def _transform(self, boxes: BoundingBoxes, _: dict[str, Any]) -> Any:
         in_fmt = boxes.format.value.lower()
 
         box_data = torchvision.ops.box_convert(
