@@ -5,9 +5,8 @@ from oddkiva.brahma.torch.object_detection.common.box_ops import (
     from_cxcywh_to_ltrb_format
 )
 
-class VarifocalLoss(torch.nn.Module):
-    """The Varifocal Loss implements the loss function described in
-    [VarifocalNet: An IoU-aware Dense Object Detector](https://arxiv.org/pdf/2008.13367)
+class MatchabilityAwareLoss(torch.nn.Module):
+    """The Matchability-Aware Loss as described in DEIM
     """
 
     def __init__(self, alpha: float, gamma: float = 2., eps: float = 1e-8):
@@ -22,7 +21,7 @@ class VarifocalLoss(torch.nn.Module):
         self.gamma = gamma
         self.eps = eps
 
-    def extract_image_query_index_pairs(
+    def extract_mage_query_index_pairs(
         self,
         matching: list[tuple[torch.Tensor, torch.Tensor]]
     ) -> tuple[torch.Tensor, torch.Tensor]:
@@ -30,7 +29,6 @@ class VarifocalLoss(torch.nn.Module):
         Params:
             matching:
                 list of pairs of tensors [query_ixs, target_ixs]:
-
                 - the `len(matches)` is the number of training samples in
                   the batch;
                 - the pair `(query_ixs, target_ixs)` are 1D-tensors of
@@ -192,7 +190,7 @@ class VarifocalLoss(torch.nn.Module):
         )
         # The target scores is basically the target probability vector that is
         # downweighted by the IoU scores since they range in [0, 1].
-        tscores[nq_ixs] = ious.to(tscores.dtype)
+        tscores[nq_ixs] = ious.to(tscores.dtype).pow(self.gamma)
         # Shape is (N, top-K)
         tscores = tscores.unsqueeze(-1) * tclass_probs
         #        (N, top-K, 1)           (N, top-K, num_classes + 1)
@@ -203,19 +201,8 @@ class VarifocalLoss(torch.nn.Module):
         # better.
         weights = \
             self.alpha * (qscores ** self.gamma) * (1 - tclass_probs) + \
-            tscores
+            tclass_probs
         assert weights.requires_grad is False
-        # NOTE: other implementations varifocal loss makes
-        # more computations as they extend to the continuous case.
-        #
-        # weights = \
-        #     self.alpha * \
-        #     ((qscores - tscores).abs() ** self.gamma) * \
-        #     (1 - tclass_probs) + \
-        #     tscores
-        #
-        # If we work them out on the paper, they are numerically equivalent
-        # on the discrete case y=0 or y=1.
 
         loss = F.binary_cross_entropy_with_logits(query_class_logits,
                                                   tscores, weight=weights,
