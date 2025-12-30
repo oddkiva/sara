@@ -23,6 +23,10 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
 
 
 class BoxClassEmbeddingMap(nn.Embedding):
+    """
+    This embedding also learns what the embed vector of the *non-object* class
+    aka token.
+    """
 
     def __init__(self, embed_dim: int, class_count: int):
         super().__init__(class_count + 1, embed_dim, padding_idx=class_count)
@@ -412,7 +416,9 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         (dn_labels,
          dn_geometry_logits,
          dn_self_attn_mask,
-         dn_meta) = astuple(self.dn_group_gen.forward(query_count, targets))
+         dn_meta) = astuple(self.dn_group_gen.forward(query_count,
+                                                      targets['boxes'],
+                                                      targets['labels']))
         # dn_attn_mask is a self-attention mask
         #
         # The denoising group generator is so-called "contrastive" as it

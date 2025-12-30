@@ -37,3 +37,6 @@ class ToNormalizedCXCYWHBoxes(v2.Transform):
         )
 
         return boxes_normalized
+
+    def transform(self, boxes: Any, params: dict[str, Any]) -> Any:
+        return self._transform(boxes, params)

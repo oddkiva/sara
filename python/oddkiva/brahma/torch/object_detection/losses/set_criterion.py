@@ -1,10 +1,11 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-import torch 
-import torch.nn as nn 
+import torch
+import torch.nn as nn
 import torch.distributed
-import torch.nn.functional as F 
+import torch.nn.functional as F
 import torchvision
+from torchvision.ops import box_cxcywh_to_xyxy, box_iou
 
 import copy
 
@@ -15,12 +16,12 @@ import copy
 class SetCriterion(nn.Module):
 
     def __init__(self, \
-        matcher, 
-        weight_dict, 
-        losses, 
-        alpha=0.2, 
-        gamma=2.0, 
-        num_classes=80, 
+        matcher,
+        weight_dict,
+        losses,
+        alpha=0.2,
+        gamma=2.0,
+        num_classes=80,
         boxes_weight_format=None,
         share_matched_indices=False):
         """Create the criterion.
@@ -36,7 +37,7 @@ class SetCriterion(nn.Module):
         self.num_classes = num_classes
         self.matcher = matcher
         self.weight_dict = weight_dict
-        self.losses = losses 
+        self.losses = losses
         self.boxes_weight_format = boxes_weight_format
         self.share_matched_indices = share_matched_indices
         self.alpha = alpha
@@ -51,7 +52,9 @@ class SetCriterion(nn.Module):
                                     dtype=torch.int64, device=src_logits.device)
         target_classes[idx] = target_classes_o
         target = F.one_hot(target_classes, num_classes=self.num_classes+1)[..., :-1]
-        loss = torchvision.ops.sigmoid_focal_loss(src_logits, target, self.alpha, self.gamma, reduction='none')
+        loss = torchvision.ops.sigmoid_focal_loss(
+            src_logits, target,
+            self.alpha, self.gamma, reduction='none')
         loss = loss.mean(1).sum() * src_logits.shape[1] / num_boxes
 
         return {'loss_focal': loss}
@@ -61,31 +64,40 @@ class SetCriterion(nn.Module):
         idx = self._get_src_permutation_idx(indices)
         if values is None:
             src_boxes = outputs['pred_boxes'][idx]
-            target_boxes = torch.cat([t['boxes'][i] for t, (_, i) in zip(targets, indices)], dim=0)
-            src_cxcywh = torchvision.ops.box_convert(src_boxes,
-                                                     'cxcywh', 'xyxy')
-            trg_cxcywh = torchvision.ops.box_convert(target_boxes,
-                                                     'cxcywh', 'xyxy')
-            ious, _ = torchvision.ops.box_iou(src_cxcywh, trg_cxcywh)
+            target_boxes = torch.cat([
+                t['boxes'][i]
+                for t, (_, i) in zip(targets, indices)
+            ], dim=0)
+            src_boxes = box_convert(src_boxes, 'cxcywh', 'xyxy')
+            trg_boxes = box_convert(target_boxes, 'cxcywh', 'xyxy')
+            ious, _ = torchvision.ops.box_iou(src_boxes, trg_boxes)
             ious = torch.diag(ious).detach()
         else:
             ious = values
 
         src_logits = outputs['pred_logits']
-        target_classes_o = torch.cat([t["labels"][J] for t, (_, J) in zip(targets, indices)])
+        target_classes_o = torch.cat([
+            t["labels"][J]
+            for t, (_, J) in zip(targets, indices)
+        ])
         target_classes = torch.full(src_logits.shape[:2], self.num_classes,
-                                    dtype=torch.int64, device=src_logits.device)
+                                    dtype=torch.int64,
+                                    device=src_logits.device)
         target_classes[idx] = target_classes_o
-        target = F.one_hot(target_classes, num_classes=self.num_classes + 1)[..., :-1]
+        target = F.one_hot(target_classes,
+                           num_classes=self.num_classes + 1)[..., :-1]
 
-        target_score_o = torch.zeros_like(target_classes, dtype=src_logits.dtype)
+        target_score_o = torch.zeros_like(target_classes,
+                                          dtype=src_logits.dtype)
         target_score_o[idx] = ious.to(target_score_o.dtype)
         target_score = target_score_o.unsqueeze(-1) * target
 
         pred_score = F.sigmoid(src_logits).detach()
         weight = self.alpha * pred_score.pow(self.gamma) * (1 - target) + target_score
-        
-        loss = F.binary_cross_entropy_with_logits(src_logits, target_score, weight=weight, reduction='none')
+
+        loss = F.binary_cross_entropy_with_logits(src_logits, target_score,
+                                                  weight=weight,
+                                                  reduction='none')
         loss = loss.mean(1).sum() * src_logits.shape[1] / num_boxes
         return {'loss_vfl': loss}
 
@@ -139,13 +151,15 @@ class SetCriterion(nn.Module):
         """
         outputs_without_aux = {k: v for k, v in outputs.items() if 'aux' not in k}
 
-        # Compute the average number of target boxes across all nodes, for normalization purposes
+        # Compute the average number of target boxes across all nodes, for
+        # normalization purposes
         num_boxes = sum(len(t["labels"]) for t in targets)
-        num_boxes = torch.as_tensor([num_boxes], dtype=torch.float, device=next(iter(outputs.values())).device)
+        num_boxes = torch.as_tensor([num_boxes], dtype=torch.float,
+                                    device=next(iter(outputs.values())).device)
         if is_dist_available_and_initialized():
             torch.distributed.all_reduce(num_boxes)
         num_boxes = torch.clamp(num_boxes / get_world_size(), min=1).item()
-        
+
         # Retrieve the matching between the outputs of the last layer and the targets
         matched = self.matcher(outputs_without_aux, targets)
         indices = matched['indices']
@@ -153,12 +167,14 @@ class SetCriterion(nn.Module):
         # Compute all the requested losses
         losses = {}
         for loss in self.losses:
-            meta = self.get_loss_meta_info(loss, outputs, targets, indices)            
+            meta = self.get_loss_meta_info(loss, outputs, targets, indices)
             l_dict = self.get_loss(loss, outputs, targets, indices, num_boxes, **meta)
-            l_dict = {k: l_dict[k] * self.weight_dict[k] for k in l_dict if k in self.weight_dict}
+            l_dict = {k: l_dict[k] * self.weight_dict[k]
+                      for k in l_dict if k in self.weight_dict}
             losses.update(l_dict)
 
-        # In case of auxiliary losses, we repeat this process with the output of each intermediate layer.
+        # In case of auxiliary losses, we repeat this process with the output
+        # of each intermediate layer.
         if 'aux_outputs' in outputs:
             for i, aux_outputs in enumerate(outputs['aux_outputs']):
                 if not self.share_matched_indices:
@@ -178,9 +194,12 @@ class SetCriterion(nn.Module):
             dn_num_boxes = num_boxes * outputs['dn_meta']['dn_num_group']
             for i, aux_outputs in enumerate(outputs['dn_aux_outputs']):
                 for loss in self.losses:
-                    meta = self.get_loss_meta_info(loss, aux_outputs, targets, indices)
-                    l_dict = self.get_loss(loss, aux_outputs, targets, indices, dn_num_boxes, **meta)
-                    l_dict = {k: l_dict[k] * self.weight_dict[k] for k in l_dict if k in self.weight_dict}
+                    meta = self.get_loss_meta_info(loss, aux_outputs, targets,
+                                                   indices)
+                    l_dict = self.get_loss(loss, aux_outputs, targets, indices,
+                                           dn_num_boxes, **meta)
+                    l_dict = {k: l_dict[k] * self.weight_dict[k]
+                              for k in l_dict if k in self.weight_dict}
                     l_dict = {k + f'_dn_{i}': v for k, v in l_dict.items()}
                     losses.update(l_dict)
 
@@ -202,11 +221,13 @@ class SetCriterion(nn.Module):
                 indices = matched['indices']
                 for loss in self.losses:
                     meta = self.get_loss_meta_info(loss, aux_outputs, enc_targets, indices)
-                    l_dict = self.get_loss(loss, aux_outputs, enc_targets, indices, num_boxes, **meta)
-                    l_dict = {k: l_dict[k] * self.weight_dict[k] for k in l_dict if k in self.weight_dict}
+                    l_dict = self.get_loss(loss, aux_outputs, enc_targets,
+                                           indices, num_boxes, **meta)
+                    l_dict = {k: l_dict[k] * self.weight_dict[k]
+                              for k in l_dict if k in self.weight_dict}
                     l_dict = {k + f'_enc_{i}': v for k, v in l_dict.items()}
                     losses.update(l_dict)
-            
+
             if class_agnostic:
                 self.num_classes = orig_num_classes
 
@@ -244,7 +265,7 @@ class SetCriterion(nn.Module):
         dn_positive_idx, dn_num_group = dn_meta["dn_positive_idx"], dn_meta["dn_num_group"]
         num_gts = [len(t['labels']) for t in targets]
         device = targets[0]['labels'].device
-        
+
         dn_match_indices = []
         for i, num_gt in enumerate(num_gts):
             if num_gt > 0:
@@ -255,6 +276,6 @@ class SetCriterion(nn.Module):
             else:
                 dn_match_indices.append((torch.zeros(0, dtype=torch.int64, device=device), \
                     torch.zeros(0, dtype=torch.int64,  device=device)))
-        
+
         return dn_match_indices
 

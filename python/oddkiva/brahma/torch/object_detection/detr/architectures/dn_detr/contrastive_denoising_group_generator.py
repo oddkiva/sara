@@ -1,6 +1,6 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-from typing import Any, Iterable
+from typing import Any
 from dataclasses import astuple, dataclass
 
 import torch
@@ -284,7 +284,7 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
     def forward(
         self,
         query_count: int,
-        boxes: Iterable[torch.Tensor],
+        boxes: list[torch.Tensor],
         labels: list[torch.Tensor]
     ) -> Output:
         assert len(boxes) == len(labels)
