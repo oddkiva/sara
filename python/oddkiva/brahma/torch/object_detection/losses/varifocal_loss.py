@@ -269,7 +269,12 @@ class VarifocalLoss(torch.nn.Module):
         # could perfect it. The number of non-matched query boxes still
         # overpowers the number of matched queries from a statistical point of
         # view...
+        #
         # Instead, there is a more balanced contrastive approach which we can
         # do.
+        #
+        # Second, not all non-matched query boxes are irrelevant, some might be
+        # overlapping strongly with a ground-truth box. Those boxes should not
+        # be used as negative samples...
 
         return mean_vfl
