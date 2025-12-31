@@ -1,6 +1,7 @@
 # copyright (c) 2025 david ok <david.ok8@gmail.com>
 
 import torch
+import torch.nn.functional as F
 
 from oddkiva.brahma.torch.losses.focal_loss import focal_loss
 
@@ -34,15 +35,6 @@ class FocalLoss(torch.nn.Module):
                   identical size, which is the number of labeled boxes in the
                   training sample.
         """
-        # image_ixs = torch.cat([
-        #     # the image index n is repeated as many times as there are labeled
-        #     # boxes in the training samples
-        #     torch.full_like(qixs_matched, n)
-        #     for n, (qixs_matched, _) in enumerate(matching)
-        # ])
-        # query_ixs = torch.cat([qixs_n for (qixs_n, _) in matching])
-        # return query[image_ixs, query_ixs]
-
         return torch.cat([
             query[n][qixs_matched]
             for n, (qixs_matched, _) in enumerate(matching)
@@ -76,7 +68,7 @@ class FocalLoss(torch.nn.Module):
     def forward(
         self,
         query_scores: torch.Tensor,
-        target_scores: list[torch.Tensor],
+        target_labels: list[torch.Tensor],
         matching: list[tuple[torch.Tensor, torch.Tensor]]
     ) -> torch.Tensor:
         r"""
@@ -99,8 +91,15 @@ class FocalLoss(torch.nn.Module):
                   training sample.
         """
 
+        num_classes = query_scores.shape[-1]
+
         # Extract the batches
         qscores_matched = self.extract_matched_queries(query_scores, matching)
-        tscores_matched = self.extract_matched_targets(target_scores, matching)
+
+        tlabels_matched = self.extract_matched_targets(
+            target_labels,
+            matching
+        ).to(torch.int64)
+        tscores_matched = F.one_hot(tlabels_matched, num_classes=num_classes)
 
         return focal_loss(qscores_matched, tscores_matched, self.alpha, self.gamma)

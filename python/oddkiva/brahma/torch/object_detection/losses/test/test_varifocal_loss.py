@@ -19,8 +19,8 @@ from oddkiva.brahma.torch.object_detection.common.data_transforms import (
 from oddkiva.brahma.torch.object_detection.losses.box_matcher import (
     BoxMatcher
 )
-from oddkiva.brahma.torch.object_detection.losses.focal_loss import (
-    FocalLoss
+from oddkiva.brahma.torch.object_detection.losses.varifocal_loss import (
+    VarifocalLoss
 )
 
 
@@ -84,46 +84,13 @@ def test_focal_loss():
 
     # Fix the query boxes and put back into cxcywh format.
     query_cxcywh = from_ltrb_to_cxcywh_format(fix_ltrb_coords(query_xyxy))
+    query_boxes = query_cxcywh
 
     matcher = BoxMatcher()
     matching = matcher.forward(query_logits, query_cxcywh, tgt_labels, tgt_boxes)
 
-    alpha = 0.35
-    gamma = 2.0
-    fl_class = FocalLoss(gamma, alpha)
+    vfl = VarifocalLoss()
 
-    # Check that the internal implementation of the focal loss class produces
-    # the intended results.
-    for n, ((qixs_n, tixs_n), tgt_count_n) in enumerate(
-        zip(matching, tgt_count_per_image)
-    ):
-        # We check sample after sample.
-        assert T.equal(qixs_n, tixs_n)
-        assert T.equal(tixs_n.sort().values, T.arange(tgt_count_n))
-
-        loss = fl_func(
-            query_logits[n, qixs_n],
-            F.one_hot(tgt_labels[n][tixs_n].to(T.int64),
-                      num_classes=num_classes),
-            alpha=alpha, gamma=gamma
-        )
-
-        loss2 = fl_class(query_logits[n][None], tgt_labels[n][None],
-                           [matching[n]])
-
-        assert T.dist(loss, loss2) < 1e-12
-
-    # Another terser checks just for the sake of checking the batched
-    # computation.
-    loss1 = T.cat([
-        fl_class(qlogits[None], tlabels[None], [m])
-        for qlogits, tlabels, m in zip(query_logits, tgt_labels, matching)
-    ])
-
-    loss2 = fl_class(
-        query_logits,
-        tgt_labels,
-        matching
-    )
-
-    assert T.dist(loss1, loss2) < 1e-12
+    vfl_val = vfl.forward(query_boxes, query_logits,
+                          tgt_boxes, tgt_labels,
+                          matching)

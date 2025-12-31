@@ -10,7 +10,10 @@ class VarifocalLoss(torch.nn.Module):
     [VarifocalNet: An IoU-aware Dense Object Detector](https://arxiv.org/pdf/2008.13367)
     """
 
-    def __init__(self, alpha: float, gamma: float = 2., eps: float = 1e-8):
+    def __init__(self,
+                 alpha: float = 0.25,
+                 gamma: float = 2.,
+                 eps: float = 1e-8):
         """
         Parameters
         ----------
@@ -43,7 +46,12 @@ class VarifocalLoss(torch.nn.Module):
             torch.full_like(qixs_matched, n)
             for n, (qixs_matched, _) in enumerate(matching)
         ])
-        query_ixs = torch.cat([qixs_n for (qixs_n, _) in matching])
+
+        query_ixs = torch.cat([
+            qixs_n
+            for (qixs_n, _) in matching
+        ])
+
         return image_ixs, query_ixs
 
     def iou(self, qboxes: torch.Tensor, tboxes: torch.Tensor) -> torch.Tensor:
@@ -129,8 +137,7 @@ class VarifocalLoss(torch.nn.Module):
         target_boxes: list[torch.Tensor],  # N tensors with different size
         target_labels: list[torch.Tensor], # N tensors with different size
         matching: list[tuple[torch.Tensor, torch.Tensor]],
-        num_classes: int,
-        num_boxes: int
+        num_boxes: int | None = None
     ):
         r"""
         Parameters:
@@ -150,6 +157,11 @@ class VarifocalLoss(torch.nn.Module):
                 The optimal permutation computed by the Hungarian assignment
                 method.
         """
+
+        num_classes = query_class_logits.shape[-1]
+        if num_boxes is None:
+            num_boxes = sum([len(tlabels) for tlabels in target_labels])
+
         # Get the list of image and query index pairs (n, q).
         nq_ixs = self.extract_image_query_index_pairs(matching)
 
@@ -166,7 +178,7 @@ class VarifocalLoss(torch.nn.Module):
         tlabels_flat = torch.cat([
             tlabels_n[tixs]
             for tlabels_n, (_, tixs) in zip(target_labels, matching)
-        ])
+        ]).to(torch.int64)
 
         # Matrix of shape (N, top-K) where each coefficient (i, j) is the
         # object class of the query box `j` in image `i`.
@@ -183,16 +195,42 @@ class VarifocalLoss(torch.nn.Module):
         tclasses[nq_ixs] = tlabels_flat
         # Shape is (N, top-K)
 
-        tclass_probs = F.one_hot(tclasses, num_classes=num_classes + 1)[..., :-1]
-        # Shape is (N, top-K, num_classes + 1)
+        # NOTE:
+        # This implementation is a bit awkward, does a lot of unnecessary
+        # computations and is prone to confusion.
+        #
+        # Non-matched query boxes that are classified as
+        # non-object-boxes.
+        # Since the query box located at (n, k) is not matched, necessarily:
+        # - it is assigned with the non-object class label, i.e., 80 (in COCO).
+        # - it does not any IoU positive score, so tscores[n, k, :] == 0.
+        #
+        # The penalty we pay for wrongly thinking that this query box contains
+        # an object of class `c != 80`:
+        # VFL[n, k, c!= 80] = -α p^γ log(1 - p)
 
-        tscores = torch.zeros_like(
-            tclasses,
-            dtype=query_class_logits.dtype
-        )
+        # Now for the particular case c == 80 (the non-object class):
+        #
+        # If `p` is the probability that it contains a "non-object" class (that
+        # is, it contains no object), the price for not being confident is this
+        # VFL value is
+        #
+        # VFL[n, k, c == 80] = - IoU (IoU * log p + (1 - Iou) * log(1 -p))
+        #
+        # But IoU == 0 and VFL[n, k, 80] == 0
+
+        tclass_probs = F.one_hot(tclasses, num_classes=num_classes + 1)[..., :-1]
+        # Shape is (N, top-K, num_classes)
+        #
+        # NOTE
+        # The following call would not work because the non-object label ID 80
+        # cannot be equal to the number of classes.
+        # tclass_probs = F.one_hot(tclasses, num_classes=num_classes)
+
+        tscores = torch.zeros_like(tclasses, dtype=query_class_logits.dtype)
         # The target scores is basically the target probability vector that is
         # downweighted by the IoU scores since they range in [0, 1].
-        tscores[nq_ixs] = ious.to(tscores.dtype)
+        tscores[nq_ixs] = ious
         # Shape is (N, top-K)
         tscores = tscores.unsqueeze(-1) * tclass_probs
         #        (N, top-K, 1)           (N, top-K, num_classes + 1)
@@ -221,7 +259,17 @@ class VarifocalLoss(torch.nn.Module):
                                                   tscores, weight=weights,
                                                   reduction='none')
         # Shape is (N, top-K, num_classes + 1)
-
         top_K = query_class_logits.shape[1]
-        loss = loss.mean(1).sum() * top_K / num_boxes
-        return loss
+        cumulated_vfl_per_image = loss.mean(1).sum() * top_K
+        mean_vfl = cumulated_vfl_per_image / num_boxes
+
+        # NOTE
+        #
+        # The normalization is a bit lazy to me, possibly unbalanced, so we
+        # could perfect it. The number of non-matched query boxes still
+        # overpowers the number of matched queries from a statistical point of
+        # view...
+        # Instead, there is a more balanced contrastive approach which we can
+        # do.
+
+        return mean_vfl

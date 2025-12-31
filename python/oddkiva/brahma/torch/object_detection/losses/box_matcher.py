@@ -8,7 +8,7 @@ from scipy.optimize import linear_sum_assignment
 from oddkiva.brahma.torch.object_detection.common.box_ops import (
     from_cxcywh_to_ltrb_format
 )
-from oddkiva.brahma.torch.object_detection.detr.losses.box_losses import giou
+from oddkiva.brahma.torch.object_detection.losses.box_losses import giou
 
 
 class BoxMatcher(torch.nn.Module):
