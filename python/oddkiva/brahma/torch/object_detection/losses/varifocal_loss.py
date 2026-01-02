@@ -133,26 +133,27 @@ class VarifocalLoss(torch.nn.Module):
     def forward(
         self,
         query_boxes: torch.Tensor,
-        query_class_logits: torch.Tensor,  # Fixed: (N, 300, 80) prob-vectors
-        target_boxes: list[torch.Tensor],  # N tensors with different size
-        target_labels: list[torch.Tensor], # N tensors with different size
+        query_class_logits: torch.Tensor,
+        target_boxes: list[torch.Tensor],
+        target_labels: list[torch.Tensor],
         matching: list[tuple[torch.Tensor, torch.Tensor]],
         num_boxes: int | None = None
     ):
         r"""
         Parameters:
             query_boxes:
-                Tensor of query boxes of (N, top_K, 4).
+                Tensor of query boxes of $(N, K, 4)$.
             query_class_logits:
                 Tensor of class logit values associated to each query box in
                 the `query_boxes` tensor.
-                The shape of this tensor is (N, top_K, 80).
+                The shape of this tensor is $(N, K, C)$, with $C = 80$ classes
+                in the COCO dataset.
             target_boxes:
                 The list of N tensors of ground-truth boxes $\mathbf{B}_n$. Each tensor has a
                 varying number of ground-truth boxes $B_n$ and thus has shape
                 $(B_n, 4)$, where $n$ is the image index in the batch.
             target_labels:
-                The list[torch.Tensor], # N tensors with different size
+                The list of N tensors of labels with different size.
             matching:
                 The optimal permutation computed by the Hungarian assignment
                 method.

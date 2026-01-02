@@ -160,7 +160,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
     def forward(
         self,
         query_embeds: torch.Tensor,
-        query_geometry: torch.Tensor,
+        query_geometries: torch.Tensor,
         memory: torch.Tensor,
         memory_spatial_sizes: list[tuple[int, int]],
         query_positional_embeds: torch.Tensor | None = None,
@@ -183,16 +183,17 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
 
         $$
         \mathbf{V}^+ = \sigma \left( \frac{1}{\sqrt{d_k}}
-            \mathbf{Q} (\mathbf{F} + \phi(\mathbf{X})^\intercal
+            \mathbf{Q} \left( \mathbf{F} + \phi(\mathbf{X})^\intercal \right)
         \right) \mathbf{V}
         $$
 
         Parameters:
             query_embeds:
-                The query encoding stacked as row vectors
-            query_geometry:
-                The 4D box geometry for each object query row vectors of
-                $\mathbf{Q}$.
+                The matrix $\mathbf{Q}$, i.e., the list of query encodings
+                stacked as row vectors
+            query_geometries:
+                The list of 4D box geometries associated to each object query
+                row vectors of $\mathbf{Q}$.
             query_self_attn_mask:
                 The self-attention mask.
 
@@ -202,7 +203,8 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
             memory:
                 the concatenated query vectors that are calculated from the
                 feature pyramid
-                (backbone -> AIFI -> CCFF -> projection -> concatenation).
+                (backbone &rarr; AIFI &rarr; CCFF &rarr; projection &rarr;
+                concatenation).
             memory_mask:
                 the attention mask used for the deformable cross-attention
                 layer.
@@ -217,7 +219,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         # In RT-DETR, a query is considered to be a new independent input even
         # if it is actually produced by the CNN backbone extractor and the
         # encoder.
-        assert query_geometry.requires_grad is False
+        assert query_geometries.requires_grad is False
 
         # Prepare the data.
         Q = K = self.with_positional_embeds(query_embeds, query_positional_embeds)
@@ -239,7 +241,7 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         # 2. Cross-attention -> (Dropout -> Add -> Norm)
         ΔV = self.cross_attention.forward(
             self.with_positional_embeds(V_super, query_positional_embeds),
-            query_geometry,
+            query_geometries,
             memory,
             memory_spatial_sizes,
             value_mask=memory_mask

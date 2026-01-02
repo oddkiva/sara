@@ -75,7 +75,7 @@ class FocalLoss(torch.nn.Module):
         Parameters:
             query_scores:
                 score values must be normalized in the range $[0, 1]$.
-            target_scores:
+            target_labels:
                 zeros or ones.
             matching:
                 This is the optimal matching computed by the Hungarian

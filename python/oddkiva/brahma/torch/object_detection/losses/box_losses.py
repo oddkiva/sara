@@ -58,19 +58,20 @@ def penalized_iou(boxes1: T.Tensor, boxes2: T.Tensor,
 def giou(boxes1: T.Tensor, boxes2: T.Tensor, normalize: bool,
          eps: float = 1e-8) -> T.Tensor:
     r"""
-    Actually... the generalized IoU (https://giou.stanford.edu/) could be
+    Actually... the [generalized IoU](https://giou.stanford.edu/) (gIoU) could be
     re-explained with an alternative interpretation.
 
-    The generalized IoU (gIoU) is basically the sum of two scores:
+    The gIoU is basically the sum of two scores:
 
     - the classical IoU score if boxes overlap ranging in $[0, 1]$.
 
-    - the IoU score between (1) the union of two boxes $b_1$ and $b_2$ and the
-      smallest enclosing bounding box enclosing $b_1$ and $b_2$ also ranging in
+    - the IoU score between (1) the union of two boxes $A$ and $B$ and the
+      smallest enclosing bounding box enclosing $A$ and $B$, also ranging in
       $[0, 1]$.
 
-      The paper says that we want to *minimize* the the normalized "gap area"
-      that is not covered in the union of the box $C$:
+      The paper says that while we want to maximize the classical IoU, we also
+      want to *minimize* the normalized "gap area" in the box $C$, and which
+      the union area does not cover:
       $$
         \frac{\mathrm{area}(C \setminus A \cup B)}{\mathrm{area}(C)}
       $$
@@ -86,9 +87,9 @@ def giou(boxes1: T.Tensor, boxes2: T.Tensor, normalize: bool,
     Instead of penalizing the classical IoU score with that normalized gap area,
     we want to maximize two types of IoU scores as the same time.
 
-    This is better in terms of interpretation, because the gIoU score stays
-    positive and in the range $[0, 2]$. Then by simply dividing it by 2, the gIoU
-    score is normalized in the range $[0, 1]$.
+    I like this interpretation better, because, then, the gIoU score stays
+    positive and in the range $[0, 2]$. Then by simply dividing it by 2, the
+    gIoU score is normalized in the range $[0, 1]$.
 
     If the IoU is $0$, then this second score does indeed comes to the rescue and
     penalizes the gap area in the enclosed bounding box.
@@ -97,8 +98,9 @@ def giou(boxes1: T.Tensor, boxes2: T.Tensor, normalize: bool,
     $-1$, the original expose complicates more than the natural intuition that
     I get.
 
-    We cannot unsee how awkward the original implementation from a numerical
-    point of view:
+    Besides the original implementation looks awkard to my taste, from a
+    numerical point of view:
+
     ```
     iou - (area - union) / area
 
