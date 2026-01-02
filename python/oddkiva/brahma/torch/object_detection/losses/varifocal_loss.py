@@ -57,15 +57,13 @@ class VarifocalLoss(torch.nn.Module):
     def iou(self, qboxes: torch.Tensor, tboxes: torch.Tensor) -> torch.Tensor:
         qxyxy = from_cxcywh_to_ltrb_format(qboxes)  # query
         txyxy = from_cxcywh_to_ltrb_format(tboxes)  # target
-        # 1. Let's not do the lazy and costlier implementation...
-        #    ious = box_iou(qxyxy, txyxy)
-        #    ious = torch.diag(ious).detach()
-        #
-        #    We can avoid the unnecessary computations since it's not too
-        #    complicated.
-        #
-        # 2. Let use the gIoU.
 
+        # Let's not do the lazy and costlier implementation...
+        # ious = box_iou(qxyxy, txyxy)
+        # ious = torch.diag(ious).detach()
+        #
+        # We can avoid the unnecessary computations since it's not too
+        # complicated.
         qtl = qxyxy[:, :2]
         ttl = txyxy[:, :2]
         qrb = qxyxy[:, 2:]
@@ -92,14 +90,9 @@ class VarifocalLoss(torch.nn.Module):
     def giou(self, qboxes: torch.Tensor, tboxes: torch.Tensor) -> torch.Tensor:
         qxyxy = from_cxcywh_to_ltrb_format(qboxes)  # query
         txyxy = from_cxcywh_to_ltrb_format(tboxes)  # target
-        # 1. Let's not do the lazy and costlier implementation...
-        #    ious = box_iou(qxyxy, txyxy)
-        #    ious = torch.diag(ious).detach()
-        #
-        #    We can avoid the unnecessary computations since it's not too
-        #    complicated.
-        #
-        # 2. Let use the gIoU.
+        # Let's not do the lazy and costlier implementation...
+        # ious = box_iou(qxyxy, txyxy)
+        # ious = torch.diag(ious).detach()
 
         qtl = qxyxy[:, :2]
         ttl = txyxy[:, :2]
@@ -266,16 +259,13 @@ class VarifocalLoss(torch.nn.Module):
 
         # NOTE
         #
-        # The normalization is a bit lazy to me, possibly unbalanced, so we
-        # could perfect it. The number of non-matched query boxes still
-        # overpowers the number of matched queries from a statistical point of
-        # view...
+        # The normalization is a bit lazy to me, possibly unbalanced, so we can
+        # perfect it. The number of non-matched query boxes still overpowers
+        # the number of matched queries from a statistical point of view...
+        # Instead, we could use a more balanced contrastive approach.
         #
-        # Instead, there is a more balanced contrastive approach which we can
-        # do.
-        #
-        # Second, not all non-matched query boxes are irrelevant, some might be
-        # overlapping strongly with a ground-truth box. Those boxes should not
-        # be used as negative samples...
+        # Second, not all non-matched query boxes may be irrelevant, some will
+        # be overlapping strongly with a ground-truth box. Those boxes should
+        # not be used as negative samples...
 
         return mean_vfl

@@ -61,6 +61,33 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         attention_mask: torch.Tensor
         dn_meta: dict[str, Any]
 
+        def populate_matching(
+            self,
+            target_labels: list[torch.Tensor],
+        ) -> list[tuple[torch.Tensor, torch.Tensor]]:
+            dn_positive_ixs = self.dn_meta['dn_positive_ixs'],
+            dn_group_count = self.dn_meta['dn_group_count']
+
+            tcount_per_image = [len(tlabels_n) for tlabels_n in target_labels]
+            device = target_labels[0].device
+
+            matching = []
+
+            for dn_pos_ixs_n, tcount_n in zip(dn_positive_ixs, tcount_per_image):
+                if tcount_n > 0:
+                    tixs_n = torch.arange(tcount_n, dtype=torch.int64, device=device)
+                    tixs_n = tixs_n.tile(dn_group_count)
+                    assert len(dn_pos_ixs_n) == len(tixs_n)
+
+                    matching.append((dn_pos_ixs_n, tixs_n))
+                else:
+                    matching.append(
+                        (torch.zeros(-1, dtype=torch.int64, device=device),
+                         torch.zeros(-1, dtype=torch.int64, device=device))
+                    )
+
+            return matching
+
     def __init__(self,
                  class_count: int,
                  box_count: int = 100,

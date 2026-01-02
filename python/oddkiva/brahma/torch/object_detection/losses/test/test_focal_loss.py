@@ -109,9 +109,10 @@ def test_focal_loss():
         )
 
         loss2 = fl_class(query_logits[n][None], tgt_labels[n][None],
-                           [matching[n]])
+                         [matching[n]])
+        qixs_n = fl_class.extract_matched_query_indices([matching[n]])
 
-        assert T.dist(loss, loss2) < 1e-12
+        assert T.dist(loss, loss2[qixs_n]) < 1e-12
 
     # Another terser checks just for the sake of checking the batched
     # computation.
