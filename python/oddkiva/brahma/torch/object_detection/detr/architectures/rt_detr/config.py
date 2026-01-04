@@ -1,5 +1,3 @@
-import torch
-
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
     ResNet50RTDETRV2Variant
 )

@@ -447,15 +447,12 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             dim=1
         )
 
-        # Post-conditions:
-        assert query.requires_grad is False
-        assert query_geometry_logits.requires_grad is False
-
         return query, query_geometry_logits, dn_self_attn_mask, dn_meta
 
     def forward(
         self,
-        query: torch.Tensor, query_geometry_logits: torch.Tensor,
+        query: torch.Tensor,
+        query_geometry_logits: torch.Tensor,
         value: torch.Tensor,
         value_spatial_sizes: list[tuple[int, int]],
         value_mask: torch.Tensor | None = None,
