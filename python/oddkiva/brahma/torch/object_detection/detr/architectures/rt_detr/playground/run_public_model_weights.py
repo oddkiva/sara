@@ -55,6 +55,7 @@ class ModelConfig:
 
         # THE MODEL
         config = RTDETRConfig()
+        config.setup_for_inference(True)
         model = RTDETRv2(config).to(device)
 
         # LOAD THE MODEL
