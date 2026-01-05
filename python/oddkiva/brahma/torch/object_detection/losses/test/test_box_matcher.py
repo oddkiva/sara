@@ -75,7 +75,7 @@ def test_box_matcher():
     num_classes = 80
     tgt_count_per_image = [len(b) for b in tgt_boxes]
     top_K = max(tgt_count_per_image)
- 
+
     # Generate noise for the box geometries and object class probabilities.
     noise_mag = 10  # pixels
     noise_xyxy = T.rand(N, top_K, 4) * noise_mag / W

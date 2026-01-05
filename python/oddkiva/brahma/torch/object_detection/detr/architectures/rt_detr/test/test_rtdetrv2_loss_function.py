@@ -78,21 +78,24 @@ def test_rtdetrv2_loss_function():
 
     rtdetrv2 = rtdetrv2.to(gpu0)
 
-    img, target_boxes, target_labels = next(coco_it)
+    img, tgt_boxes, tgt_labels = next(coco_it)
     img = img.to(gpu0)
-    target_boxes = [b.to(gpu0) for b in target_boxes]
-    target_labels = [l.to(gpu0) for l in target_labels]
+    tgt_boxes = [b.to(gpu0) for b in tgt_boxes]
+    tgt_labels = [l.to(gpu0) for l in tgt_labels]
     assert (0 <= img).all() and (img <= 1).all()
+    tgt_count = sum([len(l) for l in tgt_labels])
 
+    # Feed the input to the object detection network.
     x = img
     targets = {
-        'boxes': target_boxes,
-        'labels': target_labels
+        'boxes': tgt_boxes,
+        'labels': tgt_labels
     }
     box_geoms, box_class_logits, other_train_outputs = rtdetrv2.forward(
         x, targets
     )
 
+    # Calculate the losses.
     weight_dict = {
         'vf': 1.0,
         'box': 1.0
@@ -108,6 +111,8 @@ def test_rtdetrv2_loss_function():
     box_geoms_f = box_geoms[-1]
     box_class_logits_f = box_class_logits[-1]
     matching_f = loss_fn.matcher.forward(box_class_logits_f, box_geoms_f,
-                                         target_labels, target_boxes)
+                                         tgt_labels, tgt_boxes)
 
-    print(matching_f)
+    loss_dict = loss_fn.compute_loss_dict(box_geoms_f, box_class_logits_f,
+                                          tgt_boxes, tgt_labels, matching_f,
+                                          tgt_count)

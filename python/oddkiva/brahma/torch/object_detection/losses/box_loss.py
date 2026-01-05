@@ -3,6 +3,9 @@
 import torch
 import torch.nn.functional as F
 
+from oddkiva.brahma.torch.object_detection.common.box_ops import (
+    from_cxcywh_to_ltrb_format
+)
 from oddkiva.brahma.torch.object_detection.losses.box_losses import loss_giou
 
 
@@ -20,7 +23,7 @@ class BoxLoss(torch.nn.Module):
     def forward(
         self,
         query_boxes: torch.Tensor,
-        target_boxes: list[torch.Tensor], 
+        target_boxes: list[torch.Tensor],
         matching: list[tuple[torch.Tensor, torch.Tensor]]
     ) -> torch.Tensor:
         qboxes = torch.cat([
@@ -34,5 +37,10 @@ class BoxLoss(torch.nn.Module):
         ])
 
         return \
-            self.w_l1 * F.l1_loss(qboxes, tboxes) + \
-            self.w_giou * loss_giou(qboxes, tboxes, self.eps)
+            self.w_l1 * F.l1_loss(qboxes, tboxes, reduction='none').sum(-1) + \
+            self.w_giou * loss_giou(
+                from_cxcywh_to_ltrb_format(qboxes),
+                from_cxcywh_to_ltrb_format(tboxes),
+                eps=self.eps,
+                only_compute_diagonal=True
+            )
