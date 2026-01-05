@@ -2,6 +2,7 @@
 
 from loguru import logger
 
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.transforms import v2
 
@@ -108,11 +109,32 @@ def test_rtdetrv2_loss_function():
                                  gamma=gamma,
                                  num_classes=num_classes)
 
-    box_geoms_f = box_geoms[-1]
-    box_class_logits_f = box_class_logits[-1]
-    matching_f = loss_fn.matcher.forward(box_class_logits_f, box_geoms_f,
-                                         tgt_labels, tgt_boxes)
 
-    loss_dict = loss_fn.compute_loss_dict(box_geoms_f, box_class_logits_f,
-                                          tgt_boxes, tgt_labels, matching_f,
-                                          tgt_count)
+    (anchor_geometry_logits,
+     anchor_class_logits) = other_train_outputs['top_k_anchor_boxes']
+    anchor_geometries = F.sigmoid(anchor_geometry_logits)
+
+    matching_a = loss_fn.matcher.forward(
+        anchor_class_logits, anchor_geometries,
+        tgt_labels, tgt_boxes
+    )
+    loss_dict = loss_fn.compute_loss_dict(anchor_geometries,
+                                          anchor_class_logits,
+                                          tgt_boxes, tgt_labels,
+                                          matching_a, tgt_count)
+    loss = sum([loss_dict[k].sum() for k in loss_dict])
+    loss.backward()
+
+    # Check the parameters that has changed and those that didn't.
+
+
+
+
+    # box_geoms_f = box_geoms[-1]
+    # box_class_logits_f = box_class_logits[-1]
+    # matching_f = loss_fn.matcher.forward(box_class_logits_f, box_geoms_f,
+    #                                      tgt_labels, tgt_boxes)
+
+    # loss_dict = loss_fn.compute_loss_dict(box_geoms_f, box_class_logits_f,
+    #                                       tgt_boxes, tgt_labels, matching_f,
+    #                                       tgt_count)
