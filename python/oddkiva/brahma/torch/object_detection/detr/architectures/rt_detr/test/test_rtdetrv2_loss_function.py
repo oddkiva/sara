@@ -109,3 +109,5 @@ def test_rtdetrv2_loss_function():
     box_class_logits_f = box_class_logits[-1]
     matching_f = loss_fn.matcher.forward(box_class_logits_f, box_geoms_f,
                                          target_labels, target_boxes)
+
+    print(matching_f)

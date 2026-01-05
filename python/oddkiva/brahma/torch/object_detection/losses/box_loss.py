@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
 import torch
 import torch.nn.functional as F
@@ -35,4 +35,4 @@ class BoxLoss(torch.nn.Module):
 
         return \
             self.w_l1 * F.l1_loss(qboxes, tboxes) + \
-            self.w_giou * loss_giou(qboxes, tboxes, self.eps))
+            self.w_giou * loss_giou(qboxes, tboxes, self.eps)
