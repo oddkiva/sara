@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 import torch.nn as nn
 
@@ -25,17 +27,22 @@ class RTDETRv2(nn.Module):
         self,
         x: torch.Tensor,
         targets: dict[str, list[torch.Tensor]] | None = None
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor, dict[str, Any]]:
+        # ResNet-like backbone.
         feature_pyramid = self.backbone(x)
+
+        # AIFI+CCFF
         encoding_pyramid = self.encoder(
             feature_pyramid[-self.pyramid_level_count:]
         )
 
+        # Top-K anchor selection.
         (top_queries,
          top_class_logits,
          top_geometry_logits,
          memory) = self.query_selector(encoding_pyramid)
 
+        # The value and its original feature pyramid shapes.
         value = memory
         value_mask = None
         value_pyramid_hw_sizes = [
@@ -43,8 +50,9 @@ class RTDETRv2(nn.Module):
             for encoding_map in encoding_pyramid
         ]
 
-        # IMPORTANT: ensure the embed vectors and geometry logits are made non
-        # differentiable at the decoding stage.
+        # NOTE:
+        # At inference time, ensure that the embed vectors and geometry logits
+        # are made non differentiable at the decoding stage.
         (detection_boxes, detection_class_logits,
          dn_boxes, dn_class_logits) = self.decoder.forward(
              top_queries.detach(), top_geometry_logits.detach(),
@@ -53,21 +61,16 @@ class RTDETRv2(nn.Module):
              targets=targets
          )
 
-        train_outputs = (
+        remaining_train_outputs = {
             # To optimize:
             # - the backbone,
             # - AIFI+CCFF hybrid encoder,
             # - anchor decoder inside the self.query_selector
             # The following outputs are used as feedback:
-            top_class_logits,
-            top_geometry_logits,
+            'top_k_anchor_boxes': (top_geometry_logits, top_class_logits),
 
-            # To optimize the decoder:
-            # - Each detection boxes and class logits are tensors that contains
-            detection_boxes, detection_class_logits,
-            # To accelerate convergence:
-            dn_boxes, dn_class_logits
+            # Denoising groups to accelerate the training convergence.
+            'dn_boxes': (dn_boxes, dn_class_logits),
+        }
 
-        )
-
-        return detection_boxes, detection_class_logits
+        return detection_boxes, detection_class_logits, remaining_train_outputs

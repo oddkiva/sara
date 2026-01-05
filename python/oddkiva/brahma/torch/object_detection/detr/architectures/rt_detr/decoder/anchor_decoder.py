@@ -130,7 +130,8 @@ class AnchorDecoder(nn.Module):
                 raise ValueError()
             anchor_geometry_logits, anchor_mask = \
                 self.anchor_geometry_logit_enumerator.forward(
-                    image_pyramid_wh_sizes
+                    image_pyramid_wh_sizes,
+                    torch.device('cpu')
                 )
             # These are **not** learning parameters but we need to do this to
             # move the model to a custom device via the call `.to(device)`.

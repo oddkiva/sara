@@ -5,21 +5,27 @@ from loguru import logger
 from torch.utils.data import DataLoader
 from torchvision.transforms import v2
 
+# Data, dataset and dataloader.
 from oddkiva import DATA_DIR_PATH
-from oddkiva.brahma.torch import DEFAULT_DEVICE
 import oddkiva.brahma.torch.datasets.coco as coco
 from oddkiva.brahma.torch.datasets.coco.dataloader import (
     RTDETRImageCollateFunction
 )
+# Data augmentation.
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
     ToNormalizedFloat32
 )
+# The model.
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.config import RTDETRConfig
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.model import RTDETRv2
-
+# The loss.
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    rt_detr.loss_function import RTDETRLossFunction
+# GPU acceleration.
+from oddkiva.brahma.torch import DEFAULT_DEVICE
 
 
 FORCE_RECREATE = False
@@ -52,6 +58,7 @@ def get_coco_val_dl():
 
     return coco_dl
 
+
 def get_rtdetrv2_model():
     config = RTDETRConfig()
     model = RTDETRv2(config)
@@ -71,16 +78,34 @@ def test_rtdetrv2_loss_function():
 
     rtdetrv2 = rtdetrv2.to(gpu0)
 
-    img, boxes, labels = next(coco_it)
+    img, target_boxes, target_labels = next(coco_it)
     img = img.to(gpu0)
-    boxes = [b.to(gpu0) for b in boxes]
-    labels = [l.to(gpu0) for l in labels]
+    target_boxes = [b.to(gpu0) for b in target_boxes]
+    target_labels = [l.to(gpu0) for l in target_labels]
     assert (0 <= img).all() and (img <= 1).all()
 
     x = img
     targets = {
-        'boxes': boxes,
-        'labels': labels
+        'boxes': target_boxes,
+        'labels': target_labels
     }
-    print(boxes)
-    y = rtdetrv2.forward(x, targets)
+    box_geoms, box_class_logits, other_train_outputs = rtdetrv2.forward(
+        x, targets
+    )
+
+    weight_dict = {
+        'vf': 1.0,
+        'box': 1.0
+    }
+    alpha = 0.2
+    gamma = 2.0
+    num_classes = 80
+    loss_fn = RTDETRLossFunction(weight_dict,
+                                 alpha=alpha,
+                                 gamma=gamma,
+                                 num_classes=num_classes)
+
+    box_geoms_f = box_geoms[-1]
+    box_class_logits_f = box_class_logits[-1]
+    matching_f = loss_fn.matcher.forward(box_class_logits_f, box_geoms_f,
+                                         target_labels, target_boxes)

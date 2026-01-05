@@ -84,7 +84,7 @@ def detect_objects(model: nn.Module, rgb_image: np.ndarray, device:
     x = x.to(dtype=torch.float32) / 255
 
     with torch.no_grad():
-        object_boxes, object_class_logits = model(x)
+        object_boxes, object_class_logits, _ = model(x)
         assert object_boxes.requires_grad is False
         assert object_class_logits.requires_grad is False
 

@@ -22,7 +22,7 @@ def test_anchor_logit_enumerator():
 
     fpyr_projected: list[torch.Tensor] = \
         data['intermediate']['decoder']['input_proj']
-    fpyr_image_sizes = [fmap.shape[2:][::-1]
+    fpyr_image_sizes = [(fmap.shape[3], fmap.shape[2])  # (h, w)
                         for fmap in fpyr_projected]
 
     anchor_logit_enumerator = AnchorGeometryLogitEnumerator(
@@ -30,7 +30,10 @@ def test_anchor_logit_enumerator():
         eps=1e-2
     )
 
-    anchor_logits, anchor_mask = anchor_logit_enumerator(fpyr_image_sizes)
+    anchor_logits, anchor_mask = anchor_logit_enumerator.forward(
+        fpyr_image_sizes,
+        torch.device('cpu')
+    )
     assert anchor_logits.requires_grad is False
     assert anchor_mask.requires_grad is False
 
@@ -75,7 +78,10 @@ def test_anchor_decoder():
     fpyr_image_sizes = [(fmap.shape[3], fmap.shape[2])
                         for fmap in fpyr_projected]
     anchor_logits, anchor_mask = \
-        anchor_decoder.anchor_geometry_logit_enumerator(fpyr_image_sizes)
+        anchor_decoder.anchor_geometry_logit_enumerator.forward(
+            fpyr_image_sizes,
+            torch.device('cpu')
+        )
     anchor_geometry_logits_true, anchor_mask_true = \
         data['intermediate']['decoder']['_generate_anchors']
 
