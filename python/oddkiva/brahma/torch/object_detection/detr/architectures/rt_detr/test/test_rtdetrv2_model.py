@@ -105,7 +105,7 @@ def test_model_from_config():
     x = data['input']
 
     # Check the computations
-    box_geometries, box_class_logits = model(x)
+    box_geometries, box_class_logits, _ = model(x)
 
     layers_gt = intermediate_outs['decoder']['decoder.layer-by-layer']
     box_geometries_true = torch.stack(layers_gt['dec_out_bboxes'])

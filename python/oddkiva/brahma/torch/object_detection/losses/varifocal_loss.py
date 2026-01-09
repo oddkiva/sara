@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 
+from oddkiva.brahma.torch.object_detection.losses.box_losses import giou, iou
 from oddkiva.brahma.torch.object_detection.common.box_ops import (
     from_cxcywh_to_ltrb_format
 )
@@ -58,31 +59,7 @@ class VarifocalLoss(torch.nn.Module):
         qxyxy = from_cxcywh_to_ltrb_format(qboxes)  # query
         txyxy = from_cxcywh_to_ltrb_format(tboxes)  # target
 
-        # Let's not do the lazy and costlier implementation...
-        # ious = box_iou(qxyxy, txyxy)
-        # ious = torch.diag(ious).detach()
-        #
-        # We can avoid the unnecessary computations since it's not too
-        # complicated.
-        qtl = qxyxy[:, :2]
-        ttl = txyxy[:, :2]
-        qrb = qxyxy[:, 2:]
-        trb = txyxy[:, 2:]
-
-        tl_inter = torch.max(qtl, ttl)
-        rb_inter = torch.min(qrb, trb)
-
-        wh_query = qrb - qtl
-        wh_target = trb - ttl
-        wh_inter = rb_inter - tl_inter
-
-        area_q = wh_query[:, 0] * wh_query[:, 1]
-        area_t = wh_target[:, 0] * wh_target[:, 1]
-
-        area_inter = wh_inter[:, 0] * wh_inter[:, 1]
-        area_union = area_q + area_t - area_inter
-
-        ious = area_inter / area_union.clamp(min=self.eps)
+        ious = iou(qxyxy, txyxy, eps=self.eps, only_compute_diagonal=True)
         ious = ious.detach()  # Make this non differentiable.
 
         return ious
@@ -90,35 +67,10 @@ class VarifocalLoss(torch.nn.Module):
     def giou(self, qboxes: torch.Tensor, tboxes: torch.Tensor) -> torch.Tensor:
         qxyxy = from_cxcywh_to_ltrb_format(qboxes)  # query
         txyxy = from_cxcywh_to_ltrb_format(tboxes)  # target
-        # Let's not do the lazy and costlier implementation...
-        # ious = box_iou(qxyxy, txyxy)
-        # ious = torch.diag(ious).detach()
 
-        qtl = qxyxy[:, :2]
-        ttl = txyxy[:, :2]
-        qrb = qxyxy[:, 2:]
-        trb = txyxy[:, 2:]
-
-        tl_inter = torch.max(qtl, ttl)
-        rb_inter = torch.min(qrb, trb)
-        tl_encl = torch.min(qtl, ttl)
-        rb_encl = torch.max(qrb, trb)
-
-        wh_query = qrb - qtl
-        wh_target = trb - ttl
-        wh_inter = rb_inter - tl_inter
-        wh_encl = rb_encl - tl_encl
-
-        area_q = wh_query[:, 0] * wh_query[:, 1]
-        area_t = wh_target[:, 0] * wh_target[:, 1]
-
-        area_inter = wh_inter[:, 0] * wh_inter[:, 1]
-        area_union = area_q + area_t - area_inter
-        area_encl = wh_encl[:, 0] + wh_encl[:, 1]
-
-        ious = \
-            (area_inter / area_union.clamp(min=self.eps)) + \
-            area_union / area_encl.clamp(min=self.eps)
+        ious = giou(qxyxy, txyxy, True,
+                    eps=self.eps,
+                    only_compute_diagonal=True)
         ious = ious.detach()  # Make this non differentiable.
 
         return ious
@@ -167,7 +119,7 @@ class VarifocalLoss(torch.nn.Module):
             for tboxes_n, (_, tgt_ixs) in zip(target_boxes, matching)
         ], dim=0)
 
-        ious = self.giou(qboxes, tboxes)
+        ious = self.iou(qboxes, tboxes)
 
         tlabels_flat = torch.cat([
             tlabels_n[tixs]

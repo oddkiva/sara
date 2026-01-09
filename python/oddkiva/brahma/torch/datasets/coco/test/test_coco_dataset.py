@@ -11,6 +11,10 @@ def test_coco_dataset():
     coco_ds = COCOObjectDetectionDataset(
         train_or_val='val',
         transform=v2.Compose([
+            v2.RandomIoUCrop(),
+            v2.Resize((640, 640)),
+            v2.RandomHorizontalFlip(p=0.5),
+            v2.SanitizeBoundingBoxes()
         ])
     )
 

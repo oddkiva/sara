@@ -4,7 +4,7 @@ import torch.nn as nn
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.encoder.hybrid_encoder import FeaturePyramidProjection
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rt_detr.checkpoint import AnchorDecoder
+    rt_detr.decoder.anchor_decoder import AnchorDecoder
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.decoder.anchor_selector import AnchorSelector
 

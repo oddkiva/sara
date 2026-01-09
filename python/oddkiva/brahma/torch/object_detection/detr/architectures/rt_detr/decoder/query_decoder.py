@@ -341,8 +341,13 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         query_self_attn_mask: torch.Tensor | None = None,
         value_mask: torch.Tensor | None = None
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        assert query.requires_grad is False
-        assert query_geometry_logits.requires_grad is False
+        # NOTE
+        # The commented code is valid only at inference time and not
+        # during training time, because we generate denoising groups of queries
+        # by embedding space, space of which we are trying to learn.
+        #
+        # assert query.requires_grad is False
+        # assert query_geometry_logits.requires_grad is False
 
         # Get the actual query geometry by activating the logits with the
         # sigmoid function.
@@ -426,6 +431,14 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
          dn_meta) = astuple(self.dn_group_gen.forward(query_count,
                                                       targets['boxes'],
                                                       targets['labels']))
+
+        if dn_labels is None:
+            assert dn_geometry_logits is None
+            assert dn_self_attn_mask is None
+            assert dn_meta is None
+
+            return query, query_geometry_logits, dn_self_attn_mask, dn_meta
+
         # dn_attn_mask is a self-attention mask
         #
         # The denoising group generator is so-called "contrastive" as it
@@ -452,15 +465,12 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             dim=1
         )
 
-        # Post-conditions:
-        assert query.requires_grad is False
-        assert query_geometry_logits.requires_grad is False
-
         return query, query_geometry_logits, dn_self_attn_mask, dn_meta
 
     def forward(
         self,
-        query: torch.Tensor, query_geometry_logits: torch.Tensor,
+        query: torch.Tensor,
+        query_geometry_logits: torch.Tensor,
         value: torch.Tensor,
         value_spatial_sizes: list[tuple[int, int]],
         value_mask: torch.Tensor | None = None,
@@ -488,8 +498,11 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         )
 
         # Separate the denoising groups and the top-K image-based queries.
-        if targets is not None:
-            assert type(dn_meta) is dict
+        #
+        # Be careful: sometimes the data augmentation will yield no
+        # ground-truth data. So the condition `if targets is not None` is not
+        # sufficient
+        if dn_meta is not None:
             partition = dn_meta['dn_partition']
             dn_boxes, detection_boxes = torch.split(
                 query_geometries, partition, dim=2

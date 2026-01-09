@@ -32,7 +32,8 @@ def fix_ltrb_coords(boxes: torch.Tensor) -> torch.Tensor:
 
 def inter_and_union_areas(
     boxes1: torch.Tensor,
-    boxes2: torch.Tensor
+    boxes2: torch.Tensor,
+    only_compute_diagonal: bool = False
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """
     Parameters:
@@ -63,8 +64,13 @@ def inter_and_union_areas(
     # The max operation coupled with the broadcasting rule produce a tensor of
     # shape:
     # [max, (M, 1, 2), (N, 2)] --> (M, N, 2)
-    inter_lt = torch.max(lt1[:, None, :], lt2)
-    inter_rb = torch.min(rb1[:, None, :], rb2)
+    if only_compute_diagonal:
+        assert boxes1.shape == boxes2.shape
+        inter_lt = torch.max(lt1, lt2)
+        inter_rb = torch.min(rb1, rb2)
+    else:
+        inter_lt = torch.max(lt1[:, None, :], lt2)
+        inter_rb = torch.min(rb1[:, None, :], rb2)
 
     inter_wh = (inter_rb - inter_lt).clamp(min=0.)    # (M, N, 2)
     inter_area = inter_wh[..., 0] * inter_wh[..., 1]  # (M, N)
@@ -77,15 +83,19 @@ def inter_and_union_areas(
 
     # With the broadcasting rule
     #            (M, 1)           (1, N)           (M, N)
-    union_area = area1[:, None] + area2[None, :] - inter_area
-    # Shape is (M, N)
+    if only_compute_diagonal:
+        union_area = area1 + area2 - inter_area
+    else:
+        union_area = area1[:, None] + area2[None, :] - inter_area
+        # Shape is (M, N)
 
     return inter_area, union_area
 
 
 def smallest_enclosing_box_area(
     boxes1: torch.Tensor,
-    boxes2: torch.Tensor
+    boxes2: torch.Tensor,
+    only_compute_diagonal: bool = False
 ) -> torch.Tensor:
     lt1 = boxes1[:, :2]  # Shape is (M, 2)
     lt2 = boxes2[:, :2]  # Shape is (N, 2)
@@ -99,8 +109,13 @@ def smallest_enclosing_box_area(
     # The max operation coupled with the broadcasting rule produce a tensor of
     # shape:
     # [max, (M, 1, 2), (N, 2)] --> (M, N, 2)
-    lt_encl = torch.min(lt1[:, None, :], lt2)
-    rb_encl = torch.max(rb1[:, None, :], rb2)
+    if only_compute_diagonal:
+        assert boxes1.shape == boxes2.shape
+        lt_encl = torch.min(lt1, lt2)
+        rb_encl = torch.max(rb1, rb2)
+    else:
+        lt_encl = torch.min(lt1[:, None, :], lt2)
+        rb_encl = torch.max(rb1[:, None, :], rb2)
 
     wh_encl = (rb_encl - lt_encl).clamp(min=0.) # (M, N, 2)
     a_encl = wh_encl[..., 0] * wh_encl[..., 1]  # (M, N)

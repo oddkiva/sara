@@ -3,6 +3,8 @@
 from typing import Any
 
 import torch
+import torch.nn.functional as F
+
 import torchvision
 import torchvision.transforms.v2 as v2
 from torchvision.tv_tensors import BoundingBoxFormat, BoundingBoxes
@@ -40,3 +42,25 @@ class ToNormalizedCXCYWHBoxes(v2.Transform):
 
     def transform(self, boxes: Any, params: dict[str, Any]) -> Any:
         return self._transform(boxes, params)
+
+
+class ToNormalizedFloat32(v2.Transform):
+    _transformed_types = (
+        torch.Tensor,
+    )
+    def __init__(self, dtype='float32', scale=True) -> None:
+        super().__init__()
+        self.dtype = dtype
+        self.scale = scale
+
+    def _transform(self, inpt: Any, _: dict[str, Any]) -> Any:  
+        if self.dtype == 'float32':
+            inpt = inpt.float()
+
+        if self.scale:
+            inpt = inpt / 255.
+
+        return inpt
+
+    def transform(self, inpt: Any, params: dict[str, Any]) -> Any:
+        return self._transform(inpt, params)

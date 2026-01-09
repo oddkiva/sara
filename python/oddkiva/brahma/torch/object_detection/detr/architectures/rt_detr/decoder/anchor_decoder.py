@@ -44,12 +44,14 @@ class AnchorGeometryLogitEnumerator(nn.Module):
     @torch.no_grad()
     def forward(
         self,
-        pyramid_image_wh_sizes: list[tuple[int, int]]
+        pyramid_image_wh_sizes: list[tuple[int, int]],
+        device: torch.device
     ) -> tuple[torch.Tensor, torch.Tensor]:
         anchor_pyramid = enumerate_anchor_pyramid(
             pyramid_image_wh_sizes,
             normalized_base_box_size=self.normalized_base_size,
-            normalize_anchor_geometry=True
+            normalize_anchor_geometry=True,
+            device=device
         )
 
         anchors = torch.cat(anchor_pyramid, dim=0)
@@ -128,7 +130,8 @@ class AnchorDecoder(nn.Module):
                 raise ValueError()
             anchor_geometry_logits, anchor_mask = \
                 self.anchor_geometry_logit_enumerator.forward(
-                    image_pyramid_wh_sizes
+                    image_pyramid_wh_sizes,
+                    torch.device('cpu')
                 )
             # These are **not** learning parameters but we need to do this to
             # move the model to a custom device via the call `.to(device)`.
@@ -188,7 +191,8 @@ class AnchorDecoder(nn.Module):
         else:
             anchor_geometry_logits_refined, anchor_mask = \
                 self.anchor_geometry_logit_enumerator.forward(
-                    feature_pyramid_wh_sizes
+                    feature_pyramid_wh_sizes,
+                    memory.device
                 )
 
         memory_filtered = anchor_mask.to(dtype=memory.dtype) * memory

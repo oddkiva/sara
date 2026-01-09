@@ -1,5 +1,3 @@
-import torch
-
 from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import (
     ResNet50RTDETRV2Variant
 )
@@ -70,7 +68,7 @@ class QuerySelectorConfig:
     # The initial anchor geometries.
     anchor_normalized_base_box_sizes = 0.05
     anchor_geometry_logit_eps = 0.01
-    precalculate_anchor_geometry_logits = True
+    precalculate_anchor_geometry_logits = False
 
     # The query input dimension is the AIFI's output query dimension
     encoding_dim = 256
@@ -141,3 +139,6 @@ class RTDETRConfig:
 
     assert encoder.encoding_dim == query_selector.encoding_dim
     assert query_selector.hidden_dim == decoder.hidden_dim
+
+    def setup_for_inference(self, inference: bool) -> None:
+        self.query_selector.precalculate_anchor_geometry_logits = True

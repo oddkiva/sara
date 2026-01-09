@@ -9,7 +9,8 @@ from oddkiva.brahma.torch.object_detection.common.box_ops import (
 
 
 def iou(boxes1: T.Tensor, boxes2: T.Tensor,
-        eps: float = 1e-8) -> T.Tensor:
+        eps: float = 1e-8,
+        only_compute_diagonal: bool = False) -> T.Tensor:
     r"""
     Calculates the ratio of the intersection over the union, aka the Jaccard
     index for all possible pairs of boxes $(i, j)$ where:
@@ -28,19 +29,27 @@ def iou(boxes1: T.Tensor, boxes2: T.Tensor,
                    {\mathrm{area}(\mathbf{b}_i \cup \mathbf{b}_j)}.
             $$
     """
-    inter, union = inter_and_union_areas(boxes1, boxes2)
+    inter, union = inter_and_union_areas(
+        boxes1, boxes2,
+        only_compute_diagonal=only_compute_diagonal
+    )
     return inter / union.clamp(min=eps)
 
 
 def penalized_iou(boxes1: T.Tensor, boxes2: T.Tensor,
-                  eps: float = 1e-8) -> T.Tensor:
+                  eps: float = 1e-8,
+                  only_compute_diagonal: bool = False) -> T.Tensor:
     """
     This is the actual generalized IoU (https://giou.stanford.edu/).
     """
     assert (boxes1[:, 2:] >= boxes1[:, :2]).all()
     assert (boxes2[:, 2:] >= boxes2[:, :2]).all()
-    a_inter, a_union = inter_and_union_areas(boxes1, boxes2)
-    a_encl = smallest_enclosing_box_area(boxes1, boxes2)
+    a_inter, a_union = inter_and_union_areas(
+        boxes1, boxes2, only_compute_diagonal=only_compute_diagonal
+    )
+    a_encl = smallest_enclosing_box_area(
+        boxes1, boxes2, only_compute_diagonal=only_compute_diagonal
+    )
 
     # The classical IoU score.
     iou = a_inter / a_union.clamp(min=eps)
@@ -56,7 +65,7 @@ def penalized_iou(boxes1: T.Tensor, boxes2: T.Tensor,
 
 
 def giou(boxes1: T.Tensor, boxes2: T.Tensor, normalize: bool,
-         eps: float = 1e-8) -> T.Tensor:
+         eps: float = 1e-8, only_compute_diagonal: bool = False) -> T.Tensor:
     r"""
     Actually... the [generalized IoU](https://giou.stanford.edu/) (gIoU) could be
     re-explained with an alternative interpretation.
@@ -129,9 +138,15 @@ def giou(boxes1: T.Tensor, boxes2: T.Tensor, normalize: bool,
     # so do an early check
     assert (boxes1[:, 2:] >= boxes1[:, :2]).all()
     assert (boxes2[:, 2:] >= boxes2[:, :2]).all()
-    a_inter, a_union = inter_and_union_areas(boxes1, boxes2)
+    a_inter, a_union = inter_and_union_areas(
+        boxes1, boxes2,
+        only_compute_diagonal=only_compute_diagonal
+    )
 
-    a_encl = smallest_enclosing_box_area(boxes1, boxes2)
+    a_encl = smallest_enclosing_box_area(
+        boxes1, boxes2,
+        only_compute_diagonal=only_compute_diagonal
+    )
 
     # The classical IoU score.
     iou_1 = a_inter / a_union.clamp(min=eps)
@@ -146,10 +161,15 @@ def giou(boxes1: T.Tensor, boxes2: T.Tensor, normalize: bool,
 
 
 def loss_iou(boxes1: T.Tensor, boxes2: T.Tensor,
-             eps: float = 1e-8) -> T.Tensor:
-    return 1 - loss_iou(boxes1, boxes2, eps=eps)
+             eps: float = 1e-8,
+             only_compute_diagonal: bool = False) -> T.Tensor:
+    return 1 - loss_iou(boxes1, boxes2,
+                        eps=eps,
+                        only_compute_diagonal=only_compute_diagonal)
 
 
 def loss_giou(boxes1: T.Tensor, boxes2: T.Tensor,
-              eps: float = 1e-8) -> T.Tensor:
-    return 1 - giou(boxes1, boxes2, normalize=True, eps=eps)
+              eps: float = 1e-8,
+              only_compute_diagonal: bool = False) -> T.Tensor:
+    return 1 - giou(boxes1, boxes2, True,
+                    eps=eps, only_compute_diagonal=only_compute_diagonal)

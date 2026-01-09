@@ -56,10 +56,10 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
     @dataclass
     class Output:
-        box_labels: torch.Tensor
-        box_geometry_logits: torch.Tensor
-        attention_mask: torch.Tensor
-        dn_meta: dict[str, Any]
+        box_labels: torch.Tensor | None
+        box_geometry_logits: torch.Tensor | None
+        attention_mask: torch.Tensor | None
+        dn_meta: dict[str, Any] | None
 
         def populate_matching(
             self,
@@ -157,7 +157,8 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
             self.box_label_alter_prob < 1.0
 
         p_perturb = self.box_label_alter_prob * 0.5
-        uni01_samples = torch.rand(rep_box_labels.shape)
+        uni01_samples = torch.rand(rep_box_labels.shape,
+                                   device=rep_box_labels.device)
         mask_perturb = uni01_samples < p_perturb
 
         wrong_labels = torch.randint_like(rep_box_labels,
@@ -317,6 +318,8 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
         assert len(boxes) == len(labels)
 
         box_count_max = max([len(b) for b in boxes])
+        if box_count_max == 0:
+            return self.Output(None, None, None, None)
 
         # The number of so-called `denoising groups` in DN-DETR.
         dn_group_count = self.box_count // box_count_max
