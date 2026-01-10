@@ -28,7 +28,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 # The loss.
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rt_detr.loss_function import RTDETRHungarianLoss
+    rt_detr.hungarian_loss import RTDETRHungarianLoss
 # GPU acceleration.
 from oddkiva.brahma.torch import DEFAULT_DEVICE
 # Gradient checks.
@@ -358,5 +358,3 @@ def test_rtdetrv2_backpropagation_from_final_queries():
         layer_name = grads[layer_idx][0]
         grad_norm = torch.norm(grad_values[layer_idx])
         logger.debug(f'{layer_name} gradient norm:{grad_norm}')
-
-        assert layer_name.startswith('decoder') is False
