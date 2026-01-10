@@ -56,17 +56,21 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
     @dataclass
     class Output:
-        box_labels: torch.Tensor | None
-        box_geometry_logits: torch.Tensor | None
+        labels: torch.Tensor | None
+        geometries: torch.Tensor | None
         attention_mask: torch.Tensor | None
-        dn_meta: dict[str, Any] | None
+        positive_indices: torch.Tensor | None = None
+        group_count: int | None = None
+        partition: list[int] | None  = None
 
         def populate_matching(
             self,
             target_labels: list[torch.Tensor],
         ) -> list[tuple[torch.Tensor, torch.Tensor]]:
-            dn_positive_ixs = self.dn_meta['dn_positive_ixs'],
-            dn_group_count = self.dn_meta['dn_group_count']
+            dn_positive_ixs = self.positive_indices
+            dn_group_count = self.group_count
+            assert dn_positive_ixs is not None
+            assert dn_group_count is not None
 
             tcount_per_image = [len(tlabels_n) for tlabels_n in target_labels]
             device = target_labels[0].device
@@ -172,8 +176,10 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
         return rep_labels_perturbed
 
-    def alter_box_geometries(self, rep_box_geometries: torch.Tensor,
+    def alter_box_geometries(self,
+                             rep_box_geometries: torch.Tensor,
                              rep_box_mask: torch.Tensor,
+                             box_count_per_image: list[int],
                              N: int, B: int, G: int):
         r"""
         Parameters:
@@ -226,7 +232,19 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
         # Remember the positive samples are built off real box data.
         P_mask = P_mask.squeeze(-1) * rep_box_mask
+
+        # Now populate the positive indices.
         positive_ixs = torch.nonzero(P_mask)
+        # Group the list of positive box indices per image.
+        #
+        # 1. Remove the image index in the batch sample.
+        positive_ixs = positive_ixs[:, 1]
+        # 2. Group the positive box indices by images
+        positive_sizes_per_image = [box_count_n * G
+                                    for box_count_n in box_count_per_image]
+        positive_ixs = torch.split(positive_ixs, positive_sizes_per_image)
+
+        # Let us turn our attention to the noise process.
         rep_box_whs = rep_box_geometries[:, :, 2:]
 
         # The noise absolute magnitude is bounded (w/2, h/2).
@@ -317,9 +335,10 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
     ) -> Output:
         assert len(boxes) == len(labels)
 
-        box_count_max = max([len(b) for b in boxes])
+        box_count_per_image = [len(b) for b in boxes]
+        box_count_max = max(box_count_per_image)
         if box_count_max == 0:
-            return self.Output(None, None, None, None)
+            return self.Output(None, None, None)
 
         # The number of so-called `denoising groups` in DN-DETR.
         dn_group_count = self.box_count // box_count_max
@@ -353,9 +372,9 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
                                             rep_box_pad_mask)
         dn_geometries, positive_ixs = self.alter_box_geometries(
             rep_box_geometries, rep_box_pad_mask,
+            box_count_per_image,
             N, B, G
         )
-        dn_geometry_logits = inverse_sigmoid(dn_geometries)
 
         # ----------------------------------------------------------------------
         # Build the attention mask as explained in DN-DETR.
@@ -381,11 +400,9 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
         return self.Output(
             dn_labels,
-            dn_geometry_logits,
+            dn_geometries,
             attn_mask,
-            {
-                'dn_positive_ixs': positive_ixs,
-                'dn_group_count': dn_group_count,
-                'dn_partition': (dn_box_count, query_count)
-            }
+            positive_indices=positive_ixs,
+            group_count=dn_group_count,
+            partition=[dn_box_count, query_count]
         )

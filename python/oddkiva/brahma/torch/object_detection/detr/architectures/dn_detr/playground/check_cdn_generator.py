@@ -67,10 +67,10 @@ def from_normalized_cxcywh_to_rescaled_ltwh(
 
 
 def get_ltwh_boxes(
-    box_geometry_logits: torch.Tensor,
+    box_geometries: torch.Tensor,
     hw: tuple[int, int]
 ) -> torch.Tensor:
-    boxes = F.sigmoid(box_geometry_logits)
+    boxes = F.sigmoid(box_geometries)
     whwh = torch.tensor(hw[::-1]).tile(2)[None, ...]
     boxes = box_convert(boxes * whwh, 'cxcywh', 'xywh')
     return boxes
@@ -148,8 +148,10 @@ def user_main():
     for n in range(len(img)):
         sara.draw_image(img[n].permute(1, 2, 0).contiguous().numpy())
         # Show the noised boxes first before the ground-truth boxes for clarity.
-        dn_boxes = get_ltwh_boxes(dng.box_geometry_logits[n], boxes[n].canvas_size)
-        dn_labels = dng.box_labels[n]
+        assert dng.geometries is not None
+        assert dng.labels is not None
+        dn_boxes = get_ltwh_boxes(dng.geometries[n], boxes[n].canvas_size)
+        dn_labels = dng.labels[n]
         draw_dn_boxes(dn_boxes, dn_labels, class_count, label_colors, font)
 
         # Now show the ground-truth boxes.

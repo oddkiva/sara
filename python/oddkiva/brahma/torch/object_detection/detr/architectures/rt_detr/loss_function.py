@@ -15,6 +15,9 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
 
 
 class RTDETRLossFunction(nn.Module):
+    """
+    The composite Hungarian loss function used in RT-DETR v2.
+    """
 
     def __init__(self,
                  weight_dict: dict[str, float],
@@ -89,7 +92,6 @@ class RTDETRLossFunction(nn.Module):
             torch.distributed.all_reduce(tcount)
         tcount = torch.clamp(tcount / get_world_size(), min=1).item()
 
-
     def compute_loss_dict(self,
                           qboxes, qlogits,
                           tboxes, tlabels,
@@ -102,7 +104,6 @@ class RTDETRLossFunction(nn.Module):
                                               num_boxes),
             'box': self.box_loss.forward(qboxes, tboxes, matching)
         }
-
 
     def forward(self,
                 query_boxes: torch.Tensor,

@@ -8,7 +8,15 @@ import torch
 def hook_forward(module_name: str, grads, hook_backward):
     def hook(module, args, output):
         """Forward pass hook which attaches backward pass hooks to intermediate tensors"""
-        output.register_hook(hook_backward(module_name, grads))
+        if isinstance(output, torch.Tensor):
+            if output.requires_grad:
+                output.register_hook(hook_backward(module_name, grads))
+        elif isinstance(output, tuple):
+            for out_i in output:
+                if isinstance(out_i, torch.Tensor) and out_i.requires_grad:
+                    out_i.register_hook(hook_backward(module_name, grads))
+        else:
+            raise NotImplementedError()
     return hook
 
 
@@ -23,10 +31,12 @@ def track_all_layer_gradients(model: torch.nn.Module, hook_forward, hook_backwar
     """Register forward pass hook (which registers a backward hook) to model outputs
 
     Returns:
-        - layers: a dict with keys as layer/module and values as layer/module names
-                  e.g. layers[nn.Conv2d] = layer1.0.conv1
-        - grads: a list of tuples with module name and tensor output gradient
-                 e.g. grads[0] == (layer1.0.conv1, tensor.Torch(...))
+        layers:
+            a dict with keys as layer/module and values as layer/module names
+            e.g. layers[nn.Conv2d] = layer1.0.conv1
+        grads:
+            a list of tuples with module name and tensor output gradient, e.g.
+            grads[0] == (layer1.0.conv1, tensor.Torch(...))
     """
     layers = dict()
     grads = []

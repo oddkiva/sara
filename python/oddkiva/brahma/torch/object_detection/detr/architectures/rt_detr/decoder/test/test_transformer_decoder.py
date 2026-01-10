@@ -600,7 +600,8 @@ def test_transformer_decoder_api():
     layers_gt = data['intermediate']['decoder']['decoder.layer-by-layer']
 
     (box_geometries, box_class_logits,
-     dn_boxes, dn_class_logits) = decoder(
+     dn_boxes, dn_class_logits,
+     dn_groups) = decoder.forward(
          query, query_geometry_logits,
          value, value_spatial_sizes,
          value_mask=value_mask
@@ -612,6 +613,14 @@ def test_transformer_decoder_api():
     assert relative_error(box_class_logits, box_class_logits_true) < 5e-6
     assert dn_boxes is None
     assert dn_class_logits is None
+
+    # Check the input denoising groups.
+    assert dn_groups.labels is None
+    assert dn_groups.geometries is None
+    assert dn_groups.attention_mask is None
+    assert dn_groups.positive_indices is None
+    assert dn_groups.group_count is None
+    assert dn_groups.partition is None
 
 def test_transformer_decoder_from_config():
     ckpt = RTDETRV2Checkpoint(CKPT_FILEPATH, torch.device('cpu'))
@@ -636,7 +645,8 @@ def test_transformer_decoder_from_config():
     layers_gt = data['intermediate']['decoder']['decoder.layer-by-layer']
 
     (box_geometries, box_class_logits,
-     dn_boxes, dn_class_logits) = decoder(
+     dn_boxes, dn_class_logits,
+     dn_groups) = decoder(
          query, query_geometry_logits,
          value, value_spatial_sizes,
          value_mask=value_mask
@@ -648,3 +658,11 @@ def test_transformer_decoder_from_config():
     assert relative_error(box_class_logits, box_class_logits_true) < 5e-6
     assert dn_boxes is None
     assert dn_class_logits is None
+
+    # Check the input denoising groups.
+    assert dn_groups.labels is None
+    assert dn_groups.geometries is None
+    assert dn_groups.attention_mask is None
+    assert dn_groups.positive_indices is None
+    assert dn_groups.group_count is None
+    assert dn_groups.partition is None

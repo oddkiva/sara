@@ -1,7 +1,6 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
 from collections import OrderedDict
-from dataclasses import astuple
 
 import math
 
@@ -14,7 +13,8 @@ from oddkiva.brahma.torch.backbone.multi_layer_perceptron import (
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     dn_detr.contrastive_denoising_group_generator import (
-        ContrastiveDenoisingGroupGenerator
+        ContrastiveDenoisingGroupGenerator,
+        inverse_sigmoid
     )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     deformable_detr.multiscale_deformable_attention import (
@@ -414,25 +414,28 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         query: torch.Tensor,
         query_geometry_logits: torch.Tensor,
         targets: dict[str, list[torch.Tensor]]
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict]:
+    ) -> tuple[
+        torch.Tensor,
+        torch.Tensor,
+        ContrastiveDenoisingGroupGenerator.Output
+    ]:
         # Pre-conditions:
         assert query.requires_grad is False
         assert query_geometry_logits.requires_grad is False
 
         query_count = query.shape[1]
-        (dn_labels,
-         dn_geometry_logits,
-         dn_self_attn_mask,
-         dn_meta) = astuple(self.dn_group_gen.forward(query_count,
-                                                      targets['boxes'],
-                                                      targets['labels']))
+        dn_groups = self.dn_group_gen.forward(query_count,
+                                              targets['boxes'],
+                                              targets['labels'])
 
-        if dn_labels is None:
-            assert dn_geometry_logits is None
-            assert dn_self_attn_mask is None
-            assert dn_meta is None
+        if dn_groups.labels is None:
+            assert dn_groups.geometries is None
+            assert dn_groups.attention_mask is None
+            assert dn_groups.positive_indices is None
+            assert dn_groups.group_count is None
+            assert dn_groups.partition is None
 
-            return query, query_geometry_logits, dn_self_attn_mask, dn_meta
+            return query, query_geometry_logits, dn_groups
 
         # dn_attn_mask is a self-attention mask
         #
@@ -446,7 +449,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         # negative samples and likewise the common features between
         # positive samples.
 
-        dn_query = self.box_class_embedding_map(dn_labels)
+        dn_query = self.box_class_embedding_map(dn_groups.labels)
 
         # Fuse the noised ground-truth queries and the top-K queries in
         # that following order because of the construction of the
@@ -455,12 +458,14 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             (dn_query, query),
             dim=1
         )
+        assert dn_groups.geometries is not None
+        dn_geometry_logits = inverse_sigmoid(dn_groups.geometries)
         query_geometry_logits = torch.cat(
             (dn_geometry_logits, query_geometry_logits),
             dim=1
         )
 
-        return query, query_geometry_logits, dn_self_attn_mask, dn_meta
+        return query, query_geometry_logits, dn_groups
 
     def forward(
         self,
@@ -471,24 +476,24 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         value_mask: torch.Tensor | None = None,
         targets: dict[str, list[torch.Tensor]] | None = None
     ) -> tuple[torch.Tensor, torch.Tensor,
-               torch.Tensor | None, torch.Tensor | None]:
+               torch.Tensor | None, torch.Tensor | None,
+               ContrastiveDenoisingGroupGenerator.Output]:
         if targets is not None:
             (query,
              query_geometry_logits,
-             query_self_attn_mask,
-             dn_meta) = self.augment_query_with_dn_groups(
-                 query, query_geometry_logits,
-                 targets
-             )
+             dn_groups) = self.augment_query_with_dn_groups(query,
+                                                            query_geometry_logits,
+                                                            targets)
         else:
-            dn_meta = None
-            query_self_attn_mask = None
+            dn_groups = ContrastiveDenoisingGroupGenerator.Output(
+                None, None, None
+            )
 
         query_geometries, query_class_logits = self.decode(
             query,
             query_geometry_logits,
             value, value_spatial_sizes,
-            query_self_attn_mask=query_self_attn_mask,
+            query_self_attn_mask=dn_groups.attention_mask,
             value_mask=value_mask
         )
 
@@ -497,8 +502,8 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         # Be careful: sometimes the data augmentation will yield no
         # ground-truth data. So the condition `if targets is not None` is not
         # sufficient
-        if dn_meta is not None:
-            partition = dn_meta['dn_partition']
+        if dn_groups.partition is not None:
+            partition = dn_groups.partition
             dn_boxes, detection_boxes = torch.split(
                 query_geometries, partition, dim=2
             )
@@ -512,5 +517,6 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
 
         return (
             detection_boxes, detection_class_logits,
-            dn_boxes, dn_class_logits
+            dn_boxes, dn_class_logits,
+            dn_groups
         )

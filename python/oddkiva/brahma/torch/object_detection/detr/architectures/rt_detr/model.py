@@ -54,14 +54,15 @@ class RTDETRv2(nn.Module):
         # At inference time, ensure that the embed vectors and geometry logits
         # are made non differentiable at the decoding stage.
         (detection_boxes, detection_class_logits,
-         dn_boxes, dn_class_logits) = self.decoder.forward(
+         dn_boxes, dn_class_logits,
+         dn_groups) = self.decoder.forward(
              top_queries.detach(), top_geometry_logits.detach(),
              value, value_pyramid_hw_sizes,
              value_mask=value_mask,
              targets=targets
          )
 
-        remaining_train_outputs = {
+        aux_train_outputs = {
             # To optimize:
             # - the backbone,
             # - AIFI+CCFF hybrid encoder,
@@ -71,6 +72,9 @@ class RTDETRv2(nn.Module):
 
             # Denoising groups to accelerate the training convergence.
             'dn_boxes': (dn_boxes, dn_class_logits),
+
+            # The input denoising groups of boxes.
+            'dn_groups': dn_groups
         }
 
-        return detection_boxes, detection_class_logits, remaining_train_outputs
+        return detection_boxes, detection_class_logits, aux_train_outputs

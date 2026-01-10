@@ -77,13 +77,16 @@ def test_contrastive_denoising_group_generator():
     G = dn_group_gen.box_count // B
     group_size = 2 * B
 
-    assert dn_groups.dn_meta['dn_group_count'] == G
-    assert dn_groups.box_labels.shape == (batch_size, B * G * 2)
-    assert dn_groups.box_geometry_logits.shape == (batch_size, B * G * 2, 4)
+    assert dn_groups.group_count == G
+    assert dn_groups.labels is not None
+    assert dn_groups.labels.shape == (batch_size, B * G * 2)
+    assert dn_groups.geometries is not None
+    assert dn_groups.geometries.shape == (batch_size, B * G * 2, 4)
 
     # Let's confirm our understanding of how `dn_positive_ixs` is constructed.
     dn_splits = [len(b) * G for b in boxes]
-    dn_pos_ixs = dn_groups.dn_meta['dn_positive_ixs']
+    dn_pos_ixs = dn_groups.positive_indices
+    assert dn_pos_ixs is not None
     dn_pos_ixs_partition = torch.split(dn_pos_ixs, dn_splits)
     assert len(dn_pos_ixs_partition) == batch_size
 
@@ -116,7 +119,7 @@ def test_contrastive_denoising_group_generator():
         assert torch.equal(pos_ixs_n, dn_pos_ixs_n[:, 1])
 
     # Check the geometries of replicated boxes.
-    dn_geometries = torch.nn.functional.sigmoid(dn_groups.box_geometry_logits)
+    dn_geometries = dn_groups.geometries
     for n in range(1):#batch_size):
         logger.debug(f'Examining geometries for training sample {n}...')
         num_boxes_n = len(boxes[n])

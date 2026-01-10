@@ -70,7 +70,8 @@ def test_model_from_config_detailed():
         for encoding_map in encoding_pyramid
     ]
     (detection_boxes, detection_class_logits,
-     dn_boxes, dn_class_logits) = model.decoder(
+     dn_boxes, dn_class_logits,
+     dn_groups) = model.decoder(
          top_queries.detach(), top_geometry_logits.detach(),
          value, value_pyramid_hw_sizes,
          value_mask=value_mask
@@ -84,6 +85,14 @@ def test_model_from_config_detailed():
     assert relative_error(detection_class_logits, detection_class_logits_true) < 6e-4
     assert dn_boxes is None
     assert dn_class_logits is None
+
+    # Check the input denoising groups.
+    assert dn_groups.labels is None
+    assert dn_groups.geometries is None
+    assert dn_groups.attention_mask is None
+    assert dn_groups.positive_indices is None
+    assert dn_groups.group_count is None
+    assert dn_groups.partition is None
 
 
 def test_model_from_config():
