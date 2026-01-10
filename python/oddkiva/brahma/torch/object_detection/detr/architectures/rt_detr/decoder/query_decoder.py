@@ -389,7 +389,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             # Estimate the new object class logits (object class probabilities).
             query_class_logits_next = self.box_class_logit_heads[i](query_next)
 
-            # Estimate the new object geometry (cx cy w h).
+            # Estimate the new object geometry (cx, cy, w, h).
             Δ_query_geom_logits = self.box_geometry_logit_heads[i](query_next)
             query_geom_logits_next = \
                 query_geom_logits_curr + Δ_query_geom_logits
@@ -404,6 +404,11 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             query_geom_logits_curr = query_geom_logits_next
             # Make sure that we only optimize the residuals at the training
             # stage.
+            #
+            # We detach `query_geom_curr` from the gradient flow graph, to make
+            # sure we don't backpropagate the gradients further to previous
+            # decoding layers that calculated the previous iterations of the
+            # query objects.
             query_geom_curr = query_geom_next.detach()
 
         return (torch.stack(query_geometries_denoised),
