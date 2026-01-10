@@ -84,26 +84,16 @@ def test_contrastive_denoising_group_generator():
     assert dn_groups.geometries.shape == (batch_size, B * G * 2, 4)
 
     # Let's confirm our understanding of how `dn_positive_ixs` is constructed.
-    dn_splits = [len(b) * G for b in boxes]
     dn_pos_ixs = dn_groups.positive_indices
     assert dn_pos_ixs is not None
-    dn_pos_ixs_partition = torch.split(dn_pos_ixs, dn_splits)
-    assert len(dn_pos_ixs_partition) == batch_size
+    assert len(dn_pos_ixs) == batch_size
 
     # Check the indexing of the replicated positive (noised ground-truth)
     # boxes.
     #
-    # Each positive boxes is referenced by the pair (n, b), where
-    # - `n` indexes the training sample.
-    # - `b` is the local index of the positive boxes.
-    #
     # We are now checking that the partition correctly groups the positive
     # boxes by training sample.
-    for n, dn_pos_ixs_n in enumerate(dn_pos_ixs_partition):
-        # Check that each subsets of the partition only lists positive boxes in
-        # the training sample `n`.
-        assert torch.all(dn_pos_ixs_n[:, 0] == n)
-
+    for n, dn_pos_ixs_n in enumerate(dn_pos_ixs):
         # The positive boxes are the replicated ground-truth boxes and they are
         # replicated `G` times.
         #
@@ -116,7 +106,7 @@ def test_contrastive_denoising_group_generator():
             torch.arange(group_size * g, group_size * g + num_boxes_n)
             for g in range(G)
         ], dim = -1)
-        assert torch.equal(pos_ixs_n, dn_pos_ixs_n[:, 1])
+        assert torch.equal(pos_ixs_n, dn_pos_ixs_n)
 
     # Check the geometries of replicated boxes.
     dn_geometries = dn_groups.geometries
