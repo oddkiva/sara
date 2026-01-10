@@ -22,6 +22,10 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.config import RTDETRConfig
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.model import RTDETRv2
+from oddkiva.brahma.torch.object_detection.detr.architectures.\
+    dn_detr.contrastive_denoising_group_generator import (
+        ContrastiveDenoisingGroupGenerator
+    )
 # The loss.
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.loss_function import RTDETRLossFunction
@@ -227,6 +231,7 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
     # Calculate the loss only for the predicted anchor boxes.
     (dn_geometries, dn_class_logits) = aux_train_outs['dn_boxes']
     dn_groups = aux_train_outs['dn_groups']
+    assert type(dn_groups) is ContrastiveDenoisingGroupGenerator.Output
 
     # The Hungarian loss.
     #
@@ -246,7 +251,7 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
     # 2. Calculate the loss value for anchor boxes based on the matching.
     # iterations = dn_geometries.shape[0]
     # for i in range(iterations):
-    i = -1
+    i = 0
 
     logger.info('[Hungarian Loss] 2. Calculating the composite loss function...')
     loss_dict = loss_fn.compute_loss_dict(dn_geometries[i], dn_class_logits[i],

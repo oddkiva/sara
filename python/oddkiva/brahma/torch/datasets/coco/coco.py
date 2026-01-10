@@ -6,7 +6,10 @@ from pathlib import Path
 from typing import Any, Literal
 
 import torch
-from torchvision.io import decode_image
+if torch.torch_version.TorchVersion(torch.__version__) < (2, 6, 0):
+    from torchvision.io.image import read_image as decode_image
+else:
+    from torchvision.io.image import decode_image
 
 from oddkiva import DATA_DIR_PATH
 

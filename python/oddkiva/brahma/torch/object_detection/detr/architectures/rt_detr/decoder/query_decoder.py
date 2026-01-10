@@ -442,7 +442,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
 
             return query, query_geometry_logits, dn_groups
 
-        # dn_attn_mask is a self-attention mask
+        # `dn_groups.attention_mask` is a self-attention mask
         #
         # The denoising group generator is so-called "contrastive" as it
         # generates negative and positive samples.

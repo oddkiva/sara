@@ -113,7 +113,8 @@ class RTDETRLossFunction(nn.Module):
                 dn_groups: ContrastiveDenoisingGroupGenerator.Output,
                 target_boxes: list[torch.Tensor],
                 target_labels: list[torch.Tensor]):
-        """ This performs the loss computation.
+        """ Calculates the linear combination of several Hungarian losses used
+        in RT-DETR.
         """
         assert len(query_boxes.shape) == 4  # (iterations, batch_size, top_K, 4)
         assert query_boxes.shape[1:] == anchor_boxes.shape

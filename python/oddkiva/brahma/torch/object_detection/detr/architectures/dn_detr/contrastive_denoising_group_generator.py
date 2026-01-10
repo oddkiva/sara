@@ -85,10 +85,8 @@ class ContrastiveDenoisingGroupGenerator(nn.Module):
 
                     matching.append((dn_pos_ixs_n, tixs_n))
                 else:
-                    matching.append(
-                        (torch.zeros(-1, dtype=torch.int64, device=device),
-                         torch.zeros(-1, dtype=torch.int64, device=device))
-                    )
+                    empty = torch.tensor([], dtype=torch.int64, device=device)
+                    matching.append((empty, empty))
 
             return matching
 
