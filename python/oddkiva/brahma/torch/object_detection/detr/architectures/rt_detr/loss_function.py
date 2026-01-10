@@ -106,11 +106,17 @@ class RTDETRLossFunction(nn.Module):
         }
 
     def forward(self,
+                # The final box predictions.
                 query_boxes: torch.Tensor,
                 query_class_logits: torch.Tensor,
+                # Intermediate training outputs.
                 anchor_boxes: torch.Tensor,
                 anchor_class_logits: torch.Tensor,
+                # Auxiliary denoising outputs.
+                dn_boxes: torch.Tensor,
+                dn_classs_logits: torch.Tensor,
                 dn_groups: ContrastiveDenoisingGroupGenerator.Output,
+                # The ground-truth data.
                 target_boxes: list[torch.Tensor],
                 target_labels: list[torch.Tensor]):
         """ This performs the loss computation.
@@ -125,7 +131,12 @@ class RTDETRLossFunction(nn.Module):
 
         matching = self.matcher(outputs_without_aux, targets)
 
-        # Optimize the transformer decoder using the FINAL predictions.
+        # Optimize:
+        # - the transformer decoder using the FINAL predictions.
+        # - the backbone+hybrid encoder is also optimized because we feed the
+        #   memory tensor.
+        #   The memory tensor is the flattened feature pyramid produced by the
+        #   backbone and the hybrid encoder.
         #
         # We must minimize the errors in the box geometries and their object
         # class probability vectors *at each iteration* of the refinement
@@ -141,6 +152,9 @@ class RTDETRLossFunction(nn.Module):
         #
         # We must minimize the errors in the box geometries and their object
         # class probability vectors *at each iteration* of the refinement
+        #
+        # Again note that the backbone+hybrid encoder is also optimized because
+        # we feed the memory tensor in the transformer decoder.
         losses_iterations = []
         for qboxes_i, qlogits_i in zip(query_boxes[:-1],
                                        query_class_logits[:-1]):
@@ -149,7 +163,6 @@ class RTDETRLossFunction(nn.Module):
             losses = self.compute_loss_dict(qboxes_i, qlogits_i,
                                             target_boxes, target_labels,
                                             matching_i, target_count)
-
             losses_iterations.append(losses)
 
         # Optimize:
@@ -159,16 +172,25 @@ class RTDETRLossFunction(nn.Module):
         #
         # The denoising process must minimize the errors in the box geometries
         # and the object class probability vectors.
+        #
+        # Likewise that the backbone+hybrid encoder is also optimized because
+        # we feed the memory tensor in the transformer decoder.
         matching_dn = dn_groups.populate_matching(target_labels)
-        dnboxes = F.sigmoid(dn_groups.box_geometry_logits)
-        dnlogits = F.one_hot(dn_groups.box_labels,
-                             num_classes=self.num_classes + 1)[..., :-1]
-        losses_dn = self.compute_loss_dict(dnboxes, dnlogits,
-                                           target_boxes, target_labels,
-                                           matching_dn, target_count)
+        tgt_boxes_dn = [
+            tgt_boxes_n[tixs_n]
+            for (tgt_boxes_n, (_, tixs_n)) in zip(tgt_boxes, matching_dn)
+        ]
+        tgt_labels_dn = [
+            tgt_labels_n[tixs_n]
+            for (tgt_labels_n, (_, tixs_n)) in zip(tgt_labels, matching_dn)
+        ]
+        losses_dn = [
+            self.compute_loss_dict(dn_boxes_i, dn_class_logits_i,
+                                   tgt_boxes_dn, tgt_labels_dn,
+                                   matching_dn, target_count)
+            for dn_boxes_i, dn_class_logits_i in zip(dn_boxes, dn_class_logits)
+        ]
 
-        # dn_groups.box_geometry_logits(
-        #     F.one_hot(dn_groups.box_labels
 
         # Optimize:
         # 1. the backbone, i.e., the PA-FPN -> HybridEncoder (AIFI+CCFF),

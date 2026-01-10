@@ -230,7 +230,7 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
 
     # The Hungarian loss.
     #
-    # 1. Calculate the matching for the anchor boxes.
+    # 1. Calculate the matching for the DN-groups of boxes.
     logger.info('[Hungarian Loss] 1. Matching with the Hungarian algorithm...')
     matching_dn = dn_groups.populate_matching(tgt_labels)
 
@@ -243,7 +243,109 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
         for (tgt_labels_n, (_, tixs_n)) in zip(tgt_labels, matching_dn)
     ]
 
-    # 2. Calculate the loss value for anchor boxes based on the matching.
+    # 2. Calculate the loss value for DN groups of boxes based on the matching.
+    # iterations = dn_geometries.shape[0]
+    # for i in range(iterations):
+    i = -1
+
+    logger.info('[Hungarian Loss] 2. Calculating the composite loss function...')
+    loss_dict = loss_fn.compute_loss_dict(dn_geometries[i], dn_class_logits[i],
+                                          tgt_boxes_dn, tgt_labels_dn,
+                                          matching_dn, tgt_count)
+    loss = sum([loss_dict[k].sum() for k in loss_dict])
+    loss.backward()
+
+    # Check the parameters that has changed and those that didn't.
+    layer_ixs, grad_values = collect_gradients(grads)
+
+    # Check that we don't update the deformable transformer decoder at all.
+    for layer_idx in layer_ixs:
+        layer_name = grads[layer_idx][0]
+        grad_norm = torch.norm(grad_values[layer_idx])
+        logger.debug(f'{layer_name} gradient norm:{grad_norm}')
+
+
+def test_rtdetrv2_backpropagation_from_final_queries():
+    gpu0 = DEFAULT_DEVICE
+
+    coco_val_dl = get_coco_val_dl()
+
+    logger.info(f"Getting first batch sample from COCO dataloader...")
+    coco_it = iter(coco_val_dl)
+
+    logger.info(f"Instantiating RT-DETR v2 model...")
+    rtdetrv2 = get_rtdetrv2_model()
+    rtdetrv2 = rtdetrv2.to(gpu0)
+
+    logger.info(
+        'Instantianting AdamW optimizer with default hardcoded parameters'
+    )
+    optimizer = torch.optim.AdamW(rtdetrv2.parameters(),
+                                  lr=1e-4,
+                                  betas=(0.9, 0.999),
+                                  weight_decay=1e-4)
+    optimizer.zero_grad()
+
+
+    logger.info(f"Tracking RT-DETR v2 gradients...")
+    layers, grads = track_all_layer_gradients(rtdetrv2, hook_forward, hook_backward)
+
+
+    # Obtain the first training sample.
+    logger.info(f"Obtaining the first training batch...")
+    img, tgt_boxes, tgt_labels = next(coco_it)
+    img = img.to(gpu0)
+    tgt_boxes = [b.to(gpu0) for b in tgt_boxes]
+    tgt_labels = [l.to(gpu0) for l in tgt_labels]
+    tgt_count = sum([len(l) for l in tgt_labels])
+    assert (0 <= img).all() and (img <= 1).all()
+    assert tgt_count > 0
+
+    # Feed the input to the object detection network.
+    logger.info(f"Feeding the first training batch to RT-DETR v2...")
+    x = img
+    targets = {
+        'boxes': tgt_boxes,
+        'labels': tgt_labels
+    }
+    box_geoms, box_class_logits, aux_train_outs = rtdetrv2.forward(
+        x, targets
+    )
+
+    # Calculate the losses.
+    logger.info(f"Calculating the Hungarian loss for the denoising groups...")
+    weight_dict = {
+        'vf': 1.0,
+        'box': 1.0
+    }
+    alpha = 0.2
+    gamma = 2.0
+    num_classes = 80
+    loss_fn = RTDETRLossFunction(weight_dict,
+                                 alpha=alpha,
+                                 gamma=gamma,
+                                 num_classes=num_classes)
+
+    # Calculate the loss only for the predicted anchor boxes.
+    (dn_geometries, dn_class_logits) = aux_train_outs['dn_boxes']
+    dn_groups = aux_train_outs['dn_groups']
+
+    # The Hungarian loss.
+    #
+    # 1. Calculate the matching for the DN-groups of boxes.
+    logger.info('[Hungarian Loss] 1. Matching with the Hungarian algorithm...')
+    matching_dn = dn_groups.populate_matching(tgt_labels)
+
+    tgt_boxes_dn = [
+        tgt_boxes_n[tixs_n]
+        for (tgt_boxes_n, (_, tixs_n)) in zip(tgt_boxes, matching_dn)
+    ]
+    tgt_labels_dn = [
+        tgt_labels_n[tixs_n]
+        for (tgt_labels_n, (_, tixs_n)) in zip(tgt_labels, matching_dn)
+    ]
+
+    # 2. Calculate the loss value for DN groups of boxes based on the matching.
     # iterations = dn_geometries.shape[0]
     # for i in range(iterations):
     i = -1
