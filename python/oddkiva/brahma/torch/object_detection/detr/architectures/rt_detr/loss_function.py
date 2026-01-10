@@ -2,7 +2,6 @@
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from oddkiva.brahma.torch.object_detection.losses.box_matcher import BoxMatcher
 from oddkiva.brahma.torch.object_detection.losses.box_loss import BoxLoss
@@ -14,7 +13,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 
 
-class RTDETRLossFunction(nn.Module):
+class RTDETRHungarianLoss(nn.Module):
     """
     The composite Hungarian loss function used in RT-DETR v2.
     """

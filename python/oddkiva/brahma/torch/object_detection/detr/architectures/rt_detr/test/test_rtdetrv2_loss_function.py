@@ -28,7 +28,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 # The loss.
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rt_detr.loss_function import RTDETRLossFunction
+    rt_detr.loss_function import RTDETRHungarianLoss
 # GPU acceleration.
 from oddkiva.brahma.torch import DEFAULT_DEVICE
 # Gradient checks.
@@ -126,10 +126,10 @@ def test_rtdetrv2_backpropagation_from_anchors():
     alpha = 0.2
     gamma = 2.0
     num_classes = 80
-    loss_fn = RTDETRLossFunction(weight_dict,
-                                 alpha=alpha,
-                                 gamma=gamma,
-                                 num_classes=num_classes)
+    loss_fn = RTDETRHungarianLoss(weight_dict,
+                                  alpha=alpha,
+                                  gamma=gamma,
+                                  num_classes=num_classes)
 
     # Calculate the loss only for the predicted anchor boxes.
     (anchor_geometry_logits,
@@ -150,7 +150,6 @@ def test_rtdetrv2_backpropagation_from_anchors():
                                           matching_a, tgt_count)
     loss = sum([loss_dict[k].sum() for k in loss_dict])
     loss.backward()
-
 
     # Update RT-DETR v2 parameters with AdamW.
     optimizer.step()
@@ -223,10 +222,10 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
     alpha = 0.2
     gamma = 2.0
     num_classes = 80
-    loss_fn = RTDETRLossFunction(weight_dict,
-                                 alpha=alpha,
-                                 gamma=gamma,
-                                 num_classes=num_classes)
+    loss_fn = RTDETRHungarianLoss(weight_dict,
+                                  alpha=alpha,
+                                  gamma=gamma,
+                                  num_classes=num_classes)
 
     # Calculate the loss only for the predicted anchor boxes.
     (dn_geometries, dn_class_logits) = aux_train_outs['dn_boxes']
@@ -313,12 +312,12 @@ def test_rtdetrv2_backpropagation_from_final_queries():
         'boxes': tgt_boxes,
         'labels': tgt_labels
     }
-    box_geoms, box_class_logits, aux_train_outs = rtdetrv2.forward(
+    box_geoms, box_class_logits, _ = rtdetrv2.forward(
         x, targets
     )
 
     # Calculate the losses.
-    logger.info(f"Calculating the Hungarian loss for the denoising groups...")
+    logger.info(f"Calculating the Hungarian loss for the final boxes...")
     weight_dict = {
         'vf': 1.0,
         'box': 1.0
@@ -326,41 +325,30 @@ def test_rtdetrv2_backpropagation_from_final_queries():
     alpha = 0.2
     gamma = 2.0
     num_classes = 80
-    loss_fn = RTDETRLossFunction(weight_dict,
-                                 alpha=alpha,
-                                 gamma=gamma,
-                                 num_classes=num_classes)
-
-    # Calculate the loss only for the predicted anchor boxes.
-    (dn_geometries, dn_class_logits) = aux_train_outs['dn_boxes']
-    dn_groups = aux_train_outs['dn_groups']
+    loss_fn = RTDETRHungarianLoss(weight_dict,
+                                  alpha=alpha,
+                                  gamma=gamma,
+                                  num_classes=num_classes)
 
     # The Hungarian loss.
-    #
-    # 1. Calculate the matching for the DN-groups of boxes.
-    logger.info('[Hungarian Loss] 1. Matching with the Hungarian algorithm...')
-    matching_dn = dn_groups.populate_matching(tgt_labels)
-
-    tgt_boxes_dn = [
-        tgt_boxes_n[tixs_n]
-        for (tgt_boxes_n, (_, tixs_n)) in zip(tgt_boxes, matching_dn)
-    ]
-    tgt_labels_dn = [
-        tgt_labels_n[tixs_n]
-        for (tgt_labels_n, (_, tixs_n)) in zip(tgt_labels, matching_dn)
-    ]
-
-    # 2. Calculate the loss value for DN groups of boxes based on the matching.
-    # iterations = dn_geometries.shape[0]
-    # for i in range(iterations):
+    # for box_logits_i, box_geoms_i in zip(box_class_logits, box_geometries):
     i = 0
-
-    logger.info('[Hungarian Loss] 2. Calculating the composite loss function...')
-    loss_dict = loss_fn.compute_loss_dict(dn_geometries[i], dn_class_logits[i],
-                                          tgt_boxes_dn, tgt_labels_dn,
-                                          matching_dn, tgt_count)
+    box_logits_i = box_class_logits[i]
+    box_geoms_i = box_geoms[i]
+    # 1. Calculate the matching for the anchor boxes.
+    matching_f = loss_fn.matcher.forward(
+        box_logits_i, box_geoms_i,
+        tgt_labels, tgt_boxes
+    )
+    # 2. Calculate the loss value for anchor boxes based on the matching.
+    loss_dict = loss_fn.compute_loss_dict(box_geoms_i, box_logits_i,
+                                          tgt_boxes, tgt_labels,
+                                          matching_f, tgt_count)
     loss = sum([loss_dict[k].sum() for k in loss_dict])
     loss.backward()
+
+    # Update RT-DETR v2 parameters with AdamW.
+    optimizer.step()
 
     # Check the parameters that has changed and those that didn't.
     layer_ixs, grad_values = collect_gradients(grads)
@@ -370,3 +358,5 @@ def test_rtdetrv2_backpropagation_from_final_queries():
         layer_name = grads[layer_idx][0]
         grad_norm = torch.norm(grad_values[layer_idx])
         logger.debug(f'{layer_name} gradient norm:{grad_norm}')
+
+        assert layer_name.startswith('decoder') is False
