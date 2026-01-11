@@ -40,6 +40,9 @@ from oddkiva.brahma.torch.utils.gradient_tracking import (
 )
 
 
+DEVICE = DEFAULT_DEVICE if DEFAULT_DEVICE != 'mps' else 'cpu'
+
+
 def get_coco_val_dl():
     logger.info(f"Instantiating COCO dataset...")
     transform = v2.Compose([
@@ -74,8 +77,6 @@ def get_rtdetrv2_model():
 
 
 def test_rtdetrv2_backpropagation_from_anchors():
-    gpu0 = DEFAULT_DEVICE
-
     coco_val_dl = get_coco_val_dl()
 
     logger.info(f"Getting first batch sample from COCO dataloader...")
@@ -83,7 +84,7 @@ def test_rtdetrv2_backpropagation_from_anchors():
 
     logger.info(f"Instantiating RT-DETR v2 model...")
     rtdetrv2 = get_rtdetrv2_model()
-    rtdetrv2 = rtdetrv2.to(gpu0)
+    rtdetrv2 = rtdetrv2.to(DEVICE)
 
     logger.info(
         'Instantianting AdamW optimizer with default hardcoded parameters'
@@ -101,9 +102,9 @@ def test_rtdetrv2_backpropagation_from_anchors():
 
     # Obtain the first training sample.
     img, tgt_boxes, tgt_labels = next(coco_it)
-    img = img.to(gpu0)
-    tgt_boxes = [b.to(gpu0) for b in tgt_boxes]
-    tgt_labels = [l.to(gpu0) for l in tgt_labels]
+    img = img.to(DEVICE)
+    tgt_boxes = [b.to(DEVICE) for b in tgt_boxes]
+    tgt_labels = [l.to(DEVICE) for l in tgt_labels]
     tgt_count = sum([len(l) for l in tgt_labels])
     assert (0 <= img).all() and (img <= 1).all()
     assert tgt_count > 0
@@ -167,8 +168,6 @@ def test_rtdetrv2_backpropagation_from_anchors():
 
 
 def test_rtdetrv2_backpropagation_from_dn_groups():
-    gpu0 = DEFAULT_DEVICE
-
     coco_val_dl = get_coco_val_dl()
 
     logger.info(f"Getting first batch sample from COCO dataloader...")
@@ -176,7 +175,7 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
 
     logger.info(f"Instantiating RT-DETR v2 model...")
     rtdetrv2 = get_rtdetrv2_model()
-    rtdetrv2 = rtdetrv2.to(gpu0)
+    rtdetrv2 = rtdetrv2.to(DEVICE)
 
     logger.info(
         'Instantianting AdamW optimizer with default hardcoded parameters'
@@ -195,9 +194,9 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
     # Obtain the first training sample.
     logger.info(f"Obtaining the first training batch...")
     img, tgt_boxes, tgt_labels = next(coco_it)
-    img = img.to(gpu0)
-    tgt_boxes = [b.to(gpu0) for b in tgt_boxes]
-    tgt_labels = [l.to(gpu0) for l in tgt_labels]
+    img = img.to(DEVICE)
+    tgt_boxes = [b.to(DEVICE) for b in tgt_boxes]
+    tgt_labels = [l.to(DEVICE) for l in tgt_labels]
     tgt_count = sum([len(l) for l in tgt_labels])
     assert (0 <= img).all() and (img <= 1).all()
     assert tgt_count > 0
@@ -270,8 +269,6 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
 
 
 def test_rtdetrv2_backpropagation_from_final_queries():
-    gpu0 = DEFAULT_DEVICE
-
     coco_val_dl = get_coco_val_dl()
 
     logger.info(f"Getting first batch sample from COCO dataloader...")
@@ -279,7 +276,7 @@ def test_rtdetrv2_backpropagation_from_final_queries():
 
     logger.info(f"Instantiating RT-DETR v2 model...")
     rtdetrv2 = get_rtdetrv2_model()
-    rtdetrv2 = rtdetrv2.to(gpu0)
+    rtdetrv2 = rtdetrv2.to(DEVICE)
 
     logger.info(
         'Instantianting AdamW optimizer with default hardcoded parameters'
@@ -298,9 +295,9 @@ def test_rtdetrv2_backpropagation_from_final_queries():
     # Obtain the first training sample.
     logger.info(f"Obtaining the first training batch...")
     img, tgt_boxes, tgt_labels = next(coco_it)
-    img = img.to(gpu0)
-    tgt_boxes = [b.to(gpu0) for b in tgt_boxes]
-    tgt_labels = [l.to(gpu0) for l in tgt_labels]
+    img = img.to(DEVICE)
+    tgt_boxes = [b.to(DEVICE) for b in tgt_boxes]
+    tgt_labels = [l.to(DEVICE) for l in tgt_labels]
     tgt_count = sum([len(l) for l in tgt_labels])
     assert (0 <= img).all() and (img <= 1).all()
     assert tgt_count > 0

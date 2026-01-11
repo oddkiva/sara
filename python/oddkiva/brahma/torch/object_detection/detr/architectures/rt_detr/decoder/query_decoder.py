@@ -347,7 +347,7 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
         # by embedding space, space of which we are trying to learn.
         #
         # assert query.requires_grad is False
-        # assert query_geometry_logits.requires_grad is False
+        assert query_geometry_logits.requires_grad is False
 
         # Get the actual query geometry by activating the logits with the
         # sigmoid function.
@@ -393,6 +393,9 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             Δ_query_geom_logits = self.box_geometry_logit_heads[i](query_next)
             query_geom_logits_next = \
                 query_geom_logits_curr + Δ_query_geom_logits
+            #   ^                        ^
+            #   |                        |
+            #   |-- non-diff             |-- diff
             query_geom_next = F.sigmoid(query_geom_logits_next)
 
             # Store the denoised results.
