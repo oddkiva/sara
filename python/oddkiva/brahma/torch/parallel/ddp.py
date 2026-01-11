@@ -20,9 +20,10 @@ def get_rank() -> int | None:
     rank = os.environ.get('RANK')
     return int(rank) if rank is not None else None
 
-def get_world_size() -> int | None:
-    world_size = os.environ.get('WORLD_SIZE')
-    return int(world_size) if world_size is not None else None
+def get_world_size() -> int:
+    if not is_ddp_available_and_initialized():
+        return 1
+    return torch.distributed.get_world_size()
 
 
 def torchrun_is_running() -> bool:
@@ -46,3 +47,13 @@ def wrap_model_with_ddp_if_needed(
         return model
     else:
         return monogpu_model
+
+
+def is_ddp_available_and_initialized():
+    if not torch.distributed.is_available():
+        return False
+    if not torch.distributed.is_initialized():
+        return False
+    return True
+
+

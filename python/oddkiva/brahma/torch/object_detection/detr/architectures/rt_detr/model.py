@@ -40,7 +40,7 @@ class RTDETRv2(nn.Module):
         (top_queries,
          top_class_logits,
          top_geometry_logits,
-         memory) = self.query_selector(encoding_pyramid)
+         memory) = self.query_selector.forward(encoding_pyramid)
 
         # The value and its original feature pyramid shapes.
         value = memory

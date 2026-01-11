@@ -36,7 +36,7 @@ class BoxLoss(torch.nn.Module):
             for tboxes_n, (_, tixs_n) in zip(target_boxes, matching)
         ])
 
-        return \
+        loss_tensor = \
             self.w_l1 * F.l1_loss(qboxes, tboxes, reduction='none').sum(-1) + \
             self.w_giou * loss_giou(
                 from_cxcywh_to_ltrb_format(qboxes),
@@ -44,3 +44,6 @@ class BoxLoss(torch.nn.Module):
                 eps=self.eps,
                 only_compute_diagonal=True
             )
+
+        mean_loss = loss_tensor.sum() / len(matching)
+        return mean_loss

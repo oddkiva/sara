@@ -11,6 +11,14 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     dn_detr.contrastive_denoising_group_generator import (
         ContrastiveDenoisingGroupGenerator
     )
+from oddkiva.brahma.torch.parallel.ddp import (
+    get_world_size,
+    is_ddp_available_and_initialized
+)
+
+
+def reduce_loss_dict(loss_dict: dict[str, torch.Tensor]) -> torch.Tensor:
+    return sum([loss_dict[k] for k in loss_dict])
 
 
 class RTDETRHungarianLoss(nn.Module):
@@ -81,15 +89,17 @@ class RTDETRHungarianLoss(nn.Module):
                    num_boxes: int | None = None):
         self.box_loss.forward(query_boxes, target_boxes, matching)
 
-    def count_targets(self, targets: list[torch.Tensor]) -> torch.Tensor:
+    def count_targets(self, targets: list[torch.Tensor]) -> int | float:
         # Compute the average number of target boxes across all nodes, for
         # normalization purposes
         tcount = sum(len(t) for t in targets)
-        tcount = torch.as_tensor([tcount], dtype=torch.float,
-                                    device=targets[0].device)
-        if is_dist_available_and_initialized():
+        tcount = torch.as_tensor([tcount],
+                                 dtype=torch.float,
+                                 device=targets[0].device)
+        if is_ddp_available_and_initialized():
             torch.distributed.all_reduce(tcount)
         tcount = torch.clamp(tcount / get_world_size(), min=1).item()
+        return tcount
 
     def compute_loss_dict(self,
                           qboxes, qlogits,
@@ -113,7 +123,7 @@ class RTDETRHungarianLoss(nn.Module):
                 anchor_class_logits: torch.Tensor,
                 # Auxiliary denoising outputs.
                 dn_boxes: torch.Tensor,
-                dn_classs_logits: torch.Tensor,
+                dn_class_logits: torch.Tensor,
                 dn_groups: ContrastiveDenoisingGroupGenerator.Output,
                 # The ground-truth data.
                 target_boxes: list[torch.Tensor],
@@ -129,8 +139,6 @@ class RTDETRHungarianLoss(nn.Module):
         # normalization purposes
         target_count = self.count_targets(target_labels)
 
-        matching = self.matcher(outputs_without_aux, targets)
-
         # Optimize:
         # - the transformer decoder using the FINAL predictions.
         # - the backbone+hybrid encoder is also optimized because we feed the
@@ -142,9 +150,12 @@ class RTDETRHungarianLoss(nn.Module):
         # class probability vectors *at each iteration* of the refinement
         qboxes_final = query_boxes[-1]
         qlogits_final = query_class_logits[-1]
+        matching = self.matcher.forward(qlogits_final, qboxes_final,
+                                        target_labels, target_boxes)
         losses_final = self.compute_loss_dict(qboxes_final, qlogits_final,
                                                target_boxes, target_labels,
                                                matching, target_count)
+        loss_final = reduce_loss_dict(losses_final)
 
         # Specifically optimize *each layer* of the transformer decoder using
         # *EACH ITERATION* towards the final predictions. This is to accelerate
@@ -156,14 +167,17 @@ class RTDETRHungarianLoss(nn.Module):
         # Again note that the backbone+hybrid encoder is also optimized because
         # we feed the memory tensor in the transformer decoder.
         losses_iterations = []
+        loss_iterations = []
         for qboxes_i, qlogits_i in zip(query_boxes[:-1],
                                        query_class_logits[:-1]):
-            matching_i = self.matcher.forward(qclass_logits_i, qboxes_i,
+            matching_i = self.matcher.forward(qlogits_i, qboxes_i,
                                               target_labels, target_boxes)
             losses = self.compute_loss_dict(qboxes_i, qlogits_i,
                                             target_boxes, target_labels,
                                             matching_i, target_count)
             losses_iterations.append(losses)
+            loss_iterations.append(reduce_loss_dict(losses))
+        loss_iterations_cumulated = sum(loss_iterations)
 
         # Optimize:
         # 1. The transformer decoder network.
@@ -178,11 +192,11 @@ class RTDETRHungarianLoss(nn.Module):
         matching_dn = dn_groups.populate_matching(target_labels)
         tgt_boxes_dn = [
             tgt_boxes_n[tixs_n]
-            for (tgt_boxes_n, (_, tixs_n)) in zip(tgt_boxes, matching_dn)
+            for (tgt_boxes_n, (_, tixs_n)) in zip(target_boxes, matching_dn)
         ]
         tgt_labels_dn = [
             tgt_labels_n[tixs_n]
-            for (tgt_labels_n, (_, tixs_n)) in zip(tgt_labels, matching_dn)
+            for (tgt_labels_n, (_, tixs_n)) in zip(target_labels, matching_dn)
         ]
         losses_dn = [
             self.compute_loss_dict(dn_boxes_i, dn_class_logits_i,
@@ -190,6 +204,10 @@ class RTDETRHungarianLoss(nn.Module):
                                    matching_dn, target_count)
             for dn_boxes_i, dn_class_logits_i in zip(dn_boxes, dn_class_logits)
         ]
+        loss_dn_is = []
+        for losses_dn_i in losses_dn:
+            loss_dn_is.append(reduce_loss_dict(losses_dn_i))
+        loss_dn = sum([l for l in loss_dn_is])
 
 
         # Optimize:
@@ -209,10 +227,13 @@ class RTDETRHungarianLoss(nn.Module):
             target_boxes, target_labels,
             matching_anchors, target_count
         )
+        loss_anchors = reduce_loss_dict(losses_anchors)
+        
+        # return {
+        #     'final': loss_final,
+        #     'iters': loss_iterations_cumulated,
+        #     'init': losses_anchors,
+        #     'dn': loss_dn
+        # }
 
-        return {
-            'final': losses_final,
-            'iters': losses_iterations,
-            'init': losses_anchors,
-            'dn': losses_dn
-        }
+        return loss_final + loss_iterations_cumulated + loss_dn + loss_anchors

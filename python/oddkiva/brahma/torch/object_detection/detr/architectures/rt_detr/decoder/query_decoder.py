@@ -396,6 +396,9 @@ class MultiScaleDeformableTransformerDecoder(nn.Module):
             #   ^                        ^
             #   |                        |
             #   |-- non-diff             |-- diff
+            #
+            # NOTE: just like a Taylor expansion, we only care about estimating
+            # the residual. Only the Δ is differentiable.
             query_geom_next = F.sigmoid(query_geom_logits_next)
 
             # Store the denoised results.

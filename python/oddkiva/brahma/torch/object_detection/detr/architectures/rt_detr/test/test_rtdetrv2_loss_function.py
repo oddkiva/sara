@@ -355,3 +355,89 @@ def test_rtdetrv2_backpropagation_from_final_queries():
         layer_name = grads[layer_idx][0]
         grad_norm = torch.norm(grad_values[layer_idx])
         logger.debug(f'{layer_name} gradient norm:{grad_norm}')
+
+
+def test_hungarian_loss_api():
+    coco_val_dl = get_coco_val_dl()
+
+    logger.info(f"Getting first batch sample from COCO dataloader...")
+    coco_it = iter(coco_val_dl)
+
+    logger.info(f"Instantiating RT-DETR v2 model...")
+    rtdetrv2 = get_rtdetrv2_model()
+    rtdetrv2 = rtdetrv2.to(DEVICE)
+
+    logger.info(
+        'Instantianting AdamW optimizer with default hardcoded parameters'
+    )
+    optimizer = torch.optim.AdamW(rtdetrv2.parameters(),
+                                  lr=1e-4,
+                                  betas=(0.9, 0.999),
+                                  weight_decay=1e-4)
+    optimizer.zero_grad()
+
+
+    logger.info(f"Tracking RT-DETR v2 gradients...")
+    layers, grads = track_all_layer_gradients(rtdetrv2, hook_forward, hook_backward)
+
+
+    # Obtain the first training sample.
+    logger.info(f"Obtaining the first training batch...")
+    img, tgt_boxes, tgt_labels = next(coco_it)
+    img = img.to(DEVICE)
+    tgt_boxes = [b.to(DEVICE) for b in tgt_boxes]
+    tgt_labels = [l.to(DEVICE) for l in tgt_labels]
+    tgt_count = sum([len(l) for l in tgt_labels])
+    assert (0 <= img).all() and (img <= 1).all()
+    assert tgt_count > 0
+
+    # Feed the input to the object detection network.
+    logger.info(f"Feeding the first training batch to RT-DETR v2...")
+    x = img
+    targets = {
+        'boxes': tgt_boxes,
+        'labels': tgt_labels
+    }
+    box_geoms, box_class_logits, aux_train_outputs = rtdetrv2.forward(
+        x, targets
+    )
+
+    # Calculate the losses.
+    logger.info(f"Calculating the Hungarian loss for the final boxes...")
+    weight_dict = {
+        'vf': 1.0,
+        'box': 1.0
+    }
+    alpha = 0.2
+    gamma = 2.0
+    num_classes = 80
+    loss_fn = RTDETRHungarianLoss(weight_dict,
+                                  alpha=alpha,
+                                  gamma=gamma,
+                                  num_classes=num_classes)
+
+    (anchor_geometry_logits,
+     anchor_class_logits) = aux_train_outputs['top_k_anchor_boxes']
+    anchor_boxes = F.sigmoid(anchor_geometry_logits)
+    dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
+    dn_groups = aux_train_outputs['dn_groups']
+
+    loss = loss_fn.forward(
+        box_geoms, box_class_logits,
+        anchor_boxes, anchor_class_logits,
+        dn_boxes, dn_class_logits, dn_groups,
+        tgt_boxes, tgt_labels
+    )
+    loss.backward()
+
+    # Update RT-DETR v2 parameters with AdamW.
+    optimizer.step()
+
+    # Check the parameters that has changed and those that didn't.
+    layer_ixs, grad_values = collect_gradients(grads)
+
+    # Check that we don't update the deformable transformer decoder at all.
+    for layer_idx in layer_ixs:
+        layer_name = grads[layer_idx][0]
+        grad_norm = torch.norm(grad_values[layer_idx])
+        logger.debug(f'{layer_name} gradient norm:{grad_norm}')
