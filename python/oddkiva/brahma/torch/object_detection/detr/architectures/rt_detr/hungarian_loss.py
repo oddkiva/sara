@@ -64,10 +64,14 @@ class RTDETRHungarianLoss(nn.Module):
         query_class_logits: torch.Tensor,
         target_labels: list[torch.Tensor],
         matching: list[tuple[torch.Tensor, torch.Tensor]],
-        num_boxes: int
+        num_boxes: int | None = None
     ):
         loss = self.focal_loss.forward(query_class_logits, target_labels, matching)
-        # loss = loss.mean(1).sum() * query_class_logits.shape[1] / num_boxes
+
+        if num_boxes is None:
+            num_boxes = sum([len(l) for l in target_labels])
+
+        loss = loss.mean(1).sum() * query_class_logits.shape[1] / num_boxes
         return loss
 
     def labeling_varifocal_loss(self,
@@ -76,7 +80,7 @@ class RTDETRHungarianLoss(nn.Module):
                                 target_boxes: list[torch.Tensor],
                                 target_labels: list[torch.Tensor],
                                 matching: list[tuple[torch.Tensor, torch.Tensor]],
-                                num_boxes: int):
+                                num_boxes: int | None = None):
         return self.vf_loss.forward(query_boxes, query_class_logits,
                                     target_boxes, target_labels,
                                     matching,
@@ -87,7 +91,7 @@ class RTDETRHungarianLoss(nn.Module):
                    target_boxes: torch.Tensor,
                    matching: list[tuple[torch.Tensor, torch.Tensor]],
                    num_boxes: int | None = None):
-        self.box_loss.forward(query_boxes, target_boxes, matching)
+        self.box_loss.forward(query_boxes, target_boxes, matching, num_boxes)
 
     def count_targets(self, targets: list[torch.Tensor]) -> int | float:
         # Compute the average number of target boxes across all nodes, for

@@ -24,7 +24,8 @@ class BoxLoss(torch.nn.Module):
         self,
         query_boxes: torch.Tensor,
         target_boxes: list[torch.Tensor],
-        matching: list[tuple[torch.Tensor, torch.Tensor]]
+        matching: list[tuple[torch.Tensor, torch.Tensor]],
+        num_boxes: int | None = None
     ) -> torch.Tensor:
         qboxes = torch.cat([
             query_boxes[n, qixs_n]
@@ -45,5 +46,9 @@ class BoxLoss(torch.nn.Module):
                 only_compute_diagonal=True
             )
 
-        mean_loss = loss_tensor.sum() / len(matching)
+        if num_boxes is None:
+            num_boxes = sum([len(tgt_boxes_n) for tgt_boxes_n in target_boxes])
+
+        mean_loss = loss_tensor.sum() / num_boxes
+
         return mean_loss
