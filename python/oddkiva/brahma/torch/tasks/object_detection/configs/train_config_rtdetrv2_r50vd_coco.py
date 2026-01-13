@@ -12,6 +12,7 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard.writer import SummaryWriter
 
 import oddkiva.brahma.torch.datasets.coco as coco
+from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.parallel.ddp import (
     torchrun_is_running,
     wrap_model_with_ddp_if_needed
@@ -19,6 +20,9 @@ from oddkiva.brahma.torch.parallel.ddp import (
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
     ToNormalizedFloat32
+)
+from oddkiva.brahma.torch.datasets.coco.dataloader import (
+    RTDETRImageCollateFunction
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.config import RTDETRConfig
@@ -37,7 +41,8 @@ class ModelConfig:
 
 class TrainValTestDatasetConfig:
     Dataset = coco.COCOObjectDetectionDataset
-    batch_size: int = 4
+    train_batch_size: int = 4
+    val_batch_size: int = 32
     num_workers: int = 4
 
     train_transform: v2.Transform = v2.Compose([
@@ -56,36 +61,51 @@ class TrainValTestDatasetConfig:
     ])
 
     @staticmethod
-    def make_dataloader(
-        ds: Dataset,
-        batch_size: int
-    ) -> DataLoader:
+    def make_train_dataloader(ds: Dataset) -> DataLoader:
         if torchrun_is_running():
             return DataLoader(
                 dataset=ds,
-                batch_size=batch_size,
+                batch_size=TrainValTestDatasetConfig.train_batch_size,
+                collate_fn=RTDETRImageCollateFunction(),
                 # The following options are for parallel data training
                 shuffle=False,
                 sampler=DistributedSampler(ds),
-                num_workers=TrainValTestDatasetConfig.num_workers
+                num_workers=TrainValTestDatasetConfig.num_workers,
             )
         else:
             return DataLoader(
                 dataset=ds,
-                batch_size=batch_size,
-                shuffle=True
+                shuffle=True,
+                batch_size=TrainValTestDatasetConfig.train_batch_size,
+                collate_fn=RTDETRImageCollateFunction(),
+                num_workers=TrainValTestDatasetConfig.num_workers
             )
 
     @staticmethod
-    def make_datasets() -> tuple[DataLoader, DataLoader, DataLoader | None]:
+    def make_val_dataloader(ds: Dataset) -> DataLoader:
+        if torchrun_is_running():
+            return DataLoader(
+                dataset=ds,
+                batch_size=TrainValTestDatasetConfig.val_batch_size,
+                # The following options are for parallel data training
+                shuffle=False,
+                sampler=DistributedSampler(ds),
+                num_workers=TrainValTestDatasetConfig.num_workers,
+            )
+        else:
+            return DataLoader(
+                dataset=ds,
+                shuffle=False,
+                batch_size=TrainValTestDatasetConfig.val_batch_size,
+                num_workers=TrainValTestDatasetConfig.num_workers,
+            )
+
+    @staticmethod
+    def make_datasets() -> tuple[Dataset, Dataset, Dataset | None]:
         logger.info(f"Instantiating COCO train dataset...")
         train_ds = TrainValTestDatasetConfig.Dataset(
             train_or_val='train',
             transform=TrainValTestDatasetConfig.train_transform
-        )
-        train_dl = TrainValTestDatasetConfig.make_dataloader(
-            train_ds,
-            TrainValTestDatasetConfig.batch_size
         )
 
         logger.info(f"Instantiating COCO val dataset...")
@@ -93,15 +113,11 @@ class TrainValTestDatasetConfig:
             train_or_val='val',
             transform=TrainValTestDatasetConfig.val_transform
         )
-        val_dl = TrainValTestDatasetConfig.make_dataloader(
-            val_ds,
-            TrainValTestDatasetConfig.batch_size
-        )
 
         logger.info(f"[IGNORING] Instantiating COCO test dataset...")
         test_ds = None
 
-        return train_dl, val_dl, test_ds
+        return train_ds, val_ds, test_ds
 
 
 class OptimizationConfig:
@@ -123,4 +139,11 @@ class TrainTestPipelineConfig(ModelConfig,
                               TrainValTestDatasetConfig,
                               OptimizationConfig,
                               SummaryWriterConfig):
-    pass
+
+    dataset_dir_path: Path = DATA_DIR_PATH / 'rtdetrv2' / 'coco'
+    trained_model_out_dir = Path('train') / 'rtdetrv2' / 'coco' / 'models'
+
+    @staticmethod
+    def out_model_filepath(epoch: int) -> Path:
+        return (TrainValTestDatasetConfig.trained_model_out_dir /
+                f'trained_model_epoch{epoch}.pt')

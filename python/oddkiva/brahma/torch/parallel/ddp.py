@@ -31,7 +31,7 @@ def torchrun_is_running() -> bool:
 
 
 def wrap_model_with_ddp_if_needed(
-        monogpu_model: torch.nn.Module
+    monogpu_model: torch.nn.Module
 ) -> torch.nn.Module | DDP:
     if torchrun_is_running():
         gpu_id = get_local_rank()

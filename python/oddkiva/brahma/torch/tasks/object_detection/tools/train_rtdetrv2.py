@@ -1,0 +1,219 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
+import atexit
+from loguru import logger
+
+import torch
+import torch.nn
+import torch.nn.functional as F
+from torch.distributed import destroy_process_group
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard.writer import SummaryWriter
+
+from oddkiva.brahma.torch.utils.logging import format_msg
+from oddkiva.brahma.torch.parallel.ddp import (
+    ddp_setup,
+    get_local_rank,
+    torchrun_is_running
+)
+from oddkiva.brahma.torch.object_detection.detr.architectures\
+    .rt_detr.hungarian_loss import RTDETRHungarianLoss
+from oddkiva.brahma.torch.tasks.object_detection.configs.\
+    train_config_rtdetrv2_r50vd_coco import (
+        TrainTestPipelineConfig as PipelineConfig
+    )
+
+
+# --------------------------------------------------------------------------
+# PARALLEL TRAINING
+# Automatically clean up the parallel training environment.
+# --------------------------------------------------------------------------
+@atexit.register
+def ddp_cleanup():
+    if not torchrun_is_running():
+        return
+    logger.info(format_msg("Cleaning DistributedDataParallel environment..."))
+    destroy_process_group()
+
+
+def validate(
+    dataloader: DataLoader,
+    gpu_id: int | None,
+    test_global_step: int,
+    model: torch.nn.Module,
+    loss_fn: torch.nn.Module,
+    writer: SummaryWriter,
+    summary_write_interval: int
+) -> None:
+    model.eval()
+
+    step_count = len(dataloader)
+
+    with torch.no_grad():
+        for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
+            if gpu_id is not None:
+                imgs = imgs.to(gpu_id)
+                tgt_boxes = tgt_boxes.to(gpu_id)
+                tgt_labels = tgt_labels.to(gpu_id)
+
+            targets = {
+                'boxes': tgt_boxes,
+                'labels': tgt_labels
+            }
+            box_geoms, box_class_logits, aux_train_outputs = model.forward(
+                x, targets
+            )
+
+            (anchor_geometry_logits,
+             anchor_class_logits) = aux_train_outputs['top_k_anchor_boxes']
+            anchor_boxes = F.sigmoid(anchor_geometry_logits)
+            dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
+            dn_groups = aux_train_outputs['dn_groups']
+
+            loss = loss_fn.forward(
+                box_geoms, box_class_logits,
+                anchor_boxes, anchor_class_logits,
+                dn_boxes, dn_class_logits, dn_groups,
+                tgt_boxes, tgt_labels
+            )
+            loss.backward()
+
+            if (gpu_id is None or gpu_id == 0) and step % summary_write_interval == 0:
+                loss = loss_fn.item()
+                test_global_step += 1
+
+
+def train_for_one_epoch(
+    dataloader: DataLoader,
+    gpu_id: int | None,
+    train_global_step: int,
+    model: torch.nn.Module,
+    loss_fn: RTDETRHungarianLoss,
+    optimizer: torch.optim.Optimizer,
+    writer: SummaryWriter, summary_write_interval: int,
+) -> None:
+    torch.autograd.set_detect_anomaly(True)
+
+    step_count = len(dataloader)
+    model.train()
+
+    for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
+        optimizer.zero_grad()
+
+        if gpu_id is not None:
+            imgs = imgs.to(gpu_id)
+            tgt_boxes = tgt_boxes.to(gpu_id)
+            tgt_labels = tgt_labels.to(gpu_id)
+
+        targets = {
+            'boxes': tgt_boxes,
+            'labels': tgt_labels
+        }
+        box_geoms, box_class_logits, aux_train_outputs = model.forward(
+            imgs, targets
+        )
+
+        (anchor_geometry_logits,
+         anchor_class_logits) = aux_train_outputs['top_k_anchor_boxes']
+        anchor_boxes = F.sigmoid(anchor_geometry_logits)
+        dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
+        dn_groups = aux_train_outputs['dn_groups']
+
+        loss = loss_fn.forward(
+            box_geoms, box_class_logits,
+            anchor_boxes, anchor_class_logits,
+            dn_boxes, dn_class_logits, dn_groups,
+            tgt_boxes, tgt_labels
+        )
+        loss.backward()
+
+        optimizer.step()
+
+        if (gpu_id is None or gpu_id == 0) and step % summary_write_interval == 0:
+            # Train loss
+            loss_fn = loss_fn.item()
+
+            train_global_step += 1
+
+
+def main():
+    # PARALLEL TRAINING
+    ddp_setup()
+
+    # THE DATASET
+    train_ds, val_ds, _ = PipelineConfig.make_datasets()
+    writer = PipelineConfig.make_summary_writer()
+
+    # THE MODEL
+    gpu_id = get_local_rank()
+    rtdetrv2_model = PipelineConfig.make_model()
+
+    # THE LOSS FUNCTION
+    weight_dict = {
+        'vf': 1.0,
+        'box': 1.0
+    }
+    alpha = 0.2
+    gamma = 2.0
+    num_classes = 80
+    hungarian_loss_fn = RTDETRHungarianLoss(
+        weight_dict,
+        alpha=alpha,
+        gamma=gamma,
+        num_classes=num_classes
+    )
+
+    train_global_step = 0
+    val_global_step = 0
+    for epoch in range(10):
+        logger.info(format_msg(
+            f"learning rate = {PipelineConfig.learning_rate}"
+        ))
+
+        # Restart the state of the Adam optimizer every epoch.
+        adamw_opt = torch.optim.AdamW(rtdetrv2_model.parameters(),
+                                      lr=PipelineConfig.learning_rate,
+                                      betas=PipelineConfig.betas,
+                                      weight_decay=PipelineConfig.weight_decay)
+
+        # Resample the list of triplets for each epoch.
+        train_dl = PipelineConfig.make_train_dataloader(train_ds)
+        if torchrun_is_running():
+            train_dl.sampler.set_epoch(epoch)
+
+        # Train the model.
+        train_for_one_epoch(train_dl, gpu_id,
+                            train_global_step,
+                            rtdetrv2_model,
+                            hungarian_loss_fn,
+                            adamw_opt,
+                            writer,
+                            PipelineConfig.write_interval)
+
+        # Save the model after each training epoch.
+        if gpu_id == 0 and torchrun_is_running():
+            # In the case of distributed training, make sure only the node
+            # associated with GPU node 0 can save the model.
+            ckpt = rtdetrv2_model.module.state_dict()
+            torch.save(
+                ckpt,
+                PipelineConfig.out_model_filepath(epoch)
+            )
+        else:
+            ckpt = rtdetrv2_model.state_dict()
+            torch.save(
+                ckpt,
+                PipelineConfig.out_model_filepath(epoch)
+            )
+
+        # Evaluate the model.
+        val_dl = PipelineConfig.make_val_dataloader(val_ds)
+        if torchrun_is_running():
+            val_dl.sampler.set_epoch(epoch)
+        validate(val_dl, gpu_id, val_global_step,
+                 rtdetrv2_model, hungarian_loss_fn, writer,
+                 PipelineConfig.write_interval)
+
+
+if __name__ == "__main__":
+    main()

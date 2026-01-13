@@ -70,8 +70,6 @@ class TrainValTestDatasetConfig:
             TrainValTestDatasetConfig.batch_size
         )
 
-
-
     @staticmethod
     def out_model_filepath(epoch: int) -> Path:
         return (TrainValTestDatasetConfig.trained_model_out_dir /
