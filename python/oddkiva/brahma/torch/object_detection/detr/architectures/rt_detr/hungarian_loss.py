@@ -232,7 +232,7 @@ class RTDETRHungarianLoss(nn.Module):
             matching_anchors, target_count
         )
         loss_anchors = reduce_loss_dict(losses_anchors)
-        
+
         # return {
         #     'final': loss_final,
         #     'iters': loss_iterations_cumulated,
