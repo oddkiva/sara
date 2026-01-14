@@ -163,18 +163,37 @@ def main():
         num_classes=num_classes
     )
 
+    # Restart the state of the Adam optimizer every epoch.
+    adamw_opt = torch.optim.AdamW(rtdetrv2_model.parameters(),
+                                  lr=PipelineConfig.learning_rate,
+                                  betas=PipelineConfig.betas,
+                                  weight_decay=PipelineConfig.weight_decay)
+
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(
+        adamw_opt,
+        [1000],
+        gamma=0.1
+    )
+    # # https://stackoverflow.com/questions/73629330/what-exactly-is-meant-by-param-groups-in-pytorch
+    # #
+    # # Build param_group where each group consists of a single parameter.
+    # # `param_group_names` is created so we can keep track of which param_group
+    # # corresponds to which parameter.
+    # param_groups = []
+    # param_group_names = []
+    # for name, parameter in model.named_parameters():
+    #     param_groups.append({'params': [parameter], 'lr': learning_rates[name]})
+    #     param_group_names.append(name)
+    # 
+    # # optimizer requires default learning rate even if its overridden by all param groups
+    # optimizer = optim.SGD(param_groups, lr=10)
+
     train_global_step = 0
     val_global_step = 0
     for epoch in range(10):
         logger.info(format_msg(
             f"learning rate = {PipelineConfig.learning_rate}"
         ))
-
-        # Restart the state of the Adam optimizer every epoch.
-        adamw_opt = torch.optim.AdamW(rtdetrv2_model.parameters(),
-                                      lr=PipelineConfig.learning_rate,
-                                      betas=PipelineConfig.betas,
-                                      weight_decay=PipelineConfig.weight_decay)
 
         # Resample the list of triplets for each epoch.
         train_dl = PipelineConfig.make_train_dataloader(train_ds)
