@@ -29,8 +29,8 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
 # The loss.
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.hungarian_loss import (
-        RTDETRHungarianLoss,
-        compute_cumulated_loss
+        HungarianLossReducer,
+        RTDETRHungarianLoss
     )
 # GPU acceleration.
 from oddkiva.brahma.torch import DEFAULT_DEVICE
@@ -123,17 +123,9 @@ def test_rtdetrv2_backpropagation_from_anchors():
     )
 
     # Calculate the losses.
-    weight_dict = {
-        'vf': 1.0,
-        'box': 1.0
-    }
     alpha = 0.2
     gamma = 2.0
-    num_classes = 80
-    loss_fn = RTDETRHungarianLoss(weight_dict,
-                                  alpha=alpha,
-                                  gamma=gamma,
-                                  num_classes=num_classes)
+    loss_fn = RTDETRHungarianLoss(alpha=alpha, gamma=gamma)
 
     # Calculate the loss only for the predicted anchor boxes.
     (anchor_geometry_logits,
@@ -152,7 +144,8 @@ def test_rtdetrv2_backpropagation_from_anchors():
                                           anchor_class_logits,
                                           tgt_boxes, tgt_labels,
                                           matching_a, tgt_count)
-    loss = sum([loss_dict[k].sum() for k in loss_dict])
+    logger.debug(f'Elementary losses:\n{loss_dict}')
+    loss = torch.stack([loss_dict[k] for k in loss_dict]).sum()
     loss.backward()
 
     # Update RT-DETR v2 parameters with AdamW.
@@ -217,17 +210,9 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
 
     # Calculate the losses.
     logger.info(f"Calculating the Hungarian loss for the denoising groups...")
-    weight_dict = {
-        'vf': 1.0,
-        'box': 1.0
-    }
     alpha = 0.2
     gamma = 2.0
-    num_classes = 80
-    loss_fn = RTDETRHungarianLoss(weight_dict,
-                                  alpha=alpha,
-                                  gamma=gamma,
-                                  num_classes=num_classes)
+    loss_fn = RTDETRHungarianLoss(alpha=alpha, gamma=gamma)
 
     # Calculate the loss only for the predicted anchor boxes.
     (dn_geometries, dn_class_logits) = aux_train_outs['dn_boxes']
@@ -258,7 +243,8 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
     loss_dict = loss_fn.compute_loss_dict(dn_geometries[i], dn_class_logits[i],
                                           tgt_boxes_dn, tgt_labels_dn,
                                           matching_dn, tgt_count)
-    loss = sum([loss_dict[k].sum() for k in loss_dict])
+    logger.debug(f'Elementary losses:\n{loss_dict}')
+    loss = torch.stack([loss_dict[k] for k in loss_dict]).sum()
     loss.backward()
 
     # Check the parameters that has changed and those that didn't.
@@ -318,17 +304,9 @@ def test_rtdetrv2_backpropagation_from_final_queries():
 
     # Calculate the losses.
     logger.info(f"Calculating the Hungarian loss for the final boxes...")
-    weight_dict = {
-        'vf': 1.0,
-        'box': 1.0
-    }
     alpha = 0.2
     gamma = 2.0
-    num_classes = 80
-    loss_fn = RTDETRHungarianLoss(weight_dict,
-                                  alpha=alpha,
-                                  gamma=gamma,
-                                  num_classes=num_classes)
+    loss_fn = RTDETRHungarianLoss(alpha=alpha, gamma=gamma)
 
     # The Hungarian loss.
     # for box_logits_i, box_geoms_i in zip(box_class_logits, box_geometries):
@@ -344,7 +322,7 @@ def test_rtdetrv2_backpropagation_from_final_queries():
     loss_dict = loss_fn.compute_loss_dict(box_geoms_i, box_logits_i,
                                           tgt_boxes, tgt_labels,
                                           matching_f, tgt_count)
-    loss = sum([loss_dict[k].sum() for k in loss_dict])
+    loss = torch.stack([loss_dict[k] for k in loss_dict]).sum()
     loss.backward()
 
     # Update RT-DETR v2 parameters with AdamW.
@@ -407,17 +385,9 @@ def test_hungarian_loss_api():
 
     # Calculate the losses.
     logger.info(f"Calculating the Hungarian loss for the final boxes...")
-    weight_dict = {
-        'vf': 1.0,
-        'box': 1.0
-    }
     alpha = 0.2
     gamma = 2.0
-    num_classes = 80
-    loss_fn = RTDETRHungarianLoss(weight_dict,
-                                  alpha=alpha,
-                                  gamma=gamma,
-                                  num_classes=num_classes)
+    loss_fn = RTDETRHungarianLoss(alpha=alpha, gamma=gamma)
 
     (anchor_geometry_logits,
      anchor_class_logits) = aux_train_outputs['top_k_anchor_boxes']
@@ -431,7 +401,13 @@ def test_hungarian_loss_api():
         dn_boxes, dn_class_logits, dn_groups,
         tgt_boxes, tgt_labels
     )
-    loss = compute_cumulated_loss(loss_dict, {})
+
+    loss_reducer = HungarianLossReducer({
+        'vf': 1.0,
+        'l1': 1.0,
+        'giou': 1.0
+    })
+    loss = loss_reducer.forward(loss_dict)
     loss.backward()
 
     # Update RT-DETR v2 parameters with AdamW.

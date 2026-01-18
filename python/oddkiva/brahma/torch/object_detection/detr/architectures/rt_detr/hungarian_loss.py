@@ -27,22 +27,9 @@ class RTDETRHungarianLoss(nn.Module):
     """
 
     def __init__(self,
-                 weight_dict: dict[str, float],
                  alpha: float = 0.2,
-                 gamma: float = 2.0,
-                 num_classes: int = 80):
-        """Create the criterion.
-
-        Parameters:
-            weight_dict:
-                dict of weights for each loss.
-
-            losses:
-                list of all the losses to be applied. See get_loss for list of available losses.
-
-            num_classes:
-                The number of object categories, omitting the special non-object
-                category
+                 gamma: float = 2.0):
+        """Initializes the Hungarian loss function.
         """
         super().__init__()
         self.matcher = BoxMatcher(alpha=alpha, gamma=gamma)
@@ -50,14 +37,6 @@ class RTDETRHungarianLoss(nn.Module):
         self.focal_loss = FocalLoss(gamma=gamma, alpha=alpha)
         self.varifocal_loss = VarifocalLoss(alpha=alpha, gamma=gamma)
         self.box_loss = BoxLoss()
-
-        self.losses: dict[str, nn.Module] = {
-            'vf': self.varifocal_loss,
-            'box': self.box_loss
-        }
-
-        self.num_classes = num_classes
-        self.weight_dict = weight_dict
 
     def labeling_focal_loss(
         self,
@@ -81,14 +60,16 @@ class RTDETRHungarianLoss(nn.Module):
                                 target_labels: list[torch.Tensor],
                                 matching: list[tuple[torch.Tensor, torch.Tensor]],
                                 num_boxes: int | None = None):
-        return self.vf_loss.forward(query_boxes, query_class_logits,
-                                    target_boxes, target_labels,
-                                    matching,
-                                    num_boxes)
+        return self.varifocal_loss.forward(
+            query_boxes, query_class_logits,
+            target_boxes, target_labels,
+            matching,
+            num_boxes
+        )
 
     def loss_boxes(self,
                    query_boxes: torch.Tensor,
-                   target_boxes: torch.Tensor,
+                   target_boxes: list[torch.Tensor],
                    matching: list[tuple[torch.Tensor, torch.Tensor]],
                    num_boxes: int | None = None):
         self.box_loss.forward(query_boxes, target_boxes, matching, num_boxes)
@@ -115,7 +96,7 @@ class RTDETRHungarianLoss(nn.Module):
                                               tboxes, tlabels,
                                               matching,
                                               num_boxes),
-            'box': self.box_loss.forward(qboxes, tboxes, matching)
+            **self.box_loss.forward(qboxes, tboxes, matching)
         }
 
     def forward(self,
@@ -232,33 +213,39 @@ class RTDETRHungarianLoss(nn.Module):
         }
 
 
-def reduce_loss_dict(loss_dict: dict[str, torch.Tensor],
-                     weight: dict[str, float]) -> torch.Tensor:
-    return torch.cat([weight[k] * loss_dict[k] for k in loss_dict]).sum()
+class HungarianLossReducer(nn.Module):
+
+    def __init__(self, weights: dict[str, float]):
+        super().__init__()
+        self.weights = weights
+
+    def reduce_loss_dict(self, loss_dict: dict[str, torch.Tensor]) -> torch.Tensor:
+        return torch.stack([
+            self.weights[k] * loss_dict[k] for k in loss_dict
+        ]).sum()
 
 
-def compute_cumulated_loss(loss_dict: dict[str, Any],
-                           weight_dict: dict[str, float]) -> torch.Tensor:
-    loss_final = loss_dict['final']
-    loss_iterations = loss_dict['iters']
-    loss_anchors = loss_dict['init']
-    loss_dn = loss_dict['dn']
+    def forward(self, loss_dict: dict[str, Any]) -> torch.Tensor:
+        loss_final = loss_dict['final']
+        loss_iterations = loss_dict['iters']
+        loss_anchors = loss_dict['init']
+        loss_dn = loss_dict['dn']
 
-    loss_final = reduce_loss_dict(loss_final, weight_dict)
+        loss_final = self.reduce_loss_dict(loss_final)
 
-    loss_iterations = torch.cat([
-        reduce_loss_dict(loss_i, weight_dict)
-        for loss_i in loss_iterations
-    ]).sum()
+        loss_iterations = torch.stack([
+            self.reduce_loss_dict(loss_i)
+            for loss_i in loss_iterations
+        ]).sum()
 
-    loss_anchors = reduce_loss_dict(loss_anchors, weight_dict)
+        loss_anchors = self.reduce_loss_dict(loss_anchors)
 
-    loss_dn = torch.cat([
-        reduce_loss_dict(losses_dn_i, weight_dict)
-        for losses_dn_i in loss_dn
-    ]).sum()
+        loss_dn = torch.stack([
+            self.reduce_loss_dict(losses_dn_i)
+            for losses_dn_i in loss_dn
+        ]).sum()
 
-    return loss_final + loss_iterations + loss_dn + loss_anchors
+        return loss_final + loss_iterations + loss_dn + loss_anchors
 
 
 def compute_ddp_average_loss_dict(loss_dict: dict[str, torch.Tensor]):
