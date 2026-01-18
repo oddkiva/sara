@@ -17,7 +17,10 @@ from oddkiva.brahma.torch.parallel.ddp import (
     torchrun_is_running
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures\
-    .rt_detr.hungarian_loss import RTDETRHungarianLoss
+    .rt_detr.hungarian_loss import (
+        HungarianLossReducer,
+        RTDETRHungarianLoss
+    )
 from oddkiva.brahma.torch.tasks.object_detection.configs.\
     train_config_rtdetrv2_r50vd_coco import (
         TrainTestPipelineConfig as PipelineConfig
@@ -89,6 +92,7 @@ def train_for_one_epoch(
     train_global_step: int,
     model: torch.nn.Module,
     loss_fn: RTDETRHungarianLoss,
+    loss_reducer: HungarianLossReducer,
     optimizer: torch.optim.Optimizer,
     writer: SummaryWriter, summary_write_interval: int,
 ) -> None:
@@ -119,12 +123,13 @@ def train_for_one_epoch(
         dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
         dn_groups = aux_train_outputs['dn_groups']
 
-        loss = loss_fn.forward(
+        loss_dict = loss_fn.forward(
             box_geoms, box_class_logits,
             anchor_boxes, anchor_class_logits,
             dn_boxes, dn_class_logits, dn_groups,
             tgt_boxes, tgt_labels
         )
+        loss = loss_reducer.forward(loss_dict)
         loss.backward()
 
         optimizer.step()
@@ -149,19 +154,16 @@ def main():
     rtdetrv2_model = PipelineConfig.make_model()
 
     # THE LOSS FUNCTION
-    weight_dict = {
-        'vf': 1.0,
-        'box': 1.0
-    }
     alpha = 0.2
     gamma = 2.0
-    num_classes = 80
-    hungarian_loss_fn = RTDETRHungarianLoss(
-        weight_dict,
-        alpha=alpha,
-        gamma=gamma,
-        num_classes=num_classes
-    )
+    hungarian_loss_fn = RTDETRHungarianLoss(alpha=alpha, gamma=gamma)
+
+    weight_dict = {
+        'vf': 1.0,
+        'l1': 1.0,
+        'giou': 1.0
+    }
+    loss_reducer = HungarianLossReducer(weight_dict)
 
     # Restart the state of the Adam optimizer every epoch.
     adamw_opt = torch.optim.AdamW(rtdetrv2_model.parameters(),
@@ -205,6 +207,7 @@ def main():
                             train_global_step,
                             rtdetrv2_model,
                             hungarian_loss_fn,
+                            loss_reducer,
                             adamw_opt,
                             writer,
                             PipelineConfig.write_interval)
