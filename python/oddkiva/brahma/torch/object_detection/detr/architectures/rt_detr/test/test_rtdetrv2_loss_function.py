@@ -28,7 +28,10 @@ from oddkiva.brahma.torch.object_detection.detr.architectures.\
     )
 # The loss.
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rt_detr.hungarian_loss import RTDETRHungarianLoss
+    rt_detr.hungarian_loss import (
+        RTDETRHungarianLoss,
+        compute_cumulated_loss
+    )
 # GPU acceleration.
 from oddkiva.brahma.torch import DEFAULT_DEVICE
 # Gradient checks.
@@ -422,12 +425,13 @@ def test_hungarian_loss_api():
     dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
     dn_groups = aux_train_outputs['dn_groups']
 
-    loss = loss_fn.forward(
+    loss_dict = loss_fn.forward(
         box_geoms, box_class_logits,
         anchor_boxes, anchor_class_logits,
         dn_boxes, dn_class_logits, dn_groups,
         tgt_boxes, tgt_labels
     )
+    loss = compute_cumulated_loss(loss_dict, {})
     loss.backward()
 
     # Update RT-DETR v2 parameters with AdamW.

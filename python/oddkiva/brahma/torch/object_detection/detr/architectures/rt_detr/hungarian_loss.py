@@ -1,7 +1,11 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
+from typing import Any
+
 import torch
 import torch.nn as nn
+from torch.distributed import ReduceOp
+from torch.utils.tensorboard.writer import SummaryWriter
 
 from oddkiva.brahma.torch.object_detection.losses.box_matcher import BoxMatcher
 from oddkiva.brahma.torch.object_detection.losses.box_loss import BoxLoss
@@ -15,10 +19,6 @@ from oddkiva.brahma.torch.parallel.ddp import (
     get_world_size,
     is_ddp_available_and_initialized
 )
-
-
-def reduce_loss_dict(loss_dict: dict[str, torch.Tensor]) -> torch.Tensor:
-    return sum([loss_dict[k] for k in loss_dict])
 
 
 class RTDETRHungarianLoss(nn.Module):
@@ -156,10 +156,9 @@ class RTDETRHungarianLoss(nn.Module):
         qlogits_final = query_class_logits[-1]
         matching = self.matcher.forward(qlogits_final, qboxes_final,
                                         target_labels, target_boxes)
-        losses_final = self.compute_loss_dict(qboxes_final, qlogits_final,
+        loss_final = self.compute_loss_dict(qboxes_final, qlogits_final,
                                                target_boxes, target_labels,
                                                matching, target_count)
-        loss_final = reduce_loss_dict(losses_final)
 
         # Specifically optimize *each layer* of the transformer decoder using
         # *EACH ITERATION* towards the final predictions. This is to accelerate
@@ -170,7 +169,6 @@ class RTDETRHungarianLoss(nn.Module):
         #
         # Again note that the backbone+hybrid encoder is also optimized because
         # we feed the memory tensor in the transformer decoder.
-        losses_iterations = []
         loss_iterations = []
         for qboxes_i, qlogits_i in zip(query_boxes[:-1],
                                        query_class_logits[:-1]):
@@ -179,9 +177,8 @@ class RTDETRHungarianLoss(nn.Module):
             losses = self.compute_loss_dict(qboxes_i, qlogits_i,
                                             target_boxes, target_labels,
                                             matching_i, target_count)
-            losses_iterations.append(losses)
-            loss_iterations.append(reduce_loss_dict(losses))
-        loss_iterations_cumulated = sum(loss_iterations)
+            loss_iterations.append(losses)
+
 
         # Optimize:
         # 1. The transformer decoder network.
@@ -208,11 +205,6 @@ class RTDETRHungarianLoss(nn.Module):
                                    matching_dn, target_count)
             for dn_boxes_i, dn_class_logits_i in zip(dn_boxes, dn_class_logits)
         ]
-        loss_dn_is = []
-        for losses_dn_i in losses_dn:
-            loss_dn_is.append(reduce_loss_dict(losses_dn_i))
-        loss_dn = sum([l for l in loss_dn_is])
-
 
         # Optimize:
         # 1. the backbone, i.e., the PA-FPN -> HybridEncoder (AIFI+CCFF),
@@ -226,18 +218,91 @@ class RTDETRHungarianLoss(nn.Module):
             anchor_class_logits, anchor_boxes,
             target_labels, target_boxes
         )
-        losses_anchors = self.compute_loss_dict(
+        loss_anchors = self.compute_loss_dict(
             anchor_boxes, anchor_class_logits,
             target_boxes, target_labels,
             matching_anchors, target_count
         )
-        loss_anchors = reduce_loss_dict(losses_anchors)
 
-        # return {
-        #     'final': loss_final,
-        #     'iters': loss_iterations_cumulated,
-        #     'init': losses_anchors,
-        #     'dn': loss_dn
-        # }
+        return {
+            'final': loss_final,
+            'iters': loss_iterations,
+            'init': loss_anchors,
+            'dn': losses_dn
+        }
 
-        return loss_final + loss_iterations_cumulated + loss_dn + loss_anchors
+
+def reduce_loss_dict(loss_dict: dict[str, torch.Tensor],
+                     weight: dict[str, float]) -> torch.Tensor:
+    return torch.cat([weight[k] * loss_dict[k] for k in loss_dict]).sum()
+
+
+def compute_cumulated_loss(loss_dict: dict[str, Any],
+                           weight_dict: dict[str, float]) -> torch.Tensor:
+    loss_final = loss_dict['final']
+    loss_iterations = loss_dict['iters']
+    loss_anchors = loss_dict['init']
+    loss_dn = loss_dict['dn']
+
+    loss_final = reduce_loss_dict(loss_final, weight_dict)
+
+    loss_iterations = torch.cat([
+        reduce_loss_dict(loss_i, weight_dict)
+        for loss_i in loss_iterations
+    ]).sum()
+
+    loss_anchors = reduce_loss_dict(loss_anchors, weight_dict)
+
+    loss_dn = torch.cat([
+        reduce_loss_dict(losses_dn_i, weight_dict)
+        for losses_dn_i in loss_dn
+    ]).sum()
+
+    return loss_final + loss_iterations + loss_dn + loss_anchors
+
+
+def compute_ddp_average_loss_dict(loss_dict: dict[str, torch.Tensor]):
+    avg_loss_values = torch.cat([loss_dict[k] for k in loss_dict])
+    torch.distributed.all_reduce(avg_loss_values, op=ReduceOp.AVG)
+    return avg_loss_values
+
+
+def log_elementary_losses(loss_dict: dict[str, Any],
+                          writer: SummaryWriter,
+                          train_global_step: int) -> None:
+
+    # Compute the average final loss value across all GPUs.
+    loss_final = loss_dict['final']
+    keys = [*loss_final.keys()]
+    loss_values_f = compute_ddp_average_loss_dict(loss_final)
+    # Log.
+    for k, loss_value_f in zip(keys, loss_values_f):
+        writer.add_scalar(f'final/{k}', loss_value_f, train_global_step)
+
+    # Compute the average iterated loss values across all GPUs.
+    loss_iters = loss_dict['iters']
+    for loss_iters_i in loss_iters:
+        # Compute the average iterated loss value across all GPUs.
+        keys = [*loss_iters_i.keys()]
+        loss_values_i = compute_ddp_average_loss_dict(loss_iters_i)
+        # Log.
+        for k, loss_value_i in zip(keys, loss_values_i):
+            writer.add_scalar(f'iterated/{k}', loss_value_i, train_global_step)
+
+    # Compute the average anchor loss value across all GPUs.
+    loss_anchors = loss_dict['init']
+    keys = [*loss_anchors.keys()]
+    loss_values_a = compute_ddp_average_loss_dict(loss_anchors)
+    # Log.
+    for k, loss_value_a in zip(keys, loss_values_a):
+        writer.add_scalar(f'anchors/{k}', loss_value_a, train_global_step)
+
+    # Compute the average denoised loss value across all GPUs.
+    loss_dn = loss_dict['dn']
+    for loss_dn_i in loss_dn:
+        # Compute the average denoised loss value across all GPUs.
+        keys = [*loss_dn_i.keys()]
+        loss_values_dn_i = compute_ddp_average_loss_dict(loss_dn_i)
+        # Log.
+        for k, loss_value_i in zip(keys, loss_values_dn_i):
+            writer.add_scalar(f'dn/{k}', loss_value_i, train_global_step)
