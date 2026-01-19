@@ -98,7 +98,6 @@ def train_for_one_epoch(
     loss_fn: RTDETRHungarianLoss,
     loss_reducer: HungarianLossReducer,
     optimizer: torch.optim.Optimizer,
-    scheduler: torch.optim.lr_scheduler.LRScheduler,
     writer: SummaryWriter,
     summary_write_interval: int,
 ) -> None:
@@ -144,8 +143,6 @@ def train_for_one_epoch(
         logger.info(format_msg(f'[step:{step}] Backpropagating...'))
         loss.backward()
         optimizer.step()
-        scheduler.step()
-
 
         if step % summary_write_interval == 0:
             logger.info(format_msg(f'[step:{step}] Logging to tensorboard...'))
@@ -217,9 +214,9 @@ def main():
                                   betas=PipelineConfig.betas,
                                   weight_decay=PipelineConfig.weight_decay)
 
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(
+    lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         adamw_opt,
-        [1000],
+        milestones=[1000],
         gamma=0.1
     )
 
@@ -244,9 +241,11 @@ def main():
                             hungarian_loss_fn,
                             loss_reducer,
                             adamw_opt,
-                            scheduler,
                             summary_writer,
                             PipelineConfig.write_interval)
+
+        # Modulate the learning rate after each epoch.
+        lr_scheduler.step()
 
         # Save the model after each training epoch.
         if gpu_id == 0 and torchrun_is_running():

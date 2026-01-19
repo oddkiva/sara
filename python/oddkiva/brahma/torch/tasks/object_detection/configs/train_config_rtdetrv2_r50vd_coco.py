@@ -1,5 +1,6 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
+import os
 from pathlib import Path
 from loguru import logger
 
@@ -136,7 +137,7 @@ class OptimizationConfig:
 class SummaryWriterConfig:
     out_dir: Path = (DATA_DIR_PATH / 'trained_models' /
                      'rtdetrv2_r50' / 'train' / 'coco' / 'logs')
-    write_interval: int = 5
+    write_interval: int = 10
 
     @staticmethod
     def make_summary_writer() -> SummaryWriter:
@@ -153,5 +154,7 @@ class TrainTestPipelineConfig(ModelConfig,
 
     @staticmethod
     def out_model_filepath(epoch: int) -> Path:
-        return (TrainValTestDatasetConfig.trained_model_out_dir /
-                f'trained_model_epoch{epoch}.pt')
+        if not TrainTestPipelineConfig.trained_model_out_dir.exists():
+            os.makedirs(TrainTestPipelineConfig.trained_model_out_dir)
+        return (TrainTestPipelineConfig.trained_model_out_dir /
+                f'ckpt_epoch_{epoch}.pt')
