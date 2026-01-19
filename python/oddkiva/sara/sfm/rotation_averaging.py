@@ -1,7 +1,9 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import scipy.linalg as la
 import scipy.sparse as sp
 
-from do.sara.optimization.admm import admm
+from oddkiva.sara.optimization.admm import admm
 
 
 def huber_loss(x, sigma):

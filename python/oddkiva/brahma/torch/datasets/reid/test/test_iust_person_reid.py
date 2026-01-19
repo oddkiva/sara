@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from oddkiva import DATA_DIR_PATH
 from oddkiva.brahma.torch.datasets.reid.iust_person_reid import IUSTPersonReID
 from oddkiva.brahma.torch.datasets.reid.triplet_dataset import TripletDataset
@@ -7,10 +9,26 @@ IUST_PERSON_REID_DIR_PATH = DATA_DIR_PATH / 'reid' / 'IUSTPersonReID'
 assert IUST_PERSON_REID_DIR_PATH.exists()
 
 
-def test_iust_dataset():
+def test_iust_train_dataset():
     iust_ds = IUSTPersonReID(IUST_PERSON_REID_DIR_PATH, dataset_type='train')
     assert len(iust_ds) > 0
 
+    assert len(iust_ds.image_class_ids) > 0
+
+    assert iust_ds.class_count > 0
+
+    X, y = iust_ds[0]
+    assert X is not None
+    print(X.shape)
+    print(y)
+
+    X, y = iust_ds[-1]
+    print(X.shape)
+    print(y)
+
+def test_iust_test_dataset():
+    iust_ds = IUSTPersonReID(IUST_PERSON_REID_DIR_PATH, dataset_type='test')
+    assert len(iust_ds) > 0
     assert len(iust_ds.image_class_ids) > 0
 
     assert iust_ds.class_count > 0

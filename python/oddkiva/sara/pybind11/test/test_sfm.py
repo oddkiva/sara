@@ -1,6 +1,8 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import numpy as np
 
-from oddkiva import sara
+import pysara_pybind11 as sara
 
 
 def test_oeregion():

@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 def calculate_F_matrix_rank_2_constraint_from_7_points():
     import sympy as sp
 

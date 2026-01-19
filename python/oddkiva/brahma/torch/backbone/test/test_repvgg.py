@@ -1,0 +1,29 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
+import torch
+
+from oddkiva.brahma.torch.backbone.resnet.rtdetrv2_variant import UnbiasedConvBNA
+from oddkiva.brahma.torch.backbone.repvgg import RepVggBlock
+
+def test_repvgg_base_layer():
+    hidden_dim = 256
+    block = RepVggBlock(hidden_dim, hidden_dim,
+                        stride=1,
+                        use_identity_connection=False,
+                        activation='silu')
+
+    assert len(block.layers) == 2
+
+    assert type(block.layers[0]) is UnbiasedConvBNA
+    assert block.layers[0].layers[0].in_channels == hidden_dim
+    assert block.layers[0].layers[0].out_channels == hidden_dim
+    assert block.layers[0].layers[0].kernel_size == (3, 3)
+    assert block.layers[0].layers[0].stride == (1, 1)
+
+    assert type(block.layers[1]) is UnbiasedConvBNA
+    assert block.layers[1].layers[0].in_channels == hidden_dim
+    assert block.layers[1].layers[0].out_channels == hidden_dim
+    assert block.layers[1].layers[0].kernel_size == (1, 1)
+    assert block.layers[1].layers[0].stride == (1, 1)
+
+    assert type(block.activation) is torch.nn.SiLU

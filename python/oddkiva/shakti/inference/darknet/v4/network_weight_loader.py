@@ -1,10 +1,9 @@
-import logging
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from pathlib import Path
+from loguru import logger
 
 import numpy as np
-
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 class NetworkWeightLoader:
@@ -22,18 +21,18 @@ class NetworkWeightLoader:
             self.revision = np.fromfile(fp, count=1, dtype=np.int32)[0]
 
             if self.major * 10 + self.minor >= 2:
-                logging.debug("byte size of seen = 64 bits")
+                logger.debug("byte size of seen = 64 bits")
                 self.seen = np.fromfile(fp, count=1, dtype=np.uint64)[0]
             else:
-                logging.debug("byte size of seen= 32 bits")
+                logger.debug("byte size of seen= 32 bits")
                 self.seen = np.fromfile(fp, count=1, dtype=np.uint32)
             self.transpose = (self.major > 1000) or (self.minor > 1000)
 
-            logging.debug(f'version = {self.major}.{self.minor}.{self.revision}')
-            logging.debug(f'transpose = {self.transpose}')
-            logging.debug(f'model has seen {self.seen} images')
-            logging.debug(f'trained with {int(self.seen / 1000)} K-images '
-                          f'({int(self.seen / 64000)} K-batch of 64 images)')
+            logger.debug(f'version = {self.major}.{self.minor}.{self.revision}')
+            logger.debug(f'transpose = {self.transpose}')
+            logger.debug(f'model has seen {self.seen} images')
+            logger.debug(f'trained with {int(self.seen / 1000)} K-images '
+                         f'({int(self.seen / 64000)} K-batch of 64 images)')
 
             self._weights = np.fromfile(fp, dtype=np.float32)
             self._cursor = 0

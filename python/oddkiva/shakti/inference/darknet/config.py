@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from pathlib import Path
 from typing import Any, Optional, TypeAlias
 

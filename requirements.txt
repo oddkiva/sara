@@ -8,9 +8,9 @@ ipdbplugin
 
 Pillow
 
-torch==2.6.0
-torchvision==0.16.1
-torchaudio==2.1.1
+torch==2.5.1
+torchvision==0.20.1
+torchaudio==2.5.1
 
 coremltools
 

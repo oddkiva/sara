@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import os
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -10,7 +12,7 @@ if torch.torch_version.TorchVersion(torch.__version__) < (2, 6, 0):
 else:
     from torchvision.io.image import decode_image
 
-from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
+from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
 
@@ -22,6 +24,7 @@ class ETH123(ClassificationDatasetABC):
         root_path: Path,
         transform: Optional[v2.Transform] = None
     ):
+        super(ClassificationDatasetABC, self).__init__()
         self._root_path = root_path
         self._transform = transform
 
@@ -72,7 +75,7 @@ class ETH123(ClassificationDatasetABC):
         self._image_label_ixs = [self._labels.index(image_label)
                                  for image_label in self._image_labels]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._image_paths)
 
     def __getitem__(self, idx) -> Tuple[torch.Tensor, int]:
@@ -89,7 +92,7 @@ class ETH123(ClassificationDatasetABC):
         return self._classes
 
     @property
-    def class_count(self):
+    def class_count(self) -> int:
         return len(self._classes)
 
     @property

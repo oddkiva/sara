@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from PySide6.QtCore import QMutex, QObject, QThread, Qt, QWaitCondition, Signal
 from PySide6.QtWidgets import QApplication
 
@@ -12,6 +14,7 @@ class UserThreadSignals(QObject):
     draw_text = Signal(object, str, object, float, float,
                        bool, bool, bool)
     draw_image = Signal(object, object, float)
+    fill_rect = Signal(object, object, object)
     clear = Signal()
     set_antialiasing = Signal(bool)
 
@@ -77,7 +80,7 @@ class UserThread(QThread):
     def receivedEvent(self, event):
         pass
 
-    def sendEvent(self, event, delayMs):
+    def sendEvent(self, event, delay_ms):
         pass
 
     def run(self):

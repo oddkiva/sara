@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import sympy as sp
 from sympy.abc import x, y, z
 from sympy.codegen.rewriting import create_expand_pow_optimization

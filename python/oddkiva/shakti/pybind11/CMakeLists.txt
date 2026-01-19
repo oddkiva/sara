@@ -42,6 +42,7 @@ add_custom_target(copy_pyshakti_module)
 set(pyshakti_LIBRARY_PATH $<TARGET_FILE:pyshakti_pybind11>)
 add_custom_command(
   TARGET copy_pyshakti_module
+  POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy ${pyshakti_LIBRARY_PATH}
           ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 set_target_properties(copy_pyshakti_module PROPERTIES FOLDER "Python")

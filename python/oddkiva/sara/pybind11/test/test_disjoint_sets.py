@@ -1,7 +1,9 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import numpy as np
 
-from oddkiva.sara import (compute_adjacency_list_2d,
-                          compute_connected_components)
+from pysara_pybind11 import (compute_adjacency_list_2d,
+                             compute_connected_components)
 
 
 def test_compute_adjacency_list_2d():

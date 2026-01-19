@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 4.0.0)
 
 project(Sara LANGUAGES C CXX)
 
@@ -90,7 +90,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL iOS)
       /Users/david/GitHub/Apple-Boost-BuildScript/dist/boost.xcframework/ios-arm64/libboost.a
   )
 elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
-  find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+  if (APPLE)
+    find_package(Eigen3 3.4...5 REQUIRED NO_MODULE)
+  else ()
+    find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+  endif ()
 
   find_package(TBB)
 
@@ -99,8 +103,7 @@ elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Emscripten)
   set(Boost_USE_MULTITHREADED ON)
   find_package(
     Boost
-    COMPONENTS filesystem log program_options serialization system
-               unit_test_framework
+    COMPONENTS filesystem log program_options serialization unit_test_framework
     REQUIRED)
 
   find_package(OpenMP)
