@@ -154,7 +154,7 @@ def train_for_one_epoch(
 
             loss_value = loss
             torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
-            writer.add_scalar(f'train/loss/global',
+            writer.add_scalar(f'global',
                               loss_value, train_global_step)
 
         train_global_step += 1
