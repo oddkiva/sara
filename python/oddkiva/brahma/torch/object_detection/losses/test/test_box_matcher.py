@@ -10,11 +10,7 @@ from torchvision.transforms import v2
 # Data, dataset and dataloader.
 from oddkiva import DATA_DIR_PATH
 import oddkiva.brahma.torch.datasets.coco as coco
-from oddkiva.brahma.torch.datasets.coco.dataloader import (
-    RTDETRImageCollateFunction
-,
-    collate_fn
-)
+from oddkiva.brahma.torch.datasets.coco.dataloader import collate_fn
 # Data augmentation.
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
@@ -77,11 +73,11 @@ def test_box_matcher():
     top_K = max(tgt_count_per_image)
 
     # Generate noise for the box geometries and object class probabilities.
-    noise_mag = 10  # pixels
+    noise_mag = 15  # pixels
     noise_xyxy = T.rand(N, top_K, 4) * noise_mag / W
 
-    noise_prob_mag = 0.2  # [-0.2, +0.2]
-    noise_prob = (2 * T.rand(N, top_K, 80) - 1) * noise_prob_mag
+    noise_prob_mag = 5e-3  # [-0.2, +0.2]
+    noise_prob = (0.5 * T.rand(N, top_K, 80) - 1) * noise_prob_mag
 
     query_xyxy = noise_xyxy
     query_logits = noise_prob
@@ -107,5 +103,7 @@ def test_box_matcher():
         zip(matching, tgt_count_per_image)
     ):
         # We check sample after sample.
+        print(qixs_n)
+        print(tixs_n)
         assert T.equal(qixs_n, tixs_n)
         assert T.equal(tixs_n.sort().values, T.arange(tgt_count_n))

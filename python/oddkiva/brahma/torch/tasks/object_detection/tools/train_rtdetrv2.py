@@ -4,9 +4,11 @@ import atexit
 from loguru import logger
 
 import torch
-import torch.nn
 import torch.nn.functional as F
-from torch.distributed import destroy_process_group
+from torch.distributed import (
+    ReduceOp,
+    destroy_process_group
+)
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard.writer import SummaryWriter
 
@@ -19,7 +21,8 @@ from oddkiva.brahma.torch.parallel.ddp import (
 from oddkiva.brahma.torch.object_detection.detr.architectures\
     .rt_detr.hungarian_loss import (
         HungarianLossReducer,
-        RTDETRHungarianLoss
+        RTDETRHungarianLoss,
+        log_elementary_losses
     )
 from oddkiva.brahma.torch.tasks.object_detection.configs.\
     train_config_rtdetrv2_r50vd_coco import (
@@ -50,8 +53,6 @@ def validate(
 ) -> None:
     model.eval()
 
-    step_count = len(dataloader)
-
     with torch.no_grad():
         for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
             if gpu_id is not None:
@@ -79,11 +80,14 @@ def validate(
                 dn_boxes, dn_class_logits, dn_groups,
                 tgt_boxes, tgt_labels
             )
-            loss.backward()
 
             if (gpu_id is None or gpu_id == 0) and step % summary_write_interval == 0:
-                loss = loss_fn.item()
-                test_global_step += 1
+                loss_value = loss
+                torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
+                writer.add_scalar(f'test/loss/global',
+                                  loss_value, test_global_step)
+
+            test_global_step += 1
 
 
 def train_for_one_epoch(
@@ -94,11 +98,11 @@ def train_for_one_epoch(
     loss_fn: RTDETRHungarianLoss,
     loss_reducer: HungarianLossReducer,
     optimizer: torch.optim.Optimizer,
+    scheduler: torch.optim.lr_scheduler.LRScheduler,
     writer: SummaryWriter, summary_write_interval: int,
 ) -> None:
     torch.autograd.set_detect_anomaly(True)
 
-    step_count = len(dataloader)
     model.train()
 
     for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
@@ -129,16 +133,22 @@ def train_for_one_epoch(
             dn_boxes, dn_class_logits, dn_groups,
             tgt_boxes, tgt_labels
         )
-        loss = loss_reducer.forward(loss_dict)
-        loss.backward()
 
+        loss = loss_reducer.forward(loss_dict)
+
+        loss.backward()
         optimizer.step()
+        scheduler.step()
 
         if (gpu_id is None or gpu_id == 0) and step % summary_write_interval == 0:
-            # Train loss
-            loss_fn = loss_fn.item()
+            log_elementary_losses(loss_dict, writer, train_global_step)
 
-            train_global_step += 1
+            loss_value = loss
+            torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
+            writer.add_scalar(f'train/loss/global',
+                              loss_value, train_global_step)
+
+        train_global_step += 1
 
 
 def main():
@@ -147,7 +157,7 @@ def main():
 
     # THE DATASET
     train_ds, val_ds, _ = PipelineConfig.make_datasets()
-    writer = PipelineConfig.make_summary_writer()
+    summary_writer = PipelineConfig.make_summary_writer()
 
     # THE MODEL
     gpu_id = get_local_rank()
@@ -186,7 +196,7 @@ def main():
     # for name, parameter in model.named_parameters():
     #     param_groups.append({'params': [parameter], 'lr': learning_rates[name]})
     #     param_group_names.append(name)
-    # 
+    #
     # # optimizer requires default learning rate even if its overridden by all param groups
     # optimizer = optim.SGD(param_groups, lr=10)
 
@@ -209,11 +219,14 @@ def main():
                             hungarian_loss_fn,
                             loss_reducer,
                             adamw_opt,
-                            writer,
+                            scheduler,
+                            summary_writer,
                             PipelineConfig.write_interval)
 
         # Save the model after each training epoch.
         if gpu_id == 0 and torchrun_is_running():
+            assert isinstance(rtdetrv2_model,
+                              torch.nn.parallel.DistributedDataParallel)
             # In the case of distributed training, make sure only the node
             # associated with GPU node 0 can save the model.
             ckpt = rtdetrv2_model.module.state_dict()
@@ -233,7 +246,7 @@ def main():
         if torchrun_is_running():
             val_dl.sampler.set_epoch(epoch)
         validate(val_dl, gpu_id, val_global_step,
-                 rtdetrv2_model, hungarian_loss_fn, writer,
+                 rtdetrv2_model, hungarian_loss_fn, summary_writer,
                  PipelineConfig.write_interval)
 
 
