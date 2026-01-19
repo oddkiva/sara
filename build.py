@@ -19,6 +19,7 @@ BUILD_TASKS = [
     "book_docker",
     "serve_book",
     "emsdk_docker",
+    "pytest_torch_package",
 ]
 
 # Build types.
@@ -28,7 +29,7 @@ BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 UBUNTU_VERSION = "22.04"
 CUDA_VERSION = "12.1.0"
 TRT_VERSION = "8.6"
-SWIFT_VERSION = "6.1.2"
+SWIFT_VERSION = "6.2.2"
 HALIDE_VERSION = "19.0.0"
 
 # Docker
@@ -417,6 +418,21 @@ def build_emsdk_docker():
     ).wait()
 
 
+def pytest_torch_package():
+    # Build the docker image.
+    ret = subprocess.Popen(
+        [
+            "pytest",
+            "-s",
+            "--ignore=python/oddkiva/brahma/jax",
+            "--ignore=python/oddkiva/brahma/tf"
+        ],
+        cwd=SARA_SOURCE_DIR,
+    ).wait()
+
+    return ret
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sara Build Program Options")
 
@@ -443,7 +459,17 @@ if __name__ == "__main__":
         action="store_true",
         help="Build only essential parts of the project for Continous Integration",
     )
+    parser.add_argument(
+        "--project_type",
+        help="Specify project type for CMake (Xcode, Ninja, etc.)",
+    )
     args = parser.parse_args()
+
+    if args.project_type:
+        PROJECT_TYPE = args.project_type
+        print(f"GENERATING CUSTOM PROJECT TYPE '{PROJECT_TYPE}'")
+    else:
+        print(f"GENERATING INFERRED PROJECT TYPE '{PROJECT_TYPE}'")
 
     for task in args.tasks:
         if task == "compilation_database":
@@ -512,3 +538,6 @@ if __name__ == "__main__":
 
         if task == "serve_book":
             serve_book()
+
+        if task == 'pytest_torch_package':
+            pytest_torch_package()

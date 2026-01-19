@@ -1,7 +1,9 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import time
 
 
-class Timer(object):
+class Timer:
     def __init__(self, name=None):
         self.name = name
 

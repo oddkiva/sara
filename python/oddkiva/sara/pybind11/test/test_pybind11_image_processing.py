@@ -1,4 +1,6 @@
-import oddkiva.sara as sara
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
+import pysara_pybind11 as sara
 
 import numpy as np
 

@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 import sympy as sp
 
 # Solve the cubic polynomial.

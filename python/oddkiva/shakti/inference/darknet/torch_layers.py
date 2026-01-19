@@ -1,19 +1,16 @@
-from pathlib import Path
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from typing import Any, Optional
-import logging
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 
-logging.basicConfig(level=logging.DEBUG)
-
-
 class ConvBNA(nn.Module):
 
     def __init__(self, in_channels, darknet_params: dict[str, Any], id: int,
-                 inference=True):
+                 inference: bool = True):
         super(ConvBNA, self).__init__()
         self.layers = nn.Sequential()
 
@@ -150,7 +147,7 @@ class RouteSlice(nn.Module):
 
 class RouteConcat2(nn.Module):
 
-    def __init__(self, layers: [int], id: Optional[int] = None):
+    def __init__(self, layers: list[int], id: Optional[int] = None):
         super(RouteConcat2, self).__init__()
         self.layers = layers
         self.id = id
@@ -163,7 +160,7 @@ class RouteConcat2(nn.Module):
 
 class RouteConcat4(nn.Module):
 
-    def __init__(self, layers: [int], id: Optional[int] = None):
+    def __init__(self, layers: list[int], id: Optional[int] = None):
         super(RouteConcat4, self).__init__()
         self.layers = layers
         self.id = id
@@ -184,7 +181,7 @@ class Shortcut(nn.Module):
         elif activation == 'leaky':
             self.activation_fn = nn.LeakyReLU(0.1, inplace=True)
         elif activation == 'relu':
-            self.activation_fn = ReLU(inplace=True)
+            self.activation_fn = nn.ReLU(inplace=True)
         else:
             raise NotImplementedError(
                 f'The followig activation function "{activation}" not implemented!'

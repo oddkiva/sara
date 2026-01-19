@@ -1,36 +1,96 @@
-import logging
-from typing import Tuple
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
+from loguru import logger
 
 import torch
 from torch.utils.data import Dataset
 
-from oddkiva.brahma.torch.datasets.classification_dataset_abc import (
+from oddkiva.brahma.common.classification_dataset_abc import (
     ClassificationDatasetABC
 )
 from oddkiva.brahma.torch.datasets.utils import group_samples_by_class
-
-
-LOGGER = logging.getLogger('TripletDataset')
+from oddkiva.brahma.torch.utils.logging import format_msg
 
 
 class TripletDataset(Dataset):
+    """The base triplet dataset class.
+    """
 
-    TripletSample = Tuple[Tuple[torch.Tensor, torch.Tensor, torch.Tensor],
-                          Tuple[int, int, int]]
+    TripletSample = tuple[tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+                          tuple[int, int, int]]
 
     def __init__(self, base_dataset: ClassificationDatasetABC, repeat: int = 1):
+        r"""
+        The `TripletDataset` class must be initialized from a class derived
+        from `ClassificationDatasetABC`.
+
+        Once instantiated, the `TripletDataset` object will generate triplet of
+        samples randomly, where samples are drawn in such a way that each image
+        class is sampled in an equidistributed manner, regardless of the
+        cardinality of each image class.
+
+        The number of triplets we sample is calculated as follows.
+
+        First, let $N$ denote the number of images, $L$ denote the number of
+        image classes, $l_n$ denote the label of image $n$. Then, we count the
+        cardinality of the most frequent image class $l^*$.
+
+        $$
+        l^* = \underset{l}{\mathrm{argmax}}
+            \ \mathrm{card} \left\{ n | l_n = l \right\}
+        $$
+
+        We introduce the *repeat* parameter $r$ so that we sample each class
+        this number of times
+
+        $$
+        r \times \mathrm{card} \{ n | l_n = l^* \}
+        $$
+
+        Thus, the total number of triplet samples we draw is
+
+        $$
+        r  \times L \times \mathrm{card} \{ n | l_n = l^* \}
+        $$
+
+        Parameters:
+            base_dataset:
+                the classification dataset from which we sample triplets.
+            repeat:
+                the integer parameter $r$ in the formula.
+        """
         self.base_dataset = base_dataset
         self.repeat = repeat
 
-        LOGGER.info('Grouping samples by classes...')
+        logger.info(format_msg('Grouping samples by classes...'))
         self._group_samples_by_class()
-        LOGGER.info('Generating triplet samples...')
+        logger.info(format_msg('Generating triplet samples...'))
         self._generate_triplet_samples()
 
-    def  __len__(self):
+    def  __len__(self) -> int:
+        """Returns the number of triplet samples
+        """
         return len(self.triplets)
 
     def __getitem__(self, idx: int) -> TripletSample:
+        r"""Returns the triplet samples indexed by the index `idx`.
+
+        Parameters:
+            idx: the triplet index
+
+        - A sample is the image-label pair which we denote by
+          $(\mathbf{I}_i, l_i)$.
+        - A triplet is defined by 3 samples, namely, the anchor, positive
+          and negative samples.
+          Let us respectively index the anchor, positive and negative samples
+          by the triplet of indices $(a, p, n)$.
+          Then the anchor, positive and negative samples are respectively the
+          pairs:
+
+          - $(\mathbf{I}_a, l_a)$,
+          - $(\mathbf{I}_p, l_p)$, and
+          - $(\mathbf{I}_n, l_n)$.
+        """
         # Anchor, positive, negative samples.
         a, p, n = self.triplets[idx]
 
@@ -60,7 +120,7 @@ class TripletDataset(Dataset):
 
     def _generate_triplet_samples(self):
         # Draw two distincts class indices.
-        LOGGER.info('Positive-negative class sampling...')
+        logger.info(format_msg('Positive-negative class sampling...'))
         # We use the multinomial distribution instead of randperm as we can
         # leverage parallelization.
         #
@@ -78,7 +138,7 @@ class TripletDataset(Dataset):
             class_weights, num_samples=2, replacement=False)
 
         # Draw triplets of sample indices.
-        LOGGER.info('Triplet sampling...')
+        logger.info(format_msg('Triplet sampling...'))
         triplets = []
         for class_pair in positive_negative_class_pairs:
             p_class, n_class = [int(v.item()) for v in class_pair]

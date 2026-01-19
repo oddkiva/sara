@@ -1,4 +1,6 @@
-import logging
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
+from loguru import logger
 from pathlib import Path
 from typing import Optional
 
@@ -9,9 +11,6 @@ import torch.nn as nn
 
 import oddkiva.shakti.inference.darknet as darknet
 import oddkiva.shakti.inference.darknet.v4 as v4
-
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 class Network(nn.Module):
@@ -39,7 +38,7 @@ class Network(nn.Module):
         if cfg._model is None:
             raise ValueError()
 
-        logging.debug(cfg._metadata)
+        logger.debug(cfg._metadata)
 
         conv_id = 0
         route_id = 0
@@ -94,7 +93,7 @@ class Network(nn.Module):
             if type(block) is not darknet.ConvBNA:
                 continue
 
-            logging.debug(f'[LOADING] {block_idx} {block}')
+            logger.debug(f'[LOADING] {block_idx} {block}')
 
             conv = block.layers[0]
 
@@ -134,8 +133,8 @@ class Network(nn.Module):
                     scale_w = bn_scale[c_out] / np.sqrt(bn_var[c_out] + eps)
                     conv.weight.data[c_out, :, :, :] *= scale_w
 
-        logging.debug(f'weight loader cursor = {weight_loader._cursor}')
-        logging.debug(f'weights num elements = {weight_loader._weights.size}')
+        logger.debug(f'weight loader cursor = {weight_loader._cursor}')
+        logger.debug(f'weights num elements = {weight_loader._weights.size}')
         if self.up_to_layer is None:
             assert weight_loader._cursor == weight_loader._weights.size
 
@@ -168,11 +167,11 @@ class Network(nn.Module):
 
         # Append the convolutional block to the model.
         model.append(darknet.ConvBNA(c_in, layer_params, conv_id))
-        logging.debug(
+        logger.debug(
             f'[Conv {conv_id}] '
             f'{shape_in} -> {shape_out}'
         )
-        logging.debug(f'{layer_params}')
+        logger.debug(f'{layer_params}')
 
     def _append_route(self, model, layer_params, route_id):
         layers = layer_params['layers']
@@ -194,7 +193,7 @@ class Network(nn.Module):
             # Append the route-slice block.
             model.append(darknet.RouteSlice(
                 layers[0], groups, group_id, route_id))
-            logging.debug(
+            logger.debug(
                 f'[Route {route_id}] (Slide): '
                 f'{shape_in} -> {shape_out}'
             )
@@ -219,7 +218,7 @@ class Network(nn.Module):
             else:
                 raise NotImplementedError(
                     "Route-Concat supports only 2 or 4 inputs")
-            logging.debug(
+            logger.debug(
                 f'[Route {route_id}] (Concat): '
                 f'{shape_ins} -> {shape_out}\n'
                 f'                    layers = {layers}'
@@ -242,7 +241,7 @@ class Network(nn.Module):
         self.out_shape_at_block.append(shape_out)
 
         model.append(darknet.Shortcut(from_layer, activation))
-        logging.debug(
+        logger.debug(
             f'[Shortcut {shortcut_id}] {shape_ins} -> {shape_out}\n'
             f'                         from_layer = {from_layer}'
         )
@@ -262,8 +261,8 @@ class Network(nn.Module):
         self.out_shape_at_block.append(shape_out)
 
         model.append(darknet.MaxPool(size, stride))
-        logging.debug(f'[MaxPool {max_pool_id}] '
-                      f'{shape_in} -> {shape_out}')
+        logger.debug(f'[MaxPool {max_pool_id}] '
+                     f'{shape_in} -> {shape_out}')
 
     def _append_upsample(self, model, layer_params, upsample_id):
         # Extract the input shape
@@ -279,8 +278,8 @@ class Network(nn.Module):
         self.out_shape_at_block.append(shape_out)
 
         model.append(darknet.Upsample(stride))
-        logging.debug(f'[Upsample {upsample_id}] '
-                      f'{shape_in} -> {shape_out}')
+        logger.debug(f'[Upsample {upsample_id}] '
+                     f'{shape_in} -> {shape_out}')
 
     def _append_yolo(self, model, layer_params, yolo_id):
         # Extract the input shape
@@ -294,8 +293,8 @@ class Network(nn.Module):
         self.out_shape_at_block.append(shape_out)
 
         model.append(darknet.Yolo(layer_params))
-        logging.debug(f'[YOLO {yolo_id}] '
-                      f'{shape_in} -> {shape_out}')
+        logger.debug(f'[YOLO {yolo_id}] '
+                     f'{shape_in} -> {shape_out}')
 
     def _forward(self, x):
         ys = [x]

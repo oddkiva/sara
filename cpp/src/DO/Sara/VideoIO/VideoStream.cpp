@@ -293,10 +293,19 @@ namespace DO::Sara {
                                         nullptr, 0);
     const auto rotation_angle_from_tag =
         rotate_tag == nullptr ? 0 : std::stoi(rotate_tag->value);
+#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(60, 29, 100))
     // Since FFmpeg 5.x, we need to do this.
     const auto display_mat_ptr =
         reinterpret_cast<int32_t*>(av_stream_get_side_data(
             video_stream, AV_PKT_DATA_DISPLAYMATRIX, nullptr));
+#else
+    const auto cp = video_stream->codecpar;
+    const auto psd = av_packet_side_data_get(
+        cp->coded_side_data, cp->nb_coded_side_data, AV_PKT_DATA_DISPLAYMATRIX);
+    const auto display_mat_ptr =
+        reinterpret_cast<int32_t*>(psd ? psd->data : nullptr);
+
+#endif
     const auto rotation_angle_from_display_matrix =
         static_cast<int>(get_rotation_degrees(display_mat_ptr));
 
@@ -326,7 +335,7 @@ namespace DO::Sara {
       av_packet_unref(_pkt);
     av_frame_free(&_device_picture);
     av_frame_free(&_picture);
-    avcodec_close(_video_codec_context);
+    // avcodec_close(_video_codec_context);
     avformat_close_input(&_video_format_context);
     avcodec_free_context(&_video_codec_context);
     av_packet_free(&_pkt);

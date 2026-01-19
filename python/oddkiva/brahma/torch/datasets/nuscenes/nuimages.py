@@ -1,3 +1,5 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, NamedTuple, Tuple

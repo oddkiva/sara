@@ -1,5 +1,4 @@
 # Data
-**/assets/
 **/yolov*/
 doc/source/xml/
 html/
@@ -30,9 +29,6 @@ sara_book_files/
 sara_book.log
 sara.svg
 
-# cache folder
-.cache
-
 # NPM
 **/node_modules/
 
@@ -40,8 +36,11 @@ sara.svg
 cmake/sara_version.cmake
 compile_commands.json
 
-# GDB
+# Misc byproducts
+cpp/examples/Kalpana/Emscripten/assets/
+train/
+CS_SESSION
+.swift-version
+.cache
 .gdb_history
-
-# Mac crap
 .DS_Store

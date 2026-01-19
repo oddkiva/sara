@@ -1,51 +1,70 @@
-from PySide6.QtCore import QPointF
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
+from typing import Iterable
+
+import numpy as np
+
+from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QColor, QFont, QImage, QPainter, QPen
 
 
-def to_qimage(array):
+def to_qimage(array: np.ndarray):
     h, w, c = array.shape
-    qimage = QImage(array.data, w, h, c * w, QImage.Format_RGB888)
+    qimage = QImage(array.data, w, h, c * w, QImage.Format.Format_RGB888)
     return qimage
 
-def draw_point(array, x, y, color, antialiasing=True):
+def draw_point(array: np.ndarray, x, y, color, antialiasing: bool = True):
+    """ Draw a point.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
-    p.setRenderHints(QPainter.Antialiasing, antialiasing)
+    p.setRenderHints(QPainter.RenderHint.Antialiasing, antialiasing)
     p.setPen(QColor(*color));
     p.drawPoint(x, y);
     p.end()
 
-def draw_line(array, p1, p2, color, pen_width, antialiasing=True):
+def draw_line(array: np.ndarray, p1, p2, color, pen_width,
+              antialiasing: bool = True):
+    """ Draw a line.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
-    p.setRenderHints(QPainter.Antialiasing, antialiasing)
+    p.setRenderHints(QPainter.RenderHint.Antialiasing, antialiasing)
     p.setPen(QPen(QColor(*color), pen_width))
     p.drawLine(QPointF(*p1), QPointF(*p2))
     p.end()
 
-def draw_rect(array, top_left_corner, sizes, color, pen_width,
-              antialiasing=True):
+def draw_rect(array: np.ndarray, top_left_corner, sizes, color, pen_width,
+              antialiasing: bool = True):
+    """ Draw a rectangle.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
-    p.setRenderHints(QPainter.Antialiasing, antialiasing)
+    p.setRenderHints(QPainter.RenderHint.Antialiasing, antialiasing)
     p.setPen(QPen(QColor(*color), pen_width))
     p.drawRect(top_left_corner[0], top_left_corner[1],
                            sizes[0], sizes[1]);
     p.end()
 
-def draw_circle(array, center, radius, color, pen_width, antialiasing=True):
+def draw_circle(array: np.ndarray, center, radius, color, pen_width,
+                antialiasing: bool = True):
+    """ Draw a circle.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
-    p.setRenderHints(QPainter.Antialiasing, antialiasing);
+    p.setRenderHints(QPainter.RenderHint.Antialiasing, antialiasing)
     p.setPen(QPen(QColor(*color), pen_width))
     p.drawEllipse(QPointF(*center), radius, radius);
     p.end()
 
-def draw_ellipse(array, center, r1, r2, angle_in_degrees, color, pen_width,
-                 antialiasing=True):
+def draw_ellipse(array: np.ndarray, center, r1, r2, angle_in_degrees: float,
+                 color: Iterable[int], pen_width: int,
+                 antialiasing: bool =True):
+    """ Draw an ellipse.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
-    p.setRenderHints(QPainter.Antialiasing, antialiasing)
+    p.setRenderHints(QPainter.RenderHint.Antialiasing, antialiasing)
     p.save()
     p.setPen(QPen(QColor(*color), pen_width))
     p.translate(QPointF(*center))
@@ -55,8 +74,12 @@ def draw_ellipse(array, center, r1, r2, angle_in_degrees, color, pen_width,
     p.restore()
     p.end()
 
-def draw_text(array, p, text, color, font_size, orientation, italic, bold,
-              underline, antialiasing=True):
+def draw_text(array: np.ndarray, p: Iterable[int], text: str,
+              color: Iterable[int], font_size: int, orientation: float,
+              italic: bool, bold: bool, underline: bool,
+              antialiasing: bool = True):
+    """ Draw a string.
+    """
     font = QFont()
     font.setPointSize(font_size)
     font.setItalic(italic)
@@ -64,27 +87,31 @@ def draw_text(array, p, text, color, font_size, orientation, italic, bold,
     font.setUnderline(underline)
 
     surface = to_qimage(array)
-    p = QPainter(surface)
-    p.setRenderHints(QPainter.Antialiasing, antialiasing)
+    painter = QPainter(surface)
+    painter.setRenderHints(QPainter.RenderHint.Antialiasing, antialiasing)
 
-    p.save()
-    p.setPen(QColor(*color))
-    p.setFont(font)
+    painter.save()
+    painter.setPen(QColor(*color))
+    painter.setFont(font)
 
-    p.translate(p[0], p[1])
-    p.rotate(orientation)
-    p.drawText(0, 0, text)
-    p.restore()
-    p.end()
+    painter.translate(p[0], p[1])
+    painter.rotate(orientation)
+    painter.drawText(0, 0, text)
+    painter.restore()
+    painter.end()
 
-def draw_image(array, image, offset, scale):
+def draw_image(array: np.ndarray, image: np.ndarray,
+               offset: Iterable[int | float],
+               scale: float):
+    """ Draw an image.
+    """
     surface = to_qimage(array)
     p = QPainter(surface)
 
     xoff, yoff = offset
     p.translate(xoff, yoff)
     p.scale(scale, scale)
-    p.drawImage(0, 0, image)
+    p.drawImage(0, 0, to_qimage(image))
     p.scale(1 / scale, 1 / scale)
     p.translate(-xoff, -yoff)
     p.end()
