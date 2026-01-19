@@ -45,7 +45,7 @@ def ddp_cleanup():
 def validate(
     dataloader: DataLoader,
     gpu_id: int | None,
-    test_global_step: int,
+    val_global_step: int,
     model: torch.nn.Module,
     loss_fn: torch.nn.Module,
     writer: SummaryWriter,
@@ -84,10 +84,10 @@ def validate(
             if (gpu_id is None or gpu_id == 0) and step % summary_write_interval == 0:
                 loss_value = loss
                 torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
-                writer.add_scalar(f'test/loss/global',
-                                  loss_value, test_global_step)
+                writer.add_scalar(f'val/loss/global',
+                                  loss_value, val_global_step)
 
-            test_global_step += 1
+            val_global_step += 1
 
 
 def train_for_one_epoch(
@@ -110,8 +110,8 @@ def train_for_one_epoch(
 
         if gpu_id is not None:
             imgs = imgs.to(gpu_id)
-            tgt_boxes = tgt_boxes.to(gpu_id)
-            tgt_labels = tgt_labels.to(gpu_id)
+            tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
+            tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
 
         targets = {
             'boxes': tgt_boxes,
@@ -166,16 +166,38 @@ def main():
     # THE LOSS FUNCTION
     alpha = 0.2
     gamma = 2.0
-    hungarian_loss_fn = RTDETRHungarianLoss(alpha=alpha, gamma=gamma)
-
-    weight_dict = {
-        'vf': 1.0,
-        'l1': 1.0,
-        'giou': 1.0
+    matching_cost_weights = {
+        'class': 2.0,
+        'l1': 5.0,
+        'giou': 2.0
     }
-    loss_reducer = HungarianLossReducer(weight_dict)
+    hungarian_loss_fn = RTDETRHungarianLoss(alpha=alpha,
+                                            gamma=gamma,
+                                            weights=matching_cost_weights)
+
+    loss_weights = {
+        'vf': 1.0,
+        'l1': 5.0,
+        'giou': 2.0
+    }
+    loss_reducer = HungarianLossReducer(loss_weights)
 
     # Restart the state of the Adam optimizer every epoch.
+    #
+    # https://stackoverflow.com/questions/73629330/what-exactly-is-meant-by-param-groups-in-pytorch
+    #
+    # Build param_group where each group consists of a single parameter.
+    # `param_group_names` is created so we can keep track of which param_group
+    # corresponds to which parameter.
+    #
+    # param_groups = []
+    # param_group_names = []
+    # for name, parameter in model.named_parameters():
+    #     param_groups.append({'params': [parameter], 'lr': learning_rates[name]})
+    #     param_group_names.append(name)
+    #
+    # # optimizer requires default learning rate even if its overridden by all param groups
+    # optimizer = optim.AdamW(param_groups, lr=...)
     adamw_opt = torch.optim.AdamW(rtdetrv2_model.parameters(),
                                   lr=PipelineConfig.learning_rate,
                                   betas=PipelineConfig.betas,
@@ -186,19 +208,6 @@ def main():
         [1000],
         gamma=0.1
     )
-    # # https://stackoverflow.com/questions/73629330/what-exactly-is-meant-by-param-groups-in-pytorch
-    # #
-    # # Build param_group where each group consists of a single parameter.
-    # # `param_group_names` is created so we can keep track of which param_group
-    # # corresponds to which parameter.
-    # param_groups = []
-    # param_group_names = []
-    # for name, parameter in model.named_parameters():
-    #     param_groups.append({'params': [parameter], 'lr': learning_rates[name]})
-    #     param_group_names.append(name)
-    #
-    # # optimizer requires default learning rate even if its overridden by all param groups
-    # optimizer = optim.SGD(param_groups, lr=10)
 
     train_global_step = 0
     val_global_step = 0

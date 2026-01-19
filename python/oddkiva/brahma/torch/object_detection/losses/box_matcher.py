@@ -46,18 +46,26 @@ class BoxMatcher(torch.nn.Module):
     a different training image `j`. Such cases will be filtered out later.
     """
 
-    def __init__(self, use_focal_loss: bool = True,
-                 alpha: float = 0.25,
-                 gamma: float = 2.0):
+    def __init__(
+        self,
+        use_focal_loss: bool = True,
+        alpha: float = 0.25,
+        gamma: float = 2.0,
+        weights: dict[str, float] = {
+            'class': 2.0,
+            'l1': 5.0,
+            'giou': 2.0
+        }
+    ):
         super().__init__()
 
         self.use_focal_loss = use_focal_loss
         self.alpha = alpha
         self.gamma = gamma
 
-        self.w_class = 1.0
-        self.w_box_l1 = 1.0
-        self.w_box_giou = 1.0
+        self.w_class = weights['class']
+        self.w_box_l1 = weights['l1']
+        self.w_box_giou = weights['giou']
         self.eps = 1e-8
 
     def calculate_class_labeling_cost_matrix(

@@ -1,22 +1,24 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-from loguru import logger
-
 from pathlib import Path
+from loguru import logger
 
 import torch
 import torchvision.transforms.v2 as v2
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
-from torch.utils.tensorboard.writer import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
+# Datasets
 import oddkiva.brahma.torch.datasets.coco as coco
 from oddkiva import DATA_DIR_PATH
+# Parallelization
 from oddkiva.brahma.torch.parallel.ddp import (
     torchrun_is_running,
     wrap_model_with_ddp_if_needed
 )
+# Data Transforms
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
     ToNormalizedFloat32
@@ -24,10 +26,13 @@ from oddkiva.brahma.torch.object_detection.common.data_transforms import (
 from oddkiva.brahma.torch.datasets.coco.dataloader import (
     RTDETRImageCollateFunction
 )
+# Models
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.config import RTDETRConfig
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.model import RTDETRv2
+# Utilities
+from oddkiva.brahma.torch.utils.logging import format_msg
 
 
 class ModelConfig:
@@ -102,19 +107,21 @@ class TrainValTestDatasetConfig:
 
     @staticmethod
     def make_datasets() -> tuple[Dataset, Dataset, Dataset | None]:
-        logger.info(f"Instantiating COCO train dataset...")
+        logger.info(format_msg(f"Instantiating COCO train dataset..."))
         train_ds = TrainValTestDatasetConfig.Dataset(
             train_or_val='train',
             transform=TrainValTestDatasetConfig.train_transform
         )
 
-        logger.info(f"Instantiating COCO val dataset...")
+        logger.info(format_msg(f"Instantiating COCO val dataset..."))
         val_ds = TrainValTestDatasetConfig.Dataset(
             train_or_val='val',
             transform=TrainValTestDatasetConfig.val_transform
         )
 
-        logger.info(f"[IGNORING] Instantiating COCO test dataset...")
+        logger.info(format_msg(
+            f"[IGNORING] Instantiating COCO test dataset..."
+        ))
         test_ds = None
 
         return train_ds, val_ds, test_ds

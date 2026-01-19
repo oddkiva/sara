@@ -26,13 +26,20 @@ class RTDETRHungarianLoss(nn.Module):
     The composite Hungarian loss function used in RT-DETR v2.
     """
 
-    def __init__(self,
-                 alpha: float = 0.2,
-                 gamma: float = 2.0):
+    def __init__(
+        self,
+        alpha: float = 0.2,
+        gamma: float = 2.0,
+        weights: dict[str, float] = {
+            'class': 2.0,
+            'l1': 5.0,
+            'giou': 2.0
+        }
+    ):
         """Initializes the Hungarian loss function.
         """
         super().__init__()
-        self.matcher = BoxMatcher(alpha=alpha, gamma=gamma)
+        self.matcher = BoxMatcher(alpha=alpha, gamma=gamma, weights=weights)
 
         self.focal_loss = FocalLoss(gamma=gamma, alpha=alpha)
         self.varifocal_loss = VarifocalLoss(alpha=alpha, gamma=gamma)
@@ -249,7 +256,7 @@ class HungarianLossReducer(nn.Module):
 
 
 def compute_ddp_average_loss_dict(loss_dict: dict[str, torch.Tensor]):
-    avg_loss_values = torch.cat([loss_dict[k] for k in loss_dict])
+    avg_loss_values = torch.stack([loss_dict[k] for k in loss_dict]).sum()
     torch.distributed.all_reduce(avg_loss_values, op=ReduceOp.AVG)
     return avg_loss_values
 
