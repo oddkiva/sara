@@ -65,7 +65,7 @@ def validate(
                 'labels': tgt_labels
             }
             box_geoms, box_class_logits, aux_train_outputs = model.forward(
-                x, targets
+                imgs, targets
             )
 
             (anchor_geometry_logits,
@@ -81,7 +81,7 @@ def validate(
                 tgt_boxes, tgt_labels
             )
 
-            if (gpu_id is None or gpu_id == 0) and step % summary_write_interval == 0:
+            if step % summary_write_interval == 0:
                 loss_value = loss
                 torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
                 writer.add_scalar(f'val/loss/global',
@@ -99,7 +99,8 @@ def train_for_one_epoch(
     loss_reducer: HungarianLossReducer,
     optimizer: torch.optim.Optimizer,
     scheduler: torch.optim.lr_scheduler.LRScheduler,
-    writer: SummaryWriter, summary_write_interval: int,
+    writer: SummaryWriter,
+    summary_write_interval: int,
 ) -> None:
     torch.autograd.set_detect_anomaly(True)
 
@@ -113,6 +114,7 @@ def train_for_one_epoch(
             tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
             tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
 
+        logger.info(format_msg(f'[step:{step}] Feeding annotated images...'))
         targets = {
             'boxes': tgt_boxes,
             'labels': tgt_labels
@@ -127,6 +129,7 @@ def train_for_one_epoch(
         dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
         dn_groups = aux_train_outputs['dn_groups']
 
+        logger.info(format_msg(f'[step:{step}] Calculating the Hungarian loss...'))
         loss_dict = loss_fn.forward(
             box_geoms, box_class_logits,
             anchor_boxes, anchor_class_logits,
@@ -134,13 +137,17 @@ def train_for_one_epoch(
             tgt_boxes, tgt_labels
         )
 
+        logger.info(format_msg(f'[step:{step}] Summing the elementary losses...'))
         loss = loss_reducer.forward(loss_dict)
 
+        logger.info(format_msg(f'[step:{step}] Backpropagating...'))
         loss.backward()
         optimizer.step()
         scheduler.step()
 
-        if (gpu_id is None or gpu_id == 0) and step % summary_write_interval == 0:
+        if step % summary_write_interval == 0:
+            logger.info(format_msg(f'[step:{step}] Logging to tensorboard...'))
+
             log_elementary_losses(loss_dict, writer, train_global_step)
 
             loss_value = loss
@@ -175,6 +182,7 @@ def main():
                                             gamma=gamma,
                                             weights=matching_cost_weights)
 
+    # THE WEIGHTED SUM OF ELEMENTARY LOSSES.
     loss_weights = {
         'vf': 1.0,
         'l1': 5.0,
@@ -182,7 +190,7 @@ def main():
     }
     loss_reducer = HungarianLossReducer(loss_weights)
 
-    # Restart the state of the Adam optimizer every epoch.
+    # THE OPTIMIZER.
     #
     # https://stackoverflow.com/questions/73629330/what-exactly-is-meant-by-param-groups-in-pytorch
     #
@@ -193,10 +201,14 @@ def main():
     # param_groups = []
     # param_group_names = []
     # for name, parameter in model.named_parameters():
-    #     param_groups.append({'params': [parameter], 'lr': learning_rates[name]})
+    #     param_groups.append({
+    #         'params': [parameter],
+    #         'lr': learning_rates[name]
+    #     })
     #     param_group_names.append(name)
     #
-    # # optimizer requires default learning rate even if its overridden by all param groups
+    # optimizer requires default learning rate even if its overridden by all
+    # param groups
     # optimizer = optim.AdamW(param_groups, lr=...)
     adamw_opt = torch.optim.AdamW(rtdetrv2_model.parameters(),
                                   lr=PipelineConfig.learning_rate,
@@ -209,6 +221,8 @@ def main():
         gamma=0.1
     )
 
+    # --------------------------------------------------------------------------
+    # TRAIN AND VALIDATE.
     train_global_step = 0
     val_global_step = 0
     for epoch in range(10):
@@ -216,7 +230,7 @@ def main():
             f"learning rate = {PipelineConfig.learning_rate}"
         ))
 
-        # Resample the list of triplets for each epoch.
+        # Get the train dataloader.
         train_dl = PipelineConfig.make_train_dataloader(train_ds)
         if torchrun_is_running():
             train_dl.sampler.set_epoch(epoch)
@@ -255,7 +269,8 @@ def main():
         if torchrun_is_running():
             val_dl.sampler.set_epoch(epoch)
         validate(val_dl, gpu_id, val_global_step,
-                 rtdetrv2_model, hungarian_loss_fn, summary_writer,
+                 rtdetrv2_model, hungarian_loss_fn,
+                 summary_writer,
                  PipelineConfig.write_interval)
 
 

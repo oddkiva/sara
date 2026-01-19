@@ -358,7 +358,7 @@ class MultiscaleDeformableAttention(nn.Module):
         for x_l, value_map_l in zip(x_per_level, value_pyramid):
             # Collapse the pair of indices (attention head index, key index)
             # into a 1D index.
-            values_l = F.grid_sample(value_map_l, x_l)
+            values_l = F.grid_sample(value_map_l, x_l, align_corners=False)
             # Shape is (N * M, d_v, top-K, K)
             values_per_level.append(values_l)
 

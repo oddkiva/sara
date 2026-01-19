@@ -208,7 +208,7 @@ class BoxMatcher(torch.nn.Module):
 
         # Finally we extract the relevant cost sub-matrices corresponding to
         # each training image in the batch.
-        C = C.view(N, top_K, -1).cpu()
+        C = C.reshape(N, top_K, -1).cpu()
         Cs = [
             C[n]
             for n, C in enumerate(C.split(tgt_count_per_sample, -1))

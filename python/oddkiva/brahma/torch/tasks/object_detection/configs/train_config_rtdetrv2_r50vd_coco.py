@@ -135,7 +135,7 @@ class OptimizationConfig:
 
 class SummaryWriterConfig:
     out_dir: Path = Path('train/coco')
-    write_interval: int = 1
+    write_interval: int = 5
 
     @staticmethod
     def make_summary_writer() -> SummaryWriter:
@@ -148,7 +148,7 @@ class TrainTestPipelineConfig(ModelConfig,
                               SummaryWriterConfig):
 
     dataset_dir_path: Path = DATA_DIR_PATH / 'rtdetrv2' / 'coco'
-    trained_model_out_dir = Path('train') / 'rtdetrv2' / 'coco' / 'models'
+    trained_model_out_dir = DATA_DIR_PATH / 'train' / 'rtdetrv2' / 'coco' / 'models'
 
     @staticmethod
     def out_model_filepath(epoch: int) -> Path:
