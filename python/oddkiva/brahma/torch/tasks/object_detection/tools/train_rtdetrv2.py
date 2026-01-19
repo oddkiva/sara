@@ -139,11 +139,13 @@ def train_for_one_epoch(
 
         logger.info(format_msg(f'[step:{step}] Summing the elementary losses...'))
         loss = loss_reducer.forward(loss_dict)
+        logger.info(format_msg(f'[step:{step}] Global loss = {loss}'))
 
         logger.info(format_msg(f'[step:{step}] Backpropagating...'))
         loss.backward()
         optimizer.step()
         scheduler.step()
+
 
         if step % summary_write_interval == 0:
             logger.info(format_msg(f'[step:{step}] Logging to tensorboard...'))

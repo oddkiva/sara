@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import torch
+from torchvision.io.image import ImageReadMode
 if torch.torch_version.TorchVersion(torch.__version__) < (2, 6, 0):
     from torchvision.io.image import read_image as decode_image
 else:
@@ -99,7 +100,8 @@ class ImageAnnotationDB:
 
     def read_image(self, image: Image) -> torch.Tensor:
         image_filepath = self.image_dir_path / image.file_name
-        image_data = decode_image(str(image_filepath))
+        image_data = decode_image(str(image_filepath),
+                                  mode=ImageReadMode.RGB)
         return image_data
 
 
