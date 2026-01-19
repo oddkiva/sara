@@ -281,7 +281,7 @@ def log_elementary_losses(loss_dict: dict[str, Any],
         loss_values_i = compute_ddp_average_loss_dict(loss_iters_i)
         # Log.
         for k, loss_value_i in zip(keys, loss_values_i):
-            writer.add_scalar(f'iterated/{i}/{k}', loss_value_i, train_global_step)
+            writer.add_scalar(f'iterated_{i}/{k}', loss_value_i, train_global_step)
 
     # Compute the average anchor loss value across all GPUs.
     loss_anchors = loss_dict['init']
@@ -299,4 +299,4 @@ def log_elementary_losses(loss_dict: dict[str, Any],
         loss_values_dn_i = compute_ddp_average_loss_dict(loss_dn_i)
         # Log.
         for k, loss_value_i in zip(keys, loss_values_dn_i):
-            writer.add_scalar(f'dn/{i}/{k}', loss_value_i, train_global_step)
+            writer.add_scalar(f'dn_{i}/{k}', loss_value_i, train_global_step)
