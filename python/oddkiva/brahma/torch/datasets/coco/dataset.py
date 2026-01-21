@@ -41,9 +41,9 @@ class COCOObjectDetectionDataset(Dataset):
             [ann.category_id for ann in annotations]
         )
 
-    def __getitem__(
-        self,
-        idx: int
+
+    def read_annotated_image(
+        self, idx: int
     ) -> tuple[torch.Tensor, tvt.BoundingBoxes, torch.Tensor]:
         labeled_image = self.ds[idx]
 
@@ -62,13 +62,26 @@ class COCOObjectDetectionDataset(Dataset):
             for category_id in categories
         ], dtype=torch.int32)
 
+        return image, boxes, labels
+
+
+    def __getitem__(
+        self,
+        idx: int
+    ) -> tuple[torch.Tensor, tvt.BoundingBoxes, torch.Tensor]:
+        image, boxes, labels = self.read_annotated_image(idx)
+
         # In order to use v2.Transforms.
         ann_dict = {
             'boxes': boxes,
             'labels': labels
         }
         if self.transform is not None:
-            image, ann_dict = self.transform(image, ann_dict)
+            image, ann_dict = self.transform(
+                image,
+                ann_dict,
+                self  # For the mosaic data transform.
+            )
         # Unwrap the dictionary please...
         boxes = ann_dict['boxes']
         labels = ann_dict['labels']
