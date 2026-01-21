@@ -24,6 +24,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures\
         RTDETRHungarianLoss,
         log_elementary_losses
     )
+from oddkiva.brahma.torch.object_detection.optim.ema import ModelEMA
 from oddkiva.brahma.torch.tasks.object_detection.configs.\
     train_config_rtdetrv2_r50vd_coco import (
         TrainTestPipelineConfig as PipelineConfig
@@ -104,7 +105,8 @@ def train_for_one_epoch(
     model: torch.nn.Module,
     loss_fn: RTDETRHungarianLoss,
     loss_reducer: HungarianLossReducer,
-    optimizer: torch.optim.Optimizer,
+    optimizer: torch.optim.AdamW,
+    ema: ModelEMA,
     writer: SummaryWriter,
     summary_write_interval: int,
 ) -> None:
@@ -149,7 +151,10 @@ def train_for_one_epoch(
 
         logger.info(format_msg(f'[step:{step}] Backpropagating...'))
         loss.backward()
+
+        # AdamW and EMA should be used together.
         optimizer.step()
+        ema.update(model)
 
         if step % summary_write_interval == 0:
             logger.info(format_msg(f'[step:{step}] Logging to tensorboard...'))
@@ -216,16 +221,18 @@ def main():
     # optimizer requires default learning rate even if its overridden by all
     # param groups
     # optimizer = optim.AdamW(param_groups, lr=...)
-    adamw_opt = torch.optim.AdamW(rtdetrv2_model.parameters(),
+    adamw = torch.optim.AdamW(rtdetrv2_model.parameters(),
                                   lr=PipelineConfig.learning_rate,
                                   betas=PipelineConfig.betas,
                                   weight_decay=PipelineConfig.weight_decay)
 
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
-        adamw_opt,
+        adamw,
         milestones=[1000],
         gamma=0.1
     )
+
+    ema = ModelEMA(rtdetrv2_model, decay=0.9999, warmups=2000)
 
     # --------------------------------------------------------------------------
     # TRAIN AND VALIDATE.
@@ -247,7 +254,8 @@ def main():
                             rtdetrv2_model,
                             hungarian_loss_fn,
                             loss_reducer,
-                            adamw_opt,
+                            adamw,
+                            ema,
                             summary_writer,
                             PipelineConfig.write_interval)
 
