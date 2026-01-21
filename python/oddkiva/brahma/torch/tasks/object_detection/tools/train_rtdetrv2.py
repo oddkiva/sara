@@ -48,6 +48,7 @@ def validate(
     val_global_step: int,
     model: torch.nn.Module,
     loss_fn: torch.nn.Module,
+    loss_reducer: HungarianLossReducer,
     writer: SummaryWriter,
     summary_write_interval: int
 ) -> None:
@@ -57,9 +58,10 @@ def validate(
         for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
             if gpu_id is not None:
                 imgs = imgs.to(gpu_id)
-                tgt_boxes = tgt_boxes.to(gpu_id)
-                tgt_labels = tgt_labels.to(gpu_id)
+                tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
+                tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
 
+            logger.info(format_msg(f'[val][step:{step}] Feeding annotated images...'))
             targets = {
                 'boxes': tgt_boxes,
                 'labels': tgt_labels
@@ -74,18 +76,23 @@ def validate(
             dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
             dn_groups = aux_train_outputs['dn_groups']
 
-            loss = loss_fn.forward(
+            logger.info(format_msg(f'[val][step:{step}] Calculating the Hungarian loss...'))
+            loss_dict = loss_fn.forward(
                 box_geoms, box_class_logits,
                 anchor_boxes, anchor_class_logits,
                 dn_boxes, dn_class_logits, dn_groups,
                 tgt_boxes, tgt_labels
             )
 
+            logger.info(format_msg(f'[val][step:{step}] Summing the elementary losses...'))
+            loss = loss_reducer.forward(loss_dict)
+            logger.info(format_msg(f'[val][step:{step}] Global loss = {loss}'))
+
             if step % summary_write_interval == 0:
+                logger.info(format_msg(f'[val][step:{step}] Logging to tensorboard...'))
                 loss_value = loss
                 torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
-                writer.add_scalar(f'val/loss/global',
-                                  loss_value, val_global_step)
+                writer.add_scalar(f'val/global', loss_value, val_global_step)
 
             val_global_step += 1
 
@@ -270,7 +277,8 @@ def main():
         if torchrun_is_running():
             val_dl.sampler.set_epoch(epoch)
         validate(val_dl, gpu_id, val_global_step,
-                 rtdetrv2_model, hungarian_loss_fn,
+                 rtdetrv2_model,
+                 hungarian_loss_fn, loss_reducer,
                  summary_writer,
                  PipelineConfig.write_interval)
 

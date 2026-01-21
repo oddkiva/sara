@@ -25,7 +25,8 @@ from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedFloat32
 )
 from oddkiva.brahma.torch.datasets.coco.dataloader import (
-    RTDETRImageCollateFunction
+    RTDETRImageCollateFunction,
+    collate_fn
 )
 # Models
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -63,6 +64,7 @@ class TrainValTestDatasetConfig:
 
     val_transform: v2.Transform = v2.Compose([
         v2.Resize((640, 640)),
+        v2.SanitizeBoundingBoxes(),
         ToNormalizedFloat32(),
     ])
 
@@ -93,6 +95,7 @@ class TrainValTestDatasetConfig:
             return DataLoader(
                 dataset=ds,
                 batch_size=TrainValTestDatasetConfig.val_batch_size,
+                collate_fn=collate_fn,
                 # The following options are for parallel data training
                 shuffle=False,
                 sampler=DistributedSampler(ds),
@@ -103,6 +106,7 @@ class TrainValTestDatasetConfig:
                 dataset=ds,
                 shuffle=False,
                 batch_size=TrainValTestDatasetConfig.val_batch_size,
+                collate_fn=collate_fn,
                 num_workers=TrainValTestDatasetConfig.num_workers,
             )
 
