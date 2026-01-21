@@ -64,7 +64,7 @@ class TrainValTestDatasetConfig:
 
     val_transform: v2.Transform = v2.Compose([
         v2.Resize((640, 640)),
-        v2.SanitizeBoundingBoxes(),
+        ToNormalizedCXCYWHBoxes(),
         ToNormalizedFloat32(),
     ])
 
