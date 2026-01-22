@@ -2,6 +2,8 @@
 
 from typing import Any, Literal, Optional
 
+import PIL
+
 import torch
 from torch.utils.data import Dataset
 import torchvision.tv_tensors as tvt
@@ -77,11 +79,14 @@ class COCOObjectDetectionDataset(Dataset):
             'labels': labels
         }
         if self.transform is not None:
-            image, ann_dict = self.transform(
+            annotated_data = self.transform(
                 image,
                 ann_dict,
-                self  # For the mosaic data transform.
+                self  # Necessary for the mosaic data transform.
             )
+            image = annotated_data[0]
+            ann_dict = annotated_data[1]
+
         # Unwrap the dictionary please...
         boxes = ann_dict['boxes']
         labels = ann_dict['labels']

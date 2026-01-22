@@ -1,9 +1,11 @@
+# Copyright (C) 2025 David Ok <david.ok8@gmail.com>
+
 """
 DEIM: DETR with Improved Matching for Fast Convergence
 Copyright (c) 2024 The DEIM Authors. All Rights Reserved.
 """
 
-from typing import Sequence
+from typing import Any
 
 import random
 
@@ -25,8 +27,10 @@ from oddkiva.brahma.torch.datasets.coco.dataset import (
 
 class Mosaic(T.Transform):
     """
-    Applies Mosaic augmentation to a batch of images. Combines four randomly selected images
-    into a single composite image with randomized transformations.
+    This class implements the mosaic data augmentation to a batch of images.
+    
+    The data augmentation combines four randomly selected images into a single
+    composite image with randomized transformations.
     """
 
     def __init__(self,
@@ -61,7 +65,10 @@ class Mosaic(T.Transform):
             random_pop:
                 Whether to randomly pop a result from the cache.
         """
+
         super().__init__()
+
+        # Data transforms.
         self.resize = T.Resize(size=output_size, max_size=max_size)
         self.probability = probability
         self.affine_transform = T.RandomAffine(
@@ -70,16 +77,24 @@ class Mosaic(T.Transform):
             scale=scaling_range,
             fill=fill_value
         )
+
+        # Optimization.
         self.use_cache = use_cache
         self.mosaic_cache = []
         self.max_cached_images = max_cached_images
         self.random_pop = random_pop
 
-    def load_samples_from_dataset(self,
-                                  image_i: torch.Tensor,
-                                  targets_i: dict[str, torch.Tensor],
-                                  dataset: COCOObjectDetectionDataset):
-        """Loads and resizes a set of images and their corresponding targets."""
+    def load_samples_from_dataset(
+        self,
+        image_i: torch.Tensor,
+        targets_i: dict[str, torch.Tensor],
+        dataset: COCOObjectDetectionDataset
+    ) -> tuple[list[torch.Tensor],
+               list[dict[str, torch.Tensor]],
+               int, int]:
+        """Loads and resizes a set of images and their corresponding
+        targets.
+        """
         # Append the main image.
         get_size = F.get_size if hasattr(F, "get_size") else F.get_spatial_size
 
@@ -108,9 +123,14 @@ class Mosaic(T.Transform):
 
         return resized_images, resized_targets, h_max, w_max
 
-    def load_samples_from_cache(self, image, target, cache):
-        image, target = self.resize(image, target)
-        cache.append(dict(img=image, labels=target))
+    def load_samples_from_cache(
+        self,
+        image: torch.Tensor,
+        targets: dict[str, torch.Tensor],
+        cache: list
+    ):
+        image, targets = self.resize(image, targets)
+        cache.append(dict(img=image, labels=targets))
 
         if len(cache) > self.max_cached_images:
             if self.random_pop:
@@ -124,7 +144,7 @@ class Mosaic(T.Transform):
                                labels=self._clone(cache[idx]["labels"]))
                           for idx in sample_indices]  # sample 3 images
         mosaic_samples = [
-            dict(img=image.copy(), labels=self._clone(target))
+            dict(img=image.copy(), labels=self._clone(targets))
         ] + mosaic_samples
 
         get_size = F.get_size if hasattr(F, "get_size") else F.get_spatial_size
@@ -134,11 +154,13 @@ class Mosaic(T.Transform):
 
         return mosaic_samples, h_max, w_max
 
-    def create_mosaic_from_cache(self, mosaic_samples, h: int, w: int):
-        placement_offsets = [[0, 0],
-                             [w, 0],
-                             [0, h],
-                             [w, h]]
+    def create_mosaic_from_cache(self,
+                                 mosaic_samples: list[dict[str, Any]],
+                                 h: int, w: int):
+        placement_offsets = [(0, 0),
+                             (w, 0),
+                             (0, h),
+                             (w, h)]
         merged_image = Image.new(mode=mosaic_samples[0]["img"].mode,
                                  size=(w * 2, h * 2),
                                  color=0)
@@ -168,18 +190,18 @@ class Mosaic(T.Transform):
         return merged_image, merged_target
 
     def create_mosaic_from_dataset(self,
-                                   images,
+                                   images: list[Image.Image],
                                    targets: dict[str, torch.Tensor],
                                    h: int, w: int):
         """Creates a mosaic image by combining multiple images."""
 
-        placement_offsets = [[0, 0], [w, 0], [0, h], [w, h]]
+        shifts = [(0, 0), (w, 0), (0, h), (w, h)]
         merged_image = Image.new(mode='RGB',
                                  size=(w * 2, h * 2),
                                  color=0)
-        for i, img in enumerate(images):
+        for img, shift in zip(images, shifts):
             pil_img = F.to_pil_image(img)
-            merged_image.paste(pil_img, placement_offsets[i])
+            merged_image.paste(pil_img, shift)
 
         # Merges targets into a single target dictionary for the mosaic.
         offsets = torch.tensor([
@@ -193,7 +215,7 @@ class Mosaic(T.Transform):
         merged_targets = {}
         for key in targets[0]:
             if key == 'boxes':
-                assert targets[0]['boxes'].
+                import ipdb; ipdb.set_trace()
                 values = [target[key] + offsets[i] for i, target in enumerate(targets)]
             else:
                 values = [target[key] for target in targets]
@@ -206,7 +228,7 @@ class Mosaic(T.Transform):
         return merged_image, merged_targets
 
     @staticmethod
-    def _clone(tensor_dict):
+    def _clone(tensor_dict: dict[str, torch.Tensor]):
         return {key: value.clone() for (key, value) in tensor_dict.items()}
 
     def forward(self, *inputs):
@@ -254,7 +276,7 @@ class Mosaic(T.Transform):
         if 'boxes' in mosaic_targets:
             mosaic_targets['boxes'] = BoundingBoxes(
                 mosaic_targets['boxes'],
-                format=BoundingBoxFormat.XYXY,
+                format=BoundingBoxFormat.XYWH,
                 canvas_size=mosaic_image.size[::-1]
             )
 
@@ -265,4 +287,3 @@ class Mosaic(T.Transform):
         )
 
         return mosaic_image, mosaic_targets, dataset
-

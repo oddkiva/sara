@@ -26,7 +26,7 @@ def get_coco_val_dataset():
             random_pop=True
         ),
         v2.Resize((640, 640)),
-        v2.SanitizeBoundingBoxes()
+        v2.SanitizeBoundingBoxes(),
     ])
     ds = coco.COCOObjectDetectionDataset(
         train_or_val='val',
