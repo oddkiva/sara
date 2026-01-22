@@ -157,8 +157,12 @@ class TrainTestPipelineConfig(ModelConfig,
                              'rtdetrv2_r50' / 'train' / 'coco' / 'ckpts')
 
     @staticmethod
-    def out_model_filepath(epoch: int) -> Path:
+    def out_model_filepath(epoch: int, step: int | None = None) -> Path:
         if not TrainTestPipelineConfig.trained_model_out_dir.exists():
             os.makedirs(TrainTestPipelineConfig.trained_model_out_dir)
-        return (TrainTestPipelineConfig.trained_model_out_dir /
-                f'ckpt_epoch_{epoch}.pt')
+        if step is None:
+            return (TrainTestPipelineConfig.trained_model_out_dir /
+                    f'ckpt_epoch_{epoch}.pth')
+        else:
+            return (TrainTestPipelineConfig.trained_model_out_dir /
+                    f'ckpt_epoch_{epoch}_step_{step}.pth')

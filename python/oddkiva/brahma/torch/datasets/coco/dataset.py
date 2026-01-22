@@ -80,7 +80,7 @@ class COCOObjectDetectionDataset(Dataset):
             image, ann_dict = self.transform(
                 image,
                 ann_dict,
-                self  # For the mosaic data transform.
+                # self  # For the mosaic data transform.
             )
         # Unwrap the dictionary please...
         boxes = ann_dict['boxes']
