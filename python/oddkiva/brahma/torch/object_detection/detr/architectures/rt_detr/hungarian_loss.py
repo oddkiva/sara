@@ -145,8 +145,8 @@ class RTDETRHungarianLoss(nn.Module):
         matching = self.matcher.forward(qlogits_final, qboxes_final,
                                         target_labels, target_boxes)
         loss_final = self.compute_loss_dict(qboxes_final, qlogits_final,
-                                               target_boxes, target_labels,
-                                               matching, target_count)
+                                            target_boxes, target_labels,
+                                            matching, target_count)
 
         # Specifically optimize *each layer* of the transformer decoder using
         # *EACH ITERATION* towards the final predictions. This is to accelerate
@@ -187,10 +187,13 @@ class RTDETRHungarianLoss(nn.Module):
             tgt_labels_n[tixs_n]
             for (tgt_labels_n, (_, tixs_n)) in zip(target_labels, matching_dn)
         ]
+        # NOTE: carefully count the number of boxes in the denoising groups so
+        # that the loss is appropriately normalized.
+        target_count_dn = target_count * dn_groups.group_count
         losses_dn = [
             self.compute_loss_dict(dn_boxes_i, dn_class_logits_i,
                                    tgt_boxes_dn, tgt_labels_dn,
-                                   matching_dn, target_count)
+                                   matching_dn, target_count_dn)
             for dn_boxes_i, dn_class_logits_i in zip(dn_boxes, dn_class_logits)
         ]
 

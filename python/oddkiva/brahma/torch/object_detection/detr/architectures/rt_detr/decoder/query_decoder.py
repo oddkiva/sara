@@ -50,7 +50,16 @@ class BoxObjectClassLogitHead(nn.Linear):
     def __init__(self,
                  embed_dim: int,
                  num_classes: int,
-                 initial_prob: float = 0.1):
+                 initial_prob: float = 0.01):  # NOTE: test with 1 / num_classes
+        """
+        NOTE:
+            The initialization bias from the of the probability value is super
+            important.
+
+            It can have a huge effect in the calculation of the focal/varifocal
+            loss!
+        """
+
         super().__init__(embed_dim, num_classes)
         nn.init.constant_(
             self.bias,

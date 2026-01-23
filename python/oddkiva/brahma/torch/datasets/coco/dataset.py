@@ -79,7 +79,7 @@ class COCOObjectDetectionDataset(Dataset):
         if self.transform is not None:
             image, ann_dict = self.transform(
                 image,
-                ann_dict,
+                ann_dict
                 # self  # For the mosaic data transform.
             )
         # Unwrap the dictionary please...
