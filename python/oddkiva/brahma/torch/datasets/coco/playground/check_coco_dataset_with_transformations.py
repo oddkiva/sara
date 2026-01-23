@@ -1,20 +1,18 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-import pickle
-from loguru import logger
-
 import torchvision.transforms.v2 as v2
 
 from PySide6.QtCore import Qt
 
 import oddkiva.sara as sara
 import oddkiva.brahma.torch.datasets.coco as coco
-from oddkiva import DATA_DIR_PATH
+from oddkiva.brahma.torch.object_detection.common.mosaic import Mosaic
 from oddkiva.sara.dataset.colors import generate_label_colors
 
 
 def get_coco_dataset() -> coco.COCOObjectDetectionDataset:
     transform = v2.Compose([
+        Mosaic(use_cache=False),
         v2.RandomIoUCrop(),
         v2.RandomHorizontalFlip(p=0.5),
         v2.SanitizeBoundingBoxes()
@@ -34,8 +32,9 @@ def user_main():
     font = sara.make_font()
     label_colors = generate_label_colors(len(coco_ds.ds.categories))
 
-    sara.create_window(640, 640)
+    sara.create_window(1024, 1024)
     for img, boxes, labels in coco_ds:
+        print(img)
         sara.clear()
         sara.draw_image(img.permute(1, 2, 0).contiguous().numpy())
 

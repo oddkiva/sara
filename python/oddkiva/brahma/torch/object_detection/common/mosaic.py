@@ -28,7 +28,7 @@ from oddkiva.brahma.torch.datasets.coco.dataset import (
 class Mosaic(T.Transform):
     """
     This class implements the mosaic data augmentation to a batch of images.
-    
+
     The data augmentation combines four randomly selected images into a single
     composite image with randomized transformations.
     """
@@ -157,10 +157,7 @@ class Mosaic(T.Transform):
     def create_mosaic_from_cache(self,
                                  mosaic_samples: list[dict[str, Any]],
                                  h: int, w: int):
-        placement_offsets = [(0, 0),
-                             (w, 0),
-                             (0, h),
-                             (w, h)]
+        placement_offsets = [(0, 0), (w, 0), (0, h), (w, h)]
         merged_image = Image.new(mode=mosaic_samples[0]["img"].mode,
                                  size=(w * 2, h * 2),
                                  color=0)
@@ -215,7 +212,6 @@ class Mosaic(T.Transform):
         merged_targets = {}
         for key in targets[0]:
             if key == 'boxes':
-                import ipdb; ipdb.set_trace()
                 values = [target[key] + offsets[i] for i, target in enumerate(targets)]
             else:
                 values = [target[key] for target in targets]
@@ -285,5 +281,6 @@ class Mosaic(T.Transform):
             mosaic_image,
             mosaic_targets
         )
+        mosaic_image = F.pil_to_tensor(mosaic_image)
 
         return mosaic_image, mosaic_targets, dataset
