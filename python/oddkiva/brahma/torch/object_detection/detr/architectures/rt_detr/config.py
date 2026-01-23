@@ -80,7 +80,7 @@ class QuerySelectorConfig:
 
     geometry_head_layer_count = 3
     geometry_head_activation = 'relu'
-    initial_object_class_probability = 0.1
+    initial_object_class_probability = 0.01
 
     top_K = 300
 
