@@ -49,9 +49,9 @@ class ModelConfig:
         assert ModelConfig.CKPT_DIRPATH.exists()
         assert ModelConfig.LABELS_FILEPATH.exists()
 
-        device = torch.device(DEFAULT_DEVICE)
+        device = torch.device('cpu')  # torch.device(DEFAULT_DEVICE)
 
-        ckpt_fp = ModelConfig.CKPT_DIRPATH / f'ckpt_epoch_1.pt'
+        ckpt_fp = ModelConfig.CKPT_DIRPATH / f'ckpt_epoch_0_step_10000.pth'
         assert ckpt_fp.exists()
 
         # THE MODEL
@@ -152,7 +152,7 @@ def user_main():
 
             for (l, t, w, h, label, conf) in zip(ls, ts, ws, hs,
                                                  labels, confs):
-                if conf > 1e-5:
+                if conf < 0.05:
                     continue
                 # Draw the object box
                 color = label_colors[label]

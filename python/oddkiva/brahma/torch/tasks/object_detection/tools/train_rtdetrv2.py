@@ -186,7 +186,7 @@ def train_for_one_epoch(
 
         train_global_step += 1
 
-        if step % 500 == 0:
+        if step > 0 and step % 1000 == 0:
             save_model(model, epoch, step)
 
 
