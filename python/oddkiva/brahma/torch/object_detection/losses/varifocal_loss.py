@@ -204,6 +204,7 @@ class VarifocalLoss(torch.nn.Module):
         loss = F.binary_cross_entropy_with_logits(query_class_logits,
                                                   tscores, weight=weights,
                                                   reduction='none')
+
         # Shape is (N, top-K, num_classes + 1)
         top_K = query_class_logits.shape[1]
         cumulated_vfl_per_image = loss.mean(1).sum() * top_K
