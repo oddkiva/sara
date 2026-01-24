@@ -37,8 +37,9 @@ def optimize_repvgg_layer_for_inference(m: nn.Module):
 
 
 class ModelConfig:
-    CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
-                     'rtdetrv2_r50vd_6x_coco_ema.pth')
+    # CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
+    #                  'rtdetrv2_r50vd_6x_coco_ema.pth')
+    CKPT_FILEPATH = Path('/home/david/GitHub/krousar/RT-DETR/rtdetrv2_pytorch/output/rtdetrv2_r50vd_6x_coco/last.pth')
     LABELS_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
                        'labels.txt')
     W_INFER = 640

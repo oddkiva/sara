@@ -156,6 +156,12 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         self.dropout_3 = nn.Dropout(p=dropout)
         self.layer_norm_3 = nn.LayerNorm(embed_dim)
 
+        self._reinitialize_learning_parameters()
+
+    def _reinitialize_learning_parameters(self):
+        nn.init.xavier_uniform_(self.feedforward.linear1.weight)
+        nn.init.xavier_uniform_(self.feedforward.linear2.weight)
+
     def with_positional_embeds(
         self,
         queries: torch.Tensor,
