@@ -202,7 +202,8 @@ class VarifocalLoss(torch.nn.Module):
         # on the discrete case y=0 or y=1.
 
         loss = F.binary_cross_entropy_with_logits(query_class_logits,
-                                                  tscores, weight=weights,
+                                                  tscores,
+                                                  weight=weights,
                                                   reduction='none')
 
         # Shape is (N, top-K, num_classes + 1)

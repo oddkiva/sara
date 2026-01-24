@@ -243,9 +243,9 @@ def main():
     # param groups
     # optimizer = optim.AdamW(param_groups, lr=...)
     adamw = torch.optim.AdamW(rtdetrv2_model.parameters(),
-                                  lr=PipelineConfig.learning_rate,
-                                  betas=PipelineConfig.betas,
-                                  weight_decay=PipelineConfig.weight_decay)
+                              lr=PipelineConfig.learning_rate,
+                              betas=PipelineConfig.betas,
+                              weight_decay=PipelineConfig.weight_decay)
 
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         adamw,
