@@ -44,14 +44,20 @@ class ModelConfig:
     W_INFER = 640
     H_INFER = 640
 
+    SIMULTANEOUSLY_ALLOW_GPU_TRAINING = True
+
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
         assert ModelConfig.CKPT_DIRPATH.exists()
         assert ModelConfig.LABELS_FILEPATH.exists()
 
-        device = torch.device('cpu')  # torch.device(DEFAULT_DEVICE)
+        # This is by design so that we can keep training with the GPU...
+        if ModelConfig.SIMULTANEOUSLY_ALLOW_GPU_TRAINING:
+            device = torch.device('cpu')
+        else:
+            device = torch.device(DEFAULT_DEVICE)
 
-        ckpt_fp = ModelConfig.CKPT_DIRPATH / f'ckpt_epoch_0_step_10000.pth'
+        ckpt_fp = ModelConfig.CKPT_DIRPATH / f'ckpt_epoch_0_step_3000.pth'
         assert ckpt_fp.exists()
 
         # THE MODEL
@@ -116,6 +122,9 @@ def detect_objects(model: nn.Module, rgb_image: np.ndarray, device:
     labels = labels.cpu().numpy()
     confidences = confidences.cpu().numpy()
 
+    print('labels', labels)
+    print('confidences', confidences)
+
     return (lefts, tops, widths, heights, labels, confidences)
 
 
@@ -150,10 +159,12 @@ def user_main():
         with sara.Timer("Display"):
             np.copyto(display_frame, video_frame)
 
+            print('frame', video_frame_index)
             for (l, t, w, h, label, conf) in zip(ls, ts, ws, hs,
                                                  labels, confs):
-                if conf < 0.05:
+                if conf < 0.1:
                     continue
+
                 # Draw the object box
                 color = label_colors[label]
                 xy = (int(l + 0.5), int(t + 0.5))
@@ -165,6 +176,9 @@ def user_main():
                 text = label_names[label]
                 font_size = 12
                 bold = True
+
+                print(f'drawing [object:{text}] at [{l}, {t}, {w}, {h}]')
+
                 image_draw.draw_text(display_frame, p, text, color,
                                      font_size, 0, False, bold, False)
 

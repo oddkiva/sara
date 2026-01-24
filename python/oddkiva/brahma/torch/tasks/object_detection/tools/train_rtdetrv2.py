@@ -208,7 +208,7 @@ def main():
     matching_cost_weights = {
         'class': 2.0,
         'l1': 5.0,
-        'giou': 4.0
+        'giou': 2.0
     }
     hungarian_loss_fn = RTDETRHungarianLoss(alpha=alpha,
                                             gamma=gamma,
@@ -218,7 +218,7 @@ def main():
     loss_weights = {
         'vf': 1.0,
         'l1': 5.0,
-        'giou': 4.0
+        'giou': 2.0
     }
     loss_reducer = HungarianLossReducer(loss_weights)
 
