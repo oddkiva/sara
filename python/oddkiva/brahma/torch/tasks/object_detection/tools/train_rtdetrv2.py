@@ -24,6 +24,7 @@ from oddkiva.brahma.torch.object_detection.detr.architectures\
         RTDETRHungarianLoss,
         log_elementary_losses
     )
+from oddkiva.brahma.torch.object_detection.optim.ema import ModelEMA
 from oddkiva.brahma.torch.tasks.object_detection.configs.\
     train_config_rtdetrv2_r50vd_coco import (
         TrainTestPipelineConfig as PipelineConfig
@@ -48,6 +49,7 @@ def validate(
     val_global_step: int,
     model: torch.nn.Module,
     loss_fn: torch.nn.Module,
+    loss_reducer: HungarianLossReducer,
     writer: SummaryWriter,
     summary_write_interval: int
 ) -> None:
@@ -57,9 +59,10 @@ def validate(
         for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
             if gpu_id is not None:
                 imgs = imgs.to(gpu_id)
-                tgt_boxes = tgt_boxes.to(gpu_id)
-                tgt_labels = tgt_labels.to(gpu_id)
+                tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
+                tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
 
+            logger.info(format_msg(f'[val][step:{step}] Feeding annotated images...'))
             targets = {
                 'boxes': tgt_boxes,
                 'labels': tgt_labels
@@ -74,20 +77,42 @@ def validate(
             dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
             dn_groups = aux_train_outputs['dn_groups']
 
-            loss = loss_fn.forward(
+            logger.info(format_msg(f'[val][step:{step}] Calculating the Hungarian loss...'))
+            loss_dict = loss_fn.forward(
                 box_geoms, box_class_logits,
                 anchor_boxes, anchor_class_logits,
                 dn_boxes, dn_class_logits, dn_groups,
                 tgt_boxes, tgt_labels
             )
 
+            logger.info(format_msg(f'[val][step:{step}] Summing the elementary losses...'))
+            loss = loss_reducer.forward(loss_dict)
+            logger.info(format_msg(f'[val][step:{step}] Global loss = {loss}'))
+
             if step % summary_write_interval == 0:
+                logger.info(format_msg(f'[val][step:{step}] Logging to tensorboard...'))
                 loss_value = loss
                 torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
-                writer.add_scalar(f'val/loss/global',
-                                  loss_value, val_global_step)
+                writer.add_scalar(f'val/global', loss_value, val_global_step)
 
             val_global_step += 1
+
+
+def save_model(rtdetrv2_model: torch.nn.Module,
+               epoch: int,
+               step: int | None = None) -> None:
+    # Save the model after each training epoch.
+    if torch.distributed.get_rank() == 0 and torchrun_is_running():
+        logger.debug(format_msg(f'Saving model at epoch {epoch}...'))
+        assert isinstance(rtdetrv2_model,
+                          torch.nn.parallel.DistributedDataParallel)
+        # In the case of distributed training, make sure only the node
+        # associated with GPU node 0 can save the model.
+        ckpt = rtdetrv2_model.module.state_dict()
+        torch.save(
+            ckpt,
+            PipelineConfig.out_model_filepath(epoch, step)
+        )
 
 
 def train_for_one_epoch(
@@ -97,10 +122,11 @@ def train_for_one_epoch(
     model: torch.nn.Module,
     loss_fn: RTDETRHungarianLoss,
     loss_reducer: HungarianLossReducer,
-    optimizer: torch.optim.Optimizer,
-    scheduler: torch.optim.lr_scheduler.LRScheduler,
+    optimizer: torch.optim.AdamW,
+    ema: ModelEMA,
     writer: SummaryWriter,
     summary_write_interval: int,
+    epoch: int
 ) -> None:
     torch.autograd.set_detect_anomaly(True)
 
@@ -114,7 +140,7 @@ def train_for_one_epoch(
             tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
             tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
 
-        logger.info(format_msg(f'[step:{step}] Feeding annotated images...'))
+        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Feeding annotated images...'))
         targets = {
             'boxes': tgt_boxes,
             'labels': tgt_labels
@@ -129,7 +155,7 @@ def train_for_one_epoch(
         dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
         dn_groups = aux_train_outputs['dn_groups']
 
-        logger.info(format_msg(f'[step:{step}] Calculating the Hungarian loss...'))
+        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Calculating the Hungarian loss...'))
         loss_dict = loss_fn.forward(
             box_geoms, box_class_logits,
             anchor_boxes, anchor_class_logits,
@@ -137,18 +163,19 @@ def train_for_one_epoch(
             tgt_boxes, tgt_labels
         )
 
-        logger.info(format_msg(f'[step:{step}] Summing the elementary losses...'))
+        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Summing the elementary losses...'))
         loss = loss_reducer.forward(loss_dict)
-        logger.info(format_msg(f'[step:{step}] Global loss = {loss}'))
+        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Global loss = {loss}'))
 
-        logger.info(format_msg(f'[step:{step}] Backpropagating...'))
+        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Backpropagating...'))
         loss.backward()
-        optimizer.step()
-        scheduler.step()
 
+        # AdamW and EMA should be used together.
+        optimizer.step()
+        ema.update(model)
 
         if step % summary_write_interval == 0:
-            logger.info(format_msg(f'[step:{step}] Logging to tensorboard...'))
+            logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard...'))
 
             log_elementary_losses(loss_dict, writer, train_global_step)
 
@@ -158,6 +185,9 @@ def train_for_one_epoch(
                               loss_value, train_global_step)
 
         train_global_step += 1
+
+        if step > 0 and step % 1000 == 0:
+            save_model(model, epoch, step)
 
 
 def main():
@@ -212,16 +242,18 @@ def main():
     # optimizer requires default learning rate even if its overridden by all
     # param groups
     # optimizer = optim.AdamW(param_groups, lr=...)
-    adamw_opt = torch.optim.AdamW(rtdetrv2_model.parameters(),
-                                  lr=PipelineConfig.learning_rate,
-                                  betas=PipelineConfig.betas,
-                                  weight_decay=PipelineConfig.weight_decay)
+    adamw = torch.optim.AdamW(rtdetrv2_model.parameters(),
+                              lr=PipelineConfig.learning_rate,
+                              betas=PipelineConfig.betas,
+                              weight_decay=PipelineConfig.weight_decay)
 
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(
-        adamw_opt,
-        [1000],
+    lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
+        adamw,
+        milestones=[1000],
         gamma=0.1
     )
+
+    ema = ModelEMA(rtdetrv2_model, decay=0.9999, warmups=2000)
 
     # --------------------------------------------------------------------------
     # TRAIN AND VALIDATE.
@@ -243,35 +275,25 @@ def main():
                             rtdetrv2_model,
                             hungarian_loss_fn,
                             loss_reducer,
-                            adamw_opt,
-                            scheduler,
+                            adamw,
+                            ema,
                             summary_writer,
-                            PipelineConfig.write_interval)
+                            PipelineConfig.write_interval,
+                            epoch)
+
+        # Modulate the learning rate after each epoch.
+        lr_scheduler.step()
 
         # Save the model after each training epoch.
-        if gpu_id == 0 and torchrun_is_running():
-            assert isinstance(rtdetrv2_model,
-                              torch.nn.parallel.DistributedDataParallel)
-            # In the case of distributed training, make sure only the node
-            # associated with GPU node 0 can save the model.
-            ckpt = rtdetrv2_model.module.state_dict()
-            torch.save(
-                ckpt,
-                PipelineConfig.out_model_filepath(epoch)
-            )
-        else:
-            ckpt = rtdetrv2_model.state_dict()
-            torch.save(
-                ckpt,
-                PipelineConfig.out_model_filepath(epoch)
-            )
+        save_model(rtdetrv2_model, epoch)
 
         # Evaluate the model.
         val_dl = PipelineConfig.make_val_dataloader(val_ds)
         if torchrun_is_running():
             val_dl.sampler.set_epoch(epoch)
         validate(val_dl, gpu_id, val_global_step,
-                 rtdetrv2_model, hungarian_loss_fn,
+                 rtdetrv2_model,
+                 hungarian_loss_fn, loss_reducer,
                  summary_writer,
                  PipelineConfig.write_interval)
 

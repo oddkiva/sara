@@ -1,5 +1,6 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
+import os
 from pathlib import Path
 from loguru import logger
 
@@ -21,10 +22,11 @@ from oddkiva.brahma.torch.parallel.ddp import (
 # Data Transforms
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
-    ToNormalizedFloat32
+    FromRgb8ToRgb32f
 )
 from oddkiva.brahma.torch.datasets.coco.dataloader import (
-    RTDETRImageCollateFunction
+    RTDETRImageCollateFunction,
+    collate_fn
 )
 # Models
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -46,7 +48,7 @@ class ModelConfig:
 
 class TrainValTestDatasetConfig:
     Dataset = coco.COCOObjectDetectionDataset
-    train_batch_size: int = 4
+    train_batch_size: int = 5
     val_batch_size: int = 32
     num_workers: int = 4
 
@@ -57,12 +59,13 @@ class TrainValTestDatasetConfig:
         v2.SanitizeBoundingBoxes(),
         # Sanitize before the box normalization please.
         ToNormalizedCXCYWHBoxes(),
-        ToNormalizedFloat32(),
+        FromRgb8ToRgb32f(),
     ])
 
     val_transform: v2.Transform = v2.Compose([
         v2.Resize((640, 640)),
-        ToNormalizedFloat32(),
+        ToNormalizedCXCYWHBoxes(),
+        FromRgb8ToRgb32f(),
     ])
 
     @staticmethod
@@ -92,6 +95,7 @@ class TrainValTestDatasetConfig:
             return DataLoader(
                 dataset=ds,
                 batch_size=TrainValTestDatasetConfig.val_batch_size,
+                collate_fn=collate_fn,
                 # The following options are for parallel data training
                 shuffle=False,
                 sampler=DistributedSampler(ds),
@@ -102,6 +106,7 @@ class TrainValTestDatasetConfig:
                 dataset=ds,
                 shuffle=False,
                 batch_size=TrainValTestDatasetConfig.val_batch_size,
+                collate_fn=collate_fn,
                 num_workers=TrainValTestDatasetConfig.num_workers,
             )
 
@@ -136,7 +141,7 @@ class OptimizationConfig:
 class SummaryWriterConfig:
     out_dir: Path = (DATA_DIR_PATH / 'trained_models' /
                      'rtdetrv2_r50' / 'train' / 'coco' / 'logs')
-    write_interval: int = 5
+    write_interval: int = 10
 
     @staticmethod
     def make_summary_writer() -> SummaryWriter:
@@ -152,6 +157,12 @@ class TrainTestPipelineConfig(ModelConfig,
                              'rtdetrv2_r50' / 'train' / 'coco' / 'ckpts')
 
     @staticmethod
-    def out_model_filepath(epoch: int) -> Path:
-        return (TrainValTestDatasetConfig.trained_model_out_dir /
-                f'trained_model_epoch{epoch}.pt')
+    def out_model_filepath(epoch: int, step: int | None = None) -> Path:
+        if not TrainTestPipelineConfig.trained_model_out_dir.exists():
+            os.makedirs(TrainTestPipelineConfig.trained_model_out_dir)
+        if step is None:
+            return (TrainTestPipelineConfig.trained_model_out_dir /
+                    f'ckpt_epoch_{epoch}.pth')
+        else:
+            return (TrainTestPipelineConfig.trained_model_out_dir /
+                    f'ckpt_epoch_{epoch}_step_{step}.pth')

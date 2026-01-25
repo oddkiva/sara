@@ -12,7 +12,6 @@ from oddkiva.brahma.torch.object_detection.common.box_ops import (
     from_cxcywh_to_ltrb_format,
     from_ltrb_to_cxcywh_format
 )
-from oddkiva.brahma.torch.losses.focal_loss import focal_loss as fl_func
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes
 )
@@ -53,7 +52,7 @@ def get_coco_batched_sample():
     return sample
 
 
-def test_focal_loss():
+def test_varifocal_loss():
     images, tgt_boxes, tgt_labels = get_coco_batched_sample()
 
     N, C, W, H = 16, 3, 640, 640
@@ -89,8 +88,9 @@ def test_focal_loss():
     matcher = BoxMatcher()
     matching = matcher.forward(query_logits, query_cxcywh, tgt_labels, tgt_boxes)
 
-    vfl = VarifocalLoss()
+    vfl_fn = VarifocalLoss()
 
-    vfl_val = vfl.forward(query_boxes, query_logits,
-                          tgt_boxes, tgt_labels,
-                          matching)
+    vfl = vfl_fn.forward(query_boxes, query_logits,
+                         tgt_boxes, tgt_labels,
+                         matching)
+    logger.debug(f'vfl = {vfl}')

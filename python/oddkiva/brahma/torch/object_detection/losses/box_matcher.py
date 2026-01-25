@@ -170,8 +170,6 @@ class BoxMatcher(torch.nn.Module):
         assert len(tgt_labels_flat.shape) == 1
         assert tgt_boxes_flat.shape[1] == 4
 
-        query_boxes = from_cxcywh_to_ltrb_format(query_boxes)
-
         C_class = self.calculate_class_labeling_cost_matrix(
             query_class_probs, tgt_labels_flat
         )

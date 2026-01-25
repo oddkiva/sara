@@ -1,5 +1,7 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
+from loguru import logger
+
 import torch
 import torch.nn.functional as F
 
@@ -34,6 +36,9 @@ class BoxLoss(torch.nn.Module):
 
         if num_boxes is None:
             num_boxes = sum([len(tgt_boxes_n) for tgt_boxes_n in target_boxes])
+
+        # l1_loss_tensor = F.l1_loss(qboxes, tboxes, reduction='none').detach()
+        # logger.debug(f'L1 loss tensor =\n{l1_loss_tensor}')
 
         l1_loss = F.l1_loss(qboxes, tboxes, reduction='sum') / num_boxes
 
