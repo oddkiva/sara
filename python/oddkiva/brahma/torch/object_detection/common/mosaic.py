@@ -193,7 +193,6 @@ class Mosaic(T.Transform):
         merged_targets = {}
         for key in targets[0]:
             if key == 'boxes':
-                assert targets[0]['boxes'].
                 values = [target[key] + offsets[i] for i, target in enumerate(targets)]
             else:
                 values = [target[key] for target in targets]
