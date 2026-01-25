@@ -2,6 +2,8 @@
 
 import itertools
 
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -105,6 +107,40 @@ class MultiscaleDeformableAttention(nn.Module):
             value_dim * attention_head_count,
             embed_dim
         )
+
+        self._reset_parameters()
+
+    def _reset_parameters(self):
+        # Sampling offset predictor.
+        nn.init.constant_(self.sampling_offset_predictors.weight, 0)
+        thetas = \
+            torch.arange(self.attention_head_count, dtype=torch.float32) * \
+            (2.0 * math.pi / self.attention_head_count)
+        grid_init = torch.stack([thetas.cos(), thetas.sin()], -1)
+        grid_init = grid_init / grid_init.abs().max(-1, keepdim=True).values
+
+        grid_init = grid_init\
+            .reshape(self.attention_head_count, 1, 2)\
+            .tile([1, self.kv_count_per_attention_head, 1])
+        num_points_list = [self.kv_count_per_level] * self.pyramid_level_count
+        scaling = torch.concat([
+            torch.arange(1, n + 1)
+            for n in num_points_list
+        ]).reshape(1, -1, 1)
+        grid_init *= scaling
+        self.sampling_offset_predictors.bias.data[...] = grid_init.flatten()
+
+        # Attention weight predictor.
+        nn.init.constant_(self.attn_weight_predictors.weight, 0)
+        nn.init.constant_(self.attn_weight_predictors.bias, 0)
+
+        # Value vector projector.
+        nn.init.xavier_uniform_(self.value_projector.weight)
+        nn.init.constant_(self.value_projector.bias, 0)
+
+        # Backprojector.
+        nn.init.xavier_uniform_(self.backprojector.weight)
+        nn.init.constant_(self.backprojector.bias, 0)
 
     def predict_attention_weights(
         self,

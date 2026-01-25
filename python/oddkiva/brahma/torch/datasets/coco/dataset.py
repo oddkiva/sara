@@ -78,6 +78,7 @@ class COCOObjectDetectionDataset(Dataset):
             'boxes': boxes,
             'labels': labels
         }
+
         if self.transform is not None:
             annotated_data = self.transform(
                 image,

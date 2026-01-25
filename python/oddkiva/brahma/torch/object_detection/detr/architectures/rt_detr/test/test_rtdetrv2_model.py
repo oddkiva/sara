@@ -122,3 +122,33 @@ def test_model_from_config():
 
     assert relative_error(box_geometries, box_geometries_true) < 6e-4
     assert relative_error(box_class_logits, box_class_logits_true) < 6e-4
+
+
+def test_model_parameters():
+    # THE DATA
+    device = torch.device(DEFAULT_DEVICE)
+
+    # THE MODEL
+    config = RTDETRConfig()
+    model = RTDETRv2(config).to(device)
+    model = freeze_batch_norm(model)
+
+    backbone = model.backbone
+    bparams = sum(p.numel() for p in backbone.parameters() if p.requires_grad)
+    print(bparams)
+    # ME      : 23474016
+    # ORIGINAL: 23445504
+
+
+    #' params = sum(
+    #'     param.numel()
+    #'     for param in model.parameters()
+    #'     if param.requires_grad
+    #' )
+    #' print(params)
+    #' print(params)
+    #' print(params)
+    #' print(params)
+    #' # It shows: 43863652
+
+    #' # TODO: Find out Number of trainable parameters: 42862860

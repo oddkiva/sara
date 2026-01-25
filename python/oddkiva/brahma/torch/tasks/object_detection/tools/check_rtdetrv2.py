@@ -37,22 +37,28 @@ def optimize_repvgg_layer_for_inference(m: nn.Module):
 
 
 class ModelConfig:
-    # CKPT_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
-    #                  'rtdetrv2_r50vd_6x_coco_ema.pth')
-    CKPT_FILEPATH = Path('/home/david/GitHub/krousar/RT-DETR/rtdetrv2_pytorch/output/rtdetrv2_r50vd_6x_coco/last.pth')
+    CKPT_DIRPATH = (DATA_DIR_PATH / 'trained_models' / 'rtdetrv2_r50' /
+                    'train' / 'coco' / 'ckpts')
     LABELS_FILEPATH = (DATA_DIR_PATH / 'model-weights' / 'rtdetrv2' /
                        'labels.txt')
     W_INFER = 640
     H_INFER = 640
 
+    SIMULTANEOUSLY_ALLOW_GPU_TRAINING = True
+
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
-        assert ModelConfig.CKPT_FILEPATH.exists()
+        assert ModelConfig.CKPT_DIRPATH.exists()
         assert ModelConfig.LABELS_FILEPATH.exists()
 
-        device = torch.device(DEFAULT_DEVICE)
+        # This is by design so that we can keep training with the GPU...
+        if ModelConfig.SIMULTANEOUSLY_ALLOW_GPU_TRAINING:
+            device = torch.device('cpu')
+        else:
+            device = torch.device(DEFAULT_DEVICE)
 
-        ckpt = RTDETRV2Checkpoint(ModelConfig.CKPT_FILEPATH, device)
+        ckpt_fp = ModelConfig.CKPT_DIRPATH / f'ckpt_epoch_1_step_11000.pth'
+        assert ckpt_fp.exists()
 
         # THE MODEL
         config = RTDETRConfig()
@@ -60,7 +66,9 @@ class ModelConfig:
         model = RTDETRv2(config).to(device)
 
         # LOAD THE MODEL
-        ckpt.load_model(model)
+        ckpt = torch.load(ckpt_fp, weights_only=True, map_location=device)
+        model.load_state_dict(ckpt)
+
         model = freeze_batch_norm(model)
         optimize_repvgg_layer_for_inference(model)
         model = model.eval()
@@ -114,6 +122,9 @@ def detect_objects(model: nn.Module, rgb_image: np.ndarray, device:
     labels = labels.cpu().numpy()
     confidences = confidences.cpu().numpy()
 
+    print('labels', labels)
+    print('confidences', confidences)
+
     return (lefts, tops, widths, heights, labels, confidences)
 
 
@@ -148,10 +159,12 @@ def user_main():
         with sara.Timer("Display"):
             np.copyto(display_frame, video_frame)
 
+            print('frame', video_frame_index)
             for (l, t, w, h, label, conf) in zip(ls, ts, ws, hs,
                                                  labels, confs):
-                if conf < 0.5:
+                if conf < 0.05:
                     continue
+
                 # Draw the object box
                 color = label_colors[label]
                 xy = (int(l + 0.5), int(t + 0.5))
@@ -163,6 +176,9 @@ def user_main():
                 text = label_names[label]
                 font_size = 12
                 bold = True
+
+                print(f'drawing [object:{text}] at [{l}, {t}, {w}, {h}]')
+
                 image_draw.draw_text(display_frame, p, text, color,
                                      font_size, 0, False, bold, False)
 
@@ -171,3 +187,4 @@ def user_main():
 
 if __name__ == '__main__':
     sara.run_graphics(user_main)
+

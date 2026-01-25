@@ -15,7 +15,7 @@ from oddkiva.brahma.torch.datasets.coco.dataloader import (
 # Data augmentation.
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
-    ToNormalizedFloat32
+    FromRgb8ToRgb32f
 )
 # The model.
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -55,7 +55,7 @@ def get_coco_val_dl():
         v2.SanitizeBoundingBoxes(),
         # Sanitize before the box normalization please.
         ToNormalizedCXCYWHBoxes(),
-        ToNormalizedFloat32(),
+        FromRgb8ToRgb32f(),
     ])
     coco_ds = coco.COCOObjectDetectionDataset(
         train_or_val='val',
@@ -144,7 +144,6 @@ def test_rtdetrv2_backpropagation_from_anchors():
                                           anchor_class_logits,
                                           tgt_boxes, tgt_labels,
                                           matching_a, tgt_count)
-    logger.debug(f'Elementary losses:\n{loss_dict}')
     loss = torch.stack([loss_dict[k] for k in loss_dict]).sum()
     loss.backward()
 
@@ -161,6 +160,8 @@ def test_rtdetrv2_backpropagation_from_anchors():
         logger.debug(f'{layer_name} gradient norm:{grad_norm}')
 
         assert layer_name.startswith('decoder') is False
+
+    logger.info(f'Elementary losses:\n{loss_dict}')
 
 
 def test_rtdetrv2_backpropagation_from_dn_groups():
@@ -240,9 +241,10 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
     i = -1
 
     logger.info('[Hungarian Loss] 2. Calculating the composite loss function...')
+    tgt_count_dn = tgt_count * dn_groups.group_count
     loss_dict = loss_fn.compute_loss_dict(dn_geometries[i], dn_class_logits[i],
                                           tgt_boxes_dn, tgt_labels_dn,
-                                          matching_dn, tgt_count)
+                                          matching_dn, tgt_count_dn)
     logger.debug(f'Elementary losses:\n{loss_dict}')
     loss = torch.stack([loss_dict[k] for k in loss_dict]).sum()
     loss.backward()
@@ -255,6 +257,8 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
         layer_name = grads[layer_idx][0]
         grad_norm = torch.norm(grad_values[layer_idx])
         logger.debug(f'{layer_name} gradient norm:{grad_norm}')
+
+    logger.info(f'Elementary losses:\n{loss_dict}')
 
 
 def test_rtdetrv2_backpropagation_from_final_queries():
@@ -336,6 +340,8 @@ def test_rtdetrv2_backpropagation_from_final_queries():
         layer_name = grads[layer_idx][0]
         grad_norm = torch.norm(grad_values[layer_idx])
         logger.debug(f'{layer_name} gradient norm:{grad_norm}')
+
+    logger.info(f'Elementary losses:\n{loss_dict}')
 
 
 def test_hungarian_loss_api():
@@ -421,3 +427,6 @@ def test_hungarian_loss_api():
         layer_name = grads[layer_idx][0]
         grad_norm = torch.norm(grad_values[layer_idx])
         logger.debug(f'{layer_name} gradient norm:{grad_norm}')
+
+    for k in loss_dict:
+        logger.info(f'[{k}] loss_dict = {loss_dict[k]}')

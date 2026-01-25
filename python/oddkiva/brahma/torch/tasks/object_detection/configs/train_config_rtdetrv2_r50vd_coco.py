@@ -22,7 +22,7 @@ from oddkiva.brahma.torch.parallel.ddp import (
 # Data Transforms
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
-    ToNormalizedFloat32
+    FromRgb8ToRgb32f
 )
 from oddkiva.brahma.torch.datasets.coco.dataloader import (
     RTDETRImageCollateFunction,
@@ -48,7 +48,7 @@ class ModelConfig:
 
 class TrainValTestDatasetConfig:
     Dataset = coco.COCOObjectDetectionDataset
-    train_batch_size: int = 4
+    train_batch_size: int = 5
     val_batch_size: int = 32
     num_workers: int = 4
 
@@ -59,13 +59,13 @@ class TrainValTestDatasetConfig:
         v2.SanitizeBoundingBoxes(),
         # Sanitize before the box normalization please.
         ToNormalizedCXCYWHBoxes(),
-        ToNormalizedFloat32(),
+        FromRgb8ToRgb32f(),
     ])
 
     val_transform: v2.Transform = v2.Compose([
         v2.Resize((640, 640)),
         ToNormalizedCXCYWHBoxes(),
-        ToNormalizedFloat32(),
+        FromRgb8ToRgb32f(),
     ])
 
     @staticmethod
@@ -157,8 +157,12 @@ class TrainTestPipelineConfig(ModelConfig,
                              'rtdetrv2_r50' / 'train' / 'coco' / 'ckpts')
 
     @staticmethod
-    def out_model_filepath(epoch: int) -> Path:
+    def out_model_filepath(epoch: int, step: int | None = None) -> Path:
         if not TrainTestPipelineConfig.trained_model_out_dir.exists():
             os.makedirs(TrainTestPipelineConfig.trained_model_out_dir)
-        return (TrainTestPipelineConfig.trained_model_out_dir /
-                f'ckpt_epoch_{epoch}.pt')
+        if step is None:
+            return (TrainTestPipelineConfig.trained_model_out_dir /
+                    f'ckpt_epoch_{epoch}.pth')
+        else:
+            return (TrainTestPipelineConfig.trained_model_out_dir /
+                    f'ckpt_epoch_{epoch}_step_{step}.pth')

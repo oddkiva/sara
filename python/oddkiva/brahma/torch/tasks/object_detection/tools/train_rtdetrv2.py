@@ -98,6 +98,23 @@ def validate(
             val_global_step += 1
 
 
+def save_model(rtdetrv2_model: torch.nn.Module,
+               epoch: int,
+               step: int | None = None) -> None:
+    # Save the model after each training epoch.
+    if torch.distributed.get_rank() == 0 and torchrun_is_running():
+        logger.debug(format_msg(f'Saving model at epoch {epoch}...'))
+        assert isinstance(rtdetrv2_model,
+                          torch.nn.parallel.DistributedDataParallel)
+        # In the case of distributed training, make sure only the node
+        # associated with GPU node 0 can save the model.
+        ckpt = rtdetrv2_model.module.state_dict()
+        torch.save(
+            ckpt,
+            PipelineConfig.out_model_filepath(epoch, step)
+        )
+
+
 def train_for_one_epoch(
     dataloader: DataLoader,
     gpu_id: int | None,
@@ -109,6 +126,7 @@ def train_for_one_epoch(
     ema: ModelEMA,
     writer: SummaryWriter,
     summary_write_interval: int,
+    epoch: int
 ) -> None:
     torch.autograd.set_detect_anomaly(True)
 
@@ -168,6 +186,9 @@ def train_for_one_epoch(
 
         train_global_step += 1
 
+        if step > 0 and step % 1000 == 0:
+            save_model(model, epoch, step)
+
 
 def main():
     # PARALLEL TRAINING
@@ -222,9 +243,9 @@ def main():
     # param groups
     # optimizer = optim.AdamW(param_groups, lr=...)
     adamw = torch.optim.AdamW(rtdetrv2_model.parameters(),
-                                  lr=PipelineConfig.learning_rate,
-                                  betas=PipelineConfig.betas,
-                                  weight_decay=PipelineConfig.weight_decay)
+                              lr=PipelineConfig.learning_rate,
+                              betas=PipelineConfig.betas,
+                              weight_decay=PipelineConfig.weight_decay)
 
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         adamw,
@@ -257,28 +278,14 @@ def main():
                             adamw,
                             ema,
                             summary_writer,
-                            PipelineConfig.write_interval)
+                            PipelineConfig.write_interval,
+                            epoch)
 
         # Modulate the learning rate after each epoch.
         lr_scheduler.step()
 
         # Save the model after each training epoch.
-        if gpu_id == 0 and torchrun_is_running():
-            assert isinstance(rtdetrv2_model,
-                              torch.nn.parallel.DistributedDataParallel)
-            # In the case of distributed training, make sure only the node
-            # associated with GPU node 0 can save the model.
-            ckpt = rtdetrv2_model.module.state_dict()
-            torch.save(
-                ckpt,
-                PipelineConfig.out_model_filepath(epoch)
-            )
-        else:
-            ckpt = rtdetrv2_model.state_dict()
-            torch.save(
-                ckpt,
-                PipelineConfig.out_model_filepath(epoch)
-            )
+        save_model(rtdetrv2_model, epoch)
 
         # Evaluate the model.
         val_dl = PipelineConfig.make_val_dataloader(val_ds)

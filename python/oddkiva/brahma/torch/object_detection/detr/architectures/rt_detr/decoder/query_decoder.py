@@ -50,7 +50,16 @@ class BoxObjectClassLogitHead(nn.Linear):
     def __init__(self,
                  embed_dim: int,
                  num_classes: int,
-                 initial_prob: float = 0.1):
+                 initial_prob: float = 0.01):  # NOTE: test with 1 / num_classes
+        """
+        NOTE:
+            The initialization bias from the of the probability value is super
+            important.
+
+            It can have a huge effect in the calculation of the focal/varifocal
+            loss!
+        """
+
         super().__init__(embed_dim, num_classes)
         nn.init.constant_(
             self.bias,
@@ -146,6 +155,12 @@ class MultiScaleDeformableTransformerDecoderLayer(nn.Module):
         assert type(self.feedforward.linear2) is nn.Linear
         self.dropout_3 = nn.Dropout(p=dropout)
         self.layer_norm_3 = nn.LayerNorm(embed_dim)
+
+        self._reinitialize_learning_parameters()
+
+    def _reinitialize_learning_parameters(self):
+        nn.init.xavier_uniform_(self.feedforward.linear1.weight)
+        nn.init.xavier_uniform_(self.feedforward.linear2.weight)
 
     def with_positional_embeds(
         self,
