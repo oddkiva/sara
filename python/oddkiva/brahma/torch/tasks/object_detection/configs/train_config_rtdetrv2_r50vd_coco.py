@@ -22,7 +22,7 @@ from oddkiva.brahma.torch.parallel.ddp import (
 # Data Transforms
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
-    ConvertImageFromUint8ToFloat32
+    FromRgb8ToRgb32f
 )
 from oddkiva.brahma.torch.datasets.coco.dataloader import (
     RTDETRImageCollateFunction,
@@ -59,13 +59,13 @@ class TrainValTestDatasetConfig:
         v2.SanitizeBoundingBoxes(),
         # Sanitize before the box normalization please.
         ToNormalizedCXCYWHBoxes(),
-        ConvertImageFromUint8ToFloat32(),
+        FromRgb8ToRgb32f(),
     ])
 
     val_transform: v2.Transform = v2.Compose([
         v2.Resize((640, 640)),
         ToNormalizedCXCYWHBoxes(),
-        ConvertImageFromUint8ToFloat32(),
+        FromRgb8ToRgb32f(),
     ])
 
     @staticmethod

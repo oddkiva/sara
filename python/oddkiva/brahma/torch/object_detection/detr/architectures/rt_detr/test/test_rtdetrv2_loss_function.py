@@ -15,7 +15,7 @@ from oddkiva.brahma.torch.datasets.coco.dataloader import (
 # Data augmentation.
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
-    ConvertImageFromUint8ToFloat32
+    FromRgb8ToRgb32f
 )
 # The model.
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -55,7 +55,7 @@ def get_coco_val_dl():
         v2.SanitizeBoundingBoxes(),
         # Sanitize before the box normalization please.
         ToNormalizedCXCYWHBoxes(),
-        ConvertImageFromUint8ToFloat32(),
+        FromRgb8ToRgb32f(),
     ])
     coco_ds = coco.COCOObjectDetectionDataset(
         train_or_val='val',

@@ -14,7 +14,7 @@ from oddkiva.brahma.torch.datasets.coco.dataloader import collate_fn
 # Data augmentation.
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
-    ConvertImageFromUint8ToFloat32
+    FromRgb8ToRgb32f
 )
 # Data transformation
 from oddkiva.brahma.torch.object_detection.common.box_ops import (
@@ -39,7 +39,7 @@ def get_coco_val_dl():
         v2.SanitizeBoundingBoxes(),
         # Sanitize before the box normalization please.
         ToNormalizedCXCYWHBoxes(),
-        ConvertImageFromUint8ToFloat32(),
+        FromRgb8ToRgb32f(),
     ])
     coco_ds = coco.COCOObjectDetectionDataset(
         train_or_val='val',
@@ -76,7 +76,7 @@ def test_box_matcher():
     noise_mag = 30  # pixels
     noise_xyxy = T.rand(N, top_K, 4) * noise_mag / W
 
-    noise_prob_mag = 0.2 # [-0.2, +0.2]
+    noise_prob_mag = 0.2  # [-0.2, +0.2]
     noise_prob = (0.5 * T.rand(N, top_K, 80) - 1) * noise_prob_mag
 
     query_xyxy = noise_xyxy

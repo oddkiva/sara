@@ -44,15 +44,20 @@ class ToNormalizedCXCYWHBoxes(v2.Transform):
         return self._transform(boxes, params)
 
 
-class ConvertImageFromUint8ToFloat32(v2.Transform):
+class FromRgb8ToRgb32f(v2.Transform):
+    """
+    NOTE:
+    This is a very hacky and non-robust data transformation that can change any
+    tensor data like `BoundingBoxes` objects if we are not careful.
+    """
+
     _transformed_types = (
         torch.Tensor,
     )
-    def __init__(self, dtype='float32', scale=True) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.scale = scale
 
-    def _transform(self, inpt: Any, _: dict[str, Any]) -> Any:  
+    def _transform(self, inpt: Any, _: dict[str, Any]) -> Any:
         if inpt.dtype == torch.uint8:
             inpt = inpt.float() / 255
 
