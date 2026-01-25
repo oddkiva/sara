@@ -1,5 +1,6 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
+import re
 import atexit
 from loguru import logger
 
@@ -113,6 +114,63 @@ def save_model(rtdetrv2_model: torch.nn.Module,
             ckpt,
             PipelineConfig.out_model_filepath(epoch, step)
         )
+
+
+def create_rtdetr_parameter_groups_for_adamw(model: torch.nn.Module,
+                                             cfg: dict,
+                                             pattern: str):
+    """
+    This function is justified by the fact that if we start learning a
+    pretrained backbone, e.g., ResNet-50, we don't want to update its learned
+    parameters very aggressively.
+
+    For the record, the YAML files used the following regexes.
+    E.g.:
+        (a)  ^(?=.*a)(?=.*b).*$  means including a and b
+        (b)  ^(?=.*(?:a|b)).*$   means including a or b
+        (c)  ^(?=.*a)(?!.*b).*$  means including a, but not b
+
+    The regex for the backbone is:
+
+      ^(?=.*a)(?!.*b).*$  means including a, but not b.
+
+    For the backbone, we collect all the residual block parameters, excluding
+    the batch normalization and normalization layers, and we want to update
+    them with a low learning rate 1e-5.
+
+    The the transformer encoder and decoder, the learning rate is set to 1e-4.
+    But the weight decay is set to 0 in the AdamW optimizer.
+    """
+    param_groups = []
+    visited = []
+    for pg in cfg['params']:
+        pattern = pg['params']
+        params = {
+            k: v
+            for k, v in model.named_parameters()
+            if v.requires_grad and len(re.findall(pattern, k)) > 0
+        }
+        pg['params'] = params.values()
+        param_groups.append(pg)
+        visited.extend([*params.keys()])
+        # print(params.keys())
+
+    names = [k for k, v in model.named_parameters() if v.requires_grad]
+
+    if len(visited) < len(names):
+        unseen = set(names) - set(visited)
+        params = {
+            k: v
+            for k, v in model.named_parameters()
+            if v.requires_grad and k in unseen
+        }
+        param_groups.append({'params': params.values()})
+        visited.extend([*params.keys()])
+        # print(params.keys())
+
+    assert len(visited) == len(names), ''
+
+    return param_groups
 
 
 def train_for_one_epoch(
