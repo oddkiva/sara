@@ -76,8 +76,7 @@ class TrainValTestDatasetConfig:
                 batch_size=TrainValTestDatasetConfig.train_batch_size,
                 collate_fn=RTDETRImageCollateFunction(),
                 # The following options are for parallel data training
-                shuffle=False,
-                sampler=DistributedSampler(ds),
+                sampler=DistributedSampler(ds, shuffle=True),
                 num_workers=TrainValTestDatasetConfig.num_workers,
             )
         else:
