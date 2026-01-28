@@ -219,14 +219,20 @@ def main():
 
     # THE WEIGHTED SUM OF ELEMENTARY LOSSES.
     loss_weights = {
-        'vf': 1.0,
+        'vf': 2.0,
         'l1': 5.0,
         'giou': 2.0
     }
     loss_reducer = HungarianLossReducer(loss_weights)
 
     # THE OPTIMIZER.
+    #
+    # The parameter groups with specific learning parameters.
     rtdetrv2_param_groups = rtdetrv2_model.module.group_learnable_parameters()
+    # We learn from scratch: let's be very aggressive.
+    backbone_pg = rtdetrv2_param_groups[0]
+    backbone_pg['lr'] = 5e-5
+    # The optimizer.
     adamw = torch.optim.AdamW(rtdetrv2_param_groups,
                               lr=PipelineConfig.learning_rate,
                               betas=PipelineConfig.betas,
