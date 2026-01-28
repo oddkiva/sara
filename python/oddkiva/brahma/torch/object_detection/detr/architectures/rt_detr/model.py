@@ -89,7 +89,7 @@ class RTDETRv2(nn.Module):
         for param_name, param in self.named_parameters():
             if not param.requires_grad:
                 continue
-            if 'backbone' not in param_name:
+            if not param_name.startswith('backbone'):
                 continue
             if any([word in param_name for word in name_filter]):
                 continue
@@ -107,7 +107,7 @@ class RTDETRv2(nn.Module):
         for param_name, param in self.named_parameters():
             if not param.requires_grad:
                 continue
-            if 'query_selector' not in param_name:
+            if not param_name.startswith('query_selector'):
                 continue
             if any([word in param_name for word in name_filter]):
                 continue
@@ -124,7 +124,7 @@ class RTDETRv2(nn.Module):
         for param_name, param in self.named_parameters():
             if not param.requires_grad:
                 continue
-            if 'encoder' not in param_name:
+            if not param_name.startswith('encoder'):
                 continue
             if any([word in param_name for word in name_filter]):
                 continue
@@ -141,7 +141,7 @@ class RTDETRv2(nn.Module):
         for param_name, param in self.named_parameters():
             if not param.requires_grad:
                 continue
-            if 'decoder' not in param_name:
+            if not param_name.startswith('decoder'):
                 continue
             if any([word in param_name for word in name_filter]):
                 continue
@@ -150,51 +150,92 @@ class RTDETRv2(nn.Module):
 
         return params_filtered
 
-    def populate_learnable_parameter_groups(
+    def group_learnable_parameters(
         self,
         backbone_filter: list[str] = ['batch_norm'],
         query_selector_filter: list[str] = ['batch_norm', 'layer_norm'],
         encoder_filter: list[str] = ['batch_norm', 'layer_norm'],
         decoder_filter: list[str] = ['batch_norm', 'layer_norm'],
     ) -> list[dict[str, Any]]:
+        """
+        Populates the learnable parameter groups with the learning
+        parameter default values as set in RT-DETR's original implementation.
+
+        RT-DETR splits the parameters in 3 groups.
+
+        1. backbone parameters excluding batch norm parameters,
+        2. encoder and decoder parameters excluding batch norm and layer norm
+           parameters,
+        3. the rest are essentially batch norm and layer norms
+
+        The backbone parameters should be updated with a much lower learning
+        rate (1e-5), especially if we load the model weights from a pretrained
+        backbone.
+
+        Second, the encoder and decoder parameters are updated with a higher
+        learning rate (1e-4) and a zero weight decay for the AdamW optimizer.
+
+        Finally, the remaining parameters are essentially batch norm and layer
+        norm parameters.
+
+        Here, the implementation chooses to split RT-DETR v2's transformer
+        decoder into 2 parts, which I refer as:
+
+        - the query selector which fulfils the following operations:
+
+          1. projects the multi-scale anchor features produced by the hybrid
+             encoder (AIFI+CCFF) into the same feature dimension.
+          2. ranks and selects these projected features according to some
+             object class scoring function.
+
+        - the multiscale deformable transformer decoder, that refines the
+          anchor queries into final box geometries and object probabilities.
+        """
+
         b_params = self.backbone_learnable_params(backbone_filter)
-        qs_params = self.query_selector_learnable_params(query_selector_filter)
         e_params = self.encoder_learnable_params(encoder_filter)
-        d_params = self.decoder_filtered_params(decoder_filter)
+        qs_params = self.query_selector_learnable_params(query_selector_filter)
+        d_params = self.decoder_learnable_params(decoder_filter)
+
+        selected_params = {
+            **b_params,
+            **e_params,
+            **qs_params,
+            **d_params,
+        }
 
         remaining_params = {}
         for param_name, param in self.named_parameters():
-            if param_name in b_params:
+            if not param.requires_grad:
                 continue
-            if param_name in qs_params:
-                continue
-            if param_name in e_params:
-                continue
-            if param_name in d_params:
+            if param_name in selected_params:
                 continue
             remaining_params[param_name] = param
             print(f'[rt-detr v2 remaining] {param_name}: {param.shape}')
 
-
+        # TODO: improve this. I am not entirely satisfied...
+        #
+        # Set the learning parameters with default values and the user can
+        # modify later them at his/her convenience.
         return [
-            # Backbone
+            # Backbone.
             {
                 'params': [p for _, p in b_params.items()],
                 'lr': 1e-5,
             },
-            # Encoder (AIFI+CCFF)
+            # Hybrid encoder (AIFI+CCFF).
             {
                 'params': [p for _, p in e_params.items()],
                 'lr': 1e-4,
                 'weight_decay': 0
             },
-            # Query selector
+            # Query selector.
             {
                 'params': [p for _, p in qs_params.items()],
                 'lr': 1e-4,
                 'weight_decay': 0,
             },
-            # Transformer Decoder.
+            # Multi-scale deformable transformer decoder.
             {
                 'params': [p for _, p in d_params.items()],
                 'lr': 1e-4,
@@ -205,7 +246,5 @@ class RTDETRv2(nn.Module):
             {
                 'params': [p for _, p in remaining_params.items()],
                 'lr': 1e-4,
-                'betas': (0.9, 0.999),
-                'weight_decay': 0.0001,
             },
         ]

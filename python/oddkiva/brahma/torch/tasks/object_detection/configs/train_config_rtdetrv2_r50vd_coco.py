@@ -136,6 +136,11 @@ class OptimizationConfig:
     betas: tuple[float, float] = (0.9, 0.999)
     weight_decay: float = 0.0001
 
+    ema_decay: float = 0.9999
+    ema_warmup_steps: int = 2000
+
+    gradient_norm_max: float = 0.1
+
 
 class SummaryWriterConfig:
     out_dir: Path = (DATA_DIR_PATH / 'trained_models' /

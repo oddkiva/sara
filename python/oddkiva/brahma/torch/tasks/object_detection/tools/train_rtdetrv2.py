@@ -116,63 +116,6 @@ def save_model(rtdetrv2_model: torch.nn.Module,
         )
 
 
-def create_rtdetr_parameter_groups_for_adamw(model: torch.nn.Module,
-                                             cfg: dict,
-                                             pattern: str):
-    """
-    This function is justified by the fact that if we start learning a
-    pretrained backbone, e.g., ResNet-50, we don't want to update its learned
-    parameters very aggressively.
-
-    For the record, the YAML files used the following regexes.
-    E.g.:
-        (a)  ^(?=.*a)(?=.*b).*$  means including a and b
-        (b)  ^(?=.*(?:a|b)).*$   means including a or b
-        (c)  ^(?=.*a)(?!.*b).*$  means including a, but not b
-
-    The regex for the backbone is:
-
-      ^(?=.*a)(?!.*b).*$  means including a, but not b.
-
-    For the backbone, we collect all the residual block parameters, excluding
-    the batch normalization and normalization layers, and we want to update
-    them with a low learning rate 1e-5.
-
-    The the transformer encoder and decoder, the learning rate is set to 1e-4.
-    But the weight decay is set to 0 in the AdamW optimizer.
-    """
-    param_groups = []
-    visited = []
-    for pg in cfg['params']:
-        pattern = pg['params']
-        params = {
-            k: v
-            for k, v in model.named_parameters()
-            if v.requires_grad and len(re.findall(pattern, k)) > 0
-        }
-        pg['params'] = params.values()
-        param_groups.append(pg)
-        visited.extend([*params.keys()])
-        # print(params.keys())
-
-    names = [k for k, v in model.named_parameters() if v.requires_grad]
-
-    if len(visited) < len(names):
-        unseen = set(names) - set(visited)
-        params = {
-            k: v
-            for k, v in model.named_parameters()
-            if v.requires_grad and k in unseen
-        }
-        param_groups.append({'params': params.values()})
-        visited.extend([*params.keys()])
-        # print(params.keys())
-
-    assert len(visited) == len(names), ''
-
-    return param_groups
-
-
 def train_for_one_epoch(
     dataloader: DataLoader,
     gpu_id: int | None,
@@ -185,7 +128,7 @@ def train_for_one_epoch(
     writer: SummaryWriter,
     summary_write_interval: int,
     epoch: int,
-    max_norm: float
+    max_norm: float | None
 ) -> None:
     torch.autograd.set_detect_anomaly(True)
 
@@ -228,7 +171,8 @@ def train_for_one_epoch(
 
         logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Backpropagating...'))
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
+        if max_norm is not None:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
 
         # AdamW and EMA should be used together.
         optimizer.step()
@@ -282,26 +226,8 @@ def main():
     loss_reducer = HungarianLossReducer(loss_weights)
 
     # THE OPTIMIZER.
-    #
-    # https://stackoverflow.com/questions/73629330/what-exactly-is-meant-by-param-groups-in-pytorch
-    #
-    # Build param_group where each group consists of a single parameter.
-    # `param_group_names` is created so we can keep track of which param_group
-    # corresponds to which parameter.
-    #
-    # param_groups = []
-    # param_group_names = []
-    # for name, parameter in model.named_parameters():
-    #     param_groups.append({
-    #         'params': [parameter],
-    #         'lr': learning_rates[name]
-    #     })
-    #     param_group_names.append(name)
-    #
-    # optimizer requires default learning rate even if its overridden by all
-    # param groups
-    # optimizer = optim.AdamW(param_groups, lr=...)
-    adamw = torch.optim.AdamW(rtdetrv2_model.parameters(),
+    rtdetrv2_param_groups = rtdetrv2_model.group_learnable_parameters()
+    adamw = torch.optim.AdamW(rtdetrv2_param_groups,
                               lr=PipelineConfig.learning_rate,
                               betas=PipelineConfig.betas,
                               weight_decay=PipelineConfig.weight_decay)
@@ -312,9 +238,9 @@ def main():
         gamma=0.1
     )
 
-    ema = ModelEMA(rtdetrv2_model, decay=0.9999, warmups=2000)
-
-    max_norm = 0.1
+    ema = ModelEMA(rtdetrv2_model,
+                   decay=PipelineConfig.ema_decay,
+                   warmups=PipelineConfig.ema_warmup_steps)
 
     # --------------------------------------------------------------------------
     # TRAIN AND VALIDATE.
@@ -341,7 +267,7 @@ def main():
                             summary_writer,
                             PipelineConfig.write_interval,
                             epoch,
-                            max_norm)
+                            PipelineConfig.gradient_norm_max)
 
         # Modulate the learning rate after each epoch.
         lr_scheduler.step()
