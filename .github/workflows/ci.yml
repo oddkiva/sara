@@ -18,7 +18,7 @@ jobs:
         # os:  [macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            container: 'oddkiva/sara-devel:cuda12.1.0-ubuntu22.04-trt8.6-swift6.1.2-halide19.0.0'
+            container: 'oddkiva/sara-devel:cuda12.1.0-ubuntu22.04-trt8.6-swift6.2.3-halide21.0.0'
           - os: ubuntu-latest
             container: 'oddkiva/sara-emsdk-devel:latest'
 

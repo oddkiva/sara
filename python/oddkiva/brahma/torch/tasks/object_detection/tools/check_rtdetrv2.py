@@ -19,8 +19,6 @@ from oddkiva.brahma.torch import DEFAULT_DEVICE
 from oddkiva.brahma.torch.backbone.repvgg import RepVggBlock
 from oddkiva.brahma.torch.utils.freeze import freeze_batch_norm
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
-    rt_detr.checkpoint import RTDETRV2Checkpoint
-from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.config import RTDETRConfig
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
     rt_detr.model import RTDETRv2
@@ -44,7 +42,7 @@ class ModelConfig:
     W_INFER = 640
     H_INFER = 640
 
-    SIMULTANEOUSLY_ALLOW_GPU_TRAINING = True
+    RUN_ON_CPU = False
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
@@ -52,12 +50,12 @@ class ModelConfig:
         assert ModelConfig.LABELS_FILEPATH.exists()
 
         # This is by design so that we can keep training with the GPU...
-        if ModelConfig.SIMULTANEOUSLY_ALLOW_GPU_TRAINING:
+        if ModelConfig.RUN_ON_CPU:
             device = torch.device('cpu')
         else:
             device = torch.device(DEFAULT_DEVICE)
 
-        ckpt_fp = ModelConfig.CKPT_DIRPATH / f'ckpt_epoch_1_step_11000.pth'
+        ckpt_fp = ModelConfig.CKPT_DIRPATH / f'ckpt_epoch_2_step_2000.pth'
         assert ckpt_fp.exists()
 
         # THE MODEL
@@ -162,7 +160,7 @@ def user_main():
             print('frame', video_frame_index)
             for (l, t, w, h, label, conf) in zip(ls, ts, ws, hs,
                                                  labels, confs):
-                if conf < 0.05:
+                if conf < 0.1:
                     continue
 
                 # Draw the object box
@@ -177,7 +175,7 @@ def user_main():
                 font_size = 12
                 bold = True
 
-                print(f'drawing [object:{text}] at [{l}, {t}, {w}, {h}]')
+                print(f'[conf:{conf:.2f}] drawing [object:{text}] at [{l}, {t}, {w}, {h}]')
 
                 image_draw.draw_text(display_frame, p, text, color,
                                      font_size, 0, False, bold, False)
