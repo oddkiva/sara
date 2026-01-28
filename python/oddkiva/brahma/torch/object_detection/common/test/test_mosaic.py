@@ -50,7 +50,7 @@ def test_mosaic():
     # Some basic checks.
     assert img.shape == (3, 640, 640)
     assert img.dtype == torch.float32
-    assert (0 <= img).all() and (img <= 1).all()
+    assert (0 <= img).all().item() is True and (img <= 1).all().item() is True
     assert len(boxes) == len(labels)
 
     # Check that the boxes don't have crazily small coordinates.
