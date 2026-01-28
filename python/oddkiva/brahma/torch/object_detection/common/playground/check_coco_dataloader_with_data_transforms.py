@@ -10,20 +10,38 @@ import oddkiva.sara as sara
 import oddkiva.brahma.torch.datasets.coco as coco
 from oddkiva.sara.dataset.colors import generate_label_colors
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
+    FromRgb8ToRgb32f,
     ToNormalizedCXCYWHBoxes
 )
-from oddkiva.brahma.torch.datasets.coco.dataloader import RTDETRImageCollateFunction
+from oddkiva.brahma.torch.object_detection.common.mosaic import (
+    Mosaic
+)
+from oddkiva.brahma.torch.datasets.coco.dataloader import (
+    RTDETRImageCollateFunction
+)
 
 
 def get_coco_dataset() -> coco.COCOObjectDetectionDataset:
     with sara.Timer("COCO Dataset Generation"):
         transform = v2.Compose([
+            Mosaic(
+                output_size=320,
+                rotation_range=10,
+                translation_range=(0.1, 0.1),
+                scaling_range=(0.5, 1.5),
+                probability=1.0,
+                fill_value=0,
+                use_cache=False,
+                max_cached_images=50,
+                random_pop=True
+            ),
             v2.RandomIoUCrop(),
             v2.RandomHorizontalFlip(p=0.5),
             v2.Resize((640, 640)),
             v2.SanitizeBoundingBoxes(),
             # Important: put it after the v2.SanitizeBoundingBoxes.
-            ToNormalizedCXCYWHBoxes()
+            ToNormalizedCXCYWHBoxes(),
+            FromRgb8ToRgb32f()
         ])
         coco_ds = coco.COCOObjectDetectionDataset(
             train_or_val='val',
@@ -59,8 +77,10 @@ def user_main():
             boxes_n = boxes[n]
             labels_n = labels[n]
 
+            img_n_rgb8 = (img_n * 255).to(torch.uint8)
+
             sara.clear()
-            sara.draw_image(img_n.permute(1, 2, 0).contiguous().numpy())
+            sara.draw_image(img_n_rgb8.permute(1, 2, 0).contiguous().numpy())
 
             if len(boxes_n) == 0:
                 continue
