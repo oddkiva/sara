@@ -45,7 +45,6 @@ class ModelEMA:
         for p in self.module.parameters():
             p.requires_grad_(False)
 
-
     def update(self, model: nn.Module):
         # Update EMA parameters
         with torch.no_grad():

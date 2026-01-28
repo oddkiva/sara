@@ -226,7 +226,7 @@ def main():
     loss_reducer = HungarianLossReducer(loss_weights)
 
     # THE OPTIMIZER.
-    rtdetrv2_param_groups = rtdetrv2_model.group_learnable_parameters()
+    rtdetrv2_param_groups = rtdetrv2_model.module.group_learnable_parameters()
     adamw = torch.optim.AdamW(rtdetrv2_param_groups,
                               lr=PipelineConfig.learning_rate,
                               betas=PipelineConfig.betas,
