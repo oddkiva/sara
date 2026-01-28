@@ -198,7 +198,7 @@ def train_for_one_epoch(
             tgt_boxes = [boxes_n.to(gpu_id) for boxes_n in tgt_boxes]
             tgt_labels = [labels_n.to(gpu_id) for labels_n in tgt_labels]
 
-        logger.info(format_msg(f'[step:{step}] Feeding annotated images...'))
+        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Feeding annotated images...'))
         targets = {
             'boxes': tgt_boxes,
             'labels': tgt_labels
@@ -213,7 +213,7 @@ def train_for_one_epoch(
         dn_boxes, dn_class_logits = aux_train_outputs['dn_boxes']
         dn_groups = aux_train_outputs['dn_groups']
 
-        logger.info(format_msg(f'[step:{step}] Calculating the Hungarian loss...'))
+        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Calculating the Hungarian loss...'))
         loss_dict = loss_fn.forward(
             box_geoms, box_class_logits,
             anchor_boxes, anchor_class_logits,
@@ -221,11 +221,11 @@ def train_for_one_epoch(
             tgt_boxes, tgt_labels
         )
 
-        logger.info(format_msg(f'[step:{step}] Summing the elementary losses...'))
+        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Summing the elementary losses...'))
         loss = loss_reducer.forward(loss_dict)
-        logger.info(format_msg(f'[step:{step}] Global loss = {loss}'))
+        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Global loss = {loss}'))
 
-        logger.info(format_msg(f'[step:{step}] Backpropagating...'))
+        logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Backpropagating...'))
         loss.backward()
 
         # AdamW and EMA should be used together.
@@ -233,7 +233,7 @@ def train_for_one_epoch(
         ema.update(model)
 
         if step % summary_write_interval == 0:
-            logger.info(format_msg(f'[step:{step}] Logging to tensorboard...'))
+            logger.info(format_msg(f'[E:{epoch:0>2},S:{step:0>5}] Logging to tensorboard...'))
 
             log_elementary_losses(loss_dict, writer, train_global_step)
 

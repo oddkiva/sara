@@ -81,10 +81,13 @@ RUN wget https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz && 
       . "${SWIFTLY_HOME_DIR:-$HOME/.local/share/swiftly}/env.sh" && \
       hash -r
 
+RUN apt-get -y install python3-lldb-13 tzdata
+RUN $HOME/.local/share/swiftly/bin/swiftly install --use 6.2.3
+
 # Install Halide.
-RUN wget https://github.com/halide/Halide/releases/download/v19.0.0/Halide-19.0.0-x86-64-linux-5f17d6f8a35e7d374ef2e7e6b2d90061c0530333.tar.gz
-RUN tar xvzf Halide-19.0.0-x86-64-linux-5f17d6f8a35e7d374ef2e7e6b2d90061c0530333.tar.gz && \
-      mv Halide-19.0.0-x86-64-linux /opt
+RUN wget https://github.com/halide/Halide/releases/download/v21.0.0/Halide-21.0.0-x86-64-linux-b629c80de18f1534ec71fddd8b567aa7027a0876.tar.gz
+RUN tar xvzf Halide-21.0.0-x86-64-linux-b629c80de18f1534ec71fddd8b567aa7027a0876.tar.gz && \
+      mv Halide-21.0.0-x86-64-linux /opt
 
 # Please make my life easier
 # TODO: install neovim, etc.

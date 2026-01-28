@@ -29,8 +29,8 @@ BUILD_TYPES = ["Release", "RelWithDebInfo", "Debug", "Asan"]
 UBUNTU_VERSION = "22.04"
 CUDA_VERSION = "12.1.0"
 TRT_VERSION = "8.6"
-SWIFT_VERSION = "6.2.2"
-HALIDE_VERSION = "19.0.0"
+SWIFT_VERSION = "6.2.3"
+HALIDE_VERSION = "21.0.0"
 
 # Docker
 SARA_SOURCE_DIR = pathlib.Path(__file__).parent.resolve()
@@ -381,7 +381,7 @@ def build_book_docker():
 def build_emsdk_docker():
     # Build the docker image.
     sara_emsdk_build_image = "oddkiva/sara-emsdk-devel"
-    ret = subprocess.Popen(
+    subprocess.Popen(
         [
             "docker",
             "build",
@@ -394,7 +394,7 @@ def build_emsdk_docker():
         cwd=SARA_SOURCE_DIR,
     ).wait()
 
-    ret = subprocess.Popen(
+    subprocess.Popen(
         [
             "docker",
             "push",
@@ -404,7 +404,7 @@ def build_emsdk_docker():
     ).wait()
 
     # Run the docker image.
-    ret = subprocess.Popen(
+    subprocess.Popen(
         [
             "docker",
             "run",
