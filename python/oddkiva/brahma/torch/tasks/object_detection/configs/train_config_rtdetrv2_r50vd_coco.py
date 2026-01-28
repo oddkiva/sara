@@ -20,13 +20,16 @@ from oddkiva.brahma.torch.parallel.ddp import (
     wrap_model_with_ddp_if_needed
 )
 # Data Transforms
+from oddkiva.brahma.torch.datasets.coco.dataloader import (
+    RTDETRImageCollateFunction,
+    collate_fn
+)
 from oddkiva.brahma.torch.object_detection.common.data_transforms import (
     ToNormalizedCXCYWHBoxes,
     FromRgb8ToRgb32f
 )
-from oddkiva.brahma.torch.datasets.coco.dataloader import (
-    RTDETRImageCollateFunction,
-    collate_fn
+from oddkiva.brahma.torch.object_detection.common.mosaic import (
+    Mosaic
 )
 # Models
 from oddkiva.brahma.torch.object_detection.detr.architectures.\
@@ -53,6 +56,17 @@ class TrainValTestDatasetConfig:
     num_workers: int = 4
 
     train_transform: v2.Transform = v2.Compose([
+        Mosaic(
+            output_size=320,
+            rotation_range=10,
+            translation_range=(0.1, 0.1),
+            scaling_range=(0.5, 1.5),
+            probability=0.8,
+            fill_value=0,
+            use_cache=False,
+            max_cached_images=50,
+            random_pop=True
+        ),
         v2.RandomIoUCrop(),
         v2.RandomHorizontalFlip(p=0.5),
         v2.Resize((640, 640)),
