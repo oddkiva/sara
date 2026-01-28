@@ -18,10 +18,6 @@ class FeaturePyramidProjection(nn.Module):
         self._reinitialize_learning_parameters()
 
     def _reinitialize_learning_parameters(self):
-        # if self.learn_query_content:
-        #     nn.init.xavier_uniform_(self.tgt_embed.weight)
-
-        # Reset the parameters
         for convbna in self.projections:
             assert type(convbna) is UnbiasedConvBNA
             conv = convbna.layers[0]

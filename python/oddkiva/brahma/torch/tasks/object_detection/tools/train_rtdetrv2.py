@@ -126,7 +126,8 @@ def train_for_one_epoch(
     ema: ModelEMA,
     writer: SummaryWriter,
     summary_write_interval: int,
-    epoch: int
+    epoch: int,
+    max_norm: float
 ) -> None:
     torch.autograd.set_detect_anomaly(True)
 
@@ -169,6 +170,7 @@ def train_for_one_epoch(
 
         logger.info(format_msg(f'[step:{step}] Backpropagating...'))
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
 
         # AdamW and EMA should be used together.
         optimizer.step()
@@ -181,8 +183,7 @@ def train_for_one_epoch(
 
             loss_value = loss
             torch.distributed.all_reduce(loss_value, ReduceOp.AVG);
-            writer.add_scalar(f'global',
-                              loss_value, train_global_step)
+            writer.add_scalar(f'global', loss_value, train_global_step)
 
         train_global_step += 1
 
@@ -255,6 +256,8 @@ def main():
 
     ema = ModelEMA(rtdetrv2_model, decay=0.9999, warmups=2000)
 
+    max_norm = 0.1
+
     # --------------------------------------------------------------------------
     # TRAIN AND VALIDATE.
     train_global_step = 0
@@ -279,7 +282,8 @@ def main():
                             ema,
                             summary_writer,
                             PipelineConfig.write_interval,
-                            epoch)
+                            epoch,
+                            max_norm)
 
         # Modulate the learning rate after each epoch.
         lr_scheduler.step()

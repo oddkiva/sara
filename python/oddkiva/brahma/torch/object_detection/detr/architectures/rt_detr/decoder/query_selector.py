@@ -89,7 +89,7 @@ class QuerySelector(nn.Module):
 
         (memory_refined,
          anchor_class_logits,
-         anchor_geometry_logits) = self.anchor_decoder(
+         anchor_geometry_logits) = self.anchor_decoder.forward(
              memory,
              feature_pyramid_sizes
          )
@@ -98,7 +98,7 @@ class QuerySelector(nn.Module):
         # queries.
         (top_initial_queries,
          top_initial_class_logits,
-         top_initial_geometry_logits) = self.anchor_selector(
+         top_initial_geometry_logits) = self.anchor_selector.forward(
              memory_refined,
              anchor_class_logits,
              anchor_geometry_logits

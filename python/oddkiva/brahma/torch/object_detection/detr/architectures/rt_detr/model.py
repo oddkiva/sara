@@ -78,3 +78,134 @@ class RTDETRv2(nn.Module):
         }
 
         return detection_boxes, detection_class_logits, aux_train_outputs
+
+    def backbone_learnable_params(
+        self,
+        name_filter: list[str] = ['batch_norm']
+    ) -> dict[str, nn.Parameter]:
+        # Collect the backbone learnable parameters.
+        params_filtered = {}
+
+        for param_name, param in self.named_parameters():
+            if not param.requires_grad:
+                continue
+            if 'backbone' not in param_name:
+                continue
+            if any([word in param_name for word in name_filter]):
+                continue
+            params_filtered[param_name] = param
+            print(f'[backbone] {param_name}: {param.shape}')
+
+        return params_filtered
+
+    def query_selector_learnable_params(
+        self,
+        name_filter: list[str] = ['batch_norm', 'layer_norm']
+    ) -> dict[str, nn.Parameter]:
+        params_filtered = {}
+
+        for param_name, param in self.named_parameters():
+            if not param.requires_grad:
+                continue
+            if 'query_selector' not in param_name:
+                continue
+            if any([word in param_name for word in name_filter]):
+                continue
+            params_filtered[param_name] = param
+            print(f'[query-selector] {param_name}: {param.shape}')
+
+        return params_filtered
+
+    def encoder_learnable_params(
+        self,
+        name_filter: list[str] = ['batch_norm', 'layer_norm']
+    ) -> dict[str, nn.Parameter]:
+        params_filtered = {}
+        for param_name, param in self.named_parameters():
+            if not param.requires_grad:
+                continue
+            if 'encoder' not in param_name:
+                continue
+            if any([word in param_name for word in name_filter]):
+                continue
+            params_filtered[param_name] = param
+            print(f'[transformer-encoder] {param_name}: {param.shape}')
+        return params_filtered
+
+    def decoder_learnable_params(
+        self,
+        name_filter: list[str] = ['batch_norm', 'layer_norm']
+    ) -> dict[str, nn.Parameter]:
+        params_filtered = {}
+
+        for param_name, param in self.named_parameters():
+            if not param.requires_grad:
+                continue
+            if 'decoder' not in param_name:
+                continue
+            if any([word in param_name for word in name_filter]):
+                continue
+            params_filtered[param_name] = param
+            print(f'[transformer-decoder] {param_name}: {param.shape}')
+
+        return params_filtered
+
+    def populate_learnable_parameter_groups(
+        self,
+        backbone_filter: list[str] = ['batch_norm'],
+        query_selector_filter: list[str] = ['batch_norm', 'layer_norm'],
+        encoder_filter: list[str] = ['batch_norm', 'layer_norm'],
+        decoder_filter: list[str] = ['batch_norm', 'layer_norm'],
+    ) -> list[dict[str, Any]]:
+        b_params = self.backbone_learnable_params(backbone_filter)
+        qs_params = self.query_selector_learnable_params(query_selector_filter)
+        e_params = self.encoder_learnable_params(encoder_filter)
+        d_params = self.decoder_filtered_params(decoder_filter)
+
+        remaining_params = {}
+        for param_name, param in self.named_parameters():
+            if param_name in b_params:
+                continue
+            if param_name in qs_params:
+                continue
+            if param_name in e_params:
+                continue
+            if param_name in d_params:
+                continue
+            remaining_params[param_name] = param
+            print(f'[rt-detr v2 remaining] {param_name}: {param.shape}')
+
+
+        return [
+            # Backbone
+            {
+                'params': [p for _, p in b_params.items()],
+                'lr': 1e-5,
+            },
+            # Encoder (AIFI+CCFF)
+            {
+                'params': [p for _, p in e_params.items()],
+                'lr': 1e-4,
+                'weight_decay': 0
+            },
+            # Query selector
+            {
+                'params': [p for _, p in qs_params.items()],
+                'lr': 1e-4,
+                'weight_decay': 0,
+            },
+            # Transformer Decoder.
+            {
+                'params': [p for _, p in d_params.items()],
+                'lr': 1e-4,
+                'weight_decay': 0,
+            },
+            # Remaining parameters (basically all the batch norms and layer
+            # norms)
+            {
+                'params': [p for _, p in remaining_params.items()],
+                'lr': 1e-4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 0.0001,
+            },
+        ]
