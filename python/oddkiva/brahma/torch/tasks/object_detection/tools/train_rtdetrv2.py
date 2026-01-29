@@ -235,7 +235,6 @@ def main(args):
     hungarian_loss_fn = RTDETRHungarianLoss(
         classification_loss_params=classification_loss_params,
         box_matcher_params=box_matcher_params
-
     )
 
     # --------------------------------------------------------------------------
