@@ -219,23 +219,31 @@ def main(args):
 
     # --------------------------------------------------------------------------
     # THE LOSS FUNCTION
-    alpha = 0.2
-    gamma = 2.0
-    matching_cost_weights = {
-        'class': 2.0,
-        'l1': 5.0,
-        'giou': 2.0
+    classification_loss_params = {
+        'alpha': 0.75,
+        'gamma': 2.0
     }
-    hungarian_loss_fn = RTDETRHungarianLoss(alpha=alpha,
-                                            gamma=gamma,
-                                            weights=matching_cost_weights)
+    box_matcher_params = {
+        'alpha': 0.25,
+        'gamma': 2.0,
+        'cost_matrix_weights': {
+            'class': 2.0,
+            'l1': 5.0,
+            'giou': 2.0
+        }
+    }
+    hungarian_loss_fn = RTDETRHungarianLoss(
+        classification_loss_params=classification_loss_params,
+        box_matcher_params=box_matcher_params
+
+    )
 
     # --------------------------------------------------------------------------
     # THE COMPOUND LOSS FUNCTION
     #
     # The weights of each elementary losses.
     loss_weights = {
-        'vf': 2.0,
+        'vf': 1.0,
         'l1': 5.0,
         'giou': 2.0
     }

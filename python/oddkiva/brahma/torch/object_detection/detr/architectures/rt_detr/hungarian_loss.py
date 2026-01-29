@@ -28,21 +28,31 @@ class RTDETRHungarianLoss(nn.Module):
 
     def __init__(
         self,
-        alpha: float = 0.2,
-        gamma: float = 2.0,
-        weights: dict[str, float] = {
-            'class': 2.0,
-            'l1': 5.0,
-            'giou': 2.0
-        }
+        classification_loss_params: dict[str, float] = {
+            'alpha': 0.75,
+            'gamma': 2.0
+        },
+        box_matcher_params: dict[str, Any] = {
+            'alpha': 0.25,
+            'gamma': 2.0,
+            'cost_matrix_weights': {
+                'class': 2.0,
+                'l1': 5.0,
+                'giou': 2.0
+            }
+        },
     ):
         """Initializes the Hungarian loss function.
         """
         super().__init__()
-        self.matcher = BoxMatcher(alpha=alpha, gamma=gamma, weights=weights)
+        self.matcher = BoxMatcher(
+            alpha=box_matcher_params['alpha'],
+            gamma=box_matcher_params['gamma'],
+            weights=box_matcher_params['cost_matrix_weights']
+        )
 
-        self.focal_loss = FocalLoss(gamma=gamma, alpha=alpha)
-        self.varifocal_loss = VarifocalLoss(alpha=alpha, gamma=gamma)
+        self.focal_loss = FocalLoss(**classification_loss_params)
+        self.varifocal_loss = VarifocalLoss(**classification_loss_params)
         self.box_loss = BoxLoss()
 
     def labeling_focal_loss(
