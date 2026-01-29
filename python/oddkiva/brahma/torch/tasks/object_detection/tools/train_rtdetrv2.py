@@ -1,7 +1,9 @@
 # Copyright (C) 2025 David Ok <david.ok8@gmail.com>
 
-import re
+import argparse
 import atexit
+from pathlib import Path
+
 from loguru import logger
 
 import torch
@@ -17,7 +19,8 @@ from oddkiva.brahma.torch.utils.logging import format_msg
 from oddkiva.brahma.torch.parallel.ddp import (
     ddp_setup,
     get_local_rank,
-    torchrun_is_running
+    torchrun_is_running,
+    wrap_model_with_ddp_if_needed
 )
 from oddkiva.brahma.torch.object_detection.detr.architectures\
     .rt_detr.hungarian_loss import (
@@ -193,18 +196,25 @@ def train_for_one_epoch(
             save_model(model, epoch, step)
 
 
-def main():
+def main(args):
     # PARALLEL TRAINING
     ddp_setup()
 
-    # THE DATASET
-    train_ds, val_ds, _ = PipelineConfig.make_datasets()
-    summary_writer = PipelineConfig.make_summary_writer()
-
+    # --------------------------------------------------------------------------
     # THE MODEL
     gpu_id = get_local_rank()
     rtdetrv2_model = PipelineConfig.make_model()
+    # Load the model weights.
+    ckpt_fp = args.resume
+    if ckpt_fp is not None:
+        ckpt = torch.load(ckpt_fp, map_location='cpu')
+        rtdetrv2_model.load_state_dict(ckpt)
+    # Transfer the model to GPU memory and wrap it as a DDP model.
+    rtdetrv2_model = wrap_model_with_ddp_if_needed(rtdetrv2_model)
+    torch.distributed.barrier()
 
+
+    # --------------------------------------------------------------------------
     # THE LOSS FUNCTION
     alpha = 0.2
     gamma = 2.0
@@ -217,7 +227,10 @@ def main():
                                             gamma=gamma,
                                             weights=matching_cost_weights)
 
-    # THE WEIGHTED SUM OF ELEMENTARY LOSSES.
+    # --------------------------------------------------------------------------
+    # THE COMPOUND LOSS FUNCTION
+    #
+    # The weights of each elementary losses.
     loss_weights = {
         'vf': 2.0,
         'l1': 5.0,
@@ -225,6 +238,8 @@ def main():
     }
     loss_reducer = HungarianLossReducer(loss_weights)
 
+
+    # --------------------------------------------------------------------------
     # THE OPTIMIZER.
     #
     # The parameter groups with specific learning parameters.
@@ -247,6 +262,13 @@ def main():
     ema = ModelEMA(rtdetrv2_model,
                    decay=PipelineConfig.ema_decay,
                    warmups=PipelineConfig.ema_warmup_steps)
+
+
+    # --------------------------------------------------------------------------
+    # THE DATA.
+    train_ds, val_ds, _ = PipelineConfig.make_datasets()
+    summary_writer = PipelineConfig.make_summary_writer()
+
 
     # --------------------------------------------------------------------------
     # TRAIN AND VALIDATE.
@@ -293,4 +315,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-r', '--resume', type=str, help='Resume from checkpoint')
+    args = parser.parse_args()
+
+    main(args)

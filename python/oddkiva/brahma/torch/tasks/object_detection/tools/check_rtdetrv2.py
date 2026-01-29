@@ -42,7 +42,7 @@ class ModelConfig:
     W_INFER = 640
     H_INFER = 640
 
-    RUN_ON_CPU = True
+    RUN_ON_CPU = False
 
     @staticmethod
     def load() -> tuple[nn.Module, list[str], torch.device]:
@@ -55,7 +55,7 @@ class ModelConfig:
         else:
             device = torch.device(DEFAULT_DEVICE)
 
-        ckpt_fp = ModelConfig.CKPT_DIRPATH / f'ckpt_epoch_0_step_1000.pth'
+        ckpt_fp = ModelConfig.CKPT_DIRPATH / f'ckpt_epoch_1_step_11000.pth'
         assert ckpt_fp.exists()
 
         # THE MODEL
@@ -160,7 +160,7 @@ def user_main():
             print('frame', video_frame_index)
             for (l, t, w, h, label, conf) in zip(ls, ts, ws, hs,
                                                  labels, confs):
-                if conf < 0.05:
+                if conf < 0.1:
                     continue
 
                 # Draw the object box

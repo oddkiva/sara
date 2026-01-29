@@ -15,10 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 import oddkiva.brahma.torch.datasets.coco as coco
 from oddkiva import DATA_DIR_PATH
 # Parallelization
-from oddkiva.brahma.torch.parallel.ddp import (
-    torchrun_is_running,
-    wrap_model_with_ddp_if_needed
-)
+from oddkiva.brahma.torch.parallel.ddp import torchrun_is_running
 # Data Transforms
 from oddkiva.brahma.torch.datasets.coco.dataloader import (
     RTDETRImageCollateFunction,
@@ -43,10 +40,10 @@ from oddkiva.brahma.torch.utils.logging import format_msg
 class ModelConfig:
 
     @staticmethod
-    def make_model() -> torch.nn.Module | DDP:
+    def make_model() -> torch.nn.Module:
         config = RTDETRConfig()
         model = RTDETRv2(config)
-        return wrap_model_with_ddp_if_needed(model)
+        return model
 
 
 class TrainValTestDatasetConfig:
