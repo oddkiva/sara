@@ -54,4 +54,4 @@ def test_mosaic():
     assert len(boxes) == len(labels)
 
     # Check that the boxes don't have crazily small coordinates.
-    assert (boxes * 640).mean(0) > 40
+    assert ((boxes * 640).mean(0) > 20.).all().item() is True

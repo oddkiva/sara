@@ -81,7 +81,6 @@ def get_rtdetrv2_model():
 
 def test_rtdetrv2_backpropagation_from_anchors():
     coco_val_dl = get_coco_val_dl()
-
     logger.info(f"Getting first batch sample from COCO dataloader...")
     coco_it = iter(coco_val_dl)
 
@@ -123,9 +122,39 @@ def test_rtdetrv2_backpropagation_from_anchors():
     )
 
     # Calculate the losses.
-    alpha = 0.2
-    gamma = 2.0
-    loss_fn = RTDETRHungarianLoss(alpha=alpha, gamma=gamma)
+    logger.info(f"Calculating the Hungarian loss for the anchor queries...")
+    classification_loss_params = {
+        'alpha': 0.75,
+        'gamma': 2.0
+    }
+    box_matcher_params = {
+        'alpha': 0.25,
+        'gamma': 2.0,
+        'cost_matrix_weights': {
+            'class': 2.0,
+            'l1': 5.0,
+            'giou': 2.0
+        }
+    }
+    loss_fn = RTDETRHungarianLoss(
+        classification_loss_params=classification_loss_params,
+        box_matcher_params=box_matcher_params
+
+    )
+    # Check the focal loss parameters.
+    assert loss_fn.focal_loss.alpha == classification_loss_params['alpha']
+    assert loss_fn.focal_loss.gamma == classification_loss_params['gamma']
+    # Check the varifocal loss parameters.
+    assert loss_fn.varifocal_loss.alpha == classification_loss_params['alpha']
+    assert loss_fn.varifocal_loss.gamma == classification_loss_params['gamma']
+    # Check the focal loss parameters for the classification cost matrix.
+    assert loss_fn.matcher.alpha == box_matcher_params['alpha']
+    assert loss_fn.matcher.gamma == box_matcher_params['gamma']
+    # Check the weights for the cost matrices.
+    cost_matrix_weights = box_matcher_params['cost_matrix_weights']
+    assert loss_fn.matcher.w_class == cost_matrix_weights['class']
+    assert loss_fn.matcher.w_box_l1 == cost_matrix_weights['l1']
+    assert loss_fn.matcher.w_box_giou == cost_matrix_weights['giou']
 
     # Calculate the loss only for the predicted anchor boxes.
     (anchor_geometry_logits,
@@ -211,9 +240,45 @@ def test_rtdetrv2_backpropagation_from_dn_groups():
 
     # Calculate the losses.
     logger.info(f"Calculating the Hungarian loss for the denoising groups...")
-    alpha = 0.2
-    gamma = 2.0
-    loss_fn = RTDETRHungarianLoss(alpha=alpha, gamma=gamma)
+    classification_loss_params = {
+        'alpha': 0.75,
+        'gamma': 2.0
+    }
+    box_matcher_params = {
+        'alpha': 0.25,
+        'gamma': 2.0,
+        'cost_matrix_weights': {
+            'class': 2.0,
+            'l1': 5.0,
+            'giou': 2.0
+        }
+    }
+    loss_fn = RTDETRHungarianLoss(
+        classification_loss_params=classification_loss_params,
+        box_matcher_params=box_matcher_params
+
+    )
+    # Check the focal loss parameters.
+    assert loss_fn.focal_loss.alpha == classification_loss_params['alpha']
+    assert loss_fn.focal_loss.gamma == classification_loss_params['gamma']
+    assert loss_fn.focal_loss.alpha == 0.75
+    assert loss_fn.focal_loss.gamma == 2.0
+    # Check the varifocal loss parameters.
+    assert loss_fn.varifocal_loss.alpha == classification_loss_params['alpha']
+    assert loss_fn.varifocal_loss.gamma == classification_loss_params['gamma']
+    assert loss_fn.varifocal_loss.alpha == 0.75
+    assert loss_fn.varifocal_loss.gamma == 2.0
+    # Check the focal loss parameters for the classification cost matrix.
+    assert loss_fn.matcher.alpha == box_matcher_params['alpha']
+    assert loss_fn.matcher.gamma == box_matcher_params['gamma']
+    # Check the weights for the cost matrices.
+    cost_matrix_weights = box_matcher_params['cost_matrix_weights']
+    assert loss_fn.matcher.w_class == cost_matrix_weights['class']
+    assert loss_fn.matcher.w_box_l1 == cost_matrix_weights['l1']
+    assert loss_fn.matcher.w_box_giou == cost_matrix_weights['giou']
+    assert loss_fn.matcher.w_class == 2.0
+    assert loss_fn.matcher.w_box_l1 == 5.0
+    assert loss_fn.matcher.w_box_giou == 2.0
 
     # Calculate the loss only for the predicted anchor boxes.
     (dn_geometries, dn_class_logits) = aux_train_outs['dn_boxes']
@@ -308,9 +373,45 @@ def test_rtdetrv2_backpropagation_from_final_queries():
 
     # Calculate the losses.
     logger.info(f"Calculating the Hungarian loss for the final boxes...")
-    alpha = 0.2
-    gamma = 2.0
-    loss_fn = RTDETRHungarianLoss(alpha=alpha, gamma=gamma)
+    classification_loss_params = {
+        'alpha': 0.75,
+        'gamma': 2.0
+    }
+    box_matcher_params = {
+        'alpha': 0.25,
+        'gamma': 2.0,
+        'cost_matrix_weights': {
+            'class': 2.0,
+            'l1': 5.0,
+            'giou': 2.0
+        }
+    }
+    loss_fn = RTDETRHungarianLoss(
+        classification_loss_params=classification_loss_params,
+        box_matcher_params=box_matcher_params
+
+    )
+    # Check the focal loss parameters.
+    assert loss_fn.focal_loss.alpha == classification_loss_params['alpha']
+    assert loss_fn.focal_loss.gamma == classification_loss_params['gamma']
+    assert loss_fn.focal_loss.alpha == 0.75
+    assert loss_fn.focal_loss.gamma == 2.0
+    # Check the varifocal loss parameters.
+    assert loss_fn.varifocal_loss.alpha == classification_loss_params['alpha']
+    assert loss_fn.varifocal_loss.gamma == classification_loss_params['gamma']
+    assert loss_fn.varifocal_loss.alpha == 0.75
+    assert loss_fn.varifocal_loss.gamma == 2.0
+    # Check the focal loss parameters for the classification cost matrix.
+    assert loss_fn.matcher.alpha == box_matcher_params['alpha']
+    assert loss_fn.matcher.gamma == box_matcher_params['gamma']
+    # Check the weights for the cost matrices.
+    cost_matrix_weights = box_matcher_params['cost_matrix_weights']
+    assert loss_fn.matcher.w_class == cost_matrix_weights['class']
+    assert loss_fn.matcher.w_box_l1 == cost_matrix_weights['l1']
+    assert loss_fn.matcher.w_box_giou == cost_matrix_weights['giou']
+    assert loss_fn.matcher.w_class == 2.0
+    assert loss_fn.matcher.w_box_l1 == 5.0
+    assert loss_fn.matcher.w_box_giou == 2.0
 
     # The Hungarian loss.
     # for box_logits_i, box_geoms_i in zip(box_class_logits, box_geometries):
@@ -391,9 +492,45 @@ def test_hungarian_loss_api():
 
     # Calculate the losses.
     logger.info(f"Calculating the Hungarian loss for the final boxes...")
-    alpha = 0.2
-    gamma = 2.0
-    loss_fn = RTDETRHungarianLoss(alpha=alpha, gamma=gamma)
+    classification_loss_params = {
+        'alpha': 0.75,
+        'gamma': 2.0
+    }
+    box_matcher_params = {
+        'alpha': 0.25,
+        'gamma': 2.0,
+        'cost_matrix_weights': {
+            'class': 2.0,
+            'l1': 5.0,
+            'giou': 2.0
+        }
+    }
+    loss_fn = RTDETRHungarianLoss(
+        classification_loss_params=classification_loss_params,
+        box_matcher_params=box_matcher_params
+
+    )
+    # Check the focal loss parameters.
+    assert loss_fn.focal_loss.alpha == classification_loss_params['alpha']
+    assert loss_fn.focal_loss.gamma == classification_loss_params['gamma']
+    assert loss_fn.focal_loss.alpha == 0.75
+    assert loss_fn.focal_loss.gamma == 2.0
+    # Check the varifocal loss parameters.
+    assert loss_fn.varifocal_loss.alpha == classification_loss_params['alpha']
+    assert loss_fn.varifocal_loss.gamma == classification_loss_params['gamma']
+    assert loss_fn.varifocal_loss.alpha == 0.75
+    assert loss_fn.varifocal_loss.gamma == 2.0
+    # Check the focal loss parameters for the classification cost matrix.
+    assert loss_fn.matcher.alpha == box_matcher_params['alpha']
+    assert loss_fn.matcher.gamma == box_matcher_params['gamma']
+    # Check the weights for the cost matrices.
+    cost_matrix_weights = box_matcher_params['cost_matrix_weights']
+    assert loss_fn.matcher.w_class == cost_matrix_weights['class']
+    assert loss_fn.matcher.w_box_l1 == cost_matrix_weights['l1']
+    assert loss_fn.matcher.w_box_giou == cost_matrix_weights['giou']
+    assert loss_fn.matcher.w_class == 2.0
+    assert loss_fn.matcher.w_box_l1 == 5.0
+    assert loss_fn.matcher.w_box_giou == 2.0
 
     (anchor_geometry_logits,
      anchor_class_logits) = aux_train_outputs['top_k_anchor_boxes']
@@ -410,8 +547,8 @@ def test_hungarian_loss_api():
 
     loss_reducer = HungarianLossReducer({
         'vf': 1.0,
-        'l1': 1.0,
-        'giou': 1.0
+        'l1': 5.0,
+        'giou': 2.0
     })
     loss = loss_reducer.forward(loss_dict)
     loss.backward()
