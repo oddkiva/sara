@@ -81,7 +81,8 @@ class RTDETRv2(nn.Module):
 
     def backbone_learnable_params(
         self,
-        name_filter: list[str] = ['batch_norm']
+        name_filter: list[str] = ['batch_norm'],
+        debug: bool = False
     ) -> dict[str, nn.Parameter]:
         # Collect the backbone learnable parameters.
         params_filtered = {}
@@ -94,13 +95,16 @@ class RTDETRv2(nn.Module):
             if any([word in param_name for word in name_filter]):
                 continue
             params_filtered[param_name] = param
-            print(f'[backbone] {param_name}: {param.shape}')
+
+            if debug:
+                print(f'[backbone] {param_name}: {param.shape}')
 
         return params_filtered
 
     def query_selector_learnable_params(
         self,
-        name_filter: list[str] = ['batch_norm', 'layer_norm']
+        name_filter: list[str] = ['batch_norm', 'layer_norm'],
+        debug: bool = False
     ) -> dict[str, nn.Parameter]:
         params_filtered = {}
 
@@ -112,13 +116,16 @@ class RTDETRv2(nn.Module):
             if any([word in param_name for word in name_filter]):
                 continue
             params_filtered[param_name] = param
-            print(f'[query-selector] {param_name}: {param.shape}')
+
+            if debug:
+                print(f'[query-selector] {param_name}: {param.shape}')
 
         return params_filtered
 
     def encoder_learnable_params(
         self,
-        name_filter: list[str] = ['batch_norm', 'layer_norm']
+        name_filter: list[str] = ['batch_norm', 'layer_norm'],
+        debug: bool = False
     ) -> dict[str, nn.Parameter]:
         params_filtered = {}
         for param_name, param in self.named_parameters():
@@ -129,12 +136,15 @@ class RTDETRv2(nn.Module):
             if any([word in param_name for word in name_filter]):
                 continue
             params_filtered[param_name] = param
-            print(f'[transformer-encoder] {param_name}: {param.shape}')
+
+            if debug:
+                print(f'[transformer-encoder] {param_name}: {param.shape}')
         return params_filtered
 
     def decoder_learnable_params(
         self,
-        name_filter: list[str] = ['batch_norm', 'layer_norm']
+        name_filter: list[str] = ['batch_norm', 'layer_norm'],
+        debug: bool = False
     ) -> dict[str, nn.Parameter]:
         params_filtered = {}
 
@@ -146,7 +156,9 @@ class RTDETRv2(nn.Module):
             if any([word in param_name for word in name_filter]):
                 continue
             params_filtered[param_name] = param
-            print(f'[transformer-decoder] {param_name}: {param.shape}')
+
+            if debug:
+                print(f'[transformer-decoder] {param_name}: {param.shape}')
 
         return params_filtered
 
@@ -156,6 +168,7 @@ class RTDETRv2(nn.Module):
         query_selector_filter: list[str] = ['batch_norm', 'layer_norm'],
         encoder_filter: list[str] = ['batch_norm', 'layer_norm'],
         decoder_filter: list[str] = ['batch_norm', 'layer_norm'],
+        debug: bool = False
     ) -> list[dict[str, Any]]:
         """
         Populates the learnable parameter groups with the learning
@@ -192,10 +205,11 @@ class RTDETRv2(nn.Module):
           anchor queries into final box geometries and object probabilities.
         """
 
-        b_params = self.backbone_learnable_params(backbone_filter)
-        e_params = self.encoder_learnable_params(encoder_filter)
-        qs_params = self.query_selector_learnable_params(query_selector_filter)
-        d_params = self.decoder_learnable_params(decoder_filter)
+        b_params = self.backbone_learnable_params(backbone_filter, debug)
+        e_params = self.encoder_learnable_params(encoder_filter, debug)
+        qs_params = self.query_selector_learnable_params(query_selector_filter,
+                                                         debug)
+        d_params = self.decoder_learnable_params(decoder_filter, debug)
 
         selected_params = {
             **b_params,
@@ -211,7 +225,9 @@ class RTDETRv2(nn.Module):
             if param_name in selected_params:
                 continue
             remaining_params[param_name] = param
-            print(f'[rt-detr v2 remaining] {param_name}: {param.shape}')
+
+            if debug:
+                print(f'[rt-detr v2 remaining] {param_name}: {param.shape}')
 
         # TODO: improve this. I am not entirely satisfied...
         #

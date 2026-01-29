@@ -207,6 +207,9 @@ def main(args):
     # Load the model weights.
     ckpt_fp = args.resume
     if ckpt_fp is not None:
+        logger.info(format_msg(
+            f"Loading model weights from checkpoint: {ckpt_fp}"
+        ))
         ckpt = torch.load(ckpt_fp, map_location='cpu')
         rtdetrv2_model.load_state_dict(ckpt)
     # Transfer the model to GPU memory and wrap it as a DDP model.
@@ -323,11 +326,16 @@ if __name__ == "__main__":
         help='Resume from checkpoint'
     )
     parser.add_argument(
-        '-b', '--load_backbone_from_public_checkpoint',
+        '-b', '--backbone',
         type=str,
         help=("Load the backbone weights from the public checkpoint provided "
               "by RT-DETR's authors.")
     )
     args = parser.parse_args()
+
+    if args.resume and args.backbone:
+        print(("ERROR: choose either to resume from an existing checkpoint or "
+               "to load the backbone weights"))
+        exit()
 
     main(args)
