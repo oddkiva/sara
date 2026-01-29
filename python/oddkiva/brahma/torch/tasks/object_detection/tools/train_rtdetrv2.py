@@ -317,7 +317,17 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-r', '--resume', type=str, help='Resume from checkpoint')
+    parser.add_argument(
+        '-r', '--resume',
+        type=str,
+        help='Resume from checkpoint'
+    )
+    parser.add_argument(
+        '-b', '--load_backbone_from_public_checkpoint',
+        type=str,
+        help=("Load the backbone weights from the public checkpoint provided "
+              "by RT-DETR's authors.")
+    )
     args = parser.parse_args()
 
     main(args)
