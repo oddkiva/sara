@@ -48,8 +48,8 @@ class ModelConfig:
 
 class TrainValTestDatasetConfig:
     Dataset = coco.COCOObjectDetectionDataset
-    train_batch_size: int = 6
-    num_workers: int = 6
+    train_batch_size: int = 5
+    num_workers: int = 5
     val_batch_size: int = 32
 
     train_transform: v2.Transform = v2.Compose([

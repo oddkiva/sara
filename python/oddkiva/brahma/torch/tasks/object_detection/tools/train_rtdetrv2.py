@@ -137,7 +137,8 @@ def train_for_one_epoch(
     model.train()
 
     for step, (imgs, tgt_boxes, tgt_labels) in enumerate(dataloader):
-        optimizer.zero_grad()
+        # Optimize the GPU memory consumption as per the documentation.
+        optimizer.zero_grad(set_to_none=True)
 
         if gpu_id is not None:
             imgs = imgs.to(gpu_id)
@@ -193,6 +194,10 @@ def train_for_one_epoch(
 
         if step > 0 and step % 1000 == 0:
             save_model(model, epoch, step)
+
+        # logger.info(format_msg(
+        #     f'[E:{epoch:0>2},S:{step:0>5}] {torch.cuda.memory_summary()}'
+        # ))
 
 
 def main(args):
